@@ -1,0 +1,2 @@
+<header>Add Apache user to Unix group for new servers?</header>
+ This option determines whether the user that Apache runs as will be added to the new virtual host group.  When enabled, permissions can be tightened significantly on user home directories.  When tighter permissions (i.e. 750) are combined with SuExec, it makes it impossible for domain owners to see other domain owners directories and files.  This option is recommended on any platform that supports secondary groups.

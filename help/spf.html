@@ -1,0 +1,14 @@
+<header>DNS Options</header>
+
+This page is primarily for configuring the SPF (Sender Policy Framework) DNS record, which is used by other mail servers
+to ensure that email claiming to be from a mailbox in this domain actually was.
+This prevents spammers and worms from faking source email addresses, thus
+allowing them to be more easily blocked. <p>
+
+A domain's SPF record specifies the mail servers that are allowed to send
+email from that domain, and a policy to apply to other senders. Recipient
+servers can then lookup this record, and compare the address of the system
+sending email with the allow list for the sender's domain. <p>
+
+<footer>
+

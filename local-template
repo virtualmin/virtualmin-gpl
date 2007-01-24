@@ -1,0 +1,14 @@
+Your local mailbox has been set up successfully as follows :
+
+Email address:           ${MAILBOX}@${HOSTNAME}
+POP3 login:              ${USER}
+POP3 password:           ${PLAINPASS}
+SMTP server:             ${HOSTNAME}
+POP3 server:             ${HOSTNAME}
+${IF-FTP}
+FTP login:               Enabled
+Home directory:          ${HOME}
+${ELSE-FTP}
+FTP login:               Disabled
+${ENDIF-FTP}
+

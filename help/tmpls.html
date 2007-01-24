@@ -1,0 +1,25 @@
+<header>Server Template</header>
+
+A server template defines default settings for new domains, or for features
+added to existing domains. Almost all of the text fields and boxes below allow
+you to use variables which will be substituted based on the virtual server's
+setting at the time the template is used. Some of the more useful variables
+are :<p>
+<table>
+<tr> <td><tt><b>${DOM}</b></td>
+<td>The domain name, such as <tt>foo.com</tt></td> </tr>
+<tr> <td><tt><b>${PREFIX}</b></td>
+<td>The first part of the domain name, like <tt>foo</tt></td> </tr>
+<tr> <td><tt><b>${USER}</b></td>
+
+<td>The user that owns the domain, such as <tt>foo</tt></td> </tr>
+<tr> <td><tt><b>${IP}</b></td>
+<td>The IP address assigned to the virtual server, such as <tt>192.168.1.1</tt></td> </tr>
+<tr> <td><tt><b>${HOME}</b></td>
+<td>The domain user's home directory, such as <tt>/home/foo</tt></td> </tr>
+
+</table>
+In addition, conditional blocks like <i>$IF-MAIL...$ENDIF-MAIL</i> and <i>$IF-WEB...$ELSE-WEB...{$ENDIF-WEB}</i> may be used.<p>
+
+<footer>
+

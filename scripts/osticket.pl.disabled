@@ -1,0 +1,259 @@
+
+# script_osticket_desc()
+sub script_osticket_desc
+{
+return "osTicket";
+}
+
+sub script_osticket_uses
+{
+return ( "php" );
+}
+
+sub script_osticket_longdesc
+{
+return "osTicket is a widely-used open source support ticket system.";
+}
+
+# script_osticket_versions()
+sub script_osticket_versions
+{
+return ( "1.3.1" );
+}
+
+# script_osticket_depends(&domain, version)
+sub script_osticket_depends
+{
+local ($d, $ver) = @_;
+return "osTicket requires a website" if (!$d->{'web'});
+return "osTicket cannot be installed onto virtual servers without a home directory"
+	if (!$d->{'dir'});
+local @dbs = &domain_databases($d, [ "mysql" ]);
+return "osTicket requires a MySQL database" if (!@dbs);
+&require_apache();
+return "osTicket requires the Apache mod_php4 module"
+	if (!$apache::httpd_modules{'mod_php4'});
+eval "use Digest::MD5";
+return "The osTicket installation process requires the Digest::MD5 Perl module"
+	if ($@);
+return undef;
+}
+
+# script_osticket_params(&domain, version, &upgrade-info)
+# Returns HTML for table rows for options for installing Wordpress
+sub script_osticket_params
+{
+local ($d, $ver, $upgrade) = @_;
+local $rv;
+local $hdir = &public_html_dir($d, 1);
+if ($upgrade) {
+	# Options are fixed when upgrading
+	local ($dbtype, $dbname) = split(/_/, $upgrade->{'opts'}->{'db'}, 2);
+	$rv .= &ui_table_row("Database for osTicket tables", $dbname);
+	local $dir = $upgrade->{'opts'}->{'dir'};
+	$dir =~ s/^$d->{'home'}\///;
+	$rv .= &ui_table_row("Install directory", $dir);
+	$rv .= &ui_table_row("Title for helpdesk",
+			     $upgrade->{'opts'}->{'title'});
+	}
+else {
+	# Show editable install options
+	local @dbs = &domain_databases($d, [ "mysql" ]);
+	$rv .= &ui_table_row("Database for osTicket tables",
+		     &ui_database_select("db", undef, \@dbs));
+	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
+			     &ui_opt_textbox("dir", "osticket", 30,
+					     "At top level"));
+	$rv .= &ui_table_row("Title for helpdesk",
+			     &ui_textbox("title", "$d->{'owner'} helpdesk",30));
+	}
+return $rv;
+}
+
+# script_osticket_parse(&domain, version, &in, &upgrade-info)
+# Returns either a hash ref of parsed options, or an error string
+sub script_osticket_parse
+{
+local ($d, $ver, $in, $upgrade) = @_;
+if ($upgrade) {
+	# Options are always the same
+	return $upgrade->{'opts'};
+	}
+else {
+	local $hdir = &public_html_dir($d, 0);
+	$in{'dir_def'} || $in{'dir'} =~ /\S/ && $in{'dir'} !~ /\.\./ ||
+		return "Missing or invalid installation directory";
+	local $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
+	return { 'db' => $in->{'db'},
+		 'title' => $in->{'title'},
+		 'dir' => $dir,
+		 'path' => $in{'dir_def'} ? "/" : "/$in{'dir'}", };
+	}
+}
+
+# script_osticket_check(&domain, version, &opts, &upgrade-info)
+# Returns an error message if a required option is missing or invalid
+sub script_osticket_check
+{
+local ($d, $ver, $opts, $upgrade) = @_;
+$opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
+$opts->{'db'} || return "Missing database";
+if (-r "$opts->{'dir'}/admin.php") {
+	return "osTicket appears to be already installed in the selected directory";
+	}
+local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+local $clash = &find_database_table($dbtype, $dbname, "ticket_.*");
+$clash && return "osTicket appears to be already using the selected database (table $clash)";
+return undef;
+}
+
+# script_osticket_files(&domain, version, &opts, &upgrade-info)
+# Returns a list of files needed by Wordpress, each of which is a hash ref
+# containing a name, filename and URL
+sub script_osticket_files
+{
+local ($d, $ver, $opts, $upgrade) = @_;
+local @files = ( { 'name' => "source",
+	   'file' => "osticket_$ver.zip",
+	   'url' => "http://www.osticket.com/download.php?file=osticket_$ver.zip" } );
+return @files;
+}
+
+# script_osticket_install(&domain, version, &opts, &files, &upgrade-info)
+# Actually installs osTicket, and returns either 1 and an informational
+# message, or 0 and an error
+sub script_osticket_install
+{
+local ($d, $version, $opts, $files, $upgrade) = @_;
+local ($out, $ex);
+&has_command("unzip") ||
+	return (0, "The unzip command is needed to extract the osTicket source");
+local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+local $dbuser = &mysql_user($d);
+local $dbpass = &mysql_pass($d);
+
+# Create target dir
+if (!-d $opts->{'dir'}) {
+	$out = &run_as_domain_user($d, "mkdir -p ".quotemeta($opts->{'dir'}));
+	-d $opts->{'dir'} ||
+		return (0, "Failed to create directory : <tt>$out</tt>.");
+	}
+
+# Extract tar file to temp dir
+local $temp = &transname();
+mkdir($temp, 0755);
+chown($d->{'uid'}, $d->{'gid'}, $temp);
+$out = &run_as_domain_user($d, "cd ".quotemeta($temp).
+			       " && unzip $files->{'source'}");
+-r "$temp/osticket_$ver/upload/config.php" ||
+	return (0, "Failed to extract source : <tt>$out</tt>.");
+
+# Move html dir to target
+$out = &run_as_domain_user($d, "cp -rp ".quotemeta($temp)."/osticket_$ver/upload/* ".quotemeta($opts->{'dir'}));
+local $cfile = "$opts->{'dir'}/config.php";
+-r $cfile || return (0, "Failed to copy source : <tt>$out</tt>.");
+
+# Update the config file
+local $pt = $d->{'web_port'} == 80 ? "" : ":$d->{'web_port'}";
+local $url = "http://$d->{'dom'}$pt$opts->{'path'}/";
+local $lref = &read_file_lines($cfile);
+local $l;
+foreach $l (@$lref) {
+	if ($l =~ /^\$homepath_dir\s*=/) {
+		$l = "\$homepath_dir = \"$url/admin.php\";";
+		}
+	if ($l =~ /^\$osticket_title\s*=/) {
+		$l = "\$osticket_title = \"$opts->{'title'}/\";";
+		}
+	if ($l =~ /^\$rootpath_dir\s*=/) {
+		$l = "\$rootpath_dir = \"$opts->{'dir'}/\";";
+		}
+	if ($l =~ /^\$db_type\s*=/) {
+		$l = "\$db_type = \"mysql\";";
+		}
+	if ($l =~ /^\$db_host\s*=/) {
+		$l = "\$db_host = \"localhost\";";
+		}
+	if ($l =~ /^\$db_name\s*=/) {
+		$l = "\$db_name = \"$dbname\";";
+		}
+	if ($l =~ /^\$db_user\s*=/) {
+		$l = "\$db_user = \"$dbuser\";";
+		}
+	if ($l =~ /^\$db_pass\s*=/) {
+		$l = "\$db_pass = \"$dbpass\";";
+		}
+	if ($l =~ /^\$installed\s*=/) {
+		$l = "\$installed = TRUE;";
+		}
+	}
+&flush_file_lines($cfile);
+&set_ownership_permissions(undef, undef, 0777, $cfile);
+&unlink_file("$opts->{'dir'}/setup.php");	# not neeed
+
+if (!$upgrade) {
+	# Run the SQL setup script
+	local $sqlfile = "$temp/osticket_$ver/osticket.sql";
+	local $lref = &read_file_lines($sqlfile);
+	eval "use Digest::MD5";
+	local $md5;
+	if (!$@) {
+		$md5 = Digest::MD5::md5_hex($d->{'pass'});
+		}
+	foreach my $l (@$lref) {
+		if ($l =~ /insert\s+into\s+`ticket_reps`/i) {
+			$l =~ s/'admin'/'$d->{'user'}'/g;
+			$l =~ s/'admin\@domain.com'/'$d->{'emailto'}'/g;
+			$l =~ s/'a0f848942ce863cf53c0fa6cc684007d'/'$md5'/g if ($md5);
+			}
+		$l =~ s/http:\/\/domain\.com\/osticket\//$url/g;
+		$l =~ s/\@domain\.com/\@$d->{'dom'}/g;
+		}
+	&flush_file_lines($sqlfile);
+	&require_mysql();
+	($ex, $out) = &mysql::execute_sql_file($dbname, $sqlfile, $dbuser, $dbpass);
+	$ex && return (0, "Failed to run database setup script : <tt>$out</tt>.");
+	}
+
+# Return a URL for the user
+local $userurl = $url;
+$url .= "admin.php";
+local $rp = $opts->{'dir'};
+$rp =~ s/^$d->{'home'}\///;
+return (1, "osTicket installation complete. It can be accessed at <a href='$url'>$url</a>.", "Under $rp using $dbphptype database $dbname", $userurl);
+}
+
+# script_osticket_uninstall(&domain, version, &opts)
+# Un-installs a Wordpress installation, by deleting the directory and database.
+# Returns 1 on success and a message, or 0 on failure and an error
+sub script_osticket_uninstall
+{
+local ($d, $version, $opts) = @_;
+
+# Remove the contents of the target directory
+&is_under_directory($d->{'home'}, $opts->{'dir'}) ||
+	return (0, "Invalid install directory $opts->{'dir'}");
+local $out = &run_as_domain_user($d, "rm -rf ".quotemeta($opts->{'dir'})."/* ".
+				     quotemeta($opts->{'dir'})."/.htaccess");
+$? && return (0, "Failed to delete files : <tt>$out</tt>");
+
+if ($opts->{'dir'} ne &public_html_dir($d, 0)) {
+	# Take out the directory too
+	&run_as_domain_user($d, "rmdir ".quotemeta($opts->{'dir'}));
+	}
+
+# Remove all book_ tables from the database
+local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+&require_mysql();
+foreach $t (&mysql::list_tables($dbname)) {
+	if ($t =~ /^ticket_/ || $t eq "tickets") {
+		&mysql::execute_sql_logged($dbname,
+			"drop table ".&mysql::quotestr($t));
+		}
+	}
+
+return (1, "osTicket directory and tables deleted.");
+}
+
+1;
+

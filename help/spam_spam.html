@@ -1,0 +1,22 @@
+<header>Destination for spam emails</header>
+
+This field determines what happens to email messages that have been identified
+by SpamAssassin as spam, based on their computed score and the recipient's
+spam threshold. The available options are :<p>
+<dl>
+<dt>Throw away
+<dd>Any messages classified as spam will be immediately deleted.
+<dt>Deliver normally
+<dd>Spam will be delivered to the recipient's mailbox, but with X-Spam headers that can be used for filtering by a mail client.
+<dt>Write to standard spam file ~/mail/spam
+<dd>Spam is written to the standard folder for manual analysis and deletion.
+<dt>Write to mail file under home directory
+<dd>Spam is saved to the mail file under the user's home directory that you enter. To write to a Maildir format directory, put a / at the end of the filename.
+<dt>Forward to email address
+<dd>Any messages classified as spam will be forwarded to the entered address.
+<dt>Write to other file
+<dd>Spam will be written to the given mail file (or directory if the path ends with /), which can be anywhere on the server.
+</dl>
+
+<footer>
+

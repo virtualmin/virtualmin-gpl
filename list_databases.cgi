@@ -1,0 +1,154 @@
+#!/usr/local/bin/perl
+# Show all MySQL and PostgreSQL databases owned by this domain
+
+require './virtual-server-lib.pl';
+&ReadParse();
+$d = &get_domain($in{'dom'});
+&can_edit_domain($d) || &error($text{'edit_ecannot'});
+&can_edit_databases($d) || &error($text{'databases_ecannot'});
+
+&ui_print_header(&domain_in($d), $text{'databases_title'}, "", "databases");
+
+# Fix up manually deleted databases
+if (&can_import_servers()) {
+	@all = &all_databases($d);
+	&resync_all_databases($d, \@all);
+	}
+
+# Create select / add links
+($dleft, $dreason, $dmax) = &count_feature("dbs");
+@links = ( &select_all_link("d"),
+	   &select_invert_link("d") );
+if ($dleft != 0) {
+	push(@links, "<a href='edit_database.cgi?dom=$in{'dom'}&new=1'>".
+		     $text{'databases_add'}."</a>");
+	}
+
+# Build and show DB list
+@dbs = &domain_databases($d);
+if (@dbs) {
+	print &ui_form_start("delete_databases.cgi", "post");
+	print &ui_hidden("dom", $in{'dom'}),"\n";
+	print &ui_links_row(\@links);
+	print &ui_columns_start([ "", $text{'databases_db'},
+				  $text{'databases_type'},
+				  $text{'databases_action'} ], undef, 0,
+				[ "width=5" ]);
+	foreach $db (@dbs) {
+		local $action;
+		if ($db->{'type'} eq 'mysql' &&
+		    &foreign_available("mysql")) {
+			$action = "<a href='../mysql/edit_dbase.cgi?db=$db->{'name'}'>$text{'databases_man'}</a>";
+			}
+		elsif ($db->{'type'} eq 'postgres' &&
+		       &foreign_available("postgresql")) {
+			$action = "<a href='../postgresql/edit_dbase.cgi?db=$db->{'name'}'>$text{'databases_man'}</a>";
+			}
+		elsif ($db->{'link'}) {
+			$action = "<a href='$db->{'link'}'>$text{'databases_man'}</a>";
+			}
+		print &ui_checked_columns_row([
+			"<a href='edit_database.cgi?dom=$in{'dom'}&name=$db->{'name'}&type=$db->{'type'}'>$db->{'name'}</a>",
+			$db->{'desc'},
+			$action ],
+			[ "width=5" ],
+			"d", $db->{'type'}."_".$db->{'name'});
+		}
+	print &ui_columns_end();
+	}
+else {
+	print "<b>$text{'databases_none'}</b><p>\n";
+	shift(@links); shift(@links);
+	}
+print &ui_links_row(\@links);
+if (@dbs) {
+	print &ui_form_end([ [ "delete", $text{'databases_delete'} ] ]);
+	}
+if ($dleft == 0) {
+	print &text('databases_noadd'.$dreason, $dmax),"<br>\n";
+	}
+
+# Show form to change database usernames
+if (!$d->{'parent'} && $virtualmin_pro) {
+	print "<hr>\n";
+	print &ui_form_start("save_dbname.cgi");
+	print &ui_hidden("dom", $in{'dom'}),"\n";
+	print &ui_table_start($text{'databases_uheader'}, undef, 2);
+
+	foreach $f (@database_features) {
+		$sfunc = "set_${f}_user";
+		$ufunc = "${f}_user";
+		if (defined($sfunc) && $config{$f} && $d->{$f}) {
+			$un = &$ufunc($d);
+			print &ui_table_row($text{'feature_'.$f},
+			    &ui_opt_textbox($f, undef, 20,
+				&text('databases_leave', "<tt>$un</tt>")));
+			}
+		}
+
+	print &ui_table_end();
+	print &ui_form_end([ [ "save", $text{'save'} ] ]);
+	}
+
+# Show form to change database passwords
+if (!$d->{'parent'} && $virtualmin_pro) {
+	print "<hr>\n";
+	print &ui_form_start("save_dbpass.cgi");
+	print &ui_hidden("dom", $in{'dom'}),"\n";
+	print &ui_table_start($text{'databases_pheader'}, undef, 2);
+
+	foreach $f (@database_features) {
+		$sfunc = "set_${f}_pass";
+		$ufunc = "${f}_pass";
+		$efunc = "${f}_enc_pass";
+		if (defined($sfunc) && $config{$f} && $d->{$f}) {
+			$pw = &$ufunc($d, 1);
+			$encpw = defined(&$efunc) ? &$efunc($d) : undef;
+			print &ui_table_row($text{'feature_'.$f},
+			    &ui_radio($f."_def",
+				$encpw ? 2 : $pw eq $d->{'pass'} ? 1 : 0,
+				[ [ 1, $text{'databases_samepass'}."<br>" ],
+				  $encpw ?
+				    ( [ 2, $text{'databases_enc'}."<br>" ] ) :
+				    ( ),
+				  [ 0, $text{'databases_newpass'}." ".
+				       &ui_textbox($f,
+					 $pw eq $d->{'pass'} ? "" : $pw, 20) ]
+				]));
+			}
+		}
+
+	print &ui_table_end();
+	print &ui_form_end([ [ "save", $text{'save'} ] ]);
+	}
+
+# Show database import form, if there are any not owned by any user
+if (&can_import_servers()) {
+	foreach $dd (&list_domains()) {
+		foreach $db (&domain_databases($dd)) {
+			$inuse{$db->{'type'},$db->{'name'}}++;
+			}
+		}
+	@avail = grep { !$inuse{$_->{'type'},$_->{'name'}} &&
+		        !$_->{'special'} } @all;
+	@avail = sort { $a->{'name'} cmp $b->{'name'} } @avail;
+	if (@avail) {
+		print "<hr>\n";
+		print &ui_form_start("import_database.cgi", "post");
+		print &ui_hidden("dom", $in{'dom'}),"\n";
+		print &ui_table_start($text{'databases_iheader'}, undef, 2);
+
+		print &ui_table_row($text{'databases_ilist'},
+			&ui_select("import", [ ],
+			    [ map { [ "$_->{'type'} $_->{'name'}",
+				      "$_->{'name'} ($_->{'desc'})"
+				    ] } @avail ], 5, 1));
+
+		print &ui_table_end();
+		print &ui_form_end([ [ "ok", $text{'databases_import'} ] ]);
+		}
+	}
+
+&ui_print_footer(&domain_footer_link($d),
+		 "", $text{'index_return'});
+

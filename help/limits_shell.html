@@ -1,0 +1,18 @@
+<header>Allowed login type</header>
+
+This setting determines how the administrator for this domain is allowed to
+login. The available options are :<p>
+<dl>
+<dt><b>No login</b>
+<dd>Both FTP and SSH logins are blocked.
+<dt><b>FTP only</b>
+<dd>The user can connect via FTP, but not via SSH or telnet.
+<dt><b>SSH and FTP</b>
+<dd>Logins via FTP, SSH and telnet are allowed.
+</dl>
+
+Because this feature works by changing the virtual server Unix user's shell,
+it assumes that your FTP server uses the <tt>/etc/shells</tt> file for
+authentication. <p>
+<footer>
+

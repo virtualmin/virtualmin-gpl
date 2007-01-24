@@ -1,0 +1,52 @@
+ - separate backup schedule for each domain (or group of domains?)
+	- behave like templates, with first stored in config and others in files
+	- need to be able to backup backup schedules
+
+ - refactor UID / GID allocation code, to one place (setup_unix?)
+
+ - option to update template settings on all virtual servers that use them,
+   such as quota and limits 
+	- when the template is changed for a server, quotas/etc should be
+	  optionally updated
+	- add a new page for changing the template
+
+ - NIS support for users DB
+	- Cluster mode - each feature on a separate server
+
+ - Make new mailbox email templatable
+
+ - Allow domain owners to backup multiple domains at once (aliases,etc)
+
+ - Allow creation of user-only account, with no associated domain
+	- For owning sub-domains
+
+ - Automatically include alias domains in backups
+
+ - Need all bandwidth function for ftp and unix, to handle large FTP log files
+
+ - When changing a domain's password, username or domain, update all script
+   installers.
+
+ - Allow resellers and domain owners to use remote API
+	- Need access control enforcement in .pl scripts
+
+ - Update phprojekt script installer to be more user-friendly (POST?)
+
+ - Separate plans (sets of limits) from templates, so that they can be
+   created by resellers.
+	- When creating domain, plan can override template.
+
+ - Simple form to create 'parked' domain
+	- Field for text, sets up web, DNS and email
+	- styles (plain, virtualmin, under construction)
+	- also do in create-domain.pl
+	- need list-styles.pl script
+
+  - per-directory PHP version
+
+  - domain-level spam folder clearing
+	- ticket 297
+
+  - option to add new mailbox groups to proftpd list of those to chroot
+	- don't do if chrooting everyone
+

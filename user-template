@@ -1,0 +1,14 @@
+Your mailbox has been set up successfully as follows :
+
+Email address:           ${MAILBOX}@${DOM}
+POP3 login:              ${USER}
+POP3 password:           ${PLAINPASS}
+SMTP server:             mail.${DOM}
+POP3 server:             mail.${DOM}
+${IF-FTP}
+FTP login:               Enabled
+Home directory:          ${HOME}
+${ELSE-FTP}
+FTP login:               Disabled
+${ENDIF-FTP}
+

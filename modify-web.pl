@@ -1,0 +1,182 @@
+#!/usr/local/bin/perl
+# Change web server settings for some domain
+
+package virtual_server;
+$main::no_acl_check++;
+$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
+$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
+if ($0 =~ /^(.*\/)[^\/]+$/) {
+	chdir($1);
+	}
+chop($pwd = `pwd`);
+$0 = "$pwd/modify-web.pl";
+require './virtual-server-lib.pl';
+$< == 0 || die "modify-web.pl must be run as root";
+$config{'web'} || &usage("Web serving is not enabled for Virtualmin");
+
+$first_print = \&first_text_print;
+$second_print = \&second_text_print;
+$indent_print = \&indent_text_print;
+$outdent_print = \&outdent_text_print;
+
+# Parse command-line args
+while(@ARGV > 0) {
+	local $a = shift(@ARGV);
+	if ($a eq "--domain") {
+		push(@dnames, shift(@ARGV));
+		}
+	elsif ($a eq "--all-domains") {
+		$all_doms = 1;
+		}
+	elsif ($a eq "--mode") {
+		$mode = shift(@ARGV);
+		}
+	elsif ($a eq "--proxy") {
+		$proxy = shift(@ARGV);
+		$proxy =~ /^(http|https):\/\/\S+$/ ||
+			&usage($text{'frame_eurl'});
+		}
+	elsif ($a eq "--no-proxy") {
+		$proxy = "";
+		}
+	elsif ($a eq "--framefwd") {
+		$framefwd = shift(@ARGV);
+		$framefwd =~ /^(http|https):\/\/\S+$/ ||
+			&usage($text{'frame_eurl'});
+		}
+	elsif ($a eq "--frametitle") {
+		$frametitle = shift(@ARGV);
+		}
+	elsif ($a eq "--no-framefwd") {
+		$framefwd = "";
+		}
+	elsif ($a eq "--suexec") {
+		$suexec = 1;
+		}
+	elsif ($a eq "--no-suexec") {
+		$suexec = 0;
+		}
+	else {
+		&usage();
+		}
+	}
+@dnames || $all_doms || usage();
+$mode || defined($proxy) || defined($framefwd) || defined($suexec) ||
+	 &usage("Nothing to do");
+$proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
+
+# Get domains to update
+if ($all_doms) {
+	@doms = grep { $_->{'web'} } &list_domains();
+	}
+else {
+	foreach $n (@dnames) {
+		$d = &get_domain_by("dom", $n);
+		$d || &usage("Domain $n does not exist");
+		$d->{'web'} || &usage("Virtual server $n does not have a web site enabled");
+		push(@doms, $d);
+		}
+	}
+
+# Make sure proxy and frame settings don't clash
+foreach $d (@doms) {
+	if ($framefwd && $d->{'proxy_pass_mode'} == 1) {
+		&usage("Frame forwarding cannot be enabled for $d->{'dom'}, as it is currently using proxying");
+		}
+	if ($proxy && $d->{'proxy_pass_mode'} == 2) {
+		&usage("Proxying cannot be enabled for $d->{'dom'}, as it is currently using frame forwarding");
+		}
+	}
+
+# Make sure suexec and PHP settings don't clash
+foreach $d (@doms) {
+	$p = $mode || &get_domain_php_mode($d);
+	$s = defined($suexec) ? $suexec : &get_domain_suexec($d);
+	if ($p eq "cgi" && !$s) {
+		&usage("For PHP to be run as the domain owner in $d->{'dom'}, suexec must also be enabled");
+		}
+	@supp = &supported_php_modes($d);
+	!$mode || &indexof($mode, @supp) >= 0 ||
+		&usage("The selected PHP exection mode cannot be used with $d->{'dom'}");
+	}
+
+# Do it for all domains
+foreach $d (@doms) {
+	&$first_print("Updating server $d->{'dom'} ..");
+	&$indent_print();
+
+	# Update PHP mode
+	if ($mode) {
+		&save_domain_php_mode($d, $mode);
+		}
+
+	# Update suexec setting
+	if (defined($suexec)) {
+		&save_domain_suexec($d, $suexec);
+		}
+
+	local $oldd = { %$d };
+	if (defined($proxy)) {
+		# Update proxy mode
+		if ($proxy) {
+			$d->{'proxy_pass'} = $proxy;
+			$d->{'proxy_pass_mode'} = 1;
+			}
+		else {
+			$d->{'proxy_pass'} = undef;
+			$d->{'proxy_pass_mode'} = 0;
+			}
+		}
+
+	if (defined($framefwd)) {
+		# Update frame forwarding mode
+		if ($framefwd) {
+			$d->{'proxy_pass'} = $framefwd;
+			$d->{'proxy_pass_mode'} = 2;
+			}
+		else {
+			$d->{'proxy_pass'} = undef;
+			$d->{'proxy_pass_mode'} = 0;
+			}
+		}
+	if (defined($frametitle)) {
+		$d->{'proxy_title'} = $frametitle;
+		}
+	if (defined($frametitle) || $framefwd) {
+		&$first_print($text{'frame_gen'});
+		&create_framefwd_file($d);
+		&$second_print($text{'setup_done'});
+		}
+
+	if (defined($proxy) || defined($framefwd)) {
+		# Save the domain
+		&modify_web($d, $oldd);
+		if ($d->{'ssl'}) {
+			&modify_ssl($d, $oldd);
+			}
+
+		&$first_print($text{'save_domain'});
+		&save_domain($d);
+		&$second_print($text{'setup_done'});
+		}
+
+	&$outdent_print();
+	&$second_print(".. done");
+	}
+
+&run_post_actions();
+
+sub usage
+{
+print "$_[0]\n\n" if ($_[0]);
+print "Changes web server settings for one or more domains.\n";
+print "\n";
+print "usage: modify-web.pl [--domain name] | [--all-domains]\n";
+print "                     [--mod_php | --cgi | --fcgi]\n";
+print "                     [--suexec | --no-suexec]\n";
+print "                     [--proxy http://... | --no-proxy]\n";
+print "                     [--framefwd http://... | --no-framefwd]\n";
+print "                     [--framefwd \"title\" ]\n";
+exit(1);
+}
+

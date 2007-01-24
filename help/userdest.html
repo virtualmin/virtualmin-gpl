@@ -1,0 +1,43 @@
+<header>Email forwarding destinations</header>
+
+This table of fields determines what happens to email sent to this user.
+Normally it would just be delivered directly to the user's mailbox, but if
+any desintations are defined here then they will be used instead. This can
+be used to setup an autoresponder if the user is away on vacation, or to
+forward his email to an address on another server. <p>
+
+Each destination has a type (chosen from the menu), which can be one of the
+following :
+<ul>
+<li><b>Email address</b><br>
+    Email will be forwarded to the address entered in the adjacent field.<p>
+<li><b>Addresses in file</b><br>
+    Email will be forwarded to all of the addresses listed in the text file
+    whose path is entered in the adjacent field.<p>
+<li><b>Write to file</b><br>
+    Email to the alias will appended to the specified file. All headers and
+    the raw un-decoded body will be included.<p>
+<li><b>Feed to program</b><br>
+    The program entered in the adjacent field will be executed and email to
+    the alias passed to it as input. <p>
+<li><b>Autoreply from file</b><br>
+    When email is received by the user, and automatic reply message will be
+    sent back to the sender. The text of this autoreply will be taken from the
+    file entered in the adjacent text field. <p>
+<li><b>Apply filter file</b><br>
+    Email sent to the user will be processed according to the rules in the
+    specified filter file, which may cause it to be forwarded to other
+    addresses or files depending on the actual contents of the message. <p>
+<li><b>Mailbox of user</b><br>
+    Email will be delivered directly to the mailbox of the user entered in
+    the adjacent text field. Typically you would enter the name of the
+    user himself, so that he receives a copy of the email as well as it being
+    forwarded to any other destinations. However, you must enter the full POP3
+    login username, like <i>joe.foo</i> instead of just <i>joe</i>.<p>
+</ul>
+If you choose the <b>Addresses in file</b>, <b>Autoreply from file</b> or
+<b>Apply filter file</b> destination types, when you re-edit
+the users links labeled <b>Edit..</b> will appear next to any such destinations
+for editing the contents of the specified file. <p>
+
+<hr>

@@ -1,0 +1,21 @@
+<header>Secondary Mail Servers</header>
+
+A secondary mail server is one that can also receive email for one
+of the virtual servers managed by Virtualmin, but only as a temporary
+relay rather than the final destination. It is wise to setup a secondary
+server for heavily used mail domains, to act as a backup or holding place
+in case the primary mail server is down. <p>
+
+On this page, you can select other servers with Virtualmin installed
+to be used as secondary MX servers for new mail domains created on this
+system. Before any servers will appear, they must first be added to the
+Webmin Servers Index module, in which you must enter the root login and
+password for the remote server. <p>
+
+For each secondary mail server, you have the option of entering a different
+hostname to use in the DNS MX record, instead of the server's actual hostname,
+such as <i>secmx.yourdomain.com</i>. However, be sure that whatever you
+enter is a valid DNS name that resolves to the same server. <p>
+
+<footer>
+

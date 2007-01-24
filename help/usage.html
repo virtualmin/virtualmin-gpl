@@ -1,0 +1,23 @@
+<header>Disk Usage</header>
+
+This page displays disk usage for a virtual server, broken down into
+four sections :
+
+<dl>
+
+<dt><b>Disk Quota</b>
+<dd>This section shows the disk quota allocated to the virtual server, the space currently used by files owned by the server, and the size of owned databases.<p>
+
+<dt><b>By Directory</b>
+<dd>Shows the space used by the top 10 directories under the server's home. For each, the <b>Quota Size</b> is the size of files owned by the server's Unix grouo, while the <b>Size</b> includes files owned by other users. The latter may be larger for directories like <tt>logs</tt> when have files owned by <tt>root</tt>. The <tt>homes</tt> directory which contains mail / FTP users is not included, as it is accounted for in the next section. <p>
+
+<dt><b>By Mail / FTP User</b>
+<dd>This section shows the disk space used by the top 10 mailbox users in this domain and any sub-servers. Usage is based on files owned by the Unix user for each mailbox.<p>
+
+<dt><b>By Sub-Server</b>
+<dd>Shows the disk space used by each sub-server, based on the files in their home directories. The space used by any mailbox users in those servers is also included.<p>
+
+</dl>
+
+<footer>
+

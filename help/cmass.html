@@ -1,0 +1,35 @@
+<header>Batch Create Servers</header>
+
+This page allows you to create multiple virtual servers at once from
+a text file. This file must list one server per line, and each line must
+have the following format :<p>
+
+<tt><i>domain</i>:<i>description</i>:<i>password</i>:[<i>username</i>]:[<i>parent-domain</i>]:[<i>ip-address</i>]</tt><p>
+
+The meanings of the fields are :<br>
+<dl>
+<dt>domain
+<dd>The domain name for the virtual server to create, such as <i>foo.com</i>.
+<dt>description
+<dd>A human-readable description, such as <i>Joe's Website</i>.
+<dt>password
+<dd>The password for the server's administration login. This is only needed for parent servers.
+<dt>username
+<dd>The administration username for the server. If this is left blank, a username is selected automatically.
+<dt>parent-domain
+<dd>The domain name of the parent server to create this server under. If this is left empty, the new server is created as a parent itself.
+<dt>ip-address
+<dd>For virtual servers that do not need their own private IP, this field can be left blank. Otherwise, you must either enter a valid un-used address, or the word <tt>allocate</tt> to have Virtualmin select one for you (if configured).
+</dl><p>
+
+Quotas, bandwidth, and other limits for the created servers are set based on
+the template you select on this form. The features for the created servers
+are determined by the feature checkboxes, just as on the normal single-server
+creation page. <p>
+
+If your system uses reseller accounts, you can select to have all the virtual
+servers created under the ownership of a reseller. This option is only available
+to the master administrator. <p>
+
+<footer>
+

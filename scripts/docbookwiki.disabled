@@ -1,0 +1,165 @@
+
+# script_docbookwiki_desc()
+sub script_docbookwiki_desc
+{
+return "DocBookWiki";
+}
+
+sub script_docbookwiki_uses
+{
+return ( "php" );
+}
+
+sub script_docbookwiki_longdesc
+{
+return "DocBook Wiki is a web application that is used to display and to edit online DocBook documents.";
+}
+
+# script_docbookwiki_versions()
+sub script_docbookwiki_versions
+{
+return ( "0.8.2" );
+}
+
+# script_docbookwiki_depends(&domain, version)
+sub script_docbookwiki_depends
+{
+local ($d, $ver) = @_;
+return "DocBookWiki requires a website" if (!$d->{'web'});
+return "DocBookWiki cannot be installed onto virtual servers without a home directory"
+	if (!$d->{'dir'});
+&require_apache();
+return "DocBookWiki requires the Apache mod_php4 module"
+	if (!$apache::httpd_modules{'mod_php4'});
+return undef;
+}
+
+# script_docbookwiki_params(&domain, version, &upgrade-info)
+# Returns HTML for table rows for options for installing PHP-NUKE
+sub script_docbookwiki_params
+{
+local ($d, $ver, $upgrade) = @_;
+local $rv;
+local $hdir = &public_html_dir($d, 1);
+if ($upgrade) {
+	# Options are fixed when upgrading
+	local $dir = $upgrade->{'opts'}->{'dir'};
+	$dir =~ s/^$d->{'home'}\///;
+	$rv .= &ui_table_row("Install directory", $dir);
+	}
+else {
+	# Show editable install options
+	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
+			     &ui_opt_textbox("dir", "docbookwiki", 30,
+					     "At top level"));
+	}
+return $rv;
+}
+
+# script_docbookwiki_parse(&domain, version, &in, &upgrade-info)
+# Returns either a hash ref of parsed options, or an error string
+sub script_docbookwiki_parse
+{
+local ($d, $ver, $in, $upgrade) = @_;
+if ($upgrade) {
+	# Options are always the same
+	return $upgrade->{'opts'};
+	}
+else {
+	local $hdir = &public_html_dir($d, 0);
+	$in{'dir_def'} || $in{'dir'} =~ /\S/ && $in{'dir'} !~ /\.\./ ||
+		return "Missing or invalid installation directory";
+	local $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
+	if (-r "$dir/books.conf") {
+		return "DocBookWiki appears to be already installed in the selected directory";
+		}
+	return { 'dir' => $dir,
+		 'path' => $in{'dir_def'} ? "/" : "/$in{'dir'}", };
+	}
+}
+
+# script_docbookwiki_files(&domain, version, &opts, &upgrade-info)
+# Returns a list of files needed by PHP-Nuke, each of which is a hash ref
+# containing a name, filename and URL
+sub script_docbookwiki_files
+{
+local ($d, $ver, $opts, $upgrade) = @_;
+local @files = ( { 'name' => "source",
+	   'file' => "books-$ver.tar.gz",
+	   'url' => "http://osdn.dl.sourceforge.net/sourceforge/doc-book/books-$ver.tar.gz" } );
+return @files;
+}
+
+# script_docbookwiki_install(&domain, version, &opts, &files, &upgrade-info)
+# Actually installs PhpWiki, and returns either 1 and an informational
+# message, or 0 and an error
+sub script_docbookwiki_install
+{
+local ($d, $version, $opts, $files, $upgrade) = @_;
+local ($out, $ex);
+&has_command("tar") ||
+   return (0, "The tar command is needed to extract the DocBookWiki source");
+&has_command("gunzip") ||
+   return (0, "The gunzip command is needed to extract the DocBookWiki source");
+
+# Create target dir
+if (!-d $opts->{'dir'}) {
+	$out = &run_as_domain_user($d, "mkdir -p ".quotemeta($opts->{'dir'}));
+	-d $opts->{'dir'} ||
+		return (0, "Failed to create directory : <tt>$out</tt>.");
+	}
+
+# Extract tar file to temp dir
+local $temp = &transname();
+mkdir($temp, 0755);
+chown($d->{'uid'}, $d->{'gid'}, $temp);
+$out = &run_as_domain_user($d, "cd ".quotemeta($temp).
+			       " && (gunzip -c $files->{'source'} | tar xf -)");
+-r "$temp/books-$ver/books.conf" ||
+	return (0, "Failed to extract source : <tt>$out</tt>.");
+
+# Move all files to target
+$out = &run_as_domain_user($d, "cp -rp ".quotemeta($temp)."/docbookwiki-$ver/* ".
+			       quotemeta($opts->{'dir'}));
+local $cfile = "$opts->{'dir'}/books.conf";
+-r $cfile || return (0, "Failed to copy source : <tt>$out</tt>.");
+
+# Set email in config file
+local $lref = &read_file_lines($cfile);
+foreach my $l (@$lref) {
+	if ($l =~ /^ADMIN_EMAIL\s*=/) {
+		$l = "ADMIN_EMAIL=\"$d->{'emailto'}\"";
+		}
+	}
+&flush_file_lines($cfile);
+
+local $pt = $d->{'web_port'} == 80 ? "" : ":$d->{'web_port'}";
+local $url = "http://$d->{'dom'}$pt$opts->{'path'}/";
+local $rp = $opts->{'dir'};
+$rp =~ s/^$d->{'home'}\///;
+return (1, "DocBookWiki installation complete. Go to <a href='$url'>$url</a> to use it.", "Under $rp", $url);
+}
+
+# script_docbookwiki_uninstall(&domain, version, &opts)
+# Un-installs a PHP-Nuke installation, by deleting the directory and database.
+# Returns 1 on success and a message, or 0 on failure and an error
+sub script_docbookwiki_uninstall
+{
+local ($d, $version, $opts) = @_;
+
+# Remove the contents of the target directory
+&is_under_directory($d->{'home'}, $opts->{'dir'}) ||
+	return (0, "Invalid install directory $opts->{'dir'}");
+local $out = &backquote_logged("rm -rf ".quotemeta($opts->{'dir'})."/* 2>&1");
+$? && return (0, "Failed to delete files : <tt>$out</tt>");
+
+if ($opts->{'dir'} ne &public_html_dir($d, 0)) {
+	# Take out the directory too
+	&run_as_domain_user($d, "rmdir ".quotemeta($opts->{'dir'}));
+	}
+
+return (1, "DocBookWiki directory deleted.");
+}
+
+1;
+

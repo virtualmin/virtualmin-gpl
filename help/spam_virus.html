@@ -1,0 +1,19 @@
+<header>Destination for virus emails</header>
+
+This field determines what happens to email messages that have been identified
+by ClamAV as containing a virus. The available options are :<p>
+<dl>
+<dt>Throw away
+<dd>Any detected viruses will be immediately deleted.
+<dt>Write to standard virus file ~/mail/virus
+<dd>Viruses are written to the standard folder for manual analysis and deletion.
+<dt>Write to mail file under home directory
+<dd>Viruses are saved to the mail file under the user's home directory that you enter. To write to a Maildir format directory, put a / at the end of the filename.
+<dt>Forward to email address
+<dd>Any virus-laden messages will be forwarded to the entered address.
+<dt>Write to other file
+<dd>Viruses will be written to the given mail file (or directory if the path ends with /), which can be anywhere on the server.
+</dl>
+
+<footer>
+

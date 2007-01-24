@@ -1,0 +1,9 @@
+The following virtual server has exceeded its bandwidth limit :
+
+Domain name:             ${DOM}
+Accounting period:       ${BW_PERIOD} days
+Bandwidth limit:         ${BW_LIMIT}
+Bandwidth usage:         ${BW_USAGE} over the last ${BW_PERIOD} days
+
+Please note that usage by all sub-servers is included in this total.
+

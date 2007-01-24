@@ -1,0 +1,12 @@
+name=Virtualmin
+desc=Virtualmin Virtual Servers
+category=servers
+depends=net useradmin quota acl cron mailboxes 1.320
+os_support=*-linux macos freebsd openbsd solaris
+version=3.33
+desc_de=Virtualmin Virtuelle Server
+desc_fr=Serveurs Virtuels Virtualmin
+readonly=1
+feedback=feedback@webmin.com
+virtualmin=pro
+desc_tr=Virtualmin Sanal Sunucular&#305;

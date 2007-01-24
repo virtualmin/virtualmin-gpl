@@ -1,0 +1,54 @@
+#!/usr/local/bin/perl
+# Deletes a mail alias in some domain
+
+package virtual_server;
+$main::no_acl_check++;
+$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
+$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
+if ($0 =~ /^(.*\/)[^\/]+$/) {
+	chdir($1);
+	}
+chop($pwd = `pwd`);
+$0 = "$pwd/delete-alias.pl";
+require './virtual-server-lib.pl';
+$< == 0 || die "delete-alias.pl must be run as root";
+
+# Parse command-line args
+while(@ARGV > 0) {
+	local $a = shift(@ARGV);
+	if ($a eq "--domain") {
+		$domain = shift(@ARGV);
+		}
+	elsif ($a eq "--from") {
+		$from = shift(@ARGV);
+		}
+	else {
+		&usage();
+		}
+	}
+$from || &usage();
+
+$d = &get_domain_by("dom", $domain);
+$d || usage("Virtual server $domain does not exist");
+
+# Find the alias
+@aliases = &list_domain_aliases($d);
+$email = $from eq "*" ? "%1\@$domain" : "$from\@$domain";
+($virt) = grep { $_->{'from'} eq $email } @aliases;
+$virt || &usage("No alias for the email address $email exists");
+
+# Create it
+print "Deleting alias for $email ..\n";
+&delete_virtuser($virt);
+print ".. done\n";
+
+sub usage
+{
+print "$_[0]\n\n" if ($_[0]);
+print "Deletes a mail alias from a virtual server.\n";
+print "\n";
+print "usage: delete-alias.pl   --domain domain.name\n";
+print "                         --from mailbox\n";
+exit(1);
+}
+

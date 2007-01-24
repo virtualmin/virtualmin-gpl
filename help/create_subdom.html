@@ -1,0 +1,28 @@
+<header>Create Virtual Sub-Domain</header>
+
+This form allows you to create a new virtual sub-domain, which is owned by an
+existing administration login. A sub-domain is similar to a sub-server, in that
+it shares disk quota, bandwidth limits and limits on users, aliases and other
+objects with its parent. However, the sub-domain's name must be under the
+name of the parent domain, it uses a sub-directory of the parent's 
+<tt>public_html</tt> directory for its website, and log files are shared.<p>
+
+When creating the server, you must
+enter at least the domain name and a description. If
+multiple server templates are defined on the system, you can select one from
+the menu - templates determine various defaults for the new server, such as
+the website configuration, DNS records and so on. <p>
+
+To select which features are enabled for the server, use the checkboxes
+in the second part of the <b>Advanced options</b> section. Sub-domains have
+a much smaller set of available features compared to sub-servers or top-level
+servers. <p>
+
+At the bottom of the <b>Advanced options</b> section you can select to
+have all web traffic to this new site forwarded to another URL.
+You can also select to have the new virtual server use
+its own private IP addresses, which is required for SSL and anonymous FTP
+hosting. <p>
+
+<footer>
+

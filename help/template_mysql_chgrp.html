@@ -1,0 +1,10 @@
+<header>Set group ownership of MySQL database files?</header>
+
+When this option is enabled, any new MySQL databases will have group ownership
+set on their data files (typically under <tt>/var/lib/mysql</tt>) so that they
+are included in their virtual servers' Unix quota limits. If not enabled,
+databases disk usage will not be restricted, and it will be possible for 
+a virtual server to exceed its allowed disk allocation. <p>
+
+<footer>
+

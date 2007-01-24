@@ -1,0 +1,30 @@
+<header>Create Virtual Sub-Server</header>
+
+This form allows you to create a new virtual sub-server, which is owned by an
+existing administration login. A sub-server also shares disk quota, bandwidth
+limits and limits on users, aliases and other objects with its parent. <p>
+
+When creating the server, you must
+enter at least the domain name and a description. If
+multiple server templates are defined on the system, you can select one from
+the menu - templates determine various defaults for the new server, such as
+the website configuration, DNS records and so on. <p>
+
+Under the <b>Advanced options</b> section you can select a different
+initial database name, rather than using the default which is derived from
+the domain name. The user and group names cannot be changed, as they are
+always inherited from the parent server. <p>
+
+To select which features are enabled for the server, use the checkboxes
+in the second part of the <b>Advanced options</b> section. Some features
+depend on others and cannot be selected on their own - for example, Webalizer
+reporting on website statistics depends on actually having a website. <p>
+
+At the bottom of the <b>Advanced options</b> section you can select to
+have all web traffic to this new site forwarded to another URL, and to have
+all email forwarded. You can also select to have the new virtual server use
+its own private IP addresses, which is required for SSL and anonymous FTP
+hosting. <p>
+
+<footer>
+

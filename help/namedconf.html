@@ -1,0 +1,20 @@
+<header>Additional named.conf directives for new zones</header>
+
+When a new BIND DNS zone is created, the directives entered into this text
+box will be added to the zone's section in the <tt>named.conf</tt>
+configuration file. For example, you could enter the following to limit zone
+transfers to a selected IP addresses :
+
+<pre>
+allow-transfer { 
+  1.2.3.4;
+  1.2.3.10;
+};
+</pre>
+
+This feature should only be used by those already familiar with the BIND
+configuration format, as a mistake could cause your entire DNS server to
+stop working. <p>
+
+<footer>
+

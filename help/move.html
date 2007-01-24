@@ -1,0 +1,40 @@
+<header>Move Virtual Server</header>
+
+Moving a virtual server changes the domain administration who has control
+over it. The actual functions of the server are un-effected, but it can now
+be managed by a different administrator, and counts towards any limits on
+domains, aliases and databases for that new admin. <p>
+
+This page can be used to perform three different types of operations, depending
+on what kind of server you are editing and what you want to do with it. They
+are :
+<dl>
+<dt><b>Move a sub-server under a different parent</b>
+<dd>When editing a sub-server, you can select a different parent domain from
+    the menu to change its ownership. The server's website, DNS domain,
+    mailboxes and so on will be un-effected, but it will now be under the
+    control of the owner of the new selected parent. Its home directory
+    will be moved under the home of the new parent, and all files will have
+    their ownership changed to the new parent's user and group. <p>
+
+<dt><b>Move a parent server under a different parent</b>
+<dd>When editing a parent server, you can convert it to a sub-server using
+    this page. This should be done with care, as some settings that exist
+    only for parent servers (such as the password, quotas and limits) will be
+    lost, as they are now inherited from the new parent. In addition, any
+    Unix user, Unix group or Webmin user associated with the domain will be
+    deleted. <p>
+
+<dt><b>Convert a sub-server to a parent server</b>
+<dd>When editing a sub-server, you have the option of converting it to a 
+    parent server owned by a new server administrator. A username and password
+    for the new admin must be entered. After the move is complete, all files
+    in the server's new home directory will be owned by the new user.
+    Disk quotas, bandwidth limits and server owner limits for the moved server
+    will be copied from the old parent, but can subsequently be edited
+    separately.<p>
+
+</dl>
+
+<footer>
+

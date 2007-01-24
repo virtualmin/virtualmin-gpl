@@ -1,0 +1,18 @@
+<header>Backup destination</header>
+
+These fields control where the Virtualmin backup is written to. You can choose
+from one of three destination modes :
+
+<dl>
+<dt><b>Local file directory</b>
+<dd>In this mode, the backup is simply saved to a file on the system running Virtualmin. If using the <b>Single archive file</b> backup format, you must enter a filename here, like <tt>/backup/domainname.tgz</tt>. If using either of the <b>One file per server</b> formats, you need to enter a directory instead, like <tt>/backup</tt>.<br>
+<dt><b>FTP server</b>
+<dd>This mode can be used to have the backup file or files uploaded using the FTP protocol to another server. You must enter the server name, login, password and destination file or directory.<br>
+<dt><b>SSH server</b>
+<dd>This is similar to the FTP mode, but transfers the backup using the SSH protocol instead.<br>
+</dl>
+
+If the backup format is a single file, then the destination you specify here must be a file, which will be overwritten or created. If creating one file per domain, then the destination must be a directory which already exists. <p>
+
+<footer>
+

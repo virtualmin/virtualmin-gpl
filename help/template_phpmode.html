@@ -1,0 +1,15 @@
+<header>Default PHP exection mode</header>
+
+This option determines if PHP scripts in new virtual servers are run as the Apache web server user
+(typically <tt>httpd</tt> or <tt>apache</tt>), or the Unix user who owns
+the virtual server. The former is faster as it means that no additional
+processes need to be started to execute PHP code, but less secure as scripts
+read and write files as a user other than the domain owner. <p>
+
+If your system supports it, the <b>FCGId</b> option is the best, as it runs
+PHP scripts quickly and as the domain owner. Otherwise, unless your system is
+heavily loaded or security between users is not an issue, the
+<b>CGI wrapper</b> option is recommended. <p>
+
+<footer>
+

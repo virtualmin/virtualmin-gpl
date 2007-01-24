@@ -1,0 +1,40 @@
+The following virtual sub-server has been set up successfully :
+
+Domain name:             ${DOM}
+Hosting server:          ${HOSTNAME}
+${IF-VIRT}
+Virtual IP address:      ${IP}
+${ENDIF-VIRT}
+
+${IF-WEB}
+Website:                 http://www.${DOM}/
+${IF-WEBALIZER}
+Webalizer log reporting: Enabled
+${ELSE-WEBALIZER}
+Webalizer log reporting: Disabled
+${ENDIF-WEBALIZER}
+
+${ENDIF-WEB}
+${IF-MAIL}
+Email domain:            ${DOM}
+SMTP server:             mail.${DOM}
+POP3 server:             mail.${DOM}
+
+${ENDIF-MAIL}
+${IF-DNS}
+DNS domain:              ${DOM}
+Nameserver:              ${HOSTNAME}
+
+${ENDIF-DNS}
+${IF-MYSQL}
+MySQL database:          ${DB}
+MySQL login:             ${MYSQL_USER}
+MySQL password:          ${PASS}
+
+${ENDIF-MYSQL}
+${IF-POSTGRES}
+PostgreSQL database:     ${DB}
+PostgreSQL login:        ${USER}
+PostgreSQL password:     ${PASS}
+
+${ENDIF-POSTGRES}

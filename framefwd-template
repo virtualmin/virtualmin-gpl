@@ -1,0 +1,17 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>${PROXY_TITLE}</title>
+<meta http-equiv="content-type" content="text/html" />
+${PROXY_META}
+</head>
+<frameset rows="100%,*">
+  <frame src="${PROXY_PASS}" name="top" frameborder="0" framespacing="0" noresize="noresize" />
+  <frame src="/frameblank.html" frameborder="0" framespacing="0" noresize="noresize" title="blank page" scrolling="no" marginwidth="0" marginheight="0" />
+  <noframes>
+  <body>
+  </body>
+  </noframes>
+</frameset>
+</html>
+

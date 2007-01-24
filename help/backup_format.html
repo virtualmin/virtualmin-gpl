@@ -1,0 +1,6 @@
+<header>Backup format</header>
+
+This field determines if the backup is written as a single file, or if one file is created in the destination for each selected virtual server, named <i>domain</i>.tar.gz. The final option will also create one file per domain, but in a new format supported by Virtualmin 2.86 and above which puts all information about each server under it's home directory. This format is superior because it does not require Virtualmin to create temporary files in the /tmp directory, and thus saves on disk space. <p>
+
+<footer>
+

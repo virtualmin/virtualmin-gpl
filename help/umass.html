@@ -1,0 +1,32 @@
+<header>Batch Create Users</header>
+
+This page allows you to create multiple mail or FTP users at once from
+a text file. This file must list one user per line, and each line must
+have the following format :<p>
+
+<tt><i>username</i>:<i>realname</i>:<i>password</i>:<i>ftp-flag</i>:<i>email-flag</i>:<i>quota</i>:[<i>extras</i>]:[<i>forwards</i>]:[<i>databases</i>]</tt><p>
+
+The meanings of the fields are :<br>
+<dl>
+<dt>username
+<dd>The user's short login name, such as <i>joe</i>. If necessary the domain prefix will appended to make the real login name.
+<dt>realname
+<dd>The user's real name, like <i>Joe Smith</i>.
+<dt>password
+<dd>The initial password for the user, in plain text.
+<dt>ftp-flag
+<dd>If this is set to 1, the user will be allowed to login via FTP. Setting it to 0 or leaving it empty prevents FTP access.
+<dt>email-flag
+<dd>If this is set to 1, the user's primary email address will be enabled.
+<dt>quota
+<dd>The user's mail and home directory quota, in 1 kB disk blocks.
+<dt>extras
+<dd>A comma-separated list of extra email addresses for this user. These must be in Virtualmin domains that you manage.
+<dt>forwards
+<dd>A comma-separated list of email forwarding destinations for this user (typically addresses like <i>joe@otherdomain.com</i>).
+<dt>databases
+<dd>A comma-separated list of databases to grant access to for this user. Each must be a database type (<i>mysql</i> or <i>postgres</i>) and a database name, separated by a space.
+</dl><p>
+
+<footer>
+

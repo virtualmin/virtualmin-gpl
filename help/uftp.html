@@ -1,0 +1,13 @@
+<header>FTP login enabled?</header>
+
+When this option is set to Yes, the user will be given the shell
+<tt><exec %c = &foreign_config($module); $c{'ftp_shell'}></tt>,
+allowing him to login via FTP. When set to No, his shell will be set to
+<tt><exec %c = &foreign_config($module); $c{'shell'}></tt>
+instead, and FTP logins will be denied. <p>
+
+This assumes that the FTP shell is listed in the <tt>/etc/shells</tt>
+file, or otherwise allowed by the FTP server running on your system. <p>
+
+<hr>
+

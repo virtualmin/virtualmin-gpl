@@ -1,0 +1,348 @@
+#!/usr/local/bin/perl
+# Create multiple virtual servers at once
+
+require './virtual-server-lib.pl';
+&ReadParseMime();
+&error_setup($text{'cmass_err'});
+&can_create_master_servers() || &can_create_sub_servers() ||
+	&error($text{'form_ecannot'});
+&require_useradmin();
+
+# Validate source file
+if ($in{'file_def'} == 1) {
+	# Server-side file
+	&master_admin() || &error($text{'cmass_elocal'});
+	open(LOCAL, $in{'local'}) || &error($text{'cmass_elocal2'});
+	while(<LOCAL>) {
+		$source .= $_;
+		}
+	close(LOCAL);
+	$src = "<tt>$in{'local'}</tt>";
+	}
+elsif ($in{'file_def'} == 0) {
+	# Uploaded file
+	$in{'upload'} =~ /\S/ || &error($text{'cmass_eupload'});
+	$source = $in{'upload'};
+	$src = $text{'cmass_uploaded'};
+	}
+elsif ($in{'file_def'} == 2) {
+	# Pasted text
+	$in{'text'} =~ /\S/ || &error($text{'cmass_etext'});
+	$source = $in{'text'};
+	$src = $text{'cmass_texted'};
+	}
+$source =~ s/\r//g;
+
+# Work out the reseller
+if (&master_admin()) {
+	$resel = $in{'resel'};
+	}
+elsif (&reseller_admin()) {
+	$resel = $base_remote_user;
+	}
+else {
+	$mydom = &get_domain_by("user", $base_remote_user, "parent", undef);
+	$resel = $mydom->{'resel'};
+	}
+
+&ui_print_unbuffered_header(undef, $text{'cmass_title'}, "", "cmass");
+
+print &text('cmass_doing', $src),"<p>\n";
+
+# Split into lines, and process each one
+@lines = split(/\n+/, $source);
+$lnum = 0;
+$count = $ecount = 0;
+foreach $line (@lines) {
+	$lnum++;
+	next if ($line !~ /\S/);
+	local ($dname, $owner, $pass, $user, $pname, $ip) = split(/:/, $line, -1);
+	$dname = lc($dname);
+	$user = lc($user);
+
+	# Validate domain details
+	if (!$dname || !$owner) {
+		&line_error($text{'cmass_edname'});
+		next;
+		}
+	if ($dname !~ /^[A-Za-z0-9\.\-]+$/) {
+		&line_error($text{'setup_edomain'});
+		next;
+		}
+	if ($owner =~ /:/) {
+		&line_error($text{'setup_eowner'});
+		next;
+		}
+	local $clash = &get_domain_by("dom", $dname);
+	if ($clash) {
+		&line_error($text{'setup_edomain2'});
+		next;
+		}
+	local $parentdom;
+	if ($pname) {
+		$parentdom = &get_domain_by("dom", $pname);
+		if (!$parentdom) {
+			&line_error(&text('cmass_eparent', $pname));
+			next;
+			}
+		}
+
+	# Get the template
+	local $tmpl = &get_template($parentdom ? $in{'stemplate'}
+					       : $in{'ctemplate'});
+
+	# Validate IP address
+	local $defip = &get_default_ip();
+	local ($virt, $virtalready);
+	if ($ip) {
+		if (!&check_ipaddress($ip) && $ip ne 'allocate') {
+			&line_error($text{'cmass_eip'});
+			next;
+			}
+		if (!&can_use_feature("virt")) {
+			&line_error($text{'cmass_evirt'});
+			next;
+			}
+		if ($config{'all_namevirtual'}) {
+			# Name-based, but with different IP
+			$virt = 1;
+			$virtalready = 1;
+			}
+		elsif ($ip eq 'allocate') {
+			# Need to allocate
+			%racl = $resel ? &get_reseller_acl($resel) : ();
+			if ($racl{'ranges'}) {
+				# Allocating from reseller's range
+				$ip = &free_ip_address(\%racl);
+				if (!$ip) {
+					&line_error($text{'cmass_eipresel'});
+					next;
+					}
+				}
+			else {
+				# Allocating from template
+				if ($tmpl->{'ranges'} eq "none") {
+					&line_error($text{'cmass_eiptmpl'});
+					next;
+					}
+				$ip = &free_ip_address($tmpl);
+				if (!$ip) {
+					&line_error($text{'cmass_eipalloc'});
+					next;
+					}
+				}
+			$virt = 1;
+			$virtalready = 0;
+			}
+		else {
+			# IP specified manually
+			if ($tmpl->{'ranges'} ne "none" &&
+			    !$config{'all_namevirtual'}) {
+				&line_error($text{'cmass_eipmust'});
+				next;
+				}
+			$virt = 1;
+			$virtalready = 0;
+			}
+		}
+	else {
+		$virt = 0;
+		$virtalready = 1;
+		}
+
+	# Work out username
+	local $group;
+	if (!$parentdom) {
+		if (!$user) {
+			# Select a username
+			($user, $try1, $try2) = &unixuser_name($dname);
+			if (!$user) {
+				&line_error(&text('setup_eauto', $try1, $try2));
+				next;
+				}
+			}
+		else {
+			# Check supplied username
+			if ($user !~ /^[^\t :]+$/) {
+				&line_error($text{'setup_euser2'});
+				next;
+				}
+			if (defined(getpwnam($user))) {
+				&line_error($text{'setup_euser'});
+				next;
+				}
+			}
+
+		# Work out mailboxes group name
+		$dname =~ /^([^\.]+)/;
+		$group = $config{'longname'} ? $dname : $1;
+		}
+
+	# Check username restrictions
+	local $uerr = &useradmin::check_username_restrictions($user);
+	if ($uerr) {
+		&line_error(&text('setup_eusername', $user, $uerr));
+		next;
+		}
+
+	# Check if domains limit has been exceeded
+	local ($dleft, $dreason, $dmax) = &count_domains("realdoms");
+	if ($dleft == 0) {
+		&line_error(&text('setup_emax', $dmax));
+		next;
+		}
+
+	# Make sure domain is under parent, if required
+	if ($parentdom) {
+		local $derr = &valid_domain_name($parentdom, $dname);
+		if ($derr) {
+			&line_error($derr);
+			next;
+			}
+		}
+
+	local (%gtaken, %ggtaken, %taken, %utaken);
+	local ($gid, $ugid, $uid);
+	if ($parentdom) {
+		# User and group IDs come from parent
+		$gid = $parentdom->{'gid'};
+		$ugid = $parentdom->{'ugid'};
+		$user = $parentdom->{'user'};
+		$group = $parentdom->{'group'};
+		$uid = $parentdom->{'uid'};
+		}
+	else {
+		# Work out user and group IDs
+		&build_group_taken(\%gtaken, \%ggtaken);
+		$gid = $ugid = &allocate_gid(\%gtaken);
+		$ugroup = $group;
+		&build_taken(\%taken, \%utaken);
+		$uid = &allocate_uid(\%taken);
+		}
+	local $prefix = &compute_prefix($dname, $group, $parentdom);
+
+	# Work out options that may come from template
+	local ($quota, $uquota, $bw, $mailboxlimit, $aliaslimit, $dbslimit,
+	       $domslimit, $nodbname);
+	$quota = $tmpl->{'quota'} eq 'none' ? undef : $tmpl->{'quota'};
+	$uquota = $tmpl->{'uquota'} eq 'none' ? undef : $tmpl->{'uquota'};
+	$bw = $tmpl->{'bwlimit'} eq 'none' ? undef : $tmpl->{'bwlimit'};
+	$mailboxlimit = $tmpl->{'mailboxlimit'} eq 'none' ? undef :
+				$tmpl->{'mailboxlimit'};
+	$aliaslimit = $tmpl->{'aliaslimit'} eq 'none' ? undef :
+				$tmpl->{'aliaslimit'};
+	$dbslimit = $tmpl->{'dbslimit'} eq 'none' ? undef :
+				$tmpl->{'dbslimit'};
+	$domslimit = $tmpl->{'domslimit'} eq 'none' ? '*' :
+				$tmpl->{'domslimit'};
+	$nodbname = 0;
+
+	# Build up domain object
+	local %dom;
+	%dom = ( 'id', &domain_id(),
+		 'dom', $dname,
+		 'user', $user,
+		 'group', $group,
+		 'prefix', $prefix,
+		 'ugroup', $ugroup,
+		 $parentdom ?
+			( 'pass', $parentdom->{'pass'} ) :
+			( 'quota', $quota,
+			  'uquota', $uquota,
+			  'pass', $pass ),
+		 'uid', $uid,
+		 'gid', $gid,
+		 'ugid', $ugid,
+		 'owner', $owner,
+		 'email', $parentdom ? $parentdom->{'email'} : undef,
+		 'name', !$virt,
+		 'ip', $ip,
+		 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :
+			   $config{'dns_ip'},
+		 'virt', $virt,
+		 'virtalready', $virtalready,
+		 'source', 'mass_create.cgi',
+		 'proxy_pass_mode', 0,
+		 $parentdom ? ( ) :
+			( 'mailboxlimit', $mailboxlimit,
+			  'aliaslimit', $aliaslimit,
+			  'dbslimit', $dbslimit,
+			  'bw_limit', $bw,
+			  'domslimit', $domslimit,
+			  'nodbname', $nodbname,
+			),
+		 'parent', $parentdom ? $parentdom->{'id'} : "",
+		 'template', $tmpl->{'id'},
+		 'reseller', $in{'resel'},
+		);
+	$dom{'emailto'} = $dom{'email'} ||
+			  $dom{'user'}.'@'.&get_system_hostname();
+	$dom{'db'} = &database_name(\%dom);
+	my $f;
+	foreach $f (@features, @feature_plugins) {
+		next if ($parentdom && ($f eq 'webmin' || $f eq 'unix'));
+		$dom{$f} = &can_use_feature($f) && int($in{$f});
+		$dom{"limit_$f"} = $f eq "webmin" ? 0 : int($in{$f});
+		}
+	$dom{'home'} = &server_home_directory(\%dom, $parentdom);
+	&complete_domain(\%dom);
+
+	# Check for various clashes
+	local $derr = &virtual_server_depends(\%dom);
+	if ($derr) {
+		&line_error($derr);
+		next;
+		}
+	local $cerr = &virtual_server_clashes(\%dom);
+	if ($cerr) {
+		&line_error($cerr);
+		next;
+		}
+
+	# Check if this new domain would exceed any limits
+	local $lerr = &virtual_server_limits(\%dom);
+	if ($lerr) {
+		&line_error($lerr);
+		next;
+		}
+
+	# Actually do it!
+	&set_all_null_print();
+	local $err = &create_virtual_server(\%dom, $parentdom,
+			      $parentdom ? $parentdom->{'user'} : undef);
+	if ($err) {
+		&line_error($err);
+		next;
+		}
+	else {
+		print "<font color=#00aa00>",
+		      &text('cmass_done', "<tt>$dname</tt>"),"</font><br>\n";
+		$count++;
+		}
+	}
+
+print "<p>\n";
+print &text('cmass_complete', $count, $ecount),"<br>\n";
+&webmin_log("create", "domains", $count);
+
+# Call any theme post command
+if (defined(&theme_post_save_domain)) {
+        &theme_post_save_domain(\%dom);
+        }
+
+&ui_print_footer("", $text{'index_return'});
+
+sub line_error
+{
+local ($msg) = @_;
+print "<font color=#ff0000>";
+if (!$dname) {
+	print &text('cmass_eline', $lnum, $msg);
+	}
+else {
+	print &text('cmass_eline2', $lnum, $msg, "<tt>$dname</tt>");
+	}
+print "</font><br>\n";
+$ecount++;
+}
+

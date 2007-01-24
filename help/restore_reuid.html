@@ -1,0 +1,15 @@
+<header>Re-allocate UIDs and GID?</header>
+
+When this option is set to <b>Yes</b> and you are restoring a server that 
+does not currently exist on the system, the Unix user and group IDs for the
+server administrator and mail/FTP users will be re-allocated to use free
+IDs on your system. This is typically what you want as it avoids clashes with
+existing IDs on your system. <p>
+
+Selecting <b>No</b> tells Virtualmin to use the IDs that were in use when
+the backup was created. This should be used if other files still exist on
+the system with the old IDs, and if those IDs have not been allocated to any
+other users or groups since the backup was made. <p>
+
+<footer>
+

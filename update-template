@@ -1,0 +1,16 @@
+Your mailbox has been updated successfully as follows :
+
+Email address:           ${MAILBOX}@${DOM}
+POP3 login:              ${USER}
+${IF-PLAINPASS}
+New POP3 password:       ${PLAINPASS}
+${ENDIF-PLAINPASS}
+SMTP server:             mail.${DOM}
+POP3 server:             mail.${DOM}
+${IF-FTP}
+FTP login:               Enabled
+Home directory:          ${HOME}
+${ELSE-FTP}
+FTP login:               Disabled
+${ENDIF-FTP}
+

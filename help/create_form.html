@@ -1,0 +1,29 @@
+<header>Create Virtual Server</header>
+
+This form allows you to create a new top-level virtual server, which will have
+a new associated administration login. When creating the server, you must
+enter at least the domain name, description and administration password. If 
+multiple server templates are defined on the system, you can select one from
+the menu - templates determine various defaults for the new server, such as
+the website configuration, DNS records and so on. <p>
+
+Under the <b>Advanced options</b> section you can select a different
+administration username, group name and database name for the server, rather
+than the defaults which are taken from the first part of the domain name. 
+A contact email address for the server can also be entered - ideally this
+should be the existing address of the person who will manage the server,
+in a different domain. <p>
+
+To select which features are enabled for the server, use the checkboxes
+in the second part of the <b>Advanced options</b> section. Some features
+depend on others and cannot be selected on their own - for example, Webalizer
+reporting on website statistics depends on actually having a website. <p>
+
+At the bottom of the <b>Advanced options</b> section you can select to
+have all web traffic to this new site forwarded to another URL, and to have
+all email forwarded. You can also select to have the new virtual server use
+its own private IP addresses, which is required for SSL and anonymous FTP
+hosting. <p>
+
+<footer>
+
