@@ -161,6 +161,11 @@ if (!$aliasdom) {
 		}
 	}
 
+# Validate initial style
+if (defined($in{'content'}) && !$in{'content_def'}) {
+	$in{'content'} =~ /\S/ || &error($text{'setup_econtent'});
+	}
+
 # Work out the virtual IP
 $resel = $parentdom ? $parentdom->{'reseller'} :
 	 &reseller_admin() ? $base_remote_user : undef;
@@ -312,7 +317,7 @@ if ($add_fwdto) {
 	}
 
 # Copy initial website style
-if (!$in{'content_def'} && $dom{'web'}) {
+if (defined($in{'content'}) && !$in{'content_def'} && $dom{'web'}) {
 	($style) = grep { $_->{'name'} eq $in{'style'} }
 			&list_content_styles();
 	&$first_print(&text('setup_styleing', $style->{'desc'}));

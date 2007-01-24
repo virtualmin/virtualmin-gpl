@@ -36,12 +36,6 @@
    created by resellers.
 	- When creating domain, plan can override template.
 
- - Simple form to create 'parked' domain
-	- Field for text, sets up web, DNS and email
-	- styles (plain, virtualmin, under construction)
-	- also do in create-domain.pl
-	- need list-styles.pl script
-
   - per-directory PHP version
 
   - domain-level spam folder clearing

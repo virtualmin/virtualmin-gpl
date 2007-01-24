@@ -492,3 +492,4 @@ Changed the mail / FTP user page to hide infrequently used options in collapsed 
 Changed all rows of links to put a | between them, increasing readability.
 Added a help link in the top-left corner on the server creation form.
 Cleaned up Edit Virtual Server and Virtual Server Details pages to use collapsible sections and more consitent layout.
+Added a section to the virtual server creation form for selecting an initial style and message for a new website. Also added --style and --content options to create-domain.pl, for the same purpose.

@@ -340,6 +340,7 @@ setup_edbname2=Database name must start with $1
 setup_postfailure=.. failed! $1
 setup_efwdto=Missing default mail forwarding address
 setup_efwdtomail=A default mail forwarding address can only be entered if mail is enabled
+setup_econtent=No initial website text entered
 
 setup_title=Setting Up Virtual Server
 setup_group=Creating administration group $1 ..
