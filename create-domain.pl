@@ -445,8 +445,10 @@ print "                        [--prefix username-prefix]\n";
 print "                        [--db database-name]\n";
 print "                        [--fwdto email-address]\n";
 print "                        [--reseller name]\n";
-print "                        [--style name]\n";
-print "                        [--content text|filename]\n";
+if ($virtualmin_pro) {
+	print "                        [--style name]\n";
+	print "                        [--content text|filename]\n";
+	}
 exit(1);
 }
 
