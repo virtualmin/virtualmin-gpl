@@ -417,8 +417,9 @@ if ($config{'avail_spam'}) {
 	if ($acl{'file'}) {
 		return ( { 'mod' => 'spam',
 			   'desc' => $text{'links_spam'},
-			   'page' => 'index.cgi' } );
+			   'page' => 'index.cgi',
 			   'cat' => 'services',
+			 });
 		}
 	}
 return ( );
