@@ -40,5 +40,6 @@
 
   - add sections to mass domain update page
 
-  - delete cron jobs when deleting mailbox users
+  - feature / module / plugin left-menu links functions should have
+    category info (services, logs, etc..)
 

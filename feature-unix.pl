@@ -144,6 +144,8 @@ if (!$_[0]->{'parent'}) {
 			$uinfo->{'olduser'} = $_[1]->{'user'};
 			$uinfo->{'user'} = $_[0]->{'user'};
 			&rename_mail_file($uinfo, \%old);
+			&rename_unix_cron_jobs($_[0]->{'user'},
+					       $_[1]->{'user'});
 			}
 
 		if ($_[0]->{'home'} ne $_[1]->{'home'}) {
@@ -208,6 +210,9 @@ if (!$_[0]->{'parent'}) {
 	if ($uinfo) {
 		&set_user_quotas($uinfo->{'user'}, 0, 0, $_[0]);
 		}
+
+	# Delete his cron jobs
+	&delete_unix_cron_jobs($_[0]->{'user'});
 
 	# Delete virtuser and generic
 	local @virts = &list_virtusers();

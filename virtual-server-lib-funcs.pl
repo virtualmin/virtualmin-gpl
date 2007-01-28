@@ -770,6 +770,11 @@ $plain{$_[0]->{'user'}} = $_[0]->{'plainpass'};
 # modify_user(&user, &old, &domain, [noaliases])
 sub modify_user
 {
+# Rename any of his cron jobs
+if ($_[0]->{'unix'}) {
+	&rename_unix_cron_jobs($_[0]->{'user'}, $_[1]->{'user'});
+	}
+
 local $pop3 = &remove_userdom($_[0]->{'user'}, $_[2]);
 local $extrauser;
 if ($_[1]->{'qmail'}) {
@@ -1163,6 +1168,11 @@ if ($_[0]->{'unix'} && !$_[0]->{'noquota'}) {
 	&set_user_quotas($_[0]->{'user'}, 0, 0, $_[1]);
 	}
 
+# Delete any of his cron jobs
+if ($_[0]->{'unix'}) {
+	&delete_unix_cron_jobs($_[0]->{'user'});
+	}
+
 if ($_[0]->{'qmail'}) {
 	# Delete user in Qmail LDAP
 	local $ldap = &connect_qmail_ldap();
@@ -1293,6 +1303,50 @@ mkdir($plainpass_dir, 0700);
 &read_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
 delete($plain{$_[0]->{'user'}});
 &write_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
+}
+
+# delete_unix_cron_jobs(username)
+# Delete all Cron jobs belonging to some Unix user
+sub delete_unix_cron_jobs
+{
+local ($username) = @_;
+&foreign_require("cron", "cron-lib.pl");
+local @jobs = &cron::list_cron_jobs();
+local $cronfile;
+foreach my $j (@jobs) {
+	if ($j->{'user'} eq $username) {
+		$cronfile ||= &cron::cron_file($j);
+		&lock_file($cronfile);
+		&cron::delete_cron_job($j);
+		}
+	}
+&unlock_file($cronfile) if ($cronfile);
+}
+
+# rename_unix_cron_jobs(username, oldusername)
+# Change the name of the user who owns any cron jobs
+sub rename_unix_cron_jobs
+{
+local ($username, $oldusername) = @_;
+return if ($username eq $oldusername);
+&foreign_require("cron", "cron-lib.pl");
+if (-r "$cron::config{'cron_dir'}/$oldusername") {
+	# Rename user's crontab directory file
+	&rename_logged("$cron::config{'cron_dir'}/$oldusername",
+		       "$cron::config{'cron_dir'}/$username");
+	}
+# Rename jobs in other files
+local @jobs = &cron::list_cron_jobs();
+local $cronfile;
+foreach my $j (@jobs) {
+	if ($j->{'user'} eq $oldusername) {
+		$cronfile ||= &cron::cron_file($j);
+		&lock_file($cronfile);
+		$j->{'user'} = $username;
+		&change_cron_job($j);
+		}
+	}
+&unlock_file($cronfile) if ($cronfile);
 }
 
 # validate_user(&domain, &user, [&olduser])

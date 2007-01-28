@@ -101,6 +101,7 @@ if (!$mailbox) {
 if (&can_mailbox_home() && $d && $d->{'home'} &&
     !$mailbox && !$user->{'fixedhome'}) {
 	# Show home directory editing field
+	local $reshome = &resolve_links($user->{'home'});
 	if ($user->{'brokenhome'}) {
 		# Home directory is in odd location, and so cannot be edited
 		$homefield = "<tt>$user->{'home'}</tt>";
@@ -109,7 +110,7 @@ if (&can_mailbox_home() && $d && $d->{'home'} &&
 	elsif ($user->{'webowner'}) {
 		# Home can be public_html or a sub-dir
 		local $phd = &public_html_dir($d);
-		local $auto = $in{'new'} || $user->{'home'} eq $phd;
+		local $auto = $in{'new'} || $reshome eq &resolve_links($phd);
 		$homefield = &ui_radio("home_def", $auto ? 1 : 0,
 				       [ [ 1, $text{'user_home2'} ],
 					 [ 0, $text{'user_homeunder2'} ] ])." ".
@@ -118,7 +119,9 @@ if (&can_mailbox_home() && $d && $d->{'home'} &&
 		}
 	else {
 		# Home is under server root, and so can be edited
-		local $auto = $in{'new'} || $user->{'home'} eq "$d->{'home'}/$config{'homes_dir'}/$pop3";
+		local $auto = $in{'new'} ||
+		    $reshome eq
+		    &resolve_links("$d->{'home'}/$config{'homes_dir'}/$pop3");
 		$homefield = &ui_radio("home_def", $auto ? 1 : 0,
 				[ [ 1, $text{'user_home1'} ],
 				  [ 0, &text('user_homeunder') ] ])." ".
