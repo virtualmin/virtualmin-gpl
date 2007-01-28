@@ -1334,7 +1334,9 @@ if ($config{'avail_web'}) {
 		push(@rv, { 'mod' => 'apache',
 			    'desc' => $text{'links_web'},
 			    'page' => "virt_index.cgi?virt=".
-					&indexof($virt, @$conf) });
+					&indexof($virt, @$conf),
+			    'cat' => 'services',
+			  });
 		}
 	if ($d->{'ssl'}) {
 		# Link to configure SSL virtual host
@@ -1344,7 +1346,9 @@ if ($config{'avail_web'}) {
 			push(@rv, { 'mod' => 'apache',
 				    'desc' => $text{'links_ssl'},
 				    'page' => "virt_index.cgi?virt=".
-						&indexof($virt, @$conf) });
+						&indexof($virt, @$conf),
+				    'cat' => 'services',
+				  });
 			}
 		}
 	}
@@ -1353,7 +1357,9 @@ if ($virtualmin_pro) {
 	local $pt = $d->{'web_port'} == 80 ? "" : ":$d->{'web_port'}";
 	push(@rv, { 'mod' => $module_name,
 		    'desc' => $text{'links_website'},
-		    'page' => "link.cgi/http://www.$d->{'dom'}$pt/" });
+		    'page' => "link.cgi/http://www.$d->{'dom'}$pt/",
+		    'cat' => 'services',
+		  });
 	}
 if ($config{'avail_syslog'} && &get_webmin_version() >= 1.305) {
 	# Links to logs
@@ -1368,6 +1374,7 @@ if ($config{'avail_syslog'} && &get_webmin_version() >= 1.305) {
 				    'desc' => $log->[1],
 				    'page' => "save_log.cgi?view=1&".
 					      "$param=".&urlize($lf),
+				    'cat' => 'logs',
 				  });
 			}
 		}
@@ -1378,7 +1385,8 @@ if ($config{'avail_phpini'}) {
 	if (&get_domain_php_mode($d) ne "mod_cgi" && -r $ifile) {
 		push(@rv, { 'mod' => 'phpini',
 			    'desc' => $text{'links_phpini'},
-			    'page' => 'list_ini.cgi?file='.&urlize($ifile)
+			    'page' => 'list_ini.cgi?file='.&urlize($ifile),
+			    'cat' => 'services',
 			  });
 		}
 	}

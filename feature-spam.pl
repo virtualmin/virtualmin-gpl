@@ -418,6 +418,7 @@ if ($config{'avail_spam'}) {
 		return ( { 'mod' => 'spam',
 			   'desc' => $text{'links_spam'},
 			   'page' => 'index.cgi' } );
+			   'cat' => 'services',
 		}
 	}
 return ( );

@@ -474,6 +474,7 @@ if ($config{'avail_postgres'}) {
 		return ( { 'mod' => 'postgresql',
 			   'desc' => $text{'links_postgres'},
 			   'page' => "edit_dbase.cgi?db=$dbs[0]" } );
+			   'cat' => 'services',
 		}
 	#elsif (@dbs > 1) {
 	#	return ( { 'mod' => 'postgresql',

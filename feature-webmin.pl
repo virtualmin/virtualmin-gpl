@@ -923,7 +923,8 @@ if ($config{'avail_webminlog'}) {
 	return ( { 'mod' => 'webminlog',
 		   'desc' => $text{'links_webminlog'},
 		   'page' => "search.cgi?uall=0&user=".&urlize($d->{'user'}).
-			     "&mall=1&tall=2&fall=1"
+			     "&mall=1&tall=2&fall=1",
+		   'cat' => 'logs',
 		 } );
 	}
 return ( );

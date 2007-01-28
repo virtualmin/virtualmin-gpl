@@ -472,6 +472,7 @@ if ($config{'avail_syslog'} && &get_webmin_version() >= 1.305) {
 			    'desc' => $text{'links_flog'},
 			    'page' => "save_log.cgi?view=1&".
 				      "$param=".&urlize($lf),
+			    'cat' => 'logs',
 			  });
 		}
 	}

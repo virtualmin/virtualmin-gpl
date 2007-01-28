@@ -718,6 +718,7 @@ if ($config{'avail_mysql'}) {
 		return ( { 'mod' => 'mysql',
 			   'desc' => $text{'links_mysql'},
 			   'page' => "edit_dbase.cgi?db=$dbs[0]" } );
+			   'cat' => 'services',
 		}
 	#elsif (@dbs > 1) {
 	#	return ( { 'mod' => 'mysql',

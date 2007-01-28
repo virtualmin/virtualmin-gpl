@@ -7836,6 +7836,8 @@ sub feature_links
 {
 local ($d) = @_;
 local @rv;
+
+# Links provided by features, like editing DNS records
 foreach my $f (@features) {
 	if ($d->{$f}) {
 		local $lfunc = "links_".$f;
@@ -7848,6 +7850,8 @@ foreach my $f (@features) {
 			}
 		}
 	}
+
+# Links provided by plugins, like Mailman mailing lists
 foreach my $f (@plugins) {
 	if ($d->{$f}) {
 		foreach my $l (&plugin_call($f, "feature_links", $d)) {
@@ -7858,6 +7862,8 @@ foreach my $f (@plugins) {
 			}
 		}
 	}
+
+# Links to other Webmin modules, for domain owners
 if (!&master_admin() && !&reseller_admin()) {
 	local @ot;
 	foreach my $k (keys %config) {
@@ -7868,6 +7874,7 @@ if (!&master_admin() && !&reseller_admin()) {
 				push(@ot, { 'mod' => $1,
 					    'page' => 'index.cgi',
 					    'desc' => $minfo{'desc'},
+					    'cat' => 'webmin',
 					    'other' => 1 });
 				}
 			}
