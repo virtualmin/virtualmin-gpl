@@ -57,8 +57,15 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--option") {
 		$optf = shift(@ARGV);
-		$optn = shift(@ARGV);
-		$optv = shift(@ARGV);
+		if ($optf =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
+			$optf = $1;
+			$optn = $2;
+			$optv = $3;
+			}
+		else {
+			$optn = shift(@ARGV);
+			$optv = shift(@ARGV);
+			}
 		$optf && $optn && $optv || &usage("Invalid option specification");
 		$opts{$optf}->{$optn} = $optv;
 		}

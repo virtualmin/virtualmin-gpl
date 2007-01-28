@@ -2891,6 +2891,7 @@ local ($tmpl) = @_;
 # Email message for server creation
 print "<tr> <td valign=top>",&hlink("<b>$text{'tmpl_mail'}</b>",
 				    "template_mail"),"</td> <td>\n";
+print "mail_on = $tmpl->{'mail_on'}<br>\n";
 print &none_def_input("mail", $tmpl->{'mail_on'}, $text{'tmpl_mailbelow'});
 print "<br><textarea name=mail rows=10 cols=60>";
 if ($tmpl->{'mail'} ne "none") {

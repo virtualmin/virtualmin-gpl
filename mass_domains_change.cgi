@@ -137,6 +137,22 @@ elsif ($in{'disable'}) {
 	}
 
 else {
+	# Validate inputs
+	if ($in{'spamclear_def'} == 2) {
+		$in{'spamclear_days'} =~ /^\d+$/ && $in{'spamclear_days'} > 0 ||
+			&error($text{'spam_edays'});
+		$spamclear = { 'days' => $in{'spamclear_days'} };
+		}
+	elsif ($in{'spamclear_def'} == 3) {
+		$in{'spamclear_size'} =~ /^\d+$/ && $in{'spamclear_size'} > 0 ||
+			&error($text{'spam_esize'});
+		$spamclear = { 'size' => $in{'spamclear_size'}*
+					 $in{'spamclear_size_units'} };
+		}
+	elsif ($in{'spamclear_def'} == 0) {
+		$spamclear = "";
+		}
+
 	# Apply the changes to the domain objects, where possible
 	foreach $d (@doms) {
 		local $oldd = { %$d };
@@ -303,6 +319,13 @@ else {
 				&modify_user($user, $olduser, undef);
 				&$second_print($text{'setup_done'});
 				}
+			}
+
+		# Change spam clearing
+		if ($d->{'spam'} && defined($spamclear)) {
+			&$first_print($text{'massdomains_spamclearing'});
+			&save_domain_spam_autoclear($d, $spamclear);
+			&$second_print($text{'setup_done'});
 			}
 
 		# Save new domain details

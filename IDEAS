@@ -38,9 +38,7 @@
 
   - per-directory PHP version
 
-  - domain-level spam folder clearing
-	- ticket 297
+  - add sections to mass domain update page
 
-  - option to add new mailbox groups to proftpd list of those to chroot
-	- don't do if chrooting everyone
+  - delete cron jobs when deleting mailbox users
 

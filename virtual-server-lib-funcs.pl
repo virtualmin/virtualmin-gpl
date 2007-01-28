@@ -5917,7 +5917,7 @@ push(@rv, { 'id' => 0,
 	    'logrotate' => $config{'logrotate_config'} || "none",
 	    'status' => $config{'statusemail'} || "none",
 	    'statusonly' => int($config{'statusonly'}),
-	    'mail_on' => $config{'domain_template'},
+	    'mail_on' => $config{'domain_template'} eq "none" ? "none" : "yes",
 	    'mail' => $config{'domain_template'} eq "none" ||
 		      $config{'domain_template'} eq "default" ?
 				&cat_file("domain-template") :
@@ -5928,6 +5928,7 @@ push(@rv, { 'id' => 0,
 	    'spam' => $config{'spam_client'},
 	    'spam_host' => $config{'spam_host'},
 	    'spam_size' => $config{'spam_size'},
+	    'spamclear' => $config{'spamclear'} || 'none',
 	    'defmquota' => $config{'defmquota'} || "none",
 	    'user_aliases' => $config{'newuser_aliases'} || "none",
 	    'dom_aliases' => $config{'newdom_aliases'} || "none",
@@ -5987,8 +5988,10 @@ push(@rv, { 'id' => 0,
 push(@rv, { 'id' => 1,
 	    'name' => 'Defaults Settings For Sub-Servers',
 	    'standard' => 1,
-	    'mail_on' => $config{'subdomain_template'} eq "none" ? 0 : 1,
+	    'mail_on' => $config{'subdomain_template'} eq "none" ? "none" :
+			 $config{'subdomain_template'} eq "" ? "" : "yes",
 	    'mail' => $config{'subdomain_template'} eq "none" ||
+		      $config{'subdomain_template'} eq "" ||
 		      $config{'subdomain_template'} eq "default" ?
 				&cat_file("subdomain-template") :
 				&cat_file($config{'subdomain_template'}),
@@ -6100,14 +6103,17 @@ if ($tmpl->{'id'} == 0) {
 	$config{'statusemail'} = $tmpl->{'status'} eq 'none' ?
 					'' : $tmpl->{'status'};
 	$config{'statusonly'} = $tmpl->{'statusonly'};
-	if ($tmpl->{'mail_on'} ne "none") {
-		if ($config{'domain_template'} eq "none") {
-			$config{'domain_template'} = "default";
-			}
+	if ($tmpl->{'mail_on'} eq 'none') {
+		# Don't send
+		$config{'domain_template'} = 'none';
 		}
 	else {
-		$config{'domain_template'} = "none";
+		# Sending, but need to set a valid mail file
+		if ($config{'domain_template'} eq 'none') {
+			$config{'domain_template'} = 'default';
+			}
 		}
+	# Write message to default template file, or custom if set
 	&uncat_file($config{'domain_template'} eq "none" ||
 		    $config{'domain_template'} eq "default" ?
 			"domain-template" :
@@ -6117,6 +6123,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'spam_client'} = $tmpl->{'spam'};
 	$config{'spam_host'} = $tmpl->{'spam_host'};
 	$config{'spam_size'} = $tmpl->{'spam_size'};
+	$config{'spamclear'} = $tmpl->{'spamclear'};
 	$config{'defmquota'} = $tmpl->{'defmquota'} eq "none" ?
 					"" : $tmpl->{'defmquota'};
 	$config{'newuser_aliases'} = $tmpl->{'user_aliases'} eq "none" ?
@@ -6183,15 +6190,22 @@ if ($tmpl->{'id'} == 0) {
 elsif ($tmpl->{'id'} == 1) {
 	# For the default for sub-servers, update mail and skel in config only
 	$config{'subtmpl_nousers'} = !$tmpl->{'for_users'};
-	if ($tmpl->{'mail_on'} ne "none") {
-		if ($config{'subdomain_template'} eq "none") {
-			$config{'subdomain_template'} = "default";
-			}
+	if ($tmpl->{'mail_on'} eq 'none') {
+		# Don't send
+		$config{'subdomain_template'} = 'none';
+		}
+	elsif ($tmpl->{'mail_on'} eq '') {
+		# Use default message (for top-level servers)
+		$config{'subdomain_template'} = '';
 		}
 	else {
-		$config{'subdomain_template'} = "none";
+		# Sending, but need to set a valid mail file
+		if ($config{'subdomain_template'} eq 'none') {
+			$config{'subdomain_template'} = 'default';
+			}
 		}
 	&uncat_file($config{'subdomain_template'} eq "none" ||
+		    $config{'subdomain_template'} eq "" ||
 		    $config{'subdomain_template'} eq "default" ?
 			"subdomain-template" :
 			$config{'subdomain_template'}, $tmpl->{'mail'});
@@ -6246,7 +6260,7 @@ if (!$tmpl->{'default'}) {
 	local $p;
 	local %done;
 	foreach $p ("dns_spf", "dns_sub",
-		    "web", "dns", "ftp", "mail", "frame", "user_aliases",
+		    "web", "dns", "ftp", "frame", "user_aliases",
 		    "ugroup", "quota", "uquota", "mailboxlimit", "domslimit",
 		    "dbslimit", "aliaslimit", "bwlimit", "skel",
 		    "mysql_hosts", "mysql_mkdb", "mysql_suffix", "mysql_chgrp",
@@ -6255,8 +6269,8 @@ if (!$tmpl->{'default'}) {
 		    "othergroups", "defmquota", "quotatype", "append_style",
 		    "domalias", "logrotate", "disabled_web", "disabled_url",
 		    "php", "status", "extra_prefix", "capabilities",
-		    "webmin_group", "spam", "namedconf", "nodbname", "norename",
-		    "forceunder",
+		    "webmin_group", "spam", "spamclear", "namedconf",
+		    "nodbname", "norename", "forceunder",
 		    @plugins,
 		    (map { $_."limit" } @plugins)) {
 		if ($tmpl->{$p} eq "") {
@@ -6267,6 +6281,18 @@ if (!$tmpl->{'default'}) {
 					$tmpl->{$k} = $def->{$k};
 					$done{$k}++;
 					}
+				}
+			}
+		}
+	# Mail is a special case - it is the mail_on variable that controls
+	# inheritance.
+	if ($tmpl->{'mail_on'} eq '') {
+		local $k;
+		foreach $k (keys %$def) {
+			if (!$done{$k} &&
+			    ($k =~ /^mail_/ || $k eq 'mail')) {
+				$tmpl->{$k} = $def->{$k};
+				$done{$k}++;
 				}
 			}
 		}

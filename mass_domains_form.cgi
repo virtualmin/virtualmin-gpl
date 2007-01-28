@@ -72,6 +72,20 @@ foreach $f (@feature_plugins) {
 					 ]));
 		}
 	}
+
+# Spam clearing mode
+if ($config{'spam'}) {
+	print &ui_table_row($text{'massdomains_spamclear'},
+		&ui_radio("spamclear_def", 1,
+			[ [ 1, $text{'massdomains_leave'}."<br>" ],
+			  [ 0, $text{'no'}."<br>" ],
+			  [ 2, &text('spam_cleardays',
+			     &ui_textbox("spamclear_days", undef, 5))."<br>" ],
+			  [ 3, &text('spam_clearsize',
+			     &ui_bytesbox("spamclear_size", undef)) ],
+			 ]));
+	}
+
 print &ui_table_end();
 
 # Limits
@@ -125,6 +139,7 @@ print &ui_table_row($text{'massdomains_shell'},
 		    &ui_radio("shell_def", 1,
 		      [ [ 1, $text{'massdomains_leave'} ],
 			[ 0, &ui_select("shell", undef, \@shello) ] ]));
+
 
 print &ui_table_end();
 print &ui_submit($text{'massdomains_ok'}, "ok");

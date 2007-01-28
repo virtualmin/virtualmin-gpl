@@ -59,6 +59,18 @@ if ($d->{'spam'} && &can_spam_client()) {
 				 [ "spamc", $text{'tmpl_spamc'} ] ]));
 	}
 
+
+# Show automatic spam clearing option
+$auto = &get_domain_spam_autoclear($d);
+print &ui_table_row(&hlink($text{'spam_clear'}, 'spam_clear'),
+	&ui_radio("clear", !$auto ? 0 : $auto->{'days'} ? 1 : 2,
+		[ [ 0, $text{'no'}."<br>" ],
+		  [ 1, &text('spam_cleardays',
+			     &ui_textbox("days", $auto->{'days'}, 5))."<br>" ],
+		  [ 2, &text('spam_clearsize',
+			     &ui_bytesbox("size", $auto->{'size'})) ],
+		]));
+
 print &ui_table_end();
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 

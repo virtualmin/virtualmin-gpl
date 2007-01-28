@@ -251,13 +251,27 @@ if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin")) {
 }
 
 # validate_ssl(&domain)
-# Returns an error message if no SSL Apache virtual host exists
+# Returns an error message if no SSL Apache virtual host exists, or if the
+# cert files are missing.
 sub validate_ssl
 {
 local ($d) = @_;
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
 					    $d->{'web_sslport'});
 return &text('validate_essl', "<tt>$d->{'dom'}</tt>") if (!$virt);
+
+local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
+if (!$cert) {
+	return &text('validate_esslcert');
+	}
+elsif (!-r $cert) {
+	return &text('validate_esslcertfile', "<tt>$cert</tt>");
+	}
+
+local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf, 1);
+if ($key && !-r $key) {
+	return &text('validate_esslkeyfile', "<tt>$key</tt>");
+	}
 return undef;
 }
 

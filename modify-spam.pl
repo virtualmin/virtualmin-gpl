@@ -66,13 +66,26 @@ while(@ARGV > 0) {
 	elsif ($a =~ /^--use-(spamc|spamassassin)$/) {
 		$spam_client = $1;
 		}
+	elsif ($a eq "--spamclear-none") {
+		$auto = "";
+		}
+	elsif ($a eq "--spamclear-days") {
+		$auto = { 'days' => shift(@ARGV) };
+		$auto->{'days'} =~ /^\d+$/ ||
+		  &usage("The $a option must be followed by a number of days");
+		}
+	elsif ($a eq "--spamclear-size") {
+		$auto = { 'size' => shift(@ARGV) };
+		$auto->{'size'} =~ /^\d+$/ ||
+		  &usage("The $a option must be followed by a size in bytes");
+		}
 	else {
 		&usage();
 		}
 	}
 @dnames || $all_doms || usage();
 defined($mode{'spam'}) || defined($mode{'virus'}) || $spam_client ||
-	&usage("Nothing to do");
+    defined($auto) || &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms) {
@@ -107,6 +120,9 @@ foreach $d (@doms) {
 		&update_spam_whitelist($d);
 		&save_domain($d);
 		}
+	if (defined($auto)) {
+		&save_domain_spam_autoclear($d, $auto);
+		}
 
 	&$outdent_print();
 	&$second_print(".. done");
@@ -130,6 +146,9 @@ print "                       --virus-email address | --virus-dest file\n";
 print "                       --virus-maildir ]\n";
 print "                      [--spam-whitelist | --no-spam-whitelist]\n";
 print "                      [--use-spamassassin | --use-spamc]\n";
+print "                      [--spamclear-none |\n";
+print "                       --spamclear-days days\n";
+print "                       --spamclear-size bytes]\n";
 exit(1);
 }
 

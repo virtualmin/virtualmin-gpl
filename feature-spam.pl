@@ -158,6 +158,12 @@ if ($config{'spam_white'}) {
 	&update_spam_whitelist($d);
 	}
 
+# Setup automatic spam clearing
+local ($cmode, $cnum) = split(/\s+/, $tmpl->{'spamclear'});
+if ($cmode eq 'days' || $cmode eq 'size') {
+	&save_domain_spam_autoclear($_[0], { $cmode => $cnum });
+	}
+
 &$second_print($text{'setup_done'});
 }
 
@@ -326,6 +332,7 @@ local $spamrc = "$procmail_spam_dir/$_[0]->{'id'}";
 local $spamdir = "$spam_config_dir/$_[0]->{'id'}";
 &system_logged("rm -rf ".quotemeta($spamdir));
 &clear_lookup_domain_cache($_[0]);
+&save_domain_spam_autoclear($_[0], undef);
 &$second_print($text{'setup_done'});
 }
 
@@ -337,16 +344,22 @@ return 0;
 }
 
 # backup_spam(&domain, file)
-# Saves the server's procmail and spamassassin configuration to a file
+# Saves the server's procmail and spamassassin configuration to a file.
+# Also saves the auto-spam clearing settings.
 sub backup_spam
 {
 &$first_print($text{'backup_spamcp'});
 local $spamrc = "$procmail_spam_dir/$_[0]->{'id'}";
 local $spamdir = "$spam_config_dir/$_[0]->{'id'}";
 if (-r $spamrc) {
-	&execute_command("cp ".quotemeta($spamrc)." ".quotemeta($_[1]));
-	&execute_command("cd ".quotemeta($spamdir)." && tar cf ".quotemeta($_[1]."_cf").
-	       " . 2>/dev/null ");
+	&execute_command("cp ".quotemeta($spamrc)." ".
+			       quotemeta($_[1]));
+	&execute_command("cd ".quotemeta($spamdir)." && tar cf ".
+			       quotemeta($_[1]."_cf")." . 2>/dev/null ");
+
+	# Save spam clearing
+	local $auto = &get_domain_spam_autoclear($_[0]);
+	&write_file($_[1]."_auto", $auto || { });
 	&$second_print($text{'setup_done'});
 	return 1;
 	}
@@ -357,18 +370,32 @@ else {
 }
 
 # restore_spam(&domain, file)
-# Restores the domains procmail and spamassassin configuration files
+# Restores the domains procmail and spamassassin configuration files.
+# Also restores auto-clearing setting, if in backup.
 sub restore_spam
 {
 &$first_print($text{'restore_spamcp'});
 local $spamrc = "$procmail_spam_dir/$_[0]->{'id'}";
 local $spamdir = "$spam_config_dir/$_[0]->{'id'}";
 &lock_file($spamrc);
-&execute_command("cp ".quotemeta($_[1])." ".quotemeta($spamrc));
+&execute_command("cp ".quotemeta($_[1])." ".
+		       quotemeta($spamrc));
 &unlock_file($spamrc);
 &lock_file("$spamdir/virtualmin.cf");
-&execute_command("cd ".quotemeta($spamdir)." && tar xf ".quotemeta($_[1]."_cf"));
+&execute_command("cd ".quotemeta($spamdir)." && tar xf ".
+		       quotemeta($_[1]."_cf"));
 &unlock_file("$spamdir/virtualmin.cf");
+
+if (-r $_[1]."_auto") {
+	# Replace auto-clearing setting
+	&save_domain_spam_autoclear($_[0], undef);
+	local %auto;
+	&read_file($_[1]."_auto", \%auto);
+	if (%auto) {
+		&save_domain_spam_autoclear($_[0], \%auto);
+		}
+	}
+
 &$second_print($text{'setup_done'});
 return 1;
 }
@@ -569,6 +596,7 @@ sub show_template_spam
 {
 local ($tmpl) = @_;
 
+# Spam client program
 print &ui_table_row(&hlink($text{'tmpl_spam'}, 'template_spam'),
 	    &ui_radio("spam", $tmpl->{'spam'},
 		      [ $tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ),
@@ -576,13 +604,30 @@ print &ui_table_row(&hlink($text{'tmpl_spam'}, 'template_spam'),
 			[ "spamc", $text{'tmpl_spamc'} ],
 		      ]));
 
+# Host for spamc
 print &ui_table_row(&hlink($text{'tmpl_spam_host'}, 'template_spam_host'),
 	    &ui_opt_textbox("spam_host", $tmpl->{'spam_host'}, 30,
 			    "<tt>localhost</tt>"));
 
+# Maximum message size for spamc
 print &ui_table_row(&hlink($text{'tmpl_spam_size'}, 'template_spam_size'),
 	    &ui_opt_textbox("spam_size", $tmpl->{'spam_size'}, 8,
 			    $text{'template_spam_unlimited'}));
+
+# Default spam clearing mode
+local ($cmode, $cnum) = split(/\s+/, $tmpl->{'spamclear'});
+local $cdays = $cmode eq 'days' ? $cnum : undef;
+local $csize = $cmode eq 'size' ? $cnum : undef;
+print &ui_table_row(&hlink($text{'tmpl_spamclear'}, 'template_spamclear'),
+	    &ui_radio("spamclear", $cmode,
+	        [ $tmpl->{'default'} ? ( )
+				     : ( [ "", $text{'default'}."<br>" ] ),
+		  [ "none", $text{'no'}."<br>" ],
+		  [ "days", &text('spam_cleardays',
+			     &ui_textbox("spamclear_days", $cdays, 5))."<br>" ],
+		  [ "size", &text('spam_clearsize',
+			     &ui_bytesbox("spamclear_size", $csize)) ],
+		]));
 }
 
 # parse_template_spam(&tmpl)
@@ -609,6 +654,25 @@ if ($in{'spam'}) {
 	$in{'spam_size_def'} || $in{'spam_size'} =~ /^\d+$/ ||
 		&error($text{'tmpl_espam_size'});
 	$tmpl->{'spam_size'} = $in{'spam_size'};
+	}
+
+# Parse clearing option
+if ($in{'spamclear'} eq '') {
+	$tmpl->{'spamclear'} = '';
+	}
+elsif ($in{'spamclear'} eq 'none') {
+	$tmpl->{'spamclear'} = 'none';
+	}
+elsif ($in{'spamclear'} eq 'days') {
+	$in{'spamclear_days'} =~ /^\d+$/ && $in{'spamclear_days'} > 0 ||
+		&error($text{'spam_edays'});
+	$tmpl->{'spamclear'} = 'days '.$in{'spamclear_days'};
+	}
+elsif ($in{'spamclear'} eq 'size') {
+	$in{'spamclear_size'} =~ /^\d+$/ && $in{'spamclear_size'} > 0 ||
+		&error($text{'spam_esize'});
+	$tmpl->{'spamclear'} = 'size '.($in{'spamclear_size'}*
+					$in{'spamclear_size_units'});
 	}
 }
 
@@ -639,6 +703,61 @@ else {
 	foreach my $u (&list_domain_users($d, 0, 1, 1, 1)) {
 		delete($cache{$u->{'user'}});
 		}
+	}
+}
+
+# get_domain_spam_autoclear(&domain)
+# Returns an object containing spam clearing info for this domain, if defined
+sub get_domain_spam_autoclear
+{
+local ($d) = @_;
+local %spamclear;
+&read_file_cached($spamclear_file, \%spamclear);
+local $ds = $spamclear{$d->{'id'}};
+return undef if (!$ds);
+local %auto = map { split(/=/, $_, 2) } split(/\s+/, $ds);
+return \%auto;
+}
+
+# save_domain_spam_autoclear(&domain, &autoclear)
+# Saves the automatic spam clearing policy for a domain, and sets up the 
+# cron job if needed
+sub save_domain_spam_autoclear
+{
+local ($d, $auto) = @_;
+
+# Update config file
+local %spamclear;
+&read_file_cached($spamclear_file, \%spamclear);
+if ($auto) {
+	$spamclear{$d->{'id'}} = join(" ", map { $_."=".$auto->{$_} }
+					       keys %$auto);
+	}
+else {
+	delete($spamclear{$d->{'id'}});
+	}
+&write_file($spamclear_file, \%spamclear);
+
+# Fix cron job
+&foreign_require("cron", "cron-lib.pl");
+local ($job) = grep { $_->{'command'} eq $spamclear_cmd }
+		    &cron::list_cron_jobs();
+if ($job && !%spamclear) {
+	# Disable job, as we don't need it
+	&cron::delete_cron_job($job);
+	}
+elsif (!$job && %spamclear) {
+	# Enable the job
+	$job = { 'user' => 'root',
+		 'command' => $spamclear_cmd,
+		 'active' => 1,
+		 'mins' => int(rand()*60),
+		 'hours' => 0,
+		 'days' => '*',
+		 'months' => '*',
+		 'weekdays' => '*' };
+	&cron::create_cron_job($job);
+	&cron::create_wrapper($spamclear_cmd, $module_name, "spamclear.pl");
 	}
 }
 

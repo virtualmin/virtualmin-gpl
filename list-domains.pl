@@ -160,6 +160,15 @@ if ($multi) {
 			print "    SpamAssassin client: $c\n";
 			}
 
+		# Show spam clearing setting
+		if ($config{'spam'} && $d->{'spam'}) {
+			$auto = &get_domain_spam_autoclear($d);
+			print "    Spam clearing policy: ",
+			      (!$auto ? "None" :
+			       $auto->{'days'} ? "$auto->{'days'} days" :
+						 "$auto->{'size'} bytes"),"\n";
+			}
+
 		# Show PHP and suexec execution mode
 		if ($config{'web'} && $d->{'web'}) {
 			$p = &get_domain_php_mode($d);

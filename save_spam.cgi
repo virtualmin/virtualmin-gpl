@@ -55,6 +55,19 @@ if ($d->{'spam'} && &can_spam_client()) {
 	&modify_webmin($d, $d);
 	}
 
+# Save spam deletion field
+$auto = undef;
+if ($in{'clear'} == 1) {
+	$in{'days'} =~ /^\d+$/ && $in{'days'} > 0 ||
+		&error($text{'spam_edays'});
+	$auto = { 'days' => $in{'days'} };
+	}
+elsif ($in{'clear'} == 2) {
+	$in{'size'} =~ /^\d+$/ || &error($text{'spam_esize'});
+	$auto = { 'size' => $in{'size'}*$in{'size_units'} };
+	}
+&save_domain_spam_autoclear($d, $auto);
+
 &run_post_actions();
 
 # All done

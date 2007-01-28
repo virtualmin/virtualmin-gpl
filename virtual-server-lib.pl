@@ -127,6 +127,7 @@ $bw_cron_cmd = "$module_config_directory/bw.pl";
 $licence_cmd = "$module_config_directory/licence.pl";
 $licence_status = "$module_config_directory/licence-status";
 $quotas_cron_cmd = "$module_config_directory/quotas.pl";
+$spamclear_cmd = "$module_config_directory/spamclear.pl";
 
 $custom_fields_file = "$module_config_directory/custom-fields";
 $custom_links_file = "$module_config_directory/custom-links";
@@ -176,4 +177,4 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles") {
 $domains_dir = "$module_config_directory/domains";
 $templates_dir = "$module_config_directory/templates";
 $domainnames_dir = "$module_config_directory/names";
-
+$spamclear_file = "$module_config_directory/spamclear";

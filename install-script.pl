@@ -39,9 +39,15 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--db") {
 		$dbtype = shift(@ARGV);
+		if ($dbtype =~ /^(\S+)\s+(\S+)$/) {
+			$dbtype = $1;
+			$dbname = $2;
+			}
+		else {
+			$dbname = shift(@ARGV);
+			}
 		&indexof($dbtype, @all_database_types) >= 0 ||
 			&usage("$dbtype is not a valid database type. Allowed types are : ".join(" ", @all_database_types));
-		$dbname = shift(@ARGV);
 		$dbname =~ /^\S+$/ ||
 			&usage("Missing or invalid database name");
 		$opts->{'db'} = $dbtype."_".$dbname;
@@ -51,7 +57,13 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--opt") {
 		$oname = shift(@ARGV);
-		$ovalue = shift(@ARGV);
+		if ($oname =~ /^(\S+)\s+(\S+)$/) {
+			$oname = $1;
+			$ovalue = $2;
+			}
+		else {
+			$ovalue = shift(@ARGV);
+			}
 		$opts->{$oname} = $ovalue;
 		}
 	elsif ($a eq "--upgrade") {

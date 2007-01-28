@@ -139,3 +139,4 @@ mysql_chgrp=1
 defnodbname=0
 dbfnorename=0
 defforceunder=0
+spamclear=none
