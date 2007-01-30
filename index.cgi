@@ -72,7 +72,10 @@ if ($config{'localgroup'} && &can_edit_local()) {
 	}
 
 # Display domains
-print &ui_subheading($text{'index_header2'});
+if ($current_theme ne "virtual-server-theme" &&
+    !$main::basic_virtualmin_menu) {
+	print &ui_subheading($text{'index_header2'});
+	}
 @alldoms = &list_domains();
 @doms = grep { &can_edit_domain($_) } @alldoms;
 if ($config{'display_max'} && @doms > $config{'display_max'}) {
@@ -99,8 +102,10 @@ if ($config{'display_max'} && @doms > $config{'display_max'}) {
 elsif (@doms) {
 	# Show domains in a table
 	print &ui_form_start("domain_form.cgi");
-	&create_links(1);
-	print "<br>\n";
+	if ($current_theme ne "virtual-server-theme" &&
+	    !$main::nocreate_virtualmin_menu) {
+		&create_links(1);
+		}
 	foreach $d (@doms) {
 		$canconfig ||= &can_config_domain($d);
 		}
@@ -123,7 +128,10 @@ else {
 		}
 	print &ui_form_start("domain_form.cgi");
 	}
-&create_links(2);
+if ($current_theme ne "virtual-server-theme" &&
+    !$main::nocreate_virtualmin_menu) {
+	&create_links(2);
+	}
 if ($shown_table && $canconfig && $virtualmin_pro) {
 	# Show mass delete / change buttons
 	print &ui_submit($text{'index_delete'}, "delete"),"\n";

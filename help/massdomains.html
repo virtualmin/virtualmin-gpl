@@ -1,0 +1,48 @@
+<header>Update Virtual Servers</header>
+
+This page allows you to update settings and limits in multiple virtual servers
+at once, as selected on the previous page. By default, nothing will be changed
+on the selected servers until you choose some attribute or limit to modify
+using the fields on this page. Modifyable settings are broken down into
+the following categories :<p>
+
+<dl>
+<dt><b>Quota and bandwidth changes</b>
+<dd>These fields can be used to modify the disk quotas for selected servers, or
+    to change their bandwidth limits. Changing quotas only has an effect on
+    top-level servers, as sub-servers inherit their quotas from the parent
+    domain.<p>
+
+<dt><b>Enabled feature changes</b>
+<dd>In this section, you can select features to turn on or off for all of the
+    selected servers. These are the same features that can be activated for
+    individual servers on the <b>Edit Virtual Server</b> page.<p>
+
+<dt><b>Changes to owner limits</b>
+<dd>These fields can be used to change the various limits that apply to owners
+    of top-level virtual servers, such as the number of mailboxes, aliases
+    and domains they can create. Changes made here have no effect on
+    sub-servers, which fall under the limits imposed on their parents.<p>
+
+<dt><b>Changes to owner capabilities</b>
+<dd>The fields in this section control the capabilities of Virtualmin that
+    are available to the administrators of the selected virtual servers.
+    Again, they are only relevant for top-level servers. <p>
+
+<dt><b>Configuration changes</b>
+<dd>This section is for making various changes to the configuration of selected
+    servers, such as the method use for spam clearing or the domain
+    administrator's login shell. <p>
+
+</dl>
+
+It is also possible to temporarily disable the selected servers using the
+<b>Disable Servers</b> button at the bottom of the page. When using this,
+you can also enter a reason for disabling (such as <i>non payment</i>) into
+the adjacent text box. <p>
+
+To re-enable multiple servers that have been disabled on this page or elsewhere,
+use the <b>Enable Servers</b> button. <p>
+
+<footer>
+

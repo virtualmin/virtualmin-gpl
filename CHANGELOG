@@ -500,3 +500,5 @@ Enhanced the validation for SSL virtual servers to check for the certificate fil
 Added a new section to the Spam and Virus Delivery page for configuring automatic clearing of mailbox users' spam folders. Also added an option in the server templates for setting the default for new servers, and an input on the page for updating multiple servers.
 Added --spamclear-days, --spamclear-size and --spamclear-none options to modify-spam.pl.
 When a mailbox or domain owner is deleted, all of his Cron jobs will be removed too. Similarly, the owner of any Cron jobs will be correctly updated when a useris renamed.
+Broke the Update Virtual Servers page down into more readable collapsed sections.
+Removed redundant creation buttons from main page, when using the framed theme.

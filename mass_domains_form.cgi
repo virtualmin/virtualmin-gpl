@@ -17,7 +17,7 @@ foreach $did (@d) {
 	}
 
 # Show the form
-&ui_print_header(undef, $text{'massdomains_title'}, "");
+&ui_print_header(undef, $text{'massdomains_title'}, "", "massdomains");
 
 @dnames = map { $_->{'dom'} } @doms;
 print &text('massdomains_doms', 
@@ -27,7 +27,9 @@ print &ui_form_start("mass_domains_change.cgi", "post");
 foreach $d (@doms) {
 	print &ui_hidden("d", $d->{'id'}),"\n";
 	}
-print &ui_table_start($text{'massdomains_header'}, "width=75%", 2);
+@tds = ( "width=30%" );
+print &ui_hidden_table_start($text{'massdomains_headerq'}, "width=100%", 2,
+			     "quotas", 0);
 
 # Quota change fields
 if (&has_home_quotas() && &can_edit_quotas()) {
@@ -35,33 +37,39 @@ if (&has_home_quotas() && &can_edit_quotas()) {
 		&ui_radio("quota_def", 2,
 		  [ [ 2, $text{'massdomains_leave'} ],
 		    [ 1, $text{'form_unlimit'} ],
-		    [ 0, &quota_input("quota", undef, "home") ] ]));
+		    [ 0, &quota_input("quota", undef, "home") ] ]),
+		1, \@tds);
 
 	print &ui_table_row($text{'massdomains_uquota'},
 		&ui_radio("uquota_def", 2,
 		  [ [ 2, $text{'massdomains_leave'} ],
 		    [ 1, $text{'form_unlimit'} ],
-		    [ 0, &quota_input("uquota", undef, "home") ] ]));
+		    [ 0, &quota_input("uquota", undef, "home") ] ]),
+		1, \@tds);
 	}
 
 # Bandwidth limit fields
 if ($config{'bw_active'} && &can_edit_bandwidth()) {
 	print &ui_table_row($text{'massdomains_bw'},
-		&bandwidth_input("bw", undef, 0, 1));
+		&bandwidth_input("bw", undef, 0, 1),
+		1, \@tds);
 	}
 
+print &ui_hidden_end(),&ui_table_end();
+
 # Feature enable/disable
-print &ui_table_hr();
+print &ui_hidden_table_start($text{'massdomains_headerf'}, "width=100%", 2,
+			     "features", 0);
 foreach $f (@opt_features) {
 	if (&can_use_feature($f)) {
 		print &ui_table_row($text{'edit_'.$f},
 			&ui_radio($f, 2, [ [ 2, $text{'massdomains_leave'} ],
 					   [ 1, $text{'massdomains_enable'} ],
 					   [ 0, $text{'massdomains_disable'} ],
-					 ]));
+					 ]),
+			1, \@tds);
 		}
 	}
-print &ui_table_hr() if (@feature_plugins);
 foreach $f (@feature_plugins) {
 	if (&can_use_feature($f)) {
 		$label = &plugin_call($f, "feature_label", 1);
@@ -69,47 +77,37 @@ foreach $f (@feature_plugins) {
 			&ui_radio($f, 2, [ [ 2, $text{'massdomains_leave'} ],
 					   [ 1, $text{'massdomains_enable'} ],
 					   [ 0, $text{'massdomains_disable'} ],
-					 ]));
+					 ]),
+			1, \@tds);
 		}
 	}
 
-# Spam clearing mode
-if ($config{'spam'}) {
-	print &ui_table_row($text{'massdomains_spamclear'},
-		&ui_radio("spamclear_def", 1,
-			[ [ 1, $text{'massdomains_leave'}."<br>" ],
-			  [ 0, $text{'no'}."<br>" ],
-			  [ 2, &text('spam_cleardays',
-			     &ui_textbox("spamclear_days", undef, 5))."<br>" ],
-			  [ 3, &text('spam_clearsize',
-			     &ui_bytesbox("spamclear_size", undef)) ],
-			 ]));
-	}
-
-print &ui_table_end();
-
-# Limits
-print &ui_table_start($text{'massdomains_header2'}, "width=75%", 2);
+print &ui_hidden_end(),&ui_table_end();
 
 # Mailbox/alias/doms limits
+print &ui_hidden_table_start($text{'massdomains_headerl'}, "width=100%", 2,
+			     "limits", 0);
 foreach $l (@limit_types) {
 	print &ui_table_row($text{'form_'.$l},
 		&ui_radio($l."_def", 2,
 		  [ [ 2, $text{'massdomains_leave'} ],
 		    [ 1, $text{'form_unlimit'} ],
-		    [ 0, $text{'form_atmost'}." ".&ui_textbox($l, "", 4) ] ]));
+		    [ 0, $text{'form_atmost'}." ".&ui_textbox($l, "", 4) ] ]),
+		1, \@tds);
 	}
+print &ui_hidden_end(),&ui_table_end();
 
 # Editable capabilities
-print &ui_table_hr();
+print &ui_hidden_table_start($text{'massdomains_headerc'}, "width=100%", 2,
+			     "capabilities", 0);
 foreach $ed (@edit_limits) {
 	print &ui_table_row($text{'limits_edit_'.$ed},
 		&ui_radio("edit_".$ed, 2,
 		  [ [ 2, $text{'massdomains_leave'} ],
 		    [ 1, $text{'yes'} ],
-		    [ 0, $text{'no'} ] ]));
+		    [ 0, $text{'no'} ] ]),
+		1, \@tds);
 	}
-
 # Allowed features
 @opts = ( );
 foreach $f (@opt_features, "virt") {
@@ -124,7 +122,25 @@ print &ui_table_row($text{'massdomains_features'},
 		  [ 1, $text{'massdomains_features1'}." ".
 			&ui_select("feature1", undef, \@opts)."<br>" ],
 		  [ 0, $text{'massdomains_features0'}." ".
-			&ui_select("feature0", undef, \@opts)."<br>" ] ]));
+			&ui_select("feature0", undef, \@opts)."<br>" ] ]),
+	1, \@tds);
+print &ui_hidden_end(),&ui_table_end();
+
+# Spam clearing mode
+print &ui_hidden_table_start($text{'massdomains_headero'}, "width=100%", 2,
+			     "others", 0);
+if ($config{'spam'}) {
+	print &ui_table_row($text{'massdomains_spamclear'},
+		&ui_radio("spamclear_def", 1,
+			[ [ 1, $text{'massdomains_leave'}."<br>" ],
+			  [ 0, $text{'no'}."<br>" ],
+			  [ 2, &text('spam_cleardays',
+			     &ui_textbox("spamclear_days", undef, 5))."<br>" ],
+			  [ 3, &text('spam_clearsize',
+			     &ui_bytesbox("spamclear_size", undef)) ],
+			 ]),
+		1, \@tds);
+	}
 
 # Login shell
 @shells = &get_unix_shells();
@@ -138,7 +154,9 @@ foreach $st ('nologin', 'ftp', 'ssh') {
 print &ui_table_row($text{'massdomains_shell'},
 		    &ui_radio("shell_def", 1,
 		      [ [ 1, $text{'massdomains_leave'} ],
-			[ 0, &ui_select("shell", undef, \@shello) ] ]));
+			[ 0, &ui_select("shell", undef, \@shello) ] ]),
+		    1, \@tds);
+print &ui_hidden_end(),&ui_table_end();
 
 
 print &ui_table_end();
