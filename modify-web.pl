@@ -172,7 +172,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Changes web server settings for one or more domains.\n";
 print "\n";
 print "usage: modify-web.pl [--domain name] | [--all-domains]\n";
-print "                     [--mod_php | --cgi | --fcgi]\n";
+print "                     [--mode mod_php | cgi | fcgi]\n";
 print "                     [--suexec | --no-suexec]\n";
 print "                     [--proxy http://... | --no-proxy]\n";
 print "                     [--framefwd http://... | --no-framefwd]\n";
