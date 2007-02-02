@@ -1567,14 +1567,21 @@ if (&get_webmin_version() >= 1.201) {
 
 	}
 
-# Run PHP scripts as user
 if ($virtualmin_pro) {
+	# Run PHP scripts as user
 	print &ui_table_row(
 	    &hlink($text{'tmpl_phpmode'}, "template_phpmode"),
 	    &ui_radio("web_php_suexec", int($tmpl->{'web_php_suexec'}),
 		      [ [ 0, $text{'phpmode_mod_php'}."<br>" ],
 			[ 1, $text{'phpmode_cgi'}."<br>" ],
 			[ 2, $text{'phpmode_fcgid'}."<br>" ] ]));
+
+	# Default PHP version to setup
+	print &ui_table_row(
+	    &hlink($text{'tmpl_phpver'}, "template_phpver"),
+	    &ui_select("web_phpver", $tmpl->{'web_phpver'},
+		       [ [ "", $text{'tmpl_phpverdef'} ],
+			 map { [ $_->[0] ] } &list_available_php_versions() ]));
 	}
 
 print "</table></td> </tr>\n";
@@ -1722,6 +1729,7 @@ if ($in{"web_mode"} == 2) {
 			&error($text{'tmpl_ephpmode2'});
 			}
 		$tmpl->{'web_php_suexec'} = $in{'web_php_suexec'};
+		$tmpl->{'web_phpver'} = $in{'web_phpver'};
 		}
 	}
 $tmpl->{'webalizer'} = &parse_none_def("webalizer");
@@ -1778,225 +1786,6 @@ if ($tmpl->{'id'} == 0) {
 			}
 		}
 	}
-}
-
-# get_domain_php_mode(&domain)
-# Returns 'mod_php' if PHP is run via Apache's mod_php, 'cgi' if run via
-# a CGI script, 'fcgi' if run via fastCGI. This is detected by looking for the
-# Action lines in httpd.conf.
-sub get_domain_php_mode
-{
-local ($d) = @_;
-&require_apache();
-local $conf = &apache::get_config();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-if ($virt) {
-	local @actions = &apache::find_directive("Action", $vconf);
-	local ($dir) = grep { $_->{'value'} eq &public_html_dir($d) }
-		    &apache::find_directive_struct("Directory", $vconf);
-	push(@actions, &apache::find_directive("Action", $dir->{'members'}));
-	foreach my $a (@actions) {
-		if ($a =~ /^application\/x-httpd-php4\s+\/cgi-bin\/php4.cgi/) {
-			return 'cgi';
-			}
-		}
-	foreach my $f (&apache::find_directive("FCGIWrapper",
-						$dir->{'members'})) {
-		if ($f =~ /^\Q$d->{'home'}\E\/fcgi-bin\/php.\.fcgi/) {
-			return 'fcgid';
-			}
-		}
-	}
-return 'mod_php';
-}
-
-# save_domain_php_mode(&domain, mode)
-# Changes the method a virtual web server uses to run PHP.
-sub save_domain_php_mode
-{
-local ($d, $mode) = @_;
-&require_apache();
-local $conf = &apache::get_config();
-local @ports = ( $d->{'web_port'},
-		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
-local $dest = $mode eq "fcgid" ? "$d->{'home'}/fcgi-bin" : &cgi_bin_dir($_[0]);
-foreach my $p (@ports) {
-	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
-	if ($vconf) {
-		# Work out if PHP action and AddType are in <Directory> or
-		# <Virtualhost> sections.
-		&lock_file($virt->{'file'});
-		local ($dir) = grep { $_->{'value'} eq &public_html_dir($d) }
-			    &apache::find_directive_struct("Directory", $vconf);
-		local @pactions = grep { $_ =~ /^application\/x-httpd-php[45]/ }
-			&apache::find_directive("Action", $vconf);
-		if ($dir && !@pactions) {
-			# Add to <Directory> if it exists and not at top level
-			$phpconf = $dir->{'members'};
-			}
-		else {
-			$phpconf = $vconf;
-			}
-
-		# Remove all Action and AddType directives for suexec PHP
-		local @actions = &apache::find_directive("Action", $phpconf);
-		@actions = grep { $_ !~ /^application\/x-httpd-php[45]/ }
-				@actions;
-		local @types = &apache::find_directive("AddType", $phpconf);
-		@types = grep { $_ !~ /^application\/x-httpd-php[45]/ }
-			      @types;
-
-		# Remove all AddHandler and FCGIWrapper directives for fcgid
-		local @handlers = &apache::find_directive("AddHandler",
-							  $phpconf);
-		@handlers = grep { $_ !~ /^fcgid-script/ } @handlers;
-		local @wrappers = &apache::find_directive("FCGIWrapper",
-							  $phpconf);
-		@wrappers = grep { $_ !~ /^\Q$dest\E\/php.\.fcgi/ } @wrappers;
-
-		# Add needed Apache directives. Don't add the AddHandler,
-		# Alias and Directory if already there.
-		if ($mode eq "cgi") {
-			push(@actions,
-				"application/x-httpd-php4 /cgi-bin/php4.cgi");
-			push(@actions,
-				"application/x-httpd-php5 /cgi-bin/php5.cgi");
-			}
-		elsif ($mode eq "fcgid") {
-			push(@handlers, "fcgid-script .php");
-			push(@handlers, "fcgid-script .php4");
-			push(@handlers, "fcgid-script .php5");
-			push(@wrappers, "$dest/php4.fcgi .php");
-			push(@wrappers, "$dest/php4.fcgi .php4");
-			push(@wrappers, "$dest/php5.fcgi .php5");
-			}
-		if ($mode eq "cgi") {
-			push(@types, "application/x-httpd-php5 .php5");
-			push(@types, "application/x-httpd-php4 .php .php4");
-			}
-		&apache::save_directive("Action", \@actions, $phpconf, $conf);
-		&apache::save_directive("AddType", \@types, $phpconf, $conf);
-		&apache::save_directive("AddHandler", \@handlers,
-					$phpconf, $conf);
-		&apache::save_directive("FCGIWrapper", \@wrappers,
-					$phpconf, $conf);
-
-		# For fcgid mode, the directory needs to have Options ExecCGI
-		local ($opts) = &apache::find_directive("Options", $phpconf);
-		if ($opts && $mode eq "fcgid" && $opts !~ /ExecCGI/) {
-			$opts .= " ExecCGI";
-			&apache::save_directive("Options", [ $opts ],
-						$phpconf, $conf);
-			}
-
-		# XXX do we need a <Directory> for fcgi-bin ?
-
-		&flush_file_lines();
-		&unlock_file($virt->{'file'});
-		}
-	}
-
-# Create wrapper scripts
-if (!-d $dest) {
-	# Need to create fcgi-bin
-	&make_dir($dest, 0755);
-	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755,
-				   $dest);
-	}
-local $suffix = $mode eq "fcgid" ? "fcgi" : "cgi";
-local $php4 = &has_command("php4-cgi") ||
-              &has_command("php4") ||
-	      &has_command("php-cgi") ||
-	      &has_command("php") ||
-	      "php";
-local $dirvar = $mode eq "fcgid" ? "PWD" : "DOCUMENT_ROOT";
-local $common = "#!/bin/sh\n".
-		"PHPRC=\$$dirvar/../etc\n".
-		"PHP_FCGI_CHILDREN=4\n".
-		"export PHP_FCGI_CHILDREN PHPRC\n";
-&open_tempfile(PHP, ">$dest/php4.$suffix");
-&print_tempfile(PHP, $common);
-if ($php4 =~ /-cgi$/) {
-	# php-cgi requires the SCRIPT_FILENAME variable
-	&print_tempfile(PHP, "SCRIPT_FILENAME=\$PATH_TRANSLATED\n");
-	&print_tempfile(PHP, "export SCRIPT_FILENAME\n");
-	}
-&print_tempfile(PHP, "exec $php4\n");
-&close_tempfile(PHP);
-&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755,
-			   "$dest/php4.$suffix");
-
-local $php5 = &has_command("php5-cgi") ||
-	      &has_command("php5") ||
-	      "php5";
-&open_tempfile(PHP, ">$dest/php5.$suffix");
-&print_tempfile(PHP, $common);
-if ($php5 =~ /-cgi$/) {
-	# php-cgi requires the SCRIPT_FILENAME variable
-	&print_tempfile(PHP, "SCRIPT_FILENAME=\$PATH_TRANSLATED\n");
-	&print_tempfile(PHP, "export SCRIPT_FILENAME\n");
-	}
-&print_tempfile(PHP, "exec $php5\n");
-&close_tempfile(PHP);
-&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755,
-			   "$dest/php5.$suffix");
-
-# Copy php.ini file into etc directory, for later per-site modification
-local $etc = "$d->{'home'}/etc";
-if (!-d $etc) {
-	&make_dir($etc, 0755);
-	&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'},
-				   0755, $etc);
-	}
-if (!-r "$etc/php.ini") {
-	local $copied = 0;
-	foreach my $i ("/etc/php.ini", "/etc/php4/cgi/php.ini",
-		       "/etc/php4/cli/php.ini", "/usr/local/lib/php.ini") {
-		if (-r $i) {
-			&copy_source_dest($i, "$etc/php.ini");
-			$copied = 1;
-			last;
-			}
-		}
-	if ($copied) {
-		# Set permissions, and fix session.save_path
-		&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'},
-					   0755, "$etc/php.ini");
-		if (&foreign_check("phpini")) {
-			&foreign_require("phpini", "phpini-lib.pl");
-			local $pconf = &phpini::get_config("$etc/php.ini");
-			&phpini::save_directive($pconf, "session.save_path",
-						&create_server_tmp($d));
-			&flush_file_lines("$etc/php.ini");
-			}
-		}
-	}
-
-&register_post_action(\&restart_apache);
-}
-
-# supported_php_modes(&domain)
-# Returns a list of PHP execution modes possible for a domain
-sub supported_php_modes
-{
-local ($d) = @_;
-&require_apache();
-local @rv;
-if ($apache::httpd_modules{'mod_php4'} || $apache::httpd_modules{'mod_php5'}) {
-	# Check for Apache PHP module
-	push(@rv, "mod_php");
-	}
-local ($pvirt, $pconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-if ($pconf) {
-	local @sa = grep { /^\/cgi-bin\s/ }
-			 &apache::find_directive("ScriptAlias", $pconf);
-	push(@rv, "cgi");
-	}
-if ($apache::httpd_modules{'mod_fcgid'}) {
-	# Check for Apache fcgi module
-	push(@rv, "fcgid");
-	}
-return @rv;
 }
 
 # get_domain_suexec(&domain)

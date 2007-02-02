@@ -37,8 +37,14 @@
 	- When creating domain, plan can override template.
 
   - per-directory PHP version
+	- enable in script installers
 
   - SpamAssassin Rules Emporium
 
-  - popup link to show password on Edit Server page
+  - Better integration of protected web directories
 
+  - Delete viruses as well as spam
+
+  - Integrated web page editor, linked from left menu top
+
+  - File manager button for new HTML file

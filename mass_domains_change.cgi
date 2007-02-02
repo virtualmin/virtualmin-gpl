@@ -138,19 +138,23 @@ elsif ($in{'disable'}) {
 
 else {
 	# Validate inputs
-	if ($in{'spamclear_def'} == 2) {
-		$in{'spamclear_days'} =~ /^\d+$/ && $in{'spamclear_days'} > 0 ||
-			&error($text{'spam_edays'});
-		$spamclear = { 'days' => $in{'spamclear_days'} };
-		}
-	elsif ($in{'spamclear_def'} == 3) {
-		$in{'spamclear_size'} =~ /^\d+$/ && $in{'spamclear_size'} > 0 ||
-			&error($text{'spam_esize'});
-		$spamclear = { 'size' => $in{'spamclear_size'}*
-					 $in{'spamclear_size_units'} };
-		}
-	elsif ($in{'spamclear_def'} == 0) {
-		$spamclear = "";
+	if ($config{'spam'} && &can_edit_spam()) {
+		if ($in{'spamclear_def'} == 2) {
+			$in{'spamclear_days'} =~ /^\d+$/ &&
+			    $in{'spamclear_days'} > 0 ||
+				&error($text{'spam_edays'});
+			$spamclear = { 'days' => $in{'spamclear_days'} };
+			}
+		elsif ($in{'spamclear_def'} == 3) {
+			$in{'spamclear_size'} =~ /^\d+$/ &&
+			    $in{'spamclear_size'} > 0 ||
+				&error($text{'spam_esize'});
+			$spamclear = { 'size' => $in{'spamclear_size'}*
+						 $in{'spamclear_size_units'} };
+			}
+		elsif ($in{'spamclear_def'} == 0) {
+			$spamclear = "";
+			}
 		}
 
 	# Apply the changes to the domain objects, where possible
@@ -309,8 +313,28 @@ else {
 			&$second_print($text{'setup_done'});
 			}
 
+		# Change the PHP execution mode
+		if (&can_edit_phpmode() && $in{'phpmode'} && $d->{'web'}) {
+			&$first_print($text{'massdomains_phpmoding'});
+			if ($in{'phpmode'} ne 'mod_php' &&
+			    !&get_domain_suexec($d)) {
+				# Enable suexec automatically
+				&save_domain_suexec($d, 1);
+				}
+			&save_domain_php_mode($d, $in{'phpmode'});
+			&$second_print($text{'setup_done'});
+			}
+
+		# Change the default PHP version
+		if (&can_edit_phpver() && $in{'phpver'} && $d->{'web'}) {
+			&$first_print($text{'massdomains_phpvering'});
+			&save_domain_php_directory($d, &public_html_dir($d),
+						   $in{'phpver'});
+			&$second_print($text{'setup_done'});
+			}
+
 		# Change the shell
-		if (!$in{'shell_def'} && $d->{'unix'}) {
+		if (&can_edit_shell() && !$in{'shell_def'} && $d->{'unix'}) {
 			$user = &get_domain_owner($d);
 			if ($user) {
 				&$first_print($text{'massdomains_shelling'});

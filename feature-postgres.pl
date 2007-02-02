@@ -461,31 +461,6 @@ local $ver = &postgresql::get_postgresql_version();
 return ( [ $text{'sysinfo_postgresql'}, $ver ] );
 }
 
-sub links_postgres
-{
-local ($d) = @_;
-if ($current_theme eq "virtual-server-theme") {
-	# Left side already has databases link, so skip this
-	return ( );
-	}
-if ($config{'avail_postgres'}) {
-	local @dbs = split(/\s+/, $d->{'db_postgres'});
-	if (@dbs == 1) {
-		return ( { 'mod' => 'postgresql',
-			   'desc' => $text{'links_postgres'},
-			   'page' => "edit_dbase.cgi?db=$dbs[0]" } );
-			   'cat' => 'services',
-		}
-	#elsif (@dbs > 1) {
-	#	return ( { 'mod' => 'postgresql',
-	#		   'desc' => $text{'links_postgress'},
-	#		   'page' => 'index.cgi?'.
-	#			join("&", map { "show=$_" } @dbs) } );
-	#	}
-	}
-return ( );
-}
-
 sub startstop_postgres
 {
 &require_postgres();

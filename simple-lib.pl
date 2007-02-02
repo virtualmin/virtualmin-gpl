@@ -274,6 +274,7 @@ if ($in->{'autotext'}) {
 			$simple->{'from'} = $in->{'from'};
 			}
 		}
+	&set_alias_programs();
 	}
 if ($in->{'auto'}) {
 	$in->{'autotext'} =~ /\S/ || &error($text{'alias_eautotext'});

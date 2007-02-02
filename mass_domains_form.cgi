@@ -126,10 +126,40 @@ print &ui_table_row($text{'massdomains_features'},
 	1, \@tds);
 print &ui_hidden_end(),&ui_table_end();
 
+# Start section for PHP options
+@avail = &list_available_php_versions();
+$anyphp = @avail > 1 && &can_edit_phpver() ||
+	  &can_edit_phpmode();
+if ($anyphp) {
+	print &ui_hidden_table_start($text{'massdomains_headerp'},
+				     "width=100%", 2, "php", 0);
+	}
+
+# PHP execution mode
+if (&can_edit_phpmode()) {
+	print &ui_table_row($text{'massdomains_phpmode'},
+		&ui_radio("phpmode", undef,
+			  [ [ "", $text{'massdomains_leave'}."<br>" ],
+			    map { [ $_, $text{'phpmode_'.$_}."<br>" ] }
+				&supported_php_modes() ]), 1, \@tds);
+	}
+
+# Default PHP version
+if (@avail > 1 && &can_edit_phpver()) {
+	print &ui_table_row($text{'massdomains_phpver'},
+		&ui_radio("phpver", undef,
+			  [ [ "", $text{'massdomains_leave'} ],
+			    map { [ $_->[0] ] } @avail ]), 1, \@tds);
+	}
+
+if ($anyphp) {
+	print &ui_hidden_end(),&ui_table_end();
+	}
+
 # Spam clearing mode
 print &ui_hidden_table_start($text{'massdomains_headero'}, "width=100%", 2,
 			     "others", 0);
-if ($config{'spam'}) {
+if ($config{'spam'} && &can_edit_spam()) {
 	print &ui_table_row($text{'massdomains_spamclear'},
 		&ui_radio("spamclear_def", 1,
 			[ [ 1, $text{'massdomains_leave'}."<br>" ],
@@ -143,21 +173,24 @@ if ($config{'spam'}) {
 	}
 
 # Login shell
-@shells = &get_unix_shells();
-@shello = ( );
-foreach $st ('nologin', 'ftp', 'ssh') {
-	($sho) = grep { $_->[0] eq $st } @shells;
-	if ($sho) {
-		push(@shello, [ $sho->[1], $text{'limits_shell_'.$st} ]);
+if (&can_edit_shell()) {
+	@shells = &get_unix_shells();
+	@shello = ( );
+	foreach $st ('nologin', 'ftp', 'ssh') {
+		($sho) = grep { $_->[0] eq $st } @shells;
+		if ($sho) {
+			push(@shello,
+			     [ $sho->[1], $text{'limits_shell_'.$st} ]);
+			}
 		}
+	print &ui_table_row($text{'massdomains_shell'},
+			    &ui_radio("shell_def", 1,
+			      [ [ 1, $text{'massdomains_leave'} ],
+				[ 0, &ui_select("shell", undef, \@shello) ] ]),
+			    1, \@tds);
 	}
-print &ui_table_row($text{'massdomains_shell'},
-		    &ui_radio("shell_def", 1,
-		      [ [ 1, $text{'massdomains_leave'} ],
-			[ 0, &ui_select("shell", undef, \@shello) ] ]),
-		    1, \@tds);
-print &ui_hidden_end(),&ui_table_end();
 
+print &ui_hidden_end(),&ui_table_end();
 
 print &ui_table_end();
 print &ui_submit($text{'massdomains_ok'}, "ok");

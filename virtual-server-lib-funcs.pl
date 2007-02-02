@@ -1732,6 +1732,12 @@ sub can_edit_phpmode
 return $virtualmin_pro && &master_admin();
 }
 
+sub can_edit_phpver
+{
+return 0 if (!$virtualmin_pro);
+return &master_admin() || &reseller_admin() || $access{'edit_phpver'};
+}
+
 sub can_edit_scripts
 {
 return 0 if (!$virtualmin_pro);
@@ -2467,13 +2473,21 @@ return wantarray ? @rv : $rv[0];
 sub set_alias_programs
 {
 &require_mail();
-&system_logged("cp $module_root_directory/autoreply.pl $module_config_directory");
+
+# Copy autoresponder
+local $mailmod = &foreign_check("sendmail") ? "sendmail" :
+		 $config{'mail_system'} == 1 ? "sendmail" :
+		 $config{'mail_system'} == 0 ? "postfix" :
+					       "qmailadmin";
+&system_logged("cp $root_directory/$mailmod/autoreply.pl $module_config_directory");
 &system_logged("chmod 755 $module_config_directory/config");
 if (-d $sendmail::config{'smrsh_dir'} &&
     !-r "$sendmail::config{'smrsh_dir'}/autoreply.pl") {
 	&system_logged("ln -s $module_config_directory/autoreply.pl $sendmail::config{'smrsh_dir'}/autoreply.pl");
 	}
-&system_logged("cp $module_root_directory/filter.pl $module_config_directory");
+
+# Copy filter program
+&system_logged("cp $root_directory/$mailmod/filter.pl $module_config_directory");
 &system_logged("chmod 755 $module_config_directory/config");
 if (-d $sendmail::config{'smrsh_dir'} &&
     !-r "$sendmail::config{'smrsh_dir'}/filter.pl") {
@@ -5955,6 +5969,7 @@ push(@rv, { 'id' => 0,
 	    'web_usermin_ssl' => $config{'usermin_ssl'},
 	    'php_vars' => $config{'php_vars'} || "none",
 	    'web_php_suexec' => int($config{'php_suexec'}),
+	    'web_phpver' => $config{'phpver'},
 	    'webalizer' => $config{'def_webalizer'} || "none",
 	    'disabled_web' => $config{'disabled_web'} || "none",
 	    'disabled_url' => $config{'disabled_url'} || "none",
@@ -6131,6 +6146,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'php_vars'} = $tmpl->{'php_vars'} eq "none" ? "" :
 				$tmpl->{'php_vars'};
 	$config{'php_suexec'} = $tmpl->{'web_php_suexec'};
+	$config{'phpver'} = $tmpl->{'web_phpver'};
 	$config{'def_webalizer'} = $tmpl->{'webalizer'} eq "none" ? "" :
 					$tmpl->{'webalizer'};
 	$config{'disabled_web'} = $tmpl->{'disabled_web'} eq "none" ? "" :
@@ -8076,6 +8092,18 @@ if ($d->{'web'} && &can_edit_phpmode()) {
 		  });
 	}
 
+if ($d->{'web'} && &can_edit_phpver()) {
+	# PHP directory versions button
+	local @avail = &list_available_php_versions($d);
+	if (@avail > 1) {
+		push(@rv, { 'page' => 'edit_phpver.cgi',
+			    'title' => $text{'edit_phpver'},
+			    'desc' => $text{'edit_phpverdesc'},
+			    'cat' => 'server',
+			  });
+		}
+	}
+
 if ($d->{'dns'} && !$d->{'dns_submode'}) {
 	# SPF settings button
 	push(@rv, { 'page' => 'edit_spf.cgi',
@@ -9665,6 +9693,14 @@ else {
 	return $lr;
 	}
 
+}
+
+# show_password_popup(&domain)
+# Returns HTML for a link that pops up a password display window
+sub show_password_popup
+{
+local ($d) = @_;
+return "(<a href='showpass.cgi?dom=$d->{'id'}' onClick='window.open(\"showpass.cgi?dom=$d->{'id'}\", \"showpass\", \"toolbar=no,menubar=no,scrollbar=no,width=300,height=70\"); return false'>$text{'edit_showpass'}</a>)";
 }
 
 $done_virtual_server_lib_funcs = 1;

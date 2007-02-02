@@ -31,6 +31,7 @@ if ($max) {
 		@subs = grep { !$_->{'alias'} }
 		     	     &get_domain_by("parent", $doms[0]->{'id'});
 		}
+	@links = ( );
 	foreach $m (0, 1, 2, 3) {
 		if ($m == 1 && $in{'dom'}) {
 			# Don't show sub-server if none
@@ -44,15 +45,15 @@ if ($max) {
 		else {
 			$t = $text{'bwgraph_mode_'.$m};
 			}
-		print "&nbsp;|&nbsp;\n" if ($m);
 		if ($m == $in{'mode'}) {
-			print $t;
+			push(@links, $t);
 			}
 		else {
-			print "<a href='bwgraph.cgi?mode=$m&dom=$in{'dom'}'>$t</a>\n";
+			push(@links, "<a href='bwgraph.cgi?mode=$m&".
+				     "dom=$in{'dom'}'>$t</a>\n");
 			}
 		}
-	print "<p>\n";
+	print &ui_links_row(\@links),"<p>\n";
 
 	# Show table
 	$width = 500;
@@ -285,7 +286,7 @@ push(@rets, "", $text{'index_return'});
 sub usage_colours
 {
 local ($d, $mode) = @_;
-local $f;
+local ($f, $total);
 foreach $f (@features) {
 	local $fusage = $mode == 1 ? $d->{'bw_usage_only_'.$f}
 			     	   : $d->{'bw_usage_'.$f};
@@ -293,7 +294,11 @@ foreach $f (@features) {
 		printf "<img src=images/usage-$f.gif width=%s height=10>",
 			int($width*$fusage/$max)+($f eq "web" ? 1 : 0);
 		$donecolour{$f} += $fusage;
+		$total += $fusage;
 		}
+	}
+if (!$total) {
+	print "<img src=images/usage-web.gif width=1 height=10>";
 	}
 }
 

@@ -495,10 +495,14 @@ Cleaned up Edit Virtual Server and Virtual Server Details pages to use collapsib
 Added a section to the virtual server creation form for selecting an initial style and message for a new website. Also added --style and --content options to create-domain.pl, for the same purpose.
 ---- Changes since 3.33 ----
 Fixed bug that prevented the email for new sub-servers from being disabled, and added an option to inherit it from the parent template.
-Updated MediaWiki script installer to 1.9.1, ZenPhoto to 1.0.6, and phpAdsNew to 2.0.11 (and changed its name to Openads).
+Updated MediaWiki script installer to 1.9.1, ZenPhoto to 1.0.6, Drupal to 4.7.6, and phpAdsNew to 2.0.11 (and changed its name to Openads).
 Enhanced the validation for SSL virtual servers to check for the certificate files.
 Added a new section to the Spam and Virus Delivery page for configuring automatic clearing of mailbox users' spam folders. Also added an option in the server templates for setting the default for new servers, and an input on the page for updating multiple servers.
 Added --spamclear-days, --spamclear-size and --spamclear-none options to modify-spam.pl.
 When a mailbox or domain owner is deleted, all of his Cron jobs will be removed too. Similarly, the owner of any Cron jobs will be correctly updated when a useris renamed.
 Broke the Update Virtual Servers page down into more readable collapsed sections.
 Removed redundant creation buttons from main page, when using the framed theme.
+Added a link from the Edit Virtual Server page to show a server's current password.
+Added the PHP Versions page (under Server Configuration on the left menu) for selecting the version of PHP to run for a virtual server. This can also be configured differently on a per-directory basis.
+Added the list-php-directories.pl, set-php-directory.pl and delete-php-directory.pl scripts for changing PHP version from the command line or remote API.
+Updated the Update Virtual Servers page to allow the default PHP version and PHP execution mode to be changed on multiple servers at once.

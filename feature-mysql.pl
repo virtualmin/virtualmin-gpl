@@ -705,31 +705,6 @@ local $ver = &mysql::get_mysql_version();
 return ( [ $text{'sysinfo_mysql'}, $ver ] );
 }
 
-sub links_mysql
-{
-local ($d) = @_;
-if ($current_theme eq "virtual-server-theme") {
-	# Left side already has databases link, so skip this
-	return ( );
-	}
-if ($config{'avail_mysql'}) {
-	local @dbs = split(/\s+/, $d->{'db_mysql'});
-	if (@dbs == 1) {
-		return ( { 'mod' => 'mysql',
-			   'desc' => $text{'links_mysql'},
-			   'page' => "edit_dbase.cgi?db=$dbs[0]" } );
-			   'cat' => 'services',
-		}
-	#elsif (@dbs > 1) {
-	#	return ( { 'mod' => 'mysql',
-	#		   'desc' => $text{'links_mysqls'},
-	#		   'page' => 'index.cgi?'.
-	#			join("&", map { "show=$_" } @dbs) } );
-	#	}
-	}
-return ( );
-}
-
 sub startstop_mysql
 {
 &require_mysql();

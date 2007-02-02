@@ -7,10 +7,12 @@ sub module_uninstall
 {
 &foreign_require("cron", "cron-lib.pl");
 local @jobs = &cron::list_cron_jobs();
-local ($job) = grep { $_->{'user'} eq 'root' &&
-		      $_->{'command'} eq $backup_cron_cmd } @jobs;
-if ($job) {
-	&cron::delete_cron_job($job);
+foreach my $cmd (@all_cron_commands) {
+	local ($job) = grep { $_->{'user'} eq 'root' &&
+			      $_->{'command'} eq $cmd } @jobs;
+	if ($job) {
+		&cron::delete_cron_job($job);
+		}
 	}
 }
 

@@ -129,6 +129,9 @@ $licence_status = "$module_config_directory/licence-status";
 $quotas_cron_cmd = "$module_config_directory/quotas.pl";
 $spamclear_cmd = "$module_config_directory/spamclear.pl";
 
+@all_cron_commands = ( $backup_cron_cmd, $bw_cron_cmd, $licence_cmd,
+		       $licence_status, $quotas_cron_cmd, $spamclear_cmd );
+
 $custom_fields_file = "$module_config_directory/custom-fields";
 $custom_links_file = "$module_config_directory/custom-links";
 
@@ -152,7 +155,7 @@ $scripts_unavail_file = "$module_config_directory/scriptsunavail";
 $initial_users_dir = "$module_config_directory/initial";
 
 @edit_limits = ('domain', 'users', 'aliases', 'dbs', 'scripts',
-	        'ip', 'ssl', 'forward', 'admins', 'spam', 'backup',
+	        'ip', 'ssl', 'forward', 'admins', 'spam', 'phpver', 'backup',
 		'disable', 'delete');
 
 @virtualmin_backups = ( 'config', 'templates',
@@ -168,7 +171,8 @@ $plainpass_dir = "$module_config_directory/plainpass";
 
 $template_scripts_dir = "$module_config_directory/template-scripts";
 
-foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles") {
+foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
+		 "php") {
 	if (-r "$module_root_directory/$lib-lib.pl") {
 		do "$module_root_directory/$lib-lib.pl";
 		}

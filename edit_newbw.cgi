@@ -8,7 +8,7 @@ require './virtual-server-lib.pl';
 &ui_print_header(undef, $text{'newbw_title'}, "", "bandwidth");
 
 $job = &find_bandwidth_job();
-print "$text{'newbw_desc'}<br>\n";
+print "$text{'newbw_desc'}<p>\n";
 print &ui_form_start("save_newbw.cgi", "post");
 print &ui_table_start($text{'newbw_header'}, undef, 2);
 
