@@ -40,12 +40,8 @@
 
   - Better integration of protected web directories
 
-  - Delete viruses as well as spam
-
   - Integrated web page editor, linked from left menu top
 
   - File manager button for new HTML file
-
-  - Remove dir and web check for script installers
 
   - Fix mediawiki script installer to be friendlier
