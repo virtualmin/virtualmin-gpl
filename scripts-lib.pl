@@ -63,6 +63,7 @@ local $rv = { 'name' => $name,
 	      'uninstall_func' => "script_${name}_uninstall",
 	      'files_func' => "script_${name}_files",
 	      'php_vars_func' => "script_${name}_php_vars",
+	      'php_vers_func' => "script_${name}_php_vers",
 	      'latest_func' => "script_${name}_latest",
 	      'check_latest_func' => "script_${name}_check_latest",
 	      'avail' => !$unavail{$name},
@@ -499,40 +500,41 @@ return $php_modules{$ver}->{$mod} ? 1 : 0;
 
 # check_php_version(&domain, [number])
 # Returns true if the given version of PHP is supported by Apache. If no version
-# is given, any is allowed
+# is given, any is allowed.
 sub check_php_version
 {
 local ($d, $ver) = @_;
-
-# Work out PHP versions available as a module
-&require_apache();
-local @avail;
-local $mode = &get_domain_php_mode($d);
-if ($mode eq "mod_php") {
-	push(@avail, 4) if ($apache::httpd_modules{'mod_php4'});
-	push(@avail, 5) if ($apache::httpd_modules{'mod_php5'});
-	}
-
-# Check if the cgi wrapper for PHP is in use
-local $tmpl = &get_template($d->{'template'});
-if ($mode ne "mod_php") {
-	local $cdir = $mode eq "cgi" ? &cgi_bin_dir($d)
-				     : "$d->{'home'}/fcgi-bin";
-	local $sf = $mode eq "cgi" ? "cgi" : "fcgi";
-	if (-r "$cdir/php4.$sf" && (&has_command("php4") ||
-				    &has_command("php4-cgi") ||
-				    &has_command("php") ||
-				    &has_command("php-cgi"))) {
-		push(@avail, 4);
-		}
-	if (-r "$cdir/php5.$sf" && (&has_command("php5") ||
-				    &has_command("php5-cgi"))) {
-		push(@avail, 5);
-		}
-	}
-
+local @avail = map { $_->[0] } &list_available_php_versions($d);
 return $ver ? &indexof($ver, @avail) >= 0
 	    : scalar(@avail);
+}
+
+# setup_php_version(&domain, &versions, path)
+# Checks if one of the given PHP versions is available for the domain.
+# If not, sets up a per-directory version if possible.
+sub setup_php_version
+{
+local ($d, $vers, $path) = @_;
+
+# Find the best matching directory
+local $dirpath = &public_html_dir($d).$path;
+local @dirs = &list_domain_php_directories($d);
+foreach my $dir (sort { length($a->{'dir'}) cmp length($b->{'dir'}) } @dirs) {
+	if (&is_under_directory($dir->{'dir'}, $dirpath) ||
+	    $dir->{'dir'} eq $dirpath) {
+		$bestdir = $dir;
+		}
+	}
+$bestdir || &error("Could not find PHP version for $dirpath");
+
+if (&indexof($bestdir->{'version'}, @$vers) >= 0) {
+	# The best match dir supports this PHP version .. so we are OK!
+	return 1;
+	}
+
+# Need to add a directory, or fix one
+&save_domain_php_directory($d, $dirpath, $vers->[0]);
+return 1;
 }
 
 # validate_script_path(&opts, &script, &domain)

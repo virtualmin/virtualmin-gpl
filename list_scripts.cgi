@@ -1,11 +1,11 @@
 #!/usr/local/bin/perl
 # Show available and installed scripts for this domain
-# XXX show descriptive version (stable/etc)
 
 require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_scripts() || &error($text{'edit_ecannot'});
+$d->{'web'} && $d->{'dir'} || &error($text{'scripts_eweb'});
 @got = &list_domain_scripts($d);
 
 &ui_print_header(&domain_in($d), $text{'scripts_title'}, "", "scripts");

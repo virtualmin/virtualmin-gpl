@@ -5,6 +5,8 @@ require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_scripts() || &error($text{'edit_ecannot'});
+$d->{'web'} && $d->{'dir'} || &error($text{'scripts_eweb'});
+
 $sname = $in{'script'};
 $ver = $in{'version'};
 $script = &get_script($sname);
@@ -67,6 +69,15 @@ if (-d $opts->{'dir'} && !$sinfo && !$in{'confirm'}) {
 		}
 	}
 
+# Setup PHP version
+$phpvfunc = $script->{'php_vers_func'};
+if (defined(&$phpvfunc)) {
+	@vers = &$phpvfunc($d, $ver);
+	if (!&setup_php_version($d, \@vers, $opts->{'path'})) {
+		&error(&text('scripts_ephpvers', join(" ", @vers)));
+		}
+	}
+
 if ($sinfo) {
 	&ui_print_unbuffered_header(&domain_in($d), $text{'scripts_uptitle'}, "");
 	}
@@ -104,6 +115,8 @@ if ($ok) {
 			&$second_print($text{'scripts_aalready'});
 			}
 		}
+
+	&run_post_actions();
 
 	&webmin_log("install", "script", $sname, { 'ver' => $ver,
 						   'desc' => $desc,

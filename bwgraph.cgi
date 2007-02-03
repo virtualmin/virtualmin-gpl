@@ -276,7 +276,7 @@ else {
 if ($in{'dom'}) {
 	push(@rets, &domain_footer_link($d));
 	}
-if (&can_edit_templates()) {
+if (&can_edit_templates() && $in{'dom'}) {
 	push(@rets, "bwgraph.cgi", $text{'bwgraph_return'});
 	}
 push(@rets, "", $text{'index_return'});

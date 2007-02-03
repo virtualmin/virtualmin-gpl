@@ -56,6 +56,16 @@ foreach $sinfo (@sinfos) {
 		&$second_print(&text('massscript_edep', $derr));
 		}
 	else {
+		# Setup PHP version
+		$phpvfunc = $script->{'php_vers_func'};
+		if (defined(&$phpvfunc)) {
+			@vers = &$phpvfunc($d, $ver);
+			if (!&setup_php_version($d, \@vers, $opts->{'path'})) {
+				&error(&text('scripts_ephpvers',
+					     join(" ", @vers)));
+				}
+			}
+
 		# Go ahead and do it
 		($ok, $msg, $desc, $url) = &{$script->{'install_func'}}($d, $ver, $sinfo->{'opts'}, \%gotfiles, $sinfo);
 		&$indent_print();

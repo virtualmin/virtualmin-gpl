@@ -3,9 +3,11 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&error_setup($text{'scripts_ierr'});
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_scripts() || &error($text{'edit_ecannot'});
-&error_setup($text{'scripts_ierr'});
+$d->{'web'} && $d->{'dir'} || &error($text{'scripts_eweb'});
+
 if ($in{'upgrade'}) {
 	# Upgrading
 	@got = &list_domain_scripts($d);
@@ -28,10 +30,24 @@ else {
 
 # Check dependencies
 $derr = &{$script->{'depends_func'}}($d, $ver);
+$ok = 1;
 if ($derr) {
 	print &text('scripts_edep', $derr),"<p>\n";
+	$ok = 0;
 	}
-else {
+
+# Check PHP version
+$phpvfunc = $script->{'php_vers_func'};
+if (defined(&$phpvfunc)) {
+	@vers = &$phpvfunc($d, $ver);
+	@gotvers = grep { &check_php_version($d, $_) } @vers;
+	if (!@gotvers) {
+		print &text('scripts_ephpvers', join(" ", @vers)),"\n";
+		$ok = 0;
+		}
+	}
+
+if ($ok) {
 	# Show install options form
 	print &ui_form_start("script_install.cgi", "post");
 	print &ui_hidden("dom", $in{'dom'}),"\n";

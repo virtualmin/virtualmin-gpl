@@ -99,6 +99,11 @@ if ($id) {
 	$opts = $sinfo->{'opts'};
 	}
 
+# Check domain features
+$d->{'web'} && $d->{'dir'} ||
+	&usage("Scripts can only be installed into virtual servers with a ".
+	       "website and home directory");
+
 # Validate options
 if ($opts->{'path'}) {
 	# Convert the path into a directory
@@ -140,6 +145,21 @@ if ($derr) {
 	}
 else {
 	&$second_print(".. done");
+	}
+
+# Check PHP version
+$phpvfunc = $script->{'php_vers_func'};
+if (defined(&$phpvfunc)) {
+	&$first_print("Checking PHP version ..");
+	@vers = &$phpvfunc($d, $ver);
+	if (!&setup_php_version($d, \@vers, $opts->{'path'})) {
+		&$second_print(".. version ",join(" ", @vers),
+			       " of PHP is required, but not available");
+		exit(1);
+		}
+	else {
+		&$second_print(".. done");
+		}
 	}
 
 # First fetch needed files

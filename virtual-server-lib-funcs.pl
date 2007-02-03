@@ -5429,7 +5429,8 @@ if ($tmpl->{'domalias'} ne 'none' && !$_[0]->{'alias'}) {
 
 # Install any scripts specified in the template
 local @scripts = &get_template_scripts($tmpl);
-if (@scripts && !$dom->{'alias'} && !$noscripts) {
+if (@scripts && !$dom->{'alias'} && !$noscripts &&
+    $dom->{'web'} && $dom->{'dir'}) {
 	&$first_print($text{'setup_scripts'});
 	&$indent_print();
 	foreach my $sinfo (@scripts) {
@@ -5454,6 +5455,17 @@ if (@scripts && !$dom->{'alias'} && !$noscripts) {
 		if ($derr) {
 			&$second_print(&text('setup_scriptdeps', $derr));
 			next;
+			}
+
+		# Check PHP version
+		local $phpvfunc = $script->{'php_vers_func'};
+		if (defined(&$phpvfunc)) {
+			local @vers = &$phpvfunc($dom, $ver);
+			if (!&setup_php_version($dom, \@vers,$opts->{'path'})) {
+				&$second_print(&text('setup_scriptphpver',
+						     join(" ", @vers)));
+				next;
+				}
 			}
 
 		# Find the database, if requested

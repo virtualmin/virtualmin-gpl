@@ -32,16 +32,15 @@ sub script_squirrelmail_category
 return "Email";
 }
 
+sub script_squirrelmail_php_vers
+{
+return ( 4 );
+}
+
 # script_squirrelmail_depends(&domain, version)
 sub script_squirrelmail_depends
 {
 local ($d, $ver) = @_;
-return "SquirrelMail requires a website" if (!$d->{'web'});
-return "SquirrelMail cannot be installed onto virtual servers without a home directory"
-	if (!$d->{'dir'});
-&require_apache();
-return "SquirrelMail requires PHP version 4"
-	if (!&check_php_version($d, 4));
 return undef;
 }
 

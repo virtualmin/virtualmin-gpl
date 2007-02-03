@@ -66,14 +66,22 @@ foreach my $p (@ports) {
 			}
 		}
 	if (!@phpconfs) {
-		# No directory has them yet.
+		# No directory has them yet. Add to the <virtualhost> if it
+		# already directives for cgi, the <directory> otherwise.
+		# Unless we are using fcgid, in which case it must always be
+		# added to the directory.
 		local @pactions =
 		    grep { $_ =~ /^application\/x-httpd-php\d+/ }
 			&apache::find_directive("Action", $vconf);
 		local ($dirstr) =
 		  grep { $_->{'value'} eq &public_html_dir($d) }
 		    &apache::find_directive_struct("Directory", $vconf);
-		if ($dirstr && !@pactions) {
+		if ($mode eq "fcgid") {
+			$dirstr || &error("No &lt;Directory&gt; section found ",
+					  "for mod_fcgid directives");
+			push(@phpconfs, $dirstr);
+			}
+		elsif ($dirstr && !@pactions) {
 			push(@phpconfs, $dirstr);
 			}
 		else {
@@ -321,6 +329,18 @@ local $conf = &apache::get_config();
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return ( ) if (!$virt);
 local $mode = &get_domain_php_mode($d);
+if ($mode eq "mod_php") {
+	# All are run as version from Apache mod
+	local @avail = &list_available_php_versions($d, $mode);
+	if (@avail) {
+		return ( { 'dir' => &public_html_dir($d),
+			   'version' => $avail[0]->[0],
+			   'mode' => $mode } );
+		}
+	else {
+		return ( );
+		}
+	}
 
 # Find directories with either FCGIWrapper or AddType directives, and check
 # which version they specify for .php files

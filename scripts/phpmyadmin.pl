@@ -33,19 +33,17 @@ sub script_phpmyadmin_category
 return "Database";
 }
 
+sub script_phpmyadmin_php_vers
+{
+return ( 4, 5 );
+}
+
 # script_phpmyadmin_depends(&domain, version)
 sub script_phpmyadmin_depends
 {
 local ($d, $ver) = @_;
-return "phpMyAdmin requires a website" if (!$d->{'web'});
-return "phpMyAdmin cannot be installed onto virtual servers without a home directory"
-	if (!$d->{'dir'});
 local @dbs = &domain_databases($d, [ "mysql" ]);
 return "phpMyAdmin requires a MySQL database" if (!@dbs);
-&require_apache();
-return "phpMyAdmin requires PHP version 4 or 5"
-	if (!&check_php_version($d, 4) &&
-	    !&check_php_version($d, 5));
 return undef;
 }
 

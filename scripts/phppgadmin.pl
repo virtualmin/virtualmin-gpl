@@ -27,18 +27,17 @@ sub script_phppgadmin_category
 return "Database";
 }
 
+sub script_phppgadmin_php_vers
+{
+return ( 4 );
+}
+
 # script_phppgadmin_depends(&domain, version)
 sub script_phppgadmin_depends
 {
 local ($d, $ver) = @_;
-return "phpPgAdmin requires a website" if (!$d->{'web'});
-return "phpPgAdmin cannot be installed onto virtual servers without a home directory"
-	if (!$d->{'dir'});
 local @dbs = &domain_databases($d, [ "postgres" ]);
 return "phpPgAdmin requires a PostgreSQL database" if (!@dbs);
-&require_apache();
-return "phpPgAdmin requires PHP version 4"
-	if (!&check_php_version($d, 4));
 return undef;
 }
 

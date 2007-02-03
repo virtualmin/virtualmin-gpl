@@ -26,16 +26,15 @@ sub script_dokuwiki_category
 return "Wiki";
 }
 
+sub script_dokuwiki_php_vers
+{
+return ( 4 );
+}
+
 # script_dokuwiki_depends(&domain, version)
 sub script_dokuwiki_depends
 {
 local ($d, $ver) = @_;
-return "DokuWiki requires a website" if (!$d->{'web'});
-return "DokuWiki cannot be installed onto virtual servers without a home directory"
-	if (!$d->{'dir'});
-&require_apache();
-return "DokuWiki requires PHP version 4"
-	if (!&check_php_version($d, 4));
 return undef;
 }
 
