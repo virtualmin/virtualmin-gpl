@@ -20,6 +20,8 @@ if (@got) {
 	@tds = ( "width=5" );
 	print &ui_form_start("mass_uninstall.cgi", "post");
 	print &ui_hidden("dom", $in{'dom'});
+	@links = ( &select_all_link("d"), &select_invert_link("d") );
+	print &ui_links_row(\@links);
 	print &ui_columns_start([ "",
 				  $text{'scripts_name'},
 				  $text{'scripts_ver'},
@@ -38,6 +40,7 @@ if (@got) {
 			], \@tds, "d", $sinfo->{'id'});
 		}
 	print &ui_columns_end();
+	print &ui_links_row(\@links);
 	print &ui_form_end([ [ "uninstall", $text{'scripts_uninstalls'} ] ]);
 	print "<hr>\n";
 	}

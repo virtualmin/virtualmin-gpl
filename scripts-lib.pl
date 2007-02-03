@@ -537,6 +537,17 @@ if (&indexof($bestdir->{'version'}, @$vers) >= 0) {
 return 1;
 }
 
+# clear_php_version(&domain, &sinfo)
+# Removes the custom PHP version setting for some script
+sub clear_php_version
+{
+local ($d, $sinfo) = @_;
+if ($sinfo->{'opts'}->{'dir'} &&
+    $sinfo->{'opts'}->{'dir'} ne &public_html_dir($d)) {
+	&delete_domain_php_directory($d, $sinfo->{'opts'}->{'dir'});
+	}
+}
+
 # validate_script_path(&opts, &script, &domain)
 # Checks the 'path' in script options, and sets 'dir' and possibly
 # modifies 'path'. Returns an error message if the path is not valid

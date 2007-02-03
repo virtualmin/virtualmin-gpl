@@ -497,7 +497,7 @@ Added a section to the virtual server creation form for selecting an initial sty
 Fixed bug that prevented the email for new sub-servers from being disabled, and added an option to inherit it from the parent template.
 Updated MediaWiki script installer to 1.9.1, ZenPhoto to 1.0.6, Drupal to 4.7.6, and phpAdsNew to 2.0.11 (and changed its name to Openads).
 Enhanced the validation for SSL virtual servers to check for the certificate files.
-Added a new section to the Spam and Virus Delivery page for configuring automatic clearing of mailbox users' spam folders. Also added an option in the server templates for setting the default for new servers, and an input on the page for updating multiple servers.
+Added a new section to the Spam and Virus Delivery page for configuring automatic clearing of mailbox users' spam and virus folders. Also added an option in the server templates for setting the default for new servers, and an input on the page for updating multiple servers.
 Added --spamclear-days, --spamclear-size and --spamclear-none options to modify-spam.pl.
 When a mailbox or domain owner is deleted, all of his Cron jobs will be removed too. Similarly, the owner of any Cron jobs will be correctly updated when a useris renamed.
 Broke the Update Virtual Servers page down into more readable collapsed sections.

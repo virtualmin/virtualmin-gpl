@@ -353,7 +353,7 @@ foreach my $dir (@dirs) {
 		local $w = &apache::wsplit($v);
 		if (&indexof(".php", @$w) > 0) {
 			# This is for .php files .. look at the php version
-			if ($w->[0] =~ /php(\d+)/) {
+			if ($w->[0] =~ /php(\d+)\.(cgi|fcgi)/) {
 				# Add version and dir to list
 				push(@rv, { 'dir' => $dir->{'words'}->[0],
 					    'version' => $1,
@@ -469,20 +469,21 @@ local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return 0 if (!$virt);
 local $mode = &get_domain_php_mode($d);
 
-&lock_file($virt->{'file'});
 local @dirs = &apache::find_directive_struct("Directory", $vconf);
 local ($dirstr) = grep { $_->{'words'}->[0] eq $dir } @dirs;
 if ($dirstr) {
+	&lock_file($dirstr->{'file'});
 	local $lref = &read_file_lines($dirstr->{'file'});
 	splice(@$lref, $dirstr->{'line'},
 	       $dirstr->{'eline'}-$dirstr->{'line'}+1);
 	&flush_file_lines($dirstr->{'file'});
 	undef(@apache::get_config_cache);
-	}
-&unlock_file($virt->{'file'});
+	&unlock_file($dirstr->{'file'});
 
-&register_post_action(\&restart_apache);
-return 1;
+	&register_post_action(\&restart_apache);
+	return 1;
+	}
+return 0;
 }
 
 1;

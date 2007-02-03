@@ -35,6 +35,9 @@ if ($in{'confirm'}) {
 		if ($ok) {
 			&$second_print($text{'setup_done'});
 
+			# Remove any custom PHP directory
+			&clear_php_version($d, $sinfo);
+
 			# Record script un-install in domain
 			&remove_domain_script($d, $sinfo);
 			}
