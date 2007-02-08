@@ -4694,8 +4694,8 @@ elsif ($mode == 3 && &can_use_s3()) {
 	local $cerr = &check_s3();
 	$cerr && &error($cerr);
 	$in{$_[0].'_bucket'} =~ /^\S+$/ || &error($text{'backup_ebucket'});
-	$in{$_[0].'_akey'} =~ /^[a-z0-9\/]+$/i || &error($text{'backup_eakey'});
-	$in{$_[0].'_skey'} =~ /^[a-z0-9\/]+$/i || &error($text{'backup_eskey'});
+	$in{$_[0].'_akey'} =~ /^\S+$/i || &error($text{'backup_eakey'});
+	$in{$_[0].'_skey'} =~ /^\S+$/i || &error($text{'backup_eskey'});
 	$in{"$_[0]_s3file_def"} ||
 		$in{"$_[0]_s3file"} =~ /^[a-z0-9\-\_\.]+$/i ||
 		&error($text{'backup_euser'});

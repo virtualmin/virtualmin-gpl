@@ -350,7 +350,7 @@ if ($in{'new'}) {
 	}
 else {
 	print &ui_form_end([ [ "save", $text{'save'} ],
-		     $mailbox ? ( [ "delete", $text{'delete'} ] ) : ( ) ]);
+		     $mailbox ? ( ) : ( [ "delete", $text{'delete'} ] ) ]);
 	}
 
 if ($d) {

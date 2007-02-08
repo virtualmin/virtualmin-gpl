@@ -37,7 +37,6 @@ if ($in{'delete'}) {
 	# Just deleting a user
 	if ($in{'confirm'}) {
 		# Get rid of his mail file
-		&error("deleting user with home $user->{'home'}");
 		$mailbox && &error($text{'user_edelete'});
 		if (!$user->{'nomailfile'}) {
 			&delete_mail_file($user);
