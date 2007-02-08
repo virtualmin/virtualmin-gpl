@@ -1328,7 +1328,7 @@ local %mconfig;
 return 0 if ($mconfig{'mail_system'} != 4);
 return 0 if ($mconfig{'pop_server'} ne 'localhost' &&
 	      $mconfig{'pop_server'} ne '127.0.0.1' &&
-	      &to_ipaddress($mconfig{'pop_server'}) ne &to_ipaddress(&get_system_hostname());
+	      &to_ipaddress($mconfig{'pop_server'}) ne &to_ipaddress(&get_system_hostname()));
 
 # Set the password
 foreach my $dir ($user->{'home'}, "$user->{'home'}/.usermin", "$user->{'home'}/.usermin/mailbox") {
