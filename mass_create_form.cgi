@@ -12,6 +12,8 @@ require './virtual-server-lib.pl';
 
 print &ui_form_start("mass_create.cgi", "form-data");
 print &ui_table_start($text{'cmass_header'}, "width=100%", 2);
+print $text{'cmass_help'};
+print "<br><tt>$text{'cmass_format'}</tt><p>";
 
 # Source file / data
 if (&master_admin()) {
