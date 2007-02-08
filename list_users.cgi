@@ -17,6 +17,10 @@ $webinit = &create_initial_user($d, undef, 1);
 if ($mleft != 0) {
 	push(@links, "<a href='edit_user.cgi?new=1&dom=$in{'dom'}'>".
 		     "$text{'users_add'}</a>");
+	if ($virtualmin_pro) {
+		push(@links, "<a href='mass_ucreate_form.cgi?dom=$in{'dom'}'>".
+			     "$text{'users_batch2'}</a>");
+		}
 	}
 
 if (@users) {
@@ -54,8 +58,7 @@ if ($mleft != 0 && $webinit->{'webowner'} && $virtualmin_pro) {
 print "</tr></table>\n";
 if (@users) {
 	print &ui_form_end([ [ "delete", $text{'users_delete'} ],
-	     $virtualmin_pro ? ( [ "mass", $text{'users_mass'} ],
-				 [ "batch", $text{'users_batch'} ] ) : ( ) ]);
+	     $virtualmin_pro ? ( [ "mass", $text{'users_mass'} ] ) : ( ) ]);
 	}
 
 if ($virtualmin_pro) {
