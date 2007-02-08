@@ -10,10 +10,11 @@ require './virtual-server-lib.pl';
 	&error($text{'form_ecannot'});
 &ui_print_header(undef, $text{'cmass_title'}, "", "cmass");
 
-print &ui_form_start("mass_create.cgi", "form-data");
-print &ui_table_start($text{'cmass_header'}, "width=100%", 2);
 print $text{'cmass_help'};
 print "<br><tt>$text{'cmass_format'}</tt><p>";
+
+print &ui_form_start("mass_create.cgi", "form-data");
+print &ui_table_start($text{'cmass_header'}, "width=100%", 2);
 
 # Source file / data
 if (&master_admin()) {

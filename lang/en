@@ -2902,6 +2902,8 @@ umass_eextra=This user cannot have extra email addresses
 umass_edb=Database $1 does not exist in this domain
 umass_done=Created user $1
 umass_eto='$1' is not a valid forwarding address - only full email addresses can be used
+umass_help=This page allows you to create multiple mail / FTP users at once from a text file, in the following format (read the help for this page for more):
+umass_format=username:realname:password:ftp-flag:email-flag:quota:[extras]:[forwards]:[databases]
 
 massu_title=Un-Install Scripts
 massu_err=Failed to un-install scripts
