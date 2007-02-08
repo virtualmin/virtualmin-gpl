@@ -5,17 +5,6 @@ require './virtual-server-lib.pl';
 &ReadParse();
 &error_setup($text{'users_derr'});
 
-if ($in{'mass'}) {
-	# Redirect to mass-change form
-	&redirect("mass_form.cgi?$in");
-	exit;
-	}
-elsif ($in{'batch'}) {
-	# Redirect to batch creation form
-	&redirect("mass_ucreate_form.cgi?dom=$in{'dom'}");
-	exit;
-	}
-
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'users_ecannot'});
 &can_edit_users() || &error($text{'users_ecannot'});

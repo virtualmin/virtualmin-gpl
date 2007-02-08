@@ -24,7 +24,7 @@ if ($mleft != 0) {
 	}
 
 if (@users) {
-	print &ui_form_start("delete_users.cgi");
+	print &ui_form_start("change_users.cgi");
 	print &ui_hidden("dom", $in{'dom'}),"\n";
 	print "<table cellpadding=0 cellspacing=0 width=100%><tr><td>\n";
 	if ($mleft != 0 && $mleft != -1) {
