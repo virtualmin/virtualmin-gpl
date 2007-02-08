@@ -765,6 +765,9 @@ mkdir($plainpass_dir, 0700);
 &read_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
 $plain{$_[0]->{'user'}} = $_[0]->{'plainpass'};
 &write_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
+
+# Set the user's Usermin IMAP password
+&set_usermin_imap_password($_[0]);
 }
 
 # modify_user(&user, &old, &domain, [noaliases])
@@ -1157,6 +1160,9 @@ if (!$_[0]->{'domainowner'}) {
 if (defined(&clear_lookup_domain_cache)) {
 	&clear_lookup_domain_cache($_[2], $_[0]);
 	}
+
+# Set the user's Usermin IMAP password
+&set_usermin_imap_password($_[0]);
 }
 
 # delete_user(&user, domain)
@@ -1305,6 +1311,37 @@ delete($plain{$_[0]->{'user'}});
 &write_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
 }
 
+# set_usermin_imap_password(&user)
+# If Usermin is setup to use an IMAP inbox on localhost, set this user's IMAP password
+sub set_usermin_imap_password
+{
+local ($user) = @_;
+return 0 if (!$user->{'unix'} || !$user->{'home'});
+return 0 if (!$user->{'plainpass'});
+
+# Make sure Usermin is installed, and the mailbox module is setup for IMAP
+return 0 if (!&foreign_check("usermin"));
+&foreign_require("usermin", "usermin-lib.pl");
+return 0 if (!&usermin::get_usermin_module_info("mailbox"));
+local %mconfig;
+&read_file("$usermin::config{'usermin_dir'}/mailbox/config", \%mconfig);
+return 0 if ($mconfig{'mail_system'} != 4);
+return 0 if ($mconfig{'pop_server'} ne 'localhost' &&
+	      $mconfig{'pop_server'} ne '127.0.0.1' &&
+	      &to_ipaddress($mconfig{'pop_server'}) ne &to_ipaddress(&get_system_hostname());
+
+# Set the password
+foreach my $dir ($user->{'home'}, "$user->{'home'}/.usermin", "$user->{'home'}/.usermin/mailbox") {
+	&make_dir($dir, 0700);
+	&set_ownership_permissions($user->{'uid'}, $user->{'gid'}, 0700, $dir);
+	}
+local %inbox;
+&read_file("$user->{'home'}/.usermin/mailbox/inbox.imap", \%inbox);
+$inbox{'user'} = $user->{'user'};
+$inbox{'pass'} = $user->{'plainpass'};
+&write_file("$user->{'home'}/.usermin/mailbox/inbox.imap", \%inbox);
+}
+
 # delete_unix_cron_jobs(username)
 # Delete all Cron jobs belonging to some Unix user
 sub delete_unix_cron_jobs
@@ -1416,9 +1453,9 @@ sub create_user_home
 local $home = $_[0]->{'home'};
 if ($home) {
 	# Create his homedir
-	&system_logged("mkdir -p ".quotemeta($home));
-	&system_logged("chown $_[0]->{'uid'}:$_[0]->{'gid'} ".quotemeta($home));
-	&system_logged("chmod 755 ".quotemeta($home));
+	&system_logged("mkdir -p ".quotemeta($home)." >/dev/null 2>&1");
+	&system_logged("chown $_[0]->{'uid'}:$_[0]->{'gid'} ".quotemeta($home)." >/dev/null 2>&1");
+	&system_logged("chmod 755 ".quotemeta($home)." >/dev/null 2>&1");
 
 	# Copy files into homedir
 	&copy_skel_files(

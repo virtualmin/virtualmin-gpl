@@ -508,3 +508,4 @@ Added the list-php-directories.pl, set-php-directory.pl and delete-php-directory
 Updated the Update Virtual Servers page to allow the default PHP version and PHP execution mode to be changed on multiple servers at once.
 Changed the script installer process to automatically use the correct PHP version required by the script, if available.
 Fixed the PHP Support script installer to automatically setup the database connection details for version 2.2.
+IMAP passwords for Usermin users are automatically updated when changed in Usermin.

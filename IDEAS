@@ -45,3 +45,5 @@
   - File manager button for new HTML file
 
   - Fix mediawiki script installer to be friendlier
+
+  - Update plain password in useradmin_update.pl (and IMAP)

@@ -12,7 +12,7 @@ return ( "php" );
 
 sub script_squirrelmail_longdesc
 {
-return "SquirrelMail is a standards-based webmail package written in PHP4";
+return "SquirrelMail is a standards-based webmail package written in PHP";
 }
 
 # script_squirrelmail_versions()
@@ -34,7 +34,7 @@ return "Email";
 
 sub script_squirrelmail_php_vers
 {
-return ( 4 );
+return ( 4, 5 );
 }
 
 # script_squirrelmail_depends(&domain, version)
