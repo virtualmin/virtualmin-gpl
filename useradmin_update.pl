@@ -20,6 +20,8 @@ sub useradmin_modify_user
 {
 if ($_[0]->{'passmode'} == 3) {
 	&set_all_null_print();
+
+	# Update passwords for domain owners
 	foreach my $d (&get_domain_by("user", $_[0]->{'user'})) {
 		$oldd = { %$d };
 		$d->{'pass'} = $_[0]->{'plainpass'};
@@ -45,6 +47,24 @@ if ($_[0]->{'passmode'} == 3) {
 			}
 		&save_domain($d);
 		}
+
+	# Update mailbox user passwords
+	local $d = &get_user_domain($_[0]->{'user'});
+	if ($d && $d->{'user'} ne $_[0]->{'user'}) {
+		local ($user) = grep { $_->{'user'} eq $_[0]->{'user'} }
+				     &list_domain_users($d, 1, 0, 0, 0);
+		if ($user) {
+			# Update plain-text password
+			local %plain;
+			&read_file("$plainpass_dir/$d->{'id'}", \%plain);
+			$plain{$user->{'user'}} = $_[0]->{'plainpass'};
+			&write_file("$plainpass_dir/$d->{'id'}", \%plain);
+
+			# Update IMAP password
+			&set_usermin_imap_password($user);
+			}
+		}
+
 	&run_post_actions();
 	}
 }
