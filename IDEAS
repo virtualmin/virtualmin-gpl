@@ -36,14 +36,8 @@
    created by resellers.
 	- When creating domain, plan can override template.
 
-  - SpamAssassin Rules Emporium
-
   - Better integration of protected web directories
-
-  - Integrated web page editor, linked from left menu top
 
   - File manager button for new HTML file
 
   - Fix mediawiki script installer to be friendlier
-
-  - Update plain password in useradmin_update.pl (and IMAP)

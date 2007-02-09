@@ -170,7 +170,8 @@ if ($multi) {
 			}
 
 		# Show PHP and suexec execution mode
-		if ($config{'web'} && $d->{'web'}) {
+		if ($config{'web'} && $d->{'web'} &&
+		    defined(&get_domain_php_mode)) {
 			$p = &get_domain_php_mode($d);
 			print "    PHP execution mode: $p\n";
 			$s = &get_domain_suexec($d);

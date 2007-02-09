@@ -1382,7 +1382,8 @@ if ($config{'avail_syslog'} && &get_webmin_version() >= 1.305) {
 if ($config{'avail_phpini'}) {
 	# Links to edit PHP configs
 	local $ifile = "$d->{'home'}/etc/php.ini";
-	if (&get_domain_php_mode($d) ne "mod_cgi" && -r $ifile) {
+	if (defined(&get_domain_php_mode) &&
+	    &get_domain_php_mode($d) ne "mod_cgi" && -r $ifile) {
 		push(@rv, { 'mod' => 'phpini',
 			    'desc' => $text{'links_phpini'},
 			    'page' => 'list_ini.cgi?file='.&urlize($ifile),

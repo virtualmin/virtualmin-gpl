@@ -668,7 +668,8 @@ local @pconfs;
 if ($extramods{'phpini'}) {
 	# Can edit PHP configuration files
 	foreach my $sd (@doms) {
-		if ($sd->{'web'} && &get_domain_php_mode($sd) ne "mod_php") {
+		if ($sd->{'web'} && defined(&get_domain_php_mode) &&
+		    &get_domain_php_mode($sd) ne "mod_php") {
 			local $ini = "$sd->{'home'}/etc/php.ini";
 			if (-r $ini) {
 				push(@pconfs, "$ini=".

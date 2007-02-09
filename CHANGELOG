@@ -511,3 +511,4 @@ Fixed the PHP Support script installer to automatically setup the database conne
 IMAP passwords for Usermin users are automatically updated when changed in Usermin.
 ---- Changes since 3.34 ----
 Updated the MediaWiki script installer to version 1.9.2, and TWiki to version 4.1.1.
+When a mailbox user's password is changed in other modules, it is also updated in Virtualmin's plain-text password file.

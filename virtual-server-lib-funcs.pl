@@ -8021,6 +8021,16 @@ if ($d->{'web'} && &can_edit_scripts() && !$d->{'subdom'} && !$d->{'alias'}) {
 		  });
 	}
 
+if ($d->{'web'} && $d->{'dir'} && !$d->{'alias'} && !$d->{'proxy_pass_mode'} &&
+    $virtualmin_pro) {
+	# Edit web pages button
+	push(@rv, { 'page' => 'edit_html.cgi',
+		    'title' => $text{'edit_html'},
+		    'desc' => $text{'edit_htmldesc'},
+		    'cat' => 'objects',
+		  });
+	}
+
 if (&can_rename_domains()) {
 	# Rename domain button
 	push(@rv, { 'page' => 'rename_form.cgi',
