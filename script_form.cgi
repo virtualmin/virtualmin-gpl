@@ -40,7 +40,7 @@ if ($derr) {
 $phpvfunc = $script->{'php_vers_func'};
 if (defined(&$phpvfunc)) {
 	@vers = &$phpvfunc($d, $ver);
-	@gotvers = grep { &check_php_version($d, $_) } @vers;
+	@gotvers = grep { local $_; &check_php_version($d, $_) } @vers;
 	if (!@gotvers) {
 		print &text('scripts_ephpvers', join(" ", @vers)),"\n";
 		$ok = 0;

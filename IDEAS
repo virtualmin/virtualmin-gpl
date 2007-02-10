@@ -37,7 +37,7 @@
 	- When creating domain, plan can override template.
 
   - Better integration of protected web directories
-
-  - File manager button for new HTML file
+	- Release when Virtualmin 3.35 is out
 
   - Fix mediawiki script installer to be friendlier
+

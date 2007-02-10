@@ -18,7 +18,7 @@ if ($virt) {
 		    &apache::find_directive_struct("Directory", $vconf);
 	push(@actions, &apache::find_directive("Action", $dir->{'members'}));
 	foreach my $a (@actions) {
-		if ($a =~ /^application\/x-httpd-php4\s+\/cgi-bin\/php4.cgi/) {
+		if ($a =~ /^application\/x-httpd-php.\s+\/cgi-bin\/php.\.cgi/) {
 			return 'cgi';
 			}
 		}
@@ -281,7 +281,6 @@ return @rv;
 sub list_available_php_versions
 {
 local ($d, $mode) = @_;
-local @avail;
 
 # If the domain is using mod_php, we can only use one version
 &require_apache();
@@ -308,7 +307,9 @@ foreach my $v (@all_possible_php_versions) {
 local $php = &has_command("php-cgi") || &has_command("php");
 if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 	# What version is the php command?
+	&clean_environment();
 	local $out = `$php -v 2>&1 </dev/null`;
+	&reset_environment();
 	if ($out =~ /PHP\s+(\d+)\./) {
 		$vercmds{$1} = $php;
 		}
@@ -353,7 +354,8 @@ foreach my $dir (@dirs) {
 		local $w = &apache::wsplit($v);
 		if (&indexof(".php", @$w) > 0) {
 			# This is for .php files .. look at the php version
-			if ($w->[0] =~ /php(\d+)\.(cgi|fcgi)/) {
+			if ($w->[0] =~ /php(\d+)\.(cgi|fcgi)/ ||
+			    $w->[0] =~ /x-httpd-php(\d+)/) {
 				# Add version and dir to list
 				push(@rv, { 'dir' => $dir->{'words'}->[0],
 					    'version' => $1,
