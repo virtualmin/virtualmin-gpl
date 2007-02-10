@@ -710,12 +710,16 @@ if (!$noextras) {
 if (!$nofeatures) {
 	# Add plugin-specified modules
 	local $p;
-	foreach $p (@feature_plugins) {
-		local @pmods = &plugin_call($p, "feature_webmin", $_[0], \@doms);
+	foreach $p (@plugins) {
+		local @pmods = &plugin_call($p, "feature_webmin", $_[0],
+					    \@doms);
 		local $pm;
 		foreach $pm (@pmods) {
 			push(@mods, $pm->[0]);
-			&save_module_acl_logged($pm->[1], $_[1]->{'name'}, $pm->[0]);
+			if ($pm->[1]) {
+				&save_module_acl_logged(
+					$pm->[1], $_[1]->{'name'}, $pm->[0]);
+				}
 			}
 		}
 	}

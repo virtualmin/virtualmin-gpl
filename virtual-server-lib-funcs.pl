@@ -7926,6 +7926,12 @@ foreach my $f (@plugins) {
 				}
 			}
 		}
+	foreach my $l (&plugin_call($f, "feature_always_links", $d)) {
+		if (&foreign_available($l->{'mod'})) {
+			$l->{'plugin'} = 2;
+			push(@rv, $l);
+			}
+		}
 	}
 
 # Links to other Webmin modules, for domain owners
@@ -8264,9 +8270,10 @@ return @rv;
 # Returns a link and text suitable for the footer function
 sub domain_footer_link
 {
+local $base = "$gconfig{'webprefix'}/$module_name";
 return &can_config_domain($_[0]) ?
-	( "edit_domain.cgi?dom=$_[0]->{'id'}", $text{'edit_return'} ) :
-	( "view_domain.cgi?dom=$_[0]->{'id'}", $text{'view_return'} );
+	( "$base/edit_domain.cgi?dom=$_[0]->{'id'}", $text{'edit_return'} ) :
+	( "$base/view_domain.cgi?dom=$_[0]->{'id'}", $text{'view_return'} );
 }
 
 # domain_redirect(&domain)
