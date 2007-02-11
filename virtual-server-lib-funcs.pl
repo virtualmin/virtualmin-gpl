@@ -2216,6 +2216,13 @@ sub set_all_null_print
 {
 $first_print = $second_print = $indent_print = $outdent_print = \&null_print;
 }
+sub set_all_text_print
+{
+$first_print = \&first_text_print;
+$second_print = \&second_text_print;
+$indent_print = \&indent_text_print;
+$outdent_print = \&outdent_text_print;
+}
 
 # These functions store and retrieve the current print commands
 sub push_all_print
@@ -5496,14 +5503,23 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 
 		# Check PHP version
 		local $phpvfunc = $script->{'php_vers_func'};
+		local $phpver;
 		if (defined(&$phpvfunc)) {
 			local @vers = &$phpvfunc($dom, $ver);
-			if (!&setup_php_version($dom, \@vers,$opts->{'path'})) {
+			$phpver = &setup_php_version($dom, \@vers,
+						     $opts->{'path'});
+			if (!$phpver) {
 				&$second_print(&text('setup_scriptphpver',
 						     join(" ", @vers)));
 				next;
 				}
 			}
+
+		# Install needed PHP modules
+		local $modok = &setup_php_modules($dom, $script, $ver, $phpver);
+		next if (!$modok);
+		$modok = &setup_pear_modules($dom, $script, $ver, $phpver);
+		next if (!$modok);
 
 		# Find the database, if requested
 		if ($sinfo->{'db'}) {

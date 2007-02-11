@@ -58,13 +58,23 @@ foreach $sinfo (@sinfos) {
 	else {
 		# Setup PHP version
 		$phpvfunc = $script->{'php_vers_func'};
+		local $phpver;
 		if (defined(&$phpvfunc)) {
 			@vers = &$phpvfunc($d, $ver);
-			if (!&setup_php_version($d, \@vers, $opts->{'path'})) {
+			$phpver = &setup_php_version($d, \@vers,
+						     $opts->{'path'});
+			if (!$phpver) {
 				&error(&text('scripts_ephpvers',
 					     join(" ", @vers)));
 				}
 			}
+
+		# Install needed PHP modules
+		$modok = &setup_php_modules($d, $script, $ver, $phpver);
+		if ($modok) {
+			$modok = &setup_pear_modules($d, $script, $ver,$phpver);
+			}
+		$modok || next;
 
 		# Go ahead and do it
 		($ok, $msg, $desc, $url) = &{$script->{'install_func'}}($d, $ver, $sinfo->{'opts'}, \%gotfiles, $sinfo);

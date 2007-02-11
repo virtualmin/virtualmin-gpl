@@ -64,6 +64,8 @@ local $rv = { 'name' => $name,
 	      'files_func' => "script_${name}_files",
 	      'php_vars_func' => "script_${name}_php_vars",
 	      'php_vers_func' => "script_${name}_php_vers",
+	      'php_mods_func' => "script_${name}_php_modules",
+	      'pear_mods_func' => "script_${name}_pear_modules",
 	      'latest_func' => "script_${name}_latest",
 	      'check_latest_func' => "script_${name}_check_latest",
 	      'avail' => !$unavail{$name},
@@ -451,40 +453,43 @@ if (-r $phpini && &foreign_check("phpini")) {
 return $any;
 }
 
-# check_pear_module(mod)
+# check_pear_module(mod, [php-version], [&domain])
 # Returns 1 if some PHP Pear module is installed, 0 if not, or -1 if pear is
 # missing.
 sub check_pear_module
 {
-&has_command("pear") || return -1;
-if (!defined(%php_pear_modules)) {
-	&clean_environment();
-	&open_execute_command(PEAR, "pear list", 1);
-	&reset_environment();
-	while(<PEAR>) {
-		if (/^(\S+)\s+(\S+)\s+(\S+)/) {
-			$php_pear_modules{$1} = $2;
-			}
-		}
-	close(PEAR);
+local ($mod, $ver, $d) = @_;
+&foreign_require("php-pear", "php-pear-lib.pl");
+local @cmds = &php_pear::get_pear_commands();
+return -1 if (!@cmds);
+if (!defined(@php_pear_modules)) {
+	@php_pear_modules = &php_pear::list_installed_pear_modules();
 	}
-return $php_pear_modules{$_[0]} ? 1 : 0;
+local ($got) = grep { $_->{'name'} eq $mod &&
+		      (!$ver || $_->{'pear'} == $ver) } @php_pear_modules;
+return $got ? 1 : 0;
 }
 
-# check_php_module(mod, [version])
+# check_php_module(mod, [version], [&domain])
 # Returns 1 if some PHP module is installed, 0 if not, or -1 if the php command
 # is missing
 sub check_php_module
 {
-local ($mod, $ver) = @_;
-local $php4 = &has_command("php4") || &has_command("php4-cgi");
-local $php5 = &has_command("php5") || &has_command("php5-cgi");
-local $php = &has_command("php") || &has_command("php-cgi");
-local $cmd = $ver == 4 ? $php4 || $php :
-	     $ver == 5 ? $php5 || $php : $php;
+local ($mod, $ver, $d) = @_;
+local @vers = &list_available_php_versions();
+local $verinfo;
+if ($ver) {
+	($verinfo) = grep { $_->[0] == $ver } @vers;
+	}
+$verinfo ||= $vers[0];
+return -1 if (!$verinfo);
+local $cmd = $verinfo->[1];
 &has_command($cmd) || return -1;
 if (!defined($php_modules{$ver})) {
 	&clean_environment();
+	if ($d) {
+		$ENV{'PHPRC'} = "$d->{'home'}/etc";
+		}
 	&open_execute_command(PHP, "$cmd -m", 1);
 	&reset_environment();
 	while(<PHP>) {
@@ -529,12 +534,12 @@ $bestdir || &error("Could not find PHP version for $dirpath");
 
 if (&indexof($bestdir->{'version'}, @$vers) >= 0) {
 	# The best match dir supports this PHP version .. so we are OK!
-	return 1;
+	return $bestdir->{'version'};
 	}
 
 # Need to add a directory, or fix one
 &save_domain_php_directory($d, $dirpath, $vers->[0]);
-return 1;
+return $vers->[0];
 }
 
 # clear_php_version(&domain, &sinfo)
@@ -546,6 +551,130 @@ if ($sinfo->{'opts'}->{'dir'} &&
     $sinfo->{'opts'}->{'dir'} ne &public_html_dir($d)) {
 	&delete_domain_php_directory($d, $sinfo->{'opts'}->{'dir'});
 	}
+}
+
+# setup_php_modules(&domain, &script, version, php-version)
+# If possible, downloads PHP module packages need by the given script. Progress
+# of the install is written to STDOUT. Returns 1 if successful, 0 if not.
+sub setup_php_modules
+{
+local ($d, $script, $ver, $phpver) = @_;
+local $modfunc = $script->{'php_mods_func'};
+return 1 if (!defined(&$modfunc));
+local @mods = &$modfunc($d);
+foreach my $m (@mods) {
+	next if (&check_php_module($m, $phpver, $d) == 1);
+	&$first_print(&text('scripts_needmod', "<tt>$m</tt>"));
+
+	# Make sure the software module is installed and can do updates
+	if (!&foreign_installed("software")) {
+		&$second_print($text{'scripts_esoftware'});
+		return 0;
+		}
+	&foreign_require("software", "software-lib.pl");
+	if (!defined(&software::update_system_install)) {
+		&$second_print($text{'scripts_eupdate'});
+		return 0;
+		}
+
+	# Check if the package is already installed
+	&$indent_print();
+	local $pkg = "php$phpver-$m";
+	local @pinfo = &software::package_info($pkg);
+	if (!@pinfo) {
+		&$first_print(&text('scripts_softwaremod', "<tt>$pkg</tt>"));
+		&software::update_system_install($pkg);
+		@pinfo = &software::package_info($pkg);
+		if (@pinfo) {
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			&$second_print($text{'scripts_esoftwaremod'});
+			&$outdent_print();
+			return 0;
+			}
+		}
+
+	# Configure the domain's php.ini to load it, if needed
+	&foreign_require("phpini", "phpini-lib.pl");
+	local $mode = &get_domain_php_mode($d);
+	local $inifile = $mode eq "mod_php" ? &get_global_php_ini($phpver)
+					    : "$d->{'home'}/etc/php.ini";
+	local $pconf = &phpini::get_config($inifile);
+	local @exts = grep { $_->{'name'} eq 'extension' &&
+			     $_->{'enabled'} } @$pconf;
+	local ($got) = grep { $_->{'value'} eq "$m.so" } @exts;
+	if (!$got) {
+		# Needs to be enabled
+		&$first_print($text{'scripts_addext'});
+		local $lref = &read_file_lines($inifile);
+		splice(@$lref, $exts[$#exts]->{'line'}+1, 0, "extension=$m.so");
+		&flush_file_lines($inifile);
+		undef($phpini::get_config_cache{$inifile});
+		&$second_print($text{'setup_done'});
+		}
+
+	# Finally re-check to make sure it worked
+	&$outdent_print();
+	undef(%php_modules);
+	if (&check_php_module($m, $phpver, $d) != 1) {
+		&$second_print($text{'scripts_einstallmod'});
+		return 0;
+		}
+	else {
+		&$second_print(&text('scripts_gotmod', $m));
+		}
+	}
+return 1;
+}
+
+# setup_pear_modules(&domain, &script, version, php-version)
+# If possible, downloads Pear PHP modules needed by the given script. Progress
+# of the install is written to STDOUT. Returns 1 if successful, 0 if not.
+sub setup_pear_modules
+{
+local ($d, $script, $ver, $phpver) = @_;
+local $modfunc = $script->{'pear_mods_func'};
+return 1 if (!defined(&$modfunc));
+local @mods = &$modfunc($d);
+foreach my $m (@mods) {
+	next if (&check_pear_module($m, $phpver, $d) == 1);
+
+	# Install if needed
+	&$first_print(&text('scripts_needpear', "<tt>$m</tt>"));
+	&foreign_require("php-pear", "php-pear-lib.pl");
+	local $err = &php_pear::install_pear_module($m, $phpver);
+	if ($err) {
+		print $err;
+		&$second_print($text{'scripts_esoftwaremod'});
+		return 0;
+		}
+
+	# Finally re-check to make sure it worked
+	undef(@php_pear_modules);
+	if (&check_pear_module($m, $phpver, $d) != 1) {
+		&$second_print($text{'scripts_einstallpear'});
+		return 0;
+		}
+	else {
+		&$second_print(&text('scripts_gotpear', $m));
+		}
+	}
+return 1;
+}
+
+# get_global_php_ini(phpver, mode)
+# Returns the full path to the global PHP config file
+sub get_global_php_ini
+{
+local ($ver, $mode) = @_;
+foreach my $i ("/etc/php.ini",
+	       ($mode eq "mod_php" ? "/etc/php$ver/apache/php.ini"
+				   : "/etc/php$ver/cgi/php.ini"),
+	       "/usr/local/lib/php.ini") {
+	return $i if (-r $i);
+	}
+return undef;
 }
 
 # validate_script_path(&opts, &script, &domain)

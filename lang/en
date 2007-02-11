@@ -2372,6 +2372,17 @@ scripts_uninstalls=Un-Install Selected Scripts
 scripts_newdb=$1 ($2, new database)
 scripts_nocat=Others
 scripts_enosel=None selected
+scripts_needmod=PHP module $1 is required ..
+scripts_softwaremod=Installing package $1 ..
+scripts_esoftwaremod=.. failed to install!
+scripts_esoftware=.. the Software Packages Webmin module is not installed!
+scripts_eupdate=.. automatic module installation is not available on your system.
+scripts_einstallmod=Module is not available even after installation!
+scripts_addext=Enabling module in PHP configuration ..
+scripts_gotmod=.. PHP module $1 is now available.
+scripts_needpear=Installing PHP Pear module $1 ..
+scripts_einstallpear=Pear module is not available even after installation!
+scripts_gotpear=.. installation complete.
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations.

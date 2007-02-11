@@ -13,9 +13,7 @@ $0 = "$pwd/install-script.pl";
 require './virtual-server-lib.pl';
 $< == 0 || die "install-script.pl must be run as root";
 &foreign_require("mailboxes", "mailboxes-lib.pl");
-
-$first_print = \&first_text_print;
-$second_print = \&second_text_print;
+&set_all_text_print();
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -152,7 +150,8 @@ $phpvfunc = $script->{'php_vers_func'};
 if (defined(&$phpvfunc)) {
 	&$first_print("Checking PHP version ..");
 	@vers = &$phpvfunc($d, $ver);
-	if (!&setup_php_version($d, \@vers, $opts->{'path'})) {
+	$phpver = &setup_php_version($d, \@vers, $opts->{'path'});
+	if (!$phpver) {
 		&$second_print(".. version ",join(" ", @vers),
 			       " of PHP is required, but not available");
 		exit(1);
@@ -171,6 +170,14 @@ if ($ferr) {
 	}
 else {
 	&$second_print(".. done");
+	}
+
+# Install needed PHP modules
+if (!&setup_php_modules($d, $script, $ver, $phpver)) {
+	exit(1);
+	}
+if (!&setup_pear_modules($d, $script, $ver, $phpver)) {
+	exit(1);
 	}
 
 # Call the install function

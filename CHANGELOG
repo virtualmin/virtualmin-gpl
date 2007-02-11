@@ -514,3 +514,4 @@ Updated the MediaWiki script installer to version 1.9.2, and TWiki to version 4.
 When a mailbox user's password is changed in other modules, it is also updated in Virtualmin's plain-text password file.
 Added new pages for easily editing HTML in a virtual server's website.
 ---- Changes since 3.35 ----
+PHP and Pear modules needed by script installers are now automatically installed when needed, if supported by the underlying operating system's update service (APT or YUM).

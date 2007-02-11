@@ -179,18 +179,10 @@ if (!-r "$etc/php.ini") {
 	local $copied = 0;
 	local @vers = &list_available_php_versions($d, $mode);
 	local $defver = $vers[0]->[0];
-	foreach my $i ("/etc/php.ini",
-		       "/etc/php$defver/cgi/php.ini",
-		       "/etc/php$defver/cli/php.ini",
-		       "/usr/local/lib/php.ini") {
-		if (-r $i) {
-			&copy_source_dest($i, "$etc/php.ini");
-			$copied = 1;
-			last;
-			}
-		}
-	if ($copied) {
-		# Set permissions, and fix session.save_path
+	local $ini = &get_global_php_ini($defver, $mode);
+	if ($ini) {
+		# Copy file, set permissions, and fix session.save_path
+		&copy_source_dest($i, "$etc/php.ini");
 		&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'},
 					   0755, "$etc/php.ini");
 		if (&foreign_check("phpini")) {

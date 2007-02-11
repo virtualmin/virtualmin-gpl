@@ -73,21 +73,31 @@ if (-d $opts->{'dir'} && !$sinfo && !$in{'confirm'}) {
 $phpvfunc = $script->{'php_vers_func'};
 if (defined(&$phpvfunc)) {
 	@vers = &$phpvfunc($d, $ver);
-	if (!&setup_php_version($d, \@vers, $opts->{'path'})) {
+	$phpver = &setup_php_version($d, \@vers, $opts->{'path'});
+	if (!$phpver) {
 		&error(&text('scripts_ephpvers', join(" ", @vers)));
 		}
 	}
 
-if ($sinfo) {
-	&ui_print_unbuffered_header(&domain_in($d), $text{'scripts_uptitle'}, "");
-	}
-else {
-	&ui_print_unbuffered_header(&domain_in($d), $text{'scripts_intitle'}, "");
-	}
+&ui_print_unbuffered_header(&domain_in($d),
+	$sinfo ? $text{'scripts_uptitle'} : $text{'scripts_intitle'}, "");
 
 # First fetch needed files
 $ferr = &fetch_script_files($d, $ver, $opts, $sinfo, \%gotfiles);
 &error($ferr) if ($ferr);
+print "<br>\n";
+
+# Install needed PHP modules
+$modok = &setup_php_modules($d, $script, $ver, $phpver);
+if ($modok) {
+	$modok = &setup_pear_modules($d, $script, $ver, $phpver);
+	}
+if (!$modok) {
+	&ui_print_footer("list_scripts.cgi?dom=$in{'dom'}",
+			 $text{'scripts_return'},
+			 &domain_footer_link($d));
+	exit;
+	}
 
 # Call the install program
 &$first_print(&text('scripts_installing', $script->{'desc'}, $ver));

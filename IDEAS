@@ -41,3 +41,6 @@
 
   - Fix mediawiki script installer to be friendlier
 
+  - Ruby support
+	- GEMS installer
+	- fcgi support in Virtualmin
