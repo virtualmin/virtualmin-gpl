@@ -19,8 +19,11 @@ if ($in{'suexec'} && $apache::httpd_modules{'core'} >= 2.0 &&
 	&error($text{'phpmode_emodsuexec'});
 	}
 
-# Save execution mode
+# Save PHP execution mode
 &save_domain_php_mode($d, $in{'mode'});
+
+# Save Ruby execution mode
+&save_domain_ruby_mode($d, $in{'rubymode'});
 
 # Save suexec mode
 &save_domain_suexec($d, $in{'suexec'});

@@ -325,6 +325,20 @@ else {
 			&$second_print($text{'setup_done'});
 			}
 
+		# Change the Ruby execution mode
+		if (&can_edit_phpmode() && $in{'rubymode'} && $d->{'web'}) {
+			&$first_print($text{'massdomains_rubymoding'});
+			if ($in{'rubymode'} ne 'mod_ruby' &&
+			    $in{'rubymode'} ne 'none' &&
+			    !&get_domain_suexec($d)) {
+				# Enable suexec automatically
+				&save_domain_suexec($d, 1);
+				}
+			&save_domain_ruby_mode($d, $in{'rubymode'} eq 'none' ?
+						    undef : $in{'rubymode'});
+			&$second_print($text{'setup_done'});
+			}
+
 		# Change the default PHP version
 		if (&can_edit_phpver() && $in{'phpver'} && $d->{'web'}) {
 			&$first_print($text{'massdomains_phpvering'});

@@ -172,7 +172,7 @@ $plainpass_dir = "$module_config_directory/plainpass";
 $template_scripts_dir = "$module_config_directory/template-scripts";
 
 foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
-		 "php") {
+		 "php", "ruby") {
 	if (-r "$module_root_directory/$lib-lib.pl") {
 		do "$module_root_directory/$lib-lib.pl";
 		}

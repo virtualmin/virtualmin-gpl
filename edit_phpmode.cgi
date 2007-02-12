@@ -23,6 +23,16 @@ print &ui_table_row(&hlink($text{'phpmode_mode'}, "phpmode"),
 			      [ map { [ $_, $text{'phpmode_'.$_}."<br>" ] }
 				    &supported_php_modes($d) ]));
 
+# Ruby execution mode
+@rubys = &supported_ruby_modes($d);
+if (@rubys) {
+	print &ui_table_row(&hlink($text{'phpmode_rubymode'}, "rubymode"),
+		    &ui_radio("rubymode", &get_domain_ruby_mode($d),
+			      [ [ "", $text{'phpmode_noruby'}."<br>" ],
+				map { [ $_, $text{'phpmode_'.$_}."<br>" ] }
+				    @rubys ]));
+	}
+
 # Write logs via program
 print &ui_table_row(&hlink($text{'newweb_writelogs'}, "template_writelogs"),
 		    &ui_yesno_radio("writelogs", &get_writelogs_status($d)));

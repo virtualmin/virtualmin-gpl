@@ -178,6 +178,11 @@ if ($multi) {
 			print "    SuExec for CGIs: ",
 			      ($s ? "enabled" : "disabled"),"\n";
 			}
+		if ($config{'web'} && $d->{'web'} &&
+		    defined(&get_domain_ruby_mode)) {
+			$p = &get_domain_ruby_mode($d) || "none";
+			print "    Ruby execution mode: $p\n";
+			}
 
 		# Show DNS SPF mode
 		if ($config{'dns'} && $d->{'dns'} && !$d->{'dns_submode'}) {

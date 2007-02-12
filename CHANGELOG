@@ -515,3 +515,4 @@ When a mailbox user's password is changed in other modules, it is also updated i
 Added new pages for easily editing HTML in a virtual server's website.
 ---- Changes since 3.35 ----
 PHP and Pear modules needed by script installers are now automatically installed when needed, if supported by the underlying operating system's update service (APT or YUM).
+Added support for enabling Ruby scripts in a virtual server. This can be done on the Website Options page, with the modify-web.pl script, on the mass domain update page, and set by default in server templates. Both execution via mod_ruby and CGI scripts are supported, assuming that the required software is installed.

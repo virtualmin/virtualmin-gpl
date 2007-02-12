@@ -207,6 +207,13 @@ if (!$_[0]->{'alias'} && $_[0]->{'dir'}) {
 		# Add directives for FastCGId
 		&save_domain_php_mode($_[0], "fcgid");
 		}
+
+	if ($tmpl->{'web_ruby_suexec'} >= 0) {
+		# Setup for Ruby
+		&save_domain_ruby_mode($_[0],
+			$tmpl->{'web_ruby_suexec'} == 0 ? "mod_ruby" :
+			$tmpl->{'web_ruby_suexec'} == 1 ? "cgi" : "fcgid");
+		}
 	}
 }
 
@@ -1583,6 +1590,14 @@ if ($virtualmin_pro) {
 	    &ui_select("web_phpver", $tmpl->{'web_phpver'},
 		       [ [ "", $text{'tmpl_phpverdef'} ],
 			 map { [ $_->[0] ] } &list_available_php_versions() ]));
+
+	# Run ruby scripts as user
+	print &ui_table_row(
+	    &hlink($text{'tmpl_rubymode'}, "template_rubymode"),
+	    &ui_radio("web_ruby_suexec", int($tmpl->{'web_ruby_suexec'}),
+		      [ [ -1, $text{'phpmode_noruby'}."<br>" ],
+			[ 0, $text{'phpmode_mod_ruby'}."<br>" ],
+			[ 1, $text{'phpmode_cgi'}."<br>" ] ]));
 	}
 
 print "</table></td> </tr>\n";
@@ -1731,6 +1746,11 @@ if ($in{"web_mode"} == 2) {
 			}
 		$tmpl->{'web_php_suexec'} = $in{'web_php_suexec'};
 		$tmpl->{'web_phpver'} = $in{'web_phpver'};
+		if ($in{'web_ruby_suexec'} > 0) {
+			&has_command("ruby") ||
+				&error($text{'tmpl_erubycmd'});
+			}
+		$tmpl->{'web_ruby_suexec'} = $in{'web_ruby_suexec'};
 		}
 	}
 $tmpl->{'webalizer'} = &parse_none_def("webalizer");

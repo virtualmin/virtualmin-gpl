@@ -6034,6 +6034,8 @@ push(@rv, { 'id' => 0,
 	    'web_usermin_ssl' => $config{'usermin_ssl'},
 	    'php_vars' => $config{'php_vars'} || "none",
 	    'web_php_suexec' => int($config{'php_suexec'}),
+	    'web_ruby_suexec' => $config{'ruby_suexec'} eq '' ? -1 :
+					int($config{'ruby_suexec'}),
 	    'web_phpver' => $config{'phpver'},
 	    'webalizer' => $config{'def_webalizer'} || "none",
 	    'disabled_web' => $config{'disabled_web'} || "none",
@@ -6211,6 +6213,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'php_vars'} = $tmpl->{'php_vars'} eq "none" ? "" :
 				$tmpl->{'php_vars'};
 	$config{'php_suexec'} = $tmpl->{'web_php_suexec'};
+	$config{'ruby_suexec'} = $tmpl->{'web_ruby_suexec'};
 	$config{'phpver'} = $tmpl->{'web_phpver'};
 	$config{'def_webalizer'} = $tmpl->{'webalizer'} eq "none" ? "" :
 					$tmpl->{'webalizer'};
@@ -7569,6 +7572,7 @@ if (&has_group_quotas()) {
 			$dbq += $dbu[1];
 			}
 		}
+	$qbq /= &quota_bsize("home");
 	}
 else {
 	# Fake it by summing up user quotas
@@ -7576,7 +7580,7 @@ else {
 	($home, $mail, $dummy, $db, $dbq) = &get_domain_user_quotas(
 				$d, &get_domain_by("parent", $d->{'id'}));
 	}
-return ($home-$dbq/&quota_bsize("home"), $mail, $db);
+return ($home-$dbq, $mail, $db);
 }
 
 # compute_prefix(domain-name, group, [&parent])

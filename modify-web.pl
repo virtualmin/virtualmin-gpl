@@ -31,6 +31,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mode") {
 		$mode = shift(@ARGV);
 		}
+	elsif ($a eq "--ruby-mode") {
+		$rubymode = shift(@ARGV);
+		}
 	elsif ($a eq "--proxy") {
 		$proxy = shift(@ARGV);
 		$proxy =~ /^(http|https):\/\/\S+$/ ||
@@ -61,8 +64,8 @@ while(@ARGV > 0) {
 		}
 	}
 @dnames || $all_doms || usage();
-$mode || defined($proxy) || defined($framefwd) || defined($suexec) ||
-	 &usage("Nothing to do");
+$mode || $rubymode || defined($proxy) || defined($framefwd) ||
+  defined($suexec) || &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Get domains to update
@@ -88,16 +91,24 @@ foreach $d (@doms) {
 		}
 	}
 
-# Make sure suexec and PHP settings don't clash
+# Make sure suexec and PHP / Ruby settings don't clash
 foreach $d (@doms) {
 	$p = $mode || &get_domain_php_mode($d);
+	$r = $rubymode || &get_domain_ruby_mode($d);
 	$s = defined($suexec) ? $suexec : &get_domain_suexec($d);
 	if ($p eq "cgi" && !$s) {
 		&usage("For PHP to be run as the domain owner in $d->{'dom'}, suexec must also be enabled");
 		}
+	if ($r eq "cgi" && !$s) {
+		&usage("For Ruby to be run as the domain owner in $d->{'dom'}, suexec must also be enabled");
+		}
 	@supp = &supported_php_modes($d);
 	!$mode || &indexof($mode, @supp) >= 0 ||
 		&usage("The selected PHP exection mode cannot be used with $d->{'dom'}");
+	@rubysupp = &supported_ruby_modes($d);
+	!$rubymode || $rubymode eq "none" ||
+	    &indexof($rubymode, @rubysupp) >= 0 ||
+		&usage("The selected Ruby exection mode cannot be used with $d->{'dom'}");
 	}
 
 # Do it for all domains
@@ -108,6 +119,12 @@ foreach $d (@doms) {
 	# Update PHP mode
 	if ($mode) {
 		&save_domain_php_mode($d, $mode);
+		}
+
+	# Update Ruby mode
+	if ($rubymode) {
+		&save_domain_ruby_mode($d,
+			$rubymode eq "none" ? undef : $rubymode);
 		}
 
 	# Update suexec setting
@@ -172,7 +189,8 @@ print "$_[0]\n\n" if ($_[0]);
 print "Changes web server settings for one or more domains.\n";
 print "\n";
 print "usage: modify-web.pl [--domain name] | [--all-domains]\n";
-print "                     [--mode mod_php | cgi | fcgi]\n";
+print "                     [--mode mod_php | cgi | fcgid]\n";
+print "                     [--ruby-mode none | mod_ruby | cgi | fcgid]\n";
 print "                     [--suexec | --no-suexec]\n";
 print "                     [--proxy http://... | --no-proxy]\n";
 print "                     [--framefwd http://... | --no-framefwd]\n";

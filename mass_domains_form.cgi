@@ -135,13 +135,22 @@ if ($anyphp) {
 				     "width=100%", 2, "php", 0);
 	}
 
-# PHP execution mode
+# PHP and Ruby execution modes
 if (&can_edit_phpmode()) {
 	print &ui_table_row($text{'massdomains_phpmode'},
 		&ui_radio("phpmode", undef,
 			  [ [ "", $text{'massdomains_leave'}."<br>" ],
 			    map { [ $_, $text{'phpmode_'.$_}."<br>" ] }
 				&supported_php_modes() ]), 1, \@tds);
+	}
+@rubys = &supported_ruby_modes();
+if (&can_edit_phpmode() && @rubys) {
+	print &ui_table_row($text{'massdomains_rubymode'},
+		&ui_radio("rubymode", undef,
+			  [ [ "", $text{'massdomains_leave'}."<br>" ],
+			    [ "none", $text{'phpmode_noruby'}."<br>" ],
+			    map { [ $_, $text{'phpmode_'.$_}."<br>" ] }
+				@rubys ]), 1, \@tds);
 	}
 
 # Default PHP version

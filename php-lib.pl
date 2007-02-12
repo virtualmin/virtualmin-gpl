@@ -182,7 +182,7 @@ if (!-r "$etc/php.ini") {
 	local $ini = &get_global_php_ini($defver, $mode);
 	if ($ini) {
 		# Copy file, set permissions, and fix session.save_path
-		&copy_source_dest($i, "$etc/php.ini");
+		&copy_source_dest($ini, "$etc/php.ini");
 		&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'},
 					   0755, "$etc/php.ini");
 		if (&foreign_check("phpini")) {
