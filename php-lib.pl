@@ -220,6 +220,7 @@ local $common = "#!/bin/sh\n".
 		"export PHP_FCGI_CHILDREN PHPRC\n";
 
 # For each version of PHP, create a wrapper
+local $pub = &public_html_dir($d);
 foreach my $v (&list_available_php_versions($d, $mode)) {
 	&open_tempfile(PHP, ">$dest/php$v->[0].$suffix");
 	&print_tempfile(PHP, $common);
@@ -232,6 +233,15 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 	&close_tempfile(PHP);
 	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755,
 				   "$dest/php$v->[0].$suffix");
+
+	# Also copy the .fcgi wrapper to public_html, which is needed due to
+	# broken-ness on some Debian versions!
+	if ($mode eq "fcgid") {
+		&copy_source_dest("$dest/php$v->[0].$suffix",
+				  "$pub/php$v->[0].$suffix");
+		&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755,
+					   "$pub/php$v->[0].$suffix");
+		}
 	}
 }
 
