@@ -155,8 +155,11 @@ else {
 		    { 'doms' => [ map { $_->{'dom'} } @doms ] });
 
 	# Call any theme post command
-	if (defined(&theme_post_save_domain)) {
-		&theme_post_save_domain(\%dom);
+	foreach my $d (@doms) {
+		if (defined(&theme_post_save_domain)) {
+			&theme_post_save_domain($d,
+				$d->{'missing'} ? 'create' : 'modify');
+			}
 		}
 	}
 

@@ -330,7 +330,7 @@ if (defined($in{'content'}) && !$in{'content_def'} && $dom{'web'}) {
 
 # Call any theme post command
 if (defined(&theme_post_save_domain)) {
-	&theme_post_save_domain(\%dom);
+	&theme_post_save_domain(\%dom, 'create');
 	}
 
 &ui_print_footer("edit_domain.cgi?dom=$dom{'id'}", $text{'edit_return'},

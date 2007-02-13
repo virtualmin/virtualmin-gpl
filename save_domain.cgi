@@ -276,7 +276,7 @@ print $text{'setup_done'},"<p>\n";
 
 # Call any theme post command
 if (defined(&theme_post_save_domain)) {
-	&theme_post_save_domain($d);
+	&theme_post_save_domain($d, 'modify');
 	}
 
 &ui_print_footer("edit_domain.cgi?dom=$in{'dom'}", $text{'edit_return'},

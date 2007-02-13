@@ -99,11 +99,11 @@ else {
 		&error($err) if ($err);
 		&$outdent_print();
 		&$second_print($text{'setup_done'});
-		}
 
-	# Call any theme post command
-	if (defined(&theme_post_save_domain)) {
-		&theme_post_save_domain(\%dom);
+		# Call any theme post command
+		if (defined(&theme_post_save_domain)) {
+			&theme_post_save_domain($d, 'delete');
+			}
 		}
 
 	&webmin_log("delete", "domains", scalar(@doms));

@@ -319,16 +319,16 @@ foreach $line (@lines) {
 		      &text('cmass_done', "<tt>$dname</tt>"),"</font><br>\n";
 		$count++;
 		}
+
+	# Call any theme post command
+	if (defined(&theme_post_save_domain)) {
+		&theme_post_save_domain(\%dom, 'create');
+		}
 	}
 
 print "<p>\n";
 print &text('cmass_complete', $count, $ecount),"<br>\n";
 &webmin_log("create", "domains", $count);
-
-# Call any theme post command
-if (defined(&theme_post_save_domain)) {
-        &theme_post_save_domain(\%dom);
-        }
 
 &ui_print_footer("", $text{'index_return'});
 

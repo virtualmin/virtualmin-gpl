@@ -378,15 +378,15 @@ else {
 
 		&$outdent_print();
 		&$second_print($text{'setup_done'});
+
+		# Call any theme post command
+		if (defined(&theme_post_save_domain)) {
+			&theme_post_save_domain($d, 'modify');
+			}
 		}
 	&run_post_actions();
 	&webmin_log("modify", "domains", scalar(@doms));
 	}
-
-# Call any theme post command
-if (defined(&theme_post_save_domain)) {
-        &theme_post_save_domain($d);
-        }
 
 &ui_print_footer("", $text{'index_return'});
 

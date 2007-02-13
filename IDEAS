@@ -38,5 +38,5 @@
 
   - Fix mediawiki script installer to be friendlier
 
-  - Ruby support
-	- GEMS installer
+  - lookup-domain.pl should use server process
+

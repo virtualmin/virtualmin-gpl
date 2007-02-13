@@ -54,7 +54,7 @@ if ($config{'spam'}) {
 
 # Call any theme post command
 if (defined(&theme_post_save_domain)) {
-	&theme_post_save_domain(\%dom);
+	&theme_post_save_domain(\%dom, 'modify');
 	}
 
 &ui_print_footer("", $text{'index_return'});

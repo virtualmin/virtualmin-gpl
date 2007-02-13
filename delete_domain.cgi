@@ -86,7 +86,7 @@ else {
 	&error($err) if ($err);
 
 	# Call any theme post command
-	if (defined(&theme_post_save_domain)) {
+	if (defined(&theme_post_save_domain, 'delete')) {
 		&theme_post_save_domain(\%dom);
 		}
 
