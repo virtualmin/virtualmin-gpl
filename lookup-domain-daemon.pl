@@ -37,7 +37,8 @@ if (fork()) { exit; }
 setsid();
 open(STDIN, "</dev/null");
 open(STDOUT, ">/dev/null");
-open(STDERR, ">$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.log");
+$daemon_logfile = "$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.log";
+open(STDERR, ">>$daemon_logfile");
 
 # Write out the PID file
 open(PIDFILE, ">$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid");
@@ -105,5 +106,12 @@ else {
 	print STDERR "[$now] user=$username NOUSER\n";
 	}
 close(SOCK);
+
+# Truncate the log if too big (10MB)
+local @st = stat($daemon_logfile);
+if ($st[7] > 10*1024*1024) {
+	close(STDERR);
+	open(STDERR, ">$daemon_logfile");
+	}
 }
 
