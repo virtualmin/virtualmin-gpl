@@ -3,12 +3,46 @@
 # if the user is not approaching his quota
 
 $no_acl_check++;
+@ARGV == 1 || die "usage: lookup-domain.pl <username>";
+use Socket;
 
 # Get the message size
 while($got = read(STDIN, $buf, 1024)) {
 	$size += $got;
 	}
 $margin = $size*2+5*1024*1024;
+
+# First, try connecting to the lookup-domain-daemon.pl process
+socket(DAEMON, PF_INET, SOCK_STREAM, getprotobyname("tcp"));
+$rv = connect(DAEMON, pack_sockaddr_in(11000, inet_aton("127.0.0.1")));
+if ($rv) {
+	select(DAEMON); $| = 1; select(STDOUT);
+	print DAEMON $ARGV[0],"\n";
+	$fromdaemon = <DAEMON>;
+	$fromdaemon =~ s/\r|\n//g;
+	close(DAEMON);
+	}
+if ($fromdaemon) {
+	# We have an answer from the server process
+	($did, $dname, $spam, $spamc, $quotaleft) = split(/\t/, $fromdaemon);
+	if (!$did || !$spam) {
+		# No such user, or user's domain doesn't have spam enabled -
+		# don't do spam check
+		}
+	elsif ($spamc || $quotaleft eq "UNLIMITED") {
+		# Domain is using spamc, or user has no quota, or quota disabled
+		# Do spam check.
+		print $did,"\n";
+		}
+	elsif ($quotaleft < $margin) {
+		# Too close to quota - don't check
+		}
+	else {
+		# Do spam check
+		print $did,"\n";
+		}
+	exit(0);
+	}
 
 # Open the cache DBM
 $cachefile = "$ENV{'WEBMIN_VAR'}/lookup-domain-cache";
@@ -61,7 +95,6 @@ if (defined($usercache{$ARGV[0]})) {
 
 # Lookup the user for real
 do './virtual-server-lib.pl';
-@ARGV == 1 || die "usage: lookup-domain.pl <username>";
 $d = &get_user_domain($ARGV[0]);
 if (!$d || !$d->{'spam'}) {
 	$cachespam = $cachequota = $cacheuquota = 0;

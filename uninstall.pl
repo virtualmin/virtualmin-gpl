@@ -14,6 +14,15 @@ foreach my $cmd (@all_cron_commands) {
 		&cron::delete_cron_job($job);
 		}
 	}
+if ($virtualmin_pro) {
+	# Turn off lookup-domain action
+	&foreign_require("init", "init-lib.pl");
+	&foreign_require("proc", "proc-lib.pl");
+	if (&check_pid_file($pidfile)) {
+		&init::stop_action("lookup-domain");
+		}
+	&init::disable_at_boot("lookup-domain");
+	}
 }
 
 1;

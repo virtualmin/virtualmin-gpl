@@ -539,7 +539,7 @@ sub list_all_users_quotas
 {
 # Get quotas for all users
 &require_useradmin($_[0]);
-if (!defined(%home_quotas) && $config{'home_quotas'} && !$_[0]) {
+if (!defined(%soft_home_quota) && $config{'home_quotas'} && !$_[0]) {
 	local $n = &quota::filesystem_users($config{'home_quotas'});
 	local $i;
 	for($i=0; $i<$n; $i++) {
@@ -551,7 +551,7 @@ if (!defined(%home_quotas) && $config{'home_quotas'} && !$_[0]) {
 			$quota::user{$i,'ublocks'};
 		}
 	}
-if (!defined(%mail_quotas) && $config{'mail_quotas'} &&
+if (!defined(%soft_mail_quota) && $config{'mail_quotas'} &&
     $config{'mail_quotas'} ne $config{'home_quotas'} && !$_[0]) {
 	local $n = &quota::filesystem_users($config{'mail_quotas'});
 	local $i;
@@ -8950,7 +8950,8 @@ if ($config{'web'}) {
 	if (!$apache::httpd_modules{'mod_actions'}) {
 		return &text('check_ewebactions');
 		}
-	if ($tmpl->{'web_php_suexec'} && !$apache::httpd_modules{'mod_fcgid'}) {
+	if ($tmpl->{'web_php_suexec'} == 2 &&
+	    !$apache::httpd_modules{'mod_fcgid'}) {
 		return $text{'tmpl_ephpmode2'};
 		}
 
@@ -9787,6 +9788,23 @@ sub show_password_popup
 {
 local ($d) = @_;
 return "(<a href='showpass.cgi?dom=$d->{'id'}' onClick='window.open(\"showpass.cgi?dom=$d->{'id'}\", \"showpass\", \"toolbar=no,menubar=no,scrollbar=no,width=300,height=70\"); return false'>$text{'edit_showpass'}</a>)";
+}
+
+# flush_virtualmin_caches()
+# Clear all in-memory caches of users, quotas, domains, etc..
+sub flush_virtualmin_caches
+{
+undef(%main::get_domain_cache);
+undef(%bsize_cache);
+undef(%get_bandwidth_cache);
+undef(%soft_home_quota);
+undef(%hard_home_quota);
+undef(%used_home_quota);
+undef(%soft_mail_quota);
+undef(%hard_mail_quota);
+undef(%used_mail_quota);
+undef(@useradmin::list_users_cache);
+undef(@useradmin::list_groups_cache);
 }
 
 $done_virtual_server_lib_funcs = 1;

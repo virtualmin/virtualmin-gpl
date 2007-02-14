@@ -94,6 +94,25 @@ if ($virtualmin_pro) {
 &put_miniserv_config(\%miniserv);
 &restart_miniserv();
 
+# Setup lookup domain daemon
+if ($virtualmin_pro) {
+	&foreign_require("init", "init-lib.pl");
+	&foreign_require("proc", "proc-lib.pl");
+	local $pidfile = "$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid";
+	&init::enable_at_boot(
+	      "lookup-domain",
+	      "Daemon for quickly looking up Virtualmin ".
+	      "servers from procmail",
+	      "$module_root_directory/lookup-domain-daemon.pl",
+	      "kill `cat $pidfile`",
+	      undef);
+	if (&check_pid_file($pidfile)) {
+		&init::stop_action("lookup-domain");
+		sleep(5);	# Let port free up
+		}
+	&init::start_action("lookup-domain");
+	}
+
 # Force a restart of Apache, to apply writelogs.pl changes
 if ($config{'web'}) {
 	&require_apache();
