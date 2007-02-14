@@ -30,11 +30,11 @@
  - Allow resellers and domain owners to use remote API
 	- Need access control enforcement in .pl scripts
 
- - Update phprojekt script installer to be more user-friendly (POST?)
-
  - Separate plans (sets of limits) from templates, so that they can be
    created by resellers.
 	- When creating domain, plan can override template.
 
   - Fix mediawiki script installer to be friendlier
+
+  - ui-lib.pl and templates
 
