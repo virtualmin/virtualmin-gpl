@@ -15,6 +15,19 @@ if (&can_import_servers()) {
 	&resync_all_databases($d, \@all);
 	}
 
+# Start tabs for various options, if appropriate
+@tabs = ( [ "list", $text{'databases_tablist'} ] );
+if (!$d->{'parent'} && $virtualmin_pro) {
+	push(@tabs, [ "usernames", $text{'databases_tabusernames'} ]);
+	push(@tabs, [ "passwords", $text{'databases_tabpasswords'} ]);
+	}
+if (&can_import_servers()) {
+	push(@tabs, [ "import", $text{'databases_tabimport'} ]);
+	}
+if (@tabs > 1) {
+	print &ui_tabs_start(\@tabs, "databasemode", "list", 1);
+	}
+
 # Create select / add links
 ($dleft, $dreason, $dmax) = &count_feature("dbs");
 @links = ( &select_all_link("d"),
@@ -25,6 +38,7 @@ if ($dleft != 0) {
 	}
 
 # Build and show DB list
+print &ui_tabs_start_tab("databasemode", "list") if (@tabs > 1);
 @dbs = &domain_databases($d);
 if (@dbs) {
 	print &ui_form_start("delete_databases.cgi", "post");
@@ -67,10 +81,11 @@ if (@dbs) {
 if ($dleft == 0) {
 	print &text('databases_noadd'.$dreason, $dmax),"<br>\n";
 	}
+print &ui_tabs_end_tab() if (@tabs > 1);
 
 # Show form to change database usernames
 if (!$d->{'parent'} && $virtualmin_pro) {
-	print "<hr>\n";
+	print &ui_tabs_start_tab("databasemode", "usernames") if (@tabs > 1);
 	print &ui_form_start("save_dbname.cgi");
 	print &ui_hidden("dom", $in{'dom'}),"\n";
 	print &ui_table_start($text{'databases_uheader'}, undef, 2);
@@ -88,11 +103,12 @@ if (!$d->{'parent'} && $virtualmin_pro) {
 
 	print &ui_table_end();
 	print &ui_form_end([ [ "save", $text{'save'} ] ]);
+	print &ui_tabs_end_tab() if (@tabs > 1);
 	}
 
 # Show form to change database passwords
 if (!$d->{'parent'} && $virtualmin_pro) {
-	print "<hr>\n";
+	print &ui_tabs_start_tab("databasemode", "passwords") if (@tabs > 1);
 	print &ui_form_start("save_dbpass.cgi");
 	print &ui_hidden("dom", $in{'dom'}),"\n";
 	print &ui_table_start($text{'databases_pheader'}, undef, 2);
@@ -120,6 +136,7 @@ if (!$d->{'parent'} && $virtualmin_pro) {
 
 	print &ui_table_end();
 	print &ui_form_end([ [ "save", $text{'save'} ] ]);
+	print &ui_tabs_end_tab() if (@tabs > 1);
 	}
 
 # Show database import form, if there are any not owned by any user
@@ -133,7 +150,7 @@ if (&can_import_servers()) {
 		        !$_->{'special'} } @all;
 	@avail = sort { $a->{'name'} cmp $b->{'name'} } @avail;
 	if (@avail) {
-		print "<hr>\n";
+		print &ui_tabs_start_tab("databasemode", "import") if (@tabs > 1);
 		print &ui_form_start("import_database.cgi", "post");
 		print &ui_hidden("dom", $in{'dom'}),"\n";
 		print &ui_table_start($text{'databases_iheader'}, undef, 2);
@@ -146,8 +163,11 @@ if (&can_import_servers()) {
 
 		print &ui_table_end();
 		print &ui_form_end([ [ "ok", $text{'databases_import'} ] ]);
+		print &ui_tabs_end_tab() if (@tabs > 1);
 		}
 	}
+
+print &ui_tabs_end(1) if (@tabs > 1);
 
 &ui_print_footer(&domain_footer_link($d),
 		 "", $text{'index_return'});

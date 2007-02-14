@@ -13,9 +13,14 @@ $d->{'web'} && $d->{'dir'} || &error($text{'scripts_eweb'});
 @scripts = grep { $_->{'avail'} } @allscripts;
 %smap = map { $_->{'name'}, $_ } @allscripts;
 
+# Start tabs for listing and installing
+@tabs = ( [ "existing", $text{'scripts_tabexisting'} ],
+	  [ "new", $text{'scripts_tabnew'} ] );
+print &ui_tabs_start(\@tabs, "scriptsmode", @got ? "existing" : "new", 1);
+
 # Show table of installed scripts (if any)
+print &ui_tabs_start_tab("scriptsmode", "existing");
 if (@got) {
-	print &ui_subheading($text{'scripts_installed'});
 	print $text{'scripts_desc3'},"\n";
 	@tds = ( "width=5" );
 	print &ui_form_start("mass_uninstall.cgi", "post");
@@ -42,12 +47,15 @@ if (@got) {
 	print &ui_columns_end();
 	print &ui_links_row(\@links);
 	print &ui_form_end([ [ "uninstall", $text{'scripts_uninstalls'} ] ]);
-	print "<hr>\n";
 	}
+else {
+	print "<b>$text{'scripts_noexisting'}</b><p>\n";
+	}
+print &ui_tabs_end_tab();
 
 # Show table for installing scripts, by category
+print &ui_tabs_start_tab("scriptsmode", "new");
 if (@scripts) {
-	print &ui_subheading($text{'scripts_available'});
 	print &ui_form_start("script_form.cgi");
 	print &ui_hidden("dom", $in{'dom'}),"\n";
 	@tds = ( "width=5", "nowrap" );
@@ -99,7 +107,14 @@ if (@scripts) {
 	print &ui_columns_end();
 	print &ui_submit($text{'scripts_ok'});
 	print &ui_form_end();
+	print &ui_tabs_end_tab();
 	}
+else {
+	print "<b>$text{'scripts_nonew'}</b><p>\n";
+	}
+print &ui_tabs_end_tab();
+
+print &ui_tabs_end(1);
 
 &ui_print_footer(&domain_footer_link($d),
 		 "", $text{'index_return'});

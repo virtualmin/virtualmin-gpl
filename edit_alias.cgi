@@ -31,12 +31,14 @@ if ($virtualmin_pro && ($in{'new'} || &get_simple_alias($d, $virt))) {
 if ($can_simple) {
 	@tabs = ( [ "simple", $text{'alias_simplemode'} ],
 		  [ "complex", $text{'alias_complexmode'} ] );
-	print &ui_tabs_start(\@tabs, "simplemode", "simple");
+	print &ui_table_start($text{'alias_header'}, "width=100%", 2);
+	print &ui_table_row(
+		undef, &ui_tabs_start(\@tabs, "simplemode", "simple"), 2);
 	}
 else {
 	print &ui_hidden("simplemode", "complex"),"\n";
+	print &ui_table_start($text{'alias_header'}, "width=100%", 2);
 	}
-print &ui_table_start($text{'alias_header'}, "width=100%", 2);
 
 # Alias description
 if ($can_alias_comments) {
@@ -74,7 +76,6 @@ if ($can_simple) {
 if ($can_simple) {
 	print &ui_tabs_end_tabletab();
 	}
-
 print &ui_table_end();
 
 if ($in{'new'}) {
