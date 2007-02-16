@@ -11,6 +11,7 @@ $d = &get_domain($in{'dom'});
 
 print $text{'umass_help'};
 print "<br><tt>$text{'umass_format'}</tt><p>";
+print &text('umass_help2', 'edit_user.cgi?new=1'),"<p>\n";
 
 print &ui_form_start("mass_ucreate.cgi", "form-data");
 print &ui_table_start($text{'umass_header'}, "width=100%", 2);

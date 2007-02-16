@@ -1,6 +1,6 @@
 
 $force_load_features = 1;	# so that the latest feature-* files are used
-require 'virtual-server-lib.pl';
+do 'virtual-server-lib.pl';
 
 sub module_install
 {
