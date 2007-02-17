@@ -320,7 +320,7 @@ if ($fields) {
 # Show checkboxes for features
 print &ui_hidden_table_start($text{'edit_featuresect'}, "width=100%", 2,
 			     "feature", 0);
-$ftable = "<table width=100%>\n";
+@grid = ( );
 $i = 0;
 foreach $f ($aliasdom ? @opt_alias_features :
 	    $subdom ? @opt_subdom_features : @opt_features) {
@@ -340,13 +340,9 @@ foreach $f ($aliasdom ? @opt_alias_features :
 
 	local $txt = $parentdom ? $text{'form_sub'.$f} : undef;
 	$txt ||= $text{'form_'.$f};
-	$ftable .= "<tr>\n" if ($i%2 == 0);
-	$w = $i%2 == 0 ? 30 : 70;
-	$ftable .= "<td width=$w% align=left>".
-		   &ui_checkbox($f, 1, "", $config{$f} == 1, undef,
-			  !$config{$f} && defined($config{$f}))."\n";
-	$ftable .= "<b>".&hlink($txt, $f)."</b></td>";
-	$ftable .= "</tr>\n" if ($i++%2 == 1);
+	push(@grid, &ui_checkbox($f, 1, "", $config{$f} == 1, undef,
+                          !$config{$f} && defined($config{$f}))." ".
+		    "<b>".&hlink($txt, $f)."</b>");
 	}
 
 # Show checkboxes for plugins
@@ -356,18 +352,12 @@ foreach $f (@feature_plugins) {
 	next if (!&can_use_feature($f));
 	next if ($aliasdom && !$aliasdom->{$f});
 
-	$ftable .= "<tr>\n" if ($i%2 == 0);
 	$label = &plugin_call($f, "feature_label", 0);
-	$w = $i%2 == 0 ? 30 : 70;
-	$ftable .= "<td width=$w% align=left>".&ui_checkbox($f, 1, "", 1)."\n";
-	$ftable .= "<b>$label</b></td>\n";
-	$ftable .= "</tr>\n" if ($i++%2 == 1);
+	push(@grid, &ui_checkbox($f, 1, "", 1)." ".
+		    "<b>$label</b>");
 	}
-if ($i%2) {
-	$ftable .= "<td width=30%></td>\n";
-	$ftable .= "</tr>\n";
-	}
-$ftable .= "</table>\n";
+$ftable = &ui_grid_table(\@grid, 2, 100,
+	[ "width=30% align=left", "width=70% align=left" ]);
 print &ui_table_row(undef, $ftable, 4);
 print &ui_hidden_end();
 print &ui_table_end();

@@ -24,8 +24,12 @@ if (!$d->{'parent'} && $virtualmin_pro) {
 if (&can_import_servers()) {
 	push(@tabs, [ "import", $text{'databases_tabimport'} ]);
 	}
+foreach $t (@tabs) {
+	$t->[2] = "list_databases.cgi?dom=$in{'dom'}&databasemode=$t->[0]";
+	}
 if (@tabs > 1) {
-	print &ui_tabs_start(\@tabs, "databasemode", "list", 1);
+	print &ui_tabs_start(\@tabs, "databasemode",
+			     $in{'databasemode'} || "list", 1);
 	}
 
 # Create select / add links

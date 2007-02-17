@@ -8091,7 +8091,19 @@ if (&can_create_sub_servers() && !$d->{'alias'} && $unixer->{'unix'}) {
 	# Domain alias and sub-domain buttons
 	local ($dleft, $dreason, $dmax) = &count_domains("realdoms");
 	local ($aleft, $areason, $amax) = &count_domains("aliasdoms");
+	if ($dleft != 0 && &virtual_server::can_create_master_servers() &&
+	    !$d->{'parent'}) {
+		# Sub-server
+		push(@rv, { 'page' => 'domain_form.cgi',
+			    'title' => $text{'edit_subserv'},
+			    'desc' => &text('edit_subservesc', $d->{'dom'}),
+			    'hidden' => [ [ "parentuser1", $d->{'user'} ],
+					  [ "add1", 1 ] ],
+			    'cat' => 'create',
+			  });
+		}
 	if ($aleft != 0) {
+		# Alias domain 
 		push(@rv, { 'page' => 'domain_form.cgi',
 			    'title' => $text{'edit_alias'},
 			    'desc' => $text{'edit_aliasdesc'},
@@ -8100,6 +8112,7 @@ if (&can_create_sub_servers() && !$d->{'alias'} && $unixer->{'unix'}) {
 			  });
 		}
 	if (!$d->{'subdom'} && $dleft != 0 && $virtualmin_pro) {
+		# Sub-domain
 		push(@rv, { 'page' => 'domain_form.cgi',
 			    'title' => $text{'edit_subdom'},
 			    'desc' => &text('edit_subdomdesc', $d->{'dom'}),

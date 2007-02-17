@@ -29,11 +29,16 @@ if ($virtualmin_pro && ($in{'new'} || &get_simple_alias($d, $virt))) {
 
 # Show tabs
 if ($can_simple) {
-	@tabs = ( [ "simple", $text{'alias_simplemode'} ],
-		  [ "complex", $text{'alias_complexmode'} ] );
+	$prog = "edit_alias.cgi?dom=$in{'dom'}&".
+		($in{'new'} ? "new=1" : "alias=$in{'alias'}");
+	@tabs = ( [ "simple", $text{'alias_simplemode'},
+		    "$prog&simplemode=simple" ],
+		  [ "complex", $text{'alias_complexmode'},
+		    "$prog&simplemode=complex" ] );
 	print &ui_table_start($text{'alias_header'}, "width=100%", 2);
 	print &ui_table_row(
-		undef, &ui_tabs_start(\@tabs, "simplemode", "simple"), 2);
+		undef, &ui_tabs_start(\@tabs, "simplemode",
+			$in{'simplemode'} || "simple"), 2);
 	}
 else {
 	print &ui_hidden("simplemode", "complex"),"\n";

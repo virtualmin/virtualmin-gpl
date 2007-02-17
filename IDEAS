@@ -38,7 +38,5 @@
 
   - ui-lib.pl and templates
 
-  - simple theme for browser access
-
   - re-enable domains when bandwidth falls below some threshold
 

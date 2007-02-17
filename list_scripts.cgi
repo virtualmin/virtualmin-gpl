@@ -14,9 +14,12 @@ $d->{'web'} && $d->{'dir'} || &error($text{'scripts_eweb'});
 %smap = map { $_->{'name'}, $_ } @allscripts;
 
 # Start tabs for listing and installing
-@tabs = ( [ "existing", $text{'scripts_tabexisting'} ],
-	  [ "new", $text{'scripts_tabnew'} ] );
-print &ui_tabs_start(\@tabs, "scriptsmode", @got ? "existing" : "new", 1);
+@tabs = ( [ "existing", $text{'scripts_tabexisting'},
+	    "list_scripts.cgi?dom=$in{'dom'}&scriptsmode=existing" ],
+	  [ "new", $text{'scripts_tabnew'},
+	    "list_scripts.cgi?dom=$in{'dom'}&scriptsmode=new" ] );
+print &ui_tabs_start(\@tabs, "scriptsmode",
+	$in{'scriptsmode'} ? $in{'scriptsmode'} : @got ? "existing" : "new", 1);
 
 # Show table of installed scripts (if any)
 print &ui_tabs_start_tab("scriptsmode", "existing");

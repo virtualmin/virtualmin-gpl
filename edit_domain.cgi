@@ -220,7 +220,10 @@ if (@subdoms) {
 	}
 
 print &ui_table_end();
-if (!$parentdom) {
+$limits_section = !$parentdom &&
+		  (&has_home_quotas() && (&can_edit_quotas() || $d->{'unix'}) ||
+		  $config{'bw_active'});
+if ($limits_section) {
 	# Start of collapsible section for limits
 	print &ui_hidden_table_start($text{'edit_limitsect'}, "width=100%", 2,
 				     "limits", 0);
@@ -266,7 +269,7 @@ if ($config{'bw_active'} && !$parentdom) {
 	&show_domain_bw_usage($d);
 	}
 
-if (!$parentdom) {
+if ($limits_section) {
 	print &ui_hidden_end();
 	print &ui_table_end();
 	}
@@ -296,7 +299,7 @@ if ($d->{'disabled'}) {
 	}
 else {
 	# Show features for this domain
-	$ftable = "<table width=100%>";
+	@grid = ( );
 	$i = 0;
 	@dom_features = $aliasdom ? @opt_alias_features : @opt_features;
 	foreach $f (@dom_features) {
@@ -311,27 +314,23 @@ else {
 
 		# Don't show features that are always enabled, if currently set
 		if ($config{$f} == 3 && $d->{$f}) {
-			$ftable .= &ui_hidden($f, $d->{$f}),"\n";
+			print &ui_hidden($f, $d->{$f}),"\n";
 			next;
 			}
 
-		$ftable .= "<tr>\n" if ($i%2 == 0);
 		local $txt = $parentdom ? $text{'edit_sub'.$f} : undef;
 		$txt ||= $text{'edit_'.$f};
-		$w = $i%2 == 0 ? 30 : 70;
-		$ftable .= "<td width=$w% align=left>";
 		if (!&can_use_feature($f)) {
-			$ftable .= &ui_checkbox($f."_dis", 1, undef,
-						$d->{$f}, undef, 1);
-			$ftable .= &ui_hidden($f, $d->{$f}),"\n";
+			push(@grid, &ui_checkbox($f."_dis", 1, undef,
+						$d->{$f}, undef, 1).
+				    &ui_hidden($f, $d->{$f}).
+				    " <b>".&hlink($txt, $f)."</b>");
 			}
 		else {
-			$ftable .= &ui_checkbox($f, 1, "", $d->{$f}, undef,
-					!$config{$f} && defined($config{$f}));
+			push(@grid, &ui_checkbox($f, 1, "", $d->{$f}, undef,
+					!$config{$f} && defined($config{$f})).
+				    " <b>".&hlink($txt, $f)."</b>");
 			}
-		$ftable .= "<b>".&hlink($txt, $f)."</b>";
-		$ftable .= "</td>\n";
-		$ftable .= "</tr>\n" if ($i++%2 == 1);
 		}
 
 	foreach $f (@feature_plugins) {
@@ -341,23 +340,21 @@ else {
 		next if (!&plugin_call($f, "feature_suitable",
 					$parentdom, $aliasdom, $subdom));
 
-		$ftable .= "<tr>\n" if ($i%2 == 0);
 		$label = &plugin_call($f, "feature_label", 1);
-		$w = $i%2 == 0 ? 30 : 70;
-		$ftable .= "<td width=$w% align=left>";
 		if (!&can_use_feature($f)) {
-			$ftable .= &ui_checkbox($f."_dis", 1, "",
-						       $d->{$f}, undef, 1);
-			$ftable .= &ui_hidden($f, $d->{$f}),"\n";
+			push(@grid, &ui_checkbox($f."_dis", 1, "",
+						 $d->{$f}, undef, 1).
+				    &ui_hidden($f, $d->{$f}).
+				    " <b>$label</b>");
 			}
 		else {
-			$ftable .= &ui_checkbox($f, 1, "", $d->{$f});
+			push(@grid, &ui_checkbox($f, 1, "", $d->{$f}).
+				    " <b>$label</b>");
 			}
-		$ftable .= "<b>$label</b></td>\n";
-		$ftable .= "</tr>\n" if ($i++%2 == 1);
 		}
-	$ftable .= "</table>";
 
+	$ftable = &ui_grid_table(\@grid, 2, 100,
+			[ "width=30% align=left", "width=70% align=left" ]);
 	print &ui_table_row(undef, $ftable, 4);
 	}
 print &ui_hidden_end();

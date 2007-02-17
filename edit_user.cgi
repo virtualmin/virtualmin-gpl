@@ -276,11 +276,15 @@ if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
 		}
 	if ($simple) {
 		# Show simple / advanced tabs
-		@tabs = ( [ "simple", $text{'alias_simplemode'} ],
-			  [ "complex", $text{'alias_complexmode'} ] );
+		$prog = "edit_user.cgi?dom=$in{'dom'}&new=$in{'new'}&".
+			"user=$in{'user'}&unix=$in{'unix'}&web=$in{'web'}";
+		@tabs = ( [ "simple", $text{'alias_simplemode'},
+			    "$prog&simplemode=simple" ],
+			  [ "complex", $text{'alias_complexmode'},
+			    "$prog&simplemode=complex" ] );
 		print &ui_table_row(
-			undef, &ui_tabs_start(\@tabs, "simplemode", "simple"),
-			2);
+			undef, &ui_tabs_start(\@tabs, "simplemode",
+				$in{'simplemode'} || "simple"), 2);
 		}
 	else {
 		print &ui_hidden("simplemode", "complex"),"\n";
@@ -342,8 +346,6 @@ if (@sgroups && $user->{'unix'}) {
 if ($done_section4) {
 	print &ui_table_end();
 	}
-
-print &ui_table_end();
 
 if ($in{'new'}) {
 	print &ui_form_end([ [ "create", $text{'create'} ] ]);
