@@ -517,4 +517,5 @@ Added new pages for easily editing HTML in a virtual server's website.
 PHP and Pear modules needed by script installers are now automatically installed when needed, if supported by the underlying operating system's update service (APT or YUM).
 Added support for enabling Ruby scripts in a virtual server. This can be done on the Website Options page, with the modify-web.pl script, on the mass domain update page, and set by default in server templates. Both execution via mod_ruby and CGI scripts are supported, assuming that the required software is installed.
 Updated the lookup-domain.pl script (which is called from Procmail) to communicate with a permanent server process, rather than performing all processing on its own. This will reduce the load when email to multiple recipients arrives at once.
-Updated the PHProjekt script installer to setup the database configuration automatically.
+Updated the PHProjekt and MediaWiki script installers to setup the database configuration automatically.
+Changed pages with tabs and hidden sections to be usable by the mobile device theme.

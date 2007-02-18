@@ -34,8 +34,6 @@
    created by resellers.
 	- When creating domain, plan can override template.
 
-  - Fix mediawiki script installer to be friendlier
-
   - ui-lib.pl and templates
 
   - re-enable domains when bandwidth falls below some threshold
