@@ -10,8 +10,8 @@ $d->{'web'} && $d->{'dir'} || &error($text{'scripts_eweb'});
 $sname = $in{'script'};
 $ver = $in{'version'};
 $script = &get_script($sname);
+@got = &list_domain_scripts($d);
 if ($in{'upgrade'}) {
-	@got = &list_domain_scripts($d);
 	($sinfo) = grep { $_->{'id'} eq $in{'upgrade'} } @got;
 	}
 else {
@@ -29,6 +29,12 @@ $derr = &{$script->{'depends_func'}}($d, $ver);
 $opts = &{$script->{'parse_func'}}($d, $ver, \%incopy, $sinfo);
 if ($opts && !ref($opts)) {
 	&error($opts);
+	}
+
+# Check for a clash, unless upgrading
+if (!$sinfo) {
+	($clash) = grep { $_->{'opts'}->{'path'} eq $opts->{'path'} } @got;
+	$clash && &error(&text('scripts_eclash', "<tt>$opts->{'dir'}</tt>"));
 	}
 
 # Check options, unless upgrading

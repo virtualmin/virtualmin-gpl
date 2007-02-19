@@ -8595,7 +8595,7 @@ foreach $f (@features) {
 				    $doms[$i]->{'parent'}) {
 					# Disable feature, since the user
 					# will no longer exist
-					$doms[$i]->{'unix'} = 0;
+					$doms[$i]->{$f} = 0;
 					}
 				};
 			if ($@) {

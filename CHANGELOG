@@ -519,3 +519,4 @@ Added support for enabling Ruby scripts in a virtual server. This can be done on
 Updated the lookup-domain.pl script (which is called from Procmail) to communicate with a permanent server process, rather than performing all processing on its own. This will reduce the load when email to multiple recipients arrives at once.
 Updated the PHProjekt and MediaWiki script installers to setup the database configuration automatically.
 Changed pages with tabs and hidden sections to be usable by the mobile device theme.
+Improved detection of multiple scripts being accidentally installed into the same path.

@@ -17,9 +17,6 @@
 
  - Allow domain owners to backup multiple domains at once (aliases,etc)
 
- - Allow creation of user-only account, with no associated domain
-	- For owning sub-domains
-
  - Automatically include alias domains in backups
 
  - Need all bandwidth function for ftp and unix, to handle large FTP log files

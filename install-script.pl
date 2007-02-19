@@ -134,6 +134,12 @@ if (defined(&{$script->{'check_func'}}) && !$sinfo) {
 		}
 	}
 
+# Check for a clash, unless upgrading
+if (!$sinfo) {
+	($clash) = grep { $_->{'opts'}->{'path'} eq $opts->{'path'} } @got;
+	$clash && &usage(&text('scripts_eclash', $opts->{'dir'}));
+	}
+
 # Check dependencies
 &$first_print("Checking dependencies ..");
 $derr = &{$script->{'depends_func'}}($d, $ver);
