@@ -686,6 +686,10 @@ if ($virt) {
 				}
 			}
 		}
+	elsif ($log =~ /^\|/) {
+		# Via some program .. so we don't know where the real log is
+		return undef;
+		}
 	return $log;
 	}
 else {
