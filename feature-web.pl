@@ -198,22 +198,9 @@ if (-d $logsdir && !-e "$logsdir/.nodelete") {
 	&set_ownership_permissions(0, 0, 0700, "$logsdir/.nodelete");
 	}
 
+# Setup for script languages
 if (!$_[0]->{'alias'} && $_[0]->{'dir'}) {
-	if ($tmpl->{'web_php_suexec'} == 1) {
-		# Create cgi wrappers for PHP 4 and 5
-		&save_domain_php_mode($_[0], "cgi");
-		}
-	elsif ($tmpl->{'web_php_suexec'} == 2) {
-		# Add directives for FastCGId
-		&save_domain_php_mode($_[0], "fcgid");
-		}
-
-	if ($tmpl->{'web_ruby_suexec'} >= 0) {
-		# Setup for Ruby
-		&save_domain_ruby_mode($_[0],
-			$tmpl->{'web_ruby_suexec'} == 0 ? "mod_ruby" :
-			$tmpl->{'web_ruby_suexec'} == 1 ? "cgi" : "fcgid");
-		}
+	&add_script_language_directives($_[0], $tmpl, $_[0]->{'web_port'});
 	}
 }
 
@@ -1857,6 +1844,30 @@ else {
 	}
 &flush_file_lines();
 &register_post_action(\&restart_apache);
+}
+
+# add_script_language_directives(&domain, &tmpl, port)
+# Adds directives needed to enable PHP, Ruby and other languages to the
+# <virtualhost> for some new domain.
+sub add_script_language_directives
+{
+local ($d, $tmpl, $port) = @_;
+if ($tmpl->{'web_php_suexec'} == 1) {
+	# Create cgi wrappers for PHP 4 and 5
+	&save_domain_php_mode($d, "cgi", $port);
+	}
+elsif ($tmpl->{'web_php_suexec'} == 2) {
+	# Add directives for FastCGId
+	&save_domain_php_mode($d, "fcgid", $port);
+	}
+
+if ($tmpl->{'web_ruby_suexec'} >= 0) {
+	# Setup for Ruby
+	&save_domain_ruby_mode($d,
+		$tmpl->{'web_ruby_suexec'} == 0 ? "mod_ruby" :
+		$tmpl->{'web_ruby_suexec'} == 1 ? "cgi" : "fcgid",
+		$port);
+	}
 }
 
 $done_feature_script{'web'} = 1;

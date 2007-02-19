@@ -32,16 +32,17 @@ if ($virt) {
 return 'mod_php';
 }
 
-# save_domain_php_mode(&domain, mode)
+# save_domain_php_mode(&domain, mode, [port])
 # Changes the method a virtual web server uses to run PHP.
 sub save_domain_php_mode
 {
-local ($d, $mode) = @_;
+local ($d, $mode, $port) = @_;
 &require_apache();
 local $tmpl = &get_template($d->{'template'});
 local $conf = &apache::get_config();
 local @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+@ports = ( $port ) if ($port);	# Overridden to just do SSL or non-SSL
 local $fdest = "$d->{'home'}/fcgi-bin";
 foreach my $p (@ports) {
 	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);

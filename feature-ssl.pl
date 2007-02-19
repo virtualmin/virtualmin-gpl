@@ -84,6 +84,8 @@ push(@$lref, "<VirtualHost $_[0]->{'ip'}:$web_sslport>");
 push(@$lref, @dirs);
 push(@$lref, "</VirtualHost>");
 &flush_file_lines($f);
+&unlock_file($f);
+undef(@apache::get_config_cache);
 
 # Update the non-SSL virtualhost to include the port number, to fix old
 # hosts that were missing the :80
@@ -111,8 +113,11 @@ if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin") &&
 		      \&restart_usermin);
 	}
 
-&unlock_file($f);
-undef(@apache::get_config_cache);
+# Setup for script languages
+if (!$_[0]->{'alias'} && $_[0]->{'dir'}) {
+	&add_script_language_directives($_[0], $tmpl, $web_sslport);
+	}
+
 &$second_print($text{'setup_done'});
 &register_post_action(\&restart_apache, 1);
 $_[0]->{'web_sslport'} = $web_sslport;

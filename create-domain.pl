@@ -59,8 +59,10 @@ while(@ARGV > 0) {
 		$ip = shift(@ARGV);
 		if (!$config{'all_namevirtual'}) {
 			$feature{'virt'} = 1;	# for dependency checks
-			$virtalready = 1;
 			$virt = 1;
+			}
+		else {
+			$virtalready = 1;
 			}
 		$name = 0;
 		}
