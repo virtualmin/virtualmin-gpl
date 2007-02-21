@@ -1,5 +1,4 @@
 # Functions for talking to Amazon's S3 service
-# XXX update wiki
 
 @s3_perl_modules = ( "S3::AWSAuthConnection", "S3::QueryStringAuthGenerator" );
 

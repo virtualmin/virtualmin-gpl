@@ -1,7 +1,5 @@
 # Functions for PHP configuration
 
-@all_possible_php_versions = (4, 5);
-
 # get_domain_php_mode(&domain)
 # Returns 'mod_php' if PHP is run via Apache's mod_php, 'cgi' if run via
 # a CGI script, 'fcgi' if run via fastCGI. This is detected by looking for the

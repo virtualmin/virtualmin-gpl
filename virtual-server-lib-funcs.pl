@@ -1,4 +1,27 @@
 
+# Work out where our extra -lib.pl files are, and load them
+$virtual_server_root = $module_root_directory;
+if (!$virtual_server_root) {
+	foreach my $i (keys %INC) {
+		if ($i =~ /^(.*)\/virtual-server-lib-funcs.pl$/) {
+			$virtual_server_root = $1;
+			}
+		}
+	}
+if (!$virtual_server_root) {
+	$0 =~ /^(.*)\//;
+	$virtual_server_root = "$1/virtual-server";
+	}
+foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
+		 "php", "ruby") {
+	if (-r "$virtual_server_root/$lib-lib.pl") {
+		do "$virtual_server_root/$lib-lib.pl";
+		if ($@) {
+			print STDERR "failed to load $lib-lib.pl : $@\n";
+			}
+		}
+	}
+
 # require_useradmin([no-quotas])
 sub require_useradmin
 {

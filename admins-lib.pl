@@ -1,7 +1,5 @@
 # Functions for managing extra admins
 
-$extra_admins_dir = "$module_config_directory/admins";
-
 # list_extra_admins(&domain)
 # Returns a list of extra admins for some domain
 sub list_extra_admins

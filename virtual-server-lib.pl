@@ -171,14 +171,12 @@ $plainpass_dir = "$module_config_directory/plainpass";
 
 $template_scripts_dir = "$module_config_directory/template-scripts";
 
-foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
-		 "php", "ruby") {
-	if (-r "$module_root_directory/$lib-lib.pl") {
-		do "$module_root_directory/$lib-lib.pl";
-		}
-	}
-
 $domains_dir = "$module_config_directory/domains";
 $templates_dir = "$module_config_directory/templates";
 $domainnames_dir = "$module_config_directory/names";
 $spamclear_file = "$module_config_directory/spamclear";
+
+$extra_admins_dir = "$module_config_directory/admins";
+@all_possible_php_versions = (4, 5);
+@s3_perl_modules = ( "S3::AWSAuthConnection", "S3::QueryStringAuthGenerator" );
+
