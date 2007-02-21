@@ -48,3 +48,5 @@
   - m. suffix for mobile theme (add to DNS)
 	- enable theme always in .spec
 
+  - preload *-lib.pl files
+

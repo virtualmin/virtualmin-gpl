@@ -215,9 +215,11 @@ sub delete_domain
 # If domain is omitted, returns local users.
 sub list_domain_users
 {
+local ($d, $skipunix, $novirts, $noquotas, $nodbs) = @_;
+
 # Get all aliases (and maybe generics) to look for those that match users
 local (%aliases, %generics);
-if ($config{'mail'} && !$_[2]) {
+if ($config{'mail'} && !$novirts) {
 	&require_mail();
 	if ($config{'mail_system'} == 1) {
 		# Find Sendmail aliases for users
@@ -355,27 +357,38 @@ ins\//);
 	# Find users with broken home dir
 	foreach my $u (@users) {
 		if ($u->{'home'} &&
-		    $u->{'home'} !~ /^$_[0]->{'home'}\/$config{'homes_dir'}\// &&
-		    !&is_under_directory($_[0]->{'home'}, $u->{'home'})) {
+		    $u->{'home'} !~ /^$d->{'home'}\/$config{'homes_dir'}\// &&
+		    !&is_under_directory($d->{'home'}, $u->{'home'})) {
 			$u->{'brokenhome'} = 1;
 			}
 		}
 
 	# Merge in plain text passwords
-	local %plain;
-	&read_file("$plainpass_dir/$_[0]->{'id'}", \%plain);
+	local (%plain, $need_plainpass_save);
+	&read_file("$plainpass_dir/$d->{'id'}", \%plain);
 	foreach my $u (@users) {
 		if (!defined($u->{'plainpass'}) &&
 		    defined($plain{$u->{'user'}})) {
 			# Check if the plain password is valid, in case the
 			# crypted password was changed behind our back
-			if (&encrypt_user_password($u, $plain{$u->{'user'}}) eq
+			if ($plain{$u->{'user'}." encrypted"} eq $u->{'pass'} ||
+			    &encrypt_user_password($u, $plain{$u->{'user'}}) eq
 			    $u->{'pass'} ||
 			    &unix_crypt($plain{$u->{'user'}}, $u->{'pass'}) eq
 			    $u->{'pass'}) {
+				# Valid - we can use it
 				$u->{'plainpass'} = $plain{$u->{'user'}};
+				if (!defined($plain{$u->{'user'}." encrypted"})) {
+					# Save the correct crypted version now
+					$plain{$u->{'user'}." encrypted"} =
+						$u->{'pass'};
+					$need_plainpass_save = 1;
+					}
 				}
 			}
+		}
+	if ($need_plainpass_save) {
+		&write_file("$plainpass_dir/$d->{'id'}", \%plain);
 		}
 	}
 else {
@@ -764,6 +777,7 @@ local %plain;
 mkdir($plainpass_dir, 0700);
 &read_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
 $plain{$_[0]->{'user'}} = $_[0]->{'plainpass'};
+$plain{$_[0]->{'user'}." encrypted"} = $_[0]->{'pass'};
 &write_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
 
 # Set the user's Usermin IMAP password
@@ -1150,9 +1164,14 @@ if (!$_[0]->{'domainowner'}) {
 	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 		$plain{$_[0]->{'user'}} = $plain{$_[1]->{'user'}};
 		delete($plain{$_[1]->{'user'}});
+		$plain{$_[0]->{'user'}." encrypted"} =
+			$plain{$_[1]->{'user'}." encrypted"};
+		delete($plain{$_[1]->{'user'}." encrypted"});
 		}
-	$plain{$_[0]->{'user'}} = $_[0]->{'plainpass'}
-		if (defined($_[0]->{'plainpass'}));
+	if (defined($_[0]->{'plainpass'})) {
+		$plain{$_[0]->{'user'}} = $_[0]->{'plainpass'};
+		$plain{$_[0]->{'user'}." encrypted"} = $_[0]->{'pass'};
+		}
 	&write_file("$plainpass_dir/$_[2]->{'id'}", \%plain);
 	}
 
@@ -1308,6 +1327,7 @@ local %plain;
 mkdir($plainpass_dir, 0700);
 &read_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
 delete($plain{$_[0]->{'user'}});
+delete($plain{$_[0]->{'user'}." encrypted"});
 &write_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
 }
 

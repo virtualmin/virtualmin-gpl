@@ -26,7 +26,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--pass") {
 		$pass = shift(@ARGV);
 		}
-	elsif ($a eq "--real") {
+	elsif ($a eq "--real" || $a eq "--desc") {
 		$real = shift(@ARGV);
 		}
 	elsif ($a eq "--ftp") {
@@ -68,6 +68,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--home") {
 		$home = shift(@ARGV);
+		}
+	else {
+		&usage();
 		}
 	}
 $domain && $username && $pass || &usage();
