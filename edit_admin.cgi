@@ -96,7 +96,9 @@ if ($in{'new'}) {
 	}
 else {
 	print &ui_form_end([ [ "save", $text{'save'} ],
-			     [ "delete", $text{'delete'} ] ]);
+			     [ "delete", $text{'delete'} ],
+			     &can_switch_user($d) ?
+			       ( [ "switch", $text{'admin_switch'} ] ) : ( ) ]);
 	}
 
 &ui_print_footer("list_admins.cgi?dom=$d->{'id'}", $text{'admins_return'},

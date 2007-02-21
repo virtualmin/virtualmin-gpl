@@ -18,8 +18,12 @@ elsif ($type eq "users") {
 elsif ($type eq "alias") {
 	return &text('log_'.$action.'_alias', "<tt>$object</tt>");
 	}
+elsif ($type eq "admin") {
+	return &text('log_'.$action.'_admin', "<tt>$object</tt>");
+	}
 elsif ($type eq "aliases") {
-	return &text('log_'.$action.'_aliases', $object,"<tt>$p->{'dom'}</tt>");
+	return &text('log_'.$action.'_aliases', $object,
+		     "<tt>$p->{'dom'}</tt>");
 	}
 elsif ($type eq "domain") {
 	return &text('log_'.$action.'_domain', "<tt>$object</tt>");

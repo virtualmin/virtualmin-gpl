@@ -18,7 +18,19 @@ else {
 	$admin = { };
 	}
 
-if ($in{'delete'}) {
+if ($in{'switch'}) {
+	# Special case - switch to this Webmin user
+	&ui_print_header(&domain_in($d), $text{'admin_title2'}, "");
+	print &text('admin_switching', "<tt>$in{'old'}</tt>"),"<p>\n";
+	print "<script>\n";
+	print "var w = window;\n";
+	print "while(w.parent && w.parent != w) { w = w.parent; }\n";
+	print "w.location = \"switch_user.cgi?dom=$in{'dom'}&admin=$in{'old'}\";\n";
+	print "</script>\n";
+	&ui_print_footer();
+	exit;
+	}
+elsif ($in{'delete'}) {
 	# Just delete him
 	&delete_extra_admin($admin, $d);
 	}

@@ -1897,8 +1897,7 @@ sub can_switch_user
 {
 local ($d) = @_;
 return $virtualmin_pro &&
-       (&master_admin() ||
-        &reseller_admin() && &can_config_domain($d));
+       (&master_admin() || &can_edit_domain($d));
 }
 
 # domains_table(&domains, [checkboxes])

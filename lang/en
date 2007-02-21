@@ -1482,6 +1482,10 @@ log_delete_domains=Deleted $1 virtual servers
 log_modify_domains=Updated $1 virtual servers
 log_quotacheck=Checked disk quotas
 log_delete_templates=Deleted $1 server templates
+log_create_admin=Created extra administrator $1
+log_delete_admin=Deleted extra administrator $1
+log_modify_admin=Modified extra administrator $1
+log_switch_admin=Switched to extra administrator $1
 
 backup_title=Backup Virtual Servers
 backup_title2=Scheduled Backup
@@ -2725,6 +2729,8 @@ admin_eclash=An extra administrator or Webmin user with the same name already ex
 admin_create=Can create virtual servers?
 admin_features=Can configure server features?
 admin_modules=Can access other Webmin modules?
+admin_switch=Switch to Extra Admin
+admin_switching=Switching to extra admin $1 ..
 
 dadmins_err=Failed to delete extra administrators
 dadmins_enone=None selected
@@ -3027,6 +3033,7 @@ tdelete_err=Failed to delete templates
 tdelete_enone=None selected
 
 switch_ecannot=You are not allowed to switch to the admin of this domain
+switch_eadmin=The specified extra administrator does not exist!
 
 newlinks_title=Custom Links
 newlinks_descr=This form can be used to create links that are available on the left menu when a virtual server is selected.

@@ -38,4 +38,12 @@
   - use DenyGroups in SSH config to deny domain owner logins
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=643
 	- create a group, and add all denied members to it
-	
+
+  - SSL on primary IP address for one domain
+
+  - Allow creation of name-based domains on existing IPs
+
+  - Capability grids for extra admins and limits
+
+  - No need for table in mobile theme header
+

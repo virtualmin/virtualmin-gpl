@@ -43,7 +43,7 @@ if (defined(&$phpvfunc)) {
 	@gotvers = grep { local $v = $_; local $_;
 			  &check_php_version($d, $v) } @vers;
 	if (!@gotvers) {
-		print &text('scripts_ephpvers', join(" ", @vers)),"\n";
+		print &text('scripts_ephpvers', join(" or ", @vers)),"\n";
 		$ok = 0;
 		}
 	}

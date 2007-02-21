@@ -158,7 +158,7 @@ if (defined(&$phpvfunc)) {
 	@vers = &$phpvfunc($d, $ver);
 	$phpver = &setup_php_version($d, \@vers, $opts->{'path'});
 	if (!$phpver) {
-		&$second_print(".. version ",join(" ", @vers),
+		&$second_print(".. version ",join(" or ", @vers),
 			       " of PHP is required, but not available");
 		exit(1);
 		}

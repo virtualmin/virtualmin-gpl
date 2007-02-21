@@ -74,6 +74,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--ip-already") {
 		$virtalready = 1;
 		}
+	elsif ($a eq "--ip-primary") {
+		$virtalready = 2;
+		$virt = 1;
+		$feature{'virt'} = 1;   # for dependency checks
+		$name = 1;		# the non-SSL vhost has to be name-based
+		}
 	elsif ($a eq "--mailboxlimit" || $a eq "--max-mailboxes") {
 		$mailboxlimit = shift(@ARGV);
 		}
@@ -144,7 +150,14 @@ while(@ARGV > 0) {
 $template = 0 if ($template eq "");
 $tmpl = &get_template($template);
 
-if ($ip eq "allocate") {
+if ($virtalready == 2) {
+	# IP is the system's primary interface
+	$ip eq "allocate" &&
+		&usage("The --ip-primary option overrides --allocate-ip");
+	$ip && &usage("The --ip-primary option overrides --ip");
+	$ip = &get_default_ip();
+	}
+elsif ($ip eq "allocate") {
 	# Allocate IP now
 	$virtalready && &usage("The --ip-already and --allocate-ip options are incompatible");
 	%racl = $resel ? &get_reseller_acl($resel) : ();
@@ -236,7 +249,7 @@ if (!$parent) {
 	if ($uerr) {
 		&usage(&text('setup_eusername', $user, $uerr));
 		}
-	$user =~ /^[^\t :]+$/ || &error($text{'setup_euser2'});
+	$user =~ /^[^\t :]+$/ || &usage($text{'setup_euser2'});
 	}
 
 # Validate quotas
@@ -268,9 +281,17 @@ if (!$alias) {
 		if ($virtalready) {
 			# Make sure IP is already active
 			$clash || &usage(&text('setup_evirtclash2'));
-			local $already = &get_domain_by("ip", $ip);
-			$already && &error(&text('setup_evirtclash4',
+			if ($virtalready == 1) {
+				# Don't allow clash with another domain
+				local $already = &get_domain_by("ip", $ip);
+				$already && &usage(&text('setup_evirtclash4',
 						 $already->{'dom'}));
+				}
+			else {
+				# The system's PRIMARY ip is being used by
+				# this domain, so we can host a single SSL
+				# virtual host on it.
+				}
 			}
 		else {
 			# Make sure the IP isn't assigned yet

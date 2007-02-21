@@ -59,6 +59,8 @@ if ($_[0]->{'alias'} && $tmpl->{'web_alias'} == 1) {
 	}
 else {
 	# Add the actual <VirtualHost>
+	# We use a * for the address for name-based servers under Apache 2,
+	# if NameVirtualHost * exists.
 	local $vip = $_[0]->{'name'} &&
 		     $apache::httpd_modules{'core'} >= 1.312 &&
 		     $nvstar ? "*" : $_[0]->{'ip'};
