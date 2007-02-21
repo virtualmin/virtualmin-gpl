@@ -384,9 +384,8 @@ if ($can_feature{'mail'} && !$aliasdom && !$subdom) {
 $resel = $parentdom ? $parentdom->{'reseller'} :
 	 &reseller_admin() ? $base_remote_user : undef;
 if (!$aliasdom && &can_use_feature("virt")) {
-	$defip = &get_default_ip($resel);
 	print &ui_table_row(&hlink($text{'form_iface'}, "iface"),
-		&virtual_ip_input(\@cantmpls),
+		&virtual_ip_input(\@cantmpls, $resel),
 		undef, \@tds);
 	}
 

@@ -128,12 +128,12 @@ local ($active) = grep { $_->{'address'} eq $_[0] } @active;
 return $active || $boot;
 }
 
-# virtual_ip_input(&templates)
+# virtual_ip_input(&templates, [reseller])
 # Returns HTML for selecting a virtual IP mode for a new server, or not
 sub virtual_ip_input
 {
-local ($tmpls) = @_;
-local $defip = &get_default_ip();
+local ($tmpls, $resel) = @_;
+local $defip = &get_default_ip($resel);
 if ($config{'all_namevirtual'}) {
 	# Always name-based, but on varying IP
 	return &ui_textbox("ip", $defip, 20);

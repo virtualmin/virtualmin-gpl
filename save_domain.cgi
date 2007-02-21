@@ -219,8 +219,8 @@ elsif ($in{'virt'} && !$d->{'virt'}) {
 	&setup_virt($d);
 	}
 elsif (!$in{'virt'} && $d->{'virt'}) {
-	# Need to take down IP
-	$d->{'ip'} = &get_default_ip();
+	# Need to take down IP, and revert to default
+	$d->{'ip'} = &get_default_ip($d->{'reseller'});
 	$d->{'virt'} = 0;
 	$d->{'name'} = 1;
 	delete($d->{'dns_ip'});

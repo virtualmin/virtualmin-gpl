@@ -301,7 +301,8 @@ else {
 	# Show features for this domain
 	@grid = ( );
 	$i = 0;
-	@dom_features = $aliasdom ? @opt_alias_features : @opt_features;
+	@dom_features = $aliasdom ? @opt_alias_features :
+			$subdom ? @opt_subdom_features : @opt_features;
 	foreach $f (@dom_features) {
 		# Webmin feature is not needed for sub-servers
 		next if ($d->{'parent'} && $f eq "webmin");
