@@ -522,3 +522,4 @@ Changed pages with tabs and hidden sections to be usable by the mobile device th
 Improved detection of multiple scripts being accidentally installed into the same path.
 Updated DaDaBiK script installer to version 4.2.
 Added a button to the Edit Extra Administrator page for switching to his Webmin login without needing to know the password.
+Added the --primary-ip option to create-domain.pl, to create an SSL domain on the primary IP.
