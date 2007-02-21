@@ -84,21 +84,17 @@ foreach $f (@feature_plugins) {
 print &ui_table_hr();
 
 # Capabilities when editing a server
-$etable = "<table>\n";
-$i = 0;
+@grid = ( );
 foreach $ed (@edit_limits) {
-	$etable .= "<tr>\n" if ($i%2 == 0);
-	$etable .= "<td>".&ui_checkbox("edit", $ed, $text{'limits_edit_'.$ed} || $ed, $d->{"edit_$ed"})."</td>";
-	$etable .= "</tr>\n" if ($i++%2 == 1);
+	push(@grid, &ui_checkbox("edit", $ed, $text{'limits_edit_'.$ed} || $ed, $d->{"edit_$ed"}));
 	}
-$etable .= "</table>\n";
+$etable .= &ui_grid_table(\@grid, 2);
 print &ui_table_row(&hlink($text{'limits_edit'}, "limits_edit"), $etable);
 
 print &ui_table_hr();
 
 # Allowed features
-$ftable = "<table>";
-$i = 0;
+@grid = ( );
 foreach $f (@opt_features, "virt") {
 	next if (!&can_use_feature($f));
 	if ($config{$f} == 3) {
@@ -106,17 +102,13 @@ foreach $f (@opt_features, "virt") {
 		# bother showing it here
 		next;
 		}
-	$ftable .= "<tr>\n" if ($i%2 == 0);
-	$ftable .= "<td>".&ui_checkbox("features", $f, $text{'feature_'.$f} || $f, $d->{"limit_$f"})."</td>";
-	$ftable .= "</tr>\n" if ($i++%2 == 1);
+	push(@grid, &ui_checkbox("features", $f, $text{'feature_'.$f} || $f, $d->{"limit_$f"}));
 	}
 foreach $f (@feature_plugins) {
 	next if (!&can_use_feature($f));
-	$ftable .= "<tr>\n" if ($i%2 == 0);
-	$ftable .= "<td>".&ui_checkbox("features", $f, &plugin_call($f, "feature_name"), $d->{"limit_$f"})."</td>";
-	$ftable .= "</tr>\n" if ($i++%2 == 1);
+	push(@grid, &ui_checkbox("features", $f, &plugin_call($f, "feature_name"), $d->{"limit_$f"}));
 	}
-$ftable .= "</table>\n";
+$ftable = &ui_grid_table(\@grid, 2);
 print &ui_table_row(&hlink($text{'limits_features'}, "limits_features"),
 		    $ftable);
 

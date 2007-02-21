@@ -41,10 +41,5 @@
 
   - Allow creation of name-based domains on existing IPs
 
-  - Capability grids for extra admins and limits
-
   - No need for table in mobile theme header
-
-  - m. suffix for mobile theme (add to DNS)
-	- enable theme always in .spec
 

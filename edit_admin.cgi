@@ -80,14 +80,11 @@ print &ui_table_row(&hlink($text{'admin_modules'}, "admin_modules"),
 		    &ui_yesno_radio("modules", int($admin->{'modules'})));
 
 # Capabilities when editing a server
-$etable = "<table>\n";
-$i = 0;
+@grid = ( );
 foreach $ed (@edit_limits) {
-	$etable .= "<tr>\n" if ($i%2 == 0);
-	$etable .= "<td>".&ui_checkbox("edit", $ed, $text{'limits_edit_'.$ed} || $ed, $admin->{"edit_$ed"})."</td>";
-	$etable .= "</tr>\n" if ($i++%2 == 1);
+	push(@grid, &ui_checkbox("edit", $ed, $text{'limits_edit_'.$ed} || $ed, $admin->{"edit_$ed"}));
 	}
-$etable .= "</table>\n";
+$etable .= &ui_grid_table(\@grid, 2);
 print &ui_table_row(&hlink($text{'limits_edit'}, "admin_edit"), $etable);
 
 print &ui_table_end();
