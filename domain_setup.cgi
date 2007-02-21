@@ -262,8 +262,9 @@ if (!$parentuser) {
 		}
 	&set_capabilities_from_template(\%dom, $tmpl);
 	}
-$dom{'emailto'} = $dom{'email'} ||
-		  $dom{'user'}.'@'.&get_system_hostname();
+$dom{'emailto'} = $dom{'email'} ? $dom{'email'} :
+		  $dom{'mail'} ? $dom{'user'}.'@'.$dom{'dom'} :
+		  		 $dom{'user'}.'@'.&get_system_hostname();
 if ($in{'db_def'} || !&database_feature() || !&can_edit_databases() ||
     $aliasdom || $subdom) {
 	# Database name is automatic (or not even used, in the case of alias

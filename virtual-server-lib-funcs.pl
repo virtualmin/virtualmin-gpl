@@ -171,8 +171,9 @@ if (!defined($dom->{'db_postgres'}) && $dom->{'postgres'}) {
 	}
 $dom->{'db_postgres'} = join(" ", &unique(split(/\s+/, $dom->{'db_postgres'})));
 # This is a computed field
-$dom->{'emailto'} = $dom->{'email'} ||
-		  $dom->{'user'}.'@'.&get_system_hostname();
+$dom->{'emailto'} = $dom->{'email'} ? $dom->{'email'} :
+		    $dom->{'mail'} ? $dom->{'user'}.'@'.$dom->{'dom'} :
+		  		     $dom->{'user'}.'@'.&get_system_hostname();
 # Set edit limits based on ability to edit domains
 foreach my $ed (@edit_limits) {
 	if (!defined($dom->{'edit_'.$ed})) {
