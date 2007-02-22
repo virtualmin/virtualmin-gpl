@@ -552,6 +552,8 @@ if (!$tmpl->{'dns_replace'}) {
 			      "IN", "A", $ip);
 	&bind8::create_record($file, "ftp.$withdot", undef,
 			      "IN", "A", $ip);
+	&bind8::create_record($file, "m.$withdot", undef,
+			      "IN", "A", $ip);
 	if ($d->{'mail'}) {
 		# For mail domains, add MX to this server
 		&create_mx_records($file, $d, $ip);
