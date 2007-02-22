@@ -112,6 +112,15 @@ if (defined(@vbs)) {
 &unlock_file($module_config_file);
 &webmin_log("sched", $what);
 
-# Return to main menu
-&redirect("");
+# Show nice confirmation page
+&ui_print_header(undef, $text{'backup_title2'}, "");
 
+if ($in{'enabled'}) {
+	print &text($in{'all'} == 1 ? 'backup_senabled1' : 'backup_senabled0',
+		    scalar(@doms)),"<p>\n";
+	}
+else {
+	print $text{'backup_sdisabled'},"<p>\n";
+	}
+
+&ui_print_footer("", $text{'index_return'});

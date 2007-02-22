@@ -4568,7 +4568,8 @@ local @rv;
 if ($_[0] =~ /^ftp:\/\/([^:]*):([^\@]*)\@([^\/:]+)(:\d+)?:?(\/.*)$/) {
 	@rv = (1, $1, $2, $3, $5, $4 ? substr($4, 1) : 21);
 	}
-elsif ($_[0] =~ /^ssh:\/\/([^:]*):([^\@]*)\@([^\/]+)(:\d+)?:?(\/.*)$/) {
+elsif ($_[0] =~ /^ssh:\/\/([^:]*):([^\@]*)\@([^\/:]+)(:\d+)?:?(\/.*)$/ ||
+       $_[0] =~ /^ssh:\/\/([^:]*):([^\@]*)\@([^\/:]+)(:\d+)?:(.+)$/) {
 	@rv = (2, $1, $2, $3, $5, $4 ? substr($4, 1) : 22);
 	}
 elsif ($_[0] =~ /^s3:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
@@ -4734,10 +4735,10 @@ elsif ($mode == 2) {
 	local ($server, $port) = split(/:/, $in{"$_[0]_sserver"});
 	gethostbyname($server) || &error($text{'backup_eserver2'});
 	$port =~ /^\d*$/ || &error($text{'backup_eport'});
-	$in{"$_[0]_spath"} =~ /^\/\S/ || &error($text{'backup_epath'});
-	$in{"$_[0]_suser"} =~ /^[^:\@\/]*$/ || &error($text{'backup_euser'});
+	$in{"$_[0]_spath"} =~ /\S/ || &error($text{'backup_epath'});
+	$in{"$_[0]_suser"} =~ /^[^:\@\/]*$/ || &error($text{'backup_euser2'});
 	return "ssh://".$in{"$_[0]_suser"}.":".$in{"$_[0]_spass"}."\@".
-	       $in{"$_[0]_sserver"}.$in{"$_[0]_spath"};
+	       $in{"$_[0]_sserver"}.":".$in{"$_[0]_spath"};
 	}
 elsif ($mode == 3 && &can_use_s3()) {
 	# Amazon S3 service
