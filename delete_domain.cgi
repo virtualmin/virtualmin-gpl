@@ -86,8 +86,8 @@ else {
 	&error($err) if ($err);
 
 	# Call any theme post command
-	if (defined(&theme_post_save_domain, 'delete')) {
-		&theme_post_save_domain(\%dom);
+	if (defined(&theme_post_save_domain)) {
+		&theme_post_save_domain(\%dom, 'delete');
 		}
 
 	&webmin_log("delete", "domain", $d->{'dom'}, $d);

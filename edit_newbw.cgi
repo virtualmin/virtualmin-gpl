@@ -47,6 +47,11 @@ print &ui_table_row(&hlink($text{'newbw_disable'}, "bandwidth_bw_disable"),
 		    &ui_radio("bw_disable", $config{'bw_disable'} ? 1 : 0,
 			      [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
+# Show field for re-enable option
+print &ui_table_row(&hlink($text{'newbw_enable'}, "bandwidth_bw_enable"),
+		    &ui_radio("bw_enable", $config{'bw_enable'} ? 1 : 0,
+			      [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+
 # Show email for domains over limit
 $file = $config{'bw_template'};
 $file = "$module_config_directory/bw-template" if ($file eq "default");

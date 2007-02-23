@@ -180,7 +180,6 @@ foreach $d (@doms) {
 			&set_domain_envs($d, "DISABLE_DOMAIN");
 			&made_changes();
 			&reset_domain_envs($d);
-			&webmin_log("disable", "domain", $d->{'dom'}, $d);
 			}
 		}
 	elsif ($d->{'bw_limit'} && $config{'bw_warn'} &&
@@ -217,6 +216,47 @@ foreach $d (@doms) {
 				print STDERR "Failed to send email : $erv[1]\n";
 				}
 			}
+		}
+
+	if ($config{'bw_enable'} &&
+	    ($usage < $d->{'bw_limit'} || !$d->{'bw_limit'}) &&
+	    $d->{'disabled'} && $d->{'disabled_reason'} eq 'bw') {
+		# Falled below the disable limit .. re-enable
+		&set_all_null_print();
+		@enable = &get_enable_features($d);
+		%enable = map { $_, 1 } @enable;
+
+		# Run the before command
+		&set_domain_envs($d, "ENABLE_DOMAIN");
+		$merr = &making_changes();
+		&reset_domain_envs($d);
+		next if ($merr);
+
+		# Enable all disabled features
+		my $f;
+		foreach $f (@features) {
+			if ($d->{$f} && $enable{$f}) {
+				local $efunc = "enable_$f";
+				&try_function($f, $efunc, $d);
+				}
+			}
+		foreach $f (@feature_plugins) {
+			if ($d->{$f} && $enable{$f}) {
+				&plugin_call($f, "feature_enable", $d);
+				}
+			}
+
+		# Save new domain details
+		delete($d->{'disabled'});
+		delete($d->{'disabled_reason'});
+		delete($d->{'disabled_why'});
+		&save_domain($d);
+
+		# Run the after command
+		&run_post_actions();
+		&set_domain_envs($d, "ENABLE_DOMAIN");
+		&made_changes();
+		&reset_domain_envs($d);
 		}
 	&save_domain($d);
 	}

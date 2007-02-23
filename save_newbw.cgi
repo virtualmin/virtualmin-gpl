@@ -31,6 +31,7 @@ $config{'bw_notify'} = $in{'bw_notify'};
 $config{'bw_owner'} = $in{'bw_owner'};
 $config{'bw_email'} = $in{'bw_email'};
 $config{'bw_disable'} = $in{'bw_disable'};
+$config{'bw_enable'} = $in{'bw_enable'};
 $config{'bw_warn'} = $in{'bw_warn'} ? $in{'bw_warnlevel'} : undef;
 $config{'bw_ftplog'} = $in{'ftplog_def'} ? undef : $in{'ftplog'};
 $config{'bw_ftplog_rotated'} = $in{'ftplog_rotated'};

@@ -171,18 +171,18 @@ if (!$parentdom) {
 	}
 
 # Show active features
-print &ui_hidden_table_start($text{'edit_featuresect'}, "width=100%", 2,
-			     "feature", 0);
 if ($d->{'disabled'}) {
-	$featmsg = "<font color=#ff0000>".
-		   $text{'edit_disabled_'.$d->{'disabled_reason'}}." ".
-		   $text{'edit_disabled'}."\n".
-	           ($d->{'disabled_why'} ?
-		      "<br>".&text('edit_disabled_why', $d->{'disabled_why'}) :
-		      "").
-		   "</font>";
+	print "<font color=#ff0000>".
+	      $text{'edit_disabled_'.$d->{'disabled_reason'}}." ".
+	      $text{'edit_disabled'}."\n".
+	      ($d->{'disabled_why'} ?
+	        "<br>".&text('edit_disabled_why', $d->{'disabled_why'}) :
+	       "").
+	      "</font>";
 	}
 else {
+	print &ui_hidden_table_start($text{'edit_featuresect'}, "width=100%", 2,
+				     "feature", 0);
 	$featmsg = "<table width=100%>\n";
 	$i = 0;
 	foreach $f (@features, @feature_plugins) {
@@ -196,11 +196,10 @@ else {
 			}
 		}
 	$featmsg .= "</table>\n";
+	print &ui_table_row(undef, $featmsg);
+	print &ui_hidden_end();
+	print &ui_table_end();
 	}
-print &ui_table_row(undef, $featmsg);
-
-print &ui_hidden_end();
-print &ui_table_end();
 
 # Show actions for this domain, unless the theme vetos it (cause they are on
 # the left menu)

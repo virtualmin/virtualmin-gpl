@@ -286,20 +286,19 @@ if ($fields) {
 	}
 
 # Show buttons for turning features on and off (if allowed)
-print &ui_hidden_table_start($text{'edit_featuresect'}, "width=100%", 2,
-			     "feature", 0);
 if ($d->{'disabled'}) {
 	# Disabled, so tell the user that features cannot be changed
-	print &ui_table_row(undef,
-	      "&nbsp;<br><font color=#ff0000>".
+	print "<font color=#ff0000>".
 	      "<b>".$text{'edit_disabled_'.$d->{'disabled_reason'}}."\n".
 	      $text{'edit_disabled'}."<br>".
 	      ($d->{'disabled_why'} ?
 		&text('edit_disabled_why', $d->{'disabled_why'}) : "").
-	      "</b></font><br>&nbsp;</td>", 4);
+	      "</b></font>\n";
 	}
 else {
 	# Show features for this domain
+	print &ui_hidden_table_start($text{'edit_featuresect'}, "width=100%", 2,
+				     "feature", 0);
 	@grid = ( );
 	$i = 0;
 	@dom_features = $aliasdom ? @opt_alias_features :
@@ -358,9 +357,9 @@ else {
 	$ftable = &ui_grid_table(\@grid, 2, 100,
 			[ "width=30% align=left", "width=70% align=left" ]);
 	print &ui_table_row(undef, $ftable, 4);
+	print &ui_hidden_end();
+	print &ui_table_end();
 	}
-print &ui_hidden_end();
-print &ui_table_end();
 
 # Save changes button
 print &ui_form_end([ [ "save", $text{'edit_save'} ] ]);
