@@ -41,6 +41,7 @@ subdomain_template=none
 user_template=none
 update_template=update
 local_template=none
+reseller_template=none
 suexec=1
 edit_afiles=1
 edit_homes=0
