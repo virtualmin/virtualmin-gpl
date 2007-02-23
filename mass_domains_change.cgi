@@ -207,33 +207,40 @@ else {
 			}
 
 		# Update owner limits
+		local $changed_limits = 0;
 		if (!$d->{'parent'}) {
 			foreach $l (@limit_types) {
 				if ($in{$l."_def"} == 1) {
 					$newdom->{$l} = undef;
+					$changed_limits = 1;
 					}
 				elsif ($in{$l."_def"} == 0) {
 					$in{$l} =~ /^\d+$/ ||
 					    &error($text{'setup_e'.$l} ||
 						   $text{'limits_e'.$l});
 					$newdom->{$l} = $in{$l};
+					$changed_limits = 1;
 					}
 				}
 
 			foreach $ed (@edit_limits) {
 				if ($in{"edit_".$ed} == 0) {
 					$newdom->{"edit_".$ed} = 0;
+					$changed_limits = 1;
 					}
 				elsif ($in{"edit_".$ed} == 1) {
 					$newdom->{"edit_".$ed} = 1;
+					$changed_limits = 1;
 					}
 				}
 
 			if ($in{'features_def'} == 1) {
 				$newdom->{'limit_'.$in{'feature1'}} = 1;
+				$changed_limits = 1;
 				}
 			elsif ($in{'features_def'} == 0) {
 				$newdom->{'limit_'.$in{'feature0'}} = 0;
+				$changed_limits = 1;
 				}
 			}
 
@@ -299,7 +306,7 @@ else {
 			}
 
 		# Update limits
-		if (!$d->{'parent'}) {
+		if (!$d->{'parent'} && $changed_limits) {
 			&$first_print($text{'massdomains_limits'});
 			foreach $l (@limit_types) {
 				$d->{$l} = $newdom->{$l};

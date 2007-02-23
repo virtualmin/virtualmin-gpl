@@ -2889,53 +2889,47 @@ sub show_template_mail
 local ($tmpl) = @_;
 
 # Email message for server creation
-print "<tr> <td valign=top>",&hlink("<b>$text{'tmpl_mail'}</b>",
-				    "template_mail"),"</td> <td>\n";
-print "mail_on = $tmpl->{'mail_on'}<br>\n";
-print &none_def_input("mail", $tmpl->{'mail_on'}, $text{'tmpl_mailbelow'});
-print "<br><textarea name=mail rows=10 cols=60>";
-if ($tmpl->{'mail'} ne "none") {
-	print join("\n", split(/\t/, $tmpl->{'mail'}));
-	}
-print "</textarea>\n";
-print &email_template_input(undef, $tmpl->{'mail_subject'}, $tmpl->{'mail_cc'});
-print "</td> </tr>\n";
+print &ui_table_row(&hlink($text{'tmpl_mail'}, "template_mail"),
+	&none_def_input("mail", $tmpl->{'mail_on'}, $text{'tmpl_mailbelow'}).
+	"<br>\n".
+	&ui_textarea("mail", $tmpl->{'mail'} eq "none" ? "" :
+				join("\n", split(/\t/, $tmpl->{'mail'})),
+		     10, 60)."\n".
+	&email_template_input(undef, $tmpl->{'mail_subject'},
+			      $tmpl->{'mail_cc'})
+	);
 
 print &ui_table_hr();
 
 # Aliases for new users
-print "<tr> <td valign=top>",&hlink("<b>$text{'tmpl_aliases'}</b>",
-				    "template_aliases_mode"),"</td> <td>\n";
-print &none_def_input("aliases", $tmpl->{'user_aliases'}, $text{'tmpl_aliasbelow'});
-print "<br>\n";
-print &ui_table_start(undef, undef, 2);
-@aliases = $tmpl->{'user_aliases'} eq "none" ? ( ) :
+print &ui_table_row(&hlink($text{'tmpl_aliases'}, "template_aliases_mode"),
+	&none_def_input("aliases", $tmpl->{'user_aliases'},
+			$text{'tmpl_aliasbelow'})."<br>");
+local @aliases = $tmpl->{'user_aliases'} eq "none" ? ( ) :
 		split(/\t+/, $tmpl->{'user_aliases'});
-&alias_form(\@aliases, " ",
-	    undef, "user", "NEWUSER");
-print &ui_table_end();
-print "</td> </tr>\n";
+&alias_form(\@aliases, " ", undef, "user", "NEWUSER");
 
 # Aliases for new domains
-@aliases = $tmpl->{'dom_aliases'} eq "none" ? ( ) :
-		split(/\t+/, $tmpl->{'dom_aliases'});
-print "<tr> <td valign=top>",&hlink("<b>$text{'tmpl_domaliases'}</b>",
-				    "template_domaliases_mode"),"</td> <td>\n";
-print &none_def_input("domaliases", $tmpl->{'dom_aliases'}, $text{'tmpl_aliasbelow'});
-print &ui_columns_start([ $text{'tmpl_aliasfrom'}, $text{'tmpl_aliasto'} ]);
-$i = 0;
-foreach $a (@aliases, undef, undef) {
+local @aliases = $tmpl->{'dom_aliases'} eq "none" ? ( ) :
+			split(/\t+/, $tmpl->{'dom_aliases'});
+local $atable = &ui_columns_start([ $text{'tmpl_aliasfrom'}, $text{'tmpl_aliasto'} ]);
+local $i = 0;
+foreach my $a (@aliases, undef, undef) {
 	local ($from, $to) = split(/=/, $a, 2);
-	print &ui_columns_row([
+	$atable .= &ui_columns_row([
 		&ui_textbox("alias_from_$i", $from, 20),
 		&ui_textbox("alias_to_$i", $to, 40) ]);
 	$i++;
 	}
-print &ui_columns_end();
-print &ui_checkbox("bouncealias", 1, &hlink("<b>$text{'tmpl_bouncealias'}</b>",
-					    "template_bouncealias"),
-		   $tmpl->{'dom_aliases_bounce'});
-print "</td> </tr>\n";
+$atable .= &ui_columns_end();
+$atable .= &ui_checkbox("bouncealias", 1,
+		        &hlink("<b>$text{'tmpl_bouncealias'}</b>",
+		               "template_bouncealias"),
+		        $tmpl->{'dom_aliases_bounce'});
+print &ui_table_row(&hlink($text{'tmpl_domaliases'},
+                           "template_domaliases_mode"),
+		    &none_def_input("domaliases", $tmpl->{'dom_aliases'},
+				    $text{'tmpl_aliasbelow'})."\n".$atable);
 
 # Unix groups for mail, FTP and DB users
 print &ui_table_hr();

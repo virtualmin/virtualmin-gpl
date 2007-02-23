@@ -33,9 +33,9 @@
 
   - ui-lib.pl and templates
 
-  - re-enable domains when bandwidth falls below some threshold
-
   - use DenyGroups in SSH config to deny domain owner logins
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=643
 	- create a group, and add all denied members to it
+
+ - pre-load ui-lib.pl ?
 

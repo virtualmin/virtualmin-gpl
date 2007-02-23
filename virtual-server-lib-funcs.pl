@@ -181,6 +181,7 @@ foreach my $ed (@edit_limits) {
 				    $dom->{'domslimit'} ? 1 : 0;
 		}
 	}
+delete($dom->{'pass_set'});	# Only set by callers for modify_* functions
 }
 
 # get_domain_by(field, value, [field, value, ...])
@@ -9632,16 +9633,13 @@ local %caps = map { $_, 1 } split(/\s+/, $tmpl->{'capabilities'});
 local $etable;
 $etable .= &none_def_input("capabilities", $tmpl->{'capabilities'},
 	   $text{'tmpl_below'}, 0, 0, $text{'tmpl_capauto'})."<br>\n";
-$etable .= "<table>\n";
-local $i = 0;
+local @grid;
 foreach my $ed (@edit_limits) {
-	$etable .= "<tr>\n" if ($i%2 == 0);
-	$etable .= "<td>".&ui_checkbox("capabilities", $ed,
-				       $text{'limits_edit_'.$ed} || $ed,
-				       $caps{$ed})."</td>";
-	$etable .= "</tr>\n" if ($i++%2 == 1);
+	push(@grid, &ui_checkbox("capabilities", $ed,
+				 $text{'limits_edit_'.$ed} || $ed,
+				 $caps{$ed}));
 	}
-$etable .= "</table>\n";
+$etable .= &ui_grid_table(\@grid, 2);
 print &ui_table_row(&hlink($text{'tmpl_capabilities'},
 			   "template_capabilities"), $etable);
 

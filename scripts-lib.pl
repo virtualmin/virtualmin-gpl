@@ -538,8 +538,8 @@ if (&indexof($bestdir->{'version'}, @$vers) >= 0) {
 	}
 
 # Need to add a directory, or fix one
-&save_domain_php_directory($d, $dirpath, $vers->[0]);
-return $vers->[0];
+local $ok = &save_domain_php_directory($d, $dirpath, $vers->[0]);
+return $ok ? $vers->[0] : undef;
 }
 
 # clear_php_version(&domain, &sinfo)

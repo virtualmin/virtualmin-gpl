@@ -370,88 +370,105 @@ return @rv;
 
 # save_domain_php_directory(&domain, dir, phpversion)
 # Sets up a directory to run PHP scripts with a specific version of PHP.
-# Should only be called on domains in cgi or fcgid mode!
+# Should only be called on domains in cgi or fcgid mode! Returns 1 if the
+# directory version was set OK, 0 if not (because the virtualhost couldn't
+# be found, or the PHP mode was wrong)
 sub save_domain_php_directory
 {
 local ($d, $dir, $ver) = @_;
 &require_apache();
-local $conf = &apache::get_config();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-return 0 if (!$virt);
 local $mode = &get_domain_php_mode($d);
+return 0 if ($mode eq "mod_php");
+local $conf = &apache::get_config();
+local @ports = ( $d->{'web_port'},
+		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+local $any = 0;
+foreach my $p (@ports) {
+	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
+	next if (!$virt);
 
-# Check for an existing <Directory> block
-&lock_file($virt->{'file'});
-local @dirs = &apache::find_directive_struct("Directory", $vconf);
-local ($dirstr) = grep { $_->{'words'}->[0] eq $dir } @dirs;
-if ($dirstr) {
-	# Update the AddType or FCGIWrapper directives, so that .php scripts
-	# use the specified version, and all other .phpN use version N.
-	if ($mode eq "cgi") {
-		local @types = &apache::find_directive(
-			"AddType", $dirstr->{'members'});
-		@types = grep { $_ !~ /^application\/x-httpd-php[45]/ } @types;
-		foreach my $v (&list_available_php_versions($d)) {
-			push(@types, "application/x-httpd-php$v->[0] ".
+	# Check for an existing <Directory> block
+	&lock_file($virt->{'file'});
+	local @dirs = &apache::find_directive_struct("Directory", $vconf);
+	local ($dirstr) = grep { $_->{'words'}->[0] eq $dir } @dirs;
+	if ($dirstr) {
+		# Update the AddType or FCGIWrapper directives, so that
+		# .php scripts use the specified version, and all other
+		# .phpN use version N.
+		if ($mode eq "cgi") {
+			local @types = &apache::find_directive(
+				"AddType", $dirstr->{'members'});
+			@types = grep { $_ !~ /^application\/x-httpd-php[45]/ }
+				      @types;
+			foreach my $v (&list_available_php_versions($d)) {
+				push(@types, "application/x-httpd-php$v->[0] ".
+					     ".php$v->[0]");
+				}
+			push(@types, "application/x-httpd-php$ver .php");
+			&apache::save_directive("AddType", \@types,
+						$dirstr->{'members'}, $conf);
+			}
+		elsif ($mode eq "fcgid") {
+			local $dest = "$d->{'home'}/fcgi-bin";
+			local @wrappers = &apache::find_directive(
+				"FCGIWrapper", $dirstr->{'members'});
+			@wrappers = grep { $_ !~ /^\Q$dest\E\/php.\.fcgi/ }
+					 @wrappers;
+			foreach my $v (&list_available_php_versions($d)) {
+				push(@wrappers,
+				     "$dest/php$v->[0].fcgi .php$v->[0]");
+				}
+			push(@wrappers, "$dest/php$ver.fcgi .php");
+			&apache::save_directive("FCGIWrapper", \@wrappers,
+						$dirstr->{'members'}, $conf);
+			}
+		}
+	else {
+		# Add the directory
+		local @phplines;
+		if ($mode eq "cgi") {
+			# Directives for plain CGI
+			foreach my $v (&list_available_php_versions($d)) {
+				push(@phplines,
+				     "Action application/x-httpd-php$v->[0] ".
+				     "/cgi-bin/php$v->[0].cgi");
+				push(@phplines,
+				     "AddType application/x-httpd-php$v->[0] ".
+				     "php$v->[0]");
+				}
+			push(@phplines,
+			     "AddType application/x-httpd-php$ver .php");
+			}
+		elsif ($mode eq "fcgid") {
+			# Directives for fcgid
+			local $dest = "$d->{'home'}/fcgi-bin";
+			push(@phplines, "AddHandler fcgid-script .php");
+			push(@phplines, "FCGIWrapper $dest/php$ver.fcgi .php");
+			foreach my $v (&list_available_php_versions($d)) {
+				push(@phplines,
+				     "AddHandler fcgid-script .php$v->[0]");
+				push(@phplines,
+				     "FCGIWrapper $dest/php$v->[0].fcgi ".
 				     ".php$v->[0]");
+				}
 			}
-		push(@types, "application/x-httpd-php$ver .php");
-		&apache::save_directive("AddType", \@types,
-					$dirstr->{'members'}, $conf);
+		local @lines = (
+			"<Directory $dir>",
+			"Options Indexes IncludesNOEXEC FollowSymLinks ExecCGI",
+			"allow from all",
+			"AllowOverride All",
+			@phplines,
+			"</Directory>"
+			);
+		local $lref = &read_file_lines($virt->{'file'});
+		splice(@$lref, $virt->{'eline'}, 0, @lines);
+		undef(@apache::get_config_cache);
 		}
-	else {
-		local $dest = "$d->{'home'}/fcgi-bin";
-		local @wrappers = &apache::find_directive("FCGIWrapper",
-							  $dirstr->{'members'});
-		@wrappers = grep { $_ !~ /^\Q$dest\E\/php.\.fcgi/ } @wrappers;
-		foreach my $v (&list_available_php_versions($d)) {
-			push(@wrappers, "$dest/php$v->[0].fcgi .php$v->[0]");
-			}
-		push(@wrappers, "$dest/php$ver.fcgi .php");
-		&apache::save_directive("FCGIWrapper", \@wrappers,
-					$dirstr->{'members'}, $conf);
-		}
+	&flush_file_lines($virt->{'file'});
+	&unlock_file($virt->{'file'});
+	$any++;
 	}
-else {
-	# Add the directory
-	local @phplines;
-	if ($mode eq "cgi") {
-		# Directives for plain CGI
-		foreach my $v (&list_available_php_versions($d)) {
-			push(@phplines,
-			     "Action application/x-httpd-php$v->[0] ".
-			     "/cgi-bin/php$v->[0].cgi");
-			push(@phplines,
-			     "AddType application/x-httpd-php$v->[0] ".
-			     "php$v->[0]");
-			}
-		push(@phplines, "AddType application/x-httpd-php$ver .php");
-		}
-	else {
-		# Directives for fcgid
-		local $dest = "$d->{'home'}/fcgi-bin";
-		push(@phplines, "AddHandler fcgid-script .php");
-		push(@phplines, "FCGIWrapper $dest/php$ver.fcgi .php");
-		foreach my $v (&list_available_php_versions($d)) {
-			push(@phplines, "AddHandler fcgid-script .php$v->[0]");
-			push(@phplines, "FCGIWrapper $dest/php$v->[0].fcgi ".
-					".php$v->[0]");
-			}
-		}
-	local @lines = (
-		"<Directory $dir>",
-		"Options Indexes IncludesNOEXEC FollowSymLinks ExecCGI",
-		"allow from all",
-		"AllowOverride All",
-		@phplines,
-		"</Directory>"
-		);
-	local $lref = &read_file_lines($virt->{'file'});
-	splice(@$lref, $virt->{'eline'}, 0, @lines);
-	undef(@apache::get_config_cache);
-	}
-&flush_file_lines($virt->{'file'});
-&unlock_file($virt->{'file'});
+return 0 if (!$any);
 
 # Make sure we have all the wrapper scripts
 &create_php_wrappers($d, $mode);

@@ -929,43 +929,27 @@ sub show_template_dns
 local ($tmpl) = @_;
 
 # DNS records
-print "<tr> <td valign=top>",&hlink("<b>$text{'tmpl_dns'}</b>",
-				    "template_dns"),"</td> <td>\n";
-print &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'},1)."<br>\n";
-print "<textarea name=dns rows=10 cols=60>";
-if ($tmpl->{'dns'} ne "none") {
-	print join("\n", split(/\t/, $tmpl->{'dns'}));
-	}
-print "</textarea>\n";
-
-print "<table>\n";
-
-print "<tr> <td><b>$text{'tmpl_replace'}</b></td> <td>\n";
-printf "<input type=radio name=bind_replace value=0 %s> %s\n",
-	$tmpl->{'dns_replace'} ? "" : "checked", $text{'tmpl_replace0'};
-printf "<input type=radio name=bind_replace value=1 %s> %s</td> </tr>\n",
-	$tmpl->{'dns_replace'} ? "checked" : "", $text{'tmpl_replace1'};
+local $nd = &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'}, 1);
+print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
+	($nd =~ /\S/ ? "$nd<br>" : "").
+	&ui_textarea("dns", $tmpl->{'dns'} eq "none" ? "" :
+				join("\n", split(/\t/, $tmpl->{'dns'})),
+		     10, 60)."<br>\n".
+	&ui_radio("bind_replace", int($tmpl->{'dns_replace'}),
+		  [ [ 0, $text{'tmpl_replace0'} ],
+		    [ 1, $text{'tmpl_replace1'} ] ]));
+	
 
 # Option for view to add to, for BIND 9
 &require_bind();
 $conf = &bind8::get_config();
 @views = &bind8::find("view", $conf);
 if (@views) {
-	print "<tr> <td valign=top><b>$text{'newdns_view'}</b></td>\n";
-	print "<td><select name=view>\n";
-	printf "<option value='' %s>%s\n",
-		$config{'dns_view'} eq "" ? "selected" : "",
-		$text{'newdns_noview'};
-	foreach $v (@views) {
-		printf "<option value=%s %s>%s\n",
-			$v->{'values'}->[0],
-			$config{'dns_view'} eq $v->{'values'}->[0] ? "selected" : "",
-			$v->{'values'}->[0];
-		}
-	print "</select></td> </tr>\n";
+	print &ui_table_row($text{'newdns_view'},
+		&ui_select("view", $config{'dns_view'},
+			[ [ "", $text{'newdns_noview'} ],
+			  map { [ $_->{'values'}->[0] ] } @views ]));
 	}
-print "</table>\n";
-print "</td> </tr>\n";
 
 # Option for SPF record
 print &ui_table_row(&hlink($text{'tmpl_spf'},
