@@ -80,6 +80,13 @@ while(@ARGV > 0) {
 		$feature{'virt'} = 1;   # for dependency checks
 		$name = 1;		# the non-SSL vhost has to be name-based
 		}
+	elsif ($a eq "--shared-ip") {
+		$sharedip = shift(@ARGV);
+		$virt = 0;
+		$name = 1;
+		&indexof($sharedip, &list_shared_ips()) >= 0 ||
+		    &usage("$sharedip is not in the shared IP addresses list");
+		}
 	elsif ($a eq "--mailboxlimit" || $a eq "--max-mailboxes") {
 		$mailboxlimit = shift(@ARGV);
 		}
@@ -352,7 +359,8 @@ $pclash && &usage($text{'setup_eprefix2'});
          'email', $parent ? $parent->{'email'} : $email,
          'name', $name,
          'ip', $config{'all_namevirtual'} ? $ip :
-	       $virt ? $ip : $defip,
+	       $virt ? $ip :
+	       $sharedip ? $sharedip : $defip,
 	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :
 		$config{'dns_ip'},
          'virt', $virt,
@@ -447,7 +455,8 @@ foreach $f (@features) {
 foreach $f (@feature_plugins) {
 	print "                        [--$f]\n";
 	}
-print "                        [--allocate-ip] | [--ip virtual.ip.address]\n";
+print "                        [--allocate-ip | --ip virtual.ip.address |\n";
+print "                         --shared-ip existing.ip.address]\n";
 print "                        [--ip-already]\n";
 print "                        [--max-doms domains|*]\n";
 print "                        [--max-aliasdoms domains]\n";

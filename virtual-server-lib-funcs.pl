@@ -1819,6 +1819,11 @@ return 0 if (!$virtualmin_pro);
 return &master_admin() || &reseller_admin() || $access{'edit_phpver'};
 }
 
+sub can_edit_sharedips
+{
+return &master_admin() || &reseller_admin() || $access{'edit_sharedips'};
+}
+
 sub can_edit_scripts
 {
 return 0 if (!$virtualmin_pro);
@@ -8370,8 +8375,8 @@ sub get_template_pages
 local @tmpls = ( 'tmpl', 'user', 'update',
 	   $config{'localgroup'} ? ( 'local' ) : ( ),
 	   'bw', 'plugin',
-	   $virtualmin_pro ? ( 'fields', 'links', 'ips', 'resels', 'notify',
-			       'scripts' ) : ( ),
+	   $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'resels',
+			       'notify', 'scripts' ) : ( 'sharedips' ),
 	   &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
 	   $virtualmin_pro ? ( 'mxs', 'validate' ) : ( ),
 	   &has_home_quotas() ? ( 'quotacheck' ) : ( ) );
@@ -9862,6 +9867,21 @@ undef(%hard_mail_quota);
 undef(%used_mail_quota);
 undef(@useradmin::list_users_cache);
 undef(@useradmin::list_groups_cache);
+}
+
+# list_shared_ips()
+# Returns a list of extra IP addresses that can be used by virtual servers
+sub list_shared_ips
+{
+return split(/\s+/, $config{'sharedips'});
+}
+
+# save_shared_ips(ip, ...)
+# Updates the list of extra IP addresses that can be used by virtual servers
+sub save_shared_ips
+{
+$config{'sharedips'} = join(" ", @_);
+&save_module_config();
 }
 
 $done_virtual_server_lib_funcs = 1;

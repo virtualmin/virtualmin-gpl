@@ -523,3 +523,4 @@ Improved detection of multiple scripts being accidentally installed into the sam
 Updated DaDaBiK script installer to version 4.2, and MediaWiki to version 1.9.3.
 Added a button to the Edit Extra Administrator page for switching to his Webmin login without needing to know the password.
 Added the --primary-ip option to create-domain.pl, to create an SSL domain on the primary IP.
+Added the Shared IP Addresses page under System Configuration for defining additional shared addresses that can be selected when creating servers without a private IP. Also updated the server creation page to allow selection of one of these shared IPs, and the create-domain.pl program to use one with the --shared-ip parameter.

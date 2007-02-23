@@ -37,6 +37,8 @@ else {
 		push(@canips, [ &get_default_ip($d->{'reseller'}),
 			&text('newip_resel', $d->{'reseller'}) ]);
 		}
+	push(@canips, map { [ $_, $text{'newip_shared2'} ] }
+			  &list_shared_ips());
 	push(@canips, [ $d->{'ip'}, $text{'newip_current'} ]);
 	@canips = map { [ $_->[0], "$_->[0] ($_->[1])" ] }
 		      grep { !$done{$_->[0]}++ } @canips;

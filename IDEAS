@@ -39,5 +39,3 @@
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=643
 	- create a group, and add all denied members to it
 
-  - Allow creation of name-based domains on existing IPs
-

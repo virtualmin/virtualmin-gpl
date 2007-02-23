@@ -72,7 +72,7 @@ if (!$virtualmin_pro) {
 			 "mount", "mysql", "net", "postfix", "postgresql",
 			 "proc", "procmail", "qmailadmin", "quota", "sendmail",
 			 "servers", "software",
-			 $virtualmin_pro ? ( "spam", "status" ) : ( ),
+			 $virtualmin_pro ? ( "spam", "status", "phpini" ) : ( ),
 			 "syslog", "useradmin", "usermin", "webalizer",
 			 "webmin" );
 @confplugins = split(/\s+/, $config{'plugins'});
@@ -156,7 +156,7 @@ $initial_users_dir = "$module_config_directory/initial";
 
 @edit_limits = ('domain', 'users', 'aliases', 'dbs', 'scripts',
 	        'ip', 'ssl', 'forward', 'admins', 'spam', 'phpver', 'backup',
-		'disable', 'delete');
+		'sharedips', 'disable', 'delete');
 
 @virtualmin_backups = ( 'config', 'templates',
 			$virtualmin_pro ? ( 'resellers' ) : ( ),

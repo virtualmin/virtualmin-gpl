@@ -113,7 +113,8 @@ if (!$aliasdom) {
 		  ($d->{'virt'} ? $text{'edit_private'} :
 		   $d->{'ip'} eq $reselip ? &text('edit_rshared',
 						  "<tt>$resel->{'name'}</tt>") :
-					    $text{'edit_shared'}), 3,
+		   $d->{'ip'} eq &get_default_ip() ? $text{'edit_shared'}
+						   : $text{'edit_shared2'}), 3,
 		  \@tds);
 
 	if ($d->{'virt'}) {

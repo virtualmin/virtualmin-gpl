@@ -63,6 +63,7 @@ else {
 	# if NameVirtualHost * exists.
 	local $vip = $_[0]->{'name'} &&
 		     $apache::httpd_modules{'core'} >= 1.312 &&
+		     $_[0]->{'ip'} eq &get_default_ip() &&
 		     $nvstar ? "*" : $_[0]->{'ip'};
 	local $lref = &read_file_lines($f);
 	push(@$lref, "<VirtualHost $vip:$web_port>");
@@ -341,13 +342,16 @@ else {
 		# Listen directives, and the virtual host definition
 		&$first_print($text{'save_apache'});
 		local $conf = &apache::get_config();
-		&add_name_virtual($_[0], $conf, $_[0]->{'web_port'});
+		local $nvstar = &add_name_virtual($_[0], $conf, $_[0]->{'web_port'});
 		&add_listen($_[0], $conf, $_[0]->{'web_port'});
 
 		local $lref = &read_file_lines($virt->{'file'});
+		local $vip = $_[0]->{'name'} &&
+			     $apache::httpd_modules{'core'} >= 1.312 &&
+			     $_[0]->{'ip'} eq &get_default_ip() &&
+			     $nvstar ? "*" : $_[0]->{'ip'};
 		$lref->[$virt->{'line'}] =
-		   $_[0]->{'name'} ? "<VirtualHost *:$_[0]->{'web_port'}>" :
-			"<VirtualHost $_[0]->{'ip'}:$_[0]->{'web_port'}>";
+			"<VirtualHost $vip:$_[0]->{'web_port'}>";
 		&flush_file_lines();
 		$rv++;
 		&$second_print($text{'setup_done'});

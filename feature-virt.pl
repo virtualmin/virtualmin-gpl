@@ -146,15 +146,24 @@ else {
 		if ($tmpl->{'ranges'} ne "none") { $anyalloc++; }
 		else { $anychoose++; }
 		}
-	local @opts = ( [ 0, &text('form_shared', $defip) ] );
+	local @opts = ( [ 0, &text('form_shared', $defip)."<br>" ] );
+	local @shared = &list_shared_ips();
+	if (@shared && &can_edit_sharedips()) {
+		# Can select from extra shared list
+		push(@opts, [ 3, $text{'form_shared2'}." ".
+				 &ui_select("sharedip", undef,
+					[ map { [ $_ ] } @shared ])."<br>" ]);
+		}
 	if ($anyalloc) {
-		push(@opts, [ 2, &text('form_alloc') ]);
+		# Can allocate
+		push(@opts, [ 2, &text('form_alloc')."<br>" ]);
 		}
 	if ($anychoose) {
+		# Can enter arbitrary IP
 		push(@opts, [ 1, $text{'form_vip'}." ".
 			 &ui_textbox("ip", undef, 20)." (".
 			 &ui_checkbox("virtalready", 1,
-				      $text{'form_virtalready'}).")" ]);
+				      $text{'form_virtalready'}).")<br>" ]);
 		}
 	return &ui_radio("virt", 0, \@opts);
 	}
@@ -166,7 +175,6 @@ else {
 sub parse_virtual_ip
 {
 local ($tmpl, $resel) = @_;
-local $defip = &get_default_ip($resel);
 if ($config{'all_namevirtual'}) {
 	# Make sure the IP *is* assigned
 	&check_ipaddress($in{'ip'}) || &error($text{'setup_eip'});
@@ -211,7 +219,15 @@ elsif ($in{'virt'} == 1) {
 		}
 	return ($in{'ip'}, 1, $in{'virtalready'});
 	}
+elsif ($in{'virt'} == 3 && &can_edit_sharedips()) {
+	# On a shared virtual IP
+	&indexof($in{'sharedip'}, &list_shared_ips()) >= 0 ||
+		&error(&text('setup_evirtnoshared'));
+	return ($in{'sharedip'}, 0);
+	}
 else {
+	# Global shared IP
+	local $defip = &get_default_ip($resel);
 	return ($defip, 0);
 	}
 }
