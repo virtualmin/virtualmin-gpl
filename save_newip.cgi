@@ -86,5 +86,6 @@ foreach $sd (@doms) {
 &set_domain_envs($d, "MODIFY_DOMAIN");
 &made_changes();
 &reset_domain_envs($d);
+&webmin_log("newip", "domain", $d->{'dom'}, $d);
 
 &ui_print_footer(&domain_footer_link($d));

@@ -63,5 +63,7 @@ foreach $d (@doms) {
 	&$outdent_print();
 	}
 &run_post_actions();
+&webmin_log("newips", "domains", scalar(@doms), { 'old' => $in{'old'},
+					          'new' => $in{'new'} });
 
 &ui_print_footer("", $text{'index_return'});
