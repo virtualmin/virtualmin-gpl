@@ -1145,6 +1145,7 @@ enable_users=Un-locking mail users' accounts ..
 mail_usubject=Mailbox created
 mail_dsubject=Virtual server created
 mail_upsubject=Mailbox updated
+mail_rsubject=Reseller account created
 mail_file=failed to read template file $1 : $2
 mail_system=email is not setup in Virtualmin
 mail_ok=email sent to $1
@@ -1263,6 +1264,10 @@ sub_PREFIX=The first part of the domain name, like <tt>foo</tt>
 sub_if=In addition, conditional blocks like <i>${IF-MAIL}...${ENDIF-MAIL}</i> and <i>${IF-WEB}...${ELSE-WEB}...{$ENDIF-WEB}</i> may be used.
 sub_DESC=The server's description, such as <tt>Joe's Site</tt>
 sub_PROXY_PASS=The URL of the real website.
+sub_NAME=Reseller's Virtualmin login
+sub_RPLAINPASS=Reseller's password
+sub_EMAIL=Reseller's contact email address
+sub_WEBMINURL=URL to login to Virtualmin
 
 newuser_title=New Mailbox Email
 newuser_ecannot=You are not allowed to edit the new mailbox email template
@@ -1294,6 +1299,11 @@ newsubdom_title=New Virtual Sub-Server Email
 newsubdom_ecannot=You are not allowed to edit the new sub-server email template
 newsubdom_desc=Use this form to edit the template file $1 for the email message that will be sent to the owner of a new virtual sub-server after it is created. The following substitions will be done to the text :
 newsubdom_descdis=Use this form to edit the template file $1 for the email message that would be sent to the owner of a new virtual sub-server after it is created, if this feature was enabled on the Module Config page. The following substitions will be done to the text :
+
+newreseller_title=New Reseller Email
+newreseller_ecannot=You are not allowed to edit the new reseller email template
+newreseller_desc=Use this form to edit the template file $1 for the email message that will be sent to a new reseller account after it is created. The following substitions will be done to the text :
+newreseller_descdis=Use this form to edit the template file $1 for the email message that would be sent to a new reseller account after it is created, if this feature was enabled on the Module Config page. The following substitions will be done to the text :
 
 feature_web=Apache website
 feature_dns=BIND DNS domain

@@ -2442,8 +2442,18 @@ local ($template, $to, $subs, $subject, $cc, $d) = @_;
 local %hash = %$subs;
 
 # Add in Webmin info to the hash
-$hash{'webmin_port'} = $ENV{'SERVER_PORT'};
-$hash{'webmin_proto'} = $ENV{'HTTPS'} eq 'ON' ? 'https' : 'http';
+if ($ENV{'SERVER_PORT'}) {
+	# Running under miniserv
+	$hash{'webmin_port'} = $ENV{'SERVER_PORT'};
+	$hash{'webmin_proto'} = $ENV{'HTTPS'} eq 'ON' ? 'https' : 'http';
+	}
+else {
+	# Get from miniserv config
+	local %miniserv;
+	&get_miniserv_config(\%miniserv);
+	$hash{'webmin_port'} = $miniserv{'port'};
+	$hash{'webmin_proto'} = $miniserv{'ssl'} ? 'https' : 'http';
+	}
 $template = &substitute_template($template, \%hash);
 
 # Work out the From: address
@@ -8377,7 +8387,7 @@ local @tmpls = ( 'tmpl', 'user', 'update',
 	   $config{'localgroup'} ? ( 'local' ) : ( ),
 	   'bw', 'plugin',
 	   $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'resels',
-			       'notify', 'scripts' ) : ( 'sharedips' ),
+			       'reseller', 'notify', 'scripts' ) : ( 'sharedips' ),
 	   &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
 	   $virtualmin_pro ? ( 'mxs', 'validate' ) : ( ),
 	   &has_home_quotas() ? ( 'quotacheck' ) : ( ) );

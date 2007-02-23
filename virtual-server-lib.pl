@@ -150,7 +150,7 @@ $scripts_unavail_file = "$module_config_directory/scriptsunavail";
 @all_template_files = ( "domain-template", "subdomain-template",
 			"user-template", "local-template", "bw-template",
 			"warnbw-template", "framefwd-template",
-			"update-template" );
+			"update-template", "reseller-template" );
 
 $initial_users_dir = "$module_config_directory/initial";
 

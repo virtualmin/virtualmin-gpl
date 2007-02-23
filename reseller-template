@@ -1,0 +1,7 @@
+Your reseller account has been set up successfully as follows :
+
+Virtualmin login:        ${NAME}
+Virtualmin password:     ${PLAINPASS}
+Virtualmin URL:          ${WEBMIN_PROTO}://${HOSTNAME}:${WEBMIN_PORT}/
+Contact email address:   ${EMAIL}
+

@@ -81,6 +81,7 @@ from_addr=From: address for email sent by Virtualmin,3,Default
 user_template=Template file for email to new mailboxes,10,none-None,default-Default
 update_template=Template file for email to updated mailboxes,10,default-Default
 local_template=Template file for email to new local users,10,none-None,default-Default
+reseller_template=Template file for email to new resellers,10,none-None,default-Default
 bw_template=Template file for email to servers over bandwidth limit,10,default-Default
 warnbw_template=Template file for email to servers approaching bandwidth limit,10,default-Default
 pre_command=Command to run before making changes to a server,0

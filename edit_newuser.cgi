@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
-# edit_newdom.cgi
-# Display the current new domain email
+# edit_newuser.cgi
+# Display the current new mailbox email
 
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newuser_ecannot'});
