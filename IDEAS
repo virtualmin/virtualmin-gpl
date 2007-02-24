@@ -40,3 +40,6 @@
  - pre-load ui-lib.pl ?
 
  - better coverage of files by webmin_log
+
+ - local $_ in all use of while(<FOO>)
+

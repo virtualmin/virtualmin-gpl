@@ -1022,7 +1022,9 @@ else {
 	# Under own home
 	local $tmpl = &get_template($d->{'template'});
 	local ($hdir) = ($tmpl->{'web_html_dir'} || 'public_html');
-	$hdir = &substitute_domain_template($hdir, $d);
+	if ($hdir ne 'public_html') {
+		$hdir = &substitute_domain_template($hdir, $d);
+		}
 	return $rel ? $hdir : "$d->{'home'}/$hdir";
 	}
 }

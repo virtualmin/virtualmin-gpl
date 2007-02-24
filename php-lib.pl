@@ -2,7 +2,7 @@
 
 # get_domain_php_mode(&domain)
 # Returns 'mod_php' if PHP is run via Apache's mod_php, 'cgi' if run via
-# a CGI script, 'fcgi' if run via fastCGI. This is detected by looking for the
+# a CGI script, 'fcgid' if run via fastCGI. This is detected by looking for the
 # Action lines in httpd.conf.
 sub get_domain_php_mode
 {
@@ -14,7 +14,10 @@ if ($virt) {
 	local @actions = &apache::find_directive("Action", $vconf);
 	local ($dir) = grep { $_->{'words'}->[0] eq &public_html_dir($d) }
 		    &apache::find_directive_struct("Directory", $vconf);
-	push(@actions, &apache::find_directive("Action", $dir->{'members'}));
+	if ($dir) {
+		push(@actions, &apache::find_directive("Action",
+						       $dir->{'members'}));
+		}
 	foreach my $a (@actions) {
 		if ($a =~ /^application\/x-httpd-php.\s+\/cgi-bin\/php.\.cgi/) {
 			return 'cgi';
@@ -93,6 +96,8 @@ foreach my $p (@ports) {
 			   &list_domain_php_directories($d);
 
 	# Update all of the directories
+	local @avail = map { $_->[0] }
+			   &list_available_php_versions($d, $mode);
 	foreach my $phpstr (@phpconfs) {
 		# Remove all Action and AddType directives for suexec PHP
 		local $phpconf = $phpstr->{'members'};
@@ -113,8 +118,6 @@ foreach my $p (@ports) {
 
 		# Add needed Apache directives. Don't add the AddHandler,
 		# Alias and Directory if already there.
-		local @avail = map { $_->[0] }
-				   &list_available_php_versions($d, $mode);
 		local $ver = $pdirs{$phpstr->{'words'}->[0]} ||
 			     $tmpl->{'web_phpver'} ||
 			     $avail[0];
@@ -154,9 +157,20 @@ foreach my $p (@ports) {
 			&apache::save_directive("Options", [ $opts ],
 						$phpconf, $conf);
 			}
-
-		# XXX do we need a <Directory> for fcgi-bin ?
 		}
+
+	# For non-mod_php mode, we need a RemoveHandler .php directive at
+	# the <virtualhost> level to supress mod_php which may still be active
+	local @remove = &apache::find_directive("RemoveHandler", $vconf);
+	@remove = grep { $_ !~ /^\.php/ } @remove;
+	if ($mode ne "mod_php") {
+		push(@remove, ".php");
+		foreach my $v (@avail) {
+			push(@remove, ".php$v");
+			}
+		}
+	&apache::save_directive("RemoveHandler", \@remove, $vconf, $conf);
+
 	&flush_file_lines();
 	&unlock_file($virt->{'file'});
 	}
@@ -434,7 +448,7 @@ foreach my $p (@ports) {
 				     "/cgi-bin/php$v->[0].cgi");
 				push(@phplines,
 				     "AddType application/x-httpd-php$v->[0] ".
-				     "php$v->[0]");
+				     ".php$v->[0]");
 				}
 			push(@phplines,
 			     "AddType application/x-httpd-php$ver .php");
