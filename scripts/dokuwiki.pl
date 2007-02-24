@@ -28,7 +28,7 @@ return "Wiki";
 
 sub script_dokuwiki_php_vers
 {
-return ( 4 );
+return ( 4, 5 );
 }
 
 # script_dokuwiki_depends(&domain, version)

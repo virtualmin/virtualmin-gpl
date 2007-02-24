@@ -526,3 +526,4 @@ Added the --primary-ip option to create-domain.pl, to create an SSL domain on th
 Added the Shared IP Addresses page under System Configuration for defining additional shared addresses that can be selected when creating servers without a private IP. Also updated the server creation page to allow selection of one of these shared IPs, and the create-domain.pl program to use one with the --shared-ip parameter.
 Added the New Reseller Email page, for setting up a message to be sent to new reseller accounts.
 Added the --email parameter to create-reseller.pl and modify-reseller.pl scripts.
+Updated many script installers to support PHP 5.

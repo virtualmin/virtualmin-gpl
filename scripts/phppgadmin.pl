@@ -29,7 +29,12 @@ return "Database";
 
 sub script_phppgadmin_php_vers
 {
-return ( 4 );
+return ( 4, 5 );
+}
+
+sub script_phppgadmin_php_modules
+{
+return ("pgsql");
 }
 
 # script_phppgadmin_depends(&domain, version)

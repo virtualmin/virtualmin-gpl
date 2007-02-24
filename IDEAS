@@ -43,3 +43,12 @@
 
  - local $_ in all use of while(<FOO>)
 
+ - different php.ini files for versions 4 and 5
+	- FC4 and Debian use different default config files
+	- or otherwise deal with extension_dir
+
+ - check all scripts to see if they support PHP 5
+	- up to webcalendar
+
+ - use HTTP post to install nucleus, rather than config files
+
