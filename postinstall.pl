@@ -120,11 +120,7 @@ if ($config{'web'}) {
 	}
 
 if ($virtualmin_pro) {
-	# Create directory for autoreply files
-	&make_dir($autoreply_file_dir, 01777);
-	&set_ownership_permissions(undef, undef, 01777, $autoreply_file_dir);
-
-	# Convert existing aliases
+	# Create links for existing autoreply aliases
 	&set_alias_programs();
 	foreach my $d (&list_domains()) {
 		if ($d->{'mail'}) {

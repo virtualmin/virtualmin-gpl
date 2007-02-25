@@ -312,17 +312,37 @@ if ($in->{'auto'}) {
 $simple->{'auto'} = $in->{'auto'};
 }
 
+# get_autoreply_file_dir()
+# Returns the directory for autoreply file links
+sub get_autoreply_file_dir
+{
+local $autoreply_file_dir = "/var/virtualmin-autoreply";
+&require_useradmin();
+local @hst = stat($home_base);
+local @vst = stat("/var");
+if ($hst[0] != $vst[0]) {
+	# /var and /home are on different FS
+	$autoreply_file_dir = "$home_base/virtualmin-autoreply";
+	}
+if (!-d $autoreply_file_dir) {
+	&make_dir($autoreply_file_dir, 01777);
+	&set_ownership_permissions(undef, undef, 01777, $autoreply_file_dir);
+	}
+return $autoreply_file_dir;
+}
+
 # convert_autoreply_file(&domain, file)
-# Returns a file in the autoreply directory, for linking to
+# Returns a file in the autoreply directory, for hard linking to
 sub convert_autoreply_file
 {
 local ($d, $file) = @_;
-return undef if (!-d $autoreply_file_dir);
+local $dir = &get_autoreply_file_dir();
+return undef if (!$dir);
 if ($file =~ /\/(autoreply-(\S+)\.txt)$/) {
-	return "$autoreply_file_dir/$d->{'id'}-$1";
+	return "$dir/$d->{'id'}-$1";
 	}
 $file =~ s/\//_/g;
-return "$autoreply_file_dir/$d->{'id'}-$file";
+return "$dir/$d->{'id'}-$file";
 }
 
 # create_autoreply_alias_links(&domain)

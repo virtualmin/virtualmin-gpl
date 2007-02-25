@@ -985,6 +985,7 @@ save_unfixerrorlog=Disabling error logging via program ..
 save_status=Changing hostname and email in website status monitor ..
 save_statusssl=Changing hostname and email in SSL website status monitor ..
 save_etemplate=Invalid template selected
+save_fixvirts=Changing domain name in mail aliases ..
 
 luser_err=Failed to save local mailbox
 luser_etaken=A user with the same name already exists

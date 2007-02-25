@@ -373,6 +373,8 @@ if ($_[0]->{'home'} ne $_[1]->{'home'} ||
 				$u->{'uid'}, $_[1]->{'gid'},
 				$u->{'uid'}, $_[0]->{'gid'});
 			}
+
+		# Save the user
 		&modify_user($u, \%oldu, $_[0], 1);
 		if (!$u->{'nomailfile'}) {
 			&rename_mail_file($u, \%oldu);
@@ -416,30 +418,50 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 		}
 
 	# Update any virtusers with addresses in the old domain
+	&$first_print($text{'save_fixvirts'});
 	foreach $v (&list_virtusers()) {
 		if ($v->{'from'} =~ /^(\S*)\@(\S+)$/ &&
 		    lc($2) eq $_[1]->{'dom'}) {
+			local $oldv = { %$v };
 			$v->{'from'} = "$1\@$_[0]->{'dom'}";
-			foreach my $t (@{$v->{'to'}}) {
-				if ($t =~ /^(\S*)\@(\S+)$/ &&
-				    lc($2) eq $_[1]->{'dom'}) {
-					# Destination is an address in the
-					# domain being renamed
-					$t = "$1\@$_[0]->{'dom'}";
-					}
-				elsif ($t =~ /^\Q$_[1]->{'prefix'}\E([\.\-].*)$/) {
-					# Destination is a user being renamed,
-					# with prefix at start
-					$t = "$_[0]->{'prefix'}$1";
-					}
-				elsif ($t =~ /^(.*[\.\-])\Q$_[1]->{'prefix'}\E$/) {
-					# Destination is a user being renamed,
-					# with prefix at end
-					$t = "$1$_[0]->{'prefix'}";
-					}
-				}
-			&modify_virtuser($v, $v);
+			&fix_alias_when_renaming($v, $_[0], $_[1]);
+			&modify_virtuser($oldv, $v);
 			}
+		}
+	&$second_print($text{'setup_done'});
+	}
+}
+
+# fix_alias_when_renaming(&alias|&user, &dom, &olddom)
+# When renaming a domain, fix up the destination addresses in the given
+# alias or user.
+sub fix_alias_when_renaming
+{
+local ($virt, $dom, $olddom) = @_;
+foreach my $t (@{$virt->{'to'}}) {
+	if ($t =~ /^(\S*)\@(\S+)$/ &&
+	    lc($2) eq $olddom->{'dom'}) {
+		# Destination is an address in the
+		# domain being renamed
+		$t = "$1\@$dom->{'dom'}";
+		}
+	elsif ($t =~ /^\Q$olddom->{'prefix'}\E([\.\-].*)$/) {
+		# Destination is a user being renamed,
+		# with prefix at start
+		$t = "$dom->{'prefix'}$1";
+		}
+	elsif ($t =~ /^(.*[\.\-])\Q$olddom->{'prefix'}\E$/) {
+		# Destination is a user being renamed,
+		# with prefix at end
+		$t = "$1$dom->{'prefix'}";
+		}
+
+	# Change home directory references, for auto-
+	# reply files.
+	local $type = &alias_type($t);
+	if ($type == 5) {
+		$t =~ s/\Q$olddom->{'home'}\E/$dom->{'home'}/g;
+		$t =~ s/\Q$olddom->{'dom'}\E /$dom->{'dom'} /g;
 		}
 	}
 }

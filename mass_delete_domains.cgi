@@ -74,7 +74,7 @@ if (!$in{'confirm'}) {
 		print &ui_hidden("d", $d->{'id'}),"\n";
 		}
 	print &ui_submit($text{'massdelete_ok'}, "confirm");
-	if (&can_import_servers()) {
+	if (&can_import_servers() && !$virtualmin_pro) {
 		print "<p>",&ui_checkbox("only", 1,
 					 $text{'delete_only'}),"<br>\n";
 		}

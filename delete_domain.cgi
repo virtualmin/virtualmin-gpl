@@ -70,7 +70,7 @@ if (!$in{'confirm'}) {
 	print "<input type=hidden name=dom value='$in{'dom'}'>\n";
 	print "<input type=submit name=confirm ",
 	      "value='$text{'delete_ok'}' onClick='check_clicks(form)'>\n";
-	if (&can_import_servers()) {
+	if (&can_import_servers() && !$virtualmin_pro) {
 		print "<p><input type=checkbox name=only value=1> ",
 		      "$text{'delete_only'}<br>\n";
 		}
