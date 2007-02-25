@@ -2163,7 +2163,7 @@ foreach $u (&list_domain_users($_[0], 1)) {
 
 # Create autoreply file links
 if (defined(&create_autoreply_alias_links)) {
-	#&create_autoreply_alias_links($_[0]);
+	&create_autoreply_alias_links($_[0]);
 	}
 
 return 1;
