@@ -392,8 +392,10 @@ if (!$parent) {
 	&set_capabilities_from_template(\%dom, $tmpl);
 	}
 $dom{'db'} = $db || &database_name(\%dom);
-$dom{'emailto'} = $dom{'email'} ||
-		  $dom{'user'}.'@'.&get_system_hostname();
+$dom{'emailto'} = $parent ? $parent->{'emailto'} :
+		  $dom{'email'} ? $dom{'email'} :
+		  $dom{'mail'} ? $dom{'user'}.'@'.$dom{'dom'} :
+		  		 $dom{'user'}.'@'.&get_system_hostname();
 foreach $f (@features) {
 	$dom{$f} = $feature{$f} ? 1 : 0;
 	$dom{"limit_$f"} = $f eq "webmin" ? 0 : $dom{$f};

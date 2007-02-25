@@ -262,7 +262,8 @@ if (!$parentuser) {
 		}
 	&set_capabilities_from_template(\%dom, $tmpl);
 	}
-$dom{'emailto'} = $dom{'email'} ? $dom{'email'} :
+$dom{'emailto'} = $parentdom ? $parentdom->{'emailto'} :
+		  $dom{'email'} ? $dom{'email'} :
 		  $dom{'mail'} ? $dom{'user'}.'@'.$dom{'dom'} :
 		  		 $dom{'user'}.'@'.&get_system_hostname();
 if ($in{'db_def'} || !&database_feature() || !&can_edit_databases() ||
