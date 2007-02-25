@@ -527,3 +527,4 @@ Added the Shared IP Addresses page under System Configuration for defining addit
 Added the New Reseller Email page, for setting up a message to be sent to new reseller accounts.
 Added the --email parameter to create-reseller.pl and modify-reseller.pl scripts.
 Updated many script installers to support PHP 5.
+All autoreply email message files are now hard linked to from /var/virtualmin-autoreply, and this path is used in the autoresponders. This allows them to continue working even when a domain's home directory is not world-readable.
