@@ -194,7 +194,9 @@ if (!-r "$etc/php.ini") {
 	local $defver = $vers[0]->[0];
 	local $ini = &get_global_php_ini($defver, $mode);
 	if ($ini) {
-		# Copy file, set permissions, and fix session.save_path
+		# Copy file, set permissions, fix session.save_path, and
+		# clear out extension_dir (because it can differ between PHP
+		# versions)
 		&copy_source_dest($ini, "$etc/php.ini");
 		&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'},
 					   0755, "$etc/php.ini");
@@ -203,6 +205,7 @@ if (!-r "$etc/php.ini") {
 			local $pconf = &phpini::get_config("$etc/php.ini");
 			&phpini::save_directive($pconf, "session.save_path",
 						&create_server_tmp($d));
+			&phpini::save_directive($pconf, "extension_dir", undef);
 			&flush_file_lines("$etc/php.ini");
 			}
 		}
