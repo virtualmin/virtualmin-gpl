@@ -233,7 +233,7 @@ USER: foreach $line (@lines) {
 
 	if ($user->{'home'} && !$user->{'nocreatehome'}) {
 		# Create his homedir
-		&create_user_home($user);
+		&create_user_home($user, $d);
 		}
 
 	# Create an empty mail file, if needed

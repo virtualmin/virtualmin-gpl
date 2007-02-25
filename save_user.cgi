@@ -405,7 +405,7 @@ else {
 
 		if ($home && !$user->{'nocreatehome'}) {
 			# Create his homedir
-			&create_user_home($user);
+			&create_user_home($user, $d);
 			}
 
 		# Send an email upon creation

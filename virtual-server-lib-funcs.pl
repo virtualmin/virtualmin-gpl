@@ -1519,9 +1519,12 @@ sub create_user_home
 local $home = $_[0]->{'home'};
 if ($home) {
 	# Create his homedir
-	&system_logged("mkdir -p ".quotemeta($home)." >/dev/null 2>&1");
-	&system_logged("chown $_[0]->{'uid'}:$_[0]->{'gid'} ".quotemeta($home)." >/dev/null 2>&1");
-	&system_logged("chmod 755 ".quotemeta($home)." >/dev/null 2>&1");
+	local @st = $_[1] ? stat($_[1]->{'home'}) : ( undef, undef, 0755 );
+	&lock_file($home);
+	&make_dir($home, $st[2] & 0777);
+	&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'gid'},
+				   $st[2] & 0777, $home);
+	&unlock_file($home);
 
 	# Copy files into homedir
 	&copy_skel_files(
