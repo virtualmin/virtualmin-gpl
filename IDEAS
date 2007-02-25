@@ -51,3 +51,6 @@
 
  - command-line programs for simple aliases
 
+ - reseller-level option to hide reseller limits from domain owners
+	- bug http://www.virtualmin.com/ticket-tracker/bug?bug%5fnumber=333
+

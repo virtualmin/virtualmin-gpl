@@ -401,7 +401,8 @@ if ($acls) {
 # Set global ACL options
 local %acl = ( 'feedback' => 0,
 	       'rpc' => 0,
-	       'readonly' => $_[0]->{'demo'} );
+	       'readonly' => $_[0]->{'demo'},
+	       'fileunix' => $_[0]->{'user'} );
 $acl{'root'} = &resolve_links(
 	&substitute_domain_template($tmpl->{'gacl_root'}, $_[0]));
 if ($tmpl->{'gacl_umode'} == 1) {
