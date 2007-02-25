@@ -119,7 +119,6 @@ if (!$_[0]->{'parent'}) {
 		       $_[0]->{'home'} ne $_[1]->{'home'})) {
 		&foreign_call($usermodule, "lock_user_files");
 		local %old = %$uinfo;
-		print "pass_set=$_[0]->{'pass_set'} user=$_[0]->{'user'}=$_[1]->{'user'} home=$_[0]->{'home'}=$_[1]->{'home'}<br>\n";
 		&$first_print($text{'save_user'});
 		$uinfo->{'real'} = $_[0]->{'owner'};
 		if ($_[0]->{'pass_set'}) {
