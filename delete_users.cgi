@@ -33,6 +33,12 @@ if ($in{'confirm'}) {
 			&delete_mail_file($user);
 			}
 
+		# Delete simple autoreply file
+		if (defined(&get_simple_alias)) {
+			$simple = &get_simple_alias($d, $user);
+			&delete_simple_autoreply($d, $simple) if ($simple);
+			}
+
 		# Delete the user, his virtusers and aliases
 		&delete_user($user, $d);
 

@@ -107,6 +107,10 @@ if ($_[1]) {
 			}
 		}
 	}
+
+# Return only virtusers that match this domain,
+# which are not for forwarding email for users in the domain,
+# and which are not on the plugin ignore list.
 return grep { $_->{'from'} =~ /\@(\S+)$/ && $1 eq $_[0]->{'dom'} &&
 	      ($foruser{$_->{'from'}} ne $_->{'to'}->[0] ||
 	       @{$_->{'to'}} != 1) &&
@@ -2037,6 +2041,8 @@ if (-r "$_[1]_plainpass") {
 		&read_file("$_[1]_plainpass", \%oldplain);
 		&read_file("$plainpass_dir/$_[0]->{'id'}", \%newplain);
 		$newplain{$_[2]->{'mailuser'}} = $oldplain{$_[2]->{'mailuser'}};
+		$newplain{$_[2]->{'mailuser'}." encrypted"} =
+			$oldplain{$_[2]->{'mailuser'}." encrypted"};
 		&write_file("$plainpass_dir/$_[0]->{'id'}", \%newplain);
 		}
 	else {
@@ -2153,6 +2159,11 @@ foreach $u (&list_domain_users($_[0], 1)) {
 		&execute_command("chown -R $u->{'uid'}:$u->{'gid'} ".
 		       quotemeta($u->{'home'}));
 		}
+	}
+
+# Create autoreply file links
+if (defined(&create_autoreply_alias_links)) {
+	#&create_autoreply_alias_links($_[0]);
 	}
 
 return 1;

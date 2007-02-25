@@ -228,11 +228,22 @@ return 1;
 # delete_domain(&domain)
 sub delete_domain
 {
-&unlink_logged("$domains_dir/$_[0]->{'id'}");
+local $id = $_[0]->{'id'};
+&unlink_logged("$domains_dir/$id");
 
 # And the bandwidth and plain-text password files
-&unlink_file("$bandwidth_dir/$_[0]->{'id'}");
-&unlink_file("$plainpass_dir/$_[0]->{'id'}");
+&unlink_file("$bandwidth_dir/$id");
+&unlink_file("$plainpass_dir/$id");
+
+# Delete any autoreply file links
+opendir(AUTODIR, $autoreply_file_dir);
+foreach my $f (readdir(AUTODIR)) {
+	next if ($f eq "." || $f eq "..");
+	if ($f =~ /^\Q$id-\E/) {
+		unlink("$autoreply_file_dir/$f");
+		}
+	}
+closedir(AUTODIR);
 }
 
 # list_domain_users([&domain], [skipunix], [no-virts], [no-quotas], [no-dbs])
@@ -807,6 +818,9 @@ $plain{$_[0]->{'user'}." encrypted"} = $_[0]->{'pass'};
 
 # Set the user's Usermin IMAP password
 &set_usermin_imap_password($_[0]);
+
+# Update cache of existing usernames
+$unix_user{&escape_alias($_[0]->{'user'})}++;
 }
 
 # modify_user(&user, &old, &domain, [noaliases])
@@ -1207,6 +1221,10 @@ if (defined(&clear_lookup_domain_cache)) {
 
 # Set the user's Usermin IMAP password
 &set_usermin_imap_password($_[0]);
+
+# Update cache of existing usernames
+$unix_user{&escape_alias($_[0]->{'user'})}++;
+$unix_user{&escape_alias($_[1]->{'user'})} = 0;
 }
 
 # delete_user(&user, domain)
@@ -1272,7 +1290,7 @@ if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 	}
 
 if (!$_[0]->{'qmail'}) {
-	# Delete any virtusers
+	# Delete any virtusers (extra email addresses for this user)
 	&delete_virtuser($_[0]->{'virt'}) if ($_[0]->{'virt'});
 	local $e;
 	foreach $e (@{$_[0]->{'extravirt'}}) {
@@ -1281,7 +1299,7 @@ if (!$_[0]->{'qmail'}) {
 	}
 
 if (!$_[0]->{'qmail'}) {
-	# Delete his alias, if any
+	# Delete his alias (for forwarding), if any
 	if ($_[0]->{'alias'}) {
 		if ($config{'mail_system'} == 1) {
 			# Delete Sendmail alias with same name as user
@@ -1354,6 +1372,9 @@ mkdir($plainpass_dir, 0700);
 delete($plain{$_[0]->{'user'}});
 delete($plain{$_[0]->{'user'}." encrypted"});
 &write_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
+
+# Update cache of existing usernames
+$unix_user{&escape_alias($_[0]->{'user'})} = 0;
 }
 
 # set_usermin_imap_password(&user)

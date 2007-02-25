@@ -14,7 +14,11 @@ if (!$in{'new'}) {
 &error_setup($text{'alias_err'});
 
 if ($in{'delete'}) {
-	# Just delete the virtuser
+	# Just delete the virtuser (and the autoreply file)
+	if (defined(&get_simple_alias)) {
+		$simple = &get_simple_alias($d, $virt);
+		&delete_simple_autoreply($d, $simple) if ($simple);
+		}
 	&delete_virtuser($virt);
 	&webmin_log("delete", "alias", $virt->{'from'}, $virt);
 	}
@@ -42,6 +46,10 @@ else {
 	else {
 		# Verify and store simple inputs
 		$simple = &get_simple_alias($d, $virt);
+		if ($simple) {
+			# Remove existing autoreply file
+			&delete_simple_autoreply($d, $simple);
+			}
 		&parse_simple_form($simple, \%in, $d, 0, 0, 0);
 		&save_simple_alias($d, $virt, $simple);
 		if ($simple->{'bounce'} && @{$virt->{'to'}} > 1) {

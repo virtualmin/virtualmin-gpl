@@ -118,5 +118,19 @@ if ($config{'web'}) {
 	&require_apache();
 	&restart_apache();
 	}
+
+if ($virtualmin_pro) {
+	# Create directory for autoreply files
+	&make_dir($autoreply_file_dir, 01777);
+	&set_ownership_permissions(undef, undef, 01777, $autoreply_file_dir);
+
+	# Convert existing aliases
+	&set_alias_programs();
+	foreach my $d (&list_domains()) {
+		if ($d->{'mail'}) {
+			&create_autoreply_alias_links($d);
+			}
+		}
+	}
 }
 

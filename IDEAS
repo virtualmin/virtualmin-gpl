@@ -45,7 +45,16 @@
 
  - different php.ini files for versions 4 and 5
 	- FC4 and Debian use different default config files
-	- or otherwise deal with extension_dir
+	- just nuke extension_dir
 
  - use HTTP post to install nucleus, rather than config files
+
+ - update b2evolution script installer
+
+ - stop/start servers in mobile theme
+
+ - autoreply when home dir is not readable
+	- what if domain is renamed?
+
+ - command-line programs for simple aliases
 

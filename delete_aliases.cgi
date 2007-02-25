@@ -15,6 +15,10 @@ foreach $a (@del) {
 	($alias) = grep { $_->{'from'} eq $a } @aliases;
 	if ($alias) {
 		&delete_virtuser($alias);
+		if (defined(&get_simple_alias)) {
+			$simple = &get_simple_alias($d, $alias);
+			&delete_simple_autoreply($d, $simple) if ($simple);
+			}
 		}
 	}
 &webmin_log("delete", "aliases", scalar(@del),

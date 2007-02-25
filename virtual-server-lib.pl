@@ -180,3 +180,5 @@ $extra_admins_dir = "$module_config_directory/admins";
 @all_possible_php_versions = (4, 5);
 @s3_perl_modules = ( "S3::AWSAuthConnection", "S3::QueryStringAuthGenerator" );
 
+$autoreply_file_dir = "/var/virtualmin-autoreply";
+

@@ -108,7 +108,8 @@ if ($simple->{'tome'}) {
 if ($simple->{'auto'}) {
 	local $who = $alias->{'user'} || $alias->{'from'};
 	$simple->{'autoreply'} ||= "$d->{'home'}/autoreply-$who.txt";
-	push(@v, "|$module_config_directory/autoreply.pl $simple->{'autoreply'} $who");
+	local $link = &convert_autoreply_file($d, $simple->{'autoreply'});
+	push(@v, "|$module_config_directory/autoreply.pl $simple->{'autoreply'} $who $link");
 	}
 $alias->{'to'} = \@v;
 $alias->{'cmt'} = $simple->{'cmt'};
@@ -145,7 +146,36 @@ if ($simple->{'autotext'}) {
                 }
         &print_tempfile(AUTO, $simple->{'autotext'});
         &close_tempfile(AUTO);
+
+	# Hard link to the autoreply directory, which is readable by the mail
+	# server, unlike users' homes
+	local $link = &convert_autoreply_file($d, $simple->{'autoreply'});
+	if ($link) {
+		unlink($link);
+		link($simple->{'autoreply'}, $link) ||
+			&error("Failed to link $simple->{'autoreply'} to ",
+			       "$link : $!");
+		}
         }
+}
+
+# delete_simple_autoreply(&domain, &simple)
+# Remove the autoreply file for a domain (when the alias is deleted, or 
+# being re-saved)
+sub delete_simple_autoreply
+{
+local ($d, $simple) = @_;
+if ($simple->{'auto'} &&
+    $simple->{'autoreply'} &&
+    $simple->{'autoreply'} =~ /\/autoreply-(\S+)\.txt$/) {
+	local @st = stat($simple->{'autoreply'});
+	if ($st[4] == $d->{'uid'}) {
+		local $link = &convert_autoreply_file(
+			$d, $simple->{'autoreply'});
+		unlink($simple->{'autoreply'});
+		unlink($link) if ($link);
+		}
+	}
 }
 
 # show_simple_form(&simple, [no-reply-from], [no-local], [no-bounce], [&tds])
@@ -159,7 +189,7 @@ if ($nolocal) {
 	# Show checkbox for delivery to me
 	print &ui_table_row(&hlink($text{$sfx.'_tome'}, $sfx."_tome"),
 			    &ui_checkbox("tome", 1, $text{'alias_tomeyes'},
-					 $simple->{'tome'}));
+					 $simple->{'tome'}), undef, \@tds);
 	}
 else {
 	# Deliver to any local user
@@ -280,6 +310,63 @@ if ($in->{'auto'}) {
 	$in->{'autotext'} =~ /\S/ || &error($text{'alias_eautotext'});
 	}
 $simple->{'auto'} = $in->{'auto'};
+}
+
+# convert_autoreply_file(&domain, file)
+# Returns a file in the autoreply directory, for linking to
+sub convert_autoreply_file
+{
+local ($d, $file) = @_;
+return undef if (!-d $autoreply_file_dir);
+if ($file =~ /\/(autoreply-(\S+)\.txt)$/) {
+	return "$autoreply_file_dir/$d->{'id'}-$1";
+	}
+$file =~ s/\//_/g;
+return "$autoreply_file_dir/$d->{'id'}-$file";
+}
+
+# create_autoreply_alias_links(&domain)
+# For all aliases and users in some domain that have simple aliases with
+# autoreponders, create hard links and update the aliases to use them.
+sub create_autoreply_alias_links
+{
+local ($d) = @_;
+
+# Fix up aliases
+foreach my $virt (&list_domain_aliases($d)) {
+	local $simple = &get_simple_alias($d, $virt);
+	if ($simple && $simple->{'auto'}) {
+		local $link = &convert_autoreply_file(
+			$d, $simple->{'autoreply'});
+		local @st = stat($link);
+		if (!@st || $st[3] == 1) {
+			# Need to create the link, and re-write the alias
+			local $oldvirt = { %$virt };
+			unlink($link);
+			link($simple->{'autoreply'}, $link);
+			&save_simple_alias($d, $virt, $simple);
+			&modify_virtuser($oldvirt, $virt);
+			}
+		}
+	}
+
+# Fix up users
+foreach my $user (&list_domain_users($d)) {
+	local $simple = &get_simple_alias($d, $user);
+	if ($simple && $simple->{'auto'}) {
+		local $link = &convert_autoreply_file(
+			$d, $simple->{'autoreply'});
+		local @st = stat($link);
+		if (!@st || $st[3] == 1) {
+			# Need to create the link, and re-write the alias
+			local $olduser = { %$user };
+			unlink($link);
+			link($simple->{'autoreply'}, $link);
+			&save_simple_alias($d, $user, $simple);
+			&modify_user($user, $olduser, $d, 0);
+			}
+		}
+	}
 }
 
 1;
