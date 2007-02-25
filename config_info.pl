@@ -35,6 +35,7 @@ sub show_shells
 {
 local ($value, $desc, $type, $func, $name) = @_;
 local @shells = ("/bin/sh", "/bin/csh");
+local $_;
 open(SHELLS, "/etc/shells");
 while(<SHELLS>) {
 	s/\r|\n//g;

@@ -41,8 +41,6 @@
 
  - better coverage of files by webmin_log
 
- - local $_ in all use of while(<FOO>)
-
  - use HTTP post to install nucleus, rather than config files
 
  - update b2evolution script installer

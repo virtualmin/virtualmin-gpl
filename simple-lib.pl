@@ -56,6 +56,7 @@ sub read_autoreply
 {
 local ($file, $simple) = @_;
 local @lines;
+local $_;
 open(FILE, $file);
 while(<FILE>) {
 	if (/^Reply-Tracking:\s*(.*)/) {

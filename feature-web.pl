@@ -920,6 +920,7 @@ local $max_ltime = $_[1];
 foreach $l (&unique(@logs)) {
 	local $f;
 	foreach $f (&all_log_files($l, $max_ltime)) {
+		local $_;
 		if ($f =~ /\.gz$/i) {
 			open(LOG, "gunzip -c ".quotemeta($f)." |");
 			}

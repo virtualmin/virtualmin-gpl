@@ -434,6 +434,7 @@ return 1;
 sub cert_info
 {
 local %rv;
+local $_;
 open(OUT, "openssl x509 -in $_[0]->{'ssl_cert'} -issuer -subject -enddate |");
 while(<OUT>) {
 	s/\r|\n//g;

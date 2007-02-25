@@ -733,6 +733,7 @@ elsif ($config{'mail_system'} == 5) {
 				local $alias = { 'from' => $1 eq "default" ?
 						    "\@$dname" : "$1\@$dname",
 						 'to' => [ ] };
+				local $_;
 				open(QMAIL, "$ddir/$qf");
 				while(<QMAIL>) {
 					s/\r|\n//g;
@@ -748,6 +749,7 @@ elsif ($config{'mail_system'} == 5) {
 			# Add those from valias command (for sites using MySQL or some
 			# other backend)
 			local %aliases;
+			local $_;
 			open(ALIASES, "$vpopbin/valias -s $dname |");
 			while(<ALIASES>) {
 				s/\r|\n//g;
@@ -1947,6 +1949,7 @@ foreach $u (&list_all_users()) {
 	$exists{$u->{'name'},$u->{'unix'}} = $u;
 	}
 local $foundmailuser;
+local $_;
 open(UFILE, "$_[1]_users");
 while(<UFILE>) {
 	s/\r|\n//g;
@@ -2092,6 +2095,7 @@ if (!$_[2]->{'mailuser'}) {
 	foreach $a (&list_domain_aliases($_[0], 1)) {
 		&delete_virtuser($a);
 		}
+	local $_;
 	open(AFILE, "$_[1]_aliases");
 	while(<AFILE>) {
 		if (/^(\S+):\s*(.*)/) {
@@ -2369,6 +2373,7 @@ local $f;
 foreach $f ($config{'bw_maillog_rotated'} ?
 	    &all_log_files($maillog, $min_ltime) :
 	    ( $maillog )) {
+	local $_;
 	if ($f =~ /\.gz$/i) {
 		open(LOG, "gunzip -c ".quotemeta($f)." |");
 		}
@@ -2530,6 +2535,7 @@ elsif ($config{'mail_system'} == 1) {
 elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4) {
 	# Check Qmail rc script for use of procmail as default delivery
 	local $got;
+	local $_;
 	open(RC, "$qmailadmin::config{'qmail_dir'}/rc");
 	while(<RC>) {
 		s/#.*$//;

@@ -360,6 +360,7 @@ ins\//);
 				    'quota' => 'qquota',
 				   );
 		local $user;
+		local $_;
 		open(UINFO, "$vpopbin/vuserinfo -D $_[0]->{'dom'} |");
 		while(<UINFO>) {
 			s/\r|\n//g;
@@ -2714,6 +2715,7 @@ open(TEMP, ">$temp");
 local $ex = $?;
 local $out;
 close(TEMP);
+local $_;
 open(TEMP, $temp);
 while(<TEMP>) {
 	$out .= $_;
@@ -4972,6 +4974,7 @@ $pasv =~ /\(([0-9,]+)\)/;
 
 # transfer listing
 local @list;
+local $_;
 while(<CON>) {
 	s/\r|\n//g;
 	push(@list, $_);
@@ -6058,6 +6061,7 @@ sub get_dotqmail
 $_[0] =~ /\.qmail(-(\S+))?$/;
 local $alias = { 'file' => $_[0],
 		 'name' => $2 };
+local $_;
 open(AFILE, $_[0]) || return undef;
 while(<AFILE>) {
 	s/\r|\n//g;
@@ -6675,6 +6679,7 @@ return $ok;
 sub list_custom_fields
 {
 local @rv;
+local $_;
 open(FIELDS, $custom_fields_file);
 while(<FIELDS>) {
 	s/\r|\n//g;
@@ -6705,6 +6710,7 @@ foreach my $a (@{$_[0]}) {
 sub list_custom_links
 {
 local @rv;
+local $_;
 open(LINKS, $custom_links_file);
 while(<LINKS>) {
 	s/\r|\n//g;
@@ -6855,6 +6861,7 @@ if ($file !~ /^\//) {
 		$file = "$uinfo[7]/$file";
 		}
 	}
+local $_;
 open(FILE, $file);
 while(<FILE>) {
 	s/\r|\n//g;
@@ -7291,6 +7298,7 @@ require 'timelocal.pl';
 local $max_ltime = $_[1];
 local $f;
 foreach $f ($_[5] ? &all_log_files($_[0], $max_ltime) : ( $_[0] )) {
+	local $_;
 	if ($f =~ /\.gz$/i) {
 		open(LOG, "gunzip -c ".quotemeta($f)." |");
 		}
@@ -9352,6 +9360,7 @@ else {
 	}
 
 # Check for FTP shells in /etc/shells
+local $_;
 open(SHELLS, "/etc/shells");
 while(<SHELLS>) {
 	s/\r|\n//g;

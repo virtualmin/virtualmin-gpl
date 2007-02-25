@@ -178,6 +178,7 @@ if (-r "$userdir/quota") {
 	}
 elsif (-r "$datastore/quota_-v") {
 	# Get the quota (from v10 backup)
+	local $_;
 	open(QUOTA, "$datastore/quota_-v");
 	while(<QUOTA>) {
 		if (/^\s+\S+\s+(\d+)\s+(\d+)\s+(\d+)/) {
@@ -410,6 +411,7 @@ if ($got{'mail'}) {
 	&$first_print("Re-creating mail users ..");
 	local $mcount = 0;
 	local (%pass, %quota);
+	local $_;
 	open(SHADOW, "$dom{'home'}/etc/$dom/shadow");
 	while(<SHADOW>) {
 		s/\r|\n//g;
@@ -417,6 +419,7 @@ if ($got{'mail'}) {
 		$pass{$suser} = $spass;
 		}
 	close(SHADOW);
+	local $_;
 	open(QUOTA, "$dom{'home'}/etc/$dom/quota");
 	while(<QUOTA>) {
 		s/\r|\n//g;
@@ -425,6 +428,7 @@ if ($got{'mail'}) {
 		}
 	close(QUOTA);
 	&foreign_require("mailboxes", "mailboxes-lib.pl");
+	local $_;
 	open(PASSWD, "$dom{'home'}/etc/$dom/passwd");
 	while(<PASSWD>) {
 		# Create the user
@@ -494,6 +498,7 @@ if ($got{'mail'}) {
 	&$first_print("Copying email aliases ..");
 	&set_alias_programs();
 	local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
+	local $_;
 	open(VAD, "$userdir/vad/$dom");
 	while(<VAD>) {
 		s/\r|\n//g;
@@ -644,6 +649,7 @@ if ($got{'mysql'}) {
 		local $myucount = 0;
 		&$first_print("Re-creating MySQL users ..");
 		local %myusers;
+		local $_;
 		open(MYSQL, "$userdir/mysql.sql");
 		while(<MYSQL>) {
 			s/\r|\n//g;
@@ -719,6 +725,7 @@ if ($got{'ftp'}) {
 if (-r "$userdir/proftpdpasswd") {
 	local $fcount = 0;
 	&$first_print("Re-creating FTP users ..");
+	local $_;
 	open(FTP, "$userdir/proftpdpasswd");
 	while(<FTP>) {
 		s/\r|\n//g;
@@ -759,6 +766,7 @@ if (-r "$userdir/proftpdpasswd") {
 	}
 
 # Migrate any parked domains as alias domains
+local $_;
 open(PARKED, "$userdir/pds");
 while(<PARKED>) {
 	s/\r|\n//g;

@@ -490,6 +490,7 @@ if (!defined($php_modules{$ver})) {
 	if ($d) {
 		$ENV{'PHPRC'} = "$d->{'home'}/etc";
 		}
+	local $_;
 	&open_execute_command(PHP, "$cmd -m", 1);
 	&reset_environment();
 	while(<PHP>) {
