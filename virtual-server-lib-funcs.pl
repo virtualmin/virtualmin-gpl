@@ -236,7 +236,7 @@ local $id = $_[0]->{'id'};
 &unlink_file("$plainpass_dir/$id");
 
 # Delete any autoreply file links
-local $dir = &autoreply_file_dir();
+local $dir = &get_autoreply_file_dir();
 opendir(AUTODIR, $dir);
 foreach my $f (readdir(AUTODIR)) {
 	next if ($f eq "." || $f eq "..");

@@ -24,7 +24,7 @@ print &ui_tabs_start(\@tabs, "scriptsmode",
 # Show table of installed scripts (if any)
 print &ui_tabs_start_tab("scriptsmode", "existing");
 if (@got) {
-	print $text{'scripts_desc3'},"\n";
+	print $text{'scripts_desc3'},"<p>\n";
 	@tds = ( "width=5" );
 	print &ui_form_start("mass_uninstall.cgi", "post");
 	print &ui_hidden("dom", $in{'dom'});
