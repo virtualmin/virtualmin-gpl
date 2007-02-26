@@ -520,7 +520,7 @@ Updated the lookup-domain.pl script (which is called from Procmail) to communica
 Updated the PHProjekt and MediaWiki script installers to setup the database configuration automatically.
 Changed pages with tabs and hidden sections to be usable by the mobile device theme.
 Improved detection of multiple scripts being accidentally installed into the same path.
-Updated DaDaBiK script installer to version 4.2, and MediaWiki to version 1.9.3.
+Updated DaDaBiK script installer to version 4.2, WordPress to 2.1.1 and MediaWiki to version 1.9.3.
 Added a button to the Edit Extra Administrator page for switching to his Webmin login without needing to know the password.
 Added the --primary-ip option to create-domain.pl, to create an SSL domain on the primary IP.
 Added the Shared IP Addresses page under System Configuration for defining additional shared addresses that can be selected when creating servers without a private IP. Also updated the server creation page to allow selection of one of these shared IPs, and the create-domain.pl program to use one with the --shared-ip parameter.
@@ -530,4 +530,4 @@ Updated many script installers to support PHP 5.
 All autoreply email message files are now hard linked to from /var/virtualmin-autoreply, and this path is used in the autoresponders. This allows them to continue working even when a domain's home directory is not world-readable.
 Fixed bug that broke renaming of virtual servers when using debian-style sites-enabled directory for the Apache config.
 Fixed bug that prevented autoresponders from being updated properly when renaming or moving virtual servers.
-Fixed the Nucleus script installer so that it actually works.
+Fixed the Nucleus script installer so that it actually works, and increased version to 3.24.
