@@ -162,7 +162,8 @@ else {
 		local $oldd = { %$d };
 		local $newdom = { %$d };
 
-		if (&has_home_quotas() && $in{'quota_def'} != 2) {
+		if (&has_home_quotas() && &can_edit_quotas() &&
+		    $in{'quota_def'} != 2) {
 			# Update server quota
 			if ($in{'quota_def'}) {
 				$newdom->{'quota'} = undef;
@@ -174,7 +175,8 @@ else {
 				}
 			}
 
-		if (&has_home_quotas() && $in{'uquota_def'} != 2) {
+		if (&has_home_quotas() && &can_edit_quotas() &&
+		    $in{'uquota_def'} != 2) {
 			# Update Unix user quota
 			if ($in{'uquota_def'}) {
 				$newdom->{'uquota'} = undef;
