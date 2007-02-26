@@ -879,5 +879,32 @@ if (!ref($h)) {
 &complete_http_download($h, $out, $err);
 }
 
+# make_file_php_writable(&domain, file, [dir-only])
+# Set permissions on a file so that it is writable by PHP
+sub make_file_php_writable
+{
+local ($d, $file, $dironly) = @_;
+local $mode = &get_domain_php_mode($d);
+local $perms = $mode eq "mod_php" ? 0777 : 0755;
+if (-d $file && !$dironly) {
+	&system_logged(sprintf("chmod -R %o %s", $perms, quotemeta($file)));
+	}
+else {
+	&set_ownership_permissions(undef, undef, $perms, $file);
+	}
+}
+
+# make_file_php_nonwritable(&domain, file, [dir-only])
+sub make_file_php_nonwritable
+{
+local ($d, $file, $dironly) = @_;
+if (-d $file && !$dironly) {
+	&system_logged("chmod -R 555 ".quotemeta($file));
+	}
+else {
+	&set_ownership_permissions(undef, undef, 0555, $file);
+	}
+}
+
 1;
 

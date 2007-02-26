@@ -530,3 +530,4 @@ Updated many script installers to support PHP 5.
 All autoreply email message files are now hard linked to from /var/virtualmin-autoreply, and this path is used in the autoresponders. This allows them to continue working even when a domain's home directory is not world-readable.
 Fixed bug that broke renaming of virtual servers when using debian-style sites-enabled directory for the Apache config.
 Fixed bug that prevented autoresponders from being updated properly when renaming or moving virtual servers.
+Fixed the Nucleus script installer so that it actually works.

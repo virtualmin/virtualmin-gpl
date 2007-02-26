@@ -41,8 +41,6 @@
 
  - better coverage of files by webmin_log
 
- - use HTTP post to install nucleus, rather than config files
-
  - update b2evolution script installer
 
  - stop/start servers in mobile theme
@@ -51,4 +49,8 @@
 
  - reseller-level option to hide reseller limits from domain owners
 	- bug http://www.virtualmin.com/ticket-tracker/bug?bug%5fnumber=333
+
+ - better selector for backup / restore target
+	- form should be in sections
+	- all features enabled by default
 

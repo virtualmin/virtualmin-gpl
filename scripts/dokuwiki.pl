@@ -142,7 +142,7 @@ open(CHANGES, ">$opts->{'dir'}/data/changes.log");
 close(CHANGES);
 &set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0777,
 			   "$opts->{'dir'}/data/changes.log");
-&run_as_domain_user($d, "chmod -R 777 ".quotemeta("$opts->{'dir'}/data"));
+&make_file_php_writable($d, "$opts->{'dir'}/data");
 
 local $url = &script_path_url($d, $opts);
 local $rp = $opts->{'dir'};
