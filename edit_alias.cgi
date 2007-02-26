@@ -82,6 +82,7 @@ if ($can_simple) {
 	print &ui_tabs_end_tabletab();
 	}
 print &ui_table_end();
+print &ui_tabs_end(1) if (@tabs > 1);
 
 if ($in{'new'}) {
 	print &ui_form_end([ [ "create", $text{'create'} ] ]);
@@ -102,5 +103,4 @@ else {
 		&domain_footer_link($d),
 		"", $text{'index_return'});
 	}
-
 
