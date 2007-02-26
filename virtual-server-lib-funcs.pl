@@ -3491,12 +3491,14 @@ else {
 		return (0, 0);
 		}
 	foreach my $d (@$doms) {
-		if (!$d->{'dir'}) {
+		if (!$d->{'dir'} && !$skip) {
 			&$first_print(&text('backup_ehomeformat3',
 					    $d->{'dom'}));
 			return (0, 0);
 			}
 		}
+	# Skip any that don't have directories
+	$doms = [ grep { $_->{'dir'} } @$doms ];
 	}
 
 # Work out where to write the final tar files to
