@@ -82,7 +82,8 @@ print &ui_form_start("domain_setup.cgi", "post");
 print &ui_hidden("parentuser", $parentuser),"\n";
 print &ui_hidden("to", $in{'to'}),"\n";
 print &ui_hidden("subdom", $in{'subdom'}),"\n";
-print &ui_table_start($text{'form_header'}, "width=100%", 2);
+print &ui_hidden_table_start($text{'form_header'}, "width=100%", 2,
+			     "basic", 1);
 
 # Domain name
 if ($subdom) {
@@ -182,7 +183,7 @@ elsif ($parentdom) {
 		undef, \@tds);
 	}
 
-print &ui_table_end();
+print &ui_hidden_table_end("basic");
 
 # Start of advanced section
 $has_advanced = $aliasdom || $subdom ? 0 : 1;
@@ -243,8 +244,7 @@ if (!$aliasdom && &database_feature() && &can_edit_databases() && !$subdom) {
 	}
 
 if ($has_advanced) {
-	print &ui_hidden_end();
-	print &ui_table_end();
+	print &ui_hidden_table_end("advanced");
 	}
 
 # Show hidden section for limits
@@ -303,8 +303,7 @@ if (!$parentuser && !$config{'template_auto'}) {
 	}
 
 if (!$parentuser && !$config{'template_auto'}) {
-	print &ui_hidden_end();
-	print &ui_table_end();
+	print &ui_hidden_table_end("limits");
 	}
 
 # Show section for custom fields, if any
@@ -313,8 +312,7 @@ if ($fields) {
 	print &ui_hidden_table_start($text{'edit_customsect'}, "width=100%", 2,
 				     "custom", 0);
 	print $fields;
-	print &ui_hidden_end();
-	print &ui_table_end();
+	print &ui_hidden_table_end("custom");
 	}
 
 # Show checkboxes for features
@@ -359,8 +357,7 @@ foreach $f (@feature_plugins) {
 $ftable = &ui_grid_table(\@grid, 2, 100,
 	[ "width=30% align=left", "width=70% align=left" ]);
 print &ui_table_row(undef, $ftable, 4);
-print &ui_hidden_end();
-print &ui_table_end();
+print &ui_hidden_table_end("feature");
 
 # Start section for proxy and IP
 if (!$aliasdom) {

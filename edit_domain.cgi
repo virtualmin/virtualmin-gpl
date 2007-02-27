@@ -26,7 +26,8 @@ $tmpl = &get_template($d->{'template'});
 @tds = ( "width=30%" );
 print &ui_form_start("save_domain.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
-print &ui_table_start($text{'edit_header'}, "width=100%", 4);
+print &ui_hidden_table_start($text{'edit_header'}, "width=100%", 4,
+			     "basic", 1);
 
 # Domain name, with link
 print &ui_table_row($text{'edit_domain'},
@@ -220,7 +221,8 @@ if (@subdoms) {
 		\@tds);
 	}
 
-print &ui_table_end();
+print &ui_hidden_table_end("basic");
+
 $limits_section = !$parentdom &&
 		  (&has_home_quotas() && (&can_edit_quotas() || $d->{'unix'}) ||
 		  $config{'bw_active'});
@@ -271,8 +273,7 @@ if ($config{'bw_active'} && !$parentdom) {
 	}
 
 if ($limits_section) {
-	print &ui_hidden_end();
-	print &ui_table_end();
+	print &ui_hidden_table_end("limits");
 	}
 
 # Show section for custom fields, if any
@@ -281,8 +282,7 @@ if ($fields) {
 	print &ui_hidden_table_start($text{'edit_customsect'}, "width=100%", 2,
 				     "custom", 0);
 	print $fields;
-	print &ui_hidden_end();
-	print &ui_table_end();
+	print &ui_hidden_table_end("custom");
 	}
 
 # Show buttons for turning features on and off (if allowed)
@@ -357,8 +357,7 @@ else {
 	$ftable = &ui_grid_table(\@grid, 2, 100,
 			[ "width=30% align=left", "width=70% align=left" ]);
 	print &ui_table_row(undef, $ftable, 4);
-	print &ui_hidden_end();
-	print &ui_table_end();
+	print &ui_hidden_table_end("feature");
 	}
 
 # Save changes button

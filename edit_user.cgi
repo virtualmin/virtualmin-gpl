@@ -35,10 +35,10 @@ print &ui_hidden("old", $in{'user'});
 print &ui_hidden("unix", $in{'unix'});
 print &ui_hidden("web", $in{'web'});
 
-print &ui_table_start($mailbox ? $text{'user_mheader'} :
-			 $user->{'webowner'} ? $text{'user_wheader'} :
-			 $d ? $text{'user_header'} : $text{'user_lheader'},
-		      "width=100%", 2);
+print &ui_hidden_table_start($mailbox ? $text{'user_mheader'} :
+			     $user->{'webowner'} ? $text{'user_wheader'} :
+			     $d ? $text{'user_header'} : $text{'user_lheader'},
+		             "width=100%", 2, "table1", 1);
 
 # Show username, editable if this is not the domain owner
 if ($mailbox) {
@@ -164,7 +164,7 @@ foreach $f (@mail_plugins) {
 	$input = &plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d);
 	print $input;
 	}
-print &ui_table_end();
+print &ui_hidden_table_end();
 
 # Start second table
 print &ui_hidden_table_start($text{'user_header2'}, "width=100%", 2,
@@ -260,8 +260,7 @@ elsif (!$in{'new'}) {
 		    &ui_textbox("remail", $user->{'email'}, 20),
 		    2, \@tds);
 	}
-print &ui_hidden_end();
-print &ui_table_end();
+print &ui_hidden_table_end("table2");
 
 # Show forwarding setup for this user (can use the simple or complex forms)
 if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
@@ -308,8 +307,7 @@ if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
 		print &ui_tabs_end_tabletab();
 		}
 
-	print &ui_hidden_end();
-	print &ui_table_end();
+	print &ui_hidden_table_end("table3");
 	}
 
 # Show allowed databases
@@ -344,7 +342,7 @@ if (@sgroups && $user->{'unix'}) {
 			    2, \@tds);
 	}
 if ($done_section4) {
-	print &ui_table_end();
+	print &ui_hidden_table_end("table4");
 	}
 
 if ($in{'new'}) {

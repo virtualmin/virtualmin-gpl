@@ -61,7 +61,7 @@ if ($config{'bw_active'} && &can_edit_bandwidth()) {
 	}
 
 if ($anyqb) {
-	print &ui_hidden_end(),&ui_table_end();
+	print &ui_hidden_table_end("quotas");
 	}
 
 # Feature enable/disable
@@ -89,7 +89,7 @@ foreach $f (@feature_plugins) {
 		}
 	}
 
-print &ui_hidden_end(),&ui_table_end();
+print &ui_hidden_table_end("features");
 
 if (&can_edit_limits($doms[0])) {
 	# Mailbox/alias/doms limits
@@ -133,7 +133,7 @@ if (&can_edit_limits($doms[0])) {
 			  [ 0, $text{'massdomains_features0'}." ".
 				&ui_select("feature0", undef, \@opts)."<br>" ] ]
 			), 1, \@tds);
-	print &ui_hidden_end(),&ui_table_end();
+	print &ui_hidden_table_end("limits");
 	}
 
 # Start section for PHP options
@@ -172,7 +172,7 @@ if (@avail > 1 && &can_edit_phpver()) {
 	}
 
 if ($anyphp) {
-	print &ui_hidden_end(),&ui_table_end();
+	print &ui_hidden_table_end("php");
 	}
 
 # Spam clearing mode
@@ -209,7 +209,7 @@ if (&can_edit_shell()) {
 			    1, \@tds);
 	}
 
-print &ui_hidden_end(),&ui_table_end();
+print &ui_hidden_table_end("others");
 
 print &ui_submit($text{'massdomains_ok'}, "ok");
 if (&can_disable_domain($doms[0])) {

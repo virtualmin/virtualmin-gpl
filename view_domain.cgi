@@ -24,7 +24,8 @@ $tmpl = &get_template($d->{'template'});
                                               $text{'view_title'}, "");
 
 @tds = ( "width=30%" );
-print &ui_table_start($text{'edit_header'}, "width=100%", 4);
+print &ui_hidden_table_start($text{'edit_header'}, "width=100%", 4,
+			     "basic", 1);
 
 # Domain name (with link), user and group
 if ($d->{'web'}) {
@@ -131,7 +132,8 @@ if (@subdoms) {
 		3, \@tds);
 	}
 
-print &ui_table_end();
+print &ui_hidden_table_end("basic");
+
 if (!$parentdom) {
 	# Start of collapsible section for limits
 	print &ui_hidden_table_start($text{'edit_limitsect'}, "width=100%", 2,
@@ -166,8 +168,7 @@ if ($config{'bw_active'} && !$parentdom) {
 	}
 
 if (!$parentdom) {
-	print &ui_hidden_end();
-	print &ui_table_end();
+	print &ui_hidden_table_end("limits");
 	}
 
 # Show active features
@@ -183,22 +184,17 @@ if ($d->{'disabled'}) {
 else {
 	print &ui_hidden_table_start($text{'edit_featuresect'}, "width=100%", 2,
 				     "feature", 0);
-	$featmsg = "<table width=100%>\n";
+	@grid = ( );
 	$i = 0;
 	foreach $f (@features, @feature_plugins) {
 		if ($d->{$f}) {
 			local $txt = $text{'feature_'.$f};
-			$w = $i%2 ? 70 : 30;
-			$featmsg .= "<tr>\n" if ($i%2 == 0);
-			$featmsg .= "<td width=$w% align=left>$txt</td>\n";
-			$featmsg .= "</tr>\n" if ($i%2 == 1);
-			$i++;
+			push(@grid, $txt);
 			}
 		}
-	$featmsg .= "</table>\n";
+	$featmsg .= &ui_grid_table(\@grid, 2, [ "width=30%", "width=70%" ]);
 	print &ui_table_row(undef, $featmsg);
-	print &ui_hidden_end();
-	print &ui_table_end();
+	print &ui_hidden_table_end("feature");
 	}
 
 # Show actions for this domain, unless the theme vetos it (cause they are on
