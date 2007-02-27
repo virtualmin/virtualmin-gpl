@@ -28,8 +28,13 @@ foreach $d (@doms) {
 	print &ui_hidden("d", $d->{'id'}),"\n";
 	}
 @tds = ( "width=30%" );
-print &ui_hidden_table_start($text{'massdomains_headerq'}, "width=100%", 2,
-			     "quotas", 0);
+
+$anyqb = &has_home_quotas() && &can_edit_quotas() ||
+	 $config{'bw_active'} && &can_edit_bandwidth();
+if ($anyqb) {
+	print &ui_hidden_table_start($text{'massdomains_headerq'}, "width=100%",
+				     2, "quotas", 0);
+	}
 
 # Quota change fields
 if (&has_home_quotas() && &can_edit_quotas()) {
@@ -55,7 +60,9 @@ if ($config{'bw_active'} && &can_edit_bandwidth()) {
 		1, \@tds);
 	}
 
-print &ui_hidden_end(),&ui_table_end();
+if ($anyqb) {
+	print &ui_hidden_end(),&ui_table_end();
+	}
 
 # Feature enable/disable
 print &ui_hidden_table_start($text{'massdomains_headerf'}, "width=100%", 2,
@@ -84,47 +91,50 @@ foreach $f (@feature_plugins) {
 
 print &ui_hidden_end(),&ui_table_end();
 
-# Mailbox/alias/doms limits
-print &ui_hidden_table_start($text{'massdomains_headerl'}, "width=100%", 2,
-			     "limits", 0);
-foreach $l (@limit_types) {
-	print &ui_table_row($text{'form_'.$l},
-		&ui_radio($l."_def", 2,
-		  [ [ 2, $text{'massdomains_leave'} ],
-		    [ 1, $text{'form_unlimit'} ],
-		    [ 0, $text{'form_atmost'}." ".&ui_textbox($l, "", 4) ] ]),
-		1, \@tds);
-	}
-print &ui_hidden_end(),&ui_table_end();
+if (&can_edit_limits($doms[0])) {
+	# Mailbox/alias/doms limits
+	print &ui_hidden_table_start($text{'massdomains_headerl'}, "width=100%",
+				     2, "limits", 0);
+	foreach $l (@limit_types) {
+		print &ui_table_row($text{'form_'.$l},
+			&ui_radio($l."_def", 2,
+			  [ [ 2, $text{'massdomains_leave'} ],
+			    [ 1, $text{'form_unlimit'} ],
+			    [ 0, $text{'form_atmost'}." ".
+				 &ui_textbox($l, "", 4) ] ]),
+			1, \@tds);
+		}
+	print &ui_hidden_end(),&ui_table_end();
 
-# Editable capabilities
-print &ui_hidden_table_start($text{'massdomains_headerc'}, "width=100%", 2,
-			     "capabilities", 0);
-foreach $ed (@edit_limits) {
-	print &ui_table_row($text{'limits_edit_'.$ed},
-		&ui_radio("edit_".$ed, 2,
-		  [ [ 2, $text{'massdomains_leave'} ],
-		    [ 1, $text{'yes'} ],
-		    [ 0, $text{'no'} ] ]),
-		1, \@tds);
+	# Editable capabilities
+	print &ui_hidden_table_start($text{'massdomains_headerc'}, "width=100%",
+				     2, "capabilities", 0);
+	foreach $ed (@edit_limits) {
+		print &ui_table_row($text{'limits_edit_'.$ed},
+			&ui_radio("edit_".$ed, 2,
+			  [ [ 2, $text{'massdomains_leave'} ],
+			    [ 1, $text{'yes'} ],
+			    [ 0, $text{'no'} ] ]),
+			1, \@tds);
+		}
+	# Allowed features
+	@opts = ( );
+	foreach $f (@opt_features, "virt") {
+		push(@opts, [ $f, $text{'feature_'.$f} ]);
+		}
+	foreach $f (@feature_plugins) {
+		push(@opts, [ $f, &plugin_call($f, "feature_name") ]);
+		}
+	print &ui_table_row($text{'massdomains_features'},
+		&ui_radio("features_def", 2,
+			[ [ 2, $text{'massdomains_features2'}."<br>" ],
+			  [ 1, $text{'massdomains_features1'}." ".
+				&ui_select("feature1", undef, \@opts)."<br>" ],
+			  [ 0, $text{'massdomains_features0'}." ".
+				&ui_select("feature0", undef, \@opts)."<br>" ] ]
+			), 1, \@tds);
+	print &ui_hidden_end(),&ui_table_end();
 	}
-# Allowed features
-@opts = ( );
-foreach $f (@opt_features, "virt") {
-	push(@opts, [ $f, $text{'feature_'.$f} ]);
-	}
-foreach $f (@feature_plugins) {
-	push(@opts, [ $f, &plugin_call($f, "feature_name") ]);
-	}
-print &ui_table_row($text{'massdomains_features'},
-	&ui_radio("features_def", 2,
-		[ [ 2, $text{'massdomains_features2'}."<br>" ],
-		  [ 1, $text{'massdomains_features1'}." ".
-			&ui_select("feature1", undef, \@opts)."<br>" ],
-		  [ 0, $text{'massdomains_features0'}." ".
-			&ui_select("feature0", undef, \@opts)."<br>" ] ]),
-	1, \@tds);
-print &ui_hidden_end(),&ui_table_end();
 
 # Start section for PHP options
 @avail = &list_available_php_versions();
@@ -201,13 +211,15 @@ if (&can_edit_shell()) {
 
 print &ui_hidden_end(),&ui_table_end();
 
-print &ui_table_end();
 print &ui_submit($text{'massdomains_ok'}, "ok");
-print "&nbsp;\n";
-print &ui_submit($text{'massdomains_enablebutton'}, "enable");
-print &ui_submit($text{'massdomains_disablebutton'}, "disable");
-print "<b>$text{'disable_why'}</b> ",
-      &ui_textbox("why", undef, 30),"\n";
+if (&can_disable_domain($doms[0])) {
+	print "<br>\n";
+	print &ui_submit($text{'massdomains_enablebutton'}, "enable");
+	print "<br>\n";
+	print &ui_submit($text{'massdomains_disablebutton'}, "disable");
+	print "<b>$text{'disable_why'}</b> ",
+	      &ui_textbox("why", undef, 30),"<br>\n";
+	}
 print &ui_form_end();
 
 &ui_print_footer("", $text{'index_return'});

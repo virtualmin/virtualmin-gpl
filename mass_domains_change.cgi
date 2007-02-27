@@ -22,7 +22,10 @@ if ($in{'enable'}) {
 
 	foreach $d (@doms) {
 		&$first_print(&text('massdomains_edom', $d->{'dom'}));
-		if (!$d->{'disabled'}) {
+		if (!&can_disable_domain($d)) {
+			&$second_print($text{'massdomains_ecannotenable'});
+			}
+		elsif (!$d->{'disabled'}) {
 			&$second_print($text{'massdomains_ealready'});
 			}
 		elsif (!(@enable = &get_enable_features($d))) {
@@ -80,7 +83,10 @@ elsif ($in{'disable'}) {
 
 	foreach $d (@doms) {
 		&$first_print(&text('massdomains_ddom', $d->{'dom'}));
-		if ($d->{'disabled'}) {
+		if (!&can_disable_domain($d)) {
+			&$second_print($text{'massdomains_ecannotdisable'});
+			}
+		elsif ($d->{'disabled'}) {
 			&$second_print($text{'massdomains_dalready'});
 			}
 		elsif (!(@disable = &get_disable_features($d))) {
@@ -197,6 +203,7 @@ else {
 		# Update features
 		local %check;
 		foreach $f (&domain_features($d), @feature_plugins) {
+			next if (!&can_use_feature($f));
 			if ($in{$f} == 1) {
 				$newdom->{$f} = 1;
 				if (!$d->{$f}) {
@@ -210,7 +217,7 @@ else {
 
 		# Update owner limits
 		local $changed_limits = 0;
-		if (!$d->{'parent'}) {
+		if (!$d->{'parent'} && &can_edit_limits($d)) {
 			foreach $l (@limit_types) {
 				if ($in{$l."_def"} == 1) {
 					$newdom->{$l} = undef;
