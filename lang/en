@@ -2698,6 +2698,8 @@ massdomains_phpmode=PHP execution mode
 massdomains_phpmoding=Changing PHP execution mode ..
 massdomains_rubymode=Ruby execution mode
 massdomains_rubymoding=Changing Ruby execution mode ..
+massdomains_ecannotenable=.. you are not allowed to enable this domain.
+massdomains_ecannotdisable=.. you are not allowed to disable this domain.
 
 newmxs_title=Secondary Mail Servers
 newmxs_header=Automatic secondary mail servers
