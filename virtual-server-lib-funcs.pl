@@ -8192,7 +8192,7 @@ if (&can_create_sub_servers() && !$d->{'alias'} && $unixer->{'unix'}) {
 	# Domain alias and sub-domain buttons
 	local ($dleft, $dreason, $dmax) = &count_domains("realdoms");
 	local ($aleft, $areason, $amax) = &count_domains("aliasdoms");
-	if ($dleft != 0 && &virtual_server::can_create_master_servers() &&
+	if ($dleft != 0 && &can_create_sub_servers() &&
 	    !$d->{'parent'}) {
 		# Sub-server
 		push(@rv, { 'page' => 'domain_form.cgi',
