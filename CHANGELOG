@@ -531,3 +531,4 @@ All autoreply email message files are now hard linked to from /var/virtualmin-au
 Fixed bug that broke renaming of virtual servers when using debian-style sites-enabled directory for the Apache config.
 Fixed bug that prevented autoresponders from being updated properly when renaming or moving virtual servers.
 Fixed the Nucleus script installer so that it actually works, and increased version to 3.24.
+Fixed the b2evolution script installer to correctly use it's built-in scripts for setting up the config files and database.

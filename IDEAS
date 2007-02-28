@@ -41,8 +41,6 @@
 
  - better coverage of files by webmin_log
 
- - update b2evolution script installer
-
  - command-line programs for simple aliases
 
  - reseller-level option to hide reseller limits from domain owners
@@ -51,8 +49,4 @@
  - better selector for backup / restore target
 	- form should be in sections
 	- all features enabled by default
-
- - mass domains form and use by domain owners or resellers
-	- limits
-	- total assignable quotas / features for resellers
 
