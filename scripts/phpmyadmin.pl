@@ -19,13 +19,13 @@ return "A browser-based MySQL database management interface.";
 # script_phpmyadmin_versions()
 sub script_phpmyadmin_versions
 {
-return ( "2.9.2", "2.7.0-pl2", "2.6.4-pl4" );
+return ( "2.10.0", "2.7.0-pl2", "2.6.4-pl4" );
 }
 
 sub script_phpmyadmin_version_desc
 {
 local ($ver) = @_;
-return $ver >= 2.8 ? "$ver (Stable)" : "$ver (Old)";
+return &compare_versions($ver, 2.8) > 0 ? "$ver (Stable)" : "$ver (Old)";
 }
 
 sub script_phpmyadmin_category
@@ -129,11 +129,14 @@ return undef;
 sub script_phpmyadmin_files
 {
 local ($d, $ver, $opts, $upgrade) = @_;
-if ($ver <= 2.2) {
+if (&compare_versions($ver, 2.2) < 0) {
 	$ver = $ver."-php";
 	}
 elsif (&compare_versions($ver, "2.9.1.1") >= 0) {
 	$ver = $ver."-english";
+	}
+elsif (&compare_versions($ver, "2.10.0") >= 0) {
+	$ver = $ver."--all-languages-utf-8-only";
 	}
 local @files = ( { 'name' => "source",
 	   'file' => "phpMyAdmin-$ver.zip",

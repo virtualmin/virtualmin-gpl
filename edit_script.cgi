@@ -37,7 +37,9 @@ print &ui_table_end();
 
 # Show un-install and upgrade buttons
 print &ui_submit($text{'scripts_uok'}, "uninstall"),"\n";
-@vers = sort { $a <=> $b } grep { $_ >= $sinfo->{'version'} } @{$script->{'versions'}};
+@vers = sort { $a <=> $b }
+	     grep { &compare_versions($_, $sinfo->{'version'}) > 0 }
+		  @{$script->{'versions'}};
 if (@vers) {
 	print "&nbsp;&nbsp;\n";
 	print &ui_submit($text{'scripts_upok'}, "upgrade"),"\n";

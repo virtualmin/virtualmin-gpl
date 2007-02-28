@@ -113,20 +113,6 @@ if ($header{'location'} =~ /^(http|https):\/\/$host:$port$page(.*)$/ ||
 	&redirect("$url/$2");
 	exit;
 	}
-elsif ($header{'www-authenticate'}) {
-	# Invalid login
-	if ($config{'loginmode'} == 2) {
-		print "Set-Cookie: tunnel=; path=/\n";
-		&error(&text('link_eautologin', "<tt>$openurl</tt>",
-		     "/$module_name/link.cgi/$path"));
-		}
-	elsif ($user) {
-		&error(&text('link_elogin', $host, $user));
-		}
-	else {
-		&error(&text('link_enouser', $host));
-		}
-	}
 else {
 	# just output the headers
 	print $headers,"\n";
