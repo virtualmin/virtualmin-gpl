@@ -5434,6 +5434,12 @@ if ($dom->{'parent'}) {
 	&setup_for_subdomain($parentdom, $parentuser, $dom);
 	}
 
+# Work out if this server is being created on the primary default IP address
+if ($dom->{'ip'} eq &get_default_ip() &&
+    !$dom->{'virt'}) {
+	$dom->{'defip'} = 1;
+	}
+
 # Set up all the selected features (except Webmin login)
 my $f;
 local %vital = map { $_, 1 } @vital_features;

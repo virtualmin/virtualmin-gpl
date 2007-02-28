@@ -49,11 +49,13 @@ foreach $sd (@doms) {
 	if ($sd->{'virt'}) {
 		# Change virtual IP
 		$sd->{'ip'} = $in{'ip'};
+		delete($sd->{'defip'});
 		&try_function("virt", "modify_virt", $sd, $oldd);
 		}
 	elsif ($in{'ip'}) {
 		# Changing shared IP
 		$sd->{'ip'} = $in{'ip'};
+		$sd->{'defip'} = $sd->{'ip'} eq &get_default_ip();
 		}
 	if ($sd->{'web'}) {
 		$sd->{'web_port'} = $in{'port'};

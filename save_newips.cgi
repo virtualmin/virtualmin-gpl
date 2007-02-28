@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-# Actually update the IPs
+# Actually update the IPs for multiple servers at once
 
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newips_ecannot'});

@@ -208,6 +208,7 @@ foreach $sd (&get_domain_by("parent", $d->{'id'})) {
 if ($config{'all_namevirtual'} && !$d->{'alias'}) {
 	# Possibly changing IP
 	$d->{'ip'} = $in{'ip'};
+	$d->{'defip'} = $d->{'ip'} eq &get_default_ip();
 	delete($d->{'dns_ip'});
 	}
 elsif ($in{'virt'} && !$d->{'virt'}) {
@@ -216,11 +217,13 @@ elsif ($in{'virt'} && !$d->{'virt'}) {
 	$d->{'virt'} = 1;
 	$d->{'name'} = 0;
 	delete($d->{'dns_ip'});
+	delete($d->{'defip'});
 	&setup_virt($d);
 	}
 elsif (!$in{'virt'} && $d->{'virt'}) {
 	# Need to take down IP, and revert to default
 	$d->{'ip'} = &get_default_ip($d->{'reseller'});
+	$d->{'defip'} = $d->{'ip'} eq &get_default_ip();
 	$d->{'virt'} = 0;
 	$d->{'name'} = 1;
 	delete($d->{'dns_ip'});

@@ -50,3 +50,7 @@
 	- form should be in sections
 	- all features enabled by default
 
+ - EC2 support
+	- dynamic DNS (what if primary IP changes?)
+	- Create AMI?
+
