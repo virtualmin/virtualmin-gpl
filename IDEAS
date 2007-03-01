@@ -53,4 +53,7 @@
  - EC2 support
 	- dynamic DNS (what if primary IP changes?)
 	- Create AMI?
+	- Need way to specify licence key after install, for use with AMI
+	  'template' which has software but no licence
+		- update yum / apt too
 

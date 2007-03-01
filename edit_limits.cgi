@@ -15,8 +15,6 @@ print &ui_form_start("save_limits.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
 print &ui_table_start($text{'limits_header'}, "100%", 2);
 
-print &ui_table_row($text{'edit_user'}, "<tt>$d->{'user'}</tt>");
-
 # Maximum allowed mailboxes
 print &ui_table_row(&hlink($text{'form_mailboxlimit'}, "limits_mailbox"),
 	&ui_opt_textbox("mailboxlimit", $d->{'mailboxlimit'}, 4,

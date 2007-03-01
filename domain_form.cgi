@@ -296,7 +296,7 @@ if (!$parentuser && !$config{'template_auto'}) {
 		undef, \@tds);
 
 	# Show input for default database name limit
-	print &ui_table_row($text{'limits_nodbname'},
+	print &ui_table_row(&hlink($text{'limits_nodbname'}, "nodbname"),
 		&ui_radio("nodbname", $config{'defnodbname'} ? 1 : 0,
 			  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]),
 		undef, \@tds);
