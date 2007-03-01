@@ -7,7 +7,7 @@ require './virtual-server-lib.pl';
 
 # Validate inputs
 &error_setup($text{'backup_err2'});
-if ($in{'all'}) {
+if ($in{'all'} == 1) {
 	@doms = &list_domains();
 	}
 elsif ($in{'all'} == 2) {
