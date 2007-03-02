@@ -60,10 +60,10 @@ print "</table>\n";
 # Output HTMLarea init code
 print <<EOF;
 <script type="text/javascript">
-  _editor_url = "$gconfig{'webprefix'}/mailboxes/htmlarea/";
+  _editor_url = "$gconfig{'webprefix'}/mailboxes/xinha/";
   _editor_lang = "en";
 </script>
-<script type="text/javascript" src="../mailboxes/htmlarea/htmlarea.js"></script>
+<script type="text/javascript" src="../mailboxes/xinha/htmlarea.js"></script>
 
 <script type="text/javascript">
 var editor = null;
