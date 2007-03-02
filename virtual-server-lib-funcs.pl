@@ -13,7 +13,7 @@ if (!$virtual_server_root) {
 	$virtual_server_root = "$1/virtual-server";
 	}
 foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
-		 "php", "ruby") {
+		 "php", "ruby", "vui") {
 	if (-r "$virtual_server_root/$lib-lib.pl") {
 		do "$virtual_server_root/$lib-lib.pl";
 		if ($@) {
@@ -4669,82 +4669,81 @@ local $defport = $mode == 1 ? 21 : $mode == 2 ? 22 : undef;
 local $serverport = $port && $port != $defport ? "$server:$port" : $server;
 local $rv;
 
-$rv .= "<table cellpadding=1 cellspacing=0>";
+local @opts;
 if (!$nolocal) {
 	# Local file field (can be anywhere)
-	$rv .= "<tr> <td>".
-               &ui_oneradio($name."_mode", 0, "", $mode == 0)."</td>\n";
-	$rv .= "<td colspan=2>$text{'backup_mode0'} ".
-	       &ui_textbox($name."_file", $mode == 0 ? $path : "", 40)." ".
-	       &file_chooser_button($name."_file")."</td> </tr>\n";
+	push(@opts, [ 0, $text{'backup_mode0'},
+	       &ui_textbox($name."_file", $mode == 0 ? $path : "", 50)." ".
+	       &file_chooser_button($name."_file")."<br>\n" ]);
 	}
 elsif ($d && $d->{'dir'}) {
 	# Limit local file to under virtualmin-backups
-	$rv .= "<tr> <td>".
-               &ui_oneradio($name."_mode", 0, "", $mode == 0)."</td>\n";
-	$rv .= "<td colspan=2>$text{'backup_mode0a'}".
+	push(@opts, [ 0, $text{'backup_mode0a'},
 	       &ui_textbox($name."_file",
 		  $mode == 0 && $path =~ /virtualmin-backup\/(.*)$/ ? $1 : "",
-		  40)."</td> </tr>\n";
+		  50)."<br>\n" ]);
 	}
 
 # FTP file fields
-$rv .= "<tr> <td>".
-       &ui_oneradio($name."_mode", 1, "", $mode == 1)."</td>\n";
-$rv .= "<td>$text{'backup_mode1'} ".
+local $ft = "<table>\n";
+$ft .= "<tr> <td>$text{'backup_ftpserver'}</td> <td>".
        &ui_textbox($name."_server", $mode == 1 ? $serverport : undef, 20).
-       "</td>\n";
-$rv .= "<td>$text{'backup_path'} ".
-       &ui_textbox($name."_path", $mode == 1 ? $path : undef, 20).
        "</td> </tr>\n";
-$rv .= "<tr> <td></td>\n";
-$rv .= "<td>$text{'backup_login'} ".
+$ft .= "<tr> <td>$text{'backup_path'}</td> <td>".
+       &ui_textbox($name."_path", $mode == 1 ? $path : undef, 50).
+       "</td> </tr>\n";
+$ft .= "<tr> <td>$text{'backup_login'}</td> <td>".
        &ui_textbox($name."_user", $mode == 1 ? $user : undef, 15).
-       "</td>\n";
-$rv .= "<td>$text{'backup_pass'} ".
+       "</td> </tr>\n";
+$ft .= "<tr> <td>$text{'backup_pass'}</td> <td>".
        &ui_password($name."_pass", $mode == 1 ? $pass : undef, 15).
        "</td> </tr>\n";
+$ft .= "</table>\n";
+push(@opts, [ 1, $text{'backup_mode1'}, $ft ]);
 
 # SCP file fields
-$rv .= "<tr> <td>".
-       &ui_oneradio($name."_mode", 2, "", $mode == 2)."</td>\n";
-$rv .= "<td>$text{'backup_mode2'} ".
+local $st = "<table>\n";
+$st .= "<tr> <td>$text{'backup_sshserver'}</td> <td>".
        &ui_textbox($name."_sserver", $mode == 2 ? $serverport : undef, 20).
-       "</td>\n";
-$rv .= "<td>$text{'backup_path'} ".
-       &ui_textbox($name."_spath", $mode == 2 ? $path : undef, 20).
        "</td> </tr>\n";
-$rv .= "<tr> <td></td>\n";
-$rv .= "<td>$text{'backup_login'} ".
+$st .= "<tr> <td>$text{'backup_path'}</td> <td>".
+       &ui_textbox($name."_spath", $mode == 2 ? $path : undef, 50).
+       "</td> </tr>\n";
+$st .= "<tr> <td>$text{'backup_login'}</td> <td>".
        &ui_textbox($name."_suser", $mode == 2 ? $user : undef, 15).
-       "</td>\n";
-$rv .= "<td>$text{'backup_pass'} ".
+       "</td> </tr>\n";
+$st .= "<tr> <td>$text{'backup_pass'}</td> <td>".
        &ui_password($name."_spass", $mode == 2 ? $pass : undef, 15).
        "</td> </tr>\n";
+$st .= "</table>\n";
+push(@opts, [ 2, $text{'backup_mode2'}, $st ]);
 
 if (&can_use_s3()) {
 	# S3 backup fields (bucket, access key ID, secret key and file)
-	$rv .= "<tr> <td>".
-	       &ui_oneradio($name."_mode", 3, "", $mode == 3)."</td>\n";
-	$rv .= "<td>$text{'backup_mode3'} ".
+	local $st = "<table>\n";
+	$st .= "<tr> <td>$text{'backup_bucket'}</td> <td>".
 	       &ui_textbox($name."_bucket", $mode == 3 ? $server : undef, 20).
-	       "</td>\n";
-	$rv .= "<tr> <td></td>\n";
-	$rv .= "<td>$text{'backup_akey'} ".
+	       "</td> </tr>\n";
+	$st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
 	       &ui_textbox($name."_akey", $mode == 3 ? $user : undef, 20).
-	       "</td>\n";
-	$rv .= "<td>$text{'backup_skey'} ".
+	       "</td> </tr>\n";
+	$st .= "<tr> <td>$text{'backup_skey'}</td> <td>".
 	       &ui_password($name."_skey", $mode == 3 ? $pass : undef, 40).
 	       "</td> </tr>\n";
-	$rv .= "<tr> <td></td>\n";
-	$rv .= "<td colspan=3>$text{'backup_s3file'} ".
+	$st .= "<tr> <td>$text{'backup_s3file'}</td> <td>".
 	       &ui_opt_textbox($name."_s3file", $mode == 3 ? $path : undef,
 			       30, $text{'backup_nos3file'}).
-	       "</td>\n";
+	       "</td> </tr>\n";
+	$st .= "</table>\n";
+	push(@opts, [ 3, $text{'backup_mode3'}, $st ]);
 	}
 
-$rv .= "</table>\n";
-return $rv;
+if (defined(&ui_radio_selector)) {
+	return &ui_radio_selector(\@opts, $name."_mode", $mode);
+	}
+else {
+	return &virtualmin_ui_radio_selector(\@opts, $name."_mode", $mode);
+	}
 }
 
 # parse_backup_destination(name, &in, no-local, [&domain])
@@ -9932,6 +9931,21 @@ sub save_shared_ips
 {
 $config{'sharedips'} = join(" ", @_);
 &save_module_config();
+}
+
+# get_available_backup_features()
+# Returns a list of features for which backups are possible
+sub get_available_backup_features
+{
+local @rv;
+foreach my $f (@backup_features) {
+	local $bfunc = "backup_$f";
+	if (defined(&$bfunc) &&
+	    ($config{$f} || $f eq "unix" || $f eq "virtualmin")) {
+		push(@rv, $f);
+		}
+	}
+return @rv;
 }
 
 $done_virtual_server_lib_funcs = 1;

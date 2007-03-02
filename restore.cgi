@@ -15,7 +15,13 @@ else {
 	}
 ($mode) = &parse_backup_url($src);
 $mode > 0 || -r $src || -d $src || &error($text{'restore_esrc'});
-@do_features = split(/\0/, $in{'feature'});
+
+if ($in{'feature_all'}) {
+	@do_features = ( &get_available_backup_features(), @backup_plugins );
+	}
+else {
+	@do_features = split(/\0/, $in{'feature'});
+	}
 @do_features || &error($text{'restore_efeatures'});
 %do_features = map { $_, 1 } @do_features;
 $d = defined($in{'onedom'}) ? &get_domain($in{'onedom'}) : undef;

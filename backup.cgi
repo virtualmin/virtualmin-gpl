@@ -27,7 +27,13 @@ if (@doms) {
 else {
 	$cbmode = &can_backup_domain();
 	}
-@do_features = split(/\0/, $in{'feature'});
+
+if ($in{'feature_all'}) {
+	@do_features = ( &get_available_backup_features(), @backup_plugins );
+	}
+else {
+	@do_features = split(/\0/, $in{'feature'});
+	}
 @do_features || &error($text{'backup_efeatures'});
 $dest = &parse_backup_destination("dest", \%in, $cbmode == 2, $doms[0]);
 $dest = &backup_strftime($dest) if ($in{'strftime'});

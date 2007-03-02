@@ -19,8 +19,16 @@ else {
 		push(@doms, $dinfo) if ($dinfo);
 		}
 	}
-foreach $f (@backup_features, @backup_plugins) {
-	push(@do_features, $f) if ($config{'backup_feature_'.$f});
+
+# Work out features and options
+if ($config{'backup_feature_all'}) {
+	@do_features = ( &get_available_backup_features(), @backup_plugins );
+	}
+else {
+	@do_features = grep { $config{'backup_feature_'.$_} }
+			    (@backup_features, @backup_plugins);
+	}
+foreach $f (@do_features) {
 	$options{$f} = { map { split(/=/, $_) }
 			  split(/,/, $config{'backup_opts_'.$f}) };
 	}

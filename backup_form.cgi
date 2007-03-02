@@ -3,17 +3,21 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+if ($in{'dom'}) {
+	$d = &get_domain($in{'dom'});
+	($cbmode = &can_backup_domain($d)) || &error($text{'backup_ecannot'});
+	$msg = &domain_in($d);
+	}
 
 if ($in{'sched'}) {
-	&ui_print_header(undef, $text{'backup_title2'}, "");
+	&ui_print_header($msg, $text{'backup_title2'}, "");
 	print &ui_form_start("backup_sched.cgi", "post");
-	print &ui_table_start($text{'backup_header2'}, undef, 2);
 	}
 else {
-	&ui_print_header(undef, $text{'backup_title'}, "");
+	&ui_print_header($msg, $text{'backup_title'}, "");
 	print &ui_form_start("backup.cgi", "post");
-	print &ui_table_start($text{'backup_header'}, undef, 2);
 	}
+@tds = ( "width=30% ");
 
 # Work out default backup selection
 $dest = $config{'backup_dest'};
@@ -22,10 +26,8 @@ $backup_mkdir = $config{'backup_mkdir'};
 $backup_errors = $config{'backup_errors'};
 $backup_strftime = $config{'backup_strftime'};
 $backup_onebyone = $config{'backup_onebyone'};
-if (defined($in{'dom'})) {
+if ($d) {
 	# Just one domain
-	$d = &get_domain($in{'dom'});
-	($cbmode = &can_backup_domain($d)) || &error($text{'backup_ecannot'});
 	if (defined($d->{'backup_dest'})) {
 		$dest = $d->{'backup_dest'};
 		}
@@ -45,11 +47,11 @@ if (defined($in{'dom'})) {
 	print &ui_hidden("dom", $in{'dom'}),"\n";
 	print &ui_hidden("doms", $in{'dom'}),"\n";
 	print &ui_hidden("backup_all", 0),"\n";
-	print &ui_table_row(&hlink($text{'backup_doms'}, "backup_doms"),
-			    "<tt>$d->{'dom'}</tt>");
 	}
 else {
 	# User can select which domains
+	print &ui_hidden_table_start($text{'backup_headerdoms'}, "width=100%",
+				     2, "doms", 1, \@tds);
 	($cbmode = &can_backup_domain()) || &error($text{'backup_ecannot'});
 	$backup_all = int($config{'backup_all'});
 	@bak = split(/\s+/, $config{'backup_doms'});
@@ -61,27 +63,29 @@ else {
 		&servers_input("doms", \@bak, \@doms);
 	print &ui_table_row(&hlink($text{'backup_doms'}, "backup_doms"),
 			    $dsel);
+	print &ui_hidden_table_end("doms");
 	}
 
 # Show feature and plugin selection boxes
+print &ui_hidden_table_start($text{'backup_headerfeatures'}, "width=100%", 2,
+			     "features", 0, \@tds);
 $ftable = "";
+$ftable .= &ui_radio("feature_all", int($config{'backup_feature_all'}),
+		[ [ 1, $text{'backup_allfeatures'} ],
+		  [ 0, $text{'backup_selfeatures'} ] ])."<br>\n";
 @links = ( &select_all_link("feature"), &select_invert_link("feature") );
 $ftable .= &ui_links_row(\@links);
-foreach $f (@backup_features) {
-	local $bfunc = "backup_$f";
-	if (defined(&$bfunc) &&
-	    ($config{$f} || $f eq "unix" || $f eq "virtualmin")) {
-		$ftable .= &ui_checkbox("feature", $f,
-			$text{'backup_feature_'.$f} || $text{'feature_'.$f},
-			$config{'backup_feature_'.$f})."\n";
-		local $ofunc = "show_backup_$f";
-		if (defined(&$ofunc)) {
-			local %opts = map { split(/=/, $_) }
-					 split(/,/, $config{'backup_opts_'.$f});
-			$ftable .= &$ofunc(\%opts);
-			}
-		$ftable .= "<br>\n";
+foreach $f (&get_available_backup_features()) {
+	$ftable .= &ui_checkbox("feature", $f,
+		$text{'backup_feature_'.$f} || $text{'feature_'.$f},
+		$config{'backup_feature_'.$f})."\n";
+	local $ofunc = "show_backup_$f";
+	if (defined(&$ofunc)) {
+		local %opts = map { split(/=/, $_) }
+				 split(/,/, $config{'backup_opts_'.$f});
+		$ftable .= &$ofunc(\%opts);
 		}
+	$ftable .= "<br>\n";
 	}
 foreach $f (@backup_plugins) {
 	$ftable .= &ui_checkbox("feature", $f,
@@ -110,8 +114,11 @@ if (&can_backup_virtualmin() && !defined($in{'dom'})) {
 	print &ui_table_row(&hlink($text{'backup_virtualmin'},
 				   "backup_virtualmin"), $vtable);
 	}
+print &ui_hidden_table_end("features");
 
 # Show destination fields
+print &ui_hidden_table_start($text{'backup_headerdest'}, "width=100%", 2,
+			     "dest", 1, \@tds);
 print &ui_table_row(&hlink($text{'backup_dest'}, "backup_dest"),
 	    &show_backup_destination("dest", $dest, $cbmode == 2, $d)."\n".
 	    &ui_checkbox("strftime", 1,
@@ -142,9 +149,13 @@ print &ui_table_row(&hlink($text{'backup_errors'}, "backup_errors"),
 		    &ui_radio("errors", int($backup_errors),
 			      [ [ 0, $text{'backup_errors0'} ],
 				[ 1, $text{'backup_errors1'} ] ]));
+print &ui_hidden_table_end("dest");
 
 if ($in{'sched'}) {
 	# Show schedule inputs
+	print &ui_hidden_table_start($text{'backup_headersched'}, "width=100%",
+				     2, "sched", 0, \@tds);
+
 	&foreign_require("cron", "cron-lib.pl");
 	local @jobs = &cron::list_cron_jobs();
 	local ($job) = grep { $_->{'user'} eq 'root' &&
@@ -165,12 +176,11 @@ if ($in{'sched'}) {
 	$job ||= { 'special' => 'daily' };
 	&cron::show_times_input($job);
 	print "</table></td> </tr>\n";
+	print &ui_hidden_table_end("sched");
 
-	print &ui_table_end();
 	print &ui_form_end([ [ "save", $text{'backup_save'} ] ]);
 	}
 else {
-	print &ui_table_end();
 	print &ui_form_end([ [ "now", $text{'backup_now'} ] ]);
 	}
 

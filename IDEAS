@@ -46,14 +46,12 @@
  - reseller-level option to hide reseller limits from domain owners
 	- bug http://www.virtualmin.com/ticket-tracker/bug?bug%5fnumber=333
 
- - better selector for backup / restore target
-	- form should be in sections
-	- all features enabled by default
-
  - EC2 support
 	- dynamic DNS (what if primary IP changes?)
 	- Create AMI?
 	- Need way to specify licence key after install, for use with AMI
 	  'template' which has software but no licence
 		- update yum / apt too
+
+  - weebly integration
 

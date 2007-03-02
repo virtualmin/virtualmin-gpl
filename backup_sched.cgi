@@ -20,7 +20,12 @@ else {
 		}
 	}
 @doms || &error($text{'backup_edoms'});
-@do_features = split(/\0/, $in{'feature'});
+if ($in{'feature_all'}) {
+	@do_features = ( &get_available_backup_features(), @backup_plugins );
+	}
+else {
+	@do_features = split(/\0/, $in{'feature'});
+	}
 @do_features || &error($text{'backup_efeatures'});
 $dest = &parse_backup_destination("dest", \%in);
 if ($in{'onebyone'}) {
@@ -89,7 +94,8 @@ else {
 # Update module config with domains and features
 $config{'backup_all'} = $in{'all'};
 $config{'backup_doms'} = join(" ", split(/\0/, $in{'doms'}));
-%features = map { $_, 1 } @do_features;
+%features = map { $_, 1 } split(/\0/, $in{'feature'});
+$config{'backup_feature_all'} = $in{'feature_all'};
 foreach $f (@backup_features, @backup_plugins) {
 	$config{'backup_feature_'.$f} = $features{$f} ? 1 : 0;
 	}

@@ -1,5 +1,6 @@
 
 $force_load_features = 1;	# so that the latest feature-* files are used
+$done_virtual_server_lib_funcs = 0;
 do 'virtual-server-lib.pl';
 
 sub module_install
@@ -127,6 +128,13 @@ if ($virtualmin_pro) {
 			&create_autoreply_alias_links($d);
 			}
 		}
+	}
+
+# If installing for the first time, enable backup of all features by default
+local @doms = &list_domains();
+if (!@doms && !defined($config{'backup_feature_all'}) {
+	$config{'backup_feature_all'} = 1;
+	&save_module_config();
 	}
 }
 
