@@ -58,17 +58,20 @@ print &ui_form_end();
 print "</table>\n";
 
 # Output HTMLarea init code
+$mbroot = &module_root_directory("mailboxes");
+$prog = -d "$mbroot/xinha" ? "xinha" : "htmlarea";
 print <<EOF;
 <script type="text/javascript">
-  _editor_url = "$gconfig{'webprefix'}/mailboxes/xinha/";
+  _editor_url = "$gconfig{'webprefix'}/mailboxes/$prog/";
   _editor_lang = "en";
 </script>
-<script type="text/javascript" src="../mailboxes/xinha/htmlarea.js"></script>
+<script type="text/javascript" src="../mailboxes/$prog/htmlarea.js"></script>
 
 <script type="text/javascript">
 var editor = null;
 function initEditor() {
   editor = new HTMLArea("body");
+  editor.config.baseHref = "http://www.$d->{'dom'}/";
   editor.config.baseURL = "http://www.$d->{'dom'}/";
   editor.generate();
   return false;

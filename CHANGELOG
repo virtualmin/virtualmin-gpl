@@ -534,3 +534,5 @@ Fixed the Nucleus script installer so that it actually works, and increased vers
 Fixed the b2evolution script installer to correctly use it's built-in scripts for setting up the config files and database.
 ---- Changes since 3.36 ----
 Increased version of Gallery script installer to 2.2-rc-2.
+Change the Module Config option for the Upload and Download module to limit to uploads only.
+Replaced the HTMLarea widget for editing web pages with Xinha, when using Webmin 1.332 or later.
