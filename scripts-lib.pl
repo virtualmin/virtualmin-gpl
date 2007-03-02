@@ -206,7 +206,8 @@ foreach my $f (@files) {
 			my ($host, $port, $page, $ssl) =
 				&parse_http_url($f->{'url'});
 			&http_download($host, $port, $page, $temp, \$error,
-				       $cb, $ssl);
+				       $cb, $ssl, undef, undef, undef, 0,
+				       $f->{'nocache'});
 			}
 		elsif ($f->{'url'} =~ /^ftp:\/\/([^\/]+)(\/.*)/) {
 			# Via FTP
