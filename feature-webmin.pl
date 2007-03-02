@@ -543,6 +543,11 @@ if ($extramods{'updown'} && $_[0]->{'unix'}) {
 		       'dirs' => $_[0]->{'home'},
 		       'home' => 0,
 		       'mode' => 3, );
+	if ($extramods{'updown'} == 2) {
+		# Can only upload
+		$acl{'download'} = 0;
+		$acl{'fetch'} = 0;
+		}
 	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "updown")
 		if (!$hasmods{'updown'});
 	push(@mods, "updown");
