@@ -1448,131 +1448,98 @@ sub show_template_web
 {
 local ($tmpl) = @_;
 
-print "<tr> <td valign=top>",&hlink("<b>$text{'tmpl_web'}</b>",
-				    "template_web"),"</td> <td>\n";
-print &none_def_input("web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1);
-print "<br><textarea name=web rows=10 cols=60>";
-if ($tmpl->{'web'} ne "none") {
-	print join("\n", split(/\t/, $tmpl->{'web'}));
-	}
-print "</textarea>\n";
+local $ndi = &none_def_input("web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1);
+$ndi .= "<br>\n" if ($ndi);
+print &ui_table_row(&hlink($text{'tmpl_web'}, "template_web"),
+	$ndi.
+	&ui_textarea("web", $tmpl->{'web'} eq "none" ? "" :
+				join("\n", split(/\t/, $tmpl->{'web'})),
+		     10, 60));
 
-print "<table>\n";
 
 # Input for adding suexec directives
-print "<tr> <td>",&hlink("<b>$text{'newweb_suexec'}</b>",
-			 "template_suexec"),"</td>\n";
-print "<td>",&ui_radio("suexec", $tmpl->{'web_suexec'} ? 1 : 0,
-       [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]),"</td> </tr>\n";
+print &ui_table_row(&hlink($text{'newweb_suexec'}, "template_suexec"),
+	&ui_radio("suexec", $tmpl->{'web_suexec'} ? 1 : 0,
+	       [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
 # Input for logging via program
-print "<tr> <td>",&hlink("<b>$text{'newweb_writelogs'}</b>",
-			 "template_writelogs"),"</td>\n";
-print "<td>",&ui_radio("writelogs", $tmpl->{'web_writelogs'} ? 1 : 0,
-       [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]),"</td> </tr>\n";
+print &ui_table_row(&hlink($text{'newweb_writelogs'}, "template_writelogs"),
+	&ui_radio("writelogs", $tmpl->{'web_writelogs'} ? 1 : 0,
+	       [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
 # Input for Apache user to add to domain's group
-print "<tr> <td valign=top>",&hlink("<b>$text{'newweb_user'}</b>",
-			 "template_user_def"),"</td>\n";
-print "<td>",&ui_radio("user_def", $tmpl->{'web_user'} eq 'none' ? 2 :
+print &ui_table_row(&hlink($text{'newweb_user'}, "template_user_def"),
+	&ui_radio("user_def", $tmpl->{'web_user'} eq 'none' ? 2 :
 				   $tmpl->{'web_user'} ? 0 : 1,
-       [ [ 2, $text{'no'}."<br>" ],
-	 [ 1, $text{'newweb_userdef'}."<br>" ],
-	 [ 0, $text{'newweb_useryes'}." ".
-	      &ui_user_textbox("user", $tmpl->{'web_user'} eq 'none' ?
-					'' : $tmpl->{'web_user'}) ] ]),
-      "</td> </tr>\n";
+	       [ [ 2, $text{'no'}."<br>" ],
+		 [ 1, $text{'newweb_userdef'}."<br>" ],
+		 [ 0, $text{'newweb_useryes'}." ".
+		      &ui_user_textbox("user", $tmpl->{'web_user'} eq 'none' ?
+						'' : $tmpl->{'web_user'}) ] ]));
 
 # HTML sub-directory input
-print "<tr> <td valign=top>",&hlink("<b>$text{'newweb_htmldir'}</b>",
-				    "template_html_dir_def"),"</td>\n";
-printf "<td nowrap><input type=radio name=html_dir_def value=1 %s> %s (%s)\n",
-	$tmpl->{'web_html_dir'} ? "" : "checked", $text{'default'},
-	"<tt>public_html</tt>";
-printf "<br><input type=radio name=html_dir_def value=0 %s> %s\n",
-	$tmpl->{'web_html_dir'} ? "checked" : "", $text{'newweb_htmldir0'};
-printf "<input name=html_dir size=20 value='%s'><br>%s</td> </tr>\n",
-	$tmpl->{'web_html_dir'}, ("&nbsp;" x 3).$text{'newweb_htmldir0suf'};
-$hdir = $tmpl->{'web_html_dir'} || "public_html";
+print &ui_table_row(&hlink($text{'newweb_htmldir'}, "template_html_dir_def"),
+	&ui_opt_textbox("html_dir", $tmpl->{'web_html_dir'}, 20,
+			"$text{'default'} (<tt>public_html</tt>)<br>",
+			$text{'newweb_htmldir0'})."<br>\n".
+	("&nbsp;" x 3).$text{'newweb_htmldir0suf'});
+local $hdir = $tmpl->{'web_html_dir'} || "public_html";
 
 # HTML directory permissions
-print "<tr> <td>",&hlink("<b>$text{'newweb_htmlperms'}</b>",
-			 "template_html_perms"),"</td>\n";
-print "<td>",&ui_textbox("html_perms", $tmpl->{'web_html_perms'}, 4),
-      "</td> </tr>\n";
+print &ui_table_row(&hlink($text{'newweb_htmlperms'}, "template_html_perms"),
+	&ui_textbox("html_perms", $tmpl->{'web_html_perms'}, 4));
 
 # Webalizer stats sub-directory input
-$smode = $tmpl->{'web_stats_hdir'} ? 2 :
-	 $tmpl->{'web_stats_dir'} ? 1 : 0;
-print "<tr> <td valign=top>",&hlink("<b>$text{'newweb_statsdir'}</b>",
-				    "template_stats_dir"),"</td>\n";
-printf "<td nowrap><input type=radio name=stats_mode value=0 %s> %s (%s)\n",
-	$smode == 0 ? "checked" : "", $text{'default'},
-	"<tt>$hdir/stats</tt>";
-printf "<br><input type=radio name=stats_mode value=1 %s> %s\n",
-	$smode == 1 ? "checked" : "",
-	&text('newweb_statsdir0', "<tt>$hdir</tt>");
-printf "<input name=stats_dir size=20 value='%s'>\n",
-	$tmpl->{'web_stats_dir'};
-printf "<br><input type=radio name=stats_mode value=2 %s> %s\n",
-	$smode == 2 ? "checked" : "",
-	&text('newweb_statsdir2', "<tt>$hdir</tt>");
-printf "<input name=stats_hdir size=20 value='%s'>\n",
-	$tmpl->{'web_stats_hdir'};
-print "</td> </tr>\n";
+local $smode = $tmpl->{'web_stats_hdir'} ? 2 :
+	       $tmpl->{'web_stats_dir'} ? 1 : 0;
+print &ui_table_row(&hlink($text{'newweb_statsdir'}, "template_stats_dir"),
+	&ui_radio("stats_mode", $smode,
+		  [ [ 0, "$text{'default'} (<tt>$hdir/stats</tt>)<br>" ],
+		    [ 1, &text('newweb_statsdir0', "<tt>$hdir</tt>")."\n".
+			 &ui_textbox("stats_dir",
+				     $tmpl->{'web_stats_dir'}, 20)."<br>" ],
+		    [ 2, &text('newweb_statsdir2', "<tt>$hdir</tt>")."\n".
+			 &ui_textbox("stats_hdir",
+				     $tmpl->{'web_stats_hdir'}, 20) ] ]));
 
 # Password-protect webalizer dir
-print "<tr> <td valign=top>",&hlink("<b>$text{'newweb_statspass'}</b>",
-				    "template_statspass"),"</td>\n";
-print "<td>",&ui_radio("statspass", $tmpl->{'web_stats_pass'} ? 1 : 0,
-       [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]),"</td> </tr>\n";
+print &ui_table_row(&hlink($text{'newweb_statspass'}, "template_statspass"),
+	&ui_radio("statspass", $tmpl->{'web_stats_pass'} ? 1 : 0,
+		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
 # Allow editing of Webalizer report
-print "<tr> <td valign=top>",&hlink("<b>$text{'newweb_statsedit'}</b>",
-				    "template_statsedit"),"</td>\n";
-print "<td>",&ui_radio("statsnoedit",
-		       $tmpl->{'web_stats_noedit'} ? 1 : 0,
-       [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]),"</td> </tr>\n";
+print &ui_table_row(&hlink($text{'newweb_statsedit'}, "template_statsedit"),
+	&ui_radio("statsnoedit", $tmpl->{'web_stats_noedit'} ? 1 : 0,
+	          [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
 
 # Alias mode
-print "<tr> <td valign=top>",&hlink("<b>$text{'tmpl_alias'}</b>",
-			    "template_alias_mode"),"</td> <td>\n";
-printf "<input type=radio name=alias_mode value=0 %s> %s<br>\n",
-	$tmpl->{'web_alias'} == 0 ? "checked" : "", $text{'tmpl_alias0'};
-printf "<input type=radio name=alias_mode value=2 %s> %s<br>\n",
-	$tmpl->{'web_alias'} == 2 ? "checked" : "", $text{'tmpl_alias2'};
-printf "<input type=radio name=alias_mode value=1 %s> %s<br>\n",
-	$tmpl->{'web_alias'} == 1 ? "checked" : "", $text{'tmpl_alias1'};
-print "</td> </tr>\n";
+print &ui_table_row(&hlink($text{'tmpl_alias'}, "template_alias_mode"),
+	&ui_radio("alias_mode", int($tmpl->{'web_alias'}),
+		  [ [ 0, $text{'tmpl_alias0'}."<br>" ],
+		    [ 2, $text{'tmpl_alias2'}."<br>" ],
+		    [ 1, $text{'tmpl_alias1'} ] ]));
 
 # Port for normal webserver
-print "<tr> <td>",&hlink("<b>$text{'newweb_port'}</b>",
-			 "template_web_port"),"</td>\n";
-printf "<td><input name=web_port size=6 value='%s'></td> </tr>\n",
-	$tmpl->{'web_port'};
+print &ui_table_row(&hlink($text{'newweb_port'}, "template_web_port"),
+	&ui_textbox("web_port", $tmpl->{'web_port'}, 6));
 
 # Port for SSL webserver
-print "<tr> <td>",&hlink("<b>$text{'newweb_sslport'}</b>",
-			 "template_web_sslport"),"</td>\n";
-printf "<td><input name=web_sslport size=6 value='%s'></td> </tr>\n",
-	$tmpl->{'web_sslport'};
+print &ui_table_row(&hlink($text{'newweb_sslport'}, "template_web_sslport"),
+	&ui_textbox("web_sslport", $tmpl->{'web_sslport'}, 6));
 
 if (&get_webmin_version() >= 1.201) {
 	# Setup matching Webmin/Usermin SSL cert
-	print "<tr> <td valign=top>",
-	      &hlink("<b>$text{'newweb_webmin'}</b>",
-		     "template_web_webmin_ssl"),"</td>\n";
-	print "<td>",&ui_radio("web_webmin_ssl",
-	   $tmpl->{'web_webmin_ssl'} ? 1 : 0,
-	   [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]),"</td> </tr>\n";
+	print &ui_table_row(&hlink($text{'newweb_webmin'},
+				   "template_web_webmin_ssl"),
+		&ui_radio("web_webmin_ssl",
+			  $tmpl->{'web_webmin_ssl'} ? 1 : 0,
+			  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
-	print "<tr> <td valign=top>",
-	      &hlink("<b>$text{'newweb_usermin'}</b>",
-		     "template_web_usermin_ssl"),"</td>\n";
-	print "<td>",&ui_radio("web_usermin_ssl",
-	   $tmpl->{'web_usermin_ssl'} ? 1 : 0,
-	   [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]),"</td> </tr>\n";
-
+	print &ui_table_row(&hlink($text{'newweb_usermin'},
+				   "template_web_usermin_ssl"),
+		&ui_radio("web_usermin_ssl",
+			  $tmpl->{'web_usermin_ssl'} ? 1 : 0,
+			  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 	}
 
 if ($virtualmin_pro) {
@@ -1600,7 +1567,7 @@ if ($virtualmin_pro) {
 			[ 1, $text{'phpmode_cgi'}."<br>" ] ]));
 	}
 
-print "</table></td> </tr>\n";
+print &ui_table_hr();
 
 # Webalizer template
 print &ui_table_row(&hlink($text{'tmpl_webalizer'},

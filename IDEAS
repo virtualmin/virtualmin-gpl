@@ -31,8 +31,6 @@
    created by resellers.
 	- When creating domain, plan can override template.
 
-  - ui-lib.pl and templates
-
   - use DenyGroups in SSH config to deny domain owner logins
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=643
 	- create a group, and add all denied members to it
@@ -57,3 +55,4 @@
 
   - test cpanel migration, and add plesk migration
 
+  - cron time selector is too complex - use popup

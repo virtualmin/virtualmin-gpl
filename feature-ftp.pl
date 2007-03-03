@@ -409,31 +409,20 @@ sub show_template_ftp
 local ($tmpl) = @_;
 
 # ProFTPd directives
-print "<tr> <td valign=top>",&hlink("<b>$text{'tmpl_ftp'}</b>",
-				    "template_ftp"),"</td> <td>\n";
-print &none_def_input("ftp", $tmpl->{'ftp'}, $text{'tmpl_ftpbelow'}, 1);
-print "<textarea name=ftp rows=10 cols=60>";
-if ($tmpl->{'ftp'} ne "none") {
-	print join("\n", split(/\t/, $tmpl->{'ftp'}));
-	}
-print "</textarea>\n";
-
-print "<table>\n";
+local $ndi = &none_def_input("ftp", $tmpl->{'ftp'}, $text{'tmpl_ftpbelow'}, 1);
+$ndi .= "<br>\n" if ($ndi);
+print &ui_table_row(&hlink($text{'tmpl_ftp'}, "template_ftp"),
+	$ndi.
+	&ui_textarea("ftp", $tmpl->{'ftp'} eq "none" ? "" :
+				join("\n", split(/\t/, $tmpl->{'ftp'})),
+		     10, 60));
 
 # Directory for anonymous FTP
-print "<tr> <td valign=top>",&hlink("<b>$text{'newftp_dir'}</b>",
-				    "template_ftp_dir_def"),"</td>\n";
-printf "<td nowrap><input type=radio name=ftp_dir_def value=1 %s> %s (%s)\n",
-	$tmpl->{'ftp_dir'} ? "" : "checked", $text{'default'},
-	"<tt>ftp</tt>";
-printf "<br><input type=radio name=ftp_dir_def value=0 %s> %s\n",
-	$tmpl->{'ftp_dir'} ? "checked" : "", $text{'newftp_dir0'};
-printf "<input name=ftp_dir size=20 value='%s'><br>%s</td> </tr>\n",
-	$tmpl->{'ftp_dir'}, ("&nbsp;" x 3).$text{'newftp_dir0suf'};
-
-print "</table>\n";
-print "</td> </tr>\n";
-
+print &ui_table_row(&hlink($text{'newftp_dir'}, "template_ftp_dir_def"),
+	&ui_opt_textbox("ftp_dir", $tmpl->{'ftp_dir'}, 20,
+			"$text{'default'} (<tt>ftp</tt>)",
+			$text{'newftp_dir0'})."<br>".
+	("&nbsp;" x 3).$text{'newftp_dir0suf'});
 }
 
 # parse_template_ftp(&tmpl)
