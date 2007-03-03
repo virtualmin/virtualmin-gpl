@@ -929,9 +929,10 @@ sub show_template_dns
 local ($tmpl) = @_;
 
 # DNS records
-local $nd = &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'}, 1);
+local $ndi = &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'}, 1);
+$ndi .= "<br>\n" if ($ndi =~ /\S/);
 print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
-	($nd =~ /\S/ ? "$nd<br>" : "").
+	$ndi.
 	&ui_textarea("dns", $tmpl->{'dns'} eq "none" ? "" :
 				join("\n", split(/\t/, $tmpl->{'dns'})),
 		     10, 60)."<br>\n".

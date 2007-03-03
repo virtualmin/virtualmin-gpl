@@ -410,7 +410,7 @@ local ($tmpl) = @_;
 
 # ProFTPd directives
 local $ndi = &none_def_input("ftp", $tmpl->{'ftp'}, $text{'tmpl_ftpbelow'}, 1);
-$ndi .= "<br>\n" if ($ndi);
+$ndi .= "<br>\n" if ($ndi =~ /\S/);
 print &ui_table_row(&hlink($text{'tmpl_ftp'}, "template_ftp"),
 	$ndi.
 	&ui_textarea("ftp", $tmpl->{'ftp'} eq "none" ? "" :
