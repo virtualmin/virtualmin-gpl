@@ -1449,9 +1449,8 @@ sub show_template_web
 local ($tmpl) = @_;
 
 local $ndi = &none_def_input("web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1);
-$ndi .= "<br>\n" if ($ndi =~ /\S/);
 print &ui_table_row(&hlink($text{'tmpl_web'}, "template_web"),
-	$ndi.
+	$ndi."<br>\n".
 	&ui_textarea("web", $tmpl->{'web'} eq "none" ? "" :
 				join("\n", split(/\t/, $tmpl->{'web'})),
 		     10, 60));

@@ -930,9 +930,8 @@ local ($tmpl) = @_;
 
 # DNS records
 local $ndi = &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'}, 1);
-$ndi .= "<br>\n" if ($ndi =~ /\S/);
 print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
-	$ndi.
+	$ndi."<br>\n".
 	&ui_textarea("dns", $tmpl->{'dns'} eq "none" ? "" :
 				join("\n", split(/\t/, $tmpl->{'dns'})),
 		     10, 60)."<br>\n".
