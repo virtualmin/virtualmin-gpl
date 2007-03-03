@@ -1253,15 +1253,10 @@ sub sysinfo_web
 local $ver = $apache::httpd_modules{'core'};
 $ver =~ s/^(\d+)\.(\d)(\d+)$/$1.$2.$3/;
 local @rv = ( [ $text{'sysinfo_apache'}, $ver ] );
-if (&foreign_check("software")) {
-	&foreign_require("software", "software-lib.pl");
-	foreach my $p ("php4", "php") {
-		local $n = &software::list_packages($p);
-		if ($n && $software::packages{0,'version'}) {
-			push(@rv, [ $text{'sysinfo_php'},
-				$software::packages{0,'version'} ]);
-			break;
-			}
+if (defined(&list_available_php_versions)) {
+	local @avail = map { $_->[0] } &list_available_php_versions();
+	if (@avail) {
+		push(@rv, [ $text{'sysinfo_php'}, join(", ", @avail) ]);
 		}
 	}
 return @rv;

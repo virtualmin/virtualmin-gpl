@@ -2555,7 +2555,7 @@ sysinfo_webalizer=Webalizer version
 sysinfo_os=Operating system
 sysinfo_perl=Perl version
 sysinfo_perlpath=Path to Perl
-sysinfo_php=PHP module version
+sysinfo_php=PHP version
 
 remote_ecannot=You are not allowed to run remote commands
 remote_eprogram=Invalid remote program name
@@ -3155,3 +3155,6 @@ sharedips_erip='$1' is already a shared IP address for a reseller
 sharedips_edom='$1' is a private IP address for virtual server $2
 sharedips_eactive='$1' is not currently active on the system - use the Network Configuration module to enable it
 sharedips_eaway='$1' cannot be removed from the shared address list, as it is used by virtual server $2
+
+newdynip_title=Dynamic IP Update
+
