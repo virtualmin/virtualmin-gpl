@@ -98,6 +98,44 @@ if (!$mailbox) {
 			    2, \@tds);
 	}
 
+print &ui_hidden_table_end();
+
+if (!$mailbox) {
+	# Start quota and home table
+	print &ui_hidden_table_start($text{'user_header2'}, "width=100%", 2,
+				     "table2", 0);
+	}
+
+if (!$mailbox && $user->{'mailquota'}) {
+	# Show Qmail/VPOPMail quota field
+	$user->{'qquota'} = "" if ($user->{'qquota'} eq "none");
+	print &ui_table_row(&hlink($text{'user_qquota'},"qmailquota"),
+		&ui_radio("qquota_def", $user->{'qquota'} ? 0 : 1,
+			       [ [ 1, $text{'form_unlimit'} ],
+				 [ 0, " " ] ])." ".
+		&ui_textbox("qquota", $user->{'qquota'} || "", 10)." ".
+			$text{'form_bytes'},
+		2, \@tds);
+	}
+
+if (!$mailbox && $user->{'unix'} && !$user->{'noquota'}) {
+	# Show quotas field(s)
+	if (&has_home_quotas()) {
+		print &ui_table_row(
+			&hlink($qsame ? $text{'user_umquota'}
+				      : $text{'user_uquota'}, "diskquota"),
+			&quota_field("quota", $user->{'quota'},
+				     $user->{'uquota'}, "home"),
+			2, \@tds);
+		}
+	if (&has_mail_quotas()) {
+		print &ui_table_row(&hlink($text{'user_mquota'}, "diskmquota"),
+				    &quota_field("mquota", $user->{'mquota'},
+						 $user->{'umquota'}, "mail"),
+				    2, \@tds);
+		}
+	}
+
 if (&can_mailbox_home() && $d && $d->{'home'} &&
     !$mailbox && !$user->{'fixedhome'}) {
 	# Show home directory editing field
@@ -133,72 +171,13 @@ if (&can_mailbox_home() && $d && $d->{'home'} &&
 			    2, \@tds);
 	}
 
-if (&can_mailbox_ftp() && !$mailbox && $user->{'unix'}) {
-	# Show FTP shell field
-	$ftp = $user->{'qmail'} && !$user->{'shell'} ? -2 :
-	       $user->{'shell'} eq $config{'ftp_shell'} ? 1 :
-	       $config{'jail_shell'} &&
-		$user->{'shell'} eq $config{'jail_shell'} ? 2 :
-	       $in{'new'} || $user->{'shell'} eq $config{'shell'} ? 0 : -1;
-	if ($ftp == -1) {
-		$ftpfield = &text('user_shell', "<tt>$user->{'shell'}</tt>");
-		}
-	elsif ($ftp == -2) {
-		$ftpfield = &text('user_qmail');
-		}
-	else {
-		local @opts = ( [ 1, $text{'yes'} ] );
-		if ($config{'jail_shell'}) {
-			push(@opts, [ 2, $text{'user_jail'} ]);
-			}
-		push(@opts, [ 0, $text{'no'} ]);
-		$ftpfield = &ui_radio("ftp", $ftp, \@opts);
-		}
-	print &ui_table_row(&hlink($text{'user_ftp'}, "uftp"),
-			    $ftpfield,
-			    2, \@tds);
+if (!$mailbox) {
+	print &ui_hidden_table_end("table2");
 	}
 
-# Find and show all plugin features
-foreach $f (@mail_plugins) {
-	$input = &plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d);
-	print $input;
-	}
-print &ui_hidden_table_end();
-
-# Start second table
-print &ui_hidden_table_start($text{'user_header2'}, "width=100%", 2,
-			     "table2", 0);
-
-if ($user->{'mailquota'}) {
-	# Show Qmail/VPOPMail quota field
-	$user->{'qquota'} = "" if ($user->{'qquota'} eq "none");
-	print &ui_table_row(&hlink($text{'user_qquota'},"qmailquota"),
-		&ui_radio("qquota_def", $user->{'qquota'} ? 0 : 1,
-			       [ [ 1, $text{'form_unlimit'} ],
-				 [ 0, " " ] ])." ".
-		&ui_textbox("qquota", $user->{'qquota'} || "", 10)." ".
-			$text{'form_bytes'},
-		2, \@tds);
-	}
-
-if (!$mailbox && $user->{'unix'} && !$user->{'noquota'}) {
-	# Show quotas field(s)
-	if (&has_home_quotas()) {
-		print &ui_table_row(
-			&hlink($qsame ? $text{'user_umquota'}
-				      : $text{'user_uquota'}, "diskquota"),
-			&quota_field("quota", $user->{'quota'},
-				     $user->{'uquota'}, "home"),
-			2, \@tds);
-		}
-	if (&has_mail_quotas()) {
-		print &ui_table_row(&hlink($text{'user_mquota'}, "diskmquota"),
-				    &quota_field("mquota", $user->{'mquota'},
-						 $user->{'umquota'}, "mail"),
-				    2, \@tds);
-		}
-	}
+# Start third table
+print &ui_hidden_table_start($text{'user_header2a'}, "width=100%", 2,
+			     "table2a", 0);
 
 if ($d && !$user->{'noprimary'} && $d->{'mail'}) {
 	# Show primary email address field
@@ -260,7 +239,8 @@ elsif (!$in{'new'}) {
 		    &ui_textbox("remail", $user->{'email'}, 20),
 		    2, \@tds);
 	}
-print &ui_hidden_table_end("table2");
+
+print &ui_hidden_table_end("table2a");
 
 # Show forwarding setup for this user (can use the simple or complex forms)
 if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
@@ -310,15 +290,44 @@ if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
 	print &ui_hidden_table_end("table3");
 	}
 
+print &ui_hidden_table_start($text{'user_header4'}, "width=100%", 2,
+			     "table4", 0);
+
+if (&can_mailbox_ftp() && !$mailbox && $user->{'unix'}) {
+	# Show FTP shell field
+	$ftp = $user->{'qmail'} && !$user->{'shell'} ? -2 :
+	       $user->{'shell'} eq $config{'ftp_shell'} ? 1 :
+	       $config{'jail_shell'} &&
+		$user->{'shell'} eq $config{'jail_shell'} ? 2 :
+	       $in{'new'} || $user->{'shell'} eq $config{'shell'} ? 0 : -1;
+	if ($ftp == -1) {
+		$ftpfield = &text('user_shell', "<tt>$user->{'shell'}</tt>");
+		}
+	elsif ($ftp == -2) {
+		$ftpfield = &text('user_qmail');
+		}
+	else {
+		local @opts = ( [ 1, $text{'yes'} ] );
+		if ($config{'jail_shell'}) {
+			push(@opts, [ 2, $text{'user_jail'} ]);
+			}
+		push(@opts, [ 0, $text{'no'} ]);
+		$ftpfield = &ui_radio("ftp", $ftp, \@opts);
+		}
+	print &ui_table_row(&hlink($text{'user_ftp'}, "uftp"),
+			    $ftpfield,
+			    2, \@tds);
+	}
+
+# Find and show all plugin features
+foreach $f (@mail_plugins) {
+	$input = &plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d);
+	print $input;
+	}
+
 # Show allowed databases
 if ($d && !$mailbox) {
 	@dbs = grep { $_->{'users'} } &domain_databases($d);
-	}
-@sgroups = &allowed_secondary_groups($d);
-if (@dbs || @sgroups && $user->{'unix'}) {
-	print &ui_hidden_table_start($text{'user_header4'}, "width=100%", 2,
-				     "table4", 0);
-	$done_section4 = 1;
 	}
 if (@dbs) {
 	@userdbs = map { $_->{'type'}."_".$_->{'name'} } @{$user->{'dbs'}};
@@ -335,15 +344,14 @@ if (@dbs) {
 	}
 
 # Show secondary groups
+@sgroups = &allowed_secondary_groups($d);
 if (@sgroups && $user->{'unix'}) {
 	print &ui_table_row(&hlink($text{'user_groups'},"usergroups"),
 			    &ui_select("groups", $user->{'secs'},
 				[ map { [ $_ ] } @sgroups ], 5, 1, 1),
 			    2, \@tds);
 	}
-if ($done_section4) {
-	print &ui_hidden_table_end("table4");
-	}
+print &ui_hidden_table_end("table4");
 
 if ($in{'new'}) {
 	print &ui_form_end([ [ "create", $text{'create'} ] ]);
