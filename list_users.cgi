@@ -17,10 +17,15 @@ $webinit = &create_initial_user($d, undef, 1);
 if ($mleft != 0) {
 	push(@links, "<a href='edit_user.cgi?new=1&dom=$in{'dom'}'>".
 		     "$text{'users_add'}</a>");
-	if ($virtualmin_pro) {
-		push(@links, "<a href='mass_ucreate_form.cgi?dom=$in{'dom'}'>".
-			     "$text{'users_batch2'}</a>");
-		}
+	}
+@rlinks = ( );
+if ($virtualmin_pro) {
+	push(@rlinks, "<a href='mass_ucreate_form.cgi?dom=$in{'dom'}'>".
+		      "$text{'users_batch2'}</a>");
+	}
+if ($mleft != 0 && $webinit->{'webowner'} && $virtualmin_pro) {
+	push(@rlinks, "<a href='edit_user.cgi?new=1&web=1&",
+		      "dom=$in{'dom'}'>$text{'users_addweb'}</a>");
 	}
 
 if (@users) {
@@ -34,12 +39,9 @@ if (@users) {
 		print "<b>",&text('users_noadd'.$mreason, $mmax),"</b><p>\n";
 		}
 	print &ui_links_row(\@links);
-	print "</td>\n";
-	if ($mleft != 0 && $webinit->{'webowner'} && $virtualmin_pro) {
-		print "<td align=right><a href='edit_user.cgi?new=1&web=1&",
-		      "dom=$in{'dom'}'>$text{'users_addweb'}</a></td>\n";
-		}
-	print "</tr></table>\n";
+	print "</td> <td align=right>\n";
+	print &ui_links_row(\@rlinks);
+	print "</td> </tr></table>\n";
 	&users_table(\@users, $d, 1);
 	}
 else {
@@ -50,12 +52,9 @@ else {
 # Show below-table links
 print "<table cellpadding=0 cellspacing=0 width=100%><tr><td>\n";
 print &ui_links_row(\@links);
-print "</td>\n";
-if ($mleft != 0 && $webinit->{'webowner'} && $virtualmin_pro) {
-	print "<td align=right><a href='edit_user.cgi?new=1&web=1&",
-	      "dom=$in{'dom'}'>$text{'users_addweb'}</a></td>\n";
-	}
-print "</tr></table>\n";
+print "</td> <td align=right>\n";
+print &ui_links_row(\@rlinks);
+print "</td> </tr></table>\n";
 if (@users) {
 	print &ui_form_end([ [ "delete", $text{'users_delete'} ],
 	     $virtualmin_pro ? ( [ "mass", $text{'users_mass'} ] ) : ( ) ]);
