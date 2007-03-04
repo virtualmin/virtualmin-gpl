@@ -810,13 +810,15 @@ if ($virtualmin_pro) {
 	&update_spam_whitelist($_[1]) if ($_[1]);
 	}
 
-# Save the plain-text password
-local %plain;
+# Save the plain-text password, if known
 mkdir($plainpass_dir, 0700);
-&read_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
-$plain{$_[0]->{'user'}} = $_[0]->{'plainpass'};
-$plain{$_[0]->{'user'}." encrypted"} = $_[0]->{'pass'};
-&write_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
+if (defined($_[0]->{'plainpass'})) {
+	local %plain;
+	&read_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
+	$plain{$_[0]->{'user'}} = $_[0]->{'plainpass'};
+	$plain{$_[0]->{'user'}." encrypted"} = $_[0]->{'pass'};
+	&write_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
+	}
 
 # Set the user's Usermin IMAP password
 &set_usermin_imap_password($_[0]);
@@ -7604,7 +7606,8 @@ foreach my $d (@doms) {
 	local @users = &list_domain_users($d, 0, 1, 1, 1);
 	local $u;
 	foreach $u (@users) {
-		if ($u->{'user'} eq $_[0]) {
+		if ($u->{'user'} eq $_[0] ||
+		    &replace_atsign($u->{'user'}) eq $_[0]) {
 			return $d;
 			}
 		}
@@ -8424,13 +8427,14 @@ sub domain_redirect
 sub get_template_pages
 {
 local @tmpls = ( 'tmpl', 'user', 'update',
-	   $config{'localgroup'} ? ( 'local' ) : ( ),
-	   'bw', 'plugin',
-	   $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'resels',
-			       'reseller', 'notify', 'scripts' ) : ( 'sharedips' ),
-	   &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
-	   $virtualmin_pro ? ( 'mxs', 'validate' ) : ( ),
-	   &has_home_quotas() ? ( 'quotacheck' ) : ( ) );
+   $config{'localgroup'} ? ( 'local' ) : ( ),
+   'bw', 'plugin',
+   $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'resels',
+		       'reseller', 'notify', 'scripts' ) : ( 'sharedips' ),
+   &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
+   $virtualmin_pro ? ( 'mxs', 'validate' ) : ( ),
+   &has_home_quotas() ? ( 'quotacheck' ) : ( ),
+   'dynip' );
 local @tlinks = map { "edit_new${_}.cgi" } @tmpls;
 local @ttitles = map { $text{"new${_}_title"} } @tmpls;
 local @ticons = map { "images/new${_}.gif" } @tmpls;
@@ -9544,7 +9548,7 @@ if ($plugtmpl) {
 	print $plugtmpl;
 	}
 else {
-	print "<tr> <td colspan=2><b>$text{'tmpl_noplugins'}</b></td> </tr>\n";
+	print &ui_table_row(undef, "<b>$text{'tmpl_noplugins'}</b>");
 	}
 }
 

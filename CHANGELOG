@@ -537,3 +537,4 @@ Increased version of Gallery script installer to 2.2-rc-2.
 Change the Module Config option for the Upload and Download module to limit to uploads only.
 Replaced the HTMLarea widget for editing web pages with Xinha, when using Webmin 1.332 or later.
 Updated Zenphot script installer to version 1.0.8.2.
+Broke the Bandwidth Monitoring page down into collapsible sections.

@@ -53,6 +53,7 @@
 
   - weebly integration
 
-  - test cpanel migration, and add plesk migration
+  - plesk migration support
 
   - cron time selector is too complex - use popup
+

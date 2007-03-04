@@ -293,7 +293,7 @@ if ($apache::httpd_modules{'mod_fcgid'}) {
 return @rv;
 }
 
-# list_available_php_versions(&domain, [forcemode])
+# list_available_php_versions([&domain], [forcemode])
 # Returns a list of PHP versions and their executables installed on the system,
 # for use by a domain
 sub list_available_php_versions

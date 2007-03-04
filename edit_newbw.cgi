@@ -8,9 +8,11 @@ require './virtual-server-lib.pl';
 &ui_print_header(undef, $text{'newbw_title'}, "", "bandwidth");
 
 $job = &find_bandwidth_job();
+@tds = ( "width=30% ");
 print "$text{'newbw_desc'}<p>\n";
 print &ui_form_start("save_newbw.cgi", "post");
-print &ui_table_start($text{'newbw_header'}, undef, 2);
+print &ui_hidden_table_start($text{'newbw_header1'}, "width=100%", 2, "table1",
+			     1, \@tds);
 
 # Show active field
 print &ui_table_row(&hlink($text{'newbw_active'}, "bandwidth_bw_active"),
@@ -52,6 +54,11 @@ print &ui_table_row(&hlink($text{'newbw_enable'}, "bandwidth_bw_enable"),
 		    &ui_radio("bw_enable", $config{'bw_enable'} ? 1 : 0,
 			      [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
+print &ui_hidden_table_end("table1");
+
+print &ui_hidden_table_start($text{'newbw_header2'}, "width=100%", 2, "table2",
+			     0, \@tds);
+
 # Show email for domains over limit
 $file = $config{'bw_template'};
 $file = "$module_config_directory/bw-template" if ($file eq "default");
@@ -73,6 +80,11 @@ print &ui_table_row(&hlink($text{'newbw_warntemplate'},
 			   "bandwidth_warnbw_template"),
 		    &ui_textarea("warnbw_template", &cat_file($file),
 				5, 70));
+
+print &ui_hidden_table_end("table2");
+
+print &ui_hidden_table_start($text{'newbw_header3'}, "width=100%", 2, "table3",
+			     0, \@tds);
 
 # Servers to check or exclude
 if ($config{'bw_servers'} eq "") {
@@ -119,7 +131,7 @@ print &ui_table_row(&hlink($text{'newbw_maillog'}, "bandwidth_maillog_def"),
 						  "bandwidth_maillog_rotated"),
 		     $config{'bw_maillog_rotated'}));
 
-print &ui_table_end();
+print &ui_hidden_table_end("table3");
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 
 # Button to show graph
