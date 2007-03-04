@@ -885,18 +885,28 @@ if (!ref($h)) {
 &complete_http_download($h, $out, $err);
 }
 
-# make_file_php_writable(&domain, file, [dir-only])
+# make_file_php_writable(&domain, file, [dir-only], [owner-too])
 # Set permissions on a file so that it is writable by PHP
 sub make_file_php_writable
 {
-local ($d, $file, $dironly) = @_;
+local ($d, $file, $dironly, $setowner) = @_;
 local $mode = &get_domain_php_mode($d);
 local $perms = $mode eq "mod_php" ? 0777 : 0755;
 if (-d $file && !$dironly) {
+	if ($setowner) {
+		&system_logged(sprintf("chown -R %d:%d %s",
+			$d->{'uid'}, $d->{'gid'}, quotemeta($file)));
+		}
 	&system_logged(sprintf("chmod -R %o %s", $perms, quotemeta($file)));
 	}
 else {
-	&set_ownership_permissions(undef, undef, $perms, $file);
+	if ($setowner) {
+		&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
+					   $perms, $file);
+		}
+	else {
+		&set_ownership_permissions(undef, undef, $perms, $file);
+		}
 	}
 }
 
