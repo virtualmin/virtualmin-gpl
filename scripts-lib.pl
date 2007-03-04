@@ -626,6 +626,11 @@ foreach my $m (@mods) {
 	else {
 		&$second_print(&text('scripts_gotmod', $m));
 		}
+
+	# If we are running via mod_php or fcgid, an Apache reload is needed
+	if ($mode eq "mod_php" || $mode eq "fcgid") {
+		&register_post_action(\&restart_apache);
+		}
 	}
 return 1;
 }
