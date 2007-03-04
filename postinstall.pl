@@ -132,7 +132,7 @@ if ($virtualmin_pro) {
 
 # If installing for the first time, enable backup of all features by default
 local @doms = &list_domains();
-if (!@doms && !defined($config{'backup_feature_all'}) {
+if (!@doms && !defined($config{'backup_feature_all'})) {
 	$config{'backup_feature_all'} = 1;
 	&save_module_config();
 	}

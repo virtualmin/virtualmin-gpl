@@ -287,6 +287,7 @@ if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
 		print &ui_tabs_end_tabletab();
 		}
 
+  print &ui_tabs_end(1) if (@tabs > 1);
 	print &ui_hidden_table_end("table3");
 	}
 
