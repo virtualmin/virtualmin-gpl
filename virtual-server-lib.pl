@@ -128,9 +128,11 @@ $licence_cmd = "$module_config_directory/licence.pl";
 $licence_status = "$module_config_directory/licence-status";
 $quotas_cron_cmd = "$module_config_directory/quotas.pl";
 $spamclear_cmd = "$module_config_directory/spamclear.pl";
+$dynip_cron_cmd = "$module_config_directory/dynip.pl";
 
 @all_cron_commands = ( $backup_cron_cmd, $bw_cron_cmd, $licence_cmd,
-		       $licence_status, $quotas_cron_cmd, $spamclear_cmd );
+		       $licence_status, $quotas_cron_cmd, $spamclear_cmd,
+		       $dynip_cron_cmd );
 
 $custom_fields_file = "$module_config_directory/custom-fields";
 $custom_links_file = "$module_config_directory/custom-links";

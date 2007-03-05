@@ -1,0 +1,24 @@
+<header>Dynamic IP Update</header>
+
+This page allows you to setup Virtualmin to detect changes to the systems
+primary network interface, and update a dynamic DNS entry when it changes.
+This is useful if you are running Virtualmin on a system with an address
+that occasionally changes, such as one running on in a virtual machine
+environment like Amazon's EC2. It is also useful for servers that are connected
+to the Internet via a connection without a fixed IP address, such as ADSL
+or Cable. <p>
+
+To use this page, you must select a dynamic DNS service, enter the hostname
+used by your system on that service, and also the service's login details.
+By default, Virtualmin will look at the IP address assigned to the primary
+network interface (like <tt>eth0</tt>) to check for changes, but if your
+system is behind a NAT router you should select the <b>Address visible
+from the Internet</b> option to have it discover the IP that the rest of
+the Internet really sees. <p>
+
+When a change is detected, all virtual servers with shared IP addresses
+using the old address will be updated to the new one. This change will be
+made in both the Apache configuration and DNS records. <p>
+
+<footer>
+

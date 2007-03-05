@@ -13,7 +13,7 @@ if (!$virtual_server_root) {
 	$virtual_server_root = "$1/virtual-server";
 	}
 foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
-		 "php", "ruby", "vui") {
+		 "php", "ruby", "vui", "dynip") {
 	if (-r "$virtual_server_root/$lib-lib.pl") {
 		do "$virtual_server_root/$lib-lib.pl";
 		if ($@) {
@@ -235,16 +235,18 @@ local $id = $_[0]->{'id'};
 &unlink_file("$bandwidth_dir/$id");
 &unlink_file("$plainpass_dir/$id");
 
-# Delete any autoreply file links
-local $dir = &get_autoreply_file_dir();
-opendir(AUTODIR, $dir);
-foreach my $f (readdir(AUTODIR)) {
-	next if ($f eq "." || $f eq "..");
-	if ($f =~ /^\Q$id-\E/) {
-		unlink("$dir/$f");
+if (defined(&get_autoreply_file_dir)) {
+	# Delete any autoreply file links
+	local $dir = &get_autoreply_file_dir();
+	opendir(AUTODIR, $dir);
+	foreach my $f (readdir(AUTODIR)) {
+		next if ($f eq "." || $f eq "..");
+		if ($f =~ /^\Q$id-\E/) {
+			unlink("$dir/$f");
+			}
 		}
+	closedir(AUTODIR);
 	}
-closedir(AUTODIR);
 }
 
 # list_domain_users([&domain], [skipunix], [no-virts], [no-quotas], [no-dbs])
@@ -8429,12 +8431,13 @@ sub get_template_pages
 local @tmpls = ( 'tmpl', 'user', 'update',
    $config{'localgroup'} ? ( 'local' ) : ( ),
    'bw', 'plugin',
-   $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'resels',
-		       'reseller', 'notify', 'scripts' ) : ( 'sharedips' ),
+   $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'dynip', 'resels',
+		       'reseller', 'notify', 'scripts' )
+		   : ( 'sharedips', 'dynip' ),
    &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
    $virtualmin_pro ? ( 'mxs', 'validate' ) : ( ),
    &has_home_quotas() ? ( 'quotacheck' ) : ( ),
-   'dynip' );
+   );
 local @tlinks = map { "edit_new${_}.cgi" } @tmpls;
 local @ttitles = map { $text{"new${_}_title"} } @tmpls;
 local @ticons = map { "images/new${_}.gif" } @tmpls;

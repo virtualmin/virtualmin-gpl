@@ -3159,4 +3159,27 @@ sharedips_eactive='$1' is not currently active on the system - use the Network C
 sharedips_eaway='$1' cannot be removed from the shared address list, as it is used by virtual server $2
 
 newdynip_title=Dynamic IP Update
+newdynip_enabled=Dynamic update enabled?
+newdynip_service=Dynamic DNS service
+newdynip_host=Full hostname to update
+newdynip_user=Login for service
+newdynip_pass=Password for service
+newdynip_header=Automatic dynamic DNS update options
+newdynip_ok=Save and Apply
+newdynip_auto=Source of IP address
+newdynip_auto0=Primary network interface
+newdynip_auto1=Address visible from the Internet
+newdynip_last=Last updated IP address
+newdynip_iface=Primary interface IP address
+newdynip_external=Externally visible IP address
+newdynip_err=Failed to save dynamic IP settings
+newdynip_ecannot=You are not allowed to update dynamic IP settings
+newdynip_ehost=Missing or invalid hostname
+newdynip_on=Dynamic IP updating has been enabled. Virtualmin will check every 5 minutes for changes to your IP address $1, and update the selected dynamic DNS service.
+newdynip_off=Dynamic IP updating has been disabled. Changes to the system's IP address will <b>not</b> be reflected in the DNS.
+newdynip_never=Not updated yet
+newdynip_notify=Email IP update notifications to
+newdynip_none=Nobody
+
+dynip_dyndns=DynDNS
 
