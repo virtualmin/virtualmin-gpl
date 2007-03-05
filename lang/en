@@ -1504,6 +1504,7 @@ log_create_admin=Created extra administrator $1
 log_delete_admin=Deleted extra administrator $1
 log_modify_admin=Modified extra administrator $1
 log_switch_admin=Switched to extra administrator $1
+log_dynip=Updated dynamic IP address settings
 
 backup_title=Backup Virtual Servers
 backup_title2=Scheduled Backup

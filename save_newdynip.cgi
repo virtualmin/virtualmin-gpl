@@ -14,6 +14,7 @@ if ($in{'enabled'}) {
 	}
 
 # Save them
+&lock_file($module_config_file);
 $config{'dynip_service'} = $in{'service'};
 $config{'dynip_host'} = $in{'host'};
 $config{'dynip_auto'} = $in{'auto'};
@@ -21,6 +22,7 @@ $config{'dynip_user'} = $in{'duser'};
 $config{'dynip_pass'} = $in{'dpass'};
 $config{'dynip_email'} = $in{'email_def'} ? undef : $in{'email'};
 &save_module_config();
+&unlock_file($module_config_file);
 $job = &get_dynip_cron_job();
 if ($in{'enabled'} && !$job) {
 	# Need to create
@@ -35,7 +37,9 @@ if ($in{'enabled'} && !$job) {
 	&lock_file(&cron::cron_file($job));
 	&cron::create_cron_job($job);
 	&unlock_file(&cron::cron_file($job));
+	&lock_file($dynip_cron_cmd);
 	&cron::create_wrapper($dynip_cron_cmd, $module_name, "dynip.pl");
+	&unlock_file($dynip_cron_cmd);
 	}
 elsif (!$in{'enabled'} && $job) {
 	# Need to delete
