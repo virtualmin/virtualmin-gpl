@@ -538,3 +538,4 @@ Change the Module Config option for the Upload and Download module to limit to u
 Replaced the HTMLarea widget for editing web pages with Xinha, when using Webmin 1.332 or later.
 Broke the Bandwidth Monitoring page down into collapsible sections.
 Added a new page for regularly updating a dynamic IP address, for systems where the primary IP is not static.
+Updated the 'Show system information on main page?' Module Config option to allow display for resellers too.
