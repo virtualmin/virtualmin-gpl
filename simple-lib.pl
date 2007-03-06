@@ -244,11 +244,11 @@ if (!$nofrom) {
 }
 
 # parse_simple_form(&simple, &in, &domain, [no-reply-from], [no-local],
-#                   [no-bounce])
+#                   [no-bounce], [name])
 # Updates a simple delivery object with settings from &in
 sub parse_simple_form
 {
-local ($simple, $in, $d, $nofrom, $nolocal, $nobounce) = @_;
+local ($simple, $in, $d, $nofrom, $nolocal, $nobounce, $name) = @_;
 
 if ($nolocal) {
 	# Check to-me option
@@ -288,12 +288,18 @@ if ($in->{'autotext'}) {
 		$in->{'period'} =~ /^\d+$/ ||
 			&error($text{'alias_eperiod'});
 		$simple->{'period'} = $in->{'period'}*60;
-		local $rdir = "$d->{'home'}/replies";
-		$simple->{'replies'} ||= "$rdir/replies-$name";
-		if (!-e $rdir) {
-			&make_dir($rdir, 0777);
-			&set_ownership_permissions(
-			    $d->{'uid'}, $d->{'ugid'}, 0777, $rdir);
+		if (!$simple->{'replies'}) {
+			# Setting up for the first time
+			$simple->{'replies'} =
+				&convert_autoreply_file($d, "replies-$name");
+			}
+		else {
+			# Fix existing file
+			local $adir = &get_autoreply_file_dir();
+			if (!&is_under_directory($adir, $simple->{'replies'})) {
+				$simple->{'replies'} =
+				  &convert_autoreply_file($d, "replies-$name");
+				}
 			}
 		}
 	if (!$nofrom) {
@@ -352,6 +358,7 @@ return "$dir/$d->{'id'}-$file";
 sub create_autoreply_alias_links
 {
 local ($d) = @_;
+local $adir = &get_autoreply_file_dir();
 
 # Fix up aliases
 foreach my $virt (&list_domain_aliases($d)) {
@@ -367,6 +374,13 @@ foreach my $virt (&list_domain_aliases($d)) {
 			link($simple->{'autoreply'}, $link);
 			&save_simple_alias($d, $virt, $simple);
 			&modify_virtuser($oldvirt, $virt);
+			}
+		if ($simple->{'replies'} &&
+		    !&is_under_directory($adir, $simple->{'replies'})) {
+			# Fix up reply tracking file
+			$simple->{'replies'} = &convert_autoreply_file($d,
+						"replies-$virt->{'from'}");
+			&write_simple_autoreply($d, $simple);
 			}
 		}
 	}
@@ -385,6 +399,13 @@ foreach my $user (&list_domain_users($d)) {
 			link($simple->{'autoreply'}, $link);
 			&save_simple_alias($d, $user, $simple);
 			&modify_user($user, $olduser, $d, 0);
+			}
+		if ($simple->{'replies'} &&
+		    !&is_under_directory($adir, $simple->{'replies'})) {
+			# Fix up reply tracking file
+			$simple->{'replies'} = &convert_autoreply_file($d,
+						"replies-$user->{'user'}");
+			&write_simple_autoreply($d, $simple);
 			}
 		}
 	}

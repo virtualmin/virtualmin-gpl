@@ -56,3 +56,7 @@
 
   - cron time selector is too complex - use popup
 
+  - better display of user-level autoreponders in Virtualmin, and server-level
+    in Usermin
+	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=686
+

@@ -50,7 +50,8 @@ else {
 			# Remove existing autoreply file
 			&delete_simple_autoreply($d, $simple);
 			}
-		&parse_simple_form($simple, \%in, $d, 0, 0, 0);
+		&parse_simple_form($simple, \%in, $d, 0, 0, 0,
+				   $virt->{'from'});
 		&save_simple_alias($d, $virt, $simple);
 		if ($simple->{'bounce'} && @{$virt->{'to'}} > 1) {
 			# Cannot bounce and forward

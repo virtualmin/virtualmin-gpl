@@ -372,7 +372,8 @@ else {
 			if ($in{'simplemode'} eq 'simple') {
 				# From simple form
 				$simple = &get_simple_alias($d, $user);
-				&parse_simple_form($simple, \%in, $d, 1, 1, 1);
+				&parse_simple_form($simple, \%in, $d, 1, 1, 1,
+						   $user->{'user'});
 				$simple->{'from'} = $user->{'email'};
 				&save_simple_alias($d, $user, $simple);
 				}
@@ -469,7 +470,8 @@ else {
 			if ($in{'simplemode'} eq 'simple') {
 				# From simple form
 				$simple = &get_simple_alias($d, $user);
-				&parse_simple_form($simple, \%in, $d, 1, 1, 1);
+				&parse_simple_form($simple, \%in, $d, 1, 1, 1,
+						   $user->{'user'});
 				$simple->{'from'} = $user->{'email'};
 				&save_simple_alias($d, $user, $simple);
 				}
