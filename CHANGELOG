@@ -539,3 +539,4 @@ Replaced the HTMLarea widget for editing web pages with Xinha, when using Webmin
 Broke the Bandwidth Monitoring page down into collapsible sections.
 Added a new page for regularly updating a dynamic IP address, for systems where the primary IP is not static.
 Updated the 'Show system information on main page?' Module Config option to allow display for resellers too.
+Autoreply message recipient tracking files are now stored in /var/virtualmin-autoreply, so that they can be accessed by the mail server when a virtual server's home is not world-readable.
