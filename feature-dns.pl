@@ -186,6 +186,10 @@ if (!$_[0]->{'dns_submode'}) {
 		splice(@$lref, $z->{'line'}, $z->{'eline'} - $z->{'line'} + 1);
 		&flush_file_lines();
 		&unlock_file($rootfile);
+
+		# Clear zone names caches
+		unlink($bind8::zone_names_cache);
+		undef(@bind8::list_zone_names_cache);
 		&$second_print($text{'setup_done'});
 		}
 	else {
@@ -317,6 +321,10 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
         &bind8::bump_soa_record($nfn, \@recs);
 	&unlock_file(&bind8::make_chroot($nfn));
 	$rv++;
+
+	# Clear zone names caches
+	unlink($bind8::zone_names_cache);
+	undef(@bind8::list_zone_names_cache);
 	&$second_print($text{'setup_done'});
 
 	if (!$_[0]->{'dns_submode'}) {
@@ -624,6 +632,10 @@ if ($z) {
 	&bind8::save_directive(&bind8::get_config_parent(), [ $z ], [ $z ], 0);
 	&flush_file_lines();
 	&unlock_file($rootfile);
+
+	# Clear zone names caches
+	unlink($bind8::zone_names_cache);
+	undef(@bind8::list_zone_names_cache);
 	&$second_print($text{'setup_done'});
 	&register_post_action(\&restart_bind);
 	}
@@ -646,6 +658,10 @@ if ($z) {
 	&bind8::save_directive(&bind8::get_config_parent(), [ $z ], [ $z ], 0);
 	&flush_file_lines();
 	&unlock_file($rootfile);
+
+	# Clear zone names caches
+	unlink($bind8::zone_names_cache);
+	undef(@bind8::list_zone_names_cache);
 	&$second_print($text{'setup_done'});
 	&register_post_action(\&restart_bind);
 	}
