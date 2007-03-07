@@ -342,15 +342,18 @@ else {
 					$parentdom, $aliasdom, $subdom));
 
 		$label = &plugin_call($f, "feature_label", 1);
+		$label = "<b>$label</b>";
+		$hlink = &plugin_call($f, "feature_hlink");
+		$label = &hlink($label, $hlink, $f) if ($hlink);
 		if (!&can_use_feature($f)) {
 			push(@grid, &ui_checkbox($f."_dis", 1, "",
 						 $d->{$f}, undef, 1).
 				    &ui_hidden($f, $d->{$f}).
-				    " <b>$label</b>");
+				    " ".$label);
 			}
 		else {
 			push(@grid, &ui_checkbox($f, 1, "", $d->{$f}).
-				    " <b>$label</b>");
+				    " ".$label);
 			}
 		}
 

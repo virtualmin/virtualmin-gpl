@@ -62,3 +62,8 @@
 
   - rename /etc/aliases entry when renaming user / alias
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=689
+
+  - categorize ssl cert form
+
+  - sms in status module
+

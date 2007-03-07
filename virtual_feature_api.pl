@@ -25,6 +25,12 @@ sub feature_label
 {
 }
 
+# feature_hlink(in-edit-form)
+# Returns a help page linked to by the label returned by feature_label
+sub feature_hlink
+{
+}
+
 # feature_check()
 # Returns undef if all the needed programs for this feature are installed,
 # or an error message if not
