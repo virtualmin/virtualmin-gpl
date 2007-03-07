@@ -161,21 +161,20 @@ if ($in{'sched'}) {
 	local ($job) = grep { $_->{'user'} eq 'root' &&
 			      $_->{'command'} eq $backup_cron_cmd } @jobs;
 
+	# Email input
+	print &ui_table_row(&hlink($text{'backup_email'}, "backup_email"),
+			    &ui_textbox("email", $config{'backup_email'}, 40));
+
 	# Enabled/disabled input
 	print &ui_table_row(&hlink($text{'backup_enabled'}, "backup_enabled"),
 			    &ui_radio("enabled", $job ? 1 : 0,
 				[ [ 0, $text{'no'} ],
 				  [ 1, $text{'backup_enabledyes'} ] ]));
 
-	# Email input
-	print &ui_table_row(&hlink($text{'backup_email'}, "backup_email"),
-			    &ui_textbox("email", $config{'backup_email'}, 40));
-
 	# Times input
-	print "<tr> <td colspan=2><table border>\n";
 	$job ||= { 'special' => 'daily' };
-	&cron::show_times_input($job);
-	print "</table></td> </tr>\n";
+	$croninput = &capture_function_output(\&cron::show_times_input, $job);
+	print &ui_table_row(undef, "<table border>$croninput</table>", 2);
 	print &ui_hidden_table_end("sched");
 
 	print &ui_form_end([ [ "save", $text{'backup_save'} ] ]);
