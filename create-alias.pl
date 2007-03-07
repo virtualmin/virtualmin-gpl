@@ -41,6 +41,7 @@ $from || &usage();
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 $d->{'mail'} || usage("Virtual server $domain does not have email enabled");
+$from =~ /\@/ && &usage("No domain name is needed in the --from parameter");
 
 # Check for clash
 @aliases = &list_domain_aliases($d);

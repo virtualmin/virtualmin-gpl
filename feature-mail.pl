@@ -888,6 +888,8 @@ elsif ($config{'mail_system'} == 5) {
 }
 
 # modify_virtuser(&old, &new)
+# Update an email alias, which forwards mail from some address to multiple
+# destinations (addresses, autoresponders, etc).
 sub modify_virtuser
 {
 &require_mail();
@@ -896,6 +898,7 @@ local @to = @{$_[1]->{'to'}};
 if ($config{'mail_system'} == 1) {
 	# Modify in sendmail
 	local $alias = $_[0]->{'alias'};
+	local $oldalias = $alias ? { %$alias } : undef;
 	local @smto = map { $_ eq "BOUNCE" ? "error:nouser User unknown" :
 			    $_ =~ /^BOUNCE\s+(.*)$/ ? "error:nouser $1" :
 			    $_ } @to;
@@ -924,11 +927,12 @@ if ($config{'mail_system'} == 1) {
 		# Just update alias and maybe virtuser
 		$alias->{'values'} = \@smto;
 		&lock_file($alias->{'file'});
-		&sendmail::modify_alias($alias, $alias);
+		$alias->{'name'} = $an if ($_[1]->{'from'} ne $_[0]->{'from'});
+		&sendmail::modify_alias($oldalias, $alias);
 		&unlock_file($alias->{'file'});
 		if ($_[1]->{'from'} ne $_[0]->{'from'} ||
 		    $_[1]->{'cmt'} ne $_[0]->{'cmt'}) {
-			# Re-named .. need to change too
+			# Re-named .. need to change virtuser too
 			local $virt = { "from" => $_[1]->{'from'},
 					"to" => $an,
 					"cmt" => $_[1]->{'cmt'} };
@@ -957,6 +961,7 @@ if ($config{'mail_system'} == 1) {
 elsif ($config{'mail_system'} == 0) {
 	# Modify in postfix file
 	local $alias = $_[0]->{'alias'};
+	local $oldalias = $alias ? { %$alias } : undef;
 	$_[0]->{'from'} =~ /^(\S*)\@(\S+)$/;
 	local $an = ($1 || "default")."-".$2;
 	if (&needs_alias(@to) && !$alias) {
@@ -982,7 +987,8 @@ elsif ($config{'mail_system'} == 0) {
 		# Just update alias
 		$alias->{'values'} = \@to;
 		&lock_file($alias->{'file'});
-		&postfix::modify_alias($alias, $alias);
+		$alias->{'name'} = $an if ($_[1]->{'from'} ne $_[0]->{'from'});
+		&postfix::modify_alias($oldalias, $alias);
 		&unlock_file($alias->{'file'});
 		&postfix::regenerate_aliases();
 		if ($_[1]->{'from'} ne $_[0]->{'from'} ||

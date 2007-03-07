@@ -60,3 +60,5 @@
     in Usermin
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=686
 
+  - rename /etc/aliases entry when renaming user / alias
+	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=689
