@@ -9,7 +9,16 @@ $d = &get_domain($in{'dom'});
 &foreign_require("webmin", "webmin-lib.pl");
 &ui_print_header(&domain_in($d), $text{'cert_title'}, "");
 
+# Show tabs
+$prog = "cert_form.cgi?d=$in{'dom'}&mode=";
+@tabs = ( [ "current", $text{'cert_tabcurrent'}, $prog."current" ],
+	  [ "csr", $text{'cert_tabcsr'}, $prog."csr" ],
+	  [ "new", $text{'cert_tabnew'}, $prog."new" ],
+	);
+print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "current", 1);
+
 # Details of current cert
+print &ui_tabs_start_tab("mode", "current");
 print "$text{'cert_desc2'}<p>\n";
 print &ui_table_start($text{'cert_header2'}, undef, 4);
 $info = &cert_info($d);
@@ -19,10 +28,10 @@ foreach $i ('cn', 'o', 'issuer_cn', 'issuer_o', 'notafter', 'type') {
 		}
 	}
 print &ui_table_end();
-
-print "<hr>\n";
+print &ui_tabs_end_tab();
 
 # CSR generation form
+print &ui_tabs_start_tab("mode", "csr");
 print "$text{'cert_desc1'}<br>\n";
 print "$text{'cert_desc4'}<p>\n";
 
@@ -62,10 +71,10 @@ print &ui_table_row($webmin::text{'ssl_days'},
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'cert_csrok'} ],
 		     [ "self", $text{'cert_self'} ] ]);
-
-print "<hr>\n";
+print &ui_tabs_end_tab();
 
 # New key and cert form
+print &ui_tabs_start_tab("mode", "new");
 print "$text{'cert_desc3'}<p>\n";
 
 print &ui_form_start("newkey.cgi", "form-data");
@@ -87,6 +96,9 @@ print &ui_table_row($text{'cert_newkey'},
 
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'cert_newok'} ] ]);
+print &ui_tabs_end_tab();
+
+print &ui_tabs_end();
 
 &ui_print_footer(&domain_footer_link($d),
 		 "", $text{'index_return'});

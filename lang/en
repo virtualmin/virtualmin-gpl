@@ -1816,6 +1816,7 @@ rename_ecannot=You are not allowed to rename domains
 rename_group=Rename mail / FTP users too?
 
 cert_title=Manage SSL Certificate
+cert_desc2=This section shows the details of the SSL certificate currently being used by this virtual server.
 cert_desc1=This form can be used to create a certificate signing request (CSR) and private key for this virtual server. The resulting CSR can be submitting to a certificate authority (CA) who will return a signed certificate for pasting into the second form on this page.
 cert_desc4=You can also choose to generate a self-signed certificate, which can be used immediately, but will not be accepted as valid by browsers.
 cert_header1=Generate CSR and private key
@@ -1838,6 +1839,9 @@ cert_upload=Or from uploaded file
 cert_newkey=Matching private key
 cert_newok=Install Now
 cert_self=Generate Self-Signed Key
+cert_tabcurrent=Current Certificate
+cert_tabcsr=Signing Request
+cert_tabnew=New Certificate
 
 csr_title=Generating CSR
 csr_title2=Generating Certificate
