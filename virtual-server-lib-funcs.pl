@@ -1977,6 +1977,7 @@ sub can_switch_user
 {
 local ($d) = @_;
 return $virtualmin_pro &&
+       $main::session_id &&
        (&master_admin() || &can_edit_domain($d));
 }
 
