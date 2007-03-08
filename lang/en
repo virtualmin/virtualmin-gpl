@@ -569,6 +569,9 @@ user_tome=Deliver to this user normally
 user_forward=Forward to other addresses
 user_auto=Send automatic reply
 user_period=Minimum time between autoreplies
+user_header5=User-configured mail forwarding
+user_fcondition=Forwarding conditon
+user_faction=Action
 
 aliases_ecannot=You are not allowed to edit aliases in this domain
 aliases_title=Mail Aliases

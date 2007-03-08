@@ -287,8 +287,39 @@ if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
 		print &ui_tabs_end_tabletab();
 		}
 
-  print &ui_tabs_end(1) if (@tabs > 1);
+	print &ui_tabs_end(1) if (@tabs > 1);
 	print &ui_hidden_table_end("table3");
+	}
+
+# Show user-level mail filters, if he has any
+@filters = ( );
+$procmailrc = "$user->{'home'}/.procmailrc" if (!$in{'new'});
+if (!$in{'new'} && $user->{'email'} && $user->{'unix'} && -r $procmailrc &&
+    &foreign_check("filter") && &get_webmin_version() >= 1.333) {
+	&foreign_require("filter", "filter-lib.pl");
+	@filters = &filter::list_filters($procmailrc);
+	}
+if (@filters) {
+	print &ui_hidden_table_start($text{'user_header5'}, "width=100%", 2,
+				     "table5", 0);
+	$ftable = &ui_columns_start([ $text{'user_fcondition'},
+				      $text{'user_faction'} ], 100);
+	$lastalways = 0;
+	@folders = &mailboxes::list_user_folders($user->{'user'});
+	foreach $filter (@filters) {
+		($cdesc, $lastalways) = &filter::describe_condition($filter);
+		$adesc = &filter::describe_action($filter, \@folders,
+						  $user->{'home'});
+		$ftable .= &ui_columns_row([ $cdesc, $adesc ]);
+		}
+	if (!$lastalways) {
+		$ftable .= &ui_columns_row([
+			$filter::text{'index_calways'},
+			$filter::text{'index_adefault'} ]);
+		}
+	$ftable .= &ui_columns_end();
+	print &ui_table_row(undef, $ftable, 2);
+	print &ui_hidden_table_end("table5");
 	}
 
 print &ui_hidden_table_start($text{'user_header4'}, "width=100%", 2,

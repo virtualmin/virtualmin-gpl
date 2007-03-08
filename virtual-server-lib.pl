@@ -74,7 +74,7 @@ if (!$virtualmin_pro) {
 			 "servers", "software",
 			 $virtualmin_pro ? ( "spam", "status", "phpini" ) : ( ),
 			 "syslog", "useradmin", "usermin", "webalizer",
-			 "webmin" );
+			 "webmin", "filter" );
 @confplugins = split(/\s+/, $config{'plugins'});
 @opt_features = ( 'dir', 'unix', 'mail', 'dns', 'web', 'webalizer', 'ssl',
 		  'logrotate', 'mysql', 'postgres', 'ftp',

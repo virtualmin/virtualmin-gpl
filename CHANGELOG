@@ -542,3 +542,4 @@ Updated the 'Show system information on main page?' Module Config option to allo
 Autoreply message recipient tracking files are now stored in /var/virtualmin-autoreply, so that they can be accessed by the mail server when a virtual server's home is not world-readable.
 Plugin modules can now have help links on the virtual server creation and editing pages.
 Added tabs to the Manage SSL Certificate page.
+Added the 'User-configured mail forwarding' section to the Edit Mailbox page, to show forwarding setup by the user in their .procmailrc file (using the Mail Filters module in Usermin).
