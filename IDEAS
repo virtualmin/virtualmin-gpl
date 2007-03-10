@@ -60,9 +60,5 @@
 
   - svn mailman integration
 
-  - virtualmin.com webmin slow
-	- excessive calls to postconf
-	- getting all templates is slow, and un-needed
-
   - nicer install for integramod (like phpbb)
 

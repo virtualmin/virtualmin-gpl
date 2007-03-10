@@ -181,6 +181,7 @@ $extra_admins_dir = "$module_config_directory/admins";
 @s3_perl_modules = ( "S3::AWSAuthConnection", "S3::QueryStringAuthGenerator" );
 
 %get_domain_by_maps = ( 'user' => "$module_config_directory/map.user",
+			'dom' => "$module_config_directory/map.dom",
 			'parent' => "$module_config_directory/map.parent",
 			'alias' => "$module_config_directory/map.alias",
 			'subdom' => "$module_config_directory/map.subdom",

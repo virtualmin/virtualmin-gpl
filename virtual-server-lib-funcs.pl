@@ -287,7 +287,7 @@ foreach my $m (keys %get_domain_by_maps) {
 	local %map;
 	foreach my $d (@doms) {
 		local $v = $d->{$m};
-		next if ($v eq '');
+		#next if ($v eq '');
 		if (!defined($map{$v})) {
 			$map{$v} = $d->{'id'};
 			}
@@ -8350,7 +8350,8 @@ if ($d->{'web'} && &can_edit_phpmode()) {
 		  });
 	}
 
-if ($d->{'web'} && &can_edit_phpver()) {
+if ($d->{'web'} && &can_edit_phpver() &&
+    defined(&list_available_php_versions)) {
 	# PHP directory versions button
 	local @avail = &list_available_php_versions($d);
 	if (@avail > 1) {
