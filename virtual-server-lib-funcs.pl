@@ -7682,7 +7682,7 @@ if (&has_group_quotas()) {
 			$dbq += $dbu[1];
 			}
 		}
-	$qbq /= &quota_bsize("home");
+	$dbq /= &quota_bsize("home");
 	}
 else {
 	# Fake it by summing up user quotas
