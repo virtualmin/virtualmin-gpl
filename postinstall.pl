@@ -136,5 +136,8 @@ if (!@doms && !defined($config{'backup_feature_all'})) {
 	$config{'backup_feature_all'} = 1;
 	&save_module_config();
 	}
+
+# Build quick domain-lookup maps
+&build_domain_maps();
 }
 
