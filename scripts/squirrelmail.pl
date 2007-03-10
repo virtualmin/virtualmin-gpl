@@ -186,7 +186,7 @@ if (!$upgrade) {
 		&sysprint($fh, "$cmd->[1]\n");
 		}
 	close($fh);
-	kill('TERM', $fpid);
+	kill('KILL', $fpid);
 	local $cfile = "$opts->{'dir'}/config/config.php";
 	-r $cfile || return (0, "Failed to create config file");
 
