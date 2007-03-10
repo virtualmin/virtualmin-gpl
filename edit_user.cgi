@@ -323,7 +323,7 @@ if (@filters) {
 	}
 
 print &ui_hidden_table_start($text{'user_header4'}, "width=100%", 2,
-			     "table4", 0);
+			     "table4", 0, \@tds);
 
 if (&can_mailbox_ftp() && !$mailbox && $user->{'unix'}) {
 	# Show FTP shell field
