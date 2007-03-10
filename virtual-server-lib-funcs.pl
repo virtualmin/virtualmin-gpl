@@ -5087,13 +5087,14 @@ local $gid = $_[0]->{'gid'} || $_[0]->{'ugid'};
 # count_domains([type])
 # Returns the number of additional domains the current user is allowed to
 # create (-1 for infinite), the reason for the limit (2=this reseller,
-# 1=reseller, 0=user), and the number of domains allowed in total.
+# 1=reseller, 0=user), the number of domains allowed in total, and a flag
+# indicating if this limit should be hidden from the user.
 # May exclude alias domains if they don't count towards the max.
 sub count_domains
 {
 local ($type) = @_;
 $type ||= "doms";
-local ($left, $reason, $max) = &count_feature($type);
+local ($left, $reason, $max, $hide) = &count_feature($type);
 if ($left != 0) {
 	# If no limit has been hit, check the licence
 	local ($lstatus, $lexpiry, $lerr, $ldoms) = &check_licence_expired();
@@ -5101,7 +5102,7 @@ if ($left != 0) {
 		local @doms = &list_domains();
 		if (@doms > $ldoms) {
 			# Hit the licenced max!
-			return (0, 3, $ldoms);
+			return (0, 3, $ldoms, 0);
 			}
 		else {
 			# Haven't reached .. check if the licence limit is
@@ -5109,16 +5110,16 @@ if ($left != 0) {
 			local $dleft = $ldoms - @doms;
 			if ($left == -1 || $dleft < $left) {
 				# Will hit domains limit
-				return ($dleft, 3, $ldoms);
+				return ($dleft, 3, $ldoms, 0);
 				}
 			else {
 				# Will hit user or reseller limit
-				return ($left, $reason, $max);
+				return ($left, $reason, $max, $hide);
 				}
 			}
 		}
 	}
-return ($left, $reason, $max);
+return ($left, $reason, $max, $hide);
 }
 
 # count_mailboxes(&parent)
@@ -5142,7 +5143,8 @@ return ( $count, $parent->{'mailboxlimit'} ? $parent->{'mailboxlimit'} : 0,
 # count_feature(feature, [user])
 # Returns the number of extra instances of the given feature that the current
 # user is allowed to create, the reason for the limit (2=this reseller,
-# 1=reseller, 0=user), and the total allowed.
+# 1=reseller, 0=user), the total allowed, and a flag indicating if this
+# limit should be hidden from the user.
 # Feature can be "doms", "aliasdoms", "realdoms", "mailboxes", "aliases",
 # "quota", "uquota", "dbs", "bw" or a feature
 sub count_feature
@@ -5199,19 +5201,21 @@ if ($reseller) {
 	local @rdoms = &get_domain_by("reseller", $reseller);
 	local %racl = &get_reseller_acl($reseller);
 	local $reason = $access{'reseller'} ? 2 : 1;
+	local $hide = $base_remote_user ne $reseller && $racl{'hide'};
 	local $limit = $racl{"max_".$f};
 	if ($limit ne "") {
 		# Reseller has a limit ..
 		local $got = &count_domain_feature($f, @rdoms);
 		if ($got > $limit) {
 			# Reseller has reached his limit
-			return (0, $reason, $limit);
+			return (0, $reason, $limit, $hide);
 			}
 		else {
 			# Check if reseller limit is less than the user limit
 			local $reselleft = $limit - $got;
 			if ($userleft == -1 || $reselleft < $userleft) {
-				return ($reselleft, $reason, $limit);
+				# Yes .. reseller limit applies
+				return ($reselleft, $reason, $limit, $hide);
 				}
 			}
 		}
@@ -5220,7 +5224,7 @@ if ($reseller) {
 		# See if the reseller is over the limit for all domains types
 		local $got = &count_domain_feature("doms", @rdoms);
 		if ($got >= $racl{'max_doms'}) {
-			return (0, $reason, $racl{'max_doms'});
+			return (0, $reason, $racl{'max_doms'}, $hide);
 			}
 		}
 	}

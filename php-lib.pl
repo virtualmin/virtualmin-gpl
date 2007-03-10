@@ -121,11 +121,16 @@ foreach my $p (@ports) {
 		local $ver = $pdirs{$phpstr->{'words'}->[0]} ||
 			     $tmpl->{'web_phpver'} ||
 			     $avail[0];
+		$ver = $avail[0] if (&indexof($ver, @avail) < 0);
 		if ($mode eq "cgi") {
 			foreach my $v (@avail) {
 				push(@actions, "application/x-httpd-php$v ".
 					       "/cgi-bin/php$v.cgi");
 				}
+			foreach my $v (@avail) {
+				push(@types,"application/x-httpd-php$v .php$v");
+				}
+			push(@types, "application/x-httpd-php$ver .php");
 			}
 		elsif ($mode eq "fcgid") {
 			push(@handlers, "fcgid-script .php");
@@ -136,12 +141,6 @@ foreach my $p (@ports) {
 			foreach my $v (@avail) {
 				push(@wrappers, "$fdest/php$v.fcgi .php$v");
 				}
-			}
-		if ($mode eq "cgi") {
-			foreach my $v (@avail) {
-				push(@types,"application/x-httpd-php$v .php$v");
-				}
-			push(@types, "application/x-httpd-php$ver .php");
 			}
 		&apache::save_directive("Action", \@actions, $phpconf, $conf);
 		&apache::save_directive("AddType", \@types, $phpconf, $conf);

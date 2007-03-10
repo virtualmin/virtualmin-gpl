@@ -11,7 +11,7 @@ $d = &get_domain($in{'dom'});
 $webinit = &create_initial_user($d, undef, 1);
 
 # Create select / add links
-($mleft, $mreason, $mmax) = &count_feature("mailboxes");
+($mleft, $mreason, $mmax, $mhide) = &count_feature("mailboxes");
 @links = ( &select_all_link("d"),
 	   &select_invert_link("d") );
 if ($mleft != 0) {
@@ -24,7 +24,7 @@ if ($virtualmin_pro) {
 		      "$text{'users_batch2'}</a>");
 	}
 if ($mleft != 0 && $webinit->{'webowner'} && $virtualmin_pro) {
-	push(@rlinks, "<a href='edit_user.cgi?new=1&web=1&",
+	push(@rlinks, "<a href='edit_user.cgi?new=1&web=1&".
 		      "dom=$in{'dom'}'>$text{'users_addweb'}</a>");
 	}
 
@@ -32,7 +32,7 @@ if (@users) {
 	print &ui_form_start("change_users.cgi");
 	print &ui_hidden("dom", $in{'dom'}),"\n";
 	print "<table cellpadding=0 cellspacing=0 width=100%><tr><td>\n";
-	if ($mleft != 0 && $mleft != -1) {
+	if ($mleft != 0 && $mleft != -1 && !$mhide) {
 		print "<b>",&text('users_canadd'.$mreason, $mleft),"</b><p>\n";
 		}
 	elsif ($mleft == 0) {

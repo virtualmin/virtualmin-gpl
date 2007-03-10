@@ -10,7 +10,7 @@ $d = &get_domain($in{'dom'});
 &ui_print_header(&domain_in($d), $text{'aliases_title'}, "");
 
 # Create select / add links
-($mleft, $mreason, $mmax) = &count_feature("aliases");
+($mleft, $mreason, $mmax, $mhide) = &count_feature("aliases");
 @links = ( &select_all_link("d"),
 	   &select_invert_link("d") );
 if ($mleft != 0) {
@@ -21,8 +21,8 @@ if ($mleft != 0) {
 if (@aliases) {
 	print &ui_form_start("delete_aliases.cgi");
 	print &ui_hidden("dom", $in{'dom'}),"\n";
-	if ($mleft != 0 && $mleft != -1) {
-		print "<b>",&text('aliases_canadd'.$mreason, $mleft),"</b><p>\n";
+	if ($mleft != 0 && $mleft != -1 && !$mhide) {
+		print "<b>",&text('aliases_canadd'.$mreason,$mleft),"</b><p>\n";
 		}
 	elsif ($mleft == 0) {
 		print "<b>",&text('aliases_noadd'.$mreason, $mmax),"</b><p>\n";

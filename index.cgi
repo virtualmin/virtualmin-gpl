@@ -286,13 +286,13 @@ PAGEEND:
 # create_links(num)
 sub create_links
 {
-local ($dleft, $dreason, $dmax) = &count_domains("realdoms");
+local ($dleft, $dreason, $dmax, $dhide) = &count_domains("realdoms");
 local ($cannot_add, $limit_reason);
 if ($dleft == 0) {
 	# Need to show reason for hitting the limit
 	$cannot_add = &text('index_noadd'.$dreason, $dmax);
 	}
-elsif ($dleft != -1 && $_[0] == 1) {
+elsif ($dleft != -1 && $_[0] == 1 && !$dhide) {
 	# Tell the user how close they are to the limit, and why
 	$limit_reason = &text('index_canadd'.$dreason, $dleft);
 	}

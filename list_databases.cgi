@@ -33,7 +33,7 @@ if (@tabs > 1) {
 	}
 
 # Create select / add links
-($dleft, $dreason, $dmax) = &count_feature("dbs");
+($dleft, $dreason, $dmax, $dhide) = &count_feature("dbs");
 @links = ( &select_all_link("d"),
 	   &select_invert_link("d") );
 if ($dleft != 0) {
@@ -82,7 +82,10 @@ print &ui_links_row(\@links);
 if (@dbs) {
 	print &ui_form_end([ [ "delete", $text{'databases_delete'} ] ]);
 	}
-if ($dleft == 0) {
+if ($dleft != 0 && $dleft != -1 && !$dhide) {
+	print "<b>",&text('databases_canadd'.$dreason, $dleft),"</b><p>\n";
+	}
+elsif ($dleft == 0) {
 	print &text('databases_noadd'.$dreason, $dmax),"<br>\n";
 	}
 print &ui_tabs_end_tab() if (@tabs > 1);

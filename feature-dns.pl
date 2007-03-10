@@ -42,7 +42,8 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 				{ 'name' => 'file',
 				  'values' => [ $file ] } ]
 		};
-	if ($tmpl->{'namedconf'} ne 'none') {
+	if ($tmpl->{'namedconf'} &&
+	    $tmpl->{'namedconf'} ne 'none') {
 		push(@{$dir->{'members'}},
 		     &text_to_named_conf($tmpl->{'namedconf'}));
 		}
@@ -1176,7 +1177,8 @@ local $temp = &transname();
 &print_tempfile(TEMP, $str);
 &close_tempfile(TEMP);
 &require_bind();
-return &bind8::read_config_file($temp, 0);
+return grep { $_->{'name'} ne 'dummy' }
+	    &bind8::read_config_file($temp, 0);
 }
 
 $done_feature_script{'dns'} = 1;
