@@ -40,12 +40,12 @@ foreach my $v (@{$a->{'to'}}) {
 		return undef;
 		}
 	}
-if (!$simple->{'autoreply'}) {
-	# Get autoreply message from default file
-	$simple->{'autoreply'} = "$d->{'home'}/autoreply-".
-			         ($a->{'user'} || $a->{'from'}).".txt";
-	&read_autoreply($simple->{'autoreply'}, $simple);
-	}
+#if (!$simple->{'autoreply'}) {
+#	# Get autoreply message from default file
+#	$simple->{'autoreply'} = "$d->{'home'}/autoreply-".
+#			         ($a->{'user'} || $a->{'from'}).".txt";
+#	&read_autoreply($simple->{'autoreply'}, $simple);
+#	}
 $simple->{'cmt'} = $a->{'cmt'};
 return $simple;
 }

@@ -2,6 +2,7 @@
 # Show a form for importing a backup from some other control panel
 
 require './virtual-server-lib.pl';
+&require_migration();
 &can_migrate_servers() || &error($text{'migrate_ecannot'});
 
 &ui_print_header(undef, $text{'migrate_title'}, "");

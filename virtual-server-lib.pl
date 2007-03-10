@@ -112,9 +112,6 @@ foreach my $pname (@confplugins) {
 @startstop_plugins = grep { &plugin_defined($_, "feature_startstop") } @plugins;
 @backup_plugins = grep { &plugin_defined($_, "feature_backup") } @plugins;
 @migration_types = $virtualmin_pro ? ( "cpanel", "ensim" ) : ( );
-foreach my $m (@migration_types) {
-	do "$module_root_directory/migration-$m.pl";
-	}
 @allow_features = (@opt_features, "virt", @feature_plugins);
 @startstop_features = ("web", "dns", "mail", "ftp", "mysql", "postgres");
 @all_database_types = ( ($config{'mysql'} ? ("mysql") : ( )),
@@ -183,4 +180,10 @@ $extra_admins_dir = "$module_config_directory/admins";
 @all_possible_php_versions = (4, 5);
 @s3_perl_modules = ( "S3::AWSAuthConnection", "S3::QueryStringAuthGenerator" );
 
+%get_domain_by_maps = ( 'user' => "$module_config_directory/map.user",
+			'parent' => "$module_config_directory/map.parent",
+			'alias' => "$module_config_directory/map.alias",
+			'subdom' => "$module_config_directory/map.subdom",
+			'reseller' => "$module_config_directory/map.reseller",
+		       );
 

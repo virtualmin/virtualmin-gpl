@@ -12,6 +12,7 @@ chop($pwd = `pwd`);
 $0 = "$pwd/migrate-domain.pl";
 require './virtual-server-lib.pl';
 $< == 0 || die "migrate-domain.pl must be run as root";
+&require_migration();
 
 $first_print = \&first_text_print;
 $second_print = \&second_text_print;

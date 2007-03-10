@@ -14,11 +14,9 @@ if (!$virtual_server_root) {
 	}
 foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
 		 "php", "ruby", "vui", "dynip") {
-	if (-r "$virtual_server_root/$lib-lib.pl") {
-		do "$virtual_server_root/$lib-lib.pl";
-		if ($@) {
-			print STDERR "failed to load $lib-lib.pl : $@\n";
-			}
+	do "$virtual_server_root/$lib-lib.pl";
+	if ($@ && -r "$virtual_server_root/$lib-lib.pl") {
+		print STDERR "failed to load $lib-lib.pl : $@\n";
 		}
 	}
 
@@ -39,6 +37,14 @@ if (!$require_useradmin++) {
 	}
 if (!$_[0] && !$require_useradmin_quota++) {
 	&foreign_require("quota", "quota-lib.pl");
+	}
+}
+
+# Bring in libraries used for migrating from other servers
+sub require_migration
+{
+foreach my $m (@migration_types) {
+	do "$module_root_directory/migration-$m.pl";
 	}
 }
 
@@ -185,18 +191,35 @@ delete($dom->{'pass_set'});	# Only set by callers for modify_* functions
 }
 
 # get_domain_by(field, value, [field, value, ...])
-# Looks up a domain by some field(s)
+# Looks up a domain by some field(s). For each field, we either use the quick
+# map to find relevant domains, or check though all that we have left.
 sub get_domain_by
 {
-local $d;
 local @rv;
-foreach $d (&list_domains()) {
-	local $i;
-	local $allok = 1;
-	for($i=0; $i<@_; $i+=2) {
-		$allok = 0 if ($d->{$_[$i]} ne $_[$i+1]);
+for(my $i=0; $i<@_; $i+=2) {
+	local $mf = $get_domain_by_maps{$_[$i]};
+	local @possible;
+	local %map;
+	if ($mf && &read_file_cached($mf, \%map)) {
+		# The map knows relevant domains
+		foreach my $did (split(" ", $map{$_[$i+1]})) {
+			local $d = &get_domain($did);
+			push(@possible, $d) if ($d);
+			}
 		}
-	push(@rv, $d) if ($allok);
+	else {
+		# Need to check manually
+		@possible = grep { $_->{$_[$i]} eq $_[$i+1] } &list_domains();
+		}
+	if ($i == 0) {
+		# First field, so matches are the result
+		@rv = @possible;
+		}
+	else {
+		# Later field, so winnow down prevent results with new set
+		local %possible = map { $_->{'id'}, $_ } @possible;
+		@rv = grep { $possible{$_->{'id'}} } @rv;
+		}
 	}
 return wantarray ? @rv : $rv[0];
 }
@@ -209,6 +232,7 @@ return time().$$;
 }
 
 # save_domain(&domain)
+# Write domain information to disk
 sub save_domain
 {
 &make_dir($domains_dir, 0700);
@@ -222,10 +246,12 @@ $_[0]->{'id'} ||= &domain_id();
 &write_file("$domains_dir/$_[0]->{'id'}", $_[0]);
 &unlock_file("$domains_dir/$_[0]->{'id'}");
 $main::get_domain_cache{$_[0]->{'id'}} = $_[0];
+&build_domain_maps();
 return 1;
 }
 
 # delete_domain(&domain)
+# Delete all of Virtualmin's internal information about a domain
 sub delete_domain
 {
 local $id = $_[0]->{'id'};
@@ -246,6 +272,30 @@ if (defined(&get_autoreply_file_dir)) {
 			}
 		}
 	closedir(AUTODIR);
+	}
+delete($main::get_domain_cache{$_[0]->{'id'}});
+&build_domain_maps();
+}
+
+# build_domain_maps()
+# Create the files used by get_domain_by to quickly lookup domains by user
+# or parent 
+sub build_domain_maps
+{
+local @doms = &list_domains();
+foreach my $m (keys %get_domain_by_maps) {
+	local %map;
+	foreach my $d (@doms) {
+		local $v = $d->{$m};
+		next if ($v eq '');
+		if (!defined($map{$v})) {
+			$map{$v} = $d->{'id'};
+			}
+		else {
+			$map{$v} .= " ".$d->{'id'};
+			}
+		}
+	&write_file($get_domain_by_maps{$m}, \%map);
 	}
 }
 

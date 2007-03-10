@@ -6,6 +6,7 @@ require './virtual-server-lib.pl';
 &can_migrate_servers() || &error($text{'migrate_ecannot'});
 &error_setup($text{'migrate_err'});
 &ReadParseMime();
+&require_migration();
 
 # Validate inputs
 if ($in{'mode'} == 0) {
