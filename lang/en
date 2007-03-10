@@ -2545,6 +2545,12 @@ newscripts_fail=Halt if any server's upgrade fails?
 newscripts_save=Save Available Scripts
 newscripts_minver=Versions
 newscripts_any=&lt;Any&gt;
+newscripts_tabadd=Add Script
+newscripts_tabenable=Disable Scripts
+newscripts_tabupgrade=Upgrade Scripts
+newscripts_desc1=This form can be used to add script installers that were created by third-party vendors, so that they can be used like those built into Virtualmin.
+newscripts_desc2=This table can be used to de-select scripts that you do not want made available to virtual server owners.
+newscripts_desc3=This form allows you to upgrade a script to the latest version on some or all virtual servers at once. It should be used when security problems are found in older scripts.
 
 addscripts_err=Failed to add script installer
 addscripts_elocal=Local file does not exist

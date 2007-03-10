@@ -545,3 +545,4 @@ Added tabs to the Manage SSL Certificate page.
 Added the 'User-configured mail forwarding' section to the Edit Mailbox page, to show forwarding setup by the user in their .procmailrc file (using the Mail Filters module in Usermin).
 Added the 'Hide limits from server owners' option to the reseller page, which prevents his customers from seeing the reseller's limits (although they are still enforced). Also updated the create-reseller.pl and modify-reseller.pl programs to all --hide options.
 Added caching to make lookups of domains by parent and user faster.
+Added tabs and more help text to the Script Installers page.
