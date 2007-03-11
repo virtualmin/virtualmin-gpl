@@ -59,6 +59,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-suexec") {
 		$suexec = 0;
 		}
+	elsif ($a eq "--style") {
+		$stylename = shift(@ARGV);
+		}
+	elsif ($a eq "--content") {
+		$content = shift(@ARGV);
+		}
 	else {
 		&usage();
 		}
@@ -67,6 +73,19 @@ while(@ARGV > 0) {
 $mode || $rubymode || defined($proxy) || defined($framefwd) ||
   defined($suexec) || &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
+
+# Validate style
+if ($stylename) {
+	($style) = grep { $_->{'name'} eq $stylename } &list_content_styles();
+	$style || &usage("Style $stylename does not exist");
+	$content || &usage("--content followed by some initial text for the website must be specified when using --style");
+	if ($content =~ /^\//) {
+		$content = &read_file_contents($content);
+		$content || &usage("--content file does not exist");
+		}
+	$content =~ s/\r//g;
+	$content =~ s/\\n/\n/g;
+	}
 
 # Get domains to update
 if ($all_doms) {
@@ -165,6 +184,13 @@ foreach $d (@doms) {
 		&$second_print($text{'setup_done'});
 		}
 
+	if ($style) {
+		# Apply content style
+		&$first_print(&text('setup_styleing', $style->{'desc'}));
+		&apply_content_style($d, $style, $content);
+		&$second_print($text{'setup_done'});
+		}
+
 	if (defined($proxy) || defined($framefwd)) {
 		# Save the domain
 		&modify_web($d, $oldd);
@@ -195,6 +221,8 @@ print "                     [--suexec | --no-suexec]\n";
 print "                     [--proxy http://... | --no-proxy]\n";
 print "                     [--framefwd http://... | --no-framefwd]\n";
 print "                     [--framefwd \"title\" ]\n";
+print "                     [--style name]\n";
+print "                     [--content text|filename]\n";
 exit(1);
 }
 

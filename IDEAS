@@ -58,9 +58,8 @@
 
   - mailbox_list_mails should use select function for virtual folders!
 
-  - svn mailman integration
-
   - nicer install for integramod (like phpbb)
 
   - get default styles from openwebdesign.org and oswd.org
+	- command-line program
 
