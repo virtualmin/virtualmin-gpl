@@ -59,7 +59,7 @@ print &ui_table_row(&hlink($text{'alias_name'}, "aliasname"),
 	    &ui_radio("name_def", $name eq "" && !$in{'new'} ? 1 : 0,
 		       [ [ 1, $text{'alias_catchall'} ],
 			 [ 0, $text{'alias_mailbox'} ] ])."\n".
-	    &ui_textbox("name", $name, 20),
+	    &ui_textbox("name", $name, 20)."\@".$d->{'dom'},
 	    undef, \@tds);
 
 print &ui_table_hr();
