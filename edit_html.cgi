@@ -73,6 +73,7 @@ function initEditor() {
   editor = new HTMLArea("body");
   editor.config.baseHref = "http://www.$d->{'dom'}/";
   editor.config.baseURL = "http://www.$d->{'dom'}/";
+  editor.config.getHtmlMethod = "TransformInnerHTML";
   editor.generate();
   return false;
 }
@@ -80,12 +81,18 @@ function initEditor() {
 EOF
 
 if ($editing) {
+	&switch_to_domain_user($d);
 	if ($editing == 1) {
 		# Read the selected HTML file
 		$in{'edit'} !~ /\.\./ && $in{'edit'} !~ /\0/ ||
 			&error($text{'html_efile'});
-		&switch_to_domain_user($d);
 		$data = &read_file_contents("$pub/$in{'edit'}");
+		}
+	else {
+		# Read a template file if one exists
+		if (-r "$pub/template.html") {
+			$data = &read_file_contents("$pub/template.html");
+			}
 		}
 
 	# Show form for editing

@@ -10011,6 +10011,19 @@ foreach my $f (@backup_features) {
 return @rv;
 }
 
+# html_extract_head_body(html)
+# Given some HTML, extracts the header, body and stuff after the body
+sub html_extract_head_body
+{
+local ($html) = @_;
+if ($html =~ /^([\000-\377]*<body[^>]*>)([\000-\377]*)(<\/body[^>]*>[\000-\377]*)/i) {
+	return ($1, $2, $3);
+	}
+else {
+	return (undef, $html, undef);
+	}
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;

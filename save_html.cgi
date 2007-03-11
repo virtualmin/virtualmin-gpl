@@ -48,15 +48,32 @@ elsif ($in{'delete'}) {
 else {
 	# Validate inputs
 	$data = $in{'body'};
+	$data =~ s/\r//g;
 	$data || &error($text{'html_enone'});
 
-	# Write out the file
+	# Get the original file, and use its header
 	&switch_to_domain_user($d);
+	$olddata = &read_file_contents("$pub/$in{'file'}");
+	if ($olddata && $data !~ /<body.*>/i) {
+		($oldhead, $oldbody, $oldfoot) =
+			&html_extract_head_body($olddata);
+		$data = $oldhead.$data.$oldfoot;
+		}
+	elsif (!$olddata && $data !~ /<body.*>/i &&
+	       -r "$pub/template.html") {
+		# Use head and body from template file
+		$tmpldata = &read_file_contents("$pub/template.html");
+		($tmplhead, $tmplbody, $tmplfoot) =
+			&html_extract_head_body($tmpldata);
+		$data = $tmplhead.$data.$tmplfoot;
+		}
+
+	# Write out the file
 	&open_tempfile(HTML, ">$pub/$in{'file'}");
 	&print_tempfile(HTML, $data);
 	&close_tempfile(HTML);
 
-	&redirect("edit_html.cgi?dom=$in{'dom'}&editok=1&edit=".
+	&redirect("edit_html.cgi?dom=$in{'dom'}&edit=".
 		  &urlize($in{'file'}));
 	}
 

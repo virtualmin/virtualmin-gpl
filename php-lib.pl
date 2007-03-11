@@ -76,7 +76,7 @@ foreach my $p (@ports) {
 		    grep { $_ =~ /^application\/x-httpd-php\d+/ }
 			&apache::find_directive("Action", $vconf);
 		local ($dirstr) =
-		  grep { $_->{'value'} eq &public_html_dir($d) }
+		  grep { $_->{'words'}->[0] eq &public_html_dir($d) }
 		    &apache::find_directive_struct("Directory", $vconf);
 		if ($mode eq "fcgid") {
 			$dirstr || &error("No &lt;Directory&gt; section found ",
