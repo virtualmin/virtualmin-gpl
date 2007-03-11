@@ -74,6 +74,6 @@ else {
 	&close_tempfile(HTML);
 
 	&redirect("edit_html.cgi?dom=$in{'dom'}&edit=".
-		  &urlize($in{'file'}));
+		  &urlize($in{'file'})."&saved=1");
 	}
 

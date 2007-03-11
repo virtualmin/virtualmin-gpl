@@ -3149,6 +3149,7 @@ html_err=Failed to save web page
 html_enone=No HTML entered
 html_editing=Editing web page $1
 html_creating=Creating web page $1
+html_saved=Web page $1 has been successfully saved.
 html_cancel=Cancel
 html_delete=Delete Web Page
 html_dtitle=Delete Web Page

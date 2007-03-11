@@ -57,6 +57,12 @@ print &ui_form_end();
 
 print "</table>\n";
 
+# Tell the user if something was saved
+$port = $d->{'web_port'} == 80 ? "" : ":".$d->{'web_port'};
+if ($in{'saved'}) {
+	print "<p><b>",&text('html_saved', "<a href='http://www.$d->{'dom'}$port/$in{'edit'}' target=_new><tt>$in{'edit'}</tt></a>"),"</b><p>\n";
+	}
+
 # Output HTMLarea init code
 $mbroot = &module_root_directory("mailboxes");
 $prog = -d "$mbroot/xinha" ? "xinha" : "htmlarea";
@@ -99,7 +105,6 @@ if ($editing) {
 	print "<hr>\n";
 	print "<b>";
 	if ($editing == 1) {
-		$port = $d->{'web_port'} == 80 ? "" : ":".$d->{'web_port'};
 		print &text('html_editing', "<a href='http://www.$d->{'dom'}$port/$in{'edit'}' target=_new><tt>$in{'edit'}</tt></a>");
 		}
 	else {
