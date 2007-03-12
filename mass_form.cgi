@@ -59,8 +59,13 @@ if (&can_mailbox_ftp()) {
 print &ui_table_row($text{'mass_tempdisable'},
 	    &ui_radio('disable', 0,
 		      [ [ 0, $text{'mass_leave'} ],
-			[ 1, $text{'mass_enable'} ],
-			[ 2, $text{'mass_disable'} ] ]));
+			[ 1, $text{'mass_tempdisable1'} ],
+			[ 2, $text{'mass_tempdisable2'} ] ]));
+
+# Email on change?
+print &ui_table_hr();
+print &ui_table_row($text{'mass_updateemail'},
+	    &ui_yesno_radio('updateemail', 0));
 
 print &ui_table_end();
 print &ui_form_end([ [ "mass", $text{'mass_ok'} ] ]);

@@ -36,6 +36,7 @@ $in{'qquota_def'} < 2 || $in{'qquota'} =~ /^[0-9]+$/ ||
 &ui_print_unbuffered_header(&domain_in($d), $text{'mass_title'}, "");
 
 foreach $user (@musers) {
+	$changed = 0;
 	$old = { %$user };
 	&$first_print(&text('mass_user', "<tt>$user->{'user'}</tt>"));
 	&$indent_print();
@@ -54,11 +55,20 @@ foreach $user (@musers) {
 			&$second_print($text{'mass_eunix'});
 			}
 		elsif ($in{'quota_def'} == 1) {
-			$user->{'quota'} = 0;
+			# Quota set to unlimited
+			if ($user->{'quota'}) {
+				$user->{'quota'} = 0;
+				$changed++;
+				}
 			&$second_print($text{'mass_setu'});
 			}
 		elsif ($in{'quota_def'} == 2) {
-			$user->{'quota'} = &quota_parse("quota", "home");
+			# Quota set to specific value
+			$nq = &quota_parse("quota", "home");
+			if ($nq != $user->{'quota'}) {
+				$user->{'quota'} = $nq;
+				$changed++;
+				}
 			&$second_print(&text('mass_setq',
 					&quota_show($user->{'quota'}, "home")));
 			}
@@ -77,11 +87,18 @@ foreach $user (@musers) {
 			&$second_print($text{'mass_eunix'});
 			}
 		elsif ($in{'mquota_def'} == 1) {
-			$user->{'mquota'} = 0;
+			if ($user->{'mquota'}) {
+				$user->{'mquota'} = 0;
+				$changed++;
+				}
 			&$second_print($text{'mass_setu'});
 			}
 		elsif ($in{'mquota_def'} == 2) {
-			$user->{'mquota'} = &quota_parse("mquota", "mail");
+			$nq = &quota_parse("mquota", "mail");
+			if ($nq != $user->{'mquota'}) {
+				$user->{'mquota'} = $nq;
+				$changed++;
+				}
 			&$second_print(&text('mass_setq',
 					&quota_show($user->{'mquota'},"mail")));
 			}
@@ -94,11 +111,17 @@ foreach $user (@musers) {
 			&$second_print($text{'mass_emailquota'});
 			}
 		elsif ($in{'qquota_def'} == 1) {
-			$user->{'qquota'} = 0;
+			if ($user->{'qquota'}) {
+				$user->{'qquota'} = 0;
+				$changed++;
+				}
 			&$second_print($text{'mass_setu'});
 			}
 		elsif ($in{'qquota_def'} == 2) {
-			$user->{'qquota'} = $in{'qquota'};
+			if ($user->{'qquota'} != $in{'qquota'}) {
+				$user->{'qquota'} = $in{'qquota'};
+				$changed++;
+				}
 			&$second_print(&text('mass_setq', $user->{'qquota'}));
 			}
 		}
@@ -110,11 +133,17 @@ foreach $user (@musers) {
 			&$second_print($text{'mass_eprimary'});
 			}
 		elsif ($in{'email'} == 1) {
-			$user->{'email'} = $pop3."\@".$d->{'dom'};
+			if ($user->{'email'} ne $pop3."\@".$d->{'dom'}) {
+				$user->{'email'} = $pop3."\@".$d->{'dom'};
+				$changed++;
+				}
 			&$second_print(&text('mass_primarye',$user->{'email'}));
 			}
 		elsif ($in{'email'} == 2) {
-			$user->{'email'} = undef;
+			if ($user->{'email'}) {
+				$user->{'email'} = undef;
+				$changed++;
+				}
 			&$second_print($text{'mass_primaryd'});
 			}
 		}
@@ -126,15 +155,24 @@ foreach $user (@musers) {
 			&$second_print($text{'mass_eunix'});
 			}
 		elsif ($in{'ftp'} == 1) {
-			$user->{'shell'} = $config{'ftp_shell'};
+			if ($user->{'shell'} ne $config{'ftp_shell'}) {
+				$user->{'shell'} = $config{'ftp_shell'};
+				$changed++;
+				}
 			&$first_print($text{'mass_ftp1'});
 			}
 		elsif ($in{'ftp'} == 2) {
-			$user->{'shell'} = $config{'shell'};
+			if ($user->{'shell'} ne $config{'shell'}) {
+				$user->{'shell'} = $config{'shell'};
+				$changed++;
+				}
 			&$first_print($text{'mass_ftp2'});
 			}
 		elsif ($in{'ftp'} == 3) {
-			$user->{'shell'} = $config{'jail_shell'};
+			if ($user->{'shell'} ne $config{'jail_shell'}) {
+				$user->{'shell'} = $config{'jail_shell'};
+				$changed++;
+				}
 			&$first_print($text{'mass_ftp3'});
 			}
 		}
@@ -145,11 +183,19 @@ foreach $user (@musers) {
 			&$second_print($text{'mass_eplain'});
 			}
 		elsif ($in{'disable'} == 1) {
-			&set_pass_disable($user, 0);
+			# Enabling
+			if ($user->{'pass'} =~ /^\!/) {
+				&set_pass_disable($user, 0);
+				$changed++;
+				}
 			&$first_print($text{'mass_disable1'});
 			}
 		elsif ($in{'disable'} == 2) {
-			&set_pass_disable($user, 1);
+			# Disabling
+			if ($user->{'pass'} !~ /^\!/) {
+				&set_pass_disable($user, 1);
+				$changed++;
+				}
 			&$first_print($text{'mass_disable2'});
 			}
 		}
@@ -157,10 +203,18 @@ foreach $user (@musers) {
 	# Save the user
 	&modify_user($user, $old, $d);
 
+	# Email user if requested
+	if ($in{'updateemail'} && $changed && $user->{'email'}) {
+		&send_user_email($d, $user, $user->{'email'}, 1);
+		}
+
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
 	}
 &unlock_user_db();
+&run_post_actions();
+&webmin_log("modify", "users", scalar(@musers),
+	    { 'dom' => $d->{'dom'} });
 
 &ui_print_footer("list_users.cgi?dom=$in{'dom'}", $text{'users_return'},
 		 "", $text{'index_return2'});
