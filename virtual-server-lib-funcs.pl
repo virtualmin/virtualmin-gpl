@@ -492,8 +492,8 @@ local $tmpl = &get_template($_[0] ? $_[0]->{'template'} : 0);
 local $qtype = $tmpl->{'quotatype'};
 local $u;
 foreach $u (@users) {
-	$u->{'quota'} = $u->{$qtype.'quota'};
-	$u->{'mquota'} = $u->{$qtype.'mquota'};
+	$u->{'quota'} = $u->{$qtype.'quota'} if (!defined($u->{'quota'}));
+	$u->{'mquota'} = $u->{$qtype.'mquota'} if (!defined($u->{'mquota'}));
 	}
 
 # Detect user who are close to their quota
