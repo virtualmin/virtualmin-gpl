@@ -1177,8 +1177,13 @@ local $temp = &transname();
 &print_tempfile(TEMP, $str);
 &close_tempfile(TEMP);
 &require_bind();
-return grep { $_->{'name'} ne 'dummy' }
+local %oldconfig = %bind8::config;	# turn off chroot temporarily
+$bind8::config{'chroot'} = undef;
+$bind8::config{'auto_chroot'} = undef;
+local @rv = grep { $_->{'name'} ne 'dummy' }
 	    &bind8::read_config_file($temp, 0);
+%bind8::config = %oldconfig;
+return @rv;
 }
 
 $done_feature_script{'dns'} = 1;
