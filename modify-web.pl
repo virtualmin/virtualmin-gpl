@@ -71,7 +71,7 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || usage();
 $mode || $rubymode || defined($proxy) || defined($framefwd) ||
-  defined($suexec) || &usage("Nothing to do");
+  defined($suexec) || $stylename || &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate style
