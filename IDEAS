@@ -61,5 +61,10 @@
   - nicer install for integramod (like phpbb)
 
   - get default styles from openwebdesign.org and oswd.org
-	- command-line program
+
+  - improve dotprojekt installer
+	- http://www.virtualmin.com/ticket-tracker/bug?bug%5fnumber=362
+
+  - google analytics plugin
+	- mod_perl and filter for text/html
 
