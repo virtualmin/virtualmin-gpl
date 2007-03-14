@@ -94,7 +94,7 @@ if ($in{'new'}) {
 else {
 	print &ui_form_end([ [ "save", $text{'save'} ],
 			     [ "delete", $text{'delete'} ],
-			     &can_switch_user($d) ?
+			     &can_switch_user($d, $admin->{'name'}) ?
 			       ( [ "switch", $text{'admin_switch'} ] ) : ( ) ]);
 	}
 

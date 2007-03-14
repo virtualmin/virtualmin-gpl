@@ -2021,15 +2021,17 @@ sub can_spam_client
 return &master_admin();
 }
 
-# can_switch_user(&domain)
+# can_switch_user(&domain, [extra-admin])
 # Returns 1 if the current user can switch to the Webmin login for some domain
 sub can_switch_user
 {
-local ($d) = @_;
+local ($d, $admin) = @_;
 return $virtualmin_pro &&	# Only Pro supports this
        $main::session_id &&	# When using session auth
        !$access{'admin'} &&	# Not for extra admins
-       (&master_admin() || &can_edit_domain($d));
+       (&master_admin() ||	# Master can switch, or domain owner to extras
+	&reseller_admin() && &can_edit_domain($d) ||
+	$admin && &can_edit_domain($d));
 }
 
 # domains_table(&domains, [checkboxes])
@@ -8313,7 +8315,7 @@ if (!$d->{'parent'} && &can_edit_admins()) {
 	}
 
 if (!$d->{'parent'} && $d->{'webmin'} && &can_switch_user($d)) {
-	# Button to switch to a user
+	# Button to switch to the domain's admin
 	push(@rv, { 'page' => 'switch_user.cgi',
 		    'title' => $text{'edit_switch'},
 		    'desc' => $text{'edit_switchdesc'},

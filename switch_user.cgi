@@ -5,7 +5,7 @@ require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
-&can_switch_user($d) || &error($text{'switch_ecannot'});
+&can_switch_user($d, $in{'admin'}) || &error($text{'switch_ecannot'});
 
 if ($in{'admin'}) {
 	# Switch is to an extra admin .. make sure he exists
