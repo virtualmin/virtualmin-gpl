@@ -2026,8 +2026,9 @@ return &master_admin();
 sub can_switch_user
 {
 local ($d) = @_;
-return $virtualmin_pro &&
-       $main::session_id &&
+return $virtualmin_pro &&	# Only Pro supports this
+       $main::session_id &&	# When using session auth
+       !$access{'admin'} &&	# Not for extra admins
        (&master_admin() || &can_edit_domain($d));
 }
 
