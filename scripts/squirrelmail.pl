@@ -37,6 +37,11 @@ sub script_squirrelmail_php_vers
 return ( 4, 5 );
 }
 
+sub script_squirrelmail_pear_modules
+{
+return ("DB");
+}
+
 # script_squirrelmail_depends(&domain, version)
 sub script_squirrelmail_depends
 {
