@@ -360,9 +360,20 @@ if ($oldip ne $newip) {
 	local @recs = &bind8::read_zone_file($fn, $newzonename);
 	foreach $r (@recs) {
 		if ($r->{'values'}->[0] eq $oldip) {
+			# Change IP in A record
 			&bind8::modify_record($fn, $r, $r->{'name'},
 					      $r->{'ttl'}, $r->{'class'},
 					      $r->{'type'}, $newip,
+					      $r->{'comment'});
+			}
+		elsif ($r->{'type'} eq 'SPF' &&
+		       $r->{'values'}->[0] =~ /$oldip/) {
+			# Fix IP within an SPF
+			$r->{'values'}->[0] =~ s/$oldip/$newip/g;
+			&bind8::modify_record($fn, $r, $r->{'name'},
+					      $r->{'ttl'}, $r->{'class'},
+					      $r->{'type'},
+					      &join_record_values($r),
 					      $r->{'comment'});
 			}
 		}
