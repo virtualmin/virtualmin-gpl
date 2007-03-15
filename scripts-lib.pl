@@ -223,9 +223,15 @@ foreach my $f (@files) {
 		&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, undef,
 					   $temp);
 
-		# Make sure the downloaded file is in some archive format
+		# Make sure the downloaded file is in some archive format,
+		# or is Perl or PHP.
 		local $fmt = &compression_format($temp);
-		if (!$fmt) {
+		if (!$fmt && $temp =~ /\.(pl|php)$/i) {
+			local $cont = &read_file_contents($temp);
+			}
+		if (!$fmt &&
+		    $cont !~ /^\#\!\S+(perl|php)/i &&
+		    $cont !~ /^\s*<\?php/i) {
 			return &text('scripts_edownload2', $f->{'url'});
 			}
 
