@@ -555,4 +555,4 @@ Don't allow extra admins to switch to the domain owner.
 Added a page for installing third-party content styles, which can then be used for new websites exactly like the built-in styles.
 When configuring email notification for new mailboxes, resellers and domains, you can now enter a Bcc address as well as a Cc address.
 Split the Edit Virtual Server page into more sections.
-Improved the IntegraMod script installer to configure the database connection automatically.
+Improved the IntegraMod and dotProject script installers to configure the database connection automatically.
