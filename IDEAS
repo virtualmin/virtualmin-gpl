@@ -64,4 +64,5 @@
 	- http://www.virtualmin.com/ticket-tracker/bug?bug%5fnumber=362
 
   - clean up edit virtual server page, and move IP stuff to separate screen
+	- and edit_new* email pages
 
