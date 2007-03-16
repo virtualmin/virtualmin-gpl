@@ -143,6 +143,7 @@ $scripts_unavail_file = "$module_config_directory/scriptsunavail";
 @styles_directories = ( "$module_config_directory/styles",
 			"$module_root_directory/styles",
 		      );
+$styles_unavail_file = "$module_config_directory/stylesunavail";
 
 @reseller_maxes = ("doms", "aliasdoms", "realdoms", "quota", "mailboxes", "aliases", "dbs", "bw");
 
@@ -161,7 +162,7 @@ $initial_users_dir = "$module_config_directory/initial";
 @virtualmin_backups = ( 'config', 'templates',
 			$virtualmin_pro ? ( 'resellers' ) : ( ),
 			'email', 'custom',
-			$virtualmin_pro ? ( 'scripts' ) : ( ) );
+			$virtualmin_pro ? ( 'scripts', 'styles' ) : ( ) );
 
 @limit_types = ("mailboxlimit", "aliaslimit", "dbslimit", "domslimit",
             	"aliasdomslimit", "realdomslimit");

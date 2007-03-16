@@ -552,3 +552,4 @@ Added a button to the Edit Web Pages page to replace existing content with that 
 Removed old versions from the PHPmyAdmin script installer.
 Updated the Drupal script installer to support version 5.1, Horde to 3.1.4 and IMP to 4.1.4.
 Don't allow extra admins to switch to the domain owner.
+Added a page for installing third-party content styles, which can then be used for new websites exactly like the built-in styles.

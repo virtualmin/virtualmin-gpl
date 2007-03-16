@@ -321,11 +321,13 @@ if ($add_fwdto) {
 # Copy initial website style
 if (defined($in{'content'}) && !$in{'content_def'} && $dom{'web'}) {
 	($style) = grep { $_->{'name'} eq $in{'style'} }
-			&list_content_styles();
-	&$first_print(&text('setup_styleing', $style->{'desc'}));
-	$in{'content'} =~ s/\r//g;
-	&apply_content_style(\%dom, $style, $in{'content'});
-	&$second_print($text{'setup_done'});
+			&list_available_content_styles();
+	if ($style) {
+		&$first_print(&text('setup_styleing', $style->{'desc'}));
+		$in{'content'} =~ s/\r//g;
+		&apply_content_style(\%dom, $style, $in{'content'});
+		&$second_print($text{'setup_done'});
+		}
 	}
 
 &webmin_log("create", "domain", $dom{'dom'}, \%dom);

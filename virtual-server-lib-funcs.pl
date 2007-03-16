@@ -4113,11 +4113,12 @@ local ($file, $vbs) = @_;
 }
 
 # virtualmin_backup_scripts(file, &vbs)
-# Create a tar file of the scripts directory
+# Create a tar file of the scripts directory, and of the unavailable scripts
 sub virtualmin_backup_scripts
 {
 local ($file, $vbs) = @_;
 &execute_command("cd $module_config_directory/scripts && tar cf ".quotemeta($file)." .");
+&copy_source_dest($scripts_unavail_file, $file."_unavail");
 }
 
 # virtualmin_restore_scripts(file, &vbs)
@@ -4127,6 +4128,30 @@ sub virtualmin_restore_scripts
 local ($file, $vbs) = @_;
 mkdir("$module_config_directory/scripts", 0755);
 &execute_command("cd $module_config_directory/scripts && tar xf ".quotemeta($file));
+if (-r $file."_unavail") {
+	&copy_source_dest($file."_unavail", $scripts_unavail_file);
+	}
+}
+
+# virtualmin_backup_styles(file, &vbs)
+# Create a tar file of the styles directory, and of the unavailable styles
+sub virtualmin_backup_styles
+{
+local ($file, $vbs) = @_;
+&execute_command("cd $module_config_directory/styles && tar cf ".quotemeta($file)." .");
+&copy_source_dest($styles_unavail_file, $file."_unavail");
+}
+
+# virtualmin_restore_styles(file, &vbs)
+# Extract a tar file of all third-party styles
+sub virtualmin_restore_styles
+{
+local ($file, $vbs) = @_;
+mkdir("$module_config_directory/styles", 0755);
+&execute_command("cd $module_config_directory/styles && tar xf ".quotemeta($file));
+if (-r $file."_unavail") {
+	&copy_source_dest($file."_unavail", $styles_unavail_file);
+	}
 }
 
 # restore_domains(file, &domains, &features, &options, &vbs)
@@ -8062,6 +8087,36 @@ if (!$rv) {
 return $rv;
 }
 
+# extract_compressed_file(file, destdir)
+# Extracts the contents of some compressed file to the given directory. Returns
+# undef if OK, or an error message on failure.
+sub extract_compressed_file
+{
+local ($file, $dir) = @_;
+local $format = &compression_format($file);
+local @needs = ( undef,
+		 [ "gunzip", "tar" ],
+		 [ "uncompress", "tar" ],
+		 [ "bunzip2", "tar" ],
+		 [ "unzip" ],
+		 [ "tar" ],
+		);
+foreach my $n (@{$needs[$format]}) {
+	&has_command($n) || return &text('addstyle_ecmd', "<tt>$m</tt>");
+	}
+local ($qfile, $qdir) = ( quotemeta($file), quotemeta($dir) );
+local @cmds = ( undef,
+		"cd $qdir && gunzip -c $qfile | tar xf -",
+		"cd $qdir && uncompress -c $qfile | tar xf -",
+		"cd $qdir && bunzip2 -c $qfile | tar xf -",
+		"cd $qdir && unzip $qfile",
+		"cd $qdir && tar xf $qfile",
+	       );
+local $out = &backquote_command("$cmds[$format] 2>&1 </dev/null");
+return $? ? &text('addstyle_ecmdfailed',
+		  "<tt>".&html_escape($out)."</tt>") : undef;
+}
+
 # lock_user_db()
 # Take out a lock on all mailbox users. Should be called before performing
 # any user-related options
@@ -8491,7 +8546,7 @@ local @tmpls = ( 'tmpl', 'user', 'update',
    $config{'localgroup'} ? ( 'local' ) : ( ),
    'bw', 'plugin',
    $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'dynip', 'resels',
-		       'reseller', 'notify', 'scripts' )
+		       'reseller', 'notify', 'scripts', 'styles' )
 		   : ( 'sharedips', 'dynip' ),
    &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
    $virtualmin_pro ? ( 'mxs', 'validate' ) : ( ),

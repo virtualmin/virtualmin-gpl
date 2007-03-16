@@ -62,7 +62,7 @@ print "<tr>\n";
 print "<td><b>$text{'html_apply'}</b></td>\n";
 print "<td>",&ui_select("style", undef,
 		[ map { [ $_->{'name'}, $_->{'desc'} ] }
-		      &list_content_styles() ]),"</td>\n";
+		      &list_available_content_styles() ]),"</td>\n";
 print "<td>",&ui_submit($text{'html_styleok'}, 'styleok'),"</td>\n";
 print "</tr>\n";
 print &ui_form_end();
