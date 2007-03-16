@@ -2388,6 +2388,7 @@ local $tmpl = &get_template($_[0]->{'template'});
 local $mail = $tmpl->{'mail'};
 local $subject = $tmpl->{'mail_subject'};
 local $cc = $tmpl->{'mail_cc'};
+local $bcc = $tmpl->{'mail_bcc'};
 if ($tmpl->{'mail_on'} eq 'none') {
 	return (1, undef);
 	}
@@ -2403,7 +2404,7 @@ if ($hash{'uquota'}) {
 	}
 
 local @erv = &send_template_email($mail, $_[0]->{'emailto'},
-			    	  \%hash, $subject, $cc);
+			    	  \%hash, $subject, $cc, $bcc);
 if ($erv[0]) {
 	&$second_print(&text('setup_emailok', $erv[1]));
 	}
@@ -2449,6 +2450,7 @@ if ($config{'new'.$tmode.'_to_reseller'} && $d->{'reseller'}) {
 		}
 	}
 local $cc = join(",", @ccs);
+local $bcc = $config{'new'.$tmode.'_bcc'};
 
 &ensure_template($tmode."-template");
 return (1, undef) if ($config{$tmode.'_template'} eq 'none');
@@ -2504,8 +2506,7 @@ return (1, undef) if (!$email && !$cc);
 return &send_template_email(&cat_file($tmpl), $email, \%hash,
 			    $subject ||
 			    &entities_to_ascii($text{'mail_usubject'}),
-			    $cc,
-			    $d);
+			    $cc, $bcc, $d);
 }
 
 # ensure_template(file)
@@ -2515,14 +2516,14 @@ sub ensure_template
 	if (!-r "$module_config_directory/$_[0]");
 }
 
-# send_template_email(data, address, &substitions, subject, cc, [&domain])
+# send_template_email(data, address, &substitions, subject, cc, bcc, [&domain])
 # Sends the given file to the specified address, with the substitions from
 # a hash reference. The actual subs in the file must be like $XXX for entries
 # in the hash like xxx - ie. $DOM is replaced by the domain name, and $HOME
 # by the home directory
 sub send_template_email
 {
-local ($template, $to, $subs, $subject, $cc, $d) = @_;
+local ($template, $to, $subs, $subject, $cc, $bcc, $d) = @_;
 local %hash = %$subs;
 
 # Add in Webmin info to the hash
@@ -2561,6 +2562,7 @@ local $mail = { 'headers' => [ [ 'From', $from ||
 					 &mailboxes::get_from_address() ],
 			       [ 'To', $to ],
 			       $cc ? ( [ 'Cc', $cc ] ) : ( ),
+			       $bcc ? ( [ 'Bcc', $bcc ] ) : ( ),
 			       [ 'Subject', $subject ],
 			       [ 'Content-type', 'text/plain' ] ],
 		'body' => $template };
@@ -6053,17 +6055,17 @@ else {
 	}
 }
 
-# email_template_input(template-file, subject, other-cc,
+# email_template_input(template-file, subject, other-cc, other-bcc,
 #		       [mailbox-cc, owner-cc, reseller-cc])
 # Returns HTML for fields for editing an email template
 sub email_template_input
 {
-local ($file, $subject, $cc, $mailbox, $owner, $reseller) = @_;
+local ($file, $subject, $cc, $bcc, $mailbox, $owner, $reseller) = @_;
 local $rv;
 $rv .= &ui_table_start(undef, undef, 2);
 $rv .= &ui_table_row($text{'newdom_subject'},
 		     &ui_textbox("subject", $subject, 60));
-if (@_ >= 4) {
+if (@_ >= 5) {
 	# Show inputs for selecting destination
 	$rv .= &ui_table_row($text{'newdom_to'},
 	     &ui_checkbox("mailbox", 1, $text{'newdom_mailbox'}, $mailbox)." ".
@@ -6074,6 +6076,8 @@ if (@_ >= 4) {
 	}
 $rv .= &ui_table_row($text{'newdom_cc'},
 		     &ui_textbox("cc", $cc, 60));
+$rv .= &ui_table_row($text{'newdom_bcc'},
+		     &ui_textbox("bcc", $bcc, 60));
 if ($file) {
 	$rv .= &ui_table_row(undef,
 		&ui_textarea("template", &read_file_contents($file), 20, 70),
@@ -6083,24 +6087,27 @@ $rv .= &ui_table_end();
 return $rv;
 }
 
-# parse_email_template(file, subject-config, cc-config,
+# parse_email_template(file, subject-config, cc-config, bcc-config,
 #		       [mailbox-config, owner-config, reseller-config])
 sub parse_email_template
 {
+local ($file, $subject_config, $cc_config, $bcc_config,
+       $mailbox_config, $owner_config, $reseller_config) = @_;
 $in{'template'} =~ s/\r//g;
-&open_lock_tempfile(FILE, ">$_[0]", 1) ||
+&open_lock_tempfile(FILE, ">$file", 1) ||
 	&error(&text('efilewrite', $file, $!));
 &print_tempfile(FILE, $in{'template'});
 &close_tempfile(FILE);
 
 &lock_file($module_config_file);
-$config{$_[1]} = $in{'subject'};
-$config{$_[2]} = $in{'cc'};
-if ($_[3]) {
-	$config{$_[3]} = $in{'mailbox'};
-	$config{$_[4]} = $in{'owner'};
+$config{$subject_config} = $in{'subject'};
+$config{$cc_config} = $in{'cc'};
+$config{$bcc_config} = $in{'bcc'};
+if ($mailbox_config) {
+	$config{$mailbox_config} = $in{'mailbox'};
+	$config{$owner_config} = $in{'owner'};
 	if ($virtualmin_pro) {
-		$config{$_[5]} = $in{'reseller'};
+		$config{$reseller_config} = $in{'reseller'};
 		}
 	}
 $config{'last_check'} = time()+1;	# no need for check.cgi to be run
@@ -6244,6 +6251,7 @@ push(@rv, { 'id' => 0,
 	    'mail_subject' => $config{'newdom_subject'} ||
 			      &entities_to_ascii($text{'mail_dsubject'}),
 	    'mail_cc' => $config{'newdom_cc'},
+	    'mail_bcc' => $config{'newdom_bcc'},
 	    'spam' => $config{'spam_client'},
 	    'spam_host' => $config{'spam_host'},
 	    'spam_size' => $config{'spam_size'},
@@ -6317,6 +6325,7 @@ push(@rv, { 'id' => 1,
 	    'mail_subject' => $config{'newsubdom_subject'} ||
 			      &entities_to_ascii($text{'mail_dsubject'}),
 	    'mail_cc' => $config{'newsubdom_cc'},
+	    'mail_bcc' => $config{'newsubdom_bcc'},
 	    'skel' => $config{'sub_skel'} || "none",
 	    'for_parent' => 0,
 	    'for_sub' => 1,
@@ -6441,6 +6450,7 @@ if ($tmpl->{'id'} == 0) {
 			$config{'domain_template'}, $tmpl->{'mail'});
 	$config{'newdom_subject'} = $tmpl->{'mail_subject'};
 	$config{'newdom_cc'} = $tmpl->{'mail_cc'};
+	$config{'newdom_bcc'} = $tmpl->{'mail_bcc'};
 	$config{'spam_client'} = $tmpl->{'spam'};
 	$config{'spam_host'} = $tmpl->{'spam_host'};
 	$config{'spam_size'} = $tmpl->{'spam_size'};
@@ -6532,6 +6542,7 @@ elsif ($tmpl->{'id'} == 1) {
 			$config{'subdomain_template'}, $tmpl->{'mail'});
 	$config{'newsubdom_subject'} = $tmpl->{'mail_subject'};
 	$config{'newsubdom_cc'} = $tmpl->{'mail_cc'};
+	$config{'newsubdom_bcc'} = $tmpl->{'mail_bcc'};
 	$config{'sub_skel'} = $tmpl->{'skel'} eq "none" ? "" :
 			      $tmpl->{'skel'};
 	$save_config = 1;

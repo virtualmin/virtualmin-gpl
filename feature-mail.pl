@@ -2941,7 +2941,7 @@ print &ui_table_row(&hlink($text{'tmpl_mail'}, "template_mail"),
 				join("\n", split(/\t/, $tmpl->{'mail'})),
 		     10, 60)."\n".
 	&email_template_input(undef, $tmpl->{'mail_subject'},
-			      $tmpl->{'mail_cc'})
+			      $tmpl->{'mail_cc'}, $tmpl->{'mail_bcc'})
 	);
 
 print &ui_table_hr();
@@ -3019,6 +3019,7 @@ $in{'mail'} =~ s/\r//g;
 $tmpl->{'mail'} = $in{'mail'};
 $tmpl->{'mail_subject'} = $in{'subject'};
 $tmpl->{'mail_cc'} = $in{'cc'};
+$tmpl->{'mail_bcc'} = $in{'bcc'};
 
 # Save new user aliases
 if ($in{'aliases_mode'} == 0) {

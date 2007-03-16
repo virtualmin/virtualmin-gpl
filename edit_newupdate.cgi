@@ -19,6 +19,7 @@ $text{'sub_HOME'} = $text{'sub_POP3HOME'};
 print &email_template_input($file,
 	    $config{'newupdate_subject'} || $text{'mail_upsubject'},
 	    $config{'newupdate_cc'},
+	    $config{'newupdate_bcc'},
 	    $config{'newupdate_to_mailbox'},
 	    $config{'newupdate_to_owner'},
 	    $config{'newupdate_to_reseller'});

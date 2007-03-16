@@ -20,6 +20,7 @@ $text{'sub_HOME'} = $text{'sub_POP3HOME'};
 print &email_template_input($file,
 	    $config{'newuser_subject'} || $text{'mail_usubject'},
 	    $config{'newuser_cc'},
+	    $config{'newuser_bcc'},
 	    $config{'newuser_to_mailbox'},
 	    $config{'newuser_to_owner'},
 	    $config{'newuser_to_reseller'});

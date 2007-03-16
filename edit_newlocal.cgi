@@ -18,7 +18,8 @@ $text{'sub_HOME'} = $text{'sub_LOCALHOME'};
 &print_subs_table("USER", "FTP", "HOME");
 print &email_template_input($file,
 	    $config{'newlocal_subject'} || $text{'mail_usubject'},
-	    $config{'newlocal_cc'});
+	    $config{'newlocal_cc'},
+	    $config{'newlocal_bcc'});
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 
 &ui_print_footer("", $text{'index_return'});

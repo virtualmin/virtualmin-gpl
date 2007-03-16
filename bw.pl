@@ -134,8 +134,10 @@ foreach $d (@doms) {
 				if ($config{'bw_owner'});
 			push(@addrs, split(/\s+,\s+/, $config{'bw_email'}));
 			@erv = &send_template_email(
-				&cat_file($tmpl), join(", ", @addrs),
-				\%tkeys, &text('newbw_subject', $d->{'dom'}));
+				&cat_file($tmpl),
+				join(", ", @addrs),
+				\%tkeys,
+				&text('newbw_subject', $d->{'dom'}));
 			if ($erv[0]) {
 				$d->{'bw_notify'} = $now;
 				}
@@ -206,7 +208,8 @@ foreach $d (@doms) {
 				if ($config{'bw_owner'});
 			push(@addrs, split(/\s+,\s+/, $config{'bw_email'}));
 			@erv = &send_template_email(
-				&cat_file($tmpl), join(", ", @addrs),
+				&cat_file($tmpl),
+				join(", ", @addrs),
 				\%tkeys,
 				&text('newbw_warnsubject', $d->{'dom'}));
 			if ($erv[0]) {

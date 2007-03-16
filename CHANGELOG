@@ -553,3 +553,4 @@ Removed old versions from the PHPmyAdmin script installer.
 Updated the Drupal script installer to support version 5.1, Horde to 3.1.4 and IMP to 4.1.4.
 Don't allow extra admins to switch to the domain owner.
 Added a page for installing third-party content styles, which can then be used for new websites exactly like the built-in styles.
+When configuring email notification for new mailboxes, resellers and domains, you can now enter a Bcc address as well as a Cc address.

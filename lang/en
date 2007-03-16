@@ -1295,6 +1295,7 @@ newdom_desc=Use this form to edit the template file $1 for the email message tha
 newdom_descdis=Use this form to edit the template file $1 for the email message that would be sent to a new virtual server owner after it is created, if this feature was enabled on the Module Config page. The following substitions will be done to the text :
 newdom_subject=Subject line
 newdom_cc=Also Cc email to
+newdom_bcc=Also Bcc email to
 newdom_to=Send email to
 newdom_mailbox=User's mailbox
 newdom_owner=Virtual server owner
