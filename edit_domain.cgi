@@ -63,6 +63,46 @@ print &ui_table_row($text{'edit_created'},
 			: &make_date($d->{'created'}),
 	undef, \@tds);
 
+if ($virtualmin_pro) {
+	# Show reseller
+	print &ui_table_row($text{'edit_reseller'},
+			    $d->{'reseller'} ? "<tt>$d->{'reseller'}</tt>"
+					     : $text{'edit_noreseller'},
+			    undef, \@tds);
+	}
+
+if (!$aliasdom && $d->{'dir'}) {
+	# Show home directory
+	print &ui_table_row($text{'edit_home'},
+			    "<tt>$d->{'home'}</tt>", 3, \@tds);
+	}
+
+if ($d->{'proxy_pass_mode'} && $d->{'proxy_pass'} && $d->{'web'}) {
+	# Show forwarding / proxy destination
+	print &ui_table_row($text{'edit_proxy'.$d->{'proxy_pass_mode'}},
+			    "<tt>$d->{'proxy_pass'}</tt>", 3, \@tds);
+	}
+
+if ($aliasdom) {
+	# Show link to aliased domain
+	print &ui_table_row($text{'edit_aliasto'},
+			    "<a href='edit_domain.cgi?dom=$d->{'alias'}'>".
+			    "$aliasdom->{'dom'}</a>", 3, \@tds);
+	}
+elsif ($parentdom) {
+	# Show link to parent domain
+	print &ui_table_row($text{'edit_parent'},
+			    "<a href='edit_domain.cgi?dom=$d->{'parent'}'>".
+			    "$parentdom->{'dom'}</a>", 3, \@tds);
+	}
+
+print &ui_hidden_table_end("basic");
+
+
+# Configuration settings section
+print &ui_hidden_table_start($text{'edit_headerc'}, "width=100%", 2,
+			     "config", 0);
+
 # Show username prefix, with option to change
 if (!$aliasdom) {
 	@users = &list_domain_users($d, 1, 1, 1, 1);
@@ -73,9 +113,6 @@ if (!$aliasdom) {
 			  &text('edit_noprefix', scalar(@users)).")"
 		       : &ui_textbox("prefix", $d->{'prefix'}, 30),
 		undef, \@tds);
-	}
-else {
-	print &ui_table_row(" ", " ");  # End of row
 	}
 
 # Show active template
@@ -95,12 +132,6 @@ print &ui_table_row($text{'edit_tmpl'},
 			[ map { [ $_->{'id'}, $_->{'name'} ] } @cantmpls ]),
 		    undef, \@tds);
 
-# Show reseller
-print &ui_table_row($text{'edit_reseller'},
-		    $d->{'reseller'} ? "<tt>$d->{'reseller'}</tt>"
-				     : $text{'edit_noreseller'},
-		    undef, \@tds);
-
 if (!$aliasdom) {
 	# Show IP-related options
 	if ($d->{'reseller'}) {
@@ -115,7 +146,7 @@ if (!$aliasdom) {
 		   $d->{'ip'} eq $reselip ? &text('edit_rshared',
 						  "<tt>$resel->{'name'}</tt>") :
 		   $d->{'ip'} eq &get_default_ip() ? $text{'edit_shared'}
-						   : $text{'edit_shared2'}), 3,
+						   : $text{'edit_shared2'}), 1,
 		  \@tds);
 
 	if ($d->{'virt'}) {
@@ -159,54 +190,40 @@ if (!$aliasdom) {
 				    " ".&ui_textbox("ip", undef, 15);
 			}
 		}
-	print &ui_table_row($text{'edit_virt'}, $ipfield, 3, \@tds);
-	}
-
-if (!$aliasdom && $d->{'dir'}) {
-	# Show home directory
-	print &ui_table_row($text{'edit_home'},
-			    "<tt>$d->{'home'}</tt>", 3, \@tds);
-	}
-
-if ($d->{'proxy_pass_mode'} && $d->{'proxy_pass'} && $d->{'web'}) {
-	# Show forwarding / proxy destination
-	print &ui_table_row($text{'edit_proxy'.$d->{'proxy_pass_mode'}},
-			    "<tt>$d->{'proxy_pass'}</tt>", 3, \@tds);
+	print &ui_table_row($text{'edit_virt'}, $ipfield, 1, \@tds);
 	}
 
 # Show description
 print &ui_table_row($text{'edit_owner'},
-		    &ui_textbox("owner", $d->{'owner'}, 50), 3, \@tds);
+		    &ui_textbox("owner", $d->{'owner'}, 50), 1, \@tds);
 
-if ($aliasdom) {
-	# Show link to aliased domain
-	print &ui_table_row($text{'edit_aliasto'},
-			    "<a href='edit_domain.cgi?dom=$d->{'alias'}'>".
-			    "$aliasdom->{'dom'}</a>", 3, \@tds);
-	}
-elsif (!$parentdom) {
+if (!$parentdom) {
 	# Show owner's email address and password
 	print &ui_table_row($text{'edit_email'},
 		$d->{'unix'} ? &ui_opt_textbox("email", $d->{'email'}, 30,
 					       $text{'edit_email_def'})
-			     : &ui_textbox("email", $d->{'email'}, 30), 3,
+			     : &ui_textbox("email", $d->{'email'}, 30), 1,
 		\@tds);
 
 	print &ui_table_row($text{'edit_passwd'},
 		&ui_opt_textbox("passwd", undef, 20,
 				$text{'edit_lv'}." ".&show_password_popup($d),
-				$text{'edit_set'}), 3,
+				$text{'edit_set'}), 1,
 		\@tds);
 	}
-else {
-	# Show link to parent domain
-	print &ui_table_row($text{'edit_parent'},
-			    "<a href='edit_domain.cgi?dom=$d->{'parent'}'>".
-			    "$parentdom->{'dom'}</a>", 3, \@tds);
+
+print &ui_hidden_table_end("config");
+
+
+# Related servers section
+@aliasdoms = &get_domain_by("alias", $d->{'id'});
+@subdoms = &get_domain_by("parent", $d->{'id'}, "alias", undef);
+if (@aliasdoms || @subdoms) {
+	print &ui_hidden_table_start($text{'edit_headers'}, "width=100%", 4,
+				     "subs", 0);
 	}
 
 # Show any alias domains
-@aliasdoms = &get_domain_by("alias", $d->{'id'});
 if (@aliasdoms) {
 	print &ui_table_row($text{'edit_aliasdoms'},
 		&domains_list_links(\@aliasdoms, "alias", $d->{'dom'}), 3,
@@ -214,20 +231,22 @@ if (@aliasdoms) {
 	}
 
 # Show any sub-servers
-@subdoms = &get_domain_by("parent", $d->{'id'}, "alias", undef);
 if (@subdoms) {
 	print &ui_table_row($text{'edit_subdoms'},
 		&domains_list_links(\@subdoms, "parent", $d->{'dom'}), 3,
 		\@tds);
 	}
 
-print &ui_hidden_table_end("basic");
+if (@aliasdoms || @subdoms) {
+	print &ui_hidden_table_end("subs");
+	}
 
+
+# Start of collapsible section for limits
 $limits_section = !$parentdom &&
 		  (&has_home_quotas() && (&can_edit_quotas() || $d->{'unix'}) ||
 		  $config{'bw_active'});
 if ($limits_section) {
-	# Start of collapsible section for limits
 	print &ui_hidden_table_start($text{'edit_limitsect'}, "width=100%", 2,
 				     "limits", 0);
 	}
