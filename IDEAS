@@ -58,8 +58,6 @@
 
   - mailbox_list_mails should use select function for virtual folders!
 
-  - nicer install for integramod (like phpbb)
-
   - improve dotprojekt installer
 	- http://www.virtualmin.com/ticket-tracker/bug?bug%5fnumber=362
 
