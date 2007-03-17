@@ -63,6 +63,5 @@
 
   - package updates from theme main menu
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=714
-	- don't replace Virtualmin custom
-	- also track wbm-, wbm-, webmin and usermin
-	- make sure we cover php5
+	- support push of not-yet-installed packages
+	- thejax theme
