@@ -13,6 +13,7 @@ elsif ($in{'cloneof'}) {
 	# Fetch source for clone
 	($tmpl) = grep { $_->{'id'} == $in{'cloneof'} } @tmpls;
 	$tmpl->{'id'} = undef;
+	$tmpl->{'standard'} = 0;
 	}
 else {
 	# Start with blank

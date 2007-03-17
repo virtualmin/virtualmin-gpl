@@ -12,6 +12,7 @@ if ($in{'new'}) {
 		($tmpl) = grep { $_->{'id'} == $in{'clone'} } @tmpls;
 		$tmpl || &error("Failed to find template with ID $in{'clone'} to clone");
 		$tmpl->{'name'} .= " (Clone)";
+		$tmpl->{'standard'} = 0;
 		&ui_print_header(undef, $text{'tmpl_title3'}, "", "tmpls");
 		}
 	else {

@@ -61,3 +61,8 @@
   - clean up edit virtual server page, and move IP stuff to separate screen
 	- and edit_new* email pages
 
+  - package updates from theme main menu
+	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=714
+	- don't replace Virtualmin custom
+	- also track wbm-, wbm-, webmin and usermin
+	- make sure we cover php5

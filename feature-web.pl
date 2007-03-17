@@ -1625,7 +1625,7 @@ if ($config{'proxy_pass'} == 2) {
 
 	print &ui_table_row(&hlink($text{'tmpl_frame'}, "template_frame"),
 		&none_def_input("frame", $tmpl->{'frame'},
-				$text{'tmpl_framebelow'}, 1).
+				$text{'tmpl_framebelow'}, 1)."<br>".
 		&ui_textarea("frame", $tmpl->{'frame'} eq "none" ? undef :
 				join("\n", split(/\t/, $tmpl->{'frame'})),
 				10, 60));
