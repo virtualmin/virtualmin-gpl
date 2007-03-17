@@ -290,7 +290,7 @@ return (1, "phpMyAdmin directory deleted.");
 sub script_phpmyadmin_latest
 {
 local ($ver) = @_;
-if (&compare_versions($ver, 2.10) > 0) {
+if (&compare_versions($ver, "2.10") > 0) {
 	return ( "http://www.phpmyadmin.net/home_page/index.php",
 		 "http://prdownloads.sourceforge.net/phpmyadmin/phpMyAdmin-([0-9\\.]+)-all-languages-utf-8-only\\.zip" );
 	}
