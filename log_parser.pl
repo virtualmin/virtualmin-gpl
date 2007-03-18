@@ -58,8 +58,8 @@ elsif ($type eq "scripts") {
 elsif ($type eq "styles" && $action eq "add") {
 	return &text('log_add_styles', $object);
 	}
-elsif ($type eq "styles" && $action eq "disable") {
-	return $text{'log_disable_styles'};
+elsif ($type eq "styles" && $action eq "enable") {
+	return $text{'log_enable_styles'};
 	}
 elsif ($type eq "database") {
 	return &text('log_'.$action.'_database', "<tt>$object</tt>",

@@ -1514,7 +1514,7 @@ log_modify_admin=Modified extra administrator $1
 log_switch_admin=Switched to extra administrator $1
 log_dynip=Updated dynamic IP address settings
 log_add_styles=Installed third-party style $1
-log_disable_styles=Enabled content styles
+log_enable_styles=Enabled content styles
 
 backup_title=Backup Virtual Servers
 backup_title2=Scheduled Backup

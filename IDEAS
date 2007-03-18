@@ -61,7 +61,3 @@
   - clean up edit virtual server page, and move IP stuff to separate screen
 	- and edit_new* email pages
 
-  - package updates from theme main menu
-	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=714
-	- support push of not-yet-installed packages
-	- thejax theme

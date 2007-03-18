@@ -142,3 +142,4 @@ defnodbname=0
 dbfnorename=0
 defforceunder=0
 spamclear=none
+stats_noedit=1
