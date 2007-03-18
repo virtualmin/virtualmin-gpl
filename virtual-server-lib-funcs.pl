@@ -7261,6 +7261,7 @@ local ($user, $dom) = @_;
 if (!-d $initial_users_dir) {
 	mkdir($initial_users_dir, 0700);
 	}
+&lock_file("$initial_users_dir/$dom->{'id'}");
 local %init;
 foreach my $a ("email", "quota", "mquota", "qquota", "shell") {
 	$init{$a} = $user->{$a} if (defined($user->{$a}));
@@ -7275,6 +7276,7 @@ if (defined($user->{'dbs'})) {
 				      @{$user->{'dbs'}});
 	}
 &write_file("$initial_users_dir/$dom->{'id'}", \%init);
+&unlock_file("$initial_users_dir/$dom->{'id'}");
 }
 
 # valid_domain_name(&parent, newdomain)

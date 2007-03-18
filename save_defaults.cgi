@@ -84,9 +84,9 @@ delete($user->{'email'});
 
 # Save plugin defaults
 foreach $f (@mail_plugins) {
-	print &plugin_call($f, "mailbox_defaults_parse", $user, $d, \%in);
+	&plugin_call($f, "mailbox_defaults_parse", $user, $d, \%in);
 	}
 
 &save_initial_user($user, $d);
-&webmin_log("initial", "dom", $d->{'dom'});
+&webmin_log("initial", "domain", $d->{'dom'});
 &redirect("list_users.cgi?dom=$in{'dom'}");
