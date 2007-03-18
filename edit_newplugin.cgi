@@ -19,9 +19,8 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 	if (-r "$mdir/virtual_feature.pl") {
 		&foreign_require($m->{'dir'}, "virtual_feature.pl");
 		push(@opts, [ $m->{'dir'},
-			&plugin_call($m->{'dir'}, "feature_name")." (".
-			 ($m->{'version'} ? "$m->{'desc'} $m->{'version'}"
-					  : $m->{'desc'}).")" ]);
+			&plugin_call($m->{'dir'}, "feature_name").
+			($m->{'version'} ? " (v $m->{'version'})" : "") ]);
 		push(@allplugins, $m->{'dir'});
 		if (-r "$mdir/config.info") {
 			push(@confplugins, $m);
