@@ -59,10 +59,11 @@ else {
 			&html_extract_head_body($olddata);
 		$data = $oldhead.$data.$oldfoot;
 		}
-	elsif (!$olddata && $data !~ /<body.*>/i &&
-	       -r "$pub/template.html") {
-		# Use head and body from template file
-		$tmpldata = &read_file_contents("$pub/template.html");
+	elsif (!$olddata && $data !~ /<body.*>/i) {
+		# Page is missing a body .. use head and body from template
+		# file from style, or from default
+		$tmpldata = &read_file_contents("$pub/template.html") ||
+			    "<html>\n<head></head>\n<body></body>\n</html>\n";
 		($tmplhead, $tmplbody, $tmplfoot) =
 			&html_extract_head_body($tmpldata);
 		$data = $tmplhead.$data.$tmplfoot;
