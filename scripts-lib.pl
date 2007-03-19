@@ -928,5 +928,25 @@ else {
 	}
 }
 
+# delete_script_install_directory(&domain, &opts)
+# Delete all files installed by a script, based on the 'dir' option. Returns
+# an error message on failure.
+sub delete_script_install_directory
+{
+local ($d, $opts) = @_;
+$opts->{'dir'} || return "Missing install directory!";
+&is_under_directory($d->{'home'}, $opts->{'dir'}) ||
+	return "Invalid install directory $opts->{'dir'}";
+local $out = &backquote_logged("rm -rf ".quotemeta($opts->{'dir'})."/* ".
+			       quotemeta($opts->{'dir'})."/.htaccess 2>&1");
+$? && return "Failed to delete files : <tt>$out</tt>";
+
+if ($opts->{'dir'} ne &public_html_dir($d, 0)) {
+	# Take out the directory too
+	&run_as_domain_user($d, "rmdir ".quotemeta($opts->{'dir'}));
+	}
+return undef;
+}
+
 1;
 

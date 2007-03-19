@@ -287,16 +287,8 @@ if ($dbname) {
 	}
 
 # Remove the contents of the target directory
-&is_under_directory($d->{'home'}, $opts->{'dir'}) ||
-	return (0, "Invalid install directory $opts->{'dir'}");
-local $out = &run_as_domain_user($d, "rm -rf ".quotemeta($opts->{'dir'})."/* ".
-				     quotemeta($opts->{'dir'})."/.htaccess");
-$? && return (0, "Failed to delete files : <tt>$out</tt>");
-
-if ($opts->{'dir'} ne &public_html_dir($d, 0)) {
-	# Take out the directory too
-	&run_as_domain_user($d, "rmdir ".quotemeta($opts->{'dir'}));
-	}
+local $derr = &delete_script_install_directory($d, $opts);
+return (0, $derr) if ($derr);
 
 return (1, $dbname ? "SquirrelMail directory and tables deleted."
 		   : "SquirrelMail directory deleted.");

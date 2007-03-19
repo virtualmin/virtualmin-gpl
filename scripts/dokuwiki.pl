@@ -158,15 +158,8 @@ sub script_dokuwiki_uninstall
 local ($d, $version, $opts) = @_;
 
 # Remove the contents of the target directory
-&is_under_directory($d->{'home'}, $opts->{'dir'}) ||
-	return (0, "Invalid install directory $opts->{'dir'}");
-local $out = &backquote_logged("rm -rf ".quotemeta($opts->{'dir'})."/* 2>&1");
-$? && return (0, "Failed to delete files : <tt>$out</tt>");
-
-if ($opts->{'dir'} ne &public_html_dir($d, 0)) {
-	# Take out the directory too
-	&run_as_domain_user($d, "rmdir ".quotemeta($opts->{'dir'}));
-	}
+local $derr = &delete_script_install_directory($d, $opts);
+return (0, $derr) if ($derr);
 
 return (1, "DokuWiki directory deleted.");
 }
