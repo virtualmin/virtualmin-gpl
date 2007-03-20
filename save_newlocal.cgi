@@ -9,7 +9,8 @@ $file = $config{'local_template'};
 $file = "$module_config_directory/local-template"
 	if ($file eq "none" || $file eq 'default');
 
-&parse_email_template($file, "newlocal_subject", "newlocal_cc", "newlocal_bcc");
+&parse_email_template($file, "newlocal_subject", "newlocal_cc", "newlocal_bcc",
+		      undef, undef, undef, "local_template");
 
 &webmin_log("newlocal");
 &redirect("");

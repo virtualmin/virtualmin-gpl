@@ -1278,24 +1278,26 @@ sub_WEBMINURL=URL to login to Virtualmin
 
 newuser_title=New Mailbox Email
 newuser_ecannot=You are not allowed to edit the new mailbox email template
-newuser_desc=Use this form to edit the template file $1 for the email message that will be sent to a new mailbox after it is created. The following substitions will be done to the text :
-newuser_descdis=Use this form to edit the template file $1 for the email message that would be sent to a new mailbox after it is created, if this feature was enabled on the Module Config page. The following substitions will be done to the text :
+newuser_desc2=Use this form to edit the template for the email message that can be sent to a new mail / FTP user after it is created. The following substitions will be done to the text :
+newuser_header=New mailbox email message details
+newuser_docs=Explanation and substitutions
 
 newupdate_title=Updated Mailbox Email
 newupdate_ecannot=You are not allowed to edit the updated mailbox email template
-newupdate_desc=Use this form to edit the template file $1 for the email message that can be sent to a mailbox after it is modified. The following substitions will be done to the text :
-newupdate_descdis=Use this form to edit the template file $1 for the email message that would be sent to a mailbox after it is updated, if this feature was enabled on the Module Config page. The following substitions will be done to the text :
+newupdate_desc2=Use this form to edit the template for the email message that can be sent to a mail / FTP user after it is updated. The following substitions will be done to the text :
+newupdate_header=Updated mailbox email message details
 
 newlocal_title=New Local Mailbox Email
 newlocal_ecannot=You are not allowed to edit the new local mailbox email template
-newlocal_desc=Use this form to edit the template file $1 for the email message that will be sent to a new local mailbox after it is created. The following substitions will be done to the text :
-newlocal_descdis=Use this form to edit the template file $1 for the email message that would be sent to a new local mailbox after it is created, if this feature was enabled on the Module Config page. The following substitions will be done to the text :
+newlocal_desc2=Use this form to edit the template for the email message that can be sent to a new local mailbox user after it is created. The following substitions will be done to the text :
+newlocal_header=New local mailbox email message details
 
 newdom_title=New Virtual Server Email
 newdom_ecannot=You are not allowed to edit the new server email template
 newdom_desc=Use this form to edit the template file $1 for the email message that will be sent to a new virtual server owner after it is created. The following substitions will be done to the text :
 newdom_descdis=Use this form to edit the template file $1 for the email message that would be sent to a new virtual server owner after it is created, if this feature was enabled on the Module Config page. The following substitions will be done to the text :
 newdom_subject=Subject line
+newdom_sending=Send email?
 newdom_cc=Also Cc email to
 newdom_bcc=Also Bcc email to
 newdom_to=Send email to
@@ -1307,11 +1309,11 @@ newsubdom_title=New Virtual Sub-Server Email
 newsubdom_ecannot=You are not allowed to edit the new sub-server email template
 newsubdom_desc=Use this form to edit the template file $1 for the email message that will be sent to the owner of a new virtual sub-server after it is created. The following substitions will be done to the text :
 newsubdom_descdis=Use this form to edit the template file $1 for the email message that would be sent to the owner of a new virtual sub-server after it is created, if this feature was enabled on the Module Config page. The following substitions will be done to the text :
+newreseller_header=New reseller email message details
 
 newreseller_title=New Reseller Email
 newreseller_ecannot=You are not allowed to edit the new reseller email template
-newreseller_desc=Use this form to edit the template file $1 for the email message that will be sent to a new reseller account after it is created. The following substitions will be done to the text :
-newreseller_descdis=Use this form to edit the template file $1 for the email message that would be sent to a new reseller account after it is created, if this feature was enabled on the Module Config page. The following substitions will be done to the text :
+newreseller_desc2=Use this form to edit the template for the email message that can be sent to a new reseller account after it is created. The following substitions will be done to the text :
 
 feature_web=Apache website
 feature_dns=BIND DNS domain

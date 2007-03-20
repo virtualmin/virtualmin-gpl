@@ -6056,13 +6056,19 @@ else {
 }
 
 # email_template_input(template-file, subject, other-cc, other-bcc,
-#		       [mailbox-cc, owner-cc, reseller-cc])
+#		       [mailbox-cc, owner-cc, reseller-cc], [header],[filemode])
 # Returns HTML for fields for editing an email template
 sub email_template_input
 {
-local ($file, $subject, $cc, $bcc, $mailbox, $owner, $reseller) = @_;
+local ($file, $subject, $cc, $bcc, $mailbox, $owner, $reseller, $header,
+       $filemode) = @_;
 local $rv;
-$rv .= &ui_table_start(undef, undef, 2);
+$rv .= &ui_table_start($header, undef, 2);
+if ($filemode eq "none" || $filemode eq "default") {
+	# Show input for selecting if enabled
+	$rv .= &ui_table_row($text{'newdom_sending'},
+		&ui_yesno_radio("sending", $filemode eq "default" ? 1 : 0));
+	}
 $rv .= &ui_table_row($text{'newdom_subject'},
 		     &ui_textbox("subject", $subject, 60));
 if (@_ >= 5) {
@@ -6070,9 +6076,9 @@ if (@_ >= 5) {
 	$rv .= &ui_table_row($text{'newdom_to'},
 	     &ui_checkbox("mailbox", 1, $text{'newdom_mailbox'}, $mailbox)." ".
 	     &ui_checkbox("owner", 1, $text{'newdom_owner'}, $owner)." ".
-	     ($virtualmin_pro ? "" :
+	     ($virtualmin_pro ? 
 		&ui_checkbox("reseller", 1, $text{'newdom_reseller'},
-			     $reseller)));
+			     $reseller) : ""));
 	}
 $rv .= &ui_table_row($text{'newdom_cc'},
 		     &ui_textbox("cc", $cc, 60));
@@ -6088,11 +6094,12 @@ return $rv;
 }
 
 # parse_email_template(file, subject-config, cc-config, bcc-config,
-#		       [mailbox-config, owner-config, reseller-config])
+#		       [mailbox-config, owner-config, reseller-config],
+#		       [filemode-config])
 sub parse_email_template
 {
 local ($file, $subject_config, $cc_config, $bcc_config,
-       $mailbox_config, $owner_config, $reseller_config) = @_;
+       $mailbox_config, $owner_config, $reseller_config, $filemode_config) = @_;
 $in{'template'} =~ s/\r//g;
 &open_lock_tempfile(FILE, ">$file", 1) ||
 	&error(&text('efilewrite', $file, $!));
@@ -6109,6 +6116,9 @@ if ($mailbox_config) {
 	if ($virtualmin_pro) {
 		$config{$reseller_config} = $in{'reseller'};
 		}
+	}
+if ($filemode_config && defined($in{'sending'})) {
+	$config{$filemode_config} = $in{'sending'} ? "default" : "none";
 	}
 $config{'last_check'} = time()+1;	# no need for check.cgi to be run
 &save_module_config();

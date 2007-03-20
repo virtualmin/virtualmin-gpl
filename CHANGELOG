@@ -556,3 +556,4 @@ Added a page for installing third-party content styles, which can then be used f
 When configuring email notification for new mailboxes, resellers and domains, you can now enter a Bcc address as well as a Cc address.
 Split the Edit Virtual Server page into more sections.
 Improved the IntegraMod and dotProject script installers to configure the database connection automatically.
+Moved options for sending email to new and updated mailboxes from the Module Config page to the form for editing the actual messages.

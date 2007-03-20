@@ -10,19 +10,22 @@ $file = $config{'update_template'};
 $file = "$module_config_directory/update-template"
 	if ($file eq "none" || $file eq 'default');
 
-print &text($config{'update_template'} eq "none" ?
-	    'newupdate_descdis' : 'newupdate_desc', "<tt>$file</tt>"),"<p>\n";
+print $text{'newupdate_desc2'},"<p>\n";
 $text{'sub_USER'} = $text{'sub_POP3'};
 $text{'sub_HOME'} = $text{'sub_POP3HOME'};
+print &ui_hidden_start($text{'newuser_docs'}, "docs", 0);
 &print_subs_table("MAILBOX", "USER", "PLAINPASS", "DOM", "FTP", "HOME",
 		  "QUOTA");
+print &ui_hidden_end(),"<p>\n";
 print &email_template_input($file,
 	    $config{'newupdate_subject'} || $text{'mail_upsubject'},
 	    $config{'newupdate_cc'},
 	    $config{'newupdate_bcc'},
 	    $config{'newupdate_to_mailbox'},
 	    $config{'newupdate_to_owner'},
-	    $config{'newupdate_to_reseller'});
+	    $config{'newupdate_to_reseller'},
+	    $text{'newupdate_header'},
+	    $config{'update_template'});
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 
 &ui_print_footer("", $text{'index_return'});

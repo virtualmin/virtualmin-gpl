@@ -12,7 +12,7 @@ $file = "$module_config_directory/user-template"
 &parse_email_template($file, "newuser_subject",
 		      "newuser_cc", "newuser_bcc",
 	      	      "newuser_to_mailbox", "newuser_to_owner",
-		      "newuser_to_reseller");
+		      "newuser_to_reseller", "user_template");
 
 &webmin_log("newuser");
 &redirect("");

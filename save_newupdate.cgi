@@ -11,7 +11,7 @@ $file = "$module_config_directory/update-template"
 &parse_email_template($file, "newupdate_subject",
 		      "newupdate_cc", "newupdate_bcc",
 		      "newupdate_to_mailbox", "newupdate_to_owner",
-		      "newupdate_to_reseller");
+		      "newupdate_to_reseller", "update_template");
 
 &webmin_log("newupdate");
 &redirect("");

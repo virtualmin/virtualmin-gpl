@@ -58,6 +58,3 @@
 
   - mailbox_list_mails should use select function for virtual folders!
 
-  - clean up edit virtual server page, and move IP stuff to separate screen
-	- and edit_new* email pages
-
