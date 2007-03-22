@@ -13,8 +13,6 @@
  - NIS support for users DB
 	- Cluster mode - each feature on a separate server
 
- - Make new mailbox email templatable
-
  - Allow domain owners to backup multiple domains at once (aliases,etc)
 
  - Automatically include alias domains in backups
@@ -50,9 +48,6 @@
   - plesk migration support
 
   - cron time selector is too complex - use popup
-
-  - rename /etc/aliases entry when renaming user / alias
-	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=689
 
   - mailbox_list_mails should use select function for virtual folders!
 

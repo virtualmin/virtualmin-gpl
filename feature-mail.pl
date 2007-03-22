@@ -429,6 +429,16 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 			&modify_virtuser($oldv, $v);
 			}
 		}
+
+	# Make a second pass through users to fix aliases
+	&flush_virtualmin_caches();
+	foreach my $u (&list_domain_users($_[0])) {
+		local $oldu = { %$u };
+		if (&fix_alias_when_renaming($u, $_[0], $_[1])) {
+			&modify_user($u, $oldu, $_[0]);
+			}
+		}
+
 	&$second_print($text{'setup_done'});
 	}
 }
@@ -439,7 +449,10 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 sub fix_alias_when_renaming
 {
 local ($virt, $dom, $olddom) = @_;
-foreach my $t (@{$virt->{'to'}}) {
+local $changed = 0;
+local @newto = ( );
+foreach my $ot (@{$virt->{'to'}}) {
+	local $t = $ot;
 	if ($t =~ /^(\S*)\@(\S+)$/ &&
 	    lc($2) eq $olddom->{'dom'}) {
 		# Destination is an address in the
@@ -464,7 +477,11 @@ foreach my $t (@{$virt->{'to'}}) {
 		$t =~ s/\Q$olddom->{'home'}\E/$dom->{'home'}/g;
 		$t =~ s/\Q$olddom->{'dom'}\E /$dom->{'dom'} /g;
 		}
+	$changed++ if ($t ne $ot);
+	push(@newto, $t);
 	}
+$virt->{'to'} = \@newto;
+return $changed;
 }
 
 # validate_mail(&domain)
