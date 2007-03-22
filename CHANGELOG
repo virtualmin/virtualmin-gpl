@@ -557,3 +557,4 @@ When configuring email notification for new mailboxes, resellers and domains, yo
 Split the Edit Virtual Server page into more sections.
 Improved the IntegraMod and dotProject script installers to configure the database connection automatically.
 Moved options for sending email to new and updated mailboxes from the Module Config page to the form for editing the actual messages.
+Added the list-simple-aliases.pl and create-simple-alias.pl programs for easy alias management from the command line.

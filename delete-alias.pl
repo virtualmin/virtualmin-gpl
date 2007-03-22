@@ -37,14 +37,13 @@ $email = $from eq "*" ? "%1\@$domain" : "$from\@$domain";
 ($virt) = grep { $_->{'from'} eq $email } @aliases;
 $virt || &usage("No alias for the email address $email exists");
 
-# Create it
-print "Deleting alias for $email ..\n";
+# Delete it
 if (defined(&get_simple_alias)) {
 	$simple = &get_simple_alias($d, $virt);
 	&delete_simple_autoreply($d, $simple) if ($simple);
 	}
 &delete_virtuser($virt);
-print ".. done\n";
+print "Alias for $email deleted successfully\n";
 
 sub usage
 {

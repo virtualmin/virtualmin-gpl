@@ -39,8 +39,6 @@
 
  - better coverage of files by webmin_log
 
- - command-line programs for simple aliases
-
  - EC2 support
 	- Create AMI?
 	- Need way to specify licence key after install, for use with AMI
