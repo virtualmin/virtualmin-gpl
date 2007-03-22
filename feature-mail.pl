@@ -215,7 +215,8 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 			&create_virtuser($a) if (!$gotvirt{$a->{'from'}});
 			}
 		if ($tmpl->{'dom_aliases_bounce'} &&
-		    !$acreate{"\@$_[0]->{'dom'}"}) {
+		    !$acreate{"\@$_[0]->{'dom'}"} &&
+		    !$gotvirt{'@'.$_[0]->{'dom'}}) {
 			# Add bounce alias
 			local $v = { 'from' => "\@$_[0]->{'dom'}",
 				     'to' => [ 'BOUNCE' ] };

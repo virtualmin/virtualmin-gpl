@@ -26,9 +26,9 @@ foreach my $tf (@all_template_files) {
 # are correct.
 &set_all_null_print();
 $cerr = &html_tags_to_text(&check_virtual_server_config());
-if ($cerr) {
-	print STDERR "Warning: Module Configuration problem detected: $cerr\n";
-	}
+#if ($cerr) {
+#	print STDERR "Warning: Module Configuration problem detected: $cerr\n";
+#	}
 
 # Force update of all Webmin users, to set new ACL options
 &modify_all_webmin();
