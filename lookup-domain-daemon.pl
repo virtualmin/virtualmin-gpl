@@ -67,7 +67,8 @@ while(1) {
 		next;
 		}
 	@users = &list_domain_users($d, 0, 1, 0, 1);
-	($user) = grep { $_->{'user'} eq $username } @users;
+	($user) = grep { $_->{'user'} eq $username ||
+			 &replace_atsign($_->{'user'}) eq $username } @users;
 	if (!$user) {
 		# Failed to find user again!
 		&send_response(undef, undef);
