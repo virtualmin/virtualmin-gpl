@@ -559,3 +559,4 @@ Improved the IntegraMod and dotProject script installers to configure the databa
 Moved options for sending email to new and updated mailboxes from the Module Config page to the form for editing the actual messages.
 Added the list-simple-aliases.pl and create-simple-alias.pl programs for easy alias management from the command line.
 Fixed bugs related to renaming autoresponder files when renaming a domain.
+Added the Less Antique content style.
