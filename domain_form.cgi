@@ -406,9 +406,7 @@ if (!$aliasdom && $config{'web'} && $virtualmin_pro) {
 
 	# Style for content
 	print &ui_table_row(&hlink($text{'form_style'}, "form_style"),
-			    &ui_select("style", undef,
-				[ map { [ $_->{'name'}, $_->{'desc'} ] }
-				      &list_available_content_styles() ]),
+			    &content_style_chooser("style", undef),
 			    3, \@tds);
 
 	print &ui_hidden_end();

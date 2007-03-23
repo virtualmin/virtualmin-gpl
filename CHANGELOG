@@ -560,3 +560,4 @@ Moved options for sending email to new and updated mailboxes from the Module Con
 Added the list-simple-aliases.pl and create-simple-alias.pl programs for easy alias management from the command line.
 Fixed bugs related to renaming autoresponder files when renaming a domain.
 Added the Less Antique content style.
+Added preview images for content styles, visible via the Preview.. link next to the style menu.

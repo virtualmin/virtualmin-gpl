@@ -260,6 +260,7 @@ form_content=Create initial web page?
 form_content1=No
 form_content0=Yes, with text below ..
 form_style=Style for initial content
+form_showstyle=(Preview..)
 form_limits=Quotas and limits
 form_proxysect=IP address and forwarding
 
@@ -3257,3 +3258,7 @@ addstyle_efiles=Style archive does not contain any files!
 addstyle_done=The third-party content style $1 has been successfully installed. When used by a website, it will created $2 of HTML and image files.
 addstyle_ecmd=The un-archive command $1 is not installed
 addstyle_ecmdfailed=Un-archive command failed : $1
+
+thumb_estyle=Style does not exist
+thumb_title=Style Preview
+thumb_ethumb=The content style $1 does not have a preview image.
