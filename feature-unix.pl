@@ -519,6 +519,45 @@ foreach my $s (keys %shells) {
 return @rv;
 }
 
+# build_denied_ssh_group()
+# Update the deniedssh Unix group's membership list with all domain owners
+# who don't get to login (based on their shell)
+sub build_denied_ssh_group
+{
+# First make sure the group exists
+&require_useradmin();
+local @allgroups = &list_all_groups();
+local ($group) = grep { $_->{'group'} eq $denied_ssh_group } @allgroups;
+return 0 if (!$group);
+
+# Find domain owners who can't login
+local @shells = &get_unix_shells();
+foreach my $d (&list_domains()) {
+	next if ($d->{'parent'} || !$d->{'unix'});
+	local $user = &get_domain_owner($d);
+	local ($sinfo) = grep { $_->[1] eq $user->{'shell'} } @shells;
+	if ($sinfo && $sinfo->[0] ne 'ssh') {
+		# On the denied list..
+		push(@members, $user->{'user'});
+		}
+	}
+
+# Update the group
+local $oldgroup = { %$group };
+$group->{'members'} = join(",", @members);
+if ($group->{'members'} ne $oldgroup->{'members'}) {
+	&foreign_call($usermodule, "lock_user_files");
+	&foreign_call($usermodule, "set_group_envs", $group,
+				   'MODIFY_GROUP');
+	&foreign_call($usermodule, "making_changes");
+	&foreign_call($usermodule, "modify_group", $oldgroup, $group);
+	&foreign_call($usermodule, "made_changes");
+	&foreign_call($usermodule, "unlock_user_files");
+	}
+}
+
+
+
 $done_feature_script{'unix'} = 1;
 
 1;

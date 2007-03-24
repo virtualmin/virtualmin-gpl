@@ -139,5 +139,45 @@ if (!@doms && !defined($config{'backup_feature_all'})) {
 
 # Build quick domain-lookup maps
 &build_domain_maps();
+
+# If supported by OpenSSH, create a group of users to deny SSH for
+if (&foreign_installed("sshd")) {
+	# Add to SSHd config
+	&foreign_require("sshd", "sshd-lib.pl");
+	local $conf = &sshd::get_sshd_config();
+	local @denyg = &sshd::find_value("DenyGroups", $conf);
+	local $commas = $sshd::version{'type'} eq 'ssh' &&
+			$sshd::version{'number'} >= 3.2;
+	if ($commas) {
+		@denyg = split(/,/, $denyg[0]);
+		}
+	if (&indexof($denied_ssh_group, @denyg) < 0) {
+		push(@denyg, $denied_ssh_group);
+		&sshd::save_directive("DenyGroups", $conf,
+				       join($commas ? "," : " ", @denyg));
+		&flush_file_lines($sshd::config{'sshd_config'});
+		&sshd::restart_sshd();
+		}
+
+	# Create the actual group, if missing
+	&require_useradmin();
+	local @allgroups = &list_all_groups();
+	local ($group) = grep { $_->{'group'} eq $denied_ssh_group } @allgroups;
+	if (!$group) {
+		local (%gtaken, %ggtaken);
+		&build_group_taken(\%gtaken, \%ggtaken, \@allgroups);
+		$group = { 'group' => $denied_ssh_group,
+			   'members' => '',
+			   'gid' => &allocate_gid(\%gtaken) };
+		&foreign_call($usermodule, "lock_user_files");
+		&foreign_call($usermodule, "set_group_envs", $group,
+							     'CREATE_GROUP');
+		&foreign_call($usermodule, "making_changes");
+		&foreign_call($usermodule, "create_group", $group);
+		&foreign_call($usermodule, "made_changes");
+		&foreign_call($usermodule, "unlock_user_files");
+		}
+	}
+&build_denied_ssh_group();
 }
 

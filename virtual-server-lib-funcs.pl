@@ -880,6 +880,7 @@ $unix_user{&escape_alias($_[0]->{'user'})}++;
 }
 
 # modify_user(&user, &old, &domain, [noaliases])
+# Update a mail / FTP user
 sub modify_user
 {
 # Rename any of his cron jobs
@@ -980,7 +981,7 @@ else {
 			}
 		}
 
-	return if ($_[3]);		# no need to touch aliases and virtusers
+	goto NOALIASES if ($_[3]);	# no need to touch aliases and virtusers
 	}
 
 # Check if email has changed
@@ -1150,6 +1151,7 @@ if (!$_[0]->{'qmail'}) {
 			}
 		}
 	}
+NOALIASES:
 
 # Save his quotas (unless this is the domain owner)
 if ($_[0]->{'unix'} && $_[0]->{'user'} ne $_[2]->{'user'} &&
@@ -1281,6 +1283,11 @@ if (defined(&clear_lookup_domain_cache)) {
 # Update cache of existing usernames
 $unix_user{&escape_alias($_[0]->{'user'})}++;
 $unix_user{&escape_alias($_[1]->{'user'})} = 0;
+
+if ($_[0]->{'shell'} ne $_[1]->{'shell'}) {
+	# Rebuild denied user list, by shell
+	&build_denied_ssh_group();
+	}
 }
 
 # delete_user(&user, domain)

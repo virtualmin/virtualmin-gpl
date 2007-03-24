@@ -189,3 +189,4 @@ $extra_admins_dir = "$module_config_directory/admins";
 			'reseller' => "$module_config_directory/map.reseller",
 		       );
 
+$denied_ssh_group = "deniedssh";

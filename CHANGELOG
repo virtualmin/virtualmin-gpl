@@ -561,3 +561,4 @@ Added the list-simple-aliases.pl and create-simple-alias.pl programs for easy al
 Fixed bugs related to renaming autoresponder files when renaming a domain.
 Added the Less Antique content style.
 Added preview images for content styles, visible via the Preview.. link next to the style menu.
+Domain owners who cannot login via SSH are automatically added to the deniedssh group, which the SSH server is configured to deny even before checking their shell.

@@ -29,10 +29,6 @@
    created by resellers.
 	- When creating domain, plan can override template.
 
-  - use DenyGroups in SSH config to deny domain owner logins
-	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=643
-	- create a group, and add all denied members to it
-
  - pre-load ui-lib.pl ?
 
  - better coverage of files by webmin_log
