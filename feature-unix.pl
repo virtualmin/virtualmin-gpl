@@ -103,6 +103,9 @@ if ($_[0]->{'mail'}) {
 		&create_generic($_[0]->{'user'}, $email);
 		}
 	}
+
+# Add to denied SSH group
+&build_denied_ssh_group($_[0]);
 }
 
 # modify_unix(&domain, &olddomain)
@@ -519,11 +522,13 @@ foreach my $s (keys %shells) {
 return @rv;
 }
 
-# build_denied_ssh_group()
+# build_denied_ssh_group([&new-domain])
 # Update the deniedssh Unix group's membership list with all domain owners
 # who don't get to login (based on their shell)
 sub build_denied_ssh_group
 {
+local ($newd) = @_;
+
 # First make sure the group exists
 &require_useradmin();
 local @allgroups = &list_all_groups();
@@ -532,7 +537,7 @@ return 0 if (!$group);
 
 # Find domain owners who can't login
 local @shells = &get_unix_shells();
-foreach my $d (&list_domains()) {
+foreach my $d (&list_domains(), $newd) {
 	next if ($d->{'parent'} || !$d->{'unix'});
 	local $user = &get_domain_owner($d);
 	local ($sinfo) = grep { $_->[1] eq $user->{'shell'} } @shells;
@@ -544,7 +549,7 @@ foreach my $d (&list_domains()) {
 
 # Update the group
 local $oldgroup = { %$group };
-$group->{'members'} = join(",", @members);
+$group->{'members'} = join(",", &unique(@members));
 if ($group->{'members'} ne $oldgroup->{'members'}) {
 	&foreign_call($usermodule, "lock_user_files");
 	&foreign_call($usermodule, "set_group_envs", $group,
