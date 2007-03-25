@@ -105,9 +105,9 @@ bw_ftplog_rotated=1
 mysql_mkdb=1
 mysql_nopass=0
 show_quotas=0
-spam=1
+spam=2
 clamscan_cmd=clamscan
-virus=1
+virus=2
 clam_delivery=/dev/null
 passwd_mode=0
 newdom_aliases=postmaster=${EMAILTO}	webmaster=${EMAILTO}	abuse=${EMAILTO}	hostmaster=${EMAILTO}
