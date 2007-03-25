@@ -36,6 +36,7 @@ else {
 	}
 @do_features || &error($text{'backup_efeatures'});
 $dest = &parse_backup_destination("dest", \%in, $cbmode == 2, $doms[0]);
+$origdest = $dest;
 $dest = &backup_strftime($dest) if ($in{'strftime'});
 if ($in{'onebyone'}) {
 	$in{'dest_mode'} > 0 || &error($text{'backup_eonebyone1'});
@@ -67,7 +68,7 @@ else {
 if (defined($in{'dom'})) {
 	# Save domain-specific backup options
 	$d = &get_domain($in{'dom'});
-	$d->{'backup_dest'} = $dest;
+	$d->{'backup_dest'} = $origdest;
 	$d->{'backup_fmt'} = $in{'fmt'};
 	$d->{'backup_mkdir'} = $in{'mkdir'};
 	$d->{'backup_errors'} = $in{'backup_errors'};
