@@ -550,7 +550,7 @@ Added several new initial website content styles, such as Refresh, Dreamy, Round
 Added a button to the Edit Web Pages page to replace existing content with that generated from a style. Also added the --style option to modify-web.pl.
 ---- Changes since 3.37 ----
 Removed old versions from the PHPmyAdmin script installer.
-Updated the Drupal script installer to support version 5.1, and all the Horde scripts to their latest versions.
+Updated the Drupal script installer to support version 5.1, phpPgAdmin to 4.1.1, and all the Horde scripts to their latest versions.
 Don't allow extra admins to switch to the domain owner.
 Added a page for installing third-party content styles, which can then be used for new websites exactly like the built-in styles.
 When configuring email notification for new mailboxes, resellers and domains, you can now enter a Bcc address as well as a Cc address.
