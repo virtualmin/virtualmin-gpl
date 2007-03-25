@@ -4,12 +4,6 @@
 
  - refactor UID / GID allocation code, to one place (setup_unix?)
 
- - option to update template settings on all virtual servers that use them,
-   such as quota and limits 
-	- when the template is changed for a server, quotas/etc should be
-	  optionally updated
-	- add a new page for changing the template
-
  - NIS support for users DB
 	- Cluster mode - each feature on a separate server
 
