@@ -41,3 +41,5 @@
 
   - mailbox_list_mails should use select function for virtual folders!
 
+  - security-updates and Mandriva
+	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=738

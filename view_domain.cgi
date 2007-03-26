@@ -63,10 +63,12 @@ print &ui_table_row($text{'edit_created'},
 print &ui_table_row($text{'edit_tmpl'}, $tmpl->{'name'}, undef, \@tds);
 
 # Reseller
-print &ui_table_row($text{'edit_reseller'},
-		    $d->{'reseller'} ? "<tt>$d->{'reseller'}</tt>"
-				     : $text{'edit_noreseller'},
-		    undef, \@tds);
+if ($virtualmin_pro) {
+	print &ui_table_row($text{'edit_reseller'},
+			    $d->{'reseller'} ? "<tt>$d->{'reseller'}</tt>"
+					     : $text{'edit_noreseller'},
+			    undef, \@tds);
+	}
 
 # IP-related options
 if (!$aliasdom) {

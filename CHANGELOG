@@ -563,3 +563,4 @@ Added the Less Antique content style.
 Added preview images for content styles, visible via the Preview.. link next to the style menu.
 Domain owners who cannot login via SSH are automatically added to the deniedssh group, which the SSH server is configured to deny even before checking their shell.
 The spam and virus filtering features are now enabled by default for new virtual servers.
+---- Changes since 3.38 ----
