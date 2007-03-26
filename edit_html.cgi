@@ -44,6 +44,7 @@ if (@html) {
 	}
 
 print &ui_form_end();
+$forms++;
 
 # Show file upload form
 print &ui_form_start("upload_html.cgi", "form-data");
@@ -54,16 +55,18 @@ print "<td>",&ui_upload("upload", 30),"</td>\n";
 print "<td>",&ui_submit($text{'html_uploadok'}, 'uploadok'),"</td>\n";
 print "</tr>\n";
 print &ui_form_end();
+$forms++;
 
 # Show form to apply a style
 print &ui_form_start("apply_style.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
 print "<tr>\n";
 print "<td><b>$text{'html_apply'}</b></td>\n";
-print "<td>",&content_style_chooser("style"),"</td>\n";
+print "<td>",&content_style_chooser("style", undef, $forms),"</td>\n";
 print "<td>",&ui_submit($text{'html_styleok'}, 'styleok'),"</td>\n";
 print "</tr>\n";
 print &ui_form_end();
+$forms++;
 
 print "</table>\n";
 
