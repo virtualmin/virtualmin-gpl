@@ -2508,7 +2508,7 @@ if (($tmode eq 'user' || $tmode eq 'update') &&
 	# Don't email domain owner if disabled
 	$email = undef;
 	}
-return (1, undef) if (!$email && !$cc);
+return (1, undef) if (!$email && !$cc && !$bcc);
 
 return &send_template_email(&cat_file($tmpl), $email, \%hash,
 			    $subject ||
