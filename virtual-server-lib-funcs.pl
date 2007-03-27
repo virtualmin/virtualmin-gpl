@@ -3599,6 +3599,7 @@ local $d;
 local $ok = 1;
 local @donedoms;
 local ($okcount, $errcount) = (0, 0);
+local @errdoms;
 local %donefeatures;				# Map from domain name->features
 DOMAIN: foreach $d (@$doms) {
 	if ($homefmt) {
@@ -3645,6 +3646,7 @@ DOMAIN: foreach $d (@$doms) {
 			if (!$fok && !$skip) {
 				$ok = 0;
 				$errcount++;
+				push(@errdoms, $d->{'dom'});
 				last DOMAIN;
 				}
 			push(@donedoms, $d);
@@ -3654,8 +3656,13 @@ DOMAIN: foreach $d (@$doms) {
 			}
 		}
 	$donefeatures{$d->{'dom'}} = \@donefeatures;
-	if ($dok) { $okcount++; }
-	else { $errcount++; }
+	if ($dok) {
+		$okcount++;
+		}
+	else {
+		$errcount++;
+		push(@errdoms, $d->{'dom'});
+		}
 
 	if ($onebyone && $homefmt && $dok) {
 		# Transfer this domain now
@@ -3921,6 +3928,9 @@ if ($ok) {
 	  ($okcount || $errcount ?
 	    &text('backup_finalstatus', $okcount, $errcount) : "")."\n".
 	  ($vcount ? &text('backup_finalstatus2', $vcount) : ""));
+	if ($errcount) {
+		&$first_print(&text('backup_errorsites', join(" ", @errdoms)));
+		}
 	}
 
 return ($ok, $sz);

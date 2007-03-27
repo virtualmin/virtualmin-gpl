@@ -1619,6 +1619,7 @@ backup_upload3=Uploading archive to Amazon's S3 server ..
 backup_uploadfailed=.. upload failed! $1
 backup_finalstatus=$1 servers backed up successfully, $2 had errors.
 backup_finalstatus2=$1 Virtualmin configuration settings backed up successfully.
+backup_errorsites=Servers with errors: $1
 backup_emode=No valid backup destination mode selected
 backup_es3nopath=You must specify a filename when backing up to a single file on S3
 backup_es3path=You cannot specify a filename when backing up to multiple files on S3
