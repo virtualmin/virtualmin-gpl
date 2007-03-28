@@ -33,10 +33,25 @@ if (@got) {
 	print &ui_columns_start([ "",
 				  $text{'scripts_name'},
 				  $text{'scripts_ver'},
-				  $text{'scripts_path'} ], undef, 0, \@tds);
+				  $text{'scripts_path'},
+				  $text{'scripts_status'} ], undef, 0, \@tds);
 	foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 			       lc($smap{$b->{'name'}}->{'desc'}) } @got) {
+		# Check if a newer version exists
 		$script = $smap{$sinfo->{'name'}};
+		@vers = grep { &can_script_version($script, $_) }
+			     @{$script->{'versions'}};
+		if (&indexof($sinfo->{'version'}, @vers) < 0) {
+			@better = grep { &compare_versions($_, $sinfo->{'version'}) > 0 } @vers;
+			$status = "<font color=#ffaa00>".
+				  &text('scripts_newer', $better[$#better]).
+				  "</font>";
+			}
+		else {
+			$status = "<font color=#00aa00>".
+				  $text{'scripts_newest'}."</font>";
+			}
+		
 		print &ui_checked_columns_row([
 			"<a href='edit_script.cgi?dom=$in{'dom'}&".
 			"script=$sinfo->{'id'}'>$script->{'desc'}</a>",
@@ -44,7 +59,8 @@ if (@got) {
 			  $sinfo->{'version'},
 			$sinfo->{'url'} ? 
 			  "<a href='$sinfo->{'url'}'>$sinfo->{'desc'}</a>" :
-			  $sinfo->{'desc'}
+			  $sinfo->{'desc'},
+			$status,
 			], \@tds, "d", $sinfo->{'id'});
 		}
 	print &ui_columns_end();

@@ -25,7 +25,7 @@ return ( "2.10.0.2", "2.9.2", "2.8.2.4" );
 sub script_phpmyadmin_version_desc
 {
 local ($ver) = @_;
-return &compare_versions($ver, 2.10) > 0 ? "$ver (Stable)" : "$ver (Old)";
+return &compare_versions($ver, "2.10") > 0 ? "$ver (Latest)" : "$ver (Old)";
 }
 
 sub script_phpmyadmin_category

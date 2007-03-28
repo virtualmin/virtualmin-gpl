@@ -2464,6 +2464,9 @@ scripts_needpear=Installing PHP Pear module $1 ..
 scripts_einstallpear=Pear module is not available even after installation!
 scripts_gotpear=.. installation complete.
 scripts_eclash=Another script is already installed in $1.
+scripts_status=Status
+scripts_newest=Latest
+scripts_newer=Version $1 is available
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations.

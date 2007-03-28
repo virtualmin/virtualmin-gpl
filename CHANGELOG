@@ -566,3 +566,4 @@ The spam and virus filtering features are now enabled by default for new virtual
 ---- Changes since 3.38 ----
 Improved the layout of the Disk Usage page, using tabs.
 Added the --template option to modify-domain.pl.
+Added a column to the list of installed scripts to show if it is the latest version or not.
