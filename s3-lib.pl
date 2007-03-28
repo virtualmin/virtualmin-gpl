@@ -6,7 +6,7 @@
 # Returns an error message if S3 cannot be used
 sub check_s3
 {
-foreach my $m ("XML::Simple", @s3_perl_modules) {
+foreach my $m ("XML::Simple", "Crypt::SSLeay", @s3_perl_modules) {
 	eval "use $m";
 	if ($@) {
 		return &text('s3_emodule', "<tt>$m</tt>");

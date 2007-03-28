@@ -565,3 +565,4 @@ Domain owners who cannot login via SSH are automatically added to the deniedssh 
 The spam and virus filtering features are now enabled by default for new virtual servers.
 ---- Changes since 3.38 ----
 Improved the layout of the Disk Usage page, using tabs.
+Added the --template option to modify-domain.pl.

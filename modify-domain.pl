@@ -91,6 +91,17 @@ while(@ARGV > 0) {
 		# Changing the prefix
 		$prefix = shift(@ARGV);
 		}
+	elsif ($a eq "--template") {
+		# Changing the template
+		$templatename = shift(@ARGV);
+		foreach $t (&list_templates()) {
+			if ($t->{'name'} eq $templatename ||
+			    $t->{'id'} eq $templatename) {
+				$template = $t->{'id'};
+				}
+			}
+		$template eq "" && &usage("Unknown template name");
+		}
 	else {
 		usage();
 		}
@@ -101,7 +112,7 @@ $domain || usage();
 $dom = &get_domain_by("dom", $domain);
 $dom || usage("Virtual server $domain does not exist.");
 $old = { %$dom };
-$tmpl = &get_template($dom->{'template'});
+$tmpl = &get_template(defined($template) ? $template : $dom->{'template'});
 
 # Make sure options are valid for domain
 if ($dom->{'parent'}) {
@@ -148,6 +159,18 @@ if (defined($prefix)) {
 		$pclash = &get_domain_by("prefix", $prefix);
                 $pclash && &usage($text{'setup_eprefix2'});
 		}
+	}
+if (defined($template)) {
+	if ($dom->{'parent'} && !$dom->{'alias'} && !$tmpl->{'for_sub'}) {
+		&usage("The selected template cannot be used for sub-servers");
+		}
+	elsif (!$dom->{'parent'} && !$tmpl->{'for_parent'}) {
+		&usage("The selected template cannot be used for top-level servers");
+		}
+	elsif ($dom->{'alias'} && !$tmpl->{'for_alias'}) {
+		&usage("The selected template cannot be used for alias servers");
+		}
+	$dom->{'template'} = $template;
 	}
 
 # Find all other domains to be changed
@@ -284,6 +307,7 @@ print "                        [--resel reseller|NONE]\n";
 print "                        [--ip address] | [--allocate-ip] |\n";
 print "                        [--shared-ip address]\n";
 print "                        [--prefix name]\n";
+print "                        [--template name|id]\n";
 exit(1);
 }
 

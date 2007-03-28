@@ -43,8 +43,9 @@
 
   - theme fixes
 	- consistent left-menu categorization
-	- quota bars on IE
-	- table highlighting
+	- single create link, at top, with selector for type
 
   - templates for new mailing list configs
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=739
+
+  - add Perl modules to .sh installer
