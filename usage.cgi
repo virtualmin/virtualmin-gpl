@@ -10,11 +10,25 @@ $d=&get_domain($in{'dom'});
 $subh = &domain_in($d);
 &ui_print_header($subh, $text{'usage_title'}, "", "usage");
 
+# First work out what tabs we have
+@tabs = ( );
+$prog = "usage.cgi?dom=$in{'dom'}&mode=";
+if (&has_home_quotas()) {
+	push(@tabs, [ "summary", $text{'usage_tabsummary'}, $prog."summary" ]);
+	}
+push(@tabs, [ "homes", $text{'usage_tabhomes'}, $prog."homes" ]);
+push(@tabs, [ "users", $text{'usage_tabusers'}, $prog."users" ]);
+push(@tabs, [ "subs", $text{'usage_tabsubs'}, $prog."subs" ]);
+push(@tabs, [ "dbs", $text{'usage_tabdbs'}, $prog."dbs" ]);
+print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || $tabs[0]->[0], 1);
+
 # Show quota usage
 if (&has_home_quotas()) {
+	print &ui_tabs_start_tab("mode", "summary");
+	print $text{'usage_summaryheader'},"<p>\n";
 	$homesize = &quota_bsize("home");
 	$mailsize = &quota_bsize("mail");
-	print &ui_table_start($text{'usage_quota'}, undef, 4);
+	print &ui_table_start(undef, undef, 4);
 
 	print &ui_table_row($text{'usage_squota'},
 			    &quota_show($d->{'quota'}));
@@ -35,10 +49,8 @@ if (&has_home_quotas()) {
 		}
 
 	print &ui_table_end();
-	print "<hr>\n";
+	print &ui_tabs_end_tab();
 	}
-
-print "<table width=100%><tr>\n";
 
 # Show usage by each sub-directory under home
 opendir(DIR, $d->{'home'});
@@ -59,10 +71,10 @@ foreach $dir (readdir(DIR)) {
 	}
 push(@dirusage, [ "<i>$text{'usage_others'}</i>", &nice_size($othersgid), $others ]);
 closedir(DIR);
-print "<td valign=top width=25%>\n";
+print &ui_tabs_start_tab("mode", "homes");
 &usage_table(\@dirusage, $text{'usage_dir'}, 0, $text{'usage_dirheader'},
 	     $text{'usage_sizegid'});
-print "</td>\n";
+print &ui_tabs_end_tab();
 
 # Show usage by top 10 mail users, in all domains
 foreach $sd ($d, &get_domain_by("parent", $d->{'id'})) {
@@ -89,10 +101,10 @@ foreach $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 		       $uusage ]);
 		}
 	}
-print "<td valign=top width=25%>\n";
+print &ui_tabs_start_tab("mode", "users");
 &usage_table(\@userusage, $text{'usage_user'}, 10, $text{'usage_userheader'},
 	     $text{'usage_dom'});
-print "</td>\n";
+print &ui_tabs_end_tab();
 
 # Show usage by sub-servers
 @subs = &get_domain_by("parent", $d->{'id'});
@@ -101,9 +113,9 @@ foreach $sd (@subs) {
 	($susage) = &recursive_disk_usage_mtime($sd->{'home'});
 	push(@subusage, [ $sd->{'dom'}, $susage ]);
 	}
-print "<td valign=top width=25%>\n";
+print &ui_tabs_start_tab("mode", "subs");
 &usage_table(\@subusage, $text{'usage_sub'}, 10, $text{'usage_subheader'});
-print "</td>\n";
+print &ui_tabs_end_tab();
 
 # Show usage by databases
 $dbtotal = 0;
@@ -114,21 +126,19 @@ foreach $sd ($d, @subs) {
 		$dbtotal += $dbu;
 		}
 	}
-if ($dbtotal) {
-	print "<td valign=top width=25%>\n";
-	&usage_table(\@dbusage, $text{'usage_db'}, 10, $text{'usage_dbheader'},
-		     $text{'usage_dom'});
-	print "</td>\n";
-	}
+print &ui_tabs_start_tab("mode", "dbs");
+&usage_table(\@dbusage, $text{'usage_db'}, 10, $text{'usage_dbheader'},
+	     $text{'usage_dom'});
+print &ui_tabs_end_tab();
 
-print "</table>\n";
+print &ui_tabs_end();
 
 &ui_print_footer(&domain_footer_link($d));
 
 sub usage_table
 {
 local ($list, $type, $max, $title, $type2) = @_;
-print "<b>$title</b><br>\n";
+print "$title<p>\n";
 if (@$list) {
 	print &ui_columns_start([ $type,
 				  $type2 ? ( $type2 ) : ( ),

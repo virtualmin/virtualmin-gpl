@@ -53,6 +53,7 @@ local $serv = { 'id' => $_[0]->{'id'}.($_[1] ? "_ssl" : "_web"),
 		'email' => &monitor_email($_[0]),
 		'host' => "www.$_[0]->{'dom'}",
 		'port' => $_[1] ? $_[0]->{'web_sslport'} : $_[0]->{'web_port'},
+		'nosched' => 0,
 		'ssl' => $_[1],
 		'page' => '/' };
 return $serv;
