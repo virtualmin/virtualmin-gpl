@@ -1824,11 +1824,11 @@ sub add_script_language_directives
 local ($d, $tmpl, $port) = @_;
 if ($tmpl->{'web_php_suexec'} == 1) {
 	# Create cgi wrappers for PHP 4 and 5
-	&save_domain_php_mode($d, "cgi", $port);
+	&save_domain_php_mode($d, "cgi", $port, 1);
 	}
 elsif ($tmpl->{'web_php_suexec'} == 2) {
 	# Add directives for FastCGId
-	&save_domain_php_mode($d, "fcgid", $port);
+	&save_domain_php_mode($d, "fcgid", $port, 1);
 	}
 
 if ($tmpl->{'web_ruby_suexec'} >= 0) {
@@ -1836,7 +1836,7 @@ if ($tmpl->{'web_ruby_suexec'} >= 0) {
 	&save_domain_ruby_mode($d,
 		$tmpl->{'web_ruby_suexec'} == 0 ? "mod_ruby" :
 		$tmpl->{'web_ruby_suexec'} == 1 ? "cgi" : "fcgid",
-		$port);
+		$port, 1);
 	}
 }
 

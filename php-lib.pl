@@ -33,11 +33,11 @@ if ($virt) {
 return 'mod_php';
 }
 
-# save_domain_php_mode(&domain, mode, [port])
+# save_domain_php_mode(&domain, mode, [port], [new-domain])
 # Changes the method a virtual web server uses to run PHP.
 sub save_domain_php_mode
 {
-local ($d, $mode, $port) = @_;
+local ($d, $mode, $port, $newdom) = @_;
 &require_apache();
 local $tmpl = &get_template($d->{'template'});
 local $conf = &apache::get_config();
@@ -92,8 +92,11 @@ foreach my $p (@ports) {
 		}
 
 	# Work out which PHP version each directory uses currently
-	local %pdirs = map { $_->{'dir'}, $_->{'version'} }
-			   &list_domain_php_directories($d);
+	local %pdirs;
+	if (!$newdom) {
+		%pdirs = map { $_->{'dir'}, $_->{'version'} }
+			     &list_domain_php_directories($d);
+		}
 
 	# Update all of the directories
 	local @avail = map { $_->[0] }
