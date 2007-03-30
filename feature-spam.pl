@@ -200,7 +200,7 @@ local @recs = &procmail::parse_procmail_file($spamrc);
 local $cmd = $spam::config{'spamassassin'};
 local $found;
 foreach my $r (@recs) {
-	$found++ if ($r->{'action'} =~ /\Q$cmd\E/);
+	$found++ if ($r->{'action'} =~ /\Q$cmd\E|spamc|spamassassin/);
 	}
 return &text('validate_espamcall', "<tt>$spamrc</tt>") if (!$found);
 return undef;

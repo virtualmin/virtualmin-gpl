@@ -48,4 +48,6 @@
   - templates for new mailing list configs
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=739
 
-  - add Perl modules to .sh installer
+  - ratings for script installers
+	- star selector
+	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=723
