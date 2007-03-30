@@ -4723,12 +4723,15 @@ elsif ($_[0] =~ /^s3:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
 	@rv = (3, $1, $2, $3, $5, undef);
 	}
 elsif (!$_[0] || $_[0] =~ /^\//) {
+	# Absolute path
 	@rv = (0, undef, undef, undef, $_[0], undef);
+	$rv[4] =~ s/\/+$//;	# No need for trailing /
 	}
 else {
-	local $pwd = `pwd`;
-	chop($pwd);
+	# Relative to current dir
+	local $pwd = &get_current_dir();
 	@rv = (0, undef, undef, undef, $pwd."/".$_[0], undef);
+	$rv[4] =~ s/\/+$//;
 	}
 if ($rv[0] && $rv[3] =~ /^(\S+):(\d+)$/) {
 	# Convert hostname to host:port
@@ -4857,12 +4860,14 @@ local $mode = $in{"$_[0]_mode"};
 if ($mode == 0 && !$_[2]) {
 	# Any local file
 	$in{"$_[0]_file"} =~ /^\/\S/ || &error($text{'backup_edest'});
+	$in{"$_[0]_file"} =~ s/\/+$//;	# No need for trailing /
 	return $in{"$_[0]_file"};
 	}
 elsif ($mode == 0 && $_[2]) {
 	# Local file under virtualmin-backup directory
 	$in{"$_[0]_file"} =~ /^\S+$/ || &error($text{'backup_edest2'});
 	$in{"$_[0]_file"} =~ /\.\./ && &error($text{'backup_edest3'});
+	$in{"$_[0]_file"} =~ s/\/+$//;
 	return "$_[3]->{'home'}/virtualmin-backup/".$in{"$_[0]_file"};
 	}
 elsif ($mode == 1) {
@@ -4873,6 +4878,7 @@ elsif ($mode == 1) {
 	$in{"$_[0]_path"} =~ /^\/\S/ || &error($text{'backup_epath'});
 	$in{"$_[0]_user"} =~ /^[^:\@\/]*$/ || &error($text{'backup_euser'});
 	$in{"$_[0]_pass"} =~ /^[^:\@\/]*$/ || &error($text{'backup_epass'});
+	$in{"$_[0]_path"} =~ s/\/+$//;
 	return "ftp://".$in{"$_[0]_user"}.":".$in{"$_[0]_pass"}."\@".
 	       $in{"$_[0]_server"}.$in{"$_[0]_path"};
 	}
@@ -4883,6 +4889,7 @@ elsif ($mode == 2) {
 	$port =~ /^\d*$/ || &error($text{'backup_eport'});
 	$in{"$_[0]_spath"} =~ /\S/ || &error($text{'backup_epath'});
 	$in{"$_[0]_suser"} =~ /^[^:\@\/]*$/ || &error($text{'backup_euser2'});
+	$in{"$_[0]_spath"} =~ s/\/+$//;
 	return "ssh://".$in{"$_[0]_suser"}.":".$in{"$_[0]_spass"}."\@".
 	       $in{"$_[0]_sserver"}.":".$in{"$_[0]_spath"};
 	}
