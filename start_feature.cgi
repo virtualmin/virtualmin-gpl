@@ -17,6 +17,7 @@ else {
 	}
 &error_setup($text{'start_err'});
 &error($err) if ($err);
+&refresh_startstop_status();
 &webmin_log("start", $in{'feature'});
 
 if ($in{'show'}) {

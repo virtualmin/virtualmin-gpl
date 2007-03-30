@@ -463,10 +463,12 @@ return ( [ $text{'sysinfo_postgresql'}, $ver ] );
 
 sub startstop_postgres
 {
+local ($typestatus) = @_;
 &require_postgres();
-return undef if (defined(&postgresql::is_postgresql_local) &&
-		 !&postgresql::is_postgresql_local());
-local $r = &postgresql::is_postgresql_running();
+return undef if (!&postgresql::is_postgresql_local());
+local $r = defined($typestatus->{'postgresql'}) ?
+                $typestatus->{'postgresql'} == 1 :
+		&postgresql::is_postgresql_running();
 if ($r == 1) {
 	return { 'status' => 1,
 		 'name' => $text{'index_pgname'},

@@ -44,6 +44,7 @@
   - theme fixes
 	- consistent left-menu categorization
 	- single create link, at top, with selector for type
+	- caching on right frame
 
   - templates for new mailing list configs
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=739

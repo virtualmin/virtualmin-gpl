@@ -24,6 +24,7 @@ else {
 	}
 &error_setup($text{'restart_err'});
 &error($err) if ($err);
+&refresh_startstop_status();
 &webmin_log("restart", $in{'feature'});
 
 if ($in{'show'}) {

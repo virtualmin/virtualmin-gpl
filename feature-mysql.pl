@@ -707,9 +707,12 @@ return ( [ $text{'sysinfo_mysql'}, $ver ] );
 
 sub startstop_mysql
 {
+local ($typestatus) = @_;
 &require_mysql();
 return undef if (!&mysql::is_mysql_local());	# cannot stop/start remote
-local $r = &mysql::is_mysql_running();
+local $r = defined($typestatus->{'mysql'}) ?
+		$typestatus->{'mysql'} == 1 :
+		&mysql::is_mysql_running();
 if ($r == 1) {
 	return { 'status' => 1,
 		 'name' => $text{'index_myname'},

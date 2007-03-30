@@ -8610,10 +8610,25 @@ return (\@tlinks, \@ttitles, \@ticons);
 sub get_startstop_links
 {
 local @rv;
+local %typestatus;
+if (&foreign_check("status")) {
+	# Get scheduled monitoring status
+	&foreign_require("status", "status-lib.pl");
+	local %oldstatus;
+	if ($status::config{'sched_mode'} &&
+	    &read_file($status::oldstatus_file, \%oldstatus)) {
+		# Can use scheduled status
+		foreach my $s (&status::list_services()) {
+			local $stat = &status::expand_oldstatus(
+					$oldstatus{$s->{'id'}});
+			$typestatus{$s->{'type'}} = $stat->{'*'};
+			}
+		}
+	}
 foreach my $f (@startstop_features) {
 	if ($config{$f}) {
 		local $sfunc = "startstop_".$f;
-		local $status = &$sfunc();
+		local $status = &$sfunc(\%typestatus);
 		if ($status) {
 			$status->{'feature'} = $f;
 			push(@rv, $status);
@@ -8627,6 +8642,18 @@ foreach my $f (@startstop_plugins) {
 	push(@rv, $status);
 	}
 return @rv;
+}
+
+# refresh_startstop_status()
+# Tell the status module to perform an un-scheduled status refresh
+sub refresh_startstop_status
+{
+if (&foreign_check("status")) {
+	&foreign_require("status", "status-lib.pl");
+	if ($status::config{'sched_mode'} && -r $status::cron_cmd) {
+		&system_logged("$status::cron_cmd >/dev/null 2>&1 </dev/null");
+		}
+	}
 }
 
 # can_domain_have_users(&domain)

@@ -1396,12 +1396,14 @@ if ($config{'avail_phpini'}) {
 return @rv;
 }
 
-# startstop_web()
+# startstop_web([&typestatus])
 # Returns a hash containing the current status of the web service and short
 # and long descriptions for the action to switch statuses
 sub startstop_web
 {
-local $apid = &get_apache_pid();
+local ($typestatus) = @_;
+local $apid = defined($typestatus->{'apache'}) ?
+		$typestatus->{'apache'} == 1 : &get_apache_pid();
 if ($apid) {
 	return { 'status' => 1,
 		 'name' => $text{'index_aname'},

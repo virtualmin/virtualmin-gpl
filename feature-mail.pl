@@ -2616,8 +2616,12 @@ return undef;
 
 sub startstop_mail
 {
+local ($typestatus) = @_;
+local $msn = $config{'mail_system'} == 0 ? "postfix" :
+	     $config{'mail_system'} == 1 ? "sendmail" : "qmailadmin";
 local $ms = $text{'mail_system_'.$config{'mail_system'}};
-if (&is_mail_running()) {
+if (defined($typestatus->{$msn}) ? $typestatus->{$msn} == 1
+				 : &is_mail_running()) {
 	return { 'status' => 1,
 		 'name' => &text('index_mname', $ms),
 		 'desc' => $text{'index_mstop'},

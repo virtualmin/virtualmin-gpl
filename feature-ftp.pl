@@ -367,14 +367,22 @@ return ( [ $text{'sysinfo_proftpd'}, $proftpd::site{'version'} ] );
 
 sub startstop_ftp
 {
+local ($typestatus) = @_;
 &require_proftpd();
 local $conf = &proftpd::get_config();
 local $st = &proftpd::find_directive("ServerType", $conf);
 if ($st eq 'inetd') {
 	# Running under inetd
 	return undef;
-        }
-elsif (&proftpd::get_proftpd_pid()) {
+	}
+local $status;
+if (defined($typestatus->{'proftpd'})) {
+	$status = $typestatus->{'proftpd'} == 1;
+	}
+else {
+	$status = &proftpd::get_proftpd_pid();
+	}
+if ($status) {
 	return { 'status' => 1,
 		 'name' => $text{'index_fname'},
 		 'desc' => $text{'index_fstop'},
