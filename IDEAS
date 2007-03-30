@@ -52,3 +52,7 @@
   - ratings for script installers
 	- star selector
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=723
+
+  - after saving a global config setting, show some page instead of
+    returning to domain list (and refresh left frame if needed)
+	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=747
