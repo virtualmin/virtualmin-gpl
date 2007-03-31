@@ -179,5 +179,28 @@ if (&foreign_installed("sshd")) {
 		}
 	}
 &build_denied_ssh_group();
+
+if ($virtualmin_pro) {
+	# Create the cron job for sending in script ratings
+	&foreign_require("cron", "cron-lib.pl");
+	local ($job) = grep { $_->{'user'} eq 'root' &&
+			      $_->{'command'} eq $ratings_cron_cmd }
+			    &cron::list_cron_jobs();
+	if (!$job) {
+		# Create, and run for the first time
+		$job = { 'mins' => int(rand()*60),
+			 'hours' => int(rand()*24),
+			 'days' => '*',
+			 'months' => '*',
+			 'weekdays' => '*',
+			 'user' => 'root',
+			 'active' => 1,
+			 'command' => $ratings_cron_cmd };
+		&cron::create_cron_job($job);
+		&cron::create_wrapper($ratings_cron_cmd, $module_name,
+				      "sendratings.pl");
+		&execute_command($ratings_cron_cmd);
+		}
+	}
 }
 

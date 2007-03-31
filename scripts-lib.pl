@@ -948,5 +948,56 @@ if ($opts->{'dir'} ne &public_html_dir($d, 0)) {
 return undef;
 }
 
+# get_script_ratings()
+# Returns a hash of script ratings (from 1 to 5) for the current user
+sub get_script_ratings
+{
+local %srf;
+&read_file("$script_ratings_dir/$remote_user", \%srf);
+return \%srf;
+}
+
+# save_script_ratings(&ratings)
+# Updates the script ratings for the current user
+sub save_script_ratings
+{
+local ($srf) = @_;
+&make_dir($script_ratings_dir, 0700) if (!-d $script_ratings_dir);
+&write_file("$script_ratings_dir/$remote_user", $srf);
+}
+
+# list_all_script_ratings()
+# Returns a hash of ratings, indexed by user
+sub list_all_script_ratings
+{
+local %rv;
+opendir(SRD, $script_ratings_dir);
+foreach my $user (readdir(SRD)) {
+	next if ($user eq "." || $user eq "..");
+	local %srf;
+	&read_file("$script_ratings_dir/$user", \%srf);
+	$rv{$user} = \%srf;
+	}
+closedir(DIR);
+return \%rv;
+}
+
+# get_overall_script_ratings()
+# Returns a hash ref containing summary ratings from virtualmin.com
+sub get_overall_script_ratings
+{
+local %overall;
+&read_file($script_ratings_overall, \%overall);
+return \%overall;
+}
+
+# save_overall_script_ratings(&overall)
+# Save overall ratings from virtualmin.com
+sub save_overall_script_ratings
+{
+local ($overall) = @_;
+&write_file($script_ratings_overall, $overall);
+}
+
 1;
 

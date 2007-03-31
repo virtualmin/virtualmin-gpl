@@ -27,6 +27,7 @@ while(@ARGV > 0) {
 @scripts = map { &get_script($_) } &list_scripts();
 if ($multi) {
 	# Show each script on a separate line
+	$overall = &get_overall_script_ratings();
 	foreach $script (@scripts) {
 		print "$script->{'name'}\n";
 		print "    Name: $script->{'desc'}\n";
@@ -36,7 +37,10 @@ if ($multi) {
 		print "    Versions: ",join(" ", @{$script->{'versions'}}),"\n";
 		print "    Available: ",$script->{'avail'} ? "Yes" : "No","\n";
 		print "    Description: $script->{'longdesc'}\n";
-		print "    Used: ",join(" ", @{$script->{'uses'}}),"\n";
+		print "    Uses: ",join(" ", @{$script->{'uses'}}),"\n";
+		if ($overall->{$script->{'name'}}) {
+			print "    Rating: ".$overall->{$script->{'name'}}."\n";
+			}
 		}
 	}
 else {

@@ -4843,12 +4843,7 @@ if (&can_use_s3()) {
 	push(@opts, [ 3, $text{'backup_mode3'}, $st ]);
 	}
 
-if (defined(&ui_radio_selector)) {
-	return &ui_radio_selector(\@opts, $name."_mode", $mode);
-	}
-else {
-	return &virtualmin_ui_radio_selector(\@opts, $name."_mode", $mode);
-	}
+return &ui_radio_selector(\@opts, $name."_mode", $mode);
 }
 
 # parse_backup_destination(name, &in, no-local, [&domain])
@@ -7594,7 +7589,8 @@ if (&require_licence()) {
 	# Hasn't been checked from cron for 3 days .. do it now
 	&foreign_require("cron", "cron-lib.pl");
 	local ($job) = grep { $_->{'user'} eq 'root' &&
-			      $_->{'command'} eq $licence_cmd } &cron::list_cron_jobs();
+			      $_->{'command'} eq $licence_cmd }
+			    &cron::list_cron_jobs();
 	if (!$job) {
 		# Create
 		$job = { 'mins' => int(rand()*60),

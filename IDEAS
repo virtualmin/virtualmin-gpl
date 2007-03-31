@@ -45,14 +45,17 @@
 	- consistent left-menu categorization
 	- single create link, at top, with selector for type
 	- caching on right frame
+		- 5-minute cron job
+		- can we trust status module?
 
   - templates for new mailing list configs
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=739
 
-  - ratings for script installers
-	- star selector
-	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=723
-
   - after saving a global config setting, show some page instead of
     returning to domain list (and refresh left frame if needed)
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=747
+
+  - upgrade button in GPL version
+	- shows page that prompts to buy licence, enter serial and key,
+	  then downloads new .wbm and sets up update.txt
+

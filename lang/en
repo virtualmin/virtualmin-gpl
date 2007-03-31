@@ -2399,6 +2399,7 @@ config_oldtheme=Old Webmin theme
 
 scripts_title=Install Scripts
 scripts_longdesc=Description
+scripts_overall=Rating
 scripts_desc=This form can be used to easily install or upgrade various third-party website scripts into this virtual server's web directory.
 scripts_desc2=This form can be used to upgrade or remove an already installed script, along with any associated data files and databases.
 scripts_desc3=Click on a script name below to upgrade or remove it, or on the install path to use it.
@@ -2467,6 +2468,7 @@ scripts_eclash=Another script is already installed in $1.
 scripts_status=Status
 scripts_newest=Latest
 scripts_newer=Version $1 is available
+scripts_rating=Your rating
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations.

@@ -24,6 +24,7 @@ print &ui_tabs_start(\@tabs, "scriptsmode",
 # Show table of installed scripts (if any)
 print &ui_tabs_start_tab("scriptsmode", "existing");
 if (@got) {
+	$ratings = &get_script_ratings();
 	print $text{'scripts_desc3'},"<p>\n";
 	@tds = ( "width=5" );
 	print &ui_form_start("mass_uninstall.cgi", "post");
@@ -34,7 +35,8 @@ if (@got) {
 				  $text{'scripts_name'},
 				  $text{'scripts_ver'},
 				  $text{'scripts_path'},
-				  $text{'scripts_status'} ], undef, 0, \@tds);
+				  $text{'scripts_status'},
+				  $text{'scripts_rating'} ], undef, 0, \@tds);
 	foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 			       lc($smap{$b->{'name'}}->{'desc'}) } @got) {
 		# Check if a newer version exists
@@ -61,6 +63,9 @@ if (@got) {
 			  "<a href='$sinfo->{'url'}'>$sinfo->{'desc'}</a>" :
 			  $sinfo->{'desc'},
 			$status,
+			&virtualmin_ui_rating_selector(
+				$sinfo->{'name'}, $ratings->{$sinfo->{'name'}},
+				5, "rate_script.cgi?dom=$in{'dom'}")
 			], \@tds, "d", $sinfo->{'id'});
 		}
 	print &ui_columns_end();
@@ -81,10 +86,12 @@ if (@scripts) {
 	print &ui_columns_start([ "",
 				  $text{'scripts_name'},
 				  $text{'scripts_ver'},
-				  $text{'scripts_longdesc'} ], undef, 0, \@tds);
+				  $text{'scripts_longdesc'},
+				  $text{'scripts_overall'} ], undef, 0, \@tds);
 	foreach $script (@scripts) {
 		$script->{'sortcategory'} = $script->{'category'} || "zzz";
 		}
+	$overall = &get_overall_script_ratings();
 	foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 				lc($a->{'desc'}) cmp lc($b->{'desc'}) }
 			      @scripts) {
@@ -94,7 +101,7 @@ if (@scripts) {
 		next if (!@vers);	# No allowed versions!
 		if ($cat ne $lastcat) {
 			print &ui_columns_row([ "<b>$cat</b>" ],
-					      [ "colspan=4]" ]);
+					      [ "colspan=5" ]);
 			$lastcat = $cat;
 			}
 		if (@vers > 1) {
@@ -106,22 +113,13 @@ if (@scripts) {
 			$vsel = ($script->{'vdesc'}->{$vers[0]} || $vers[0]).
 				&ui_hidden("ver_".$script->{'name'}, $vers[0]);
 			}
-		if (defined(&ui_radio_columns_row)) {
-			print &ui_radio_columns_row([
-			    $script->{'desc'},
-			    $vsel,
-			    $script->{'longdesc'}
-			    ], \@tds, "script", $script->{'name'});
-			}
-		else {
-			# Old function without highlighting
-			print &ui_columns_row([
-			    &ui_oneradio("script", $script->{'name'}),
-			    $script->{'desc'},
-			    $vsel,
-			    $script->{'longdesc'}
-			    ], \@tds);
-			}
+		$r = $overall->{$script->{'name'}};
+		print &ui_radio_columns_row([
+		    $script->{'desc'},
+		    $vsel,
+		    $script->{'longdesc'},
+		    $r ? &virtualmin_ui_rating_selector(undef, $r, 5) : "",
+		    ], \@tds, "script", $script->{'name'});
 		}
 	print &ui_columns_end();
 	print &ui_submit($text{'scripts_ok'});

@@ -126,10 +126,11 @@ $licence_status = "$module_config_directory/licence-status";
 $quotas_cron_cmd = "$module_config_directory/quotas.pl";
 $spamclear_cmd = "$module_config_directory/spamclear.pl";
 $dynip_cron_cmd = "$module_config_directory/dynip.pl";
+$ratings_cron_cmd = "$module_config_directory/sendratings.pl";
 
 @all_cron_commands = ( $backup_cron_cmd, $bw_cron_cmd, $licence_cmd,
 		       $licence_status, $quotas_cron_cmd, $spamclear_cmd,
-		       $dynip_cron_cmd );
+		       $dynip_cron_cmd, $ratings_cron_cmd );
 
 $custom_fields_file = "$module_config_directory/custom-fields";
 $custom_links_file = "$module_config_directory/custom-links";
@@ -190,3 +191,11 @@ $extra_admins_dir = "$module_config_directory/admins";
 		       );
 
 $denied_ssh_group = "deniedssh";
+
+$script_ratings_dir = "$module_config_directory/ratings";
+$script_ratings_overall = "$module_config_directory/overall-ratings";
+$script_ratings_host = "software.virtualmin.com";
+$script_ratings_port = 80;
+$script_ratings_page = "/cgi-bin/sendratings.cgi";
+$script_fetch_ratings_page = "/cgi-bin/getratings.cgi";
+

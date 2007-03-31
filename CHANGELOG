@@ -567,3 +567,4 @@ The spam and virus filtering features are now enabled by default for new virtual
 Improved the layout of the Disk Usage page, using tabs.
 Added the --template option to modify-domain.pl.
 Added a column to the list of installed scripts to show if it is the latest version or not.
+Added a star rating system (out of 5) for script installers. Users can rate installed scripts, and ratings for those available are collated based on submissions from Virtualmin Pro users and displayed in the list of scripts available.
