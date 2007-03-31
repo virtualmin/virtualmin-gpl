@@ -42,7 +42,6 @@
   - mailbox_list_mails should use select function for virtual folders!
 
   - theme fixes
-	- single create link, at top, with selector for type
 	- caching on right frame
 		- 5-minute cron job
 		- can we trust status module?

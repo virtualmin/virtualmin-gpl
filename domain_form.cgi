@@ -33,9 +33,46 @@ elsif ($in{'mass'}) {
 	return;
 	}
 
-# Get parent settings
+# Can this user even create servers?
 &can_create_master_servers() || &can_create_sub_servers() ||
 	&error($text{'form_ecannot'});
+
+# If we are in generic mode, work out all possible modes for the current user
+if ($in{'generic'}) {
+	$gparent = &get_domain($in{'gparent'}) if ($in{'gparent'});
+	if (&can_create_master_servers()) {
+		# Top-level server
+		push(@generics, [ $text{'form_generic_master'}, '' ]);
+		}
+	if (&can_create_sub_servers() && $gparent) {
+		# Sub-server under parent's user
+		push(@generics, [ $text{'form_generic_subserver'},
+				  'add1=1&parentuser1='.$gparent->{'user'} ]);
+		if (!$gparent->{'alias'}) {
+			# Alias domain
+			push(@generics, [ &text('form_generic_alias',
+						$gparent->{'dom'}),
+					  'to='.$gparent->{'id'} ]);
+			}
+		if (!$gparent->{'alias'} && !$gparent->{'subdom'}) {
+			# Sub-domain
+			push(@generics, [ &text('form_generic_subdom',
+						$gparent->{'dom'}),
+					  'add1=1&parentuser1='.
+					  $gparent->{'user'}.'&subdom='.
+					  $gparent->{'id'} ]);
+			}
+		}
+	if (!defined($in{'genericmode'})) {
+		$in{'genericmode'} = 0;
+		}
+
+	# Force inputs to match selected generic type 
+	$generic = $generics[$in{'genericmode'}];
+	%in = ( %in, map { split(/=/, $_, 2) } split(/\&/, $generic->[1]) );
+	}
+
+# Get parent settings
 if ($in{'to'}) {
 	# Creating an alias domain
 	$aliasdom = &get_domain($in{'to'});
@@ -75,6 +112,24 @@ if ($in{'subdom'}) {
 			$parentdom ? "create_subserver" :
 			$subdom ? "create_subdom" :
 				  "create_form");
+
+# Show generic mode selector
+if ($in{'generic'} && @generics > 1) {
+	print "<b>$text{'form_genericmode'}</b>\n";
+	@links = ( );
+	for($i=0; $i<@generics; $i++) {
+		$g = $generics[$i];
+		if ($i == $in{'genericmode'}) {
+			push(@links, $g->[0]);
+			}
+		else {
+			push(@links, "<a href='domain_form.cgi?generic=1&".
+				     "genericmode=$i&gparent=$in{'gparent'}&".
+				     "$g->[1]'>$g->[0]</a>");
+			}
+		}
+	print &ui_links_row(\@links),"<p>\n";
+	}
 
 # Form header
 @tds = ( "width=30%" );
