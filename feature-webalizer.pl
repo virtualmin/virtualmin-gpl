@@ -462,7 +462,7 @@ if ($config{'avail_webalizer'}) {
 			   'desc' => $text{'links_webalizer2'},
 			   'page' => 'view_log.cgi/'.&urlize(&urlize($log)).
 						     '/index.html',
-			   'cat' => 'services',
+			   'cat' => 'logs',
 			  });
 		}
 	else {
@@ -471,7 +471,7 @@ if ($config{'avail_webalizer'}) {
 			   'desc' => $text{'links_webalizer'},
 			   'page' => 'edit_log.cgi?file='.
 				&urlize($log).'&type=1',
-			   'cat' => 'services',
+			   'cat' => 'logs',
 			 });
 		}
 	}
