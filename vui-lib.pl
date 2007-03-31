@@ -3,28 +3,64 @@
 # virtualmin_ui_rating_selector(name, value, max, cgi)
 # Returns HTML for a field for selecting a rating for something. When chosen,
 # submits to the given CGI.
-# XXX AJAX theme can override
-# XXX just * links
 sub virtualmin_ui_rating_selector
 {
 return &theme_virtualmin_ui_rating_selector(@_)
 	if (defined(&theme_virtualmin_ui_rating_selector));
 local ($name, $value, $max, $cgi) = @_;
+$value ||= 0;
 local $rv;
+if (!$main::done_virtualmin_ui_rating_selector++) {
+	# Generate highlighting Javascript code
+	$rv .= &virtualmin_ui_rating_selector_javascript();
+	}
 for($i=1; $i<=$max; $i++) {
-	local $img = $i <= $value ? "starover.gif" : "staroff.gif";
+	local $img = $i <= $value ? "staron.gif" : "staroff.gif";
 	if ($cgi) {
 		local $cgiv = $cgi;
 		$cgiv .= ($cgi =~ /\?/ ? "&" : "?");
 		$cgiv .= $name."=".$i;
-		$rv .= "<a href='$cgiv' id=$name$i>".
-		       "<img src=images/$img border=0></a>";
+		$rv .= "<a href='$cgiv' id=$name$i ".
+		  "onMouseOver='rating_selector_entry(\"$name\", $i, $max)' ".
+		  "onMouseOut='rating_selector_exit(\"$name\", $value, $max)'>".
+		  "<img src=images/$img border=0></a>";
 		}
 	else {
 		$rv .= "<img src=images/$img>";
 		}
 	}
 return $rv;
+}
+
+sub virtualmin_ui_rating_selector_javascript
+{
+return <<EOF;
+<script>
+// Highlight this star and others before it
+function rating_selector_entry(name, idx, max)
+{
+for(i=1; i<=max; i++) {
+   obj = document.getElementById(name+i);
+   if (obj) {
+     img = i <= idx ? 'starover.gif' : 'staroff.gif';
+     obj.innerHTML = '<img src=images/'+img+' border=0>';
+     }
+   }
+}
+
+// Returns all stars to default
+function rating_selector_exit(name, value, max)
+{
+for(i=1; i<=max; i++) {
+   obj = document.getElementById(name+i);
+   if (obj) {
+     img = i <= value ? 'staron.gif' : 'staroff.gif';
+     obj.innerHTML = '<img src=images/'+img+' border=0>';
+     }
+   }
+}
+</script>
+EOF
 }
 
 1;

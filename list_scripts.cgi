@@ -26,7 +26,7 @@ print &ui_tabs_start_tab("scriptsmode", "existing");
 if (@got) {
 	$ratings = &get_script_ratings();
 	print $text{'scripts_desc3'},"<p>\n";
-	@tds = ( "width=5" );
+	@tds = ( "width=5", undef, undef, undef, undef, "nowrap" );
 	print &ui_form_start("mass_uninstall.cgi", "post");
 	print &ui_hidden("dom", $in{'dom'});
 	@links = ( &select_all_link("d"), &select_invert_link("d") );
@@ -82,7 +82,7 @@ print &ui_tabs_start_tab("scriptsmode", "new");
 if (@scripts) {
 	print &ui_form_start("script_form.cgi");
 	print &ui_hidden("dom", $in{'dom'}),"\n";
-	@tds = ( "width=5", "nowrap" );
+	@tds = ( "width=5", "nowrap", undef, undef, "nowrap" );
 	print &ui_columns_start([ "",
 				  $text{'scripts_name'},
 				  $text{'scripts_ver'},
