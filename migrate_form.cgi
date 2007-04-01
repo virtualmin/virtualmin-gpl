@@ -15,7 +15,7 @@ print &ui_table_start($text{'migrate_header'}, "width=100%", 4);
 print &ui_table_row($text{'migrate_file'},
 	&ui_radio("mode", 0,
 		[ [ 0, &text('migrate_file0', &ui_upload("upload"))."<br>" ],
-		  [ 1, &text('migrate_file1', &ui_textbox("file", undef, 30)).
+		  [ 1, &text('migrate_file1', &ui_textbox("file", undef, 50)).
 		         &file_chooser_button("file") ] ]), 3);
 
 print &ui_table_row($text{'migrate_type'},

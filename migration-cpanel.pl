@@ -485,8 +485,17 @@ local $owner = &get_domain_owner(\%dom);
 if ($owner) {
 	&$first_print("Moving server owner's mailbox ..");
 	local ($mfile, $mtype) = &user_mail_file($owner);
-	local $srcfolder = { 'type' => 0, 'file' => "$dom{'home'}/mail/inbox" };
-	if (-r $srcfolder->{'file'}) {
+	local $srcfolder;
+	if (-d "$dom{'home'}/mail/cur") {
+		# Maildir format
+		$srcfolder = { 'type' => 1, 'file' => "$dom{'home'}/mail" };
+		}
+	elsif (-r "$dom{'home'}/mail/inbox") {
+		# mbox format
+		$srcfolder = { 'type' => 0,
+			       'file' => "$dom{'home'}/mail/inbox" };
+		}
+	if ($srcfolder) {
 		local $dstfolder = { 'type' => $mtype, 'file' => $mfile };
 		&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
 		&$second_print(".. done");
