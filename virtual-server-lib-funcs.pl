@@ -13,7 +13,7 @@ if (!$virtual_server_root) {
 	$virtual_server_root = "$1/virtual-server";
 	}
 foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
-		 "php", "ruby", "vui", "dynip") {
+		 "php", "ruby", "vui", "dynip", "collect") {
 	do "$virtual_server_root/$lib-lib.pl";
 	if ($@ && -r "$virtual_server_root/$lib-lib.pl") {
 		print STDERR "failed to load $lib-lib.pl : $@\n";
@@ -8609,26 +8609,27 @@ local @ticons = map { "images/new${_}.gif" } @tmpls;
 return (\@tlinks, \@ttitles, \@ticons);
 }
 
-# get_startstop_links()
+# get_startstop_links([live])
 # Returns a list of status objects for relevant features and plugins
 sub get_startstop_links
 {
+local ($live) = @_;
 local @rv;
 local %typestatus;
-if (&foreign_check("status")) {
-	# Get scheduled monitoring status
-	&foreign_require("status", "status-lib.pl");
-	local %oldstatus;
-	if ($status::config{'sched_mode'} &&
-	    &read_file($status::oldstatus_file, \%oldstatus)) {
-		# Can use scheduled status
-		foreach my $s (&status::list_services()) {
-			local $stat = &status::expand_oldstatus(
-					$oldstatus{$s->{'id'}});
-			$typestatus{$s->{'type'}} = $stat->{'*'};
-			}
-		}
-	}
+#if (&foreign_check("status")) {
+#	# Get scheduled monitoring status (Disabled due to inaccuracy)
+#	&foreign_require("status", "status-lib.pl");
+#	local %oldstatus;
+#	if ($status::config{'sched_mode'} &&
+#	    &read_file($status::oldstatus_file, \%oldstatus)) {
+#		# Can use scheduled status
+#		foreach my $s (&status::list_services()) {
+#			local $stat = &status::expand_oldstatus(
+#					$oldstatus{$s->{'id'}});
+#			$typestatus{$s->{'type'}} = $stat->{'*'};
+#			}
+#		}
+#	}
 foreach my $f (@startstop_features) {
 	if ($config{$f}) {
 		local $sfunc = "startstop_".$f;
@@ -8649,15 +8650,10 @@ return @rv;
 }
 
 # refresh_startstop_status()
-# Tell the status module to perform an un-scheduled status refresh
+# Refresh regularly collected info on status of services
 sub refresh_startstop_status
 {
-if (&foreign_check("status")) {
-	&foreign_require("status", "status-lib.pl");
-	if ($status::config{'sched_mode'} && -r $status::cron_cmd) {
-		&system_logged("$status::cron_cmd >/dev/null 2>&1 </dev/null");
-		}
-	}
+unlink($collected_info_file);
 }
 
 # can_domain_have_users(&domain)

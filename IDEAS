@@ -41,10 +41,9 @@
 
   - mailbox_list_mails should use select function for virtual folders!
 
-  - theme fixes
-	- caching on right frame
-		- 5-minute cron job
-		- can we trust status module?
+  - theme caching
+	- mobile and thejax themes too
+	- need to release new Virtualmin first
 
   - templates for new mailing list configs
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=739
