@@ -187,6 +187,9 @@ local %got = map { $_, 1 } &postgresql::list_databases();
 foreach my $db (&domain_databases($d, [ "postgres" ])) {
 	$got{$db->{'name'}} || return &text('validate_epostgres',$db->{'name'});
 	}
+if (!&postgres_user_exists($d)) {
+	return &text('validate_epostgresuser', &mysql_user($d));
+	}
 return undef;
 }
 

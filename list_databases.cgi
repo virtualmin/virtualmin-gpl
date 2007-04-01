@@ -159,9 +159,9 @@ if (&can_import_servers()) {
 	@avail = grep { !$inuse{$_->{'type'},$_->{'name'}} &&
 		        !$_->{'special'} } @all;
 	@avail = sort { $a->{'name'} cmp $b->{'name'} } @avail;
+	print &ui_tabs_start_tab("databasemode", "import") if (@tabs > 1);
+	print "$text{'databases_desc4'}<p>\n";
 	if (@avail) {
-		print &ui_tabs_start_tab("databasemode", "import") if (@tabs > 1);
-		print "$text{'databases_desc4'}<p>\n";
 		print &ui_form_start("import_database.cgi", "post");
 		print &ui_hidden("dom", $in{'dom'}),"\n";
 		print &ui_table_start($text{'databases_iheader'}, undef, 2);
@@ -174,8 +174,11 @@ if (&can_import_servers()) {
 
 		print &ui_table_end();
 		print &ui_form_end([ [ "ok", $text{'databases_import'} ] ]);
-		print &ui_tabs_end_tab() if (@tabs > 1);
 		}
+	else {
+		print "$text{'databases_noimport'}<p>\n";
+		}
+	print &ui_tabs_end_tab() if (@tabs > 1);
 	}
 
 print &ui_tabs_end(1) if (@tabs > 1);

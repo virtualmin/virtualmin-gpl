@@ -486,9 +486,14 @@ if ($owner) {
 	&$first_print("Moving server owner's mailbox ..");
 	local ($mfile, $mtype) = &user_mail_file($owner);
 	local $srcfolder = { 'type' => 0, 'file' => "$dom{'home'}/mail/inbox" };
-	local $dstfolder = { 'type' => $mtype, 'file' => $mfile };
-	&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
-	&$second_print(".. done");
+	if (-r $srcfolder->{'file'}) {
+		local $dstfolder = { 'type' => $mtype, 'file' => $mfile };
+		&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
+		&$second_print(".. done");
+		}
+	else {
+		&$second_print(".. none exists");
+		}
 	}
 
 if ($got{'mail'}) {

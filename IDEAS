@@ -53,7 +53,6 @@
     returning to domain list (and refresh left frame if needed)
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=747
 
-  - upgrade button in GPL version
-	- shows page that prompts to buy licence, enter serial and key,
-	  then downloads new .wbm and sets up update.txt
-
+  - option to make php.ini non-editable
+	- allow ${DOM} substitions when copying from global
+	- https://www.virtualmin.com/ticket-tracker/bug?bug%5fnumber=399

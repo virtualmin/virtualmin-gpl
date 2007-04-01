@@ -199,3 +199,9 @@ $script_ratings_port = 80;
 $script_ratings_page = "/cgi-bin/sendratings.cgi";
 $script_fetch_ratings_page = "/cgi-bin/getratings.cgi";
 
+$upgrade_virtualmin_host = "software.virtualmin.com";
+$upgrade_virtualmin_port = 80;
+$upgrade_virtualmin_testpage = "/licence-test.txt";
+$upgrade_virtualmin_updates = "/wbm/updates.txt";
+
+$virtualmin_license_file = "/etc/virtualmin-license";

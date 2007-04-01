@@ -5,13 +5,12 @@ $virtualmin_licence_host = "software.virtualmin.com";
 $virtualmin_licence_port = 80;
 $virtualmin_licence_prog = "/cgi-bin/vlicence.cgi";
 $virtualmin_licence_ssl = 0;
-$virtualmin_serial_file = "/etc/virtualmin-license";
 
 # licence_scheduled(hostid)
 sub licence_scheduled
 {
 local ($out, $error);
-&read_env_file($virtualmin_serial_file, \%serial);
+&read_env_file($virtualmin_license_file, \%serial);
 &http_download($virtualmin_licence_host,
 	       $virtualmin_licence_port,
 	       "$virtualmin_licence_prog?id=$_[0]&serial=$serial{'LicenseKey'}",

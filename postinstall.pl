@@ -49,7 +49,7 @@ if ($config{'virus'} && $virtualmin_pro) {
 	&fix_clam_wrapper();
 	}
 
-if ($virtualmin_pro) {
+if ($virtualmin_pro && !$gconfig{'no_virtualmin_preload'}) {
 	# Configure miniserv to pre-load virtual-server-lib-funcs.pl and
 	# all of the feature files
 	local @preload = split(/\s+/, $miniserv{'preload'});

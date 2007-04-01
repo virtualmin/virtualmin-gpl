@@ -2363,6 +2363,13 @@ $second_print = \&second_text_print;
 $indent_print = \&indent_text_print;
 $outdent_print = \&outdent_text_print;
 }
+sub set_all_html_print
+{
+$first_print = \&first_html_print;
+$second_print = \&second_html_print;
+$indent_print = \&indent_html_print;
+$outdent_print = \&outdent_html_print;
+}
 
 # These functions store and retrieve the current print commands
 sub push_all_print
@@ -8594,6 +8601,7 @@ local @tmpls = ( 'tmpl', 'user', 'update',
    &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
    $virtualmin_pro ? ( 'mxs', 'validate' ) : ( ),
    &has_home_quotas() ? ( 'quotacheck' ) : ( ),
+   $virtualmin_pro ? ( ) : ( 'upgrade' ),
    );
 local @tlinks = map { "edit_new${_}.cgi" } @tmpls;
 local @ttitles = map { $text{"new${_}_title"} } @tmpls;

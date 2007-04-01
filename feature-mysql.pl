@@ -189,7 +189,7 @@ return $rv;
 }
 
 # validate_mysql(&domain)
-# Make sure all MySQL databases exist
+# Make sure all MySQL databases exist, and that the admin user exists
 sub validate_mysql
 {
 local ($d) = @_;
@@ -197,6 +197,9 @@ local ($d) = @_;
 local %got = map { $_, 1 } &mysql::list_databases();
 foreach my $db (&domain_databases($d, [ "mysql" ])) {
 	$got{$db->{'name'}} || return &text('validate_emysql', $db->{'name'});
+	}
+if (!&mysql_user_exists($d)) {
+	return &text('validate_emysqluser', &mysql_user($d));
 	}
 return undef;
 }

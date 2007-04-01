@@ -16,7 +16,7 @@ foreach $user (keys %$ratings) {
 
 if (%count) {
 	# We have some scores .. send them in
-	&read_env_file("/etc/virtualmin-license", \%serial);
+	&read_env_file($virtualmin_license_file, \%serial);
 	@params = ( "serial=".
 		    ($serial{'SerialNumber'} || &get_system_hostname()) );
 	foreach $type (keys %count) {
