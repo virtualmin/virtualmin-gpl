@@ -7,7 +7,7 @@ $d = &get_domain($in{'dom'});
 &can_config_domain($d) || &error($text{'edit_ecannot'});
 
 &ui_print_header(&domain_in($d), $text{'reemail_title'}, "");
-if (&will_send_domain_email()) {
+if (&will_send_domain_email($d)) {
 	&send_domain_email($d);
 	}
 else {

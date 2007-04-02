@@ -50,6 +50,9 @@ if ($multi) {
 		print &remove_userdom($u->{'user'}, $d),"\n";
 		print "    Unix username: ",$u->{'user'},"\n";
 		print "    Real name: ",$u->{'real'},"\n";
+		if (defined($u->{'plainpass'})) {
+			print "    Password: ",$u->{'plainpass'},"\n";
+			}
 		$pass = $u->{'pass'};
 		$disable = $pass =~ s/^\!//;
 		print "    Encrypted password: ",$pass,"\n";
