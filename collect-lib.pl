@@ -42,7 +42,7 @@ if (&foreign_check("proc")) {
 # Available package updates
 if (&foreign_check("security-updates")) {
 	&foreign_require("security-updates", "security-updates-lib.pl");
-	local @poss = &security_updates::list_possible_updates(1);
+	local @poss = &security_updates::list_possible_updates(2);
 	$info->{'poss'} = \@poss;
 	}
 
