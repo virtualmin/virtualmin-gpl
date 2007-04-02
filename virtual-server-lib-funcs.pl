@@ -8653,7 +8653,9 @@ return @rv;
 # Refresh regularly collected info on status of services
 sub refresh_startstop_status
 {
-unlink($collected_info_file);
+local $info = &get_collected_info();
+$info->{'startstop'} = [ &get_startstop_links() ];
+&save_collected_info($info);
 }
 
 # can_domain_have_users(&domain)
