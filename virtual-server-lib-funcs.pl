@@ -9099,6 +9099,7 @@ $d->{'ugid'} = $parent->{'ugid'};
 $d->{'pass'} = $parent->{'pass'};
 $d->{'mysql_user'} = $parent->{'mysql_user'};
 $d->{'postgres_user'} = $parent->{'postgres_user'};
+$d->{'email'} = $parent->{'email'};
 }
 
 # check_virtual_server_config()
