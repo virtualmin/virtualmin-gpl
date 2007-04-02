@@ -181,5 +181,27 @@ local ($info) = @_;
 &close_tempfile(INFO);
 }
 
+# refresh_startstop_status()
+# Refresh regularly collected info on status of services
+sub refresh_startstop_status
+{
+local $info = &get_collected_info();
+$info->{'startstop'} = [ &get_startstop_links() ];
+&save_collected_info($info);
+}
+
+# refresh_possible_packages(&newpackages)
+# Refresh regularly collected info on available packages
+sub refresh_possible_packages
+{
+local ($pkgs) = @_;
+local %pkgs = map { $_, 1 } @$pkgs;
+local $info = &get_collected_info();
+if ($info->{'poss'}) {
+	$info->{'poss'} = [ grep { !$pkgs{$_->{'name'}} } @{$info->{'poss'}} ];
+	}
+&save_collected_info($info);
+}
+
 1;
 

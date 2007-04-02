@@ -8649,15 +8649,6 @@ foreach my $f (@startstop_plugins) {
 return @rv;
 }
 
-# refresh_startstop_status()
-# Refresh regularly collected info on status of services
-sub refresh_startstop_status
-{
-local $info = &get_collected_info();
-$info->{'startstop'} = [ &get_startstop_links() ];
-&save_collected_info($info);
-}
-
 # can_domain_have_users(&domain)
 # Returns 1 if the given domain can have mail/FTP/DB users
 sub can_domain_have_users
