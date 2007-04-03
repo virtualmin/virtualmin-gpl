@@ -456,22 +456,59 @@ if ($got{'mail'}) {
 
 		# Move his mail files
 		local $mailsrc = "$dom{'home'}/mail/$dom/$muser";
-		opendir(DIR, $mailsrc);
-		local $mf;
-		while($mf = readdir(DIR)) {
-			next if ($mf =~ /^\./);
-			local $srcfolder = { 'type' => 0, 'file' => "$mailsrc/$mf" };
-			local $dstfolder;
-			if ($mf eq "inbox") {
-				$dstfolder = { 'file' => $crfile, 'type' => $crtype };
-				}
-			else {
-				$dstfolder = { 'type' => 0,
-					       'file' => "$uinfo->{'home'}/mail/$mf" };
-				}
+		local $sfdir = $mailboxes::config{'mail_usermin'};
+		local $sftype = $sfdir eq 'Maildir' ? 1 : 0;
+		if (-d "$mailsrc/cur") {
+			# Mail directory is in Maildir format, and sub-folders
+			# are in Maildir++
+			local $srcfolder = { 'type' => 1,
+					     'file' => $mailsrc };
+			local $dstfolder = { 'file' => $crfile,
+					     'type' => $crtype };
 			&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
+			opendir(DIR, $mailsrc);
+			local $mf;
+			while($mf = readdir(DIR)) {
+				next if ($mf eq "." || $mf eq ".." ||
+					 $mf !~ /^\./);
+				local $srcfolder = { 'type' => 1,
+					'file' => "$mailsrc/$mf" };
+				# Remove . if destination is not Maildir++
+				$mf =~ s/^\.// if (!$sftype);
+				local $dstfolder = { 'type' => $sftype,
+				    'file' => "$uinfo->{'home'}/$sfdir/$mf" };
+				&mailboxes::mailbox_move_folder($srcfolder,
+								$dstfolder);
+				}
+			closedir(DIR);
 			}
-		closedir(DIR);
+		else {
+			# Assume that mail files are mbox formatted
+			opendir(DIR, $mailsrc);
+			local $mf;
+			while($mf = readdir(DIR)) {
+				next if ($mf =~ /^\./);
+				local $srcfolder = { 'type' => 0,
+						     'file' => "$mailsrc/$mf" };
+				local $dstfolder;
+				if ($mf eq "inbox") {
+					$dstfolder = { 'file' => $crfile,
+						       'type' => $crtype };
+					}
+				else {
+					# Copying an extra folder - use
+					# Maildir++ name if dest folders are
+					# under ~/Maildir
+					$mf = ".$mf" if ($sftype);
+					$dstfolder = { 'type' => $sftype,
+						'file' =>
+						"$uinfo->{'home'}/$sfdir/$mf" };
+					}
+				&mailboxes::mailbox_move_folder($srcfolder,
+								$dstfolder);
+				}
+			closedir(DIR);
+			}
 		$mcount++;
 		$useremail{$uinfo->{'email'}} = $uinfo;
 		$usermap{$uinfo->{'user'}} = $uinfo;
