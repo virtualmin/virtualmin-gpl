@@ -34,12 +34,26 @@ if (!$in{'new'}) {
 	print &ui_hidden("new", $in{'new'}),"\n";
 	print $text{'tmpl_editmode'},"\n";
 	%isfeature = map { $_, 1 } @features;
+	@editmodes = &list_template_editmodes();
+	$idx = &indexof($in{'editmode'}, @editmodes);
+	if ($in{'nprev'}) {
+		$idx--;
+		$idx = @editmodes-1 if ($idx < 0);
+		}
+	elsif ($in{'nnext'}) {
+		$idx++;
+		$idx = 0 if ($idx >= @editmodes);
+		}
+	$in{'editmode'} = $editmodes[$idx];
 	print &ui_select("editmode", $in{'editmode'},
 		 [ map { [ $_, $text{'feature_'.$_} ||
 			       $text{'tmpl_editmode_'.$_} ] }
-		       &list_template_editmodes() ],
+		       @editmodes ],
 		 1, 0, 0, 0, "onChange='form.submit()'" );
 	print &ui_submit($text{'tmpl_switch'});
+	print "&nbsp;&nbsp;\n";
+	print &ui_submit($text{'tmpl_nprev'}, "nprev");
+	print &ui_submit($text{'tmpl_nnext'}, "nnext");
 	print &ui_form_end();
 	}
 
