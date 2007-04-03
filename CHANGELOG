@@ -571,3 +571,4 @@ Added a star rating system (out of 5) for script installers. Users can rate inst
 Validation of MySQL and PostgreSQL features now check that the database user exists too.
 Added plaintext password to list-users.pl output.
 Added the resend-email.pl command-line script for re-sending a domain's signup email.
+Added Module Config options for a hosting provider logo.
