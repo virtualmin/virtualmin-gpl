@@ -572,3 +572,4 @@ Validation of MySQL and PostgreSQL features now check that the database user exi
 Added plaintext password to list-users.pl output.
 Added the resend-email.pl command-line script for re-sending a domain's signup email.
 Added Module Config options for a hosting provider logo.
+Updated the Wordpress script installer to version 2.1.3, and Gallery to 2.2.1.
