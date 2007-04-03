@@ -416,9 +416,7 @@ if (&can_mailbox_quota()) {
 	# Show inputs for editing quotas
 	local $quota = $_[1];
 	$quota = undef if ($quota eq "none");
-	$rv .= &ui_radio($_[0]."_def", $quota ? 0 : 1,
-			 [ [ 1, $text{'form_unlimit'} ],
-			   [ 0, &quota_input($_[0], $quota || "", $_[3]) ] ]);
+	$rv .= &opt_quota_input($_[0], $quota, $_[3]);
 	$rv .= "\n";
 	if (!$in{'new'}) {
 		$rv .= &text('user_used', &quota_show($_[2], $_[3])),"\n";

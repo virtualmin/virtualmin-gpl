@@ -573,3 +573,5 @@ Added plaintext password to list-users.pl output.
 Added the resend-email.pl command-line script for re-sending a domain's signup email.
 Added Module Config options for a hosting provider logo.
 Updated the Wordpress script installer to version 2.1.3, and Gallery to 2.2.1.
+Fixed bugs that prevent owner limits from being mass-updated, and caused bandwidth limits to be un-necessarily changed.
+Re-factored all code for displaying quota fields, so that the text box is greyed out when 'Unlimited' is selected.

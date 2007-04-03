@@ -852,9 +852,13 @@ foreach my $admin (@admins) {
 	local $pass = &indexof("webmin", @dis) >= 0 ? "*LK*" :
 			&acl::encrypt_password($admin->{'pass'});
 	if ($wuser) {
-		# Update password
-		$wuser->{'pass'} = $pass;
-		&acl::modify_user($wuser->{'name'}, $wuser);
+		# Update password (if changed)
+		if ($pass eq "*LK*" ||
+		    &acl::encrypt_password($admin->{'pass'}, $wuser->{'pass'})
+		     ne $wuser->{'pass'}) {
+			$wuser->{'pass'} = $pass;
+			&acl::modify_user($wuser->{'name'}, $wuser);
+			}
 		}
 	else {
 		# Need to create user

@@ -16,35 +16,28 @@ print &ui_table_start($text{'defaults_header'}, "width=100%", 2);
 
 # Disk quotas
 if (&has_home_quotas()) {
-	$quota = $user->{'quota'};
 	print &ui_table_row($text{'defaults_quota'},
-		&ui_radio("quota_def", 
-			$quota eq "" ? 0 : $quota eq "none" ? 1 : 2,
-			[ [ 0, $text{'defaults_tmpl'} ],
-			  [ 1, $text{'form_unlimit'} ],
-			  [ 2, " " ] ])."\n".
-		&quota_input("quota", $quota, "home"), 1);
+		&opt_quota_input("quota", $user->{'quota'}, "home",
+				 $text{'defaults_tmpl'}));
 	}
 if (&has_mail_quotas()) {
-	$mquota = $user->{'mquota'};
 	print &ui_table_row($text{'defaults_mquota'},
-		&ui_radio("mquota_def", 
-			$mquota eq "" ? 0 : $mquota eq "none" ? 1 : 2,
-			[ [ 0, $text{'defaults_tmpl'} ],
-			  [ 1, $text{'form_unlimit'} ],
-			  [ 2, " " ] ])."\n".
-		&quota_input("mquota", $mquota, "home"), 1);
+		&opt_quota_input("mquota", $user->{'mquota'}, "mail",
+				 $text{'defaults_tmpl'}));
 	}
 
 # Mail server quota
 if (&has_server_quotas()) {
 	$qquota = $user->{'qquota'};
+	local $dis1 = &js_disable_inputs([ "qquota" ], [ ]);
+	local $dis2 = &js_disable_inputs([ ], [ "qquota" ]);
 	print &ui_table_row($text{'defaults_qquota'},
 		&ui_radio("qquota_def", 
-			$qquota eq "" || $qquota eq "none" ? 1 : 2,
-			[ [ 1, $text{'form_unlimit'} ],
-			  [ 2, " " ] ])."\n".
-		&ui_textbox("qquota", $qquota eq "none" ? "" : $qquota, 10), 1);
+			$qquota eq "" || $qquota eq "none" ? 1 : 0,
+			[ [ 1, $text{'form_unlimit'}, "onClick='$dis1'" ],
+			  [ 0, " ", "onClick='$dis2'" ] ])."\n".
+		&ui_textbox("qquota", $qquota eq "none" ? "" : $qquota, 10,
+			    $qquota eq "" || $qquota eq "none"), 1);
 	}
 
 # FTP login

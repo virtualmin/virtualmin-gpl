@@ -3345,18 +3345,19 @@ else {
 	}
 }
 
-# quota_input(name, number, filesystem|"home"|"mail")
+# quota_input(name, number, filesystem|"home"|"mail", [disabled])
 # Returns HTML for an input for entering a quota, doing block->kb conversion
 sub quota_input
 {
-local $bsize = &quota_bsize($_[2]);
+local ($name, $value, $fs, $dis) = @_;
+local $bsize = &quota_bsize($fs);
 if ($bsize) {
 	# Allow units selection
-	local $sz = $_[1]*$bsize;
+	local $sz = $value*$bsize;
 	local $units = 1;
-	if ($_[1] eq "") {
-		# Default to kB, since bytes are rarely useful
-		$units = 1024;
+	if ($value eq "") {
+		# Default to MB, since bytes are rarely useful
+		$units = 1024*1024;
 		}
 	elsif ($sz >= 1024*1024*1024) {
 		$units = 1024*1024*1024;
@@ -3372,15 +3373,32 @@ if ($bsize) {
 		}
 	$sz = $sz == 0 ? "" : sprintf("%.2f", ($sz*1.0)/$units);
 	$sz =~ s/\.00$//;
-	return &ui_textbox($_[0], $sz, 8)." ".
-	       &ui_select($_[0]."_units", $units,
+	return &ui_textbox($name, $sz, 8, $dis)." ".
+	       &ui_select($name."_units", $units,
 			 [ [ 1, "bytes" ], [ 1024, "kB" ], [ 1024*1024, "MB" ],
-			   [ 1024*1024*1024, "GB" ] ]);
+			   [ 1024*1024*1024, "GB" ] ], 1, 0, 0, $_[3]);
 	}
 else {
 	# Just show blocks input
-	return &ui_textbox($_[0], $_[1], 10)." ".$text{'form_b'};
+	return &ui_textbox($name, $value, 10, $dis)." ".$text{'form_b'};
 	}
+}
+
+# opt_quota_input(name, value, filesystem|"home"|"mail"|"none",
+#                 [third-option], [set-label])
+# Returns HTML for a field for selecting a quota or unlimited
+sub opt_quota_input
+{
+local ($name, $value, $fs, $third, $label) = @_;
+local $dis1 = &js_disable_inputs([ $name, $name."_units" ], [ ]);
+local $dis2 = &js_disable_inputs([ ], [ $name, $name."_units" ]);
+local $mode = $value eq "" ? 1 : $value eq "none" ? 2 : 0;
+local $qi = $fs eq "none" ? &ui_textbox($name, $mode ? "" : $value, 10)
+			  : &quota_input($name, $mode ? "" : $value, $fs,$mode);
+return &ui_radio($name."_def", $mode,
+	  [ $third ? ([ 2, $third, "onClick='$dis1'" ]) : ( ),
+	    [ 1, $text{'form_unlimit'}, "onClick='$dis1'" ],
+	    [ 0, $label." ".$qi, "onClick='$dis2'" ] ]);
 }
 
 # quota_parse(name, filesystem|"home"|"mail")
@@ -6020,48 +6038,53 @@ $get_bandwidth_cache{$_[0]->{'id'}} ||= $_[1];
 # Returns HTML for a bandwidth input field, with an 'unlimited' option
 sub bandwidth_input
 {
+local ($name, $value, $nounlimited, $dontchange) = @_;
 local $rv;
-if (!$_[2]) {
-	if ($_[3]) {
+local $dis1 = &js_disable_inputs([ $name, $name."_units" ], [ ]);
+local $dis2 = &js_disable_inputs([ ], [ $name, $name."_units" ]);
+local $dis;
+if (!$nounlimited) {
+	if ($dontchange) {
 		# Show don't change option
-		$rv .= &ui_radio("$_[0]_def", 2,
-				 [ [ 2, $text{'massdomains_leave'} ],
-				   [ 1, $text{'edit_bwnone'} ],
-				   [ 0, " " ] ]);
+		$rv .= &ui_radio($name."_def", 2,
+			 [ [ 2, $text{'massdomains_leave'}, "onClick='$dis1'" ],
+			   [ 1, $text{'edit_bwnone'}, "onClick='$dis1'" ],
+			   [ 0, " ", "onClick='$dis2'" ] ]);
+		$dis = 1;
 		}
 	else {
 		# Show unlimited option
-		$rv .= &ui_radio("$_[0]_def", $_[1] ? 0 : 1,
-				 [ [ 1, $text{'edit_bwnone'} ],
-				   [ 0, " " ] ]);
+		$rv .= &ui_radio($name."_def", $value ? 0 : 1,
+			 [ [ 1, $text{'edit_bwnone'}, "onClick='$dis1'" ],
+			   [ 0, " ", "onClick='$dis2'" ] ]);
+		$dis = 1 if (!$value);
 		}
 	}
 local ($val, $u);
-if ($_[1] && $_[1]%(1024*1024*1024) == 0) {
-	$val = $_[1]/(1024*1024*1024);
+if ($value eq "") {
+	# Default to GB, since bytes are rarely useful
 	$u = "GB";
 	}
-elsif ($_[1] && $_[1]%(1024*1024) == 0) {
-	$val = $_[1]/(1024*1024);
+elsif ($value && $value%(1024*1024*1024) == 0) {
+	$val = $value/(1024*1024*1024);
+	$u = "GB";
+	}
+elsif ($value && $value%(1024*1024) == 0) {
+	$val = $value/(1024*1024);
 	$u = "MB";
 	}
-elsif ($_[1] && $_[1]%(1024) == 0) {
-	$val = $_[1]/(1024);
+elsif ($value && $value%(1024) == 0) {
+	$val = $value/(1024);
 	$u = "kB";
 	}
 else {
-	$val = $_[1];
+	$val = $value;
 	$u = "bytes";
 	}
-local $sel = "<select name=$_[0]_units>";
-local $t;
-foreach $t ("bytes", "kB", "MB", "GB") {
-	$sel .= sprintf "<option %s>%s\n",
-		$t eq $u ? "selected" : "", $t;
-	}
-$sel .= "</select>\n";
+local $sel = &ui_select($name."_units", $u,
+		[ ["bytes"], ["kB"], ["MB"], ["GB"] ], 1, 0, 0, $dis);
 $rv .= &text('edit_bwpast_'.$config{'bw_past'},
-	     "<input name=$_[0] size=10 value='$val'> $sel",
+	     &ui_textbox($name, $val, 10, $dis)." ".$sel,
 	     $config{'bw_period'});
 return $rv;
 }

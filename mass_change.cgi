@@ -25,11 +25,11 @@ foreach $mu (@mass) {
 @musers || &error($text{'mass_enone'});
 
 # Validate inputs
-$in{'quota_def'} < 2 || $in{'quota'} =~ /^[0-9\.]+$/ ||
+$in{'quota_def'} != 1 || $in{'quota'} =~ /^[0-9\.]+$/ ||
 	&error($text{'user_equota'});
-$in{'mquota_def'} < 2 || $in{'mquota'} =~ /^[0-9\.]+$/ ||
+$in{'mquota_def'} != 1 || $in{'mquota'} =~ /^[0-9\.]+$/ ||
 	&error($text{'user_emquota'});
-$in{'qquota_def'} < 2 || $in{'qquota'} =~ /^[0-9]+$/ ||
+$in{'qquota_def'} != 1 || $in{'qquota'} =~ /^[0-9]+$/ ||
 	&error($text{'user_eqquota'});
 
 # Update each one
@@ -43,7 +43,7 @@ foreach $user (@musers) {
 	$pop3 = &remove_userdom($user->{'user'}, $d);
 
 	# Home directory quota
-	if ($in{'quota_def'}) {
+	if ($in{'quota_def'} != 2) {
 		&$first_print($text{'mass_setquota'});
 		if ($user->{'domainowner'}) {
 			&$second_print($text{'mass_edomainowner'});
@@ -62,7 +62,7 @@ foreach $user (@musers) {
 				}
 			&$second_print($text{'mass_setu'});
 			}
-		elsif ($in{'quota_def'} == 2) {
+		elsif ($in{'quota_def'} == 0) {
 			# Quota set to specific value
 			$nq = &quota_parse("quota", "home");
 			if ($nq != $user->{'quota'}) {
@@ -75,7 +75,7 @@ foreach $user (@musers) {
 		}
 
 	# Mail file quota
-	if ($in{'mquota_def'}) {
+	if ($in{'mquota_def'} != 2) {
 		&$first_print($text{'mass_setmquota'});
 		if ($user->{'domainowner'}) {
 			&$second_print($text{'mass_edomainowner'});
@@ -93,7 +93,7 @@ foreach $user (@musers) {
 				}
 			&$second_print($text{'mass_setu'});
 			}
-		elsif ($in{'mquota_def'} == 2) {
+		elsif ($in{'mquota_def'} == 0) {
 			$nq = &quota_parse("mquota", "mail");
 			if ($nq != $user->{'mquota'}) {
 				$user->{'mquota'} = $nq;
@@ -105,7 +105,7 @@ foreach $user (@musers) {
 		}
 
 	# Mail server quota
-	if ($in{'qquota_def'}) {
+	if ($in{'qquota_def'} != 2) {
 		&$first_print($text{'mass_setqquota'});
 		if (!$user->{'mailquota'}) {
 			&$second_print($text{'mass_emailquota'});
@@ -117,7 +117,7 @@ foreach $user (@musers) {
 				}
 			&$second_print($text{'mass_setu'});
 			}
-		elsif ($in{'qquota_def'} == 2) {
+		elsif ($in{'qquota_def'} == 0) {
 			if ($user->{'qquota'} != $in{'qquota'}) {
 				$user->{'qquota'} = $in{'qquota'};
 				$changed++;

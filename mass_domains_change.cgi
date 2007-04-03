@@ -163,7 +163,8 @@ else {
 			}
 		}
 
-	# Apply the changes to the domain objects, where possible
+	# Apply the changes to the new domain objects, where possible
+	local $changed_limits = 0;
 	foreach $d (@doms) {
 		local $oldd = { %$d };
 		local $newdom = { %$d };
@@ -194,7 +195,8 @@ else {
 				}
 			}
 
-		if ($config{'bw_active'} && &can_edit_bandwidth()) {
+		if ($config{'bw_active'} && !$d->{'parent'} &&
+		    &can_edit_bandwidth() && $in{'bw_def'} != 2) {
 			# Update BW limit
 			$newdom->{'bw_limit'} =
 				&parse_bandwidth("bw", $text{'save_ebwlimit'});
@@ -216,7 +218,6 @@ else {
 			}
 
 		# Update owner limits
-		local $changed_limits = 0;
 		if (!$d->{'parent'} && &can_edit_limits($d)) {
 			foreach $l (@limit_types) {
 				if ($in{$l."_def"} == 1) {
@@ -279,17 +280,19 @@ else {
 		&set_domain_envs($d, "MODIFY_DOMAIN");
 		$merr = &making_changes();
 		&reset_domain_envs($d);
-		&error(&text('save_emaking', "<tt>$merr</tt>")) if (defined($merr));
+		&error(&text('save_emaking', "<tt>$merr</tt>"))
+			if (defined($merr));
 
 		# Update quotas and BW limit
-		if (&has_home_quotas() && !$d->{'parent'} && &can_edit_quotas($d)) {
+		if (&has_home_quotas() && !$d->{'parent'} &&
+		    &can_edit_quotas($d)) {
 			$d->{'quota'} = $newdom->{'quota'};
 			$d->{'uquota'} = $newdom->{'uquota'};
 			}
-		if ($config{'bw_active'} && !$d->{'parent'} && &can_edit_bandwidth()) {
+		if ($config{'bw_active'} && !$d->{'parent'} &&
+		    &can_edit_bandwidth()) {
 			$d->{'bw_limit'} = $newdom->{'bw_limit'};
 			}
-
 
 		# Call appropriate save functions
 		if (!$d->{'disabled'}) {

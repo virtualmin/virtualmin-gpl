@@ -27,14 +27,10 @@ push(@qtypes, "mquota") if (&has_mail_quotas());
 push(@qtypes, "qquota") if (&has_server_quotas());
 foreach $quota (@qtypes) {
 	print &ui_table_row($text{'mass_'.$quota},
-	    &ui_radio($quota."_def", 0,
-		      [ [ 0, $text{'mass_leave'} ],
-			[ 1, $text{'mass_unlimited'} ],
-			[ 2, $text{'mass_set'} ] ])."\n".
-		      ($quota eq "qquota" ?
-			&ui_textbox($quota, undef, 10) :
-		        &quota_input($quota, undef,
-				     $quota eq "quota" ? "home" : "mail")));
+	    &opt_quota_input($quota, "none",
+			     $quota eq "quota" ? "home" :
+				$quota eq "mquota" ? "mail" : "none",
+			     $text{'mass_unlimited'}, $text{'mass_set'}));
 	}
 
 # Primary email address

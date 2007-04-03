@@ -254,16 +254,9 @@ if ($limits_section) {
 # Show user and group quota editing inputs
 if (&has_home_quotas() && !$parentdom && &can_edit_quotas()) {
 	print &ui_table_row($text{'edit_quota'},
-		&ui_radio("quota_def", $d->{'quota'} ? 0 : 1,
-		  [ [ 1, $text{'form_unlimit'} ],
-		    [ 0, &quota_input("quota", $d->{'quota'}, "home") ] ]), 3,
-		\@tds);
-
+		&opt_quota_input("quota", $d->{'quota'}, "home"), 3, \@tds);
 	print &ui_table_row($text{'edit_uquota'},
-		&ui_radio("uquota_def", $d->{'uquota'} ? 0 : 1,
-		  [ [ 1, $text{'form_unlimit'} ],
-		    [ 0, &quota_input("uquota", $d->{'uquota'}, "home") ] ]), 3,
-		\@tds);
+		&opt_quota_input("uquota", $d->{'uquota'}, "home"), 3, \@tds);
 	}
 
 if ($config{'bw_active'} && !$parentdom) {

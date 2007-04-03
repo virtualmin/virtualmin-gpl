@@ -39,17 +39,13 @@ if ($anyqb) {
 # Quota change fields
 if (&has_home_quotas() && &can_edit_quotas()) {
 	print &ui_table_row($text{'massdomains_quota'},
-		&ui_radio("quota_def", 2,
-		  [ [ 2, $text{'massdomains_leave'} ],
-		    [ 1, $text{'form_unlimit'} ],
-		    [ 0, &quota_input("quota", undef, "home") ] ]),
+		&opt_quota_input("quota", "none", "home",
+				 $text{'massdomains_leave'}),
 		1, \@tds);
 
 	print &ui_table_row($text{'massdomains_uquota'},
-		&ui_radio("uquota_def", 2,
-		  [ [ 2, $text{'massdomains_leave'} ],
-		    [ 1, $text{'form_unlimit'} ],
-		    [ 0, &quota_input("uquota", undef, "home") ] ]),
+		&opt_quota_input("uquota", "none", "home",
+				 $text{'massdomains_leave'}),
 		1, \@tds);
 	}
 

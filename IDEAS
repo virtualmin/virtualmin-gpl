@@ -55,3 +55,5 @@
   - setup squirrelmail virtualhost plugin by default
 	- conf.pl infinite loop?
 
+  - better mail log viewing / reporting
+	- parse both postfix and procmail logs, integrate to show delivery
