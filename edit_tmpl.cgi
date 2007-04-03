@@ -28,12 +28,7 @@ else {
 # Show section selector form
 $in{'editmode'} ||= 'basic';
 if (!$in{'new'}) {
-	# Can only edit basic settings for new template!
-	print &ui_form_start("edit_tmpl.cgi");
-	print &ui_hidden("id", $in{'id'}),"\n";
-	print &ui_hidden("new", $in{'new'}),"\n";
-	print $text{'tmpl_editmode'},"\n";
-	%isfeature = map { $_, 1 } @features;
+	# Work out template section to edit
 	@editmodes = &list_template_editmodes();
 	$idx = &indexof($in{'editmode'}, @editmodes);
 	if ($in{'nprev'}) {
@@ -45,6 +40,13 @@ if (!$in{'new'}) {
 		$idx = 0 if ($idx >= @editmodes);
 		}
 	$in{'editmode'} = $editmodes[$idx];
+
+	# Can only edit basic settings for new template!
+	print &ui_form_start("edit_tmpl.cgi");
+	print &ui_hidden("id", $in{'id'}),"\n";
+	print &ui_hidden("new", $in{'new'}),"\n";
+	print $text{'tmpl_editmode'},"\n";
+	%isfeature = map { $_, 1 } @features;
 	print &ui_select("editmode", $in{'editmode'},
 		 [ map { [ $_, $text{'feature_'.$_} ||
 			       $text{'tmpl_editmode_'.$_} ] }
