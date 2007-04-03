@@ -41,6 +41,8 @@ show_sysinfo=Show system information on main page?,1,1-Yes,0-No,2-Only for maste
 template_auto=Allow editing of options from template when creating server?,1,0-Yes,1-No
 domains_sort=Sort virtual servers by,1,user-Owner,dom-Domain name,owner-Description
 show_ugroup=Allow selection of different group for server admins?,1,1-Yes,0-No
+theme_image=URL for company logo image,3,None or default,50
+theme_link=Link destination for company logo,3,None,50
 
 line1.5=Server administrator permissions,11
 edit_afiles=Can edit alias include and reply files?,1,1-Yes,0-No
