@@ -21,9 +21,9 @@ for($i=1; $i<=$max; $i++) {
 		$cgiv .= ($cgi =~ /\?/ ? "&" : "?");
 		$cgiv .= $name."=".$i;
 		$rv .= "<a href='$cgiv' id=$name$i ".
-		  "onMouseOver='rating_selector_entry(\"$name\", $i, $max)' ".
-		  "onMouseOut='rating_selector_exit(\"$name\", $value, $max)'>".
-		  "<img src=images/$img border=0></a>";
+#		  "onMouseOver='rating_selector_entry(\"$name\", $i, $max)' ".
+#		  "onMouseOut='rating_selector_exit(\"$name\", $value, $max)' ".
+		  "><img src=images/$img border=0></a>";
 		}
 	else {
 		$rv .= "<img src=images/$img>";
