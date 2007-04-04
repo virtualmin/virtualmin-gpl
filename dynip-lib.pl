@@ -20,14 +20,16 @@ return ( { 'name' => 'dyndns',
 }
 
 # get_last_dynip_update(service)
-# Returns the IP last sent to this dynamic DNS service
+# Returns the IP last sent to this dynamic DNS service, and when it was
+# sent (if called in an array context)
 sub get_last_dynip_update
 {
 local ($service) = @_;
 local $file = "$module_config_directory/dynip.$service";
 local $ip = &read_file_contents($file);
 $ip =~ s/\r|\n//g;
-return $ip;
+local @st = stat($file);
+return wantarrau ? ( $ip, $st[9] ) : $ip;
 }
 
 # set_last_dynip_update(service, ip)

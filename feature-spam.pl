@@ -316,6 +316,34 @@ if (!$gotdrop) {
 &unlock_file($procmail::procmailrc);
 }
 
+# enable_procmail_logging()
+# Configure Procmail to log to /var/log/procmail.log, and setup logrotate
+# for that directory.
+sub enable_procmail_logging
+{
+&require_spam();
+&lock_file($procmail::procmailrc);
+local @recipes = &procmail::get_procmailrc();
+local $gotlog;
+foreach my $r (@recipes) {
+	if ($r->{'name'} eq 'LOGFILE') {
+		$gotlog = 1;
+		}
+	}
+if (!$gotlog) {
+	# Add LOGFILE, VERBOSE and LOGABSTRACT variables
+	my $rec = { 'name' => 'LOGFILE',
+		    'value' => $procmail_log_file };
+	&procmail::create_recipe_before($rec, $recipes[0]);
+	# XXX
+	}
+&unlock_file($procmail::procmailrc);
+
+if ($config{'logrotate'}) {
+	# XXX
+	}
+}
+
 # modify_spam(&domain, &olddomain)
 # Doesn't have to do anything
 sub modify_spam

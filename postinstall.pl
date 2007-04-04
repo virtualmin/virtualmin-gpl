@@ -44,6 +44,11 @@ if ($config{'spam'} && $virtualmin_pro) {
 	&setup_default_delivery();
 	}
 
+# Enable logging in Procmail, if we are using it
+if ($config{'spam'} && $virtualmin_pro) {
+	&enable_procmail_logging();
+	}
+
 # Fix up old procmail scripts that don't call the clam wrapper
 if ($config{'virus'} && $virtualmin_pro) {
 	&fix_clam_wrapper();
