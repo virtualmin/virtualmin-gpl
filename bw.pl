@@ -56,7 +56,7 @@ foreach $d (@bwdoms) {
 
 	# Add bandwidth for all plugins
 	foreach $f (@feature_plugins) {
-		if ($d->{$f} && &plugin_defined($f, "feature_bandwidth")) {
+		if (&plugin_defined($f, "feature_bandwidth")) {
 			$bwinfo->{"last_$f"} =
 				&plugin_call($f, "feature_bandwidth", $d,
 					     $bwinfo->{"last_$f"}, $bwinfo);

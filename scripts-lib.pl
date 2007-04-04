@@ -198,7 +198,8 @@ foreach my $f (@files) {
 		# Need to fetch it
 		my $temp = &transname($f->{'file'});
 		if (defined(&convert_osdn_url)) {
-			$f->{'url'} = &convert_osdn_url($f->{'url'});
+			local $newurl = &convert_osdn_url($f->{'url'});
+			$f->{'url'} = $newurl if ($newurl);
 			}
 		$progress_callback_url = $f->{'url'};
 		if ($f->{'url'} =~ /^http/) {
