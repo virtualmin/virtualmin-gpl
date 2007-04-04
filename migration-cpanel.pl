@@ -220,7 +220,7 @@ $prefix ||= &compute_prefix($dom, $group, $parent);
 if (!$parent) {
 	&set_limits_from_template(\%dom, $tmpl);
 	$dom{'quota'} = $quota;
-	$dom{'uquota'} = $uquota;
+	$dom{'uquota'} = $quota;
 	&set_capabilities_from_template(\%dom, $tmpl);
 	}
 $dom{'db'} = $db || &database_name(\%dom);

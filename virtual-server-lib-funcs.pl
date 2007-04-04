@@ -1811,14 +1811,13 @@ sub can_create_sub_servers
 return $access{'create'};
 }
 
-# Returns 1 if the user can import existing servers and databases
+# Returns 1 if the user can migrate servers from other control panels
 sub can_migrate_servers
 {
-return 0 if (!$virtualmin_pro);
 return $access{'import'};
 }
 
-# Returns 1 if the user can migrate servers from other control panels
+# Returns 1 if the user can import existing servers and databases
 sub can_import_servers
 {
 return $access{'import'};
