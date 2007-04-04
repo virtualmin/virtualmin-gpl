@@ -1274,6 +1274,7 @@ sub_QUOTA=The user's home directory quota (if any), like <tt>50 MB</tt>
 sub_PLAINPASS=The user's password for POP3, FTP and database logins
 sub_LOCALHOME=The user's home directory, like <tt>/home/fred</tt>
 sub_PREFIX=The first part of the domain name, like <tt>foo</tt>
+sub_EMAILTO=The server's contain email address, like <tt>foo@bar.com</tt>
 sub_if=In addition, conditional blocks like <i>${IF-MAIL}...${ENDIF-MAIL}</i> and <i>${IF-WEB}...${ELSE-WEB}...{$ENDIF-WEB}</i> may be used.
 sub_DESC=The server's description, such as <tt>Joe's Site</tt>
 sub_PROXY_PASS=The URL of the real website.
@@ -3136,7 +3137,7 @@ switch_ecannot=You are not allowed to switch to the admin of this domain
 switch_eadmin=The specified extra administrator does not exist!
 
 newlinks_title=Custom Links
-newlinks_descr=This form can be used to create links that are available on the left menu when a virtual server is selected.
+newlinks_descr=This form can be used to create links that are available on the left menu when a virtual server is selected. The following substitions can be used in the URL and link title :
 newlinks_desc=Link title
 newlinks_url=Destination URL
 newlinks_who=Visible to

@@ -5,7 +5,10 @@ require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newlinks_ecannot'});
 &ui_print_header(undef, $text{'newlinks_title'}, "", "custom_links");
 
+print &ui_hidden_start($text{'newuser_docs'}, "docs", 0);
 print "$text{'newlinks_descr'}<p>\n";
+&print_subs_table("DOM", "IP", "USER", "EMAILTO");
+print &ui_hidden_end(),"<p>\n";
 
 @links = &list_custom_links();
 print &ui_form_start("save_newlinks.cgi", "post");

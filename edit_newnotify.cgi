@@ -7,6 +7,7 @@ require './virtual-server-lib.pl';
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 
 print "$text{'newnotify_desc'}<p>\n";
+
 print &ui_form_start("notify.cgi", "form-data");
 print &ui_table_start($text{'newnotify_header'}, undef, 2);
 
