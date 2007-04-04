@@ -113,9 +113,23 @@ if (!$_[0]->{'parent'} && $_[1]->{'parent'}) {
 	local $pass = &postgres_pass($_[0]);
 	&postgresql::execute_sql_logged($qconfig{'basedb'}, "create user \"$user\" with password $pass nocreatedb nocreateuser");
 	if (&postgresql::get_postgresql_version() >= 8.0) {
-		foreach my $db (&domain_databases($_[0], [ "mysql" ])) {
+		foreach my $db (&domain_databases($_[0], [ "postgres" ])) {
 			&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter database \"$db->{'name'}\" owner to \"$user\"");
 			}
+		}
+	&$second_print($text{'setup_done'});
+	}
+elsif ($_[0]->{'parent'} && !$_[1]->{'parent'}) {
+	# Server has changed from parent to sub-server .. need to remove the
+	# old user and update all DB permissions
+	&$first_print($text{'save_postgresuser'});
+	if (&postgresql::get_postgresql_version() >= 8.0) {
+		foreach my $db (&domain_databases($_[0], [ "postgres" ])) {
+			&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter database \"$db->{'name'}\" owner to \"$user\"");
+			}
+		}
+	if (&postgres_user_exists($_[1])) {
+		&postgresql::execute_sql_logged($qconfig{'basedb'}, "drop user \"$olduser\"");
 		}
 	&$second_print($text{'setup_done'});
 	}

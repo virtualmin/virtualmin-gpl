@@ -146,6 +146,16 @@ if (!$_[0]->{'parent'} && $_[1]->{'parent'}) {
 	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
 	&$second_print($text{'setup_done'});
 	}
+elsif ($_[0]->{'parent'} && !$_[1]->{'parent'}) {
+	# Server has changed from parent to sub-server .. need to remove the
+	# old user and update all DB permissions
+	&$first_print($text{'save_mysqluser'});
+	&mysql::execute_sql_logged($mysql::master_db, "delete from user where user = '$olduser'");
+	&mysql::execute_sql_logged($mysql::master_db, "update db set user = '$user' where user = '$olduser'");
+	&mysql::execute_sql_logged($master_db, 'flush privileges');
+	&$second_print($text{'setup_done'});
+	$rv++;
+	}
 elsif ($user ne $olduser && !$_[0]->{'parent'}) {
 	# MySQL user in a parent domain has changed, perhaps due to username
 	# change. Need to update user in DB and all db entries
