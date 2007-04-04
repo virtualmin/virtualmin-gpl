@@ -58,8 +58,3 @@
   - better mail log viewing / reporting
 	- parse both postfix and procmail logs, integrate to show delivery
 
-  - allow substitions when emailing all server owners / all mailboxes
-	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=756
-
-  - 750 home directory permissions by default
-	- also need to use CGI or fastCGI PHP mode by default?

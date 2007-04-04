@@ -577,3 +577,4 @@ Fixed bugs that prevent owner limits from being mass-updated, and caused bandwid
 Re-factored all code for displaying quota fields, so that the text box is greyed out when 'Unlimited' is selected.
 Fixed the cPanel migration code to handle new Maildir++ format mailboxes.
 Added Prev/Next buttons to template form, for easily navigating through sections.
+Email to all domain owners and all mailboxes in a domain can now use substitions like ${DOM} and ${QUOTA}.

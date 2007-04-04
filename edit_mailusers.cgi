@@ -9,7 +9,13 @@ $d = &get_domain($in{'dom'});
 &ui_print_header(&domain_in($d), $text{'mailusers_title'}, "");
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 
+print &ui_hidden_start($text{'newuser_docs'}, "docs", 0);
+$text{'sub_USER'} = $text{'sub_POP3'};
+$text{'sub_HOME'} = $text{'sub_POP3HOME'};
 print "$text{'mailusers_desc'}<p>\n";
+&print_subs_table("MAILBOX", "USER", "PLAINPASS", "DOM", "HOME", "QUOTA");
+print &ui_hidden_end(),"<p>\n";
+
 print &ui_form_start("mailusers.cgi", "form-data");
 print &ui_hidden("dom", $in{'dom'}),"\n";
 print &ui_table_start($text{'mailusers_header'}, undef, 2);
@@ -22,7 +28,7 @@ print &ui_table_row($text{'mailusers_to'},
 			[ [ 1, $text{'mailusers_all'} ],
 			  [ 0, $text{'mailusers_sel'} ] ])."<br>\n".
 		    &ui_select("to", undef,
-			[ map { [ $_->{'email'} || $_->{'user'},
+			[ map { [ $_->{'user'},
 				  &remove_userdom($_->{'user'}, $d) ] } @users ],
 			5, 1));
 

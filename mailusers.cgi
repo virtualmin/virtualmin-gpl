@@ -11,28 +11,29 @@ $d = &get_domain($in{'dom'});
 # Validate inputs
 &error_setup($text{'mailusers_err'});
 if ($in{'to_def'}) {
-	@to = map { $_->{'email'} || $_->{'user'} }
-		  grep { $_->{'email'} || $_->{'user'} eq $d->{'user'} }
-		       &list_domain_users($d, 0, 0, 1, 1);
+	@users = grep { $_->{'email'} || $_->{'user'} eq $d->{'user'} }
+		       &list_domain_users($d, 0, 0, 0, 0);
 	}
 else {
-	@to = split(/\0/, $in{'to'});
+	%to = map { $_, 1 } split(/\0/, $in{'to'});
+	@users = grep { $to{$_->{'user'}} } &list_domain_users($d, 0, 0, 0, 0);
 	}
-@to || &error($text{'mailusers_eto'});
+@users || &error($text{'mailusers_eto'});
 $in{'subject'} =~ /\S/ || &error($text{'newnotify_esubject'});
 $in{'from'} =~ /^\S+\@\S+$/ || &error($text{'newnotify_efrom'});
 $in{'body'} =~ s/\r//g;
 $in{'body'} =~ /\S/ || &error($text{'newnotify_ebody'});
 
 # Construct and send the email
-&send_notify_email($in{'from'}, \@to, $in{'subject'}, $in{'body'},
+&send_notify_email($in{'from'}, \@users, $d, $in{'subject'}, $in{'body'},
 		   $in{'attach'}, $in{"attach_filename"},
 		   $in{"attach_content_type"});
 
 # Tell the user
 &ui_print_header(&domain_in($d), $text{'mailusers_title'}, "");
 
-print $text{'newnotify_done'},"<br>\n";
+print $text{'newnotify_done'},"<p>\n";
+@to = map { $_->{'email'} || $_->{'user'} } @users;
 foreach $t (@to) {
 	print "<tt>$t</tt><br>\n";
 	}

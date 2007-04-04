@@ -22,14 +22,14 @@ $in{'body'} =~ /\S/ || &error($text{'newnotify_ebody'});
 
 # Construct and send the email
 @to = map { $_->{'emailto'} } @doms;
-&send_notify_email($in{'from'}, \@to, $in{'subject'}, $in{'body'},
+&send_notify_email($in{'from'}, \@doms, undef, $in{'subject'}, $in{'body'},
 		   $in{'attach'}, $in{"attach_filename"},
 		   $in{"attach_content_type"});
 
 # Tell the user
 &ui_print_header(undef, $text{'newnotify_title'}, "");
 
-print $text{'newnotify_done'},"<br>\n";
+print $text{'newnotify_done'},"<p>\n";
 foreach $t (@to) {
 	print "<tt>$t</tt><br>\n";
 	}

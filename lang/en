@@ -2481,7 +2481,7 @@ scripts_newer=Version $1 is available
 scripts_rating=Your rating
 
 newnotify_title=Email Server Owners
-newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations.
+newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:
 newnotify_header=Options for email to server owners
 newnotify_servers=Virtual servers to email
 newnotify_subject=Email subject
@@ -2498,6 +2498,7 @@ newnotify_edoms=No servers selected
 newnotify_attach=Optional attached file
 
 mailusers_title=Email All Mailboxes
+mailusers_desc=This form can be used to send email to all mailboxes in this domain, or those you selected. The following substitions can be used in the message body and subject:
 mailusers_header=Options for email to all mailboxes
 mailusers_to=Mailboxes to email
 mailusers_all=All

@@ -2407,15 +2407,7 @@ if ($tmpl->{'mail_on'} eq 'none') {
 	}
 &$first_print($text{'setup_email'});
 
-# Make quotas use nice units
-local %hash = %{$_[0]};
-if ($hash{'quota'}) {
-	$hash{'quota'} = &nice_size($user->{'quota'}*&quota_bsize("home"));
-	}
-if ($hash{'uquota'}) {
-	$hash{'uquota'} = &nice_size($user->{'uquota'}*&quota_bsize("home"));
-	}
-
+local %hash = &make_domain_substitions($_[0]);
 local @erv = &send_template_email($mail, $_[0]->{'emailto'},
 			    	  \%hash, $subject, $cc, $bcc);
 if ($erv[0]) {
@@ -2424,6 +2416,21 @@ if ($erv[0]) {
 else {
 	&$second_print(&text('setup_emailfailed', $erv[1]));
 	}
+}
+
+# make_domain_substitions(&domain)
+# Returns a hash of substitions for eamil to a virtual server
+sub make_domain_substitions
+{
+local ($d) = @_;
+local %hash = %$d;
+if ($hash{'quota'}) {
+	$hash{'quota'} = &nice_size($d->{'quota'}*&quota_bsize("home"));
+	}
+if ($hash{'uquota'}) {
+	$hash{'uquota'} = &nice_size($d->{'uquota'}*&quota_bsize("home"));
+	}
+return %hash;
 }
 
 # will_send_user_email([&domain])
@@ -2470,17 +2477,40 @@ return (1, undef) if ($config{$tmode.'_template'} eq 'none');
 local $tmpl = $config{$tmode.'_template'} eq 'default' ?
 	"$module_config_directory/$tmode-template" :
 	$config{$tmode.'_template'};
+local %hash = &make_user_substitutions($user, $d);
+local $email = $d ? $hash{'mailbox'}.'@'.$hash{'dom'}
+		  : $hash{'user'}.'@'.&get_system_hostname();
+
+# Work out who we send to
+if ($userto) {
+	$email = $userto eq 'none' ? undef : $userto;
+	}
+if (($tmode eq 'user' || $tmode eq 'update') &&
+    !$config{'new'.$tmode.'_to_mailbox'}) {
+	# Don't email domain owner if disabled
+	$email = undef;
+	}
+return (1, undef) if (!$email && !$cc && !$bcc);
+
+return &send_template_email(&cat_file($tmpl), $email, \%hash,
+			    $subject ||
+			    &entities_to_ascii($text{'mail_usubject'}),
+			    $cc, $bcc, $d);
+}
+
+# make_user_substitutions(&user, &domain)
+# Create a hash of email substitions for a user in some domain
+sub make_user_substitutions
+{
+local ($user, $d) = @_;
 local %hash;
-local $email;
 if ($d) {
 	%hash = ( %$d, %$user );
 	$hash{'mailbox'} = &remove_userdom($user->{'user'}, $d);
-	$email = $hash{'mailbox'}.'@'.$hash{'dom'};
 	}
 else {
 	%hash = ( %$user );
 	$hash{'mailbox'} = $hash{'user'};
-	$email = $hash{'user'}.'@'.&get_system_hostname();
 	}
 $hash{'plainpass'} ||= "";
 $hash{'extra'} = join(" ", @{$user->{'extraemail'}});
@@ -2504,22 +2534,7 @@ if ($hash{'umquota'}) {
 if ($hash{'qquota'}) {
 	$hash{'qquota'} = &nice_size($user->{'qquota'});
 	}
-
-# Work out who we send to
-if ($userto) {
-	$email = $userto eq 'none' ? undef : $userto;
-	}
-if (($tmode eq 'user' || $tmode eq 'update') &&
-    !$config{'new'.$tmode.'_to_mailbox'}) {
-	# Don't email domain owner if disabled
-	$email = undef;
-	}
-return (1, undef) if (!$email && !$cc && !$bcc);
-
-return &send_template_email(&cat_file($tmpl), $email, \%hash,
-			    $subject ||
-			    &entities_to_ascii($text{'mail_usubject'}),
-			    $cc, $bcc, $d);
+return %hash;
 }
 
 # ensure_template(file)
@@ -2583,30 +2598,49 @@ local $mail = { 'headers' => [ [ 'From', $from ||
 return (1, &text('mail_ok', $to));
 }
 
-# send_notify_email(from, &to, subject, body,
+# send_notify_email(from, &doms|&users, [&dom], subject, body,
 #		    [attach, attach-filename, attach-type])
+# Sends a single email to multiple recipients. These can be Virtualmin domains
+# or users.
+# XXX notify mailboxes
 sub send_notify_email
 {
-local ($from, $to, $subject, $body, $attach, $attachfile, $attachtype) = @_;
-local $mail = { 'headers' =>
-	[ [ 'From' => $from ],
-	  [ 'Bcc' => join(", ", @$to) ],
-	  [ 'Subject' => $subject ] ],
-	  'attach' =>
-	[ { 'headers' => [ [ 'Content-type', 'text/plain' ] ],
-	    'data' => &entities_to_ascii($body) } ] };
-if ($attach) {
-	local $filename = $attachfile;
-	$filename =~ s/^.*(\\|\/)//;
-	local $type = $attachtype." name=\"$filename\"";
-	local $disp = "inline; filename=\"$filename\"";
-	push(@{$mail->{'attach'}},
-	     { 'data' => $in{'attach'},
-	       'headers' => [ [ 'Content-type', $type ],
+local ($from, $recips, $d, $subject, $body, $attach, $attachfile, $attachtype)
+	= @_;
+foreach my $r (@$recips) {
+	# Work out recipient type
+	local ($email, %hash);
+	if ($r->{'id'}) {
+		# A domain
+		$email = $r->{'emailto'};
+		%hash = &make_domain_substitions($r);
+		}
+	else {
+		# A mailbox user
+		$email = $r->{'email'} || $r->{'user'};
+		%hash = &make_user_substitutions($r, $d);
+		}
+	local $mail = { 'headers' =>
+		[ [ 'From' => $from ],
+		  [ 'To' => $email ],
+		  [ 'Subject' => &substitute_template($subject, \%hash) ] ],
+		  'attach' =>
+		[ { 'headers' => [ [ 'Content-type', 'text/plain' ] ],
+		    'data' => &entities_to_ascii(
+				&substitute_template($body, \%hash)) } ] };
+	if ($attach) {
+		local $filename = $attachfile;
+		$filename =~ s/^.*(\\|\/)//;
+		local $type = $attachtype." name=\"$filename\"";
+		local $disp = "inline; filename=\"$filename\"";
+		push(@{$mail->{'attach'}},
+		     { 'data' => $in{'attach'},
+		       'headers' => [ [ 'Content-type', $type ],
 			      [ 'Content-Disposition', $disp ],
 			      [ 'Content-Transfer-Encoding', 'base64' ] ] });
+		}
+	&mailboxes::send_mail($mail);
 	}
-&mailboxes::send_mail($mail);
 }
 
 # userdom_substitutions(&user, &dom)
