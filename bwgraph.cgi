@@ -203,8 +203,10 @@ if ($max) {
 				local $bwinfo = &get_bandwidth($dd);
 				push(@bands, $bwinfo);
 				local $min = &minimum_day($bwinfo);
-				$start_day = $min if (!defined($start_day) ||
-						   $min < $start_day);
+				if ($min && (!defined($start_day) ||
+					     $min < $start_day)) {
+					$start_day = $min;
+					}
 				}
 			}
 
