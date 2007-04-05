@@ -579,3 +579,4 @@ Fixed the cPanel migration code to handle new Maildir++ format mailboxes.
 Added Prev/Next buttons to template form, for easily navigating through sections.
 Email to all domain owners and all mailboxes in a domain can now use substitions like ${DOM} and ${QUOTA}.
 Added the virtusertable plugin to the Squirrelmail script installer, so that users can login with their email addresses.
+Change the Module Config option for new domain passwords to add an option to require the password to be entered twice.

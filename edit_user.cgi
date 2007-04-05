@@ -89,7 +89,8 @@ if (!$mailbox) {
 		}
 	if (!$user->{'alwaysplain'}) {
 		# Option to disable
-		$pwfield .= "<br>".
+		$pwfield .= "<br>" if ($pwfield !~ /\/table>/);
+		$pwfield .=
 			&ui_checkbox("disable", 1, $text{'user_disabled'},
 				     $user->{'pass'} =~ /^\!/ ? 1 : 0);
 		}

@@ -54,7 +54,6 @@ localgroup=Prim&#228;re Gruppe der lokalen Benutzer,3,Keine lokalen Benutzer anz
 mail_skel=Standardverzeichnis der Mailbenutzer,3,Keine
 proxy_pass=Erlaube die Erzeugung von <tt>proxy-only</tt> Webseiten?,1,1-Ja&#44; mit Proxy,2-Ja&#44; durch Frame&#45;Forwarding,0-Nein
 homes_dir=Unterverzeichnis f&#252;r die Mailbox,0,20
-passwd_mode=Standard&#45;Passwort f&#252;r neue Server,1,1-Zuf&#228;llig,0-Wie eingegeben
 line6=Standard&#45;Beschr&#228;nkungen f&#252;r neue Domainen,11
 defmquota=Standard&#45;Quota f&#252;r neue Mailboxen,0,8,,Bl&#246;cke
 limitnoalias=Alias&#45;Domains in Grenzen einrechnen?,1,0-Ja,1-Nein

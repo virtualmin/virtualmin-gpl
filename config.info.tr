@@ -67,7 +67,6 @@ localgroup=Lokal kullan&#305;c&#305;lar için birincil grup,3,Lokal kullan&#305;c
 mail_skel=E-posta kullan&#305;c&#305;lar&#305; için ba&#351;lang&#305;ç dosyalar&#305; klasörü,3,Hiçbiri
 proxy_pass=Sadece yönlendiren web sitesi olu&#351;turulmas&#305;na izin verilsin mi?,1,1-Evet proxying kullan&#305;larak,2-Evet yönlendirme kullan&#305;larak,0-Hay&#305;r
 homes_dir=Posta kutusu kullan&#305;c&#305;lar&#305; anaklasörleri için altklasör,0,20
-passwd_mode=Rastlant&#305;sal &#351;ifre üretilsin mi?,1,1-Evet,0-Hay&#305;r
 passwd_length=Rastlant&#305;sal üretilen &#351;ifre uzunlu&#287;u,3,Varsay&#305;lan (15 karakter),5
 webalizer_nocron=Webalizer zamanland&#305;r&#305;lm&#305;&#351; i&#351;i her sanal sunucu için kurulsun mu?,1,0-Evet,1-Hay&#305;r
 limitnoalias=Alias sunucular&#305; limitlere dahil edilsin mi?,1,0-Evet,1-Hay&#305;r
