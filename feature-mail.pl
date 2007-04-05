@@ -2398,15 +2398,7 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 	    &all_log_files($maillog, $min_ltime) :
 	    ( $maillog )) {
 	local $_;
-	if ($f =~ /\.gz$/i) {
-		open(LOG, "gunzip -c ".quotemeta($f)." |");
-		}
-	elsif ($f =~ /\.Z$/i) {
-		open(LOG, "uncompress -c ".quotemeta($f)." |");
-		}
-	else {
-		open(LOG, $f);
-		}
+	&open_uncompress_file(LOG, $f);
 
 	# Scan the log, looking for entries for various mail systems
 	local %sizes;
@@ -2429,11 +2421,11 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 				     $apache_mmap{lc($1)}, $tm[5]-1);
 				}
 			local $user = $11 || $9;
+			local $sz = $sizes{$8};
 			$user =~ s/^<(.*)>/$1/;
 			$user =~ s/,$//;
 			local ($mb, $dom) = split(/\@/, $user);
 			local $md = $maildoms{$dom};
-			local $sz = $sizes{$8};
 			if ($md) {
 				$max_ltime{$md->{'id'}} = $ltime
 					if ($ltime > $max_ltime{$md->{'id'}});
