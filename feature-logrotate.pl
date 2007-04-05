@@ -64,7 +64,7 @@ if (@logs) {
 		}
 	&lock_file($lconf->{'file'});
 	&logrotate::save_directive($parent, undef, $lconf);
-	&flush_file_lines();
+	&flush_file_lines($lconf->{'file'});
 	&unlock_file($lconf->{'file'});
 	&$second_print($text{'setup_done'});
 	}

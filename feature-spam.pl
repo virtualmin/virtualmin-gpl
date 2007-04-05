@@ -324,23 +324,53 @@ sub enable_procmail_logging
 &require_spam();
 &lock_file($procmail::procmailrc);
 local @recipes = &procmail::get_procmailrc();
-local $gotlog;
+local ($gotlog, $gottrap);
 foreach my $r (@recipes) {
 	if ($r->{'name'} eq 'LOGFILE') {
 		$gotlog = 1;
 		}
+	if ($r->{'name'} eq 'TRAP') {
+		$gottrap = 1;
+		}
 	}
 if (!$gotlog) {
-	# Add LOGFILE, VERBOSE and LOGABSTRACT variables
-	my $rec = { 'name' => 'LOGFILE',
-		    'value' => $procmail_log_file };
-	&procmail::create_recipe_before($rec, $recipes[0]);
-	# XXX
+	# Add LOGFILE variables
+	my $rec0 = { 'name' => 'LOGFILE',
+		     'value' => $procmail_log_file };
+	&procmail::create_recipe_before($rec0, $recipes[0]);
+	}
+if (!$gottrap) {
+	# Add TRAP, which specifies a command to output logging info about
+	# the email after delivery
+	my $rec1 = { 'name' => 'TRAP', 'value' => $procmail_log_cmd };
+	&procmail::create_recipe_before($rec1, $recipes[0]);
 	}
 &unlock_file($procmail::procmailrc);
 
-if ($config{'logrotate'}) {
-	# XXX
+# Copy the log writer command to /etc/webmin
+&copy_source_dest("$module_root_directory/procmail-logger.pl",
+		  $procmail_log_cmd);
+&set_ownership_permissions(undef, undef, 0755, $procmail_log_cmd);
+
+if ($config{'logrotate'} && &foreign_installed("logrotate")) {
+	# Add logrotate section, if needed
+	&require_logrotate();
+	local $log = &get_logrotate_section($procmail_log_file);
+	if (!$log) {
+		local $parent = &logrotate::get_config_parent();
+		local $lconf = { 'file' => &logrotate::get_add_file(),
+				 'name' => [ $procmail_log_file ] };
+		$lconf->{'members'} = [
+				{ 'name' => 'rotate',
+				  'value' => $config{'logrotate_num'} || 5 },
+				{ 'name' => 'daily' },
+				{ 'name' => 'compress' },
+				];
+		&lock_file($lconf->{'file'});
+		&logrotate::save_directive($parent, undef, $lconf);
+		&flush_file_lines($lconf->{'file'});
+		&unlock_file($lconf->{'file'});
+		}
 	}
 }
 

@@ -54,4 +54,6 @@
 
   - better mail log viewing / reporting
 	- parse both postfix and procmail logs, integrate to show delivery
-
+	- use TRAP for procmail log
+	- can get LOGNAME, LASTFOLDER, time
+	- Copy procmail-logger.pl to /etc/webmin

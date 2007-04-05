@@ -209,3 +209,6 @@ $virtualmin_license_file = "/etc/virtualmin-license";
 
 $collected_info_file = "$module_config_directory/collected";
 
+$procmail_log_file = "/var/log/procmail.log";
+$procmail_log_cmd = "$module_config_directory/procmail-logger.pl";
+
