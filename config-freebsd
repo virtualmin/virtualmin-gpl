@@ -141,3 +141,4 @@ dbfnorename=0
 defforceunder=0
 spamclear=none
 stats_noedit=1
+alias_mode=1
