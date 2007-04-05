@@ -39,7 +39,8 @@ return ( 4, 5 );
 
 sub script_squirrelmail_pear_modules
 {
-return ("DB");
+local ($d, $opts) = @_;
+return $opts->{'db'} ? ( "DB" ) : ( );
 }
 
 # script_squirrelmail_depends(&domain, version)
@@ -130,7 +131,11 @@ sub script_squirrelmail_files
 local ($d, $ver, $opts, $upgrade) = @_;
 local @files = ( { 'name' => "source",
 	   'file' => "squirrelmail-$ver.tar.gz",
-	   'url' => "http://prdownloads.sourceforge.net/squirrelmail/squirrelmail-$ver.tar.gz" } );
+	   'url' => "http://prdownloads.sourceforge.net/squirrelmail/squirrelmail-$ver.tar.gz" },
+	   { 'name' => 'virtusertable',
+	     'file' => 'virtusertable.tar.gz',
+	     'url' => 'http://www.squirrelmail.org/plugins/virtusertable-0.3.tar.gz' },
+	    );
 return @files;
 }
 
@@ -257,6 +262,32 @@ if (!$upgrade) {
 	# Make data directory writable
 	&set_ownership_permissions(undef, undef, 0777,
 				   "$opts->{'dir'}/data");
+
+	# Install the virtusertable plugin
+	local $vut = &get_mail_virtusertable();
+	if ($vut) {
+		$out = &run_as_domain_user($d,
+			"cd ".quotemeta("$opts->{'dir'}/plugins").
+			" && (gunzip -c $files->{'virtusertable'} | tar xf -)");
+		local $s = "$opts->{'dir'}/plugins/virtusertable/setup.php";
+		-r $s || return (0, "Failed to extract virtusertable plugin : ".
+				    "<tt>$out</tt>.");
+
+		# Setup it's config file
+		local $lref = &read_file_lines($s);
+		foreach my $l (@$lref) {
+			if ($l =~ /^\s*\$filename\s*=/) {
+				$l = "\$filename = '$vut';";
+				}
+			}
+		&flush_file_lines($s);
+
+		# Register in squirrelmail config file
+		local $lref = &read_file_lines($cfile);
+		splice(@$lref, @$lref-1, 0,
+		       "\$plugins[0] = 'virtusertable';");
+		&flush_file_lines($cfile);
+		}
 	}
 
 # Return a URL for the user

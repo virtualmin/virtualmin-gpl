@@ -3199,6 +3199,16 @@ if ($clash) {
 &create_virtuser($virt);
 }
 
+# get_mail_virtusertable()
+# Returns the path to a file mapping email addresses to usernames, suitable
+# for the mail server in use.
+sub get_mail_virtusertable
+{
+&require_mail();
+return $config{'mail_system'} == 1 ? $sendmail_vfile :
+       $config{'mail_system'} == 0 ? $virtual_map_files[0] : undef;
+}
+
 $done_feature_script{'mail'} = 1;
 
 1;

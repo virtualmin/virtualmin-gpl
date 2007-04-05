@@ -96,7 +96,7 @@ print "<br>\n";
 # Install needed PHP modules
 $modok = &setup_php_modules($d, $script, $ver, $phpver);
 if ($modok) {
-	$modok = &setup_pear_modules($d, $script, $ver, $phpver);
+	$modok = &setup_pear_modules($d, $script, $ver, $phpver, $opts);
 	}
 if (!$modok) {
 	&ui_print_footer("list_scripts.cgi?dom=$in{'dom'}",

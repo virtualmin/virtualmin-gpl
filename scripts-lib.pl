@@ -642,7 +642,7 @@ foreach my $m (@mods) {
 return 1;
 }
 
-# setup_pear_modules(&domain, &script, version, php-version)
+# setup_pear_modules(&domain, &script, version, php-version, &opts)
 # If possible, downloads Pear PHP modules needed by the given script. Progress
 # of the install is written to STDOUT. Returns 1 if successful, 0 if not.
 sub setup_pear_modules
@@ -650,7 +650,7 @@ sub setup_pear_modules
 local ($d, $script, $ver, $phpver) = @_;
 local $modfunc = $script->{'pear_mods_func'};
 return 1 if (!defined(&$modfunc));
-local @mods = &$modfunc($d);
+local @mods = &$modfunc($d, $opts);
 foreach my $m (@mods) {
 	next if (&check_pear_module($m, $phpver, $d) == 1);
 

@@ -5779,7 +5779,8 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 		# Install needed PHP modules
 		local $modok = &setup_php_modules($dom, $script, $ver, $phpver);
 		next if (!$modok);
-		$modok = &setup_pear_modules($dom, $script, $ver, $phpver);
+		$modok = &setup_pear_modules($dom, $script, $ver, $phpver,
+					     $opts);
 		next if (!$modok);
 
 		# Find the database, if requested
