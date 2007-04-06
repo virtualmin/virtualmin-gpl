@@ -20,7 +20,11 @@ $from = &address_parts($from);
 $to = &address_parts($to);
 
 $now = time();
-print "Time:$now From:$from To:$to User:$ENV{'LOGNAME'} Size:$size Dest:$ENV{'LASTFOLDER'}\n";
+$dest = $ENV{'LASTFOLDER'};
+if ($dest =~ /^\S+\/sendmail.*\s(\S+)$/) {
+	$dest = $1;
+	}
+print "Time:$now From:$from To:$to User:$ENV{'LOGNAME'} Size:$size Dest:$dest\n";
 
 # address_parts(string)
 # Returns the email addresses in a string

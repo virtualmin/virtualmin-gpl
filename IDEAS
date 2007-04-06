@@ -53,7 +53,6 @@
 	- https://www.virtualmin.com/ticket-tracker/bug?bug%5fnumber=399
 
   - better mail log viewing / reporting
-	- parse both postfix and procmail logs, integrate to show delivery
-	- use TRAP for procmail log
-	- can get LOGNAME, LASTFOLDER, time
-	- Copy procmail-logger.pl to /etc/webmin
+	- postfix logs
+	- what about multiple destinations?
+	- cache parsed logs in some fast format, refresh as needed

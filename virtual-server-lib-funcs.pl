@@ -13,7 +13,7 @@ if (!$virtual_server_root) {
 	$virtual_server_root = "$1/virtual-server";
 	}
 foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
-		 "php", "ruby", "vui", "dynip", "collect") {
+		 "php", "ruby", "vui", "dynip", "collect", "maillog") {
 	do "$virtual_server_root/$lib-lib.pl";
 	if ($@ && -r "$virtual_server_root/$lib-lib.pl") {
 		print STDERR "failed to load $lib-lib.pl : $@\n";
@@ -2038,6 +2038,19 @@ return $virtualmin_pro &&	# Only Pro supports this
        (&master_admin() ||	# Master can switch, or domain owner to extras
 	&reseller_admin() && &can_edit_domain($d) ||
 	$admin && &can_edit_domain($d));
+}
+
+# Returns 1 if the user can view mail logs for some domain (or all domains if
+# none was given)
+sub can_view_maillog
+{
+local ($d) = @_;
+if ($d) {
+	return &can_edit_domain($d);
+	}
+else {
+	return &master_admin();
+	}
 }
 
 # domains_table(&domains, [checkboxes])
@@ -7912,17 +7925,23 @@ return $user;
 sub new_password_input
 {
 local ($name) = @_;
-if ($config{'passwd_mode'}) {
+if ($config{'passwd_mode'} == 1) {
+	# Random but editable password
 	return &ui_textbox($name, &random_password(), 40);
 	}
-else {
+elsif ($config{'passwd_mode'} == 1) {
+	# One hidden password
 	return &ui_password($name, undef, 40);
 	}
-#return &ui_radio($name."_def", int($config{'passwd_mode'}),
-#				[ [ 1, $text{'form_pass1'}." ($rand)" ],
-#				  [ 0, $text{'form_pass0'} ] ]).
-#       &ui_password($name, undef, 15).
-#       &ui_hidden($name."_rand", $rand);
+elsif ($config{'passwd_mode'} == 2) {
+	# Two hidden passwords
+	return "<table>\n".
+	       "<tr><td>$text{'form_passf'}</td> ".
+	       "<td>".&ui_password($name, undef, 40)."</td> </tr>\n".
+	       "<tr><td>$text{'form_passa'}</td> ".
+	       "<td>".&ui_password($name."_again", undef, 40)."</td> </tr>\n".
+	       "</table>";
+	}
 }
 
 # parse_new_password(name, allow-empty)
@@ -7931,14 +7950,10 @@ sub parse_new_password
 {
 local ($name, $empty) = @_;
 $empty || $in{$name} =~ /\S/ || &error($text{'setup_epass'});
+if (defined($in{$name."_again"}) && $in{$name} ne $in{$name."_again"}) {
+	&error($text{'setup_epassagain'});
+	}
 return $in{$name};
-#if ($in{$name.'_def'}) {
-#	return $in{$name."_rand"} || &random_password();
-#	}
-#else {
-#	$empty || $in{$name} =~ /\S/ || &error($text{'setup_epass'});
-#	return $in{$name};
-#	}
 }
 
 # get_disable_features(&domain)
@@ -8562,6 +8577,15 @@ if (!$d->{'alias'} && &can_config_domain($d) && $virtualmin_pro) {
 		    'desc' => &text('edit_reemaildesc',
                                     "<tt>$d->{'emailto'}</tt>"),
 		    'cat' => 'admin',
+		  });
+	}
+
+# Button to show mail logs
+if ($virtualmin_pro && &can_view_maillog($d)) {
+	push(@rv, { 'page' => 'maillog.cgi',
+		    'title' => $text{'edit_maillog'},
+		    'desc' => $text{'edit_maillogdesc'},
+		    'cat' => 'logs',
 		  });
 	}
 
@@ -10204,6 +10228,25 @@ if ($html =~ /^([\000-\377]*<body[^>]*>)([\000-\377]*)(<\/body[^>]*>[\000-\377]*
 	}
 else {
 	return (undef, $html, undef);
+	}
+}
+
+# open_uncompress_file(filehandle, filename)
+# Open a file, uncompressing if needed
+sub open_uncompress_file
+{
+local ($fh, $f) = @_;
+if ($f =~ /\.gz$/i) {
+	return open($fh, "gunzip -c ".quotemeta($f)." |");
+	}
+elsif ($f =~ /\.Z$/i) {
+	return open($fh, "uncompress -c ".quotemeta($f)." |");
+	}
+elsif ($f =~ /\.bz2$/i) {
+	return open($fh, "bunzip2 -c ".quotemeta($f)." |");
+	}
+else {
+	return open($fh, $f);
 	}
 }
 

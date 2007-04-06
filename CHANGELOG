@@ -580,3 +580,5 @@ Added Prev/Next buttons to template form, for easily navigating through sections
 Email to all domain owners and all mailboxes in a domain can now use substitions like ${DOM} and ${QUOTA}.
 Added the virtusertable plugin to the Squirrelmail script installer, so that users can login with their email addresses.
 Change the Module Config option for new domain passwords to add an option to require the password to be entered twice.
+Added the Search Mail Logs page, which can show the destination of email to your system regardless of the final delivery method (local, autoreply, spam, virus, or forwarded). To support this, Virtualmin configures Procmail to log the destination file for all email it processes, to /var/log/procmail.log.
+Added the search-maillogs.pl command-line script, with the same functionality as the web-based mail search.
