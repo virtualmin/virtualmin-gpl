@@ -169,7 +169,9 @@ if (!$parentuser) {
 print "<script>\n";
 print "function select_template(num)\n";
 print "{\n";
-foreach $t (&list_available_templates($parentdom, $aliasdom)) {
+@availtmpls = &list_available_templates($parentdom, $aliasdom);
+$deftmpl = $availtmpls[0];
+foreach $t (@availtmpls) {
 	local $tmpl = &get_template($t->{'id'});
 	print "if (num == $tmpl->{'id'}) {\n";
 	if (!$parentdom) {
@@ -270,8 +272,10 @@ if (!$parentuser) {
 
 	if (&can_choose_ugroup()) {
 		# Group for Unix user
+		local $ug = $deftmpl->{'ugroup'};
+		$ug = "" if ($ug eq "none");
 		print &ui_table_row(&hlink($text{'form_group'},"unixgroupname"),
-			&ui_opt_textbox("group", undef, 15,
+			&ui_opt_textbox("group", $ug, 15,
 					$text{'form_crgroup'},
 					$text{'form_exgroup'}).
 			&group_chooser_button("group"),
