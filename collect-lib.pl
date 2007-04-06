@@ -197,8 +197,10 @@ sub refresh_possible_packages
 local ($pkgs) = @_;
 local %pkgs = map { $_, 1 } @$pkgs;
 local $info = &get_collected_info();
-if ($info->{'poss'}) {
-	$info->{'poss'} = [ grep { !$pkgs{$_->{'name'}} } @{$info->{'poss'}} ];
+if ($info->{'poss'} && &foreign_check("security-updates")) {
+	&foreign_require("security-updates", "security-updates-lib.pl");
+	local @poss = &security_updates::list_possible_updates(2);
+	$info->{'poss'} = \@poss;
 	}
 &save_collected_info($info);
 }

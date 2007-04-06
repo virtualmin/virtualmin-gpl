@@ -60,12 +60,15 @@ if ($multiline) {
 		print "    From: $l->{'from'}\n";
 		print "    To: $l->{'to'}\n";
 		print "    Size: $l->{'size'}\n";
+		print "    User: $l->{'user'}\n" if ($l->{'level'});
 		print $l->{'auto'} ? "    Action: Auto-reply" :
 		      $l->{'forward'} ? "    Forward: $l->{'forward'}" :
+		      $l->{'inbox'} ? "    Action: Inbox" :
 		      $l->{'file'} ? "    Mailbox: $l->{'file'}" :
 		      $l->{'program'} ? "    Program: $l->{'program'}" :
 		      $l->{'local'} ?   "    Local: $l->{'local'}" :
 		      $l->{'bounce'} ?  "    Action: Bounce" :
+		      $l->{'throw'} ?   "    Action: Discard" :
 					"    Action: Unknown","\n";
 		}
 	}
@@ -78,11 +81,13 @@ else {
 		@tm = localtime($l->{'time'});
 		$dest = $l->{'auto'} ? "Autoreply" :
 			$l->{'forward'} ? $l->{'forward'} :
+		        $l->{'inbox'} ? "Inbox" :
 			$l->{'file'} ? $l->{'file'} :
 			$l->{'program'} ? "|".$l->{'program'} :
 			$l->{'local'} ? "Local $l->{'local'}" :
 		        $l->{'bounce'} ? "Bounce" :
-					  "Unknown";
+		        $l->{'throw'} ? "Discard" :
+					"Unknown";
 		printf $fmt,
 			strftime("%Y-%m-%d", @tm),
 			strftime("%H:%M:%S", @tm),

@@ -53,6 +53,6 @@
 	- https://www.virtualmin.com/ticket-tracker/bug?bug%5fnumber=399
 
   - better mail log viewing / reporting
-	- postfix logs
-	- what about multiple destinations?
 	- cache parsed logs in some fast format, refresh as needed
+	- help page
+	- click on email to show more details

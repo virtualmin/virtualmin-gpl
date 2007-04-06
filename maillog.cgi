@@ -71,6 +71,7 @@ if ($in{'search'}) {
 			$text{'maillog_time'},
 			$text{'maillog_from'},
 			$text{'maillog_to'},
+			$text{'maillog_user'},
 			$text{'maillog_action'},
 			]);
 		foreach $l (@logs) {
@@ -82,8 +83,13 @@ if ($in{'search'}) {
 				$dest = &text('maillog_forward',
 					      "<tt>$l->{'forward'}</tt>");
 				}
+			elsif ($l->{'throw'}) {
+				$dest = $text{'maillog_throw'};
+				}
+			elsif ($l->{'inbox'}) {
+				$dest = $text{'maillog_inbox'};
+				}
 			elsif ($l->{'file'}) {
-				# XXX nicer
 				$dest = "<tt>$l->{'file'}</tt>";
 				}
 			elsif ($l->{'bounce'}) {
@@ -106,6 +112,7 @@ if ($in{'search'}) {
 				strftime("%H:%M:%S", @tm),
 				$l->{'from'},
 				$l->{'to'},
+				$l->{'user'},
 				$dest
 				]);
 			}

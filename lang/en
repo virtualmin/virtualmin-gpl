@@ -3349,3 +3349,6 @@ maillog_unknown=Unknown
 maillog_none=No messages matched your search.
 maillog_etime=Invalid date specification
 maillog_local=Mailbox of $1
+maillog_throw=Throw away
+maillog_inbox=User's email inbox
+maillog_user=User
