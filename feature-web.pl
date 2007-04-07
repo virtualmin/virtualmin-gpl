@@ -955,19 +955,20 @@ sub all_log_files
 $_[0] =~ /^(.*)\/([^\/]+)$/;
 local $dir = $1;
 local $base = $2;
-local ($f, @rv);
+local ($f, @rv, %mtime);
 opendir(DIR, $dir);
 foreach $f (readdir(DIR)) {
-	if ($f =~ /^\Q$base\E/ && -f "$dir/$f") {
+	if ($f =~ /^\Q$base\E/ && -f "$dir/$f" && $f ne $base.".offset") {
+		local @st = stat("$dir/$f");
 		if ($f ne $base) {
-			local @st = stat("$dir/$f");
 			next if ($_[1] && $st[9] <= $_[1]);
 			}
+		$mtime{"$dir/$f"} = $st[9];
 		push(@rv, "$dir/$f");
 		}
 	}
 closedir(DIR);
-return @rv;
+return sort { $mtime{$a} cmp $mtime{$b} } @rv;
 }
 
 # create_framefwd_file(&domain)

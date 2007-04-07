@@ -17,6 +17,6 @@ for($i=0; defined($in{"desc_$i"}); $i++) {
 		    'who' => \%who });
 	}
 &save_custom_links(\@rv);
-&redirect("");
+&redirect("edit_newlinks.cgi");
 
 
