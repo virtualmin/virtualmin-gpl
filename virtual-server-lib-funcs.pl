@@ -6911,7 +6911,7 @@ return @rv;
 # save_custom_fields(&fields)
 sub save_custom_fields
 {
-&open_tempfile(FIELDS, ">$custom_fields_file");
+&open_lock_tempfile(FIELDS, ">$custom_fields_file");
 foreach my $a (@{$_[0]}) {
 	&print_tempfile(FIELDS, $a->{'name'},":",$a->{'type'},":",
 		     $a->{'opts'},":",$a->{'desc'},"\n");
@@ -6943,7 +6943,7 @@ return @rv;
 # Write out the given list of custom links to a file
 sub save_custom_links
 {
-&open_tempfile(LINKS, ">$custom_links_file");
+&open_lock_tempfile(LINKS, ">$custom_links_file");
 foreach my $a (@{$_[0]}) {
 	&print_tempfile(LINKS, $a->{'desc'}."\t".$a->{'url'}."\t".
 			       join(":", keys %{$a->{'who'}})."\t".

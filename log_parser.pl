@@ -66,6 +66,9 @@ elsif ($type eq "database") {
 		     $text{'databases_'.$p->{'type'}},
 		     "<tt>$p->{'dom'}</tt>");
 	}
+elsif ($type eq "links") {
+	return $text{'log_'.$action.'_links'};
+	}
 elsif ($action eq "start" || $action eq "stop" || $action eq "restart") {
 	return $text{'log_'.$action.'_'.$type};
 	}

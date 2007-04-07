@@ -1530,6 +1530,8 @@ log_dynip=Updated dynamic IP address settings
 log_add_styles=Installed third-party style $1
 log_enable_styles=Enabled content styles
 log_upgrade=Upgraded to Virtualmin Pro
+log_save_links=Updated custom links
+log_move_links=Swapped two custom links
 
 backup_title=Backup Virtual Servers
 backup_title2=Scheduled Backup
@@ -3157,6 +3159,7 @@ newlinks_ewho=No visible user types selected in line $1
 newlinks_open=Open in window
 newlinks_same=Same
 newlinks_new=New
+newlinks_move=Move
 
 postsave_title=Virtual Server Modified
 postsave_done=The virtual server $1 has been successfully updated. Use the links below to continue managing it.

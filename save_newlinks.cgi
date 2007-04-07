@@ -8,15 +8,16 @@ require './virtual-server-lib.pl';
 
 for($i=0; defined($in{"desc_$i"}); $i++) {
 	next if (!$in{"desc_$i"});
-	$in{"url_$i"} || &errror(&text('newlinks_eurl', $i+1));
+	$in{"url_$i"} || &error(&text('newlinks_eurl', $i+1));
 	local %who = map { $_, 1 } split(/\0/, $in{"who_$i"});
-	%who || &errror(&text('newlinks_ewho', $i+1));
+	%who || &error(&text('newlinks_ewho', $i+1));
 	push(@rv, { 'desc' => $in{"desc_$i"},
 		    'url' => $in{"url_$i"},
 		    'open' => $in{"open_$i"},
 		    'who' => \%who });
 	}
 &save_custom_links(\@rv);
+&webmin_log("save", "links");
 &redirect("edit_newlinks.cgi");
 
 
