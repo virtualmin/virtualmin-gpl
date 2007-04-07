@@ -135,6 +135,7 @@ $collect_cron_cmd = "$module_config_directory/collectinfo.pl";
 
 $custom_fields_file = "$module_config_directory/custom-fields";
 $custom_links_file = "$module_config_directory/custom-links";
+$custom_link_categories_file = "$module_config_directory/custom-link-cats";
 
 @scripts_directories = ( "$module_config_directory/scripts",
 			 "$module_root_directory/scripts",

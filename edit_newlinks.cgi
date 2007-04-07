@@ -11,12 +11,14 @@ print "$text{'newlinks_descr'}<p>\n";
 print &ui_hidden_end(),"<p>\n";
 
 @links = &list_custom_links();
+@cats = &list_custom_link_categories();
 @tds = ( undef, undef, undef, undef, "width=32" );
 print &ui_form_start("save_newlinks.cgi", "post");
 print &ui_columns_start([ $text{'newlinks_desc'},
 			  $text{'newlinks_url'},
 			  $text{'newlinks_open'},
 			  $text{'newlinks_who'},
+			  @cats ? ( $text{'newlinks_cat'} ) : ( ),
 			  @links > 1 ? ( $text{'newlinks_move'} ) : ( ), ],
 			100, 0, \@tds);
 $i = 0;
@@ -40,6 +42,9 @@ foreach $l (@links, { }, { }) {
 				   "<img src=images/moveup.gif border=0></a>";
 			}
 		}
+	$catsel = &ui_select("cat_$i", $l->{'cat'},
+	    [ [ "", $text{'newlinks_nocat'} ],
+	      map { [ $_->{'id'}, &shorten_category($_->{'desc'}) ] } @cats ]);
 	print &ui_columns_row([
 		&ui_textbox("desc_$i", $l->{'desc'}, 20),
 		&ui_textbox("url_$i", $l->{'url'}, 60),
@@ -49,6 +54,7 @@ foreach $l (@links, { }, { }) {
 		join(" ", map { &ui_checkbox("who_$i", $_,
 				$text{'newlinks_'.$_}, $l->{'who'}->{$_}) }
 			      ('master', 'domain', 'reseller')),
+		@cats ? ( $catsel ) : ( ),
 		@links > 1 ? ( $updown ) : ( ),
 		], \@tds);
 	$i++;	
@@ -56,5 +62,28 @@ foreach $l (@links, { }, { }) {
 print &ui_columns_end();
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 
+# Show link category form
+print "<hr>\n";
+
+print "$text{'newlinks_catdesc'}<p>\n";
+print &ui_form_start("save_linkcats.cgi", "post");
+print &ui_columns_start([ $text{'newlinks_catname'} ]);
+$i = 0;
+foreach $c (@cats, { }, { }) {
+	print &ui_columns_row([ &ui_textbox("desc_$i", $c->{'desc'}, 50).
+				&ui_hidden("id_$i", $c->{'id'}) ]);
+	$i++;
+	}
+print &ui_form_end([ [ undef, $text{'save'} ] ]);
+
 &ui_print_footer("", $text{'index_return'});
+
+sub shorten_category
+{
+local ($desc) = @_;
+if (length($desc) > 12) {
+	return substr($desc, 0, 10)."...";
+	}
+return $desc;
+}
 

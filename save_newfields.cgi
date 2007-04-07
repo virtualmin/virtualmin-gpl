@@ -15,6 +15,7 @@ for($i=0; defined($in{"name_$i"}); $i++) {
 		    'opts' => $in{"opts_$i"} });
 	}
 &save_custom_fields(\@rv);
+&webmin_log("save", "fields");
 &redirect("");
 
 

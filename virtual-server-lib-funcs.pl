@@ -6928,11 +6928,12 @@ local $_;
 open(LINKS, $custom_links_file);
 while(<LINKS>) {
 	s/\r|\n//g;
-	local @a = split(/\t+/, $_);
+	local @a = split(/\t/, $_);
 	push(@rv, { 'desc' => $a[0],
 		    'url' => $a[1],
 		    'who' => { map { $_ => 1 } split(/:/, $a[2]) },
 		    'open' => $a[3],
+		    'cat' => $a[4],
 		  });
 	}
 close(LINKS);
@@ -6947,26 +6948,55 @@ sub save_custom_links
 foreach my $a (@{$_[0]}) {
 	&print_tempfile(LINKS, $a->{'desc'}."\t".$a->{'url'}."\t".
 			       join(":", keys %{$a->{'who'}})."\t".
-			       int($a->{'open'})."\n");
+			       int($a->{'open'})."\t".$a->{'cat'}."\n");
 	}
 &close_tempfile(LINKS);
 }
 
+# list_custom_link_categories()
+# Returns a list of all custom link category hash refs
+sub list_custom_link_categories
+{
+local @rv;
+open(LINKCATS, $custom_link_categories_file);
+while(<LINKCATS>) {
+	s/\r|\n//g;
+	local @a = split(/\t/, $_);
+	push(@rv, { 'id' => $a[0], 'desc' => $a[1] });
+	}
+close(LINKCATS);
+return @rv;
+}
+
+# save_custom_link_categories(&cats)
+# Write out the given list of link categories to a file
+sub save_custom_link_categories
+{
+&open_lock_tempfile(LINKCATS, ">$custom_link_categories_file");
+foreach my $a (@{$_[0]}) {
+	&print_tempfile(LINKCATS, $a->{'id'}."\t".$a->{'desc'}."\n");
+	}
+&close_tempfile(LINKCATS);
+}
+
 # list_visible_custom_links(&domain)
 # Returns a list of descriptions and URLs for custom links in the given domain,
-# for the current user type.
+# for the current user type. Category names are also include.
 sub list_visible_custom_links
 {
 local ($d) = @_;
 local @rv;
 local $me = &master_admin() ? 'master' :
 	    &reseller_admin() ? 'reseller' : 'domain';
+local %cats = map { $_->{'id'}, $_->{'desc'} } &list_custom_link_categories();
 foreach my $l (&list_custom_links()) {
 	if ($l->{'who'}->{$me}) {
 		local $nl = {
 			'desc' => &substitute_domain_template($l->{'desc'}, $d),
 			'url' => &substitute_domain_template($l->{'url'}, $d),
 			'open' => $l->{'open'},
+			'catname' => $cats{$l->{'cat'}},
+			'cat' => $l->{'cat'}, 
 			};
 		if ($nl->{'desc'} && $nl->{'url'}) {
 			push(@rv, $nl);

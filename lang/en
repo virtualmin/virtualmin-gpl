@@ -1532,6 +1532,8 @@ log_enable_styles=Enabled content styles
 log_upgrade=Upgraded to Virtualmin Pro
 log_save_links=Updated custom links
 log_move_links=Swapped two custom links
+log_save_linkcats=Updated custom link categories
+log_save_fields=Updated custom fields
 
 backup_title=Backup Virtual Servers
 backup_title2=Scheduled Backup
@@ -3160,6 +3162,10 @@ newlinks_open=Open in window
 newlinks_same=Same
 newlinks_new=New
 newlinks_move=Move
+newlinks_catdesc=You can group custom links into categories by entering them into this form, and then selecting categories for your link above.
+newlinks_catname=Category name
+newlinks_cat=Category
+newlinks_nocat=&lt;None&gt;
 
 postsave_title=Virtual Server Modified
 postsave_done=The virtual server $1 has been successfully updated. Use the links below to continue managing it.

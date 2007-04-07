@@ -14,7 +14,9 @@ for($i=0; defined($in{"desc_$i"}); $i++) {
 	push(@rv, { 'desc' => $in{"desc_$i"},
 		    'url' => $in{"url_$i"},
 		    'open' => $in{"open_$i"},
-		    'who' => \%who });
+		    'who' => \%who,
+		    'cat' => $in{"cat_$i"},
+		   });
 	}
 &save_custom_links(\@rv);
 &webmin_log("save", "links");

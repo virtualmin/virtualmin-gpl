@@ -584,3 +584,5 @@ Added the Search Mail Logs page, which can show the destination of email to your
 Added the search-maillogs.pl command-line script, with the same functionality as the web-based mail search.
 Removed the 'All virtual servers are name-based' Module Config option, as this function has been superceded by support for multiple shared IP addresses (and was confusing to boot).
 Added a Module Config option for a Unix group to add all domain owners to.
+Added arrows to the Custom Links page to move them up and down.
+Added a new section to the Custom Links page for defining categories, and menus for assiging links into categories.

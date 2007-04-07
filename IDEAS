@@ -52,6 +52,3 @@
 	- allow ${DOM} substitions when copying from global
 	- https://www.virtualmin.com/ticket-tracker/bug?bug%5fnumber=399
 
-  - moving / categorizing custom links
-	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=767
-
