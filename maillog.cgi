@@ -21,6 +21,13 @@ print &ui_form_start("maillog.cgi");
 print &ui_table_start($text{'maillog_header'}, undef, 4);
 
 # Start and end dates
+if (!defined($in{'start_d'})) {
+	# Default to today
+	@tm = localtime(time());
+	$in{'start_d'} = $tm[3];
+	$in{'start_m'} = $tm[4];
+	$in{'start_y'} = $tm[5]+1900;
+	}
 foreach $t ("start", "end") {
 	print &ui_table_row($text{'maillog_'.$t},
 		&ui_textbox($t."_d", $in{$t."_d"}, 2)."/".
@@ -47,8 +54,8 @@ print &ui_form_end([ [ "search", $text{'maillog_search'} ] ]);
 
 if ($in{'search'}) {
 	# Parse criteria
-	$start = &parse_time("start");
-	$end = &parse_time("end");
+	$start = &parse_time("start", 0);
+	$end = &parse_time("end", 1);
 	$source = $in{'source'};
 	$dest = $in{'user'};
 	$dest .= "\@".$d->{'dom'} if ($in{'dom'});
@@ -76,40 +83,13 @@ if ($in{'search'}) {
 			]);
 		foreach $l (@logs) {
 			@tm = localtime($l->{'time'});
-			if ($l->{'auto'}) {
-				$dest = $text{'maillog_auto'};
-				}
-			elsif ($l->{'forward'}) {
-				$dest = &text('maillog_forward',
-					      "<tt>$l->{'forward'}</tt>");
-				}
-			elsif ($l->{'throw'}) {
-				$dest = $text{'maillog_throw'};
-				}
-			elsif ($l->{'inbox'}) {
-				$dest = $text{'maillog_inbox'};
-				}
-			elsif ($l->{'file'}) {
-				$dest = "<tt>$l->{'file'}</tt>";
-				}
-			elsif ($l->{'bounce'}) {
-				$dest = &text('maillog_bounce',
-					      "<i>$l->{'bounce'}</i>");
-				}
-			elsif ($l->{'program'}) {
-				$dest = &text('maillog_program',
-					      "<tt>$l->{'program'}</tt>");
-				}
-			elsif ($l->{'local'}) {
-				$dest = &text('maillog_local',
-					      "<tt>$l->{'local'}</tt>");
-				}
-			else {
-				$dest = $text{'maillog_unknown'};
-				}
+			$dest = &maillog_destination($l);
+			$link = "view_maillog.cgi?id=$l->{'id'}&time=$l->{'time'}";
 			print &ui_columns_row([
-				strftime("%Y-%m-%d", @tm),
-				strftime("%H:%M:%S", @tm),
+				"<a href='$link'>".
+					strftime("%Y-%m-%d", @tm)."</a>",
+				"<a href='$link'>".
+					strftime("%H:%M:%S", @tm)."</a>",
 				$l->{'from'},
 				$l->{'to'},
 				$l->{'user'},
@@ -125,14 +105,18 @@ if ($in{'search'}) {
 
 &ui_print_footer($d ? ( &domain_footer_link($d) ) : ( ),
 		 "", $text{'index_return'});
+
+# parse_time(name, end-day)
 sub parse_time
 {
-local $d = $in{"$_[0]_d"};
-local $m = $in{"$_[0]_m"};
-local $y = $in{"$_[0]_y"};
+local ($name, $end) = @_;
+local $d = $in{$name."_d"};
+local $m = $in{$name."_m"};
+local $y = $in{$name."_y"};
 return 0 if (!$d && !$y);
 local $rv;
-eval { $rv = timelocal(0, 0, 0, $d, $m, $y-1900) };
+eval { $rv = $end ? timelocal(59, 59, 23, $d, $m, $y-1900)
+		  : timelocal(0, 0, 0, $d, $m, $y-1900) };
 &error($text{'maillog_etime'}) if ($@);
 return $rv;
 }

@@ -61,6 +61,12 @@ if ($multiline) {
 		print "    To: $l->{'to'}\n";
 		print "    Size: $l->{'size'}\n";
 		print "    User: $l->{'user'}\n" if ($l->{'level'});
+		if ($l->{'spam'}) {
+			print "    Classified: Spam\n";
+			}
+		elsif ($l->{'virus'}) {
+			print "    Classified: Virus\n";
+			}
 		print $l->{'auto'} ? "    Action: Auto-reply" :
 		      $l->{'forward'} ? "    Forward: $l->{'forward'}" :
 		      $l->{'inbox'} ? "    Action: Inbox" :
@@ -70,6 +76,15 @@ if ($multiline) {
 		      $l->{'bounce'} ?  "    Action: Bounce" :
 		      $l->{'throw'} ?   "    Action: Discard" :
 					"    Action: Unknown","\n";
+		if ($l->{'fullfile'}) {
+			print "    Full path: $l->{'fullfile'}\n";
+			}
+		if ($l->{'relay'}) {
+			print "    Outgoing email relay: $l->{'relay'}\n";
+			}
+		if ($l->{'status'}) {
+			print "    Mail server status: $l->{'status'}\n";
+			}
 		}
 	}
 else {
@@ -81,6 +96,8 @@ else {
 		@tm = localtime($l->{'time'});
 		$dest = $l->{'auto'} ? "Autoreply" :
 			$l->{'forward'} ? $l->{'forward'} :
+		        $l->{'spam'} ? "Spam" :
+		        $l->{'virus'} ? "Virus" :
 		        $l->{'inbox'} ? "Inbox" :
 			$l->{'file'} ? $l->{'file'} :
 			$l->{'program'} ? "|".$l->{'program'} :

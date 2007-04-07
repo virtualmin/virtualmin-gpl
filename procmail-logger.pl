@@ -24,7 +24,8 @@ $dest = $ENV{'LASTFOLDER'};
 if ($dest =~ /^\S+\/sendmail.*\s(\S+)$/) {
 	$dest = $1;
 	}
-print "Time:$now From:$from To:$to User:$ENV{'LOGNAME'} Size:$size Dest:$dest\n";
+$mode = $ENV{'VIRUSMODE'} ? "Virus" : $ENV{'SPAMMODE'} ? "Spam" : "None";
+print "Time:$now From:$from To:$to User:$ENV{'LOGNAME'} Size:$size Dest:$dest Mode:$mode\n";
 
 # address_parts(string)
 # Returns the email addresses in a string

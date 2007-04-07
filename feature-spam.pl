@@ -98,15 +98,21 @@ local $recipe1 = { 'flags' => [ 'f', 'w' ],	# Call spamassassin
 		   'type' => '|',
 		   'action' => $cmd,
 		 };
-local $recipe2;
+local ($varon, $recipe2, $varoff);
 if ($config{'spam_delivery'}) {
+	$varon = { 'name' => 'SPAMMODE', 'value' => 1 };
 	$recipe2 = { 'flags' => [ ],		# Forward spam to destination
 		     'conds' => [ [ '', '^X-Spam-Status: Yes' ] ],
 		     'action' => $config{'spam_delivery'} };
+	$varoff = { 'name' => 'SPAMMODE', 'value' => 0 };
 	}
 &procmail::create_recipe($recipe0, $spamrc);
 &procmail::create_recipe($recipe1, $spamrc);
-&procmail::create_recipe($recipe2, $spamrc) if ($recipe2);
+if ($recipe2) {
+	&procmail::create_recipe($varon, $spamrc);
+	&procmail::create_recipe($recipe2, $spamrc);
+	&procmail::create_recipe($varoff, $spamrc);
+	}
 
 &set_ownership_permissions(undef, undef, 0755, $spamrc);
 &unlock_file($spamrc);
@@ -346,6 +352,70 @@ if (!$gottrap) {
 	&procmail::create_recipe_before($rec1, $recipes[0]);
 	}
 &unlock_file($procmail::procmailrc);
+
+# For any domains with spam or virus filtering enabled, add SPAMMODE and
+# VIRUSMODE procmail variables so that the logger knows what kind of destination
+# email ended up at
+foreach my $d (&list_domains()) {
+	next if (!$d->{'spam'});
+	local $spamrc = "$procmail_spam_dir/$d->{'id'}";
+	local @recipes = &procmail::parse_procmail_file($spamrc);
+	local ($spamrec, $spamrecafter, $gotspammode);
+	local $i = 0;
+	foreach my $r (@recipes) {
+		if ($r->{'name'} eq 'SPAMMODE') {
+			$gotspammode = 1;
+			}
+		elsif ($r->{'conds'}->[0]->[1] eq '^X-Spam-Status: Yes') {
+			# Found place to insert
+			$spamrec = $r;
+			$spamrecafter = $recipes[$i+1];
+			last;
+			}
+		$i++;
+		}
+	if ($spamrec && !$gotspammode) {
+		local $varon = { 'name' => 'SPAMMODE', 'value' => 1 };
+		local $varoff = { 'name' => 'SPAMMODE', 'value' => 0 };
+		if ($spamrecafter) {
+			&procmail::create_recipe_before($varoff, $spamrecafter,
+							$spamrc);
+			}
+		else {
+			&procmail::create_recipe($varoff, $spamrc);
+			}
+		&procmail::create_recipe_before($varon, $spamrec, $spamrc);
+		}
+
+	# Do the same for viruses
+	next if (!$d->{'virus'});
+	local @recipes = &procmail::parse_procmail_file($spamrc);
+	local ($clamrec, $clamafter, $gotclammode);
+	local $i = 0;
+	foreach my $r (@recipes) {
+		if ($r->{'name'} eq 'VIRUSMODE') {
+			$gotclammode = 1;
+			}
+		elsif ($r->{'action'} =~ /^\Q$clam_wrapper_cmd\E/) {
+			# Insert after this one
+			$clamrec = $recipes[$i+1];
+			$clamrecafter = $recipes[$i+2];
+			}
+		$i++;
+		}
+	if ($clamrec && !$gotclammode) {
+		local $varon = { 'name' => 'VIRUSMODE', 'value' => 1 };
+		local $varoff = { 'name' => 'VIRUSMODE', 'value' => 0 };
+		if ($clamrecafter) {
+			&procmail::create_recipe_before($varoff, $clamrecafter,
+							$spamrc);
+			}
+		else {
+			&procmail::create_recipe($varoff, $spamrc);
+			}
+		&procmail::create_recipe_before($varon, $clamrec, $spamrc);
+		}
+	}
 
 # Copy the log writer command to /etc/webmin
 &copy_source_dest("$module_root_directory/procmail-logger.pl",

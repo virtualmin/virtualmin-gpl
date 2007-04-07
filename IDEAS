@@ -54,5 +54,6 @@
 
   - better mail log viewing / reporting
 	- cache parsed logs in some fast format, refresh as needed
-	- help page
-	- click on email to show more details
+
+  - optional secondary group for domain owners
+	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=763

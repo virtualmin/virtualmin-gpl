@@ -3352,3 +3352,25 @@ maillog_local=Mailbox of $1
 maillog_throw=Throw away
 maillog_inbox=User's email inbox
 maillog_user=User
+maillog_spam=(<font color=#ff0000>Spam</font>)
+maillog_virus=(<font color=#ff00ff>Virus</font>)
+maillog_return=log search form
+
+viewmaillog_err=Failed to display logged message
+viewmaillog_egone=No longer in log!
+viewmaillog_title=Logged Email Message
+viewmaillog_header=Details of single logged message
+viewmaillog_id=Message ID
+viewmaillog_unknown=Unknown
+viewmaillog_time=Date and time received
+viewmaillog_from=Sender's address
+viewmaillog_to=Recipient's address
+viewmaillog_level=Delivery type
+viewmaillog_level1=Processed by procmail
+viewmaillog_level0=Handled by email alias
+viewmaillog_user=Destination mailbox user
+viewmaillog_none=None
+viewmaillog_dest=Final destination
+viewmaillog_file=Full destination path
+viewmaillog_relay=Outgoing email relay
+viewmaillog_status=Mail server delivery status

@@ -37,15 +37,21 @@ else {
 			   'type' => '|',
 			   'action' => $clam_wrapper_cmd." ".
 				       &full_clamscan_path() };
+	local $varon = { 'name' => 'VIRUSMODE', 'value' => 1 };
 	local $recipe1 = { 'flags' => [ 'e' ],
 			   'action' => $config{'clam_delivery'} };
+	local $varoff = { 'name' => 'VIRUSMODE', 'value' => 0 };
 	if (@recipes > 1) {
 		&procmail::create_recipe_before($recipe0, $recipes[1], $spamrc);
+		&procmail::create_recipe_before($varon, $recipes[1], $spamrc);
 		&procmail::create_recipe_before($recipe1, $recipes[1], $spamrc);
+		&procmail::create_recipe_before($varoff, $recipes[1], $spamrc);
 		}
 	else {
 		&procmail::create_recipe($recipe0, $spamrc);
+		&procmail::create_recipe($varon, $spamrc);
 		&procmail::create_recipe($recipe1, $spamrc);
+		&procmail::create_recipe($varoff, $spamrc);
 		}
 	&unlock_file($spamrc);
 	&$second_print($text{'setup_done'});

@@ -961,7 +961,7 @@ foreach $f (readdir(DIR)) {
 	if ($f =~ /^\Q$base\E/ && -f "$dir/$f") {
 		if ($f ne $base) {
 			local @st = stat("$dir/$f");
-			next if ($_[1] && $st[7] <= $_[1]);
+			next if ($_[1] && $st[9] <= $_[1]);
 			}
 		push(@rv, "$dir/$f");
 		}
