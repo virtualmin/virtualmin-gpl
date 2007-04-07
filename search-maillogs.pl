@@ -39,14 +39,8 @@ while(@ARGV > 0) {
 		}
 	}
 
-# Get the logs
-@logs = &parse_procmail_log($start, $end);
-if ($source) {
-	@logs = grep { $_->{'from'} =~ /\Q$source\E/i } @logs;
-	}
-if ($dest) {
-	@logs = grep { $_->{'to'} =~ /\Q$dest\E/i } @logs;
-	}
+# Get the matching logs
+@logs = &parse_procmail_log($start, $end, $source, $dest);
 
 # Show what's left
 if ($multiline) {

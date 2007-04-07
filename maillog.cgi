@@ -15,8 +15,16 @@ else {
 &ui_print_header($d ? &domain_in($d) : undef,
 		 $text{'maillog_title'}, "", "maillog");
 
-# Show the search form
 print $text{'maillog_desc'},"<p>\n";
+$ok = &procmail_log_status();
+if ($ok == 0) {
+	print "<b>$text{'maillog_ok0'}</b><p>\n";
+	}
+elsif ($ok == 1) {
+	print "<b>$text{'maillog_ok1'}</b><p>\n";
+	}
+
+# Show the search form
 print &ui_form_start("maillog.cgi");
 print &ui_table_start($text{'maillog_header'}, undef, 4);
 
@@ -60,14 +68,8 @@ if ($in{'search'}) {
 	$dest = $in{'user'};
 	$dest .= "\@".$d->{'dom'} if ($in{'dom'});
 
-	# Get results
-	@logs = &parse_procmail_log($start, $end);
-	if ($source) {
-		@logs = grep { $_->{'from'} =~ /\Q$source\E/i } @logs;
-		}
-	if ($dest) {
-		@logs = grep { $_->{'to'} =~ /\Q$dest\E/i } @logs;
-		}
+	# Get matching results
+	@logs = &parse_procmail_log($start, $end, $source, $dest);
 
 	# Show them
 	if (@logs) {
@@ -84,7 +86,7 @@ if ($in{'search'}) {
 		foreach $l (@logs) {
 			@tm = localtime($l->{'time'});
 			$dest = &maillog_destination($l);
-			$link = "view_maillog.cgi?id=$l->{'id'}&time=$l->{'time'}";
+			$link = "view_maillog.cgi?cid=$l->{'cid'}";
 			print &ui_columns_row([
 				"<a href='$link'>".
 					strftime("%Y-%m-%d", @tm)."</a>",

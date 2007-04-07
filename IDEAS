@@ -58,8 +58,3 @@
   - moving / categorizing custom links
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=767
 
-  - mail log caching
-	- don't read further back than needed
-	- search is missing some results!
-	- cache timelocal lookup of hour
-	- don't read mail log before start of procmail log

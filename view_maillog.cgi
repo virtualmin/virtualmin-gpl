@@ -7,13 +7,7 @@ use POSIX;
 &error_setup($text{'viewmaillog_err'});
 
 # Get the message
-@logs = &parse_procmail_log($in{'time'}, $in{'time'});
-if ($in{'id'}) {
-	($l) = grep { $_->{'id'} eq $in{'id'} } @logs;
-	}
-else {
-	$l = $logs[0];
-	}
+($l) = &parse_procmail_log(undef, undef, undef, undef, $in{'cid'});
 $l || &error($text{'viewmaillog_egone'});
 
 # Validate destination domain
@@ -49,8 +43,12 @@ print &ui_table_row($text{'viewmaillog_user'},
 		    $l->{'user'} ? "<tt>$l->{'user'}</tt>"
 				 : $text{'viewmaillog_none'});
 
+print &ui_table_row($text{'viewmaillog_size'},
+		    $l->{'size'} ? &nice_size($l->{'size'})
+				 : $text{'viewmaillog_unknown'});
+
 print &ui_table_row($text{'viewmaillog_dest'},
-		    &maillog_destination($l), 3);
+		    &maillog_destination($l));
 
 if ($l->{'fullfile'}) {
 	print &ui_table_row($text{'viewmaillog_file'},
