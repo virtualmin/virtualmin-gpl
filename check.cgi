@@ -50,6 +50,9 @@ if ($config{'spam'}) {
 	&setup_default_delivery();
 	}
 
+# Update the domain owner's group
+&update_domain_owners_group();
+
 &webmin_log("check");
 
 # Call any theme post command

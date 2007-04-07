@@ -104,8 +104,9 @@ if ($_[0]->{'mail'}) {
 		}
 	}
 
-# Add to denied SSH group
+# Add to denied SSH group and domain owner group
 &build_denied_ssh_group($_[0]);
+&update_domain_owners_group($_[0]);
 }
 
 # modify_unix(&domain, &olddomain)
@@ -257,6 +258,10 @@ if (!$_[0]->{'parent'}) {
 		}
 	&foreign_call($usermodule, "unlock_user_files");
 	}
+
+# Update any groups
+&build_denied_ssh_group(undef, $_[0]);
+&update_domain_owners_group(undef, $_[0]);
 }
 
 # validate_unix(&domain)
@@ -527,7 +532,7 @@ return @rv;
 # who don't get to login (based on their shell)
 sub build_denied_ssh_group
 {
-local ($newd) = @_;
+local ($newd, $deld) = @_;
 
 # First make sure the group exists
 &require_useradmin();
@@ -538,7 +543,7 @@ return 0 if (!$group);
 # Find domain owners who can't login
 local @shells = &get_unix_shells();
 foreach my $d (&list_domains(), $newd) {
-	next if ($d->{'parent'} || !$d->{'unix'});
+	next if ($d->{'parent'} || !$d->{'unix'} || $d eq $deld);
 	local $user = &get_domain_owner($d);
 	local ($sinfo) = grep { $_->[1] eq $user->{'shell'} } @shells;
 	if ($sinfo && $sinfo->[0] ne 'ssh') {
@@ -561,7 +566,41 @@ if ($group->{'members'} ne $oldgroup->{'members'}) {
 	}
 }
 
+# update_domain_owners_group([&new-domain], [&deleting-domain])
+# If configure, update the member list of a secondary group which should
+# contain all domain owners.
+sub update_domain_owners_group
+{
+local ($newd, $deld) = @_;
+return 0 if (!$config{'domains_group'});
 
+# First make sure the group exists
+&require_useradmin();
+local @allgroups = &list_all_groups();
+local ($group) = grep { $_->{'group'} eq $config{'domains_group'} } @allgroups;
+return 0 if (!$group);
+
+# Find domain owners with Unix logins
+local @members;
+foreach my $d (&list_domains(), $newd) {
+	if ($d->{'unix'} && $d ne $deld) {
+		push(@members, $d->{'user'});
+		}
+	}
+
+# Update the group
+local $oldgroup = { %$group };
+$group->{'members'} = join(",", &unique(@members));
+if ($group->{'members'} ne $oldgroup->{'members'}) {
+	&foreign_call($usermodule, "lock_user_files");
+	&foreign_call($usermodule, "set_group_envs", $group,
+				   'MODIFY_GROUP');
+	&foreign_call($usermodule, "making_changes");
+	&foreign_call($usermodule, "modify_group", $oldgroup, $group);
+	&foreign_call($usermodule, "made_changes");
+	&foreign_call($usermodule, "unlock_user_files");
+	}
+}
 
 $done_feature_script{'unix'} = 1;
 

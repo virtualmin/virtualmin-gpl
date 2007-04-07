@@ -1288,6 +1288,9 @@ if ($_[0]->{'shell'} ne $_[1]->{'shell'}) {
 	# Rebuild denied user list, by shell
 	&build_denied_ssh_group();
 	}
+
+# Rebuild group of domain owners
+&update_domain_owners_group();
 }
 
 # delete_user(&user, domain)
@@ -8093,7 +8096,7 @@ foreach my $c ("mail_system", "generics", "append_style", "ldap_host",
 	       "clamscan_cmd", "iface", "localgroup", "home_quotas",
 	       "mail_quotas", "group_quotas", "quotas", "shell", "ftp_shell",
 	       "all_namevirtual", "dns_ip", "default_procmail",
-	       "compression", "suexec") {
+	       "compression", "suexec", "domains_group") {
 	# Some important config option was changed
 	return 1 if ($config{$c} ne $lastconfig{$c});
 	}
