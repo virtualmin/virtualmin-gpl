@@ -52,17 +52,17 @@ print &ui_table_row($text{'viewmaillog_dest'},
 
 if ($l->{'fullfile'}) {
 	print &ui_table_row($text{'viewmaillog_file'},
-			    "<tt>$l->{'fullfile'}</tt>");
+			    "<tt>$l->{'fullfile'}</tt>", 3);
 	}
 
 if ($l->{'relay'}) {
 	print &ui_table_row($text{'viewmaillog_relay'},
-			    "<tt>$l->{'relay'}</tt>");
+			    "<tt>$l->{'relay'}</tt>", 3);
 	}
 
 if ($l->{'status'}) {
 	print &ui_table_row($text{'viewmaillog_status'},
-			    "<tt>$l->{'status'}</tt>");
+			    "<tt>$l->{'status'}</tt>", 3);
 	}
 
 print &ui_table_end();
