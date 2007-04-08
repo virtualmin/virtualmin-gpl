@@ -607,8 +607,9 @@ foreach my $m (@mods) {
 	# Configure the domain's php.ini to load it, if needed
 	&foreign_require("phpini", "phpini-lib.pl");
 	local $mode = &get_domain_php_mode($d);
-	local $inifile = $mode eq "mod_php" ? &get_global_php_ini($phpver)
-					    : "$d->{'home'}/etc/php.ini";
+	local $inifile = $mode eq "mod_php" ?
+			&get_global_php_ini($phpver, $mode) :
+			"$d->{'home'}/etc/php.ini";
 	local $pconf = &phpini::get_config($inifile);
 	local @exts = grep { $_->{'name'} eq 'extension' &&
 			     $_->{'enabled'} } @$pconf;

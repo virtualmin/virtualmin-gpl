@@ -2128,6 +2128,8 @@ tmpl_disabled_urlsel=Redirect to $1
 tmpl_disabled_urlnone=None (local HTML)
 tmpl_phpmode=Default PHP exection mode
 tmpl_phpver=Default PHP version
+tmpl_php_ini=Template PHP configuration file
+tmpl_php_noedit=Allow editing of PHP configuration file?
 tmpl_rubymode=Default Ruby execution mode
 tmpl_phpverdef=Lowest available
 tmpl_edisabled_url=Missing or invalid disabled website URL
@@ -2173,6 +2175,7 @@ tmpl_espam=The SpamAssassin program $1 was not found on your system
 tmpl_espamd=You have chosen to use the <tt>spamc</tt> client program, but the <tt>spamd</tt> server does not appear to be running
 tmpl_ephpmode2=PHP exection via fcgid requires the Apache mod_fcgid module
 tmpl_spamclear=Automatically delete spam?
+tmpl_ephpini=Template PHP configuration file does not exist
 
 newplugin_title=Plugin Modules
 newplugin_desc=Plugins are Webmin modules which provided additional server and mailbox features for Virtualmin. Unlike the core features, they can be installed separately and written by third-party developers.

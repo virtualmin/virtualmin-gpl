@@ -194,12 +194,30 @@ if (!-r "$etc/php.ini") {
 	local $copied = 0;
 	local @vers = &list_available_php_versions($d, $mode);
 	local $defver = $vers[0]->[0];
-	local $ini = &get_global_php_ini($defver, $mode);
+	local $ini = $tmpl->{'web_php_ini'};
+	local $subs_ini = 0;
+	if (!$ini || $ini eq "none") {
+		$ini = &get_global_php_ini($defver, $mode);
+		}
+	else {
+		$subs_ini = 1;
+		}
 	if ($ini) {
 		# Copy file, set permissions, fix session.save_path, and
 		# clear out extension_dir (because it can differ between PHP
 		# versions)
-		&copy_source_dest($ini, "$etc/php.ini");
+		if ($subs_ini) {
+			# Perform substitions on config file
+			local $inidata = &read_file_contents($ini);
+			$inidata = &substitute_template($inidata, $d);
+			&open_tempfile(INIDATA, ">$etc/php.ini");
+			&print_tempfile(INIDATA, $inidata);
+			&close_tempfile(INIDATA);
+			}
+		else {
+			# Just copy verbatim
+			&copy_source_dest($ini, "$etc/php.ini");
+			}
 		&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'},
 					   0755, "$etc/php.ini");
 		if (&foreign_check("phpini")) {

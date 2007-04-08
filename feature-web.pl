@@ -1555,6 +1555,12 @@ if ($virtualmin_pro) {
 		       [ [ "", $text{'tmpl_phpverdef'} ],
 			 map { [ $_->[0] ] } &list_available_php_versions() ]));
 
+	# Source php.ini file
+	print &ui_table_row(
+	    &hlink($text{'tmpl_php_ini'}, "template_php_ini"),
+	    &ui_opt_textbox("web_php_ini", $tmpl->{'web_php_ini'},
+			    40, $text{'default'}));
+
 	# Run ruby scripts as user
 	print &ui_table_row(
 	    &hlink($text{'tmpl_rubymode'}, "template_rubymode"),
@@ -1710,6 +1716,10 @@ if ($in{"web_mode"} == 2) {
 			}
 		$tmpl->{'web_php_suexec'} = $in{'web_php_suexec'};
 		$tmpl->{'web_phpver'} = $in{'web_phpver'};
+		$in{'web_php_ini_def'} || -r $in{'web_php_ini'} ||
+			&error($text{'tmpl_ephpini'});
+		$tmpl->{'web_php_ini'} = $in{'web_php_ini_def'} ? undef :
+						$in{'web_php_ini'};
 		if ($in{'web_ruby_suexec'} > 0) {
 			&has_command("ruby") ||
 				&error($text{'tmpl_erubycmd'});

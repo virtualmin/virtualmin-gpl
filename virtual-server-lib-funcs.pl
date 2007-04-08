@@ -6336,6 +6336,7 @@ push(@rv, { 'id' => 0,
 	    'web_ruby_suexec' => $config{'ruby_suexec'} eq '' ? -1 :
 					int($config{'ruby_suexec'}),
 	    'web_phpver' => $config{'phpver'},
+	    'web_php_ini' => $config{'php_ini'},
 	    'webalizer' => $config{'def_webalizer'} || "none",
 	    'disabled_web' => $config{'disabled_web'} || "none",
 	    'disabled_url' => $config{'disabled_url'} || "none",
@@ -6516,6 +6517,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'php_suexec'} = $tmpl->{'web_php_suexec'};
 	$config{'ruby_suexec'} = $tmpl->{'web_ruby_suexec'};
 	$config{'phpver'} = $tmpl->{'web_phpver'};
+	$config{'php_ini'} = $tmpl->{'web_php_ini'};
 	$config{'def_webalizer'} = $tmpl->{'webalizer'} eq "none" ? "" :
 					$tmpl->{'webalizer'};
 	$config{'disabled_web'} = $tmpl->{'disabled_web'} eq "none" ? "" :

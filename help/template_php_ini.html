@@ -1,0 +1,27 @@
+<header>Template PHP configuration file</header>
+
+By default, when a virtual server runs PHP scripts as the server's owner,
+Virtualmin will copy the system's global PHP configuration file (usually 
+<tt>/etc/php.ini</tt>) to the domain's <tt>~/etc</tt> directory. This allows
+PHP options to be set differently on a per-server basis. <p>
+
+This setting can be used to enter a different path for the base PHP
+configuration file to copy. In addition, you can use Virtualmin substitions
+like ${DOM} in this template file, which will be replaced when it is copied.
+Other useful substitions available include :<p>
+
+<table>
+<tr> <td><tt><b>${DOM}</b></td>
+<td>The domain name, such as <tt>foo.com</tt></td> </tr>
+<tr> <td><tt><b>${USER}</b></td>
+<td>The server's administration login, such as <tt>foo</tt></td> </tr>
+<tr> <td><tt><b>${HOME}</b></td>
+<td>The server's home directory, like <tt>/home/foo</tt></td> </tr>
+<tr> <td><tt><b>${EMAILTO}</b></td>
+<td>The virtual server's contact email address</td> </tr>
+</table>
+
+In addition, conditional blocks like <i>${IF-MAIL}...${ENDIF-MAIL}</i> and <i>${IF-WEB}...${ELSE-WEB}...{$ENDIF-WEB}</i> may be used.<p>
+
+<footer>
+
