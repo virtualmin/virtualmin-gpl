@@ -7966,7 +7966,7 @@ if ($config{'passwd_mode'} == 1) {
 	# Random but editable password
 	return &ui_textbox($name, &random_password(), 40);
 	}
-elsif ($config{'passwd_mode'} == 1) {
+elsif ($config{'passwd_mode'} == 0) {
 	# One hidden password
 	return &ui_password($name, undef, 40);
 	}

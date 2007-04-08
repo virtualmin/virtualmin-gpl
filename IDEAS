@@ -49,6 +49,4 @@
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=747
 
   - ruby on rails script installer
-
-  - clam deletion needs to handle SPAMMODE variables
-
+	- need open to run ruby via mod_fcgid

@@ -29,7 +29,7 @@ local $file = "$module_config_directory/dynip.$service";
 local $ip = &read_file_contents($file);
 $ip =~ s/\r|\n//g;
 local @st = stat($file);
-return wantarrau ? ( $ip, $st[9] ) : $ip;
+return wantarray ? ( $ip, $st[9] ) : $ip;
 }
 
 # set_last_dynip_update(service, ip)
