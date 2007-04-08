@@ -587,3 +587,4 @@ Added a Module Config option for a Unix group to add all domain owners to.
 Added arrows to the Custom Links page to move them up and down.
 Added a new section to the Custom Links page for defining categories, and menus for assiging links into categories.
 Added an option in the Apache website section of the server templates for specifying a php.ini file to copy into new virtual servers' ~/etc directory, instead of the global default. This .ini file can also contain substitions like ${DOM} and ${HOME}.
+Added a server template option to make virtual servers' php.ini files non-editable by the server owner.

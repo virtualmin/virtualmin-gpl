@@ -677,7 +677,8 @@ if ($extramods{'phpini'}) {
 		if ($sd->{'web'} && defined(&get_domain_php_mode) &&
 		    &get_domain_php_mode($sd) ne "mod_php") {
 			local $ini = "$sd->{'home'}/etc/php.ini";
-			if (-r $ini) {
+			local @st = stat($ini);
+			if (@st && $st[4] == $sd->{'uid'}) {
 				push(@pconfs, "$ini=".
 					&text('webmin_phpini', $sd->{'dom'}));
 				}

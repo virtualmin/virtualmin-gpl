@@ -218,8 +218,11 @@ if (!-r "$etc/php.ini") {
 			# Just copy verbatim
 			&copy_source_dest($ini, "$etc/php.ini");
 			}
-		&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'},
-					   0755, "$etc/php.ini");
+		local ($uid, $gid) = (0, 0);
+		if (!$tmpl->{'web_php_noedit'}) {
+			($uid, $gid) = ($d->{'uid'}, $d->{'ugid'});
+			}
+		&set_ownership_permissions($uid, $gid, 0755, "$etc/php.ini");
 		if (&foreign_check("phpini")) {
 			&foreign_require("phpini", "phpini-lib.pl");
 			local $pconf = &phpini::get_config("$etc/php.ini");

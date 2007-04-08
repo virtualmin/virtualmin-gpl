@@ -1561,6 +1561,12 @@ if ($virtualmin_pro) {
 	    &ui_opt_textbox("web_php_ini", $tmpl->{'web_php_ini'},
 			    40, $text{'default'}));
 
+	# Allow editing of PHP configs
+	print &ui_table_row(
+	    &hlink($text{'tmpl_php_noedit'}, "template_php_noedit"),
+	    &ui_radio("web_php_noedit", $tmpl->{'web_php_noedit'},
+		      [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
+
 	# Run ruby scripts as user
 	print &ui_table_row(
 	    &hlink($text{'tmpl_rubymode'}, "template_rubymode"),
@@ -1720,6 +1726,7 @@ if ($in{"web_mode"} == 2) {
 			&error($text{'tmpl_ephpini'});
 		$tmpl->{'web_php_ini'} = $in{'web_php_ini_def'} ? undef :
 						$in{'web_php_ini'};
+		$tmpl->{'web_php_noedit'} = $in{'web_php_noedit'};
 		if ($in{'web_ruby_suexec'} > 0) {
 			&has_command("ruby") ||
 				&error($text{'tmpl_erubycmd'});

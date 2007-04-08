@@ -1,0 +1,16 @@
+<header>Allow editing of PHP configuration?</header>
+
+When this option is set to <b>Yes</b> (as it is by default), virtual server
+owners are allowed to edit their PHP configuration. However, you can set it
+to <b>No</b> to prevent this, either for security reasons or to prevent
+in-experienced admins from making incorrect changes. <p>
+
+This is implemented by making the domain's <tt>~/etc/php.ini</tt> file
+editable only by the <tt>root</tt> Unix user. Be aware that this is not
+a foolproof method of preventing changes to the PHP configuration though - the
+domain owner could still specify a different config file by editing the PHP
+wrapper scripts in <tt>cgi-bin</tt>, running their own copy of PHP, or
+running PHP scripts as CGI programs. <p>
+
+<footer>
+
