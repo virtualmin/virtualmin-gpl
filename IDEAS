@@ -48,3 +48,7 @@
     returning to domain list (and refresh left frame if needed)
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=747
 
+  - ruby on rails script installer
+
+  - clam deletion needs to handle SPAMMODE variables
+

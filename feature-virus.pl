@@ -77,6 +77,14 @@ local @clamrec = &find_clam_recipe(\@recipes);
 if (@clamrec) {
 	&procmail::delete_recipe($clamrec[1]);
 	&procmail::delete_recipe($clamrec[0]);
+
+	# Also take out VIRUSMODE variables
+	@recipes = &procmail::parse_procmail_file($spamrc);
+	foreach my $r (reverse(@recipes)) {
+		if ($r->{'name'} eq 'VIRUSMODE') {
+			&procmail::delete_recipe($r);
+			}
+		}
 	&$second_print($text{'setup_done'});
 	}
 else {
