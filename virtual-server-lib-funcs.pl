@@ -3545,7 +3545,8 @@ if ($mode == 1) {
 elsif ($mode == 2) {
 	# Try a dummy SCP
 	local $scperr;
-	local $r = ($user ? "$user\@" : "")."$server:/tmp/virtualmin-copy-test";
+	local $r = ($user ? "$user\@" : "").
+		   "$server:/tmp/virtualmin-copy-test.$user";
 	local $temp = &transname();
 	open(TEMP, ">$temp");
 	close(TEMP);
