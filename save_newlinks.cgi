@@ -20,6 +20,6 @@ for($i=0; defined($in{"desc_$i"}); $i++) {
 	}
 &save_custom_links(\@rv);
 &webmin_log("save", "links");
-&redirect("edit_newlinks.cgi");
+&redirect("edit_newlinks.cgi?refresh=1");
 
 

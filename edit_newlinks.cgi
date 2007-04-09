@@ -2,6 +2,7 @@
 # Display all custom links for domains
 
 require './virtual-server-lib.pl';
+&ReadParse();
 &can_edit_templates() || &error($text{'newlinks_ecannot'});
 &ui_print_header(undef, $text{'newlinks_title'}, "", "custom_links");
 
@@ -75,6 +76,13 @@ foreach $c (@cats, { }, { }) {
 	$i++;
 	}
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
+
+if ($in{'refresh'}) {
+	# Update left frame after changing custom links
+	if (defined(&theme_post_save_domain)) {
+		&theme_post_save_domain($d, 'modify');
+		}
+	}
 
 &ui_print_footer("", $text{'index_return'});
 
