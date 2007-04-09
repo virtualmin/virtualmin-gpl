@@ -333,7 +333,8 @@ else {
 			}
 
 		# Change the PHP execution mode
-		if (&can_edit_phpmode() && $in{'phpmode'} && $d->{'web'}) {
+		if (&can_edit_phpmode() && $in{'phpmode'} && $d->{'web'} &&
+		    !$d->{'alias'}) {
 			&$first_print($text{'massdomains_phpmoding'});
 			if ($in{'phpmode'} ne 'mod_php' &&
 			    !&get_domain_suexec($d)) {
@@ -345,7 +346,8 @@ else {
 			}
 
 		# Change the Ruby execution mode
-		if (&can_edit_phpmode() && $in{'rubymode'} && $d->{'web'}) {
+		if (&can_edit_phpmode() && $in{'rubymode'} && $d->{'web'} &&
+		    !$d->{'alias'}) {
 			&$first_print($text{'massdomains_rubymoding'});
 			if ($in{'rubymode'} ne 'mod_ruby' &&
 			    $in{'rubymode'} ne 'none' &&
@@ -359,7 +361,8 @@ else {
 			}
 
 		# Change the default PHP version
-		if (&can_edit_phpver() && $in{'phpver'} && $d->{'web'}) {
+		if (&can_edit_phpver() && $in{'phpver'} && $d->{'web'} &&
+		    !$d->{'alias'}) {
 			&$first_print($text{'massdomains_phpvering'});
 			&save_domain_php_directory($d, &public_html_dir($d),
 						   $in{'phpver'});
