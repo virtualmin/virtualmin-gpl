@@ -55,6 +55,10 @@ foreach $line (split(/\r?\n/, $uout)) {
 	if (%info && ($info{'version'} > $ver ||
 		      $info{'version'} == $ver && $info{'version'} !~ /gpl/)) {
 		&$second_print(&text('upgrade_gotver', $info{'version'}));
+		if ($mod eq "virtual-server") {
+			$errors++;
+			goto PAGEEND;
+			}
 		next;
 		}
 
@@ -118,7 +122,7 @@ $webmin::config{'uppass'} = $in{'key'};
 $webmin::config{'upshow'} = 0;
 &webmin::save_module_config();
 &unlock_file($webmin::module_config_file);
-@job = &cron::list_cron_jobs();
+@jobs = &cron::list_cron_jobs();
 $upjob = &webmin::find_cron_job(\@jobs);
 if ($upjob) {
 	&$second_print($text{'upgrade_schedok'});
