@@ -38,6 +38,11 @@ sub script_phpmyadmin_php_vers
 return ( 4, 5 );
 }
 
+sub script_phpmyadmin_php_modules
+{
+return ("mcrypt");
+}
+
 # script_phpmyadmin_depends(&domain, version)
 sub script_phpmyadmin_depends
 {
