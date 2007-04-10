@@ -29,8 +29,6 @@
 
  - EC2 support
 	- Create AMI?
-		- quotas need to be enabled at boot
-		- delete last dynamic IP address
 		- install instructions
 	- Need way to specify licence key after install, for use with AMI
 	  'template' which has software but no licence
