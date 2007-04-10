@@ -592,3 +592,4 @@ Added a server template option to make virtual servers' php.ini files non-editab
 Updated Gallery script installer to 1.5.6.
 If a domain with the same TLD already exists as one you are creating, the automatically generated group name will be the new full domain name, to avoid clashes.
 The stats web directory is now password-protected by default.
+Added the list-bandwidth.pl command-line script for displaying usage by domain, date and feature.
