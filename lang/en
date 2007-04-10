@@ -281,6 +281,7 @@ setup_evirtalloc2=Could not allocate virtual IP address from reseller range
 setup_evirttmpl=No IP allocation range is defined for the selected template
 setup_evirttmpl2=IP allocation must be used for the selected template
 setup_eauto=A free automatically chosen administration username could not be found (both $1 and $2 already exist)
+setup_eauto2=A free automatically chosen administration group name could not be found (both $1 and $2 already exist)
 setup_euser=The specified administration user already exists
 setup_eowner=Description cannot contain the : character
 setup_euser2=Missing or invalid administrator username

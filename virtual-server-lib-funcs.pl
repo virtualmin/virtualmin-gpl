@@ -5487,10 +5487,25 @@ if (defined(getpwnam($try1)) || $config{'longname'}) {
 	$try2 = $user;
 	if (defined(getpwnam($try))) {
 		return (undef, $try1, $try2);
-		&error(&text('setup_eauto', $try1, $try2));
 		}
 	}
 return ($user);
+}
+
+# unixgroup_name(domainname)
+# Returns a Unix group name for some domain, or undef if none can be found
+sub unixgroup_name
+{
+$_[0] =~ /^([^\.]+)/;
+local ($try1, $group) = ($1, $1);
+if (defined(getgrnam($try1)) || $config{'longname'}) {
+	$group = $_[0];
+	$try2 = $group;
+	if (defined(getpwnam($try))) {
+		return (undef, $try1, $try2);
+		}
+	}
+return ($group);
 }
 
 # virtual_server_clashes(&dom, [&features-to-check], [field-to-check])

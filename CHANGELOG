@@ -590,3 +590,4 @@ Added an option in the Apache website section of the server templates for specif
 Added a server template option to make virtual servers' php.ini files non-editable by the server owner.
 ---- Changes since 3.39 ----
 Updated Gallery script installer to 1.5.6.
+If a domain with the same TLD already exists as one you are creating, the automatically generated group name will be the new full domain name, to avoid clashes.
