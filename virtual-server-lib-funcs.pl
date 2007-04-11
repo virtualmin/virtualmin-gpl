@@ -3503,10 +3503,16 @@ if ($unlimited) {
 	if ($value eq "none") {
 		$rv .= "    document.forms[0].${name}_def[0].checked = true;\n";
 		$rv .= "    document.forms[0].${name}.disabled = true;\n";
+		$rv .= "    if (document.forms[0].${name}_units) {\n";
+		$rv .= "        document.forms[0].${name}_units.disabled = true;\n";
+		$rv .= "    }\n";
 		}
 	else {
 		$rv .= "    document.forms[0].${name}_def[1].checked = true;\n";
 		$rv .= "    document.forms[0].${name}.disabled = false;\n";
+		$rv .= "    if (document.forms[0].${name}_units) {\n";
+		$rv .= "        document.forms[0].${name}_units.disabled = false;\n";
+		$rv .= "    }\n";
 		}
 	}
 return $rv;

@@ -27,13 +27,6 @@
 
  - better coverage of files by webmin_log
 
- - EC2 support
-	- Create AMI?
-		- install instructions
-	- Need way to specify licence key after install, for use with AMI
-	  'template' which has software but no licence
-		- update yum / apt too
-
   - weebly integration
 
   - plesk migration support
