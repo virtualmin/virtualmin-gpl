@@ -44,3 +44,6 @@
 
   - ruby on rails script installer
 	- need open to run ruby via mod_fcgid
+
+  - set IMAP password for new users
+
