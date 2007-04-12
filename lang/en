@@ -2484,6 +2484,7 @@ scripts_eupdate=.. automatic module installation is not available on your system
 scripts_einstallmod=Module is not available even after installation!
 scripts_addext=Enabling module in PHP configuration ..
 scripts_gotmod=.. PHP module $1 is now available.
+scripts_nopearmod=The PHP Pear modules $1 are required, by Webmin's Pear module is not available to install them - proceeding anyway.
 scripts_needpear=Installing PHP Pear module $1 ..
 scripts_einstallpear=Pear module is not available even after installation!
 scripts_gotpear=.. installation complete.

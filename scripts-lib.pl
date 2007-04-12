@@ -467,6 +467,7 @@ return $any;
 sub check_pear_module
 {
 local ($mod, $ver, $d) = @_;
+return -1 if (!&foreign_check("php-pear"));
 &foreign_require("php-pear", "php-pear-lib.pl");
 local @cmds = &php_pear::get_pear_commands();
 return -1 if (!@cmds);
@@ -652,6 +653,12 @@ local ($d, $script, $ver, $phpver) = @_;
 local $modfunc = $script->{'pear_mods_func'};
 return 1 if (!defined(&$modfunc));
 local @mods = &$modfunc($d, $opts);
+if (!&foreign_check("php-pear")) {
+	# Cannot do anything
+	&$first_print(&text('scripts_nopearmod',
+			    "<tt>".join(" ", @mods)."</tt>"));
+	return 0;
+	}
 foreach my $m (@mods) {
 	next if (&check_pear_module($m, $phpver, $d) == 1);
 
