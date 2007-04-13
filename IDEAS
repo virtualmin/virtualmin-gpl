@@ -27,21 +27,17 @@
 
  - better coverage of files by webmin_log
 
-  - weebly integration
+ - weebly integration
 
-  - plesk migration support
+ - plesk migration support
 
-  - cron time selector is too complex - use popup
+ - cron time selector is too complex - use popup
 
-  - mailbox_list_mails should use select function for virtual folders!
+ - mailbox_list_mails should use select function for virtual folders!
 
-  - templates for new mailing list configs
+ - templates for new mailing list configs
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=739
 
-  - after saving a global config setting, show some page instead of
-    returning to domain list (and refresh left frame if needed)
-	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=747
-
-  - ruby on rails script installer
+ - ruby on rails script installer
 	- need open to run ruby via mod_fcgid
 
