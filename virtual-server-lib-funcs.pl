@@ -1458,9 +1458,10 @@ return 0 if (!&usermin::get_usermin_module_info("mailbox"));
 local %mconfig;
 &read_file("$usermin::config{'usermin_dir'}/mailbox/config", \%mconfig);
 return 0 if ($mconfig{'mail_system'} != 4);
-return 0 if ($mconfig{'pop_server'} ne 'localhost' &&
-	      $mconfig{'pop_server'} ne '127.0.0.1' &&
-	      &to_ipaddress($mconfig{'pop_server'}) ne &to_ipaddress(&get_system_hostname()));
+return 0 if ($mconfig{'pop3_server'} ne '' &&
+             $mconfig{'pop3_server'} ne 'localhost' &&
+	     $mconfig{'pop3_server'} ne '127.0.0.1' &&
+	     &to_ipaddress($mconfig{'pop3_server'}) ne &to_ipaddress(&get_system_hostname()));
 
 # Set the password
 foreach my $dir ($user->{'home'}, "$user->{'home'}/.usermin", "$user->{'home'}/.usermin/mailbox") {
