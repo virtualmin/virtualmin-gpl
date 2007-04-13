@@ -6764,6 +6764,9 @@ if (!$tmpl->{'default'}) {
 				}
 			}
 		}
+	# The ruby setting needs to default to -1 if the web section is defined
+	# in this template, but we are using the GPL release
+	$tmpl->{'web_ruby_suexec'} = -1 if ($tmpl->{'web_ruby_suexec'} eq '');
 	}
 return $tmpl;
 }

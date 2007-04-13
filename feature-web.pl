@@ -1609,30 +1609,28 @@ if ($virtualmin_pro) {
 		$ptable);
 	}
 
-if ($virtualmin_pro) {
-	# Disabled website HTML
-	print &ui_table_hr();
+# Disabled website HTML
+print &ui_table_hr();
 
-	print &ui_table_row(&hlink($text{'tmpl_disabled_web'},
-			    'disabled_web'),
-	  &none_def_input("disabled_web", $tmpl->{'disabled_web'},
-			  $text{'tmpl_disabled_websel'}, 0, 0,
-			  $text{'tmpl_disabled_webdef'})."<br>\n".
-	  &ui_textarea("disabled_web",
-	    $tmpl->{'disabled_web'} eq "none" ? undef :
-	      join("\n", split(/\t/, $tmpl->{'disabled_web'})),
-	    5, 50));
+print &ui_table_row(&hlink($text{'tmpl_disabled_web'},
+		    'disabled_web'),
+  &none_def_input("disabled_web", $tmpl->{'disabled_web'},
+		  $text{'tmpl_disabled_websel'}, 0, 0,
+		  $text{'tmpl_disabled_webdef'})."<br>\n".
+  &ui_textarea("disabled_web",
+    $tmpl->{'disabled_web'} eq "none" ? undef :
+      join("\n", split(/\t/, $tmpl->{'disabled_web'})),
+    5, 50));
 
-	# Disabled website URL
-	$url = $tmpl->{'disabled_url'};
-	$url = "" if ($url eq "none");
-	print &ui_table_row(&hlink($text{'tmpl_disabled_url'},
-			    'disabled_url'),
-	  &none_def_input("disabled_url", $tmpl->{'disabled_url'},
-		  &text('tmpl_disabled_urlsel',
-			&ui_textbox("disabled_url", $url, 30)), 0, 0,
-		  $text{'tmpl_disabled_urlnone'}));
-	}
+# Disabled website URL
+$url = $tmpl->{'disabled_url'};
+$url = "" if ($url eq "none");
+print &ui_table_row(&hlink($text{'tmpl_disabled_url'},
+		    'disabled_url'),
+  &none_def_input("disabled_url", $tmpl->{'disabled_url'},
+	  &text('tmpl_disabled_urlsel',
+		&ui_textbox("disabled_url", $url, 30)), 0, 0,
+	  $text{'tmpl_disabled_urlnone'}));
 
 if ($config{'proxy_pass'} == 2) {
 	# Frame-forwarding HTML (if enabled)
@@ -1738,14 +1736,12 @@ $tmpl->{'webalizer'} = &parse_none_def("webalizer");
 if ($in{"webalizer_mode"} == 2) {
 	-r $in{'webalizer'} || &error($text{'tmpl_ewebalizer'});
 	}
-if ($virtualmin_pro) {
-	$tmpl->{'disabled_web'} = &parse_none_def("disabled_web");
-	if ($in{'disabled_url_mode'} == 2) {
-		$in{'disabled_url'} =~ /^(http|https):\/\/\S+/ ||
-			&error($text{'tmpl_edisabled_url'});
-		}
-	$tmpl->{'disabled_url'} = &parse_none_def("disabled_url");
+$tmpl->{'disabled_web'} = &parse_none_def("disabled_web");
+if ($in{'disabled_url_mode'} == 2) {
+	$in{'disabled_url'} =~ /^(http|https):\/\/\S+/ ||
+		&error($text{'tmpl_edisabled_url'});
 	}
+$tmpl->{'disabled_url'} = &parse_none_def("disabled_url");
 
 # Save PHP variables
 if ($virtualmin_pro) {
@@ -1842,21 +1838,26 @@ else {
 sub add_script_language_directives
 {
 local ($d, $tmpl, $port) = @_;
-if ($tmpl->{'web_php_suexec'} == 1) {
-	# Create cgi wrappers for PHP 4 and 5
-	&save_domain_php_mode($d, "cgi", $port, 1);
-	}
-elsif ($tmpl->{'web_php_suexec'} == 2) {
-	# Add directives for FastCGId
-	&save_domain_php_mode($d, "fcgid", $port, 1);
+
+if (defined(&save_domain_php_mode)) {
+	if ($tmpl->{'web_php_suexec'} == 1) {
+		# Create cgi wrappers for PHP 4 and 5
+		&save_domain_php_mode($d, "cgi", $port, 1);
+		}
+	elsif ($tmpl->{'web_php_suexec'} == 2) {
+		# Add directives for FastCGId
+		&save_domain_php_mode($d, "fcgid", $port, 1);
+		}
 	}
 
-if ($tmpl->{'web_ruby_suexec'} >= 0) {
-	# Setup for Ruby
-	&save_domain_ruby_mode($d,
-		$tmpl->{'web_ruby_suexec'} == 0 ? "mod_ruby" :
-		$tmpl->{'web_ruby_suexec'} == 1 ? "cgi" : "fcgid",
-		$port, 1);
+if (defined(&save_domain_ruby_mode)) {
+	if ($tmpl->{'web_ruby_suexec'} >= 0) {
+		# Setup for Ruby
+		&save_domain_ruby_mode($d,
+			$tmpl->{'web_ruby_suexec'} == 0 ? "mod_ruby" :
+			$tmpl->{'web_ruby_suexec'} == 1 ? "cgi" : "fcgid",
+			$port, 1);
+		}
 	}
 }
 
