@@ -612,14 +612,27 @@ foreach my $m (@mods) {
 			&get_global_php_ini($phpver, $mode) :
 			"$d->{'home'}/etc/php.ini";
 	local $pconf = &phpini::get_config($inifile);
-	local @exts = grep { $_->{'name'} eq 'extension' &&
-			     $_->{'enabled'} } @$pconf;
+	local @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
+	local @exts = grep { $_->{'enabled'} } @allexts;
 	local ($got) = grep { $_->{'value'} eq "$m.so" } @exts;
 	if (!$got) {
 		# Needs to be enabled
 		&$first_print($text{'scripts_addext'});
 		local $lref = &read_file_lines($inifile);
-		splice(@$lref, $exts[$#exts]->{'line'}+1, 0, "extension=$m.so");
+		if (@exts) {
+			# After current extensions
+			splice(@$lref, $exts[$#exts]->{'line'}+1, 0,
+			       "extension=$m.so");
+			}
+		elsif (@allexts) {
+			# After commented out extensions
+			splice(@$lref, $allexts[$#allexts]->{'line'}+1, 0,
+			       "extension=$m.so");
+			}
+		else {
+			# At end of file (should never happen, but..)
+			push(@$lref, "extension=$m.so");
+			}
 		&flush_file_lines($inifile);
 		undef($phpini::get_config_cache{$inifile});
 		&$second_print($text{'setup_done'});
@@ -798,7 +811,7 @@ foreach $script (@list) {
 			       &ui_textbox("db_$i",
 				$db_def == 1 ? "" : $script->{'db'}, 10) ] ]),
 		&ui_select("dbtype_$i", $script->{'dbtype'}, \@dbopts),
-		], [ "valign=top", "valign=top", undef, "valign=top" ]);
+		], [ "valign=top", "valign=top", "nowrap", "valign=top" ]);
 		    
 	$i++;
 	}
