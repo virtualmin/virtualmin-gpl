@@ -41,3 +41,5 @@
  - ruby on rails script installer
 	- need open to run ruby via mod_fcgid
 
+ - cache mail log indexes in a text file
+	- can scan and exclude outside date range

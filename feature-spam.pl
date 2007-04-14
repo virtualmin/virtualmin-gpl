@@ -222,18 +222,8 @@ sub setup_default_delivery
 local @recipes = &procmail::get_procmailrc();
 my ($gotdef, $gotorgmail, $gotdel, $gotdrop);
 foreach my $r (@recipes) {
-	if ($r->{'action'} eq '$DEFAULT' &&
-	    !@{$r->{'conds'}}) {
+	if ($r->{'action'} eq '$DEFAULT' && !@{$r->{'conds'}}) {
 		$gotdel = $r;
-		}
-	elsif ($r->{'name'} eq 'DEFAULT') {
-		$gotdef = $r;
-		}
-	elsif ($r->{'name'} eq 'ORGMAIL') {
-		$gotorgmail = $r;
-		}
-	elsif ($r->{'name'} eq 'DROPPRIVS') {
-		$gotdrop = $r;
 		}
 	}
 
@@ -249,6 +239,14 @@ if ($config{'default_procmail'} && !$gotdel) {
 elsif (!$config{'default_procmail'} && $gotdel) {
 	# Remove default delivery rule
 	&procmail::delete_recipe($gotdel);
+	}
+
+# Find the DEFAULT variable setting
+@recipes = &procmail::get_procmailrc();
+foreach my $r (@recipes) {
+	if ($r->{'name'} eq 'DEFAULT') {
+		$gotdef = $r;
+		}
 	}
 
 # The DEFAULT destination needs to be set to match the mail server, as procmail
@@ -274,6 +272,14 @@ else {
 		}
 	}
 
+# Find the ORGMAIL variable
+@recipes = &procmail::get_procmailrc();
+foreach my $r (@recipes) {
+	if ($r->{'name'} eq 'ORGMAIL') {
+		$gotorgmail = $r;
+		}
+	}
+
 # Same for the ORGMAIL destination, to prevent delivery falling back to
 # /var/mail/XXX in an over-quota situation
 if ($gotorgmail) {
@@ -293,13 +299,16 @@ else {
 		}
 	}
 
-# Re-get the default delivery receipe
+# Re-get the default delivery receipe, and DROPPRIVS
 $gotdel = undef;
-local @recipes = &procmail::get_procmailrc();
+@recipes = &procmail::get_procmailrc();
 foreach my $r (@recipes) {
 	if ($r->{'action'} eq '$DEFAULT' &&
 	    !@{$r->{'conds'}}) {
 		$gotdel = $r;
+		}
+	elsif ($r->{'name'} eq 'DROPPRIVS') {
+		$gotdrop = $r;
 		}
 	}
 
