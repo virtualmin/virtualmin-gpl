@@ -17,9 +17,9 @@ $from = $config{'from_addr'} || &mailboxes::get_from_address();
 ($oldip, $oldwhen) = &get_last_dynip_update($config{'dynip_service'});
 $newip = $config{'dynip_auto'} ? &get_external_ip_address()
 			       : &get_default_ip();
-if ($oldip ne $newip || $oldwhen < time()-7*24*60*60) {
+if ($oldip ne $newip || $oldwhen < time()-28*24*60*60) {
 	# Talk to the dynamic IP service, as our IP has changed or we
-	# haven't reported in for a week.
+	# haven't reported in for a month
 	($ip, $err) = &update_dynip_service();
 	if ($err) {
 		# Failed .. tell the user
