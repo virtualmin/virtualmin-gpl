@@ -45,16 +45,19 @@ if ($_[0]->{'ssl'}) {
 # make_monitor(&domain, ssl)
 sub make_monitor
 {
-local $serv = { 'id' => $_[0]->{'id'}.($_[1] ? "_ssl" : "_web"),
+local ($d, $ssl) = @_;
+local $tmpl = &get_template($d->{'template'});
+local $serv = { 'id' => $d->{'id'}.($ssl ? "_ssl" : "_web"),
 		'type' => 'http',
-		'desc' => $_[1] ? "Website www.$_[0]->{'dom'} (SSL)" 
-				: "Website www.$_[0]->{'dom'}",
+		'desc' => $ssl ? "Website www.$d->{'dom'} (SSL)" 
+				: "Website www.$d->{'dom'}",
 		'fails' => 1,
-		'email' => &monitor_email($_[0]),
-		'host' => "www.$_[0]->{'dom'}",
-		'port' => $_[1] ? $_[0]->{'web_sslport'} : $_[0]->{'web_port'},
+		'email' => &monitor_email($d),
+		'host' => "www.$d->{'dom'}",
+		'port' => $ssl ? $d->{'web_sslport'} : $d->{'web_port'},
 		'nosched' => 0,
-		'ssl' => $_[1],
+		'ssl' => $ssl,
+		'alarm' => $tmpl->{'statustimeout'},
 		'page' => '/' };
 return $serv;
 }
@@ -263,6 +266,11 @@ print &ui_table_row(
 	&hlink($text{'tmpl_statusonly'}, "template_statusonly"),
 	&ui_radio("statusonly", int($tmpl->{'statusonly'}),
 		  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
+
+print &ui_table_row(
+	&hlink($text{'tmpl_statustimeout'}, "template_statustimeout"),
+	&ui_opt_textbox("statustimeout", $tmpl->{'statustimeout'},
+			5, &text('tmpl_statustimeoutdef', 10)));
 }
 
 # parse_template_status(&tmpl)
@@ -276,6 +284,10 @@ $tmpl->{'status'} = &parse_none_def("status");
 if ($in{'status_mode'} == 2) {
 	$in{'status'} =~ /\S/ || &error($text{'tmpl_estatus'});
 	$tmpl->{'statusonly'} = $in{'statusonly'};
+	$in{'statustimeout_def'} || $in{'statustimeout'} =~ /^\d+$/ ||
+		&error($text{'tmpl_estatustimeout'});
+	$tmpl->{'statustimeout'} = $in{'statustimeout_def'} ? undef :
+					$in{'statustimeout'};
 	}
 }
 

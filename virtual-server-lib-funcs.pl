@@ -6377,6 +6377,7 @@ push(@rv, { 'id' => 0,
 	    'logrotate' => $config{'logrotate_config'} || "none",
 	    'status' => $config{'statusemail'} || "none",
 	    'statusonly' => int($config{'statusonly'}),
+	    'statustimeout' => $config{'statustimeout'},
 	    'mail_on' => $config{'domain_template'} eq "none" ? "none" : "yes",
 	    'mail' => $config{'domain_template'} eq "none" ||
 		      $config{'domain_template'} eq "default" ?
@@ -6569,6 +6570,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'statusemail'} = $tmpl->{'status'} eq 'none' ?
 					'' : $tmpl->{'status'};
 	$config{'statusonly'} = $tmpl->{'statusonly'};
+	$config{'statustimeout'} = $tmpl->{'statustimeout'};
 	if ($tmpl->{'mail_on'} eq 'none') {
 		# Don't send
 		$config{'domain_template'} = 'none';
