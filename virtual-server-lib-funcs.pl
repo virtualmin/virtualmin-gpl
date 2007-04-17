@@ -2091,6 +2091,7 @@ local $d;
 local %done;
 local $sortfield = $config{'domains_sort'} || "user";
 foreach $d (sort { $a->{$sortfield} cmp $b->{$sortfield} ||
+		   $a->{'parent'} <=> $b->{'parent'} ||
 		   $a->{'created'} <=> $b->{'created'} } @$doms) {
 	$done{$d->{'id'}}++;
 	local $dn = &shorten_domain_name($d);
