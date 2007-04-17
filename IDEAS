@@ -30,6 +30,7 @@
  - weebly integration
 
  - plesk migration support
+	- files in ~/contrib/plesk
 
  - cron time selector is too complex - use popup
 

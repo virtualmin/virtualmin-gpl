@@ -40,10 +40,10 @@ if ($oldip ne $newip || $oldwhen < time()-28*24*60*60) {
 	}
 
 # Save and tell the user
-if ($ip && $ip ne $oldip) {
-	# Changed! 
+if ($ip) {
 	&set_last_dynip_update($config{'dynip_service'}, $ip);
-
+	}
+if ($ip && $ip ne $oldip) {
 	# Fix up any virtual servers using the old IP
 	if ($oldip) {
 		#&set_all_null_print();
