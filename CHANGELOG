@@ -595,3 +595,4 @@ The stats web directory is now password-protected by default.
 Added the list-bandwidth.pl command-line script for displaying usage by domain, date and feature.
 Added script installer for Simple Machines Forum.
 Added a server templates option to set the default timeout for the HTTP status monitor feature.
+The number of days to keep old bandwidth data can now be configured on the Bandwidth Monitoring page.

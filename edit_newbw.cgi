@@ -30,6 +30,11 @@ print &ui_table_row(&hlink($text{'newbw_period'}, "bandwidth_bw_past"),
 		      $config{'bw_past'} ? undef : $config{'bw_period'}, 4)." ".
 		    $text{'newbw_days'});
 
+# Show field for max days to keep
+print &ui_table_row(&hlink($text{'newbw_maxdays'}, "bandwidth_maxdays"),
+		    &ui_opt_textbox("bw_maxdays", $config{'bw_maxdays'},
+				    10, $text{'newbw_maxdaysdef'}));
+
 # Show email to owner field
 print &ui_table_row(&hlink($text{'newbw_owner'}, "bandwidth_bw_owner"),
 		    &ui_radio("bw_owner", $config{'bw_owner'} ? 1 : 0,

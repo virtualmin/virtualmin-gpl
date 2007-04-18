@@ -43,6 +43,7 @@ foreach $f (@features) {
 
 # For each server, scan it's log files for all usage since the last check, and
 # update the count for each day.
+$maxdays = $config{'bw_maxdays'} || 366;
 foreach $d (@bwdoms) {
 	# Add bandwidth for all features
 	$bwinfo = $bwinfomap{$d->{'id'}};
@@ -65,7 +66,7 @@ foreach $d (@bwdoms) {
 
 	# Prune days more than 1 year old
 	foreach $k (keys %$bwinfo) {
-		if ($k =~ /^(\S+)_(\d+)$/ && $2 < $day - 366) {
+		if ($k =~ /^(\S+)_(\d+)$/ && $2 < $day - $maxdays) {
 			delete($bwinfo->{$k});
 			}
 		}

@@ -1900,6 +1900,8 @@ newbw_past_week=Weekly
 newbw_past_month=Monthly
 newbw_past_year=Yearly
 newbw_past_=Last
+newbw_maxdays=Number of days to keep bandwidth data
+newbw_maxdaysdef=Default (1 year)
 newbw_days=days
 newbw_notify=Interval between sending emails
 newbw_hours=hours
@@ -1944,6 +1946,7 @@ newbw_servers1=Selected servers ..
 newbw_servers2=All except selected servers ..
 newbw_maillogdef=Default mail log $1
 newbw_unknown=(Unknown)
+newbw_emaxdays=Missing or invalid number of days to keep bandwidth data
 
 newframe_title=Frame-Forwarding HTML
 newframe_ecannot=You are not allowed to edit the frame-forwarding HTML template

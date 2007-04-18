@@ -10,6 +10,9 @@ require './virtual-server-lib.pl';
 # Validate inputs
 $in{'bw_past'} || $in{'bw_period'} =~ /^\d+$/ && $in{'bw_period'} > 0 || 
 	&error($text{'newbw_eperiod'});
+$in{'bw_maxdays_def'} ||
+    $in{'bw_maxdays'} =~ /^\d+$/ && $in{'bw_maxdays'} > 0 ||
+	&error($text{'newbw_emaxdays'});
 $in{'bw_notify'} =~ /^\d+$/ && $in{'bw_notify'} > 0 || 
 	&error($text{'newbw_enotify'});
 !$in{'bw_warn'} || ($in{'bw_warnlevel'} > 0 && $in{'bw_warnlevel'} <= 100) ||
@@ -27,6 +30,7 @@ if ($in{'serversmode'}) {
 $config{'bw_active'} = $in{'bw_active'};
 $config{'bw_past'} = $in{'bw_past'};
 $config{'bw_period'} = $in{'bw_period'};
+$config{'bw_maxdays'} = $in{'bw_maxdays_def'} ? undef : $in{'bw_maxdays'};
 $config{'bw_notify'} = $in{'bw_notify'};
 $config{'bw_owner'} = $in{'bw_owner'};
 $config{'bw_email'} = $in{'bw_email'};
