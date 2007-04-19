@@ -10317,6 +10317,47 @@ else {
 	}
 }
 
+# list_available_features([&parentdom], [&aliasdom], [&subdom])
+# Returns a list of features available for a virtual server, by the current
+# Virtualmin user.
+sub list_available_features
+{
+local ($parentdom, $aliasdom, $subdom) = @_;
+
+# Start with core features
+local @core = $aliasdom ? @opt_alias_features :
+	    $subdom ? @opt_subdom_features : @opt_features;
+@core = grep { &can_use_feature($_) } @core;
+if ($parentdom) {
+	@core = grep { $_ ne 'webmin' && $_ ne 'unix' } @core;
+	}
+if ($aliasdom) {
+	@core = grep { $aliasdom->{$_} } @core;
+	}
+local @rv = map { { 'feature' => $_,
+		    'desc' => $text{'feature_'.$_},
+		    'core' => 1,
+		    'auto' => $config{$_} == 3,
+		    'default' => $config{$_} != 2,
+		    'enabled' => $config{$_} || !defined($config{$_}) } } @core;
+
+# Add plugin features
+local @plug = grep { &plugin_call($_, "feature_suitable",
+			$parentdom, $aliasdom, $subdom) } @feature_plugins;
+@plug = grep { &can_use_feature($_) } @plug;
+if ($aliasdom) {
+	@plug = grep { $aliasdom->{$_} } @plug;
+	}
+push(@rv, map { { 'feature' => $_,
+		  'desc' => &plugin_call($_, "feature_name", 0),
+		  'plugin' => 1,
+		  'auto' => 0,
+		  'default' => 1,
+		  'enabled' => 1 } } @plug);
+
+return @rv;
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;
