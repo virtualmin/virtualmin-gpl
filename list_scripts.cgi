@@ -45,9 +45,14 @@ if (@got) {
 			     @{$script->{'versions'}};
 		if (&indexof($sinfo->{'version'}, @vers) < 0) {
 			@better = grep { &compare_versions($_, $sinfo->{'version'}) > 0 } @vers;
-			$status = "<font color=#ffaa00>".
+			if (@better) {
+				$status = "<font color=#ffaa00>".
 				  &text('scripts_newer', $better[$#better]).
 				  "</font>";
+				}
+			else {
+				$status = $text{'scripts_nonewer'};
+				}
 			}
 		else {
 			$status = "<font color=#00aa00>".

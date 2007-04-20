@@ -196,7 +196,7 @@ if (!-r "$etc/php.ini") {
 	local $defver = $vers[0]->[0];
 	local $ini = $tmpl->{'web_php_ini'};
 	local $subs_ini = 0;
-	if (!$ini || $ini eq "none") {
+	if (!$ini || $ini eq "none" || !-r $ini) {
 		$ini = &get_global_php_ini($defver, $mode);
 		}
 	else {

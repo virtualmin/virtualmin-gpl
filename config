@@ -127,7 +127,6 @@ check_apache=0
 show_ugroup=0
 php_suexec=0
 ruby_suexec=-1
-php_ini=/etc/php.ini
 newuser_to_mailbox=1
 newupdate_to_mailbox=1
 bind_sub=yes

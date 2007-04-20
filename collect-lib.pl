@@ -90,7 +90,7 @@ if (&virtual_server::has_home_quotas()) {
 	# Work out quotas
 	foreach my $d (@doms) {
 		# If this is a parent domain, sum up quotas
-		if (!$d->{'parent'} && &virtual_server::has_home_quotas()) {
+		if (!$d->{'parent'}) {
 			local ($home, $mail, $dbusage) =
 				&virtual_server::get_domain_quota($d, 1);
 			local $usage = $home*$homesize +

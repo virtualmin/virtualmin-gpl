@@ -589,20 +589,32 @@ foreach my $m (@mods) {
 
 	# Check if the package is already installed
 	&$indent_print();
-	local $pkg = "php$phpver-$m";
-	local @pinfo = &software::package_info($pkg);
-	if (!@pinfo) {
-		&$first_print(&text('scripts_softwaremod', "<tt>$pkg</tt>"));
-		&software::update_system_install($pkg);
-		@pinfo = &software::package_info($pkg);
-		if (@pinfo) {
-			&$second_print($text{'setup_done'});
+	local $iok = 0;
+	foreach my $pkg ("php$phpver-$m", "php-$m") {
+		local @pinfo = &software::package_info($pkg);
+		if (!@pinfo || $pinfo[0] ne $pkg) {
+			# Not installed .. try to fetch it
+			&$first_print(&text('scripts_softwaremod',
+					    "<tt>$pkg</tt>"));
+			&software::update_system_install($pkg);
+			@pinfo = &software::package_info($pkg);
+			if (@pinfo && $pinfo[0] eq $pkg) {
+				# Yep, it worked
+				&$second_print($text{'setup_done'});
+				$iok = 1;
+				last;
+				}
 			}
 		else {
-			&$second_print($text{'scripts_esoftwaremod'});
-			&$outdent_print();
-			return 0;
+			# Already installed .. we're done
+			$iok = 1;
+			last;
 			}
+		}
+	if (!$iok) {
+		&$second_print($text{'scripts_esoftwaremod'});
+		&$outdent_print();
+		return 0;
 		}
 
 	# Configure the domain's php.ini to load it, if needed

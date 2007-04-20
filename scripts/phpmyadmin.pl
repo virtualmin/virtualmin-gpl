@@ -40,7 +40,7 @@ return ( 4, 5 );
 
 sub script_phpmyadmin_php_modules
 {
-return ("mcrypt");
+return ("mysql","mcrypt");
 }
 
 # script_phpmyadmin_depends(&domain, version)

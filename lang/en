@@ -2498,6 +2498,7 @@ scripts_eclash=Another script is already installed in $1.
 scripts_status=Status
 scripts_newest=Latest
 scripts_newer=Version $1 is available
+scripts_nonewer=Newer than latest
 scripts_rating=Your rating
 
 newnotify_title=Email Server Owners
