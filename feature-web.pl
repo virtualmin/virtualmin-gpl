@@ -1840,7 +1840,10 @@ sub add_script_language_directives
 local ($d, $tmpl, $port) = @_;
 
 if (defined(&save_domain_php_mode)) {
-	if ($tmpl->{'web_php_suexec'} == 1) {
+	&require_apache();
+	if ($tmpl->{'web_php_suexec'} == 1 ||
+	    $tmpl->{'web_php_suexec'} == 2 &&
+	     !$apache::httpd_modules{'mod_fcgid'}) {
 		# Create cgi wrappers for PHP 4 and 5
 		&save_domain_php_mode($d, "cgi", $port, 1);
 		}

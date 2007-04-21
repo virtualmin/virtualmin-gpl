@@ -46,7 +46,3 @@
 	- can scan and exclude outside date range
 
  - option to force bandwidth re-processing since some date
-
- - php module installation and mod_php mode
-	- how to check which modules are available?
-	- PHPRC= .. and run php -m
