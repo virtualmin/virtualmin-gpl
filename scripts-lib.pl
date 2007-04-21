@@ -485,6 +485,7 @@ return $got ? 1 : 0;
 sub check_php_module
 {
 local ($mod, $ver, $d) = @_;
+local $mode = &get_domain_php_mode($d);
 local @vers = &list_available_php_versions();
 local $verinfo;
 if ($ver) {
@@ -496,7 +497,17 @@ local $cmd = $verinfo->[1];
 &has_command($cmd) || return -1;
 if (!defined($php_modules{$ver})) {
 	&clean_environment();
-	if ($d) {
+	if ($mode eq "mod_php") {
+		# Use global PHP config, since with mod_php we can't do
+		# per-domain configurations
+		local $gini = &get_global_php_ini($ver, $mode);
+		if ($gini) {
+			$gini =~ s/\/php.ini$//;
+			$ENV{'PHPRC'} = $gini;
+			}
+		}
+	elsif ($d) {
+		# Use domain's php.ini
 		$ENV{'PHPRC'} = "$d->{'home'}/etc";
 		}
 	local $_;
