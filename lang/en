@@ -1874,6 +1874,9 @@ cert_self=Generate Self-Signed Key
 cert_tabcurrent=Current Certificate
 cert_tabcsr=Signing Request
 cert_tabnew=New Certificate
+cert_download=Download certificate
+cert_pem=PEM format..
+cert_edownload=No SSL certificate found!
 
 csr_title=Generating CSR
 csr_title2=Generating Certificate

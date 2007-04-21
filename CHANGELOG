@@ -598,3 +598,4 @@ Added a server templates option to set the default timeout for the HTTP status m
 The number of days to keep old bandwidth data can now be configured on the Bandwidth Monitoring page.
 Added the list-features.pl script, for finding available features for new virtual servers.
 Updated all script installers to check for the mysql and possibly pgsql PHP modules, if needed.
+Added a link on the Manage SSL Certificate page for downloading a domain's cert in PEM format.

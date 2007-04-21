@@ -650,7 +650,8 @@ foreach my $m (@mods) {
 		&$second_print($text{'setup_done'});
 		}
 
-	# Finally re-check to make sure it worked
+	# Finally re-check to make sure it worked (but this is only possible
+	# CGI mode)
 	&$outdent_print();
 	undef(%php_modules);
 	if (&check_php_module($m, $phpver, $d) != 1) {
@@ -716,8 +717,9 @@ sub get_global_php_ini
 {
 local ($ver, $mode) = @_;
 foreach my $i ("/etc/php.ini",
-	       ($mode eq "mod_php" ? "/etc/php$ver/apache/php.ini"
-				   : "/etc/php$ver/cgi/php.ini"),
+	       $mode eq "mod_php" ? ("/etc/php$ver/apache/php.ini",
+				     "/etc/php$ver/apache2/php.ini")
+				  : ("/etc/php$ver/cgi/php.ini"),
 	       "/usr/local/lib/php.ini") {
 	return $i if (-r $i);
 	}

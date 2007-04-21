@@ -435,7 +435,8 @@ sub cert_info
 {
 local %rv;
 local $_;
-open(OUT, "openssl x509 -in $_[0]->{'ssl_cert'} -issuer -subject -enddate |");
+open(OUT, "openssl x509 -in ".quotemeta($_[0]->{'ssl_cert'}).
+	  " -issuer -subject -enddate |");
 while(<OUT>) {
 	s/\r|\n//g;
 	if (/subject=.*CN=([^\/]+)/) {
@@ -458,6 +459,18 @@ close(OUT);
 $rv{'type'} = $rv{'o'} eq $rv{'issuer_o'} ? $text{'cert_typeself'}
 					  : $text{'cert_typereal'};
 return \%rv;
+}
+
+# cert_pem_data(&domain)
+# Returns a domain's cert in PEM format
+sub cert_pem_data
+{
+local ($d) = @_;
+local $data = &read_file_contents($_[0]->{'ssl_cert'});
+if ($data =~ /(-----BEGIN\s+CERTIFICATE-----\n([A-Za-z0-9\+\/=\n\r]+)-----END\s+CERTIFICATE-----)/) {
+	return $1;
+	}
+return undef;
 }
 
 # show_restore_ssl(&options)
