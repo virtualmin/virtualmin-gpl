@@ -8,6 +8,7 @@ require './virtual-server-lib.pl';
 &ReadParse();
 
 # Validate inputs, and check for clashes
+$defip = &get_default_ip();
 @ips = split(/\s+/, $in{'ips'});
 if (defined(&list_resellers)) {
 	@rips = map { $_->{'acl'}->{'defip'} }
@@ -16,7 +17,7 @@ if (defined(&list_resellers)) {
 @active = map { $_->{'address'} } &net::active_interfaces();
 foreach $ip (@ips) {
 	&check_ipaddress($ip) || &error(&text('sharedips_eip', $ip));
-	$ip ne &get_default_ip() || &error(&text('sharedips_edef', $ip));
+	$ip ne $defip || &error(&text('sharedips_edef', $ip));
 	&indexof($ip, @rips) < 0 || &error(&text('sharedips_erip', $ip));
 	$d = &get_domain_by("ip", $ip, "virt", 1);
 	$d && error(&text('sharedips_edom', $ip, $d->{'dom'}));
@@ -26,7 +27,7 @@ foreach $ip (@ips) {
 # Check if one taken away was in use
 @oldips = &list_shared_ips();
 foreach $ip (@oldips) {
-	if (&indexof($ip, @ips) < 0) {
+	if (&indexof($ip, @ips) < 0 && $ip ne $defip) {
 		$d = &get_domain_by("ip", $ip);
 		$d && &error(&text('sharedips_eaway', $ip, $d->{'dom'}));
 		}
