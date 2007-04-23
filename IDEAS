@@ -45,4 +45,3 @@
  - cache mail log indexes in a text file
 	- can scan and exclude outside date range
 
- - option to force bandwidth re-processing since some date

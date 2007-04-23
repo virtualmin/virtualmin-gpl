@@ -2373,6 +2373,7 @@ sub bandwidth_all_mail
 {
 local ($doms, $starts, $bws) = @_;
 local %max_ltime = %$starts;
+local %max_updated;
 local $maillog = $config{'bw_maillog'};
 $maillog = &get_mail_log() if ($maillog eq "auto");
 return $starts if (!$maillog);
@@ -2388,9 +2389,10 @@ foreach my $d (@$doms) {
 	}
 
 # Find the minimum last activity time
-local $min_ltime = time()+24*60*60;
+local $start_now = time();
+local $min_ltime = $start_now+24*60*60;
 foreach my $lt (values %$starts) {
-	$min_ltime = $lt if ($lt < $min_ltime);
+	$min_ltime = $lt if ($lt && $lt < $min_ltime);
 	}
 
 local $f;
@@ -2427,8 +2429,12 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 			local ($mb, $dom) = split(/\@/, $user);
 			local $md = $maildoms{$dom};
 			if ($md) {
-				$max_ltime{$md->{'id'}} = $ltime
-					if ($ltime > $max_ltime{$md->{'id'}});
+				if ($ltime > $max_ltime{$md->{'id'}}) {
+					# Update most recent seen time for
+					# this domain.
+					$max_ltime{$md->{'id'}} = $ltime;
+					$max_updated{$md->{'id'}} = 1;
+					}
 				if ($ltime > $starts->{$md->{'id'}} && $sz) {
 					# To a user in a hosted domain
 					local $day =
@@ -2455,8 +2461,12 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 			local ($mb, $dom) = split(/\@/, $user);
 			local $md = $maildoms{$dom};
 			if ($md) {
-				$max_ltime{$md->{'id'}} = $ltime
-					if ($ltime > $max_ltime{$md->{'id'}});
+				if ($ltime > $max_ltime{$md->{'id'}}) {
+					# Update most recent seen time for
+					# this domain.
+					$max_ltime{$md->{'id'}} = $ltime;
+					$max_updated{$md->{'id'}} = 1;
+					}
 				if ($ltime > $starts->{$md->{'id'}} && $sz) {
 					# To a user in this domain
 					local $day =
@@ -2469,6 +2479,14 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 			}
 		}
 	close(LOG);
+	}
+
+# For any domain for which max_ltime was not updated (because we didn't see
+# any email), set it to the current time
+foreach my $did (keys %max_ltime) {
+	if (!$max_updated{$did}) {
+		$max_ltime{$did} = $start_now;
+		}
 	}
 
 return \%max_ltime;

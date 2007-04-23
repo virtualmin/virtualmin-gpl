@@ -144,6 +144,10 @@ print "<hr>\n";
 print &ui_buttons_start();
 print &ui_buttons_row("bwgraph.cgi", $text{'newbw_graphbutton'},
 				     $text{'newbw_graphdesc'});
+if ($config{'bw_active'} && $virtualmin_pro) {
+	print &ui_buttons_row("bwreset_form.cgi", $text{'newbw_resetbutton'},
+						  $text{'newbw_resetdesc'});
+	}
 print &ui_buttons_end();
 
 &ui_print_footer("", $text{'index_return'});
