@@ -600,3 +600,4 @@ Added the list-features.pl script, for finding available features for new virtua
 Updated all script installers to check for the mysql and possibly pgsql PHP modules, if needed.
 Added a link on the Manage SSL Certificate page for downloading a domain's cert in PEM format.
 Added a button on the Bandwidth Monitoring page for re-generating bandwidth stats from the original log files.
+Added a script installer for SugarCRM 4.5.1b.

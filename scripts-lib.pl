@@ -920,7 +920,8 @@ return 1 if (&master_admin() ||
 
 sub post_http_connection
 {
-local ($host, $port, $page, $params, $out, $err) = @_;
+local ($host, $port, $page, $params, $out, $err, $headers,
+       $returnheaders) = @_;
 
 local $h = &make_http_connection($host, $port, 0, "POST", $page);
 if (!ref($h)) {
@@ -931,11 +932,27 @@ if (!ref($h)) {
 &write_http_connection($h, "User-agent: Webmin\r\n");
 &write_http_connection($h, "Content-type: application/x-www-form-urlencoded\r\n");
 &write_http_connection($h, "Content-length: ".length($params)."\r\n");
+if ($headers) {
+	foreach my $hd (keys %headers) {
+		&write_http_connection($h, "$hd: $headers{$hd}\r\n");
+		}
+	}
 &write_http_connection($h, "\r\n");
 &write_http_connection($h, "$params\r\n");
 
 # Read back the results
-&complete_http_download($h, $out, $err);
+$post_http_headers = undef;
+&complete_http_download($h, $out, $err, \&capture_http_headers);
+if ($returnheaders && $post_http_headers) {
+	%$returnheaders = %$post_http_headers;
+	}
+}
+
+sub capture_http_headers
+{
+if ($_[0] == 4) {
+	$post_http_headers = \%header;
+	}
 }
 
 # make_file_php_writable(&domain, file, [dir-only], [owner-too])
