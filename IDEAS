@@ -45,3 +45,4 @@
  - cache mail log indexes in a text file
 	- can scan and exclude outside date range
 
+ - add check when installing a script that the domain can really login to the DB
