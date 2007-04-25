@@ -70,7 +70,7 @@ foreach $sinfo (@sinfos) {
 			}
 
 		# Install needed PHP modules
-		$modok = &setup_php_modules($d, $script, $ver, $phpver);
+		$modok = &setup_php_modules($d, $script, $ver, $phpver, $opts);
 		if ($modok) {
 			$modok = &setup_pear_modules($d, $script, $ver,
 						     $phpver, $opts);

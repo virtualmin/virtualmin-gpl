@@ -179,7 +179,7 @@ else {
 	}
 
 # Install needed PHP modules
-if (!&setup_php_modules($d, $script, $ver, $phpver)) {
+if (!&setup_php_modules($d, $script, $ver, $phpver, $opts)) {
 	exit(1);
 	}
 if (!&setup_pear_modules($d, $script, $ver, $phpver, $opts)) {

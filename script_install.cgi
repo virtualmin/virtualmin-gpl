@@ -94,7 +94,7 @@ $ferr = &fetch_script_files($d, $ver, $opts, $sinfo, \%gotfiles);
 print "<br>\n";
 
 # Install needed PHP modules
-$modok = &setup_php_modules($d, $script, $ver, $phpver);
+$modok = &setup_php_modules($d, $script, $ver, $phpver, $opts);
 if ($modok) {
 	$modok = &setup_pear_modules($d, $script, $ver, $phpver, $opts);
 	}

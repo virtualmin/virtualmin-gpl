@@ -5832,7 +5832,8 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			}
 
 		# Install needed PHP modules
-		local $modok = &setup_php_modules($dom, $script, $ver, $phpver);
+		local $modok = &setup_php_modules($dom, $script, $ver, $phpver,
+						  $opts);
 		next if (!$modok);
 		$modok = &setup_pear_modules($dom, $script, $ver, $phpver,
 					     $opts);

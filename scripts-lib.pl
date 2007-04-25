@@ -574,15 +574,15 @@ if ($sinfo->{'opts'}->{'dir'} &&
 	}
 }
 
-# setup_php_modules(&domain, &script, version, php-version)
+# setup_php_modules(&domain, &script, version, php-version, &opts)
 # If possible, downloads PHP module packages need by the given script. Progress
 # of the install is written to STDOUT. Returns 1 if successful, 0 if not.
 sub setup_php_modules
 {
-local ($d, $script, $ver, $phpver) = @_;
+local ($d, $script, $ver, $phpver, $opts) = @_;
 local $modfunc = $script->{'php_mods_func'};
 return 1 if (!defined(&$modfunc));
-local @mods = &$modfunc($d);
+local @mods = &$modfunc($d, $ver, $phpver, $opts);
 foreach my $m (@mods) {
 	next if (&check_php_module($m, $phpver, $d) == 1);
 	&$first_print(&text('scripts_needmod', "<tt>$m</tt>"));
