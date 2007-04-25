@@ -471,6 +471,11 @@ return -1 if (!&foreign_check("php-pear"));
 &foreign_require("php-pear", "php-pear-lib.pl");
 local @cmds = &php_pear::get_pear_commands();
 return -1 if (!@cmds);
+if ($ver) {
+	# Check if we have Pear for this PHP version
+	local ($vercmd) = grep { $_->[1] == $ver } @cmds;
+	return -1 if (!$vercmd);
+	}
 if (!defined(@php_pear_modules)) {
 	@php_pear_modules = &php_pear::list_installed_pear_modules();
 	}
@@ -690,12 +695,27 @@ local ($d, $script, $ver, $phpver) = @_;
 local $modfunc = $script->{'pear_mods_func'};
 return 1 if (!defined(&$modfunc));
 local @mods = &$modfunc($d, $opts);
+return 1 if (!@mods);
+
+# Make sure we have the pear module
 if (!&foreign_check("php-pear")) {
 	# Cannot do anything
 	&$first_print(&text('scripts_nopearmod',
 			    "<tt>".join(" ", @mods)."</tt>"));
-	return 0;
+	return 1;
 	}
+
+# And that we have Pear for this PHP version
+&foreign_require("php-pear", "php-pear-lib.pl");
+local @cmds = &php_pear::get_pear_commands();
+local ($vercmd) = grep { $_->[1] == $phpver } @cmds;
+if (!$vercmd) {
+	# No pear .. cannot do anything
+	&$first_print(&text('scripts_nopearcmd',
+			    "<tt>".join(" ", @mods)."</tt>", $phpver));
+	return 1;
+	}
+
 foreach my $m (@mods) {
 	next if (&check_pear_module($m, $phpver, $d) == 1);
 
