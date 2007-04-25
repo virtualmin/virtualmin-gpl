@@ -54,7 +54,8 @@ if ($in{'generic'}) {
 						$gparent->{'dom'}),
 					  'to='.$gparent->{'id'} ]);
 			}
-		if (!$gparent->{'alias'} && !$gparent->{'subdom'}) {
+		if (!$gparent->{'alias'} && !$gparent->{'subdom'} &&
+		    &can_create_sub_domains()) {
 			# Sub-domain
 			push(@generics, [ &text('form_generic_subdom',
 						$gparent->{'dom'}),

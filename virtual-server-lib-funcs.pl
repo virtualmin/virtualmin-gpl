@@ -1815,6 +1815,21 @@ sub can_create_sub_servers
 return $access{'create'};
 }
 
+sub can_create_sub_domains
+{
+return 0 if (!&can_create_sub_servers());
+if ($config{'allow_subdoms'} eq '1') {
+	return 1;
+	}
+elsif ($config{'allow_subdoms'} eq '0') {
+	return 0;
+	}
+else {
+	local @subdoms = grep { $_->{'subdom'} } &list_domains();
+	return @subdoms ? 1 : 0;
+	}
+}
+
 # Returns 1 if the user can migrate servers from other control panels
 sub can_migrate_servers
 {
@@ -8473,7 +8488,7 @@ if (&can_rename_domains()) {
 	}
 
 if (&can_move_domain($d) && !$d->{'alias'} && !$d->{'subdom'}) {
-	# Move sub-domain to different owner, or turn parent into sub
+	# Move sub-server to different owner, or turn parent into sub
 	push(@rv, { 'page' => 'move_form.cgi',
 		    'title' => $text{'edit_move'},
 		    'desc' => $d->{'parent'} ? $text{'edit_movedesc2'}
@@ -8517,7 +8532,8 @@ if (&can_create_sub_servers() && !$d->{'alias'} && $unixer->{'unix'}) {
 			    'cat' => 'create',
 			  });
 		}
-	if (!$d->{'subdom'} && $dleft != 0 && $virtualmin_pro) {
+	if (!$d->{'subdom'} && $dleft != 0 && $virtualmin_pro &&
+	    &can_create_sub_domains()) {
 		# Sub-domain
 		push(@rv, { 'page' => 'domain_form.cgi',
 			    'title' => $text{'edit_subdom'},

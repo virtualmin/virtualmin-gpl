@@ -227,5 +227,12 @@ if (!$job) {
 	&cron::create_wrapper($collect_cron_cmd, $module_name,
 			      "collectinfo.pl");
 	}
+
+# Decide if sub-domains should be allowed, by checking if any exist
+if ($config{'allow_subdoms'} eq '') {
+	local @subdoms = grep { $_->{'subdom'} } &list_domains();
+	$config{'allow_subdoms'} = @subdoms ? 1 : 0;
+	&save_module_config();
+	}
 }
 

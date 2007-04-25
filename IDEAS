@@ -49,5 +49,3 @@
 
  - don't install un-needed PHP modules (ie. pgsql)
 
- - remove sub-domains feature
-

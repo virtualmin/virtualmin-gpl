@@ -72,6 +72,7 @@ passwd_mode=Password field type,1,1-Randomly generated password,0-Enter password
 passwd_length=Length of randomly generated password,3,Default (15 characters),5
 webalizer_nocron=Setup Webalizer Cron job for each virtual server?,1,0-Yes,1-No
 limitnoalias=Include alias servers in limits?,1,0-Yes,1-No
+allow_subdoms=Allow creation of sub-domains?,1,1-Yes,0-No,-Decide automatically
 
 line6.5=Reseller settings,11
 reseller_theme=Theme for new resellers,15,theme,reseller_theme
