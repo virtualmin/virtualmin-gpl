@@ -53,7 +53,7 @@ if (@dbs) {
 				  $text{'databases_type'},
 				  $text{'databases_action'} ], undef, 0,
 				[ "width=5" ]);
-	foreach $db (@dbs) {
+	foreach $db (sort { $a->{'name'} cmp $b->{'name'} } @dbs) {
 		local $action;
 		if ($db->{'type'} eq 'mysql' &&
 		    &foreign_available("mysql")) {

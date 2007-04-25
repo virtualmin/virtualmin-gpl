@@ -185,6 +185,9 @@ USER: foreach $line (@lines) {
 	if ($email && !$user->{'noprimary'}) {
 		$user->{'email'} = "$username\@$d->{'dom'}"
 		}
+	else {
+		$user->{'email'} = undef;
+		}
 	if ($user->{'unix'} && !$user->{'noquota'}) {
 		$user->{'quota'} = $quota;
 		$user->{'mquota'} = $mquota;

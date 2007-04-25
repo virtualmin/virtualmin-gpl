@@ -47,3 +47,7 @@
 
  - add check when installing a script that the domain can really login to the DB
 
+ - don't install un-needed PHP modules (ie. pgsql)
+
+ - remove sub-domains feature
+
