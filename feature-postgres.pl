@@ -518,6 +518,27 @@ sub start_service_postgres
 return &postgresql::start_postgresql();
 }
 
+# check_postgres_login(dbname, dbuser, dbpass)
+# Tries to login to PostgreSQL with the given credentials, returning undef
+# on failure
+sub check_postgres_login
+{
+local ($dbname, $dbuser, $dbpass) = @_;
+&require_postgres();
+local $main::error_must_die = 1;
+local $postgresql::postgres_login = $dbuser;
+local $postgresql::postgres_pass = $dbpass;
+eval { &postgresql::execute_sql($dbname, "select version()") };
+local $err = $@;
+if ($err) {
+	$err =~ s/\s+at\s+.*\sline//g;
+	return $err;
+	}
+return undef;
+}
+
+
+
 $done_feature_script{'postgres'} = 1;
 
 1;

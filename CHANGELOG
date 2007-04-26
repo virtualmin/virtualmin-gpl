@@ -602,3 +602,4 @@ Added a link on the Manage SSL Certificate page for downloading a domain's cert 
 Added a button on the Bandwidth Monitoring page for re-generating bandwidth stats from the original log files.
 Added a script installer for SugarCRM 4.5.1b.
 Added a Module Config option to control of sub-domains can be created. This is disabled by default unless the system already has some sub-domains, as they are confusing and rarely used.
+All script installers now check that they can connect to the selected database bbefore proceeding with the install, just in case the login is invalid. This prevents odd errors later on.

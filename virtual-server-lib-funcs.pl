@@ -9971,11 +9971,13 @@ sub substitute_domain_template
 {
 local ($str, $d) = @_;
 local %hash = %$d;
+delete($hash{''});
 if ($d->{'parent'}) {
 	local $parent = &get_domain($d->{'parent'});
 	foreach my $k (keys %$parent) {
 		$hash{'parent_domain_'.$k} = $parent->{$k};
 		}
+	delete($hash{'parent_domain_'});
 	}
 return &substitute_template($str, \%hash);
 }

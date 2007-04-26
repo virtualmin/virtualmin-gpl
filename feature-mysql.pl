@@ -913,6 +913,24 @@ else {
 	}
 }
 
+# check_mysql_login(dbname, dbuser, dbpass)
+# Tries to login to MySQL with the given credentials, returning undef on failure
+sub check_mysql_login
+{
+local ($dbname, $dbuser, $dbpass) = @_;
+&require_mysql();
+local $main::error_must_die = 1;
+local $mysql::mysql_login = $dbuser;
+local $mysql::mysql_pass = $dbpass;
+eval { &mysql::execute_sql($dbname, "show tables") };
+local $err = $@;
+if ($err) {
+	$err =~ s/\s+at\s+.*\sline//g;
+	return $err;
+	}
+return undef;
+}
+
 $done_feature_script{'mysql'} = 1;
 
 1;

@@ -1083,5 +1083,26 @@ local ($overall) = @_;
 &write_file($script_ratings_overall, $overall);
 }
 
+# check_script_db_connection(dbtype, dbname, dbuser, dbpass)
+# Returns an error message if connection to the database with the given details
+# would fail, undef otherwise
+sub check_script_db_connection
+{
+local ($dbtype, $dbname, $dbuser, $dbpass) = @_;
+if (&indexof($dbtype, @database_features) >= 0) {
+	# Core feature
+	local $cfunc = "check_".$dbtype."_login";
+	if (defined(&$cfunc)) {
+		return &$cfunc($dbname, $dbuser, $dbpass);
+		}
+	}
+elsif (&indexof($dbtype, @database_plugins) >= 0) {
+	# Plugin database
+	return &plugin_call($dbtype, "feature_database_check_login",
+			    $dbname, $dbuser, $dbpass);
+	}
+return undef;
+}
+
 1;
 
