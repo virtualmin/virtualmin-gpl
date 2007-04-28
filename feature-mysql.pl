@@ -887,12 +887,14 @@ return $opts;
 }
 
 # has_mysql_quotas()
-# Returns 1 if the filesystem for user quotas includes the MySQL data dir
+# Returns 1 if the filesystem for user quotas includes the MySQL data dir.
+# Will never be true when using external quota programs.
 sub has_mysql_quotas
 {
 &require_mysql();
 return &has_home_quotas() &&
        $mysql::config{'mysql_data'} &&
+       $config{'home_quotas'} &&
        &is_under_directory($config{'home_quotas'},
 			   $mysql::config{'mysql_data'});
 }

@@ -117,7 +117,7 @@ else {
 			    &ftp_shell($u),
 			    scalar(@{$u->{'dbs'}}) || "No",
 			    $u->{'mailquota'} ? $u->{'qquota'} :
-			    $config{'home_quotas'} ? 
+			    &has_home_quotas() ? 
 				    &quota_show($u->{'quota'}, "home") :
 				    "NA";
 		}

@@ -445,6 +445,7 @@ setup_scriptfailed=.. failed! $1
 setup_ednsview=DNS view $1 was not found
 
 indom=In domain $1
+equotacommand=Quota command $1 failed : $2
 
 users_ecannot=You are not allowed to edit users in this domain
 users_ecannot2=You are not allowed to edit local users
@@ -1432,6 +1433,11 @@ check_statusok=The System and Server Status module is installed and checking on 
 check_statussched=The System and Server Status module is installed, but is not set up to check servers on a regular schedule. This should be enabled on its <a href='$1'>Scheduled Monitoring</a> page.
 check_ebcmd=The command $1 needed to create or restore backups is not installed.
 check_bcmdok=All commands needed to create and restore backups are installed.
+check_eset_user=External quota commands are enabled, but the command to set a user's quota is not defined or does not exist
+check_eset_group=External quota commands are enabled, but the command to set a group's quota is not defined or does not exist
+check_elist_users=External quota commands are enabled, but the command to list user quotas not defined or does not exist
+check_elist_groups=External quota commands are enabled, but the command to list group quotas not defined or does not exist
+check_quotacommands=External quota commands will be used for virtual servers and mailboxes.
 
 allwebmin_ecannot=You are not allowed to update all Webmin users
 allwebmin_title=Updating Webmin Users

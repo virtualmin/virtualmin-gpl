@@ -14,7 +14,7 @@ $tmpl = &get_template($in{'template'});
 
 # Validate inputs
 &error_setup($text{'save_err'});
-if ($config{'home_quotas'} && !$d->{'parent'} && &can_edit_quotas($d)) {
+if (&has_home_quotas() && !$d->{'parent'} && &can_edit_quotas($d)) {
 	if ($in{'quota'} eq -1) { $in{'quota'} = $in{'otherquota'} };
 	if ($in{'uquota'} eq -1) { $in{'uquota'} = $in{'otheruquota'} };
 	$in{'quota_def'} || $in{'quota'} =~ /^[0-9\.]+$/ ||
@@ -57,11 +57,11 @@ if (!$d->{'mysql'} && $in{'mysql'} && &check_mysql_clash($d, 'db')) {
 
 # Check for various clashes
 %newdom = %$d;
-if ($config{'home_quotas'} && !$d->{'parent'} && &can_edit_quotas($d)) {
+if (&has_home_quotas() && !$d->{'parent'} && &can_edit_quotas($d)) {
 	$newdom{'uquota'} = $in{'uquota_def'} ? undef :
-				&quota_parse('uquota', $config{'home_quotas'});
+				&quota_parse('uquota', "home");
 	$newdom{'quota'} = $in{'quota_def'} ? undef :
-				&quota_parse('quota', $config{'home_quotas'});
+				&quota_parse('quota', "home");
 	}
 foreach $f (@dom_features, @feature_plugins) {
         if ($in{$f}) {
@@ -194,7 +194,7 @@ else {
 $d->{'email'} = $in{'email_def'} ? undef : $in{'email'};
 
 # Update quotas in domain object
-if ($config{'home_quotas'} && !$d->{'parent'} && &can_edit_quotas($d)) {
+if (&has_home_quotas() && !$d->{'parent'} && &can_edit_quotas($d)) {
 	$d->{'uquota'} = $newdom{'uquota'};
 	$d->{'quota'} = $newdom{'quota'};
 	}

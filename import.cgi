@@ -27,7 +27,7 @@ if (!$parent) {
 		&error_exit($text{'import_egroup'});
 
 	# Validate quota
-	if ($config{'home_quotas'}) {
+	if (&has_home_quotas()) {
 		if ($in{'quota'} == -1) { $in{'quota'} = $in{'otherquota'} };
 		$in{'quota'} =~ /^[0-9\.]+$/ ||  &error($text{'setup_equota'});
 		}

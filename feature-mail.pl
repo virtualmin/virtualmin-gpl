@@ -1843,10 +1843,9 @@ foreach $u (&list_domain_users($_[0])) {
 			      $u->{'email'}));
 
 	# Add home and mail quotas
-	if ($config{'home_quotas'} && $u->{'unix'}) {
+	if (&has_home_quotas() && $u->{'unix'}) {
 		&print_tempfile(UFILE, ":$u->{'quota'}");
-		if ($config{'mail_quotas'} &&
-		    $config{'home_quotas'} ne $config{'mail_quotas'}) {
+		if (&has_mail_quotas()) {
 			&print_tempfile(UFILE, ":$u->{'mquota'}");
 			}
 		else {

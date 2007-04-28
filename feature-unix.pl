@@ -82,7 +82,7 @@ if (!defined(getpwnam($_[0]->{'user'}))) {
 &$second_print($text{'setup_done'});
 
 # Set the user's quota
-if ($config{'home_quotas'}) {
+if (&has_home_quotas()) {
 	&set_server_quotas($_[0]);
 	}
 
@@ -168,7 +168,7 @@ if (!$_[0]->{'parent'}) {
 		&foreign_call($usermodule, "unlock_user_files");
 		}
 
-	if ($config{'home_quotas'} && $access{'edit'} == 1) {
+	if (&has_home_quotas() && $access{'edit'} == 1) {
 		# Update the unix user's and domain's quotas (if changed)
 		if ($_[0]->{'quota'} != $_[1]->{'quota'} ||
 		    $_[0]->{'uquota'} != $_[1]->{'uquota'}) {
@@ -367,7 +367,7 @@ local ($d, $file, $opts) = @_;
 &$first_print($text{'restore_unixuser'});
 
 # Also re-set quotas
-if ($config{'home_quotas'}) {
+if (&has_home_quotas()) {
 	&set_server_quotas($_[0]);
 	}
 

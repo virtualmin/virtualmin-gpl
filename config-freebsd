@@ -142,3 +142,4 @@ spamclear=none
 stats_noedit=1
 alias_mode=1
 stats_pass=1
+quota_commands=0

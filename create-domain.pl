@@ -187,7 +187,7 @@ elsif ($virt) {
 
 # Make sure all needed args are set
 $domain && ($parentdomain || $pass) || &usage("Missing password");
-if ($config{'home_quotas'} && !$parentdomain) {
+if (&has_home_quotas() && !$parentdomain) {
 	$quota && $uquota || $tlimit || &usage("No quota specified");
 	}
 if ($parentdomain) {
@@ -260,7 +260,7 @@ if (!$parent) {
 	}
 
 # Validate quotas
-if ($config{'home_quotas'} && !$parent && !$tlimit) {
+if (&has_home_quotas() && !$parent && !$tlimit) {
         $quota =~ /^\d+$/ || &usage($text{'setup_equota'});
         $uquota =~ /^\d+$/ || &usage($text{'setup_euquota'});
         }
@@ -466,7 +466,7 @@ print "                        [--max-realdoms domains]\n";
 print "                        [--max-mailboxes boxes]\n";
 print "                        [--max-dbs databases]\n";
 print "                        [--max-aliases aliases]\n";
-if ($config{'home_quotas'}) {
+if (&has_home_quotas()) {
 	print "                        [--quota quota-for-domain]\n";
 	print "                        [--uquota quota-for-unix-user]\n";
 	}

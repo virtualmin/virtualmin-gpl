@@ -143,7 +143,7 @@ if (!$parentdom) {
 	}
 
 # Show user and group quotas
-if ($config{'home_quotas'} && !$parentdom) {
+if (&has_home_quotas() && !$parentdom) {
 	print &ui_table_row($text{'edit_quota'},
 	    $d->{'quota'} ? &quota_show($d->{'quota'}, "home")
 			  : $text{'form_unlimit'}, 3, \@tds);

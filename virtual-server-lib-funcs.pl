@@ -35,7 +35,7 @@ if (!$require_useradmin++) {
 		$usermodule = "useradmin";
 		}
 	}
-if (!$_[0] && !$require_useradmin_quota++) {
+if (!&has_quota_commands() && !$_[0] && !$require_useradmin_quota++) {
 	&foreign_require("quota", "quota-lib.pl");
 	}
 }
@@ -642,29 +642,43 @@ sub list_all_users_quotas
 {
 # Get quotas for all users
 &require_useradmin($_[0]);
-if (!defined(%soft_home_quota) && $config{'home_quotas'} && !$_[0]) {
-	local $n = &quota::filesystem_users($config{'home_quotas'});
-	local $i;
-	for($i=0; $i<$n; $i++) {
-		$soft_home_quota{$quota::user{$i,'user'}} =
-			$quota::user{$i,'sblocks'};
-		$hard_home_quota{$quota::user{$i,'user'}} =
-			$quota::user{$i,'hblocks'};
-		$used_home_quota{$quota::user{$i,'user'}} =
-			$quota::user{$i,'ublocks'};
+if (&has_quota_commands()) {
+	# Get from user quota command
+	if (!defined(%soft_home_quota) && !$_[0]) {
+		local $out = &run_quota_command("list_users");
+		foreach my $l (split(/\r?\n/, $out)) {
+			local ($user, $used, $soft, $hard) = split(/\s+/, $l);
+			$soft_home_quota{$user} = $soft;
+			$hard_home_quota{$user} = $hard;
+			$used_home_quota{$user} = $used;
+			}
 		}
 	}
-if (!defined(%soft_mail_quota) && $config{'mail_quotas'} &&
-    $config{'mail_quotas'} ne $config{'home_quotas'} && !$_[0]) {
-	local $n = &quota::filesystem_users($config{'mail_quotas'});
-	local $i;
-	for($i=0; $i<$n; $i++) {
-		$soft_mail_quota{$quota::user{$i,'user'}} =
-			$quota::user{$i,'sblocks'};
-		$hard_mail_quota{$quota::user{$i,'user'}} =
-			$quota::user{$i,'hblocks'};
-		$used_mail_quota{$quota::user{$i,'user'}} =
-			$quota::user{$i,'ublocks'};
+else {
+	# Get from real quota system
+	if (!defined(%soft_home_quota) && &has_home_quotas() && !$_[0]) {
+		local $n = &quota::filesystem_users($config{'home_quotas'});
+		local $i;
+		for($i=0; $i<$n; $i++) {
+			$soft_home_quota{$quota::user{$i,'user'}} =
+				$quota::user{$i,'sblocks'};
+			$hard_home_quota{$quota::user{$i,'user'}} =
+				$quota::user{$i,'hblocks'};
+			$used_home_quota{$quota::user{$i,'user'}} =
+				$quota::user{$i,'ublocks'};
+			}
+		}
+	if (!defined(%soft_mail_quota) && &has_mail_quotas() && !$_[0]) {
+		local $n = &quota::filesystem_users($config{'mail_quotas'});
+		local $i;
+		for($i=0; $i<$n; $i++) {
+			$soft_mail_quota{$quota::user{$i,'user'}} =
+				$quota::user{$i,'sblocks'};
+			$hard_mail_quota{$quota::user{$i,'user'}} =
+				$quota::user{$i,'hblocks'};
+			$used_mail_quota{$quota::user{$i,'user'}} =
+				$quota::user{$i,'ublocks'};
+			}
 		}
 	}
 
@@ -1550,14 +1564,39 @@ return undef;
 sub set_user_quotas
 {
 local $tmpl = &get_template($_[3] ? $_[3]->{'template'} : 0);
-if ($config{'home_quotas'}) {
-	&set_quota($_[0], $config{'home_quotas'}, $_[1],
-		   $tmpl->{'quotatype'} eq 'hard');
+if (&has_quota_commands()) {
+	# Call the external quota program
+	&run_quota_command("set_user", $_[0],
+	    $tmpl->{'quotatype'} eq 'hard' ? ( $_[1], $_[1] ) : ( $_[1], 0 ));
 	}
-if ($config{'mail_quotas'} &&
-    $config{'mail_quotas'} ne $config{'home_quotas'}) {
-	&set_quota($_[0], $config{'mail_quotas'}, $_[2],
-		   $tmpl->{'quotatype'} eq 'hard');
+else {
+	# Call through to quotas module
+	if (&has_home_quotas()) {
+		&set_quota($_[0], $config{'home_quotas'}, $_[1],
+			   $tmpl->{'quotatype'} eq 'hard');
+		}
+	if (&has_mail_quotas()) {
+		&set_quota($_[0], $config{'mail_quotas'}, $_[2],
+			   $tmpl->{'quotatype'} eq 'hard');
+		}
+	}
+}
+
+# run_quota_command(config-suffix, arg, ...)
+# Run some external quota set/get command. On failure calls error, otherwise
+# returns the output.
+sub run_quota_command
+{
+local ($cfg, @args) = @_;
+local $cmd = $config{'quota_'.$cfg.'_command'}." ".
+	     join(" ", map { quotemeta($_) } @args);
+local $out = &backquote_logged("$cmd 2>&1 </dev/null");
+if ($?) {
+	&error(&text('equotacommand', "<tt>$cmd</tt>",
+		     "<pre>".&html_escape($out)."</pre>"));
+	}
+else {
+	return $out;
 	}
 }
 
@@ -2090,7 +2129,7 @@ if ($showchecks) {
 push(@cols, $text{'index_domain'}, $text{'index_user'},
 	    $text{'index_owner'} );
 local $f;
-local $qshow = $config{'home_quotas'} && $config{'show_quotas'};
+local $qshow = &has_home_quotas() && $config{'show_quotas'};
 foreach $f (@table_features) {
 	push(@cols, $text{'index_'.$f}) if ($config{$f});
 	}
@@ -2183,7 +2222,7 @@ foreach $d (sort { $a->{$sortfield} cmp $b->{$sortfield} ||
 		else {
 			# Show quota for server
 			push(@cols, $d->{'quota'} ?
-			  &quota_show($d->{'quota'}, $config{'home_quotas'}) :
+			  &quota_show($d->{'quota'}, "home") :
 			  $text{'form_unlimit'});
 			$qmax = $d->{'quota'} ?
 			    $d->{'quota'}*&quota_bsize("home") : undef;
@@ -3223,31 +3262,47 @@ else {
 sub set_server_quotas
 {
 local $tmpl = &get_template($_[0]->{'template'});
-if (&has_home_quotas()) {
-	# Set Unix user quota for home
-	&set_quota($_[0]->{'user'}, $config{'home_quotas'}, $_[0]->{'uquota'},
-		   $tmpl->{'quotatype'} eq 'hard');
-	}
-if (&has_mail_quotas()) {
-	# Set Unix user quota for mail
-	&set_quota($_[0]->{'user'}, $config{'mail_quotas'}, $_[0]->{'uquota'},
-		   $tmpl->{'quotatype'} eq 'hard');
-	}
-if (&has_group_quotas() && $_[0]->{'group'}) {
-	# Set group quotas for home and possibly mail
-	&require_useradmin();
-	local @qargs;
-	if ($tmpl->{'quotatype'} eq 'hard') {
-		@qargs = ( int($_[0]->{'quota'}), int($_[0]->{'quota'}), 0, 0 );
+if (&has_quota_commands()) {
+	# User and group quotas are set externally
+	&run_quota_command("set_user", $_[0]->{'user'},
+		$tmpl->{'quotatype'} eq 'hard' ? ( $_[0]->{'uquota'},
+						   $_[0]->{'uquota'} )
+					       : ( 0, $_[0]->{'uquota'} ));
+	if (&has_group_quotas() && $_[0]->{'group'}) {
+		&run_quota_command("set_group", $_[0]->{'group'},
+			$tmpl->{'quotatype'} eq 'hard' ? ( $_[0]->{'quota'},
+							   $_[0]->{'quota'} )
+						     : ( 0, $_[0]->{'quota'} ));
 		}
-	else {
-		@qargs = ( int($_[0]->{'quota'}), 0, 0, 0 );
+	}
+else {
+	if (&has_home_quotas()) {
+		# Set Unix user quota for home
+		&set_quota($_[0]->{'user'}, $config{'home_quotas'},
+			   $_[0]->{'uquota'}, $tmpl->{'quotatype'} eq 'hard');
 		}
-	&quota::edit_group_quota(
-		$_[0]->{'group'}, $config{'home_quotas'}, @qargs);
 	if (&has_mail_quotas()) {
+		# Set Unix user quota for mail
+		&set_quota($_[0]->{'user'}, $config{'mail_quotas'},
+			   $_[0]->{'uquota'}, $tmpl->{'quotatype'} eq 'hard');
+		}
+	if (&has_group_quotas() && $_[0]->{'group'}) {
+		# Set group quotas for home and possibly mail
+		&require_useradmin();
+		local @qargs;
+		if ($tmpl->{'quotatype'} eq 'hard') {
+			@qargs = ( int($_[0]->{'quota'}),
+				   int($_[0]->{'quota'}), 0, 0 );
+			}
+		else {
+			@qargs = ( int($_[0]->{'quota'}), 0, 0, 0 );
+			}
 		&quota::edit_group_quota(
-			$_[0]->{'group'}, $config{'mail_quotas'}, @qargs);
+			$_[0]->{'group'}, $config{'home_quotas'}, @qargs);
+		if (&has_mail_quotas()) {
+			&quota::edit_group_quota(
+			    $_[0]->{'group'}, $config{'mail_quotas'}, @qargs);
+			}
 		}
 	}
 }
@@ -3256,7 +3311,7 @@ if (&has_group_quotas() && $_[0]->{'group'}) {
 # Output a table of mailbox users
 sub users_table
 {
-local $can_quotas = $config{'home_quotas'} || $config{'mail_quotas'};
+local $can_quotas = &has_home_quotas() || &has_mail_quotas();
 local $can_qquotas = $config{'mail_system'} == 4 || $config{'mail_system'} == 5;
 
 # Work out table header
@@ -3376,6 +3431,10 @@ print &ui_columns_end();
 # quota_bsize(filesystem|"home"|"mail", [for-filesys])
 sub quota_bsize
 {
+if (&has_quota_commands()) {
+	# When using quota commands, the block size is always 1024
+	return 1024;
+	}
 local $fs = $_[0] eq "home" ? $config{'home_quotas'} :
 	    $_[0] eq "mail" ? $config{'mail_quotas'} : $_[0];
 local $forfs = int($_[1]);
@@ -3458,7 +3517,7 @@ sub opt_quota_input
 local ($name, $value, $fs, $third, $label) = @_;
 local $dis1 = &js_disable_inputs([ $name, $name."_units" ], [ ]);
 local $dis2 = &js_disable_inputs([ ], [ $name, $name."_units" ]);
-local $mode = $value eq "" ? 1 : $value eq "none" ? 2 : 0;
+local $mode = $value eq "" ? 1 : $value eq "0" ? 1 : $value eq "none" ? 2 : 0;
 local $qi = $fs eq "none" ? &ui_textbox($name, $mode ? "" : $value, 10)
 			  : &quota_input($name, $mode ? "" : $value, $fs,$mode);
 return &ui_radio($name."_def", $mode,
@@ -7943,15 +8002,30 @@ local ($d, $dbtoo) = @_;
 local ($home, $mail, $db, $dbq);
 if (&has_group_quotas()) {
 	# Query actual group quotas
-	&require_useradmin();
-	local $n = &quota::group_filesystems($d->{'group'});
-	for(my $i=0; $i<$n; $i++) {
-		if ($quota::filesys{$i,'filesys'} eq $config{'home_quotas'}) {
-			$home = $quota::filesys{$i,'ublocks'};
+	if (&has_quota_commands()) {
+		# Get from group quota list command
+		local $out = &run_quota_command("list_groups");
+		foreach my $l (split(/\r?\n/, $out)) {
+			local ($group, $used, $soft, $hard) = split(/\s+/, $l);
+			if ($group eq $d->{'group'}) {
+				$home = $used;
+				}
 			}
-		elsif ($config{'mail_quotas'} &&
-		       $quota::filesys{$i,'filesys'} eq $config{'mail_quotas'}) {
-			$mail = $quota::filesys{$i,'ublocks'};
+		}
+	else {
+		# Get from real quotas
+		&require_useradmin();
+		local $n = &quota::group_filesystems($d->{'group'});
+		for(my $i=0; $i<$n; $i++) {
+			if ($quota::filesys{$i,'filesys'} eq
+			    $config{'home_quotas'}) {
+				$home = $quota::filesys{$i,'ublocks'};
+				}
+			elsif ($config{'mail_quotas'} &&
+			       $quota::filesys{$i,'filesys'} eq
+			       $config{'mail_quotas'}) {
+				$mail = $quota::filesys{$i,'ublocks'};
+				}
 			}
 		}
 	if ($dbtoo) {
@@ -8082,6 +8156,7 @@ return ( [ $text{'sysinfo_os'}, "$gconfig{'real_os_type'} $gconfig{'real_os_vers
 # Returns 1 if home directory quotas are enabled
 sub has_home_quotas
 {
+return 1 if (&has_quota_commands());
 return $config{'home_quotas'} ? 1 : 0;
 }
 
@@ -8089,6 +8164,7 @@ return $config{'home_quotas'} ? 1 : 0;
 # Returns 1 if mail directory quotas are enabled, and needed
 sub has_mail_quotas
 {
+return 0 if (&has_quota_commands());
 return $config{'mail_quotas'} &&
        $config{'mail_quotas'} ne $config{'home_quotas'} ? 1 : 0;
 }
@@ -8105,7 +8181,15 @@ return $config{'mail'} && ($config{'mail_system'} == 4 ||
 # Returns 1 if group quotas are enabled
 sub has_group_quotas
 {
+return 1 if (&has_quota_commands());
 return $config{'group_quotas'} ? 1 : 0;
+}
+
+# has_quota_commands()
+# Returns 1 if external quota commands are being used
+sub has_quota_commands
+{
+return $config{'quota_commands'} ? 1 : 0;
 }
 
 # get_database_usage(&domain)
@@ -8175,7 +8259,10 @@ foreach my $c ("mail_system", "generics", "append_style", "ldap_host",
 	       "clamscan_cmd", "iface", "localgroup", "home_quotas",
 	       "mail_quotas", "group_quotas", "quotas", "shell", "ftp_shell",
 	       "all_namevirtual", "dns_ip", "default_procmail",
-	       "compression", "suexec", "domains_group") {
+	       "compression", "suexec", "domains_group",
+	       "quota_commands",
+	       "quota_set_user_command", "quota_set_group_command",
+	       "quota_list_users_command", "quota_list_groups_command") {
 	# Some important config option was changed
 	return 1 if ($config{$c} ne $lastconfig{$c});
 	}
@@ -8765,7 +8852,7 @@ local @tmpls = ( 'tmpl', 'user', 'update',
 		   : ( 'sharedips', 'dynip' ),
    &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
    $virtualmin_pro ? ( 'mxs', 'validate' ) : ( ),
-   &has_home_quotas() ? ( 'quotacheck' ) : ( ),
+   &has_home_quotas() && !&has_quota_commands() ? ( 'quotacheck' ) : ( ),
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
    );
 local @tlinks = map { "edit_new${_}.cgi" } @tmpls;
@@ -9620,7 +9707,15 @@ if ($config{'localgroup'} && !defined(getgrnam($config{'localgroup'}))) {
 $config{'home_quotas'} = '';
 $config{'mail_quotas'} = '';
 $config{'group_quotas'} = '';
-if ($config{'quotas'}) {
+if ($config{'quotas'} && $config{'quota_commands'}) {
+	# External commands are being used for quotas - make sure they exist! 
+	foreach my $c ("set_user", "set_group", "list_users", "list_groups") {
+		local $cmd = $config{"quota_".$c."_command"};
+		$cmd && &has_command($cmd) || return $text{'check_e'.$c};
+		}
+	&$second_print($text{'check_quotacommands'});
+	}
+elsif ($config{'quotas'}) {
 	# Make sure quotas are enabled, and work out where they are needed
 	local $qerr;
 	&require_useradmin();

@@ -105,13 +105,13 @@ if (!$parentuser) {
 	if ($uerr) {
 		&error(&text('setup_eusername', $user, $uerr));
 		}
-	if ($config{'home_quotas'} && !$config{'template_auto'}) {
+	if (&has_home_quotas() && !$config{'template_auto'}) {
 		if ($in{'quota'} == -1) { $in{'quota'} = $in{'otherquota'} };
 		if ($in{'uquota'} == -1) { $in{'uquota'} = $in{'otheruquota'} }; 
 		$in{'quota'} =~ /^[0-9\.]+$/ ||  &error($text{'setup_equota'});
 		$in{'uquota'} =~ /^[0-9\.]+$/ ||  &error($text{'setup_euquota'});
-		$quota = &quota_parse('quota', $config{'home_quotas'});
-		$uquota = &quota_parse('uquota', $config{'home_quotas'});
+		$quota = &quota_parse('quota', "home");
+		$uquota = &quota_parse('uquota', "home");
 		}
 	if (!$config{'template_auto'}) {
 		if ($config{'bw_active'} && !$config{'template_auto'}) {

@@ -1,0 +1,16 @@
+<header>Command to list user quotas</header>
+
+When external quota commands are being used, the program set in this
+option will be called when Virtualmin needs to find existing user quotas.
+It is not called with any parameters, but must output one line of text per
+user, with each line containing space-separated fields. The fields on
+each row must be :
+<ol>
+<li>The Unix username.
+<li>Current quota used in 1 kB blocks.
+<li>The soft quota in 1 kB blocks, or 0 for unlimited.
+<li>The hard quota in 1 kB blocks, or 0 for unlimited.
+</ol>
+
+<footer>
+
