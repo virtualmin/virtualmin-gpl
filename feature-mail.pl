@@ -2966,7 +2966,8 @@ local ($tmpl) = @_;
 
 # Email message for server creation
 print &ui_table_row(&hlink($text{'tmpl_mail'}, "template_mail"),
-	&none_def_input("mail", $tmpl->{'mail_on'}, $text{'tmpl_mailbelow'}).
+	&none_def_input("mail", $tmpl->{'mail_on'}, $text{'tmpl_mailbelow'},
+			0, 0, undef, [ "mail", "subject", "cc", "bcc" ]).
 	"<br>\n".
 	&ui_textarea("mail", $tmpl->{'mail'} eq "none" ? "" :
 				join("\n", split(/\t/, $tmpl->{'mail'})),
@@ -2978,11 +2979,13 @@ print &ui_table_row(&hlink($text{'tmpl_mail'}, "template_mail"),
 print &ui_table_hr();
 
 # Aliases for new users
-print &ui_table_row(&hlink($text{'tmpl_aliases'}, "template_aliases_mode"),
-	&none_def_input("aliases", $tmpl->{'user_aliases'},
-			$text{'tmpl_aliasbelow'})."<br>");
 local @aliases = $tmpl->{'user_aliases'} eq "none" ? ( ) :
 		split(/\t+/, $tmpl->{'user_aliases'});
+local @afields = map { ("type_".$_, "val_".$_) } (0..scalar(@aliases)+2);
+print &ui_table_row(&hlink($text{'tmpl_aliases'}, "template_aliases_mode"),
+	&none_def_input("aliases", $tmpl->{'user_aliases'},
+			$text{'tmpl_aliasbelow'}, 0, 0, undef,
+			\@afields)."<br>");
 &alias_form(\@aliases, " ", undef, "user", "NEWUSER");
 
 # Aliases for new domains
@@ -2990,11 +2993,13 @@ local @aliases = $tmpl->{'dom_aliases'} eq "none" ? ( ) :
 			split(/\t+/, $tmpl->{'dom_aliases'});
 local $atable = &ui_columns_start([ $text{'tmpl_aliasfrom'}, $text{'tmpl_aliasto'} ]);
 local $i = 0;
+local @dafields;
 foreach my $a (@aliases, undef, undef) {
 	local ($from, $to) = split(/=/, $a, 2);
 	$atable .= &ui_columns_row([
 		&ui_textbox("alias_from_$i", $from, 20),
 		&ui_textbox("alias_to_$i", $to, 40) ]);
+	push(@dafields, "alias_from_$i", "alias_to_$i");
 	$i++;
 	}
 $atable .= &ui_columns_end();
@@ -3002,17 +3007,19 @@ $atable .= &ui_checkbox("bouncealias", 1,
 		        &hlink("<b>$text{'tmpl_bouncealias'}</b>",
 		               "template_bouncealias"),
 		        $tmpl->{'dom_aliases_bounce'});
+push(@dafields, "bouncealias");
 print &ui_table_row(&hlink($text{'tmpl_domaliases'},
                            "template_domaliases_mode"),
 		    &none_def_input("domaliases", $tmpl->{'dom_aliases'},
-				    $text{'tmpl_aliasbelow'})."\n".$atable);
+				    $text{'tmpl_aliasbelow'}, 0, 0, undef,
+				    \@dafields)."\n".$atable);
 
 # Unix groups for mail, FTP and DB users
 print &ui_table_hr();
 foreach $g ("mailgroup", "ftpgroup", "dbgroup") {
 	print &ui_table_row(&hlink($text{'tmpl_'.$g}, "template_".$g),
 		    &none_def_input($g, $tmpl->{$g},
-				    $text{'tmpl_setgroup'}).
+			    $text{'tmpl_setgroup'}, 0, 0, undef, [ $g ]).
 		    &ui_textbox($g, $tmpl->{$g} eq 'none' ? undef :
 					      $tmpl->{$g}, 15));
 	}
@@ -3020,7 +3027,7 @@ foreach $g ("mailgroup", "ftpgroup", "dbgroup") {
 # Other groups to which users can be assigned
 print &ui_table_row(&hlink($text{'tmpl_othergroups'}, "template_othergroups"),
 	    &none_def_input("othergroups", $tmpl->{'othergroups'},
-			    $text{'tmpl_setgroups'}).
+		    $text{'tmpl_setgroups'}, 0, 0, undef, [ "othergroups" ]).
 	    &ui_textbox("othergroups", $tmpl->{"othergroups"} eq 'none' ?
 				undef : $tmpl->{'othergroups'}, 40));
 

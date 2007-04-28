@@ -255,10 +255,13 @@ sub show_template_status
 {
 local ($tmpl) = @_;
 
+local @status_fields = ( "status", "statusonly", "statustimeout",
+			 "statustimeout_def" );
 print &ui_table_row(
 	&hlink($text{'tmpl_status'}, "template_status"),
 	&none_def_input("status", $tmpl->{'status'},
-			$text{'tmpl_statusemail'})."\n".
+			$text{'tmpl_statusemail'}, 0, 0, undef,
+			\@status_fields)."\n".
 	&ui_textbox("status", $tmpl->{'status'} eq "none" ? undef :
 				$tmpl->{'status'}, 50));
 

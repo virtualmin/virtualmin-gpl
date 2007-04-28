@@ -957,9 +957,13 @@ return &bind8::stop_bind();
 sub show_template_dns
 {
 local ($tmpl) = @_;
+&require_bind();
+$conf = &bind8::get_config();
+@views = &bind8::find("view", $conf);
 
 # DNS records
-local $ndi = &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'}, 1);
+local $ndi = &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'}, 1,
+     0, undef, [ "dns", "bind_replace", @views ? ( "newdns_view" ) : ( ) ]);
 print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
 	$ndi."<br>\n".
 	&ui_textarea("dns", $tmpl->{'dns'} eq "none" ? "" :
@@ -971,9 +975,6 @@ print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
 	
 
 # Option for view to add to, for BIND 9
-&require_bind();
-$conf = &bind8::get_config();
-@views = &bind8::find("view", $conf);
 if (@views) {
 	print &ui_table_row($text{'newdns_view'},
 		&ui_select("view", $config{'dns_view'},
@@ -981,11 +982,14 @@ if (@views) {
 			  map { [ $_->{'values'}->[0] ] } @views ]));
 	}
 
+print &ui_table_hr();
+
 # Option for SPF record
 print &ui_table_row(&hlink($text{'tmpl_spf'},
                            "template_dns_spf_mode"),
 	&none_def_input("dns_spf", $tmpl->{'dns_spf'},
-		        $text{'tmpl_spfyes'}, 0, 0, $text{'no'}));
+		        $text{'tmpl_spfyes'}, 0, 0, $text{'no'},
+			[ "dns_spfhosts", "dns_spfall", "dns_sub_mode" ]));
 
 # Extra SPF hosts
 print &ui_table_row(&hlink($text{'tmpl_spfhosts'},
@@ -1008,7 +1012,8 @@ print &ui_table_hr();
 
 print &ui_table_row(&hlink($text{'tmpl_namedconf'}, "namedconf"),
     &none_def_input("namedconf", $tmpl->{'namedconf'},
-		    $text{'tmpl_namedconfbelow'})."<br>".
+		    $text{'tmpl_namedconfbelow'}, 0, 0, undef,
+		    [ "namedconf" ])."<br>".
     &ui_textarea("namedconf",
 		 $tmpl->{'namedconf'} eq 'none' ? '' :
 			join("\n", split(/\t/, $tmpl->{'namedconf'})),

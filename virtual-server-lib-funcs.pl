@@ -10027,10 +10027,11 @@ local ($tmpl) = @_;
 
 if ($virtualmin_pro) {
 	# Automatic alias domain
+	local @afields = ( "domalias", "domalias_type" );
 	print &ui_table_row(&hlink($text{'tmpl_domalias'}, "template_domalias"),
 		&none_def_input("domalias", $tmpl->{'domalias'},
 				$text{'tmpl_aliasset'},
-				undef, undef, $text{'no'})."\n".
+				undef, undef, $text{'no'}, \@afields)."\n".
 		&ui_textbox("domalias", $tmpl->{'domalias'} eq "none" ? undef :
 					$tmpl->{'domalias'}, 30));
 
@@ -10132,7 +10133,7 @@ foreach my $l ("mailbox", "alias", "dbs", "doms", "bw") {
 				   "template_".$l."limit"),
 	    &none_def_input($l.'limit', $tmpl->{$l.'limit'},
 			    $text{'tmpl_atmost'}, undef, undef,
-			    $text{'form_unlimit'})."\n".
+			    $text{'form_unlimit'}, [ $l.'limit' ])."\n".
 	    ($l eq "bw" ? 
 		&bandwidth_input($l.'limit', $limit, 1) :
 		&ui_textbox($l.'limit', $limit, 10)));
@@ -10142,7 +10143,8 @@ foreach my $l ("mailbox", "alias", "dbs", "doms", "bw") {
 local %caps = map { $_, 1 } split(/\s+/, $tmpl->{'capabilities'});
 local $etable;
 $etable .= &none_def_input("capabilities", $tmpl->{'capabilities'},
-	   $text{'tmpl_below'}, 0, 0, $text{'tmpl_capauto'})."<br>\n";
+	   $text{'tmpl_below'}, 0, 0, $text{'tmpl_capauto'},
+	   [ "capabilities" ])."<br>\n";
 local @grid;
 foreach my $ed (@edit_limits) {
 	push(@grid, &ui_checkbox("capabilities", $ed,

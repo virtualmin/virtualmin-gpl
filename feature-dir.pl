@@ -297,7 +297,8 @@ local ($tmpl) = @_;
 # The skeleton files directory
 print &ui_table_row(&hlink($text{'tmpl_skel'}, "template_skel"),
 	&none_def_input("skel", $tmpl->{'skel'}, $text{'tmpl_skeldir'}, 0,
-			$tmpl->{'standard'} ? 1 : 0)."\n".
+			$tmpl->{'standard'} ? 1 : 0, undef,
+			[ "skel", "skel_subs" ])."\n".
 	&ui_textbox("skel", $tmpl->{'skel'} eq "none" ? undef
 						      : $tmpl->{'skel'}, 40));
 

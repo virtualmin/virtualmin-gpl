@@ -265,10 +265,12 @@ sub show_template_virt
 local ($tmpl) = @_;
 
 # IP allocation range
-$rtable = &none_def_input("ranges", $tmpl->{'ranges'},
-			 $text{'tmpl_rangesbelow'});
 @ranges = &parse_ip_ranges($tmpl->{'ranges'})
 	if ($tmpl->{'ranges'} ne "none");
+local @rfields = map { ("ranges_start_".$_, "ranges_end_".$_) }
+		     (0..scalar(@ranges)+1);
+$rtable = &none_def_input("ranges", $tmpl->{'ranges'},
+			 $text{'tmpl_rangesbelow'}, 0, 0, undef, \@rfields);
 $rtable .= &ui_columns_start([ $text{'tmpl_ranges_start'},
 			  $text{'tmpl_ranges_end'} ]);
 $i = 0;

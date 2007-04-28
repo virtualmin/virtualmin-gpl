@@ -63,5 +63,29 @@ for(i=1; i<=max; i++) {
 EOF
 }
 
+# virtualmin_ui_apply_radios([tag])
+# Returns Javascript to fake a click on all radio buttons on a form, to make
+# them perform any onClick actions
+sub virtualmin_ui_apply_radios
+{
+local ($tag) = @_;
+local $rv = <<EOF;
+for(i=0; i<document.forms.length; i++) {
+  form = document.forms[i];
+  for(j=0; j<form.elements.length; j++) {
+    e = form.elements[j];
+    if (e.type == "radio") {
+      if (e.checked && !e.done_click) {
+        e.done_click = 1;
+        e.click();
+        }
+      }
+    }
+  }
+EOF
+$rv =~ s/\n/ /g;
+return $tag ? "$tag='$rv'" : $rv;
+}
+
 1;
 

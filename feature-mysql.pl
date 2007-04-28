@@ -774,23 +774,27 @@ local ($tmpl) = @_;
 &require_mysql();
 
 print &ui_table_row(&hlink($text{'tmpl_mysql'}, "template_mysql"),
-	&none_def_input("mysql", $tmpl->{'mysql'}, $text{'tmpl_mysqlpat'}, 1).
+	&none_def_input("mysql", $tmpl->{'mysql'}, $text{'tmpl_mysqlpat'}, 1,
+			0, undef, [ "mysql" ]).
 	&ui_textbox("mysql", $tmpl->{'mysql'}, 20));
 
 print &ui_table_row(&hlink($text{'tmpl_mysql_suffix'}, "template_mysql_suffix"),
 	&none_def_input("mysql_suffix", $tmpl->{'mysql_suffix'},
-		        $text{'tmpl_mysqlpat'}, 0).
+		        $text{'tmpl_mysqlpat'}, 0, 0, undef,
+			[ "mysql_suffix" ]).
 	&ui_textbox("mysql_suffix", $tmpl->{'mysql_suffix'} eq "none" ?
 					undef : $tmpl->{'mysql_suffix'}, 20));
 
 print &ui_table_row(&hlink($text{'tmpl_mysql_wild'}, "template_mysql_wild"),
 	&none_def_input("mysql_wild", $tmpl->{'mysql_wild'},
-			$text{'tmpl_mysqlpat'}, 1).
+			$text{'tmpl_mysqlpat'}, 1, 0, undef,
+			[ "mysql_wild" ]).
 	&ui_textbox("mysql_wild", $tmpl->{'mysql_wild'}, 20));
 
 print &ui_table_row(&hlink($text{'tmpl_mysql_hosts'}, "template_mysql_hosts"),
 	&none_def_input("mysql_hosts", $tmpl->{'mysql_hosts'},
-			$text{'tmpl_mysqlh'}).
+			$text{'tmpl_mysqlh'}, 0, 0, undef,
+			[ "mysql_hosts" ]).
 	&ui_textbox("mysql_hosts", $tmpl->{'mysql_hosts'} eq "none" ? "" :
 					$tmpl->{'mysql_hosts'}, 40));
 
@@ -808,7 +812,8 @@ if (-d $mysql::config{'mysql_data'}) {
 	print &ui_table_row(&hlink($text{'tmpl_mysql_chgrp'},
 				   "template_mysql_chgrp"),
 		&ui_radio("mysql_chgrp", $tmpl->{'mysql_chgrp'},
-			[ [ 1, $text{'yes'} ], [ 0, $text{'no'} ],
+			[ [ 1, $text{'yes'} ],
+			  [ 0, $text{'no'} ],
 			  ($tmpl->{'default'} ? ( ) :
 				( [ "", $text{'default'} ] ) )]));
 	}

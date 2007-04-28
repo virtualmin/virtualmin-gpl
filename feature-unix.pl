@@ -441,23 +441,27 @@ print &ui_table_row(&hlink($text{'tmpl_quotatype'}, "template_quotatype"),
 		[ "soft", $text{'tmpl_soft'} ] ]));
 
 print &ui_table_row(&hlink($text{'tmpl_quota'}, "template_quota"),
-    &none_def_input("quota", $tmpl->{'quota'}, $text{'tmpl_quotasel'}, 1)."\n".
+    &none_def_input("quota", $tmpl->{'quota'}, $text{'tmpl_quotasel'}, 1,
+		    0, undef, [ "quota", "quota_units" ])."\n".
     &quota_input("quota", $tmpl->{'quota'} eq "none" ?
 				"" : $tmpl->{'quota'}, "home"));
 
 print &ui_table_row(&hlink($text{'tmpl_uquota'}, "template_uquota"),
-    &none_def_input("uquota", $tmpl->{'uquota'}, $text{'tmpl_quotasel'},1)."\n".
+    &none_def_input("uquota", $tmpl->{'uquota'}, $text{'tmpl_quotasel'}, 1,
+		    0, undef, [ "quota", "quota_units" ])."\n".
     &quota_input("uquota", $tmpl->{'uquota'} eq "none" ?
 				"" : $tmpl->{'uquota'}, "home"));
 
 print &ui_table_row(&hlink($text{'tmpl_defmquota'}, "template_defmquota"),
     &none_def_input("defmquota", $tmpl->{'defmquota'}, $text{'tmpl_quotasel'},
-		    0, 0, $text{'form_unlimit'})."\n".
+		    0, 0, $text{'form_unlimit'},
+		    [ "defmquota", "defmquota_units" ])."\n".
     &quota_input("defmquota", $tmpl->{'defmquota'}, "home"));
 
 # Domain owner primary group
 print &ui_table_row(&hlink($text{'tmpl_ugroup'}, "template_ugroup_mode"),
-    &none_def_input("ugroup", $tmpl->{'ugroup'}, $text{'tmpl_ugroupsel'})."\n".
+    &none_def_input("ugroup", $tmpl->{'ugroup'}, $text{'tmpl_ugroupsel'},
+		    0, 0, undef, [ "ugroup" ])."\n".
     &ui_textbox("ugroup", $tmpl->{'ugroup'} eq "none" ?
 				"" : $tmpl->{'ugroup'}, 13)."\n".
     &group_chooser_button("ugroup", 0, 1));

@@ -254,7 +254,7 @@ print &ui_table_row(
 	&hlink($text{'tmpl_logrotate'}, "template_logrotate"),
 	&none_def_input("logrotate", $tmpl->{'logrotate'},
 			$text{'tmpl_ftpbelow'}, 0, 0,
-			$text{'tmpl_logrotatenone'})."<br>\n".
+			$text{'tmpl_logrotatenone'}, [ "logrotate" ])."<br>\n".
 	&ui_textarea("logrotate",
 		$tmpl->{'logrotate'} eq "none" ? undef :
 		  join("\n", split(/\t/, $tmpl->{'logrotate'})),

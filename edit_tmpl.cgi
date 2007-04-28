@@ -6,6 +6,8 @@ require './virtual-server-lib.pl';
 &ReadParse();
 
 @tmpls = &list_templates();
+@hargs = ( 0, 0, undef, undef, undef,
+	   &virtualmin_ui_apply_radios("onLoad") );
 if ($in{'new'}) {
 	if ($in{'clone'}) {
 		# Start with template we are cloning
@@ -13,16 +15,19 @@ if ($in{'new'}) {
 		$tmpl || &error("Failed to find template with ID $in{'clone'} to clone");
 		$tmpl->{'name'} .= " (Clone)";
 		$tmpl->{'standard'} = 0;
-		&ui_print_header(undef, $text{'tmpl_title3'}, "", "tmpls");
+		&ui_print_header(undef, $text{'tmpl_title3'}, "", "tmpls",
+			 	 @hargs);
 		}
 	else {
-		&ui_print_header(undef, $text{'tmpl_title1'}, "", "tmpls");
+		&ui_print_header(undef, $text{'tmpl_title1'}, "", "tmpls",
+			 	 @hargs);
 		}
 	}
 else {
 	($tmpl) = grep { $_->{'id'} == $in{'id'} } @tmpls;
 	$tmpl || &error("Failed to find template with ID $in{'id'}");
-	&ui_print_header($tmpl->{'name'}, $text{'tmpl_title2'}, "", "tmpls");
+	&ui_print_header($tmpl->{'name'}, $text{'tmpl_title2'}, "", "tmpls",
+			 @hargs);
 	}
 
 # Show section selector form
@@ -87,26 +92,33 @@ print &ui_form_end([
 &ui_print_footer("edit_newtmpl.cgi", $text{'newtmpl_return'},
 		 "", $text{'index_return'});
 
-# none_def_input(name, value, final-option, no-none, no-default, none-text)
+# none_def_input(name, value, final-option, no-none, no-default, none-text,
+#		 &disable-fields)
 sub none_def_input
 {
+local ($name, $value, $final, $nonone, $nodef, $nonemsg, $dis) = @_;
 local $rv;
-local $mode = $_[1] eq "none" ? 0 :
-	      $_[1] eq "" ? 1 : 2;
+local $mode = $value eq "none" ? 0 :
+	      $value eq "" ? 1 : 2;
 local @opts;
-push(@opts, 0) if (!$_[3]);
-push(@opts, 1) if (!$tmpl->{'default'} && !$_[4]);
+push(@opts, 0) if (!$nonone);
+push(@opts, 1) if (!$tmpl->{'default'} && !$nodef);
 push(@opts, 2);
 if (@opts > 1) {
 	local $m;
+	local $dis1 = @$dis ? &js_disable_inputs($dis, [ ]) : undef;
+	local $dis2 = @$dis ? &js_disable_inputs([ ], $dis) : undef;
 	foreach $m (@opts) {
-		$rv .= &ui_oneradio("$_[0]_mode", $m,
-			$m == 0 ? ($_[5] || $text{'newtmpl_none'}) :
-			$m == 1 ? $text{'default'} : $_[2], $mode == $m)."\n";
+		local $disn = $m == 2 ? $dis2 : $dis1;
+		$rv .= &ui_oneradio($name."_mode", $m,
+			$m == 0 ? ($nonemsg || $text{'newtmpl_none'}) :
+			$m == 1 ? $text{'tmpl_default'} : $final,
+			$mode == $m,
+			$disn ? "onClick='$disn'" : "")."\n";
 		}
 	}
 else {
-	$rv .= &ui_hidden("$_[0]_mode", $opts[0])."\n";
+	$rv .= &ui_hidden($name."_mode", $opts[0])."\n";
 	}
 return $rv;
 }

@@ -808,20 +808,27 @@ sub show_template_scripts
 {
 local ($tmpl) = @_;
 local $scripts = &list_template_scripts($tmpl);
+local $empty = { 'db' => '${DB}' };
+local @list = $scripts eq "none" ? ( $empty ) : ( @$scripts, $empty );
 
-print "<tr> <td colspan=2>\n";
+# Build field list and disablers
+local @sfields = map { ("name_".$_, "path_".$_, "db_def_".$_,
+			"db_".$_, "dbtype_".$_) } (0..scalar(@list)-1);
+local $dis1 = &js_disable_inputs(\@sfields, [ ]);
+local $dis2 = &js_disable_inputs([ ], \@sfields);
 
-print $text{'tscripts_what'},"\n";
-print &ui_radio("def",
+# None/default/listed selector
+local $stable = $text{'tscripts_what'}."\n";
+$stable .= &ui_radio("def",
 	$scripts eq "none" ? 2 :
 	  @$scripts ? 0 :
 	  $tmpl->{'default'} ? 2 : 1,
-	[ [ 2, $text{'tscripts_none'} ],
-	  $tmpl->{'default'} ? ( ) : ( [ 1, $text{'default'} ] ),
-	  [ 0, $text{'tscripts_below'} ] ]),"<p>\n";
+	[ [ 2, $text{'tscripts_none'}, "onClick='$dis1'" ],
+	  $tmpl->{'default'} ? ( ) : ( [ 1, $text{'default'}, "onClick='$dis1'" ] ),
+	  [ 0, $text{'tscripts_below'}, "onClick='$dis2'" ] ]),"<p>\n";
 
 # Find scripts
-@opts = ( );
+local @opts = ( );
 foreach $sname (&list_available_scripts()) {
 	$script = &get_script($sname);
 	foreach $v (@{$script->{'versions'}}) {
@@ -829,22 +836,20 @@ foreach $sname (&list_available_scripts()) {
 		}
 	}
 @opts = sort { lc($a->[1]) cmp lc($b->[1]) } @opts;
-@dbopts = ( );
+local @dbopts = ( );
 push(@dbopts, [ "mysql", $text{'databases_mysql'} ]) if ($config{'mysql'});
 push(@dbopts, [ "postgres", $text{'databases_postgres'} ]) if ($config{'postgres'});
 
 # Show table of scripts
-print &ui_columns_start([ $text{'tscripts_name'},
+$stable .= &ui_columns_start([ $text{'tscripts_name'},
 			  $text{'tscripts_path'},
 			  $text{'tscripts_db'},
 			  $text{'tscripts_dbtype'} ]);
-$empty = { 'db' => '${DB}' };
-@list = $scripts eq "none" ? ( $empty ) : ( @$scripts, $empty );
-$i = 0;
+local $i = 0;
 foreach $script (@list) {
 	$db_def = $script->{'db'} eq '${DB}' ? 1 :
                         $script->{'db'} ? 2 : 0;
-	print &ui_columns_row([
+	$stable .= &ui_columns_row([
 		&ui_select("name_$i", $script->{'name'},
 		  [ [ undef, "&nbsp;" ], @opts ]),
 		&ui_textbox("path_$i", $script->{'path'}, 25),
@@ -860,9 +865,9 @@ foreach $script (@list) {
 		    
 	$i++;
 	}
-print &ui_columns_end();
+$stable .= &ui_columns_end();
 
-print "</td> </tr>\n";
+print &ui_table_row(undef, $stable, 2);
 }
 
 # parse_template_scripts(&tmpl)

@@ -768,11 +768,17 @@ sub show_template_spam
 local ($tmpl) = @_;
 
 # Spam client program
+local @sfields = ( "spam_host", "spam_host_def", "spam_size", "spam_size_def" );
+local $dis1 = &js_disable_inputs(\@sfields, [ ]);
+local $dis2 = &js_disable_inputs([ ], \@sfields);
 print &ui_table_row(&hlink($text{'tmpl_spam'}, 'template_spam'),
 	    &ui_radio("spam", $tmpl->{'spam'},
-		      [ $tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ),
-			[ "spamassassin", $text{'tmpl_spamassassin'} ],
-			[ "spamc", $text{'tmpl_spamc'} ],
+		      [ $tmpl->{'default'} ? ( ) :
+			 ( [ "", $text{'default'}, "onClick='$dis1'" ] ),
+			[ "spamassassin", $text{'tmpl_spamassassin'},
+			  "onClick='$dis2'" ],
+			[ "spamc", $text{'tmpl_spamc'},
+			  "onClick='$dis2'" ],
 		      ]));
 
 # Host for spamc

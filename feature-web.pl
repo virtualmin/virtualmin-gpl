@@ -1446,7 +1446,19 @@ sub show_template_web
 {
 local ($tmpl) = @_;
 
-local $ndi = &none_def_input("web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1);
+# Work out fields to disable
+local @webfields = ( "web", "suexec", "writelogs", "user_def", "user",
+		     "html_dir", "html_dir_def", "html_perms", "stats_mode",
+		     "stats_dir", "stats_hdir", "statspass", "statsnoedit",
+		     "alias_mode", "web_port", "web_sslport",
+		     "web_webmin_ssl", "web_usermin_ssl" );
+if ($virtualmin_pro) {
+	push(@webfields, "web_php_suexec", "web_phpver", "web_php_ini",
+		 "web_php_ini_def", "web_php_noedit", "web_ruby_suexec" );
+	}
+
+local $ndi = &none_def_input("web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1,
+			     0, undef, \@webfields);
 print &ui_table_row(&hlink($text{'tmpl_web'}, "template_web"),
 	$ndi."<br>\n".
 	&ui_textarea("web", $tmpl->{'web'} eq "none" ? "" :
@@ -1524,20 +1536,18 @@ print &ui_table_row(&hlink($text{'newweb_port'}, "template_web_port"),
 print &ui_table_row(&hlink($text{'newweb_sslport'}, "template_web_sslport"),
 	&ui_textbox("web_sslport", $tmpl->{'web_sslport'}, 6));
 
-if (&get_webmin_version() >= 1.201) {
-	# Setup matching Webmin/Usermin SSL cert
-	print &ui_table_row(&hlink($text{'newweb_webmin'},
-				   "template_web_webmin_ssl"),
-		&ui_radio("web_webmin_ssl",
-			  $tmpl->{'web_webmin_ssl'} ? 1 : 0,
-			  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+# Setup matching Webmin/Usermin SSL cert
+print &ui_table_row(&hlink($text{'newweb_webmin'},
+			   "template_web_webmin_ssl"),
+	&ui_radio("web_webmin_ssl",
+		  $tmpl->{'web_webmin_ssl'} ? 1 : 0,
+		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
-	print &ui_table_row(&hlink($text{'newweb_usermin'},
-				   "template_web_usermin_ssl"),
-		&ui_radio("web_usermin_ssl",
-			  $tmpl->{'web_usermin_ssl'} ? 1 : 0,
-			  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
-	}
+print &ui_table_row(&hlink($text{'newweb_usermin'},
+			   "template_web_usermin_ssl"),
+	&ui_radio("web_usermin_ssl",
+		  $tmpl->{'web_usermin_ssl'} ? 1 : 0,
+		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
 if ($virtualmin_pro) {
 	# Run PHP scripts as user
@@ -1583,29 +1593,34 @@ print &ui_table_row(&hlink($text{'tmpl_webalizer'},
 			   "template_webalizer"),
     &none_def_input("webalizer", $tmpl->{'webalizer'},
 		    $text{'tmpl_webalizersel'}, 0, 0,
-		    $text{'tmpl_webalizernone'})."\n".
+		    $text{'tmpl_webalizernone'}, [ "webalizer" ])."\n".
     &ui_textbox("webalizer", $tmpl->{'webalizer'} eq "none" ?
 				"" : $tmpl->{'webalizer'}, 40));
+
+print &ui_table_hr();
 
 # PHP variables for scripts
 if ($virtualmin_pro) {
 	$ptable = &ui_columns_start([ $text{'tmpl_phpname'},
 				      $text{'tmpl_phpval'} ] );
-	$i = 0;
-	@pv = $tmpl->{'php_vars'} eq "none" ? ( ) :
+	local $i = 0;
+	local @pv = $tmpl->{'php_vars'} eq "none" ? ( ) :
 		split(/\t+/, $tmpl->{'php_vars'});
+	local @pfields;
 	foreach $pv (@pv, "", "") {
 		local ($n, $v) = split(/=/, $pv, 2);
 		$ptable .= &ui_columns_row([
 			&ui_textbox("phpname_$i", $n, 25),
 			&ui_textbox("phpval_$i", $v, 35) ]);
+		push(@pfields, "phpname_$i", "phpval_$i");
 		$i++;
 		}
 	$ptable .= &ui_columns_end();
 	print &ui_table_row(
 		&hlink($text{'tmpl_php_vars'}, "template_php_vars"),
 		&none_def_input("php_vars", $tmpl->{'php_vars'},
-				$text{'tmpl_disabled_websel'})."<br>\n".
+				$text{'tmpl_disabled_websel'}, 0, 0, undef,
+			        \@pfields)."<br>\n".
 		$ptable);
 	}
 
@@ -1616,7 +1631,7 @@ print &ui_table_row(&hlink($text{'tmpl_disabled_web'},
 		    'disabled_web'),
   &none_def_input("disabled_web", $tmpl->{'disabled_web'},
 		  $text{'tmpl_disabled_websel'}, 0, 0,
-		  $text{'tmpl_disabled_webdef'})."<br>\n".
+		  $text{'tmpl_disabled_webdef'}, [ "disabled_web" ])."<br>\n".
   &ui_textarea("disabled_web",
     $tmpl->{'disabled_web'} eq "none" ? undef :
       join("\n", split(/\t/, $tmpl->{'disabled_web'})),
@@ -1630,7 +1645,7 @@ print &ui_table_row(&hlink($text{'tmpl_disabled_url'},
   &none_def_input("disabled_url", $tmpl->{'disabled_url'},
 	  &text('tmpl_disabled_urlsel',
 		&ui_textbox("disabled_url", $url, 30)), 0, 0,
-	  $text{'tmpl_disabled_urlnone'}));
+	  $text{'tmpl_disabled_urlnone'}, [ "disabled_url" ]));
 
 if ($config{'proxy_pass'} == 2) {
 	# Frame-forwarding HTML (if enabled)
@@ -1638,7 +1653,8 @@ if ($config{'proxy_pass'} == 2) {
 
 	print &ui_table_row(&hlink($text{'tmpl_frame'}, "template_frame"),
 		&none_def_input("frame", $tmpl->{'frame'},
-				$text{'tmpl_framebelow'}, 1)."<br>".
+				$text{'tmpl_framebelow'}, 1, 0, undef,
+				[ "frame" ])."<br>".
 		&ui_textarea("frame", $tmpl->{'frame'} eq "none" ? undef :
 				join("\n", split(/\t/, $tmpl->{'frame'})),
 				10, 60));

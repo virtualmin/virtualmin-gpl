@@ -417,7 +417,9 @@ sub show_template_ftp
 local ($tmpl) = @_;
 
 # ProFTPd directives
-local $ndi = &none_def_input("ftp", $tmpl->{'ftp'}, $text{'tmpl_ftpbelow'}, 1);
+local @ffields = ( "ftp", "ftp_dir", "ftp_dir_def" );
+local $ndi = &none_def_input("ftp", $tmpl->{'ftp'}, $text{'tmpl_ftpbelow'}, 1,
+			     0, undef, \@ffields);
 print &ui_table_row(&hlink($text{'tmpl_ftp'}, "template_ftp"),
 	$ndi."<br>\n".
 	&ui_textarea("ftp", $tmpl->{'ftp'} eq "none" ? "" :

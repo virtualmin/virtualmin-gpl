@@ -605,3 +605,4 @@ Added a Module Config option to control of sub-domains can be created. This is d
 All script installers now check that they can connect to the selected database bbefore proceeding with the install, just in case the login is invalid. This prevents odd errors later on.
 Added Module Config options for external quota commands to use, instead of the standard Unix commands. This allows a different quota system (such as ZFS or on an NFS server) to be used instead.
 When creating a virtual server inside a Solaris zone, existing virtual IPs in the zone can be selected for domains that need a private IP.
+When editing server templates, fields that are not used because they are inheriting from the Default Settings are now greyed out.

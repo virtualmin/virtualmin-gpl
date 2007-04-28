@@ -954,10 +954,14 @@ local ($tmpl) = @_;
 
 # Global ACL on or off
 if (!$tmpl->{'default'}) {
+	local @gacl_fields = ( "gacl_umode", "gacl_uusers", "gacl_ugroups",
+			       "gacl_groups", "gacl_root" );
+	local $dis1 = &js_disable_inputs(\@gacl_fields, [ ]);
+	local $dis2 = &js_disable_inputs([ ], \@gacl_fields);
 	print &ui_table_row(&hlink($text{'tmpl_gacl'}, "template_gacl"),
 		&ui_radio("gacl", int($tmpl->{'gacl'}),
-				   [ [ 0, $text{'default'} ],
-				     [ 1, $text{'tmpl_gaclbelow'} ] ]));
+		   [ [ 0, $text{'default'}, "onClick='$dis1'" ],
+		     [ 1, $text{'tmpl_gaclbelow'}, "onClick='$dis2'" ] ]));
 	}
 
 # Global ACL users
@@ -984,7 +988,7 @@ print &ui_table_row(&hlink($text{'tmpl_gaclr'}, "template_root"),
 print &ui_table_row(
 	&hlink($text{'tmpl_extra_prefix'}, "template_extra_prefix"),
 	&none_def_input("extra_prefix", $tmpl->{'extra_prefix'},
-		    	$text{'tmpl_sel'})." ".
+		    	$text{'tmpl_sel'}, 0, 0, undef, [ "extra_prefix" ])." ".
 	&ui_textbox("extra_prefix", $tmpl->{'extra_prefix'} eq "none" ? undef :
 				  $tmpl->{'extra_prefix'}, 15));
 
