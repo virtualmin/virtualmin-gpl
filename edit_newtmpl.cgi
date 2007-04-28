@@ -8,7 +8,9 @@ require './virtual-server-lib.pl';
 # Show list of templates
 @tmpls = &list_templates();
 print &ui_form_start("delete_tmpls.cgi");
-print "<a href='edit_tmpl.cgi?new=1'>$text{'newtmpl_add'}</a>\n";
+@clinks = ( "<a href='edit_tmpl.cgi?new=1&cp=1'>$text{'newtmpl_add2'}</a>",
+	    "<a href='edit_tmpl.cgi?new=1'>$text{'newtmpl_add1'}</a>" );
+print &ui_links_row(\@clinks);
 @tds = ( "width=5" );
 print &ui_columns_start([ "",
 			  $text{'newtmpl_name'},
@@ -55,7 +57,7 @@ foreach $t (@tmpls) {
 		}
 	}
 print &ui_columns_end();
-print "<a href='edit_tmpl.cgi?new=1'>$text{'newtmpl_add'}</a><br>\n";
+print &ui_links_row(\@clinks);
 print &ui_form_end($deletable ? [ [ "delete", $text{'newtmpl_delete'} ] ] : []);
 
 &ui_print_footer("", $text{'index_return'});

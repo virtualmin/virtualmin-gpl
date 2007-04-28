@@ -18,7 +18,17 @@ if ($in{'new'}) {
 		&ui_print_header(undef, $text{'tmpl_title3'}, "", "tmpls",
 			 	 @hargs);
 		}
+	elsif ($in{'cp'}) {
+		# Start with the default settings
+		($tmpl) = grep { $_->{'id'} == 0 } @tmpls;
+		$tmpl->{'name'} .= " (Copy)";
+		$tmpl->{'standard'} = 0;
+		$tmpl->{'default'} = 0;
+		&ui_print_header(undef, $text{'tmpl_title4'}, "", "tmpls",
+			 	 @hargs);
+		}
 	else {
+		# Start with an empty template
 		&ui_print_header(undef, $text{'tmpl_title1'}, "", "tmpls",
 			 	 @hargs);
 		}
@@ -68,6 +78,7 @@ print &ui_form_start("save_tmpl.cgi", "post");
 print &ui_hidden("id", $in{'id'}),"\n";
 print &ui_hidden("new", $in{'new'}),"\n";
 print &ui_hidden("cloneof", $in{'clone'}),"\n";
+print &ui_hidden("cp", $in{'cp'}),"\n";
 print &ui_hidden("editmode", $in{'editmode'}),"\n";
 $emode = $text{'feature_'.$in{'editmode'}} ||
 	 $text{'tmpl_editmode_'.$in{'editmode'}};

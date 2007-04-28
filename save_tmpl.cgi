@@ -15,6 +15,13 @@ elsif ($in{'cloneof'}) {
 	$tmpl->{'id'} = undef;
 	$tmpl->{'standard'} = 0;
 	}
+elsif ($in{'cp'}) {
+	# Fetch source for copy
+	($tmpl) = grep { $_->{'id'} == 0 } @tmpls;
+	$tmpl->{'id'} = undef;
+	$tmpl->{'standard'} = 0;
+	$tmpl->{'default'} = 0;
+	}
 else {
 	# Start with blank
 	$tmpl = { };
