@@ -254,6 +254,7 @@ form_iface=Network interface
 form_shared=Shared, on IP $1
 form_shared2=Shared, on non-default IP
 form_vip=Virtual with IP
+form_activeip=Virtual on existing IP
 form_eparent=No parent Virtualmin server for the user $1 was found!
 form_esubdom=The parent domain Virtualmin server $1 was not found!
 form_alloc=Virtual with allocated IP

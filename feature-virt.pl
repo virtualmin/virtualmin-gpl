@@ -139,12 +139,21 @@ if ($config{'all_namevirtual'}) {
 	return &ui_textbox("ip", $defip, 20);
 	}
 else {
-	# A private IP can be selected .. possible automatically
-	local ($t, $anyalloc, $anychoose);
-	foreach $t (@$tmpls) {
-		local $tmpl = &get_template($t->{'id'});
-		if ($tmpl->{'ranges'} ne "none") { $anyalloc++; }
-		else { $anychoose++; }
+	# An IP can be selected, perhaps private, shared or default
+	local ($t, $anyalloc, $anychoose, $anyzone);
+	if (&running_in_zone()) {
+		# When running in a Solaris zone, you MUST select an existing
+		# active IP
+		$anyzone = 1;
+		}
+	elsif (&can_use_feature("virt")) {
+		# Check if private IPs are allocated or manual, if we are
+		# allowed to choose them.
+		foreach $t (@$tmpls) {
+			local $tmpl = &get_template($t->{'id'});
+			if ($tmpl->{'ranges'} ne "none") { $anyalloc++; }
+			else { $anychoose++; }
+			}
 		}
 	local @opts = ( [ 0, &text('form_shared', $defip)."<br>" ] );
 	local @shared = &list_shared_ips();
@@ -164,6 +173,15 @@ else {
 			 &ui_textbox("ip", undef, 20)." (".
 			 &ui_checkbox("virtalready", 1,
 				      $text{'form_virtalready'}).")<br>" ]);
+		}
+	if ($anyzone) {
+		# Can select an existing active IP
+		&foreign_require("net", "net-lib.pl");
+		local @act = grep { $_->{'virtual'} ne '' }
+				  &net::active_interfaces();
+		push(@opts, [ 4, $text{'form_activeip'}." ".
+				 &ui_select("zoneip", undef,
+				  [ map { [ $_->{'address'} ] } @act ]) ]);
 		}
 	return &ui_radio("virt", 0, \@opts);
 	}
@@ -224,6 +242,14 @@ elsif ($in{'virt'} == 3 && &can_edit_sharedips()) {
 	&indexof($in{'sharedip'}, &list_shared_ips()) >= 0 ||
 		&error(&text('setup_evirtnoshared'));
 	return ($in{'sharedip'}, 0);
+	}
+elsif ($in{'virt'} == 4 && &running_in_zone()) {
+	# On an active IP
+	local $clash = &check_virt_clash($in{'zoneip'});
+	local $already = &get_domain_by("ip", $in{'ip'});
+	$already && &error(&text('setup_evirtclash4',
+				 $already->{'dom'}));
+	return ($in{'zoneip'}, 1, 1);
 	}
 else {
 	# Global shared IP

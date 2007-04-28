@@ -1890,8 +1890,16 @@ return $config{'show_ugroup'} && &master_admin();
 # can_use_feature(feature)
 sub can_use_feature
 {
-return 0 if ($_[0] eq 'virt' && &running_in_zone());
 return &master_admin() || $access{"feature_".$_[0]};
+}
+
+# Returns 1 if the current user is allowed to select a private or shared
+# IP for a virtual server
+sub can_select_ip
+{
+local @shared = &list_shared_ips();
+return $config{'all_namevirtual'} || &can_use_feature("virt") ||
+       @shared && &can_edit_sharedips();
 }
 
 # can_edit_limits(&domain)

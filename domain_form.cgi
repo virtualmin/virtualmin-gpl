@@ -442,7 +442,7 @@ if ($can_feature{'mail'} && !$aliasdom && !$subdom) {
 # Show IP address allocation section
 $resel = $parentdom ? $parentdom->{'reseller'} :
 	 &reseller_admin() ? $base_remote_user : undef;
-if (!$aliasdom && &can_use_feature("virt")) {
+if (!$aliasdom && &can_select_ip()) {
 	print &ui_table_row(&hlink($text{'form_iface'}, "iface"),
 		&virtual_ip_input(\@cantmpls, $resel),
 		undef, \@tds);

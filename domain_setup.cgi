@@ -174,7 +174,7 @@ if ($aliasdom) {
 	$ip = $aliasdom->{'ip'};
 	$virt = 0;
 	}
-elsif (!&can_use_feature("virt")) {
+elsif (!&can_select_ip()) {
 	$ip = $defip;
 	$virt = 0;
 	}
