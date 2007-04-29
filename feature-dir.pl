@@ -262,8 +262,8 @@ sub virtual_server_directories
 {
 local $tmpl = &get_template($_[0]->{'template'});
 local $perms = $tmpl->{'web_html_perms'};
-return ( $d->{'subdom'} ? ( ) : ( [ &public_html_dir($_[0], 1), $perms ] ),
-         $d->{'subdom'} ? ( ) : ( [ 'cgi-bin', $perms ] ),
+return ( $d->{'subdom'} || $d->{'alias'} ? ( ) : ( [ &public_html_dir($_[0], 1), $perms ] ),
+         $d->{'subdom'} || $d->{'alias'} ? ( ) : ( [ 'cgi-bin', $perms ] ),
          [ 'logs', '750' ],
          [ $config{'homes_dir'}, '755' ] );
 }
