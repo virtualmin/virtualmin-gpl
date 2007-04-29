@@ -2071,7 +2071,6 @@ else {
 # Returns 1 if the current user can execute remote commands
 sub can_remote
 {
-return 0 if (!$virtualmin_pro);
 return &master_admin();
 }
 
