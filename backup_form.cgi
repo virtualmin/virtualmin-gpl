@@ -134,8 +134,10 @@ if (!$d) {
 	print &ui_table_row(&hlink($text{'backup_fmt'}, "backup_fmt"),
 		&ui_radio("fmt", int($backup_fmt),
 			  [ [ 0, $text{'backup_fmt0'} ],
-			    [ 1, $text{'backup_fmt1'} ],
-			    [ 2, $text{'backup_fmt2'} ] ])."<br>".
+			    $backup_fmt == 1 ?
+				( [ 1, $text{'backup_fmt1'} ],
+				  [ 2, $text{'backup_fmt2'} ] ) :
+			    ( [ 2, $text{'backup_fmt1'} ] ) ])."<br>".
 		&ui_checkbox("mkdir", 1, $text{'backup_mkdir'},
 			     int($backup_mkdir)));
 	}
