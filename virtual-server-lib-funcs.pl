@@ -10481,6 +10481,48 @@ push(@rv, map { { 'feature' => $_,
 return @rv;
 }
 
+# count_domain_users()
+# Returns a hash ref from domain IDs to user counts
+sub count_domain_users
+{
+local %rv;
+local %homemap;
+foreach my $d (&list_domains()) {
+	$homemap{$d->{'home'}} = $d->{'id'};
+	}
+foreach my $u (&list_all_users_quotas(1)) {
+	local $h = $u->{'home'};
+	local $did;
+	if ($homemap{$h}) {
+		# User home is a domain's home .. so this is the domain owner
+		$did = $homemap{$h};
+		}
+	elsif ($h =~ /^(.*)\/homes\/(\S+)$/) {
+		# User's home is under a domain's homes dir, so he must
+		# belong to it.
+		$did = $homemap{$1};
+		}
+	elsif ($h =~ /^(.*)\/public_html$/) {
+		# Home is public_html, so he is a web user
+		$did = $homemap{$1};
+		}
+	else {
+		# Fallback to trying each home (longest first)
+		foreach my $hd (sort { length($b) cmp length($a) }
+				     keys %homemap) {
+			if ($h =~ /^\Q$hd\E\//) {
+				$did = $homemap{$hd};
+				last;
+				}
+			}
+		}
+	if ($did) {
+		$rv{$did}++;
+		}
+	}
+return \%rv;
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;

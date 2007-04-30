@@ -50,20 +50,20 @@ if (&foreign_check("security-updates")) {
 $info->{'startstop'} = [ &get_startstop_links() ];
 
 # Counts for domains
-local @doms = &virtual_server::list_domains();
-local %fcount = map { $_, 0 } @virtual_server::features;
+local $dusers = &count_domain_users();
+local $daliases = &count_domain_aliases(1);
+local @doms = &list_domains();
+local %fcount = map { $_, 0 } @features;
 $fcount{'doms'} = 0;
 foreach my $d (@doms) {
 	$fcount{'doms'}++;
-	foreach my $f (@virtual_server::features) {
+	foreach my $f (@features) {
 		$fcount{$f}++ if ($d->{$f});
 		}
-	my @dbs = &virtual_server::domain_databases($d);
+	my @dbs = &domain_databases($d);
 	$fcount{'dbs'} += scalar(@dbs);
-	my @users = &virtual_server::list_domain_users($d, 0, 1, 1, 1);
-	$fcount{'users'} += scalar(@users);
-	my @aliases = &virtual_server::list_domain_aliases($d, 1);
-	$fcount{'aliases'} += scalar(@aliases);
+	$fcount{'users'} += $dusers->{$d->{'id'}};
+	$fcount{'aliases'} += $daliases->{$d->{'id'}};
 	}
 $info->{'fcount'} = \%fcount;
 $info->{'ftypes'} = [ "doms", "dns", "web", "ssl", "mail", "dbs",
@@ -71,7 +71,7 @@ $info->{'ftypes'} = [ "doms", "dns", "web", "ssl", "mail", "dbs",
 local (%fmax, %fextra, %fhide);
 foreach my $f (@{$info->{'ftypes'}}) {
 	local ($extra, $reason, $max, $hide) =
-		&virtual_server::count_feature($f);
+		&count_feature($f);
 	$fmax{$f} = $max;
 	$fextra{$f} = $extra;
 	$fhide{$f} = $hide;
@@ -81,10 +81,10 @@ $info->{'fextra'} = \%fextra;
 $info->{'fhide'} = \%fhide;
 
 # Quota use for domains
-if (&virtual_server::has_home_quotas()) {
+if (&has_home_quotas()) {
 	local @quota;
-	local $homesize = &virtual_server::quota_bsize("home");
-	local $mailsize = &virtual_server::quota_bsize("mail");
+	local $homesize = &quota_bsize("home");
+	local $mailsize = &quota_bsize("mail");
 	local $maxquota = 0;
 
 	# Work out quotas
@@ -92,7 +92,7 @@ if (&virtual_server::has_home_quotas()) {
 		# If this is a parent domain, sum up quotas
 		if (!$d->{'parent'}) {
 			local ($home, $mail, $dbusage) =
-				&virtual_server::get_domain_quota($d, 1);
+				&get_domain_quota($d, 1);
 			local $usage = $home*$homesize +
 				       $mail*$mailsize;
 			$maxquota = $usage+$dbusage if ($usage+$dbusage > $maxquota);
@@ -113,17 +113,17 @@ foreach my $d (@doms) {
 	$ipdom{$d->{'ip'}} ||= $d;
 	}
 if (keys %ipdom > 1) {
-	local $defip = &virtual_server::get_default_ip();
-	if (defined(&virtual_server::list_resellers)) {
-		foreach my $r (&virtual_server::list_resellers()) {
+	local $defip = &get_default_ip();
+	if (defined(&list_resellers)) {
+		foreach my $r (&list_resellers()) {
 			if ($r->{'acl'}->{'defip'}) {
 				$reselip{
 				  $r->{'acl'}->{'defip'}} = $r;
 				}
 			}
 		}
-	if (defined(&virtual_server::list_shared_ips)) {
-		foreach my $ip (&virtual_server::list_shared_ips()) {
+	if (defined(&list_shared_ips)) {
+		foreach my $ip (&list_shared_ips()) {
 			$sharedip{$ip}++;
 			}
 		}
@@ -144,8 +144,8 @@ if (keys %ipdom > 1) {
 
 # Program information
 local @progs;
-foreach my $f ("virtualmin", @virtual_server::features) {
-	if ($virtual_server::config{$f} || $f eq "virtualmin") {
+foreach my $f ("virtualmin", @features) {
+	if ($config{$f} || $f eq "virtualmin") {
 		local $ifunc = "sysinfo_$f";
 		if (defined(&$ifunc)) {
 			push(@progs, &$ifunc());

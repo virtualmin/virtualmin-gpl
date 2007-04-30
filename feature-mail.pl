@@ -3225,6 +3225,53 @@ return $config{'mail_system'} == 1 ? $sendmail_vfile :
        $config{'mail_system'} == 0 ? $virtual_map_files[0] : undef;
 }
 
+# count_domain_aliases([ignore-plugins]
+# Return a hash ref from domain ID to a count of aliases.
+sub count_domain_aliases
+{
+local ($ignore) = @_;
+local %rv;
+
+# Find local users, so we can skip aliases from user@domain -> user.domain
+local %users;
+foreach my $u (&list_all_users_quotas(1)) {
+	$users{$u->{'user'}} = 1;
+	}
+
+local %ignore;
+if ($ignore) {
+	# Get a list to ignore from each plugin
+	foreach my $f (@feature_plugins) {
+		foreach my $i (&plugin_call($f, "virtusers_ignore", undef)) {
+			$ignore{lc($i)} = 1;
+			}
+		}
+	}
+
+# Map each virtuser to a domain, except for those owned by plugins or for
+# which the destination is a user
+local %dmap = map { $_->{'dom'}, $_ } &list_domains();
+foreach my $v (&list_virtusers()) {
+	if (!$ignore{$v->{'from'}} && $v->{'from'} =~ /\@(\S+)$/) {
+		local $d = $dmap{$1};
+		if ($d) {
+			if (@{$v->{'to'}} == 1 && $users{$v->{'to'}->[0]}) {
+				# Points to a user .. skip only if the 
+				# email addresss is for that user
+				local $user = &remove_userdom(
+						$v->{'to'}->[0], $d);
+				if ($v->{'from'} eq $user."\@".$d->{'dom'}) {
+					next;
+					}
+				}
+			$rv{$d->{'id'}}++;
+			}
+		}
+	}
+
+return \%rv;
+}
+
 $done_feature_script{'mail'} = 1;
 
 1;
