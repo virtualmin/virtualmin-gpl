@@ -125,7 +125,7 @@ if ($config{'web'}) {
 	&restart_apache();
 	}
 
-if ($virtualmin_pro) {
+if ($virtualmin_pro && !$config{'done_fix_autoreplies'}) {
 	# Create links for existing autoreply aliases
 	&set_alias_programs();
 	foreach my $d (&list_domains()) {
@@ -133,6 +133,8 @@ if ($virtualmin_pro) {
 			&create_autoreply_alias_links($d);
 			}
 		}
+	$config{'done_fix_autoreplies'} = 1;
+	&save_module_config();
 	}
 
 # If installing for the first time, enable backup of all features by default
