@@ -1601,15 +1601,20 @@ else {
 # block size, not the file lengths in bytes.
 sub recursive_disk_usage_mtime
 {
-local ($dir, $gid, $levels) = @_;
+local ($dir, $gid, $levels, $inodes) = @_;
 local $dir = &translate_filename($dir);
 local $bs = &quota_bsize("mail", 1);
+$inodes ||= { };
 if (-l $dir) {
 	return (0, undef);
 	}
 elsif (!-d $dir) {
 	local @st = stat($dir);
-	if (!defined($gid) || $st[5] == $gid) {
+	if ($inodes{$st[1]}++) {
+		# Already done this inode (ie. hard link)
+		return ( 0, undef );
+		}
+	elsif (!defined($gid) || $st[5] == $gid) {
 		return ( $st[12]*$bs, $st[9] );
 		}
 	else {
@@ -1630,8 +1635,9 @@ else {
 		foreach my $f (@files) {
 			next if ($f eq "." || $f eq "..");
 			local ($ss, $st) = &recursive_disk_usage_mtime(
-				"$dir/$f", $gid, defined($levels) ? $levels - 1
-								  : undef);
+				"$dir/$f", $gid,
+				defined($levels) ? $levels - 1 : undef,
+				$inodes);
 			$rv += $ss;
 			$rt = $st if ($st > $rt);
 			}
