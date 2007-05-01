@@ -190,7 +190,9 @@ if (!$aliasdom) {
 				    " ".&ui_textbox("ip", undef, 15);
 			}
 		}
-	print &ui_table_row($text{'edit_virt'}, $ipfield, 1, \@tds);
+	if (&can_use_feature("virt")) {
+		print &ui_table_row($text{'edit_virt'}, $ipfield, 1, \@tds);
+		}
 	}
 
 # Show description

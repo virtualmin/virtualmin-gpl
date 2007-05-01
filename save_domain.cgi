@@ -75,7 +75,7 @@ foreach $f (@dom_features, @feature_plugins) {
 		}
 	}
 &set_chained_features(\%newdom);
-if (!$config{'all_namevirtual'} && !$d->{'alias'}) {
+if (!$config{'all_namevirtual'} && !$d->{'alias'} && &can_use_feature("virt")) {
 	$newdom{'virt'} = $in{'virt'};
 	}
 $derr = &virtual_server_depends(\%newdom);
@@ -85,7 +85,7 @@ $cerr = &virtual_server_clashes(\%newdom, \%check);
 $lerr = &virtual_server_limits(\%newdom, $oldd);
 &error($lerr) if ($lerr);
 
-if (!$d->{'alias'}) {
+if (!$d->{'alias'} && &can_use_feature("virt")) {
 	if ($config{'all_namevirtual'}) {
 		# Make sure any new IP *is* assigned
 		&check_ipaddress($in{'ip'}) || &error($text{'setup_eip'});
@@ -205,34 +205,36 @@ foreach $sd (&get_domain_by("parent", $d->{'id'})) {
 	$sd->{'email'} = $d->{'email'};
 	}
 
-if ($config{'all_namevirtual'} && !$d->{'alias'}) {
-	# Possibly changing IP
-	$d->{'ip'} = $in{'ip'};
-	$d->{'defip'} = $d->{'ip'} eq &get_default_ip();
-	delete($d->{'dns_ip'});
-	}
-elsif ($in{'virt'} && !$d->{'virt'}) {
-	# Need to bring up IP
-	$d->{'ip'} = $in{'ip'};
-	$d->{'virt'} = 1;
-	$d->{'name'} = 0;
-	delete($d->{'dns_ip'});
-	delete($d->{'defip'});
-	&setup_virt($d);
-	}
-elsif (!$in{'virt'} && $d->{'virt'}) {
-	# Need to take down IP, and revert to default
-	$d->{'ip'} = &get_default_ip($d->{'reseller'});
-	$d->{'defip'} = $d->{'ip'} eq &get_default_ip();
-	$d->{'virt'} = 0;
-	$d->{'name'} = 1;
-	delete($d->{'dns_ip'});
-	&delete_virt($d);
-	}
-if ($d->{'alias'} && !$d->{'ip'}) {
-	# IP lost bug to bug! Fix it up ..
-	$aliasdom = &get_domain($d->{'alias'});
-	$d->{'ip'} = $aliasdom->{'ip'};
+if (&can_use_feature("virt")) {
+	if ($config{'all_namevirtual'} && !$d->{'alias'}) {
+		# Possibly changing IP
+		$d->{'ip'} = $in{'ip'};
+		$d->{'defip'} = $d->{'ip'} eq &get_default_ip();
+		delete($d->{'dns_ip'});
+		}
+	elsif ($in{'virt'} && !$d->{'virt'}) {
+		# Need to bring up IP
+		$d->{'ip'} = $in{'ip'};
+		$d->{'virt'} = 1;
+		$d->{'name'} = 0;
+		delete($d->{'dns_ip'});
+		delete($d->{'defip'});
+		&setup_virt($d);
+		}
+	elsif (!$in{'virt'} && $d->{'virt'}) {
+		# Need to take down IP, and revert to default
+		$d->{'ip'} = &get_default_ip($d->{'reseller'});
+		$d->{'defip'} = $d->{'ip'} eq &get_default_ip();
+		$d->{'virt'} = 0;
+		$d->{'name'} = 1;
+		delete($d->{'dns_ip'});
+		&delete_virt($d);
+		}
+	if ($d->{'alias'} && !$d->{'ip'}) {
+		# IP lost bug to bug! Fix it up ..
+		$aliasdom = &get_domain($d->{'alias'});
+		$d->{'ip'} = $aliasdom->{'ip'};
+		}
 	}
 
 if (!$d->{'disabled'}) {
