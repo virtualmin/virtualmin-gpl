@@ -612,3 +612,4 @@ Optimized the collectinfo.pl program, which generates the right-side system info
 ---- Changes since 3.39 ----
 Updated the SugarCRM script installer to version 4.5.1c.
 Password restrictions set in the Users and Groups module are now checked when creating or saving a domain.
+Webmin libraries are not pre-loaded into memory for performance if the system has less than 256M RAM.

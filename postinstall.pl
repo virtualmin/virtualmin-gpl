@@ -54,7 +54,18 @@ if ($config{'virus'} && $virtualmin_pro) {
 	&fix_clam_wrapper();
 	}
 
-if ($virtualmin_pro && !$gconfig{'no_virtualmin_preload'}) {
+# Check if we have enough memory to preload
+local $lowmem;
+&foreign_require("proc", "proc-lib.pl");
+if (defined(&proc::get_memory_info)) {
+	local ($real) = &proc::get_memory_info();
+	if ($real*1024 <= 256*1024*1024*1024) {
+		# Less that 256 M .. don't preload
+		$lowmem = 1;
+		}
+	}
+
+if ($virtualmin_pro && !$gconfig{'no_virtualmin_preload'} && !$lowmem) {
 	# Configure miniserv to pre-load virtual-server-lib-funcs.pl and
 	# all of the feature files
 	local @preload = split(/\s+/, $miniserv{'preload'});
