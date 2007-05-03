@@ -78,6 +78,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--prefix") {
 		$prefix = shift(@ARGV);
 		}
+	elsif ($a eq "--email") {
+		$email = shift(@ARGV);
+		}
 	else {
 		&usage();
 		}
@@ -113,7 +116,7 @@ print "Starting migration of $domain from $src ..\n\n";
 &lock_domain_name($domain);
 $mfunc = "migration_${type}_migrate";
 @doms = &$mfunc($src, $domain, $user, $webmin, $template,
-		$ip, $virt, $pass, $parent, $prefix, $virtalready);
+		$ip, $virt, $pass, $parent, $prefix, $virtalready, $email);
 &run_post_actions();
 
 # Show the result

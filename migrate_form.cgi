@@ -66,6 +66,10 @@ else {
 print &ui_table_row($text{'migrate_prefix'},
 		   &ui_opt_textbox("prefix", undef, 20, $text{'migrate_auto'}));
 
+# Contact email
+print &ui_table_row($text{'migrate_email'},
+	    &ui_opt_textbox("email", undef, 40, $text{'form_email_def'}), 3);
+
 print &ui_table_end();
 print &ui_form_end([ [ "migrate", $text{'migrate_show'} ] ]);
 

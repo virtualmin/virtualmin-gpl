@@ -44,7 +44,7 @@ return undef;
 sub migration_ensim_migrate
 {
 local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
-       $prefix, $virtalready) = @_;
+       $prefix, $virtalready, $defemail) = @_;
 local $root = &extract_ensim_dir($file);
 
 # Get the manifest and some useful info from it
@@ -158,7 +158,7 @@ $prefix ||= &compute_prefix($dom, $group, $parent);
          'gid', $gid,
          'ugid', $ugid,
          'owner', "Migrated Ensim server $dom",
-         'email', $parent ? $parent->{'email'} : $email,
+         'email', $defemail ? $defemail : $parent ? $parent->{'email'} : $email,
          'name', !$virt,
          'ip', $ip,
 	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :

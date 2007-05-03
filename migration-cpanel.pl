@@ -36,13 +36,13 @@ return undef;
 
 # migration_cpanel_migrate(file, domain, username, create-webmin, template-id,
 #			   ip-address, virtmode, pass, [&parent], [prefix],
-#			   virt-already)
+#			   virt-already, [email])
 # Actually extract the given cPanel backup, and return the list of domains
 # created.
 sub migration_cpanel_migrate
 {
 local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
-       $prefix, $virtalready) = @_;
+       $prefix, $virtalready, $email) = @_;
 local $group = $user;
 local $ugroup = $group;
 local $root = &extract_cpanel_dir($file);
@@ -200,7 +200,7 @@ $prefix ||= &compute_prefix($dom, $group, $parent);
          'gid', $gid,
          'ugid', $ugid,
          'owner', "Migrated cPanel server $dom",
-         'email', $parent ? $parent->{'email'} : undef,
+         'email', $email ? $email : $parent ? $parent->{'email'} : undef,
          'name', !$virt,
          'ip', $ip,
 	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :

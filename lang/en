@@ -2582,6 +2582,7 @@ migrate_parent=Owned by server owner
 migrate_parent1=New user
 migrate_parent0=Existing user
 migrate_prefix=Prefix for mail usernames
+migrate_email=Contact email address
 migrate_auto=Automatic
 
 newscripts_title=Script Installers

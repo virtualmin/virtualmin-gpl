@@ -36,6 +36,7 @@ if (!$in{'prefix_def'}) {
 		&error($text{'setup_eprefix'});
 	$prefix = $in{'prefix'};
 	}
+$in{'email_def'} || $in{'email'} =~ /\S/ || &error($text{'setup_eemail'});
 
 # Validate the file
 $vfunc = "migration_$in{'type'}_validate";
@@ -53,7 +54,8 @@ $err = &$vfunc($file, $in{'dom'}, $in{'user'}, $parent, $prefix);
 &$indent_print();
 $mfunc = "migration_$in{'type'}_migrate";
 @doms = &$mfunc($file, $in{'dom'}, $in{'user'}, $in{'webmin'}, $in{'template'},
-		$ip, $virt, $in{'pass'}, $parent, $prefix);
+		$ip, $virt, $in{'pass'}, $parent, $prefix,
+		$virtalready, $in{'email_def'} ? undef : $in{'email'});
 &run_post_actions();
 &$outdent_print();
 if (@doms) {
