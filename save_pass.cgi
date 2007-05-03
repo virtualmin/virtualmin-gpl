@@ -19,6 +19,14 @@ elsif (!&reseller_admin()) {
 $in{'new1'} || &error($text{'pass_enew1'});
 $in{'new1'} eq $in{'new2'} || error($text{'pass_enew2'});
 
+# Check password quality for virtual servers
+if ($d) {
+	local $fakeuser = { 'user' => $d->{'user'},
+			    'plainpass' => $in{'new1'} };
+	$err = &check_password_restrictions($fakeuser);
+	&error($err) if ($err);
+	}
+
 &ui_print_header($d ? &domain_in($d) : undef, $text{'pass_title'}, "");
 if ($d) {
 	# Update domain's password
