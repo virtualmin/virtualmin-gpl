@@ -611,3 +611,4 @@ The old one file per directory backup format is no longer available, unless alre
 Optimized the collectinfo.pl program, which generates the right-side system information frame.
 ---- Changes since 3.39 ----
 Updated the SugarCRM script installer to version 4.5.1c.
+Password restrictions set in the Users and Groups module are now checked when creating or saving a domain.

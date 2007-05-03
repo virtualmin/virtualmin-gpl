@@ -47,6 +47,14 @@ if (defined($in{'prefix'})) {
 		}
 	}
 
+# Check if the password was changed, and if so is it valid
+if (!$d->{'parent'} && !$in{'passwd_def'}) {
+	local $fakeuser = { 'user' => $d->{'user'},
+			    'plainpass' => $in{'passwd'} };
+	$err = &check_password_restrictions($fakeuser);
+	&error($err) if ($err);
+	}
+
 # Work out which features are relevant
 @dom_features = &domain_features($d);
 
