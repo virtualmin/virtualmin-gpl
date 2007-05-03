@@ -134,6 +134,13 @@ if (!$parentuser) {
 			  $in{'domslimit_def'} == 2 ? "*" : $in{'domslimit'};
 		$nodbname = $in{'nodbname'};
 		}
+
+	# Check password restrictions
+	if (defined($pass)) {
+		local $fakeuser = { 'user' => $user, 'plainpass' => $pass };
+		$err = &check_password_restrictions($fakeuser);
+		&error($err) if ($err);
+		}
 	}
 if (!$aliasdom) {
 	# Validate non-alias domain inputs
