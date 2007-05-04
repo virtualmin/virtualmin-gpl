@@ -9,13 +9,13 @@ $d = &get_domain($in{'dom'});
 
 # Validate and store inputs
 &error_setup($text{'limits_err'});
-$in{'mailboxlimit_def'} || $in{'mailboxlimit'} =~ /^[1-9]\d*$/ ||
+$in{'mailboxlimit_def'} || $in{'mailboxlimit'} =~ /^\d+$/ ||
 	&error($text{'setup_emailboxlimit'});
 $d->{'mailboxlimit'} = $in{'mailboxlimit_def'} ? undef : $in{'mailboxlimit'};
-$in{'aliaslimit_def'} || $in{'aliaslimit'} =~ /^[1-9]\d*$/ ||
+$in{'aliaslimit_def'} || $in{'aliaslimit'} =~ /^\d+$/ ||
 	&error($text{'setup_ealiaslimit'});
 $d->{'aliaslimit'} = $in{'aliaslimit_def'} ? undef : $in{'aliaslimit'};
-$in{'dbslimit_def'} || $in{'dbslimit'} =~ /^[1-9]\d*$/ ||
+$in{'dbslimit_def'} || $in{'dbslimit'} =~ /^\d+$/ ||
 	&error($text{'setup_edbslimit'});
 $d->{'dbslimit'} = $in{'dbslimit_def'} ? undef : $in{'dbslimit'};
 $in{'domslimit_def'} || $in{'domslimit'} =~ /^\d+$/ ||
