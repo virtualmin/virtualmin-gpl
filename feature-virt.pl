@@ -141,9 +141,10 @@ if ($config{'all_namevirtual'}) {
 else {
 	# An IP can be selected, perhaps private, shared or default
 	local ($t, $anyalloc, $anychoose, $anyzone);
-	if (&running_in_zone()) {
-		# When running in a Solaris zone, you MUST select an existing
-		# active IP
+	if (&running_in_zone() ||
+	    (defined(&running_in_vserver) && &running_in_vserver())) {
+		# When running in a Solaris zone or VServer, you MUST select an
+		# existing active IP, as they are controlled from the host.
 		$anyzone = 1;
 		}
 	elsif (&can_use_feature("virt")) {
