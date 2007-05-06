@@ -38,6 +38,9 @@ if ($in{'confirm'}) {
 
 		# Record script un-install in domain
 		&remove_domain_script($d, $sinfo);
+
+		&run_post_actions();
+
 		&webmin_log("uninstall", "script", $sinfo->{'name'},
 			    { 'ver' => $sinfo->{'version'},
 			      'desc' => $sinfo->{'desc'},

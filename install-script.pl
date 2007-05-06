@@ -216,6 +216,8 @@ if ($ok) {
 			&$second_print($text{'scripts_aalready'});
 			}
 		}
+
+	&run_post_actions();
 	}
 else {
 	&$second_print($text{'scripts_failed'});

@@ -613,3 +613,4 @@ Optimized the collectinfo.pl program, which generates the right-side system info
 Updated the SugarCRM script installer to version 4.5.1c.
 Password restrictions set in the Users and Groups module are now checked when creating or saving a domain.
 Webmin libraries are not pre-loaded into memory for performance if the system has less than 256M RAM.
+Updated the TWiki script install to redirect /twiki (or whatever path is selected) to /cgi-bin/twiki/view, which actually shows the Wiki.

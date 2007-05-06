@@ -54,3 +54,6 @@
 	- autoindex PHP script (805)
 	- jupload (806)
 
+ - for cpanel imports, use a different cgi-bin directory (domain-level option)
+
+

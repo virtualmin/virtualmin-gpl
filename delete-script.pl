@@ -73,6 +73,8 @@ if ($ok) {
 
 	# Record script un-install in domain
 	&remove_domain_script($d, $sinfo);
+
+	&run_post_actions();
 	}
 else {
 	&$second_print($text{'scripts_failed'});
