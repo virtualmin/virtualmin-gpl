@@ -325,6 +325,7 @@ elsif ($got{'web'}) {
 	&apache::save_directive("ScriptAlias",
 		[ "/cgi-bin $dom{'home'}/public_html/cgi-bin" ], $virt, $conf);
 	&register_post_action(\&restart_apache) if (!$got{'ssl'});
+	$d->{'cgi_bin_dir'} = "public_html/cgi-bin";
 	}
 
 if ($got{'ssl'}) {

@@ -1036,7 +1036,7 @@ else {
 sub cgi_bin_dir
 {
 local ($d, $rel, $nosubdom) = @_;
-local $cdir = "cgi-bin";
+local $cdir = $d->{'cgi_bin_dir'} || "cgi-bin";
 if ($d->{'subdom'} && !$nosubdom) {
 	# Under cgi-bin of parent domain
 	local $subdom = &get_domain($d->{'subdom'});
