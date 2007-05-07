@@ -3668,7 +3668,7 @@ elsif ($mode == 3) {
 		}
 	local $cerr = &check_s3();
 	if ($cerr) {
-		&$first_print($err);
+		&$first_print($cerr);
 		return (0, 0);
 		}
 	local $err = &init_s3_bucket($user, $pass, $server);
@@ -10461,7 +10461,7 @@ local @rv = map { { 'feature' => $_,
 		    'desc' => $text{'feature_'.$_},
 		    'core' => 1,
 		    'auto' => $config{$_} == 3,
-		    'default' => $config{$_} != 2,
+		    'default' => $config{$_} == 1 || $config{$_} == 3,
 		    'enabled' => $config{$_} || !defined($config{$_}) } } @core;
 
 # Add plugin features
