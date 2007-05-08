@@ -233,6 +233,41 @@ local @rv = ( $fullcmd, @args );
 return join(" ", map { /\s/ ? "\"$_\"" : $_ } @rv);
 }
 
+# get_domain_virus_scanner(&domain)
+# Returns the virus scanning command use for some domain. This can be clamscan,
+# clamdscan or some other path.
+sub get_domain_virus_scanner
+{
+local ($d) = @_;
+&require_spam();
+local $spamrc = "$procmail_spam_dir/$d->{'id'}";
+local @recipes = &procmail::parse_procmail_file($spamrc);
+local @clamrec = &find_clam_recipe(\@recipes);
+if (@clamrec) {
+	local $rv = $clamrec[0]->{'action'};
+	$rv =~ s/^\Q$clam_wrapper_cmd\E\s+//;
+	return $rv;
+	}
+else {
+	return undef;
+	}
+}
+
+# save_domain_virus_scanner(&domain, program)
+# Updates the virus scanning program in the procmail config
+sub save_domain_virus_scanner
+{
+local ($d, $prog) = @_;
+&require_spam();
+local $spamrc = "$procmail_spam_dir/$d->{'id'}";
+local @recipes = &procmail::parse_procmail_file($spamrc);
+local @clamrec = &find_clam_recipe(\@recipes);
+if (@clamrec) {
+	$clamrec[0]->{'action'} = "$clam_wrapper_cmd $prog";
+	&procmail::modify_recipe($clamrec[0]);
+	}
+}
+
 $done_feature_script{'virus'} = 1;
 
 1;

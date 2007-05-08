@@ -2092,6 +2092,12 @@ sub can_spam_client
 return &master_admin();
 }
 
+# Returns 1 if the current user can select the ClamAV program for a domain
+sub can_virus_scanner
+{
+return &master_admin();
+}
+
 # can_switch_user(&domain, [extra-admin])
 # Returns 1 if the current user can switch to the Webmin login for some domain
 sub can_switch_user
@@ -9637,6 +9643,10 @@ if ($config{'virus'}) {
 	# Make sure ClamAV is installed and working
 	&full_clamscan_path() ||
 		return &text('index_evirus', "<tt>$config{'clamscan_cmd'}</tt>", $clink);
+	if ($config{'clamscan_cmd'} eq "clamdscan") {
+		# Need clamd to be running
+		&find_byname("clamd") || return $text{'check_eclamd'};
+		}
 	local $out = `$config{'clamscan_cmd'} - </dev/null 2>&1`;
 	$? && return &text('index_evirusrun', "<tt>$config{'clamscan_cmd'}</tt>", "<pre>$out</pre>", $clink);
 	&$second_print($text{'check_virusok'});

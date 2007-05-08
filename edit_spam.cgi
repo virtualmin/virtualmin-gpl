@@ -71,6 +71,20 @@ print &ui_table_row(&hlink($text{'spam_clear'}, 'spam_clear'),
 			     &ui_bytesbox("size", $auto->{'size'})) ],
 		]));
 
+if ($d->{'virus'} && &can_virus_scanner()) {
+	# Show virus scanning program
+	$scanner = &get_domain_virus_scanner($d);
+	if ($scanner) {
+		print &ui_table_row(&hlink($text{'spam_scanner'}, 'spam_scanner'),
+			&ui_radio('scanner', $scanner eq 'clamscan' ? 0 :
+					     $scanner eq 'clamdscan' ? 1 : 2,
+			  [ [ 0, $text{'spam_scanner0'}."<br>" ],
+			    [ 1, $text{'spam_scanner1'}."<br>" ],
+			    [ 2, &text('spam_scanner2',
+					&ui_textbox("scanprog", $scanner, 40)) ] ]));
+		}
+	}
+
 print &ui_table_end();
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 

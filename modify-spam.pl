@@ -79,12 +79,15 @@ while(@ARGV > 0) {
 		$auto->{'size'} =~ /^\d+$/ ||
 		  &usage("The $a option must be followed by a size in bytes");
 		}
+	elsif ($a =~ /^--use-(clamscan|clamdscan)$/) {
+		$virus_scanner = $1;
+		}
 	else {
 		&usage();
 		}
 	}
 @dnames || $all_doms || usage();
-defined($mode{'spam'}) || defined($mode{'virus'}) || $spam_client ||
+defined($mode{'spam'}) || defined($mode{'virus'}) || $spam_client || $virus_scanner ||
     defined($auto) || &usage("Nothing to do");
 
 # Get domains to update
@@ -123,6 +126,9 @@ foreach $d (@doms) {
 	if (defined($auto)) {
 		&save_domain_spam_autoclear($d, $auto);
 		}
+	if (defined($virus_scanner)) {
+		&save_domain_virus_scanner($d, $virus_scanner);
+		}
 
 	&$outdent_print();
 	&$second_print(".. done");
@@ -149,6 +155,7 @@ print "                      [--use-spamassassin | --use-spamc]\n";
 print "                      [--spamclear-none |\n";
 print "                       --spamclear-days days\n";
 print "                       --spamclear-size bytes]\n";
+print "                      [--use-clamscan | --use-clamdscan]\n";
 exit(1);
 }
 

@@ -1439,6 +1439,7 @@ check_eset_group=External quota commands are enabled, but the command to set a g
 check_elist_users=External quota commands are enabled, but the command to list user quotas not defined or does not exist
 check_elist_groups=External quota commands are enabled, but the command to list group quotas not defined or does not exist
 check_quotacommands=External quota commands will be used for virtual servers and mailboxes.
+check_eclamd=You have selected to use <tt>clamdscan</tt> for virus scanning, but the <tt>clamd</tt> server it talks to is not running
 
 allwebmin_ecannot=You are not allowed to update all Webmin users
 allwebmin_title=Updating Webmin Users
@@ -2993,6 +2994,12 @@ spam_cleardays=Yes, if older than $1 days
 spam_clearsize=Yes, when mailbox exceeds $1
 spam_esize=Missing or invalid maximum spam mailbox size
 spam_edays=Missing or invalid maximum spam age
+spam_scanner=Virus scanning program
+spam_scanner0=Standalone scanner (<tt>clamscan</tt>)
+spam_scanner1=Server scanner (<tt>clamdscan</tt>)
+spam_scanner2=Other program $1
+spam_escanner=Missing or invalid virus scanning program
+spam_eclamdscan=The server virus scanner cannot be selected unless the <tt>clamd</tt> daemon is running
 
 cat_objects=Server Objects
 cat_server=Server Configuration

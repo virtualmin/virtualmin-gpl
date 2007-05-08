@@ -613,4 +613,6 @@ Optimized the collectinfo.pl program, which generates the right-side system info
 Updated the SugarCRM script installer to version 4.5.1c.
 Password restrictions set in the Users and Groups module are now checked when creating or saving a domain.
 Webmin libraries are not pre-loaded into memory for performance if the system has less than 256M RAM.
-Updated the TWiki script install to redirect /twiki (or whatever path is selected) to /cgi-bin/twiki/view, which actually shows the Wiki.
+Updated the TWiki script install to redirect /twiki (or whatever path is selected) to /cgi-bin/twiki/view, which actually shows the Wiki. 
+Added a section to the Spam and Virus Delivery page for changing the virus scanner to use for existing domains, for choosing between clamscan and clamdscan. Also made it easier to change the default for this on the Module Config page.
+Updated the modify-spam.pl program to add the --use-clamscan and --use-clamdscan program.
