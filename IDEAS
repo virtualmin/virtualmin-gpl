@@ -54,3 +54,6 @@
 	- autoindex PHP script (805)
 	- jupload (806)
 
+ - when adding SSL, plugins that modify httpd.conf need to update the SSL
+   virtualhost too (for filip)
+	- also, any ServerAlias for the alias domains need to be added

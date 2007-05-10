@@ -9,7 +9,7 @@ $d = &get_domain($in{'dom'});
 
 # Validate inputs
 &error_setup($text{'csr_err'});
-$in{'commonName'} =~ /^[A-Za-z0-9\.\-]+$/ ||
+$in{'commonName'} =~ /^[A-Za-z0-9\.\-\*]+$/ ||
 	&error($webmin::text{'newkey_ecn'});
 $in{'size_def'} || $in{'size'} =~ /^\d+$/ ||
 	&error($webmin::text{'newkey_esize'});
