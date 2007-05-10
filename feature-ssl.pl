@@ -228,6 +228,11 @@ sub delete_ssl
 &require_apache();
 local $conf = &apache::get_config();
 &$first_print($text{'delete_ssl'});
+
+# Remove the custom Listen directive added for the domain
+&remove_listen($d, $conf, $d->{'web_sslport'});
+
+# Remove the <virtualhost>
 local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 					    $_[0]->{'web_sslport'});
 local $tmpl = &get_template($_[0]->{'template'});

@@ -616,3 +616,4 @@ Webmin libraries are not pre-loaded into memory for performance if the system ha
 Updated the TWiki script install to redirect /twiki (or whatever path is selected) to /cgi-bin/twiki/view, which actually shows the Wiki. 
 Added a section to the Spam and Virus Delivery page for changing the virus scanner to use for existing domains, for choosing between clamscan and clamdscan. Also made it easier to change the default for this on the Module Config page.
 Updated the modify-spam.pl program to add the --use-clamscan and --use-clamdscan program.
+When a virtual server with a website and private IP address is deleted, any Listen directives added for its IP are removed from the Apache configuration.

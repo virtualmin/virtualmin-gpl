@@ -235,6 +235,10 @@ if ($_[0]->{'alias_mode'}) {
 elsif ($config{'delete_indom'}) {
 	# Delete all matching virtual servers
 	&$first_print($text{'delete_apache'});
+	if (!$_[0]->{'alias_mode'}) {
+		# Remove the custom Listen directive added for the domain
+		&remove_listen($d, $conf, $d->{'web_port'});
+		}
 	local @virt = reverse(&apache::find_directive_struct("VirtualHost",
 							     $conf));
 	foreach $v (@virt) {
@@ -250,6 +254,10 @@ elsif ($config{'delete_indom'}) {
 else {
 	# Just delete one virtual server
 	&$first_print($text{'delete_apache'});
+	if (!$_[0]->{'alias_mode'}) {
+		# Remove the custom Listen directive added for the domain
+		&remove_listen($d, $conf, $d->{'web_port'});
+		}
 	local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 						    $_[0]->{'web_port'});
 	if ($virt) {
@@ -1320,6 +1328,23 @@ if (!$lfound && @listen > 0) {
 	&apache::save_directive("Listen", [ @listen, "$ip:$web_port" ],
 				$conf, $conf);
 	&flush_file_lines();
+	}
+}
+
+# remove_listen(&domain, &conf, port)
+# Remove any Listen directive that exactly matches the domain's IP and the
+# given port, if and only if the domain has a private IP address
+sub remove_listen
+{
+local ($d, $conf, $web_port) = @_;
+if ($d->{'virt'} && !$d->{'name'}) {
+	local @listen = &apache::find_directive("Listen", $conf);
+	local @newlisten = grep { $_ ne "$d->{'ip'}:$web_port" } @listen;
+	if (scalar(@listen) != scalar(@newlisten)) {
+		&apache::save_directive("Listen", \@newlisten,
+					$conf, $conf);
+		&flush_file_lines();
+		}
 	}
 }
 
