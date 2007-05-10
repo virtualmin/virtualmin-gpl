@@ -620,3 +620,4 @@ When a virtual server with a website and private IP address is deleted, any List
 Added a Module Config option to change the default SSL key size, and increased the default to 1024 bits.
 Added Module Config options for choosing different locations for servers' SSL certificate and key files.
 The PHP module mcrypt is now only recommended when installing phpMyAdmin, but not strictly required.
+Added a button on the Install Scripts for upgrading several to the latest version at once.

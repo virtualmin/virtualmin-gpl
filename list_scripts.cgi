@@ -25,6 +25,7 @@ print &ui_tabs_start(\@tabs, "scriptsmode",
 print &ui_tabs_start_tab("scriptsmode", "existing");
 if (@got) {
 	$ratings = &get_script_ratings();
+	$upcount = 0;
 	print $text{'scripts_desc3'},"<p>\n";
 	@tds = ( "width=5", undef, undef, undef, undef, "nowrap" );
 	print &ui_form_start("mass_uninstall.cgi", "post");
@@ -49,6 +50,7 @@ if (@got) {
 				$status = "<font color=#ffaa00>".
 				  &text('scripts_newer', $better[$#better]).
 				  "</font>";
+				$upcount++;
 				}
 			else {
 				$status = $text{'scripts_nonewer'};
@@ -75,7 +77,10 @@ if (@got) {
 		}
 	print &ui_columns_end();
 	print &ui_links_row(\@links);
-	print &ui_form_end([ [ "uninstall", $text{'scripts_uninstalls'} ] ]);
+	print &ui_form_end([
+		     [ "uninstall", $text{'scripts_uninstalls'} ],
+		     $upcount ? ( [ "upgrade", $text{'scripts_upgrades'} ] )
+			      : ( ) ]);
 	}
 else {
 	print "<b>$text{'scripts_noexisting'}</b><p>\n";

@@ -59,7 +59,3 @@
 	- also, any ServerAlias for the alias domains need to be added
 	- just copy from non-ssl vhost
 
- - mass upgrade on installed scripts page
-
- - 'nice to have' PHP modules, like mcrypt for phpmyadmin
-

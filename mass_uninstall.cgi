@@ -5,6 +5,12 @@ require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_scripts() || &error($text{'edit_ecannot'});
+if ($in{'upgrade'}) {
+	# Just go to mass upgrade page
+	&redirect("mass_upgrade.cgi?$in");
+	exit;
+	}
+
 &error_setup($text{'massu_err'});
 @d = split(/\0/, $in{'d'});
 @d || &error($text{'masse_enone'});
