@@ -68,6 +68,7 @@ if (!-r $_[0]->{'ssl_cert'} && !-r $_[0]->{'ssl_key'}) {
 	unlink($temp);
 	if (!-r $_[0]->{'ssl_cert'} || !-r $_[0]->{'ssl_key'} || $?) {
 		&$second_print(&text('setup_eopenssl', "<pre>$out</pre>"));
+		return 0;
 		}
 	else {
 		&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'}, 0755, $_[0]->{'ssl_cert'}, $_[0]->{'ssl_key'});
@@ -84,12 +85,22 @@ if (!-r $_[0]->{'ssl_cert'} && !-r $_[0]->{'ssl_key'}) {
 # Add a Listen directive if needed
 &add_listen($_[0], $conf, $web_sslport);
 
-# Add the actual <VirtualHost>
+# Find directives in the non-SSL virtualhost, for copying
 &$first_print($text{'setup_ssl'});
+local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
+					    $_[0]->{'web_port'});
+if (!$virt) {
+	&$second_print($text{'setup_esslcopy'});
+	return 0;
+	}
+local $srclref = &read_file_lines($virt->{'file'});
+
+# Add the actual <VirtualHost>
 local $lref = &read_file_lines($f);
-local @dirs = &apache_ssl_template($tmpl->{'web'}, $_[0],$tmpl->{'web_suexec'});
+local @ssldirs = &apache_ssl_directives($_[0], $tmpl);
 push(@$lref, "<VirtualHost $_[0]->{'ip'}:$web_sslport>");
-push(@$lref, @dirs);
+push(@$lref, @$srclref[$virt->{'line'}+1 .. $virt->{'eline'}-1]);
+push(@$lref, @ssldirs);
 push(@$lref, "</VirtualHost>");
 &flush_file_lines($f);
 &unlock_file($f);
@@ -97,8 +108,6 @@ undef(@apache::get_config_cache);
 
 # Update the non-SSL virtualhost to include the port number, to fix old
 # hosts that were missing the :80
-local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
-					    $_[0]->{'web_port'});
 &lock_file($virt->{'file'});
 local $lref = &read_file_lines($virt->{'file'});
 if (!$_[0]->{'name'} && $lref->[$virt->{'line'}] !~ /:\d+/) {
@@ -194,19 +203,22 @@ if ($_[0]->{'proxy_pass_mode'} == 1 &&
 	&$second_print($text{'setup_done'});
 	}
 if ($_[0]->{'proxy_pass_mode'} != $_[1]->{'proxy_pass_mode'}) {
-	# Proxy mode has been enabled or disabled .. update all
-	# Apache directives from template
+	# Proxy mode has been enabled or disabled .. copy all directives from
+	# non-SSL site
 	local $mode = $_[0]->{'proxy_pass_mode'} ||
 		      $_[1]->{'proxy_pass_mode'};
 	&$first_print($mode == 2 ? $text{'save_ssl8'}
 				 : $text{'save_ssl9'});
+	local ($nonvirt, $nonvconf) = &get_apache_virtual($_[1]->{'dom'},
+						          $_[1]->{'web_port'});
 	local $lref = &read_file_lines($virt->{'file'});
+	local $nonlref = &read_file_lines($nonvirt->{'file'});
 	local $tmpl = &get_template($_[0]->{'tmpl'});
-	local @dirs = &apache_ssl_template($tmpl->{'web'}, $_[0],
-				           $tmpl->{'web_suexec'});
+	local @dirs = @$nonlref[$nonvirt->{'line'}+1 .. $nonvirt->{'eline'}-1];
+	push(@dirs, &apache_ssl_directives($_[0], $tmpl));
 	splice(@$lref, $virt->{'line'} + 1,
 	       $virt->{'eline'} - $virt->{'line'} - 1, @dirs);
-	&flush_file_lines();
+	&flush_file_lines($virt->{'file'});
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}
@@ -548,12 +560,12 @@ if (&delete_ipkeys($olddom, $getfunc, $putfunc, $postfunc)) {
 	}
 }
 
-# apache_ssl_template(text, &domain, suexec)
-# Returns a suitably substituted Apache template, with SSL directives
-sub apache_ssl_template
+# apache_ssl_directives(&domain, template)
+# Returns extra Apache directives needed for SSL
+sub apache_ssl_directives
 {
-local ($txt, $d, $suexec) = @_;
-local @dirs = &apache_template($txt, $d, $suexec);
+local ($d, $tmpl) = @_;
+local @dirs;
 push(@dirs, "SSLEngine on");
 push(@dirs, "SSLCertificateFile $d->{'ssl_cert'}");
 push(@dirs, "SSLCertificateKeyFile $d->{'ssl_key'}");

@@ -621,3 +621,4 @@ Added a Module Config option to change the default SSL key size, and increased t
 Added Module Config options for choosing different locations for servers' SSL certificate and key files.
 The PHP module mcrypt is now only recommended when installing phpMyAdmin, but not strictly required.
 Added a button on the Install Scripts for upgrading several to the latest version at once.
+When SSL is enabled for a virtual server, all Apache directives are copied from the non-SSL virtualhost section. This ensures that directives added by plugins or PHP configuration are preserved.
