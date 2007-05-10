@@ -108,7 +108,7 @@ else {
 		}
 	print &text('massg_rusure', scalar(@d)),"<p>\n";
 	print "<table>\n";
-	foreach $s (@sinfos) {
+	foreach $sinfo (@sinfos) {
 		$script = $scriptmap{$sinfo->{'id'}};
 		$ver = $vermap{$sinfo->{'id'}};
 		print "<tr>\n";
