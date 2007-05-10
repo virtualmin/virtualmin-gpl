@@ -42,11 +42,13 @@ $_[0]->{'ssl_cert'} ||= "$_[0]->{'home'}/ssl.cert";
 $_[0]->{'ssl_key'} ||= "$_[0]->{'home'}/ssl.key";
 if (!-r $_[0]->{'ssl_cert'} && !-r $_[0]->{'ssl_key'}) {
 	# Need to do it
+	&foreign_require("webmin", "webmin-lib.pl");
 	local $temp = &transname();
 	&$first_print($text{'setup_openssl'});
 	&lock_file($_[0]->{'ssl_cert'});
 	&lock_file($_[0]->{'ssl_key'});
-	&open_execute_command(CA, "openssl req -newkey rsa:512 -x509 -nodes -out $_[0]->{'ssl_cert'} -keyout $_[0]->{'ssl_key'} -days 1825 >$temp 2>&1", 0);
+	local $size = $config{'key_size'} || $webmin::default_key_size;
+	&open_execute_command(CA, "openssl req -newkey rsa:$size -x509 -nodes -out $_[0]->{'ssl_cert'} -keyout $_[0]->{'ssl_key'} -days 1825 >$temp 2>&1", 0);
 	print CA ".\n";
 	print CA ".\n";
 	print CA ".\n";

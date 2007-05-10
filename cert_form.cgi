@@ -64,8 +64,8 @@ print &ui_table_row($webmin::text{'ca_c'},
 		    &ui_textbox("countryName", undef, 2));
 
 print &ui_table_row($webmin::text{'ssl_size'},
-		    &ui_opt_textbox("size", undef, 6,
-				    "$text{'default'} ($webmin::default_key_size)").
+		    &ui_opt_textbox("size", $config{'key_size'}, 6,
+			    "$text{'default'} ($webmin::default_key_size)").
 			" ".$text{'ssl_bits'});
 
 print &ui_table_row($webmin::text{'ssl_days'},
