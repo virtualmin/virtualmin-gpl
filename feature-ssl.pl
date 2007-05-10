@@ -38,8 +38,14 @@ local $f = &get_website_file($_[0]);
 &lock_file($f);
 
 # Create a self-signed cert and key, if needed
-$_[0]->{'ssl_cert'} ||= "$_[0]->{'home'}/ssl.cert";
-$_[0]->{'ssl_key'} ||= "$_[0]->{'home'}/ssl.key";
+local $defcert = $config{'cert_tmpl'} ?
+		    &substitute_domain_template($config{'cert_tmpl'}, $_[0]) :
+		    "$_[0]->{'home'}/ssl.cert";
+local $defkey = $config{'key_tmpl'} ?
+		    &substitute_domain_template($config{'key_tmpl'}, $_[0]) :
+		    "$_[0]->{'home'}/ssl.key";
+$_[0]->{'ssl_cert'} ||= $defcert;
+$_[0]->{'ssl_key'} ||= $defkey;
 if (!-r $_[0]->{'ssl_cert'} && !-r $_[0]->{'ssl_key'}) {
 	# Need to do it
 	&foreign_require("webmin", "webmin-lib.pl");

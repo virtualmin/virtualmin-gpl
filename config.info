@@ -73,7 +73,11 @@ passwd_length=Length of randomly generated password,3,Default (15 characters),5
 webalizer_nocron=Setup Webalizer Cron job for each virtual server?,1,0-Yes,1-No
 limitnoalias=Include alias servers in limits?,1,0-Yes,1-No
 allow_subdoms=Allow creation of sub-domains?,1,1-Yes,0-No,-Decide automatically
+
+line2.1=SSL settings,11
 key_size=Default SSL key size,3,Webmin default (512 bits),6,,bits
+key_tmpl=Template for private key path,3,Default (<tt>~/ssl.key</tt>)
+cert_tmpl=Template for certificate path,3,Default (<tt>~/ssl.cert</tt>)
 
 line6.5=Reseller settings,11
 reseller_theme=Theme for new resellers,15,theme,reseller_theme
