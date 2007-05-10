@@ -2500,6 +2500,7 @@ scripts_newdb=$1 ($2, new database)
 scripts_nocat=Others
 scripts_enosel=None selected
 scripts_needmod=PHP module $1 is required ..
+scripts_optmod=PHP module $1 is recommended ..
 scripts_softwaremod=Installing package $1 ..
 scripts_esoftwaremod=.. failed to install!
 scripts_esoftware=.. the Software Packages Webmin module is not installed!

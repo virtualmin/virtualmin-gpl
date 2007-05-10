@@ -65,6 +65,7 @@ local $rv = { 'name' => $name,
 	      'php_vars_func' => "script_${name}_php_vars",
 	      'php_vers_func' => "script_${name}_php_vers",
 	      'php_mods_func' => "script_${name}_php_modules",
+	      'php_opt_mods_func' => "script_${name}_php_optional_modules",
 	      'pear_mods_func' => "script_${name}_pear_modules",
 	      'latest_func' => "script_${name}_latest",
 	      'check_latest_func' => "script_${name}_check_latest",
@@ -586,21 +587,33 @@ sub setup_php_modules
 {
 local ($d, $script, $ver, $phpver, $opts) = @_;
 local $modfunc = $script->{'php_mods_func'};
-return 1 if (!defined(&$modfunc));
-local @mods = &$modfunc($d, $ver, $phpver, $opts);
+local $optmodfunc = $script->{'php_opt_mods_func'};
+return 1 if (!defined(&$modfunc) && !defined(&$optmodfunc));
+local (@mods, @optmods);
+if (defined(&$modfunc)) {
+	push(@mods, &$modfunc($d, $ver, $phpver, $opts));
+	}
+if (defined(&$optmodfunc)) {
+	@optmods = &$optmodfunc($d, $ver, $phpver, $opts);
+	push(@mods, @optmods);
+	}
 foreach my $m (@mods) {
 	next if (&check_php_module($m, $phpver, $d) == 1);
-	&$first_print(&text('scripts_needmod', "<tt>$m</tt>"));
+	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
+	&$first_print(&text($opt ? 'scripts_optmod' : 'scripts_needmod',
+			    "<tt>$m</tt>"));
 
 	# Make sure the software module is installed and can do updates
 	if (!&foreign_installed("software")) {
 		&$second_print($text{'scripts_esoftware'});
-		return 0;
+		if ($opt) { next; }
+		else { return 0; }
 		}
 	&foreign_require("software", "software-lib.pl");
 	if (!defined(&software::update_system_install)) {
 		&$second_print($text{'scripts_eupdate'});
-		return 0;
+		if ($opt) { next; }
+		else { return 0; }
 		}
 
 	# Check if the package is already installed
@@ -630,7 +643,8 @@ foreach my $m (@mods) {
 	if (!$iok) {
 		&$second_print($text{'scripts_esoftwaremod'});
 		&$outdent_print();
-		return 0;
+		if ($opt) { next; }
+		else { return 0; }
 		}
 
 	# Configure the domain's php.ini to load it, if needed
@@ -672,7 +686,8 @@ foreach my $m (@mods) {
 	undef(%php_modules);
 	if (&check_php_module($m, $phpver, $d) != 1) {
 		&$second_print($text{'scripts_einstallmod'});
-		return 0;
+		if ($opt) { next; }
+		else { return 0; }
 		}
 	else {
 		&$second_print(&text('scripts_gotmod', $m));

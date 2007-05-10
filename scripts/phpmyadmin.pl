@@ -43,6 +43,11 @@ sub script_phpmyadmin_php_modules
 return ("mysql");
 }
 
+sub script_phpmyadmin_php_optional_modules
+{
+return ("mcrypt");
+}
+
 # script_phpmyadmin_depends(&domain, version)
 sub script_phpmyadmin_depends
 {
