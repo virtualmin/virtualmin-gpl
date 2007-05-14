@@ -622,3 +622,4 @@ Added Module Config options for choosing different locations for servers' SSL ce
 The PHP module mcrypt is now only recommended when installing phpMyAdmin, but not strictly required.
 Added a button on the Install Scripts for upgrading several to the latest version at once.
 When SSL is enabled for a virtual server, all Apache directives are copied from the non-SSL virtualhost section. This ensures that directives added by plugins or PHP configuration are preserved.
+Added an option to the Edit Virtual Server page to turn off disabling when the bandwidth limit is reached, or a per-domain basis. Also added corresponding --bw-disable and --bw-no-disable options to the modify-domain.pl command-line script.

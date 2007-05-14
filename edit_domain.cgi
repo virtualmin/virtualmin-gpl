@@ -266,6 +266,16 @@ if ($config{'bw_active'} && !$parentdom) {
 	if (&can_edit_bandwidth()) {
 		print &ui_table_row($text{'edit_bw'},
 			    &bandwidth_input("bw", $d->{'bw_limit'}), 3, \@tds);
+
+		# If bandwidth disabling is enabled, show option to turn off
+		# for this domain
+		if ($config{'bw_disable'}) {
+			print &ui_table_row($text{'edit_bw_disable'},
+				&ui_radio("bw_no_disable",
+					  int($d->{'bw_no_disable'}),
+					  [ [ 0, $text{'yes'} ],
+					    [ 1, $text{'no'} ] ]));
+			}
 		}
 	else {
 		print &ui_table_row($text{'edit_bw'},

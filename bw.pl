@@ -146,7 +146,8 @@ foreach $d (@doms) {
 				print STDERR "Failed to send email : $erv[1]\n";
 				}
 			}
-		if (!$d->{'disabled'} && $etime && $config{'bw_disable'}) {
+		if (!$d->{'disabled'} && $etime && $config{'bw_disable'} &&
+		    !$d->{'bw_no_disable'}) {
 			# Time to disable
 			&set_all_null_print();
 			@disable = &get_disable_features($d);

@@ -163,7 +163,9 @@ if ($config{'bw_active'} && !$parentdom) {
 	print &ui_table_row($text{'edit_bw'},
 	    $d->{'bw_limit'} ?
 		&text('edit_bwpast_'.$config{'bw_past'},
-		      &nice_size($d->{'bw_limit'}), $config{'bw_period'}) :
+		      &nice_size($d->{'bw_limit'}), $config{'bw_period'})." ".
+		($config{'bw_disable'} &&
+		 !$d->{'bw_no_disable'} ? $text{'edit_bwdis'} : "") :
 		$text{'edit_bwnone'}, 3, \@tds);
 
 	&show_domain_bw_usage($d);

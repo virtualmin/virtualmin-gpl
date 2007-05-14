@@ -133,6 +133,10 @@ if ($multi) {
 				print "    Bandwidth start: ",&make_date($d->{'bw_start'}*(24*60*60), 1),"\n";
 				print "    Bandwidth usage: ",&nice_size($d->{'bw_usage'}),"\n";
 				}
+			if ($config{'bw_disable'}) {
+				print "    Disable if over bandwidth limit: ",
+			           ($d->{'bw_no_disable'} ? "No" : "Yes"),"\n";
+				}
 			}
 		if ($d->{'reseller'}) {
 			print "    Reseller: $d->{'reseller'}\n";

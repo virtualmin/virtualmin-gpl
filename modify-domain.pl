@@ -68,6 +68,14 @@ while(@ARGV > 0) {
 		$bw = shift(@ARGV);
 		$bw eq "NONE" || $bw =~ /^\d+$/ || &usage("Bandwidth limit must be a number of bytes, or NONE");
 		}
+	elsif ($a eq "--bw-disable") {
+		# Set over-bw limit disable to yes
+		$bw_no_disable = 0;
+		}
+	elsif ($a eq "--bw-no-disable") {
+		# Set over-bw limit disable to no
+		$bw_no_disable = 1;
+		}
 	elsif ($a eq "--ip") {
 		# Changing or adding a virtual IP
 		$ip = shift(@ARGV);
@@ -231,6 +239,9 @@ if (defined($newdomain)) {
 if (defined($bw)) {
 	$dom->{'bw_limit'} = $bw eq "none" ? undef : $bw;
 	}
+if (defined($bw_no_disable)) {
+	$dom->{'bw_no_disable'} = $bw_no_disable;
+	}
 if (defined($ip)) {
 	# Just change the IP
 	$dom->{'ip'} = $ip;
@@ -303,6 +314,9 @@ print "                        [--quota new-quota]\n";
 print "                        [--uquota new-unix-quota]\n";
 print "                        [--newdomain new-name]\n";
 print "                        [--bw bytes|NONE]\n";
+if ($config{'bw_disable'}) {
+	print "                        [--bw-disable|--bw-no-disable]\n";
+	}
 print "                        [--resel reseller|NONE]\n";
 print "                        [--ip address] | [--allocate-ip] |\n";
 print "                        [--shared-ip address]\n";

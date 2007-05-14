@@ -24,6 +24,9 @@ if (&has_home_quotas() && !$d->{'parent'} && &can_edit_quotas($d)) {
 	}
 if ($config{'bw_active'} && !$d->{'parent'} && &can_edit_bandwidth()) {
 	$d->{'bw_limit'} = &parse_bandwidth("bw", $text{'save_ebwlimit'});
+	if ($config{'bw_disable'}) {
+		$d->{'bw_no_disable'} = $in{'bw_no_disable'};
+		}
 	}
 $d->{'db'} = &database_name($d) if (!$d->{'db'});
 if ($d->{'template'} != $tmpl->{'id'}) {

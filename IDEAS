@@ -44,6 +44,7 @@
 
  - cache mail log indexes in a text file
 	- can scan and exclude outside date range
+	- checkbox on search page to ignore spam / viruses
 
  - script installers for
 	- phpmyfamily (bug 800)
