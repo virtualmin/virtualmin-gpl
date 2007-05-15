@@ -74,7 +74,11 @@ else {
 		local $aliasdom = &get_domain($_[0]->{'alias'});
 		local $port = $aliasdom->{'web_port'} == 80 ? "" :
 				":$aliasdom->{'web_port'}";
-		local $url = "http://www.$aliasdom->{'dom'}$port/";
+		local $urlhost = "www.".$aliasdom->{'dom'};
+		if (!gethostbyname($urlhost)) {
+			$urlhost = $aliasdom->{'dom'};
+			}
+		local $url = "http://$urlhost$port/";
 		if ($apache::httpd_modules{'mod_proxy'} &&
 		    $tmpl->{'web_alias'} == 2) {
 			push(@dirs, "ProxyPass / $url",
