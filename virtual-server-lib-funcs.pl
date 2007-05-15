@@ -9687,7 +9687,8 @@ if (!$config{'iface'}) {
 		&foreign_require("net", "net-lib.pl");
 		foreach my $a (&net::active_interfaces()) {
 			if ($a->{'up'} && $a->{'virtual'} eq '' &&
-			    &net::iface_type($a->{'name'}) =~ /ethernet/i) {
+			    (&net::iface_type($a->{'name'}) =~ /ethernet/i ||
+			     $a->{'name'} =~ /^bond/)) {
 				$config{'iface'} = $a->{'fullname'};
 				last;
 				}
