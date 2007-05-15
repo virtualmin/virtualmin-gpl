@@ -120,7 +120,7 @@ php_vars=memory_limit=32M
 webalizer_nocron=0
 domains_sort=user
 name_max=20
-show_mailsize=1
+show_mailsize=0
 check_apache=0
 show_ugroup=0
 php_suexec=0
