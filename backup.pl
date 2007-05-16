@@ -54,7 +54,8 @@ else {
 			       $config{'backup_onebyone'});
 
 # Send an email to the recipient
-if ($config{'backup_email'} && &foreign_check("mailboxes")) {
+if ($config{'backup_email'} && &foreign_check("mailboxes") &&
+    (!$ok || !$config{'backup_email_err'})) {
 	if ($ok) {
 		$output .= &text('backup_done', &nice_size($size))."\n";
 		}
