@@ -55,3 +55,8 @@
 	- autoindex PHP script (805)
 	- jupload (806)
 
+ - SSL cert export in PK12 and other formats
+	- http://www.virtualmin.com/ticket-tracker/bug?bug%5fnumber=470
+	- get MIME type correct for PEM and PK12
+
+ - Use IP for link.cgi or http_post, in case DNS isn't up yet

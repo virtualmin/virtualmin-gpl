@@ -625,3 +625,4 @@ When SSL is enabled for a virtual server, all Apache directives are copied from 
 Added an option to the Edit Virtual Server page to turn off disabling when the bandwidth limit is reached, or a per-domain basis. Also added corresponding --bw-disable and --bw-no-disable options to the modify-domain.pl command-line script.
 If the system has a bonded interface but no ethernet, it will be detected as the primary interface.
 The display of mailbox sizes is now off by default.
+The configuration check process now ensures that the system is setup to use itself as a DNS server, so that newly created domains will resolve.

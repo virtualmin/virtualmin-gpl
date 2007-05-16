@@ -9387,6 +9387,22 @@ if ($config{'dns'}) {
 	# Make sure BIND is installed
 	&foreign_installed("bind8", 1) == 2 ||
 		return &text('index_ebind', "/bind8/", $clink);
+
+	# Make sure this server is configured to use the local BIND
+	if (&foreign_check("net")) {
+		&foreign_require("net", "net-lib.pl");
+		local %ips = map { $_->{'address'}, $_ }
+				 &net::active_interfaces();
+		local $dns = &net::get_dns_config();
+		local $hasdns;
+		foreach my $ns (@{$dns->{'nameserver'}}) {
+			$hasdns++ if ($ips{&to_ipaddress($ns)});
+			}
+		if (!$hasdns) {
+			return &text('check_eresolv', '/net/list_dns.cgi',
+						      $clink);
+			}
+		}
 	&$second_print($text{'check_dnsok'});
 	}
 

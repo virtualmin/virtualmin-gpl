@@ -1392,7 +1392,7 @@ check_ewebsuexec=Suexec is enabled in the default template, but the Apache modul
 check_ewebactions=The Apache module <tt>mod_actions</tt> is either not installed or not enabled.
 check_webok=Apache is installed.
 check_ftpok=ProFTPd is installed.
-check_dnsok=BIND DNS server is installed.
+check_dnsok=BIND DNS server is installed, and the system is configured to use it.
 check_mysqlok=MySQL is installed and running.
 check_postgresok=PostgreSQL is installed and running.
 check_webalizerok=Webalizer is installed.
@@ -1443,6 +1443,7 @@ check_elist_users=External quota commands are enabled, but the command to list u
 check_elist_groups=External quota commands are enabled, but the command to list group quotas not defined or does not exist
 check_quotacommands=External quota commands will be used for virtual servers and mailboxes.
 check_eclamd=You have selected to use <tt>clamdscan</tt> for virus scanning, but the <tt>clamd</tt> server it talks to is not running
+check_eresolv=Virtualmin is configured to setup DNS zones, but this system is not setup to use itself as a DNS server. Either add 127.0.0.1 to the <a href='$1'>list of DNS servers</a>, or turn off the BIND feature on the <a href='$2'>module config</a> page.
 
 allwebmin_ecannot=You are not allowed to update all Webmin users
 allwebmin_title=Updating Webmin Users
