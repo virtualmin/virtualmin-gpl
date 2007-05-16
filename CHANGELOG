@@ -626,3 +626,4 @@ Added an option to the Edit Virtual Server page to turn off disabling when the b
 If the system has a bonded interface but no ethernet, it will be detected as the primary interface.
 The display of mailbox sizes is now off by default.
 The configuration check process now ensures that the system is setup to use itself as a DNS server, so that newly created domains will resolve.
+Added a regular check for ophan php-cgi processes left around by Apache restarts on some systems, and kill any found.

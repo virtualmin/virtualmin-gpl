@@ -546,5 +546,24 @@ if ($dirstr) {
 return 0;
 }
 
+# cleanup_php_cgi_processes()
+# Finds and kills and php-cgi, php4-cgi and php5-cgi processes which are
+# orphans (owned by init). This can happen if they are not killed when Apache
+# is restarted.
+sub cleanup_php_cgi_processes
+{
+if (&foreign_check("proc")) {
+	&foreign_require("proc", "proc-lib.pl");
+	local @procs = &proc::list_processes();
+	local @cgis = grep { $_->{'args'} =~ /^\S+php(4|5|)-cgi/ &&
+			     $_->{'ppid'} == 1 } @procs;
+	foreach my $p (@cgis) {
+		kill('KILL', $p->{'pid'});
+		}
+	return scalar(@cgis);
+	}
+return -1;
+}
+
 1;
 

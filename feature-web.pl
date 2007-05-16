@@ -650,15 +650,14 @@ if ($_[0]) {
 	&apache::stop_apache();
 	sleep(5);
 	&apache::start_apache();
-	&$second_print($text{'setup_done'});
-	return 1;
 	}
 else {
 	# Just signal a re-load
 	&apache::restart_apache();
-	&$second_print($text{'setup_done'});
-	return 1;
 	}
+&cleanup_php_cgi_processes() if (defined(&cleanup_php_cgi_processes));
+&$second_print($text{'setup_done'});
+return 1;
 }
 
 # get_apache_log(domain-name, [port], [errorlog])

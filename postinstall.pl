@@ -247,5 +247,27 @@ if ($config{'allow_subdoms'} eq '') {
 	$config{'allow_subdoms'} = @subdoms ? 1 : 0;
 	&save_module_config();
 	}
+
+# Create the cron job for killing orphan php*-cgi processes
+if ($virtualmin_pro) {
+	&foreign_require("cron", "cron-lib.pl");
+	local ($job) = grep { $_->{'user'} eq 'root' &&
+			      $_->{'command'} eq $fcgiclear_cron_cmd }
+			    &cron::list_cron_jobs();
+	if (!$job) {
+		# Create, and run for the first time
+		$job = { 'mins' => '0',
+			 'hours' => '*',
+			 'days' => '*',
+			 'months' => '*',
+			 'weekdays' => '*',
+			 'user' => 'root',
+			 'active' => 1,
+			 'command' => $fcgiclear_cron_cmd };
+		&cron::create_cron_job($job);
+		&cron::create_wrapper($fcgiclear_cron_cmd, $module_name,
+				      "fcgiclear.pl");
+		}
+	}
 }
 
