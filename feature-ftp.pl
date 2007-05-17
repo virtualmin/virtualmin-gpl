@@ -22,14 +22,15 @@ local @dirs = &proftpd_template($tmpl->{'ftp'}, $_[0]);
 # Add the directives
 local $conf = &proftpd::get_config();
 local $l = $conf->[@$conf - 1];
-&lock_file($l->{'file'});
-local $lref = &read_file_lines($l->{'file'});
+local $addfile = $proftpd::config{'add_file'} || $l->{'file'};
+&lock_file($addfile);
+local $lref = &read_file_lines($addfile);
 local @lines = ( "<VirtualHost $_[0]->{'ip'}>" );
 push(@lines, @dirs);
 push(@lines, "</VirtualHost>");
 push(@$lref, @lines);
-&flush_file_lines();
-&unlock_file($l->{'file'});
+&flush_file_lines($addfile);
+&unlock_file($addfile);
 
 # Create directory for FTP root
 local ($fdir) = ($tmpl->{'ftp_dir'} || 'ftp');
