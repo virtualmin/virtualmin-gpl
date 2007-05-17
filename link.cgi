@@ -6,24 +6,25 @@ require '../web-lib.pl';
 &init_config();
 #$ENV{'PATH_INFO'} =~ /^\/(.*)$/ ||
 #	&error("Bad PATH_INFO : $ENV{'PATH_INFO'}");
-$ENV{'PATH_INFO'} =~ /^\/(http|https):\/+([^:\/]+)(:(\d+))?(.*)$/ ||
+$ENV{'PATH_INFO'} =~ /^\/([0-9\.]+)\/(http|https):\/+([^:\/]+)(:(\d+))?(.*)$/ ||
 	&error("Bad PATH_INFO : $ENV{'PATH_INFO'}");
 delete($ENV{'HTTP_REFERER'});		# So error page doesn't link to it
-$protocol = $1;
+$ip = $1;
+$protocol = $2;
 $ssl = $protocol eq "https";
-$host = $2;
-$port = $4 || 80;
-$path = $5;
-$openurl = "$1://$2$3$5";
-$baseurl = "$1://$2$3";
+$host = $3;
+$port = $5 || 80;
+$path = $6;
+$openurl = "$2://$3$4$6";
+$baseurl = "$2://$3$4";
 if ($ENV{'QUERY_STRING'}) {
 	$path .= '?'.$ENV{'QUERY_STRING'};
 	}
 elsif (@ARGV) {
 	$path .= '?'.join('+', @ARGV);
 	}
-$linkurl = "/$module_name/link.cgi/";
-$url = "/$module_name/link.cgi/$openurl";
+$linkurl = "/$module_name/link.cgi/$ip/";
+$url = "/$module_name/link.cgi/$ip/$openurl";
 $| = 1;
 $meth = $ENV{'REQUEST_METHOD'};
 
@@ -65,7 +66,7 @@ elsif ($config{'loginmode'} == 1) {
 	}
 
 # Connect to the server
-$con = &make_http_connection($host, $port, $ssl, $meth, $path);
+$con = &make_http_connection($ip, $port, $ssl, $meth, $path);
 &error($con) if (!ref($con));
 
 # Send request headers

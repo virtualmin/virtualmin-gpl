@@ -958,12 +958,24 @@ return 1 if (&master_admin() ||
 	     &compare_versions($ver, $script->{'minversion'}) >= 0);
 }
 
+# post_http_connection(&hostname, port, page, &cgi-params, &out, &err,
+#		       &moreheaders, &returnheaders)
+# Makes an HTTP post to some URL, sending the given CGI parameters as data.
 sub post_http_connection
 {
 local ($host, $port, $page, $params, $out, $err, $headers,
        $returnheaders) = @_;
 
-local $h = &make_http_connection($host, $port, 0, "POST", $page);
+# Find the Virtualmin domain for the hostname, so we can get the IP
+local ($d) = &get_domain_by("dom", $host);
+if (!$d) {
+	local $nowww = $host;
+	$nowww =~ s/^www\.//g;
+	($d) = &get_domain_by("dom", $nowww);
+	}
+local $ip = $d ? $d->{'ip'} : $host;
+
+local $h = &make_http_connection($ip, $port, 0, "POST", $page);
 if (!ref($h)) {
 	$$err = $h;
 	return 0;

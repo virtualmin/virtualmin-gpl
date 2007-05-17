@@ -1388,7 +1388,7 @@ if ($virtualmin_pro) {
 	local $pt = $d->{'web_port'} == 80 ? "" : ":$d->{'web_port'}";
 	push(@rv, { 'mod' => $module_name,
 		    'desc' => $text{'links_website'},
-		    'page' => "link.cgi/http://www.$d->{'dom'}$pt/",
+		    'page' => "link.cgi/$d->{'ip'}/http://www.$d->{'dom'}$pt/",
 		    'cat' => 'services',
 		  });
 	}
