@@ -44,6 +44,13 @@ if (!-d $ftp) {
 &$second_print($text{'setup_done'});
 &register_post_action(\&restart_proftpd);
 undef(@proftpd::get_config_cache);
+
+# Add the FTP server user to the domain's group, so that the directory
+# can be accessed in anonymous mode
+local $ftp_user = &get_proftpd_user($_[0]);
+if ($ftp_user) {
+	&add_user_to_domain_group($_[0], $ftp_user, 'setup_ftpuser');
+	}
 }
 
 # delete_ftp(&domain)
@@ -476,7 +483,25 @@ if ($config{'avail_syslog'} && &get_webmin_version() >= 1.305) {
 		}
 	}
 return @rv;
+}
 
+# get_proftpd_user(&domain)
+# Returns the Unix user that anonymous FTP access is done as. This is just
+# taken from the User line in the template directives.
+sub get_proftpd_user
+{
+local ($d) = @_;
+local $tmpl = &get_template($d->{'template'});
+local @dirs = &proftpd_template($tmpl->{'ftp'}, $d);
+foreach my $l (@dirs) {
+	if ($l =~ /^\s*User\s+(\S+)/) {
+		return $1;
+		}
+	}
+foreach my $u ("ftp", "anonymous") {
+	return $u if (defined(getpwnam($u)));
+	}
+return undef;
 }
 
 $done_feature_script{'ftp'} = 1;

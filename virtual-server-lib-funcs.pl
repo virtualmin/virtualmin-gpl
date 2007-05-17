@@ -10550,6 +10550,33 @@ foreach my $u (&list_all_users_quotas(1)) {
 return \%rv;
 }
 
+# add_user_to_domain_group(&domain, user, text-message)
+# Adds some user (like httpd or ftp) to the Unix group for a domain, if missing
+sub add_user_to_domain_group
+{
+local ($d, $user, $msg) = @_;
+return 0 if ($d->{'alias'} || !$d->{'group'});
+&require_useradmin();
+local @groups = &list_all_groups();
+local ($group) = grep { $_->{'group'} eq $d->{'group'} } @groups;
+if ($group) {
+	local @mems = split(/,/, $group->{'members'});
+	if (&indexof($user, @mems) < 0) {
+		# Need to add him
+		&$first_print(&text($msg, $user)) if ($msg);
+		$group->{'members'} = join(",", @mems, $user);
+		&foreign_call($usermodule, "set_group_envs", $group,
+					   'MODIFY_GROUP');
+		&foreign_call($usermodule, "making_changes");
+		&foreign_call($usermodule, "modify_group", $group, $group);
+		&foreign_call($usermodule, "made_changes");
+		&$second_print($text{'setup_done'}) if ($msg);
+		return 1;
+		}
+	}
+return 0;
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;

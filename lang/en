@@ -372,6 +372,7 @@ setup_webpid2=Stopping and re-starting web server ..
 setup_webfailed=.. failed! An Apache configuration error was detected : $1
 setup_proftpdpid=Applying FTP server configuration ..
 setup_proftpdfailed=.. failed : $1
+setup_ftpuser=Adding ProFTPd user $1 to server's group ..
 setup_bind=Adding new DNS zone ..
 setup_bindslave=Adding slave zone on $1 ..
 setup_eslave=.. failed! $1

@@ -160,38 +160,20 @@ else {
 
 # Add the Apache user to the group for this virtual server, if missing, unless
 # the template says not to.
-local $web_user = &get_apache_user();
-if ($tmpl->{'web_user'} ne 'none' && $web_user && !$_[0]->{'alias'} &&
-    $_[0]->{'group'}) {
-	&require_useradmin();
-	local @groups = &list_all_groups();
-	local ($group) = grep { $_->{'group'} eq $_[0]->{'group'} } @groups;
-	if ($group) {
-		local @mems = split(/,/, $group->{'members'});
-		if (&indexof($web_user, @mems) < 0) {
-			# Need to add him
-			&$first_print(&text('setup_webuser', $web_user));
-			$group->{'members'} = join(",", @mems, $web_user);
-			&foreign_call($usermodule, "set_group_envs", $group, 'MODIFY_GROUP');
-			&foreign_call($usermodule, "making_changes");
-			&foreign_call($usermodule, "modify_group", $group, $group);
-			&foreign_call($usermodule, "made_changes");
-			&$second_print($text{'setup_done'});
-			}
-		}
+local $web_user = &get_apache_user($_[0]);
+if ($tmpl->{'web_user'} ne 'none' && $web_user) {
+	&add_user_to_domain_group($_[0], $web_user, 'setup_webuser');
 	}
 
 # Make the web directory accessible under SElinux Apache
 if (&has_command("chcon")) {
 	local $hdir = &public_html_dir($_[0]);
-	&execute_command("chcon -R -t httpd_sys_content_t ".quotemeta($hdir).
-	       ">/dev/null 2>&1");
+	&execute_command("chcon -R -t httpd_sys_content_t ".quotemeta($hdir));
 	local $cgidir = &cgi_bin_dir($_[0]);
-	&execute_command("chcon -R -t httpd_sys_script_exec_t ".quotemeta($cgidir).
-	       ">/dev/null 2>&1");
+	&execute_command("chcon -R -t httpd_sys_script_exec_t ".
+			 quotemeta($cgidir));
 	local $logdir = "$_[0]->{'home'}/logs";
-	&execute_command("chcon -R -t httpd_log_t ".quotemeta($logdir).
-	       ">/dev/null 2>&1");
+	&execute_command("chcon -R -t httpd_log_t ".quotemeta($logdir));
 	}
 
 # Setup the writelogs wrapper
