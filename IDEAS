@@ -57,7 +57,3 @@
 	- flyspray (ticket 512)
 	- mantis (ticket 512)
 
- - SSL cert export in PK12 and other formats
-	- http://www.virtualmin.com/ticket-tracker/bug?bug%5fnumber=470
-	- get MIME type correct for PEM and PK12
-
