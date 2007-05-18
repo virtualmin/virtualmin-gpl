@@ -90,6 +90,24 @@ print &ui_tabs_end_tab();
 # Show table for installing scripts, by category
 print &ui_tabs_start_tab("scriptsmode", "new");
 if (@scripts) {
+	# Show search form
+	print &ui_form_start("list_scripts.cgi");
+	print &ui_hidden("dom", $in{'dom'});
+	print &ui_hidden("scriptsmode", "new");
+	print "<b>$text{'scripts_find'}</b> ",
+	      &ui_textbox("search", $in{'search'}, 30)," ",
+	      &ui_submit($text{'scripts_findok'});
+	print &ui_form_end();
+
+	if ($in{'search'}) {
+		# Limit to matches
+		$search = $in{'search'};
+		@scripts = grep { $_->{'desc'} =~ /\Q$search\E/i ||
+				  $_->{'longdesc'} =~ /\Q$search\E/i ||
+				  $_->{'category'} =~ /\Q$search\E/i } @scripts;
+		}
+
+	# Show table of available
 	print &ui_form_start("script_form.cgi");
 	print &ui_hidden("dom", $in{'dom'}),"\n";
 	@tds = ( "width=5", "nowrap", undef, undef, "nowrap" );
@@ -129,7 +147,8 @@ if (@scripts) {
 		    $vsel,
 		    $script->{'longdesc'},
 		    $r ? &virtualmin_ui_rating_selector(undef, $r, 5) : "",
-		    ], \@tds, "script", $script->{'name'});
+		    ], \@tds, "script", $script->{'name'},
+		       $in{'search'} && @scripts == 1);
 		}
 	print &ui_columns_end();
 	print &ui_submit($text{'scripts_ok'});
