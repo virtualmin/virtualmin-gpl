@@ -57,6 +57,11 @@ print &ui_table_row($text{'maillog_dest'},
 	   [ &can_view_maillog() ? ( [ "", $text{'maillog_any'} ] ) : ( ),
 	     map { [ $_->{'id'}, $_->{'dom'} ] } @doms ]));
 
+# Spam and virus flags
+print &ui_table_row($text{'maillog_bad'},
+	&ui_checkbox('spam', 1, $text{'maillog_showspam'}, $in{'spam'})."\n".
+	&ui_checkbox('virus', 1, $text{'maillog_showvirus'}, $in{'virus'}), 3);
+
 print &ui_table_end();
 print &ui_form_end([ [ "search", $text{'maillog_search'} ] ]);
 
@@ -70,6 +75,8 @@ if ($in{'search'}) {
 
 	# Get matching results
 	@logs = &parse_procmail_log($start, $end, $source, $dest);
+	@logs = grep { ($in{'spam'} || !$_->{'spam'}) &&
+		       ($in{'virus'} || !$_->{'virus'}) } @logs;
 
 	# Show them
 	if (@logs) {

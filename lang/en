@@ -3411,6 +3411,9 @@ maillog_virus=(<font color=#ff00ff>Virus</font>)
 maillog_return=log search form
 maillog_ok0=No mail server log file was found on your system! Searches of the log will not return any results.
 maillog_ok1=Virtualmin has not yet initialized your mail server log cache file. The first search may be slow.
+maillog_showspam=Show spam?
+maillog_showvirus=Show viruses?
+maillog_bad=Exclusions
 
 viewmaillog_err=Failed to display logged message
 viewmaillog_egone=No longer in log!

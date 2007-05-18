@@ -44,7 +44,6 @@
 
  - cache mail log indexes in a text file
 	- can scan and exclude outside date range
-	- checkbox on search page to ignore spam / viruses
 
  - script installers for
 	- phpmyfamily (bug 800)
@@ -54,6 +53,9 @@
 	- cslh (bug 804)
 	- autoindex PHP script (805)
 	- jupload (806)
+	- trac (ticket 512)
+	- flyspray (ticket 512)
+	- mantis (ticket 512)
 
  - SSL cert export in PK12 and other formats
 	- http://www.virtualmin.com/ticket-tracker/bug?bug%5fnumber=470
