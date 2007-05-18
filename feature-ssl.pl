@@ -491,11 +491,26 @@ return \%rv;
 sub cert_pem_data
 {
 local ($d) = @_;
-local $data = &read_file_contents($_[0]->{'ssl_cert'});
+local $data = &read_file_contents($d->{'ssl_cert'});
 if ($data =~ /(-----BEGIN\s+CERTIFICATE-----\n([A-Za-z0-9\+\/=\n\r]+)-----END\s+CERTIFICATE-----)/) {
 	return $1;
 	}
 return undef;
+}
+
+# cert_pkcs12_data(&domain)
+# Returns a domain's cert in PKCS12 format
+sub cert_pkcs12_data
+{
+local ($d) = @_;
+open(OUT, "openssl pkcs12 -in ".quotemeta($d->{'ssl_cert'}).
+          " -inkey ".quotemeta($_[0]->{'ssl_key'}).
+	  " -export -passout pass: -nokeys |");
+while(<OUT>) {
+	$data .= $_;
+	}
+close(OUT);
+return $data;
 }
 
 # show_restore_ssl(&options)

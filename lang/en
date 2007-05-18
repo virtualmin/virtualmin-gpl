@@ -1889,8 +1889,11 @@ cert_tabcurrent=Current Certificate
 cert_tabcsr=Signing Request
 cert_tabnew=New Certificate
 cert_download=Download certificate
-cert_pem=PEM format..
+cert_pem=PEM format
+cert_pkcs12=PKCS12 format
+cert_pkcs7=PKCS7 format
 cert_edownload=No SSL certificate found!
+cert_eformat=Could not work out requested certificate format
 
 csr_title=Generating CSR
 csr_title2=Generating Certificate

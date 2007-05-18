@@ -27,9 +27,13 @@ foreach $i ('cn', 'o', 'issuer_cn', 'issuer_o', 'notafter', 'type') {
 		print &ui_table_row($text{'cert_'.$i}, $info->{$i});
 		}
 	}
-print &ui_table_row($text{'cert_download'},
+@dlinks = (
 	"<a href='download_cert.cgi/cert.pem?dom=$in{'dom'}'>".
-	"$text{'cert_pem'}</a>");
+	"$text{'cert_pem'}</a>",
+	"<a href='download_cert.cgi/cert.p12?dom=$in{'dom'}'>".
+	"$text{'cert_pkcs12'}</a>",
+	);
+print &ui_table_row($text{'cert_download'}, &ui_links_row(\@dlinks));
 print &ui_table_end();
 print &ui_tabs_end_tab();
 
