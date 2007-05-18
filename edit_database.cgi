@@ -24,7 +24,7 @@ if (!$in{'new'}) {
 else {
 	print &ui_hidden("new", 1),"\n";
 	}
-print &ui_table_start($text{'database_header'}, undef, 2);
+print &ui_table_start($text{'database_header'}, undef, 2, [ "width=30%" ]);
 
 # Database name
 if ($in{'new'} && $tmpl->{'mysql_suffix'} ne "none") {
