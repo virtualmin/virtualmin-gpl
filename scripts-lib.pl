@@ -67,6 +67,8 @@ local $rv = { 'name' => $name,
 	      'php_mods_func' => "script_${name}_php_modules",
 	      'php_opt_mods_func' => "script_${name}_php_optional_modules",
 	      'pear_mods_func' => "script_${name}_pear_modules",
+	      'perl_mods_func' => "script_${name}_perl_modules",
+	      'perl_opt_mods_func' => "script_${name}_opt_perl_modules",
 	      'latest_func' => "script_${name}_latest",
 	      'check_latest_func' => "script_${name}_check_latest",
 	      'avail' => !$unavail{$name},
@@ -530,6 +532,15 @@ if (!defined($php_modules{$ver})) {
 return $php_modules{$ver}->{$mod} ? 1 : 0;
 }
 
+# check_perl_module(mod, &domain)
+# Checks if some Perl module exists
+sub check_perl_module
+{
+local ($mod, $d) = @_;
+eval "use $mod";
+return $@ ? 0 : 1;
+}
+
 # check_php_version(&domain, [number])
 # Returns true if the given version of PHP is supported by Apache. If no version
 # is given, any is allowed.
@@ -752,6 +763,79 @@ foreach my $m (@mods) {
 		}
 	else {
 		&$second_print(&text('scripts_gotpear', $m));
+		}
+	}
+return 1;
+}
+
+# setup_perl_modules(&domain, &script, version, &opts)
+# If possible, downloads Perl needed by the given script. Progress
+# of the install is written to STDOUT. Returns 1 if successful, 0 if not.
+# At the moment, auto-install of modules is done only from APT or YUM.
+sub setup_perl_modules
+{
+local ($d, $script, $ver, $opts) = @_;
+local $modfunc = $script->{'perl_mods_func'};
+local $optmodfunc = $script->{'perl_opt_mods_func'};
+return 1 if (!defined(&$modfunc) && !defined(&$optmodfunc));
+if (defined(&$modfunc)) {
+	push(@mods, &$modfunc($d, $ver, $opts));
+	}
+if (defined(&$optmodfunc)) {
+	@optmods = &$optmodfunc($d, $ver, $opts);
+	push(@mods, @optmods);
+	}
+foreach my $m (@mods) {
+	next if (&check_perl_module($m, $d) == 1);
+	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
+	&$first_print(&text($opt ? 'scripts_optperlmod' : 'scripts_needperlmod',
+			    "<tt>$m</tt>"));
+
+	# Make sure the software module is installed and can do updates
+	if (!&foreign_installed("software")) {
+		&$second_print($text{'scripts_esoftware'});
+		if ($opt) { next; }
+		else { return 0; }
+		}
+	&foreign_require("software", "software-lib.pl");
+	if (!defined(&software::update_system_install)) {
+		&$second_print($text{'scripts_eupdate'});
+		if ($opt) { next; }
+		else { return 0; }
+		}
+
+	# Work out the package name
+	local $pkg;
+	local $mp = $m;
+	if ($software::config{'package_system'} eq 'rpm') {
+		$mp =~ s/::/\-/g;
+		$pkg = "perl-$mp";
+		}
+	elsif ($software::config{'package_system'} eq 'debian') {
+		$mp = lc($mp);
+		$mp =~ s/::/\-/g;
+		$pkg = "lib$mp-perl";
+		}
+	else {
+		&$second_print($text{'scripts_eperlsoftware'});
+		if ($opt) { next; }
+		else { return 0; }
+		}
+
+	# Install the update
+	&$first_print(&text('scripts_softwaremod', "<tt>$pkg</tt>"));
+	&$indent_print();
+	&software::update_system_install($pkg);
+	&$outdent_print();
+	@pinfo = &software::package_info($pkg);
+	if (@pinfo && $pinfo[0] eq $pkg) {
+		# Yep, it worked
+		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$second_print($text{'scripts_esoftwaremod'});
+		if ($opt) { next; }
+		else { return 0; }
 		}
 	}
 return 1;

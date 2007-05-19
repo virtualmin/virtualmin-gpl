@@ -178,11 +178,14 @@ else {
 	&$second_print(".. done");
 	}
 
-# Install needed PHP modules
+# Install needed PHP and Perl modules
 if (!&setup_php_modules($d, $script, $ver, $phpver, $opts)) {
 	exit(1);
 	}
 if (!&setup_pear_modules($d, $script, $ver, $phpver, $opts)) {
+	exit(1);
+	}
+if (!&setup_perl_modules($d, $script, $ver, $opts)) {
 	exit(1);
 	}
 

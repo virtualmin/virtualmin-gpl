@@ -632,3 +632,4 @@ When a virtual server with anonymous FTP is created, the ProFTPd user (typically
 Added checkboxes to the mail log search form to exclude spam and viruses from the results.
 Added a search box to the list of scripts, to more easily find the one you want in the current huge list.
 Added a script installers for the Flyspray and Mantis issue trackers.
+Script installers that require Perl modules will now automatically install them, if possible.

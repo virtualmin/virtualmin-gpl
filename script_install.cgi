@@ -93,10 +93,13 @@ $ferr = &fetch_script_files($d, $ver, $opts, $sinfo, \%gotfiles);
 &error($ferr) if ($ferr);
 print "<br>\n";
 
-# Install needed PHP modules
+# Install needed PHP and Perl modules
 $modok = &setup_php_modules($d, $script, $ver, $phpver, $opts);
 if ($modok) {
 	$modok = &setup_pear_modules($d, $script, $ver, $phpver, $opts);
+	}
+if ($modok) {
+	$modok = &setup_perl_modules($d, $script, $ver, $opts);
 	}
 if (!$modok) {
 	&ui_print_footer("list_scripts.cgi?dom=$in{'dom'}",

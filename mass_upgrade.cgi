@@ -70,6 +70,11 @@ if ($in{'confirm'}) {
 				}
 			$modok || next;
 
+			# Install needed Perl modules
+			if (!&setup_perl_modules($d, $script, $ver, $opts)) {
+				next;
+				}
+
 			# Fetch needed files
 			$ferr = &fetch_script_files($sinfo->{'dom'}, $ver,$opts,
 						    $sinfo, \%gotfiles);

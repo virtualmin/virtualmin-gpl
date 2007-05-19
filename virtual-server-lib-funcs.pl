@@ -5910,6 +5910,8 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 		$modok = &setup_pear_modules($dom, $script, $ver, $phpver,
 					     $opts);
 		next if (!$modok);
+		$modok = &setup_perl_modules($d, $script, $ver, $opts);
+		next if (!$modok);
 
 		# Find the database, if requested
 		if ($sinfo->{'db'}) {

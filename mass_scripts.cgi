@@ -77,6 +77,11 @@ foreach $sinfo (@sinfos) {
 			}
 		$modok || next;
 
+		# Install needed Perl modules
+		if (!&setup_perl_modules($d, $script, $ver, $opts)) {
+			next;
+			}
+
 		# Go ahead and do it
 		($ok, $msg, $desc, $url) = &{$script->{'install_func'}}($d, $ver, $sinfo->{'opts'}, \%gotfiles, $sinfo);
 		&$indent_print();
