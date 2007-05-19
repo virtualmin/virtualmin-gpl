@@ -104,6 +104,7 @@ $config{'backup_fmt'} = $in{'fmt'};
 $config{'backup_mkdir'} = $in{'mkdir'};
 $config{'backup_email'} = $in{'email'};
 $config{'backup_email_err'} = $in{'email_err'};
+$config{'backup_email_doms'} = $in{'email_doms'};
 $config{'backup_errors'} = $in{'errors'};
 $config{'backup_strftime'} = $in{'strftime'};
 $config{'backup_onebyone'} = $in{'onebyone'};

@@ -166,10 +166,15 @@ if ($in{'sched'}) {
 	# Email input
 	print &ui_table_row(&hlink($text{'backup_email'}, "backup_email"),
 			    &ui_textbox("email", $config{'backup_email'}, 40).
-			    " ".
+			    "<br>\n".
 			    &ui_checkbox("email_err", 1,
 					 $text{'backup_email_err'},
-					 $config{'backup_email_err'}));
+					 $config{'backup_email_err'}).
+			    "<br>\n".
+			    &ui_checkbox("email_doms", 1,
+					 $text{'backup_email_doms'},
+					 $config{'backup_email_doms'})
+			    );
 
 	# Enabled/disabled input
 	print &ui_table_row(&hlink($text{'backup_enabled'}, "backup_enabled"),

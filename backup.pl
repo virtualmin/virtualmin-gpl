@@ -53,8 +53,16 @@ else {
 			       $config{'backup_mkdir'},
 			       $config{'backup_onebyone'});
 
-# Send an email to the recipient
-if ($config{'backup_email'} && &foreign_check("mailboxes") &&
+# Work out who might get emailed
+@emails = ( );
+push(@emails, $config{'backup_email'}) if ($config{'backup_email'});
+if ($config{'backup_email_doms'}) {
+	push(@emails, map { $_->{'emailto'} } @doms);
+	}
+@emails = &unique(@emails);
+
+# Send an email to the recipient, if there are any
+if (@emails && &foreign_check("mailboxes") &&
     (!$ok || !$config{'backup_email_err'})) {
 	if ($ok) {
 		$output .= &text('backup_done', &nice_size($size))."\n";
@@ -64,10 +72,16 @@ if ($config{'backup_email'} && &foreign_check("mailboxes") &&
 		}
 	&foreign_require("mailboxes", "mailboxes-lib.pl");
 	$host = &get_system_hostname();
+	if ($emails[0] eq $config{'backup_email'}) {
+		# Sent To: the master admin, bcc everyone else
+		$to = shift(@emails);
+		}
+	$bcc = join(", ", @emails);
 	$mail = { 'headers' => [ [ 'From', $config{'from_addr'} ||
 					   &mailboxes::get_from_address() ],
 				 [ 'Subject', "Backup of Virtualmin on $host" ],
-				 [ 'To', $config{'backup_email'} ] ],
+				 [ 'To', $to ],
+				 [ 'Bcc', $bcc ] ],
 		  'attach'  => [ { 'headers' => [ [ 'Content-type',
 						    'text/plain' ] ],
 				   'data' => &entities_to_ascii($output) } ]

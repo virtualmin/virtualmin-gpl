@@ -1571,6 +1571,7 @@ backup_errors0=Halt the backup immediately
 backup_errors1=Continue with other features and servers
 backup_email=Email backup report to
 backup_email_err=Only send email on failure
+backup_email_doms=Also send email to owners of backed-up servers
 backup_strftime=Do <tt>strftime</tt>-style time substitutions on file or directory name
 backup_onebyone=Transfer each virtual server after it is backed up
 backup_now=Backup Now
