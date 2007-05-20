@@ -631,5 +631,5 @@ Added an option to the scheduled backup page to only send an email report when t
 When a virtual server with anonymous FTP is created, the ProFTPd user (typically ftp) is added to the domain's Unix group. This allows anonymous FTP to work even when the domain's home directory is not world-readable.
 Added checkboxes to the mail log search form to exclude spam and viruses from the results.
 Added a search box to the list of scripts, to more easily find the one you want in the current huge list.
-Added a script installers for the Flyspray and Mantis issue trackers.
+Added script installers for the Bugzilla, Flyspray and Mantis issue trackers.
 Script installers that require Perl modules will now automatically install them, if possible.

@@ -2535,6 +2535,8 @@ scripts_findok=Search
 scripts_needperlmod=Perl module $1 is required ..
 scripts_optperlmod=Perl module $1 is recommended ..
 scripts_eperlsoftware=.. Virtualmin cannot work which software package contains this Perl module
+scripts_perlmod=Installing Perl module $1 from CPAN ..
+scripts_eperlmod=.. CPAN failed! See the error message above for details
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:

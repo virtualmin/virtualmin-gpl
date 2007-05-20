@@ -785,57 +785,74 @@ if (defined(&$optmodfunc)) {
 	@optmods = &$optmodfunc($d, $ver, $opts);
 	push(@mods, @optmods);
 	}
+
+# Check if the software module is installed and can do update
+local $canpkgs = 0;
+if (&foreign_installed("software")) {
+	&foreign_require("software", "software-lib.pl");
+	if (defined(&software::update_system_install)) {
+		$canpkgs = 1;
+		}
+	}
+
 foreach my $m (@mods) {
 	next if (&check_perl_module($m, $d) == 1);
 	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
 	&$first_print(&text($opt ? 'scripts_optperlmod' : 'scripts_needperlmod',
 			    "<tt>$m</tt>"));
 
-	# Make sure the software module is installed and can do updates
-	if (!&foreign_installed("software")) {
-		&$second_print($text{'scripts_esoftware'});
-		if ($opt) { next; }
-		else { return 0; }
-		}
-	&foreign_require("software", "software-lib.pl");
-	if (!defined(&software::update_system_install)) {
-		&$second_print($text{'scripts_eupdate'});
-		if ($opt) { next; }
-		else { return 0; }
-		}
-
-	# Work out the package name
 	local $pkg;
-	local $mp = $m;
-	if ($software::config{'package_system'} eq 'rpm') {
-		$mp =~ s/::/\-/g;
-		$pkg = "perl-$mp";
-		}
-	elsif ($software::config{'package_system'} eq 'debian') {
-		$mp = lc($mp);
-		$mp =~ s/::/\-/g;
-		$pkg = "lib$mp-perl";
-		}
-	else {
-		&$second_print($text{'scripts_eperlsoftware'});
-		if ($opt) { next; }
-		else { return 0; }
+	local $done = 0;
+	if ($canpkgs) {
+		# Work out the package name
+		local $mp = $m;
+		if ($software::config{'package_system'} eq 'rpm') {
+			$mp =~ s/::/\-/g;
+			$pkg = "perl-$mp";
+			}
+		elsif ($software::config{'package_system'} eq 'debian') {
+			$mp = lc($mp);
+			$mp =~ s/::/\-/g;
+			$pkg = "lib$mp-perl";
+			}
 		}
 
-	# Install the update
-	&$first_print(&text('scripts_softwaremod', "<tt>$pkg</tt>"));
-	&$indent_print();
-	&software::update_system_install($pkg);
-	&$outdent_print();
-	@pinfo = &software::package_info($pkg);
-	if (@pinfo && $pinfo[0] eq $pkg) {
-		# Yep, it worked
-		&$second_print($text{'setup_done'});
+	if ($pkg) {
+		# Install the RPM or debian package
+		&$first_print(&text('scripts_softwaremod', "<tt>$pkg</tt>"));
+		&$indent_print();
+		&software::update_system_install($pkg);
+		&$outdent_print();
+		@pinfo = &software::package_info($pkg);
+		if (@pinfo && $pinfo[0] eq $pkg) {
+			# Yep, it worked
+			&$second_print($text{'setup_done'});
+			$done = 1;
+			}
 		}
-	else {
-		&$second_print($text{'scripts_esoftwaremod'});
-		if ($opt) { next; }
-		else { return 0; }
+
+	if (!$done) {
+		# Fall back to CPAN
+		&$first_print(&text('scripts_perlmod', "<tt>$m</tt>"));
+		local $perl = &get_perl_path();
+		&open_execute_command(CPAN,
+			"echo n | $perl -MCPAN -e 'install $m' 2>&1", 1);
+		&$indent_print();
+		print "<pre>";
+		while(<CPAN>) {
+			print &html_escape($_);
+			}
+		print "</pre>";
+		close(CPAN);
+		&$outdent_print();
+		if ($?) {
+			&$second_print($text{'scripts_eperlmod'});
+			if ($opt) { next; }
+			else { return 0; }
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
 		}
 	}
 return 1;
