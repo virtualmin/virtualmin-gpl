@@ -146,3 +146,4 @@ alias_mode=1
 stats_pass=1
 quota_commands=0
 key_size=1024
+maillog_period=30

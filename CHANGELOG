@@ -633,3 +633,4 @@ Added checkboxes to the mail log search form to exclude spam and viruses from th
 Added a search box to the list of scripts, to more easily find the one you want in the current huge list.
 Added script installers for the Bugzilla, Flyspray and Mantis issue trackers.
 Script installers that require Perl modules will now automatically install them, if possible.
+Added a Module Config setting for the number of days of processed mail logs to keep, implemented an index cache file to speed up searches, and created a Cron job to periodically update the logs.
