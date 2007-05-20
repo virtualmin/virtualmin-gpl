@@ -42,9 +42,6 @@
  - ruby on rails script installer
 	- need open to run ruby via mod_fcgid
 
- - cache mail log indexes in a text file
-	- can scan and exclude outside date range
-
  - script installers for
 	- phpmyfamily (bug 800)
 	- tutos (bug 801)
@@ -53,3 +50,8 @@
 	- cslh (bug 804)
 	- autoindex PHP script (805)
 	- jupload (806)
+
+ - delete old mail logs
+
+ - periodically (once per day) index mail logs
+

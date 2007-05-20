@@ -34,6 +34,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--no-spam") {
+		$nospam = 1;
+		}
+	elsif ($a eq "--no-virus") {
+		$novirus = 1;
+		}
 	else {
 		&usage();
 		}
@@ -41,6 +47,8 @@ while(@ARGV > 0) {
 
 # Get the matching logs
 @logs = &parse_procmail_log($start, $end, $source, $dest);
+@logs = grep { (!$_->{'spam'} || !$nospam) &&
+	       (!$_->{'virus'} || !$novirus) } @logs;
 
 # Show what's left
 if ($multiline) {
@@ -118,6 +126,7 @@ print "                             [--end yyyy-mm-dd:hh:mm:ss]\n";
 print "                             [--dest domain|user\@domain]\n";
 print "                             [--source domain|user\@domain]\n";
 print "                             [--multiline]\n";
+print "                             [--no-spam] [--no-virus]\n";
 exit(1);
 }
 
