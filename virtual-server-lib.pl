@@ -130,11 +130,13 @@ $ratings_cron_cmd = "$module_config_directory/sendratings.pl";
 $collect_cron_cmd = "$module_config_directory/collectinfo.pl";
 $fcgiclear_cron_cmd = "$module_config_directory/fcgiclear.pl";
 $maillog_cron_cmd = "$module_config_directory/maillog.pl";
+$spamconfig_cron_cmd = "$module_config_directory/spamconfig.pl";
 
 @all_cron_commands = ( $backup_cron_cmd, $bw_cron_cmd, $licence_cmd,
 		       $licence_status, $quotas_cron_cmd, $spamclear_cmd,
 		       $dynip_cron_cmd, $ratings_cron_cmd, $collect_cron_cmd,
-		       $fcgiclear_cron_cmd, $maillog_cron_cmd );
+		       $fcgiclear_cron_cmd, $maillog_cron_cmd,
+		       $spamconfig_cron_cmd );
 
 $custom_fields_file = "$module_config_directory/custom-fields";
 $custom_links_file = "$module_config_directory/custom-links";

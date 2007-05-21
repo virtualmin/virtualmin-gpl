@@ -157,22 +157,7 @@ local $spamdir = "$spam_config_dir/$_[0]->{'id'}";
 
 # Link all files in the default directory (/etc/mail/spamassassin) to
 # the domain's directory
-local $defdir;
-if (-d $spam::config{'local_cf'}) {
-	$defdir = $spam::config{'local_cf'};
-	}
-elsif ($spam::config{'local_cf'} =~ /^(.*)\//) {
-	$defdir = $1;
-	}
-if ($defdir) {
-	opendir(DIR, $defdir);
-	foreach my $f (readdir(DIR)) {
-		if ($f ne "." && $f ne "..") {
-			&symlink_logged("$defdir/$f", "$spamdir/$f");
-			}
-		}
-	closedir(DIR);
-	}
+&create_spam_config_links($_[0]);
 
 # Create the config file for this server
 &lock_file("$spamdir/virtualmin.cf");
@@ -960,6 +945,46 @@ elsif (!$job && %spamclear) {
 		 'weekdays' => '*' };
 	&cron::create_cron_job($job);
 	&cron::create_wrapper($spamclear_cmd, $module_name, "spamclear.pl");
+	}
+}
+
+# create_spam_config_links(&domain)
+# Creates links from the global spamasasassin config directory to the domain's
+# spam directory.
+sub create_spam_config_links
+{
+local ($d) = @_;
+local $defdir;
+&require_spam();
+if (-d $spam::config{'local_cf'}) {
+	$defdir = $spam::config{'local_cf'};
+	}
+elsif ($spam::config{'local_cf'} =~ /^(.*)\//) {
+	$defdir = $1;
+	}
+local $spamdir = "$spam_config_dir/$d->{'id'}";
+if ($defdir) {
+	# Remove any old links
+	opendir(DIR, $spamdir);
+	foreach my $f (readdir(DIR)) {
+		local $p = "$spamdir/$f";
+		if ($f ne "." && $f ne "..") {
+			local $lnk = readlink($p);
+			if ($lnk && $lnk =~ /^\Q$defdir\/\E/ && !-e $lnk) {
+				unlink($p);
+				}
+			}
+		}
+	closedir(DIR);
+
+	# Create the new links
+	opendir(DIR, $defdir);
+	foreach my $f (readdir(DIR)) {
+		if ($f ne "." && $f ne "..") {
+			&symlink_logged("$defdir/$f", "$spamdir/$f");
+			}
+		}
+	closedir(DIR);
 	}
 }
 

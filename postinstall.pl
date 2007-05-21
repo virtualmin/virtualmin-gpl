@@ -70,6 +70,33 @@ if ($config{'spam'} && $virtualmin_pro) {
 		}
 	}
 
+# Setup Cron job to periodically re-sync links in domains' spamassassin config
+# directories.
+if ($config{'spam'} && $virtualmin_pro) {
+	local ($job) = grep { $_->{'user'} eq 'root' &&
+			      $_->{'command'} eq $spamconfig_cron_cmd }
+			    &cron::list_cron_jobs();
+	if (!$job) {
+		# Create, and run for the first time
+		$job = { 'mins' => int(rand()*60),
+			 'hours' => '*',
+			 'days' => '*',
+			 'months' => '*',
+			 'weekdays' => '*',
+			 'user' => 'root',
+			 'active' => 1,
+			 'command' => $spamconfig_cron_cmd };
+		&cron::create_cron_job($job);
+		&cron::create_wrapper($spamconfig_cron_cmd, $module_name,
+				      "spamconfig.pl");
+		}
+
+	# And run now, just in case spamassassin was upgraded recently
+	foreach my $d (grep { $_->{'spam'} } &list_domains()) {
+		&create_spam_config_links($d);
+		}
+	}
+
 # Fix up old procmail scripts that don't call the clam wrapper
 if ($config{'virus'} && $virtualmin_pro) {
 	&fix_clam_wrapper();
