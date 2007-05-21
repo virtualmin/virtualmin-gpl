@@ -46,7 +46,7 @@ if ($ip) {
 if ($ip && $ip ne $oldip) {
 	# Fix up any virtual servers using the old IP
 	if ($oldip) {
-		#&set_all_null_print();
+		&set_all_null_print();
 		$dc = &update_all_domain_ip_addresses($ip, $oldip);
 		&run_post_actions();
 

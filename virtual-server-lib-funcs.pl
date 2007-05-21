@@ -10422,6 +10422,23 @@ $config{'sharedips'} = join(" ", @_);
 &save_module_config();
 }
 
+# is_shared_ip(ip)
+# Returns 1 if some IP address is shared among multiple domains (ie. default,
+# shared or reseller shared)
+sub is_shared_ip
+{
+local ($ip) = @_;
+return 1 if ($ip eq &get_default_ip());
+return 1 if (&indexof($ip, &list_shared_ips()) >= 0);
+if (defined(&list_resellers)) {
+	foreach my $r (&list_resellers()) {
+		return 1 if ($r->{'acl'}->{'defip'} &&
+			     $ip eq $r->{'acl'}->{'defip'});
+		}
+	}
+return 0;
+}
+
 # get_available_backup_features()
 # Returns a list of features for which backups are possible
 sub get_available_backup_features

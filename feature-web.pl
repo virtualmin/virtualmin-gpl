@@ -63,7 +63,7 @@ else {
 	# if NameVirtualHost * exists.
 	local $vip = $_[0]->{'name'} &&
 		     $apache::httpd_modules{'core'} >= 1.312 &&
-		     $_[0]->{'ip'} eq &get_default_ip() &&
+		     &is_shared_ip($_[0]->{'ip'}) &&
 		     $nvstar ? "*" : $_[0]->{'ip'};
 	local $lref = &read_file_lines($f);
 	push(@$lref, "<VirtualHost $vip:$web_port>");
@@ -342,7 +342,7 @@ else {
 		local $lref = &read_file_lines($virt->{'file'});
 		local $vip = $_[0]->{'name'} &&
 			     $apache::httpd_modules{'core'} >= 1.312 &&
-			     $_[0]->{'ip'} eq &get_default_ip() &&
+			     &is_shared_ip($_[0]->{'ip'}) &&
 			     $nvstar ? "*" : $_[0]->{'ip'};
 		$lref->[$virt->{'line'}] =
 			"<VirtualHost $vip:$_[0]->{'web_port'}>";
