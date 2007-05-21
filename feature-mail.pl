@@ -2321,6 +2321,15 @@ return 0;
 # Ensure that a mail domain has a home directory and Unix group
 sub check_depends_mail
 {
+# Check for virtusers file
+if ($config{'mail_system'} == 1) {
+	$sendmail_vfile || return $text{'setup_esendmailvfile'};
+	@$sendmail_afiles || return $text{'setup_esendmailafile'};
+	}
+elsif ($config{'mail_system'} == 0) {
+	@virtual_map_files || return $text{'setup_epostfixvfile'};
+	@$postfix_afiles || return $text{'setup_epostfixafile'};
+	}
 if ($_[0]->{'alias'}) {
 	# If this is an alias domain, then no home is needed
 	return undef;
