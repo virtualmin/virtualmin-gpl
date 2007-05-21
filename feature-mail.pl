@@ -2322,6 +2322,7 @@ return 0;
 sub check_depends_mail
 {
 # Check for virtusers file
+&require_mail();
 if ($config{'mail_system'} == 1) {
 	$sendmail_vfile || return $text{'setup_esendmailvfile'};
 	@$sendmail_afiles || return $text{'setup_esendmailafile'};

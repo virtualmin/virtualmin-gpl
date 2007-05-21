@@ -65,9 +65,34 @@ if (!$gotvirt) {
 		$var2->{'conds'} =
 			[ [ "?", "sh -c \"$testcmd '$VIRTUALMIN' != ''\"" ] ];
 		}
+
+	# If the procmailrc file is empty, add at the end.
+	# If there is a TRAP variable, add after it (so we do logging properly)
+	# Otherwise, add at the top
 	if (@recipes) {
-		&procmail::create_recipe_before($var1, $recipes[0]);
-		&procmail::create_recipe_before($var2, $recipes[0]);
+		# Has some recipes .. check if there is a TRAP
+		local ($trap, $aftertrap);
+		for(my $i=0; $i<@recipes; $i++) {
+			if ($recipes[$i]->{'name'} eq 'TRAP') {
+				$trap = $recipes[$i];
+				$trapafter = $recipes[$i+1];
+				}
+			}
+		if ($trapafter) {
+			# Add before the recipe that is after TRAP
+			&procmail::create_recipe_before($var1, $trapafter);
+			&procmail::create_recipe_before($var2, $trapafter);
+			}
+		elsif ($trap) {
+			# Nothing after TRAP, so just add at end
+			&procmail::create_recipe($var1);
+			&procmail::create_recipe($var2);
+			}
+		else {
+			# Just add at start
+			&procmail::create_recipe_before($var1, $recipes[0]);
+			&procmail::create_recipe_before($var2, $recipes[0]);
+			}
 		}
 	else {
 		&procmail::create_recipe($var1);
