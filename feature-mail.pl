@@ -201,6 +201,12 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 		local ($a, %acreate);
 		foreach $a (@aliases) {
 			local ($from, $to) = split(/=/, $a, 2);
+			if ($config{'mail_system'} == 5 &&
+			    lc($from) eq 'postmaster') {
+				# Postmaster is created automatically
+				# on vpopmail systems
+				next;
+				}
 			$to = &substitute_domain_template($to, $_[0]);
 			$from = $from eq "*" ? "\@$_[0]->{'dom'}" : "$from\@$_[0]->{'dom'}";
 			if ($acreate{$from}) {
