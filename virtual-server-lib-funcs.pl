@@ -1458,12 +1458,14 @@ $unix_user{&escape_alias($_[0]->{'user'})} = 0;
 }
 
 # set_usermin_imap_password(&user)
-# If Usermin is setup to use an IMAP inbox on localhost, set this user's IMAP password
+# If Usermin is setup to use an IMAP inbox on localhost, set this user's
+# IMAP password
 sub set_usermin_imap_password
 {
 local ($user) = @_;
 return 0 if (!$user->{'unix'} || !$user->{'home'});
 return 0 if (!$user->{'plainpass'});
+return 0 if (!$user->{'email'});
 
 # Make sure Usermin is installed, and the mailbox module is setup for IMAP
 return 0 if (!&foreign_check("usermin"));
