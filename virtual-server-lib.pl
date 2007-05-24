@@ -90,7 +90,7 @@ if (!$virtualmin_pro) {
 @template_features = ( 'basic', 'limits', @features, 'virt',
 		       $virtualmin_pro ? ( 'virtualmin' ) : ( ),
 		       'plugins',
-		       $virtualmin_pro ? ( 'scripts' ) : ( ) );
+		       $virtualmin_pro ? ( 'scripts', 'phpwrappers' ) : ( ) );
 @template_features_effecting_webmin = ( 'web', 'webmin' );
 foreach my $fname (@features, "virt") {
 	if (!$done_feature_script{$fname} || $force_load_features) {
@@ -187,6 +187,7 @@ $spamclear_file = "$module_config_directory/spamclear";
 
 $extra_admins_dir = "$module_config_directory/admins";
 @all_possible_php_versions = (4, 5);
+@php_wrapper_templates = ("php4cgi", "php5cgi", "php4fcgi", "php5fcgi");
 @s3_perl_modules = ( "S3::AWSAuthConnection", "S3::QueryStringAuthGenerator" );
 
 %get_domain_by_maps = ( 'user' => "$module_config_directory/map.user",

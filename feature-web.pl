@@ -1634,9 +1634,9 @@ if ($virtualmin_pro) {
 		$ptable);
 	}
 
-# Disabled website HTML
 print &ui_table_hr();
 
+# Disabled website HTML
 print &ui_table_row(&hlink($text{'tmpl_disabled_web'},
 		    'disabled_web'),
   &none_def_input("disabled_web", $tmpl->{'disabled_web'},
@@ -1808,6 +1808,44 @@ if ($tmpl->{'id'} == 0) {
 		foreach $d (&list_domains()) {
 			&save_domain($d);
 			}
+		}
+	}
+}
+
+# show_template_phpwrappers(&template)
+# Outputs HTML for setting custom PHP wrapper scripts
+sub show_template_phpwrappers
+{
+local ($tmpl) = @_;
+foreach my $w (@php_wrapper_templates) {
+	local $ndi = &none_def_input($w, $tmpl->{$w},
+				     $text{'tmpl_wrapperbelow'}, 0, 0,
+				     $text{'tmpl_wrappernone'}, [ $w ]);
+	print &ui_table_row(&hlink($text{'tmpl_'.$w}, "template_".$w),
+			    $ndi."<br>".
+		&ui_textarea($w, $tmpl->{$w} eq "none" ? "" :
+				join("\n", split(/\t/, $tmpl->{$w})),
+			     5, 60));
+	}
+}
+
+# parse_template_phpwrappers(&template)
+# Update the template with inputs from show_template_phpwrappers
+sub parse_template_phpwrappers
+{
+local ($tmpl) = @_;
+foreach my $w (@php_wrapper_templates) {
+	if ($in{$w."_mode"} == 0) {
+		$tmpl->{$w} = 'none';
+		}
+	elsif ($in{$w."_mode"} == 0) {
+		delete($tmpl->{$w});
+		}
+	elsif ($in{$w."_mode"} == 2) {
+		$in{$w} =~ s/\r//g;
+		$in{$w} =~ /^\#\!/ || &error($text{'tmpl_e'.$w});
+		$tmpl->{$w} = $in{$w};
+		$tmpl->{$w} =~ s/\n/\t/g;
 		}
 	}
 }

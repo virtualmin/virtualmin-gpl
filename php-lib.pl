@@ -262,20 +262,32 @@ local $common = "#!/bin/sh\n".
 local $pub = &public_html_dir($d);
 foreach my $v (&list_available_php_versions($d, $mode)) {
 	&open_tempfile(PHP, ">$dest/php$v->[0].$suffix");
-	&print_tempfile(PHP, $common);
-	if ($v->[1] =~ /-cgi$/) {
-		# php-cgi requires the SCRIPT_FILENAME variable
-		&print_tempfile(PHP, "SCRIPT_FILENAME=\$PATH_TRANSLATED\n");
-		&print_tempfile(PHP, "export SCRIPT_FILENAME\n");
+	local $t = "php".$v->[0].$suffix;
+	if ($tmpl->{$t} ne 'none') {
+		# Use custom script from template
+		local $s = &substitute_domain_template($tmpl->{$t}, $d);
+		$s .= "\n" if ($s !~ /\n$/);
+		&print_tempfile(PHP, $s);
 		}
-	&print_tempfile(PHP, "exec $v->[1]\n");
+	else {
+		# Automatically generate
+		&print_tempfile(PHP, $common);
+		if ($v->[1] =~ /-cgi$/) {
+			# php-cgi requires the SCRIPT_FILENAME variable
+			&print_tempfile(PHP,
+					"SCRIPT_FILENAME=\$PATH_TRANSLATED\n");
+			&print_tempfile(PHP,
+					"export SCRIPT_FILENAME\n");
+			}
+		&print_tempfile(PHP, "exec $v->[1]\n");
+		}
 	&close_tempfile(PHP);
 	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755,
 				   "$dest/php$v->[0].$suffix");
 
 	# Also copy the .fcgi wrapper to public_html, which is needed due to
 	# broken-ness on some Debian versions!
-	if ($mode eq "fcgid") {
+	if ($mode eq "fcgid" && $gconfig{'os_type'} eq 'debian-linux') {
 		&copy_source_dest("$dest/php$v->[0].$suffix",
 				  "$pub/php$v->[0].$suffix");
 		&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755,

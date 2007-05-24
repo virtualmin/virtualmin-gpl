@@ -635,3 +635,5 @@ Added script installers for the Bugzilla, Flyspray and Mantis issue trackers.
 Script installers that require Perl modules will now automatically install them, if possible.
 Added a Module Config setting for the number of days of processed mail logs to keep, implemented an index cache file to speed up searches, and created a Cron job to periodically update the logs.
 Added a Cron job to periodically update per-domain SpamAssassin config files from the global configuration, so that configs added by a SpamAssassin upgrade are not missing from the per-domain directories.
+---- Changes since 3.40 ----
+Added a new template section for defining your own PHP wrapper scripts, for use when PHP is run via CGI or FastCGI.

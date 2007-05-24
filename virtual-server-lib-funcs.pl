@@ -6541,6 +6541,9 @@ push(@rv, { 'id' => 0,
 	    'resellers' => !defined($config{'tmpl_resellers'}) ? "*" :
 				$config{'tmpl_resellers'},
 	  } );
+foreach my $w (@php_wrapper_templates) {
+	$rv[0]->{$w} = $config{$w} || 'none';
+	}
 push(@rv, { 'id' => 1,
 	    'name' => 'Defaults Settings For Sub-Servers',
 	    'standard' => 1,
@@ -6748,6 +6751,9 @@ if ($tmpl->{'id'} == 0) {
 	$config{'domalias'} = $tmpl->{'domalias'} eq 'none' ? undef :
 			      $tmpl->{'domalias'};
 	$config{'domalias_type'} = $tmpl->{'domalias_type'};
+	foreach my $w (@php_wrapper_templates) {
+		$config{$w} = $tmpl->{$w};
+		}
 	$save_config = 1;
 	}
 elsif ($tmpl->{'id'} == 1) {
@@ -6836,6 +6842,7 @@ if (!$tmpl->{'default'}) {
 		    "webmin_group", "spam", "spamclear", "namedconf",
 		    "nodbname", "norename", "forceunder",
 		    @plugins,
+		    @php_wrapper_templates,
 		    (map { $_."limit" } @plugins)) {
 		if ($tmpl->{$p} eq "") {
 			local $k;
