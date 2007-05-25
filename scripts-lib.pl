@@ -1076,7 +1076,10 @@ if (!$d) {
 	}
 local $ip = $d ? $d->{'ip'} : $host;
 
+local $oldproxy = $gconfig{'http_proxy'};	# Proxies mess up connection
+$gconfig{'http_proxy'} = '';			# to the IP explicitly
 local $h = &make_http_connection($ip, $port, 0, "POST", $page);
+$gconfig{'http_proxy'} = $oldproxy;
 if (!ref($h)) {
 	$$err = $h;
 	return 0;
