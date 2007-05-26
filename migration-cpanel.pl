@@ -396,15 +396,16 @@ if ($?) {
 	&$second_print(".. copy failed : <tt>$out</tt>");
 	}
 else {
-	# Fix up ownership and permissions
-	&set_home_ownership(\%dom);
-	&system_logged("chmod '$uconfig{'homedir_perms'}' ".
-		       quotemeta($dom{'home'}));
-	foreach my $sd (&virtual_server_directories(\%dom)) {
-		&system_logged("chmod $sd->[1] ".
-			       quotemeta("$dom{'home'}/$sd->[0]"));
-		}
 	&$second_print(".. done");
+	}
+
+# Fix up home ownership and permissions
+&set_home_ownership(\%dom);
+&system_logged("chmod '$uconfig{'homedir_perms'}' ".
+	       quotemeta($dom{'home'}));
+foreach my $sd (&virtual_server_directories(\%dom)) {
+	&system_logged("chmod $sd->[1] ".
+		       quotemeta("$dom{'home'}/$sd->[0]"));
 	}
 
 if ($got{'mail'}) {
