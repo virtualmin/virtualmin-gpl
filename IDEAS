@@ -54,3 +54,8 @@
  - security updates module should install Webmin updates
 
  - backup-domain.pl should have --everything option, for migration
+
+ - fcgi on blog.webmin.com
+
+ - sugarcrm 4.5.1d installer wizard
+
