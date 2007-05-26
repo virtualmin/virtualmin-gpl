@@ -220,7 +220,7 @@ elsif ($in{'virt'} == 2) {
 	return ($ip, 1, 0);
 	}
 elsif ($in{'virt'} == 1) {
-	# Make sure the IP isn't assigned yet
+	# Manual IP allocation chosen
 	$tmpl->{'ranges'} eq "none" ||&error(&text('setup_evirttmpl2'));
 	&check_ipaddress($in{'ip'}) || &error($text{'setup_eip'});
 	local $clash = &check_virt_clash($in{'ip'});

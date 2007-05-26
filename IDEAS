@@ -52,3 +52,5 @@
 	- jupload (806)
 
  - security updates module should install Webmin updates
+
+ - backup-domain.pl should have --everything option, for migration
