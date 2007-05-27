@@ -386,10 +386,11 @@ if ($got{'dns'} && -d $daily) {
 		}
 	}
 
-# Migrate home directory contents
+# Migrate home directory contents (except logs)
 &$first_print("Copying home directory to $dom{'home'} ..");
 local $qhome = quotemeta($dom{'home'});
 local $out;
+&execute_command("cd $homesrc && rm -rf logs");
 &execute_command("cd $homesrc && (tar cvf - . | (cd $qhome && tar xf -))",
 		 undef, \$out, \$out);
 if ($?) {
