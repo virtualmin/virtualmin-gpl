@@ -120,12 +120,23 @@ return undef;
 sub check_virt_clash
 {
 return undef if ($config{'iface_manual'});	# no clash for manual mode
+
+# Check active and boot-time interfaces
 &foreign_require("net", "net-lib.pl");
 local @boot = &net::boot_interfaces();
 local ($boot) = grep { $_->{'address'} eq $_[0] } @boot;
 local @active = &net::active_interfaces();
 local ($active) = grep { $_->{'address'} eq $_[0] } @active;
-return $active || $boot;
+return 1 if ($active || $boot);
+
+# Do a quick ping test
+local $pingcmd = $gconfig{'os_type'} =~ /-linux$/ ?
+			"ping -c 1 -t 1" : "ping";
+local ($out, $timed_out) = &backquote_with_timeout(
+				$pingcmd." ".$_[0]." 2>&1", 2, 1);
+return 1 if (!$timed_out && !$?);
+
+return 0;
 }
 
 # virtual_ip_input(&templates, [reseller])
@@ -180,9 +191,15 @@ else {
 		&foreign_require("net", "net-lib.pl");
 		local @act = grep { $_->{'virtual'} ne '' }
 				  &net::active_interfaces();
-		push(@opts, [ 4, $text{'form_activeip'}." ".
+		if (@act) {
+			push(@opts, [ 4, $text{'form_activeip'}." ".
 				 &ui_select("zoneip", undef,
 				  [ map { [ $_->{'address'} ] } @act ]) ]);
+			}
+		else {
+			push(@opts, [ 4, $text{'form_activeip'}." ".
+					 &ui_textbox("zoneip", undef, 20) ]);
+			}
 		}
 	return &ui_radio("virt", 0, \@opts);
 	}
@@ -248,7 +265,9 @@ elsif ($in{'virt'} == 4 && (&running_in_zone() ||
 		    defined(&running_in_vserver) && &running_in_vserver())) {
 	# On an active IP on a virtual machine that cannot bring up its
 	# own IP.
+	&check_ipadress($in{'zoneip'}) || &error($text{'setup_eip'});
 	local $clash = &check_virt_clash($in{'zoneip'});
+	$clash || &error(&text('setup_evirtclash2'));
 	local $already = &get_domain_by("ip", $in{'ip'});
 	$already && &error(&text('setup_evirtclash4',
 				 $already->{'dom'}));
