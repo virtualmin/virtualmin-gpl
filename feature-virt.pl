@@ -244,8 +244,10 @@ elsif ($in{'virt'} == 3 && &can_edit_sharedips()) {
 		&error(&text('setup_evirtnoshared'));
 	return ($in{'sharedip'}, 0);
 	}
-elsif ($in{'virt'} == 4 && &running_in_zone()) {
-	# On an active IP
+elsif ($in{'virt'} == 4 && (&running_in_zone() ||
+		    defined(&running_in_vserver) && &running_in_vserver())) {
+	# On an active IP on a virtual machine that cannot bring up its
+	# own IP.
 	local $clash = &check_virt_clash($in{'zoneip'});
 	local $already = &get_domain_by("ip", $in{'ip'});
 	$already && &error(&text('setup_evirtclash4',
