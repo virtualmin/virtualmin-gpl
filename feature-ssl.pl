@@ -406,21 +406,6 @@ if ($_[2]->{'fixip'}) {
 		$dstlref->[$virt->{'line'}] = $1.$_[0]->{'ip'}.$3;
 		}
 	}
-if ($_[3]->{'reuid'}) {
-	# Fix up any UID or GID in suexec lines
-	local $i;
-	foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
-		if ($dstlref->[$i] =~ /^SuexecUserGroup\s/) {
-			$dstlref->[$i] = "SuexecUserGroup \"#$_[0]->{'uid'}\" \"#$_[0]->{'ugid'}\"";
-			}
-		elsif ($dstlref->[$i] =~ /^User\s/) {
-			$dstlref->[$i] = "User \"#$_[0]->{'uid'}\"";
-			}
-		elsif ($dstlref->[$i] =~ /^Group\s/) {
-			$dstlref->[$i] = "Group \"#$_[0]->{'ugid'}\"";
-			}
-		}
-	}
 if ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
 	# Fix up any DocumentRoot or other file-related directives
 	local $i;
@@ -429,12 +414,23 @@ if ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
 		}
 	}
 &flush_file_lines();
-&unlock_file($virt->{'file'});
 undef(@apache::get_config_cache);
 
-# Restore the cert and key, if any and if saved
+# Copy suexec-related directives from non-SSL virtual host
 ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 				      $_[0]->{'web_sslport'});
+local ($nvirt, $nvconf) = &get_apache_virtual($_[0]->{'dom'},
+					      $_[0]->{'web_port'});
+if ($nvirt) {
+	foreach my $dir ("User", "Group", "SuexecUserGroup") {
+		local @vals = &apache::find_directive($dir, $nvconf);
+		&apache::save_directive($dir, \@vals, $vconf, $conf);
+		}
+	&flush_file_lines();
+	}
+&unlock_file($virt->{'file'});
+
+# Restore the cert and key, if any and if saved
 local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
 if ($cert && -r "$_[1]_cert") {
 	&lock_file($cert);
