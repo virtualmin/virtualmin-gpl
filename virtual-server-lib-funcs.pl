@@ -4555,6 +4555,8 @@ if ($ok) {
 			elsif (!$d->{'virt'} && !$config{'all_namevirtual'}) {
 				$d->{'ip'} = &get_default_ip($d->{'reseller'});
 				}
+			$d->{'nocreationmail'} = 1;
+			$d->{'nocreationscripts'} = 1;
 			&create_virtual_server($d, $parentdom,
 			       $parentdom ? $parentdom->{'user'} : undef, 1);
 			&$outdent_print();
@@ -5867,7 +5869,7 @@ if ($tmpl->{'domalias'} ne 'none' && !$_[0]->{'alias'}) {
 # Install any scripts specified in the template
 local @scripts = &get_template_scripts($tmpl);
 if (@scripts && !$dom->{'alias'} && !$noscripts &&
-    $dom->{'web'} && $dom->{'dir'}) {
+    $dom->{'web'} && $dom->{'dir'} && !$dom->{'nocreationscripts'}) {
 	&$first_print($text{'setup_scripts'});
 	&$indent_print();
 	foreach my $sinfo (@scripts) {
