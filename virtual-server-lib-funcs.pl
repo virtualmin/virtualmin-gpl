@@ -4003,8 +4003,19 @@ elsif (!$onebyone) {
 	}
 
 # Work out backup size, including files already transferred and deleted
-local $sz = $dirfmt ? &disk_usage_kb($dest)*1024
-		  : (@st=stat($dest))[7];
+local $sz = 0;
+if ($dirfmt) {
+	# Multiple files
+	foreach my $f (@destfiles) {
+		local @st = stat("$dest/$f");
+		$sz += $st[7];
+		}
+	}
+else {
+	# One file
+	local @st = stat($dest);
+	$sz = $st[7];
+	}
 $sz += $transferred_sz;
 
 if ($ok && $mode == 1 && (@destfiles || !$dirfmt)) {
