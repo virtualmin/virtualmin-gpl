@@ -868,10 +868,39 @@ if ($virt) {
 		}
 	if (!$tmpl->{'web_suexec'}) {
 		# Remove suexec directives if not supported on this server
-		foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
+		foreach $i ($virt->{'line'} ..
+			    $virt->{'line'}+scalar(@$srclref)-1) {
 			if ($dstlref->[$i] =~ /^(SuexecUserGroup|User|Group)\s/) {
 				splice(@$dstlref, $i--, 1);
 				}
+			}
+		}
+	else {
+		# Fix SuexecUserGroup or User/Group directives to match
+		# Apache version
+		local ($uline, $gline, $suline);
+		foreach $i ($virt->{'line'} ..
+			    $virt->{'line'}+scalar(@$srclref)-1) {
+			local $l = $dstlref->[$i];
+			$uline = $i if ($l =~ /^User\s/);
+			$gline = $i if ($l =~ /^Group\s/);
+			$suline = $i if ($l =~ /^SuexecUserGroup\s/);
+			}
+		local $pdom = $_[0]->{'parent'} ?
+				&get_domain($_[0]->{'parent'}) : $_[0];
+		if ($apache::httpd_modules{'core'} >= 2.0 && $uline) {
+			# Replace User and Group with SuexecUserGroup
+			splice(@$dstlref, $uline, 1,
+			       "SuexecUserGroup \"#$pdom->{'uid'}\" \"#$pdom->{'ugid'}\"");
+			if ($gline) {
+				splice(@$dstlref, $gline, 1);
+				}
+			}
+		elsif ($apache::httpd_modules{'core'} < 2.0 && $suline) {
+			# Replace SuexecUserGroup with User and Group
+			splice(@$dstlref, $suline, 1,
+			       "User \"#$pdom->{'uid'}\"",
+			       "Group \"#$pdom->{'ugid'}\"");
 			}
 		}
 	if ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
@@ -884,6 +913,13 @@ if ($virt) {
 	&flush_file_lines();
 	&unlock_file($virt->{'file'});
 	undef(@apache::get_config_cache);
+
+	# Re-generate PHP wrappers to match this system
+	if (defined(&create_php_wrappers)) {
+		local $mode = &get_domain_php_mode($_[0]);
+		&create_php_wrappers($_[0], $mode);
+		}
+
 	&$second_print($text{'setup_done'});
 
 	&register_post_action(\&restart_apache);
