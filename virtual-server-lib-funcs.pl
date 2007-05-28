@@ -9410,7 +9410,8 @@ if ($config{'dns'}) {
 		local $dns = &net::get_dns_config();
 		local $hasdns;
 		foreach my $ns (@{$dns->{'nameserver'}}) {
-			$hasdns++ if ($ips{&to_ipaddress($ns)});
+			$hasdns++ if ($ips{&to_ipaddress($ns)} ||
+				      $ns eq "127.0.0.1");
 			}
 		if (!$hasdns) {
 			return &text('check_eresolv', '/net/list_dns.cgi',
