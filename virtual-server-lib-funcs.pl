@@ -2873,7 +2873,9 @@ return undef;
 
 sub reset_changes_environment
 {
-%ENV = %UNCLEAN_ENV;
+foreach my $e (keys %UNCLEAN_ENV) {
+	$ENV{$e} = $UNCLEAN_ENV{$e};
+        }
 }
 
 sub clean_changes_environment
