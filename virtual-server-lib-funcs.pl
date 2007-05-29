@@ -686,6 +686,7 @@ else {
 local @users = &foreign_call($usermodule, "list_users");
 local $u;
 foreach $u (@users) {
+	$u->{'module'} = $usermodule;
 	$u->{'softquota'} = $soft_home_quota{$u->{'user'}};
 	$u->{'hardquota'} = $hard_home_quota{$u->{'user'}};
 	$u->{'uquota'} = $used_home_quota{$u->{'user'}};
@@ -3149,9 +3150,16 @@ return 1;
 sub list_all_users
 {
 &require_useradmin();
-local @rv = &useradmin::list_users();
+local @rv;
+foreach my $u (&useradmin::list_users()) {
+	$u->{'module'} = 'useradmin';
+	push(@rv, $u);
+	}
 if ($config{'ldap'}) {
-	push(@rv, &ldap_useradmin::list_users());
+	foreach my $u (&ldap_useradmin::list_users()) {
+		$u->{'module'} = 'ldap-useradmin';
+		push(@rv, $u);
+		}
 	}
 if ($config{'mail_system'} == 4) {
 	local $ldap = &connect_qmail_ldap();
@@ -3172,9 +3180,16 @@ return @rv;
 sub list_all_groups
 {
 &require_useradmin();
-local @rv = &useradmin::list_groups();
+local @rv;
+foreach my $g (&useradmin::list_groups()) {
+	$g->{'module'} = 'useradmin';
+	push(@rv, $g);
+	}
 if ($config{'ldap'}) {
-	push(@rv, &ldap_useradmin::list_groups());
+	foreach my $g (&ldap_useradmin::list_groups()) {
+		$g->{'module'} = 'ldap-useradmin';
+		push(@rv, $g);
+		}
 	}
 return @rv;
 }

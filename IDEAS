@@ -55,7 +55,7 @@
 
  - security updates module should install Webmin updates
 
- - backup-domain.pl should have --everything option, for migration
-
  - fcgi on blog.webmin.com
+
+ - script installers should return login and password
 
