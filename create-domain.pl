@@ -398,12 +398,11 @@ $dom{'emailto'} = $parent ? $parent->{'emailto'} :
 		  		 $dom{'user'}.'@'.&get_system_hostname();
 foreach $f (@features) {
 	$dom{$f} = $feature{$f} ? 1 : 0;
-	$dom{"limit_$f"} = $f eq "webmin" ? 0 : $dom{$f};
 	}
 foreach $f (@feature_plugins) {
 	$dom{$f} = $plugin{$f} ? 1 : 0;
-	$dom{"limit_$f"} = $dom{$f};
 	}
+&set_featurelimits_from_template(\%dom, $tmpl);
 
 # Work out home directory
 $dom{'home'} = &server_home_directory(\%dom, $parent);

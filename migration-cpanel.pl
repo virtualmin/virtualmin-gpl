@@ -226,14 +226,10 @@ if (!$parent) {
 $dom{'db'} = $db || &database_name(\%dom);
 $dom{'emailto'} = $dom{'email'} ||
 		  $dom{'user'}.'@'.&get_system_hostname();
-foreach my $f (@features) {
+foreach my $f (@features, @feature_plugins) {
 	$dom{$f} = $got{$f} ? 1 : 0;
-	$dom{"limit_$f"} = $f eq "webmin" ? 0 : $dom{$f};
 	}
-foreach my $f (@feature_plugins) {
-	$dom{$f} = $got{$f} ? 1 : 0;
-	$dom{"limit_$f"} = $dom{$f};
-	}
+&set_featurelimits_from_template(\%dom, $tmpl);
 
 local $orighome;
 if (-d $daily) {

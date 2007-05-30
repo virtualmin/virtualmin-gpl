@@ -596,13 +596,13 @@ foreach my $d (&list_domains(), $newd) {
 local $oldgroup = { %$group };
 $group->{'members'} = join(",", &unique(@members));
 if ($group->{'members'} ne $oldgroup->{'members'}) {
-	&foreign_call($g->{'module'}, "lock_user_files");
-	&foreign_call($g->{'module'}, "set_group_envs", $group,
+	&foreign_call($group->{'module'}, "lock_user_files");
+	&foreign_call($group->{'module'}, "set_group_envs", $group,
 				      'MODIFY_GROUP');
-	&foreign_call($g->{'module'}, "making_changes");
-	&foreign_call($g->{'module'}, "modify_group", $oldgroup, $group);
-	&foreign_call($g->{'module'}, "made_changes");
-	&foreign_call($g->{'module'}, "unlock_user_files");
+	&foreign_call($group->{'module'}, "making_changes");
+	&foreign_call($group->{'module'}, "modify_group", $oldgroup, $group);
+	&foreign_call($group->{'module'}, "made_changes");
+	&foreign_call($group->{'module'}, "unlock_user_files");
 	}
 }
 

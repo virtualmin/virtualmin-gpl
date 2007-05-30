@@ -191,8 +191,8 @@ $dom{'emailto'} = $dom{'email'} ||
 		  $dom{'user'}.'@'.&get_system_hostname();
 foreach my $f (@features, @feature_plugins) {
 	$dom{$f} = $got{$f} ? 1 : 0;
-	$dom{"limit_$f"} = $f eq "webmin" ? 0 : $dom{$f};
 	}
+&set_featurelimits_from_template(\%dom, $tmpl);
 $dom{'home'} = &server_home_directory(\%dom, $parent);
 &complete_domain(\%dom);
 

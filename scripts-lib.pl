@@ -562,6 +562,7 @@ local ($d, $vers, $path) = @_;
 # Find the best matching directory
 local $dirpath = &public_html_dir($d).$path;
 local @dirs = &list_domain_php_directories($d);
+local $bestdir;
 foreach my $dir (sort { length($a->{'dir'}) cmp length($b->{'dir'}) } @dirs) {
 	if (&is_under_directory($dir->{'dir'}, $dirpath) ||
 	    $dir->{'dir'} eq $dirpath) {

@@ -6552,6 +6552,7 @@ push(@rv, { 'id' => 0,
 	    'bwlimit' => $config{'defbwlimit'} eq "" ? "none" :
 			 $config{'defbwlimit'},
 	    'capabilities' => $config{'defcapabilities'},
+	    'featurelimits' => $config{'featurelimits'} || "none",
 	    'nodbname' => $config{'defnodbname'},
 	    'norename' => $config{'defnorename'},
 	    'forceunder' => $config{'defforceunder'},
@@ -6762,6 +6763,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'defbwlimit'} = $tmpl->{'bwlimit'} eq 'none' ? undef :
 				$tmpl->{'bwlimit'};
 	$config{'defcapabilities'} = $tmpl->{'capabilities'};
+	$config{'featurelimits'} = $tmpl->{'featurelimits'};
 	$config{'defnodbname'} = $tmpl->{'nodbname'};
 	$config{'defnorename'} = $tmpl->{'norename'};
 	$config{'defforceunder'} = $tmpl->{'forceunder'};
@@ -6873,6 +6875,8 @@ if (!$tmpl->{'default'}) {
 		    "nodbname", "norename", "forceunder",
 		    @plugins,
 		    @php_wrapper_templates,
+		    "capabilities",
+		    "featurelimits",
 		    (map { $_."limit" } @plugins)) {
 		if ($tmpl->{$p} eq "") {
 			local $k;
@@ -10176,6 +10180,27 @@ $d->{'norename'} = $tmpl->{'norename'};
 $d->{'forceunder'} = $tmpl->{'forceunder'};
 }
 
+# set_featurelimits_from_template(&domain, &template)
+# Updates a virtual server's limit_ variables based on either the enabled
+# features or limits defined in the template.
+sub set_featurelimits_from_template
+{
+local ($d, $tmpl) = @_;
+if ($tmpl->{'featurelimits'} && $tmpl->{'featurelimits'} ne 'none') {
+	# From template
+	local %flimits = map { $_, 1 } split(/\s+/, $tmpl->{'featurelimits'});
+	foreach my $f (@features, @feature_plugins) {
+		$d->{'limit_'.$f} = int($flimits{$f});
+		}
+	}
+else {
+	# From domain
+	foreach my $f (@features, @feature_plugins) {
+		$d->{'limit_'.$f} = $f eq "webmin" ? 0 : int($d->{$f});
+		}
+	}
+}
+
 # set_capabilities_from_template(&domain, &template)
 # Set initial owner editing capabilities on a domain from the given template
 sub set_capabilities_from_template
@@ -10195,6 +10220,28 @@ sub show_template_limits
 {
 local ($tmpl) = @_;
 
+# Show default feature limits
+local $ftable;
+local %flimits = map { $_, 1 } split(/\s+/, $tmpl->{'featurelimits'});
+$ftable .= &none_def_input("featurelimits", $tmpl->{'featurelimits'},
+	   $text{'tmpl_below'}, 0, 0, $text{'tmpl_featauto'},
+	   [ "featurelimits" ])."<br>\n";
+local @grid;
+foreach my $f (@opt_features, "virt") {
+	push(@grid, &ui_checkbox("featurelimits", $f,
+				 $text{'feature_'.$f} || $f,
+				 $flimits{$f}));
+	}
+foreach my $f (@feature_plugins) {
+	push(@grid, &ui_checkbox("featurelimits", $f,
+			 &plugin_call($f, "feature_name"), $flimits{$f}));
+	}
+$ftable .= &ui_grid_table(\@grid, 2);
+print &ui_table_row(&hlink($text{'tmpl_featurelimits'},
+			   "template_featurelimits"), $ftable);
+
+print &ui_table_hr();
+
 # Show limits on numbers of things
 foreach my $l ("mailbox", "alias", "dbs", "doms", "bw") {
 	my $limit = $tmpl->{$l.'limit'} eq "none" ? undef : $tmpl->{$l.'limit'};
@@ -10207,6 +10254,8 @@ foreach my $l ("mailbox", "alias", "dbs", "doms", "bw") {
 		&bandwidth_input($l.'limit', $limit, 1) :
 		&ui_textbox($l.'limit', $limit, 10)));
 	}
+
+print &ui_table_hr();
 
 # Show capabilities
 local %caps = map { $_, 1 } split(/\s+/, $tmpl->{'capabilities'});
@@ -10224,6 +10273,8 @@ $etable .= &ui_grid_table(\@grid, 2);
 print &ui_table_row(&hlink($text{'tmpl_capabilities'},
 			   "template_capabilities"), $etable);
 
+print &ui_table_hr();
+
 # Show rename and db name limits
 foreach my $n ('nodbname', 'norename', 'forceunder') {
 	print &ui_table_row(&hlink($text{'limits_'.$n}, 'limits_'.$n),
@@ -10240,6 +10291,22 @@ foreach my $n ('nodbname', 'norename', 'forceunder') {
 sub parse_template_limits
 {
 local ($tmpl) = @_;
+
+# Save feature limits
+if ($in{'featurelimits_mode'} == 0) {
+	# Determine automatically
+	$tmpl->{'featurelimits'} = 'none';
+	}
+elsif ($in{'featurelimits_mode'} == 1) {
+	# Default
+	$tmpl->{'featurelimits'} = undef;
+	}
+else {
+	# Explicitly selected
+	$in{'featurelimits'} || &error($text{'tmpl_efeaturelimits'});
+	$tmpl->{'featurelimits'} =
+		join(" ", split(/\0/, $in{'featurelimits'}));
+	}
 
 # Save limits on various objects
 foreach my $l ("mailbox", "alias", "dbs", "doms") {

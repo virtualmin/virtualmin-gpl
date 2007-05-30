@@ -294,8 +294,8 @@ else {
 my $f;
 foreach $f (@features, @feature_plugins) {
 	$dom{$f} = &can_use_feature($f) && int($in{$f});
-	$dom{"limit_$f"} = $f eq "webmin" ? 0 : int($dom{$f});
 	}
+&set_featurelimits_from_template(\%dom, $tmpl);
 &set_chained_features(\%dom);
 $dom{'home'} = &server_home_directory(\%dom, $parentdom);
 &complete_domain(\%dom);

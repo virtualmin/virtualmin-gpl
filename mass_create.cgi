@@ -282,8 +282,8 @@ foreach $line (@lines) {
 	foreach $f (@features, @feature_plugins) {
 		next if ($parentdom && ($f eq 'webmin' || $f eq 'unix'));
 		$dom{$f} = &can_use_feature($f) && int($in{$f});
-		$dom{"limit_$f"} = $f eq "webmin" ? 0 : int($in{$f});
 		}
+	&set_featurelimits_from_template(\%dom, $tmpl);
 	$dom{'home'} = &server_home_directory(\%dom, $parentdom);
 	&complete_domain(\%dom);
 
