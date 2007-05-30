@@ -68,6 +68,11 @@ else {
 			    $text{'databases_'.$dbtype}, $dbname),"\n";
 		}
 	print "<p>\n";
+	if ($opts->{'dir'} eq &public_html_dir($d)) {
+		# Show extra warning about public_html
+		print &text('scripts_rusurehome',
+			    &public_html_dir($d, 1)),"<p>\n";
+		}
 	print &ui_submit($text{'scripts_uok2'}, "confirm"),"<br>\n";
 	print &ui_form_end();
 	print "</center>\n";

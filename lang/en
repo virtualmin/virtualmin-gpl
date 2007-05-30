@@ -2503,6 +2503,7 @@ scripts_utitle=Un-Install Script
 scripts_rusure=Are you sure you want to un-install the script $1 version $2? All files under <tt>$3</tt> will be deleted ($4).
 scripts_rusuredb=Tables related to this script in the $1 database $2 will be also removed.
 scripts_rusurei=Are you sure you want to install $1 into the directory $2? $3 files totalling $4 already exist, and will be deleted if the script is un-installed.
+scripts_rusurehome=Because this script is installed into the virtual server's top-level web directory, <b>all</b> files under <tt>$1</tt> will be deleted when it is un-installed!
 scripts_uok2=Un-Install Now
 scripts_etitle=Manage Script
 scripts_uheader=Details of script to un-install
@@ -3121,6 +3122,7 @@ massu_err=Failed to un-install scripts
 massu_enone=None selected
 massu_rusure=Are you sure you want to un-install the $1 selected scripts, which use $2 of disk space?
 massu_rusuredb=Data from $1 databases will also be deleted.
+massu_rusurehome=Because one of the scripts is installed into the virtual server's top-level web directory, <b>all</b> files under <tt>$1</tt> will be deleted when it is un-installed!
 
 usage_title=Disk Usage
 usage_summaryheader=Summary of disk usage and limits for this virtual server.

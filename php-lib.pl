@@ -266,6 +266,7 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 	if ($tmpl->{$t} ne 'none') {
 		# Use custom script from template
 		local $s = &substitute_domain_template($tmpl->{$t}, $d);
+		$s =~ s/\t/\n/g;
 		$s .= "\n" if ($s !~ /\n$/);
 		&print_tempfile(PHP, $s);
 		}

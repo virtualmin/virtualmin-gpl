@@ -640,3 +640,4 @@ Added a new template section for defining your own PHP wrapper scripts, for use 
 When a virtual server with a private IP is added, ping is now used to check if the IP is already in use.
 Updated the Flyspray script installer to version 0.9.9.2.
 In the server templates pages under Default domain owner limits, added a section for specifying the features that can be used by the server owner. Previously, these were always automatically determined based on the features initially enabled when the domain was created.
+Added additional warning when deleting scripts from ~/public_html.

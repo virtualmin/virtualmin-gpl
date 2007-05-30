@@ -72,12 +72,19 @@ else {
 				$dbcount++;
 				}
 			}
+		if ($opts->{'dir'} eq &public_html_dir($d)) {
+			$delhtml = 1;
+			}
 		}
 	print &text('massu_rusure', scalar(@d), &nice_size($sz)),"\n";
 	if ($dbcount) {
 		print &text('massu_rusuredb', $dbcount),"\n";
 		}
 	print "<p>\n";
+	if ($delhtml) {
+		print &text('massu_rusurehome', &public_html_dir($d, 1)),
+		      "<p>\n";
+		}
 	print &ui_submit($text{'scripts_uok2'}, "confirm"),"<br>\n";
 	print &ui_form_end();
 	print "</center>\n";
