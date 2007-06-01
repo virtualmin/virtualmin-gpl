@@ -55,7 +55,7 @@ sub list_domains
 local (@rv, $d);
 opendir(DIR, $domains_dir);
 foreach $d (readdir(DIR)) {
-	if ($d !~ /^\./ && $d !~ /\.(lock|bak|rpmsave|sav|swp|~)$/i) {
+	if ($d !~ /^\./ && $d !~ /\.(lock|bak|rpmsave|sav|swp|webmintmp|~)$/i) {
 		push(@rv, &get_domain($d));
 		}
 	}

@@ -59,3 +59,5 @@
 
  - script installers should return login and password
 
+ - add 'ftp' user to existing domain groups at install time
+
