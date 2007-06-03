@@ -638,6 +638,6 @@ Added a Cron job to periodically update per-domain SpamAssassin config files fro
 ---- Changes since 3.40 ----
 Added a new template section for defining your own PHP wrapper scripts, for use when PHP is run via CGI or FastCGI.
 When a virtual server with a private IP is added, ping is now used to check if the IP is already in use.
-Updated the Flyspray script installer to version 0.9.9.2.
+Updated the Flyspray script installer to version 0.9.9.2, and phpPgAdmin to 4.1.2.
 In the server templates pages under Default domain owner limits, added a section for specifying the features that can be used by the server owner. Previously, these were always automatically determined based on the features initially enabled when the domain was created.
 Added additional warning when deleting scripts from ~/public_html.
