@@ -475,15 +475,34 @@ sub validate_web
 {
 local ($d) = @_;
 if ($d->{'alias_mode'}) {
+	# Find alias target
 	local $alias = &get_domain($d->{'alias'});
 	local ($pvirt, $pconf) = &get_apache_virtual($alias->{'dom'},
 						     $alias->{'web_port'});
 	return &text('validate_eweb', "<tt>$alias->{'dom'}</tt>") if (!$virt);
 	}
 else {
+	# Find real domain
 	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
 						    $d->{'web_port'});
 	return &text('validate_eweb', "<tt>$d->{'dom'}</tt>") if (!$virt);
+
+	# If using php via CGI or fcgi, check for wrappers
+	if (defined(&get_domain_php_mode)) {
+		local $mode = &get_domain_php_mode($d);
+		if ($mode ne "mod_php") {
+			local $dest = $mode eq "fcgid" ? "$d->{'home'}/fcgi-bin"
+						       : &cgi_bin_dir($_[0]);
+			local $suffix = $mode eq "fcgid" ? "fcgi" : "cgi";
+			foreach my $v (&list_available_php_versions($d,$mode)) {
+				local $path = "$dest/php$v->[0].$suffix";
+				if (!-x $path) {
+					return &text('validate_ewebphp',
+						     $v->[0], "<tt>$path</tt>");
+					}
+				}
+			}
+		}
 	}
 return undef;
 }

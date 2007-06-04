@@ -61,5 +61,3 @@
 
  - add 'ftp' user to existing domain groups at install time
 
- - validate should check for PHP wrappers
-
