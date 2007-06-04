@@ -9435,7 +9435,7 @@ if ($config{'dns'}) {
 		return &text('index_ebind', "/bind8/", $clink);
 
 	# Make sure this server is configured to use the local BIND
-	if (&foreign_check("net")) {
+	if (&foreign_check("net") && $config{'dns_check'}) {
 		&foreign_require("net", "net-lib.pl");
 		local %ips = map { $_->{'address'}, $_ }
 				 &net::active_interfaces();
@@ -9449,8 +9449,11 @@ if ($config{'dns'}) {
 			return &text('check_eresolv', '/net/list_dns.cgi',
 						      $clink);
 			}
+		&$second_print($text{'check_dnsok'});
 		}
-	&$second_print($text{'check_dnsok'});
+	else {
+		&$second_print($text{'check_dnsok2'});
+		}
 	}
 
 if ($config{'mail'}) {

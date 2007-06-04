@@ -61,3 +61,4 @@
 
  - add 'ftp' user to existing domain groups at install time
 
+ - separate .ini files for PHP 4 and 5 (~/etc/php4 and ~/etc/php5)

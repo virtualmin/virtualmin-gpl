@@ -1398,6 +1398,7 @@ check_ewebactions=The Apache module <tt>mod_actions</tt> is either not installed
 check_webok=Apache is installed.
 check_ftpok=ProFTPd is installed.
 check_dnsok=BIND DNS server is installed, and the system is configured to use it.
+check_dnsok2=BIND DNS server is installed.
 check_mysqlok=MySQL is installed and running.
 check_postgresok=PostgreSQL is installed and running.
 check_webalizerok=Webalizer is installed.

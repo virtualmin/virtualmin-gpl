@@ -1,0 +1,15 @@
+<header>Check resolv.conf for this system?</header>
+
+When this is set to <b>Yes</b> (as it is by default), Virtualmin will check
+the system's DNS client configuration file <tt>/etc/resolv.conf</tt> to
+ensure that it is setup to use the local DNS server for name resolution.
+This is necessary, as without it and DNS domains you create may not be
+resolvable by the system running Virtualmin until they are fully registered
+by a DNS registrar. <p>
+
+If you are certain that this is not needed (perhaps because you have an
+automatic secondary DNS server setup), this can be changed to <b>No</b> to
+prevent spurious configuration check errors. <p>
+
+<footer>
+
