@@ -10680,7 +10680,7 @@ foreach my $u (&list_all_users_quotas(1)) {
 return \%rv;
 }
 
-# add_user_to_domain_group(&domain, user, text-message)
+# add_user_to_domain_group(&domain, user, [text-message])
 # Adds some user (like httpd or ftp) to the Unix group for a domain, if missing
 sub add_user_to_domain_group
 {

@@ -314,5 +314,15 @@ if ($virtualmin_pro) {
 				      "fcgiclear.pl");
 		}
 	}
+
+# Add ftp user to the groups for all domains that have FTP enabled
+foreach my $d (&list_domains()) {
+	if ($d->{'ftp'}) {
+		local $ftp_user = &get_proftpd_user($d);
+		if ($ftp_user) {
+			&add_user_to_domain_group($d, $ftp_user, undef);
+			}
+		}
+	}
 }
 
