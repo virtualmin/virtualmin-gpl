@@ -44,8 +44,9 @@ else {
 	}
 
 # Rename mailboxes option
+@users = &list_domain_users($d, 1, 1, 1, 1);
 print &ui_table_row($text{'rename_group'},
-		    &ui_yesno_radio("group_mode", 0));
+		    &ui_yesno_radio("group_mode", @users ? 0 : 1));
 
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'rename_ok'} ] ]);
