@@ -868,6 +868,7 @@ foreach my $i ("/etc/php.ini",
 	       $mode eq "mod_php" ? ("/etc/php$ver/apache/php.ini",
 				     "/etc/php$ver/apache2/php.ini")
 				  : ("/etc/php$ver/cgi/php.ini"),
+	       "/opt/csw/php$ver/lib/php.ini",
 	       "/usr/local/lib/php.ini") {
 	return $i if (-r $i);
 	}
