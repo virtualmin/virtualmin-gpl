@@ -63,7 +63,7 @@ if (!$gotvirt) {
 	if ($gconfig{'os_type'} eq 'solaris') {
 		# Need to call sh as shell explicitly
 		$var2->{'conds'} =
-			[ [ "?", "sh -c \"$testcmd '$VIRTUALMIN' != ''\"" ] ];
+			[ [ "?", "sh -c \"$testcmd '\$VIRTUALMIN' != ''\"" ] ];
 		}
 
 	# If the procmailrc file is empty, add at the end.
