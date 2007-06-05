@@ -254,9 +254,11 @@ if (!-d $dest) {
 local $suffix = $mode eq "fcgid" ? "fcgi" : "cgi";
 local $dirvar = $mode eq "fcgid" ? "PWD" : "DOCUMENT_ROOT";
 local $common = "#!/bin/sh\n".
-		"PHPRC=\$$dirvar/../etc\n".
-		"PHP_FCGI_CHILDREN=4\n".
-		"export PHP_FCGI_CHILDREN PHPRC\n";
+		"PHPRC=\$$dirvar/../etc\n";
+if ($mode eq "fcgid") {
+	$common .= "PHP_FCGI_CHILDREN=4\n".
+		   "export PHP_FCGI_CHILDREN PHPRC\n";
+	}
 
 # For each version of PHP, create a wrapper
 local $pub = &public_html_dir($d);
@@ -355,7 +357,13 @@ if ($d) {
 
 # For CGI and fCGId modes, check which wrappers could exist
 foreach my $v (@all_possible_php_versions) {
-	local $phpn = &has_command("php$v-cgi") || &has_command("php$v");
+	local $phph;
+	if ($gconfig{'os_type'} eq 'solaris') {
+		# On Solaris with CSW packages, php-cgi is in a directory named
+		# after the PHP version
+		$phpn = &has_command("/opt/csw/php$v/bin/php-cgi");
+		}
+	$phpn ||= &has_command("php$v-cgi") || &has_command("php$v");
 	$vercmds{$v} = $phpn if ($phpn);
 	}
 local $php = &has_command("php-cgi") || &has_command("php");
