@@ -631,15 +631,27 @@ foreach my $m (@mods) {
 	# Check if the package is already installed
 	&$indent_print();
 	local $iok = 0;
-	foreach my $pkg ("php$phpver-$m", "php-$m") {
+	local @poss;
+	if ($software::update_system eq "csw") {
+		@poss = ( "php".$phpver."_".$m );
+		}
+	else {
+		@poss = ( "php".$phpver."-".$m, "php-".$m );
+		}
+	foreach my $pkg (@poss) {
 		local @pinfo = &software::package_info($pkg);
 		if (!@pinfo || $pinfo[0] ne $pkg) {
 			# Not installed .. try to fetch it
 			&$first_print(&text('scripts_softwaremod',
 					    "<tt>$pkg</tt>"));
 			&software::update_system_install($pkg);
-			@pinfo = &software::package_info($pkg);
-			if (@pinfo && $pinfo[0] eq $pkg) {
+			local $newpkg = $pkg;
+			if ($software::update_system eq "csw") {
+				# Real package name is different
+				$newpkg = "CSWphp".$phpver.$m;
+				}
+			@pinfo = &software::package_info($newpkg);
+			if (@pinfo && $pinfo[0] eq $newpkg) {
 				# Yep, it worked
 				&$second_print($text{'setup_done'});
 				$iok = 1;
@@ -816,10 +828,15 @@ foreach my $m (@mods) {
 			$mp =~ s/::/\-/g;
 			$pkg = "lib$mp-perl";
 			}
+		if ($software::config{'package_system'} eq 'pkgadd') {
+			$mp = lc($mp);
+			$mp =~ s/:://g;
+			$pkg = "pm_$mp";
+			}
 		}
 
 	if ($pkg) {
-		# Install the RPM or debian package
+		# Install the RPM, Debian or CSW package
 		&$first_print(&text('scripts_softwaremod', "<tt>$pkg</tt>"));
 		&$indent_print();
 		&software::update_system_install($pkg);
