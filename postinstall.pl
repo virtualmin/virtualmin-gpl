@@ -112,6 +112,11 @@ if (defined(&proc::get_memory_info)) {
 		$lowmem = 1;
 		}
 	}
+if (&running_in_zone() || defined(&running_in_vserver) &&
+			  &running_in_vserver()) {
+	# Assume that zones and vservers don't have a lot of memory
+	$lowmem = 1;
+	}
 
 if ($virtualmin_pro && !$gconfig{'no_virtualmin_preload'} && !$lowmem) {
 	# Configure miniserv to pre-load virtual-server-lib-funcs.pl and
