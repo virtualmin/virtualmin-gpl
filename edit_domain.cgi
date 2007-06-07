@@ -343,6 +343,9 @@ else {
 			next;
 			}
 
+		# Don't show features that are globally disabled
+		next if (!$config{$f} && defined($config{$f}));
+
 		local $txt = $parentdom ? $text{'edit_sub'.$f} : undef;
 		$txt ||= $text{'edit_'.$f};
 		if (!&can_use_feature($f)) {
@@ -352,8 +355,7 @@ else {
 				    " <b>".&hlink($txt, $f)."</b>");
 			}
 		else {
-			push(@grid, &ui_checkbox($f, 1, "", $d->{$f}, undef,
-					!$config{$f} && defined($config{$f})).
+			push(@grid, &ui_checkbox($f, 1, "", $d->{$f}).
 				    " <b>".&hlink($txt, $f)."</b>");
 			}
 		}

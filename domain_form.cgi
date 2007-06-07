@@ -388,6 +388,7 @@ foreach $f ($aliasdom ? @opt_alias_features :
 	next if ($parentdom && $f eq "webmin");
 	next if ($parentdom && $f eq "unix");
 	next if ($aliasdom && !$aliasdom->{$f});
+	next if (!$config{$f} && defined($config{$f}));		# Not enabled
 	$can_feature{$f}++;
 
 	if ($config{$f} == 3) {
@@ -398,8 +399,7 @@ foreach $f ($aliasdom ? @opt_alias_features :
 
 	local $txt = $parentdom ? $text{'form_sub'.$f} : undef;
 	$txt ||= $text{'form_'.$f};
-	push(@grid, &ui_checkbox($f, 1, "", $config{$f} == 1, undef,
-                          !$config{$f} && defined($config{$f}))." ".
+	push(@grid, &ui_checkbox($f, 1, "", $config{$f} == 1).
 		    "<b>".&hlink($txt, $f)."</b>");
 	}
 

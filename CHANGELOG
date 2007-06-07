@@ -645,3 +645,4 @@ Website validation now includes a check for PHP wrapper scripts.
 Added a Module Config option to make the DNS client configuration check optional.
 PHP modules are now automatically installed from CSW packages on Solaris.
 Added the --default-features option to create-domain.pl, to avoid the need to specify feature flags manually.
+Globally disabled features are no longer shown greyed-out on the virtual server creation and editing forms.
