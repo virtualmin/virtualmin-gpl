@@ -211,7 +211,7 @@ if ($ok) {
 	# Config web server for PHP
 	if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 		&$first_print($text{'scripts_apache'});
-		if (&setup_web_for_php($d, $script)) {
+		if (&setup_web_for_php($d, $script, $phpver)) {
 			&$second_print($text{'setup_done'});
 			&restart_apache();
 			}

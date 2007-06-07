@@ -57,7 +57,7 @@
 
  - script installers should return login and password
 
- - separate .ini files for PHP 4 and 5 (~/etc/php4 and ~/etc/php5)
-	- postinstall fixup
-	- modification by scripts / etc
-	- changelog
+ - allow plugins to be available but off by default
+
+ - virtualmin-init module for filip
+

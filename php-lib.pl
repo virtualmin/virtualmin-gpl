@@ -191,18 +191,19 @@ if (!-d $etc) {
 	}
 local @vers = &list_available_php_versions($d, $mode);
 local $defver = $vers[0]->[0];
+local $defini;
 foreach my $ver (@vers) {
 	# Create separate .ini file for each PHP version, if missing
 	local $subs_ini = 0;
-	local $ini = $tmpl->{'web_php_ini'};
-	if (!$ini || $ini eq "none" || !-r $ini) {
-		$ini = &get_global_php_ini($ver->[0], $mode);
+	local $srcini = $tmpl->{'web_php_ini'};
+	if (!$srcini || $srcini eq "none" || !-r $srcini) {
+		$srcini = &get_global_php_ini($ver->[0], $mode);
 		}
 	else {
 		$subs_ini = 1;
 		}
 	local $inidir = "$etc/php$ver->[0]";
-	if ($ini && !-r "$inidir/php.ini") {
+	if ($srcini && !-r "$inidir/php.ini") {
 		# Copy file, set permissions, fix session.save_path, and
 		# clear out extension_dir (because it can differ between
 		# PHP versions)
@@ -212,9 +213,16 @@ foreach my $ver (@vers) {
 				$_[0]->{'uid'}, $_[0]->{'ugid'},
 				0755, $inidir);
 			}
-		if ($subs_ini) {
+		if (-r "$etc/php.ini" && !-l "$etc/php.ini") {
+			# We are converting from the old style of a single
+			# php.ini file to the new multi-version one .. just
+			# copy the existing file for all versions, which is
+			# assumed to be working
+			&copy_source_dest("$etc/php.ini", "$inidir/php.ini");
+			}
+		elsif ($subs_ini) {
 			# Perform substitions on config file
-			local $inidata = &read_file_contents($ini);
+			local $inidata = &read_file_contents($srcini);
 			$inidata = &substitute_template($inidata, $d);
 			&open_tempfile(INIDATA, ">$inidir/php.ini");
 			&print_tempfile(INIDATA, $inidata);
@@ -222,7 +230,7 @@ foreach my $ver (@vers) {
 			}
 		else {
 			# Just copy verbatim
-			&copy_source_dest($ini, "$inidir/php.ini");
+			&copy_source_dest($srcini, "$inidir/php.ini");
 			}
 		local ($uid, $gid) = (0, 0);
 		if (!$tmpl->{'web_php_noedit'}) {
@@ -240,11 +248,16 @@ foreach my $ver (@vers) {
 			}
 		}
 
-	# Link ~/etc/php.ini to default version
+	# Is this the default of PHP, remember the path for later linking
 	if ($ver->[0] eq $defver) {
-		&unlink_file("$etc/php.ini");
-		&link_file("$inidir/php.ini", "$etc/php.ini");
+		$defini = "php$ver->[0]/php.ini";
 		}
+	}
+
+# Link ~/etc/php.ini to the per-version ini file
+if ($defini && !-l "$etc/php.ini") {
+	&unlink_file("$etc/php.ini");
+	&symlink_file($defini, "$etc/php.ini");
 	}
 
 &register_post_action(\&restart_apache);
@@ -597,6 +610,50 @@ if (&foreign_check("proc")) {
 	return scalar(@cgis);
 	}
 return -1;
+}
+
+# list_domain_php_inis(&domain)
+# Returns a list of php.ini files used by a domain, and their PHP versions
+sub list_domain_php_inis
+{
+local ($d) = @_;
+local @inis;
+foreach my $v (&list_available_php_versions($d)) {
+	local $ifile = "$d->{'home'}/etc/php$v->[0]/php.ini";
+	if (-r $ifile) {
+		push(@inis, [ $v->[0], $ifile ]);
+		}
+	}
+if (!@inis) {
+	local $ifile = "$d->{'home'}/etc/php.ini";
+	if (-r $ifile) {
+		push(@inis, [ undef, $ifile ]);
+		}
+	}
+return @inis;
+}
+
+# get_domain_php_ini(&domain, php-version, [dir-only])
+# Returns the php.ini file path for this domain and a PHP version
+sub get_domain_php_ini
+{
+local ($d, $phpver, $dir) = @_;
+local @inis = &list_domain_php_inis($d);
+local ($ini) = grep { $_->[0] == $phpver } @inis;
+if (!$ini) {
+	($ini) = grep { !$_->[0]} @inis;
+	}
+if (!$ini && -r "$d->{'home'}/etc/php.ini") {
+	# For domains with no matching version file
+	$ini = [ undef, "$d->{'home'}/etc/php.ini" ];
+	}
+if (!$ini) {
+	return undef;
+	}
+else {
+	$ini->[1] =~ s/\/php.ini$//i if ($dir);
+	return $ini->[1];
+	}
 }
 
 1;

@@ -1452,27 +1452,15 @@ if ($config{'avail_syslog'} && &get_webmin_version() >= 1.305) {
 	}
 if ($config{'avail_phpini'}) {
 	# Links to edit PHP configs
-	local $ifile = "$d->{'home'}/etc/php.ini";
 	if (defined(&get_domain_php_mode) &&
-	    &get_domain_php_mode($d) ne "mod_cgi" && -r $ifile) {
-		local @vers = &list_available_php_versions($d);
-		local $doneini;
-		foreach my $v (@vers) {
-			local $ivfile = "$d->{'home'}/etc/php$v->[0]/php.ini";
-			next if (!-r $ivfile);
+	    &get_domain_php_mode($d) ne "mod_cgi") {
+		foreach my $ini (&list_domain_php_inis($d)) {
 			push(@rv, { 'mod' => 'phpini',
-				    'desc' => &text('links_phpini2', $v->[0]),
+				    'desc' => $ini->[0] ?
+					&text('links_phpini2', $ini->[0]) :
+					&text('links_phpini'),
 				    'page' => 'list_ini.cgi?file='.
-						&urlize($ivfile),
-				    'cat' => 'services',
-				  });
-			$doneini++;
-			}
-		if (!$doneini) {
-			push(@rv, { 'mod' => 'phpini',
-				    'desc' => $text{'links_phpini'},
-				    'page' => 'list_ini.cgi?file='.
-						&urlize($ifile),
+						&urlize($ini->[1]),
 				    'cat' => 'services',
 				  });
 			}

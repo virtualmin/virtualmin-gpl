@@ -647,3 +647,4 @@ PHP modules are now automatically installed from CSW packages on Solaris.
 Added the --default-features option to create-domain.pl, to avoid the need to specify feature flags manually.
 Globally disabled features are no longer shown greyed-out on the virtual server creation and editing forms.
 Under Apache 2.2, add NameVirtualHost *:80 instead of just *.
+Virtual servers now have separate php.ini files for each PHP version (4 and 5), under ~/etc/php*. This allows different extensions to be loaded for each PHP version, and for different settings to exist.

@@ -676,17 +676,7 @@ if ($extramods{'phpini'}) {
 	foreach my $sd (@doms) {
 		if ($sd->{'web'} && defined(&get_domain_php_mode) &&
 		    &get_domain_php_mode($sd) ne "mod_php") {
-			local @vers = &list_available_php_versions($sd);
-			local @inis;
-			foreach my $v (@vers) {
-				push(@inis, [ $v->[0], "$sd->{'home'}/etc/".
-						       "php$v->[0]/php.ini" ]);
-				}
-			if (!@inis) {
-				push(@inis, [ undef,
-					      "$sd->{'home'}/etc/php.ini" ]);
-				}
-			foreach my $ini (@inis) {
+			foreach my $ini (&list_domain_php_inis($sd)) {
 				local @st = stat($ini->[1]);
 				if (@st && $st[4] == $sd->{'uid'}) {
 					if ($ini->[0]) {

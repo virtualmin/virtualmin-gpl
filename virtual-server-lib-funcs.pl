@@ -6008,7 +6008,7 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 
 			# Config web server for PHP
 			if (&indexof("php", @{$script->{'uses'}}) >= 0) {
-				if (&setup_web_for_php($dom, $script)) {
+				if (&setup_web_for_php($dom, $script, $phpver)){
 					&$first_print($text{'scripts_apache'});
 					&$second_print($text{'setup_done'});
 					&register_post_action(\&restart_apache);

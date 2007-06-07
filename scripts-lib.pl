@@ -371,11 +371,11 @@ else {
 	}
 }
 
-# setup_web_for_php(&domain, &script)
+# setup_web_for_php(&domain, &script, php-version)
 # Update a virtual server's web config to add any PHP settings from the template
 sub setup_web_for_php
 {
-local ($d, $script) = @_;
+local ($d, $script, $phpver) = @_;
 local $tmpl = &get_template($d->{'template'});
 local $any = 0;
 local @tmplphpvars = $tmpl->{'php_vars'} eq 'none' ? ( ) :
@@ -429,7 +429,7 @@ if ($apache::httpd_modules{'mod_php4'} ||
 		}
 	}
 
-local $phpini = "$d->{'home'}/etc/php.ini";
+local $phpini = &get_domain_php_ini($d, $phpver);
 if (-r $phpini && &foreign_check("phpini")) {
 	# Add the variables to the domain's php.ini file. Start by finding
 	# the variables already set, including those that are commented out.
@@ -516,7 +516,7 @@ if (!defined($php_modules{$ver})) {
 		}
 	elsif ($d) {
 		# Use domain's php.ini
-		$ENV{'PHPRC'} = "$d->{'home'}/etc";
+		$ENV{'PHPRC'} = &get_domain_php_ini($d, $ver, 1);
 		}
 	local $_;
 	&open_execute_command(PHP, "$cmd -m", 1);
@@ -676,7 +676,7 @@ foreach my $m (@mods) {
 	local $mode = &get_domain_php_mode($d);
 	local $inifile = $mode eq "mod_php" ?
 			&get_global_php_ini($phpver, $mode) :
-			"$d->{'home'}/etc/php.ini";
+			&get_domain_php_ini($d, $phpver);
 	local $pconf = &phpini::get_config($inifile);
 	local @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
 	local @exts = grep { $_->{'enabled'} } @allexts;
