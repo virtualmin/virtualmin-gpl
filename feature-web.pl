@@ -1313,7 +1313,9 @@ return @rv;
 
 # add_name_virtual(&domain, $conf, port)
 # Adds a NameVirtualHost entry for some domain, if needed. Returns 1 there is
-# an existing NameVirtualHost entry for * or *:80
+# an existing NameVirtualHost entry for * or *:80 .
+# For Apache 2.2 and above, NameVirtualHost * will no longer match
+# virtualhosts like *:80, so we need to add *:80 even if * is already there.
 sub add_name_virtual
 {
 local ($d, $conf, $web_port) = @_;
@@ -1322,13 +1324,14 @@ local $nvstar;
 if ($d->{'name'}) {
 	local ($found, $found_no_port);
 	local @nv = &apache::find_directive("NameVirtualHost", $conf);
+	local $canstar = $apache::httpd_modules{'core'} < 2.2;
 	foreach my $nv (@nv) {
 		$found++ if ( #$nv eq $d->{'ip'} ||
 			     $nv =~ /^(\S+):(\S+)/ && $1 eq $d->{'ip'} ||
-			     $nv eq '*' ||
+			     $nv eq '*' && $canstar ||
 			     $nv =~ /^\*:(\d+)$/ && $1 == $web_port);
 		$found_no_port++ if ($nv eq $d->{'ip'});
-		$nvstar++ if ($nv eq "*" ||
+		$nvstar++ if ($nv eq '*' && $canstar ||
 			      $nv =~ /^\*:(\d+)$/ && $1 == $web_port);
 		}
 	if (!$found) {
