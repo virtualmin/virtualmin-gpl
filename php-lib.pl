@@ -189,48 +189,61 @@ if (!-d $etc) {
 	&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'},
 				   0755, $etc);
 	}
-if (!-r "$etc/php.ini") {
-	# XXX ideally we would have separate 4 and 5 .ini files
-	local $copied = 0;
-	local @vers = &list_available_php_versions($d, $mode);
-	local $defver = $vers[0]->[0];
-	local $ini = $tmpl->{'web_php_ini'};
+local @vers = &list_available_php_versions($d, $mode);
+local $defver = $vers[0]->[0];
+foreach my $ver (@vers) {
+	# Create separate .ini file for each PHP version, if missing
 	local $subs_ini = 0;
+	local $ini = $tmpl->{'web_php_ini'};
 	if (!$ini || $ini eq "none" || !-r $ini) {
-		$ini = &get_global_php_ini($defver, $mode);
+		$ini = &get_global_php_ini($ver->[0], $mode);
 		}
 	else {
 		$subs_ini = 1;
 		}
-	if ($ini) {
+	local $inidir = "$etc/php$ver->[0]";
+	if ($ini && !-r "$inidir/php.ini") {
 		# Copy file, set permissions, fix session.save_path, and
-		# clear out extension_dir (because it can differ between PHP
-		# versions)
+		# clear out extension_dir (because it can differ between
+		# PHP versions)
+		if (!-d $inidir) {
+			&make_dir($inidir, 0755);
+			&set_ownership_permissions(
+				$_[0]->{'uid'}, $_[0]->{'ugid'},
+				0755, $inidir);
+			}
 		if ($subs_ini) {
 			# Perform substitions on config file
 			local $inidata = &read_file_contents($ini);
 			$inidata = &substitute_template($inidata, $d);
-			&open_tempfile(INIDATA, ">$etc/php.ini");
+			&open_tempfile(INIDATA, ">$inidir/php.ini");
 			&print_tempfile(INIDATA, $inidata);
 			&close_tempfile(INIDATA);
 			}
 		else {
 			# Just copy verbatim
-			&copy_source_dest($ini, "$etc/php.ini");
+			&copy_source_dest($ini, "$inidir/php.ini");
 			}
 		local ($uid, $gid) = (0, 0);
 		if (!$tmpl->{'web_php_noedit'}) {
 			($uid, $gid) = ($d->{'uid'}, $d->{'ugid'});
 			}
-		&set_ownership_permissions($uid, $gid, 0755, "$etc/php.ini");
+		&set_ownership_permissions($uid, $gid, 0755, "$inidir/php.ini");
 		if (&foreign_check("phpini")) {
+			# Fix up session save path
 			&foreign_require("phpini", "phpini-lib.pl");
-			local $pconf = &phpini::get_config("$etc/php.ini");
+			local $pconf = &phpini::get_config("$inidir/php.ini");
 			&phpini::save_directive($pconf, "session.save_path",
 						&create_server_tmp($d));
 			&phpini::save_directive($pconf, "extension_dir", undef);
-			&flush_file_lines("$etc/php.ini");
+			&flush_file_lines("$inidir/php.ini");
 			}
+		}
+
+	# Link ~/etc/php.ini to default version
+	if ($ver->[0] eq $defver) {
+		&unlink_file("$etc/php.ini");
+		&link_file("$inidir/php.ini", "$etc/php.ini");
 		}
 	}
 
@@ -253,12 +266,6 @@ if (!-d $dest) {
 
 local $suffix = $mode eq "fcgid" ? "fcgi" : "cgi";
 local $dirvar = $mode eq "fcgid" ? "PWD" : "DOCUMENT_ROOT";
-local $common = "#!/bin/sh\n".
-		"PHPRC=\$$dirvar/../etc\n";
-if ($mode eq "fcgid") {
-	$common .= "PHP_FCGI_CHILDREN=4\n".
-		   "export PHP_FCGI_CHILDREN PHPRC\n";
-	}
 
 # For each version of PHP, create a wrapper
 local $pub = &public_html_dir($d);
@@ -274,6 +281,12 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 		}
 	else {
 		# Automatically generate
+		local $common = "#!/bin/sh\n".
+				"PHPRC=\$$dirvar/../etc/php$v->[0]\n";
+		if ($mode eq "fcgid") {
+			$common .= "PHP_FCGI_CHILDREN=4\n".
+				   "export PHP_FCGI_CHILDREN PHPRC\n";
+			}
 		&print_tempfile(PHP, $common);
 		if ($v->[1] =~ /-cgi$/) {
 			# php-cgi requires the SCRIPT_FILENAME variable

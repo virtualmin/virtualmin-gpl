@@ -1452,11 +1452,27 @@ if ($config{'avail_phpini'}) {
 	local $ifile = "$d->{'home'}/etc/php.ini";
 	if (defined(&get_domain_php_mode) &&
 	    &get_domain_php_mode($d) ne "mod_cgi" && -r $ifile) {
-		push(@rv, { 'mod' => 'phpini',
-			    'desc' => $text{'links_phpini'},
-			    'page' => 'list_ini.cgi?file='.&urlize($ifile),
-			    'cat' => 'services',
-			  });
+		local @vers = &list_available_php_versions($d);
+		local $doneini;
+		foreach my $v (@vers) {
+			local $ivfile = "$d->{'home'}/etc/php$v->[0]/php.ini";
+			next if (!-r $ivfile);
+			push(@rv, { 'mod' => 'phpini',
+				    'desc' => &text('links_phpini2', $v->[0]),
+				    'page' => 'list_ini.cgi?file='.
+						&urlize($ivfile),
+				    'cat' => 'services',
+				  });
+			$doneini++;
+			}
+		if (!$doneini) {
+			push(@rv, { 'mod' => 'phpini',
+				    'desc' => $text{'links_phpini'},
+				    'page' => 'list_ini.cgi?file='.
+						&urlize($ifile),
+				    'cat' => 'services',
+				  });
+			}
 		}
 	}
 return @rv;

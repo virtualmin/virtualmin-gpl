@@ -676,11 +676,30 @@ if ($extramods{'phpini'}) {
 	foreach my $sd (@doms) {
 		if ($sd->{'web'} && defined(&get_domain_php_mode) &&
 		    &get_domain_php_mode($sd) ne "mod_php") {
-			local $ini = "$sd->{'home'}/etc/php.ini";
-			local @st = stat($ini);
-			if (@st && $st[4] == $sd->{'uid'}) {
-				push(@pconfs, "$ini=".
-					&text('webmin_phpini', $sd->{'dom'}));
+			local @vers = &list_available_php_versions($sd);
+			local @inis;
+			foreach my $v (@vers) {
+				push(@inis, [ $v->[0], "$sd->{'home'}/etc/".
+						       "php$v->[0]/php.ini" ]);
+				}
+			if (!@inis) {
+				push(@inis, [ undef,
+					      "$sd->{'home'}/etc/php.ini" ]);
+				}
+			foreach my $ini (@inis) {
+				local @st = stat($ini->[1]);
+				if (@st && $st[4] == $sd->{'uid'}) {
+					if ($ini->[0]) {
+						push(@pconfs, "$ini->[1]=".
+						  &text('webmin_phpini2',
+						    $sd->{'dom'}, $ini->[0]));
+						}
+					else {
+						push(@pconfs, "$ini->[1]=".
+						  &text('webmin_phpini',
+						    $sd->{'dom'}));
+						}
+					}
 				}
 			}
 		}

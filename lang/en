@@ -2780,6 +2780,7 @@ links_alog=Apache Access Log
 links_elog=Apache Error Log
 links_flog=ProFTPd Log
 links_phpini=PHP Configuration
+links_phpini2=PHP $1 Configuration
 
 massscript_err=Failed to upgrade scripts
 massscript_enone=No virtual servers selected
@@ -3158,6 +3159,7 @@ webmin_alog=Apache access log for $1
 webmin_elog=Apache error log for $1
 webmin_flog=ProFTPd log for $1
 webmin_phpini=PHP configuration for $1
+webmin_phpini2=PHP $2 configuration for $1
 
 newquotacheck_title=Check Disk Quotas
 newquotacheck_ecannot=You are not allowed to check disk quotas.

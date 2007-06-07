@@ -32,6 +32,20 @@ $cerr = &html_tags_to_text(&check_virtual_server_config());
 #	print STDERR "Warning: Module Configuration problem detected: $cerr\n";
 #	}
 
+if ($virtualmin_pro) {
+	# Convert all existing domains with PHP to use new per-version .inis,
+	# if they don't exist yet
+	foreach my $d (&list_domains()) {
+		next if (!$d->{'web'} || !$d->{'dir'});
+		local $mode = &get_domain_php_mode($d);
+		next if ($mode eq "mod_php");
+		if (!-r "$d->{'home'}/etc/php4/php.ini" &&
+		    !-r "$d->{'home'}/etc/php5/php.ini") {
+			&save_domain_php_mode($d, $mode);
+			}
+		}
+	}
+
 # Force update of all Webmin users, to set new ACL options
 &modify_all_webmin();
 if ($virtualmin_pro) {
@@ -329,5 +343,6 @@ foreach my $d (&list_domains()) {
 			}
 		}
 	}
+
 }
 
