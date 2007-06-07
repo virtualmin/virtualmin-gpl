@@ -53,8 +53,6 @@
 	- atutor (552)
 	- another groupware (552)
 
- - security updates module should install Webmin updates
-
  - fcgi on blog.webmin.com
 
  - script installers should return login and password

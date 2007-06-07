@@ -609,7 +609,7 @@ When editing server templates, fields that are not used because they are inherit
 Added a link for copying the default settings template, rather than creating an empty template which inherits from it.
 The old one file per directory backup format is no longer available, unless already selected.
 Optimized the collectinfo.pl program, which generates the right-side system information frame.
----- Changes since 3.39 ----
+---- Changes since 3.40 ----
 Updated the SugarCRM script installer to version 4.5.1d, and WordPress to version 2.2.
 Password restrictions set in the Users and Groups module are now checked when creating or saving a domain.
 Webmin libraries are not pre-loaded into memory for performance if the system has less than 256M RAM.
@@ -635,7 +635,7 @@ Added script installers for the Bugzilla, Flyspray and Mantis issue trackers.
 Script installers that require Perl modules will now automatically install them, if possible.
 Added a Module Config setting for the number of days of processed mail logs to keep, implemented an index cache file to speed up searches, and created a Cron job to periodically update the logs.
 Added a Cron job to periodically update per-domain SpamAssassin config files from the global configuration, so that configs added by a SpamAssassin upgrade are not missing from the per-domain directories.
----- Changes since 3.40 ----
+---- Changes since 3.41 ----
 Added a new template section for defining your own PHP wrapper scripts, for use when PHP is run via CGI or FastCGI.
 When a virtual server with a private IP is added, ping is now used to check if the IP is already in use.
 Updated the Flyspray script installer to version 0.9.9.2, and phpPgAdmin to 4.1.2.
@@ -643,3 +643,5 @@ In the server templates pages under Default domain owner limits, added a section
 Added additional warning when deleting scripts from ~/public_html.
 Website validation now includes a check for PHP wrapper scripts.
 Added a Module Config option to make the DNS client configuration check optional.
+PHP modules are now automatically installed from CSW packages on Solaris.
+Added the --default-features option to create-domain.pl, to avoid the need to specify feature flags manually.

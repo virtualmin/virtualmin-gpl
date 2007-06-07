@@ -55,6 +55,9 @@ while(@ARGV > 0) {
 	       &indexof($1, @feature_plugins) >= 0) {
 		$plugin{$1}++;
 		}
+	elsif ($a eq "--default-features") {
+		$deffeatures = 1;
+		}
 	elsif ($a eq "--ip") {
 		$ip = shift(@ARGV);
 		if (!$config{'all_namevirtual'}) {
@@ -231,6 +234,22 @@ if (!$parent) {
 		}
 	}
 $owner ||= $domain;
+
+# Work out features, if using automatic mode
+if ($deffeatures) {
+	%feature = ( 'virt' => $feature{'virt'} );
+	%plugin = ( );
+	foreach my $f (&list_available_features($parent, $alias, $subdom)) {
+		if ($f->{'default'} && $f->{'enabled'}) {
+			if ($f->{'plugin'}) {
+				$plugin{$f->{'feature'}} = 1;
+				}
+			else {
+				$feature{$f->{'feature'}} = 1;
+				}
+			}
+		}
+	}
 
 if (!$parent) {
 	# Make sure alias, database, etc limits are set properly
@@ -456,6 +475,7 @@ foreach $f (@features) {
 foreach $f (@feature_plugins) {
 	print "                        [--$f]\n";
 	}
+print "                        [--default-features]\n";
 print "                        [--allocate-ip | --ip virtual.ip.address |\n";
 print "                         --shared-ip existing.ip.address]\n";
 print "                        [--ip-already]\n";
