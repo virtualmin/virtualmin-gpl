@@ -404,6 +404,7 @@ foreach $f ($aliasdom ? @opt_alias_features :
 	}
 
 # Show checkboxes for plugins
+%inactive = map { $_, 1 } split(/\s+/, $config{'plugins_inactive'});
 foreach $f (@feature_plugins) {
 	next if (!&plugin_call($f, "feature_suitable",
 				$parentdom, $aliasdom, $subdom));
@@ -414,7 +415,7 @@ foreach $f (@feature_plugins) {
 	$label = "<b>$label</b>";
 	$hlink = &plugin_call($f, "feature_hlink");
 	$label = &hlink($label, $hlink, $f) if ($hlink);
-	push(@grid, &ui_checkbox($f, 1, "", 1)." ".$label);
+	push(@grid, &ui_checkbox($f, 1, "", !$inactive{$f})." ".$label);
 	}
 $ftable = &ui_grid_table(\@grid, 2, 100,
 	[ "width=30% align=left", "width=70% align=left" ]);

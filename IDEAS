@@ -57,7 +57,5 @@
 
  - script installers should return login and password
 
- - allow plugins to be available but off by default
-
  - virtualmin-init module for filip
 

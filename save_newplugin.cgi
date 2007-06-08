@@ -16,9 +16,16 @@ foreach $p (@newplugins) {
 		}
 	}
 
+# Work out which ones are not on by default
+%active = map { $_, 1 } split(/\0/, $in{'active'});
+foreach $p (split(/\0/, $in{'allplugins'})) {
+	push(@inactive, $p) if (!$active{$p});
+	}
+
 # Save module config
 &lock_file($module_config_file);
 $config{'plugins'} = join(" ", @newplugins);
+$config{'plugins_inactive'} = join(" ", @inactive);
 if ($config{'last_check'} < time()) {
 	$config{'last_check'} = time()+1;
 	}

@@ -10629,11 +10629,12 @@ local @plug = grep { &plugin_call($_, "feature_suitable",
 if ($aliasdom) {
 	@plug = grep { $aliasdom->{$_} } @plug;
 	}
+local %inactive = map { $_, 1 } split(/\s+/, $config{'plugins_inactive'});
 push(@rv, map { { 'feature' => $_,
 		  'desc' => &plugin_call($_, "feature_name", 0),
 		  'plugin' => 1,
 		  'auto' => 0,
-		  'default' => 1,
+		  'default' => !$inactive{$_},
 		  'enabled' => 1 } } @plug);
 
 return @rv;

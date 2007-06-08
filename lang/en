@@ -2232,13 +2232,19 @@ tmpl_ephp5fcgi=Missing or invalid FastCGI wrapper for PHP 5
 
 newplugin_title=Plugin Modules
 newplugin_desc=Plugins are Webmin modules which provided additional server and mailbox features for Virtualmin. Unlike the core features, they can be installed separately and written by third-party developers.
-newplugin_desc2=Only those plugins actually selected (highlighted) in the list below are currently active. To select a plugin, ctrl-click on it. Once a plugin is activated, the feature it enables can be selecting when creating or editing a virtual server.
+newplugin_desc3=Only those plugins actually checked in the list below are currently active. Once a plugin is activated, the feature it enables can be selecting when creating or editing a virtual server.
 newplugin_mods=Enabled plugin modules
 newplugin_emod=The plugin $1 cannot be used : $2
 newplugin_config=Configure plugin:
 newplugin_configdesc=Select a plugin below to edit its module configuration.
 newplugin_mdesc=Module $1
 newplugin_return=plugins list
+newplugin_name=Plugin name
+newplugin_version=Version
+newplugin_def=Default?
+newplugin_acts=Actions
+newplugin_conf=Configure
+newplugin_open=Open
 
 bwgraph_title=Bandwidth Usage
 bwgraph_none=No bandwidth usage statistics have been collected yet.
