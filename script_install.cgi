@@ -110,7 +110,8 @@ if (!$modok) {
 
 # Call the install program
 &$first_print(&text('scripts_installing', $script->{'desc'}, $ver));
-($ok, $msg, $desc, $url) = &{$script->{'install_func'}}($d, $ver, $opts, \%gotfiles, $sinfo);
+($ok, $msg, $desc, $url, $suser, $spass) =
+	&{$script->{'install_func'}}($d, $ver, $opts, \%gotfiles, $sinfo);
 &$indent_print();
 print $msg,"<br>\n";
 &$outdent_print();
@@ -121,7 +122,9 @@ if ($ok) {
 	if ($sinfo) {
 		&remove_domain_script($d, $sinfo);
 		}
-	&add_domain_script($d, $sname, $ver, $opts, $desc, $url);
+	&add_domain_script($d, $sname, $ver, $opts, $desc, $url,
+			   $sinfo ? ( $sinfo->{'user'}, $sinfo->{'pass'} )
+				  : ( $suser, $spass ));
 
 	# Config web server for PHP
 	if (&indexof("php", @{$script->{'uses'}}) >= 0) {

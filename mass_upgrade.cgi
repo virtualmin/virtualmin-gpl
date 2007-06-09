@@ -90,7 +90,8 @@ if ($in{'confirm'}) {
 				&$second_print($text{'setup_done'});
 				&remove_domain_script($d, $sinfo);
 				&add_domain_script($d, $sinfo->{'name'}, $ver,
-					   $opts, $desc, $url);
+					$opts, $desc, $url,
+					$sinfo->{'user'}, $sinfo->{'pass'});
 				}
 			else {
 				&$second_print($text{'scripts_failed'});

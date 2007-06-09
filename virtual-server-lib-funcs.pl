@@ -5997,14 +5997,15 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			}
 
 		# Call the install function
-		local ($ok, $msg, $desc, $url) = &{$script->{'install_func'}}($dom, $ver, $opts, \%gotfiles, undef);
+		local ($ok, $msg, $desc, $url, $suser, $spass) =
+			&{$script->{'install_func'}}($dom, $ver, $opts, \%gotfiles, undef);
 
 		if ($ok) {
 			&$second_print(&text('setup_scriptdone', $msg));
 
 			# Record script install in domain
 			&add_domain_script($dom, $name, $ver, $opts,
-					   $desc, $url);
+					   $desc, $url, $suser, $spass);
 
 			# Config web server for PHP
 			if (&indexof("php", @{$script->{'uses'}}) >= 0) {

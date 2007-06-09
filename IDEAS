@@ -55,8 +55,5 @@
 
  - fcgi on blog.webmin.com
 
- - script installers should return login and password
-	- list-scripts.pl should show too
-
  - virtualmin-init module for filip
 

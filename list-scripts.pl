@@ -36,6 +36,7 @@ if ($multi) {
 	# Show each script on a separate line
 	foreach $sinfo (@scripts) {
 		$script = &get_script($sinfo->{'name'});
+		$opts = $sinfo->{'opts'};
 		print "$sinfo->{'id'}\n";
 		print "    Type: $script->{'name'}\n";
 		print "    Description: $script->{'desc'}\n";
@@ -43,6 +44,17 @@ if ($multi) {
 		print "    Installed: ",&make_date($sinfo->{'time'}),"\n";
 		print "    Details: $sinfo->{'desc'}\n";
 		print "    URL: $sinfo->{'url'}\n";
+		if ($opts->{'dir'}) {
+			print "    Directory: $opts->{'dir'}\n";
+			}
+		($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+		if ($dbtype) {
+			print "    Database: $dbname ($dbtype)\n";
+			}
+		if ($sinfo->{'user'}) {
+			print "    Initial login: $sinfo->{'user'}\n";
+			print "    Initial password: $sinfo->{'pass'}\n";
+			}
 		}
 	}
 else {

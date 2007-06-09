@@ -92,7 +92,8 @@ foreach $sinfo (@sinfos) {
 			&$second_print($text{'setup_done'});
 			&remove_domain_script($d, $sinfo);
 			&add_domain_script($d, $sname, $ver, $sinfo->{'opts'},
-					   $desc, $url);
+					   $desc, $url,
+					   $sinfo->{'user'}, $sinfo->{'pass'});
 			}
 		else {
 			&$second_print($text{'scripts_failed'});
