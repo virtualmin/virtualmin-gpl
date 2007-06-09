@@ -13,6 +13,8 @@ if ($in{'new'}) {
 	}
 else {
 	&ui_print_header(&domain_in($d), $text{'database_title2'}, "");
+	($db) = grep { $_->{'name'} eq $in{'name'} &&
+		       $_->{'type'} eq $in{'type'} } &domain_databases($d);
 	}
 
 print &ui_form_start("save_database.cgi", "post");
@@ -87,7 +89,10 @@ if ($in{'new'}) {
 else {
 	print &ui_form_end([ [ "delete", $text{'database_delete'} ],
 	     &can_import_servers() ? ( [ "disc", $text{'database_disc'} ] )
-			     : ( ) ]);
+				   : ( ),
+	     $db->{'link'} ? ( [ "manage", $text{'database_manage'} ] )
+			   : ( )
+	     ]);
 	}
 
 &ui_print_footer("list_databases.cgi?dom=$in{'dom'}", $text{'databases_return'},

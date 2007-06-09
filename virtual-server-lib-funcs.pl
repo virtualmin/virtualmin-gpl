@@ -7606,20 +7606,27 @@ sub domain_databases
 local @dbs;
 if ($_[0]->{'mysql'}) {
 	local %done;
+	local $av = &foreign_available("mysql");
 	foreach my $db (split(/\s+/, $_[0]->{'db_mysql'})) {
 		next if ($done{$db}++);
 		push(@dbs, { 'name' => $db,
 			     'type' => 'mysql',
 			     'users' => 1,
+			     'link' => $av ? "../mysql/edit_dbase.cgi?db=$db"
+					   : undef,
 			     'desc' => $text{'databases_mysql'} });
 		}
 	}
 if ($_[0]->{'postgres'}) {
 	local %done;
+	local $av = &foreign_available("postgresql");
 	foreach my $db (split(/\s+/, $_[0]->{'db_postgres'})) {
 		next if ($done{$db}++);
 		push(@dbs, { 'name' => $db,
 			     'type' => 'postgres',
+			     'link' => $av ? "../postgresql/".
+					     "edit_dbase.cgi?db=$db"
+					   : undef,
 			     'desc' => $text{'databases_postgres'} });
 		}
 	}

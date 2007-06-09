@@ -104,6 +104,13 @@ elsif ($in{'disc'}) {
 	&webmin_log("export", "database", $in{'name'},
 		    { 'type' => $in{'type'}, 'dom' => $d->{'dom'} });
 	}
+elsif ($in{'manage'}) {
+	# Just redirect to module to manage
+	($db) = grep { $_->{'name'} eq $in{'name'} &&
+		       $_->{'type'} eq $in{'type'} } &domain_databases($d);
+	&redirect($db->{'link'});
+	exit;
+	}
 
 &ui_print_footer("list_databases.cgi?dom=$in{'dom'}", $text{'databases_return'},
 		 &domain_footer_link($d),

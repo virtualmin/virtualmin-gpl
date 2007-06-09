@@ -111,16 +111,19 @@ closedir(DIR);
 return @rv;
 }
 
-# add_domain_script(&domain, name, version, &opts, desc, url)
+# add_domain_script(&domain, name, version, &opts, desc, url,
+#		    [login, password])
 # Records the installation of a script for a domains
 sub add_domain_script
 {
-local ($d, $name, $version, $opts, $desc) = @_;
+local ($d, $name, $version, $opts, $desc, $url, $user, $pass) = @_;
 local %info = ( 'id' => time().$$,
 		'name' => $name,
 		'version' => $version,
 		'desc' => $desc,
-		'url' => $url );
+		'url' => $url,
+		'user' => $user,
+		'pass' => $pass );
 local $o;
 foreach $o (keys %$opts) {
 	$info{'opts_'.$o} = $opts->{$o};
@@ -504,7 +507,6 @@ return -1 if (!$verinfo);
 local $cmd = $verinfo->[1];
 &has_command($cmd) || return -1;
 if (!defined($php_modules{$ver})) {
-	&clean_environment();
 	if ($mode eq "mod_php") {
 		# Use global PHP config, since with mod_php we can't do
 		# per-domain configurations
@@ -518,9 +520,9 @@ if (!defined($php_modules{$ver})) {
 		# Use domain's php.ini
 		$ENV{'PHPRC'} = &get_domain_php_ini($d, $ver, 1);
 		}
+	&clean_environment();
 	local $_;
 	&open_execute_command(PHP, "$cmd -m", 1);
-	&reset_environment();
 	while(<PHP>) {
 		s/\r|\n//g;
 		if (/^\S+$/ && !/\[/) {
@@ -528,6 +530,7 @@ if (!defined($php_modules{$ver})) {
 			}
 		}
 	close(PHP);
+	&reset_environment();
 	}
 return $php_modules{$ver}->{$mod} ? 1 : 0;
 }

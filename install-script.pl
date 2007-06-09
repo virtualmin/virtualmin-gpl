@@ -191,7 +191,8 @@ if (!&setup_perl_modules($d, $script, $ver, $opts)) {
 
 # Call the install function
 &$first_print(&text('scripts_installing', $script->{'desc'}, $ver));
-($ok, $msg, $desc, $url) = &{$script->{'install_func'}}($d, $ver, $opts, \%gotfiles, $sinfo);
+($ok, $msg, $desc, $url, $suser, $spass) =
+	&{$script->{'install_func'}}($d, $ver, $opts, \%gotfiles, $sinfo);
 if ($msg =~ /</) {
 	$msg = &mailboxes::html_to_text($msg);
 	$msg =~ s/^\s+//;
@@ -206,7 +207,9 @@ if ($ok) {
 	if ($sinfo) {
 		&remove_domain_script($d, $sinfo);
 		}
-	&add_domain_script($d, $sname, $ver, $opts, $desc, $url);
+	&add_domain_script($d, $sname, $ver, $opts, $desc, $url,
+			   $sinfo ? ( $sinfo->{'user'}, $sinfo->{'pass'} )
+				  : ( $suser, $spass ));
 
 	# Config web server for PHP
 	if (&indexof("php", @{$script->{'uses'}}) >= 0) {

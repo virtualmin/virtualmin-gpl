@@ -8,6 +8,7 @@ $d = &get_domain($in{'dom'});
 @got = &list_domain_scripts($d);
 ($sinfo) = grep { $_->{'id'} eq $in{'script'} } @got;
 $script = &get_script($sinfo->{'name'});
+$opts = $sinfo->{'opts'};
 
 &ui_print_header(&domain_in($d), $text{'scripts_etitle'}, "");
 print "$text{'scripts_udesc'}<p>\n";
@@ -32,6 +33,29 @@ if ($sinfo->{'url'}) {
 			    "<a href='$sinfo->{'url'}'>$sinfo->{'url'}</a>");
 	}
 print &ui_table_row($text{'scripts_itime'}, &make_date($sinfo->{'time'}));
+
+# Show directory
+if ($opts->{'dir'}) {
+	print &ui_table_row($text{'scripts_idir'},
+			    "<tt>$opts->{'dir'}</tt>");
+	}
+
+# Show DB, if we have it
+($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+if ($dbtype) {
+	print &ui_table_row($text{'scripts_idb'},
+		&text('scripts_idbname',
+		      "edit_database.cgi?dom=$in{'dom'}&type=$dbtype&".
+			"name=$dbname",
+		      $text{'databases_'.$dbtype}, "<tt>$dbname</tt>"));
+	}
+
+# Show login, if we have it
+if ($sinfo->{'user'}) {
+	print &ui_table_row($text{'scripts_iuser'},
+			    &text('scripts_ipass',"<tt>$sinfo->{'user'}</tt>",
+						  "<tt>$sinfo->{'pass'}</tt>"));
+	}
 
 print &ui_table_end();
 

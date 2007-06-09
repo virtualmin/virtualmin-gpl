@@ -55,16 +55,9 @@ if (@dbs) {
 				[ "width=5" ]);
 	foreach $db (sort { $a->{'name'} cmp $b->{'name'} } @dbs) {
 		local $action;
-		if ($db->{'type'} eq 'mysql' &&
-		    &foreign_available("mysql")) {
-			$action = "<a href='../mysql/edit_dbase.cgi?db=$db->{'name'}'>$text{'databases_man'}</a>";
-			}
-		elsif ($db->{'type'} eq 'postgres' &&
-		       &foreign_available("postgresql")) {
-			$action = "<a href='../postgresql/edit_dbase.cgi?db=$db->{'name'}'>$text{'databases_man'}</a>";
-			}
-		elsif ($db->{'link'}) {
-			$action = "<a href='$db->{'link'}'>$text{'databases_man'}</a>";
+		if ($db->{'link'}) {
+			$action = "<a href='$db->{'link'}'>".
+				  "$text{'databases_man'}</a>";
 			}
 		print &ui_checked_columns_row([
 			"<a href='edit_database.cgi?dom=$in{'dom'}&name=$db->{'name'}&type=$db->{'type'}'>$db->{'name'}</a>",
