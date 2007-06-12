@@ -269,6 +269,7 @@ sub create_php_wrappers
 {
 local ($d, $mode) = @_;
 local $dest = $mode eq "fcgid" ? "$d->{'home'}/fcgi-bin" : &cgi_bin_dir($_[0]);
+local $tmpl = &get_template($d->{'template'});
 
 if (!-d $dest) {
 	# Need to create fcgi-bin
@@ -285,7 +286,7 @@ local $pub = &public_html_dir($d);
 foreach my $v (&list_available_php_versions($d, $mode)) {
 	&open_tempfile(PHP, ">$dest/php$v->[0].$suffix");
 	local $t = "php".$v->[0].$suffix;
-	if ($tmpl->{$t} ne 'none') {
+	if ($tmpl->{$t} && $tmpl->{$t} ne 'none') {
 		# Use custom script from template
 		local $s = &substitute_domain_template($tmpl->{$t}, $d);
 		$s =~ s/\t/\n/g;
