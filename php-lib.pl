@@ -384,7 +384,7 @@ if ($d) {
 
 # For CGI and fCGId modes, check which wrappers could exist
 foreach my $v (@all_possible_php_versions) {
-	local $phph;
+	local $phpn;
 	if ($gconfig{'os_type'} eq 'solaris') {
 		# On Solaris with CSW packages, php-cgi is in a directory named
 		# after the PHP version
