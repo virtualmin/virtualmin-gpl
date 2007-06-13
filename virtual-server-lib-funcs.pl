@@ -8597,7 +8597,7 @@ if (&can_domain_have_users($d) && &can_edit_users()) {
 		    });
 	}
 
-if ($d->{'mail'} && &can_edit_aliases()) {
+if ($d->{'mail'} && $config{'mail'} && &can_edit_aliases()) {
 	# Mail aliases button
 	push(@rv, { 'page' => 'list_aliases.cgi',
 		    'title' => $text{'edit_aliases'},
@@ -8615,7 +8615,8 @@ if (&database_feature($d) && &can_edit_databases()) {
 		  });
 	}
 
-if ($d->{'web'} && &can_edit_scripts() && !$d->{'subdom'} && !$d->{'alias'}) {
+if ($d->{'web'} && $config{'web'} && &can_edit_scripts() &&
+    !$d->{'subdom'} && !$d->{'alias'}) {
 	# Scripts button
 	push(@rv, { 'page' => 'list_scripts.cgi',
 		    'title' => $text{'edit_scripts'},
@@ -8624,7 +8625,8 @@ if ($d->{'web'} && &can_edit_scripts() && !$d->{'subdom'} && !$d->{'alias'}) {
 		  });
 	}
 
-if ($d->{'web'} && $d->{'dir'} && !$d->{'alias'} && !$d->{'proxy_pass_mode'} &&
+if ($d->{'web'} && $config{'web'} && $d->{'dir'} && !$d->{'alias'} &&
+    !$d->{'proxy_pass_mode'} &&
     $virtualmin_pro) {
 	# Edit web pages button
 	push(@rv, { 'page' => 'edit_html.cgi',
@@ -8702,7 +8704,7 @@ if (&can_create_sub_servers() && !$d->{'alias'} && $unixer->{'unix'}) {
 		}
 	}
 
-if ($d->{'ssl'} && $d->{'dir'} && &can_edit_ssl()) {
+if ($d->{'ssl'} && $config{'ssl'} && $d->{'dir'} && &can_edit_ssl()) {
 	# SSL options page button
 	push(@rv, { 'page' => 'cert_form.cgi',
 		    'title' => $text{'edit_cert'},
@@ -8739,7 +8741,7 @@ if (!$d->{'parent'} && $d->{'webmin'} && &can_switch_user($d)) {
 		  });
 	}
 
-if ($d->{'web'} && !$d->{'alias'} && &can_edit_forward()) {
+if ($d->{'web'} && $config{'web'} && !$d->{'alias'} && &can_edit_forward()) {
 	# Proxying / frame forwward configuration button
 	local $mode = $d->{'proxy_pass_mode'} || $config{'proxy_pass'};
 	local $psuffix = $mode == 2 ? "frame" : "proxy";
@@ -8750,7 +8752,8 @@ if ($d->{'web'} && !$d->{'alias'} && &can_edit_forward()) {
 		  });
 	}
 
-if (($d->{'spam'} || $d->{'virus'}) && &can_edit_spam()) {
+if (($d->{'spam'} && $config{'spam'} ||
+     $d->{'virus'} && $config{'virus'}) && &can_edit_spam()) {
 	# Spam/virus delivery button
 	push(@rv, { 'page' => 'edit_spam.cgi',
 		    'title' => $text{'edit_spamvirus'},
@@ -8759,7 +8762,7 @@ if (($d->{'spam'} || $d->{'virus'}) && &can_edit_spam()) {
 		  });
 	}
 
-if ($d->{'web'} && &can_edit_phpmode()) {
+if ($d->{'web'} && $config{'web'} && &can_edit_phpmode()) {
 	# PHP execution mode button
 	push(@rv, { 'page' => 'edit_phpmode.cgi',
 		    'title' => $text{'edit_phpmode'},
@@ -8781,7 +8784,7 @@ if ($d->{'web'} && &can_edit_phpver() &&
 		}
 	}
 
-if ($d->{'dns'} && !$d->{'dns_submode'}) {
+if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'}) {
 	# SPF settings button
 	push(@rv, { 'page' => 'edit_spf.cgi',
 		    'title' => $text{'edit_spf'},
