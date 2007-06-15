@@ -1937,6 +1937,14 @@ return $access{'norename'} ? 0 :
        &master_admin() || &reseller_admin() ? 2 : 1;
 }
 
+# Returns 1 if the current user can change the home directory of a domain,
+# 2 if he can change it to anything
+sub can_rehome_domains
+{
+return $access{'norename'} ? 0 :
+       &master_admin() ? 2 : 1;
+}
+
 sub can_edit_users
 {
 return &master_admin() || &reseller_admin() || $access{'edit_users'};
@@ -5149,6 +5157,7 @@ else {
 	}
 &$cbfunc(1, 0) if ($cbfunc);
 
+# Switch to binary mode
 &ftp_command("TYPE I", 2, $_[3]) || return 0;
 
 # get the file size and tell the callback

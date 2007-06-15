@@ -12,8 +12,9 @@ $d = &get_domain($in{'dom'});
 # Validate inputs
 $in{'new'} =~ /^[A-Za-z0-9\.\-]+$/ || &error($text{'rename_enew'});
 $in{'new'} = lc($in{'new'});
-$in{'new'} ne $d->{'dom'} || &error($text{'rename_esame'});
-if (!$d->{'parent'} && &can_rename_domains() == 2) {
+$newdom = $in{'new'} ne $d->{'dom'} ? 1 : 0;
+if (!$d->{'parent'} && &can_rename_domains() == 2 &&
+    ($in{'user_mode'} == 2 || $newdom)) {
 	if ($in{'user_mode'} == 1) {
 		# Make up a new username
 		($user, $try1, $try2) = &unixuser_name($in{'new'});
@@ -39,22 +40,39 @@ if ($parentdom) {
 	}
 
 # Make sure no domain with the same name already exists
-@doms = &list_domains();
-($clash) = grep { $_->{'dom'} eq $in{'new'} } @doms;
-$clash && &error($text{'rename_eclash'});
+if ($newdom) {
+	@doms = &list_domains();
+	($clash) = grep { $_->{'dom'} eq $in{'new'} } @doms;
+	$clash && &error($text{'rename_eclash'});
+	}
 
 # Update the domain object, where appropriate
 %oldd = %$d;
-$d->{'email'} =~ s/\@$d->{'dom'}$/\@$in{'new'}/gi;
-$d->{'emailto'} =~ s/\@$d->{'dom'}$/\@$in{'new'}/gi;
-$d->{'dom'} = $in{'new'};
+if ($newdom) {
+	$d->{'email'} =~ s/\@$d->{'dom'}$/\@$in{'new'}/gi;
+	$d->{'emailto'} =~ s/\@$d->{'dom'}$/\@$in{'new'}/gi;
+	$d->{'dom'} = $in{'new'};
+	}
 if ($user) {
 	$d->{'email'} =~ s/^\Q$d->{'user'}\E\@/$user\@/g;
 	$d->{'emailto'} =~ s/^\Q$d->{'user'}\E\@/$user\@/g;
 	$d->{'user'} = $user;
 	}
-if ($in{'home_mode'}) {
+if ($in{'home_mode'} == 1) {
+	# Automatic home
+	&can_rehome_domains() || &error($text{'rename_ehome'});
 	&change_home_directory($d, &server_home_directory($d, $parentdom));
+	}
+elsif ($in{'home_mode'} == 2) {
+	# User-selected home
+	&can_rehome_domains() == 2 || &error($text{'rename_ehome'});
+	$in{'home'} || &error($text{'rename_ehome2'});
+	-e $in{'home'} && &error($text{'rename_ehome3'});
+	$in{'home'} =~ /^(.*)\// && -d $1 || &error($text{'rename_ehome4'});
+	&change_home_directory($d, $in{'home'});
+	}
+if ($oldd{'home'} ne $d->{'home'}) {
+	$newhome = $d->{'home'};
 	}
 if ($group) {
 	$d->{'group'} = $group;
@@ -72,8 +90,10 @@ if (!$d->{'parent'}) {
 			$sd->{'emailto'} =~ s/^\Q$sd->{'user'}\E\@/$user\@/g;
 			$sd->{'user'} = $user;
 			}
-		$sd->{'email'} =~ s/\@$d->{'dom'}$/\@$in{'new'}/gi;
-		$sd->{'emailto'} =~ s/\@$d->{'dom'}$/\@$in{'new'}/gi;
+		if ($newdom) {
+			$sd->{'email'} =~ s/\@$d->{'dom'}$/\@$in{'new'}/gi;
+			$sd->{'emailto'} =~ s/\@$d->{'dom'}$/\@$in{'new'}/gi;
+			}
 		if ($in{'home_mode'}) {
 			&change_home_directory($sd,
 					       &server_home_directory($sd, $d));
@@ -92,12 +112,12 @@ foreach $ad (@aliases) {
 	push(@oldaliases, \%oldad);
 	}
 
-# Check for domain name clash
+# Check for domain name clash, where the domain, user or group have changed
 my $f;
 foreach $f (@features) {
 	if ($in{$f}) {
 		local $cfunc = "check_${f}_clash";
-		if (&$cfunc($d, 'dom')) {
+		if ($newdom && &$cfunc($d, 'dom')) {
 			&error(&text('setup_e'.$f, $in{'dom'}, $dom{'db'},
 				     $user, $d->{'group'} || $group));
 			}
@@ -120,9 +140,17 @@ $merr = &making_changes();
 
 &ui_print_unbuffered_header(&domain_in(\%oldd), $text{'rename_title'}, "");
 
-print "<b>",&text('rename_doing', "<tt>$in{'new'}</tt>");
-print &text('rename_doinguser', "<tt>$user</tt>"),"\n" if ($user);
-print "...</b><p>\n";
+if ($newdom) {
+	print "<b>",&text('rename_doingdom',
+			  "<tt>$in{'new'}</tt>"),"</b><br>\n";
+	}
+if ($user) {
+	print "<b>",&text('rename_doinguser', "<tt>$user</tt>"),"</b><br>\n";
+	}
+if ($newhome) {
+	print "<b>",&text('rename_doinghome', "<tt>$newhome</tt>"),"</b><br>\n";
+	}
+print "<p>\n";
 
 # Build the list of domains being changed
 @doms = ( $d );

@@ -650,4 +650,6 @@ Under Apache 2.2, add NameVirtualHost *:80 instead of just *.
 Virtual servers now have separate php.ini files for each PHP version (4 and 5), under ~/etc/php*. This allows different extensions to be loaded for each PHP version, and for different settings to exist.
 Changed the layout of the Plugin Modules page to make it easier to see what is selected, and added a checkbox to have plugins available but not active by default.
 Logins and passwords for using installed scripts are now recorded.
-The Manage Script page now shows more information about an installed script, such as the install directory, database and possibly login and password. The list-scripts.pl command also displays the same information.
+The Manage Script page now shows more information about an installed scripts, such as the install directory, database and possibly login and password. The list-scripts.pl command also displays the same information.
+---- Changes since 3.42 ----
+The Change Domain Name page can be used to modify the administrative username and home directory for a virtual server, without changing the domain name.

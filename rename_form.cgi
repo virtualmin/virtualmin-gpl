@@ -9,7 +9,8 @@ $d = &get_domain($in{'dom'});
 &can_rename_domains() || &error($text{'rename_ecannot'});
 &ui_print_header(&domain_in($d), $text{'rename_title'}, "");
 
-print "$text{'rename_desc'}<p>\n";
+print "$text{'rename_desc'}\n";
+print "$text{'rename_desc2'}<p>\n";
 
 print &ui_form_start("rename.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
@@ -31,12 +32,20 @@ if ($d->{'unix'} && &can_rename_domains() == 2) {
 			     &ui_textbox("user", undef, 20) ] ]));
 	}
 
-if ($d->{'dir'}) {
+$rh = &can_rehome_domains();
+if (!$rh) {
+	# Cannot change home at all
+	print &ui_hidden("home_mode", 0),"\n";
+	}
+elsif ($d->{'dir'}) {
 	# Change home dir option
 	print &ui_table_row($text{'rename_home'},
 	    &ui_radio("home_mode", 1,
 		      [ [ 0, &text('rename_home0', "<tt>$d->{'home'}</tt>") ],
-			[ 1, $text{'rename_home1'} ] ]));
+			[ 1, $text{'rename_home1'} ],
+			$rh == 2 ? ( [ 2, &text('rename_home2',
+				&ui_textbox("home", undef, 30)) ] ) : ( ),
+		      ]));
 	}
 else {
 	# Always change home, since there is none!
