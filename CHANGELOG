@@ -653,3 +653,4 @@ Logins and passwords for using installed scripts are now recorded.
 The Manage Script page now shows more information about an installed scripts, such as the install directory, database and possibly login and password. The list-scripts.pl command also displays the same information.
 ---- Changes since 3.42 ----
 The Change Domain Name page can be used to modify the administrative username and home directory for a virtual server, without changing the domain name.
+Updated the phpMyAdmin script installer to version 2.10.2.
