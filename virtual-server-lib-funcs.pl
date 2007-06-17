@@ -6506,6 +6506,7 @@ push(@rv, { 'id' => 0,
 	    'dns_spfhosts' => $config{'bind_spfhosts'},
 	    'dns_spfall' => $config{'bind_spfall'},
 	    'dns_sub' => $config{'bind_sub'} || "none",
+	    'dns_master' => $config{'bind_master'} || "none",
 	    'namedconf' => $config{'namedconf'} || "none",
 	    'ftp' => $config{'proftpd_config'},
 	    'ftp_dir' => $config{'ftp_dir'},
@@ -6698,6 +6699,8 @@ if ($tmpl->{'id'} == 0) {
 	$config{'bind_spfall'} = $tmpl->{'dns_spfall'};
 	$config{'bind_sub'} = $tmpl->{'dns_sub'} eq 'none' ? undef
 							   : $tmpl->{'dns_sub'};
+	$config{'bind_master'} = $tmpl->{'dns_master'} eq 'none' ? undef
+						   : $tmpl->{'dns_master'};
 	$config{'dns_view'} = $tmpl->{'dns_view'};
 	$config{'namedconf'} = $tmpl->{'namedconf'} eq 'none' ? undef :
 							$tmpl->{'namedconf'};
@@ -6872,7 +6875,7 @@ if (!$tmpl->{'default'}) {
 	local $def = $tmpls[0];
 	local $p;
 	local %done;
-	foreach $p ("dns_spf", "dns_sub",
+	foreach $p ("dns_spf", "dns_sub", "dns_master",
 		    "web", "dns", "ftp", "frame", "user_aliases",
 		    "ugroup", "quota", "uquota", "mailboxlimit", "domslimit",
 		    "dbslimit", "aliaslimit", "bwlimit", "skel",

@@ -540,7 +540,10 @@ if (!$tmpl->{'dns_replace'}) {
 			    "\$ttl $zd{'minimum'}$zd{'minunit'}\n");
 			}
 		&close_tempfile(RECS);
-		local $master = $bconfig{'default_prins'} ||
+		local $tmaster = $tmpl->{'dns_master'} eq 'none' ? undef :
+					$tmpl->{'dns_master'};
+		local $master = $tmaster ||
+				$bconfig{'default_prins'} ||
 				&get_system_hostname();
 		$master .= "." if ($master !~ /\.$/);
 		local $email = $bconfig{'tmpl_email'} ||
@@ -984,6 +987,15 @@ if (@views) {
 
 print &ui_table_hr();
 
+# Master NS hostnames
+print &ui_table_row(&hlink($text{'tmpl_dnsmaster'},
+                           "template_dns_master"),
+	&none_def_input("dns_master", $tmpl->{'dns_master'},
+			$text{'tmpl_dnsmnames'}, 0, 0, $text{'tmpl_dnsmauto'},
+			[ "dns_master" ])." ".
+	&ui_textbox("dns_master", $tmpl->{'dns_master'} eq 'none' ? '' :
+					$tmpl->{'dns_master'}, 40));
+
 # Option for SPF record
 print &ui_table_row(&hlink($text{'tmpl_spf'},
                            "template_dns_spf_mode"),
@@ -1074,6 +1086,13 @@ if ($in{"dns_mode"} == 2) {
 		$soa && &error($text{'newdns_esoa2'});
 		}
 	}
+
+# Save NS hostname
+$in{'dns_master_mode'} != 2 ||
+   ($in{'dns_master'} =~ /^[a-z0-9\.\-\_]+$/i && $in{'dns_master'} =~ /\./) ||
+	&error($text{'tmpl_ednsmaster'});
+$tmpl->{'dns_master'} = $in{'dns_master_mode'} == 0 ? "none" :
+		        $in{'dns_master_mode'} == 1 ? undef : $in{'dns_master'};
 
 # Save SPF
 $tmpl->{'dns_spf'} = $in{'dns_spf_mode'} == 0 ? "none" :

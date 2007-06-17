@@ -654,3 +654,4 @@ The Manage Script page now shows more information about an installed scripts, su
 ---- Changes since 3.42 ----
 The Change Domain Name page can be used to modify the administrative username and home directory for a virtual server, without changing the domain name.
 Updated the phpMyAdmin script installer to version 2.10.2.
+Added an option to the DNS section of server templates for specifying the hostname to use in the primary NS record for new DNS domains, rather than the system's hostname.
