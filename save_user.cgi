@@ -115,7 +115,9 @@ else {
 		$mleft == 0 && &error($text{'user_emailboxlimit'});
 		}
 	if (!$mailbox) {
-		$in{'mailuser'} = lc($in{'mailuser'});
+		if (!$config{'allow_upper'}) {
+			$in{'mailuser'} = lc($in{'mailuser'});
+			}
 		$in{'mailuser'} =~ /^[^ \t:]+$/ || &error($text{'user_euser'});
 		if ($user->{'person'}) {
 			$in{'real'} =~ /^[^:]*$/ || &error($text{'user_ereal'});

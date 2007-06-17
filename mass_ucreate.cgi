@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-# Actually create users
+# Create multiple users from a batch file
 
 require './virtual-server-lib.pl';
 &ReadParseMime();
@@ -45,7 +45,9 @@ USER: foreach $line (@lines) {
 	$lnum++;
 	next if ($line !~ /\S/);
 	local ($username, $real, $pass, $ftp, $email, $quota, $extras, $forwards, $dbs) = split(/:/, $line, -1);
-	$username = lc($username);
+	if (!$config{'allow_upper'}) {
+		$username = lc($username);
+		}
 	$quota = &has_home_quotas() ? $quota : undef;
 	local $mquota = &has_mail_quotas() ? $quota : undef;
 	local $qquota = &has_server_quotas() ? $quota : undef;

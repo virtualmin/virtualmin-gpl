@@ -21,7 +21,10 @@ while(@ARGV > 0) {
 		$domain = shift(@ARGV);
 		}
 	elsif ($a eq "--user") {
-		$username = lc(shift(@ARGV));
+		$username = shift(@ARGV);
+		if (!$config{'allow_upper'}) {
+			$username = lc($username);
+			}
 		}
 	elsif ($a eq "--pass") {
 		$pass = shift(@ARGV);

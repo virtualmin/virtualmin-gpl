@@ -20,7 +20,7 @@ while(@ARGV > 0) {
 		$domain = shift(@ARGV);
 		}
 	elsif ($a eq "--user") {
-		$username = lc(shift(@ARGV));
+		$username = shift(@ARGV);
 		}
 	elsif ($a eq "--pass") {
 		$pass = shift(@ARGV);
@@ -70,6 +70,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--newuser") {
 		# Changing the username
 		$newusername = shift(@ARGV);
+		if (!$config{'allow_upper'}) {
+			$newusername = lc($newusername);
+			}
 		$newusername =~ /^[^ \t:]+$/ || &error("Invalid new username");
 		}
 	elsif ($a eq "--enable-ftp") {
