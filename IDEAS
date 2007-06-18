@@ -64,3 +64,4 @@
  - sub-servers owned by different mailbox user, as suggested by filip
 	- perhaps combine with extra admins?
 
+ - backup should include backup settings, and re-create cron job

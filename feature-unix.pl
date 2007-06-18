@@ -448,7 +448,7 @@ print &ui_table_row(&hlink($text{'tmpl_quota'}, "template_quota"),
 
 print &ui_table_row(&hlink($text{'tmpl_uquota'}, "template_uquota"),
     &none_def_input("uquota", $tmpl->{'uquota'}, $text{'tmpl_quotasel'}, 1,
-		    0, undef, [ "quota", "quota_units" ])."\n".
+		    0, undef, [ "uquota", "uquota_units" ])."\n".
     &quota_input("uquota", $tmpl->{'uquota'} eq "none" ?
 				"" : $tmpl->{'uquota'}, "home"));
 
@@ -456,7 +456,8 @@ print &ui_table_row(&hlink($text{'tmpl_defmquota'}, "template_defmquota"),
     &none_def_input("defmquota", $tmpl->{'defmquota'}, $text{'tmpl_quotasel'},
 		    0, 0, $text{'form_unlimit'},
 		    [ "defmquota", "defmquota_units" ])."\n".
-    &quota_input("defmquota", $tmpl->{'defmquota'}, "home"));
+    &quota_input("defmquota", $tmpl->{'defmquota'} eq "none" ?
+				"" : $tmpl->{'defmquota'}, "home"));
 
 # Domain owner primary group
 print &ui_table_row(&hlink($text{'tmpl_ugroup'}, "template_ugroup_mode"),
