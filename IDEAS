@@ -27,8 +27,6 @@
 
  - better coverage of files by webmin_log
 
- - weebly integration
-
  - plesk migration support
 	- files in ~/contrib/plesk
 
@@ -58,8 +56,6 @@
 	- phpscheduleit (873)
 	- plans calendar (873)
 	- php-calendar (873)
-
- - virtualmin-init module for filip
 
  - sub-servers owned by different mailbox user, as suggested by filip
 	- perhaps combine with extra admins?

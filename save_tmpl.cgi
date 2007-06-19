@@ -59,7 +59,7 @@ if ($in{'next'}) {
 	else {
 		$nextmode = $editmodes[$idx+1];
 		}
-	&redirect("edit_tmpl.cgi?id=$in{'id'}&editmode=$nextmode");
+	&redirect("edit_tmpl.cgi?id=$tmpl->{'id'}&editmode=$nextmode");
 	}
 else {
 	# Return to template list
