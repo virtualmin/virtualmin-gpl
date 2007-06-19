@@ -6923,14 +6923,21 @@ return $tmpl;
 }
 
 # delete_template(&template)
-# Just mark this template as deleted, as it may be needed later
+# If this template is used by any domains, just mark it as deleted.
+# Otherwise, really delete it.
 sub delete_template
 {
 local %tmpl;
 &lock_file("$templates_dir/$_[0]->{'id'}");
-&read_file("$templates_dir/$_[0]->{'id'}", \%tmpl);
-$tmpl{'deleted'} = 1;
-&write_file("$templates_dir/$_[0]->{'id'}", \%tmpl);
+local @users = &get_domain_by("template", $_[0]->{'id'});
+if (@users) {
+	&read_file("$templates_dir/$_[0]->{'id'}", \%tmpl);
+	$tmpl{'deleted'} = 1;
+	&write_file("$templates_dir/$_[0]->{'id'}", \%tmpl);
+	}
+else {
+	&unlink_file("$templates_dir/$_[0]->{'id'}");
+	}
 &unlock_file("$templates_dir/$_[0]->{'id'}");
 }
 
