@@ -5653,6 +5653,8 @@ sub virtual_server_clashes
 local ($dom, $check, $field) = @_;
 my $f;
 foreach $f (@features) {
+	next if ($dom->{'parent'} && $f eq "webmin");
+	next if ($dom->{'parent'} && $f eq "unix");
 	if ($dom->{$f} && (!$check || $check->{$f})) {
 		local $cfunc = "check_${f}_clash";
 		if (&$cfunc($dom, $field)) {
