@@ -117,6 +117,8 @@ if ($lconf) {
 	&logrotate::save_directive($parent, $lconf, undef);
 	&flush_file_lines();
 	&unlock_file($lconf->{'file'});
+	undef($logrotate::get_config_parent_cache);
+	undef($logrotate::get_config_cache);
 	&$second_print($text{'setup_done'});
 	}
 else {
@@ -208,8 +210,10 @@ if ($lconf) {
 			$dstlref->[$i] =~ s/(^|\s)$_[5]->{'home'}/$1$_[0]->{'home'}/g;
 			}
 		}
-	&flush_file_lines();
+	&flush_file_lines($lconf->{'file'});
 	&unlock_file($lconf->{'file'});
+	undef($logrotate::get_config_parent_cache);
+	undef($logrotate::get_config_cache);
 	&$second_print($text{'setup_done'});
 	return 1;
 	}
