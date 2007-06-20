@@ -7609,13 +7609,19 @@ if (defined($user->{'dbs'})) {
 }
 
 # valid_domain_name(&parent, newdomain)
-# Returns an error message if some domain name is invalid, or undef if OK
+# Returns an error message if some domain name is invalid, or undef if OK.
+# Checks domain-owner subdomain and reseller subdomain limits.
 sub valid_domain_name
 {
-if ($access{'forceunder'}) {
+if ($_[0] && $access{'forceunder'}) {
 	local $pd = $_[0]->{'dom'};
 	if ($_[1] !~ /\.\Q$pd\E$/i) {
 		return &text('setup_eforceunder', $parentdom->{'dom'});
+		}
+	}
+if ($access{'subdom'}) {
+	if ($_[1] !~ /\.\Q$access{'subdom'}\E$/i) {
+		return &text('setup_eforceunder', $access{'subdom'});
 		}
 	}
 return undef;

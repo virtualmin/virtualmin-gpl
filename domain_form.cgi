@@ -148,9 +148,11 @@ if ($subdom) {
 		undef, \@tds);
 	}
 else {
+	local $force = $access{'forceunder'} && $parentdom ?
+			".$parentdom->{'dom'}" :
+		       $access{'subdom'} ? ".$access{'subdom'}" : undef;
 	print &ui_table_row(&hlink($text{'form_domain'}, "domainname"),
-	      &ui_textbox("dom", $access{'forceunder'} && $parentdom ?
-					".$parentdom->{'dom'}" : undef, 50),
+	      &ui_textbox("dom", $force, 50),
 	      undef, \@tds);
 	}
 

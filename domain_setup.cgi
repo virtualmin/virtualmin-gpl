@@ -189,11 +189,9 @@ else {
 	($ip, $virt, $virtalready) = &parse_virtual_ip($tmpl, $resel);
 	}
 
-if ($parentdom) {
-	# Make sure domain is under parent, if required
-	local $derr = &valid_domain_name($parentdom, $in{'dom'});
-	&error($derr) if ($derr);
-	}
+# Make sure domain is under parent, if required
+local $derr = &valid_domain_name($parentdom, $in{'dom'});
+&error($derr) if ($derr);
 
 if ($parentuser) {
 	# User and group IDs come from parent
