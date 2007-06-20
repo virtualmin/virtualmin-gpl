@@ -87,8 +87,8 @@ while(@ARGV > 0) {
 		}
 	}
 @dnames || $all_doms || usage();
-defined($mode{'spam'}) || defined($mode{'virus'}) || $spam_client || $virus_scanner ||
-    defined($auto) || &usage("Nothing to do");
+defined($mode{'spam'}) || defined($mode{'virus'}) || $spam_client ||
+    $virus_scanner || defined($auto) || &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms) {
