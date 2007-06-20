@@ -465,6 +465,7 @@ if ($got{'mail'}) {
 			local $dstfolder = { 'file' => $crfile,
 					     'type' => $crtype };
 			&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
+			&set_mailfolder_owner($dstfolder, $uinfo);
 			opendir(DIR, $mailsrc);
 			local $mf;
 			while($mf = readdir(DIR)) {
@@ -478,6 +479,7 @@ if ($got{'mail'}) {
 				    'file' => "$uinfo->{'home'}/$sfdir/$mf" };
 				&mailboxes::mailbox_move_folder($srcfolder,
 								$dstfolder);
+				&set_mailfolder_owner($dstfolder, $uinfo);
 				}
 			closedir(DIR);
 			}
@@ -505,6 +507,7 @@ if ($got{'mail'}) {
 					}
 				&mailboxes::mailbox_move_folder($srcfolder,
 								$dstfolder);
+				&set_mailfolder_owner($dstfolder, $uinfo);
 				}
 			closedir(DIR);
 			}
@@ -534,6 +537,7 @@ if ($owner) {
 	if ($srcfolder) {
 		local $dstfolder = { 'type' => $mtype, 'file' => $mfile };
 		&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
+		&set_mailfolder_owner($dstfolder, $owner);
 		&$second_print(".. done");
 		}
 	else {
@@ -886,6 +890,15 @@ local $temp = &transname();
 local $qf = quotemeta($_[0]);
 local $out = `gunzip -c $qf >$temp`;
 return $? ? undef : $temp;
+}
+
+# set_mailfolder_owner(&folder, &user)
+# Chowns some mail folder to a user
+sub set_mailfolder_owner
+{
+local ($folder, $user) = @_;
+&execute_command("chown -R $user->{'uid'}:$user->{'gid'} ".
+		 quotemeta($folder->{'file'}));
 }
 
 1;
