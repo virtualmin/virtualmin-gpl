@@ -657,3 +657,4 @@ Updated the phpMyAdmin script installer to version 2.10.2, WordPress to 2.2.1, a
 Added an option to the DNS section of server templates for specifying the hostname to use in the primary NS record for new DNS domains, rather than the system's hostname.
 Added a script installer for phpScheduleIt.
 Added an option to the Edit Reseller page to force all virtual servers he creates to be under a specified parent domain. Also updated the create-reseller.pl, modify-reseller.pl and list-resellers.pl scripts to edit and show this setting.
+Added a page for creating multiple email aliases at once from a batch file, linked from the Mail Aliases list.

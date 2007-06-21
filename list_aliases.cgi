@@ -17,10 +17,15 @@ if ($mleft != 0) {
 	push(@links, "<a href='edit_alias.cgi?new=1&dom=$in{'dom'}'>".
 		     "$text{'aliases_add'}</a>");
 	}
+if ($virtualmin_pro && $mleft != 0) {
+	push(@rlinks, "<a href='mass_acreate_form.cgi?dom=$in{'dom'}'>".
+		      "$text{'aliases_mass'}</a>");
+	}
 
 if (@aliases) {
 	print &ui_form_start("delete_aliases.cgi");
 	print &ui_hidden("dom", $in{'dom'}),"\n";
+	print "<table cellpadding=0 cellspacing=0 width=100%><tr><td>\n";
 	if ($mleft != 0 && $mleft != -1 && !$mhide) {
 		print "<b>",&text('aliases_canadd'.$mreason,$mleft),"</b><p>\n";
 		}
@@ -28,6 +33,9 @@ if (@aliases) {
 		print "<b>",&text('aliases_noadd'.$mreason, $mmax),"</b><p>\n";
 		}
 	print &ui_links_row(\@links);
+	print "</td> <td align=right>\n";
+	print &ui_links_row(\@rlinks);
+	print "</td> </tr></table>\n";
 	if ($can_alias_comments) {
 		($anycmt) = grep { $_->{'cmt'} } @aliases;
 		}
@@ -75,7 +83,11 @@ else {
 	print "<b>$text{'aliases_none'}</b><p>\n";
 	shift(@links); shift(@links);
 	}
+print "<table cellpadding=0 cellspacing=0 width=100%><tr><td>\n";
 print &ui_links_row(\@links);
+print "</td> <td align=right>\n";
+print &ui_links_row(\@rlinks);
+print "</td> </tr></table>\n";
 if (@aliases) {
 	print &ui_form_end([ [ "delete", $text{'aliases_delete'} ] ]);
 	}

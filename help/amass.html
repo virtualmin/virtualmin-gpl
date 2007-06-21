@@ -1,0 +1,28 @@
+<header>Batch Create Aliases</header>
+
+This page allows you to create multiple email aliases at once from a text file.
+This file must list one alias per line, and each line must
+have the following format :<p>
+
+<tt><i>name</i>:[<i>comment</i>]:<i>destination1</i>:[<i>destination2</i>:...]</tt><p>
+
+The meanings of the fields are :<br>
+<dl>
+<dt>name
+<dd>The mailbox name of the alias, with as <i>sales</i>. To create an alias which matches all mail to the domain, enter <i>*</i> here.
+<dt>comment
+<dd>This optional field can be used to enter a descriptive comment for the alias, such as <i>Corporate sales</i>.
+<dt>destination
+<dd>One or more destinations can be entered, typically in the form of email addresses to forward mail to, like <i>joe@yourdomain.com</i>. The following special destinations are also supported :
+	<ul>
+	<li><tt>bounce</tt><br>
+	    Creates an alias that bounces email back to the sender.
+	<li><tt>autoreply <i>Your autoreply message</i></tt><br>
+	    Sends an automatic response back to the sender, containing the text after the word <tt>autoreply</tt>.
+	<li><tt>local <i>username</i></tt><br>
+	    Delivers email directly to the mailbox of the specified user.
+	</ul>
+</dl><p>
+
+<footer>
+
