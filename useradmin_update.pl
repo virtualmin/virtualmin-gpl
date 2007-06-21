@@ -54,14 +54,18 @@ if ($_[0]->{'passmode'} == 3) {
 		local ($user) = grep { $_->{'user'} eq $_[0]->{'user'} }
 				     &list_domain_users($d, 1, 0, 0, 0);
 		if ($user) {
-			# Update plain-text password
-			local %plain;
-			&read_file("$plainpass_dir/$d->{'id'}", \%plain);
-			$plain{$user->{'user'}} = $_[0]->{'plainpass'};
-			&write_file("$plainpass_dir/$d->{'id'}", \%plain);
+			$olduser = { %$user };
+			$user->{'passmode'} = 3;
+			$user->{'plainpass'} = $_[0]->{'plainpass'};
+			$user->{'pass'} = &encrypt_user_password(
+						$user, $_[0]->{'plainpass'});
+			&modify_user($user, $olduser, $d);
 
-			# Update IMAP password
-			&set_usermin_imap_password($user);
+			# Call plugin save functions
+			foreach $f (@mail_plugins) {
+				&plugin_call($f, "mailbox_modify",
+					     $user, $olduser, $d);
+				}
 			}
 		}
 

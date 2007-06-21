@@ -62,6 +62,3 @@
  - backup should include backup settings, and re-create cron job
 	- and Usermin settings?
 
- - useradmin_update.pl should handle mailbox password changes
-	- call plugins too
-
