@@ -2136,6 +2136,14 @@ if (!$_[2]->{'mailuser'}) {
 		if (/^(\S+):\s*(.*)/) {
 			local $virt = { 'from' => $1,
 					'to' => [ split(/,/, $2) ] };
+			if ($virt->{'to'}->[0] =~ /^(\S+)\\@(\S+)$/ &&
+			    $config{'mail_system'} == 0) {
+				# Virtusers is to a local user with an @ in
+				# the name, like foo\@bar.com. But on Postfix
+				# this won't work - instead, we need to use the
+				# alternate foo-bar.com format.
+				$virt->{'to'}->[0] = $1."-".$2;
+				}
 			&create_virtuser($virt);
 			}
 		}
