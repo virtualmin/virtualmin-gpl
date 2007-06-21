@@ -658,3 +658,4 @@ Added an option to the DNS section of server templates for specifying the hostna
 Added a script installer for phpScheduleIt.
 Added an option to the Edit Reseller page to force all virtual servers he creates to be under a specified parent domain. Also updated the create-reseller.pl, modify-reseller.pl and list-resellers.pl scripts to edit and show this setting.
 Added a page for creating multiple email aliases at once from a batch file, linked from the Mail Aliases list.
+Updated the Batch Create Servers page to allow alias domains to be created, by specifying an extra field for the alias domain name.

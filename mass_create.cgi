@@ -56,7 +56,7 @@ $count = $ecount = 0;
 foreach $line (@lines) {
 	$lnum++;
 	next if ($line !~ /\S/);
-	local ($dname, $owner, $pass, $user, $pname, $ip) = split(/:/, $line, -1);
+	local ($dname, $owner, $pass, $user, $pname, $ip, $aname) = split(/:/, $line, -1);
 	$dname = lc($dname);
 	$user = lc($user);
 
@@ -86,6 +86,15 @@ foreach $line (@lines) {
 			next;
 			}
 		}
+	local $aliasdom;
+	if ($aname) {
+		$aliasdom = &get_domain_by("dom", $aname);
+		if (!$aliasdom) {
+			&line_error(&text('cmass_ealias', $aname));
+			next;
+			}
+		$parentdom ||= $aliasdom;
+		}
 
 	# Get the template
 	local $tmpl = &get_template($parentdom ? $in{'stemplate'}
@@ -94,7 +103,10 @@ foreach $line (@lines) {
 	# Validate IP address
 	local $defip = &get_default_ip();
 	local ($virt, $virtalready);
-	if ($ip) {
+	if ($aliasdom) {
+		$ip = $aliasdom->{'ip'};
+		}
+	elsif ($ip) {
 		if (!&check_ipaddress($ip) && $ip ne 'allocate') {
 			&line_error($text{'cmass_eip'});
 			next;
@@ -176,17 +188,18 @@ foreach $line (@lines) {
 		# Work out mailboxes group name
 		$dname =~ /^([^\.]+)/;
 		$group = $config{'longname'} ? $dname : $1;
-		}
 
-	# Check username restrictions
-	local $uerr = &useradmin::check_username_restrictions($user);
-	if ($uerr) {
-		&line_error(&text('setup_eusername', $user, $uerr));
-		next;
+		# Check username restrictions
+		local $uerr = &useradmin::check_username_restrictions($user);
+		if ($uerr) {
+			&line_error(&text('setup_eusername', $user, $uerr));
+			next;
+			}
 		}
 
 	# Check if domains limit has been exceeded
-	local ($dleft, $dreason, $dmax) = &count_domains("realdoms");
+	local ($dleft, $dreason, $dmax) =
+		&count_domains($aliasdom ? "aliasdoms" : "realdoms");
 	if ($dleft == 0) {
 		&line_error(&text('setup_emax', $dmax));
 		next;
@@ -272,6 +285,7 @@ foreach $line (@lines) {
 			  'nodbname', $nodbname,
 			),
 		 'parent', $parentdom ? $parentdom->{'id'} : "",
+		 'alias', $aliasdom ? $aliasdom->{'id'} : "",
 		 'template', $tmpl->{'id'},
 		 'reseller', $in{'resel'},
 		);
@@ -281,6 +295,15 @@ foreach $line (@lines) {
 	my $f;
 	foreach $f (@features, @feature_plugins) {
 		next if ($parentdom && ($f eq 'webmin' || $f eq 'unix'));
+		if (&indexof($f, @feature_plugins) >= 0) {
+			# Check if plugin is suitable for domain
+			next if (!&plugin_call($f, "feature_suitable",
+                                 $parentdom, $aliasdom, $subdom));
+			}
+		if ($aliasdom) {
+			# Check if feature is suitable for aliases
+			next if (&indexof($f, @opt_alias_features) < 0);
+			}
 		$dom{$f} = &can_use_feature($f) && int($in{$f});
 		}
 	&set_featurelimits_from_template(\%dom, $tmpl);

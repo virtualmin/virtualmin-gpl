@@ -4,7 +4,7 @@ This page allows you to create multiple virtual servers at once from
 a text file. This file must list one server per line, and each line must
 have the following format :<p>
 
-<tt><i>domain</i>:<i>description</i>:<i>password</i>:[<i>username</i>]:[<i>parent-domain</i>]:[<i>ip-address</i>]</tt><p>
+<tt><i>domain</i>:<i>description</i>:<i>password</i>:[<i>username</i>]:[<i>parent-domain</i>]:[<i>ip-address</i>]:[<i>alias-domain</i>]</tt><p>
 
 The meanings of the fields are :<br>
 <dl>
@@ -20,6 +20,8 @@ The meanings of the fields are :<br>
 <dd>The domain name of the parent server to create this server under. If this is left empty, the new server is created as a parent itself.
 <dt>ip-address
 <dd>For virtual servers that do not need their own private IP, this field can be left blank. Otherwise, you must either enter a valid un-used address, or the word <tt>allocate</tt> to have Virtualmin select one for you (if configured).
+<dt>alias-domain
+<dd>The domain name of the virtual server that this should become an alias for. If left out, the new server will be either top-level or a sub-server.
 </dl><p>
 
 Quotas, bandwidth, and other limits for the created servers are set based on
