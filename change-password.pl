@@ -73,6 +73,7 @@ if ($user->{'domainowner'}) {
 	}
 else {
 	# Can just change the user
+	$olduser = { %$user };
 	if (defined($user->{'plainpass'})) {
 		$user->{'plainpass'} eq $oldpass ||
 			&error_exit("Wrong password");
@@ -81,6 +82,11 @@ else {
 	$user->{'plainpass'} = $newpass;
 	$user->{'pass'} = &encrypt_user_password($user, $newpass);
 	&modify_user($user, $olduser, $d);
+
+	# Call plugin save functions
+	foreach $f (@mail_plugins) {
+		&plugin_call($f, "mailbox_modify", $user, $olduser, $d);
+		}
 	}
 
 print "Password changed for $username in $d->{'dom'}\n";
