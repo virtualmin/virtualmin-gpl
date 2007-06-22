@@ -296,10 +296,11 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 	else {
 		# Automatically generate
 		local $common = "#!/bin/sh\n".
-				"PHPRC=\$$dirvar/../etc/php$v->[0]\n";
+				"PHPRC=\$$dirvar/../etc/php$v->[0]\n".
+				"export PHPRC\n";
 		if ($mode eq "fcgid") {
 			$common .= "PHP_FCGI_CHILDREN=4\n".
-				   "export PHP_FCGI_CHILDREN PHPRC\n";
+				   "export PHP_FCGI_CHILDREN\n";
 			}
 		&print_tempfile(PHP, $common);
 		if ($v->[1] =~ /-cgi$/) {
