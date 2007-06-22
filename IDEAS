@@ -53,7 +53,6 @@
 	- RT (863)
 	- RTFM (863)
 	- OTRS (863)
-	- plans calendar (873)
 
  - sub-servers owned by different mailbox user, as suggested by filip
 	- perhaps combine with extra admins?
