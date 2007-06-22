@@ -4814,6 +4814,7 @@ if ($mode == 1) {
 		return $err if (!$list);
 		foreach $f (@$list) {
 			$f =~ s/^$path[\\\/]//;
+			next if ($f eq "." || $f eq ".." || $f eq "");
 			&ftp_download($server, "$path/$f", "$temp/$f", \$err,
 				      undef, $user, $pass, $port);
 			return $err if ($err);
