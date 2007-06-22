@@ -20,6 +20,7 @@ if (&foreign_check("proc")) {
 		$info->{'mem'} = \@m;
 		}
 	if (&foreign_check("mount")) {
+		&require_useradmin();
 		&foreign_require("mount", "mount-lib.pl");
 		local @mounted = &mount::list_mounted();
 		local $total = 0;
@@ -27,7 +28,7 @@ if (&foreign_check("proc")) {
 		foreach my $m (@mounted) {
 			if ($m->[2] eq "ext2" || $m->[2] eq "ext3" ||
 			    $m->[2] eq "reiserfs" || $m->[2] eq "ufs" ||
-			    $m->[1] =~ /^\/dev\//) {
+			    $m->[1] =~ /^\/dev\// || $m->[1] eq $home_base) {
 				local ($t, $f) =
 					&mount::disk_space($m->[2], $m->[0]);
 				$total += $t*1024;
