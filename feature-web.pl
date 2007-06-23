@@ -67,6 +67,7 @@ else {
 		     $nvstar ? "*" : $_[0]->{'ip'};
 	local $lref = &read_file_lines($f);
 	push(@$lref, "<VirtualHost $vip:$web_port>");
+	local $proxying;
 	if ($_[0]->{'alias'}) {
 		# Because this is just an alias to an existing virtual server,
 		# create a ProxyPass or Redirect
@@ -83,6 +84,7 @@ else {
 		    $tmpl->{'web_alias'} == 2) {
 			push(@dirs, "ProxyPass / $url",
 				    "ProxyPassReverse / $url");
+			$proxying = 1;
 			}
 		else {
 			push(@dirs, "Redirect / $url");
@@ -134,6 +136,11 @@ else {
 	&flush_file_lines();
 	$_[0]->{'web_port'} = $web_port;
 	undef(@apache::get_config_cache);
+
+	if ($proxying) {
+		# Add <Proxy *> section, to ensure that proxypass works
+		&add_proxy_allow_directives($_[0]);
+		}
 
 	# Create a link from another Apache dir
 	if ($newfile) {
@@ -803,6 +810,12 @@ if (!$ppdir && $_[1]->{'proxy_pass'}) {
 		    $apache::httpd_modules{'core'} >= 2.0) {
 			# SSL proxy mode
 			push(@dirs, "SSLProxyEngine on");
+			}
+		if ($apache::httpd_modules{'core'} >= 2.0) {
+			# Ensure that proxying works
+			push(@dirs, "<Proxy *>",
+				    "allow from all",
+				    "</Proxy>");
 			}
 		}
 	else {
@@ -1988,6 +2001,37 @@ if (defined(&save_domain_ruby_mode)) {
 			$port, 1);
 		}
 	}
+}
+
+# add_proxy_allow_directives(&domain)
+# Adds a <Proxy *> section to allow ProxyPass to work, in case it is overridden
+# at a higher level (as seen on Ubuntu).
+sub add_proxy_allow_directives
+{
+local ($d) = @_;
+&require_apache();
+return 0 if ($apache::httpd_modules{'core'} < 2);	# Not supported in 1.3
+local @ports;
+push(@ports, $d->{'web_port'}) if ($d->{'web'});
+push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+local $added = 0;
+foreach my $port (@ports) {
+	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+	next if (!$virt);
+	local @proxy = grep { $_ eq "*" }
+			    &apache::find_directive("Proxy", $vconf);
+	if (!@proxy) {
+		local $lref = &read_file_lines($virt->{'file'});
+		splice(@$lref, $virt->{'eline'}, 0,
+		       "<Proxy *>",
+		       "allow from all",
+		       "</Proxy>");
+		&flush_file_lines($virt->{'file'});
+		undef(@apache::get_config_cache);
+		$added++;
+		}
+	}
+return $added;
 }
 
 $done_feature_script{'web'} = 1;
