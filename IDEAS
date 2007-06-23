@@ -37,9 +37,6 @@
  - templates for new mailing list configs
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=739
 
- - ruby on rails script installer
-	- need open to run ruby via mod_fcgid
-
  - script installers for
 	- phpmyfamily (bug 800)
 	- tutos (bug 801)

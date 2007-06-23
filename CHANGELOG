@@ -660,3 +660,4 @@ Added an option to the Edit Reseller page to force all virtual servers he create
 Added a page for creating multiple email aliases at once from a batch file, linked from the Mail Aliases list.
 Updated the Batch Create Servers page to allow alias domains to be created, by specifying an extra field for the alias domain name.
 Password changes to mail / FTP users from the Users and Groups modules now correctly update all the various passwords maintained by Virtualmin, such as MySQL and SVN - if the option to update in other modules is checked.
+Added a script installer for Ruby on Rails. Unlike others, this does not setup a full working application - instead, it just installs the environment needed for developing Rails applications.
