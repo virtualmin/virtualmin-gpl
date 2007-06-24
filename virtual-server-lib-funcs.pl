@@ -8984,16 +8984,15 @@ local %typestatus;
 foreach my $f (@startstop_features) {
 	if ($config{$f}) {
 		local $sfunc = "startstop_".$f;
-		local $status = &$sfunc(\%typestatus);
-		if ($status) {
-			$status->{'feature'} = $f;
+		foreach my $status (&$sfunc(\%typestatus)) {
+			$status->{'feature'} ||= $f;
 			push(@rv, $status);
 			}
 		}
 	}
 foreach my $f (@startstop_plugins) {
 	local $status = &plugin_call($f, "feature_startstop");
-	$status->{'feature'} = $f;
+	$status->{'feature'} ||= $f;
 	$status->{'plugin'} = 1;
 	push(@rv, $status);
 	}

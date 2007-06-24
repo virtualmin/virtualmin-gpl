@@ -381,7 +381,7 @@ local $conf = &proftpd::get_config();
 local $st = &proftpd::find_directive("ServerType", $conf);
 if ($st eq 'inetd') {
 	# Running under inetd
-	return undef;
+	return ( );
 	}
 local $status;
 if (defined($typestatus->{'proftpd'})) {
@@ -391,17 +391,17 @@ else {
 	$status = &proftpd::get_proftpd_pid();
 	}
 if ($status) {
-	return { 'status' => 1,
-		 'name' => $text{'index_fname'},
-		 'desc' => $text{'index_fstop'},
-		 'restartdesc' => $text{'index_frestart'},
-		 'longdesc' => $text{'index_fstopdesc'} };
+	return ( { 'status' => 1,
+		   'name' => $text{'index_fname'},
+		   'desc' => $text{'index_fstop'},
+		   'restartdesc' => $text{'index_frestart'},
+		   'longdesc' => $text{'index_fstopdesc'} } );
 	}
 else {
-	return { 'status' => 0,
-		 'name' => $text{'index_fname'},
-		 'desc' => $text{'index_fstart'},
-		 'longdesc' => $text{'index_fstartdesc'} };
+	return ( { 'status' => 0,
+		   'name' => $text{'index_fname'},
+		   'desc' => $text{'index_fstart'},
+		   'longdesc' => $text{'index_fstartdesc'} } );
 	}
 }
 

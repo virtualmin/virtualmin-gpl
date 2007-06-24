@@ -929,17 +929,17 @@ local ($typestatus) = @_;
 local $bpid = defined($typestatus{'bind8'}) ?
 		$typestatus{'bind8'} == 1 : &get_bind_pid();
 if ($bpid && kill(0, $bpid)) {
-	return { 'status' => 1,
-		 'name' => $text{'index_bname'},
-		 'desc' => $text{'index_bstop'},
-		 'restartdesc' => $text{'index_brestart'},
-		 'longdesc' => $text{'index_bstopdesc'} };
+	return ( { 'status' => 1,
+		   'name' => $text{'index_bname'},
+		   'desc' => $text{'index_bstop'},
+		   'restartdesc' => $text{'index_brestart'},
+		   'longdesc' => $text{'index_bstopdesc'} } );
 	}
 else {
-	return { 'status' => 0,
-		 'name' => $text{'index_bname'},
-		 'desc' => $text{'index_bstart'},
-		 'longdesc' => $text{'index_bstartdesc'} };
+	return ( { 'status' => 0,
+		   'name' => $text{'index_bname'},
+		   'desc' => $text{'index_bstart'},
+		   'longdesc' => $text{'index_bstartdesc'} } );
 	}
 }
 

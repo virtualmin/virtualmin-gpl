@@ -4,7 +4,7 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 &can_stop_servers() || &error($text{'start_ecannot'});
-if (&indexof($in{'feature'}, @startstop_features) >= 0) {
+if (&indexof($in{'feature'}, @plugins) < 0) {
 	# Core feature
 	$sfunc = "start_service_".$in{'feature'};
 	$err = &$sfunc();

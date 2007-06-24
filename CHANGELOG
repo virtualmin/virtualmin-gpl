@@ -662,3 +662,4 @@ Updated the Batch Create Servers page to allow alias domains to be created, by s
 Password changes to mail / FTP users from the Users and Groups modules now correctly update all the various passwords maintained by Virtualmin, such as MySQL and SVN - if the option to update in other modules is checked.
 Added a script installer for Ruby on Rails. Unlike others, this does not setup a full working application - instead, it just installs the environment needed for developing Rails applications.
 Fixed a bug that can prevent per-domain PHP configurations from working when running PHP via CGI scripts.
+Added the status of the Dovecot IMAP/POP3 server to the server status section of the right frame.

@@ -1491,17 +1491,17 @@ local ($typestatus) = @_;
 local $apid = defined($typestatus->{'apache'}) ?
 		$typestatus->{'apache'} == 1 : &get_apache_pid();
 if ($apid) {
-	return { 'status' => 1,
-		 'name' => $text{'index_aname'},
-		 'desc' => $text{'index_astop'},
-		 'restartdesc' => $text{'index_arestart'},
-		 'longdesc' => $text{'index_astopdesc'} };
+	return ( { 'status' => 1,
+		   'name' => $text{'index_aname'},
+		   'desc' => $text{'index_astop'},
+		   'restartdesc' => $text{'index_arestart'},
+		   'longdesc' => $text{'index_astopdesc'} } );
 	}
 else {
-	return { 'status' => 0,
-		 'name' => $text{'index_aname'},
-		 'desc' => $text{'index_astart'},
-		 'longdesc' => $text{'index_astartdesc'} };
+	return ( { 'status' => 0,
+		   'name' => $text{'index_aname'},
+		   'desc' => $text{'index_astart'},
+		   'longdesc' => $text{'index_astartdesc'} } );
 	}
 }
 

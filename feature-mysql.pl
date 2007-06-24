@@ -722,25 +722,25 @@ sub startstop_mysql
 {
 local ($typestatus) = @_;
 &require_mysql();
-return undef if (!&mysql::is_mysql_local());	# cannot stop/start remote
+return ( ) if (!&mysql::is_mysql_local());	# cannot stop/start remote
 local $r = defined($typestatus->{'mysql'}) ?
 		$typestatus->{'mysql'} == 1 :
 		&mysql::is_mysql_running();
 if ($r == 1) {
-	return { 'status' => 1,
-		 'name' => $text{'index_myname'},
-		 'desc' => $text{'index_mystop'},
-		 'restartdesc' => $text{'index_myrestart'},
-		 'longdesc' => $text{'index_mystopdesc'} };
+	return ( { 'status' => 1,
+		   'name' => $text{'index_myname'},
+		   'desc' => $text{'index_mystop'},
+		   'restartdesc' => $text{'index_myrestart'},
+		   'longdesc' => $text{'index_mystopdesc'} } );
 	}
 elsif ($r == 0) {
-	return { 'status' => 0,
-		 'name' => $text{'index_myname'},
-		 'desc' => $text{'index_mystart'},
-		 'longdesc' => $text{'index_mystartdesc'} };
+	return ( { 'status' => 0,
+		   'name' => $text{'index_myname'},
+		   'desc' => $text{'index_mystart'},
+		   'longdesc' => $text{'index_mystartdesc'} } );
 	}
 else {
-	return undef;
+	return ( );
 	}
 }
 

@@ -482,25 +482,25 @@ sub startstop_postgres
 {
 local ($typestatus) = @_;
 &require_postgres();
-return undef if (!&postgresql::is_postgresql_local());
+return ( ) if (!&postgresql::is_postgresql_local());
 local $r = defined($typestatus->{'postgresql'}) ?
                 $typestatus->{'postgresql'} == 1 :
 		&postgresql::is_postgresql_running();
 if ($r == 1) {
-	return { 'status' => 1,
-		 'name' => $text{'index_pgname'},
-		 'desc' => $text{'index_pgstop'},
-		 'restartdesc' => $text{'index_pgrestart'},
-		 'longdesc' => $text{'index_pgstopdesc'} };
+	return ( { 'status' => 1,
+		   'name' => $text{'index_pgname'},
+		   'desc' => $text{'index_pgstop'},
+		   'restartdesc' => $text{'index_pgrestart'},
+		   'longdesc' => $text{'index_pgstopdesc'} } );
 	}
 elsif ($r == 0) {
-	return { 'status' => 0,
-		 'name' => $text{'index_pgname'},
-		 'desc' => $text{'index_pgstart'},
-		 'longdesc' => $text{'index_pgstartdesc'} };
+	return ( { 'status' => 0,
+		   'name' => $text{'index_pgname'},
+		   'desc' => $text{'index_pgstart'},
+		   'longdesc' => $text{'index_pgstartdesc'} } );
 	}
 else {
-	return undef;
+	return ( );
 	}
 }
 

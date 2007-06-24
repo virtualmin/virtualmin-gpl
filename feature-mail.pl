@@ -2659,20 +2659,41 @@ local ($typestatus) = @_;
 local $msn = $config{'mail_system'} == 0 ? "postfix" :
 	     $config{'mail_system'} == 1 ? "sendmail" : "qmailadmin";
 local $ms = $text{'mail_system_'.$config{'mail_system'}};
+local @rv;
 if (defined($typestatus->{$msn}) ? $typestatus->{$msn} == 1
 				 : &is_mail_running()) {
-	return { 'status' => 1,
-		 'name' => &text('index_mname', $ms),
-		 'desc' => $text{'index_mstop'},
-		 'restartdesc' => $text{'index_mrestart'},
-		 'longdesc' => $text{'index_mstopdesc'} };
+	push(@rv,{ 'status' => 1,
+		   'name' => &text('index_mname', $ms),
+		   'desc' => $text{'index_mstop'},
+		   'restartdesc' => $text{'index_mrestart'},
+		   'longdesc' => $text{'index_mstopdesc'} } );
 	}
 else {
-	return { 'status' => 0,
-		 'name' => &text('index_mname', $ms),
-		 'desc' => $text{'index_mstart'},
-		 'longdesc' => $text{'index_mstartdesc'} };
+	push(@rv,{ 'status' => 0,
+		   'name' => &text('index_mname', $ms),
+		   'desc' => $text{'index_mstart'},
+		   'longdesc' => $text{'index_mstartdesc'} } );
 	}
+if (&foreign_installed("dovecot")) {
+	# Add status for Dovecot
+	&foreign_require("dovecot", "dovecot-lib.pl");
+	if (&dovecot::is_dovecot_running()) {
+		push(@rv,{ 'status' => 1,
+			   'feature' => 'dovecot',
+			   'name' => &text('index_dname', $ms),
+			   'desc' => $text{'index_dstop'},
+			   'restartdesc' => $text{'index_drestart'},
+			   'longdesc' => $text{'index_dstopdesc'} } );
+		}
+	else {
+		push(@rv,{ 'status' => 0,
+			   'feature' => 'dovecot',
+			   'name' => &text('index_dname', $ms),
+			   'desc' => $text{'index_dstart'},
+			   'longdesc' => $text{'index_dstartdesc'} } );
+		}
+	}
+return @rv;
 }
 
 sub start_service_mail
@@ -2683,6 +2704,18 @@ return &startup_mail_server(1);
 sub stop_service_mail
 {
 return &shutdown_mail_server(1);
+}
+
+sub start_service_dovecot
+{
+&foreign_require("dovecot", "dovecot-lib.pl");
+return &dovecot::start_dovecot();
+}
+
+sub stop_service_dovecot
+{
+&foreign_require("dovecot", "dovecot-lib.pl");
+return &dovecot::stop_dovecot();
 }
 
 # check_secondary_mx()
