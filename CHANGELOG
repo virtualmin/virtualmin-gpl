@@ -653,7 +653,7 @@ Logins and passwords for using installed scripts are now recorded.
 The Manage Script page now shows more information about an installed scripts, such as the install directory, database and possibly login and password. The list-scripts.pl command also displays the same information.
 ---- Changes since 3.42 ----
 The Change Domain Name page can be used to modify the administrative username and home directory for a virtual server, without changing the domain name.
-Updated the phpMyAdmin script installer to version 2.10.2, WordPress to 2.2.1, and Gallery to 2.2.2.
+Updated the phpMyAdmin script installer to version 2.10.2, WordPress to 2.2.1, SMF to 1.1.3 and Gallery to 2.2.2.
 Added an option to the DNS section of server templates for specifying the hostname to use in the primary NS record for new DNS domains, rather than the system's hostname.
 Added script installers for phpScheduleIt, PHP-Calendar and Plans, and created a new script category for calendars.
 Added an option to the Edit Reseller page to force all virtual servers he creates to be under a specified parent domain. Also updated the create-reseller.pl, modify-reseller.pl and list-resellers.pl scripts to edit and show this setting.
