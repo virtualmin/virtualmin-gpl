@@ -57,5 +57,3 @@
  - backup should include backup settings, and re-create cron job
 	- and Usermin settings?
 
- - More Rails apps, like Typo?
-
