@@ -136,18 +136,18 @@ foreach $d (@doms) {
 	&$indent_print();
 
 	# Update PHP mode
-	if ($mode) {
+	if ($mode && !$d->{'alias'}) {
 		&save_domain_php_mode($d, $mode);
 		}
 
 	# Update Ruby mode
-	if ($rubymode) {
+	if ($rubymode && !$d->{'alias'}) {
 		&save_domain_ruby_mode($d,
 			$rubymode eq "none" ? undef : $rubymode);
 		}
 
 	# Update suexec setting
-	if (defined($suexec)) {
+	if (defined($suexec) && !$d->{'alias'}) {
 		&save_domain_suexec($d, $suexec);
 		}
 
@@ -184,7 +184,7 @@ foreach $d (@doms) {
 		&$second_print($text{'setup_done'});
 		}
 
-	if ($style) {
+	if ($style && !$d->{'alias'}) {
 		# Apply content style
 		&$first_print(&text('setup_styleing', $style->{'desc'}));
 		&apply_content_style($d, $style, $content);
