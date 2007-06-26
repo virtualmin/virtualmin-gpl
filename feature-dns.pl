@@ -47,6 +47,25 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 		push(@{$dir->{'members'}},
 		     &text_to_named_conf($tmpl->{'namedconf'}));
 		}
+	local @slaves = &bind8::list_slave_servers();
+	if (@slaves) {
+		# Also notify slave servers, unless already added
+		local ($also) = grep { $_->{'name'} eq 'also-notify' }
+				     @{$dir->{'members'}};
+		if (!$also) {
+			$also = { 'name' => 'also-notify',
+				  'type' => 1,
+				  'members' => [ ] };
+			foreach my $s (@slaves) {
+				push(@{$also->{'members'}},
+				     { 'name' => &to_ipaddress($s->{'host'}) });
+				}
+			push(@{$dir->{'members'}}, $also);
+			push(@{$dir->{'members'}}, 
+				{ 'name' => 'notify',
+				  'values' => [ 'yes' ] });
+			}
+		}
 	local $pconf;
 	local $indent = 0;
 	if ($tmpl->{'dns_view'}) {
@@ -97,7 +116,6 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 	&bind8::get_zone_defaults(\%zd);
 	local $rootfile = &bind8::make_chroot($file);
 	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
-	local @slaves = &bind8::list_slave_servers();
 	if (!-r $rootfile) {
 		&lock_file($rootfile);
 		&create_standard_records($file, $_[0], $ip);
