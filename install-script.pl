@@ -188,6 +188,9 @@ if (!&setup_pear_modules($d, $script, $ver, $phpver, $opts)) {
 if (!&setup_perl_modules($d, $script, $ver, $opts)) {
 	exit(1);
 	}
+if (!&setup_ruby_modules($d, $script, $ver, $opts)) {
+	exit(1);
+	}
 
 # Call the install function
 &$first_print(&text('scripts_installing', $script->{'desc'}, $ver));

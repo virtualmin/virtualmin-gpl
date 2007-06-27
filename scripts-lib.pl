@@ -1262,5 +1262,47 @@ elsif (&indexof($dbtype, @database_plugins) >= 0) {
 return undef;
 }
 
+# setup_ruby_modules(&domain, &script, version, &opts)
+# Attempt to install any support programs needed by this script for Ruby.
+# At the moment, all it does is try to install 'gem'
+sub setup_ruby_modules
+{
+local ($d, $script, $ver, $opts) = @_;
+return if (&indexof("ruby", @{$script->{'uses'}}) < 0);
+if (!&has_command("gem")) {
+	# Try to install gem from YUM or APT
+	&$first_print($text{'scripts_installgem'});
+
+	# Make sure the software module is installed and can do updates
+	if (!&foreign_installed("software")) {
+		&$second_print($text{'scripts_esoftware'});
+		return 0;
+		}
+	&foreign_require("software", "software-lib.pl");
+	if (!defined(&software::update_system_install)) {
+		&$second_print($text{'scripts_eupdate'});
+		return 0;
+		}
+
+	# Try to install it. We assume that the package is always called
+	# 'rubygems' on all update systems.
+	&software::update_system_install("rubygems");
+	delete($main::has_command_cache{'gem'});
+	local $newpkg = $software::update_system eq "csw" ? "CSWrubygems"
+							  : "rubygems";
+	local @pinfo = &software::package_info($newpkg);
+	if (@pinfo && $pinfo[0] eq $newpkg) {
+		# Worked
+		&execute_command("gem list --remote");	# Force cache init
+		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$second_print($text{'scripts_esoftwaremod'});
+		return 0;
+		}
+	}
+return 1;
+}
+
 1;
 

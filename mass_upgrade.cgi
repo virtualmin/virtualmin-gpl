@@ -75,6 +75,11 @@ if ($in{'confirm'}) {
 				next;
 				}
 
+			# Install needed Ruby modules
+			if (!&setup_ruby_modules($d, $script, $ver, $opts)) {
+				next;
+				}
+
 			# Fetch needed files
 			$ferr = &fetch_script_files($sinfo->{'dom'}, $ver,$opts,
 						    $sinfo, \%gotfiles);

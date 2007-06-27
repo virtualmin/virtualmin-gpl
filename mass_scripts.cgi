@@ -82,6 +82,11 @@ foreach $sinfo (@sinfos) {
 			next;
 			}
 
+		# Install needed Ruby modules
+		if (!&setup_ruby_modules($d, $script, $ver, $opts)) {
+			next;
+			}
+
 		# Go ahead and do it
 		($ok, $msg, $desc, $url) = &{$script->{'install_func'}}($d, $ver, $sinfo->{'opts'}, \%gotfiles, $sinfo);
 		&$indent_print();
