@@ -5680,6 +5680,8 @@ sub virtual_server_depends
 {
 local ($d, $feat) = @_;
 local $f;
+
+# Check features that are enabled
 foreach $f (grep { $d->{$_} } @features) {
 	next if ($feat && $f ne $feat);
 	local $dfunc = "check_depends_$f";
@@ -5694,11 +5696,26 @@ foreach $f (grep { $d->{$_} } @features) {
 		return &text('setup_edep'.$f) if (!$d->{$fd});
 		}
 	}
+
+# Check plugins that are enabled
 foreach $f (grep { $d->{$_} } @feature_plugins) {
 	next if ($feat && $f ne $feat);
 	local $derr = &plugin_call($f, "feature_depends", $d);
 	return $derr if ($derr);
 	}
+
+# Check features that are NOT enabled, to ensure that any needed features are
+# not missing. ie. mysql missing from parent but on children
+foreach $f (grep { !$d->{$_} } @features) {
+	next if ($feat && $f ne $feat);
+	local $dfunc = "check_anti_depends_$f";
+	if (defined(&$dfunc)) {
+		# Call dependecy function
+		local $derr = &$dfunc($d);
+		return $derr if ($derr);
+		}
+	}
+
 return undef;
 }
 

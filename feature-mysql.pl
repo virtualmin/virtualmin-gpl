@@ -17,6 +17,19 @@ return $text{'setup_edepmysql'} if (!$parent->{'mysql'});
 return undef;
 }
 
+# check_anti_depends_mysql(&dom)
+# Ensure that a parent server without MySQL does not have any children with it
+sub check_anti_depends_mysql
+{
+if (!$_[0]->{'mysql'}) {
+	local @subs = &get_domain_by("parent", $_[0]->{'id'});
+	foreach my $s (@subs) {
+		return $text{'setup_edepmysqlsub'} if ($s->{'mysql'});
+		}
+	}
+return undef;
+}
+
 # setup_mysql(&domain, [no-db])
 # Create a new MySQL database, user and permissions
 sub setup_mysql
