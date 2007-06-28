@@ -281,6 +281,7 @@ else {
 	$newzonename = $_[1]->{'dom'};
 	$oldzonename = $_[1]->{'dom'};
 	}
+return 0 if (!$z);	# No DNS zone!
 local $oldip = $_[1]->{'dns_ip'} || $_[1]->{'ip'};
 local $newip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 local $rv = 0;

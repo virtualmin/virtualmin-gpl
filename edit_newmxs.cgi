@@ -18,13 +18,12 @@ if (@servers) {
 				      $text{'newmxs_mxname'} ], undef,0, \@tds);
 	foreach $s (@servers) {
 		$mx = $mxs{$s->{'id'}};
-		$stable .= &ui_columns_row(
-		  [ &ui_checkbox("servers", $s->{'id'}, undef, $mx),
-		    $s->{'desc'} || $s->{'host'},
+		$stable .= &ui_checked_columns_row(
+		  [ $s->{'desc'} || $s->{'host'},
 		    &ui_opt_textbox("mxname_".$s->{'id'},
 				    $mx ? $mx->{'mxname'} : undef, 30,
 				    $text{'newmxs_same'}) ],
-		  \@tds);
+		  \@tds, "servers", $s->{'id'}, $mx);
 		}
 	$stable .= &ui_columns_end(),"<br>\n";
 	print $stable;

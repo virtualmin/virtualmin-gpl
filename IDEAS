@@ -50,6 +50,9 @@
 	- RT (863)
 	- RTFM (863)
 	- OTRS (863)
+	- textpattern
+	- mephisto (RoR)
+	- Instiki
 
  - sub-servers owned by different mailbox user, as suggested by filip
 	- perhaps combine with extra admins?
@@ -58,6 +61,4 @@
 	- and Usermin settings?
 
  - allow Mysql user and group updates on multiple systems
-
- - if gem is missing, yum install rubygems
 
