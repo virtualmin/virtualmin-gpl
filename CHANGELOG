@@ -665,3 +665,4 @@ Added a script installer for Typo, which makes use of the Ruby on Rails framewor
 Fixed a bug that can prevent per-domain PHP configurations from working when running PHP via CGI scripts.
 Added the status of the Dovecot IMAP/POP3 server to the server status section of the right frame.
 ---- Changes since 3.43 ----
+Added a script installer for the Textpattern Blog.

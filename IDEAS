@@ -50,7 +50,6 @@
 	- RT (863)
 	- RTFM (863)
 	- OTRS (863)
-	- textpattern
 	- mephisto (RoR)
 	- Instiki
 
@@ -61,6 +60,4 @@
 	- and Usermin settings?
 
  - allow Mysql user and group updates on multiple systems
-
- - backup needs to include scripts log for a domain!
 
