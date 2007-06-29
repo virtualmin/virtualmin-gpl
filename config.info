@@ -31,6 +31,7 @@ ldap=Store users and groups,1,1-In LDAP database,0-In local files
 compression=Backup compression format,1,0-gzip,1-bzip2,2-None (tar only)
 maillog_period=Number of days to keep processed mail logs,3,Forever
 allow_upper=Force mailbox usernames to lower case?,1,0-Yes,1-No
+mysql_replicas=Additional MySQL servers to create users on,3,Just this system
 
 line1.4=User interface settings,11
 display_max=Maximum number of domains to display,3,Unlimited

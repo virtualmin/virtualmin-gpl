@@ -1,0 +1,16 @@
+<header>Additional MySQL servers to create users on</header>
+
+By default, Virtualmin will create all MySQL account and permissions on a
+single MySQL server, typically the one running on the same machine as
+Virtualmin itself. However, if you are running multiple servers with replication
+or the NDBCluster system, you may need Virtualmin to create these permissions
+on several servers. This will allow domain owners to login to any one of them.
+<p>
+
+To set this up, enter a space-separated list of additional servers 
+into this field. Virtual servers created from now on will be added to the
+masystem, and to those in the list. Existing virtual servers will not be added
+though. <p>
+
+<footer>
+
