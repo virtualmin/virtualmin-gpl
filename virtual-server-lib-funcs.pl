@@ -4167,7 +4167,18 @@ if ($config{'bw_active'}) {
 		}
 	else {
 		# Create an empty file to indicate that we have no data
-		&open_tempfile(EMPTY, ">$bandwidth_dir/$_[0]->{'id'}");
+		&open_tempfile(EMPTY, ">".$_[1]."_bw");
+		&close_tempfile(EMPTY);
+		}
+	}
+if ($virtualmin_pro) {
+	# Script logs
+	if (-d "$script_log_directory/$_[0]->{'id'}") {
+		&execute_command("cd ".quotemeta("$script_log_directory/$_[0]->{'id'}")." && tar cf ".quotemeta($_[1]."_scripts")." .");
+		}
+	else {
+		# Create an empty file to indicate that we have no scripts
+		&open_tempfile(EMPTY, ">".$_[1]."_scripts");
 		&close_tempfile(EMPTY);
 		}
 	}
@@ -4902,6 +4913,14 @@ if (!$_[3]->{'fix'}) {
 		# Also restore bandwidth files
 		&make_dir($bandwidth_dir, 0700);
 		&copy_source_dest($_[1]."_bw", "$bandwidth_dir/$_[0]->{'id'}");
+		}
+	if ($virtualmin_pro && -r $_[1]."_scripts") {
+		# Also restore script logs
+		&execute_command("rm -rf ".quotemeta("$script_log_directory/$_[0]->{'id'}"));
+		if (-s $_[1]."_scripts") {
+			mkdir("$script_log_directory/$_[0]->{'id'}", 0755);
+			&execute_command("cd ".quotemeta("$script_log_directory/$_[0]->{'id'}")." && tar xf ".quotemeta($_[1]."_scripts")." .");
+			}
 		}
 	&$second_print($text{'setup_done'});
 	}
