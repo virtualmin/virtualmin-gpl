@@ -62,3 +62,5 @@
 
  - allow Mysql user and group updates on multiple systems
 
+ - backup needs to include scripts log for a domain!
+

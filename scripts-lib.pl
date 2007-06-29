@@ -1268,7 +1268,7 @@ return undef;
 sub setup_ruby_modules
 {
 local ($d, $script, $ver, $opts) = @_;
-return if (&indexof("ruby", @{$script->{'uses'}}) < 0);
+return 1 if (&indexof("ruby", @{$script->{'uses'}}) < 0);
 if (!&has_command("gem")) {
 	# Try to install gem from YUM or APT
 	&$first_print($text{'scripts_installgem'});
