@@ -59,5 +59,3 @@
  - backup should include backup settings, and re-create cron job
 	- and Usermin settings?
 
- - allow Mysql user and group updates on multiple systems
-
