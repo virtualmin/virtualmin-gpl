@@ -107,53 +107,65 @@ if (@scripts) {
 				  $_->{'category'} =~ /\Q$search\E/i } @scripts;
 		}
 
-	# Show table of available
-	print &ui_form_start("script_form.cgi");
-	print &ui_hidden("dom", $in{'dom'}),"\n";
-	@tds = ( "width=5", "nowrap", undef, undef, "nowrap" );
-	print &ui_columns_start([ "",
-				  $text{'scripts_name'},
-				  $text{'scripts_ver'},
-				  $text{'scripts_longdesc'},
-				  $text{'scripts_overall'} ], undef, 0, \@tds);
-	foreach $script (@scripts) {
-		$script->{'sortcategory'} = $script->{'category'} || "zzz";
+	if (@scripts) {
+		# Show table of available
+		print &ui_form_start("script_form.cgi");
+		print &ui_hidden("dom", $in{'dom'}),"\n";
+		@tds = ( "width=5", "nowrap", undef, undef, "nowrap" );
+		print &ui_columns_start([ "",
+					  $text{'scripts_name'},
+					  $text{'scripts_ver'},
+					  $text{'scripts_longdesc'},
+					  $text{'scripts_overall'} ],
+					undef, 0, \@tds);
+		foreach $script (@scripts) {
+			$script->{'sortcategory'} = $script->{'category'} ||
+						    "zzz";
+			}
+		$overall = &get_overall_script_ratings();
+		foreach $script (sort { $a->{'sortcategory'} cmp
+						$b->{'sortcategory'} ||
+					lc($a->{'desc'}) cmp lc($b->{'desc'}) }
+				      @scripts) {
+			$cat = $script->{'category'} || $text{'scripts_nocat'};
+			@vers = grep { &can_script_version($script, $_) }
+				     @{$script->{'versions'}};
+			next if (!@vers);	# No allowed versions!
+			if ($cat ne $lastcat) {
+				print &ui_columns_row([ "<b>$cat</b>" ],
+						      [ "colspan=5" ]);
+				$lastcat = $cat;
+				}
+			if (@vers > 1) {
+				$vsel = &ui_select("ver_".$script->{'name'},
+				    undef,
+				    [ map { [ $_, $script->{'vdesc'}->{$_} ] }
+				          @vers ]);
+				}
+			else {
+				$vsel = ($script->{'vdesc'}->{$vers[0]} ||
+					 $vers[0]).
+					&ui_hidden("ver_".$script->{'name'},
+						   $vers[0]);
+				}
+			$r = $overall->{$script->{'name'}};
+			print &ui_radio_columns_row([
+			    $script->{'desc'},
+			    $vsel,
+			    $script->{'longdesc'},
+			    $r ? &virtualmin_ui_rating_selector(undef, $r, 5)
+			       : "",
+			    ], \@tds, "script", $script->{'name'},
+			       $in{'search'} && @scripts == 1);
+			}
+		print &ui_columns_end();
+		print &ui_submit($text{'scripts_ok'});
+		print &ui_form_end();
+		print &ui_tabs_end_tab();
 		}
-	$overall = &get_overall_script_ratings();
-	foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
-				lc($a->{'desc'}) cmp lc($b->{'desc'}) }
-			      @scripts) {
-		$cat = $script->{'category'} || $text{'scripts_nocat'};
-		@vers = grep { &can_script_version($script, $_) }
-			     @{$script->{'versions'}};
-		next if (!@vers);	# No allowed versions!
-		if ($cat ne $lastcat) {
-			print &ui_columns_row([ "<b>$cat</b>" ],
-					      [ "colspan=5" ]);
-			$lastcat = $cat;
-			}
-		if (@vers > 1) {
-			$vsel = &ui_select("ver_".$script->{'name'}, undef,
-				   [ map { [ $_, $script->{'vdesc'}->{$_} ] }
-				   @vers ]);
-			}
-		else {
-			$vsel = ($script->{'vdesc'}->{$vers[0]} || $vers[0]).
-				&ui_hidden("ver_".$script->{'name'}, $vers[0]);
-			}
-		$r = $overall->{$script->{'name'}};
-		print &ui_radio_columns_row([
-		    $script->{'desc'},
-		    $vsel,
-		    $script->{'longdesc'},
-		    $r ? &virtualmin_ui_rating_selector(undef, $r, 5) : "",
-		    ], \@tds, "script", $script->{'name'},
-		       $in{'search'} && @scripts == 1);
+	else {
+		print "<b>$text{'scripts_nomatch'}</b><p>\n";
 		}
-	print &ui_columns_end();
-	print &ui_submit($text{'scripts_ok'});
-	print &ui_form_end();
-	print &ui_tabs_end_tab();
 	}
 else {
 	print "<b>$text{'scripts_nonew'}</b><p>\n";

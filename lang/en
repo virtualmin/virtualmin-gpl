@@ -2513,6 +2513,7 @@ scripts_uninstall=Manage script:
 scripts_un=Show Options
 scripts_noexisting=No scripts have been installed on this virtual server yet.
 scripts_nonew=No scripts are available for this virtual server.
+scripts_nomatch=No scripts matched your search.
 scripts_iheader=Script install options
 scripts_iname=Script to install
 scripts_idesc=Script description
