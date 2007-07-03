@@ -531,6 +531,7 @@ if (!defined($php_modules{$ver})) {
 		}
 	close(PHP);
 	&reset_environment();
+	delete($ENV{'PHPRC'});
 	}
 return $php_modules{$ver}->{$mod} ? 1 : 0;
 }
