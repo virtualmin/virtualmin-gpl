@@ -947,7 +947,7 @@ if ($virt) {
 	undef(@apache::get_config_cache);
 
 	# Re-generate PHP wrappers to match this system
-	if (defined(&create_php_wrappers)) {
+	if (defined(&create_php_wrappers) && !$_[0]->{'alias'}) {
 		local $mode = &get_domain_php_mode($_[0]);
 		&create_php_wrappers($_[0], $mode);
 		}
