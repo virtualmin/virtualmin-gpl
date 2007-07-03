@@ -667,4 +667,4 @@ Added the status of the Dovecot IMAP/POP3 server to the server status section of
 ---- Changes since 3.43 ----
 Added a script installer for the Textpattern Blog.
 Added a Module Config option to have MySQL users and permissions added to multiple servers, for use with replication or NDBCluster.
-Updated Coppermine script installer to version 1.4.11, PhpWiki to 1.3.14, and Mantis to 1.0.8.
+Updated Coppermine script installer to version 1.4.11, PhpWiki to 1.3.14, TextPattern to 4.0.5, and Mantis to 1.0.8.
