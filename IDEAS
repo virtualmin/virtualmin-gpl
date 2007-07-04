@@ -51,11 +51,12 @@
 	- RTFM (863)
 	- OTRS (863)
 	- mephisto (RoR)
-	- Instiki (broken for subdirs?)
 
  - sub-servers owned by different mailbox user, as suggested by filip
 	- perhaps combine with extra admins?
 
  - backup should include backup settings, and re-create cron job
 	- and Usermin settings?
+
+ - need to check for sqlite for scripts that need it?
 
