@@ -60,4 +60,13 @@
 	- and Usermin settings?
 
  - need to check for sqlite for scripts that need it?
+	- RoR installation outside of document root
+
+ - new fcgid mode, as suggested by filip
+	Action php5-fcgi /fcgi-bin/php5-fcgi
+	AddHandler php5-fcgi .php
+	<Directory /home/xxx/fcgi-bin>
+	Options ExecCGI
+	SetHandler fcgid-script
+	</Location>
 

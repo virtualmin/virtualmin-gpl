@@ -861,6 +861,16 @@ while(<PARKED>) {
 	}
 close(PARKED);
 
+if ($got{'webalizer'}) {
+	# Copy existing Weblizer stats to ~/public_html/stats
+	&$first_print("Copying Weblizer data files ..");
+	&execute_command("cp ".quotemeta("$homesrc/tmp/webalizer")."/* ".
+			       quotemeta(&webalizer_stats_dir(\%dom)));
+	&execute_command("chown -R $dom{'uid'}:$dom{'ugid'} ".
+			 quotemeta(&webalizer_stats_dir(\%dom)));
+        &$second_print($text{'setup_done'});
+	}
+
 if ($parent) {
 	# Re-save parent user, to update Webmin ACLs
 	&refresh_webmin_user($parent);

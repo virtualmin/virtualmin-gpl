@@ -23,21 +23,12 @@ if (!$alog) {
 
 # Create directory for stats
 local $tmpl = &get_template($_[0]->{'template'});
-local $hdir = &public_html_dir($_[0]);
-local $stats;
-if ($tmpl->{'web_stats_hdir'}) {
-	$stats = "$_[0]->{'home'}/$tmpl->{'web_stats_hdir'}";
-	}
-elsif ($tmpl->{'web_stats_dir'}) {
-	$stats = "$hdir/$tmpl->{'web_stats_dir'}";
-	}
-else {
-	$stats = "$hdir/stats";
-	}
+local $stats = &webalizer_stats_dir($_[0]);
 if (!-d $stats) {
-	&system_logged("mkdir '$stats' 2>/dev/null");
-	&system_logged("chmod 755 '$stats'");
-	&system_logged("chown $_[0]->{'uid'}:$_[0]->{'ugid'} '$stats'");
+	&system_logged("mkdir ".quotemeta($stats)." 2>/dev/null");
+	&system_logged("chmod 755 ".quotemeta($stats));
+	&system_logged("chown $_[0]->{'uid'}:$_[0]->{'ugid'} ".
+		       quotemeta($stats));
 	}
 
 local $htaccess_file = "$stats/.htaccess";
@@ -476,6 +467,26 @@ if ($config{'avail_webalizer'}) {
 		}
 	}
 return ( );
+}
+
+# webalizer_stats_dir(&domain)
+# Returns the full directory for Webalizer stats files
+sub webalizer_stats_dir
+{
+local ($d) = @_;
+local $tmpl = &get_template($d->{'template'});
+local $hdir = &public_html_dir($d);
+local $stats;
+if ($tmpl->{'web_stats_hdir'}) {
+	$stats = "$d->{'home'}/$tmpl->{'web_stats_hdir'}";
+	}
+elsif ($tmpl->{'web_stats_dir'}) {
+	$stats = "$hdir/$tmpl->{'web_stats_dir'}";
+	}
+else {
+	$stats = "$hdir/stats";
+	}
+return $stats;
 }
 
 $done_feature_script{'webalizer'} = 1;
