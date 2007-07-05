@@ -61,5 +61,3 @@
 
  - need to check for sqlite for scripts that need it?
 
- - RoR port allocation should be generic, and check other installed scripts
-	- and /etc/services
