@@ -670,3 +670,4 @@ Added a script installer for Instiki, a Ruby on Rails Wiki.
 Added a Module Config option to have MySQL users and permissions added to multiple servers, for use with replication or NDBCluster.
 Updated Coppermine script installer to version 1.4.12, PhpWiki to 1.3.14, TextPattern to 4.0.5, and Mantis to 1.0.8.
 Webalizer statistics are now included in cPanel migrations.
+Added a script installer for Mephisto, a Ruby on Rails Blog.
