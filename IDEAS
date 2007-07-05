@@ -51,6 +51,7 @@
 	- RTFM (863)
 	- OTRS (863)
 	- mephisto (RoR)
+	- radiant cmt (RoR)
 
  - sub-servers owned by different mailbox user, as suggested by filip
 	- perhaps combine with extra admins?
@@ -60,3 +61,5 @@
 
  - need to check for sqlite for scripts that need it?
 
+ - RoR port allocation should be generic, and check other installed scripts
+	- and /etc/services
