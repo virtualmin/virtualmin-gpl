@@ -818,6 +818,7 @@ if ($z) {
 		# Copy whole file
 		&lock_file($filename);
 		&copy_source_dest($_[1], $filename);
+		&bind8::set_ownership($filename);
 		}
 	else {
 		# Only copy section after SOA
