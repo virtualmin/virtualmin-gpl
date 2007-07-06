@@ -70,6 +70,13 @@ if ($ok) {
 				    $sinfo->{'version'});
 		}
 
+	# Show script type
+	$uses = $script->{'uses'}->[0];
+	$utext = $text{'scripts_iuses_'.$uses};
+	if ($utext) {
+		print &ui_table_row($text{'scripts_iuses'}, $utext);
+		}
+
 	# Show parameters
 	$opts = &{$script->{'params_func'}}($d, $ver, $sinfo);
 	print $opts;
