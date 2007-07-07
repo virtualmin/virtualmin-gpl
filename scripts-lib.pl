@@ -147,7 +147,7 @@ sub find_database_table
 {
 local ($dbtype, $dbname, $table) = @_;
 local $cfunc = "check_".$dbtype."_database_clash";
-if (&$cfunc($dbname)) {
+if (&$cfunc(undef, $dbname)) {
 	local $lfunc = "list_".$dbtype."_tables";
 	local @tables = &$lfunc($dbname);
 	foreach my $t (@tables) {
