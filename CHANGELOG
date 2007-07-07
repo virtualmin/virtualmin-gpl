@@ -673,3 +673,4 @@ Webalizer statistics are now included in cPanel migrations.
 Added a script installer for Mephisto, a Ruby on Rails Blog.
 Ruby on Rails script directories are now protected from regular web access via a .htaccess file, as they are always accessed via a proxy.
 Added an installer for Radiant, a Ruby on Rails content management system. Unfortunately it can only be reliably installed at the top level of a virtual server's web directory.
+When a virtual server is deleted, all Mongrel server processes for Ruby on Rails applications associated with it are stopped, and prevented from starting at boot time.

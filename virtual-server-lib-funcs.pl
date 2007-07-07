@@ -6114,6 +6114,25 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 					      : &list_domain_users($dd, 1);
 		local @aliases = &list_domain_aliases($dd);
 
+		# Stop any processes belonging to installed scripts, such
+		# as Ruby on Rails mongrels
+		local $done_stopscripts;
+		if (!$dd->{'alias'} && defined(&list_domain_scripts)) {
+			foreach my $sinfo (&list_domain_scripts($dd)) {
+				local $script = &get_script($sinfo->{'name'});
+				local $sfunc = $script->{'stop_func'};
+				if (defined(&$sfunc)) {
+					&$first_print(
+					    $text{'delete_stopscripts'})
+						if (!$done_stopscripts++);
+					&$sfunc($dd, $sinfo);
+					}
+				}
+			}
+		if ($done_stopscripts) {
+			&$second_print($text{'setup_done'});
+			}
+
 		if (@users) {
 			# Delete mail users and their mail files
 			&$first_print($text{'delete_users'});

@@ -919,6 +919,7 @@ delete_postgresuser=Deleting PostgreSQL login ..
 delete_postgresdb=Deleting PostgreSQL database $1 ..
 delete_webmin=Deleting Webmin login ..
 delete_ssl=Deleting SSL virtual website ..
+delete_stopscripts=Stopping script installer server processes ..
 delete_users=Deleting mailboxes ..
 delete_aliases=Deleting mail aliases ..
 delete_doms=Removing from email domains list ..
