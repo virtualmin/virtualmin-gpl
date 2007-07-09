@@ -178,6 +178,8 @@ if (!defined($dom->{'db_postgres'}) && $dom->{'postgres'}) {
 $dom->{'db_postgres'} = join(" ", &unique(split(/\s+/, $dom->{'db_postgres'})));
 # This is a computed field
 $dom->{'emailto'} = $dom->{'email'} ? $dom->{'email'} :
+		    $dom->{'parent'} ? &get_domain($dom->{'parent'})
+					->{'emailto'} :
 		    $dom->{'mail'} ? $dom->{'user'}.'@'.$dom->{'dom'} :
 		  		     $dom->{'user'}.'@'.&get_system_hostname();
 # Set edit limits based on ability to edit domains
