@@ -154,6 +154,11 @@ local @files = ( { 'name' => "source",
 return @files;
 }
 
+sub script_phpmyadmin_commands
+{
+return ("unzip");
+}
+
 # script_phpmyadmin_install(&domain, version, &opts, &files, &upgrade-info)
 # Actually installs phpMyAdmin, and returns either 1 and an informational
 # message, or 0 and an error
@@ -161,8 +166,6 @@ sub script_phpmyadmin_install
 {
 local ($d, $ver, $opts, $files, $upgrade) = @_;
 local ($out, $ex);
-&has_command("unzip") ||
-	return (0, "The unzip command is needed to extract the phpMyAdmin source");
 local @dbs = split(/\s+/, $opts->{'db'});
 local $dbuser = &mysql_user($d);
 local $dbpass = &mysql_pass($d);

@@ -139,6 +139,11 @@ local @files = ( { 'name' => "source",
 return @files;
 }
 
+sub script_squirrelmail_commands
+{
+return ("tar", "gunzip");
+}
+
 # script_squirrelmail_install(&domain, version, &opts, &files, &upgrade-info)
 # Actually installs SquirrelMail, and returns either 1 and an informational
 # message, or 0 and an error
@@ -146,8 +151,6 @@ sub script_squirrelmail_install
 {
 local ($d, $version, $opts, $files, $upgrade) = @_;
 local ($out, $ex);
-&has_command("tar") && &has_command("gunzip") ||
-	return (0, "The tar and gunzip commands are needed to extract the SquirrelMail source");
 local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
 local $dbuser = $dbtype eq "mysql" ? &mysql_user($d) : &postgres_user($d);
 local $dbpass = $dbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);

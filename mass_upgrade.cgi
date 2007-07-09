@@ -46,6 +46,12 @@ if ($in{'confirm'}) {
 			# Failed depends
 			&$second_print(&text('massscript_edep', $derr));
 			}
+		elsif (@missing = &check_script_required_commands($d, $script,
+					$ver, $sinfo->{'opts'})) {
+			# Missing commands
+			&$second_print(&text('massscript_ecommands',
+					     join(" ", @missing)));
+			}
 		else {
 			# Setup PHP version
 			&$indent_print();

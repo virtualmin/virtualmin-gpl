@@ -72,6 +72,7 @@ local $rv = { 'name' => $name,
 	      'perl_opt_mods_func' => "script_${name}_opt_perl_modules",
 	      'latest_func' => "script_${name}_latest",
 	      'check_latest_func' => "script_${name}_check_latest",
+	      'commands_func' => "script_${name}_commands",
 	      'avail' => !$unavail{$name},
 	      'minversion' => $unavail{$name."_minversion"},
 	    };
@@ -1304,6 +1305,24 @@ if (!&has_command("gem")) {
 		}
 	}
 return 1;
+}
+
+# check_script_required_commands(&domain, &script, version)
+# Checks for commands required by some script, and returns an list of those
+# that are missing.
+sub check_script_required_commands
+{
+local ($d, $script, $ver, $opts) = @_;
+local $cfunc = $script->{'commands_func'};
+local @missing;
+if ($cfunc && defined(&$cfunc)) {
+	foreach my $c (&$cfunc($d, $ver, $opts)) {
+		if (!&has_command($c)) {
+			push(@missing, $c);
+			}
+		}
+	}
+return @missing;
 }
 
 1;

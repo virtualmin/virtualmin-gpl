@@ -151,6 +151,18 @@ else {
 	&$second_print(".. done");
 	}
 
+# Check for needed commands
+&$first_print("Checking for required commands ..");
+@missing = &check_script_required_commands($d, $script, $ver, $opts);
+if (@missing) {
+	&$second_print(".. the following commands are missing : ".
+		       join(" ", @missing));
+	exit(1);
+	}
+else {
+	&$second_print(".. done");
+	}
+
 # Check PHP version
 $phpvfunc = $script->{'php_vers_func'};
 if (defined(&$phpvfunc)) {

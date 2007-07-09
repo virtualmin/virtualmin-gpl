@@ -103,6 +103,11 @@ local @files = ( { 'name' => "source",
 return @files;
 }
 
+sub script_dokuwiki_commands
+{
+return ("tar", "gunzip");
+}
+
 # script_dokuwiki_install(&domain, version, &opts, &files, &upgrade-info)
 # Actually installs PhpWiki, and returns either 1 and an informational
 # message, or 0 and an error
@@ -110,10 +115,6 @@ sub script_dokuwiki_install
 {
 local ($d, $version, $opts, $files, $upgrade) = @_;
 local ($out, $ex);
-&has_command("tar") ||
-   return (0, "The tar command is needed to extract the DokuWiki source");
-&has_command("gunzip") ||
-   return (0, "The gunzip command is needed to extract the DokuWiki source");
 
 # Create target dir
 if (!-d $opts->{'dir'}) {

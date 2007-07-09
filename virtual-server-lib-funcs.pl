@@ -5973,6 +5973,15 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			next;
 			}
 
+		# Check for needed commands
+		local @missing = &check_script_required_commands($d, $script,
+								 $ver, $opts);
+		if (@missing) {
+			&$second_print(&text('setup_scriptcommands',
+				    join(' ', @missing)));
+			next;
+			}
+
 		# Check PHP version
 		local $phpvfunc = $script->{'php_vers_func'};
 		local $phpver;

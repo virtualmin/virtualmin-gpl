@@ -122,6 +122,11 @@ local @files = ( { 'name' => "source",
 return @files;
 }
 
+sub script_phppgadmin_commands
+{
+return ("unzip");
+}
+
 # script_phppgadmin_install(&domain, version, &opts, &files, &upgrade-info)
 # Actually installs phpPgAdmin, and returns either 1 and an informational
 # message, or 0 and an error
@@ -129,8 +134,6 @@ sub script_phppgadmin_install
 {
 local ($d, $version, $opts, $files, $upgrade) = @_;
 local ($out, $ex);
-&has_command("unzip") ||
-	return (0, "The unzip command is needed to extract the phpPgAdmin source");
 local @dbs = split(/\s+/, $opts->{'db'});
 local $dbuser = &postgres_user($d);
 local $dbpass = &postgres_pass($d);

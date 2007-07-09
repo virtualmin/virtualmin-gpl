@@ -24,6 +24,10 @@ else {
 $derr = &{$script->{'depends_func'}}($d, $ver);
 &error(&text('scripts_edep', $derr)) if ($derr);
 
+# Check for commands
+@missing = &check_script_required_commands($d, $script, $ver, $opts);
+&error(&text('scripts_ecommands', join(' ', @missing))) if (@missing);
+
 # Parse inputs
 %incopy = %in;
 $opts = &{$script->{'parse_func'}}($d, $ver, \%incopy, $sinfo);

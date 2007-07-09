@@ -65,4 +65,5 @@
 	SetHandler fcgid-script
 	</Location>
 
- - mongrel needs gcc, make, ruby-devel, sqlite3-devel (perhaps)
+ - documentation (API, script installers, plugins, styles)
+
