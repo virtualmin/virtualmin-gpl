@@ -473,7 +473,8 @@ sub modify_spam
 # Just remove the domain's procmail config file
 sub delete_spam
 {
-&$first_print($text{'delete_spam'});
+&$first_print($_[0]->{'virus'} ? $text{'delete_spamvirus'}
+			       : $text{'delete_spam'});
 local $spamrc = "$procmail_spam_dir/$_[0]->{'id'}";
 &unlink_logged($spamrc);
 local $spamdir = "$spam_config_dir/$_[0]->{'id'}";

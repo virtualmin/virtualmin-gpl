@@ -68,9 +68,14 @@ sub modify_virus
 # Just remove the procmail entry that calls clamscan
 sub delete_virus
 {
+local $spamrc = "$procmail_spam_dir/$_[0]->{'id'}";
+if (!-r $spamrc && !$_[0]->{'spam'}) {
+	# Spam already deleted, so the whole procmail file will have been
+	# already removed. So do nothing!
+	return 1;
+	}
 &$first_print($text{'delete_virus'});
 &require_spam();
-local $spamrc = "$procmail_spam_dir/$_[0]->{'id'}";
 &lock_file($spamrc);
 local @recipes = &procmail::parse_procmail_file($spamrc);
 local @clamrec = &find_clam_recipe(\@recipes);

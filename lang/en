@@ -941,6 +941,7 @@ delete_logrotate=Disabling log file rotation ..
 delete_failure=.. $1 failed! : $2
 delete_evdeldomain=.. vdeldomain failed : $1
 delete_spam=Turning off spam filtering ..
+delete_spamvirus=Turning off spam and virus filtering ..
 delete_virus=Turning off virus filtering ..
 delete_virusnone=.. Procmail entry not found.
 delete_status=Removing status monitor for website ..
