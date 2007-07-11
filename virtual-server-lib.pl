@@ -165,7 +165,7 @@ $initial_users_dir = "$module_config_directory/initial";
 
 @edit_limits = ('domain', 'users', 'aliases', 'dbs', 'scripts',
 	        'ip', 'ssl', 'forward', 'admins', 'spam', 'phpver', 'backup',
-		'sharedips', 'disable', 'delete');
+		'sharedips', 'catchall', 'disable', 'delete');
 
 @virtualmin_backups = ( 'config', 'templates',
 			$virtualmin_pro ? ( 'resellers' ) : ( ),

@@ -1847,6 +1847,7 @@ limits_edit_admins=Can manage extra admins
 limits_edit_spam=Can configure spam and virus delivery
 limits_edit_phpver=Can select PHP versions
 limits_edit_sharedips=Can select shared IPs
+limits_edit_catchall=Can create catchall aliases
 limits_shell=Allowed login type
 limits_shell_nologin=No login
 limits_shell_ftp=FTP only

@@ -55,12 +55,21 @@ if ($can_alias_comments) {
 # Alias name, or catchall
 $name = $virt->{'from'};
 $name =~ s/\@\S+$//;
-print &ui_table_row(&hlink($text{'alias_name'}, "aliasname"),
-	    &ui_radio("name_def", $name eq "" && !$in{'new'} ? 1 : 0,
-		       [ [ 1, $text{'alias_catchall'} ],
-			 [ 0, $text{'alias_mailbox'} ] ])."\n".
-	    &ui_textbox("name", $name, 20)."\@".$d->{'dom'},
-	    undef, \@tds);
+if (&can_edit_catchall() || ($name eq "" && !$in{'new'})) {
+	# Allow catchall option
+	print &ui_table_row(&hlink($text{'alias_name'}, "aliasname"),
+		    &ui_radio("name_def", $name eq "" && !$in{'new'} ? 1 : 0,
+			       [ [ 1, $text{'alias_catchall'} ],
+				 [ 0, $text{'alias_mailbox'} ] ])."\n".
+		    &ui_textbox("name", $name, 20)."\@".$d->{'dom'},
+		    undef, \@tds);
+	}
+else {
+	# Specific alias name only
+	print &ui_table_row(&hlink($text{'alias_name'}, "aliasname2"),
+		    &ui_textbox("name", $name, 20)."\@".$d->{'dom'},
+		    undef, \@tds);
+	}
 
 print &ui_table_hr();
 

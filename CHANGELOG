@@ -675,3 +675,4 @@ Ruby on Rails script directories are now protected from regular web access via a
 Added an installer for Radiant, a Ruby on Rails content management system. Unfortunately it can only be reliably installed at the top level of a virtual server's web directory.
 When a virtual server is deleted, all Mongrel server processes for Ruby on Rails applications associated with it are stopped, and prevented from starting at boot time.
 Added checks for gcc and make to the Ruby on Rails script installers (needed to compile the MySQL driver), and make checking for commands by scripts more generic.
+Added a restriction to the Edit Owner Limits page to prevent the creation of catchall email aliases.
