@@ -436,7 +436,7 @@ if ($config{'proxy_pass'} && !$aliasdom) {
 	}
 
 # Show field for mail forwarding
-if ($can_feature{'mail'} && !$aliasdom && !$subdom) {
+if ($can_feature{'mail'} && !$aliasdom && !$subdom && &can_edit_catchall()) {
 	print &ui_table_row(&hlink($text{'form_fwdto'}, "fwdto"),
 		&ui_opt_textbox("fwdto", undef, 30, $text{'form_fwdto_none'}),
 		undef, \@tds);

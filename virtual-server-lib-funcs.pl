@@ -1994,7 +1994,7 @@ return &master_admin() || &reseller_admin() || $access{'edit_sharedips'};
 
 sub can_edit_catchall
 {
-return &master_admin() || $access{'edit_catchall'};
+return &master_admin() || &reseller_admin() || $access{'edit_catchall'};
 }
 
 sub can_edit_scripts

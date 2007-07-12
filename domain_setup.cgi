@@ -159,7 +159,8 @@ if (!$aliasdom) {
 		$in{'db'} =~ /^[a-z0-9\-\_]+$/i ||
 			&error($text{'setup_edbname'});
 		}
-	if (defined($in{'fwdto'}) && !$in{'fwdto_def'} && !$subdom) {
+	if (defined($in{'fwdto'}) && !$in{'fwdto_def'} && !$subdom &&
+	    &can_edit_catchall()) {
 		$in{'mail'} ||
 			&error($text{'setup_efwdtomail'});
 		$in{'fwdto'} =~ /^\S+\@\S+$/ ||
