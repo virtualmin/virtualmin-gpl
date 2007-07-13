@@ -1325,5 +1325,43 @@ if ($cfunc && defined(&$cfunc)) {
 return @missing;
 }
 
+# create_script_wget_job(&domain, url, mins, hours)
+# Creates a cron job running as some domain owner which regularly wget's
+# some URL, to perform some periodic task for a script
+sub create_script_wget_job
+{
+local ($d, $url, $mins, $hours) = @_;
+return 0 if (!&foreign_check("cron"));
+&foreign_require("cron", "cron-lib.pl");
+local $wget = &has_command("wget");
+return 0 if (!$wget);
+local $job = { 'user' => $d->{'user'},
+	       'active' => 1,
+	       'command' => "$wget -q -O /dev/null $url",
+	       'mins' => $mins,
+	       'hours' => $hours,
+	       'days' => '*',
+	       'months' => '*',
+	       'weekdays' => '*' };
+&cron::create_cron_job($job);
+return 1;
+}
+
+# delete_script_wget_job(&domain, url)
+# Deletes the cron job that regularly fetches some URL
+sub delete_script_wget_job
+{
+local ($d, $url) = @_;
+return 0 if (!&foreign_check("cron"));
+&foreign_require("cron", "cron-lib.pl");
+local @jobs = &cron::list_cron_jobs();
+local ($job) = grep { $_->{'user'} eq $d->{'user'} &&
+		      $_->{'command'} =~ /^\S*wget\s.*\s(\S+)$/ &&
+		      $1 eq $url } @jobs;
+return 0 if (!$job);
+&cron::delete_cron_job($job);
+return 1;
+}
+
 1;
 
