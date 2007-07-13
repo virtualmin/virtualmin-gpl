@@ -39,7 +39,7 @@ if ($derr) {
 # Check for commands
 @missing = &check_script_required_commands($d, $script, $ver, $opts);
 if (@missing) {
-	print &text('scripts_ecommands', join(' ', @missing))),"<p>\n";
+	print &text('scripts_ecommands', join(' ', @missing)),"<p>\n";
 	$ok = 0;
 	}
 
