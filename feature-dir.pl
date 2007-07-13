@@ -150,6 +150,8 @@ $xtemp = &transname();
 if ($_[2]->{'dirnologs'}) {
 	&print_tempfile(XTEMP, "logs\n");
 	}
+&print_tempfile(XTEMP, ".zfs");
+&print_tempfile(XTEMP, "$config{'homes_dir'}/.zfs");
 &print_tempfile(XTEMP, "virtualmin-backup\n");
 &close_tempfile(XTEMP);
 
