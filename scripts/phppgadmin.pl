@@ -19,7 +19,7 @@ return "A browser-based PostgreSQL database management interface.";
 # script_phppgadmin_versions()
 sub script_phppgadmin_versions
 {
-return ( "4.1.2" );
+return ( "4.1.3" );
 }
 
 sub script_phppgadmin_category
