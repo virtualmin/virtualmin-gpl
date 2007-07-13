@@ -147,12 +147,23 @@ local $gzip = $_[3] && &has_command("gzip");
 $xtemp = &transname();
 &open_tempfile(XTEMP, ">$xtemp");
 &print_tempfile(XTEMP, "domains\n");
+&print_tempfile(XTEMP, "./domains\n");
 if ($_[2]->{'dirnologs'}) {
 	&print_tempfile(XTEMP, "logs\n");
+	&print_tempfile(XTEMP, "./logs\n");
 	}
-&print_tempfile(XTEMP, ".zfs");
-&print_tempfile(XTEMP, "$config{'homes_dir'}/.zfs");
 &print_tempfile(XTEMP, "virtualmin-backup\n");
+&print_tempfile(XTEMP, "./virtualmin-backup\n");
+
+# Exclude all .zfs files, for Solaris
+open(FIND, "find ".quotemeta($_[0]->{'home'})." -name .zfs |");
+while(<FIND>) {
+	s/\r|\n//g;
+	s/^\Q$_[0]->{'home'}\E\///;
+	&print_tempfile(XTEMP, "$_\n");
+	&print_tempfile(XTEMP, "./$_\n");
+	}
+close(FIND);
 &close_tempfile(XTEMP);
 
 # Do the backup
