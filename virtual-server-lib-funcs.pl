@@ -2828,7 +2828,8 @@ local $mailmod = &foreign_check("sendmail") ? "sendmail" :
 		 $config{'mail_system'} == 1 ? "sendmail" :
 		 $config{'mail_system'} == 0 ? "postfix" :
 					       "qmailadmin";
-&system_logged("cp $root_directory/$mailmod/autoreply.pl $module_config_directory");
+&copy_source_dest("$root_directory/$mailmod/autoreply.pl",
+		  $module_config_directory);
 &system_logged("chmod 755 $module_config_directory/config");
 if (-d $sendmail::config{'smrsh_dir'} &&
     !-r "$sendmail::config{'smrsh_dir'}/autoreply.pl") {

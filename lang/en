@@ -703,6 +703,12 @@ alias_efile=Attached file $1 for autoreply does not exist
 alias_eautotextfile=Autoreply files cannot be entered unless a message is
 alias_ebefore=Alias pre-modification command failed : $1
 alias_tomeyes=Yes, deliver to mailbox
+alias_start=Automatic reply start date
+alias_end=Automatic reply end date
+alias_pdef=Any time
+alias_psel=On date
+alias_estart=Invalid automatic reply start date
+alias_eend=Invalid automatic reply end date
 
 stop_ecannot=You are not allowed to stop services
 stop_err=Failed to stop service

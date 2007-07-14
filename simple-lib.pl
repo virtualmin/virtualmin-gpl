@@ -1,5 +1,7 @@
 # Functions for simple alias parsing
 
+use Time::Local;
+
 # get_simple_alias(&domain, &alias)
 # If the current forwarding rules are simple (local delivery, autoreply
 # and forwarding only), return a hash ref containing the settings. Otherwise,
@@ -74,6 +76,12 @@ while(<FILE>) {
 	elsif (/^Autoreply-File:\s*(.*)/) {
 		push(@{$simple->{'autoreply_file'}}, $1);
 		}
+	elsif (/^Autoreply-Start:\s*(\d+)/) {
+		$simple->{'autoreply_start'} = $1;
+		}
+	elsif (/^Autoreply-End:\s*(\d+)/) {
+		$simple->{'autoreply_end'} = $1;
+		}
 	elsif (/^From:\s*(.*)/) {
 		$simple->{'from'} = $1;
 		}
@@ -142,6 +150,14 @@ if ($simple->{'autotext'}) {
         foreach my $f (@{$simple->{'autoreply_file'}}) {
                 &print_tempfile(AUTO, "Autoreply-File: $f\n");
                 }
+	if ($simple->{'autoreply_start'}) {
+		&print_tempfile(AUTO,
+			"Autoreply-Start: $simple->{'autoreply_start'}\n");
+		}
+	if ($simple->{'autoreply_end'}) {
+		&print_tempfile(AUTO,
+			"Autoreply-End: $simple->{'autoreply_end'}\n");
+		}
         if ($simple->{'from'}) {
                 &print_tempfile(AUTO, "From: $simple->{'from'}\n");
                 }
@@ -233,6 +249,24 @@ print &ui_table_row(&hlink($text{$sfx.'_period'}, $sfx."_period"),
 	    $text{'alias_mins'},
 	    undef, $tds);
 
+# Autoreply date range
+foreach my $p ('start', 'end') {
+	local @tm;
+	if ($simple->{'autoreply_'.$p}) {
+		@tm = localtime($simple->{'autoreply_'.$p});
+		$tm[4]++; $tm[5] += 1900;
+		}
+	local $dis1 = &js_disable_inputs([ 'd'.$p, 'm'.$p, 'y'.$p ], [ ]);
+	local $dis2 = &js_disable_inputs([ ], [ 'd'.$p, 'm'.$p, 'y'.$p ]);
+	print &ui_table_row(&hlink($text{'alias_'.$p}, 'alias_'.$p),
+		&ui_radio($p.'_def', $simple->{'autoreply_'.$p} ? 0 : 1,
+			  [ [ 1, $text{'alias_pdef'}, "onClick='$dis1'" ],
+			    [ 0, $text{'alias_psel'}, "onClick='$dis2'" ] ]).
+		&ui_date_input($tm[3], $tm[4], $tm[5],
+			       'd'.$p, 'm'.$p, 'y'.$p, !$tm[3])." ".
+		&date_chooser_button('d'.$p, 'm'.$p, 'y'.$p));
+	}
+
 if (!$nofrom) {
 	print &ui_table_row(&hlink($text{$sfx.'_from'}, $sfx."_from"),
 		&ui_radio("from_def", $simple->{'from'} ? 0 : 1,
@@ -302,6 +336,23 @@ if ($in->{'autotext'}) {
 				}
 			}
 		}
+
+	# Save autoreply start and end
+	foreach my $p ('start', 'end') {
+		if ($in{'d'.$p}) {
+			local ($s, $m, $h) = $p eq 'start' ? (0, 0, 0) :
+						(59, 59, 23);
+			local $tm = timelocal($s, $m, $h, $in{'d'.$p},
+                                        $in{'m'.$p}-1, $in{'y'.$p}-1900);
+			$tm || &error($text{'alias_e'.$p});
+			$simple->{'autoreply_'.$p} = $tm;
+			}
+		else {
+			delete($simple->{'autoreply_'.$p});
+			}
+		}
+
+	# Save autoreply from address
 	if (!$nofrom) {
 		if ($in->{'from_def'}) {
 			delete($simple->{'from'});
