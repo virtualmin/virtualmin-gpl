@@ -210,7 +210,9 @@ if ($subdomain) {
 	}
 
 # Validate args and work out defaults for those unset
-$domain =~ /^[A-Za-z0-9\.\-]+$/ || usage($text{'setup_edomain'});
+$domain =~ /^[A-Za-z0-9\.\-]+$/ || &usage($text{'setup_edomain'});
+$domain =~ /^\./ && &usage($text{'setup_edomain'});
+$domain =~ /\.$/ && &usage($text{'setup_edomain'});
 &lock_domain_name($domain);
 foreach $d (&list_domains()) {
         usage($text{'setup_edomain2'}) if (lc($d->{'dom'}) eq lc($domain));

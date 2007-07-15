@@ -44,6 +44,8 @@ if ($in{'subdom'}) {
 
 # Validate inputs (check domain name to see if in use)
 $in{'dom'} =~ /^[A-Za-z0-9\.\-]+$/ || &error($text{'setup_edomain'});
+$in{'dom'} =~ /^\./ && &error($text{'setup_edomain'});
+$in{'dom'} =~ /\.$/ && &error($text{'setup_edomain'});
 $in{'dom'} = lc($in{'dom'});
 &lock_domain_name($in{'dom'});
 if ($subdom) {
