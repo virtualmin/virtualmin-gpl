@@ -278,6 +278,8 @@ if (!$parent) {
 		&usage(&text('setup_eusername', $user, $uerr));
 		}
 	$user =~ /^[^\t :]+$/ || &usage($text{'setup_euser2'});
+	&indexof($user, @banned_usernames) < 0 ||
+		&usage(&text('setup_eroot', 'root'));
 	}
 
 # Validate quotas

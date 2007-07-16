@@ -117,7 +117,7 @@ foreach my $pname (@confplugins) {
 @all_database_types = ( ($config{'mysql'} ? ("mysql") : ( )),
 		        ($config{'postgres'} ? ("postgres") : ( )),
 		        @database_plugins );
-		       
+@banned_usernames = ( 'root' );
 
 $backup_cron_cmd = "$module_config_directory/backup.pl";
 $bw_cron_cmd = "$module_config_directory/bw.pl";

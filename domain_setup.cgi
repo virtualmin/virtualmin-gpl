@@ -83,6 +83,8 @@ if (!$parentuser) {
 		$user =~ /^[^\t :]+$/ || &error($text{'setup_euser2'});
 		defined(getpwnam($user)) && &error($text{'setup_euser'});
 		}
+	&indexof($user, @banned_usernames) < 0 ||
+		&error(&text('setup_eroot', 'root'));
 
 	# Parse mail group name
 	if ($in{'mgroup_def'}) {
