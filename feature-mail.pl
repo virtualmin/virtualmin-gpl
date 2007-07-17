@@ -322,6 +322,18 @@ elsif ($config{'mail_system'} == 5) {
 	}
 &$second_print($text{'setup_done'});
 
+if ($config{'delete_virts'}) {
+	# Delete all email aliases
+	&$first_print($text{'delete_aliases'});
+	foreach my $v (&list_virtusers()) {
+		if ($v->{'from'} =~ /\@(\S+)$/ &&
+		    $1 eq $_[0]->{'dom'}) {
+			&delete_virtuser($v);
+			}
+		}
+	&$second_print($text{'setup_done'});
+	}
+
 # Remove any secondary MX servers
 &delete_on_secondaries($_[0]);
 }
