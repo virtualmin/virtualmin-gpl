@@ -65,5 +65,3 @@
 	SetHandler fcgid-script
 	</Location>
 
- - documentation (API, script installers, plugins, styles)
-

@@ -18,15 +18,15 @@ if ($virt) {
 		push(@actions, &apache::find_directive("Action",
 						       $dir->{'members'}));
 		}
-	foreach my $a (@actions) {
-		if ($a =~ /^application\/x-httpd-php.\s+\/cgi-bin\/php.\.cgi/) {
-			return 'cgi';
-			}
-		}
 	foreach my $f (&apache::find_directive("FCGIWrapper",
 						$dir->{'members'})) {
 		if ($f =~ /^\Q$d->{'home'}\E\/fcgi-bin\/php.\.fcgi/) {
 			return 'fcgid';
+			}
+		}
+	foreach my $a (@actions) {
+		if ($a =~ /^application\/x-httpd-php.\s+\/cgi-bin\/php.\.cgi/) {
+			return 'cgi';
 			}
 		}
 	}
