@@ -1905,7 +1905,7 @@ return $config{'show_ugroup'} && &master_admin();
 # can_use_feature(feature)
 sub can_use_feature
 {
-return &master_admin() || $access{"feature_".$_[0]};
+return &master_admin() || $config{$f} == 3 || $access{"feature_".$_[0]};
 }
 
 # Returns 1 if the current user is allowed to select a private or shared
