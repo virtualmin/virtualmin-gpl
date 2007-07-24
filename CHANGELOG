@@ -678,3 +678,5 @@ Added checks for gcc and make to the Ruby on Rails script installers (needed to 
 Added a restriction to the Edit Owner Limits page to prevent the creation of catchall email aliases.
 Added fields to the autoreply section of the alias and user email forwarding pages to limit the date range on which replies are sent.
 Added a Module Config option to delete aliases when email is disabled for a domain.
+---- Changes since 3.44 ----
+Updated phpBB script installer to allow a choice of the 3.0 and 2.0 versions.
