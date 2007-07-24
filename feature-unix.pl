@@ -506,13 +506,15 @@ sub get_unix_shells
 {
 # Read FTP-capable shells
 local $_;
+local @shells;
 open(SHELLS, "/etc/shells");
 while(<SHELLS>) {
 	s/\r|\n//g;
 	s/#.*$//;
-	$shells{$_} = 1 if (/\S/);
+	push(@shells, $_) if (/\S/);
 	}
 close(SHELLS);
+local %shells = map { $_, 1 } @shells;
 
 # Find no-login shells
 local @nologin = ($config{'shell'}, '/dev/null', '/sbin/nologin',
