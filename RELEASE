@@ -1,9 +1,16 @@
- x Create tar.gz file
+ - Create tar.gz file
 
- x Upload to download.webmin.com
+ - build RPM and .deb
+	./makemodulerpm.pl --dir virtual-server gpl-virtual-server
+	./makemodulerpm.pl virtual-server-theme
+	./makemoduledeb.pl --dir virtual-server gpl-virtual-server
+	./makemoduledeb.pl virtual-server-theme
+
+ - Upload to download.webmin.com
 
  - Add the freshmeat.net
 
- x Announce on mailing list
+ - Announce on mailing list
 
- x Add to updates.txt
+ - Add to updates.txt
+
