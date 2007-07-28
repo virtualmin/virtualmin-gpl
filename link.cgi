@@ -6,17 +6,32 @@ require '../web-lib.pl';
 &init_config();
 #$ENV{'PATH_INFO'} =~ /^\/(.*)$/ ||
 #	&error("Bad PATH_INFO : $ENV{'PATH_INFO'}");
-$ENV{'PATH_INFO'} =~ /^\/([0-9\.]+)\/(http|https):\/+([^:\/]+)(:(\d+))?(.*)$/ ||
+if ($ENV{'PATH_INFO'} =~ /^\/([0-9\.]+)\/(http|https):\/+([^:\/]+)(:(\d+))?(.*)$/) {
+	# Version with IP and URL
+	$ip = $1;
+	$protocol = $2;
+	$ssl = $protocol eq "https";
+	$host = $3;
+	$port = $5 || 80;
+	$path = $6;
+	$openurl = "$2://$3$4$6";
+	$baseurl = "$2://$3$4";
+	}
+elsif ($ENV{'PATH_INFO'} =~ /^\/(http|https):\/+([^:\/]+)(:(\d+))?(.*)$/) {
+	# Version without IP, for offsite links
+	$protocol = $1;
+	$ssl = $protocol eq "https";
+	$host = $2;
+	$port = $4 || 80;
+	$path = $5;
+	$openurl = "$1://$2$3$5";
+	$baseurl = "$1://$2$3";
+	$ip = &to_ipaddress($host);
+	}
+else {
 	&error("Bad PATH_INFO : $ENV{'PATH_INFO'}");
-delete($ENV{'HTTP_REFERER'});		# So error page doesn't link to it
-$ip = $1;
-$protocol = $2;
-$ssl = $protocol eq "https";
-$host = $3;
-$port = $5 || 80;
-$path = $6;
-$openurl = "$2://$3$4$6";
-$baseurl = "$2://$3$4";
+	}
+delete($ENV{'HTTP_REFERER'});	# So error page doesn't link to it
 if ($ENV{'QUERY_STRING'}) {
 	$path .= '?'.$ENV{'QUERY_STRING'};
 	}
@@ -25,6 +40,7 @@ elsif (@ARGV) {
 	}
 $linkurl = "/$module_name/link.cgi/$ip/";
 $url = "/$module_name/link.cgi/$ip/$openurl";
+$noiplinkurl = "/$module_name/link.cgi/";
 $| = 1;
 $meth = $ENV{'REQUEST_METHOD'};
 
@@ -131,9 +147,9 @@ if ($header{'content-type'} =~ /text\/html/ && !$header{'x-no-links'}) {
 		s/src=(\/[^ "'>]*)/src=$baseurl$1/gi;
 
 		# Fix offsite image links <img src=http://www.blah.com/foo.gif>
-		s/src='((http|https):\/\/[^']*)'/src='$linkurl$1'/gi;
-		s/src="((http|https):\/\/[^"]*)"/src="$linkurl$1"/gi;
-		s/src=((http|https):\/\/[^ "'>]*)/src=$linkurl$1/gi;
+		s/src='((http|https):\/\/[^']*)'/src='$noiplinkurl$1'/gi;
+		s/src="((http|https):\/\/[^"]*)"/src="$noiplinkurl$1"/gi;
+		s/src=((http|https):\/\/[^ "'>]*)/src=$noiplinkurl$1/gi;
 
 		# Fix absolute hrefs like <a href=/foo.html>
 		s/href='(\/[^']*)'/href='$baseurl$1'/gi;
@@ -141,9 +157,9 @@ if ($header{'content-type'} =~ /text\/html/ && !$header{'x-no-links'}) {
 		s/href=(\/[^ "'>]*)/href=$baseurl$1/gi;
 
 		# Fix offsite hrefs like <a href=http://www.blah.com/>
-		s/href='((http|https):\/\/[^']*)'/href='$linkurl$1'/gi;
-		s/href="((http|https):\/\/[^"]*)"/href="$linkurl$1"/gi;
-		s/href=((http|https):\/\/[^ "'>]*)/href=$linkurl$1/gi;
+		s/href='((http|https):\/\/[^']*)'/href='$noiplinkurl$1'/gi;
+		s/href="((http|https):\/\/[^"]*)"/href="$noiplinkurl$1"/gi;
+		s/href=((http|https):\/\/[^ "'>]*)/href=$noiplinkurl$1/gi;
 
 		# Fix absolute form actions like <form action=/foo>
 		s/action='(\/[^']*)'/action='$baseurl$1'/gi;
@@ -151,9 +167,9 @@ if ($header{'content-type'} =~ /text\/html/ && !$header{'x-no-links'}) {
 		s/action=(\/[^ "'>]*)/action=$baseurl$1/gi;
 
 		# Fix offsite form actions
-		s/action='((http|https):\/\/[^']*)'/action='$linkurl$1'/gi;
-		s/action="((http|https):\/\/[^"]*)"/action="$linkurl$1"/gi;
-		s/action=((http|https):\/\/[^ "'>]*)/action=$linkurl$1/gi;
+		s/action='((http|https):\/\/[^']*)'/action='$noiplinkurl$1'/gi;
+		s/action="((http|https):\/\/[^"]*)"/action="$noiplinkurl$1"/gi;
+		s/action=((http|https):\/\/[^ "'>]*)/action=$noiplinkurl$1/gi;
 
 		# Fix CSS imports
 		s/\@import '(\/[^']*)'/\@import '$baseurl$1'/gi;
