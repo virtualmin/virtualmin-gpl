@@ -5,6 +5,7 @@ require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
+&can_edit_html() || &error($text{'edit_ecannot'});
 
 $editing = $in{'editok'} ? 1 :
 	   $in{'createok'} || $in{'create'} ? 2 : 0;

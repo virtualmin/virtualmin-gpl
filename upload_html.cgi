@@ -6,6 +6,7 @@ require './virtual-server-lib.pl';
 &error_setup($text{'upload_err'});
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
+&can_edit_html() || &error($text{'edit_ecannot'});
 
 # Validate inputs
 $pub = &public_html_dir($d);

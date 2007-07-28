@@ -193,8 +193,9 @@ else {
 # Set edit limits based on ability to edit domains
 foreach my $ed (@edit_limits) {
 	if (!defined($dom->{'edit_'.$ed})) {
-		$dom->{'edit_'.$ed} = $ed eq "users" || $ed eq "aliases" ? 1 :
-				    $dom->{'domslimit'} ? 1 : 0;
+		$dom->{'edit_'.$ed} = $ed eq "users" || $ed eq "aliases" ||
+				      $ed eq "html" ? 1 :
+				      $dom->{'domslimit'} ? 1 : 0;
 		}
 	}
 delete($dom->{'pass_set'});	# Only set by callers for modify_* functions
@@ -2003,6 +2004,11 @@ return &master_admin() || &reseller_admin() || $access{'edit_sharedips'};
 sub can_edit_catchall
 {
 return &master_admin() || &reseller_admin() || $access{'edit_catchall'};
+}
+
+sub can_edit_html
+{
+return &master_admin() || &reseller_admin() || $access{'edit_html'};
 }
 
 sub can_edit_scripts
@@ -8737,7 +8743,7 @@ if ($d->{'web'} && $config{'web'} && &can_edit_scripts() &&
 
 if ($d->{'web'} && $config{'web'} && $d->{'dir'} && !$d->{'alias'} &&
     !$d->{'proxy_pass_mode'} &&
-    $virtualmin_pro) {
+    $virtualmin_pro && &can_edit_html()) {
 	# Edit web pages button
 	push(@rv, { 'page' => 'edit_html.cgi',
 		    'title' => $text{'edit_html'},
