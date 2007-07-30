@@ -10,7 +10,7 @@ if ($config{'backup_all'} == 1) {
 	@doms = &list_domains();
 	}
 elsif ($config{'backup_all'} == 2) {
-	%exc = map { $_, 1 } split(/\0/, $config{'backup_doms'});
+	%exc = map { $_, 1 } split(/\s+/, $config{'backup_doms'});
 	@doms = grep { !$exc{$_->{'id'}} } &list_domains();
 	}
 else {
