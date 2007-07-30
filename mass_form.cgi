@@ -30,7 +30,7 @@ foreach $quota (@qtypes) {
 	    &opt_quota_input($quota, "none",
 			     $quota eq "quota" ? "home" :
 				$quota eq "mquota" ? "mail" : "none",
-			     $text{'mass_unlimited'}, $text{'mass_set'}));
+			     $text{'mass_leave'}, $text{'mass_set'}));
 	}
 
 # Primary email address
