@@ -871,6 +871,16 @@ if ($got{'webalizer'}) {
         &$second_print($text{'setup_done'});
 	}
 
+if ($got{'virtualmin-awstats'}) {
+	# Copy AWstats data files to ~/awstats
+	&$first_print("Copying AWstats data files ..");
+	&execute_command("cp ".quotemeta("$homesrc/tmp/awstats")."/* ".
+			       quotemeta("$dom{'home'}/awstats"));
+	&execute_command("chown -R $dom{'uid'}:$dom{'ugid'} ".
+			 quotemeta("$dom{'home'}/awstats"));
+        &$second_print($text{'setup_done'});
+	}
+
 if ($parent) {
 	# Re-save parent user, to update Webmin ACLs
 	&refresh_webmin_user($parent);

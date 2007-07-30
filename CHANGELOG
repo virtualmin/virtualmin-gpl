@@ -683,3 +683,4 @@ Updated phpBB script installer to allow a choice of the 3.0 and 2.0 versions.
 Updated the Drupal script installer to versions 5.2 and 4.7.7.
 Added an option on the Edit Owner Limits page to prevent use of the HTML editor.
 Added a script installer for the PostNuke CMS.
+AWstats statistics are now included in cPanel migrations.
