@@ -8088,7 +8088,7 @@ if ($status == 0 && $doms) {
 	local @doms = grep { !$_->{'alias'} } &list_domains();
 	if (@doms > $doms) {
 		$status = 1;
-		$err = "Your system is licenced for only $doms servers, but you have ",scalar(@doms),".";
+		$err = "Your system is licenced for only $doms servers, but you have ".scalar(@doms).".";
 		}
 	}
 return ($status, $expiry, $err, $doms);
