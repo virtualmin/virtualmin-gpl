@@ -25,12 +25,12 @@ foreach $mu (@mass) {
 @musers || &error($text{'mass_enone'});
 
 # Validate inputs
-$in{'quota_def'} != 1 || $in{'quota'} =~ /^[0-9\.]+$/ ||
-	&error($text{'user_equota'});
-$in{'mquota_def'} != 1 || $in{'mquota'} =~ /^[0-9\.]+$/ ||
-	&error($text{'user_emquota'});
-$in{'qquota_def'} != 1 || $in{'qquota'} =~ /^[0-9]+$/ ||
-	&error($text{'user_eqquota'});
+!&has_home_quotas() || $in{'quota_def'} != 0 ||
+    $in{'quota'} =~ /^[0-9\.]+$/ || &error($text{'user_equota'});
+!&has_mail_quotas() || $in{'mquota_def'} != 0 ||
+    $in{'mquota'} =~ /^[0-9\.]+$/ || &error($text{'user_emquota'});
+!&has_server_quotas() || $in{'qquota_def'} != 0 ||
+    $in{'qquota'} =~ /^[0-9]+$/ || &error($text{'user_eqquota'});
 
 # Update each one
 &ui_print_unbuffered_header(&domain_in($d), $text{'mass_title'}, "");
@@ -43,7 +43,7 @@ foreach $user (@musers) {
 	$pop3 = &remove_userdom($user->{'user'}, $d);
 
 	# Home directory quota
-	if ($in{'quota_def'} != 2) {
+	if (&has_home_quotas() && $in{'quota_def'} != 2) {
 		&$first_print($text{'mass_setquota'});
 		if ($user->{'domainowner'}) {
 			&$second_print($text{'mass_edomainowner'});
@@ -75,7 +75,7 @@ foreach $user (@musers) {
 		}
 
 	# Mail file quota
-	if ($in{'mquota_def'} != 2) {
+	if (&has_mail_quotas() && $in{'mquota_def'} != 2) {
 		&$first_print($text{'mass_setmquota'});
 		if ($user->{'domainowner'}) {
 			&$second_print($text{'mass_edomainowner'});
@@ -105,7 +105,7 @@ foreach $user (@musers) {
 		}
 
 	# Mail server quota
-	if ($in{'qquota_def'} != 2) {
+	if (&has_server_quotas() && $in{'qquota_def'} != 2) {
 		&$first_print($text{'mass_setqquota'});
 		if (!$user->{'mailquota'}) {
 			&$second_print($text{'mass_emailquota'});
