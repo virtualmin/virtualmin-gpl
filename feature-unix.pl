@@ -120,7 +120,8 @@ if (!$_[0]->{'parent'}) {
 	local ($uinfo) = grep { $_->{'user'} eq $_[1]->{'user'} } @allusers;
 	if ($uinfo && ($_[0]->{'pass_set'} ||
 		       $_[0]->{'user'} ne $_[1]->{'user'} ||
-		       $_[0]->{'home'} ne $_[1]->{'home'})) {
+		       $_[0]->{'home'} ne $_[1]->{'home'} ||
+		       $_[0]->{'owner'} ne $_[1]->{'owner'})) {
 		&foreign_call($usermodule, "lock_user_files");
 		local %old = %$uinfo;
 		&$first_print($text{'save_user'});
@@ -155,6 +156,11 @@ if (!$_[0]->{'parent'}) {
 		if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 			# Home directory was changed
 			$uinfo->{'home'} = $_[0]->{'home'};
+			}
+
+		if ($_[0]->{'owner'} ne $_[1]->{'owner'}) {
+			# Domain description was changed
+			$uinfo->{'real'} = $_[0]->{'owner'};
 			}
 
 		&modify_user($uinfo, \%old, undef);
