@@ -1,48 +1,30 @@
 #!/usr/local/bin/perl
-# Create multiple mail aliases from a batch file
+# Create, update or delete multiple aliases from a text file
 
 require './virtual-server-lib.pl';
 &ReadParseMime();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'aliases_ecannot'});
-&error_setup($text{'amass_err'});
 
-# Validate source file
-if ($in{'file_def'} == 1) {
-	# Server-side file
-	&master_admin() || &error($text{'cmass_elocal'});
-	open(LOCAL, $in{'local'}) || &error($text{'cmass_elocal2'});
-	while(<LOCAL>) {
-		$source .= $_;
+# Find the old aliases
+@aliases = &list_domain_aliases($d, 1);
+foreach $o (split(/\0/, $in{'orig'})) {
+	my ($alias) = grep { $_->{'from'} eq $o } @aliases;
+	if ($alias) {
+		$oldmap{$o} = $alias;
 		}
-	close(LOCAL);
-	$src = "<tt>$in{'local'}</tt>";
 	}
-elsif ($in{'file_def'} == 0) {
-	# Uploaded file
-	$in{'upload'} =~ /\S/ || &error($text{'cmass_eupload'});
-	$source = $in{'upload'};
-	$src = $text{'cmass_uploaded'};
-	}
-elsif ($in{'file_def'} == 2) {
-	# Pasted text
-	$in{'text'} =~ /\S/ || &error($text{'cmass_etext'});
-	$source = $in{'text'};
-	$src = $text{'cmass_texted'};
-	}
-$source =~ s/\r//g;
 
 # Do it!
-&ui_print_header(&domain_in($d), $text{'amass_title'}, "");
+&ui_print_header(&domain_in($d), $text{'aedit_title'}, "");
 
-print &text('amass_doing', $src),"<p>\n";
+print $text{'aedit_doing'},"<p>\n";
 
-@aliases = &list_domain_aliases($d);
-
-# Split into lines, and process each one
-@lines = split(/\n+/, $source);
+# Parse and process each line
+$in{'aliases'} =~ s/\r//g;
+@lines = split(/\n+/, $in{'aliases'});
 $lnum = 0;
-$count = $ecount = 0;
+$count = $ecount = $mcount = $dcount = 0;
 USER: foreach $line (@lines) {
 	$lnum++;
 	next if ($line !~ /\S/);
@@ -69,16 +51,19 @@ USER: foreach $line (@lines) {
 		next USER;
 		}
 
-	# Create the simple alias object
+	# Check if this alias already exists
 	$name = "" if ($name eq "*");
-	local $virt = { 'from' => $name."\@".$d->{'dom'},
-		    	'cmt' => $desc };
-	local $simple= { };
+	$from = $name."\@".$d->{'dom'};
+	$virt = $oldmap{$from};
+	$old = $virt ? { %$virt } : undef;
+	if (!$virt) {
+		$virt = { 'from' => $from, 'cmt' => $desc };
+		}
+	$simple= { };
 
-	# Check for a clash
-	($clash) = grep { $_->{'from'} eq $virt->{'from'} } @aliases;
-	if ($clash) {
-		&line_error($text{'amass_eclash'});
+	# Cannot edit the same alias twice
+	if ($seen{$from}++) {
+		&line_error($text{'aedit_etwice'});
 		next USER;
 		}
 
@@ -95,12 +80,9 @@ USER: foreach $line (@lines) {
 			$simple->{'local'} = $1;
 			}
 		elsif ($dest =~ /^autoreply\s+(.*)$/) {
-			if ($simple->{'auto'}) {
-				&line_error($text{'amass_eauto'});
-				next USER;
-				}
-			$simple->{'auto'} = 1;
-			$simple->{'autotext'} = $1;
+			# Not allowed
+			&line_error($text{'aedit_eauto'});
+			next USER;
 			}
 		elsif ($dest =~ /^\S+\@\S+$/) {
 			push(@{$simple->{'forward'}}, $dest);
@@ -119,20 +101,49 @@ USER: foreach $line (@lines) {
 		next USER;
 		}
 
-	# Create it
+	# Create or update it
 	&save_simple_alias($d, $virt, $simple);
-	&create_virtuser($virt);
+	if ($old) {
+		&modify_virtuser($old, $virt);
+		}
+	else {
+		&create_virtuser($virt);
+		}
 	push(@created, $simple);
-	push(@aliases, $virt);
 
-	print "<font color=#00aa00>",
-	      &text('amass_done', "<tt>$virt->{'from'}</tt>"),"</font><br>\n";
-	$count++;
+	if ($old) {
+		print "<font color=#ffaa00>";
+		print &text('aedit_done', "<tt>$virt->{'from'}</tt>");
+		print "</font><br>\n";
+		$mcount++;
+		}
+	else {
+		print "<font color=#00aa00>";
+		print &text('amass_done', "<tt>$virt->{'from'}</tt>");
+		print "</font><br>\n";
+		$count++;
+		}
+	}
+
+# Find aliases that are no longer in the list
+foreach $o (keys %oldmap) {
+	if (!$seen{$o}) {
+		$virt = $oldmap{$o};
+		$simple = &get_simple_alias($d, $virt);
+		if ($simple) {
+			&delete_simple_autoreply($d, $simple);
+			}
+		&delete_virtuser($virt);
+		print "<font color=#ff0000>";
+		print &text('aedit_deleted', "<tt>$virt->{'from'}</tt>");
+		print "</font><br>\n";
+		$dcount++;
+		}
 	}
 
 print "<p>\n";
-print &text('cmass_complete', $count, $ecount),"<br>\n";
-&webmin_log("create", "aliases", $count);
+print &text('aedit_complete', $count, $ecount, $mcount, $dcount),"<br>\n";
+&webmin_log("manual", "aliases", $count);
 
 # Write out autoreply files. This has to be done last, as it is done
 # with domain owner permissions

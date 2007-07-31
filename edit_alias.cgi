@@ -23,7 +23,7 @@ print &ui_hidden("dom", $in{'dom'}),"\n";
 print &ui_hidden("old", $in{'alias'}),"\n";
 
 # Work out if simple mode is supported
-if ($virtualmin_pro && ($in{'new'} || &get_simple_alias($d, $virt))) {
+if ($in{'new'} || &get_simple_alias($d, $virt)) {
 	$can_simple = 1;
 	}
 

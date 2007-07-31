@@ -21,6 +21,8 @@ if ($virtualmin_pro && $mleft != 0) {
 	push(@rlinks, "<a href='mass_acreate_form.cgi?dom=$in{'dom'}'>".
 		      "$text{'aliases_mass'}</a>");
 	}
+push(@rlinks, "<a href='mass_aedit_form.cgi?dom=$in{'dom'}'>".
+	      "$text{'aliases_emass'}</a>");
 
 if (@aliases) {
 	print &ui_form_start("delete_aliases.cgi");
@@ -50,7 +52,7 @@ if (@aliases) {
 		$name =~ s/\@\S+$//;
 		$name = "<i>$text{'alias_catchall'}</i>" if ($name eq "");
 		$alines = "";
-		$simple = $virtualmin_pro ? &get_simple_alias($d, $a) : undef;
+		$simple = &get_simple_alias($d, $a);
 		foreach $v (@{$a->{'to'}}) {
 			($anum, $astr) = &alias_type($v);
 			if ($anum == 5 && $simple) {

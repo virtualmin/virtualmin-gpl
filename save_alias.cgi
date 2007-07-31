@@ -50,6 +50,7 @@ else {
 			# Remove existing autoreply file
 			&delete_simple_autoreply($d, $simple);
 			}
+		$simple ||= { };
 		&parse_simple_form($simple, \%in, $d, 0, 0, 0,
 				   $virt->{'from'});
 		&save_simple_alias($d, $virt, $simple);

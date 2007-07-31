@@ -9,7 +9,6 @@ use Time::Local;
 sub get_simple_alias
 {
 local ($d, $a) = @_;
-return undef if (!$virtualmin_pro);
 local $simple;
 foreach my $v (@{$a->{'to'}}) {
 	local ($atype, $aval) = &alias_type($v, $a->{'user'} || $a->{'name'});
