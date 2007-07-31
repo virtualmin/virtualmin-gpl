@@ -668,10 +668,16 @@ if ($config{'mail_system'} == 1) {
 		else { 
 			# Just the original value
 			$rv{'to'} = [ $v->{'to'} ];
-			if ($v->{'to'} =~ /^error:nouser\s+(.*)/i) {
+			if ($v->{'to'} eq "error:nouser User unknown") {
+				# Default message
+				$rv{'to'} = [ "BOUNCE" ];
+				}
+			elsif ($v->{'to'} =~ /^error:nouser\s+(.*)/i) {
+				# Custom message
 				$rv{'to'} = [ "BOUNCE $1" ];
 				}
 			elsif ($v->{'to'} eq "error:nouser") {
+				# No message
 				$rv{'to'} = [ "BOUNCE" ];
 				}
 			}

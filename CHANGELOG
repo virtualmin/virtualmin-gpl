@@ -686,3 +686,4 @@ Added a script installer for the PostNuke CMS.
 AWstats statistics are now included in cPanel migrations.
 The real name of a virtual server's Unix user is updated when the server's description is changed.
 Added a link from the Mail Aliases page to manually edit aliases in a domain using a text box. This makes bulk changes and copies simpler.
+Removed the batch alias creation page, as it has be superceded by manual alias management.

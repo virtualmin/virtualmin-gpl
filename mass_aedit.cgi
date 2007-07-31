@@ -5,6 +5,7 @@ require './virtual-server-lib.pl';
 &ReadParseMime();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'aliases_ecannot'});
+($mleft, $mreason, $mmax, $mhide) = &count_feature("aliases");
 
 # Find the old aliases
 @aliases = &list_domain_aliases($d, 1);
@@ -80,9 +81,12 @@ USER: foreach $line (@lines) {
 			$simple->{'local'} = $1;
 			}
 		elsif ($dest =~ /^autoreply\s+(.*)$/) {
-			# Not allowed
-			&line_error($text{'aedit_eauto'});
-			next USER;
+			if ($simple->{'auto'}) {
+				&line_error($text{'amass_eauto'});
+				next USER;
+				}
+			$simple->{'auto'} = 1;
+			$simple->{'autotext'} = $1;
 			}
 		elsif ($dest =~ /^\S+\@\S+$/) {
 			push(@{$simple->{'forward'}}, $dest);
@@ -100,17 +104,35 @@ USER: foreach $line (@lines) {
 		&line_error($text{'amass_ebounce'});
 		next USER;
 		}
+	&save_simple_alias($d, $virt, $simple);
+
+	# Check if we really changed anything
+	if ($old) {
+		$oldto = join(" ", sort { $a cmp $b } @{$old->{'to'}});
+		$newto = join(" ", sort { $a cmp $b } @{$virt->{'to'}});
+		if ($oldto eq $newto) {
+			next USER;
+			}
+		}
 
 	# Create or update it
-	&save_simple_alias($d, $virt, $simple);
 	if ($old) {
 		&modify_virtuser($old, $virt);
 		}
 	else {
-		&create_virtuser($virt);
+		if ($mleft == 0) {
+			# No more left
+			&line_error($text{'alias_ealiaslimit'});
+			next USER;
+			}
+		else {
+			&create_virtuser($virt);
+			$mleft-- if ($mleft > 0);
+			}
 		}
 	push(@created, $simple);
 
+	# Tell the user
 	if ($old) {
 		print "<font color=#ffaa00>";
 		print &text('aedit_done', "<tt>$virt->{'from'}</tt>");

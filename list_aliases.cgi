@@ -17,10 +17,6 @@ if ($mleft != 0) {
 	push(@links, "<a href='edit_alias.cgi?new=1&dom=$in{'dom'}'>".
 		     "$text{'aliases_add'}</a>");
 	}
-if ($virtualmin_pro && $mleft != 0) {
-	push(@rlinks, "<a href='mass_acreate_form.cgi?dom=$in{'dom'}'>".
-		      "$text{'aliases_mass'}</a>");
-	}
 push(@rlinks, "<a href='mass_aedit_form.cgi?dom=$in{'dom'}'>".
 	      "$text{'aliases_emass'}</a>");
 
