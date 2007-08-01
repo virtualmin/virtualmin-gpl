@@ -616,10 +616,18 @@ if ($got{'mail'}) {
 			next if ($name eq "*" && $domfwd);
 
 			if ($useremail{$name}) {
-				# This is an alias from a user
+				# This is an alias from a user. Preserve
+				# delivery to his mailbox though, as this is
+				# what cPanel seems to do.
 				local $uinfo = $useremail{$name};
 				local $olduinfo = { %$uinfo };
-				$uinfo->{'to'} = \@values;
+				local $touser = $uinfo->{'user'};
+				if ($config{'mail_system'} == 0 &&
+				    $escuser =~ /\@/) {
+					$touser = &replace_atsign($touser);
+					}
+				$touser = "\\".$touser;
+				$uinfo->{'to'} = [ $touser, @values ];
 				&modify_user($uinfo, $olduinfo, \%dom);
 				}
 			else {
