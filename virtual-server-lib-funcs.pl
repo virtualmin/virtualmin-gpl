@@ -2633,9 +2633,23 @@ else {
 	}
 $hash{'plainpass'} ||= "";
 $hash{'extra'} = join(" ", @{$user->{'extraemail'}});
-$hash{'ftp'} = $user->{'shell'} eq $config{'ftp_shell'} ||
-	       $config{'jail_shell'} &&
-		$user->{'shell'} eq $config{'jail_shell'} ? 1 : 0;
+if ($user->{'domainowner'}) {
+	# Check SSH and FTP shells
+	local ($sh) = grep { $_->[1] eq $user->{'shell'} } &get_unix_shells();
+	if ($sh) {
+		$hash{'ftp'} = $sh->[0] eq 'nologin' ? 0 : 1;
+		}
+	else {
+		# Assume yes if unknown shell
+		$hash{'ftp'} = 1;
+		}
+	}
+else {
+	# Compare shell
+	$hash{'ftp'} = $user->{'shell'} eq $config{'ftp_shell'} ||
+		       $config{'jail_shell'} &&
+			$user->{'shell'} eq $config{'jail_shell'} ? 1 : 0;
+	}
 
 # Make quotas use nice units
 if ($hash{'quota'}) {
