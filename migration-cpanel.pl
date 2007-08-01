@@ -419,11 +419,12 @@ if ($got{'mail'}) {
 		}
 	close(SHADOW);
 	local $_;
+	local $bsize = &quota_bsize("home");
 	open(QUOTA, "$dom{'home'}/etc/$dom/quota");
 	while(<QUOTA>) {
 		s/\r|\n//g;
 		local ($quser, $qquota) = split(/:/, $_);
-		$quota{$quser} = $qquota;
+		$quota{$quser} = $bsize ? int($qquota/$bsize) : 0;
 		}
 	close(QUOTA);
 	&foreign_require("mailboxes", "mailboxes-lib.pl");
