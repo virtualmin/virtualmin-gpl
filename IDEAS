@@ -66,5 +66,3 @@
 	SetHandler fcgid-script
 	</Location>
 
- - new template-level default limits should be enabled
-

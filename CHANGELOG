@@ -688,3 +688,4 @@ The real name of a virtual server's Unix user is updated when the server's descr
 Added a link from the Mail Aliases page to manually edit aliases in a domain using a text box. This makes bulk changes and copies simpler.
 Removed the batch alias creation page, as it has be superceded by manual alias management.
 Migrated cPanel users with forwarding have email also delivered to their inbox, to maintain consistency with cPanel.
+Added a script installer for the Movable Type blogging platform.
