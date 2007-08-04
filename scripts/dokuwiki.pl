@@ -18,7 +18,7 @@ return "DokuWiki is a standards compliant, simple to use Wiki, mainly aimed at c
 # script_dokuwiki_versions()
 sub script_dokuwiki_versions
 {
-return ( "2007-06-26" );
+return ( "2007-06-26b" );
 }
 
 sub script_dokuwiki_category
@@ -170,7 +170,7 @@ return (1, "DokuWiki directory deleted.");
 sub script_dokuwiki_latest
 {
 return ( "http://www.splitbrain.org/projects/dokuwiki",
-	 "dokuwiki-([0-9\\-]+)\\.tgz" );
+	 "dokuwiki-([0-9][a-z0-9\\-]+)\\.tgz" );
 }
 
 
