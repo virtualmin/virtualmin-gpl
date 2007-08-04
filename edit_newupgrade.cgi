@@ -13,7 +13,7 @@ print "<li>",&text('upgrade_step3');
 print "</ol>\n";
 
 print &ui_form_start("upgrade.cgi", "post");
-print &ui_table_start($text{'upgrade_header'}, undef, 2);
+print &ui_table_start($text{'upgrade_header'}, undef, 4);
 
 print &ui_table_row($text{'upgrade_serial'},
 		    &ui_textbox("serial", undef, 30));

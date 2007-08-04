@@ -11,8 +11,6 @@
 
  - Automatically include alias domains in backups
 
- - Need all bandwidth function for ftp and unix, to handle large FTP log files
-
  - When changing a domain's password, username or domain, update all script
    installers.
 
@@ -31,8 +29,6 @@
 	- files in ~/contrib/plesk
 
  - cron time selector is too complex - use popup
-
- - mailbox_list_mails should use select function for virtual folders!
 
  - templates for new mailing list configs
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=739
@@ -64,4 +60,6 @@
 	Options ExecCGI
 	SetHandler fcgid-script
 	</Location>
+
+ - proxy balance directives page
 
