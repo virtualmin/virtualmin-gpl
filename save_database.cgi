@@ -99,6 +99,13 @@ elsif ($in{'disc'}) {
 	@dbs = split(/\s+/, $d->{'db_'.$in{'type'}});
 	@dbs = grep { $_ ne $in{'name'} } @dbs;
 	$d->{'db_'.$in{'type'}} = join(" ", @dbs);
+
+	# Call the revoke function to actually remove access
+	$gfunc = "revoke_".$in{'type'}."_database";
+	if (defined(&$gfunc)) {
+		&$gfunc($d, $in{'name'});
+		}
+
 	&save_domain_print($d);
 	&refresh_webmin_user($d);
 	&webmin_log("export", "database", $in{'name'},

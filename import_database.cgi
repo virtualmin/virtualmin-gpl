@@ -6,15 +6,23 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_databases() && &can_import_servers() ||
 	&error($text{'edit_ecannot'});
+&set_all_null_print();
 
 foreach $tn (split(/\0/, $in{'import'})) {
 	($type, $db) = split(/\s+/, $tn, 2);
 	@dbs = split(/\s+/, $d->{'db_'.$type});
 	push(@dbs, $db);
 	$d->{'db_'.$type} = join(" ", @dbs);
+
+	# Call the grant function to actually allow access
+	$gfunc = "grant_".$type."_database";
+	if (defined(&$gfunc)) {
+		&$gfunc($d, $db);
+		}
 	&webmin_log("import", "database", $db,
 		    { 'type' => $type, 'dom' => $d->{'dom'} });
 	}
 &save_domain($d);
+&refresh_webmin_user($d);
 &redirect("list_databases.cgi?dom=$in{'dom'}");
 

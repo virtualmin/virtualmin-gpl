@@ -558,6 +558,7 @@ return 1 if (&indexof($_[1], @dblist) >= 0);
 sub create_mysql_database
 {
 local ($d, $dbname, $opts) = @_;
+&require_mysql();
 
 # Create the database
 &$first_print(&text('setup_mysqldb', $dbname));
@@ -569,9 +570,22 @@ local @dbs = split(/\s+/, $d->{'db_mysql'});
 push(@dbs, $dbname);
 $d->{'db_mysql'} = join(" ", @dbs);
 
+# Make the DB accessible to the domain owner
+&grant_mysql_database($d, $dbname);
+&$second_print($text{'setup_done'});
+}
+
+# grant_mysql_database(&domain, dbname)
+# Adds MySQL permission entries for grant the domain owner access to some DB,
+# and sets file ownership so that quotas work.
+sub grant_mysql_database
+{
+local ($d, $dbname) = @_;
+&require_mysql();
+local $tmpl = &get_template($d->{'template'});
+
 # Add db entries for the user for each host
 local $pfunc = sub {
-	local $tmpl = &get_template($d->{'template'});
 	local $h;
 	local @hosts = &get_mysql_hosts($d);
 	local $user = &mysql_user($d);
@@ -588,7 +602,6 @@ if ($tmpl->{'mysql_chgrp'} && $dd) {
 	&system_logged("chgrp -R $d->{'group'} ".quotemeta($dd));
 	&system_logged("chmod +s ".quotemeta($dd));
 	}
-&$second_print($text{'setup_done'});
 }
 
 # delete_mysql_database(&domain, dbname, ...)
@@ -617,19 +630,42 @@ foreach my $db (@dbnames) {
 $d->{'db_mysql'} = join(" ", @dbs);
 
 # Drop permissions
-local $dfunc = sub {
-	foreach my $db (@dbnames) {
-		local $qdb = &quote_mysql_database($db);
-		&mysql::execute_sql_logged($mysql::master_db, "delete from db where db = '$db' or db = '$qdb'");
-		}
-	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
-	};
-&execute_for_all_mysql_servers($dfunc);
+foreach my $db (@dbnames) {
+	&revoke_mysql_database($d, $db);
+	}
+
 if (@missing) {
 	&$second_print(&text('delete_mysqlmissing', join(", ", @missing)));
 	}
 else {
 	&$second_print($text{'setup_done'});
+	}
+}
+
+# revoke_mysql_database(&domain, dbname)
+# Remove a domain's access to a MySQL database, by delete from the db table.
+# Also resets group permissions.
+sub revoke_mysql_database
+{
+local ($d, $dbname) = @_;
+&require_mysql();
+
+# Make away MySQL permissions
+local $dfunc = sub {
+	local $qdbname = &quote_mysql_database($dbname);
+	&mysql::execute_sql_logged($mysql::master_db, "delete from db where db = '$dbname' or db = '$qdbname'");
+	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
+	};
+&execute_for_all_mysql_servers($dfunc);
+
+# Fix group owner, if the DB still exists, by setting to the owner of the
+# 'mysql' database
+local $tmpl = &get_template($d->{'template'});
+local $dd = &get_mysql_database_dir($dbname);
+if ($tmpl->{'mysql_chgrp'} && $dd && -d $dd) {
+	local @st = stat("$dd/../mysql");
+	local $group = defined(@st) ? $st[5] : "mysql";
+	&system_logged("chgrp -R $group ".quotemeta($dd));
 	}
 }
 

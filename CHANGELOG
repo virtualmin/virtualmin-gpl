@@ -689,3 +689,4 @@ Added a link from the Mail Aliases page to manually edit aliases in a domain usi
 Removed the batch alias creation page, as it has be superceded by manual alias management.
 Migrated cPanel users with forwarding have email also delivered to their inbox, to maintain consistency with cPanel.
 Added a script installer for the Movable Type blogging platform.
+When an existing database is imported to a virtual server, the MySQL or PostgreSQL permissions to it are properly granted. Similarly, when a database is dis-associated, permissions to it and directory group permissions are properly removed.

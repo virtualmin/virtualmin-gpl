@@ -405,6 +405,18 @@ $_[0]->{'db_postgres'} = join(" ", @dbs);
 &$second_print($text{'setup_done'});
 }
 
+# grant_postgres_database(&domain, dbname)
+# Alters the owner of a PostgreSQL database to some domain
+sub grant_postgres_database
+{
+local ($d, $dbname) = @_;
+&require_postgres();
+if (&postgresql::get_postgresql_version() >= 8.0) {
+	local $user = &postgres_user($d);
+	&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter database \"$dbname\" owner to \"$user\"");
+	}
+}
+
 # delete_postgres_database(&domain, dbname, ...)
 # Delete one PostgreSQL database
 sub delete_postgres_database
@@ -429,6 +441,19 @@ if (@missing) {
 	}
 else {
 	&$second_print($text{'setup_done'});
+	}
+}
+
+# revoke_postgres_database(&domain, dbname)
+# Takes away a domain's access to a PostgreSQL database, by setting the owner
+# back to postgres
+sub revoke_postgres_database
+{
+local ($d, $dbname) = @_;
+&require_postgres();
+if (&postgresql::get_postgresql_version() >= 8.0 &&
+    &postgres_user_exists("postgres")) {
+	&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter database \"$dbname\" owner to \"postgres\"");
 	}
 }
 
