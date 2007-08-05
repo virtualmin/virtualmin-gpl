@@ -46,6 +46,7 @@
 	- RT (863)
 	- RTFM (863)
 	- OTRS (863)
+	- WordPress MU
 
  - sub-servers owned by different mailbox user, as suggested by filip
 	- perhaps combine with extra admins?
@@ -62,9 +63,4 @@
 	</Location>
 
  - proxy balance directives page
-
- - GPL image
-	- finish creation and registration
-	- make backup!
-	- update aws page
 

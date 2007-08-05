@@ -195,7 +195,7 @@ local $defini;
 foreach my $ver (@vers) {
 	# Create separate .ini file for each PHP version, if missing
 	local $subs_ini = 0;
-	local $srcini = $tmpl->{'web_php_ini'};
+	local $srcini = $tmpl->{'web_php_ini_'.$ver->[0]};
 	if (!$srcini || $srcini eq "none" || !-r $srcini) {
 		$srcini = &get_global_php_ini($ver->[0], $mode);
 		}

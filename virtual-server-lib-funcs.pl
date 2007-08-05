@@ -6599,7 +6599,6 @@ push(@rv, { 'id' => 0,
 	    'web_ruby_suexec' => $config{'ruby_suexec'} eq '' ? -1 :
 					int($config{'ruby_suexec'}),
 	    'web_phpver' => $config{'phpver'},
-	    'web_php_ini' => $config{'php_ini'},
 	    'web_php_noedit' => int($config{'php_noedit'}),
 	    'webalizer' => $config{'def_webalizer'} || "none",
 	    'disabled_web' => $config{'disabled_web'} || "none",
@@ -6692,6 +6691,11 @@ push(@rv, { 'id' => 0,
 foreach my $w (@php_wrapper_templates) {
 	$rv[0]->{$w} = $config{$w} || 'none';
 	}
+foreach my $phpver (@all_possible_php_versions) {
+        $rv[0]->{'web_php_ini_'.$phpver} =
+		defined($config{'php_ini_'.$phpver}) ?
+			$config{'php_ini_'.$phpver} : $config{'php_ini'},
+	}
 push(@rv, { 'id' => 1,
 	    'name' => 'Defaults Settings For Sub-Servers',
 	    'standard' => 1,
@@ -6729,6 +6733,12 @@ while(defined($f = readdir(DIR))) {
 			}
 		else {
 			push(@rv, \%tmpl);
+			}
+		foreach my $phpver (@all_possible_php_versions) {
+			if (!defined($tmpl{'web_php_ini_'.$phpver})) {
+				$tmpl{'web_php_ini_'.$phpver} =
+					$tmpl{'web_php_ini'};
+				}
 			}
 		}
 	}
@@ -6787,7 +6797,10 @@ if ($tmpl->{'id'} == 0) {
 	$config{'php_suexec'} = $tmpl->{'web_php_suexec'};
 	$config{'ruby_suexec'} = $tmpl->{'web_ruby_suexec'};
 	$config{'phpver'} = $tmpl->{'web_phpver'};
-	$config{'php_ini'} = $tmpl->{'web_php_ini'};
+	foreach my $phpver (@all_possible_php_versions) {
+		$config{'php_ini_'.$phpver} = $tmpl->{'web_php_ini_'.$phpver};
+		}
+	delete($config{'php_ini'});
 	$config{'php_noedit'} = $tmpl->{'web_php_noedit'};
 	$config{'def_webalizer'} = $tmpl->{'webalizer'} eq "none" ? "" :
 					$tmpl->{'webalizer'};

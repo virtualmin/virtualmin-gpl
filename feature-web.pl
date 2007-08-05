@@ -1538,8 +1538,12 @@ local @webfields = ( "web", "suexec", "writelogs", "user_def", "user",
 		     "alias_mode", "web_port", "web_sslport",
 		     "web_webmin_ssl", "web_usermin_ssl" );
 if ($virtualmin_pro) {
-	push(@webfields, "web_php_suexec", "web_phpver", "web_php_ini",
-		 "web_php_ini_def", "web_php_noedit", "web_ruby_suexec" );
+	push(@webfields, "web_php_suexec", "web_phpver",
+			 "web_php_noedit", "web_ruby_suexec" );
+	foreach my $phpver (@all_possible_php_versions) {
+		push(@webfields, "web_php_ini_".$phpver,
+				 "web_php_ini_".$phpver."_def");
+		}
 	}
 
 local $ndi = &none_def_input("web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1,
@@ -1650,11 +1654,14 @@ if ($virtualmin_pro) {
 		       [ [ "", $text{'tmpl_phpverdef'} ],
 			 map { [ $_->[0] ] } &list_available_php_versions() ]));
 
-	# Source php.ini file
-	print &ui_table_row(
-	    &hlink($text{'tmpl_php_ini'}, "template_php_ini"),
-	    &ui_opt_textbox("web_php_ini", $tmpl->{'web_php_ini'},
-			    40, $text{'default'}));
+	# Source php.ini files
+	foreach my $phpver (@all_possible_php_versions) {
+		print &ui_table_row(
+		    &hlink(&text('tmpl_php_iniv', $phpver), "template_php_ini"),
+		    &ui_opt_textbox("web_php_ini_$phpver",
+				    $tmpl->{'web_php_ini_'.$phpver},
+				    40, $text{'default'}));
+		}
 
 	# Allow editing of PHP configs
 	print &ui_table_row(
@@ -1821,10 +1828,14 @@ if ($in{"web_mode"} == 2) {
 			}
 		$tmpl->{'web_php_suexec'} = $in{'web_php_suexec'};
 		$tmpl->{'web_phpver'} = $in{'web_phpver'};
-		$in{'web_php_ini_def'} || -r $in{'web_php_ini'} ||
-			&error($text{'tmpl_ephpini'});
-		$tmpl->{'web_php_ini'} = $in{'web_php_ini_def'} ? undef :
-						$in{'web_php_ini'};
+		foreach my $phpver (@all_possible_php_versions) {
+			$in{'web_php_ini_'.$phpver.'_def'} ||
+			  -r $in{'web_php_ini_'.$phpver} ||
+				&error($text{'tmpl_ephpini'});
+			$tmpl->{'web_php_ini_'.$phpver} =
+				$in{'web_php_ini_'.$phpver.'_def'} ? undef
+					       : $in{'web_php_ini_'.$phpver};
+			}
 		$tmpl->{'web_php_noedit'} = $in{'web_php_noedit'};
 		if ($in{'web_ruby_suexec'} > 0) {
 			&has_command("ruby") ||
