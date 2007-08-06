@@ -110,8 +110,8 @@ if ($in{'subdom'}) {
 			$parentdom ? $text{'form_title2'} :
 				     $text{'form_title'}, "",
 			$aliasdom ? "create_alias" :
-			$parentdom ? "create_subserver" :
 			$subdom ? "create_subdom" :
+			$parentdom ? "create_subserver" :
 				  "create_form");
 
 # Show generic mode selector
