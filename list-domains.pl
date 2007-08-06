@@ -30,6 +30,18 @@ while(@ARGV > 0) {
 	elsif ($a eq "--without-feature") {
 		$without = shift(@ARGV);
 		}
+	elsif ($a eq "--alias") {
+		$must_alias = 1;
+		}
+	elsif ($a eq "--toplevel") {
+		$must_toplevel = 1;
+		}
+	elsif ($a eq "--subserver") {
+		$must_subserver = 1;
+		}
+	elsif ($a eq "--subdomain") {
+		$must_subdomain = 1;
+		}
 	else {
 		&usage();
 		}
@@ -44,8 +56,12 @@ if (@domains) {
 		}
 	}
 else {
-	# Showing all domains
+	# Showing all domains, with some limits
 	@doms = &list_domains();
+	@doms = grep { $_->{'alias'} } @doms if ($must_alias);
+	@doms = grep { $_->{'parent'} } @doms if ($must_subserver);
+	@doms = grep { !$_->{'parent'} } @doms if ($must_toplevel);
+	@doms = grep { $_->{'subdom'} } @doms if ($must_subdomain);
 	}
 @doms = sort { $a->{'user'} cmp $b->{'user'} ||
 	       $a->{'created'} <=> $b->{'created'} } @doms;
@@ -255,6 +271,8 @@ print "usage: list-domains.pl   [--multiline]\n";
 print "                         [--domain name]*\n";
 print "                         [--with-feature feature]\n";
 print "                         [--without-feature feature]\n";
+print "                         [--alias | --subserver |\n";
+print "                          --toplevel | --subdomain]\n";
 exit(1);
 }
 
