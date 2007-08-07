@@ -3913,7 +3913,7 @@ DOMAIN: foreach $d (@$doms) {
 			# Via FTP
 			&$first_print($text{'backup_upload'});
 			&ftp_upload($server, "$path/$df", "$dest/$df", \$err,
-				    undef, $user, $pass);
+				    undef, $user, $pass, $port);
 			}
 		if ($mode == 3) {
 			# Via S3 upload
@@ -4086,7 +4086,7 @@ if ($ok && $mode == 1 && (@destfiles || !$dirfmt)) {
 		# Need to upload entire directory .. which has to be created
 		foreach my $df (@destfiles) {
 			&ftp_upload($server, "$path/$df", "$dest/$df", \$err,
-				    undef, $user, $pass);
+				    undef, $user, $pass, $port);
 			if ($err) {
 				&$second_print(
 					&text('backup_uploadfailed', $err));
@@ -4097,7 +4097,8 @@ if ($ok && $mode == 1 && (@destfiles || !$dirfmt)) {
 		}
 	else {
 		# Just a single file
-		&ftp_upload($server, $path, $dest, \$err, undef, $user, $pass);
+		&ftp_upload($server, $path, $dest, \$err, undef, $user, $pass,
+			    $port);
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
 			$ok = 0;
