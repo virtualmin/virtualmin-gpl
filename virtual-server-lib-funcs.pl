@@ -876,7 +876,8 @@ foreach my $g (@{$_[0]->{'secs'}}) {
 		local @mems = split(/,/, $group->{'members'});
 		push(@mems, $_[0]->{'user'});
 		$group->{'members'} = join(",", @mems);
-		&foreign_call($usermodule, "modify_group", $group, $group);
+		&foreign_call($group->{'module'}, "modify_group",
+			      $group, $group);
 		}
 	}
 
@@ -1267,7 +1268,8 @@ foreach my $group (@groups) {
 	if ($changed) {
 		# Only save group if members were changed
 		$group->{'members'} = join(",", @mems);
-		&foreign_call($usermodule, "modify_group", $group, $group);
+		&foreign_call($group->{'module'}, "modify_group",
+			      $group, $group);
 		}
 	}
 
@@ -1445,7 +1447,8 @@ foreach my $group (@groups) {
 	if ($idx >= 0) {
 		splice(@mems, $idx, 1);
 		$group->{'members'} = join(",", @mems);
-		&foreign_call($usermodule, "modify_group", $group, $group);
+		&foreign_call($group->{'module'}, "modify_group",
+			      $group, $group);
 		}
 	}
 
@@ -8541,14 +8544,15 @@ foreach my $g ("mailgroup", "ftpgroup", "dbgroup") {
 	# Get the group
 	local ($group) = grep { $_->{'group'} eq $gn } @groups;
 	if ($group) {
-		# Update the secondary members, removing any users who don't exist
-		# or are in this domain but shouldn't be there.
+		# Update the secondary members, removing any users who don't
+		# exist or are in this domain but shouldn't be there.
 		local @mems = split(/,/, $group->{'members'});
 		@mems = grep { !($indom{$_} && !$innames{$_}) } @mems;
 		@mems = &unique(@mems, @innames);
 		@mems = grep { $taken{$_} } @mems;
 		$group->{'members'} = join(",", @mems);
-		&foreign_call($usermodule, "modify_group", $group, $group);
+		&foreign_call($group->{'module'}, "modify_group",
+			      $group, $group);
 		}
 	else {
 		# Need to create!
@@ -10865,11 +10869,12 @@ if ($group) {
 		# Need to add him
 		&$first_print(&text($msg, $user)) if ($msg);
 		$group->{'members'} = join(",", @mems, $user);
-		&foreign_call($usermodule, "set_group_envs", $group,
-					   'MODIFY_GROUP');
-		&foreign_call($usermodule, "making_changes");
-		&foreign_call($usermodule, "modify_group", $group, $group);
-		&foreign_call($usermodule, "made_changes");
+		&foreign_call($group->{'module'}, "set_group_envs", $group,
+						  'MODIFY_GROUP');
+		&foreign_call($group->{'module'}, "making_changes");
+		&foreign_call($group->{'module'}, "modify_group",
+						  $group, $group);
+		&foreign_call($group->{'module'}, "made_changes");
 		&$second_print($text{'setup_done'}) if ($msg);
 		return 1;
 		}
