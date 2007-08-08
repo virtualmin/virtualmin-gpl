@@ -64,7 +64,6 @@
 
  - proxy balance directives page
 
- - domain-level setting for backup directories to exclude
-
  - display script updates across all domains on theme main page
 	- stay on same minor version
+	- also add scheduled email to nag server owners?

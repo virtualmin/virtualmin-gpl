@@ -154,16 +154,22 @@ if ($_[2]->{'dirnologs'}) {
 	}
 &print_tempfile(XTEMP, "virtualmin-backup\n");
 &print_tempfile(XTEMP, "./virtualmin-backup\n");
+foreach my $e (&get_backup_excludes($_[0])) {
+	&print_tempfile(XTEMP, "$e\n");
+	&print_tempfile(XTEMP, "./$e\n");
+	}
 
 # Exclude all .zfs files, for Solaris
-open(FIND, "find ".quotemeta($_[0]->{'home'})." -name .zfs |");
-while(<FIND>) {
-	s/\r|\n//g;
-	s/^\Q$_[0]->{'home'}\E\///;
-	&print_tempfile(XTEMP, "$_\n");
-	&print_tempfile(XTEMP, "./$_\n");
+if ($gconfig{'os_type'} eq 'solaris') {
+	open(FIND, "find ".quotemeta($_[0]->{'home'})." -name .zfs |");
+	while(<FIND>) {
+		s/\r|\n//g;
+		s/^\Q$_[0]->{'home'}\E\///;
+		&print_tempfile(XTEMP, "$_\n");
+		&print_tempfile(XTEMP, "./$_\n");
+		}
+	close(FIND);
 	}
-close(FIND);
 &close_tempfile(XTEMP);
 
 # Do the backup

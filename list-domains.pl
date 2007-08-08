@@ -250,6 +250,13 @@ if ($multi) {
 			print "    Shell type: ",
 			      ($shell->[0] || "unknown"),"\n";
 			}
+
+		# Show backup excludes
+		if (!$d->{'alias'}) {
+			foreach my $e (&get_backup_excludes($d)) {
+				print "    Backup exclusion: $e\n";
+				}
+			}
 		}
 	}
 else {

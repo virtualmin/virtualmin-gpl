@@ -110,6 +110,12 @@ while(@ARGV > 0) {
 			}
 		$template eq "" && &usage("Unknown template name");
 		}
+	elsif ($a eq "--add-exclude") {
+		push(@add_excludes, shift(@ARGV));
+		}
+	elsif ($a eq "--remove-exclude") {
+		push(@remove_excludes, shift(@ARGV));
+		}
 	else {
 		usage();
 		}
@@ -290,6 +296,19 @@ for(my $i=0; $i<@doms; $i++) {
 	&$second_print($text{'setup_done'});
 	}
 
+# Apply exclude changes
+if (@add_excludes || @remove_excludes) {
+	&$first_print("Updating excluded directories ..");
+	@excludes = &get_backup_excludes($dom);
+	push(@excludes, @add_excludes);
+	%remove_excludes = map { $_, 1 } @remove_excludes;
+	@excludes = grep { !$remove_excludes{$_} } @excludes;
+	@excludes = &unique(@excludes);
+	&save_backup_excludes($dom, \@excludes);
+	&$second_print($text{'setup_done'});
+	}
+
+
 &refresh_webmin_user($dom);
 
 # Run the after command
@@ -322,6 +341,8 @@ print "                        [--ip address] | [--allocate-ip] |\n";
 print "                        [--shared-ip address]\n";
 print "                        [--prefix name]\n";
 print "                        [--template name|id]\n";
+print "                        [--add-exclude directory]*\n";
+print "                        [--remove-exclude directory]*\n";
 exit(1);
 }
 

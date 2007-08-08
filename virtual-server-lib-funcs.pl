@@ -2033,6 +2033,11 @@ sub can_edit_bandwidth
 return &master_admin() || &reseller_admin();
 }
 
+sub can_edit_exclude
+{
+return 1;	# For now, anyone can
+}
+
 # Returns 1 if the current user can disable and enable the given domain
 sub can_disable_domain
 {
@@ -8995,6 +9000,14 @@ if (!$d->{'alias'} && $cb) {
 			  });
 		}
 	}
+if (!$d->{'alias'} && &can_edit_exclude()) {
+	# Anyone can edit excludes
+	push(@rv, { 'page' => 'edit_exclude.cgi',
+		    'title' => $text{'edit_exclude'},
+		    'desc' => $text{'edit_excludedesc'},
+		    'cat' => 'backup',
+		  });
+	}
 
 if (&can_disable_domain($d)) {
 	# Enabled or disable buttons
@@ -10862,6 +10875,23 @@ if ($group) {
 		}
 	}
 return 0;
+}
+
+# get_backup_excludes(&domain)
+# Returns a list of excluded directories
+sub get_backup_excludes
+{
+local ($d) = @_;
+return split(/\t+/, $d->{'backup_excludes'});
+}
+
+# save_backup_excludes(&domain, &excludes)
+# Updates the list of excluded directories
+sub save_backup_excludes
+{
+local ($d, $excludes) = @_;
+$d->{'backup_excludes'} = join("\t", @$excludes);
+&save_domain($d);
 }
 
 $done_virtual_server_lib_funcs = 1;
