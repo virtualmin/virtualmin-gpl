@@ -32,10 +32,13 @@ else {
 	%can_alias_types = map { $_, 1 } (0 .. 11);
 	}
 
-$first_print = \&first_html_print;
-$second_print = \&second_html_print;
-$indent_print = \&indent_html_print;
-$outdent_print = \&outdent_html_print;
+# Only set defaults if not already set
+if (!defined($first_print)) {
+	$first_print = \&first_html_print;
+	$second_print = \&second_html_print;
+	$indent_print = \&indent_html_print;
+	$outdent_print = \&outdent_html_print;
+	}
 
 # hlink(text, page, [module], [width], [height])
 # This is an override for the standard hlink function which checks if the
