@@ -13,7 +13,8 @@ if (!$virtual_server_root) {
 	$virtual_server_root = "$1/virtual-server";
 	}
 foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
-		 "php", "ruby", "vui", "dynip", "collect", "maillog") {
+		 "php", "ruby", "vui", "dynip", "collect", "maillog",
+		 "balancer") {
 	do "$virtual_server_root/$lib-lib.pl";
 	if ($@ && -r "$virtual_server_root/$lib-lib.pl") {
 		print STDERR "failed to load $lib-lib.pl : $@\n";
@@ -8002,6 +8003,22 @@ else {
 	}
 }
 
+# has_proxy_balancer(&domain)
+# Returns 1 if some domain supports proxy balancing
+sub has_proxy_balancer
+{
+local ($d) = @_;
+return 1;
+if ($d->{'web'} && $config{'web'} && !$d->{'alias'} && $virtualmin_pro) {
+	&require_apache();
+	if ($apache::httpd_modules{'mod_proxy'} &&
+	    $apache::httpd_modules{'mod_proxy_balancer'}) {
+		return 1;
+		}
+	}
+return 0;
+}
+
 # require_licence()
 # Reads in the file containing the licence_scheduled function. Returns 1 if OK, 0 if not
 sub require_licence
@@ -8905,6 +8922,15 @@ if ($d->{'web'} && $config{'web'} && !$d->{'alias'} && &can_edit_forward()) {
 	push(@rv, { 'page' => $psuffix.'_form.cgi',
 		    'title' => $text{'edit_'.$psuffix},
 		    'desc' => $text{'edit_'.$psuffix.'desc'},
+		    'cat' => 'server',
+		  });
+	}
+
+if (&has_proxy_balancer($d) && &can_edit_forward()) {
+	# Proxy balance editor
+	push(@rv, { 'page' => 'list_balancers.cgi',
+		    'title' => $text{'edit_balancer'},
+		    'desc' => $text{'edit_balancerdesc'},
 		    'cat' => 'server',
 		  });
 	}
