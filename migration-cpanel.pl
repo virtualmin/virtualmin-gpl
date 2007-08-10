@@ -436,6 +436,7 @@ if ($got{'mail'}) {
 		local ($muser, $mdummy, $muid, $mgid, $mreal, $mdir, $mshell) =
 			split(/:/, $_);
 		next if (!$muser);
+		next if ($muser =~ /_logs$/);	# Special logs user
 		local $uinfo = &create_initial_user(\%dom);
 		$uinfo->{'user'} = &userdom_name($muser, \%dom);
 		$uinfo->{'pass'} = $pass{$muser};
