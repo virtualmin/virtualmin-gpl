@@ -5107,7 +5107,7 @@ if (&can_use_s3()) {
 	       &ui_textbox($name."_bucket", $mode == 3 ? $server : undef, 20).
 	       "</td> </tr>\n";
 	$st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
-	       &ui_textbox($name."_akey", $mode == 3 ? $user : undef, 20).
+	       &ui_textbox($name."_akey", $mode == 3 ? $user : undef, 40).
 	       "</td> </tr>\n";
 	$st .= "<tr> <td>$text{'backup_skey'}</td> <td>".
 	       &ui_password($name."_skey", $mode == 3 ? $pass : undef, 40).
