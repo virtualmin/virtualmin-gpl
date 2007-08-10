@@ -70,3 +70,6 @@
 
  - Postfix SSL/TLS options (FS 3153)
 
+ - Domain registration plugin, via API
+	- Who pays?
+	- Needs a page for setting up account

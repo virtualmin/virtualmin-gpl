@@ -468,7 +468,11 @@ ins\//);
 	local (%plain, $need_plainpass_save);
 	&read_file("$plainpass_dir/$d->{'id'}", \%plain);
 	foreach my $u (@users) {
-		if (!defined($u->{'plainpass'}) &&
+		if ($u->{'domainowner'}) {
+			# The domain owner's password is always known
+			$u->{'plainpass'} = $d->{'pass'};
+			}
+		elsif (!defined($u->{'plainpass'}) &&
 		    defined($plain{$u->{'user'}})) {
 			# Check if the plain password is valid, in case the
 			# crypted password was changed behind our back

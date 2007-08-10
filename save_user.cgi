@@ -194,6 +194,10 @@ else {
 			$user->{'dbs'} = \@dbs;
 			}
 		}
+	else {
+		# For a domain owner, the password is never changed here
+		$user->{'passmode'} = 4;
+		}
 
 	# Save extra email addresses
 	$eu = $mailbox ? $d->{'user'} : $in{'mailuser'};
