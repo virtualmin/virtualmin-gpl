@@ -60,7 +60,7 @@ local $lcn = &webalizer::log_config_name($alog);
 &lock_file($lcn);
 local $cfile = &webalizer::config_file_name($alog);
 &lock_file($cfile);
-if (!-r $lcn) {
+if (!-r $lcn || !-r $cfile) {
 	$lconf = { 'dir' => $stats,
 		   'sched' => 1,
 		   'type' => 0,
