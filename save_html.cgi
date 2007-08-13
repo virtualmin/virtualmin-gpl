@@ -55,7 +55,7 @@ else {
 	# Get the original file, and use its header
 	&switch_to_domain_user($d);
 	$olddata = &read_file_contents("$pub/$in{'file'}");
-	if ($olddata && $data !~ /<body.*>/i) {
+	if ($olddata && $data !~ /<body[\000-\377]*>/i) {
 		($oldhead, $oldbody, $oldfoot) =
 			&html_extract_head_body($olddata);
 		$data = $oldhead.$data.$oldfoot;
