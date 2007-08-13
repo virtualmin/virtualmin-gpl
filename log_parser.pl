@@ -31,6 +31,14 @@ elsif ($type eq "domain") {
 elsif ($type eq "domains") {
 	return &text('log_'.$action.'_domains', $object);
 	}
+elsif ($type eq "balancer") {
+	return &text('log_'.$action.'_balancer', "<tt>$object</tt>",
+		     "<tt>$p->{'dom'}</tt>");
+	}
+elsif ($type eq "balancers") {
+	return &text('log_'.$action.'_balancers', $object,
+		     "<tt>$p->{'dom'}</tt>");
+	}
 elsif ($type eq "resel") {
 	return &text('log_'.$action.'_resel', "<tt>$object</tt>");
 	}

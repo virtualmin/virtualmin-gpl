@@ -62,9 +62,6 @@
 	SetHandler fcgid-script
 	</Location>
 
- - proxy balance directives page
-	- remove 'return 1'
-
  - display script updates across all domains on theme main page
 	- stay on same minor version
 	- also add scheduled email to nag server owners?

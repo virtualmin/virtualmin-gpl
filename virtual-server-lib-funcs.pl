@@ -8008,7 +8008,6 @@ else {
 sub has_proxy_balancer
 {
 local ($d) = @_;
-return 1;
 if ($d->{'web'} && $config{'web'} && !$d->{'alias'} && $virtualmin_pro) {
 	&require_apache();
 	if ($apache::httpd_modules{'mod_proxy'} &&
