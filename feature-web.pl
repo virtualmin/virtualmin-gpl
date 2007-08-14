@@ -400,19 +400,36 @@ else {
 		&$second_print($text{'setup_done'});
 		}
 	if ($_[0]->{'proxy_pass_mode'} != $_[1]->{'proxy_pass_mode'}) {
-		# Proxy mode has been enabled or disabled .. update all
-		# Apache directives from template
+		# Proxy mode has been enabled or disabled .. remove all
+		# ProxyPass / , ProxyPassReverse / and AliasMatch ^/$
+		# directives, and create new ones as appropriate.
 		local $mode = $_[0]->{'proxy_pass_mode'} ||
 			      $_[1]->{'proxy_pass_mode'};
 		&$first_print($mode == 2 ? $text{'save_apache8'}
 					 : $text{'save_apache9'});
+
+		# Take out old proxy directives and block
 		local $lref = &read_file_lines($virt->{'file'});
-		local $tmpl = &get_template($_[0]->{'tmpl'});
-		local @dirs = &apache_template($tmpl->{'web'}, $_[0],
-					       $tmpl->{'web_suexec'});
+		local @lines = @$lref[$virt->{'line'}+1 .. $virt->{'eline'}-1];
+		@lines = grep { !/^ProxyPass\s+\/\s/ &&
+				!/^ProxyPassReverse\s+\/\s/ &&
+				!/^AliasMatch\s+\^\/\.\*\$\s/ &&
+				!/^SSLProxyEngine\s/ } @lines;
+		for(my $i=0; $i<@lines; $i++) {
+			if ($lines[$i] eq "<Proxy *>" &&
+			    $lines[$i+2] eq "</Proxy>") {
+				# Take out <Proxy *> block
+				splice(@lines, $i, 3);
+				last;
+				}
+			}
+
+		# Add new directives
+		local @ppdirs = &apache_proxy_directives($_[0]);
+		push(@lines, @ppdirs);
 		splice(@$lref, $virt->{'line'} + 1,
-		       $virt->{'eline'} - $virt->{'line'} - 1, @dirs);
-		&flush_file_lines();
+		       $virt->{'eline'} - $virt->{'line'} - 1, @lines);
+		&flush_file_lines($virt->{'file'});
 		$rv++;
 		&$second_print($text{'setup_done'});
 		}
@@ -802,27 +819,8 @@ if (!$sudir && $_[2] && $pdom->{'unix'}) {
 		}
 	}
 if (!$ppdir && $_[1]->{'proxy_pass'}) {
-	if ($_[1]->{'proxy_pass_mode'} == 1) {
-		# Proxy to another server
-		push(@dirs, "ProxyPass / $_[1]->{'proxy_pass'}",
-			    "ProxyPassReverse / $_[1]->{'proxy_pass'}");
-		if ($_[1]->{'proxy_pass'} =~ /^https:/ &&
-		    $apache::httpd_modules{'core'} >= 2.0) {
-			# SSL proxy mode
-			push(@dirs, "SSLProxyEngine on");
-			}
-		if ($apache::httpd_modules{'core'} >= 2.0) {
-			# Ensure that proxying works
-			push(@dirs, "<Proxy *>",
-				    "allow from all",
-				    "</Proxy>");
-			}
-		}
-	else {
-		# Redirect to /framefwd.html
-		local $ff = &framefwd_file($_[1]);
-		push(@dirs, "AliasMatch ^/.*\$ $ff");
-		}
+	# Add proxy directives
+	push(@dirs, &apache_proxy_directives($_[1]));
 	}
 if ($tmpl->{'web_writelogs'}) {
 	# Fix any CustomLog or ErrorLog directives to write via writelogs.pl
@@ -831,6 +829,37 @@ if ($tmpl->{'web_writelogs'}) {
 			$d = "$1 \"|$writelogs_cmd $_[1]->{'id'} $2\"$3";
 			}
 		}
+	}
+return @dirs;
+}
+
+# apache_proxy_directives(&domain)
+# Returns text lines for proxy pass or frame forwarding directives
+sub apache_proxy_directives
+{
+local ($d) = @_;
+&require_apache();
+local @dirs;
+if ($d->{'proxy_pass_mode'} == 1) {
+	# Proxy to another server
+	push(@dirs, "ProxyPass / $d->{'proxy_pass'}",
+		    "ProxyPassReverse / $d->{'proxy_pass'}");
+	if ($d->{'proxy_pass'} =~ /^https:/ &&
+	    $apache::httpd_modules{'core'} >= 2.0) {
+		# SSL proxy mode
+		push(@dirs, "SSLProxyEngine on");
+		}
+	if ($apache::httpd_modules{'core'} >= 2.0) {
+		# Ensure that proxying works
+		push(@dirs, "<Proxy *>",
+			    "allow from all",
+			    "</Proxy>");
+		}
+	}
+elsif ($d->{'proxy_pass_mode'} == 2) {
+	# Redirect to /framefwd.html
+	local $ff = &framefwd_file($d);
+	push(@dirs, "AliasMatch ^/.*\$ $ff");
 	}
 return @dirs;
 }

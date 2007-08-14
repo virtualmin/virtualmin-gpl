@@ -694,3 +694,4 @@ In the Server Templates section, separate template php.ini files can be specifie
 Added --alias, --toplevel, --subserver and --subdomain parameters to list-domains.pl to limit output.
 Added the Excluded Directories page for entering directories not to include in backups for a virtual server.
 Updated the modify-domain.pl script to allow excluded directories to be managed with the --add-exclude and --remove-exclude parameters. Also updated list-domains.pl to show exclusions.
+When enabling or disabling proxying for a domain, existing Apache directives are no longer re-generated from the template.
