@@ -47,6 +47,7 @@
 	- RTFM (863)
 	- OTRS (863)
 	- WordPress MU
+	- phpMySites
 
  - sub-servers owned by different mailbox user, as suggested by filip
 	- perhaps combine with extra admins?
@@ -71,3 +72,9 @@
  - Domain registration plugin, via API
 	- Who pays?
 	- Needs a page for setting up account
+ 
+ - clicky in analytics module
+
+ - detect script installs that fail due to lack of quota
+	- generic tar/zip extract function
+
