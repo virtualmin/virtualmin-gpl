@@ -5,12 +5,14 @@
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newscripts_ecannot'});
 &ui_print_header(undef, $text{'newscripts_title'}, "");
+&ReadParse();
 
 # Show tabs
 $prog = "edit_newscripts.cgi?mode=";
 @tabs = ( [ "add", $text{'newscripts_tabadd'}, $prog."add" ],
 	  [ "enable", $text{'newscripts_tabenable'}, $prog."enable" ],
 	  [ "upgrade", $text{'newscripts_tabupgrade'}, $prog."upgrade" ],
+	  [ "warn", $text{'newscripts_tabwarn'}, $prog."warn" ],
 	);
 print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "add", 1);
 
@@ -74,7 +76,8 @@ print &ui_tabs_end_tab();
 print &ui_tabs_start_tab("mode", "upgrade");
 print "$text{'newscripts_desc3'}<p>\n";
 print &ui_form_start("mass_scripts.cgi", "post");
-print &ui_table_start($text{'newscripts_mheader'}, undef, 2);
+print &ui_table_start($text{'newscripts_mheader'}, undef, 2,
+		      [ "width=30%" ]);
 
 # Script to upgrade to
 @scripts = &list_available_scripts();
@@ -101,6 +104,34 @@ print &ui_table_row($text{'newscripts_fail'},
 
 print &ui_table_end();
 print &ui_form_end([ [ "upgrade", $text{'newscripts_upgrade'} ] ]);
+print &ui_tabs_end_tab();
+
+# Show form to setup scheduled email warnings about old scripts
+print &ui_tabs_start_tab("mode", "warn");
+print "$text{'newscripts_desc4'}<p>\n";
+print &ui_form_start("save_scriptwarn.cgi", "post");
+print &ui_table_start($text{'newscripts_wheader'}, undef, 2,
+		      [ "width=30%" ]);
+
+# Warning enabled and schedule
+$job = &find_scriptwarn_job();
+print &ui_table_row($text{'newscripts_wenabled'},
+		    &ui_yesno_radio("enabled", $job ? 1 : 0));
+
+# Send email to
+%email = map { $_, 1 } split(/\s+/, $config{'scriptwarn_email'});
+($other) = grep { /\@/ } (keys %email);
+print &ui_table_row($text{'newscripts_wemail'},
+	    &ui_checkbox("wemail", "owner", $text{'newscripts_wowner'},
+			 $email{'owner'})."<br>\n".
+	    &ui_checkbox("wemail", "reseller", $text{'newscripts_wreseller'},
+			 $email{'reseller'})."<br>\n".
+	    &ui_checkbox("wemail", "other", $text{'newscripts_wother'},
+			 $other)." ".
+	    &ui_textbox("wother", $other, 40));
+
+print &ui_table_end();
+print &ui_form_end([ [ undef, $text{'save'} ] ]);
 print &ui_tabs_end_tab();
 
 print &ui_tabs_end(1);

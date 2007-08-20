@@ -1363,5 +1363,42 @@ return 0 if (!$job);
 return 1;
 }
 
+sub find_scriptwarn_job
+{
+&foreign_require("cron", "cron-lib.pl");
+local ($job) = grep { $_->{'command'} eq $scriptwarn_cron_cmd &&
+		      $_->{'user'} eq 'root' } &cron::list_cron_jobs();
+return $job;
+}
+
+# list_script_upgrades(&domains)
+# Returns a list of script updates that can be done in the given domains
+sub list_script_upgrades
+{
+local ($doms) = @_;
+local (%scache, @rv);
+foreach my $d (@$doms) {
+	foreach my $sinfo (&list_domain_scripts($d)) {
+		# Find a version better than the one we have
+		$script = $scache{$sinfo->{'name'}} ||
+			    &get_script($sinfo->{'name'});
+		$scache{$sinfo->{'name'}} = $script;
+		local @vers = grep { &can_script_version($script, $_) }
+			     @{$script->{'versions'}};
+		local @better = grep { &compare_versions($_,
+					$sinfo->{'version'}) > 0 } @vers;
+		local $ver = @better ? $better[$#better] : undef;
+		next if (!$ver);
+
+		# We have one - add to the results
+		push(@rv, { 'sinfo' => $sinfo,
+			    'script' => $script,
+			    'dom' => $d,
+			    'ver' => $ver });
+		}
+	}
+return @rv;
+}
+
 1;
 

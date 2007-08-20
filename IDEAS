@@ -63,18 +63,12 @@
 	SetHandler fcgid-script
 	</Location>
 
- - display script updates across all domains on theme main page
-	- stay on same minor version
-	- also add scheduled email to nag server owners?
-
  - Postfix SSL/TLS options (FS 3153)
 
  - Domain registration plugin, via API
 	- Who pays?
 	- Needs a page for setting up account
  
- - clicky in analytics module
-
  - detect script installs that fail due to lack of quota
 	- generic tar/zip extract function
 

@@ -55,7 +55,8 @@ elsif ($type eq "script") {
 	return &text('log_'.$action.'_script', $object, $p->{'ver'},
 		     "<tt>$p->{'dom'}</tt>");
 	}
-elsif ($type eq "scripts" && ($action eq "upgrade" || $action eq "uninstall")) {
+elsif ($type eq "scripts" && ($action eq "upgrade" || $action eq "uninstall" ||
+			      $action eq "warn")) {
 	return &text('log_'.$action.'_scripts', $object);
 	}
 elsif ($type eq "scripts") {
