@@ -467,7 +467,7 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'}) {
 		if (&indexof($id, @oldmxs) < 0) {
 			# A new MX .. add a record for it
 			local $s = $servers{$id};
-			local $mxhost = $s->{'mxhost'} || $s->{'host'};
+			local $mxhost = $s->{'mxname'} || $s->{'host'};
 			&bind8::create_record($fn, $withdot, undef,
 				      "IN", "MX", "10 $mxhost.");
 			}

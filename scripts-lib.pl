@@ -1400,5 +1400,39 @@ foreach my $d (@$doms) {
 return @rv;
 }
 
+# extract_script_archive(file, dir, &domain)
+# Attempts to extract a tar.gz or tar or zip file for a script. Returns undef
+# on success, or an HTML error message on failure.
+sub extract_script_archive
+{
+local ($file, $dir, $d) = @_;
+local $fmt = &compression_format($file);
+local $qfile = quotemeta($file);
+local $cmd;
+if ($fmt == 0) {
+	return "Not a compressed file";
+	}
+elsif ($fmt == 1) {
+	$cmd = "(gunzip -c $qfile | tar xf -)";
+	}
+elsif ($fmt == 2) {
+	$cmd = "(uncompress -c $qfile | tar xf -)";
+	}
+elsif ($fmt == 3) {
+	$cmd = "(bunzip2 -c $qfile | tar xf -)";
+	}
+elsif ($fmt == 4) {
+	$cmd = "unzip $qfile";
+	}
+elsif ($fmt == 5) {
+	$cmd = "tar xf $qfile";
+	}
+else {
+	return "Unknown compression format";
+	}
+local $out = &run_as_domain_user($d, "cd ".quotemeta($dir)." && ".$cmd);
+return $? ? "<pre>".&html_escape($out)."</pre>" : undef;
+}
+
 1;
 
