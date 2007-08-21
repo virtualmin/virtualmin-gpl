@@ -1479,7 +1479,7 @@ if ($config{'avail_syslog'} && &get_webmin_version() >= 1.305) {
 	foreach my $log ([ 0, $text{'links_alog'} ],
 			 [ 1, $text{'links_elog'} ]) {
 		local $lf = &get_apache_log($d->{'dom'},
-					 $sd->{'web_port'}, $log->[0]);
+					    $d->{'web_port'}, $log->[0]);
 		if ($lf) {
 			local $param = &master_admin() ? "file"
 						       : "extra";
