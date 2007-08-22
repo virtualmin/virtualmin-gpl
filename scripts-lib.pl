@@ -1451,18 +1451,22 @@ return "<pre>".&html_escape($out)."</pre>" if ($?);
 # Copy to a target dir, if requested
 if ($copydir) {
 	local $path = "$dir/$subdir";
-	if (!-d $path) {
+	local $out;
+	if (-f $path) {
 		# Copy one file
-		local $out = &run_as_domain_user($d, "cp ".quotemeta($dir).
-					     "/$subdir ".quotemeta($copydir));
+		$out = &run_as_domain_user($d, "cp ".quotemeta($dir).
+					   "/$subdir ".quotemeta($copydir));
+		}
+	elsif (-d $path) {
+		# Copy a directory's contents
+		$out = &run_as_domain_user($d, "cp -r ".quotemeta($dir).
+					   ($subdir ? "/$subdir/*" : "/*").
+					   " ".quotemeta($copydir));
 		}
 	else {
-		# Copy a directory's contents
-		local $out = &run_as_domain_user($d, "cp -r ".quotemeta($dir).
-					     ($subdir ? "/$subdir/*" : "/*").
-					     " ".quotemeta($copydir));
+		return "Sub-directory $subdir was not found";
 		}
-	return "<pre>".&html_escape($out)."</pre>" if ($?);
+	return "<pre>".&html_escape($out || "Exit status $?")."</pre>" if ($?);
 	}
 
 return undef;
