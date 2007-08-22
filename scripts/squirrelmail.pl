@@ -161,27 +161,12 @@ if ($dbtype) {
 	return (0, "Database connection failed : $dberr") if ($dberr);
 	}
 
-# Create target dir
-if (!-d $opts->{'dir'}) {
-	$out = &run_as_domain_user($d, "mkdir -p ".quotemeta($opts->{'dir'}));
-	-d $opts->{'dir'} ||
-		return (0, "Failed to create directory : <tt>$out</tt>.");
-	}
-
-# Extract tar file to temp dir
+# Extract tar file to temp dir and copy to target
 local $temp = &transname();
-mkdir($temp, 0755);
-chown($d->{'uid'}, $d->{'gid'}, $temp);
-$out = &run_as_domain_user($d, "cd ".quotemeta($temp).
-			       " && (gunzip -c $files->{'source'} | tar xf -)");
--r "$temp/squirrelmail-$ver/index.php" ||
-	return (0, "Failed to extract source : <tt>$out</tt>.");
-
-# Move html dir to target
-$out = &run_as_domain_user($d, "cp -rp ".quotemeta($temp)."/squirrelmail-$ver/* ".
-			       quotemeta($opts->{'dir'}));
+local $err = &extract_script_archive($files->{'source'}, $temp, $d,
+                                     $opts->{'dir'}, "squirrelmail-$ver");
+$err && return (0, "Failed to extract source : $err");
 local $cprog = "$opts->{'dir'}/config/conf.pl";
--r $cprog || return (0, "Failed to copy source : <tt>$out</tt>.");
 
 if (!$upgrade) {
 	# Run the config program

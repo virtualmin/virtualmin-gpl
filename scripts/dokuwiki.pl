@@ -116,27 +116,12 @@ sub script_dokuwiki_install
 local ($d, $version, $opts, $files, $upgrade) = @_;
 local ($out, $ex);
 
-# Create target dir
-if (!-d $opts->{'dir'}) {
-	$out = &run_as_domain_user($d, "mkdir -p ".quotemeta($opts->{'dir'}));
-	-d $opts->{'dir'} ||
-		return (0, "Failed to create directory : <tt>$out</tt>.");
-	}
-
-# Extract tar file to temp dir
+# Extract tar file to temp dir and copy to target
 local $temp = &transname();
-mkdir($temp, 0755);
-chown($d->{'uid'}, $d->{'gid'}, $temp);
-$out = &run_as_domain_user($d, "cd ".quotemeta($temp).
-			       " && (gunzip -c $files->{'source'} | tar xf -)");
--r "$temp/dokuwiki-$ver/doku.php" ||
-	return (0, "Failed to extract source : <tt>$out</tt>.");
-
-# Move all files to target
-$out = &run_as_domain_user($d, "cp -rp ".quotemeta($temp)."/dokuwiki-$ver/* ".
-			       quotemeta($opts->{'dir'}));
+local $err = &extract_script_archive($files->{'source'}, $temp, $d,
+                                     $opts->{'dir'}, "dokuwiki-$ver");
+$err && return (0, "Failed to extract source : $err");
 local $cfile = "$opts->{'dir'}/doku.php";
--r $cfile || return (0, "Failed to copy source : <tt>$out</tt>.");
 
 # Set permissions
 open(CHANGES, ">$opts->{'dir'}/data/changes.log");

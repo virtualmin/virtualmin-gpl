@@ -1400,12 +1400,27 @@ foreach my $d (@$doms) {
 return @rv;
 }
 
-# extract_script_archive(file, dir, &domain)
+# extract_script_archive(file, dir, &domain, [copy-to-dir], [sub-dir])
 # Attempts to extract a tar.gz or tar or zip file for a script. Returns undef
 # on success, or an HTML error message on failure.
 sub extract_script_archive
 {
-local ($file, $dir, $d) = @_;
+local ($file, $dir, $d, $copydir, $subdir) = @_;
+
+# Create the target dir if missing
+if ($copydir && !-d $copydir) {
+	local $out = &run_as_domain_user($d, "mkdir -p ".quotemeta($copydir));
+	if ($? || !-d $copydir) {
+		return "Failed to create target directory : ".
+		       "<tt>".&html_escape($out)."</tt>";
+		}
+	}
+
+# Extract compressed file to a temp dir
+if (!-d $dir) {
+	&make_dir($dir, 0755);
+	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, undef, $dir);
+	}
 local $fmt = &compression_format($file);
 local $qfile = quotemeta($file);
 local $cmd;
@@ -1431,7 +1446,26 @@ else {
 	return "Unknown compression format";
 	}
 local $out = &run_as_domain_user($d, "cd ".quotemeta($dir)." && ".$cmd);
-return $? ? "<pre>".&html_escape($out)."</pre>" : undef;
+return "<pre>".&html_escape($out)."</pre>" if ($?);
+
+# Copy to a target dir, if requested
+if ($copydir) {
+	local $path = "$dir/$subdir";
+	if (!-d $path) {
+		# Copy one file
+		local $out = &run_as_domain_user($d, "cp ".quotemeta($dir).
+					     "/$subdir ".quotemeta($copydir));
+		}
+	else {
+		# Copy a directory's contents
+		local $out = &run_as_domain_user($d, "cp -r ".quotemeta($dir).
+					     ($subdir ? "/$subdir/*" : "/*").
+					     " ".quotemeta($copydir));
+		}
+	return "<pre>".&html_escape($out)."</pre>" if ($?);
+	}
+
+return undef;
 }
 
 1;

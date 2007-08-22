@@ -171,39 +171,20 @@ local $dbuser = &mysql_user($d);
 local $dbpass = &mysql_pass($d);
 local $dbhost = &get_database_host("mysql");
 
-# Create target dir
-if (!-d $opts->{'dir'}) {
-	$out = &run_as_domain_user($d, "mkdir -p ".quotemeta($opts->{'dir'}));
-	-d $opts->{'dir'} ||
-		return (0, "Failed to create directory : <tt>$out</tt>.");
-	}
-
-# Extract tar file to temp dir
-local $temp = &transname();
-mkdir($temp, 0755);
-chown($d->{'uid'}, $d->{'gid'}, $temp);
-$out = &run_as_domain_user($d, "cd ".quotemeta($temp).
-			       " && unzip $files->{'source'}");
+# Extract tar file to temp dir and copy to target
 local $verdir = &compare_versions($ver, "2.9.1.1") >= 0 ?
 	"phpMyAdmin-$ver-english" : "phpMyAdmin-$ver";
-if (&compare_versions($ver, "2.9.1.1") >= 0) {
-	$version = $ver."-english";
-	}
--r "$temp/$verdir/config.inc.php" ||
-  -r "$temp/$verdir/config.default.php" ||
-    -r "$temp/$verdir/libraries/config.default.php" ||
-      return (0, "Failed to extract source ($temp/$verdir/config.inc.php) : <tt>$out</tt>.");
-
-# Move source dir to target
-$out = &run_as_domain_user($d, "cp -rp ".quotemeta($temp)."/$verdir/* ".
-			       quotemeta($opts->{'dir'}));
+local $temp = &transname();
+local $err = &extract_script_archive($files->{'source'}, $temp, $d,
+                                     $opts->{'dir'}, $verdir);
+$err && return (0, "Failed to extract source : $err");
 local $cfile = "$opts->{'dir'}/config.inc.php";
 if (!-r $cfile) {
 	local $cdef = "$opts->{'dir'}/config.default.php";
 	$cdef = "$opts->{'dir'}/libraries/config.default.php" if (!-r $cdef);
 	&run_as_domain_user($d, "cp ".quotemeta($cdef)." ".quotemeta($cfile));
 	}
--r $cfile || return (0, "Failed to copy source : <tt>$out</tt>.");
+-r $cfile || return (0, "Failed to copy config file");
 
 # Update the config file
 local $lref = &read_file_lines($cfile);

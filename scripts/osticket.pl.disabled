@@ -151,7 +151,6 @@ $out = &run_as_domain_user($d, "cd ".quotemeta($temp).
 # Move html dir to target
 $out = &run_as_domain_user($d, "cp -rp ".quotemeta($temp)."/osticket_$ver/upload/* ".quotemeta($opts->{'dir'}));
 local $cfile = "$opts->{'dir'}/config.php";
--r $cfile || return (0, "Failed to copy source : <tt>$out</tt>.");
 
 # Update the config file
 local $pt = $d->{'web_port'} == 80 ? "" : ":$d->{'web_port'}";

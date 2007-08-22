@@ -696,3 +696,4 @@ Added the Excluded Directories page for entering directories not to include in b
 Updated the modify-domain.pl script to allow excluded directories to be managed with the --add-exclude and --remove-exclude parameters. Also updated list-domains.pl to show exclusions.
 When enabling or disabling proxying for a domain, existing Apache directives are no longer re-generated from the template.
 Added a new tab to the Script Installers page under System Settings to send daily emails to domain owners, resellers or the master administrator notifying them of scripts that have new versions available.
+Re-factored the code in all script installers that extracts ZIP and TAR archives to better check for domains that are out of disk quota, to prevent partial installs.

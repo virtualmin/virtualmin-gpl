@@ -139,28 +139,13 @@ local $dbuser = &postgres_user($d);
 local $dbpass = &postgres_pass($d);
 local $dbhost = &get_database_host("postgres");
 
-# Create target dir
-if (!-d $opts->{'dir'}) {
-	$out = &run_as_domain_user($d, "mkdir -p ".quotemeta($opts->{'dir'}));
-	-d $opts->{'dir'} ||
-		return (0, "Failed to create directory : <tt>$out</tt>.");
-	}
-
-# Extract zip file to temp dir
+# Extract tar file to temp dir and copy to target
 local $temp = &transname();
-mkdir($temp, 0755);
-chown($d->{'uid'}, $d->{'gid'}, $temp);
-$out = &run_as_domain_user($d, "cd ".quotemeta($temp).
-			       " && unzip $files->{'source'}");
--r "$temp/phpPgAdmin-$ver/conf/config.inc.php-dist" ||
-	return (0, "Failed to extract source : <tt>$out</tt>.");
-
-# Move source dir to target
-$out = &run_as_domain_user($d, "cp -rp ".quotemeta($temp)."/phpPgAdmin-$ver/* ".
-			       quotemeta($opts->{'dir'}));
+local $err = &extract_script_archive($files->{'source'}, $temp, $d,
+                                     $opts->{'dir'}, "phpPgAdmin-$ver");
+$err && return (0, "Failed to extract source : $err");
 local $cfileorig = "$opts->{'dir'}/conf/config.inc.php-dist";
 local $cfile = "$opts->{'dir'}/conf/config.inc.php";
--r $cfileorig || return (0, "Failed to copy source : <tt>$out</tt>.");
 
 if (!-r $cfile) {
 	# Copy and update the config file
