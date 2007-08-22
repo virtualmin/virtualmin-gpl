@@ -71,4 +71,4 @@
  
  - detect script installs that fail due to lack of quota
 	- generic tar/zip extract function
-
+	- change function to copy sub-dir to target as well (optionally)

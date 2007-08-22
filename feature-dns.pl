@@ -479,7 +479,7 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'}) {
 		if (&indexof($id, @newmxs) < 0) {
 			# An old MX .. remove it
 			local $s = $servers{$id};
-			local $mxhost = $s->{'mxhost'} || $s->{'host'};
+			local $mxhost = $s->{'mxname'} || $s->{'host'};
 			foreach my $r (@recs) {
 				if ($r->{'type'} eq 'MX' &&
 				    $r->{'name'} eq $withdot &&
@@ -532,7 +532,7 @@ local %ids = map { $_, 1 }
 local @servers = grep { $ids{$_->{'id'}} } &list_mx_servers();
 local $n = 10;
 foreach my $s (@servers) {
-	local $mxhost = $s->{'mxhost'} || $s->{'host'};
+	local $mxhost = $s->{'mxname'} || $s->{'host'};
 	&bind8::create_record($file, $withdot, undef,
 		      "IN", "MX", "$n $mxhost.");
 	$n += 5;

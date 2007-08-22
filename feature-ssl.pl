@@ -104,7 +104,6 @@ push(@$lref, @ssldirs);
 push(@$lref, "</VirtualHost>");
 &flush_file_lines($f);
 &unlock_file($f);
-undef(@apache::get_config_cache);
 
 # Update the non-SSL virtualhost to include the port number, to fix old
 # hosts that were missing the :80
@@ -116,6 +115,7 @@ if (!$_[0]->{'name'} && $lref->[$virt->{'line'}] !~ /:\d+/) {
 	&flush_file_lines();
 	}
 &unlock_file($virt->{'file'});
+undef(@apache::get_config_cache);
 
 # Add this IP and cert to Webmin/Usermin's SSL keys list
 if ($tmpl->{'web_webmin_ssl'} && $d->{'virt'}) {
@@ -128,11 +128,6 @@ if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin") &&
 	&setup_ipkeys($_[0], \&usermin::get_usermin_miniserv_config,
 		      \&usermin::put_usermin_miniserv_config,
 		      \&restart_usermin);
-	}
-
-# Setup for script languages
-if (!$_[0]->{'alias'} && $_[0]->{'dir'}) {
-	&add_script_language_directives($_[0], $tmpl, $web_sslport);
 	}
 
 &$second_print($text{'setup_done'});
