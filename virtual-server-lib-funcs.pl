@@ -8658,7 +8658,7 @@ local @cmds = ( undef,
 		"cd $qdir && unzip $qfile",
 		"cd $qdir && tar xf $qfile",
 	       );
-local $out = &backquote_command("$cmds[$format] 2>&1 </dev/null");
+local $out = &backquote_command("($cmds[$format]) 2>&1 </dev/null");
 return $? ? &text('addstyle_ecmdfailed',
 		  "<tt>".&html_escape($out)."</tt>") : undef;
 }
