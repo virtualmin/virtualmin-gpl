@@ -4989,8 +4989,8 @@ return strftime($_[0], @tm);
 
 # parse_backup_url(string)
 # Converts a URL like ftp:// or a filename into its components. These will be
-# protocol (1 for FTP, 2 for SSH, 0 for local), login, password, host, path
-# and port
+# protocol (1 for FTP, 2 for SSH, 0 for local, 3 for S3, 4 for download), login,
+# password, host, path and port
 sub parse_backup_url
 {
 local @rv;
@@ -5003,6 +5003,9 @@ elsif ($_[0] =~ /^ssh:\/\/([^:]*):([^\@]*)\@([^\/:]+)(:\d+)?:?(\/.*)$/ ||
 	}
 elsif ($_[0] =~ /^s3:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
 	@rv = (3, $1, $2, $3, $5, undef);
+	}
+elsif ($_[0] eq "download:") {
+	return (4, undef, undef, undef, undef, undef);
 	}
 elsif (!$_[0] || $_[0] =~ /^\//) {
 	# Absolute path
@@ -5046,11 +5049,11 @@ else {
 	}
 }
 
-# show_backup_destination(name, value, no-local, [&domain])
+# show_backup_destination(name, value, no-local, [&domain], [nodownload])
 # Returns HTML for fields for selecting a local or FTP file
 sub show_backup_destination
 {
-local ($name, $value, $nolocal, $d) = @_;
+local ($name, $value, $nolocal, $d, $nodownload) = @_;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($_[1]);
 local $defport = $mode == 1 ? 21 : $mode == 2 ? 22 : undef;
 local $serverport = $port && $port != $defport ? "$server:$port" : $server;
@@ -5125,6 +5128,12 @@ if (&can_use_s3()) {
 	push(@opts, [ 3, $text{'backup_mode3'}, $st ]);
 	}
 
+if (!$nodownload) {
+	# Show mode to download in browser
+	push(@opts, [ 4, $text{'backup_mode4'},
+		      $text{'backup_mode4desc'}."<p>" ]);
+	}
+
 return &ui_radio_selector(\@opts, $name."_mode", $mode);
 }
 
@@ -5183,6 +5192,10 @@ elsif ($mode == 3 && &can_use_s3()) {
 	return "s3://".$in{$_[0].'_akey'}.":".$in{$_[0].'_skey'}."\@".
 	       $in{$_[0].'_bucket'}.
 	       ($in{"$_[0]_s3file_def"} ? "" : "/".$in{"$_[0]_s3file"});
+	}
+elsif ($mode == 4) {
+	# Just download
+	return "download:";
 	}
 else {
 	&error($text{'backup_emode'});

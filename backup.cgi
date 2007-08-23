@@ -36,6 +36,9 @@ else {
 	}
 @do_features || &error($text{'backup_efeatures'});
 $dest = &parse_backup_destination("dest", \%in, $cbmode == 2, $doms[0]);
+if ($dest eq "download:" && $in{'fmt'}) {
+	&error($text{'backup_edownloadfmt'});
+	}
 $origdest = $dest;
 $dest = &backup_strftime($dest) if ($in{'strftime'});
 if ($in{'onebyone'}) {
@@ -86,36 +89,64 @@ if (defined($in{'dom'})) {
 		}
 	}
 
-&ui_print_unbuffered_header(undef, $text{'backup_title'}, "");
-
-$nice = &nice_backup_url($dest);
-if (@doms) {
-	print &text('backup_doing', scalar(@doms), $nice),"<p>\n";
+if ($dest eq "download:") {
+	# Special case .. we backup to a temp file and output in the browser
+	$temp = &transname().($config{'compression'} == 0 ? ".tar.gz" :
+			      $config{'compression'} == 1 ? ".tar.bz2" :".tar");
+	&set_all_null_print();
+	($ok, $size) = &backup_domains($temp, \@doms, \@do_features,
+				       $in{'fmt'}, $in{'errors'}, \%options,
+				       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
+				       $in{'onebyone'}, $cbmode == 2);
+	&run_post_actions();
+	if ($ok) {
+		@st = stat($temp);
+		print "Content-type: application/octet-stream\n";
+		print "Content-length: $st[7]\n";
+		print "\n";
+		open(TEMP, $temp);
+		unlink($temp);
+		while(read(TEMP, $buf, 1024) > 0) {
+			print $buf;
+			}
+		close(TEMP);
+		}
+	else {
+		&error($text{'backup_edownloadfailed'});
+		}
 	}
 else {
-	print &text('backup_doing2', scalar(@vbs), $nice),"<p>\n";
-	}
-($ok, $size) = &backup_domains($dest, \@doms, \@do_features,
-			       $in{'fmt'}, $in{'errors'}, \%options,
-			       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
-			       $in{'onebyone'}, $cbmode == 2);
-&run_post_actions();
-if (!$ok) {
-	#&unlink_file($dest);
-	print "<p>",$text{'backup_failed'},"<p>\n";
-	}
-else {
-	print "<p>",&text('backup_done', &nice_size($size)),"<p>\n";
-	&webmin_log("backup", $dest, undef,
-		    { 'doms' => [ map { $_->{'dom'} } @doms ] });
-	}
+	# Show backup progress
+	&ui_print_unbuffered_header(undef, $text{'backup_title'}, "");
 
-if (defined($in{'dom'})) {
-	# Link is back to view/edit form
-	&ui_print_footer(&domain_footer_link(&get_domain($in{'dom'})));
-	}
-else {
-	&ui_print_footer("", $text{'index_return'});
-	}
+	$nice = &nice_backup_url($dest);
+	if (@doms) {
+		print &text('backup_doing', scalar(@doms), $nice),"<p>\n";
+		}
+	else {
+		print &text('backup_doing2', scalar(@vbs), $nice),"<p>\n";
+		}
+	($ok, $size) = &backup_domains($dest, \@doms, \@do_features,
+				       $in{'fmt'}, $in{'errors'}, \%options,
+				       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
+				       $in{'onebyone'}, $cbmode == 2);
+	&run_post_actions();
+	if (!$ok) {
+		#&unlink_file($dest);
+		print "<p>",$text{'backup_failed'},"<p>\n";
+		}
+	else {
+		print "<p>",&text('backup_done', &nice_size($size)),"<p>\n";
+		&webmin_log("backup", $dest, undef,
+			    { 'doms' => [ map { $_->{'dom'} } @doms ] });
+		}
 
+	if (defined($in{'dom'})) {
+		# Link is back to view/edit form
+		&ui_print_footer(&domain_footer_link(&get_domain($in{'dom'})));
+		}
+	else {
+		&ui_print_footer("", $text{'index_return'});
+		}
+	}
 

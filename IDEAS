@@ -69,9 +69,4 @@
 	- Who pays?
 	- Needs a page for setting up account
  
- - detect script installs that fail due to lack of quota
-	- generic tar/zip extract function
-	- change function to copy sub-dir to target as well (optionally)
-	- test movable type on lentor
-
  - rails scripts should be able to make use of balancer

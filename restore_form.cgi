@@ -25,8 +25,12 @@ if (defined($in{'dom'})) {
 	}
 
 # Show source file field
+if ($dest eq "download:") {
+	# Not possible for restores
+	$dest = "/";
+	}
 print &ui_table_row($text{'restore_src'},
-		    &show_backup_destination("src", $dest));
+		    &show_backup_destination("src", $dest, 0, undef, 1));
 print &ui_hidden_table_end("source");
 
 # Show feature selection boxes

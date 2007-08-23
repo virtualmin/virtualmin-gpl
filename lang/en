@@ -1617,6 +1617,8 @@ backup_mode0a=File or directory under <tt>virtualmin-backup/</tt>
 backup_mode1=FTP server
 backup_mode2=SSH server
 backup_mode3=Amazon S3 bucket
+backup_mode4=Download in browser
+backup_mode4desc=The resulting Virtualmin backup file will be downloaded in your browser, for saving on your PC.
 backup_akey=Access key ID
 backup_skey=Secret key ID
 backup_s3file=File under bucket
@@ -1735,6 +1737,8 @@ backup_cron=Backing up Cron jobs ..
 backup_cronnone=.. none defined.
 backup_allfeatures=Backup all features
 backup_selfeatures=Only those selected below ..
+backup_edownloadfmt=Only backups to a single file can be downloaded in your browser
+backup_edownloadfailed=Backup failed - try again to a file on the server to see the full error message
 
 restore_title=Restore Virtual Servers
 restore_header=Options for restoring backup

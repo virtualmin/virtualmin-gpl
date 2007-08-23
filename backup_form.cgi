@@ -15,7 +15,7 @@ if ($in{'sched'}) {
 	}
 else {
 	&ui_print_header($msg, $text{'backup_title'}, "");
-	print &ui_form_start("backup.cgi", "post");
+	print &ui_form_start("backup.cgi/backup.tgz", "post");
 	}
 @tds = ( "width=30% ");
 
@@ -120,7 +120,7 @@ print &ui_hidden_table_end("features");
 print &ui_hidden_table_start($text{'backup_headerdest'}, "width=100%", 2,
 			     "dest", 1, \@tds);
 print &ui_table_row(&hlink($text{'backup_dest'}, "backup_dest"),
-	    &show_backup_destination("dest", $dest, $cbmode == 2, $d)."\n".
+	    &show_backup_destination("dest", $dest, $cbmode == 2, $d, !$d)."\n".
 	    &ui_checkbox("strftime", 1,
 			 &hlink($text{'backup_strftime'}, "backup_strftime"),
 			 $backup_strftime)."<br>\n".

@@ -697,3 +697,4 @@ Updated the modify-domain.pl script to allow excluded directories to be managed 
 When enabling or disabling proxying for a domain, existing Apache directives are no longer re-generated from the template.
 Added a new tab to the Script Installers page under System Settings to send daily emails to domain owners, resellers or the master administrator notifying them of scripts that have new versions available.
 Re-factored the code in all script installers that extracts ZIP and TAR archives to better check for domains that are out of disk quota, to prevent partial installs.
+Added an option to the form for backing up a single virtual server to download the resulting file in the browser, rather than saving it to a file or sending to an SSH or FTP server.
