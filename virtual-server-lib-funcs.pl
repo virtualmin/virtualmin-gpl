@@ -985,7 +985,8 @@ else {
 	&require_mail();
 
 	# Update the unix user
-	&foreign_call($usermodule, "set_user_envs", $_[0], 'MODIFY_USER', $_[0]->{'plainpass'});
+	&foreign_call($usermodule, "set_user_envs", $_[0], 'MODIFY_USER',
+		      $_[0]->{'plainpass'}, $_[1], $_[1]->{'plainpass'});
 	&foreign_call($usermodule, "making_changes");
 	&foreign_call($usermodule, "lock_user_files");
 	&userdom_substitutions($_[0], $_[2]);
@@ -1002,7 +1003,8 @@ else {
 			$extrauser = { %{$_[0]} };
 			$extrauser->{'user'} = &replace_atsign($_[0]->{'user'});
 			&foreign_call($usermodule, "set_user_envs", $extrauser,
-					'MODIFY_USER', $_[0]->{'plainpass'});
+					'MODIFY_USER', $_[0]->{'plainpass'},
+					$oldextrauser, $_[1]->{'plainpass'});
 			&foreign_call($usermodule, "making_changes");
 			&foreign_call($usermodule, "lock_user_files");
 			&userdom_substitutions($extrauser, $_[2]);

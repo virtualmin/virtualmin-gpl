@@ -70,3 +70,6 @@
 	- Needs a page for setting up account
  
  - rails scripts should be able to make use of balancer
+
+ - per-domain control over number of fcgi child processes
+	- FS 3168

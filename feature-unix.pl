@@ -312,7 +312,8 @@ if (!$_[0]->{'parent'}) {
 	local ($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'} } @allusers;
 	if ($uinfo) {
 		&$first_print($text{'disable_unix'});
-		&foreign_call($usermodule, "set_user_envs", $uinfo, 'MODIFY_USER', "");
+		&foreign_call($usermodule, "set_user_envs", $uinfo,
+			      'MODIFY_USER', "", $uinfo, "");
 		&foreign_call($usermodule, "making_changes");
 		$_[0]->{'disabled_oldpass'} = $uinfo->{'pass'};
 		$uinfo->{'pass'} = $uconfig{'lock_string'};
@@ -335,7 +336,8 @@ if (!$_[0]->{'parent'}) {
 	local ($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'} } @allusers;
 	if ($uinfo) {
 		&$first_print($text{'enable_unix'});
-		&foreign_call($usermodule, "set_user_envs", $uinfo, 'MODIFY_USER', "");
+		&foreign_call($usermodule, "set_user_envs", $uinfo,
+			      'MODIFY_USER', "", $uinfo, "");
 		&foreign_call($usermodule, "making_changes");
 		$uinfo->{'pass'} = $_[0]->{'disabled_oldpass'};
 		delete($_[0]->{'disabled_oldpass'});
@@ -382,6 +384,7 @@ if (&has_home_quotas()) {
 local @allusers = &foreign_call($usermodule, "list_users");
 local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
 if ($uinfo && !$d->{'parent'}) {
+	local $olduinfo = { %$uinfo };
 	&foreign_call($usermodule, "lock_user_files");
 	$uinfo->{'real'} = $d->{'owner'};
 	local $enc = &foreign_call($usermodule, "encrypt_password",
@@ -389,7 +392,7 @@ if ($uinfo && !$d->{'parent'}) {
 	$uinfo->{'pass'} = $enc;
 	&set_pass_change($uinfo);
 	&foreign_call($usermodule, "set_user_envs",
-		$uinfo, 'MODIFY_USER', $d->{'pass'});
+		      $uinfo, 'MODIFY_USER', $d->{'pass'}, $olduinfo);
 	&foreign_call($usermodule, "making_changes");
 	&foreign_call($usermodule, "modify_user", $uinfo, $uinfo);
 	&foreign_call($usermodule, "made_changes");
