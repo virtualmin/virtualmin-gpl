@@ -625,6 +625,7 @@ if (!$config{'ftp'} && &foreign_installed("proftpd")) {
 	# buttons.
 	return &startstop_ftp();
 	}
+return ( );
 }
 
 sub stop_service_unix
