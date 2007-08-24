@@ -193,7 +193,7 @@ if (!$_[0]->{'parent'}) {
 		&$first_print($text{'save_group'});
 		$ginfo->{'group'} = $_[0]->{'group'};
 		&foreign_call($usermodule, "set_group_envs", $ginfo,
-					   'MODIFY_GROUP');
+					   'MODIFY_GROUP', \%old);
 		&foreign_call($usermodule, "making_changes");
 		&foreign_call($usermodule, "modify_group", \%old, $ginfo);
 		&foreign_call($usermodule, "made_changes");
@@ -574,7 +574,7 @@ $group->{'members'} = join(",", &unique(@members));
 if ($group->{'members'} ne $oldgroup->{'members'}) {
 	&foreign_call($group->{'module'}, "lock_user_files");
 	&foreign_call($group->{'module'}, "set_group_envs", $group,
-				   	  'MODIFY_GROUP');
+				   	  'MODIFY_GROUP', $oldgroup);
 	&foreign_call($group->{'module'}, "making_changes");
 	&foreign_call($group->{'module'}, "modify_group", $oldgroup, $group);
 	&foreign_call($group->{'module'}, "made_changes");
@@ -610,7 +610,7 @@ $group->{'members'} = join(",", &unique(@members));
 if ($group->{'members'} ne $oldgroup->{'members'}) {
 	&foreign_call($group->{'module'}, "lock_user_files");
 	&foreign_call($group->{'module'}, "set_group_envs", $group,
-				      'MODIFY_GROUP');
+				      'MODIFY_GROUP', $oldgroup);
 	&foreign_call($group->{'module'}, "making_changes");
 	&foreign_call($group->{'module'}, "modify_group", $oldgroup, $group);
 	&foreign_call($group->{'module'}, "made_changes");

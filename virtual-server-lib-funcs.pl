@@ -10913,12 +10913,13 @@ if ($group) {
 	if (&indexof($user, @mems) < 0) {
 		# Need to add him
 		&$first_print(&text($msg, $user)) if ($msg);
+		local $oldgroup = { %$group };
 		$group->{'members'} = join(",", @mems, $user);
 		&foreign_call($group->{'module'}, "set_group_envs", $group,
-						  'MODIFY_GROUP');
+						  'MODIFY_GROUP', $oldgroup);
 		&foreign_call($group->{'module'}, "making_changes");
 		&foreign_call($group->{'module'}, "modify_group",
-						  $group, $group);
+						  $oldgroup, $group);
 		&foreign_call($group->{'module'}, "made_changes");
 		&$second_print($text{'setup_done'}) if ($msg);
 		return 1;
