@@ -116,7 +116,7 @@ foreach my $pname (@confplugins) {
 @backup_plugins = grep { &plugin_defined($_, "feature_backup") } @plugins;
 @migration_types = ( "cpanel", "ensim" );
 @allow_features = (@opt_features, "virt", @feature_plugins);
-@startstop_features = ("web", "dns", "mail", "ftp", "mysql", "postgres");
+@startstop_features = ("web", "dns", "mail", "ftp", "unix", "mysql","postgres");
 @all_database_types = ( ($config{'mysql'} ? ("mysql") : ( )),
 		        ($config{'postgres'} ? ("postgres") : ( )),
 		        @database_plugins );

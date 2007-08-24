@@ -1445,6 +1445,7 @@ check_edepssl=SSL cannot be enabled in Virtualmin's <a href='$1'>module configur
 check_eshell=Shell $1 for non-FTP users is included in $2, which may allow FTP access.
 check_eftpshell=Shell $1 for FTP users is not included in $2, which may prevent FTP access.
 check_allwebmin=Updating all Webmin users with new settings..
+check_allresel=Updating all resellers with new settings..
 check_needupdate=Some of the module configuration settings that effect which modules Webmin users have access to have changed. Click the button below to update all users with the new permissions.
 check_updatenow=Update Webmin Users
 check_current=In Webalizer's global configuration, the <b>Webalizer incremental file</b> is set to an absolute path. Use the <a href='$1'>Webalizer</a> module to change it to a relative path, like just <tt>webalizer.current</tt>.

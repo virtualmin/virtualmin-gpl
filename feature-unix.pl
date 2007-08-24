@@ -618,6 +618,27 @@ if ($group->{'members'} ne $oldgroup->{'members'}) {
 	}
 }
 
+sub startstop_unix
+{
+if (!$config{'ftp'} && &foreign_installed("proftpd")) {
+	# Even if the FTP feature is not enabled, show the proftpd start/stop
+	# buttons.
+	return &startstop_ftp();
+	}
+}
+
+sub stop_service_unix
+{
+return &stop_service_ftp();
+}
+
+sub start_service_unix
+{
+return &start_service_ftp();
+}
+
+
+
 $done_feature_script{'unix'} = 1;
 
 1;
