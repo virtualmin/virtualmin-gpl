@@ -283,6 +283,7 @@ local $dirvar = $mode eq "fcgid" ? "PWD" : "DOCUMENT_ROOT";
 
 # For each version of PHP, create a wrapper
 local $pub = &public_html_dir($d);
+local $children = &get_domain_php_children($d);
 foreach my $v (&list_available_php_versions($d, $mode)) {
 	&open_tempfile(PHP, ">$dest/php$v->[0].$suffix");
 	local $t = "php".$v->[0].$suffix;
@@ -299,7 +300,11 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 				"PHPRC=\$$dirvar/../etc/php$v->[0]\n".
 				"export PHPRC\n";
 		if ($mode eq "fcgid") {
-			$common .= "PHP_FCGI_CHILDREN=4\n".
+			local $defchildren = $tmpl->{'web_phpchildren'};
+			if (!$defchildren || $defchildren eq "none") {
+				$defchildren = $default_php_fcgid_children;
+				}
+			$common .= "PHP_FCGI_CHILDREN=$defchildren\n".
 				   "export PHP_FCGI_CHILDREN\n";
 			}
 		&print_tempfile(PHP, $common);
@@ -315,6 +320,10 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 	&close_tempfile(PHP);
 	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755,
 				   "$dest/php$v->[0].$suffix");
+	if ($children > 0) {
+		# Put back the old number of child processes
+		&save_domain_php_children($d, $children);
+		}
 
 	# Also copy the .fcgi wrapper to public_html, which is needed due to
 	# broken-ness on some Debian versions!
@@ -656,6 +665,48 @@ else {
 	$ini->[1] =~ s/\/php.ini$//i if ($dir);
 	return $ini->[1];
 	}
+}
+
+# get_domain_php_children(&domain)
+# For a domain using fcgi to run PHP, returns the number of child processes.
+# Returns -1 if not set.
+sub get_domain_php_children
+{
+local ($d) = @_;
+local ($ver) = &list_available_php_versions($d, "fcgi");
+return -2 if (!$ver);
+local $childs = -1;
+open(WRAPPER, "$d->{'home'}/fcgi-bin/php$ver->[0].fcgi") || return -2;
+while(<WRAPPER>) {
+	if (/^PHP_FCGI_CHILDREN\s*=\s*(\d+)/) {
+		$childs = $1;
+		}
+	}
+close(WRAPPER);
+return $childs;
+}
+
+# save_domain_php_children(&domain, children)
+# Update all of a domain's PHP wrapper scripts with the new number of children
+sub save_domain_php_children
+{
+local ($d, $children) = @_;
+local $count = 0;
+foreach my $ver (&list_available_php_versions($d, "fcgi")) {
+	local $wrapper = "$d->{'home'}/fcgi-bin/php$ver->[0].fcgi";
+	next if (!-r $wrapper);
+	&lock_file($wrapper);
+	local $lref = &read_file_lines($wrapper);
+	foreach my $l (@$lref) {
+		if ($l =~ s/PHP_FCGI_CHILDREN\s*=\s*\d+/PHP_FCGI_CHILDREN=$children/g) {
+			$count++;
+			}
+		}
+	&flush_file_lines($wrapper);
+	&unlock_file($wrapper);
+	}
+&register_post_action(\&restart_apache);
+return $count;
 }
 
 1;

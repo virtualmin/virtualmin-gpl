@@ -6629,6 +6629,7 @@ push(@rv, { 'id' => 0,
 					int($config{'ruby_suexec'}),
 	    'web_phpver' => $config{'phpver'},
 	    'web_php_noedit' => int($config{'php_noedit'}),
+	    'web_phpchildren' => $config{'phpchildren'},
 	    'webalizer' => $config{'def_webalizer'} || "none",
 	    'disabled_web' => $config{'disabled_web'} || "none",
 	    'disabled_url' => $config{'disabled_url'} || "none",
@@ -6826,6 +6827,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'php_suexec'} = $tmpl->{'web_php_suexec'};
 	$config{'ruby_suexec'} = $tmpl->{'web_ruby_suexec'};
 	$config{'phpver'} = $tmpl->{'web_phpver'};
+	$config{'phpchildren'} = $tmpl->{'web_phpchildren'};
 	foreach my $phpver (@all_possible_php_versions) {
 		$config{'php_ini_'.$phpver} = $tmpl->{'web_php_ini_'.$phpver};
 		}

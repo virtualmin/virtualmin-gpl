@@ -193,6 +193,8 @@ $extra_admins_dir = "$module_config_directory/admins";
 @all_possible_php_versions = (4, 5);
 @php_wrapper_templates = ("php4cgi", "php5cgi", "php4fcgi", "php5fcgi");
 @s3_perl_modules = ( "S3::AWSAuthConnection", "S3::QueryStringAuthGenerator" );
+$max_php_fcgid_children = 20;
+$default_php_fcgid_children = 4;
 
 %get_domain_by_maps = ( 'user' => "$module_config_directory/map.user",
 			'gid' => "$module_config_directory/map.gid",

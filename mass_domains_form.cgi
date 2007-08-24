@@ -167,6 +167,14 @@ if (@avail > 1 && &can_edit_phpver()) {
 			    map { [ $_->[0] ] } @avail ]), 1, \@tds);
 	}
 
+# PHP child processes
+if (&can_edit_phpmode()) {
+	print &ui_table_row($text{'massdomains_phpchildren'},
+		&ui_radio("phpchildren_def", 1,
+			  [ [ 1, $text{'massdomains_leave'} ],
+			    [ 0, &ui_textbox("phpchildren", undef, 5) ] ]));
+	}
+
 if ($anyphp) {
 	print &ui_hidden_table_end("php");
 	}

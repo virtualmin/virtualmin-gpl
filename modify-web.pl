@@ -34,6 +34,11 @@ while(@ARGV > 0) {
 	elsif ($a eq "--ruby-mode") {
 		$rubymode = shift(@ARGV);
 		}
+	elsif ($a eq "--php-children") {
+		$children = shift(@ARGV);
+		$children > 0 || &usage("Invalid number of PHP sub-processes");
+		$children > $max_php_fcgid_children || &usage("Too many PHP sub-processes - maximum is $max_php_fcgid_children");
+		}
 	elsif ($a eq "--proxy") {
 		$proxy = shift(@ARGV);
 		$proxy =~ /^(http|https):\/\/\S+$/ ||
@@ -71,7 +76,7 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || usage();
 $mode || $rubymode || defined($proxy) || defined($framefwd) ||
-  defined($suexec) || $stylename || &usage("Nothing to do");
+  defined($suexec) || $stylename || $children || &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate style
@@ -138,6 +143,11 @@ foreach $d (@doms) {
 	# Update PHP mode
 	if ($mode && !$d->{'alias'}) {
 		&save_domain_php_mode($d, $mode);
+		}
+
+	# Update PHP fCGId children
+	if ($children && !$d->{'alias'}) {
+		&save_domain_php_children($d, $children);
 		}
 
 	# Update Ruby mode
@@ -216,6 +226,7 @@ print "Changes web server settings for one or more domains.\n";
 print "\n";
 print "usage: modify-web.pl [--domain name] | [--all-domains]\n";
 print "                     [--mode mod_php | cgi | fcgid]\n";
+print "                     [--php-children number]\n";
 print "                     [--ruby-mode none | mod_ruby | cgi | fcgid]\n";
 print "                     [--suexec | --no-suexec]\n";
 print "                     [--proxy http://... | --no-proxy]\n";

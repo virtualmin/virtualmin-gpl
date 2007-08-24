@@ -1567,7 +1567,7 @@ local @webfields = ( "web", "suexec", "writelogs", "user_def", "user",
 		     "alias_mode", "web_port", "web_sslport",
 		     "web_webmin_ssl", "web_usermin_ssl" );
 if ($virtualmin_pro) {
-	push(@webfields, "web_php_suexec", "web_phpver",
+	push(@webfields, "web_php_suexec", "web_phpver", "web_phpchildren",
 			 "web_php_noedit", "web_ruby_suexec" );
 	foreach my $phpver (@all_possible_php_versions) {
 		push(@webfields, "web_php_ini_".$phpver,
@@ -1682,6 +1682,12 @@ if ($virtualmin_pro) {
 	    &ui_select("web_phpver", $tmpl->{'web_phpver'},
 		       [ [ "", $text{'tmpl_phpverdef'} ],
 			 map { [ $_->[0] ] } &list_available_php_versions() ]));
+
+	# Default number of PHP child processes
+	print &ui_table_row(
+	    &hlink($text{'tmpl_phpchildren'}, "template_phpchildren"),
+	    &ui_opt_textbox("web_phpchildren", $tmpl->{'web_phpchildren'},
+		    5, $text{'default'}." ($default_php_fcgid_children)"));
 
 	# Source php.ini files
 	foreach my $phpver (@all_possible_php_versions) {
@@ -1857,6 +1863,17 @@ if ($in{"web_mode"} == 2) {
 			}
 		$tmpl->{'web_php_suexec'} = $in{'web_php_suexec'};
 		$tmpl->{'web_phpver'} = $in{'web_phpver'};
+		if ($in{'web_phpchildren_def'}) {
+			$tmpl->{'web_phpchildren'} = undef;
+			}
+		else {
+			if ($in{'web_phpchildren'} < 1 ||
+			    $in{'web_phpchildren'} > $max_php_fcgid_children) {
+				&error(&text('phpmode_echildren',
+					     $max_php_fcgid_children));
+				}
+			$tmpl->{'web_phpchildren'} = $in{'web_phpchildren'};
+			}
 		foreach my $phpver (@all_possible_php_versions) {
 			$in{'web_php_ini_'.$phpver.'_def'} ||
 			  -r $in{'web_php_ini_'.$phpver} ||

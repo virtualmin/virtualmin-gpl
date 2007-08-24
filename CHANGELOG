@@ -699,3 +699,5 @@ Added a new tab to the Script Installers page under System Settings to send dail
 Re-factored the code in all script installers that extracts ZIP and TAR archives to better check for domains that are out of disk quota, to prevent partial installs.
 Added an option to the form for backing up a single virtual server to download the resulting file in the browser, rather than saving it to a file or sending to an SSH or FTP server.
 The button to stop or restart ProFTPd is always displayed in the right frame, even if private IP-based FTP is not enabled.
+Added a field to the Website Options page to set the number of PHP sub-processes used for service fCGId requests. A default for this can also be set in the Server Templates section, and the setting can be changed for multiple domains at once on the Update Virtual Servers.
+Added the --php-children parameter to the modify-web.pl command-line script, to change the number of PHP fCGId sub-processes. The current setting is also displayed in list-domains.pl.

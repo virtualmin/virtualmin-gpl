@@ -162,6 +162,12 @@ else {
 			$spamclear = "";
 			}
 		}
+	if (&can_edit_phpmode() && !$in{'phpchildren_def'}) {
+		$in{'phpchildren'} > 0 &&
+		    $in{'phpchildren'} <= $max_php_fcgid_children || 
+			&error(&text('phpmode_echildren',
+				     $max_php_fcgid_children));
+		}
 
 	# Apply the changes to the new domain objects, where possible
 	local $changed_limits = 0;
@@ -342,6 +348,14 @@ else {
 				&save_domain_suexec($d, 1);
 				}
 			&save_domain_php_mode($d, $in{'phpmode'});
+			&$second_print($text{'setup_done'});
+			}
+
+		# Check the PHP child processes ..
+		if (&can_edit_phpmode() && !$in{'phpchildren_def'} &&
+		    $d->{'web'} && !$d->{'alias'}) {
+			&$first_print($text{'massdomains_phpchildrening'});
+			&save_domain_php_children($d, $in{'phpchildren'});
 			&$second_print($text{'setup_done'});
 			}
 

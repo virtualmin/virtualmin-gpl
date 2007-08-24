@@ -18,10 +18,21 @@ print &ui_table_row(&hlink($text{'phpmode_suexec'}, "phpmode_suexec"),
 		    &ui_yesno_radio("suexec", &get_domain_suexec($d)));
 
 # PHP execution mode
+@modes = &supported_php_modes($d);
 print &ui_table_row(&hlink($text{'phpmode_mode'}, "phpmode"),
 		    &ui_radio("mode", &get_domain_php_mode($d),
 			      [ map { [ $_, $text{'phpmode_'.$_}."<br>" ] }
-				    &supported_php_modes($d) ]));
+				    @modes ]));
+
+# PHP fcgi sub-processes
+if (&indexof("fcgid", @modes) >= 0) {
+	$children = &get_domain_php_children($d);
+	if ($children > 0) {
+		print &ui_table_row(&hlink($text{'phpmode_children'},
+					   "phpmode_children"),
+				    &ui_textbox("children", $children, 5));
+		}
+	}
 
 # Ruby execution mode
 @rubys = &supported_ruby_modes($d);

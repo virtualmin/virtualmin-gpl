@@ -200,6 +200,12 @@ if ($multi) {
 			      ($s ? "enabled" : "disabled"),"\n";
 			}
 		if ($config{'web'} && $d->{'web'} &&
+		    defined(&get_domain_php_children)) {
+			$childs = &get_domain_php_children($d);
+			print "    PHP fCGId subprocesses: ",
+				$childs < 0 ? "Not set" : $childs,"\n";
+			}
+		if ($config{'web'} && $d->{'web'} &&
 		    defined(&get_domain_ruby_mode)) {
 			$p = &get_domain_ruby_mode($d) || "none";
 			print "    Ruby execution mode: $p\n";

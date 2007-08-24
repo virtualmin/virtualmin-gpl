@@ -18,9 +18,18 @@ if ($in{'suexec'} && $apache::httpd_modules{'core'} >= 2.0 &&
     !$apache::httpd_modules{'mod_suexec'}) {
 	&error($text{'phpmode_emodsuexec'});
 	}
+if (defined($in{'children'}) &&
+    ($in{'children'} < 1 || $in{'children'} > $max_php_fcgid_children)) {
+	&error(&text('phpmode_echildren', $max_php_fcgid_children));
+	}
 
 # Save PHP execution mode
 &save_domain_php_mode($d, $in{'mode'});
+
+# Save PHP fcgi children
+if (defined($in{'children'})) {
+	&save_domain_php_children($d, $in{'children'});
+	}
 
 # Save Ruby execution mode
 &save_domain_ruby_mode($d, $in{'rubymode'});
