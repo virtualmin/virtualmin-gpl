@@ -3363,6 +3363,7 @@ postsave_index=Show all of your Virtualmin virtual servers.
 showpass_title=Virtual Server Password
 showpass_user=Administration login
 showpass_pass=Administration password
+showpass_ecannot=You are not allowed to view virtual server passwords
 
 phpver_title=PHP Versions
 phpver_dir=Website subdirectory

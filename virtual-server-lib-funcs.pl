@@ -8020,6 +8020,12 @@ else {
 	}
 }
 
+# Returns 1 if the current user can see mailbox and domain passwords
+sub can_show_pass
+{
+return &master_admin() || &reseller_admin() || $config{'show_pass'};
+}
+
 # has_proxy_balancer(&domain)
 # Returns 1 if some domain supports proxy balancing
 sub has_proxy_balancer
@@ -10718,7 +10724,12 @@ else {
 sub show_password_popup
 {
 local ($d) = @_;
-return "(<a href='showpass.cgi?dom=$d->{'id'}' onClick='window.open(\"showpass.cgi?dom=$d->{'id'}\", \"showpass\", \"toolbar=no,menubar=no,scrollbar=no,width=300,height=70\"); return false'>$text{'edit_showpass'}</a>)";
+if (&can_show_pass()) {
+	return "(<a href='showpass.cgi?dom=$d->{'id'}' onClick='window.open(\"showpass.cgi?dom=$d->{'id'}\", \"showpass\", \"toolbar=no,menubar=no,scrollbar=no,width=300,height=70\"); return false'>$text{'edit_showpass'}</a>)";
+	}
+else {
+	return "";
+	}
 }
 
 # flush_virtualmin_caches()

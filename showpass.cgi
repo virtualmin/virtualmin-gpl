@@ -7,6 +7,7 @@ use POSIX;
 $d = &get_domain($in{'dom'});
 $d || &error($text{'edit_egone'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
+&can_show_pass() || &error($text{'showpass_ecannot'});
 
 &popup_header($text{'showpass_title'});
 

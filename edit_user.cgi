@@ -77,7 +77,8 @@ if (!$mailbox) {
 		# For an existing user, offer to change password
 		$pwfield = &ui_opt_textbox("mailpass", undef, 13,
 			$text{'user_passdef'}."\n".
-			($user->{'plainpass'} ? "($user->{'plainpass'})" :
+			(!&can_show_pass() ? "" :
+			 $user->{'plainpass'} ? "($user->{'plainpass'})" :
 			 defined($user->{'plainpass'}) ?
 			   "(<i>$text{'user_none'}</i>)" : ""),
 			$text{'user_passset'});
