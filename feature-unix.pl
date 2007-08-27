@@ -313,7 +313,7 @@ if (!$_[0]->{'parent'}) {
 	if ($uinfo) {
 		&$first_print($text{'disable_unix'});
 		&foreign_call($usermodule, "set_user_envs", $uinfo,
-			      'MODIFY_USER', "", $uinfo, "");
+			      'MODIFY_USER', "", undef, $uinfo, "");
 		&foreign_call($usermodule, "making_changes");
 		$_[0]->{'disabled_oldpass'} = $uinfo->{'pass'};
 		$uinfo->{'pass'} = $uconfig{'lock_string'};
@@ -337,7 +337,7 @@ if (!$_[0]->{'parent'}) {
 	if ($uinfo) {
 		&$first_print($text{'enable_unix'});
 		&foreign_call($usermodule, "set_user_envs", $uinfo,
-			      'MODIFY_USER', "", $uinfo, "");
+			      'MODIFY_USER', "", undef, $uinfo, "");
 		&foreign_call($usermodule, "making_changes");
 		$uinfo->{'pass'} = $_[0]->{'disabled_oldpass'};
 		delete($_[0]->{'disabled_oldpass'});
@@ -392,7 +392,7 @@ if ($uinfo && !$d->{'parent'}) {
 	$uinfo->{'pass'} = $enc;
 	&set_pass_change($uinfo);
 	&foreign_call($usermodule, "set_user_envs",
-		      $uinfo, 'MODIFY_USER', $d->{'pass'}, $olduinfo);
+		      $uinfo, 'MODIFY_USER', $d->{'pass'}, undef, $olduinfo);
 	&foreign_call($usermodule, "making_changes");
 	&foreign_call($usermodule, "modify_user", $uinfo, $uinfo);
 	&foreign_call($usermodule, "made_changes");
