@@ -16,7 +16,7 @@ $prog = "edit_newscripts.cgi?mode=";
 	);
 print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "add", 1);
 
-# Show form for installing a script
+# Show form for installing a script installer
 print &ui_tabs_start_tab("mode", "add");
 print "$text{'newscripts_desc1'}<p>\n";
 print &ui_form_start("add_script.cgi", "form-data");
@@ -79,9 +79,16 @@ print &ui_form_start("mass_scripts.cgi", "post");
 print &ui_table_start($text{'newscripts_mheader'}, undef, 2,
 		      [ "width=30%" ]);
 
+# Find those we actually use
+foreach $d (&list_domains()) {
+	foreach my $sinfo (&list_domain_scripts($d)) {
+		$used{$sinfo->{'name'}}++;
+		}
+	}
+
 # Script to upgrade to
 @scripts = &list_available_scripts();
-foreach $sname (@scripts) {
+foreach $sname (grep { $used{$_} } @scripts) {
 	$script = &get_script($sname);
 	foreach $v (@{$script->{'versions'}}) {
 		push(@opts, [ "$sname $v", "$script->{'desc'} $v" ]);

@@ -704,3 +704,4 @@ Added the --php-children parameter to the modify-web.pl command-line script, to 
 ---- Changes since 3.45 ----
 Updated the phpBB script installer to version 3.0.RC5, and Xoops to 2.0.17.
 Added a setting to control if virtual server owners can see mailboxes, on the Module Config page under Server administrator permissions.
+On the Upgrade Scripts page for upgrading across multiple domains at once, only show those actually used in the menu.

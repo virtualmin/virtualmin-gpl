@@ -73,3 +73,5 @@
 
  - xoops installer should be more automated
 
+ - phpsurveyor is now limesurvey
+	- login doesn't work??
