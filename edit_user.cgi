@@ -324,8 +324,23 @@ if (@filters) {
 	print &ui_hidden_table_end("table5");
 	}
 
-print &ui_hidden_table_start($text{'user_header4'}, "width=100%", 2,
-			     "table4", 0, \@tds);
+# Work out if the other permissions section has anything to display
+if ($d && !$mailbox) {
+	@dbs = grep { $_->{'users'} } &domain_databases($d);
+	}
+@sgroups = &allowed_secondary_groups($d);
+foreach $f (@mail_plugins) {
+	$anyplugins++ if (&plugin_defined($f, "mailbox_inputs"));
+	}
+$anyother = &can_mailbox_ftp() && !$mailbox && $user->{'unix'} ||
+	    $anyplugins ||
+	    @dbs ||
+	    @sgroups && $user->{'unix'};
+
+if ($anyother) {
+	print &ui_hidden_table_start($text{'user_header4'}, "width=100%", 2,
+				     "table4", 0, \@tds);
+	}
 
 if (&can_mailbox_ftp() && !$mailbox && $user->{'unix'}) {
 	# Show FTP shell field
@@ -360,9 +375,6 @@ foreach $f (@mail_plugins) {
 	}
 
 # Show allowed databases
-if ($d && !$mailbox) {
-	@dbs = grep { $_->{'users'} } &domain_databases($d);
-	}
 if (@dbs) {
 	@userdbs = map { $_->{'type'}."_".$_->{'name'} } @{$user->{'dbs'}};
 	print &ui_table_row(&hlink($text{'user_dbs'},"userdbs"),
@@ -378,14 +390,16 @@ if (@dbs) {
 	}
 
 # Show secondary groups
-@sgroups = &allowed_secondary_groups($d);
 if (@sgroups && $user->{'unix'}) {
 	print &ui_table_row(&hlink($text{'user_groups'},"usergroups"),
 			    &ui_select("groups", $user->{'secs'},
 				[ map { [ $_ ] } @sgroups ], 5, 1, 1),
 			    2, \@tds);
 	}
-print &ui_hidden_table_end("table4");
+
+if ($anyother) {
+	print &ui_hidden_table_end("table4");
+	}
 
 if ($in{'new'}) {
 	print &ui_form_end([ [ "create", $text{'create'} ] ]);
