@@ -702,7 +702,7 @@ The button to stop or restart ProFTPd is always displayed in the right frame, ev
 Added a field to the Website Options page to set the number of PHP sub-processes used for service fCGId requests. A default for this can also be set in the Server Templates section, and the setting can be changed for multiple domains at once on the Update Virtual Servers.
 Added the --php-children parameter to the modify-web.pl command-line script, to change the number of PHP fCGId sub-processes. The current setting is also displayed in list-domains.pl.
 ---- Changes since 3.45 ----
-Updated the phpBB script installer to version 3.0.RC5, and Xoops to 2.0.17.
+Updated the phpBB script installer to version 3.0.RC5, WebCalendar to 1.1.4, and Xoops to 2.0.17.
 Added a setting to control if virtual server owners can see mailboxes, on the Module Config page under Server administrator permissions.
 On the Upgrade Scripts page for upgrading across multiple domains at once, only show those actually used in the menu.
 Renamed the phpSurveyor installer to Limesurvey, and updated the version 1.52.
