@@ -406,6 +406,7 @@ setup_doms=Adding to email domains list ..
 setup_save=Saving server details ..
 setup_virt=Adding virtual IP interface for $1 ..
 setup_virtdone=.. created interface $1
+setup_virtmissing=.. parent interface $1 does not exist!
 setup_virt2=Finding virtual IP interface for $1 ..
 setup_virtdone2=.. associated interface $1
 setup_done=.. done

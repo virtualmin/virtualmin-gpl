@@ -10,6 +10,11 @@ if (!$config{'iface_manual'} && !$_[0]->{'virtalready'}) {
 	# Actually bring up
 	&$first_print(&text('setup_virt', $_[0]->{'ip'}));
 	local ($iface) = grep { $_->{'fullname'} eq $config{'iface'} } @boot;
+	if (!$iface) {
+		# Interface doesn't really exist!
+		&$second_print(&text('setup_virtmissing', $config{'iface'}));
+		return 0;
+		}
 	local $b;
 	local $vmax = $config{'iface_base'} || int($net::min_virtual_number);
 	foreach $b (@boot) {
