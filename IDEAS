@@ -46,7 +46,6 @@
 	- RT (863)
 	- RTFM (863)
 	- OTRS (863)
-	- WordPress MU
 	- phpMySites
 
  - sub-servers owned by different mailbox user, as suggested by filip
@@ -63,8 +62,6 @@
 	SetHandler fcgid-script
 	</Location>
 
- - Postfix SSL/TLS options (FS 3153)
-
  - Domain registration plugin, via API
 	- Who pays?
 	- Needs a page for setting up account
@@ -72,4 +69,7 @@
  - rails scripts should be able to make use of balancer
 
  - xoops installer should be more automated
+
+ - mass switch to clamdscan from web
+	- should clamdscan be the default?
 
