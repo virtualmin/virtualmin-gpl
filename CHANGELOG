@@ -706,3 +706,4 @@ Updated the phpBB script installer to version 3.0.RC5, WebCalendar to 1.1.4, and
 Added a setting to control if virtual server owners can see mailboxes, on the Module Config page under Server administrator permissions.
 On the Upgrade Scripts page for upgrading across multiple domains at once, only show those actually used in the menu.
 Renamed the phpSurveyor installer to Limesurvey, and updated the version 1.52.
+Added a script installer for WordPress MU version 1.2.4. This is the multi-user version of the popular WordPress blogging engine.
