@@ -402,6 +402,13 @@ else {
 			&$second_print($text{'setup_done'});
 			}
 
+		# Change virus scanner
+		if ($d->{'virus'} && $in{'scanner'}) {
+			&$first_print($text{'massdomains_scannering'});
+			&save_domain_virus_scanner($d, $in{'scanner'});
+			&$second_print($text{'setup_done'});
+			}
+
 		# Save new domain details
 		&$first_print($text{'save_domain'});
 		&save_domain($d);

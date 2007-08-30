@@ -179,9 +179,10 @@ if ($anyphp) {
 	print &ui_hidden_table_end("php");
 	}
 
-# Spam clearing mode
 print &ui_hidden_table_start($text{'massdomains_headero'}, "width=100%", 2,
 			     "others", 0);
+
+# Spam clearing mode
 if ($config{'spam'} && &can_edit_spam()) {
 	print &ui_table_row($text{'massdomains_spamclear'},
 		&ui_radio("spamclear_def", 1,
@@ -193,6 +194,15 @@ if ($config{'spam'} && &can_edit_spam()) {
 			     &ui_bytesbox("spamclear_size", undef)) ],
 			 ]),
 		1, \@tds);
+	}
+
+# Virus processing program
+if ($config{'virus'} && &can_edit_spam()) {
+	print &ui_table_row($text{'massdomains_scanner'},
+		&ui_radio("scanner", "",
+			[ [ "", $text{'massdomains_leave'}."<br>" ],
+			  [ "clamscan", $text{'spam_scanner0'}."<br>" ],
+			  [ "clamdscan", $text{'spam_scanner1'}."<br>" ] ]));
 	}
 
 # Login shell

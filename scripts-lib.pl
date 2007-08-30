@@ -1400,15 +1400,16 @@ foreach my $d (@$doms) {
 return @rv;
 }
 
-# extract_script_archive(file, dir, &domain, [copy-to-dir], [sub-dir])
+# extract_script_archive(file, dir, &domain, [copy-to-dir], [sub-dir],
+#			 [single-file])
 # Attempts to extract a tar.gz or tar or zip file for a script. Returns undef
 # on success, or an HTML error message on failure.
 sub extract_script_archive
 {
-local ($file, $dir, $d, $copydir, $subdir) = @_;
+local ($file, $dir, $d, $copydir, $subdir, $single) = @_;
 
 # Create the target dir if missing
-if ($copydir && !-d $copydir) {
+if (!$single && $copydir && !-d $copydir) {
 	local $out = &run_as_domain_user($d, "mkdir -p ".quotemeta($copydir));
 	if ($? || !-d $copydir) {
 		return "Failed to create target directory : ".
