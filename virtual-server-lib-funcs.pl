@@ -1896,6 +1896,11 @@ else {
 	}
 }
 
+sub can_create_batch
+{
+return &master_admin() || &reseller_admin() || $config{'batch_create'};
+}
+
 # Returns 1 if the user can migrate servers from other control panels
 sub can_migrate_servers
 {

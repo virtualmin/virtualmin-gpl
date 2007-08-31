@@ -330,7 +330,7 @@ if (&can_migrate_servers()) {
 	print "<input type=submit name=migrate value='$text{'index_migrate'}'>\n";
 	}
 if ((&can_create_master_servers() || &can_create_sub_servers()) &&
-    $virtualmin_pro) {
+    $virtualmin_pro && &can_create_batch()) {
 	print &ui_submit($text{'index_batch'}, "batch"),"\n";
 	}
 print "&nbsp;\n" if (!$cannot_add);

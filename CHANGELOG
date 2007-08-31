@@ -709,3 +709,5 @@ Renamed the phpSurveyor installer to Limesurvey, and updated the version 1.52.
 Added a script installer for WordPress MU version 1.2.4. This is the multi-user version of the popular WordPress blogging engine.
 Added a field to the Update Virtual Servers page to change the virus scanner (clmscan or clamdscan) on multiple domains at once.
 Better handle additional databases in domains that start with a number, by converting the first digit to a word.
+Added a Module Config option to control use of the batch domain creation form by domain owners.
+Fixed bugs on the batch creation form that allowed domain owners to add new top-level servers, or sub-servers under domains that they don't own!

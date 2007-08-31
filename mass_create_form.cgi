@@ -8,6 +8,7 @@ require './virtual-server-lib.pl';
 &ReadParse();
 &can_create_master_servers() || &can_create_sub_servers() ||
 	&error($text{'form_ecannot'});
+&can_create_batch() || &error($text{'cmass_ecannot'});
 &ui_print_header(undef, $text{'cmass_title'}, "", "cmass");
 
 print $text{'cmass_help'};
@@ -29,10 +30,12 @@ print &ui_table_row($text{'cmass_file'},
 
 # Templates for parent and sub domains
 @ptmpls = &list_available_templates(undef, undef);
-print &ui_table_row($text{'cmass_ptmpl'},
-	    &ui_select("ptemplate", undef,
-		       [ map { [ $_->{'id'}, $_->{'name'} ] } @ptmpls ]),
-	    1, \@tds);
+if (&can_create_master_servers()) {
+	print &ui_table_row($text{'cmass_ptmpl'},
+		    &ui_select("ptemplate", undef,
+			       [ map { [ $_->{'id'}, $_->{'name'} ] }@ptmpls ]),
+		    1, \@tds);
+	}
 @stmpls = &list_available_templates({ }, undef);
 print &ui_table_row($text{'cmass_stmpl'},
 	    &ui_select("stemplate", undef,

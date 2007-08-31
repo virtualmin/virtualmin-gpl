@@ -3161,6 +3161,7 @@ dbname_eclash=A database user with the same name already exists
 dbpass_err=Failed to change database passwords
 
 cmass_title=Batch Create Servers
+cmass_ecannot=You are not allowed to create servers from a batch file
 cmass_header=Create multiple servers from batch file
 cmass_help=This page allows you to create multiple virtual servers at once from a text file, in the following format (read the help for this page for more):
 cmass_format=domain:description:password:[username]:[parent-domain]:[ip-address]:[alias-domain]
@@ -3193,6 +3194,8 @@ cmass_eiptmpl=Automatic IP allocation cannot be used unless ranges are set up in
 cmass_eipalloc=Failed to allocate IP address from template's ranges!
 cmass_eipmust=Automatic IP allocation is mandatory for this template
 cmass_emustparent=You are not allowed to create top-level virtual servers - a parent domain must be specified
+cmass_ecanparent=You are not allowed to manage the parent virtual server $1
+cmass_eparpar=The parent server $1 is not a top-level server
 
 umass_title=Batch Create Users
 umass_header=Create multiple mail and FTP users from batch file

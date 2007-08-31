@@ -6,6 +6,7 @@ require './virtual-server-lib.pl';
 &error_setup($text{'cmass_err'});
 &can_create_master_servers() || &can_create_sub_servers() ||
 	&error($text{'form_ecannot'});
+&can_create_batch() || &error($text{'cmass_ecannot'});
 &require_useradmin();
 
 # Validate source file
@@ -85,6 +86,10 @@ foreach $line (@lines) {
 			&line_error(&text('cmass_eparent', $pname));
 			next;
 			}
+		&can_config_domain($parentdom) ||
+		    &line_error(&text('cmass_ecanparent', $parentdom->{'dom'}));
+		$parentdom->{'parent'} &&
+		    &line_error(&text('cmass_eparpar', $parentdom->{'dom'}));
 		}
 	elsif (!&can_create_master_servers()) {
 		&line_error($text{'cmass_emustparent'});
@@ -96,6 +101,8 @@ foreach $line (@lines) {
 			&line_error(&text('cmass_ealias', $aname));
 			next;
 			}
+		&can_config_domain($aliasdom) ||
+		    &line_error(&text('cmass_ecanparent', $aliasdom->{'dom'}));
 		$parentdom ||= $aliasdom;
 		}
 
