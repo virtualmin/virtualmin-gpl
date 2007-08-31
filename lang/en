@@ -3192,6 +3192,7 @@ cmass_eipresel=Failed to allocate IP address from reseller's ranges!
 cmass_eiptmpl=Automatic IP allocation cannot be used unless ranges are set up in the template
 cmass_eipalloc=Failed to allocate IP address from template's ranges!
 cmass_eipmust=Automatic IP allocation is mandatory for this template
+cmass_emustparent=You are not allowed to create top-level virtual servers - a parent domain must be specified
 
 umass_title=Batch Create Users
 umass_header=Create multiple mail and FTP users from batch file

@@ -86,6 +86,9 @@ foreach $line (@lines) {
 			next;
 			}
 		}
+	elsif (!&can_create_master_servers()) {
+		&line_error($text{'cmass_emustparent'});
+		}
 	local $aliasdom;
 	if ($aname) {
 		$aliasdom = &get_domain_by("dom", $aname);
