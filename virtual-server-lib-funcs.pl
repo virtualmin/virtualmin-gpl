@@ -5682,6 +5682,17 @@ local $tmpl = &get_template($_[0]->{'template'});
 local $db = &substitute_domain_template($tmpl->{'mysql'}, $_[0]);
 $db = lc($db);
 $db ||= $_[0]->{'prefix'};
+$db = &fix_database_name($db);
+return $db;
+}
+
+# fix_database_name(dbname)
+# If a database name starts with a number, convert it to a word to support
+# PostgreSQL, which doesn't like numeric names. Also converts . and - to _,
+# and handles reserved DB names.
+sub fix_database_name
+{
+local ($db) = @_;
 $db =~ s/[\.\-]/_/g;	# mysql doesn't like . or _
 $db =~ s/^0/zero/g;	# postgresql doesn't like leading numbers
 $db =~ s/^1/one/g;

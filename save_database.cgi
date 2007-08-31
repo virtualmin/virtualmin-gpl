@@ -22,6 +22,7 @@ if ($in{'new'}) {
 		$prefix =~ s/\./_/g;
 		$in{'name'} = $prefix.$in{'name'};
 		}
+	$in{'name'} = &fix_database_name($in{'name'});
 	$in{'name'} =~ /^[a-z0-9\_]+$/i && $in{'name'} =~ /^[a-z]/i ||
 		&error($text{'database_ename'});
 

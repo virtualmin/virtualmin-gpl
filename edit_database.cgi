@@ -33,6 +33,7 @@ if ($in{'new'} && $tmpl->{'mysql_suffix'} ne "none") {
 	$prefix = &substitute_domain_template($tmpl->{'mysql_suffix'}, $d);
 	$prefix =~ s/-/_/g;
 	$prefix =~ s/\./_/g;
+	$prefix = &fix_database_name($prefix);
 	}
 print &ui_table_row($text{'database_name'},
     $in{'new'} ? $prefix.&ui_textbox("name", undef, 30) : "<tt>$in{'name'}</tt>");

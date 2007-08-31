@@ -72,3 +72,4 @@
 
  - graphing of stats
 
+ - security-updates module needs to handle RPM webmin installs

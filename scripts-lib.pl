@@ -290,7 +290,7 @@ if ($newsuffix) {
 						$tmpl->{'mysql_suffix'}, $d);
 			$prefix =~ s/-/_/g;
 			$prefix =~ s/\./_/g;
-			$newdbname = $prefix.$newsuffix;
+			$newdbname = &fix_database_name($prefix.$newsuffix);
 			}
 		else {
 			$newdbname = $d->{'db'}."_".$newsuffix;
