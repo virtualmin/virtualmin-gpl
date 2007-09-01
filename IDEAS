@@ -72,4 +72,4 @@
 
  - graphing of stats
 
- - security-updates module needs to handle RPM webmin installs
+ - add 'mail' attribute with all addresses to LDAP users (optional)
