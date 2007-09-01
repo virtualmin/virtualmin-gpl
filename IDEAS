@@ -71,5 +71,6 @@
  - xoops installer should be more automated
 
  - graphing of stats
+	- for VM2 as well, for each machine
 
  - add 'mail' attribute with all addresses to LDAP users (optional)

@@ -206,5 +206,77 @@ if ($info->{'poss'} && &foreign_check("security-updates")) {
 &save_collected_info($info);
 }
 
+# add_historic_collected_info(&info, time)
+# Add to the collected info log files the current CPU load, memory uses, swap
+# use, disk use and other info we might want to graph
+sub add_historic_collected_info
+{
+local ($info, $time) = @_;
+if (!-d $historic_info_dir) {
+	&make_dir($historic_info_dir, 0700);
+	}
+local @stats;
+push(@stats, [ "load", $info->{'load'}->[0] ]) if ($info->{'load'});
+push(@stats, [ "procs", $info->{'procs'} ]) if ($info->{'procs'});
+if ($info->{'mem'}) {
+	push(@stats, [ "memused",
+		       ($info->{'mem'}->[0]-$info->{'mem'}->[1])*1024 ]);
+	if ($info->{'mem'}->[2]) {
+		push(@stats, [ "swapused",
+			      ($info->{'mem'}->[2]-$info->{'mem'}->[3])*1024 ]);
+		}
+	}
+if ($info->{'disk_total'}) {
+	push(@stats, [ "diskused",
+		       $info->{'disk_total'}-$info->{'disk_free'} ]);
+	}
+# XXX more?
+# XXX total quota allocated
+foreach my $stat (@stats) {
+	open(HISTORY, ">>$historic_info_dir/$stat->[0]");
+	print HISTORY $time," ",$stat->[1],"\n";
+	close(HISTORY);
+	}
+}
+
+# list_historic_collected_info(stat, [start], [end])
+# Returns an array of times and values for some stat, within the given
+# time period
+sub list_historic_collected_info
+{
+local ($stat, $start, $end) = @_;
+local @rv;
+open(HISTORY, "$historic_info_dir/$stat");
+while(<HISTORY>) {
+	chop;
+	local ($time, $value) = split(" ", $_);
+	if ((!defined($start) || $time >= $start) &&
+	    (!defined($end) || $time <= $end)) {
+		push(@rv, [ $time, $value ]);
+		}
+	if (defined($end) && $time > $end) {
+		last;	# Past the end point
+		}
+	}
+close(HISTORY);
+return @rv;
+}
+
+# list_all_historic_collected_info([start], [end])
+# Returns a hash mapping stats to data within some time period
+sub list_all_historic_collected_info
+{
+local ($start, $end) = @_;
+opendir(HISTDIR, $historic_info_dir);
+foreach my $f (readdir(HISTDIR)) {
+	if ($f =~ /^[a-z]$/) {
+		local @rv = &list_historic_collected_info($f, $start, $end);
+		$all{$f} = \@rv;
+		}
+	}
+closedir(HISTDIR);
+return \%all;
+}
+
 1;
 

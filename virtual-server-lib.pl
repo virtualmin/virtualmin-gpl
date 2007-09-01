@@ -222,6 +222,7 @@ $upgrade_virtualmin_updates = "/wbm/updates.txt";
 $virtualmin_license_file = "/etc/virtualmin-license";
 
 $collected_info_file = "$module_config_directory/collected";
+$historic_info_dir = "$module_config_directory/history";
 
 $procmail_log_file = "/var/log/procmail.log";
 $procmail_log_cmd = "$module_config_directory/procmail-logger.pl";

@@ -2049,6 +2049,12 @@ sub can_edit_bandwidth
 return &master_admin() || &reseller_admin();
 }
 
+# Returns 1 if the current user can see historical system data
+sub can_show_history
+{
+return &master_admin();
+}
+
 sub can_edit_exclude
 {
 return 1;	# For now, anyone can

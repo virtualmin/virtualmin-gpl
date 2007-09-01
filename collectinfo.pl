@@ -5,6 +5,7 @@
 package virtual_server;
 $main::no_acl_check++;
 require './virtual-server-lib.pl';
+$start = time();
 
 # Make sure we are not already running
 if (&test_lock($collected_info_file)) {
@@ -16,5 +17,6 @@ if (&test_lock($collected_info_file)) {
 $info = &collect_system_info();
 if ($info) {
 	&save_collected_info($info);
+	&add_historic_collected_info($info, $start);
 	}
 &unlock_file($collected_info_file);
