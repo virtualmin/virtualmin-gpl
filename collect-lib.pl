@@ -220,15 +220,18 @@ push(@stats, [ "load", $info->{'load'}->[0] ]) if ($info->{'load'});
 push(@stats, [ "procs", $info->{'procs'} ]) if ($info->{'procs'});
 if ($info->{'mem'}) {
 	push(@stats, [ "memused",
-		       ($info->{'mem'}->[0]-$info->{'mem'}->[1])*1024 ]);
+		       ($info->{'mem'}->[0]-$info->{'mem'}->[1])*1024,
+		       $info->{'mem'}->[0]*1024 ]);
 	if ($info->{'mem'}->[2]) {
 		push(@stats, [ "swapused",
-			      ($info->{'mem'}->[2]-$info->{'mem'}->[3])*1024 ]);
+			      ($info->{'mem'}->[2]-$info->{'mem'}->[3])*1024,
+			      $info->{'mem'}->[2]*1024 ]);
 		}
 	}
 if ($info->{'disk_total'}) {
 	push(@stats, [ "diskused",
-		       $info->{'disk_total'}-$info->{'disk_free'} ]);
+		       $info->{'disk_total'}-$info->{'disk_free'},
+		       $info->{'disk_total'} ]);
 	}
 # XXX more?
 # XXX total quota allocated
@@ -237,6 +240,16 @@ foreach my $stat (@stats) {
 	print HISTORY $time," ",$stat->[1],"\n";
 	close(HISTORY);
 	}
+
+# Update the file storing the max possible value for each variable
+local %maxpossible;
+&read_file("$historic_info_dir/maxes", \%maxpossible);
+foreach my $stat (@stats) {
+	if ($stat->[2] && $stat->[2] > $maxpossible{$stat->[0]}) {
+		$maxpossible{$stat->[0]} = $stat->[2];
+		}
+	}
+&write_file("$historic_info_dir/maxes", \%maxpossible);
 }
 
 # list_historic_collected_info(stat, [start], [end])
@@ -269,13 +282,22 @@ sub list_all_historic_collected_info
 local ($start, $end) = @_;
 opendir(HISTDIR, $historic_info_dir);
 foreach my $f (readdir(HISTDIR)) {
-	if ($f =~ /^[a-z]$/) {
+	if ($f =~ /^[a-z]$/ && $f ne "maxes") {
 		local @rv = &list_historic_collected_info($f, $start, $end);
 		$all{$f} = \@rv;
 		}
 	}
 closedir(HISTDIR);
 return \%all;
+}
+
+# get_historic_maxes()
+# Returns a hash reference from stats to the max possible values ever seen
+sub get_historic_maxes
+{
+local %maxpossible;
+&read_file("$historic_info_dir/maxes", \%maxpossible);
+return \%maxpossible;
 }
 
 1;

@@ -1,10 +1,8 @@
 #!/usr/local/bin/perl
 # Show a historic graph of one or more collected stats
 # XXX multiple stats on same graph
-# XXX scale to mem/disk free
-# XXX put empty values to left where we don't have them
+# XXX put empty values to left where we don't have them (not quite working)
 # XXX labels on graph
-# XXX link from theme
 # XXX link from left menu
 
 require './virtual-server-lib.pl';
@@ -92,6 +90,15 @@ print "</tr></table>\n";
 print "<div id='history' style='height: 300px;'></div>\n";
 
 # Generate 
+$maxes = &get_historic_maxes();
+if ($maxes->{$stat}) {
+	$maxv = $stat eq "memused" || $stat eq "swapused" ?
+		 $maxes->{$stat}/(1024*1024) :
+		$stat eq "diskused" ?
+		 $maxes->{$stat}/(1024*1024*1024) :
+		 $maxes->{$stat};
+	$maxopt = "max: $maxv,";
+	}
 print <<EOF;
 <script>
 var timeplot;
@@ -105,12 +112,15 @@ function onLoad() {
       valueGeometry: new Timeplot.DefaultValueGeometry({
         gridColor: "#000000",
         axisLabelsPlacement: "left",
+	min: 0,
+	$maxopt
       }),
       timeGeometry: new Timeplot.DefaultTimeGeometry({
         gridColor: "#000000",
         axisLabelsPlacement: "top"
       }),
       showValues: true,
+      fillColor: "#dadaf8",
     })
   ];
             
