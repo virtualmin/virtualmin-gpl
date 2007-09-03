@@ -220,7 +220,7 @@ $upgrade_virtualmin_testpage = "/licence-test.txt";
 $upgrade_virtualmin_updates = "/wbm/updates.txt";
 
 $virtualmin_license_file = "/etc/virtualmin-license";
-$virtualmin_yum_repo = "/etc/yum.d/virtualmin.repo";
+$virtualmin_yum_repo = "/etc/yum.repos.d/virtualmin.repo";
 
 $collected_info_file = "$module_config_directory/collected";
 $historic_info_dir = "$module_config_directory/history";

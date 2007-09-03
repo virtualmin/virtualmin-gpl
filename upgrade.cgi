@@ -54,7 +54,7 @@ if (-r $virtualmin_yum_repo) {
 	local $lref = &read_file_lines($virtualmin_yum_repo);
 	foreach my $l (@$lref) {
 		if ($l =~ /^baseurl=.*\/gpl(\/.*)/) {
-			$l = "baseurl="http://$in{'serial'}:$in{'key'}\@$upgrade_virtualmin_host$1";
+			$l = "baseurl=http://$in{'serial'}:$in{'key'}\@$upgrade_virtualmin_host$1";
 			$found++;
 			}
 		}
@@ -63,23 +63,25 @@ if (-r $virtualmin_yum_repo) {
 			       "<tt>$virtualmin_yum_repo</tt>"));
 
 	# Update all Virtualmin-related packages
+	# XXX how can we force an update of Virtualmin Pro itself?
 	&foreign_require("software", "software-lib.pl");
-	$n = &software::list_packages();
-	for($i=0; $i<$n; $i++) {
-		$name = $software::packages{$i,'name'};
-		if ($name eq "webmin" || $name eq "usermin" ||
-		    $name =~ /^{wbm,wbt,usm,ust}-/) {
-			push(@packages, $name);
+	foreach $p (&software::update_system_available()) {
+		if ($p->{'name'} eq "webmin" || $p->{'name'} eq "usermin" ||
+		    $p->{'name'} =~ /^(wbm|wbt|usm|ust)-/) {
+			push(@packages, $p->{'name'});
 			}
 		}
-	&$first_print($text{'upgrade_rpms'});
+	&$first_print(&text('upgrade_rpms',
+		join(" ", map { "<tt>$_</tt>" } @packages)));
 	print "<pre>";
+	&clean_environment();
 	open(YUM, "yum -y install ".join(" ", @packages)." 2>&1 |");
 	while(<YUM>) {
 		print &html_escape($_);
 		}
 	close(YUM);
 	$errors++ if ($?);
+	&reset_environment();
 	&$second_print($text{'setup_done'});
 	}
 else {
