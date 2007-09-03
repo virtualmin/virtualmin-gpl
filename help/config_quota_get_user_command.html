@@ -1,0 +1,18 @@
+<header>Command to get a user's quota</header>
+
+When external quota commands are being used, the program set in this
+option can be called by Virtualmin to fetch the quota for a single user.
+It is called with a single parameter - the full Unix username, and must output
+a single line containing the following space-separated fields :
+
+<ol>
+<li>Current quota used in 1 kB blocks.
+<li>The soft quota in 1 kB blocks, or 0 for unlimited.
+<li>The hard quota in 1 kB blocks, or 0 for unlimited.
+</ol>
+
+If this command is not set on the Module Config page, Virtualmin will
+use the <b>Command to list user quotas</b> instead. <p>
+
+<footer>
+

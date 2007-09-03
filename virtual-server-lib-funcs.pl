@@ -347,7 +347,13 @@ if (!$_[2]) {
 	@virts = &list_virtusers();
 	}
 
-local @users = &list_all_users_quotas($_[3]);
+# Are we setting quotas individually?
+local $ind_quota = 0;
+if (&has_quota_commands() && $config{'quota_get_user_command'} && $_[0]) {
+	$ind_quota = 1;
+	}
+
+local @users = &list_all_users_quotas($noquotas || $ind_quota);
 if ($_[0]) {
 	# Limit to domain users.
 	@users = grep { defined($_[0]->{'gid'}) &&
@@ -368,6 +374,15 @@ if ($_[0]) {
 			$u->{'nocreatehome'} = 1;
 			$u->{'nomailfile'} = 1;
 			delete($u->{'email'});
+			}
+		if ($ind_quota && !$noquotas) {
+			# Call quota getting command for each user
+			local $out = &run_quota_command(
+					"get_user", $u->{'user'});
+			local ($used, $soft, $hard) = split(/\s+/, $out);
+			$u->{'softquota'} = $soft;
+			$u->{'hardquota'} = $hard;
+			$u->{'uquota'} = $used;
 			}
 		}
 	local @subdoms;
@@ -8557,7 +8572,8 @@ foreach my $c ("mail_system", "generics", "append_style", "ldap_host",
 	       "compression", "suexec", "domains_group",
 	       "quota_commands",
 	       "quota_set_user_command", "quota_set_group_command",
-	       "quota_list_users_command", "quota_list_groups_command") {
+	       "quota_list_users_command", "quota_list_groups_command",
+	       "quota_get_user_command", "quota_get_group_command") {
 	# Some important config option was changed
 	return 1 if ($config{$c} ne $lastconfig{$c});
 	}
@@ -10058,6 +10074,10 @@ if ($config{'quotas'} && $config{'quota_commands'}) {
 	foreach my $c ("set_user", "set_group", "list_users", "list_groups") {
 		local $cmd = $config{"quota_".$c."_command"};
 		$cmd && &has_command($cmd) || return $text{'check_e'.$c};
+		}
+	foreach my $c ("get_user", "get_group") {
+		local $cmd = $config{"quota_".$c."_command"};
+		!$cmd || &has_command($cmd) || return $text{'check_e'.$c};
 		}
 	&$second_print($text{'check_quotacommands'});
 	}
