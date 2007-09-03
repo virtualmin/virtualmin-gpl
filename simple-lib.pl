@@ -34,7 +34,8 @@ foreach my $v (@{$a->{'to'}}) {
 		$simple->{'autoreply'} = $aval =~ /^\// ? $aval
 							: "$d->{'home'}/$aval";
 		$simple->{'auto'} = 1;
-		&read_autoreply($simple->{'autoreply'}, $simple);
+		&read_autoreply(&command_as_user($d->{'user'}, 0,
+		    "cat ".quotemeta($simple->{'autoreply'}))." |", $simple);
 		}
 	else {
 		# Some un-supported rule
