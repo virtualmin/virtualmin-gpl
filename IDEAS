@@ -74,3 +74,10 @@
 	- for VM2 as well, for each machine
 
  - add 'mail' attribute with all addresses to LDAP users (optional)
+
+ - GPL version
+	- upgrader
+	- test all on Ubuntu too
+	- upgrade should clear security-updates cache files
+	- verify that GPL version detects updates on schedule
+	- not being shown on right-hand frame, but was appearing in security-ups

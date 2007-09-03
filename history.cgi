@@ -1,9 +1,12 @@
 #!/usr/local/bin/perl
 # Show a historic graph of one or more collected stats
 # XXX multiple stats on same graph
-# XXX put empty values to left where we don't have them (not quite working)
 # XXX labels on graph
 # XXX link from left menu
+# XXX more stats
+#	XXX total quota allocated
+#	XXX total domains
+#	XXX total mailboxes
 
 require './virtual-server-lib.pl';
 &can_show_history() || &error($text{'history_ecannot'});
@@ -23,8 +26,8 @@ require './virtual-server-lib.pl';
 
 # Work out the stat and time range we want
 $stat = $in{'stat'} || "load";
-$start = $in{'start'} || time()-60*60;
-$period = $in{'period'} || 60*60;
+$start = $in{'start'} || time()-24*60*60;
+$period = $in{'period'} || 24*60*60;
 $end = $start + $period;
 if ($end > time()) {
 	# Too far in future .. shift back
@@ -51,7 +54,8 @@ print "<table cellpadding=0 cellspacing=0 width=100%><tr>\n";
 print "<td align=left>";
 @llinks = ( );
 for($i=1; $i<=4; $i*=2) {
-	$msg = "&lt;&lt;".&text('history_'.&period_to_name($period).'s', $i);
+	$s = $i == 1 ? "" : "s";
+	$msg = "&lt;&lt;".&text('history_'.&period_to_name($period).$s, $i);
 	push(@llinks, "<a href='history.cgi?stat=$stat&period=$period&".
 		      "start=".($start-$period*$i)."'>$msg</a>");
 	}
@@ -66,7 +70,8 @@ foreach $p (map { [ $text{'history_'.$_->[0]}, $_->[1] ] } @history_periods) {
 		push(@plinks, "<b>$p->[0]</b>");
 		}
 	else {
-		push(@plinks, "<a href='history.cgi?stat=$stat&start=$start&".
+		$nstart = $end - $p->[1];
+		push(@plinks, "<a href='history.cgi?stat=$stat&start=$nstart&".
 			      "period=$p->[1]'>$p->[0]</a>");
 		}
 	}
@@ -78,7 +83,8 @@ print "</td>\n";
 print "<td align=right>";
 @rlinks = ( );
 for($i=1; $i<=4; $i*=2) {
-	$msg = &text('history_'.&period_to_name($period).'s', $i)."&gt;&gt;";
+	$s = $i == 1 ? "" : "s";
+	$msg = &text('history_'.&period_to_name($period).$s, $i)."&gt;&gt;";
 	push(@rlinks, "<a href='history.cgi?stat=$stat&period=$period&".
 		      "start=".($start+$period*$i)."'>$msg</a>");
 	}

@@ -11,9 +11,19 @@ use POSIX;
 						   $in{'end'} || undef);
 if ($in{'start'} && @info > 1) {
 	$gap = $info[1]->[0] - $info[0]->[0];
-	while($info[0]->[0] > $in{'start'}-$gap) {
+	while($info[0]->[0] > $in{'start'}+$gap) {
 		unshift(@info, [ $info[0]->[0]-$gap, undef ]);
 		}
+	}
+
+# If there is too much data to reasonably display, reduce the number of points
+# to approx 1024
+if (scalar(@info) > 1024) {
+	$step = int(scalar(@info) / 1024);
+	for($i=0; $i<scalar(@info); $i+=$step) {
+		push(@newinfo, $info[$i]);
+		}
+	@info = @newinfo;
 	}
 
 print "Content-type: text/plain\n\n";

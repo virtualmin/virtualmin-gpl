@@ -477,11 +477,11 @@ local ($d, $dir, $ver) = @_;
 &require_apache();
 local $mode = &get_domain_php_mode($d);
 return 0 if ($mode eq "mod_php");
-local $conf = &apache::get_config();
 local @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 local $any = 0;
 foreach my $p (@ports) {
+	local $conf = &apache::get_config();
 	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
 	next if (!$virt);
 
@@ -560,9 +560,9 @@ foreach my $p (@ports) {
 			);
 		local $lref = &read_file_lines($virt->{'file'});
 		splice(@$lref, $virt->{'eline'}, 0, @lines);
+		&flush_file_lines($virt->{'file'});
 		undef(@apache::get_config_cache);
 		}
-	&flush_file_lines($virt->{'file'});
 	&unlock_file($virt->{'file'});
 	$any++;
 	}

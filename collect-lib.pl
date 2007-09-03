@@ -233,8 +233,6 @@ if ($info->{'disk_total'}) {
 		       $info->{'disk_total'}-$info->{'disk_free'},
 		       $info->{'disk_total'} ]);
 	}
-# XXX more?
-# XXX total quota allocated
 foreach my $stat (@stats) {
 	open(HISTORY, ">>$historic_info_dir/$stat->[0]");
 	print HISTORY $time," ",$stat->[1],"\n";
