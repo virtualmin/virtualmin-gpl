@@ -34,8 +34,15 @@ foreach my $v (@{$a->{'to'}}) {
 		$simple->{'autoreply'} = $aval =~ /^\// ? $aval
 							: "$d->{'home'}/$aval";
 		$simple->{'auto'} = 1;
-		&read_autoreply(&command_as_user($d->{'user'}, 0,
+		local $l = &read_autoreply(&command_as_user($d->{'user'}, 0,
 		    "cat ".quotemeta($simple->{'autoreply'}))." |", $simple);
+		local @st = stat($simple->{'autoreply'});
+		if ($st[7] && !$l) {
+			# Fall back to reading directly, if allowed
+			if ($st[4] == $d->{'uid'}) {
+				&read_autoreply($simple->{'autoreply'},$simple);
+				}
+			}
 		}
 	else {
 		# Some un-supported rule
@@ -59,6 +66,7 @@ sub read_autoreply
 local ($file, $simple) = @_;
 local @lines;
 local $_;
+local $lines;
 open(FILE, $file);
 while(<FILE>) {
 	if (/^Reply-Tracking:\s*(.*)/) {
@@ -88,9 +96,11 @@ while(<FILE>) {
 	else {
 		push(@lines, $_);
 		}
+	$lines++;
 	}
 close(FILE);
 $simple->{'autotext'} = join("", @lines);
+return $lines;
 }
 
 # save_simple_alias(&domain, &alias|&user, &simple)

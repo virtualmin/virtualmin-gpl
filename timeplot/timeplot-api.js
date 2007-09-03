@@ -133,6 +133,7 @@
     if (typeof SimileAjax == "undefined") {
         window.SimileAjax_onLoad = loadTimeline;
         
+        //var url = "../ajax/simile-ajax-api.js?bundle=true";
         var url = debug ?
             "/ajax/api-2.0/simile-ajax-api.js?bundle=false" :
             "http://static.simile.mit.edu/ajax/api-2.0/simile-ajax-api.js?bundle=true";

@@ -3524,6 +3524,8 @@ upgrade_problems=Some errors occurred while upgrading your system to Virtualmin 
 upgrade_complete=Your system has been successfully upgraded to Virtualmin Pro!
 upgrade_theme=Enabling theme <i>$1</i> ..
 upgrade_esharedroot=Your Webmin root directory $1 is shared between multiple systems - module updates are not allowed
+upgrade_eyumrepo=Virtualmin has been installed from an RPM, but not using the Virtualmin GPL repository. Upgrading is not possible at this time.
+upgrade_rpms=Upgrading all Virtualmin RPM packages ..
 
 maillog_title=Search Mail Log
 maillog_desc=This form can be used to search the mail logs for messages matching some conditions, to find out what happened to them. All fields are optional, and will be skipped for comparison purposes if left empty.
