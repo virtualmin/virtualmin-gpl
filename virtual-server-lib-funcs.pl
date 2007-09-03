@@ -3523,10 +3523,18 @@ foreach $u (@{$_[0]}) {
 		push(@cols, &plugin_call($f, "mailbox_column", $u, $_[1]));
 		}
 	if ($_[2]) {
-		print &ui_checked_columns_row(\@cols, undef, "d",
+		if ($u->{'domainowner'}) {
+			# Domain owner cannot be mass updated/deleted
+			print &ui_columns_row([ "", @cols ]);
+			}
+		else {
+			# Other users can be mass changed
+			print &ui_checked_columns_row(\@cols, undef, "d",
 					int($u->{'unix'})."/".$u->{'user'});
+			}
 		}
 	else {
+		# Mass operations disabled
 		print &ui_checked_columns_row(\@cols);
 		}
 	}
