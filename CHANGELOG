@@ -711,3 +711,4 @@ Added a field to the Update Virtual Servers page to change the virus scanner (cl
 Better handle additional databases in domains that start with a number, by converting the first digit to a word.
 Added a Module Config option to control use of the batch domain creation form by domain owners.
 Fixed bugs on the batch creation form that allowed domain owners to add new top-level servers, or sub-servers under domains that they don't own!
+Added links from the CPU load, memory used, disk used and other information on the right-hand system information page to graphs showing their values over time. This is taken from data collected by Virtualmin starting with the installation of this new release.

@@ -233,6 +233,17 @@ if ($info->{'disk_total'}) {
 		       $info->{'disk_total'}-$info->{'disk_free'},
 		       $info->{'disk_total'} ]);
 	}
+push(@stats, [ "doms", $info->{'fcount'}->{'doms'} ]);
+push(@stats, [ "users", $info->{'fcount'}->{'users'} ]);
+push(@stats, [ "aliases", $info->{'fcount'}->{'aliases'} ]);
+local $qlimit = 0;
+local $qused = 0;
+foreach my $q (@{$info->{'quota'}}) {
+	$qlimit += $q->[2];
+	$qused += $q->[1]+$q->[3];
+	}
+push(@stats, [ "quotalimit", $qlimit ]);
+push(@stats, [ "quotaused", $qused ]);
 foreach my $stat (@stats) {
 	open(HISTORY, ">>$historic_info_dir/$stat->[0]");
 	print HISTORY $time," ",$stat->[1],"\n";
@@ -278,12 +289,9 @@ return @rv;
 sub list_all_historic_collected_info
 {
 local ($start, $end) = @_;
-opendir(HISTDIR, $historic_info_dir);
-foreach my $f (readdir(HISTDIR)) {
-	if ($f =~ /^[a-z]$/ && $f ne "maxes") {
-		local @rv = &list_historic_collected_info($f, $start, $end);
-		$all{$f} = \@rv;
-		}
+foreach my $f (&list_historic_stats()) {
+	local @rv = &list_historic_collected_info($f, $start, $end);
+	$all{$f} = \@rv;
 	}
 closedir(HISTDIR);
 return \%all;
@@ -296,6 +304,41 @@ sub get_historic_maxes
 local %maxpossible;
 &read_file("$historic_info_dir/maxes", \%maxpossible);
 return \%maxpossible;
+}
+
+# get_historic_first_last(stat)
+# Returns the Unix time for the first and last stats recorded
+sub get_historic_first_last
+{
+local ($stat) = @_;
+open(HISTORY, "$historic_info_dir/$stat") || return (undef, undef);
+local $first = <HISTORY>;
+$first || return (undef, undef);
+chop($first);
+local ($firsttime, $firstvalue) = split(" ", $first);
+seek(HISTORY, 2, -256) || seek(HISTORY, 0, 0);
+while(<HISTORY>) {
+	$last = $_;
+	}
+close(HISTORY);
+chop($last);
+local ($lasttime, $lastvalue) = split(" ", $last);
+return ($firsttime, $lasttime);
+}
+
+# list_historic_stats()
+# Returns a list of variables on which we have stats
+sub list_historic_stats
+{
+local @rv;
+opendir(HISTDIR, $historic_info_dir);
+foreach my $f (readdir(HISTDIR)) {
+	if ($f =~ /^[a-z]+$/ && $f ne "maxes") {
+		push(@rv, $f);
+		}
+	}
+closedir(HISTDIR);
+return @rv;
 }
 
 1;

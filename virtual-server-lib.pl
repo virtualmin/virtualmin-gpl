@@ -223,6 +223,8 @@ $virtualmin_license_file = "/etc/virtualmin-license";
 
 $collected_info_file = "$module_config_directory/collected";
 $historic_info_dir = "$module_config_directory/history";
+@historic_graph_colors = ( '#000000', '#ff0000', '#00aa00', '#0000ff',
+			   '#ffaa00', '#ff00ff', '#00ffff' );
 
 $procmail_log_file = "/var/log/procmail.log";
 $procmail_log_cmd = "$module_config_directory/procmail-logger.pl";

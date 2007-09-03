@@ -1,12 +1,7 @@
 #!/usr/local/bin/perl
 # Show a historic graph of one or more collected stats
-# XXX multiple stats on same graph
-# XXX labels on graph
-# XXX link from left menu
-# XXX more stats
-#	XXX total quota allocated
-#	XXX total domains
-#	XXX total mailboxes
+# XXX serve all javascript from Virtualmin
+# XXX command-line API to get data
 
 require './virtual-server-lib.pl';
 &can_show_history() || &error($text{'history_ecannot'});
@@ -25,13 +20,19 @@ require './virtual-server-lib.pl';
 		 "onload='onLoad();' onresize='onResize();'");
 
 # Work out the stat and time range we want
-$stat = $in{'stat'} || "load";
+@stats = split(/\0/, $in{'stat'});
+@stats = ( "load" ) if (!@stats);
+$statsparams = join("&", map { "stat=$_" } @stats);
 $start = $in{'start'} || time()-24*60*60;
 $period = $in{'period'} || 24*60*60;
 $end = $start + $period;
-if ($end > time()) {
+($first, $last) = &get_historic_first_last($stats[0]);
+if (!$first) {
+	&ui_print_endpage($text{'history_none'});
+	}
+if ($end > $last) {
 	# Too far in future .. shift back
-	$start = time()-$period;
+	$start = $last-$period;
 	$end = $start+$period;
 	}
 
@@ -45,18 +46,21 @@ else {
 	$startmsg = &make_date($start, 0);
 	$endmsg = &make_date($end, 0);
 	}
-print "<b>",&text('history_range', $text{'history_stat_'.$stat},
-				   $startmsg, $endmsg),"</b><p>\n";
+for($i=0; $i<@stats; $i++) {
+	$color = $historic_graph_colors[$i % scalar(@historic_graph_colors)];
+	push(@statnames, "<font color=$color>".
+			 $text{'history_stat_'.$stats[$i]}."</font>");
+	}
+print "<b>",&text('history_showing', join(", ", @statnames)),"</b><p>\n";
 print "<table cellpadding=0 cellspacing=0 width=100%><tr>\n";
 
 # Move back links. The steps are 1, 2 and 4 times the period
-# XXX what if off the end?
-print "<td align=left>";
+print "<td align=left width=33%>";
 @llinks = ( );
 for($i=1; $i<=4; $i*=2) {
 	$s = $i == 1 ? "" : "s";
 	$msg = "&lt;&lt;".&text('history_'.&period_to_name($period).$s, $i);
-	push(@llinks, "<a href='history.cgi?stat=$stat&period=$period&".
+	push(@llinks, "<a href='history.cgi?$statsparams&period=$period&".
 		      "start=".($start-$period*$i)."'>$msg</a>");
 	}
 print &ui_links_row(\@llinks);
@@ -64,28 +68,28 @@ print "</td>\n";
 
 # Time period links
 @plinks = ( );
-print "<td align=middle>";
+print "<td align=middle width=33%>";
 foreach $p (map { [ $text{'history_'.$_->[0]}, $_->[1] ] } @history_periods) {
 	if ($period == $p->[1]) {
 		push(@plinks, "<b>$p->[0]</b>");
 		}
 	else {
 		$nstart = $end - $p->[1];
-		push(@plinks, "<a href='history.cgi?stat=$stat&start=$nstart&".
-			      "period=$p->[1]'>$p->[0]</a>");
+		push(@plinks,"<a href='history.cgi?$statsparams&start=$nstart&".
+			     "period=$p->[1]'>$p->[0]</a>");
 		}
 	}
 print &ui_links_row(\@plinks);
 print "</td>\n";
 
 # Move forward links
-# XXX what if off the end?
-print "<td align=right>";
+print "<td align=right width=33%>";
 @rlinks = ( );
 for($i=1; $i<=4; $i*=2) {
 	$s = $i == 1 ? "" : "s";
+	next if ($start+$period*$i >= $last);	# Off the end
 	$msg = &text('history_'.&period_to_name($period).$s, $i)."&gt;&gt;";
-	push(@rlinks, "<a href='history.cgi?stat=$stat&period=$period&".
+	push(@rlinks, "<a href='history.cgi?$statsparams&period=$period&".
 		      "start=".($start+$period*$i)."'>$msg</a>");
 	}
 print &ui_links_row(\@rlinks);
@@ -95,45 +99,68 @@ print "</td>\n";
 print "</tr></table>\n";
 print "<div id='history' style='height: 300px;'></div>\n";
 
-# Generate 
-$maxes = &get_historic_maxes();
-if ($maxes->{$stat}) {
-	$maxv = $stat eq "memused" || $stat eq "swapused" ?
-		 $maxes->{$stat}/(1024*1024) :
-		$stat eq "diskused" ?
-		 $maxes->{$stat}/(1024*1024*1024) :
-		 $maxes->{$stat};
-	$maxopt = "max: $maxv,";
+# Checkboxes for statistics to show
+print "<hr>\n";
+print "<b>$text{'history_showsel'}</b><br>\n";
+print &ui_form_start("history.cgi");
+print &ui_hidden("start", $start);
+print &ui_hidden("period", $period);
+@grid = ( );
+foreach $s (&list_historic_stats()) {
+	push(@grid, &ui_checkbox("stat", $s, $text{'history_stat_'.$s},
+			   	 &indexof($s, @stats) >= 0));
 	}
+print &ui_grid_table(\@grid, 4);
+print &ui_form_end([ [ undef, $text{'history_ok'} ] ]);
+
+# Javascript to generate it
+$maxes = &get_historic_maxes();
+print "<script>\n";
+print "var timeplot;\n";
+print "function onLoad() {\n";
+print "  var eventSource = new Timeplot.DefaultEventSource();\n";
+print "  var plotInfo = [\n";
+$plotno = 1;
+foreach $stat (@stats) {
+	$color = $historic_graph_colors[
+			($plotno-1) % scalar(@historic_graph_colors)];
+	$maxopt = "";
+	if ($maxes->{$stat}) {
+		$maxv = $stat eq "memused" || $stat eq "swapused" ?
+			 $maxes->{$stat}/(1024*1024) :
+			$stat eq "diskused" ?
+			 $maxes->{$stat}/(1024*1024*1024) :
+			 $maxes->{$stat};
+		$maxopt = "max: $maxv,";
+		}
+	print "    Timeplot.createPlotInfo({\n";
+	print "      id: 'plot$plotno',\n";
+	print "      dataSource: new Timeplot.ColumnSource(eventSource, $plotno),\n";
+	print "      valueGeometry: new Timeplot.DefaultValueGeometry({\n";
+	print "        gridColor: '#000000',\n";
+	print "        axisLabelsPlacement: 'left',\n";
+	print "        min: 0,\n";
+	print "        $maxopt\n";
+	print "      }),\n";
+	print "      timeGeometry: new Timeplot.DefaultTimeGeometry({\n";
+	print "        gridColor: '#000000',\n";
+	print "        axisLabelsPlacement: 'top'\n";
+	print "      }),\n";
+	print "      showValues: true,\n";
+	print "      lineColor: '$color',\n";
+	if (@stats == 1) {
+		print "      fillColor: '#dadaf8',\n";
+		}
+	print "    }),\n";
+	$plotno++;
+	}
+print "  ];\n";
+print "  timeplot = Timeplot.create(document.getElementById('history'), plotInfo);\n";
+print "  timeplot.loadText('history_data.cgi?$statsparams&start=$start&end=$end&nice=1', ',', eventSource);\n";
+print "}\n";
+
+# Resize handler Javascript
 print <<EOF;
-<script>
-var timeplot;
-
-function onLoad() {
-  var eventSource = new Timeplot.DefaultEventSource();
-  var plotInfo = [
-    Timeplot.createPlotInfo({
-      id: "plot1",
-      dataSource: new Timeplot.ColumnSource(eventSource,1),
-      valueGeometry: new Timeplot.DefaultValueGeometry({
-        gridColor: "#000000",
-        axisLabelsPlacement: "left",
-	min: 0,
-	$maxopt
-      }),
-      timeGeometry: new Timeplot.DefaultTimeGeometry({
-        gridColor: "#000000",
-        axisLabelsPlacement: "top"
-      }),
-      showValues: true,
-      fillColor: "#dadaf8",
-    })
-  ];
-            
-  timeplot = Timeplot.create(document.getElementById("history"), plotInfo);
-  timeplot.loadText("history_data.cgi?stat=$stat&start=$start&end=$end&nice=1", ",", eventSource);
-}
-
 var resizeTimerID = null;
 function onResize() {
     if (resizeTimerID == null) {
