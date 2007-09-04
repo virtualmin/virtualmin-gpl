@@ -108,7 +108,7 @@ foreach $line (@lines) {
 
 	# Get the template
 	local $tmpl = &get_template($parentdom ? $in{'stemplate'}
-					       : $in{'ctemplate'});
+					       : $in{'ptemplate'});
 
 	# Validate IP address
 	local $defip = &get_default_ip($resel);
