@@ -111,7 +111,7 @@ foreach $line (@lines) {
 					       : $in{'ctemplate'});
 
 	# Validate IP address
-	local $defip = &get_default_ip();
+	local $defip = &get_default_ip($resel);
 	local ($virt, $virtalready);
 	if ($aliasdom) {
 		$ip = $aliasdom->{'ip'};
@@ -170,6 +170,7 @@ foreach $line (@lines) {
 	else {
 		$virt = 0;
 		$virtalready = 1;
+		$ip = $defip;
 		}
 
 	# Work out username
