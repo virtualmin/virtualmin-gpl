@@ -30,7 +30,15 @@ if ($itype eq "rpm") {
 	-r $virtualmin_yum_repo || &error($text{'upgrade_eyumrepo'});
 	}
 elsif ($itype eq "deb") {
-	# XXX
+	$sources_list = "/etc/apt/sources.list";
+	$lref = &read_file_lines($sources_list);
+	$found = 0;
+	foreach $l (@$lref) {
+		if ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com/) {
+			$found = 1;
+			}
+		}
+	$found || $text{'upgrade_edebrepo'};
 	}
 
 &ui_print_unbuffered_header(undef, $text{'upgrade_title'}, "");
@@ -48,7 +56,7 @@ $SIG{'TERM'} = 'IGNORE';	# Stop process from being killed on upgrade
 
 # Work out how we were installed. Possible sources are from the wbm.gz files,
 # from the GPL YUM repo, and from the GPL Debian repo
-if (-r $virtualmin_yum_repo) {
+if ($itype eq "rpm") {
 	# GPL YUM repo. Replace it with the Pro version
 	local $found;
 	local $lref = &read_file_lines($virtualmin_yum_repo);
@@ -63,7 +71,6 @@ if (-r $virtualmin_yum_repo) {
 			       "<tt>$virtualmin_yum_repo</tt>"));
 
 	# Update all Virtualmin-related packages
-	# XXX how can we force an update of Virtualmin Pro itself?
 	&foreign_require("software", "software-lib.pl");
 	foreach $p (&software::update_system_available()) {
 		if ($p->{'name'} eq "webmin" || $p->{'name'} eq "usermin" ||
@@ -76,6 +83,47 @@ if (-r $virtualmin_yum_repo) {
 	print "<pre>";
 	&clean_environment();
 	open(YUM, "yum -y install ".join(" ", @packages)." 2>&1 |");
+	while(<YUM>) {
+		print &html_escape($_);
+		}
+	close(YUM);
+	$errors++ if ($?);
+	&reset_environment();
+	&$second_print($text{'setup_done'});
+	}
+elsif ($itype eq "deb") {
+	# GPL APT repo .. change to use the Pro one
+	$lref = &read_file_lines($sources_list);
+	foreach $l (@$lref) {
+		if ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com(\/.*)/) {
+			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com$1";
+			}
+		}
+	&flush_file_lines($sources_list);
+
+	# Force refresh of packages
+	&$first_print($text{'upgrade_update'});
+	print "<pre>";
+	open(YUM, "apt-get update 2>&1 |");
+	while(<YUM>) {
+		print &html_escape($_);
+		}
+	close(YUM);
+	&$second_print($text{'setup_done'});
+
+	# Update all Virtualmin-related packages
+	&foreign_require("software", "software-lib.pl");
+	foreach $p (&software::update_system_available()) {
+		if ($p->{'name'} eq "webmin" || $p->{'name'} eq "usermin" ||
+		    $p->{'name'} =~ /^(webmin|usermin)-/) {
+			push(@packages, $p->{'name'});
+			}
+		}
+	&$first_print(&text('upgrade_debs',
+		join(" ", map { "<tt>$_</tt>" } @packages)));
+	print "<pre>";
+	&clean_environment();
+	open(YUM, "apt-get install ".join(" ", @packages)." 2>&1 |");
 	while(<YUM>) {
 		print &html_escape($_);
 		}
