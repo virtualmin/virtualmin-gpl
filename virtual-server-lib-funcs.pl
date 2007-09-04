@@ -2434,7 +2434,8 @@ elsif (&running_in_zone()) {
 else {
 	# From interface detected at check time
 	&foreign_require("net", "net-lib.pl");
-	local ($iface) = grep { $_->{'fullname'} eq $config{'iface'} }
+	local $ifacename = $config{'iface'} || &first_ethernet_iface();
+	local ($iface) = grep { $_->{'fullname'} eq $ifacename }
 			      &net::active_interfaces();
 	if ($iface) {
 		return $iface->{'address'};
@@ -2443,6 +2444,21 @@ else {
 		return undef;
 		}
 	}
+}
+
+# first_ethernet_iface()
+# Returns the name of the first active ethernet interface
+sub first_ethernet_iface
+{
+&foreign_require("net", "net-lib.pl");
+foreach my $a (&net::active_interfaces()) {
+	if ($a->{'up'} && $a->{'virtual'} eq '' &&
+	    (&net::iface_type($a->{'name'}) =~ /ethernet/i ||
+	     $a->{'name'} =~ /^bond/)) {
+		return $a->{'fullname'};
+		}
+	}
+return undef;
 }
 
 # get_address_iface(address)
@@ -4687,6 +4703,11 @@ if ($ok) {
 				}
 			elsif (!$d->{'virt'} && !$config{'all_namevirtual'}) {
 				$d->{'ip'} = &get_default_ip($d->{'reseller'});
+				if (!$d->{'ip'}) {
+					&$second_print($text{'restore_edefip'});
+					$ok = 0;
+					last DOMAIN;
+					}
 				}
 			$d->{'nocreationmail'} = 1;
 			$d->{'nocreationscripts'} = 1;
@@ -10028,15 +10049,7 @@ foreach $p (@plugins) {
 if (!$config{'iface'}) {
 	if (!&running_in_zone()) {
 		# Work out the network interface automatically
-		&foreign_require("net", "net-lib.pl");
-		foreach my $a (&net::active_interfaces()) {
-			if ($a->{'up'} && $a->{'virtual'} eq '' &&
-			    (&net::iface_type($a->{'name'}) =~ /ethernet/i ||
-			     $a->{'name'} =~ /^bond/)) {
-				$config{'iface'} = $a->{'fullname'};
-				last;
-				}
-			}
+		$config{'iface'} = &first_ethernet_iface();
 		if (!$config{'iface'}) {
 			return &text('index_eiface',
 				     "/config.cgi?$module_name");
