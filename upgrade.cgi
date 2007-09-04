@@ -70,6 +70,11 @@ if ($itype eq "rpm") {
 	$found || &error(&text('upgrade_eyumfile',
 			       "<tt>$virtualmin_yum_repo</tt>"));
 
+	# Clear all YUM caches
+	&$first_print($text{'upgrade_yumclear'});
+	&execute_command("yum clean all");
+	&$second_print($text{'setup_done'});
+
 	# Update all Virtualmin-related packages
 	&foreign_require("software", "software-lib.pl");
 	foreach $p (&software::update_system_available()) {
