@@ -91,6 +91,11 @@ print &ui_table_row(&hlink($text{'restore_reuid'}, "restore_reuid"),
 
 print &ui_table_row(&hlink($text{'restore_fix'}, "restore_fix"),
 		    &ui_yesno_radio("fix", 0));
+
+if (!$d) {
+	print &ui_table_row(&hlink($text{'restore_only'}, "restore_only"),
+			    &ui_yesno_radio("only", 0));
+	}
 print &ui_hidden_table_end("opts");
 
 print &ui_table_end();

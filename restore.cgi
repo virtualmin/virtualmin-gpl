@@ -149,7 +149,8 @@ else {
 	else {
 		print &text('restore_doing2', scalar(@vbs), $nice),"<p>\n";
 		}
-	$ok = &restore_domains($src, \@doms, \@do_features, \%options, \@vbs);
+	$ok = &restore_domains($src, \@doms, \@do_features, \%options, \@vbs,
+			       $in{'only'});
 	&run_post_actions();
 	if ($ok) {
 		print &text('restore_done'),"<p>\n";

@@ -1757,6 +1757,7 @@ restore_mailuser=Only restore user:
 restore_dirchown=Reset file ownerships
 restore_reuid=Re-allocate UIDs and GID?
 restore_fix=Just re-import server details?
+restore_only=Only create servers with selected features?
 restore_virtualmin=Virtualmin settings to restore
 restore_dnswholefile=Restore everything in DNS zone file
 
