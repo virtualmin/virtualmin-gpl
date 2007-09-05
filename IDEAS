@@ -70,7 +70,3 @@
 
  - xoops installer should be more automated
 
- - add 'mail' attribute with all addresses to LDAP users (optional)
-
- - show bandwidth for previous months
-	- FS3192

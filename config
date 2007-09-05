@@ -152,3 +152,4 @@ allow_upper=0
 delete_virts=0
 show_pass=1
 batch_create=1
+ldap_mail=0

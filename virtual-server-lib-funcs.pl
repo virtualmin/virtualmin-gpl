@@ -765,6 +765,13 @@ elsif ($_[0]->{'vpopmail'}) {
 	}
 else {
 	# Add the Unix user
+	if ($config{'ldap_mail'}) {
+		if ($_[0]->{'email'}) {
+			push(@{$_[0]->{'ldap_attrs'}}, "mail",$_[0]->{'email'});
+			}
+		push(@{$_[0]->{'ldap_attrs'}},
+		     map { ( "mail", $_ ) } @{$_[0]->{'extraemail'}});
+		}
 	&foreign_call($usermodule, "set_user_envs", $_[0], 'CREATE_USER', $_[0]->{'plainpass'}, [ ]);
 	&foreign_call($usermodule, "making_changes");
 	&foreign_call($usermodule, "lock_user_files");
@@ -1000,6 +1007,13 @@ else {
 	&require_mail();
 
 	# Update the unix user
+	if ($config{'ldap_mail'}) {
+		if ($_[0]->{'email'}) {
+			push(@{$_[0]->{'ldap_attrs'}}, "mail",$_[0]->{'email'});
+			}
+		push(@{$_[0]->{'ldap_attrs'}},
+		     map { ( "mail", $_ ) } @{$_[0]->{'extraemail'}});
+		}
 	&foreign_call($usermodule, "set_user_envs", $_[0], 'MODIFY_USER',
 		      $_[0]->{'plainpass'}, undef, $_[1], $_[1]->{'plainpass'});
 	&foreign_call($usermodule, "making_changes");
