@@ -78,6 +78,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--all-virtualmin") {
 		@vbs = @virtualmin_backups;
 		}
+	elsif ($a eq "--only-features") {
+		$onlyfeats = 1;
+		}
 	else {
 		&usage();
 		}
@@ -145,7 +148,7 @@ if ($test) {
 $opts{'reuid'} = $reuid;
 $opts{'fix'} = $fix;
 &$first_print("Starting restore..");
-$ok = &restore_domains($src, \@doms, \@rfeats, \%opts, \@vbs);
+$ok = &restore_domains($src, \@doms, \@rfeats, \%opts, \@vbs, $onlyfeats);
 &run_post_actions();
 if ($ok) {
 	&$second_print("Restore completed successfully.");
@@ -169,6 +172,7 @@ print "                  [--reuid]\n";
 print "                  [--fix]\n";
 print "                  [--option feature name value]\n";
 print "                  [--all-virtualmin] | [--virtualmin config]\n";
+print "                  [--only-features]\n";
 print "\n";
 print "Multiple domains may be specified with multiple --domain parameters.\n";
 print "Features must be specified using their short names, like web and dns.\n";

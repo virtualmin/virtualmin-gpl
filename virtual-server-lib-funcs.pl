@@ -4497,11 +4497,12 @@ if (-r $file."_unavail") {
 	}
 }
 
-# restore_domains(file, &domains, &features, &options, &vbs)
+# restore_domains(file, &domains, &features, &options, &vbs,
+#		  [only-backup-features])
 # Restore multiple domains from the given file
 sub restore_domains
 {
-local ($file, $doms, $features, $opts, $vbs) = @_;
+local ($file, $doms, $features, $opts, $vbs, $onlyfeats) = @_;
 
 # Work out where the backup is located
 local $ok = 1;
@@ -4634,6 +4635,18 @@ if ($ok) {
 			# This domain doesn't exist yet - need to re-create it
 			&$first_print(&text('restore_createdomain',
 				      $d->{'dom'}));
+
+			# Only features in the backup are enabled
+			if ($onlyfeats) {
+				foreach my $f (@backup_features,
+					       @backup_plugins) {
+					if ($d->{$f} &&
+					    &indexof($f, @$features) < 0) {
+						$d->{$f} = 0;
+						}
+					}
+				}
+
 			local $cerr = &virtual_server_clashes($d);
 			if ($cerr) {
 				&$second_print(&text('restore_eclash', $cerr));

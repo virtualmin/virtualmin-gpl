@@ -28,9 +28,10 @@ mkdir($extra_admins_dir, 0700);
 mkdir("$extra_admins_dir/$d->{'id'}", 0700);
 $admin->{'file'} = "$extra_admins_dir/$d->{'id'}/$admin->{'name'}.admin";
 &write_file($admin->{'file'}, $admin);
-&set_all_null_print();
+&push_all_print();
 &refresh_webmin_user($d);
 &run_post_actions();
+&pop_all_print();
 }
 
 # delete_extra_admin(&admin, &domain)
@@ -39,9 +40,10 @@ sub delete_extra_admin
 {
 local ($admin, $d) = @_;
 unlink($admin->{'file'});
-&set_all_null_print();
+&push_all_print();
 &refresh_webmin_user($d);
 &run_post_actions();
+&pop_all_print();
 }
 
 # modify_extra_admin(&admin, &old, &domain)
@@ -55,8 +57,10 @@ if ($old->{'name'} ne $admin->{'name'}) {
 	}
 &write_file($admin->{'file'}, $admin);
 &set_all_null_print();
+&push_all_print();
 &refresh_webmin_user($d);
 &run_post_actions();
+&pop_all_print();
 }
 
 1;
