@@ -34,10 +34,8 @@ if ($in{'group_mode'}) {
 	}
 
 # Make sure new domain is valid
-if ($parentdom) {
-	local $derr = &valid_domain_name($parentdom, $in{'new'});
-	&error($derr) if ($derr);
-	}
+local $derr = &valid_domain_name($parentdom, $in{'new'});
+&error($derr) if ($derr);
 
 # Make sure no domain with the same name already exists
 if ($newdom) {
