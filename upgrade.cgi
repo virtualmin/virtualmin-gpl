@@ -125,10 +125,9 @@ elsif ($itype eq "deb") {
 				# For the Virtualmin package, select pro
 				# version explicitly so that the GPL is
 				# replaced.
-				if ($p->{'version'} !~ /gpl/) {
-					push(@packages, $p->{'name'}.":".
-							$p->{'version'});
-					}
+				local ($ver) = grep { !/\.gpl/ }
+					&apt_package_versions($p->{'name'});
+                                push(@packages, $p->{'name'}."=".$ver);
 				}
 			else {
 				push(@packages, $p->{'name'});
@@ -281,3 +280,16 @@ else {
 &webmin_log("upgrade");
 &ui_print_footer("", $text{'index_return'});
 
+sub apt_package_versions
+{
+local ($name) = @_;
+local @rv;
+open(OUT, "apt-cache show ".quotemeta($name)." |");
+while(<OUT>) {
+	if (/^Version:\s+(\S+)/) {
+		push(@rv, $1);
+		}
+	}
+close(OUT);
+return @rv;
+}
