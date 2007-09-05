@@ -2311,6 +2311,8 @@ bwgraph_mode_2=By date
 bwgraph_mode_3=By month
 bwgraph_return=bandwidth usage for all servers
 bwgraph_dis=Monitoring disabled
+bwgraph_mago=Show statistics for month:
+bwgraph_mok=Show
 
 plugconfig_title=Plugin Configuration
 plugconfig_dir=For plugin $1

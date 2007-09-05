@@ -8051,28 +8051,70 @@ if ($@) {
 return 1;
 }
 
-# bandwidth_period_start()
-# Returns the day number on which the current bandwidth period started
+# bandwidth_period_start([ago])
+# Returns the day number on which the current (or some previous)
+# bandwidth period started
 sub bandwidth_period_start
 {
+local ($ago) = @_;
 local $now = time();
 local $day = int($now / (24*60*60));
 local @tm = localtime(time());
+local $rv;
 if ($config{'bw_past'} eq 'week') {
 	# Start on last sunday
-	return $day - $tm[6];
+	$rv = $day - $tm[6];
+	$rv -= $ago*7;
 	}
 elsif ($config{'bw_past'} eq 'month') {
 	# Start at 1st of month
-	return int(timelocal(59, 59, 23, 1, $tm[4], $tm[5]) / (24*60*60));
+	for(my $i=0; $i<$ago; $i++) {
+		$tm[4]--;
+		if ($tm[4] < 0) {
+			$tm[5]--;
+			$tm[4] = 11;
+			}
+		}
+	$rv = int(timelocal(59, 59, 23, 1, $tm[4], $tm[5]) / (24*60*60));
 	}
 elsif ($config{'bw_past'} eq 'year') {
 	# Start at start of year
-	return int(timelocal(59, 59, 23, 1, 0, $tm[5]) / (24*60*60));
+	$tm[4] -= $ago;
+	$rv = int(timelocal(59, 59, 23, 1, 0, $tm[5]) / (24*60*60));
 	}
 else {
 	# Start N days ago
-	return $day - $config{'bw_period'};
+	$rv = $day - $config{'bw_period'};
+	$rv -= $ago*$config{'bw_period'};
+	}
+return $rv;
+}
+
+# bandwidth_period_end([ago])
+# Returns the day number on which some bandwidth period ends (inclusive)
+sub bandwidth_period_end
+{
+local ($ago) = @_;
+local $now = time();
+local $day = int($now / (24*60*60));
+if ($ago == 0) {
+	return $day;
+	}
+local $sday = &bandwidth_period_start($ago);
+if ($config{'bw_past'} eq 'week') {
+	# 6 days after start
+	return $day + 6;
+	}
+elsif ($config{'bw_past'} eq 'month') {
+	# End of the month
+	return &bandwidth_period_start($ago-1)-1;
+	}
+elsif ($config{'bw_past'} eq 'year') {
+	# End of the year
+	return &bandwidth_period_start($ago-1)-1;
+	}
+else {
+	return $day + $config{'bw_period'} - 1;
 	}
 }
 
@@ -9092,7 +9134,7 @@ if ($config{'bw_active'} && !$d->{'parent'} && &can_monitor_bandwidth($d)) {
 	push(@rv, { 'page' => 'bwgraph.cgi',
 		    'title' => $text{'edit_bwgraph'},
 		    'desc' => $text{'edit_bwgraphdesc'},
-		    'cat' => 'admin',
+		    'cat' => 'logs',
 		  });
 	}
 

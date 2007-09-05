@@ -50,7 +50,7 @@ if ($max) {
 			}
 		else {
 			push(@links, "<a href='bwgraph.cgi?mode=$m&".
-				     "dom=$in{'dom'}'>$t</a>\n");
+			     "dom=$in{'dom'}&mago=$in{'mago'}'>$t</a>\n");
 			}
 		}
 	print &ui_links_row(\@links),"<p>\n";
@@ -59,30 +59,73 @@ if ($max) {
 	$width = 500;
 	print "<table>\n";
 	if ($in{'mode'} == 0 || $in{'mode'} == 1) {
-		# By domain
+		# By domain .. start by computing usage for the selected
+		# period for each domain
+		%usage = ( );
+		%usage_only = ( );
+		%fusage = ( );
+		%fusage_only = ( );
+		$start_day = &bandwidth_period_start($in{'mago'});
+		$end_day = &bandwidth_period_end($in{'mago'});
+		foreach $d (grep { !$_->{'parent'} } @doms) {
+			if ($in{'mago'}) {
+				# Need to re-compute for some past period
+				foreach $dd ($d, &get_domain_by("parent", $d->{'id'})) {
+					$bwinfo = &get_bandwidth($dd);
+					foreach $k (keys %$bwinfo) {
+						$v = $bwinfo->{$k};
+						if ($k =~ /^(\S+)_(\d+)$/ &&
+						    $2 >= $start_day &&
+						    $2 <= $end_day) {
+							$usage_only{$dd->{'id'}} += $v;
+							$fusage_only{$1}->{$dd->{'id'}} += $v;
+							$pid = $dd->{'parent'} || $dd->{'id'};
+							$usage{$pid} += $v;
+							$fusage{$1}->{$pid} += $v;
+							}
+						}
+					}
+				}
+			else {
+				# bw.pl has already given us stats for the
+				# current period
+				$usage{$d->{'id'}} = $d->{'bw_usage'};
+				$usage_only{$d->{'id'}} = $d->{'bw_usage_only'};
+				foreach $f (@features) {
+					$fusage{$f}->{$d->{'id'}} =
+						$d->{'bw_usage_'.$f};
+					$fusage_only{$f}->{$d->{'id'}} =
+						$d->{'bw_usage_only_'.$f};
+					}
+				}
+			}
+
+		# Show the table of domains
 		print "<tr> <td><b>$text{'newbw_dom'}</b></td>\n";
 		print "<td><b>",&text('edit_bwpast_'.$config{'bw_past'},
-				      $text{'newbw_graph'}, $config{'bw_period'}),
+			      $text{'newbw_graph'}, $config{'bw_period'}),
 		      "</b></td>\n";
 		print "<td><b>$text{'newbw_glimit'}</b></td>\n";
 		print "<td><b>$text{'newbw_gusage'}</b></td>\n";
 		print "</tr>\n";
-		foreach $d (sort { $b->{'bw_usage'} <=> $a->{'bw_usage'} }
+		foreach $d (sort { $usage{$b->{'id'}} <=> $usage{$a->{'id'}} }
 			    grep { !$_->{'parent'} }
 			    @doms) {
-			$usage = $in{'mode'} == 1 ? $d->{'bw_usage_only'}
-						  : $d->{'bw_usage'};
+			$usage = $in{'mode'} == 1 ? $usage_only{$d->{'id'}}
+						  : $usage{$d->{'id'}};
 			if ($in{'dom'}) {
 				print "<tr> <td>$d->{'dom'}</td> <td nowrap>\n";
 				}
 			else {
-				print "<tr> <td><a href='bwgraph.cgi?dom=$d->{'id'}'>",
+				print "<tr> <td><a href='bwgraph.cgi?",
+				      "dom=$d->{'id'}&mago=$in{'mago'}'>",
 				      "$d->{'dom'}</td> <td nowrap>\n";
 				}
 
 			# Show nothing if this domain is disabled
 			if (!&can_monitor_bandwidth($d)) {
-				print "</td> <td colspan=2>$text{'bwgraph_dis'}</td> </tr>\n";
+				print "</td> <td colspan=2>",
+				      "$text{'bwgraph_dis'}</td> </tr>\n";
 				next;
 				}
 
@@ -98,7 +141,8 @@ if ($max) {
 
 			# Show usage by feature
 			print "<br>";
-			&usage_colours($d, $in{'mode'});
+			&usage_colours($d, $in{'mode'} ? \%fusage_only
+						       : \%fusage);
 
 			print "</td>\n";
 			print "<td>\n";
@@ -129,10 +173,11 @@ if ($max) {
 
 				printf "<img src=images/white.gif width=%s height=10>",
 					int($width*$space/$max);
-				&usage_colours($sd, 1);
+				&usage_colours($sd, $in{'mode'} ? \%fusage_only
+							        : \%fusage);
 				print "</td>\n";
 				print "<td></td>\n";
-				print "<td>",&nice_size($sd->{'bw_usage_only'}),"</td>\n";
+				print "<td>",&nice_size($usage_only{$sd->{'id'}}),"</td>\n";
 				print "</tr>\n";
 				$space += $sd->{'bw_usage_only'};
 				}
@@ -154,9 +199,8 @@ if ($max) {
 			}
 
 		# Work out the max day
-		$now = time();
-		$day = int($now / (24*60*60));
-		$start_day = &bandwidth_period_start();
+		$day = &bandwidth_period_end($in{'mago'});
+		$start_day = &bandwidth_period_start($in{'mago'});
 		$max = 0;
 		for($i=$day; $i>=$start_day; $i--) {
 			$usage = 0;
@@ -220,10 +264,10 @@ if ($max) {
 		$max = 0;
 		for($i=$end_month; $i>=$start_month; $i--) {
 			@tm = ( 0, 0, 0, 1, $i%12, int($i/12)-1900 );
-			$istart[$i] = timelocal(@tm)/(24*60*60);
+			$istart[$i] = int(timelocal(@tm)/(24*60*60));
 			@endtm = ( 0, 0, 0, 1, $tm[4]+1, $tm[5] );
 			if ($endtm[4] == 12) { $endtm[4] = 0; $endtm[5]++ };
-			$iend[$i] = timelocal(@endtm)/(24*60*60) - 1;
+			$iend[$i] = int(timelocal(@endtm)/(24*60*60) - 1);
 			$usage = 0;
 			foreach $f (@features) {
 				$usage += &usage_for_days(
@@ -232,7 +276,7 @@ if ($max) {
 			$max = $usage if ($usage > $max);
 			}
 
-		# Show the day table
+		# Show the month table
 		$max ||= 1;
 		for($i=$end_month; $i>=$start_month; $i--) {
 			@tm = ( 0, 0, 0, 1, $i%12, int($i/12)-1900 );
@@ -270,6 +314,26 @@ if ($max) {
 			}
 		}
 	print "<br>\n";
+
+	# Show month selector
+	if ($in{'mode'} != 3) {
+		print &ui_form_start("bwgraph.cgi");
+		print &ui_hidden("mode", $in{'mode'});
+		print &ui_hidden("dom", $in{'dom'});
+		print "<b>$text{'bwgraph_mago'}</b>\n";
+		@mago = ( );
+		@tm = localtime(time());
+		for($i=0; $i<24; $i++) {
+			local $sday = &bandwidth_period_start($i);
+			local $eday = &bandwidth_period_end($i);
+			push(@mago, [ $i, &make_date($sday*24*60*60, 1)." - ".
+					  &make_date($eday*24*60*60, 1) ]);
+			}
+		print &ui_select("mago", $in{'mago'}, \@mago,
+				 1, 0, 0, 0, "onChange='form.submit()'" );
+		print &ui_submit($text{'bwgraph_mok'});
+		print &ui_form_end();
+		}
 	}
 else {
 	print "<b>$text{'bwgraph_none'}</b><p>\n";
@@ -284,14 +348,13 @@ if (&can_edit_templates() && $in{'dom'}) {
 push(@rets, "", $text{'index_return'});
 &ui_print_footer(@rets);
 
-# usage_colours(&domain, mode)
+# usage_colours(&domain, &usage)
 sub usage_colours
 {
-local ($d, $mode) = @_;
+local ($d, $usage) = @_;
 local ($f, $total);
 foreach $f (@features) {
-	local $fusage = $mode == 1 ? $d->{'bw_usage_only_'.$f}
-			     	   : $d->{'bw_usage_'.$f};
+	local $fusage = $usage->{$f}->{$d->{'id'}};
 	if ($fusage) {
 		printf "<img src=images/usage-$f.gif width=%s height=10>",
 			int($width*$fusage/$max)+($f eq "web" ? 1 : 0);
