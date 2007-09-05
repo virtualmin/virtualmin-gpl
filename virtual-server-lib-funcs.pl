@@ -7838,6 +7838,13 @@ if ($access{'subdom'}) {
 		return &text('setup_eforceunder', $access{'subdom'});
 		}
 	}
+if (!&master_admin()) {
+	foreach my $re (split(/\s+/, $config{'denied_domains'})) {
+		if ($_[1] =~ /^$re$/i) {
+			return $text{'setup_edenieddomain'};
+			}
+		}
+	}
 return undef;
 }
 

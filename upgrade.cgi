@@ -100,7 +100,7 @@ elsif ($itype eq "deb") {
 	# GPL APT repo .. change to use the Pro one
 	$lref = &read_file_lines($sources_list);
 	foreach $l (@$lref) {
-		if ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com(\/.*)/) {
+		if ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/gpl(\/.*)/) {
 			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com$1";
 			}
 		}
@@ -120,15 +120,26 @@ elsif ($itype eq "deb") {
 	&foreign_require("software", "software-lib.pl");
 	foreach $p (&software::update_system_available()) {
 		if ($p->{'name'} eq "webmin" || $p->{'name'} eq "usermin" ||
-		    $p->{'name'} =~ /^(webmin|usermin)-/) {
-			push(@packages, $p->{'name'});
+		    $p->{'name'} =~ /^(webmin|usermin)-(virtualmin|virtual-server|security-updates)/) {
+			if ($p->{'name'} eq 'webmin-virtual-server') {
+				# For the Virtualmin package, select pro
+				# version explicitly so that the GPL is
+				# replaced.
+				if ($p->{'version'} !~ /gpl/) {
+					push(@packages, $p->{'name'}.":".
+							$p->{'version'});
+					}
+				}
+			else {
+				push(@packages, $p->{'name'});
+				}
 			}
 		}
 	&$first_print(&text('upgrade_debs',
 		join(" ", map { "<tt>$_</tt>" } @packages)));
 	print "<pre>";
 	&clean_environment();
-	open(YUM, "apt-get install ".join(" ", @packages)." 2>&1 |");
+	open(YUM, "apt-get -y --force-yes -f install ".join(" ", @packages)." 2>&1 |");
 	while(<YUM>) {
 		print &html_escape($_);
 		}

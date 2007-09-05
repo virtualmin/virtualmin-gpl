@@ -713,3 +713,4 @@ Added a Module Config option to control use of the batch domain creation form by
 Fixed bugs on the batch creation form that allowed domain owners to add new top-level servers, or sub-servers under domains that they don't own!
 Added links from the CPU load, memory used, disk used and other information on the right-hand system information page to graphs showing their values over time. This is taken from data collected by Virtualmin starting with the installation of this new release.
 In the Quota commands section of the Module Config page, added two new commands to get the quotas for a single user and group respectively. If defined, Virtualmin will use these when listing users in a domain or editing a single user, on the assumption that they are faster than the command which outputs quotas for all users.
+Creation of domains that match certain regular expressions can be denied using a new Module Config option in the Defaults for new domains section.
