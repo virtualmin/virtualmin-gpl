@@ -31,6 +31,7 @@ if (!@scripts) {
 
 foreach $s (@scripts) {
 	$script = &get_script($s);
+	next if (!$script->{'enabled'});
 
 	# Make sure all of the versions are available
 	foreach $v (@{$script->{'versions'}}) {

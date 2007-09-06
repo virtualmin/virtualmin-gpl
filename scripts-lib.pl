@@ -46,8 +46,13 @@ local $vfunc = "script_${name}_versions";
 local $ufunc = "script_${name}_uses";
 local $vdfunc = "script_${name}_version_desc";
 local $catfunc = "script_${name}_category";
+local $disfunc = "script_${name}_disabled";
 local %unavail;
 &read_file_cached($scripts_unavail_file, \%unavail);
+local $disabled;
+if (defined(&$disfunc)) {
+	$disabled = &$disfunc();
+	}
 local $rv = { 'name' => $name,
 	      'desc' => &$dfunc(),
 	      'longdesc' => defined(&$lfunc) ? &$lfunc() : undef,
@@ -73,7 +78,8 @@ local $rv = { 'name' => $name,
 	      'latest_func' => "script_${name}_latest",
 	      'check_latest_func' => "script_${name}_check_latest",
 	      'commands_func' => "script_${name}_commands",
-	      'avail' => !$unavail{$name},
+	      'avail' => !$unavail{$name} && !$disabled,
+	      'enabled' => !$disabled,
 	      'minversion' => $unavail{$name."_minversion"},
 	    };
 if (defined(&$vdfunc)) {
