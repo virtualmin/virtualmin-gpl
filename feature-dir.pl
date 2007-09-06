@@ -202,7 +202,7 @@ else {
 sub show_backup_dir
 {
 return sprintf
-	"<input type=checkbox name=dir_logs value=1 %s> %s",
+	"(<input type=checkbox name=dir_logs value=1 %s> %s)",
 	!$opts{'dirnologs'} ? "checked" : "", $text{'backup_dirlogs'};
 }
 
