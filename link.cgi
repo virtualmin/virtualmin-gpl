@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 # link.cgi
 # Forward the URL from path_info on to another webmin server
 

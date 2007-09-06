@@ -137,13 +137,13 @@ foreach $stat (@stats) {
 	print "      id: 'plot$plotno',\n";
 	print "      dataSource: new Timeplot.ColumnSource(eventSource, $plotno),\n";
 	print "      valueGeometry: new Timeplot.DefaultValueGeometry({\n";
-	print "        gridColor: '#000000',\n";
+	print "        gridColor: '#B3B6B0',\n";
 	print "        axisLabelsPlacement: 'left',\n";
 	print "        min: 0,\n";
 	print "        $maxopt\n";
 	print "      }),\n";
 	print "      timeGeometry: new Timeplot.DefaultTimeGeometry({\n";
-	print "        gridColor: '#000000',\n";
+	print "        gridColor: '#B3B6B0',\n";
 	print "        axisLabelsPlacement: 'top'\n";
 	print "      }),\n";
 	print "      showValues: true,\n";
