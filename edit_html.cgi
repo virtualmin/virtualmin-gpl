@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 # Show a form for editing or creating an HTML page in a virtual server
 
 require './virtual-server-lib.pl';
