@@ -905,12 +905,10 @@ if ($virt) {
 	&lock_file($virt->{'file'});
 	splice(@$dstlref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1,
 	       @$srclref[1 .. @$srclref-2]);
-	if ($_[2]->{'fixip'}) {
-		# Fix IP address in <Virtualhost> section (if needed)
-		if ($dstlref->[$virt->{'line'}] =~
-		    /^(.*<Virtualhost\s+)([0-9\.]+)(.*)$/i) {
-			$dstlref->[$virt->{'line'}] = $1.$_[0]->{'ip'}.$3;
-			}
+	# Fix IP address in <Virtualhost> section (if needed)
+	if ($dstlref->[$virt->{'line'}] =~
+	    /^(.*<Virtualhost\s+)([0-9\.]+)(.*)$/i) {
+		$dstlref->[$virt->{'line'}] = $1.$_[0]->{'ip'}.$3;
 		}
 	if ($_[3]->{'reuid'}) {
 		# Fix up any UID or GID in suexec lines
@@ -1190,24 +1188,6 @@ else {
 return &ui_table_row($label,
 	&ui_opt_textbox("proxy", $_[0], 40,
 			$text{'form_plocal'}, $text{'form_purl'}), 3);
-}
-
-# show_restore_web(&options)
-# Returns HTML for website restore option inputs
-sub show_restore_web
-{
-# Offer to update IP
-return sprintf
-	"<input type=checkbox name=web_fixip value=1 %s> %s",
-	$_[0]->{'fixip'} ? "checked" : "", $text{'restore_webfixip'};
-}
-
-# parse_restore_web(&in)
-# Parses the inputs for website restore options
-sub parse_restore_web
-{
-local %in = %{$_[0]};
-return { 'fixip' => $in{'web_fixip'} };
 }
 
 # setup_writelogs(&domain)

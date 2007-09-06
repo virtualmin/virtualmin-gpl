@@ -394,12 +394,10 @@ local $dstlref = &read_file_lines($virt->{'file'});
 &lock_file($virt->{'file'});
 splice(@$dstlref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1,
        @$srclref[1 .. @$srclref-2]);
-if ($_[2]->{'fixip'}) {
-	# Fix ip address in <Virtualhost> section (if needed)
-	if ($dstlref->[$virt->{'line'}] =~
-	    /^(.*<Virtualhost\s+)([0-9\.]+)(.*)$/i) {
-		$dstlref->[$virt->{'line'}] = $1.$_[0]->{'ip'}.$3;
-		}
+# Fix ip address in <Virtualhost> section (if needed)
+if ($dstlref->[$virt->{'line'}] =~
+    /^(.*<Virtualhost\s+)([0-9\.]+)(.*)$/i) {
+	$dstlref->[$virt->{'line'}] = $1.$_[0]->{'ip'}.$3;
 	}
 if ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
 	# Fix up any DocumentRoot or other file-related directives
@@ -502,24 +500,6 @@ while(<OUT>) {
 	}
 close(OUT);
 return $data;
-}
-
-# show_restore_ssl(&options)
-# Returns HTML for website restore option inputs
-sub show_restore_ssl
-{
-# Offer to update IP
-return sprintf
-	"<input type=checkbox name=ssl_fixip value=1 %s> %s",
-	$opts{'fixip'} ? "checked" : "", $text{'restore_webfixip'};
-}
-
-# parse_restore_ssl(&in)
-# Parses the inputs for website restore options
-sub parse_restore_ssl
-{
-local %in = %{$_[0]};
-return { 'fixip' => $in{'ssl_fixip'} };
 }
 
 # setup_ipkeys(&domain, &miniserv-getter, &miniserv-saver, &post-action)

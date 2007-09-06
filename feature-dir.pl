@@ -233,7 +233,7 @@ if ($?) {
 	}
 else {
 	&$second_print($text{'setup_done'});
-	if ($_[2]->{'chown'} && $_[0]->{'unix'}) {
+	if ($_[0]->{'unix'}) {
 		# Set ownership on extracted home directory, apart from
 		# content of ~/homes
 		&$first_print($text{'restore_dirchowning'});
@@ -255,24 +255,6 @@ $hd =~ s/^\.\///;
 local $gid = $_[0]->{'gid'} || $_[0]->{'ugid'};
 &system_logged("find ".quotemeta($_[0]->{'home'})." | grep -v '$_[0]->{'home'}/$hd/' | sed -e 's/^/\"/' | sed -e 's/\$/\"/' | xargs chown $_[0]->{'uid'}:$gid");
 &system_logged("chown $_[0]->{'uid'}:$gid ".quotemeta($_[0]->{'home'})."/".$config{'homes_dir'});
-}
-
-# show_restore_dir(&options)
-# Returns HTML for home restore option inputs
-sub show_restore_dir
-{
-# Offer to set file ownership
-return sprintf
-	"<input type=checkbox name=dir_chown value=1 %s> %s",
-	$opts{'chown'} ? "checked" : "", $text{'restore_dirchown'};
-}
-
-# parse_restore_dir(&in)
-# Parses the inputs for home restore options
-sub parse_restore_dir
-{
-local %in = %{$_[0]};
-return { 'chown' => $in{'dir_chown'} };
 }
 
 # virtual_server_directories(&dom)

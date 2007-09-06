@@ -837,21 +837,19 @@ if ($z) {
 	local @recs = &bind8::read_zone_file($fn, $_[0]->{'dom'});
 	&bind8::bump_soa_record($file->{'values'}->[0], \@recs);
 
-	if ($_[2]->{'fixip'}) {
-		# Need to update IP addresses
-		local $r;
-		local ($baserec) = grep { $_->{'type'} eq "A" &&
-					  ($_->{'name'} eq $_[0]->{'dom'}."." ||
-					   $_->{'name'} eq '@') } @recs;
-		foreach $r (@recs) {
-			if ($r->{'type'} eq "A" &&
-			    $r->{'values'}->[0] eq $baserec->{'values'}->[0]) {
-				&bind8::modify_record($fn, $r, $r->{'name'},
-						      $r->{'ttl'},$r->{'class'},
-						      $r->{'type'},
-						      $_[0]->{'ip'},
-						      $r->{'comment'});
-				}
+	# Need to update IP addresses
+	local $r;
+	local ($baserec) = grep { $_->{'type'} eq "A" &&
+				  ($_->{'name'} eq $_[0]->{'dom'}."." ||
+				   $_->{'name'} eq '@') } @recs;
+	foreach $r (@recs) {
+		if ($r->{'type'} eq "A" &&
+		    $r->{'values'}->[0] eq $baserec->{'values'}->[0]) {
+			&bind8::modify_record($fn, $r, $r->{'name'},
+					      $r->{'ttl'},$r->{'class'},
+					      $r->{'type'},
+					      $_[0]->{'ip'},
+					      $r->{'comment'});
 			}
 		}
 
@@ -899,9 +897,7 @@ return $view;
 sub show_restore_dns
 {
 local ($opts, $d) = @_;
-return &ui_checkbox("dns_fixip", 1, $text{'restore_dnsfixip'},
-		    $opts->{'fixip'})."<br>\n".
-       &ui_checkbox("dns_wholefile", 1, $text{'restore_dnswholefile'},
+return &ui_checkbox("dns_wholefile", 1, $text{'restore_dnswholefile'},
 		    $opts->{'wholefile'});
 }
 
@@ -910,8 +906,7 @@ return &ui_checkbox("dns_fixip", 1, $text{'restore_dnsfixip'},
 sub parse_restore_dns
 {
 local ($in, $d) = @_;
-return { 'fixip' => $in->{'dns_fixip'},
-	 'wholefile' => $in->{'dns_wholefile'} };
+return { 'wholefile' => $in->{'dns_wholefile'} };
 }
 
 # sysinfo_dns()
