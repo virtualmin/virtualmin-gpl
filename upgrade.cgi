@@ -269,6 +269,14 @@ else {
 		}
 	}
 
+# Clear security updates caches, as we now have new updates available
+if (&foreign_installed("security-updates")) {
+	&foreign_require("security-updates", "security-updates-lib.pl");
+	unlink($security_updates::security_cache_file);
+	unlink($security_updates::available_cache_file);
+	unlink($security_updates::current_cache_file);
+	}
+
 PAGEEND:
 if ($errors) {
 	print "<b>$text{'upgrade_problems'}</b><p>\n";
