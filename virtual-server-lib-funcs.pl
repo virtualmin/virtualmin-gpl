@@ -9855,6 +9855,7 @@ if ($config{'mail'}) {
 		&$second_print(&text('check_detected', &mail_system_name()));
 		&save_module_config();
 		}
+	local $expected_mailboxes;
 	if ($config{'mail_system'} == 1) {
 		# Make sure sendmail is installed
 		if (!&sendmail_installed()) {
@@ -9873,6 +9874,7 @@ if ($config{'mail'}) {
 					     '/sendmail/', $clink);
 			}
 		&$second_print($text{'check_sendmailok'});
+		$expected_mailboxes = 1;
 		}
 	elsif ($config{'mail_system'} == 0) {
 		# Make sure postfix is installed
@@ -9892,6 +9894,7 @@ if ($config{'mail'}) {
 					    '/postfix/', $clink);
 			}
 		&$second_print($text{'check_postfixok'});
+		$expected_mailboxes = 0;
 		}
 	elsif ($config{'mail_system'} == 2) {
 		# Make sure qmail is installed
@@ -9909,6 +9912,7 @@ if ($config{'mail'}) {
 		else {
 			&$second_print($text{'check_qmailok'});
 			}
+		$expected_mailboxes = 2;
 		}
 	elsif ($config{'mail_system'} == 4) {
 		# Make sure qmail with LDAP is installed
@@ -9930,6 +9934,7 @@ if ($config{'mail'}) {
 			return &text('index_eqmailconn', $lerr, $clink);
 			}
 		&$second_print($text{'check_qmailldapok'});
+		$expected_mailboxes = 4;
 		}
 	elsif ($config{'mail_system'} == 5) {
 		# Make sure qmail with VPOPMail is installed
@@ -9941,6 +9946,17 @@ if ($config{'mail'}) {
 			return &text('index_eqgens', $clink);
 			}
 		&$second_print($text{'check_vpopmailok'});
+		$expected_mailboxes = 5;
+		}
+	# Check that Read User Mail module agrees
+	if (&foreign_check("mailboxes") && defined($expected_mailboxes)) {
+		local %mconfig = &foreign_config("mailboxes");
+		$mconfig{'mail_system'} == 3 ||
+		    $mconfig{'mail_system'} == $expected_mailboxes ||
+			return &text('index_emailboxessystem',
+				     '/mailboxes/',
+				     "../config.cgi?$module_name",
+				     $text{'mail_system_'.$expected_mailboxes});
 		}
 	}
 

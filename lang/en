@@ -47,6 +47,7 @@ index_eqmailhost=The Qmail LDAP host set on the <a href='$1'>module configuratio
 index_eqmailbase=The Qmail LDAP base set on the <a href='$1'>module configuration</a> page is missing or invalid.
 index_eqmailconn=An error occurred connecting to the LDAP server used for Qmail : $1. If you are running a different mail server, select it on the <a href='$2'>module configuration</a> page.
 index_evpopmail=The QMail server does not appear to be installed on your system, is missing the VPOPMail extensions, or has not yet been set up properly in Webmin's <a href='$1'>QMail Configuration</a> module. If you are running a different mail server, select it on the <a href='$2'>module configuration</a> page.
+index_emailboxessystem=The Read User Mail module is not setup to use the $3 mail server. Either adjust its <a href='$1'>module configuration</a> to match, or change the <a href='$2'>Virtualmin configuration</a>.
 index_eiface=No Ethernet interface could be automatically found on your system. Use the <a href='$1'>module configuration</a> page to set the interface manually.
 index_elogrotate=The Logrotate program does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>Log File Rotation</a> module. If your system does not use Logrotate, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page.
 index_elogrotatever=The Logrotate program appears to be version $3, but Virtualmin requires version $4 or above in order to support multiple log files in the same section.

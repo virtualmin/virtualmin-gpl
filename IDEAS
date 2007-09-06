@@ -70,3 +70,4 @@
 
  - xoops installer should be more automated
 
+ - remove useless restore options that should default to on
