@@ -224,8 +224,8 @@ $virtualmin_yum_repo = "/etc/yum.repos.d/virtualmin.repo";
 
 $collected_info_file = "$module_config_directory/collected";
 $historic_info_dir = "$module_config_directory/history";
-@historic_graph_colors = ( '#000000', '#ff0000', '#00aa00', '#0000ff',
-			   '#ffaa00', '#ff00ff', '#00ffff' );
+@historic_graph_colors = ( '#393939', '#c01627', '#27c016', '#167cc0',
+			   '#e6d42d', '#5a16c0', '#16c0af' );
 
 $procmail_log_file = "/var/log/procmail.log";
 $procmail_log_cmd = "$module_config_directory/procmail-logger.pl";
