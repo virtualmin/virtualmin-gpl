@@ -32,13 +32,13 @@ print &ui_table_row($text{'cmass_file'},
 @ptmpls = &list_available_templates(undef, undef);
 if (&can_create_master_servers()) {
 	print &ui_table_row($text{'cmass_ptmpl'},
-		    &ui_select("ptemplate", undef,
+		    &ui_select("ptemplate", &get_init_template(0),
 			       [ map { [ $_->{'id'}, $_->{'name'} ] }@ptmpls ]),
 		    1, \@tds);
 	}
 @stmpls = &list_available_templates({ }, undef);
 print &ui_table_row($text{'cmass_stmpl'},
-	    &ui_select("stemplate", undef,
+	    &ui_select("stemplate", &get_init_template(1),
 		       [ map { [ $_->{'id'}, $_->{'name'} ] } @stmpls ]),
 	    1, \@tds);
 

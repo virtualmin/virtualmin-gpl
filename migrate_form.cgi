@@ -41,7 +41,7 @@ foreach $t (&list_templates()) {
 	push(@tmpls, $t);
 	}
 print &ui_table_row($text{'migrate_template'},
-		    &ui_select("template", 0, 
+		    &ui_select("template", &get_init_template(0), 
 			[ map { [ $_->{'id'}, $_->{'name'} ] } @tmpls ]));
 
 # IP to assign

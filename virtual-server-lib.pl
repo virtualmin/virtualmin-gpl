@@ -12,6 +12,12 @@ if (!defined($access{'feature_unix'})) {
 if (!defined($access{'feature_dir'})) {
 	$access{'feature_dir'} = 1;
 	}
+if (!defined($config{'init_template'})) {
+	$config{'init_template'} = 0;
+	}
+if (!defined($config{'initsub_template'})) {
+	$config{'initsub_template'} = 1;
+	}
 
 if (!$done_virtual_server_lib_funcs) {
 	do 'virtual-server-lib-funcs.pl';

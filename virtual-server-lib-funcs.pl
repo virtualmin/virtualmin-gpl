@@ -10738,6 +10738,13 @@ $tmpl->{'norename'} = $in{'norename'};
 $tmpl->{'forceunder'} = $in{'forceunder'};
 }
 
+# get_init_template(subdom)
+# Returns the ID of the initially selected template
+sub get_init_template
+{
+return $_[0] ? $config{'initsub_template'} : $config{'init_template'};
+}
+
 # set_chained_features(&domain)
 # Updates a domain object, setting any features that are automatically based
 # on another. Called from .cgi scripts to activate hidden features (mode 3).

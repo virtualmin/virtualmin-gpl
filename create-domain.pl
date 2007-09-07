@@ -157,7 +157,9 @@ while(@ARGV > 0) {
 		&usage("Unknown option $a");
 		}
 	}
-$template = 0 if ($template eq "");
+if ($template eq "") {
+	$template = &get_init_template($parentdomain);
+	}
 $tmpl = &get_template($template);
 
 if ($virtalready == 2) {

@@ -717,3 +717,4 @@ Creation of domains that match certain regular expressions can be denied using a
 Added the --only-features parameter to restore-domain.pl, which tells Virtualmin to only enable features selected for restore when creating a new domain as part of the process.
 Added a similar option to the restore form in the Virtualmin web interface.
 Usage for previous months can be shown on the Bandwidth Monitoring page, using a month selector menu at the bottom of the table of domains or dates.
+Added options on the Edit Server Template page to make some non-default template the one that is initially selected when adding new virtual servers, migrating them or creating from a batch file.

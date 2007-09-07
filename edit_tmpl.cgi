@@ -82,11 +82,30 @@ print &ui_hidden("cp", $in{'cp'}),"\n";
 print &ui_hidden("editmode", $in{'editmode'}),"\n";
 $emode = $text{'feature_'.$in{'editmode'}} ||
 	 $text{'tmpl_editmode_'.$in{'editmode'}};
-print &ui_table_start($text{'tmpl_header'}." (".$emode.")", "100%", 2);
+print &ui_table_start($text{'tmpl_header'}." (".$emode.")", "100%", 2,
+		      [ "width=30%" ]);
 
 # Show selected options type
 $sfunc = "show_template_".$in{'editmode'};
 &$sfunc($tmpl);
+
+if ($in{'editmode'} eq 'basic') {
+	# Show option to make this the default template (for parents and subs)
+	if ($tmpl->{'id'} != 1 || $in{'new'}) {
+		print &ui_table_row(
+			&hlink($text{'tmpl_init'}, "template_init"),
+			!$in{'new'} && $tmpl->{'id'} == &get_init_template(0) ?
+				$text{'yes'} :
+				&ui_yesno_radio("init", 0));
+		}
+	if ($tmpl->{'id'} != 0 || $in{'new'}) {
+		print &ui_table_row(
+			&hlink($text{'tmpl_initsub'}, "template_initsub"),
+			!$in{'new'} && $tmpl->{'id'} == &get_init_template(1) ?
+				$text{'yes'} :
+				&ui_yesno_radio("initsub", 0));
+		}
+	}
 
 print &ui_table_end();
 

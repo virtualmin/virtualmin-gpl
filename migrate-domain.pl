@@ -20,7 +20,7 @@ $indent_print = \&indent_text_print;
 $outdent_print = \&outdent_text_print;
 
 # Parse command-line args
-$template = 0;
+$template = "";
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--source") {
@@ -88,6 +88,9 @@ while(@ARGV > 0) {
 $src && $type && $domain || usage();
 if (!$parent) {
 	$user && $pass || &usage();
+	}
+if ($template eq "") {
+	$template = &get_init_template($parentdomain);
 	}
 $tmpl = &get_template($template);
 

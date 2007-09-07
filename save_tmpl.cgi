@@ -47,6 +47,16 @@ $pfunc = "parse_template_".$in{'editmode'};
 
 # Create or update the template
 &save_template($tmpl);
+
+# Update the module config for the default template
+if ($in{'init'}) {
+	$config{'init_template'} = $tmpl->{'id'};
+	}
+if ($in{'initsub'}) {
+	$config{'initsub_template'} = $tmpl->{'id'};
+	}
+&save_module_config();
+
 &webmin_log($in{'new'} ? "create" : "modify", "template", $tmpl->{'name'});
 
 if ($in{'next'}) {

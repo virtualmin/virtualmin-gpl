@@ -173,7 +173,9 @@ print "<script>\n";
 print "function select_template(num)\n";
 print "{\n";
 @availtmpls = &list_available_templates($parentdom, $aliasdom);
-$deftmpl = $availtmpls[0];
+$deftmplid = &get_init_template($parentdom);
+($deftmpl) = grep { $_->{'id'} == $deftmplid } @availtmpls;
+$deftmpl ||= $availtmpls[0];
 foreach $t (@availtmpls) {
 	local $tmpl = &get_template($t->{'id'});
 	print "if (num == $tmpl->{'id'}) {\n";
@@ -221,9 +223,8 @@ foreach $t (&list_available_templates($parentdom, $aliasdom)) {
 	push(@opts, [ $t->{'id'}, $t->{'name'} ]);
 	push(@cantmpls, $t);
 	}
-print "</select></td> </tr>\n";
 print &ui_table_row(&hlink($text{'form_template'},"template"),
-	&ui_select("template", undef, \@opts, 1, 0,
+	&ui_select("template", $deftmpl->{'id'}, \@opts, 1, 0,
 		   0, 0, $config{'template_auto'} ? "" :
 		"onChange='select_template(options[selectedIndex].value)'"),
 	undef, \@tds);
