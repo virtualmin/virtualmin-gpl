@@ -67,8 +67,6 @@
 
  - xoops installer should be more automated
 
- - migration should automate domain / user / password where possible
-
  - is there any point having per-domain spam and virus filtering programs?
 	- single setting to control all domains and template
 

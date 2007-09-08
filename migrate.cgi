@@ -22,8 +22,14 @@ else {
 	}
 $in{'dom'} =~ /^[a-z0-9\.\-\_]+$/i || &error($text{'migrate_edom'});
 &get_domain_by("dom", $in{'dom'}) && &error($text{'migrate_eclash'});
-$in{'user'} =~ /^[a-z0-9\.\-\_]+$/i || &error($text{'migrate_euser'});
-defined(getpwnam($in{'user'})) && &error($text{'migrate_euserclash'});
+if (!$in{'user_def'}) {
+	$in{'user'} =~ /^[a-z0-9\.\-\_]+$/i || &error($text{'migrate_euser'});
+	$user = $in{'user'};
+	defined(getpwnam($in{'user'})) && &error($text{'migrate_euserclash'});
+	}
+if (!$in{'pass_def'}) {
+	$pass = $in{'pass'};
+	}
 $tmpl = &get_template($in{'template'});
 if (!$in{'parent_def'}) {
 	$parent = &get_domain_by("user", $in{'parent'}, "parent", "");
@@ -40,7 +46,7 @@ $in{'email_def'} || $in{'email'} =~ /\S/ || &error($text{'setup_eemail'});
 
 # Validate the file
 $vfunc = "migration_$in{'type'}_validate";
-$err = &$vfunc($file, $in{'dom'}, $in{'user'}, $parent, $prefix);
+$err = &$vfunc($file, $in{'dom'}, $user, $parent, $prefix, $pass);
 &error($err) if ($err);
 
 &ui_print_header(undef, $text{'migrate_title'}, "");
@@ -53,8 +59,8 @@ $err = &$vfunc($file, $in{'dom'}, $in{'user'}, $parent, $prefix);
 		      "<tt>$in{'file'}</tt>"));
 &$indent_print();
 $mfunc = "migration_$in{'type'}_migrate";
-@doms = &$mfunc($file, $in{'dom'}, $in{'user'}, $in{'webmin'}, $in{'template'},
-		$ip, $virt, $in{'pass'}, $parent, $prefix,
+@doms = &$mfunc($file, $in{'dom'}, $user, $in{'webmin'}, $in{'template'},
+		$ip, $virt, $pass, $parent, $prefix,
 		$virtalready, $in{'email_def'} ? undef : $in{'email'});
 &run_post_actions();
 &$outdent_print();

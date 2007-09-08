@@ -2680,6 +2680,7 @@ migrate_file1=File on server $1
 migrate_type=Backup file type
 migrate_cpanel=cPanel backup
 migrate_ensim=Ensim backup
+migrate_plesk=Plesk 8 backup
 migrate_dom=Domain name to migrate
 migrate_user=Username for domain
 migrate_pass=Password for administrator
@@ -2705,6 +2706,7 @@ migrate_parent0=Existing user
 migrate_prefix=Prefix for mail usernames
 migrate_email=Contact email address
 migrate_auto=Automatic
+migrate_auto2=Work out from backup, if possible
 
 newscripts_title=Script Installers
 newscripts_desc=This page allows you to add script installers created by other vendors, and to control which scripts are available to domain owners.

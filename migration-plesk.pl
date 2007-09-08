@@ -5,11 +5,11 @@
 # XXX domain aliases
 # XXX original SSL cert
 
-# migration_plesk_validate(file, domain, username, [&parent], [prefix])
+# migration_plesk_validate(file, domain, [user], [&parent], [prefix], [pass])
 # Make sure the given file is a Plesk backup, and contains the domain
 sub migration_plesk_validate
 {
-local ($file, $dom, $user, $parent, $prefix) = @_;
+local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
 local $root = &extract_plesk_dir($file);
 $root || return "Not a Plesk 8 backup file";
 -r "$root/dump.xml" || return "Not a complete Plesk 8 backup file - missing dump.xml";
@@ -18,18 +18,26 @@ $root || return "Not a Plesk 8 backup file";
 &get_webmin_version() >= 1.365 ||
     return "Webmin version 1.365 or later is needed to migrate Plesk domains";
 
-# Check the domain
+# Check if the domain is in there
 local $dump = &read_plesk_xml("$root/dump.xml");
 ref($dump) || return $dump;
-local $realdom = $dump->{'domain'}->{'name'};
-$realdom eq $dom ||
-	return "Backup is for domain $realdom, not $dom";
+local $domain = $dump->{'domain'}->{$dom};
+if (!$domain && $dump->{'domain'}->{'name'} eq $dom) {
+	$domain = $dump->{'domain'};
+	}
+$domain || return "Backup does not contain the domain $dom";
 
-if (!$parent) {
-	# Check the user
-	local $realuser = $dump->{'domain'}->{'phosting'}->{'sysuser'}->{'name'};
-	$realuser eq $user ||
-		return "Original username is $realuser, not $user";
+if (!$parent && !$user) {
+	# Check if we can work out the user
+	$user = $domain->{'phosting'}->{'sysuser'}->{'name'};
+	$user || return "Could not work out original username from backup";
+	}
+
+if (!$parent && !$pass) {
+	# Check if we can work out the password
+	$pass = $domain->{'phosting'}->{'sysuser'}->{'password'}->{'content'} ||
+		$domain->{'domainuser'}->{'password'}->{'content'};
+	$pass || return "Could not work out original password from backup";
 	}
 
 # Check for clashes
@@ -50,15 +58,20 @@ sub migration_plesk_migrate
 local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
        $prefix, $virtalready, $email) = @_;
 
-# Work out user and group
-local $group = $user;
-local $ugroup = $group;
+# Extract backup and read the dump file
 local $root = &extract_plesk_dir($file);
 local $dump = &read_plesk_xml("$root/dump.xml");
-local $domain = $dump->{'domain'};
-if (ref($domain) eq 'ARRAY') {
-	$domain = $domain->[0];
+local $domain = $dump->{'domain'}->{$dom};
+if (!$domain && $dump->{'domain'}->{'name'} eq $dom) {
+	$domain = $dump->{'domain'};
 	}
+
+# Work out user and group
+if (!$user) {
+	$user = $domain->{'phosting'}->{'sysuser'}->{'name'};
+	}
+local $group = $user;
+local $ugroup = $group;
 
 # First work out what features we have
 &$first_print("Checking for Plesk features ..");
@@ -151,13 +164,13 @@ else {
 	$duser = $user;
 	}
 
-# Get the quota and domain password
+# Get the quota and domain password (if not supplied)
 local $bsize = &has_home_quotas() ? &quota_bsize("home") : undef;
 local $quota;
 if (!$parent && &has_home_quotas()) {
 	$quota = $domain->{'phosting'}->{'sysuser'}->{'quota'} / $bsize;
 	}
-if (!$parent) {
+if (!$parent && !$pass) {
 	$pass = $domain->{'phosting'}->{'sysuser'}->{'password'}->{'content'} ||
 		$domain->{'domainuser'}->{'password'}->{'content'};
 	}
@@ -473,6 +486,10 @@ return (\%dom);
 sub extract_plesk_dir
 {
 local ($file) = @_;
+if ($main::plesk_dir_cache{$file} && -d $main::plesk_dir_cache{$file}) {
+	# Use cached extract from this session
+	return $main::plesk_dir_cache{$file};
+	}
 local $dir = &transname();
 &make_dir($dir, 0700);
 
@@ -519,6 +536,7 @@ foreach my $a (@{$mail->{'attach'}}) {
 	}
 return undef if (!$count);	# No attachments!
 
+$main::plesk_dir_cache{$file} = $dir;
 return $dir;
 }
 

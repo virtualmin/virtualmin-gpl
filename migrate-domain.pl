@@ -86,9 +86,6 @@ while(@ARGV > 0) {
 		}
 	}
 $src && $type && $domain || usage();
-if (!$parent) {
-	$user && $pass || &usage();
-	}
 if ($template eq "") {
 	$template = &get_init_template($parentdomain);
 	}
@@ -109,7 +106,7 @@ else {
 
 # Validate the file
 $vfunc = "migration_${type}_validate";
-$err = &$vfunc($src, $domain, $user, $parent, $prefix);
+$err = &$vfunc($src, $domain, $user, $parent, $prefix, $pass);
 if ($err) {
 	&usage("Failed to validate source file : $err");
 	}
@@ -135,20 +132,20 @@ sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
 print "Migrates a Virtualmin server from a backup created by another product\n";
-print "like cPanel or Plesk.\n";
+print "like cPanel, Ensim or Plesk.\n";
 print "\n";
 $types = join("|", @migration_types);
-print "usage: migrate-domain.pl     --source file\n";
-print "                             --type $types\n";
-print "                             --domain name\n";
-print "                             --user username\n";
-print "                             --pass password\n";
-print "                             [--webmin]\n";
-print "                             [--template name]\n";
-print "                             [--ip address] [--allocate-ip]\n";
-print "                             [--ip-already]\n";
-print "                             [--parent domain]\n";
-print "                             [--prefix string]\n";
+print "usage: migrate-domain.pl --source file\n";
+print "                         --type $types\n";
+print "                         --domain name\n";
+print "                         [--user username]\n";
+print "                         [--pass password]\n";
+print "                         [--webmin]\n";
+print "                         [--template name]\n";
+print "                         [--ip address] [--allocate-ip]\n";
+print "                         [--ip-already]\n";
+print "                         [--parent domain]\n";
+print "                         [--prefix string]\n";
 exit(1);
 }
 

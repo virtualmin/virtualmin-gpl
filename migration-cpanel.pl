@@ -1,10 +1,10 @@
 # Functions for migrating a cpanel backup
 
-# migration_cpanel_validate(file, domain, username, [&parent], [prefix])
+# migration_cpanel_validate(file, domain, [user], [&parent], [prefix], [pass])
 # Make sure the given file is a cPanel backup, and contains the domain
 sub migration_cpanel_validate
 {
-local ($file, $dom, $user, $parent, $prefix) = @_;
+local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
 local $root = &extract_cpanel_dir($file);
 $root || return "Not a cPanel tar.gz file";
 local $daily = "$root/backup/cpbackup/daily";
@@ -14,16 +14,36 @@ local $datastore = "$root/.cpanel-datastore";
 	return "Not a cPanel daily or home directory backup file";
 
 if (-d $daily) {
-	# Check for user and Apache domain file
+	# Older style backup - check for user and Apache domain file
+	if (!$user) {
+		local ($tgz) = glob("$daily/*.tar.gz");
+		$tgz =~ /\/([^\/]+)\.tar\.gz$/ ||
+			return "Could not work out username from cPanel backup";
+		$user = $1;
+		}
 	-r "$daily/$user.tar.gz" || return "Could not find directory for $user in backup";
 	local $httpd = &extract_cpanel_file("$daily/files/_etc_httpd_conf_httpd.conf.gz");
 	local ($vconf, $virt) = &get_apache_virtual($dom, undef, $httpd);
 	$vconf || return "Could not find Apache virtual server $dom in backup";
 	}
 elsif (-d $homedir) {
-	# Check for aliases file
+	# Newer style backup - check for aliases file
 	($vfdom) = glob("$root/*/vf/$dom");
 	-r $vfdom || return "Could not find mail aliases file for $dom in backup";
+	if (!$user) {
+		$homedir =~ /\/backup-([^\/]+)_([^\/]+)\// ||
+			return "Could not work out username from cPanel backup";
+		$user = $2;
+		}
+	}
+else {
+	# Home-only backup
+	$user || return "Could not work out username from cPanel backup";
+	}
+
+# Password is needed for cPanel migrations
+if (!$parent && !$pass) {
+	return "A password must be supplied for cPanel migrations";
 	}
 
 # Check some clashes
@@ -43,11 +63,26 @@ sub migration_cpanel_migrate
 {
 local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
        $prefix, $virtalready, $email) = @_;
-local $group = $user;
-local $ugroup = $group;
 local $root = &extract_cpanel_dir($file);
 local $daily = "$root/backup/cpbackup/daily";
 local $datastore = "$root/.cpanel-datastore";
+
+# Work out the username again if it wasn't supplied
+if (!$user) {
+	local ($homedir) = glob("$root/*/homedir");
+	if (-d $daily) {
+		local ($tgz) = glob("$daily/*.tar.gz");
+		$tgz =~ /\/([^\/]+)\.tar\.gz$/;
+		$user = $1;
+		}
+	elsif (-d $homedir) {
+		$homedir =~ /\/backup-([^\/]+)_([^\/]+)\//;
+		$user = $2;
+		}
+	$user || &error("Could not work out username automatically");
+	}
+local $group = $user;
+local $ugroup = $group;
 
 # First work out what features we have ..
 &$first_print("Checking for cPanel features ..");
@@ -904,12 +939,20 @@ return (\%dom);
 # Extracts a tar.gz file, and returns the directory under which it was extracted
 sub extract_cpanel_dir
 {
-return undef if (!-r $_[0]);
+local ($file) = @_;
+return undef if (!-r $file);
+if ($main::cpanel_dir_cache{$file} && -d $main::cpanel_dir_cache{$file}) {
+	# Use cached extract from this session
+	return $main::cpanel_dir_cache{$file};
+	}
 local $temp = &transname();
 mkdir($temp, 0700);
-local $qf = quotemeta($_[0]);
-local $out = `cd $temp && tar xzf $qf 2>&1`;
-return $? ? undef : $temp;
+local $err = &extract_compressed_file($file, $temp);
+if ($err) {
+	return undef;
+	}
+$main::cpanel_dir_cache{$file} = $temp;
+return $temp;
 }
 
 # extract_cpanel_file(file)

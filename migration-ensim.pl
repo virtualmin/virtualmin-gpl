@@ -1,10 +1,10 @@
 # Functions for migrating an ensim backup
 
-# migration_ensim_validate(file, domain, username, [&parent], [prefix])
+# migration_ensim_validate(file, domain, [user], [&parent], [prefix], [pass])
 # Make sure the given file is an ensim backup, and contains the domain
 sub migration_ensim_validate
 {
-local ($file, $dom, $user, $parent, $prefix) = @_;
+local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
 
 # Validate file
 local $root = &extract_ensim_dir($file);
@@ -21,11 +21,17 @@ if ($@) {
 $manifest->{'siteIdent'}->{'sitename'} eq $dom ||
 	return "Backup is for domain $manifest->{'siteIdent'}->{'sitename'}, not $dom";
 
-# Make sure username is correct
-local $service = $manifest->{'siteIdent'}->{'service'};
-local ($si) = grep { $_->{'serviceName'} eq 'siteinfo' } @$service;
-$parent || $si->{'config'}->{'admin_user'} eq $user ||
-	return "Domain is owned by user $si->{'config'}->{'admin_user'}, not $user";
+# Check if we can work out the user
+if (!$parent && !$user) {
+	local $service = $manifest->{'siteIdent'}->{'service'};
+	local ($si) = grep { $_->{'serviceName'} eq 'siteinfo' } @$service;
+	$user = $si->{'config'}->{'admin_user'};
+	$user || return "Could not work out original username from backup";
+	}
+
+if (!$parent && !$pass) {
+	return "A password must be supplied for Ensim migrations";
+	}
 
 # Check some clashes
 $prefix ||= &compute_prefix($dom, undef, $parent);
@@ -48,6 +54,10 @@ local $root = &extract_ensim_dir($file);
 
 # Get the manifest and some useful info from it
 local $manifest = &parse_enim_xml($root);
+local $service = $manifest->{'siteIdent'}->{'service'};
+local ($si) = grep { $_->{'serviceName'} eq 'siteinfo' } @$service;
+local $origuser = $si->{'config'}->{'admin_user'};
+$user ||= $origuser;
 local $group = $manifest->{'userIdent'}->{'group'} || $user;
 local $ugroup = $group;
 
@@ -129,7 +139,7 @@ local ($si) = grep { $_->{'serviceName'} eq 'siteinfo' } @$service;
 local $email = $si ? $si->{'config'}->{'email'} : undef;
 
 # Extract encrypted password
-local $userident = $manifest->{'userIdent'}->{$user};
+local $userident = $manifest->{'userIdent'}->{$origuser};
 if (!$userident) {
 	# There are no extra users .. everything is directly under userIdent
 	$userident = $manifest->{'userIdent'};
@@ -333,7 +343,7 @@ if ($got{'mysql'}) {
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 local $usercount = 0;
 local $userident = $manifest->{'userIdent'};
-if ($userident->{$user}) {
+if ($userident->{$origuser}) {
 	&$first_print("Copying mail/FTP users ..");
 	foreach my $mu (keys %$userident) {
 		next if ($mu eq $user);
@@ -389,11 +399,11 @@ if ($userident->{$user}) {
 
 # Move server owner's inbox file
 local $owner = &get_domain_owner(\%dom);
-if (!$parent && -r "$root/var/spool/mail/$user") {
+if (!$parent && -r "$root/var/spool/mail/$origuser") {
 	&$first_print("Moving server owner's mailbox ..");
 	local ($mfile, $mtype) = &user_mail_file($owner);
 	local $srcfolder = { 'type' => 0,
-			     'file' => "$root/var/spool/mail/$user" };
+			     'file' => "$root/var/spool/mail/$origuser" };
 	local $dstfolder = { 'type' => $mtype,
 			     'file' => $mfile };
 	&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
