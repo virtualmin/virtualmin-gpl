@@ -25,10 +25,6 @@
 
  - better coverage of files by webmin_log
 
- - plesk migration support
-	- files in ~/contrib/plesk
-	- don't send email notification when migrating or restoring backup
-
  - cron time selector is too complex - use popup
 
  - templates for new mailing list configs
@@ -74,8 +70,7 @@
  - migration should automate domain / user / password where possible
 
  - is there any point having per-domain spam and virus filtering programs?
-	- ask joe
 	- single setting to control all domains and template
 
- - category system settings menu
+ - categorize system settings menu
 	- email, slaves, etc..

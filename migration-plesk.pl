@@ -3,8 +3,7 @@
 
 # XXX how to find regular aliases?
 # XXX domain aliases
-# XXX SSL cert
-# XXX DNS records (new ones, with correct IP)
+# XXX original SSL cert
 
 # migration_plesk_validate(file, domain, username, [&parent], [prefix])
 # Make sure the given file is a Plesk backup, and contains the domain
@@ -12,8 +11,12 @@ sub migration_plesk_validate
 {
 local ($file, $dom, $user, $parent, $prefix) = @_;
 local $root = &extract_plesk_dir($file);
-$root || return "Not a Plesk MIME-format backup file";
--r "$root/dump.xml" || return "Not a Plesk backup file - missing dump.xml";
+$root || return "Not a Plesk 8 backup file";
+-r "$root/dump.xml" || return "Not a complete Plesk 8 backup file - missing dump.xml";
+
+# Check Webmin version
+&get_webmin_version() >= 1.365 ||
+    return "Webmin version 1.365 or later is needed to migrate Plesk domains";
 
 # Check the domain
 local $dump = &read_plesk_xml("$root/dump.xml");
@@ -186,6 +189,7 @@ $prefix ||= &compute_prefix($dom, $group, $parent);
 	 'prefix', $prefix,
 	 'no_tmpl_aliases', 1,
 	 'no_mysql_db', $got{'mysql'} ? 1 : 0,
+	 'nocreationmail', 1,
 	 'parent', $parent ? $parent->{'id'} : undef,
         );
 if (!$parent) {
@@ -250,8 +254,78 @@ else {
 	&$second_print(".. not found in Plesk backup");
 	}
 
+# Copy CGI files
+&$first_print("Copying CGI scripts ..");
+local $cgis = "$root/$dom.cgi-bin";
+if (-r $cgis) {
+	local $cdir = &cgi_bin_dir(\%dom);
+	local $err = &extract_compressed_file($cgis, $cdir);
+	if ($err) {
+		&$second_print(".. failed : $err");
+		}
+	else {
+		&set_home_ownership(\%dom);
+		&$second_print(".. done");
+		}
+	}
+else {
+	&$second_print(".. not found in Plesk backup");
+	}
+
 # Re-create DNS records
-# XXX
+local $oldip = $domain->{'ip'}->{'ip-address'};
+if ($got{'dns'}) {
+	&$first_print("Copying and fixing DNS records ..");
+	local $zonexml = $domain->{'dns-zone'};
+	local $newzone = &get_bind_zone($dom);
+	if (!$newzone) {
+		&$second_print(".. could not find new DNS zone!");
+		}
+	elsif (!$zonexml) {
+		&$second_print(".. could not find zone in backup");
+		}
+	else {
+		local $rcount = 0;
+		local $zdstfile = &bind8::find_value("file",
+						     $newzone->{'members'});
+		local @recs = &bind8::read_zone_file($zdstfile, $dom);
+		foreach my $rec (@{$zonexml->{'dnsrec'}}) {
+			local $recname = $rec->{'src'};
+			$recname .= ".".$dom."." if ($recname !~ /\.$/);
+			local ($oldrec) = grep { $_->{'name'} eq $recname }
+					       @recs;
+			if (!$oldrec) {
+				# Found one we need to add
+				local $recvalue = $rec->{'dst'};
+				local $rectype = $rec->{'type'};
+				if ($rectype eq "A" && $recvalue eq $oldip) {
+					# Use new IP address
+					$recvalue = $ip;
+					}
+				if ($rectype eq "MX") {
+					# Include priority in value
+					$recvalue = $rec->{'opt'}." ".$recvalue;
+					}
+				if ($rectype eq "PTR") {
+					# Not migratable
+					next;
+					}
+				&bind8::create_record($zdstfile,
+						      $recname,
+						      undef,
+						      "IN",
+						      $rectype,
+						      $recvalue);
+				$rcount++;
+				}
+			}
+		if ($rcount) {
+			&bind8::bump_soa_record($zdstfile, \@recs);
+			&register_post_action(\&restart_bind);
+			}
+		&$second_print(".. done (added $rcount records)");
+		}
+	}
 
 # Re-create mail users and copy mail files
 &$first_print("Re-creating mail users ..");

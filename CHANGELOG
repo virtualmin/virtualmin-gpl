@@ -720,3 +720,4 @@ Usage for previous months can be shown on the Bandwidth Monitoring page, using a
 Added options on the Edit Server Template page to make some non-default template the one that is initially selected when adding new virtual servers, migrating them or creating from a batch file.
 ---- Changes since 3.46 ----
 Updated the Wordpress script installer to version 2.2.3.
+Added support for migrating domains from Plesk 8 backups.

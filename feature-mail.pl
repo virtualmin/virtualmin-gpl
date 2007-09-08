@@ -1004,13 +1004,14 @@ elsif ($config{'mail_system'} == 0) {
 	# Modify in postfix file
 	local $alias = $_[0]->{'alias'};
 	local $oldalias = $alias ? { %$alias } : undef;
+	local @psto = map { $_ =~ /^BOUNCE\s+(.*)$/ ? "BOUNCE" : $_ } @to;
 	$_[0]->{'from'} =~ /^(\S*)\@(\S+)$/;
 	local $an = ($1 || "default")."-".$2;
-	if (&needs_alias(@to) && !$alias) {
+	if (&needs_alias(@psto) && !$alias) {
 		# Alias needs to be created and virtuser updated
 		local $alias = { "name" => $an,
 				 "enabled" => 1,
-				 "values" => \@to };
+				 "values" => \@psto };
 		$_[1]->{'alias'} = $alias;
 		&postfix::lock_alias_files($postfix_afiles);
 		&postfix::create_alias($alias, $postfix_afiles);
@@ -1027,7 +1028,7 @@ elsif ($config{'mail_system'} == 0) {
 		}
 	elsif ($alias) {
 		# Just update alias
-		$alias->{'values'} = \@to;
+		$alias->{'values'} = \@psto;
 		&lock_file($alias->{'file'});
 		$alias->{'name'} = $an if ($_[1]->{'from'} ne $_[0]->{'from'});
 		&postfix::modify_alias($oldalias, $alias);
@@ -1049,7 +1050,7 @@ elsif ($config{'mail_system'} == 0) {
 		}
 	else {
 		# Just update virtuser
-		local $t = $_[1]->{'to'}->[0];
+		local $t = $psto[0];
 		$t =~ s/^\%1\@/\@/;	# postfix format is different
 		local $virt = { "name" => $_[1]->{'from'},
 				"value" => $t,
@@ -1144,14 +1145,15 @@ if ($config{'mail_system'} == 1) {
 	}
 elsif ($config{'mail_system'} == 0) {
 	# Create in postfix file
-	if (&needs_alias(@to)) {
+	local @psto = map { $_ =~ /^BOUNCE\s+(.*)$/ ? "BOUNCE" : $_ } @to;
+	if (&needs_alias(@psto)) {
 		# Need to create an alias, named address-domain
 		$_[0]->{'from'} =~ /^(\S*)\@(\S+)$/;
 		local $an = ($1 || "default")."-".$2;
 		&check_alias_clash($an) && &error(&text('alias_eclash2', $an));
 		local $alias = { "name" => $an,
 				 "enabled" => 1,
-				 "values" => \@to };
+				 "values" => \@psto };
 		$_[0]->{'alias'} = $alias;
 		&postfix::lock_alias_files($postfix_afiles);
 		&postfix::create_alias($alias, $postfix_afiles);
@@ -1163,7 +1165,7 @@ elsif ($config{'mail_system'} == 0) {
 		}
 	else {
 		# A single virtuser will do
-		local $t = $_[0]->{'to'}->[0];
+		local $t = $psto[0];
 		$t =~ s/^\%1\@/\@/;	# postfix format is different
 		$virt = { 'name' => $_[0]->{'from'},
 			  'value' => $t,
