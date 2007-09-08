@@ -3,7 +3,6 @@
 
 # XXX how to find regular aliases?
 # XXX domain aliases
-# XXX databases (and users .. test scripts)
 # XXX SSL cert
 # XXX DNS records (new ones, with correct IP)
 
@@ -80,13 +79,31 @@ if ($domain->{'phosting'}->{'logrotation'}->{'enabled'} eq 'true') {
 if ($domain->{'phosting'}->{'webalizer'}) {
 	push(@got, "webalizer");
 	}
-# XXX DB
+
+# Check for MySQL databases
+local $databases = $domain->{'phosting'}->{'sapp-installed'}->{'database'};
+if (!$databases) {
+	$databases = { };
+	}
+elsif ($databases->{'version'}) {
+	# Just one database
+	$databases = { $databases->{'name'} => $databases };
+	}
+local @mysqldbs = grep { $databases->{$_}->{'type'} eq 'mysql' }
+		       (keys %$databases);
+if (@mysqldbs) {
+	push(@got, "mysql");
+	}
+
+# Check for mail users
 local $mailusers = $domain->{'mailsystem'}->{'mailuser'};
-if ($mailusers->{'mailbox-quota'}) {
+if (!$mailusers) {
+	$mailusers = { };
+	}
+elsif ($mailusers->{'mailbox-quota'}) {
 	# Just one user
 	$mailusers = { $mailusers->{'name'} => $mailusers };
 	}
-use Data::Dumper;
 local ($has_spam, $has_virus);
 foreach my $name (keys %$mailusers) {
 	local $mailuser = $mailusers->{$name};
@@ -301,9 +318,6 @@ foreach my $name (keys %$mailusers) {
 local $acount = 0;
 &$first_print("Re-creating mail aliases ..");
 &set_alias_programs();
-foreach my $virt (&list_domain_aliases(\%dom)) {
-	&delete_virtuser($virt);
-	}
 local $ca = $domain->{'mailsystem'}->{'catch-all'};
 if ($ca) {
 	local @to;
@@ -319,6 +333,62 @@ if ($ca) {
 	$acount++;
 	}
 &$second_print(".. done (migrated $acount)");
+
+# Re-create MySQL databases
+if ($got{'mysql'}) {
+	&require_mysql();
+	local $mcount = 0;
+	local $myucount = 0;
+	&$first_print("Migrating MySQL databases ..");
+	foreach my $name (keys %$databases) {
+		local $database = $databases->{$name};
+		next if ($database->{'type'} ne 'mysql');
+
+		# Create and import the DB
+		&$indent_print();
+		&create_mysql_database(\%dom, $name);
+		&save_domain(\%dom);
+		local ($ex, $out) = &mysql::execute_sql_file($name,
+			"$root/$database->{'cid'}");
+		if ($ex) {
+			&$first_print("Error loading $db : $out");
+			}
+
+		# Create any DB users as domain users
+		local $dbusers = $database->{'dbuser'};
+		$dbusers = !$dbusers ? { } :
+		   $dbusers->{'password'} ? { $dbusers->{'name'} => $dbusers } :
+					    $dbusers;
+		foreach my $mname (keys %$dbusers) {
+			next if ($mname eq $user);	# Domain owner
+			local $myuinfo = &create_initial_user(\%dom);
+			$myuinfo->{'user'} = $mname;
+			$myuinfo->{'plainpass'} =
+				$dbusers->{$mname}->{'password'}->{'content'};
+			$myuinfo->{'pass'} = &encrypt_user_password($myuinfo,
+						$myuinfo->{'plainpass'});
+			local %taken;
+			&build_taken(\%taken);
+			$myuinfo->{'uid'} = &allocate_uid(\%taken);
+			$myuinfo->{'gid'} = $dom{'gid'};
+			$myuinfo->{'real'} = "MySQL user";
+			$myuinfo->{'home'} =
+				"$dom{'home'}/$config{'homes_dir'}/$myuser";
+			$myuinfo->{'shell'} = $config{'shell'};
+			delete($myuinfo->{'email'});
+			$myuinfo->{'dbs'} = [ { 'type' => 'mysql',
+					        'name' => $name } ];
+			&create_user($myuinfo, \%dom);
+			&create_user_home($myuinfo, \%dom);
+			&create_mail_file($myuinfo);
+			$myucount++;
+			}
+
+		&$outdent_print();
+		$mcount++;
+		}
+	&$second_print(".. done (migrated $mcount, and created $myucount users)");
+	}
 
 return (\%dom);
 }
