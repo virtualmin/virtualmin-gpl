@@ -1,6 +1,12 @@
 # Functions for migrating a plesk backup. These appear to be in MIME format,
 # with each part (home dir, settings, etc) in a separate 'attachment'
 
+# XXX how to find regular aliases?
+# XXX domain aliases
+# XXX databases (and users .. test scripts)
+# XXX SSL cert
+# XXX DNS records (new ones, with correct IP)
+
 # migration_plesk_validate(file, domain, username, [&parent], [prefix])
 # Make sure the given file is a Plesk backup, and contains the domain
 sub migration_plesk_validate
@@ -16,6 +22,13 @@ ref($dump) || return $dump;
 local $realdom = $dump->{'domain'}->{'name'};
 $realdom eq $dom ||
 	return "Backup is for domain $realdom, not $dom";
+
+if (!$parent) {
+	# Check the user
+	local $realuser = $dump->{'domain'}->{'phosting'}->{'sysuser'}->{'name'};
+	$realuser eq $user ||
+		return "Original username is $realuser, not $user";
+	}
 
 # Check for clashes
 $prefix ||= &compute_prefix($dom, undef, $parent);
@@ -40,28 +53,53 @@ local $group = $user;
 local $ugroup = $group;
 local $root = &extract_plesk_dir($file);
 local $dump = &read_plesk_xml("$root/dump.xml");
+local $domain = $dump->{'domain'};
+if (ref($domain) eq 'ARRAY') {
+	$domain = $domain->[0];
+	}
 
 # First work out what features we have
 &$first_print("Checking for Plesk features ..");
 local @got = ( "dir", $parent ? () : ("unix"), "web" );
 push(@got, "webmin") if ($webmin && !$parent);
-if ($dump->{'domain'}->{'dns-zone'}) {
+if (exists($domain->{'mailsystem'}->{'status'}->{'enabled'})) {
+	push(@got, "mail");
+	}
+if ($domain->{'dns-zone'}) {
 	push(@got, "dns");
 	}
-if ($dump->{'domain'}->{'www'} eq 'true') {
+if ($domain->{'www'} eq 'true') {
 	push(@got, "web");
 	}
-if ($dump->{'domain'}->{'ip'}->{'ip-type'} eq 'exclusive') {
+if ($domain->{'ip'}->{'ip-type'} eq 'exclusive' && $virt) {
 	push(@got, "ssl");
 	}
-if ($dump->{'domain'}->{'phosting'}->{'logrotation'}->{'enabled'} eq 'true') {
+if ($domain->{'phosting'}->{'logrotation'}->{'enabled'} eq 'true') {
 	push(@got, "logrotate");
 	}
-if ($dump->{'domain'}->{'phosting'}->{'webalizer'}) {
+if ($domain->{'phosting'}->{'webalizer'}) {
 	push(@got, "webalizer");
 	}
 # XXX DB
-# XXX check if any mailusers have spam or virus
+local $mailusers = $domain->{'mailsystem'}->{'mailuser'};
+if ($mailusers->{'mailbox-quota'}) {
+	# Just one user
+	$mailusers = { $mailusers->{'name'} => $mailusers };
+	}
+use Data::Dumper;
+local ($has_spam, $has_virus);
+foreach my $name (keys %$mailusers) {
+	local $mailuser = $mailusers->{$name};
+	if ($mailuser->{'spamassassin'}->{'status'} eq 'on') {
+		$has_spam++;
+		}
+	if ($mailuser->{'virusfilter'}->{'state'} eq 'inout' ||
+	    $mailuser->{'virusfilter'}->{'state'} eq 'in') {
+		$has_virus++;
+		}
+	}
+push(@got, "spam") if ($has_spam);
+push(@got, "virus") if ($has_virus);
 
 # Tell the user what we have got
 local %pconfig = map { $_, 1 } @feature_plugins;
@@ -93,7 +131,16 @@ else {
 	$duser = $user;
 	}
 
-# XXX how to get quota?
+# Get the quota and domain password
+local $bsize = &has_home_quotas() ? &quota_bsize("home") : undef;
+local $quota;
+if (!$parent && &has_home_quotas()) {
+	$quota = $domain->{'phosting'}->{'sysuser'}->{'quota'} / $bsize;
+	}
+if (!$parent) {
+	$pass = $domain->{'phosting'}->{'sysuser'}->{'password'}->{'content'} ||
+		$domain->{'domainuser'}->{'password'}->{'content'};
+	}
 
 # Create the virtual server object
 local %dom;
@@ -106,7 +153,7 @@ $prefix ||= &compute_prefix($dom, $group, $parent);
          'uid', $uid,
          'gid', $gid,
          'ugid', $ugid,
-         'owner', "Migrated cPanel server $dom",
+         'owner', "Migrated Plesk server $dom",
          'email', $email ? $email : $parent ? $parent->{'email'} : undef,
          'name', !$virt,
          'ip', $ip,
@@ -190,7 +237,88 @@ else {
 # XXX
 
 # Re-create mail users and copy mail files
-# XXX
+&$first_print("Re-creating mail users ..");
+&foreign_require("mailboxes", "mailboxes-lib.pl");
+local $mcount = 0;
+foreach my $name (keys %$mailusers) {
+	local $mailuser = $mailusers->{$name};
+	local $uinfo = &create_initial_user(\%dom);
+	$uinfo->{'user'} = &userdom_name($name, \%dom);
+	if ($mailuser->{'password'}->{'type'} eq 'plain') {
+		$uinfo->{'plainpass'} = $mailuser->{'password'}->{'content'};
+		$uinfo->{'pass'} = &encrypt_user_password(
+					$uinfo, $uinfo->{'plainpass'});
+		}
+	else {
+		$uinfo->{'pass'} = $mailuser->{'password'}->{'content'};
+		}
+	local %taken;
+	&build_taken(\%taken);
+	$uinfo->{'uid'} = &allocate_uid(\%taken);
+	$uinfo->{'gid'} = $dom{'gid'};
+	$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$name";
+	$uinfo->{'shell'} = $config{'shell'};
+	if ($mailuser->{'mailbox'}->{'enabled'} eq 'true') {
+		$uinfo->{'email'} = $name."\@".$dom;
+		}
+	if (&has_home_quotas()) {
+		local $q = $mailuser->{'mailbox-quota'} < 0 ? undef :
+				$mailuser->{'mailbox-quota'}*1024;
+		$uinfo->{'qquota'} = $q;
+		$uinfo->{'quota'} = $q / &quota_bsize("home");
+		$uinfo->{'mquota'} = $q / &quota_bsize("home");
+		}
+	&create_user($uinfo, \%dom);
+	&create_user_home($uinfo, \%dom);
+	local ($crfile, $crtype) = &create_mail_file($uinfo);
+
+	# Copy mail into user's inbox
+	local $mfile = $mailuser->{'mailbox'}->{'cid'};
+	local $mpath = "$root/$mfile";
+	if ($mfile && -r $mpath) {
+		local $fmt = &compression_format($mpath);
+		if ($fmt) {
+			# Extract the maildir first
+			local $temp = &transname();
+			&make_dir($temp, 0700);
+			&extract_compressed_file($mpath, $temp);
+			$mpath = $temp;
+			}
+		local $srcfolder = {
+		  'file' => $mpath,
+		  'type' => $mailuser->{'mailbox'}->{'type'} eq 'mdir' ? 1 : 0,
+		  };
+		local $dstfolder = { 'file' => $crfile, 'type' => $crtype };
+		&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
+		&set_mailfolder_owner($dstfolder, $uinfo);
+		}
+
+	$mcount++;
+	}
+&$second_print(".. done (migrated $mcount)");
+
+# Re-create mail aliases
+local $acount = 0;
+&$first_print("Re-creating mail aliases ..");
+&set_alias_programs();
+foreach my $virt (&list_domain_aliases(\%dom)) {
+	&delete_virtuser($virt);
+	}
+local $ca = $domain->{'mailsystem'}->{'catch-all'};
+if ($ca) {
+	local @to;
+	if ($ca =~ /^bounce:(.*)/) {
+		push(@to, "BOUNCE $1");
+		}
+	else {
+		push(@to, $ca);
+		}
+	local $virt = { 'from' => "\@$dom",
+			'to' => \@to };
+	&create_virtuser($virt);
+	$acount++;
+	}
+&$second_print(".. done (migrated $acount)");
 
 return (\%dom);
 }
@@ -235,7 +363,7 @@ while(read(FILE, $buf, 1024) > 0) {
 close(FILE);
 
 # Parse out the attachments and save each one off
-&mailboxes::parse_mail($mail);
+&mailboxes::parse_mail($mail, undef, undef, 1);
 local $count = 0;
 foreach my $a (@{$mail->{'attach'}}) {
 	if ($a->{'filename'}) {

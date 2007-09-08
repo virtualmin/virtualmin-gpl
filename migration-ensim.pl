@@ -18,7 +18,6 @@ eval { $manifest = &parse_enim_xml($root); };
 if ($@) {
 	&error($@);
 	}
-use Data::Dumper;
 $manifest->{'siteIdent'}->{'sitename'} eq $dom ||
 	return "Backup is for domain $manifest->{'siteIdent'}->{'sitename'}, not $dom";
 

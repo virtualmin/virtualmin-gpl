@@ -70,3 +70,6 @@
 
  - xoops installer should be more automated
 
+ - secondary DNS setup not working?
+
+ - migration should automate domain / user / password where possible

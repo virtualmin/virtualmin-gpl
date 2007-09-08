@@ -120,7 +120,7 @@ foreach my $pname (@confplugins) {
 @database_plugins = grep { &plugin_defined($_, "database_name") } @plugins;
 @startstop_plugins = grep { &plugin_defined($_, "feature_startstop") } @plugins;
 @backup_plugins = grep { &plugin_defined($_, "feature_backup") } @plugins;
-@migration_types = ( "cpanel", "ensim" );
+@migration_types = ( "cpanel", "ensim", "plesk" );
 @allow_features = (@opt_features, "virt", @feature_plugins);
 @startstop_features = ("web", "dns", "mail", "ftp", "unix", "mysql","postgres");
 @all_database_types = ( ($config{'mysql'} ? ("mysql") : ( )),
@@ -176,6 +176,10 @@ $initial_users_dir = "$module_config_directory/initial";
 @edit_limits = ('domain', 'users', 'aliases', 'dbs', 'scripts',
 	        'ip', 'ssl', 'forward', 'admins', 'spam', 'phpver', 'backup',
 		'sharedips', 'catchall', 'html', 'disable', 'delete');
+if (!$virtualmin_pro) {
+	@edit_limits = grep { $_ ne 'scripts' && $_ ne 'admins' &&
+			      $_ ne 'spam' && $_ ne 'phpver' } @edit_limits;
+	}
 
 @virtualmin_backups = ( 'config', 'templates',
 			$virtualmin_pro ? ( 'resellers' ) : ( ),
