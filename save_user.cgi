@@ -43,10 +43,8 @@ if ($in{'delete'}) {
 			}
 
 		# Delete simple autoreply file
-		if (defined(&get_simple_alias)) {
-			$simple = &get_simple_alias($d, $user);
-			&delete_simple_autoreply($d, $simple) if ($simple);
-			}
+		$simple = &get_simple_alias($d, $user);
+		&delete_simple_autoreply($d, $simple) if ($simple);
 
 		# Delete the user, his virtusers and aliases
 		&delete_user($user, $d);
@@ -382,6 +380,13 @@ else {
 						   $user->{'user'});
 				$simple->{'from'} = $user->{'email'};
 				&save_simple_alias($d, $user, $simple);
+				if (@{$user->{'to'}} == 1 &&
+				    $simple->{'tome'}) {
+					# If forwarding is just to the user's
+					# mailbox, then that is like no
+					# forwarding at all
+					$user->{'to'} = undef;
+					}
 				}
 			else {
 				# From complex form
@@ -480,6 +485,13 @@ else {
 						   $user->{'user'});
 				$simple->{'from'} = $user->{'email'};
 				&save_simple_alias($d, $user, $simple);
+				if (@{$user->{'to'}} == 1 &&
+				    $simple->{'tome'}) {
+					# If forwarding is just to the user's
+					# mailbox, then that is like no
+					# forwarding at all
+					$user->{'to'} = undef;
+					}
 				}
 			else {
 				# From complex form

@@ -250,7 +250,14 @@ if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
 				     "table3", 0);
 
 	# Work out if simple mode is supported
-	$simple = $virtualmin_pro ? &get_simple_alias($d, $user) : undef;
+	if (!@{$user->{'to'}}) {
+		# If no forwarding, just check delivery to me as this is
+		# the default.
+		$simple = { 'tome' => 1 };
+		}
+	else {
+		$simple = &get_simple_alias($d, $user);
+		}
 	if ($simple && ($simple->{'local'} || $simple->{'bounce'})) {
 		# Local and bounce delivery are not allowed on the simple form
 		$simple = undef;
