@@ -9281,11 +9281,34 @@ local @tmpls = ( 'tmpl', 'user', 'update',
 		       'reseller', 'notify', 'scripts', 'styles' )
 		   : ( 'sharedips', 'dynip' ),
    &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
+   &has_home_quotas() && !&has_quota_commands() ? ( 'quotacheck' ) : ( ),
 #   &can_show_history() ? ( 'history' ) : ( ),
    $virtualmin_pro ? ( 'mxs', 'validate' ) : ( ),
-   &has_home_quotas() && !&has_quota_commands() ? ( 'quotacheck' ) : ( ),
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
    );
+local %tmplcat = (
+	'user' => 'email',
+	'update' => 'email',
+	'local' => 'email',
+	'reseller' => 'email',
+	'notify' => 'email',
+	'ips' => 'ip',
+	'sharedips' => 'ip',
+	'dynip' => 'ip',
+	'mxs' => 'ip',
+	'quotas' => 'check',
+	'validate' => 'check',
+	'quotacheck' => 'check',
+	'tmpl' => 'setting',
+	'bw' => 'setting',
+	'plugin' => 'setting',
+	'scripts' => 'setting',
+	'upgrade' => 'setting',
+	'resels' => 'setting',
+	'fields' => 'custom',
+	'links' => 'custom',
+	'styles' => 'custom',
+	);
 local %nonew = ( 'history', 1 );
 local @tlinks = map { $nonew{$_} ? "history.cgi"
 			         : "edit_new${_}.cgi" } @tmpls;
@@ -9293,7 +9316,8 @@ local @ttitles = map { $nonew{$_} ? $text{"${_}_title"}
 			          : $text{"new${_}_title"} } @tmpls;
 local @ticons = map { $nonew{$_} ? "images/${_}.gif"
 			         : "images/new${_}.gif" } @tmpls;
-return (\@tlinks, \@ttitles, \@ticons);
+local @tcats = map { $tmplcat{$_} } @tmpls;
+return (\@tlinks, \@ttitles, \@ticons, \@tcats);
 }
 
 # get_startstop_links([live])

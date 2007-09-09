@@ -7,7 +7,7 @@ require './virtual-server-lib.pl';
 
 print "$text{'newquotacheck_desc'}<p>\n";
 print &ui_form_start("quotacheck.cgi", "post");
-print &ui_table_start($text{'newquotacheck_header'}, undef, 2);
+print &ui_table_start($text{'newquotacheck_header'}, undef, 2, [ "width=30%" ]);
 
 # Filesystems to check
 if (&has_home_quotas()) {

@@ -7,7 +7,7 @@ require './virtual-server-lib.pl';
 
 print "$text{'newips_desc'}<p>\n";
 print &ui_form_start("save_newips.cgi", "post");
-print &ui_table_start($text{'newips_header'}, undef, 2);
+print &ui_table_start($text{'newips_header'}, undef, 2, [ "width=30%" ]);
 
 print &ui_table_row(&hlink($text{'newips_old'}, "newips_old"),
 		    &ui_textbox("old", &get_default_ip(), 20));

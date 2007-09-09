@@ -722,3 +722,4 @@ Added options on the Edit Server Template page to make some non-default template
 Updated the Wordpress script installer to version 2.2.3.
 Added support for migrating domains from Plesk 8 backups.
 The migration function will use the username and password from the original domain where possible, removing the need to specify them manually when on the migration form or as parameters to migrate-domain.pl. For Plesk backups the original username and password can be retrieved, while for Ensim and cPanel only the username can be found automatically.
+The System Settings category on the left menu of the framed theme is now broken down into 5 smaller menus, to make things easier to find.

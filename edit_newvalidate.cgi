@@ -7,7 +7,7 @@ require './virtual-server-lib.pl';
 
 print "$text{'newvalidate_desc'}<p>\n";
 print &ui_form_start("validate.cgi", "post");
-print &ui_table_start($text{'newvalidate_header'}, undef, 2);
+print &ui_table_start($text{'newvalidate_header'}, undef, 2, [ "width=30%" ]);
 
 # Servers to check
 @doms = &list_domains();
