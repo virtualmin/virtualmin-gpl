@@ -65,8 +65,9 @@
  
  - rails scripts should be able to make use of balancer
 
- - xoops installer should be more automated
-
  - is there any point having per-domain spam and virus filtering programs?
 	- single setting to control all domains and template
+
+ - new GPL EC2 image
+	- verify all features
 

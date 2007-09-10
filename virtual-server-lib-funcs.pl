@@ -9317,7 +9317,7 @@ local @ttitles = map { $nonew{$_} ? $text{"${_}_title"}
 local @ticons = map { $nonew{$_} ? "images/${_}.gif"
 			         : "images/new${_}.gif" } @tmpls;
 local @tcats = map { $tmplcat{$_} } @tmpls;
-return (\@tlinks, \@ttitles, \@ticons, \@tcats);
+return (\@tlinks, \@ttitles, \@ticons, $virtualmin_pro ? \@tcats : undef);
 }
 
 # get_startstop_links([live])

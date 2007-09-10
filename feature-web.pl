@@ -86,8 +86,11 @@ else {
 				    "ProxyPassReverse / $url");
 			$proxying = 1;
 			}
-		else {
+		elsif ($tmpl->{'web_alias'} == 0) {
 			push(@dirs, "Redirect / $url");
+			}
+		elsif ($tmpl->{'web_alias'} == 4) {
+			push(@dirs, "RedirectPermanent / $url");
 			}
 		}
 	elsif ($_[0]->{'subdom'}) {
@@ -375,7 +378,8 @@ else {
 		&$first_print($text{'save_apache4'});
 		local $lref = &read_file_lines($virt->{'file'});
 		for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
-			if ($lref->[$i] =~ /^\s*(Proxy|Redirect\s)/) {
+			if ($lref->[$i] =~
+			    /^\s*(Proxy|Redirect\s|RedirectPermanent\s)/) {
 				$lref->[$i] =~ s/$_[3]->{'dom'}/$_[2]->{'dom'}/g;
 				}
 			}
@@ -1623,6 +1627,7 @@ print &ui_table_row(&hlink($text{'newweb_statsedit'}, "template_statsedit"),
 print &ui_table_row(&hlink($text{'tmpl_alias'}, "template_alias_mode"),
 	&ui_radio("alias_mode", int($tmpl->{'web_alias'}),
 		  [ [ 0, $text{'tmpl_alias0'}."<br>" ],
+		  [ [ 0, $text{'tmpl_alias4'}."<br>" ],
 		    [ 2, $text{'tmpl_alias2'}."<br>" ],
 		    [ 1, $text{'tmpl_alias1'} ] ]));
 
@@ -1648,6 +1653,8 @@ print &ui_table_row(&hlink($text{'newweb_usermin'},
 		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
 if ($virtualmin_pro) {
+	print &ui_table_hr();
+
 	# Run PHP scripts as user
 	print &ui_table_row(
 	    &hlink($text{'tmpl_phpmode'}, "template_phpmode"),

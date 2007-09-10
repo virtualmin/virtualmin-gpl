@@ -2103,6 +2103,7 @@ tmpl_alias=Create alias websites by
 tmpl_alias2=Creating ProxyPass virtual host
 tmpl_alias1=Adding ServerAlias to parent
 tmpl_alias0=Creating Redirect virtual host
+tmpl_alias4=Creating permanent Redirect virtual host
 tmpl_err=Failed to save server template
 tmpl_ename=Missing template name
 tmpl_eskel=Missing or invalid skeleton directory
