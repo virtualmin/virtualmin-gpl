@@ -114,7 +114,7 @@ USER: foreach $line (@lines) {
 		if ($f !~ /\@/) {
 			$f .= "\@$d->{'dom'}";
 			}
-		if ($f !~ /^[a-z0-9\.-\_\+]+\@[a-z0-9\.-\_\+]+$/) {
+		if ($f !~ /^[a-z0-9\.\-\_\+]+\@[a-z0-9\.\-\_\+]+$/) {
 			&line_error(&text('umass_eto', $f));
 			next USER;
 			}
