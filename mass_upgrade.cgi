@@ -35,8 +35,7 @@ if ($in{'confirm'}) {
 		$script = $scriptmap{$sinfo->{'id'}};
 		$ver = $vermap{$sinfo->{'id'}};
 		$opts = $sinfo->{'opts'};
-		&$first_print(&text('massg_doing', $script->{'desc'},
-				    $sinfo->{'version'}));
+		&$first_print(&text('massg_doing', $script->{'desc'}, $ver));
 		if (&compare_versions($sinfo->{'version'}, $ver) >= 0) {
 			# Already got it
 			&$second_print(&text('massscript_ever',
