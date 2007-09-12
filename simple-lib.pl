@@ -341,9 +341,16 @@ if ($in->{'autotext'}) {
 			# Fix existing file
 			local $adir = &get_autoreply_file_dir();
 			if (!&is_under_directory($adir, $simple->{'replies'})) {
-				$simple->{'replies'} =
-				  &convert_autoreply_file($d, "replies-$name");
+				local $c = &convert_autoreply_file(
+						$d, "replies-$name");
+				$simple->{'replies'} = $c if ($c);
 				}
+			}
+		if (!$simple->{'replies'}) {
+			# If we couldn't link the reply tracking file, use one
+			# in the home dir. This can happen if each user has
+			# a home on a different fs
+			$simple->{'replies'} = "$d->{'home'}/replies-$name";
 			}
 		}
 
@@ -404,13 +411,26 @@ return $autoreply_file_dir;
 sub convert_autoreply_file
 {
 local ($d, $file) = @_;
+local $origfile = $file;
 local $dir = &get_autoreply_file_dir();
 return undef if (!$dir);
 if ($file =~ /\/(autoreply-(\S+)\.txt)$/) {
-	return "$dir/$d->{'id'}-$1";
+	$linkpath = "$dir/$d->{'id'}-$1";
 	}
-$file =~ s/\//_/g;
-return "$dir/$d->{'id'}-$file";
+else {
+	$file =~ s/\//_/g;
+	$linkpath = "$dir/$d->{'id'}-$file";
+	}
+local @fst = stat($origfile);
+local @lst = stat($linkpath);
+if ($fst[0] == $lst[0]) {
+	return $linkpath;
+	}
+else {
+	# Still not on same filesystem, perhaps due to user's home being
+	# a different mount. Don't link.
+	return undef;
+	}
 }
 
 # create_autoreply_alias_links(&domain)
@@ -427,21 +447,23 @@ foreach my $virt (&list_domain_aliases($d)) {
 	if ($simple && $simple->{'auto'}) {
 		local $link = &convert_autoreply_file(
 			$d, $simple->{'autoreply'});
-		local @st = stat($link);
-		if (!@st || $st[3] == 1) {
-			# Need to create the link, and re-write the alias
-			local $oldvirt = { %$virt };
-			unlink($link);
-			link($simple->{'autoreply'}, $link);
-			&save_simple_alias($d, $virt, $simple);
-			&modify_virtuser($oldvirt, $virt);
-			}
-		if ($simple->{'replies'} &&
-		    !&is_under_directory($adir, $simple->{'replies'})) {
-			# Fix up reply tracking file
-			$simple->{'replies'} = &convert_autoreply_file($d,
-						"replies-$virt->{'from'}");
-			&write_simple_autoreply($d, $simple);
+		if ($link) {
+			local @st = stat($link);
+			if (!@st || $st[3] == 1) {
+				# Need to create the link, and re-write alias
+				local $oldvirt = { %$virt };
+				unlink($link);
+				link($simple->{'autoreply'}, $link);
+				&save_simple_alias($d, $virt, $simple);
+				&modify_virtuser($oldvirt, $virt);
+				}
+			if ($simple->{'replies'} &&
+			    !&is_under_directory($adir, $simple->{'replies'})) {
+				# Fix up reply tracking file
+				$simple->{'replies'} = &convert_autoreply_file(
+					$d, "replies-$virt->{'from'}");
+				&write_simple_autoreply($d, $simple);
+				}
 			}
 		}
 	}
@@ -452,21 +474,23 @@ foreach my $user (&list_domain_users($d)) {
 	if ($simple && $simple->{'auto'}) {
 		local $link = &convert_autoreply_file(
 			$d, $simple->{'autoreply'});
-		local @st = stat($link);
-		if (!@st || $st[3] == 1) {
-			# Need to create the link, and re-write the alias
-			local $olduser = { %$user };
-			unlink($link);
-			link($simple->{'autoreply'}, $link);
-			&save_simple_alias($d, $user, $simple);
-			&modify_user($user, $olduser, $d, 0);
-			}
-		if ($simple->{'replies'} &&
-		    !&is_under_directory($adir, $simple->{'replies'})) {
-			# Fix up reply tracking file
-			$simple->{'replies'} = &convert_autoreply_file($d,
-						"replies-$user->{'user'}");
-			&write_simple_autoreply($d, $simple);
+		if ($link) {
+			local @st = stat($link);
+			if (!@st || $st[3] == 1) {
+				# Need to create the link, and re-write alias
+				local $olduser = { %$user };
+				unlink($link);
+				link($simple->{'autoreply'}, $link);
+				&save_simple_alias($d, $user, $simple);
+				&modify_user($user, $olduser, $d, 0);
+				}
+			if ($simple->{'replies'} &&
+			    !&is_under_directory($adir, $simple->{'replies'})) {
+				# Fix up reply tracking file
+				$simple->{'replies'} = &convert_autoreply_file(
+					$d, "replies-$user->{'user'}");
+				&write_simple_autoreply($d, $simple);
+				}
 			}
 		}
 	}
