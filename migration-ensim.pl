@@ -401,7 +401,7 @@ if ($userident->{$origuser}) {
 local $owner = &get_domain_owner(\%dom);
 if (!$parent && -r "$root/var/spool/mail/$origuser") {
 	&$first_print("Moving server owner's mailbox ..");
-	local ($mfile, $mtype) = &user_mail_file($owner);
+	local ($mfile, $mtype) = &create_mail_file($owner);
 	local $srcfolder = { 'type' => 0,
 			     'file' => "$root/var/spool/mail/$origuser" };
 	local $dstfolder = { 'type' => $mtype,

@@ -239,6 +239,11 @@ if (!$_[0]->{'parent'}) {
 			}
 		}
 
+	# Delete his mail file
+	if (!$uinfo->{'nomailfile'}) {
+		&delete_mail_file($uinfo);
+		}
+
 	# Delete unix user
 	&foreign_call($usermodule, "lock_user_files");
 	if ($uinfo) {
