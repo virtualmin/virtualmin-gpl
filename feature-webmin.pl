@@ -27,6 +27,7 @@ else {
 			 'theme' => $config{'webmin_theme'} eq '*' ? undef :
 				    $config{'webmin_theme'} eq '' ? '' :
 				     $config{'webmin_theme'},
+			 'desc' => $_[0]->{'owner'},
 			 );
 	&acl::create_user(\%wuser);
 	&set_user_modules($_[0], \%wuser);
@@ -101,8 +102,15 @@ if (!$_[0]->{'parent'}) {
 	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 		# Need to re-name user
 		&$first_print($text{'save_webminuser'});
+		$wuser->{'real'} = $_[0]->{'owner'};
 		$wuser->{'name'} = $_[0]->{'user'};
 		&acl::modify_user($_[1]->{'user'}, $wuser);
+		}
+	elsif ($_[0]->{'owner'} ne $_[1]->{'owner'}) {
+		# Need to update owner
+		&$first_print($text{'save_webminreal'});
+		$wuser->{'real'} = $_[0]->{'owner'};
+		&acl::modify_user($_[0]->{'user'}, $wuser);
 		}
 	else {
 		# Leave name unchanged

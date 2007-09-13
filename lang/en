@@ -987,6 +987,7 @@ save_dirhome=Moving home directory ..
 save_dirhomefailed=.. move failed : $1
 save_webmin=Updating Webmin user ..
 save_webminuser=Renaming Webmin user ..
+save_webminreal=Updating Webmin user's real name ..
 save_htaccess=Updating protected web directories ..
 save_apache=Changing IP address of virtual website ..
 save_apache2=Changing hostname of virtual website ..
