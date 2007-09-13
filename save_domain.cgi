@@ -54,7 +54,7 @@ if (defined($in{'prefix'})) {
 if (!$d->{'parent'} && !$in{'passwd_def'}) {
 	local $fakeuser = { 'user' => $d->{'user'},
 			    'plainpass' => $in{'passwd'} };
-	$err = &check_password_restrictions($fakeuser);
+	$err = &check_password_restrictions($fakeuser, $d->{'webmin'});
 	&error($err) if ($err);
 	}
 

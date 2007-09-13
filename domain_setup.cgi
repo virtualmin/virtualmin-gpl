@@ -142,7 +142,7 @@ if (!$parentuser) {
 	# Check password restrictions
 	if (defined($pass)) {
 		local $fakeuser = { 'user' => $user, 'plainpass' => $pass };
-		$err = &check_password_restrictions($fakeuser);
+		$err = &check_password_restrictions($fakeuser, $in{'webmin'});
 		&error($err) if ($err);
 		}
 	}

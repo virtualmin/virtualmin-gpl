@@ -725,3 +725,4 @@ The migration function will use the username and password from the original doma
 The System Settings category on the left menu of the framed theme is now broken down into 5 smaller menus, to make things easier to find.
 Updated the Xoops script installer to automate the database connection and administration user creation, so that you no longer have to go through the install wizard manually.
 Added an option to the Create alias websites by setting in server templates to use RedirectMatch instead of Redirect, which is more Google-friendly for parked domains.
+If password quality restrictions are setup in the Webmin Users module, enforce them in Virtualmin too.

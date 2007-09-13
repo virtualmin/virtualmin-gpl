@@ -23,7 +23,7 @@ $in{'new1'} eq $in{'new2'} || error($text{'pass_enew2'});
 if ($d) {
 	local $fakeuser = { 'user' => $d->{'user'},
 			    'plainpass' => $in{'new1'} };
-	$err = &check_password_restrictions($fakeuser);
+	$err = &check_password_restrictions($fakeuser, $d->{'webmin'});
 	&error($err) if ($err);
 	}
 

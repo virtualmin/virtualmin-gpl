@@ -398,7 +398,7 @@ else {
 
 		# Now we have the username, check the password
 		if ($need_password_check) {
-			$perr = &check_password_restrictions($user);
+			$perr = &check_password_restrictions($user, 0);
 			&error($perr) if ($perr);
 			}
 
@@ -509,7 +509,7 @@ else {
 
 		# Now we have the username, check the password
 		if ($need_password_check) {
-			$perr = &check_password_restrictions($user);
+			$perr = &check_password_restrictions($user, 0);
 			&error($perr) if ($perr);
 			}
 
