@@ -134,7 +134,7 @@ local $user = &mysql_user($d, $changeduser);
 $d->{'mysql_user'} = $user;
 local $oldencpass = &encrypted_mysql_pass($oldd);
 local $encpass = &encrypted_mysql_pass($d);
-local $tmpl = &get_template($d->{'id'});
+local $tmpl = &get_template($d->{'template'});
 if ($encpass ne $oldencpass && !$d->{'parent'} && !$tmpl->{'mysql_nopass'}) {
 	# Change MySQL password
 	&$first_print($text{'save_mysqlpass'});
