@@ -2176,18 +2176,6 @@ sub can_edit_shell
 return &master_admin();
 }
 
-# Returns 1 if the current user can select the spamassassin client for a domain
-sub can_spam_client
-{
-return &master_admin();
-}
-
-# Returns 1 if the current user can select the ClamAV program for a domain
-sub can_virus_scanner
-{
-return &master_admin();
-}
-
 # can_switch_user(&domain, [extra-admin])
 # Returns 1 if the current user can switch to the Webmin login for some domain
 sub can_switch_user
@@ -6751,9 +6739,6 @@ push(@rv, { 'id' => 0,
 			      &entities_to_ascii($text{'mail_dsubject'}),
 	    'mail_cc' => $config{'newdom_cc'},
 	    'mail_bcc' => $config{'newdom_bcc'},
-	    'spam' => $config{'spam_client'},
-	    'spam_host' => $config{'spam_host'},
-	    'spam_size' => $config{'spam_size'},
 	    'spamclear' => $config{'spamclear'} || 'none',
 	    'defmquota' => $config{'defmquota'} || "none",
 	    'user_aliases' => $config{'newuser_aliases'} || "none",
@@ -6974,9 +6959,6 @@ if ($tmpl->{'id'} == 0) {
 	$config{'newdom_subject'} = $tmpl->{'mail_subject'};
 	$config{'newdom_cc'} = $tmpl->{'mail_cc'};
 	$config{'newdom_bcc'} = $tmpl->{'mail_bcc'};
-	$config{'spam_client'} = $tmpl->{'spam'};
-	$config{'spam_host'} = $tmpl->{'spam_host'};
-	$config{'spam_size'} = $tmpl->{'spam_size'};
 	$config{'spamclear'} = $tmpl->{'spamclear'};
 	$config{'defmquota'} = $tmpl->{'defmquota'} eq "none" ?
 					"" : $tmpl->{'defmquota'};
@@ -7128,7 +7110,7 @@ if (!$tmpl->{'default'}) {
 		    "othergroups", "defmquota", "quotatype", "append_style",
 		    "domalias", "logrotate", "disabled_web", "disabled_url",
 		    "php", "status", "extra_prefix", "capabilities",
-		    "webmin_group", "spam", "spamclear", "namedconf",
+		    "webmin_group", "spamclear", "namedconf",
 		    "nodbname", "norename", "forceunder",
 		    @plugins,
 		    @php_wrapper_templates,

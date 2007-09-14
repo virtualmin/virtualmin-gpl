@@ -189,12 +189,11 @@ sub spamassassin_client_command
 {
 local ($d, $client) = @_;
 local $spamid = $d->{'parent'} || $d->{'id'};
-local $tmpl = &get_template($d->{'template'});
-$client ||= $tmpl->{'spam'};
+$client ||= $config{'spam_client'};
 local $cmd = &has_command($client);
 if ($client eq 'spamc') {
-	$cmd .= " -d $tmpl->{'spam_host'}" if ($tmpl->{'spam_host'});
-	$cmd .= " -s $tmpl->{'spam_size'}" if ($tmpl->{'spam_size'});
+	$cmd .= " -d $config{'spam_host'}" if ($config{'spam_host'});
+	$cmd .= " -s $config{'spam_size'}" if ($config{'spam_size'});
 	}
 else {
 	$cmd .= " --siteconfigpath $spam_config_dir/$spamid";
@@ -748,10 +747,47 @@ foreach my $r (@recipes) {
 }
 
 # get_global_spam_client()
-# Returns the spam client that is supposed to be used by all domains
+# Returns the spam client that is supposed to be used by all domains. If this
+# is spamc, also returns the spamd hostname and max message size
 sub get_global_spam_client
 {
-# XXX
+local ($client, $host, $size);
+if ($config{'spam_client_global'}) {
+	# We know the global setting for sure
+	$client = $config{'spam_client'};
+	}
+else {
+	# Find the most used one for all domains
+	local (%cmdcount, $maxcmd);
+	foreach my $d (grep { $_->{'spam'} } &list_domains()) {
+		local $cmd = &get_domain_spam_client($d);
+		if ($cmd) {
+			$cmdcount{$cmd}++;
+			if (!$maxcmd || $cmdcount{$cmd} > $cmdcount{$maxcmd}) {
+				$maxcmd = $cmd;
+				}
+			}
+		}
+	return $maxcmd || $config{'spam_client'};
+	}
+$host = $config{'spam_host'};
+$size = $config{'spam_size'};
+return wantarray ? ( $client, $host, $size ) : $client;
+}
+
+# save_global_spam_client(client, spamc-host, spamc-size)
+# Updates all domains with a new SpamAssassin client program
+sub save_global_spam_client
+{
+local ($client, $host, $size) = @_;
+$config{'spam_client'} = $client;
+$config{'spam_client_global'} = 1;
+$config{'spam_host'} = $host;
+$config{'spam_size'} = $size;
+&save_module_config();
+foreach my $d (grep { $_->{'spam'} } &list_domains()) {
+	&save_domain_spam_client($d, $client);
+	}
 }
 
 # update_spam_whitelist(&domain)
@@ -784,30 +820,6 @@ if (join(" ", @whites) ne join(" ", @oldwhites)) {
 sub show_template_spam
 {
 local ($tmpl) = @_;
-
-# Spam client program
-local @sfields = ( "spam_host", "spam_host_def", "spam_size", "spam_size_def" );
-local $dis1 = &js_disable_inputs(\@sfields, [ ]);
-local $dis2 = &js_disable_inputs([ ], \@sfields);
-print &ui_table_row(&hlink($text{'tmpl_spam'}, 'template_spam'),
-	    &ui_radio("spam", $tmpl->{'spam'},
-		      [ $tmpl->{'default'} ? ( ) :
-			 ( [ "", $text{'default'}, "onClick='$dis1'" ] ),
-			[ "spamassassin", $text{'tmpl_spamassassin'},
-			  "onClick='$dis2'" ],
-			[ "spamc", $text{'tmpl_spamc'},
-			  "onClick='$dis2'" ],
-		      ]));
-
-# Host for spamc
-print &ui_table_row(&hlink($text{'tmpl_spam_host'}, 'template_spam_host'),
-	    &ui_opt_textbox("spam_host", $tmpl->{'spam_host'}, 30,
-			    "<tt>localhost</tt>"));
-
-# Maximum message size for spamc
-print &ui_table_row(&hlink($text{'tmpl_spam_size'}, 'template_spam_size'),
-	    &ui_opt_textbox("spam_size", $tmpl->{'spam_size'}, 8,
-			    $text{'template_spam_unlimited'}));
 
 # Default spam clearing mode
 local ($cmode, $cnum) = split(/\s+/, $tmpl->{'spamclear'});

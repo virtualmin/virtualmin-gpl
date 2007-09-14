@@ -51,15 +51,6 @@ if ($d->{'spam'}) {
 		    &ui_yesno_radio("spam_white", int($d->{'spam_white'})));
 	}
 
-# Show choice of spam client (for master admin)
-if ($d->{'spam'} && &can_spam_client()) {
-	print &ui_table_row(&hlink($text{'spam_client'}, 'spam_client'),
-		    &ui_select("spam_client", &get_domain_spam_client($d),
-			       [ [ "spamassassin", $text{'tmpl_spamassassin'} ],
-				 [ "spamc", $text{'tmpl_spamc'} ] ]));
-	}
-
-
 # Show automatic spam clearing option
 $auto = &get_domain_spam_autoclear($d);
 print &ui_table_row(&hlink($text{'spam_clear'}, 'spam_clear'),

@@ -12,13 +12,22 @@ print &ui_table_start($text{'sv_header'}, "width=100%", 2, [ "width=30%" ]);
 
 if ($config{'spam'}) {
 	# Spam scanning program
-	# XXX
+	($client, $host, $size) = &get_global_spam_client();
+	print &ui_table_row(&hlink($text{'spam_client'}, 'spam_client'),
+		    &ui_select("spam_client", $client,
+			       [ [ "spamassassin", $text{'tmpl_spamassassin'} ],
+				 [ "spamc", $text{'tmpl_spamc'} ] ]));
 
 	# Spamc host
-	# XXX
+	print &ui_table_row(
+		&hlink($text{'tmpl_spam_host'}, 'template_spam_host'),
+		&ui_opt_textbox("spam_host", $host, 30, "<tt>localhost</tt>"));
 
 	# Spamc max size
-	# XXX
+	print &ui_table_row(
+		&hlink($text{'tmpl_spam_size'}, 'template_spam_size'),
+		&ui_opt_textbox("spam_size", $size, 8,
+				$text{'template_spam_unlimited'}));
 	}
 
 # Virus scanning program

@@ -50,11 +50,6 @@ if ($d->{'spam'}) {
 	&save_domain($d);
 	}
 
-if ($d->{'spam'} && &can_spam_client()) {
-	&save_domain_spam_client($d, $in{'spam_client'});
-	&modify_webmin($d, $d);
-	}
-
 # Save spam deletion field
 $auto = undef;
 if ($in{'clear'} == 1) {

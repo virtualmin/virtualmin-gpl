@@ -314,13 +314,13 @@ else {
 sub save_global_virus_scanner
 {
 local ($cmd) = @_;
-foreach my $d (grep { $_->{'virus'} } &list_domains()) {
-	&save_domain_virus_scanner($d, $cmd);
-	}
 $config{'clamscan_cmd'} = $cmd;
 $config{'clamscan_cmd_global'} = 1;
 $config{'last_check'} = time()+1;
 &save_module_config();
+foreach my $d (grep { $_->{'virus'} } &list_domains()) {
+	&save_domain_virus_scanner($d, $cmd);
+	}
 }
 
 # test_virus_scanner(command)

@@ -69,6 +69,9 @@
 	- single setting to control all domains and template
 	- move spam settings from template to module config
 	- document all in CHANGELOG
+	- check all use of get_domain_spam_client and get_domain_virus_scanner
+	- check all use of tmpl->{'spam_client'}
+	- remove from parse_template_spam
 
  - serve all timeplot graphs locally
 	- FS 3218
