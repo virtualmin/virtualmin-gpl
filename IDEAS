@@ -69,3 +69,6 @@
 	- single setting to control all domains and template
 	- move spam settings from template to module config
 	- document all in CHANGELOG
+
+ - serve all timeplot graphs locally
+	- FS 3218

@@ -17,8 +17,10 @@ if (&can_import_servers()) {
 
 # Start tabs for various options, if appropriate
 @tabs = ( [ "list", $text{'databases_tablist'} ] );
-if (!$d->{'parent'} && $virtualmin_pro) {
-	push(@tabs, [ "usernames", $text{'databases_tabusernames'} ]);
+if (!$d->{'parent'}) {
+	if ($virtualmin_pro) {
+		push(@tabs, [ "usernames", $text{'databases_tabusernames'} ]);
+		}
 	push(@tabs, [ "passwords", $text{'databases_tabpasswords'} ]);
 	}
 if (&can_import_servers()) {
@@ -109,7 +111,7 @@ if (!$d->{'parent'} && $virtualmin_pro) {
 	}
 
 # Show form to change database passwords
-if (!$d->{'parent'} && $virtualmin_pro) {
+if (!$d->{'parent'}) {
 	print &ui_tabs_start_tab("databasemode", "passwords") if (@tabs > 1);
 	print "$text{'databases_desc3'}<p>\n";
 	print &ui_form_start("save_dbpass.cgi");
