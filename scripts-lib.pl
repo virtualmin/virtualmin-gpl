@@ -1416,7 +1416,8 @@ local ($file, $dir, $d, $copydir, $subdir, $single) = @_;
 
 # Create the target dir if missing
 if (!$single && $copydir && !-d $copydir) {
-	local $out = &run_as_domain_user($d, "mkdir -p ".quotemeta($copydir));
+	local $out = &run_as_domain_user(
+		$d, "mkdir -p ".quotemeta($copydir)." 2>&1");
 	if ($? || !-d $copydir) {
 		return "Failed to create target directory : ".
 		       "<tt>".&html_escape($out)."</tt>";
@@ -1457,18 +1458,18 @@ return "<pre>".&html_escape($out)."</pre>" if ($?);
 
 # Copy to a target dir, if requested
 if ($copydir) {
-	local $path = "$dir/$subdir";
+	local $path = glob("$dir/$subdir");
 	local $out;
 	if (-f $path) {
 		# Copy one file
 		$out = &run_as_domain_user($d, "cp ".quotemeta($dir).
-					   "/$subdir ".quotemeta($copydir));
+				   "/$subdir ".quotemeta($copydir)." 2>&1");
 		}
 	elsif (-d $path) {
 		# Copy a directory's contents
 		$out = &run_as_domain_user($d, "cp -r ".quotemeta($dir).
-					   ($subdir ? "/$subdir/*" : "/*").
-					   " ".quotemeta($copydir));
+				   ($subdir ? "/$subdir/*" : "/*").
+				   " ".quotemeta($copydir)." 2>&1");
 		}
 	else {
 		return "Sub-directory $subdir was not found";
