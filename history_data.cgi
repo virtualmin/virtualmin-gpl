@@ -37,18 +37,29 @@ if (scalar(@$first) > 1024) {
 $first = $infomap{$stats[0]};
 
 print "Content-type: text/plain\n\n";
+$maxes = &get_historic_maxes();
 for($i=0; $i<scalar(@$first); $i++) {
 	@values = ( );
 	foreach $stat (@stats) {
 		$v = $infomap{$stat}->[$i]->[1];
 		if ($in{'nice'}) {
-			$v = $stat eq 'memused' ||
-			     $stat eq 'swapused' ? $v/(1024*1024) :
-			     $stat eq 'diskused' ||
-			     $stat eq 'quotalimit' ||
-			     $stat eq 'quotaused' ? $v/(1024*1024*1024) :
-			     $stat eq 'load' ? $v*100 :
-			     $v;
+			if ($stat eq 'memused' || $stat eq 'swapused') {
+				$v /= 1024*1024;
+				}
+			elsif ($stat eq 'quotalimit' || $stat eq 'quotaused') {
+				if ($maxes->{$stat} < 10*1024*1024*1024) {
+					$v /= 1024*1024;
+					}
+				else {
+					$v /= 1024*1024*1024;
+					}
+				}
+			elsif ($stat eq 'diskused') {
+				$v /= 1024*1024*1024;
+				}
+			elsif ($stat eq 'load') {
+				$v *= 100;
+				}
 			}
 		$v = int($v);
 		push(@values, $v);

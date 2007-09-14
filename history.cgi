@@ -36,20 +36,35 @@ if ($end > $last) {
 	$end = $start+$period;
 	}
 
-# Generate DIV for the graph and navigation buttons
-if ($period > 24*60*60) {
-	# Show dates only
-	$startmsg = &make_date($start, 1);
-	$endmsg = &make_date($end, 1);
-	}
-else {
-	$startmsg = &make_date($start, 0);
-	$endmsg = &make_date($end, 0);
-	}
+# Heading for stats being shown
+$maxes = &get_historic_maxes();
 for($i=0; $i<@stats; $i++) {
 	$color = $historic_graph_colors[$i % scalar(@historic_graph_colors)];
+	$stat = $stats[$i];
+	if ($stat eq 'memused' || $stat eq 'swapused') {
+		$units = "MB";
+		}
+	elsif ($stat eq 'quotalimit' || $stat eq 'quotaused') {
+		if ($maxes->{$stat} < 10*1024*1024*1024) {
+			$units = "MB";
+			}
+		else {
+			$units = "GB";
+			}
+		}
+	elsif ($stat eq 'diskused') {
+		$units = "GB";
+		}
+	elsif ($stat eq 'load') {
+		$units = $text{'history_pc'};
+		}
+	else {
+		$units = undef;
+		}
 	push(@statnames, "<font color=$color>".
-			 $text{'history_stat_'.$stats[$i]}."</font>");
+			 $text{'history_stat_'.$stat}.
+			 ($units ? " ($units)" : "").
+			 "</font>");
 	}
 print "<b>",&text('history_showing', join(", ", @statnames)),"</b><p>\n";
 print "<table cellpadding=0 cellspacing=0 width=100%><tr>\n";
@@ -106,7 +121,8 @@ print &ui_form_start("history.cgi");
 print &ui_hidden("start", $start);
 print &ui_hidden("period", $period);
 @grid = ( );
-foreach $s (sort { $a cmp $b } &list_historic_stats()) {
+foreach $s (sort { $text{'history_stat_'.$a} cmp
+		   $text{'history_stat_'.$b} } &list_historic_stats()) {
 	push(@grid, &ui_checkbox("stat", $s, $text{'history_stat_'.$s},
 			   	 &indexof($s, @stats) >= 0));
 	}
@@ -114,7 +130,6 @@ print &ui_grid_table(\@grid, 4);
 print &ui_form_end([ [ undef, $text{'history_ok'} ] ]);
 
 # Javascript to generate it
-$maxes = &get_historic_maxes();
 print "<script>\n";
 print "var timeplot;\n";
 print "function onLoad() {\n";
