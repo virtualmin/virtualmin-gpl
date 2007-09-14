@@ -106,7 +106,7 @@ print &ui_form_start("history.cgi");
 print &ui_hidden("start", $start);
 print &ui_hidden("period", $period);
 @grid = ( );
-foreach $s (&list_historic_stats()) {
+foreach $s (sort { $a cmp $b } &list_historic_stats()) {
 	push(@grid, &ui_checkbox("stat", $s, $text{'history_stat_'.$s},
 			   	 &indexof($s, @stats) >= 0));
 	}

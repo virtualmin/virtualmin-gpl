@@ -51,7 +51,7 @@ for($i=0; $i<scalar(@$first); $i++) {
 			     $v;
 			}
 		$v = int($v);
-		push(@values, int($v));
+		push(@values, $v);
 		}
 	print strftime("%Y-%m-%d %H:%M:%S", localtime($first->[$i]->[0])),",",
 	      join(",", @values),"\n";
