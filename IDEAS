@@ -67,7 +67,5 @@
 
  - is there any point having per-domain spam and virus filtering programs?
 	- single setting to control all domains and template
-	- remove from module config page
 	- move spam settings from template to module config
-	- command-line API
-	- need to use full path in procmail
+	- document all in CHANGELOG
