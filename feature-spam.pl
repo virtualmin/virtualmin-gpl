@@ -747,6 +747,13 @@ foreach my $r (@recipes) {
 	}
 }
 
+# get_global_spam_client()
+# Returns the spam client that is supposed to be used by all domains
+sub get_global_spam_client
+{
+# XXX
+}
+
 # update_spam_whitelist(&domain)
 # Adds all mailboxes in this domain to the spamassassin whitelist in its
 # configuration, and removes any whitelists that don't correspond to users.

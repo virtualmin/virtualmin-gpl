@@ -251,6 +251,12 @@ local @clamrec = &find_clam_recipe(\@recipes);
 if (@clamrec) {
 	local $rv = $clamrec[0]->{'action'};
 	$rv =~ s/^\Q$clam_wrapper_cmd\E\s+//;
+	if ($rv eq &has_command("clamscan")) {
+		$rv = "clamscan";
+		}
+	elsif ($rv eq &has_command("clamdscan")) {
+		$rv = "clamdscan";
+		}
 	return $rv;
 	}
 else {
@@ -268,8 +274,70 @@ local $spamrc = "$procmail_spam_dir/$d->{'id'}";
 local @recipes = &procmail::parse_procmail_file($spamrc);
 local @clamrec = &find_clam_recipe(\@recipes);
 if (@clamrec) {
+	if ($prog eq "clamscan") {
+		$prog = &has_command("clamscan");
+		}
+	elsif ($prog eq "clamdscan") {
+		$prog = &has_command("clamdscan");
+		}
 	$clamrec[0]->{'action'} = "$clam_wrapper_cmd $prog";
 	&procmail::modify_recipe($clamrec[0]);
+	}
+}
+
+# get_global_virus_scanner()
+# Returns the virus scanning program used by all domains
+sub get_global_virus_scanner
+{
+if ($config{'clamscan_cmd_global'}) {
+	# We know it from the module config
+	return $config{'clamscan_cmd'};
+	}
+else {
+	# Find the most used one for all domains
+	local (%cmdcount, $maxcmd);
+	foreach my $d (grep { $_->{'virus'} } &list_domains()) {
+		local $cmd = &get_domain_virus_scanner($d);
+		if ($cmd) {
+			$cmdcount{$cmd}++;
+			if (!$maxcmd || $cmdcount{$cmd} > $cmdcount{$maxcmd}) {
+				$maxcmd = $cmd;
+				}
+			}
+		}
+	return $maxcmd || $config{'clamscan_cmd'};
+	}
+}
+
+# save_global_virus_scanner(command)
+# Update all domains to use a new scanning command
+sub save_global_virus_scanner
+{
+local ($cmd) = @_;
+foreach my $d (grep { $_->{'virus'} } &list_domains()) {
+	&save_domain_virus_scanner($d, $cmd);
+	}
+$config{'clamscan_cmd'} = $cmd;
+$config{'clamscan_cmd_global'} = 1;
+$config{'last_check'} = time()+1;
+&save_module_config();
+}
+
+# test_virus_scanner(command)
+# Tests some virus scanning command. Returns an error message on failure, undef
+# on success.
+sub test_virus_scanner
+{
+local ($cmd) = @_;
+local $out = `$cmd - </dev/null 2>&1`;
+if ($?) {
+	return "<pre>".&html_escape($out)."</pre>";
+	}
+elsif ($out !~ /OK/) {
+	return $text{'sv_etestok'};
+	}
+else {
+	return undef;
 	}
 }
 

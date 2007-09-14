@@ -55,7 +55,7 @@ index_espam=The SpamAssassin program does not appear to be installed on your sys
 index_eprocmail=The Procmail program needed for spam filtering does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>Procmail Mail Filter</a> module. If your system does not use spam filtering, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page.
 index_evirus=The ClamAV program $1 does not appear to be installed on your system. Either adjust the path on the <a href='$2'>module configuration</a> page, or disable this feature.
 index_estatus=The System and Server Status module does not appear to be installed on your system. Either install it, or disable status monitoring on the <a href='$2'>module configuration</a> page.
-index_evirusrun=The ClamAV program $1 does not appear to be working properly : $2 Either adjust the path on the <a href='$3'>module configuration</a> page, or disable this feature.
+index_evirusrun2=The ClamAV program $1 does not appear to be working properly : $2. Either change the program on the <a href='$3'>spam and virus scanners</a> page, or disable this feature.
 index_astart=Start Apache
 index_astartdesc=The Apache webserver is currently down, meaning that all virtual server web pages are inaccessible. Click this button to start it.
 index_astop=Stop Apache
@@ -1589,6 +1589,7 @@ log_create_balancer=Created proxy balancer in $1 for $2
 log_delete_balancer=Delete proxy balancer in $1 for $2
 log_modify_balancer=Modified proxy balancer in $1 for $2
 log_delete_balancers=Deleted $2 proxy balancers in $1
+log_sv=Updated spam and virus scanners
 
 backup_title=Backup Virtual Servers
 backup_title2=Scheduled Backup
@@ -3717,3 +3718,15 @@ history_showing=Showing historic values for : $1
 history_none=No historic system statistics have been recorded yet.
 history_showsel=Select historic statistics to show :
 history_ok=Show Selected
+
+sv_title=Spam and Virus Scanning
+newsv_title=$sv_title
+sv_ecannot=You are not allowed to edit spam and virus scanning
+sv_header=Global spam and virus scanner options
+sv_desc=The spam and virus scanning options set on this page will be applied to all virtual servers with filtering enabled. Any per-server settings will be over-ridden.
+sv_vdoms=Virtual servers with virus scanning
+sv_none=None yet
+sv_eclamdscan=The <tt>clamdscan</tt> command which communications with the virus scanning server is not installed
+sv_eclamscan=The <tt>clamscan</tt> virus scanning command is not installed
+sv_etest=The selected virus scanning command does not work : $1
+sv_etestok=No virus report produced - perhaps this is not a ClamAV program?

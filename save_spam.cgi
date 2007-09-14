@@ -68,20 +68,6 @@ elsif ($in{'clear'} == 2) {
 	}
 &save_domain_spam_autoclear($d, $auto);
 
-# Save virus scanning program
-if ($d->{'virus'} && &can_virus_scanner() && defined($in{'scanner'})) {
-	if ($in{'scanner'} == 2) {
-		local ($cmd, @args) = &split_quoted_string($in{'scanprog'});
-		&has_command($cmd) || &error($text{'spam_escanner'});
-		}
-	elsif ($in{'scanner'} == 1) {
-		&find_byname("clamd") || &error($text{'spam_eclamdscan'});
-		}
-	&save_domain_virus_scanner($d,
-		$in{'scanner'} == 0 ? "clamscan" :
-		$in{'scanner'} == 1 ? "clamdscan" : $in{'scanprog'});
-	}
-
 &run_post_actions();
 
 # All done

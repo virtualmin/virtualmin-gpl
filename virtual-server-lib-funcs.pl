@@ -9280,6 +9280,7 @@ local @tmpls = ( 'tmpl', 'user', 'update',
    $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'dynip', 'resels',
 		       'reseller', 'notify', 'scripts', 'styles' )
 		   : ( 'sharedips', 'dynip' ),
+   $virtualmin_pro && ($config{'spam'} || $config{'virus'}) ? ( 'sv' ) : ( ),
    &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
    &has_home_quotas() && !&has_quota_commands() ? ( 'quotacheck' ) : ( ),
 #   &can_show_history() ? ( 'history' ) : ( ),
@@ -9292,6 +9293,7 @@ local %tmplcat = (
 	'local' => 'email',
 	'reseller' => 'email',
 	'notify' => 'email',
+	'sv' => 'email',
 	'ips' => 'ip',
 	'sharedips' => 'ip',
 	'dynip' => 'ip',
@@ -10129,8 +10131,10 @@ if ($config{'virus'}) {
 		# Need clamd to be running
 		&find_byname("clamd") || return $text{'check_eclamd'};
 		}
-	local $out = `$config{'clamscan_cmd'} - </dev/null 2>&1`;
-	$? && return &text('index_evirusrun', "<tt>$config{'clamscan_cmd'}</tt>", "<pre>$out</pre>", $clink);
+	local $err = &test_virus_scanner($config{'clamscan_cmd'});
+	if ($err) {
+		return &text('index_evirusrun2', "<tt>$config{'clamscan_cmd'}</tt>", $err, "edit_newsv.cgi");
+		}
 	&$second_print($text{'check_virusok'});
 	}
 
