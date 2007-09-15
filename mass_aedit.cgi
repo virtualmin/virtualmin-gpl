@@ -58,7 +58,7 @@ USER: foreach $line (@lines) {
 	$virt = $oldmap{$from};
 	$old = $virt ? { %$virt } : undef;
 	if (!$virt) {
-		$virt = { 'from' => $from, 'cmt' => $desc };
+		$virt = { 'from' => $from };
 		}
 	$simple= { };
 
@@ -92,7 +92,7 @@ USER: foreach $line (@lines) {
 			push(@{$simple->{'forward'}}, $dest);
 			}
 		elsif ($dest =~ /^[a-z0-9\.\-\_\+]+$/i) {
-			push(@{$simple->{'forward'}}, $dest."\@".$d->{'dom'});
+			push(@{$simple->{'forward'}}, $dest);
 			}
 		else {
 			&line_error(&text('amass_eunknown', "<tt>$dest</tt>"));
@@ -105,12 +105,14 @@ USER: foreach $line (@lines) {
 		next USER;
 		}
 	&save_simple_alias($d, $virt, $simple);
+	$virt->{'cmt'} = $desc;
 
 	# Check if we really changed anything
 	if ($old) {
 		$oldto = join(" ", sort { $a cmp $b } @{$old->{'to'}});
 		$newto = join(" ", sort { $a cmp $b } @{$virt->{'to'}});
-		if ($oldto eq $newto) {
+		if ($oldto eq $newto &&
+		    $old->{'cmt'} eq $virt->{'cmt'}) {
 			next USER;
 			}
 		}
