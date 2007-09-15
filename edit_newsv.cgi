@@ -32,11 +32,6 @@ if ($config{'spam'}) {
 
 # Virus scanning program
 if ($config{'virus'}) {
-	# Domain count
-	@vdoms = grep { $_->{'virus'} } @doms;
-	print &ui_table_row($text{'sv_vdoms'},
-		scalar(@vdoms) || $text{'sv_none'});
-
 	# Virus scanner
 	$scanner = &get_global_virus_scanner();
 	print &ui_table_row(&hlink($text{'spam_scanner'}, 'spam_scanner'),

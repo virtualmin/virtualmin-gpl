@@ -12,7 +12,9 @@ local $conf = &apache::get_config();
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 if ($virt) {
 	local @actions = &apache::find_directive("Action", $vconf);
-	local ($dir) = grep { $_->{'words'}->[0] eq &public_html_dir($d) }
+	local $pdir = &public_html_dir($d);
+	local ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
+			      $_->{'words'}->[0] eq $pdir."/" }
 		    &apache::find_directive_struct("Directory", $vconf);
 	if ($dir) {
 		push(@actions, &apache::find_directive("Action",
@@ -75,8 +77,9 @@ foreach my $p (@ports) {
 		local @pactions =
 		    grep { $_ =~ /^application\/x-httpd-php\d+/ }
 			&apache::find_directive("Action", $vconf);
-		local ($dirstr) =
-		  grep { $_->{'words'}->[0] eq &public_html_dir($d) }
+		local $pdir = &public_html_dir($d);
+		local ($dirstr) = grep { $_->{'words'}->[0] eq $pdir ||
+					 $_->{'words'}->[0] eq $pdir."/" }
 		    &apache::find_directive_struct("Directory", $vconf);
 		if ($mode eq "fcgid") {
 			$dirstr || &error("No &lt;Directory&gt; section found ",
