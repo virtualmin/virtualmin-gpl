@@ -12,7 +12,7 @@ if ($ENV{'PATH_INFO'} =~ /^\/([0-9\.]+)\/(http|https):\/+([^:\/]+)(:(\d+))?(.*)$
 	$protocol = $2;
 	$ssl = $protocol eq "https";
 	$host = $3;
-	$port = $5 || 80;
+	$port = $5 || ($ssl ? 443 : 80);
 	$path = $6;
 	$openurl = "$2://$3$4$6";
 	$baseurl = "$2://$3$4";
@@ -22,7 +22,7 @@ elsif ($ENV{'PATH_INFO'} =~ /^\/(http|https):\/+([^:\/]+)(:(\d+))?(.*)$/) {
 	$protocol = $1;
 	$ssl = $protocol eq "https";
 	$host = $2;
-	$port = $4 || 80;
+	$port = $4 || ($ssl ? 443 : 80);
 	$path = $5;
 	$openurl = "$1://$2$3$5";
 	$baseurl = "$1://$2$3";
@@ -129,8 +129,14 @@ $defport = $ssl ? 443 : 80;
 if ($header{'location'} =~ /^(http|https):\/\/$host:$port$page(.*)$/ ||
     $header{'location'} =~ /^(http|https):\/\/$host$page(.*)/ &&
     $port == $defport) {
-	# fix a redirect
-	&redirect("$url/$2");
+	# fix a redirect to the same site
+        ($lproto, $lpage) = ($1, $2);
+        if ($lproto ne $proto) {
+                # to same host, but different protocol
+                $url =~ s/\/(http|https)/\/$lproto/;
+                }
+	$url =~ s/\/$//;
+        &redirect("$url/$lpage");
 	exit;
 	}
 else {
