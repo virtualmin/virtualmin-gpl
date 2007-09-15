@@ -9301,6 +9301,19 @@ local @ttitles = map { $nonew{$_} ? $text{"${_}_title"}
 local @ticons = map { $nonew{$_} ? "images/${_}.gif"
 			         : "images/new${_}.gif" } @tmpls;
 local @tcats = map { $tmplcat{$_} } @tmpls;
+
+# Get from plugins too
+foreach my $p (@plugins) {
+	if (&plugin_defined($p, "settings_links")) {
+		foreach my $sl (&plugin_call($p, "settings_links")) {
+			push(@tlinks, $sl->{'link'});
+			push(@ttitles, $sl->{'title'});
+			push(@ticons, $sl->{'icon'});
+			push(@tcats, $sl->{'cat'});
+			}
+		}
+	}
+
 return (\@tlinks, \@ttitles, \@ticons, $virtualmin_pro ? \@tcats : undef);
 }
 

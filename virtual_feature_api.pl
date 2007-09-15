@@ -338,5 +338,13 @@ sub template_parse
 {
 }
 
+# settings_links()
+# If defined, should return a list of additional System Settings section links
+# related to this plugin, typically for configuring global settings. Each
+# element must be a hash ref containing link, title, icon and cat keys.
+sub settings_links
+{
+}
+
 1;
 
