@@ -123,7 +123,8 @@
         if (typeof Timeline != "undefined") {
             loadTimeplot();
         } else {
-            var timelineURL = (debug) ? "/timeline/api-2.0/timeline-api.js?bundle=false" : "http://static.simile.mit.edu/timeline/api-2.0/timeline-api.js";
+	    var timelineURL = "timeplot/timeline/timeline-api.js";
+            //var timelineURL = (debug) ? "/timeline/api-2.0/timeline-api.js?bundle=false" : "http://static.simile.mit.edu/timeline/api-2.0/timeline-api.js";
             window.SimileAjax_onLoad = loadTimeplot;
             SimileAjax.includeJavascriptFile(document, timelineURL);
         }
@@ -133,10 +134,10 @@
     if (typeof SimileAjax == "undefined") {
         window.SimileAjax_onLoad = loadTimeline;
         
-        //var url = "../ajax/simile-ajax-api.js?bundle=true";
-        var url = debug ?
-            "/ajax/api-2.0/simile-ajax-api.js?bundle=false" :
-            "http://static.simile.mit.edu/ajax/api-2.0/simile-ajax-api.js?bundle=true";
+        var url = "timeplot/ajax/simile-ajax-api.js?bundle=true";
+        //var url = debug ?
+        //    "/ajax/api-2.0/simile-ajax-api.js?bundle=false" :
+        //    "http://static.simile.mit.edu/ajax/api-2.0/simile-ajax-api.js?bundle=true";
                 
         var createScriptElement = function() {
             var script = document.createElement("script");

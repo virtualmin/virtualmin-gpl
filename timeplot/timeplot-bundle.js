@@ -400,7 +400,7 @@ message.containerDiv.className="timeplot-message-container";
 containerDiv.appendChild(message.containerDiv);
 
 message.contentDiv.className="timeplot-message";
-message.contentDiv.innerHTML="<img src='http://static.simile.mit.edu/timeline/api/images/progress-running.gif' /> Loading...";
+message.contentDiv.innerHTML="<img src='timeplot/timeline/images/progress-running.gif' /> Loading...";
 
 this.showLoadingMessage=function(){message.containerDiv.style.display="block";};
 this.hideLoadingMessage=function(){message.containerDiv.style.display="none";};

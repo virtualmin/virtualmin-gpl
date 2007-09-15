@@ -65,8 +65,5 @@
  
  - rails scripts should be able to make use of balancer
 
- - serve all timeplot graphs locally
-	- FS 3218
-
- - mass alias editor and non-@ addresses
-
+ - consolidate plugins and features onto one page
+	- rename Module Config and Recheck Config
