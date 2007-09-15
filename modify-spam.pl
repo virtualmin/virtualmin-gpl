@@ -156,6 +156,9 @@ print "                      [--spamclear-none |\n";
 print "                       --spamclear-days days\n";
 print "                       --spamclear-size bytes]\n";
 print "                      [--use-clamscan | --use-clamdscan]\n";
+print "\n";
+print "Warning - modifying the SpamAssassin or virus scanning client for\n";
+print "individual domains is deprecated.\n";
 exit(1);
 }
 

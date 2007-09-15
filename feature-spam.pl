@@ -843,26 +843,6 @@ sub parse_template_spam
 {
 local ($tmpl) = @_;
 
-$tmpl->{'spam'} = $in{'spam'};
-if ($in{'spam'}) {
-	# Make sure program is valid
-	&has_command($in{'spam'}) ||
-		&error(&text('tmpl_espam', "<tt>$in{'spam'}</tt>"));
-	if ($in{'spam'} eq 'spamc' && $in{'spam_host_def'} &&
-	    !&find_byname("spamd")) {
-		&error($text{'tmpl_espamd'});
-		}
-
-	# Validate spamc args
-	$in{'spam_host_def'} || gethostbyname($in{'spam_host'}) ||
-		&error($text{'tmpl_espam_host'});
-	$tmpl->{'spam_host'} = $in{'spam_host'};
-
-	$in{'spam_size_def'} || $in{'spam_size'} =~ /^\d+$/ ||
-		&error($text{'tmpl_espam_size'});
-	$tmpl->{'spam_size'} = $in{'spam_size'};
-	}
-
 # Parse clearing option
 if ($in{'spamclear'} eq '') {
 	$tmpl->{'spamclear'} = '';

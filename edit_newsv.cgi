@@ -14,19 +14,19 @@ if ($config{'spam'}) {
 	# Spam scanning program
 	($client, $host, $size) = &get_global_spam_client();
 	print &ui_table_row(&hlink($text{'spam_client'}, 'spam_client'),
-		    &ui_select("spam_client", $client,
+		    &ui_select("client", $client,
 			       [ [ "spamassassin", $text{'tmpl_spamassassin'} ],
 				 [ "spamc", $text{'tmpl_spamc'} ] ]));
 
 	# Spamc host
 	print &ui_table_row(
 		&hlink($text{'tmpl_spam_host'}, 'template_spam_host'),
-		&ui_opt_textbox("spam_host", $host, 30, "<tt>localhost</tt>"));
+		&ui_opt_textbox("host", $host, 30, "<tt>localhost</tt>"));
 
 	# Spamc max size
 	print &ui_table_row(
 		&hlink($text{'tmpl_spam_size'}, 'template_spam_size'),
-		&ui_opt_textbox("spam_size", $size, 8,
+		&ui_opt_textbox("size", $size, 8,
 				$text{'template_spam_unlimited'}));
 	}
 

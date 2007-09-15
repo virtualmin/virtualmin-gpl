@@ -20,6 +20,18 @@ while(@ARGV > 0) {
 	if ($a =~ /^--use-(spamc|spamassassin)$/) {
 		$spam_client = $1;
 		}
+	elsif ($a eq "--spamc-host") {
+		$spam_host = shift(@ARGV);
+		}
+	elsif ($a eq "--no-spamc-host") {
+		$spam_host = "";
+		}
+	elsif ($a eq "--spamc-max") {
+		$spam_max = shift(@ARGV);
+		}
+	elsif ($a eq "--no-spamc-max") {
+		$spam_max = 0;
+		}
 	elsif ($a =~ /^--use-(clamscan|clamdscan)$/) {
 		$virus_scanner = $1;
 		}
@@ -48,9 +60,14 @@ if ($virus_scanner) {
 	$err && &usage("Virus scanner failed : $err");
 	}
 
-if ($spam_client) {
+if ($spam_client || $spam_host || $spam_max) {
 	print "Updating all virtual servers with new SpamAssassin client ..\n";
-	&save_global_spam_client($spam_client);
+	($old_spam_client, $old_spam_host, $old_spam_max) =
+		&get_global_spam_client();
+	$spam_client = $old_spam_client if (!defined($spam_client));
+	$spam_host = $old_spam_host if (!defined($spam_host));
+	$spam_max = $old_spam_max if (!defined($spam_max));
+	&save_global_spam_client($spam_client, $spam_host, $spam_max);
 	print ".. done\n\n";
 	}
 
@@ -65,8 +82,14 @@ if ($virus_scanner) {
 if ($show) {
 	# Show current settings
 	if ($config{'spam'}) {
-		$client = &get_global_spam_client();
+		($client, $host, $max) = &get_global_spam_client();
 		print "SpamAssassin client: $client\n";
+		if ($host) {
+			print "SpamAssassin spamc host: $host\n";
+			}
+		if ($max) {
+			print "SpamAssassin spamc maximum size: $max\n";
+			}
 		}
 	if ($config{'virus'}) {
 		$scanner = &get_global_virus_scanner();
@@ -80,6 +103,8 @@ print "$_[0]\n\n" if ($_[0]);
 print "Changes the spam and virus scanning programs for all domains.\n";
 print "\n";
 print "usage: set-spam.pl [--use-spamassassin | --use-spamc]\n";
+print "                   [--spamc-host hostname | --no-spamc-host]\n";
+print "                   [--spamc-max bytes | --no-spamc-max]\n";
 print "                   [--use-clamscan | --use-clamdscan |\n";
 print "                    --use-virus command]\n";
 print "                   [--show]\n";
