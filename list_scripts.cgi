@@ -36,6 +36,7 @@ if (@got) {
 				  $text{'scripts_name'},
 				  $text{'scripts_ver'},
 				  $text{'scripts_path'},
+				  $text{'scripts_db'},
 				  $text{'scripts_status'},
 				  $text{'scripts_rating'} ], undef, 0, \@tds);
 	foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
@@ -60,15 +61,26 @@ if (@got) {
 			$status = "<font color=#00aa00>".
 				  $text{'scripts_newest'}."</font>";
 			}
-		
+		$path = $sinfo->{'opts'}->{'path'};
+		($dbtype, $dbname) = split(/_/, $sinfo->{'opts'}->{'db'}, 2);
+		if ($dbtype) {
+			$dbdesc = &text('scripts_idbname2',
+			      "edit_database.cgi?dom=$in{'dom'}&type=$dbtype&".
+				"name=$dbname",
+			      $text{'databases_'.$dbtype}, "<tt>$dbname</tt>");
+			}
+		else {
+			$dbdesc = "<i>$text{'scripts_nodb'}</i>";
+			}
 		print &ui_checked_columns_row([
 			"<a href='edit_script.cgi?dom=$in{'dom'}&".
 			"script=$sinfo->{'id'}'>$script->{'desc'}</a>",
 			$script->{'vdesc'}->{$sinfo->{'version'}} ||
 			  $sinfo->{'version'},
 			$sinfo->{'url'} ? 
-			  "<a href='$sinfo->{'url'}'>$sinfo->{'desc'}</a>" :
-			  $sinfo->{'desc'},
+			  "<a href='$sinfo->{'url'}'>$path</a>" :
+			  $path,
+			$dbdesc,
 			$status,
 			&virtualmin_ui_rating_selector(
 				$sinfo->{'name'}, $ratings->{$sinfo->{'name'}},

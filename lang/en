@@ -2594,6 +2594,7 @@ scripts_itime=Installed on
 scripts_idir=Installation directory
 scripts_idb=Uses database
 scripts_idbname=<a href='$1'>$2 database $3</a>
+scripts_idbname2=<a href='$1'>$2 $3</a>
 scripts_iuser=Initial login
 scripts_ipass=$1 with password $2
 scripts_uok=Un-Install Script
@@ -2610,6 +2611,8 @@ scripts_tabnew=Available Scripts
 scripts_name=Script
 scripts_ver=Version
 scripts_path=Install path
+scripts_db=Using database
+scripts_nodb=None
 scripts_uninstalls=Un-Install Selected Scripts
 scripts_upgrades=Upgrade Selected Scripts
 scripts_newdb=$1 ($2, new database)
