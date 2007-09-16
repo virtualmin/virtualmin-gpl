@@ -728,3 +728,4 @@ Added an option to the Create alias websites by setting in server templates to u
 If password quality restrictions are setup in the Webmin Users module, enforce them in Virtualmin too.
 Removed the ability to select the SpamAssassin client program and ClamAV virus filter on a per-domain basis, or in templates. This is now configured using the new Spam and Virus Scanning page, which effects all virtual servers.
 Added the set-spam.pl command-line program, which modifies the spam and virus scanners for all virtual servers at once.
+Expanded the plugin API to allow plugins to add their own links to the System Settings menus.

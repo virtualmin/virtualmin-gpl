@@ -508,6 +508,7 @@ foreach my $p (@ports) {
 			push(@types, "application/x-httpd-php$ver .php");
 			&apache::save_directive("AddType", \@types,
 						$dirstr->{'members'}, $conf);
+			&flush_file_lines($dirstr->{'file'});
 			}
 		elsif ($mode eq "fcgid") {
 			local $dest = "$d->{'home'}/fcgi-bin";
@@ -522,6 +523,7 @@ foreach my $p (@ports) {
 			push(@wrappers, "$dest/php$ver.fcgi .php");
 			&apache::save_directive("FCGIWrapper", \@wrappers,
 						$dirstr->{'members'}, $conf);
+			&flush_file_lines($dirstr->{'file'});
 			}
 		}
 	else {

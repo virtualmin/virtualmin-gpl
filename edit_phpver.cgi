@@ -64,8 +64,9 @@ print &ui_columns_end();
 print &ui_links_row(\@links);
 
 print &ui_table_end();
-print &ui_form_end([ @dirs > 1 ? ( [ "delete", $text{'phpver_delete'} ] ) : ( ),
-		     [ "save", $text{'save'} ] ]);
+print &ui_form_end([ @dirs > 1 ? ( [ "delete", $text{'phpver_delete'} ], undef )
+			       : ( ),
+		     [ "save", $text{'phpver_save'} ] ]);
 
 &ui_print_footer(&domain_footer_link($d),
 		 "", $text{'index_return'});

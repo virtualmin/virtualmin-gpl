@@ -264,24 +264,30 @@ local $db;
 foreach $db (@dbs) {
 	&$first_print(&text('backup_postgresdump', $db));
 	local $dbfile = $_[1]."_".$db;
+	local $destfile = $dbfile;
 	if ($postgresql::postgres_sameunix) {
 		# For a backup done as the postgres user, create an empty file
 		# owned by him first
 		local @uinfo = getpwnam($postgresql::postgres_login);
 		if (@uinfo) {
-			&open_tempfile(EMPTY, ">$dbfile", 0, 1);
+			$destfile = &transname();
+			&open_tempfile(EMPTY, ">$destfile", 0, 1);
 			&close_tempfile(EMPTY);
 			&set_ownership_permissions($uinfo[2], $uinfo[3],
-						   undef, $dbfile);
+						   undef, $destfile);
 			}
 		}
-	local $err = &postgresql::backup_database($db, $dbfile, 'c', undef);
+	local $err = &postgresql::backup_database($db, $destfile, 'c', undef);
 	if ($err) {
 		&$second_print(&text('backup_postgresdumpfailed',
 				     "<pre>$err</pre>"));
 		return 0;
 		}
 	else {
+		if ($destfile ne $dbfile) {
+			&copy_source_dest($destfile, $dbfile);
+			&unlink_file($destfile);
+			}
 		&$second_print($text{'setup_done'});
 		}
 	}
