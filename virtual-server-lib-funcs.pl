@@ -6805,6 +6805,10 @@ foreach my $phpver (@all_possible_php_versions) {
 		defined($config{'php_ini_'.$phpver}) ?
 			$config{'php_ini_'.$phpver} : $config{'php_ini'},
 	}
+if (!defined(getpwnam($rv[0]->{'web_user'}))) {
+	# Apache user is invalid, due to bad Virtualmin install script. Fix it
+	$rv[0]->{'web_user'} = &get_apache_user();
+	}
 push(@rv, { 'id' => 1,
 	    'name' => 'Defaults Settings For Sub-Servers',
 	    'standard' => 1,

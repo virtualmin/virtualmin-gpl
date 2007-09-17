@@ -1307,13 +1307,15 @@ else {
 return wantarray ? ($rv, $newfile) : $rv;
 }
 
-# get_apache_user(&domain)
+# get_apache_user([&domain])
 # Returns the Unix user that the Apache process runs as, such as www or httpd
 sub get_apache_user
 {
-local $tmpl = &get_template($_[0]->{'template'});
-return $tmpl->{'web_user'} if ($tmpl->{'web_user'} &&
-			       defined(getpwnam($tmpl->{'web_user'})));
+if ($_[0]) {
+	local $tmpl = &get_template($_[0]->{'template'});
+	return $tmpl->{'web_user'} if ($tmpl->{'web_user'} &&
+				       defined(getpwnam($tmpl->{'web_user'})));
+	}
 foreach $u ("httpd", "apache", "www", "www-data", "wwwrun", "nobody") {
 	return $u if (defined(getpwnam($u)));
 	}
