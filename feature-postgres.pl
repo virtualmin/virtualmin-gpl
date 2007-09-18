@@ -91,11 +91,11 @@ local $changeduser = $_[0]->{'user'} eq $_[1]->{'user'} ? 0 : 1;
 local $user = &postgres_user($_[0], $changeduser);
 local $olduser = &postgres_user($_[1]);
 
-if ($_[0]->{'pass'} ne $_[1]->{'pass'} &&
+local $pass = &postgres_pass($_[0]);
+local $oldpass = &postgres_pass($_[1]);
+if ($pass ne $oldpass &&
     !$_[0]->{'parent'} && !$config{'mysql_nopass'}) {
 	# Change PostgreSQL password ..
-	local $pass = &postgres_pass($_[0]);
-	local $oldpass = &postgres_pass($_[1]);
 	&$first_print($text{'save_postgrespass'});
 	if (&postgres_user_exists($_[1])) {
 		&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter user \"$olduser\" with password $pass");
