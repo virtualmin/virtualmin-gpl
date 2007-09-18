@@ -8919,6 +8919,9 @@ sub get_domain_actions
 {
 local ($d) = @_;
 local @rv;
+$| = 1;
+
+printf STDERR "Got here...\n";
 
 if (&can_domain_have_users($d) && &can_edit_users()) {
 	# Users button
@@ -8926,6 +8929,7 @@ if (&can_domain_have_users($d) && &can_edit_users()) {
 		    'title' => $text{'edit_users2'},
 		    'desc' => $text{'edit_usersdesc'},
 		    'cat' => 'objects',
+		    'icon' => 'group',
 		    });
 	}
 
@@ -8935,6 +8939,7 @@ if ($d->{'mail'} && $config{'mail'} && &can_edit_aliases()) {
 		    'title' => $text{'edit_aliases'},
 		    'desc' => $text{'edit_aliasesdesc'},
 		    'cat' => 'objects',
+		    'icon' => 'email_go',
 		    });
 	}
 
@@ -8944,6 +8949,7 @@ if (&database_feature($d) && &can_edit_databases()) {
 		    'title' => $text{'edit_databases'},
 		    'desc' => $text{'edit_databasesdesc'},
 		    'cat' => 'objects',
+		    'icon' => 'database',
 		  });
 	}
 
@@ -8954,6 +8960,7 @@ if ($d->{'web'} && $config{'web'} && &can_edit_scripts() &&
 		    'title' => $text{'edit_scripts'},
 		    'desc' => $text{'edit_scriptsdesc'},
 		    'cat' => 'objects',
+		    'icon' => 'page_code',
 		  });
 	}
 
@@ -8965,6 +8972,7 @@ if ($d->{'web'} && $config{'web'} && $d->{'dir'} && !$d->{'alias'} &&
 		    'title' => $text{'edit_html'},
 		    'desc' => $text{'edit_htmldesc'},
 		    'cat' => 'objects',
+		    'icon' => 'page_edit',
 		  });
 	}
 
@@ -8974,6 +8982,7 @@ if (&can_rename_domains()) {
 		    'title' => $text{'edit_rename'},
 		    'desc' => $text{'edit_renamedesc'},
 		    'cat' => 'server',
+		    'icon' => 'comment_edit',
 		  });
 	}
 
@@ -8984,6 +8993,7 @@ if (&can_move_domain($d) && !$d->{'alias'} && !$d->{'subdom'}) {
 		    'desc' => $d->{'parent'} ? $text{'edit_movedesc2'}
 					     : $text{'edit_movedesc'},
 		    'cat' => 'server',
+		    'icon' => 'arrow_right',
 		  });
 	}
 
@@ -8993,6 +9003,7 @@ if (&can_change_ip($d) && !$d->{'alias'}) {
 		    'title' => $text{'edit_newip'},
 		    'desc' => $text{'edit_newipdesc'},
 		    'cat' => 'server',
+		    'icon' => 'connect',
 		  });
 	}
 
