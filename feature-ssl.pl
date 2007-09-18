@@ -39,10 +39,12 @@ local $f = &get_website_file($_[0]);
 
 # Create a self-signed cert and key, if needed
 local $defcert = $config{'cert_tmpl'} ?
-		    &substitute_domain_template($config{'cert_tmpl'}, $_[0]) :
+		    &absolute_domain_path($_[0],
+		     &substitute_domain_template($config{'cert_tmpl'}, $_[0])) :
 		    "$_[0]->{'home'}/ssl.cert";
 local $defkey = $config{'key_tmpl'} ?
-		    &substitute_domain_template($config{'key_tmpl'}, $_[0]) :
+		    &absolute_domain_path($_[0],
+		     &substitute_domain_template($config{'key_tmpl'}, $_[0])) :
 		    "$_[0]->{'home'}/ssl.key";
 $_[0]->{'ssl_cert'} ||= $defcert;
 $_[0]->{'ssl_key'} ||= $defkey;

@@ -10581,6 +10581,26 @@ if ($d->{'parent'}) {
 return &substitute_template($str, \%hash);
 }
 
+# absolute_domain_path(&domain, path)
+# Converts some path to be relative to a domain, like foo.txt or bar/foo.txt or
+# ~/bar/foo.txt. Absolute paths are not converted.
+sub absolute_domain_path
+{
+local ($d, $path) = @_;
+if ($path =~ /^\//) {
+	# Already absolute
+	return $path;
+	}
+elsif ($path =~ /^~\/(.*)/) {
+	# Relative to home
+	return $d->{'home'}.'/'.$1;
+	}
+else {
+	# Also relative to home
+	return $d->{'home'}.'/'.$path;
+	}
+}
+
 # set_limits_from_template(&domain, &template)
 # Set initial owner limits on a domain from the given template
 sub set_limits_from_template
