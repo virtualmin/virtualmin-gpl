@@ -8919,9 +8919,6 @@ sub get_domain_actions
 {
 local ($d) = @_;
 local @rv;
-$| = 1;
-
-printf STDERR "Got here...\n";
 
 if (&can_domain_have_users($d) && &can_edit_users()) {
 	# Users button
