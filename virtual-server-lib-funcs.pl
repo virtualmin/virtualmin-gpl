@@ -8834,6 +8834,7 @@ foreach my $f (@features) {
 		if (defined(&$lfunc)) {
 			foreach my $l (&$lfunc($d)) {
 				if (&foreign_available($l->{'mod'})) {
+					$l->{'title'} ||= $l->{'desc'};
 					push(@rv, $l);
 					}
 				}
@@ -8846,6 +8847,7 @@ foreach my $f (@plugins) {
 	if ($d->{$f}) {
 		foreach my $l (&plugin_call($f, "feature_links", $d)) {
 			if (&foreign_available($l->{'mod'})) {
+				$l->{'title'} ||= $l->{'desc'};
 				$l->{'plugin'} = 1;
 				push(@rv, $l);
 				}
@@ -8853,6 +8855,7 @@ foreach my $f (@plugins) {
 		}
 	foreach my $l (&plugin_call($f, "feature_always_links", $d)) {
 		if (&foreign_available($l->{'mod'})) {
+			$l->{'title'} ||= $l->{'desc'};
 			$l->{'plugin'} = 2;
 			push(@rv, $l);
 			}
@@ -8869,6 +8872,7 @@ if (!&master_admin() && !&reseller_admin()) {
 				local %minfo = &get_module_info($1);
 				push(@ot, { 'mod' => $1,
 					    'page' => 'index.cgi',
+					    'title' => $minfo{'desc'},
 					    'desc' => $minfo{'desc'},
 					    'cat' => 'webmin',
 					    'other' => 1 });
