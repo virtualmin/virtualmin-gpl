@@ -131,6 +131,13 @@ sub feature_links
 {
 }
 
+# feature_always_links(&domain)
+# Returns an array of link objects for webmin modules, regardless of whether
+# this feature is enabled or not
+sub feature_always_links
+{
+}
+
 # feature_backup(&domain, file, &opts, &all-opts)
 # Called to backup this feature for the domain to the given file. Must return 1
 # on success or 0 on failure

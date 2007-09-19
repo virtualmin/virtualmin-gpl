@@ -140,6 +140,7 @@ elsif ($user ne $olduser && !$_[0]->{'parent'}) {
 		if (&postgresql::get_postgresql_version() >= 7.4) {
 			# Can use proper rename command
 			&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter user \"$olduser\" rename to \"$user\"");
+			&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter user \"$user\" with password $pass");
 			$_[0]->{'postgres_user'} = $user;
 			&$second_print($text{'setup_done'});
 			}
