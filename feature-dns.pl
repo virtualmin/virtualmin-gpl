@@ -300,9 +300,11 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 				       &bind8::make_chroot($nfn))
 			}
 		$file->{'values'}->[0] = $nfn;
+		$file->{'value'} = $nfn;
 
 		# Change zone in .conf file
 		$z->{'values'}->[0] = $_[0]->{'dom'};
+		$z->{'value'} = $_[0]->{'dom'};
 		&bind8::save_directive(&bind8::get_config_parent(),
 				       [ $z ], [ $z ], 0);
 		&flush_file_lines();
