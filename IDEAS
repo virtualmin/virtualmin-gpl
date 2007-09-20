@@ -68,3 +68,6 @@
  - consolidate plugins and features onto one page
 	- rename Module Config and Recheck Config
 
+ - admin messages module FS#3235
+	- do as plugin, linked from system settings
+
