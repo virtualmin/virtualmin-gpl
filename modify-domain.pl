@@ -255,6 +255,7 @@ if (defined($ip)) {
 	if (!$config{'all_namevirtual'}) {
 		$dom->{'virt'} = 1;
 		$dom->{'name'} = 0;
+		$dom->{'virtalready'} = 0;
 		}
 	}
 if (defined($sharedip)) {

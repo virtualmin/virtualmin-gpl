@@ -269,7 +269,7 @@ elsif ($in{'virt'} == 3 && &can_edit_sharedips()) {
 	# On a shared virtual IP
 	&indexof($in{'sharedip'}, &list_shared_ips()) >= 0 ||
 		&error(&text('setup_evirtnoshared'));
-	return ($in{'sharedip'}, 0);
+	return ($in{'sharedip'}, 0, 0);
 	}
 elsif ($in{'virt'} == 4 && (&running_in_zone() ||
 		    defined(&running_in_vserver) && &running_in_vserver())) {
@@ -286,7 +286,7 @@ elsif ($in{'virt'} == 4 && (&running_in_zone() ||
 else {
 	# Global shared IP
 	local $defip = &get_default_ip($resel);
-	return ($defip, 0);
+	return ($defip, 0, 0);
 	}
 }
 

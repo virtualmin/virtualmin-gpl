@@ -238,6 +238,7 @@ if (&can_use_feature("virt")) {
 		$d->{'ip'} = &get_default_ip($d->{'reseller'});
 		$d->{'defip'} = $d->{'ip'} eq &get_default_ip();
 		$d->{'virt'} = 0;
+		$d->{'virtalready'} = 0;
 		$d->{'name'} = 1;
 		delete($d->{'dns_ip'});
 		&delete_virt($d);

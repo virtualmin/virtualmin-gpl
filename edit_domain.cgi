@@ -399,5 +399,10 @@ if ($current_theme ne "virtual-server-theme" &&
 	&show_domain_buttons($d);
 	}
 
+# Make sure the left menu is showing this domain
+if (defined(&theme_select_domain)) {
+	&theme_select_domain($d);
+	}
+
 &ui_print_footer("", $text{'index_return'});
 
