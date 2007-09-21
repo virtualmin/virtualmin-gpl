@@ -41,7 +41,12 @@ else {
 	&$first_print(&text('setup_virt2', $_[0]->{'ip'}));
 	local ($virt) = grep { $_->{'address'} eq $_[0]->{'ip'} } @boot;
 	$_[0]->{'iface'} = $virt ? $virt->{'fullname'} : undef;
-	&$second_print(&text('setup_virtdone2', $_[0]->{'iface'}));
+	if ($_[0]->{'iface'}) {
+		&$second_print(&text('setup_virtdone2', $_[0]->{'iface'}));
+		}
+	else {
+		&$second_print(&text('setup_virtnotdone', $_[0]->{'ip'}));
+		}
 	}
 }
 
