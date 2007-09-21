@@ -2190,10 +2190,11 @@ return $virtualmin_pro &&	# Only Pro supports this
 }
 
 # Returns 1 if the user can view mail logs for some domain (or all domains if
-# none was given)
+# none was given). Also returns 0 if mail logs are not enabled.
 sub can_view_maillog
 {
 local ($d) = @_;
+return 0 if (!&procmail_logging_enabled());
 if ($d) {
 	return &can_edit_domain($d);
 	}

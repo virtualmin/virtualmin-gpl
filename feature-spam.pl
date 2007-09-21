@@ -462,6 +462,20 @@ if ($config{'logrotate'} && &foreign_installed("logrotate")) {
 	}
 }
 
+# procmail_logging_enabled()
+# Returns 1 if logging entries exist in /etc/procmailrc
+sub procmail_logging_enabled
+{
+&require_spam();
+local @recipes = &procmail::get_procmailrc();
+foreach my $r (@recipes) {
+	if ($r->{'name'} eq 'LOGFILE') {
+		return 1;
+		}
+	}
+return 0;
+}
+
 # modify_spam(&domain, &olddomain)
 # Doesn't have to do anything
 sub modify_spam
