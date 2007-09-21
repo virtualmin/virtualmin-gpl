@@ -228,6 +228,7 @@ if (&can_use_feature("virt")) {
 		$d->{'ip'} = $in{'ip'};
 		$d->{'virt'} = 1;
 		$d->{'name'} = 0;
+		$d->{'virtalready'} = 0;
 		delete($d->{'dns_ip'});
 		delete($d->{'defip'});
 		&setup_virt($d);
