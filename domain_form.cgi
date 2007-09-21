@@ -32,6 +32,19 @@ elsif ($in{'mass'}) {
 	&redirect("mass_domains_form.cgi?".join("&", map { "d=$_" } @d));
 	return;
 	}
+elsif ($in{'disable'}) {
+	# Redirect to mass disable form
+	@d = split(/\0/, $in{'d'});
+	&redirect("mass_disable.cgi?".join("&", map { "d=$_" } @d));
+	return;
+	}
+elsif ($in{'enable'}) {
+	# Redirect to mass enable form
+	@d = split(/\0/, $in{'d'});
+	&redirect("mass_enable.cgi?".join("&", map { "d=$_" } @d));
+	return;
+	}
+
 
 # Can this user even create servers?
 &can_create_master_servers() || &can_create_sub_servers() ||

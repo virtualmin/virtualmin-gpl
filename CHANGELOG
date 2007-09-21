@@ -729,3 +729,4 @@ If password quality restrictions are setup in the Webmin Users module, enforce t
 Removed the ability to select the SpamAssassin client program and ClamAV virus filter on a per-domain basis, or in templates. This is now configured using the new Spam and Virus Scanning page, which effects all virtual servers.
 Added the set-spam.pl command-line program, which modifies the spam and virus scanners for all virtual servers at once.
 Expanded the plugin API to allow plugins to add their own links to the System Settings menus.
+Moved the buttons for disabling and enabling multiple virtual servers off the Update Virtual Servers page to the domains list where they are more visible, and added confirmation pages.

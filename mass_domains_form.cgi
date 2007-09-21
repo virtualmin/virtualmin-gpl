@@ -225,15 +225,6 @@ if (&can_edit_shell()) {
 
 print &ui_hidden_table_end("others");
 
-print &ui_submit($text{'massdomains_ok'}, "ok");
-if (&can_disable_domain($doms[0])) {
-	print "<br>\n";
-	print &ui_submit($text{'massdomains_enablebutton'}, "enable");
-	print "<br>\n";
-	print &ui_submit($text{'massdomains_disablebutton'}, "disable");
-	print "<b>$text{'disable_why'}</b> ",
-	      &ui_textbox("why", undef, 30),"<br>\n";
-	}
-print &ui_form_end();
+print &ui_form_end([ [ "ok", $text{'massdomains_ok'} ] ]);
 
 &ui_print_footer("", $text{'index_return'});

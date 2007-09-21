@@ -170,6 +170,8 @@ index_canadd2=Based on your reseller limits, $1 additional servers can be added.
 index_canadd3=Based on the system's licence, $1 additional servers can be added.
 index_delete=Delete Selected
 index_mass=Update Selected
+index_disable=Disable Selected
+index_enable=Enable Selected
 
 index_backup=Backup Virtual Servers
 index_backupdesc=Click this button to perform an immediate backup. A form for choosing which servers to backup, what features to save and where to backup to will be displayed.
@@ -2955,6 +2957,15 @@ massdomains_rubymode=Ruby execution mode
 massdomains_rubymoding=Changing Ruby execution mode ..
 massdomains_ecannotenable=.. you are not allowed to enable this domain.
 massdomains_ecannotdisable=.. you are not allowed to disable this domain.
+massdomains_diserr=Failed to disable servers
+massdomains_disrusure=Are you sure you want to disable the $1 selected virtual servers? This can be reversed later with no loss of data by re-enabling the server.
+massdomains_disok=Disable Servers Now
+massdomains_why=Reason for disabling:
+massdomains_disdoms=Servers to disable: $1
+massdomains_enaerr=Failed to enable servers
+massdomains_enarusure=Are you sure you want to enable the $1 selected virtual servers? They will be returned to the state they were in before being disabled.
+massdomains_enaok=Enable Servers Now
+massdomains_enadoms=Servers to enable: $1
 
 newmxs_title=Secondary Mail Servers
 newmxs_header=Automatic secondary mail servers

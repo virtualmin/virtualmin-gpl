@@ -46,6 +46,11 @@ else {
 	print &ui_links_row(\@links);
 	print &ui_submit($text{'index_delete'}, "delete"),"\n";
 	print &ui_submit($text{'index_mass'}, "mass"),"\n";
+	if (&can_disable_domain($doms[0])) {
+		print "&nbsp;&nbsp;\n";
+		print &ui_submit($text{'index_disable'}, "disable"),"\n";
+		print &ui_submit($text{'index_enable'}, "enable"),"\n";
+		}
 	print &ui_form_end();
 	}
 
