@@ -6,6 +6,11 @@ $main::no_acl_check++;
 require './virtual-server-lib.pl';
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 
+# hack to force correct DBM mode
+$temp = &transname();
+&make_dir($temp, 0700);
+&mailboxes::open_dbm_db(\%dummy, "$temp/dummy", 0700);
+
 foreach $d (&list_domains()) {
 	# Is clearing enabled?
 	next if (!$d->{'spam'});
@@ -27,6 +32,24 @@ foreach $d (&list_domains()) {
 					   $_->{'index'} != 0 } @folders;
 			next if (!$folder);
 			#print STDERR "found spam folder $folder->{'file'}\n";
+
+			# Verify the index on the spam folder
+			if ($folder->{'type'} == 0) {
+				local $ifile = &mailboxes::user_index_file(
+						$folder->{'file'});
+				local %index;
+				eval {
+					&mailboxes::build_dbm_index(
+						$folder->{'file'}, \%index);
+					dbmclose(%index);
+					};
+				if ($@) {
+					# Bad .. need to clear
+					unlink($ifile.".dir",
+					       $ifile.".pag",
+					       $ifile.".db");
+					}
+				}
 
 			# Get email in the folder, and check criteria
 			my @mail = &mailboxes::mailbox_list_mails(
