@@ -130,7 +130,7 @@ index_searchok=Search Now
 index_nomail=Disabled
 index_versionmode=Version $1, $2 mode
 index_mastermode=master admin
-index_usermode=server owner
+index_usermode=server administrator
 index_resellermode=reseller
 index_mailmode=mail manager
 index_esaliases=No aliases file was found in your <a href='$1'>Sendmail</a> configuration. Maybe Sendmail is not installed properly, or another mail server is in use.
