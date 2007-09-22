@@ -465,8 +465,7 @@ if (!$aliasdom && &can_select_ip()) {
 		undef, \@tds);
 	}
 
-print &ui_hidden_end();
-print &ui_table_end();
+print &ui_hidden_table_end();
 
 if (!$aliasdom && $config{'web'} && $virtualmin_pro) {
 	# Show field for initial content
@@ -486,8 +485,7 @@ if (!$aliasdom && $config{'web'} && $virtualmin_pro) {
 			    &content_style_chooser("style", undef),
 			    3, \@tds);
 
-	print &ui_hidden_end();
-	print &ui_table_end();
+	print &ui_hidden_table_end();
 	}
 
 print &ui_form_end([ [ "ok", $text{'form_ok'} ] ]);
