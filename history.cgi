@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 # Show a historic graph of one or more collected stats
 # XXX serve all javascript from Virtualmin
 # XXX command-line API to get data
