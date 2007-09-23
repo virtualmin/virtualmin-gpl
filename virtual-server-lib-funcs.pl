@@ -10145,6 +10145,19 @@ if ($config{'virus'}) {
 		}
 	local $err = &test_virus_scanner($config{'clamscan_cmd'});
 	if ($err) {
+		# Failed .. but this can often be due to the ClamAV database
+		# being out of date.
+		local $freshclam = &has_command("freshclam");
+		if (!$freshclam &&
+		    $config{'clamscan_cmd'} =~ /^(\/.*\/)[^\/]+$/) {
+			$freshclam = $1."freshclam";
+			}
+		if (-x $freshclam) {
+			local $cout = &backquote_with_timeout($freshclam, 180);
+			$err = &test_virus_scanner($config{'clamscan_cmd'});
+			}
+		}
+	if ($err) {
 		return &text('index_evirusrun2', "<tt>$config{'clamscan_cmd'}</tt>", $err, "edit_newsv.cgi");
 		}
 	&$second_print($text{'check_virusok'});
