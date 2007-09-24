@@ -11222,7 +11222,7 @@ local $want = $level == 0 ? "for_master" :
 local @rv;
 foreach my $p (@plugins) {
         if (&plugin_defined($p, "theme_sections")) {
-		foreach my $s (&plugin_call($p, "theme_sections"))) {
+		foreach my $s (&plugin_call($p, "theme_sections")) {
 			if ($s->{$want}) {
 				$s->{'plugin'} = $p;
 				push(@rv, $s);
