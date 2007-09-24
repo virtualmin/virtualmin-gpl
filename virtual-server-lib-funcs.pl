@@ -9263,7 +9263,7 @@ return &can_config_domain($_[0]) ?
 # Calls redirect to edit_domain.cgi or view_domain.cgi
 sub domain_redirect
 {
-&redirect("$gconfig{'webprefix'}/$module_name/postsave.cgi?dom=$_[0]->{'id'}");
+&redirect("/$module_name/postsave.cgi?dom=$_[0]->{'id'}");
 #&redirect(&can_config_domain($_[0]) ? "edit_domain.cgi?dom=$_[0]->{'id'}"
 #				    : "view_domain.cgi?dom=$_[0]->{'id'}");
 }
