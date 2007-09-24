@@ -353,5 +353,16 @@ sub settings_links
 {
 }
 
+# theme_sections()
+# If defined, should return a list of extra sections to be displayed (typically
+# on the right-hand frame) of a theme. Each must be a hash ref containing the
+# keys 'title' (section heading), 'html' (contents of the section) and
+# 'status' (open or not by default). It can also contain 'for_master',
+# 'for_reseller' and 'for_owner' flags, indicating if the section should be
+# visible to master admins, resellers and domain owners.
+sub theme_sections
+{
+}
+
 1;
 

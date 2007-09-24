@@ -11211,6 +11211,28 @@ $d->{'backup_excludes'} = join("\t", @$excludes);
 &save_domain($d);
 }
 
+# list_plugin_sections(level)
+# Returns a list of right-frame sections defined by Virtualmin plugins.
+# Level 0 = master admin, 1 = domain owner, 2 = reseller
+sub list_plugin_sections
+{
+local ($level) = @_;
+local $want = $level == 0 ? "for_master" :
+	      $level == 1 ? "for_owner" : "for_reseller";
+local @rv;
+foreach my $p (@plugins) {
+        if (&plugin_defined($p, "theme_sections")) {
+		foreach my $s (&plugin_call($p, "theme_sections"))) {
+			if ($s->{$want}) {
+				$s->{'plugin'} = $p;
+				push(@rv, $s);
+				}
+			}
+		} 
+        }
+return @rv;
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;

@@ -59,10 +59,6 @@
 	SetHandler fcgid-script
 	</Location>
 
- - Domain registration plugin, via API
-	- Who pays?
-	- Needs a page for setting up account
- 
  - rails scripts should be able to make use of balancer
 	- generic proxying page
 
