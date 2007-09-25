@@ -19,6 +19,7 @@ sub setup_logrotate
 &require_logrotate();
 &require_apache();
 
+# Work out the log files we are rotating
 local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}, 0);
 local $elog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}, 1);
 local @logs = ( $alog, $elog );
@@ -28,9 +29,21 @@ if ($_[0]->{'ftp'}) {
 local @logs = &unique(grep { $_ } @logs);
 local $tmpl = &get_template($_[0]->{'template'});
 if (@logs) {
+	# Check if any are already rotated
 	local $parent = &logrotate::get_config_parent();
+	foreach my $c (@{$parent->{'members'}}) {
+		foreach my $n (@{$c->{'name'}}) {
+			if (&indexof($n, @logs) >= 0) {
+				# Clash!!
+				&error(&text('setup_clashlogrotate',
+					     "<tt>$n</tt>"));
+				}
+			}
+		}
+
+	# Add the new section
 	local $lconf = { 'file' => &logrotate::get_add_file(),
-			  'name' => \@logs };
+			 'name' => \@logs };
 	if ($tmpl->{'logrotate'} eq 'none') {
 		# Use automatic configurtation
 		local $apachectl = $apache::config{'apachectl_path'} ||
