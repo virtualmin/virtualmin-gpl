@@ -6775,6 +6775,9 @@ push(@rv, { 'id' => 0,
 	    'domslimit' => $config{'defdomslimit'} eq "" ? 0 :
 			   $config{'defdomslimit'} eq "*" ? "none" :
 			   $config{'defdomslimit'},
+	    'aliasdomslimit' => $config{'defaliasdomslimit'} eq "" ||
+			        $config{'defaliasdomslimit'} eq "*" ? "none" :
+			        $config{'defaliasdomslimit'},
 	    'bwlimit' => $config{'defbwlimit'} eq "" ? "none" :
 			 $config{'defbwlimit'},
 	    'capabilities' => $config{'defcapabilities'},
@@ -7004,6 +7007,8 @@ if ($tmpl->{'id'} == 0) {
 	$config{'defdomslimit'} = $tmpl->{'domslimit'} eq 'none' ? "*" :
 				  $tmpl->{'domslimit'} eq '0' ? "" :
 				  $tmpl->{'domslimit'};
+	$config{'defaliasdomslimit'} = $tmpl->{'aliasdomslimit'} eq 'none' ?
+					"*" : $tmpl->{'aliasdomslimit'};
 	$config{'defbwlimit'} = $tmpl->{'bwlimit'} eq 'none' ? undef :
 				$tmpl->{'bwlimit'};
 	$config{'defcapabilities'} = $tmpl->{'capabilities'};
@@ -10639,6 +10644,8 @@ $d->{'dbslimit'} = $tmpl->{'dbslimit'} eq 'none' ? undef :
 			$tmpl->{'dbslimit'};
 $d->{'domslimit'} = $tmpl->{'domslimit'} eq 'none' ? '*' :
 			$tmpl->{'domslimit'};
+$d->{'aliasdomslimit'} = $tmpl->{'aliasdomslimit'} eq 'none' ? '*' :
+			$tmpl->{'aliasdomslimit'};
 $d->{'nodbname'} = $tmpl->{'nodbname'};
 $d->{'norename'} = $tmpl->{'norename'};
 $d->{'forceunder'} = $tmpl->{'forceunder'};
@@ -10707,7 +10714,7 @@ print &ui_table_row(&hlink($text{'tmpl_featurelimits'},
 print &ui_table_hr();
 
 # Show limits on numbers of things
-foreach my $l ("mailbox", "alias", "dbs", "doms", "bw") {
+foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms", "bw") {
 	my $limit = $tmpl->{$l.'limit'} eq "none" ? undef : $tmpl->{$l.'limit'};
 	print &ui_table_row(&hlink($text{'tmpl_'.$l.'limit'},
 				   "template_".$l."limit"),
@@ -10773,7 +10780,7 @@ else {
 	}
 
 # Save limits on various objects
-foreach my $l ("mailbox", "alias", "dbs", "doms") {
+foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms") {
 	$tmpl->{$l.'limit'} = &parse_none_def($l.'limit');
 	if ($in{$l."limit_mode"} == 2) {
 		$in{$l.'limit'} =~ /^\d+$/ ||
