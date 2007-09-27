@@ -9841,7 +9841,7 @@ $d->{'email'} = $parent->{'email'};
 # Returns undef on success, or an error message on failure.
 sub check_virtual_server_config
 {
-local $clink = "../config.cgi?$module_name";
+local $clink = "edit_newfeatures.cgi";
 
 # Make sure networking is supported
 if (!&foreign_check("net")) {
@@ -10147,6 +10147,7 @@ if ($config{'spam'}) {
 
 if ($config{'virus'}) {
 	# Make sure ClamAV is installed and working
+	$config{'check_evirusspam'} || return $text{'check_evirusspam'};
 	&full_clamscan_path() ||
 		return &text('index_evirus', "<tt>$config{'clamscan_cmd'}</tt>", $clink);
 	if ($config{'clamscan_cmd'} eq "clamdscan") {

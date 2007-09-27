@@ -37,11 +37,9 @@ if (&need_config_check() && &can_check_config()) {
 	print &ui_submit($text{'index_srefresh'});
 	print &ui_form_end();
 
-	if (@plugins) {
-		print &ui_form_start("edit_newplugin.cgi");
-		print &ui_submit($text{'index_plugins'});
-		print &ui_form_end();
-		}
+	print &ui_form_start("edit_newfeatures.cgi");
+	print &ui_submit($text{'index_featuresb'});
+	print &ui_form_end();
 
 	print &ui_form_start("edit_newtmpl.cgi");
 	print &ui_submit($text{'index_tmpls'});

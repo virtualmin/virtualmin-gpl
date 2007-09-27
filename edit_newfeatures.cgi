@@ -1,9 +1,5 @@
 #!/usr/local/bin/perl
 # Display all supported plugins and features
-# XXX support all config modes (what about logrotate mode 3? Force on?)
-# XXX saving
-# XXX remove from Module Config
-# XXX do config check after saving
 
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'features_ecannot'});
@@ -37,8 +33,8 @@ foreach $f (@features) {
 			"<img src=images/tick.gif>",
 			$text{'feature_'.$f},
 			$text{'features_feature'},
-			undef,
-			&ui_checkbox("factive", $f, "", $config{$f} != 2),
+			$module_info{'version'},
+			&ui_checkbox("factive", $f, "", $config{$f} == 3),
 			&ui_links_row(\@acts)
 			], \@tds);
 		}
@@ -47,10 +43,10 @@ foreach $f (@features) {
 		print &ui_checked_columns_row([
 			$text{'feature_'.$f},
 			$text{'features_feature'},
-			undef,
+			$module_info{'version'},
 			&ui_checkbox("factive", $f, "", $config{$f} != 2),
 			&ui_links_row(\@acts)
-			], \@tds, "mods", $f, $config{$f} != 0);
+			], \@tds, "fmods", $f, $config{$f} != 0);
 		}
 	}
 

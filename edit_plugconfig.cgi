@@ -34,6 +34,6 @@ if (!$func) {
 print &ui_table_end();
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 
-&ui_print_footer("edit_newplugin.cgi", $text{'newplugin_return'},
+&ui_print_footer("edit_newfeatures.cgi", $text{'features_return'},
 		 "", $text{'index_return'});
 

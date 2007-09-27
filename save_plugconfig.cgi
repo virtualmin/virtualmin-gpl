@@ -32,5 +32,5 @@ if (!$func) {
 &write_file("$config_directory/$m/config", \%pconfig);
 &unlock_file("$config_directory/$m/config");
 &webmin_log("_config_", undef, undef, \%in, $m);
-&redirect("edit_newplugin.cgi");
+&redirect("edit_newfeatures.cgi");
 

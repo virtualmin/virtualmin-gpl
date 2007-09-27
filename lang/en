@@ -154,7 +154,7 @@ index_squotas4g=Active for users and groups on home directories filesystem $1, a
 index_squotas5=Active for users only on home directories and email filesystem $1.
 index_squotas5g=Active for users and groups on home directories and email filesystem $1.
 index_srefresh=Re-check and refresh configuration
-index_plugins=Manage Plugin Modules
+index_featuresb=Manage Enabled Features and Plugins
 index_tmpls=Edit Server Templates
 index_smail=Mail server
 index_needcheck=Virtualmin's configuration has not been checked since it was last updated. Click the button below to verify it now.
@@ -1486,6 +1486,7 @@ check_eget_group=External quota commands are enabled, but the command to get a s
 check_quotacommands=External quota commands will be used for virtual servers and mailboxes.
 check_eclamd=You have selected to use <tt>clamdscan</tt> for virus scanning, but the <tt>clamd</tt> server it talks to is not running
 check_eresolv=Virtualmin is configured to setup DNS zones, but this system is not setup to use itself as a DNS server. Either add 127.0.0.1 to the <a href='$1'>list of DNS servers</a>, or turn off the BIND feature on the <a href='$2'>module config</a> page.
+check_evirusspam=Virus scanning cannot be enabled without spam filtering
 
 allwebmin_ecannot=You are not allowed to update all Webmin users
 allwebmin_title=Updating Webmin Users
@@ -3757,12 +3758,14 @@ sv_eclamscan=The <tt>clamscan</tt> virus scanning command is not installed
 sv_etest=The selected virus scanning command does not work : $1
 sv_etestok=No virus report produced - perhaps this is not a ClamAV program?
 
-features_title=Enabled Features
+features_title=Features and Plugins
 features_ecannot=You are not allowed to edit enabled features
 newfeatures_title=$features_title
 features_name=Feature or Plugin
 features_type=Source
 features_feature=Core
 features_plugin=Plugin
-features_desc=XXX
+features_desc=This page allows you to select the core features and plugins that are available for use by virtual servers. The checkbox in the first column determines if it is available at all, while the box in the <b>Default</b> column controls whether or not it is enabled by default.
 features_used=Show domains
+features_err=Failed to save enabled features
+features_return=list of features and plugins

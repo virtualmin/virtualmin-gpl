@@ -2,10 +2,9 @@
 # Update both enabled core features and plugin modules
 
 require './virtual-server-lib.pl';
+&error_setup($text{'features_err'});
 &can_edit_templates() || &error($text{'features_ecannot'});
 &ReadParse();
-
-# Validate features
 
 # Validate plugins
 @newplugins = split(/\0/, $in{'mods'});
@@ -18,18 +17,57 @@ foreach $p (@newplugins) {
 		}
 	}
 
-# Work out which ones are not on by default
+# Work out which plugins are not on by default
 %active = map { $_, 1 } split(/\0/, $in{'active'});
 foreach $p (split(/\0/, $in{'allplugins'})) {
 	push(@inactive, $p) if (!$active{$p});
 	}
 
-# Update module config
+# Update module config with features and plugins
+%factive = map { $_, 1 } split(/\0/, $in{'factive'});
+%fselected = map { $_, 1 } split(/\0/, $in{'fmods'});
+foreach $f (@features) {
+	if (&indexof($f, @vital_features) >= 0) {
+		# Features that are never disabled can only be switched
+		# to be not selected by default
+		$config{$f} = $factive{$f} ? 3 : 1;
+		}
+	else {
+		# Other features may be active, active but not selected by
+		# default, or disabled
+		if (!$fselected{$f}) {
+			# Totally disabled
+			$config{$f} = 0;
+			}
+		elsif ($factive{$f}) {
+			# Enabled by default
+			if ($f eq "logrotate" && $config{$f} != 1) {
+				# For logrotate, use always mode unless the user
+				# had it on enabled but optional
+				$config{$f} = 3;
+				}
+			else {
+				$config{$f} = 1;
+				}
+			}
+		else {
+			# Enabled, but not on by default
+			$config{$f} = 2;
+			}
+		}
+	}
 $config{'plugins'} = join(" ", @newplugins);
 $config{'plugins_inactive'} = join(" ", @inactive);
 
 # Validate new settings with a config check
-# XXX
+&set_all_null_print();
+$cerr = &check_virtual_server_config();
+&error($cerr) if ($cerr);
+
+# Update the procmail setting for default delivery
+if ($config{'spam'}) {
+	&setup_default_delivery();
+	}
 
 # Save the config
 &lock_file($module_config_file);

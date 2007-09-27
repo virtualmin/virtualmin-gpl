@@ -1,0 +1,13 @@
+<header>Features and Plugins</header>
+
+This page displays all available Virtualmin core features and plugin modules,
+and allows you to select which are available for use when creating new virtual servers. For each you can control its availability using the checkbox in the first column, except for the <b>Home directory</b> and <b>Administration user</b> which are so critical that they cannot be turned off.<p>
+
+If there are some features that you don't want selected by default when creating new virtual servers, they can be de-selected in the <b>Default</b> column - for example, you might want to setup an SSL website for new domains occasionally, but not all the time. <p>
+
+<h3>More about plugins</h3>
+
+Plugins are Webmin modules which provided additional server and mailbox features for Virtualmin. Unlike the core features, they can be installed separately and written by third-party developers.  Like Webmin and Usermin, Virtualmin has an API for writing plug-in modules. It is somewhat different, however, in that Virtualmin modules are also Webmin modules but they also tie directly to Virtualmin domains, so that when a domain is modified, the third party modules will also be modified. Virtualmin modules also have the ability to check for configured Virtualmin features when being installed, to insure compatibility with the system.<p>
+
+<footer>
+
