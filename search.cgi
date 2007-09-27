@@ -28,13 +28,29 @@ foreach $d (&list_domains()) {
 	}
 
 &ui_print_header(undef, $text{'search_title'}, "");
+$isfeat = &indexof($in{'field'}, @features) >= 0;
+if ($isfeat) {
+	$fname = $text{'feature_'.$in{'field'}};
+	}
 
 if (!@doms) {
-	print "<b>",&text('search_none', "<tt>$oldwhat</tt>"),"</b><p>\n";
+	if ($isfeat) {
+		print "<b>",&text('search_nonef', $fname),"</b><p>\n";
+		}
+	else {
+		print "<b>",&text('search_none',
+				  "<tt>$oldwhat</tt>"),"</b><p>\n";
+		}
 	}
 else {
-	print "<b>",&text('search_results', "<tt>$oldwhat</tt>",
-			  scalar(@doms)),"</b><p>\n";
+	if ($isfeat) {
+		print "<b>",&text('search_resultsf', $fname,
+				  scalar(@doms)),"</b><p>\n";
+		}
+	else {
+		print "<b>",&text('search_results', "<tt>$oldwhat</tt>",
+				  scalar(@doms)),"</b><p>\n";
+		}
 	print &ui_form_start("domain_form.cgi");
 	@links = ( );
 	if ($virtualmin_pro) {

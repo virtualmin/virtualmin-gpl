@@ -1065,7 +1065,9 @@ other=Other...
 
 search_title=Search Results
 search_none=No virtual servers containing $1 were found.
+search_nonef=No virtual servers using the feature $1 were found.
 search_results=Found $2 virtual servers matching $1 ..
+search_resultsf=Found $2 virtual servers using the feature $1 ..
 
 import_title=Import Virtual Server
 import_desc1=This form can be used to bring an existing domain on your system under the control of Virtualmin. Mailboxes and aliases for the domain name, any existing Apache virtual server and DNS domain will be automatically detected. You can also enter the name of a database to associate with the domain, if any exist.
@@ -1572,6 +1574,7 @@ log_upgrade_scripts=Upgraded $1 scripts
 log_uninstall_scripts=Uninstalled $1 scripts
 log_warn_scripts=Save script upgrade notification options
 log_plugins=Changed enabled plugins
+log_features=Changed enabled features
 log_delete_domains=Deleted $1 virtual servers
 log_modify_domains=Updated $1 virtual servers
 log_newips_domains=Changed the IP address of $1 virtual servers
@@ -3753,3 +3756,13 @@ sv_eclamdscan=The <tt>clamdscan</tt> command which communications with the virus
 sv_eclamscan=The <tt>clamscan</tt> virus scanning command is not installed
 sv_etest=The selected virus scanning command does not work : $1
 sv_etestok=No virus report produced - perhaps this is not a ClamAV program?
+
+features_title=Enabled Features
+features_ecannot=You are not allowed to edit enabled features
+newfeatures_title=$features_title
+features_name=Feature or Plugin
+features_type=Source
+features_feature=Core
+features_plugin=Plugin
+features_desc=XXX
+features_used=Show domains

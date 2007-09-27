@@ -9278,9 +9278,9 @@ sub domain_redirect
 # and icons
 sub get_template_pages
 {
-local @tmpls = ( 'tmpl', 'user', 'update',
+local @tmpls = ( 'features', 'tmpl', 'user', 'update',
    $config{'localgroup'} ? ( 'local' ) : ( ),
-   'bw', 'plugin',
+   'bw',
    $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'dynip', 'resels',
 		       'reseller', 'notify', 'scripts', 'styles' )
 		   : ( 'sharedips', 'dynip' ),
@@ -9292,6 +9292,7 @@ local @tmpls = ( 'tmpl', 'user', 'update',
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
    );
 local %tmplcat = (
+	'features' => 'setting',
 	'user' => 'email',
 	'update' => 'email',
 	'local' => 'email',
