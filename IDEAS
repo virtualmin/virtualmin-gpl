@@ -62,10 +62,6 @@
  - rails scripts should be able to make use of balancer
 	- generic proxying page
 
- - consolidate plugins and features onto one page
-	- rename Module Config and Recheck Config
-
  - admin messages module FS#3235
 	- release when 3.47 is
 
- - Usermin IMAP should set/use read flags
