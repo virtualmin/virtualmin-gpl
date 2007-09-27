@@ -35,11 +35,11 @@ EOF
 $onch = "onChange='pchange(form)'";
 
 print &ui_form_start("import.cgi", "post");
-print &ui_table_start($text{'import_header'}, "width=100%", 4);
+print &ui_table_start($text{'import_header'}, "width=100%", 2);
 
 # Domain name
 print &ui_table_row($text{'import_dom'},
-		    &ui_textbox("dom", undef, 40), 3);
+		    &ui_textbox("dom", undef, 40));
 
 # Parent virtual server
 @doms = sort { $a->{'user'} cmp $b->{'user'} }
@@ -50,7 +50,7 @@ if (@doms) {
 			      [ [ 1, $text{'migrate_parent1'}, $onch ],
 				[ 0, $text{'migrate_parent0'}, $onch ] ])."\n".
 			    &ui_select("parent", undef,
-				       [ map { [ $_->{'user'} ] } @doms ]), 3);
+				       [ map { [ $_->{'user'} ] } @doms ]));
 	}
 else {
 	print &ui_hidden("parent_def", 1);
@@ -59,13 +59,13 @@ else {
 print &ui_table_row($text{'import_user'},
     &ui_radio("user_def", 0, [ [ 1, $text{'import_ucr'} ],
 			       [ 0, $text{'import_uex'} ] ])."\n".
-    &unix_user_input("user"), 3);
+    &unix_user_input("user"));
 
 # New or existing group
 print &ui_table_row($text{'import_group'},
     &ui_radio("group_def", 0, [ [ 1, $text{'import_gdf'} ],
 			       [ 0, $text{'import_gex'} ] ])."\n".
-    &unix_group_input("group"), 3);
+    &unix_group_input("group"));
 
 # Pattern for mailbox users
 print &ui_table_row($text{'import_regexp'},
@@ -74,11 +74,11 @@ print &ui_table_row($text{'import_regexp'},
 
 # Home directory
 print &ui_table_row($text{'import_home'},
-    &ui_opt_textbox("home", undef, 40, $text{'import_auto'}), 3);
+    &ui_opt_textbox("home", undef, 40, $text{'import_auto'}));
 
 # Domain prefix
 print &ui_table_row($text{'migrate_prefix'},
-	   &ui_opt_textbox("prefix", undef, 20, $text{'migrate_auto'}), 3);
+	   &ui_opt_textbox("prefix", undef, 20, $text{'migrate_auto'}));
 
 # Password
 print &ui_table_row($text{'import_pass'},
@@ -98,16 +98,16 @@ print &ui_table_row($text{'import_hasvirt'},
 
 if (&has_home_quotas()) {
 	print &ui_table_row($text{'form_quota'},
-		    &quota_input("quota", $config{'defquota'}, "home"), 3);
+		    &quota_input("quota", $config{'defquota'}, "home"));
 	}
 
 if ($config{'mysql'}) {
 	print &ui_table_row($text{'import_db_mysql'},
-			    &ui_textbox("db_mysql", undef, 40), 3);
+			    &ui_textbox("db_mysql", undef, 40));
 	}
 if ($config{'postgres'}) {
 	print &ui_table_row($text{'import_db_postgres'},
-			    &ui_textbox("db_postgres", undef, 40), 3);
+			    &ui_textbox("db_postgres", undef, 40));
 	}
 
 print &ui_table_end();

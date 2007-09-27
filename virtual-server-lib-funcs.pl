@@ -1278,6 +1278,7 @@ if ($_[2] && !$_[0]->{'domainowner'}) {
 # Rename user in secondary groups, and update membership
 local @groups = &list_all_groups();
 local %secs = map { $_, 1 } @{$_[0]->{'secs'}};
+local @sgroups = &allowed_secondary_groups($_[2]);
 foreach my $group (@groups) {
 	local @mems = split(/,/, $group->{'members'});
 	local $idx = &indexof($_[1]->{'user'}, @mems);
@@ -1285,16 +1286,19 @@ foreach my $group (@groups) {
 	if ($idx >= 0) {
 		# User is currently in group
 		if ($secs{$group->{'group'}}) {
-			# Just rename in group
+			# Just rename in group, if needed
 			if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 				$changed = 1;
 				$mems[$idx] = $_[0]->{'user'};
 				}
 			}
 		else {
-			# Remove from group
-			splice(@mems, $idx, 1);
-			$changed = 1;
+			# Remove from group, if this is a secondary managed
+			# by Virtualmin
+			if (&indexof($group->{'group'}, @sgroups) >= 0) {
+				splice(@mems, $idx, 1);
+				$changed = 1;
+				}
 			}
 		}
 	elsif ($secs{$group->{'group'}}) {
