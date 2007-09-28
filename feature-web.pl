@@ -869,7 +869,8 @@ return @dirs;
 }
 
 # backup_web(&domain, file)
-# Save the virtual server's Apache config as a separate file
+# Save the virtual server's Apache config as a separate file, except for 
+# ServerAlias lines for alias domains
 sub backup_web
 {
 return 1 if ($_[0]->{'alias'} && $_[0]->{'alias_mode'});
@@ -879,8 +880,17 @@ local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 if ($virt) {
 	local $lref = &read_file_lines($virt->{'file'});
 	local $l;
+	local @adoms = &get_domain_by("alias", $_[0]->{'id'});
+	local %adoms = map { $_->{'dom'}, 1 } @adoms;
 	&open_tempfile(FILE, ">$_[1]");
 	foreach $l (@$lref[$virt->{'line'} .. $virt->{'eline'}]) {
+		if ($l =~ /^ServerAlias\s+(.*)/i) {
+			local @sa = split(/\s+/, $1);
+			@sa = grep { !($adoms{$_} ||
+				       /^([^\.]+)\.(\S+)/ && $adoms{$2}) } @sa;
+			next if (!@sa);
+			$l = "ServerAlias ".join(" ", @sa);
+			}
 		&print_tempfile(FILE, "$l\n");
 		}
 	&close_tempfile(FILE);
