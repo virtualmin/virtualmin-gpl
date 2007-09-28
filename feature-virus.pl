@@ -357,7 +357,10 @@ if (!&has_command("clamd")) {
 	}
 &foreign_require("init", "init-lib.pl");
 if (&init::action_status("clamd-wrapper")) {
-	return 0;	# CentOS, not setup yet
+	return 0;	# Redhat, not setup yet
+	}
+elsif (&init::action_status("clamav-daemon")) {
+	return 0;	# Ubuntu
 	}
 # XXX
 return -1;
@@ -373,13 +376,13 @@ return if ($st == 1 || $st == -1);
 
 &foreign_require("init", "init-lib.pl");
 if (&init::action_status("clamd-wrapper")) {
-        # Looks like a centos-ish system .. start by creating the .conf file
+        # Looks like a Redhat system .. start by creating the .conf file
 	local $service = "virtualmin";
 	local $cfile = "/etc/clamd.$service.conf";
 	local $srcpat = "/usr/share/doc/clamav-server-*/clamd.conf";
 	local ($srcfile) = glob($srcpat);
 	&$first_print(&text('clamd_copyconf', "<tt>$cfile</tt>"));
-	if (!$srcfile) {
+	if (!$srcfile && !-r $cfile) {
 		&$second_print(&text('clamd_esrcfile', "<tt>$srcpat</tt>"));
 		return 0;
 		}
@@ -437,6 +440,21 @@ if (&init::action_status("clamd-wrapper")) {
 		}
         }
 
+elsif (&init::action_status("clamav-daemon")) {
+	# Ubuntu .. all we have to do is enable and start the daemon!
+	&$first_print(&text('clamd_start'));
+	local $ifile = &init::action_filename("clamav-daemon");
+	&init::enable_at_boot("clamav-daemon");
+	local $out = &backquote_logged("$ifile start 2>&1");
+	if ($? || $out =~ /failed|error/i) {
+		&$second_print(&text('clamd_estart',
+				"<tt>".&html_escape($out)."</tt>"));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	}
+
 return 1;
 }
 
@@ -444,6 +462,23 @@ return 1;
 # Shut down the clamd process. May also print stuff.
 sub disable_clamd
 {
+&foreign_require("init", "init-lib.pl");
+foreach my $init ("clamd-wrapper", "clamav-daemon") {
+	if (&init::action_status($init)) {
+		&$first_print(&text('clamd_stop'));
+		local $ifile = &init::action_filename($init);
+		&init::enable_at_boot($init);
+		local $out = &backquote_logged("$ifile stop 2>&1");
+		if ($? || $out =~ /failed|error/i) {
+			&$second_print(&text('clamd_estop',
+					"<tt>".&html_escape($out)."</tt>"));
+			return 0;
+			}
+		&$second_print($text{'setup_done'});
+		return 1;
+		}
+	}
+return 0;
 }
 
 $done_feature_script{'virus'} = 1;

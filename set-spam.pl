@@ -13,6 +13,7 @@ $0 = "$pwd/set-spam.pl";
 require './virtual-server-lib.pl';
 $< == 0 || die "set-spam.pl must be run as root";
 $config{'spam'} || &usage("Spam filtering is not enabled for Virtualmin");
+&set_all_text_print();
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -41,13 +42,20 @@ while(@ARGV > 0) {
 	elsif ($a eq "--show") {
 		$show = 1;
 		}
+	elsif ($a eq "--enable-clamd") {
+		$clamd = 1;
+		}
+	elsif ($a eq "--disable-clamd") {
+		$clamd = 0;
+		}
 	else {
 		&usage();
 		}
 	}
 
 # Validate inputs
-$virus_scanner || $spam_client || $show || &usage("Nothing to do");
+$virus_scanner || $spam_client || $show || defined($clamd) ||
+	&usage("Nothing to do");
 if ($spam_client) {
 	&has_command($spam_client) ||
 	    &usage("SpamAssassin client program $spam_client does not exist");
@@ -56,8 +64,16 @@ if ($virus_scanner) {
 	local ($cmd, @args) = &split_quoted_string($virus_scanner);
 	&has_command($cmd) ||
 		&usage("Virus scanning command $cmd does not exist");
-	$err = &test_virus_scanner($virus_scanner);
-	$err && &usage("Virus scanner failed : $err");
+	if (!$clamd || $virus_scanner ne "clamdscan") {
+		# Only test if we aren't enabling clamd anyway
+		$err = &test_virus_scanner($virus_scanner);
+		$err && &usage("Virus scanner failed : $err");
+		}
+	}
+if (defined($clamd)) {
+	$cs = &check_clamd_status();
+	$cs >= 0 || &usage("Virtualmin does not know how to enable clamd on ".
+			   "your system");
 	}
 
 if ($spam_client || $spam_host || $spam_max) {
@@ -69,6 +85,21 @@ if ($spam_client || $spam_host || $spam_max) {
 	$spam_max = $old_spam_max if (!defined($spam_max));
 	&save_global_spam_client($spam_client, $spam_host, $spam_max);
 	print ".. done\n\n";
+	}
+
+if (defined($clamd)) {
+	if ($clamd) {
+		print "Configuring and enabling clamd ..\n";
+		&$indent_print();
+		&enable_clamd();
+		&$outdent_print();
+		}
+	else {
+		print "Disabling clamd ..\n";
+		&$indent_print();
+		&disable_clamd();
+		&$outdent_print();
+		}
 	}
 
 if ($virus_scanner) {
@@ -107,6 +138,9 @@ print "                   [--spamc-host hostname | --no-spamc-host]\n";
 print "                   [--spamc-max bytes | --no-spamc-max]\n";
 print "                   [--use-clamscan | --use-clamdscan |\n";
 print "                    --use-virus command]\n";
+if (&check_clamd_status() >= 0) {
+	print "                   [--enable-clamd | --disable-clamd]\n";
+	}
 print "                   [--show]\n";
 exit(1);
 }

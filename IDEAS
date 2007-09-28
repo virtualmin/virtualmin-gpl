@@ -67,3 +67,5 @@
 
  - button to setup clamd
 	- enable at install time if possible, and change default scanner
+	- test on CentOS
+	- solaris

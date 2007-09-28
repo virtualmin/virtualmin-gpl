@@ -47,7 +47,22 @@ print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
 # Check if clamd is running, if not offer to set it up
-# XXX
+if ($config{'virus'}) {
+	$cs = &check_clamd_status();
+	if ($cs != -1) {
+		print "<hr>\n";
+		print &ui_buttons_start();
+		if ($cs) {
+			print &ui_buttons_row("disable_clamd.cgi",
+				$text{'sv_disable'}, $text{'sv_disabledesc'});
+			}
+		else {
+			print &ui_buttons_row("enable_clamd.cgi",
+				$text{'sv_enable'}, $text{'sv_enabledesc'});
+			}
+		print &ui_buttons_end();
+		}
+	}
 
 &ui_print_footer("", $text{'index_return'});
 

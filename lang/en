@@ -3166,7 +3166,7 @@ spam_scanner0=Standalone scanner (<tt>clamscan</tt>)
 spam_scanner1=Server scanner (<tt>clamdscan</tt>)
 spam_scanner2=Other program $1
 spam_escanner=Missing or invalid virus scanning program
-spam_eclamdscan=The server virus scanner cannot be selected unless the <tt>clamd</tt> daemon is running
+spam_eclamdscan=The server virus scanner cannot be selected unless the <tt>clamd</tt> virus scanning server is running
 
 cat_objects=Server Objects
 cat_server=Server Configuration
@@ -3757,6 +3757,18 @@ sv_eclamdscan=The <tt>clamdscan</tt> command which communications with the virus
 sv_eclamscan=The <tt>clamscan</tt> virus scanning command is not installed
 sv_etest=The selected virus scanning command does not work : $1
 sv_etestok=No virus report produced - perhaps this is not a ClamAV program?
+sv_disable=Disable ClamAV Server
+sv_disabledesc=Click this button to shut down the ClamAV virus scanning server. It will no longer be possible to use the <tt>clamdscan</tt> server scanner above.
+sv_enable=Enable ClamAV Server
+sv_enabledesc=Click this button to configure and start the ClamAV virus scanning server <tt>clamd</tt>. This will allow you to select the <tt>clamdscan</tt> server scanner above, which is generally faster when processing a large volume of email.
+sv_title2=Disable Virus Scanning Server
+sv_title3=Enable Virus Scanning Server
+sv_disabling=Disabling the ClamAV scanning server ..
+sv_return=spam and virus scanning
+sv_enabling=Configuring and enabling the ClamAV scanning server ..
+sv_enabledok=.. all done
+sv_notenabled=.. something went wrong!
+sv_warning=Warning! Virtualmin is configured to use the server scanner, but the ClamAV server process is no longer running
 
 features_title=Features and Plugins
 features_ecannot=You are not allowed to edit enabled features
@@ -3769,3 +3781,13 @@ features_desc=This page allows you to select the core features and plugins that 
 features_used=Show domains
 features_err=Failed to save enabled features
 features_return=list of features and plugins
+
+clamd_copyconf=Creating ClamAV configuration file $1 ..
+clamd_esrcfile=.. source file matching $1 was not found!
+clamd_initscript=Fixing ClamAV bootup action $1 ..
+clamd_initalready=.. already done
+clamd_start=Starting ClamAV server and enabling at boot ..
+clamd_estart=.. failed to start : $1
+clamd_stop=Stopping ClamAV server and disabling at boot ..
+clamd_estop=.. failed : $1
+
