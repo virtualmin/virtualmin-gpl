@@ -344,7 +344,6 @@ else {
 # check_clamd_status()
 # Checks if clamd is configured and running on this system. Returns 0 if not,
 # 1 if yes, or -1 if we can't tell (due to a non-supported OS).
-# XXX test on CentOS, RHEL?, Fedora, Debian, Ubuntu, Solaris
 sub check_clamd_status
 {
 if (&find_byname("clamd")) {
@@ -378,7 +377,7 @@ return if ($st == 1 || $st == -1);
 if (&init::action_status("clamd-wrapper")) {
         # Looks like a Redhat system .. start by creating the .conf file
 	local $service = "virtualmin";
-	local $cfile = "/etc/clamd.$service.conf";
+	local $cfile = "/etc/clamd.d/$service.conf";
 	local $srcpat = "/usr/share/doc/clamav-server-*/clamd.conf";
 	local ($srcfile) = glob($srcpat);
 	&$first_print(&text('clamd_copyconf', "<tt>$cfile</tt>"));
@@ -404,6 +403,10 @@ if (&init::action_status("clamd-wrapper")) {
 		}
 	&flush_file_lines($cfile);
 	&unlock_file($cfile);
+	local $othercfile = "/etc/clamd.conf";
+	if (!-r $othercfile) {
+		&symlink_logged($cfile, $othercfile);
+		}
 	&$second_print($text{'setup_done'});
 
 	# Fix the init wrapper script
@@ -423,8 +426,23 @@ if (&init::action_status("clamd-wrapper")) {
 				}
 			}
 		&flush_file_lines($ifile);
+		&set_ownership_permissions(undef, undef, 0755, $ifile);
 		&unlock_file($ifile);
 		&$second_print($text{'setup_done'});
+		}
+
+	# Copy the clamd program
+	local $clamd = &has_command("clamd");
+	local $clamdcopy = $clamd.".".$service;
+	if (!-r $clamdcopy) {
+		&$first_print(&text('clamd_copybin', "<tt>$clamdcopy</tt>"));
+		&copy_source_dest($clamd, $clamdcopy);
+		&$second_print($text{'setup_done'});
+		}
+
+	# Create the socket directory
+	if (-d "/var/run/clamd.$service") {
+		&make_dir("/var/run/clamd.$service", 0777);
 		}
 
 	# Start the daemon, and enable at boot

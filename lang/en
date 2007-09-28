@@ -3790,4 +3790,4 @@ clamd_start=Starting ClamAV server and enabling at boot ..
 clamd_estart=.. failed to start : $1
 clamd_stop=Stopping ClamAV server and disabling at boot ..
 clamd_estop=.. failed : $1
-
+clamd_copybin=Copying ClamAV server to $1 ..
