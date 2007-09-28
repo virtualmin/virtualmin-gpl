@@ -3784,6 +3784,7 @@ features_return=list of features and plugins
 
 clamd_copyconf=Creating ClamAV configuration file $1 ..
 clamd_esrcfile=.. source file matching $1 was not found!
+clamd_esrcalready=.. already exists
 clamd_initscript=Fixing ClamAV bootup action $1 ..
 clamd_initalready=.. already done
 clamd_start=Starting ClamAV server and enabling at boot ..
@@ -3791,3 +3792,7 @@ clamd_estart=.. failed to start : $1
 clamd_stop=Stopping ClamAV server and disabling at boot ..
 clamd_estop=.. failed : $1
 clamd_copybin=Copying ClamAV server to $1 ..
+clamd_logdir=Creating logging directory ..
+clamd_logalready=.. log file already exists
+clamd_logdone=.. created $1
+clamd_lognone=.. could not work out directory from config file

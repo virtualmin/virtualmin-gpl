@@ -733,3 +733,4 @@ Moved the buttons for disabling and enabling multiple virtual servers off the Up
 Plugin modules can now define additional sections to appear on the right-hand side of the framed theme, and new global options to appear in the System Settings categories on the left.
 The default number of alias servers that new virtual server owners can create can now be set on the Server Templates page.
 Removed the Plugin Modules page and the section for enabled features from the Module Config page, and merged them into a single Features and Plugins page where you can select which are enabled.
+Added a button to the Spam and Virus Scanning page to configure and start clamd, so that the clamdscan virus scanner can be used to save on CPU.

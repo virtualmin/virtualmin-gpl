@@ -350,18 +350,25 @@ if (&find_byname("clamd")) {
 	# Running already, so we assume everything is cool
 	return 1;
 	}
-if (!&has_command("clamd")) {
+local $clamd = &has_command("clamd") ||
+	       &has_command("/opt/csw/sbin/clamd");
+if (!$clamd) {
 	# No installed
 	return -1;
 	}
 &foreign_require("init", "init-lib.pl");
-if (&init::action_status("clamd-wrapper")) {
-	return 0;	# Redhat, not setup yet
+if (&init::action_status("clamdscan-clamd")) {
+	return 0;	# Joe's init script for redhat
 	}
 elsif (&init::action_status("clamav-daemon")) {
 	return 0;	# Ubuntu
 	}
-# XXX
+elsif (&init::action_status("clamd-wrapper")) {
+	return 0;	# Redhat, not setup yet
+	}
+elsif (-r "/opt/csw/etc/clamd.conf.CSW") {
+	return 0;	# Solaris CSW package
+	}
 return -1;
 }
 
@@ -373,8 +380,32 @@ sub enable_clamd
 local $st = &check_clamd_status();
 return if ($st == 1 || $st == -1);
 
+# Check for simple init scripts
+local $init;
 &foreign_require("init", "init-lib.pl");
-if (&init::action_status("clamd-wrapper")) {
+foreach my $i ("clamav-daemon", "clamdscan-clamd") {
+	if (&init::action_status($i)) {
+		$init = $i;
+		last;
+		}
+	}
+
+if ($init) {
+	# Ubuntu or Joe's .. all we have to do is enable and start the daemon!
+	&$first_print(&text('clamd_start'));
+	local $ifile = &init::action_filename($init);
+	&init::enable_at_boot($init);
+	local $out = &backquote_logged("$ifile start 2>&1");
+	if ($? || $out =~ /failed|error/i) {
+		&$second_print(&text('clamd_estart',
+				"<tt>".&html_escape($out)."</tt>"));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	}
+
+elsif (&init::action_status("clamd-wrapper")) {
         # Looks like a Redhat system .. start by creating the .conf file
 	local $service = "virtualmin";
 	local $cfile = "/etc/clamd.d/$service.conf";
@@ -458,11 +489,59 @@ if (&init::action_status("clamd-wrapper")) {
 		}
         }
 
-elsif (&init::action_status("clamav-daemon")) {
-	# Ubuntu .. all we have to do is enable and start the daemon!
+elsif (-r "/opt/csw/etc/clamd.conf.CSW") {
+	# Solaris CSW package .. copy config file
+	local $cfile = "/opt/csw/etc/clamd.conf";
+	local $srcfile = "/opt/csw/etc/clamd.conf.CSW";
+	&$first_print(&text('clamd_copyconf', "<tt>$cfile</tt>"));
+	if (-r $cfile) {
+		&$second_print($text{'clamd_esrcalready'});
+		}
+	else {
+		&copy_source_dest($srcfile, $cfile);
+		&$second_print($text{'setup_done'});
+		}
+
+	# Create the log directory
+	&$first_print($text{'clamd_logdir'});
+	local $lref = &read_file_lines($cfile);
+	local ($logfile, $user);
+	foreach my $l (@$lref) {
+		if ($l =~ /^\s*LogFile\s+(\S+)/i) {
+			$logfile = $1;
+			}
+		elsif ($l =~ /^\s*User\s+(\S+)/i) {
+			$user = $1;
+			}
+		}
+	if (-r $logfile) {
+		&$second_print($text{'clamd_logalready'});
+		}
+	elsif ($logfile) {
+		local $logdir = $logfile;
+		$logdir =~ s/\/[^\/]+$//;
+		&make_dir($logdir, 0700);
+		if ($user) {
+			&set_ownership_permissions($user, undef, undef,$logdir);
+			}
+		else {
+			&set_ownership_permissions(undef, undef, 0777, $logdir);
+			}
+		&$second_print(&text('clamd_logdone', "<tt>$logdir</tt>"));
+		}
+	else {
+		&$second_print($text{'clamd_lognone'});
+		}
+
+	# Create or enable bootup action
 	&$first_print(&text('clamd_start'));
-	local $ifile = &init::action_filename("clamav-daemon");
-	&init::enable_at_boot("clamav-daemon");
+	local $init = "clamd-csw";
+	local $clamd = &has_command("clamd") ||
+		       &has_command("/opt/csw/sbin/clamd");
+	&init::enable_at_boot($init, "Start ClamAV server",
+			      "$clamd",
+			      "ps -ef | grep clamd | grep -v grep | grep -v \$\$ | awk '{ print \$2 }' | xargs kill");
+	local $ifile = &init::action_filename($init);
 	local $out = &backquote_logged("$ifile start 2>&1");
 	if ($? || $out =~ /failed|error/i) {
 		&$second_print(&text('clamd_estart',
@@ -481,7 +560,8 @@ return 1;
 sub disable_clamd
 {
 &foreign_require("init", "init-lib.pl");
-foreach my $init ("clamd-wrapper", "clamav-daemon") {
+foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-wrapper",
+		  "clamd-csw") {
 	if (&init::action_status($init)) {
 		&$first_print(&text('clamd_stop'));
 		local $ifile = &init::action_filename($init);
