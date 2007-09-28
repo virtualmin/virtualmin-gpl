@@ -4587,6 +4587,12 @@ if ($ok) {
 			$homeformat{$f} = $f;
 			$extract = "./.backup";
 			}
+		elsif (&indexof(".backup", @lines) >= 0) {
+			# Also home format, but with slightly different
+			# directory name
+			$homeformat{$f} = $f;
+			$extract = ".backup";
+			}
 
 		&execute_command("cd '$restoredir' && ($comp $q | tar xf - $extract)", undef, \$out, \$out);
 		if ($?) {
