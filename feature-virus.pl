@@ -341,6 +341,111 @@ else {
 	}
 }
 
+# check_clamd_status()
+# Checks if clamd is configured and running on this system. Returns 0 if not,
+# 1 if yes, or -1 if we can't tell (due to a non-supported OS).
+# XXX test on CentOS, RHEL?, Fedora, Debian, Ubuntu, Solaris
+sub check_clamd_status
+{
+if (&find_byname("clamd")) {
+	# Running already, so we assume everything is cool
+	return 1;
+	}
+if (!&has_command("clamd")) {
+	# No installed
+	return -1;
+	}
+&foreign_require("init", "init-lib.pl");
+if (&init::action_status("clamd-wrapper")) {
+	return 0;	# CentOS, not setup yet
+	}
+# XXX
+return -1;
+}
+
+# enable_clamd()
+# Do everything needed to configure and start clamd. May print stuff with the
+# standard functions.
+sub enable_clamd
+{
+local $st = &check_clamd_status();
+return if ($st == 1 || $st == -1);
+
+&foreign_require("init", "init-lib.pl");
+if (&init::action_status("clamd-wrapper")) {
+        # Looks like a centos-ish system .. start by creating the .conf file
+	local $service = "virtualmin";
+	local $cfile = "/etc/clamd.$service.conf";
+	local $srcpat = "/usr/share/doc/clamav-server-*/clamd.conf";
+	local ($srcfile) = glob($srcpat);
+	&$first_print(&text('clamd_copyconf', "<tt>$cfile</tt>"));
+	if (!$srcfile) {
+		&$second_print(&text('clamd_esrcfile', "<tt>$srcpat</tt>"));
+		return 0;
+		}
+	local $user = "nobody";
+	local @uinfo = getgrnam($user);
+	local $group = getgrgid($uinfo[3]);
+	&lock_file($cfile);
+	if (!-r $cfile) {
+		&copy_source_dest($srcfile, $cfile);
+		}
+	local $lref = &read_file_lines($cfile);
+	foreach my $l (@$lref) {
+		if ($l =~ /^\s*Example/) {
+			$l = "# Example";
+			}
+		$l =~ s/<SERVICE>/$service/g;
+		$l =~ s/<USER>/$user/g;
+		$l =~ s/<GROUP>/$group/g;
+		}
+	&flush_file_lines($cfile);
+	&unlock_file($cfile);
+	&$second_print($text{'setup_done'});
+
+	# Fix the init wrapper script
+	local $ifile = &init::action_filename("clamd-wrapper");
+	&$first_print(&text('clamd_initscript', "<tt>$ifile</tt>"));
+	local $lref = &read_file_lines($ifile);
+	local ($already) = grep { /^CLAMD_SERVICE=/ } @$lref;
+	if ($already) {
+		&$second_print($text{'clamd_initalready'});
+		}
+	else {
+		&lock_file($ifile);
+		for(my $i=0; $i<@$lref; $i++) {
+			if ($lref->[$i] !~ /^#/) {
+				splice(@$lref, $i, 0, "CLAMD_SERVICE=$service");
+				last;
+				}
+			}
+		&flush_file_lines($ifile);
+		&unlock_file($ifile);
+		&$second_print($text{'setup_done'});
+		}
+
+	# Start the daemon, and enable at boot
+	&$first_print(&text('clamd_start'));
+	&init::enable_at_boot("clamd-wrapper");
+	local $out = &backquote_logged("$ifile start 2>&1");
+	if ($? || $out =~ /failed|error/i) {
+		&$second_print(&text('clamd_estart',
+				"<tt>".&html_escape($out)."</tt>"));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+        }
+
+return 1;
+}
+
+# disable_clamd()
+# Shut down the clamd process. May also print stuff.
+sub disable_clamd
+{
+}
+
 $done_feature_script{'virus'} = 1;
 
 1;

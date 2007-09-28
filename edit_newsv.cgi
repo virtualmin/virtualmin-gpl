@@ -46,5 +46,8 @@ if ($config{'virus'}) {
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
+# Check if clamd is running, if not offer to set it up
+# XXX
+
 &ui_print_footer("", $text{'index_return'});
 

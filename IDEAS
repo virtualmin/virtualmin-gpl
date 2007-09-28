@@ -65,3 +65,5 @@
  - admin messages module FS#3235
 	- release when 3.47 is
 
+ - button to setup clamd
+	- enable at install time if possible, and change default scanner
