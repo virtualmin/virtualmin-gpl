@@ -9298,7 +9298,8 @@ local @tmpls = ( 'features', 'tmpl', 'user', 'update',
    &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
    &has_home_quotas() && !&has_quota_commands() ? ( 'quotacheck' ) : ( ),
 #   &can_show_history() ? ( 'history' ) : ( ),
-   $virtualmin_pro ? ( 'mxs', 'validate' ) : ( ),
+   $virtualmin_pro ? ( 'mxs' ) : ( ),
+   'validate',
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
    );
 local %tmplcat = (
