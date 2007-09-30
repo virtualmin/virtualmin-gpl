@@ -67,5 +67,5 @@
 
  - serial usage checking on virtualmin.com
 	- enforce in Virtualmin
-	- set servers_used and domains_used
 	- get from vlicence.cgi and compare
+	- verify that this works!

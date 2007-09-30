@@ -2552,6 +2552,8 @@ licence_doing=Now re-checking your Virtualmin licence ..
 licence_ok=.. licence is OK!
 licence_goterr=.. a problem was detected : $1
 licence_ecannot=You are not allowed to re-check the Virtualmin licence
+licence_maxdoms=Your system is licenced for only $1 servers, but you have $2.
+licence_maxservers=Your serial number is licenced for only $1 servers, but is being used on $2.
 
 config_deftheme=Global Webmin default
 config_oldtheme=Old Webmin theme

@@ -8188,7 +8188,8 @@ return 0;
 }
 
 # require_licence()
-# Reads in the file containing the licence_scheduled function. Returns 1 if OK, 0 if not
+# Reads in the file containing the licence_scheduled function.
+# Returns 1 if OK, 0 if not
 sub require_licence
 {
 return 0 if (!$virtualmin_pro);
@@ -8307,13 +8308,21 @@ if (!$id) {
 	$id = &get_system_hostname();
 	}
 
-local ($status, $expiry, $err, $doms) = &licence_scheduled($id);
+local ($status, $expiry, $err, $doms, $max_servers, $servers) =
+	&licence_scheduled($id);
 if ($status == 0 && $doms) {
 	# A domains limit exists .. check if we have exceeded it
 	local @doms = grep { !$_->{'alias'} } &list_domains();
 	if (@doms > $doms) {
 		$status = 1;
-		$err = "Your system is licenced for only $doms servers, but you have ".scalar(@doms).".";
+		$err = &text('licence_maxdoms', $doms, scalar(@doms));
+		}
+	}
+if ($status == 0 && $max_servers && !$err) {
+	# A servers limit exists .. check if we have exceeded it
+	if ($servers > $max_servers+1) {
+		$status = 1;
+		$err = &text('licence_maxservers', $doms, scalar(@doms));
 		}
 	}
 return ($status, $expiry, $err, $doms);
