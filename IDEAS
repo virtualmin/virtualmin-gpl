@@ -66,4 +66,6 @@
 	- release when 3.47 is
 
  - serial usage checking on virtualmin.com
-
+	- enforce in Virtualmin
+	- set servers_used and domains_used
+	- get from vlicence.cgi and compare

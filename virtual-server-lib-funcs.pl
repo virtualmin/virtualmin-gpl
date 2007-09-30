@@ -5246,7 +5246,7 @@ elsif ($mode == 1) {
 	gethostbyname($server) || &error($text{'backup_eserver1'});
 	$port =~ /^\d*$/ || &error($text{'backup_eport'});
 	$in{"$_[0]_path"} =~ /^\/\S/ || &error($text{'backup_epath'});
-	$in{"$_[0]_user"} =~ /^[^:\@\/]*$/ || &error($text{'backup_euser'});
+	$in{"$_[0]_user"} =~ /^[^:\/]*$/ || &error($text{'backup_euser'});
 	$in{"$_[0]_pass"} =~ /^[^:\@\/]*$/ || &error($text{'backup_epass'});
 	$in{"$_[0]_path"} =~ s/\/+$//;
 	return "ftp://".$in{"$_[0]_user"}.":".$in{"$_[0]_pass"}."\@".
