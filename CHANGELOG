@@ -736,3 +736,4 @@ Removed the Plugin Modules page and the section for enabled features from the Mo
 Added a button to the Spam and Virus Scanning page to configure and start clamd, so that the clamdscan virus scanner can be used to save on CPU.
 ---- Changes since 3.47 ----
 Updated Xoops script installer to version 2.0.17.1.
+Updated the Horde script installer to version 3.1.5, along with many Horde applications like IMP and Kronolith.
