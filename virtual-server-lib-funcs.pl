@@ -8274,9 +8274,12 @@ return ($licence{'status'}, $licence{'expiry'},
 sub update_licence_from_site
 {
 local ($licence) = @_;
-local ($status, $expiry, $err, $doms) = &check_licence_site();
+local ($status, $expiry, $err, $doms, $servers, $max_servers) =
+	&check_licence_site();
 $licence->{'status'} = $status;
 $licence->{'expiry'} = $expiry;
+$licence->{'used_servers'} = $servers;
+$licence->{'servers'} = $max_servers;
 $licence->{'err'} = $err;
 if (defined($doms)) {
 	# Only store the max domains if we got something valid back
@@ -8322,10 +8325,10 @@ if ($status == 0 && $max_servers && !$err) {
 	# A servers limit exists .. check if we have exceeded it
 	if ($servers > $max_servers+1) {
 		$status = 1;
-		$err = &text('licence_maxservers', $doms, scalar(@doms));
+		$err = &text('licence_maxservers', $max_servers, $servers);
 		}
 	}
-return ($status, $expiry, $err, $doms);
+return ($status, $expiry, $err, $doms, $servers, $max_servers);
 }
 
 # licence_warning_message()
