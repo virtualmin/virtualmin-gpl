@@ -18,7 +18,7 @@ return "SquirrelMail is a standards-based webmail package written in PHP";
 # script_squirrelmail_versions()
 sub script_squirrelmail_versions
 {
-return ( "1.4.9a", "1.5.1" );
+return ( "1.4.11", "1.5.1" );
 }
 
 sub  script_squirrelmail_version_desc
@@ -192,6 +192,14 @@ if (!$upgrade) {
 	local $cfile = "$opts->{'dir'}/config/config.php";
 	-r $cfile || return (0, "Failed to create config file");
 
+	# Create data directories
+	local $data_dir = "$opts->{'dir'}/data";
+	&make_dir($data_dir, 0700) if (!-d $data_dir);
+	&make_file_php_writable($d, $data_dir, 1, 1);
+	local $attachment_dir = "$opts->{'dir'}/attach";
+	&make_dir($attachment_dir, 0700) if (!-d $attachment_dir);
+	&make_file_php_writable($d, $attachment_dir, 1, 1);
+
 	# Update the config file
 	local $lref = &read_file_lines($cfile);
 	local $dburl = "$dbphptype://$dbuser:$dbpass\@$dbhost/$dbname";
@@ -213,6 +221,12 @@ if (!$upgrade) {
 			}
 		if ($l =~ /^\$default_folder_prefix\s*=\s*/) {
 			$l = "\$default_folder_prefix = '';";
+			}
+		if ($l =~ /^\$data_dir\s*=\s*/) {
+			$l = "\$data_dir = '$data_dir';";
+			}
+		if ($l =~ /^\$attachment_dir\s*=\s*/) {
+			$l = "\$attachment_dir = '$attachment_dir';";
 			}
 		}
 	&flush_file_lines($cfile);
@@ -250,10 +264,6 @@ if (!$upgrade) {
 				PRIMARY KEY (user,prefkey)
 			)");
 		}
-
-	# Make data directory writable
-	&set_ownership_permissions(undef, undef, 0777,
-				   "$opts->{'dir'}/data");
 
 	# Install the virtusertable plugin
 	local $vut = &get_mail_virtusertable();
