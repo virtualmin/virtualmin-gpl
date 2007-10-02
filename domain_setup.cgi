@@ -88,7 +88,7 @@ if (!$parentuser) {
 
 	# Parse mail group name
 	if ($in{'mgroup_def'}) {
-		($group, $gtry1, $gtry2) = &unixuser_name($in{'dom'});
+		($group, $gtry1, $gtry2) = &unixgroup_name($in{'dom'});
 		$group || &error(&text('setup_eauto2', $try1, $try2));
 		}
 	else {

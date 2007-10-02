@@ -74,18 +74,20 @@ if (&has_home_quotas() && !$d->{'parent'} && &can_edit_quotas($d)) {
 	$newdom{'quota'} = $in{'quota_def'} ? undef :
 				&quota_parse('quota', "home");
 	}
-foreach $f (@dom_features, @feature_plugins) {
-        if ($in{$f}) {
-		$newdom{$f} = 1;
-		if (!$d->{$f}) {
-			$check{$f}++;
+if (!$d->{'disabled'}) {
+	foreach $f (@dom_features, @feature_plugins) {
+		if ($in{$f}) {
+			$newdom{$f} = 1;
+			if (!$d->{$f}) {
+				$check{$f}++;
+				}
+			}
+		else {
+			$newdom{$f} = 0;
 			}
 		}
-	else {
-		$newdom{$f} = 0;
-		}
+	&set_chained_features(\%newdom);
 	}
-&set_chained_features(\%newdom);
 if (!$config{'all_namevirtual'} && !$d->{'alias'} && &can_use_feature("virt")) {
 	$newdom{'virt'} = $in{'virt'};
 	}

@@ -196,9 +196,23 @@ foreach $line (@lines) {
 				}
 			}
 
-		# Work out mailboxes group name
-		$dname =~ /^([^\.]+)/;
-		$group = $config{'longname'} ? $dname : $1;
+		if (!$user) {
+			# Work out mailboxes group name
+			($group, $gtry1, $gtry2) = &unixgroup_name($dname);
+			if (!$group) {
+				&line_error(&text('setup_eauto2',
+						  $gtry1, $gtry2));
+				next;
+				}
+			}
+		else {
+			# Check supplied username as a group
+			$group = $user;
+			if (defined(getgrnam($user))) {
+				&line_error($text{'setup_egroup'});
+				next;
+				}
+			}
 
 		# Check username restrictions
 		local $uerr = &useradmin::check_username_restrictions($user);
