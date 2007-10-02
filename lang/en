@@ -430,6 +430,7 @@ setup_virus=Setting up virus filtering ..
 setup_virusalready=.. already enabled!
 setup_eforceunder=You are only allowed to create domains under $1.
 setup_edenieddomain=The specified domain name is not allowed
+setup_edomainprefix=The domain name does not need to have $1 at the start
 setup_evadddomain=.. vadddomain failed : $1
 setup_fwding=Adding alias to forward all email to $1 ..
 setup_styleing=Applying initial website style '$1' ..
