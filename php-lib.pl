@@ -301,7 +301,8 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 		# Automatically generate
 		local $common = "#!/bin/sh\n".
 				"PHPRC=\$$dirvar/../etc/php$v->[0]\n".
-				"export PHPRC\n";
+				"export PHPRC\n".
+				"umask 022\n";
 		if ($mode eq "fcgid") {
 			local $defchildren = $tmpl->{'web_phpchildren'};
 			if (!$defchildren || $defchildren eq "none") {
