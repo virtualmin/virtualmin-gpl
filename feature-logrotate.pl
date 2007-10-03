@@ -292,12 +292,15 @@ if ($in{"logrotate_mode"} == 2) {
 	}
 }
 
-# chained_logrotate(&domain)
-# Logrotate is automatically enabled when a website is
+# chained_logrotate(&domain, [&old-domain])
+# Logrotate is automatically enabled when a website is, if set to always mode
+# and if the website is just being turned on now.
 sub chained_logrotate
 {
-local ($d) = @_;
-return $d->{'web'} && !$d->{'alias'} && !$d->{'subdom'};
+local ($d, $oldd) = @_;
+return $d->{'web'} && (!$oldd || !$oldd->{'web'}) &&
+       !$d->{'alias'} && !$d->{'subdom'} &&
+       $config{'logrotate'} == 3;
 }
 
 $done_feature_script{'logrotate'} = 1;

@@ -299,7 +299,7 @@ foreach $f (@features, @feature_plugins) {
 	$dom{$f} = &can_use_feature($f) && int($in{$f});
 	}
 &set_featurelimits_from_template(\%dom, $tmpl);
-&set_chained_features(\%dom);
+&set_chained_features(\%dom, undef);
 $dom{'home'} = &server_home_directory(\%dom, $parentdom);
 &complete_domain(\%dom);
 

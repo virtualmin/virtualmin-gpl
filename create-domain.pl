@@ -428,6 +428,7 @@ foreach $f (@feature_plugins) {
 	$dom{$f} = $plugin{$f} ? 1 : 0;
 	}
 &set_featurelimits_from_template(\%dom, $tmpl);
+&set_chained_features(\%dom, undef);
 
 # Work out home directory
 $dom{'home'} = &server_home_directory(\%dom, $parent);

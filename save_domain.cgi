@@ -86,7 +86,7 @@ if (!$d->{'disabled'}) {
 			$newdom{$f} = 0;
 			}
 		}
-	&set_chained_features(\%newdom);
+	&set_chained_features(\%newdom, $d);
 	}
 if (!$config{'all_namevirtual'} && !$d->{'alias'} && &can_use_feature("virt")) {
 	$newdom{'virt'} = $in{'virt'};

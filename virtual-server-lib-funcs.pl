@@ -10854,17 +10854,17 @@ sub get_init_template
 return $_[0] ? $config{'initsub_template'} : $config{'init_template'};
 }
 
-# set_chained_features(&domain)
+# set_chained_features(&domain, [&old-domain])
 # Updates a domain object, setting any features that are automatically based
 # on another. Called from .cgi scripts to activate hidden features (mode 3).
 sub set_chained_features
 {
-local ($d) = @_;
+local ($d, $oldd) = @_;
 foreach my $f (@features) {
 	if ($config{$f} == 3) {
 		local $cfunc = "chained_$f";
 		if (defined(&$cfunc)) {
-			$d->{$f} = &$cfunc($d);
+			$d->{$f} = &$cfunc($d, $oldd);
 			}
 		}
 	}
