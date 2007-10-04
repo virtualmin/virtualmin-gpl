@@ -30,7 +30,7 @@ if ($_[0]->{'unix'} && !$uinfo) {
 if ($uinfo) {
 	&system_logged("chown $uinfo->{'uid'}:$uinfo->{'gid'} $qh");
 	}
-if ($tmpl->{'skel'} ne "none") {
+if ($tmpl->{'skel'} ne "none" && !$d->{'nocopyskel'}) {
 	&copy_skel_files(&substitute_domain_template($tmpl->{'skel'}, $_[0]),
 			 $uinfo, $_[0]->{'home'},
 			 $_[0]->{'group'} || $_[0]->{'ugroup'}, $_[0]);
