@@ -735,5 +735,5 @@ The default number of alias servers that new virtual server owners can create ca
 Removed the Plugin Modules page and the section for enabled features from the Module Config page, and merged them into a single Features and Plugins page where you can select which are enabled.
 Added a button to the Spam and Virus Scanning page to configure and start clamd, so that the clamdscan virus scanner can be used to save on CPU.
 ---- Changes since 3.47 ----
-Updated Xoops script installer to version 2.0.17.1, and SquirrelMail to version 1.4.11.
+Updated Xoops script installer to version 2.0.17.1, SugarCRM to 4.5.1f, and SquirrelMail to version 1.4.11.
 Updated the Horde script installer to version 3.1.5, along with many Horde applications like IMP and Kronolith.

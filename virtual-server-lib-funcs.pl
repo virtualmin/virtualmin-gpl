@@ -10864,7 +10864,10 @@ foreach my $f (@features) {
 	if ($config{$f} == 3) {
 		local $cfunc = "chained_$f";
 		if (defined(&$cfunc)) {
-			$d->{$f} = &$cfunc($d, $oldd);
+			local $c = &$cfunc($d, $oldd);
+			if (defined($c)) {
+				$d->{$f} = $c;
+				}
 			}
 		}
 	}

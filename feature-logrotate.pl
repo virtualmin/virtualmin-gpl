@@ -298,6 +298,29 @@ if ($in{"logrotate_mode"} == 2) {
 sub chained_logrotate
 {
 local ($d, $oldd) = @_;
+if ($config{'logrotate'} != 3) {
+	# Not in auto mode, so don't touch
+	return undef;
+	}
+elsif ($d->{'alias'} || $d->{'subdom'}) {
+	# These types never have logs
+	return 0;
+	}
+elsif ($d->{'web'}) {
+	if (!$oldd || !$oldd->{'web'}) {
+		# Turning on web, so turn on logrotate
+		return 1;
+		}
+	else {
+		# Don't do anything
+		return undef;
+		}
+	}
+else {
+	# Always off when web is
+	return 0;
+	}
+
 return $d->{'web'} && (!$oldd || !$oldd->{'web'}) &&
        !$d->{'alias'} && !$d->{'subdom'} &&
        $config{'logrotate'} == 3;
