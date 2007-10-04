@@ -1480,5 +1480,25 @@ if ($copydir) {
 return undef;
 }
 
+# has_domain_databases($d, &types, [dont-create])
+# Returns 1 if a domain has any databases of the given types, or if one can
+# be created by the script install process.
+sub has_domain_databases
+{
+local ($d, $types, $nocreate) = @_;
+local @dbs = &domain_databases($d, $types);
+if (@dbs) {
+	return 1;
+	}
+if (!$nocreate) {
+	# Can we create one?
+	local ($dleft, $dreason, $dmax) = &count_feature("dbs");
+	if ($dleft != 0 && &can_edit_databases()) {
+		return 1;
+		}
+	}
+return 0;
+}
+
 1;
 

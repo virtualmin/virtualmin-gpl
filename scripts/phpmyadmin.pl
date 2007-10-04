@@ -52,8 +52,8 @@ return ("mcrypt");
 sub script_phpmyadmin_depends
 {
 local ($d, $ver) = @_;
-local @dbs = &domain_databases($d, [ "mysql" ]);
-return "phpMyAdmin requires a MySQL database" if (!@dbs);
+&has_domain_databases($d, [ "mysql" ], 1) ||
+	return "phpMyAdmin requires a MySQL database";
 return undef;
 }
 

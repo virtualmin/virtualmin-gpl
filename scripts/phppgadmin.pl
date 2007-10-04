@@ -41,8 +41,8 @@ return ("pgsql");
 sub script_phppgadmin_depends
 {
 local ($d, $ver) = @_;
-local @dbs = &domain_databases($d, [ "postgres" ]);
-return "phpPgAdmin requires a PostgreSQL database" if (!@dbs);
+&has_domain_databases($d, [ "postgres" ], 1) ||
+	return "phpPgAdmin requires a PostgreSQL database";
 return undef;
 }
 
