@@ -2360,10 +2360,14 @@ sub check_depends_mail
 if ($config{'mail_system'} == 1) {
 	$sendmail_vfile || return $text{'setup_esendmailvfile'};
 	@$sendmail_afiles || return $text{'setup_esendmailafile'};
+	!$config{'generics'} || $sendmail_gdbm ||
+		return $text{'setup_esendmailgfile'};
 	}
 elsif ($config{'mail_system'} == 0) {
 	@virtual_map_files || return $text{'setup_epostfixvfile'};
 	@$postfix_afiles || return $text{'setup_epostfixafile'};
+	!$config{'generics'} || $canonical_maps ||
+		return $text{'setup_epostfixgfile'};
 	}
 if ($_[0]->{'alias'}) {
 	# If this is an alias domain, then no home is needed
