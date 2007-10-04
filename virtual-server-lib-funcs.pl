@@ -8259,7 +8259,8 @@ if (&require_licence()) {
 
 # check_licence_expired()
 # Returns 0 if the licence is valid, 1 if not, or 2 if could not be checked,
-# 3 if expired, the expiry date, error message and number of domain.
+# 3 if expired, the expiry date, error message, number of domain and number
+# of servers.
 sub check_licence_expired
 {
 return 0 if (!&require_licence());
@@ -8271,7 +8272,7 @@ if (time() - $licence{'last'} > 3*24*60*60) {
 	&write_file($licence_status, \%licence);
 	}
 return ($licence{'status'}, $licence{'expiry'},
-	$licence{'err'}, $licence{'doms'});
+	$licence{'err'}, $licence{'doms'}, $licence{'servers'});
 }
 
 # update_licence_from_site(&licence)
@@ -8282,12 +8283,15 @@ local ($status, $expiry, $err, $doms, $servers, $max_servers) =
 	&check_licence_site();
 $licence->{'status'} = $status;
 $licence->{'expiry'} = $expiry;
-$licence->{'used_servers'} = $servers;
-$licence->{'servers'} = $max_servers;
 $licence->{'err'} = $err;
 if (defined($doms)) {
 	# Only store the max domains if we got something valid back
 	$licence->{'doms'} = $doms;
+	}
+if (defined($servers)) {
+	# Same for servers
+	$licence->{'used_servers'} = $servers;
+	$licence->{'servers'} = $max_servers;
 	}
 $licence->{'last'} = time();
 }

@@ -9,9 +9,11 @@ print "$text{'licence_doing'}<br>\n";
 &read_file($licence_status, \%licence);
 &update_licence_from_site(\%licence);
 &write_file($licence_status, \%licence);
-($status, $expiry, $err) = &check_licence_expired();
+($status, $expiry, $err, $doms, $servers) = &check_licence_expired();
 if ($status == 0) {
-	print "$text{'licence_ok'}<p>\n";
+	print &text('licence_ok2',
+	    $doms > 0 ? $doms : $text{'licence_unlimited'},
+	    $servers > 0 ? $servers : $text{'licence_unlimited'}),"<p>\n";
 	}
 else {
 	print &text('licence_goterr', $err),"<p>\n";
