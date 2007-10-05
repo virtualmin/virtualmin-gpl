@@ -1670,11 +1670,13 @@ local ($user, $pass) = @_;
 if ($user->{'qmail'}) {
 	# Force crypt mode for Qmail+LDAP
 	local $salt = $user->{'pass'} || substr(time(), -2);
+	$salt =~ s/^\!//;
 	return &unix_crypt($pass, $salt);
 	}
 else {
-	return &foreign_call($usermodule, "encrypt_password",
-					  $pass, $user->{'pass'});
+	local $salt = $user->{'pass'};
+	$salt =~ s/^\!//;
+	return &foreign_call($usermodule, "encrypt_password", $pass, $salt);
 	}
 }
 
