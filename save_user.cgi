@@ -67,6 +67,7 @@ if ($in{'delete'}) {
 
 		$user->{'dom'} = $d->{'dom'};
 		&run_post_actions();
+		&unlock_user_db();
 		&webmin_log("delete", "user",
 			    &remove_userdom($user->{'user'}, $d), $user);
 		}
@@ -559,13 +560,15 @@ else {
 		}
 
 	# Create an empty mail file, if needed
-	if ($user->{'email'}) {
+	if ($user->{'email'} && ($in{'new'} || !$old{'email'} ||
+				 $user->{'user'} ne $old{'user'})) {
 		&create_mail_file($user);
 		}
 
 	# Run plugin save functions
 	foreach $f (@mail_plugins) {
-		$dp = &plugin_call($f, "mailbox_save", $user, \%old, \%in, $in{'new'}, $d);
+		$dp = &plugin_call($f, "mailbox_save", $user, \%old,
+				   \%in, $in{'new'}, $d);
 		if ($dp eq '1') {
 			# For use by email template
 			$user->{$f} = 1;
@@ -595,6 +598,7 @@ else {
 	$user->{'dom'} = $d->{'dom'};
 	&webmin_log($in{'new'} ? "create" : "modify", "user",
 		    &remove_userdom($user->{'user'}, $d), $user);
+	&unlock_user_db();
 
 	if ($simple) {
 		# Write out the simple alias autoreply file
@@ -602,6 +606,5 @@ else {
 		&write_simple_autoreply($d, $simple);
 		}
 	}
-&unlock_user_db();
 &redirect($d ? "list_users.cgi?dom=$in{'dom'}" : "index.cgi");
 

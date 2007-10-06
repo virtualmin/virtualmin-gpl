@@ -1217,15 +1217,22 @@ if (!$_[0]->{'qmail'}) {
 	}
 NOALIASES:
 
-# Save his quotas (unless this is the domain owner)
+# Save his quotas if changed (unless this is the domain owner)
 if ($_[0]->{'unix'} && $_[0]->{'user'} ne $_[2]->{'user'} &&
-    !$_[0]->{'noquota'}) {
+    !$_[0]->{'noquota'} &&
+    ($_[0]->{'quota'} != $_[1]->{'quota'} ||
+     $_[0]->{'mquota'} != $_[1]->{'mquota'})) {
 	&set_user_quotas($_[0]->{'user'}, $_[0]->{'quota'}, $_[0]->{'mquota'},
 			 $_[2]);
 	}
 
-# Update his allowed databases (unless this is the domain owner)
-if ($_[2] && !$_[0]->{'domainowner'}) {
+# Update his allowed databases (unless this is the domain owner), if any
+# have been added or removed.
+local $newdbstr = join(" ", map { $_->{'type'}."_".$_->{'name'} }
+				@{$_[0]->{'dbs'}});
+local $olddbstr = join(" ", map { $_->{'type'}."_".$_->{'name'} }
+				@{$_[1]->{'dbs'}});
+if ($_[2] && !$_[0]->{'domainowner'} && $newdbstr ne $olddbstr) {
 	local $dt;
 	foreach $dt (&unique(map { $_->{'type'} } &domain_databases($_[2]))) {
 		local @dbs = map { $_->{'name'} }
@@ -1359,7 +1366,9 @@ if ($_[0]->{'shell'} ne $_[1]->{'shell'}) {
 	}
 
 # Rebuild group of domain owners
-&update_domain_owners_group();
+if ($_[0]->{'domainowner'}) {
+	&update_domain_owners_group();
+	}
 }
 
 # delete_user(&user, domain)
@@ -6699,6 +6708,10 @@ else {
 # top-level and sub-servers
 sub list_templates
 {
+if (defined(@list_templates_cache)) {
+	# Use cached copy
+	return @list_templates_cache;
+	}
 local @rv;
 push(@rv, { 'id' => 0,
 	    'name' => 'Default Settings',
@@ -6873,6 +6886,7 @@ while(defined($f = readdir(DIR))) {
 		}
 	}
 closedir(DIR);
+@list_templates_cache = @rv;
 return @rv;
 }
 
@@ -7110,6 +7124,7 @@ if ($save_config) {
 	&write_file($module_config_file, \%config);
 	&unlock_file($module_config_file);
 	}
+undef(@list_templates_cache);
 }
 
 # get_template(id)

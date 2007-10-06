@@ -1,8 +1,8 @@
  x Create tar.gz file
 
  x build RPM and .deb
-	./makemodulerpm.pl --dir virtual-server gpl-virtual-server
-	./makemodulerpm.pl virtual-server-theme
+	./makemodulerpm.pl --dir --sign virtual-server gpl-virtual-server
+	./makemodulerpm.pl --sign virtual-server-theme
 	./makemoduledeb.pl --dir virtual-server gpl-virtual-server
 	./makemoduledeb.pl virtual-server-theme
 
@@ -10,9 +10,9 @@
 
  x Add to website
 
- - Add the freshmeat.net
+ x Add the freshmeat.net
 
- - Announce on mailing list
+ x Announce on mailing list
 
  x Add to updates.txt
 
