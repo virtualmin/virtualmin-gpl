@@ -5997,7 +5997,10 @@ foreach $f (@dof) {
 		local $sfunc = "setup_$f";
 		if ($vital{$f}) {
 			# Failure of this feature should halt the entire setup
-			&$sfunc($dom);
+			if (!&$sfunc($dom)) {
+				return &text('setup_evital',
+					     $text{'feature_'.$f});
+				}
 			}
 		else {
 			# Failure can be ignored

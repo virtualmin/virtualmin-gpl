@@ -46,6 +46,8 @@ foreach $d (&virtual_server_directories($_[0])) {
 		}
         }
 &$second_print($text{'setup_done'});
+
+return 1;
 }
 
 # modify_dir(&domain, &olddomain)

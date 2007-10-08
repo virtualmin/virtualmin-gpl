@@ -34,13 +34,19 @@ if (&mail_system_needs_group() || $_[0]->{'gid'} == $_[0]->{'ugid'}) {
 	%ginfo = ( 'group', $_[0]->{'group'},
 		   'gid', $_[0]->{'gid'},
 		 );
-	&foreign_call($usermodule, "set_group_envs", \%ginfo, 'CREATE_GROUP');
-	&foreign_call($usermodule, "making_changes");
-	&foreign_call($usermodule, "create_group", \%ginfo);
-	&foreign_call($usermodule, "made_changes");
-	if (!defined(getgrnam($_[0]->{'group'}))) {
-		&$second_print($text{'setup_ecrgroup'});
-		exit;
+	eval {
+		local $main::error_must_die = 1;
+		&foreign_call($usermodule, "set_group_envs", \%ginfo,
+			      'CREATE_GROUP');
+		&foreign_call($usermodule, "making_changes");
+		&foreign_call($usermodule, "create_group", \%ginfo);
+		&foreign_call($usermodule, "made_changes");
+		};
+	if (@$ || !defined(getgrnam($_[0]->{'group'}))) {
+		&delete_partial_group(\%ginfo);
+		&$second_print($@ ? &text('setup_ecrgroup2', $@)
+				  : $text{'setup_ecrgroup'});
+		return 0;
 		}
 	&$second_print($text{'setup_done'});
 	}
@@ -66,47 +72,77 @@ else {
 	   'dom_prefix', substr($_[0]->{'dom'}, 0, 1),
 	 );
 &set_pass_change(\%uinfo);
-&foreign_call($usermodule, "set_user_envs", \%uinfo, 'CREATE_USER', $_[0]->{'pass'}, [ ]);
-&foreign_call($usermodule, "making_changes");
-&foreign_call($usermodule, "create_user", \%uinfo);
-&foreign_call($usermodule, "made_changes");
-&foreign_call($usermodule, "unlock_user_files");
-if ($config{'other_doms'}) {
-	&foreign_call($usermodule, "other_modules", "useradmin_create_user",
-		      \%uinfo);
-	}
-if (!defined(getpwnam($_[0]->{'user'}))) {
-	&$second_print($text{'setup_ecruser'});
-	exit;
+eval {
+	local $main::error_must_die = 1;
+	&foreign_call($usermodule, "set_user_envs", \%uinfo,
+		      'CREATE_USER', $_[0]->{'pass'}, [ ]);
+	&foreign_call($usermodule, "making_changes");
+	&foreign_call($usermodule, "create_user", \%uinfo);
+	&foreign_call($usermodule, "made_changes");
+	&foreign_call($usermodule, "unlock_user_files");
+	if ($config{'other_doms'}) {
+		&foreign_call($usermodule, "other_modules",
+			      "useradmin_create_user", \%uinfo);
+		}
+	};
+if ($@ || !defined(getpwnam($_[0]->{'user'}))) {
+	&delete_partial_group(\%ginfo) if (%ginfo);
+	&delete_partial_user(\%uinfo);
+	&$second_print($@ ? &text('setup_ecruser2', $@)
+			  : $text{'setup_ecruser'});
+	return 0;
 	}
 &$second_print($text{'setup_done'});
 
 # Set the user's quota
+&$first_print($text{'setup_usermail'});
 if (&has_home_quotas()) {
 	&set_server_quotas($_[0]);
 	}
 
-# Create mail file
-&create_mail_file(\%uinfo);
+eval {
+	# Create mail file
+	local $main::error_must_die = 1;
+	&create_mail_file(\%uinfo);
 
-# Create virtuser pointing to new user, and possibly generics entry
-if ($_[0]->{'mail'}) {
-	local @virts = &list_virtusers();
-	local $email = $_[0]->{'user'}."\@".$_[0]->{'dom'};
-	local ($virt) = grep { $_->{'from'} eq $email } @virts;
-	if (!$virt) {
-		$virt = { 'from' => $email,
-			  'to' => [ $_[0]->{'user'} ] };
-		&create_virtuser($virt);
+	# Create virtuser pointing to new user, and possibly generics entry
+	if ($_[0]->{'mail'}) {
+		local @virts = &list_virtusers();
+		local $email = $_[0]->{'user'}."\@".$_[0]->{'dom'};
+		local ($virt) = grep { $_->{'from'} eq $email } @virts;
+		if (!$virt) {
+			$virt = { 'from' => $email,
+				  'to' => [ $_[0]->{'user'} ] };
+			&create_virtuser($virt);
+			}
+		if ($config{'generics'}) {
+			&create_generic($_[0]->{'user'}, $email);
+			}
 		}
-	if ($config{'generics'}) {
-		&create_generic($_[0]->{'user'}, $email);
-		}
+	};
+if ($@) {
+	&$second_print(&text('setup_eusermail', $@));
+	}
+else {
+	&$second_print($text{'setup_done'});
 	}
 
-# Add to denied SSH group and domain owner group
-&build_denied_ssh_group($_[0]);
-&update_domain_owners_group($_[0]);
+# Add to denied SSH group and domain owner group. Don't let the failure of
+# this block the whole user creation though
+&$first_print($text{'setup_usergroups'});
+eval {
+	local $main::error_must_die = 1;
+	&build_denied_ssh_group($_[0]);
+	&update_domain_owners_group($_[0]);
+	};
+if ($@) {
+	&$second_print(&text('setup_eusergroups', $@));
+	}
+else {
+	&$second_print($text{'setup_done'});
+	}
+
+return 1;
 }
 
 # modify_unix(&domain, &olddomain)
@@ -585,6 +621,8 @@ if ($group->{'members'} ne $oldgroup->{'members'}) {
 	&foreign_call($group->{'module'}, "made_changes");
 	&foreign_call($group->{'module'}, "unlock_user_files");
 	}
+
+return 1;
 }
 
 # update_domain_owners_group([&new-domain], [&deleting-domain])
@@ -643,7 +681,45 @@ sub start_service_unix
 return &start_service_ftp();
 }
 
+# delete_partial_group(&group)
+# Deletes a group that may not have been created completely
+sub delete_partial_group
+{
+local ($group) = @_;
+eval {
+	local $main::error_must_die = 1;
+	local @allgroups = &list_all_groups();
+	local ($ginfo) = grep { $_->{'group'} eq $group->{'group'} &&
+				$_->{'module'} eq $usermodule } @allgroups;
+	if ($ginfo) {
+		&foreign_call($ginfo->{'module'}, "set_group_envs", $ginfo,
+			      'DELETE_GROUP');
+		&foreign_call($ginfo->{'module'}, "making_changes");
+		&foreign_call($ginfo->{'module'}, "delete_group", $ginfo);
+		&foreign_call($ginfo->{'module'}, "made_changes");
+		}
+	};
+}
 
+# delete_partial_user(&user)
+# Deletes a user that may not have been created completely
+sub delete_partial_user
+{
+local ($user) = @_;
+eval {
+	local $main::error_must_die = 1;
+	local @allusers = &list_all_users();
+	local ($uinfo) = grep { $_->{'user'} eq $user->{'user'} &&
+				$_->{'module'} eq $usermodule } @allusers;
+	if ($uinfo) {
+		&foreign_call($uinfo->{'module'}, "set_user_envs", $uinfo,
+			      'DELETE_USER');
+		&foreign_call($uinfo->{'module'}, "making_changes");
+		&foreign_call($uinfo->{'module'}, "delete_user", $uinfo);
+		&foreign_call($uinfo->{'module'}, "made_changes");
+		}
+	};
+}
 
 $done_feature_script{'unix'} = 1;
 
