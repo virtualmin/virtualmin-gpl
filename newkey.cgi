@@ -23,8 +23,9 @@ $newkey =~ /BEGIN RSA PRIVATE KEY/ &&
 $conf = &apache::get_config();
 ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
                                       $d->{'web_sslport'});
-$d->{'ssl_cert'} ||= "$d->{'home'}/ssl.cert";
-$d->{'ssl_key'} ||= "$d->{'home'}/ssl.key";
+
+$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
+$d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
 &lock_file($virt->{'file'});
 &apache::save_directive("SSLCertificateFile", [ $d->{'ssl_cert'} ],
 			$vconf, $conf);

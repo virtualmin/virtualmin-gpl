@@ -739,3 +739,4 @@ Updated Xoops script installer to version 2.0.17.1, SugarCRM to 4.5.1f, and Squi
 Updated the Horde script installer to version 3.1.5, along with many Horde applications like IMP and Kronolith.
 Domains that don't have any databases but are allowed to create one can now install scripts that have the ability to create a database.
 When re-creating a domain as part of a restore, the external DNS IP address is set to match the target system, rather than being copied from the source.
+Added the CA Certificate tab to the Manage SSL Certificate page, for uploading a chained cert from your CA.

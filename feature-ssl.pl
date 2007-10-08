@@ -38,16 +38,8 @@ local $f = &get_website_file($_[0]);
 &lock_file($f);
 
 # Create a self-signed cert and key, if needed
-local $defcert = $config{'cert_tmpl'} ?
-		    &absolute_domain_path($_[0],
-		     &substitute_domain_template($config{'cert_tmpl'}, $_[0])) :
-		    "$_[0]->{'home'}/ssl.cert";
-local $defkey = $config{'key_tmpl'} ?
-		    &absolute_domain_path($_[0],
-		     &substitute_domain_template($config{'key_tmpl'}, $_[0])) :
-		    "$_[0]->{'home'}/ssl.key";
-$_[0]->{'ssl_cert'} ||= $defcert;
-$_[0]->{'ssl_key'} ||= $defkey;
+$_[0]->{'ssl_cert'} ||= &default_certificate_file($_[0], 'cert');
+$_[0]->{'ssl_key'} ||= &default_certificate_file($_[0], 'key');
 if (!-r $_[0]->{'ssl_cert'} && !-r $_[0]->{'ssl_key'}) {
 	# Need to do it
 	&foreign_require("webmin", "webmin-lib.pl");
@@ -449,12 +441,20 @@ return 1;
 # Returns a hash of details of a domain's cert
 sub cert_info
 {
+return &cert_file_info($_[0]->{'ssl_cert'});
+}
+
+# cert_file_info(file)
+# Returns a hash of details of a cert in some file
+sub cert_file_info
+{
+local ($file) = @_;
 local %rv;
 local $_;
-open(OUT, "openssl x509 -in ".quotemeta($_[0]->{'ssl_cert'}).
-	  " -issuer -subject -enddate |");
+open(OUT, "openssl x509 -in ".quotemeta($file)." -issuer -subject -enddate |");
 while(<OUT>) {
 	s/\r|\n//g;
+	s/http:\/\//http:\|\|/g;	# So we can parse with regexp
 	if (/subject=.*CN=([^\/]+)/) {
 		$rv{'cn'} = $1;
 		}
@@ -472,6 +472,9 @@ while(<OUT>) {
 		}
 	}
 close(OUT);
+foreach my $k (keys %rv) {
+	$rv{$k} =~ s/http:\|\|/http:\/\//g;
+	}
 $rv{'type'} = $rv{'o'} eq $rv{'issuer_o'} ? $text{'cert_typeself'}
 					  : $text{'cert_typereal'};
 return \%rv;
@@ -558,6 +561,69 @@ push(@dirs, "SSLEngine on");
 push(@dirs, "SSLCertificateFile $d->{'ssl_cert'}");
 push(@dirs, "SSLCertificateKeyFile $d->{'ssl_key'}");
 return @dirs;
+}
+
+# get_chained_certificate_file(&domain)
+# Returns the file used for the chained cert, or undef if not set
+sub get_chained_certificate_file
+{
+local ($d) = @_;
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+					    $d->{'web_sslport'});
+return undef if (!$virt);
+local ($cert) = &apache::find_directive("SSLCACertificateFile", $vconf);
+return $cert;
+}
+
+# save_chained_certificate_file(&domain, [file])
+# Updates the chained cert file, or removed it if file is undef
+sub save_chained_certificate_file
+{
+local ($d, $file) = @_;
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+					    $d->{'web_sslport'});
+return undef if (!$virt);
+&lock_file($virt->{'file'});
+&apache::save_directive("SSLCACertificateFile", $file ? [ $file ] : [ ],
+			$vconf,$conf);
+&flush_file_lines($virt->{'file'});
+&unlock_file($virt->{'file'});
+&register_post_action(\&restart_apache);
+}
+
+# check_certificate_data(data)
+# Checks if some data looks like a valid cert. Returns undef if OK, or an error
+# message if not
+sub check_certificate_data
+{
+local ($data) = @_;
+local $temp = &transname();
+&open_tempfile(CERTDATA, ">$temp", 0, 1);
+&print_tempfile(CERTDATA, $data);
+&close_tempfile(CERTDATA);
+local $out = &backquote_command("openssl x509 -in ".quotemeta($temp)." -issuer -subject -enddate 2>&1");
+local $ex = $?;
+&unlink_file($temp);
+if ($ex) {
+	return "<tt>".&html_escape($out)."</tt>";
+	}
+elsif ($out !~ /subject=.*CN=/) {
+	return $text{'cert_esubject'};
+	}
+else {
+	return undef;
+	}
+}
+
+# default_certificate_file(&domain, "cert"|"key"|"ca")
+# Returns the default path that should be used for a cert, key or CA file
+sub default_certificate_file
+{
+local ($d, $mode) = @_;
+return $config{$mode.'_tmpl'} ?
+	    &absolute_domain_path($d,
+	     &substitute_domain_template($config{$mode.'_tmpl'}, $d)) :
+	    "$d->{'home'}/ssl.".$mode;
 }
 
 $done_feature_script{'ssl'} = 1;

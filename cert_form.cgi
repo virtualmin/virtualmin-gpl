@@ -8,12 +8,14 @@ $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_ssl() || &error($text{'edit_ecannot'});
 &foreign_require("webmin", "webmin-lib.pl");
 &ui_print_header(&domain_in($d), $text{'cert_title'}, "");
+@cert_attributes = ('cn', 'o', 'issuer_cn', 'issuer_o', 'notafter', 'type');
 
 # Show tabs
 $prog = "cert_form.cgi?d=$in{'dom'}&mode=";
 @tabs = ( [ "current", $text{'cert_tabcurrent'}, $prog."current" ],
 	  [ "csr", $text{'cert_tabcsr'}, $prog."csr" ],
 	  [ "new", $text{'cert_tabnew'}, $prog."new" ],
+	  [ "chain", $text{'cert_tabchain'}, $prog."new" ],
 	);
 print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "current", 1);
 
@@ -22,7 +24,7 @@ print &ui_tabs_start_tab("mode", "current");
 print "$text{'cert_desc2'}<p>\n";
 print &ui_table_start($text{'cert_header2'}, undef, 4);
 $info = &cert_info($d);
-foreach $i ('cn', 'o', 'issuer_cn', 'issuer_o', 'notafter', 'type') {
+foreach $i (@cert_attributes) {
 	if ($info->{$i}) {
 		print &ui_table_row($text{'cert_'.$i}, $info->{$i});
 		}
@@ -103,6 +105,44 @@ print &ui_table_row($text{'cert_newkey'},
 
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'cert_newok'} ] ]);
+print &ui_tabs_end_tab();
+
+# CA certificate form
+$chain = &get_chained_certificate_file($d);
+print &ui_tabs_start_tab("mode", "chain");
+print "$text{'cert_desc4'}<p>\n";
+
+print &ui_form_start("newchain.cgi", "form-data");
+print &ui_hidden("dom", $in{'dom'});
+print &ui_table_start($text{'cert_header4'}, undef, 2);
+
+# Where cert is stored
+# XXX if changed by regular user, force to home dir
+print &ui_table_row($text{'cert_chain'},
+	&ui_radio("mode", $chain ? 1 : 0,
+	  [ [ 0, $text{'cert_chain0'}."<br>" ],
+	    &can_chained_cert_path() ?
+		  ( [ 1, &text('cert_chain1',
+			       &ui_textbox("file", $chain, 50)." ".
+			       &file_chooser_button("file"))."<br>" ] ) :
+	    $chain ? ( [ 1, &text('cert_chain1', "<tt>$chain</tt>")."<br>" ] ) :
+		     ( ),
+	    [ 2, &text('cert_chain2',
+		       &ui_upload("upload", 50)) ] ]));
+
+# Current details
+if ($chain) {
+	$info = &cert_file_info($chain);
+	foreach $i (@cert_attributes) {
+		if ($info->{$i}) {
+			print &ui_table_row($text{'cert_c'.$i} ||
+					    $text{'cert_'.$i}, $info->{$i});
+			}
+		}
+	}
+
+print &ui_table_end();
+print &ui_form_end([ [ "ok", $text{'cert_chainok'} ] ]);
 print &ui_tabs_end_tab();
 
 print &ui_tabs_end(1);

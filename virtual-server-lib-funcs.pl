@@ -8196,6 +8196,13 @@ sub can_show_pass
 return &master_admin() || &reseller_admin() || $config{'show_pass'};
 }
 
+# Returns 1 if the current user can set the chained certificate path to
+# anywhere.
+sub can_chained_cert_path
+{
+return &master_admin();
+}
+
 # has_proxy_balancer(&domain)
 # Returns 1 if some domain supports proxy balancing
 sub has_proxy_balancer

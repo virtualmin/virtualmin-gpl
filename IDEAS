@@ -69,3 +69,5 @@
 
  - security-updates should show plugins that you *could* install
 
+ - licence checks that fail due to network/CGI errors should allow 3 days
+   before rejection
