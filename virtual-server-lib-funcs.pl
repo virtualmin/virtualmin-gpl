@@ -4746,6 +4746,10 @@ if ($ok) {
 					last DOMAIN;
 					}
 				}
+			# DNS external IP is always reset to match this system,
+			# as the old setting is unlikely to be correct.
+			$d->{'dns_ip'} = $virt || $config{'all_namevirtual'} ?
+				undef : $config{'dns_ip'};
 			$d->{'nocreationmail'} = 1;
 			$d->{'nocreationscripts'} = 1;
 			$d->{'nocopyskel'} = 1;

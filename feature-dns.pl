@@ -581,6 +581,7 @@ if (!$tmpl->{'dns_replace'}) {
 		&bind8::create_record($file, "@", undef, "IN",
 				      "NS", $master);
 		local $slave;
+		local @slaves = &bind8::list_slave_servers();
 		foreach $slave (@slaves) {
 			local @bn = $slave->{'nsname'} ||
 				    gethostbyname($slave->{'host'});
@@ -844,9 +845,11 @@ if ($z) {
 	local ($baserec) = grep { $_->{'type'} eq "A" &&
 				  ($_->{'name'} eq $_[0]->{'dom'}."." ||
 				   $_->{'name'} eq '@') } @recs;
+	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
+	local $baseip = $baserec ? $baserec->{'values'}->[0] : undef;
 	foreach $r (@recs) {
 		if ($r->{'type'} eq "A" &&
-		    $r->{'values'}->[0] eq $baserec->{'values'}->[0]) {
+		    $r->{'values'}->[0] eq $baseip) {
 			&bind8::modify_record($fn, $r, $r->{'name'},
 					      $r->{'ttl'},$r->{'class'},
 					      $r->{'type'},
