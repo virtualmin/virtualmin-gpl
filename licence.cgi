@@ -14,9 +14,15 @@ if ($status == 0) {
 	print &text('licence_ok2',
 	    $doms > 0 ? $doms : $text{'licence_unlimited'},
 	    $servers > 0 ? $servers : $text{'licence_unlimited'}),"<p>\n";
+	if ($licence{'warn'}) {
+		# Most recent check failed
+		print &text('licence_warn',
+			"<font color=#ff8800>$licence{'warn'}</font>"),"<p>\n";
+		}
 	}
 else {
-	print &text('licence_goterr', $err),"<p>\n";
+	print &text('licence_goterr',
+		"<font color=#ff0000>$err</font>"),"<p>\n";
 	}
 
 &ui_print_footer("", $text{'index_return'});
