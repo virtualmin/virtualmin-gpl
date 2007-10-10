@@ -60,9 +60,8 @@
 	</Location>
 
  - rails scripts should be able to make use of balancer
-	- generic proxying page
 	- make domain-level proxying a subset of this
 	- get current proxy setting from Apache config, not from domain
-	- balancer form should only show input for one URL
-	- remove use of word 'balancer'
+	- multiple mongrel instances
+		- controllable by limits
 
