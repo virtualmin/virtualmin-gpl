@@ -1,13 +1,18 @@
-<header>Proxy Balancers</header>
+<header>Proxy Paths</header>
 
-Proxy balancers allow you to map a URL path in a virtual server's website
+Proxying allows you to map a URL path in a virtual server's website
 to one or more destination URLs. This is typically used to make Ruby on Rails
 applications served by multiple Mongrel instances available under a URL
-path in the server's website. <p>
+path in the server's website. It can also be used to make other webservers
+such as Tomcat available via a URL path on your website. <p>
 
 For example, you might map the path <tt>/radiant</tt> to the URLs <tt>http://localhost:3001</tt> and <tt>http://localhost:3002</tt>, which are the ports for
 two Mongrel instances serving the same application running on your Virtualmin
 system. <p>
+
+Only systems that have the <tt>mod_proxy_balancer</tt> Apache module installed
+can map a path to multiple URLs. Others that only support Apache's regular
+proxy module can forward a path to just a single URL. <p>
 
 <footer>
 
