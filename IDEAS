@@ -67,6 +67,3 @@
 	- also registrar and password reset modules
 	- add to repos
 
- - security-updates should show plugins that you *could* install
-	- test on .wbm-only system (solaris)
-	- not working yet
