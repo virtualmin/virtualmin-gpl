@@ -8207,7 +8207,8 @@ return &master_admin();
 }
 
 # has_proxy_balancer(&domain)
-# Returns 1 if some domain supports proxy balancing
+# Returns 2 if some domain supports proxy balancing to multiple URLs, 1 for
+# proxying to a single URL, 0 if neither.
 sub has_proxy_balancer
 {
 local ($d) = @_;
@@ -8216,6 +8217,9 @@ if ($d->{'web'} && $config{'web'} && !$d->{'alias'} && $virtualmin_pro &&
 	&require_apache();
 	if ($apache::httpd_modules{'mod_proxy'} &&
 	    $apache::httpd_modules{'mod_proxy_balancer'}) {
+		return 2;
+		}
+	elsif ($apache::httpd_modules{'mod_proxy'}) {
 		return 1;
 		}
 	}
