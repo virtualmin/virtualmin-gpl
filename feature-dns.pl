@@ -110,6 +110,8 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 	&bind8::save_directive($pconf, undef, [ $dir ], $indent);
 	&flush_file_lines();
 	&unlock_file($dir->{'file'});
+	unlink($bind8::zone_names_cache);
+	undef(@bind8::list_zone_names_cache);
 
 	# Create the records file
 	local %zd;
