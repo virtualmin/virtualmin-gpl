@@ -73,6 +73,13 @@ print &ui_table_row(&hlink($text{'limits_forceunder'}, "limits_forceunder"),
 	&ui_radio("forceunder", $d->{'forceunder'} ? 1 : 0,
 	       [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
 
+# Mongrel instances
+if ($virtualmin_pro) {
+	print &ui_table_row(&hlink($text{'limits_mongrels'}, "limits_mongrels"),
+		&ui_opt_textbox("mongrels", $d->{'mongrelslimit'}, 5,
+				$text{'form_unlimit'}));
+	}
+
 # Show limits from plugins
 foreach $f (@feature_plugins) {
 	$input = &plugin_call($f, "feature_limits_input", $d);

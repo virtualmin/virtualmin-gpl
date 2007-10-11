@@ -239,6 +239,9 @@ if ($multi) {
 			print "    Maximum aliases: ",
 			      ($d->{'aliaslimit'} eq '' ? "Unlimited" :
 				$d->{'aliaslimit'}),"\n";
+			print "    Maximum Mongrel instances: ",
+			      ($d->{'mongrelslimit'} eq '' ? "Unlimited" :
+				$d->{'mongrelslimit'}),"\n";
 			print "    Can choose database names: ",
 				($d->{'nodbname'} ? "No" : "Yes"),"\n";
 			print "    Can rename servers: ",

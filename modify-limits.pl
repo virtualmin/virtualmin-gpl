@@ -47,6 +47,10 @@ while(@ARGV > 0) {
 		$aliases = shift(@ARGV);
 		$aliases eq "UNLIMITED" || $aliases =~ /^\d+$/ || &usage("Maximum aliases must be a number or UNLIMITED");
 		}
+	elsif ($a eq "--max-mongrels") {
+		$mongrels = shift(@ARGV);
+		$mongrels eq "UNLIMITED" || $mongrels =~ /^[1-9]\d*$/ || &usage("Maximum Mongrel instances number or UNLIMITED");
+		}
 	elsif ($a eq "--can-dbname") {
 		$candbname = 1;
 		}
@@ -137,6 +141,9 @@ if (defined($aliasdoms)) {
 if (defined($realdoms)) {
 	$dom->{'realdomslimit'} = $realdoms eq "UNLIMITED" ? undef
 							   : $realdoms;
+	}
+if (defined($mongrels)) {
+	$dom->{'mongrelslimit'} = $mongrels eq "UNLIMITED" ? undef : $mongrels;
 	}
 $dom->{'nodbname'} = $candbname ? 0 :
 		     $cannotdbname ? 1 : $dom->{'nodbname'};

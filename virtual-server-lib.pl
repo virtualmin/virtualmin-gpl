@@ -189,6 +189,9 @@ if (!$virtualmin_pro) {
 
 @limit_types = ("mailboxlimit", "aliaslimit", "dbslimit", "domslimit",
             	"aliasdomslimit", "realdomslimit");
+if ($virtualmin_pro) {
+	push(@limit_types, "mongrelslimit");
+	}
 
 $bandwidth_dir = "$module_config_directory/bandwidth";
 $plainpass_dir = "$module_config_directory/plainpass";

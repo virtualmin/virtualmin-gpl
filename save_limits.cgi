@@ -33,6 +33,11 @@ $d->{'realdomslimit'} = $in{'realdomslimit_def'} == 1 ? undef
 $d->{'nodbname'} = $in{'nodbname'};
 $d->{'norename'} = $in{'norename'};
 $d->{'forceunder'} = $in{'forceunder'};
+if ($virtualmin_pro) {
+	$in{'mongrels_def'} || $in{'mongrels'} =~ /^[1-9][0-9]*$/ ||
+		&error($text{'limits_emongrels'});
+	$d->{'mongrelslimit'} = $in{'mongrels_def'} ? undef : $in{'mongrels'};
+	}
 $d->{'demo'} = $in{'demo'};
 %sel_features = map { $_, 1 } split(/\0/, $in{'features'});
 foreach $f (@opt_features, "virt", @feature_plugins) {

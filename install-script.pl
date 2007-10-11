@@ -67,6 +67,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--upgrade") {
 		$id = shift(@ARGV);
 		}
+	elsif ($a eq "--mongrels") {
+		$opts->{'mongrels'} = shift(@ARGV);
+		}
 	else {
 		&usage();
 		}
@@ -80,6 +83,9 @@ $script = &get_script($sname);
 $script || &usage("Script type $sname is not known");
 $ver || &usage("Missing version number. Available versions are : ".
 	       join(" ", @{$script->{'versions'}}));
+if ($opts->{'mongrels'} > 1 && &has_proxy_balancer($d) != 2) {
+	&error("This virtual server does not support more than one Mongrel");
+	}
 if ($ver eq "latest") {
 	$ver = $script->{'versions'}->[0];
 	}
@@ -257,6 +263,7 @@ print "                         [--db type name]\n";
 print "                         [--opt name value]\n";
 print "                         [--upgrade id]\n";
 print "                         [--force-dir directory]\n";
+print "                         [--mongrels number]\n";
 exit(1);
 }
 

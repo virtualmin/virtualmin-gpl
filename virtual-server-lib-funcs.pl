@@ -6813,6 +6813,8 @@ push(@rv, { 'id' => 0,
 			        $config{'defaliasdomslimit'},
 	    'bwlimit' => $config{'defbwlimit'} eq "" ? "none" :
 			 $config{'defbwlimit'},
+	    'mongrelslimit' => $config{'defmongrelslimit'} eq "" ? "none" :
+			       $config{'defmongrelslimit'},
 	    'capabilities' => $config{'defcapabilities'},
 	    'featurelimits' => $config{'featurelimits'} || "none",
 	    'nodbname' => $config{'defnodbname'},
@@ -7045,6 +7047,8 @@ if ($tmpl->{'id'} == 0) {
 					"*" : $tmpl->{'aliasdomslimit'};
 	$config{'defbwlimit'} = $tmpl->{'bwlimit'} eq 'none' ? undef :
 				$tmpl->{'bwlimit'};
+	$config{'defmongrelslimit'} = $tmpl->{'mongrelslimit'} eq 'none' ?
+					undef : $tmpl->{'mongrelslimit'};
 	$config{'defcapabilities'} = $tmpl->{'capabilities'};
 	$config{'featurelimits'} = $tmpl->{'featurelimits'};
 	$config{'defnodbname'} = $tmpl->{'nodbname'};
@@ -7148,7 +7152,7 @@ if (!$tmpl->{'default'}) {
 	foreach $p ("dns_spf", "dns_sub", "dns_master",
 		    "web", "dns", "ftp", "frame", "user_aliases",
 		    "ugroup", "quota", "uquota", "mailboxlimit", "domslimit",
-		    "dbslimit", "aliaslimit", "bwlimit", "skel",
+		    "dbslimit", "aliaslimit", "bwlimit", "mongrelslimit","skel",
 		    "mysql_hosts", "mysql_mkdb", "mysql_suffix", "mysql_chgrp",
 		    "mysql_nopass", "mysql_wild", "mysql", "webalizer",
 		    "dom_aliases", "ranges", "mailgroup", "ftpgroup", "dbgroup",
@@ -10729,6 +10733,10 @@ $d->{'domslimit'} = $tmpl->{'domslimit'} eq 'none' ? '*' :
 			$tmpl->{'domslimit'};
 $d->{'aliasdomslimit'} = $tmpl->{'aliasdomslimit'} eq 'none' ? '*' :
 			$tmpl->{'aliasdomslimit'};
+if ($virtualmin_pro) {
+	$d->{'mongrelslimit'} = $tmpl->{'mongrelslimit'} eq 'none' ? undef :
+				$tmpl->{'mongrelslimit'};
+	}
 $d->{'nodbname'} = $tmpl->{'nodbname'};
 $d->{'norename'} = $tmpl->{'norename'};
 $d->{'forceunder'} = $tmpl->{'forceunder'};
@@ -10797,7 +10805,8 @@ print &ui_table_row(&hlink($text{'tmpl_featurelimits'},
 print &ui_table_hr();
 
 # Show limits on numbers of things
-foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms", "bw") {
+foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms", "bw",
+	       $virtualmin_pro ? ( "mongrels" ) : ( )) {
 	my $limit = $tmpl->{$l.'limit'} eq "none" ? undef : $tmpl->{$l.'limit'};
 	print &ui_table_row(&hlink($text{'tmpl_'.$l.'limit'},
 				   "template_".$l."limit"),
@@ -10863,7 +10872,8 @@ else {
 	}
 
 # Save limits on various objects
-foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms") {
+foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms",
+	       $virtualmin_pro ? ( "mongrels" ) : ( )) {
 	$tmpl->{$l.'limit'} = &parse_none_def($l.'limit');
 	if ($in{$l."limit_mode"} == 2) {
 		$in{$l.'limit'} =~ /^\d+$/ ||

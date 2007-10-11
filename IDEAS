@@ -60,8 +60,15 @@
 	</Location>
 
  - rails scripts should be able to make use of balancer
-	- make domain-level proxying a subset of this
-	- get current proxy setting from Apache config, not from domain
 	- multiple mongrel instances
-		- controllable by limits
+		- mass change of limits
+		- update all scripts
+		- upgrade mysql!
 
+ - per-reseller logos / links
+	- one function to get image
+	- update both themes
+
+ - plugin developers docs
+	- example plugin
+	- explain how to register
