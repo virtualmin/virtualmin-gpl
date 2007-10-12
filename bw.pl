@@ -6,6 +6,12 @@ package virtual_server;
 $main::no_acl_check++;
 require './virtual-server-lib.pl';
 
+# Are we already running? If so, die
+if (&test_lock($bandwidth_dir)) {
+	exit(0);
+	}
+&lock_file($bandwidth_dir);
+
 # Work out the start of the monitoring period
 $now = time();
 $day = int($now / (24*60*60));
@@ -266,3 +272,5 @@ foreach $d (@doms) {
 	&save_domain($d);
 	}
 
+# Release running lock
+&unlock_file($bandwidth_dir);
