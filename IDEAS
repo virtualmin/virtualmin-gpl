@@ -60,10 +60,11 @@
 	</Location>
 
  - rails scripts should be able to make use of balancer
-	- multiple mongrel instances
-		- mass change of limits
-		- update all scripts
-		- upgrade mysql!
+	- mass change of limits
+	- update all scripts
+	- upgrade mysql!
+		- init script
+		- remove old RPM
 
  - per-reseller logos / links
 	- one function to get image

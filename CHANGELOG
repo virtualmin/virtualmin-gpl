@@ -744,3 +744,4 @@ If the create of the Unix user or group for a virtual server fails, both are rol
 Virtualmin plugins and modules that are not installed but could be are now in the right-hand frame, with a link to the Package Updates module to install them.
 Updated the proxy paths page to allow proxying paths to a single URL, even on systems that don't have mod_proxy_balancer installed. For those with a module, the proxy can still be to multiple URLs.
 Changed default PHPlist version to stable release 2.10.5.
+Added a field to the Upgrade Notification section of the Script Installers page to specify a custom base URL for Webmin for email messages.

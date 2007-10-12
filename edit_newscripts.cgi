@@ -137,6 +137,11 @@ print &ui_table_row($text{'newscripts_wemail'},
 			 $other)." ".
 	    &ui_textbox("wother", $other, 40));
 
+# Webmin URL in email
+print &ui_table_row($text{'newscripts_wurl'},
+	&ui_opt_textbox("wurl", $config{'scriptwarn_url'}, 40,
+			$text{'newscripts_wurldef'}));
+
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 print &ui_tabs_end_tab();

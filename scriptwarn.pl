@@ -56,7 +56,7 @@ if (@updates) {
 				}
 			$email .= "\n";
 			$email .= &text('scriptwarn_where2',
-				$proto."://$d->{'dom'}:$port/virtual-server/".
+				&get_webmin_url($d)."/$module_name/".
 				"list_scripts.cgi?dom=$d->{'id'}")."\n\n";
 			$email =~ s/\\n/\n/g;
 
@@ -90,5 +90,17 @@ local $mail = { 'headers' => [ [ 'From', $config{'from_addr'} ||
 			       [ 'Content-type', 'text/plain' ] ],
 		'body' => $text };
 &mailboxes::send_mail($mail);
+}
+
+sub get_webmin_url
+{
+local ($d) = @_;
+if ($config{'scriptwarn_url'}) {
+	$d ||= { 'dom' => &get_system_hostname() };
+	return &substitute_domain_template($config{'scriptwarn_url'}, $d);
+	}
+else {
+	return $proto."://$d->{'dom'}:$port";
+	}
 }
 

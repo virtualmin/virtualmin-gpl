@@ -2798,6 +2798,9 @@ newscripts_wheader=Script upgrade notification options
 newscripts_werr=Failed to save upgrade notifications
 newscripts_ewother=Missing or invalid email address to notify
 newscripts_ewnone=Nobody to notify selected
+newscripts_wurl=Webmin base URL for email
+newscripts_wurldef=Automatic
+newscripts_ewurl=Missing or invalid Webmin base URL
 
 addscripts_err=Failed to add script installer
 addscripts_elocal=Local file does not exist

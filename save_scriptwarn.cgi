@@ -18,6 +18,14 @@ if ($in{'enabled'}) {
 	@email || &error($text{'newscripts_ewnone'});
 	}
 $config{'scriptwarn_email'} = join(" ", @email);
+if ($in{'wurl_def'}) {
+	delete($config{'scriptwarn_url'});
+	}
+else {
+	$in{'wurl'} =~ /^(http|https):\/\/\S+$/ ||
+		&error($text{'newscripts_ewurl'});
+	$config{'scriptwarn_url'} = $in{'wurl'};
+	}
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
