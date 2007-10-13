@@ -735,7 +735,7 @@ The default number of alias servers that new virtual server owners can create ca
 Removed the Plugin Modules page and the section for enabled features from the Module Config page, and merged them into a single Features and Plugins page where you can select which are enabled.
 Added a button to the Spam and Virus Scanning page to configure and start clamd, so that the clamdscan virus scanner can be used to save on CPU.
 ---- Changes since 3.47 ----
-Updated Xoops script installer to version 2.0.17.1, SugarCRM to 4.5.1f, and SquirrelMail to version 1.4.11.
+Updated Xoops script installer to version 2.0.17.1, SugarCRM to 4.5.1f, TikiWiki to 1.9.8, Rails to 1.2.3, Radiant to 0.6.3, and SquirrelMail to version 1.4.11.
 Updated the Horde script installer to version 3.1.5, along with many Horde applications like IMP and Kronolith.
 Domains that don't have any databases but are allowed to create one can now install scripts that have the ability to create a database.
 When re-creating a domain as part of a restore, the external DNS IP address is set to match the target system, rather than being copied from the source.
@@ -746,3 +746,6 @@ Updated the proxy paths page to allow proxying paths to a single URL, even on sy
 Changed default PHPlist version to stable release 2.10.5.
 Added a field to the Upgrade Notification section of the Script Installers page to specify a custom base URL for Webmin for email messages.
 On systems with the mod_proxy_balancer Apache module, Ruby-based script installers can run multiple Mongrel instances to handle higher loads. All needed proxy directives and server processes are setup automatically.
+Cleaned up the reseller editing page by breaking down fields into collapsible sections.
+The hosting provider's logo that appears in the top-left corner can now be customized on a per-reseller basis, so that customers of each reseller see a different logo when they login.
+Added --logo and --link parameters to create-reseller.pl and modify-reseller.pl, to set the logo their customers see, and updated list-resellers.pl to show the current logo for each reseller.

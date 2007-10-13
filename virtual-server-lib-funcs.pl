@@ -11341,6 +11341,40 @@ foreach my $p (@plugins) {
 return @rv;
 }
 
+# get_provider_link()
+# Returns HTML for the logo that should be displayed in the theme for the
+# Virtualmin hosting provider. In an array context, also returns the image
+# URL and link URL, if set.
+sub get_provider_link
+{
+# Does this user's domain's reseller have a logo?
+local ($logo, $link);
+local $d = &get_domain_by("user", $remote_user, "parent", "");
+if ($d && $d->{'reseller'} && defined(&get_reseller)) {
+	local $resel = &get_reseller($d->{'reseller'});
+	if ($resel->{'acl'}->{'logo'}) {
+		# Reseller has one - use it
+		$logo = $resel->{'acl'}->{'logo'};
+		$link = $resel->{'acl'}->{'link'};
+		}
+	}
+if (!$logo) {
+	# Call back to global config
+	$logo = $config{'theme_image'} || $gconfig{'virtualmin_theme_image'};
+	$link = $config{'theme_link'} || $gconfig{'virtualmin_theme_link'};
+	}
+if ($logo && $logo ne "none") {
+	local $html;
+	$html .= "<a href='$link' target=_new>" if ($link);
+	$html .= "<img src='$image' border=0>";
+	$html .= "</a>" if ($link);
+	return wantarray ? ( $html, $logo, $link ) : $html;
+	}
+else {
+	return wantarray ? ( ) : undef;
+	}
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;

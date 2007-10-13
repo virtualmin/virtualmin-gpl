@@ -59,10 +59,6 @@
 	SetHandler fcgid-script
 	</Location>
 
- - per-reseller logos / links
-	- one function to get image
-	- update both themes
-
  - plugin developers docs
 	- example plugin
 	- explain how to register
