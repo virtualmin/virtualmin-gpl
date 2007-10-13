@@ -60,6 +60,7 @@ $config{'plugins'} = join(" ", @newplugins);
 $config{'plugins_inactive'} = join(" ", @inactive);
 
 # Validate new settings with a config check
+@plugins = @newplugins;
 &set_all_null_print();
 $cerr = &check_virtual_server_config();
 &error($cerr) if ($cerr);
