@@ -8235,6 +8235,14 @@ if ($d->{'web'} && $config{'web'} && !$d->{'alias'} && $virtualmin_pro &&
 return 0;
 }
 
+# has_proxy_none()
+# Returns 1 if the system supports disabling proxying for some URL
+sub has_proxy_none
+{
+&require_apache();
+return $apache::httpd_modules{'mod_proxy'} >= 2.0;
+}
+
 # require_licence()
 # Reads in the file containing the licence_scheduled function.
 # Returns 1 if OK, 0 if not
