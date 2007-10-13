@@ -59,13 +59,6 @@
 	SetHandler fcgid-script
 	</Location>
 
- - rails scripts should be able to make use of balancer
-	- mass change of limits
-	- update all scripts
-	- upgrade mysql!
-		- init script
-		- remove old RPM
-
  - per-reseller logos / links
 	- one function to get image
 	- update both themes

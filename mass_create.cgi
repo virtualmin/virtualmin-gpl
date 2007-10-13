@@ -357,7 +357,7 @@ foreach $line (@lines) {
 	# Actually do it!
 	&set_all_null_print();
 	local $err = &create_virtual_server(\%dom, $parentdom,
-			      $parentdom ? $parentdom->{'user'} : undef);
+			      $parentdom ? $parentdom->{'user'} : undef, 0, 1);
 	if ($err) {
 		&line_error($err);
 		next;
@@ -373,6 +373,9 @@ foreach $line (@lines) {
 		&theme_post_save_domain(\%dom, 'create');
 		}
 	}
+
+# Run post-create commands
+&run_post_actions();
 
 print "<p>\n";
 print &text('cmass_complete', $count, $ecount),"<br>\n";

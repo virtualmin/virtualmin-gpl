@@ -745,3 +745,4 @@ Virtualmin plugins and modules that are not installed but could be are now in th
 Updated the proxy paths page to allow proxying paths to a single URL, even on systems that don't have mod_proxy_balancer installed. For those with a module, the proxy can still be to multiple URLs.
 Changed default PHPlist version to stable release 2.10.5.
 Added a field to the Upgrade Notification section of the Script Installers page to specify a custom base URL for Webmin for email messages.
+On systems with the mod_proxy_balancer Apache module, Ruby-based script installers can run multiple Mongrel instances to handle higher loads. All needed proxy directives and server processes are setup automatically.

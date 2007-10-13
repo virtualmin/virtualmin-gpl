@@ -253,6 +253,7 @@ form_aliasdomslimit=Maximum allowed alias servers
 form_aliasdomslimit0=At most
 form_realdomslimit=Maximum allowed non-alias servers
 form_aliasdomsabove=(Sub-server limit also applies)
+form_mongrelslimit=Maximum Mongrel server processes for Rails
 form_unlimit=Unlimited
 form_atmost=At most
 form_proxy=Proxy website to URL

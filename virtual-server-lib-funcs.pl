@@ -5965,11 +5965,12 @@ if (!$oldd) {
 return undef;
 }
 
-# create_virtual_server(&domain, [&parent-domain], [parent-user], [no-scripts])
+# create_virtual_server(&domain, [&parent-domain], [parent-user], [no-scripts],
+#			[no-post-actions])
 # Given a complete domain object, setup all it's features
 sub create_virtual_server
 {
-local ($dom, $parentdom, $parentuser, $noscripts) = @_;
+local ($dom, $parentdom, $parentuser, $noscripts, $nopost) = @_;
 
 # Run the before command
 &set_domain_envs($dom, "CREATE_DOMAIN");
@@ -6033,7 +6034,9 @@ if ($dom->{'webmin'}) {
 		}
 	}
 
-&run_post_actions();
+if (!$nopost) {
+	&run_post_actions();
+	}
 
 # Add virtual IP address, if needed
 if ($dom->{'virt'}) {
@@ -6262,7 +6265,9 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 	}
 
 # Run the after creation command
-&run_post_actions();
+if (!$nopost) {
+	&run_post_actions();
+	}
 &made_changes();
 
 return undef;
