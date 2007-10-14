@@ -63,6 +63,9 @@
 	- example plugin
 	- explain how to register
 
- - proxying to 'none' , to disable
-	- Help for proxy edit page?
-	- Possible for balancer mode?
+ - rails documentation
+	- need to install gcc and make
+	- need mysql-devel libraries
+	- need sqlite sqlite-devel
+	- need ruby, ruby-devel
+

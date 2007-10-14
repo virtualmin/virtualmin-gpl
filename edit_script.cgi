@@ -24,10 +24,7 @@ print &ui_table_row($text{'scripts_iname'}, $script->{'desc'});
 print &ui_table_row($text{'scripts_iversion'},
 	$script->{'vdesc'}->{$sinfo->{'version'}} || $sinfo->{'version'});
 
-# Show install info
-if ($sinfo->{'desc'}) {
-	print &ui_table_row($text{'scripts_iinfo'}, $sinfo->{'desc'});
-	}
+# Show install URL
 if ($sinfo->{'url'}) {
 	print &ui_table_row($text{'scripts_iurl'},
 			    "<a href='$sinfo->{'url'}'>$sinfo->{'url'}</a>");
