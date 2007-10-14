@@ -5,10 +5,23 @@ require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_scripts() || &error($text{'edit_ecannot'});
+
 if ($in{'upgrade'}) {
 	# Just redirect to the install form, in upgrade mode
 	&redirect("script_form.cgi?dom=$in{'dom'}&script=$in{'script'}&version=$in{'version'}&upgrade=1");
 	exit;
+	}
+elsif ($in{'stop'}) {
+	# Redirect to Rails server stop form
+	&redirect("stop_script.cgi?dom=$in{'dom'}&script=$in{'script'}");
+	}
+elsif ($in{'start'}) {
+	# Redirect to Rails server start form
+	&redirect("start_script.cgi?dom=$in{'dom'}&script=$in{'script'}");
+	}
+elsif ($in{'restart'}) {
+	# Redirect to Rails server restart form
+	&redirect("restart_script.cgi?dom=$in{'dom'}&script=$in{'script'}");
 	}
 
 # Get the script being removed

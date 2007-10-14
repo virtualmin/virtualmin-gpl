@@ -751,3 +751,4 @@ The hosting provider's logo that appears in the top-left corner can now be custo
 Added --logo and --link parameters to create-reseller.pl and modify-reseller.pl, to set the logo their customers see, and updated list-resellers.pl to show the current logo for each reseller.
 Added an option to the proxy paths page to serve locally for some path (disable proxying). Also added a corresponding flag to the create-proxy.pl command-line API.
 When batch creating or mass deleting virtual servers, servers like Apache and BIND are not restarted to apply the changes until the entire batch is complete.
+Scripts that have a background server process (like Mongrel instances for Ruby on Rails) can now be stopped, started and restarted from the Manage Script page.

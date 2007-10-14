@@ -54,6 +54,21 @@ if ($sinfo->{'user'}) {
 						  "<tt>$sinfo->{'pass'}</tt>"));
 	}
 
+# Show Mongrel ports and status
+if ($opts->{'port'}) {
+	@ports = split(/\s+/, $opts->{'port'});
+	print &ui_table_row($text{'scripts_iport'},
+			    join(", ", @ports));
+	}
+$sfunc = $script->{'status_server_func'};
+if (defined(&$sfunc)) {
+	@pids = &$sfunc($d, $opts);
+	print &ui_table_row($text{'scripts_istatus'},
+		@pids ? "<font color=#00aa00>$text{'scripts_istatus1'}</font>"
+		      : "<font color=#ff0000>$text{'scripts_istatus0'}</font>");
+	$gotstatus = 1;
+	}
+
 print &ui_table_end();
 
 # Show un-install and upgrade buttons
@@ -66,6 +81,16 @@ if (@vers) {
 	print &ui_submit($text{'scripts_upok'}, "upgrade"),"\n";
 	print &ui_select("version", $vers[$#vers],
 			 [ map { [ $_ ] } @vers ]),"\n";
+	}
+if ($gotstatus) {
+	print "&nbsp;&nbsp;\n";
+	if (@pids) {
+		print &ui_submit($text{'scripts_ustop'}, "stop"),"\n";
+		print &ui_submit($text{'scripts_urestart'}, "restart"),"\n";
+		}
+	else {
+		print &ui_submit($text{'scripts_ustart'}, "start"),"\n";
+		}
 	}
 print &ui_form_end();
 
