@@ -6273,12 +6273,12 @@ if (!$nopost) {
 return undef;
 }
 
-# delete_virtual_server(&domain, only-disconnect)
+# delete_virtual_server(&domain, only-disconnect, no-post)
 # Deletes a Virtualmin domain and all sub-domains and aliases. Returns undef
 # on succes, or an error message on failure.
 sub delete_virtual_server
 {
-local ($d, $only) = @_;
+local ($d, $only, $nopost) = @_;
 
 # Get domain details
 local @subs = &get_domain_by("parent", $d->{'id'});
@@ -6409,8 +6409,10 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 		}
 	}
 
-# Run the after creation command
-&run_post_actions();
+# Run the after deletion command
+if (!$nopost) {
+	&run_post_actions();
+	}
 &made_changes();
 
 return undef;

@@ -95,7 +95,7 @@ else {
 		&$first_print(&text('massdelete_doing', $d->{'dom'}));
 		&$indent_print();
 		$in{'only'} = 0 if (!&can_import_servers());
-		$err = &delete_virtual_server($d, $in{'only'});
+		$err = &delete_virtual_server($d, $in{'only'}, 1);
 		&error($err) if ($err);
 		&$outdent_print();
 		&$second_print($text{'setup_done'});
@@ -105,6 +105,7 @@ else {
 			&theme_post_save_domain($d, 'delete');
 			}
 		}
+	&run_post_actions();
 
 	&webmin_log("delete", "domains", scalar(@doms));
 	&ui_print_footer("", $text{'index_return'});
