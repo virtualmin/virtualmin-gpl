@@ -5275,6 +5275,7 @@ elsif ($mode == 2) {
 	$port =~ /^\d*$/ || &error($text{'backup_eport'});
 	$in{"$_[0]_spath"} =~ /\S/ || &error($text{'backup_epath'});
 	$in{"$_[0]_suser"} =~ /^[^:\/]*$/ || &error($text{'backup_euser2'});
+	$in{"$_[0]_spass"} =~ /^[^\@]*$/ || &error($text{'backup_epass2'});
 	$in{"$_[0]_spath"} =~ s/\/+$//;
 	return "ssh://".$in{"$_[0]_suser"}.":".$in{"$_[0]_spass"}."\@".
 	       $in{"$_[0]_sserver"}.":".$in{"$_[0]_spath"};
