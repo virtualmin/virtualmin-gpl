@@ -73,3 +73,9 @@
  - apache function to update blocks in config file properly
 	- use everywhere in virtualmin and apache module
 
+ - turn off spam on a per-user basis
+	- check in lookup-domain.pl and server
+	- command-line API
+
+ - directi API in registrar module
+

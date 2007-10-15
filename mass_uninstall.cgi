@@ -50,6 +50,7 @@ if ($in{'confirm'}) {
 		else {
 			&$second_print($text{'scripts_failed'});
 			}
+		&run_post_actions();
 		}
 	&webmin_log("uninstall", "scripts", scalar(@d));
 	}
