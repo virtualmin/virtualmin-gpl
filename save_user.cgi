@@ -284,6 +284,11 @@ else {
 		}
 	$user->{'secs'} = [ @secs ];
 
+	# Update no-spam flag
+	if ($config{'spam'} && $d->{'spam'}) {
+		$user->{'nospam'} = $in{'nospam'};
+		}
+
 	# Create or update the user
 	$emailmailbox = 0;
 	if ($in{'new'}) {

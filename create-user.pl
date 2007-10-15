@@ -72,6 +72,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--home") {
 		$home = shift(@ARGV);
 		}
+	elsif ($a eq "--no-check-spam") {
+		$nospam = 1;
+		}
 	else {
 		&usage();
 		}
@@ -193,6 +196,7 @@ if ($user->{'unix'} && !$user->{'noquota'}) {
 	}
 $user->{'dbs'} = \@dbs if (@dbs);
 $user->{'secs'} = \@groups;
+$user->{'nospam'} = $nospam;
 
 if ($user->{'unix'}) {
 	# Check for a Unix clash
@@ -272,5 +276,8 @@ print "                        [--extra email.address\@some.domain]\n";
 print "                        [--mysql db] ...\n";
 print "                        [--group name] ...\n";
 print "                        [--web]\n";
+if ($config{'spam'}) {
+	print "                        [--no-check-spam]\n";
+	}
 exit(1);
 }

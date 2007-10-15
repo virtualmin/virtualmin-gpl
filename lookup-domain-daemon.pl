@@ -60,6 +60,7 @@ while(1) {
 
 	# Find the user
 	&flush_virtualmin_caches();
+	&flush_webmin_caches();
 	$d = &get_user_domain($username);
 	if (!$d) {
 		# No such user!
@@ -95,7 +96,9 @@ if ($d && $user) {
 		($quota, $uquota) = ($user->{'mquota'}, $user->{'umquota'});
 		}
 	local $client = &get_domain_spam_client($d);
-	print join("\t", $d->{'id'}, $d->{'dom'}, $d->{'spam'},
+	print join("\t", $d->{'id'},
+			 $d->{'dom'},
+			 $d->{'spam'} && !$user->{'nospam'},
 			 ($client eq "spamc" ? 1 : 0),
 			 ($quota ? ($quota - $uquota)*&quota_bsize($qmode)
 				 : "UNLIMITED"),

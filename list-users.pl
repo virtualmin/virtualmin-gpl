@@ -87,6 +87,11 @@ if ($multi) {
 		if (@{$u->{'extraemail'}} && !$u->{'noextra'}) {
 			print "    Extra addresses: ",join(" ", @{$u->{'extraemail'}}),"\n";
 			}
+		if ($config{'spam'}) {
+			print "    Check spam and viruses: ",
+				!$d->{'spam'} ? "Disabled for domain" :
+				$u->{'nospam'} ? "No" : "Yes","\n";
+			}
 		@dblist = ( );
 		foreach $db (@{$u->{'dbs'}}) {
 			push(@dblist, $db->{'name'}." ($db->{'type'})");

@@ -482,7 +482,7 @@ ins\//);
 
 	# Merge in plain text passwords
 	local (%plain, $need_plainpass_save);
-	&read_file("$plainpass_dir/$d->{'id'}", \%plain);
+	&read_file_cached("$plainpass_dir/$d->{'id'}", \%plain);
 	foreach my $u (@users) {
 		if ($u->{'domainowner'}) {
 			# The domain owner's password is always known
@@ -643,9 +643,9 @@ if (!$_[4] && $_[0]) {
 		}
 	}
 
+# Add any secondary groups in the template
 local @sgroups = &allowed_secondary_groups($_[0]);
 if (@sgroups) {
-	# Add any secondary groups in the template
 	local @groups = &list_all_groups();
 	foreach my $u (@users) {
 		$u->{'secs'} = [ ];
@@ -660,6 +660,17 @@ if (@sgroups) {
 					push(@{$u->{'secs'}}, $g);
 					}
 				}
+			}
+		}
+	}
+
+# Add no-spam flags
+if ($_[0]) {
+	local %nospam;
+	&read_file_cached("$nospam_dir/$_[0]->{'id'}", \%nospam);
+	foreach my $u (@users) {
+		if (!defined($u->{'nospam'})) {
+			$u->{'nospam'} = $nospam{$u->{'user'}};
 			}
 		}
 	}
@@ -917,13 +928,26 @@ if ($virtualmin_pro) {
 	}
 
 # Save the plain-text password, if known
-mkdir($plainpass_dir, 0700);
+if (!-d $plainpass_dir) {
+	mkdir($plainpass_dir, 0700);
+	}
 if (defined($_[0]->{'plainpass'})) {
 	local %plain;
-	&read_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
+	&read_cached_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
 	$plain{$_[0]->{'user'}} = $_[0]->{'plainpass'};
 	$plain{$_[0]->{'user'}." encrypted"} = $_[0]->{'pass'};
 	&write_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
+	}
+
+# Save the no-spam-check flag
+if (!-d $nospam_dir) {
+	mkdir($nospam_dir, 0700);
+	}
+if ($_[0]->{'nospam'}) {
+	local %nospam;
+	&read_cached_file("$nospam_dir/$_[1]->{'id'}", \%nospam);
+	$nospam{$_[0]->{'user'}} = 1;
+	&write_file("$nospam_dir/$_[1]->{'id'}", \%nospam);
 	}
 
 # Set the user's Usermin IMAP password
@@ -1333,7 +1357,7 @@ if ($virtualmin_pro) {
 if (!$_[0]->{'domainowner'}) {
 	local %plain;
 	mkdir($plainpass_dir, 0700);
-	&read_file("$plainpass_dir/$_[2]->{'id'}", \%plain);
+	&read_file_cached("$plainpass_dir/$_[2]->{'id'}", \%plain);
 	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 		$plain{$_[0]->{'user'}} = $plain{$_[1]->{'user'}};
 		delete($plain{$_[1]->{'user'}});
@@ -1346,6 +1370,20 @@ if (!$_[0]->{'domainowner'}) {
 		$plain{$_[0]->{'user'}." encrypted"} = $_[0]->{'pass'};
 		}
 	&write_file("$plainpass_dir/$_[2]->{'id'}", \%plain);
+	}
+
+# Update the no-spam-check flag
+if (!-d $nospam_dir) {
+	mkdir($nospam_dir, 0700);
+	}
+if (defined($_[0]->{'nospam'})) {
+	local %nospam;
+	&read_file_cached("$nospam_dir/$_[2]->{'id'}", \%nospam);
+	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+		delete($nospam{$_[1]->{'user'}});
+		}
+	$nospam{$_[0]->{'user'}} = $_[0]->{'nospam'};
+	&write_file("$nospam_dir/$_[2]->{'id'}", \%nospam);
 	}
 
 # Clear quota cache for this user
@@ -1512,11 +1550,22 @@ if ($virtualmin_pro) {
 
 # Remove the plain-text password
 local %plain;
-mkdir($plainpass_dir, 0700);
-&read_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
+if (!-d $plainpass_dir) {
+	mkdir($plainpass_dir, 0700);
+	}
+&read_file_cached("$plainpass_dir/$_[1]->{'id'}", \%plain);
 delete($plain{$_[0]->{'user'}});
 delete($plain{$_[0]->{'user'}." encrypted"});
 &write_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
+
+# Clear the no-spam flag
+local %spam;
+if (!-d $nospam_dir) {
+	mkdir($nospam_dir, 0700);
+	}
+&read_file_cached("$nospam_dir/$_[1]->{'id'}", \%spam);
+delete($spam{$_[0]->{'user'}});
+&write_file("$nospam_dir/$_[1]->{'id'}", \%spam);
 
 # Update cache of existing usernames
 $unix_user{&escape_alias($_[0]->{'user'})} = 0;

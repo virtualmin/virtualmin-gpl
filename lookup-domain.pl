@@ -141,7 +141,11 @@ else {
 $bsize = &quota_bsize($qmode);
 $quota *= $bsize;
 $uquota *= $bsize;
-if ($cacheclient eq "spamc") {
+if ($user->{'nospam'}) {
+	# Spam filtering disabled for this user
+	$cachespam = 0;
+	}
+elsif ($cacheclient eq "spamc") {
 	# Using spamc, so quotas don't matter since spam processing is run
 	# by a daemon
 	print "$d->{'id'}\n";

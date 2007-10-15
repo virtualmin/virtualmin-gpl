@@ -1920,6 +1920,11 @@ if (-r "$plainpass_dir/$_[0]->{'id'}") {
 	&copy_source_dest("$plainpass_dir/$_[0]->{'id'}", "$_[1]_plainpass");
 	}
 
+# Copy no-spam flags file too
+if (-r "$nospam_dir/$_[0]->{'id'}") {
+	&copy_source_dest("$nospam_dir/$_[0]->{'id'}", "$_[1]_nospam");
+	}
+
 &$second_print($text{'setup_done'});
 
 if (!&mail_under_home() && $_[2]->{'mailfiles'}) {
@@ -2129,6 +2134,23 @@ if (-r "$_[1]_plainpass") {
 		# Copy the whole file
 		&copy_source_dest("$_[1]_plainpass",
 				  "$plainpass_dir/$_[0]->{'id'}");
+		}
+	}
+
+# Restore no-spam flags file too
+if (-r "$_[1]_nospam") {
+	if ($_[2]->{'mailuser'}) {
+		# Just copy one flag
+		local (%oldspam, %newspam);
+		&read_file("$_[1]_nospam", \%oldspam);
+		&read_file("$nospam_dir/$_[0]->{'id'}", \%newspam);
+		$newspam{$_[2]->{'mailuser'}} = $oldspam{$_[2]->{'mailuser'}};
+		&write_file("$nospam_dir/$_[0]->{'id'}", \%newspam);
+		}
+	else {
+		# Copy the whole file
+		&copy_source_dest("$_[1]_nospam",
+				  "$nospam_dir/$_[0]->{'id'}");
 		}
 	}
 

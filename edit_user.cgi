@@ -242,6 +242,14 @@ elsif (!$in{'new'}) {
 		    2, \@tds);
 	}
 
+# Show spam check flag
+if ($config{'spam'}) {
+	print &ui_table_row(&hlink($text{'user_nospam'}, "nospam"),
+		!$d->{'spam'} ? $text{'user_spamdis'} :
+			&ui_radio("nospam", int($user->{'nospam'}),
+				  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
+	}
+
 print &ui_hidden_table_end("table2a");
 
 # Show forwarding setup for this user (can use the simple or complex forms)

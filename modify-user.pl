@@ -102,6 +102,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--update-email" || $a eq "--send-update-email") {
 		$remail = 1;
 		}
+	elsif ($a eq "--no-check-spam") {
+		$nospam = 1;
+		}
+	elsif ($a eq "--check-spam") {
+		$nospam = 0;
+		}
 	else {
 		&usage();
 		}
@@ -261,6 +267,9 @@ elsif ($jail_ftp) {
 	$user->{'unix'} || &usage("FTP cannot be enabled for non-Unix users");
 	$user->{'shell'} = $config{'jail_shell'};
 	}
+if (defined($nospam)) {
+	$user->{'nospam'} = $nospam;
+	}
 
 # Update secondary groups
 @newsecs = &unique(@{$user->{'secs'}}, @addgroups);
@@ -344,6 +353,9 @@ if ($config{'jail_shell'}) {
 print "                         [--add-group group] ...\n";
 print "                         [--del-group group] ...\n";
 print "                         [--send-update-email]\n";
+if ($config{'spam'}) {
+	print "                         [--no-check-spam | --check-spam]\n";
+	}
 exit(1);
 }
 
