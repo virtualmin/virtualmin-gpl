@@ -24,5 +24,7 @@ else {
 	print $text{'setup_done'},"<p>\n";
 	}
 
-&ui_print_footer("list_scripts.cgi?dom=$in{'dom'}", $text{'scripts_return'},
+&ui_print_footer("edit_script.cgi?dom=$in{'dom'}&script=$in{'script'}",
+		  $text{'scripts_ereturn'},
+		 "list_scripts.cgi?dom=$in{'dom'}", $text{'scripts_return'},
 		 &domain_footer_link($d));

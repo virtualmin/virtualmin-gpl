@@ -2624,6 +2624,7 @@ scripts_istatus1=Running
 scripts_istatus0=Down
 scripts_upversion=Current version number
 scripts_iok=Install Now
+scripts_ereturn=script information
 scripts_edep=This script cannot be installed, as this virtual server does not meet its requirements : $1
 scripts_ecommands=This script cannot be installed, as it requires the following commands : <tt>$1</tt>
 scripts_eweb=Scripts can only be installed into virtual servers with a home directory and website

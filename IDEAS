@@ -73,4 +73,3 @@
  - apache function to update blocks in config file properly
 	- use everywhere in virtualmin and apache module
 
- - script info should show ports, if running or not, buttons to stop/start/restart
