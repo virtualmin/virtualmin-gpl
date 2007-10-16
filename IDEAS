@@ -69,13 +69,15 @@
 	- need sqlite sqlite-devel
 	- need ruby, ruby-devel
 	- test on ubuntu too
-		- mod_proxy and mod_proxy_balancer in Apache module
-		- gcc, make
+		- mod_proxy , mod_proxy_http and mod_proxy_balancer in Apache module
+		- gcc, make , rake
 		- ruby1.8-dev
-		- libc6-dev
+		- libc6-dev libmysqlclient15-dev
 
  - apache function to update blocks in config file properly
 	- use everywhere in virtualmin and apache module
 
  - directi API in registrar module
+
+ - postinstall not doing preload?
 
