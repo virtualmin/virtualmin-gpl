@@ -5143,11 +5143,12 @@ return strftime($_[0], @tm);
 sub parse_backup_url
 {
 local @rv;
-if ($_[0] =~ /^ftp:\/\/([^:]*):([^\@]*)\@([^\/:]+)(:\d+)?:?(\/.*)$/) {
+if ($_[0] =~ /^ftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/) {
 	@rv = (1, $1, $2, $3, $5, $4 ? substr($4, 1) : 21);
 	}
-elsif ($_[0] =~ /^ssh:\/\/([^:]*):([^\@]*)\@([^\/:]+)(:\d+)?:?(\/.*)$/ ||
-       $_[0] =~ /^ssh:\/\/([^:]*):([^\@]*)\@([^\/:]+)(:\d+)?:(.+)$/) {
+elsif ($_[0] =~ /^ssh:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
+       $_[0] =~ /^ssh:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
+	# SSH url with no @ in password
 	@rv = (2, $1, $2, $3, $5, $4 ? substr($4, 1) : 22);
 	}
 elsif ($_[0] =~ /^s3:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
@@ -5312,7 +5313,6 @@ elsif ($mode == 1) {
 	$port =~ /^\d*$/ || &error($text{'backup_eport'});
 	$in{"$_[0]_path"} =~ /^\/\S/ || &error($text{'backup_epath'});
 	$in{"$_[0]_user"} =~ /^[^:\/]*$/ || &error($text{'backup_euser'});
-	$in{"$_[0]_pass"} =~ /^[^:\@\/]*$/ || &error($text{'backup_epass'});
 	$in{"$_[0]_path"} =~ s/\/+$//;
 	return "ftp://".$in{"$_[0]_user"}.":".$in{"$_[0]_pass"}."\@".
 	       $in{"$_[0]_server"}.$in{"$_[0]_path"};
@@ -5324,7 +5324,6 @@ elsif ($mode == 2) {
 	$port =~ /^\d*$/ || &error($text{'backup_eport'});
 	$in{"$_[0]_spath"} =~ /\S/ || &error($text{'backup_epath'});
 	$in{"$_[0]_suser"} =~ /^[^:\/]*$/ || &error($text{'backup_euser2'});
-	$in{"$_[0]_spass"} =~ /^[^\@]*$/ || &error($text{'backup_epass2'});
 	$in{"$_[0]_spath"} =~ s/\/+$//;
 	return "ssh://".$in{"$_[0]_suser"}.":".$in{"$_[0]_spass"}."\@".
 	       $in{"$_[0]_sserver"}.":".$in{"$_[0]_spath"};
