@@ -69,6 +69,10 @@
 	- need sqlite sqlite-devel
 	- need ruby, ruby-devel
 	- test on ubuntu too
+		- mod_proxy and mod_proxy_balancer in Apache module
+		- gcc, make
+		- ruby1.8-dev
+		- libc6-dev
 
  - apache function to update blocks in config file properly
 	- use everywhere in virtualmin and apache module
