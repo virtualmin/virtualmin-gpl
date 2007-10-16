@@ -753,3 +753,5 @@ Added an option to the proxy paths page to serve locally for some path (disable 
 When batch creating or mass deleting virtual servers, servers like Apache and BIND are not restarted to apply the changes until the entire batch is complete.
 Scripts that have a background server process (like Mongrel instances for Ruby on Rails) can now be stopped, started and restarted from the Manage Script page.
 Added an option to the Edit Mailbox page to disable spam filtering for a user. Also added equivalent command-line flags to the user modify-user.pl and create-user.pl command-line scripts.
+---- Changes since 3.48 ----
+Updated phpMyAdmin to 2.11.1.1.

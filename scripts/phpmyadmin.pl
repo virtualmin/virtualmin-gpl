@@ -19,7 +19,7 @@ return "A browser-based MySQL database management interface.";
 # script_phpmyadmin_versions()
 sub script_phpmyadmin_versions
 {
-return ( "2.11.1", "2.9.2", "2.8.2.4" );
+return ( "2.11.1.1", "2.9.2", "2.8.2.4" );
 }
 
 sub script_phpmyadmin_version_desc
@@ -166,7 +166,8 @@ sub script_phpmyadmin_install
 {
 local ($d, $ver, $opts, $files, $upgrade) = @_;
 local ($out, $ex);
-local @dbs = split(/\s+/, $opts->{'db'});
+local @dbs = map { my ($dbtype, $dbname) = split(/_/, $_, 2); $dbname }
+		 split(/\s+/, $opts->{'db'});
 local $dbuser = &mysql_user($d);
 local $dbpass = &mysql_pass($d);
 local $dbhost = &get_database_host("mysql");
