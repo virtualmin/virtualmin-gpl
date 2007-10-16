@@ -121,7 +121,7 @@ local $lowmem;
 &foreign_require("proc", "proc-lib.pl");
 if (defined(&proc::get_memory_info)) {
 	local ($real) = &proc::get_memory_info();
-	if ($real*1024 <= 256*1024*1024*1024) {
+	if ($real*1024 <= 256*1024*1024) {
 		# Less that 256 M .. don't preload
 		$lowmem = 1;
 		}
