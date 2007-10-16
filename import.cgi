@@ -558,7 +558,7 @@ else {
 		if (&plugin_call($f, "feature_import", $in{'dom'},
 				 $user || $in{'user'},
 				 $in{'db'})) {
-			$found{$p}++;
+			$found{$f}++;
 			print "<b>",&text('import_plugin', $pname),"</b><p>\n";
 			}
 		else {
