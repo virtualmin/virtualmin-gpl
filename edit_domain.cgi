@@ -361,9 +361,6 @@ else {
 		}
 
 	foreach $f (@feature_plugins) {
-		# Cannot enable features not in alias target
-		next if ($aliasdom && !$aliasdom->{$f});
-
 		next if (!&plugin_call($f, "feature_suitable",
 					$parentdom, $aliasdom, $subdom));
 
