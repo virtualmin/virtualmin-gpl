@@ -425,7 +425,6 @@ foreach $f (@feature_plugins) {
 	next if (!&plugin_call($f, "feature_suitable",
 				$parentdom, $aliasdom, $subdom));
 	next if (!&can_use_feature($f));
-	next if ($aliasdom && !$aliasdom->{$f});
 
 	$label = &plugin_call($f, "feature_label", 0);
 	$label = "<b>$label</b>";
