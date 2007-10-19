@@ -68,3 +68,8 @@
 
  - directi API in registrar module
  - tucows http://developer.tucows.com:4080/wiki/index.php?n=index.php?n=Main.XCP
+
+ - test suite to detect failures in common operations
+	- command-line API driven
+	- create/modify/delete a user, domain, script, database, etc..
+

@@ -1,7 +1,7 @@
  x Create tar.gz file
 
  x build RPM and .deb
-	./makemodulerpm.pl --dir --sign virtual-server gpl-virtual-server
+	./makemodulerpm.pl --sign --dir virtual-server gpl-virtual-server
 	./makemodulerpm.pl --sign virtual-server-theme
 	./makemoduledeb.pl --dir virtual-server gpl-virtual-server
 	./makemoduledeb.pl virtual-server-theme
