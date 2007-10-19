@@ -933,7 +933,7 @@ if (!-d $plainpass_dir) {
 	}
 if (defined($_[0]->{'plainpass'})) {
 	local %plain;
-	&read_cached_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
+	&read_file_cached("$plainpass_dir/$_[1]->{'id'}", \%plain);
 	$plain{$_[0]->{'user'}} = $_[0]->{'plainpass'};
 	$plain{$_[0]->{'user'}." encrypted"} = $_[0]->{'pass'};
 	&write_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
@@ -945,7 +945,7 @@ if (!-d $nospam_dir) {
 	}
 if ($_[0]->{'nospam'}) {
 	local %nospam;
-	&read_cached_file("$nospam_dir/$_[1]->{'id'}", \%nospam);
+	&read_file_cached("$nospam_dir/$_[1]->{'id'}", \%nospam);
 	$nospam{$_[0]->{'user'}} = 1;
 	&write_file("$nospam_dir/$_[1]->{'id'}", \%nospam);
 	}
