@@ -10538,6 +10538,22 @@ if ($config{'ldap'}) {
 		}
 	}
 
+# Check for NSCD
+if ($config{'unix'}) {
+	if (&find_byname("nscd")) {
+		local $msg;
+		if (&foreign_available("init")) {
+			&foreign_require("init", "init-lib.pl");
+			if ($init::init_mode eq 'init' &&
+			    &init::action_status("nscd") == 2) {
+				$msg = &text('check_enscd2',
+					'../init/edit_action.cgi?0+nscd');
+				}
+			}
+		&$second_print($text{'check_enscd'}." ".$msg);
+		}
+	}
+
 # Make sure needed compression programs are installed
 if (!&has_command("tar")) {
 	return &text('check_ebcmd', "<tt>tar</tt>");

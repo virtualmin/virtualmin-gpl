@@ -755,3 +755,4 @@ Scripts that have a background server process (like Mongrel instances for Ruby o
 Added an option to the Edit Mailbox page to disable spam filtering for a user. Also added equivalent command-line flags to the user modify-user.pl and create-user.pl command-line scripts.
 ---- Changes since 3.48 ----
 Updated the phpMyAdmin script installer to 2.11.1.2, and Drupal to 5.3 and 4.7.8.
+Added a warning about NSCD to the configuration check page.
