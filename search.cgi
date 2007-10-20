@@ -34,7 +34,10 @@ if ($isfeat) {
 	}
 
 if (!@doms) {
-	if ($isfeat) {
+	if ($in{'nonemsg'}) {
+		print "<b>$in{'nonemsg'}</b><p>\n";
+		}
+	elsif ($isfeat) {
 		print "<b>",&text('search_nonef', $fname),"</b><p>\n";
 		}
 	else {
@@ -43,7 +46,10 @@ if (!@doms) {
 		}
 	}
 else {
-	if ($isfeat) {
+	if ($in{'msg'}) {
+		print "<b>$in{'msg'}</b><p>\n";
+		}
+	elsif ($isfeat) {
 		print "<b>",&text('search_resultsf', $fname,
 				  scalar(@doms)),"</b><p>\n";
 		}

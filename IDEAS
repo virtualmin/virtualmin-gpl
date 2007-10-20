@@ -74,3 +74,8 @@
 	- create/modify/delete a user, domain, script, database, etc..
 
  - spamassassin rule updates from http://saupdates.openprotect.com/
+
+ - standard documentation page for each plugin
+	- CGI on virtualmin.com to redirect to them
+	- linked from security-updates module
+
