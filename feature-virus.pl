@@ -424,6 +424,7 @@ elsif (&init::action_status("clamd-wrapper")) {
 		&copy_source_dest($srcfile, $cfile);
 		}
 	local $lref = &read_file_lines($cfile);
+	local $logfile;
 	foreach my $l (@$lref) {
 		if ($l =~ /^\s*Example/) {
 			$l = "# Example";
@@ -431,7 +432,10 @@ elsif (&init::action_status("clamd-wrapper")) {
 		$l =~ s/<SERVICE>/$service/g;
 		$l =~ s/<USER>/$user/g;
 		$l =~ s/<GROUP>/$group/g;
-		$l =~ s/^#+\s*LogFile\s+(\/\S+)/LogFile $1/;
+		if ($l =~ /^#+\s*LogFile\s+(\/\S+)/) {
+			$l = "LogFile $1";
+			$logfile = $1;
+			}
 		}
 	&flush_file_lines($cfile);
 	&unlock_file($cfile);
@@ -440,6 +444,13 @@ elsif (&init::action_status("clamd-wrapper")) {
 		&symlink_logged($cfile, $othercfile);
 		}
 	&$second_print($text{'setup_done'});
+
+	# Create empty log
+	if ($logfile && !-r $logfile) {
+		&open_tempfile(LOG, ">$logfile", 0, 1);
+		&close_tempfile(LOG);
+		&set_ownership_permissions($user, $group, 0755, $logfile);
+		}
 
 	# Fix the init wrapper script
 	local $ifile = &init::action_filename("clamd-wrapper");
