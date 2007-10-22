@@ -431,6 +431,7 @@ elsif (&init::action_status("clamd-wrapper")) {
 		$l =~ s/<SERVICE>/$service/g;
 		$l =~ s/<USER>/$user/g;
 		$l =~ s/<GROUP>/$group/g;
+		$l =~ s/^#+\s*LogFile\s+(\/\S+)/LogFile $1/;
 		}
 	&flush_file_lines($cfile);
 	&unlock_file($cfile);
