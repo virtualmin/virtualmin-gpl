@@ -424,7 +424,7 @@ elsif (&init::action_status("clamd-wrapper")) {
 		&copy_source_dest($srcfile, $cfile);
 		}
 	local $lref = &read_file_lines($cfile);
-	local $logfile;
+	local ($logfile, $socketfile);
 	foreach my $l (@$lref) {
 		if ($l =~ /^\s*Example/) {
 			$l = "# Example";
@@ -435,6 +435,9 @@ elsif (&init::action_status("clamd-wrapper")) {
 		if ($l =~ /^#+\s*LogFile\s+(\/\S+)/) {
 			$l = "LogFile $1";
 			$logfile = $1;
+			}
+		if ($l =~ /^LocalSocket\s+(\S+)/) {
+			$socketfile = $1;
 			}
 		}
 	&flush_file_lines($cfile);
@@ -450,6 +453,17 @@ elsif (&init::action_status("clamd-wrapper")) {
 		&open_tempfile(LOG, ">$logfile", 0, 1);
 		&close_tempfile(LOG);
 		&set_ownership_permissions($user, $group, 0755, $logfile);
+		}
+
+	# Create directory for socket file
+	if ($socketfile) {
+		local $socketdir = $socketfile;
+		$socketdir =~ s/\/[^\/]+$//;
+		if (!-d $socketdir) {
+			&make_dir($socketdir, 0755);
+			&set_ownership_permissions($user, $group, 0755,
+						   $socketdir);
+			}
 		}
 
 	# Fix the init wrapper script
