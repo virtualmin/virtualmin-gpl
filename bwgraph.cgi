@@ -67,8 +67,8 @@ if ($max) {
 		%fusage_only = ( );
 		$start_day = &bandwidth_period_start($in{'mago'});
 		$end_day = &bandwidth_period_end($in{'mago'});
-		foreach $d (grep { !$_->{'parent'} } @doms) {
-			if ($in{'mago'}) {
+		if ($in{'mago'}) {
+			foreach $d (grep { !$_->{'parent'} } @doms) {
 				# Need to re-compute for some past period
 				foreach $dd ($d, &get_domain_by("parent", $d->{'id'})) {
 					$bwinfo = &get_bandwidth($dd);
@@ -86,16 +86,22 @@ if ($max) {
 						}
 					}
 				}
-			else {
+			}
+		else {
+			foreach $d (@doms) {
 				# bw.pl has already given us stats for the
 				# current period
-				$usage{$d->{'id'}} = $d->{'bw_usage'};
-				$usage_only{$d->{'id'}} = $d->{'bw_usage_only'};
-				foreach $f (@features) {
-					$fusage{$f}->{$d->{'id'}} =
-						$d->{'bw_usage_'.$f};
-					$fusage_only{$f}->{$d->{'id'}} =
-						$d->{'bw_usage_only_'.$f};
+				foreach $dd ($d, &get_domain_by("parent",
+								$d->{'id'})) {
+					$pid = $dd->{'parent'} || $dd->{'id'};
+					$usage{$pid} += $dd->{'bw_usage'};
+					$usage_only{$dd->{'id'}} = $dd->{'bw_usage_only'};
+					foreach $f (@features) {
+						$fusage{$f}->{$pid} +=
+							$dd->{'bw_usage_'.$f};
+						$fusage_only{$f}->{$dd->{'id'}} =
+							$dd->{'bw_usage_only_'.$f};
+						}
 					}
 				}
 			}

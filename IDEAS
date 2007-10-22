@@ -60,8 +60,15 @@
 	</Location>
 
  - plugin developers docs
-	- example plugin
-	- explain how to register
+	- explain objects
+	- make sure complete
+	- link old docs to new location
+	- talk about CGIs
+	- announce
+
+ - LDAP docs
+	- ldap-useradmin module should be able to setup automatically
+	- test on virgin system
 
  - apache function to update blocks in config file properly
 	- use everywhere in virtualmin and apache module
@@ -74,8 +81,4 @@
 	- create/modify/delete a user, domain, script, database, etc..
 
  - spamassassin rule updates from http://saupdates.openprotect.com/
-
- - standard documentation page for each plugin
-	- CGI on virtualmin.com to redirect to them
-	- linked from security-updates module
 
