@@ -288,7 +288,7 @@ sub database_create
 {
 }
 
-# database_deletes(&domain, dbname)
+# database_delete(&domain, dbname)
 # Creates an existing database for some domain. May call the *print functions to
 # report progress
 sub database_delete

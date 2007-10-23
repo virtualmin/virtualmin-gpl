@@ -59,13 +59,6 @@
 	SetHandler fcgid-script
 	</Location>
 
- - plugin developers docs
-	- explain objects
-	- make sure complete
-	- link old docs to new location
-	- talk about CGIs
-	- announce
-
  - LDAP docs
 	- ldap-useradmin module should be able to setup automatically
 	- test on virgin system
@@ -79,6 +72,4 @@
  - test suite to detect failures in common operations
 	- command-line API driven
 	- create/modify/delete a user, domain, script, database, etc..
-
- - spamassassin rule updates from http://saupdates.openprotect.com/
 
