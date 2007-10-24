@@ -221,6 +221,8 @@ if (!-d $historic_info_dir) {
 	}
 local @stats;
 push(@stats, [ "load", $info->{'load'}->[0] ]) if ($info->{'load'});
+push(@stats, [ "load5", $info->{'load'}->[1] ]) if ($info->{'load'});
+push(@stats, [ "load15", $info->{'load'}->[2] ]) if ($info->{'load'});
 push(@stats, [ "procs", $info->{'procs'} ]) if ($info->{'procs'});
 if ($info->{'mem'}) {
 	push(@stats, [ "memused",
@@ -337,7 +339,7 @@ sub list_historic_stats
 local @rv;
 opendir(HISTDIR, $historic_info_dir);
 foreach my $f (readdir(HISTDIR)) {
-	if ($f =~ /^[a-z]+$/ && $f ne "maxes") {
+	if ($f =~ /^[a-z]+[0-9]*$/ && $f ne "maxes") {
 		push(@rv, $f);
 		}
 	}

@@ -1,6 +1,5 @@
 #!/usr/local/bin/perl
 # Show a historic graph of one or more collected stats
-# XXX serve all javascript from Virtualmin
 # XXX command-line API to get data
 
 require './virtual-server-lib.pl';
@@ -55,7 +54,7 @@ for($i=0; $i<@stats; $i++) {
 	elsif ($stat eq 'diskused') {
 		$units = "GB";
 		}
-	elsif ($stat eq 'load') {
+	elsif ($stat eq 'load' || $stat eq 'load5' || $stat eq 'load15') {
 		$units = $text{'history_pc'};
 		}
 	else {

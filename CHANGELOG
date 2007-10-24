@@ -758,3 +758,4 @@ Updated the phpMyAdmin script installer to 2.11.1.2, Nucleus to 3.31, SugarCRM t
 Upgraded the OpenAds script installer to 2.4.0, which uses a completely different installation wizard.
 Added a warning about NSCD to the configuration check page.
 Logging is now enabled when setting up clamd, and the socket directory created if needed.
+Added 5 and 15 minute load averages to system statistics.
