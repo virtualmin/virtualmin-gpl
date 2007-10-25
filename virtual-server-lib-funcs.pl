@@ -10090,13 +10090,33 @@ if ($config{'mail'}) {
 		&require_mail();
 		@$postfix_afiles ||
 			return &text('index_epaliases', '/postfix/');
-		$virtual_maps =~ /^[a-z0-9]+:\//i ||
+		$virtual_maps =~ /^([a-z0-9]+):\//i ||
 			return &text('index_epvirts', '/postfix/');
 		if ($config{'generics'}) {
 			$canonical_maps ||
 				return &text('index_epgens',
 					    '/postfix/', $clink);
 			}
+
+		# Check for LDAP / MySQL integration
+		if (defined(&postfix::can_access_map)) {
+			local @tv = &postfix::get_maps_types_files(
+					$virtual_maps);
+			foreach my $tv (@tv) {
+				local $err = &postfix::can_access_map(@$tv);
+				if ($err) {
+					return &text('check_epmapaccess',
+						     "$tv->[0]:$tv->[1]", $err);
+					}
+				}
+			}
+		else {
+			# Only hash and regexp types allowed with older
+			# Webmin versions
+			$virtual_maps =~ /(hash|regexp):/ ||
+				return &text('check_epmaptype', $virtual_maps);
+			}
+
 		&$second_print($text{'check_postfixok'});
 		$expected_mailboxes = 0;
 		}

@@ -1501,6 +1501,8 @@ check_quotacommands=External quota commands will be used for virtual servers and
 check_eclamd=You have selected to use <tt>clamdscan</tt> for virus scanning, but the <tt>clamd</tt> server it talks to is not running
 check_eresolv=Virtualmin is configured to setup DNS zones, but this system is not setup to use itself as a DNS server. Either add 127.0.0.1 to the <a href='$1'>list of DNS servers</a>, or turn off the BIND feature on the <a href='$2'>module config</a> page.
 check_evirusspam=Virus scanning cannot be enabled without spam filtering
+check_epmapaccess=The address mapping source <tt>$1</tt> cannot be used : $2
+check_epmaptype=The address mapping source <tt>$1</tt> is not supported by Virtualmin - only <tt>hash</tt> and <tt>regexp</tt> types are allowed
 
 allwebmin_ecannot=You are not allowed to update all Webmin users
 allwebmin_title=Updating Webmin Users
