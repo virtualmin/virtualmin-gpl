@@ -2996,11 +2996,21 @@ if (-d $sendmail::config{'smrsh_dir'} &&
 # CREATE_DOMAIN, MODIFY_DOMAIN or DELETE_DOMAIN
 sub set_domain_envs
 {
-local $e;
+local ($d, $action) = @_;
 &reset_domain_envs();
-$ENV{'VIRTUALSERVER_ACTION'} = $_[1];
-foreach $e (keys %{$_[0]}) {
-	$ENV{'VIRTUALSERVER_'.uc($e)} = $_[0]->{$e};
+$ENV{'VIRTUALSERVER_ACTION'} = $action;
+foreach my $e (keys %$d) {
+	$ENV{'VIRTUALSERVER_'.uc($e)} = $d->{$e};
+	}
+if ($d->{'reseller'} && defined(&get_reseller)) {
+	local $resel = &get_reseller($d->{'reseller'});
+	local $acl = $resel->{'acl'};
+	$ENV{'RESELLER_NAME'} = $resel->{'name'};
+	$ENV{'RESELLER_THEME'} = $resel->{'theme'};
+	$ENV{'RESELLER_MODULES'} = join(" ", @{$resel->{'modules'}});
+	foreach my $a (keys %$acl) {
+		$ENV{'RESELLER_'.uc($a)} = $acl->{$a};
+		}
 	}
 }
 
@@ -3010,7 +3020,7 @@ sub reset_domain_envs
 {
 local $e;
 foreach $e (keys %ENVS) {
-	delete($ENV{$e}) if ($e =~ /^VIRTUALSERVER_/);
+	delete($ENV{$e}) if ($e =~ /^(VIRTUALSERVER_|RESELLER_)/);
 	}
 }
 
