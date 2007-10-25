@@ -760,3 +760,4 @@ Added a warning about NSCD to the configuration check page.
 Logging is now enabled when setting up clamd, and the socket directory created if needed.
 Added 5 and 15 minute load averages to system statistics.
 Details of a virtual server's resellers are now made available to pre and post virtual server change commands in the RESELLER_ environment variables.
+Reseller details can now be used in templates and email messages, with keys like RESELLER_NAME and RESELLER_EMAIL.

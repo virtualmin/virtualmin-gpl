@@ -10782,6 +10782,16 @@ if ($d->{'parent'}) {
 		}
 	delete($hash{'parent_domain_'});
 	}
+if ($d->{'reseller'} && defined(&get_reseller)) {
+	local $resel = &get_reseller($d->{'reseller'});
+	local $acl = $resel->{'acl'};
+	$hash{'reseller_name'} = $resel->{'name'};
+	$hash{'reseller_theme'} = $resel->{'theme'};
+	$hash{'reseller_modules'} = join(" ", @{$resel->{'modules'}});
+	foreach my $a (keys %$acl) {
+		$hash{'reseller_'.$a} = $acl->{$a};
+		}
+	}
 return &substitute_template($str, \%hash);
 }
 
