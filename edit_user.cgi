@@ -226,7 +226,7 @@ if (!$user->{'noextra'}) {
 if ($in{'new'} && &will_send_user_email($d)) {
 	# Show address for confirmation email (for the mailbox itself)
 	print &ui_table_row(&hlink($text{'user_newmail'},"newmail"),
-		&ui_opt_textbox("newmail", undef, 20,
+		&ui_opt_textbox("newmail", undef, 40,
 				$user->{'email'} ? $text{'user_newmail1'}
 						 : $text{'user_newmail2'},
 				$text{'user_newmail0'}),
@@ -238,7 +238,7 @@ elsif (!$in{'new'}) {
 		    &ui_radio("remail_def", 1,
 			  [ [ 1, $text{'user_remail1'} ],
 			    [ 0, $text{'user_remail0'} ] ])." ".
-		    &ui_textbox("remail", $user->{'email'}, 20),
+		    &ui_textbox("remail", $user->{'email'}, 40),
 		    2, \@tds);
 	}
 
