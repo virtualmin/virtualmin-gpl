@@ -138,7 +138,7 @@ return grep { $_->{'from'} =~ /\@(\S+)$/ && $1 eq $_[0]->{'dom'} &&
 	      !$ignore{lc($_->{'from'})} } @virts;
 }
 
-# setup_mail(&domain, [leave-aliases])
+# setup_mail(&domain, [no-aliases])
 # Adds a domain to the list of those accepted by the mail system
 sub setup_mail
 {
@@ -343,7 +343,7 @@ elsif ($config{'mail_system'} == 5) {
 	}
 &$second_print($text{'setup_done'});
 
-if ($config{'delete_virts'}) {
+if ($config{'delete_virts'} && !$_[1]) {
 	# Delete all email aliases
 	&$first_print($text{'delete_aliases'});
 	foreach my $v (&list_virtusers()) {
@@ -463,9 +463,32 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 		if ($v->{'from'} =~ /^(\S*)\@(\S+)$/ &&
 		    lc($2) eq $_[1]->{'dom'}) {
 			local $oldv = { %$v };
-			$v->{'from'} = "$1\@$_[0]->{'dom'}";
+			local $u = $1;
+			if ($u eq $_[1]->{'user'}) {
+				# For admin user, who has changed
+				$u = $_[0]->{'user'};
+				}
+			$v->{'from'} = "$u\@$_[0]->{'dom'}";
 			&fix_alias_when_renaming($v, $_[0], $_[1]);
 			&modify_virtuser($oldv, $v);
+			}
+		}
+
+	# Update any generics/sender canonical entries in the old domain
+	if ($config{'generics'}) {
+		local %ghash = &get_generics_hash();
+		foreach my $g (values %ghash) {
+			if ($g->{'to'} =~ /^(.*)\@(\S+)$/ &&
+			    $2 eq $_[1]->{'dom'}) {
+				local $oldg = { %$g };
+				local $u = $1;
+				if ($u eq $_[1]->{'user'}) {
+					# For admin user, who has changed
+					$u = $_[0]->{'user'};
+					}
+				$g->{'to'} = "$u\@$_[0]->{'dom'}";
+				&modify_generic($g, $oldg);
+				}
 			}
 		}
 
@@ -3327,6 +3350,26 @@ elsif ($config{'mail_system'} == 0) {
 	# For postfix
 	&lock_file($canonical_map_files[0]);
 	&postfix::delete_mapping($canonical_type, $generic);
+	&unlock_file($canonical_map_files[0]);
+	}
+}
+
+# modify_generic(&generic, &old-generic)
+# Updates one outgoing addresses table entry
+sub modify_generic
+{
+local ($generic, $oldgeneric) = @_;
+if ($config{'mail_system'} == 1) {
+	# For sendmail
+	&lock_file($sendmail_gfile);
+	&sendmail::modify_generic($oldgeneric, $generic, $sendmail_gfile,
+			$sendmail_gdbm, $sendmail_gdbmtype);
+	&unlock_file($sendmail_gfile);
+	}
+elsif ($config{'mail_system'} == 0) {
+	# For postfix
+	&lock_file($canonical_map_files[0]);
+	&postfix::modify_mapping($canonical_type, $oldgeneric, $generic);
 	&unlock_file($canonical_map_files[0]);
 	}
 }
