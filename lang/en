@@ -1503,6 +1503,7 @@ check_eresolv=Virtualmin is configured to setup DNS zones, but this system is no
 check_evirusspam=Virus scanning cannot be enabled without spam filtering
 check_epmapaccess=The address mapping source <tt>$1</tt> cannot be used : $2
 check_epmaptype=The address mapping source <tt>$1</tt> is not supported by Virtualmin - only <tt>hash</tt> and <tt>regexp</tt> types are allowed
+check_epmapsupport=The address mapping source <tt>$1</tt> is not supported by Postfix - you may need to install Postfix libraries for it, or re-compile
 
 allwebmin_ecannot=You are not allowed to update all Webmin users
 allwebmin_title=Updating Webmin Users

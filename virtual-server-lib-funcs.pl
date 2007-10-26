@@ -10103,6 +10103,10 @@ if ($config{'mail'}) {
 			local @tv = &postfix::get_maps_types_files(
 					$virtual_maps);
 			foreach my $tv (@tv) {
+				if (!&postfix::supports_map_type($tv->[0])) {
+					return &text('check_epmapsupport',
+						     "$tv->[0]:$tv->[1]");
+					}
 				local $err = &postfix::can_access_map(@$tv);
 				if ($err) {
 					return &text('check_epmapaccess',

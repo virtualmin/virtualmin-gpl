@@ -73,5 +73,4 @@
 	- command-line API driven
 	- create/modify/delete a user, domain, script, database, etc..
 
- - multiple postfix virtual destinations
 
