@@ -414,6 +414,19 @@ if ($_[0]->{'home'} ne $_[1]->{'home'} ||
 				$u->{'uid'}, $_[0]->{'gid'});
 			}
 
+		# Update email address attributes for the user, as these
+		# are used in LDAP
+		if ($u->{'email'}) {
+			$u->{'email'} =~ s/\@\Q$_[1]->{'dom'}\E$/\@$_[0]->{'dom'}/;
+			}
+		local @newextra;
+		foreach my $extra (@{$u->{'extraemail'}}) {
+			my $newextra = $extra;
+			$newextra =~ s/\@\Q$_[1]->{'dom'}\E$/\@$_[0]->{'dom'}/;
+			push(@newextra, $newextra);
+			}
+		$u->{'extraemail'} = \@newextra;
+
 		# Save the user
 		&modify_user($u, \%oldu, $_[0], 1);
 		if (!$u->{'nomailfile'}) {
