@@ -330,7 +330,7 @@ if ($config{'mail'} && !$novirts) {
 	elsif ($config{'mail_system'} == 0) {
 		# Find Postfix aliases for users
 		%aliases = map { $_->{'name'}, $_ }
-			       &postfix::list_aliases($postfix_afiles);
+			       &$postfix_list_aliases($postfix_afiles);
 		}
 	elsif ($config{'mail_system'} == 5) {
 		# Find VPOPMail aliases to match with users
@@ -857,7 +857,7 @@ if (!$_[0]->{'qmail'}) {
 			}
 		elsif ($config{'mail_system'} == 0) {
 			&postfix::lock_alias_files($postfix_afiles);
-			&postfix::create_alias($alias, $postfix_afiles);
+			&$postfix_create_alias($alias, $postfix_afiles);
 			&postfix::unlock_alias_files($postfix_afiles);
 			&postfix::regenerate_aliases();
 			}
@@ -1164,7 +1164,7 @@ if (!$_[0]->{'qmail'}) {
 		elsif ($config{'mail_system'} == 0) {
 			# Create Postfix alias with same name as user
 			&postfix::lock_alias_files($postfix_afiles);
-			&postfix::create_alias($alias, $postfix_afiles);
+			&$postfix_create_alias($alias, $postfix_afiles);
 			&postfix::unlock_alias_files($postfix_afiles);
 			&postfix::regenerate_aliases();
 			}
@@ -1189,7 +1189,7 @@ if (!$_[0]->{'qmail'}) {
 		elsif ($config{'mail_system'} == 0) {
 			# Delete Postfix alias
 			&lock_file($_[0]->{'alias'}->{'file'});
-			&postfix::delete_alias($_[0]->{'alias'});
+			&$postfix_delete_alias($_[0]->{'alias'});
 			&unlock_file($_[0]->{'alias'}->{'file'});
 			&postfix::regenerate_aliases();
 			}
@@ -1214,7 +1214,7 @@ if (!$_[0]->{'qmail'}) {
 		elsif ($config{'mail_system'} == 0) {
 			# Update Postfix alias
 			&lock_file($_[1]->{'alias'}->{'file'});
-			&postfix::modify_alias($_[1]->{'alias'}, $alias);
+			&$postfix_modify_alias($_[1]->{'alias'}, $alias);
 			&unlock_file($_[1]->{'alias'}->{'file'});
 			&postfix::regenerate_aliases();
 			}
@@ -1492,7 +1492,7 @@ if (!$_[0]->{'qmail'}) {
 		elsif ($config{'mail_system'} == 0) {
 			# Delete Postfix alias with same name as user
 			&lock_file($_[0]->{'alias'}->{'file'});
-			&postfix::delete_alias($_[0]->{'alias'});
+			&$postfix_delete_alias($_[0]->{'alias'});
 			&unlock_file($_[0]->{'alias'}->{'file'});
 			&postfix::regenerate_aliases();
 			}

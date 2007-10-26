@@ -47,6 +47,20 @@ elsif ($config{'mail_system'} == 0) {
 		# Comments not supported by map backend, such as MySQL
 		$can_alias_comments = 0;
 		}
+	if (defined(&postfix::create_postfix_alias)) {
+		# New functions that can use maps
+		$postfix_list_aliases = \&postfix::list_postfix_aliases;
+		$postfix_create_alias = \&postfix::create_postfix_alias;
+		$postfix_modify_alias = \&postfix::modify_postfix_alias;
+		$postfix_delete_alias = \&postfix::delete_postfix_alias;
+		}
+	else {
+		# Old functions that use files only
+		$postfix_list_aliases = \&postfix::list_aliases;
+		$postfix_create_alias = \&postfix::create_alias;
+		$postfix_modify_alias = \&postfix::modify_alias;
+		$postfix_delete_alias = \&postfix::delete_alias;
+		}
 	}
 elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
        $config{'mail_system'} == 5) {
@@ -553,7 +567,7 @@ if ($config{'mail_system'} != 5) {	# skip for vpopmail
 				$user->{'user'}, $user->{'home'}, $ru);
 			}
 		if ($st[5] != $user->{'gid'}) {
-			local $rg = getgrgid($st[4]) || $user->{'gid'};
+			local $rg = getgrgid($st[5]) || $user->{'gid'};
 			return &text('validate_emailhomeg',
 				$user->{'user'}, $user->{'home'}, $rg);
 			}
@@ -697,7 +711,7 @@ elsif ($config{'mail_system'} == 0) {
 	local $svirts = &postfix::get_maps($virtual_type);
 	local %aliases = map { lc($_->{'name'}), $_ }
 			 grep { $_->{'enabled'} && !$unix_user{$_->{'name'}} }
-			     &postfix::list_aliases($postfix_afiles);
+			     &$postfix_list_aliases($postfix_afiles);
 	local ($v, $a, @virts);
 	foreach $v (@$svirts) {
 		local %rv = ( 'from' => lc($v->{'name'}),
@@ -902,7 +916,7 @@ elsif ($config{'mail_system'} == 0) {
 	if ($_[0]->{'alias'}) {
 		# Delete alias too
 		&lock_file($_[0]->{'alias'}->{'file'});
-		&postfix::delete_alias($_[0]->{'alias'});
+		&$postfix_delete_alias($_[0]->{'alias'});
 		&unlock_file($_[0]->{'alias'}->{'file'});
 		&postfix::regenerate_aliases();
 		}
@@ -1021,7 +1035,7 @@ elsif ($config{'mail_system'} == 0) {
 				 "values" => \@psto };
 		$_[1]->{'alias'} = $alias;
 		&postfix::lock_alias_files($postfix_afiles);
-		&postfix::create_alias($alias, $postfix_afiles);
+		&$postfix_create_alias($alias, $postfix_afiles);
 		&postfix::unlock_alias_files($postfix_afiles);
 		&postfix::regenerate_aliases();
 		local $virt = { "name" => $_[1]->{'from'},
@@ -1038,7 +1052,7 @@ elsif ($config{'mail_system'} == 0) {
 		$alias->{'values'} = \@psto;
 		&lock_file($alias->{'file'});
 		$alias->{'name'} = $an if ($_[1]->{'from'} ne $_[0]->{'from'});
-		&postfix::modify_alias($oldalias, $alias);
+		&$postfix_modify_alias($oldalias, $alias);
 		&unlock_file($alias->{'file'});
 		&postfix::regenerate_aliases();
 		if ($_[1]->{'from'} ne $_[0]->{'from'} ||
@@ -1163,7 +1177,7 @@ elsif ($config{'mail_system'} == 0) {
 				 "values" => \@psto };
 		$_[0]->{'alias'} = $alias;
 		&postfix::lock_alias_files($postfix_afiles);
-		&postfix::create_alias($alias, $postfix_afiles);
+		&$postfix_create_alias($alias, $postfix_afiles);
 		&postfix::unlock_alias_files($postfix_afiles);
 		&postfix::regenerate_aliases();
 		$virt = { 'name' => $_[0]->{'from'},
@@ -1838,7 +1852,7 @@ if ($config{'mail_system'} == 1) {
 	return $clash;
 	}
 elsif ($config{'mail_system'} == 0) {
-	local @aliases = &postfix::list_aliases($postfix_afiles);
+	local @aliases = &$postfix_list_aliases($postfix_afiles);
 	local ($clash) = grep { lc($_->{'name'}) eq lc($_[0]) &&
 				$_->{'enabled'} } @aliases;
 	return $clash;
@@ -2363,7 +2377,7 @@ if ($config{'mail_system'} == 1) {
 	}
 elsif ($config{'mail_system'} == 0) {
 	# Check for a Postfix alias with the same name as the user
-	local @aliases = &postfix::list_aliases($postfix_afiles);
+	local @aliases = &$postfix_list_aliases($postfix_afiles);
 	local $an = $_[0] ? "$_[0]-$_[1]" : "default-$_[1]";
 	($clash) = grep { ($config{'alias_clash'} &&
 			   $_[0] && $_->{'name'} eq $_[0]) ||

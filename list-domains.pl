@@ -95,7 +95,9 @@ if ($multi) {
 			}
 		print "    Description: $d->{'owner'}\n";
 		print "    Username: $d->{'user'}\n";
+		print "    User ID: $d->{'uid'}\n";
 		print "    Group name: $d->{'group'}\n";
+		print "    Group ID: $d->{'gid'}\n";
 		print "    Mailbox username prefix: $d->{'prefix'}\n";
 		print "    Password: $d->{'pass'}\n";
 		print "    Home directory: $d->{'home'}\n";
