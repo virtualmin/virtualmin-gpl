@@ -421,8 +421,10 @@ else {
 	$file =~ s/\//_/g;
 	$linkpath = "$dir/$d->{'id'}-$file";
 	}
-local @fst = stat($origfile);
-local @lst = stat($linkpath);
+local $origdir = $origfile;
+$origdir =~ s/\/[^\/]+$//;
+local @fst = stat($origdir);
+local @lst = stat($dir);
 if ($fst[0] == $lst[0]) {
 	return $linkpath;
 	}
