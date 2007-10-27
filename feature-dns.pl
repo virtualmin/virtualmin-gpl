@@ -463,17 +463,28 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'}) {
 	local $fn = $file->{'values'}->[0];
 	local @recs = &bind8::read_zone_file($fn, $newzonename);
 	&foreign_require("servers", "servers-lib.pl");
-	local %servers = map { $_->{'id'}, $_ } &servers::list_servers();
+	local %servers = map { $_->{'id'}, $_ }
+			     (&servers::list_servers(), &list_mx_servers());
 	local $withdot = $_[0]->{'dom'}.".";
 
 	# Add missing MX records
 	foreach my $id (@newmxs) {
 		if (&indexof($id, @oldmxs) < 0) {
-			# A new MX .. add a record for it
+			# A new MX .. add a record for it, if there isn't one
 			local $s = $servers{$id};
 			local $mxhost = $s->{'mxname'} || $s->{'host'};
-			&bind8::create_record($fn, $withdot, undef,
-				      "IN", "MX", "10 $mxhost.");
+			local $already = 0;
+			foreach my $r (@recs) {
+				if ($r->{'type'} eq 'MX' &&
+				    $r->{'name'} eq $withdot &&
+				    $r->{'values'}->[1] eq $mxhost.".") {
+					$already = 1;
+					}
+				}
+			if (!$already) {
+				&bind8::create_record($fn, $withdot, undef,
+					      "IN", "MX", "10 $mxhost.");
+				}
 			}
 		}
 
