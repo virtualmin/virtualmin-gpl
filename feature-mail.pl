@@ -587,7 +587,7 @@ foreach my $s (@servers) {
 # Check mailbox permissions
 if ($config{'mail_system'} != 5) {	# skip for vpopmail
 	local %doneuid;
-	foreach my $user (&list_domain_users($d, 0)) {
+	foreach my $user (&list_domain_users($d, 1)) {
 		if (!$user->{'webowner'} && $doneuid{$user->{'uid'}}++) {
 			return &text('validate_emailuid', $user->{'user'},
 							  $user->{'uid'});
