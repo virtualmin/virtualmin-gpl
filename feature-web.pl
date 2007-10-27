@@ -507,7 +507,7 @@ if ($d->{'alias_mode'}) {
 	local $alias = &get_domain($d->{'alias'});
 	local ($pvirt, $pconf) = &get_apache_virtual($alias->{'dom'},
 						     $alias->{'web_port'});
-	return &text('validate_eweb', "<tt>$alias->{'dom'}</tt>") if (!$virt);
+	return &text('validate_eweb', "<tt>$alias->{'dom'}</tt>") if (!$pvirt);
 	}
 else {
 	# Find real domain
