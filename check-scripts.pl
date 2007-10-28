@@ -104,7 +104,7 @@ foreach $s (@scripts) {
 			($host, $port, $page, $ssl) = &parse_http_url($url);
 			$data = $err = undef;
 			&http_download($host, $port, $page, \$data, \$err,
-				       undef, $ssl);
+				       undef, $ssl, undef, undef, undef, 0, 1);
 			if ($err || !$data) {
 				push(@errs, [ $script, $v, $url,
 					"Failed to find latest version" ]);
