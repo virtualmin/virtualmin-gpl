@@ -38,6 +38,22 @@ elsif ($config{'mail_system'} == 0) {
 		$canonical_maps = &postfix::get_real_value($canonical_type);
 		@canonical_map_files =&postfix::get_maps_files($canonical_maps);
 		}
+	if (defined(&postfix::get_maps_types_files)) {
+		# Work out storage type for Postfix
+		@virtual_map_backends = map { $_->[0] }
+			&postfix::get_maps_types_files($virtual_maps);
+		@alias_backends = map { $_->[0] }
+			&postfix::get_maps_types_files(
+				&postfix::get_real_value("alias_maps"));
+		@canonical_backends = map { $_->[0] }
+				&postfix::get_maps_types_files($canonical_maps);
+		}
+	else {
+		# Assume hash
+		@virtual_map_backends = ( "hash" );
+		@alias_backends = ( "hash" );
+		@canonical_backends = $canonical_maps ? ( "hash" ) : ( );
+		}
 	$can_alias_types{9} = 0;	# bounce not yet supported for postfix
 	$can_alias_comments = $virtualmin_pro &&
 			      &get_webmin_version() >= 1.294;
@@ -2443,8 +2459,11 @@ if ($config{'mail_system'} == 1) {
 		return $text{'setup_esendmailgfile'};
 	}
 elsif ($config{'mail_system'} == 0) {
-	@virtual_map_files || return $text{'setup_epostfixvfile'};
-	@$postfix_afiles || return $text{'setup_epostfixafile'};
+	@virtual_map_files || $virtual_map_backends[0] eq "mysql" ||
+	    $virtual_map_backends[0] eq "ldap" ||
+		return $text{'setup_epostfixvfile'};
+	@$postfix_afiles || $alias_backends[0] eq "mysql" ||
+	    $alias_backends[0] eq "ldap" || return $text{'setup_epostfixafile'};
 	!$config{'generics'} || $canonical_maps ||
 		return $text{'setup_epostfixgfile'};
 	}
