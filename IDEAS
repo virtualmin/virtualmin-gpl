@@ -62,6 +62,7 @@
  - LDAP docs
 	- ldap-useradmin module should be able to setup automatically
 	- test on virgin system
+	- openldap server module
 
  - apache function to update blocks in config file properly
 	- use everywhere in virtualmin and apache module
