@@ -255,8 +255,9 @@ foreach my $ver (@vers) {
 			local $pconf = &phpini::get_config("$inidir/php.ini");
 			&phpini::save_directive($pconf, "session.save_path",
 						&create_server_tmp($d));
-			if (scalar(@srcinis) == 1) {
-				# Only if the same source is used
+			if (scalar(@srcinis) == 1 && scalar(@vers) > 1) {
+				# Only if the same source is used for multiple
+				# PHP versions.
 				&phpini::save_directive($pconf, "extension_dir",
 							undef);
 				}
