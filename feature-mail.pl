@@ -1589,7 +1589,11 @@ sub user_mail_file
 {
 &require_mail();
 local @rv;
-if ($config{'mail_system'} == 1) {
+if (!$_[0]->{'user'} || !$_[0]->{'home'}) {
+	# User doesn't exist!
+	@rv = ( );
+	}
+elsif ($config{'mail_system'} == 1) {
 	# Just look at the Sendmail mail file
 	@rv = ( &sendmail::user_mail_file($_[0]->{'user'}), 0 );
 	}

@@ -276,7 +276,7 @@ if (!$_[0]->{'parent'}) {
 		}
 
 	# Delete his mail file
-	if (!$uinfo->{'nomailfile'}) {
+	if ($uinfo && !$uinfo->{'nomailfile'}) {
 		&delete_mail_file($uinfo);
 		}
 
