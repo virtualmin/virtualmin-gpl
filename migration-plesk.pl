@@ -434,7 +434,7 @@ if ($got{'mysql'}) {
 		# Create and import the DB
 		&$indent_print();
 		&create_mysql_database(\%dom, $name);
-		&save_domain(\%dom);
+		&save_domain(\%dom, 1);
 		local ($ex, $out) = &mysql::execute_sql_file($name,
 			"$root/$database->{'cid'}");
 		if ($ex) {

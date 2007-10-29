@@ -243,21 +243,27 @@ sub domain_id
 return time().$$;
 }
 
-# save_domain(&domain)
+# save_domain(&domain, [creating])
 # Write domain information to disk
 sub save_domain
 {
-&make_dir($domains_dir, 0700);
-&lock_file("$domains_dir/$_[0]->{'id'}");
-if (!$_[0]->{'created'}) {
-	$_[0]->{'created'} = time();
-	$_[0]->{'creator'} ||= $remote_user;
-	$_[0]->{'creator'} ||= getpwuid($<);
+local ($d, $creating) = @_;
+if (!$creating && $d->{'id'} && !-r "$domains_dir/$d->{'id'}") {
+	# Deleted from under us! Don't save
+	print STDERR "Domain was deleted before saving!\n";
+	return 0;
 	}
-$_[0]->{'id'} ||= &domain_id();
-&write_file("$domains_dir/$_[0]->{'id'}", $_[0]);
-&unlock_file("$domains_dir/$_[0]->{'id'}");
-$main::get_domain_cache{$_[0]->{'id'}} = $_[0];
+&make_dir($domains_dir, 0700);
+&lock_file("$domains_dir/$d->{'id'}");
+if (!$d->{'created'}) {
+	$d->{'created'} = time();
+	$d->{'creator'} ||= $remote_user;
+	$d->{'creator'} ||= getpwuid($<);
+	}
+$d->{'id'} ||= &domain_id();
+&write_file("$domains_dir/$d->{'id'}", $d);
+&unlock_file("$domains_dir/$d->{'id'}");
+$main::get_domain_cache{$d->{'id'}} = $d;
 &build_domain_maps();
 return 1;
 }
@@ -272,6 +278,7 @@ local $id = $_[0]->{'id'};
 # And the bandwidth and plain-text password files
 &unlink_file("$bandwidth_dir/$id");
 &unlink_file("$plainpass_dir/$id");
+&unlink_file("$nospam_dir/$id");
 
 if (defined(&get_autoreply_file_dir)) {
 	# Delete any autoreply file links
@@ -4702,7 +4709,7 @@ if ($ok) {
 			if ($_[3]->{'fix'}) {
 				# We can just use the domains file from the
 				# backup and import it
-				&save_domain($d);
+				&save_domain($d, 1);
 				}
 			else {
 				# We will be re-creating the server
@@ -6113,7 +6120,7 @@ if ($in{'mailbox'}) {
 
 # Save domain details
 &$first_print($text{'setup_save'});
-&save_domain($dom);
+&save_domain($dom, 1);
 &$second_print($text{'setup_done'});
 
 if (!$dom->{'nocreationmail'}) {
