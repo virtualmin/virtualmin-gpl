@@ -185,6 +185,22 @@ if ($mode ne "mod_php") {
 	&create_php_wrappers($d, $mode);
 	}
 
+# Work out source php.ini files
+local (%srcini, %subs_ini);
+local @vers = &list_available_php_versions($d, $mode);
+foreach my $ver (@vers) {
+	$subs_ini{$ver->[0]} = 0;
+	local $srcini = $tmpl->{'web_php_ini_'.$ver->[0]};
+	if (!$srcini || $srcini eq "none" || !-r $srcini) {
+		$srcini = &get_global_php_ini($ver->[0], $mode);
+		}
+	else {
+		$subs_ini{$ver->[0]} = 1;
+		}
+	$srcini{$ver->[0]} = $srcini;
+	}
+local @srcinis = &unique(values %srcini);
+
 # Copy php.ini file into etc directory, for later per-site modification
 local $etc = "$d->{'home'}/etc";
 if (!-d $etc) {
@@ -192,19 +208,12 @@ if (!-d $etc) {
 	&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'},
 				   0755, $etc);
 	}
-local @vers = &list_available_php_versions($d, $mode);
 local $defver = $vers[0]->[0];
 local $defini;
 foreach my $ver (@vers) {
 	# Create separate .ini file for each PHP version, if missing
-	local $subs_ini = 0;
-	local $srcini = $tmpl->{'web_php_ini_'.$ver->[0]};
-	if (!$srcini || $srcini eq "none" || !-r $srcini) {
-		$srcini = &get_global_php_ini($ver->[0], $mode);
-		}
-	else {
-		$subs_ini = 1;
-		}
+	local $subs_ini = $subs_ini{$ver->[0]};
+	local $srcini = $srcini{$ver->[0]};
 	local $inidir = "$etc/php$ver->[0]";
 	if ($srcini && !-r "$inidir/php.ini") {
 		# Copy file, set permissions, fix session.save_path, and
@@ -241,12 +250,16 @@ foreach my $ver (@vers) {
 			}
 		&set_ownership_permissions($uid, $gid, 0755, "$inidir/php.ini");
 		if (&foreign_check("phpini")) {
-			# Fix up session save path
+			# Fix up session save path and extension_dir
 			&foreign_require("phpini", "phpini-lib.pl");
 			local $pconf = &phpini::get_config("$inidir/php.ini");
 			&phpini::save_directive($pconf, "session.save_path",
 						&create_server_tmp($d));
-			&phpini::save_directive($pconf, "extension_dir", undef);
+			if (scalar(@srcinis) == 1) {
+				# Only if the same source is used
+				&phpini::save_directive($pconf, "extension_dir",
+							undef);
+				}
 			&flush_file_lines("$inidir/php.ini");
 			}
 		}
