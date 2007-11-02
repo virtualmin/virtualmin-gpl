@@ -1462,7 +1462,7 @@ else {
 	return "Unknown compression format";
 	}
 local $out = &run_as_domain_user($d, "cd ".quotemeta($dir)." && ".$cmd);
-return "<pre>".&html_escape($out)."</pre>" if ($?);
+return "Uncompression failed : <pre>".&html_escape($out)."</pre>" if ($?);
 
 # Copy to a target dir, if requested
 if ($copydir) {
@@ -1482,6 +1482,7 @@ if ($copydir) {
 	else {
 		return "Sub-directory $subdir was not found";
 		}
+	$out = undef if ($out !~ /\S/);
 	return "<pre>".&html_escape($out || "Exit status $?")."</pre>" if ($?);
 	}
 
