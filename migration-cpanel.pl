@@ -441,6 +441,7 @@ foreach my $sd (&virtual_server_directories(\%dom)) {
 		       quotemeta("$dom{'home'}/$sd->[0]"));
 	}
 
+&foreign_require("mailboxes", "mailboxes-lib.pl");
 if ($got{'mail'}) {
 	# Migrate mail users
 	&$first_print("Re-creating mail users ..");
@@ -463,7 +464,6 @@ if ($got{'mail'}) {
 		$quota{$quser} = $bsize ? int($qquota/$bsize) : 0;
 		}
 	close(QUOTA);
-	&foreign_require("mailboxes", "mailboxes-lib.pl");
 	local $_;
 	open(PASSWD, "$dom{'home'}/etc/$dom/passwd");
 	while(<PASSWD>) {
