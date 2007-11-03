@@ -64,9 +64,6 @@
 	- test on virgin system
 	- openldap server module
 
- - apache function to update blocks in config file properly
-	- use everywhere in virtualmin and apache module
-
  - directi API in registrar module
  - tucows http://developer.tucows.com:4080/wiki/index.php?n=index.php?n=Main.XCP
 
@@ -74,3 +71,5 @@
 	- command-line API driven
 	- create/modify/delete a user, domain, script, database, etc..
 
+ - use new Apache module function for block updates instead of directly
+   modifying config file, when Webmin 1.380 is out
