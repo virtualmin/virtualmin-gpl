@@ -41,21 +41,23 @@ print &ui_table_row(&hlink($text{'form_domslimit'}, "limits_doms"),
 				$dlm == 0 ? $d->{'domslimit'} : "", 4) ] ]));
 
 # Limit on alias domains
+$alm = $d->{'aliasdomslimit'} eq "*" || $d->{'aliasdomslimit'} eq "" ? 1 : 0;
 print &ui_table_row(&hlink($text{'form_aliasdomslimit'}, "limits_aliasdoms"),
-	&ui_radio("aliasdomslimit_def", $d->{'aliasdomslimit'} ? 0 : 1,
+	&ui_radio("aliasdomslimit_def", $alm,
 		  [ [ 1, $text{'form_unlimit'} ],
 		    [ 0, $text{'form_aliasdomslimit0'}." ".
-			 &ui_textbox("aliasdomslimit",
-			    $d->{'aliasdomslimit'} || "", 4)." ".
+			 &ui_textbox("aliasdomslimit", 
+			    $alm ? "" : $d->{'aliasdomslimit'}, 4)." ".
 			 $text{'form_aliasdomsabove'} ] ]));
 
 # Limit on non-alias domains
+$nlm = $d->{'realdomslimit'} eq "*" || $d->{'realdomslimit'} eq "" ? 1 : 0;
 print &ui_table_row(&hlink($text{'form_realdomslimit'}, "limits_realdoms"),
-	&ui_radio("realdomslimit_def", $d->{'realdomslimit'} ? 0 : 1,
+	&ui_radio("realdomslimit_def", $nlm,
 		  [ [ 1, $text{'form_unlimit'} ],
 		    [ 0, $text{'form_aliasdomslimit0'}." ".
 			 &ui_textbox("realdomslimit",
-			    $d->{'realdomslimit'} || "", 4)." ".
+			    $nlm ? "" : $d->{'realdomslimit'}, 4)." ".
 			 $text{'form_aliasdomsabove'} ] ]));
 
 # Can choose db name

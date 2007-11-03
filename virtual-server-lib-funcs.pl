@@ -6884,6 +6884,9 @@ push(@rv, { 'id' => 0,
 	    'aliasdomslimit' => $config{'defaliasdomslimit'} eq "" ||
 			        $config{'defaliasdomslimit'} eq "*" ? "none" :
 			        $config{'defaliasdomslimit'},
+	    'realdomslimit' => $config{'defrealdomslimit'} eq "" ||
+			       $config{'defrealdomslimit'} eq "*" ? "none" :
+			       $config{'defrealdomslimit'},
 	    'bwlimit' => $config{'defbwlimit'} eq "" ? "none" :
 			 $config{'defbwlimit'},
 	    'mongrelslimit' => $config{'defmongrelslimit'} eq "" ? "none" :
@@ -7118,6 +7121,8 @@ if ($tmpl->{'id'} == 0) {
 				  $tmpl->{'domslimit'};
 	$config{'defaliasdomslimit'} = $tmpl->{'aliasdomslimit'} eq 'none' ?
 					"*" : $tmpl->{'aliasdomslimit'};
+	$config{'defrealdomslimit'} = $tmpl->{'realdomslimit'} eq 'none' ?
+					"*" : $tmpl->{'realdomslimit'};
 	$config{'defbwlimit'} = $tmpl->{'bwlimit'} eq 'none' ? undef :
 				$tmpl->{'bwlimit'};
 	$config{'defmongrelslimit'} = $tmpl->{'mongrelslimit'} eq 'none' ?
