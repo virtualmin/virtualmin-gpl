@@ -1393,16 +1393,20 @@ local ($doms) = @_;
 local (%scache, @rv);
 foreach my $d (@$doms) {
 	foreach my $sinfo (&list_domain_scripts($d)) {
-		# Find a version better than the one we have
+		# Find the lowest version better or equal to the one we have
 		$script = $scache{$sinfo->{'name'}} ||
 			    &get_script($sinfo->{'name'});
 		$scache{$sinfo->{'name'}} = $script;
 		local @vers = grep { &can_script_version($script, $_) }
 			     @{$script->{'versions'}};
+		@vers = sort { &compare_versions($b, $a) } @vers;
 		local @better = grep { &compare_versions($_,
-					$sinfo->{'version'}) > 0 } @vers;
+					$sinfo->{'version'}) >= 0 } @vers;
 		local $ver = @better ? $better[$#better] : undef;
 		next if (!$ver);
+
+		# Don't upgrade if we are already running this version
+		next if ($ver eq $sinfo->{'version'});
 
 		# We have one - add to the results
 		push(@rv, { 'sinfo' => $sinfo,

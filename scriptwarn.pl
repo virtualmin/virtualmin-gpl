@@ -7,6 +7,10 @@ $main::no_acl_check++;
 require './virtual-server-lib.pl';
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 
+if ($ARGV[0] eq "-debug" || $ARGV[0] eq "--debug") {
+	$debug_mode = 1;
+	}
+
 # Find scripts that need updating
 @doms = &list_domains();
 @updates = &list_script_upgrades(\@doms);
@@ -89,7 +93,13 @@ local $mail = { 'headers' => [ [ 'From', $config{'from_addr'} ||
 			       [ 'Subject', $text{'scriptwarn_subject'} ],
 			       [ 'Content-type', 'text/plain' ] ],
 		'body' => $text };
-&mailboxes::send_mail($mail);
+if ($debug_mode) {
+	print STDERR "Sending to ",join(", ", @$emailto),"\n";
+	print STDERR $text,"\n";
+	}
+else {
+	&mailboxes::send_mail($mail);
+	}
 }
 
 sub get_webmin_url
