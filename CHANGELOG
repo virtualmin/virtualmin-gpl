@@ -763,3 +763,4 @@ Details of a virtual server's resellers are now made available to pre and post v
 Reseller details can now be used in templates and email messages, with keys like RESELLER_NAME and RESELLER_EMAIL.
 When a domain is renamed, generics or sender canonical maps are properly updated too.
 MySQL and LDAP sources for aliases and virtual addresses for Postfix can now be used by Virtualmin, when Webmin 1.390 or newer is installed and when they are setup properly in the Postfix module. This allows Virtualmin to effectively configure a remote mail server, assuming that domain Unix users and groups are also stored in LDAP.
+Current versions are shown in the script updates notification email.

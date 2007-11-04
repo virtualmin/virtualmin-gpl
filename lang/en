@@ -3779,6 +3779,7 @@ balancer_none=Don't proxy for this path - serve locally instead
 scriptwarn_header=The following scripts managed by Virtualmin have new versions available :
 scriptwarn_header2=The following scripts managed by Virtualmin have new versions available, in the\nvirtual server $1 :
 scriptwarn_script=Script name
+scriptwarn_oldver=Old version
 scriptwarn_ver=New version
 scriptwarn_dom=Domain name
 scriptwarn_where=Upgrades can be done in Virtualmin, on each domain's Install Scripts page.

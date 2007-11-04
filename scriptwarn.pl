@@ -27,15 +27,19 @@ if (@updates) {
 	if (!$email{'owner'} && !$email{'reseller'}) {
 		# Just send one for all domains
 		$email = $text{'scriptwarn_header'}."\n\n";
-		$fmt = "%-30.30s %-30.30s %-15.15s\n";
+		$fmt = "%-30.30s %-25.25s %-11.11s %-11.11s\n";
 		$email .= sprintf $fmt, $text{'scriptwarn_dom'},
 					$text{'scriptwarn_script'},
+					$text{'scriptwarn_oldver'},
 					$text{'scriptwarn_ver'};
-		$email .= sprintf $fmt, ("-" x 30), ("-" x 30), ("-" x 15);
+		$email .= sprintf $fmt, ("-" x 30), ("-" x 25),
+					("-" x 11), ("-" x 11);
 		foreach $u (@updates) {
 			$email .= sprintf $fmt,
 				$u->{'dom'}->{'dom'},
-				$u->{'script'}->{'desc'}, $u->{'ver'};
+				$u->{'script'}->{'desc'},
+				$u->{'sinfo'}->{'version'},
+				$u->{'ver'};
 			}
 		$email .= "\n";
 		$email .= $text{'scriptwarn_where'}."\n\n";
@@ -50,13 +54,17 @@ if (@updates) {
 			next if (!@dupdates);
 			$email = &text('scriptwarn_header2', $d->{'dom'}).
 				 "\n\n";
-			$fmt = "%-60.60s %-15.15s\n";
+			$fmt = "%-48.48s %-15.15s %-15.15s\n";
 			$email .= sprintf $fmt, $text{'scriptwarn_script'},
+						$text{'scriptwarn_oldver'},
 						$text{'scriptwarn_ver'};
-			$email .= sprintf $fmt, ("-" x 60), ("-" x 15);
+			$email .= sprintf $fmt,
+					("-" x 48), ("-" x 15), ("-" x 15);
 			foreach $u (@dupdates) {
 				$email .= sprintf $fmt,
-					$u->{'script'}->{'desc'}, $u->{'ver'};
+					$u->{'script'}->{'desc'},
+					$u->{'sinfo'}->{'version'},
+					$u->{'ver'};
 				}
 			$email .= "\n";
 			$email .= &text('scriptwarn_where2',
