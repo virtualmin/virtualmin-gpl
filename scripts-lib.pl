@@ -1434,6 +1434,7 @@ if (!$single && $copydir && !-d $copydir) {
 		return "Failed to create target directory : ".
 		       "<tt>".&html_escape($out)."</tt>";
 		}
+	&set_ownership_permissions(undef, undef, 0755, $copydir);
 	}
 
 # Extract compressed file to a temp dir
