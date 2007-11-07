@@ -110,7 +110,7 @@ print &ui_tabs_end_tab();
 # CA certificate form
 $chain = &get_chained_certificate_file($d);
 print &ui_tabs_start_tab("mode", "chain");
-print "$text{'cert_desc4'}<p>\n";
+print "$text{'cert_desc5'}<p>\n";
 
 print &ui_form_start("newchain.cgi", "form-data");
 print &ui_hidden("dom", $in{'dom'});

@@ -1987,7 +1987,7 @@ cert_chain=CA certificate file
 cert_chain0=None needed
 cert_chain1=In file on server $1
 cert_chain2=Uploaded file $1
-cert_desc4=If your virtual server's SSL certificate is from a certificate authority that is not directly known to major browsers, you may need to upload the CA's certificate using this form.
+cert_desc5=If your virtual server's SSL certificate is from a certificate authority that is not directly known to major browsers, you may need to upload the CA's certificate using this form.
 cert_chainok=Save Certificate
 cert_esubject=Certficate does not appear to have a common name
 
