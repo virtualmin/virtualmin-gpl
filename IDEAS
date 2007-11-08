@@ -73,3 +73,5 @@
 
  - use new Apache module function for block updates instead of directly
    modifying config file, when Webmin 1.380 is out
+
+ - nice Virtualmin cron jobs - FS 3334
