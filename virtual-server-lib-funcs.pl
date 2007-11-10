@@ -3094,20 +3094,31 @@ $ENV{'HOME'} = $_[0]->{'home'};
 sub run_as_domain_user
 {
 &foreign_require("proc", "proc-lib.pl");
-local $temp = &transname();
-open(TEMP, ">$temp");
-&proc::safe_process_exec_logged($_[1], $_[0]->{'uid'}, $_[0]->{'ugid'}, \*TEMP);
-local $ex = $?;
-local $out;
-close(TEMP);
-local $_;
-open(TEMP, $temp);
-while(<TEMP>) {
-	$out .= $_;
+local @uinfo = getpwnam($_[0]->{'user'});
+if ($uinfo[8] =~ /\/(sh|bash|tcsh|csh)$/ ||
+    $gconfig{'os_type'} =~ /-linux$/) {
+	# Usable shell .. use su
+	local $cmd = &command_as_user($_[0]->{'user'}, 0, $_[1]);
+	local $out = &backquote_logged($cmd);
+	return wantarray ? ($out, $?) : $out;
 	}
-close(TEMP);
-unlink($temp);
-return wantarray ? ($out, $ex) : $out;
+else {
+	# Need to run ourselfs
+	local $temp = &transname();
+	open(TEMP, ">$temp");
+	&proc::safe_process_exec_logged($_[1], $_[0]->{'uid'}, $_[0]->{'ugid'}, \*TEMP);
+	local $ex = $?;
+	local $out;
+	close(TEMP);
+	local $_;
+	open(TEMP, $temp);
+	while(<TEMP>) {
+		$out .= $_;
+		}
+	close(TEMP);
+	unlink($temp);
+	return wantarray ? ($out, $ex) : $out;
+	}
 }
 
 # print_subs_table(sub, ..)

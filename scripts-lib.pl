@@ -1434,7 +1434,7 @@ if (!$single && $copydir && !-d $copydir) {
 		return "Failed to create target directory : ".
 		       "<tt>".&html_escape($out)."</tt>";
 		}
-	elsif (!-d $copydir && sleep(1) && !-d $copydir) {
+	elsif (!-d $copydir) {
 		return "Command to create target directory did not work!";
 		}
 	&set_ownership_permissions(undef, undef, 0755, $copydir);
