@@ -1430,9 +1430,12 @@ local ($file, $dir, $d, $copydir, $subdir, $single) = @_;
 if (!$single && $copydir && !-d $copydir) {
 	local $out = &run_as_domain_user(
 		$d, "mkdir -p ".quotemeta($copydir)." 2>&1");
-	if ($? || !-d $copydir) {
+	if ($?) {
 		return "Failed to create target directory : ".
 		       "<tt>".&html_escape($out)."</tt>";
+		}
+	elsif (!-d $copydir) {
+		return "Command to create target directory did not work!";
 		}
 	&set_ownership_permissions(undef, undef, 0755, $copydir);
 	}
