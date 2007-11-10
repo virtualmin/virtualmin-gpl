@@ -1419,6 +1419,7 @@ sub create_mail_file
 local $mf;
 local $md;
 local ($uid, $gid) = ($_[0]->{'uid'}, $_[0]->{'gid'});
+local @rv;
 if ($config{'mail_system'} == 1) {
 	# Sendmail always uses mail files
 	$mf = &sendmail::user_mail_file($_[0]->{'user'});
@@ -1468,19 +1469,23 @@ elsif ($config{'mail_system'} == 5) {
 	@rv = ( &user_mail_file($_[0]), 1 );
 	}
 
-if ($mf && !-r $mf) {
-	# Create the mailbox, owned by the user
-	&open_tempfile(MF, ">$mf");
-	&close_tempfile(MF);
-	&set_ownership_permissions($uid, $gid, undef, $mf);
+if ($mf) {
+	if (!-r $mf) {
+		# Create the mailbox, owned by the user
+		&open_tempfile(MF, ">$mf");
+		&close_tempfile(MF);
+		&set_ownership_permissions($uid, $gid, undef, $mf);
+		}
 	@rv = ( $mf, 0 );
 	}
-if ($md && !-d $md) {
-	# Create the Maildir, owned by the user
-	local $d;
-	foreach $d ($md, "$md/cur", "$md/tmp", "$md/new") {
-		&make_dir($d, 0700, 1);
-		&set_ownership_permissions($uid, $gid, undef, $d);
+elsif ($md) {
+	if (!-d $md) {
+		# Create the Maildir, owned by the user
+		local $d;
+		foreach $d ($md, "$md/cur", "$md/tmp", "$md/new") {
+			&make_dir($d, 0700, 1);
+			&set_ownership_permissions($uid, $gid, undef, $d);
+			}
 		}
 	@rv = ( $md, 1 );
 	}

@@ -402,12 +402,17 @@ local $owner = &get_domain_owner(\%dom);
 if (!$parent && -r "$root/var/spool/mail/$origuser") {
 	&$first_print("Moving server owner's mailbox ..");
 	local ($mfile, $mtype) = &create_mail_file($owner);
-	local $srcfolder = { 'type' => 0,
-			     'file' => "$root/var/spool/mail/$origuser" };
-	local $dstfolder = { 'type' => $mtype,
-			     'file' => $mfile };
-	&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
-	&$second_print(".. done");
+	if ($mfile) {
+		local $srcfolder = { 'type' => 0,
+				     'file' => "$root/var/spool/mail/$origuser" };
+		local $dstfolder = { 'type' => $mtype,
+				     'file' => $mfile };
+		&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
+		&$second_print(".. done");
+		}
+	else {
+		&$second_print(".. could not work out mail file");
+		}
 	}
 
 if ($got{'mail'}) {
