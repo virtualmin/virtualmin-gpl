@@ -754,7 +754,7 @@ When batch creating or mass deleting virtual servers, servers like Apache and BI
 Scripts that have a background server process (like Mongrel instances for Ruby on Rails) can now be stopped, started and restarted from the Manage Script page.
 Added an option to the Edit Mailbox page to disable spam filtering for a user. Also added equivalent command-line flags to the user modify-user.pl and create-user.pl command-line scripts.
 ---- Changes since 3.48 ----
-Updated the phpMyAdmin script installer to 2.11.2, Nucleus to 3.31, SugarCRM to 4.5.1g, Plans calendar to 7.9.6, WordPress to 2.3.1, WordPress MU to 1.3, Drupal to 5.3 and 4.7.8, LimeSurvey to 1.53, ZenPhoto to 1.1.2, and TikiWiki to 1.9.8.3.
+Updated the phpMyAdmin script installer to 2.11.2.1, Nucleus to 3.31, SugarCRM to 4.5.1g, Plans calendar to 7.9.6, WordPress to 2.3.1, WordPress MU to 1.3, Drupal to 5.3 and 4.7.8, LimeSurvey to 1.53, ZenPhoto to 1.1.2, and TikiWiki to 1.9.8.3.
 Upgraded the OpenAds script installer to 2.4.1, which uses a completely different installation wizard.
 Added a warning about NSCD to the configuration check page.
 Logging is now enabled when setting up clamd, and the socket directory created if needed.
