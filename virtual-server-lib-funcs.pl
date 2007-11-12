@@ -9625,7 +9625,7 @@ sub domain_features
 {
 local ($d) = @_;
 return $d->{'alias'} ? @alias_features :
-	$d->{'parent'} ? ( grep { $_ ne "webmin" } @features ) :
+	$d->{'parent'} ? ( grep { $_ ne "webmin" && $_ ne "unix" } @features ) :
 		         @features;
 }
 

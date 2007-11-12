@@ -48,6 +48,10 @@ foreach $d (@doms) {
 	local $oldd = { %$d };
 	local $newdom = { %$d };
 
+	my $parentdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
+	my $aliasdom = $d->{'alias'} ? &get_domain($d->{'alias'}) : undef;
+	my $subdom = $d->{'subdom'} ? &get_domain($d->{'subdom'}) : undef;
+
 	if (&has_home_quotas() && &can_edit_quotas() &&
 	    $in{'quota_def'} != 2) {
 		# Update server quota
@@ -84,7 +88,16 @@ foreach $d (@doms) {
 	# Update features
 	local %check;
 	foreach $f (&domain_features($d), @feature_plugins) {
+		# User can't use this feature
 		next if (!&can_use_feature($f));
+
+		# Not suitable for plugin
+		if (&indexof($f, @feature_plugins) >= 0 &&
+		    !&plugin_call($f, "feature_suitable",
+				  $parentdom, $aliasdom, $subdom)) {
+			next;
+			}
+
 		if ($in{$f} == 1) {
 			$newdom->{$f} = 1;
 			if (!$d->{$f}) {
