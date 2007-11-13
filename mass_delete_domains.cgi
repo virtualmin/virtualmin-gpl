@@ -12,7 +12,7 @@ foreach $did (@d) {
 	$d = &get_domain($did);
 	$d && $d->{'uid'} && ($d->{'gid'} || $d->{'ugid'}) ||
 		&error("Domain $did does not exist!");
-	&can_delete_domain($d) || &error($text{'edit_ecannot'});
+	&can_delete_domain($d) || &error($text{'delete_ecannot'});
 	push(@doms, $d);
 	}
 

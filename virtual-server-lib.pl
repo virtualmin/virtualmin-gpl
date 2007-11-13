@@ -6,12 +6,7 @@ do '../web-lib.pl';
 do '../ui-lib.pl';
 use Time::Local;
 %access = &get_module_acl();
-if (!defined($access{'feature_unix'})) {
-	$access{'feature_unix'} = 1;
-	}
-if (!defined($access{'feature_dir'})) {
-	$access{'feature_dir'} = 1;
-	}
+
 if (!defined($config{'init_template'})) {
 	$config{'init_template'} = 0;
 	}

@@ -2020,9 +2020,30 @@ return $config{'show_ugroup'} && &master_admin();
 }
 
 # can_use_feature(feature)
+# Returns 1 if the current user can use some feature at domain creation time,
+# or enable or disable it for existing domains
 sub can_use_feature
 {
-return &master_admin() || $config{$f} == 3 || $access{"feature_".$_[0]};
+local ($f) = @_;
+if (&master_admin()) {
+	# Master admin can use anything
+	return 1;
+	}
+elsif (&reseller_admin()) {
+	# Resellers can use features they have been granted, or features
+	# that are forced on
+	return $config{$f} == 3 || $access{"feature_".$f};
+	}
+else {
+	# Domain owners can use granted features (but never change the Unix
+	# account, which will be always on)
+	if ($f eq 'unix') {
+		return 0;
+		}
+	else {
+		return $config{$f} == 3 || $access{"feature_".$f};
+		}
+	}
 }
 
 # Returns 1 if the current user is allowed to select a private or shared

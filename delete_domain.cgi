@@ -10,7 +10,7 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 $d && $d->{'uid'} && ($d->{'gid'} || $d->{'ugid'}) ||
 	&error("Domain $in{'dom'} does not exist!");
-&can_delete_domain($d) || &error($text{'edit_ecannot'});
+&can_delete_domain($d) || &error($text{'delete_ecannot'});
 
 if ($in{'confirm'}) {
 	&ui_print_unbuffered_header(&domain_in($d), $text{'delete_title'}, "");
