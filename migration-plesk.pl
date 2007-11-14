@@ -10,8 +10,8 @@
 sub migration_plesk_validate
 {
 local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
-local $root = &extract_plesk_dir($file);
-$root || return "Not a Plesk 8 backup file";
+local ($ok, $root) = &extract_plesk_dir($file);
+$ok || return "Not a Plesk 8 backup file : $root";
 -r "$root/dump.xml" || return "Not a complete Plesk 8 backup file - missing dump.xml";
 
 # Check Webmin version
@@ -59,7 +59,7 @@ local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
        $prefix, $virtalready, $email) = @_;
 
 # Extract backup and read the dump file
-local $root = &extract_plesk_dir($file);
+local ($ok, $root) = &extract_plesk_dir($file);
 local $dump = &read_plesk_xml("$root/dump.xml");
 local $domain = $dump->{'domain'}->{$dom};
 if (!$domain && $dump->{'domain'}->{'name'} eq $dom) {
@@ -488,7 +488,7 @@ sub extract_plesk_dir
 local ($file) = @_;
 if ($main::plesk_dir_cache{$file} && -d $main::plesk_dir_cache{$file}) {
 	# Use cached extract from this session
-	return $main::plesk_dir_cache{$file};
+	return (1, $main::plesk_dir_cache{$file});
 	}
 local $dir = &transname();
 &make_dir($dir, 0700);
@@ -496,7 +496,7 @@ local $dir = &transname();
 # Is this compressed?
 local $cf = &compression_format($file);
 if ($cf != 0 && $cf != 1) {
-	return undef;
+	return (0, "Unknown compression format");
 	}
 
 # Read in the backup as a fake mail object
@@ -534,10 +534,10 @@ foreach my $a (@{$mail->{'attach'}}) {
 		$count++;
 		}
 	}
-return undef if (!$count);	# No attachments!
+return (0, "No attachments found in MIME data") if (!$count);
 
 $main::plesk_dir_cache{$file} = $dir;
-return $dir;
+return (1, $dir);
 }
 
 # read_plesk_xml(file)

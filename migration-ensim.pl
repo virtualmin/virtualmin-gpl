@@ -7,8 +7,8 @@ sub migration_ensim_validate
 local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
 
 # Validate file
-local $root = &extract_ensim_dir($file);
-$root || return "Not an Ensim tar.gz file";
+local ($ok, $root) = &extract_ensim_dir($file);
+$ok || return "Not an Ensim tar.gz file : $root";
 local $www = "$root/var/www";
 -d $www || return "Not an Ensim backup file";
 
@@ -50,7 +50,7 @@ sub migration_ensim_migrate
 {
 local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
        $prefix, $virtalready, $defemail) = @_;
-local $root = &extract_ensim_dir($file);
+local ($ok, $root) = &extract_ensim_dir($file);
 
 # Get the manifest and some useful info from it
 local $manifest = &parse_enim_xml($root);
@@ -456,18 +456,21 @@ return (\%dom);
 }
 
 # extract_ensim_dir(file)
-# Extracts a tar.gz file, and returns the directory under which it was
-# extracted
+# Extracts a tar.gz file, and returns a a status code and the directory under
+# which it was extracted or an error message
 sub extract_ensim_dir
 {
-return undef if (!-r $_[0]);
-return $done{$_[0]} if ($done{$_[0]});	# Cache extracted dir
+return (0, "File does not exist") if (!-r $_[0]);
+return (1, $done{$_[0]}) if ($done{$_[0]});	# Cache extracted dir
 local $temp = &transname();
 mkdir($temp, 0700);
 local $qf = quotemeta($_[0]);
 local $out = `cd $temp && tar xzf $qf 2>&1`;
+if ($?) {
+	return (0, $out);
+	}
 $done{$_[0]} = $temp;
-return $temp;
+return (1, $temp);
 }
 
 # parse_enim_xml(dir)

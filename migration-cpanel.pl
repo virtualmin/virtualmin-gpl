@@ -5,8 +5,8 @@
 sub migration_cpanel_validate
 {
 local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
-local $root = &extract_cpanel_dir($file);
-$root || return "Not a cPanel tar.gz file";
+local ($ok, $root) = &extract_cpanel_dir($file);
+$ok || return "Not a cPanel tar.gz file : $root";
 local $daily = "$root/backup/cpbackup/daily";
 local ($homedir) = glob("$root/*/homedir");
 local $datastore = "$root/.cpanel-datastore";
@@ -63,7 +63,8 @@ sub migration_cpanel_migrate
 {
 local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
        $prefix, $virtalready, $email) = @_;
-local $root = &extract_cpanel_dir($file);
+local ($ok, $root) = &extract_cpanel_dir($file);
+$ok || &error("Failed to extract backup : $root");
 local $daily = "$root/backup/cpbackup/daily";
 local $datastore = "$root/.cpanel-datastore";
 
@@ -936,23 +937,24 @@ return (\%dom);
 }
 
 # extract_cpanel_dir(file)
-# Extracts a tar.gz file, and returns the directory under which it was extracted
+# Extracts a tar.gz file, and returns a status code and either the directory
+# under which it was extracted, or an error message
 sub extract_cpanel_dir
 {
 local ($file) = @_;
 return undef if (!-r $file);
 if ($main::cpanel_dir_cache{$file} && -d $main::cpanel_dir_cache{$file}) {
 	# Use cached extract from this session
-	return $main::cpanel_dir_cache{$file};
+	return (1, $main::cpanel_dir_cache{$file});
 	}
 local $temp = &transname();
 mkdir($temp, 0700);
 local $err = &extract_compressed_file($file, $temp);
 if ($err) {
-	return undef;
+	return (0, $err);
 	}
 $main::cpanel_dir_cache{$file} = $temp;
-return $temp;
+return (1, $temp);
 }
 
 # extract_cpanel_file(file)
