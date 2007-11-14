@@ -277,10 +277,12 @@ if (-d $daily) {
 	$orighome =~ s/\/public_html$//;
 	}
 else {
-	# Try to stick with cpanel home standard (/home/$user)
-	$orighome = "/home/$user";
+	if (!$parent) {
+		# Try to stick with cpanel home standard (/home/$user)
+		$orighome = "/home/$user";
+		}
 	}
-if (&is_under_directory($home_base, $orighome)) {
+if ($orighome && &is_under_directory($home_base, $orighome)) {
 	# Use same home directory as cPanel
 	$dom{'home'} = $orighome;
 	}
