@@ -131,7 +131,7 @@ print &ui_tabs_start_tab("mode", "dbs");
 	     $text{'usage_dom'});
 print &ui_tabs_end_tab();
 
-print &ui_tabs_end();
+print &ui_tabs_end(1);
 
 &ui_print_footer(&domain_footer_link($d));
 
