@@ -7,16 +7,29 @@ require './virtual-server-lib.pl';
 # Validate inputs
 &error_setup($text{'backup_err'});
 if ($in{'all'} == 1) {
+	# All domains
 	@doms = &list_domains();
 	}
 elsif ($in{'all'} == 2) {
+	# All except selected
 	%exc = map { $_, 1 } split(/\0/, $in{'doms'});
 	@doms = grep { !$exc{$_->{'id'}} } &list_domains();
+	if ($in{'parent'}) {
+		@doms = grep { !$_->{'parent'} || !$ext{$_->{'parent'}} } @doms;
+		}
 	}
 else {
+	# Only selected
 	foreach $d (split(/\0/, $in{'doms'})) {
-		push(@doms, &get_domain($d));
+		local $dinfo = &get_domain($d);
+		if ($dinfo) {
+			push(@doms, $dinfo);
+			if (!$dinfo->{'parent'} && $in{'parent'}) {
+				push(@doms, &get_domain_by("parent", $d));
+				}
+			}
 		}
+	@doms = grep { !$donedom{$_->{'id'}}++ } @doms;
 	}
 if (@doms) {
 	foreach my $bd (@doms) {

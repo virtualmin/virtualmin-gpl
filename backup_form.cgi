@@ -61,6 +61,8 @@ else {
 			  [ 0, $text{'backup_sel'} ],
 			  [ 2, $text{'backup_exc'} ] ])."<br>\n".
 		&servers_input("doms", \@bak, \@doms);
+	$dsel .= "<br>".&ui_checkbox("parent", 1, $text{'backup_parent'},
+			      	     $config{'backup_parent'});
 	print &ui_table_row(&hlink($text{'backup_doms'}, "backup_doms"),
 			    $dsel);
 	print &ui_hidden_table_end("doms");

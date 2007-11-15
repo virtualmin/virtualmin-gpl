@@ -94,6 +94,7 @@ else {
 # Update module config with domains and features
 $config{'backup_all'} = $in{'all'};
 $config{'backup_doms'} = join(" ", split(/\0/, $in{'doms'}));
+$config{'backup_parent'} = $in{'parent'};
 %features = map { $_, 1 } split(/\0/, $in{'feature'});
 $config{'backup_feature_all'} = $in{'feature_all'};
 foreach $f (@backup_features, @backup_plugins) {

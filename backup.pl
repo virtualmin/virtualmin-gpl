@@ -12,12 +12,21 @@ if ($config{'backup_all'} == 1) {
 elsif ($config{'backup_all'} == 2) {
 	%exc = map { $_, 1 } split(/\s+/, $config{'backup_doms'});
 	@doms = grep { !$exc{$_->{'id'}} } &list_domains();
+	if ($in{'parent'}) {
+		@doms = grep { !$_->{'parent'} || !$ext{$_->{'parent'}} } @doms;
+		}
 	}
 else {
 	foreach $d (split(/\s+/, $config{'backup_doms'})) {
 		local $dinfo = &get_domain($d);
-		push(@doms, $dinfo) if ($dinfo);
+		if ($dinfo) {
+			push(@doms, $dinfo);
+			if (!$dinfo->{'parent'} && $in{'parent'}) {
+				push(@doms, &get_domain_by("parent", $d));
+				}
+			}
 		}
+	@doms = grep { !$donedom{$_->{'id'}}++ } @doms;
 	}
 
 # Work out features and options
