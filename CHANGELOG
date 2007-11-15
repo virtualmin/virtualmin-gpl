@@ -767,3 +767,4 @@ Current versions are shown in the script updates notification email.
 Errors when extracting cPanel, Plesk and Ensim backup files are reported in more detail.
 Sub-domains in cPanel backups can now be properly imported.
 Virtualin plugins can now export script installers, using the scripts_list function in virtual_feature.pl.
+Added a command-line option to backup-domain.pl to backup all domains owned by some Virtualmin user.

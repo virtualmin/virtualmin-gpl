@@ -34,6 +34,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--domain") {
 		push(@bdoms, shift(@ARGV));
 		}
+	elsif ($a eq "--user") {
+		push(@users, shift(@ARGV));
+		}
 	elsif ($a eq "--all-features") {
 		@bfeats = grep { $config{$_} || $_ eq 'virtualmin' }
 			       @backup_features;
@@ -93,8 +96,8 @@ while(@ARGV > 0) {
 		}
 	}
 $dest || usage();
-@bdoms || $all_doms || @vbs || usage();
-if (@bdoms || $all_doms) {
+@bdoms || @users || $all_doms || @vbs || usage();
+if (@bdoms || @users || $all_doms) {
 	@bfeats || usage();
 	}
 ($bmode) = &parse_backup_url($dest);
@@ -110,9 +113,11 @@ if ($onebyone && !$bmode) {
 
 # Work out what will be backed up
 if ($all_doms) {
+	# All domains
 	@doms = &list_domains();
 	}
 else {
+	# Get domains by name
 	foreach $dname (@bdoms) {
 		local $dinfo = &get_domain_by("dom", $dname);
 		if ($dinfo) {
@@ -120,6 +125,18 @@ else {
 			}
 		else {
 			&usage("The domain $dname does not exist");
+			}
+		}
+	# Get domains by user
+	foreach $uname (@users) {
+		local $dinfo = &get_domain_by("user", $uname, "parent", "");
+		if ($dinfo) {
+			push(@doms, $dinfo);
+			push(@doms, &get_domain_by("user", $uname, "parent",
+						   $dinfo->{'id'}));
+			}
+		else {
+			&usage("No top-level domain ownered by $uname exists");
 			}
 		}
 	}
@@ -182,6 +199,7 @@ print "\n";
 print "usage: backup-domain.pl --dest file\n";
 print "                        [--test]\n";
 print "                        [--domain name] | [--all-domains]\n";
+print "                        [--user name]\n";
 print "                        [--feature name] | [--all-features]\n";
 print "                                           [--except-feature name]\n";
 print "                        [--ignore-errors]\n";
