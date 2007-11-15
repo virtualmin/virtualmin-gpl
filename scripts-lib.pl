@@ -5,6 +5,8 @@
 sub list_scripts
 {
 local (@rv, $s);
+
+# From core directories
 foreach $s (@scripts_directories) {
 	opendir(DIR, $s);
 	foreach $f (readdir(DIR)) {
@@ -12,6 +14,12 @@ foreach $s (@scripts_directories) {
 		}
 	closedir(DIR);
 	}
+
+# From plugins
+foreach my $p (@script_plugins) {
+	push(@rv, &plugin_call($p, "scripts_list"));
+	}
+
 return &unique(@rv);
 }
 
@@ -31,6 +39,8 @@ return grep { !$unavail{$_} } @rv;
 sub get_script
 {
 local ($name) = @_;
+
+# Find the script's .pl file
 local ($s, $sdir);
 foreach $s (@scripts_directories) {
 	if (-r "$s/$name.pl") {
@@ -38,7 +48,19 @@ foreach $s (@scripts_directories) {
 		last;
 		}
 	}
-$sdir || return undef;
+if (!$sdir) {
+	# Not in core .. perhaps in a plugin?
+	foreach my $p (@script_plugins) {
+		local $pdir = &module_root_directory($p);
+		if (-r "$pdir/$name.pl") {
+			$sdir = $pdir;
+			last;
+			}
+		}
+	}
+return undef if (!$sdir);
+
+# Read in the .pl file
 (do "$sdir/$name.pl") || return undef;
 local $dfunc = "script_${name}_desc";
 local $lfunc = "script_${name}_longdesc";

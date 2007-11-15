@@ -364,5 +364,13 @@ sub theme_sections
 {
 }
 
+# scripts_list()
+# If defined, should return a list of script names supported by this plugin.
+# For each, the directory must contain a .pl file with the same name in standard
+# script format.
+sub scripts_list
+{
+}
+
 1;
 
