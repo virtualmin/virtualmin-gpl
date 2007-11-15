@@ -58,6 +58,7 @@ elsif ($config{'mail_system'} == 0) {
 	$can_alias_comments = $virtualmin_pro &&
 			      &get_webmin_version() >= 1.294;
 	if ($can_alias_comments &&
+	    $virtual_maps !~ /^hash:/ &&
 	    defined(&postfix::can_map_comments) &&
 	    !&postfix::can_map_comments($virtual_type)) {
 		# Comments not supported by map backend, such as MySQL
