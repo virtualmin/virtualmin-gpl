@@ -127,17 +127,39 @@ else {
 		($userdir) = glob("$root/*");
 		}
 	$homesrc = "$userdir/homedir";
+	$datastore = "$homesrc/.cpanel-datastore";
 	}
 
+# Work out if the original domain was a sub-server in cPanel
+local $waschild = 0;
+if (-r "$datastore/apache_LISTMULTIPARKED_0") {
+	# Sub-servers are in this config file
+	local $subs = &read_file_contents(
+		"$datastore/apache_LISTMULTIPARKED_0");
+	$waschild = $subs =~ /[^a-z0-9\.\-]\Q$dom\E[^a-z0-9\.\-]/ ? 1 : 0;
+	}
+elsif (-d "$homesrc/tmp/webalizer") {
+	# Sub-servers had separate webalizer config
+	$waschild = -d "$homesrc/tmp/webalizer/$dom" ? 1 : 0;
+	}
+else {
+	# Can't be sure, so guess
+	$waschild = $parent ? 1 : 0;
+	}
+local $wasuser = $dom;
+$wasuser =~ s/\..*$//;
+
 # Check for Webalizer and AWstats
-if (-d "$homesrc/tmp/webalizer") {
+local $webalizer = $waschild ? "$homesrc/tmp/webalizer/$dom"
+			     : "$homesrc/tmp/webalizer";
+if (-d $webalizer) {
 	push(@got, "webalizer");
 	}
-if (-d "$homesrc/tmp/awstats") {
+if (-r "$homesrc/tmp/awstats/awstats.$dom.conf") {
 	push(@got, "virtualmin-awstats");
 	}
 
-if (-s "$userdir/mysql.sql") {
+if (-s "$userdir/mysql.sql" && !$waschild) {
 	# Check for mysql
 	local $mycount = 0;
 	local $mydir = "$userdir/mysql";
@@ -277,8 +299,8 @@ if (-d $daily) {
 	$orighome =~ s/\/public_html$//;
 	}
 else {
-	if (!$parent) {
-		# Try to stick with cpanel home standard (/home/$user)
+	# Try to stick with cpanel home standard (/home/$user)
+	if (!$waschild) {
 		$orighome = "/home/$user";
 		}
 	}
@@ -356,9 +378,10 @@ if ($got{'web'} && -d $daily) {
 elsif ($got{'web'}) {
 	# Just adjust cgi-bin directory to match cPanel
 	local $conf = &apache::get_config();
-	local ($vconf, $virt) = &get_apache_virtual($dom, undef);
+	local ($virt, $vconf) = &get_apache_virtual($dom, undef);
 	&apache::save_directive("ScriptAlias",
-		[ "/cgi-bin $dom{'home'}/public_html/cgi-bin" ], $virt, $conf);
+		[ "/cgi-bin $dom{'home'}/public_html/cgi-bin" ], $vconf, $conf);
+	&flush_file_lines($virt->{'file'});
 	&register_post_action(\&restart_apache) if (!$got{'ssl'});
 	$d->{'cgi_bin_dir'} = "public_html/cgi-bin";
 	}
@@ -421,13 +444,26 @@ if ($got{'dns'} && -d $daily) {
 		}
 	}
 
-# Migrate home directory contents (except logs)
-&$first_print("Copying home directory to $dom{'home'} ..");
-local $qhome = quotemeta($dom{'home'});
 local $out;
-&execute_command("cd $homesrc && rm -rf logs");
-&execute_command("cd $homesrc && (tar cvf - . | (cd $qhome && tar xf -))",
-		 undef, \$out, \$out);
+if ($waschild) {
+	# Migrate web directory
+	local $ht = &public_html_dir(\%dom);
+	local $qht = quotemeta($ht);
+	local $qhtsrc = "$homesrc/public_html/$wasuser";
+	&$first_print("Copying web pages to $ht ..");
+	&execute_command("cd $qhtsrc && ".
+			 "(tar cf - . | (cd $qht && tar xf -))",
+			 undef, \$out, \$out);
+	}
+else {
+	# Migrate home directory contents (except logs)
+	&$first_print("Copying home directory to $dom{'home'} ..");
+	local $qhome = quotemeta($dom{'home'});
+	&execute_command("cd $homesrc && rm -rf logs");
+	&execute_command("cd $homesrc && ".
+			 "(tar cf - . | (cd $qhome && tar xf -))",
+			 undef, \$out, \$out);
+	}
 if ($?) {
 	&$second_print(".. copy failed : <tt>$out</tt>");
 	}
@@ -562,7 +598,7 @@ if ($got{'mail'}) {
 
 # Move server owner's inbox file
 local $owner = &get_domain_owner(\%dom);
-if ($owner) {
+if ($owner && !$parent) {
 	&$first_print("Moving server owner's mailbox ..");
 	local ($mfile, $mtype) = &user_mail_file($owner);
 	local $srcfolder;
@@ -705,7 +741,7 @@ if ($got{'virtualmin-mailman'}) {
 	}
 
 # Copy cron jobs for user (direct to his cron file)
-if (-r "$userdir/cron/$user") {
+if (-r "$userdir/cron/$user" && !$waschild) {
 	&foreign_require("cron", "cron-lib.pl");
 	&$first_print("Copying Cron jobs ..");
 	$cron::cron_temp_file = &transname();
@@ -753,6 +789,7 @@ if ($got{'mysql'}) {
 		&$first_print("Re-creating MySQL users ..");
 		local %myusers;
 		local $_;
+		local (%donemysqluser, %donemysqlpriv);
 		open(MYSQL, "$userdir/mysql.sql");
 		while(<MYSQL>) {
 			s/\r|\n//g;
@@ -760,6 +797,7 @@ if ($got{'mysql'}) {
 				# Creating a MySQL user
 				local ($myuser, $mypass) = ($1, $3);
 				next if ($myuser eq $user);	# domain owner
+				next if ($donemysqluser{$myuser}++);
 				local $myuinfo = &create_initial_user(\%dom);
 				$myuinfo->{'user'} = $myuser;
 				$myuinfo->{'pass'} = "x";	# not needed
@@ -775,6 +813,7 @@ if ($got{'mysql'}) {
 				# Granting access to a MySQL database
 				local ($mydb, $myuser) = ($1, $2);
 				next if ($myuser eq $user);	# domain owner
+				next if ($donemysqlpriv{$mydb,$myuser}++);
 				$mydb =~ s/\\(.)/$1/g;
 				if ($myusers{$myuser}) {
 					push(@{$myusers{$myuser}->{'dbs'}},
@@ -825,7 +864,7 @@ if ($got{'ftp'}) {
 	}
 
 # Migrate or update FTP users
-if (-r "$userdir/proftpdpasswd") {
+if (-r "$userdir/proftpdpasswd" && !$waschild) {
 	local $fcount = 0;
 	&$first_print("Re-creating FTP users ..");
 	local $_;
@@ -869,52 +908,56 @@ if (-r "$userdir/proftpdpasswd") {
 	}
 
 # Migrate any parked domains as alias domains
-local $_;
-open(PARKED, "$userdir/pds");
-while(<PARKED>) {
-	s/\r|\n//g;
-	local ($pdom) = split(/\s+/, $_);
-        &$first_print("Creating parked domain $pdom ..");
-        &$indent_print();
-        local %alias = ( 'id', &domain_id(),
-                         'dom', $pdom,
-                         'user', $dom{'user'},
-                         'group', $dom{'group'},
-                         'prefix', $dom{'prefix'},
-                         'ugroup', $dom{'ugroup'},
-                         'pass', $dom{'pass'},
-                         'alias', $dom{'id'},
-                         'uid', $dom{'uid'},
-                         'gid', $dom{'gid'},
-                         'ugid', $dom{'ugid'},
-                         'owner', "Parked domain for $dom{'dom'}",
-                         'email', $dom{'email'},
-                         'name', 1,
-                         'ip', $dom{'ip'},
-                         'virt', 0,
-                         'source', $dom{'source'},
-                         'parent', $dom{'id'},
-                         'template', $dom{'template'},
-                         'reseller', $dom{'reseller'},
-                        );
-        foreach my $f (@alias_features) {
-                $alias{$f} = $dom{$f};
-                }
-        local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
-                                          : \%dom;
-        $alias{'home'} = &server_home_directory(\%alias, $parentdom);
-        &complete_domain(\%alias);
-        &create_virtual_server(\%alias, $parentdom, $parentdom->{'user'});
-        &$outdent_print();
-        &$second_print($text{'setup_done'});
+if (!$waschild) {
+	local $_;
+	open(PARKED, "$userdir/pds");
+	while(<PARKED>) {
+		s/\r|\n//g;
+		local ($pdom) = split(/\s+/, $_);
+		&$first_print("Creating parked domain $pdom ..");
+		&$indent_print();
+		local %alias = ( 'id', &domain_id(),
+				 'dom', $pdom,
+				 'user', $dom{'user'},
+				 'group', $dom{'group'},
+				 'prefix', $dom{'prefix'},
+				 'ugroup', $dom{'ugroup'},
+				 'pass', $dom{'pass'},
+				 'alias', $dom{'id'},
+				 'uid', $dom{'uid'},
+				 'gid', $dom{'gid'},
+				 'ugid', $dom{'ugid'},
+				 'owner', "Parked domain for $dom{'dom'}",
+				 'email', $dom{'email'},
+				 'name', 1,
+				 'ip', $dom{'ip'},
+				 'virt', 0,
+				 'source', $dom{'source'},
+				 'parent', $dom{'id'},
+				 'template', $dom{'template'},
+				 'reseller', $dom{'reseller'},
+				);
+		foreach my $f (@alias_features) {
+			$alias{$f} = $dom{$f};
+			}
+		local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+						  : \%dom;
+		$alias{'home'} = &server_home_directory(\%alias, $parentdom);
+		&complete_domain(\%alias);
+		&create_virtual_server(\%alias, $parentdom,
+				       $parentdom->{'user'});
+		&$outdent_print();
+		&$second_print($text{'setup_done'});
+		}
+	close(PARKED);
 	}
-close(PARKED);
 
 if ($got{'webalizer'}) {
 	# Copy existing Weblizer stats to ~/public_html/stats
 	&$first_print("Copying Weblizer data files ..");
-	&execute_command("cp ".quotemeta("$homesrc/tmp/webalizer")."/* ".
-			       quotemeta(&webalizer_stats_dir(\%dom)));
+	&execute_command("cp ".
+		quotemeta($webalizer)."/*.{png,gif,html,current,hist} ".
+		quotemeta(&webalizer_stats_dir(\%dom)));
 	&execute_command("chown -R $dom{'uid'}:$dom{'ugid'} ".
 			 quotemeta(&webalizer_stats_dir(\%dom)));
         &$second_print($text{'setup_done'});
@@ -923,7 +966,7 @@ if ($got{'webalizer'}) {
 if ($got{'virtualmin-awstats'}) {
 	# Copy AWstats data files to ~/awstats
 	&$first_print("Copying AWstats data files ..");
-	&execute_command("cp ".quotemeta("$homesrc/tmp/awstats")."/* ".
+	&execute_command("cp ".quotemeta("$homesrc/tmp/awstats")."/*.$dom.txt ".
 			       quotemeta("$dom{'home'}/awstats"));
 	&execute_command("chown -R $dom{'uid'}:$dom{'ugid'} ".
 			 quotemeta("$dom{'home'}/awstats"));

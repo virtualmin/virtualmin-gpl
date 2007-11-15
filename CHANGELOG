@@ -765,3 +765,4 @@ When a domain is renamed, generics or sender canonical maps are properly updated
 MySQL and LDAP sources for aliases and virtual addresses for Postfix can now be used by Virtualmin, when Webmin 1.390 or newer is installed and when they are setup properly in the Postfix module. This allows Virtualmin to effectively configure a remote mail server, assuming that domain Unix users and groups are also stored in LDAP.
 Current versions are shown in the script updates notification email.
 Errors when extracting cPanel, Plesk and Ensim backup files are reported in more detail.
+Sub-domains in cPanel backups can now be properly imported.
