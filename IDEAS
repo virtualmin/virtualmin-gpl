@@ -74,7 +74,5 @@
  - use new Apache module function for block updates instead of directly
    modifying config file, when Webmin 1.380 is out
 
- - nice Virtualmin cron jobs - FS 3334
-
  - security updates and apt pinning
 	- http://www.virtualmin.com/forums/virtualmin/re%3adebian-backports-and-virtualmin.html#8423
