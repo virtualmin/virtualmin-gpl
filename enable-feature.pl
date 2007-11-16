@@ -27,6 +27,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--all-domains") {
 		$all_doms = 1;
 		}
+	elsif ($a eq "--user") {
+		push(@users, shift(@ARGV));
+		}
 	elsif ($a =~ /^--(\S+)$/ &&
 	       &indexof($1, @features) >= 0) {
 		$config{$1} || &usage("The $a option cannot be used unless the feature is enabled in the module configuration");
@@ -40,17 +43,31 @@ while(@ARGV > 0) {
 		&usage();
 		}
 	}
-@dnames || $all_doms || usage();
+@dnames || $all_doms || @users || usage();
 
 # Get domains to update
 if ($all_doms) {
 	@doms = &list_domains();
 	}
 else {
+	# Get domains by name
 	foreach $n (@dnames) {
 		$d = &get_domain_by("dom", $n);
 		$d || &usage("Domain $n does not exist");
 		push(@doms, $d);
+		}
+
+	# Get domains by user
+	foreach $uname (@users) {
+		local $dinfo = &get_domain_by("user", $uname, "parent", "");
+		if ($dinfo) {
+			push(@doms, $dinfo);
+			push(@doms, &get_domain_by("user", $uname, "parent",
+						   $dinfo->{'id'}));
+			}
+		else {
+			&usage("No top-level domain ownered by $uname exists");
+			}
 		}
 	}
 

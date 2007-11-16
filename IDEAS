@@ -44,6 +44,7 @@
 	- RTFM (863)
 	- OTRS (863)
 	- phpMySites
+	- counters (FS 3348)
 
  - sub-servers owned by different mailbox user, as suggested by filip
 	- perhaps combine with extra admins?
