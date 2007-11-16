@@ -25,7 +25,7 @@ if ($_[0]->{'unix'} && !$uinfo) {
 
 # Create and populate home directory
 &$first_print($text{'setup_home'});
-&system_logged("mkdir $qh");
+&system_logged("mkdir $qh") if (!-d $_[0]->{'home'});
 &system_logged("chmod '$uconfig{'homedir_perms'}' $qh");
 if ($uinfo) {
 	&system_logged("chown $uinfo->{'uid'}:$uinfo->{'gid'} $qh");
