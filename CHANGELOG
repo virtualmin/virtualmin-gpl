@@ -769,4 +769,4 @@ Sub-domains in cPanel backups can now be properly imported.
 Virtualin plugins can now export script installers, using the scripts_list function in virtual_feature.pl.
 Added the --user command-line option to backup-domain.pl to backup all domains owned by some Virtualmin user.
 Added a checkbox to the backup form to include sub-servers of those selected too.
-Added the --user option to disable-feature.pl and enable-feature.pl to turn features off and on in all domains owned by some user.
+Added the --user option to disable-feature.pl and enable-feature.pl to turn features off and on in all domains owned by some user, and the list-domains.pl to fnd domains by user.

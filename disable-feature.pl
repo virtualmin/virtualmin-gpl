@@ -69,6 +69,7 @@ else {
 			&usage("No top-level domain ownered by $uname exists");
 			}
 		}
+	@doms = grep { !$donedomain{$_->{'id'}}++ } @doms;
 	}
 
 # Do it for all domains
@@ -159,7 +160,9 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Enables features for one or more domains specified on the command line.\n";
 print "\n";
-print "usage: disable-feature.pl [--domain name] | [--all-domains]\n";
+print "usage: disable-feature.pl [--domain name] |\n";
+print "                          [--user name] |\n";
+print "                          [--all-domains]\n";
 foreach $f (@features) {
 	print "                         [--$f]\n" if ($config{$f});
 	}
