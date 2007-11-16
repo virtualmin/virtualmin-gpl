@@ -64,7 +64,7 @@ foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 		@v > 1 ? &ui_select($script->{'name'}."_minversion",
 				$script->{'minversion'},
 				[ [ undef, $text{'newscripts_any'} ],
-				  map { [ $_, ">$_" ] } @v ],
+				  map { [ $_, ">= $_" ] } @v ],
 				1, 0, 1) : "",
 		], undef, "d", $script->{'name'}, $script->{'avail'});
 	}
