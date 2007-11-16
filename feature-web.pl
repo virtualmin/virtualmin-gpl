@@ -1364,8 +1364,7 @@ if ($d->{'name'}) {
 	local @nv = &apache::find_directive("NameVirtualHost", $conf);
 	local $canstar = $apache::httpd_modules{'core'} < 2.2;
 	foreach my $nv (@nv) {
-		$found++ if ( #$nv eq $d->{'ip'} ||
-			     $nv =~ /^(\S+):(\S+)/ && $1 eq $d->{'ip'} ||
+		$found++ if ($nv =~ /^(\S+):(\S+)/ && $1 eq $d->{'ip'} ||
 			     $nv eq '*' && $canstar ||
 			     $nv =~ /^\*:(\d+)$/ && $1 == $web_port);
 		$found_no_port++ if ($nv eq $d->{'ip'});
