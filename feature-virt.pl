@@ -29,7 +29,9 @@ if (!$config{'iface_manual'} && !$_[0]->{'virtalready'}) {
 					$_[0]->{'ip'} : $iface->{'broadcast'},
 			'name' => $iface->{'name'},
 			'virtual' => $vmax+1,
-			'up' => 1 };
+			'up' => 1,
+			'desc' => "Virtualmin server $_[0]->{'dom'}",
+		      };
 	$virt->{'fullname'} = $virt->{'name'}.":".$virt->{'virtual'};
 	&net::save_interface($virt);
 	&net::activate_interface($virt);
