@@ -90,6 +90,7 @@ if (defined($in{'dom'})) {
 	$d->{'backup_errors'} = $in{'backup_errors'};
 	$d->{'backup_strftime'} = $in{'backup_strftime'};
 	$d->{'backup_onebyone'} = $in{'backup_onebyone'};
+	$d->{'backup_parent'} = $in{'parent'};
 	&save_domain($d);
 
 	# Create virtualmin-backup directory

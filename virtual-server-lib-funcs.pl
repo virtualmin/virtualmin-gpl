@@ -4205,6 +4205,10 @@ if ($ok) {
 		if ($asowner) {
 			$writer = &command_as_user(
 					$doms[0]->{'user'}, 0, $writer);
+			&open_tempfile(DEST, ">$dest", 0, 1);
+			&close_tempfile(DEST);
+			&set_ownership_permissions(
+			  $doms[0]->{'uid'}, $doms[0]->{'ugid'}, undef, $dest);
 		 	}
 		&$first_print($text{'backup_final'});
 		&execute_command("cd $backupdir && (tar cf - . | $comp) 2>&1 | $writer", undef, \$out);

@@ -7,10 +7,6 @@
  - NIS support for users DB
 	- Cluster mode - each feature on a separate server
 
- - Allow domain owners to backup multiple domains at once (aliases,etc)
-
- - Automatically include alias domains in backups
-
  - When changing a domain's password, username or domain, update all script
    installers.
 
@@ -45,12 +41,6 @@
 	- OTRS (863)
 	- phpMySites
 	- counters (FS 3348)
-
- - sub-servers owned by different mailbox user, as suggested by filip
-	- perhaps combine with extra admins?
-
- - backup should include backup settings, and re-create cron job
-	- and Usermin settings?
 
  - new fcgid mode, as suggested by filip
 	Action php5-fcgi /fcgi-bin/php5-fcgi

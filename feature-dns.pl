@@ -1080,20 +1080,20 @@ if ($in{"dns_mode"} == 2) {
 	$tmpl->{'dns_view'} = $in{'view'};
 
 	&require_bind();
-	$fakeip = "1.2.3.4";
-	$fakedom = "foo.com";
-	$recs = &substitute_template(
-		join("\n", split(/\t+/, $in{'dns'}))."\n",
-		{ 'ip' => $fakeip,
-		  'dom' => $fakedom });
-	$temp = &transname();
+	local $fakeip = "1.2.3.4";
+	local $fakedom = "foo.com";
+	local $recs = &substitute_template(
+			join("\n", split(/\t+/, $in{'dns'}))."\n",
+			{ 'ip' => $fakeip,
+			  'dom' => $fakedom });
+	local $temp = &transname();
 	&open_tempfile(TEMP, ">$temp");
 	&print_tempfile(TEMP, $recs);
 	&close_tempfile(TEMP);
 	$bind8::config{'short_names'} = 0;	# force canonicalization
 	$bind8::config{'chroot'} = '/';		# turn off chroot for temp path
 	$bind8::config{'auto_chroot'} = undef;
-	@recs = &bind8::read_zone_file($temp, $fakedom);
+	local @recs = &bind8::read_zone_file($temp, $fakedom);
 	unlink($temp);
 	foreach $r (@recs) {
 		$soa++ if ($r->{'name'} eq $fakedom."." &&

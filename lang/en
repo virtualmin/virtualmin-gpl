@@ -1626,6 +1626,7 @@ backup_headerdest=Destination and format
 backup_headersched=Schedule and reporting
 backup_doms=Servers to save
 backup_parent=Include sub-servers of those selected?
+backup_parent2=Include sub-servers in backup?
 backup_features=Features to backup
 backup_all=All virtual servers
 backup_sel=Only selected ..

@@ -26,6 +26,7 @@ $backup_mkdir = $config{'backup_mkdir'};
 $backup_errors = $config{'backup_errors'};
 $backup_strftime = $config{'backup_strftime'};
 $backup_onebyone = $config{'backup_onebyone'};
+$backup_parent = $config{'backup_parent'};
 if ($d) {
 	# Just one domain
 	if (defined($d->{'backup_dest'})) {
@@ -44,6 +45,8 @@ if ($d) {
 		if (defined($d->{'backup_strftime'}));
 	$backup_onebyone = $d->{'backup_onebyone'}
 		if (defined($d->{'backup_onebyone'}));
+	$backup_parent = $d->{'backup_parent'}
+		if (defined($d->{'backup_parent'}));
 	print &ui_hidden("dom", $in{'dom'}),"\n";
 	print &ui_hidden("doms", $in{'dom'}),"\n";
 	print &ui_hidden("backup_all", 0),"\n";
@@ -61,8 +64,9 @@ else {
 			  [ 0, $text{'backup_sel'} ],
 			  [ 2, $text{'backup_exc'} ] ])."<br>\n".
 		&servers_input("doms", \@bak, \@doms);
-	$dsel .= "<br>".&ui_checkbox("parent", 1, $text{'backup_parent'},
-			      	     $config{'backup_parent'});
+	$dsel .= "<br>".&ui_checkbox(
+		"parent", 1, &hlink($text{'backup_parent'}, 'backup_parent'),
+		$backup_parent);
 	print &ui_table_row(&hlink($text{'backup_doms'}, "backup_doms"),
 			    $dsel);
 	print &ui_hidden_table_end("doms");
@@ -153,6 +157,13 @@ print &ui_table_row(&hlink($text{'backup_errors'}, "backup_errors"),
 		    &ui_radio("errors", int($backup_errors),
 			      [ [ 0, $text{'backup_errors0'} ],
 				[ 1, $text{'backup_errors1'} ] ]));
+
+# For a single domain, show option to add sub-servers
+if ($d) {
+	print &ui_table_row(&hlink($text{'backup_parent2'}, "backup_parent2"),
+			    &ui_yesno_radio("parent", $backup_parent ? 1 : 0));
+	}
+
 print &ui_hidden_table_end("dest");
 
 if ($in{'sched'}) {
