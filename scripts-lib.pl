@@ -166,6 +166,29 @@ foreach $o (keys %$opts) {
 &write_file("$script_log_directory/$d->{'id'}/$info{'id'}.script", \%info);
 }
 
+# save_domain_script(&domin, &sinfo)
+# Updates a script object for a domain on disk
+sub save_domain_script
+{
+local ($d, $sinfo) = @_;
+local %info;
+foreach my $k (keys %$sinfo) {
+	if ($k eq 'id' || $k eq 'file') {
+		next;	# No need to save
+		}
+	elsif ($k eq 'opts') {
+		local $opts = $sinfo->{'opts'};
+		foreach my $o (keys %$opts) {
+			$info{'opts_'.$o} = $opts->{$o};
+			}
+		}
+	else {
+		$info{$k} = $sinfo->{$k};
+		}
+	}
+&write_file("$script_log_directory/$d->{'id'}/$sinfo->{'id'}.script", \%info);
+}
+
 # remove_domain_script(&domain, &script-info)
 # Records the un-install of a script for a domain
 sub remove_domain_script

@@ -26,8 +26,9 @@ if ($d->{'unix'} && &can_rename_domains() == 2) {
 	# Rename user option
 	print &ui_table_row($text{'rename_user'},
 	    &ui_radio("user_mode", 1,
-		      [ [ 0, &text('rename_user0', "<tt>$d->{'user'}</tt>") ],
-			[ 1, $text{'rename_user1'} ],
+		      [ [ 0, &text('rename_user0',
+				   "<tt>$d->{'user'}</tt>")."<br>" ],
+			[ 1, $text{'rename_user1'}."<br>" ],
 			[ 2, $text{'rename_user2'}." ".
 			     &ui_textbox("user", undef, 20) ] ]));
 	}
@@ -41,8 +42,9 @@ elsif ($d->{'dir'}) {
 	# Change home dir option
 	print &ui_table_row($text{'rename_home'},
 	    &ui_radio("home_mode", 1,
-		      [ [ 0, &text('rename_home0', "<tt>$d->{'home'}</tt>") ],
-			[ 1, $text{'rename_home1'} ],
+		      [ [ 0, &text('rename_home0',
+				   "<tt>$d->{'home'}</tt>")."<br>" ],
+			[ 1, $text{'rename_home1'}."<br>" ],
 			$rh == 2 ? ( [ 2, &text('rename_home2',
 				&ui_textbox("home", undef, 30)) ] ) : ( ),
 		      ]));

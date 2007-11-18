@@ -205,6 +205,8 @@ foreach $f (@features) {
 			}
 		}
 	}
+
+# Update plugins in all domains
 foreach $f (@feature_plugins) {
 	for($i=0; $i<@doms; $i++) {
 		if ($doms[$i]->{$f}) {
@@ -212,6 +214,34 @@ foreach $f (@feature_plugins) {
 			&plugin_call($f, "feature_modify", $doms[$i], $olddoms[$i]);
 			}
 		}
+	}
+
+# Fix script installer paths in all domains
+if (defined(&list_domain_scripts)) {
+	&$first_print($text{'rename_scripts'});
+	for($i=0; $i<@doms; $i++) {
+		($olddir, $newdir) =
+		    ($olddoms[$i]->{'home'}, $doms[$i]->{'home'});
+		($olddname, $newdname) =
+		    ($olddoms[$i]->{'dom'}, $doms[$i]->{'dom'});
+		foreach $sinfo (&list_domain_scripts($doms[$i])) {
+			$changed = 0;
+			if ($olddir ne $newdir) {
+				# Fix directory
+				$changed++
+				   if ($sinfo->{'opts'}->{'dir'} =~
+				       s/^\Q$olddir\E\//$newdir\//);
+				}
+			if ($olddname ne $newdname) {
+				# Fix domain in URL
+				$changed++
+				    if ($sinfo->{'url'} =~
+					s/\Q$olddname\E/$newdname/);
+				}
+			&save_domain_script($d, $sinfo) if ($changed);
+			}
+		}
+	&$second_print($text{'setup_done'});
 	}
 
 &refresh_webmin_user($d);

@@ -1950,6 +1950,7 @@ rename_ehome=You are not allowed to change the home directory
 rename_ehome2=No new home directory entered
 rename_ehome3=New home directory already exists
 rename_ehome4=Parent of new home directory does not exist
+rename_scripts=Updating paths in script database ..
 
 cert_title=Manage SSL Certificate
 cert_desc2=This section shows the details of the SSL certificate currently being used by this virtual server.
