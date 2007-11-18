@@ -117,28 +117,8 @@ if ($all_doms) {
 	@doms = &list_domains();
 	}
 else {
-	# Get domains by name
-	foreach $dname (@bdoms) {
-		local $dinfo = &get_domain_by("dom", $dname);
-		if ($dinfo) {
-			push(@doms, $dinfo);
-			}
-		else {
-			&usage("The domain $dname does not exist");
-			}
-		}
-	# Get domains by user
-	foreach $uname (@users) {
-		local $dinfo = &get_domain_by("user", $uname, "parent", "");
-		if ($dinfo) {
-			push(@doms, $dinfo);
-			push(@doms, &get_domain_by("user", $uname, "parent",
-						   $dinfo->{'id'}));
-			}
-		else {
-			&usage("No top-level domain ownered by $uname exists");
-			}
-		}
+	# Get domains by name and user
+	@doms = &get_domains_by_names_users(\@bdoms, \@users, \&usage);
 	}
 
 if ($test) {

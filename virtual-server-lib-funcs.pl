@@ -236,6 +236,32 @@ for(my $i=0; $i<@_; $i+=2) {
 return wantarray ? @rv : $rv[0];
 }
 
+# get_domains_by_names_users(&dnames, &usernames, &errorfunc)
+# Given a list of domain names and usernames, returns all matching domains.
+# May callback to the error function if one cannot be resolved.
+sub get_domains_by_names_users
+{
+local ($dnames, $users, $efunc) = @_;
+foreach my $domain (@$dnames) {
+	local $d = &get_domain_by("dom", $domain);
+	$d || &$efunc("Virtual server $domain does not exist");
+	push(@doms, $d);
+	}
+foreach my $uname (@$users) {
+	local $dinfo = &get_domain_by("user", $uname, "parent", "");
+	if ($dinfo) {
+		push(@doms, $dinfo);
+		push(@doms, &get_domain_by("parent", $dinfo->{'id'}));
+		}
+	else {
+		&$efunc("No top-level domain owned by $uname exists");
+		}
+	}
+local %donedomain;
+@doms = grep { !$donedomain{$_->{'id'}}++ } @doms;
+return @doms;
+}
+
 # domain_id()
 # Returns a new unique domain ID
 sub domain_id

@@ -50,26 +50,8 @@ if ($all_doms) {
 	@doms = &list_domains();
 	}
 else {
-	# Get domains by name
-	foreach $n (@dnames) {
-		$d = &get_domain_by("dom", $n);
-		$d || &usage("Domain $n does not exist");
-		push(@doms, $d);
-		}
-
-	# Get domains by user
-	foreach $uname (@users) {
-		local $dinfo = &get_domain_by("user", $uname, "parent", "");
-		if ($dinfo) {
-			push(@doms, $dinfo);
-			push(@doms, &get_domain_by("user", $uname, "parent",
-						   $dinfo->{'id'}));
-			}
-		else {
-			&usage("No top-level domain ownered by $uname exists");
-			}
-		}
-	@doms = grep { !$donedomain{$_->{'id'}}++ } @doms;
+	# Get domains by name and user
+	@doms = &get_domains_by_names_users(\@dnames, \@users, \&usage);
 	}
 
 # Do it for all domains

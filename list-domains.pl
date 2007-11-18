@@ -55,23 +55,7 @@ while(@ARGV > 0) {
 
 if (@domains || @users) {
 	# Just showing listed domains or domains owned by some user
-	foreach $domain (@domains) {
-		$d = &get_domain_by("dom", $domain);
-		$d || &usage("Virtual server $domain does not exist");
-		push(@doms, $d);
-		}
-	foreach $uname (@users) {
-		local $dinfo = &get_domain_by("user", $uname, "parent", "");
-		if ($dinfo) {
-			push(@doms, $dinfo);
-			push(@doms, &get_domain_by("user", $uname, "parent",
-						   $dinfo->{'id'}));
-			}
-		else {
-			&usage("No top-level domain ownered by $uname exists");
-			}
-		}
-	@doms = grep { !$donedomain{$_->{'id'}}++ } @doms;
+	@doms = &get_domains_by_names_users(\@domains, \@users, \&usage);
 	}
 else {
 	# Showing all domains, with some limits
