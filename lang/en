@@ -2821,6 +2821,7 @@ newscripts_tabupgrade=Upgrade Scripts
 newscripts_tabwarn=Upgrade Notification
 newscripts_desc1=This form can be used to add script installers that were created by third-party vendors, so that they can be used like those built into Virtualmin.
 newscripts_desc2=This table can be used to de-select scripts that you do not want made available to virtual server owners.
+newscripts_desc2b=You can also limit available scripts to those of at least some version or at most some version, to prevent installation of buggy or unstable releases.
 newscripts_desc3=This form allows you to upgrade a script to the latest version on some or all virtual servers at once. It should be used when security problems are found in older scripts.
 newscripts_desc4=This form can be used to send out automatic email messages to virtual server owners or the master administrator, notifying them of updates available to installed scripts.
 newscripts_wenabled=Send available upgrade notifications?

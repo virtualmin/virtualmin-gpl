@@ -34,7 +34,8 @@ print &ui_tabs_end_tab();
 
 # Display a list of those currently available, with checkboxes for enabling
 print &ui_tabs_start_tab("mode", "enable");
-print "$text{'newscripts_desc2'}<p>\n";
+print "$text{'newscripts_desc2'}\n";
+print "$text{'newscripts_desc2b'}<p>\n";
 print &ui_form_start("disable_scripts.cgi", "post");
 print &ui_columns_start([ "",
 			  $text{'newscripts_name'},
@@ -55,7 +56,7 @@ foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 				      [ "colspan=5]" ]);
 		$lastcat = $cat;
 		}
-	@v = @{$script->{'versions'}};
+	@v = sort { &compare_versions($b, $a) } @{$script->{'versions'}};
 	print &ui_checked_columns_row([
 		$script->{'desc'},
 		$script->{'longdesc'},
@@ -64,7 +65,8 @@ foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 		@v > 1 ? &ui_select($script->{'name'}."_minversion",
 				$script->{'minversion'},
 				[ [ undef, $text{'newscripts_any'} ],
-				  map { [ $_, ">= $_" ] } @v ],
+				  (map { [ "$_", ">= $_" ] } @v),
+				  (map { [ "<=$_", "<= $_" ] } @v) ],
 				1, 0, 1) : "",
 		], undef, "d", $script->{'name'}, $script->{'avail'});
 	}

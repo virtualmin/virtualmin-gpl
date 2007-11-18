@@ -1110,9 +1110,22 @@ return @vers;
 sub can_script_version
 {
 local ($script, $ver) = @_;
-return 1 if (&master_admin() ||
-	     !$script->{'minversion'} ||
-	     &compare_versions($ver, $script->{'minversion'}) >= 0);
+if (!$script->{'minversion'}) {
+	return 1;	# No restrictions
+	}
+elsif ($script->{'minversion'} =~ /^<=(.*)$/) {
+	return &compare_versions($ver, "$1") <= 0;	# At or below
+	}
+elsif ($script->{'minversion'} =~ /^=(.*)$/) {
+	return $ver eq $1;				# At exact version
+	}
+elsif ($script->{'minversion'} =~ /^<=(.*)$/ ||
+       $script->{'minversion'} =~ /^(.*)$/) {
+	return &compare_versions($ver, "$1") >= 0;	# At or above
+	}
+else {
+	return 1;	# Can never happen!
+	}
 }
 
 # post_http_connection(&hostname, port, page, &cgi-params, &out, &err,
