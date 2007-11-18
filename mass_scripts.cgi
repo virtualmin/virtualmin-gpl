@@ -24,7 +24,8 @@ foreach my $d (@doms) {
 # Work out who has it
 foreach my $d (@doms) {
 	@got = &list_domain_scripts($d);
-	@dsinfos = grep { $_->{'name'} eq $sname } @got;
+	@dsinfos = grep { $_->{'name'} eq $sname &&
+			  &compare_versions($_->{'version'}, $ver) < 0 } @got;
 	foreach $sinfo (@dsinfos) {
 		$sinfo->{'dom'} = $d;
 		}
@@ -41,6 +42,7 @@ print &text('massstart_start', $script->{'desc'},
 $ferr = &fetch_script_files($sinfos[0]->{'dom'}, $ver, $sinfos[0]->{'opts'},
 	    		    $sinfos[0], \%gotfiles);
 &error($ferr) if ($ferr);
+print "<p>\n";
 
 # Do each server that has it
 foreach $sinfo (@sinfos) {

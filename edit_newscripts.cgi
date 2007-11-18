@@ -81,10 +81,16 @@ print &ui_form_start("mass_scripts.cgi", "post");
 print &ui_table_start($text{'newscripts_mheader'}, undef, 2,
 		      [ "width=30%" ]);
 
-# Find those we actually use
+# Find those we actually use, and the minimum version of each installed
 foreach $d (&list_domains()) {
 	foreach my $sinfo (&list_domain_scripts($d)) {
-		$used{$sinfo->{'name'}}++;
+		$n = $sinfo->{'name'};
+		$used{$n}++;
+		if (!$minversion{$n} ||
+		    &compare_versions($sinfo->{'version'},
+				      $minversion{$n}) < 0) {
+			$minversion{$n} = $sinfo->{'version'};
+			}
 		}
 	}
 
@@ -93,7 +99,9 @@ foreach $d (&list_domains()) {
 foreach $sname (grep { $used{$_} } @scripts) {
 	$script = &get_script($sname);
 	foreach $v (@{$script->{'versions'}}) {
-		push(@opts, [ "$sname $v", "$script->{'desc'} $v" ]);
+		if (&compare_versions($v, $minversion{$sname}) > 0) {
+			push(@opts, [ "$sname $v", "$script->{'desc'} $v" ]);
+			}
 		}
 	}
 @opts = sort { lc($a->[1]) cmp lc($b->[1]) } @opts;

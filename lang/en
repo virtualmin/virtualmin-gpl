@@ -2968,7 +2968,7 @@ massstart_start=Now upgrading $1 to version $2 in $3 locations ..
 massscript_ever=.. version $1 is already installed.
 massscript_edep=.. failed dependencies : $1
 massscript_ecommands=.. required commands are missing : $1
-massscript_doing=Installing in $1 $3 ..
+massscript_doing=Installing in domain $1  ..
 
 massdelete_title=Delete Virtual Servers
 massdelete_rusure=Are you sure you want to delete the $1 selected servers? $2 of data in their home directories will be deleted.
