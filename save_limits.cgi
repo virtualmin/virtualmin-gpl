@@ -68,8 +68,10 @@ if (defined($in{'shell'})) {
 	# Update shell
 	$user = &get_domain_owner($d);
 	$olduser = { %$user };
-	$user->{'shell'} = $in{'shell'};
-	&modify_user($user, $olduser, undef);
+	if ($olduser->{'shell'} ne $in{'shell'}) {
+		$user->{'shell'} = $in{'shell'};
+		&modify_user($user, $olduser, $d);
+		}
 	}
 &refresh_webmin_user($d);
 &run_post_actions();

@@ -1361,7 +1361,7 @@ if ($virtualmin_pro) {
 	}
 
 # Update the plain-text password, except for a domain owner
-if (!$_[0]->{'domainowner'}) {
+if (!$_[0]->{'domainowner'} && $_[2]) {
 	local %plain;
 	mkdir($plainpass_dir, 0700);
 	&read_file_cached("$plainpass_dir/$_[2]->{'id'}", \%plain);
@@ -1380,17 +1380,19 @@ if (!$_[0]->{'domainowner'}) {
 	}
 
 # Update the no-spam-check flag
-if (!-d $nospam_dir) {
-	mkdir($nospam_dir, 0700);
-	}
-if (defined($_[0]->{'nospam'})) {
-	local %nospam;
-	&read_file_cached("$nospam_dir/$_[2]->{'id'}", \%nospam);
-	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
-		delete($nospam{$_[1]->{'user'}});
+if ($_[2]) {
+	if (!-d $nospam_dir) {
+		mkdir($nospam_dir, 0700);
 		}
-	$nospam{$_[0]->{'user'}} = $_[0]->{'nospam'};
-	&write_file("$nospam_dir/$_[2]->{'id'}", \%nospam);
+	if (defined($_[0]->{'nospam'})) {
+		local %nospam;
+		&read_file_cached("$nospam_dir/$_[2]->{'id'}", \%nospam);
+		if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+			delete($nospam{$_[1]->{'user'}});
+			}
+		$nospam{$_[0]->{'user'}} = $_[0]->{'nospam'};
+		&write_file("$nospam_dir/$_[2]->{'id'}", \%nospam);
+		}
 	}
 
 # Clear quota cache for this user
