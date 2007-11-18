@@ -9190,8 +9190,7 @@ if (&database_feature($d) && &can_edit_databases()) {
 		  });
 	}
 
-if ($d->{'web'} && $config{'web'} && &can_edit_scripts() &&
-    !$d->{'subdom'} && !$d->{'alias'}) {
+if (&can_domain_have_scripts($d) && &can_edit_scripts()) {
 	# Scripts button
 	push(@rv, { 'page' => 'list_scripts.cgi',
 		    'title' => $text{'edit_scripts'},
@@ -9629,6 +9628,13 @@ if (!$d->{'dir'}) {
 	return 0 if ($config{'mail_system'} != 5);
 	}
 return 1;
+}
+
+# Returns 1 if some domain can have scripts installed
+sub can_domain_have_scripts
+{
+local ($d) = @_;
+return $d->{'web'} && $config{'web'} && !$d->{'subdom'} && !$d->{'alias'};
 }
 
 # call_feature_func(feature, &domain, &olddomain)

@@ -771,4 +771,4 @@ Added the --user command-line option to backup-domain.pl to backup all domains o
 Added a checkbox to the backup form to include sub-servers of those selected too. A similar option is also available to virtual server owners when backing up a single domain, to include all sub-servers with the same owner.
 Added the --user option to disable-feature.pl and enable-feature.pl to turn features off and on in all domains owned by some user, and the list-domains.pl to fnd domains by user.
 Both the maximum and minimum versions for scripts can now be selected on the global Script Installers page.
-Added the --user parameter to list-scripts.pl and allow --domain to be given more than once, to list scripts in multiple domains.
+Added the --user and --all-domains parameters to list-scripts.pl, list-users.pl, list-aliases.pl and list-simple-aliases.pl, to list objects in multiple domains.

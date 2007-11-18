@@ -22,6 +22,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--user") {
 		push(@users, shift(@ARGV));
 		}
+	elsif ($a eq "--all-domains") {
+		$all = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
@@ -31,8 +34,15 @@ while(@ARGV > 0) {
 	}
 
 # Validate args and get domains
-@dnames || @users || &usage();
-@doms = &get_domains_by_names_users(\@dnames, \@users, \&usage);
+@dnames || @users || $all || &usage();
+if ($all) {
+	@doms = &list_domains();
+	}
+else {
+	@doms = &get_domains_by_names_users(\@dnames, \@users, \&usage);
+	}
+@doms = grep { &can_domain_have_scripts($_) } @doms;
+@doms || &usage("None of the selected virtual servers can have scripts");
 
 foreach my $d (@doms) {
 	@scripts = &list_domain_scripts($d);
@@ -91,7 +101,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the scripts installed on one or more virtual servers.\n";
 print "\n";
-print "usage: list-scripts.pl   [--domain domain.name]*\n";
+print "usage: list-scripts.pl   [--all-domains] | [--domain domain.name] |\n";
 print "                         [--user username]*\n";
 print "                         [--multiline]\n";
 exit(1);
