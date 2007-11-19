@@ -8513,7 +8513,7 @@ local $id;
 if (&has_command("hostid")) {
 	chop($id = `hostid 2>/dev/null`);
 	}
-if (!$id) {
+if (!$id || $id =~ /^0+$/) {
 	&foreign_require("net", "net-lib.pl");
 	local ($iface) = grep { $_->{'fullname'} eq $config{'iface'} }
 			      &net::active_interfaces();
