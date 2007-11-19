@@ -67,3 +67,5 @@
 
  - security updates and apt pinning
 	- http://www.virtualmin.com/forums/virtualmin/re%3adebian-backports-and-virtualmin.html#8423
+
+ - get website URLs for all scripts, include in Virtualmin

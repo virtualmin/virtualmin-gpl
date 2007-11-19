@@ -40,20 +40,19 @@ sub get_script
 {
 local ($name) = @_;
 
-# Find the script's .pl file
+# Find the script's .pl file, first from a plugin, then from the core
 local ($s, $sdir);
-foreach $s (@scripts_directories) {
-	if (-r "$s/$name.pl") {
-		$sdir = $s;
+foreach my $p (@script_plugins) {
+	local $pdir = &module_root_directory($p);
+	if (-r "$pdir/$name.pl") {
+		$sdir = $pdir;
 		last;
 		}
 	}
 if (!$sdir) {
-	# Not in core .. perhaps in a plugin?
-	foreach my $p (@script_plugins) {
-		local $pdir = &module_root_directory($p);
-		if (-r "$pdir/$name.pl") {
-			$sdir = $pdir;
+	foreach $s (@scripts_directories) {
+		if (-r "$s/$name.pl") {
+			$sdir = $s;
 			last;
 			}
 		}
