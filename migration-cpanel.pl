@@ -132,11 +132,20 @@ else {
 
 # Work out if the original domain was a sub-server in cPanel
 local $waschild = 0;
+local $wasuser = $dom;
+$wasuser =~ s/\..*$//;
 if (-r "$datastore/apache_LISTMULTIPARKED_0") {
-	# Sub-servers are in this config file
+	# Sub-servers are in this config file. We can also work out the original
+	# 'username' for the sub-directory.
 	local $subs = &read_file_contents(
 		"$datastore/apache_LISTMULTIPARKED_0");
-	$waschild = $subs =~ /[^a-z0-9\.\-]\Q$dom\E[^a-z0-9\.\-]/ ? 1 : 0;
+	if ($subs =~ /(\/[a-z0-9\.\-_\/]+)[^a-z0-9\.\-]+\Q$dom\E[^a-z0-9\.\-]/i) {
+		$waschild = 1;
+		my $wasdir = $1;
+		if ($wasdir =~ /public_html\/(.*)$/) {
+			$wasuser = $1;
+			}
+		}
 	}
 elsif (-d "$homesrc/tmp/webalizer") {
 	# Sub-servers had separate webalizer config
@@ -146,8 +155,6 @@ else {
 	# Can't be sure, so guess
 	$waschild = $parent ? 1 : 0;
 	}
-local $wasuser = $dom;
-$wasuser =~ s/\..*$//;
 
 # Check for Webalizer and AWstats
 local $webalizer = $waschild ? "$homesrc/tmp/webalizer/$dom"
