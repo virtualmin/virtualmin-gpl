@@ -17,6 +17,7 @@ if ($0 =~ /^(.*\/)[^\/]+$/) {
 	}
 chop($pwd = `pwd`);
 $0 = "$pwd/lookup-domain-daemon.pl";
+$no_virtualmin_plugins = 1;
 require './virtual-server-lib.pl';
 $< == 0 || die "lookup-domain-daemon.pl must be run as root";
 use POSIX;

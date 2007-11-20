@@ -80,6 +80,9 @@ if (!$virtualmin_pro) {
 			 "syslog", "useradmin", "usermin", "webalizer",
 			 "webmin", "filter" );
 @confplugins = split(/\s+/, $config{'plugins'});
+if ($no_virtualmin_plugins) {
+	@confplugins = ( );
+	}
 @opt_features = ( 'dir', 'unix', 'mail', 'dns', 'web', 'webalizer', 'ssl',
 		  'logrotate', 'mysql', 'postgres', 'ftp',
 		  $virtualmin_pro ? ( 'spam', 'virus', 'status' ) : ( ),
