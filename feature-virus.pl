@@ -346,7 +346,8 @@ else {
 # 1 if yes, or -1 if we can't tell (due to a non-supported OS).
 sub check_clamd_status
 {
-if (&find_byname("clamd")) {
+local @pids = grep { $_ != $$ } &find_byname("clamd");
+if (@pids) {
 	# Running already, so we assume everything is cool
 	return 1;
 	}
@@ -378,7 +379,7 @@ return -1;
 sub enable_clamd
 {
 local $st = &check_clamd_status();
-return if ($st == 1 || $st == -1);
+return 1 if ($st == 1 || $st == -1);
 
 # Check for simple init scripts
 local $init;
