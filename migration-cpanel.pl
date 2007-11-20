@@ -67,6 +67,7 @@ local ($ok, $root) = &extract_cpanel_dir($file);
 $ok || &error("Failed to extract backup : $root");
 local $daily = "$root/backup/cpbackup/daily";
 local $datastore = "$root/.cpanel-datastore";
+local $tmpl = &get_template($template);
 
 # Work out the username again if it wasn't supplied
 if (!$user) {
@@ -288,6 +289,7 @@ $prefix ||= &compute_prefix($dom, $group, $parent);
 	 'no_tmpl_aliases', 1,
 	 'no_mysql_db', $got{'mysql'} ? 1 : 0,
 	 'nocreationmail', 1,
+	 'nocopyskel', 1,
 	 'parent', $parent ? $parent->{'id'} : undef,
         );
 if (!$parent) {
@@ -397,7 +399,9 @@ elsif ($got{'web'}) {
 		[ "/cgi-bin $dom{'home'}/public_html/cgi-bin" ], $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	&register_post_action(\&restart_apache) if (!$got{'ssl'});
-	$d->{'cgi_bin_dir'} = "public_html/cgi-bin";
+	$dom{'cgi_bin_dir'} = "public_html/cgi-bin";
+	&save_domain(\%dom);
+	&add_script_language_directives(\%dom, $tmpl, $dom{'web_port'});
 	}
 
 if ($got{'ssl'}) {
@@ -922,53 +926,68 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 	}
 
 # Migrate any parked domains as alias domains
+local @parked;
 if (!$waschild) {
 	local $_;
 	open(PARKED, "$userdir/pds");
 	while(<PARKED>) {
 		s/\r|\n//g;
 		local ($pdom) = split(/\s+/, $_);
-		&$first_print("Creating parked domain $pdom ..");
-		&$indent_print();
-		local %alias = ( 'id', &domain_id(),
-				 'dom', $pdom,
-				 'user', $dom{'user'},
-				 'group', $dom{'group'},
-				 'prefix', $dom{'prefix'},
-				 'ugroup', $dom{'ugroup'},
-				 'pass', $dom{'pass'},
-				 'alias', $dom{'id'},
-				 'uid', $dom{'uid'},
-				 'gid', $dom{'gid'},
-				 'ugid', $dom{'ugid'},
-				 'owner', "Parked domain for $dom{'dom'}",
-				 'email', $dom{'email'},
-				 'name', 1,
-				 'ip', $dom{'ip'},
-				 'virt', 0,
-				 'source', $dom{'source'},
-				 'parent', $dom{'id'},
-				 'template', $dom{'template'},
-				 'reseller', $dom{'reseller'},
-				);
-		foreach my $f (@alias_features) {
-			$alias{$f} = $dom{$f};
-			}
-		local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
-						  : \%dom;
-		$alias{'home'} = &server_home_directory(\%alias, $parentdom);
-		&complete_domain(\%alias);
-		&create_virtual_server(\%alias, $parentdom,
-				       $parentdom->{'user'});
-		&$outdent_print();
-		&$second_print($text{'setup_done'});
+		push(@parked, $pdom) if ($pdom);
 		}
 	close(PARKED);
 	}
 
 # Create alias domain for sub-domain
 if ($aliasdom) {
-	# XXX
+	push(@parked, $aliasdom);
+	}
+
+# Actually create alias doms
+foreach my $pdom (&unique(@parked)) {
+	if ($pdom eq $aliasdom) {
+		&$first_print("Creating alias domain $pdom ..");
+		}
+	else {
+		&$first_print("Creating parked domain $pdom ..");
+		}
+	&$indent_print();
+	local %alias = ( 'id', &domain_id(),
+			 'dom', $pdom,
+			 'user', $dom{'user'},
+			 'group', $dom{'group'},
+			 'prefix', $dom{'prefix'},
+			 'ugroup', $dom{'ugroup'},
+			 'pass', $dom{'pass'},
+			 'alias', $dom{'id'},
+			 'uid', $dom{'uid'},
+			 'gid', $dom{'gid'},
+			 'ugid', $dom{'ugid'},
+			 'owner', $pdom eq $aliasdom ?
+					"Migrated cPanel alias for $dom{'dom'}":
+					"Parked domain for $dom{'dom'}",
+			 'email', $dom{'email'},
+			 'name', 1,
+			 'ip', $dom{'ip'},
+			 'virt', 0,
+			 'source', $dom{'source'},
+			 'parent', $dom{'id'},
+			 'template', $dom{'template'},
+			 'reseller', $dom{'reseller'},
+			 'nocreationmail', 1,
+			 'nocopyskel', 1,
+			);
+	foreach my $f (@alias_features) {
+		$alias{$f} = $dom{$f};
+		}
+	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+					  : \%dom;
+	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
+	&complete_domain(\%alias);
+	&create_virtual_server(\%alias, $parentdom,
+			       $parentdom->{'user'});
+	&$outdent_print();
+	&$second_print($text{'setup_done'});
 	}
 
 if ($got{'webalizer'}) {
