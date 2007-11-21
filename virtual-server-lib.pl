@@ -122,7 +122,8 @@ foreach my $pname (@confplugins) {
 @script_plugins = grep { &plugin_defined($_, "scripts_list") } @plugins;
 @migration_types = ( "cpanel", "ensim", "plesk" );
 @allow_features = (@opt_features, "virt", @feature_plugins);
-@startstop_features = ("web", "dns", "mail", "ftp", "unix", "mysql","postgres");
+@startstop_features = ("web", "dns", "mail", "ftp", "unix", "virus",
+		       "mysql", "postgres");
 @all_database_types = ( ($config{'mysql'} ? ("mysql") : ( )),
 		        ($config{'postgres'} ? ("postgres") : ( )),
 		        @database_plugins );

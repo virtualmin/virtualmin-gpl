@@ -772,3 +772,5 @@ Added a checkbox to the backup form to include sub-servers of those selected too
 Added the --user option to disable-feature.pl and enable-feature.pl to turn features off and on in all domains owned by some user, and the list-domains.pl to fnd domains by user.
 Both the maximum and minimum versions for scripts can now be selected on the global Script Installers page.
 Added the --user and --all-domains parameters to list-scripts.pl, list-users.pl, list-aliases.pl and list-simple-aliases.pl, to list objects in multiple domains.
+---- Changes since 3.49 ----
+When used, the ClamAV server clamd can be stopped and started from the system information page, just like MySQL and Apache.

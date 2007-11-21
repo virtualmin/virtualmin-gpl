@@ -3440,6 +3440,16 @@ return $config{'mail_system'} == 1 ? $sendmail_vfile :
        $config{'mail_system'} == 0 ? $virtual_map_files[0] : undef;
 }
 
+# get_mail_genericstable()
+# Returns the path to a file mapping usernames to email addresses, suitable
+# for the mail server in use, if one exists.
+sub get_mail_genericstable
+{
+&require_mail();
+return $config{'mail_system'} == 1 ? $sendmail_gfile :
+       $config{'mail_system'} == 0 ? $canonical_map_files[0] : undef;
+}
+
 # count_domain_aliases([ignore-plugins]
 # Return a hash ref from domain ID to a count of aliases.
 sub count_domain_aliases

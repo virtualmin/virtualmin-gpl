@@ -9598,9 +9598,11 @@ local %typestatus;
 foreach my $f (@startstop_features) {
 	if ($config{$f}) {
 		local $sfunc = "startstop_".$f;
-		foreach my $status (&$sfunc(\%typestatus)) {
-			$status->{'feature'} ||= $f;
-			push(@rv, $status);
+		if (defined(&$sfunc)) {
+			foreach my $status (&$sfunc(\%typestatus)) {
+				$status->{'feature'} ||= $f;
+				push(@rv, $status);
+				}
 			}
 		}
 	}

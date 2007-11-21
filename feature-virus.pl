@@ -592,7 +592,7 @@ foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-wrapper",
 	if (&init::action_status($init)) {
 		&$first_print(&text('clamd_stop'));
 		local $ifile = &init::action_filename($init);
-		&init::enable_at_boot($init);
+		&init::disable_at_boot($init);
 		local $out = &backquote_logged("$ifile stop 2>&1");
 		if ($? || $out =~ /failed|error/i) {
 			&$second_print(&text('clamd_estop',
@@ -604,6 +604,69 @@ foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-wrapper",
 		}
 	}
 return 0;
+}
+
+# startstop_virus([&typestatus])
+# Returns a hash containing the current status of the clamd server and short
+# and long descriptions for the action to switch statuses
+sub startstop_virus
+{
+if (&get_global_virus_scanner() ne 'clamdscan') {
+	# Clamd isn't being used
+	return ( );
+	}
+local @pids = grep { $_ != $$ } &find_byname("clamd");
+if (@pids) {
+	return ( { 'status' => 1,
+		   'name' => $text{'index_clamname'},
+		   'desc' => $text{'index_clamstop'},
+		   'restartdesc' => $text{'index_clamrestart'},
+		   'longdesc' => $text{'index_clamstopdesc'} } );
+	}
+else {
+	return ( { 'status' => 0,
+		   'name' => $text{'index_clamname'},
+		   'desc' => $text{'index_clamstart'},
+		   'longdesc' => $text{'index_clamstartdesc'} } );
+	}
+}
+
+# start_service_virus()
+# Attempts to start the clamd server, returning undef on success or any error
+# message on failure.
+sub start_service_virus
+{
+&push_all_print();
+&set_all_null_print();
+local $rv = &enable_clamd();
+&pop_all_print();
+return $rv ? undef : $text{'clamd_estartmsg'};
+}
+
+# stop_service_virus()
+# Attempts to stop the clamd server, returning undef on success or any error
+# message on failure.
+sub stop_service_virus
+{
+&foreign_require("init", "init-lib.pl");
+foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-wrapper",
+		  "clamd-csw") {
+	if (&init::action_status($init)) {
+		local $ifile = &init::action_filename($init);
+		local $out = &backquote_logged("$ifile stop 2>&1");
+		return $? ? "<tt>".&html_escape($out)."</tt>" : undef;
+		}
+	}
+local @pids = grep { $_ != $$ } &find_byname("clamd");
+if (@pids) {
+	if (&kill_logged('TERM', @pids)) {
+		return undef;
+		}
+	return &text('clamd_ekillmsg', $!);
+	}
+else {
+	return $text{'clamd_estopmsg'};
+	}
 }
 
 $done_feature_script{'virus'} = 1;
