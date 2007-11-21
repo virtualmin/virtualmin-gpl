@@ -344,5 +344,10 @@ return "Failed to find versions" if (!@vers);
 return $ver eq $vers[0] ? undef : $vers[0];
 }
 
+sub script_squirrelmail_site
+{
+return 'http://www.squirrelmail.org/';
+}
+
 1;
 

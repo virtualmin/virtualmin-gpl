@@ -158,7 +158,10 @@ return ( "http://www.splitbrain.org/projects/dokuwiki",
 	 "dokuwiki-([0-9][a-z0-9\\-]+)\\.tgz" );
 }
 
-
+sub script_dokuwiki_site
+{
+return 'http://www.splitbrain.org/projects/dokuwiki';
+}
 
 1;
 

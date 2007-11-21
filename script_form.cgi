@@ -84,6 +84,13 @@ if ($ok) {
 		print &ui_table_row($text{'scripts_iuses'}, $utext);
 		}
 
+	# Show original website
+	if ($script->{'site'}) {
+		print &ui_table_row($text{'scripts_isite'},
+			"<a href='$script->{'site'}' target=_new>".
+			"$script->{'site'}</a>");
+		}
+
 	# Show parameters
 	$opts = &{$script->{'params_func'}}($d, $ver, $sinfo);
 	print $opts;

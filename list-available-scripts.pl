@@ -41,6 +41,9 @@ if ($multi) {
 		if ($overall->{$script->{'name'}}) {
 			print "    Rating: ".$overall->{$script->{'name'}}."\n";
 			}
+		if ($script->{'site'}) {
+			print "    Website: $script->{'site'}\n";
+			}
 		}
 	}
 else {

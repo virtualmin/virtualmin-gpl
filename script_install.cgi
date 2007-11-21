@@ -120,7 +120,10 @@ if (!$modok) {
 ($ok, $msg, $desc, $url, $suser, $spass) =
 	&{$script->{'install_func'}}($d, $ver, $opts, \%gotfiles, $sinfo);
 &$indent_print();
-print $msg,"<br>\n";
+print $msg,"<p>\n";
+if ($script->{'site'}) {
+	print &text('scripts_sitelink', $script->{'site'}),"<p>\n";
+	}
 &$outdent_print();
 if ($ok) {
 	&$second_print($text{'setup_done'});

@@ -195,5 +195,10 @@ return ( "http://phppgadmin.sourceforge.net/",
 	 "latest\\s+version:\\s+<.*>([0-9\\.]+)" );
 }
 
+sub script_phppgadmin_site
+{
+return 'http://phppgadmin.sourceforge.net/';
+}
+
 1;
 

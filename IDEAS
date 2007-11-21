@@ -68,4 +68,9 @@
  - security updates and apt pinning
 	- http://www.virtualmin.com/forums/virtualmin/re%3adebian-backports-and-virtualmin.html#8423
 
- - get website URLs for all scripts, include in Virtualmin
+ - only load plugins on demand, to save on memory
+	 - check and cache which functions are supported, to avoid need for
+	   plugin_defined call
+	 - no need for preloading their libs
+
+ - allow shells list (with descriptions) to be configurable for domain owners

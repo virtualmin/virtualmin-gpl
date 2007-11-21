@@ -78,7 +78,7 @@ if (@got) {
 			$script->{'vdesc'}->{$sinfo->{'version'}} ||
 			  $sinfo->{'version'},
 			$sinfo->{'url'} ? 
-			  "<a href='$sinfo->{'url'}'>$path</a>" :
+			  "<a href='$sinfo->{'url'}' target=_new>$path</a>" :
 			  $path,
 			$dbdesc,
 			$status,

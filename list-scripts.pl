@@ -71,6 +71,9 @@ foreach my $d (@doms) {
 				print "    Initial login: $sinfo->{'user'}\n";
 				print "    Initial password: $sinfo->{'pass'}\n";
 				}
+			if ($script->{'site'}) {
+				print "    Website: $script->{'site'}\n";
+				}
 			}
 		}
 	else {

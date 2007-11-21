@@ -27,7 +27,8 @@ print &ui_table_row($text{'scripts_iversion'},
 # Show install URL
 if ($sinfo->{'url'}) {
 	print &ui_table_row($text{'scripts_iurl'},
-			    "<a href='$sinfo->{'url'}'>$sinfo->{'url'}</a>");
+			    "<a href='$sinfo->{'url'}' target=_new>".
+			    "$sinfo->{'url'}</a>");
 	}
 print &ui_table_row($text{'scripts_itime'}, &make_date($sinfo->{'time'}));
 
@@ -52,6 +53,13 @@ if ($sinfo->{'user'}) {
 	print &ui_table_row($text{'scripts_iuser'},
 			    &text('scripts_ipass',"<tt>$sinfo->{'user'}</tt>",
 						  "<tt>$sinfo->{'pass'}</tt>"));
+	}
+
+# Show original website
+if ($script->{'site'}) {
+	print &ui_table_row($text{'scripts_isite'},
+		"<a href='$script->{'site'}' target=_new>".
+		"$script->{'site'}</a>");
 	}
 
 # Show Mongrel ports and status

@@ -286,5 +286,10 @@ else {
 	}
 }
 
+sub script_phpmyadmin_site
+{
+return "http://www.phpmyadmin.net/";
+}
+
 1;
 
