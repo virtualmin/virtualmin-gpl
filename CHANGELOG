@@ -775,3 +775,4 @@ Added the --user and --all-domains parameters to list-scripts.pl, list-users.pl,
 ---- Changes since 3.49 ----
 When used, the ClamAV server clamd can be stopped and started from the system information page, just like MySQL and Apache.
 Added the original website URLs for all script installers, displayed on the installation form and on the page showing details of an installed script.
+Updated the phpMyAdmin script installer to 2.11.2.2.
