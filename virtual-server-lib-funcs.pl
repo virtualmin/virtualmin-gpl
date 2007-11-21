@@ -3138,21 +3138,29 @@ $ENV{'USER'} = $ENV{'LOGNAME'} = $_[0]->{'user'};
 $ENV{'HOME'} = $_[0]->{'home'};
 }
 
-# run_as_domain_user(&domain, command)
+# run_as_domain_user(&domain, command, background)
 # Runs some command as the owner of a virtual server, and returns the output
 sub run_as_domain_user
 {
+local ($d, $cmd, $bg) = @_;
 &foreign_require("proc", "proc-lib.pl");
 local @uinfo = getpwnam($_[0]->{'user'});
 if ($uinfo[8] =~ /\/(sh|bash|tcsh|csh)$/ ||
     $gconfig{'os_type'} =~ /-linux$/) {
 	# Usable shell .. use su
 	local $cmd = &command_as_user($_[0]->{'user'}, 0, $_[1]);
-	local $out = &backquote_logged($cmd);
-	return wantarray ? ($out, $?) : $out;
+	if ($bg) {
+		# No status available
+		&system_logged("$cmd &");
+		return wantarray ? (undef, 0) : undef;
+		}
+	else {
+		local $out = &backquote_logged($cmd);
+		return wantarray ? ($out, $?) : $out;
+		}
 	}
 else {
-	# Need to run ourselfs
+	# Need to run ourselves
 	local $temp = &transname();
 	open(TEMP, ">$temp");
 	&proc::safe_process_exec_logged($_[1], $_[0]->{'uid'}, $_[0]->{'ugid'}, \*TEMP);
