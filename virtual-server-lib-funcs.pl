@@ -8054,7 +8054,7 @@ if (!&master_admin()) {
 		}
 	}
 if ($_[1] =~ /^(www|ftp)\./i) {
-	return &text('setup_edomainprefix', $1);
+	return &text('setup_edomainprefix', "$1");
 	}
 return undef;
 }
