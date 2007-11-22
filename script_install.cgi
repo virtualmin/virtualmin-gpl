@@ -124,6 +124,19 @@ print $msg,"<p>\n";
 if ($script->{'site'}) {
 	print &text('scripts_sitelink', $script->{'site'}),"<p>\n";
 	}
+if (!$sinfo) {
+	# Show login details
+	if ($suser && $spass) {
+		print &text('scripts_userpass',
+			    "<tt>$suser</tt>", "<tt>$spass</tt>"),"<p>\n";
+		}
+	elsif ($suser) {
+		print &text('scripts_useronly', "<tt>$suser</tt>"),"<p>\n";
+		}
+	elsif ($spass) {
+		print &text('scripts_passonly', "<tt>$spass</tt>"),"<p>\n";
+		}
+	}
 &$outdent_print();
 if ($ok) {
 	&$second_print($text{'setup_done'});
