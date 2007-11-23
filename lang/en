@@ -2485,6 +2485,9 @@ vfile_eother=Missing From: address for reply
 
 reemail_title=Re-Send Signup Email
 reemail_dis=The signup email cannot be sent to this server owner, as it is disabled in the server's template.
+reemail_desc=This page can be used to re-send the email that was originally sent when the virtual server was created.
+reemail_to=Server owner's email address:
+reemail_ok=Send Now
 
 newips_title=Change IP Addresses
 newips_ecannot=You are not allowed to change IP addresses

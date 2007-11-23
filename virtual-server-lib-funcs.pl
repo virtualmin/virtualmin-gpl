@@ -2691,13 +2691,14 @@ local $tmpl = &get_template($_[0]->{'template'});
 return $tmpl->{'mail_on'} ne 'none';
 }
 
-# send_domain_email(&domain)
+# send_domain_email(&domain, [force-to])
 # Sends the signup email to a new domain owner. Returns a pair containing a
 # number (0=failed, 1=success) and an optional message. Also outputs status
 # messages.
 sub send_domain_email
 {
-local $tmpl = &get_template($_[0]->{'template'});
+local ($d, $forceto) = @_;
+local $tmpl = &get_template($d->{'template'});
 local $mail = $tmpl->{'mail'};
 local $subject = $tmpl->{'mail_subject'};
 local $cc = $tmpl->{'mail_cc'};
@@ -2707,8 +2708,8 @@ if ($tmpl->{'mail_on'} eq 'none') {
 	}
 &$first_print($text{'setup_email'});
 
-local %hash = &make_domain_substitions($_[0]);
-local @erv = &send_template_email($mail, $_[0]->{'emailto'},
+local %hash = &make_domain_substitions($d);
+local @erv = &send_template_email($mail, $forceto || $d->{'emailto'},
 			    	  \%hash, $subject, $cc, $bcc);
 if ($erv[0]) {
 	&$second_print(&text('setup_emailok', $erv[1]));

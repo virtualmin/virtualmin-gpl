@@ -778,3 +778,4 @@ Added the original website URLs for all script installers, displayed on the inst
 Updated the phpMyAdmin script installer to 2.11.2.2, and Instiki 0.12.0.
 The initial administration login and password is displayed after installing a script.
 Advanced autoreply options are hidden by default, to make the alias form less confusing.
+When re-sending the signup email for a server, the owner's email address can be entered.
