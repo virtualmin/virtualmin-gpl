@@ -1275,7 +1275,7 @@ if (!$_[0]->{'qmail'}) {
 NOALIASES:
 
 # Save his quotas if changed (unless this is the domain owner)
-if ($_[0]->{'unix'} && $_[0]->{'user'} ne $_[2]->{'user'} &&
+if ($_[0]->{'unix'} && $_[2] && $_[0]->{'user'} ne $_[2]->{'user'} &&
     !$_[0]->{'noquota'} &&
     ($_[0]->{'quota'} != $_[1]->{'quota'} ||
      $_[0]->{'mquota'} != $_[1]->{'mquota'})) {
@@ -1382,8 +1382,8 @@ foreach my $group (@groups) {
 &update_secondary_groups($_[2]) if ($_[2]);
 
 # Update spamassassin whitelist
-if ($virtualmin_pro) {
-	&update_spam_whitelist($_[2]) if ($_[2]);
+if ($virtualmin_pro && $_[2]) {
+	&update_spam_whitelist($_[2]);
 	}
 
 # Update the plain-text password, except for a domain owner
@@ -1422,7 +1422,7 @@ if ($_[2]) {
 	}
 
 # Clear quota cache for this user
-if (defined(&clear_lookup_domain_cache)) {
+if (defined(&clear_lookup_domain_cache) && $_[2]) {
 	&clear_lookup_domain_cache($_[2], $_[0]);
 	}
 
