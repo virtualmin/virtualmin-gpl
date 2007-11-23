@@ -251,6 +251,15 @@ print &ui_table_row(&hlink($text{$sfx.'_auto'}, $sfx."_auto"),
 				 5, 70),
 		    undef, $tds);
 
+if (defined(&ui_hidden_table_row_start)) {
+	my $aopts = $simple->{'replies'} ||
+		    $simple->{'autoreply_start'} ||
+		    $simple->{'autoreply_end'} ||
+		    $simple->{'from'};
+	print &ui_hidden_table_row_start($text{'alias_aopts'}, "aopts", $aopts);
+	}
+
+# Autoreply period
 $period = $simple->{'replies'} && $simple->{'period'} ?
 		int($simple->{'period'}/60) :
 	  $simple->{'replies'} ? 60 : undef;
@@ -277,6 +286,7 @@ foreach my $p ('start', 'end') {
 		&date_chooser_button('d'.$p, 'm'.$p, 'y'.$p));
 	}
 
+# Autoreply From: address
 if (!$nofrom) {
 	print &ui_table_row(&hlink($text{$sfx.'_from'}, $sfx."_from"),
 		&ui_radio("from_def", $simple->{'from'} ? 0 : 1,
@@ -284,6 +294,10 @@ if (!$nofrom) {
 			    [ 0, &ui_textbox("from", $simple->{'from'},
 					     40) ] ]),
 		undef, $tds);
+	}
+
+if (defined(&ui_hidden_table_row_end)) {
+	print &ui_hidden_table_row_end("aopts");
 	}
 }
 

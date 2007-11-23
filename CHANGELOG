@@ -777,3 +777,4 @@ When used, the ClamAV server clamd can be stopped and started from the system in
 Added the original website URLs for all script installers, displayed on the installation form and on the page showing details of an installed script.
 Updated the phpMyAdmin script installer to 2.11.2.2, and Instiki 0.12.0.
 The initial administration login and password is displayed after installing a script.
+Advanced autoreply options are hidden by default, to make the alias form less confusing.
