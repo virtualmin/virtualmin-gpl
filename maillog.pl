@@ -4,6 +4,7 @@
 
 package virtual_server;
 $main::no_acl_check++;
+$no_virtualmin_plugins = 1;
 require './virtual-server-lib.pl';
 if (&procmail_log_status() == 2) {
 	# Only do if caching has been used

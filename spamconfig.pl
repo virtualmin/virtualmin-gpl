@@ -4,6 +4,7 @@
 
 package virtual_server;
 $main::no_acl_check++;
+$no_virtualmin_plugins = 1;
 require './virtual-server-lib.pl';
 foreach my $d (grep { $_->{'spam'} } &list_domains()) {
 	&create_spam_config_links($d);

@@ -3,6 +3,7 @@
 # in Virtualmin
 
 package virtual_server;
+$no_virtualmin_plugins = 1;
 $main::no_acl_check++;
 require './virtual-server-lib.pl';
 

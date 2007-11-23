@@ -4,6 +4,7 @@
 
 package virtual_server;
 $main::no_acl_check++;
+$no_virtualmin_plugins = 1;
 require './virtual-server-lib.pl';
 
 # For each server, first find its total usage
