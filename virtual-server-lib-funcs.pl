@@ -11587,6 +11587,18 @@ else {
 	}
 }
 
+# nice_domains_list(&doms)
+# Returns a string listing multiple domains
+sub nice_domains_list
+{
+local ($doms) = @_;
+local @ttdoms = map { "<tt>$_->{'dom'}</tt>" } @$doms;
+if (@ttdoms > 10) {
+	@ttdoms = ( @ttdoms[0..9], &text('index_dmore', @ttdoms-10) );
+	}
+return join(" , ", @ttdoms);
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;

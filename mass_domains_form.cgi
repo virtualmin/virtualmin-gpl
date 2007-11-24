@@ -19,9 +19,7 @@ foreach $did (@d) {
 # Show the form
 &ui_print_header(undef, $text{'massdomains_title'}, "", "massdomains");
 
-@dnames = map { $_->{'dom'} } @doms;
-print &text('massdomains_doms', 
-	join(" ", map { "<tt>$_</tt>" } @dnames)),"<p>\n";
+print &text('massdomains_doms', &nice_domains_list(\@doms)),"<p>\n";
 
 print &ui_form_start("mass_domains_change.cgi", "post");
 foreach $d (@doms) {

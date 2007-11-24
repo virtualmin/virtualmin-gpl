@@ -95,7 +95,13 @@ if ($config{'display_max'} && @doms > $config{'display_max'}) {
 	print &ui_submit($text{'index_searchok'});
 	print &ui_form_end();
 
+	# Show update/delete all buttons
 	print &ui_form_start("domain_form.cgi");
+	foreach $d (@doms) {
+		print &ui_hidden("d", $d->{'id'});
+		}
+	print &ui_submit($text{'index_delete_all'}, "delete"),"\n";
+	print &ui_submit($text{'index_mass_all'}, "mass"),"\n";
 	}
 elsif (@doms) {
 	# Show domains in a table

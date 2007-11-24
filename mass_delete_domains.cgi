@@ -23,6 +23,9 @@ else {
 	&ui_print_header(undef, $text{'massdelete_title'}, "");
 	}
 
+foreach $d (@doms) {
+	$idmap{$d->{'id'}} = $d;
+	}
 if (!$in{'confirm'}) {
 	# Ask the user if he is sure
 	print &check_clicks_function();
@@ -34,7 +37,9 @@ if (!$in{'confirm'}) {
 	$subs = 0;
 	$dbs = $dbssize = 0;
 	foreach $d (@doms) {
-		if ($d->{'dir'}) {
+		if ($d->{'dir'} &&
+		    (!$d->{'parent'} || !$idmap{$d->{'parent'}})) {
+			# Don't count sub-domains when doing parent
 			$size += &disk_usage_kb($d->{'home'})*1024;
 			}
 		@users = &list_domain_users($d, 1);
@@ -46,12 +51,11 @@ if (!$in{'confirm'}) {
 		$subs += scalar(@subs);
 		$dbs += scalar(@dbs);
 		$dbssize += &get_database_usage($d);
-		push(@dnames, $d->{'dom'});
-		push(@dnames, map { $_->{'dom'} } @subs);
+		push(@alldel, $d, @subs);
 		}
-	@dnames = &unique(@dnames);
+	@alldel = &unique(@alldel);
 
-	print &text('massdelete_rusure', scalar(@doms),
+	print &text('massdelete_rusure', scalar(@alldel),
 					 &nice_size($size)),"<br>\n";
 	if ($subs) {
 		print &text('massdelete_subs', $subs),"<br>\n";
@@ -65,8 +69,7 @@ if (!$in{'confirm'}) {
 		}
 	print "<p>\n";
 	@dnames = sort @dnames;
-	print &text('massdelete_doms', 
-		join(" ", map { "<tt>$_</tt>" } @dnames)),"<br>\n";
+	print &text('massdelete_doms', &nice_domains_list(\@alldel)),"<br>\n";
 
 	print "<center>\n";
 	print &ui_form_start("mass_delete_domains.cgi", "post");
@@ -85,9 +88,6 @@ if (!$in{'confirm'}) {
 	}
 else {
 	# Strip out all sub-domains of domains to be deleted
-	foreach $d (@doms) {
-		$idmap{$d->{'id'}} = $d;
-		}
 	@doms = grep { !$_->{'parent'} || !$idmap{$_->{'parent'}} } @doms;
 
 	foreach $d (@doms) {

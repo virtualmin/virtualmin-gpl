@@ -72,7 +72,7 @@
 	 - check and cache which functions are supported, to avoid need for
 	   plugin_defined call
 	 - no need for preloading their libs
+	 - no need for variable to not load plugins
 
  - allow shells list (with descriptions) to be configurable for domain owners
 
- - if too many virtual servers to list, show buttons to update / delete all
