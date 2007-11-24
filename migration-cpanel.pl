@@ -370,9 +370,12 @@ if ($got{'web'} && -d $daily) {
 			next if ($a->{'type'});
 			$dirs{$a->{'name'}}++;
 			}
-		$dirs{'ScriptAlias'} = 0;	# copy this
+		$dirs{'ScriptAlias'} = 0;	# Always copy this
 		$dirs{'ServerAlias'} = 0;	# and this
-		$dirs{'BytesLog'} = 1;		# not supported
+		$dirs{'BytesLog'} = 1;		# Not supported
+		$dirs{'User'} = 1;		# Don't copy user-related
+		$dirs{'Group'} = 1;		# settings, as Virtualmin will
+		$dirs{'SuexecUserGroup'} = 1;	# have already set them
 		local %vals;
 		foreach my $a (@$srcvirt) {
 			next if ($a->{'type'} || $dirs{$a->{'name'}});
