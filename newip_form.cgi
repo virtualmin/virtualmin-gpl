@@ -16,7 +16,7 @@ else {
 
 print &ui_form_start("save_newip.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
-print &ui_table_start($text{'newip_header'}, undef, 2);
+print &ui_table_start($text{'newip_header'}, undef, 2, [ "width=30%" ]);
 
 print &ui_table_row($text{'newip_old'},
 		    "<tt>$d->{'ip'}</tt>");
