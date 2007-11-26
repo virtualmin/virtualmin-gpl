@@ -257,6 +257,14 @@ elsif ($parentdom) {
 		undef, \@tds);
 	}
 
+if (!$parentuser) {
+	# Unix username
+	print &ui_table_row(&hlink($text{'form_user'}, "unixusername"),
+		&ui_opt_textbox("vuser", undef, 15,
+				$text{'form_auto'}, $text{'form_nwuser'}),
+		undef, \@tds);
+	}
+
 print &ui_hidden_table_end("basic");
 
 # Start of advanced section
@@ -273,12 +281,6 @@ if (!$parentuser) {
 		&ui_opt_textbox("email", undef, 30,
 				$text{'form_email_def'},
 				$text{'form_email_set'}),
-		undef, \@tds);
-
-	# Unix username
-	print &ui_table_row(&hlink($text{'form_user'}, "unixusername"),
-		&ui_opt_textbox("vuser", undef, 15,
-				$text{'form_auto'}, $text{'form_nwuser'}),
 		undef, \@tds);
 
 	# Mail group name
