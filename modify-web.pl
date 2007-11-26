@@ -37,7 +37,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--php-children") {
 		$children = shift(@ARGV);
 		$children > 0 || &usage("Invalid number of PHP sub-processes");
-		$children > $max_php_fcgid_children || &usage("Too many PHP sub-processes - maximum is $max_php_fcgid_children");
+		$children > $max_php_fcgid_children && &usage("Too many PHP sub-processes - maximum is $max_php_fcgid_children");
 		}
 	elsif ($a eq "--proxy") {
 		$proxy = shift(@ARGV);
