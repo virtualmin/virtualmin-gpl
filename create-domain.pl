@@ -227,14 +227,25 @@ if ($parentdomain) {
 	!$subdomain || $domain =~ /\.\Q$subdomain\E$/ ||
 		&usage("Sub-domain $domain must be under the parent domain $subdomain");
 	}
+
+# Allow user and group names
 if (!$parent) {
 	if (!$user) {
 		($user, $try1, $try2) = &unixuser_name($domain);
-		$user || usage(&text('setup_eauto', $try1, $try2));
+		$user || &usage(&text('setup_eauto', $try1, $try2));
 		}
 	else {
 		$user =~ /^[^\t :]+$/ || &usage($text{'setup_euser2'});
 		defined(getpwnam($user)) && &usage($text{'setup_euser'});
+		}
+	if (!$group) {
+		($group, $gtry1, $gtry2) = &unixgroup_name($domain, $user);
+		$group || &usage(&text('setup_eauto2', $try1, $try2));
+		}
+	else {
+		$group =~ /^[^\t :]+$/ || &usage($text{'setup_egroup2'});
+		defined(getgrnam($group)) &&
+			&usage(&text('setup_egroup', $group));
 		}
 	}
 $owner ||= $domain;
@@ -375,8 +386,8 @@ $pclash && &usage($text{'setup_eprefix2'});
 %dom = ( 'id', &domain_id(),
 	 'dom', $domain,
          'user', $user,
-         'group', $user,
-         'ugroup', $user,
+         'group', $group,
+         'ugroup', $group,
          'uid', $uid,
          'gid', $gid,
          'ugid', $gid,

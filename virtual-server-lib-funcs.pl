@@ -5963,11 +5963,19 @@ if (defined(getpwnam($try1)) || $config{'longname'}) {
 return ($user);
 }
 
-# unixgroup_name(domainname)
+# unixgroup_name(domainname, username)
 # Returns a Unix group name for some domain, or undef if none can be found
 sub unixgroup_name
 {
-$_[0] =~ /^([^\.]+)/;
+local ($dname, $user) = @_;
+if ($user && $config{'groupsame'}) {
+	# Same as username where possible
+	if (!defined(getgrnam($user))) {
+		return ($user);
+		}
+	return (undef, $user, $user);
+	}
+$dname =~ /^([^\.]+)/;
 local ($try1, $group) = ($1, $1);
 if (defined(getgrnam($try1)) || $config{'longname'}) {
 	$group = $_[0];

@@ -780,3 +780,4 @@ The initial administration login and password is displayed after installing a sc
 Advanced autoreply options are hidden by default, to make the alias form less confusing.
 When re-sending the signup email for a server, the owner's email address can be entered.
 When there are too many servers on the List Virtual Servers page to show in a table, buttons to update and delete them all are displayed along with the seach form.
+Added a Module Config option to make the Unix group name for a new domain always follow the username, and made group name selection more consistent across creation methods.

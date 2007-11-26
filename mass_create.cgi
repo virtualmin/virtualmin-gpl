@@ -196,22 +196,12 @@ foreach $line (@lines) {
 				}
 			}
 
-		if (!$user) {
-			# Work out mailboxes group name
-			($group, $gtry1, $gtry2) = &unixgroup_name($dname);
-			if (!$group) {
-				&line_error(&text('setup_eauto2',
-						  $gtry1, $gtry2));
-				next;
-				}
-			}
-		else {
-			# Check supplied username as a group
-			$group = $user;
-			if (defined(getgrnam($user))) {
-				&line_error($text{'setup_egroup'});
-				next;
-				}
+		# Work out mailboxes group name
+		($group, $gtry1, $gtry2) = &unixgroup_name($dname, $user);
+		if (!$group) {
+			&line_error(&text('setup_eauto2',
+					  $gtry1, $gtry2));
+			next;
 			}
 
 		# Check username restrictions

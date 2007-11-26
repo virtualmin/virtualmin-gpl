@@ -156,3 +156,4 @@ ldap_mail=0
 init_template=0
 initsub_template=1
 defmongrelslimit=4
+groupsame=0
