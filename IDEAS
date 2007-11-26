@@ -76,7 +76,3 @@
 
  - allow shells list (with descriptions) to be configurable for domain owners
 
- - security-updates should have mode (on by default) to only show packages
-   that are new / updatable
-
-
