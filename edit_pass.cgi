@@ -17,7 +17,7 @@ elsif (!&reseller_admin()) {
 print &ui_form_start("save_pass.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
 print &ui_table_start($d ? $text{'pass_header1'} : $text{'pass_header2'},
-		      undef, 2);
+		      undef, 2, [ "width=30%" ]);
 
 print &ui_table_row($text{'pass_new1'},
 		    &ui_password("new1", undef, 20));
