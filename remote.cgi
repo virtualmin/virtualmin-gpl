@@ -2,9 +2,11 @@
 # This program is designed to be called via HTTP requests from programs, and
 # simply passes on parameters to a specified command-line program
 
+package virtual_server;
 require './virtual-server-lib.pl';
 &ReadParse();
 &can_remote() || &error($text{'remote_ecannot'});
+use subs qw(exit);
 
 if (!$in{'program'}) {
 	# Tell the user what needs to be done
@@ -26,26 +28,43 @@ if (!$in{'program'}) {
 	exit;
 	}
 
-# Run the program
+# Build the arg list
 $in{'program'} =~ /^[a-z0-9\.-]+$/i || &error($text{'remote_eprogram'});
 $cmd = "$module_root_directory/$in{'program'}.pl";
 -x $cmd || &error(&text('remote_eprogram2', "<tt>$cmd</tt>"));
+@args = ( );
 foreach $i (keys %in) {
 	next if ($i eq "program");
 	if ($in{$i} eq "") {
-		$cmd .= " --".quotemeta($i);
+		push(@args, "--".$i);
 		}
 	else {
 		foreach $v (split(/\0/, $in{$i})) {
-			$cmd .= " --".quotemeta($i)." ".quotemeta($v);
+			push(@args, "--".$i, $v);
 			}
 		}
 	}
-print "Content-type: text/plain\n\n";
-&open_execute_command(OUT, "$cmd 2>&1", 1);
-while(<OUT>) {
-	print $_;
-	}
-close(OUT);
+
+# Setup handler if script calls exit
+sub exit
+{
 print "\n";
-print "Exit status: $?\n";
+print "Exit status: $_[0]\n";
+CORE::exit(0);
+}
+
+# Run the script within this same Perl process
+print "Content-type: text/plain\n\n";
+@ARGV = @args;
+do $cmd;
+print "\n";
+print "Exit status: 0\n";
+
+#&open_execute_command(OUT, "$cmd 2>&1", 1);
+#while(<OUT>) {
+#	print $_;
+#	}
+#close(OUT);
+#print "\n";
+#print "Exit status: $?\n";
+

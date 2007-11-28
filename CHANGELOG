@@ -783,3 +783,4 @@ When there are too many servers on the List Virtual Servers page to show in a ta
 Added a Module Config option to make the Unix group name for a new domain always follow the username, and made group name selection more consistent across creation methods.
 Moved the Administration username field into the first (visible) section of the Create Virtual Server page.
 Cron jobs created by Virtualmin will still be recognized even if manually modified to redirect output or add other pre- and post-commands.
+Virtualmin API scripts run via HTTP are now executed within the same process, which should make them about twice as fast.

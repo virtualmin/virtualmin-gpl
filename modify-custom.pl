@@ -2,16 +2,18 @@
 # Sets the value of a custom field for some server
 
 package virtual_server;
-$main::no_acl_check++;
-$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
-$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
-if ($0 =~ /^(.*\/)[^\/]+$/) {
-	chdir($1);
+if (!$module_name) {
+	$main::no_acl_check++;
+	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
+	$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
+	if ($0 =~ /^(.*\/)[^\/]+$/) {
+		chdir($1);
+		}
+	chop($pwd = `pwd`);
+	$0 = "$pwd/modify-custom.pl";
+	require './virtual-server-lib.pl';
+	$< == 0 || die "modify-custom.pl must be run as root";
 	}
-chop($pwd = `pwd`);
-$0 = "$pwd/modify-custom.pl";
-require './virtual-server-lib.pl';
-$< == 0 || die "modify-custom.pl must be run as root";
 use POSIX;
 
 # Parse command-line args

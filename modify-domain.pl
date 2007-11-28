@@ -2,16 +2,18 @@
 # Modifies a virtual domain, based on command-line parameters
 
 package virtual_server;
-$main::no_acl_check++;
-$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
-$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
-if ($0 =~ /^(.*\/)[^\/]+$/) {
-	chdir($1);
+if (!$module_name) {
+	$main::no_acl_check++;
+	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
+	$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
+	if ($0 =~ /^(.*\/)[^\/]+$/) {
+		chdir($1);
+		}
+	chop($pwd = `pwd`);
+	$0 = "$pwd/modify-domain.pl";
+	require './virtual-server-lib.pl';
+	$< == 0 || die "modify-domain.pl must be run as root";
 	}
-chop($pwd = `pwd`);
-$0 = "$pwd/modify-domain.pl";
-require './virtual-server-lib.pl';
-$< == 0 || die "modify-domain.pl must be run as root";
 
 $first_print = \&first_text_print;
 $second_print = \&second_text_print;

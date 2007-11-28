@@ -2,16 +2,18 @@
 # Change DNS settings for some domains
 
 package virtual_server;
-$main::no_acl_check++;
-$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
-$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
-if ($0 =~ /^(.*\/)[^\/]+$/) {
-	chdir($1);
+if (!$module_name) {
+	$main::no_acl_check++;
+	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
+	$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
+	if ($0 =~ /^(.*\/)[^\/]+$/) {
+		chdir($1);
+		}
+	chop($pwd = `pwd`);
+	$0 = "$pwd/modify-dns.pl";
+	require './virtual-server-lib.pl';
+	$< == 0 || die "modify-dns.pl must be run as root";
 	}
-chop($pwd = `pwd`);
-$0 = "$pwd/modify-dns.pl";
-require './virtual-server-lib.pl';
-$< == 0 || die "modify-dns.pl must be run as root";
 $config{'dns'} || &usage("The BIND DNS server is not enabled for Virtualmin");
 
 $first_print = \&first_text_print;

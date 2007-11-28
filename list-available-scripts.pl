@@ -2,16 +2,18 @@
 # Lists all scripts that are available for install
 
 package virtual_server;
-$main::no_acl_check++;
-$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
-$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
-if ($0 =~ /^(.*\/)[^\/]+$/) {
-	chdir($1);
+if (!$module_name) {
+	$main::no_acl_check++;
+	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
+	$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
+	if ($0 =~ /^(.*\/)[^\/]+$/) {
+		chdir($1);
+		}
+	chop($pwd = `pwd`);
+	$0 = "$pwd/list-available-scripts.pl";
+	require './virtual-server-lib.pl';
+	$< == 0 || die "list-available-scripts.pl must be run as root";
 	}
-chop($pwd = `pwd`);
-$0 = "$pwd/list-available-scripts.pl";
-require './virtual-server-lib.pl';
-$< == 0 || die "list-available-scripts.pl must be run as root";
 
 # Parse command-line args
 while(@ARGV > 0) {

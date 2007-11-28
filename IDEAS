@@ -86,5 +86,3 @@
 	- remove debug code
 	- deleting / renaming domains
 
- - make remote.cgi calls faster by just requireing .pl file
-	- no need to init_config/etc
