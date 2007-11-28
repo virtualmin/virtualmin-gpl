@@ -30,6 +30,7 @@ $from || &usage();
 
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
+$d->{'aliascopy'} && &usage("Aliases cannot be edited in alias domains in copy mode");
 
 # Find the alias
 @aliases = &list_domain_aliases($d);

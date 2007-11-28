@@ -2409,7 +2409,7 @@ foreach $d (sort { $a->{$sortfield} cmp $b->{$sortfield} ||
 		if ($d->{'mail'}) {
 			# Link to aliases
 			local @aliases = &list_domain_aliases($d);
-			if (&can_edit_aliases()) {
+			if (&can_edit_aliases() && !$d->{'aliascopy'}) {
 				push(@cols, sprintf("%d&nbsp;(<a href='list_aliases.cgi?dom=$d->{'id'}'>$text{'index_list'}</a>)\n", scalar(@aliases)));
 				}
 			else {
@@ -9189,7 +9189,8 @@ if (&can_domain_have_users($d) && &can_edit_users()) {
 		    });
 	}
 
-if ($d->{'mail'} && $config{'mail'} && &can_edit_aliases()) {
+if ($d->{'mail'} && $config{'mail'} && &can_edit_aliases() &&
+    !$d->{'aliascopy'}) {
 	# Mail aliases button
 	push(@rv, { 'page' => 'list_aliases.cgi',
 		    'title' => $text{'edit_aliases'},

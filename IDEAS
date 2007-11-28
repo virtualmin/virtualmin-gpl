@@ -81,3 +81,5 @@
 	- update after changing users/aliases
 	- need handler for switching back to old mode
 	- command-line program to switch
+	- make sure virtusers from alias aren't picked up by users in the
+	  target domain

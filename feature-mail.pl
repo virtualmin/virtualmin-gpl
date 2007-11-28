@@ -3535,10 +3535,57 @@ if ($config{'mail_system'} == 1) {
 		if ($dname eq $d->{'dom'}) {
 			$already{$mb} = $virt;
 			}
+		elsif ($dname eq $aliasdom->{'dom'}) {
+			$need{$mb} = { 'from' => $mb."\@".$d->{'dom'},
+				       'to' => $virt->{'to'} };
+			}
 		}
-	# Add those that are missing
-	# XXX
+	# Add those that are missing, update existing
+	foreach my $mb (keys %need) {
+		local $virt = $already{$mb};
+		if ($virt) {
+			print STDERR "modifying virtuser $need{$mb}->{'from'} -> $need{$mb}->{'to'}\n";
+			&sendmail::modify_virtuser($virt, $need{$mb},
+			   $sendmail_vfile, $sendmail_vdbm, $sendmail_vdbmtype);
+			}
+		else {
+			print STDERR "creating virtuser $need{$mb}->{'from'} -> $need{$mb}->{'to'}\n";
+			&sendmail::create_virtuser($need{$mb},
+			   $sendmail_vfile, $sendmail_vdbm, $sendmail_vdbmtype);
+			}
+		delete($already{$mb});
+		}
+	# Delete any leftovers
+	foreach my $virt (values %already) {
+		print STDERR "deleting virtuser $virt->{'from'} -> $virt->{'to'}\n";
+		&sendmail::delete_virtuser($virt,
+		   $sendmail_vfile, $sendmail_vdbm, $sendmail_vdbmtype);
+		}
 	}
+elsif ($config{'mail_system'} == 0) {
+	# XXX postfix too
+	}
+}
+
+# create_alias_catchall(&dom, &sourcedom)
+# Removes all virtusers for some domain and creates a catchall to forward mail
+sub create_alias_catchall
+{
+if ($config{'mail_system'} == 1) {
+	# Remove virtusers in Sendmail
+	foreach my $virt (&sendmail::list_virtusers($sendmail_vfile)) {
+		local ($mb, $dname) = split(/\@/, $virt->{'from'});
+		if ($dname eq $d->{'dom'}) {
+			&sendmail::delete_virtuser($virt,
+			   $sendmail_vfile, $sendmail_vdbm, $sendmail_vdbmtype);
+			}
+		}
+	}
+elsif ($config{'mail_system'} == 0) {
+	# XXX postfix too
+	}
+&create_virtuser({ 'from' => '@'.$d->{'dom'},
+		   'to' => [ '%1@'.$aliasdom->{'dom'} ] })
 }
 
 $done_feature_script{'mail'} = 1;
