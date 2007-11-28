@@ -6927,6 +6927,7 @@ push(@rv, { 'id' => 0,
 			      &entities_to_ascii($text{'mail_dsubject'}),
 	    'mail_cc' => $config{'newdom_cc'},
 	    'mail_bcc' => $config{'newdom_bcc'},
+	    'aliascopy' => $config{'aliascopy'} || 0,
 	    'spamclear' => $config{'spamclear'} || 'none',
 	    'defmquota' => $config{'defmquota'} || "none",
 	    'user_aliases' => $config{'newuser_aliases'} || "none",
@@ -7160,6 +7161,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'newdom_subject'} = $tmpl->{'mail_subject'};
 	$config{'newdom_cc'} = $tmpl->{'mail_cc'};
 	$config{'newdom_bcc'} = $tmpl->{'mail_bcc'};
+	$config{'aliascopy'} = $tmpl->{'aliascopy'};
 	$config{'spamclear'} = $tmpl->{'spamclear'};
 	$config{'defmquota'} = $tmpl->{'defmquota'} eq "none" ?
 					"" : $tmpl->{'defmquota'};
@@ -7319,7 +7321,7 @@ if (!$tmpl->{'default'}) {
 		    "domalias", "logrotate", "disabled_web", "disabled_url",
 		    "php", "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "namedconf",
-		    "nodbname", "norename", "forceunder",
+		    "nodbname", "norename", "forceunder", "aliascopy",
 		    @plugins,
 		    @php_wrapper_templates,
 		    "capabilities",

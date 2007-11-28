@@ -1,0 +1,22 @@
+<header>Mail alias mode for alias domains</header>
+
+This setting controls how Virtualmin forwards email from an alias virtual
+server to the target server. The default setting is <b>Catchall forwarding</b>,
+which uses a single catchall alias in the source domain to forward all messages
+to corresponding addresses in the target. The alternative is <b>Copy aliases
+from target</b>, which tells Virtualmin to duplicate all mail aliases in the 
+target real domain into the alias. <p>
+
+The advantage of this second mode is that with the Postfix mail server, email
+to an address in the alias domain will be rejected at the SMTP level. When
+the catchall mode is selected, email to an invalid address will be forwarded
+to the target domain and then bounced back to the sender. This can generate
+significant load on your system and cause email to be sent to incorrect
+addresses if a spammer is sending email to a large number of addresses within
+the alias domain. <p>
+
+As with most template settings, this only applies to virtual servers created
+after the setting was changed. <p>
+
+<footer>
+

@@ -22,6 +22,7 @@ if ($config{'mail_system'} == 1) {
 			&sendmail::generics_dbm($sendmail_conf);
 		}
 	$can_alias_comments = $virtualmin_pro && &get_webmin_version() >= 1.294;
+	$supports_aliascopy = 1;
 	}
 elsif ($config{'mail_system'} == 0) {
 	# Using postfix for email
@@ -78,6 +79,7 @@ elsif ($config{'mail_system'} == 0) {
 		$postfix_modify_alias = \&postfix::modify_alias;
 		$postfix_delete_alias = \&postfix::delete_alias;
 		}
+	$supports_aliascopy = 1;
 	}
 elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
        $config{'mail_system'} == 5) {
@@ -111,6 +113,7 @@ elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
 		$can_alias_types{10} = 0;
 		}
 	$can_alias_comments = 0;
+	$supports_aliascopy = 0;
 	}
 }
 
@@ -228,9 +231,18 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 	if ($_[0]->{'alias'}) {
 		# Alias all mail to this domain to a different domain
 		local $aliasdom = &get_domain($_[0]->{'alias'});
-		&create_virtuser({ 'from' => '@'.$_[0]->{'dom'},
+		if ($supports_aliascopy) {
+			$_[0]->{'aliascopy'} = $tmpl->{'aliascopy'};
+			}
+		if ($_[0]->{'aliascopy'}) {
+			# Sync all virtusers from the dest domain
+			&copy_alias_virtuals($_[0], $aliasdom);
+			}
+		elsif (!$gotvirt{'@'.$_[0]->{'dom'}}) {
+			# Just create a catchall
+			&create_virtuser({ 'from' => '@'.$_[0]->{'dom'},
 				   'to' => [ '%1@'.$aliasdom->{'dom'} ] })
-			if (!$gotvirt{'@'.$_[0]->{'dom'}});
+			}
 		}
 	elsif ($tmpl->{'dom_aliases'} && $tmpl->{'dom_aliases'} ne "none") {
 		# Setup aliases from this domain based on the template
@@ -3209,6 +3221,17 @@ print &ui_table_row(&hlink($text{'tmpl_domaliases'},
 				    $text{'tmpl_aliasbelow'}, 0, 0, undef,
 				    \@dafields)."\n".$atable);
 
+# Virtusers mode for alias domains
+if ($supports_aliascopy) {
+	print &ui_table_row(
+		&hlink($text{'tmpl_aliascopy'}, "template_aliascopy"),
+		&ui_radio("aliascopy", $tmpl->{'aliascopy'},
+			  [ $tmpl->{'default'} ? ( )
+					       : ( [ "", $text{'default'} ] ),
+			    [ 1, $text{'tmpl_aliascopy1'} ],
+			    [ 0, $text{'tmpl_aliascopy0'} ] ]));
+	}
+
 # Unix groups for mail, FTP and DB users
 print &ui_table_hr();
 foreach $g ("mailgroup", "ftpgroup", "dbgroup") {
@@ -3291,6 +3314,9 @@ else {
 	}
 if ($in{'domaliases_mode'} != 1) {
 	$tmpl->{'dom_aliases_bounce'} = $in{'bouncealias'};
+	}
+if ($supports_aliascopy) {
+	$tmpl->{'aliascopy'} = $in{'aliascopy'};
 	}
 
 # Save secondary groups
@@ -3495,6 +3521,24 @@ foreach my $v (&list_virtusers()) {
 	}
 
 return \%rv;
+}
+
+# copy_alias_virtuals(&dom, &sourcedom)
+# Copy all virtual/virtuser entries from some source domain into the alias
+sub copy_alias_virtuals
+{
+local ($d, $aliasdom) = @_;
+if ($config{'mail_system'} == 1) {
+	# Find existing virtusers in the alias
+	foreach my $virt (&sendmail::list_virtusers($sendmail_vfile)) {
+		local ($mb, $dname) = split(/\@/, $virt->{'from'});
+		if ($dname eq $d->{'dom'}) {
+			$already{$mb} = $virt;
+			}
+		}
+	# Add those that are missing
+	# XXX
+	}
 }
 
 $done_feature_script{'mail'} = 1;
