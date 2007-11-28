@@ -170,11 +170,7 @@ if ($in{'sched'}) {
 	# Show schedule inputs
 	print &ui_hidden_table_start($text{'backup_headersched'}, "width=100%",
 				     2, "sched", 0, \@tds);
-
-	&foreign_require("cron", "cron-lib.pl");
-	local @jobs = &cron::list_cron_jobs();
-	local ($job) = grep { $_->{'user'} eq 'root' &&
-			      $_->{'command'} eq $backup_cron_cmd } @jobs;
+	local $job = &find_virtualmin_cron_job($backup_cron_cmd);
 
 	# Email input
 	print &ui_table_row(&hlink($text{'backup_email'}, "backup_email"),
@@ -197,6 +193,7 @@ if ($in{'sched'}) {
 
 	# Times input
 	$job ||= { 'special' => 'daily' };
+	&foreign_require("cron", "cron-lib.pl");
 	$croninput = &capture_function_output(\&cron::show_times_input, $job);
 	print &ui_table_row(undef, "<table border>$croninput</table>", 2);
 	print &ui_hidden_table_end("sched");

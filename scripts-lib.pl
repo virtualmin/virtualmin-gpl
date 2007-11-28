@@ -1438,9 +1438,7 @@ return 1;
 
 sub find_scriptwarn_job
 {
-&foreign_require("cron", "cron-lib.pl");
-local ($job) = grep { $_->{'command'} eq $scriptwarn_cron_cmd &&
-		      $_->{'user'} eq 'root' } &cron::list_cron_jobs();
+local $job = &find_virtualmin_cron_job($scriptwarn_cron_cmd);
 return $job;
 }
 

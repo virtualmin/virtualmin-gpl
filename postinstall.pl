@@ -65,9 +65,7 @@ if ($config{'spam'} && $virtualmin_pro) {
 	&enable_procmail_logging();
 
 	# And setup cron job to periodically process logs
-	local ($job) = grep { $_->{'user'} eq 'root' &&
-			      $_->{'command'} eq $maillog_cron_cmd }
-			    &cron::list_cron_jobs();
+	local $job = &find_virtualmin_cron_job($maillog_cron_cmd);
 	if (!$job) {
 		# Create, and run for the first time
 		$job = { 'mins' => int(rand()*60),
@@ -87,9 +85,7 @@ if ($config{'spam'} && $virtualmin_pro) {
 # Setup Cron job to periodically re-sync links in domains' spamassassin config
 # directories.
 if ($config{'spam'} && $virtualmin_pro) {
-	local ($job) = grep { $_->{'user'} eq 'root' &&
-			      $_->{'command'} eq $spamconfig_cron_cmd }
-			    &cron::list_cron_jobs();
+	local $job = &find_virtualmin_cron_job($spamconfig_cron_cmd);
 	if (!$job) {
 		# Create, and run for the first time
 		$job = { 'mins' => int(rand()*60),
@@ -267,9 +263,7 @@ if (&foreign_installed("sshd")) {
 
 if ($virtualmin_pro) {
 	# Create the cron job for sending in script ratings
-	local ($job) = grep { $_->{'user'} eq 'root' &&
-			      $_->{'command'} eq $ratings_cron_cmd }
-			    &cron::list_cron_jobs();
+	local $job = &find_virtualmin_cron_job($ratings_cron_cmd);
 	if (!$job) {
 		# Create, and run for the first time
 		$job = { 'mins' => int(rand()*60),
@@ -288,9 +282,7 @@ if ($virtualmin_pro) {
 	}
 
 # Create the cron job for collecting system info
-local ($job) = grep { $_->{'user'} eq 'root' &&
-		      $_->{'command'} eq $collect_cron_cmd }
-		    &cron::list_cron_jobs();
+local $job = &find_virtualmin_cron_job($collect_cron_cmd);
 if (!$job) {
 	# Create, and run for the first time
 	$job = { 'mins' => '0,5,10,15,20,25,30,35,40,45,50,55',
@@ -315,9 +307,7 @@ if ($config{'allow_subdoms'} eq '') {
 
 # Create the cron job for killing orphan php*-cgi processes
 if ($virtualmin_pro) {
-	local ($job) = grep { $_->{'user'} eq 'root' &&
-			      $_->{'command'} eq $fcgiclear_cron_cmd }
-			    &cron::list_cron_jobs();
+	local $job = &find_virtualmin_cron_job($fcgiclear_cron_cmd);
 	if (!$job) {
 		# Create, and run for the first time
 		$job = { 'mins' => '0',

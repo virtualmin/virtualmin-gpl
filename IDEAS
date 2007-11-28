@@ -83,3 +83,8 @@
 	- command-line program to switch
 	- make sure virtusers from alias aren't picked up by users in the
 	  target domain
+	- remove debug code
+	- deleting / renaming domains
+
+ - make remote.cgi calls faster by just requireing .pl file
+	- no need to init_config/etc

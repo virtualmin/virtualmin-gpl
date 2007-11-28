@@ -8,8 +8,7 @@ sub module_uninstall
 &foreign_require("cron", "cron-lib.pl");
 local @jobs = &cron::list_cron_jobs();
 foreach my $cmd (@all_cron_commands) {
-	local ($job) = grep { $_->{'user'} eq 'root' &&
-			      $_->{'command'} eq $cmd } @jobs;
+	local $job = &find_virtualmin_cron_job($cmd, \@jobs);
 	if ($job) {
 		&cron::delete_cron_job($job);
 		}

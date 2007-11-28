@@ -114,9 +114,7 @@ else {
 &unlock_file($lcn);
 &unlock_file($cfile);
 
-&foreign_require("cron", "cron-lib.pl");
-local ($job) = grep { $_->{'command'} eq "$webalizer::cron_cmd $alog" }
-		    &cron::list_cron_jobs();
+local $job = &find_virtualmin_cron_job("$webalizer::cron_cmd $alog");
 if (!$job) {
 	# Create a Cron job to process the log
 	&setup_webalizer_cron($lconf, $alog);
@@ -128,6 +126,7 @@ if (!$job) {
 sub setup_webalizer_cron
 {
 local ($lconf, $alog) = @_;
+&foreign_require("cron", "cron-lib.pl");
 local $job = { 'user' => 'root',
 	       'active' => 1,
 	       'mins' => $lconf->{'mins'},

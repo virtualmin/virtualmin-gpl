@@ -941,8 +941,7 @@ else {
 
 # Fix cron job
 &foreign_require("cron", "cron-lib.pl");
-local ($job) = grep { $_->{'command'} eq $spamclear_cmd }
-		    &cron::list_cron_jobs();
+local $job = &find_virtualmin_cron_job($spamclear_cmd);
 if ($job && !%spamclear) {
 	# Disable job, as we don't need it
 	&cron::delete_cron_job($job);

@@ -4,9 +4,7 @@
 # Returns the cron job used for updating a dynamic IP
 sub get_dynip_cron_job
 {
-&foreign_require("cron", "cron-lib.pl");
-local @jobs = &cron::list_cron_jobs();
-local ($job) = grep { $_->{'command'} eq $dynip_cron_cmd } @jobs;
+local $job = &find_virtualmin_cron_job($dynip_cron_cmd);
 return $job;
 }
 

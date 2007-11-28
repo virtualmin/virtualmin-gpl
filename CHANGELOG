@@ -762,7 +762,7 @@ Added 5 and 15 minute load averages to system statistics.
 Details of a virtual server's resellers are now made available to pre and post virtual server change commands in the RESELLER_ environment variables.
 Reseller details can now be used in templates and email messages, with keys like RESELLER_NAME and RESELLER_EMAIL.
 When a domain is renamed, generics or sender canonical maps are properly updated too.
-MySQL and LDAP sources for aliases and virtual addresses for Postfix can now be used by Virtualmin, when Webmin 1.390 or newer is installed and when they are setup properly in the Postfix module. This allows Virtualmin to effectively configure a remote mail server, assuming that domain Unix users and groups are also stored in LDAP.
+MySQL and LDAP sources for aliases and virtual addresses for Postfix can now be used by Virtualmin, when Webmin 1.380 or newer is installed and when they are setup properly in the Postfix module. This allows Virtualmin to effectively configure a remote mail server, assuming that domain Unix users and groups are also stored in LDAP.
 Current versions are shown in the script updates notification email.
 Errors when extracting cPanel, Plesk and Ensim backup files are reported in more detail.
 Sub-domains in cPanel backups can now be properly imported.
@@ -782,3 +782,4 @@ When re-sending the signup email for a server, the owner's email address can be 
 When there are too many servers on the List Virtual Servers page to show in a table, buttons to update and delete them all are displayed along with the seach form.
 Added a Module Config option to make the Unix group name for a new domain always follow the username, and made group name selection more consistent across creation methods.
 Moved the Administration username field into the first (visible) section of the Create Virtual Server page.
+Cron jobs created by Virtualmin will still be recognized even if manually modified to redirect output or add other pre- and post-commands.

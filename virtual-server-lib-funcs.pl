@@ -6607,10 +6607,7 @@ foreach $a (@main::post_actions) {
 # Returns the cron job used for bandwidth monitoring
 sub find_bandwidth_job
 {
-&foreign_require("cron", "cron-lib.pl");
-local @jobs = &cron::list_cron_jobs();
-local ($job) = grep { $_->{'user'} eq 'root' &&
-		      $_->{'command'} eq $bw_cron_cmd } @jobs;
+local $job = &find_virtualmin_cron_job($bw_cron_cmd);
 return $job;
 }
 
@@ -11608,6 +11605,21 @@ if (@ttdoms > 10) {
 	@ttdoms = ( @ttdoms[0..9], &text('index_dmore', @ttdoms-10) );
 	}
 return join(" , ", @ttdoms);
+}
+
+# find_virtualmin_cron_job(command, [&jobs], [user])
+# Returns the cron job object that runs some command (perhaps with redirection)
+sub find_virtualmin_cron_job
+{
+local ($cmd, $jobs, $user) = @_;
+if (!$jobs) {
+	&foreign_require("cron", "cron-lib.pl");
+	$jobs = [ &cron::list_cron_jobs() ];
+	}
+$user ||= "root";
+local @rv = grep { $_->{'user'} eq $user &&
+	     $_->{'command'} =~ /(^|[ \|\&;])\Q$cmd\E($|[ \|\&><;])/ } @$jobs;
+return wantarray ? @rv : $rv[0];
 }
 
 $done_virtual_server_lib_funcs = 1;

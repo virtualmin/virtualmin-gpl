@@ -53,9 +53,7 @@ if (&can_backup_virtualmin()) {
 
 # Check if the cron job exists
 &foreign_require("cron", "cron-lib.pl");
-local @jobs = &cron::list_cron_jobs();
-local ($job) = grep { $_->{'user'} eq 'root' &&
-		      $_->{'command'} eq $backup_cron_cmd } @jobs;
+local $job = &find_virtualmin_cron_job($backup_cron_cmd);
 
 # Create, update or delete it
 if ($job && $in{'enabled'}) {
