@@ -293,7 +293,7 @@ sub delete_mail
 &$first_print($text{'delete_doms'});
 &require_mail();
 
-if ($_[0]->{'alias'}) {
+if ($_[0]->{'alias'} && !$_[0]->{'aliascopy'}) {
         # Remove whole-domain alias
         local @virts = &list_virtusers();
         local ($catchall) = grep { lc($_->{'from'}) eq '@'.$_[0]->{'dom'} }
@@ -302,6 +302,10 @@ if ($_[0]->{'alias'}) {
                 &delete_virtuser($catchall);
                 }
         }
+elsif ($_[0]->{'alias'} && $_[0]->{'aliascopy'}) {
+	# Remove alias copy virtuals
+	&delete_alias_virtuals($_[0]);
+	}
 
 if ($config{'mail_system'} == 1) {
 	# Delete domain from sendmail local domains file
@@ -467,16 +471,30 @@ if ($_[0]->{'home'} ne $_[1]->{'home'} ||
 	
 if ($_[0]->{'alias'} && $_[2] && $_[2]->{'dom'} ne $_[3]->{'dom'}) {
 	# This is an alias, and the domain it is aliased to has changed ..
-	# update the catchall alias
-	local @virts = &list_virtusers();
-	local ($catchall) = grep { $_->{'to'}->[0] eq '%1@'.$_[3]->{'dom'} }
-				 @virts;
-	if ($catchall) {
-		&$first_print($text{'save_mailalias'});
-		$catchall->{'to'} = [ '%1@'.$_[2]->{'dom'} ];
-		&modify_virtuser($catchall, $catchall);
-		&$second_print($text{'setup_done'});
+	# update the catchall alias or virtuser copies
+	if (!$_[0]->{'aliascopy'}) {
+		# Fixup dest in catchall
+		local @virts = &list_virtusers();
+		local ($catchall) = grep {
+			$_->{'to'}->[0] eq '%1@'.$_[3]->{'dom'} } @virts;
+		if ($catchall) {
+			&$first_print($text{'save_mailalias'});
+			$catchall->{'to'} = [ '%1@'.$_[2]->{'dom'} ];
+			&modify_virtuser($catchall, $catchall);
+			&$second_print($text{'setup_done'});
+			}
 		}
+	else {
+		# Re-write all copied virtuals
+		&copy_alias_virtuals($_[0], $_[2]);
+		}
+	}
+elsif ($_[0]->{'alias'} && $_[0]->{'dom'} ne $_[1]->{'dom'} &&
+       $_[0]->{'aliascopy'}) {
+	# This is an alias and the domain name has changed - fix all virtuals
+	&delete_alias_virtuals($_[1]);
+	local $alias = &get_domain($_[0]->{'alias'});
+	&copy_alias_virtuals($_[0], $alias);
 	}
 
 if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
@@ -2285,6 +2303,7 @@ if (!$_[2]->{'mailuser'}) {
 			}
 		}
 	close(AFILE);
+	&sync_alias_virtuals($_[0]);
 	&$second_print($text{'setup_done'});
 	}
 
@@ -3454,6 +3473,7 @@ if ($clash) {
 	&delete_virtuser($clash);
 	}
 &create_virtuser($virt);
+&sync_alias_virtuals($d);
 }
 
 # get_mail_virtusertable()
@@ -3541,25 +3561,26 @@ if ($config{'mail_system'} == 1) {
 			}
 		}
 	# Add those that are missing, update existing
+	local @sargs = ( $sendmail_vfile, $sendmail_vdbm, $sendmail_vdbmtype );
 	foreach my $mb (keys %need) {
 		local $virt = $already{$mb};
 		if ($virt) {
-			print STDERR "modifying virtuser $need{$mb}->{'from'} -> $need{$mb}->{'to'}\n";
-			&sendmail::modify_virtuser($virt, $need{$mb},
-			   $sendmail_vfile, $sendmail_vdbm, $sendmail_vdbmtype);
+			if ($virt->{'to'} ne $need{$mb}->{'to'}) {
+				print STDERR "modifying virtuser $need{$mb}->{'from'} -> $need{$mb}->{'to'}\n";
+				&sendmail::modify_virtuser($virt, $need{$mb},
+							   @sargs);
+				}
 			}
 		else {
 			print STDERR "creating virtuser $need{$mb}->{'from'} -> $need{$mb}->{'to'}\n";
-			&sendmail::create_virtuser($need{$mb},
-			   $sendmail_vfile, $sendmail_vdbm, $sendmail_vdbmtype);
+			&sendmail::create_virtuser($need{$mb}, @sargs);
 			}
 		delete($already{$mb});
 		}
 	# Delete any leftovers
 	foreach my $virt (values %already) {
 		print STDERR "deleting virtuser $virt->{'from'} -> $virt->{'to'}\n";
-		&sendmail::delete_virtuser($virt,
-		   $sendmail_vfile, $sendmail_vdbm, $sendmail_vdbmtype);
+		&sendmail::delete_virtuser($virt, @sargs);
 		}
 	}
 elsif ($config{'mail_system'} == 0) {
@@ -3567,9 +3588,10 @@ elsif ($config{'mail_system'} == 0) {
 	}
 }
 
-# create_alias_catchall(&dom, &sourcedom)
-# Removes all virtusers for some domain and creates a catchall to forward mail
-sub create_alias_catchall
+# delete_alias_virtuals(&dom)
+# Removes all virtusers for some domain, typically for conversion away from
+# alias copy mode.
+sub delete_alias_virtuals
 {
 if ($config{'mail_system'} == 1) {
 	# Remove virtusers in Sendmail
@@ -3584,8 +3606,19 @@ if ($config{'mail_system'} == 1) {
 elsif ($config{'mail_system'} == 0) {
 	# XXX postfix too
 	}
-&create_virtuser({ 'from' => '@'.$d->{'dom'},
-		   'to' => [ '%1@'.$aliasdom->{'dom'} ] })
+}
+
+# sync_alias_virtuals(&domain)
+# This is called after making any changes to mail aliases, to update the
+# copied virtusers in any alias domains that point to it.
+sub sync_alias_virtuals
+{
+local ($d) = @_;
+foreach my $ad (&get_domain_by("alias", $d->{'id'})) {
+	if ($ad->{'aliascopy'}) {
+		&copy_alias_virtuals($ad, $d);
+		}
+	}
 }
 
 $done_feature_script{'mail'} = 1;

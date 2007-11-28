@@ -165,6 +165,7 @@ foreach $o (keys %oldmap) {
 		}
 	}
 
+&sync_alias_virtuals($d);
 print "<p>\n";
 print &text('aedit_complete', $count, $ecount, $mcount, $dcount),"<br>\n";
 &webmin_log("manual", "aliases", $count);

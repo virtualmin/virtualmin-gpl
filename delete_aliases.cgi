@@ -21,6 +21,7 @@ foreach $a (@del) {
 			}
 		}
 	}
+&sync_alias_virtuals($d);
 &webmin_log("delete", "aliases", scalar(@del),
 	    { 'dom' => $d->{'dom'} });
 &redirect("list_aliases.cgi?dom=$in{'dom'}");

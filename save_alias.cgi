@@ -20,6 +20,7 @@ if ($in{'delete'}) {
 		&delete_simple_autoreply($d, $simple) if ($simple);
 		}
 	&delete_virtuser($virt);
+	&sync_alias_virtuals($d);
 	&webmin_log("delete", "alias", $virt->{'from'}, $virt);
 	}
 else {
@@ -82,6 +83,7 @@ else {
 		&modify_virtuser(\%oldvirt, $virt);
 		&webmin_log("modify", "alias", $virt->{'from'}, $virt);
 		}
+	&sync_alias_virtuals($d);
 
 	if ($in{'simplemode'} eq 'simple') {
 		# Write out the autoreply file, if any

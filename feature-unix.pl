@@ -114,6 +114,7 @@ eval {
 			$virt = { 'from' => $email,
 				  'to' => [ $_[0]->{'user'} ] };
 			&create_virtuser($virt);
+			&sync_alias_virtuals($_[0]);
 			}
 		if ($config{'generics'}) {
 			&create_generic($_[0]->{'user'}, $email);
@@ -266,6 +267,7 @@ if (!$_[0]->{'parent'}) {
 	local ($virt) = grep { $_->{'from'} eq $email } @virts;
 	if ($virt) {
 		&delete_virtuser($virt);
+		&sync_alias_virtuals($_[0]);
 		}
 	if ($config{'generics'}) {
 		local %generics = &get_generics_hash();

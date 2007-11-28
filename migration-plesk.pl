@@ -477,6 +477,7 @@ if ($got{'mysql'}) {
 	&$second_print(".. done (migrated $mcount, and created $myucount users)");
 	}
 
+&sync_alias_virtuals(\%dom);
 return (\%dom);
 }
 

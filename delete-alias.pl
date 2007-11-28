@@ -46,6 +46,7 @@ if (defined(&get_simple_alias)) {
 	&delete_simple_autoreply($d, $simple) if ($simple);
 	}
 &delete_virtuser($virt);
+&sync_alias_virtuals($d);
 print "Alias for $email deleted successfully\n";
 
 sub usage

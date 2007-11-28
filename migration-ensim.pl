@@ -452,6 +452,7 @@ if ($parent) {
 	&refresh_webmin_user($parent);
 	}
 
+&sync_alias_virtuals(\%dom);
 return (\%dom);
 }
 

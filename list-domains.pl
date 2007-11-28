@@ -91,6 +91,8 @@ if ($multi) {
 		if ($d->{'alias'}) {
 			$aliasdom = &get_domain_by("id", $d->{'alias'});
 			print "    Real domain: $aliasdom->{'dom'}\n";
+			print "    Mail aliases mode: ",
+				($d->{'aliascopy'} ? "Copy" : "Catchall"),"\n";
 			}
 		elsif ($d->{'parent'}) {
 			$parentdom = &get_domain_by("id", $d->{'parent'});

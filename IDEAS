@@ -77,12 +77,7 @@
  - allow shells list (with descriptions) to be configurable for domain owners
 
  - filip's new alias domain system
-	- this means that the domain cannot have own aliases
-	- update after changing users/aliases
-	- need handler for switching back to old mode
-	- command-line program to switch
 	- make sure virtusers from alias aren't picked up by users in the
 	  target domain
 	- remove debug code
-	- deleting / renaming domains
-
+	- test renaming

@@ -98,6 +98,7 @@ $virt = { 'from' => $email,
 	  'cmt' => $cmt };
 &save_simple_alias($d, $virt, $simple);
 &create_virtuser($virt);
+&sync_alias_virtuals($d);
 &switch_to_domain_user($d);
 &write_simple_autoreply($d, $simple);
 print "Alias for $email created successfully\n";

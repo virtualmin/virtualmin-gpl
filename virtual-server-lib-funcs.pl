@@ -988,6 +988,8 @@ if ($_[0]->{'nospam'}) {
 
 # Update cache of existing usernames
 $unix_user{&escape_alias($_[0]->{'user'})}++;
+
+&sync_alias_virtuals($_[1]);
 }
 
 # modify_user(&user, &old, &domain, [noaliases])
@@ -1272,6 +1274,7 @@ if (!$_[0]->{'qmail'}) {
 			}
 		}
 	}
+&sync_alias_virtuals($_[2]);
 NOALIASES:
 
 # Save his quotas if changed (unless this is the domain owner)
@@ -1604,6 +1607,8 @@ delete($spam{$_[0]->{'user'}});
 
 # Update cache of existing usernames
 $unix_user{&escape_alias($_[0]->{'user'})} = 0;
+
+&sync_alias_virtuals($_[1]);
 }
 
 # set_usermin_imap_password(&user)
@@ -6196,6 +6201,7 @@ if ($in{'mailbox'}) {
 	local $virt = { 'from' => $user."\@".$dom->{'dom'},
 			'to' => [ $user ] };
 	&create_virtuser($virt);
+	&sync_alias_virtuals($dom);
 	&$second_print($text{'setup_done'});
 	}
 
@@ -6487,14 +6493,17 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 			}
 
                 # Delete all virtusers
-                &$first_print($text{'delete_aliases'});
-                foreach my $v (&list_virtusers()) {
-                        if ($v->{'from'} =~ /\@(\S+)$/ &&
-                            $1 eq $dd->{'dom'}) {
-                                &delete_virtuser($v);
-                                }
-                        }
-                &$second_print($text{'setup_done'});
+		if (!$dd->{'aliascopy'}) {
+			&$first_print($text{'delete_aliases'});
+			foreach my $v (&list_virtusers()) {
+				if ($v->{'from'} =~ /\@(\S+)$/ &&
+				    $1 eq $dd->{'dom'}) {
+					&delete_virtuser($v);
+					}
+				}
+			&sync_alias_virtuals($dd);
+			&$second_print($text{'setup_done'});
+			}
 
 		# Take down IP
 		if ($dd->{'iface'}) {

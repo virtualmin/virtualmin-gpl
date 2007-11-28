@@ -61,7 +61,9 @@ foreach $d (@doms) {
 	if ($d->{'aliascopy'} && !$aliascopy) {
 		# Switch to catchall
 		&$first_print("Switching to catchall for server $d->{'dom'} ..");
-		&create_alias_catchall($d, $aliasdom);
+		&delete_alias_virtuals($d);
+		&create_virtuser({ 'from' => '@'.$d->{'dom'},
+				   'to' => [ '%1@'.$aliasdom->{'dom'} ] })
 		&$second_print(".. done");
 		}
 	elsif (!$d->{'aliascopy'} && $aliascopy) {

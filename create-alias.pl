@@ -57,6 +57,7 @@ $virt = { 'from' => $email,
 	  'to' => \@to,
 	  'cmt' => $cmt };
 &create_virtuser($virt);
+&sync_alias_virtuals($d);
 print "Alias for $email created successfully\n";
 
 sub usage
