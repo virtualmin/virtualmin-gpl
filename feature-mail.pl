@@ -3306,6 +3306,7 @@ print &ui_table_row(&hlink($text{'tmpl_append'}, "template_append"),
 sub parse_template_mail
 {
 local ($tmpl) = @_;
+&require_mail();
 
 # Save mail settings
 $tmpl->{'mail_on'} = $in{'mail_mode'} == 0 ? "none" :
