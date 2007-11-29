@@ -205,6 +205,7 @@ delete($dom->{'pass_set'});	# Only set by callers for modify_* functions
 # get_domain_by(field, value, [field, value, ...])
 # Looks up a domain by some field(s). For each field, we either use the quick
 # map to find relevant domains, or check though all that we have left.
+# The special value _ANY_ matches any domains where the field is non-empty
 sub get_domain_by
 {
 local @rv;
@@ -214,14 +215,29 @@ for(my $i=0; $i<@_; $i+=2) {
 	local %map;
 	if ($mf && &read_file_cached($mf, \%map)) {
 		# The map knows relevant domains
-		foreach my $did (split(" ", $map{$_[$i+1]})) {
-			local $d = &get_domain($did);
-			push(@possible, $d) if ($d);
+		if ($_[$i+1] eq "_ANY_") {
+			# Find domains where the field is non-empty
+			foreach my $k (keys %map) {
+				next if ($k eq '');
+				foreach my $did (split(" ", $map{$k})) {
+					local $d = &get_domain($did);
+					push(@possible, $d) if ($d);
+					}
+				}
+			}
+		else {
+			# Check for a match
+			foreach my $did (split(" ", $map{$_[$i+1]})) {
+				local $d = &get_domain($did);
+				push(@possible, $d) if ($d);
+				}
 			}
 		}
 	else {
 		# Need to check manually
-		@possible = grep { $_->{$_[$i]} eq $_[$i+1] } &list_domains();
+		@possible = grep { $_->{$_[$i]} eq $_[$i+1] ||
+				   $_->{$_[$i]} ne "" && $_[$i+1] eq "_ANY_" }
+				 &list_domains();
 		}
 	if ($i == 0) {
 		# First field, so matches are the result
@@ -10783,7 +10799,9 @@ if (@resels) {
 			  [ 0, $text{'tmpl_resellers_sel'} ] ])."<br>\n".
 		&ui_select("resellers", [ split(/\s+/, $tmpl->{'resellers'}) ],
 			 [ map { [ $_->{'name'},
-				   "$_->{'name'} ($_->{'acl'}->{'desc'})" ] }
+				   $_->{'name'}.
+				    ($_->{'acl'}->{'desc'} ?
+					" ($_->{'acl'}->{'desc'})" : "") ] }
 			       @resels ], 5, 1));
 	}
 }

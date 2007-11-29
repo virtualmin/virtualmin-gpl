@@ -404,10 +404,10 @@ local $tmpl = &get_template($_[0]->{'template'});
 # as part of the domain's directory.
 # No need to do this for VPOPMail users.
 # Also, any users in the user@domain name format need to be renamed
-if ($_[0]->{'home'} ne $_[1]->{'home'} ||
-    $_[0]->{'dom'} ne $_[1]->{'dom'} ||
-    $_[0]->{'gid'} != $_[1]->{'gid'} ||
-    $_[0]->{'prefix'} ne $_[1]->{'prefix'}) {
+if (($_[0]->{'home'} ne $_[1]->{'home'} ||
+     $_[0]->{'dom'} ne $_[1]->{'dom'} ||
+     $_[0]->{'gid'} != $_[1]->{'gid'} ||
+     $_[0]->{'prefix'} ne $_[1]->{'prefix'}) && !$_[0]->{'alias'}) {
 	&$first_print($text{'save_mailrename'});
 	local $u;
 	local $domhack = { %{$_[0]} };		# This hack is needed to find
@@ -517,47 +517,52 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 			}
 		}
 
-	# Update any virtusers with addresses in the old domain
-	&$first_print($text{'save_fixvirts'});
-	foreach $v (&list_virtusers()) {
-		if ($v->{'from'} =~ /^(\S*)\@(\S+)$/ &&
-		    lc($2) eq $_[1]->{'dom'}) {
-			local $oldv = { %$v };
-			local $u = $1;
-			if ($u eq $_[1]->{'user'}) {
-				# For admin user, who has changed
-				$u = $_[0]->{'user'};
-				}
-			$v->{'from'} = "$u\@$_[0]->{'dom'}";
-			&fix_alias_when_renaming($v, $_[0], $_[1]);
-			&modify_virtuser($oldv, $v);
-			}
-		}
-
-	# Update any generics/sender canonical entries in the old domain
-	if ($config{'generics'}) {
-		local %ghash = &get_generics_hash();
-		foreach my $g (values %ghash) {
-			if ($g->{'to'} =~ /^(.*)\@(\S+)$/ &&
-			    $2 eq $_[1]->{'dom'}) {
-				local $oldg = { %$g };
+	if (!$_[0]->{'aliascopy'}) {
+		# Update any virtusers with addresses in the old domain
+		&$first_print($text{'save_fixvirts'});
+		foreach $v (&list_virtusers()) {
+			if ($v->{'from'} =~ /^(\S*)\@(\S+)$/ &&
+			    lc($2) eq $_[1]->{'dom'}) {
+				local $oldv = { %$v };
 				local $u = $1;
 				if ($u eq $_[1]->{'user'}) {
 					# For admin user, who has changed
 					$u = $_[0]->{'user'};
 					}
-				$g->{'to'} = "$u\@$_[0]->{'dom'}";
-				&modify_generic($g, $oldg);
+				$v->{'from'} = "$u\@$_[0]->{'dom'}";
+				&fix_alias_when_renaming($v, $_[0], $_[1]);
+				&modify_virtuser($oldv, $v);
 				}
 			}
 		}
 
-	# Make a second pass through users to fix aliases
-	&flush_virtualmin_caches();
-	foreach my $u (&list_domain_users($_[0])) {
-		local $oldu = { %$u };
-		if (&fix_alias_when_renaming($u, $_[0], $_[1])) {
-			&modify_user($u, $oldu, $_[0]);
+	if (!$_[0]->{'alias'}) {
+		# Update any generics/sender canonical entries in the old domain
+		if ($config{'generics'}) {
+			local %ghash = &get_generics_hash();
+			foreach my $g (values %ghash) {
+				if ($g->{'to'} =~ /^(.*)\@(\S+)$/ &&
+				    $2 eq $_[1]->{'dom'}) {
+					local $oldg = { %$g };
+					local $u = $1;
+					if ($u eq $_[1]->{'user'}) {
+						# For admin user, who has
+						# changed name
+						$u = $_[0]->{'user'};
+						}
+					$g->{'to'} = "$u\@$_[0]->{'dom'}";
+					&modify_generic($g, $oldg);
+					}
+				}
+			}
+
+		# Make a second pass through users to fix aliases
+		&flush_virtualmin_caches();
+		foreach my $u (&list_domain_users($_[0])) {
+			local $oldu = { %$u };
+			if (&fix_alias_when_renaming($u, $_[0], $_[1])) {
+				&modify_user($u, $oldu, $_[0]);
+				}
 			}
 		}
 
@@ -753,6 +758,17 @@ if (!defined(%unix_user)) {
 		}
 	}
 
+# Build a list of copy-mode alias domains, as their Sendmail and Postfix
+# virtusers shouldn't be included
+local %alias_copy;
+if ($supports_aliascopy) {
+	foreach my $d (&get_domain_by("alias", "_ANY_")) {
+		if ($d->{'aliascopy'}) {
+			$alias_copy{$d->{'dom'}}++;
+			}
+		}
+	}
+
 if ($config{'mail_system'} == 1) {
 	# Get from sendmail
 	local @svirts = &sendmail::list_virtusers($sendmail_vfile);
@@ -764,6 +780,8 @@ if ($config{'mail_system'} == 1) {
 		local %rv = ( 'virt' => $v,
 			      'cmt' => $v->{'cmt'},
 			      'from' => lc($v->{'from'}) );
+		local ($mb, $dname) = split(/\@/, $rv{'from'});
+		next if ($alias_copy{$dname});
 		if ($v->{'to'} !~ /\@/ && ($a = $aliases{lc($v->{'to'})})) {
 			# Points to an alias - use its values
 			$rv{'to'} = $a->{'values'};
@@ -800,6 +818,8 @@ elsif ($config{'mail_system'} == 0) {
 		local %rv = ( 'from' => lc($v->{'name'}),
 			      'cmt' => $v->{'cmt'},
 			      'virt' => $v );
+		local ($mb, $dname) = split(/\@/, $rv{'from'});
+		next if ($alias_copy{$dname});
 		if ($v->{'value'} !~ /\@/ &&
 		    ($a = $aliases{lc($v->{'value'})})) {
 			$rv{'to'} = $a->{'values'};
@@ -3549,7 +3569,7 @@ sub copy_alias_virtuals
 {
 local ($d, $aliasdom) = @_;
 if ($config{'mail_system'} == 1) {
-	# Find existing virtusers in the alias
+	# Find existing Sendmail virtusers in the alias domain
 	foreach my $virt (&sendmail::list_virtusers($sendmail_vfile)) {
 		local ($mb, $dname) = split(/\@/, $virt->{'from'});
 		if ($dname eq $d->{'dom'}) {
@@ -3584,7 +3604,36 @@ if ($config{'mail_system'} == 1) {
 		}
 	}
 elsif ($config{'mail_system'} == 0) {
-	# XXX postfix too
+	# Find existing Postfix virtuals in the alias domain
+	local $alreadyvirts = &postfix::get_maps($virtual_type);
+	foreach my $virt (@$alreadyvirts) {
+		local ($mb, $dname) = split(/\@/, $virt->{'name'});
+		if ($dname eq $d->{'dom'}) {
+			$already{$mb} = $virt;
+			}
+		elsif ($dname eq $aliasdom->{'dom'}) {
+			$need{$mb} = { 'name' => $mb."\@".$d->{'dom'},
+				       'value' => $virt->{'value'} };
+			}
+		}
+	# Add those that are missing, update existing
+	foreach my $mb (keys %need) {
+		local $virt = $already{$mb};
+		if ($virt) {
+			if ($virt->{'value'} ne $need{$mb}->{'value'}) {
+				&postfix::modify_mapping($virtual_type,
+							 $virt, $need{$mb});
+				}
+			}
+		else {
+			&postfix::create_mapping($virtual_type, $need{$mb});
+			}
+		delete($already{$mb});
+		}
+	# Delete any leftovers
+	foreach my $virt (values %already) {
+		&postfix::delete_mapping($virtual_type, $virt);
+		}
 	}
 }
 
@@ -3604,7 +3653,15 @@ if ($config{'mail_system'} == 1) {
 		}
 	}
 elsif ($config{'mail_system'} == 0) {
-	# XXX postfix too
+	# Remove Postfix virtuals
+	local $virts = &postfix::get_maps($virtual_type);
+	local @origvirts = @$virts;	# Needed as $virts gets modified!
+	foreach my $virt (@origvirts) {
+		local ($mb, $dname) = split(/\@/, $virt->{'name'});
+		if ($dname eq $d->{'dom'}) {
+			&postfix::delete_mapping($virtual_type, $virt);
+			}
+		}
 	}
 }
 
