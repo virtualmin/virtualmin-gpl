@@ -508,7 +508,7 @@ if ($got{'mail'}) {
 	local $mcount = 0;
 	local (%pass, %quota);
 	local $_;
-	open(SHADOW, "$dom{'home'}/etc/$dom/shadow");
+	open(SHADOW, "$homesrc/etc/$dom/shadow");
 	while(<SHADOW>) {
 		s/\r|\n//g;
 		local ($suser, $spass) = split(/:/, $_);
@@ -517,7 +517,7 @@ if ($got{'mail'}) {
 	close(SHADOW);
 	local $_;
 	local $bsize = &quota_bsize("home");
-	open(QUOTA, "$dom{'home'}/etc/$dom/quota");
+	open(QUOTA, "$homesrc/etc/$dom/quota");
 	while(<QUOTA>) {
 		s/\r|\n//g;
 		local ($quser, $qquota) = split(/:/, $_);
@@ -525,7 +525,7 @@ if ($got{'mail'}) {
 		}
 	close(QUOTA);
 	local $_;
-	open(PASSWD, "$dom{'home'}/etc/$dom/passwd");
+	open(PASSWD, "$homesrc/etc/$dom/passwd");
 	while(<PASSWD>) {
 		# Create the user
 		s/\r|\n//g;
@@ -552,7 +552,7 @@ if ($got{'mail'}) {
 		local ($crfile, $crtype) = &create_mail_file($uinfo);
 
 		# Move his mail files
-		local $mailsrc = "$dom{'home'}/mail/$dom/$muser";
+		local $mailsrc = "$homesrc/mail/$dom/$muser";
 		local $sfdir = $mailboxes::config{'mail_usermin'};
 		local $sftype = $sfdir eq 'Maildir' ? 1 : 0;
 		if (-d "$mailsrc/cur") {
@@ -623,14 +623,14 @@ if ($owner && !$parent) {
 	&$first_print("Moving server owner's mailbox ..");
 	local ($mfile, $mtype) = &user_mail_file($owner);
 	local $srcfolder;
-	if (-d "$dom{'home'}/mail/cur") {
+	if (-d "$homesrc/mail/cur") {
 		# Maildir format
-		$srcfolder = { 'type' => 1, 'file' => "$dom{'home'}/mail" };
+		$srcfolder = { 'type' => 1, 'file' => "$homesrc/mail" };
 		}
-	elsif (-r "$dom{'home'}/mail/inbox") {
+	elsif (-r "$homesrc/mail/inbox") {
 		# mbox format
 		$srcfolder = { 'type' => 0,
-			       'file' => "$dom{'home'}/mail/inbox" };
+			       'file' => "$homesrc/mail/inbox" };
 		}
 	if ($srcfolder) {
 		local $dstfolder = { 'type' => $mtype, 'file' => $mfile };
