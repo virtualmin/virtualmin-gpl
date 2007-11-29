@@ -3586,20 +3586,17 @@ if ($config{'mail_system'} == 1) {
 		local $virt = $already{$mb};
 		if ($virt) {
 			if ($virt->{'to'} ne $need{$mb}->{'to'}) {
-				print STDERR "modifying virtuser $need{$mb}->{'from'} -> $need{$mb}->{'to'}\n";
 				&sendmail::modify_virtuser($virt, $need{$mb},
 							   @sargs);
 				}
 			}
 		else {
-			print STDERR "creating virtuser $need{$mb}->{'from'} -> $need{$mb}->{'to'}\n";
 			&sendmail::create_virtuser($need{$mb}, @sargs);
 			}
 		delete($already{$mb});
 		}
 	# Delete any leftovers
 	foreach my $virt (values %already) {
-		print STDERR "deleting virtuser $virt->{'from'} -> $virt->{'to'}\n";
 		&sendmail::delete_virtuser($virt, @sargs);
 		}
 	}
