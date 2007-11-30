@@ -133,7 +133,7 @@ close(CHANGES);
 local $url = &script_path_url($d, $opts);
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
-return (1, "DokuWiki installation complete. Go to <a href='$url'>$url</a> to use it.", "Under $rp", $url);
+return (1, "DokuWiki installation complete. Go to <a target=_new href='$url'>$url</a> to use it.", "Under $rp", $url);
 }
 
 # script_dokuwiki_uninstall(&domain, version, &opts)

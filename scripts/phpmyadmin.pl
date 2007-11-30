@@ -255,7 +255,7 @@ foreach $l (@$lref) {
 # Return a URL for the user
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
-return (1, "phpMyAdmin installation complete. It can be accessed at <a href='$url'>$url</a>.", "Under $rp", $url);
+return (1, "phpMyAdmin installation complete. It can be accessed at <a target=_new href='$url'>$url</a>.", "Under $rp", $url);
 }
 
 # script_phpmyadmin_uninstall(&domain, version, &opts)
