@@ -792,6 +792,7 @@ edit_dbs=Databases
 edit_nodbs=None created
 edit_dbtypes=$1 MySQL, $2 PostgreSQL
 edit_owner=Description
+edit_aliascopy=Mail aliases mode
 edit_email=Contact email
 edit_email_def=Administrator's mailbox
 edit_passwd=Administration password
@@ -1069,6 +1070,8 @@ save_status=Changing hostname and email in website status monitor ..
 save_statusssl=Changing hostname and email in SSL website status monitor ..
 save_etemplate=Invalid template selected
 save_fixvirts=Changing domain name in mail aliases ..
+save_aliascopy0=Switching to catchall alias mode ..
+save_aliascopy1=Switching to alias copy mode ..
 
 luser_err=Failed to save local mailbox
 luser_etaken=A user with the same name already exists

@@ -784,5 +784,5 @@ Added a Module Config option to make the Unix group name for a new domain always
 Moved the Administration username field into the first (visible) section of the Create Virtual Server page.
 Cron jobs created by Virtualmin will still be recognized even if manually modified to redirect output or add other pre- and post-commands.
 Virtualmin API scripts run via HTTP are now executed within the same process, which should make them about twice as fast.
-Alias mail domains can now be implemented by copying virtusers into the alias rather than using a catchall. Under Postfix this allows email to invalid addresses in the alias domain to be rejected at the SMTP level. The default for this can be changed on the Server Templates page under Mail for domain.
+Alias mail domains can now be implemented by copying virtusers into the alias rather than using a catchall. Under Postfix this allows email to invalid addresses in the alias domain to be rejected at the SMTP level. The default for this can be changed on the Server Templates page under Mail for domain, and it can be changed for existing domains on the Edit Virtual Server page.
 Added the modify-aliascopy.pl command-line program to change the email aliasing mode (from catchall to copying virtusers).

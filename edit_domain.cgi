@@ -199,6 +199,15 @@ if (!$aliasdom) {
 print &ui_table_row($text{'edit_owner'},
 		    &ui_textbox("owner", $d->{'owner'}, 50), 1, \@tds);
 
+# Show alias mode
+&require_mail();
+if ($d->{'alias'} && $supports_aliascopy && $d->{'mail'}) {
+	print &ui_table_row($text{'edit_aliascopy'},
+		    &ui_radio("aliascopy", int($d->{'aliascopy'}),
+			      [ [ 1, $text{'tmpl_aliascopy1'} ],
+				[ 0, $text{'tmpl_aliascopy0'} ] ]));
+	}
+
 if (!$parentdom) {
 	# Show owner's email address and password
 	print &ui_table_row($text{'edit_email'},
@@ -216,7 +225,6 @@ if (!$parentdom) {
 
 print &ui_hidden_table_end("config");
 
-
 # Related servers section
 @aliasdoms = &get_domain_by("alias", $d->{'id'});
 @subdoms = &get_domain_by("parent", $d->{'id'}, "alias", undef);
@@ -225,17 +233,17 @@ if (@aliasdoms || @subdoms) {
 				     "subs", 0);
 	}
 
-# Show any alias domains
-if (@aliasdoms) {
-	print &ui_table_row($text{'edit_aliasdoms'},
-		&domains_list_links(\@aliasdoms, "alias", $d->{'dom'}), 3,
-		\@tds);
-	}
-
 # Show any sub-servers
 if (@subdoms) {
 	print &ui_table_row($text{'edit_subdoms'},
 		&domains_list_links(\@subdoms, "parent", $d->{'dom'}), 3,
+		\@tds);
+	}
+
+# Show any alias domains
+if (@aliasdoms) {
+	print &ui_table_row($text{'edit_aliasdoms'},
+		&domains_list_links(\@aliasdoms, "alias", $d->{'dom'}), 3,
 		\@tds);
 	}
 
