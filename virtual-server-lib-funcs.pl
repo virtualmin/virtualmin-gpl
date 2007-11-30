@@ -2349,6 +2349,7 @@ else {
 sub domains_table
 {
 local ($doms, $checks) = @_;
+local $usercounts = &count_domain_users();
 local @table_features = $config{'show_features'} ?
     (grep { $_ ne 'webmin' && $_ ne 'mail' &&
 	    $_ ne 'unix' && $_ ne 'dir' } @features) : ( );
@@ -2412,15 +2413,15 @@ foreach $d (sort { $a->{$sortfield} cmp $b->{$sortfield} ||
 		push(@cols, $d->{$f} ? $text{'yes'} : $text{'no'})
 			if ($config{$f});
 		}
-	local @users = &list_domain_users($d, 0, 1, $qshow ? 0 : 1, 1);
-	local ($duser) = grep { $_->{'user'} eq $d->{'user'} } @users;
 	if (&can_domain_have_users($d)) {
 		# Link to users
+		local $uc = int($usercounts->{$d->{'id'}});
 		if (&can_edit_users()) {
-			push(@cols, sprintf("%d&nbsp;(<a href='list_users.cgi?dom=$d->{'id'}'>$text{'index_list'}</a>)\n", scalar(@users)));
+			push(@cols, $uc."&nbsp;(<a href='list_users.cgi?".
+				"dom=$d->{'id'}'>$text{'index_list'}</a>)");
 			}
 		else {
-			push(@cols, scalar(@users));
+			push(@cols, $uc);
 			}
 		}
 	else {
