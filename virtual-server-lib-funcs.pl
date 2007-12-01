@@ -9554,7 +9554,7 @@ sub domain_redirect
 # and icons
 sub get_template_pages
 {
-local @tmpls = ( 'features', 'tmpl', 'user', 'update',
+local @tmpls = ( 'features', 'tmpl', 'user', 'update', 'shells',
    $config{'localgroup'} ? ( 'local' ) : ( ),
    'bw',
    $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'dynip', 'resels',
@@ -9592,6 +9592,7 @@ local %tmplcat = (
 	'fields' => 'custom',
 	'links' => 'custom',
 	'styles' => 'custom',
+	'shells' => 'custom',
 	);
 local %nonew = ( 'history', 1 );
 local @tlinks = map { $nonew{$_} ? "history.cgi"
@@ -11648,6 +11649,76 @@ $user ||= "root";
 local @rv = grep { $_->{'user'} eq $user &&
 	     $_->{'command'} =~ /(^|[ \|\&;])\Q$cmd\E($|[ \|\&><;])/ } @$jobs;
 return wantarray ? @rv : $rv[0];
+}
+
+# list_available_shells()
+# Returns a list of shells assignable to domain owners and/or mailboxes.
+# Each is a hash ref with shell, desc, owner and mailbox keys.
+sub list_available_shells
+{
+local @rv;
+if (-r $custom_shells_file) {
+	# Read shells data file
+	open(SHELLS, $custom_shells_file);
+	while(<SHELLS>) {
+		s/\r|\n//g;
+		local %shell = map { split(/=/, $_, 2) } split(/\t+/, $_);
+		push(@rv, \%shell);
+		}
+	close(SHELLS);
+	}
+else {
+	# Fake up from config file and known shells
+	push(@rv, { 'shell' => $config{'shell'},
+		    'desc' => $text{'shells_mailbox'},
+		    'mailbox' => 1,
+		    'default' => 1,
+		    'avail' => 1 });
+	push(@rv, { 'shell' => $config{'ftp_shell'},
+		    'desc' => $text{'shells_mailboxftp'},
+		    'mailbox' => 1,
+		    'avail' => 1 });
+	if ($config{'jail_shell'}) {
+		push(@rv, { 'shell' => $config{'jail_shell'},
+			    'desc' => $text{'shells_mailboxjail'},
+			    'mailbox' => 1,
+			    'avail' => 1 });
+		}
+	local %done;
+	foreach my $us (&get_unix_shells()) {
+		local %shell = ( 'shell' => $us->[1],
+				 'desc' => $text{'shells_'.$us->[0]},
+				 'id' => $us->[0],
+				 'owner' => 1 );
+		if ($us->[1] eq $config{'unix_shell'}) {
+			$shell{'default'} = 1;
+			}
+		if (!$done{$us->[0]}++) {
+			$shell{'avail'} = 1;
+			}
+		push(@rv, \%shell);
+		}
+	}
+return @rv;
+}
+
+# save_available_shells(&shells|undef)
+# Updates the list of custom shells available, or resets to the built-in
+# defaults if undef is given
+sub save_available_shells
+{
+local ($shells) = @_;
+if ($shells) {
+	&open_lock_tempfile(SHELLS, ">$custom_shells_file");
+	foreach my $s (@$shells) {
+		&print_tempfile(SHELLS,
+			join("\t", map { $_."=".$s->{$_} } keys %$s),"\n");
+		}
+	&close_tempfile(SHELLS);
+	}
+else {
+	&unlink_logged($custom_shells_file);
+	}
 }
 
 $done_virtual_server_lib_funcs = 1;

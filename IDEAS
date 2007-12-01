@@ -75,6 +75,12 @@
 	 - no need for variable to not load plugins
 
  - allow shells list (with descriptions) to be configurable for domain owners
+	- GPL too
+	- remove from config.info
+	- include in backups (config)
+	- command-line setting
+	- mode to use built-in defaults?
+	- validate after saving, based on /etc/shells
+	- change all code that uses shells from config
 
  - pages that do multiple remote calls fail on later ones?
-

@@ -557,6 +557,7 @@ if ($in{"ugroup_mode"} == 2) {
 sub get_unix_shells
 {
 # Read FTP-capable shells
+local @rv;
 local $_;
 local @shells;
 open(SHELLS, "/etc/shells");

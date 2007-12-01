@@ -3915,3 +3915,23 @@ startscript_title=Start Rails Server
 startscript_doing=Starting up the Rails server process for $1 ..
 startscript_failed=.. failed : $1
 restartscript_title=Restart Rails Server
+
+newshells_title=Custom Shells
+newshells_descr=This page allows you to customize the shells that are available to virtual server administrators and mail/FTP users to meet your site's needs. Custom shells are often used to grant users access to FTP, SSH or other services.
+newshells_defs=Available shells for admins and mailboxes :
+newshells_defs1=Virtualmin built-in defaults
+newshells_defs0=Custom shells below ..
+newshells_shell=Path to shell
+newshells_desc=Description
+newshells_owner=Admin?
+newshells_mailbox=Mailbox?
+newshells_default=Default?
+newshells_avail=Enabled?
+
+shells_mailbox=POP3 / IMAP login only
+shells_mailboxftp=POP3, IMAP and FTP
+shells_mailboxjail=POP3, IMAP and jailed FTP
+shells_nologin=POP3 / IMAP login only
+shells_ftp=POP3, IMAP and FTP
+shells_ssh=POP3, IMAP, FTP and SSH login
+
