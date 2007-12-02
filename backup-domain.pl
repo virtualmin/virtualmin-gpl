@@ -84,6 +84,10 @@ while(@ARGV > 0) {
 		$optf && $optn && $optv || &usage("Invalid option specification");
 		$opts{$optf}->{$optn} = $optv;
 		}
+	elsif ($a eq "--mailfiles") {
+		# Convenience flag for --option mail mailfiles 1
+		$opts{'mail'}->{'mailfiles'} = 1;
+		}
 	elsif ($a eq "--virtualmin") {
 		$v = shift(@ARGV);
 		&indexof($v, @virtualmin_backups) >= 0 ||
@@ -189,6 +193,7 @@ print "                        [--separate] | [--newformat]\n";
 print "                        [--onebyone]\n";
 print "                        [--all-virtualmin] | [--virtualmin config]\n";
 print "                        [--option feature name value]\n";
+print "                        [--mailfiles]\n";
 print "\n";
 print "Multiple domains may be specified with multiple --domain parameters.\n";
 print "Features must be specified using their short names, like web and dns.\n";
