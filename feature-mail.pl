@@ -723,7 +723,11 @@ elsif ($config{'mail_system'} == 0) {
 	local ($lv) = grep { lc($_->{'from'}) eq $_[0] } @virts;
 	$found++ if ($lv);
 	local @md = split(/[, ]+/,&postfix::get_current_value("mydestination"));
-	$found++ if (&indexof($_[0], @md) >= 0);
+	local $hostname = lc(&get_system_hostname());
+	foreach my $md (@md) {
+		$found++ if (lc($md) eq lc($_[0]) ||
+			     $md eq '$myhostname' && lc($_[0]) eq $hostname);
+		}
 	}
 elsif ($config{'mail_system'} == 2) {
 	# Check qmail rcpthosts and virtualdomains files
