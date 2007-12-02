@@ -1587,6 +1587,10 @@ local $umf = &user_mail_file($_[0]);
 if ($umf) {
 	&system_logged("rm -rf ".quotemeta($umf));
 	}
+&foreign_require("mailboxes", "mailboxes-lib.pl");
+if (defined(&mailboxes::delete_user_index_files)) {
+	&mailboxes::delete_user_index_files($_[0]->{'user'});
+	}
 }
 
 # rename_mail_file(&user, &olduser)
