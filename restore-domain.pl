@@ -71,6 +71,10 @@ while(@ARGV > 0) {
 		$optf && $optn && $optv || &usage("Invalid option specification");
 		$opts{$optf}->{$optn} = $optv;
 		}
+	elsif ($a eq "--mailfiles") {
+		# Convenience flag for --option mail mailfiles 1
+		$opts{'mail'}->{'mailfiles'} = 1;
+		}
 	elsif ($a eq "--virtualmin") {
 		$v = shift(@ARGV);
 		&indexof($v, @virtualmin_backups) >= 0 ||
