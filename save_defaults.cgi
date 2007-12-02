@@ -48,10 +48,11 @@ if (&has_server_quotas()) {
 		}
 	}
 
-# Save FTP login
+# Save default shell
 if (&can_mailbox_ftp()) {
-	$user->{'shell'} = $in{'ftp'} == 1 ? $config{'ftp_shell'} :
-			 $in{'ftp'} == 3 ? $config{'jail_shell'} : $in{'shell'};
+	&check_available_shell($in{'shell'}, 'mailbox', $user->{'shell'}) ||
+		&error($text{'user_eshell'});
+	$user->{'shell'} = $in{'shell'};
 	}
 
 # Save mail forwarding

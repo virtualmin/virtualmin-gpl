@@ -80,12 +80,10 @@
 	- GPL too
 	- remove from config.info
 	- include in backups (config)
-	- command-line setting
+	- command-line setting for domain owner
 	- fix module config check
 	- change all code that uses shells from config (user list too)
-	- mass user updates
-	- user defaults
-	- batch user creation
 	- migration user creation
+	- command-line program to list shells?
 
  - pages that do multiple remote calls fail on later ones?

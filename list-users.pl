@@ -53,6 +53,7 @@ if ($all) {
 else {
 	@doms = &get_domains_by_names_users(\@dnames, \@users, \&usage);
 	}
+@ashells = grep { $_->{'mailbox'} } &list_available_shells();
 
 foreach $d (@doms) {
 	@users = &list_domain_users($d, $owner, 0, 0, 0);
@@ -74,7 +75,15 @@ foreach $d (@doms) {
 			print "    Encrypted password: ",$pass,"\n";
 			print "    Disabled: ",($disable ? "Yes" : "No"),"\n";
 			print "    Home directory: ",$u->{'home'},"\n";
-			print "    FTP access: ",&ftp_shell($u),"\n";
+			($shell) = grep { $_->{'shell'} eq $u->{'shell'} }
+					@ashells;
+			print "    FTP access: ",
+			    ($shell->{'id'} eq 'nologin' ? "No" : "Yes"),"\n";
+			if ($shell) {
+				print "    Login permissions: ",
+				      $shell->{'desc'},"\n";
+				}
+			print "    Shell: ",$u->{'shell'},"\n";
 			print "    User type: ",($u->{'domainowner'} ? "Server owner" :
 						 $u->{'webowner'} ? "Website manager" :
 							"Normal user"),"\n";
@@ -135,10 +144,12 @@ foreach $d (@doms) {
 		printf $fmt, ("-" x 20), ("-" x 20), ("-" x 4), ("-" x 10), ("-" x 4),
 			     ("-" x 15);
 		foreach $u (@users) {
+			($shell) = grep { $_->{'shell'} eq $u->{'shell'} }
+					@ashells;
 			printf $fmt, &remove_userdom($u->{'user'}, $d),
 				    $u->{'real'},
 				    $u->{'email'} ? "Yes" : "No",
-				    &ftp_shell($u),
+				    $shell->{'id'} eq 'nologin' ? "No" : "Yes",
 				    scalar(@{$u->{'dbs'}}) || "No",
 				    $u->{'mailquota'} ? $u->{'qquota'} :
 				    &has_home_quotas() ? 
@@ -162,16 +173,5 @@ print "                       [--multiline]\n";
 print "                       [--include-owner]\n";
 print "                       [--user name]\n";
 exit(1);
-}
-
-sub ftp_shell
-{
-local ($u) = @_;
-return  !$u->{'unix'} && !$u->{'shell'} ? "Mail only" :
-        $u->{'shell'} eq $config{'ftp_shell'} ? "Yes" :
-        $config{'jail_shell'} &&
-	$u->{'shell'} eq $config{'jail_shell'} ? "Jailed" :
-	$u->{'shell'} eq $config{'shell'} ? "No" :
-	"Shell $u->{'shell'}";
 }
 

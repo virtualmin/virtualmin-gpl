@@ -15,6 +15,10 @@ if (!$module_name) {
 	$< == 0 || die "modify-user.pl must be run as root";
 	}
 
+# Get shells
+@ashells = grep { $_->{'mailbox'} && $_->{'avail'} } &list_available_shells();
+($nologin_shell, $ftp_shell, $jailed_shell) = &get_common_available_shells();
+
 # Parse command-line args
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
@@ -78,14 +82,17 @@ while(@ARGV > 0) {
 		$newusername =~ /^[^ \t:]+$/ || &error("Invalid new username");
 		}
 	elsif ($a eq "--enable-ftp") {
-		$enable_ftp = 1;
+		$shell = $ftp_shell;
 		}
 	elsif ($a eq "--disable-ftp") {
-		$disable_ftp = 1;
+		$shell = $nologin_shell;
 		}
 	elsif ($a eq "--jail-ftp") {
-		$config{'jail_shell'} || &usage("The --jail-ftp option cannot be used without an FTP jail shell specified on the Module Config page");
-		$jail_ftp = 1;
+		$shell = $jail_shell;
+		$shell || &usage("The --jail-ftp option cannot be used without an FTP jail shell specified on the Custom Shells page");
+		}
+	elsif ($a eq "--shell") {
+		$shell = { 'shell' => shift(@ARGV) };
 		}
 	elsif ($a eq "--add-group") {
 		$group = shift(@ARGV);
@@ -257,17 +264,10 @@ if (defined($newusername)) {
 		&rename_mail_file($user, $olduser);
 		}
 	}
-if ($enable_ftp) {
-	$user->{'unix'} || &usage("FTP cannot be enabled for non-Unix users");
-	$user->{'shell'} = $config{'ftp_shell'};
-	}
-elsif ($disable_ftp) {
-	$user->{'unix'} || &usage("FTP cannot be disabled for non-Unix users");
-	$user->{'shell'} = $config{'shell'};
-	}
-elsif ($jail_ftp) {
-	$user->{'unix'} || &usage("FTP cannot be enabled for non-Unix users");
-	$user->{'shell'} = $config{'jail_shell'};
+if ($shell) {
+	$user->{'unix'} ||
+		&usage("The shell cannot be changed for non-Unix users");
+	$user->{'shell'} = $shell->{'shell'};
 	}
 if (defined($nospam)) {
 	$user->{'nospam'} = $nospam;

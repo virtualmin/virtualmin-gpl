@@ -40,16 +40,10 @@ if (&has_server_quotas()) {
 			    $qquota eq "" || $qquota eq "none"), 1);
 	}
 
-# FTP login
+# Default shell
 if (&can_mailbox_ftp()) {
-	$ftp = $user->{'shell'} eq $config{'ftp_shell'} ? 1 :
-	       $user->{'shell'} eq $config{'jail_shell'} ? 3 : 2;
-        print &ui_table_row($text{'user_ftp'},
-                    &ui_radio('ftp', $ftp,
-                              [ [ 1, $text{'yes'} ],
-                                ( $config{'jail_shell'} ?
-                                        ( [ 3, $text{'user_jail'} ] ) : ( ) ),
-                                [ 2, $text{'no'} ] ]), 1);
+        print &ui_table_row($text{'user_ushell'},
+	    &available_shells_menu("shell", $user->{'shell'}, "mailbox"));
         }
 
 # Mail forwarding

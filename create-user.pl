@@ -16,6 +16,11 @@ if (!$module_name) {
 	$< == 0 || die "create-user.pl must be run as root";
 	}
 
+# Get shells
+@ashells = grep { $_->{'mailbox'} && $_->{'avail'} } &list_available_shells();
+($nologin_shell, $ftp_shell, $jailed_shell, $shell) =
+	&get_common_available_shells();
+
 # Parse command-line args
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
@@ -35,11 +40,13 @@ while(@ARGV > 0) {
 		$real = shift(@ARGV);
 		}
 	elsif ($a eq "--ftp") {
-		$ftp = 1;
+		$shell = $ftp_shell;
 		}
 	elsif ($a eq "--jailed-ftp") {
-		$config{'jail_shell'} || usage();
-		$ftp = 2;
+		$shell = $jailed_shell;
+		}
+	elsif ($a eq "--shell") {
+		$shell = { 'shell' => shift(@ARGV) };
 		}
 	elsif ($a eq "--noemail") {
 		$noemail++;
@@ -147,9 +154,7 @@ if ($user->{'person'}) {
 	$user->{'real'} = $real;
 	}
 if ($user->{'unix'}) {
-	$user->{'shell'} = $ftp == 1 ? $config{'ftp_shell'} :
-			   $ftp == 2 ? $config{'jail_shell'} :
-				       $config{'shell'};
+	$user->{'shell'} = $shell->{'shell'};
 	}
 if (!$user->{'fixedhome'}) {
 	if (defined($home)) {
@@ -269,9 +274,10 @@ if (!$user || $user->{'person'}) {
 	}
 if (!$user || $user->{'unix'}) {
 	print "                        [--ftp]\n";
-	if ($config{'jail_ftp'}) {
+	if ($jailed_shell) {
 		print "                        [--jail-ftp]\n";
 		}
+	print "                        [--shell /path/to/shell]\n";
 	}
 print "                        [--noemail]\n";
 print "                        [--extra email.address\@some.domain]\n";

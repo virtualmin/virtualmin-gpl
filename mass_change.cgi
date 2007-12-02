@@ -12,6 +12,7 @@ $d = &get_domain($in{'dom'});
 
 &lock_user_db();
 @users = &list_domain_users($d);
+@ashells = grep { $_->{'mailbox'} && $_->{'avail'} } &list_available_shells();
 
 # Get the users
 foreach $mu (@mass) {
@@ -149,31 +150,23 @@ foreach $user (@musers) {
 		}
 
 	# FTP login
-	if ($in{'ftp'} && &can_mailbox_ftp()) {
-		&$first_print($text{'mass_setftp'});
+	if (!$in{'shell_def'} && &can_mailbox_ftp()) {
+		&$first_print($text{'mass_setshell'});
+		($shell) = grep { $_->{'shell'} eq $in{'shell'} }
+				@ashells;
 		if (!$user->{'unix'}) {
 			&$second_print($text{'mass_eunix'});
 			}
-		elsif ($in{'ftp'} == 1) {
-			if ($user->{'shell'} ne $config{'ftp_shell'}) {
-				$user->{'shell'} = $config{'ftp_shell'};
+		elsif ($shell) {
+			if ($user->{'shell'} ne $in{'shell'}) {
+				$user->{'shell'} = $in{'shell'};
 				$changed++;
 				}
-			&$first_print($text{'mass_ftp1'});
+			&$second_print(&text('mass_shelldone',
+					     $shell->{'desc'}));
 			}
-		elsif ($in{'ftp'} == 2) {
-			if ($user->{'shell'} ne $config{'shell'}) {
-				$user->{'shell'} = $config{'shell'};
-				$changed++;
-				}
-			&$first_print($text{'mass_ftp2'});
-			}
-		elsif ($in{'ftp'} == 3) {
-			if ($user->{'shell'} ne $config{'jail_shell'}) {
-				$user->{'shell'} = $config{'jail_shell'};
-				$changed++;
-				}
-			&$first_print($text{'mass_ftp3'});
+		else {
+			&$second_print(&text('mass_shellbad'));
 			}
 		}
 
@@ -188,7 +181,7 @@ foreach $user (@musers) {
 				&set_pass_disable($user, 0);
 				$changed++;
 				}
-			&$first_print($text{'mass_disable1'});
+			&$second_print($text{'mass_disable1'});
 			}
 		elsif ($in{'disable'} == 2) {
 			# Disabling
@@ -196,7 +189,7 @@ foreach $user (@musers) {
 				&set_pass_disable($user, 1);
 				$changed++;
 				}
-			&$first_print($text{'mass_disable2'});
+			&$second_print($text{'mass_disable2'});
 			}
 		}
 

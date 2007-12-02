@@ -11658,6 +11658,9 @@ return wantarray ? @rv : $rv[0];
 sub list_available_shells
 {
 local @rv;
+if (defined(@list_available_shells_cache)) {
+	return @list_available_shells_cache;
+	}
 if (-r $custom_shells_file) {
 	# Read shells data file
 	open(SHELLS, $custom_shells_file);
@@ -11710,6 +11713,7 @@ else {
 		$firstclass->{'avail'} = 1;
 		}
 	}
+@list_available_shells_cache = @rv;
 return @rv;
 }
 
@@ -11726,9 +11730,11 @@ if ($shells) {
 			join("\t", map { $_."=".$s->{$_} } keys %$s),"\n");
 		}
 	&close_tempfile(SHELLS);
+	@list_available_shells_cache = @$shells;
 	}
 else {
 	&unlink_logged($custom_shells_file);
+	undef(@list_available_shells_cache);
 	}
 }
 
@@ -11777,6 +11783,30 @@ local ($type) = @_;
 local @ashells = grep { $_->{$type} && $_->{'avail'} } &list_available_shells();
 local ($def) = grep { $_->{'default'} } @ashells;
 return $def ? $def->{'shell'} : undef;
+}
+
+# check_available_shell(shell, type, [old])
+# Returns 1 if some shell is on the available list for this type
+sub check_available_shell
+{
+local ($shell, $type, $old) = @_;
+local @ashells = grep { $_->{$type} && $_->{'avail'} } &list_available_shells();
+local ($got) = grep { $_->{'shell'} eq $shell } @ashells;
+return $got || $old && $shell eq $old;
+}
+
+# get_common_available_shells()
+# Returns the nologin, FTP and jailed FTP shells for mailbox users, some of
+# which may be undef. Mainly for legacy use.
+sub get_common_available_shells
+{
+my @ashells = grep { $_->{'mailbox'} && $_->{'avail'} }
+		   &list_available_shells();
+my ($nologin_shell) = grep { $_->{'id'} eq 'nologin' } @ashells;
+my ($ftp_shell) = grep { $_->{'id'} eq 'ftp' } @ashells;
+my ($jailed_shell) = grep { $_->{'id'} eq 'ftp' && $_ ne $ftp_shell } @ashells;
+my ($def_shell) = grep { $_->{'default'} } @ashells;
+return ($nologin_shell, $ftp_shell, $jailed_shell, $def_shell);
 }
 
 $done_virtual_server_lib_funcs = 1;

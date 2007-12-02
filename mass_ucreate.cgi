@@ -32,6 +32,10 @@ elsif ($in{'file_def'} == 2) {
 	}
 $source =~ s/\r//g;
 
+# Get shells
+@ashells = grep { $_->{'mailbox'} && $_->{'avail'} } &list_available_shells();
+($nologin_shell, $ftp_shell, $jailed_shell) = &get_common_available_shells();
+
 # Do it!
 &ui_print_header(&domain_in($d), $text{'umass_title'}, "", "umass");
 
@@ -162,9 +166,24 @@ USER: foreach $line (@lines) {
 		$user->{'real'} = $real;
 		}
 	if ($user->{'unix'}) {
-		$user->{'shell'} = $ftp == 1 ? $config{'ftp_shell'} :
-				   $ftp == 2 ? $config{'jail_shell'} :
-					       $config{'shell'};
+		if ($ftp =~ /^\//) {
+			# Custom shell
+			($shell) = grep { $_->{'shell'} eq $ftp } @ashells;
+			if (!$shell) {
+				&line_error(&text('umass_eshell2', $ftp));
+				next USER;
+				}
+			}
+		else {
+			# Old-style number
+			$shell = $ftp == 1 ? $ftp_shell :
+				 $ftp == 2 ? $jailed_shell : $nologin_shell;
+			if (!$shell) {
+				&line_error(&text('umass_eshell'));
+				next USER;
+				}
+			}
+		$user->{'shell'} = $shell->{'shell'};
 		}
 	$user->{'passmode'} = 3;
 	$user->{'plainpass'} = $pass;

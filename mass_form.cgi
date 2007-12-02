@@ -42,13 +42,11 @@ print &ui_table_row($text{'mass_email'},
 
 # FTP login
 if (&can_mailbox_ftp()) {
-	print &ui_table_row($text{'mass_ftp'},
-		    &ui_radio('ftp', 0,
-			      [ [ 0, $text{'mass_leave'} ],
-				[ 1, $text{'mass_enable'} ],
-				( $config{'jail_shell'} ?
-					( [ 3, $text{'mass_jail'} ] ) : ( ) ),
-				[ 2, $text{'mass_disable'} ] ]));
+	print &ui_table_row($text{'mass_shell'},
+		&ui_radio('shell_def', 1, 
+			  [ [ 1, $text{'mass_leave'} ],
+			    [ 0, $text{'mass_set'} ] ])." ".
+		&available_shells_menu("shell", undef, "mailbox"));
 	}
 
 # Disable or enable
