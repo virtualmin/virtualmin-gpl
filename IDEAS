@@ -73,14 +73,19 @@
 	   plugin_defined call
 	 - no need for preloading their libs
 	 - no need for variable to not load plugins
+	 - module config option for loading module (full, core only, none)
+	 - update preloads after config change / feature change
 
  - allow shells list (with descriptions) to be configurable for domain owners
 	- GPL too
 	- remove from config.info
 	- include in backups (config)
 	- command-line setting
-	- mode to use built-in defaults?
-	- validate after saving, based on /etc/shells
-	- change all code that uses shells from config
+	- fix module config check
+	- change all code that uses shells from config (user list too)
+	- mass user updates
+	- user defaults
+	- batch user creation
+	- migration user creation
 
  - pages that do multiple remote calls fail on later ones?

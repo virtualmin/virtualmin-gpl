@@ -359,28 +359,9 @@ if ($anyother) {
 
 if (&can_mailbox_ftp() && !$mailbox && $user->{'unix'}) {
 	# Show FTP shell field
-	$ftp = $user->{'qmail'} && !$user->{'shell'} ? -2 :
-	       $user->{'shell'} eq $config{'ftp_shell'} ? 1 :
-	       $config{'jail_shell'} &&
-		$user->{'shell'} eq $config{'jail_shell'} ? 2 :
-	       $in{'new'} || $user->{'shell'} eq $config{'shell'} ? 0 : -1;
-	if ($ftp == -1) {
-		$ftpfield = &text('user_shell', "<tt>$user->{'shell'}</tt>");
-		}
-	elsif ($ftp == -2) {
-		$ftpfield = &text('user_qmail');
-		}
-	else {
-		local @opts = ( [ 1, $text{'yes'} ] );
-		if ($config{'jail_shell'}) {
-			push(@opts, [ 2, $text{'user_jail'} ]);
-			}
-		push(@opts, [ 0, $text{'no'} ]);
-		$ftpfield = &ui_radio("ftp", $ftp, \@opts);
-		}
-	print &ui_table_row(&hlink($text{'user_ftp'}, "uftp"),
-			    $ftpfield,
-			    2, \@tds);
+	print &ui_table_row(&hlink($text{'user_ushell'}, "ushell"),
+		&available_shells_menu("shell", $user->{'shell'}, "mailbox"),
+		2, \@tds);
 	}
 
 # Find and show all plugin features

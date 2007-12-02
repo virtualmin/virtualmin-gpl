@@ -3624,6 +3624,7 @@ sub users_table
 {
 local $can_quotas = &has_home_quotas() || &has_mail_quotas();
 local $can_qquotas = $config{'mail_system'} == 4 || $config{'mail_system'} == 5;
+local @ashells = &list_available_shells();
 
 # Work out table header
 local @cols;
@@ -3638,7 +3639,7 @@ if ($can_qquotas) {
 if ($config{'show_mailsize'}) {
 	push(@cols, $text{'users_size'});
 	}
-push(@cols, $text{'users_ftp'});
+push(@cols, $text{'users_ushell'});
 if ($_[1]->{'mysql'} || $_[1]->{'postgres'}) {
 	push(@cols, $text{'users_db'});
 	}
@@ -3712,14 +3713,13 @@ foreach $u (@{$_[0]}) {
 			}
 		}
 
-	push(@cols,
-		$u->{'domainowner'} ? $text{'users_main'} :
-		!$u->{'unix'} && !$u->{'shell'} ? $text{'users_qmail'} :
-		$u->{'shell'} eq $config{'ftp_shell'} ? $text{'yes'} :
-		$config{'jail_shell'} &&
-		 $u->{'shell'} eq $config{'jail_shell'} ? $text{'users_jail'} :
-		$u->{'shell'} eq $config{'shell'} ? $text{'no'} :
-			&text('users_shell', "<tt>$u->{'shell'}</tt>"));
+	# Work out shell access level
+	local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} } @ashells;
+	push(@cols, !$u->{'shell'} ? $text{'users_qmail'} :
+		    !$shell ? &text('users_shell', "<tt>$u->{'shell'}</tt>") :
+		    $shell->{'desc'});
+#		    $shell->{'id'} eq 'nologin' ? $text{'no'} :
+#		    $shell->{'id'} eq 'ftp' ? $text{'yes'} : $shell->{'desc'});
 	if ($_[1]->{'mysql'} || $_[1]->{'postgres'}) {
 		push(@cols, $u->{'domainowner'} ? $text{'users_all'} :
 					   @{$u->{'dbs'}} ? $text{'yes'}
@@ -9554,12 +9554,13 @@ sub domain_redirect
 # and icons
 sub get_template_pages
 {
-local @tmpls = ( 'features', 'tmpl', 'user', 'update', 'shells',
+local @tmpls = ( 'features', 'tmpl', 'user', 'update',
    $config{'localgroup'} ? ( 'local' ) : ( ),
    'bw',
    $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'dynip', 'resels',
 		       'reseller', 'notify', 'scripts', 'styles' )
 		   : ( 'sharedips', 'dynip' ),
+   'shells',
    $virtualmin_pro && ($config{'spam'} || $config{'virus'}) ? ( 'sv' ) : ( ),
    &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
    &has_home_quotas() && !&has_quota_commands() ? ( 'quotacheck' ) : ( ),
@@ -11673,30 +11674,40 @@ else {
 		    'desc' => $text{'shells_mailbox'},
 		    'mailbox' => 1,
 		    'default' => 1,
-		    'avail' => 1 });
+		    'avail' => 1,
+		    'id' => 'nologin' });
 	push(@rv, { 'shell' => $config{'ftp_shell'},
 		    'desc' => $text{'shells_mailboxftp'},
 		    'mailbox' => 1,
-		    'avail' => 1 });
+		    'avail' => 1,
+		    'id' => 'ftp' });
 	if ($config{'jail_shell'}) {
 		push(@rv, { 'shell' => $config{'jail_shell'},
 			    'desc' => $text{'shells_mailboxjail'},
 			    'mailbox' => 1,
-			    'avail' => 1 });
+			    'avail' => 1,
+			    'id' => 'ftp' });
 		}
-	local %done;
+	local (%done, %classes, $defclass);
 	foreach my $us (&get_unix_shells()) {
+		next if (!-r $us->[1]);
+		next if ($done{$us->[1]}++);
 		local %shell = ( 'shell' => $us->[1],
 				 'desc' => $text{'shells_'.$us->[0]},
 				 'id' => $us->[0],
 				 'owner' => 1 );
 		if ($us->[1] eq $config{'unix_shell'}) {
 			$shell{'default'} = 1;
-			}
-		if (!$done{$us->[0]}++) {
 			$shell{'avail'} = 1;
+			$defclass = $us->[0];
 			}
 		push(@rv, \%shell);
+		$classes{$us->[0]}++;
+		}
+	# Only the default or first of each class are available
+	foreach my $c (grep { $_ ne $defclass } keys %classes) {
+		local ($firstclass) = grep { $_->{'id'} eq $c } @rv;
+		$firstclass->{'avail'} = 1;
 		}
 	}
 return @rv;
@@ -11719,6 +11730,53 @@ if ($shells) {
 else {
 	&unlink_logged($custom_shells_file);
 	}
+}
+
+# available_shells_menu(name, [value], 'owner'|'mailbox')
+# Returns HTML for selecting a shell for a mailbox or domain owner
+sub available_shells_menu
+{
+local ($name, $value, $type) = @_;
+local @tshells = grep { $_->{$type} } &list_available_shells();
+local @ashells = grep { $_->{'avail'} } @tshells;
+if (defined($value)) {
+	# Is current shell on the list?
+	local ($got) = grep { $_->{'shell'} } @ashells;
+	if (!$got) {
+		($got) = grep { $_->{'shell'} } @tshells;
+		if ($got) {
+			# Current exists but is not available .. make it visible
+			push(@ashells, $got);
+			}
+		else {
+			# Totally unknown
+			if ($value) {
+				push(@ashells, { 'shell' => $value,
+						 'desc' => $value });
+				}
+			else {
+				push(@ashells, { 'shell' => '',
+					 'desc' => $text{'shells_none'} });
+				}
+			}
+		}
+	}
+else {
+	local ($def) = grep { $_->{'default'} } @ashells;
+	$value = $def ? $def->{'shell'} : undef;
+	}
+return &ui_select($name, $value,
+		  [ map { [ $_->{'shell'}, $_->{'desc'} ] } @ashells ]);
+}
+
+# default_available_shell('owner'|'mailbox')
+# Returns the default shell for a mailbox user or domain owner
+sub default_available_shell
+{
+local ($type) = @_;
+local @ashells = grep { $_->{$type} && $_->{'avail'} } &list_available_shells();
+local ($def) = grep { $_->{'default'} } @ashells;
+return $def ? $def->{'shell'} : undef;
 }
 
 $done_virtual_server_lib_funcs = 1;

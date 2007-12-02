@@ -312,14 +312,13 @@ else {
 		if ($user->{'unix'}) {
 			if (&can_mailbox_ftp()) {
 				# Shell can be set based on FTP flag
-				$user->{'shell'} =
-					$in{'ftp'} == 1 ? $config{'ftp_shell'} :
-					$in{'ftp'} == 2 ? $config{'jail_shell'} :
-							  $config{'shell'};
+				$user->{'shell'} = $in{'shell'};
 				}
 			elsif ($in{'new'}) {
-				# For new users, shell is always non-FTP
-				$user->{'shell'} = $config{'shell'};
+				# If the shell cannot be edited, always use
+				# the default.
+				$user->{'shell'} =
+					&default_available_shell('mailbox');
 				}
 			}
 		if (!$user->{'fixedhome'} && !$user->{'brokenhome'}) {
@@ -535,11 +534,8 @@ else {
 				}
 
 			# Update shell
-			if (defined($in{'ftp'})) {
-				$user->{'shell'} =
-				    $in{'ftp'} == 1 ? $config{'ftp_shell'} :
-				    $in{'ftp'} == 2 ? $config{'jail_shell'} :
-						      $config{'shell'};
+			if (defined($in{'shell'})) {
+				$user->{'shell'} = $in{'shell'};
 				}
 
 			# Set mail file location

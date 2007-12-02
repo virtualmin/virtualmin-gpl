@@ -19,7 +19,6 @@ foreach $s (@shells) {
 print &ui_form_start("save_newshells.cgi", "post");
 
 # Use defaults?
-# XXX javascript to disable
 print "<b>$text{'newshells_defs'}</b>\n";
 $defs = -r $custom_shells_file ? 0 : 1;
 $js1 = &js_disable_inputs(\@fields, [ ], "onClick");
@@ -35,17 +34,23 @@ print &ui_columns_start([ $text{'newshells_avail'},
 			  $text{'newshells_desc'},
 			  $text{'newshells_owner'},
 			  $text{'newshells_mailbox'},
-			  $text{'newshells_default'} ]);
+			  $text{'newshells_default'},
+			  $text{'newshells_id'},
+			 ]);
 $i = 0;
-foreach $s (@shells) {
+foreach $s (@shells, { }) {
 	print &ui_checked_columns_row([
 		&ui_textbox("shell_$i", $s->{'shell'}, 25, $defs),
 		&ui_textbox("desc_$i", $s->{'desc'}, 40, $defs),
 		&ui_checkbox("owner_$i", 1, " ", $s->{'owner'}, undef, $defs),
 		&ui_checkbox("mailbox_$i", 1, " ", $s->{'mailbox'},
 			     undef, $defs),
-		&ui_checkbox("default_$i", $i, " ", $s->{'default'},
+		&ui_checkbox("default_$i", 1, " ", $s->{'default'},
 			     undef, $defs),
+		&ui_select("id_$i", $s->{'id'},
+			   [ [ 'nologin', $text{'limits_shell_nologin'} ],
+			     [ 'ftp', $text{'limits_shell_ftp'} ],
+			     [ 'ssh', $text{'limits_shell_ssh'} ] ]),
 		], \@tds, "avail_$i", 1, $s->{'avail'}, $defs);
 	$i++;
 	}

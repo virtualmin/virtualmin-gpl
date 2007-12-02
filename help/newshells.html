@@ -1,0 +1,39 @@
+<header>Custom Shells</header>
+
+This page allows you to customize the Unix shells available to mailbox users and
+virtual server administrators. The shell is used by servers like ProFTPd and
+SSHd to control the types of logins allowed for each user, such as email,
+FTP and remote shell access. <p>
+
+When <b>Virtualmin built-in defaults</b> is selected, the shells available
+are determined automatically by Virtualmin, which is typically satisfactory
+for most systems. If you want to modify them, select <b>Custom shells below</b>
+and make changes to the table. <p>
+
+For each shell, the following fields can be edited :
+<dl>
+<dt><b>Enabled?</b>
+<dd>This checkbox determines if the shell is visible when creating or editing
+    users.
+
+<dt><b>Path to shell</b>
+<dd>This must contain the full path to the shell command, like <tt>/bin/sh</tt> or <tt>/bin/false</tt>.
+
+<dt><b>Description</b>
+<dd>This is the title that will appear in the menu when the shell is selected.
+
+<dt><b>Admin?</b>
+<dd>Check this box if you want the shell to be made available for virtual server administrator Unix users.
+
+<dt><b>Mailbox?</b>
+<dd>Check this box if you want the shell to be made available for mail / FTP users.
+
+<dt><b>Default?</b>
+<dd>Exactly one shell for administrators and one for mailboxes must have this entry checked, indicating that it is the default for Unix users of that type.
+
+<dt><b>Access</b>
+<dd>This menu indicates to Virtualmin what type of access is granted by this shell. When adding your own, you should select if it allows FTP and/or SSH or not.
+</dl>
+
+<footer>
+
