@@ -76,5 +76,3 @@
 	 - module config option for loading module (full, core only, none)
 	 - update preloads after config change / feature change
 
- - pages that do multiple remote calls fail on later ones?
-

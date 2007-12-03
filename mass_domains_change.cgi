@@ -309,11 +309,20 @@ foreach $d (@doms) {
 	&$second_print($text{'setup_done'});
 
 	# Call any theme post command
-	if (defined(&theme_post_save_domain)) {
+	if (defined(&theme_post_save_domain) &&
+	    !defined(&theme_post_save_domains)) {
 		&theme_post_save_domain($d, 'modify');
 		}
+	else {
+		push(@das, $d, 'modify');
+		}
 	}
+
+# Run post-change commands
 &run_post_actions();
+if (defined(&theme_post_save_domains)) {
+	&theme_post_save_domains(@das);
+	}
 &webmin_log("modify", "domains", scalar(@doms));
 
 &ui_print_footer("", $text{'index_return'});

@@ -89,6 +89,7 @@ if (!$in{'confirm'}) {
 else {
 	# Strip out all sub-domains of domains to be deleted
 	@doms = grep { !$_->{'parent'} || !$idmap{$_->{'parent'}} } @doms;
+	@das = ( );
 
 	foreach $d (@doms) {
 		# Go ahead and delete this domain and all sub-domains ..
@@ -101,11 +102,18 @@ else {
 		&$second_print($text{'setup_done'});
 
 		# Call any theme post command
-		if (defined(&theme_post_save_domain)) {
+		if (defined(&theme_post_save_domain) &&
+		    !defined(&theme_post_save_domains)) {
 			&theme_post_save_domain($d, 'delete');
+			}
+		else {
+			push(@das, $d, 'delete');
 			}
 		}
 	&run_post_actions();
+	if (defined(&theme_post_save_domains)) {
+		&theme_post_save_domains(@das);
+		}
 
 	&webmin_log("delete", "domains", scalar(@doms));
 	&ui_print_footer("", $text{'index_return'});

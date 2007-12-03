@@ -359,13 +359,20 @@ foreach $line (@lines) {
 		}
 
 	# Call any theme post command
-	if (defined(&theme_post_save_domain)) {
+	if (defined(&theme_post_save_domain) &&
+	    !defined(&theme_post_save_domains)) {
 		&theme_post_save_domain(\%dom, 'create');
+		}
+	else {
+		push(@das, \%dom, 'create');
 		}
 	}
 
 # Run post-create commands
 &run_post_actions();
+if (defined(&theme_post_save_domains)) {
+	&theme_post_save_domains(@das);
+	}
 
 print "<p>\n";
 print &text('cmass_complete', $count, $ecount),"<br>\n";
