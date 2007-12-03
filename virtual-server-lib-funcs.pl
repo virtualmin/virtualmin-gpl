@@ -2840,22 +2840,18 @@ else {
 	}
 $hash{'plainpass'} ||= "";
 $hash{'extra'} = join(" ", @{$user->{'extraemail'}});
-if ($user->{'domainowner'}) {
-	# Check SSH and FTP shells
-	local ($sh) = grep { $_->[1] eq $user->{'shell'} } &get_unix_shells();
-	if ($sh) {
-		$hash{'ftp'} = $sh->[0] eq 'nologin' ? 0 : 1;
-		}
-	else {
-		# Assume yes if unknown shell
-		$hash{'ftp'} = 1;
-		}
+
+# Check SSH and FTP shells
+local ($shell) = grep { $_->{'shell'} eq $user->{'shell'} }
+		      &list_available_shells();
+if ($shell) {
+	$hash{'ftp'} = $shell->{'id'} eq 'nologin' ? 0 : 1;
+	$hash{'ssh'} = $shell->{'id'} eq 'ssh' ? 1 : 0;
 	}
 else {
-	# Compare shell
-	$hash{'ftp'} = $user->{'shell'} eq $config{'ftp_shell'} ||
-		       $config{'jail_shell'} &&
-			$user->{'shell'} eq $config{'jail_shell'} ? 1 : 0;
+	# Assume FTP but no SSH if unknown shell
+	$hash{'ftp'} = 1;
+	$hash{'ssh'} = 0;
 	}
 
 # Make quotas use nice units
@@ -7997,7 +7993,7 @@ if (!$user->{'noprimary'}) {
 			   $_[0]->{'mail'} ? "newuser\@$_[0]->{'dom'}" : undef;
 	}
 $user->{'secs'} = [ ];
-$user->{'shell'} = $config{'shell'};
+$user->{'shell'} = &default_available_shell('mailbox');
 
 # Merge in configurable initial user settings
 if ($_[0]) {
@@ -8024,6 +8020,8 @@ if ($_[0]) {
 
 if ($_[2] && $user->{'unix'}) {
 	# This is a website management user
+	local (undef, $ftp_shell, undef, $def_shell) =
+		&get_common_available_shells();
 	$user->{'webowner'} = 1;
 	$user->{'fixedhome'} = 0;
 	$user->{'home'} = &public_html_dir($_[0]);
@@ -8034,7 +8032,7 @@ if ($_[2] && $user->{'unix'}) {
 	$user->{'noalias'} = 1;
 	$user->{'nocreatehome'} = 1;
 	$user->{'nomailfile'} = 1;
-	$user->{'shell'} = $config{'ftp_shell'};
+	$user->{'shell'} = $ftp_shell || $def_shell;
 	delete($user->{'email'});
 	}
 
@@ -8981,6 +8979,9 @@ local %gtaken;
 local %taken;
 &build_taken(undef, \%taken);
 
+# Find FTP-capable shells
+local %shellmap = map { $_->{'shell'}, $_->{'id'} } &list_available_shells();
+
 foreach my $g ("mailgroup", "ftpgroup", "dbgroup") {
 	local $gn = $tmpl->{$g};
 	next if (!$gn || $gn eq "none");
@@ -8992,7 +8993,9 @@ foreach my $g ("mailgroup", "ftpgroup", "dbgroup") {
 		}
 	elsif ($g eq "ftpgroup") {
 		@inusers = grep { $_->{'unix'} &&
-				  $_->{'shell'} ne $config{'shell'} } @$users;
+				  $shellmap{$_->{'shell'}} &&
+				  $shellmap{$_->{'shell'}} ne 'nologin' }
+				@$users;
 		}
 	elsif ($g eq "dbgroup") {
 		@inusers = grep { $_->{'unix'} && @{$_->{'dbs'}} > 0 } @$users;
@@ -10671,13 +10674,14 @@ while(<SHELLS>) {
 	$shells{$_}++;
 	}
 close(SHELLS);
-if ($shells{$config{'shell'}}) {
-	&$second_print(&text('check_eshell', "<tt>$config{'shell'}</tt>",
-		    "<tt>/etc/shells</tt>"));
+local ($nologin_shell, $ftp_shell) = &get_common_available_shells();
+if ($nologin_shell && $shells{$nologin_shell->{'shell'}}) {
+	&$second_print(&text('check_eshell',
+		"<tt>$nologin_shell->{'shell'}</tt>", "<tt>/etc/shells</tt>"));
 	}
-if (!$shells{$config{'ftp_shell'}}) {
-	&$second_print(&text('check_eftpshell', "<tt>$config{'ftp_shell'}</tt>",
-		    "<tt>/etc/shells</tt>"));
+if ($ftp_shell && !$shells{$ftp_shell->{'shell'}}) {
+	&$second_print(&text('check_eftpshell',
+		"<tt>$ftp_shell->{'shell'}</tt>", "<tt>/etc/shells</tt>"));
 	}
 
 # Check for problem module config settings
@@ -11750,9 +11754,9 @@ local @tshells = grep { $_->{$type} } &list_available_shells();
 local @ashells = grep { $_->{'avail'} } @tshells;
 if (defined($value)) {
 	# Is current shell on the list?
-	local ($got) = grep { $_->{'shell'} } @ashells;
+	local ($got) = grep { $_->{'shell'} eq $value } @ashells;
 	if (!$got) {
-		($got) = grep { $_->{'shell'} } @tshells;
+		($got) = grep { $_->{'shell'} eq $value } @tshells;
 		if ($got) {
 			# Current exists but is not available .. make it visible
 			push(@ashells, $got);

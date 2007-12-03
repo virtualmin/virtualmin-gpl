@@ -194,7 +194,7 @@ if ($in{'confirm'}) {
 						"encrypt_password", $in{'pass'}),
 				   'real', $owner,
 				   'home', $dom{'home'},
-				   'shell', $config{'unix_shell'},
+				   'shell', &default_available_shell('owner'),
 				   'mailbox', $cruser,
 				   'dom', $in{'dom'},
 				 );

@@ -69,6 +69,12 @@ local $daily = "$root/backup/cpbackup/daily";
 local $datastore = "$root/.cpanel-datastore";
 local $tmpl = &get_template($template);
 
+# Get shells for users
+local ($nologin_shell, $ftp_shell, undef, $def_shell) =
+	&get_common_available_shells();
+$nologin_shell ||= $def_shell;
+$ftp_shell ||= $def_shell;
+
 # Work out the username again if it wasn't supplied
 if (!$user) {
 	local ($homedir) = glob("$root/*/homedir");
@@ -542,7 +548,7 @@ if ($got{'mail'}) {
 		$uinfo->{'gid'} = $dom{'gid'};
 		$uinfo->{'real'} = $mreal;
 		$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$muser";
-		$uinfo->{'shell'} = $config{'shell'};
+		$uinfo->{'shell'} = $nologin_shell;
 		$uinfo->{'email'} = "$muser\@$dom";
 		$uinfo->{'qquota'} = $quota{$muser};
 		$uinfo->{'quota'} = $quota{$muser};
@@ -826,7 +832,7 @@ if ($got{'mysql'}) {
 				$myuinfo->{'gid'} = $dom{'gid'};
 				$myuinfo->{'real'} = "MySQL user";
 				$myuinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$myuser";
-				$myuinfo->{'shell'} = $config{'shell'};
+				$myuinfo->{'shell'} = $nologin_shell;
 				delete($myuinfo->{'email'});
 				$myusers{$myuser} = $myuinfo;
 				}
@@ -901,7 +907,7 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 		if ($already) {
 			# Turn on FTP for existing user
 			local $olduinfo = { %$already };
-			$already->{'shell'} = $config{'ftp_shell'};
+			$already->{'shell'} = $ftp_shell;
 			&modify_user($already, $olduinfo, \%dom);
 			}
 		else {
@@ -915,7 +921,7 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 			$fuinfo->{'gid'} = $dom{'gid'};
 			$fuinfo->{'real'} = "FTP user";
 			$fuinfo->{'home'} = $fhome;
-			$fuinfo->{'shell'} = $config{'ftp_shell'};
+			$fuinfo->{'shell'} = $ftp_shell;
 			delete($fuinfo->{'email'});
 			$usermap{$fuser} = $fuinfo;
 			&create_user($fuinfo, \%dom);

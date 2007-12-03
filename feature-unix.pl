@@ -66,7 +66,7 @@ else {
 				 $_[0]->{'pass'}),
 	   'real', $_[0]->{'owner'},
 	   'home', $_[0]->{'home'},
-	   'shell', $config{'unix_shell'},
+	   'shell', &default_available_shell('owner'),
 	   'mailbox', $_[0]->{'user'},
 	   'dom', $_[0]->{'dom'},
 	   'dom_prefix', substr($_[0]->{'dom'}, 0, 1),
@@ -609,12 +609,12 @@ local ($group) = grep { $_->{'group'} eq $denied_ssh_group } @allgroups;
 return 0 if (!$group);
 
 # Find domain owners who can't login
-local @shells = &get_unix_shells();
+local @shells = &list_available_shells();
 foreach my $d (&list_domains(), $newd) {
 	next if ($d->{'parent'} || !$d->{'unix'} || $d eq $deld);
 	local $user = &get_domain_owner($d);
-	local ($sinfo) = grep { $_->[1] eq $user->{'shell'} } @shells;
-	if ($sinfo && $sinfo->[0] ne 'ssh') {
+	local ($sinfo) = grep { $_->{'shell'} eq $user->{'shell'} } @shells;
+	if ($sinfo && $sinfo->{'id'} ne 'ssh') {
 		# On the denied list..
 		push(@members, $user->{'user'});
 		}

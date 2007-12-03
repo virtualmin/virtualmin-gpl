@@ -58,6 +58,11 @@ sub migration_plesk_migrate
 local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
        $prefix, $virtalready, $email) = @_;
 
+# Get shells for users
+local ($nologin_shell, $ftp_shell, undef, $def_shell) =
+	&get_common_available_shells();
+$nologin_shell ||= $def_shell;
+
 # Extract backup and read the dump file
 local ($ok, $root) = &extract_plesk_dir($file);
 local $dump = &read_plesk_xml("$root/dump.xml");
@@ -361,7 +366,7 @@ foreach my $name (keys %$mailusers) {
 	$uinfo->{'uid'} = &allocate_uid(\%taken);
 	$uinfo->{'gid'} = $dom{'gid'};
 	$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$name";
-	$uinfo->{'shell'} = $config{'shell'};
+	$uinfo->{'shell'} = $nologin_shell;
 	if ($mailuser->{'mailbox'}->{'enabled'} eq 'true') {
 		$uinfo->{'email'} = $name."\@".$dom;
 		}
@@ -461,7 +466,7 @@ if ($got{'mysql'}) {
 			$myuinfo->{'real'} = "MySQL user";
 			$myuinfo->{'home'} =
 				"$dom{'home'}/$config{'homes_dir'}/$myuser";
-			$myuinfo->{'shell'} = $config{'shell'};
+			$myuinfo->{'shell'} = $nologin_shell;
 			delete($myuinfo->{'email'});
 			$myuinfo->{'dbs'} = [ { 'type' => 'mysql',
 					        'name' => $name } ];

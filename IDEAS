@@ -77,14 +77,9 @@
 	 - update preloads after config change / feature change
 
  - allow shells list (with descriptions) to be configurable for domain owners
-	- GPL too
-	- remove from config.info
 	- include in backups (config)
-	- command-line setting for domain owner
-	- fix module config check
-	- change all code that uses shells from config (user list too)
-	- migration user creation
-	- command-line program to list shells?
+		- custom fields and links too
+	- CHANGELOGs
 
  - pages that do multiple remote calls fail on later ones?
 

@@ -61,6 +61,12 @@ $user ||= $origuser;
 local $group = $manifest->{'userIdent'}->{'group'} || $user;
 local $ugroup = $group;
 
+# Get shells for users
+local ($nologin_shell, $ftp_shell, undef, $def_shell) =
+	&get_common_available_shells();
+$nologin_shell ||= $def_shell;
+$ftp_shell ||= $def_shell;
+
 # First work out what features we have ..
 &$first_print("Checking for Ensim features ..");
 local $service = $manifest->{'siteIdent'}->{'service'};
@@ -364,7 +370,7 @@ if ($userident->{$origuser}) {
 		$uinfo->{'gid'} = $dom{'gid'};
 		$uinfo->{'real'} = $uu->{'config'}->{'fullname'};
 		$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$mu";
-		$uinfo->{'shell'} = $config{'shell'};
+		$uinfo->{'shell'} = $nologin_shell;
 		$uinfo->{'email'} = $mu.'@'.$dom;
 		if ($qu) {
 			$uinfo->{'quota'} = $uinfo->{'mquota'} =

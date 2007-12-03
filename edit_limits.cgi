@@ -13,7 +13,8 @@ $d = &get_domain($in{'dom'});
 
 print &ui_form_start("save_limits.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
-print &ui_table_start($text{'limits_header'}, "100%", 2);
+print &ui_hidden_table_start($text{'limits_header'}, "100%", 2,
+			     "limits", 1, [ "width=30%" ]);
 
 # Maximum allowed mailboxes
 print &ui_table_row(&hlink($text{'form_mailboxlimit'}, "limits_mailbox"),
@@ -88,7 +89,9 @@ foreach $f (@feature_plugins) {
 	print $input;
 	}
 
-print &ui_table_hr();
+print &ui_hidden_table_end("limits");
+print &ui_hidden_table_start($text{'limits_header2'}, "100%", 2,
+			     "features", 0, [ "width=30%" ]);
 
 # Capabilities when editing a server
 @grid = ( );
@@ -119,7 +122,9 @@ $ftable = &ui_grid_table(\@grid, 2);
 print &ui_table_row(&hlink($text{'limits_features'}, "limits_features"),
 		    $ftable);
 
-print &ui_table_hr();
+print &ui_hidden_table_end("limits");
+print &ui_hidden_table_start($text{'limits_header3'}, "100%", 2,
+			     "other", 0, [ "width=30%" ]);
 
 # Demo mode
 print &ui_table_row(&hlink($text{'limits_demo'}, "limits_demo"),
@@ -134,36 +139,13 @@ if (&can_webmin_modules()) {
 	}
 
 if (&can_edit_shell() && $d->{'unix'}) {
-	# Can SSH or FTP in?
+	# Login shell, which determines FTP/SSH access
 	$user = &get_domain_owner($d);
-	@shells = &get_unix_shells();
-	($curr) = grep { $_->[1] eq $user->{'shell'} } @shells;
-	if ($curr) {
-		# Current shell is supported
-		@shello = ( );
-		foreach $st ('nologin', 'ftp', 'ssh') {
-			($sho) = grep { $_->[0] eq $st &&
-					$_->[1] eq $user->{'shell'} } @shells;
-			if (!$sho) {
-				($sho) = grep { $_->[0] eq $st } @shells;
-				}
-			if ($sho) {
-				push(@shello,
-				     [ $sho->[1], $text{'limits_shell_'.$st} ]);
-				}
-			}
-		$shellinput = &ui_select("shell", $user->{'shell'}, \@shello);
-		}
-	else {
-		# Unknown shell! Don't change
-		$shellinput = &text('limits_unshell',
-				    "<tt>$user->{'shell'}</tt>");
-		}
 	print &ui_table_row(&hlink($text{'limits_shell'}, "limits_shell"),
-			    $shellinput);
+		    &available_shells_menu("shell", $user->{'shell'}, 'owner'));
 	}
 
-print &ui_table_end();
+print &ui_hidden_table_end("other");
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 
 &ui_print_footer(&domain_footer_link($d),

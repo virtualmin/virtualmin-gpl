@@ -99,9 +99,10 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--shell") {
 		$shellmode = shift(@ARGV);
-		@shells = &get_unix_shells();
-		($shell) = grep { $_->[0] eq $shellmode } @shells;
-		$shell || &usage("Unknown or un-support shell type $shellmode");
+		@shells = grep { $_->{'owner'} } &list_available_shells();
+		($shell) = grep { $_->{'shell'} eq $shellmode ||
+				  $_->{'id'} eq $shellmode } @shells;
+		$shell || &usage("Unknown or un-supported shell $shellmode");
 		}
 	else {
 		usage();
@@ -179,8 +180,8 @@ foreach $e (@cannotedit) {
 if ($shell && $dom->{'unix'}) {
 	$user = &get_domain_owner($dom);
 	$olduser = { %$user };
-	$user->{'shell'} = $shell->[1];
-	&modify_user($user, $olduser, undef);
+	$user->{'shell'} = $shell->{'shell'};
+	&modify_user($user, $olduser, $dom);
 	}
 
 &run_post_actions();

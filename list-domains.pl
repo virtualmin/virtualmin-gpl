@@ -79,7 +79,7 @@ if ($without) {
 
 if ($multi) {
 	# Show attributes on multiple lines
-	@shells = &get_unix_shells();
+	@shells = grep { $_->{'owner'} } &list_available_shells();
 	foreach $d (@doms) {
 		local @users = &list_domain_users($d, 0, 1, 0, 1);
 		local ($duser) = grep { $_->{'user'} eq $d->{'user'} } @users;
@@ -262,9 +262,13 @@ if ($multi) {
 			print "    Edit capabilities: ",
 				join(" ", grep { $d->{'edit_'.$_} } @edit_limits),"\n";
 
-			($shell) = grep { $_->[1] eq $duser->{'shell'}} @shells;
-			print "    Shell type: ",
-			      ($shell->[0] || "unknown"),"\n";
+			($shell) = grep { $_->{'shell'} eq $duser->{'shell'} }
+					@shells;
+			if ($shell) {
+				print "    Shell type: $shell->{'id'}\n";
+				print "    Login permissions: $shell->{'desc'}\n";
+				}
+			print "    Shell command: $duser->{'shell'}\n";
 			}
 
 		# Show backup excludes

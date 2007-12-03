@@ -205,20 +205,11 @@ if ($config{'virus'} && &can_edit_spam()) {
 
 # Login shell
 if (&can_edit_shell()) {
-	@shells = &get_unix_shells();
-	@shello = ( );
-	foreach $st ('nologin', 'ftp', 'ssh') {
-		($sho) = grep { $_->[0] eq $st } @shells;
-		if ($sho) {
-			push(@shello,
-			     [ $sho->[1], $text{'limits_shell_'.$st} ]);
-			}
-		}
 	print &ui_table_row($text{'massdomains_shell'},
-			    &ui_radio("shell_def", 1,
-			      [ [ 1, $text{'massdomains_leave'} ],
-				[ 0, &ui_select("shell", undef, \@shello) ] ]),
-			    1, \@tds);
+	    &ui_radio("shell_def", 1,
+	      [ [ 1, $text{'massdomains_leave'} ],
+		[ 0, &available_shells_menu("shell", undef, 'owner') ] ]),
+	    1, \@tds);
 	}
 
 print &ui_hidden_table_end("others");

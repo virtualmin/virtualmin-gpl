@@ -1890,6 +1890,8 @@ restore_allfeatures=Restore all features
 
 limits_title=Server Owner Limits
 limits_header=Virtualmin limits for server owner
+limits_header2=Allowed capabilities and features
+limits_header3=Other restrictions
 limits_desc=
 limits_create=Can create new servers?
 limits_create_1=Yes, including new parent servers
