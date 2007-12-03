@@ -259,6 +259,7 @@ if ($max) {
 					}
 				}
 			}
+		$start_day ||= time()/(24*60*60);	# If none
 
 		# Work out the start and end months
 		@start_tm = localtime($start_day * (24*60*60));
