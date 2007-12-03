@@ -4618,19 +4618,36 @@ local ($file, $vbs) = @_;
 }
 
 # virtualmin_backup_email(file, &vbs)
-# Copies the custom fields file
+# Copies the custom fields, links and shells files
 sub virtualmin_backup_custom
 {
 local ($file, $vbs) = @_;
-&copy_source_dest($custom_fields_file, $file);
+foreach my $fm ([ $custom_fields_file, $file ],
+		[ $custom_links_file, $file."_links" ],
+		[ $custom_link_categories_file, $file."_linkcats" ],
+		[ $custom_shells_file, $file."_shells" ]) {
+	if (-r $fm->[0]) {
+		&copy_source_dest($fm->[0], $fm->[1]);
+		}
+	else {
+		&create_empty_file($fm->[1]);
+		}
+	}
 }
 
 # virtualmin_restore_custom(file, &vbs)
-# Restores the custom fields file
+# Restores the custom fields, links and shells files
 sub virtualmin_restore_custom
 {
 local ($file, $vbs) = @_;
-&copy_source_dest($file, $custom_fields_file);
+foreach my $fm ([ $custom_fields_file, $file ],
+		[ $custom_links_file, $file."_links" ],
+		[ $custom_link_categories_file, $file."_linkcats" ],
+		[ $custom_shells_file, $file."_shells" ]) {
+	if (-r $fm->[1]) {
+		&copy_source_dest($fm->[1], $fm->[0]);
+		}
+	}
 }
 
 # virtualmin_backup_scripts(file, &vbs)
@@ -11814,6 +11831,15 @@ my ($ftp_shell) = grep { $_->{'id'} eq 'ftp' } @ashells;
 my ($jailed_shell) = grep { $_->{'id'} eq 'ftp' && $_ ne $ftp_shell } @ashells;
 my ($def_shell) = grep { $_->{'default'} } @ashells;
 return ($nologin_shell, $ftp_shell, $jailed_shell, $def_shell);
+}
+
+# create_empty_file(path)
+# Creates a new root-owned empty file
+sub create_empty_file
+{
+local ($file) = @_;
+&open_tempfile(EMPTY, ">$file", 0, 1);
+&close_tempfile(EMPTY);
 }
 
 $done_virtual_server_lib_funcs = 1;

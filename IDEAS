@@ -76,10 +76,5 @@
 	 - module config option for loading module (full, core only, none)
 	 - update preloads after config change / feature change
 
- - allow shells list (with descriptions) to be configurable for domain owners
-	- include in backups (config)
-		- custom fields and links too
-	- CHANGELOGs
-
  - pages that do multiple remote calls fail on later ones?
 
