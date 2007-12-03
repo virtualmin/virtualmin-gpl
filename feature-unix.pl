@@ -70,6 +70,10 @@ else {
 	   'mailbox', $_[0]->{'user'},
 	   'dom', $_[0]->{'dom'},
 	   'dom_prefix', substr($_[0]->{'dom'}, 0, 1),
+	   'plainpass', $_[0]->{'pass'},
+	   'domainowner', 1,
+	   'unix', 1,
+	   'email', $_[0]->{'user'}.'\@'.$_[0]->{'dom'},
 	 );
 &set_pass_change(\%uinfo);
 eval {
@@ -143,6 +147,9 @@ else {
 	&$second_print($text{'setup_done'});
 	}
 
+# Set the user's Usermin IMAP password
+&set_usermin_imap_password(\%uinfo);
+
 return 1;
 }
 
@@ -179,6 +186,7 @@ if (!$_[0]->{'parent'}) {
 							# password is not valid
 			$uinfo->{'plainpass'} = $_[0]->{'pass'};
 			&set_pass_change($uinfo);
+			&set_usermin_imap_password($uinfo);
 			}
 
 		if ($_[0]->{'user'} ne $_[1]->{'user'}) {

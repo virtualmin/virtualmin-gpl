@@ -1653,8 +1653,11 @@ return 0 if ($mconfig{'pop3_server'} ne '' &&
 foreach my $dir ($user->{'home'}, "$user->{'home'}/.usermin", "$user->{'home'}/.usermin/mailbox") {
 	next if ($user->{'webowner'} && $dir eq $user->{'home'});
 	next if ($user->{'domainowner'} && $dir eq $user->{'home'});
-	&make_dir($dir, 0700);
-	&set_ownership_permissions($user->{'uid'}, $user->{'gid'}, 0700, $dir);
+	if (!-d $dir) {
+		&make_dir($dir, 0700);
+		&set_ownership_permissions($user->{'uid'}, $user->{'gid'},
+					   0700, $dir);
+		}
 	}
 local %inbox;
 &read_file("$user->{'home'}/.usermin/mailbox/inbox.imap", \%inbox);
