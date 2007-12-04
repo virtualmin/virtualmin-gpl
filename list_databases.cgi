@@ -92,7 +92,8 @@ if (!$d->{'parent'} && $virtualmin_pro) {
 	print "$text{'databases_desc2'}<p>\n";
 	print &ui_form_start("save_dbname.cgi");
 	print &ui_hidden("dom", $in{'dom'}),"\n";
-	print &ui_table_start($text{'databases_uheader'}, undef, 2);
+	print &ui_table_start($text{'databases_uheader'}, undef, 2,
+			      [ "width=30%" ]);
 
 	foreach $f (@database_features) {
 		$sfunc = "set_${f}_user";
@@ -116,7 +117,8 @@ if (!$d->{'parent'}) {
 	print "$text{'databases_desc3'}<p>\n";
 	print &ui_form_start("save_dbpass.cgi");
 	print &ui_hidden("dom", $in{'dom'}),"\n";
-	print &ui_table_start($text{'databases_pheader'}, undef, 2);
+	print &ui_table_start($text{'databases_pheader'}, undef, 2,
+			      [ "width=30%" ]);
 
 	foreach $f (@database_features) {
 		$sfunc = "set_${f}_pass";
@@ -159,7 +161,8 @@ if (&can_import_servers()) {
 	if (@avail) {
 		print &ui_form_start("import_database.cgi", "post");
 		print &ui_hidden("dom", $in{'dom'}),"\n";
-		print &ui_table_start($text{'databases_iheader'}, undef, 2);
+		print &ui_table_start($text{'databases_iheader'}, undef, 2,
+				      [ "width=30%" ]);
 
 		print &ui_table_row($text{'databases_ilist'},
 			&ui_select("import", [ ],
