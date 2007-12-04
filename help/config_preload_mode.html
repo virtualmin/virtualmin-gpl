@@ -1,0 +1,26 @@
+<header>Preload Virtualmin libraries at startup?</header>
+
+In order to speed up the performance of the CGI scripts that make up Virtualmin,
+Webmin can be configured to load some of their Perl libraries into memory at
+startup time so that they do not have to be read from disk and parsed for
+every request. However this uses up more RAM - approximately 100M on a typical
+Linux system. <p>
+
+This setting gives you more control over how much pre-loading is done. The
+options are :
+<dl>
+<dt><b>All libraries</b>
+<dd>Libraries for all Webmin modules and plugins used by Virtualmin are loaded.
+    The Webmin server process will consume approximately 100M of RAM.
+
+<dt><b>Only core</b>
+<dd>Only those libraries that are part of Virtualmin itself are loaded.
+    The Webmin server process will use around 50M of RAM.
+
+<dt><b>No</b>
+<dd>Nothing is pre-loaded - instead, all libraries are loaded on demand.
+    The Webmin server process will use only 15M of RAM.
+</dl>
+
+<footer>
+
