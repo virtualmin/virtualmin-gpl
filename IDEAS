@@ -73,6 +73,9 @@
 	   plugin_defined call
 	 - no need for preloading their libs
 	 - no need for variable to not load plugins
-	 - module config option for loading module (full, core only, none)
-	 - update preloads after config change / feature change
+
+ - module config option for loading module (full, core only, none)
+	- help page for config
+	- show message during config check
+	- CHANGELOG
 

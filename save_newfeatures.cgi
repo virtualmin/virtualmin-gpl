@@ -56,6 +56,7 @@ foreach $f (@features) {
 			}
 		}
 	}
+$oldplugins = $config{'plugins'};
 $config{'plugins'} = join(" ", @newplugins);
 $config{'plugins_inactive'} = join(" ", @inactive);
 
@@ -77,6 +78,12 @@ if ($config{'last_check'} < time()) {
 	}
 &save_module_config();
 &unlock_file($module_config_file);
+
+# Update the miniserv preload list, which includes plugins
+if ($virtualmin_pro && $oldplugins ne $config{'plugins'}) {
+	&update_miniserv_preloads($config{'preload_mode'});
+	&restart_miniserv();
+	}
 
 &webmin_log("features");
 &redirect("");

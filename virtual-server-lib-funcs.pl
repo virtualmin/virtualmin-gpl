@@ -8956,7 +8956,8 @@ foreach my $c ("mail_system", "generics", "append_style", "ldap_host",
 	       "quota_commands",
 	       "quota_set_user_command", "quota_set_group_command",
 	       "quota_list_users_command", "quota_list_groups_command",
-	       "quota_get_user_command", "quota_get_group_command") {
+	       "quota_get_user_command", "quota_get_group_command",
+	       "preload_mode") {
 	# Some important config option was changed
 	return 1 if ($config{$c} ne $lastconfig{$c});
 	}
@@ -11840,6 +11841,50 @@ sub create_empty_file
 local ($file) = @_;
 &open_tempfile(EMPTY, ">$file", 0, 1);
 &close_tempfile(EMPTY);
+}
+
+# update_miniserv_preloads(mode)
+# Changes the Perl libraries preloaded by miniserv, based on the mode flag.
+# This can be 0 for none, 1 for Virtualmin only, or 2 for Virtualmin and
+# plugins.
+sub update_miniserv_preloads
+{
+local ($mode) = @_;
+
+local $msc = $ENV{'MINISERV_CONFIG'} || "$config_directory/miniserv.conf";
+&lock_file($msc);
+local %miniserv;
+&get_miniserv_config(\%miniserv);
+local @preload;
+if ($mode == 0) {
+	# Nothing to load
+	@preload = ( );
+	}
+else {
+	# Do core library and features
+	local $vslf = "virtual-server/virtual-server-lib-funcs.pl";
+	push(@preload, "virtual-server=$vslf");
+	foreach my $f (@features, "virt") {
+		local $file = "virtual-server/feature-$f.pl";
+		push(@preload, "virtual-server=$file");
+		}
+
+	# Do web-lib-funcs.pl in modules we call and plugins
+	local $file = "web-lib-funcs.pl";
+	push(@preload, "virtual-server=$file");
+	if ($mode == 2) {
+		foreach my $minfo (&get_all_module_infos()) {
+			local $mdir = &module_root_directory($minfo->{'dir'});
+			if (&indexof($minfo->{'dir'},
+				     @used_webmin_modules, @plugins) >= 0) {
+				push(@preload, "$minfo->{'dir'}=$file");
+				}
+			}
+		}
+	}
+$miniserv{'preload'} = join(" ", &unique(@preload));
+&put_miniserv_config(\%miniserv);
+&unlock_file($msc);
 }
 
 $done_virtual_server_lib_funcs = 1;

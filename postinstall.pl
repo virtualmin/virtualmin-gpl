@@ -16,6 +16,7 @@ if ($virtualmin_pro) {
 		# Need to add
 		push(@sa, "/$module_name/remote.cgi");
 		$miniserv{'sessiononly'} = join(" ", @sa);
+		&put_miniserv_config(\%miniserv);
 		}
 	}
 
@@ -129,47 +130,22 @@ if (&running_in_zone() || defined(&running_in_vserver) &&
 	$lowmem = 1;
 	}
 
-if ($virtualmin_pro && !$gconfig{'no_virtualmin_preload'} && !$lowmem) {
-	# Configure miniserv to pre-load virtual-server-lib-funcs.pl and
-	# all of the feature files
-	local @preload = split(/\s+/, $miniserv{'preload'});
-	foreach my $pf (@preload) {
-		local ($p, $f) = split(/=/, $pf);
-		$preloaded{$p,$f} = 1;
+if ($virtualmin_pro) {
+	# Decide whether to preload, and then do it
+	if ($config{'preload_mode'} eq '') {
+		$config{'preload_mode'} = $lowmem ? 0 : 2;
 		}
-	local $need_restart;
-	local $vslf = "virtual-server/virtual-server-lib-funcs.pl";
-	if (!$preloaded{"virtual-server",$vslf}) {
-		push(@preload,
-		   "virtual-server=$vslf");
-		$need_restart = 1;
+	if ($gconfig{'no_virtualmin_preload'}) {
+		$config{'preload_mode'} = 0;
 		}
-	foreach my $f (@features, "virt") {
-		local $file = "virtual-server/feature-$f.pl";
-		if (!$preloaded{"virtual-server",$file}) {
-			push(@preload, "virtual-server=$file");
-			$need_restart = 1;
-			}
-		}
-
-	# Pre-load web-lib.pl for all modules used by Virtualmin
-	local $file = "web-lib-funcs.pl";
-	foreach my $minfo (&get_all_module_infos()) {
-		local $mdir = &module_root_directory($minfo->{'dir'});
-		if (-r "$mdir/virtual_feature.pl" ||
-		    &indexof($minfo->{'dir'}, @used_webmin_modules) >= 0 ||
-		    $minfo->{'dir'} eq "virtual-server") {
-			if (!$preloaded{$minfo->{'dir'},$file}) {
-				push(@preload, "$minfo->{'dir'}=$file");
-				$need_restart = 1;
-				}
-			}
-		}
-	$miniserv{'preload'} = join(" ", &unique(@preload));
+	&save_module_config();
+	&update_miniserv_preloads($config{'preload_mode'});
 	}
 
+# Run in package eval mode, to avoid loading the same module twice
+local %miniserv;
+&get_miniserv_config(\%miniserv);
 if ($virtualmin_pro) {
-	# Run in package eval mode, to avoid loading the same module twice
 	$miniserv{'eval_package'} = 1;
 	}
 &put_miniserv_config(\%miniserv);

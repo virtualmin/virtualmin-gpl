@@ -53,6 +53,12 @@ if ($config{'spam'}) {
 # Update the domain owner's group
 &update_domain_owners_group();
 
+# Update preload settings if changed
+if ($virtualmin_pro && $config{'preload_mode'} != $lastconfig{'preload_mode'}) {
+	&update_miniserv_preloads($config{'preload_mode'});
+	&restart_miniserv();
+	}
+
 &webmin_log("check");
 
 # Call any theme post command
