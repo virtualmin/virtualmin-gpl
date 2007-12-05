@@ -4481,6 +4481,7 @@ local ($file, $vbs) = @_;
 sub virtualmin_restore_config
 {
 local ($file, $vbs) = @_;
+local %oldconfig = %config;
 local @tmpls = &list_templates();
 &copy_source_dest($file, $module_config_file);
 &read_file($module_config_file, \%config);
@@ -4489,6 +4490,13 @@ foreach my $t (@tmpls) {
 		&save_template($t);
 		}
 	}
+# Put back site-specific settings, as those in the backup are unlikely to
+# be correct.
+$config{'iface'} = $oldconfig{'iface'};
+$config{'home_quotas'} = $oldconfig{'home_quotas'};
+$config{'mail_quotas'} = $oldconfig{'mail_quotas'};
+$config{'group_quotas'} = $oldconfig{'group_quotas'};
+&save_module_config();
 }
 
 # virtualmin_backup_templates(file, &vbs)
