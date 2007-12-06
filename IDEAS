@@ -74,3 +74,8 @@
 	 - no need for preloading their libs
 	 - no need for variable to not load plugins
 
+ - mobile theme for webmail
+	- view and reply forms
+	- uploads not possible
+	- HTML email compose never possible
+	- fix folder management page to be more mobile-friendly

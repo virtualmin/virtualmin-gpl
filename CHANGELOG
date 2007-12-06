@@ -775,7 +775,7 @@ Added the --user and --all-domains parameters to list-scripts.pl, list-users.pl,
 ---- Changes since 3.49 ----
 When used, the ClamAV server clamd can be stopped and started from the system information page, just like MySQL and Apache.
 Added the original website URLs for all script installers, displayed on the installation form and on the page showing details of an installed script.
-Updated the phpMyAdmin script installer to 2.11.2.2, OpenAds to 2.4.2, phpBB to 3.0.RC8, ZenCart to 1.3.8, Plans Calendar to 7.9.8, and Instiki 0.12.0.
+Updated the phpMyAdmin script installer to 2.11.2.2, OpenAds to 2.4.2, phpBB to 3.0.RC8, ZenCart to 1.3.8, Plans Calendar to 7.9.8, Drupal to 5.4 and 4.7.9, and Instiki 0.12.0.
 The initial administration login and password is displayed after installing a script.
 Advanced autoreply options are hidden by default, to make the alias form less confusing.
 When re-sending the signup email for a server, the owner's email address can be entered.
