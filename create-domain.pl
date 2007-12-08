@@ -155,6 +155,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--content") {
 		$content = shift(@ARGV);
 		}
+	elsif ($a eq "--no-email") {
+		$nocreationmail = 1;
+		}
 	else {
 		&usage("Unknown option $a");
 		}
@@ -422,6 +425,7 @@ $pclash && &usage($text{'setup_eprefix2'});
 		     'bw_limit', $bw eq 'NONE' ? undef : $bw ),
 	 'prefix', $prefix,
 	 'reseller', $resel,
+	 'nocreationmail', $nocreationmail,
         );
 if (!$parent) {
 	if ($tlimit) {

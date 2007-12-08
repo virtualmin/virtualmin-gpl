@@ -1,5 +1,7 @@
  - re-make with fix!
 
+ - run functional-test.pl
+
  x Create tar.gz file
 
  x build RPM and .deb
