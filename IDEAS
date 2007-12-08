@@ -55,9 +55,6 @@
 	- test on virgin system
 	- openldap server module
 
- - directi API in registrar module
- - tucows http://developer.tucows.com:4080/wiki/index.php?n=index.php?n=Main.XCP
-
  - test suite to detect failures in common operations
 	- command-line API driven
 	- create/modify/delete a user, domain, script, database, etc..
@@ -75,7 +72,5 @@
 	 - no need for variable to not load plugins
 
  - mobile theme for webmail
-	- view and reply forms
-	- uploads not possible
-	- HTML email compose never possible
-	- fix folder management page to be more mobile-friendly
+	- release
+
