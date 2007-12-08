@@ -790,3 +790,4 @@ Added --mailfiles flag to backup-domain.pl and restore-domain.pl, to save and re
 Shells for mailboxes and domain owners are now configured on the new Custom Shells page, linked under System Customizatoin on the left menu. This allows you to define as many different shells as you like, for access levels like email only, FTP and SCP only. When editing mailboxes or domain owner limits, you can then select one of the defined shells.
 Added the list-available-shells.pl command-line program, and added the --shell parameter to create-user.pl and modify-user.pl. Also updated modify-limits.pl so that the --shell option can specify any defined shell.
 The size of the Webmin server process can be traded off against the speed of Virtualmin by adjusting the amount of library pre-loading done, using a new setting on the Module Config page.
+Added the test-smtp.pl command for validating mail server relaying and logins.
