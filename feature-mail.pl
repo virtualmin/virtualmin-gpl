@@ -283,7 +283,9 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 	}
 
 # Setup any secondary MX servers
-&setup_on_secondaries($_[0]);
+if (!$_[0]->{'nosecondaries'}) {
+	&setup_on_secondaries($_[0]);
+	}
 }
 
 # delete_mail(&domain, [leave-aliases])

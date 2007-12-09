@@ -55,10 +55,6 @@
 	- test on virgin system
 	- openldap server module
 
- - test suite to detect failures in common operations
-	- command-line API driven
-	- create/modify/delete a user, domain, script, database, etc..
-
  - use new Apache module function for block updates instead of directly
    modifying config file, when Webmin 1.380 is out
 

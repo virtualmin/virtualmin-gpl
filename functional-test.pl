@@ -24,8 +24,14 @@ $test_domain = "example.com";	# Never really exists
 $test_subdomain = "example.net";
 $test_user = "testy";
 $test_alias = "testing";
+$test_reseller = "testsel";
 $timeout = 60;			# Longest time a test should take
 $wget_command = "wget -O - --cache=off --proxy=off ";
+
+@create_args = ( [ 'limits-from-template' ],
+		 [ 'no-email' ],
+		 [ 'no-slaves' ],
+	  	 [ 'no-secondaries' ] );
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -42,6 +48,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-cleanup") {
 		$no_cleanup = 1;
 		}
+	elsif ($a eq "--output") {
+		$output = 1;
+		}
 	else {
 		&usage();
 		}
@@ -52,7 +61,6 @@ $test_full_user = &userdom_name($test_user, { 'dom' => $test_domain,
 					      'prefix' => $prefix });
 ($test_domain_user) = &unixuser_name($test_domain);
 
-# XXX test domain for users/aliases/etc
 # XXX don't run remote actions
 
 # Build list of test types
@@ -64,11 +72,10 @@ $domains_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
 		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
-		      [ 'postgres' ], [ 'spam' ], [ 'virus' ],
-		      [ 'limits-from-template' ],
+		      [ 'postgres' ], [ 'spam' ], [ 'virus' ], [ 'webmin' ],
 		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
-		      [ 'no-email' ] ],
+		      @create_args, ],
         },
 
 	# Make sure the domain was created
@@ -90,6 +97,15 @@ $domains_tests = [
 	{ 'command' => $wget_command.
 		       'ftp://'.$test_domain_user.':smeg@localhost/',
 	  'antigrep' => 'Login incorrect',
+	},
+
+	# Check Webmin login
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       'http://'.$test_domain_user.':smeg@localhost:10000/',
+	},
+
+	# Check MySQL login
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_user.' -e "select version()"',
 	},
 
 	# Disable a feature
@@ -121,6 +137,11 @@ $domains_tests = [
 		      'Description: New description',
 		      'Server quota: 555',
 		      'Bandwidth limit: 666', ],
+	},
+
+	# Check new Webmin password
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       'http://'.$test_domain_user.':newpass@localhost:10000/',
 	},
 
 	# Disable the whole domain
@@ -158,7 +179,7 @@ $domains_tests = [
 		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
 		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
 		      [ 'postgres' ], [ 'spam' ], [ 'virus' ],
-		      [ 'no-email' ] ],
+		      @create_args, ],
 	},
 
 	# Make sure it worked
@@ -184,8 +205,7 @@ $mailbox_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'mail' ], [ 'mysql' ],
-		      [ 'limits-from-template' ],
-		      [ 'no-email' ] ],
+		      @create_args, ],
         },
 
 	# Add a mailbox to the domain
@@ -242,6 +262,10 @@ $mailbox_tests = [
 		      'Extra addresses:.*extra@'.$test_domain, ],
 	},
 
+	# Check user's MySQL login
+	{ 'command' => 'mysql -u '.$test_full_user.' -pnewpass '.$test_domain_user.' -e "select version()"',
+	},
+
 	# Delete the user
 	{ 'command' => 'delete-user.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -262,8 +286,7 @@ $alias_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'mail' ], [ 'dns' ],
-		      [ 'limits-from-template' ],
-		      [ 'no-email' ] ],
+		      @create_args, ],
         },
 
 	# Add a test alias
@@ -321,16 +344,205 @@ $alias_tests = [
 	];
 
 # Reseller tests
-# XXX
+$reseller_tests = [
+	# Create a reseller
+	{ 'command' => 'create-reseller.pl',
+	  'args' => [ [ 'name', $test_reseller ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test reseller' ],
+		      [ 'email', $test_reseller.'@'.$test_domain ] ],
+	},
+
+	# Verify that he exists
+	{ 'command' => 'list-resellers.pl',
+	  'args' => [ [ 'multiline' ] ],
+	  'grep' => [ '^'.$test_reseller,
+		      'Description: Test reseller',
+		      'Email: '.$test_reseller.'@'.$test_domain,
+		    ],
+	},
+
+	# Check Webmin login
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       'http://'.$test_reseller.':smeg@localhost:10000/',
+	},
+
+	# Make changes
+	{ 'command' => 'modify-reseller.pl',
+	  'args' => [ [ 'name', $test_reseller ],
+		      [ 'desc', 'New description' ],
+		      [ 'email', 'newmail@'.$test_domain ],
+		      [ 'max-doms', 66 ],
+		      [ 'allow', 'web' ],
+		      [ 'logo', 'http://'.$test_domain.'/logo.gif' ],
+		      [ 'link', 'http://'.$test_domain ] ],
+	},
+
+	# Check new reseller details
+	{ 'command' => 'list-resellers.pl',
+	  'args' => [ [ 'multiline' ] ],
+	  'grep' => [ 'Description: New description',
+		      'Email: newmail@'.$test_domain,
+		      'Maximum domains: 66',
+		      'Allowed features:.*web',
+		      'Logo URL: http://'.$test_domain.'/logo.gif',
+		      'Logo link: http://'.$test_domain,
+		    ],
+	},
+
+	# Delete the reseller
+	{ 'command' => 'delete-reseller.pl',
+	  'args' => [ [ 'name', $test_reseller ] ],
+	  'cleanup' => 1 },
+	];
 
 # Script tests
-# XXX
+$script_tests = [
+	# Create a domain for the scripts
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'mysql' ], [ 'dns' ],
+		      @create_args, ],
+        },
+
+	# List all scripts
+	{ 'command' => 'list-available-scripts.pl',
+	  'grep' => 'WordPress',
+	},
+
+	# Install Wordpress
+	{ 'command' => 'install-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'wordpress' ],
+		      [ 'path', '/wordpress' ],
+		      [ 'db', 'mysql '.$test_domain_user ],
+		      [ 'version', 'latest' ] ],
+	},
+
+	# Check that it works
+	{ 'command' => $wget_command.'http://'.$test_domain.'/wordpress/',
+	  'grep' => 'WordPress installation',
+	},
+
+	# Un-install
+	{ 'command' => 'delete-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'wordpress' ] ],
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
+# Database tests
+$database_tests = [
+	# Create a domain for the databases
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'mysql' ], [ 'postgres' ],
+		      @create_args, ],
+        },
+
+	# Add a MySQL database
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'name', $test_domain_user.'_extra' ] ],
+	},
+
+	# Check that we can login to MySQL
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_user.'_extra -e "select version()"',
+	},
+
+	# Create a PostgreSQL database
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'postgres' ],
+		      [ 'name', $test_domain_user.'_extra2' ] ],
+	},
+
+	# Make sure both databases appear in the list
+	{ 'command' => 'list-databases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^'.$test_domain_user.'_extra',
+		      '^'.$test_domain_user.'_extra2' ],
+	},
+
+	# Drop the MySQL database
+	{ 'command' => 'delete-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'name', $test_domain_user.'_extra' ] ],
+	},
+
+	# Drop the PostgreSQL database
+	{ 'command' => 'delete-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'postgres' ],
+		      [ 'name', $test_domain_user.'_extra2' ] ],
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
+# Proxy tests
+$proxy_tests = [
+	# Create the domain for proxies
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ],
+		      @create_args, ],
+        },
+
+	# Create a proxy to Google
+	{ 'command' => 'create-proxy.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/google/' ],
+		      [ 'url', 'http://www.google.com/' ] ],
+	},
+
+	# Test that it works
+	{ 'command' => $wget_command.'http://'.$test_domain.'/google/',
+	  'grep' => '<title>Google',
+	},
+
+	# Check the proxy list
+	{ 'command' => 'list-proxies.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'grep' => '/google/',
+	},
+
+	# Delete the proxy
+	{ 'command' => 'delete-proxy.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/google/' ] ],
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
 
 $alltests = { 'domains' => $domains_tests,
 	      'mailbox' => $mailbox_tests,
 	      'alias' => $alias_tests,
 	      'reseller' => $reseller_tests,
 	      'script' => $script_tests,
+	      'database' => $database_tests,
+	      'proxy' => $proxy_tests,
 	    };
 
 # Run selected tests
@@ -433,6 +645,7 @@ if ($t->{'antigrep'}) {
 			}
 		}
 	}
+print $out if ($output);
 print "    .. success\n";
 return 1;
 }

@@ -158,6 +158,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-email") {
 		$nocreationmail = 1;
 		}
+	elsif ($a eq "--no-slaves") {
+		$noslaves = 1;
+		}
+	elsif ($a eq "--no-secondaries") {
+		$nosecondaries = 1;
+		}
 	else {
 		&usage("Unknown option $a");
 		}
@@ -426,6 +432,8 @@ $pclash && &usage($text{'setup_eprefix2'});
 	 'prefix', $prefix,
 	 'reseller', $resel,
 	 'nocreationmail', $nocreationmail,
+	 'noslaves', $noslaves,
+	 'nosecondaries', $nosecondaries,
         );
 if (!$parent) {
 	if ($tlimit) {

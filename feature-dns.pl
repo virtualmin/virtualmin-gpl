@@ -129,7 +129,7 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 	# Create on slave servers
 	local $myip = $bconfig{'this_ip'} ||
 		      &to_ipaddress(&get_system_hostname());
-	if (@slaves) {
+	if (@slaves && !$_[0]->{'noslaves'}) {
 		local $slaves = join(" ", map { $_->{'host'} } @slaves);
 		&$first_print(&text('setup_bindslave', $slaves));
 		local @slaveerrs = &bind8::create_on_slaves($_[0]->{'dom'},
