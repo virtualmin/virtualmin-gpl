@@ -620,7 +620,7 @@ if ($got{'mail'}) {
 		$usermap{$uinfo->{'user'}} = $uinfo;
 		}
 	close(PASSWD);
-	&$second_print(".. done (migrated $mcount)");
+	&$second_print(".. done (migrated $mcount mail users)");
 	}
 
 # Move server owner's inbox file
@@ -745,7 +745,7 @@ if ($got{'mail'}) {
 			}
 		}
 	close(VA);
-	&$second_print(".. done (migrated $acount)");
+	&$second_print(".. done (migrated $acount aliases)");
 	}
 
 # Create mailing lists
@@ -764,7 +764,7 @@ if ($got{'virtualmin-mailman'}) {
 			$lcount++;
 			}
 		}
-	&$second_print(".. done (created $lcount)");
+	&$second_print(".. done (created $lcount lists)");
 	}
 
 # Copy cron jobs for user (direct to his cron file)
@@ -808,7 +808,7 @@ if ($got{'mysql'}) {
 			}
 		}
 	closedir(MYDIR);
-	&$second_print(".. done (created $mycount)");
+	&$second_print(".. done (created $mycount databases)");
 
 	# Re-create MySQL users
 	if ($got{'mysql'}) {
@@ -868,7 +868,7 @@ if ($got{'mysql'}) {
 				}
 			$myucount++;
 			}
-		&$second_print(".. done (created $myucount)");
+		&$second_print(".. done (created $myucount MySQL users)");
 		}
 	}
 
@@ -931,7 +931,7 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 			}
 		}
 	close(FTP);
-	&$second_print(".. done (created $fcount)");
+	&$second_print(".. done (created $fcount FTP users)");
 	}
 
 # Migrate any parked domains as alias domains

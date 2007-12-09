@@ -27,6 +27,13 @@ $test_alias = "testing";
 $test_reseller = "testsel";
 $timeout = 60;			# Longest time a test should take
 $wget_command = "wget -O - --cache=off --proxy=off ";
+$migration_dir = "/usr/local/webadmin/virtualmin/migration";
+$migration_ensim_domain = "apservice.org";
+$migration_ensim = "$migration_dir/$migration_ensim_domain.ensim.tar.gz";
+$migration_cpanel_domain = "hyccchina.com";
+$migration_cpanel = "$migration_dir/$migration_cpanel_domain.cpanel.tar.gz";
+$migration_plesk_domain = "requesttosend.com";
+$migration_plesk = "$migration_dir/$migration_plesk_domain.plesk.txt";
 
 @create_args = ( [ 'limits-from-template' ],
 		 [ 'no-email' ],
@@ -51,6 +58,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--output") {
 		$output = 1;
 		}
+	elsif ($a eq "--migrate") {
+		$migrate = shift(@ARGV);
+		}
 	else {
 		&usage();
 		}
@@ -60,8 +70,6 @@ $prefix = &compute_prefix($test_domain);
 $test_full_user = &userdom_name($test_user, { 'dom' => $test_domain,
 					      'prefix' => $prefix });
 ($test_domain_user) = &unixuser_name($test_domain);
-
-# XXX don't run remote actions
 
 # Build list of test types
 $domains_tests = [
@@ -536,6 +544,106 @@ $proxy_tests = [
 	  'cleanup' => 1 },
 	];
 
+# Migration tests
+$migrate_tests = [
+	# Migrate an ensim backup
+	{ 'command' => 'migrate-domain.pl',
+	  'args' => [ [ 'type', 'ensim' ],
+		      [ 'source', $migration_ensim ],
+		      [ 'domain', $migration_ensim_domain ],
+		      [ 'pass', 'smeg' ] ],
+	  'grep' => [ 'successfully migrated\s+:\s+'.$migration_ensim_domain,
+		      'migrated\s+5\s+aliases' ],
+	  'migrate' => 'ensim',
+	  'always_cleanup' => 1,
+	},
+
+	# Make sure ensim migration worked
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $migration_ensim_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Username: apservice',
+		      'Features: dir unix mail dns web webalizer',
+		      'Server quota:\s+30\s+MB' ],
+	  'migrate' => 'ensim',
+	},
+
+	# Cleanup the ensim domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $migration_ensim_domain ] ],
+	  'cleanup' => 1,
+	  'migrate' => 'ensim',
+	},
+
+	# Migrate a cPanel backup
+	{ 'command' => 'migrate-domain.pl',
+	  'args' => [ [ 'type', 'cpanel' ],
+		      [ 'source', $migration_cpanel ],
+		      [ 'domain', $migration_cpanel_domain ],
+		      [ 'pass', 'smeg' ] ],
+	  'grep' => [ 'successfully migrated\s+:\s+'.$migration_cpanel_domain,
+		      'migrated\s+4\s+mail\s+users',
+		      'created\s+1\s+list',
+		      'created\s+1\s+database',
+		    ],
+	  'migrate' => 'cpanel',
+	  'timeout' => 180,
+	  'always_cleanup' => 1,
+	},
+
+	# Make sure cPanel migration worked
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $migration_cpanel_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Username: adam',
+		      'Features: dir unix mail dns web webalizer mysql',
+		    ],
+	  'migrate' => 'cpanel',
+	},
+
+	# Cleanup the cpanel domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $migration_cpanel_domain ] ],
+	  'cleanup' => 1,
+	  'migrate' => 'cpanel',
+	},
+
+	# Migrate a Plesk backup
+	{ 'command' => 'migrate-domain.pl',
+	  'args' => [ [ 'type', 'plesk' ],
+		      [ 'source', $migration_plesk ],
+		      [ 'domain', $migration_plesk_domain ],
+		      [ 'pass', 'smeg' ] ],
+	  'grep' => [ 'successfully migrated\s+:\s+'.$migration_plesk_domain,
+		      'migrated\s+3\s+users',
+		      'migrated\s+1\s+alias',
+		      'migrated\s+1\s+databases,\s+and\s+created\s+1\s+user',
+		    ],
+	  'migrate' => 'plesk',
+	  'always_cleanup' => 1,
+	},
+
+	# Make sure the Plesk domain worked
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $migration_plesk_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Username: rtsadmin',
+		      'Features: dir unix mail dns web webalizer logrotate mysql spam virus',
+		    ],
+	  'migrate' => 'plesk',
+	},
+
+	# Cleanup the plesk domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $migration_plesk_domain ] ],
+	  'cleanup' => 1,
+	  'migrate' => 'plesk',
+	},
+	];
+if (!-d $migration_dir) {
+	$migrate_tests = [ { 'command' => 'echo Migration files under '.$migration_dir.' were not found in this system' } ];
+	}
+
 $alltests = { 'domains' => $domains_tests,
 	      'mailbox' => $mailbox_tests,
 	      'alias' => $alias_tests,
@@ -543,6 +651,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'script' => $script_tests,
 	      'database' => $database_tests,
 	      'proxy' => $proxy_tests,
+	      'migrate' => $migrate_tests,
 	    };
 
 # Run selected tests
@@ -557,7 +666,18 @@ foreach $tt (@tests) {
 	$count = 0;
 	$failed = 0;
 	$total = 0;
+	local $i = 0;
 	foreach $t (@tts) {
+		$t->{'index'} = $i++;
+		}
+	if ($migrate) {
+		# Limit migration tests to one type
+		@tts = grep { !$_->{'migrate'} ||
+			      $_->{'migrate'} eq $migrate } @tts;
+		}
+	$lastt = undef;
+	foreach $t (@tts) {
+		$lastt = $t;
 		$total++;
 		$ok = &run_test($t);
 		if (!$ok) {
@@ -567,10 +687,11 @@ foreach $tt (@tests) {
 			}
 		$count++;
 		}
-	if (!$allok && $count && !$no_cleanup) {
+	if (!$allok && ($count || $lastt->{'always_cleanup'}) && !$no_cleanup) {
 		# Run cleanup
-		($cleaner) = grep { $_->{'cleanup'} } @tts;
-		if ($cleaner && $cleaner ne $t) {
+		($cleaner) = grep { $_->{'cleanup'} &&
+				    $_->{'index'} >= $lastt->{'index'} } @tts;
+		if ($cleaner && $cleaner ne $lastt) {
 			$total++;
 			&run_test($cleaner);
 			}
@@ -604,7 +725,8 @@ foreach my $a (@{$t->{'args'}}) {
 	}
 print "    Running $cmd ..\n";
 sleep($t->{'sleep'});
-local $out = &backquote_with_timeout("$cmd 2>&1 </dev/null", $timeout);
+local $out = &backquote_with_timeout("$cmd 2>&1 </dev/null",
+				     $t->{'timeout'} || $timeout);
 if ($? && !$t->{'fail'} || !$? && $t->{'fail'}) {
 	print $out;
 	print "    .. failed : $?\n";
@@ -653,10 +775,14 @@ return 1;
 sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
+local @mig = join("|", @migration_types);
 print "Runs some or all Virtualmin functional tests.\n";
 print "\n";
 print "usage: functional-tests.pl [--domain test.domain]\n";
 print "                           [--test type]*\n";
+print "                           [--no-cleanup]\n";
+print "                           [--output]\n";
+print "                           [--migrate $mig]\n";
 exit(1);
 }
 

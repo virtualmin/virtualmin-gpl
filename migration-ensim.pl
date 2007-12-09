@@ -450,7 +450,7 @@ if ($got{'mail'}) {
 		&create_virtuser($virt);
 		$acount++;
 		}
-	&$second_print(".. done (migrated $acount)");
+	&$second_print(".. done (migrated $acount aliases)");
 	}
 
 if ($parent) {

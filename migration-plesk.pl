@@ -404,7 +404,7 @@ foreach my $name (keys %$mailusers) {
 
 	$mcount++;
 	}
-&$second_print(".. done (migrated $mcount)");
+&$second_print(".. done (migrated $mcount users)");
 
 # Re-create mail aliases
 local $acount = 0;
@@ -424,7 +424,7 @@ if ($ca) {
 	&create_virtuser($virt);
 	$acount++;
 	}
-&$second_print(".. done (migrated $acount)");
+&$second_print(".. done (migrated $acount aliases)");
 
 # Re-create MySQL databases
 if ($got{'mysql'}) {
@@ -479,7 +479,7 @@ if ($got{'mysql'}) {
 		&$outdent_print();
 		$mcount++;
 		}
-	&$second_print(".. done (migrated $mcount, and created $myucount users)");
+	&$second_print(".. done (migrated $mcount databases, and created $myucount users)");
 	}
 
 &sync_alias_virtuals(\%dom);
