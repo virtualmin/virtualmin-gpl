@@ -473,7 +473,7 @@ local $temp = &transname();
 mkdir($temp, 0700);
 local $qf = quotemeta($_[0]);
 local $out = `cd $temp && tar xzf $qf 2>&1`;
-if ($?) {
+if ($? && $out !~ /decompression\s+OK/i) {
 	return (0, $out);
 	}
 $done{$_[0]} = $temp;
