@@ -59,16 +59,20 @@ if ($in{'generic'}) {
 		}
 	if (&can_create_sub_servers() && $gparent) {
 		# Sub-server under parent's user
-		push(@generics, [ $text{'form_generic_subserver'},
+		($rdleft, $rdreason, $rdmax) = &count_domains("realdoms");
+		($adleft, $adreason, $admax) = &count_domains("aliasdoms");
+		if ($rdleft) {
+			push(@generics, [ $text{'form_generic_subserver'},
 				  'add1=1&parentuser1='.$gparent->{'user'} ]);
-		if (!$gparent->{'alias'}) {
+			}
+		if (!$gparent->{'alias'} && $adleft) {
 			# Alias domain
 			push(@generics, [ &text('form_generic_alias',
 						$gparent->{'dom'}),
 					  'to='.$gparent->{'id'} ]);
 			}
 		if (!$gparent->{'alias'} && !$gparent->{'subdom'} &&
-		    &can_create_sub_domains()) {
+		    &can_create_sub_domains() && $rdleft) {
 			# Sub-domain
 			push(@generics, [ &text('form_generic_subdom',
 						$gparent->{'dom'}),
