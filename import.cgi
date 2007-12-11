@@ -284,7 +284,7 @@ if ($in{'confirm'}) {
 	# Create the domain details
 	&complete_domain(\%dom);
 	print $text{'setup_save'},"<br>\n";
-	&save_domain(\%dom);
+	&save_domain(\%dom, 1);
 	print $text{'setup_done'},"<p>\n";
 
 	# Create or update webmin user
