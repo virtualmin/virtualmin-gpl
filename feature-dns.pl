@@ -73,10 +73,14 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 		# file references inside the view, if any
 		$pconf = &bind8::get_config_parent();
 		local $view = &get_bind_view($conf, $tmpl->{'dns_view'});
+		print STDERR "viewname=$tmpl->{'dns_view'} view=$view\n";
 		if ($view) {
 			local $addfile = &bind8::add_to_file();
 			local $addfileok;
-			if ($bind8::config{'zones_file'}) {
+			if ($bind8::config{'zones_file'} &&
+			    $view->{'file'} ne $bind8::config{'zones_file'}) {
+				# BIND module config asks for a file .. make sure
+				# it is included in the view
 				foreach my $vm (@{$view->{'members'}}) {
 					if ($vm->{'file'} eq $addfile) {
 						# Add file is OK
@@ -85,6 +89,7 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 					}
 				}
 
+			print STDERR "addfileok=$addfileok\n";
 			if (!$addfileok) {
 				# Add to named.conf
 				$pconf = $view;
