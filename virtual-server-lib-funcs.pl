@@ -7025,7 +7025,7 @@ push(@rv, { 'id' => 0,
 			 $config{'defbwlimit'},
 	    'mongrelslimit' => $config{'defmongrelslimit'} eq "" ? "none" :
 			       $config{'defmongrelslimit'},
-	    'capabilities' => $config{'defcapabilities'},
+	    'capabilities' => $config{'defcapabilities'} || "none",
 	    'featurelimits' => $config{'featurelimits'} || "none",
 	    'nodbname' => $config{'defnodbname'},
 	    'norename' => $config{'defnorename'},
