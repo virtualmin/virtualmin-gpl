@@ -23,7 +23,7 @@ print &ui_form_start("save_admin.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
 print &ui_hidden("new", $in{'new'}),"\n";
 print &ui_hidden("old", $in{'name'}),"\n";
-print &ui_table_start($text{'admin_header'}, "width=100%", 2);
+print &ui_table_start($text{'admin_header'}, "width=100%", 2, [ "width=30%" ]);
 
 # Show general user information
 if ($tmpl->{'extra_prefix'} ne "none") {

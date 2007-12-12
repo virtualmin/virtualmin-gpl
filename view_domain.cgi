@@ -196,7 +196,8 @@ else {
 			push(@grid, $txt);
 			}
 		}
-	$featmsg .= &ui_grid_table(\@grid, 2, [ "width=30%", "width=70%" ]);
+	$featmsg .= &ui_grid_table(\@grid, 2, [ "width=30%", "width=70%" ],
+				   undef, "width=100%");
 	print &ui_table_row(undef, $featmsg);
 	print &ui_hidden_table_end("feature");
 	}

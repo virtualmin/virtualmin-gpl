@@ -138,13 +138,11 @@ local ($d) = @_;
 local @users = &acl::list_users();
 local ($wuser) = grep { $_->{'name'} eq $d->{'user'} } @users;
 return &text('validate_ewebmin', $d->{'user'}) if (!$wuser);
-if ($virtualmin_pro) {
-	foreach my $admin (&list_extra_admins($d)) {
-		local ($wuser) = grep { $_->{'name'} eq $admin->{'name'} }
-				      @users;
-		return &text('validate_ewebminextra', $admin->{'name'})
-			if (!$wuser);
-		}
+foreach my $admin (&list_extra_admins($d)) {
+	local ($wuser) = grep { $_->{'name'} eq $admin->{'name'} }
+			      @users;
+	return &text('validate_ewebminextra', $admin->{'name'})
+		if (!$wuser);
 	}
 return undef;
 }
@@ -840,7 +838,6 @@ local $afile = "$config_directory/$_[2]/$_[1].acl";
 sub update_extra_webmin
 {
 local ($d) = @_;
-return undef if (!$virtualmin_pro);
 local @admins = &list_extra_admins($d);
 local %admins = map { $_->{'name'}, $_ } @admins;
 local %webmins;
@@ -914,10 +911,8 @@ local ($d, $file, $opts) = @_;
 &$first_print($text{'backup_webmin'});
 local @files;
 push(@files, "$d->{'user'}.acl", "*/$d->{'user'}.acl");
-if ($virtualmin_pro) {
-	foreach my $admin (&list_extra_admins($d)) {
-		push(@files, "$admin->{'name'}.acl", "*/$admin->{'name'}.acl");
-		}
+foreach my $admin (&list_extra_admins($d)) {
+	push(@files, "$admin->{'name'}.acl", "*/$admin->{'name'}.acl");
 	}
 local $out = &backquote_command("cd $config_directory && tar cf ".quotemeta($file)." ".join(" ", @files)." 2>&1");
 if ($?) {
@@ -1038,6 +1033,18 @@ $tmpl->{'gacl_groups'} = $in{'gacl_groups'};
 $tmpl->{'gacl_root'} = $in{'gacl_root'};
 $tmpl->{'extra_prefix'} = &parse_none_def("extra_prefix");
 $tmpl->{'webmin_group'} = $in{'webmin_group'};
+}
+
+# get_reseller_acl(username)
+# Returns just the ACL for some reseller
+sub get_reseller_acl
+{
+local %acl;
+&read_file_cached("$module_config_directory/$_[0].acl", \%acl);
+if (defined(&theme_get_module_acl)) {
+	%acl = &theme_get_module_acl($_[0], $module_name, \%acl);
+	}
+return %acl;
 }
 
 $done_feature_script{'webmin'} = 1;

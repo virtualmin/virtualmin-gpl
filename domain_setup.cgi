@@ -74,10 +74,12 @@ if (!$parentuser) {
 
 	# Parse admin/unix username
 	if ($in{'vuser_def'}) {
+		# Automatic
 		($user, $try1, $try2) = &unixuser_name($in{'dom'});
 		$user || &error(&text('setup_eauto', $try1, $try2));
 		}
 	else {
+		# Selected by user
 		$in{'vuser'} = lc($in{'vuser'});
 		$user = $in{'vuser'};
 		$user =~ /^[^\t :]+$/ || &error($text{'setup_euser2'});
@@ -88,10 +90,21 @@ if (!$parentuser) {
 
 	# Parse mail group name
 	if ($in{'mgroup_def'}) {
-		($group, $gtry1, $gtry2) = &unixgroup_name($in{'dom'}, $user);
-		$group || &error(&text('setup_eauto2', $try1, $try2));
+		if ($in{'vuser_def'}) {
+			# Automatic
+			($group, $gtry1, $gtry2) =
+				&unixgroup_name($in{'dom'}, $user);
+			$group || &error(&text('setup_eauto2', $try1, $try2));
+			}
+		else {
+			# Same as admin user
+			$group = $user;
+			defined(getgrnam($group)) &&
+				&error(&text('setup_egroup', $group));
+			}
 		}
 	else {
+		# Selected by user
 		$in{'mgroup'} = lc($in{'mgroup'});
 		$group = $in{'mgroup'};
 		$group =~ /^[^\t :]+$/ || &error($text{'setup_egroup2'});

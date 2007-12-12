@@ -2229,7 +2229,12 @@ return $virtualmin_pro && &master_admin();
 
 sub can_edit_exclude
 {
-return 1;	# For now, anyone can
+return !$access{'admin'};	# Any except extra admins
+}
+
+sub can_edit_spf
+{
+return !$access{'admin'};	# Any except extra admins
 }
 
 # Returns 1 if the current user can disable and enable the given domain
@@ -9447,7 +9452,7 @@ if ($d->{'web'} && &can_edit_phpver() &&
 		}
 	}
 
-if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'}) {
+if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} && &can_edit_spf()) {
 	# SPF settings button
 	push(@rv, { 'page' => 'edit_spf.cgi',
 		    'title' => $text{'edit_spf'},
