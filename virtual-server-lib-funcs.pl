@@ -5975,6 +5975,7 @@ return $db;
 sub fix_database_name
 {
 local ($db) = @_;
+$db = lc($db);
 $db =~ s/[\.\-]/_/g;	# mysql doesn't like . or _
 $db =~ s/^0/zero/g;	# postgresql doesn't like leading numbers
 $db =~ s/^1/one/g;
