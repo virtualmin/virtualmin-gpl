@@ -179,7 +179,7 @@ $initial_users_dir = "$module_config_directory/initial";
 	        'ip', 'ssl', 'forward', 'admins', 'spam', 'phpver', 'backup',
 		'sharedips', 'catchall', 'html', 'disable', 'delete');
 if (!$virtualmin_pro) {
-	@edit_limits = grep { $_ ne 'scripts' && $_ ne 'admins' &&
+	@edit_limits = grep { $_ ne 'scripts' &&
 			      $_ ne 'spam' && $_ ne 'phpver' } @edit_limits;
 	}
 

@@ -2164,7 +2164,6 @@ return &master_admin() || &reseller_admin() ||
 
 sub can_edit_admins
 {
-return 0 if (!$virtualmin_pro);
 return &master_admin() || &reseller_admin() || $access{'edit_admins'};
 }
 
@@ -6553,7 +6552,7 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 			}
 		}
 
-	if (!$dd->{'parent'} && $virtualmin_pro) {
+	if (!$dd->{'parent'}) {
 		# Delete any extra admins
 		foreach my $admin (&list_extra_admins($dd)) {
 			&delete_extra_admin($admin);
