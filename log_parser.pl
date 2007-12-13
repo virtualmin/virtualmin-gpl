@@ -97,7 +97,7 @@ elsif ($action eq "notify" || $action eq "mailusers") {
 	return &text('log_'.$action, scalar(split(/\0/, $p->{'to'})));
 	}
 elsif ($action eq "shells") {
-	return $text{'log_shells'.int($object));
+	return $text{'log_shells'.int($object)};
 	}
 else {
 	return $text{'log_'.$action};
