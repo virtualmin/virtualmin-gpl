@@ -1,5 +1,23 @@
 <header>Add mail attribute to LDAP users?</header>
 
+When storing Virtualmin users in LDAP, this setting allows you to have
+their email addresses added to the LDAP database as well. This is useful if
+your mail server or spam filter use the same database to deliver email. <p>
+
+The available options are :
+<ul>
+<li><b>Yes using only <tt>mail</tt> attribute</b><br>
+    Each user's primary and extra email addresses will be stored in this
+    attribute as separate values.<p>
+
+<li><b>Yes using <tt>mail</tt> and <tt>mailAlternateAddress</tt></b><br>
+    Users' primary addresses will be stored in the <tt>mail</tt> attribute,
+    and additional addresses in <tt>mailAlternateAddress</tt>.<p>
+
+<li><b>No</b><br>
+    Email addresses will never be stored in LDAP.<p>
+</ul>
+
 When this is set to <b>Yes</b>, Webmin will add LDAP <tt>mail</tt> attributes
 to each user it creates or modifies for their primary and additional email
 addresses. This is useful if you are using the same LDAP database with a 
