@@ -15,7 +15,7 @@ else {
 	}
 print &ui_form_start("move.cgi");
 print &ui_hidden("dom", $d->{'id'}),"\n";
-print &ui_table_start($text{'move_header'}, undef, 2);
+print &ui_table_start($text{'move_header'}, undef, 2, [ "width=30%" ]);
 
 # Domain being moved
 print &ui_table_row($text{'move_dom'}, "<tt>$d->{'dom'}</tt>");

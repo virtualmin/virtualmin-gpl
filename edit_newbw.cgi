@@ -112,7 +112,7 @@ print &ui_table_row(&hlink($text{'newbw_servers'}, "bandwidth_serversmode"),
 				   [ &list_domains() ]));
 
 # Log files for FTP and mail
-$defftplog = &get_proftpd_log();
+$defftplog = $config{'ftp'} ? &get_proftpd_log() : undef;
 print &ui_table_row(&hlink($text{'newbw_ftplog'}, "bandwidth_ftplog_def"),
 	&ui_opt_textbox("ftplog", $config{'bw_ftplog'}, 40,
 	  $defftplog ? &text('newbw_ftplogdef', "<tt>$defftplog</tt>")."<br>"
@@ -123,7 +123,7 @@ print &ui_table_row(&hlink($text{'newbw_ftplog'}, "bandwidth_ftplog_def"),
 		     $config{'bw_ftplog_rotated'}));
 
 $mode = $config{'bw_maillog'} eq "auto" ? 2 : $config{'bw_maillog'} ? 0 : 1;
-$defmaillog = &get_mail_log();
+$defmaillog = $config{'mail'} ? &get_mail_log() : undef;
 print &ui_table_row(&hlink($text{'newbw_maillog'}, "bandwidth_maillog_def"),
 	&ui_radio("maillog_def", $mode,
 	  [ [ 1, $text{'newbw_ftplognone'}."<br>" ],
