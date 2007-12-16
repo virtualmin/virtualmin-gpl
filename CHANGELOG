@@ -791,3 +791,5 @@ Shells for mailboxes and domain owners are now configured on the new Custom Shel
 Added the list-available-shells.pl command-line program, and added the --shell parameter to create-user.pl and modify-user.pl. Also updated modify-limits.pl so that the --shell option can specify any defined shell.
 The size of the Webmin server process can be traded off against the speed of Virtualmin by adjusting the amount of library pre-loading done, using a new setting on the Module Config page.
 Added the test-smtp.pl command for validating mail server relaying and logins.
+---- Changes since 3.49 ----
+Upgraded the SquirrelMail script installer to version 1.4.13.
