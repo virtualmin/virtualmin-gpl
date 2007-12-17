@@ -555,6 +555,7 @@ $migrate_tests = [
 	  'grep' => [ 'successfully migrated\s+:\s+'.$migration_ensim_domain,
 		      'migrated\s+5\s+aliases' ],
 	  'migrate' => 'ensim',
+	  'timeout' => 180,
 	  'always_cleanup' => 1,
 	},
 
@@ -620,6 +621,7 @@ $migrate_tests = [
 		      'migrated\s+1\s+databases,\s+and\s+created\s+1\s+user',
 		    ],
 	  'migrate' => 'plesk',
+	  'timeout' => 180,
 	  'always_cleanup' => 1,
 	},
 
