@@ -1504,6 +1504,7 @@ check_spamok=SpamAssassin and Procmail are installed and configured for use.
 check_noprocmail=SpamAssassin and Procmail are installed. However, your mail server does not appear to be configured to deliver using Procmail.
 check_spamglobal=SpamAssassin is configured to be run from the global Procmail configuration $1, which is not needed as Virtualmin will set it up on a per-domain basis.
 check_virusok=ClamAV is installed and running.
+check_virusok2=ClamAV is installed and assumed to be running.
 check_emysqlplugin=The MySQL users plugin is no longer needed, as its functionality has been incorporated into the Virtualmin core.
 check_statusok=The System and Server Status module is installed and checking on schedule.
 check_statussched=The System and Server Status module is installed, but is not set up to check servers on a regular schedule. This should be enabled on its <a href='$1'>Scheduled Monitoring</a> page.

@@ -10498,12 +10498,16 @@ if ($config{'virus'}) {
 	# Make sure ClamAV is installed and working
 	$config{'spam'} || return $text{'check_evirusspam'};
 	&full_clamscan_path() ||
-		return &text('index_evirus', "<tt>$config{'clamscan_cmd'}</tt>", $clink);
+		return &text('index_evirus',
+			     "<tt>$config{'clamscan_cmd'}</tt>", $clink);
 	if ($config{'clamscan_cmd'} eq "clamdscan") {
 		# Need clamd to be running
 		&find_byname("clamd") || return $text{'check_eclamd'};
 		}
-	local $err = &test_virus_scanner($config{'clamscan_cmd'});
+	local $err;
+	if ($config{'clamscan_cmd_tested'} ne $config{'clamscan_cmd'}) {
+		$err = &test_virus_scanner($config{'clamscan_cmd'});
+		}
 	if ($err) {
 		# Failed .. but this can often be due to the ClamAV database
 		# being out of date.
@@ -10518,9 +10522,17 @@ if ($config{'virus'}) {
 			}
 		}
 	if ($err) {
-		return &text('index_evirusrun2', "<tt>$config{'clamscan_cmd'}</tt>", $err, "edit_newsv.cgi");
+		return &text('index_evirusrun2',
+			     "<tt>$config{'clamscan_cmd'}</tt>",
+			     $err, "edit_newsv.cgi");
 		}
-	&$second_print($text{'check_virusok'});
+	if ($config{'clamscan_cmd_tested'} eq $config{'clamscan_cmd'}) {
+		&$second_print($text{'check_virusok2'});
+		}
+	else {
+		$config{'clamscan_cmd_tested'} = $config{'clamscan_cmd'};
+		&$second_print($text{'check_virusok'});
+		}
 	}
 
 if ($config{'status'}) {
