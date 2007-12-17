@@ -64,19 +64,20 @@ closedir(DIR);
 return @rv;
 }
 
-# get_domain(id, [file])
+# get_domain(id, [file], [force-reread])
 # Looks up a domain object by ID
 sub get_domain
 {
-return undef if (!$_[0] && !$_[1]);
-if ($_[0] && defined($main::get_domain_cache{$_[0]})) {
-	return $main::get_domain_cache{$_[0]};
+local ($id, $file, $force) = @_;
+return undef if (!$id && !$file);
+if ($id && defined($main::get_domain_cache{$id}) && !$force) {
+	return $main::get_domain_cache{$id};
 	}
 local %dom;
-local $file = $_[1] || "$domains_dir/$_[0]";
+$file ||= "$domains_dir/$id";
 &read_file($file, \%dom) || return undef;
-$dom{'file'} = "$domains_dir/$_[0]";
-$dom{'id'} ||= $_[0];
+$dom{'file'} = "$domains_dir/$id";
+$dom{'id'} ||= $id;
 &complete_domain(\%dom);
 if (!defined($dom->{'created'})) {
 	# compat - creation date can be inferred from ID
@@ -84,8 +85,16 @@ if (!defined($dom->{'created'})) {
         $dom->{'created'} = $1;
         }
 delete($dom->{'missing'});	# never set in a saved domain
-if ($_[0]) {
-	$main::get_domain_cache{$_[0]} = \%dom;
+if ($id) {
+	if ($main::get_domain_cache{$id} && $force) {
+		# In forced re-read mode, update existing object in cache
+		local $cache = $main::get_domain_cache{$id};
+		%$cache = %dom;
+		}
+	else {
+		# Add to cache
+		$main::get_domain_cache{$id} = \%dom;
+		}
 	}
 return \%dom;
 }

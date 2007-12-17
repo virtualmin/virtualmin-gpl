@@ -70,8 +70,5 @@
  - mobile theme for webmail
 	- release
 
- - in bw.pl , re-read domains after getting stats and before saving
-	- also add STDERR warning if a domain has been written since read
-
  - framed theme should show bandwidth, and make quota sorting by %/usage
    configurable, and make number of domains to show configurable
