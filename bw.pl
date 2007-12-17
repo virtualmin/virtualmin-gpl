@@ -83,6 +83,7 @@ foreach $d (@bwdoms) {
 # that are over their limit
 foreach $d (@doms) {
 	$d = &get_domain($d->{'id'}, undef, 1);	# Force re-read from disk
+	next if (!$d);				# Deleted
 	next if ($d->{'parent'});
 
 	# Sum up usage for domain and sub-domains
