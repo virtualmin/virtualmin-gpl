@@ -54,6 +54,7 @@ if ($config{'backup_strftime'}) {
 else {
 	$dest = $config{'backup_dest'};
 	}
+$start_time = time();
 ($ok, $size) = &backup_domains($dest, \@doms, \@do_features,
 			       $config{'backup_fmt'},
 			       $config{'backup_errors'}, \%options,
@@ -74,11 +75,13 @@ if ($config{'backup_email_doms'}) {
 if (@emails && &foreign_check("mailboxes") &&
     (!$ok || !$config{'backup_email_err'})) {
 	if ($ok) {
-		$output .= &text('backup_done', &nice_size($size))."\n";
+		$output .= &text('backup_done', &nice_size($size))." ";
 		}
 	else {
-		$output .= $text{'backup_failed'}."\n";
+		$output .= $text{'backup_failed'}." ";
 		}
+	$total_time = time() - $start_time;
+	$output .= &text('backup_time', &nice_hour_mins_secs($total_time))."\n";
 	&foreign_require("mailboxes", "mailboxes-lib.pl");
 	$host = &get_system_hostname();
 	if ($emails[0] eq $config{'backup_email'}) {

@@ -1738,6 +1738,7 @@ backup_ebucket=Missing or invalid S3 bucket name
 backup_eakey=Missing or invalid S3 authentication key
 backup_eskey=Missing or invalid S3 secret key
 backup_done=Backup is complete. Final size was $1.
+backup_time=Total backup time was $1.
 backup_failed=Backup failed! See the progress output above for the reason why.
 backup_upload=Uploading archive to FTP server ..
 backup_upload2=Uploading archive to SSH server ..
@@ -3954,3 +3955,6 @@ shells_ftp=Email and FTP
 shells_ssh=Email, FTP and SSH
 shells_none=&lt;No shell&gt;
 
+nicetime_days=$1 days, $2 hours, $3:$4
+nicetime_hours=$1 hours, $2:$3
+nicetime_mins=$1 minutes, $2 seconds

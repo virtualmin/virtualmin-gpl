@@ -11916,6 +11916,26 @@ $miniserv{'preload'} = join(" ", &unique(@preload));
 &unlock_file($msc);
 }
 
+# nice_hour_mins_secs(unixtime)
+# Convert a number of seconds into an HH:MM:SS format
+sub nice_hour_mins_secs
+{
+local ($time) = @_;
+local $days = int($time / (24*60*60));
+local $hours = int($time / (60*60)) % 24;
+local $mins = int($time / 60) % 60;
+local $secs = int($time) % 60;
+if ($days) {
+	return &text('nicetime_days', $days, $hours, $mins, $secs);
+	}
+elsif ($days || $hours) {
+	return &text('nicetime_hours', $hours, $mins, $secs);
+	}
+else {
+	return &text('nicetime_mins', $mins, $secs);
+	}
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;

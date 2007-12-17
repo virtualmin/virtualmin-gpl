@@ -794,3 +794,4 @@ Added the test-smtp.pl command for validating mail server relaying and logins.
 ---- Changes since 3.49 ----
 Upgraded the SquirrelMail script installer to version 1.4.13.
 Only run clamscan once to verify that it is working, rather than after every configuration change.
+Include the total backup time in the scheduled backup email.
