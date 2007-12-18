@@ -51,9 +51,6 @@
 	</Location>
 
  - LDAP docs
-	- ldap-useradmin module should be able to setup automatically
-	- test on virgin system
-	- openldap server module
 
  - use new Apache module function for block updates instead of directly
    modifying config file, when Webmin 1.380 is out
@@ -70,5 +67,3 @@
  - mobile theme for webmail
 	- release
 
- - framed theme should show bandwidth, and make quota sorting by %/usage
-   configurable, and make number of domains to show configurable
