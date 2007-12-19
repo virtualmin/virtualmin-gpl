@@ -209,7 +209,7 @@ foreach $d (@doms) {
 			$tkeys{'bw_percent'} = int(100*$usage/$d->{'bw_limit'});
 			foreach $k (keys %usage) {
 				$tkeys{'bw_usage_'.$k} =
-					&nice_size($tkeys{'bw_usage_'}.$k);
+					&nice_size($tkeys{'bw_usage_'.$k});
 				}
 			$tkeys{'bw_warn'} = $config{'bw_warn'};
 			local @addrs;
