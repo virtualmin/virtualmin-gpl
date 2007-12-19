@@ -796,3 +796,4 @@ Upgraded the SquirrelMail script installer to version 1.4.13.
 Upgraded the ZenPhoto installer to version 1.1.3, and made it more automated.
 Only run clamscan once to verify that it is working, rather than after every configuration change.
 Include the total backup time in the scheduled backup email.
+Added a script installer for RoundCube, a new IMAP webmail client with a nicer user interface than Squirrelmail.
