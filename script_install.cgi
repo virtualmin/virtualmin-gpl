@@ -115,7 +115,10 @@ if (!$modok) {
 	exit;
 	}
 
-# Call the install program
+# Restart Apache now if needed
+&run_post_actions();
+
+# Call the install function
 &$first_print(&text('scripts_installing', $script->{'desc'}, $ver));
 ($ok, $msg, $desc, $url, $suser, $spass) =
 	&{$script->{'install_func'}}($d, $ver, $opts, \%gotfiles, $sinfo);

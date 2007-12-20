@@ -188,6 +188,9 @@ if (defined(&$phpvfunc)) {
 		}
 	}
 
+# Apply Apache config if needed, for new PHP version
+&run_post_actions();
+
 # First fetch needed files
 &$first_print("Fetching required files ..");
 $ferr = &fetch_script_files($d, $ver, $opts, $sinfo, \%gotfiles, 1);
