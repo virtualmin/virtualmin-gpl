@@ -493,31 +493,26 @@ sub show_template_unix
 {
 local ($tmpl) = @_;
 
-# Quota-related defaults
+# Quota-related defaults .. starting with quota type (hard or soft)
 print &ui_table_row(&hlink($text{'tmpl_quotatype'}, "template_quotatype"),
     &ui_radio("quotatype", $tmpl->{'quotatype'},
 	      [ $tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ),
 		[ "hard", $text{'tmpl_hard'} ],
 		[ "soft", $text{'tmpl_soft'} ] ]));
 
+# Default domain quota
 print &ui_table_row(&hlink($text{'tmpl_quota'}, "template_quota"),
     &none_def_input("quota", $tmpl->{'quota'}, $text{'tmpl_quotasel'}, 1,
 		    0, undef, [ "quota", "quota_units" ])."\n".
     &quota_input("quota", $tmpl->{'quota'} eq "none" ?
 				"" : $tmpl->{'quota'}, "home"));
 
+# Default admin user quota
 print &ui_table_row(&hlink($text{'tmpl_uquota'}, "template_uquota"),
     &none_def_input("uquota", $tmpl->{'uquota'}, $text{'tmpl_quotasel'}, 1,
 		    0, undef, [ "uquota", "uquota_units" ])."\n".
     &quota_input("uquota", $tmpl->{'uquota'} eq "none" ?
 				"" : $tmpl->{'uquota'}, "home"));
-
-print &ui_table_row(&hlink($text{'tmpl_defmquota'}, "template_defmquota"),
-    &none_def_input("defmquota", $tmpl->{'defmquota'}, $text{'tmpl_quotasel'},
-		    0, 0, $text{'form_unlimit'},
-		    [ "defmquota", "defmquota_units" ])."\n".
-    &quota_input("defmquota", $tmpl->{'defmquota'} eq "none" ?
-				"" : $tmpl->{'defmquota'}, "home"));
 
 # Domain owner primary group
 print &ui_table_row(&hlink($text{'tmpl_ugroup'}, "template_ugroup_mode"),
@@ -545,11 +540,6 @@ $tmpl->{'uquota'} = &parse_none_def("uquota");
 if ($in{"uquota_mode"} == 2) {
 	$in{'uquota'} =~ /^[0-9\.]+$/ || &error($text{'tmpl_euquota'});
 	$tmpl->{'uquota'} = &quota_parse("uquota", "home");
-	}
-$tmpl->{'defmquota'} = &parse_none_def("defmquota");
-if ($in{"defmquota_mode"} == 2) {
-	$in{'defmquota'} =~ /^[0-9\.]+$/ || &error($text{'tmpl_edefmquota'});
-	$tmpl->{'defmquota'} = &quota_parse("defmquota", "home");
 	}
 
 # Save domain owner primary group option

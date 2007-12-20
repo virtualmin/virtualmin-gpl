@@ -3281,8 +3281,17 @@ if ($supports_aliascopy) {
 			    [ 0, $text{'tmpl_aliascopy0'} ] ]));
 	}
 
-# Unix groups for mail, FTP and DB users
 print &ui_table_hr();
+
+# Default mailbox quota
+print &ui_table_row(&hlink($text{'tmpl_defmquota'}, "template_defmquota"),
+    &none_def_input("defmquota", $tmpl->{'defmquota'}, $text{'tmpl_quotasel'},
+		    0, 0, $text{'form_unlimit'},
+		    [ "defmquota", "defmquota_units" ])."\n".
+    &quota_input("defmquota", $tmpl->{'defmquota'} eq "none" ?
+				"" : $tmpl->{'defmquota'}, "home"));
+
+# Unix groups for mail, FTP and DB users
 foreach $g ("mailgroup", "ftpgroup", "dbgroup") {
 	print &ui_table_row(&hlink($text{'tmpl_'.$g}, "template_".$g),
 		    &none_def_input($g, $tmpl->{$g},
@@ -3367,6 +3376,13 @@ if ($in{'domaliases_mode'} != 1) {
 	}
 if ($supports_aliascopy) {
 	$tmpl->{'aliascopy'} = $in{'aliascopy'};
+	}
+
+# Save default quota
+$tmpl->{'defmquota'} = &parse_none_def("defmquota");
+if ($in{"defmquota_mode"} == 2) {
+	$in{'defmquota'} =~ /^[0-9\.]+$/ || &error($text{'tmpl_edefmquota'});
+	$tmpl->{'defmquota'} = &quota_parse("defmquota", "home");
 	}
 
 # Save secondary groups

@@ -1,6 +1,4 @@
- - re-make with fix!
-
- - run functional-test.pl
+ x run functional-test.pl
 
  x Create tar.gz file
 
@@ -14,9 +12,9 @@
 
  x Add to website
 
- x Add the freshmeat.net
+ - Add the freshmeat.net
 
- x Announce on mailing list
+ - Announce on mailing list
 
  x Add to updates.txt
 
