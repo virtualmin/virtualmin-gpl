@@ -61,8 +61,9 @@ USER: foreach $line (@lines) {
 		&line_error($text{'umass_euname'});
 		next USER;
 		}
-	if ($username !~ /^[^ \t:]+$/) {
-		&line_error($text{'user_euser'});
+	$err = &valid_mailbox_name($username);
+	if ($err) {
+		&line_error($err);
 		next USER;
 		}
 	if ($user->{'person'} && $real !~ /^[^:]*$/) {

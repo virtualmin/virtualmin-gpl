@@ -107,7 +107,8 @@ if ($user->{'unix'} && !$user->{'noquota'}) {
 if ($user->{'mailquota'}) {
 	!$qquota || $qquota =~ /^\d+$/ || usage();
 	}
-$username =~ /^[^ \t:]+$/ || usage($text{'user_euser'});
+$err = &valid_mailbox_name($username);
+&usage($err) if ($err);
 if ($user->{'person'}) {
 	$real =~ /^[^:]*$/ || usage($text{'user_ereal'});
 	}

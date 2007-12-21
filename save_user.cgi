@@ -117,7 +117,8 @@ else {
 		if (!$config{'allow_upper'}) {
 			$in{'mailuser'} = lc($in{'mailuser'});
 			}
-		$in{'mailuser'} =~ /^[^ \t:]+$/ || &error($text{'user_euser'});
+		$err = &valid_mailbox_name($in{'mailuser'});
+		&error($err) if ($err);
 		if ($user->{'person'}) {
 			$in{'real'} =~ /^[^:]*$/ || &error($text{'user_ereal'});
 			$user->{'real'} = $in{'real'};

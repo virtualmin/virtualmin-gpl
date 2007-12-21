@@ -2565,6 +2565,14 @@ else {
 	}
 }
 
+# valid_mailbox_name(name)
+# Returns an error message if a mailbox name contains bogus characters
+sub valid_mailbox_name
+{
+local ($name) = @_;
+return $name =~ /^[^ \t:\&\(\)\|\;\<\>\*\?]+$/ ? $text{'user_euser'} : undef;
+}
+
 sub max_username_length
 {
 &require_useradmin();
