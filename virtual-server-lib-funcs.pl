@@ -2275,7 +2275,6 @@ return $config{'edit_afiles'} || &master_admin();
 # Returns 1 if the current user can change the IP of a domain
 sub can_change_ip
 {
-return 0 if (!$virtualmin_pro);
 local $tmpl = &get_template($_[0]->{'template'});
 return &master_admin() ||
        $access{'edit_ip'} && &can_use_feature("virt") &&
