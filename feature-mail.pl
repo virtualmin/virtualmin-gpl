@@ -1701,10 +1701,17 @@ sub get_mail_style
 if ($config{'mail_system'} == 1) {
 	# Can get paths from Sendmail module config
 	if ($sendmail::config{'mail_dir'}) {
+		# File under /var/mail
 		return ($sendmail::config{'mail_dir'},
 			$sendmail::config{'mail_style'}, undef, undef);
 		}
+	elsif ($sendmail::config{'mail_type'} == 1) {
+		# Maildir in home directory
+		return (undef, $sendmail::config{'mail_style'},
+			undef, $sendmail::config{'mail_file'});
+		}
 	else {
+		# mbox in home directory
 		return (undef, $sendmail::config{'mail_style'},
 			$sendmail::config{'mail_file'}, undef);
 		}
