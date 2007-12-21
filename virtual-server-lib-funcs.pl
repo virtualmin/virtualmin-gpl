@@ -11777,6 +11777,18 @@ else {
 		push(@rv, \%shell);
 		$classes{$us->[0]}++;
 		}
+	if (!$defclass) {
+		# Default for owners was not found .. use config
+		local %shell = ( 'shell' => $config{'unix_shell'},
+				 'desc' => $text{'shells_ssh'},
+			         'id' => 'ssh',
+				 'owner' => 1,
+				 'default' => 1,
+				 'avail' => 1 );
+		push(@rv, \%shell);
+                $classes{'ssh'}++;
+		$defclass = 'ssh';
+		}
 	# Only the default or first of each class are available
 	foreach my $c (grep { $_ ne $defclass } keys %classes) {
 		local ($firstclass) = grep { $_->{'id'} eq $c } @rv;

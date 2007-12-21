@@ -573,7 +573,8 @@ local @nologin = ($config{'shell'}, '/dev/null', '/sbin/nologin',
 push(@rv, map { [ 'nologin', $_ ] } grep { !$shells{$_} } @nologin);
 
 # Find a good FTP-capable shell
-local @ftp = ( $config{'ftp_shell'}, '/bin/false', '/bin/true' );
+local @ftp = ( $config{'ftp_shell'}, '/bin/false', '/bin/true',
+	       '/sbin/nologin', '/bin/nologin' );
 push(@rv, map { [ 'ftp', $_ ] } grep { $shells{$_} } @ftp);
 
 # Find FTP and SSH login shells
