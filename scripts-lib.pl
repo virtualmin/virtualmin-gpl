@@ -358,6 +358,7 @@ if ($newsuffix) {
 			# Don't offer to create if already exists
 			$newdbname = $newdbtype = $newdbdesc = undef;
 			}
+		$value ||= "*".$newdbtype."_".$newdbname;
 		}
 	}
 return &ui_select($name, $value,
