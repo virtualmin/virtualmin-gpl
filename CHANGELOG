@@ -792,7 +792,7 @@ Added the list-available-shells.pl command-line program, and added the --shell p
 The size of the Webmin server process can be traded off against the speed of Virtualmin by adjusting the amount of library pre-loading done, using a new setting on the Module Config page.
 Added the test-smtp.pl command for validating mail server relaying and logins.
 ---- Changes since 3.50 ----
-Upgraded the SquirrelMail script installer to version 1.4.13, phpBB to 3.0.0 (and fixed a module bug), and Mantis to 1.1.0.
+Upgraded the SquirrelMail script installer to version 1.4.13, phpBB to 3.0.0 (and fixed a module bug), TikiWiki to 1.9.9, and Mantis to 1.1.0.
 Upgraded the ZenPhoto installer to version 1.1.3, and made it more automated.
 Removed the Squirrelmail 1.5.1 version, as it is no longer available for download.
 Only run clamscan once to verify that it is working, rather than after every configuration change.
