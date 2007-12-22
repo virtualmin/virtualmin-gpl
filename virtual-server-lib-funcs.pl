@@ -6190,6 +6190,9 @@ sub create_virtual_server
 {
 local ($dom, $parentdom, $parentuser, $noscripts, $nopost) = @_;
 
+# Sanity checks
+$dom->{'ip'} || return $text{'setup_edefip'};
+
 # Run the before command
 &set_domain_envs($dom, "CREATE_DOMAIN");
 local $merr = &making_changes();
