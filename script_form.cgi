@@ -95,6 +95,40 @@ if ($ok) {
 	$opts = &{$script->{'params_func'}}($d, $ver, $sinfo);
 	print $opts;
 
+	# Show custom login and password
+	if (defined(&{$script->{'passmode_func'}})) {
+		$passmode = &{$script->{'passmode_func'}}($d, $ver);
+		}
+	if ($passmode == 1) {
+		# Can choose login and password
+		print &ui_table_row($text{'scripts_passmode'},
+		      &ui_radio("passmode_def", 1,
+			[ [ 1, $text{'scripts_passmodedef1'}."<br>" ],
+			  [ 0, &text('scripts_passmode1',
+			     &ui_textbox("passmodeuser", $d->{'user'}, 20),
+			     &ui_textbox("passmodepass", $d->{'pass'}, 20)) ]
+			]));
+		}
+	elsif ($passmode == 2) {
+		# Can choose only password
+		print &ui_table_row($text{'scripts_passmode'},
+		      &ui_radio("passmode_def", 1,
+			[ [ 1, $text{'scripts_passmodedef2'}."<br>" ],
+			  [ 0, &text('scripts_passmode2',
+			     &ui_textbox("passmodepass", $d->{'pass'}, 20)) ]
+			]));
+		}
+	elsif ($passmode == 3) {
+		# Can choose only login
+		print &ui_table_row($text{'scripts_passmode'},
+		      &ui_radio("passmode_def", 1,
+			[ [ 1, $text{'scripts_passmodedef3'}."<br>" ],
+			  [ 0, &text('scripts_passmode3',
+			     &ui_textbox("passmodeuser", $d->{'user'}, 20)) ],
+			]));
+		}
+	print &ui_hidden("passmode", $passmode);
+
 	print &ui_table_end();
 	print &ui_form_end([ [ "install", $text{'scripts_iok'} ] ]);
 	}

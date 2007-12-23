@@ -90,9 +90,14 @@ if ($in{'confirm'}) {
 						    $sinfo, \%gotfiles);
 			&error($ferr) if ($ferr);
 
+			# Work out username and password
+			$domuser = $sinfo->{'user'} || $d->{'user'};
+			$dompass = $sinfo->{'pass'} || $d->{'pass'};
+
 			# Go ahead and do it
 			($ok, $msg, $desc, $url) = &{$script->{'install_func'}}(
-				$d, $ver, $opts, \%gotfiles, $sinfo);
+				$d, $ver, $opts, \%gotfiles, $sinfo,
+				$domuser, $dompass);
 			print $msg,"<br>\n";
 			&$outdent_print();
 			if ($ok) {

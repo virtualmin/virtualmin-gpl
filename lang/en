@@ -2754,6 +2754,14 @@ scripts_sitelink=More information on using this script can be found at <a href='
 scripts_userpass=The initial administration login is $1 with the password $2.
 scripts_useronly=The initial administration login is $1.
 scripts_passonly=The initial administration password is $1.
+scripts_passmode=Initial login for script
+scripts_passmodedef1=Same username and password as domain
+scripts_passmode1=Username $1 and password $2
+scripts_passmodedef2=Same password as domain
+scripts_passmode2=Password $1
+scripts_passmodedef3=Same username as domain
+scripts_passmode3=Username $1
+scripts_epassmodeuser=Invalid login for script - only letters, numbers and the characters . - _ may be used
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:

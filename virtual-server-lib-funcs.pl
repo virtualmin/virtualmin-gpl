@@ -6459,7 +6459,9 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 
 		# Call the install function
 		local ($ok, $msg, $desc, $url, $suser, $spass) =
-			&{$script->{'install_func'}}($dom, $ver, $opts, \%gotfiles, undef);
+			&{$script->{'install_func'}}(
+				$dom, $ver, $opts, \%gotfiles, undef,
+				$dom->{'user'}, $dom->{'pass'});
 
 		if ($ok) {
 			&$second_print(&text('setup_scriptdone', $msg));

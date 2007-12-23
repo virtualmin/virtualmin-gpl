@@ -95,8 +95,14 @@ foreach $sinfo (@sinfos) {
 			next;
 			}
 
+		# Work out login and password
+		$domuser = $sinfo->{'user'} || $d->{'user'};
+		$dompass = $sinfo->{'pass'} || $d->{'pass'};
+
 		# Go ahead and do it
-		($ok, $msg, $desc, $url) = &{$script->{'install_func'}}($d, $ver, $sinfo->{'opts'}, \%gotfiles, $sinfo);
+		($ok, $msg, $desc, $url) = &{$script->{'install_func'}}(
+			$d, $ver, $sinfo->{'opts'}, \%gotfiles, $sinfo,
+			$domuser, $dompass);
 		&$indent_print();
 		print $msg,"<br>\n";
 		&$outdent_print();

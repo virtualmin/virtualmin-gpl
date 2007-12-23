@@ -67,3 +67,7 @@
  - mobile theme for webmail
 	- release
 
+ - separate passwords for scripts
+	- FS#3444
+	- update all installers
+	- API docs

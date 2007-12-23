@@ -20,6 +20,28 @@ else {
 	}
 &error_setup($text{'scripts_ierr'});
 
+# Validate user and pass
+if ($in{'upgrade'}) {
+	# Same as before
+	$domuser = $sinfo->{'user'} || $d->{'user'};
+	$dompass = $sinfo->{'pass'} || $d->{'pass'};
+	}
+else {
+	$domuser = $d->{'user'};
+	$dompass = $d->{'pass'};
+	if ($in{'passmode'} && !$in{'passmode_def'}) {
+		if ($in{'passmode'} == 1 || $in{'passmode'} == 3) {
+			# Check username
+			$in{'passmodeuser'} =~ /^[a-z0-9\.\-\_]+$/ ||
+				&error($text{'scripts_epassmodeuser'});
+			$domuser = $in{'passmodeuser'};
+			}
+		if ($in{'passmode'} == 1 || $in{'passmode'} == 2) {
+			$dompass = $in{'passmodepass'};
+			}
+		}
+	}
+
 # Check depends again
 $derr = &{$script->{'depends_func'}}($d, $ver);
 &error(&text('scripts_edep', $derr)) if ($derr);
@@ -121,7 +143,8 @@ if (!$modok) {
 # Call the install function
 &$first_print(&text('scripts_installing', $script->{'desc'}, $ver));
 ($ok, $msg, $desc, $url, $suser, $spass) =
-	&{$script->{'install_func'}}($d, $ver, $opts, \%gotfiles, $sinfo);
+	&{$script->{'install_func'}}($d, $ver, $opts, \%gotfiles, $sinfo,
+				     $domuser, $dompass);
 &$indent_print();
 print $msg,"<p>\n";
 if ($script->{'site'}) {

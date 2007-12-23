@@ -73,6 +73,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mongrels") {
 		$opts->{'mongrels'} = shift(@ARGV);
 		}
+	elsif ($a eq "--user") {
+		$domuser = shift(@ARGV);
+		$domuser =~ /^[a-z0-9\.\-\_]+$/ ||
+			&usage("Invalid default script username");
+		}
+	elsif ($a eq "--pass") {
+		$dompass = shift(@ARGV);
+		}
 	else {
 		&usage();
 		}
@@ -104,6 +112,12 @@ if ($id) {
 	($sinfo) = grep { $_->{'id'} eq $id } @scripts;
 	$sinfo || &usage("No script install to upgrade with ID $id was found");
 	$opts = $sinfo->{'opts'};
+	$domuser = $sinfo->{'user'} || $d->{'user'};
+	$dompass = $sinfo->{'pass'} || $d->{'pass'};
+	}
+else {
+	$domuser ||= $d->{'user'};
+	$dompass ||= $d->{'pass'};
 	}
 
 # Check domain features
@@ -219,7 +233,8 @@ if (!&setup_ruby_modules($d, $script, $ver, $opts)) {
 # Call the install function
 &$first_print(&text('scripts_installing', $script->{'desc'}, $ver));
 ($ok, $msg, $desc, $url, $suser, $spass) =
-	&{$script->{'install_func'}}($d, $ver, $opts, \%gotfiles, $sinfo);
+	&{$script->{'install_func'}}($d, $ver, $opts, \%gotfiles, $sinfo,
+				     $domuser, $dompass);
 if ($msg =~ /</) {
 	$msg = &mailboxes::html_to_text($msg);
 	$msg =~ s/^\s+//;
