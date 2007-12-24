@@ -346,6 +346,10 @@ if ($newsuffix) {
 						$tmpl->{'mysql_suffix'}, $d);
 			$prefix =~ s/-/_/g;
 			$prefix =~ s/\./_/g;
+			if ($prefix && $prefix !~ /_$/) {
+				# Always use _ as separator
+				$prefix .= "_";
+				}
 			$newdbname = &fix_database_name($prefix.$newsuffix);
 			}
 		else {
@@ -1551,6 +1555,9 @@ if ($copydir) {
 		}
 	$out = undef if ($out !~ /\S/);
 	return "<pre>".&html_escape($out || "Exit status $?")."</pre>" if ($?);
+
+	# Make dest files non-world-readable
+	&run_as_domain_user($d, "chmod -R o-rxw ".quotemeta($copydir));
 	}
 
 return undef;
