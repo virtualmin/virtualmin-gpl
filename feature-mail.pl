@@ -3,6 +3,7 @@ sub require_mail
 {
 return if ($require_mail++);
 $can_alias_types{12} = 0;	# this autoreponder for vpopmail only
+$supports_bcc = 0;
 if ($config{'mail_system'} == 1) {
 	# Using sendmail for email
 	&foreign_require("sendmail", "sendmail-lib.pl");
@@ -78,6 +79,13 @@ elsif ($config{'mail_system'} == 0) {
 		$postfix_create_alias = \&postfix::create_alias;
 		$postfix_modify_alias = \&postfix::modify_alias;
 		$postfix_delete_alias = \&postfix::delete_alias;
+		}
+	# Work out if we can turn on automatic bcc'ing
+	if ($config{'bccs'}) {
+		$sender_bcc_maps = &postfix::get_real_value("sender_bcc_maps");
+		@sender_bcc_map_files = &postfix::get_maps_files(
+						$sender_bcc_maps);
+		$supports_bcc = 1;
 		}
 	$supports_aliascopy = 1;
 	}
@@ -3288,6 +3296,22 @@ if ($supports_aliascopy) {
 			    [ 0, $text{'tmpl_aliascopy0'} ] ]));
 	}
 
+# BCC address
+if ($supports_bcc) {
+	local $mode = $tmpl->{'bccto'} eq 'none' ? 0 :
+		      $tmpl->{'bccto'} eq '' ? 1 : 2;
+	print &ui_table_row(
+                &hlink($text{'tmpl_bccto'}, "template_bccto"),
+		&ui_radio("bccto_def", $mode,
+		  [ $tmpl->{'default'} ? ( )
+				       : ( [ 1, $text{'default'}."<br>" ] ),
+		    [ 0, $text{'mail_bcc1'}."<br>" ],
+		    [ 2, &text('mail_bcc0',
+		     	       &ui_textbox("bccto",
+				    $mode == 2 ? $tmpl->{'bcc'} : "", 50)) ]
+		  ]));
+	}
+
 print &ui_table_hr();
 
 # Default mailbox quota
@@ -3383,6 +3407,19 @@ if ($in{'domaliases_mode'} != 1) {
 	}
 if ($supports_aliascopy) {
 	$tmpl->{'aliascopy'} = $in{'aliascopy'};
+	}
+if ($supports_bcc) {
+	if ($in{'bccto_def'} == 0) {
+		$tmpl->{'bccto'} = 'none';	# Nowhere
+		}
+	elsif ($in{'bccto_def'} == 1) {
+		$tmpl->{'bccto'} = '';		# Default
+		}
+	else {
+		# Explicit email address
+		$in{'bccto'} =~ /^\S+\@\S+$/ || &error($text{'tmpl_ebccto'});
+		$tmpl->{'bccto'} = $in{'bccto'};
+		}
 	}
 
 # Save default quota
@@ -3706,6 +3743,54 @@ foreach my $ad (&get_domain_by("alias", $d->{'id'})) {
 	if ($ad->{'aliascopy'}) {
 		&copy_alias_virtuals($ad, $d);
 		}
+	}
+}
+
+# get_domain_sender_bcc(&domain)
+# If a domain has automatic BCCing enabled, return the address to which mail
+# is sent. Otherwise, return undef.
+sub get_domain_sender_bcc
+{
+local ($d) = @_;
+&require_mail();
+if ($config{'mail_server'} == 0 && $sender_bcc_maps) {
+	# Check Postfix config
+	local $map = &postfix::get_maps("sender_bcc_maps");
+	local ($rv) = grep { $_->{'name'} eq '@'.$d->{'dom'} } @$map;
+	return $rv ? $rv->{'value'} : undef;
+	}
+return undef;
+}
+
+# save_domain_sender_bcc(&domain, [email])
+# Turns on or off automatic BCCing for some domain. May call &error.
+sub save_domain_sender_bcc
+{
+local ($d, $email) = @_;
+&require_mail();
+if ($config{'mail_server'} == 0) {
+	$sender_bcc_maps || &error($text{'bcc_epostfix'});
+	local $map = &postfix::get_maps("sender_bcc_maps");
+        local ($rv) = grep { $_->{'name'} eq '@'.$d->{'dom'} } @$map;
+	if ($rv && $email) {
+		# Update existing
+		local $old = { %$rv };
+		$rv->{'value'} = $email;
+		&postfix::modify_mapping("sender_bcc_maps", $old, $rv);
+		}
+	elsif ($rv && !$email) {
+		# Remove existing
+		&postfix::delete_mapping("sender_bcc_maps", $rv);
+		}
+	elsif (!$rv && $email) {
+		# Add new mapping
+		&postfix::create_mapping("sender_bcc_maps",
+					 { 'name' => '@'.$d->{'dom'},
+					   'value' => $email });
+		}
+	}
+else {
+	return $text{'bcc_emailserver'};
 	}
 }
 

@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "list-domains.pl must be run as root";
 	}
+&require_mail();
 
 # Parse command-line args
 $owner = 1;
@@ -223,6 +224,14 @@ if ($multi) {
 			$spf = &get_domain_spf($d);
 			print "    SPF DNS record: ",
 			      ($spf ? "Enabled" : "Disabled"),"\n";
+			}
+
+		# Show BCC setting
+		if ($config{'mail'} && $supports_bcc) {
+			$bcc = &get_domain_sender_bcc($d);
+			if ($bcc) {
+				print "    BCC email to: $bcc\n";
+				}
 			}
 
 		# Show owner limits

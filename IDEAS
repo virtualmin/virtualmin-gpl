@@ -68,4 +68,11 @@
 	- release
 
  - option to BCC sent mail - FS#3450
-
+	- Setup in installer
+	- Mass domain update
+	- Renaming domain
+	- Backup and restore
+	- Template
+	- Enable when creating, disable when deleting
+	- GPL version
+	- Help for template, edit_mail.cgi and config option

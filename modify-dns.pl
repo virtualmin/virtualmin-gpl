@@ -86,7 +86,7 @@ else {
 	foreach $n (@dnames) {
 		$d = &get_domain_by("dom", $n);
 		$d || &usage("Domain $n does not exist");
-		$d->{'spam'} || &usage("Virtual server $n does not have a DNS domain");
+		$d->{'dns'} || &usage("Virtual server $n does not have a DNS domain");
 		push(@doms, $d);
 		}
 	}

@@ -803,3 +803,4 @@ Moved the default quota for mailboxes to the 'Mail for domain' section of templa
 Shell special characters like ; and & are no longer allowed in mailbox usernames.
 When selecting a database for a script, the default is now to use a new DB if possible.
 When installing a script that uses authentication, you can now enter a username and/or password instead of it being setup to use the domain's login details by default. Similarly, the install-script.pl command now has optional --user and --pass parameters.
+Removed the modify-aliascopy.pl command-line program, as it's features have been included in modify-mail.pl.

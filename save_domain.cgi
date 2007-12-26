@@ -283,25 +283,6 @@ if ($d->{'parent'}) {
 &parse_custom_fields($d, \%in);
 
 # Update alias copy mode
-if (defined($in{'aliascopy'}) && $d->{'mail'}) {
-	$aliasdom = &get_domain($d->{'alias'});
-	if ($d->{'aliascopy'} && !$in{'aliascopy'}) {
-		# Switch to catchall
-		&$first_print($text{'save_aliascopy0'});
-		&delete_alias_virtuals($d);
-		&create_virtuser({ 'from' => '@'.$d->{'dom'},
-				   'to' => [ '%1@'.$aliasdom->{'dom'} ] });
-		&$second_print($text{'setup_done'});
-		}
-	elsif (!$d->{'aliascopy'} && $in{'aliascopy'}) {
-		# Switch to copy mode
-		&$first_print($text{'save_aliascopy1'});
-		&copy_alias_virtuals($d, $aliasdom);
-		&$second_print($text{'setup_done'});
-		}
-	$d->{'aliascopy'} = $in{'aliascopy'};
-	}
-
 # Save new domain details
 print $text{'save_domain'},"<br>\n";
 &save_domain($d);

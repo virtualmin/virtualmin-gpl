@@ -199,15 +199,6 @@ if (!$aliasdom) {
 print &ui_table_row($text{'edit_owner'},
 		    &ui_textbox("owner", $d->{'owner'}, 50), 1, \@tds);
 
-# Show alias mode
-&require_mail();
-if ($d->{'alias'} && $supports_aliascopy && $d->{'mail'}) {
-	print &ui_table_row($text{'edit_aliascopy'},
-		    &ui_radio("aliascopy", int($d->{'aliascopy'}),
-			      [ [ 1, $text{'tmpl_aliascopy1'} ],
-				[ 0, $text{'tmpl_aliascopy0'} ] ]));
-	}
-
 if (!$parentdom) {
 	# Show owner's email address and password
 	print &ui_table_row($text{'edit_email'},

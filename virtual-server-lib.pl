@@ -176,8 +176,8 @@ $styles_unavail_file = "$module_config_directory/stylesunavail";
 $initial_users_dir = "$module_config_directory/initial";
 
 @edit_limits = ('domain', 'users', 'aliases', 'dbs', 'scripts',
-	        'ip', 'ssl', 'forward', 'admins', 'spam', 'phpver', 'backup',
-		'sharedips', 'catchall', 'html', 'disable', 'delete');
+	        'ip', 'ssl', 'forward', 'admins', 'spam', 'phpver', 'mail',
+	 	'backup', 'sharedips', 'catchall', 'html', 'disable', 'delete');
 if (!$virtualmin_pro) {
 	@edit_limits = grep { $_ ne 'scripts' &&
 			      $_ ne 'spam' && $_ ne 'phpver' } @edit_limits;

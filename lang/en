@@ -945,6 +945,8 @@ edit_featuresect=Enabled features
 edit_showpass=Show..
 edit_maillog=Search Mail Logs
 edit_maillogdesc=Search the email log for this virtual server
+edit_mailopts=Email Settings
+edit_mailoptsdesc=Configure settings related to email for this virtual server.
 
 delete_title=Delete Server
 delete_rusure2=Are you sure you want to delete the virtual server $1, which has $2 of files? The following features will be deleted :
@@ -1525,6 +1527,9 @@ check_epmapaccess=The address mapping source <tt>$1</tt> cannot be used : $2
 check_epmaptype=The address mapping source <tt>$1</tt> is not supported by Virtualmin - only <tt>hash</tt> and <tt>regexp</tt> types are allowed
 check_epmapsupport=The address mapping source <tt>$1</tt> is not supported by Postfix - you may need to install Postfix libraries for it, or re-compile
 check_preload=Updating Virtualmin library pre-load settings ..
+check_esendmailbccs=Automatic BCCing of outgoing email is not supported by the Sendmail mail server, and so must be turned off on the <a href='$1'>module configuration</a> page.
+check_eqmailbccs=Automatic BCCing of outgoing email is not supported by the Qmail mail server, and so must be turned off on the <a href='$1'>module configuration</a> page.
+check_epostfixbccs=Automatic BCCing of outgoing email cannot be enabled unless a BCC map is defined in the <a href='$1'>Postfix Mailserver</a> module, or manually in the Postfix configuration file. Otherwise it must be turned off on the <a href='$2'>module configuration</a> page.
 
 allwebmin_ecannot=You are not allowed to update all Webmin users
 allwebmin_title=Updating Webmin Users
@@ -1937,6 +1942,7 @@ limits_edit_phpver=Can select PHP versions
 limits_edit_sharedips=Can select shared IPs
 limits_edit_catchall=Can create catchall aliases
 limits_edit_html=Can use web page editor
+limits_edit_mail=Can edit email settings
 limits_shell=Allowed login type
 limits_shell_nologin=No login
 limits_shell_ftp=FTP only
@@ -2238,6 +2244,8 @@ tmpl_domaliases=Mail aliases for new domains
 tmpl_aliascopy=Mail alias mode for alias domains
 tmpl_aliascopy1=Copy aliases from target
 tmpl_aliascopy0=Catchall forwarding
+tmpl_bccto=Default outgoing BCC address
+tmpl_ebccto=Missing or invalid default BCC address
 tmpl_aliasfrom=Mailbox name or *
 tmpl_aliasto=Destination address
 tmpl_ealiasfrom=Invalid mailbox name in alias $1
@@ -3967,3 +3975,17 @@ shells_none=&lt;No shell&gt;
 nicetime_days=$1 days, $2 hours, $3:$4
 nicetime_hours=$1 hours, $2:$3
 nicetime_mins=$1 minutes, $2 seconds
+
+bcc_epostfix=No BCC mapping file is set up in your Postfix configuration!
+bcc_emailserver=Your mail server does not support BCCing
+
+mail_title=Email Settings
+mail_header=Virtual server email-related settings
+mail_bcc=BCC outgoing email to
+mail_bcc1=Nowhere - just deliver to recipients
+mail_bcc0=Additional email address $1
+mail_err=Failed to save email settings
+mail_ebcc=Missing or invalid BCC address
+mail_bccing=BCCing all sent email to $1 ..
+mail_nobcc=Disabling the BCC of sent email
+mail_bccoff=Leaving BCCing of sent email disabled.

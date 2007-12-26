@@ -2250,6 +2250,11 @@ sub can_edit_spf
 return !$access{'admin'};	# Any except extra admins
 }
 
+sub can_edit_mail
+{
+return &master_admin() || &reseller_admin() || $access{'edit_mail'};
+}
+
 # Returns 1 if the current user can disable and enable the given domain
 sub can_disable_domain
 {
@@ -7005,6 +7010,7 @@ push(@rv, { 'id' => 0,
 	    'mail_cc' => $config{'newdom_cc'},
 	    'mail_bcc' => $config{'newdom_bcc'},
 	    'aliascopy' => $config{'aliascopy'} || 0,
+	    'bccto' => $config{'bccto'} || 'none',
 	    'spamclear' => $config{'spamclear'} || 'none',
 	    'defmquota' => $config{'defmquota'} || "none",
 	    'user_aliases' => $config{'newuser_aliases'} || "none",
@@ -7239,6 +7245,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'newdom_cc'} = $tmpl->{'mail_cc'};
 	$config{'newdom_bcc'} = $tmpl->{'mail_bcc'};
 	$config{'aliascopy'} = $tmpl->{'aliascopy'};
+	$config{'bccto'} = $tmpl->{'bccto'};
 	$config{'spamclear'} = $tmpl->{'spamclear'};
 	$config{'defmquota'} = $tmpl->{'defmquota'} eq "none" ?
 					"" : $tmpl->{'defmquota'};
@@ -7398,7 +7405,7 @@ if (!$tmpl->{'default'}) {
 		    "domalias", "logrotate", "disabled_web", "disabled_url",
 		    "php", "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "namedconf",
-		    "nodbname", "norename", "forceunder", "aliascopy",
+		    "nodbname", "norename", "forceunder", "aliascopy", "bccto",
 		    @plugins,
 		    @php_wrapper_templates,
 		    "capabilities",
@@ -8984,7 +8991,7 @@ foreach my $f (@features) {
 	# A feature was enabled or disabled
 	return 1 if ($config{$f} != $lastconfig{$f});
 	}
-foreach my $c ("mail_system", "generics", "append_style", "ldap_host",
+foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "ldap_base", "ldap_login", "ldap_pass", "ldap_port", "ldap",
 	       "vpopmail_dir", "vpopmail_user", "vpopmail_group",
 	       "clamscan_cmd", "iface", "localgroup", "home_quotas",
@@ -9482,6 +9489,17 @@ if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} && &can_edit_spf()) {
 	push(@rv, { 'page' => 'edit_spf.cgi',
 		    'title' => $text{'edit_spf'},
 		    'desc' => $text{'edit_spfdesc'},
+		    'cat' => 'server',
+		  });
+	}
+
+&require_mail();
+if ($d->{'mail'} && $config{'mail'} && &can_edit_mail() &&
+    ($supports_bcc || $d->{'alias'} && $supports_aliascopy)) {
+	# Email settings button
+	push(@rv, { 'page' => 'edit_mail.cgi',
+		    'title' => $text{'edit_mailopts'},
+		    'desc' => $text{'edit_mailoptsdesc'},
 		    'cat' => 'server',
 		  });
 	}
@@ -10268,6 +10286,9 @@ if ($config{'mail'}) {
 		    		return &text('index_esgens',
 					     '/sendmail/', $clink);
 			}
+		if ($config{'bccs'}) {
+			return &text('check_esendmailbccs', $clink);
+			}
 		&$second_print($text{'check_sendmailok'});
 		$expected_mailboxes = 1;
 		}
@@ -10286,6 +10307,11 @@ if ($config{'mail'}) {
 		if ($config{'generics'}) {
 			$canonical_maps ||
 				return &text('index_epgens',
+					    '/postfix/', $clink);
+			}
+		if ($config{'bccs'}) {
+			$sender_bcc_maps ||
+				return &text('check_epostfixbccs',
 					    '/postfix/', $clink);
 			}
 
@@ -10324,6 +10350,9 @@ if ($config{'mail'}) {
 		if ($config{'generics'}) {
 			return &text('index_eqgens', $clink);
 			}
+		if ($config{'bccs'}) {
+			return &text('check_eqmailbccs', $clink);
+			}
 		local $tmpl = &get_template(0);
 		if ($tmpl->{'append_style'} == 6) {
 			&$second_print($text{'check_qmailmode6'});
@@ -10341,6 +10370,9 @@ if ($config{'mail'}) {
 			}
 		if ($config{'generics'}) {
 			return &text('index_eqgens', $clink);
+			}
+		if ($config{'bccs'}) {
+			return &text('check_eqmailbccs', $clink);
 			}
 		if (!gethostbyname($config{'ldap_host'})) {
 			return &text('index_eqmailhost', $clink);
@@ -10363,6 +10395,9 @@ if ($config{'mail'}) {
 			}
 		if ($config{'generics'}) {
 			return &text('index_eqgens', $clink);
+			}
+		if ($config{'bccs'}) {
+			return &text('check_eqmailbccs', $clink);
 			}
 		&$second_print($text{'check_vpopmailok'});
 		$expected_mailboxes = 5;
