@@ -7,7 +7,7 @@ $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_mail() || &error($text{'edit_ecannot'});
 &require_mail();
 
-&ui_print_header(&domain_in($d), $text{'mail_title'}, "", "mail");
+&ui_print_header(&domain_in($d), $text{'mail_title'}, "", "mailopts");
 
 print &ui_form_start("save_mail.cgi");
 print &ui_hidden("dom", $d->{'id'}),"\n";

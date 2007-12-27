@@ -803,4 +803,5 @@ Moved the default quota for mailboxes to the 'Mail for domain' section of templa
 Shell special characters like ; and & are no longer allowed in mailbox usernames.
 When selecting a database for a script, the default is now to use a new DB if possible.
 When installing a script that uses authentication, you can now enter a username and/or password instead of it being setup to use the domain's login details by default. Similarly, the install-script.pl command now has optional --user and --pass parameters.
+When using Postfix with the sender_bcc_maps directive, a new option on the Module Config page can be used to allow BCCing all sent email in some or all domains to a separate address. This can be set on the Email Settings page, or by default for new domains in Server Templates. It can also be changed on the command line with the new modify-mail.pl script.
 Removed the modify-aliascopy.pl command-line program, as it's features have been included in modify-mail.pl.

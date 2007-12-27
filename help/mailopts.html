@@ -1,0 +1,16 @@
+<header>Email Settings</header>
+
+This page is for configuring email-related settings for a virtual server.
+If your system supports BCCing sent email (and it is enabled on the Module
+Config page), the <b>BCC outgoing email to</b> section can be used to select
+an address to copy mail to. <p>
+
+If the virtual server is an alias domain, the <b>Mail aliases mode</b> field
+controls if mail aliases are copied from the target domain, or if a single
+catchall alias is created to forward all email to the target. The former 
+mode is not available with all mail servers, but is superior when using Postfix
+as it allows mail to invalid addresses to be bounced at the SMTP conversation
+level. <p>
+
+<footer>
+

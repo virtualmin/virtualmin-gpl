@@ -290,6 +290,13 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 		}
 	}
 
+# Setup default BCC address
+if ($supports_bcc && $tmpl->{'bccto'} ne 'none') {
+	&$first_print(&text('mail_bccing', $tmpl->{'bccto'}));
+	&save_domain_sender_bcc($_[0], $tmpl->{'bccto'});
+	&$second_print($text{'setup_done'});
+	}
+
 # Setup any secondary MX servers
 if (!$_[0]->{'nosecondaries'}) {
 	&setup_on_secondaries($_[0]);
@@ -396,6 +403,14 @@ if ($config{'delete_virts'} && !$_[1]) {
 			}
 		}
 	&$second_print($text{'setup_done'});
+	}
+
+# Remove BCC address
+if ($supports_bcc) {
+	local $bcc = &get_domain_sender_bcc($_[0]);
+	if ($bcc) {
+		&save_domain_sender_bcc($_[0], undef);
+		}
 	}
 
 # Remove any secondary MX servers
@@ -510,8 +525,16 @@ elsif ($_[0]->{'alias'} && $_[0]->{'dom'} ne $_[1]->{'dom'} &&
 if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 	# Delete the old mail domain and add the new
 	local $no_restart_mail = 1;
+	local $oldbcc;
+	if ($supports_bcc) {
+		$oldbcc = &get_domain_sender_bcc($_[1]);
+		}
 	&delete_mail($_[1], 1);
 	&setup_mail($_[0], 1);
+	if ($supports_bcc) {
+		$oldbcc =~ s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g;
+		&save_domain_sender_bcc($_[0], $oldbcc);
+		}
 	&require_mail();
 	if (&is_mail_running()) {
 		if ($config{'mail_system'} == 1) {
@@ -2083,6 +2106,14 @@ if (-r "$nospam_dir/$_[0]->{'id'}") {
 	&copy_source_dest("$nospam_dir/$_[0]->{'id'}", "$_[1]_nospam");
 	}
 
+# Create BCC file
+if ($supports_bcc) {
+	local $bcc = &get_domain_sender_bcc($_[0]);
+	&open_tempfile(BCC, ">$_[1]_bcc");
+	&print_tempfile(BCC, $bcc,"\n");
+	&close_tempfile(BCC);
+	}
+
 &$second_print($text{'setup_done'});
 
 if (!&mail_under_home() && $_[2]->{'mailfiles'}) {
@@ -2310,6 +2341,13 @@ if (-r "$_[1]_nospam") {
 		&copy_source_dest("$_[1]_nospam",
 				  "$nospam_dir/$_[0]->{'id'}");
 		}
+	}
+
+# Restore BCC file
+if ($supports_bcc && -r "$_[1]_bcc") {
+	local $bcc = &read_file_contents("$_[1]_bcc");
+	chop($bcc);
+	&save_domain_sender_bcc($_[0], $bcc);
 	}
 
 if (@errs) {
@@ -3308,7 +3346,7 @@ if ($supports_bcc) {
 		    [ 0, $text{'mail_bcc1'}."<br>" ],
 		    [ 2, &text('mail_bcc0',
 		     	       &ui_textbox("bccto",
-				    $mode == 2 ? $tmpl->{'bcc'} : "", 50)) ]
+				    $mode == 2 ? $tmpl->{'bccto'} : "", 50)) ]
 		  ]));
 	}
 
