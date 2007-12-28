@@ -3514,6 +3514,14 @@ foreach $u (@users) {
 	$_[1]->{$u->{'user'}} = 1;
 	}
 
+# Add system users
+setpwent();
+while(my @uinfo = getpwent()) {
+	$_[0]->{$uinfo[2]} = 1;
+	$_[1]->{$uinfo[0]} = 1;
+	}
+endpwent();
+
 # Add domain users
 local $d;
 foreach $d (&list_domains()) {
@@ -3527,12 +3535,24 @@ foreach $d (&list_domains()) {
 sub build_group_taken
 {
 &require_useradmin();
+
+# Add Unix groups
 local @groups = $_[2] ? @{$_[2]} : &list_all_groups();
 local $g;
 foreach $g (@groups) {
 	$_[0]->{$g->{'gid'}} = 1;
 	$_[1]->{$g->{'group'}} = 1;
 	}
+
+# Add system groups
+setgrent();
+while(my @ginfo = getgrent()) {
+	$_[0]->{$ginfo[2]} = 1;
+	$_[1]->{$ginfo[0]} = 1;
+	}
+endgrent();
+
+# Add domains
 local $d;
 foreach $d (&list_domains()) {
 	$_[0]->{$d->{'gid'}} = 1;

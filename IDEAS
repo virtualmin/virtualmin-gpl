@@ -21,8 +21,6 @@
 
  - better coverage of files by webmin_log
 
- - cron time selector is too complex - use popup
-
  - templates for new mailing list configs
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=739
 
@@ -66,4 +64,5 @@
 
  - mobile theme for webmail
 	- release
+
 
