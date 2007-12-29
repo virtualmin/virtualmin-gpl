@@ -77,9 +77,6 @@ print &ui_tabs_end_tab();
 # Show form to mass upgrade scripts
 print &ui_tabs_start_tab("mode", "upgrade");
 print "$text{'newscripts_desc3'}<p>\n";
-print &ui_form_start("mass_scripts.cgi", "post");
-print &ui_table_start($text{'newscripts_mheader'}, undef, 2,
-		      [ "width=30%" ]);
 
 # Find those we actually use, and the minimum version of each installed
 foreach $d (&list_domains()) {
@@ -94,7 +91,7 @@ foreach $d (&list_domains()) {
 		}
 	}
 
-# Script to upgrade to
+# Find installed scripts and possible upgrades
 @scripts = &list_available_scripts();
 foreach $sname (grep { $used{$_} } @scripts) {
 	$script = &get_script($sname);
@@ -105,22 +102,33 @@ foreach $sname (grep { $used{$_} } @scripts) {
 		}
 	}
 @opts = sort { lc($a->[1]) cmp lc($b->[1]) } @opts;
-print &ui_table_row($text{'newscripts_script'},
-		    &ui_select("script", undef, \@opts));
 
-# Servers to upgrade
-@doms = &list_domains();
-print &ui_table_row($text{'newscripts_servers'},
-		    &ui_radio("servers_def", 1,
-			[ [ 1, $text{'newips_all'} ],
-			  [ 0, $text{'newips_sel'} ] ])."<br>\n".
-		    &servers_input("servers", [ ], \@doms));
+if (@opts) {
+	# Script selector
+	print &ui_form_start("mass_scripts.cgi", "post");
+	print &ui_table_start($text{'newscripts_mheader'}, undef, 2,
+			      [ "width=30%" ]);
+	print &ui_table_row($text{'newscripts_script'},
+			    &ui_select("script", undef, \@opts));
 
-print &ui_table_row($text{'newscripts_fail'},
-		    &ui_yesno_radio("fail", 1));
+	# Servers to upgrade
+	@doms = &list_domains();
+	print &ui_table_row($text{'newscripts_servers'},
+			    &ui_radio("servers_def", 1,
+				[ [ 1, $text{'newips_all'} ],
+				  [ 0, $text{'newips_sel'} ] ])."<br>\n".
+			    &servers_input("servers", [ ], \@doms));
 
-print &ui_table_end();
-print &ui_form_end([ [ "upgrade", $text{'newscripts_upgrade'} ] ]);
+	print &ui_table_row($text{'newscripts_fail'},
+			    &ui_yesno_radio("fail", 1));
+
+	print &ui_table_end();
+	print &ui_form_end([ [ "upgrade", $text{'newscripts_upgrade'} ] ]);
+	}
+else {
+	# No upgrade possible
+	print "<b>$text{'newscripts_noup'}</b><p>\n";
+	}
 print &ui_tabs_end_tab();
 
 # Show form to setup scheduled email warnings about old scripts

@@ -2888,6 +2888,7 @@ newscripts_ewnone=Nobody to notify selected
 newscripts_wurl=Webmin base URL for email
 newscripts_wurldef=Automatic
 newscripts_ewurl=Missing or invalid Webmin base URL
+newscripts_noup=None of the virtual servers on this system have any upgradable scripts installed.
 
 addscripts_err=Failed to add script installer
 addscripts_elocal=Local file does not exist
