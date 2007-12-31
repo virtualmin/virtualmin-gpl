@@ -311,5 +311,13 @@ foreach my $d (&list_domains()) {
 		}
 	}
 
+# Prevent an un-needed module config check
+if (!$cerr) {
+	$config{'last_check'} = time()+1;
+	&lock_file($module_config_file);
+	&save_module_config();
+	&unlock_file($module_config_file);
+	&write_file("$module_config_directory/last-config", \%config);
+	}
 }
 
