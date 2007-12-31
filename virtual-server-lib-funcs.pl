@@ -2956,7 +2956,7 @@ local $mail = { 'headers' => [ [ 'From', $from ||
 			       [ 'To', $to ],
 			       $cc ? ( [ 'Cc', $cc ] ) : ( ),
 			       $bcc ? ( [ 'Bcc', $bcc ] ) : ( ),
-			       [ 'Subject', $subject ],
+			       [ 'Subject', &entities_to_ascii($subject) ],
 			       [ 'Content-type', 'text/plain' ] ],
 		'body' => $template };
 &mailboxes::send_mail($mail);
@@ -2988,7 +2988,8 @@ foreach my $r (@$recips) {
 	local $mail = { 'headers' =>
 		[ [ 'From' => $from ],
 		  [ 'To' => $email ],
-		  [ 'Subject' => &substitute_template($subject, \%hash) ] ],
+		  [ 'Subject' => &entities_to_ascii(
+				  &substitute_template($subject, \%hash)) ] ],
 		  'attach' =>
 		[ { 'headers' => [ [ 'Content-type', 'text/plain' ] ],
 		    'data' => &entities_to_ascii(
