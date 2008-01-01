@@ -8115,7 +8115,8 @@ if ($_[2] && $user->{'unix'}) {
 	$user->{'noalias'} = 1;
 	$user->{'nocreatehome'} = 1;
 	$user->{'nomailfile'} = 1;
-	$user->{'shell'} = $ftp_shell || $def_shell;
+	$user->{'shell'} = $ftp_shell ? $ftp_shell->{'shell'}
+				      : $def_shell->{'shell'};
 	delete($user->{'email'});
 	}
 
