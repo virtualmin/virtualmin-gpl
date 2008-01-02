@@ -1518,6 +1518,14 @@ elsif ($config{'mail_system'} == 0) {
 	if ($s == 0 || $s == 1) {
 		# A mail file
 		$mf = &postfix::postfix_mail_file($_[0]->{'user'});
+		if ($s == 0 && $_[0]->{'user'} =~ /\@/) {
+			# For Postfix delivering to /var/mail with @ usernames,
+			# we need to create the file without the @ in it, and
+			# link from the @ so that the mail server and Webmin
+			# agree.
+			$mfreal = &postfix::postfix_mail_file(
+					&replace_atsign($_[0]->{'user'}));
+			}
 		}
 	elsif ($s == 2) {
 		# A mail directory
@@ -1560,9 +1568,19 @@ elsif ($config{'mail_system'} == 5) {
 if ($mf) {
 	if (!-r $mf) {
 		# Create the mailbox, owned by the user
-		&open_tempfile(MF, ">$mf");
-		&close_tempfile(MF);
-		&set_ownership_permissions($uid, $gid, undef, $mf);
+		if ($mfreal) {
+			# Create real file, and link to it
+			&open_tempfile(MF, ">$mfreal");
+			&close_tempfile(MF);
+			&set_ownership_permissions($uid, $gid, undef, $mfreal);
+			&symlink_file($mfreal, $mf);
+			}
+		else {
+			# Just one file
+			&open_tempfile(MF, ">$mf");
+			&close_tempfile(MF);
+			&set_ownership_permissions($uid, $gid, undef, $mf);
+			}
 		}
 	@rv = ( $mf, 0 );
 	}
@@ -1619,6 +1637,15 @@ sub delete_mail_file
 local $umf = &user_mail_file($_[0]);
 if ($umf) {
 	&system_logged("rm -rf ".quotemeta($umf));
+	}
+if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
+	# Remove real file as well as link, if any
+	local $fakeuser = { %{$_[0]} };
+	$fakeuser->{'user'} = &replace_atsign($_[0]->{'user'});
+	local ($realumf, $realtype) = &user_mail_file($fakeuser);
+	if ($realumf ne $umf && $realtype == 0) {
+		&system_logged("rm -f ".quotemeta($realumf));
+		}
 	}
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 if (defined(&mailboxes::delete_user_index_files)) {
@@ -1681,7 +1708,7 @@ elsif ($config{'mail_system'} == 5) {
 }
 
 # user_mail_file(&user)
-# Returns the full path a user's mail file, and the type
+# Returns the full path to a user's mail file, and the type
 sub user_mail_file
 {
 &require_mail();
