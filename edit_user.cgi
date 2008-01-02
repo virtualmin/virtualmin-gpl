@@ -142,6 +142,7 @@ if (&can_mailbox_home() && $d && $d->{'home'} &&
     !$mailbox && !$user->{'fixedhome'}) {
 	# Show home directory editing field
 	local $reshome = &resolve_links($user->{'home'});
+	local $helppage = "userhome";
 	if ($user->{'brokenhome'}) {
 		# Home directory is in odd location, and so cannot be edited
 		$homefield = "<tt>$user->{'home'}</tt>";
@@ -156,6 +157,7 @@ if (&can_mailbox_home() && $d && $d->{'home'} &&
 					 [ 0, $text{'user_homeunder2'} ] ])." ".
 			     &ui_textbox("home", $auto ? "" :
 				substr($user->{'home'}, length($phd)+1), 20);
+		$helppage = "userhomeftp";
 		}
 	else {
 		# Home is under server root, and so can be edited
@@ -168,7 +170,7 @@ if (&can_mailbox_home() && $d && $d->{'home'} &&
 			     &ui_textbox("home", $auto ? "" :
 			substr($user->{'home'}, length($d->{'home'})+1), 20);
 		}
-	print &ui_table_row(&hlink($text{'user_home'}, "userhome"),
+	print &ui_table_row(&hlink($text{'user_home'}, $helppage),
 			    $homefield,
 			    2, \@tds);
 	}
