@@ -1509,8 +1509,13 @@ local $md;
 local ($uid, $gid) = ($_[0]->{'uid'}, $_[0]->{'gid'});
 local @rv;
 if ($config{'mail_system'} == 1) {
-	# Sendmail always uses mail files
+	# Sendmail normally uses a mail file
 	$mf = &sendmail::user_mail_file($_[0]->{'user'});
+	if ($sendmail::config{'mail_type'} == 1) {
+		# But not today
+		$md = $mf;
+		$mf = undef;
+		}
 	}
 elsif ($config{'mail_system'} == 0) {
 	# Postfix user
@@ -1719,7 +1724,8 @@ if (!$_[0]->{'user'} || !$_[0]->{'home'}) {
 	}
 elsif ($config{'mail_system'} == 1) {
 	# Just look at the Sendmail mail file
-	@rv = ( &sendmail::user_mail_file($_[0]->{'user'}), 0 );
+	@rv = ( &sendmail::user_mail_file($_[0]->{'user'}),
+		$sendmail::config{'mail_type'} );
 	}
 elsif ($config{'mail_system'} == 0) {
 	# Find out from Postfix which file to check
