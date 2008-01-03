@@ -11,7 +11,7 @@ $d = &get_domain($in{'dom'});
 
 print &ui_form_start("save_phpmode.cgi");
 print &ui_hidden("dom", $d->{'id'}),"\n";
-print &ui_table_start($text{'phpmode_header'}, undef, 2);
+print &ui_table_start($text{'phpmode_header'}, undef, 2, [ "width=30%" ]);
 
 # Use suexec
 print &ui_table_row(&hlink($text{'phpmode_suexec'}, "phpmode_suexec"),

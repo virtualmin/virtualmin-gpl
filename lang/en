@@ -3460,6 +3460,14 @@ phpmode_mod_ruby=Apache <tt>mod_ruby</tt> (run as Apache's user)
 phpmode_noruby=Ruby scripts disabled
 phpmode_children=PHP FCGId sub-processes
 phpmode_echildren=Number of PHP sub-processes must be between 1 and $1
+phpmode_moding=Changing PHP execution mode to $1 ..
+phpmode_kidding=Changing number of PHP sub-processes to $1 ..
+phpmode_rmoding=Changing Ruby execution mode to $1 ..
+phpmode_suexecon=Enabling CGI scripts as domain owner ..
+phpmode_suexecoff=Disabling CGI scripts as domain owner ..
+phpmode_writeon=Turning on logging via script ..
+phpmode_writeoff=Turning off logging via script ..
+phpmode_nothing=No configuration changes were made!
 
 spf_title=DNS Options
 spf_enable=Enabling SPF ..

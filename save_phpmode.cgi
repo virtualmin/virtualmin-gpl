@@ -7,7 +7,6 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
 &can_edit_phpmode($d) || &error($text{'phpmode_ecannot'});
-&set_all_null_print();
 
 # Check for option clashes
 if (($in{'mode'} eq 'cgi' || $in{'mode'} eq 'fcgid') && !$in{'suexec'}) {
@@ -23,33 +22,70 @@ if (defined($in{'children'}) &&
 	&error(&text('phpmode_echildren', $max_php_fcgid_children));
 	}
 
+# Start telling the user what is being done
+&ui_print_unbuffered_header(&domain_in($d), $text{'phpmode_title'}, "");
+
 # Save PHP execution mode
-&save_domain_php_mode($d, $in{'mode'});
+$oldmode = &get_domain_php_mode($d);
+if ($oldmode ne $in{'mode'}) {
+	&$first_print(&text('phpmode_moding', $text{'phpmode_'.$in{'mode'}}));
+	&save_domain_php_mode($d, $in{'mode'});
+	&$second_print($text{'setup_done'});
+	$anything++;
+	}
 
 # Save PHP fcgi children
-if (defined($in{'children'})) {
+if (defined($in{'children'}) &&
+    $in{'children'} != &get_domain_php_children($d)) {
+	&$first_print(&text('phpmode_kidding', $in{'children'}));
 	&save_domain_php_children($d, $in{'children'});
+	&$second_print($text{'setup_done'});
+	$anything++;
 	}
 
 # Save Ruby execution mode
-&save_domain_ruby_mode($d, $in{'rubymode'});
+if (defined($in{'rubymode'}) && &get_domain_ruby_mode($d) ne $in{'rubymode'}) {
+	&$first_print(&text('phpmode_rmoding',
+			    $text{'phpmode_'.$in{'rubymode'}}));
+	&save_domain_ruby_mode($d, $in{'rubymode'});
+	&$second_print($text{'setup_done'});
+	$anything++;
+	}
 
 # Save suexec mode
-&save_domain_suexec($d, $in{'suexec'});
+if (defined($in{'suexec'}) && $in{'suexec'} != &get_domain_suexec($d)) {
+	&$first_print($in{'suexec'} ? $text{'phpmode_suexecon'}
+				    : $text{'phpmode_suexecoff'});
+	&save_domain_suexec($d, $in{'suexec'});
+	&$second_print($text{'setup_done'});
+	$anything++;
+	}
 
 # Save log writing mode
 $wl = &get_writelogs_status($d);
 if ($in{'writelogs'} && !$wl) {
 	&setup_writelogs($d);
 	&enable_writelogs($d);
+	$anything++;
 	}
 elsif (!$in{'writelogs'} && $wl) {
 	&disable_writelogs($d);
+	$anything++;
+	}
+
+if (!$anything) {
+	&$first_print($text{'phpmode_nothing'});
 	}
 
 &run_post_actions();
 
+# Call any theme post command
+if (defined(&theme_post_save_domain)) {
+	&theme_post_save_domain($d, 'modify');
+	}
+
 # All done
 &webmin_log("phpmode", "domain", $d->{'dom'});
-&domain_redirect($d);
+&ui_print_footer(&domain_footer_link($d),
+		 "", $text{'index_return'});
 
