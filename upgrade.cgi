@@ -11,6 +11,7 @@ require './virtual-server-lib.pl';
 # Make sure the serial and key are valid, by trying a HTTP request
 $in{'serial'} =~ /^\S+$/ || &error($text{'upgrade_eserial'});
 $in{'key'} =~ /^\S+$/ || &error($text{'upgrade_ekey'});
+$in{'key'} eq 'AMAZON' && &error($text{'upgrade_eamazon'});
 &http_download($upgrade_virtualmin_host, $upgrade_virtualmin_port,
 	       $upgrade_virtualmin_testpage, \$out, \$error, undef, 0,
 	       $in{'serial'}, $in{'key'}, undef, 0, 1);
