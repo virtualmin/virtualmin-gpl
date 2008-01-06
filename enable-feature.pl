@@ -115,7 +115,7 @@ foreach $d (@doms) {
 			}
 		}
 	foreach $f (@feature_plugins) {
-		if ($plugin{$f} && !$olddom{$f}) {
+		if ($plugin{$f} && !$oldd->{$f}) {
 			&plugin_call($f, "feature_setup", $d);
 			}
 		elsif ($oldd->{$f}) {
