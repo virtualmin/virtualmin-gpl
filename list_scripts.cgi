@@ -18,6 +18,10 @@ $d->{'web'} && $d->{'dir'} || &error($text{'scripts_eweb'});
 	    "list_scripts.cgi?dom=$in{'dom'}&scriptsmode=existing" ],
 	  [ "new", $text{'scripts_tabnew'},
 	    "list_scripts.cgi?dom=$in{'dom'}&scriptsmode=new" ] );
+if (&can_unsupported_scripts()) {
+	push(@tabs, [ "unsup", $text{'scripts_tabunsup'},
+		      "list_scripts.cgi?dom=$in{'dom'}&scriptsmode=unsup" ] );
+	}
 print &ui_tabs_start(\@tabs, "scriptsmode",
 	$in{'scriptsmode'} ? $in{'scriptsmode'} : @got ? "existing" : "new", 1);
 
@@ -183,6 +187,30 @@ else {
 	print "<b>$text{'scripts_nonew'}</b><p>\n";
 	}
 print &ui_tabs_end_tab();
+
+# Show form for installing a non-standard version
+if (&can_unsupported_scripts()) {
+	print &ui_tabs_start_tab("scriptsmode", "unsup");
+	print $text{'scripts_unsupdesc'},"<p>\n";
+	print &ui_form_start("script_form.cgi");
+	print &ui_hidden("dom", $in{'dom'}),"\n";
+	print &ui_table_start($text{'scripts_unsupheader'}, undef, 2,
+			      [ "width=30%" ]);
+
+	# Script type
+	print &ui_table_row($text{'scripts_unsupname'},
+	   &ui_select("script", undef, 
+	      [ map { [ $_->{'name'}, $_->{'desc'} ] }
+		 sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) } @scripts ]));
+
+	# Version to install
+	print &ui_table_row($text{'scripts_unsupver'},
+		&ui_textbox("ver", undef, 15));
+
+	print &ui_table_end();
+	print &ui_form_end([ [ undef, $text{'scripts_ok'} ] ]);
+	print &ui_tabs_end_tab();
+	}
 
 print &ui_tabs_end(1);
 

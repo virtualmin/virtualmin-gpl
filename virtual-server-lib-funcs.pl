@@ -2218,6 +2218,11 @@ return 0 if (!$virtualmin_pro);
 return &master_admin() || &reseller_admin() || $access{'edit_scripts'};
 }
 
+sub can_unsupported_scripts
+{
+return $virtualmin_pro && &master_admin();
+}
+
 sub can_edit_forward
 {
 return &master_admin() || &reseller_admin() || $access{'edit_forward'};

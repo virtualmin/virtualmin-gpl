@@ -30,6 +30,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--version") {
 		$ver = shift(@ARGV);
 		}
+	elsif ($a eq "--unsupported") {
+		$unsupported = 1;
+		}
 	elsif ($a eq "--path") {
 		$opts->{'path'} = shift(@ARGV);
 		$opts->{'path'} =~ /^\/\S*$/ ||&usage("Path must start with /");
@@ -101,7 +104,7 @@ if ($ver eq "latest") {
 	$ver = $script->{'versions'}->[0];
 	}
 else {
-	&indexof($ver, @{$script->{'versions'}}) >= 0 ||
+	&indexof($ver, @{$script->{'versions'}}) >= 0 || $unsupported ||
 	       &usage("Version $ver is not valid for script. ".
 		      "Available versions are : ".
 		      join(" ", @{$script->{'versions'}}));
@@ -278,7 +281,7 @@ print "Installs a third-party script into some virtual server.\n";
 print "\n";
 print "usage: install-script.pl --domain domain.name\n";
 print "                         --type name\n";
-print "                         --version number|\"latest\"\n";
+print "                         --version number|\"latest\" [--unsupported]\n";
 print "                         [--path url-path]\n";
 print "                         [--db type name]\n";
 print "                         [--opt name value]\n";

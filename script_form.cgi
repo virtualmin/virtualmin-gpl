@@ -21,12 +21,17 @@ else {
 	# Installing new
 	$sname = $in{'script'};
 	$sname || &error($text{'scripts_enosel'});
-	$ver = $in{'ver_'.$sname};
+	$ver = $in{'ver_'.$sname} || $in{'ver'};
 	$script = &get_script($sname);
 	$script->{'avail'} || &error($text{'scripts_eavail'});
 	&can_script_version($script, $ver) || &error($text{'scripts_eavail'});
 	&ui_print_header(&domain_in($d), $text{'scripts_intitle'}, "");
 	}
+
+# Validate version number
+$ver =~ /^\S+$/ || &error($text{'scripts_eversion'});
+&indexof($ver, @{$script->{'versions'}}) >= 0 || &can_unsupported_scripts() ||
+	&error($text{'scripts_eversion2'});
 
 # Check dependencies
 $derr = &{$script->{'depends_func'}}($d, $ver);
@@ -96,7 +101,7 @@ if ($ok) {
 	print $opts;
 
 	# Show custom login and password
-	if (defined(&{$script->{'passmode_func'}})) {
+	if (!$sinfo && defined(&{$script->{'passmode_func'}})) {
 		$passmode = &{$script->{'passmode_func'}}($d, $ver);
 		}
 	if ($passmode == 1) {

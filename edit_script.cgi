@@ -86,10 +86,17 @@ print &ui_submit($text{'scripts_uok'}, "uninstall"),"\n";
 		    &can_script_version($script, $_) }
 		  @{$script->{'versions'}};
 if (@vers) {
+	# Upgrade button
 	print "&nbsp;&nbsp;\n";
 	print &ui_submit($text{'scripts_upok'}, "upgrade"),"\n";
 	print &ui_select("version", $vers[$#vers],
 			 [ map { [ $_ ] } @vers ]),"\n";
+	}
+elsif (&can_unsupported_scripts()) {
+	# Upgrade to un-supported version
+	print "&nbsp;&nbsp;\n";
+        print &ui_submit($text{'scripts_upok2'}, "upgrade"),"\n";
+	print &ui_textbox("version", undef, 15),"\n";
 	}
 if ($gotstatus) {
 	print "&nbsp;&nbsp;\n";
