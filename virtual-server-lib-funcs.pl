@@ -6514,6 +6514,31 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 	&save_domain($dom);
 	}
 
+# If this was an alias domain, notify all features in the original domain. This
+# is useful for things like awstats, which need to add the alias domain to those
+# supported for the main site.
+if ($dom->{'alias'}) {
+	local $aliasdom = &get_domain($dom->{'alias'});
+	foreach my $f (@features) {
+		local $safunc = "setup_alias_$f";
+		if ($aliasdom->{$f} && defined(&$safunc)) {
+			&try_function($f, $safunc, $aliasdom, $dom);
+			}
+		}
+	foreach $f (@feature_plugins) {
+		if ($aliasdom->{$f} &&
+		    &plugin_defined($f, "feature_setup_alias")) {
+			local $main::error_must_die = 1;
+			eval { &plugin_call($f, "feature_setup_alias",
+					    $aliasdom, $dom) };
+			if ($@) {
+				&$second_print(&text('setup_aliasfailure',
+					&plugin_call($f, "feature_name"), $@));
+				}
+			}
+		}
+	}
+
 # Run the after creation command
 if (!$nopost) {
 	&run_post_actions();
@@ -6612,6 +6637,31 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 		# Delete any extra admins
 		foreach my $admin (&list_extra_admins($dd)) {
 			&delete_extra_admin($admin);
+			}
+		}
+
+	# If this is an alias domain, notify the target that it is being
+	# deleted. This allows things like extra awstats symlinks to be removed
+	if (!$only && $dd->{'alias'}) {
+		local $aliasdom = &get_domain($dd->{'alias'});
+		foreach my $f (@features) {
+			local $dafunc = "delete_alias_$f";
+			if ($aliasdom->{$f} && defined(&$dafunc)) {
+				&try_function($f, $dafunc, $aliasdom, $dd);
+				}
+			}
+		foreach $f (@feature_plugins) {
+			if ($aliasdom->{$f} &&
+			    &plugin_defined($f, "feature_delete_alias")) {
+				local $main::error_must_die = 1;
+				eval { &plugin_call($f, "feature_delete_alias",
+						    $aliasdom, $dd) };
+				if ($@) {
+					&$second_print(
+					 &text('delete_aliasfailure',
+					 &plugin_call($f, "feature_name"), $@));
+					}
+				}
 			}
 		}
 

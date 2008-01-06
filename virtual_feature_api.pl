@@ -189,6 +189,30 @@ sub feature_validate
 {
 }
 
+# feature_setup_alias(&domain, &alias)
+# Called when an alias of this domain is created, to perform any required
+# configuration changes. Only useful when the plugin itself does not implement
+# an alias feature.
+sub feature_setup_alias
+{
+}
+
+# feature_delete_alias(&domain, &alias)
+# Called when an alias of this domain is deleted, to perform any required
+# configuration changes. Only useful when the plugin itself does not implement
+# an alias feature.
+sub feature_delete_alias
+{
+}
+
+# feature_modify_alias(&domain, &alias, &old-alias)
+# Called when an alias of this domain is deleted, to perform any required
+# configuration changes. Only useful when the plugin itself does not implement
+# an alias feature.
+sub feature_modify_alias
+{
+}
+
 # mailbox_inputs(&user, new, &domain)
 # Returns HTML for additional inputs on the mailbox form. These should be
 # formatted to appear inside a table.

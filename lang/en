@@ -379,6 +379,7 @@ setup_emaxnone=You are not allowed to create any virtual servers
 setup_eprefix=Missing or invalid mail username prefix
 setup_eprefix2=The specified username prefix is already in use
 setup_failure=.. $1 failed! : $2
+setup_aliasfailure=.. $1 alias setup failed : $2
 setup_edbname=Missing or invalid database name
 setup_edbname2=Database name must start with $1
 setup_postfailure=.. failed! $1
@@ -999,6 +1000,7 @@ delete_statusssl=Removing status monitor for SSL website ..
 delete_nostatus=.. not found!
 delete_mxs=Removing secondary mail servers $1 ..
 delete_dom=Deleting sub-server $1 ..
+delete_aliasfailure=.. $1 alias deletion failed : $2
 
 save_err=Failed to modify server
 save_title=Save Server

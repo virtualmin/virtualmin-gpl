@@ -407,6 +407,7 @@ $pclash && &usage($text{'setup_eprefix2'});
          'name', $name,
          'ip', $config{'all_namevirtual'} ? $ip :
 	       $virt ? $ip :
+	       $alias ? $ip :
 	       $sharedip ? $sharedip : $defip,
 	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :
 		$config{'dns_ip'},
