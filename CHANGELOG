@@ -808,3 +808,4 @@ Removed the modify-aliascopy.pl command-line program, as it's features have been
 Fixed a bug that prevented mail for users with @ in their names and mbox-format mail files from being properly displayed on systems using Postfix.
 When an alias domain is created, the primary domain can now update its configuration as needed. This allows AWstats to work when accessed via the alias domain.
 Un-supported script versions can now be installed by the master admin .. but use this feature at your own risk!
+Put back the osTicket installer, now that it is available again, and updated it to version 1.6 RC2.
