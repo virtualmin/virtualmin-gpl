@@ -999,8 +999,8 @@ sub show_template_dns
 {
 local ($tmpl) = @_;
 &require_bind();
-$conf = &bind8::get_config();
-@views = &bind8::find("view", $conf);
+local $conf = &bind8::get_config();
+local @views = &bind8::find("view", $conf);
 
 # DNS records
 local $ndi = &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'}, 1,
@@ -1018,7 +1018,7 @@ print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
 # Option for view to add to, for BIND 9
 if (@views) {
 	print &ui_table_row($text{'newdns_view'},
-		&ui_select("view", $config{'dns_view'},
+		&ui_select("view", $tmpl->{'dns_view'},
 			[ [ "", $text{'newdns_noview'} ],
 			  map { [ $_->{'values'}->[0] ] } @views ]));
 	}
@@ -1028,9 +1028,9 @@ print &ui_table_hr();
 # Master NS hostnames
 print &ui_table_row(&hlink($text{'tmpl_dnsmaster'},
                            "template_dns_master"),
-	&none_def_input("dns_master", $tmpl->{'dns_master'},
-			$text{'tmpl_dnsmnames'}, 0, 0, $text{'tmpl_dnsmauto'},
-			[ "dns_master" ])." ".
+	&none_def_input("dns_master", $tmpl->{'dns_master'}."<br>",
+			$text{'tmpl_dnsmnames'}."<br>", 0, 0,
+			$text{'tmpl_dnsmauto'}, [ "dns_master" ])." ".
 	&ui_textbox("dns_master", $tmpl->{'dns_master'} eq 'none' ? '' :
 					$tmpl->{'dns_master'}, 40));
 
