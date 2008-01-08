@@ -108,10 +108,10 @@
 
         var timeplotURLPrefix = (local) ? "timeplot/api/1.0/" : Timeplot.urlPrefix;
 
-        if (local && !("console" in window)) {
-            var firebug = [ timeplotURLPrefix + "lib/firebug/firebug.js" ];
-            SimileAjax.includeJavascriptFiles(document, "", firebug);
-        }
+        //if (local && !("console" in window)) {
+        //    var firebug = [ timeplotURLPrefix + "lib/firebug/firebug.js" ];
+        //    SimileAjax.includeJavascriptFiles(document, "", firebug);
+        //}
         
         var canvas = document.createElement("canvas");
 
@@ -138,7 +138,7 @@
         //};
         
         window.SimileAjax_onLoad = function() {
-            if (local && window.console.open) window.console.open();
+            //if (local && window.console.open) window.console.open();
             if (Timeplot.params.callback) {
                 eval(Timeplot.params.callback + "()");
             }
