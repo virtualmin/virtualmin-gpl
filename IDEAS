@@ -67,3 +67,5 @@
 
  - scripts from other modules should use latest version, not first
 
+ - timeplot IE support
+
