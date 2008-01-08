@@ -15,7 +15,7 @@ require './virtual-server-lib.pl';
 	);
 
 &ui_print_header(undef, $text{'history_title'}, "", undef, 0, 0, 0, undef,
-		 "<script src=timeplot/timeplot-api.js></script>",
+		 "<script src=timeplot/timeplot-api.js?local></script>",
 		 "onload='onLoad();' onresize='onResize();'");
 
 # Work out the stat and time range we want
