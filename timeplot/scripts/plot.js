@@ -232,26 +232,43 @@ Timeplot.Plot.prototype = {
 
         if (this._dataSource) {     
             if (this._plotInfo.fillColor) {
-                var gradient = ctx.createLinearGradient(0,this._canvas.height,0,0);
-                gradient.addColorStop(0,this._plotInfo.fillColor.toString());
-                gradient.addColorStop(0.5,this._plotInfo.fillColor.toString());
-                gradient.addColorStop(1, 'rgba(255,255,255,0)');
+                if (this._plotInfo.fillGradient) {
+                    var gradient = ctx.createLinearGradient(0,this._canvas.height,0,0);
+                    gradient.addColorStop(0,this._plotInfo.fillColor.toString());
+                    gradient.addColorStop(0.5,this._plotInfo.fillColor.toString());
+                    gradient.addColorStop(1, 'rgba(255,255,255,0)');
 
-                ctx.fillStyle = gradient;
+                    ctx.fillStyle = gradient;
+                } else {
+                    ctx.fillStyle = this._plotInfo.fillColor.toString();
+                }
 
                 ctx.beginPath();
                 ctx.moveTo(0,0);
 	            this._plot(function(x,y) {
                     ctx.lineTo(x,y);
 	            });
-                ctx.lineTo(this._canvas.width, 0);
+                if (this._plotInfo.fillFrom == Number.NEGATIVE_INFINITY) {
+                    ctx.lineTo(this._canvas.width, 0);
+                } else if (this._plotInfo.fillFrom == Number.POSITIVE_INFINITY) {
+                    ctx.lineTo(this._canvas.width, this._canvas.height);
+                    ctx.lineTo(0, this._canvas.height);
+                } else {
+                    ctx.lineTo(this._canvas.width, this._valueGeometry.toScreen(this._plotInfo.fillFrom));
+                    ctx.lineTo(0, this._valueGeometry.toScreen(this._plotInfo.fillFrom));
+                }
                 ctx.fill();
             }
                     
             if (this._plotInfo.lineColor) {
                 ctx.strokeStyle = this._plotInfo.lineColor.toString();
 	            ctx.beginPath();
+                    var first = true;
 	            this._plot(function(x,y) {
+                        if (first) {
+                             first = false;
+                             ctx.moveTo(x,y);
+                        }
 	                ctx.lineTo(x,y);
 	            });
 	            ctx.stroke();

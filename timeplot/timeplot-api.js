@@ -8,24 +8,42 @@
 
 (function() {
 
-    var debug = false;
-    
+    var local = false;
+
+    // obtain local mode from the document URL    
     if (document.location.search.length > 0) {
         var params = document.location.search.substr(1).split("&");
         for (var i = 0; i < params.length; i++) {
-            if (params[i] == "debug") {
-                debug = true;
+            if (params[i] == "local") {
+                local = true;
             }
         }
     }
-    
+
+    // obtain local mode from the script URL params attribute
+    if (!local) {
+        var heads = document.documentElement.getElementsByTagName("head");
+        for (var h = 0; h < heads.length; h++) {
+            var node = heads[h].firstChild;
+            while (node != null) {
+                if (node.nodeType == 1 && node.tagName.toLowerCase() == "script") {
+                    var url = node.src;
+                    if (url.indexOf("timeplot-api") >= 0) {
+                        local = (url.indexOf("local") >= 0);
+                    }
+                }
+                node = node.nextSibling;
+            }
+        }
+    }
+
     // Load Timeplot if it's not already loaded (after SimileAjax and Timeline)
     var loadTimeplot = function() {
-    	
+
         if (typeof window.Timeplot != "undefined") {
             return;
         }
-    
+        
         window.Timeplot = {
             loaded:     false,
             params:     { bundle: true, autoCreate: true },
@@ -88,13 +106,25 @@
             }
         }
 
-        var timeplotURLPrefix = (debug) ? "/timeplot/api/1.0/" : Timeplot.urlPrefix;
+        var timeplotURLPrefix = (local) ? "/timeplot/api/1.0/" : Timeplot.urlPrefix;
+
+        if (local && !("console" in window)) {
+            var firebug = [ timeplotURLPrefix + "lib/firebug/firebug.js" ];
+            SimileAjax.includeJavascriptFiles(document, "", firebug);
+        }
+        
+        var canvas = document.createElement("canvas");
+
+        if (!canvas.getContext) {
+            var excanvas = [ timeplotURLPrefix + "lib/excanvas.js" ];
+            SimileAjax.includeJavascriptFiles(document, "", excanvas);
+        }
         
         var scriptURLs = Timeplot.params.js || [];
         var cssURLs = Timeplot.params.css || [];
 
         // Core scripts and styles
-        if (Timeplot.params.bundle && !debug) {
+        if (Timeplot.params.bundle && !local) {
             scriptURLs.push(timeplotURLPrefix + "timeplot-bundle.js");
             cssURLs.push(timeplotURLPrefix + "timeplot-bundle.css");
         } else {
@@ -107,12 +137,13 @@
         //    scriptURLs.push(Timeplot.urlPrefix + "locales/" + locales[i] + "/locale.js");
         //};
         
-        if (Timeplot.params.callback) {
-            window.SimileAjax_onLoad = function() {
+        window.SimileAjax_onLoad = function() {
+            if (local && window.console.open) window.console.open();
+            if (Timeplot.params.callback) {
                 eval(Timeplot.params.callback + "()");
             }
         }
-
+        
         SimileAjax.includeJavascriptFiles(document, "", scriptURLs);
         SimileAjax.includeCssFiles(document, "", cssURLs);
         Timeplot.loaded = true;
@@ -123,8 +154,7 @@
         if (typeof Timeline != "undefined") {
             loadTimeplot();
         } else {
-	    var timelineURL = "timeplot/timeline/timeline-api.js";
-            //var timelineURL = (debug) ? "/timeline/api-2.0/timeline-api.js?bundle=false" : "http://static.simile.mit.edu/timeline/api-2.0/timeline-api.js";
+            var timelineURL = (local) ? "/timeline/api-2.0/timeline-api.js?bundle=false" : "http://static.simile.mit.edu/timeline/api-2.0/timeline-api.js";
             window.SimileAjax_onLoad = loadTimeplot;
             SimileAjax.includeJavascriptFile(document, timelineURL);
         }
@@ -134,10 +164,9 @@
     if (typeof SimileAjax == "undefined") {
         window.SimileAjax_onLoad = loadTimeline;
         
-        var url = "timeplot/ajax/simile-ajax-api.js?bundle=true";
-        //var url = debug ?
-        //    "/ajax/api-2.0/simile-ajax-api.js?bundle=false" :
-        //    "http://static.simile.mit.edu/ajax/api-2.0/simile-ajax-api.js?bundle=true";
+        var url = local ?
+            "/ajax/api-2.0/simile-ajax-api.js?bundle=false" :
+            "http://static.simile.mit.edu/ajax/api-2.0/simile-ajax-api.js?bundle=true";
                 
         var createScriptElement = function() {
             var script = document.createElement("script");

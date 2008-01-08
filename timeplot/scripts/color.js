@@ -92,7 +92,7 @@ Timeplot.Color.prototype = {
         	this.b = 0;
         }
         if (this.a > 1.0){
-            this.a = 255;
+            this.a = 1.0;
         } else if (this.a < 0.0){
             this.a = 0.0;
         }
@@ -105,7 +105,8 @@ Timeplot.Color.prototype = {
      * @param {float} alpha   (optional) Transparency value, between 0.0 (fully transparent) and 1.0 (fully opaque).
      */
     toString: function(alpha) {
-        return 'rgba(' + this.r + ',' + this.g + ',' + this.b + ',' + ((alpha) ? alpha : '1.0') + ')';
+        var a = (alpha) ? alpha : ((this.a) ? this.a : 1.0);
+        return 'rgba(' + this.r + ',' + this.g + ',' + this.b + ',' + a + ')';
     },
 
     /**

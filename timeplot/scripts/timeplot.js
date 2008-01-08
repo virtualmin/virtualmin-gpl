@@ -6,7 +6,7 @@
  */
 
 Timeline.Debug = SimileAjax.Debug; // timeline uses it's own debug system which is not as advanced
-log = SimileAjax.Debug.log; // shorter name is easier to use
+var log = SimileAjax.Debug.log; // shorter name is easier to use
 
 /*
  * This function is used to implement a raw but effective OOP-like inheritance
@@ -40,6 +40,8 @@ Timeplot.createPlotInfo = function(params) {
         valueGeometry:     ("valueGeometry" in params) ? params.valueGeometry : new Timeplot.DefaultValueGeometry(),
         timeZone:          ("timeZone" in params) ? params.timeZone : 0,
         fillColor:         ("fillColor" in params) ? ((params.fillColor == "string") ? new Timeplot.Color(params.fillColor) : params.fillColor) : null,
+        fillGradient:      ("fillGradient" in params) ? params.fillGradient : true,
+        fillFrom:          ("fillFrom" in params) ? params.fillFrom : Number.NEGATIVE_INFINITY,
         lineColor:         ("lineColor" in params) ? ((params.lineColor == "string") ? new Timeplot.Color(params.lineColor) : params.lineColor) : new Timeplot.Color("#606060"),
         lineWidth:         ("lineWidth" in params) ? params.lineWidth : 1.0,
         dotRadius:         ("dotRadius" in params) ? params.dotRadius : 2.0,
@@ -70,6 +72,7 @@ Timeplot._Impl = function(elmt, plotInfos) {
     };
     this._painter = null;
     this._active = false;
+    this._upright = false;
     this._initialize();
 };
 
@@ -258,6 +261,7 @@ Timeplot._Impl.prototype = {
 	        container.appendChild(div);
     	}
         div.setAttribute("class","timeplot-div " + clazz);
+        div.setAttribute("className","timeplot-div " + clazz);
         this.placeDiv(div,styles);
         return div;
     },
@@ -273,12 +277,22 @@ Timeplot._Impl.prototype = {
             for (style in styles) {
                 if (style == "left") {
                     styles[style] += this._paddingX;
+                    styles[style] += "px";
                 } else if (style == "right") {
                     styles[style] += this._paddingX;
+                    styles[style] += "px";
                 } else if (style == "top") {
                     styles[style] += this._paddingY;
+                    styles[style] += "px";
                 } else if (style == "bottom") {
                     styles[style] += this._paddingY;
+                    styles[style] += "px";
+                } else if (style == "width") {
+                    if (styles[style] < 0) styles[style] = 0;
+                    styles[style] += "px";
+                } else if (style == "height") {
+                    if (styles[style] < 0) styles[style] = 0;
+                    styles[style] += "px";
                 }
                 div.style[style] = styles[style];
             }
@@ -381,23 +395,38 @@ Timeplot._Impl.prototype = {
     _prepareCanvas: function() {
         var canvas = this.getCanvas();
 
-        var s = SimileAjax.DOM.getSize(this._containerDiv);    
+        // using jQuery.  note we calculate the average padding; if your
+        // padding settings are not symmetrical, the labels will be off
+        // since they expect to be centered on the canvas.
+        var con = $('#' + this._containerDiv.id);
+        this._paddingX = (parseInt(con.css('paddingLeft')) +
+                          parseInt(con.css('paddingRight'))) / 2;
+        this._paddingY = (parseInt(con.css('paddingTop')) +
+                          parseInt(con.css('paddingBottom'))) / 2;
 
-        canvas.width = s.w;
-        canvas.height = s.h;
-        
-        this._paddingX = (this.getWidth() - canvas.width) / 2;
-        this._paddingY = (this.getHeight() - canvas.height) / 2;
-    
+        canvas.width = this.getWidth() - (this._paddingX * 2);
+        canvas.height = this.getHeight() - (this._paddingY * 2);
+
         var ctx = canvas.getContext('2d');
-        ctx.translate(0,canvas.height);
-        ctx.scale(1,-1);
+        this._setUpright(ctx, canvas);
         ctx.globalCompositeOperation = 'source-over';
+    },
+
+    _setUpright: function(ctx, canvas) {
+        // excanvas+IE requires this to be done only once, ever; actual canvas
+        // implementations reset and require this for each call to re-layout
+        if (!SimileAjax.Platform.browser.isIE) this._upright = false;
+        if (!this._upright) {
+            this._upright = true;
+            ctx.translate(0, canvas.height);
+            ctx.scale(1,-1);
+        }
     },
     
     _isBrowserSupported: function(canvas) {
     	var browser = SimileAjax.Platform.browser;
-    	if (canvas.getContext && window.getComputedStyle) {
+    	if ((canvas.getContext && window.getComputedStyle) ||
+            (browser.isIE && browser.majorVersion >= 6)) {
         	return true;
     	} else {
     		return false;
@@ -424,14 +453,18 @@ Timeplot._Impl.prototype = {
         var canvas = doc.createElement("canvas");
         
         if (this._isBrowserSupported(canvas)) {
-	        // this is where we'll place the labels
-	        var labels = doc.createElement("div");
-	        containerDiv.appendChild(labels);
+            // this is where we'll place the labels
+            var labels = doc.createElement("div");
+            containerDiv.appendChild(labels);
 
             this._canvas = canvas;
             canvas.className = "timeplot-canvas";
-            this._prepareCanvas();
             containerDiv.appendChild(canvas);
+            if(!canvas.getContext && G_vmlCanvasManager) {
+                canvas = G_vmlCanvasManager.initElement(this._canvas);
+                this._canvas = canvas;
+            }
+            this._prepareCanvas();
     
             // inserting copyright and link to simile
             var elmtCopyright = SimileAjax.Graphics.createTranslucentImage(Timeplot.urlPrefix + "images/copyright.png");
@@ -478,7 +511,7 @@ Timeplot._Impl.prototype = {
             containerDiv.appendChild(message.containerDiv);
             
             message.contentDiv.className = "timeplot-message";
-            message.contentDiv.innerHTML = "<img src='http://static.simile.mit.edu/timeline/api/images/progress-running.gif' /> Loading...";
+            message.contentDiv.innerHTML = "<img src='" + Timeplot.urlPrefix + "images/progress-running.gif' /> Loading...";
             
             this.showLoadingMessage = function() { message.containerDiv.style.display = "block"; };
             this.hideLoadingMessage = function() { message.containerDiv.style.display = "none"; };

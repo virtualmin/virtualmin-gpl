@@ -5,7 +5,7 @@
 
 
 Timeline.Debug=SimileAjax.Debug;
-log=SimileAjax.Debug.log;
+var log=SimileAjax.Debug.log;
 
 
 Object.extend=function(destination,source){
@@ -32,6 +32,8 @@ timeGeometry:("timeGeometry"in params)?params.timeGeometry:new Timeplot.DefaultT
 valueGeometry:("valueGeometry"in params)?params.valueGeometry:new Timeplot.DefaultValueGeometry(),
 timeZone:("timeZone"in params)?params.timeZone:0,
 fillColor:("fillColor"in params)?((params.fillColor=="string")?new Timeplot.Color(params.fillColor):params.fillColor):null,
+fillGradient:("fillGradient"in params)?params.fillGradient:true,
+fillFrom:("fillFrom"in params)?params.fillFrom:Number.NEGATIVE_INFINITY,
 lineColor:("lineColor"in params)?((params.lineColor=="string")?new Timeplot.Color(params.lineColor):params.lineColor):new Timeplot.Color("#606060"),
 lineWidth:("lineWidth"in params)?params.lineWidth:1.0,
 dotRadius:("dotRadius"in params)?params.dotRadius:2.0,
@@ -58,6 +60,7 @@ foreground:[]
 };
 this._painter=null;
 this._active=false;
+this._upright=false;
 this._initialize();
 };
 
@@ -203,6 +206,7 @@ div.setAttribute("id",tid);
 container.appendChild(div);
 }
 div.setAttribute("class","timeplot-div "+clazz);
+div.setAttribute("className","timeplot-div "+clazz);
 this.placeDiv(div,styles);
 return div;
 },
@@ -213,12 +217,22 @@ if(styles){
 for(style in styles){
 if(style=="left"){
 styles[style]+=this._paddingX;
+styles[style]+="px";
 }else if(style=="right"){
 styles[style]+=this._paddingX;
+styles[style]+="px";
 }else if(style=="top"){
 styles[style]+=this._paddingY;
+styles[style]+="px";
 }else if(style=="bottom"){
 styles[style]+=this._paddingY;
+styles[style]+="px";
+}else if(style=="width"){
+if(styles[style]<0)styles[style]=0;
+styles[style]+="px";
+}else if(style=="height"){
+if(styles[style]<0)styles[style]=0;
+styles[style]+="px";
 }
 div.style[style]=styles[style];
 }
@@ -303,23 +317,38 @@ ctx.clearRect(0,0,canvas.width,canvas.height);
 _prepareCanvas:function(){
 var canvas=this.getCanvas();
 
-var s=SimileAjax.DOM.getSize(this._containerDiv);
 
-canvas.width=s.w;
-canvas.height=s.h;
 
-this._paddingX=(this.getWidth()-canvas.width)/2;
-this._paddingY=(this.getHeight()-canvas.height)/2;
+
+var con=$('#'+this._containerDiv.id);
+this._paddingX=(parseInt(con.css('paddingLeft'))+
+parseInt(con.css('paddingRight')))/2;
+this._paddingY=(parseInt(con.css('paddingTop'))+
+parseInt(con.css('paddingBottom')))/2;
+
+canvas.width=this.getWidth()-(this._paddingX*2);
+canvas.height=this.getHeight()-(this._paddingY*2);
 
 var ctx=canvas.getContext('2d');
+this._setUpright(ctx,canvas);
+ctx.globalCompositeOperation='source-over';
+},
+
+_setUpright:function(ctx,canvas){
+
+
+if(!SimileAjax.Platform.browser.isIE)this._upright=false;
+if(!this._upright){
+this._upright=true;
 ctx.translate(0,canvas.height);
 ctx.scale(1,-1);
-ctx.globalCompositeOperation='source-over';
+}
 },
 
 _isBrowserSupported:function(canvas){
 var browser=SimileAjax.Platform.browser;
-if(canvas.getContext&&window.getComputedStyle){
+if((canvas.getContext&&window.getComputedStyle)||
+(browser.isIE&&browser.majorVersion>=6)){
 return true;
 }else{
 return false;
@@ -352,8 +381,12 @@ containerDiv.appendChild(labels);
 
 this._canvas=canvas;
 canvas.className="timeplot-canvas";
-this._prepareCanvas();
 containerDiv.appendChild(canvas);
+if(!canvas.getContext&&G_vmlCanvasManager){
+canvas=G_vmlCanvasManager.initElement(this._canvas);
+this._canvas=canvas;
+}
+this._prepareCanvas();
 
 
 var elmtCopyright=SimileAjax.Graphics.createTranslucentImage(Timeplot.urlPrefix+"images/copyright.png");
@@ -400,7 +433,7 @@ message.containerDiv.className="timeplot-message-container";
 containerDiv.appendChild(message.containerDiv);
 
 message.contentDiv.className="timeplot-message";
-message.contentDiv.innerHTML="<img src='timeplot/timeline/images/progress-running.gif' /> Loading...";
+message.contentDiv.innerHTML="<img src='"+Timeplot.urlPrefix+"images/progress-running.gif' /> Loading...";
 
 this.showLoadingMessage=function(){message.containerDiv.style.display="block";};
 this.hideLoadingMessage=function(){message.containerDiv.style.display="none";};
@@ -636,26 +669,43 @@ ctx.lineJoin='miter';
 
 if(this._dataSource){
 if(this._plotInfo.fillColor){
+if(this._plotInfo.fillGradient){
 var gradient=ctx.createLinearGradient(0,this._canvas.height,0,0);
 gradient.addColorStop(0,this._plotInfo.fillColor.toString());
 gradient.addColorStop(0.5,this._plotInfo.fillColor.toString());
 gradient.addColorStop(1,'rgba(255,255,255,0)');
 
 ctx.fillStyle=gradient;
+}else{
+ctx.fillStyle=this._plotInfo.fillColor.toString();
+}
 
 ctx.beginPath();
 ctx.moveTo(0,0);
 this._plot(function(x,y){
 ctx.lineTo(x,y);
 });
+if(this._plotInfo.fillFrom==Number.NEGATIVE_INFINITY){
 ctx.lineTo(this._canvas.width,0);
+}else if(this._plotInfo.fillFrom==Number.POSITIVE_INFINITY){
+ctx.lineTo(this._canvas.width,this._canvas.height);
+ctx.lineTo(0,this._canvas.height);
+}else{
+ctx.lineTo(this._canvas.width,this._valueGeometry.toScreen(this._plotInfo.fillFrom));
+ctx.lineTo(0,this._valueGeometry.toScreen(this._plotInfo.fillFrom));
+}
 ctx.fill();
 }
 
 if(this._plotInfo.lineColor){
 ctx.strokeStyle=this._plotInfo.lineColor.toString();
 ctx.beginPath();
+var first=true;
 this._plot(function(x,y){
+if(first){
+first=false;
+ctx.moveTo(x,y);
+}
 ctx.lineTo(x,y);
 });
 ctx.stroke();
@@ -927,6 +977,8 @@ onClear:function(){source._clear();}
 }
 this.addListener(this._processingListener);
 this._listeners=[];
+this._data=null;
+this._range=null;
 };
 
 Timeplot.DataSource.prototype={
@@ -964,7 +1016,7 @@ getValue:function(t){
 if(this._data){
 for(var i=0;i<this._data.times.length;i++){
 var l=this._data.times[i];
-if(l>t){
+if(l>=t){
 return this._data.values[i];
 }
 }
@@ -1035,6 +1087,8 @@ this._data={
 times:times,
 values:values
 };
+
+if(max==Number.MIN_VALUE)max=1;
 
 this._range={
 earliestDate:this._eventSource.getEarliestDate(),
@@ -1258,7 +1312,7 @@ power--;
 var unit=Math.pow(10,power);
 var inc=unit;
 while(true){
-dy=this.toScreen(this._minValue+inc);
+var dy=this.toScreen(this._minValue+inc);
 
 while(dy<this._gridSpacing){
 inc+=unit;
@@ -1608,7 +1662,7 @@ break;
 if(x>0){
 grid.push({x:x,label:l});
 }
-time.incrementByInterval(t,unit);
+time.incrementByInterval(t,unit,this._timeZone);
 }while(t.getTime()<this._latestDate.getTime());
 
 return grid;
@@ -1756,8 +1810,8 @@ this._lens.instrumented=true;
 
 
 Timeplot.MagnifyingTimeGeometry.prototype.setMagnifyingParams=function(c,a,b){
-var a=a/2;
-var b=b/2;
+a=a/2;
+b=b/2;
 
 var w=this._canvas.width;
 var d=this._period;
@@ -1885,7 +1939,7 @@ this.b=255;
 this.b=0;
 }
 if(this.a>1.0){
-this.a=255;
+this.a=1.0;
 }else if(this.a<0.0){
 this.a=0.0;
 }
@@ -1894,7 +1948,8 @@ return this;
 
 
 toString:function(alpha){
-return'rgba('+this.r+','+this.g+','+this.b+','+((alpha)?alpha:'1.0')+')';
+var a=(alpha)?alpha:((this.a)?this.a:1.0);
+return'rgba('+this.r+','+this.g+','+this.b+','+a+')';
 },
 
 
