@@ -52,6 +52,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--test") {
 		push(@tests, shift(@ARGV));
 		}
+	elsif ($a eq "--skip-test") {
+		push(@skips, shift(@ARGV));
+		}
 	elsif ($a eq "--no-cleanup") {
 		$no_cleanup = 1;
 		}
@@ -661,6 +664,7 @@ $total_failed = 0;
 if (!@tests) {
 	@tests = keys %$alltests;
 	}
+@tests = grep { &indexof($_, @skips) < 0 } @tests;
 foreach $tt (@tests) {
 	print "Running $tt tests ..\n";
 	@tts = @{$alltests->{$tt}};
@@ -782,6 +786,7 @@ print "Runs some or all Virtualmin functional tests.\n";
 print "\n";
 print "usage: functional-tests.pl [--domain test.domain]\n";
 print "                           [--test type]*\n";
+print "                           [--skip-test type]*\n";
 print "                           [--no-cleanup]\n";
 print "                           [--output]\n";
 print "                           [--migrate $mig]\n";
