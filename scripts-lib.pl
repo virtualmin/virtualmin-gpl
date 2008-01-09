@@ -61,14 +61,16 @@ return undef if (!@sfiles);
 
 # Work out the newest one, so that plugins can override Virtualmin and
 # vice-versa
-local @notver = grep { !$_->[2] } @sfiles;
-if (@notver) {
-	# Need to use time-based comparison
-	@sfiles = sort { $b->[1] <=> $a->[1] } @sfiles;
-	}
-else {
-	# Use version numbers
-	@sfiles = sort { &compare_versions($b->[2], $a->[2]) } @sfiles;
+if (@sfiles > 1) {
+	local @notver = grep { !$_->[2] } @sfiles;
+	if (@notver) {
+		# Need to use time-based comparison
+		@sfiles = sort { $b->[1] <=> $a->[1] } @sfiles;
+		}
+	else {
+		# Use version numbers
+		@sfiles = sort { &compare_versions($b->[2], $a->[2]) } @sfiles;
+		}
 	}
 local $spath = $sfiles[0]->[0];
 local $sdir = $spath;
