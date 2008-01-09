@@ -15,7 +15,7 @@ require './virtual-server-lib.pl';
 	);
 
 &ui_print_header(undef, $text{'history_title'}, "", undef, 0, 0, 0, undef,
-		 "<script src=timeplot/timeplot-api.js?local></script>",
+		 "<script src='timeplot/timeplot-api.js?local'></script>",
 		 "onload='onLoad();' onresize='onResize();'");
 
 # Work out the stat and time range we want
@@ -153,19 +153,24 @@ foreach $stat (@stats) {
 	print "      valueGeometry: new Timeplot.DefaultValueGeometry({\n";
 	print "        gridColor: '#B3B6B0',\n";
 	print "        axisLabelsPlacement: 'left',\n";
-	print "        min: 0,\n";
 	print "        $maxopt\n";
+	print "        min: 0\n";
 	print "      }),\n";
 	print "      timeGeometry: new Timeplot.DefaultTimeGeometry({\n";
 	print "        gridColor: '#B3B6B0',\n";
 	print "        axisLabelsPlacement: 'top'\n";
 	print "      }),\n";
 	print "      showValues: true,\n";
-	print "      lineColor: '$color',\n";
 	if (@stats == 1) {
 		print "      fillColor: '#dadaf8',\n";
 		}
-	print "    }),\n";
+	print "      lineColor: '$color'\n";
+	if ($stat eq $stats[$#stats]) {
+		print "    })\n";
+		}
+	else {
+		print "    }),\n";
+		}
 	$plotno++;
 	}
 print "  ];\n";
