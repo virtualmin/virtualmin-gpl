@@ -1,4 +1,4 @@
- x run functional-test.pl
+ - run functional-test.pl
 
  x Create tar.gz file
 
@@ -10,11 +10,11 @@
 
  x Upload to download.webmin.com
 
- x Add to website
+ - Add to website
 
- x Add the freshmeat.net
+ - Add the freshmeat.net
 
- x Announce on mailing list
+ - Announce on mailing list
 
- x Add to updates.txt
+ - Add to updates.txt
 
