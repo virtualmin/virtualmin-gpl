@@ -40,27 +40,42 @@ sub get_script
 {
 local ($name) = @_;
 
-# Find the script's .pl file, first from a plugin, then from the core
-local ($s, $sdir);
+# Find all .pl files for this script, which may come from plugins or
+# the core
+local @sfiles;
+foreach $s (@scripts_directories) {
+	local $spath = "$s/$name.pl";
+	local @st = stat($spath);
+	if (@st) {
+		push(@sfiles, [ $spath, $st[9],&guess_script_version($spath) ]);
+		}
+	}
 foreach my $p (@script_plugins) {
-	local $pdir = &module_root_directory($p);
-	if (-r "$pdir/$name.pl") {
-		$sdir = $pdir;
-		last;
+	local $spath = &module_root_directory($p)."/$name.pl";
+	local @st = stat($spath);
+	if (@st) {
+		push(@sfiles, [ $spath, $st[9],&guess_script_version($spath) ]);
 		}
 	}
-if (!$sdir) {
-	foreach $s (@scripts_directories) {
-		if (-r "$s/$name.pl") {
-			$sdir = $s;
-			last;
-			}
-		}
+return undef if (!@sfiles);
+
+# Work out the newest one, so that plugins can override Virtualmin and
+# vice-versa
+local @notver = grep { !$_->[2] } @sfiles;
+if (@notver) {
+	# Need to use time-based comparison
+	@sfiles = sort { $b->[1] <=> $a->[1] } @sfiles;
 	}
-return undef if (!$sdir);
+else {
+	# Use version numbers
+	@sfiles = sort { &compare_versions($b->[2], $a->[2]) } @sfiles;
+	}
+local $spath = $sfiles[0]->[0];
+local $sdir = $spath;
+$sdir =~ s/\/[^\/]+$//;
 
 # Read in the .pl file
-(do "$sdir/$name.pl") || return undef;
+(do $spath) || return undef;
 local $dfunc = "script_${name}_desc";
 local $lfunc = "script_${name}_longdesc";
 local $vfunc = "script_${name}_versions";
@@ -1591,6 +1606,27 @@ if (!$nocreate) {
 		}
 	}
 return 0;
+}
+
+# guess_script_version(file)
+# Returns the highest version number from some script file
+sub guess_script_version
+{
+local ($file) = @_;
+local $lref = &read_file_lines($file, 1);
+for(my $i=0; $i<@$lref; $i++) {
+	if ($lref->[$i] =~ /^\s*sub\s+script_\S+_versions/) {
+		if ($lref->[$i+2] =~ /^\s*return\s+\(([^\)]*)\)/ ||
+		    $lref->[$i+1] =~ /^\s*return\s+\(([^\)]*)\)/) {
+			local $verlist = $1;
+			$verlist =~ s/^\s+//; $verlist =~ s/\s+$//;
+			local @vers = &split_quoted_string($verlist);
+			return $vers[0];
+			}
+		return undef;	# Versions not found where expected
+		}
+	}
+return undef;
 }
 
 1;
