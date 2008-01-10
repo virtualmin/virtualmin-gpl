@@ -811,3 +811,5 @@ Un-supported script versions can now be installed by the master admin .. but use
 Put back the osTicket installer, now that it is available again, and updated it to version 1.6 RC2.
 Added a script installer for eTicket version 1.5.6-RC4, a fork of the osTicket project.
 The system statistics graphs can now be displayed using IE, as well as Firefox.
+---- Changes since 3.51 ----
+Updated the Horde script installer to version 3.1.6, and the versions of several other Horde-related scripts.
