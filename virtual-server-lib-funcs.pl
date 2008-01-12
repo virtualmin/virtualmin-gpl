@@ -4705,11 +4705,20 @@ sub virtualmin_restore_custom
 local ($file, $vbs) = @_;
 foreach my $fm ([ $custom_fields_file, $file ],
 		[ $custom_links_file, $file."_links" ],
-		[ $custom_link_categories_file, $file."_linkcats" ],
-		[ $custom_shells_file, $file."_shells" ]) {
+		[ $custom_link_categories_file, $file."_linkcats" ]) {
 	if (-r $fm->[1]) {
 		&copy_source_dest($fm->[1], $fm->[0]);
 		}
+	}
+if (-s $file."_shells") {
+	# A non-empty shells file means that the original system defined some
+	# custom shells.
+	&copy_source_dest($file."_shells", $custom_shells_file);
+	}
+elsif (-r $file."_shells") {
+	# An empty shells file means that the original system was using the
+	# default shells, so so should we
+	&unlink_file($custom_shells_file);
 	}
 }
 
