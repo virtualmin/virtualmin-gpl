@@ -67,6 +67,9 @@
 
  - when restoring a backup, make sure all features enabled for the domain that
    were on the source system exist on the target
+	- CGI version too
+	- use contdoms
+	- option to not check
 
  - when restoring a backup with PHP scripts, make sure we have all needed
    PHP modules installed

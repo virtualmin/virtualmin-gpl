@@ -77,10 +77,18 @@ if (!$in{'confirm'}) {
 	# Tell the user what will be done
 	print &ui_form_start("restore.cgi", "post");
 	print &text('restore_from', $nice),"<p>\n";
-	@links = ( &select_all_link("dom", 0), &select_invert_link("dom", 0) );
-	print &ui_links_row(\@links);
+
+	# Check for missing features
+	@missing = &missing_restore_features($cont);
+	if (@missing) {
+		print "<b>",&text('restore_fmissing', 
+			join(", ", map { $_->{'desc'} } @missing)),"</b><p>\n";
+		print "<b>",$text{'restore_fmissing2'},"</b><p>\n";
+		}
 
 	# Show domains
+	@links = ( &select_all_link("dom", 0), &select_invert_link("dom", 0) );
+	print &ui_links_row(\@links);
 	%plugins = map { $_, 1 } @backup_plugins;
 	print "<dl>\n";
 	foreach $d (sort { $a cmp $b } keys %$cont) {

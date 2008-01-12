@@ -5099,13 +5099,16 @@ if ($mode > 0) {
 return $ok;
 }
 
-# backup_contents(file)
+# backup_contents(file, [want-domains])
 # Returns a hash ref of domains and features in a backup file, or an error
-# string if it is invalid
+# string if it is invalid. If the want-domains flag is given, the domain
+# structures are also returned as a list of hash refs (except for S3).
 sub backup_contents
 {
+local ($file, $wantdoms) = @_;
 local $backup;
-local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($_[0]);
+local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($file);
+local $doms;
 if ($mode == 3) {
 	# For S3, just download the backup contents files
 	local $s3b = &s3_list_backups($user, $pass, $server, $path);
@@ -5114,7 +5117,7 @@ if ($mode == 3) {
 	foreach my $b (keys %$s3b) {
 		$rv{$b} = $s3b->{$b}->{'features'};
 		}
-	return \%rv;
+	return $wantdoms ? (\%rv, undef) : \%rv;
 	}
 elsif ($mode > 0) {
 	# Need to download to temp file first
@@ -5133,8 +5136,15 @@ if (-d $backup) {
 	local %rv;
 	foreach $f (readdir(DIR)) {
 		next if ($f eq "." || $f eq "..");
-		local $cont = &backup_contents("$backup/$f");
+		local ($cont, $fdoms);
+		if ($wantdoms) {
+			($cont, $fdoms) = &backup_contents("$backup/$f", 1);
+			}
+		else {
+			$cont = &backup_contents("$backup/$f", 0);
+			}
 		if (ref($cont)) {
+			# Merge in contents of file
 			local $d;
 			foreach $d (keys %$cont) {
 				if ($rv{$d}) {
@@ -5145,23 +5155,24 @@ if (-d $backup) {
 					$rv{$d} = $cont->{$d};
 					}
 				}
+			if ($fdoms) {
+				$doms ||= [ ];
+				push(@$doms, @$fdoms);
+				}
 			}
 		else {
+			# Failed to read this file
 			&clean_contents_temp();
 			return $backup."/".$f." : ".$cont;
 			}
 		}
 	closedir(DIR);
 	&clean_contents_temp();
-	return \%rv;
+	return $wantdoms ? (\%rv, $doms) : \%rv;
 	}
 else {
 	# A single file
 	local $err;
-	open(BACKUP, $backup);
-	local $two;
-	read(BACKUP, $two, 2);
-	close(BACKUP);
 	local $out;
 	local $q = quotemeta($backup);
 	local $cf = &compression_format($backup);
@@ -5175,12 +5186,15 @@ else {
 		}
 
 	# Look for a home-format backup first
-	local ($l, %rv, %done, $dotbackup);
+	local ($l, %rv, %done, $dotbackup, @virtfiles);
 	foreach $l (split(/\n/, $out)) {
 		if ($l =~ /^(.\/)?.backup\/([^_]+)_([a-z0-9\-]+)$/) {
 			# Found a .backup/domain_feature file
 			push(@{$rv{$2}}, $3) if (!$done{$2,$3}++);
 			push(@{$rv{$2}}, "dir") if (!$done{$2,"dir"}++);
+			if ($3 eq 'virtualmin') {
+				push(@virtfiles, $l);
+				}
 			$dotbackup = 1;
 			}
 		}
@@ -5190,17 +5204,77 @@ else {
 			if ($l =~ /^(.\/)?([^_]+)_([a-z0-9\-]+)$/) {
 				# Found a domain_feature file
 				push(@{$rv{$2}}, $3) if (!$done{$2,$3}++);
+				if ($3 eq 'virtualmin') {
+					push(@virtfiles, $l);
+					}
 				}
 			}
 		}
+
+	# Extract and read domain files
+	if ($wantdoms) {
+		local $vftemp = &transname();
+		&make_dir($vftemp, 0700);
+		local $qvirtfiles = join(" ", map { quotemeta($_) } @virtfiles);
+		$out = `cd $vftemp ; ($comp $q | tar xvf - $qvirtfiles) 2>&1`;
+		if (!$?) {
+			$doms = [ ];
+			foreach my $f (@virtfiles) {
+				local %d;
+				&read_file("$vftemp/$f", \%d);
+				push(@$doms, \%d);
+				}
+			}
+		}
+
 	&clean_contents_temp();
-	return \%rv;
+	return $wantdoms ? (\%rv, $doms) : \%rv;
 	}
 
 	sub clean_contents_temp
 	{
 	&execute_command("rm -rf ".quotemeta($backup)) if ($mode > 0);
 	}
+}
+
+# missing_restore_features(&contents)
+# Returns a list of features that are in a backup, but not supported on
+# this system.
+sub missing_restore_features
+{
+local ($cont) = @_;
+local @allfeatures;
+foreach my $dname (keys %$cont) {
+	push(@allfeatures, @{$cont->{$dname}});
+	}
+@allfeatures = &unique(@allfeatures);
+local @rv;
+foreach my $f (@allfeatures) {
+	next if ($f eq 'virtualmin');	# Not a feature
+	if (&indexof($f, @features) >= 0) {
+		if (!$config{$f}) {
+			# Missing feature
+			push(@rv, { 'feature' => $f,
+				    'desc' => $text{'feature_'.$f} });
+			}
+		}
+	elsif (&indexof($f, @plugins) < 0) {
+		# Assume missing plugin
+		local $desc = "Plugin $f";
+		if (&foreign_check($f)) {
+			# Plugin exists, but isn't enabled
+			eval {
+				local $main::error_must_die = 1;
+				&foreign_require($f, "virtual_feature.pl");
+				$desc = &plugin_call($f, "feature_name");
+				};
+			}
+		push(@rv, { 'feature' => $f,
+			    'plugin' => 1,
+			    'desc' => $desc });
+		}
+	}
+return @rv;
 }
 
 # download_backup(url, tempfile, [&domain-names], [&config-features])

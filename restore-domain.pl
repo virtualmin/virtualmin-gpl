@@ -91,16 +91,16 @@ while(@ARGV > 0) {
 		&usage();
 		}
 	}
-$src || usage();
-@rdoms || $all_doms || @vbs || usage();
+$src || usage("Missing --source parameter");
+@rdoms || $all_doms || @vbs || usage("No domains to restore specified");
 if (@rdoms || $all_doms) {
-	@rfeats || $fix || usage();
+	@rfeats || $fix || usage("No features to restore specified");
 	}
 ($mode) = &parse_backup_url($src);
 $mode > 0 || -r $src || -d $src || &usage("Missing or invalid restore file");
 
 # Find the selected domains
-$cont = &backup_contents($src);
+($cont, $contdoms) = &backup_contents($src, 1);
 ref($cont) || &usage("Failed to read backup file : $cont");
 (keys %$cont) || &usage("Nothing in backup file!");
 if ($all_doms) {
@@ -119,6 +119,20 @@ foreach $dname (@rdoms) {
 		push(@doms, { 'dom' => $dname,
 			      'missing' => 1 });
 		}
+	}
+
+# Check for missing features
+&$first_print("Checking for missing features ..");
+@missing = &missing_restore_features($cont);
+if (@missing) {
+	&$second_print(
+	  ".. WARNING - The following features were enabled for one or more\n".
+	  "domains in the backup, but do not exist on this system. Some\n".
+	  "functions of the restored domains may not work : ".
+	  join(", ", map { $_->{'desc'} } @missing));
+	}
+else {
+	&$second_print(".. all features in backup are supported");
 	}
 
 if ($test) {
