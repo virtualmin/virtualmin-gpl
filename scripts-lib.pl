@@ -1431,12 +1431,12 @@ if ($cfunc && defined(&$cfunc)) {
 return @missing;
 }
 
-# create_script_wget_job(&domain, url, mins, hours)
+# create_script_wget_job(&domain, url, mins, hours, [call-now])
 # Creates a cron job running as some domain owner which regularly wget's
 # some URL, to perform some periodic task for a script
 sub create_script_wget_job
 {
-local ($d, $url, $mins, $hours) = @_;
+local ($d, $url, $mins, $hours, $callnow) = @_;
 return 0 if (!&foreign_check("cron"));
 &foreign_require("cron", "cron-lib.pl");
 local $wget = &has_command("wget");
@@ -1450,6 +1450,10 @@ local $job = { 'user' => $d->{'user'},
 	       'months' => '*',
 	       'weekdays' => '*' };
 &cron::create_cron_job($job);
+if ($callnow) {
+	# Run wget now
+	&system_logged("$wget -q -O /dev/null $url >/dev/null 2>&1 </dev/null");
+	}
 return 1;
 }
 
