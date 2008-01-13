@@ -4804,6 +4804,7 @@ else {
 
 local $restoredir;
 local %homeformat;
+local %missing;
 if ($ok) {
 	# Create a temp dir for the backup archive contents
 	$restoredir = &transname();
@@ -4906,6 +4907,7 @@ if ($ok) {
 	DOMAIN: foreach $d (sort { $a->{'parent'} <=> $b->{'parent'} } @{$_[1]}) {
 		if ($d->{'missing'}) {
 			# This domain doesn't exist yet - need to re-create it
+			$missing{$d->{'id'}} = $d;
 			&$first_print(&text('restore_createdomain',
 				      $d->{'dom'}));
 
@@ -5088,6 +5090,78 @@ if ($ok) {
 				}
 			}
 		&$second_print($text{'setup_done'});
+		}
+	}
+
+# If any created restored domains had scripts, re-verify their dependencies
+if (defined(&list_domain_scripts) && $ok && scalar(keys %missing)) {
+	&$first_print($text{'restore_phpmods'});
+	local %scache;
+	local (@phpinstalled, $phpanyfailed, @phpbad);
+	foreach my $d (grep { $missing{$_->{'id'}} } @$doms) {
+		local @sinfos = &list_domain_scripts($d);
+		foreach my $sinfo (@sinfos) {
+			# Get the script, with caching
+			local $script = $scache{$sinfo->{'name'}};
+			if (!$script) {
+				$script = $scache{$sinfo->{'name'}} =
+					&get_script($sinfo->{'name'});
+				}
+			next if (!$script);
+			next if (&indexof('php', @{$script->{'uses'}}) < 0);
+
+			# Work out PHP version for this particular install. Use
+			# the version recorded at script install time first,
+			# then that from it's directory.
+			local $phpver = $sinfo->{'opts'}->{'phpver'};
+			local @dirs = &list_domain_php_directories($d);
+			foreach my $dir (@dirs) {
+				if ($dir->{'dir'} eq $sinfo->{'dir'}) {
+					$phpver ||= $dir->{'version'};
+					}
+				}
+			foreach my $dir (@dirs) {
+				if ($dir->{'dir'} eq &public_html_dir($d)) {
+					$phpver ||= $dir->{'version'};
+					}
+				}
+			local @allvers = map { $_->[0] }
+					     &list_available_php_versions($d);
+			$phpver ||= $allvers[0];
+
+			# Is this PHP version supported on the new system?
+			if (&indexof($phpver, @allvers) < 0) {
+				push(@phpbad, [ $d, $sinfo, $script, $phpver ]);
+				next;
+				}
+
+			# Re-activate it's PHP modules
+			&push_all_print();
+			local $ok = &setup_php_modules($d, $script,
+			   $sinfo->{'version'}, $phpver, $sinfo->{'opts'},
+			   \@phpinstalled);
+			&pop_all_print();
+			$phpanyfailed++ if (!$ok);
+			}
+		}
+	if ($anyfailed) {
+		&$second_print($text{'restore_ephpmodserr'});
+		}
+	elsif (@phpinstalled) {
+		&$second_print(&text('restore_phpmodsdone',
+			join(" ", &unique(@phpinstalled))));
+		}
+	else {
+		&$second_print($text{'restore_phpmodsnone'});
+		}
+	if (@phpbad) {
+		# Some scripts needed missing PHP versions!
+		my $badlist = $text{'restore_phpbad'}."<br>\n";
+		foreach my $b (@phpbad) {
+			$badlist .= &text('restore_phpbad2', $b->[0]->{'dom'},
+					  $b->[2]->{'desc'}, $b->[3])."<br>\n";
+			}
+		&$second_print($badlist);
 		}
 	}
 
@@ -6525,6 +6599,7 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 						     join(" ", @vers)));
 				next;
 				}
+			$opts->{'phpver'} = $phpver;
 			}
 
 		# Install needed PHP modules

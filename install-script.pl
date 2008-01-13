@@ -203,6 +203,7 @@ if (defined(&$phpvfunc)) {
 	else {
 		&$second_print(".. done");
 		}
+	$opts->{'phpver'} = $phpver;
 	}
 
 # Apply Apache config if needed, for new PHP version

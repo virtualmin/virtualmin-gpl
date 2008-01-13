@@ -65,6 +65,3 @@
  - mobile theme for webmail
 	- release
 
- - when restoring a backup with PHP scripts, make sure we have all needed
-   PHP modules installed
-

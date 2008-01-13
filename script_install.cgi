@@ -109,6 +109,7 @@ if (defined(&$phpvfunc)) {
 	if (!$phpver) {
 		&error(&text('scripts_ephpvers', join(" ", @vers)));
 		}
+	$opts->{'phpver'} = $phpver;
 	}
 
 &ui_print_unbuffered_header(&domain_in($d),

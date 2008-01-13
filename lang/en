@@ -1860,7 +1860,13 @@ restore_downloadssh=Downloading archive from SSH server ..
 restore_downloads3=Downloading archive from Amazon S3 server ..
 restore_downloadfailed=.. download failed! $1
 restore_global=Restoring Virtualmin settings ($1) ..
+restore_phpmods=Enabling PHP modules for restored scripts ..
+restore_ephpmodserr=.. some PHP modules could not be installed.
+restore_phpmodsdone=.. the following PHP modules were installed : $1
+restore_phpmodsnone=.. no PHP modules needed to be installed
 restore_es3info=No backup file for $1 was found on S3.
+restore_phpbad=WARNING - The following scripts used PHP versions that are not available on this system :
+restore_phpbad2=$1 - $2 - Version $3
 
 restore_unixuser=Updating administration password and quotas ..
 restore_dirtar=Extracting TAR file of home directory ..

@@ -686,12 +686,12 @@ if ($sinfo->{'opts'}->{'dir'} &&
 	}
 }
 
-# setup_php_modules(&domain, &script, version, php-version, &opts)
+# setup_php_modules(&domain, &script, version, php-version, &opts, [&installed])
 # If possible, downloads PHP module packages need by the given script. Progress
 # of the install is written to STDOUT. Returns 1 if successful, 0 if not.
 sub setup_php_modules
 {
-local ($d, $script, $ver, $phpver, $opts) = @_;
+local ($d, $script, $ver, $phpver, $opts, $installed) = @_;
 local $modfunc = $script->{'php_mods_func'};
 local $optmodfunc = $script->{'php_opt_mods_func'};
 return 1 if (!defined(&$modfunc) && !defined(&$optmodfunc));
@@ -738,7 +738,21 @@ foreach my $m (@mods) {
 			# Not installed .. try to fetch it
 			&$first_print(&text('scripts_softwaremod',
 					    "<tt>$pkg</tt>"));
-			&software::update_system_install($pkg);
+			if ($first_print eq \&null_print) {
+				# Suppress output
+				&capture_function_output(
+				    \&software::update_system_install, $pkg);
+				}
+			elsif ($first_print eq \&first_text_print) {
+				# Make output text
+				local $out = &capture_function_output(
+				    \&software::update_system_install, $pkg);
+				print &html_tags_to_text($out);
+				}
+			else {
+				# Show HTML output
+				&software::update_system_install($pkg);
+				}
 			local $newpkg = $pkg;
 			if ($software::update_system eq "csw") {
 				# Real package name is different
@@ -749,6 +763,7 @@ foreach my $m (@mods) {
 				# Yep, it worked
 				&$second_print($text{'setup_done'});
 				$iok = 1;
+				push(@$installed, $m) if ($installed);
 				last;
 				}
 			}
