@@ -187,8 +187,11 @@ if (!$aliasdom) {
 	}
 
 # Validate initial style
+($style) = grep { $_->{'name'} eq $in{'style'} }
+	&list_available_content_styles();
 if (defined($in{'content'}) && !$in{'content_def'}) {
-	$in{'content'} =~ /\S/ || &error($text{'setup_econtent'});
+	$in{'content'} =~ /\S/ || $style->{'nocontent'} ||
+		&error($text{'setup_econtent'});
 	}
 
 # Work out the virtual IP
@@ -343,8 +346,6 @@ if ($add_fwdto) {
 
 # Copy initial website style
 if (defined($in{'content'}) && !$in{'content_def'} && $dom{'web'}) {
-	($style) = grep { $_->{'name'} eq $in{'style'} }
-			&list_available_content_styles();
 	if ($style) {
 		&$first_print(&text('setup_styleing', $style->{'desc'}));
 		$in{'content'} =~ s/\r//g;

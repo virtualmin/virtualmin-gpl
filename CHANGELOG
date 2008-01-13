@@ -815,3 +815,4 @@ The system statistics graphs can now be displayed using IE, as well as Firefox.
 Updated the Horde script installer to version 3.1.6, and the versions of several other Horde-related scripts.
 Updated the Drupal installer to versions 5.6 and 4.7.11, and phpMyAdmin to 2.11.4.
 When restoring a virtual server that uses features not supported on the system, a warning will be displayed listing the missing or disabled features.
+Custom styles can use the nocontent=1 line in style.info to specify that no initial content needs to be entered.

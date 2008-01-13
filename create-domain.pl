@@ -361,7 +361,7 @@ else {
 if ($stylename) {
 	($style) = grep { $_->{'name'} eq $stylename } &list_content_styles();
 	$style || &usage("Style $stylename does not exist");
-	$content || &usage("--content followed by some initial text for the website must be specified when using --style");
+	$content || $style->{'nocontent'} || &usage("--content followed by some initial text for the website must be specified when using --style");
 	if ($content =~ /^\//) {
 		$content = &read_file_contents($content);
 		$content || &usage("--content file does not exist");
