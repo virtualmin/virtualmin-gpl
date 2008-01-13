@@ -38,7 +38,7 @@ foreach $f (@do_features) {
 $options{'reuid'} = $in{'reuid'};
 $options{'fix'} = $in{'fix'};
 
-$cont = &backup_contents($src);
+($cont, $contdoms) = &backup_contents($src, 1);
 if (!$in{'confirm'}) {
 	# See what is in the tar file or directory
 	ref($cont) || &error(&text('restore_efile', $cont));
@@ -79,7 +79,7 @@ if (!$in{'confirm'}) {
 	print &text('restore_from', $nice),"<p>\n";
 
 	# Check for missing features
-	@missing = &missing_restore_features($cont);
+	@missing = &missing_restore_features($cont, $contdoms);
 	if (@missing) {
 		print "<b>",&text('restore_fmissing', 
 			join(", ", map { $_->{'desc'} } @missing)),"</b><p>\n";

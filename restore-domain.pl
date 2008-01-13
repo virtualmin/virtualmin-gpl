@@ -123,7 +123,7 @@ foreach $dname (@rdoms) {
 
 # Check for missing features
 &$first_print("Checking for missing features ..");
-@missing = &missing_restore_features($cont);
+@missing = &missing_restore_features($cont, $contdoms);
 if (@missing) {
 	&$second_print(
 	  ".. WARNING - The following features were enabled for one or more\n".

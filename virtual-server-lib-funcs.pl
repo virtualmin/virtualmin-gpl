@@ -5237,17 +5237,34 @@ else {
 	}
 }
 
-# missing_restore_features(&contents)
+# missing_restore_features(&contents, [&domains])
 # Returns a list of features that are in a backup, but not supported on
 # this system.
 sub missing_restore_features
 {
-local ($cont) = @_;
+local ($cont, $doms) = @_;
+
+# Work out all features in the backup
 local @allfeatures;
 foreach my $dname (keys %$cont) {
 	push(@allfeatures, @{$cont->{$dname}});
 	}
+if ($doms) {
+	foreach my $d (@$doms) {
+		foreach my $f (@features, @plugins) {
+			# Look for known features and plugins
+			push(@allfeatures, $f) if ($d->{$f});
+			}
+		foreach my $k (keys %$d) {
+			# Look for plugins not on this system
+			push(@allfeatures, $k)
+				if ($k =~ /^virtualmin-([a-z0-9\-\_]+)$/ &&
+				    $k !~ /limit$/);
+			}
+		}
+	}
 @allfeatures = &unique(@allfeatures);
+
 local @rv;
 foreach my $f (@allfeatures) {
 	next if ($f eq 'virtualmin');	# Not a feature
