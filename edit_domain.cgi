@@ -184,10 +184,13 @@ if (!$aliasdom) {
 				}
 			}
 		else {
-			# Use must enter IP
+			# User must enter IP, but has option to use one
+			# that is already active.
 			$ipfield .= &ui_oneradio("virt", 1,
 						 $text{'edit_virtalloc'}, 0).
-				    " ".&ui_textbox("ip", undef, 15);
+				    " ".&ui_textbox("ip", undef, 15)." ".
+				    &ui_checkbox("virtalready", 1,
+					$text{'form_virtalready'});
 			}
 		}
 	if (&can_use_feature("virt")) {

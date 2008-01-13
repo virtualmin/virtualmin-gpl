@@ -10034,7 +10034,7 @@ if (&indexof($f, @features) >= 0 && $config{$f}) {
 		}
 	elsif (!$d->{$f} && $oldd->{$f}) {
 		# Delete some feature
-		if (!&try_function($f, $dfunc, $d)) {
+		if (!&try_function($f, $dfunc, $oldd)) {
 			$d->{$f} = 1;
 			}
 		}
@@ -10049,7 +10049,7 @@ elsif (&indexof($f, @feature_plugins) >= 0) {
 		&plugin_call($f, "feature_setup", $d);
 		}
 	elsif (!$d->{$f} && $oldd->{$f}) {
-		&plugin_call($f, "feature_delete", $d);
+		&plugin_call($f, "feature_delete", $oldd);
 		}
 	elsif ($d->{$f}) {
 		&plugin_call($f, "feature_modify", $d, $oldd);

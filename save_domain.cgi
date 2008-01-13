@@ -121,11 +121,20 @@ if (!$d->{'alias'} && &can_use_feature("virt")) {
 			$in{'ip'} || &text('setup_evirtalloc');
 			}
 		else {
-			# Make sure the IP isn't assigned yet
 			&check_ipaddress($in{'ip'}) ||
 				&error($text{'setup_eip'});
-			if (&check_virt_clash($in{'ip'})) {
-				&error(&text('setup_evirtclash'));
+			$clash = &check_virt_clash($in{'ip'});
+			if (!$in{'virtalready'}) {
+				# Make sure the IP isn't assigned yet
+				$clash && &error(&text('setup_evirtclash'));
+				}
+			elsif ($in{'virtalready'}) {
+				# Make sure the IP is assigned already, but
+				# not to any domain
+				$clash || &error(&text('setup_evirtclash2'));
+				$already = &get_domain_by("ip", $in{'ip'});
+				$already && &error(&text('setup_evirtclash4',
+							 $already->{'dom'}));
 				}
 			}
 		}
@@ -230,7 +239,7 @@ if (&can_use_feature("virt")) {
 		$d->{'ip'} = $in{'ip'};
 		$d->{'virt'} = 1;
 		$d->{'name'} = 0;
-		$d->{'virtalready'} = 0;
+		$d->{'virtalready'} = $in{'virtalready'};
 		delete($d->{'dns_ip'});
 		delete($d->{'defip'});
 		&setup_virt($d);
@@ -243,7 +252,7 @@ if (&can_use_feature("virt")) {
 		$d->{'virtalready'} = 0;
 		$d->{'name'} = 1;
 		delete($d->{'dns_ip'});
-		&delete_virt($d);
+		&delete_virt($oldd);
 		}
 	if ($d->{'alias'} && !$d->{'ip'}) {
 		# IP lost bug to bug! Fix it up ..
