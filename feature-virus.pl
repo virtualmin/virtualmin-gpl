@@ -325,12 +325,17 @@ foreach my $d (grep { $_->{'virus'} } &list_domains()) {
 
 # test_virus_scanner(command)
 # Tests some virus scanning command. Returns an error message on failure, undef
-# on success.
+# on success. If clamscan takes more than 10 seconds, this typically assumes
+# that it is working but slow.
 sub test_virus_scanner
 {
 local ($cmd) = @_;
-local $out = `$cmd - </dev/null 2>&1`;
-if ($?) {
+local ($out, $timed_out) =
+	&backquote_with_timeout("$cmd - </dev/null 2>&1", 10, 1);
+if ($timed_out) {
+	return undef;
+	}
+elsif ($?) {
 	return "<pre>".&html_escape($out)."</pre>";
 	}
 elsif ($out !~ /OK/) {
