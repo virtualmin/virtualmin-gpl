@@ -475,6 +475,12 @@ elsif (&init::action_status("clamd-wrapper")) {
 	# Fix the init wrapper script
 	local $ifile = &init::action_filename("clamd-wrapper");
 	&$first_print(&text('clamd_initscript', "<tt>$ifile</tt>"));
+	local $ilink = readlink($ifile);
+	if ($ilink) {
+		# Init script is a link .. copy it first
+		&unlink_file($ifile);
+		&copy_source_dest($ilink, $ifile);
+		}
 	local $lref = &read_file_lines($ifile);
 	local ($already) = grep { /^CLAMD_SERVICE=/ } @$lref;
 	if ($already) {
