@@ -816,6 +816,8 @@ if ($z) {
 	local $file = &bind8::find("file", $z->{'members'});
 	local $filename = &bind8::make_chroot(
 			&bind8::absolute_path($file->{'values'}->[0]));
+	local $fn = $file->{'values'}->[0];
+	local @thisrecs;
 
 	if ($_[2]->{'wholefile'}) {
 		# Copy whole file
@@ -825,6 +827,7 @@ if ($z) {
 		}
 	else {
 		# Only copy section after SOA
+		@thisrecs = &bind8::read_zone_file($fn, $_[0]->{'dom'});
 		local $srclref = &read_file_lines($_[1]);
 		local $dstlref = &read_file_lines($filename);
 		&lock_file($filename);
@@ -836,7 +839,6 @@ if ($z) {
 		}
 
 	# Need to bump SOA
-	local $fn = $file->{'values'}->[0];
 	local @recs = &bind8::read_zone_file($fn, $_[0]->{'dom'});
 	&bind8::bump_soa_record($file->{'values'}->[0], \@recs);
 
@@ -848,6 +850,24 @@ if ($z) {
 	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 	local $baseip = $baserec ? $baserec->{'values'}->[0] : undef;
 	&modify_records_ip_address(\@recs, $fn, $baseip, $_[0]->{'ip'});
+
+	# Replace NS records with those from new system
+	if (!$_[2]->{'wholefile'}) {
+		local @thisns = grep { $_->{'type'} eq 'NS' } @thisrecs;
+		local @ns = grep { $_->{'type'} eq 'NS' } @recs;
+		foreach my $r (@thisns) {
+			# Create NS records that were in new system's file
+			&bind8::create_record($fn, $r->{'name'}, $r->{'ttl'},
+					      $r->{'class'}, $r->{'type'},
+					      &join_record_values($r),
+					      $r->{'comment'});
+			}
+		foreach my $r (reverse(@ns)) {
+			# Remove old NS records that we copied over
+			&bind8::delete_record($fn, $r);
+			}
+		}
+
 	&unlock_file($filename);
 	&$second_print($text{'setup_done'});
 
@@ -891,6 +911,8 @@ return $count;
 }
 
 # except_soa(&domain, file)
+# Returns the start and end lines of a records file for the entries
+# after the SOA.
 sub except_soa
 {
 local $bind8::config{'chroot'} = "/";	# make sure path is absolute
