@@ -386,25 +386,7 @@ if ($oldip ne $newip) {
 	local $zonefile = &bind8::make_chroot($fn);
 	&lock_file($zonefile);
 	local @recs = &bind8::read_zone_file($fn, $newzonename);
-	foreach $r (@recs) {
-		if ($r->{'values'}->[0] eq $oldip) {
-			# Change IP in A record
-			&bind8::modify_record($fn, $r, $r->{'name'},
-					      $r->{'ttl'}, $r->{'class'},
-					      $r->{'type'}, $newip,
-					      $r->{'comment'});
-			}
-		elsif ($r->{'type'} eq 'SPF' &&
-		       $r->{'values'}->[0] =~ /$oldip/) {
-			# Fix IP within an SPF
-			$r->{'values'}->[0] =~ s/$oldip/$newip/g;
-			&bind8::modify_record($fn, $r, $r->{'name'},
-					      $r->{'ttl'}, $r->{'class'},
-					      $r->{'type'},
-					      &join_record_values($r),
-					      $r->{'comment'});
-			}
-		}
+	&modify_records_ip_address(\@recs, $fn, $oldip, $newip);
 
 	# Update SOA record
 	&bind8::bump_soa_record($fn, \@recs);
@@ -865,17 +847,7 @@ if ($z) {
 				   $_->{'name'} eq '@') } @recs;
 	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 	local $baseip = $baserec ? $baserec->{'values'}->[0] : undef;
-	foreach $r (@recs) {
-		if ($r->{'type'} eq "A" &&
-		    $r->{'values'}->[0] eq $baseip) {
-			&bind8::modify_record($fn, $r, $r->{'name'},
-					      $r->{'ttl'},$r->{'class'},
-					      $r->{'type'},
-					      $_[0]->{'ip'},
-					      $r->{'comment'});
-			}
-		}
-
+	&modify_records_ip_address(\@recs, $fn, $baseip, $_[0]->{'ip'});
 	&unlock_file($filename);
 	&$second_print($text{'setup_done'});
 
@@ -886,6 +858,36 @@ else {
 	&$second_print($text{'backup_dnsnozone'});
 	return 0;
 	}
+}
+
+# modify_records_ip_address(&records, filename, oldip, newip)
+# Update the IP address in all DNS records
+sub modify_records_ip_address
+{
+local ($recs, $fn, $oldip, $newip) = @_;
+local $count = 0;
+foreach my $r (@$recs) {
+	my $changed = 0;
+	if ($r->{'type'} eq "A" && $r->{'values'}->[0] eq $oldip) {
+		# Address record - just replace IP
+		$r->{'values'}->[0] = $newip;
+		$changed = 1;
+		}
+	elsif ($r->{'type'} eq "SPF" && $r->{'values'}->[0] =~ /$oldip/) {
+		# SPF record - replace ocurrances of IP
+		$r->{'values'}->[0] =~ s/$oldip/$newip/g;
+		$changed = 1;
+		}
+	if ($changed) {
+		&bind8::modify_record($fn, $r, $r->{'name'},
+				      $r->{'ttl'},$r->{'class'},
+				      $r->{'type'},
+				      &join_record_values($r),
+				      $r->{'comment'});
+		$count++;
+		}
+	}
+return $count;
 }
 
 # except_soa(&domain, file)

@@ -5332,7 +5332,8 @@ if ($doms) {
 		foreach my $k (keys %$d) {
 			# Look for plugins not on this system
 			push(@allfeatures, $k)
-				if ($k =~ /^virtualmin-([a-z0-9\-\_]+)$/ &&
+				if ($d->{$k} &&
+				    $k =~ /^virtualmin-([a-z0-9\-\_]+)$/ &&
 				    $k !~ /limit$/);
 			}
 		}
