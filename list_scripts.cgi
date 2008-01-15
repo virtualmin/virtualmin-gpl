@@ -148,6 +148,8 @@ if (@scripts) {
 				     @{$script->{'versions'}};
 			next if (!@vers);	# No allowed versions!
 			if ($cat ne $lastcat) {
+				# Supress row color alternating
+				$theme_ui_columns_row_toggle = 0;
 				print &ui_columns_row([ "<b>$cat</b>" ],
 						      [ "colspan=5" ]);
 				$lastcat = $cat;
