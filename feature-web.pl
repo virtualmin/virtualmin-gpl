@@ -441,10 +441,11 @@ else {
 		# Username has changed .. update SuexecUserGroup and User
 		local $suexec = &apache::find_directive_struct(
 			"SuexecUserGroup", $vconf);
-		if ($suexec && $suexec->{'words'}->[0] eq $_[1]->{'user'}) {
+		if ($suexec && ($suexec->{'words'}->[0] eq $_[1]->{'user'} ||
+				$suexec->{'words'}->[0] eq '#'.$_[1]->{'uid'})){
 			&$first_print($text{'save_apache7'});
 			&apache::save_directive("SuexecUserGroup",
-					[ "$_[0]->{'user'} $_[0]->{'ugroup'}" ],
+					[ "#$_[0]->{'uid'} #$_[0]->{'ugid'}" ],
 					$vconf, $conf);
 			&flush_file_lines();
 			$rv++;
@@ -452,10 +453,11 @@ else {
 			}
 		local $user = &apache::find_directive_struct(
 			"User", $vconf);
-		if ($user && $user->{'words'}->[0] eq $_[1]->{'user'}) {
+		if ($user && ($user->{'words'}->[0] eq $_[1]->{'user'} ||
+			      $user->{'words'}->[0] eq '#'.$_[1]->{'uid'})) {
 			&$first_print($text{'save_apache7'});
 			&apache::save_directive("User",
-					[ $_[0]->{'user'} ],
+					[ '#'.$_[0]->{'uid'} ],
 					$vconf, $conf);
 			&flush_file_lines();
 			$rv++;
