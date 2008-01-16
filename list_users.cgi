@@ -23,7 +23,7 @@ if ($virtualmin_pro) {
 	push(@rlinks, "<a href='mass_ucreate_form.cgi?dom=$in{'dom'}'>".
 		      "$text{'users_batch2'}</a>");
 	}
-if ($mleft != 0 && $webinit->{'webowner'} && $virtualmin_pro) {
+if ($mleft != 0 && $webinit->{'webowner'}) {
 	push(@rlinks, "<a href='edit_user.cgi?new=1&web=1&".
 		      "dom=$in{'dom'}'>$text{'users_addweb'}</a>");
 	}
