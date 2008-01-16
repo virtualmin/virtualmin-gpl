@@ -418,7 +418,9 @@ if ($supports_bcc) {
 }
 
 # modify_mail(&domain, &olddomain)
-# Deal with a change in domain name
+# Deal with a change in domain name, UID or home.
+# Note - this may be called even for domains without mail enabled, in order to
+# just update users.
 sub modify_mail
 {
 local $tmpl = &get_template($_[0]->{'template'});
@@ -471,23 +473,32 @@ if (($_[0]->{'home'} ne $_[1]->{'home'} ||
 				$u->{'uid'}, $_[1]->{'gid'},
 				$u->{'uid'}, $_[0]->{'gid'});
 			}
+		if ($_[0]->{'uid'} != $_[1]->{'uid'} &&
+ 		    $u->{'uid'} == $_[1]->{'uid'}) {
+			# Website FTP access user's UID needs to change
+			$u->{'uid'} = $_[0]->{'uid'};
+			}
 
-		# Update email address attributes for the user, as these
-		# are used in LDAP
-		if ($u->{'email'}) {
-			$u->{'email'} =~ s/\@\Q$_[1]->{'dom'}\E$/\@$_[0]->{'dom'}/;
+		if ($_[0]->{'mail'}) {
+			# Update email address attributes for the user, as these
+			# are used in LDAP
+			if ($u->{'email'}) {
+				$u->{'email'} =~
+				    s/\@\Q$_[1]->{'dom'}\E$/\@$_[0]->{'dom'}/;
+				}
+			local @newextra;
+			foreach my $extra (@{$u->{'extraemail'}}) {
+				my $newextra = $extra;
+				$newextra =~
+				    s/\@\Q$_[1]->{'dom'}\E$/\@$_[0]->{'dom'}/;
+				push(@newextra, $newextra);
+				}
+			$u->{'extraemail'} = \@newextra;
 			}
-		local @newextra;
-		foreach my $extra (@{$u->{'extraemail'}}) {
-			my $newextra = $extra;
-			$newextra =~ s/\@\Q$_[1]->{'dom'}\E$/\@$_[0]->{'dom'}/;
-			push(@newextra, $newextra);
-			}
-		$u->{'extraemail'} = \@newextra;
 
 		# Save the user
 		&modify_user($u, \%oldu, $_[0], 1);
-		if (!$u->{'nomailfile'}) {
+		if (!$u->{'nomailfile'} && $_[0]->{'mail'}) {
 			&rename_mail_file($u, \%oldu);
 			}
 		}
@@ -522,7 +533,7 @@ elsif ($_[0]->{'alias'} && $_[0]->{'dom'} ne $_[1]->{'dom'} &&
 	&copy_alias_virtuals($_[0], $alias);
 	}
 
-if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
+if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 	# Delete the old mail domain and add the new
 	local $no_restart_mail = 1;
 	local $oldbcc;

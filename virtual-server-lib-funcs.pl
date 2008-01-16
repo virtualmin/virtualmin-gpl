@@ -10204,7 +10204,8 @@ local %vital = map { $_, 1 } @vital_features;
 foreach $f (@features) {
 	local $mfunc = "modify_$f";
 	for(my $i=0; $i<@doms; $i++) {
-		if ($doms[$i]->{$f} && ($config{$f} || $f eq "unix")) {
+		if (($doms[$i]->{$f} || $f eq 'mail') &&
+		    ($config{$f} || $f eq "unix" || $f eq "mail")) {
 			$doing_dom = $doms[$i];
 			local $main::error_must_die = 1;
 			eval {

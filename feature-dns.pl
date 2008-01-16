@@ -419,9 +419,9 @@ if ($_[0]->{'mail'} && !$_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 elsif (!$_[0]->{'mail'} && $_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 	# Email was disabled .. remove MX records
 	local $file = &bind8::find("file", $z->{'members'});
-	local $zonefile = &bind8::make_chroot($file);
-	&lock_file($zonefile);
 	local $fn = $file->{'values'}->[0];
+	local $zonefile = &bind8::make_chroot($fn);
+	&lock_file($zonefile);
 	local @recs = &bind8::read_zone_file($fn, $newzonename);
 	local @mx = grep { $_->{'type'} eq 'MX' &&
 			   $_->{'name'} eq $_[0]->{'dom'}."." ||
@@ -445,9 +445,9 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'}) {
 	local @newmxs = split(/\s+/, $_[0]->{'mx_servers'});
 	local @oldmxs = split(/\s+/, $_[1]->{'mx_servers'});
 	local $file = &bind8::find("file", $z->{'members'});
-	local $zonefile = &bind8::make_chroot($file);
-	&lock_file($zonefile);
 	local $fn = $file->{'values'}->[0];
+	local $zonefile = &bind8::make_chroot($fn);
+	&lock_file($zonefile);
 	local @recs = &bind8::read_zone_file($fn, $newzonename);
 	&foreign_require("servers", "servers-lib.pl");
 	local %servers = map { $_->{'id'}, $_ }
