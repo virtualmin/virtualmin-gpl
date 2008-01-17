@@ -95,7 +95,16 @@ while(<FILE>) {
 		}
 	else {
 		push(@lines, $_);
+		if (/\S/) {
+			# End of headers, so just read the rest of the lines
+			# verbatim
+			last;
+			}
 		}
+	$lines++;
+	}
+while(<FILE>) {
+	push(@lines, $_);
 	$lines++;
 	}
 close(FILE);
