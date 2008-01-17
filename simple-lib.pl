@@ -248,7 +248,7 @@ print &ui_table_row(&hlink($text{$sfx.'_auto'}, $sfx."_auto"),
 		    &ui_checkbox("auto", 1,$text{'alias_autoyes'},
 				 $simple->{'auto'})."<br>\n".
 		    &ui_textarea("autotext", $simple->{'autotext'},
-				 5, 70),
+				 5, 60),
 		    undef, $tds);
 
 if (defined(&ui_hidden_table_row_start)) {
@@ -425,18 +425,27 @@ return $autoreply_file_dir;
 sub convert_autoreply_file
 {
 local ($d, $file) = @_;
-local $origfile = $file;
 local $dir = &get_autoreply_file_dir();
 return undef if (!$dir);
+local $origdir;
 if ($file =~ /\/(autoreply-(\S+)\.txt)$/) {
+	# Autoreply file in directory
 	$linkpath = "$dir/$d->{'id'}-$1";
+	$origdir = $file;
+	$origdir =~ s/\/[^\/]+$//;
+	}
+elsif ($file !~ /\//) {
+	# A relative path
+	$linkpath = "$dir/$d->{'id'}-$file";
+        $origdir = $dir;
 	}
 else {
+	# An absolute path of some other type
+	$origdir = $file;
+	$origdir =~ s/\/[^\/]+$//;
 	$file =~ s/\//_/g;
 	$linkpath = "$dir/$d->{'id'}-$file";
 	}
-local $origdir = $origfile;
-$origdir =~ s/\/[^\/]+$//;
 local @fst = stat($origdir);
 local @lst = stat($dir);
 if ($fst[0] == $lst[0]) {
