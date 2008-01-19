@@ -67,11 +67,16 @@ if (@got) {
 			}
 		$path = $sinfo->{'opts'}->{'path'};
 		($dbtype, $dbname) = split(/_/, $sinfo->{'opts'}->{'db'}, 2);
-		if ($dbtype) {
+		if ($dbtype && $dbname) {
 			$dbdesc = &text('scripts_idbname2',
 			      "edit_database.cgi?dom=$in{'dom'}&type=$dbtype&".
 				"name=$dbname",
 			      $text{'databases_'.$dbtype}, "<tt>$dbname</tt>");
+			}
+		elsif ($sinfo->{'opts'}->{'db'}) {
+			# Just a DB name, perhaps for a script that can only
+			# use a single type
+			$dbdesc = "<tt>$sinfo->{'opts'}->{'db'}</tt>";
 			}
 		else {
 			$dbdesc = "<i>$text{'scripts_nodb'}</i>";
