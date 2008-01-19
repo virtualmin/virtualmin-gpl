@@ -179,11 +179,20 @@ if (!$mailbox) {
 	print &ui_hidden_table_end("table2");
 	}
 
-# Start third table
-print &ui_hidden_table_start($text{'user_header2a'}, "width=100%", 2,
-			     "table2a", 0);
+# Start third table, for email settings
+$hasprimary = $d && !$user->{'noprimary'} && $d->{'mail'};
+$hasmailfile = !$in{'new'} && ($user->{'email'} || @{$user->{'extraemail'}}) &&
+	       !$user->{'nomailfile'};
+$hasextra = !$user->{'noextra'};
+$hassend = $in{'new'} && &will_send_user_email($d) || !$in{'new'};
+$hasemail = $hasprimary || $hasmailfile || $hasextra || $hassend ||
+	    $config{'spam'};
+if ($hasemail) {
+	print &ui_hidden_table_start($text{'user_header2a'}, "width=100%", 2,
+				     "table2a", 0);
+	}
 
-if ($d && !$user->{'noprimary'} && $d->{'mail'}) {
+if ($hasprimary) {
 	# Show primary email address field
 	print &ui_table_row(&hlink($text{'user_mailbox'}, "mailbox"),
 		    &ui_yesno_radio("mailbox",
@@ -191,8 +200,7 @@ if ($d && !$user->{'noprimary'} && $d->{'mail'}) {
 		    2, \@tds);
 	}
 
-if (!$in{'new'} && ($user->{'email'} || @{$user->{'extraemail'}}) &&
-    !$user->{'nomailfile'}) {
+if ($hasmailfile) {
 	# Show the user's mail file
 	local ($sz, $umf, $lastmod) = &mail_file_size($user);
 	local $link = &read_mail_link($user, $d);
@@ -217,7 +225,7 @@ if (!$in{'new'} && ($user->{'email'} || @{$user->{'extraemail'}}) &&
 			    2, \@tds);
 	}
 
-if (!$user->{'noextra'}) {
+if ($hasextra) {
 	# Show extra email addresses
 	print &ui_table_row(&hlink($text{'user_extra'}, "extraemail"),
 			    &ui_textarea("extra",
@@ -252,7 +260,9 @@ if ($config{'spam'}) {
 				  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
 	}
 
-print &ui_hidden_table_end("table2a");
+if ($hasemail) {
+	print &ui_hidden_table_end("table2a");
+	}
 
 # Show forwarding setup for this user (can use the simple or complex forms)
 if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
