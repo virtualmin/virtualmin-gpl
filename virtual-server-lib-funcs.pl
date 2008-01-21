@@ -11110,7 +11110,12 @@ sub mount_point
 local $dir = &resolve_links($_[0]);
 local @mounts = &mount::list_mounts();
 local @mounted = &mount::list_mounted();
-@mounts = @mounted if (!@mounts);
+local @realmounts = grep { $_->[0] ne 'none' && $_->[0] !~ /^swap/ } @mounts;
+if (!@realmounts) {
+	# If /etc/fstab contains no real mounts (such as in a VPS environment),
+	# then fake it to be the same as /etc/mtab
+	@mounts = @mounted;
+	}
 foreach $m (sort { length($b->[0]) <=> length($a->[0]) } @mounted) {
 	if ($dir eq $m->[0] || $m->[0] eq "/" ||
 	    substr($dir, 0, length($m->[0])+1) eq "$m->[0]/") {

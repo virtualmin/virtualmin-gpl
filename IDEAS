@@ -65,3 +65,7 @@
  - mobile theme for webmail
 	- release
 
+ - global lock on domain DB, to prevent problems with concurrent ops
+	- or do better per-feature locking, ie. Apache and BIND and user DB
+	- FS #3500
+
