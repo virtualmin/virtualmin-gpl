@@ -10939,12 +10939,10 @@ elsif ($config{'quotas'}) {
 		local ($home_mtab, $home_fstab) = &mount_point($home_base);
 		local ($mail_mtab, $mail_fstab) = &mount_point($mail_base);
 		if (!$home_mtab) {
-			&$second_print("<b>",&text('index_ehomemtab',
-		    		"<tt>$home_base</tt>"),"</b>");
+			$qerr = &text('index_ehomemtab', "<tt>$home_base</tt>");
 			}
 		elsif (!$mail_mtab) {
-			&$second_print("<b>",&text('index_emailmtab',
-				"<tt>$mail_base</tt>"),"</b>");
+			$qerr = &text('index_emailmtab', "<tt>$mail_base</tt>");
 			}
 		else {
 			# Check if quotas are enabled for home filesystem
