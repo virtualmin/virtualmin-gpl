@@ -10927,7 +10927,7 @@ elsif ($config{'quotas'}) {
 	local $qerr;
 	&require_useradmin();
 	if (!$home_base) {
-		&$second_print("<b>",&text('index_ehomebase'),"</b>");
+		$qerr = &text('index_ehomebase');
 		}
 	elsif (&running_in_zone()) {
 		$qerr = &text('index_ezone');
@@ -11009,7 +11009,7 @@ elsif ($config{'quotas'}) {
 			}
 		}
 	if ($qerr) {
-		&$second_print($qerr);
+		&$second_print("<b>$qerr</b>");
 		}
 	elsif (!$config{'group_quotas'}) {
 		&$second_print($text{'check_nogroup'});
