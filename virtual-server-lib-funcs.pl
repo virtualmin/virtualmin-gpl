@@ -6507,7 +6507,7 @@ if ($remote_user) {
 
 # Create an automatic alias domain, if specified in template
 local $tmpl = &get_template($dom->{'template'});
-if ($tmpl->{'domalias'} ne 'none' && !$_[0]->{'alias'}) {
+if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$_[0]->{'alias'}) {
 	local $aliasname = $_[0]->{'dom'};
 	if ($tmpl->{'domalias_type'} == 1) {
 		$aliasname =~ s/\..*$//;
