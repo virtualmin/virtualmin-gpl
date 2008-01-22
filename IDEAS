@@ -67,5 +67,7 @@
 
  - global lock on domain DB, to prevent problems with concurrent ops
 	- or do better per-feature locking, ie. Apache and BIND and user DB
+	- each feature has an obtain_lock_XXX function, which locks some
+	  config file and flushes all in-memory caches (unless already locked
+	  by this process, in which case it does nothing)
 	- FS #3500
-

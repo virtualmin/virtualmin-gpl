@@ -60,11 +60,3 @@ do $cmd;
 print "\n";
 print "Exit status: 0\n";
 
-#&open_execute_command(OUT, "$cmd 2>&1", 1);
-#while(<OUT>) {
-#	print $_;
-#	}
-#close(OUT);
-#print "\n";
-#print "Exit status: $?\n";
-
