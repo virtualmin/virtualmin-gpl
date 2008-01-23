@@ -29,6 +29,7 @@ local $tmpl = &get_template($_[0]->{'template'});
 if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 	# Creating a new real zone
 	&$first_print($text{'setup_bind'});
+	&obtain_lock_dns($_[0]);
 	local $conf = &bind8::get_config();
 	local $base = $bconfig{'master_dir'} ? $bconfig{'master_dir'} :
 					       &bind8::base_directory($conf);
@@ -73,7 +74,6 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 		# file references inside the view, if any
 		$pconf = &bind8::get_config_parent();
 		local $view = &get_bind_view($conf, $tmpl->{'dns_view'});
-		print STDERR "viewname=$tmpl->{'dns_view'} view=$view\n";
 		if ($view) {
 			local $addfile = &bind8::add_to_file();
 			local $addfileok;
@@ -89,7 +89,6 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 					}
 				}
 
-			print STDERR "addfileok=$addfileok\n";
 			if (!$addfileok) {
 				# Add to named.conf
 				$pconf = $view;
@@ -111,10 +110,10 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 		$dir->{'file'} = &bind8::add_to_file();
 		$pconf = &bind8::get_config_parent($dir->{'file'});
 		}
-	&lock_file($dir->{'file'});
+	&lock_file(&bind8::make_chroot($dir->{'file'}));
 	&bind8::save_directive($pconf, undef, [ $dir ], $indent);
 	&flush_file_lines();
-	&unlock_file($dir->{'file'});
+	&unlock_file(&bind8::make_chroot($dir->{'file'}));
 	unlink($bind8::zone_names_cache);
 	undef(@bind8::list_zone_names_cache);
 
@@ -158,6 +157,7 @@ else {
 	# Creating a sub-domain - add to parent's DNS zone
 	local $parent = &get_domain($_[0]->{'subdom'});
 	&$first_print(&text('setup_bindsub', $parent->{'dom'}));
+	&obtain_lock_dns($parent);
 	local $z = &get_bind_zone($parent->{'dom'});
 	if (!$z) {
 		&error(&text('setup_ednssub', $parent->{'dom'}));
@@ -190,6 +190,7 @@ sub delete_dns
 &require_bind();
 if (!$_[0]->{'dns_submode'}) {
 	&$first_print($text{'delete_bind'});
+	&obtain_lock_dns($_[0]);
 	local $z = &get_bind_zone($_[0]->{'dom'});
 	if ($z) {
 		# Delete the records file
@@ -245,6 +246,7 @@ else {
 	# Delete records from parent zone
 	local $parent = &get_domain($_[0]->{'subdom'});
 	&$first_print(&text('delete_bindsub', $parent->{'dom'}));
+	&obtain_lock_dns($parent);
 	local $z = &get_bind_zone($parent->{'dom'});
 	if (!$z) {
 		&$second_print($text{'save_nobind'});
@@ -279,11 +281,13 @@ local ($oldzonename, $newzonename);
 if ($_[0]->{'dns_submode'}) {
 	# Get parent domain
 	local $parent = &get_domain($_[0]->{'subdom'});
+	&obtain_lock_dns($parent);
 	$z = &get_bind_zone($parent->{'dom'});
 	$oldzonename = $newzonename = $parent->{'dom'};
 	}
 else {
 	# Get this domain
+	&obtain_lock_dns($_[0]);
 	$z = &get_bind_zone($_[1]->{'dom'});
 	$newzonename = $_[1]->{'dom'};
 	$oldzonename = $_[1]->{'dom'};
@@ -660,6 +664,7 @@ return undef;
 sub disable_dns
 {
 &$first_print($text{'disable_bind'});
+&obtain_lock_dns($_[0]);
 &require_bind();
 local $z = &get_bind_zone($_[0]->{'dom'});
 if ($z) {
@@ -686,6 +691,7 @@ else {
 sub enable_dns
 {
 &$first_print($text{'enable_bind'});
+&obtain_lock_dns($_[0]);
 &require_bind();
 local $z = &get_bind_zone($_[0]->{'dom'});
 if ($z) {
@@ -811,6 +817,7 @@ sub restore_dns
 &require_bind();
 return 1 if ($_[0]->{'dns_submode'});	# restored in parent
 &$first_print($text{'restore_dnscp'});
+&obtain_lock_dns($_[0]);
 local $z = &get_bind_zone($_[0]->{'dom'});
 if ($z) {
 	local $file = &bind8::find("file", $z->{'members'});
@@ -1197,6 +1204,7 @@ return undef;
 sub save_domain_spf
 {
 local ($d, $spf) = @_;
+&obtain_lock_dns($_[0]);
 local @recs = &get_domain_dns_records($d);
 return if (!@recs);		# Domain not found!
 local ($r) = grep { $_->{'type'} eq 'SPF' &&
@@ -1283,6 +1291,21 @@ local @rv = grep { $_->{'name'} ne 'dummy' }
 	    &bind8::read_config_file($temp, 0);
 %bind8::config = %oldconfig;
 return @rv;
+}
+
+# obtain_lock_dns(&domain)
+# Lock a domain's zone file and named.conf file
+sub obtain_lock_dns
+{
+local ($d) = @_;
+if (!$got_lock_dns++) {
+	&require_bind();
+	&lock_file(&bind8::make_chroot($config{'zones_file'} ||
+				       $config{'named_conf'}));
+	undef(@bind8::get_config_cache);
+	undef(%bind8::get_config_parent_cache);
+	# XXX lock zone file too?
+	}
 }
 
 $done_feature_script{'dns'} = 1;

@@ -71,3 +71,10 @@
 	  config file and flushes all in-memory caches (unless already locked
 	  by this process, in which case it does nothing)
 	- FS #3500
+	- obtain_lock_unix should be called by mailbox programs, and use
+	  /etc/passwd
+	- should we lock mail server files in obtain_lock_mail ? If so, this
+	  would cause later locks to not be taken ..
+		- Or should we move all locking to these functions, for calling
+		  from CGIs?
+	- Need to do web, webalizer, ssl, spam, virus

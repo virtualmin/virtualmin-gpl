@@ -3510,6 +3510,7 @@ return @rv;
 # Fills in the the given hashes with used usernames and UIDs
 sub build_taken
 {
+&obtain_lock_unix();
 &require_useradmin();
 
 # Add Unix users
@@ -3540,6 +3541,7 @@ foreach $d (&list_domains()) {
 # Fills in the the given hashes with used group names and GIDs
 sub build_group_taken
 {
+&obtain_lock_unix();
 &require_useradmin();
 
 # Add Unix groups

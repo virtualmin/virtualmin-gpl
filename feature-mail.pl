@@ -170,6 +170,7 @@ return grep { $_->{'from'} =~ /\@(\S+)$/ && $1 eq $_[0]->{'dom'} &&
 # Adds a domain to the list of those accepted by the mail system
 sub setup_mail
 {
+&obtain_lock_mail($_[0]);
 &$first_print($text{'setup_doms'});
 &require_mail();
 local $tmpl = &get_template($_[0]->{'template'});
@@ -307,6 +308,7 @@ if (!$_[0]->{'nosecondaries'}) {
 # Removes a domain from the list of those accepted by the mail system
 sub delete_mail
 {
+&obtain_lock_mail($_[0]);
 &$first_print($text{'delete_doms'});
 &require_mail();
 
@@ -435,6 +437,7 @@ if (($_[0]->{'home'} ne $_[1]->{'home'} ||
      $_[0]->{'dom'} ne $_[1]->{'dom'} ||
      $_[0]->{'gid'} != $_[1]->{'gid'} ||
      $_[0]->{'prefix'} ne $_[1]->{'prefix'}) && !$_[0]->{'alias'}) {
+	&obtain_lock_mail($_[0]);
 	&$first_print($text{'save_mailrename'});
 	local $u;
 	local $domhack = { %{$_[0]} };		# This hack is needed to find
@@ -508,6 +511,7 @@ if (($_[0]->{'home'} ne $_[1]->{'home'} ||
 if ($_[0]->{'alias'} && $_[2] && $_[2]->{'dom'} ne $_[3]->{'dom'}) {
 	# This is an alias, and the domain it is aliased to has changed ..
 	# update the catchall alias or virtuser copies
+	&obtain_lock_mail($_[0]);
 	if (!$_[0]->{'aliascopy'}) {
 		# Fixup dest in catchall
 		local @virts = &list_virtusers();
@@ -528,6 +532,7 @@ if ($_[0]->{'alias'} && $_[2] && $_[2]->{'dom'} ne $_[3]->{'dom'}) {
 elsif ($_[0]->{'alias'} && $_[0]->{'dom'} ne $_[1]->{'dom'} &&
        $_[0]->{'aliascopy'}) {
 	# This is an alias and the domain name has changed - fix all virtuals
+	&obtain_lock_mail($_[0]);
 	&delete_alias_virtuals($_[1]);
 	local $alias = &get_domain($_[0]->{'alias'});
 	&copy_alias_virtuals($_[0], $alias);
@@ -535,6 +540,7 @@ elsif ($_[0]->{'alias'} && $_[0]->{'dom'} ne $_[1]->{'dom'} &&
 
 if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 	# Delete the old mail domain and add the new
+	&obtain_lock_mail($_[0]);
 	local $no_restart_mail = 1;
 	local $oldbcc;
 	if ($supports_bcc) {
@@ -712,6 +718,7 @@ return undef;
 # Turn off mail for the domain, and disable login for all users
 sub disable_mail
 {
+&obtain_lock_mail($_[0]);
 &delete_mail($_[0], 1);
 
 &$first_print($text{'disable_users'});
@@ -728,6 +735,7 @@ foreach my $user (&list_domain_users($_[0], 1)) {
 # Turn on mail for the domain, and re-enable login for all users
 sub enable_mail
 {
+&obtain_lock_mail($_[0]);
 &setup_mail($_[0], 1);
 
 &$first_print($text{'enable_users'});
@@ -2218,6 +2226,7 @@ return 1;
 sub restore_mail
 {
 local ($u, %olduid, @errs);
+&obtain_lock_mail($_[0]);
 if ($_[2]->{'mailuser'}) {
 	# Just doing a single user .. delete him first if he exists
 	&$first_print(&text('restore_mailusers2', $_[2]->{'mailuser'}));
@@ -3037,6 +3046,7 @@ else {
 sub setup_secondary_mx
 {
 local ($dom) = @_;
+&obtain_lock_mail($_[0]);
 &require_mail();
 if ($config{'mail_system'} == 1) {
 	# Just add to sendmail relay domains file
@@ -3085,6 +3095,7 @@ return undef;
 sub delete_secondary_mx
 {
 local ($dom) = @_;
+&obtain_lock_mail($_[0]);
 &require_mail();
 if ($config{'mail_system'} == 1) {
 	# Just remove from sendmail relay domains file
@@ -3721,6 +3732,7 @@ return \%rv;
 sub copy_alias_virtuals
 {
 local ($d, $aliasdom) = @_;
+&obtain_lock_mail($_[0]);
 if ($config{'mail_system'} == 1) {
 	# Find existing Sendmail virtusers in the alias domain
 	foreach my $virt (&sendmail::list_virtusers($sendmail_vfile)) {
@@ -3792,6 +3804,7 @@ elsif ($config{'mail_system'} == 0) {
 # alias copy mode.
 sub delete_alias_virtuals
 {
+&obtain_lock_mail($_[0]);
 if ($config{'mail_system'} == 1) {
 	# Remove virtusers in Sendmail
 	foreach my $virt (&sendmail::list_virtusers($sendmail_vfile)) {
@@ -3873,6 +3886,48 @@ if ($config{'mail_server'} == 0) {
 	}
 else {
 	return $text{'bcc_emailserver'};
+	}
+}
+
+# obtain_lock_mail(&domain)
+# Lock the mail aliases and virtusers files
+sub obtain_lock_mail
+{
+if (!$got_lock_unix++) {
+	&require_mail();
+	if ($config{'mail_system'} == 0) {
+		# Lock Postfix files
+		foreach my $vfile (@virtual_map_files) {
+			&lock_file($vfile) if ($vfile =~ /^\//);
+			}
+		foreach my $gfile (@canonical_map_files) {
+			&lock_file($gfile) if ($gfile =~ /^\//);
+			}
+		foreach my $afile (@$postfix_afiles) {
+			&lock_file($afile);
+			}
+		foreach my $bfile (@sender_bcc_map_files) {
+			&lock_file($bfile) if ($bfile =~ /^\//);
+			}
+		undef(%postfix::list_aliases_cache);
+		undef(%postfix::maps_cache);
+		}
+	elsif ($config{'mail_system'} == 1) {
+		# Lock Sendmail files
+		&lock_file($sendmail_vfile) if ($sendmail_vfile);
+		foreach my $afile (@$sendmail_afiles) {
+			&lock_file($afile);
+			}
+		&lock_file($sendmail_gfile) if ($sendmail_gfile);
+		undef(%sendmail::list_aliases_cache);
+		undef(@sendmail::list_virtusers_cache);
+		undef(@sendmail::list_generics_cache);
+		}
+	elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4) {
+		# Lock Qmail control files
+		&lock_file("$qmailadmin::qmail_control_dir/rcpthosts");
+		&lock_file("$qmailadmin::qmail_control_dir/locals");
+		}
 	}
 }
 

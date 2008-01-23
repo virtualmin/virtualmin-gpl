@@ -7,6 +7,7 @@ $feature_depends{'unix'} = [ 'dir' ];
 sub setup_unix
 {
 local $tmpl = &get_template($_[0]->{'template'});
+&obtain_lock_unix($_[0]);
 &require_useradmin();
 local (%uinfo, %ginfo);
 
@@ -159,6 +160,7 @@ sub modify_unix
 {
 if (!$_[0]->{'parent'}) {
 	# Check for a user change
+	&obtain_lock_unix($_[0]);
 	&require_useradmin();
 	local @allusers = &list_domain_users($_[1]);
 	local ($uinfo) = grep { $_->{'user'} eq $_[1]->{'user'} } @allusers;
@@ -256,6 +258,7 @@ elsif ($_[0]->{'parent'} && !$_[1]->{'parent'}) {
 # Delete the unix user and group for a domain
 sub delete_unix
 {
+&obtain_lock_unix($_[0]);
 &require_useradmin();
 local @allusers = &foreign_call($usermodule, "list_users");
 local ($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'} } @allusers;
@@ -357,6 +360,7 @@ return 0;
 sub disable_unix
 {
 if (!$_[0]->{'parent'}) {
+	&obtain_lock_unix($_[0]);
 	&require_useradmin();
 	&foreign_call($usermodule, "lock_user_files");
 	local @allusers = &foreign_call($usermodule, "list_users");
@@ -381,6 +385,7 @@ if (!$_[0]->{'parent'}) {
 sub enable_unix
 {
 if (!$_[0]->{'parent'}) {
+	&obtain_lock_unix($_[0]);
 	&require_useradmin();
 	&foreign_call($usermodule, "lock_user_files");
 	local @allusers = &foreign_call($usermodule, "list_users");
@@ -419,10 +424,11 @@ return 1;
 }
 
 # restore_unix(&domain, file, &options)
-# Extracts the given tar file into a user's home directory
+# Update's the domain's unix user's password, description, quotas and cron jobs
 sub restore_unix
 {
 local ($d, $file, $opts) = @_;
+&obtain_lock_unix($_[0]);
 &$first_print($text{'restore_unixuser'});
 
 # Also re-set quotas
@@ -594,6 +600,7 @@ sub build_denied_ssh_group
 local ($newd, $deld) = @_;
 
 # First make sure the group exists
+&obtain_lock_unix($_[0]);
 &require_useradmin();
 local @allgroups = &list_all_groups();
 local ($group) = grep { $_->{'group'} eq $denied_ssh_group } @allgroups;
@@ -636,6 +643,7 @@ local ($newd, $deld) = @_;
 return 0 if (!$config{'domains_group'});
 
 # First make sure the group exists
+&obtain_lock_unix($_[0]);
 &require_useradmin();
 local @allgroups = &list_all_groups();
 local ($group) = grep { $_->{'group'} eq $config{'domains_group'} } @allgroups;
@@ -721,6 +729,20 @@ eval {
 		&foreign_call($uinfo->{'module'}, "made_changes");
 		}
 	};
+}
+
+sub obtain_lock_unix
+{
+if (!$got_lock_unix++) {
+	&lock_user_db();
+	undef(@useradmin::list_users_cache);
+	undef(@useradmin::list_groups_cache);
+	undef(%soft_home_quota);
+	undef(%hard_home_quota);
+	undef(%used_home_quota);
+	undef(%soft_mail_quota);
+	undef(%hard_mail_quota);
+	}
 }
 
 $done_feature_script{'unix'} = 1;
