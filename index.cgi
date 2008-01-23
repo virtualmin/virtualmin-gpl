@@ -30,27 +30,33 @@ if ($single_domain_mode) {
 	undef, undef, undef, $vtitle);
 
 # Check if server module configuration has been checked
+$formno = 0;
 if (&need_config_check() && &can_check_config()) {
 	# Not since last config change .. force it now
 	print &ui_form_start("check.cgi");
 	print "<b>$text{'index_needcheck'}</b><p>\n";
 	print &ui_submit($text{'index_srefresh'});
 	print &ui_form_end();
+	$formno++;
 
 	print &ui_form_start("edit_newfeatures.cgi");
 	print &ui_submit($text{'index_featuresb'});
 	print &ui_form_end();
+	$formno++;
 
 	print &ui_form_start("edit_newtmpl.cgi");
 	print &ui_submit($text{'index_tmpls'});
 	print &ui_form_end();
+	$formno++;
 
 	&ui_print_footer("/", $text{'index'});
 	exit;
 	}
 
 # Setup the licence cron job
-print &licence_warning_message();
+$lerr = &licence_warning_message();
+print $lerr;
+$formno++ if ($lerr =~ /<\s*form/i);
 
 # Display local users
 if ($config{'localgroup'} && &can_edit_local()) {
@@ -94,6 +100,7 @@ if ($config{'display_max'} && @doms > $config{'display_max'}) {
 	print &ui_textbox("what", undef, 30),"\n";
 	print &ui_submit($text{'index_searchok'});
 	print &ui_form_end();
+	$formno++;
 
 	# Show update/delete all buttons
 	print &ui_form_start("domain_form.cgi");
@@ -115,8 +122,8 @@ elsif (@doms) {
 		}
 	@links = ( );
 	if ($canconfig && $virtualmin_pro) {
-		push(@links, &select_all_link("d"),
-			     &select_invert_link("d"));
+		push(@links, &select_all_link("d", $formno),
+			     &select_invert_link("d", $formno));
 		}
 	print &ui_links_row(\@links);
 	&domains_table(\@doms, $virtualmin_pro);
