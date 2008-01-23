@@ -1674,7 +1674,12 @@ foreach my $dir ($user->{'home'}, "$user->{'home'}/.usermin", "$user->{'home'}/.
 	}
 local %inbox;
 &read_file("$user->{'home'}/.usermin/mailbox/inbox.imap", \%inbox);
-$inbox{'user'} = $user->{'user'};
+if (&usermin::get_usermin_version() >= 1.323) {
+	$inbox{'user'} = '*';
+	}
+else {
+	$inbox{'user'} = $user->{'user'};
+	}
 $inbox{'pass'} = $user->{'plainpass'};
 &write_file("$user->{'home'}/.usermin/mailbox/inbox.imap", \%inbox);
 }
