@@ -11357,6 +11357,8 @@ $d->{'domslimit'} = $tmpl->{'domslimit'} eq 'none' ? '*' :
 			$tmpl->{'domslimit'};
 $d->{'aliasdomslimit'} = $tmpl->{'aliasdomslimit'} eq 'none' ? '*' :
 			$tmpl->{'aliasdomslimit'};
+$d->{'realdomslimit'} = $tmpl->{'realdomslimit'} eq 'none' ? '*' :
+			$tmpl->{'realdomslimit'};
 if ($virtualmin_pro) {
 	$d->{'mongrelslimit'} = $tmpl->{'mongrelslimit'} eq 'none' ? undef :
 				$tmpl->{'mongrelslimit'};
