@@ -11967,6 +11967,12 @@ sub get_provider_link
 # Does this user's domain's reseller have a logo?
 local ($logo, $link);
 local $d = &get_domain_by("user", $remote_user, "parent", "");
+if (!$d) {
+	# No domain found by user .. but is this user an extra admin?
+	if ($access{'admin'}) {
+		$d = &get_domain($access{'admin'});
+		}
+	}
 if ($d && $d->{'reseller'} && defined(&get_reseller)) {
 	local $resel = &get_reseller($d->{'reseller'});
 	if ($resel->{'acl'}->{'logo'}) {
