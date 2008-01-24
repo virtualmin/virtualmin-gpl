@@ -2,8 +2,6 @@
 	- behave like templates, with first stored in config and others in files
 	- need to be able to backup backup schedules
 
- - refactor UID / GID allocation code, to one place (setup_unix?)
-
  - NIS support for users DB
 	- Cluster mode - each feature on a separate server
 

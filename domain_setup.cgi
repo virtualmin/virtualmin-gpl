@@ -224,14 +224,16 @@ if ($parentuser) {
 	}
 else {
 	# Work out user and group IDs
-	&build_group_taken(\%gtaken, \%ggtaken);
-	$gid = &allocate_gid(\%gtaken);
-	$ugid = $in{'group_def'} || !&can_choose_ugroup() ?
-			$gid : getgrnam($in{'group'});
-	$ugroup = $in{'group_def'} || !&can_choose_ugroup() ?
-			$group : $in{'group'};
-	&build_taken(\%taken, \%utaken);
-	$uid = &allocate_uid(\%taken);
+	$uid = undef;
+	$gid = undef;
+	if ($in{'group_def'} || !&can_choose_ugroup()) {
+		$ugid = undef;
+		$ugroup = $group;
+		}
+	else {
+		$ugid = getgrnam($in{'group'});
+		$ugroup = $in{'group'};
+		}
 	}
 $prefix = $in{'prefix_def'} ? &compute_prefix($in{'dom'}, $group, $parentdom)
 			    : $in{'prefix'};
