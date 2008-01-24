@@ -219,6 +219,7 @@ if (&foreign_installed("sshd")) {
 
 	# Create the actual group, if missing
 	&require_useradmin();
+	&obtain_lock_unix();
 	local @allgroups = &list_all_groups();
 	local ($group) = grep { $_->{'group'} eq $denied_ssh_group } @allgroups;
 	if (!$group) {
@@ -227,14 +228,13 @@ if (&foreign_installed("sshd")) {
 		$group = { 'group' => $denied_ssh_group,
 			   'members' => '',
 			   'gid' => &allocate_gid(\%gtaken) };
-		&foreign_call($usermodule, "lock_user_files");
 		&foreign_call($usermodule, "set_group_envs", $group,
 							     'CREATE_GROUP');
 		&foreign_call($usermodule, "making_changes");
 		&foreign_call($usermodule, "create_group", $group);
 		&foreign_call($usermodule, "made_changes");
-		&foreign_call($usermodule, "unlock_user_files");
 		}
+	&release_lock_unix();
 	}
 &build_denied_ssh_group();
 

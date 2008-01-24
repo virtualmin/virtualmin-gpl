@@ -170,8 +170,8 @@ return grep { $_->{'from'} =~ /\@(\S+)$/ && $1 eq $_[0]->{'dom'} &&
 # Adds a domain to the list of those accepted by the mail system
 sub setup_mail
 {
-&obtain_lock_mail($_[0]);
 &$first_print($text{'setup_doms'});
+&obtain_lock_mail($_[0]);
 &require_mail();
 local $tmpl = &get_template($_[0]->{'template'});
 if ($config{'mail_system'} == 1) {
@@ -302,14 +302,15 @@ if ($supports_bcc && $tmpl->{'bccto'} ne 'none') {
 if (!$_[0]->{'nosecondaries'}) {
 	&setup_on_secondaries($_[0]);
 	}
+&release_lock_mail($_[0]);
 }
 
 # delete_mail(&domain, [leave-aliases])
 # Removes a domain from the list of those accepted by the mail system
 sub delete_mail
 {
-&obtain_lock_mail($_[0]);
 &$first_print($text{'delete_doms'});
+&obtain_lock_mail($_[0]);
 &require_mail();
 
 if ($_[0]->{'alias'} && !$_[0]->{'aliascopy'}) {
@@ -417,6 +418,7 @@ if ($supports_bcc) {
 
 # Remove any secondary MX servers
 &delete_on_secondaries($_[0]);
+&release_lock_mail($_[0]);
 }
 
 # modify_mail(&domain, &olddomain)
@@ -427,6 +429,8 @@ sub modify_mail
 {
 local $tmpl = &get_template($_[0]->{'template'});
 &require_useradmin();
+local $our_mail_locks = 0;
+local $our_unix_locks = 0;
 
 # Need to update the home directory of all mail users .. but only
 # in the Unix object, as their files will have already been moved
@@ -437,7 +441,8 @@ if (($_[0]->{'home'} ne $_[1]->{'home'} ||
      $_[0]->{'dom'} ne $_[1]->{'dom'} ||
      $_[0]->{'gid'} != $_[1]->{'gid'} ||
      $_[0]->{'prefix'} ne $_[1]->{'prefix'}) && !$_[0]->{'alias'}) {
-	&obtain_lock_mail($_[0]);
+	&obtain_lock_mail($_[0]); $our_mail_locks++;
+	&obtain_lock_unix($_[0]); $our_unix_locks++;
 	&$first_print($text{'save_mailrename'});
 	local $u;
 	local $domhack = { %{$_[0]} };		# This hack is needed to find
@@ -511,7 +516,7 @@ if (($_[0]->{'home'} ne $_[1]->{'home'} ||
 if ($_[0]->{'alias'} && $_[2] && $_[2]->{'dom'} ne $_[3]->{'dom'}) {
 	# This is an alias, and the domain it is aliased to has changed ..
 	# update the catchall alias or virtuser copies
-	&obtain_lock_mail($_[0]);
+	&obtain_lock_mail($_[0]); $our_mail_locks++;
 	if (!$_[0]->{'aliascopy'}) {
 		# Fixup dest in catchall
 		local @virts = &list_virtusers();
@@ -532,7 +537,7 @@ if ($_[0]->{'alias'} && $_[2] && $_[2]->{'dom'} ne $_[3]->{'dom'}) {
 elsif ($_[0]->{'alias'} && $_[0]->{'dom'} ne $_[1]->{'dom'} &&
        $_[0]->{'aliascopy'}) {
 	# This is an alias and the domain name has changed - fix all virtuals
-	&obtain_lock_mail($_[0]);
+	&obtain_lock_mail($_[0]); $our_mail_locks++;
 	&delete_alias_virtuals($_[1]);
 	local $alias = &get_domain($_[0]->{'alias'});
 	&copy_alias_virtuals($_[0], $alias);
@@ -540,7 +545,6 @@ elsif ($_[0]->{'alias'} && $_[0]->{'dom'} ne $_[1]->{'dom'} &&
 
 if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 	# Delete the old mail domain and add the new
-	&obtain_lock_mail($_[0]);
 	local $no_restart_mail = 1;
 	local $oldbcc;
 	if ($supports_bcc) {
@@ -617,6 +621,14 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 		}
 
 	&$second_print($text{'setup_done'});
+	}
+
+# Unlock mail and unix DBs the same number of times we locked them
+while($our_mail_locks--) {
+	&release_lock_mail($_[0]);
+	}
+while($our_unix_locks--) {
+	&release_lock_unix($_[0]);
 	}
 }
 
@@ -719,6 +731,7 @@ return undef;
 sub disable_mail
 {
 &obtain_lock_mail($_[0]);
+&obtain_lock_unix($_[0]);
 &delete_mail($_[0], 1);
 
 &$first_print($text{'disable_users'});
@@ -729,6 +742,8 @@ foreach my $user (&list_domain_users($_[0], 1)) {
 		}
 	}
 &$second_print($text{'setup_done'});
+&release_lock_mail($_[0]);
+&release_lock_unix($_[0]);
 }
 
 # enable_mail(&domain)
@@ -736,6 +751,7 @@ foreach my $user (&list_domain_users($_[0], 1)) {
 sub enable_mail
 {
 &obtain_lock_mail($_[0]);
+&obtain_lock_unix($_[0]);
 &setup_mail($_[0], 1);
 
 &$first_print($text{'enable_users'});
@@ -746,6 +762,8 @@ foreach my $user (&list_domain_users($_[0], 1)) {
 		}
 	}
 &$second_print($text{'setup_done'});
+&release_lock_mail($_[0]);
+&release_lock_unix($_[0]);
 }
 
 # check_mail_clash()
@@ -1061,27 +1079,19 @@ if ($config{'mail_system'} == 1) {
 	# Delete from sendmail
 	if ($_[0]->{'alias'}) {
 		# Delete alias too
-		&lock_file($_[0]->{'alias'}->{'file'});
 		&sendmail::delete_alias($_[0]->{'alias'});
-		&unlock_file($_[0]->{'alias'}->{'file'});
 		}
-	&lock_file($_[0]->{'virt'}->{'file'});
 	&sendmail::delete_virtuser($_[0]->{'virt'}, $sendmail_vfile,
 				   $sendmail_vdbm, $sendmail_vdbmtype);
-	&unlock_file($_[0]->{'virt'}->{'file'});
 	}
 elsif ($config{'mail_system'} == 0) {
 	# Delete from postfix file
 	if ($_[0]->{'alias'}) {
 		# Delete alias too
-		&lock_file($_[0]->{'alias'}->{'file'});
 		&$postfix_delete_alias($_[0]->{'alias'});
-		&unlock_file($_[0]->{'alias'}->{'file'});
 		&postfix::regenerate_aliases();
 		}
-	&lock_file($_[0]->{'virt'}->{'file'});
 	&postfix::delete_mapping($virtual_type, $_[0]->{'virt'});
-	&unlock_file($_[0]->{'virt'}->{'file'});
 	&postfix::regenerate_virtual_table();
 	}
 elsif ($config{'mail_system'} == 2) {
@@ -1138,32 +1148,26 @@ if ($config{'mail_system'} == 1) {
 		local $virt = { "from" => $_[1]->{'from'},
 				"to" => $an,
 				"cmt" => $_[1]->{'cmt'} };
-		&lock_file($_[0]->{'virt'}->{'file'});
 		&sendmail::modify_virtuser($_[0]->{'virt'}, $virt,
 					   $sendmail_vfile, $sendmail_vdbm,
 					   $sendmail_vdbmtype);
-		&unlock_file($_[0]->{'virt'}->{'file'});
 		$_[1]->{'virt'} = $virt;
 		}
 	elsif ($alias) {
 		# Just update alias and maybe virtuser
 		$alias->{'values'} = \@smto;
-		&lock_file($alias->{'file'});
 		$alias->{'name'} = $an if ($_[1]->{'from'} ne $_[0]->{'from'});
 		&sendmail::modify_alias($oldalias, $alias);
-		&unlock_file($alias->{'file'});
 		if ($_[1]->{'from'} ne $_[0]->{'from'} ||
 		    $_[1]->{'cmt'} ne $_[0]->{'cmt'}) {
 			# Re-named .. need to change virtuser too
 			local $virt = { "from" => $_[1]->{'from'},
 					"to" => $an,
 					"cmt" => $_[1]->{'cmt'} };
-			&lock_file($_[0]->{'virt'}->{'file'});
 			&sendmail::modify_virtuser($_[0]->{'virt'}, $virt,
 						   $sendmail_vfile,
 						   $sendmail_vdbm,
 						   $sendmail_vdbmtype);
-			&unlock_file($_[0]->{'virt'}->{'file'});
 			$_[1]->{'virt'} = $virt;
 			}
 		}
@@ -1172,11 +1176,9 @@ if ($config{'mail_system'} == 1) {
 		local $virt = { "from" => $_[1]->{'from'},
 				"to" => $smto[0],
 				"cmt" => $_[1]->{'cmt'} };
-		&lock_file($_[0]->{'virt'}->{'file'});
 		&sendmail::modify_virtuser($_[0]->{'virt'}, $virt,
 					   $sendmail_vfile, $sendmail_vdbm,
 					   $sendmail_vdbmtype);
-		&unlock_file($_[0]->{'virt'}->{'file'});
 		$_[1]->{'virt'} = $virt;
 		}
 	}
@@ -1200,19 +1202,15 @@ elsif ($config{'mail_system'} == 0) {
 		local $virt = { "name" => $_[1]->{'from'},
 				"value" => $an,
 				"cmt" => $_[1]->{'cmt'} };
-		&lock_file($_[0]->{'virt'}->{'file'});
 		&postfix::modify_mapping($virtual_type, $_[0]->{'virt'}, $virt);
-		&unlock_file($_[0]->{'virt'}->{'file'});
 		$_[1]->{'virt'} = $virt;
 		&postfix::regenerate_virtual_table();
 		}
 	elsif ($alias) {
 		# Just update alias
 		$alias->{'values'} = \@psto;
-		&lock_file($alias->{'file'});
 		$alias->{'name'} = $an if ($_[1]->{'from'} ne $_[0]->{'from'});
 		&$postfix_modify_alias($oldalias, $alias);
-		&unlock_file($alias->{'file'});
 		&postfix::regenerate_aliases();
 		if ($_[1]->{'from'} ne $_[0]->{'from'} ||
 		    $_[1]->{'cmt'} ne $_[0]->{'cmt'}) {
@@ -1220,10 +1218,8 @@ elsif ($config{'mail_system'} == 0) {
 			local $virt = { "name" => $_[1]->{'from'},
 					"value" => $an,
 					"cmt" => $_[1]->{'cmt'} };
-			&lock_file($_[0]->{'virt'}->{'file'});
 			&postfix::modify_mapping($virtual_type, $_[0]->{'virt'},
 						 $virt);
-			&unlock_file($_[0]->{'virt'}->{'file'});
 			$_[1]->{'virt'} = $virt;
 			&postfix::regenerate_virtual_table();
 			}
@@ -1235,9 +1231,7 @@ elsif ($config{'mail_system'} == 0) {
 		local $virt = { "name" => $_[1]->{'from'},
 				"value" => $t,
 				"cmt" => $_[1]->{'cmt'} };
-		&lock_file($_[0]->{'virt'}->{'file'});
 		&postfix::modify_mapping($virtual_type, $_[0]->{'virt'}, $virt);
-		&unlock_file($_[0]->{'virt'}->{'file'});
 		$_[1]->{'virt'} = $virt;
 		&postfix::regenerate_virtual_table();
 		}
@@ -1316,11 +1310,9 @@ if ($config{'mail_system'} == 1) {
 			  "to" => $smto[0],
 			  "cmt" => $_[0]->{'cmt'} };
 		}
-	&lock_file($sendmail_vfile);
 	&sendmail::create_virtuser($virt, $sendmail_vfile,
 				   $sendmail_vdbm,
 				   $sendmail_vdbmtype);
-	&unlock_file($sendmail_vfile);
 	$_[0]->{'virt'} = $virt;
 	}
 elsif ($config{'mail_system'} == 0) {
@@ -1351,9 +1343,7 @@ elsif ($config{'mail_system'} == 0) {
 			  'value' => $t,
 			  'cmt' => $_[0]->{'cmt'} };
 		}
-	&lock_file($virtual_map_files[0]);
 	&create_replace_mapping($virtual_type, $virt);
-	&unlock_file($virtual_map_files[0]);
 	&postfix::regenerate_virtual_table();
 	$_[0]->{'virt'} = $virt;
 	}
@@ -2227,6 +2217,7 @@ sub restore_mail
 {
 local ($u, %olduid, @errs);
 &obtain_lock_mail($_[0]);
+&obtain_lock_unix($_[0]);
 if ($_[2]->{'mailuser'}) {
 	# Just doing a single user .. delete him first if he exists
 	&$first_print(&text('restore_mailusers2', $_[2]->{'mailuser'}));
@@ -2527,6 +2518,8 @@ if (defined(&create_autoreply_alias_links)) {
 	&create_autoreply_alias_links($_[0]);
 	}
 
+&release_lock_mail($_[0]);
+&release_lock_unix($_[0]);
 return 1;
 }
 
@@ -3590,17 +3583,13 @@ sub create_generic
 local ($user, $email) = @_;
 if ($config{'mail_system'} == 1) {
 	local $gen = { 'from' => $user, 'to' => $email };
-	&lock_file($sendmail_gfile);
 	&sendmail::create_generic($gen, $sendmail_gfile,
 				  $sendmail_gdbm, $sendmail_gdbmtype);
-	&unlock_file($sendmail_gfile);
 	}
 elsif ($config{'mail_system'} == 0) {
 	local $gen = { 'name' => $user,
 		       'value' => $email };
-	&lock_file($canonical_map_files[0]);
 	&create_replace_mapping($canonical_type, $gen);
-	&unlock_file($canonical_map_files[0]);
 	&postfix::regenerate_canonical_table();
 	}
 }
@@ -3612,16 +3601,12 @@ sub delete_generic
 local ($generic) = @_;
 if ($config{'mail_system'} == 1) {
 	# For sendmail
-	&lock_file($sendmail_gfile);
 	&sendmail::delete_generic($generic, $sendmail_gfile,
 			$sendmail_gdbm, $sendmail_gdbmtype);
-	&unlock_file($sendmail_gfile);
 	}
 elsif ($config{'mail_system'} == 0) {
 	# For postfix
-	&lock_file($canonical_map_files[0]);
 	&postfix::delete_mapping($canonical_type, $generic);
-	&unlock_file($canonical_map_files[0]);
 	}
 }
 
@@ -3632,16 +3617,12 @@ sub modify_generic
 local ($generic, $oldgeneric) = @_;
 if ($config{'mail_system'} == 1) {
 	# For sendmail
-	&lock_file($sendmail_gfile);
 	&sendmail::modify_generic($oldgeneric, $generic, $sendmail_gfile,
 			$sendmail_gdbm, $sendmail_gdbmtype);
-	&unlock_file($sendmail_gfile);
 	}
 elsif ($config{'mail_system'} == 0) {
 	# For postfix
-	&lock_file($canonical_map_files[0]);
 	&postfix::modify_mapping($canonical_type, $oldgeneric, $generic);
-	&unlock_file($canonical_map_files[0]);
 	}
 }
 
@@ -3893,42 +3874,52 @@ else {
 # Lock the mail aliases and virtusers files
 sub obtain_lock_mail
 {
-if (!$got_lock_unix++) {
+if ($main::got_lock_mail == 0) {
+	print STDERR "getting Mail lock\n";
 	&require_mail();
+	@main::got_lock_mail_files = ( );
 	if ($config{'mail_system'} == 0) {
 		# Lock Postfix files
-		foreach my $vfile (@virtual_map_files) {
-			&lock_file($vfile) if ($vfile =~ /^\//);
-			}
-		foreach my $gfile (@canonical_map_files) {
-			&lock_file($gfile) if ($gfile =~ /^\//);
-			}
-		foreach my $afile (@$postfix_afiles) {
-			&lock_file($afile);
-			}
-		foreach my $bfile (@sender_bcc_map_files) {
-			&lock_file($bfile) if ($bfile =~ /^\//);
-			}
+		push(@main::got_lock_mail_files, @virtual_map_files);
+		push(@main::got_lock_mail_files, @canonical_map_files);
+		push(@main::got_lock_mail_files, @$postfix_afiles);
+		push(@main::got_lock_mail_files, @sender_bcc_map_files);
 		undef(%postfix::list_aliases_cache);
 		undef(%postfix::maps_cache);
 		}
 	elsif ($config{'mail_system'} == 1) {
 		# Lock Sendmail files
-		&lock_file($sendmail_vfile) if ($sendmail_vfile);
-		foreach my $afile (@$sendmail_afiles) {
-			&lock_file($afile);
-			}
-		&lock_file($sendmail_gfile) if ($sendmail_gfile);
+		push(@main::got_lock_mail_files, $sendmail_vfile);
+		push(@main::got_lock_mail_files, @$sendmail_afiles);
+		push(@main::got_lock_mail_files, $sendmail_gfile);
 		undef(%sendmail::list_aliases_cache);
 		undef(@sendmail::list_virtusers_cache);
 		undef(@sendmail::list_generics_cache);
 		}
 	elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4) {
 		# Lock Qmail control files
-		&lock_file("$qmailadmin::qmail_control_dir/rcpthosts");
-		&lock_file("$qmailadmin::qmail_control_dir/locals");
+		push(@main::got_lock_mail_files,
+		     "$qmailadmin::qmail_control_dir/rcpthosts",
+		     "$qmailadmin::qmail_control_dir/locals");
+		}
+	@main::got_lock_mail_files = grep { /^\// } @main::got_lock_mail_files;
+	foreach my $f (@main::got_lock_mail_files) {
+		&lock_file($f);
 		}
 	}
+$main::got_lock_mail++;
+}
+
+# Unlock all Mail server files
+sub release_lock_mail
+{
+if ($main::got_lock_mail == 1) {
+	print STDERR "releasing Mail lock\n";
+	foreach my $f (@main::got_lock_mail_files) {
+		&unlock_file($f);
+		}
+	}
+$main::got_lock_mail-- if ($main::got_lock_mail);
 }
 
 $done_feature_script{'mail'} = 1;

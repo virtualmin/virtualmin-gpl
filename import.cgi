@@ -75,6 +75,7 @@ if (!$in{'regexp_def'}) {
 if ($in{'confirm'}) {
 	# Go ahead and do it
 	&lock_domain_name($in{'dom'});
+	&obtain_lock_unix();
 	print "$text{'import_doing'}<p>\n";
 	&require_useradmin();
 
@@ -168,13 +169,11 @@ if ($in{'confirm'}) {
 		if (!$ginfo) {
 			# Create the unix group
 			print &text('setup_group', $crgroup),"<br>\n";
-			&foreign_call($usermodule, "lock_user_files");
 			%ginfo = ( 'group', $crgroup,
 				   'gid', $gid );
 			&foreign_call($usermodule, "set_group_envs", \%ginfo, 'CREATE_GROUP');
 			&foreign_call($usermodule, "making_changes");
 			&foreign_call($usermodule, "create_group", \%ginfo);
-			&foreign_call($usermodule, "unlock_user_files");
 			&foreign_call($usermodule, "made_changes");
 			print $text{'setup_done'},"<p>\n";
 			}
@@ -186,7 +185,6 @@ if ($in{'confirm'}) {
 			# Create the Unix user
 			# XXX use common function??
 			print &text('setup_user', $cruser),"<br>\n";
-			&foreign_call($usermodule, "lock_user_files");
 			%uinfo = ( 'user', $cruser,
 				   'uid', $uid,
 				   'gid', $gid,
@@ -202,9 +200,7 @@ if ($in{'confirm'}) {
 			&foreign_call($usermodule, "set_user_envs", \%uinfo, 'CREATE_USER', $in{'pass'}, [ ]);
 			&foreign_call($usermodule, "making_changes");
 			&foreign_call($usermodule, "create_user", \%uinfo);
-			&foreign_call($usermodule, "unlock_user_files");
 			&foreign_call($usermodule, "made_changes");
-			&foreign_call($usermodule, "unlock_user_files");
 			print $text{'setup_done'},"<p>\n";
 
 			if (!-d $uinfo{'home'}) {
@@ -265,9 +261,7 @@ if ($in{'confirm'}) {
 			$oldu = { %$u };
 			$u->{'gid'} = $dom{'gid'};
 			&foreign_call($usermodule, "making_changes");
-			&foreign_call($usermodule, "lock_user_files");
 			&foreign_call($usermodule, "modify_user", $oldu, $u);
-			&foreign_call($usermodule, "unlock_user_files");
 			&foreign_call($usermodule, "made_changes");
 
 			# Also fix group permissions on his home and mail file
@@ -315,6 +309,7 @@ if ($in{'confirm'}) {
 					       $dom{'id'});
 		&save_module_acl(\%access);
 		}
+	&release_lock_unix();
 	&webmin_log("import", "domain", $dom{'dom'});
 	}
 else {

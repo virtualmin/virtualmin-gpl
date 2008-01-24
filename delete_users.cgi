@@ -11,7 +11,10 @@ $d = &get_domain($in{'dom'});
 @del = split(/\0/, $in{'d'});
 @del || &error($text{'users_ednone'});
 
-&lock_user_db();
+if ($in{'confirm'}) {
+	&obtain_lock_unix($d);
+	&obtain_lock_mail($d);
+	}
 @users = &list_domain_users($d);
 
 # Get the users
@@ -59,6 +62,8 @@ if ($in{'confirm'}) {
 			}
 		}
 	&run_post_actions();
+	&release_lock_unix($d);
+	&release_lock_mail($d);
 	&webmin_log("delete", "users", scalar(@dusers),
 		    { 'dom' => $d->{'dom'} });
 	&redirect("list_users.cgi?dom=$in{'dom'}");
@@ -89,5 +94,4 @@ else {
 	&ui_print_footer("list_users.cgi?dom=$in{'dom'}",
 			 $text{'users_return'});
 	}
-&unlock_user_db();
 

@@ -10,7 +10,8 @@ $d = &get_domain($in{'dom'});
 @mass = split(/\0/, $in{'d'});
 @mass || &error($text{'mass_enone'});
 
-&lock_user_db();
+&obtain_lock_unix($d);
+&obtain_lock_mail($d);
 @users = &list_domain_users($d);
 @ashells = grep { $_->{'mailbox'} && $_->{'avail'} } &list_available_shells();
 
@@ -204,7 +205,8 @@ foreach $user (@musers) {
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
 	}
-&unlock_user_db();
+&release_lock_unix($d);
+&release_lock_mail($d);
 &run_post_actions();
 &webmin_log("modify", "users", scalar(@musers),
 	    { 'dom' => $d->{'dom'} });

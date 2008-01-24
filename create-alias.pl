@@ -47,6 +47,7 @@ $from =~ /\@/ && &usage("No domain name is needed in the --from parameter");
 $d->{'aliascopy'} && &usage("Aliases cannot be edited in alias domains in copy mode");
 
 # Check for clash
+&obtain_lock_mail($d);
 @aliases = &list_domain_aliases($d);
 $email = $from eq "*" ? "%1\@$domain" : "$from\@$domain";
 ($clash) = grep { $_->{'from'} eq $email } @aliases;
@@ -58,6 +59,7 @@ $virt = { 'from' => $email,
 	  'cmt' => $cmt };
 &create_virtuser($virt);
 &sync_alias_virtuals($d);
+&release_lock_mail($d);
 print "Alias for $email created successfully\n";
 
 sub usage

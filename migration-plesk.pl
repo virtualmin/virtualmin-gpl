@@ -148,9 +148,6 @@ local %pconfig = map { $_, 1 } @feature_plugins;
 local %got = map { $_, 1 } @got;
 
 # Work out user and group IDs
-local (%gtaken, %ggtaken, %taken, %utaken);
-&build_group_taken(\%gtaken, \%ggtaken);
-&build_taken(\%taken, \%utaken);
 local ($gid, $ugid, $uid, $duser);
 if ($parent) {
 	# UID and GID come from parent
@@ -162,10 +159,8 @@ if ($parent) {
 	$ugroup = $parent->{'ugroup'};
 	}
 else {
-	# Allocate new IDs
-	$gid = &allocate_gid(\%gtaken);
-	$ugid = $gid;
-	$uid = &allocate_uid(\%taken);
+	# IDs are allocated in setup_unix
+	$gid = $ugid = $uid = undef;
 	$duser = $user;
 	}
 
@@ -345,6 +340,12 @@ if ($got{'dns'}) {
 		}
 	}
 
+# Lock the user DB and build list of used IDs
+&obtain_lock_unix(\%dom);
+&obtain_lock_mail(\%dom);
+local (%taken, %utaken);
+&build_taken(\%taken, \%utaken);
+
 # Re-create mail users and copy mail files
 &$first_print("Re-creating mail users ..");
 &foreign_require("mailboxes", "mailboxes-lib.pl");
@@ -361,8 +362,6 @@ foreach my $name (keys %$mailusers) {
 	else {
 		$uinfo->{'pass'} = $mailuser->{'password'}->{'content'};
 		}
-	local %taken;
-	&build_taken(\%taken);
 	$uinfo->{'uid'} = &allocate_uid(\%taken);
 	$uinfo->{'gid'} = $dom{'gid'};
 	$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$name";
@@ -379,6 +378,7 @@ foreach my $name (keys %$mailusers) {
 		}
 	&create_user($uinfo, \%dom);
 	&create_user_home($uinfo, \%dom);
+	$taken{$uinfo->{'uid'}}++;
 	local ($crfile, $crtype) = &create_mail_file($uinfo);
 
 	# Copy mail into user's inbox
@@ -459,8 +459,6 @@ if ($got{'mysql'}) {
 				$dbusers->{$mname}->{'password'}->{'content'};
 			$myuinfo->{'pass'} = &encrypt_user_password($myuinfo,
 						$myuinfo->{'plainpass'});
-			local %taken;
-			&build_taken(\%taken);
 			$myuinfo->{'uid'} = &allocate_uid(\%taken);
 			$myuinfo->{'gid'} = $dom{'gid'};
 			$myuinfo->{'real'} = "MySQL user";
@@ -473,6 +471,7 @@ if ($got{'mysql'}) {
 			&create_user($myuinfo, \%dom);
 			&create_user_home($myuinfo, \%dom);
 			&create_mail_file($myuinfo);
+			$taken{$myuinfo->{'uid'}}++;
 			$myucount++;
 			}
 
@@ -481,6 +480,8 @@ if ($got{'mysql'}) {
 		}
 	&$second_print(".. done (migrated $mcount databases, and created $myucount users)");
 	}
+&release_lock_unix(\%dom);
+&release_lock_mail(\%dom);
 
 &sync_alias_virtuals(\%dom);
 return (\%dom);

@@ -12,7 +12,11 @@ else {
 	&can_edit_local() || &error($text{'users_ecannot2'});
 	}
 &can_edit_users() || &error($text{'users_ecannot'});
-&lock_user_db();
+
+if (!$in{'delete'} || $in{'confirm'}) {
+	&obtain_lock_unix($d);
+	&obtain_lock_mail($d);
+	}
 @users = &list_domain_users($d);
 $tmpl = $d ? &get_template($d->{'template'}) : &get_template(0);
 if (!$in{'new'}) {
@@ -67,7 +71,8 @@ if ($in{'delete'}) {
 
 		$user->{'dom'} = $d->{'dom'};
 		&run_post_actions();
-		&unlock_user_db();
+		&release_lock_unix($d);
+		&release_lock_mail($d);
 		&webmin_log("delete", "user",
 			    &remove_userdom($user->{'user'}, $d), $user);
 		}
@@ -604,9 +609,10 @@ else {
 
 	&run_post_actions();
 	$user->{'dom'} = $d->{'dom'};
+	&release_lock_unix($d);
+	&release_lock_mail($d);
 	&webmin_log($in{'new'} ? "create" : "modify", "user",
 		    &remove_userdom($user->{'user'}, $d), $user);
-	&unlock_user_db();
 
 	if ($simple) {
 		# Write out the simple alias autoreply file

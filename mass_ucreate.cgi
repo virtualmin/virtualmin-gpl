@@ -36,6 +36,12 @@ $source =~ s/\r//g;
 @ashells = grep { $_->{'mailbox'} && $_->{'avail'} } &list_available_shells();
 ($nologin_shell, $ftp_shell, $jailed_shell) = &get_common_available_shells();
 
+# Build taken lists
+local (%taken, %utaken);
+&obtain_lock_unix();
+&obtain_lock_mail();
+&build_taken(\%taken, \%utaken);
+
 # Do it!
 &ui_print_header(&domain_in($d), $text{'umass_title'}, "", "umass");
 
@@ -149,11 +155,6 @@ USER: foreach $line (@lines) {
 			}
 		}
 
-	# Build taken lists
-	local (%taken, %utaken);
-	&lock_user_db();
-	&build_taken(\%taken, \%utaken);
-
 	# Populate the user object
 	local $user = &create_initial_user($d, 0, 0);
 	if ($user->{'unix'} && !$user->{'webowner'}) {
@@ -162,6 +163,7 @@ USER: foreach $line (@lines) {
 	else {
 		$user->{'uid'} = $d->{'uid'};
 		}
+	$taken{$user->{'uid'}}++;
 	$user->{'gid'} = $d->{'gid'} || $d->{'ugid'};
 	if ($user->{'person'}) {
 		$user->{'real'} = $real;
@@ -269,14 +271,14 @@ USER: foreach $line (@lines) {
 	# Send an email upon creation
 	@erv = &send_user_email($d, $user);
 
-	&unlock_user_db();
-
 	print "<font color=#00aa00>",
 	      &text('umass_done', "<tt>$username</tt>"),"</font><br>\n";
 	$count++;
 	}
 
 print "<p>\n";
+&release_lock_unix();
+&release_lock_mail();
 print &text('umass_complete', $count, $ecount),"<br>\n";
 &webmin_log("create", "users", $count);
 

@@ -93,6 +93,8 @@ $domain && $username && $pass || &usage();
 # Get the initial user
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
+&obtain_lock_unix($d);
+&obtain_lock_mail($d);
 $user = &create_initial_user($d, 0, $web);
 
 # Make sure all needed args are set
@@ -140,7 +142,6 @@ foreach $g (@groups) {
 	}
 
 # Build taken lists
-&lock_user_db();
 &build_taken(\%taken, \%utaken);
 
 # Construct user object
@@ -250,8 +251,9 @@ if ($user->{'email'} && !$user->{'nomailfile'}) {
 # Send an email upon creation
 @erv = &send_user_email($d, $user, undef, 0);
 
+&release_lock_unix($d);
+&release_lock_mail($d);
 print "User $user->{'user'} created successfully\n";
-&unlock_user_db();
 
 sub usage
 {

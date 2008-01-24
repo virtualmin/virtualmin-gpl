@@ -33,7 +33,8 @@ while(@ARGV > 0) {
 $domain && $username || &usage();
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
-&lock_user_db();
+&obtain_lock_mail($d);
+&obtain_lock_unix($d);
 @users = &list_domain_users($d);
 ($user) = grep { $_->{'user'} eq $username ||
 		 &remove_userdom($_->{'user'}, $d) eq $username } @users;
@@ -72,8 +73,9 @@ if ($config{'other_users'}) {
 
 &run_post_actions();
 
+&release_lock_mail($d);
+&release_lock_unix($d);
 print "User $user->{'user'} deleted successfully\n";
-&unlock_user_db();
 
 sub usage
 {

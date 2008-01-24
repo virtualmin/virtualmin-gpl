@@ -226,9 +226,6 @@ local %pconfig = map { $_, 1 } @feature_plugins;
 local %got = map { $_, 1 } @got;
 
 # Work out user and group IDs
-local (%gtaken, %ggtaken, %taken, %utaken);
-&build_group_taken(\%gtaken, \%ggtaken);
-&build_taken(\%taken, \%utaken);
 local ($gid, $ugid, $uid, $duser);
 if ($parent) {
 	# UID and GID come from parent
@@ -240,10 +237,8 @@ if ($parent) {
 	$ugroup = $parent->{'ugroup'};
 	}
 else {
-	# Allocate new IDs
-	$gid = &allocate_gid(\%gtaken);
-	$ugid = $gid;
-	$uid = &allocate_uid(\%taken);
+	# IDs are allocated by setup_unix
+	$uid = $gid = $ugid = undef;
 	$duser = $user;
 	}
 
@@ -507,6 +502,12 @@ foreach my $sd (&virtual_server_directories(\%dom)) {
 		       quotemeta("$dom{'home'}/$sd->[0]"));
 	}
 
+# Lock the user DB and build list of used IDs
+&obtain_lock_unix(\%dom);
+&obtain_lock_mail(\%dom);
+local (%taken, %utaken);
+&build_taken(\%taken, \%utaken);
+
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 if ($got{'mail'}) {
 	# Migrate mail users
@@ -542,8 +543,6 @@ if ($got{'mail'}) {
 		local $uinfo = &create_initial_user(\%dom);
 		$uinfo->{'user'} = &userdom_name($muser, \%dom);
 		$uinfo->{'pass'} = $pass{$muser};
-		local %taken;
-		&build_taken(\%taken);
 		$uinfo->{'uid'} = &allocate_uid(\%taken);
 		$uinfo->{'gid'} = $dom{'gid'};
 		$uinfo->{'real'} = $mreal;
@@ -555,6 +554,7 @@ if ($got{'mail'}) {
 		$uinfo->{'mquota'} = $quota{$muser};
 		&create_user($uinfo, \%dom);
 		&create_user_home($uinfo, \%dom);
+		$taken{$uinfo->{'uid'}}++;
 		local ($crfile, $crtype) = &create_mail_file($uinfo);
 
 		# Move his mail files
@@ -850,8 +850,6 @@ if ($got{'mysql'}) {
 			}
 		close(MYSQL);
 		foreach my $myuinfo (values %myusers) {
-			local %taken;
-			&build_taken(\%taken);
 			local $already = $usermap{$myuinfo->{'user'}};
 			if ($already) {
 				# User already exists, so just give him the dbs
@@ -864,6 +862,7 @@ if ($got{'mysql'}) {
 				&create_user($myuinfo, \%dom);
 				&create_user_home($myuinfo, \%dom);
 				&create_mail_file($myuinfo);
+				$taken{$myuinfo->{'uid'}}++;
 				$usermap{$myuinfo->{'user'}} = $myuinfo;
 				}
 			$myucount++;
@@ -912,8 +911,6 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 			}
 		else {
 			# Create new FTP-only user
-			local %taken;
-			&build_taken(\%taken);
 			local $fuinfo = &create_initial_user(\%dom);
 			$fuinfo->{'user'} = $fuser;
 			$fuinfo->{'pass'} = $fpass;
@@ -927,12 +924,15 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 			&create_user($fuinfo, \%dom);
 			&create_user_home($fuinfo, \%dom);
 			&create_mail_file($fuinfo);
+			$taken{$fuinfo->{'uid'}}++;
 			$fcount++;
 			}
 		}
 	close(FTP);
 	&$second_print(".. done (created $fcount FTP users)");
 	}
+&release_lock_unix(\%dom);
+&release_lock_mail(\%dom);
 
 # Migrate any parked domains as alias domains
 local @parked;

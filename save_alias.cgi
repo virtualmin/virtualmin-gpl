@@ -6,6 +6,8 @@ require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_aliases() || &error($text{'aliases_ecannot'});
+
+&obtain_lock_mail($d);
 @aliases = &list_domain_aliases($d);
 if (!$in{'new'}) {
 	($virt) = grep { $_->{'from'} eq $in{'old'} } @aliases;
@@ -21,6 +23,7 @@ if ($in{'delete'}) {
 		}
 	&delete_virtuser($virt);
 	&sync_alias_virtuals($d);
+	&release_lock_mail($d);
 	&webmin_log("delete", "alias", $virt->{'from'}, $virt);
 	}
 else {
@@ -69,7 +72,6 @@ else {
 
 		# Create the virtuser
 		&create_virtuser($virt);
-		&webmin_log("create", "alias", $virt->{'from'}, $virt);
 		}
 	else {
 		if ($virt->{'from'} ne $in{'old'}) {
@@ -81,9 +83,15 @@ else {
 
 		# Modify virtuser
 		&modify_virtuser(\%oldvirt, $virt);
-		&webmin_log("modify", "alias", $virt->{'from'}, $virt);
 		}
 	&sync_alias_virtuals($d);
+	&release_lock_mail($d);
+	if ($in{'new'}) {
+		&webmin_log("create", "alias", $virt->{'from'}, $virt);
+		}
+	else {
+		&webmin_log("modify", "alias", $virt->{'from'}, $virt);
+		}
 
 	if ($in{'simplemode'} eq 'simple') {
 		# Write out the autoreply file, if any

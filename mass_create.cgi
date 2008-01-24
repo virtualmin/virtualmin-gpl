@@ -240,12 +240,9 @@ foreach $line (@lines) {
 		$uid = $parentdom->{'uid'};
 		}
 	else {
-		# Work out user and group IDs
-		&build_group_taken(\%gtaken, \%ggtaken);
-		$gid = $ugid = &allocate_gid(\%gtaken);
+		# User and group IDs are allocated in setup_unix
+		$gid = $gid = $uid = undef;
 		$ugroup = $group;
-		&build_taken(\%taken, \%utaken);
-		$uid = &allocate_uid(\%taken);
 		}
 	local $prefix = &compute_prefix($dname, $group, $parentdom);
 

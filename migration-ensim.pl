@@ -96,9 +96,6 @@ local %pconfig = map { $_, 1 } @feature_plugins;
 local %got = map { $_, 1 } @got;
 
 # Work out user and group IDs
-local (%gtaken, %ggtaken, %taken, %utaken);
-&build_group_taken(\%gtaken, \%ggtaken);
-&build_taken(\%taken, \%utaken);
 local ($gid, $ugid, $uid, $duser);
 if ($parent) {
 	# UID and GID come from parent
@@ -110,10 +107,8 @@ if ($parent) {
 	$ugroup = $parent->{'ugroup'};
 	}
 else {
-	# Allocate new IDs
-	$gid = &allocate_gid(\%gtaken);
-	$ugid = $gid;
-	$uid = &allocate_uid(\%taken);
+	# IDs are allocated by setup_unix
+	$gid = $ugid = $uid = undef;
 	$duser = $user;
 	}
 
@@ -345,6 +340,12 @@ if ($got{'mysql'}) {
 	&$second_print(".. done (created $mycount)");
 	}
 
+# Lock the user DB and build list of used IDs
+&obtain_lock_unix(\%dom);
+&obtain_lock_mail(\%dom);
+local (%taken, %utaken);
+&build_taken(\%taken, \%utaken);
+
 # Migrate mail users (if there are any)
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 local $usercount = 0;
@@ -364,8 +365,6 @@ if ($userident->{$origuser}) {
 		local $uinfo = &create_initial_user(\%dom);
 		$uinfo->{'user'} = $mu.'@'.$dom;
 		$uinfo->{'pass'} = $uu->{'config'}->{'password'};
-		local %taken;
-		&build_taken(\%taken);
 		$uinfo->{'uid'} = &allocate_uid(\%taken);
 		$uinfo->{'gid'} = $dom{'gid'};
 		$uinfo->{'real'} = $uu->{'config'}->{'fullname'};
@@ -379,6 +378,7 @@ if ($userident->{$origuser}) {
 			}
 		&create_user($uinfo, \%dom);
 		&create_user_home($uinfo, \%dom);
+		$taken{$uinfo->{'uid'}}++;
 
 		# Move his mail file
 		local ($crfile, $crtype) = &create_mail_file($uinfo);
@@ -402,6 +402,8 @@ if ($userident->{$origuser}) {
 		}
 	&$second_print(".. done (created $usercount)");
 	}
+&release_lock_unix(\%dom);
+&release_lock_mail(\%dom);
 
 # Move server owner's inbox file
 local $owner = &get_domain_owner(\%dom);

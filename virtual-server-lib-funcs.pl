@@ -744,39 +744,39 @@ sub list_all_users_quotas
 &require_useradmin($_[0]);
 if (&has_quota_commands()) {
 	# Get from user quota command
-	if (!defined(%soft_home_quota) && !$_[0]) {
+	if (!defined(%main::soft_home_quota) && !$_[0]) {
 		local $out = &run_quota_command("list_users");
 		foreach my $l (split(/\r?\n/, $out)) {
 			local ($user, $used, $soft, $hard) = split(/\s+/, $l);
-			$soft_home_quota{$user} = $soft;
-			$hard_home_quota{$user} = $hard;
-			$used_home_quota{$user} = $used;
+			$main::soft_home_quota{$user} = $soft;
+			$main::hard_home_quota{$user} = $hard;
+			$main::used_home_quota{$user} = $used;
 			}
 		}
 	}
 else {
 	# Get from real quota system
-	if (!defined(%soft_home_quota) && &has_home_quotas() && !$_[0]) {
+	if (!defined(%main::soft_home_quota) && &has_home_quotas() && !$_[0]) {
 		local $n = &quota::filesystem_users($config{'home_quotas'});
 		local $i;
 		for($i=0; $i<$n; $i++) {
-			$soft_home_quota{$quota::user{$i,'user'}} =
+			$main::soft_home_quota{$quota::user{$i,'user'}} =
 				$quota::user{$i,'sblocks'};
-			$hard_home_quota{$quota::user{$i,'user'}} =
+			$main::hard_home_quota{$quota::user{$i,'user'}} =
 				$quota::user{$i,'hblocks'};
-			$used_home_quota{$quota::user{$i,'user'}} =
+			$main::used_home_quota{$quota::user{$i,'user'}} =
 				$quota::user{$i,'ublocks'};
 			}
 		}
-	if (!defined(%soft_mail_quota) && &has_mail_quotas() && !$_[0]) {
+	if (!defined(%main::soft_mail_quota) && &has_mail_quotas() && !$_[0]) {
 		local $n = &quota::filesystem_users($config{'mail_quotas'});
 		local $i;
 		for($i=0; $i<$n; $i++) {
-			$soft_mail_quota{$quota::user{$i,'user'}} =
+			$main::soft_mail_quota{$quota::user{$i,'user'}} =
 				$quota::user{$i,'sblocks'};
-			$hard_mail_quota{$quota::user{$i,'user'}} =
+			$main::hard_mail_quota{$quota::user{$i,'user'}} =
 				$quota::user{$i,'hblocks'};
-			$used_mail_quota{$quota::user{$i,'user'}} =
+			$main::used_mail_quota{$quota::user{$i,'user'}} =
 				$quota::user{$i,'ublocks'};
 			}
 		}
@@ -787,12 +787,12 @@ local @users = &foreign_call($usermodule, "list_users");
 local $u;
 foreach $u (@users) {
 	$u->{'module'} = $usermodule;
-	$u->{'softquota'} = $soft_home_quota{$u->{'user'}};
-	$u->{'hardquota'} = $hard_home_quota{$u->{'user'}};
-	$u->{'uquota'} = $used_home_quota{$u->{'user'}};
-	$u->{'softmquota'} = $soft_mail_quota{$u->{'user'}};
-	$u->{'hardmquota'} = $hard_mail_quota{$u->{'user'}};
-	$u->{'umquota'} = $used_mail_quota{$u->{'user'}};
+	$u->{'softquota'} = $main::soft_home_quota{$u->{'user'}};
+	$u->{'hardquota'} = $main::hard_home_quota{$u->{'user'}};
+	$u->{'uquota'} = $main::used_home_quota{$u->{'user'}};
+	$u->{'softmquota'} = $main::soft_mail_quota{$u->{'user'}};
+	$u->{'hardmquota'} = $main::hard_mail_quota{$u->{'user'}};
+	$u->{'umquota'} = $main::used_mail_quota{$u->{'user'}};
 	$u->{'unix'} = 1;
 	$u->{'person'} = 1;
 	}
@@ -845,10 +845,8 @@ else {
 		}
 	&foreign_call($usermodule, "set_user_envs", $_[0], 'CREATE_USER', $_[0]->{'plainpass'}, [ ]);
 	&foreign_call($usermodule, "making_changes");
-	&foreign_call($usermodule, "lock_user_files");
 	&userdom_substitutions($_[0], $_[1]);
 	&foreign_call($usermodule, "create_user", $_[0]);
-	&foreign_call($usermodule, "unlock_user_files");
 	&foreign_call($usermodule, "made_changes");
 	}
 
@@ -861,10 +859,8 @@ if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/ &&
 	$extrauser->{'user'} = &replace_atsign($extrauser->{'user'});
 	&foreign_call($usermodule, "set_user_envs", $extrauser, 'CREATE_USER', $extrauser->{'plainpass'}, [ ]);
 	&foreign_call($usermodule, "making_changes");
-	&foreign_call($usermodule, "lock_user_files");
 	&userdom_substitutions($extrauser, $_[1]);
 	&foreign_call($usermodule, "create_user", $extrauser);
-	&foreign_call($usermodule, "unlock_user_files");
 	&foreign_call($usermodule, "made_changes");
 	}
 
@@ -1105,10 +1101,8 @@ else {
 	&foreign_call($usermodule, "set_user_envs", $_[0], 'MODIFY_USER',
 		      $_[0]->{'plainpass'}, undef, $_[1], $_[1]->{'plainpass'});
 	&foreign_call($usermodule, "making_changes");
-	&foreign_call($usermodule, "lock_user_files");
 	&userdom_substitutions($_[0], $_[2]);
 	&foreign_call($usermodule, "modify_user", $_[1], $_[0]);
-	&foreign_call($usermodule, "unlock_user_files");
 	&foreign_call($usermodule, "made_changes");
 
 	if ($config{'mail_system'} == 0 && $_[1]->{'user'} =~ /\@/) {
@@ -1124,11 +1118,9 @@ else {
 					undef, $oldextrauser,
 					$_[1]->{'plainpass'});
 			&foreign_call($usermodule, "making_changes");
-			&foreign_call($usermodule, "lock_user_files");
 			&userdom_substitutions($extrauser, $_[2]);
 			&foreign_call($usermodule, "modify_user",
 					$oldextrauser, $extrauser);
-			&foreign_call($usermodule, "unlock_user_files");
 			&foreign_call($usermodule, "made_changes");
 			}
 		}
@@ -1517,9 +1509,7 @@ else {
 	# Delete the user
 	&foreign_call($usermodule, "set_user_envs", $_[0], 'DELETE_USER')
 	&foreign_call($usermodule, "making_changes");
-	&foreign_call($usermodule, "lock_user_files");
 	&foreign_call($usermodule, "delete_user",$_[0]);
-	&foreign_call($usermodule, "unlock_user_files");
 	&foreign_call($usermodule, "made_changes");
 	}
 
@@ -1531,9 +1521,7 @@ if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 	if ($extrauser) {
 		&foreign_call($usermodule, "set_user_envs", $extrauser, 'DELETE_USER')
 		&foreign_call($usermodule, "making_changes");
-		&foreign_call($usermodule, "lock_user_files");
 		&foreign_call($usermodule, "delete_user", $extrauser);
-		&foreign_call($usermodule, "unlock_user_files");
 		&foreign_call($usermodule, "made_changes");
 		}
 	}
@@ -4892,6 +4880,11 @@ foreach $d (@{$_[1]}) {
 		}
 	}
 
+# Lock user DB for UID re-allocation
+if ($_[3]->{'reuid'}) {
+	&obtain_lock_unix($d);
+	}
+
 local $vcount = 0;
 if ($ok) {
 	# Fill in missing domain details
@@ -4965,7 +4958,7 @@ if ($ok) {
 				}
 			elsif ($_[3]->{'reuid'}) {
 				# Re-allocate the UID and GID
-				local ($samegid) =($d->{'gid'} == $d->{'ugid'});
+				local ($samegid) = ($d->{'gid'} == $d->{'ugid'});
 				local (%gtaken, %taken);
 				&build_group_taken(\%gtaken);
 				$d->{'gid'} = &allocate_gid(\%gtaken);
@@ -5006,6 +4999,7 @@ if ($ok) {
 					last DOMAIN;
 					}
 				}
+
 			# DNS external IP is always reset to match this system,
 			# as the old setting is unlikely to be correct.
 			$d->{'dns_ip'} = $virt || $config{'all_namevirtual'} ?
@@ -5172,6 +5166,10 @@ if (defined(&list_domain_scripts) && $ok && scalar(keys %missing)) {
 			}
 		&$second_print($badlist);
 		}
+	}
+
+if ($_[3]->{'reuid'}) {
+	&release_lock_unix($d);
 	}
 
 &execute_command("rm -rf ".quotemeta($restoredir));
@@ -9417,21 +9415,6 @@ return $? ? &text('addstyle_ecmdfailed',
 		  "<tt>".&html_escape($out)."</tt>") : undef;
 }
 
-# lock_user_db()
-# Take out a lock on all mailbox users. Should be called before performing
-# any user-related options
-sub lock_user_db
-{
-return &lock_file("$module_config_directory/userdb");
-}
-
-# unlock_user_db()
-# Releases the lock take out by lock_user_db()
-sub unlock_user_db
-{
-return &unlock_file("$module_config_directory/userdb");
-}
-
 # feature_links(&domain)
 # Returns a list of links for editing specific features within a domain, such
 # as the DNS zone, apache config and so on. Includes plugins.
@@ -11728,12 +11711,12 @@ sub flush_virtualmin_caches
 undef(%main::get_domain_cache);
 undef(%bsize_cache);
 undef(%get_bandwidth_cache);
-undef(%soft_home_quota);
-undef(%hard_home_quota);
-undef(%used_home_quota);
-undef(%soft_mail_quota);
-undef(%hard_mail_quota);
-undef(%used_mail_quota);
+undef(%main::soft_home_quota);
+undef(%main::hard_home_quota);
+undef(%main::used_home_quota);
+undef(%main::soft_mail_quota);
+undef(%main::hard_mail_quota);
+undef(%main::used_mail_quota);
 undef(@useradmin::list_users_cache);
 undef(@useradmin::list_groups_cache);
 }

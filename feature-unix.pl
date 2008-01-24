@@ -731,30 +731,30 @@ eval {
 # Lock all Unix password files
 sub obtain_lock_unix
 {
-if ($got_lock_unix == 0) {
+if ($main::got_lock_unix == 0) {
 	print STDERR "getting Unix lock\n";
 	&require_useradmin();
 	&foreign_call($usermodule, "lock_user_files");
 	undef(@useradmin::list_users_cache);
 	undef(@useradmin::list_groups_cache);
-	undef(%soft_home_quota);
-	undef(%hard_home_quota);
-	undef(%used_home_quota);
-	undef(%soft_mail_quota);
-	undef(%hard_mail_quota);
+	undef(%main::soft_home_quota);
+	undef(%main::hard_home_quota);
+	undef(%main::used_home_quota);
+	undef(%main::soft_mail_quota);
+	undef(%main::hard_mail_quota);
 	}
-$got_lock_unix++;
+$main::got_lock_unix++;
 }
 
 # Unlock all Unix password files
 sub release_lock_unix
 {
-if ($got_lock_unix == 1) {
+if ($main::got_lock_unix == 1) {
 	print STDERR "releasing Unix lock\n";
 	&require_useradmin();
 	&foreign_call($usermodule, "unlock_user_files");
 	}
-$got_lock_unix-- if ($got_lock_unix);
+$main::got_lock_unix-- if ($main::got_lock_unix);
 }
 
 $done_feature_script{'unix'} = 1;

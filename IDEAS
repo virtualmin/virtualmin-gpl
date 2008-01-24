@@ -60,21 +60,16 @@
 	 - no need for preloading their libs
 	 - no need for variable to not load plugins
 
- - mobile theme for webmail
-	- release
-
  - global lock on domain DB, to prevent problems with concurrent ops
 	- or do better per-feature locking, ie. Apache and BIND and user DB
 	- each feature has an obtain_lock_XXX function, which locks some
 	  config file and flushes all in-memory caches (unless already locked
 	  by this process, in which case it does nothing)
 	- FS #3500
-	- obtain_lock_unix should be called by mailbox programs, and use
-	  /etc/passwd
 	- move all locking to obtain_lock_* functions.
-	- Call from feature_* functions, and from CGIs and .pls that do user
-	  and alias management
-	- Need to do web, webalizer, ssl, spam, virus
+	- Need to do web, webalizer, ssl, spam, virus, webmin
 	- Need release_lock functions too
-	- UID allocation MUST be done in setup_unix, so that we can have a
-	  locked copy of /etc/passwd in RAM
+	- Remove debugging code
+	- All CGIs and .pl scripts that do something should call appropriate
+	  lock function first
+	- Remove all other calls to locking code

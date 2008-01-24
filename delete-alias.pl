@@ -35,6 +35,7 @@ $d || usage("Virtual server $domain does not exist");
 $d->{'aliascopy'} && &usage("Aliases cannot be edited in alias domains in copy mode");
 
 # Find the alias
+&obtain_lock_mail($d);
 @aliases = &list_domain_aliases($d);
 $email = $from eq "*" ? "%1\@$domain" : "$from\@$domain";
 ($virt) = grep { $_->{'from'} eq $email } @aliases;
@@ -47,6 +48,7 @@ if (defined(&get_simple_alias)) {
 	}
 &delete_virtuser($virt);
 &sync_alias_virtuals($d);
+&release_lock_mail($d);
 print "Alias for $email deleted successfully\n";
 
 sub usage
