@@ -101,6 +101,7 @@ elsif ($in{$_[0]."_mode"} == 1) {
 	return undef;
 	}
 else {
+	$in{$_[0]} =~ s/\t/ /g;
 	$in{$_[0]} =~ s/\r//g;
 	$in{$_[0]} =~ s/\n/\t/g;
 	return $in{$_[0]};
