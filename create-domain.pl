@@ -379,12 +379,8 @@ if ($parent) {
 	$uid = $parent->{'uid'};
 	}
 else {
-	# Work out user and group IDs
-	&build_group_taken(\%gtaken, \%ggtaken);
-	$gid = &allocate_gid(\%gtaken);
-	$ugid = $gid;
-	&build_taken(\%taken, \%utaken);
-	$uid = &allocate_uid(\%taken);
+	# IDs are allocated later
+	$uid = $ugid = $gid = undef;
 	}
 
 # Work out prefix if needed, and check it

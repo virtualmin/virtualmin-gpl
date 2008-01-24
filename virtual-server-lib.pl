@@ -83,7 +83,7 @@ if (!$virtualmin_pro) {
 if ($no_virtualmin_plugins) {
 	@confplugins = ( );
 	}
-@opt_features = ( 'dir', 'unix', 'mail', 'dns', 'web', 'webalizer', 'ssl',
+@opt_features = ( 'unix', 'dir', 'mail', 'dns', 'web', 'webalizer', 'ssl',
 		  'logrotate', 'mysql', 'postgres', 'ftp',
 		  $virtualmin_pro ? ( 'spam', 'virus', 'status' ) : ( ),
 		  'webmin' );

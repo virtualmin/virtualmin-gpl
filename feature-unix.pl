@@ -27,11 +27,11 @@ if ($gclash || !$_[0]->{'gid'}) {
 	&build_group_taken(\%gtaken, \%ggtaken, \@allgroups);
 	$_[0]->{'gid'} = &allocate_gid(\%gtaken);
 	}
+$_[0]->{'ugid'} = $_[0]->{'gid'} if ($_[0]->{'ugid'} eq '');
 
 if (&mail_system_needs_group() || $_[0]->{'gid'} == $_[0]->{'ugid'}) {
 	# Create the group
 	&$first_print(&text('setup_group', $_[0]->{'group'}));
-	&foreign_call($usermodule, "lock_user_files");
 	%ginfo = ( 'group', $_[0]->{'group'},
 		   'gid', $_[0]->{'gid'},
 		 );
@@ -47,6 +47,7 @@ if (&mail_system_needs_group() || $_[0]->{'gid'} == $_[0]->{'ugid'}) {
 		&delete_partial_group(\%ginfo);
 		&$second_print($@ ? &text('setup_ecrgroup2', $@)
 				  : $text{'setup_ecrgroup'});
+		&release_lock_unix($_[0]);
 		return 0;
 		}
 	&$second_print($text{'setup_done'});
@@ -84,7 +85,6 @@ eval {
 	&foreign_call($usermodule, "making_changes");
 	&foreign_call($usermodule, "create_user", \%uinfo);
 	&foreign_call($usermodule, "made_changes");
-	&foreign_call($usermodule, "unlock_user_files");
 	if ($config{'other_doms'}) {
 		&foreign_call($usermodule, "other_modules",
 			      "useradmin_create_user", \%uinfo);
@@ -95,22 +95,20 @@ if ($@ || !defined(getpwnam($_[0]->{'user'}))) {
 	&delete_partial_user(\%uinfo);
 	&$second_print($@ ? &text('setup_ecruser2', $@)
 			  : $text{'setup_ecruser'});
+	&release_lock_unix($_[0]);
 	return 0;
 	}
 &$second_print($text{'setup_done'});
 
 # Set the user's quota
-&$first_print($text{'setup_usermail'});
 if (&has_home_quotas()) {
 	&set_server_quotas($_[0]);
 	}
 
+&$first_print($text{'setup_usermail2'});
 eval {
-	# Create mail file
-	local $main::error_must_die = 1;
-	&create_mail_file(\%uinfo);
-
 	# Create virtuser pointing to new user, and possibly generics entry
+	local $main::error_must_die = 1;
 	if ($_[0]->{'mail'}) {
 		local @virts = &list_virtusers();
 		local $email = $_[0]->{'user'}."\@".$_[0]->{'dom'};
@@ -127,7 +125,7 @@ eval {
 		}
 	};
 if ($@) {
-	&$second_print(&text('setup_eusermail', $@));
+	&$second_print(&text('setup_eusermail2', $@));
 	}
 else {
 	&$second_print($text{'setup_done'});
@@ -151,6 +149,7 @@ else {
 # Set the user's Usermin IMAP password
 &set_usermin_imap_password(\%uinfo);
 
+&release_lock_unix($_[0]);
 return 1;
 }
 
@@ -168,7 +167,6 @@ if (!$_[0]->{'parent'}) {
 		       $_[0]->{'user'} ne $_[1]->{'user'} ||
 		       $_[0]->{'home'} ne $_[1]->{'home'} ||
 		       $_[0]->{'owner'} ne $_[1]->{'owner'})) {
-		&foreign_call($usermodule, "lock_user_files");
 		local %old = %$uinfo;
 		&$first_print($text{'save_user'});
 		$uinfo->{'real'} = $_[0]->{'owner'};
@@ -218,7 +216,6 @@ if (!$_[0]->{'parent'}) {
 			}
 
 		&$second_print($text{'setup_done'});
-		&foreign_call($usermodule, "unlock_user_files");
 		}
 
 	if (&has_home_quotas() && $access{'edit'} == 1) {
@@ -235,7 +232,6 @@ if (!$_[0]->{'parent'}) {
 	local ($ginfo) = grep { $_->{'group'} eq $_[1]->{'group'} }
 			      &list_all_groups();
 	if ($ginfo && $_[0]->{'group'} ne $_[1]->{'group'}) {
-		&foreign_call($usermodule, "lock_user_files");
 		local %old = %$ginfo;
 		&$first_print($text{'save_group'});
 		$ginfo->{'group'} = $_[0]->{'group'};
@@ -244,9 +240,9 @@ if (!$_[0]->{'parent'}) {
 		&foreign_call($usermodule, "making_changes");
 		&foreign_call($usermodule, "modify_group", \%old, $ginfo);
 		&foreign_call($usermodule, "made_changes");
-		&foreign_call($usermodule, "unlock_user_files");
 		&$second_print($text{'setup_done'});
 		}
+	&release_lock_unix($_[0]);
 	}
 elsif ($_[0]->{'parent'} && !$_[1]->{'parent'}) {
 	# Unix feature has been turned off .. so delete the user and group
@@ -258,12 +254,13 @@ elsif ($_[0]->{'parent'} && !$_[1]->{'parent'}) {
 # Delete the unix user and group for a domain
 sub delete_unix
 {
-&obtain_lock_unix($_[0]);
-&require_useradmin();
-local @allusers = &foreign_call($usermodule, "list_users");
-local ($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'} } @allusers;
-
 if (!$_[0]->{'parent'}) {
+	# Get the user object
+	&obtain_lock_unix($_[0]);
+	&require_useradmin();
+	local @allusers = &foreign_call($usermodule, "list_users");
+	local ($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'} } @allusers;
+
 	# Zero his quotas
 	if ($uinfo) {
 		&set_user_quotas($uinfo->{'user'}, 0, 0, $_[0]);
@@ -294,7 +291,6 @@ if (!$_[0]->{'parent'}) {
 		}
 
 	# Delete unix user
-	&foreign_call($usermodule, "lock_user_files");
 	if ($uinfo) {
 		&$first_print($text{'delete_user'});
 		&delete_user($uinfo, $_[0]);
@@ -316,7 +312,7 @@ if (!$_[0]->{'parent'}) {
 		&foreign_call($usermodule, "made_changes");
 		&$second_print($text{'setup_done'});
 		}
-	&foreign_call($usermodule, "unlock_user_files");
+	&release_lock_unix($_[0]);
 	}
 
 # Update any groups
@@ -362,7 +358,6 @@ sub disable_unix
 if (!$_[0]->{'parent'}) {
 	&obtain_lock_unix($_[0]);
 	&require_useradmin();
-	&foreign_call($usermodule, "lock_user_files");
 	local @allusers = &foreign_call($usermodule, "list_users");
 	local ($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'} } @allusers;
 	if ($uinfo) {
@@ -376,7 +371,7 @@ if (!$_[0]->{'parent'}) {
 		&foreign_call($usermodule, "made_changes");
 		&$second_print($text{'setup_done'});
 		}
-	&foreign_call($usermodule, "unlock_user_files");
+	&release_lock_unix($_[0]);
 	}
 }
 
@@ -387,7 +382,6 @@ sub enable_unix
 if (!$_[0]->{'parent'}) {
 	&obtain_lock_unix($_[0]);
 	&require_useradmin();
-	&foreign_call($usermodule, "lock_user_files");
 	local @allusers = &foreign_call($usermodule, "list_users");
 	local ($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'} } @allusers;
 	if ($uinfo) {
@@ -401,7 +395,7 @@ if (!$_[0]->{'parent'}) {
 		&foreign_call($usermodule, "made_changes");
 		&$second_print($text{'setup_done'});
 		}
-	&foreign_call($usermodule, "unlock_user_files");
+	&release_lock_unix($_[0]);
 	}
 }
 
@@ -442,7 +436,6 @@ local @allusers = &foreign_call($usermodule, "list_users");
 local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
 if ($uinfo && !$d->{'parent'}) {
 	local $olduinfo = { %$uinfo };
-	&foreign_call($usermodule, "lock_user_files");
 	$uinfo->{'real'} = $d->{'owner'};
 	local $enc = &foreign_call($usermodule, "encrypt_password",
 			$d->{'pass'});
@@ -453,7 +446,6 @@ if ($uinfo && !$d->{'parent'}) {
 	&foreign_call($usermodule, "making_changes");
 	&foreign_call($usermodule, "modify_user", $uinfo, $uinfo);
 	&foreign_call($usermodule, "made_changes");
-	&foreign_call($usermodule, "lock_user_files");
 	}
 &$second_print($text{'setup_done'});
 
@@ -465,6 +457,7 @@ if (-r $file) {
 	&cron::copy_crontab($d->{'user'});
 	&$second_print($text{'setup_done'});
 	}
+&release_lock_unix($_[0]);
 
 return 1;
 }
@@ -604,7 +597,10 @@ local ($newd, $deld) = @_;
 &require_useradmin();
 local @allgroups = &list_all_groups();
 local ($group) = grep { $_->{'group'} eq $denied_ssh_group } @allgroups;
-return 0 if (!$group);
+if (!$group) {
+	&release_lock_unix($_[0]);
+	return 0;
+	}
 
 # Find domain owners who can't login
 local @shells = &list_available_shells();
@@ -622,15 +618,14 @@ foreach my $d (&list_domains(), $newd) {
 local $oldgroup = { %$group };
 $group->{'members'} = join(",", &unique(@members));
 if ($group->{'members'} ne $oldgroup->{'members'}) {
-	&foreign_call($group->{'module'}, "lock_user_files");
 	&foreign_call($group->{'module'}, "set_group_envs", $group,
 				   	  'MODIFY_GROUP', $oldgroup);
 	&foreign_call($group->{'module'}, "making_changes");
 	&foreign_call($group->{'module'}, "modify_group", $oldgroup, $group);
 	&foreign_call($group->{'module'}, "made_changes");
-	&foreign_call($group->{'module'}, "unlock_user_files");
 	}
 
+&release_lock_unix($_[0]);
 return 1;
 }
 
@@ -647,7 +642,10 @@ return 0 if (!$config{'domains_group'});
 &require_useradmin();
 local @allgroups = &list_all_groups();
 local ($group) = grep { $_->{'group'} eq $config{'domains_group'} } @allgroups;
-return 0 if (!$group);
+if (!$group) {
+	&release_lock_unix($_[0]);
+	return 0;
+	}
 
 # Find domain owners with Unix logins
 local @members;
@@ -661,14 +659,13 @@ foreach my $d (&list_domains(), $newd) {
 local $oldgroup = { %$group };
 $group->{'members'} = join(",", &unique(@members));
 if ($group->{'members'} ne $oldgroup->{'members'}) {
-	&foreign_call($group->{'module'}, "lock_user_files");
 	&foreign_call($group->{'module'}, "set_group_envs", $group,
 				      'MODIFY_GROUP', $oldgroup);
 	&foreign_call($group->{'module'}, "making_changes");
 	&foreign_call($group->{'module'}, "modify_group", $oldgroup, $group);
 	&foreign_call($group->{'module'}, "made_changes");
-	&foreign_call($group->{'module'}, "unlock_user_files");
 	}
+&release_lock_unix($_[0]);
 }
 
 sub startstop_unix
@@ -731,10 +728,13 @@ eval {
 	};
 }
 
+# Lock all Unix password files
 sub obtain_lock_unix
 {
-if (!$got_lock_unix++) {
-	&lock_user_db();
+if ($got_lock_unix == 0) {
+	print STDERR "getting Unix lock\n";
+	&require_useradmin();
+	&foreign_call($usermodule, "lock_user_files");
 	undef(@useradmin::list_users_cache);
 	undef(@useradmin::list_groups_cache);
 	undef(%soft_home_quota);
@@ -743,6 +743,18 @@ if (!$got_lock_unix++) {
 	undef(%soft_mail_quota);
 	undef(%hard_mail_quota);
 	}
+$got_lock_unix++;
+}
+
+# Unlock all Unix password files
+sub release_lock_unix
+{
+if ($got_lock_unix == 1) {
+	print STDERR "releasing Unix lock\n";
+	&require_useradmin();
+	&foreign_call($usermodule, "unlock_user_files");
+	}
+$got_lock_unix-- if ($got_lock_unix);
 }
 
 $done_feature_script{'unix'} = 1;

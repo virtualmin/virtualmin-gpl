@@ -7,6 +7,7 @@ sub setup_dir
 local $tmpl = &get_template($_[0]->{'template'});
 &require_useradmin();
 local $qh = quotemeta($_[0]->{'home'});
+&$first_print($text{'setup_home'});
 
 # Get Unix user, either for this domain or its parent
 local $uinfo;
@@ -17,6 +18,7 @@ if ($_[0]->{'unix'} || $_[0]->{'parent'}) {
 if ($_[0]->{'unix'} && !$uinfo) {
 	# If we are going to have a Unix user but none has been created
 	# yet, fake his details here for use in chowning and skel copying
+	# This should never happen!
 	$uinfo ||= { 'uid' => $_[0]->{'uid'},
 		     'gid' => $_[0]->{'ugid'},
 		     'shell' => '/bin/sh',
@@ -24,7 +26,6 @@ if ($_[0]->{'unix'} && !$uinfo) {
 	}
 
 # Create and populate home directory
-&$first_print($text{'setup_home'});
 &system_logged("mkdir $qh") if (!-d $_[0]->{'home'});
 &system_logged("chmod '$uconfig{'homedir_perms'}' $qh");
 if ($uinfo) {
@@ -46,6 +47,19 @@ foreach $d (&virtual_server_directories($_[0])) {
 		}
         }
 &$second_print($text{'setup_done'});
+
+# Create mail file
+&$first_print($text{'setup_usermail3'});
+eval {
+	local $main::error_must_die = 1;
+	&create_mail_file(\%uinfo);
+	};
+if ($@) {
+	&$second_print(&text('setup_eusermail3', $@));
+	}
+else {
+	&$second_print($text{'setup_done'});
+	}
 
 return 1;
 }

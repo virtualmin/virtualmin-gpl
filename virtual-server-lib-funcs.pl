@@ -3540,6 +3540,7 @@ foreach $d (&list_domains()) {
 	$_[0]->{$d->{'uid'}} = 1;
 	$_[1]->{$d->{'user'}} = 1;
 	}
+&release_lock_unix();
 }
 
 # build_group_taken(&gid-taken, &groupname-taken, [&groups])
@@ -3571,6 +3572,7 @@ foreach $d (&list_domains()) {
 	$_[0]->{$d->{'gid'}} = 1;
 	$_[1]->{$d->{'group'}} = 1;
 	}
+&release_lock_unix();
 }
 
 # allocate_uid(&uid-taken)
