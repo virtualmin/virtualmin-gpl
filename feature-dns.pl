@@ -1057,9 +1057,9 @@ print &ui_table_hr();
 # Master NS hostnames
 print &ui_table_row(&hlink($text{'tmpl_dnsmaster'},
                            "template_dns_master"),
-	&none_def_input("dns_master", $tmpl->{'dns_master'}."<br>",
-			$text{'tmpl_dnsmnames'}."<br>", 0, 0,
-			$text{'tmpl_dnsmauto'}, [ "dns_master" ])." ".
+	&none_def_input("dns_master", $tmpl->{'dns_master'},
+			$text{'tmpl_dnsmnames'}, 0, 0,
+			$text{'tmpl_dnsmauto'}."<br>", [ "dns_master" ])." ".
 	&ui_textbox("dns_master", $tmpl->{'dns_master'} eq 'none' ? '' :
 					$tmpl->{'dns_master'}, 40));
 
