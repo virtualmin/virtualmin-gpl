@@ -6520,40 +6520,42 @@ if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$_[0]->{'alias'}) {
 		$aliasname =~ s/\..*$//;
 		}
 	$aliasname .= ".".$tmpl->{'domalias'};
-	&$first_print(&text('setup_domalias', $aliasname));
-	&$indent_print();
-	local %alias = ( 'id', &domain_id(),
-			 'dom', $aliasname,
-			 'user', $dom->{'user'},
-			 'group', $dom->{'group'},
-			 'prefix', $dom->{'prefix'},
-			 'ugroup', $dom->{'ugroup'},
-			 'pass', $dom->{'pass'},
-			 'alias', $dom->{'id'},
-			 'uid', $dom->{'uid'},
-			 'gid', $dom->{'gid'},
-			 'ugid', $dom->{'ugid'},
-			 'owner', "Automatic alias of $dom->{'dom'}",
-			 'email', $dom->{'email'},
-			 'nocreationmail', 1,
-			 'name', 1,
-			 'ip', $dom->{'ip'},
-			 'virt', 0,
-			 'source', $dom->{'source'},
-			 'parent', $dom->{'id'},
-			 'template', $dom->{'template'},
-			 'reseller', $dom->{'reseller'},
-			);
-	foreach my $f (@alias_features) {
-		$alias{$f} = $dom->{$f};
+	if ($aliasname ne $_[0]->{'dom'}) {
+		&$first_print(&text('setup_domalias', $aliasname));
+		&$indent_print();
+		local %alias = ( 'id', &domain_id(),
+				 'dom', $aliasname,
+				 'user', $dom->{'user'},
+				 'group', $dom->{'group'},
+				 'prefix', $dom->{'prefix'},
+				 'ugroup', $dom->{'ugroup'},
+				 'pass', $dom->{'pass'},
+				 'alias', $dom->{'id'},
+				 'uid', $dom->{'uid'},
+				 'gid', $dom->{'gid'},
+				 'ugid', $dom->{'ugid'},
+				 'owner', "Automatic alias of $dom->{'dom'}",
+				 'email', $dom->{'email'},
+				 'nocreationmail', 1,
+				 'name', 1,
+				 'ip', $dom->{'ip'},
+				 'virt', 0,
+				 'source', $dom->{'source'},
+				 'parent', $dom->{'id'},
+				 'template', $dom->{'template'},
+				 'reseller', $dom->{'reseller'},
+				);
+		foreach my $f (@alias_features) {
+			$alias{$f} = $dom->{$f};
+			}
+		local $parentdom = $dom->{'parent'} ?
+			&get_domain($dom->{'parent'}) : $dom;
+		$alias{'home'} = &server_home_directory(\%alias, $parentdom);
+		&complete_domain(\%alias);
+		&create_virtual_server(\%alias, $parentdom,$parentdom->{'user'});
+		&$outdent_print();
+		&$second_print($text{'setup_done'});
 		}
-	local $parentdom = $dom->{'parent'} ? &get_domain($dom->{'parent'})
-					    : $dom;
-	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
-	&complete_domain(\%alias);
-	&create_virtual_server(\%alias, $parentdom, $parentdom->{'user'});
-	&$outdent_print();
-	&$second_print($text{'setup_done'});
 	}
 
 # Install any scripts specified in the template
