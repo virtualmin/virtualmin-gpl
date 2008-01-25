@@ -29,7 +29,7 @@ local $tmpl = &get_template($_[0]->{'template'});
 if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 	# Creating a new real zone
 	&$first_print($text{'setup_bind'});
-	&obtain_lock_dns($_[0]);
+	&obtain_lock_dns($_[0], 1);
 	local $conf = &bind8::get_config();
 	local $base = $bconfig{'master_dir'} ? $bconfig{'master_dir'} :
 					       &bind8::base_directory($conf);
@@ -110,10 +110,8 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 		$dir->{'file'} = &bind8::add_to_file();
 		$pconf = &bind8::get_config_parent($dir->{'file'});
 		}
-	&lock_file(&bind8::make_chroot($dir->{'file'}));
 	&bind8::save_directive($pconf, undef, [ $dir ], $indent);
 	&flush_file_lines();
-	&unlock_file(&bind8::make_chroot($dir->{'file'}));
 	unlink($bind8::zone_names_cache);
 	undef(@bind8::list_zone_names_cache);
 
@@ -123,10 +121,8 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 	local $rootfile = &bind8::make_chroot($file);
 	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 	if (!-r $rootfile) {
-		&lock_file($rootfile);
 		&create_standard_records($file, $_[0], $ip);
 		&bind8::set_ownership($rootfile);
-		&unlock_file($rootfile);
 		}
 	&$second_print($text{'setup_done'});
 
@@ -151,7 +147,7 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 		$_[0]->{'dns_slave'} = $slaves;
 		}
 
-	undef(@bind8::get_config_cache);
+	&release_lock_dns($_[0], 1);
 	}
 else {
 	# Creating a sub-domain - add to parent's DNS zone
@@ -164,15 +160,14 @@ else {
 		}
 	local $file = &bind8::find("file", $z->{'members'});
 	local $fn = $file->{'values'}->[0];
-	&lock_file(&bind8::make_chroot($fn));
 	$_[0]->{'dns_submode'} = 1;	# So we know how this was done
 	local $ipdom = $_[0]->{'virt'} ? $_[0] : $parent;
 	local $ip = $ipdom->{'dns_ip'} || $ipdom->{'ip'};
 	&create_standard_records($fn, $_[0], $ip);
 	local @recs = &bind8::read_zone_file($fn, $parent->{'dom'});
         &bind8::bump_soa_record($nfn, \@recs);
-	&unlock_file(&bind8::make_chroot($fn));
 
+	&release_lock_dns($parent);
 	&$second_print($text{'setup_done'});
 	}
 &register_post_action(\&restart_bind);
@@ -190,7 +185,7 @@ sub delete_dns
 &require_bind();
 if (!$_[0]->{'dns_submode'}) {
 	&$first_print($text{'delete_bind'});
-	&obtain_lock_dns($_[0]);
+	&obtain_lock_dns($_[0], 1);
 	local $z = &get_bind_zone($_[0]->{'dom'});
 	if ($z) {
 		# Delete the records file
@@ -208,11 +203,9 @@ if (!$_[0]->{'dns_submode'}) {
 
 		# Delete from named.conf
 		local $rootfile = &bind8::make_chroot($z->{'file'});
-		&lock_file($rootfile);
 		local $lref = &read_file_lines($rootfile);
 		splice(@$lref, $z->{'line'}, $z->{'eline'} - $z->{'line'} + 1);
 		&flush_file_lines();
-		&unlock_file($rootfile);
 
 		# Clear zone names caches
 		unlink($bind8::zone_names_cache);
@@ -241,6 +234,7 @@ if (!$_[0]->{'dns_submode'}) {
 			}
 		delete($_[0]->{'dns_slave'});
 		}
+	&release_lock_dns($_[0], 1);
 	}
 else {
 	# Delete records from parent zone
@@ -254,7 +248,6 @@ else {
 		}
 	local $file = &bind8::find("file", $z->{'members'});
 	local $fn = $file->{'values'}->[0];
-	&lock_file(&bind8::make_chroot($fn));
 	local @recs = &bind8::read_zone_file($fn, $parent->{'dom'});
 	foreach $r (reverse(@recs)) {
 		if ($r->{'name'} =~ /$_[0]->{'dom'}/) {
@@ -262,7 +255,7 @@ else {
 			}
 		}
         &bind8::bump_soa_record($fn, \@recs);
-	&unlock_file(&bind8::make_chroot($fn));
+	&release_lock_dns($parent);
 	&$second_print($text{'setup_done'});
 	$_[0]->{'dns_submode'} = 0;
 	}
@@ -277,22 +270,29 @@ sub modify_dns
 &require_bind();
 local $tmpl = &get_template($_[0]->{'template'});
 local $z;
-local ($oldzonename, $newzonename);
+local ($oldzonename, $newzonename, $lockon, $lockconf);
 if ($_[0]->{'dns_submode'}) {
 	# Get parent domain
 	local $parent = &get_domain($_[0]->{'subdom'});
 	&obtain_lock_dns($parent);
+	$lockon = $parent;
 	$z = &get_bind_zone($parent->{'dom'});
 	$oldzonename = $newzonename = $parent->{'dom'};
 	}
 else {
 	# Get this domain
-	&obtain_lock_dns($_[0]);
+	&obtain_lock_dns($_[0], 1);
+	$lockon = $_[0];
+	$lockconf = 1;
 	$z = &get_bind_zone($_[1]->{'dom'});
 	$newzonename = $_[1]->{'dom'};
 	$oldzonename = $_[1]->{'dom'};
 	}
-return 0 if (!$z);	# No DNS zone!
+if (!$z) {
+	# Not found!
+	&release_lock_dns($lockon, $lockconf);
+	return 0;
+	}
 local $oldip = $_[1]->{'dns_ip'} || $_[1]->{'ip'};
 local $newip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 local $rv = 0;
@@ -302,7 +302,6 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 	if (!$_[0]->{'dns_submode'}) {
 		# Domain name has changed .. rename zone file
 		&$first_print($text{'save_dns2'});
-		&lock_file(&bind8::make_chroot($z->{'file'}));
 		local $fn = $file->{'values'}->[0];
 		$nfn = $fn;
 		$nfn =~ s/$_[1]->{'dom'}/$_[0]->{'dom'}/;
@@ -319,7 +318,6 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 		&bind8::save_directive(&bind8::get_config_parent(),
 				       [ $z ], [ $z ], 0);
 		&flush_file_lines();
-		&unlock_file(&bind8::make_chroot($z->{'file'}));
 		}
 	else {
 		&$first_print($text{'save_dns6'});
@@ -388,13 +386,11 @@ if ($oldip ne $newip) {
 	local $file = &bind8::find("file", $z->{'members'});
 	local $fn = $file->{'values'}->[0];
 	local $zonefile = &bind8::make_chroot($fn);
-	&lock_file($zonefile);
 	local @recs = &bind8::read_zone_file($fn, $newzonename);
 	&modify_records_ip_address(\@recs, $fn, $oldip, $newip);
 
 	# Update SOA record
 	&bind8::bump_soa_record($fn, \@recs);
-	&unlock_file($zonefile);
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}
@@ -404,7 +400,6 @@ if ($_[0]->{'mail'} && !$_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 	local $file = &bind8::find("file", $z->{'members'});
 	local $fn = $file->{'values'}->[0];
 	local $zonefile = &bind8::make_chroot($fn);
-	&lock_file($zonefile);
 	local @recs = &bind8::read_zone_file($fn, $newzonename);
 	local ($mx) = grep { $_->{'type'} eq 'MX' &&
 			     $_->{'name'} eq $_[0]->{'dom'}."." ||
@@ -418,14 +413,12 @@ if ($_[0]->{'mail'} && !$_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 		&$second_print($text{'setup_done'});
 		$rv++;
 		}
-	&unlock_file($zonefile);
 	}
 elsif (!$_[0]->{'mail'} && $_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 	# Email was disabled .. remove MX records
 	local $file = &bind8::find("file", $z->{'members'});
 	local $fn = $file->{'values'}->[0];
 	local $zonefile = &bind8::make_chroot($fn);
-	&lock_file($zonefile);
 	local @recs = &bind8::read_zone_file($fn, $newzonename);
 	local @mx = grep { $_->{'type'} eq 'MX' &&
 			   $_->{'name'} eq $_[0]->{'dom'}."." ||
@@ -440,7 +433,6 @@ elsif (!$_[0]->{'mail'} && $_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 		&$second_print($text{'setup_done'});
 		$rv++;
 		}
-	&unlock_file($zonefile);
 	}
 
 if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'}) {
@@ -451,7 +443,6 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'}) {
 	local $file = &bind8::find("file", $z->{'members'});
 	local $fn = $file->{'values'}->[0];
 	local $zonefile = &bind8::make_chroot($fn);
-	&lock_file($zonefile);
 	local @recs = &bind8::read_zone_file($fn, $newzonename);
 	&foreign_require("servers", "servers-lib.pl");
 	local %servers = map { $_->{'id'}, $_ }
@@ -503,6 +494,9 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'}) {
 	&$second_print($text{'setup_done'});
 	$rv++;
 	}
+
+# Release locks
+&release_lock_dns($lockon, $lockconf);
 
 &register_post_action(\&restart_bind) if ($rv);
 return $rv;
@@ -664,19 +658,21 @@ return undef;
 sub disable_dns
 {
 &$first_print($text{'disable_bind'});
-&obtain_lock_dns($_[0]);
+if ($_[0]->{'dns_submode'}) {
+	# Disable is not done for sub-domains
+	&$second_print($text{'disable_bindnosub'});
+	return;
+	}
+&obtain_lock_dns($_[0], 1);
 &require_bind();
 local $z = &get_bind_zone($_[0]->{'dom'});
 if ($z) {
 	local $rootfile = &bind8::make_chroot($z->{'file'});
-	&lock_file($rootfile);
 	$z->{'values'}->[0] = $_[0]->{'dom'}.".disabled";
 	&bind8::save_directive(&bind8::get_config_parent(), [ $z ], [ $z ], 0);
 	&flush_file_lines();
-	&unlock_file($rootfile);
 
 	# Clear zone names caches
-	unlink($bind8::zone_names_cache);
 	undef(@bind8::list_zone_names_cache);
 	&$second_print($text{'setup_done'});
 	&register_post_action(\&restart_bind);
@@ -684,6 +680,7 @@ if ($z) {
 else {
 	&$second_print($text{'save_nobind'});
 	}
+&release_lock_dns($_[0], 1);
 }
 
 # enable_dns(&domain)
@@ -691,19 +688,21 @@ else {
 sub enable_dns
 {
 &$first_print($text{'enable_bind'});
-&obtain_lock_dns($_[0]);
+if ($_[0]->{'dns_submode'}) {
+	# Disable is not done for sub-domains
+	&$second_print($text{'enable_bindnosub'});
+	return;
+	}
+&obtain_lock_dns($_[0], 1);
 &require_bind();
 local $z = &get_bind_zone($_[0]->{'dom'});
 if ($z) {
 	local $rootfile = &bind8::make_chroot($z->{'file'});
-	&lock_file($rootfile);
 	$z->{'values'}->[0] = $_[0]->{'dom'};
 	&bind8::save_directive(&bind8::get_config_parent(), [ $z ], [ $z ], 0);
 	&flush_file_lines();
-	&unlock_file($rootfile);
 
 	# Clear zone names caches
-	unlink($bind8::zone_names_cache);
 	undef(@bind8::list_zone_names_cache);
 	&$second_print($text{'setup_done'});
 	&register_post_action(\&restart_bind);
@@ -711,6 +710,7 @@ if ($z) {
 else {
 	&$second_print($text{'save_nobind'});
 	}
+&release_lock_dns($_[0], 1);
 }
 
 # get_bind_zone(name, [&config], [file])
@@ -817,7 +817,7 @@ sub restore_dns
 &require_bind();
 return 1 if ($_[0]->{'dns_submode'});	# restored in parent
 &$first_print($text{'restore_dnscp'});
-&obtain_lock_dns($_[0]);
+&obtain_lock_dns($_[0], 1);
 local $z = &get_bind_zone($_[0]->{'dom'});
 if ($z) {
 	local $file = &bind8::find("file", $z->{'members'});
@@ -828,7 +828,6 @@ if ($z) {
 
 	if ($_[2]->{'wholefile'}) {
 		# Copy whole file
-		&lock_file($filename);
 		&copy_source_dest($_[1], $filename);
 		&bind8::set_ownership($filename);
 		}
@@ -837,7 +836,6 @@ if ($z) {
 		@thisrecs = &bind8::read_zone_file($fn, $_[0]->{'dom'});
 		local $srclref = &read_file_lines($_[1]);
 		local $dstlref = &read_file_lines($filename);
-		&lock_file($filename);
 		local ($srcstart, $srcend) = &except_soa($_[0], $_[1]);
 		local ($dststart, $dstend) = &except_soa($_[0], $filename);
 		splice(@$dstlref, $dststart, $dstend - $dststart + 1,
@@ -875,7 +873,6 @@ if ($z) {
 			}
 		}
 
-	&unlock_file($filename);
 	&$second_print($text{'setup_done'});
 
 	&register_post_action(\&restart_bind);
@@ -885,6 +882,7 @@ else {
 	&$second_print($text{'backup_dnsnozone'});
 	return 0;
 	}
+&release_lock_dns($_[0], 1);
 }
 
 # modify_records_ip_address(&records, filename, oldip, newip)
@@ -1204,12 +1202,15 @@ return undef;
 sub save_domain_spf
 {
 local ($d, $spf) = @_;
-&obtain_lock_dns($_[0]);
 local @recs = &get_domain_dns_records($d);
-return if (!@recs);		# Domain not found!
+if (!@recs) {
+	# Domain not found!
+	return;
+	}
 local ($r) = grep { $_->{'type'} eq 'SPF' &&
 		    $_->{'name'} eq $d->{'dom'}.'.' } @recs;
 local $str = $spf ? &bind8::join_spf($spf) : undef;
+local $bump = 1;
 if ($r && $spf) {
 	# Update record
 	&bind8::modify_record($r->{'file'}, $r, $r->{'name'}, $r->{'ttl'},
@@ -1226,10 +1227,13 @@ elsif (!$r && $spf) {
 			      "IN", "TXT", "\"$str\"");
 	}
 else {
-	return;
+	# Nothing to do
+	$bump = 0;
 	}
-&bind8::bump_soa_record($recs[0]->{'file'}, \@recs);
-&register_post_action(\&restart_bind);
+if ($bump) {
+	&bind8::bump_soa_record($recs[0]->{'file'}, \@recs);
+	&register_post_action(\&restart_bind);
+	}
 }
 
 # get_domain_dns_records(&domain)
@@ -1293,18 +1297,73 @@ local @rv = grep { $_->{'name'} ne 'dummy' }
 return @rv;
 }
 
-# obtain_lock_dns(&domain)
+# obtain_lock_dns(&domain, [named-conf-too])
 # Lock a domain's zone file and named.conf file
 sub obtain_lock_dns
 {
-local ($d) = @_;
-if (!$got_lock_dns++) {
+local ($d, $conftoo) = @_;
+
+# Lock records file
+if ($main::got_lock_dns_zone{$d->{'id'}} == 0) {
+	print STDERR "getting DNS zone lock for $d->{'dom'}\n";
 	&require_bind();
-	&lock_file(&bind8::make_chroot($config{'zones_file'} ||
-				       $config{'named_conf'}));
-	undef(@bind8::get_config_cache);
-	undef(%bind8::get_config_parent_cache);
-	# XXX lock zone file too?
+	local $conf = &bind8::get_config();
+	local $z = &get_bind_zone($d->{'dom'}, $conf);
+	local $fn;
+	if ($z) {
+		local $file = &bind8::find("file", $z->{'members'});
+		$fn = $file->{'values'}->[0];
+		}
+	else {
+		local $base = $bconfig{'master_dir'} ||
+			      &bind8::base_directory($conf);
+		$fn = &bind8::automatic_filename($d->{'dom'}, 0, $base);
+		}
+	local $rootfn = &bind8::make_chroot($fn);
+	&lock_file($rootfn);
+	print STDERR "DNS zone file is $rootfn\n";
+	$main::got_lock_dns_file{$d->{'id'}} = $rootfn;
+	}
+$main::got_lock_dns_zone{$d->{'id'}}++;
+
+# Lock named.conf for this domain, if needed. We assume that all domains are
+# in the same .conf file, even though that may not be true.
+if ($conftoo) {
+	if ($main::got_lock_dns == 0) {
+		print STDERR "getting DNS lock\n";
+		&require_bind();
+		undef(@bind8::get_config_cache);
+		undef(%bind8::get_config_parent_cache);
+		&lock_file(&bind8::make_chroot($config{'zones_file'} ||
+					       $config{'named_conf'}));
+		}
+	$main::got_lock_dns++;
+	}
+}
+
+# release_lock_dns(&domain, [named-conf-too])
+# Unlock the zone's records file and possibly named.conf entry
+sub release_lock_dns
+{
+local ($d, $conftoo) = @_;
+
+# Unlock records file
+if ($main::got_lock_dns_zone{$d->{'id'}} == 1) {
+	print STDERR "releasing DNS zone lock for $d->{'dom'}\n";
+	local $rootfn = $main::got_lock_dns_file{$d->{'id'}};
+	&unlock_file($rootfn) if ($rootfn);
+	}
+$main::got_lock_dns_zone{$d->{'id'}}-- if ($main::got_lock_dns_zone{$d->{'id'}});
+
+# Unlock named.conf
+if ($conftoo) {
+	if ($main::got_lock_dns == 1) {
+		print STDERR "releasing DNS lock\n";
+		&require_bind();
+		&unlock_file(&bind8::make_chroot($config{'zones_file'} ||
+					         $config{'named_conf'}));
+		}
+	$main::got_lock_dns-- if ($main::got_lock_dns);
 	}
 }
 

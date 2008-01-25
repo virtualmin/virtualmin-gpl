@@ -73,3 +73,5 @@
 	- All CGIs and .pl scripts that do something should call appropriate
 	  lock function first
 	- Remove all other calls to locking code
+	- obtain_lock functions should do nothing if config{'xxx'} is not set
+	- plugins too

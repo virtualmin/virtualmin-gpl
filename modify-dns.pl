@@ -94,6 +94,7 @@ else {
 # Do it for all domains
 foreach $d (@doms) {
 	&$first_print("Updating server $d->{'dom'} ..");
+	&obtain_lock_dns($d);
 	&$indent_print();
 	$oldd = { %$d };
 
@@ -156,6 +157,7 @@ foreach $d (@doms) {
 		}
 
 	&$outdent_print();
+	&release_lock_dns($d);
 	&$second_print(".. done");
 	}
 

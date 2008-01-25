@@ -6749,6 +6749,8 @@ local @aliasdoms = &get_domain_by("alias", $d->{'id'});
 local @aliasdoms = grep { $_->{'parent'} != $d->{'id'} } @aliasdoms;
 
 # Go ahead and delete this domain and all sub-domains ..
+&obtain_lock_mail();
+&obtain_lock_unix();
 foreach my $dd (@aliasdoms, @subs, $d) {
 	if ($dd ne $d) {
 		# Show domain name
@@ -6899,6 +6901,8 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 		&$second_print($text{'setup_done'});
 		}
 	}
+&release_lock_mail();
+&release_lock_unix();
 
 # Run the after deletion command
 if (!$nopost) {

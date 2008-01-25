@@ -18,6 +18,7 @@ sub setup_logrotate
 &$first_print($text{'setup_logrotate'});
 &require_logrotate();
 &require_apache();
+&obtain_lock_logrotate($_[0]);
 
 # Work out the log files we are rotating
 local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}, 0);
@@ -75,15 +76,14 @@ if (@logs) {
 		$lconf->{'members'} = $tconf->[0]->{'members'};
 		unlink($temp);
 		}
-	&lock_file($lconf->{'file'});
 	&logrotate::save_directive($parent, undef, $lconf);
 	&flush_file_lines($lconf->{'file'});
-	&unlock_file($lconf->{'file'});
 	&$second_print($text{'setup_done'});
 	}
 else {
 	&$second_print($text{'setup_nolog'});
 	}
+&release_lock_logrotate($_[0]);
 }
 
 # modify_logrotate(&domain, &olddomain)
@@ -93,6 +93,7 @@ sub modify_logrotate
 if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 	&require_logrotate();
 	&$first_print($text{'save_logrotate'});
+	&obtain_lock_logrotate($_[0]);
 
 	# Work out the *old* access log, which will have already been renamed
 	local $oldalog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
@@ -100,7 +101,6 @@ if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 	local $lconf = &get_logrotate_section($oldalog);
 
 	if ($lconf) {
-		&lock_file($lconf->{'file'});
 		local $parent = &logrotate::get_config_parent();
 		local $n;
 		foreach $n (@{$lconf->{'name'}}) {
@@ -108,12 +108,12 @@ if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 			}
 		&logrotate::save_directive($parent, $lconf, $lconf);
 		&flush_file_lines();
-		&unlock_file($lconf->{'file'});
 		&$second_print($text{'setup_done'});
 		}
 	else {
 		&$second_print($text{'setup_nologrotate'});
 		}
+	&release_lock_logrotate($_[0]);
 	}
 }
 
@@ -123,13 +123,12 @@ sub delete_logrotate
 {
 &require_logrotate();
 &$first_print($text{'delete_logrotate'});
+&obtain_lock_logrotate($_[0]);
 local $lconf = &get_logrotate_section($_[0]);
 if ($lconf) {
 	local $parent = &logrotate::get_config_parent();
-	&lock_file($lconf->{'file'});
 	&logrotate::save_directive($parent, $lconf, undef);
 	&flush_file_lines();
-	&unlock_file($lconf->{'file'});
 	undef($logrotate::get_config_parent_cache);
 	undef($logrotate::get_config_cache);
 	&$second_print($text{'setup_done'});
@@ -137,6 +136,7 @@ if ($lconf) {
 else {
 	&$second_print($text{'setup_nologrotate'});
 	}
+&release_lock_logrotate($_[0]);
 }
 
 # validate_logrotate(&domain)
@@ -208,11 +208,12 @@ else {
 sub restore_logrotate
 {
 &$first_print($text{'restore_logrotatecp'});
+&obtain_lock_logrotate($_[0]);
 local $lconf = &get_logrotate_section($_[0]);
+local $rv;
 if ($lconf) {
 	local $srclref = &read_file_lines($_[1]);
 	local $dstlref = &read_file_lines($lconf->{'file'});
-	&lock_file($lconf->{'file'});
 	splice(@$dstlref, $lconf->{'line'}+1,
 	       $lconf->{'eline'}-$lconf->{'line'}-1,
 	       @$srclref[1 .. @$srclref-2]);
@@ -224,16 +225,17 @@ if ($lconf) {
 			}
 		}
 	&flush_file_lines($lconf->{'file'});
-	&unlock_file($lconf->{'file'});
 	undef($logrotate::get_config_parent_cache);
 	undef($logrotate::get_config_cache);
 	&$second_print($text{'setup_done'});
-	return 1;
+	$rv = 1;
 	}
 else {
 	&$second_print($text{'setup_nologrotate'});
-	return 0;
+	$rv = 0;
 	}
+&release_lock_logrotate($_[0]);
+return $rv;
 }
 
 # sysinfo_logrotate()
@@ -324,6 +326,33 @@ else {
 return $d->{'web'} && (!$oldd || !$oldd->{'web'}) &&
        !$d->{'alias'} && !$d->{'subdom'} &&
        $config{'logrotate'} == 3;
+}
+
+# Lock the logrotate config files
+sub obtain_lock_logrotate
+{
+if ($main::got_lock_logrotate == 0) {
+	print STDERR "getting Logrotate lock\n";
+	&require_logrotate();
+	&lock_file($logrotate::config{'add_file'})
+		if ($logrotate::config{'add_file'});
+	&lock_file($logrotate::config{'logrotate_conf'});
+	undef($logrotate::get_config_cache);
+	}
+$main::got_lock_logrotate++;
+}
+
+# Unlock all logrotate config files
+sub release_lock_logrotate
+{
+if ($main::got_lock_logrotate == 1) {
+	print STDERR "releasing Logrotate lock\n";
+	&require_logrotate();
+	&unlock_file($logrotate::config{'add_file'})
+		if ($logrotate::config{'add_file'});
+	&unlock_file($logrotate::config{'logrotate_conf'});
+	}
+$main::got_lock_logrotate-- if ($main::got_lock_logrotate);
 }
 
 $done_feature_script{'logrotate'} = 1;

@@ -9,6 +9,7 @@ $d = &get_domain($in{'dom'});
 &set_all_null_print();
 $oldd = { %$d };
 
+&obtain_lock_dns($d);
 $spf = &get_domain_spf($d);
 if ($in{'enabled'}) {
 	$spf ||= &default_domain_spf($d);
@@ -41,6 +42,7 @@ else {
 	$d->{'dns_ip'} = $in{'dns_ip'};
 	}
 &modify_dns($d, $oldd);
+&release_lock_dns($d);
 &save_domain($d);
 
 &run_post_actions();
