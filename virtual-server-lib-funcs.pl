@@ -11538,7 +11538,12 @@ $tmpl->{'forceunder'} = $in{'forceunder'};
 # Returns the ID of the initially selected template
 sub get_init_template
 {
-return $_[0] ? $config{'initsub_template'} : $config{'init_template'};
+local $rv = $_[0] ? $config{'initsub_template'} : $config{'init_template'};
+if ($rv > 1 && !-r "$templates_dir/$rv") {
+	# Template doesn't exist! Return sensible default
+	return $_[0] ? 1 : 0;
+	}
+return $rv;
 }
 
 # set_chained_features(&domain, [&old-domain])
