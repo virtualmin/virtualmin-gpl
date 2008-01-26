@@ -43,7 +43,7 @@ else {
 	}
 
 # Check depends again
-$derr = &{$script->{'depends_func'}}($d, $ver);
+$derr = &{$script->{'depends_func'}}($d, $ver, $sinfo);
 &error(&text('scripts_edep', $derr)) if ($derr);
 
 # Check for commands
