@@ -1304,27 +1304,29 @@ sub obtain_lock_dns
 local ($d, $conftoo) = @_;
 
 # Lock records file
-if ($main::got_lock_dns_zone{$d->{'id'}} == 0) {
-	print STDERR "getting DNS zone lock for $d->{'dom'}\n";
-	&require_bind();
-	local $conf = &bind8::get_config();
-	local $z = &get_bind_zone($d->{'dom'}, $conf);
-	local $fn;
-	if ($z) {
-		local $file = &bind8::find("file", $z->{'members'});
-		$fn = $file->{'values'}->[0];
+if ($d) {
+	if ($main::got_lock_dns_zone{$d->{'id'}} == 0) {
+		print STDERR "getting DNS zone lock for $d->{'dom'}\n";
+		&require_bind();
+		local $conf = &bind8::get_config();
+		local $z = &get_bind_zone($d->{'dom'}, $conf);
+		local $fn;
+		if ($z) {
+			local $file = &bind8::find("file", $z->{'members'});
+			$fn = $file->{'values'}->[0];
+			}
+		else {
+			local $base = $bconfig{'master_dir'} ||
+				      &bind8::base_directory($conf);
+			$fn = &bind8::automatic_filename($d->{'dom'}, 0, $base);
+			}
+		local $rootfn = &bind8::make_chroot($fn);
+		&lock_file($rootfn);
+		print STDERR "DNS zone file is $rootfn\n";
+		$main::got_lock_dns_file{$d->{'id'}} = $rootfn;
 		}
-	else {
-		local $base = $bconfig{'master_dir'} ||
-			      &bind8::base_directory($conf);
-		$fn = &bind8::automatic_filename($d->{'dom'}, 0, $base);
-		}
-	local $rootfn = &bind8::make_chroot($fn);
-	&lock_file($rootfn);
-	print STDERR "DNS zone file is $rootfn\n";
-	$main::got_lock_dns_file{$d->{'id'}} = $rootfn;
+	$main::got_lock_dns_zone{$d->{'id'}}++;
 	}
-$main::got_lock_dns_zone{$d->{'id'}}++;
 
 # Lock named.conf for this domain, if needed. We assume that all domains are
 # in the same .conf file, even though that may not be true.
@@ -1348,12 +1350,15 @@ sub release_lock_dns
 local ($d, $conftoo) = @_;
 
 # Unlock records file
-if ($main::got_lock_dns_zone{$d->{'id'}} == 1) {
-	print STDERR "releasing DNS zone lock for $d->{'dom'}\n";
-	local $rootfn = $main::got_lock_dns_file{$d->{'id'}};
-	&unlock_file($rootfn) if ($rootfn);
+if ($d) {
+	if ($main::got_lock_dns_zone{$d->{'id'}} == 1) {
+		print STDERR "releasing DNS zone lock for $d->{'dom'}\n";
+		local $rootfn = $main::got_lock_dns_file{$d->{'id'}};
+		&unlock_file($rootfn) if ($rootfn);
+		}
+	$main::got_lock_dns_zone{$d->{'id'}}--
+		if ($main::got_lock_dns_zone{$d->{'id'}});
 	}
-$main::got_lock_dns_zone{$d->{'id'}}-- if ($main::got_lock_dns_zone{$d->{'id'}});
 
 # Unlock named.conf
 if ($conftoo) {

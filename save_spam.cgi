@@ -44,6 +44,7 @@ foreach $w (@what) {
 	&$func($d, $mode, $dest);
 	}
 
+&obtain_lock_spam($d);
 if ($d->{'spam'}) {
 	$d->{'spam_white'} = $in{'spam_white'};
 	&update_spam_whitelist($d);
@@ -62,6 +63,7 @@ elsif ($in{'clear'} == 2) {
 	$auto = { 'size' => $in{'size'}*$in{'size_units'} };
 	}
 &save_domain_spam_autoclear($d, $auto);
+&release_lock_spam($d);
 
 &run_post_actions();
 

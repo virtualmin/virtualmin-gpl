@@ -108,6 +108,7 @@ else {
 # Do it for all domains
 foreach $d (@doms) {
 	&$first_print("Updating server $d->{'dom'} ..");
+	&obtain_lock_spam($d);
 	&$indent_print();
 
 	if ($config{'spam'} && $d->{'spam'} && defined($mode{'spam'})) {
@@ -133,6 +134,7 @@ foreach $d (@doms) {
 		}
 
 	&$outdent_print();
+	&release_lock_spam($d);
 	&$second_print(".. done");
 	}
 

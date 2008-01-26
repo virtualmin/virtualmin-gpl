@@ -979,8 +979,10 @@ foreach my $g (@{$_[0]->{'secs'}}) {
 &update_secondary_groups($_[1]) if ($_[1]);
 
 # Update spamassassin whitelist
-if ($virtualmin_pro) {
-	&update_spam_whitelist($_[1]) if ($_[1]);
+if ($virtualmin_pro && $_[1]) {
+	&obtain_lock_spam($_[1]);
+	&update_spam_whitelist($_[1]);
+	&release_lock_spam($_[1]);
 	}
 
 # Save the plain-text password, if known
@@ -1407,7 +1409,9 @@ foreach my $group (@groups) {
 
 # Update spamassassin whitelist
 if ($virtualmin_pro && $_[2]) {
+	&obtain_lock_spam($_[2]);
 	&update_spam_whitelist($_[2]);
+	&release_lock_spam($_[2]);
 	}
 
 # Update the plain-text password, except for a domain owner
@@ -1599,8 +1603,10 @@ foreach my $group (@groups) {
 &update_secondary_groups($_[1]) if ($_[1]);
 
 # Update spamassassin whitelist
-if ($virtualmin_pro) {
-	&update_spam_whitelist($_[1]) if ($_[1]);
+if ($virtualmin_pro && $_[1]) {
+	&obtain_lock_spam($_[1]);
+	&update_spam_whitelist($_[1]);
+	&release_lock_spam($_[1]);
 	}
 
 # Remove the plain-text password

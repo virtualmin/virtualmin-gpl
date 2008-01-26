@@ -51,6 +51,8 @@ if ($config{'virus'}) {
 		}
 	}
 
+&obtain_lock_spam_all();
+
 # Update spam scanner
 if ($config{'spam'}) {
 	&save_global_spam_client($client, $host, $size);
@@ -62,6 +64,8 @@ if ($config{'virus'}) {
 		$in{'scanner'} == 0 ? "clamscan" :
 		$in{'scanner'} == 1 ? "clamdscan" : $in{'scanprog'});
 	}
+
+&release_lock_spam_all();
 
 &set_all_null_print();
 &run_post_actions();

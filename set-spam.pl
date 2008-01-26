@@ -79,6 +79,8 @@ if (defined($clamd)) {
 			   "your system");
 	}
 
+&obtain_lock_spam_all();
+
 if ($spam_client || $spam_host || $spam_max) {
 	print "Updating all virtual servers with new SpamAssassin client ..\n";
 	($old_spam_client, $old_spam_host, $old_spam_max) =
@@ -110,6 +112,8 @@ if ($virus_scanner) {
 	&save_global_virus_scanner($virus_scanner);
 	print ".. done\n\n";
 	}
+
+&release_lock_spam_all();
 
 &run_post_actions();
 

@@ -194,15 +194,6 @@ if ($config{'spam'} && &can_edit_spam()) {
 		1, \@tds);
 	}
 
-# Virus processing program
-if ($config{'virus'} && &can_edit_spam()) {
-	print &ui_table_row($text{'massdomains_scanner'},
-		&ui_radio("scanner", "",
-			[ [ "", $text{'massdomains_leave'}."<br>" ],
-			  [ "clamscan", $text{'spam_scanner0'}."<br>" ],
-			  [ "clamdscan", $text{'spam_scanner1'}."<br>" ] ]));
-	}
-
 # Login shell
 if (&can_edit_shell()) {
 	print &ui_table_row($text{'massdomains_shell'},

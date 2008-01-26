@@ -15,10 +15,10 @@ $clam_wrapper_cmd = "$module_config_directory/clam-wrapper.pl";
 sub setup_virus
 {
 &$first_print($text{'setup_virus'});
+&obtain_lock_virus($_[0]);
 &require_spam();
 
 local $spamrc = "$procmail_spam_dir/$_[0]->{'id'}";
-&lock_file($spamrc);
 
 # Find the clamscan recipe
 local @recipes = &procmail::parse_procmail_file($spamrc);
@@ -53,9 +53,9 @@ else {
 		&procmail::create_recipe($recipe1, $spamrc);
 		&procmail::create_recipe($varoff, $spamrc);
 		}
-	&unlock_file($spamrc);
 	&$second_print($text{'setup_done'});
 	}
+&release_lock_virus($_[0]);
 }
 
 # modify_virus(&domain, &olddomain)
@@ -75,8 +75,8 @@ if (!-r $spamrc && !$_[0]->{'spam'}) {
 	return 1;
 	}
 &$first_print($text{'delete_virus'});
+&obtain_lock_virus($_[0]);
 &require_spam();
-&lock_file($spamrc);
 local @recipes = &procmail::parse_procmail_file($spamrc);
 local @clamrec = &find_clam_recipe(\@recipes);
 if (@clamrec) {
@@ -95,7 +95,7 @@ if (@clamrec) {
 else {
 	&$second_print($text{'delete_virusnone'});
 	}
-&unlock_file($spamrc);
+&release_lock_virus($_[0]);
 }
 
 # validate_virus(&domain)
@@ -214,7 +214,6 @@ local $spamrc = "$procmail_spam_dir/$d->{'id'}";
 local @recipes = &procmail::parse_procmail_file($spamrc);
 local @clamrec = &find_clam_recipe(\@recipes);
 return 0 if (!@clamrec);
-&lock_file($spamrc);
 local $r = $clamrec[1];
 $r->{'action'} = $mode == 0 ? "/dev/null" :
 		 $mode == 4 ? "\$HOME/mail/virus" :
@@ -223,7 +222,6 @@ $r->{'action'} = $mode == 0 ? "/dev/null" :
 			      $dest;
 $r->{'type'} = $mode == 2 ? "!" : "";
 &procmail::modify_recipe($r);
-&unlock_file($spamrc);
 return 1;
 }
 
@@ -678,6 +676,18 @@ if (@pids) {
 else {
 	return $text{'clamd_estopmsg'};
 	}
+}
+
+# Virus config files are the same as spam
+sub obtain_lock_virus
+{
+&obtain_lock_spam(@_);
+}
+
+# Virus config files are the same as spam
+sub release_lock_virus
+{
+&release_lock_spam(@_);
 }
 
 $done_feature_script{'virus'} = 1;

@@ -67,7 +67,7 @@
 	  by this process, in which case it does nothing)
 	- FS #3500
 	- move all locking to obtain_lock_* functions.
-	- Need to do web, webalizer, ssl, spam, virus, webmin
+	- Need to do web, webalizer, ssl, webmin
 	- Need release_lock functions too
 	- Remove debugging code
 	- All CGIs and .pl scripts that do something should call appropriate
@@ -75,3 +75,5 @@
 	- Remove all other calls to locking code
 	- obtain_lock functions should do nothing if config{'xxx'} is not set
 	- plugins too
+	- obtain_lock_unix should lock crontab for user too
+	- what should mass_domains_change.cgi lock?
