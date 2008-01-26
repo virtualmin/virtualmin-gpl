@@ -1602,8 +1602,9 @@ if ($copydir) {
 	$out = undef if ($out !~ /\S/);
 	return "<pre>".&html_escape($out || "Exit status $?")."</pre>" if ($?);
 
-	# Make dest files non-world-readable
+	# Make dest files non-world-readable, and user writable
 	&run_as_domain_user($d, "chmod -R o-rxw ".quotemeta($copydir));
+	&run_as_domain_user($d, "chmod -R u+rw ".quotemeta($copydir));
 	}
 
 return undef;
