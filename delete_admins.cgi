@@ -10,12 +10,14 @@ $d = &get_domain($in{'dom'});
 @del = split(/\0/, $in{'d'});
 @del || &error($text{'dadmins_enone'});
 
+&obtain_lock_webmin();
 @admins = &list_extra_admins($d);
 foreach $name (@del) {
 	($admin) = grep { $_->{'name'} eq $name } @admins;
 	$admin || &error($text{'dadmins_egone'});
 	&delete_extra_admin($admin, $d);
 	}
+&release_lock_webmin();
 &webmin_log("delete", "admins", scalar(@del));
 &redirect("list_admins.cgi?dom=$d->{'id'}");
 

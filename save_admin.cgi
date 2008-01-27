@@ -6,6 +6,8 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
 &can_edit_admins($d) || &error($text{'admins_ecannot'});
+
+&obtain_lock_webmin() if (!$in{'switch'});
 @admins = &list_extra_admins($d);
 &require_acl();
 
@@ -81,6 +83,7 @@ else {
 		&modify_extra_admin($admin, $oldadmin, $d);
 		}
 	}
+&release_lock_webmin();
 
 &webmin_log($in{'new'} ? "create" : $in{'delete'} ? "delete" : "modify",
 	    "admin", $oldadmin ? $oldadmin->{'name'} : $admin->{'name'});

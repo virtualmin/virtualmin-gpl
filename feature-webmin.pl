@@ -10,6 +10,7 @@ return if ($require_acl++);
 sub setup_webmin
 {
 &$first_print($text{'setup_webmin'});
+&obtain_lock_webmin($_[0]);
 &require_acl();
 local ($wuser) = grep { $_->{'name'} eq $_[1]->{'user'} }
 		      &acl::list_users();
@@ -33,8 +34,9 @@ else {
 	&set_user_modules($_[0], \%wuser);
 	}
 &update_extra_webmin($_[0]);
-&$second_print($text{'setup_done'});
+&release_lock_webmin($_[0]);
 &register_post_action(\&restart_webmin);
+&$second_print($text{'setup_done'});
 }
 
 # webmin_password(&domain)
@@ -50,6 +52,7 @@ return &acl::encrypt_password($_[0]->{'pass'});
 sub delete_webmin
 {
 &$first_print($text{'delete_webmin'});
+&obtain_lock_webmin($_[0]);
 &require_acl();
 &acl::delete_user($_[0]->{'user'});
 local $m;
@@ -57,15 +60,17 @@ foreach $m (&get_all_module_infos()) {
 	&unlink_logged("$config_directory/$m->{'dir'}/$_[0]->{'user'}.acl");
 	}
 &update_extra_webmin($_[0]);
-&$second_print($text{'setup_done'});
+&release_lock_webmin($_[0]);
 &register_post_action(\&restart_webmin);
+&$second_print($text{'setup_done'});
 }
 
 # modify_webmin(&domain, &olddomain)
 sub modify_webmin
 {
 if ($_[0]->{'home'} ne $_[1]->{'home'} && &foreign_check("htaccess-htpasswd")) {
-	# If home has changed, update protected web directories that referred to old dir
+	# If home has changed, update protected web directories that
+	# referred to old dir
 	&$first_print($text{'save_htaccess'});
 	&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
 	local @dirs = &htaccess_htpasswd::list_directories(1);
@@ -91,6 +96,7 @@ if ($_[0]->{'home'} ne $_[1]->{'home'} && &foreign_check("htaccess-htpasswd")) {
 	}
 if (!$_[0]->{'parent'}) {
 	# Update the Webmin user
+	&obtain_lock_webmin($_[0]);
 	&require_acl();
 	local ($wuser) = grep { $_->{'name'} eq $_[1]->{'user'} }
 			      &acl::list_users();
@@ -118,8 +124,9 @@ if (!$_[0]->{'parent'}) {
 		}
 	&set_user_modules($_[0], $wuser) if ($wuser);
 	&update_extra_webmin($_[0]);
-	&$second_print($text{'setup_done'});
+	&release_lock_webmin($_[0]);
 	&register_post_action(\&restart_webmin);
+	&$second_print($text{'setup_done'});
 	return 1;
 	}
 elsif ($_[0]->{'parent'} && !$_[1]->{'parent'}) {
@@ -152,6 +159,7 @@ return undef;
 sub disable_webmin
 {
 &$first_print($text{'disable_webmin'});
+&obtain_lock_webmin($_[0]);
 &require_acl();
 local ($wuser) = grep { $_->{'name'} eq $_[0]->{'user'} } &acl::list_users();
 if ($wuser) {
@@ -159,6 +167,7 @@ if ($wuser) {
 	&acl::modify_user($wuser->{'name'}, $wuser);
 	&register_post_action(\&restart_webmin);
 	}
+&release_lock_webmin($_[0]);
 &$second_print($text{'setup_done'});
 }
 
@@ -167,6 +176,7 @@ if ($wuser) {
 sub enable_webmin
 {
 &$first_print($text{'enable_webmin'});
+&obtain_lock_webmin($_[0]);
 &require_acl();
 local ($wuser) = grep { $_->{'name'} eq $_[0]->{'user'} } &acl::list_users();
 if ($wuser) {
@@ -174,6 +184,7 @@ if ($wuser) {
 	&acl::modify_user($wuser->{'name'}, $wuser);
 	&register_post_action(\&restart_webmin);
 	}
+&release_lock_webmin($_[0]);
 &$second_print($text{'setup_done'});
 }
 
@@ -790,6 +801,7 @@ sub modify_all_webmin
 {
 local ($tid) = @_;
 &$first_print($text{'check_allwebmin'});
+&obtain_lock_webmin($_[0]);
 	{
 	local ($first_print, $second_print, $indent_print, $outdent_print);
 	&set_all_null_print();
@@ -801,6 +813,7 @@ local ($tid) = @_;
 			}
 		}
 	}
+&release_lock_webmin($_[0]);
 &$second_print($text{'setup_done'});
 &register_post_action(\&restart_webmin);
 }
@@ -931,15 +944,20 @@ sub restore_webmin
 {
 local ($d, $file, $opts) = @_;
 &$first_print($text{'restore_webmin'});
-local $out = &backquote_logged("cd $config_directory && tar xf ".quotemeta($file)." 2>&1");
+&obtain_lock_webmin($_[0]);
+local $out = &backquote_logged(
+	"cd $config_directory && tar xf ".quotemeta($file)." 2>&1");
+local $rv;
 if ($?) {
 	&$second_print(&text('backup_webminfailed', "<pre>$out</pre>"));
-	return 0;
+	$rv = 0;
 	}
 else {
 	&$second_print($text{'setup_done'});
-	return 1;
+	$rv = 1;
 	}
+&release_lock_webmin($_[0]);
+return $rv;
 }
 
 # links_webmin(&domain)
@@ -1045,6 +1063,29 @@ if (defined(&theme_get_module_acl)) {
 	%acl = &theme_get_module_acl($_[0], $module_name, \%acl);
 	}
 return %acl;
+}
+
+# obtain_lock_webmin()
+# Lock a flag file indicating that Virtualmin is managing Webmin users.
+# Real locking is done in acl-lib.pl.
+sub obtain_lock_webmin
+{
+if ($main::got_lock_webmin == 0) {
+	print STDERR "getting Webmin lock\n";
+	&lock_file("$module_config_directory/webminlock");
+	}
+$main::got_lock_webmin++;
+}
+
+# release_lock_webmin()
+# Release the lock flag file
+sub release_lock_webmin
+{
+if ($main::got_lock_webmin == 1) {
+	print STDERR "releasing Webmin lock\n";
+	&unlock_file("$module_config_directory/webminlock");
+	}
+$main::got_lock_webmin-- if ($main::got_lock_webmin);
 }
 
 $done_feature_script{'webmin'} = 1;

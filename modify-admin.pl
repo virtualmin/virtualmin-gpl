@@ -72,9 +72,10 @@ while(@ARGV > 0) {
 $domain && $name || &usage();
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
-@admins = &list_extra_admins($d);
 
 # Find the admin
+&obtain_lock_webmin();
+@admins = &list_extra_admins($d);
 ($admin) = grep { $_->{'name'} eq $name } @admins;
 $admin || &usage("Extra administrator $name does not exist in this virtual server");
 $old = { %$admin };
@@ -113,6 +114,7 @@ foreach $e (@cannotedits) {
 
 # Save him
 &modify_extra_admin($admin, $old, $d);
+&release_lock_webmin();
 print "Extra administrator $name modified successfully\n";
 
 sub usage

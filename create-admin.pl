@@ -64,6 +64,7 @@ $d->{'parent'} && &usage("Virtual server $domain is not a parent server");
 
 # Check for a clash
 $name eq "webmin" && &usage("The login name webmin is reserved");
+&obtain_lock_webmin();
 &require_acl();
 ($clash) = grep { $_->{'name'} eq $name } &acl::list_users();
 $clash && &usage("The login name $name is already in use");
@@ -83,6 +84,7 @@ foreach $e (@edits) {
 
 # Create the admin
 &create_extra_admin($admin, $d);
+&release_lock_webmin();
 print "Extra administrator $name created successfully\n";
 
 sub usage

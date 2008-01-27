@@ -66,7 +66,7 @@
 	  config file and flushes all in-memory caches (unless already locked
 	  by this process, in which case it does nothing)
 	- FS #3500
-	- Need to do web, webalizer, ssl, webmin
+	- Need to do web, ssl
 	- Need release_lock functions too
 	- Remove debugging code
 	- All CGIs and .pl scripts that do something should call appropriate
@@ -76,4 +76,3 @@
 	- plugins too
 	- need separate obtain_lock_cron
 	- what should mass_domains_change.cgi lock?
-	- need obtain_lock_virt too

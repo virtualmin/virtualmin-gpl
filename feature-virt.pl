@@ -4,6 +4,7 @@
 # Bring up an interface for a domain, if the IP isn't already enabled
 sub setup_virt
 {
+&obtain_lock_virt($_[0]);
 &foreign_require("net", "net-lib.pl");
 local @boot = &net::active_interfaces();
 if (!$config{'iface_manual'} && !$_[0]->{'virtalready'}) {
@@ -50,6 +51,7 @@ else {
 		&$second_print(&text('setup_virtnotdone', $_[0]->{'ip'}));
 		}
 	}
+&release_lock_virt($_[0]);
 }
 
 # delete_virt(&domain)
@@ -58,6 +60,7 @@ sub delete_virt
 {
 if (!$config{'iface_manual'} && !$_[0]->{'virtalready'}) {
 	&$first_print($text{'delete_virt'});
+	&obtain_lock_virt($_[0]);
 	&foreign_require("net", "net-lib.pl");
 	local ($biface) = grep { $_->{'address'} eq $_[0]->{'ip'} }
 			       &net::boot_interfaces();
@@ -75,6 +78,7 @@ if (!$config{'iface_manual'} && !$_[0]->{'virtalready'}) {
 	else {
 		&$second_print(&text('delete_novirt', $biface->{'fullname'}));
 		}
+	&release_lock_virt($_[0]);
 	}
 delete($_[0]->{'iface'});
 }
@@ -86,6 +90,7 @@ sub modify_virt
 if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[0]->{'virt'} &&
     !$config{'iface_manual'} && !$_[0]->{'virtalready'}) {
 	&$first_print($text{'save_virt'});
+	&obtain_lock_virt($_[0]);
 	&foreign_require("net", "net-lib.pl");
 	local ($biface) = grep { $_->{'address'} eq $_[1]->{'ip'} }
 			       &net::boot_interfaces();
@@ -105,6 +110,7 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[0]->{'virt'} &&
 	else {
 		&$second_print(&text('delete_novirt', $_[1]->{'iface'}));
 		}
+	&release_lock_virt($_[0]);
 	}
 }
 
@@ -353,6 +359,33 @@ else {
 	@ranges || &error($text{'tmpl_eranges'});
 	$tmpl->{'ranges'} = &join_ip_ranges(\@ranges);
 	}
+}
+
+# obtain_lock_virt(&domain)
+# Signal that we are locking virtual IPs
+sub obtain_lock_virt
+{
+# Lock the network config directory or file
+if ($main::got_lock_virt == 0) {
+	print STDERR "getting Virt lock\n";
+	&foreign_require("net", "net-lib.pl");
+	local $main::got_lock_virt_file = $net::network_interfaces_config ||
+					  $net::network_config ||
+					  "$module_config_directory/virtlock";
+	&lock_file($main::got_lock_virt_file);
+	}
+$main::got_lock_virt++;
+}
+
+# Release virtual IPs lock
+sub release_lock_virt
+{
+# Unlock the network config directory or file
+if ($main::got_lock_virt == 1) {
+	print STDERR "releasing Virt lock\n";
+	&unlock_file($main::got_lock_virt_file);
+	}
+$main::got_lock_virt-- if ($main::got_lock_virt);
 }
 
 $done_feature_script{'virt'} = 1;
