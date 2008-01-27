@@ -1530,13 +1530,19 @@ check_quotacommands=External quota commands will be used for virtual servers and
 check_eclamd=You have selected to use <tt>clamdscan</tt> for virus scanning, but the <tt>clamd</tt> server it talks to is not running
 check_eresolv=Virtualmin is configured to setup DNS zones, but this system is not setup to use itself as a DNS server. Either add 127.0.0.1 to the <a href='$1'>list of DNS servers</a>, or turn off the BIND feature on the <a href='$2'>module config</a> page.
 check_evirusspam=Virus scanning cannot be enabled without spam filtering
-check_epmapaccess=The address mapping source <tt>$1</tt> cannot be used : $2
-check_epmaptype=The address mapping source <tt>$1</tt> is not supported by Virtualmin - only <tt>hash</tt> and <tt>regexp</tt> types are allowed
-check_epmapsupport=The address mapping source <tt>$1</tt> is not supported by Postfix - you may need to install Postfix libraries for it, or re-compile
 check_preload=Updating Virtualmin library pre-load settings ..
 check_esendmailbccs=Automatic BCCing of outgoing email is not supported by the Sendmail mail server, and so must be turned off on the <a href='$1'>module configuration</a> page.
 check_eqmailbccs=Automatic BCCing of outgoing email is not supported by the Qmail mail server, and so must be turned off on the <a href='$1'>module configuration</a> page.
 check_epostfixbccs=Automatic BCCing of outgoing email cannot be enabled unless a BCC map is defined in the <a href='$1'>Postfix Mailserver</a> module, or manually in the Postfix configuration file. Otherwise it must be turned off on the <a href='$2'>module configuration</a> page.
+check_ealias_maps=A problem was found with your Postfix alias maps : $1
+check_evirtual_maps=A problem was found with your Postfix virtual maps : $1
+check_ecanonical_maps=A problem was found with your Postfix canonical maps, used for outgoing address mapping : $1
+check_ebcc_maps=A problem was found with your Postfix sender BCC maps : $1
+
+checkmap_enone=No map sources were found in the <a href='$1'>Postfix configuration</a>
+checkmap_esupport=The map source <tt>$1</tt> is not supported by Postfix - you may need to install Postfix libraries for it, or re-compile
+checkmap_eaccess=The map source <tt>$1</tt> cannot be used : $2
+checkmap_efile=The map type is not supported by this version of Webmin - only maps using files like <tt>hash</tt> and <tt>regexp</tt> can be used
 
 allwebmin_ecannot=You are not allowed to update all Webmin users
 allwebmin_title=Updating Webmin Users

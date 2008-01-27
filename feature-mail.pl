@@ -3870,6 +3870,39 @@ else {
 	}
 }
 
+# check_postfix_map(mapname)
+# Checks that all data sources in a map are usable. Returns undef if OK, or
+# an error message if not.
+sub check_postfix_map
+{
+local ($mapname) = @_;
+&require_mail();
+local $tv = &postfix::get_real_value($mapname);
+$tv || return &text('checkmap_enone', '../postfix/');
+if (defined(&postfix::can_access_map)) {
+	# Can use new Webmin functions to check
+	local @tv = &postfix::get_maps_types_files($tv);
+	@tv || return &text('checkmap_enone', '../postfix/');
+	foreach my $tv (@tv) {
+		if (!&postfix::supports_map_type($tv->[0])) {
+			return &text('checkmap_esupport',
+				     "$tv->[0]:$tv->[1]");
+			}
+		local $err = &postfix::can_access_map(@$tv);
+		if ($err) {
+			return &text('checkmap_eaccess',
+				     "$tv->[0]:$tv->[1]", $err);
+			}
+		}
+	}
+else {
+	# Only allow file-based maps
+	$tv =~ /(hash|regexp|pcre|btree|dbm):/i ||
+		return $text{'checkmap_efile'};
+	}
+return undef;
+}
+
 # obtain_lock_mail(&domain)
 # Lock the mail aliases and virtusers files
 sub obtain_lock_mail

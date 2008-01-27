@@ -10555,45 +10555,27 @@ if ($config{'mail'}) {
 		if (!&postfix_installed()) {
 			return &text('index_epostfix', '/postfix/',
 					   "../config.cgi?$module_name");
+
 			}
-		# Check that aliases and virtusers are configured
+
+		# Check that all the need Postfix maps are working
 		&require_mail();
-		@$postfix_afiles ||
-			return &text('index_epaliases', '/postfix/');
-		$virtual_maps =~ /^([a-z0-9]+):\//i ||
-			return &text('index_epvirts', '/postfix/');
+		my $err = &check_postfix_map("alias_maps");
+		return &text('check_ealias_maps', $err) if ($err);
+		$err = &check_postfix_map($virtual_type);
+		return &text('check_evirtual_maps', $err) if ($err);
 		if ($config{'generics'}) {
 			$canonical_maps ||
-				return &text('index_epgens',
-					    '/postfix/', $clink);
+			  return &text('index_epgens', '/postfix/', $clink);
+			$err = &check_postfix_map($canonical_type);
+			return &text('check_ecanonical_maps', $err) if ($err);
 			}
 		if ($config{'bccs'}) {
 			$sender_bcc_maps ||
-				return &text('check_epostfixbccs',
-					    '/postfix/', $clink);
-			}
-
-		# Check for LDAP / MySQL integration
-		if (defined(&postfix::can_access_map)) {
-			local @tv = &postfix::get_maps_types_files(
-					$virtual_maps);
-			foreach my $tv (@tv) {
-				if (!&postfix::supports_map_type($tv->[0])) {
-					return &text('check_epmapsupport',
-						     "$tv->[0]:$tv->[1]");
-					}
-				local $err = &postfix::can_access_map(@$tv);
-				if ($err) {
-					return &text('check_epmapaccess',
-						     "$tv->[0]:$tv->[1]", $err);
-					}
-				}
-			}
-		else {
-			# Only hash and regexp types allowed with older
-			# Webmin versions
-			$virtual_maps =~ /(hash|regexp):/ ||
-				return &text('check_epmaptype', $virtual_maps);
+				return &text('check_epostfixbccs', '/postfix/',
+					     $clink);
+			$err = &check_postfix_map("sender_bcc_maps");
+			return &text('check_ebcc_maps', $err) if ($err);
 			}
 
 		&$second_print($text{'check_postfixok'});
