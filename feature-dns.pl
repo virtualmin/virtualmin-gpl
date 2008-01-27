@@ -79,8 +79,8 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 			local $addfileok;
 			if ($bind8::config{'zones_file'} &&
 			    $view->{'file'} ne $bind8::config{'zones_file'}) {
-				# BIND module config asks for a file .. make sure
-				# it is included in the view
+				# BIND module config asks for a file .. make
+				# sure it is included in the view
 				foreach my $vm (@{$view->{'members'}}) {
 					if ($vm->{'file'} eq $addfile) {
 						# Add file is OK
@@ -193,7 +193,7 @@ if (!$_[0]->{'dns_submode'}) {
 		if ($file) {
 			local $zonefile =
 			    &bind8::make_chroot($file->{'values'}->[0]);
-			&unlink_logged($zonefile);
+			&unlink_file($zonefile);
 			local $logfile = $zonefile.".log";
 			if (!-r $logfile) { $logfile = $zonefile.".jnl"; }
 			if (-r $logfile) {
@@ -205,7 +205,7 @@ if (!$_[0]->{'dns_submode'}) {
 		local $rootfile = &bind8::make_chroot($z->{'file'});
 		local $lref = &read_file_lines($rootfile);
 		splice(@$lref, $z->{'line'}, $z->{'eline'} - $z->{'line'} + 1);
-		&flush_file_lines();
+		&flush_file_lines($z->{'file'});
 
 		# Clear zone names caches
 		unlink($bind8::zone_names_cache);

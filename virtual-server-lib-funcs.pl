@@ -12265,8 +12265,8 @@ sub nice_hour_mins_secs
 local ($time) = @_;
 local $days = int($time / (24*60*60));
 local $hours = int($time / (60*60)) % 24;
-local $mins = int($time / 60) % 60;
-local $secs = int($time) % 60;
+local $mins = sprintf("%2.2d", int($time / 60) % 60);
+local $secs = sprintf("%2.2d", int($time) % 60);
 if ($days) {
 	return &text('nicetime_days', $days, $hours, $mins, $secs);
 	}
