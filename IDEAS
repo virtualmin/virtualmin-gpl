@@ -66,7 +66,6 @@
 	  config file and flushes all in-memory caches (unless already locked
 	  by this process, in which case it does nothing)
 	- FS #3500
-	- move all locking to obtain_lock_* functions.
 	- Need to do web, webalizer, ssl, webmin
 	- Need release_lock functions too
 	- Remove debugging code
@@ -75,5 +74,6 @@
 	- Remove all other calls to locking code
 	- obtain_lock functions should do nothing if config{'xxx'} is not set
 	- plugins too
-	- obtain_lock_unix should lock crontab for user too
+	- need separate obtain_lock_cron
 	- what should mass_domains_change.cgi lock?
+	- need obtain_lock_virt too

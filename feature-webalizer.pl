@@ -15,20 +15,22 @@ sub setup_webalizer
 &$first_print($text{'setup_webalizer'});
 &require_webalizer();
 
-local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
-if (!$alog) {
-	&$second_print($text{'setup_nolog'});
-	return;
-	}
-
-# Create directory for stats
+# Create the stats directory now, as the lock function needs it
 local $tmpl = &get_template($_[0]->{'template'});
 local $stats = &webalizer_stats_dir($_[0]);
 if (!-d $stats) {
-	&system_logged("mkdir ".quotemeta($stats)." 2>/dev/null");
-	&system_logged("chmod 755 ".quotemeta($stats));
-	&system_logged("chown $_[0]->{'uid'}:$_[0]->{'ugid'} ".
-		       quotemeta($stats));
+	&make_dir($stats, 0755);
+	&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'},
+				   0755, $stats);
+	}
+
+&obtain_lock_webalizer($_[0]);
+&obtain_lock_cron($_[0]);
+local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
+if (!$alog) {
+	&release_lock_webalizer($_[0]);
+	&$second_print($text{'setup_nolog'});
+	return;
 	}
 
 local $htaccess_file = "$stats/.htaccess";
@@ -57,9 +59,7 @@ else {
 
 # Set up config for log in Webalizer module
 local $lcn = &webalizer::log_config_name($alog);
-&lock_file($lcn);
 local $cfile = &webalizer::config_file_name($alog);
-&lock_file($cfile);
 if (!-r $lcn || !-r $cfile) {
 	$lconf = { 'dir' => $stats,
 		   'sched' => 1,
@@ -111,14 +111,15 @@ else {
 	&webalizer::save_directive($wconf, "IncrementalName", "$stats/webalizer.current");
 	&flush_file_lines();
 	}
-&unlock_file($lcn);
-&unlock_file($cfile);
 
 local $job = &find_virtualmin_cron_job("$webalizer::cron_cmd $alog");
 if (!$job) {
 	# Create a Cron job to process the log
 	&setup_webalizer_cron($lconf, $alog);
 	}
+
+&release_lock_webalizer($_[0]);
+&release_lock_cron($_[0]);
 &$second_print($text{'setup_done'});
 }
 
@@ -137,15 +138,11 @@ local $job = { 'user' => 'root',
 	       'special' => $lconf->{'special'},
 	       'command' => "$webalizer::cron_cmd $alog" };
 if (!-r $webalizer::cron_cmd) {
-	&lock_file($webalizer::cron_cmd);
 	&cron::create_wrapper($webalizer::cron_cmd,
 			      "webalizer", "webalizer.pl");
-	&unlock_file($webalizer::cron_cmd);
 	}
 if (!$config{'webalizer_nocron'}) {
-	&lock_file(&cron::cron_file($job));
 	&cron::create_cron_job($job);
-	&unlock_file(&cron::cron_file($job));
 	}
 }
 
@@ -153,6 +150,8 @@ if (!$config{'webalizer_nocron'}) {
 sub modify_webalizer
 {
 &require_webalizer();
+&obtain_lock_webalizer($_[0]);
+&obtain_lock_cron($_[0]);
 local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
 if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 	# Update Webalizer configuration to use new log file
@@ -166,7 +165,6 @@ if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 	local $oldcfile = &webalizer::config_file_name($oldalog);
 	local $cfile = &webalizer::config_file_name($alog);
 	&rename_logged($oldcfile, $cfile);
-	&lock_file($cfile);
 	local $conf = &webalizer::get_config($alog);
 	local $changed;
 	foreach my $c (@$conf) {
@@ -178,18 +176,15 @@ if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 			}
 		}
 	&flush_file_lines($changed) if ($changed);
-	&unlock_file($cfile);
 
 	# Rename the .log file, which is in Webmin format. Also update the
 	# dir= line in that file
 	local $oldlcn = &webalizer::log_config_name($oldalog);
 	local $lcn = &webalizer::log_config_name($alog);
 	&rename_logged($oldlcn, $lcn);
-	&lock_file($lcn);
 	local $lconf = &webalizer::get_log_config($alog);
 	$lconf->{'dir'} =~ s/\Q$_[1]->{'home'}\E/$_[0]->{'home'}/g;
 	&webalizer::save_log_config($alog, $lconf);
-	&unlock_file($lcn);
 
 	# Change the log file path in the Cron job
 	&foreign_require("cron", "cron-lib.pl");
@@ -197,9 +192,7 @@ if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 			    &cron::list_cron_jobs();
 	if ($job) {
 		$job->{'command'} = "$webalizer::cron_cmd $alog";
-		&lock_file(&cron::cron_file($job));
 		&cron::change_cron_job($job);
-		&unlock_file(&cron::cron_file($job));
 		}
 	&$second_print($text{'setup_done'});
 	}
@@ -207,29 +200,27 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 	# Update hostname in Webalizer configuration
 	&$first_print($text{'save_webalizer'});
 	local $cfile = &webalizer::config_file_name($alog);
-	&lock_file($cfile);
 	local $wconf = &webalizer::get_config($alog);
 	&webalizer::save_directive($wconf, "HostName", $_[0]->{'dom'});
 	&webalizer::save_directive($wconf, "HideReferrer", "*.$_[0]->{'dom'}");
 	&flush_file_lines();
-	&unlock_file($cfile);
 	&$second_print($text{'setup_done'});
 	}
 if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 	# Update Unix user Webliazer is run as
 	&$first_print($text{'save_webalizeruser'});
 	local $lcn = &webalizer::log_config_name($alog);
-	&lock_file($lcn);
 	local $lconf = &webalizer::get_log_config($alog);
 	$lconf->{'user'} = $_[0]->{'user'};
 	&webalizer::save_log_config($alog, $lconf);
-	&unlock_file($lcn);
 	&$second_print($text{'setup_done'});
 	}
 if ($_[0]->{'stats_pass'}) {
 	# Update password for stats dir
 	&update_create_htpasswd($_[0], $_[0]->{'stats_pass'}, $_[1]->{'user'});
 	}
+&release_lock_webalizer($_[0]);
+&release_lock_cron($_[0]);
 }
 
 # delete_webalizer(&domain)
@@ -237,6 +228,8 @@ if ($_[0]->{'stats_pass'}) {
 sub delete_webalizer
 {
 &$first_print($text{'delete_webalizer'});
+&obtain_lock_webalizer($_[0]);
+&obtain_lock_cron($_[0]);
 &require_webalizer();
 local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
 if (!$alog && -r "$_[0]->{'home'}/logs/access_log") {
@@ -262,10 +255,10 @@ if ($_[0]->{'deleting'}) {
 local ($job) = grep { $_->{'command'} eq "$webalizer::cron_cmd $alog" }
 		    &cron::list_cron_jobs();
 if ($job) {
-	&lock_file(&cron::cron_file($job));
 	&cron::delete_cron_job($job);
-	&unlock_file(&cron::cron_file($job));
         }
+&release_lock_webalizer($_[0]);
+&release_lock_cron($_[0]);
 &$second_print($text{'setup_done'});
 }
 
@@ -333,26 +326,25 @@ sub restore_webalizer
 {
 &$first_print($text{'restore_webalizercp'});
 &require_webalizer();
+&obtain_lock_webalizer($_[0]);
 local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
 if (!$alog) {
+	&release_lock_webalizer($_[0]);
 	&$second_print($text{'setup_nolog'});
 	return 0;
 	}
 else {
 	# Copy the Webmin config for webalizer, and update the home directory
 	local $lcn = &webalizer::log_config_name($alog);
-	&lock_file($lcn);
 	&copy_source_dest($_[1], $lcn);
 	if ($_[5] && $_[0]->{'home'} ne $_[5]->{'home'}) {
 		local $lconf = &webalizer::get_log_config($alog);
 		$lconf->{'dir'} =~ s/\Q$_[5]->{'home'}\E/$_[0]->{'home'}/g;
 		&webalizer::save_log_config($alog, $lconf);
 		}
-	&unlock_file($lcn);
 
 	# Copy the actual Webalizer config file, and update home directory
 	local $cfile = &webalizer::config_file_name($alog);
-	&lock_file($cfile);
 	&copy_source_dest($_[1]."_conf", $cfile);
 	if ($_[5] && $_[0]->{'home'} ne $_[5]->{'home'}) {
 		local $conf = &webalizer::get_config($alog);
@@ -367,20 +359,18 @@ else {
 			}
 		&flush_file_lines($changed) if ($changed);
 		}
-	&unlock_file($cfile);
 
 	# Delete and re-create the cron job
+	&obtain_lock_cron($_[0]);
 	&foreign_require("cron", "cron-lib.pl");
 	local ($job) = grep { $_->{'command'} eq "$webalizer::cron_cmd $alog" }
 			    &cron::list_cron_jobs();
 	if ($job) {
-		&lock_file(&cron::cron_file($job));
 		&cron::delete_cron_job($job);
 		}
 	local $lcn = &webalizer::log_config_name($alog);
 	local $lconf;
 	if (!-r $lcn) {
-		&lock_file($lcn);
 		$lconf = { 'dir' => $stats,
 		   'sched' => 1,
 		   'type' => 0,
@@ -393,12 +383,13 @@ else {
 		   'months' => '*',
 		   'weekdays' => '*' };
 		&webalizer::save_log_config($alog, $lconf);
-		&unlock_file($lcn);
 		}
 	else {
 		$lconf = &webalizer::get_log_config($alog);
 		}
 	&setup_webalizer_cron($lconf, $alog);
+	&release_lock_webalizer($_[0]);
+	&release_lock_cron($_[0]);
 	&$second_print($text{'setup_done'});
 	return 1;
 	}
@@ -486,6 +477,50 @@ else {
 	$stats = "$hdir/stats";
 	}
 return $stats;
+}
+
+# obtain_lock_webalizer(&domain)
+# Lock a domain's Webalizer config files, and password protection files
+sub obtain_lock_webalizer
+{
+local ($d) = @_;
+
+if ($main::got_lock_webalizer_dom{$d->{'id'}} == 0) {
+	print STDERR "getting Webalizer lock for $d->{'dom'}\n";
+	&require_webalizer();
+	local $alog = &get_apache_log($d->{'dom'}, $d->{'web_port'});
+	local $stats = &webalizer_stats_dir($d);
+	if ($alog) {
+		&lock_file(&webalizer::log_config_name($alog));
+		&lock_file(&webalizer::config_file_name($alog));
+		&lock_file("$stats/.htaccess");
+		&lock_file("$d->{'home'}/.stats-htpasswd");
+		}
+	$main::got_lock_webalizer_stats{$d->{'id'}} = $stats;
+	$main::got_lock_webalizer_alog{$d->{'id'}} = $alog;
+	}
+$main::got_lock_webalizer_dom{$d->{'id'}}++;
+}
+
+# release_lock_webalizer(&domain)
+# Unlock a domain's Webalizer config files
+sub release_lock_webalizer
+{
+local ($d) = @_;
+
+if ($main::got_lock_webalizer_dom{$d->{'id'}} == 1) {
+	print STDERR "releasing Webalizer lock for $d->{'dom'}\n";
+	local $alog = $main::got_lock_webalizer_alog{$d->{'id'}};
+	local $stats = $main::got_lock_webalizer_alog{$d->{'id'}};
+	if ($alog) {
+		&unlock_file(&webalizer::log_config_name($alog));
+		&unlock_file(&webalizer::config_file_name($alog));
+		&unlock_file("$stats/.htaccess");
+		&unlock_file("$d->{'home'}/.stats-htpasswd");
+		}
+	}
+$main::got_lock_webalizer_dom{$d->{'id'}}--
+	if ($main::got_lock_webalizer_dom{$d->{'id'}});
 }
 
 $done_feature_script{'webalizer'} = 1;

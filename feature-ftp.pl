@@ -14,6 +14,7 @@ sub setup_ftp
 {
 local $tmpl = &get_template($_[0]->{'template'});
 &$first_print($text{'setup_proftpd'});
+&obtain_lock_ftp($_[0]);
 &require_proftpd();
 
 # Get the template
@@ -23,14 +24,12 @@ local @dirs = &proftpd_template($tmpl->{'ftp'}, $_[0]);
 local $conf = &proftpd::get_config();
 local $l = $conf->[@$conf - 1];
 local $addfile = $proftpd::config{'add_file'} || $l->{'file'};
-&lock_file($addfile);
 local $lref = &read_file_lines($addfile);
 local @lines = ( "<VirtualHost $_[0]->{'ip'}>" );
 push(@lines, @dirs);
 push(@lines, "</VirtualHost>");
 push(@$lref, @lines);
 &flush_file_lines($addfile);
-&unlock_file($addfile);
 
 # Create directory for FTP root
 local ($fdir) = ($tmpl->{'ftp_dir'} || 'ftp');
@@ -41,6 +40,7 @@ if (!-d $ftp) {
 	&system_logged("chown $_[0]->{'uid'}:$_[0]->{'ugid'} '$ftp'");
 	}
 
+&release_lock_ftp($_[0]);
 &$second_print($text{'setup_done'});
 &register_post_action(\&restart_proftpd);
 undef(@proftpd::get_config_cache);
@@ -58,15 +58,14 @@ if ($ftp_user) {
 sub delete_ftp
 {
 &require_proftpd();
-local $conf = &proftpd::get_config();
 &$first_print($text{'delete_proftpd'});
+&obtain_lock_ftp($_[0]);
+local $conf = &proftpd::get_config();
 local ($virt, $vconf) = &get_proftpd_virtual($_[0]->{'ip'});
 if ($virt) {
-	&lock_file($virt->{'file'});
 	local $lref = &read_file_lines($virt->{'file'});
 	splice(@$lref, $virt->{'line'}, $virt->{'eline'} - $virt->{'line'} + 1);
 	&flush_file_lines();
-	&unlock_file($virt->{'file'});
 
 	&$second_print($text{'setup_done'});
 	&register_post_action(\&restart_proftpd);
@@ -75,6 +74,7 @@ if ($virt) {
 else {
 	&$second_print($text{'delete_noproftpd'});
 	}
+&release_lock_ftp($_[0]);
 }
 
 # modify_ftp(&domain, &olddomain)
@@ -82,11 +82,22 @@ else {
 sub modify_ftp
 {
 local $rv = 0;
+
+if ($_[0]->{'dom'} eq $_[1]->{'dom'} &&
+    $_[0]->{'home'} eq $_[1]->{'home'} &&
+    $_[0]->{'ip'} eq $_[1]->{'ip'}) {
+	# Nothing important has changed, so exit now
+	return 1;
+	}
+
+&obtain_lock_ftp($_[0]);
 &require_proftpd();
 local $conf = &proftpd::get_config();
 local ($virt, $vconf, $anon, $aconf) = &get_proftpd_virtual($_[1]->{'ip'});
-return 0 if (!$virt);
-&lock_file($virt->{'file'});
+if (!$virt) {
+	&release_lock_ftp($_[0]);
+	return 0;
+	}
 if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 	# Update domain name in ProFTPd virtual server
 	&$first_print($text{'save_proftpd2'});
@@ -116,7 +127,7 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'}) {
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}
-&unlock_file($virt->{'file'});
+&release_lock_ftp($_[0]);
 &register_post_action(\&restart_proftpd) if ($rv);
 return $rv;
 }
@@ -136,10 +147,10 @@ return undef;
 sub disable_ftp
 {
 &$first_print($text{'disable_proftpd'});
+&obtain_lock_ftp($_[0]);
 &require_proftpd();
 local ($virt, $vconf, $anon, $aconf) = &get_proftpd_virtual($_[0]->{'ip'});
 if ($anon) {
-	&lock_file($anon->{'file'});
 	local @limit = &proftpd::find_directive_struct("Limit", $aconf);
 	local ($login) = grep { $_->{'words'}->[0] eq "LOGIN" } @limit;
 	if (!$login) {
@@ -148,13 +159,13 @@ if ($anon) {
 		       "<Limit LOGIN>", "DenyAll", "</Limit>");
 		&flush_file_lines();
 		}
-	&unlock_file($anon->{'file'});
 	&$second_print($text{'setup_done'});
 	&register_post_action(\&restart_proftpd);
 	}
 else {
 	&$second_print($text{'delete_noproftpd'});
 	}
+&release_lock_ftp($_[0]);
 }
 
 # enable_ftp(&domain)
@@ -162,10 +173,10 @@ else {
 sub enable_ftp
 {
 &$first_print($text{'enable_proftpd'});
+&obtain_lock_ftp($_[0]);
 &require_proftpd();
 local ($virt, $vconf, $anon, $aconf) = &get_proftpd_virtual($_[0]->{'ip'});
 if ($virt) {
-	&lock_file($anon->{'file'});
 	local @limit = &proftpd::find_directive_struct("Limit", $aconf);
 	local ($login) = grep { $_->{'words'}->[0] eq "LOGIN" } @limit;
 	if ($login) {
@@ -174,13 +185,13 @@ if ($virt) {
 		       $login->{'eline'} - $login->{'line'} + 1);
 		&flush_file_lines();
 		}
-	&unlock_file($anon->{'file'});
 	&$second_print($text{'setup_done'});
 	&register_post_action(\&restart_proftpd);
 	}
 else {
 	&$second_print($text{'delete_noproftpd'});
 	}
+&release_lock_ftp($_[0]);
 }
 
 # proftpd_template(text, &domain)
@@ -298,11 +309,12 @@ else {
 sub restore_ftp
 {
 &$first_print($text{'restore_proftpdcp'});
+&obtain_lock_ftp($_[0]);
 local ($virt, $vconf) = &get_proftpd_virtual($_[0]->{'ip'});
+local $rv;
 if ($virt) {
 	local $srclref = &read_file_lines($_[1]);
 	local $dstlref = &read_file_lines($virt->{'file'});
-	&lock_file($virt->{'file'});
 	splice(@$dstlref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1,
 	       @$srclref[1 .. @$srclref-2]);
 	if ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
@@ -313,16 +325,17 @@ if ($virt) {
 			}
 		}
 	&flush_file_lines();
-	&unlock_file($virt->{'file'});
 	&$second_print($text{'setup_done'});
+	&register_post_action(\&restart_proftpd);
+	$rv = 1;
 	}
 else {
 	&$second_print($text{'delete_noproftpd'});
-	return 0;
+	$rv = 0;
 	}
 
-&register_post_action(\&restart_proftpd);
-return 1;
+&release_lock_ftp($_[0]);
+return $rv;
 }
 
 # get_proftpd_log(ip)
@@ -502,6 +515,33 @@ foreach my $u ("ftp", "anonymous") {
 	return $u if (defined(getpwnam($u)));
 	}
 return undef;
+}
+
+# Lock the ProFTPd config file
+sub obtain_lock_ftp
+{
+if ($main::got_lock_ftp == 0) {
+	print STDERR "getting FTP lock\n";
+	&require_proftpd();
+	&lock_file($proftpd::config{'proftpd_conf'});
+	&lock_file($proftpd::config{'add_file'})
+		if ($proftpd::config{'add_file'});
+	undef(@proftpd::get_config_cache);
+	}
+$main::got_lock_ftp++;
+}
+
+# Unlock the ProFTPd config file
+sub release_lock_ftp
+{
+if ($main::got_lock_ftp == 1) {
+	print STDERR "releasing FTP lock\n";
+	&require_proftpd();
+	&unlock_file($proftpd::config{'proftpd_conf'});
+	&unlock_file($proftpd::config{'add_file'})
+		if ($proftpd::config{'add_file'});
+	}
+$main::got_lock_ftp-- if ($main::got_lock_ftp);
 }
 
 $done_feature_script{'ftp'} = 1;

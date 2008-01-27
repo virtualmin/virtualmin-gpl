@@ -157,16 +157,21 @@ return 1;
 # Change the password and real name for a domain unix user
 sub modify_unix
 {
+if (!$_[0]->{'pass_set'} &&
+    $_[0]->{'user'} eq $_[1]->{'user'} &&
+    $_[0]->{'home'} eq $_[1]->{'home'} &&
+    $_[0]->{'owner'} eq $_[1]->{'owner'} &&
+    $_[0]->{'parent'} eq $_[1]->{'parent'}) {
+	# Nothing important has changed, so return now
+	return 1;
+	}
 if (!$_[0]->{'parent'}) {
 	# Check for a user change
 	&obtain_lock_unix($_[0]);
 	&require_useradmin();
 	local @allusers = &list_domain_users($_[1]);
 	local ($uinfo) = grep { $_->{'user'} eq $_[1]->{'user'} } @allusers;
-	if ($uinfo && ($_[0]->{'pass_set'} ||
-		       $_[0]->{'user'} ne $_[1]->{'user'} ||
-		       $_[0]->{'home'} ne $_[1]->{'home'} ||
-		       $_[0]->{'owner'} ne $_[1]->{'owner'})) {
+	if ($uinfo) {
 		local %old = %$uinfo;
 		&$first_print($text{'save_user'});
 		$uinfo->{'real'} = $_[0]->{'owner'};
@@ -194,8 +199,10 @@ if (!$_[0]->{'parent'}) {
 			$uinfo->{'olduser'} = $_[1]->{'user'};
 			$uinfo->{'user'} = $_[0]->{'user'};
 			&rename_mail_file($uinfo, \%old);
+			&obtain_lock_cron($_[0]);
 			&rename_unix_cron_jobs($_[0]->{'user'},
 					       $_[1]->{'user'});
+			&release_lock_cron($_[0]);
 			}
 
 		if ($_[0]->{'home'} ne $_[1]->{'home'}) {
@@ -257,6 +264,7 @@ sub delete_unix
 if (!$_[0]->{'parent'}) {
 	# Get the user object
 	&obtain_lock_unix($_[0]);
+	&obtain_lock_cron($_[0]);
 	&require_useradmin();
 	local @allusers = &foreign_call($usermodule, "list_users");
 	local ($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'} } @allusers;
@@ -313,6 +321,7 @@ if (!$_[0]->{'parent'}) {
 		&$second_print($text{'setup_done'});
 		}
 	&release_lock_unix($_[0]);
+	&release_lock_cron($_[0]);
 	}
 
 # Update any groups
@@ -423,6 +432,7 @@ sub restore_unix
 {
 local ($d, $file, $opts) = @_;
 &obtain_lock_unix($_[0]);
+&obtain_lock_cron($_[0]);
 &$first_print($text{'restore_unixuser'});
 
 # Also re-set quotas
@@ -458,6 +468,7 @@ if (-r $file) {
 	&$second_print($text{'setup_done'});
 	}
 &release_lock_unix($_[0]);
+&release_lock_cron($_[0]);
 
 return 1;
 }
@@ -755,6 +766,33 @@ if ($main::got_lock_unix == 1) {
 	&foreign_call($usermodule, "unlock_user_files");
 	}
 $main::got_lock_unix-- if ($main::got_lock_unix);
+}
+
+# obtain_lock_cron(&domain)
+# Locks a domain's user's crontab file
+sub obtain_lock_cron
+{
+local ($d) = @_;
+if ($main::got_lock_cron_user{$d->{'user'}} == 0) {
+	print STDERR "getting Cron lock for $d->{'user'}\n";
+	&foreign_require("cron", "cron-lib.pl");
+	&lock_file(&cron::cron_file({ 'user' => $d->{'user'} }));
+	}
+$main::got_lock_cron_user{$d->{'user'}}++;
+}
+
+# release_lock_cron(&domain)
+# Un-locks a domain's user's crontab file
+sub release_lock_cron
+{
+local ($d) = @_;
+if ($main::got_lock_cron_user{$d->{'user'}} == 1) {
+	print STDERR "releasing Cron lock for $d->{'user'}\n";
+	&foreign_require("cron", "cron-lib.pl");
+	&unlock_file(&cron::cron_file({ 'user' => $d->{'user'} }));
+	}
+$main::got_lock_cron_user{$d->{'user'}}--
+	if ($main::got_lock_cron_user{$d->{'user'}});
 }
 
 $done_feature_script{'unix'} = 1;
