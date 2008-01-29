@@ -820,3 +820,4 @@ When moving a virtual server to a new system via a restore, if any required PHP 
 When editing a virtual server without a private IP address, one can be added that is associated with an existing interface on the system.
 When a domain is restored to a system with a new IP address, the IP in the SPF record is updated. Also, any NS records are updated to match the new system.
 When a virtual server is moved under a new owner, the Apache directives that control which user CGIs and PHP scripts run as are properly updated.
+Fixed bugs in the FAQMasterFlex installer that prevented it's config file from being setup properly.
