@@ -17,13 +17,17 @@ sub setup_web
 {
 local $tmpl = &get_template($_[0]->{'template'});
 local $web_port = $_[0]->{'web_port'} || $tmpl->{'web_port'} || 80;
+local ($alias, $lockdom);
 if ($_[0]->{'alias'} && $tmpl->{'web_alias'} == 1) {
 	&$first_print($text{'setup_webalias'});
+	$lockdom = $alias = &get_domain($_[0]->{'alias'});
 	}
 else {
 	&$first_print($text{'setup_web'});
+	$lockdom = $_[0];
 	}
 &require_apache();
+&obtain_lock_web($lockdom);
 local $conf = &apache::get_config();
 local ($f, $newfile) = &get_website_file($_[0]);
 &lock_file($f);
@@ -37,7 +41,6 @@ local $nvstar = &add_name_virtual($_[0], $conf, $web_port);
 local @dirs = &apache_template($tmpl->{'web'}, $_[0], $tmpl->{'web_suexec'});
 if ($_[0]->{'alias'} && $tmpl->{'web_alias'} == 1) {
 	# Update the parent virtual host
-	local $alias = &get_domain($_[0]->{'alias'});
 	local ($pvirt, $pconf) = &get_apache_virtual($alias->{'dom'},
 						     $alias->{'web_port'});
 	if (!$pvirt) {
@@ -201,6 +204,8 @@ if (-d $logsdir && !-e "$logsdir/.nodelete") {
 if (!$_[0]->{'alias'} && $_[0]->{'dir'}) {
 	&add_script_language_directives($_[0], $tmpl, $_[0]->{'web_port'});
 	}
+
+&release_lock_web($lockdom);
 }
 
 # delete_web(&domain)
@@ -1294,7 +1299,8 @@ return $custom =~ /^"\|$writelogs_cmd\s+(\S+)\s+(\S+)"(\s*\S*)/ ? 1 : 0;
 }
 
 # get_website_file(&domain)
-# Returns the file to add a new website to
+# Returns the file to add a new website to, and optionally a flag indicating
+# that this is a new file.
 sub get_website_file
 {
 &require_apache();
@@ -2089,6 +2095,59 @@ foreach my $port (@ports) {
 		}
 	}
 return $added;
+}
+
+# obtain_lock_web(&domain)
+# Lock the Apache config file for some domain
+sub obtain_lock_web
+{
+local ($d) = @_;
+
+# Where is the domain's .conf file? We have to guess, as actually checking could
+# mean reading the whole Apache config in twice.
+local $file = &get_website_file($d);
+if ($main::got_lock_web_file{$file} == 0) {
+	print STDERR "got lock on Web domain file $file\n";
+	&lock_file($file);
+	undef(@apache::get_config_cache);
+	}
+$main::got_lock_web_file{$file}++;
+$main::got_lock_web_path{$d->{'id'}} = $file;
+
+# Always lock main config file too, as we may modify it with a Listen
+&require_web();
+local ($conf) = &apache::find_httpd_conf();
+if ($conf) {
+	if ($main::got_lock_web_file{$conf} == 0) {
+		print STDERR "got lock on Web main file $file\n";
+		&lock_file($conf);
+		}
+	$main::got_lock_web_file{$conf}++;
+	}
+$main::got_lock_web_conf = $conf;
+}
+
+# release_lock_web(&domain)
+# Un-lock the Apache config file for some domain
+sub release_lock_web
+{
+local ($d) = @_;
+local $file = $main::got_lock_web_path{$d->{'id'}};
+if ($main::got_lock_web_file{$file} == 1) {
+	print STDERR "released lock on Web domain file $file\n";
+	&unlock_file($file);
+	}
+$main::got_lock_web_file{$file}-- if ($main::got_lock_web_file{$file});
+
+# Unlock main config file too
+local $conf = $main::got_lock_web_conf;
+if ($conf) {
+	print STDERR "released lock on Web main file $file\n";
+	if ($main::got_lock_web_file{$conf} == 1) {
+		&unlock_file($conf);
+		}
+	$main::got_lock_web_file{$conf}-- if ($main::got_lock_web_file{$conf});
+	}
 }
 
 $done_feature_script{'web'} = 1;
