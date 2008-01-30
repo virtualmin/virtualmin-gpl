@@ -12260,6 +12260,32 @@ else {
 	}
 }
 
+# obtain_lock_everything(&domain)
+# Obtain locks on everything lockable that this domain has enabled
+sub obtain_lock_everything
+{
+local ($d) = @_;
+foreach my $f (@features) {
+	local $lfunc = "obtain_lock_".$f;
+	if (defined(&$lfunc) && $d->{$d}) {
+		&$lfunc($d);
+		}
+	}
+}
+
+# release_lock_everything(&domain)
+# Reverses obtain_lock_everything
+sub release_lock_everything
+{
+local ($d) = @_;
+foreach my $f (@features) {
+	local $lfunc = "release_lock_".$f;
+	if (defined(&$lfunc) && $d->{$d}) {
+		&$lfunc($d);
+		}
+	}
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;

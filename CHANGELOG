@@ -821,3 +821,4 @@ When editing a virtual server without a private IP address, one can be added tha
 When a domain is restored to a system with a new IP address, the IP in the SPF record is updated. Also, any NS records are updated to match the new system.
 When a virtual server is moved under a new owner, the Apache directives that control which user CGIs and PHP scripts run as are properly updated.
 Fixed bugs in the FAQMasterFlex installer that prevented it's config file from being setup properly.
+Re-wrote all code that locks configuration files managed by Virtualmin. This improves the coverage of Webmin logging, and makes it much safer to perform multiple operations on the same or different domains at once.

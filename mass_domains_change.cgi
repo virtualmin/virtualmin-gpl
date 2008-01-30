@@ -162,7 +162,6 @@ foreach $d (@doms) {
 &ui_print_unbuffered_header(undef, $text{'massdomains_title'}, "");
 
 # Lock everything in the domains being modified
-# XXX
 foreach $d (@doms) {
 	&obtain_lock_everything($d);
 	}
@@ -315,6 +314,10 @@ foreach $d (@doms) {
 	else {
 		push(@das, $d, 'modify');
 		}
+	}
+
+foreach $d (@doms) {
+	&release_lock_everything($d);
 	}
 
 # Run post-change commands
