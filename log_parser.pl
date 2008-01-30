@@ -36,8 +36,7 @@ elsif ($type eq "balancer") {
 		     "<tt>$p->{'dom'}</tt>");
 	}
 elsif ($type eq "balancers") {
-	return &text('log_'.$action.'_balancers', $object,
-		     "<tt>$p->{'dom'}</tt>");
+	return &text('log_'.$action.'_balancers', "<tt>$p->{'dom'}</tt>",$object);
 	}
 elsif ($type eq "resel") {
 	return &text('log_'.$action.'_resel', "<tt>$object</tt>");

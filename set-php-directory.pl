@@ -51,8 +51,10 @@ elsif ($dir !~ /^\//) {
 	}
 
 # Make the change
+&obtain_lock_web($d);
 &set_all_null_print();
 &save_domain_php_directory($d, $dir, $version);
+&release_lock_web($d);
 &run_post_actions();
 
 sub usage

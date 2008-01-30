@@ -64,6 +64,10 @@ foreach $sinfo (@sinfos) {
 				     join(" ", @missing)));
 		}
 	else {
+		# Get locks
+		&obtain_lock_web($d);
+		&obtain_lock_cron($d);
+
 		# Setup PHP version
 		$phpvfunc = $script->{'php_vers_func'};
 		local $phpver;
@@ -106,6 +110,8 @@ foreach $sinfo (@sinfos) {
 		&$indent_print();
 		print $msg,"<br>\n";
 		&$outdent_print();
+		&release_lock_web($d);
+		&release_lock_cron($d);
 		if ($ok) {
 			# Worked .. record it
 			&$second_print($text{'setup_done'});

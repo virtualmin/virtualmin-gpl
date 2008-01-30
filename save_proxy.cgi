@@ -29,6 +29,7 @@ $merr = &making_changes();
 
 &ui_print_unbuffered_header(&domain_in($d), $text{'proxy_title'}, "");
 
+&obtain_lock_web($d);
 &modify_web($d, $oldd);
 if ($d->{'ssl'}) {
 	&modify_ssl($d, $oldd);
@@ -40,6 +41,7 @@ print $text{'save_domain'},"<br>\n";
 print $text{'setup_done'},"<p>\n";
 
 # Run the after command
+&release_lock_web($d);
 &run_post_actions();
 &set_domain_envs($d, "MODIFY_DOMAIN");
 &made_changes();

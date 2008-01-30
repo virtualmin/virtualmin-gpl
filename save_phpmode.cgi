@@ -24,6 +24,7 @@ if (defined($in{'children'}) &&
 
 # Start telling the user what is being done
 &ui_print_unbuffered_header(&domain_in($d), $text{'phpmode_title'}, "");
+&obtain_lock_web($d);
 
 # Save PHP execution mode
 $oldmode = &get_domain_php_mode($d);
@@ -77,6 +78,7 @@ if (!$anything) {
 	&$first_print($text{'phpmode_nothing'});
 	}
 
+&release_lock_web($d);
 &run_post_actions();
 
 # Call any theme post command

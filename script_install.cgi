@@ -101,6 +101,10 @@ if (-d $opts->{'dir'} && !$sinfo && !$in{'confirm'}) {
 		}
 	}
 
+# Get locks
+&obtain_lock_web($d);
+&obtain_lock_cron($d);
+
 # Setup PHP version
 $phpvfunc = $script->{'php_vers_func'};
 if (defined(&$phpvfunc)) {
@@ -198,6 +202,9 @@ if ($ok) {
 else {
 	&$second_print($text{'scripts_failed'});
 	}
+
+&release_lock_web($d);
+&release_lock_cron($d);
 
 &ui_print_footer("list_scripts.cgi?dom=$in{'dom'}", $text{'scripts_return'},
 		 &domain_footer_link($d));

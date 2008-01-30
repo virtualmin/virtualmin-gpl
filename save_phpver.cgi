@@ -6,6 +6,7 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
 &can_edit_phpver($d) || &error($text{'phpver_ecannot'});
+&obtain_lock_web($d);
 
 &set_all_null_print();
 if ($in{'delete'}) {
@@ -37,6 +38,7 @@ else {
 					       $in{'newdir'}, $in{'newver'});
 		}
 	}
+&release_lock_web($d);
 &run_post_actions();
 &webmin_log("phpver", "domain", $d->{'dom'});
 &domain_redirect($d);

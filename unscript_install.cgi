@@ -35,6 +35,10 @@ if ($in{'confirm'}) {
 
 	&ui_print_unbuffered_header(&domain_in($d), $text{'scripts_utitle'}, "");
 
+	# Get locks
+	&obtain_lock_web($d);
+	&obtain_lock_cron($d);
+
 	# Call the un-install function
 	&$first_print(&text('scripts_uninstalling', $script->{'desc'},
 						    $sinfo->{'version'}));
@@ -62,6 +66,9 @@ if ($in{'confirm'}) {
 	else {
 		&$second_print($text{'scripts_failed'});
 		}
+
+	&release_lock_web($d);
+	&release_lock_cron($d);
 	}
 else {
 	# Ask first

@@ -189,6 +189,10 @@ else {
 	&$second_print(".. done");
 	}
 
+# Get locks
+&obtain_lock_web($d);
+&obtain_lock_cron($d);
+
 # Check PHP version
 $phpvfunc = $script->{'php_vers_func'};
 if (defined(&$phpvfunc)) {
@@ -274,6 +278,9 @@ if ($ok) {
 else {
 	&$second_print($text{'scripts_failed'});
 	}
+
+&release_lock_web($d);
+&release_lock_cron($d);
 
 sub usage
 {

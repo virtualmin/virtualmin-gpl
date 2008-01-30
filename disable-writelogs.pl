@@ -47,6 +47,11 @@ else {
 		}
 	}
 
+# Lock them all
+foreach $d (@doms) {
+	&obtain_lock_web($d);
+	}
+
 # Do it for all domains
 foreach $d (@doms) {
 	&$first_print("Updating server $d->{'dom'} ..");
@@ -56,6 +61,10 @@ foreach $d (@doms) {
 
 	&$outdent_print();
 	&$second_print(".. done");
+	}
+
+foreach $d (@doms) {
+	&release_lock_web($d);
 	}
 
 &run_post_actions();

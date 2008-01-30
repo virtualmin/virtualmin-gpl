@@ -28,6 +28,10 @@ if ($in{'confirm'}) {
 	# Do it
 	&ui_print_unbuffered_header(&domain_in($d), $text{'massu_title'}, "");
 
+	# Get locks
+	&obtain_lock_web($d);
+	&obtain_lock_cron($d);
+
 	foreach $sinfo (@del) {
 		# Call the un-install function
 		$script = &get_script($sinfo->{'name'});
@@ -52,6 +56,9 @@ if ($in{'confirm'}) {
 			}
 		&run_post_actions();
 		}
+
+	&release_lock_web($d);
+	&release_lock_cron($d);
 	&webmin_log("uninstall", "scripts", scalar(@d));
 	}
 else {

@@ -30,7 +30,6 @@ else {
 &obtain_lock_web($lockdom);
 local $conf = &apache::get_config();
 local ($f, $newfile) = &get_website_file($_[0]);
-&lock_file($f);
 
 # add NameVirtualHost if needed
 local $nvstar = &add_name_virtual($_[0], $conf, $web_port);
@@ -47,7 +46,6 @@ if ($_[0]->{'alias'} && $tmpl->{'web_alias'} == 1) {
 		&$second_print($text{'setup_ewebalias'});
 		return 0;
 		}
-	&lock_file($pvirt->{'file'});
 	local @sa = &apache::find_directive("ServerAlias", $pconf);
 	local $d;
 	foreach $d (@dirs) {
@@ -57,7 +55,6 @@ if ($_[0]->{'alias'} && $tmpl->{'web_alias'} == 1) {
 		}
 	&apache::save_directive("ServerAlias", \@sa, $pconf, $conf);
 	&flush_file_lines();
-	&unlock_file($pvirt->{'file'});
 	$_[0]->{'alias_mode'} = 1;
 	}
 else {
@@ -166,7 +163,6 @@ else {
 		}
 	$_[0]->{'alias_mode'} = 0;
 	}
-&unlock_file($f);
 &create_framefwd_file($_[0]);
 &$second_print($text{'setup_done'});
 &register_post_action(\&restart_apache);
@@ -218,24 +214,26 @@ if ($_[0]->{'alias_mode'}) {
 	# Just delete ServerAlias directives from parent
 	&$first_print($text{'delete_apachealias'});
 	local $alias = &get_domain($_[0]->{'alias'});
+	&obtain_lock_web($alias);
 	local ($pvirt, $pconf) = &get_apache_virtual($alias->{'dom'},
 						     $alias->{'web_port'});
 	if (!$pvirt) {
+		&release_lock_web($alias);
 		&$second_print($text{'setup_ewebalias'});
 		return 0;
 		}
-	&lock_file($pvirt->{'file'});
 	local @sa = &apache::find_directive("ServerAlias", $pconf);
 	@sa = grep { !/\Q$_[0]->{'dom'}\E$/ } @sa;
 	&apache::save_directive("ServerAlias", \@sa, $pconf, $conf);
 	&flush_file_lines();
-	&unlock_file($pvirt->{'file'});
-	&$second_print($text{'setup_done'});
+	&release_lock_web($alias);
 	&register_post_action(\&restart_apache);
+	&$second_print($text{'setup_done'});
 	}
 elsif ($config{'delete_indom'}) {
 	# Delete all matching virtual servers
 	&$first_print($text{'delete_apache'});
+	&obtain_lock_web($_[0]);
 	if (!$_[0]->{'alias_mode'}) {
 		# Remove the custom Listen directive added for the domain
 		&remove_listen($d, $conf, $d->{'web_port'});
@@ -249,12 +247,14 @@ elsif ($config{'delete_indom'}) {
 			&delete_web_virtual_server($v);
 			}
 		}
-	&$second_print($text{'setup_done'});
+	&release_lock_web($_[0]);
 	&register_post_action(\&restart_apache);
+	&$second_print($text{'setup_done'});
 	}
 else {
 	# Just delete one virtual server
 	&$first_print($text{'delete_apache'});
+	&obtain_lock_web($_[0]);
 	if (!$_[0]->{'alias_mode'}) {
 		# Remove the custom Listen directive added for the domain
 		&remove_listen($d, $conf, $d->{'web_port'});
@@ -269,6 +269,7 @@ else {
 	else {
 		&$second_print($text{'delete_noapache'});
 		}
+	&release_lock_web($_[0]);
 	}
 undef(@apache::get_config_cache);
 }
@@ -278,7 +279,6 @@ undef(@apache::get_config_cache);
 sub delete_web_virtual_server
 {
 &require_apache();
-&lock_file($_[0]->{'file'});
 local $lref = &read_file_lines($_[0]->{'file'});
 splice(@$lref, $_[0]->{'line'}, $_[0]->{'eline'} - $_[0]->{'line'} + 1);
 &flush_file_lines();
@@ -289,7 +289,6 @@ if (&is_empty($lref)) {
 	# Delete a link from another Apache dir
 	&apache::delete_webfile_link($_[0]->{'file'});
 	}
-&unlock_file($_[0]->{'file'});
 }
 
 # is_empty(&lref)
@@ -317,13 +316,13 @@ if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
 	if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 		&$first_print($text{'save_apache5'});
 		local $alias = &get_domain($_[0]->{'alias'});
+		&obtain_lock_web($alias);
 		local ($pvirt, $pconf) = &get_apache_virtual($alias->{'dom'},
 						     $alias->{'web_port'});
 		if (!$pvirt) {
 			&$second_print($text{'setup_ewebalias'});
 			}
 		else {
-			&lock_file($pvirt->{'file'});
 			local @sa = &apache::find_directive("ServerAlias", $pconf);
 			local $s;
 			foreach $s (@sa) {
@@ -332,17 +331,17 @@ if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
 			&apache::save_directive("ServerAlias", \@sa, $pconf,
 						$conf);
 			&flush_file_lines();
-			&unlock_file($pvirt->{'file'});
 			&$second_print($text{'setup_done'});
 			$rv++;
 			}
+		&release_lock_web($alias);
 		}
 	}
 else {
 	# Update an actual virtual server
 	local ($virt, $vconf) = &get_apache_virtual($_[1]->{'dom'},
 						    $_[1]->{'web_port'});
-	&lock_file($virt->{'file'});
+	&obtain_lock_web($_[0]);
 	if ($_[0]->{'name'} != $_[1]->{'name'} ||
 	    $_[0]->{'ip'} ne $_[1]->{'ip'} ||
 	    $_[0]->{'ssl'} != $_[1]->{'ssl'} ||
@@ -481,7 +480,6 @@ else {
 		$rv++;
 		if ($virt->{'file'} =~ /$_[1]->{'dom'}/) {
 			# Filename contains domain name .. need to re-name
-			&unlock_file($virt->{'file'});
 			&apache::delete_webfile_link($virt->{'file'});
 			local $nfn = $virt->{'file'};
 			$nfn =~ s/$_[1]->{'dom'}/$_[0]->{'dom'}/;
@@ -490,7 +488,7 @@ else {
 			}
 		&$second_print($text{'setup_done'});
 		}
-	&unlock_file($virt->{'file'});
+	&release_lock_web($_[0]);
 	if ($rv) {
 		undef(@apache::get_config_cache);
 		}
@@ -552,6 +550,7 @@ sub disable_web
 {
 &$first_print($text{'disable_apache'});
 &require_apache();
+&obtain_lock_web($_[0]);
 local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 					    $_[0]->{'web_port'});
 if ($virt) {
@@ -562,6 +561,7 @@ if ($virt) {
 else {
 	&$second_print($text{'delete_noapache'});
 	}
+&release_lock_web($_[0]);
 }
 
 # create_disable_directives(&virt, &vconf, &domain)
@@ -569,7 +569,6 @@ sub create_disable_directives
 {
 local ($virt, $vconf, $d) = @_;
 local $tmpl = &get_template($d->{'template'});
-&lock_file($virt->{'file'});
 local $conf = &apache::get_config();
 if ($tmpl->{'disabled_url'} eq 'none') {
 	# Disable is done via local HTML
@@ -595,7 +594,6 @@ else {
 			[ @rm, "^/.*\$ $url" ], $vconf, $conf);
 	&flush_file_lines();
 	}
-&unlock_file($virt->{'file'});
 }
 
 # disabled_website_html(&domain)
@@ -615,6 +613,7 @@ sub enable_web
 {
 &$first_print($text{'enable_apache'});
 &require_apache();
+&obtain_lock_web($_[0]);
 local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 					    $_[0]->{'web_port'});
 if ($virt) {
@@ -625,13 +624,13 @@ if ($virt) {
 else {
 	&$second_print($text{'delete_noapache'});
 	}
+&release_lock_web($_[0]);
 }
 
 # remove_disable_directives(&virt, &vconf, &domain)
 sub remove_disable_directives
 {
 local ($virt, $vconf, $d) = @_;
-&lock_file($virt->{'file'});
 
 # Remove local disables
 local @am = &apache::find_directive("AliasMatch", $vconf);
@@ -647,7 +646,6 @@ local @rm = &apache::find_directive("RedirectMatch", $vconf);
 &apache::save_directive("RedirectMatch", \@rm, $vconf, $conf);
 
 &flush_file_lines();
-&unlock_file($virt->{'file'});
 }
 
 # check_web_clash(&domain, [field])
@@ -917,13 +915,14 @@ sub restore_web
 {
 return 1 if ($_[0]->{'alias'} && $_[0]->{'alias_mode'});
 &$first_print($text{'restore_apachecp'});
+&obtain_lock_web($_[0]);
+local $rv;
 local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 					    $_[0]->{'web_port'});
 local $tmpl = &get_template($_[0]->{'template'});
 if ($virt) {
 	local $srclref = &read_file_lines($_[1]);
 	local $dstlref = &read_file_lines($virt->{'file'});
-	&lock_file($virt->{'file'});
 	splice(@$dstlref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1,
 	       @$srclref[1 .. @$srclref-2]);
 	# Fix IP address in <Virtualhost> section (if needed)
@@ -991,7 +990,6 @@ if ($virt) {
 			}
 		}
 	&flush_file_lines();
-	&unlock_file($virt->{'file'});
 	undef(@apache::get_config_cache);
 
 	# Re-generate PHP wrappers to match this system
@@ -1003,12 +1001,14 @@ if ($virt) {
 	&$second_print($text{'setup_done'});
 
 	&register_post_action(\&restart_apache);
-	return 1;
+	$rv = 1;
 	}
 else {
 	&$second_print($text{'delete_noapache'});
-	return 0;
+	$rv = 0;
 	}
+&release_lock_web($_[0]);
+return $rv;
 }
 
 %apache_mmap = ( 'jan' => 0, 'feb' => 1, 'mar' => 2, 'apr' => 3,
@@ -2115,7 +2115,7 @@ $main::got_lock_web_file{$file}++;
 $main::got_lock_web_path{$d->{'id'}} = $file;
 
 # Always lock main config file too, as we may modify it with a Listen
-&require_web();
+&require_apache();
 local ($conf) = &apache::find_httpd_conf();
 if ($conf) {
 	if ($main::got_lock_web_file{$conf} == 0) {
