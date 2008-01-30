@@ -999,6 +999,7 @@ if ($defdir) {
 sub obtain_lock_spam
 {
 local ($d) = @_;
+return if (!$config{'spam'});
 
 if ($d) {
 	# Lock domain's files
@@ -1027,6 +1028,7 @@ $main::get_lock_spam++;
 sub release_lock_spam
 {
 local ($d) = @_;
+return if (!$config{'spam'});
 
 if ($d) {
 	# Unlock domain's files

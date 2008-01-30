@@ -161,6 +161,12 @@ foreach $d (@doms) {
 # Make the changes
 &ui_print_unbuffered_header(undef, $text{'massdomains_title'}, "");
 
+# Lock everything in the domains being modified
+# XXX
+foreach $d (@doms) {
+	&obtain_lock_everything($d);
+	}
+
 foreach $d (@doms) {
 	&$first_print(&text('massdomains_dom', $d->{'dom'}));
 	&$indent_print();

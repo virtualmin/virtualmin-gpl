@@ -3907,6 +3907,7 @@ return undef;
 # Lock the mail aliases and virtusers files
 sub obtain_lock_mail
 {
+return if (!$config{'mail'});
 if ($main::got_lock_mail == 0) {
 	print STDERR "getting Mail lock\n";
 	&require_mail();
@@ -3946,6 +3947,7 @@ $main::got_lock_mail++;
 # Unlock all Mail server files
 sub release_lock_mail
 {
+return if (!$config{'mail'});
 if ($main::got_lock_mail == 1) {
 	print STDERR "releasing Mail lock\n";
 	foreach my $f (@main::got_lock_mail_files) {

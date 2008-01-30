@@ -54,7 +54,6 @@ foreach my $p (@ports) {
 	# Find <directory> sections containing PHP directives.
 	# If none exist, add them in either the directory for
 	# public_html, or the <virtualhost> if it already has them
-	&lock_file($virt->{'file'});
 	local @phpconfs;
 	local @dirstrs = &apache::find_directive_struct("Directory",
 							$vconf);
@@ -177,7 +176,6 @@ foreach my $p (@ports) {
 	&apache::save_directive("RemoveHandler", \@remove, $vconf, $conf);
 
 	&flush_file_lines();
-	&unlock_file($virt->{'file'});
 	}
 
 # Create wrapper scripts
@@ -504,7 +502,6 @@ foreach my $p (@ports) {
 	next if (!$virt);
 
 	# Check for an existing <Directory> block
-	&lock_file($virt->{'file'});
 	local @dirs = &apache::find_directive_struct("Directory", $vconf);
 	local ($dirstr) = grep { $_->{'words'}->[0] eq $dir } @dirs;
 	if ($dirstr) {
@@ -583,7 +580,6 @@ foreach my $p (@ports) {
 		&flush_file_lines($virt->{'file'});
 		undef(@apache::get_config_cache);
 		}
-	&unlock_file($virt->{'file'});
 	$any++;
 	}
 return 0 if (!$any);
@@ -610,13 +606,11 @@ local $mode = &get_domain_php_mode($d);
 local @dirs = &apache::find_directive_struct("Directory", $vconf);
 local ($dirstr) = grep { $_->{'words'}->[0] eq $dir } @dirs;
 if ($dirstr) {
-	&lock_file($dirstr->{'file'});
 	local $lref = &read_file_lines($dirstr->{'file'});
 	splice(@$lref, $dirstr->{'line'},
 	       $dirstr->{'eline'}-$dirstr->{'line'}+1);
 	&flush_file_lines($dirstr->{'file'});
 	undef(@apache::get_config_cache);
-	&unlock_file($dirstr->{'file'});
 
 	&register_post_action(\&restart_apache);
 	return 1;
@@ -715,7 +709,6 @@ local $count = 0;
 foreach my $ver (&list_available_php_versions($d, "fcgi")) {
 	local $wrapper = "$d->{'home'}/fcgi-bin/php$ver->[0].fcgi";
 	next if (!-r $wrapper);
-	&lock_file($wrapper);
 	local $lref = &read_file_lines($wrapper);
 	foreach my $l (@$lref) {
 		if ($l =~ s/PHP_FCGI_CHILDREN\s*=\s*\d+/PHP_FCGI_CHILDREN=$children/g) {
@@ -723,7 +716,6 @@ foreach my $ver (&list_available_php_versions($d, "fcgi")) {
 			}
 		}
 	&flush_file_lines($wrapper);
-	&unlock_file($wrapper);
 	}
 &register_post_action(\&restart_apache);
 return $count;

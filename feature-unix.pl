@@ -769,16 +769,18 @@ $main::got_lock_unix-- if ($main::got_lock_unix);
 }
 
 # obtain_lock_cron(&domain)
-# Locks a domain's user's crontab file
+# Locks a domain's user's crontab file, and root's
 sub obtain_lock_cron
 {
 local ($d) = @_;
-if ($main::got_lock_cron_user{$d->{'user'}} == 0) {
-	print STDERR "getting Cron lock for $d->{'user'}\n";
-	&foreign_require("cron", "cron-lib.pl");
-	&lock_file(&cron::cron_file({ 'user' => $d->{'user'} }));
+foreach my $u ($d->{'user'}, 'root') {
+	if ($main::got_lock_cron_user{$u} == 0) {
+		print STDERR "getting Cron lock for $u\n";
+		&foreign_require("cron", "cron-lib.pl");
+		&lock_file(&cron::cron_file({ 'user' => $u }));
+		}
+	$main::got_lock_cron_user{$u}++;
 	}
-$main::got_lock_cron_user{$d->{'user'}}++;
 }
 
 # release_lock_cron(&domain)
@@ -786,13 +788,15 @@ $main::got_lock_cron_user{$d->{'user'}}++;
 sub release_lock_cron
 {
 local ($d) = @_;
-if ($main::got_lock_cron_user{$d->{'user'}} == 1) {
-	print STDERR "releasing Cron lock for $d->{'user'}\n";
-	&foreign_require("cron", "cron-lib.pl");
-	&unlock_file(&cron::cron_file({ 'user' => $d->{'user'} }));
+foreach my $u ($d->{'user'}, 'root') {
+	if ($main::got_lock_cron_user{$u} == 1) {
+		print STDERR "releasing Cron lock for $u\n";
+		&foreign_require("cron", "cron-lib.pl");
+		&unlock_file(&cron::cron_file({ 'user' => $u }));
+		}
+	$main::got_lock_cron_user{$u}--
+		if ($main::got_lock_cron_user{$u});
 	}
-$main::got_lock_cron_user{$d->{'user'}}--
-	if ($main::got_lock_cron_user{$d->{'user'}});
 }
 
 $done_feature_script{'unix'} = 1;

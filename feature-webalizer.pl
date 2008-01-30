@@ -484,6 +484,7 @@ return $stats;
 sub obtain_lock_webalizer
 {
 local ($d) = @_;
+return if (!$config{'webalizer'});
 
 if ($main::got_lock_webalizer_dom{$d->{'id'}} == 0) {
 	print STDERR "getting Webalizer lock for $d->{'dom'}\n";
@@ -507,6 +508,7 @@ $main::got_lock_webalizer_dom{$d->{'id'}}++;
 sub release_lock_webalizer
 {
 local ($d) = @_;
+return if (!$config{'webalizer'});
 
 if ($main::got_lock_webalizer_dom{$d->{'id'}} == 1) {
 	print STDERR "releasing Webalizer lock for $d->{'dom'}\n";

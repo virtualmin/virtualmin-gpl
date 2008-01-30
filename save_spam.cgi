@@ -45,6 +45,7 @@ foreach $w (@what) {
 	}
 
 &obtain_lock_spam($d);
+&obtain_lock_cron($d);
 if ($d->{'spam'}) {
 	$d->{'spam_white'} = $in{'spam_white'};
 	&update_spam_whitelist($d);
@@ -64,6 +65,7 @@ elsif ($in{'clear'} == 2) {
 	}
 &save_domain_spam_autoclear($d, $auto);
 &release_lock_spam($d);
+&release_lock_cron($d);
 
 &run_post_actions();
 

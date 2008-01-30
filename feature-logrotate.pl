@@ -331,6 +331,7 @@ return $d->{'web'} && (!$oldd || !$oldd->{'web'}) &&
 # Lock the logrotate config files
 sub obtain_lock_logrotate
 {
+return if (!$config{'logrotate'});
 if ($main::got_lock_logrotate == 0) {
 	print STDERR "getting Logrotate lock\n";
 	&require_logrotate();
@@ -345,6 +346,7 @@ $main::got_lock_logrotate++;
 # Unlock all logrotate config files
 sub release_lock_logrotate
 {
+return if (!$config{'logrotate'});
 if ($main::got_lock_logrotate == 1) {
 	print STDERR "releasing Logrotate lock\n";
 	&require_logrotate();

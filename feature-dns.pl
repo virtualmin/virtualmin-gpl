@@ -1302,6 +1302,7 @@ return @rv;
 sub obtain_lock_dns
 {
 local ($d, $conftoo) = @_;
+return if (!$config{'dns'});
 
 # Lock records file
 if ($d) {
@@ -1348,6 +1349,7 @@ if ($conftoo) {
 sub release_lock_dns
 {
 local ($d, $conftoo) = @_;
+return if (!$config{'dns'});
 
 # Unlock records file
 if ($d) {

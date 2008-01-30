@@ -2102,6 +2102,7 @@ return $added;
 sub obtain_lock_web
 {
 local ($d) = @_;
+return if (!$config{'web'});
 
 # Where is the domain's .conf file? We have to guess, as actually checking could
 # mean reading the whole Apache config in twice.
@@ -2132,6 +2133,7 @@ $main::got_lock_web_conf = $conf;
 sub release_lock_web
 {
 local ($d) = @_;
+return if (!$config{'web'});
 local $file = $main::got_lock_web_path{$d->{'id'}};
 if ($main::got_lock_web_file{$file} == 1) {
 	print STDERR "released lock on Web domain file $file\n";

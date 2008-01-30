@@ -33,9 +33,9 @@ sub setup_ssl
 local $tmpl = &get_template($_[0]->{'template'});
 local $web_sslport = $_[0]->{'web_sslport'} || $tmpl->{'web_sslport'} || 443;
 &require_apache();
+&obtain_lock_web($_[0]);
 local $conf = &apache::get_config();
 local $f = &get_website_file($_[0]);
-&lock_file($f);
 
 # Create a self-signed cert and key, if needed
 $_[0]->{'ssl_cert'} ||= &default_certificate_file($_[0], 'cert');
@@ -97,18 +97,15 @@ push(@$lref, @$srclref[$virt->{'line'}+1 .. $virt->{'eline'}-1]);
 push(@$lref, @ssldirs);
 push(@$lref, "</VirtualHost>");
 &flush_file_lines($f);
-&unlock_file($f);
 
 # Update the non-SSL virtualhost to include the port number, to fix old
 # hosts that were missing the :80
-&lock_file($virt->{'file'});
 local $lref = &read_file_lines($virt->{'file'});
 if (!$_[0]->{'name'} && $lref->[$virt->{'line'}] !~ /:\d+/) {
 	$lref->[$virt->{'line'}] =
 		"<VirtualHost $_[0]->{'ip'}:$_[0]->{'web_port'}>";
 	&flush_file_lines();
 	}
-&unlock_file($virt->{'file'});
 undef(@apache::get_config_cache);
 
 # Add this IP and cert to Webmin/Usermin's SSL keys list
@@ -124,6 +121,7 @@ if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin") &&
 		      \&restart_usermin);
 	}
 
+&release_lock_web($_[0]);
 &$second_print($text{'setup_done'});
 &register_post_action(\&restart_apache, 1);
 $_[0]->{'web_sslport'} = $web_sslport;
@@ -134,11 +132,11 @@ sub modify_ssl
 {
 local $rv = 0;
 &require_apache();
+&obtain_lock_web($_[0]);
 local $conf = &apache::get_config();
 local ($virt, $vconf) = &get_apache_virtual($_[1]->{'dom'},
                                             $_[1]->{'web_sslport'});
 local $tmpl = &get_template($_[0]->{'template'});
-&lock_file($virt->{'file'});
 if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 	# Home directory has changed .. update any directives that referred
 	# to the old directory
@@ -225,7 +223,7 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'}) {
 			      \&restart_usermin);
 		}
 	}
-&unlock_file($virt->{'file'});
+&release_lock_web($_[0]);
 &register_post_action(\&restart_apache, 1) if ($rv);
 return $rv;
 }
@@ -235,8 +233,9 @@ return $rv;
 sub delete_ssl
 {
 &require_apache();
-local $conf = &apache::get_config();
 &$first_print($text{'delete_ssl'});
+&obtain_lock_web($_[0]);
+local $conf = &apache::get_config();
 
 # Remove the custom Listen directive added for the domain
 &remove_listen($d, $conf, $d->{'web_sslport'});
@@ -267,6 +266,7 @@ if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin")) {
 		      \&usermin::put_usermin_miniserv_config,
 		      \&restart_usermin);
 	}
+&release_lock_web($_[0]);
 }
 
 # validate_ssl(&domain)
@@ -379,13 +379,13 @@ return 1;
 sub restore_ssl
 {
 &$first_print($text{'restore_sslcp'});
+&obtain_lock_web($_[0]);
 
 # Restore the Apache directives
 local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 					    $_[0]->{'web_sslport'});
 local $srclref = &read_file_lines($_[1]);
 local $dstlref = &read_file_lines($virt->{'file'});
-&lock_file($virt->{'file'});
 splice(@$dstlref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1,
        @$srclref[1 .. @$srclref-2]);
 # Fix ip address in <Virtualhost> section (if needed)
@@ -415,24 +415,24 @@ if ($nvirt) {
 		}
 	&flush_file_lines();
 	}
-&unlock_file($virt->{'file'});
 
 # Restore the cert and key, if any and if saved
 local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
 if ($cert && -r "$_[1]_cert") {
 	&lock_file($cert);
-	&execute_command("cp ".quotemeta("$_[1]_cert")." ".quotemeta($cert));
+	&copy_source_dest("$_[1]_cert", $cert);
 	&unlock_file($cert);
 	}
 local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf, 1);
 if ($key && -r "$_[1]_key" && $key ne $cert) {
 	&lock_file($key);
-	&execute_command("cp ".quotemeta("$_[1]_key")." ".quotemeta($key));
+	&copy_source_dest("$_[1]_key", $key);
 	&unlock_file($key);
 	}
 
 &$second_print($text{'setup_done'});
 
+&release_lock_web($_[0]);
 &register_post_action(\&restart_apache);
 return 1;
 }
@@ -624,6 +624,42 @@ return $config{$mode.'_tmpl'} ?
 	    &absolute_domain_path($d,
 	     &substitute_domain_template($config{$mode.'_tmpl'}, $d)) :
 	    "$d->{'home'}/ssl.".$mode;
+}
+
+# obtain_lock_ssl(&domain)
+# Lock the Apache config file for some domain, and the Webmin config
+sub obtain_lock_ssl
+{
+local ($d) = @_;
+return if (!$config{'ssl'});
+&obtain_lock_web($d);
+if ($main::got_lock_ssl == 0) {
+	local @sfiles = ($ENV{'MINISERV_CONFIG'} ||
+		         "$config_directory/miniserv.conf",
+		        $config_directory =~ /^(.*)\/webmin$/ ?
+		         "$1/usermin/miniserv.conf" :
+			 "/etc/usermin/miniserv.conf");
+	foreach my $f (@sfiles) {
+		&lock_file($f);
+		}
+	@main::got_lock_ssl_files = @sfiles;
+	}
+$main::got_lock_ssl++;
+}
+
+# release_lock_web(&domain)
+# Un-lock the Apache config file for some domain, and the Webmin config
+sub release_lock_ssl
+{
+local ($d) = @_;
+return if (!$config{'ssl'});
+&release_lock_web($d);
+if ($main::got_lock_ssl == 1) {
+	foreach my $f (@main::got_lock_ssl_files) {
+		&unlock_file($f);
+		}
+	}
+$main::got_lock_ssl-- if ($main::got_lock_ssl);
 }
 
 $done_feature_script{'ssl'} = 1;
