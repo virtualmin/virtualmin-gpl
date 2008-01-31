@@ -2378,6 +2378,7 @@ sub domains_table
 {
 local ($doms, $checks) = @_;
 local $usercounts = &count_domain_users();
+local $aliascounts = &count_domain_aliases(1);
 local @table_features = $config{'show_features'} ?
     (grep { $_ ne 'webmin' && $_ ne 'mail' &&
 	    $_ ne 'unix' && $_ ne 'dir' } @features) : ( );
@@ -2458,9 +2459,9 @@ foreach $d (sort { $a->{$sortfield} cmp $b->{$sortfield} ||
 	if ($config{'mail'}) {
 		if ($d->{'mail'}) {
 			# Link to aliases
-			local @aliases = &list_domain_aliases($d);
+			local $ac = $aliascounts->{$d->{'id'}};
 			if (&can_edit_aliases() && !$d->{'aliascopy'}) {
-				push(@cols, sprintf("%d&nbsp;(<a href='list_aliases.cgi?dom=$d->{'id'}'>$text{'index_list'}</a>)\n", scalar(@aliases)));
+				push(@cols, sprintf("%d&nbsp;(<a href='list_aliases.cgi?dom=$d->{'id'}'>$text{'index_list'}</a>)\n", $ac));
 				}
 			else {
 				push(@cols, scalar(@aliases));
