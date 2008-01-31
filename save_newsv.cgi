@@ -58,6 +58,22 @@ if ($config{'spam'}) {
 	&save_global_spam_client($client, $host, $size);
 	}
 
+# Update user procmail setting
+if ($config{'spam'}) {
+	if ($config{'default_procmail'} != $in{'default_procmail'}) {
+		$config{'default_procmail'} = $in{'default_procmail'};
+		&setup_default_delivery();
+
+		# Save the config
+		&lock_file($module_config_file);
+		if ($config{'last_check'} < time()) {
+			$config{'last_check'} = time()+1;
+			}
+		&save_module_config();
+		&unlock_file($module_config_file);
+		}
+	}
+
 # Update virus scanner
 if ($config{'virus'}) {
 	&save_global_virus_scanner(

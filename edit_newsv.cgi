@@ -28,6 +28,12 @@ if ($config{'spam'}) {
 		&hlink($text{'tmpl_spam_size'}, 'template_spam_size'),
 		&ui_opt_textbox("size", $size, 8,
 				$text{'template_spam_unlimited'}));
+
+	# Allow user .procmailrc file?
+	print &ui_table_row(
+		&hlink($text{'spam_procmail'}, 'config_default_procmail'),
+		&ui_radio("default_procmail", $config{'default_procmail'},
+			  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
 	}
 
 # Virus scanning program

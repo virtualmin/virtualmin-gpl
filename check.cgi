@@ -45,11 +45,6 @@ if ($webminchanged) {
 # Setup the licence cron job (if needed)
 &setup_licence_cron();
 
-# Update the procmail setting for default delivery
-if ($config{'spam'}) {
-	&setup_default_delivery();
-	}
-
 # Update the domain owner's group
 &update_domain_owners_group();
 

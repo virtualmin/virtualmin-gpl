@@ -68,3 +68,4 @@
 	- supports_mass_setup_XXX functions that take a domain as an arg,
 	  to decide which domains can be batch created with mass_setup_XXX
 	  functions
+

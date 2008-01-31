@@ -823,3 +823,4 @@ When a virtual server is moved under a new owner, the Apache directives that con
 Fixed bugs in the FAQMasterFlex installer that prevented it's config file from being setup properly.
 Re-wrote all code that locks configuration files managed by Virtualmin. This improves the coverage of Webmin logging, and makes it much safer to perform multiple operations on the same or different domains at once.
 Outgoing email relayed via the Virtualmin system is now counted towards the sender's domain's bandwidth limit, unless disabled on the Bandwidth Monitoring page.
+Moved the option that controls if mailbox users can have .procmailrc files to the Spam and Virus Delivery page, where it is easier to find and is applied immediately.
