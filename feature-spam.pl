@@ -1004,7 +1004,6 @@ return if (!$config{'spam'});
 if ($d) {
 	# Lock domain's files
 	if ($main::got_lock_spam_dom{$d->{'id'}} == 0) {
-		print STDERR "getting Spam file lock for $d->{'dom'}\n";
 		&require_spam();
 		&lock_file("$procmail_spam_dir/$d->{'id'}");
 		&lock_file("$spam_config_dir/$d->{'id'}");
@@ -1015,7 +1014,6 @@ if ($d) {
 
 # Lock master procmail config file
 if ($main::get_lock_spam == 0) {
-	print STDERR "getting Procmail lock\n";
 	&require_spam();
 	&lock_file($procmail::procmailrc);
 	&lock_file($spamclear_file);
@@ -1033,7 +1031,6 @@ return if (!$config{'spam'});
 if ($d) {
 	# Unlock domain's files
 	if ($main::got_lock_spam_dom{$d->{'id'}} == 1) {
-		print STDERR "releasing Spam file lock for $d->{'dom'}\n";
 		&require_spam();
 		&unlock_file("$procmail_spam_dir/$d->{'id'}");
 		&unlock_file("$spam_config_dir/$d->{'id'}");
@@ -1045,7 +1042,6 @@ if ($d) {
 
 # Unlock only master procmail config file
 if ($main::get_lock_spam == 1) {
-	print STDERR "releasing Procmail lock\n";
 	&require_spam();
 	&unlock_file($procmail::procmailrc);
 	&unlock_file($spamclear_file);

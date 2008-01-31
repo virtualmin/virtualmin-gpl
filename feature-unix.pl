@@ -743,7 +743,6 @@ eval {
 sub obtain_lock_unix
 {
 if ($main::got_lock_unix == 0) {
-	print STDERR "getting Unix lock\n";
 	&require_useradmin();
 	&foreign_call($usermodule, "lock_user_files");
 	undef(@useradmin::list_users_cache);
@@ -761,7 +760,6 @@ $main::got_lock_unix++;
 sub release_lock_unix
 {
 if ($main::got_lock_unix == 1) {
-	print STDERR "releasing Unix lock\n";
 	&require_useradmin();
 	&foreign_call($usermodule, "unlock_user_files");
 	}
@@ -775,7 +773,6 @@ sub obtain_lock_cron
 local ($d) = @_;
 foreach my $u ($d->{'user'}, 'root') {
 	if ($main::got_lock_cron_user{$u} == 0) {
-		print STDERR "getting Cron lock for $u\n";
 		&foreign_require("cron", "cron-lib.pl");
 		&lock_file(&cron::cron_file({ 'user' => $u }));
 		}
@@ -790,7 +787,6 @@ sub release_lock_cron
 local ($d) = @_;
 foreach my $u ($d->{'user'}, 'root') {
 	if ($main::got_lock_cron_user{$u} == 1) {
-		print STDERR "releasing Cron lock for $u\n";
 		&foreign_require("cron", "cron-lib.pl");
 		&unlock_file(&cron::cron_file({ 'user' => $u }));
 		}

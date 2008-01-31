@@ -45,6 +45,7 @@ $config{'bw_maillog_rotated'} = $in{'maillog_rotated'};
 $config{'bw_servers'} = $in{'serversmode'} == 0 ? "" :
 			$in{'serversmode'} == 1 ? join(" ", @servers) :
 						  "!".join(" ", @servers);
+$config{'bw_nomailout'} = $in{'nomailout'};
 &lock_file($module_config_file);
 $config{'last_check'} = time()+1;	# no need for check.cgi to be run
 &save_module_config();

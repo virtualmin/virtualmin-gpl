@@ -1072,7 +1072,6 @@ sub obtain_lock_webmin
 {
 return if (!$config{'webmin'});
 if ($main::got_lock_webmin == 0) {
-	print STDERR "getting Webmin lock\n";
 	&lock_file("$module_config_directory/webminlock");
 	}
 $main::got_lock_webmin++;
@@ -1084,7 +1083,6 @@ sub release_lock_webmin
 {
 return if (!$config{'webmin'});
 if ($main::got_lock_webmin == 1) {
-	print STDERR "releasing Webmin lock\n";
 	&unlock_file("$module_config_directory/webminlock");
 	}
 $main::got_lock_webmin-- if ($main::got_lock_webmin);

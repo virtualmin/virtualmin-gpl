@@ -487,7 +487,6 @@ local ($d) = @_;
 return if (!$config{'webalizer'});
 
 if ($main::got_lock_webalizer_dom{$d->{'id'}} == 0) {
-	print STDERR "getting Webalizer lock for $d->{'dom'}\n";
 	&require_webalizer();
 	local $alog = &get_apache_log($d->{'dom'}, $d->{'web_port'});
 	local $stats = &webalizer_stats_dir($d);
@@ -511,7 +510,6 @@ local ($d) = @_;
 return if (!$config{'webalizer'});
 
 if ($main::got_lock_webalizer_dom{$d->{'id'}} == 1) {
-	print STDERR "releasing Webalizer lock for $d->{'dom'}\n";
 	local $alog = $main::got_lock_webalizer_alog{$d->{'id'}};
 	local $stats = $main::got_lock_webalizer_alog{$d->{'id'}};
 	if ($alog) {

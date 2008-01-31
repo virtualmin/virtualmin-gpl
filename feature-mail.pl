@@ -2724,7 +2724,7 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 	&open_uncompress_file(LOG, $f);
 
 	# Scan the log, looking for entries for various mail systems
-	local %sizes;
+	local (%sizes, %fromdoms);
 	local $now = time();
 	local @tm = localtime($now);
 	while(<LOG>) {
@@ -2732,7 +2732,17 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 		s/\r|\n//g;
 		if (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(\S+):\s+from=(\S+),\s+size=(\d+)/) {
 			# The initial From: line that contains the size
-			$sizes{$8} = $10;
+			local ($id, $size, $fromuser) = ($8, $10, $9);
+			$sizes{$id} = $size;
+			$fromuser =~ s/^<(.*)>/$1/;
+                        $fromuser =~ s/,$//;
+			local ($mb, $dom) = split(/\@/, $fromuser);
+			local $md = $maildoms{$dom};
+			if ($md) {
+				# Mail is from a hosted domain. If it is to a non-
+				# local domain, we will count it in the next block
+				$fromdoms{$id} = $md;
+				}
 			}
 		elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(\S+):\s+to=(\S+),(\s+orig_to=(\S+))?/) {
 			# A To: line that has the local recipient
@@ -2745,11 +2755,14 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 				}
 			local $user = $11 || $9;
 			local $sz = $sizes{$8};
+			local $fd = $fromdoms{$8};
 			$user =~ s/^<(.*)>/$1/;
 			$user =~ s/,$//;
 			local ($mb, $dom) = split(/\@/, $user);
 			local $md = $maildoms{$dom};
 			if ($md) {
+				# To a local domain - add the size to that
+				# domain's usage
 				if ($ltime > $max_ltime{$md->{'id'}}) {
 					# Update most recent seen time for
 					# this domain.
@@ -2757,10 +2770,27 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 					$max_updated{$md->{'id'}} = 1;
 					}
 				if ($ltime > $starts->{$md->{'id'}} && $sz) {
-					# To a user in a hosted domain
+					# New enough to record
 					local $day =
 					    int($ltime / (24*60*60));
 					$bws->{$md->{'id'}}->
+						{"mail_".$day} += $sz;
+					}
+				}
+			elsif ($fd) {
+				# From a local domain, but to an off-site domain -
+				# add the size to the sender's usage
+				if ($ltime > $max_ltime{$fd->{'id'}}) {
+					# Update most recent seen time for
+					# this domain.
+					$max_ltime{$fd->{'id'}} = $ltime;
+					$max_updated{$fd->{'id'}} = 1;
+					}
+				if ($ltime > $starts->{$fd->{'id'}} && $sz) {
+					# New enough to record
+					local $day =
+					    int($ltime / (24*60*60));
+					$bws->{$fd->{'id'}}->
 						{"mail_".$day} += $sz;
 					}
 				}
@@ -3909,7 +3939,6 @@ sub obtain_lock_mail
 {
 return if (!$config{'mail'});
 if ($main::got_lock_mail == 0) {
-	print STDERR "getting Mail lock\n";
 	&require_mail();
 	@main::got_lock_mail_files = ( );
 	if ($config{'mail_system'} == 0) {
@@ -3949,7 +3978,6 @@ sub release_lock_mail
 {
 return if (!$config{'mail'});
 if ($main::got_lock_mail == 1) {
-	print STDERR "releasing Mail lock\n";
 	foreach my $f (@main::got_lock_mail_files) {
 		&unlock_file($f);
 		}

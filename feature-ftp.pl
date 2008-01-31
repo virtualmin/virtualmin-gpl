@@ -522,7 +522,6 @@ sub obtain_lock_ftp
 {
 return if (!$config{'ftp'});
 if ($main::got_lock_ftp == 0) {
-	print STDERR "getting FTP lock\n";
 	&require_proftpd();
 	&lock_file($proftpd::config{'proftpd_conf'});
 	&lock_file($proftpd::config{'add_file'})
@@ -537,7 +536,6 @@ sub release_lock_ftp
 {
 return if (!$config{'ftp'});
 if ($main::got_lock_ftp == 1) {
-	print STDERR "releasing FTP lock\n";
 	&require_proftpd();
 	&unlock_file($proftpd::config{'proftpd_conf'});
 	&unlock_file($proftpd::config{'add_file'})

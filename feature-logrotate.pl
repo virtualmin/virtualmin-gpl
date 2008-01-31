@@ -333,7 +333,6 @@ sub obtain_lock_logrotate
 {
 return if (!$config{'logrotate'});
 if ($main::got_lock_logrotate == 0) {
-	print STDERR "getting Logrotate lock\n";
 	&require_logrotate();
 	&lock_file($logrotate::config{'add_file'})
 		if ($logrotate::config{'add_file'});
@@ -348,7 +347,6 @@ sub release_lock_logrotate
 {
 return if (!$config{'logrotate'});
 if ($main::got_lock_logrotate == 1) {
-	print STDERR "releasing Logrotate lock\n";
 	&require_logrotate();
 	&unlock_file($logrotate::config{'add_file'})
 		if ($logrotate::config{'add_file'});

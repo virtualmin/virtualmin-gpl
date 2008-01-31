@@ -2108,7 +2108,6 @@ return if (!$config{'web'});
 # mean reading the whole Apache config in twice.
 local $file = &get_website_file($d);
 if ($main::got_lock_web_file{$file} == 0) {
-	print STDERR "got lock on Web domain file $file\n";
 	&lock_file($file);
 	undef(@apache::get_config_cache);
 	}
@@ -2120,7 +2119,6 @@ $main::got_lock_web_path{$d->{'id'}} = $file;
 local ($conf) = &apache::find_httpd_conf();
 if ($conf) {
 	if ($main::got_lock_web_file{$conf} == 0) {
-		print STDERR "got lock on Web main file $file\n";
 		&lock_file($conf);
 		}
 	$main::got_lock_web_file{$conf}++;
@@ -2136,7 +2134,6 @@ local ($d) = @_;
 return if (!$config{'web'});
 local $file = $main::got_lock_web_path{$d->{'id'}};
 if ($main::got_lock_web_file{$file} == 1) {
-	print STDERR "released lock on Web domain file $file\n";
 	&unlock_file($file);
 	}
 $main::got_lock_web_file{$file}-- if ($main::got_lock_web_file{$file});
@@ -2144,7 +2141,6 @@ $main::got_lock_web_file{$file}-- if ($main::got_lock_web_file{$file});
 # Unlock main config file too
 local $conf = $main::got_lock_web_conf;
 if ($conf) {
-	print STDERR "released lock on Web main file $file\n";
 	if ($main::got_lock_web_file{$conf} == 1) {
 		&unlock_file($conf);
 		}

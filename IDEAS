@@ -60,9 +60,6 @@
 	 - no need for preloading their libs
 	 - no need for variable to not load plugins
 
- - global lock on domain DB, to prevent problems with concurrent ops
-	- FS #3500
-	- Remove debugging code
-	- plugins too
-
  - outgoing email bandwidth monitoring
+	- test on postfix
+	- GPL too

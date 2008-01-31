@@ -1307,7 +1307,6 @@ return if (!$config{'dns'});
 # Lock records file
 if ($d) {
 	if ($main::got_lock_dns_zone{$d->{'id'}} == 0) {
-		print STDERR "getting DNS zone lock for $d->{'dom'}\n";
 		&require_bind();
 		local $conf = &bind8::get_config();
 		local $z = &get_bind_zone($d->{'dom'}, $conf);
@@ -1323,7 +1322,6 @@ if ($d) {
 			}
 		local $rootfn = &bind8::make_chroot($fn);
 		&lock_file($rootfn);
-		print STDERR "DNS zone file is $rootfn\n";
 		$main::got_lock_dns_file{$d->{'id'}} = $rootfn;
 		}
 	$main::got_lock_dns_zone{$d->{'id'}}++;
@@ -1333,7 +1331,6 @@ if ($d) {
 # in the same .conf file, even though that may not be true.
 if ($conftoo) {
 	if ($main::got_lock_dns == 0) {
-		print STDERR "getting DNS lock\n";
 		&require_bind();
 		undef(@bind8::get_config_cache);
 		undef(%bind8::get_config_parent_cache);
@@ -1354,7 +1351,6 @@ return if (!$config{'dns'});
 # Unlock records file
 if ($d) {
 	if ($main::got_lock_dns_zone{$d->{'id'}} == 1) {
-		print STDERR "releasing DNS zone lock for $d->{'dom'}\n";
 		local $rootfn = $main::got_lock_dns_file{$d->{'id'}};
 		&unlock_file($rootfn) if ($rootfn);
 		}
@@ -1365,7 +1361,6 @@ if ($d) {
 # Unlock named.conf
 if ($conftoo) {
 	if ($main::got_lock_dns == 1) {
-		print STDERR "releasing DNS lock\n";
 		&require_bind();
 		&unlock_file(&bind8::make_chroot($config{'zones_file'} ||
 					         $config{'named_conf'}));

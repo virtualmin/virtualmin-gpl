@@ -2122,6 +2122,7 @@ newbw_emaxdays=Missing or invalid number of days to keep bandwidth data
 newbw_resetbutton=Re-Compute Statistics
 newbw_resetdesc=This button opens a form for forcing the re-generating of bandwidth statistics from the original log files, for some or all features and virtual servers.
 newbw_return=bandwidth monitoring form
+newbw_mailout=Include outgoing email in bandwidth usage?
 
 newframe_title=Frame-Forwarding HTML
 newframe_ecannot=You are not allowed to edit the frame-forwarding HTML template
