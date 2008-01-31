@@ -837,7 +837,9 @@ sub refresh_webmin_user
 {
 local ($d, $quiet) = @_;
 local $wd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
-&modify_webmin($wd, $wd);
+if ($wd->{'webmin'}) {
+	&modify_webmin($wd, $wd);
+	}
 if ($wd->{'reseller'} && $virtualmin_pro) {
 	local @resels = &list_resellers();
 	local ($r) = grep { $_->{'name'} eq $d->{'reseller'} } @resels;
