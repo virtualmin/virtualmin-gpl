@@ -2777,7 +2777,7 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 						{"mail_".$day} += $sz;
 					}
 				}
-			elsif ($fd) {
+			elsif ($fd && !$config{'bw_nomailout'}) {
 				# From a local domain, but to an off-site domain -
 				# add the size to the sender's usage
 				if ($ltime > $max_ltime{$fd->{'id'}}) {
