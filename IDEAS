@@ -69,3 +69,9 @@
 	  to decide which domains can be batch created with mass_setup_XXX
 	  functions
 
+ - new features display, on right frame
+	- button to dismiss (should remove section completely)
+	- option to show again
+	- features can be for resellers, domain owners, master admin
+	- separate dirs for pro and gpl
+	- what about plugins and their versions?
