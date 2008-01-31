@@ -60,3 +60,11 @@
 	 - no need for preloading their libs
 	 - no need for variable to not load plugins
 
+ - faster mass alias domain creation
+	- cache httpd.conf and mail files in memory
+	- only update Webmin at end
+	- command-line program that can create from file
+	- CGI too
+	- supports_mass_setup_XXX functions that take a domain as an arg,
+	  to decide which domains can be batch created with mass_setup_XXX
+	  functions

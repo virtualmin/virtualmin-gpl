@@ -657,8 +657,8 @@ if ($extramods{'syslog'} && $_[0]->{'webmin'} &&
 	local @extras;
 	local %done;
 	foreach my $sd (@doms) {
-		# Add Apache logs
-		if ($sd->{'web'}) {
+		# Add Apache logs, for domains with websites and separate logs
+		if ($sd->{'web'} && !$sd->{'alias_mode'}) {
 			local $alog = &get_apache_log($sd->{'dom'},
 						      $sd->{'web_port'}, 0);
 			local $elog = &get_apache_log($sd->{'dom'},
