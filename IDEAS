@@ -60,6 +60,3 @@
 	 - no need for preloading their libs
 	 - no need for variable to not load plugins
 
- - outgoing email bandwidth monitoring
-	- test on postfix
-	- GPL too
