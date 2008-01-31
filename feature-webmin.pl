@@ -235,7 +235,8 @@ if ($features{'dns'} && $config{'avail_dns'}) {
 	# Allow user to manage just this domain
 	push(@mods, "bind8");
 	local %acl = ( 'noconfig' => 1,
-		       'zones' => join(" ", map { $_->{'dom'} } @doms),
+		       'zones' => join(" ", map { $_->{'dom'} }
+					     grep { $_->{'dns'} } @doms),
 		       'dir' => &resolve_links($_[0]->{'home'}),
 		       'master' => 0,
 		       'slave' => 0,
@@ -269,7 +270,8 @@ if ($features{'mysql'} && $config{'avail_mysql'}) {
 	# Allow user to manage just the domain's DB
 	push(@mods, "mysql");
 	local %acl = ( 'noconfig' => 1,
-		       'dbs' => join(" ", map { split(/\s+/, $_->{'db_mysql'}) } @doms),
+		       'dbs' => join(" ", map { split(/\s+/, $_->{'db_mysql'}) }
+					      grep { $_->{'mysql'} } @doms),
 		       'create' => 0,
 		       'delete' => 0,
 		       'stop' => 0,
@@ -291,7 +293,9 @@ if ($features{'postgres'} && $config{'avail_postgres'}) {
 	# Allow user to manage just the domain's DB
 	push(@mods, "postgresql");
 	local %acl = ( 'noconfig' => 1,
-		       'dbs' => join(" ", map { split(/\s+/, $_->{'db_postgres'}) } @doms),
+		       'dbs' => join(" ",
+				   map { split(/\s+/, $_->{'db_postgres'}) }
+				       grep { $_->{'postgres'} } @doms),
 		       'create' => 0,
 		       'delete' => 0,
 		       'stop' => 0,
@@ -314,7 +318,9 @@ if ($features{'web'} && $config{'avail_web'}) {
 	&require_apache();
 	push(@mods, "apache");
 	local %acl = ( 'noconfig' => 1,
-		       'virts' => join(" ", map { $_->{'dom'}, "$_->{'dom'}:$_->{'web_port'}" } @doms),
+		       'virts' => join(" ",
+			  map { $_->{'dom'}, "$_->{'dom'}:$_->{'web_port'}" }
+			      grep { $_->{'web'} } @doms),
 		       'global' => 0,
 		       'create' => 0,
 		       'vuser' => 0,
@@ -332,7 +338,9 @@ if ($features{'web'} && $config{'avail_web'}) {
 		       'dirs' => 'ServerName ServerAlias SSLEngine SSLCertificateFile SSLCertificateKeyFile',
 		      );
 	if ($_[0]->{'ssl'}) {
-		$acl{'virts'} .= " ".join(" ", map { $_->{'dom'}, "$_->{'dom'}:$_->{'web_sslport'}" } @doms);
+		$acl{'virts'} .= " ".join(" ",
+			map { $_->{'dom'}, "$_->{'dom'}:$_->{'web_sslport'}" }
+			    grep { $_->{'web'} } @doms);
 		}
 	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "apache")
 		if (!$hasmods{'apache'});
@@ -346,9 +354,11 @@ if ($features{'webalizer'} && $config{'avail_webalizer'}) {
 	push(@mods, "webalizer");
 	local @logs;
 	local $d;
-	foreach $d (@doms) {
-		push(@logs, &resolve_links(&get_apache_log($d->{'dom'}, $d->{'web_port'})));
+	foreach $d (grep { $_->{'webalizer'} } @doms) {
+		push(@logs, &resolve_links(&get_apache_log(
+				$d->{'dom'}, $d->{'web_port'})));
 		}
+	@logs = &unique(@logs);
 	local %acl = ( 'noconfig' => 1,
 		       'view' => $tmpl->{'web_stats_noedit'},
 		       'global' => 0,
@@ -367,7 +377,7 @@ else {
 local @spamassassin_doms;
 if (defined(&get_domain_spam_client)) {
 	@spamassassin_doms = grep { &get_domain_spam_client($_) ne 'spamc' }
-				  @doms;
+				  grep { $_->{'spam'} } @doms;
 	}
 if ($features{'spam'} && $config{'avail_spam'} && @spamassassin_doms) {
 	push(@mods, "spam");
@@ -601,7 +611,8 @@ if ($extramods{'mailboxes'} && $_[0]->{'mail'}) {
 	# Can read mailboxes of users
 	local %acl = ( 'noconfig' => 1,
 		       'fmode' => 1,
-		       'from' => join(" ", map { $_->{'dom'} } @doms),
+		       'from' => join(" ", map { $_->{'dom'} }
+					       grep { $_->{'mail'} } @doms),
 		       'canattach' => 0,
 		       'candetach' => 0,
 		       'dir' => &mail_domain_base($_[0]) );
