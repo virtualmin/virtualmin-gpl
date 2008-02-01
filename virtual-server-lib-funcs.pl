@@ -12038,8 +12038,9 @@ if (-r $custom_shells_file) {
 		}
 	close(SHELLS);
 	}
-else {
-	# Fake up from config file and known shells
+if (@rv) {
+	# Fake up from config file and known shells, if there is no custom
+	# file or if it is somehow empty.
 	push(@rv, { 'shell' => $config{'shell'},
 		    'desc' => $text{'shells_mailbox'},
 		    'mailbox' => 1,
