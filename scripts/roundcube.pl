@@ -183,7 +183,7 @@ if (!$upgrade) {
 			$l = "\$rcmail_config['smtp_server'] = 'localhost';";
 			}
 		if ($l =~ /^\$rcmail_config\['smtp_port'\]\s+=/) {
-			$l = "\$rcmail_config['smtp_port'] = 143;";
+			$l = "\$rcmail_config['smtp_port'] = 25;";
 			}
 		if ($l =~ /^\$rcmail_config\['smtp_user'\]\s+=/) {
 			$l = "\$rcmail_config['smtp_user'] = '%u';";
