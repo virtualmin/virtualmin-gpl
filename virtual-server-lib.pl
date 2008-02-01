@@ -248,6 +248,7 @@ $procmail_log_cmd = "$module_config_directory/procmail-logger.pl";
 $procmail_log_cache = "$ENV{'WEBMIN_VAR'}/procmail.cache";
 $procmail_log_times = "$ENV{'WEBMIN_VAR'}/procmail.times";
 
-@newfeatures_dirs = ( 'newfeatures-all',
-		      $virtualmin_pro ? 'newfeatures-pro' : 'newfeatures-gpl' );
-
+@newfeatures_dirs = ( "$module_root_directory/newfeatures-all",
+		      $virtualmin_pro ? "$module_root_directory/newfeatures-pro"
+				      : "$module_root_directory/newfeatures-gpl" );
+$newfeatures_seen_dir = "$module_config_directory/seenfeatures";

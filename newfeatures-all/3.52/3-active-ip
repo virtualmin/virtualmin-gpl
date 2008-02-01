@@ -1,0 +1,4 @@
+desc=Servers can be assigned an existing IP address
+html=When editing a virtual server without a private IP address, one can be added that is associated with an existing interface on the system.
+master=1
+link=edit_domain.cgi?id=${ID}

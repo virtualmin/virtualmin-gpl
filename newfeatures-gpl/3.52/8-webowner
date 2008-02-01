@@ -1,0 +1,6 @@
+desc=Website FTP access users
+html=Website FTP access users can be created, who have the same permissions as a domain owner but are limited to FTP access for editing web pages. This feature was ported from the Pro version.
+master=1
+reseller=1
+domain=1
+link=list_users.cgi?dom=${ID}

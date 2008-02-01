@@ -1,0 +1,4 @@
+desc=Outgoing email bandwidth accounting
+html=Outgoing email relayed via the Virtualmin system is now counted towards the sender's domain's bandwidth limit, unless disabled on the Bandwidth Monitoring page.
+master=1
+link=edit_newbw.cgi

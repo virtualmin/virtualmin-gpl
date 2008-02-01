@@ -137,7 +137,7 @@ print &ui_table_row(&hlink($text{'newbw_maillog'}, "bandwidth_maillog_def"),
 		     $config{'bw_maillog_rotated'}));
 
 # Include outgoing email
-print &ui_table_row(&hlink($text{'newbw_mailout', "bandwidth_mailout"),
+print &ui_table_row(&hlink($text{'newbw_mailout'}, "bandwidth_mailout"),
 	&ui_radio("nomailout", $config{'bw_nomailout'},
 		  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
 

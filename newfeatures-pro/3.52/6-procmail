@@ -1,0 +1,4 @@
+desc=Moved Procmail option
+html=Moved the option that controls if mailbox users can have .procmailrc files to the Spam and Virus Delivery page, where it is easier to find and is applied immediately.
+master=1
+link=edit_newsv.cgi

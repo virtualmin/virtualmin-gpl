@@ -1,0 +1,4 @@
+desc=Restores install PHP modules
+html=When moving a virtual server to a new system via a restore, if any required PHP modules that were installed on the old system are missing on the new, they will be automatically installed (where possible). In addition, you will be notified if any required PHP versions are missing.
+master=1
+link=restore_form.cgi

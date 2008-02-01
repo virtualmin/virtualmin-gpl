@@ -1,0 +1,4 @@
+desc=Custom styles with no content
+html=Custom styles can use the nocontent=1 line in style.info to specify that no initial content needs to be entered.
+master=1
+link=edit_newstyles.cgi

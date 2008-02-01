@@ -1,0 +1,4 @@
+desc=Restored features validation
+html=When restoring a virtual server that uses features not supported on the system, a warning will be displayed listing the missing or disabled features.
+master=1
+link=restore_form.cgi

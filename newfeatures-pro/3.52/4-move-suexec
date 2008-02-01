@@ -1,0 +1,5 @@
+desc=Move correctly updates Apache
+html=When a virtual server is moved under a new owner, the Apache directives that control which user CGIs and PHP scripts run as are properly updated.
+master=1
+reseller=1
+link=move_form.cgi?dom=${ID}
