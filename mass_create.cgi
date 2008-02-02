@@ -299,7 +299,7 @@ foreach $line (@lines) {
 		 'parent', $parentdom ? $parentdom->{'id'} : "",
 		 'alias', $aliasdom ? $aliasdom->{'id'} : "",
 		 'template', $tmpl->{'id'},
-		 'reseller', $in{'resel'},
+		 'reseller', $resel,
 		);
 	$dom{'emailto'} = $dom{'email'} ||
 			  $dom{'user'}.'@'.&get_system_hostname();

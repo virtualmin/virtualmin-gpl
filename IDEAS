@@ -84,3 +84,4 @@
 	- test all functions
 	- can rename files?? move domain? (move doesn't work)
 	- CHANGELOG and new features files
+	- postinstall
