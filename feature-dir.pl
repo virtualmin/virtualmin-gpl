@@ -68,6 +68,9 @@ return 1;
 # Rename home directory if needed
 sub modify_dir
 {
+if (defined(&set_php_wrappers_writable)) {
+	&set_php_wrappers_writable($_[1], 1);
+	}
 if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 	# Move the home directory if changed, and if not already moved as
 	# part of parent
@@ -90,6 +93,9 @@ if ($_[0]->{'unix'} && !$_[1]->{'unix'} ||
 	&set_home_ownership($_[0]);
 	&$second_print($text{'setup_done'});
 	}
+if (defined(&set_php_wrappers_writable)) {
+	&set_php_wrappers_writable($_[0], 0);
+	}
 }
 
 # delete_dir(&domain)
@@ -99,6 +105,9 @@ sub delete_dir
 # Delete homedir
 if (-d $_[0]->{'home'} && $_[0]->{'home'} ne "/") {
 	&$first_print($text{'delete_home'});
+	if (defined(&set_php_wrappers_writable)) {
+		&set_php_wrappers_writable($_[0], 1);
+		}
 	&system_logged("rm -rf ".quotemeta($_[0]->{'home'}));
 	&$second_print($text{'setup_done'});
 	}
@@ -235,6 +244,9 @@ return { 'dirnologs' => !$in{'dir_logs'} };
 sub restore_dir
 {
 &$first_print($text{'restore_dirtar'});
+if (defined(&set_php_wrappers_writable)) {
+	&set_php_wrappers_writable($_[0], 1);
+	}
 local $out;
 local $cf = &compression_format($_[1]);
 local $comp = $cf == 1 ? "gunzip -c" :

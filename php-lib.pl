@@ -296,6 +296,9 @@ if (!-d $dest) {
 local $suffix = $mode eq "fcgid" ? "fcgi" : "cgi";
 local $dirvar = $mode eq "fcgid" ? "PWD" : "DOCUMENT_ROOT";
 
+# Make wrappers mutable
+&set_php_wrappers_writable($d, 1);
+
 # For each version of PHP, create a wrapper
 local $pub = &public_html_dir($d);
 local $children = &get_domain_php_children($d);
@@ -348,6 +351,26 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 				  "$pub/php$v->[0].$suffix");
 		&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755,
 					   "$pub/php$v->[0].$suffix");
+		}
+	}
+
+# Make wrappers immutable, to prevent deletion by users (which can crash Apache)
+&set_php_wrappers_writable($d, 0);
+}
+
+# set_php_wrappers_writable(&domain, flag)
+# If possible, make PHP wrapper scripts mutable or immutable
+sub set_php_wrappers_writable
+{
+local ($d, $writable) = @_;
+if (&has_command("chattr")) {
+	foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
+		foreach my $f (glob("$dir/php?.*cgi")) {
+			if (-r $f) {
+				&system_logged("chattr ".
+				    ($writable ? "-i" : "+i")." ".quotemeta($f));
+				}
+			}
 		}
 	}
 }
@@ -706,6 +729,7 @@ sub save_domain_php_children
 {
 local ($d, $children) = @_;
 local $count = 0;
+&set_php_wrappers_writable($d, 1);
 foreach my $ver (&list_available_php_versions($d, "fcgi")) {
 	local $wrapper = "$d->{'home'}/fcgi-bin/php$ver->[0].fcgi";
 	next if (!-r $wrapper);
@@ -717,6 +741,7 @@ foreach my $ver (&list_available_php_versions($d, "fcgi")) {
 		}
 	&flush_file_lines($wrapper);
 	}
+&set_php_wrappers_writable($d, 0);
 &register_post_action(\&restart_apache);
 return $count;
 }
