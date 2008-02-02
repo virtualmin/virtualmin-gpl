@@ -268,6 +268,9 @@ else {
 		&set_home_ownership($_[0]);
 		&$second_print($text{'setup_done'});
 		}
+	if (defined(&set_php_wrappers_writable)) {
+		&set_php_wrappers_writable($_[0], 0);
+		}
 
 	return 1;
 	}

@@ -79,9 +79,3 @@
 
  - wordpress plugin installers?
 
- - make php*.fcgi files immutable
-	- make writable on restore too
-	- test all functions
-	- can rename files?? move domain? (move doesn't work)
-	- CHANGELOG and new features files
-	- postinstall

@@ -341,7 +341,7 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 				   "$dest/php$v->[0].$suffix");
 	if ($children > 0) {
 		# Put back the old number of child processes
-		&save_domain_php_children($d, $children);
+		&save_domain_php_children($d, $children, 1);
 		}
 
 	# Also copy the .fcgi wrapper to public_html, which is needed due to
@@ -723,13 +723,13 @@ close(WRAPPER);
 return $childs;
 }
 
-# save_domain_php_children(&domain, children)
+# save_domain_php_children(&domain, children, [no-writable])
 # Update all of a domain's PHP wrapper scripts with the new number of children
 sub save_domain_php_children
 {
-local ($d, $children) = @_;
+local ($d, $children, $nowritable) = @_;
 local $count = 0;
-&set_php_wrappers_writable($d, 1);
+&set_php_wrappers_writable($d, 1) if (!$nowritable);
 foreach my $ver (&list_available_php_versions($d, "fcgi")) {
 	local $wrapper = "$d->{'home'}/fcgi-bin/php$ver->[0].fcgi";
 	next if (!-r $wrapper);
@@ -741,7 +741,7 @@ foreach my $ver (&list_available_php_versions($d, "fcgi")) {
 		}
 	&flush_file_lines($wrapper);
 	}
-&set_php_wrappers_writable($d, 0);
+&set_php_wrappers_writable($d, 0) if (!$nowritable);
 &register_post_action(\&restart_apache);
 return $count;
 }

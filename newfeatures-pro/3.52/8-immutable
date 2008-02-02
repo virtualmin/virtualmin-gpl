@@ -1,0 +1,3 @@
+desc=PHP deletion protection
+html=The wrapper scripts for running PHP via CGI or fastCGI now have the immutable flag set on Linux, to prevent accidental deletion by domain owners.
+master=1

@@ -311,6 +311,15 @@ foreach my $d (&list_domains()) {
 		}
 	}
 
+# Mark PHP wrappers as immutable
+if (defined(&set_php_wrappers_writable) && &has_command("chattr")) {
+	foreach my $d (&list_domains()) {
+		if ($d->{'web'}) {
+			&set_php_wrappers_writable($d);
+			}
+		}
+	}
+
 # Prevent an un-needed module config check
 if (!$cerr) {
 	$config{'last_check'} = time()+1;
