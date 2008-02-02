@@ -79,3 +79,4 @@
 
  - wordpress plugin installers?
 
+ - unit tests should cover backup / restore and move-domain
