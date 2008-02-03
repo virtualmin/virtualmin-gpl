@@ -81,4 +81,3 @@
 
  - unit tests should cover backup / restore and move-domain
 
- - bugzilla web install doesn't work! CGIs?
