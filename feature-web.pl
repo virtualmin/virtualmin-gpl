@@ -467,6 +467,13 @@ else {
 			$rv++;
 			&$second_print($text{'setup_done'});
 			}
+
+		# Add the Apache user to the group for the new domain
+		local $web_user = &get_apache_user($_[0]);
+		if ($tmpl->{'web_user'} ne 'none' && $web_user) {
+			&add_user_to_domain_group($_[0], $web_user,
+						  'setup_webuser');
+			}
 		}
 	if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 		# Domain name has changed .. update ServerName and ServerAlias

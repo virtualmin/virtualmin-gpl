@@ -21,6 +21,7 @@ $ENV{'http_proxy'} = undef;
 $ENV{'ftp_proxy'} = undef;
 
 $test_domain = "example.com";	# Never really exists
+$test_target_domain = "exampletarget.com";
 $test_subdomain = "example.net";
 $test_user = "testy";
 $test_alias = "testing";
@@ -73,6 +74,7 @@ $prefix = &compute_prefix($test_domain);
 $test_full_user = &userdom_name($test_user, { 'dom' => $test_domain,
 					      'prefix' => $prefix });
 ($test_domain_user) = &unixuser_name($test_domain);
+($test_target_domain_user) = &unixuser_name($test_target_domain);
 
 # Build list of test types
 $domains_tests = [
@@ -649,6 +651,105 @@ if (!-d $migration_dir) {
 	$migrate_tests = [ { 'command' => 'echo Migration files under '.$migration_dir.' were not found in this system' } ];
 	}
 
+# Move domain tests
+$move_tests = [
+	# Create a parent domain to be moved
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ], [ 'mail' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a domain to be the target
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'desc', 'Test target domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ],
+		      @create_args, ],
+        },
+
+	# Add a user to the domain being moved
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
+	# Move under the target
+	{ 'command' => 'move-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'parent', $test_target_domain ] ],
+	},
+
+	# Make sure the old Unix user is gone
+	{ 'command' => 'grep ^'.$test_domain_user.': /etc/passwd',
+	  'fail' => 1,
+	},
+
+	# Make sure the website still works
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test home page',
+	},
+
+	# Make sure the parent domain and user are correct
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'Parent domain: '.$test_target_domain,
+		      'Username: '.$test_target_domain_user ],
+	},
+
+	# Make sure the mailbox still exists
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ] ],
+	  'grep' => "^$test_user",
+	},
+
+	# Move back to top-level
+	{ 'command' => 'move-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'newuser', $test_domain_user ],
+		      [ 'newpass', 'smeg' ] ],
+	},
+
+	# Make sure the Unix user is back
+	{ 'command' => 'grep ^'.$test_domain_user.': /etc/passwd',
+	},
+
+	# Make sure the website still works
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test home page',
+	},
+
+	# Make sure the parent domain and user are correct
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => 'Username: '.$test_domain_user,
+	  'antigrep' => 'Parent domain:',
+	},
+
+	# Cleanup the domain being moved
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+
+	# Cleanup the target domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ] ],
+	  'cleanup' => 1 },
+	];
+
+
+
 $alltests = { 'domains' => $domains_tests,
 	      'mailbox' => $mailbox_tests,
 	      'alias' => $alias_tests,
@@ -657,6 +758,8 @@ $alltests = { 'domains' => $domains_tests,
 	      'database' => $database_tests,
 	      'proxy' => $proxy_tests,
 	      'migrate' => $migrate_tests,
+	      'move' => $move_tests,
+	      'backup' => $backup_tests,
 	    };
 
 # Run selected tests

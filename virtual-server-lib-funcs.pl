@@ -11891,8 +11891,10 @@ sub add_user_to_domain_group
 local ($d, $user, $msg) = @_;
 return 0 if ($d->{'alias'} || !$d->{'group'});
 &require_useradmin();
+&obtain_lock_unix($d);
 local @groups = &list_all_groups();
 local ($group) = grep { $_->{'group'} eq $d->{'group'} } @groups;
+local $rv;
 if ($group) {
 	local @mems = split(/,/, $group->{'members'});
 	if (&indexof($user, @mems) < 0) {
@@ -11907,10 +11909,11 @@ if ($group) {
 						  $oldgroup, $group);
 		&foreign_call($group->{'module'}, "made_changes");
 		&$second_print($text{'setup_done'}) if ($msg);
-		return 1;
+		$rv = 1;
 		}
 	}
-return 0;
+&release_lock_unix($d);
+return $rv;
 }
 
 # get_backup_excludes(&domain)
