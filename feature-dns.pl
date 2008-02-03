@@ -114,6 +114,7 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 	&flush_file_lines();
 	unlink($bind8::zone_names_cache);
 	undef(@bind8::list_zone_names_cache);
+	undef(@bind8::get_config_cache);
 
 	# Create the records file
 	local %zd;
