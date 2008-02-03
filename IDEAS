@@ -70,13 +70,6 @@
 	  to decide which domains can be batch created with mass_setup_XXX
 	  functions
 
- - new features display, on right frame
-	- option to show again
-	- test for plugins
-	- domains link
-	- should we show to resellers / domain owners? Configurable?
-	- other themes
-
  - wordpress plugin installers?
 
  - unit tests should cover backup / restore and move-domain

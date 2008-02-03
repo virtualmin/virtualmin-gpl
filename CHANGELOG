@@ -825,3 +825,4 @@ Re-wrote all code that locks configuration files managed by Virtualmin. This imp
 Outgoing email relayed via the Virtualmin system is now counted towards the sender's domain's bandwidth limit, unless disabled on the Bandwidth Monitoring page.
 Moved the option that controls if mailbox users can have .procmailrc files to the Spam and Virus Delivery page, where it is easier to find and is applied immediately.
 The wrapper scripts for running PHP via CGI or fastCGI now have the immutable flag set on Linux, to prevent accidental deletion by domain owners.
+New features in this version of Virtualmin and any plugins are shown on the System Information page, if using the Virtualmin theme.

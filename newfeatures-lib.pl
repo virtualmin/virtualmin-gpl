@@ -113,10 +113,12 @@ return undef if (!@nf);
 local (@rv, @modvers, %modvers);
 local $me = &master_admin() ? 'master' :
 	    &reseller_admin() ? 'reseller' : 'domain';
+local %shownf = map { $_, 1 } split(/,/, $config{'show_nf'});
+return undef if (!$shownf{$me});
 local %donemod;
 foreach my $nf (@nf) {
-	# Get new features in some version. If there were none, stop looking for this
-	# module.
+	# Get new features in some version. If there were none, stop looking
+	# for this module.
 	next if ($donemod{$nf->[0]});
 	local @mrv = &list_new_features($nf->[0], $nf->[1]);
 	if (!@mrv) {
@@ -143,13 +145,24 @@ foreach my $nf (@nf) {
 return undef if (!@rv);
 @rv = reverse(@rv);
 
+# If not given, pick a domain
+if (!$d) {
+	foreach my $cd (&list_domains()) {
+		if (&can_edit_domain($cd)) {
+			$d = $cd;
+			last;
+			}
+		}
+	}
+
 # Make the HTML
 local $rv;
 local $modvers = @modvers <= 1 ? join(", ", @modvers) :
 		 	&text('nf_and', join(", ", @modvers[0..$#modvers-1]),
 					$modvers[$#modvers]);
 $rv .= &text('nf_header', $modvers)."<br>\n";
-$rv .= &ui_columns_start([ $text{'nf_desc'}, $text{'nf_html'} ]);
+#$rv .= &ui_columns_start([ $text{'nf_desc'}, $text{'nf_html'} ]);
+$rv .= "<dl>\n";
 foreach my $nf (@rv) {
 	local $link;
 	if ($nf->{'link'}) {
@@ -163,10 +176,16 @@ foreach my $nf (@rv) {
 				}
 			}
 		}
-	$rv .= &ui_columns_row([ $link ? "<a href='$link'>$nf->{'desc'}</a>"
-				       : $nf->{'desc'}, $nf->{'html'} ]);
+	#$rv .= &ui_columns_row([ $link ? "<a href='$link'>$nf->{'desc'}</a>"
+	#			       : $nf->{'desc'}, $nf->{'html'} ]);
+	$rv .= "<dt><b>$nf->{'desc'}</b>\n";
+	if ($link) {
+		$rv .= " | <a href='$link'>$text{'nf_try'}</a>\n";
+		}
+	$rv .= "<dd>$nf->{'html'}<p>\n";
 	}
-$rv .= &ui_table_end();
+$rv .= "</dl>\n";
+#$rv .= &ui_table_end();
 $rv .= &ui_form_start("$gconfig{'webprefix'}/$module_name/seen_newfeatures.cgi");
 $rv .= &ui_form_end([ [ undef, $text{'nf_seen'} ] ]);
 
