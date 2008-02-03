@@ -21,7 +21,6 @@ else {
 	# Features from some plugin
 	@dirs = ( &module_root_directory($mod)."/newfeatures/".$ver );
 	}
-print STDERR "mod=$mod ver=$ver dirs=",join(" ", @dirs),"\n";
 foreach my $dir (@dirs) {
 	opendir(NF, $dir);
 	foreach my $f (grep { !/^\./ } readdir(NF)) {
