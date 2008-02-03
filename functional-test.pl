@@ -35,6 +35,7 @@ $migration_cpanel_domain = "hyccchina.com";
 $migration_cpanel = "$migration_dir/$migration_cpanel_domain.cpanel.tar.gz";
 $migration_plesk_domain = "requesttosend.com";
 $migration_plesk = "$migration_dir/$migration_plesk_domain.plesk.txt";
+$test_backup_file = "/tmp/$test_domain.tar.gz";
 
 @create_args = ( [ 'limits-from-template' ],
 		 [ 'no-email' ],
@@ -748,7 +749,87 @@ $move_tests = [
 	  'cleanup' => 1 },
 	];
 
+# Backup tests
+@post_restore_tests = (
+	# Test DNS lookup
+	{ 'command' => 'host '.$test_domain,
+	  'grep' => &get_default_ip(),
+	},
 
+	# Test HTTP get
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test home page',
+	},
+
+	# Check FTP login
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_domain_user.':smeg@localhost/',
+	  'antigrep' => 'Login incorrect',
+	},
+
+	# Check Webmin login
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       'http://'.$test_domain_user.':smeg@localhost:10000/',
+	},
+
+	# Check MySQL login
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_user.' -e "select version()"',
+	},
+	);
+$backup_tests = [
+	# Create a parent domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ], [ 'mail' ],
+		      [ 'mysql' ], [ 'spam' ], [ 'virus' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Backup to a temp file
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_file ] ],
+	},
+
+	# Delete web page
+	{ 'command' => 'rm -f ~'.$test_domain_user.'/public_html/index.*',
+	},
+
+	# Restore with the domain still in place
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ] ],
+	},
+
+	# Test that everything will works
+	@post_restore_tests,
+
+	# Delete the domain, in preparation for re-creation
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Re-create from backup
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ] ],
+	},
+
+	# Run various tests again
+	@post_restore_tests,
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
 
 $alltests = { 'domains' => $domains_tests,
 	      'mailbox' => $mailbox_tests,
