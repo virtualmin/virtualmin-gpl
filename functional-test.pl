@@ -775,6 +775,12 @@ $move_tests = [
 	# Check MySQL login
 	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_user.' -e "select version()"',
 	},
+
+	# Make sure the mailbox still exists
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ] ],
+	  'grep' => "^$test_user",
+	},
 	);
 $backup_tests = [
 	# Create a parent domain to be backed up
@@ -788,6 +794,16 @@ $backup_tests = [
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
+
+	# Add a user to the domain being backed up
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
 
 	# Backup to a temp file
 	{ 'command' => 'backup-domain.pl',
