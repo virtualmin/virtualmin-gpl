@@ -3090,8 +3090,9 @@ if ($config{'mail_system'} == 1) {
 	}
 elsif ($config{'mail_system'} == 0) {
 	# Add to Postfix relay domains
-	local @rd = split(/[, ]+/,&postfix::get_current_value("relay_domains"));
-	if (&indexof(lc($dom), (map { lc($_) } @rd)) >= 0) {
+	local @rd = split(/[, ]+/,
+			&postfix::get_current_value("relay_domains"));
+	if (&indexoflc($dom, @rd) >= 0) {
 		return $text{'newmxs_already'};
 		}
 	@rd = &unique(@rd, $dom);
@@ -3140,8 +3141,9 @@ if ($config{'mail_system'} == 1) {
 	}
 elsif ($config{'mail_system'} == 0) {
 	# Add to Postfix relay domains
-	local @rd = split(/[, ]+/,&postfix::get_current_value("relay_domains"));
-	local $idx = &indexof(lc($dom), (map { lc($_) } @rd));
+	local @rd = split(/[, ]+/,
+			&postfix::get_current_value("relay_domains"));
+	local $idx = &indexoflc($dom, @rd);
 	if ($idx < 0) {
 		return $text{'newmxs_missing'};
 		}
