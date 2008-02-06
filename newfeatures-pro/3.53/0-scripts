@@ -1,0 +1,6 @@
+desc=New script installers
+html=Updated the WordPress installer to version 2.3.3, and WordPress MU to 1.3.3.
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}
