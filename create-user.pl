@@ -99,10 +99,10 @@ $user = &create_initial_user($d, 0, $web);
 
 # Make sure all needed args are set
 if ($user->{'unix'} && !$user->{'noquota'}) {
-	if (&has_home_quotas()) {
+	if (&has_home_quotas() && defined($quota)) {
 		$quota =~ /^\d+$/ || &usage();
 		}
-	if (&has_mail_quotas()) {
+	if (&has_mail_quotas() && defined($mquota)) {
 		$mquota =~ /^\d+$/ || &usage();
 		}
 	}
@@ -200,8 +200,13 @@ if ($user->{'mailquota'}) {
 	$user->{'qquota'} = $qquota;
 	}
 if ($user->{'unix'} && !$user->{'noquota'}) {
-	$user->{'quota'} = $quota;
-	$user->{'mquota'} = $mquota;
+	# Set quotas, if not using the defaults
+	if (defined($quota)) {
+		$user->{'quota'} = $quota;
+		}
+	if (defined($mquota)) {
+		$user->{'mquota'} = $mquota;
+		}
 	}
 $user->{'dbs'} = \@dbs if (@dbs);
 $user->{'secs'} = \@groups;
@@ -264,10 +269,10 @@ print "usage: create-user.pl    --domain domain.name\n";
 print "                         --user new-username\n";
 print "                         --pass password-for-new-user\n";
 if (&has_home_quotas()) {
-	print "                         --quota quota-in-blocks\n";
+	print "                        [--quota quota-in-blocks]\n";
 	}
 if (&has_mail_quotas()) {
-	print "                         --mail-quota quota-in-blocks\n";
+	print "                        [--mail-quota quota-in-blocks]\n";
 	}
 if (&has_server_quotas()) {
 	print "                         --qmail-quota quota-in-bytes\n";

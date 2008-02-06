@@ -828,3 +828,4 @@ The wrapper scripts for running PHP via CGI or fastCGI now have the immutable fl
 New features in this version of Virtualmin and any plugins are shown on the System Information page, if using the Virtualmin theme.
 ---- Changes since 3.52 ----
 Updated the WordPress installer to version 2.3.3.
+The --quota and --mail-quota parameters to create-user.pl are now optional. If missing the defaults for the domain or template will be used.
