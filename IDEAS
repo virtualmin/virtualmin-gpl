@@ -70,3 +70,5 @@
 	  to decide which domains can be batch created with mass_setup_XXX
 	  functions
 
+ - roundcube automatic domain detection
+

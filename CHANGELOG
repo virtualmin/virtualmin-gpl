@@ -829,3 +829,4 @@ New features in this version of Virtualmin and any plugins are shown on the Syst
 ---- Changes since 3.52 ----
 Updated the WordPress installer to version 2.3.3, and WordPress MU to 1.3.3.
 The --quota and --mail-quota parameters to create-user.pl are now optional. If missing the defaults for the domain or template will be used.
+Added the check-config.pl command line script for validating the Virtualmin configuration.
