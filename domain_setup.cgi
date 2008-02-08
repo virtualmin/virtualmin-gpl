@@ -187,11 +187,13 @@ if (!$aliasdom) {
 	}
 
 # Validate initial style
-($style) = grep { $_->{'name'} eq $in{'style'} }
-	&list_available_content_styles();
-if (defined($in{'content'}) && !$in{'content_def'}) {
-	$in{'content'} =~ /\S/ || $style->{'nocontent'} ||
-		&error($text{'setup_econtent'});
+if (defined($in{'content'})) {
+	($style) = grep { $_->{'name'} eq $in{'style'} }
+		&list_available_content_styles();
+	if (!$in{'content_def'}) {
+		$in{'content'} =~ /\S/ || $style->{'nocontent'} ||
+			&error($text{'setup_econtent'});
+		}
 	}
 
 # Work out the virtual IP
