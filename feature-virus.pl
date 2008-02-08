@@ -498,14 +498,13 @@ elsif (&init::action_status("clamd-wrapper")) {
 		&$second_print($text{'setup_done'});
 		}
 
-	# Copy the clamd program
+	# Link the clamd program
 	local $clamd = &has_command("clamd");
 	local $clamdcopy = $clamd.".".$service;
-	if (!-r $clamdcopy) {
-		&$first_print(&text('clamd_copybin', "<tt>$clamdcopy</tt>"));
-		&copy_source_dest($clamd, $clamdcopy);
-		&$second_print($text{'setup_done'});
-		}
+	&$first_print(&text('clamd_linkbin', "<tt>$clamdcopy</tt>"));
+	&unlink_file($clamdcopy);
+	&symlink_logged($clamd, $clamdcopy);
+	&$second_print($text{'setup_done'});
 
 	# Create the socket directory
 	if (-d "/var/run/clamd.$service") {
