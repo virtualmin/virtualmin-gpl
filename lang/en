@@ -960,6 +960,7 @@ delete_ok=Yes, Delete It
 delete_only=Only remove server from Virtualmin's control, and leave website, users and databases untouched
 delete_domain=Deleting server details for $1 ..
 delete_apache=Deleting virtual website ..
+delete_apachelog=Deleting Apache log files ..
 delete_apachealias=Removing from target virtual website ..
 delete_noapache=.. no Apache virtual host found!
 delete_bind=Deleting DNS zone ..

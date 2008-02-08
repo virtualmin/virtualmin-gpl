@@ -262,8 +262,20 @@ else {
 	local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 						    $_[0]->{'web_port'});
 	if ($virt) {
+		local $alog = &get_apache_log($_[0]->{'dom'},
+					      $_[0]->{'web_port'}, 0);
+		local $elog = &get_apache_log($_[0]->{'dom'},
+					      $_[0]->{'web_port'}, 1);
 		&delete_web_virtual_server($virt);
 		&$second_print($text{'setup_done'});
+
+		# Delete logs too, if outside home dir
+		if ($alog && !&is_under_directory($_[0]->{'home'}, $alog)) {
+			&$first_print($text{'delete_apachelog'});
+			&unlink_file($alog);
+			&unlink_file($elog) if ($elog);
+			&$second_print($text{'setup_done'});
+			}
 		&register_post_action(\&restart_apache);
 		}
 	else {
@@ -476,13 +488,31 @@ else {
 			}
 		}
 	if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
-		# Domain name has changed .. update ServerName and ServerAlias
+		# Domain name has changed .. update ServerName and ServerAlias,
+		# and any log files that contain the domain name
 		&$first_print($text{'save_apache2'});
 		&apache::save_directive("ServerName", [ $_[0]->{'dom'} ],
 					$vconf, $conf);
-		local @sa = map { s/$_[1]->{'dom'}/$_[0]->{'dom'}/g; $_ }
+		local @sa = map { s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g; $_ }
 				&apache::find_directive("ServerAlias", $vconf);
 		&apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
+		foreach my $ld ("ErrorLog", "TransferLog", "CustomLog") {
+			local @ldv = &apache::find_directive($ld, $vconf);
+			next if (!@ldv);
+			foreach my $l (@ldv) {
+				local $oldl = $l;
+				if ($l =~ /\/[^\/]*\Q$_[1]->{'dom'}\E[^\/]*$/) {
+					$l =~ s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g;
+					}
+				if ($l ne $oldl) {
+					# Rename file too
+					local @wl = &apache::wsplit($l);
+					local @woldl = &apache::wsplit($oldl);
+					&rename_file($woldl[0], $wl[0]);
+					}
+				}
+			&apache::save_directive($ld, \@ldv, $vconf, $conf);
+			}
 		&flush_file_lines();
 		$rv++;
 		if ($virt->{'file'} =~ /$_[1]->{'dom'}/) {
