@@ -60,7 +60,7 @@ else {
 	# Show editable install options
 	local @dbs = &domain_databases($d, [ "mysql" ]);
 	$rv .= &ui_table_row("Database for RoundCube preferences",
-		     &ui_database_select("db", undef, \@dbs, "d", $roundcube));
+		     &ui_database_select("db", undef, \@dbs, $d, "roundcube"));
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
 			     &ui_opt_textbox("dir", "roundcube", 30,
 					     "At top level"));
@@ -169,6 +169,7 @@ if (!$upgrade) {
 	local $mcfile = "$opts->{'dir'}/config/main.inc.php";
 	&copy_source_dest($mcfileorig, $mcfile);
 	local $lref = &read_file_lines($mcfile);
+	local $vuf = &get_mail_virtusertable();
 	foreach my $l (@$lref) {
 		if ($l =~ /^\$rcmail_config\['enable_caching'\]\s+=/) {
 			$l = "\$rcmail_config['enable_caching'] = FALSE;";
@@ -193,6 +194,9 @@ if (!$upgrade) {
 			}
 		if ($l =~ /^\$rcmail_config\['mail_domain'\]\s+=/) {
 			$l = "\$rcmail_config['mail_domain'] = '$d->{'dom'}';";
+			}
+		if ($l =~ /^\$rcmail_config\['virtuser_file'\]\s+=/ && $vuf) {
+			$l = "\$rcmail_config['virtuser_file'] = '$vuf';";
 			}
 		}
 	&flush_file_lines($mcfile);
