@@ -3,6 +3,7 @@
 # simply passes on parameters to a specified command-line program
 
 package virtual_server;
+$trust_unknown_referers = 1;
 require './virtual-server-lib.pl';
 &ReadParse();
 &can_remote() || &error($text{'remote_ecannot'});
