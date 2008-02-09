@@ -332,6 +332,7 @@ return $d->{'web'} && (!$oldd || !$oldd->{'web'}) &&
 sub obtain_lock_logrotate
 {
 return if (!$config{'logrotate'});
+&obtain_lock_anything();
 if ($main::got_lock_logrotate == 0) {
 	&require_logrotate();
 	&lock_file($logrotate::config{'add_file'})
@@ -353,6 +354,7 @@ if ($main::got_lock_logrotate == 1) {
 	&unlock_file($logrotate::config{'logrotate_conf'});
 	}
 $main::got_lock_logrotate-- if ($main::got_lock_logrotate);
+&release_lock_anything();
 }
 
 $done_feature_script{'logrotate'} = 1;

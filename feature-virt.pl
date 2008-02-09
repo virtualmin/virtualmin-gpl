@@ -366,6 +366,7 @@ else {
 sub obtain_lock_virt
 {
 # Lock the network config directory or file
+&obtain_lock_anything();
 if ($main::got_lock_virt == 0) {
 	&foreign_require("net", "net-lib.pl");
 	local $main::got_lock_virt_file = $net::network_interfaces_config ||
@@ -384,6 +385,7 @@ if ($main::got_lock_virt == 1) {
 	&unlock_file($main::got_lock_virt_file);
 	}
 $main::got_lock_virt-- if ($main::got_lock_virt);
+&release_lock_anything();
 }
 
 $done_feature_script{'virt'} = 1;

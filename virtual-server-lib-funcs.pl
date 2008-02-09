@@ -12291,6 +12291,22 @@ foreach my $f (@features) {
 	}
 }
 
+# obtain_lock_anything(&domain)
+# Called by the various obtain_lock_* functions
+sub obtain_lock_anything
+{
+local ($d) = @_;
+# Assume that we are about to do something important, and so don't want to be
+# killed by a SIGPIPE triggered by a browser cancel.
+$SIG{'PIPE'} = 'ignore';
+}
+
+# release_lock_anything(&domain)
+sub release_lock_anything
+{
+local ($d) = @_;
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;

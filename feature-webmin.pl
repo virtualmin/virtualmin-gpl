@@ -1084,6 +1084,7 @@ return %acl;
 sub obtain_lock_webmin
 {
 return if (!$config{'webmin'});
+&obtain_lock_anything();
 if ($main::got_lock_webmin == 0) {
 	&lock_file("$module_config_directory/webminlock");
 	}
@@ -1099,6 +1100,7 @@ if ($main::got_lock_webmin == 1) {
 	&unlock_file("$module_config_directory/webminlock");
 	}
 $main::got_lock_webmin-- if ($main::got_lock_webmin);
+&release_lock_anything();
 }
 
 $done_feature_script{'webmin'} = 1;

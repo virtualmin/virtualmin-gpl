@@ -1,0 +1,3 @@
+desc=Browser stop ignored
+html=Hitting <b>Stop</b> in the browser during the creation of a virtual server or some other action will no longer cancel it, which prevents domains from being half created.
+master=1

@@ -1304,6 +1304,7 @@ sub obtain_lock_dns
 {
 local ($d, $conftoo) = @_;
 return if (!$config{'dns'});
+&obtain_lock_anything($d);
 
 # Lock records file
 if ($d) {
@@ -1368,6 +1369,8 @@ if ($conftoo) {
 		}
 	$main::got_lock_dns-- if ($main::got_lock_dns);
 	}
+
+&release_lock_anything($d);
 }
 
 $done_feature_script{'dns'} = 1;

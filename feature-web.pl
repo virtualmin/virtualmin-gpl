@@ -2140,6 +2140,7 @@ sub obtain_lock_web
 {
 local ($d) = @_;
 return if (!$config{'web'});
+&obtain_lock_anything($d);
 
 # Where is the domain's .conf file? We have to guess, as actually checking could
 # mean reading the whole Apache config in twice.
@@ -2183,6 +2184,7 @@ if ($conf) {
 		}
 	$main::got_lock_web_file{$conf}-- if ($main::got_lock_web_file{$conf});
 	}
+&release_lock_anything($d);
 }
 
 $done_feature_script{'web'} = 1;

@@ -485,6 +485,7 @@ sub obtain_lock_webalizer
 {
 local ($d) = @_;
 return if (!$config{'webalizer'});
+&obtain_lock_anything($d);
 
 if ($main::got_lock_webalizer_dom{$d->{'id'}} == 0) {
 	&require_webalizer();
@@ -521,6 +522,7 @@ if ($main::got_lock_webalizer_dom{$d->{'id'}} == 1) {
 	}
 $main::got_lock_webalizer_dom{$d->{'id'}}--
 	if ($main::got_lock_webalizer_dom{$d->{'id'}});
+&release_lock_anything($d);
 }
 
 $done_feature_script{'webalizer'} = 1;

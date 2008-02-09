@@ -521,6 +521,7 @@ return undef;
 sub obtain_lock_ftp
 {
 return if (!$config{'ftp'});
+&obtain_lock_anything();
 if ($main::got_lock_ftp == 0) {
 	&require_proftpd();
 	&lock_file($proftpd::config{'proftpd_conf'});
@@ -542,6 +543,7 @@ if ($main::got_lock_ftp == 1) {
 		if ($proftpd::config{'add_file'});
 	}
 $main::got_lock_ftp-- if ($main::got_lock_ftp);
+&release_lock_anything();
 }
 
 $done_feature_script{'ftp'} = 1;

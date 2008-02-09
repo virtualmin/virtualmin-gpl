@@ -632,6 +632,7 @@ sub obtain_lock_ssl
 {
 local ($d) = @_;
 return if (!$config{'ssl'});
+&obtain_lock_anything($d);
 &obtain_lock_web($d);
 if ($main::got_lock_ssl == 0) {
 	local @sfiles = ($ENV{'MINISERV_CONFIG'} ||
@@ -660,6 +661,7 @@ if ($main::got_lock_ssl == 1) {
 		}
 	}
 $main::got_lock_ssl-- if ($main::got_lock_ssl);
+&release_lock_anything($d);
 }
 
 $done_feature_script{'ssl'} = 1;

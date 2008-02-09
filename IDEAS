@@ -70,12 +70,8 @@
 	  to decide which domains can be batch created with mass_setup_XXX
 	  functions
 
- - roundcube automatic domain detection
-
  - create sub-domains and sub-servers before main virtualhost, to avoid
    problems with ServerAlias *.foo.com
 
  - SSL on default IP
 
- - Block SIGPIPE on CGI browser cancel, to stop partially completed domains
-	- Do when any obtain_lock function is called

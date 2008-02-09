@@ -742,6 +742,7 @@ eval {
 # Lock all Unix password files
 sub obtain_lock_unix
 {
+&obtain_lock_anything();
 if ($main::got_lock_unix == 0) {
 	&require_useradmin();
 	&foreign_call($usermodule, "lock_user_files");
@@ -764,6 +765,7 @@ if ($main::got_lock_unix == 1) {
 	&foreign_call($usermodule, "unlock_user_files");
 	}
 $main::got_lock_unix-- if ($main::got_lock_unix);
+&release_lock_anything();
 }
 
 # obtain_lock_cron(&domain)
@@ -771,6 +773,7 @@ $main::got_lock_unix-- if ($main::got_lock_unix);
 sub obtain_lock_cron
 {
 local ($d) = @_;
+&obtain_lock_anything($d);
 foreach my $u ($d->{'user'}, 'root') {
 	if ($main::got_lock_cron_user{$u} == 0) {
 		&foreign_require("cron", "cron-lib.pl");
@@ -793,6 +796,7 @@ foreach my $u ($d->{'user'}, 'root') {
 	$main::got_lock_cron_user{$u}--
 		if ($main::got_lock_cron_user{$u});
 	}
+&release_lock_anything($d);
 }
 
 $done_feature_script{'unix'} = 1;

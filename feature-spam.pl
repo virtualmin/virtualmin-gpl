@@ -1000,6 +1000,7 @@ sub obtain_lock_spam
 {
 local ($d) = @_;
 return if (!$config{'spam'});
+&obtain_lock_anything($d);
 
 if ($d) {
 	# Lock domain's files
@@ -1047,6 +1048,7 @@ if ($main::get_lock_spam == 1) {
 	&unlock_file($spamclear_file);
 	}
 $main::got_lock_spam-- if ($main::got_lock_spam);
+&release_lock_anything($d);
 }
 
 # obtain_lock_spam_all()

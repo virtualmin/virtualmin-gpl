@@ -3940,6 +3940,7 @@ return undef;
 sub obtain_lock_mail
 {
 return if (!$config{'mail'});
+&obtain_lock_anything();
 if ($main::got_lock_mail == 0) {
 	&require_mail();
 	@main::got_lock_mail_files = ( );
@@ -3985,6 +3986,7 @@ if ($main::got_lock_mail == 1) {
 		}
 	}
 $main::got_lock_mail-- if ($main::got_lock_mail);
+&release_lock_anything();
 }
 
 $done_feature_script{'mail'} = 1;
