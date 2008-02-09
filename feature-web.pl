@@ -61,12 +61,11 @@ else {
 	# Add the actual <VirtualHost>
 	# We use a * for the address for name-based servers under Apache 2,
 	# if NameVirtualHost * exists.
+	# First build up the directives
 	local $vip = $_[0]->{'name'} &&
 		     $apache::httpd_modules{'core'} >= 1.312 &&
 		     &is_shared_ip($_[0]->{'ip'}) &&
 		     $nvstar ? "*" : $_[0]->{'ip'};
-	local $lref = &read_file_lines($f);
-	push(@$lref, "<VirtualHost $vip:$web_port>");
 	local $proxying;
 	if ($_[0]->{'alias'}) {
 		# Because this is just an alias to an existing virtual server,
@@ -134,8 +133,26 @@ else {
 				}
 			}
 		}
-	push(@$lref, @dirs);
-	push(@$lref, "</VirtualHost>");
+
+	# Work out where in the file to add.
+	# If this domain is foo.bar.com and a virtual host for *.bar.com exists
+	# in the same file, we need to add before it.
+	local $lref = &read_file_lines($f);
+	local $pos = scalar(@$lref);
+	if ($_[0]->{'dom'} =~ /^([^\.]+)\.(\S+)$/) {
+		local ($dsuffix, $dprefix) = ($1, $2);
+		local ($starvirt, undef) = &get_apache_virtual("*.$dprefix",
+							       $web_port);
+		if ($starvirt && $starvirt->{'file'} eq $f) {
+			# Insert before
+			$pos = $starvirt->{'line'};
+			}
+		}
+
+	# Add to the file
+	splice(@$lref, $pos, 0, "<VirtualHost $vip:$web_port>",
+				@dirs,
+				"</VirtualHost>");
 	&flush_file_lines();
 	$_[0]->{'web_port'} = $web_port;
 	undef(@apache::get_config_cache);

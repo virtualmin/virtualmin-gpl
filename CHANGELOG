@@ -832,3 +832,4 @@ The --quota and --mail-quota parameters to create-user.pl are now optional. If m
 Added the check-config.pl command line script for validating the Virtualmin configuration.
 Apache log files outside a domain's home directory are renamed and deleted when appropriate.
 Hitting Stop in the browser during the creation of a virtual server or some other action will no longer cancel it, which prevents domains from being half created.
+When the Apache virtual host *.domain exists and a new virtual host for something.domain is created, it is placed before *.domain in the Apache config file to give it precedence.
