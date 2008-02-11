@@ -1432,7 +1432,7 @@ feature_status=Status monitoring
 
 bandwidth_web=Website traffic
 bandwidth_ftp=FTP transfers
-bandwidth_mail=Mail received
+bandwidth_mail=Mail transferred
 
 losing_web=All Apache directives in the virtual host will be removed.
 sublosing_web=$losing_web
