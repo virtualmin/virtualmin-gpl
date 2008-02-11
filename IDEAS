@@ -71,4 +71,6 @@
 	  functions
 
  - SSL on default IP
-
+	- Allow SSL to be enabled for 1 virtual server per IP
+	- what about non-Virtualmin <virtualhost>
+	- CHANGELOG
