@@ -28,6 +28,15 @@ else {
 	if ($sslclash) {
 		return &text('setup_edepssl3', $_[0]->{'ip'});
 		}
+	# Check for <virtualhost> on the IP
+	&require_apache();
+	local $conf = &apache::get_config();
+	foreach my $v (&apache::find_directive_struct("VirtualHost", $conf)) {
+		local ($vip, $vport) = split(/:/, $v->{'words'}->[0]);
+		if ($vip eq $_[0]->{'ip'} && $vport == $port) {
+			return &text('setup_edepssl4', $_[0]->{'ip'}, $port);
+			}
+		}
 	return undef;
 	}
 }

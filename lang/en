@@ -341,6 +341,7 @@ setup_epostfixgfile=No outgoing address mapping file (<tt>sender_canonical_maps<
 setup_edepwebalizer=Webalizer cannot be enabled unless a website is configured
 setup_edepssl=SSL cannot be enabled unless a website is configured
 setup_edepssl3=SSL cannot be enabled for more than one domain on the IP address $1 unless a virtual IP interface or private port is enabled
+setup_edepssl4=SSL cannot be enabled as there is already an Apache virtual host on IP address $1 and port $2
 setup_edepftp=Virtual FTP cannot be enabled unless a virtual IP address is allocated
 setup_edepspam=Spam filtering cannot be enabled unless email is
 setup_edepspamvpop=Spam filtering cannot be used with VPopMail

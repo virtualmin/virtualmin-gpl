@@ -1,0 +1,6 @@
+desc=SSL without private IP
+html=SSL can now be enabled for domains without a private IP address, for a single virtual server on each shared address. This means that on a typical single-IP system, you can have one SSL website.
+master=1
+reseller=1
+domain=1
+link=edit_domain.cgi?dom=${ID}

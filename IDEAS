@@ -70,7 +70,4 @@
 	  to decide which domains can be batch created with mass_setup_XXX
 	  functions
 
- - SSL on default IP
-	- Allow SSL to be enabled for 1 virtual server per IP
-	- what about non-Virtualmin <virtualhost>
 	- CHANGELOG

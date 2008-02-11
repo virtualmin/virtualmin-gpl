@@ -80,10 +80,7 @@ while(@ARGV > 0) {
 		$virtalready = 1;
 		}
 	elsif ($a eq "--ip-primary") {
-		$virtalready = 2;
-		$virt = 1;
-		$feature{'virt'} = 1;   # for dependency checks
-		$name = 1;		# the non-SSL vhost has to be name-based
+		&usage("The --ip-primary flag is no longer needed, as a single SSL website can be created for each shared IP address");
 		}
 	elsif ($a eq "--shared-ip") {
 		$sharedip = shift(@ARGV);
@@ -173,14 +170,7 @@ if ($template eq "") {
 	}
 $tmpl = &get_template($template);
 
-if ($virtalready == 2) {
-	# IP is the system's primary interface
-	$ip eq "allocate" &&
-		&usage("The --ip-primary option overrides --allocate-ip");
-	$ip && &usage("The --ip-primary option overrides --ip");
-	$ip = &get_default_ip();
-	}
-elsif ($ip eq "allocate") {
+if ($ip eq "allocate") {
 	# Allocate IP now
 	$virtalready && &usage("The --ip-already and --allocate-ip options are incompatible");
 	%racl = $resel ? &get_reseller_acl($resel) : ();
