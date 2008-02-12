@@ -206,7 +206,7 @@ if (!$_[0]->{'dns_submode'}) {
 		local $rootfile = &bind8::make_chroot($z->{'file'});
 		local $lref = &read_file_lines($rootfile);
 		splice(@$lref, $z->{'line'}, $z->{'eline'} - $z->{'line'} + 1);
-		&flush_file_lines($z->{'file'});
+		&flush_file_lines($rootfile);
 
 		# Clear zone names caches
 		unlink($bind8::zone_names_cache);
