@@ -32,7 +32,7 @@ if (!$in{'program'}) {
 # Build the arg list
 $in{'program'} =~ /^[a-z0-9\.-]+$/i || &error($text{'remote_eprogram'});
 $cmd = "$module_root_directory/$in{'program'}.pl";
--x $cmd || &error(&text('remote_eprogram2', "<tt>$cmd</tt>"));
+-x $cmd || &error(&text('remote_eprogram2', "<tt>".&html_escape($cmd)."</tt>"));
 @args = ( );
 foreach $i (keys %in) {
 	next if ($i eq "program");
