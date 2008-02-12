@@ -146,9 +146,6 @@ else {
 	&$second_print($text{'setup_done'});
 	}
 
-# Set the user's Usermin IMAP password
-&set_usermin_imap_password(\%uinfo);
-
 &release_lock_unix($_[0]);
 return 1;
 }

@@ -1666,16 +1666,18 @@ foreach my $dir ($user->{'home'}, "$user->{'home'}/.usermin", "$user->{'home'}/.
 					   0700, $dir);
 		}
 	}
-local %inbox;
-&read_file("$user->{'home'}/.usermin/mailbox/inbox.imap", \%inbox);
-if (&usermin::get_usermin_version() >= 1.323) {
-	$inbox{'user'} = '*';
+if (-d "$user->{'home'}/.usermin/mailbox") {
+	local %inbox;
+	&read_file("$user->{'home'}/.usermin/mailbox/inbox.imap", \%inbox);
+	if (&usermin::get_usermin_version() >= 1.323) {
+		$inbox{'user'} = '*';
+		}
+	else {
+		$inbox{'user'} = $user->{'user'};
+		}
+	$inbox{'pass'} = $user->{'plainpass'};
+	&write_file("$user->{'home'}/.usermin/mailbox/inbox.imap", \%inbox);
 	}
-else {
-	$inbox{'user'} = $user->{'user'};
-	}
-$inbox{'pass'} = $user->{'plainpass'};
-&write_file("$user->{'home'}/.usermin/mailbox/inbox.imap", \%inbox);
 }
 
 # delete_unix_cron_jobs(username)

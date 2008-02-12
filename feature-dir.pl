@@ -53,6 +53,9 @@ foreach $d (&virtual_server_directories($_[0])) {
 eval {
 	local $main::error_must_die = 1;
 	&create_mail_file(\%uinfo);
+
+	# Set the user's Usermin IMAP password
+	&set_usermin_imap_password($uinfo);
 	};
 if ($@) {
 	&$second_print(&text('setup_eusermail3', $@));
