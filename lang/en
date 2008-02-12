@@ -1541,6 +1541,7 @@ check_ealias_maps=A problem was found with your Postfix alias maps : $1
 check_evirtual_maps=A problem was found with your Postfix virtual maps : $1
 check_ecanonical_maps=A problem was found with your Postfix canonical maps, used for outgoing address mapping : $1
 check_ebcc_maps=A problem was found with your Postfix sender BCC maps : $1
+check_elogrotateconf=Current logrotate configuration is not valid : $1. This must be fixed, or log file rotation will not be done.
 
 checkmap_enone=No map sources were found in the <a href='$1'>Postfix configuration</a>
 checkmap_esupport=The map source <tt>$1</tt> is not supported by Postfix - you may need to install Postfix libraries for it, or re-compile
