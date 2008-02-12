@@ -10784,6 +10784,16 @@ if ($config{'spam'}) {
 		return &text('index_espam', "/spam/", $clink);
 	&foreign_installed("procmail", 1) == 2 ||
 		return &text('index_eprocmail', "/procmail/", $clink);
+	local $spamclient = &get_global_spam_client();
+	if ($spamclient =~ /^spamassassin/) {
+		# Make sure it supports --siteconfigpath
+		local $out = &backquote_command("$spamclient -h 2>&1 </dev/null");
+		if ($out !~ /\-\-siteconfigpath/) {
+			&require_spam();
+			local $ver = &spam::get_spamassassin_version();
+			return &text('check_espamsiteconfig', $ver);
+			}
+		}
 	if (&mail_system_has_procmail()) {
 		&$second_print($text{'check_spamok'});
 		}

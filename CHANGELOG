@@ -835,3 +835,4 @@ Hitting Stop in the browser during the creation of a virtual server or some othe
 When the Apache virtual host *.domain exists and a new virtual host for something.domain is created, it is placed before *.domain in the Apache config file to give it precedence.
 SSL can now be enabled for domains without a private IP address, for a single virtual server on each shared address. This means that on a typical single-IP system, you can have one SSL website. This replaces the --ip-primary flag to create-domain.pl.
 The logrotate configuration is now validated by Virtualmin, to detect duplicate entries that can cause rotation to stop working.
+The SpamAssassin version is validated as part of the configuration check, to ensure that it supports the needed --siteconfigpath parameter.
