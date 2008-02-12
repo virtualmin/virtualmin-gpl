@@ -70,3 +70,4 @@
 	  to decide which domains can be batch created with mass_setup_XXX
 	  functions
 
+ - verify that logrotate works when doing a config check, with -f -d

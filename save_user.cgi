@@ -279,6 +279,11 @@ else {
 			$home = &useradmin::auto_home_dir(
 				$home_base, $in{'mailuser'}, $config{'localgroup'});
 			}
+
+		# Make sure home exists, for web owner user
+		if ($user->{'webowner'} && !-d $home) {
+			&error($text{'user_ehomeexists'});
+			}
 		}
 
 	# Update secondary groups
