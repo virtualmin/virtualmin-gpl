@@ -2713,14 +2713,18 @@ $maillog = &get_mail_log() if ($maillog eq "auto");
 return $starts if (!$maillog);
 require 'timelocal.pl';
 
-# Build a map from domain names to objects
-local %maildoms;
+# Build a map from domain names to objects, and from Unix usernames to objects
+local (%maildoms, %mailusers);
 foreach my $d (@$doms) {
 	$maildoms{$d->{'dom'}} = $d;
 	foreach my $md (split(/\s+/, $d->{'bw_maildoms'})) {
 		$maildoms{$md} = $d;
 		}
+	foreach my $user (&list_domain_users($d, 0, 1, 1, 1)) {
+		$mailusers{$user->{'user'}} = $d;
+		}
 	}
+local $myhostname = &get_system_hostname();
 
 # Find the minimum last activity time
 local $start_now = time();
@@ -2751,9 +2755,18 @@ foreach $f ($config{'bw_maillog_rotated'} ?
                         $fromuser =~ s/,$//;
 			local ($mb, $dom) = split(/\@/, $fromuser);
 			local $md = $maildoms{$dom};
+			if (!$md && $dom eq $myhostname) {
+				# Check for mail from local user@hostname
+				$md = $mailusers{$mb};
+				}
+			if (!$md && !$dom) {
+				# Check for mail from un-qualified user
+				$md = $mailusers{$fromuser};
+				}
 			if ($md) {
-				# Mail is from a hosted domain. If it is to a non-
-				# local domain, we will count it in the next block
+				# Mail is from a hosted domain. If it is to a
+				# non-local domain, we will count it in the
+				# next block
 				$fromdoms{$id} = $md;
 				}
 			}
