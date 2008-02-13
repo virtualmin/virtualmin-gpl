@@ -4026,8 +4026,7 @@ if (-d $ddir) {
 	return $ddir;
 	}
 else {
-	return "$config{'vpopmail_dir'}/domains/".
-	       substr($dname, 0, 1)."/$dname";
+	return glob("$config{'vpopmail_dir'}/domains/?/$dname");
 	}
 }
 
