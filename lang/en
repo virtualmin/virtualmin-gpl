@@ -4016,11 +4016,17 @@ newshells_emailboxdef=Exactly one shell must be the default for mailboxes
 newshells_id=Access
 
 shells_mailbox=Email only
+shells_mailbox2=No access
 shells_mailboxftp=Email and FTP
+shells_mailboxftp2=FTP
 shells_mailboxjail=Email and jailed FTP
+shells_mailboxjail2=Jailed FTP
 shells_nologin=Email only
+shells_nologin2=No access
 shells_ftp=Email and FTP
+shells_ftp2=FTP
 shells_ssh=Email, FTP and SSH
+shells_ssh2=FTP and SSH
 shells_none=&lt;No shell&gt;
 
 nicetime_days=$1 days, $2 hours, $3:$4 minutes

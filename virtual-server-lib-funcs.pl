@@ -3684,7 +3684,7 @@ sub users_table
 {
 local $can_quotas = &has_home_quotas() || &has_mail_quotas();
 local $can_qquotas = $config{'mail_system'} == 4 || $config{'mail_system'} == 5;
-local @ashells = &list_available_shells();
+local @ashells = &list_available_shells($_[1]);
 
 # Work out table header
 local @cols;
@@ -12044,14 +12044,16 @@ local @rv = grep { $_->{'user'} eq $user &&
 return wantarray ? @rv : $rv[0];
 }
 
-# list_available_shells()
+# list_available_shells([&domain])
 # Returns a list of shells assignable to domain owners and/or mailboxes.
 # Each is a hash ref with shell, desc, owner and mailbox keys.
 sub list_available_shells
 {
+local ($d) = @_;
+local $mail = !$d || $d->{'mail'};
 local @rv;
-if (defined(@list_available_shells_cache)) {
-	return @list_available_shells_cache;
+if ($list_available_shells_cache{$mail}) {
+	return @{$list_available_shells_cache{$mail}};
 	}
 if (-r $custom_shells_file) {
 	# Read shells data file
@@ -12067,19 +12069,22 @@ if (!@rv) {
 	# Fake up from config file and known shells, if there is no custom
 	# file or if it is somehow empty.
 	push(@rv, { 'shell' => $config{'shell'},
-		    'desc' => $text{'shells_mailbox'},
+		    'desc' => $mail ? $text{'shells_mailbox'}
+				    : $text{'shells_mailbox2'},
 		    'mailbox' => 1,
 		    'default' => 1,
 		    'avail' => 1,
 		    'id' => 'nologin' });
 	push(@rv, { 'shell' => $config{'ftp_shell'},
-		    'desc' => $text{'shells_mailboxftp'},
+		    'desc' => $mail ? $text{'shells_mailboxftp'}
+				    : $text{'shells_mailboxftp2'},
 		    'mailbox' => 1,
 		    'avail' => 1,
 		    'id' => 'ftp' });
 	if ($config{'jail_shell'}) {
 		push(@rv, { 'shell' => $config{'jail_shell'},
-			    'desc' => $text{'shells_mailboxjail'},
+			    'desc' => $mail ? $text{'shells_mailboxjail'}
+					    : $text{'shells_mailboxjail2'},
 			    'mailbox' => 1,
 			    'avail' => 1,
 			    'id' => 'ftp' });
@@ -12089,7 +12094,8 @@ if (!@rv) {
 		next if (!-r $us->[1]);
 		next if ($done{$us->[1]}++);
 		local %shell = ( 'shell' => $us->[1],
-				 'desc' => $text{'shells_'.$us->[0]},
+				 'desc' => $mail ? $text{'shells_'.$us->[0]}
+						: $text{'shells_'.$us->[0].'2'},
 				 'id' => $us->[0],
 				 'owner' => 1 );
 		if ($us->[1] eq $config{'unix_shell'}) {
@@ -12118,7 +12124,7 @@ if (!@rv) {
 		$firstclass->{'avail'} = 1;
 		}
 	}
-@list_available_shells_cache = @rv;
+$list_available_shells_cache{$mail} = \@rv;
 return @rv;
 }
 
