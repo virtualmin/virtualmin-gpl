@@ -11869,7 +11869,7 @@ return @rv;
 sub count_domain_users
 {
 local %rv;
-local %homemap;
+local (%homemap, %doneuser);
 foreach my $d (&list_domains()) {
 	$homemap{$d->{'home'}} = $d->{'id'};
 	}
@@ -11898,6 +11898,11 @@ foreach my $u (&list_all_users_quotas(1)) {
 				last;
 				}
 			}
+		}
+	if ($config{'mail_system'} == 0) {
+		# Don't double-count Postfix @ and - users
+		local $noat = &replace_atsign($u->{'user'});
+		next if ($doneuser{$noat}++);
 		}
 	if ($did) {
 		$rv{$did}++;
