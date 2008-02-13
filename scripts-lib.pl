@@ -1602,8 +1602,14 @@ if ($copydir) {
 	$out = undef if ($out !~ /\S/);
 	return "<pre>".&html_escape($out || "Exit status $?")."</pre>" if ($?);
 
-	# Make dest files non-world-readable, and user writable
-	&run_as_domain_user($d, "chmod -R o-rxw ".quotemeta($copydir));
+	# Make dest files non-world-readable and user writable, unless we don't
+	# add Apache to a group, of if the home is world-readable
+	local $tmpl = &get_template($d->{'template'});
+	local $web_user = &get_apache_user($d);
+	local @st = stat($d->{'home'});
+	if ($tmpl->{'web_user'} ne 'none' && $web_user && ($st[2]&07) == 0) {
+		&run_as_domain_user($d, "chmod -R o-rxw ".quotemeta($copydir));
+		}
 	&run_as_domain_user($d, "chmod -R u+rw ".quotemeta($copydir));
 	}
 
