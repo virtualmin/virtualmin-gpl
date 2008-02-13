@@ -7,7 +7,8 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_users() || &error($text{'users_ecannot'});
 @users = &list_domain_users($d, 0, 0, 0, 0);
-&ui_print_header(&domain_in($d), $text{'users_title'}, "");
+&ui_print_header(&domain_in($d), $d->{'mail'} ? $text{'users_title'}
+					      : $text{'users_title2'}, "");
 $webinit = &create_initial_user($d, undef, 1);
 
 # Create select / add links

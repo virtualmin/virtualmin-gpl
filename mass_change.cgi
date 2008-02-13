@@ -129,7 +129,7 @@ foreach $user (@musers) {
 		}
 
 	# Primary email address
-	if ($in{'email'}) {
+	if ($in{'email'} && $d->{'mail'}) {
 		&$first_print($text{'mass_setprimary'});
 		if ($user->{'noprimary'}) {
 			&$second_print($text{'mass_eprimary'});

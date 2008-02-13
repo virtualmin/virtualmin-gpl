@@ -41,19 +41,21 @@ print &ui_hidden_table_start($mailbox ? $text{'user_mheader'} :
 		             "width=100%", 2, "table1", 1);
 
 # Show username, editable if this is not the domain owner
+$ulabel = $d->{'mail'} ? &hlink($text{'user_user'}, "username")
+		       : &hlink($text{'user_user2'}, "username2");
 if ($mailbox) {
-	print &ui_table_row(&hlink($text{'user_user'}, "username"),
-			    "<tt>$user->{'user'}</tt>", 2, \@tds);
+	print &ui_table_row($ulabel, "<tt>$user->{'user'}</tt>", 2, \@tds);
 	$pop3 = $user->{'user'};
 	}
 else {
 	$pop3 = $d && !$user->{'noappend'} ?
 		&remove_userdom($user->{'user'}, $d) : $user->{'user'};
-	print &ui_table_row(&hlink($text{'user_user'}, "username"),
+	print &ui_table_row($ulabel,
 		&ui_textbox("mailuser", $pop3, 13).
 		($d ? "\@$d->{'dom'}" : "")."\n".
 		($pop3 ne $user->{'user'} ?
-			" ".&text('user_pop3', "<tt>$user->{'user'}</tt>") :
+			" ".&text($d->{'mail'} ? 'user_pop3' : 'user_pop3f',
+				  "<tt>$user->{'user'}</tt>") :
 			""),
 		2, \@tds);
 	print &ui_hidden("oldpop3", $pop3),"\n";

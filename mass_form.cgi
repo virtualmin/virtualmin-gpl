@@ -34,11 +34,13 @@ foreach $quota (@qtypes) {
 	}
 
 # Primary email address
-print &ui_table_row($text{'mass_email'},
-	    &ui_radio('email', 0,
-		      [ [ 0, $text{'mass_leave'} ],
-			[ 1, $text{'mass_enable'} ],
-			[ 2, $text{'mass_disable'} ] ]));
+if ($d->{'mail'}) {
+	print &ui_table_row($text{'mass_email'},
+		    &ui_radio('email', 0,
+			      [ [ 0, $text{'mass_leave'} ],
+				[ 1, $text{'mass_enable'} ],
+				[ 2, $text{'mass_disable'} ] ]));
+	}
 
 # FTP login
 if (&can_mailbox_ftp()) {

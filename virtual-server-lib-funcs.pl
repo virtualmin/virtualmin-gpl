@@ -3689,14 +3689,16 @@ local @ashells = &list_available_shells();
 # Work out table header
 local @cols;
 push(@cols, "") if ($_[2]);
-push(@cols, $text{'users_name'}, $text{'users_pop3'}, $text{'users_real'} );
+push(@cols, $text{'users_name'},
+	    $_[1]->{'mail'} ? $text{'users_pop3'} : $text{'users_pop3f'},
+	    $text{'users_real'} );
 if ($can_quotas) {
 	push(@cols, $text{'users_quota'}, $text{'users_uquota'});
 	}
 if ($can_qquotas) {
 	push(@cols, $text{'users_qquota'});
 	}
-if ($config{'show_mailsize'}) {
+if ($config{'show_mailsize'} && $_[1]->{'mail'}) {
 	push(@cols, $text{'users_size'});
 	}
 push(@cols, $text{'users_ushell'});
@@ -3753,7 +3755,7 @@ foreach $u (@{$_[0]}) {
 		push(@cols, "");
 		}
 
-	if ($config{'show_mailsize'}) {
+	if ($config{'show_mailsize'} && $_[1]->{'mail'}) {
 		# Mailbox link, if this user has email enabled or is the owner
 		if (!$u->{'nomailfile'} &&
 		    ($u->{'email'} || @{$u->{'extraemail'}} ||
@@ -3778,8 +3780,6 @@ foreach $u (@{$_[0]}) {
 	push(@cols, !$u->{'shell'} ? $text{'users_qmail'} :
 		    !$shell ? &text('users_shell', "<tt>$u->{'shell'}</tt>") :
 		    $shell->{'desc'});
-#		    $shell->{'id'} eq 'nologin' ? $text{'no'} :
-#		    $shell->{'id'} eq 'ftp' ? $text{'yes'} : $shell->{'desc'});
 	if ($_[1]->{'mysql'} || $_[1]->{'postgres'}) {
 		push(@cols, $u->{'domainowner'} ? $text{'users_all'} :
 					   @{$u->{'dbs'}} ? $text{'yes'}
@@ -9534,7 +9534,8 @@ local @rv;
 if (&can_domain_have_users($d) && &can_edit_users()) {
 	# Users button
 	push(@rv, { 'page' => 'list_users.cgi',
-		    'title' => $text{'edit_users2'},
+		    'title' => $d->{'mail'} ? $text{'edit_users2'}
+					    : $text{'edit_users3'},
 		    'desc' => $text{'edit_usersdesc'},
 		    'cat' => 'objects',
 		    'icon' => 'group',
