@@ -830,7 +830,7 @@ elsif ($_[0]->{'vpopmail'}) {
 	local $cmd = "$vpopbin/vadduser $quota -c $qreal $quser\@$qdom $qpass";
 	local $out = &backquote_logged("$cmd 2>&1");
 	&error("<tt>$cmd</tt> failed: <pre>$out</pre>") if ($?);
-	$_[0]->{'home'} = "$config{'vpopmail_dir'}/domains/$_[1]->{'dom'}/$_[0]->{'user'}";
+	$_[0]->{'home'} = &domain_vpopmail_dir($_[1])."/".$_[0]->{'user'};
 	}
 else {
 	# Add the Unix user
@@ -1067,7 +1067,7 @@ elsif ($_[1]->{'vpopmail'}) {
 		}
 	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 		# Need to rename manually
-		local $vdomdir = "$config{'vpopmail_dir'}/domains/$_[2]->{'dom'}";
+		local $vdomdir = &domain_vpopmail_dir($_[2]);
 		&rename_logged("$vdomdir/$_[1]->{'user'}", "$vdomdir/$_[0]->{'user'}");
 		&lock_file("$vdomdir/vpasswd");
 		local $lref = &read_file_lines("$vdomdir/vpasswd");
@@ -3382,9 +3382,9 @@ for($i=0; defined($t = $in{"type_$i"}); $i++) {
 		local @qm = getpwnam($config{'vpopmail_user'});
 		if (!$v) {
 			# Create an empty responder file
+			local $ddir = &domain_vpopmail_dir($_[4]);
 			$v = $_[3] eq "alias" ?
-				"$config{'vpopmail_dir'}/domains/$_[4]->{'dom'}/$_[1].respond" :
-				"$config{'vpopmail_dir'}/domains/$_[4]->{'dom'}/$_[1]/respond";
+				"$ddir/$_[1].respond" : "$ddir/$_[1]/respond";
 			if (!-r $v) {
 				&open_tempfile(MSG, ">$v");
 				&close_tempfile(MSG);

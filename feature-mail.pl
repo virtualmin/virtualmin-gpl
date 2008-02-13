@@ -959,14 +959,25 @@ elsif ($config{'mail_system'} == 5) {
 	# Use the valias program to get aliases for all domains
 	if (!defined(@vpopmail_aliases_cache)) {
 		@vpopmail_aliases_cache = ( );
+
+		# Build up list of all domains
 		opendir(DDIR, "$config{'vpopmail_dir'}/domains");
-		local @doms = grep { $_ !~ /^\./ } readdir(DDIR);
+		local @doms = grep { $_ !~ /^\./ && length($_) > 1 }
+				   readdir(DDIR);
+		local @letters = grep { $_ !~ /^\./ && length($_) == 1 }
+				      readdir(DIR);
 		closedir(DDIR);
+		foreach my $l (@letters) {
+			opendir(DDIR, "$config{'vpopmail_dir'}/domains/$l");
+			push(@doms, grep { $_ !~ /^\./ } readdir(DDIR));
+			closedir(DDIR);
+			}
+
 		local $dname;
 		foreach $dname (@doms) {
 			# Get aliases from .qmail files
 			local %already;
-			local $ddir = "$config{'vpopmail_dir'}/domains/$dname";
+			local $ddir = &domain_vpopmail_dir($dname);
 			opendir(DDIR, $ddir);
 			while($qf = readdir(DDIR)) {
 				next if ($qf !~ /^.qmail-(.*)$/);
@@ -986,8 +997,8 @@ elsif ($config{'mail_system'} == 5) {
 				}
 			closedir(DDIR);
 
-			# Add those from valias command (for sites using MySQL or some
-			# other backend)
+			# Add those from valias command (for sites using MySQL
+			# or some other backend)
 			local %aliases;
 			local $_;
 			open(ALIASES, "$vpopbin/valias -s $dname |");
@@ -1022,7 +1033,7 @@ elsif ($config{'mail_system'} == 5) {
 # Virtualmin format. 
 sub qmail_to_vpopmail
 {
-local $ddir = "$config{'vpopmail_dir'}/domains/$_[1]";
+local $ddir = &domain_vpopmail_dir($_[1]);
 if ($_[0] =~ /^\|\s*$vpopbin\/vdelivermail\s+''\s+(\S+)\@(\S+)$/) {
 	# External address
 	return $2 eq $_[1] ? $1 : "$1\@$2";
@@ -1048,7 +1059,7 @@ else {
 # vpopmail_to_qmail(alias, domain)
 sub vpopmail_to_qmail
 {
-local $ddir = "$config{'vpopmail_dir'}/domains/$_[1]";
+local $ddir = &domain_vpopmail_dir($_[1]);
 if ($_[0] =~ /^\S+\@\S+$/) {
 	return $_[0];
 	}
@@ -1385,7 +1396,7 @@ elsif ($config{'mail_system'} == 5) {
 		}
 	if ($box eq "default" || $maxlen > 160) {
 		# Create .qmail file directly
-		local $ddir = "$config{'vpopmail_dir'}/domains/$dom";
+		local $ddir = &domain_vpopmail_dir($dom);
 		local $qmf = "$ddir/.qmail-$box";
 		&lock_file($qmf);
 		&open_tempfile(QMAIL, ">$qmf");
@@ -1963,7 +1974,7 @@ if ($config{'mail_system'} == 4) {
 	}
 elsif ($config{'mail_system'} == 5) {
 	# All mail for VPOPmail is under the domain's directory
-	return "$config{'vpopmail_dir'}/domains/$_[0]->{'dom'}";
+	return &domain_vpopmail_dir($_[0]);
 	}
 elsif (&mail_under_home()) {
 	return "$_[0]->{'home'}/homes";
@@ -3987,6 +3998,22 @@ if ($main::got_lock_mail == 1) {
 	}
 $main::got_lock_mail-- if ($main::got_lock_mail);
 &release_lock_anything();
+}
+
+# domain_vpopmail_dir(&domain|dname)
+# Returns the vpopmail directory for a domain
+sub domain_vpopmail_dir
+{
+local ($d) = @_;
+local $dname = ref($d) ? $d->{'dom'} : $d;
+local $ddir = "$config{'vpopmail_dir'}/domains/$dname";
+if (-d $ddir) {
+	return $ddir;
+	}
+else {
+	return "$config{'vpopmail_dir'}/domains/".
+	       substr($dname, 0, 1)."/$dname";
+	}
 }
 
 $done_feature_script{'mail'} = 1;
