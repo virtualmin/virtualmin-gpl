@@ -964,10 +964,9 @@ elsif ($config{'mail_system'} == 5) {
 
 		# Build up list of all domains
 		opendir(DDIR, "$config{'vpopmail_dir'}/domains");
-		local @doms = grep { $_ !~ /^\./ && length($_) > 1 }
-				   readdir(DDIR);
-		local @letters = grep { $_ !~ /^\./ && length($_) == 1 }
-				      readdir(DIR);
+		local @df = readdir(DDIR);
+		local @doms = grep { $_ !~ /^\./ && length($_) > 1 } @df;
+		local @letters = grep { $_ !~ /^\./ && length($_) == 1 } @df;
 		closedir(DDIR);
 		foreach my $l (@letters) {
 			opendir(DDIR, "$config{'vpopmail_dir'}/domains/$l");
