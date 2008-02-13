@@ -313,8 +313,10 @@ sub delete_mail
 &obtain_lock_mail($_[0]);
 &require_mail();
 
-if ($_[0]->{'alias'} && !$_[0]->{'aliascopy'}) {
-        # Remove whole-domain alias
+if ($_[0]->{'alias'} && !$_[0]->{'aliascopy'} ||
+    !$_[0]->{'alias'} && $config{'mail_system'} == 0) {
+        # Remove whole-domain alias, for alias domains or regular domains using
+	# Postfix
         local @virts = &list_virtusers();
         local ($catchall) = grep { lc($_->{'from'}) eq '@'.$_[0]->{'dom'} }
 				 @virts;
