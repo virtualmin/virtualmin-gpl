@@ -152,10 +152,10 @@ if (!$modok) {
 				     $domuser, $dompass);
 &$indent_print();
 print $msg,"<p>\n";
-if ($script->{'site'}) {
+if ($ok && $script->{'site'}) {
 	print &text('scripts_sitelink', $script->{'site'}),"<p>\n";
 	}
-if (!$sinfo) {
+if ($ok && !$sinfo) {
 	# Show login details
 	if ($suser && $spass) {
 		print &text('scripts_userpass',

@@ -98,6 +98,7 @@ foreach $s (@scripts) {
 
 	# Make sure Virtualmin has the latest version
 	$lfunc = $script->{'latest_func'};
+	$url = undef;
 	if (defined(&$lfunc)) {
 		foreach $v (@{$script->{'versions'}}) {
 			($url, $re) = &$lfunc($v);
