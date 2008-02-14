@@ -1607,8 +1607,19 @@ if ($copydir) {
 	local $tmpl = &get_template($d->{'template'});
 	local $web_user = &get_apache_user($d);
 	local @st = stat($d->{'home'});
+	local $mode = &get_domain_php_mode($d);
 	if ($tmpl->{'web_user'} ne 'none' && $web_user && ($st[2]&07) == 0) {
+		# Apache is a member of the domain's group, so we can make
+		# all script files non-world-readable
 		&run_as_domain_user($d, "chmod -R o-rxw ".quotemeta($copydir));
+		}
+	elsif ($mode ne "mod_php") {
+		# Running via CGI or fastCGI, so make .php, .cgi and .pl files
+		# non-world-readable
+		&run_as_domain_user($d,
+		  "find ".quotemeta($copydir)." -type f ".
+		  "-name '*.php' -o -name '*.php?' -o -name '*.cgi' ".
+		  "-o -name '*.pl' | xargs chmod -R o-rxw 2>/dev/null");
 		}
 	&run_as_domain_user($d, "chmod -R u+rw ".quotemeta($copydir));
 	}
