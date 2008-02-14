@@ -1578,12 +1578,13 @@ elsif ($fmt == 5) {
 else {
 	return "Unknown compression format";
 	}
-local $out = &run_as_domain_user($d, "cd ".quotemeta($dir)." && ".$cmd);
+local $out = &run_as_domain_user($d, "(cd ".quotemeta($dir)." && ".$cmd.") 2>&1");
 return "Uncompression failed : <pre>".&html_escape($out)."</pre>" if ($?);
 
 # Copy to a target dir, if requested
 if ($copydir) {
-	local $path = glob("$dir/$subdir");
+	local $path = "$dir/$subdir";
+	($path) = glob("$dir/$subdir") if (!-e $path);
 	local $out;
 	if (-f $path) {
 		# Copy one file
