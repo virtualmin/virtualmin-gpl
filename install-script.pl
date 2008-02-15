@@ -253,6 +253,20 @@ print "$msg\n";
 if ($ok) {
 	&$second_print($text{'setup_done'});
 
+	if (!$sinfo) {
+		# Show username and password
+		if ($suser && $spass) {
+			print &text('scripts_userpass',
+				    $suser, $spass),"\n\n";
+			}
+		elsif ($suser) {
+			print &text('scripts_useronly', $suser),"\n\n";
+			}
+		elsif ($spass) {
+			print &text('scripts_passonly', $spass),"\n\n";
+			}
+		}
+
 	# Record script install in domain
 	if ($sinfo) {
 		&remove_domain_script($d, $sinfo);
