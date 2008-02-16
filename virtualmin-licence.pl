@@ -13,10 +13,12 @@ $virtualmin_licence_ssl = 0;
 sub licence_scheduled
 {
 local ($out, $error);
+local @doms = grep { !$_->{'alias'} } &list_domains();
 &read_env_file($virtualmin_license_file, \%serial);
 &http_download($virtualmin_licence_host,
 	       $virtualmin_licence_port,
-	       "$virtualmin_licence_prog?id=$_[0]&serial=$serial{'LicenseKey'}",
+	       "$virtualmin_licence_prog?id=$_[0]&".
+		"serial=$serial{'LicenseKey'}&doms=".scalar(@doms),
 	       \$out, \$error, undef, $virtualmin_licence_ssl);
 return (2, undef, "Failed to contact licence server : $error") if ($error);
 return $out =~ /^EXP\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?

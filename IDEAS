@@ -17,8 +17,6 @@
 
  - pre-load ui-lib.pl ?
 
- - better coverage of files by webmin_log
-
  - templates for new mailing list configs
 	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=739
 
@@ -70,4 +68,3 @@
 	  to decide which domains can be batch created with mass_setup_XXX
 	  functions
 
- - add IMAP and POP3 usage to bandwidth
