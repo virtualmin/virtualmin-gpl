@@ -34,7 +34,7 @@ $ver =~ /^\S+$/ || &error($text{'scripts_eversion'});
 	&error($text{'scripts_eversion2'});
 
 # Check dependencies
-$derr = &{$script->{'depends_func'}}($d, $ver);
+$derr = &{$script->{'depends_func'}}($d, $ver, $sinfo);
 $ok = 1;
 if ($derr) {
 	print &text('scripts_edep', $derr),"<p>\n";
