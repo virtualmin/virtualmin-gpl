@@ -23,9 +23,11 @@ else {
 &require_acl();
 &get_miniserv_config(\%miniserv);
 &acl::open_session_db(\%miniserv);
-($olduser, $oldtime) = split(/\s+/, $acl::sessiondb{$main::session_id});
+$skey = defined(&acl::session_db_key) ? &acl::session_db_key($main::session_id)
+				      : $main::session_id;
+($olduser, $oldtime) = split(/\s+/, $acl::sessiondb{$skey});
 $olduser || &error($acl::text{'switch_eold'});
-$acl::sessiondb{$main::session_id} = "$user $oldtime $ENV{'REMOTE_ADDR'}";
+$acl::sessiondb{$skey} = "$user $oldtime $ENV{'REMOTE_ADDR'}";
 dbmclose(%acl::sessiondb);
 &reload_miniserv();
 if ($in{'admin'}) {
