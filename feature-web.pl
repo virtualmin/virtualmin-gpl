@@ -260,7 +260,10 @@ elsif ($config{'delete_indom'}) {
 	foreach $v (@virt) {
 		local $sn = &apache::find_directive("ServerName",
 						    $v->{'members'});
-		if ($sn =~ /\Q$_[0]->{'dom'}\E$/) {
+		local $vp = $v->{'words'}->[0] =~ /:(\d+)$/ ? $1 :
+				$default_web_port;
+		if ($sn =~ /\Q$_[0]->{'dom'}\E$/ &&
+		    $vp != $d->{'web_sslport'}) {
 			&delete_web_virtual_server($v);
 			}
 		}
