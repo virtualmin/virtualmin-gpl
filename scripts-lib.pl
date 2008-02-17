@@ -1581,6 +1581,11 @@ else {
 local $out = &run_as_domain_user($d, "(cd ".quotemeta($dir)." && ".$cmd.") 2>&1");
 return "Uncompression failed : <pre>".&html_escape($out)."</pre>" if ($?);
 
+# Make sure the target files are owner-writable, so we can copy over them
+if ($copydir && -e $copydir) {
+	&run_as_domain_user($d, "chmod -R u+w ".quotemeta($copydir));
+	}
+
 # Copy to a target dir, if requested
 if ($copydir) {
 	local $path = "$dir/$subdir";
