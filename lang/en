@@ -1584,6 +1584,7 @@ log_dbpass_domain=Changed the database password for virtual server $1
 log_switch_domain=Switched to the administration login for virtual server $1
 log_move_domain=Moved virtual server $1
 log_spam_domain=Changed spam and virus delivery for server $1
+log_spf_domain=Changed DNS options for server $1
 log_phpmode_domain=Changed PHP options for server $1
 log_phpver_domain=Changed PHP versions for server $1
 log_initial_domain=Changed user defaults for server $1
