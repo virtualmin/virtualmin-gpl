@@ -177,7 +177,7 @@ if (@errs) {
 		$body .= "\n";
 		$body .= "Script:  $e->[0]->{'name'}\n";
 		$body .= "Version: $e->[1]\n";
-		$body .= "URL:     $e->[2]\n";
+		$body .= "URL:     $e->[2]\n" if ($e->[2]);
 		$body .= "Error:   $e->[3]\n";
 		}
 	if ($debug) {
