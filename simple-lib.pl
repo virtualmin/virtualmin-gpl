@@ -124,12 +124,22 @@ if ($simple->{'bounce'}) {
 	push(@v, "BOUNCE");
 	}
 if ($simple->{'local'}) {
-	push(@v, "\\".$simple->{'local'});
+	local $escuser = $simple->{'local'};
+	if ($config{'mail_system'} == 0 && $escuser =~ /\@/) {
+		$escuser = &replace_atsign($escuser);
+		}
+	else {
+		$escuser = &escape_user($escuser);
+		}
+	push(@v, "\\".$escuser);
 	}
 if ($simple->{'tome'}) {
 	local $escuser = $alias->{'user'};
 	if ($config{'mail_system'} == 0 && $escuser =~ /\@/) {
 		$escuser = &replace_atsign($escuser);
+		}
+	else {
+		$escuser = &escape_user($escuser);
 		}
 	push(@v, "\\".($escuser || $alias->{'name'}));
 	}
