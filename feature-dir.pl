@@ -49,19 +49,21 @@ foreach $d (&virtual_server_directories($_[0])) {
 &$second_print($text{'setup_done'});
 
 # Create mail file
-&$first_print($text{'setup_usermail3'});
-eval {
-	local $main::error_must_die = 1;
-	&create_mail_file(\%uinfo);
+if (!$_[0]->{'parent'}) {
+	&$first_print($text{'setup_usermail3'});
+	eval {
+		local $main::error_must_die = 1;
+		&create_mail_file(\%uinfo);
 
-	# Set the user's Usermin IMAP password
-	&set_usermin_imap_password($uinfo);
-	};
-if ($@) {
-	&$second_print(&text('setup_eusermail3', $@));
-	}
-else {
-	&$second_print($text{'setup_done'});
+		# Set the user's Usermin IMAP password
+		&set_usermin_imap_password($uinfo);
+		};
+	if ($@) {
+		&$second_print(&text('setup_eusermail3', $@));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
 	}
 
 return 1;
