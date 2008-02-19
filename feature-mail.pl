@@ -2575,7 +2575,7 @@ else {
 	$rv = &ui_checkbox("mail_mailfiles", 1, $text{'restore_mailfiles2'},
 			   $_[0]->{'mailfiles'});
 	}
-if ($_[1]) {
+if ($_[1] && !&mail_under_home()) {
 	$rv .= "<br>".$text{'restore_mailuser'}." ".
 		&ui_textbox("mail_mailuser", $_[0]->{'mailuser'}, 15);
 	}

@@ -50,7 +50,8 @@ foreach $f (&get_available_backup_features()) {
 	local %opts = map { split(/=/, $_) }
 			split(/,/, $config{'backup_opts_'.$f});
 	local $ohtml;
-	if (defined(&$ofunc) && ($ohtml = &$ofunc(\%opts, $d))) {
+	if (defined(&$ofunc) && ($ohtml = &$ofunc(\%opts, $d)) &&
+	    $ohtml =~ /type=(text|radio|check)/i) {
 		$ftable .= "<table><tr><td>\n";
 		$ftable .= ("&nbsp;" x 5);
 		$ftable .= "</td> <td>\n";
