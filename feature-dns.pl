@@ -673,6 +673,24 @@ if ($z) {
 	&bind8::save_directive(&bind8::get_config_parent(), [ $z ], [ $z ], 0);
 	&flush_file_lines();
 
+	# Rename all records in the domain with the new .disabled name
+	local $file = &bind8::find("file", $z->{'members'});
+	local $fn = $file->{'values'}->[0];
+	local $bind8::config{'short_names'} = 1;
+	local @recs = &bind8::read_zone_file($fn, $_[0]->{'dom'});
+	foreach my $r (@recs) {
+		if ($r->{'name'} =~ /\.\Q$_[0]->{'dom'}\E\.$/ ||
+		    $r->{'name'} eq "$_[0]->{'dom'}.") {
+			# Need to rename
+                        &bind8::modify_record($fn, $r,
+					      $r->{'name'}."disabled.",
+                                              $r->{'ttl'}, $r->{'class'},
+                                              $r->{'type'},
+					      &join_record_values($r),
+                                              $r->{'comment'});
+			}
+		}
+
 	# Clear zone names caches
 	undef(@bind8::list_zone_names_cache);
 	&$second_print($text{'setup_done'});
@@ -702,6 +720,25 @@ if ($z) {
 	$z->{'values'}->[0] = $_[0]->{'dom'};
 	&bind8::save_directive(&bind8::get_config_parent(), [ $z ], [ $z ], 0);
 	&flush_file_lines();
+
+	# Fix all records in the domain with the .disabled name
+	local $file = &bind8::find("file", $z->{'members'});
+	local $fn = $file->{'values'}->[0];
+	local $bind8::config{'short_names'} = 1;
+	local @recs = &bind8::read_zone_file($fn, $_[0]->{'dom'});
+	foreach my $r (@recs) {
+		if ($r->{'name'} =~ /\.\Q$_[0]->{'dom'}\E\.disabled\.$/ ||
+		    $r->{'name'} eq "$_[0]->{'dom'}.disabled.") {
+			# Need to rename
+			$r->{'name'} =~ s/\.disabled\.$/\./;
+                        &bind8::modify_record($fn, $r,
+					      $r->{'name'},
+                                              $r->{'ttl'}, $r->{'class'},
+                                              $r->{'type'},
+					      &join_record_values($r),
+                                              $r->{'comment'});
+			}
+		}
 
 	# Clear zone names caches
 	undef(@bind8::list_zone_names_cache);
