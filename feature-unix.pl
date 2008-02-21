@@ -158,6 +158,9 @@ if (!$_[0]->{'pass_set'} &&
     $_[0]->{'user'} eq $_[1]->{'user'} &&
     $_[0]->{'home'} eq $_[1]->{'home'} &&
     $_[0]->{'owner'} eq $_[1]->{'owner'} &&
+    $_[0]->{'group'} eq $_[1]->{'group'} &&
+    $_[0]->{'quota'} eq $_[1]->{'quota'} &&
+    $_[0]->{'uquota'} eq $_[1]->{'uquota'} &&
     $_[0]->{'parent'} eq $_[1]->{'parent'}) {
 	# Nothing important has changed, so return now
 	return 1;

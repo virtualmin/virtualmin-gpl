@@ -60,7 +60,7 @@ foreach $s (@scripts) {
 
 foreach $h (&unique(@rv)) {
 	if ($firewall) {
-		print "-A FORWARD -d $h -m tcp --dport 80 -j ACCEPT\n";
+		print "-A FORWARD -d $h -m tcp -p tcp --dport 80 -j ACCEPT\n";
 		}
 	else {
 		print $h,"\n";
