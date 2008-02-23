@@ -1373,8 +1373,8 @@ if ($conftoo) {
 		&require_bind();
 		undef(@bind8::get_config_cache);
 		undef(%bind8::get_config_parent_cache);
-		&lock_file(&bind8::make_chroot($config{'zones_file'} ||
-					       $config{'named_conf'}));
+		&lock_file(&bind8::make_chroot($bind8::config{'zones_file'} ||
+					       $bind8::config{'named_conf'}));
 		}
 	$main::got_lock_dns++;
 	}
@@ -1401,8 +1401,8 @@ if ($d) {
 if ($conftoo) {
 	if ($main::got_lock_dns == 1) {
 		&require_bind();
-		&unlock_file(&bind8::make_chroot($config{'zones_file'} ||
-					         $config{'named_conf'}));
+		&unlock_file(&bind8::make_chroot($bind8::config{'zones_file'} ||
+					         $bind8::config{'named_conf'}));
 		}
 	$main::got_lock_dns-- if ($main::got_lock_dns);
 	}
