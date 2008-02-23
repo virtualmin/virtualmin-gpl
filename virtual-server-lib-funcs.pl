@@ -6778,7 +6778,7 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 		if (defined($merr));
 
 	if (!$only) {
-		local @users = $dd->{'alias'} ? ( )
+		local @users = $dd->{'alias'} || !$dd->{'group'} ? ( )
 					      : &list_domain_users($dd, 1);
 		local @aliases = &list_domain_aliases($dd);
 
