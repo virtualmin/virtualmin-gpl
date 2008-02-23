@@ -10771,13 +10771,13 @@ if ($config{'logrotate'}) {
 
 	# Make sure the current config is OK
 	# Commented out, as can falsely fail if a log file is empty :-(
-	#local $out = &backquote_command(
-	#	"$logrotate::config{'logrotate'} -d -f ".
-	#	&quote_path($logrotate::config{'logrotate_conf'})." 2>&1");
-	#if ($?) {
-	#	return &text('check_elogrotateconf',
-	#		     "<pre>".&html_escape($out)."</pre>");
-	#	}
+	local $out = &backquote_command(
+		"$logrotate::config{'logrotate'} -d -f ".
+		&quote_path($logrotate::config{'logrotate_conf'})." 2>&1");
+	if ($? && $out =~ /(.*stat\s+of\s+.*\s+failed:.*)/) {
+		return &text('check_elogrotateconf',
+			     "<pre>".&html_escape("$1")."</pre>");
+		}
 	&$second_print($text{'check_logrotateok'});
 	}
 
