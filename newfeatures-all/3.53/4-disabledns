@@ -1,0 +1,5 @@
+desc=DNS disable improvements
+html=When a DNS domain is disabled, all records in it that use the domain name are renamed too, to keep BIND happy.
+master=1
+reseller=1
+link=disable_domain.cgi?dom=${ID}
