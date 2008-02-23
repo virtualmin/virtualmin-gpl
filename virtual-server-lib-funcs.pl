@@ -10770,13 +10770,14 @@ if ($config{'logrotate'}) {
 				   $clink, $ver, 3.6);
 
 	# Make sure the current config is OK
-	local $out = &backquote_command(
-		"$logrotate::config{'logrotate'} -d -f ".
-		&quote_path($logrotate::config{'logrotate_conf'})." 2>&1");
-	if ($?) {
-		return &text('check_elogrotateconf',
-			     "<pre>".&html_escape($out)."</pre>");
-		}
+	# Commented out, as can falsely fail if a log file is empty :-(
+	#local $out = &backquote_command(
+	#	"$logrotate::config{'logrotate'} -d -f ".
+	#	&quote_path($logrotate::config{'logrotate_conf'})." 2>&1");
+	#if ($?) {
+	#	return &text('check_elogrotateconf',
+	#		     "<pre>".&html_escape($out)."</pre>");
+	#	}
 	&$second_print($text{'check_logrotateok'});
 	}
 
