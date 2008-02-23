@@ -289,8 +289,9 @@ else {
 		&delete_web_virtual_server($virt);
 		&$second_print($text{'setup_done'});
 
-		# Delete logs too, if outside home dir
-		if ($alog && !&is_under_directory($_[0]->{'home'}, $alog)) {
+		# Delete logs too, if outside home dir and if not a sub-domain
+		if ($alog && !&is_under_directory($_[0]->{'home'}, $alog) &&
+		    !$_[0]->{'subdom'}) {
 			&$first_print($text{'delete_apachelog'});
 			&unlink_file($alog);
 			&unlink_file($elog) if ($elog);
@@ -521,7 +522,8 @@ else {
 			next if (!@ldv);
 			foreach my $l (@ldv) {
 				local $oldl = $l;
-				if ($l =~ /\/[^\/]*\Q$_[1]->{'dom'}\E[^\/]*$/) {
+				if ($l =~ /\/[^\/]*\Q$_[1]->{'dom'}\E[^\/]*$/ &&
+				    !$_[0]->{'subdom'}) {
 					$l =~ s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g;
 					}
 				if ($l ne $oldl) {
