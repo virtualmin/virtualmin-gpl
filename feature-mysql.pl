@@ -89,10 +89,13 @@ local $qdb = &quote_mysql_database($db);
 }
 
 # delete_mysql(&domain)
-# Delete a mysql database, the domain's mysql user and all permissions for both
+# Delete mysql databases, the domain's mysql user and all permissions for both
 sub delete_mysql
 {
 local ($d) = @_;
+
+# Get the domain's users, so we can remove their MySQL logins
+local @users = &list_domain_users($d, 1, 1, 1, 0);
 
 # First remove the databases
 &require_mysql();
@@ -100,7 +103,7 @@ if ($d->{'db_mysql'}) {
 	&delete_mysql_database($d, &unique(split(/\s+/, $d->{'db_mysql'})));
 	}
 
-# Then remove the user
+# Then remove the main user
 &$first_print($text{'delete_mysqluser'}) if (!$d->{'parent'});
 local $dfunc = sub { 
 	local $user = &mysql_user($d);
@@ -114,6 +117,20 @@ local $dfunc = sub {
 	if ($wild && $wild ne $d->{'db'}) {
 		# Remove any wildcard entry for the user
 		&mysql::execute_sql_logged($mysql::master_db, "delete from db where db = '$wild'");
+		}
+	# Remove any other users. This has to be done here, as when users in
+	# the domain are deleted they won't be able to find their database
+	# privileges anymore.
+	foreach my $u (@users) {
+		foreach my $udb (@{$u->{'dbs'}}) {
+			if ($udb->{'type'} eq 'mysql') {
+				local $myuser = &mysql_username($u->{'user'});
+				&mysql::execute_sql_logged($mysql::master_db,
+				    "delete from user where user = '$myuser'");
+				&mysql::execute_sql_logged($mysql::master_db,
+				    "delete from db where user = '$myuser'");
+				}
+			}
 		}
 	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
 	};
@@ -650,7 +667,7 @@ sub revoke_mysql_database
 local ($d, $dbname) = @_;
 &require_mysql();
 
-# Make away MySQL permissions
+# Take away MySQL permissions
 local $dfunc = sub {
 	local $qdbname = &quote_mysql_database($dbname);
 	&mysql::execute_sql_logged($mysql::master_db, "delete from db where db = '$dbname' or db = '$qdbname'");

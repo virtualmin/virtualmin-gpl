@@ -107,7 +107,7 @@ foreach $d (@doms) {
 			local $dfunc = "delete_$f";
 			local $mfunc = "modify_$f";
 			if ($feature{$f} && $oldd->{$f}) {
-				&$dfunc($d);
+				&$dfunc($oldd);
 				}
 			elsif ($oldd->{$f}) {
 				&$mfunc($d, $oldd);
@@ -116,7 +116,7 @@ foreach $d (@doms) {
 		}
 	foreach $f (@feature_plugins) {
 		if ($plugin{$f} && $oldd->{$f}) {
-			&plugin_call($f, "feature_delete", $d);
+			&plugin_call($f, "feature_delete", $oldd);
 			}
 		elsif ($oldd->{$f}) {
 			&plugin_call($f, "feature_modify", $d, $oldd);
