@@ -414,7 +414,7 @@ if (&has_quota_commands() && $config{'quota_get_user_command'} && $_[0]) {
 local @users = &list_all_users_quotas($noquotas || $ind_quota);
 if ($_[0]) {
 	# Limit to domain users.
-	@users = grep { defined($_[0]->{'gid'}) &&
+	@users = grep { $_[0]->{'gid'} ne '' &&
 			$_->{'gid'} == $_[0]->{'gid'} ||
 			$_->{'user'} eq $_[0]->{'user'} } @users;
 	foreach my $u (@users) {

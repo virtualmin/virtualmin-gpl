@@ -60,6 +60,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--default-features") {
 		$deffeatures = 1;
 		}
+	elsif ($a eq "--features-from-template") {
+		$templatefeatures = 1;
+		}
 	elsif ($a eq "--ip") {
 		$ip = shift(@ARGV);
 		if (!$config{'all_namevirtual'}) {
@@ -251,8 +254,29 @@ if (!$parent) {
 	}
 $owner ||= $domain;
 
-# Work out features, if using automatic mode
-if ($deffeatures) {
+# Work out features, if using automatic mode.
+# If the user asked for features from the template but it doesn't define any,
+# fall back to the global defaults.
+$tfl = $tmpl->{'featurelimits'};
+$tfl = "" if ($tfl eq "none");
+if ($templatefeatures && $tfl) {
+	# From limits on selected template
+	%flimits = map { $_, 1 } split(/\s+/, $tfl);
+	%feature = ( 'virt' => $feature{'virt'} );
+	%plugin = ( );
+	foreach my $f (&list_available_features($parent, $alias, $subdom)) {
+		if ($flimits{$f->{'feature'}} && $f->{'enabled'}) {
+			if ($f->{'plugin'}) {
+				$plugin{$f->{'feature'}} = 1;
+				}
+			else {
+				$feature{$f->{'feature'}} = 1;
+				}
+			}
+		}
+	}
+elsif ($deffeatures || $templatefeatures && !$tfl) {
+	# From global configured defaults
 	%feature = ( 'virt' => $feature{'virt'} );
 	%plugin = ( );
 	foreach my $f (&list_available_features($parent, $alias, $subdom)) {
