@@ -2178,7 +2178,9 @@ return &master_admin() || &reseller_admin() ||
 
 sub can_edit_admins
 {
-return &master_admin() || &reseller_admin() || $access{'edit_admins'};
+local ($d) = @_;
+return $d->{'webmin'} &&
+       (&master_admin() || &reseller_admin() || $access{'edit_admins'});
 }
 
 sub can_edit_spam
@@ -9675,7 +9677,7 @@ if ($d->{'unix'} && &can_edit_limits($d) && !$d->{'alias'}) {
 		  });
 	}
 
-if (!$d->{'parent'} && &can_edit_admins()) {
+if (!$d->{'parent'} && &can_edit_admins($d)) {
 	# Extra admins buttons
 	push(@rv, { 'page' => 'list_admins.cgi',
 		    'title' => $text{'edit_admins'},
