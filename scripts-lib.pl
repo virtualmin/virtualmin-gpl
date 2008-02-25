@@ -276,46 +276,69 @@ foreach my $f (@files) {
 		$gotfiles->{$f->{'name'}} = "$d->{'home'}/$f->{'file'}";
 		}
 	else {
-		# Need to fetch it
+		# Need to fetch it .. build list of possible URLs, from script
+		# and from Virtualmin
+		local @urls;
 		my $temp = &transname($f->{'file'});
 		if (defined(&convert_osdn_url)) {
 			local $newurl = &convert_osdn_url($f->{'url'});
-			$f->{'url'} = $newurl if ($newurl);
-			}
-		$progress_callback_url = $f->{'url'};
-		if ($f->{'url'} =~ /^http/) {
-			# Via HTTP
-			my ($host, $port, $page, $ssl) =
-				&parse_http_url($f->{'url'});
-			&http_download($host, $port, $page, $temp, \$error,
-				       $cb, $ssl, undef, undef, undef, 0,
-				       $f->{'nocache'});
-			}
-		elsif ($f->{'url'} =~ /^ftp:\/\/([^\/]+)(\/.*)/) {
-			# Via FTP
-			my ($host, $page) = ($1, $2);
-			&ftp_download($host, $page, $temp, \$error, $cb);
+			push(@urls, $newurl || $f->{'url'});
 			}
 		else {
-			return &text('scripts_eurl', $f->{'url'});
+			push(@urls, $f->{'url'});
 			}
-		if ($error) {
-			return &text('scripts_edownload', $error, $f->{'url'});
-			}
-		&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, undef,
-					   $temp);
+		push(@urls, "http://$script_download_host:$script_download_port$script_download_dir$f->{'file'}");
 
-		# Make sure the downloaded file is in some archive format,
-		# or is Perl or PHP.
-		local $fmt = &compression_format($temp);
-		if (!$fmt && $temp =~ /\.(pl|php)$/i) {
-			local $cont = &read_file_contents($temp);
+		# Try each URL
+		local $firsterror;
+		foreach my $url (@urls) {
+			local $error;
+			$progress_callback_url = $url;
+			if ($url =~ /^http/) {
+				# Via HTTP
+				my ($host, $port, $page, $ssl) =
+					&parse_http_url($url);
+				&http_download($host, $port, $page, $temp,
+					       \$error, $cb, $ssl, undef, undef,
+					       undef, 0, $f->{'nocache'});
+				}
+			elsif ($url =~ /^ftp:\/\/([^\/]+)(\/.*)/) {
+				# Via FTP
+				my ($host, $page) = ($1, $2);
+				&ftp_download($host, $page, $temp, \$error,$cb);
+				}
+			else {
+				$firsterror ||= &text('scripts_eurl', $url);
+				next;
+				}
+			if ($error) {
+				$firsterror ||=
+				    &text('scripts_edownload', $error, $url);
+				next;
+				}
+			&set_ownership_permissions($d->{'uid'}, $d->{'ugid'},
+						   undef, $temp);
+
+			# Make sure the downloaded file is in some archive
+			# format, or is Perl or PHP.
+			local $fmt = &compression_format($temp);
+			local $cont;
+			if (!$fmt && $temp =~ /\.(pl|php)$/i) {
+				$cont = &read_file_contents($temp);
+				}
+			if (!$fmt &&
+			    $cont !~ /^\#\!\s*\S+(perl|php)/i &&
+			    $cont !~ /^\s*<\?php/i) {
+				$firsterror ||=
+					&text('scripts_edownload2', $url);
+				next;
+				}
+
+			# If we got this far, it must have worked!
+			$firsterror = undef;
+			last;
 			}
-		if (!$fmt &&
-		    $cont !~ /^\#\!\s*\S+(perl|php)/i &&
-		    $cont !~ /^\s*<\?php/i) {
-			return &text('scripts_edownload2', $f->{'url'});
-			}
+		return $firsterror if ($firsterror);
 
 		$gotfiles->{$f->{'name'}} = $temp;
 		}

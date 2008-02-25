@@ -229,6 +229,9 @@ $script_ratings_host = "software.virtualmin.com";
 $script_ratings_port = 80;
 $script_ratings_page = "/cgi-bin/sendratings.cgi";
 $script_fetch_ratings_page = "/cgi-bin/getratings.cgi";
+$script_download_host = "scripts.virtualmin.com";
+$script_download_port = 80;
+$script_download_dir = "/";
 
 $upgrade_virtualmin_host = "software.virtualmin.com";
 $upgrade_virtualmin_port = 80;

@@ -70,4 +70,7 @@
 
  - delete spam if above some level
 	- FS#3622
+	- Usermin too
 
+ - backup repo of script files, for fallback download
+	- cron job to sync

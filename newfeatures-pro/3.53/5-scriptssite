@@ -1,0 +1,6 @@
+desc=Backup script repository
+html=If a script package cannot be downloaded from the vendor's website, Virtualmin will fall back to using a copy from scripts.virtualmin.com. This protects against changes made to script vendor's websites or download repositories.
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}
