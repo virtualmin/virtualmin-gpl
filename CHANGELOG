@@ -841,3 +841,5 @@ Vpopmail systems with so many domains that letter-suffix directories under /home
 When a DNS domain is disabled, all records in it that use the domain name are renamed too, to keep BIND happy.
 Added the --features-from-template parameter to create-domain.pl, to use features based on limits defined in the template.
 If a script package cannot be downloaded from the vendor's website, Virtualmin will fall back to using a copy from scripts.virtualmin.com. This protects against changes made to script vendor's websites or download repositories.
+---- Changes since 3.53 ----
+When your Virtualmin Pro license is within 7 days of expiry, a notification is displayed on the system information page when the master administrator logs in.

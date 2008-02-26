@@ -2666,7 +2666,10 @@ resel_linkurl=To URL
 resel_elogo=Missing or invalid-looking company logo URL
 resel_elink=Missing or invalid-looking logo link URL
 
-licence_err=A problem was detected with your Virtualmin licence :
+licence_err=A problem was detected with your Virtualmin license :
+licence_soon=Notice - Your Virtualmin license will expire in $1 days.
+licence_soon2=Notice - Your Virtualmin license will expire in $1 hours.
+licence_renew=A renewal can be purchased at <a target=_new href='$1'>$1</a>
 licence_recheck=Re-check Licence Status
 licence_title=Re-Check Licence
 licence_doing=Now re-checking your Virtualmin licence ..

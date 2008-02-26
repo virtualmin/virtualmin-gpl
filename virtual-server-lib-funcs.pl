@@ -8929,16 +8929,44 @@ sub licence_warning_message
 {
 return undef if (!&master_admin());
 local ($status, $expiry, $err) = &check_licence_expired();
-return undef if ($status == 0);
-local $rv = "<table width=100%><tr bgcolor=#ff8888><td align=center>";
-$rv .= "<b>".$text{'licence_err'}."</b><br>\n";
-$rv .= $err."\n";
-if (&can_recheck_licence()) {
-	$rv .= &ui_form_start("/$module_name/licence.cgi");
-	$rv .= &ui_submit($text{'licence_recheck'});
-	$rv .= &ui_form_end();
+local $expirytime;
+if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
+	# Make Unix time
+	require 'timelocal.pl';
+	$expirytime = timelocal(59, 59, 23, $3, $2-1, $1-1900);
 	}
-$rv .= "</td></tr></table>\n";
+local $rv;
+if ($status != 0) {
+	# Not valid .. show message
+	$rv = "<table width=100%><tr bgcolor=#ff8888><td align=center>";
+	$rv .= "<b>".$text{'licence_err'}."</b><br>\n";
+	$rv .= $err."\n";
+	if (&can_recheck_licence()) {
+		$rv .= &ui_form_start("/$module_name/licence.cgi");
+		$rv .= &ui_submit($text{'licence_recheck'});
+		$rv .= &ui_form_end();
+		}
+	$rv .= "</td></tr></table>\n";
+	}
+elsif ($expirytime && $expirytime - time() < 7*24*60*60) {
+	# One week to expiry .. tell the user
+	local $days = int(($expirytime - time()) / (24*60*60));
+	local $hours = int(($expirytime - time()) / (60*60));
+	$rv = "<table width=100%><tr bgcolor=#ffff88><td align=center>";
+	if ($days) {
+		$rv .= "<b>".&text('licence_soon', $days)."</b><br>\n";
+		}
+	else {
+		$rv .= "<b>".&text('licence_soon2', $hours)."</b><br>\n";
+		}
+	$rv .= &text('licence_renew', $virtualmin_renewal_url),"\n";
+	if (&can_recheck_licence()) {
+		$rv .= &ui_form_start("/$module_name/licence.cgi");
+		$rv .= &ui_submit($text{'licence_recheck'});
+		$rv .= &ui_form_end();
+		}
+	$rv .= "</td></tr></table>\n";
+	}
 return $rv;
 }
 
