@@ -252,6 +252,9 @@ else {
 # Copy web files
 &$first_print("Copying web pages ..");
 local $htdocs = "$root/$dom.httpdocs";
+if (!-r $htdocs) {
+	$htdocs = "$root/$dom.htdocs";
+	}
 if (-r $htdocs) {
 	local $hdir = &public_html_dir(\%dom);
 	local $err = &extract_compressed_file($htdocs, $hdir);
@@ -270,6 +273,9 @@ else {
 # Copy CGI files
 &$first_print("Copying CGI scripts ..");
 local $cgis = "$root/$dom.cgi-bin";
+if (!-r $cgis) {
+	$cgis = "$root/$dom.cgi";
+	}
 if (-r $cgis) {
 	local $cdir = &cgi_bin_dir(\%dom);
 	local $err = &extract_compressed_file($cgis, $cdir);

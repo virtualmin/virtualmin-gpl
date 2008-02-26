@@ -85,6 +85,7 @@ foreach $s (@scripts) {
 						0755, $destfile);
 					}
 				}
+			unlink($temp);
 			}
 		}
 	}
