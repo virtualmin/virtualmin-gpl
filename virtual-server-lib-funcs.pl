@@ -5241,7 +5241,6 @@ if (-d $backup) {
 			local $d;
 			foreach $d (keys %$cont) {
 				if ($rv{$d}) {
-					&clean_contents_temp();
 					return &text('restore_edup', $d);
 					}
 				else {
@@ -5255,12 +5254,10 @@ if (-d $backup) {
 			}
 		else {
 			# Failed to read this file
-			&clean_contents_temp();
 			return $backup."/".$f." : ".$cont;
 			}
 		}
 	closedir(DIR);
-	&clean_contents_temp();
 	return $wantdoms ? (\%rv, $doms) : \%rv;
 	}
 else {
@@ -5274,7 +5271,6 @@ else {
 		      $cf == 3 ? "bunzip2 -c" : "cat";
 	$out = `($comp $q | tar tf -) 2>&1`;
 	if ($?) {
-		&clean_contents_temp();
 		return $text{'restore_etar'};
 		}
 
@@ -5320,13 +5316,7 @@ else {
 			}
 		}
 
-	&clean_contents_temp();
 	return $wantdoms ? (\%rv, $doms) : \%rv;
-	}
-
-	sub clean_contents_temp
-	{
-	&execute_command("rm -rf ".quotemeta($backup)) if ($mode > 0);
 	}
 }
 
@@ -5394,6 +5384,12 @@ return @rv;
 sub download_backup
 {
 local ($url, $temp, $domnames, $vbs) = @_;
+local $cache = $main::download_backup_cache{$url};
+if ($cache && -r $cache) {
+	# Already got the file .. no need to re-download
+	link($cache, $temp);
+	return undef;
+	}
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($url);
 if ($mode == 1) {
 	# Download from FTP server
@@ -5414,20 +5410,19 @@ if ($mode == 1) {
 				      undef, $user, $pass, $port);
 			return $err if ($err);
 			}
-		return undef;
 		}
 	else {
 		# Can just download a single file
 		&ftp_download($server, $path, $temp, \$err,
 			      undef, $user, $pass, $port);
-		return $err;
+		return $err if ($err);
 		}
 	}
 elsif ($mode == 2) {
 	# Download from SSH server
 	&scp_copy(($user ? "$user\@" : "")."$server:$path",
 		  $temp, $pass, \$err, $port);
-	return $err;
+	return $err if ($err);
 	}
 elsif ($mode == 3) {
 	# Download from S3 server
@@ -5447,8 +5442,9 @@ elsif ($mode == 3) {
 					  $si->{'file'}, "$temp/$si->{'file'}");
 		return $err if ($err);
 		}
-	return undef;
 	}
+$main::download_backup_cache{$url} = $temp;
+return undef;
 }
 
 # restore_virtualmin(&domain, file, &opts, &allopts)
