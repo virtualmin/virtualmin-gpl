@@ -1,0 +1,6 @@
+desc=New script installers
+html=Updated the LimeSurvey script installer to version 1.70.
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}

@@ -843,3 +843,4 @@ Added the --features-from-template parameter to create-domain.pl, to use feature
 If a script package cannot be downloaded from the vendor's website, Virtualmin will fall back to using a copy from scripts.virtualmin.com. This protects against changes made to script vendor's websites or download repositories.
 ---- Changes since 3.53 ----
 When your Virtualmin Pro license is within 7 days of expiry, a notification is displayed on the system information page when the master administrator logs in.
+Updated the LimeSurvey script installer to version 1.70.
