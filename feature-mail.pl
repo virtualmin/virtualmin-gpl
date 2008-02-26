@@ -1657,6 +1657,7 @@ else {
 }
 
 # delete_mail_file(&user)
+# Delete's a unix user's mail file, associated indexes, and clamav temp files
 sub delete_mail_file
 {
 &require_mail();
@@ -1673,10 +1674,26 @@ if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 		&system_logged("rm -f ".quotemeta($realumf));
 		}
 	}
+
+# Remove mailboxes moduile indexes
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 if (defined(&mailboxes::delete_user_index_files)) {
 	&mailboxes::delete_user_index_files($_[0]->{'user'});
 	}
+
+# Remove clamav temp files
+opendir(TEMP, "/tmp");
+foreach my $f (readdir(TEMP)) {
+	local $p = "/tmp/$f";
+	if ($f =~ /^clamav-([a-f0-9]+)$/ && -d $p) {
+		local @st = stat($p);
+		if ($st[4] == $_[0]->{'uid'} && $st[5] == $_[0]->{'gid'}) {
+			# Found one to remove
+			&unlink_file($p);
+			}
+		}
+	}
+closedir(TEMP);
 }
 
 # rename_mail_file(&user, &olduser)
