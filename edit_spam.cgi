@@ -15,7 +15,7 @@ print &ui_table_start($text{'spam_header'}, undef, 2);
 
 # Work out what we can edit
 if ($d->{'spam'}) {
-	($smode, $sdest) = &get_domain_spam_delivery($d);
+	($smode, $sdest, $slevel) = &get_domain_spam_delivery($d);
 	if ($smode >= 0) {
 		push(@what, [ 'spam', $smode, $sdest ]);
 		}
@@ -27,7 +27,7 @@ if ($d->{'virus'}) {
 		}
 	}
 
-# Show the inputs
+# Show the inputs for spam and/or virus
 foreach $w (@what) {
 	# Show fields for dest
 	($pfx, $vmode, $vdest) = @$w;
@@ -43,6 +43,12 @@ foreach $w (@what) {
 	       &ui_textbox($pfx."_email", $vmode == 2 ? $vdest : "", 30))."<br>" ],
 	    [ 3, &text('spam_'.$pfx.'3',
 	       &ui_textbox($pfx."_dest", $vmode == 3 ? $vdest : "", 30))."<br>" ]]));
+	}
+
+# Show spam delete level
+if ($d->{'spam'}) {
+	print &ui_table_row(&hlink($text{'spam_level'}, 'spam_level'),
+	    &ui_opt_textbox("spamlevel", $slevel, 5, $text{'spam_nolevel'}));
 	}
 
 # Show input for option to whitelist all mailboxes

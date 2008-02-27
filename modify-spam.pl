@@ -22,6 +22,7 @@ $indent_print = \&indent_text_print;
 $outdent_print = \&outdent_text_print;
 
 # Parse command-line args
+$spamlevel = undef;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -81,6 +82,14 @@ while(@ARGV > 0) {
 		$auto->{'size'} =~ /^\d+$/ ||
 		  &usage("The $a option must be followed by a size in bytes");
 		}
+	elsif ($a eq "--spam-delete-level") {
+		$spamlevel = shift(@ARGV);
+		$spamlevel =~ /^[1-9]\d*$/ ||
+		    &usage("--spam-delete-level must be followed by a number");
+		}
+	elsif ($a eq "--spam-no-delete-level") {
+		$spamlevel = 0;
+		}
 	elsif ($a =~ /^--use-(clamscan|clamdscan)$/) {
 		$virus_scanner = $1;
 		}
@@ -90,7 +99,8 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || usage();
 defined($mode{'spam'}) || defined($mode{'virus'}) || $spam_client ||
-    $virus_scanner || defined($auto) || &usage("Nothing to do");
+    $virus_scanner || defined($auto) || defined($spamlevel) ||
+	 &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms) {
@@ -112,8 +122,10 @@ foreach $d (@doms) {
 	&obtain_lock_cron($d);
 	&$indent_print();
 
-	if ($config{'spam'} && $d->{'spam'} && defined($mode{'spam'})) {
-		&save_domain_spam_delivery($d, $mode{'spam'}, $dest{'spam'});
+	if ($config{'spam'} && $d->{'spam'} &&
+	    (defined($mode{'spam'}) || defined($spamlevel))) {
+		&save_domain_spam_delivery($d, $mode{'spam'}, $dest{'spam'},
+					   $spamlevel, undef);
 		}
 	if ($config{'virus'} && $d->{'virus'} && defined($mode{'virus'})) {
 		&save_domain_virus_delivery($d, $mode{'virus'}, $dest{'virus'});
@@ -152,6 +164,7 @@ print "                      [--spam-delete | --spam-deliver |\n";
 print "                       --spam-normal | --spam-file file-under-home |\n";
 print "                       --spam-email address | --spam-dest file |\n";
 print "                       --spam-maildir ]\n";
+print "                      [--spam-delete-level N | --spam-no-delete-level]\n";
 print "                      [--virus-delete |\n";
 print "                       --virus-normal | --virus-file file-under-home |\n";
 print "                       --virus-email address | --virus-dest file\n";

@@ -68,7 +68,3 @@
 	  to decide which domains can be batch created with mass_setup_XXX
 	  functions
 
- - delete spam if above some level
-	- FS#3622
-	- Usermin too
-

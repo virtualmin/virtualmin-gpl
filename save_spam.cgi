@@ -41,7 +41,19 @@ foreach $w (@what) {
 		$dest = $in{$pfx."_dest"};
 		$dest =~ /\S/ || &error($text{'spam_edest'});
 		}
-	&$func($d, $mode, $dest);
+	@args = ( $d, $mode, $dest );
+	if ($pfx eq "spam" && defined($in{'spamlevel'})) {
+		# Spam deletion level
+		if ($in{'spamlevel_def'}) {
+			push(@args, 0);
+			}
+		else {
+			$in{'spamlevel'} =~ /^[1-9]\d*$/ ||
+				&error($text{'spam_elevel'});
+			push(@args, $in{'spamlevel'});
+			}
+		}
+	&$func(@args);
 	}
 
 &obtain_lock_spam($d);

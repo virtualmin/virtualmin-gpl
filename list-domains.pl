@@ -170,7 +170,7 @@ if ($multi) {
 		foreach $w ('spam', 'virus') {
 			next if (!$config{$w} || !$d->{$w});
 			$func = "get_domain_${w}_delivery";
-			($mode, $dest) = &$func($d);
+			($mode, $dest, $slevel) = &$func($d);
 			$msg = $mode == -1 ? "Not configured!" :
 			       $mode == 0 ? "Throw away" :
 			       $mode == 1 ? "Mail file under home $dest" :
@@ -181,6 +181,9 @@ if ($multi) {
 			       $mode == 6 ? "Default mail directory" :
 					    "???";
 			print "    ".ucfirst($w)." delivery: $msg\n";
+			if ($w eq 'spam' && $slevel) {
+				print "    Spam deletion level: $slevel\n";
+				}
 			}
 
 		# Show spam filtering client

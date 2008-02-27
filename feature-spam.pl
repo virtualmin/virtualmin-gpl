@@ -129,19 +129,28 @@ local $recipe1 = { 'flags' => [ 'f', 'w' ],	# Call spamassassin
 		   'type' => '|',
 		   'action' => $cmd,
 		 };
-local ($varon, $recipe2, $varoff);
+local ($recipe2, $recipe3);
+local $varon = { 'name' => 'SPAMMODE', 'value' => 1 };
+if ($config{'spam_level'}) {
+	# Recipe to delete high-score spam
+	local $stars = join("", map { "\\*" } (1..$config{'spam_level'}));
+	$recipe3 = { 'flags' => [ ],
+		     'conds' => [ [ '', '^X-Spam-Level: '.$stars ] ],
+		     'action' => '/dev/null' };
+	}
 if ($config{'spam_delivery'}) {
-	$varon = { 'name' => 'SPAMMODE', 'value' => 1 };
-	$recipe2 = { 'flags' => [ ],		# Forward spam to destination
+	# Receipe to deliver spam to some folder
+	$recipe2 = { 'flags' => [ ],
 		     'conds' => [ [ '', '^X-Spam-Status: Yes' ] ],
 		     'action' => $config{'spam_delivery'} };
-	$varoff = { 'name' => 'SPAMMODE', 'value' => 0 };
 	}
+local $varoff = { 'name' => 'SPAMMODE', 'value' => 0 };
 &procmail::create_recipe($recipe0, $spamrc);
 &procmail::create_recipe($recipe1, $spamrc);
-if ($recipe2) {
+if ($recipe2 || $recipe3) {
 	&procmail::create_recipe($varon, $spamrc);
-	&procmail::create_recipe($recipe2, $spamrc);
+	&procmail::create_recipe($recipe3, $spamrc) if ($recipe3);
+	&procmail::create_recipe($recipe2, $spamrc) if ($recipe2);
 	&procmail::create_recipe($varoff, $spamrc);
 	}
 
@@ -582,39 +591,47 @@ return ( );
 }
 
 # find_spam_recipe(&recipes)
-# Returns the one or two or four recipes used for spam filtering
+# Returns the five recipes used for spam filtering, some of which may be
+# undef if not set. They are :
+# 0 - Call to spamassassin or spamc
+# 1 - Setting of SPAMMODE=1
+# 2 - Delivery for high-score spam
+# 3 - Delivery for other spam
+# 4 - Setting of SPAMMODE=0
 sub find_spam_recipe
 {
-local $i;
-for($i=0; $i<@{$_[0]}; $i++) {
-	if ($_[0]->[$i]->{'action'} =~ /spamassassin|spamc/) {
-		# Found spamassassin .. but is the next one using the header?
-		local $r = $_[0]->[$i+1];
-		local @rv = ( $_[0]->[$i], undef, undef, undef );
-		if ($r->{'name'} eq 'SPAMMODE') {
-			# There are SPAMMODE settings before and after the
-			# delivery recipe
-			$rv[1] = $r;
-			$r = $_[0]->[$i+2];
-			if ($r->{'name'} eq 'SPAMMODE') {
-				# No delivery recipe?
-				$rv[3] = $r;
-				}
-			elsif ($_[0]->[$i+3]->{'name'} eq 'SPAMMODE') {
-				# SPAMMODE after delivery recipe
-				$rv[3] = $_[0]->[$i+3];
-				}
+local ($recs) = @_;
+local @rv;
+for(my $i=0; $i<@$recs; $i++) {
+	if ($recs->[$i]->{'action'} =~ /spamassassin|spamc/) {
+		# Found spamassassin
+		$rv[0] = $recs->[$i];
+		}
+	elsif ($recs->[$i]->{'name'} eq 'SPAMMODE') {
+		# Start or end of spam delivery block
+		if ($recs->[$i]->{'value'} eq '1') {
+			$rv[1] = $recs->[$i];
 			}
+		else {
+			# End of recipes we care about
+			$rv[4] = $recs->[$i];
+			last;
+			}
+		}
+	else {
+		# Look at conditions
+		my $r = $recs->[$i];
 		foreach my $c (@{$r->{'conds'}}) {
 			if ($c->[1] =~ /X-Spam-Status/i) {
-				$rv[2] = $r;
-				last;
+				$rv[3] ||= $r;
+				}
+			elsif ($c->[1] =~ /X-Spam-Level/i) {
+				$rv[2] ||= $r;
 				}
 			}
-		return @rv;
 		}
 	}
-return ( );
+return @rv;
 }
 
 # get_domain_spam_delivery(&domain)
@@ -622,6 +639,8 @@ return ( );
 # 0 - Throw away , 1 - File under home , 2 - Forward to email , 3 - Other file,
 # 4 - Normal ~/mail/spam file , 5 - Deliver normally , 6 - ~/Maildir/.spam/ ,
 # -1 - Broken!
+# Also returns the score at which spam is deleted, and the destination (usually
+# /dev/null)
 sub get_domain_spam_delivery
 {
 local ($d) = @_;
@@ -629,91 +648,120 @@ local ($d) = @_;
 local $spamrc = "$procmail_spam_dir/$d->{'id'}";
 local @recipes = &procmail::parse_procmail_file($spamrc);
 local @spamrec = &find_spam_recipe(\@recipes);
+local @rv;
 if (!@spamrec) {
-	return (-1);
+	@rv = (-1, undef);
 	}
-elsif (!$spamrec[2]) {
-	return (5);
+elsif (!$spamrec[3]) {
+	@rv = (5, undef);
 	}
-elsif ($spamrec[2]->{'action'} eq '/dev/null') {
-	return (0);
+elsif ($spamrec[3]->{'action'} eq '/dev/null') {
+	@rv = (0, undef);
 	}
-elsif ($spamrec[2]->{'action'} =~ /^\$HOME\/mail\/spam$/) {
-	return (4);
+elsif ($spamrec[3]->{'action'} =~ /^\$HOME\/mail\/spam$/) {
+	@rv = (4, undef);
 	}
-elsif ($spamrec[2]->{'action'} =~ /^\$HOME\/Maildir\/\.spam\/$/) {
-	return (6);
+elsif ($spamrec[3]->{'action'} =~ /^\$HOME\/Maildir\/\.spam\/$/) {
+	@rv = (6, undef);
 	}
-elsif ($spamrec[2]->{'action'} =~ /^\$HOME\/(.*)$/) {
-	return (1, $1);
+elsif ($spamrec[3]->{'action'} =~ /^\$HOME\/(.*)$/) {
+	@rv = (1, $1);
 	}
-elsif ($spamrec[2]->{'action'} =~ /\@/) {
-	return (2, $spamrec[2]->{'action'});
+elsif ($spamrec[3]->{'action'} =~ /\@/) {
+	@rv = (2, $spamrec[3]->{'action'});
 	}
 else {
-	return (3, $spamrec[2]->{'action'});
+	@rv = (3, $spamrec[3]->{'action'});
 	}
+if ($spamrec[2]) {
+	# Add deletion recipe info
+	foreach my $c (@{$spamrec[2]->{'conds'}}) {
+		if ($c->[1] =~ /X-Spam-Level:\s+((\\\*)+)/i) {
+			# Found it
+			push(@rv, length($1)/2, $r->{'action'});
+			}
+		}
+	}
+return @rv;
 }
 
-# save_domain_spam_delivery(&domain, mode, dest)
+# save_domain_spam_delivery(&domain, [mode, dest], [delete-level, delete-dest])
 # Updates the delivery method for spam for some domain
 sub save_domain_spam_delivery
 {
-local ($d, $mode, $dest) = @_;
+local ($d, $mode, $dest, $level, $ddest) = @_;
 &require_spam();
 local $spamrc = "$procmail_spam_dir/$d->{'id'}";
 local @recipes = &procmail::parse_procmail_file($spamrc);
 local @spamrec = &find_spam_recipe(\@recipes);
 return 0 if (!@spamrec);
-if ($mode == 5 && $spamrec[2]) {
-	if ($spamrec[1]) {
-		# Delete SPAMMODE settings and delivery recipe
-		&procmail::delete_recipe($spamrec[3]);
-		&procmail::delete_recipe($spamrec[2]);
-		&procmail::delete_recipe($spamrec[1]);
-		}
-	else {
-		# Delete just delivery recipe
-		&procmail::delete_recipe($spamrec[2]);
-		}
+
+# Preserve existing settings if not set
+local ($oldmode, $olddest, $oldlevel, $oldddest) =
+	&get_domain_spam_delivery($d);
+if (!defined($mode)) {
+	($mode, $dest) = ($oldmode, $olddest);
 	}
-elsif ($mode != 5) {
-	# Create or update
+if (!defined($level)) {
+	$level = $oldlevel;
+	}
+if (!defined($ddest)) {
+	$ddest = $oldddest;
+	}
+$ddest ||= "/dev/null";
+
+# Remove the existing recipes (except the spamassassin call)
+local @todel = sort { $b->{'line'} <=> $a->{'line'} }
+		    grep { $_ } @spamrec[1..$#spamrec];
+foreach my $r (@todel) {
+	&procmail::delete_recipe($r);
+	}
+
+# Make those we now want
+local @want;
+if ($mode != 5 || $level) {
+	# Start of delivery section
+	push(@want, { 'name' => 'SPAMMODE', 'value' => 1 });
+	}
+if ($level) {
+	# High-level deletion
+	local $stars = join("", map { "\\*" } (1..$level));
+	push(@want, { 'conds' => [ [ '', '^X-Spam-Level: '.$stars ] ],
+		      'action' => $ddest });
+	}
+if ($mode != 5) {
+	# Regular delivery
 	local $action = $mode == 0 ? "/dev/null" :
 			$mode == 4 ? "\$HOME/mail/spam" :
 			$mode == 6 ? "\$HOME/Maildir/.spam/" :
 			$mode == 1 ? "\$HOME/$dest" :
 				      $dest;
 	local $type = $mode == 2 ? "!" : "";
-	if ($spamrec[2]) {
-		# Update recipe
-		local $r = $spamrec[2];
-		$r->{'action'} = $action;
-		$r->{'type'} = $type;
-		&procmail::modify_recipe($r);
+	push(@want, { 'conds' => [ [ '', '^X-Spam-Status: Yes' ] ],
+		      'action' => $action,
+		      'type' => $type });
+	}
+if ($mode != 5 || $level) {
+	# End of delivery section
+	push(@want, { 'name' => 'SPAMMODE', 'value' => 0 });
+	}
+
+# Add them
+if (@want) {
+	@recipes = &procmail::parse_procmail_file($spamrc);
+	@spamrec = &find_spam_recipe(\@recipes);
+	local $idx = &indexof($spamrec[0], @recipes);
+	if ($idx == $#recipes) {
+		# Add at end
+		foreach my $r (@want) {
+			&procmail::create_recipe($r, $spamrc);
+			}
 		}
 	else {
-		# Create recipe
-		local $r = { 'conds' => [ [ '', '^X-Spam-Status: Yes' ] ],
-			     'action' => $action,
-			     'type' => $type };
-		local $spammode1 = { 'name' => 'SPAMMODE', 'value' => 1 };
-		local $spammode0 = { 'name' => 'SPAMMODE', 'value' => 0 };
-		local $idx = &indexof($spamrec[0], @recipes);
-		if ($idx == @recipes-1) {
-			# Add at end
-			&procmail::create_recipe($spammode1, $spamrc);
-			&procmail::create_recipe($r, $spamrc);
-			&procmail::create_recipe($spammode0, $spamrc);
-			}
-		else {
-			# Insert after spamassassin call
-			&procmail::create_recipe_before($spammode1,
-						$recipes[$idx+1], $spamrc);
-			&procmail::create_recipe_before($r, $recipes[$idx+1],
-							$spamrc);
-			&procmail::create_recipe_before($spammode0,
-						$recipes[$idx+1], $spamrc);
+		# After spamassassin call
+		foreach my $r (@want) {
+			procmail::create_recipe_before($r, $recipes[$idx+1],
+						       $spamrc);
 			}
 		}
 	}
