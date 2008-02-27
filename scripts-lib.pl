@@ -1551,12 +1551,12 @@ return @rv;
 }
 
 # extract_script_archive(file, dir, &domain, [copy-to-dir], [sub-dir],
-#			 [single-file])
+#			 [single-file], [ignore-errors])
 # Attempts to extract a tar.gz or tar or zip file for a script. Returns undef
 # on success, or an HTML error message on failure.
 sub extract_script_archive
 {
-local ($file, $dir, $d, $copydir, $subdir, $single) = @_;
+local ($file, $dir, $d, $copydir, $subdir, $single, $ignore) = @_;
 
 # Create the target dir if missing
 if (!$single && $copydir && !-d $copydir) {
@@ -1602,7 +1602,8 @@ else {
 	return "Unknown compression format";
 	}
 local $out = &run_as_domain_user($d, "(cd ".quotemeta($dir)." && ".$cmd.") 2>&1");
-return "Uncompression failed : <pre>".&html_escape($out)."</pre>" if ($?);
+return "Uncompression failed : <pre>".&html_escape($out)."</pre>"
+	if ($? && !$ignore);
 
 # Make sure the target files are owner-writable, so we can copy over them
 if ($copydir && -e $copydir) {

@@ -1,5 +1,5 @@
 desc=New script installers
-html=Updated the LimeSurvey script installer to version 1.70.
+html=Updated the LimeSurvey script installer to version 1.70, and Flyspray to 0.9.9.5.
 master=1
 reseller=1
 domain=1
