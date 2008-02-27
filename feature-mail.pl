@@ -2989,6 +2989,7 @@ if (&foreign_installed("syslog")) {
 	foreach my $c (@$conf) {
 		next if (!$c->{'active'});
 		next if (!$c->{'file'});
+		next if ($c->{'file'} =~ /^\/dev\//);
 		foreach my $s (@{$c->{'sel'}}) {
 			local ($fac,$level) = split(/\./, $s);
 			return $c->{'file'} if ($fac =~ /mail/ &&
