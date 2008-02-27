@@ -22,7 +22,8 @@ print &ui_table_row($text{'move_dom'}, "<tt>$d->{'dom'}</tt>");
 
 # New parent
 @pdoms = sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) }
-		grep { !$_->{'parent'} } &list_domains();
+		grep { !$_->{'parent'} && &can_config_domain($_) }
+	      &list_domains();
 if ($d->{'parent'}) {
 	@pdoms = grep { $_->{'id'} ne $d->{'parent'} } @pdoms;
 	}

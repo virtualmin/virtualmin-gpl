@@ -3199,6 +3199,7 @@ dadmins_egone=Administrator no longer exists
 
 move_title=Move Virtual Server
 move_ecannot=You are not allowed to move this server
+move_ecannot2=You are not allowed to move a domain to this server
 move_desc=This page allows you to convert this top-level server into a sub-server under an existing domain. Be careful, as this will result in the server's password, quota and bandwidth limits being lost, as they will now be inherited from the new parent.
 move_desc2=This page allows you to change the ownership of this sub-server so that it is controlled by the owner of another domain.
 move_header=Virtual server move options

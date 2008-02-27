@@ -15,8 +15,9 @@ if ($in{'parent'}) {
 		$parent->{'id'} ==$d->{'parent'} && &error($text{'move_esame'});
 		}
 	else {
-		$parent->{'id'} ==$d->{'id'} && &error($text{'move_eparent'});
+		$parent->{'id'} == $d->{'id'} && &error($text{'move_eparent'});
 		}
+	&can_config_domain($parent) || &error($text{'move_ecannot2'});
 	}
 else {
 	# Turning into a parent domain - check the username for clashes
