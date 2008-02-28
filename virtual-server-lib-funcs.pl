@@ -7358,7 +7358,9 @@ foreach my $phpver (@all_possible_php_versions) {
 		defined($config{'php_ini_'.$phpver}) ?
 			$config{'php_ini_'.$phpver} : $config{'php_ini'},
 	}
-if (!defined(getpwnam($rv[0]->{'web_user'}))) {
+if (!defined(getpwnam($rv[0]->{'web_user'})) &&
+    $rv[0]->{'web_user'} ne 'none' &&
+    $rv[0]->{'web_user'} ne '') {
 	# Apache user is invalid, due to bad Virtualmin install script. Fix it
 	$rv[0]->{'web_user'} = &get_apache_user();
 	}
