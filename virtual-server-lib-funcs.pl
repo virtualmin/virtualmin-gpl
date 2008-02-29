@@ -11899,9 +11899,10 @@ return @rv;
 sub count_domain_users
 {
 local %rv;
-local (%homemap, %doneuser);
+local (%homemap, %doneuser, %gidmap);
 foreach my $d (&list_domains()) {
 	$homemap{$d->{'home'}} = $d->{'id'};
+	$gidmap{$d->{'gid'}} = $d->{'id'} if (!$d->{'parent'});
 	}
 foreach my $u (&list_all_users_quotas(1)) {
 	local $h = $u->{'home'};
@@ -11920,7 +11921,7 @@ foreach my $u (&list_all_users_quotas(1)) {
 		$did = $homemap{$1};
 		}
 	else {
-		# Fallback to trying each home (longest first)
+		# Fallback to trying each domain's home (longest first)
 		foreach my $hd (sort { length($b) cmp length($a) }
 				     keys %homemap) {
 			if ($h =~ /^\Q$hd\E\//) {
@@ -11928,6 +11929,8 @@ foreach my $u (&list_all_users_quotas(1)) {
 				last;
 				}
 			}
+		# If THAT still doesn't work, look by GID
+		$did = $gidmap{$u->{'gid'}};
 		}
 	if ($config{'mail_system'} == 0) {
 		# Don't double-count Postfix @ and - users
