@@ -226,12 +226,12 @@ if (!$_[0]->{'alias'} && $_[0]->{'dir'}) {
 sub delete_web
 {
 &require_apache();
-local $conf = &apache::get_config();
 if ($_[0]->{'alias_mode'}) {
 	# Just delete ServerAlias directives from parent
 	&$first_print($text{'delete_apachealias'});
 	local $alias = &get_domain($_[0]->{'alias'});
 	&obtain_lock_web($alias);
+	local $conf = &apache::get_config();
 	local ($pvirt, $pconf) = &get_apache_virtual($alias->{'dom'},
 						     $alias->{'web_port'});
 	if (!$pvirt) {
@@ -251,6 +251,7 @@ elsif ($config{'delete_indom'}) {
 	# Delete all matching virtual servers
 	&$first_print($text{'delete_apache'});
 	&obtain_lock_web($_[0]);
+	local $conf = &apache::get_config();
 	if (!$_[0]->{'alias_mode'}) {
 		# Remove the custom Listen directive added for the domain
 		&remove_listen($d, $conf, $d->{'web_port'});
@@ -275,6 +276,7 @@ else {
 	# Just delete one virtual server
 	&$first_print($text{'delete_apache'});
 	&obtain_lock_web($_[0]);
+	local $conf = &apache::get_config();
 	if (!$_[0]->{'alias_mode'}) {
 		# Remove the custom Listen directive added for the domain
 		&remove_listen($d, $conf, $d->{'web_port'});
