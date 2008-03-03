@@ -53,7 +53,7 @@ foreach $sinfo (@sinfos) {
 		# Already got it
 		&$second_print(&text('massscript_ever', $sinfo->{'version'}));
 		}
-	elsif ($derr = &{$script->{'depends_func'}}($d, $ver)) {
+	elsif ($derr = &{$script->{'depends_func'}}($d, $ver, $sinfo)) {
 		# Failed depends
 		&$second_print(&text('massscript_edep', $derr));
 		}

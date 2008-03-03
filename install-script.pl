@@ -168,7 +168,7 @@ if (!$sinfo) {
 
 # Check dependencies
 &$first_print("Checking dependencies ..");
-$derr = &{$script->{'depends_func'}}($d, $ver);
+$derr = &{$script->{'depends_func'}}($d, $ver, $sinfo);
 if ($derr) {
 	&$second_print(".. failed : $derr");
 	exit(1);
