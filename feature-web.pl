@@ -143,7 +143,7 @@ else {
 		local ($dsuffix, $dprefix) = ($1, $2);
 		local ($starvirt, undef) = &get_apache_virtual("*.$dprefix",
 							       $web_port);
-		if ($starvirt && $starvirt->{'file'} eq $f) {
+		if ($starvirt && &same_file($starvirt->{'file'}, $f)) {
 			# Insert before
 			$pos = $starvirt->{'line'};
 			}
