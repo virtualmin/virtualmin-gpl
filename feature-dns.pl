@@ -1301,17 +1301,21 @@ local $defip = &get_default_ip();
 local $spf = { 'a' => 1, 'mx' => 1,
 	       'a:' => [ $d->{'dom'} ],
 	       'ip4:' => [ $defip ] };
-local $hosts = &substitute_domain_template(
-	$tmpl->{'dns_spfhosts'}, $d);
+local $hosts = &substitute_domain_template($tmpl->{'dns_spfhosts'}, $d);
 foreach my $h (split(/\s+/, $hosts)) {
 	if (&check_ipaddress($h) ||
-	    $h =~ /^(\S+)\// &&
-	    &check_ipaddress($1)) {
+	    $h =~ /^(\S+)\// && &check_ipaddress($1)) {
 		push(@{$spf->{'ip4:'}}, $h);
 		}
 	else {
 		push(@{$spf->{'a:'}}, $h);
 		}
+	}
+if ($d->{'dns_ip'}) {
+	push(@{$spf->{'ip4:'}}, $d->{'dns_ip'});
+	}
+if ($d->{'ip'} ne $defip) {
+	push(@{$spf->{'ip4:'}}, $d->{'ip'});
 	}
 $spf->{'all'} = $tmpl->{'dns_spfall'} ? 2 : 1;
 return $spf;
