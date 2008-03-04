@@ -2,8 +2,6 @@
 # with each part (home dir, settings, etc) in a separate 'attachment'
 
 # XXX how to find regular aliases?
-# XXX domain aliases
-# XXX original SSL cert
 
 # migration_plesk_validate(file, domain, [user], [&parent], [prefix], [pass])
 # Make sure the given file is a Plesk backup, and contains the domain
@@ -349,6 +347,30 @@ if ($got{'dns'}) {
 		}
 	}
 
+# Migrate SSL certs
+local $certificate = $domain->{'certificate'};
+if ($dom{'ssl'} && $certificate) {
+	&$first_print("Migrating SSL certificate and key ..");
+	local $cert = &cleanup_plesk_cert($certificate->{'certificate-data'});
+	if ($cert) {
+		$dom{'ssl_cert'} ||= &default_certificate_file(\%dom, 'cert');
+		&open_tempfile(CERT, ">$dom{'ssl_cert'}");
+		&print_tempfile(CERT, $cert);
+		&close_tempfile(CERT);
+		}
+	local $key = &cleanup_plesk_cert($certificate->{'private-key'});
+	if ($key) {
+		$dom{'ssl_key'} ||= &default_certificate_file(\%dom, 'key');
+		&open_tempfile(CERT, ">$dom{'ssl_key'}");
+		&print_tempfile(CERT, $cert);
+		&close_tempfile(CERT);
+		}
+	&$second_print($cert && $key ? ".. done" :
+		       !$cert && $key ? ".. missing certificate" :
+		       $cert && !$key ? ".. missing key" :
+					".. not found in backup");
+	}
+
 # Lock the user DB and build list of used IDs
 &obtain_lock_unix(\%dom);
 &obtain_lock_mail(\%dom);
@@ -627,6 +649,18 @@ eval {
 	};
 $ref || return "Failed to read XML file : $@";
 return $ref;
+}
+
+# cleanup_plesk_cert(data)
+# Removes extra spacing from a Plesk cert
+sub cleanup_plesk_cert
+{
+local ($data) = @_;
+local @lines = grep { /\S/ } split(/\n/, $data);
+foreach my $l (@lines) {
+	$l =~ s/^\s+//;
+	}
+return join("", map { $_."\n" } @lines);
 }
 
 1;
