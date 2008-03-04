@@ -1077,7 +1077,10 @@ if (!@repls) {
 else {
 	# Call for this system and all replicas
 	local $thishost = $mysql::config{'host'};
+	local %done;
 	foreach my $host ($thishost, @repls) {
+		local $ip = &to_ipaddress($host);
+		next if ($ip && $done{$ip}++);
 		$mysql::config{'host'} = $host;
 		&$code;
 		}
