@@ -872,13 +872,13 @@ if ($z) {
 	else {
 		# Only copy section after SOA
 		@thisrecs = &bind8::read_zone_file($fn, $_[0]->{'dom'});
-		local $srclref = &read_file_lines($_[1]);
+		local $srclref = &read_file_lines($_[1], 1);
 		local $dstlref = &read_file_lines($filename);
 		local ($srcstart, $srcend) = &except_soa($_[0], $_[1]);
 		local ($dststart, $dstend) = &except_soa($_[0], $filename);
 		splice(@$dstlref, $dststart, $dstend - $dststart + 1,
 		       @$srclref[$srcstart .. $srcend]);
-		&flush_file_lines();
+		&flush_file_lines($filename);
 		}
 
 	# Need to bump SOA
@@ -959,6 +959,8 @@ return $count;
 sub except_soa
 {
 local $bind8::config{'chroot'} = "/";	# make sure path is absolute
+local $bind8::config{'auto_chroot'} = undef;
+undef($bind8::get_chroot_cache);
 local @recs = &bind8::read_zone_file($_[1], $_[0]->{'dom'});
 local ($r, $start, $end);
 foreach $r (@recs) {
