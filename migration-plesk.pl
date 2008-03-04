@@ -349,7 +349,7 @@ if ($got{'dns'}) {
 
 # Migrate SSL certs
 local $certificate = $domain->{'certificate'};
-if ($dom{'ssl'} && $certificate) {
+if ($certificate) {
 	&$first_print("Migrating SSL certificate and key ..");
 	local $cert = &cleanup_plesk_cert($certificate->{'certificate-data'});
 	if ($cert) {
