@@ -953,6 +953,7 @@ if ($aliasdom) {
 	}
 
 # Actually create alias doms
+local @rvdoms;
 foreach my $pdom (&unique(@parked)) {
 	if ($pdom eq $aliasdom) {
 		&$first_print("Creating alias domain $pdom ..");
@@ -997,6 +998,7 @@ foreach my $pdom (&unique(@parked)) {
 			       $parentdom->{'user'});
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
+	push(@rvdoms, \%alias);
 	}
 
 if ($got{'webalizer'}) {
@@ -1026,7 +1028,7 @@ if ($parent) {
 	}
 
 &sync_alias_virtuals(\%dom);
-return (\%dom);
+return (\%dom, @rvdoms);
 }
 
 # extract_cpanel_dir(file)

@@ -104,6 +104,9 @@ if ($domain->{'phosting'}->{'webalizer'}) {
 # Check for MySQL databases
 local $databases = $domain->{'phosting'}->{'sapp-installed'}->{'database'};
 if (!$databases) {
+        $databases = $domain->{'database'};
+        }
+if (!$databases) {
 	$databases = { };
 	}
 elsif ($databases->{'version'}) {
@@ -490,7 +493,61 @@ if ($got{'mysql'}) {
 &release_lock_mail(\%dom);
 
 &sync_alias_virtuals(\%dom);
-return (\%dom);
+
+# Migrate alias domains
+local $aliasdoms = $domain->{'domain-alias'};
+if (!$aliasdoms) {
+	$aliasdoms = { };
+	}
+elsif ($aliasdoms->{'web'}) {
+	# Just one alias
+	$aliasdoms = { $aliasdoms->{'name'} => $aliasdoms };
+	}
+local @rvdoms;
+foreach my $adom (keys %$aliasdoms) {
+	local $aliasdom = $aliasdoms->{$adom};
+	&$first_print("Creating alias domain $adom ..");
+	&$indent_print();
+	local %alias = ( 'id', &domain_id(),
+			 'dom', $adom,
+			 'user', $dom{'user'},
+			 'group', $dom{'group'},
+			 'prefix', $dom{'prefix'},
+			 'ugroup', $dom{'ugroup'},
+			 'pass', $dom{'pass'},
+			 'alias', $dom{'id'},
+			 'uid', $dom{'uid'},
+			 'gid', $dom{'gid'},
+			 'ugid', $dom{'ugid'},
+			 'owner', "Migrated Plesk alias for $dom{'dom'}",
+			 'email', $dom{'email'},
+			 'name', 1,
+			 'ip', $dom{'ip'},
+			 'virt', 0,
+			 'source', $dom{'source'},
+			 'parent', $dom{'id'},
+			 'template', $dom{'template'},
+			 'reseller', $dom{'reseller'},
+			 'nocreationmail', 1,
+			 'nocopyskel', 1,
+			);
+	foreach my $f (@alias_features) {
+		local $want = $f eq 'web' ? $aliasdom->{'web'} eq 'true' :
+			      $f eq 'dns' ? $aliasdom->{'dns'} eq 'true' : 1;
+		$alias{$f} = $dom{$f} && $want;
+		}
+	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+					  : \%dom;
+	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
+	&complete_domain(\%alias);
+	&create_virtual_server(\%alias, $parentdom,
+			       $parentdom->{'user'});
+	&$outdent_print();
+	&$second_print($text{'setup_done'});
+	push(@rvdoms, \%alias);
+	}
+
+return (\%dom, @rvdoms);
 }
 
 # extract_plesk_dir(file)

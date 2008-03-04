@@ -1,0 +1,5 @@
+desc=Plesk migration improvements
+html=Fixed bugs in Plesk migration, and added automatic detection of alias domains in the original backup.
+master=1
+reseller=1
+link=migrate_form.cgi

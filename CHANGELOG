@@ -844,3 +844,4 @@ If a script package cannot be downloaded from the vendor's website, Virtualmin w
 ---- Changes since 3.53 ----
 When your Virtualmin Pro license is within 7 days of expiry, a notification is displayed on the system information page when the master administrator logs in.
 Updated the LimeSurvey script installer to version 1.70, ZenPhoto to 1.1.5, phpMyAdmin to 2.11.5, and Flyspray to 0.9.9.5.
+Fixed bugs in Plesk migration, and added automatic detection of alias domains in the original backup.
