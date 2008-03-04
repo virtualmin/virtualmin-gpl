@@ -85,6 +85,7 @@ foreach $s (@str) {
 		}
 	}
 local $qdb = &quote_mysql_database($db);
+&mysql::execute_sql_logged($mysql::master_db, "delete from db where host = '$host' and db = '$qdb' and user = '$user'");
 &mysql::execute_sql_logged($mysql::master_db, "insert into db (host, db, user, ".join(", ", @fields).") values ('$host', '$qdb', '$user', ".join(", ", @yeses).")");
 }
 
