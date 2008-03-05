@@ -12,6 +12,7 @@ require './virtual-server-lib.pl';
 $in{'serial'} =~ /^\S+$/ || &error($text{'upgrade_eserial'});
 $in{'key'} =~ /^\S+$/ || &error($text{'upgrade_ekey'});
 $in{'key'} eq 'AMAZON' && &error($text{'upgrade_eamazon'});
+$in{'key'} eq 'DEMO' && &error($text{'upgrade_eamazon'});
 &http_download($upgrade_virtualmin_host, $upgrade_virtualmin_port,
 	       $upgrade_virtualmin_testpage, \$out, \$error, undef, 0,
 	       $in{'serial'}, $in{'key'}, undef, 0, 1);
@@ -164,8 +165,10 @@ else {
 		local %minfo = &get_module_info($mod);
 		local %tinfo = &get_theme_info($mod);
 		local %info = %minfo ? %minfo : %tinfo;
-		if (%info && ($info{'version'} > $ver ||
-			      $info{'version'} == $ver &&
+		local $current_ver = &round_hundred($info{'version'});
+		local $new_ver = &round_hundred($ver);
+		if (%info && ($current_ver > $new_ver ||
+			      $current_ver == $new_ver &&
 			      $info{'version'} !~ /gpl/)) {
 			&$second_print(&text('upgrade_gotver',
 					     $info{'version'}));
@@ -302,3 +305,21 @@ while(<OUT>) {
 close(OUT);
 return @rv;
 }
+
+# round_hundred(version)
+# Given a version line x.yyz, returns x.yy.
+# Also strips suffixes like .gpl.
+sub round_hundred
+{
+local ($v) = @_;
+if ($v =~ /^(\d+)\.(\d\d)/) {
+	return "$1.$2";
+	}
+elsif ($v =~ /^([0-9\.]+)/) {
+	return $1;
+	}
+else {
+	return $v;
+	}
+}
+
