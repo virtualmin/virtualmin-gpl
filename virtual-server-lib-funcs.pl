@@ -5390,7 +5390,7 @@ local ($url, $temp, $domnames, $vbs) = @_;
 local $cache = $main::download_backup_cache{$url};
 if ($cache && -r $cache) {
 	# Already got the file .. no need to re-download
-	link($cache, $temp);
+	link($cache, $temp) || symlink($cache, $temp);
 	return undef;
 	}
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($url);
