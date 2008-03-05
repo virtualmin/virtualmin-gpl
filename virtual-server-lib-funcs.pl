@@ -2255,7 +2255,10 @@ return !$access{'admin'};	# Any except extra admins
 
 sub can_edit_spf
 {
-return !$access{'admin'};	# Any except extra admins
+# Allow master admin, resellers, domain owners with BIND record access.
+# Don't allow extra admins.
+return &master_admin() || &reseller_admin() ||
+       !$access{'admin'} && &foreign_available("bind8");
 }
 
 sub can_edit_mail
@@ -9774,8 +9777,7 @@ if ($d->{'web'} && &can_edit_phpver() &&
 		}
 	}
 
-if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} && &can_edit_spf() &&
-    &foreign_available("bind8")) {
+if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} && &can_edit_spf()) {
 	# SPF settings button
 	push(@rv, { 'page' => 'edit_spf.cgi',
 		    'title' => $text{'edit_spf'},
