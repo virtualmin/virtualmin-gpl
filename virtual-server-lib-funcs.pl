@@ -9774,7 +9774,8 @@ if ($d->{'web'} && &can_edit_phpver() &&
 		}
 	}
 
-if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} && &can_edit_spf()) {
+if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} && &can_edit_spf() &&
+    &foreign_available("bind8")) {
 	# SPF settings button
 	push(@rv, { 'page' => 'edit_spf.cgi',
 		    'title' => $text{'edit_spf'},
