@@ -846,3 +846,4 @@ When your Virtualmin Pro license is within 7 days of expiry, a notification is d
 Updated the LimeSurvey script installer to version 1.70, ZenPhoto to 1.1.5, phpMyAdmin to 2.11.5, and Flyspray to 0.9.9.5.
 Fixed bugs in Plesk migration, and added automatic detection of alias domains in the original backup. SSL certificates and keys from the backup are also migrated.
 A domain's private IP and external IP for DNS are now also included in SPF records.
+When restoring a backup, switch to a supported PHP execution mode if the original Apache config used an un-supported mode.

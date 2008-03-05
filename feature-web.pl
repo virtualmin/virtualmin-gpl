@@ -1058,8 +1058,27 @@ if ($virt) {
 		local $mode = &get_domain_php_mode($_[0]);
 		&create_php_wrappers($_[0], $mode);
 		}
-
 	&$second_print($text{'setup_done'});
+
+	# Make sure the PHP execution mode is valid
+	if (defined(&get_domain_php_mode)) {
+		&$first_print($text{'restore_checkmode'});
+		local $mode = &get_domain_php_mode($_[0]);
+		local @supp = &supported_php_modes($_[0]);
+		if ($mode && &indexof($mode, @supp) < 0 && @supp) {
+			# Need to fix
+			local $fix = pop(@supp);
+			&save_domain_php_mode($_[0], $fix);
+			&$second_print(&text('restore_badmode', 
+					$text{'phpmode_short_'.$mode},
+					$text{'phpmode_short_'.$fix}));
+			}
+		else {
+			# Looks good
+			&$second_print(&text('restore_okmode',
+					$text{'phpmode_short_'.$mode}));
+			}
+		}
 
 	&register_post_action(\&restart_apache);
 	$rv = 1;
