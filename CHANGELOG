@@ -847,3 +847,4 @@ Updated the LimeSurvey script installer to version 1.70, ZenPhoto to 1.1.5, phpM
 Fixed bugs in Plesk migration, and added automatic detection of alias domains in the original backup. SSL certificates and keys from the backup are also migrated. Also added initial support for Windows Plesk backups.
 A domain's private IP and external IP for DNS are now also included in SPF records.
 When restoring a backup, switch to a supported PHP execution mode if the original Apache config used an un-supported mode.
+A default email template for status monitors can now be defined, when using Webmin 1.404 or later.

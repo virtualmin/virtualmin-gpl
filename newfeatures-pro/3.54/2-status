@@ -1,0 +1,4 @@
+desc=Status email template
+html=A default email template for status monitors can now be defined, when using Webmin 1.404 or later.
+master=1
+link=edit_tmpl.cgi?id=0&editmode=status

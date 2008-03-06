@@ -2358,6 +2358,7 @@ tmpl_estatus=No email addresses for monitoring messages entered
 tmpl_estatustimeout=Missing or invalid timeout in seconds
 tmpl_statustimeout=HTTP check timeout
 tmpl_statustimeoutdef=Default ($1 seconds)
+tmpl_statustmpl=Status email template
 tmpl_extra_prefix=Prefix for extra administrators
 tmpl_scripts=Edit Default Script Installers
 tmpl_dbs=Edit Default Databases

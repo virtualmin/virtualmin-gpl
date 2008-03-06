@@ -7281,6 +7281,7 @@ push(@rv, { 'id' => 0,
 	    'status' => $config{'statusemail'} || "none",
 	    'statusonly' => int($config{'statusonly'}),
 	    'statustimeout' => $config{'statustimeout'},
+	    'statustmpl' => $config{'statustmpl'},
 	    'mail_on' => $config{'domain_template'} eq "none" ? "none" : "yes",
 	    'mail' => $config{'domain_template'} eq "none" ||
 		      $config{'domain_template'} eq "default" ?
@@ -7509,6 +7510,7 @@ if ($tmpl->{'id'} == 0) {
 					'' : $tmpl->{'status'};
 	$config{'statusonly'} = $tmpl->{'statusonly'};
 	$config{'statustimeout'} = $tmpl->{'statustimeout'};
+	$config{'statustmpl'} = $tmpl->{'statustmpl'};
 	if ($tmpl->{'mail_on'} eq 'none') {
 		# Don't send
 		$config{'domain_template'} = 'none';

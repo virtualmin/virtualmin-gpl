@@ -58,6 +58,7 @@ local $serv = { 'id' => $d->{'id'}.($ssl ? "_ssl" : "_web"),
 		'nosched' => 0,
 		'ssl' => $ssl,
 		'alarm' => $tmpl->{'statustimeout'},
+		'tmpl' => $tmpl->{'statustmpl'},
 		'page' => '/' };
 return $serv;
 }
@@ -254,6 +255,7 @@ if ($_[0]->{'ssl'}) {
 sub show_template_status
 {
 local ($tmpl) = @_;
+&require_status();
 
 local @status_fields = ( "status", "statusonly", "statustimeout",
 			 "statustimeout_def" );
@@ -265,15 +267,27 @@ print &ui_table_row(
 	&ui_textbox("status", $tmpl->{'status'} eq "none" ? undef :
 				$tmpl->{'status'}, 50));
 
+# Send email to server owner
 print &ui_table_row(
 	&hlink($text{'tmpl_statusonly'}, "template_statusonly"),
 	&ui_radio("statusonly", int($tmpl->{'statusonly'}),
 		  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
 
+# Default HTTP check timeout
 print &ui_table_row(
 	&hlink($text{'tmpl_statustimeout'}, "template_statustimeout"),
 	&ui_opt_textbox("statustimeout", $tmpl->{'statustimeout'},
 			5, &text('tmpl_statustimeoutdef', 10)));
+
+# Default email template
+if (defined(&status::list_templates)) {
+	local @stmpls = &status::list_templates();
+	print &ui_table_row(
+		&hlink($text{'tmpl_statustmpl'}, "template_statustmpl"),
+		&ui_select("statustmpl", $tmpl->{'statustmpl'},
+			   [ [ '', "&lt;$status::text{'mon_notmpl'}&gt;" ],
+			     map { [ $_->{'id'}, $_->{'desc'} ] } @stmpls ]));
+	}
 }
 
 # parse_template_status(&tmpl)
@@ -291,6 +305,9 @@ if ($in{'status_mode'} == 2) {
 		&error($text{'tmpl_estatustimeout'});
 	$tmpl->{'statustimeout'} = $in{'statustimeout_def'} ? undef :
 					$in{'statustimeout'};
+	if (defined($in{'statustmpl'})) {
+		$tmpl->{'statustmpl'} = $in{'statustmpl'};
+		}
 	}
 }
 
