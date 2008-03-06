@@ -10,32 +10,62 @@ sub migration_plesk_validate
 local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
 local ($ok, $root) = &extract_plesk_dir($file);
 $ok || return "Not a Plesk 8 backup file : $root";
--r "$root/dump.xml" || return "Not a complete Plesk 8 backup file - missing dump.xml";
+local $xfile = "$root/dump.xml";
+local $windows = 0;
+if (!-r $xfile) {
+	$xfile = "$root/info.xml";
+	$windows = 1;
+	}
+-r $xfile || return "Not a complete Plesk 8 backup file - missing dump.xml";
 
 # Check Webmin version
 &get_webmin_version() >= 1.365 ||
     return "Webmin version 1.365 or later is needed to migrate Plesk domains";
 
 # Check if the domain is in there
-local $dump = &read_plesk_xml("$root/dump.xml");
+local $dump = &read_plesk_xml($xfile);
 ref($dump) || return $dump;
-local $domain = $dump->{'domain'}->{$dom};
-if (!$domain && $dump->{'domain'}->{'name'} eq $dom) {
-	$domain = $dump->{'domain'};
-	}
-$domain || return "Backup does not contain the domain $dom";
+if (!$windows) {
+	# Linux Plesk format
+	local $domain = $dump->{'domain'}->{$dom};
+	if (!$domain && $dump->{'domain'}->{'name'} eq $dom) {
+		$domain = $dump->{'domain'};
+		}
+	$domain || return "Backup does not contain the domain $dom";
 
-if (!$parent && !$user) {
-	# Check if we can work out the user
-	$user = $domain->{'phosting'}->{'sysuser'}->{'name'};
-	$user || return "Could not work out original username from backup";
-	}
+	if (!$parent && !$user) {
+		# Check if we can work out the user
+		$user = $domain->{'phosting'}->{'sysuser'}->{'name'};
+		$user ||
+		    return "Could not work out original username from backup";
+		}
 
-if (!$parent && !$pass) {
-	# Check if we can work out the password
-	$pass = $domain->{'phosting'}->{'sysuser'}->{'password'}->{'content'} ||
-		$domain->{'domainuser'}->{'password'}->{'content'};
-	$pass || return "Could not work out original password from backup";
+	if (!$parent && !$pass) {
+		# Check if we can work out the password
+		$pass = $domain->{'phosting'}->{'sysuser'}->{'password'}->{'content'} ||
+			$domain->{'domainuser'}->{'password'}->{'content'};
+		$pass ||
+		    return "Could not work out original password from backup";
+		}
+	}
+else {
+	# On Windows, domain details are in a different place in the XML
+	local $domain = $dump->{'clients'}->{'client'}->{'domain'};
+	$domain->{'name'} eq $dom ||
+		return "Backup does not contain the domain $dom";
+
+	if (!$parent && !$user) {
+		# Check if we can work out the user
+		$user = $domain->{'hosting'}->{'sys_user'}->{'login'};
+		$user ||
+		    return "Could not work out original username from backup";
+		}
+
+	if (!$parent && !$pass) {
+		# We must have the password
+		$pass || return "A password must be supplied when migrating ".
+				"a Plesk backup";
+		}
 	}
 
 # Check for clashes
@@ -63,15 +93,33 @@ $nologin_shell ||= $def_shell;
 
 # Extract backup and read the dump file
 local ($ok, $root) = &extract_plesk_dir($file);
-local $dump = &read_plesk_xml("$root/dump.xml");
-local $domain = $dump->{'domain'}->{$dom};
-if (!$domain && $dump->{'domain'}->{'name'} eq $dom) {
-	$domain = $dump->{'domain'};
+local $windows = 0;
+local $xfile = "$root/dump.xml";
+if (!-r $xfile) {
+	$xfile = "$root/info.xml";
+	$windows = 1;
 	}
+local $dump = &read_plesk_xml($xfile);
 
-# Work out user and group
-if (!$user) {
-	$user = $domain->{'phosting'}->{'sysuser'}->{'name'};
+local $domain;
+if (!$windows) {
+	# Linux format
+	$domain = $dump->{'domain'}->{$dom};
+	if (!$domain && $dump->{'domain'}->{'name'} eq $dom) {
+		$domain = $dump->{'domain'};
+		}
+
+	# Work out user and group
+	if (!$user) {
+		$user = $domain->{'phosting'}->{'sysuser'}->{'name'};
+		}
+	}
+else {
+	# Windows format
+	$domain = $dump->{'clients'}->{'client'}->{'domain'};
+	if (!$user) {
+		$user = $domain->{'hosting'}->{'sys_user'}->{'login'};
+		}
 	}
 local $group = $user;
 local $ugroup = $group;
@@ -80,13 +128,14 @@ local $ugroup = $group;
 &$first_print("Checking for Plesk features ..");
 local @got = ( "dir", $parent ? () : ("unix"), "web" );
 push(@got, "webmin") if ($webmin && !$parent);
-if (exists($domain->{'mailsystem'}->{'status'}->{'enabled'})) {
+if (exists($domain->{'mailsystem'}->{'status'}->{'enabled'}) ||
+    $domain->{'mail'}) {
 	push(@got, "mail");
 	}
-if ($domain->{'dns-zone'}) {
+if ($domain->{'dns-zone'} || $domain->{'dns_zone'}) {
 	push(@got, "dns");
 	}
-if ($domain->{'www'} eq 'true') {
+if ($domain->{'www'} eq 'true' || -d "$root/$dom/httpdocs") {
 	push(@got, "web");
 	}
 if ($domain->{'ip'}->{'ip-type'} eq 'exclusive' && $virt) {
@@ -118,6 +167,7 @@ if (@mysqldbs) {
 	}
 
 # Check for mail users
+# XXX for windows
 local $mailusers = $domain->{'mailsystem'}->{'mailuser'};
 if (!$mailusers) {
 	$mailusers = { };
@@ -252,23 +302,32 @@ else {
 
 # Copy web files
 &$first_print("Copying web pages ..");
-local $htdocs = "$root/$dom.httpdocs";
-if (!-r $htdocs) {
-	$htdocs = "$root/$dom.htdocs";
-	}
-if (-r $htdocs) {
-	local $hdir = &public_html_dir(\%dom);
-	local $err = &extract_compressed_file($htdocs, $hdir);
-	if ($err) {
-		&$second_print(".. failed : $err");
-		}
-	else {
-		&set_home_ownership(\%dom);
-		&$second_print(".. done");
-		}
+local $hdir = &public_html_dir(\%dom);
+if (-d "$root/$dom/httpdocs") {
+	# Windows format
+	&copy_source_dest("$root/$dom/httpdocs", $hdir);
+	&set_home_ownership(\%dom);
+	&$second_print(".. done");
 	}
 else {
-	&$second_print(".. not found in Plesk backup");
+	# Linux format (a tar file)
+	local $htdocs = "$root/$dom.httpdocs";
+	if (!-r $htdocs) {
+		$htdocs = "$root/$dom.htdocs";
+		}
+	if (-r $htdocs) {
+		local $err = &extract_compressed_file($htdocs, $hdir);
+		if ($err) {
+			&$second_print(".. failed : $err");
+			}
+		else {
+			&set_home_ownership(\%dom);
+			&$second_print(".. done");
+			}
+		}
+	else {
+		&$second_print(".. not found in Plesk backup");
+		}
 	}
 
 # Copy CGI files
@@ -587,46 +646,56 @@ local $dir = &transname();
 
 # Is this compressed?
 local $cf = &compression_format($file);
-if ($cf != 0 && $cf != 1) {
+if ($cf != 0 && $cf != 1 && $cf != 4) {
 	return (0, "Unknown compression format");
 	}
 
-# Read in the backup as a fake mail object
-&foreign_require("mailboxes", "mailboxes-lib.pl");
-local $mail = { };
-if ($cf == 0) {
-	open(FILE, $file) || return undef;
+if ($cf == 4) {
+	# Windows Plesk backup, which is a ZIP file
+	&has_command("unzip") || return (0, "The unzip command is needed to ".
+					    "extract Plesk Windows backups");
+	&execute_command("cd ".quotemeta($dir)." && unzip ".quotemeta($file));
 	}
 else {
-	open(FILE, "gunzip -c ".quotemeta($file)." |") || return undef;
-	}
-while(<FILE>) {
-	s/\r|\n//g;
-	if (/^(\S+):\s+(.*)/) {
-		$mail->{'header'}->{lc($1)} = $2;
-		push(@{$mail->{'headers'}}, [ $1, $2 ]);
+	# Read in the backup as a fake mail object
+	&foreign_require("mailboxes", "mailboxes-lib.pl");
+	local $mail = { };
+	if ($cf == 0) {
+		# MIME format file
+		open(FILE, $file) || return undef;
 		}
 	else {
-		last;	# End of 'headers'
+		# Gzipped MIME file
+		open(FILE, "gunzip -c ".quotemeta($file)." |") || return undef;
 		}
-	}
-while(read(FILE, $buf, 1024) > 0) {
-	$mail->{'body'} .= $buf;
-	}
-close(FILE);
+	while(<FILE>) {
+		s/\r|\n//g;
+		if (/^(\S+):\s+(.*)/) {
+			$mail->{'header'}->{lc($1)} = $2;
+			push(@{$mail->{'headers'}}, [ $1, $2 ]);
+			}
+		else {
+			last;	# End of 'headers'
+			}
+		}
+	while(read(FILE, $buf, 1024) > 0) {
+		$mail->{'body'} .= $buf;
+		}
+	close(FILE);
 
-# Parse out the attachments and save each one off
-&mailboxes::parse_mail($mail, undef, undef, 1);
-local $count = 0;
-foreach my $a (@{$mail->{'attach'}}) {
-	if ($a->{'filename'}) {
-		open(ATTACH, ">$dir/$a->{'filename'}");
-		print ATTACH $a->{'data'};
-		close(ATTACH);
-		$count++;
+	# Parse out the attachments and save each one off
+	&mailboxes::parse_mail($mail, undef, undef, 1);
+	local $count = 0;
+	foreach my $a (@{$mail->{'attach'}}) {
+		if ($a->{'filename'}) {
+			open(ATTACH, ">$dir/$a->{'filename'}");
+			print ATTACH $a->{'data'};
+			close(ATTACH);
+			$count++;
+			}
 		}
+	return (0, "No attachments found in MIME data") if (!$count);
 	}
-return (0, "No attachments found in MIME data") if (!$count);
 
 $main::plesk_dir_cache{$file} = $dir;
 return (1, $dir);

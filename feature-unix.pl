@@ -11,6 +11,14 @@ local $tmpl = &get_template($_[0]->{'template'});
 &require_useradmin();
 local (%uinfo, %ginfo);
 
+# Do some sanity checks
+if ($_[0]->{'user'} eq '') {
+	&error("Domain is missing Unix username!");
+	}
+if ($_[0]->{'group'} eq '' && &mail_system_needs_group()) {
+	&error("Domain is missing Unix group name!");
+	}
+
 # Check if the UID or GID has been allocated to someone else, and if so
 # re-allocate them. Also allocate if they haven't been done yet.
 local @allusers = &list_all_users();
