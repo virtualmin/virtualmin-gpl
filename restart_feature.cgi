@@ -23,8 +23,8 @@ else {
 	$name = &plugin_call($in{'feature'}, "feature_name");
 	}
 &error_setup($text{'restart_err'});
-&error($err) if ($err);
 &refresh_startstop_status();
+&error($err) if ($err);
 &webmin_log("restart", $in{'feature'});
 
 if ($in{'show'}) {

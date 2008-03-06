@@ -16,8 +16,8 @@ else {
 	$name = &plugin_call($in{'feature'}, "feature_name");
 	}
 &error_setup($text{'start_err'});
-&error($err) if ($err);
 &refresh_startstop_status();
+&error($err) if ($err);
 &webmin_log("start", $in{'feature'});
 
 if ($in{'show'}) {
