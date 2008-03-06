@@ -660,6 +660,7 @@ if (!$_[4] && $_[0]) {
 	# Add accessible databases
 	local @dbs = &domain_databases($_[0]);
 	local $db;
+	local %dbdone;
 	foreach $db (@dbs) {
 		local @dbu;
 		local $ufunc;
@@ -683,10 +684,14 @@ if (!$_[4] && $_[0]) {
 			# Domain owner always gets all databases
 			next if ($u->{'user'} eq $_[0]->{'user'} &&
 				 $u->{'unix'});
+
+			# For each user, add this DB to his list if there
+			# is a user for it with the same name.
 			local $uname = $ufunc ? &$ufunc($u->{'user'}) :
 				&plugin_call($db->{'type'}, "database_user",
 					     $u->{'user'});
-			if (exists($dbu{$uname})) {
+			if (exists($dbu{$uname}) &&
+			    !$dbdone{$db->{'type'},$db->{'name'},$uname}++) {
 				push(@{$u->{'dbs'}}, $db);
 				$u->{$db->{'type'}."_user"} = $uname;
 				$u->{$db->{'type'}."_pass"} = $dbu{$uname};
