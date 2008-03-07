@@ -167,7 +167,6 @@ if (@mysqldbs) {
 	}
 
 # Check for mail users
-# XXX for windows
 local $mailusers = $domain->{'mailsystem'}->{'mailuser'};
 if (!$mailusers) {
 	$mailusers = { };
@@ -187,6 +186,19 @@ foreach my $name (keys %$mailusers) {
 		$has_virus++;
 		}
 	}
+
+# Check for Windows mail users
+local $mailusers = $domain->{'mail'};
+if (!$mailusers) {
+	$mailusers = { };
+	}
+foreach my $mid (keys %$mailusers) {
+	local $mailuser = $mailusers->{$mid};
+	if ($mailuser->{'sa_conf'}) {
+		$has_spam++;
+		}
+	}
+
 push(@got, "spam") if ($has_spam);
 push(@got, "virus") if ($has_virus);
 
@@ -440,7 +452,9 @@ local (%taken, %utaken);
 &$first_print("Re-creating mail users ..");
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 local $mcount = 0;
+# Linux mailboxes
 foreach my $name (keys %$mailusers) {
+	next if ($windows);
 	local $mailuser = $mailusers->{$name};
 	local $uinfo = &create_initial_user(\%dom);
 	$uinfo->{'user'} = &userdom_name($name, \%dom);
@@ -494,12 +508,52 @@ foreach my $name (keys %$mailusers) {
 
 	$mcount++;
 	}
+# Windows mail users
+foreach my $mid (keys %$mailusers) {
+	next if (!$windows);
+	local $mailuser = $mailusers->{$mid};
+	next if ($mailuser->{'mail_group'} eq 'true');
+	local $name = $mailuser->{'mail_name'};
+	local $uinfo = &create_initial_user(\%dom);
+	$uinfo->{'user'} = &userdom_name($name, \%dom);
+	if ($mailuser->{'account'}->{'type'} eq 'plain') {
+		$uinfo->{'plainpass'} = $mailuser->{'account'}->{'password'};
+		$uinfo->{'pass'} = &encrypt_user_password(
+					$uinfo, $uinfo->{'plainpass'});
+		}
+	else {
+		$uinfo->{'pass'} = $mailuser->{'account'}->{'password'};
+		}
+	$uinfo->{'uid'} = &allocate_uid(\%taken);
+	$uinfo->{'gid'} = $dom{'gid'};
+	$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$name";
+	$uinfo->{'shell'} = $nologin_shell;
+	$uinfo->{'email'} = $name."\@".$dom;
+	if (&has_home_quotas()) {
+		local $q = $mailuser->{'mbox_quota'} < 0 ? undef :
+				$mailuser->{'mbox_quota'}*1024;
+		$uinfo->{'qquota'} = $q;
+		$uinfo->{'quota'} = $q / &quota_bsize("home");
+		$uinfo->{'mquota'} = $q / &quota_bsize("home");
+		}
+	foreach my $r (values %{$mailuser->{'mail_redir'}}) {
+		if ($r->{'address'}) {
+			push(@{$uinfo->{'to'}}, $r->{'address'});
+			}
+		}
+	&create_user($uinfo, \%dom);
+	&create_user_home($uinfo, \%dom);
+	$taken{$uinfo->{'uid'}}++;
+	local ($crfile, $crtype) = &create_mail_file($uinfo);
+	$mcount++;
+	}
 &$second_print(".. done (migrated $mcount users)");
 
 # Re-create mail aliases
 local $acount = 0;
 &$first_print("Re-creating mail aliases ..");
 &set_alias_programs();
+# Linux catch all
 local $ca = $domain->{'mailsystem'}->{'catch-all'};
 if ($ca) {
 	local @to;
@@ -511,6 +565,21 @@ if ($ca) {
 		}
 	local $virt = { 'from' => "\@$dom",
 			'to' => \@to };
+	&create_virtuser($virt);
+	$acount++;
+	}
+# Windows mail aliases
+foreach my $mid (keys %$mailusers) {
+	next if (!$windows);
+	local $mailuser = $mailusers->{$mid};
+	next if ($mailuser->{'mail_group'} eq 'false');
+	local $virt = { 'from' => $mailuser->{'mail_name'}.'@'.$dom,
+			'to' => [ ] };
+	foreach my $r (values %{$mailuser->{'mail_redir'}}) {
+		if ($r->{'address'}) {
+			push(@{$virt->{'to'}}, $r->{'address'});
+			}
+		}
 	&create_virtuser($virt);
 	$acount++;
 	}
