@@ -848,3 +848,4 @@ Fixed bugs in Plesk migration, and added automatic detection of alias domains in
 A domain's private IP and external IP for DNS are now also included in SPF records.
 When restoring a backup, switch to a supported PHP execution mode if the original Apache config used an un-supported mode.
 A default email template for status monitors can now be defined, when using Webmin 1.404 or later.
+Added a check for Sendmail not accepting email on the external interface, which is the default in some distributions.

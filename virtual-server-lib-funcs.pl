@@ -10590,6 +10590,42 @@ if ($config{'mail'}) {
 		if ($config{'bccs'}) {
 			return &text('check_esendmailbccs', $clink);
 			}
+
+		# Check for external interface
+		local @addrs;
+		local $conf = &sendmail::get_sendmailcf();
+		foreach my $dpo (&sendmail::find_options("DaemonPortOptions",
+							 $conf)) {
+			local $addr = "*";
+			if ($dpo->[1] =~ /(Addr|Address|A)=([^,]+)/i) {
+				$addr = $2;
+				}
+			local $port = 25;
+			if ($dpo->[1] =~ /(Port|P)=([^,]+)/i) {
+				$port = $2;
+				}
+			push(@addrs, [ $addr, $port ]);
+			}
+		if (@addrs) {
+			# Need at least one non-localhost port 25
+			local @adescs;
+			foreach my $a (@addrs) {
+				if ($a->[0] eq '*') {
+					push(@adescs, "port $a->[1]");
+					}
+				else {
+					push(@adescs, "$a->[0] port $a->[1]");
+					}
+				}
+			@addrs = grep { $_->[0] ne 'localhost' &&
+					$_->[0] ne '127.0.0.1' &&
+					$_->[0] !~ /:/ &&
+					($_->[1] eq '25' || $_->[1] eq 'smtp') }
+				      @addrs;
+			@addrs || return &text('check_esendmailaddrs',
+					join(", ", @adescs), '/sendmail/');
+			}
+
 		&$second_print($text{'check_sendmailok'});
 		$expected_mailboxes = 1;
 		}
