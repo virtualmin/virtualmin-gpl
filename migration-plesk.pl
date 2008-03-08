@@ -433,7 +433,7 @@ if ($certificate) {
 	if ($key) {
 		$dom{'ssl_key'} ||= &default_certificate_file(\%dom, 'key');
 		&open_tempfile(CERT, ">$dom{'ssl_key'}");
-		&print_tempfile(CERT, $cert);
+		&print_tempfile(CERT, $key);
 		&close_tempfile(CERT);
 		}
 	&$second_print($cert && $key ? ".. done" :

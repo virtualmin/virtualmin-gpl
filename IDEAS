@@ -69,3 +69,6 @@
  - email should come from reseller email, if set
 	- optional
 
+ - when adding a sub-domain with the same name as a DNS record, don't delete
+   when removing
+
