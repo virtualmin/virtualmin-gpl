@@ -24,7 +24,8 @@ else {
 	# Neither .. but we can still do SSL, if there are no other domains
 	# with SSL on the same IP
 	local ($sslclash) = grep { $_->{'ip'} eq $_[0]->{'ip'} &&
-				   $_->{'ssl'} } &list_domains();
+				   $_->{'ssl'} &&
+				   $_->{'id'} ne $_[0]->{'id'}} &list_domains();
 	if ($sslclash) {
 		return &text('setup_edepssl3', $_[0]->{'ip'});
 		}
