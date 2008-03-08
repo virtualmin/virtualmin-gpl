@@ -131,7 +131,9 @@ foreach $d (@doms) {
 	&made_changes();
 	&reset_domain_envs($d);
 
-	&refresh_webmin_user($d);
+	if ($d->{'parent'}) {
+		&refresh_webmin_user($d);
+		}
 
 	&$outdent_print();
 	&$second_print(".. done");
