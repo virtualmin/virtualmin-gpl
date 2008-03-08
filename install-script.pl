@@ -210,9 +210,6 @@ if (defined(&$phpvfunc)) {
 	$opts->{'phpver'} = $phpver;
 	}
 
-# Apply Apache config if needed, for new PHP version
-&run_post_actions();
-
 # First fetch needed files
 &$first_print("Fetching required files ..");
 $ferr = &fetch_script_files($d, $ver, $opts, $sinfo, \%gotfiles, 1);
@@ -237,6 +234,9 @@ if (!&setup_perl_modules($d, $script, $ver, $opts)) {
 if (!&setup_ruby_modules($d, $script, $ver, $opts)) {
 	exit(1);
 	}
+
+# Apply Apache config if needed, for new PHP version or modules or settings
+&run_post_actions();
 
 # Call the install function
 &$first_print(&text('scripts_installing', $script->{'desc'}, $ver));
