@@ -1,5 +1,5 @@
 desc=New script installers
-html=Updated the LimeSurvey script installer to version 1.70, ZenPhoto to 1.1.5, phpMyAdmin to 2.11.5, SugarCRM to 5.0.0b, and Flyspray to 0.9.9.5.
+html=Updated the LimeSurvey script installer to version 1.70, ZenPhoto to 1.1.5, phpMyAdmin to 2.11.5, SugarCRM to 5.0.0b, Horde to 3.1.7, and Flyspray to 0.9.9.5.
 master=1
 reseller=1
 domain=1
