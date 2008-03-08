@@ -317,10 +317,12 @@ if ($features{'web'} && $config{'avail_web'}) {
 	# Allow user to manage just this website
 	&require_apache();
 	push(@mods, "apache");
+	local @webdoms = grep { $_->{'web'} &&
+				(!$_->{'alias'} || !$_->{'alias_mode'}) } @doms;
 	local %acl = ( 'noconfig' => 1,
 		       'virts' => join(" ",
 			  map { $_->{'dom'}, "$_->{'dom'}:$_->{'web_port'}" }
-			      grep { $_->{'web'} } @doms),
+			      @webdoms),
 		       'global' => 0,
 		       'create' => 0,
 		       'vuser' => 0,
@@ -337,10 +339,11 @@ if ($features{'web'} && $config{'avail_web'}) {
 		       'dirsmode' => 2,
 		       'dirs' => 'ServerName ServerAlias SSLEngine SSLCertificateFile SSLCertificateKeyFile',
 		      );
-	if ($_[0]->{'ssl'}) {
+	local @ssldoms = grep { $_->{'ssl'} } @webdoms;
+	if (@ssldoms) {
 		$acl{'virts'} .= " ".join(" ",
 			map { $_->{'dom'}, "$_->{'dom'}:$_->{'web_sslport'}" }
-			    grep { $_->{'web'} } @doms);
+			    @ssldoms);
 		}
 	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "apache")
 		if (!$hasmods{'apache'});
