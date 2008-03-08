@@ -374,9 +374,9 @@ if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
 	}
 else {
 	# Update an actual virtual server
+	&obtain_lock_web($_[0]);
 	local ($virt, $vconf) = &get_apache_virtual($_[1]->{'dom'},
 						    $_[1]->{'web_port'});
-	&obtain_lock_web($_[0]);
 	if ($_[0]->{'name'} != $_[1]->{'name'} ||
 	    $_[0]->{'ip'} ne $_[1]->{'ip'} ||
 	    $_[0]->{'ssl'} != $_[1]->{'ssl'} ||
