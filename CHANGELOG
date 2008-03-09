@@ -850,3 +850,4 @@ When restoring a backup, switch to a supported PHP execution mode if the origina
 A default email template for status monitors can now be defined, when using Webmin 1.404 or later.
 Added a check for Sendmail not accepting email on the external interface, which is the default in some distributions.
 Updated the b2evolution, DotProject, FAQMasterFlex, Advanced Guestbook, Help Center Live, Integramod, Nucleus, PHPwebsite and PollPHP script installers to support PHP version 5.
+When a sub-domain is created with the same name as a record in the parent domain, the record is not removed whem the domain is deleted.

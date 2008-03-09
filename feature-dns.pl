@@ -161,11 +161,18 @@ else {
 		}
 	local $file = &bind8::find("file", $z->{'members'});
 	local $fn = $file->{'values'}->[0];
+	local @recs = &bind8::read_zone_file($fn, $parent->{'dom'});
 	$_[0]->{'dns_submode'} = 1;	# So we know how this was done
+	local ($already) = grep { $_->{'name'} eq $_[0]->{'dom'}."." }
+				grep { $_->{'type'} eq 'A' } @recs;
+	if ($already) {
+		# A record with the same name as the sub-domain exists .. we
+		# don't want to delete this later
+		$_[0]->{'dns_subalready'} = 1;
+		}
 	local $ipdom = $_[0]->{'virt'} ? $_[0] : $parent;
 	local $ip = $ipdom->{'dns_ip'} || $ipdom->{'ip'};
 	&create_standard_records($fn, $_[0], $ip);
-	local @recs = &bind8::read_zone_file($fn, $parent->{'dom'});
         &bind8::bump_soa_record($nfn, \@recs);
 
 	&release_lock_dns($parent);
@@ -250,10 +257,14 @@ else {
 	local $file = &bind8::find("file", $z->{'members'});
 	local $fn = $file->{'values'}->[0];
 	local @recs = &bind8::read_zone_file($fn, $parent->{'dom'});
+	local $withdot = $_[0]->{'dom'}.".";
 	foreach $r (reverse(@recs)) {
-		if ($r->{'name'} =~ /$_[0]->{'dom'}/) {
-			&bind8::delete_record($fn, $r);
-			}
+		# Don't delete if outside sub-domain
+		next if ($r->{'name'} !~ /\Q$withdot\E$/);
+		# Don't delete if the same as an existing record
+		next if ($r->{'name'} eq $withdot && $r->{'type'} eq 'A' &&
+			 $_[0]->{'dns_subalready'});
+		&bind8::delete_record($fn, $r);
 		}
         &bind8::bump_soa_record($fn, \@recs);
 	&release_lock_dns($parent);
@@ -553,7 +564,7 @@ local $serial = $bconfig{'soa_style'} ?
 if (!$tmpl->{'dns_replace'}) {
 	# Create records that are appropriate for this domain
 	if (!$d->{'dns_submode'}) {
-		# Only add SOA if this is a new file, not a sub-domain
+		# Only add SOA and NS if this is a new file, not a sub-domain
 		&open_tempfile(RECS, ">$rootfile");
 		if ($bconfig{'master_ttl'}) {
 			&print_tempfile(RECS,
@@ -589,21 +600,29 @@ if (!$tmpl->{'dns_replace'}) {
 					      "NS", "$bn[0].");
 			}
 		}
+	
+	# Work out which records are already in the file
+	local $rd = $d->{'subdom'} ? &get_domain($d->{'subdom'}) : $d;
+	local %already = map { $_->{'name'}, $_ }
+			     grep { $_->{'type'} eq 'A' }
+				  &bind8::read_zone_file($file, $rd->{'dom'});
+
+	# Add standard records we don't have yet
 	local $withdot = $d->{'dom'}.".";
-	&bind8::create_record($file, $withdot, undef,
-			      "IN", "A", $ip);
-	&bind8::create_record($file, "www.$withdot", undef,
-			      "IN", "A", $ip);
-	&bind8::create_record($file, "ftp.$withdot", undef,
-			      "IN", "A", $ip);
-	&bind8::create_record($file, "m.$withdot", undef,
-			      "IN", "A", $ip);
+	foreach my $n ($withdot, "www.$withdot", "ftp.$withdot", "m.$withdot") {
+		if (!$already{$n}) {
+			&bind8::create_record($file, $n, undef,
+					      "IN", "A", $ip);
+			}
+		}
+
+	# For mail domains, add MX to this server
 	if ($d->{'mail'}) {
-		# For mail domains, add MX to this server
 		&create_mx_records($file, $d, $ip);
 		}
+
+	# Add SPF record for domain
 	if ($tmpl->{'dns_spf'} ne "none") {
-		# Add SPF record for domain
 		local $str = &bind8::join_spf(&default_domain_spf($d));
 		&bind8::create_record($file, $withdot, undef,
 				      "IN", "TXT", "\"$str\"");
