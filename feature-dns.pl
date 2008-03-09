@@ -621,8 +621,9 @@ if (!$tmpl->{'dns_replace'}) {
 		&create_mx_records($file, $d, $ip);
 		}
 
-	# Add SPF record for domain
-	if ($tmpl->{'dns_spf'} ne "none") {
+	# Add SPF record for domain, if defined and if it's not a sub-domain
+	if ($tmpl->{'dns_spf'} ne "none" &&
+	    !$d->{'subdom'}) {
 		local $str = &bind8::join_spf(&default_domain_spf($d));
 		&bind8::create_record($file, $withdot, undef,
 				      "IN", "TXT", "\"$str\"");

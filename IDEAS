@@ -5,15 +5,8 @@
  - NIS support for users DB
 	- Cluster mode - each feature on a separate server
 
- - When changing a domain's password, username or domain, update all script
-   installers.
-
  - Allow resellers and domain owners to use remote API
 	- Need access control enforcement in .pl scripts
-
- - Separate plans (sets of limits) from templates, so that they can be
-   created by resellers.
-	- When creating domain, plan can override template.
 
  - pre-load ui-lib.pl ?
 
@@ -69,6 +62,7 @@
  - email should come from reseller email, if set
 	- optional
 
- - when adding a sub-domain with the same name as a DNS record, don't delete
-   when removing
+ - option to replicate procmail files to other mail servers
+	- general mail cluster feature?
+	- how can lookup-domain work? Via network?
 
