@@ -981,7 +981,7 @@ return 1;
 sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
-local @mig = join("|", @migration_types);
+local $mig = join("|", @migration_types);
 print "Runs some or all Virtualmin functional tests.\n";
 print "\n";
 print "usage: functional-tests.pl [--domain test.domain]\n";

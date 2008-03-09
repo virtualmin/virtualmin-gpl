@@ -166,36 +166,40 @@ if (@mysqldbs) {
 	push(@got, "mysql");
 	}
 
-# Check for mail users
-local $mailusers = $domain->{'mailsystem'}->{'mailuser'};
-if (!$mailusers) {
-	$mailusers = { };
-	}
-elsif ($mailusers->{'mailbox-quota'}) {
-	# Just one user
-	$mailusers = { $mailusers->{'name'} => $mailusers };
-	}
+local $mailusers;
 local ($has_spam, $has_virus);
-foreach my $name (keys %$mailusers) {
-	local $mailuser = $mailusers->{$name};
-	if ($mailuser->{'spamassassin'}->{'status'} eq 'on') {
-		$has_spam++;
+if (!$windows) {
+	# Check for Linux mail users
+	$mailusers = $domain->{'mailsystem'}->{'mailuser'};
+	if (!$mailusers) {
+		$mailusers = { };
 		}
-	if ($mailuser->{'virusfilter'}->{'state'} eq 'inout' ||
-	    $mailuser->{'virusfilter'}->{'state'} eq 'in') {
-		$has_virus++;
+	elsif ($mailusers->{'mailbox-quota'}) {
+		# Just one user
+		$mailusers = { $mailusers->{'name'} => $mailusers };
+		}
+	foreach my $name (keys %$mailusers) {
+		local $mailuser = $mailusers->{$name};
+		if ($mailuser->{'spamassassin'}->{'status'} eq 'on') {
+			$has_spam++;
+			}
+		if ($mailuser->{'virusfilter'}->{'state'} eq 'inout' ||
+		    $mailuser->{'virusfilter'}->{'state'} eq 'in') {
+			$has_virus++;
+			}
 		}
 	}
-
-# Check for Windows mail users
-local $mailusers = $domain->{'mail'};
-if (!$mailusers) {
-	$mailusers = { };
-	}
-foreach my $mid (keys %$mailusers) {
-	local $mailuser = $mailusers->{$mid};
-	if ($mailuser->{'sa_conf'}) {
-		$has_spam++;
+else {
+	# Check for Windows mail users
+	local $mailusers = $domain->{'mail'};
+	if (!$mailusers) {
+		$mailusers = { };
+		}
+	foreach my $mid (keys %$mailusers) {
+		local $mailuser = $mailusers->{$mid};
+		if ($mailuser->{'sa_conf'}) {
+			$has_spam++;
+			}
 		}
 	}
 
