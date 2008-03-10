@@ -4659,7 +4659,11 @@ mkdir($temp, 0700);
 foreach my $resel (&list_resellers()) {
 	&acl::delete_user($resel->{'name'});
 	}
-&reload_miniserv();
+local %miniserv;
+&get_miniserv_config(\%miniserv);
+if (&check_pid_file($miniserv{'pidfile'})) {
+	&reload_miniserv();
+	}
 opendir(DIR, $temp);
 foreach my $f (readdir(DIR)) {
 	if ($f =~ /^(.*)\.webmin$/) {

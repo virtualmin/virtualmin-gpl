@@ -147,7 +147,9 @@ if ($virtualmin_pro) {
 	$miniserv{'eval_package'} = 1;
 	}
 &put_miniserv_config(\%miniserv);
-&restart_miniserv();
+if (&check_pid_file($miniserv{'pidfile'})) {
+	&restart_miniserv();
+	}
 
 # Setup lookup domain daemon
 if ($virtualmin_pro) {

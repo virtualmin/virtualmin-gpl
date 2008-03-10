@@ -192,8 +192,15 @@ if ($wuser) {
 sub restart_webmin
 {
 &$first_print($text{'setup_webminpid2'});
-&reload_miniserv();
-&$second_print($text{'setup_done'});
+local %miniserv;
+&get_miniserv_config(\%miniserv);
+if (&check_pid_file($miniserv{'pidfile'})) {
+	&reload_miniserv();
+	&$second_print($text{'setup_done'});
+	}
+else {
+	&$second_print($text{'setup_webmindown'});
+	}
 }
 
 # restart_usermin()
