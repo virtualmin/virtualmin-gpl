@@ -851,3 +851,4 @@ A default email template for status monitors can now be defined, when using Webm
 Added a check for Sendmail not accepting email on the external interface, which is the default in some distributions.
 Updated the b2evolution, DotProject, FAQMasterFlex, Advanced Guestbook, Help Center Live, Integramod, Nucleus, PHPwebsite and PollPHP script installers to support PHP version 5.
 When a sub-domain is created with the same name as a record in the parent domain, the record is not removed whem the domain is deleted.
+When using Qmail, domains with the same name as the system's primary hostname (typically from the <tt>control/me</tt> file) are not longer allowed, as they break Virtualmin's use of the <tt>virtualdomains</tt> file.
