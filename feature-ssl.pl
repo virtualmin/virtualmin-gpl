@@ -9,10 +9,11 @@ $default_web_sslport = $config{'web_sslport'} || 443;
 # An SSL website requires either a private IP, or private port
 sub check_depends_ssl
 {
-local $tmpl = &get_template($_[0]->{'template'});
+local ($d, $oldd) = @_;
+local $tmpl = &get_template($d->{'template'});
 local $defport = $tmpl->{'web_sslport'} || 443;
-local $port = $_[0]->{'web_sslport'} || $defport;
-if ($_[0]->{'virt'}) {
+local $port = $d->{'web_sslport'} || $defport;
+if ($d->{'virt'}) {
 	# Has a private IP
 	return undef;
 	}
@@ -23,19 +24,23 @@ elsif ($port != $defport) {
 else {
 	# Neither .. but we can still do SSL, if there are no other domains
 	# with SSL on the same IP
-	local ($sslclash) = grep { $_->{'ip'} eq $_[0]->{'ip'} &&
+	local ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
 				   $_->{'ssl'} &&
-				   $_->{'id'} ne $_[0]->{'id'}} &list_domains();
+				   $_->{'id'} ne $d->{'id'}} &list_domains();
 	if ($sslclash) {
-		return &text('setup_edepssl3', $_[0]->{'ip'});
+		return &text('setup_edepssl3', $d->{'ip'});
 		}
-	# Check for <virtualhost> on the IP
-	&require_apache();
-	local $conf = &apache::get_config();
-	foreach my $v (&apache::find_directive_struct("VirtualHost", $conf)) {
-		local ($vip, $vport) = split(/:/, $v->{'words'}->[0]);
-		if ($vip eq $_[0]->{'ip'} && $vport == $port) {
-			return &text('setup_edepssl4', $_[0]->{'ip'}, $port);
+	# Check for <virtualhost> on the IP, if we are turning on SSL
+	if (!$oldd || !$oldd->{'ssl'}) {
+		&require_apache();
+		local $conf = &apache::get_config();
+		foreach my $v (&apache::find_directive_struct("VirtualHost",
+							      $conf)) {
+			local ($vip, $vport) = split(/:/, $v->{'words'}->[0]);
+			if ($vip eq $d->{'ip'} && $vport == $port) {
+				return &text('setup_edepssl4',
+					     $d->{'ip'}, $port);
+				}
 			}
 		}
 	return undef;

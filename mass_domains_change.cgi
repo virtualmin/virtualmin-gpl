@@ -147,7 +147,7 @@ foreach $d (@doms) {
 		}
 
 	# Check depends, clashes and limits
-	$derr = &virtual_server_depends($newdom);
+	$derr = &virtual_server_depends($newdom, $oldd);
 	&error("$d->{'dom'} : $derr") if ($derr);
 	$cerr = &virtual_server_clashes($newdom, \%check);
 	&error("$d->{'dom'} : $cerr") if ($cerr);

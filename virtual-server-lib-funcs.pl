@@ -6317,12 +6317,12 @@ foreach $f (@feature_plugins) {
 return undef;
 }
 
-# virtual_server_depends(&dom, [feature])
+# virtual_server_depends(&dom, [feature], [&old-dom])
 # Returns an error message if any of the features in the domain depend on
 # missing features
 sub virtual_server_depends
 {
-local ($d, $feat) = @_;
+local ($d, $feat, $oldd) = @_;
 local $f;
 
 # Check features that are enabled
@@ -6331,7 +6331,7 @@ foreach $f (grep { $d->{$_} } @features) {
 	local $dfunc = "check_depends_$f";
 	if (defined(&$dfunc)) {
 		# Call dependecy function
-		local $derr = &$dfunc($d);
+		local $derr = &$dfunc($d, $oldd);
 		return $derr if ($derr);
 		}
 	# Check fixed dependency list
@@ -6344,7 +6344,7 @@ foreach $f (grep { $d->{$_} } @features) {
 # Check plugins that are enabled
 foreach $f (grep { $d->{$_} } @feature_plugins) {
 	next if ($feat && $f ne $feat);
-	local $derr = &plugin_call($f, "feature_depends", $d);
+	local $derr = &plugin_call($f, "feature_depends", $d, $oldd);
 	return $derr if ($derr);
 	}
 

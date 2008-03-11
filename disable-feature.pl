@@ -75,7 +75,7 @@ foreach $d (@doms) {
 				}
 			}
 		}
-	$derr = &virtual_server_depends(\%newdom);
+	$derr = &virtual_server_depends(\%newdom, $oldd);
 	if ($derr) {
 		&$second_print($derr);
 		next;
