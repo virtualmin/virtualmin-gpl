@@ -6302,9 +6302,15 @@ foreach $f (@features) {
 	next if ($dom->{'parent'} && $f eq "unix");
 	if ($dom->{$f} && (!$check || $check->{$f})) {
 		local $cfunc = "check_${f}_clash";
-		if (&$cfunc($dom, $field)) {
-			return &text('setup_e'.$f, $dom->{'dom'}, $dom->{'db'},
-				     $dom->{'user'}, $dom->{'group'});
+		local $err = &$cfunc($dom, $field);
+		if ($err) {
+			if ($err eq '1') {
+				# Use a built-in error
+				$err = &text('setup_e'.$f,
+					     $dom->{'dom'}, $dom->{'db'},
+					     $dom->{'user'}, $dom->{'group'});
+				}
+			return $err;
 			}
 		}
 	}

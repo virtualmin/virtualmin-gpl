@@ -231,7 +231,7 @@ if ($hasextra) {
 	# Show extra email addresses
 	print &ui_table_row(&hlink($text{'user_extra'}, "extraemail"),
 			    &ui_textarea("extra",
-				join("\n", @{$user->{'extraemail'}}), 5, 30),
+				join("\n", @{$user->{'extraemail'}}), 5, 50),
 			    2, \@tds);
 	}
 

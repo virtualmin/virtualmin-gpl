@@ -769,9 +769,21 @@ foreach my $user (&list_domain_users($_[0], 1)) {
 }
 
 # check_mail_clash()
-# Does nothing, because no clash checking is needed
+# Does nothing, because no clash checking is needed.
+# Except for qmail, where we have to check for clash with hostname.
 sub check_mail_clash
 {
+local ($dname) = @_;
+if ($config{'mail_system'} == 2 || $config{'mail_system'} == 4) {
+	# Qmail virtualdomains don't work if the domain name is the same
+	# as the hostname
+	&require_mail();
+	local $qme = &qmailadmin::get_control_file("me");
+	$qme ||= &get_system_hostname();
+	if ($dname eq $qme) {
+		return &text('setup_qmailme', "<tt>$qme</tt>");
+		}
+	}
 return 0;
 }
 
