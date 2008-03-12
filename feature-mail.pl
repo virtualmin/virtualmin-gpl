@@ -3694,6 +3694,7 @@ if ($config{'mail_system'} == 1) {
 elsif ($config{'mail_system'} == 0) {
 	# For postfix
 	&postfix::delete_mapping($canonical_type, $generic);
+	&postfix::regenerate_canonical_table();
 	}
 }
 
