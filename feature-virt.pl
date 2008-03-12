@@ -157,11 +157,11 @@ return 1 if (!$timed_out && !$?);
 return 0;
 }
 
-# virtual_ip_input(&templates, [reseller])
+# virtual_ip_input(&templates, [reseller], [show-original])
 # Returns HTML for selecting a virtual IP mode for a new server, or not
 sub virtual_ip_input
 {
-local ($tmpls, $resel) = @_;
+local ($tmpls, $resel, $orig) = @_;
 local $defip = &get_default_ip($resel);
 if ($config{'all_namevirtual'}) {
 	# Always name-based, but on varying IP
@@ -185,7 +185,12 @@ else {
 			else { $anychoose++; }
 			}
 		}
-	local @opts = ( [ 0, &text('form_shared', $defip)."<br>" ] );
+	local @opts;
+	if ($orig) {
+		# For restores - option to use original IP
+		push(@opts, [ -1, $text{'form_origip'}."<br>" ]);
+		}
+	push(@opts, [ 0, &text('form_shared', $defip)."<br>" ]);
 	local @shared = &list_shared_ips();
 	if (@shared && &can_edit_sharedips()) {
 		# Can select from extra shared list

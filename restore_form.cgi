@@ -87,16 +87,28 @@ print &ui_hidden_table_end("features");
 # Creation options
 print &ui_hidden_table_start($text{'restore_headeropts'}, "width=100%", 2,
 			     "opts", 0, \@tds);
+
+# Re-allocate UIDs
 print &ui_table_row(&hlink($text{'restore_reuid'}, "restore_reuid"),
 		    &ui_yesno_radio("reuid", 1));
 
+# Just re-import, to fix missing domains file
 print &ui_table_row(&hlink($text{'restore_fix'}, "restore_fix"),
 		    &ui_yesno_radio("fix", 0));
 
 if (!$d) {
+	# Limit features to those in backup
 	print &ui_table_row(&hlink($text{'restore_only'}, "restore_only"),
 			    &ui_yesno_radio("only", 0));
 	}
+
+# IP address for restored domains
+if (&can_select_ip()) {
+	@cantmpls = ( &get_template(0) );
+	print &ui_table_row(&hlink($text{'restore_newip'}, "restore_newip"),
+			&virtual_ip_input(\@cantmpls, undef, 1));
+	}
+
 print &ui_hidden_table_end("opts");
 
 print &ui_table_end();

@@ -270,6 +270,7 @@ form_framefwd=Frame-forward website to URL
 form_plocal=Serve locally
 form_purl=Web URL
 form_iface=Network interface
+form_origip=Original IP address
 form_shared=Shared, on IP $1
 form_shared2=Shared, on non-default IP
 form_vip=Virtual with IP
@@ -1847,6 +1848,7 @@ restore_fix=Just re-import server details?
 restore_only=Only create servers with selected features?
 restore_virtualmin=Virtualmin settings to restore
 restore_dnswholefile=Restore everything in DNS zone file
+restore_newip=IP address for restored servers
 
 restore_ecannot=You are not allowed to restore backups
 restore_err=Restore failed

@@ -4786,11 +4786,11 @@ if (-r $file."_unavail") {
 }
 
 # restore_domains(file, &domains, &features, &options, &vbs,
-#		  [only-backup-features])
+#		  [only-backup-features], [&ip-address-info])
 # Restore multiple domains from the given file
 sub restore_domains
 {
-local ($file, $doms, $features, $opts, $vbs, $onlyfeats) = @_;
+local ($file, $doms, $features, $opts, $vbs, $onlyfeats, $ipinfo) = @_;
 
 # Work out where the backup is located
 local $ok = 1;
@@ -5012,10 +5012,18 @@ if ($ok) {
 			&$indent_print();
 			delete($d->{'missing'});
 			if ($d->{'alias'}) {
+				# Alias domains always have same IP as parent
 				local $alias = &get_domain($d->{'alias'});
 				$d->{'ip'} = $alias->{'ip'};
 				}
+			elsif ($ipinfo) {
+				# Use IP specified on backup form
+				$d->{'ip'} = $ipinfo->{'ip'};
+				$d->{'virt'} = $ipinfo->{'virt'};
+				$d->{'virtalready'} = $ipinfo->{'virtalready'};
+				}
 			elsif (!$d->{'virt'} && !$config{'all_namevirtual'}) {
+				# Use this system's default IP
 				$d->{'ip'} = &get_default_ip($d->{'reseller'});
 				if (!$d->{'ip'}) {
 					&$second_print($text{'restore_edefip'});

@@ -38,6 +38,18 @@ foreach $f (@do_features) {
 $options{'reuid'} = $in{'reuid'};
 $options{'fix'} = $in{'fix'};
 
+# Parse IP inputs
+if (!&can_select_ip() || $in{'virt'} == -1) {
+	# Just use original IP, or shared IP
+	$ipinfo = undef;
+	}
+else {
+	$tmpl = &get_template(0);
+	($ip, $virt, $virtalready) = &parse_virtual_ip($tmpl, undef);
+	$ipinfo = { 'ip' => $ip, 'virt' => $virt, 'mode' => $in{'virt'},
+		    'virtalready' => $virtalready };
+	}
+
 ($cont, $contdoms) = &backup_contents($src, 1);
 if (!$in{'confirm'}) {
 	# See what is in the tar file or directory
@@ -158,7 +170,7 @@ else {
 		print &text('restore_doing2', scalar(@vbs), $nice),"<p>\n";
 		}
 	$ok = &restore_domains($src, \@doms, \@do_features, \%options, \@vbs,
-			       $in{'only'});
+			       $in{'only'}, $ipinfo);
 	&run_post_actions();
 	if ($ok) {
 		print &text('restore_done'),"<p>\n";

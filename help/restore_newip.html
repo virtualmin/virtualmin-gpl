@@ -1,0 +1,16 @@
+<header>IP address for restored servers</header>
+
+This setting is only used when restoring a virtual server that does not
+currently exist on the system. By default, Virtualmin will either assign it
+the system's default shared IP address if it was on a shared IP originally, or
+use the private IP from the original system if it wasn't on a shared address.
+<p>
+
+This works fine if your are moving a domain between two systems on the same
+network, but if not the restored domain is not likely to be contactable via
+the network. To avoid this, select the <b>Virtual with allocated IP</b> or
+<b>Virtual with IP</b> option in this field, and Virtualmin will either select
+a free IP for you, or use the one you enter. <p>
+
+<footer>
+
