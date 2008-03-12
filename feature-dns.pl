@@ -427,15 +427,34 @@ if ($_[0]->{'mail'} && !$_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 		}
 	}
 elsif (!$_[0]->{'mail'} && $_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
-	# Email was disabled .. remove MX records
+	# Email was disabled .. remove MX records, but only those that
+	# point to this system or secondaries.
 	local $file = &bind8::find("file", $z->{'members'});
 	local $fn = $file->{'values'}->[0];
 	local $zonefile = &bind8::make_chroot($fn);
 	local @recs = &bind8::read_zone_file($fn, $newzonename);
-	local @mx = grep { $_->{'type'} eq 'MX' &&
-			   $_->{'name'} eq $_[0]->{'dom'}."." ||
-			   $_->{'type'} eq 'A' &&
-			   $_->{'name'} eq "mail.".$_[0]->{'dom'}."." } @recs;
+	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
+	local %ids = map { $_, 1 }
+		split(/\s+/, $_[0]->{'mx_servers'});
+	local @slaves = grep { $ids{$_->{'id'}} } &list_mx_servers();
+	local @slaveips = map { &to_ipaddress($_->{'mxname'} || $_->{'host'}) }
+			      @slaves;
+	foreach my $r (@recs) {
+		if ($r->{'type'} eq 'A' &&
+		    $r->{'name'} eq "mail.".$_[0]->{'dom'}."." &&
+		    $r->{'values'}->[0] eq $ip) {
+			# mail.domain A record, pointing to our IP
+			push(@mx, $r);
+			}
+		elsif ($r->{'type'} eq 'MX' &&
+		       $r->{'name'} eq $_[0]->{'dom'}.".") {
+			# MX record for domain .. does it point to our IP?
+			local $mxip = &to_ipaddress($r->{'values'}->[1]);
+			if ($mxip eq $ip || &indexof($mxip, @slaveips) >= 0) {
+				push(@mx, $r);
+				}
+			}
+		}
 	if (@mx) {
 		&$first_print($text{'save_dns5'});
 		foreach my $r (reverse(@mx)) {
@@ -447,7 +466,7 @@ elsif (!$_[0]->{'mail'} && $_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 		}
 	}
 
-if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'}) {
+if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'} && $_[0]->{'mail'}) {
 	# Secondary MX servers have been changed - add or remove MX records
 	&$first_print($text{'save_dns7'});
 	local @newmxs = split(/\s+/, $_[0]->{'mx_servers'});
