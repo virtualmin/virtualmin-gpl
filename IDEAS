@@ -66,7 +66,3 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - option to change IP on restore
-	- command line too
-	- what about clashes? re-allocation?
-

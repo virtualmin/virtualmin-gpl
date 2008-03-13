@@ -1,0 +1,4 @@
+desc=Re-allocate IP on restore
+html=When restoring a backup of a domain that doesn't exist on the system, it's IP address can be changed or re-allocated from the range available on your system. This makes migration of domains with private IP addresses between systems on different networks easier.
+master=1
+link=restore_form.cgi

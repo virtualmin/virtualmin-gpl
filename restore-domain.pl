@@ -87,6 +87,29 @@ while(@ARGV > 0) {
 	elsif ($a eq "--only-features") {
 		$onlyfeats = 1;
 		}
+
+	# Alternate IP options
+	elsif ($a eq "--shared-ip") {
+		$sharedip = shift(@ARGV);
+		&indexof($sharedip, &list_shared_ips()) >= 0 ||
+		    &usage("$sharedip is not in the shared IP addresses list");
+		$ipinfo = { 'virt' => 0, 'ip' => $sharedip,
+			    'virtalready' => 0, 'mode' => 3 };
+		}
+	elsif ($a eq "--ip") {
+		$ip = shift(@ARGV);
+		&check_ipaddress($ip) || &usage("Invalid IP address");
+		&check_virt_clash($ip) &&
+			&usage("IP address is already in use");
+		$ipinfo = { 'virt' => 1, 'ip' => $ip,
+			    'virtalready' => 0, 'mode' => 1 };
+		}
+	elsif ($a eq "--allocate-ip") {
+		$tmpl = &get_template(0);
+		$ip = &free_ip_address($tmpl);
+		$ipinfo = { 'virt' => 1, 'ip' => $ip,
+			    'virtalready' => 0, 'mode' => 2 };
+		}
 	else {
 		&usage();
 		}
@@ -168,7 +191,8 @@ if ($test) {
 $opts{'reuid'} = $reuid;
 $opts{'fix'} = $fix;
 &$first_print("Starting restore..");
-$ok = &restore_domains($src, \@doms, \@rfeats, \%opts, \@vbs, $onlyfeats);
+$ok = &restore_domains($src, \@doms, \@rfeats, \%opts, \@vbs, $onlyfeats,
+		       $ipinfo);
 &run_post_actions();
 if ($ok) {
 	&$second_print("Restore completed successfully.");

@@ -4948,12 +4948,6 @@ if ($ok) {
 					}
 				}
 
-			local $cerr = &virtual_server_clashes($d);
-			if ($cerr) {
-				&$second_print(&text('restore_eclash', $cerr));
-				$ok = 0;
-				last DOMAIN;
-				}
 			local ($parentdom, $parentuser);
 			if ($d->{'parent'}) {
 				# Does the parent exist?
@@ -5008,9 +5002,7 @@ if ($ok) {
 				$d->{'ssl_key'} =~ s/\Q$oldhome\E/$d->{'home'}/;
 				}
 
-			# Create the domain, fixing the IP if needed
-			&$indent_print();
-			delete($d->{'missing'});
+			# Fix up the IP address if needed
 			if ($d->{'alias'}) {
 				# Alias domains always have same IP as parent
 				local $alias = &get_domain($d->{'alias'});
@@ -5021,6 +5013,17 @@ if ($ok) {
 				$d->{'ip'} = $ipinfo->{'ip'};
 				$d->{'virt'} = $ipinfo->{'virt'};
 				$d->{'virtalready'} = $ipinfo->{'virtalready'};
+				if ($ipinfo->{'mode'} == 2) {
+					# Re-allocate an IP, as we might be
+					# doing several domains
+					$d->{'ip'} = &free_ip_address($tmpl);
+					}
+				if (!$d->{'ip'}) {
+					&$second_print(
+						&text('setup_evirtalloc'));
+					$ok = 0;
+					last DOMAIN;
+					}
 				}
 			elsif (!$d->{'virt'} && !$config{'all_namevirtual'}) {
 				# Use this system's default IP
@@ -5036,6 +5039,18 @@ if ($ok) {
 			# as the old setting is unlikely to be correct.
 			$d->{'dns_ip'} = $virt || $config{'all_namevirtual'} ?
 				undef : $config{'dns_ip'};
+
+			# Check for clashes
+			local $cerr = &virtual_server_clashes($d);
+			if ($cerr) {
+				&$second_print(&text('restore_eclash', $cerr));
+				$ok = 0;
+				last DOMAIN;
+				}
+
+			# Finally, create it
+			&$indent_print();
+			delete($d->{'missing'});
 			$d->{'nocreationmail'} = 1;
 			$d->{'nocreationscripts'} = 1;
 			$d->{'nocopyskel'} = 1;
