@@ -6517,13 +6517,13 @@ if ($dom->{'webmin'}) {
 		}
 	}
 
-if (!$nopost) {
-	&run_post_actions();
-	}
-
 # Add virtual IP address, if needed
 if ($dom->{'virt'}) {
 	&setup_virt($dom);
+	}
+
+if (!$nopost) {
+	&run_post_actions();
 	}
 
 # Add a virtuser for the unix user, if requested
