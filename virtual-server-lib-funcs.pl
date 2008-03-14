@@ -4065,7 +4065,7 @@ elsif ($mode == 0) {
 	if ($dirfmt && !-d $desturl) {
 		# Looking for a directory
 		if ($mkdir) {
-			&make_dir($desturl, 0755);
+			&make_dir($desturl, 0755, 1);
 			}
 		else {
 			&$first_print(&text('backup_edirtest',
