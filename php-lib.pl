@@ -444,11 +444,12 @@ foreach my $v (@all_possible_php_versions) {
 	}
 local $php = &has_command("php-cgi") || &has_command("php");
 if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
-	# What version is the php command?
+	# What version is the php command? If it is a version we don't have
+	# a command for yet, use it.
 	&clean_environment();
 	local $out = `$php -v 2>&1 </dev/null`;
 	&reset_environment();
-	if ($out =~ /PHP\s+(\d+)\./) {
+	if ($out =~ /PHP\s+(\d+)\./ && !$vercmds{$1}) {
 		$vercmds{$1} = $php;
 		}
 	}
