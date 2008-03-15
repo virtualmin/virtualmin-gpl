@@ -893,7 +893,7 @@ if (!$_[0]->{'qmail'}) {
 		}
 	local @extravirt;
 	local $e;
-	foreach $e (@{$_[0]->{'extraemail'}}) {
+	foreach $e (&unique(@{$_[0]->{'extraemail'}})) {
 		local $virt = { 'from' => $e,
 				'to' => [ $vto ] };
 		&create_virtuser($virt);
@@ -1198,7 +1198,7 @@ if (!$_[0]->{'qmail'} && $echanged) {
 		$_[0]->{'virt'} = $virt;
 		}
 	local @extravirt;
-	foreach $e (@{$_[0]->{'extraemail'}}) {
+	foreach $e (&unique(@{$_[0]->{'extraemail'}})) {
 		local $virt = { 'from' => $e,
 				'to' => [ $vto ],
 				'cmt' => $oldcmt{$e} };

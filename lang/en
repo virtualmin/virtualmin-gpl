@@ -598,6 +598,7 @@ user_eextra2=The additional email domain '$1' is not managed by Virtualmin
 user_eextra3=You are not allowed to manage the additional email domain '$1'
 user_eextra4=A mailbox or mail alias that clashes with the additional address '$1' already exists
 user_eextra5=The additional email address '$1' is the same as the user's primary address
+user_eextra6=The additional email address '$1' was listed twice
 user_home=Home directory
 user_home1=Automatic
 user_home2=Main website directory
