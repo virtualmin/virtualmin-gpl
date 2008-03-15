@@ -4071,6 +4071,7 @@ nf_header=The following new features are available in $1 ..
 nf_desc=Feature
 nf_html=Description
 nf_vm=Virtualmin
+nf_date=(installed $1)
 nf_and=$1 and $2
 nf_seen=Hide New Features
 nf_try=Try it ..

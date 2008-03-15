@@ -328,5 +328,14 @@ if (!$cerr) {
 	&unlock_file($module_config_file);
 	&write_file("$module_config_directory/last-config", \%config);
 	}
+
+# Record the install time for this version
+local %itimes;
+&read_file($install_times_file, \%itimes);
+local $basever = &get_base_module_version();
+if (!$itimes{$basever}) {
+	$itimes{$basever} = time();
+	&write_file($install_times_file, \%itimes);
+	}
 }
 

@@ -255,3 +255,5 @@ $procmail_log_times = "$ENV{'WEBMIN_VAR'}/procmail.times";
 		      $virtualmin_pro ? "$module_root_directory/newfeatures-pro"
 				      : "$module_root_directory/newfeatures-gpl" );
 $newfeatures_seen_dir = "$module_config_directory/seenfeatures";
+$install_times_file = "$module_config_directory/installtimes";
+

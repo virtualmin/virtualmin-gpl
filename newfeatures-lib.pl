@@ -37,7 +37,7 @@ return sort { $b->{'id'} <=> $a->{'id'} } @rv;
 }
 
 # list_new_features_modules()
-# Returns a list of module info structures for modules that we are interested in 
+# Returns a list of module info structures for modules that we are interested in
 sub list_new_features_modules
 {
 local @rv;
@@ -98,6 +98,14 @@ else {
 	}
 }
 
+# get_base_module_version()
+# Returns the Virtualmin version, rounded to 2 decimals
+sub get_base_module_version
+{
+local $ver = $module_info{'version'};
+return sprintf("%.2f", int($ver*100) / 100.0);
+}
+
 # get_new_features_html(&domain)
 # Returns HTML listing new features in this (and older) versions of Virtualmin.
 # If there are none, returns undef.
@@ -127,7 +135,7 @@ foreach my $nf (@nf) {
 	push(@rv, @mrv);
 	if (@mrv && !$modvers{$mf->[0]}++) {
 		# Create a description for this new version
-		local $mdesc;
+		local ($mdesc, $timestr);
 		if ($nf->[0] eq $module_name) {
 			$mdesc = $text{'nf_vm'};
 			}
@@ -138,7 +146,17 @@ foreach my $nf (@nf) {
 			local %minfo = &get_module_info($nf->[0]);
 			$mdesc = $minfo{'desc'};
 			}
-		push(@modvers, "$mdesc $nf->[1]");
+		if ($nf->[0] eq $module_name) {
+			# When was Virtualmin installed?
+			local %itimes;
+			&read_file_cached($install_times_file, \%itimes);
+			local $basever = &get_base_module_version();
+			if ($itimes{$basever}) {
+				$timestr = " ".&text('nf_date',
+					&make_date($itimes{$basever}, 1));
+				}
+			}
+		push(@modvers, "$mdesc $nf->[1]$timestr");
 		}
 	}
 return undef if (!@rv);

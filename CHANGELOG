@@ -854,3 +854,4 @@ When a sub-domain is created with the same name as a record in the parent domain
 When using Qmail, domains with the same name as the system's primary hostname (typically from the <tt>control/me</tt> file) are not longer allowed, as they break Virtualmin's use of the <tt>virtualdomains</tt> file.
 When email is disabled for a domain, only MX and mail records pointing to the Virtualmin system or known secondaries are removed.
 When restoring a backup of a domain that doesn't exist on the system, it's IP address can be changed or re-allocated from the range available on your system. This makes migration of domains with private IP addresses between systems on different networks easier.
+The list of new features includes the date Virtualmin was installed.
