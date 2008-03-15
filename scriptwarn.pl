@@ -87,22 +87,22 @@ if (@updates) {
 			if ($other) {
 				push(@emailto, $other);
 				}
-			&send_scriptwarn_email($email, \@emailto);
+			&send_scriptwarn_email($email, \@emailto, $d);
 			}
 		}
 	}
 
 sub send_scriptwarn_email
 {
-local ($text, $emailto) = @_;
-local $mail = { 'headers' => [ [ 'From', $config{'from_addr'} ||
-					 &mailboxes::get_from_address() ],
+local ($text, $emailto, $d) = @_;
+local $mail = { 'headers' => [ [ 'From', &get_global_from_address($d) ],
 			       [ 'To', join(", ", @$emailto) ],
 			       [ 'Subject', $text{'scriptwarn_subject'} ],
 			       [ 'Content-type', 'text/plain' ] ],
 		'body' => $text };
 if ($debug_mode) {
 	print STDERR "Sending to ",join(", ", @$emailto),"\n";
+	print STDERR "Sending from ",&get_global_from_address($d),"\n";
 	print STDERR $text,"\n";
 	}
 else {

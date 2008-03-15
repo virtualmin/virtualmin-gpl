@@ -1,0 +1,4 @@
+desc=Email from reseller's address
+html=Email to domain owners for over-bandwidth warnings, new script notifications and others can now come from their resellers' addresses, if set. This behaviour must be enabled using a new setting on the <b>Module Config</b> page.
+master=1
+link=../config.cgi?module=virtual-server&section=line4

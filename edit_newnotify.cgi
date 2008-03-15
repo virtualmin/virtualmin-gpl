@@ -28,8 +28,7 @@ print &ui_table_row($text{'newnotify_subject'},
 
 # Message sender
 print &ui_table_row($text{'newnotify_from'},
-		    &ui_textbox("from", $config{'from_addr'} ||
-				        &mailboxes::get_from_address(), 50));
+		    &ui_textbox("from", &get_global_from_address(), 50));
 
 # Message body
 print &ui_table_row($text{'newnotify_body'},

@@ -77,7 +77,8 @@ reseller_theme=Theme for new resellers,15,theme,reseller_theme
 reseller_modules=Additional modules for resellers,15,modules,reseller_modules
 
 line4=Actions upon server and user creation,11
-from_addr=From: address for email sent by Virtualmin,3,Default
+from_addr=From: address for email sent by Virtualmin,3,Webmin default
+from_reseller=From: address to email sent to domain owners,1,1-Reseller's address (if any),0-Address set above
 pre_command=Command to run before making changes to a server,0
 post_command=Command to run after making changes to a server,0
 alias_pre_command=Command to run before making changes to an alias,0

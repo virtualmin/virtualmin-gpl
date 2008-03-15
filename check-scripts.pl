@@ -186,7 +186,7 @@ if (@errs) {
 		}
 	else {
 		$mail = { 'headers' =>
-			[ [ 'From', &mailboxes::get_from_address() ],
+			[ [ 'From', &get_global_from_address() ],
 			  [ 'To', "jcameron\@webmin.com" ],
 			  [ 'Subject', "Virtualmin script errors" ] ],
 			'attach' =>

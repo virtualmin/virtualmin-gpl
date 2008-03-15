@@ -89,8 +89,7 @@ if (@emails && &foreign_check("mailboxes") &&
 		$to = shift(@emails);
 		}
 	$bcc = join(", ", @emails);
-	$mail = { 'headers' => [ [ 'From', $config{'from_addr'} ||
-					   &mailboxes::get_from_address() ],
+	$mail = { 'headers' => [ [ 'From', &get_global_from_address() ],
 				 [ 'Subject', "Backup of Virtualmin on $host" ],
 				 [ 'To', $to ],
 				 [ 'Bcc', $bcc ] ],

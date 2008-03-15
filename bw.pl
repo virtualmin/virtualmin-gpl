@@ -120,6 +120,7 @@ foreach $d (@doms) {
 	foreach $k (keys %usage) {
 		$d->{'bw_usage_'.$k} = $usage{$k};
 		}
+	local $from = &get_global_from_address($d);
 	if ($d->{'bw_limit'} && $usage > $d->{'bw_limit'}) {
 		# Over the limit! But check limit on how often to notify
 		$etime = $now - $d->{'bw_notify'} > $config{'bw_notify'}*60*60;
@@ -146,7 +147,8 @@ foreach $d (@doms) {
 				&cat_file($tmpl),
 				join(", ", @addrs),
 				\%tkeys,
-				&text('newbw_subject', $d->{'dom'}));
+				&text('newbw_subject', $d->{'dom'}),
+				undef, undef, undef, $from);
 			if ($erv[0]) {
 				$d->{'bw_notify'} = $now;
 				}
@@ -221,7 +223,8 @@ foreach $d (@doms) {
 				&cat_file($tmpl),
 				join(", ", @addrs),
 				\%tkeys,
-				&text('newbw_warnsubject', $d->{'dom'}));
+				&text('newbw_warnsubject', $d->{'dom'}),
+				undef, undef, undef, $from);
 			if ($erv[0]) {
 				$d->{'bw_warnnotify'} = $now;
 				}

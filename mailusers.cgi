@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-# Actually email server owners
+# Actually email mailboxes in a domain
 
 require './virtual-server-lib.pl';
 &ReadParseMime();

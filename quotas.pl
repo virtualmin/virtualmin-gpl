@@ -49,8 +49,7 @@ if (@msgs) {
 
 	# Send the email
 	&foreign_require("mailboxes", "mailboxes-lib.pl");
-	$mail = { 'headers' => [ [ 'From' => $config{'from_addr'} ||
-					     &mailboxes::get_from_address() ],
+	$mail = { 'headers' => [ [ 'From' => &get_global_from_address() ],
 				 [ 'To' => $config{'quota_email'} ],
 				 [ 'Subject' => 'Disk Quota Monitoring' ],
 				 [ 'Content-type', 'text/plain' ] ],

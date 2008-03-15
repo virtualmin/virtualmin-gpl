@@ -12,7 +12,7 @@ exit(1) if (!$config{'dynip_service'});
 $h = &get_system_hostname();
 ($svc) = grep { $_->{'name'} eq $config{'dynip_service'} }
 	      &list_dynip_services();
-$from = $config{'from_addr'} || &mailboxes::get_from_address();
+$from = &get_global_from_address();
 
 # Check if we need to update
 ($oldip, $oldwhen) = &get_last_dynip_update($config{'dynip_service'});

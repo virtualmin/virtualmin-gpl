@@ -2781,7 +2781,8 @@ if ($tmpl->{'mail_on'} eq 'none') {
 
 local %hash = &make_domain_substitions($d);
 local @erv = &send_template_email($mail, $forceto || $d->{'emailto'},
-			    	  \%hash, $subject, $cc, $bcc);
+			    	  \%hash, $subject, $cc, $bcc, undef,
+				  &get_global_from_address($d));
 if ($erv[0]) {
 	&$second_print(&text('setup_emailok', $erv[1]));
 	}
@@ -2926,14 +2927,15 @@ sub ensure_template
 	if (!-r "$module_config_directory/$_[0]");
 }
 
-# send_template_email(data, address, &substitions, subject, cc, bcc, [&domain])
+# send_template_email(data, address, &substitions, subject, cc, bcc,
+#		      [&domain], [from])
 # Sends the given file to the specified address, with the substitions from
 # a hash reference. The actual subs in the file must be like $XXX for entries
 # in the hash like xxx - ie. $DOM is replaced by the domain name, and $HOME
 # by the home directory
 sub send_template_email
 {
-local ($template, $to, $subs, $subject, $cc, $bcc, $d) = @_;
+local ($template, $to, $subs, $subject, $cc, $bcc, $d, $from) = @_;
 local %hash = %$subs;
 
 # Add in Webmin info to the hash
@@ -2951,9 +2953,8 @@ else {
 	}
 $template = &substitute_template($template, \%hash);
 
-# Work out the From: address
-local $from;
-if ($remote_user && !&master_admin() && $d) {
+# Work out the From: address - if a domain is given, user it's email address.
+if (!$from && $remote_user && !&master_admin() && $d) {
 	$from = $d->{'emailto'};
 	}
 
@@ -2984,7 +2985,6 @@ return (1, &text('mail_ok', $to));
 #		    [attach, attach-filename, attach-type])
 # Sends a single email to multiple recipients. These can be Virtualmin domains
 # or users.
-# XXX notify mailboxes
 sub send_notify_email
 {
 local ($from, $recips, $d, $subject, $body, $attach, $attachfile, $attachtype)
@@ -3024,6 +3024,23 @@ foreach my $r (@$recips) {
 		}
 	&mailboxes::send_mail($mail);
 	}
+}
+
+# get_global_from_address(&domain)
+# Returns the from address to use when sending email to some domain. This may
+# be the reseller's email (if set), or the system-wide default
+sub get_global_from_address
+{
+local ($d) = @_;
+&foreign_require("mailboxes", "mailboxes-lib.pl");
+local $rv = $config{'from_addr'} || &mailboxes::get_from_address();
+if ($d && $d->{'reseller'}) {
+	local $resel = &get_reseller($d->{'reseller'});
+	if ($resel && $resel->{'acl'}->{'email'}) {
+		$rv = $resel->{'acl'}->{'email'};
+		}
+	}
+return $rv;
 }
 
 # userdom_substitutions(&user, &dom)

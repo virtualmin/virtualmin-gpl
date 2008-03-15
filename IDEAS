@@ -59,9 +59,6 @@
 	  to decide which domains can be batch created with mass_setup_XXX
 	  functions
 
- - email should come from reseller email, if set
-	- optional
-
  - option to replicate procmail files to other mail servers
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
