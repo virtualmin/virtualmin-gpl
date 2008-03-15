@@ -63,6 +63,3 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - functional tests for
-	- mail delivery / spam / virus filtering
-	- spam disable / enable
