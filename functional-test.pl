@@ -35,6 +35,8 @@ $migration_cpanel_domain = "hyccchina.com";
 $migration_cpanel = "$migration_dir/$migration_cpanel_domain.cpanel.tar.gz";
 $migration_plesk_domain = "requesttosend.com";
 $migration_plesk = "$migration_dir/$migration_plesk_domain.plesk.txt";
+$migration_plesk_windows_domain = "sbcher.com";
+$migration_plesk_windows = "$migration_dir/$migration_plesk_windows_domain.plesk_windows.psa";
 $test_backup_file = "/tmp/$test_domain.tar.gz";
 
 @create_args = ( [ 'limits-from-template' ],
@@ -615,7 +617,7 @@ $migrate_tests = [
 	  'migrate' => 'cpanel',
 	},
 
-	# Migrate a Plesk backup
+	# Migrate a Plesk for Linux backup
 	{ 'command' => 'migrate-domain.pl',
 	  'args' => [ [ 'type', 'plesk' ],
 		      [ 'source', $migration_plesk ],
@@ -647,6 +649,40 @@ $migrate_tests = [
 	  'cleanup' => 1,
 	  'migrate' => 'plesk',
 	},
+
+	# Migrate a Plesk for Windows backup
+	{ 'command' => 'migrate-domain.pl',
+	  'args' => [ [ 'type', 'plesk' ],
+		      [ 'source', $migration_plesk_windows ],
+		      [ 'domain', $migration_plesk_windows_domain ],
+		      [ 'pass', 'smeg' ] ],
+	  'grep' => [ 'successfully migrated\s+:\s+'.
+			$migration_plesk_windows_domain,
+		      'migrated\s+2\s+users',
+		      'migrated\s+1\s+alias',
+		    ],
+	  'migrate' => 'plesk_windows',
+	  'timeout' => 180,
+	  'always_cleanup' => 1,
+	},
+
+	# Make sure the Plesk domain worked
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $migration_plesk_windows_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Username: sbcher',
+		      'Features: unix dir mail dns web logrotate spam',
+		    ],
+	  'migrate' => 'plesk_windows',
+	},
+
+	# Cleanup the plesk domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $migration_plesk_windows_domain ] ],
+	  'cleanup' => 1,
+	  'migrate' => 'plesk_windows',
+	},
+
 	];
 if (!-d $migration_dir) {
 	$migrate_tests = [ { 'command' => 'echo Migration files under '.$migration_dir.' were not found in this system' } ];

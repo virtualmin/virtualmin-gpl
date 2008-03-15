@@ -141,7 +141,8 @@ if ($domain->{'www'} eq 'true' || -d "$root/$dom/httpdocs") {
 if ($domain->{'ip'}->{'ip-type'} eq 'exclusive' && $virt) {
 	push(@got, "ssl");
 	}
-if ($domain->{'phosting'}->{'logrotation'}->{'enabled'} eq 'true') {
+if ($domain->{'phosting'}->{'logrotation'}->{'enabled'} eq 'true' ||
+    $windows && &indexof("web", @got) >= 0) {
 	push(@got, "logrotate");
 	}
 if ($domain->{'phosting'}->{'webalizer'}) {
@@ -191,7 +192,7 @@ if (!$windows) {
 	}
 else {
 	# Check for Windows mail users
-	local $mailusers = $domain->{'mail'};
+	$mailusers = $domain->{'mail'};
 	if (!$mailusers) {
 		$mailusers = { };
 		}
