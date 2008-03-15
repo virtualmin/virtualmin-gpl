@@ -257,3 +257,8 @@ $procmail_log_times = "$ENV{'WEBMIN_VAR'}/procmail.times";
 $newfeatures_seen_dir = "$module_config_directory/seenfeatures";
 $install_times_file = "$module_config_directory/installtimes";
 
+$disabled_website = "$module_config_directory/disabled.html";
+$disabled_website_dir = "$module_config_directory/disabledweb";
+
+1;
+

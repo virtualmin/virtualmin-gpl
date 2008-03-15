@@ -601,10 +601,6 @@ else {
 return undef;
 }
 
-
-$disabled_website = "$module_config_directory/disabled.html";
-$disabled_website_dir = "$module_config_directory/disabledweb";
-
 # disable_web(&domain)
 # Adds a directive to force all requests to show an error page
 sub disable_web
