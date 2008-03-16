@@ -344,7 +344,7 @@ foreach my $m ("mysql", "postgresql", "ldap-client", "ldap-server",
 	       "ldap-useradmin", $module_name) {
 	local $mdir = "$config_directory/$m";
 	if (-d $mdir) {
-		&set_ownership_permissions(undef, undef, 0750,
+		&set_ownership_permissions(undef, undef, 0751,
 					   $mdir, "$mdir/config");
 		}
 	}
