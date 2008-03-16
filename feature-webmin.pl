@@ -860,12 +860,14 @@ if ($wd->{'reseller'} && $virtualmin_pro) {
 }
 
 # save_module_acl_logged(&acl, user, module)
+# Save an ACL file, with locking and tight permissions
 sub save_module_acl_logged
 {
 local $afile = "$config_directory/$_[2]/$_[1].acl";
 &lock_file($afile);
 &save_module_acl(@_);
 &unlock_file($afile);
+&set_ownership_permissions(undef, undef, 0600, $afile);
 }
 
 # update_extra_webmin(&domain)

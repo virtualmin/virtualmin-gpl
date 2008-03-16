@@ -329,6 +329,26 @@ if (!$cerr) {
 	&write_file("$module_config_directory/last-config", \%config);
 	}
 
+# Make all domains' .acl files non-world-readable
+foreach my $d (grep { !$_->{'parent'} && $_->{'webmin'} } &list_domains()) {
+	local @aclfiles = glob("$config_directory/*/$d->{'user'}.acl");
+	foreach my $f (@aclfiles) {
+		&set_ownership_permissions(undef, undef, 0600, $f);
+		}
+	}
+
+# Make some module config files containing passwords non-world-readable.
+# This is to fix an old Webmin bug that could expose passwords in
+# /etc/webmin/*/config files
+foreach my $m ("mysql", "postgresql", "ldap-client", "ldap-server",
+	       "ldap-useradmin") {
+	local $mdir = "$config_directory/$m";
+	if (-d $mdir) {
+		&set_ownership_permissions(undef, undef, 0750,
+					   $mdir, "$mdir/config");
+		}
+	}
+
 # Record the install time for this version
 local %itimes;
 &read_file($install_times_file, \%itimes);
