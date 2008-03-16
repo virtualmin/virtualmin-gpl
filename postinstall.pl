@@ -341,7 +341,7 @@ foreach my $d (grep { !$_->{'parent'} && $_->{'webmin'} } &list_domains()) {
 # This is to fix an old Webmin bug that could expose passwords in
 # /etc/webmin/*/config files
 foreach my $m ("mysql", "postgresql", "ldap-client", "ldap-server",
-	       "ldap-useradmin") {
+	       "ldap-useradmin", $module_name) {
 	local $mdir = "$config_directory/$m";
 	if (-d $mdir) {
 		&set_ownership_permissions(undef, undef, 0750,
