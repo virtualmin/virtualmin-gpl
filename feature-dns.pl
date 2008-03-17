@@ -635,6 +635,13 @@ if (!$tmpl->{'dns_replace'}) {
 			}
 		}
 
+	# Add the localhost record - yes, I know it's lame, but some
+	# registrars require it!
+	if (!$already{"localhost.$withdot"}) {
+		&bind8::create_record($file, "localhost.$withdot", undef,
+				      "IN", "A", "127.0.0.l");
+		}
+
 	# For mail domains, add MX to this server
 	if ($d->{'mail'}) {
 		&create_mx_records($file, $d, $ip);
