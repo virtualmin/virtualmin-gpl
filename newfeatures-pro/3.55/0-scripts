@@ -1,0 +1,6 @@
+desc=New script installers
+html=Updated the osTicket script installer to versoin 1.6.rc4.
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}

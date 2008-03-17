@@ -856,3 +856,5 @@ When email is disabled for a domain, only MX and mail records pointing to the Vi
 When restoring a backup of a domain that doesn't exist on the system, it's IP address can be changed or re-allocated from the range available on your system. This makes migration of domains with private IP addresses between systems on different networks easier.
 The list of new features includes the date Virtualmin was installed.
 Email to domain owners for over-bandwidth warnings, new script notifications and others can now come from their resellers' addresses, if set. This behaviour must be enabled using a new setting on the <b>Module Config</b> page, under <b>Actions upon server and user creation</b>.
+---- Changes since 3.54 ----
+Updated the osTicket script installer to versoin 1.6.rc4.
