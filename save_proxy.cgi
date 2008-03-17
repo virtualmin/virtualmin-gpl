@@ -13,6 +13,10 @@ if ($in{'enabled'}) {
 	# Activate or update
 	$d->{'proxy_pass_mode'} = 1;
 	$in{'url'} =~ /^(http|https):\/\/\S+$/ || &error($text{'frame_eurl'});
+	if ($in{'url'} =~ /(http|https):\/\/[^\/]+$/) {
+		# Add trailing / if URL is like http://foo.com
+		$in{'url'} .= "/";
+		}
 	$d->{'proxy_pass'} = $in{'url'};
 	}
 else {
