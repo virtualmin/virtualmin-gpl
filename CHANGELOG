@@ -857,6 +857,6 @@ When restoring a backup of a domain that doesn't exist on the system, it's IP ad
 The list of new features includes the date Virtualmin was installed.
 Email to domain owners for over-bandwidth warnings, new script notifications and others can now come from their resellers' addresses, if set. This behaviour must be enabled using a new setting on the <b>Module Config</b> page, under <b>Actions upon server and user creation</b>.
 ---- Changes since 3.54 ----
-Updated the osTicket script installer to version 1.6.rc4, and Php-Wiki to 1.2.11.
+Updated the osTicket script installer to version 1.6.rc4, Instiki to 0.13.0, and Php-Wiki to 1.2.11.
 New DNS domains have the localhost A record added, with an IP of 127.0.0.1.
 When a script is installed into a path that is already served by a proxy (such as for a rails application on /), a negating proxy rule is added so that the script is accessible.
