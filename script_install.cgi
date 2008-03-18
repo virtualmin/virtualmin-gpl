@@ -135,6 +135,9 @@ if ($modok) {
 if ($modok) {
 	$modok = &setup_ruby_modules($d, $script, $ver, $opts);
 	}
+if ($modok) {
+	$modok = &setup_noproxy_path($d, $script, $ver, $opts);
+	}
 if (!$modok) {
 	&ui_print_footer("list_scripts.cgi?dom=$in{'dom'}",
 			 $text{'scripts_return'},

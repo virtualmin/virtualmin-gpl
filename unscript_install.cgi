@@ -53,6 +53,10 @@ if ($in{'confirm'}) {
 		# Remove any custom PHP directory
 		&clear_php_version($d, $sinfo);
 
+		# Remove custom proxy path
+		&delete_noproxy_path($d, $script, $sinfo->{'version'},
+				     $sinfo->{'opts'});
+
 		# Record script un-install in domain
 		&remove_domain_script($d, $sinfo);
 

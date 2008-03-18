@@ -859,3 +859,4 @@ Email to domain owners for over-bandwidth warnings, new script notifications and
 ---- Changes since 3.54 ----
 Updated the osTicket script installer to version 1.6.rc4.
 New DNS domains have the localhost A record added, with an IP of 127.0.0.1.
+When a script is installed into a path that is already served by a proxy (such as for a rails application on /), a negating proxy rule is added so that the script is accessible.

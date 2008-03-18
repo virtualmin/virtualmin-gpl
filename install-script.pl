@@ -234,6 +234,9 @@ if (!&setup_perl_modules($d, $script, $ver, $opts)) {
 if (!&setup_ruby_modules($d, $script, $ver, $opts)) {
 	exit(1);
 	}
+if (!&setup_noproxy_path($d, $script, $ver, $opts)) {
+	exit(1);
+	}
 
 # Apply Apache config if needed, for new PHP version or modules or settings
 &run_post_actions();

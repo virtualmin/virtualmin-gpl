@@ -6689,6 +6689,8 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 		next if (!$modok);
 		$modok = &setup_ruby_modules($d, $script, $ver, $opts);
 		next if (!$modok);
+		$modok = &setup_noproxy_path($d, $script, $ver, $opts);
+		next if (!$modok);
 
 		# Find the database, if requested
 		if ($sinfo->{'db'}) {

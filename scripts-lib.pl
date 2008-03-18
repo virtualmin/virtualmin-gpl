@@ -1699,5 +1699,84 @@ for(my $i=0; $i<@$lref; $i++) {
 return undef;
 }
 
+# setup_noproxy_path(&domain, &script, ver, &opts)
+# If a script isn't using proxying, ensure that it's path is not blocked.
+# Prints messages, and returns 1 on success, 0 on failure.
+sub setup_noproxy_path
+{
+local ($d, $script, $ver, $opts) = @_;
+
+# Check if the script doesn't use proxying, and if Apache supports negatives
+return 1 if (&indexof("proxy", @{$script->{'uses'}}) >= 0);
+return 1 if (!&has_proxy_balancer($d) || !&has_proxy_none());
+
+# Check if a proxy exists for a parent path
+local @proxies = &list_proxy_balancers($d);
+local $clash;
+foreach my $p (@proxies) {
+	if (!$p->{'none'} &&
+	    ($p->{'path'} eq '/' ||
+	     $p->{'path'} eq $opts->{'path'} ||
+	     substr($opts->{'path'}, 0, length($p->{'path'})+1) eq
+	     $p->{'path'}."/")) {
+		$clash = $p;
+		last;
+		}
+	}
+
+# Check if we are already negating this path
+foreach my $p (@proxies) {
+	if ($p->{'path'} eq $opts->{'path'} && $p->{'none'}) {
+		return 1;
+		}
+	}
+
+local $err;
+if ($clash && $clash->{'path'} eq $opts->{'path'}) {
+	# Remove direct clash
+	&$first_print(&text('scripts_delproxy', $opts->{'path'}));
+	$err = &delete_proxy_balancer($d, $clash);
+	}
+elsif ($clash) {
+	# Add a negative override
+	&$first_print(&text('scripts_addover', $opts->{'path'}));
+	local $over = { 'path' => $opts->{'path'}, 'none' => 1 };
+	$err = &create_proxy_balancer($d, $over);
+	}
+else {
+	# Nothing needs to be done
+	return 1;
+	}
+if ($err) {
+	&$second_print(&text('scripts_proxyfailed', $err));
+	return 0;
+	}
+else {
+	&$second_print($text{'setup_done'});
+	return 1;
+	}
+}
+
+# delete_noproxy_path(&domain, &script, ver, &opts)
+# Delete any negative proxy for a script, as created by setup_noproxy_path
+sub delete_noproxy_path
+{
+local ($d, $script, $ver, $opts) = @_;
+
+# Check if the script doesn't use proxying, and if Apache supports negatives
+return 0 if (&indexof("proxy", @{$script->{'uses'}}) >= 0);
+return 0 if (!&has_proxy_balancer($d) || !&has_proxy_none());
+
+# Find and remove the negator
+local @proxies = &list_proxy_balancers($d);
+foreach my $p (@proxies) {
+	if ($p->{'path'} eq $opts->{'path'} && $p->{'none'}) {
+		&delete_proxy_balancer($d, $p);
+		return 1;
+		}
+	}
+return 0;
+}
+
 1;
 
