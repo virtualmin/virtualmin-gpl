@@ -639,7 +639,7 @@ if (!$tmpl->{'dns_replace'}) {
 	# registrars require it!
 	if (!$already{"localhost.$withdot"}) {
 		&bind8::create_record($file, "localhost.$withdot", undef,
-				      "IN", "A", "127.0.0.l");
+				      "IN", "A", "127.0.0.1");
 		}
 
 	# For mail domains, add MX to this server
