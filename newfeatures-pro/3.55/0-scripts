@@ -1,5 +1,5 @@
 desc=New script installers
-html=Updated the osTicket script installer to version 1.6.rc4.
+html=Updated the osTicket script installer to version 1.6.rc4, and Php-Wiki to 1.2.11.
 master=1
 reseller=1
 domain=1
