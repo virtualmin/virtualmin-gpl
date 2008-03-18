@@ -28,7 +28,6 @@ while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--source") {
 		$src = shift(@ARGV);
-		-r $src || &usage("Source file does not exist");
 		}
 	elsif ($a eq "--type") {
 		$type = shift(@ARGV);
@@ -107,6 +106,17 @@ else {
 	$ip = &get_default_ip();
 	}
 
+# Download the file, if needed
+($mode) = &parse_backup_url($src);
+$mode > 0 || -r $src || &usage("Source file does not exist");
+$oldsrc = $src;
+if ($mode > 0) {
+	$temp = &transname();
+	$err = &download_backup($src, $temp);
+	$err && &usage("Download failed : $err");
+	$src = $temp;
+	}
+
 # Validate the file
 $vfunc = "migration_${type}_validate";
 $err = &$vfunc($src, $domain, $user, $parent, $prefix, $pass);
@@ -115,7 +125,8 @@ if ($err) {
 	}
 
 # Start the migration
-print "Starting migration of $domain from $src ..\n\n";
+print "Starting migration of $domain from ".
+	&html_tags_to_text(&nice_backup_url($oldsrc))." ..\n\n";
 &lock_domain_name($domain);
 $mfunc = "migration_${type}_migrate";
 @doms = &$mfunc($src, $domain, $user, $webmin, $template,
@@ -149,6 +160,14 @@ print "                         [--ip address] [--allocate-ip]\n";
 print "                         [--ip-already]\n";
 print "                         [--parent domain]\n";
 print "                         [--prefix string]\n";
+print "\n";
+print "The source can be one of :\n";
+print " - A local file, like /backup/yourdomain.com.tgz\n";
+print " - An FTP destination, like ftp://login:pass\@server/backup/yourdomain.com.tgz\n";
+print " - An SSH destination, like ssh://login:pass\@server/backup/yourdomain.com.tgz\n";
+if ($virtualmin_pro) {
+	print " - An S3 bucket, like s3://accesskey:secretkey\@bucket\n";
+	}
 exit(1);
 }
 
