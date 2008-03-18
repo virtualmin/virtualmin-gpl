@@ -5590,6 +5590,9 @@ elsif ($_[0] =~ /^s3:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
 elsif ($_[0] eq "download:") {
 	return (4, undef, undef, undef, undef, undef);
 	}
+elsif ($_[0] eq "upload:") {
+	return (5, undef, undef, undef, undef, undef);
+	}
 elsif (!$_[0] || $_[0] =~ /^\//) {
 	# Absolute path
 	@rv = (0, undef, undef, undef, $_[0], undef);
@@ -5627,16 +5630,23 @@ elsif ($proto == 3) {
 elsif ($proto == 0) {
 	return &text('backup_nicefile', "<tt>$path</tt>");
 	}
+elsif ($proto == 4) {
+	return $text{'backup_nicedownload'};
+	}
+elsif ($proto == 5) {
+	return $text{'backup_niceupload'};
+	}
 else {
 	return $url;
 	}
 }
 
-# show_backup_destination(name, value, no-local, [&domain], [nodownload])
+# show_backup_destination(name, value, no-local, [&domain], [no-download],
+#			  [no-upload])
 # Returns HTML for fields for selecting a local or FTP file
 sub show_backup_destination
 {
-local ($name, $value, $nolocal, $d, $nodownload) = @_;
+local ($name, $value, $nolocal, $d, $nodownload, $noupload) = @_;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($_[1]);
 local $defport = $mode == 1 ? 21 : $mode == 2 ? 22 : undef;
 local $serverport = $port && $port != $defport ? "$server:$port" : $server;
@@ -5717,7 +5727,16 @@ if (!$nodownload) {
 		      $text{'backup_mode4desc'}."<p>" ]);
 	}
 
-return &ui_radio_selector(\@opts, $name."_mode", $mode);
+if (!$noupload) {
+	# Show mode to upload to server
+	push(@opts, [ 5, $text{'backup_mode5'},
+		      &ui_upload($name."_upload", 40) ]);
+	}
+
+return &ui_table_start(undef, 2).
+       &ui_table_row(undef, 
+	&ui_radio_selector(\@opts, $name."_mode", $mode), 2).
+       &ui_table_end();
 }
 
 # parse_backup_destination(name, &in, no-local, [&domain])
@@ -5778,6 +5797,11 @@ elsif ($mode == 3 && &can_use_s3()) {
 elsif ($mode == 4) {
 	# Just download
 	return "download:";
+	}
+elsif ($mode == 5) {
+	# Uploaded file
+	$in{$_[0]."_upload"} || &error($text{'backup_eupload'});
+	return "upload:";
 	}
 else {
 	&error($text{'backup_emode'});

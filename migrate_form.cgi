@@ -12,29 +12,37 @@ print "$text{'migrate_desc'}<p>\n";
 print &ui_form_start("migrate.cgi", "form-data");
 print &ui_table_start($text{'migrate_header'}, "width=100%", 2, [ "width=30%"]);
 
+# Source file
 print &ui_table_row($text{'migrate_file'},
-	&ui_radio("mode", 0,
-		[ [ 0, &text('migrate_file0', &ui_upload("upload"))."<br>" ],
-		  [ 1, &text('migrate_file1', &ui_textbox("file", undef, 50)).
-		         &file_chooser_button("file") ] ]));
+	&show_backup_destination("src", undef, 0, undef, 1, 0));
+#	&ui_radio("mode", 0,
+#		[ [ 0, &text('migrate_file0', &ui_upload("upload"))."<br>" ],
+#		  [ 1, &text('migrate_file1', &ui_textbox("file", undef, 50)).
+#		         &file_chooser_button("file") ] ]));
 
+# Source type (plesk, cpanel, etc..)
 print &ui_table_row($text{'migrate_type'},
 		    &ui_select("type", undef,
 			[ map { [ $_, $text{'migrate_'.$_} ] }
 			      @migration_types ]));
 
+# Domain to extract
 print &ui_table_row($text{'migrate_dom'},
 		   &ui_textbox("dom", undef, 60));
 
+# Username, if needed
 print &ui_table_row($text{'migrate_user'},
 		    &ui_opt_textbox("user", undef, 20, $text{'migrate_auto2'}));
 
+# Password, if needed
 print &ui_table_row($text{'migrate_pass'},
 		    &ui_opt_textbox("pass", undef, 20, $text{'migrate_auto2'}));
 
+# Create Webmin user?
 print &ui_table_row($text{'migrate_webmin'},
 		    &ui_yesno_radio("webmin", 1));
 
+# Template to use
 foreach $t (&list_templates()) {
 	next if ($t->{'deleted'});
 	next if (!$t->{'for_parent'});	# XXX

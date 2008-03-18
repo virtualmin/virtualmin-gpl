@@ -126,7 +126,8 @@ print &ui_hidden_table_end("features");
 print &ui_hidden_table_start($text{'backup_headerdest'}, "width=100%", 2,
 			     "dest", 1, \@tds);
 print &ui_table_row(&hlink($text{'backup_dest'}, "backup_dest"),
-	    &show_backup_destination("dest", $dest, $cbmode == 2, $d, !$d)."\n".
+	    &show_backup_destination("dest", $dest, $cbmode == 2, $d, !$d, 1).
+	    "\n".
 	    &ui_checkbox("strftime", 1,
 			 &hlink($text{'backup_strftime'}, "backup_strftime"),
 			 $backup_strftime)."<br>\n".

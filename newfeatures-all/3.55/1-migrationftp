@@ -1,0 +1,4 @@
+desc=Migration from FTP or SSH server
+html=When migrating a domain from other control panel like Plesk, you can now select to have to downloaded directly from a remote FTP or SSH server. The migrate-domain.pl command-line script also allows use of ftp:// or ssh:// URLs for backup sources.
+master=1
+link=migrate_form.cgi

@@ -110,23 +110,32 @@ else {
 ($mode) = &parse_backup_url($src);
 $mode > 0 || -r $src || &usage("Source file does not exist");
 $oldsrc = $src;
+$nice = &html_tags_to_text(&nice_backup_url($oldsrc));
 if ($mode > 0) {
+	&$first_print("Downloading migration file from $nice ..");
 	$temp = &transname();
 	$err = &download_backup($src, $temp);
-	$err && &usage("Download failed : $err");
+	if ($err) {
+		&$second_print(".. download failed : $err");
+		exit(2);
+		}
 	$src = $temp;
+	@st = stat($src);
+	&$second_print(".. downloaded ".&nice_size($st[7]));
 	}
 
 # Validate the file
+&$first_print("Validating migration file ..");
 $vfunc = "migration_${type}_validate";
 $err = &$vfunc($src, $domain, $user, $parent, $prefix, $pass);
 if ($err) {
-	&usage("Failed to validate source file : $err");
+	&$second_print(".. validation failed : $err");
+	exit(3);
 	}
+&$second_print(".. done");
 
 # Start the migration
-print "Starting migration of $domain from ".
-	&html_tags_to_text(&nice_backup_url($oldsrc))." ..\n\n";
+print "Starting migration of $domain from $nice ..\n\n";
 &lock_domain_name($domain);
 $mfunc = "migration_${type}_migrate";
 @doms = &$mfunc($src, $domain, $user, $webmin, $template,

@@ -1,6 +1,5 @@
 #!/usr/local/bin/perl
 # Migrate some virtual server backup file
-# XXX allow specification of parent when migrating/importing
 
 require './virtual-server-lib.pl';
 &can_migrate_servers() || &error($text{'migrate_ecannot'});
@@ -8,18 +7,14 @@ require './virtual-server-lib.pl';
 &ReadParseMime();
 &require_migration();
 
-# Validate inputs
-if ($in{'mode'} == 0) {
-	$in{'upload'} || &error($text{'migrate_eupload'});
-	$file = &transname();
-	open(FILE, ">$file");
-	print FILE $in{'upload'};
-	close(FILE);
+# Parse source file input
+$src = &parse_backup_destination("src", \%in, 0, undef);
+($mode) = &parse_backup_url($src);
+if ($mode == 0) {
+	-r $src || &error($text{'migrate_efile'});
 	}
-else {
-	-r $in{'file'} || &error($text{'migrate_efile'});
-	$file = $in{'file'};
-	}
+
+# Validate other inputs
 $in{'dom'} =~ /^[a-z0-9\.\-\_]+$/i || &error($text{'migrate_edom'});
 &get_domain_by("dom", $in{'dom'}) && &error($text{'migrate_eclash'});
 if (!$in{'user_def'}) {
@@ -44,22 +39,48 @@ if (!$in{'prefix_def'}) {
 	}
 $in{'email_def'} || $in{'email'} =~ /\S/ || &error($text{'setup_eemail'});
 
-# Validate the file
-$vfunc = "migration_$in{'type'}_validate";
-$err = &$vfunc($file, $in{'dom'}, $user, $parent, $prefix, $pass);
-&error($err) if ($err);
+&ui_print_unbuffered_header(undef, $text{'migrate_title'}, "");
 
-&ui_print_header(undef, $text{'migrate_title'}, "");
+# Download the file
+$oldsrc = $src;
+$nice = &nice_backup_url($oldsrc);
+if ($mode == 5) {
+	# Uploaded data .. save to temp file
+	$src = &transname();
+	&open_tempfile(SRC, ">$src", 0, 1);
+	&print_tempfile(SRC, $in{'src_upload'});
+	&close_tempfile(SRC);
+	}
+elsif ($mode > 0) {
+	# Fetch from some server
+	&$first_print(&text('migrate_downloading', $nice));
+	$temp = &transname();
+	$err = &download_backup($src, $temp);
+	if ($err) {
+		&$second_print(&text('migrate_edownload', $err));
+		goto DONE;
+		}
+	$src = $temp;
+	@st = stat($src);
+	&$second_print(&text('migrate_downloaded', &nice_size($st[7])));
+	}
+
+# Validate the file
+&$first_print($text{'migrate_validating'});
+$vfunc = "migration_$in{'type'}_validate";
+$err = &$vfunc($src, $in{'dom'}, $user, $parent, $prefix, $pass);
+if ($err) {
+	&$second_print(&text('migrate_evalidate', $err));
+	goto DONE;
+	}
+&$second_print($text{'setup_done'});
 
 # Call the migration function
 &lock_domain_name($in{'dom'});
-&$first_print($in{'mode'} == 0 ?
-		&text('migrate_doing0', "<tt>$in{'dom'}</tt>") :
-		&text('migrate_doing1', "<tt>$in{'dom'}</tt>",
-		      "<tt>$in{'file'}</tt>"));
+&$first_print(&text('migrate_doing1', "<tt>$in{'dom'}</tt>", $nice));
 &$indent_print();
 $mfunc = "migration_$in{'type'}_migrate";
-@doms = &$mfunc($file, $in{'dom'}, $user, $in{'webmin'}, $in{'template'},
+@doms = &$mfunc($src, $in{'dom'}, $user, $in{'webmin'}, $in{'template'},
 		$ip, $virt, $pass, $parent, $prefix,
 		$virtalready, $in{'email_def'} ? undef : $in{'email'});
 &run_post_actions();
@@ -77,5 +98,6 @@ else {
 	&$second_print(&text('migrate_failed'));
 	}
 
+DONE:
 &ui_print_footer("", $text{'index_return'});
 
