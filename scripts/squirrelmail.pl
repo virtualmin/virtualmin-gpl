@@ -21,7 +21,7 @@ sub script_squirrelmail_versions
 return ( "1.4.13" );
 }
 
-sub  script_squirrelmail_version_desc
+sub script_squirrelmail_version_desc
 {
 local ($ver) = @_;
 return $ver < 1.5 ? "$ver (Stable)" : "$ver (Development)";

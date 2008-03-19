@@ -1,5 +1,5 @@
 desc=New script installers
-html=Updated the osTicket script installer to version 1.6.rc4, Instiki to 0.13.0, and Php-Wiki to 1.2.11.
+html=Updated the osTicket script installer to version 1.6.rc4, Instiki to 0.13.0, and Php-Wiki to 1.2.11. Also added the latest 1.70+ build of LimeSurvey.
 master=1
 reseller=1
 domain=1
