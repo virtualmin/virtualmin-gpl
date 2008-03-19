@@ -37,6 +37,20 @@ if ($tmpl->{'skel'} ne "none" && !$_[0]->{'nocopyskel'}) {
 			 $_[0]->{'group'} || $_[0]->{'ugroup'}, $_[0]);
 	}
 
+# If this is a sub-domain, move public_html from any skeleton to it's sub-dir
+# under the parent
+if ($_[0]->{'subdom'}) {
+	local $phsrc = &public_html_dir($_[0], 0, 1);
+	local $phdst = &public_html_dir($_[0], 0, 0);
+	if (-d $phsrc && !-d $phdst) {
+		&make_dir($phdst, 0755);
+		&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'gid'},
+					   undef, $phdst);
+		&copy_source_dest($phsrc, $phdst);
+		&unlink_file($phsrc);
+		}
+	}
+
 # Setup sub-directories
 local $d;
 foreach $d (&virtual_server_directories($_[0])) {

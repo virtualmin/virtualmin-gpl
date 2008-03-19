@@ -861,3 +861,4 @@ Updated the osTicket script installer to version 1.6.rc4, Instiki to 0.13.0, and
 New DNS domains have the localhost A record added, with an IP of 127.0.0.1.
 When a script is installed into a path that is already served by a proxy (such as for a rails application on /), a negating proxy rule is added so that the script is accessible.
 When migrating a domain from other control panel like Plesk, you can now select to have to downloaded directly from a remote FTP or SSH server. The migrate-domain.pl command-line script also allows use of ftp:// or ssh:// URLs for backup sources.
+If the skeleton directory contains a public_html sub-directory, it is copied to a sub-domain's web pages directory when the domain is created.

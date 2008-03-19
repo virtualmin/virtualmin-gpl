@@ -228,8 +228,11 @@ if ($parentdomain) {
 	$parent || &usage("Parent domain does not exist");
 	$alias = $parent if ($aliasdomain);
 	$subdom = $parent if ($subdomain);
-	!$subdomain || $domain =~ /\.\Q$subdomain\E$/ ||
-		&usage("Sub-domain $domain must be under the parent domain $subdomain");
+	if ($subdomain) {
+		$domain =~ /^(\S+)\.\Q$subdomain\E$/ ||
+			&usage("Sub-domain $domain must be under the parent domain $subdomain");
+		$subprefix = $1;
+		}
 	}
 
 # Allow user and group names
@@ -445,6 +448,7 @@ $pclash && &usage($text{'setup_eprefix2'});
 	 'nocreationmail', $nocreationmail,
 	 'noslaves', $noslaves,
 	 'nosecondaries', $nosecondaries,
+	 'subprefix', $subprefix,
         );
 if (!$parent) {
 	if ($tlimit) {
