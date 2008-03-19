@@ -314,8 +314,13 @@ else {
 		}
 	$dom{'db'} = $in{'db'};
 	}
-my $f;
-foreach $f (@features, @feature_plugins) {
+
+# Set selected features in domain object
+# Special magic - if the dir feature is enabled by default and this is an alias
+# domain, don't set it
+foreach my $f (@features, @feature_plugins) {
+	next if ($f eq 'dir' && $config{$f} == 3 && $aliasdom &&
+                 $tmpl->{'aliascopy'});
 	$dom{$f} = &can_use_feature($f) && int($in{$f});
 	}
 &set_featurelimits_from_template(\%dom, $tmpl);
