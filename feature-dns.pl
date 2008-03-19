@@ -1016,6 +1016,7 @@ foreach $r (@recs) {
 		}
 	$end = $r->{'eline'};
 	}
+undef($bind8::get_chroot_cache);	# Reset cache back
 return ($start, $end);
 }
 
@@ -1210,9 +1211,10 @@ if ($in{"dns_mode"} == 2) {
 	&open_tempfile(TEMP, ">$temp");
 	&print_tempfile(TEMP, $recs);
 	&close_tempfile(TEMP);
-	$bind8::config{'short_names'} = 0;	# force canonicalization
-	$bind8::config{'chroot'} = '/';		# turn off chroot for temp path
-	$bind8::config{'auto_chroot'} = undef;
+	local $bind8::config{'short_names'} = 0;  # force canonicalization
+	local $bind8::config{'chroot'} = '/';	  # turn off chroot for temp path
+	local $bind8::config{'auto_chroot'} = undef;
+	undef($bind8::get_chroot_cache);
 	local @recs = &bind8::read_zone_file($temp, $fakedom);
 	unlink($temp);
 	foreach $r (@recs) {
@@ -1226,6 +1228,7 @@ if ($in{"dns_mode"} == 2) {
 			   $r->{'type'} eq "A" ||
 			   $r->{'type'} eq "CNAME");
 		}
+	undef($bind8::get_chroot_cache);	# reset cache back
 
 	if ($in{'bind_replace'}) {
 		# Make sure an SOA and NS records exist
@@ -1378,12 +1381,12 @@ local $temp = &transname();
 &print_tempfile(TEMP, $str);
 &close_tempfile(TEMP);
 &require_bind();
-local %oldconfig = %bind8::config;	# turn off chroot temporarily
-$bind8::config{'chroot'} = undef;
-$bind8::config{'auto_chroot'} = undef;
+local $bind8::config{'chroot'} = undef;		# turn off chroot temporarily
+local $bind8::config{'auto_chroot'} = undef;
+undef($bind8::get_chroot_cache);
 local @rv = grep { $_->{'name'} ne 'dummy' }
 	    &bind8::read_config_file($temp, 0);
-%bind8::config = %oldconfig;
+undef($bind8::get_chroot_cache);		# reset cache back
 return @rv;
 }
 

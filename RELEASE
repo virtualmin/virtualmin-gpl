@@ -8,6 +8,8 @@
 	./makemoduledeb.pl --dir virtual-server gpl-virtual-server
 	./makemoduledeb.pl virtual-server-theme
 
+ - run functional-test.pl on xencentos
+
  x Upload to download.webmin.com
 
  x Add to website
