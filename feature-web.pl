@@ -375,7 +375,7 @@ if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
 else {
 	# Update an actual virtual server
 	&obtain_lock_web($_[0]);
-	local ($virt, $vconf) = &get_apache_virtual($_[1]->{'dom'},
+	local ($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
 						    $_[1]->{'web_port'});
 	if ($_[0]->{'name'} != $_[1]->{'name'} ||
 	    $_[0]->{'ip'} ne $_[1]->{'ip'} ||
@@ -384,7 +384,6 @@ else {
 		# Name-based hosting mode or IP has changed .. update the
 		# Listen directives, and the virtual host definition
 		&$first_print($text{'save_apache'});
-		local $conf = &apache::get_config();
 		local $nvstar = &add_name_virtual($_[0], $conf, $_[0]->{'web_port'});
 		&add_listen($_[0], $conf, $_[0]->{'web_port'});
 
@@ -396,6 +395,9 @@ else {
 		$lref->[$virt->{'line'}] =
 			"<VirtualHost $vip:$_[0]->{'web_port'}>";
 		&flush_file_lines();
+		undef(@apache::get_config_cache);
+		($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
+						      $_[1]->{'web_port'});
 		$rv++;
 		&$second_print($text{'setup_done'});
 		}
@@ -408,6 +410,9 @@ else {
 			$lref->[$i] =~ s/$_[1]->{'home'}/$_[0]->{'home'}/g;
 			}
 		&flush_file_lines();
+		undef(@apache::get_config_cache);
+		($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
+						      $_[1]->{'web_port'});
 		$rv++;
 		&$second_print($text{'setup_done'});
 		}
@@ -423,6 +428,9 @@ else {
 				}
 			}
 		&flush_file_lines();
+		undef(@apache::get_config_cache);
+		($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
+						      $_[1]->{'web_port'});
 		$rv++;
 		&$second_print($text{'setup_done'});
 		}
@@ -439,6 +447,9 @@ else {
 				}
 			}
 		&flush_file_lines();
+		undef(@apache::get_config_cache);
+		($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
+						      $_[1]->{'web_port'});
 		$rv++;
 		&$second_print($text{'setup_done'});
 		}
@@ -473,6 +484,9 @@ else {
 		splice(@$lref, $virt->{'line'} + 1,
 		       $virt->{'eline'} - $virt->{'line'} - 1, @lines);
 		&flush_file_lines($virt->{'file'});
+		undef(@apache::get_config_cache);
+		($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
+						      $_[1]->{'web_port'});
 		$rv++;
 		&$second_print($text{'setup_done'});
 		}
@@ -546,13 +560,13 @@ else {
 			$nfn =~ s/$_[1]->{'dom'}/$_[0]->{'dom'}/;
 			&rename_logged($virt->{'file'}, $nfn);
 			&apache::create_webfile_link($nfn);
+			undef(@apache::get_config_cache);
+			($virt, $vconf, $conf) = &get_apache_virtual(
+				$_[1]->{'dom'}, $_[1]->{'web_port'});
 			}
 		&$second_print($text{'setup_done'});
 		}
 	&release_lock_web($_[0]);
-	if ($rv) {
-		undef(@apache::get_config_cache);
-		}
 	&create_framefwd_file($_[0]);
 	if (!$_[0]->{'ssl'}) {
 		# Only re-start here if we won't re-start later after
@@ -834,13 +848,13 @@ foreach $v (&apache::find_directive_struct("VirtualHost", $conf)) {
 	local $vp = $v->{'words'}->[0] =~ /:(\d+)$/ ? $1 : $default_web_port;
 	next if ($vp != $sp);
         local $sn = &apache::find_directive("ServerName", $v->{'members'});
-	return ($v, $v->{'members'}) if (lc($sn) eq $_[0] ||
-					 lc($sn) eq "www.$_[0]");
+	return ($v, $v->{'members'}, $conf) if (lc($sn) eq $_[0] ||
+					        lc($sn) eq "www.$_[0]");
 	local $n;
 	foreach $n (&apache::find_directive_struct(
 			"ServerAlias", $v->{'members'})) {
 		local @lcw = map { lc($_) } @{$n->{'words'}};
-		return ($v, $v->{'members'})
+		return ($v, $v->{'members'}, $conf)
 			if (&indexof($_[0], @lcw) >= 0 ||
 			    &indexof("www.$_[0]", @lcw) >= 0);
 		}
