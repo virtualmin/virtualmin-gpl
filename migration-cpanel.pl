@@ -404,6 +404,7 @@ elsif ($got{'web'}) {
 	&flush_file_lines($virt->{'file'});
 	&register_post_action(\&restart_apache) if (!$got{'ssl'});
 	$dom{'cgi_bin_dir'} = "public_html/cgi-bin";
+	$dom{'cgi_bin_path'} = "$d->{'home'}/$dom{'cgi_bin_dir'}";
 	&save_domain(\%dom);
 	&add_script_language_directives(\%dom, $tmpl, $dom{'web_port'});
 	}

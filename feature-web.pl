@@ -125,6 +125,8 @@ else {
 				$d = "CustomLog $clog $2";
 				}
 			}
+		$_[0]->{'public_html_dir'} = $subdir;
+		$_[0]->{'cgi_bin_dir'} = $subcgi;
 		foreach my $sd ($subdir, $subcgi) {
 			if (!-d $sd) {
 				mkdir($sd, 0755);
@@ -156,6 +158,11 @@ else {
 	&flush_file_lines();
 	$_[0]->{'web_port'} = $web_port;
 	undef(@apache::get_config_cache);
+
+	# Same the HTML and CGI dirs that we set
+	if (!$_[0]->{'alias'} && !$_[0]->{'subdom'}) {
+		&find_html_cgi_dirs($_[0]);
+		}
 
 	if ($proxying) {
 		# Add <Proxy *> section, to ensure that proxypass works
@@ -414,6 +421,7 @@ else {
 		($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
 						      $_[1]->{'web_port'});
 		$rv++;
+		&find_html_cgi_dirs($_[0]);
 		&$second_print($text{'setup_done'});
 		}
 	if ($_[0]->{'alias'} && $_[2] && $_[2]->{'dom'} ne $_[3]->{'dom'}) {
@@ -562,7 +570,7 @@ else {
 			&apache::create_webfile_link($nfn);
 			undef(@apache::get_config_cache);
 			($virt, $vconf, $conf) = &get_apache_virtual(
-				$_[1]->{'dom'}, $_[1]->{'web_port'});
+				$_[0]->{'dom'}, $_[0]->{'web_port'});
 			}
 		&$second_print($text{'setup_done'});
 		}
@@ -1090,6 +1098,9 @@ if ($virt) {
 			}
 		}
 
+	# Set new public_html and cgi-bin paths
+	&find_html_cgi_dirs($_[0]);
+
 	&register_post_action(\&restart_apache);
 	$rv = 1;
 	}
@@ -1208,6 +1219,11 @@ if ($_[0]->{'proxy_pass_mode'} == 2) {
 sub public_html_dir
 {
 local ($d, $rel, $nosubdom) = @_;
+# First check for cache in domain object
+local $want = $rel ? 'public_html_dir' : 'public_html_path';
+if ($d->{$want} && !$nosubdom) {
+	return $d->{$want};
+	}
 if ($d->{'subdom'} && !$nosubdom) {
 	# Under public_html of parent domain
 	local $subdom = &get_domain($d->{'subdom'});
@@ -1235,6 +1251,11 @@ else {
 sub cgi_bin_dir
 {
 local ($d, $rel, $nosubdom) = @_;
+# First check for cache in domain object
+local $want = $rel ? 'cgi_bin_dir' : 'cgi_bin_path';
+if ($d->{$want} && !$nosubdom) {
+	return $d->{$want};
+	}
 local $cdir = $d->{'cgi_bin_dir'} || "cgi-bin";
 if ($d->{'subdom'} && !$nosubdom) {
 	# Under cgi-bin of parent domain
@@ -2185,6 +2206,43 @@ foreach my $port (@ports) {
 		}
 	}
 return $added;
+}
+
+# find_html_cgi_dirs(&domain)
+# Updates the public_html_dir and cgi_bin_dir values in a domain's hash with
+# their paths from Apache.
+sub find_html_cgi_dirs
+{
+local ($d) = @_;
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+if ($virt) {
+	# Set public_html directory from document root
+	local $str = &apache::find_directive_struct("DocumentRoot", $vconf);
+	if ($str) {
+		$d->{'public_html_path'} = $str->{'words'}->[0];
+		if ($d->{'public_html_path'} =~ /^\Q$d->{'home'}\E\/(.*)$/) {
+			$d->{'public_html_dir'} = $1;
+			}
+		else {
+			delete($d->{'public_html_dir'});
+			}
+		}
+
+	# Set CGI directory from ScriptAlias for /cgi-bin/
+	local @str = &apache::find_directive_struct("ScriptAlias", $vconf);
+	@str = grep { $_->{'words'}->[0] eq '/cgi-bin/' ||
+		      $_->{'words'}->[0] eq '/cgi-bin' } @str;
+	if (@str) {
+		$d->{'cgi_bin_path'} = $str[0]->{'words'}->[1];
+		$d->{'cgi_bin_path'} =~ s/\/$//;
+		if ($d->{'cgi_bin_path'} =~ /^\Q$d->{'home'}\E\/(.*)$/) {
+			$d->{'cgi_bin_dir'} = $1;
+			}
+		else {
+			delete($d->{'cgi_bin_dir'});
+			}
+		}
+	}
 }
 
 # obtain_lock_web(&domain)
