@@ -123,6 +123,13 @@ elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
 	$can_alias_comments = 0;
 	$supports_aliascopy = 0;
 	}
+elsif ($config{'mail_system'} == 6) {
+	# Using sendmail for email
+	&foreign_require("exim", "exim-lib.pl");
+	%xconfig = &foreign_config("exim");
+	$can_alias_comments = 0;
+	$supports_aliascopy = 0;
+	}
 }
 
 # list_domain_aliases(&domain, [ignore-plugins])
@@ -229,6 +236,10 @@ elsif ($config{'mail_system'} == 5) {
 		return;
 		}
 	}
+elsif ($config{'mail_system'} == 6) {
+	&exim::add_local_domain( $_[0]->{'dom'} );
+	}
+
 &$second_print($text{'setup_done'});
 
 # Create any aliases specified in the template, if missing
@@ -396,6 +407,10 @@ elsif ($config{'mail_system'} == 5) {
 		return;
 		}
 	}
+elsif ($config{'mail_system'} == 6) {
+	&exim::remove_domain( $_[0]->{'dom'} );
+	}
+
 &$second_print($text{'setup_done'});
 
 if ($config{'delete_virts'} && !$_[1]) {
@@ -570,6 +585,9 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 		elsif ($config{'mail_system'} == 2 ||
 		       $config{'mail_system'} == 4) {
 			&qmailadmin::restart_qmail();
+			}
+		elsif ($config{'mail_system'} == 6) {
+			&exim::restart_exim();
 			}
 		}
 
@@ -827,6 +845,12 @@ elsif ($config{'mail_system'} == 4) {
 	@$rlist = map { lc($_) } @$rlist;
 	$found++ if (&indexof($_[0], @$rlist) >= 0);
 	}
+elsif ($config{'mail_system'} == 6) {
+    local @dlist = &exim::list_aliases();
+	foreach my $d (@dlist) {
+		$found++ if (lc($d) eq lc($_[0]));
+		}
+	}
 return $found;
 }
 
@@ -1039,6 +1063,9 @@ elsif ($config{'mail_system'} == 5) {
 		}
 	return @vpopmail_aliases_cache;
 	}
+elsif ($config{'mail_system'} == 6) {
+	return &exim::list_virtusers();
+	}
 }
 
 # qmail_to_vpopmail(line, domain)
@@ -1139,6 +1166,13 @@ elsif ($config{'mail_system'} == 5) {
 	if ($?) {
 		&error("<tt>$cmd</tt> failed : <pre>$out</pre>");
 		}
+	}
+elsif ($config{'mail_system'} == 6) {
+	$_[0]->{'from'} =~ /^(\S*)\@(\S+)$/;
+	local ($box, $dom) = ($1 || "default", $2);
+	local $alias = { 'name' => "$box",
+			 'dom' => $dom };
+	&exim::delete_alias($alias);
 	}
 &execute_after_virtuser($_[0], 'DELETE_ALIAS');
 }
@@ -1296,6 +1330,20 @@ elsif ($config{'mail_system'} == 5) {
 	&delete_virtuser($_[0]);
 	&create_virtuser($_[1]);
 	}
+elsif ($config{'mail_system'} == 6) {
+	$_[1]->{'from'} =~ /^(\S*)\@(\S+)$/;
+	local ($box, $dom) = ($1 || "default", $2);
+	local $alias = { 'name' => "$box",
+			 'dom' => "$dom",
+			 'values' => $_[1]->{'to'} };
+	$_[0]->{'from'} =~ /^(\S*)\@(\S+)$/;
+	local ($box, $dom) = ($1 || "default", $2);
+	local $old = { 'name' => "$box",
+			 'dom' => "$dom",
+			 'values' => $_[0]->{'to'} };
+	&exim::modify_alias($old,$alias);
+	$_[1]->{'alias'} = $alias;
+	}
 &execute_after_virtuser($_[1], 'MODIFY_ALIAS');
 }
 
@@ -1435,6 +1483,15 @@ elsif ($config{'mail_system'} == 5) {
 			}
 		}
 	}
+elsif ($config{'mail_system'} == 6) {
+	$_[0]->{'from'} =~ /^(\S*)\@(\S+)$/;
+	local ($box, $dom) = ($1 || "default", $2);
+	local $alias = { 'name' => "$box",
+			 'dom' => $dom,
+			 'values' => \@to };
+	&exim::create_alias($alias);
+	$_[0]->{'alias'} = $alias;
+	}
 &execute_after_virtuser($_[0], 'CREATE_ALIAS');
 }
 
@@ -1475,6 +1532,11 @@ elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
 	local ($pid) = &find_byname("qmail-send");
 	return $pid ? 1 : 0;
 	}
+elsif ($config{'mail_system'} == 6) {
+	# Call the postfix module 
+	local ($pid) = &find_byname("exim4");
+	return $pid ? 1 : 0;
+	}
 }
 
 # shutdown_mail_server([return-error])
@@ -1495,6 +1557,10 @@ elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
        $config{'mail_system'} == 5) {
 	# Call the qmail stop function
 	$err = &qmailadmin::stop_qmail();
+	}
+elsif ($config{'mail_system'} == 6) {
+	# Run the sendmail start command
+	$err = &backquote_command("/etc/init.d/exim4 stop", 1);
 	}
 if ($_[0]) {
 	return $err;
@@ -1522,6 +1588,10 @@ elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
        $config{'mail_system'} == 5) {
 	# Call the qmail start function
 	$err = &qmailadmin::start_qmail();
+	}
+elsif ($config{'mail_system'} == 6) {
+	# Run the sendmail start command
+	$err = &backquote_command("/etc/init.d/exim4 start", 1);
 	}
 if ($_[0]) {
 	return $err;
@@ -1601,6 +1671,14 @@ elsif ($config{'mail_system'} == 5) {
 	# Nothing to do for VPOPMail, because it gets created automatically
 	# by vadduser
 	@rv = ( &user_mail_file($_[0]), 1 );
+	}
+elsif ($config{'mail_system'} == 6) {
+	if ($exim::config{'mail_system'} == 0) {
+		$mf = &exim::user_mail_file($_[0]);
+		}
+	elsif ($exim::config{'mail_system'} == 1) {
+		$md = &exim::user_mail_file($_[0]);
+		}
 	}
 
 if ($mf) {
@@ -1802,6 +1880,14 @@ elsif ($config{'mail_system'} == 4) {
 elsif ($config{'mail_system'} == 5) {
 	# Mail dir is under VPOPMail home
 	@rv = ( "$_[0]->{'home'}/Maildir", 1 );
+	}
+elsif ($config{'mail_system'} == 6) { 
+	if (-d "$_[0]->{'home'}/Maildir") {
+		@rv = ( "$_[0]->{'home'}/Maildir", 1 );
+	} 
+	else {
+		@rv = ( "/var/mail/$_[0]->{'user'}", 1 );
+		}
 	}
 return wantarray ? @rv : $rv[0];
 }
@@ -2057,6 +2143,13 @@ return &foreign_installed("postfix", 1) == 2;
 sub sendmail_installed
 {
 return &foreign_installed("sendmail", 1) == 2;
+}
+
+# exim_installed()
+# Returns 1 if exim installed
+sub exim_installed
+{
+return &foreign_installed("exim", 1) == 2;
 }
 
 # qmail_installed()
@@ -2725,6 +2818,7 @@ sub mail_system_needs_group
 return 0 if ($config{'mail_system'} == 5);	# never for vpopmail
 #return 0 if ($config{'mail_system'} == 4 &&	# not for Qmail+LDAP,
 #	     !$config{'ldap_unix'});		# if users are non-unix
+return 0 if ($config{'mail_system'} == 6);	# never for exim
 return 1;
 }
 
@@ -2946,6 +3040,10 @@ elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
 		 [ $text{'sysinfo_mailprog'},
 			"$qmailadmin::config{'qmail_dir'}/bin/qmail-inject" ] );
 	}
+elsif ($config{'mail_system'} == 6) {
+	return ( [ $text{'sysinfo_exim'}, "Unknown" ],
+		 [ $text{'sysinfo_mailprog'}, $prog." -t" ] );
+	}
 else {
 	return ( );
 	}
@@ -3034,6 +3132,7 @@ sub startstop_mail
 {
 local ($typestatus) = @_;
 local $msn = $config{'mail_system'} == 0 ? "postfix" :
+	     $config{'mail_system'} == 6 ? "exim" :
 	     $config{'mail_system'} == 1 ? "sendmail" : "qmailadmin";
 local $ms = $text{'mail_system_'.$config{'mail_system'}};
 local @rv;
