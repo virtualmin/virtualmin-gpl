@@ -8,9 +8,9 @@ local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
 
 # Validate file
 local ($ok, $root) = &extract_ensim_dir($file);
-$ok || return "Not an Ensim tar.gz file : $root";
+$ok || return ("Not an Ensim tar.gz file : $root");
 local $www = "$root/var/www";
--d $www || return "Not an Ensim backup file";
+-d $www || return ("Not an Ensim backup file");
 
 # Check XML file and domain
 local $manifest;
@@ -18,27 +18,34 @@ eval { $manifest = &parse_enim_xml($root); };
 if ($@) {
 	&error($@);
 	}
-$manifest->{'siteIdent'}->{'sitename'} eq $dom ||
-	return "Backup is for domain $manifest->{'siteIdent'}->{'sitename'}, not $dom";
+if (!$dom) {
+	# Work out domain name
+	$dom = $manifest->{'siteIdent'}->{'sitename'};
+	$dom || return ("Could not work out domain name from backup");
+	}
+else {
+	$manifest->{'siteIdent'}->{'sitename'} eq $dom ||
+		return ("Backup is for domain $manifest->{'siteIdent'}->{'sitename'}, not $dom");
+	}
 
 # Check if we can work out the user
 if (!$parent && !$user) {
 	local $service = $manifest->{'siteIdent'}->{'service'};
 	local ($si) = grep { $_->{'serviceName'} eq 'siteinfo' } @$service;
 	$user = $si->{'config'}->{'admin_user'};
-	$user || return "Could not work out original username from backup";
+	$user || return ("Could not work out original username from backup");
 	}
 
 if (!$parent && !$pass) {
-	return "A password must be supplied for Ensim migrations";
+	return ("A password must be supplied for Ensim migrations");
 	}
 
 # Check some clashes
 $prefix ||= &compute_prefix($dom, undef, $parent);
 local $pclash = &get_domain_by("prefix", $prefix);
-$pclash && return "A virtual server using the prefix $prefix already exists";
+$pclash && return ("A virtual server using the prefix $prefix already exists");
 
-return undef;
+return (undef, $dom, $user, $pass);
 }
 
 # migration_ensim_migrate(file, domain, username, create-webmin, template-id,

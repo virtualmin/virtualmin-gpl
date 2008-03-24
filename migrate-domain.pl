@@ -87,7 +87,7 @@ while(@ARGV > 0) {
 		&usage();
 		}
 	}
-$src && $type && $domain || usage();
+$src && $type || usage();
 if ($template eq "") {
 	$template = &get_init_template($parentdomain);
 	}
@@ -127,7 +127,8 @@ if ($mode > 0) {
 # Validate the file
 &$first_print("Validating migration file ..");
 $vfunc = "migration_${type}_validate";
-$err = &$vfunc($src, $domain, $user, $parent, $prefix, $pass);
+($err, $domain, $user, $pass) =
+	&$vfunc($src, $domain, $user, $parent, $prefix, $pass);
 if ($err) {
 	&$second_print(".. validation failed : $err");
 	exit(3);

@@ -28,7 +28,7 @@ print &ui_table_row($text{'migrate_type'},
 
 # Domain to extract
 print &ui_table_row($text{'migrate_dom'},
-		   &ui_textbox("dom", undef, 60));
+		   &ui_opt_textbox("dom", undef, 50, $text{'migrate_auto2'}));
 
 # Username, if needed
 print &ui_table_row($text{'migrate_user'},

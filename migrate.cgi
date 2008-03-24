@@ -15,8 +15,13 @@ if ($mode == 0) {
 	}
 
 # Validate other inputs
-$in{'dom'} =~ /^[a-z0-9\.\-\_]+$/i || &error($text{'migrate_edom'});
-&get_domain_by("dom", $in{'dom'}) && &error($text{'migrate_eclash'});
+if ($in{'dom_def'}) {
+	$domain = undef;
+	}
+else {
+	$in{'dom'} =~ /^[a-z0-9\.\-\_]+$/i || &error($text{'migrate_edom'});
+	$domain = $in{'dom'};
+	}
 if (!$in{'user_def'}) {
 	$in{'user'} =~ /^[a-z0-9\.\-\_]+$/i || &error($text{'migrate_euser'});
 	$user = $in{'user'};
@@ -68,19 +73,24 @@ elsif ($mode > 0) {
 # Validate the file
 &$first_print($text{'migrate_validating'});
 $vfunc = "migration_$in{'type'}_validate";
-$err = &$vfunc($src, $in{'dom'}, $user, $parent, $prefix, $pass);
+($err, $domain, $user, $pass) =
+	&$vfunc($src, $domain, $user, $parent, $prefix, $pass);
 if ($err) {
 	&$second_print(&text('migrate_evalidate', $err));
+	goto DONE;
+	}
+elsif (&get_domain_by("dom", $domain)) {
+	&$second_print($text{'migrate_eclash'});
 	goto DONE;
 	}
 &$second_print($text{'setup_done'});
 
 # Call the migration function
-&lock_domain_name($in{'dom'});
-&$first_print(&text('migrate_doing1', "<tt>$in{'dom'}</tt>", $nice));
+&lock_domain_name($domain);
+&$first_print(&text('migrate_doing1', "<tt>$domain</tt>", $nice));
 &$indent_print();
 $mfunc = "migration_$in{'type'}_migrate";
-@doms = &$mfunc($src, $in{'dom'}, $user, $in{'webmin'}, $in{'template'},
+@doms = &$mfunc($src, $domain, $user, $in{'webmin'}, $in{'template'},
 		$ip, $virt, $pass, $parent, $prefix,
 		$virtalready, $in{'email_def'} ? undef : $in{'email'});
 &run_post_actions();

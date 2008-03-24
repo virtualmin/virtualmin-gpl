@@ -6,52 +6,66 @@ sub migration_cpanel_validate
 {
 local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
 local ($ok, $root) = &extract_cpanel_dir($file);
-$ok || return "Not a cPanel tar.gz file : $root";
+$ok || return ("Not a cPanel tar.gz file : $root");
 local $daily = "$root/backup/cpbackup/daily";
 local ($homedir) = glob("$root/*/homedir");
 local $datastore = "$root/.cpanel-datastore";
 -d $daily || -d $homedir || -d $datastore ||
-	return "Not a cPanel daily or home directory backup file";
+	return ("Not a cPanel daily or home directory backup file");
+
+# Try to work out the domain
+if (!$dom) {
+	local @domfiles = glob("$root/*/vf/*");
+	if (@domfiles == 1 && $domfiles[0] =~ /\/vf\/([^\/]+)$/) {
+		$dom = $1;
+		}
+	else {
+		return ("Could not work on domain name from cPanel backup");
+		}
+	}
 
 if (-d $daily) {
 	# Older style backup - check for user and Apache domain file
 	if (!$user) {
 		local ($tgz) = glob("$daily/*.tar.gz");
 		$tgz =~ /\/([^\/]+)\.tar\.gz$/ ||
-			return "Could not work out username from cPanel backup";
+		    return ("Could not work out username from cPanel backup");
 		$user = $1;
 		}
-	-r "$daily/$user.tar.gz" || return "Could not find directory for $user in backup";
+	-r "$daily/$user.tar.gz" ||
+		return ("Could not find directory for $user in backup");
 	local $httpd = &extract_cpanel_file("$daily/files/_etc_httpd_conf_httpd.conf.gz");
 	local ($vconf, $virt) = &get_apache_virtual($dom, undef, $httpd);
-	$vconf || return "Could not find Apache virtual server $dom in backup";
+	$vconf ||
+	    return ("Could not find Apache virtual server $dom in backup");
 	}
 elsif (-d $homedir) {
 	# Newer style backup - check for aliases file
 	($vfdom) = glob("$root/*/vf/$dom");
-	-r $vfdom || return "Could not find mail aliases file for $dom in backup";
+	-r $vfdom ||
+	    return ("Could not find mail aliases file for $dom in backup");
 	if (!$user) {
 		$homedir =~ /\/backup-([^\/]+)_([^\/]+)\// ||
-			return "Could not work out username from cPanel backup";
+		    return ("Could not work out username from cPanel backup");
 		$user = $2;
 		}
 	}
 else {
 	# Home-only backup
-	$user || return "Could not work out username from cPanel backup";
+	$user || return ("Could not work out username from cPanel backup");
 	}
 
 # Password is needed for cPanel migrations
 if (!$parent && !$pass) {
-	return "A password must be supplied for cPanel migrations";
+	return ("A password must be supplied for cPanel migrations");
 	}
 
 # Check some clashes
 $prefix ||= &compute_prefix($dom, undef, $parent);
 local $pclash = &get_domain_by("prefix", $prefix);
-$pclash && return "A virtual server using the prefix $prefix already exists";
+$pclash && return ("A virtual server using the prefix $prefix already exists");
 
-return undef;
+return (undef, $dom, $user, $pass);
 }
 
 # migration_cpanel_migrate(file, domain, username, create-webmin, template-id,
@@ -404,7 +418,7 @@ elsif ($got{'web'}) {
 	&flush_file_lines($virt->{'file'});
 	&register_post_action(\&restart_apache) if (!$got{'ssl'});
 	$dom{'cgi_bin_dir'} = "public_html/cgi-bin";
-	$dom{'cgi_bin_path'} = "$d->{'home'}/$dom{'cgi_bin_dir'}";
+	$dom{'cgi_bin_path'} = "$dom{'home'}/$dom{'cgi_bin_dir'}";
 	&save_domain(\%dom);
 	&add_script_language_directives(\%dom, $tmpl, $dom{'web_port'});
 	}

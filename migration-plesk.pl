@@ -9,35 +9,40 @@ sub migration_plesk_validate
 {
 local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
 local ($ok, $root) = &extract_plesk_dir($file);
-$ok || return "Not a Plesk 8 backup file : $root";
+$ok || return ("Not a Plesk 8 backup file : $root");
 local $xfile = "$root/dump.xml";
 local $windows = 0;
 if (!-r $xfile) {
 	$xfile = "$root/info.xml";
 	$windows = 1;
 	}
--r $xfile || return "Not a complete Plesk 8 backup file - missing dump.xml";
+-r $xfile || return ("Not a complete Plesk 8 backup file - missing dump.xml or info.xml");
 
 # Check Webmin version
 &get_webmin_version() >= 1.365 ||
-    return "Webmin version 1.365 or later is needed to migrate Plesk domains";
+    return ("Webmin version 1.365 or later is needed to migrate Plesk domains");
 
 # Check if the domain is in there
 local $dump = &read_plesk_xml($xfile);
-ref($dump) || return $dump;
+ref($dump) || return ($dump);
 if (!$windows) {
 	# Linux Plesk format
+	if (!$dom) {
+		# Work out domain name
+		$dom = $dump->{'domain'}->{'name'};
+		$dom || return ("Could not work out domain name from backup");
+		}
 	local $domain = $dump->{'domain'}->{$dom};
 	if (!$domain && $dump->{'domain'}->{'name'} eq $dom) {
 		$domain = $dump->{'domain'};
 		}
-	$domain || return "Backup does not contain the domain $dom";
+	$domain || return ("Backup does not contain the domain $dom");
 
 	if (!$parent && !$user) {
 		# Check if we can work out the user
 		$user = $domain->{'phosting'}->{'sysuser'}->{'name'};
 		$user ||
-		    return "Could not work out original username from backup";
+		    return ("Could not work out original username from backup");
 		}
 
 	if (!$parent && !$pass) {
@@ -45,35 +50,40 @@ if (!$windows) {
 		$pass = $domain->{'phosting'}->{'sysuser'}->{'password'}->{'content'} ||
 			$domain->{'domainuser'}->{'password'}->{'content'};
 		$pass ||
-		    return "Could not work out original password from backup";
+		    return ("Could not work out original password from backup");
 		}
 	}
 else {
 	# On Windows, domain details are in a different place in the XML
+	if (!$dom) {
+		# Work out domain name
+		$dom = $dump->{'clients'}->{'client'}->{'domain'}->{'name'};
+		$dom || return ("Could not work out domain name from backup");
+		}
 	local $domain = $dump->{'clients'}->{'client'}->{'domain'};
 	$domain->{'name'} eq $dom ||
-		return "Backup does not contain the domain $dom";
+		return ("Backup does not contain the domain $dom");
 
 	if (!$parent && !$user) {
 		# Check if we can work out the user
 		$user = $domain->{'hosting'}->{'sys_user'}->{'login'};
 		$user ||
-		    return "Could not work out original username from backup";
+		    return ("Could not work out original username from backup");
 		}
 
 	if (!$parent && !$pass) {
 		# We must have the password
-		$pass || return "A password must be supplied when migrating ".
-				"a Plesk backup";
+		$pass || return ("A password must be supplied when migrating ".
+				 "a Plesk backup");
 		}
 	}
 
 # Check for clashes
 $prefix ||= &compute_prefix($dom, undef, $parent);
 local $pclash = &get_domain_by("prefix", $prefix);
-$pclash && return "A virtual server using the prefix $prefix already exists";
+$pclash && return ("A virtual server using the prefix $prefix already exists");
 
-return undef;
+return (undef, $dom, $user, $pass);
 }
 
 # migration_plesk_migrate(file, domain, username, create-webmin, template-id,

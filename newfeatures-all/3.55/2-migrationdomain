@@ -1,0 +1,4 @@
+desc=Automatic domain migration
+html=When migrating a cPanel, Plesk or Ensim backup, the original domain name can now be worked out automatically, as long as the backup contains just one.
+link=migrate_form.cgi
+master=1
