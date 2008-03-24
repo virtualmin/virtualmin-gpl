@@ -1,4 +1,4 @@
-# Functions for getting and showing new Virtualmin features
+# Functions for getting and showing new Virtualmin or VM2 features
 
 # list_new_features(mod, version)
 # Returns a list of new features in a given Virtualmin or plugin version. Each
@@ -93,7 +93,7 @@ else {
 sub down_one_version
 {
 local ($ver, $mod) = @_;
-if ($mod eq $module_name) {
+if ($mod eq $module_name && $mod !~ /^server-manager/) {
 	return (int($ver*100) - 1)  / 100.0;
 	}
 else {
@@ -121,10 +121,11 @@ local ($d) = @_;
 local @nf = &should_show_new_features();
 return undef if (!@nf);
 local (@rv, @modvers, %modvers);
-local $me = &master_admin() ? 'master' :
+local $me = !defined(&master_admin) ? undef :	# For VM2
+	    &master_admin() ? 'master' :
 	    &reseller_admin() ? 'reseller' : 'domain';
 local %shownf = map { $_, 1 } split(/,/, $config{'show_nf'});
-return undef if (!$shownf{$me});
+return undef if ($me && !$shownf{$me});
 local %donemod;
 foreach my $nf (@nf) {
 	# Get new features in some version. If there were none, stop looking
@@ -134,7 +135,9 @@ foreach my $nf (@nf) {
 	if (!@mrv) {
 		$donemod{$nf->[0]} = 1;
 		}
-	@mrv = grep { $_->{$me} } @mrv;
+	if ($me) {
+		@mrv = grep { $_->{$me} } @mrv;
+		}
 	push(@rv, @mrv);
 	if (@mrv && !$modvers{$mf->[0]}++) {
 		# Create a description for this new version
@@ -165,8 +168,8 @@ foreach my $nf (@nf) {
 return undef if (!@rv);
 @rv = reverse(@rv);
 
-# If not given, pick a domain
-if (!$d) {
+# If not given, pick a domain or server
+if (!$d && defined(&list_domains)) {
 	foreach my $cd (&list_domains()) {
 		if (&can_edit_domain($cd)) {
 			$d = $cd;
@@ -174,6 +177,14 @@ if (!$d) {
 			}
 		}
 	}
+elsif (!$d && defined(&list_managed_servers)) {
+	($d) = &list_managed_servers();
+	}
+
+# Select template function for Virtualmin or VM2
+local $subs = defined(&substitute_domain_template) ?
+	\&substitute_domain_template :
+	\&substitute_template;
 
 # Make the HTML
 local $rv;
@@ -188,7 +199,7 @@ foreach my $nf (@rv) {
 	if ($nf->{'link'}) {
 		# Create link, with domain substitution
 		if ($d || $nf->{'link'} !~ /\$\{/) {
-			$link = $d ? &substitute_domain_template($nf->{'link'}, $d)
+			$link = $d ? &$subs($nf->{'link'}, $d)
 				   : $nf->{'link'};
 			if ($link !~ /^\// && $link !~ /^(http|https):/) {
 				# Assume in this module
