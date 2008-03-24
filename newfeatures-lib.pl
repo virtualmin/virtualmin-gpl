@@ -169,7 +169,12 @@ return undef if (!@rv);
 @rv = reverse(@rv);
 
 # If not given, pick a domain or server
+local @servers;
+if (defined(&list_managed_servers)) {
+	@servers = &list_managed_servers();
+	}
 if (!$d && defined(&list_domains)) {
+	# First Virtualmin domain we can edit
 	foreach my $cd (&list_domains()) {
 		if (&can_edit_domain($cd)) {
 			$d = $cd;
@@ -178,7 +183,8 @@ if (!$d && defined(&list_domains)) {
 		}
 	}
 elsif (!$d && defined(&list_managed_servers)) {
-	($d) = &list_managed_servers();
+	# First VM2 server
+	$d = $servers[0];
 	}
 
 # Select template function for Virtualmin or VM2
@@ -199,6 +205,15 @@ foreach my $nf (@rv) {
 	if ($nf->{'link'}) {
 		# Create link, with domain substitution
 		if ($d || $nf->{'link'} !~ /\$\{/) {
+			# If this is VM2 and the new feature is only for
+			# some type, limit to them
+			if ($module_name =~ /^server-manager/ &&
+			    $nf->{'managers'}) {
+				($d) = grep { &match_server_manager($_,
+					        $nf->{'managers'}) } @servers;
+				}
+
+			# Convert the link template into a real link
 			$link = $d ? &$subs($nf->{'link'}, $d)
 				   : $nf->{'link'};
 			if ($link !~ /^\// && $link !~ /^(http|https):/) {
@@ -221,6 +236,16 @@ $rv .= &ui_form_start("$gconfig{'webprefix'}/$module_name/seen_newfeatures.cgi")
 $rv .= &ui_form_end([ [ undef, $text{'nf_seen'} ] ]);
 
 return $rv;
+}
+
+sub match_server_manager
+{
+local ($server, $managers) = @_;
+return 1 if (!$managers);
+foreach my $m (split(/\s+/, $managers)) {
+	return 1 if ($server->{'manager'} eq $m);
+	}
+return 0;
 }
 
 1;
