@@ -321,6 +321,17 @@ foreach my $f (@features, @feature_plugins) {
 	}
 &set_featurelimits_from_template(\%dom, $tmpl);
 
+# Work out the master admin MySQL password
+if (open(MYSQL, "$userdir/mysql.sql")) {
+	while(<MYSQL>) {
+		s/\r|\n//g;
+		if (/^GRANT USAGE ON \*\.\* TO '(\S+)'\@'(\S+)' IDENTIFIED BY PASSWORD '(\S+)';/ && $1 eq $user) {
+			$dom{'mysql_enc_pass'} = $3;
+			}
+		}
+	close(MYSQL);
+	}
+
 local $orighome;
 if (-d $daily) {
 	# Work out home directory (use cpanel home by default)
