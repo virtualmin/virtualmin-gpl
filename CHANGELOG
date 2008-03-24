@@ -866,3 +866,4 @@ For alias domains whose virtusers are always copied from the target, no home dir
 The path to the public_html and cgi-bin directories is now stored in each new domain's data file, so that they are correctly preserved when the path is changed in the template, or the domain is moved to another system with a different directory name.
 Basic Exim support, thanks to Bill Moyers and John Gray.
 When migrating a cPanel, Plesk or Ensim backup, the original domain name can now be worked out automatically, as long as the backup contains just one.
+For new installs, new features in older versions are not shown on the System Information page.

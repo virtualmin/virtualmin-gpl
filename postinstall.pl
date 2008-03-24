@@ -7,6 +7,10 @@ sub module_install
 {
 &foreign_require("cron", "cron-lib.pl");
 
+# Remember the first version we installed, to avoid showing new features
+# from before it
+$config{'first_version'} ||= &get_base_module_version();
+
 # Make sure the remote.cgi page is accessible in non-session mode
 local %miniserv;
 &get_miniserv_config(\%miniserv);

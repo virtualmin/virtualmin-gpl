@@ -60,7 +60,10 @@ local %seen;
 foreach my $minfo (&list_new_features_modules()) {
 	local $ver = $minfo->{'version'};
 	local $mod = $minfo->{'dir'};
-	while($ver > 0 && (!$seen{$mod} || $seen{$mod} < $ver)) {
+	local %mc = &foreign_config($mod);
+	while($ver > 0 &&
+	      (!$seen{$mod} || $seen{$mod} < $ver) &&
+	      (!$mc{'first_version'} || $mc{'first_version'} <= $ver)) {
 		push(@nf, [ $mod, $ver ]);
 		$ver = &down_one_version($ver, $mod);
 		}
