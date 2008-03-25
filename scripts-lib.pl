@@ -366,7 +366,7 @@ for(my $i=0; $i<@sp1 || $i<@sp2; $i++) {
 		local ($v1n, $v1s) = ($1, $2);
 		$v2 =~ /^(\d+)(\S*)$/;
 		local ($v2n, $v2s) = ($1, $2);
-		$comp = $v1n <=> $v2n || $v1s <=> $v2s;
+		$comp = $v1n <=> $v2n || $v1s cmp $v2s;
 		}
 	else {
 		# String compare
