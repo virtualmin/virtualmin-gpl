@@ -994,6 +994,19 @@ if ($virt) {
 		}
 	&close_tempfile(FILE);
 	&$second_print($text{'setup_done'});
+
+	# If the Apache log is outside the home, back it up too
+	local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
+	if (!&is_under_directory($_[0]->{'home'}, $alog)) {
+		&$first_print($text{'backup_apachelog'});
+		&copy_source_dest($alog, $_[1]."_alog");
+		local $elog = &get_apache_log($_[0]->{'dom'},
+					      $_[0]->{'web_port'}, 1);
+		if (!&is_under_directory($_[0]->{'home'}, $elog)) {
+			&copy_source_dest($elog, $_[1]."_elog");
+			}
+		&$second_print($text{'setup_done'});
+		}
 	return 1;
 	}
 else {
@@ -1115,6 +1128,20 @@ if ($virt) {
 
 	# Set new public_html and cgi-bin paths
 	&find_html_cgi_dirs($_[0]);
+
+	# Copy back log files if they were in the backup
+	if (-r $_[1]."_alog") {
+		&$first_print($text{'restore_apachelog'});
+		local $alog = &get_apache_log($_[0]->{'dom'},
+					      $_[0]->{'web_port'});
+		&copy_source_dest($_[1]."_alog", $alog);
+		if (-r $_[1]."_elog") {
+			local $elog = &get_apache_log($_[0]->{'dom'},
+						      $_[0]->{'web_port'}, 1);
+			&copy_source_dest($_[1]."_elog", $elog);
+			}
+		&$second_print($text{'setup_done'});
+		}
 
 	&register_post_action(\&restart_apache);
 	$rv = 1;
