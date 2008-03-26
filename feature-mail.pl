@@ -846,7 +846,7 @@ elsif ($config{'mail_system'} == 4) {
 	$found++ if (&indexof($_[0], @$rlist) >= 0);
 	}
 elsif ($config{'mail_system'} == 6) {
-    local @dlist = &exim::list_aliases();
+    local @dlist = &exim::list_domains();
 	foreach my $d (@dlist) {
 		$found++ if (lc($d) eq lc($_[0]));
 		}
