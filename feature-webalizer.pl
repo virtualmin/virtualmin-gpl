@@ -152,19 +152,55 @@ sub modify_webalizer
 &require_webalizer();
 &obtain_lock_webalizer($_[0]);
 &obtain_lock_cron($_[0]);
-local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
-if ($_[0]->{'home'} ne $_[1]->{'home'}) {
-	# Update Webalizer configuration to use new log file
-	&$first_print($text{'save_webalizerlog'});
 
-	# Rename the .conf file, which is in Webalizer config format. Also
-	# update any directives that use the old path.
-	local $oldalog = $alog;
-	$oldalog =~ s/$_[0]->{'home'}/$_[1]->{'home'}/;	# because it will
-							# have been renamed
+# Work out the old and new Webalizer log files
+local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
+local $oldalog = &get_old_apache_log($alog, $_[0], $_[1]);
+
+if ($alog ne $oldalog) {
+	# Log file has been renamed - fix up Webmin Webalizer config files
+	&$first_print($text{'save_webalizerlog'});
 	local $oldcfile = &webalizer::config_file_name($oldalog);
 	local $cfile = &webalizer::config_file_name($alog);
-	&rename_logged($oldcfile, $cfile);
+	if ($oldcfile ne $cfile) {
+		&rename_logged($oldcfile, $cfile);
+		}
+	local $oldlcn = &webalizer::log_config_name($oldalog);
+	local $lcn = &webalizer::log_config_name($alog);
+	if ($oldlcn ne $lcn) {
+		&rename_logged($oldlcn, $lcn);
+		}
+
+	# Change log file path in .conf file
+	local $conf = &webalizer::get_config($alog);
+	local $changed;
+	foreach my $c (@$conf) {
+		if ($c->{'value'} =~ /\Q$oldalog\E/) {
+			$c->{'value'} =~ s/\Q$oldalog\E/$alog/g;
+			&webalizer::save_directive($conf, $c->{'name'},
+						   $c->{'value'});
+			$changed = $c->{'file'};
+			}
+		}
+	&flush_file_lines($changed) if ($changed);
+
+	# Change the log file path in the Cron job
+	&foreign_require("cron", "cron-lib.pl");
+	local ($job) = grep
+		{ $_->{'command'} eq "$webalizer::cron_cmd $oldalog" }
+		&cron::list_cron_jobs();
+	if ($job) {
+		$job->{'command'} = "$webalizer::cron_cmd $alog";
+		&cron::change_cron_job($job);
+		}
+	&$second_print($text{'setup_done'});
+	}
+
+if ($_[0]->{'home'} ne $_[1]->{'home'}) {
+	# Change home directory is Webalizer config files
+	&$first_print($text{'save_webalizerhome'});
+
+	# Change home in .conf file
 	local $conf = &webalizer::get_config($alog);
 	local $changed;
 	foreach my $c (@$conf) {
@@ -177,35 +213,23 @@ if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 		}
 	&flush_file_lines($changed) if ($changed);
 
-	# Rename the .log file, which is in Webmin format. Also update the
-	# dir= line in that file
-	local $oldlcn = &webalizer::log_config_name($oldalog);
-	local $lcn = &webalizer::log_config_name($alog);
-	&rename_logged($oldlcn, $lcn);
+	# Change home in .log file
 	local $lconf = &webalizer::get_log_config($alog);
 	$lconf->{'dir'} =~ s/\Q$_[1]->{'home'}\E/$_[0]->{'home'}/g;
 	&webalizer::save_log_config($alog, $lconf);
-
-	# Change the log file path in the Cron job
-	&foreign_require("cron", "cron-lib.pl");
-	local ($job) = grep { $_->{'command'} eq "$webalizer::cron_cmd $oldalog" }
-			    &cron::list_cron_jobs();
-	if ($job) {
-		$job->{'command'} = "$webalizer::cron_cmd $alog";
-		&cron::change_cron_job($job);
-		}
 	&$second_print($text{'setup_done'});
 	}
+
 if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
-	# Update hostname in Webalizer configuration
+	# Update domain name in Webalizer configuration
 	&$first_print($text{'save_webalizer'});
-	local $cfile = &webalizer::config_file_name($alog);
-	local $wconf = &webalizer::get_config($alog);
-	&webalizer::save_directive($wconf, "HostName", $_[0]->{'dom'});
-	&webalizer::save_directive($wconf, "HideReferrer", "*.$_[0]->{'dom'}");
+	local $conf = &webalizer::get_config($alog);
+	&webalizer::save_directive($conf, "HostName", $_[0]->{'dom'});
+	&webalizer::save_directive($conf, "HideReferrer", "*.$_[0]->{'dom'}");
 	&flush_file_lines();
 	&$second_print($text{'setup_done'});
 	}
+
 if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 	# Update Unix user Webliazer is run as
 	&$first_print($text{'save_webalizeruser'});
@@ -215,6 +239,7 @@ if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 	&webalizer::save_log_config($alog, $lconf);
 	&$second_print($text{'setup_done'});
 	}
+
 if ($_[0]->{'stats_pass'}) {
 	# Update password for stats dir
 	&update_create_htpasswd($_[0], $_[0]->{'stats_pass'}, $_[1]->{'user'});

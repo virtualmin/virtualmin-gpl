@@ -90,21 +90,24 @@ else {
 # Adjust path if home directory has changed
 sub modify_logrotate
 {
-if ($_[0]->{'home'} ne $_[1]->{'home'}) {
+# Work out old and new Apache logs
+local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
+local $oldalog = &get_old_apache_log($alog, $_[0], $_[1]);
+local $elog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}, 1);
+local $oldelog = &get_old_apache_log($elog, $_[0], $_[1]);
+
+if ($alog ne $oldalog || $elog ne $oldelog) {
 	&require_logrotate();
 	&$first_print($text{'save_logrotate'});
 	&obtain_lock_logrotate($_[0]);
 
-	# Work out the *old* access log, which will have already been renamed
-	local $oldalog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
-	$oldalog =~ s/$_[0]->{'home'}/$_[1]->{'home'}/;
+	# Fix up the logrotate section for the old file
 	local $lconf = &get_logrotate_section($oldalog);
-
 	if ($lconf) {
 		local $parent = &logrotate::get_config_parent();
-		local $n;
-		foreach $n (@{$lconf->{'name'}}) {
-			$n =~ s/(^|\s)$_[1]->{'home'}/$1$_[0]->{'home'}/g;
+		foreach my $n (@{$lconf->{'name'}}) {
+			$n = $alog if ($alog && $n eq $oldalog);
+			$n = $elog if ($elog && $n eq $oldelog);
 			}
 		&logrotate::save_directive($parent, $lconf, $lconf);
 		&flush_file_lines();

@@ -814,6 +814,21 @@ else {
 	}
 }
 
+# get_old_apache_log(newlog, &domain, &old-domain)
+# Returns the Apache log path that would have been used in the old domain
+sub get_old_apache_log
+{
+local ($alog, $d, $oldd) = @_;
+if ($d->{'home'} ne $oldd->{'home'}) {
+	$alog =~ s/$d->{'home'}/$oldd->{'home'}/;
+	}
+if ($d->{'dom'} ne $oldd->{'dom'} && 
+    !&is_under_directory($d->{'home'}, $alog)) {
+	$alog =~ s/$d->{'dom'}/$oldd->{'dom'}/;
+	}
+return $alog;
+}
+
 # get_apache_template_log(&domain, [errorlog])
 # Returns the log file path that a domain's template would use
 sub get_apache_template_log
