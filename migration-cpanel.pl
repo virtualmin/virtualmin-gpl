@@ -12,12 +12,33 @@ local ($homedir) = glob("$root/*/homedir");
 local $datastore = "$root/.cpanel-datastore";
 -d $daily || -d $homedir || -d $datastore ||
 	return ("Not a cPanel daily or home directory backup file");
+print STDERR "daily=$daily homedir=$homedir\n";
 
 # Try to work out the domain
 if (!$dom) {
 	local @domfiles = glob("$root/*/vf/*");
-	if (@domfiles == 1 && $domfiles[0] =~ /\/vf\/([^\/]+)$/) {
-		$dom = $1;
+	if (!@domfiles) {
+		@domfiles = glob("$root/vf/*");
+		}
+	local @doms = map { /\/vf\/([^\/]+)$/; $1 } @domfiles;
+	if (@doms > 1) {
+		# Hack to work out primary domain
+		local $ds = "$homedir/.cpanel-datastore";
+		$ds = $datastore if (!-d $ds);
+		opendir(DATASTORE, $ds);
+		foreach my $gdi (readdir(DATASTORE)) {
+			if ($gdi =~ /^apache_GETDOMAINIP_(\S+)$/) {
+				$gdi{$1} = 1;
+				}
+			}
+		closedir(DATASTORE);
+		@doms = grep { $gdi{$_} } @doms;
+		}
+	if (@doms == 1) {
+		$dom = $doms[0];
+		}
+	elsif (@doms > 1) {
+		return ("More than one domain name was found in the cPanel backup : ".join(" ", @doms));
 		}
 	else {
 		return ("Could not work on domain name from cPanel backup");
@@ -44,15 +65,20 @@ elsif (-d $homedir) {
 	($vfdom) = glob("$root/*/vf/$dom");
 	-r $vfdom ||
 	    return ("Could not find mail aliases file for $dom in backup");
-	if (!$user) {
-		$homedir =~ /\/backup-([^\/]+)_([^\/]+)\// ||
-		    return ("Could not work out username from cPanel backup");
+	if (!$user && $homedir =~ /\/backup-([^\/]+)_([^\/]+)\//) {
 		$user = $2;
 		}
+	if (!$user) {
+		opendir(ROOT, $root);
+		local @rootfiles = grep { !/^\./ } readdir(ROOT);
+		closedir(ROOT);
+		$user = $rootfiles[0];
+		}
+	$user || return ("Could not work out username from cPanel backup");
 	}
 else {
 	# Home-only backup
-	$user || return ("Could not work out username from cPanel backup");
+	$user || return ("Username must be supplied for this type of cPanel backup");
 	}
 
 # Password is needed for cPanel migrations
@@ -354,6 +380,11 @@ else {
 	# Use Virtualmin's home
 	$dom{'home'} = &server_home_directory(\%dom, $parent);
 	}
+
+# Set cgi directories to cpanel standard
+$dom{'cgi_bin_dir'} = "public_html/cgi-bin";
+$dom{'cgi_bin_path'} = "$dom{'home'}/$dom{'cgi_bin_dir'}";
+
 &complete_domain(\%dom);
 
 # Check for various clashes
@@ -428,8 +459,6 @@ elsif ($got{'web'}) {
 		[ "/cgi-bin $dom{'home'}/public_html/cgi-bin" ], $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	&register_post_action(\&restart_apache) if (!$got{'ssl'});
-	$dom{'cgi_bin_dir'} = "public_html/cgi-bin";
-	$dom{'cgi_bin_path'} = "$dom{'home'}/$dom{'cgi_bin_dir'}";
 	&save_domain(\%dom);
 	&add_script_language_directives(\%dom, $tmpl, $dom{'web_port'});
 	}
@@ -573,7 +602,7 @@ if ($got{'mail'}) {
 		$uinfo->{'gid'} = $dom{'gid'};
 		$uinfo->{'real'} = $mreal;
 		$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$muser";
-		$uinfo->{'shell'} = $nologin_shell;
+		$uinfo->{'shell'} = $nologin_shell->{'shell'};
 		$uinfo->{'email'} = "$muser\@$dom";
 		$uinfo->{'qquota'} = $quota{$muser};
 		$uinfo->{'quota'} = $quota{$muser};
@@ -858,7 +887,7 @@ if ($got{'mysql'}) {
 				$myuinfo->{'gid'} = $dom{'gid'};
 				$myuinfo->{'real'} = "MySQL user";
 				$myuinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$myuser";
-				$myuinfo->{'shell'} = $nologin_shell;
+				$myuinfo->{'shell'} = $nologin_shell->{'shell'};
 				delete($myuinfo->{'email'});
 				$myusers{$myuser} = $myuinfo;
 				}
@@ -932,7 +961,7 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 		if ($already) {
 			# Turn on FTP for existing user
 			local $olduinfo = { %$already };
-			$already->{'shell'} = $ftp_shell;
+			$already->{'shell'} = $ftp_shell->{'shell'};
 			&modify_user($already, $olduinfo, \%dom);
 			}
 		else {
@@ -944,7 +973,7 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 			$fuinfo->{'gid'} = $dom{'gid'};
 			$fuinfo->{'real'} = "FTP user";
 			$fuinfo->{'home'} = $fhome;
-			$fuinfo->{'shell'} = $ftp_shell;
+			$fuinfo->{'shell'} = $ftp_shell->{'shell'};
 			delete($fuinfo->{'email'});
 			$usermap{$fuser} = $fuinfo;
 			&create_user($fuinfo, \%dom);

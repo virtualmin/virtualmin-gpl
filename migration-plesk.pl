@@ -484,7 +484,7 @@ foreach my $name (keys %$mailusers) {
 	$uinfo->{'uid'} = &allocate_uid(\%taken);
 	$uinfo->{'gid'} = $dom{'gid'};
 	$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$name";
-	$uinfo->{'shell'} = $nologin_shell;
+	$uinfo->{'shell'} = $nologin_shell->{'shell'};
 	if ($mailuser->{'mailbox'}->{'enabled'} eq 'true') {
 		$uinfo->{'email'} = $name."\@".$dom;
 		}
@@ -542,7 +542,7 @@ foreach my $mid (keys %$mailusers) {
 	$uinfo->{'uid'} = &allocate_uid(\%taken);
 	$uinfo->{'gid'} = $dom{'gid'};
 	$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$name";
-	$uinfo->{'shell'} = $nologin_shell;
+	$uinfo->{'shell'} = $nologin_shell->{'shell'};
 	$uinfo->{'email'} = $name."\@".$dom;
 	if (&has_home_quotas()) {
 		local $q = $mailuser->{'mbox_quota'} < 0 ? undef :
@@ -638,7 +638,7 @@ if ($got{'mysql'}) {
 			$myuinfo->{'real'} = "MySQL user";
 			$myuinfo->{'home'} =
 				"$dom{'home'}/$config{'homes_dir'}/$myuser";
-			$myuinfo->{'shell'} = $nologin_shell;
+			$myuinfo->{'shell'} = $nologin_shell->{'shell'};
 			delete($myuinfo->{'email'});
 			$myuinfo->{'dbs'} = [ { 'type' => 'mysql',
 					        'name' => $name } ];

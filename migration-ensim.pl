@@ -376,7 +376,7 @@ if ($userident->{$origuser}) {
 		$uinfo->{'gid'} = $dom{'gid'};
 		$uinfo->{'real'} = $uu->{'config'}->{'fullname'};
 		$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$mu";
-		$uinfo->{'shell'} = $nologin_shell;
+		$uinfo->{'shell'} = $nologin_shell->{'shell'};
 		$uinfo->{'email'} = $mu.'@'.$dom;
 		if ($qu) {
 			$uinfo->{'quota'} = $uinfo->{'mquota'} =
