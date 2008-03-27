@@ -93,6 +93,7 @@ if ($no_virtualmin_plugins) {
 @opt_alias_features = ( 'dir', 'mail', 'dns', 'web' );
 @opt_subdom_features = ( 'dir', 'dns', 'web', 'ssl' );
 @alias_features = ( @opt_alias_features );
+@subdom_features = ( @opt_subdom_features );
 @database_features = ( 'mysql', 'postgres' );
 @template_features = ( 'basic', 'limits', @features, 'virt',
 		       $virtualmin_pro ? ( 'virtualmin' ) : ( ),

@@ -100,6 +100,7 @@ $pclash && &error("A virtual server using the prefix $prefix already exists");
 local ($nologin_shell, $ftp_shell, undef, $def_shell) =
 	&get_common_available_shells();
 $nologin_shell ||= $def_shell;
+$ftp_shell ||= $def_shell;
 
 # Extract backup and read the dump file
 local ($ok, $root) = &extract_plesk_dir($file);
@@ -281,6 +282,7 @@ $prefix ||= &compute_prefix($dom, $group, $parent);
 	 'no_tmpl_aliases', 1,
 	 'no_mysql_db', $got{'mysql'} ? 1 : 0,
 	 'nocreationmail', 1,
+	 'nocopyskel', 1,
 	 'parent', $parent ? $parent->{'id'} : undef,
         );
 if (!$parent) {
@@ -637,7 +639,7 @@ if ($got{'mysql'}) {
 			$myuinfo->{'gid'} = $dom{'gid'};
 			$myuinfo->{'real'} = "MySQL user";
 			$myuinfo->{'home'} =
-				"$dom{'home'}/$config{'homes_dir'}/$myuser";
+				"$dom{'home'}/$config{'homes_dir'}/$mname";
 			$myuinfo->{'shell'} = $nologin_shell->{'shell'};
 			delete($myuinfo->{'email'});
 			$myuinfo->{'dbs'} = [ { 'type' => 'mysql',
@@ -710,6 +712,129 @@ foreach my $adom (keys %$aliasdoms) {
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
 	push(@rvdoms, \%alias);
+	}
+
+# Migrate sub-domains
+local $subdoms = $domain->{'phosting'}->{'subdomain'};
+if (!$subdoms) {
+	$subdoms = { };
+	}
+elsif ($subdoms->{'cid_conf'}) {
+	# Just one sub-domain
+	$subdoms = { $subdoms->{'name'} => $subdoms };
+	}
+foreach my $sdom (keys %$subdoms) {
+	local $subdom = $subdoms->{$sdom};
+	&$first_print("Creating sub-domain $sdom.$dom{'dom'} ..");
+	&$indent_print();
+	local %subd = ( 'id', &domain_id(),
+			'dom', $sdom.".".$dom{'dom'},
+			'user', $dom{'user'},
+			'group', $dom{'group'},
+			'prefix', $dom{'prefix'},
+			'ugroup', $dom{'ugroup'},
+			'pass', $dom{'pass'},
+			'subdom', $dom{'id'},
+			'subprefix', $sdom,
+			'uid', $dom{'uid'},
+			'gid', $dom{'gid'},
+			'ugid', $dom{'ugid'},
+			'owner', "Migrated Plesk sub-domain for $dom{'dom'}",
+			'email', $dom{'email'},
+			'name', 1,
+			'ip', $dom{'ip'},
+			'virt', 0,
+			'source', $dom{'source'},
+			'parent', $dom{'id'},
+			'template', $dom{'template'},
+			'reseller', $dom{'reseller'},
+			'nocreationmail', 1,
+			'nocopyskel', 1,
+			);
+	foreach my $f (@subdom_features) {
+		local $want = $f eq 'ssl' ? 0 : 1;
+		$subd{$f} = $dom{$f} && $want;
+		}
+	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+					  : \%dom;
+	$subd{'home'} = &server_home_directory(\%subd, $parentdom);
+	&complete_domain(\%subd);
+	&create_virtual_server(\%subd, $parentdom,
+			       $parentdom->{'user'});
+	&$outdent_print();
+	&$second_print($text{'setup_done'});
+	push(@rvdoms, \%subd);
+
+	# Extract sub-domain's HTML directory
+	local $htdocs = "$root/$subd{'dom'}.httpdocs";
+	if (!-r $htdocs) {
+		$htdocs = "$root/$subd{'dom'}.htdocs";
+		}
+	local $hdir = &public_html_dir(\%subd);
+	if (-r $htdocs) {
+		&$first_print(
+			"Copying web pages for sub-domain $subd{'dom'} ..");
+		local $err = &extract_compressed_file($htdocs, $hdir);
+		if ($err) {
+			&$second_print(".. failed : $err");
+			}
+		else {
+			&set_home_ownership(\%dom);
+			&$second_print(".. done");
+			}
+		}
+
+	# Extract sub-domains CGI directory
+	local $cgis = "$root/$subd{'dom'}.cgi-bin";
+	if (!-r $cgis) {
+		$cgis = "$root/$subd{'dom'}.cgi";
+		}
+	if (-r $cgis) {
+		&$first_print(
+			"Copying CGI scripts for sub-domain $subd{'dom'} ..");
+		local $cdir = &cgi_bin_dir(\%subd);
+		local $err = &extract_compressed_file($cgis, $cdir);
+		if ($err) {
+			&$second_print(".. failed : $err");
+			}
+		else {
+			&set_home_ownership(\%dom);
+			&$second_print(".. done");
+			}
+		}
+
+	# Re-create users for sub-domains
+	&$first_print("Re-creating sub-domain users ..");
+	local $sysusers = $subdom->{'sysuser'};
+	if (!$sysusers) {
+		$sysusers = { };
+		}
+	elsif ($sysusers->{'name'}) {
+		# Just one user
+		$sysusers = { $sysusers->{'name'} => $sysusers };
+		}
+	local $sucount = 0;
+	foreach my $name (keys %$sysusers) {
+		local $mailuser = $sysusers->{$name};
+		local $uinfo = &create_initial_user(\%dom, 0, 1);
+		$uinfo->{'user'} = &userdom_name($name, \%dom);
+		if ($mailuser->{'password'}->{'type'} eq 'plain') {
+			$uinfo->{'plainpass'} =
+				$mailuser->{'password'}->{'content'};
+			$uinfo->{'pass'} = &encrypt_user_password(
+						$uinfo, $uinfo->{'plainpass'});
+			}
+		else {
+			$uinfo->{'pass'} = $mailuser->{'password'}->{'content'};
+			}
+		$uinfo->{'uid'} = $dom{'uid'};
+		$uinfo->{'gid'} = $dom{'gid'};
+		$uinfo->{'home'} = $hdir;
+		$uinfo->{'shell'} = $ftp_shell->{'shell'};
+		&create_user($uinfo, \%dom);
+		$sucount++;
+		}
+	&$second_print(".. created $sucount");
 	}
 
 return (\%dom, @rvdoms);

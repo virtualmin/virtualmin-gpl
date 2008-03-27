@@ -192,6 +192,7 @@ $prefix ||= &compute_prefix($dom, $group, $parent);
 	 'no_tmpl_aliases', 1,
 	 'no_mysql_db', $got{'mysql'} ? 1 : 0,
 	 'nocreationmail', 1,
+	 'nocopyskel', 1,
 	 'parent', $parent ? $parent->{'id'} : undef,
         );
 if (!$parent) {
