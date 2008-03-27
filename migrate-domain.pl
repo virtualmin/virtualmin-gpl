@@ -83,6 +83,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--email") {
 		$email = shift(@ARGV);
 		}
+	elsif ($a eq "--delete-existing") {
+		$delete_existing = 1;
+		}
 	else {
 		&usage();
 		}
@@ -135,6 +138,24 @@ if ($err) {
 	}
 &$second_print(".. done");
 
+# Delete any existing clashing domain
+if ($delete_existing && $domain) {
+	$clash = &get_domain_by("dom", $domain);
+	if ($clash) {
+		&$first_print("Deleting existing virtual server $domain ..");
+		&$indent_print();
+		$err = &delete_virtual_server($clash);
+		&$outdent_print();
+		if ($err) {
+			&$second_print(".. deletion failed : $err");
+			exit(4);
+			}
+		else {
+			&$second_print(".. done");
+			}
+		}
+	}
+
 # Start the migration
 print "Starting migration of $domain from $nice ..\n\n";
 &lock_domain_name($domain);
@@ -170,6 +191,7 @@ print "                         [--ip address] [--allocate-ip]\n";
 print "                         [--ip-already]\n";
 print "                         [--parent domain]\n";
 print "                         [--prefix string]\n";
+print "                         [--delete-existing]\n";
 print "\n";
 print "The source can be one of :\n";
 print " - A local file, like /backup/yourdomain.com.tgz\n";

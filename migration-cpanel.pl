@@ -12,7 +12,6 @@ local ($homedir) = glob("$root/*/homedir");
 local $datastore = "$root/.cpanel-datastore";
 -d $daily || -d $homedir || -d $datastore ||
 	return ("Not a cPanel daily or home directory backup file");
-print STDERR "daily=$daily homedir=$homedir\n";
 
 # Try to work out the domain
 if (!$dom) {
@@ -86,11 +85,6 @@ if (!$parent && !$pass) {
 	return ("A password must be supplied for cPanel migrations");
 	}
 
-# Check some clashes
-$prefix ||= &compute_prefix($dom, undef, $parent);
-local $pclash = &get_domain_by("prefix", $prefix);
-$pclash && return ("A virtual server using the prefix $prefix already exists");
-
 return (undef, $dom, $user, $pass);
 }
 
@@ -108,6 +102,11 @@ $ok || &error("Failed to extract backup : $root");
 local $daily = "$root/backup/cpbackup/daily";
 local $datastore = "$root/.cpanel-datastore";
 local $tmpl = &get_template($template);
+
+# Check for prefix clash
+$prefix ||= &compute_prefix($dom, undef, $parent);
+local $pclash = &get_domain_by("prefix", $prefix);
+$pclash && &error("A virtual server using the prefix $prefix already exists");
 
 # Get shells for users
 local ($nologin_shell, $ftp_shell, undef, $def_shell) =

@@ -869,3 +869,4 @@ When migrating a cPanel, Plesk or Ensim backup, the original domain name can now
 For new installs, new features in older versions are not shown on the System Information page.
 Fixed the modification of Webalizer and Logrotate config files when a domain's Apache logs are outside it's home directory.
 Apache logs outside a domain's home directory are now included in backups and restores.
+Added the --delete-existing flag to migrate-domain.pl, to remove any existing virtual server with the same name before re-migrating.

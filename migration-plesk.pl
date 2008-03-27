@@ -78,11 +78,6 @@ else {
 		}
 	}
 
-# Check for clashes
-$prefix ||= &compute_prefix($dom, undef, $parent);
-local $pclash = &get_domain_by("prefix", $prefix);
-$pclash && return ("A virtual server using the prefix $prefix already exists");
-
 return (undef, $dom, $user, $pass);
 }
 
@@ -95,6 +90,11 @@ sub migration_plesk_migrate
 {
 local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
        $prefix, $virtalready, $email) = @_;
+
+# Check for prefix clash
+$prefix ||= &compute_prefix($dom, undef, $parent);
+local $pclash = &get_domain_by("prefix", $prefix);
+$pclash && &error("A virtual server using the prefix $prefix already exists");
 
 # Get shells for users
 local ($nologin_shell, $ftp_shell, undef, $def_shell) =

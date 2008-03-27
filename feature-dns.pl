@@ -218,6 +218,7 @@ if (!$_[0]->{'dns_submode'}) {
 		# Clear zone names caches
 		unlink($bind8::zone_names_cache);
 		undef(@bind8::list_zone_names_cache);
+		undef(@bind8::get_config_cache);
 		&$second_print($text{'setup_done'});
 		}
 	else {

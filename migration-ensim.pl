@@ -40,11 +40,6 @@ if (!$parent && !$pass) {
 	return ("A password must be supplied for Ensim migrations");
 	}
 
-# Check some clashes
-$prefix ||= &compute_prefix($dom, undef, $parent);
-local $pclash = &get_domain_by("prefix", $prefix);
-$pclash && return ("A virtual server using the prefix $prefix already exists");
-
 return (undef, $dom, $user, $pass);
 }
 
@@ -58,6 +53,11 @@ sub migration_ensim_migrate
 local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
        $prefix, $virtalready, $defemail) = @_;
 local ($ok, $root) = &extract_ensim_dir($file);
+
+# Check for prefix clash
+$prefix ||= &compute_prefix($dom, undef, $parent);
+local $pclash = &get_domain_by("prefix", $prefix);
+$pclash && &error("A virtual server using the prefix $prefix already exists");
 
 # Get the manifest and some useful info from it
 local $manifest = &parse_enim_xml($root);
