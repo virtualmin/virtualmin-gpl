@@ -6825,7 +6825,9 @@ if ($dom->{'alias'}) {
 if (!$nopost) {
 	&run_post_actions();
 	}
+&set_domain_envs($dom, "CREATE_DOMAIN");
 &made_changes();
+&reset_domain_envs($dom);
 
 return undef;
 }
