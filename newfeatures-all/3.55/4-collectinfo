@@ -1,0 +1,4 @@
+desc=Status collection job schedule
+html=The background collectinfo.pl cron job can be run less frequently or disabled using a new Module Config page option.
+link=/config.cgi?virtual-server
+master=1

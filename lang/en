@@ -1544,6 +1544,8 @@ check_eclamd=You have selected to use <tt>clamdscan</tt> for virus scanning, but
 check_eresolv=Virtualmin is configured to setup DNS zones, but this system is not setup to use itself as a DNS server. Either add 127.0.0.1 to the <a href='$1'>list of DNS servers</a>, or turn off the BIND feature on the <a href='$2'>module config</a> page.
 check_evirusspam=Virus scanning cannot be enabled without spam filtering
 check_preload=Updating Virtualmin library pre-load settings ..
+check_collect=Updating status collection job ..
+check_collectoff=Disabling status collection job ..
 check_esendmailbccs=Automatic BCCing of outgoing email is not supported by the Sendmail mail server, and so must be turned off on the <a href='$1'>module configuration</a> page.
 check_eqmailbccs=Automatic BCCing of outgoing email is not supported by the Qmail mail server, and so must be turned off on the <a href='$1'>module configuration</a> page.
 check_epostfixbccs=Automatic BCCing of outgoing email cannot be enabled unless a BCC map is defined in the <a href='$1'>Postfix Mailserver</a> module, or manually in the Postfix configuration file. Otherwise it must be turned off on the <a href='$2'>module configuration</a> page.

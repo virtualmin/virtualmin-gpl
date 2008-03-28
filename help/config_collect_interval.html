@@ -1,0 +1,17 @@
+<header>Interval between status collection job runs</header>
+
+Virtualmin has a background process called <tt>collectinfo.pl</tt> that
+is run by default every 5 minutes from Cron, to collect information used
+for the System Information page and historical graphs. If this is too often
+for your system, you can increase the gap between runs to up to 30 minutes
+using this field. <p>
+
+Alternately, select <b>Never run</b> to turn this process off completely.
+If you rarely login to Virtualmin's web interface as <tt>root</tt> and
+never look at the graphs of CPU load and other statitics, this option
+will reduce the CPU load on your system. However, it will cause the 
+System Information page to take longer to load. <p>
+
+<footer>
+
+

@@ -167,7 +167,8 @@ return $info;
 # Returns the most recently collected system information, or the current info
 sub get_collected_info
 {
-local $infostr = &read_file_contents($collected_info_file);
+local $infostr = $config{'collect_interval'} eq 'none' ? undef :
+			&read_file_contents($collected_info_file);
 if ($infostr) {
 	local $info = &unserialise_variable($infostr);
 	if (ref($info) eq 'HASH' && keys(%$info) > 0) {
@@ -346,6 +347,50 @@ foreach my $f (readdir(HISTDIR)) {
 	}
 closedir(HISTDIR);
 return @rv;
+}
+
+# setup_collectinfo_job()
+# Creates or updates the collectinfo.pl cron job, based on the schedule
+# set in the module config.
+sub setup_collectinfo_job
+{
+# Work out correct steps
+local $step = $config{'collect_interval'};
+$step = 5 if (!$step || $step eq 'none');
+local $offset = int(rand()*$step);
+local @mins;
+for(my $i=$offset; $i<60; $i+= $step) {
+	push(@mins, $i);
+	}
+local $job = &find_virtualmin_cron_job($collect_cron_cmd);
+if (!$job && $config{'collect_interval'} ne 'none') {
+	# Create, and run for the first time
+	$job = { 'mins' => join(',', @mins),
+		 'hours' => '*',
+		 'days' => '*',
+		 'months' => '*',
+		 'weekdays' => '*',
+		 'user' => 'root',
+		 'active' => 1,
+		 'command' => $collect_cron_cmd };
+	&cron::create_cron_job($job);
+	}
+elsif ($job && $config{'collect_interval'} ne 'none') {
+	# Update existing job, if step has changed
+	local @oldmins = split(/,/, $job->{'mins'});
+	local $oldstep = $oldmins[0] eq '*' ? 1 :
+			 @oldmins == 1 ? 60 :
+			 $oldmins[1]-$oldmins[0];
+	if ($step != $oldstep) {
+		$job->{'mins'} = join(',', @mins);
+		&cron::change_cron_job($job);
+		}
+	}
+elsif ($job && $config{'collect_interval'} eq 'none') {
+	# No longer wanted, so delete
+	&cron::delete_cron_job($job);
+	}
+&cron::create_wrapper($collect_cron_cmd, $module_name, "collectinfo.pl");
 }
 
 1;

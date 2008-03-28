@@ -871,3 +871,4 @@ Fixed the modification of Webalizer and Logrotate config files when a domain's A
 Apache logs outside a domain's home directory are now included in backups and restores.
 Added the --delete-existing flag to migrate-domain.pl, to remove any existing virtual server with the same name before re-migrating.
 Plesk sub-domains are now included with migrating, including any users for managing their content.
+The background collectinfo.pl cron job can be run less frequently or disabled using a new Module Config page option.

@@ -19,6 +19,7 @@ allow_upper=Force mailbox usernames to lower case?,1,0-Yes,1-No
 mysql_replicas=Additional MySQL servers to create users on,3,Just this system
 delete_virts=Delete all email aliases when disabling mail?,1,1-Yes,0-No
 preload_mode=Preload Virtualmin libraries at startup?,1,2-All libraries,1-Only core,0-No
+collect_interval=Interval between status collection job runs,10,none-Never run,Minutes
 
 line1.4=User interface settings,11
 display_max=Maximum number of domains to display,3,Unlimited

@@ -263,21 +263,7 @@ if ($virtualmin_pro) {
 	}
 
 # Create the cron job for collecting system info
-local $job = &find_virtualmin_cron_job($collect_cron_cmd);
-if (!$job) {
-	# Create, and run for the first time
-	$job = { 'mins' => '0,5,10,15,20,25,30,35,40,45,50,55',
-		 'hours' => '*',
-		 'days' => '*',
-		 'months' => '*',
-		 'weekdays' => '*',
-		 'user' => 'root',
-		 'active' => 1,
-		 'command' => $collect_cron_cmd };
-	&cron::create_cron_job($job);
-	&cron::create_wrapper($collect_cron_cmd, $module_name,
-			      "collectinfo.pl");
-	}
+&setup_collectinfo_job();
 
 # Decide if sub-domains should be allowed, by checking if any exist
 if ($config{'allow_subdoms'} eq '') {

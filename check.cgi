@@ -56,6 +56,18 @@ if ($virtualmin_pro && $config{'preload_mode'} != $lastconfig{'preload_mode'}) {
 	&$second_print($text{'setup_done'});
 	}
 
+# Update collectinfo.pl run time
+if ($config{'collect_interval'} ne $lastconfig{'collect_interval'}) {
+	if ($config{'collect_interval'} eq 'none') {
+		&$first_print($text{'check_collectoff'});
+		}
+	else {
+		&$first_print($text{'check_collect'});
+		}
+	&setup_collectinfo_job();
+	&$second_print($text{'setup_done'});
+	}
+
 &webmin_log("check");
 
 # Call any theme post command
