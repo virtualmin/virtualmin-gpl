@@ -383,6 +383,7 @@ else {
 # Set cgi directories to cpanel standard
 $dom{'cgi_bin_dir'} = "public_html/cgi-bin";
 $dom{'cgi_bin_path'} = "$dom{'home'}/$dom{'cgi_bin_dir'}";
+$dom{'cgi_bin_correct'} = 1;	# So that setup_web doesn't fix it
 
 &complete_domain(\%dom);
 
@@ -461,6 +462,7 @@ elsif ($got{'web'}) {
 	&save_domain(\%dom);
 	&add_script_language_directives(\%dom, $tmpl, $dom{'web_port'});
 	}
+$dom{'cgi_bin_correct'} = 0;	# So that it is computed from now on
 
 if ($got{'ssl'}) {
 	# Copy and use the SSL certs that came with the domain

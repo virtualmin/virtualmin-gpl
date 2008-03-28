@@ -2260,7 +2260,7 @@ local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 if ($virt) {
 	# Set public_html directory from document root
 	local $str = &apache::find_directive_struct("DocumentRoot", $vconf);
-	if ($str) {
+	if ($str && !$d->{'public_html_correct'}) {
 		$d->{'public_html_path'} = $str->{'words'}->[0];
 		if ($d->{'public_html_path'} =~ /^\Q$d->{'home'}\E\/(.*)$/) {
 			$d->{'public_html_dir'} = $1;
@@ -2274,7 +2274,7 @@ if ($virt) {
 	local @str = &apache::find_directive_struct("ScriptAlias", $vconf);
 	@str = grep { $_->{'words'}->[0] eq '/cgi-bin/' ||
 		      $_->{'words'}->[0] eq '/cgi-bin' } @str;
-	if (@str) {
+	if (@str && !$d->{'cgi_bin_correct'}) {
 		$d->{'cgi_bin_path'} = $str[0]->{'words'}->[1];
 		$d->{'cgi_bin_path'} =~ s/\/$//;
 		if ($d->{'cgi_bin_path'} =~ /^\Q$d->{'home'}\E\/(.*)$/) {
