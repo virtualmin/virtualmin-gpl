@@ -565,6 +565,7 @@ local (%taken, %utaken);
 &build_taken(\%taken, \%utaken);
 
 &foreign_require("mailboxes", "mailboxes-lib.pl");
+local %usermap;
 if ($got{'mail'}) {
 	# Migrate mail users
 	&$first_print("Re-creating mail users ..");
@@ -673,7 +674,7 @@ if ($got{'mail'}) {
 			}
 		$mcount++;
 		$useremail{$uinfo->{'email'}} = $uinfo;
-		$usermap{$uinfo->{'user'}} = $uinfo;
+		$usermap{$muser} = $uinfo;
 		}
 	close(PASSWD);
 	&$second_print(".. done (migrated $mcount mail users)");
