@@ -8976,21 +8976,7 @@ if (defined($servers)) {
 sub check_licence_site
 {
 return (0) if (!&require_licence());
-
-# First work out a host ID, from the hostid command or MAC address or hostname
-local $id;
-if (&has_command("hostid")) {
-	chop($id = `hostid 2>/dev/null`);
-	}
-if (!$id || $id =~ /^0+$/) {
-	&foreign_require("net", "net-lib.pl");
-	local ($iface) = grep { $_->{'fullname'} eq $config{'iface'} }
-			      &net::active_interfaces();
-	$id = $iface->{'ether'} if ($iface);
-	}
-if (!$id) {
-	$id = &get_system_hostname();
-	}
+local $id = &get_licence_hostid();
 
 local ($status, $expiry, $err, $doms, $max_servers, $servers) =
 	&licence_scheduled($id);
@@ -9010,6 +8996,27 @@ if ($status == 0 && $max_servers && !$err) {
 		}
 	}
 return ($status, $expiry, $err, $doms, $servers, $max_servers);
+}
+
+# get_licence_hostid()
+# Return a host ID for licence checking, from the hostid command or
+# MAC address or hostname
+sub get_licence_hostid
+{
+local $id;
+if (&has_command("hostid")) {
+	chop($id = `hostid 2>/dev/null`);
+	}
+if (!$id || $id =~ /^0+$/) {
+	&foreign_require("net", "net-lib.pl");
+	local ($iface) = grep { $_->{'fullname'} eq $config{'iface'} }
+			      &net::active_interfaces();
+	$id = $iface->{'ether'} if ($iface);
+	}
+if (!$id) {
+	$id = &get_system_hostname();
+	}
+return $id;
 }
 
 # licence_warning_message()

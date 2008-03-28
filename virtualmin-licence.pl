@@ -7,19 +7,21 @@ $virtualmin_licence_prog = "/cgi-bin/vlicence.cgi";
 $virtualmin_licence_ssl = 0;
 $virtualmin_renewal_url = "http://www.virtualmin.com/shop/";
 
-# licence_scheduled(hostid)
+# licence_scheduled(hostid, [serial, key])
 # Returns a status code (0=OK, 1=Invalid, 2=Down, 3=Expired), the expiry date,
 # an error message, the number of domains max, the number of servers max, and
 # the number of servers used.
 sub licence_scheduled
 {
+local ($hostid, $serial, $key) = @_;
 local ($out, $error);
 local @doms = grep { !$_->{'alias'} } &list_domains();
 &read_env_file($virtualmin_license_file, \%serial);
+$key ||= $serial{'LicenseKey'};
 &http_download($virtualmin_licence_host,
 	       $virtualmin_licence_port,
-	       "$virtualmin_licence_prog?id=$_[0]&".
-		"serial=$serial{'LicenseKey'}&doms=".scalar(@doms),
+	       "$virtualmin_licence_prog?id=$hostid&".
+		"serial=$key&doms=".scalar(@doms),
 	       \$out, \$error, undef, $virtualmin_licence_ssl);
 return (2, undef, "Failed to contact licence server : $error") if ($error);
 return $out =~ /^EXP\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?
