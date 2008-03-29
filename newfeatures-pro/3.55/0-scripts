@@ -1,5 +1,5 @@
 desc=New script installers
-html=Updated the osTicket script installer to version 1.6.rc4, Instiki to 0.13.0, Flyspray to 0.9.9.5.1, WordPress to 2.5, and Php-Wiki to 1.2.11. Also added the latest 1.70+ build of LimeSurvey.
+html=Updated the osTicket script installer to version 1.6.rc4, Instiki to 0.13.0, Flyspray to 0.9.9.5.1, WordPress to 2.5, phpMyAdmin to 2.11.5.1, and Php-Wiki to 1.2.11. Also added the latest 1.70+ build of LimeSurvey.
 master=1
 reseller=1
 domain=1
