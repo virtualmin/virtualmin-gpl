@@ -857,7 +857,7 @@ When restoring a backup of a domain that doesn't exist on the system, it's IP ad
 The list of new features includes the date Virtualmin was installed.
 Email to domain owners for over-bandwidth warnings, new script notifications and others can now come from their resellers' addresses, if set. This behaviour must be enabled using a new setting on the <b>Module Config</b> page, under <b>Actions upon server and user creation</b>.
 ---- Changes since 3.54 ----
-Updated the osTicket script installer to version 1.6.rc4, Instiki to 0.13.0, Flyspray to 0.9.9.5.1, and Php-Wiki to 1.2.11. Also added the latest 1.70+ build of LimeSurvey.
+Updated the osTicket script installer to version 1.6.rc4, Instiki to 0.13.0, Flyspray to 0.9.9.5.1, WordPress to 2.5, and Php-Wiki to 1.2.11. Also added the latest 1.70+ build of LimeSurvey.
 New DNS domains have the localhost A record added, with an IP of 127.0.0.1.
 When a script is installed into a path that is already served by a proxy (such as for a rails application on /), a negating proxy rule is added so that the script is accessible.
 When migrating a domain from other control panel like Plesk, you can now select to have to downloaded directly from a remote FTP or SSH server. The migrate-domain.pl command-line script also allows use of ftp:// or ssh:// URLs for backup sources.

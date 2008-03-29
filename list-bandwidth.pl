@@ -98,6 +98,8 @@ foreach my $d (@doms) {
 		}
 	}
 
+# date_to_time(date-string)
+# Convert a date string like YYYY-MM-DD or -5 to a Unix time
 sub date_to_time
 {
 local ($date) = @_;
