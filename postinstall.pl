@@ -67,7 +67,7 @@ if ($config{'spam'} && $virtualmin_pro) {
 if ($config{'spam'} && $virtualmin_pro) {
 	&enable_procmail_logging();
 
-	# And setup cron job to periodically process logs
+	# And setup cron job to periodically process mail logs
 	# Disabled, as it is generating too much load on big sites
 	#local $job = &find_virtualmin_cron_job($maillog_cron_cmd);
 	#if (!$job) {

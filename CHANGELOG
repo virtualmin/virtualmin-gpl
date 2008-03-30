@@ -874,4 +874,4 @@ Plesk sub-domains are now included with migrating, including any users for manag
 The background collectinfo.pl cron job can be run less frequently or disabled using a new Module Config page option.
 Added a script to change the Virtualmin license in all needed files on an already installed system.
 Added the Magento eCommerce package to Virtualmin's script installers, beta version 0.9.17740.
-Added the --name-only flag to list-users.pl, list-aliases.pl and list-admins.pl, to output just object names for easier use in scripts.
+Added the --name-only flag to all list-* command-line API programs, to output just object names for easier use in scripts.

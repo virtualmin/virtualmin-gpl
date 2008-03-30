@@ -24,6 +24,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
+	elsif ($a eq "--name-only") {
+		$nameonly = 1;
+		}
+	elsif ($a eq "--type") {
+		$type = shift(@ARGV);
+		}
 	else {
 		&usage();
 		}
@@ -33,6 +39,9 @@ $domain || &usage();
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 @dbs = &domain_databases($d);
+if ($type) {
+	@dbs = grep { $_->{'type'} eq $type } @dbs;
+	}
 if ($multi) {
 	# Show each database on a separate line
 	foreach $db (@dbs) {
@@ -43,6 +52,12 @@ if ($multi) {
 			print "    Size: ",&nice_size($size),"\n";
 			}
 		print "    Tables: $tables\n";
+		}
+	}
+elsif ($nameonly) {
+	# Just show DB names
+	foreach $db (@dbs) {
+		print $db->{'name'},"\n";
 		}
 	}
 else {
@@ -76,7 +91,8 @@ print "$_[0]\n\n" if ($_[0]);
 print "Lists the databases associated with some virtual server.\n";
 print "\n";
 print "usage: list-databases.pl   --domain domain.name\n";
-print "                           [--multiline]\n";
+print "                           [--multiline | --name-only]\n";
+print "                           [--type dbtype]\n";
 exit(1);
 }
 

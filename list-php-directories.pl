@@ -25,6 +25,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
+	elsif ($a eq "--name-only") {
+		$nameonly = 1;
+		}
 	else {
 		&usage();
 		}
@@ -45,6 +48,12 @@ if ($multi) {
 		    ($dir->{'dir'} eq &public_html_dir($d) ? "Yes" : "No"),"\n";
 		}
 	}
+elsif ($nameonly) {
+	# Just directories
+	foreach $dir (@dirs) {
+                print $dir->{'dir'},"\n";
+		}
+	}
 else {
 	# Show in table
 	$fmt = "%-70.70s %-7.7s\n";
@@ -61,7 +70,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Lists web directories with different PHP versions in a virtual server.\n";
 print "\n";
 print "usage: list-php-directories.pl   --domain domain.name\n";
-print "                                 [--multiline]\n";
+print "                                 [--multiline | --name-only]\n";
 exit(1);
 }
 

@@ -1,0 +1,3 @@
+desc=Name-only parameter to command-line scripts
+html=Added the --name-only flag to all list-* command-line API programs, to output just object names for easier use in scripts.
+master=1

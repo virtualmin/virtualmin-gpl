@@ -30,6 +30,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
+	elsif ($a eq "--name-only") {
+		$nameonly = 1;
+		}
 	else {
 		&usage();
 		}
@@ -78,6 +81,12 @@ foreach my $d (@doms) {
 				}
 			}
 		}
+	elsif ($nameonly) {
+		# Just show script type codes
+		foreach $sinfo (@scripts) {
+			print $sinfo->{'name'},"\n";
+			}
+		}
 	else {
 		# Show all on one line
 		if (@doms > 1) {
@@ -108,7 +117,7 @@ print "Lists the scripts installed on one or more virtual servers.\n";
 print "\n";
 print "usage: list-scripts.pl   [--all-domains] | [--domain domain.name] |\n";
 print "                         [--user username]*\n";
-print "                         [--multiline]\n";
+print "                         [--multiline | --name-only]\n";
 exit(1);
 }
 
