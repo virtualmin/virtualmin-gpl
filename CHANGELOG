@@ -875,3 +875,4 @@ The background collectinfo.pl cron job can be run less frequently or disabled us
 Added a script to change the Virtualmin license in all needed files on an already installed system.
 Added the Magento eCommerce package to Virtualmin's script installers, beta version 0.9.17740.
 Added the --name-only flag to all list-* command-line API programs, to output just object names for easier use in scripts.
+Leftover /tmp/clamav-* files older than 1 day are now periodically deleted by Virtualmin.

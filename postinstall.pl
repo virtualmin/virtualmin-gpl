@@ -87,7 +87,7 @@ if ($config{'spam'} && $virtualmin_pro) {
 	}
 
 # Setup Cron job to periodically re-sync links in domains' spamassassin config
-# directories.
+# directories, and to clean up old /tmp/clamav-* files
 if ($config{'spam'} && $virtualmin_pro) {
 	local $job = &find_virtualmin_cron_job($spamconfig_cron_cmd);
 	if (!$job) {
