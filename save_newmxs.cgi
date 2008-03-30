@@ -60,6 +60,7 @@ foreach $id (split(/\0/, $in{'servers'})) {
 					}
 				push(@mxs, $server);
 				}
+			$newmxids{$server->{'id'}} = $server;
 			}
 		&$second_print($text{'setup_done'});
 		}
@@ -121,6 +122,7 @@ foreach my $d (&list_domains()) {
 	&$second_print($text{'setup_done'});
 	}
 
+&run_post_actions();
 &webmin_log("mxs");
 failed:			# Goto here if one server fails
 &ui_print_footer("", $text{'index_return'});
