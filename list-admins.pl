@@ -24,6 +24,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
+	elsif ($a eq "--name-only") {
+		$nameonly = 1;
+		}
 	else {
 		&usage();
 		}
@@ -45,6 +48,12 @@ if ($multi) {
 		print "    Access Webmin modules: ",($admin->{'modules'} ? "Yes" : "No"),"\n";
 		$caps = join(" ", grep { $admin->{'edit_'.$_} } @edit_limits);
 		print "    Edit capabilities: ",$caps,"\n";
+		}
+	}
+elsif ($nameonly) {
+	# Just show names
+	foreach $admin (@admins) {
+		print $admin->{'name'},"\n";
 		}
 	}
 else {

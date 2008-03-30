@@ -31,6 +31,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
+	elsif ($a eq "--name-only") {
+		$nameonly = 1;
+		}
 	elsif ($a eq "--include-owner") {
 		$owner = 0;
 		}
@@ -134,6 +137,12 @@ foreach $d (@doms) {
 				}
 			}
 		}
+	elsif ($nameonly) {
+		# Just show full usernames
+		foreach $u (@users) {
+			print $u->{'user'},"\n";
+			}
+		}
 	else {
 		# Show all on one line
 		if (@doms > 1) {
@@ -169,7 +178,7 @@ print "Lists the mail, FTP and database users in one or more virtual servers.\n"
 print "\n";
 print "usage: list-users.pl   [--all-domains] | [--domain domain.name] |\n";
 print "                       [--domain-user username]*\n";
-print "                       [--multiline]\n";
+print "                       [--multiline | --name-only]\n";
 print "                       [--include-owner]\n";
 print "                       [--user name]\n";
 exit(1);

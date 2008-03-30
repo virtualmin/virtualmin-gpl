@@ -30,6 +30,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
+	elsif ($a eq "--name-only") {
+		$nameonly = 1;
+		}
 	elsif ($a eq "--plugins") {
 		$plugins = 1;
 		}
@@ -59,6 +62,12 @@ foreach $d (@doms) {
 				}
 			}
 		}
+	elsif ($nameonly) {
+		# Just show names
+		foreach $a (@aliases) {
+			print &nice_from($a->{'from'}),"\n";
+			}
+		}
 	else {
 		# Show all on one line
 		if (@doms > 1) {
@@ -80,7 +89,7 @@ foreach $d (@doms) {
 sub nice_from
 {
 local $f = $_[0];
-$f =~ s/\@$domain$//;
+$f =~ s/\@\Q$d->{'dom'}\E$//;
 return $f eq "%1" ? "*" : $f;
 }
 
@@ -91,7 +100,7 @@ print "Lists the mail aliases in one or more virtual servers.\n";
 print "\n";
 print "usage: list-aliases.pl   [--all-domains] | [--domain domain.name] |\n";
 print "                         [--user username]*\n";
-print "                         [--multiline]\n";
+print "                         [--multiline | --name-only]\n";
 print "                         [--plugins]\n";
 exit(1);
 }
