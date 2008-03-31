@@ -13,9 +13,9 @@ $oldd = { %$d };
 &ui_print_unbuffered_header(&domain_in($d), $text{'dbpass_title'}, "");
 
 # Run the before command
-&set_domain_envs($d, "DBPASS_DOMAIN");
+&set_domain_envs($oldd, "DBPASS_DOMAIN", $d);
 $merr = &making_changes();
-&reset_domain_envs($d);
+&reset_domain_envs($oldd);
 &error(&text('setup_emaking', "<tt>$merr</tt>")) if (defined($merr));
 
 # Call the database change functions

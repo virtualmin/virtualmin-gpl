@@ -174,7 +174,7 @@ foreach $d (@doms) {
 	$newdom = $newdom_map{$d->{'id'}};
 
 	# Run the before command
-	&set_domain_envs($d, "MODIFY_DOMAIN");
+	&set_domain_envs($d, "MODIFY_DOMAIN", $newdom);
 	$merr = &making_changes();
 	&reset_domain_envs($d);
 	&error(&text('save_emaking', "<tt>$merr</tt>"))

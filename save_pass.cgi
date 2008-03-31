@@ -41,9 +41,9 @@ if ($d) {
 	$d->{'pass_set'} = 1;
 
 	# Run the before command
-	&set_domain_envs($d, "MODIFY_DOMAIN");
+	&set_domain_envs(\%oldd, "MODIFY_DOMAIN", $d);
 	$merr = &making_changes();
-	&reset_domain_envs($d);
+	&reset_domain_envs(\%oldd);
 	&error(&text('save_emaking', "<tt>$merr</tt>")) if (defined($merr));
 
 	# Call all save functions

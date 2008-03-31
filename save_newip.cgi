@@ -30,8 +30,23 @@ if ($d->{'web'}) {
 
 &ui_print_unbuffered_header(&domain_in($d), $text{'newip_title'}, "");
 
+# Build new domain object
+$newdom = { %$d };
+if ($newdom->{'virt'}) {
+	$newdom->{'ip'} = $in{'ip'};
+	delete($newdom->{'defip'});
+	}
+elsif ($in{'ip'}) {
+	$newdom->{'ip'} = $in{'ip'};
+	$newdom->{'defip'} = $newdom->{'ip'} eq &get_default_ip();
+	}
+if ($newdom->{'web'}) {
+	$newdom->{'web_port'} = $in{'port'};
+	$newdom->{'web_sslport'} = $in{'sslport'};
+	}
+
 # Run the before command
-&set_domain_envs($d, "MODIFY_DOMAIN");
+&set_domain_envs($d, "MODIFY_DOMAIN", $newdom);
 $merr = &making_changes();
 &reset_domain_envs($d);
 &error(&text('save_emaking', "<tt>$merr</tt>")) if (defined($merr));

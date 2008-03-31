@@ -26,9 +26,9 @@ $d->{'proxy_title'} = $in{'title'};
 $d->{'proxy_meta'} = $in{'meta'};
 
 # Run the before command
-&set_domain_envs(\%oldd, "MODIFY_DOMAIN");
+&set_domain_envs(\%oldd, "MODIFY_DOMAIN", $d);
 $merr = &making_changes();
-&reset_domain_envs($d);
+&reset_domain_envs(\%oldd);
 &error(&text('rename_emaking', "<tt>$merr</tt>")) if (defined($merr));
 
 &ui_print_unbuffered_header(&domain_in($d), $text{'frame_title'}, "");

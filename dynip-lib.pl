@@ -114,17 +114,17 @@ foreach my $d (&list_domains()) {
 	     $d->{'dns_ip'} eq $oldip) && !$d->{'virt'}) {
 		# Need to fix this server ..
 
-		# Run the before command
-		&set_domain_envs($d, "MODIFY_DOMAIN");
-		$merr = &making_changes();
-		&reset_domain_envs($d);
-		&error(&text('save_emaking', "<tt>$merr</tt>"))
-			if (defined($merr));
-
 		# Update the object
 		local $oldd = { %$d };
 		$d->{'ip'} = $ip if ($d->{'ip'} eq $oldip);
 		$d->{'dns_ip'} = $ip if ($d->{'dns_ip'} eq $oldip);
+
+		# Run the before command
+		&set_domain_envs(\%oldd, "MODIFY_DOMAIN", $d);
+		$merr = &making_changes();
+		&reset_domain_envs(\%oldd);
+		&error(&text('save_emaking', "<tt>$merr</tt>"))
+			if (defined($merr));
 
 		# Update all features
 		foreach my $f (@features) {

@@ -3133,17 +3133,24 @@ if (-d $sendmail::config{'smrsh_dir'} &&
 	}
 }
 
-# set_domain_envs(&domain, action)
+# set_domain_envs(&domain, action, [&new-domain])
 # Sets up VIRTUALSERVER_ environment variables for a domain update or some kind,
 # prior to calling making_changes or made_changes. action must be one of
 # CREATE_DOMAIN, MODIFY_DOMAIN or DELETE_DOMAIN
 sub set_domain_envs
 {
-local ($d, $action) = @_;
+local ($d, $action, $newd) = @_;
 &reset_domain_envs();
 $ENV{'VIRTUALSERVER_ACTION'} = $action;
 foreach my $e (keys %$d) {
 	$ENV{'VIRTUALSERVER_'.uc($e)} = $d->{$e};
+	}
+if ($newd) {
+	# Set details of virtual server being changed to. This is only
+	# done in the pre-modify call
+	foreach my $e (keys %$newd) {
+		$ENV{'VIRTUALSERVER_NEWSERVER_'.uc($e)} = $newd->{$e};
+		}
 	}
 if ($d->{'reseller'} && defined(&get_reseller)) {
 	local $resel = &get_reseller($d->{'reseller'});
@@ -3161,8 +3168,7 @@ if ($d->{'reseller'} && defined(&get_reseller)) {
 # Removes all environment variables set by set_domain_envs
 sub reset_domain_envs
 {
-local $e;
-foreach $e (keys %ENVS) {
+foreach my $e (keys %ENV) {
 	delete($ENV{$e}) if ($e =~ /^(VIRTUALSERVER_|RESELLER_)/);
 	}
 }
@@ -10276,13 +10282,6 @@ if ($d->{'parent'}) {
 	$oldparent = &get_domain($d->{'parent'});
 	}
 
-# Run the before command
-&set_domain_envs($oldd, "MODIFY_DOMAIN");
-local $merr = &making_changes();
-&reset_domain_envs($oldd);
-&error(&text('rename_emaking', "<tt>$merr</tt>")) if (defined($merr));
-&setup_for_subdomain($parent);
-
 # Update the domain object with new home directory and parent details
 local (@doms, @olddoms);
 &set_parent_attributes($d, $parent);
@@ -10317,6 +10316,13 @@ else {
 		push(@olddoms, $oldad);
 		}
 	}
+
+# Run the before command
+&set_domain_envs($oldd, "MODIFY_DOMAIN", $d);
+local $merr = &making_changes();
+&reset_domain_envs($oldd);
+&error(&text('rename_emaking', "<tt>$merr</tt>")) if (defined($merr));
+&setup_for_subdomain($parent);
 
 # Setup print function to include domain name
 sub first_html_withdom_move

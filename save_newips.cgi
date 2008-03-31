@@ -30,14 +30,15 @@ foreach $d (@doms) {
 	&$first_print(&text('newips_dom', $d->{'dom'}));
 	&$indent_print();
 
-	# Run the before command
-	&set_domain_envs($d, "MODIFY_DOMAIN");
-	$merr = &making_changes();
-	&reset_domain_envs($d);
-	&error(&text('save_emaking', "<tt>$merr</tt>")) if (defined($merr));
-
 	$oldd = { %$d };
 	$d->{'ip'} = $in{'new'};
+
+	# Run the before command
+	&set_domain_envs(\%oldd, "MODIFY_DOMAIN", $d);
+	$merr = &making_changes();
+	&reset_domain_envs(\%oldd);
+	&error(&text('save_emaking', "<tt>$merr</tt>")) if (defined($merr));
+
 	foreach $f (@features) {
 		local $mfunc = "modify_$f";
 		if ($config{$f} && $d->{$f}) {

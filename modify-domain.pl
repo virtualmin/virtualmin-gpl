@@ -268,6 +268,12 @@ if (defined($resel)) {
 	$dom->{'reseller'} = $resel eq "NONE" ? undef : $resel;
 	}
 
+# Run the before script
+&set_domain_envs($old, "MODIFY_DOMAIN", $dom);
+$merr = &making_changes();
+&reset_domain_envs($old);
+&usage(&text('rename_emaking', "<tt>$merr</tt>")) if (defined($merr));
+
 # Apply the IP change
 if ($dom->{'virt'} && !$old->{'virt'}) {
 	&setup_virt($dom);

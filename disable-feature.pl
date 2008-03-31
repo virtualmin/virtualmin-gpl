@@ -87,7 +87,7 @@ foreach $d (@doms) {
 		}
 
 	# Run the before command
-	&set_domain_envs($d, "MODIFY_DOMAIN");
+	&set_domain_envs($d, "MODIFY_DOMAIN", \%newdom);
 	$merr = &making_changes();
 	&reset_domain_envs($d);
 	if (defined($merr)) {

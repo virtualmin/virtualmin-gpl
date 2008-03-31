@@ -193,7 +193,7 @@ if (!$in{'confirm'} && !$d->{'disabled'}) {
 &ui_print_unbuffered_header(&domain_in($d), $text{'save_title'}, "");
 
 # Run the before command
-&set_domain_envs($d, "MODIFY_DOMAIN");
+&set_domain_envs($d, "MODIFY_DOMAIN", \%newdom);
 $merr = &making_changes();
 &reset_domain_envs($d);
 &error(&text('save_emaking', "<tt>$merr</tt>")) if (defined($merr));
