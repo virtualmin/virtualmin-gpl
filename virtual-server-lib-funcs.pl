@@ -10598,6 +10598,7 @@ $d->{'email'} = $parent->{'email'};
 sub check_virtual_server_config
 {
 local $clink = "edit_newfeatures.cgi";
+local $mclink = "../config.cgi?$module_name";
 
 # Make sure networking is supported
 if (!&foreign_check("net")) {
@@ -10676,10 +10677,10 @@ if ($config{'mail'}) {
 		if ($config{'generics'}) {
 			$sendmail_gdbm ||
 		    		return &text('index_esgens',
-					     '/sendmail/', $clink);
+					     '/sendmail/', $mclink);
 			}
 		if ($config{'bccs'}) {
-			return &text('check_esendmailbccs', $clink);
+			return &text('check_esendmailbccs', $mclink);
 			}
 
 		# Check for external interface
@@ -10736,14 +10737,14 @@ if ($config{'mail'}) {
 		return &text('check_evirtual_maps', $err) if ($err);
 		if ($config{'generics'}) {
 			$canonical_maps ||
-			  return &text('index_epgens', '/postfix/', $clink);
+			  return &text('index_epgens', '/postfix/', $mclink);
 			$err = &check_postfix_map($canonical_type);
 			return &text('check_ecanonical_maps', $err) if ($err);
 			}
 		if ($config{'bccs'}) {
 			$sender_bcc_maps ||
 				return &text('check_epostfixbccs', '/postfix/',
-					     $clink);
+					     $mclink);
 			$err = &check_postfix_map("sender_bcc_maps");
 			return &text('check_ebcc_maps', $err) if ($err);
 			}
@@ -10758,10 +10759,10 @@ if ($config{'mail'}) {
 					   "../config.cgi?$module_name");
 			}
 		if ($config{'generics'}) {
-			return &text('index_eqgens', $clink);
+			return &text('index_eqgens', $mclink);
 			}
 		if ($config{'bccs'}) {
-			return &text('check_eqmailbccs', $clink);
+			return &text('check_eqmailbccs', $mclink);
 			}
 		local $tmpl = &get_template(0);
 		if ($tmpl->{'append_style'} == 6) {
@@ -10779,20 +10780,20 @@ if ($config{'mail'}) {
 					   "../config.cgi?$module_name");
 			}
 		if ($config{'generics'}) {
-			return &text('index_eqgens', $clink);
+			return &text('index_eqgens', $mclink);
 			}
 		if ($config{'bccs'}) {
-			return &text('check_eqmailbccs', $clink);
+			return &text('check_eqmailbccs', $mclink);
 			}
 		if (!gethostbyname($config{'ldap_host'})) {
-			return &text('index_eqmailhost', $clink);
+			return &text('index_eqmailhost', $mclink);
 			}
 		if (!$config{'ldap_base'}) {
-			return &text('index_eqmailbase', $clink);
+			return &text('index_eqmailbase', $mclink);
 			}
 		local $lerr = &connect_qmail_ldap(1);
 		if (!ref($lerr)) {
-			return &text('index_eqmailconn', $lerr, $clink);
+			return &text('index_eqmailconn', $lerr, $mclink);
 			}
 		&$second_print($text{'check_qmailldapok'});
 		$expected_mailboxes = 4;
@@ -10804,10 +10805,10 @@ if ($config{'mail'}) {
 					   "../config.cgi?$module_name");
 			}
 		if ($config{'generics'}) {
-			return &text('index_eqgens', $clink);
+			return &text('index_eqgens', $mclink);
 			}
 		if ($config{'bccs'}) {
-			return &text('check_eqmailbccs', $clink);
+			return &text('check_eqmailbccs', $mclink);
 			}
 		&$second_print($text{'check_vpopmailok'});
 		$expected_mailboxes = 5;
