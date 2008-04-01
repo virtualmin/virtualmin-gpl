@@ -1,0 +1,7 @@
+desc=Auto-whitelist management
+html=Users in domains with spam filtering enabled can have their auto-whitelists viewed and edited, using a new link on the Edit Mailbox page (which using Webmin 1.411 or later).
+link=list_users.cgi?dom=${ID}
+master=1
+owner=1
+reseller=1
+webmin=1.411

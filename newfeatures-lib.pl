@@ -127,6 +127,7 @@ local $me = !defined(&master_admin) ? undef :	# For VM2
 local %shownf = map { $_, 1 } split(/,/, $config{'show_nf'});
 return undef if ($me && !$shownf{$me});
 local %donemod;
+local $wver = &get_webmin_version();
 foreach my $nf (@nf) {
 	# Get new features in some version. If there were none, stop looking
 	# for this module.
@@ -138,6 +139,7 @@ foreach my $nf (@nf) {
 	if ($me) {
 		@mrv = grep { $_->{$me} } @mrv;
 		}
+	@mrv = grep { $wver >= $_->{'webmin'} } @mrv;	# Filter for Webmin vers
 	push(@rv, @mrv);
 	if (@mrv && !$modvers{$mf->[0]}++) {
 		# Create a description for this new version

@@ -256,10 +256,24 @@ elsif (!$in{'new'}) {
 
 # Show spam check flag
 if ($config{'spam'}) {
+	$awl_link = undef;
+	if (!$in{'new'} && &foreign_available("spam")) {
+		# Create AWL link
+		&foreign_require("spam", "spam-lib.pl");
+		if (defined(&spam::can_edit_awl) &&
+		    &spam::supports_auto_whitelist() == 2 &&
+		    &spam::get_auto_whitelist_file($user->{'user'}) &&
+		    &spam::can_edit_awl($user->{'user'})) {
+			$awl_link = "&nbsp;( <a href='../spam/edit_awl.cgi?".
+				    "user=".&urlize($user->{'user'}).
+				    "'>$text{'user_awl'}</a> )";
+			}
+		}
 	print &ui_table_row(&hlink($text{'user_nospam'}, "nospam"),
 		!$d->{'spam'} ? $text{'user_spamdis'} :
 			&ui_radio("nospam", int($user->{'nospam'}),
-				  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
+				  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]).
+			$awl_link);
 	}
 
 if ($hasemail) {
