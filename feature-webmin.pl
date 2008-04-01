@@ -394,7 +394,8 @@ if ($features{'spam'} && $config{'avail_spam'} && @spamassassin_doms) {
 	local %acl = ( 'noconfig' => 1,
 		       'avail' => 'white,score,report,user,header,procmail',
 		       'procmailrc' => "$procmail_spam_dir/$_[0]->{'id'}",
-		       'file' => "$spam_config_dir/$_[0]->{'id'}/virtualmin.cf"
+		       'file' => "$spam_config_dir/$_[0]->{'id'}/virtualmin.cf",
+		       'awl_groups' => $_[0]->{'group'},
 		     );
 	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "spam")
 		if (!$hasmods{'spam'});
