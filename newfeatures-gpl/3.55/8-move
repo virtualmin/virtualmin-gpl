@@ -1,0 +1,3 @@
+desc=Move Virtual Servers
+html=Ported the Move Virtual Server feature from the Pro version, which allows domains to be moved under different parents or converted from sub-servers to top-level.
+link=move_form.cgi?dom=${ID}

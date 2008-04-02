@@ -1941,7 +1941,6 @@ return &can_edit_domain($d) &&
 sub can_move_domain
 {
 local ($d) = @_;
-return 0 if (!$virtualmin_pro);
 return &can_edit_domain($d) &&
        (&master_admin() || &reseller_admin());
 }
