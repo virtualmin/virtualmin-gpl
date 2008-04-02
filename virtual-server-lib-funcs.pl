@@ -6895,10 +6895,10 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 			# Delete mail users and their mail files
 			&$first_print($text{'delete_users'});
 			foreach my $u (@users) {
-				&delete_user($u, $dd);
 				if (!$u->{'nomailfile'}) {
 					&delete_mail_file($u);
 					}
+				&delete_user($u, $dd);
 				if (!$u->{'nocreatehome'}) {
 					&delete_user_home($u, $d);
 					}
