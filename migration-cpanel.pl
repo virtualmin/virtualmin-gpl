@@ -893,7 +893,7 @@ if ($got{'mysql'}) {
 				delete($myuinfo->{'email'});
 				$myusers{$myuser} = $myuinfo;
 				}
-			elsif (/GRANT ALL PRIVILEGES ON `(\S+)`\.\* TO '(\S+)'\@'(\S+)';/) {
+			elsif (/GRANT ALL PRIVILEGES ON `(\S+)`\.\* TO '(\S+)'\@'(\S+)';/ || /GRANT SELECT.*\sON `(\S+)`\.\* TO '(\S+)'\@'(\S+)';/) {
 				# Granting access to a MySQL database
 				local ($mydb, $myuser) = ($1, $2);
 				next if ($myuser eq $user);	# domain owner
