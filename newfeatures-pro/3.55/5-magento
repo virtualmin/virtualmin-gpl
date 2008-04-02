@@ -1,5 +1,5 @@
 desc=Magento Script Installer
-html=Added the Magento eCommerce package to Virtualmin's script installers, beta version 0.9.17740.
+html=Added the Magento eCommerce package to Virtualmin's script installers, version 1.0.
 master=1
 reseller=1
 domain=1
