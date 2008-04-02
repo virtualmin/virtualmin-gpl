@@ -157,6 +157,11 @@ else {
 				"</VirtualHost>");
 	&flush_file_lines();
 	$_[0]->{'web_port'} = $web_port;
+
+	# Create a link from another Apache dir
+	if ($newfile) {
+		&apache::create_webfile_link($f);
+		}
 	undef(@apache::get_config_cache);
 
 	# Same the HTML and CGI dirs that we set
@@ -167,11 +172,6 @@ else {
 	if ($proxying) {
 		# Add <Proxy *> section, to ensure that proxypass works
 		&add_proxy_allow_directives($_[0]);
-		}
-
-	# Create a link from another Apache dir
-	if ($newfile) {
-		&apache::create_webfile_link($f);
 		}
 
 	# Create empty access and error log files, world-readable

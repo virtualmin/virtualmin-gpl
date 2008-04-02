@@ -172,6 +172,7 @@ if ($ok) {
 	}
 else {
 	&$second_print("Backup failed!");
+	exit(2);
 	}
 
 sub usage
