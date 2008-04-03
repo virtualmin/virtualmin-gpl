@@ -959,6 +959,9 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 		next if (!$fuser);
 		next if ($fuser eq "ftp" || $fuser eq $user ||
 			 $fuser eq $user."_logs");	# skip cpanel users
+		if ($fhome eq "/dev/null") {
+			$fhome = "$dom{'home'}/$config{'homes_dir'}/$fuser";
+			}
 		local $already = $usermap{$fuser};
 		if ($already) {
 			# Turn on FTP for existing user
