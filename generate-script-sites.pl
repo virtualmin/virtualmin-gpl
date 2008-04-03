@@ -59,6 +59,8 @@ foreach $s (@scripts) {
 	}
 
 foreach $h (&unique(@rv)) {
+	$h = &to_ipaddress($h);
+	$h || next;
 	if ($firewall) {
 		print "-A FORWARD -d $h -m tcp -p tcp --dport 80 -j ACCEPT\n";
 		}

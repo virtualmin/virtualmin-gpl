@@ -199,6 +199,7 @@ if ($ok) {
 	}
 else {
 	&$second_print("Restore failed!");
+	exit(1);
 	}
 
 sub usage
