@@ -28,7 +28,7 @@ if (&foreign_check("proc")) {
 		foreach my $m (@mounted) {
 			if ($m->[2] eq "ext2" || $m->[2] eq "ext3" ||
 			    $m->[2] eq "reiserfs" || $m->[2] eq "ufs" ||
-			    $m->[2] eq "zfs" ||
+			    $m->[2] eq "zfs" || $m->[2] eq "simfs" ||
 			    $m->[1] =~ /^\/dev\// || $m->[1] eq $home_base) {
 				local ($t, $f) =
 					&mount::disk_space($m->[2], $m->[0]);
