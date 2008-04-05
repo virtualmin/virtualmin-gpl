@@ -31,7 +31,19 @@ if (!$dom) {
 				}
 			}
 		closedir(DATASTORE);
-		@doms = grep { $gdi{$_} } @doms;
+		if (scalar(keys %gdi)) {
+			# Can limit by domain IP to find the master
+			@doms = grep { $gdi{$_} } @doms;
+			}
+		else {
+			# Look at the cp/username file
+			local ($cpfile) = glob("$root/*/cp/*");
+			if ($cpfile && -r $cpfile) {
+				local %cp;
+				&read_env_file($cpfile, \%cp);
+				@doms = ( $cp{'DNS'} );
+				}
+			}
 		}
 	if (@doms == 1) {
 		$dom = $doms[0];
