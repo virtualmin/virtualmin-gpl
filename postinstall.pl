@@ -132,17 +132,16 @@ if (&running_in_zone() || defined(&running_in_vserver) &&
 	$lowmem = 1;
 	}
 
-if ($virtualmin_pro) {
-	# Decide whether to preload, and then do it
-	if ($config{'preload_mode'} eq '') {
-		$config{'preload_mode'} = $lowmem ? 0 : 2;
-		}
-	if ($gconfig{'no_virtualmin_preload'}) {
-		$config{'preload_mode'} = 0;
-		}
-	&save_module_config();
-	&update_miniserv_preloads($config{'preload_mode'});
+# Decide whether to preload, and then do it
+if ($config{'preload_mode'} eq '') {
+	$config{'preload_mode'} = !$virtualmin_pro ? 0 :
+				  $lowmem ? 0 : 2;
 	}
+if ($gconfig{'no_virtualmin_preload'}) {
+	$config{'preload_mode'} = 0;
+	}
+&save_module_config();
+&update_miniserv_preloads($config{'preload_mode'});
 
 # Run in package eval mode, to avoid loading the same module twice
 local %miniserv;
