@@ -109,6 +109,11 @@ foreach $d (@doms) {
 				($msize) = &mail_file_size($u);
 				print "    Mail file size: ",&nice_size($msize),"\n";
 				}
+			($mfile, $mtype) = &user_mail_file($u);
+			print "    Mail location: $mfile\n";
+			print "    Mail storage type: ",
+			      ($mtype == 0 ? "mbox" : $mtype == 1 ? "Maildir" :
+			       "Type $mtype"),"\n";
 			if ($u->{'email'}) {
 				print "    Email address: ",$u->{'email'},"\n";
 				}
