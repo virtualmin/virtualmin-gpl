@@ -878,3 +878,5 @@ Added the --name-only flag to all list-* command-line API programs, to output ju
 Leftover /tmp/clamav-* files older than 1 day are now periodically deleted by Virtualmin.
 The pre-change script now has access to the settings that will be applied in $VIRTUALSERVER_NEWSERVER_* variables, while the $VIRTUALSERVER_* variables always contain the domain's settings before the change is made.
 Users in domains with spam filtering enabled can have their auto-whitelists viewed and edited, using a new link on the Edit Mailbox page (which using Webmin 1.411 or later).
+---- Changes since 3.55 ----
+Added the list-mailbox.pl command-line script, for dumping a user's mail.

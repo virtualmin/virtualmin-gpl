@@ -883,6 +883,45 @@ $backup_tests = [
 	  'cleanup' => 1 },
 	];
 
+$mail_tests = [
+	# Create a domain to get spam
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'mail' ],
+		      [ 'spam' ], [ 'virus' ],
+		      @create_args, ],
+
+	# Add a mailbox to the domain
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
+        # Send some mail to him
+	{ 'command' => 'echo Hello World | mail -s "Test mail" '.
+		       $test_user.'\@'.$test_domain,
+	},
+
+	# Give the mail server 30 seconds to deliver
+	{ 'command' => 'sleep 30',
+	},
+
+	# Check procmail log for delivery
+	# XXX
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+        },
+
 $alltests = { 'domains' => $domains_tests,
 	      'mailbox' => $mailbox_tests,
 	      'alias' => $alias_tests,
@@ -893,6 +932,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'migrate' => $migrate_tests,
 	      'move' => $move_tests,
 	      'backup' => $backup_tests,
+              'mail' => $mail_tests,
 	    };
 
 # Run selected tests
