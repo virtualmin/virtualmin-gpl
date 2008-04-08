@@ -115,6 +115,15 @@ if (!$gotvirt) {
 	&foreign_require("cron", "cron-lib.pl");
 	&cron::create_wrapper($domain_lookup_cmd, $module_name,
 			      "lookup-domain.pl");
+
+	# Fix up bad quoted VIRTUAMIN= line, introduced by Webmin 1.410
+	local $lref = &read_file_lines($procmail::procmailrc);
+	foreach my $l (@$lref) {
+		if ($l =~ /^\"(VIRTUALMIN=.*)\"$/) {
+			$l = $1;
+			}
+		}
+	&flush_file_lines($procmail::procmailrc);
 	}
 
 # Build spamassassin command to call
