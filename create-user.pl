@@ -84,6 +84,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-check-spam") {
 		$nospam = 1;
 		}
+	elsif ($a eq "--no-creation-mail") {
+		$nocreationmail = 1;
+		}
 	else {
 		&usage();
 		}
@@ -254,7 +257,9 @@ if ($user->{'email'} && !$user->{'nomailfile'}) {
 	}
 
 # Send an email upon creation
-@erv = &send_user_email($d, $user, undef, 0);
+if (!$nocreationmail) {
+	@erv = &send_user_email($d, $user, undef, 0);
+	}
 
 &release_lock_unix($d);
 &release_lock_mail($d);
@@ -295,5 +300,6 @@ print "                        [--web]\n";
 if ($config{'spam'}) {
 	print "                        [--no-check-spam]\n";
 	}
+print "                        [--no-creation-mail]\n";
 exit(1);
 }

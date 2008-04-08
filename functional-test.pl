@@ -892,6 +892,7 @@ $mail_tests = [
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'mail' ],
 		      [ 'spam' ], [ 'virus' ],
 		      @create_args, ],
+	},
 
 	# Add a mailbox to the domain
 	{ 'command' => 'create-user.pl',
@@ -901,26 +902,37 @@ $mail_tests = [
 		      [ 'desc', 'Test user' ],
 		      [ 'quota', 100*1024 ],
 		      [ 'ftp' ],
-		      [ 'mail-quota', 100*1024 ] ],
+		      [ 'mail-quota', 100*1024 ],
+		      [ 'no-creation-mail' ] ],
 	},
 
-        # Send some mail to him
+        # Send some reasonable mail to him
 	{ 'command' => 'echo Hello World | mail -s "Test mail" '.
-		       $test_user.'\@'.$test_domain,
+		       $test_user.'@'.$test_domain,
 	},
 
-	# Give the mail server 30 seconds to deliver
-	{ 'command' => 'sleep 30',
+	# Give the mail server 10 seconds to deliver
+	{ 'command' => 'sleep 10',
 	},
 
 	# Check procmail log for delivery
-	# XXX
+	{ 'command' => 'tail -5 /var/log/procmail.log | grep '.
+		       $test_user.'@'.$test_domain,
+	},
+
+	# Check if the mail arrived
+	{ 'command' => 'list-mailbox.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'user', $test_user ] ],
+	  'grep' => [ 'Hello World', 'X-Spam-Status:' ],
+	},
 
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
-	  'cleanup' => 1 },
+	  'cleanup' => 1,
         },
+	];
 
 $alltests = { 'domains' => $domains_tests,
 	      'mailbox' => $mailbox_tests,
@@ -1007,7 +1019,7 @@ foreach my $a (@{$t->{'args'}}) {
 	}
 print "    Running $cmd ..\n";
 sleep($t->{'sleep'});
-local $out = &backquote_with_timeout("$cmd 2>&1 </dev/null",
+local $out = &backquote_with_timeout("($cmd) 2>&1 </dev/null",
 				     $t->{'timeout'} || $timeout);
 if ($? && !$t->{'fail'} || !$? && $t->{'fail'}) {
 	print $out;
