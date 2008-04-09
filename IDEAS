@@ -64,4 +64,7 @@
 	- how can lookup-domain work? Via network?
 
  - script installer for poMMo
-
+	- debug install
+	- CHANGELOG / newfeatures
+	- option for list name
+	- new version check
