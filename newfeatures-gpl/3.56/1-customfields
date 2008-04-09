@@ -1,0 +1,4 @@
+desc=Custom Fields
+html=Added links to the Custom Fields feature from the Pro version, which lets you add additional information to virtual servers.
+master=1
+link=edit_newfields.cgi

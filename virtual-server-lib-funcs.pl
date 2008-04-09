@@ -10029,7 +10029,7 @@ local @tmpls = ( 'features', 'tmpl', 'user', 'update',
    'bw',
    $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'dynip', 'resels',
 		       'reseller', 'notify', 'scripts', 'styles' )
-		   : ( 'sharedips', 'dynip' ),
+		   : ( 'fields', 'sharedips', 'dynip' ),
    'shells',
    $virtualmin_pro && ($config{'spam'} || $config{'virus'}) ? ( 'sv' ) : ( ),
    &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
