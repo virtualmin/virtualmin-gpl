@@ -38,6 +38,9 @@ $migration_plesk = "$migration_dir/$migration_plesk_domain.plesk.txt";
 $migration_plesk_windows_domain = "sbcher.com";
 $migration_plesk_windows = "$migration_dir/$migration_plesk_windows_domain.plesk_windows.psa";
 $test_backup_file = "/tmp/$test_domain.tar.gz";
+$test_email_dir = "/usr/local/webadmin/virtualmin/testmail";
+$spam_email_file = "$test_email_dir/spam.txt";
+$virus_email_file = "$test_email_dir/virus.txt";
 
 @create_args = ( [ 'limits-from-template' ],
 		 [ 'no-email' ],
@@ -894,6 +897,14 @@ $mail_tests = [
 		      @create_args, ],
 	},
 
+	# Setup spam and virus delivery
+	{ 'command' => 'modify-spam.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'virus-delete' ],
+		      [ 'spam-file', 'spam' ],
+		      [ 'spam-no-delete-level' ] ],
+	},
+
 	# Add a mailbox to the domain
 	{ 'command' => 'create-user.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -917,7 +928,10 @@ $mail_tests = [
 
 	# Check procmail log for delivery
 	{ 'command' => 'tail -5 /var/log/procmail.log | grep '.
-		       $test_user.'@'.$test_domain,
+		       'To:'.$test_user.'@'.$test_domain,
+	},
+	{ 'command' => 'tail -5 /var/log/procmail.log | grep '.
+		       'User:'.$test_full_user,
 	},
 
 	# Check if the mail arrived
@@ -926,6 +940,56 @@ $mail_tests = [
                       [ 'user', $test_user ] ],
 	  'grep' => [ 'Hello World', 'X-Spam-Status:' ],
 	},
+
+	-r $virus_email_file ? (
+		# Send a virus message, if we have one
+		{ 'command' => 'sendmail -t <'.$virus_email_file,
+		},
+
+		# Wait 10 seconds for it to be processed
+		{ 'command' => 'sleep 10',
+		},
+
+		# Check procmail log for virus detection
+		{ 'command' => 'tail -5 /var/log/procmail.log | grep '.
+			       'To:'.$test_user.'@'.$test_domain.' | grep '.
+			       'Mode:Virus'
+		},
+
+		# Make sure it was NOT delivered
+		{ 'command' => 'list-mailbox.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'user', $test_user ] ],
+		  'antigrep' => 'Virus test',
+		},
+		) : ( ),
+
+	-r $spam_email_file ? (
+		# Add the spammer's address to this domain's blacklist
+		{ 'command' => 'echo blacklist_from spam@spam.com >'.
+			       $module_config_directory.'/spam/'.
+			       '`./list-domains.pl --domain '.$test_domain.
+			       ' --id-only`/virtualmin.cf',
+		},
+
+		# Send a virus message, if we have one
+		{ 'command' => 'sendmail -t <'.$spam_email_file,
+		},
+
+		# Wait 10 seconds for it to be processed
+		{ 'command' => 'sleep 10',
+		},
+
+		# Check procmail log for spam detection
+		{ 'command' => 'tail -5 /var/log/procmail.log | grep '.
+			       'To:'.$test_user.'@'.$test_domain.' | grep '.
+			       'Mode:Spam'
+		},
+
+		# Make sure it went to the spam folder
+		{ 'command' => 'grep "Spam test" ~'.$test_full_user.'/spam',
+		},
+		) : ( ),
 
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',

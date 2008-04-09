@@ -26,6 +26,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
 		}
+	elsif ($a eq "--id-only") {
+		$idonly = 1;
+		}
 	elsif ($a eq "--domain") {
 		push(@domains, shift(@ARGV));
 		}
@@ -297,6 +300,12 @@ elsif ($nameonly) {
 		print $d->{'dom'},"\n";
 		}
 	}
+elsif ($idonly) {
+	# Just IDs
+	foreach $d (@doms) {
+		print $d->{'id'},"\n";
+		}
+	}
 else {
 	# Just show summary table
 	$fmt = "%-30.30s %-15.15s %-30.30s\n";
@@ -312,7 +321,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the virtual servers on this system.\n";
 print "\n";
-print "usage: list-domains.pl   [--multiline | --name-only]\n";
+print "usage: list-domains.pl   [--multiline | --name-only | --id-only]\n";
 print "                         [--domain name]*\n";
 print "                         [--user name]*\n";
 print "                         [--with-feature feature]\n";

@@ -65,5 +65,3 @@
 
  - script installer for poMMo
 
- - include mail and spam filtering in functional tests
-	- full re-setup of procmail
