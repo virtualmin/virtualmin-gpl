@@ -1,0 +1,6 @@
+html=New script installers
+desc=Added a script insaller for poMMo, a new web-based mailing list manager.
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}
