@@ -63,8 +63,13 @@ foreach my $d (@doms) {
 			print "    Description: $script->{'desc'}\n";
 			print "    Version: $sinfo->{'version'}\n";
 			print "    Installed: ",&make_date($sinfo->{'time'}),"\n";
-			print "    Details: $sinfo->{'desc'}\n";
-			print "    URL: $sinfo->{'url'}\n";
+			if ($sinfo->{'desc'}) {
+				print "    Details: $sinfo->{'desc'}\n";
+				}
+			if ($sinfo->{'url'}) {
+				print "    URL: $sinfo->{'url'}\n";
+				}
+			print "    State: ",$sinfo->{'partial'} || "OK","\n";
 			if ($opts->{'dir'}) {
 				print "    Directory: $opts->{'dir'}\n";
 				}

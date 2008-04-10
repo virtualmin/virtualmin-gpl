@@ -6777,11 +6777,13 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 				$dom->{'user'}, $dom->{'pass'});
 
 		if ($ok) {
-			&$second_print(&text('setup_scriptdone', $msg));
+			&$second_print(&text($ok < 0 ? 'setup_scriptpartial' :
+						'setup_scriptdone', $msg));
 
 			# Record script install in domain
 			&add_domain_script($dom, $name, $ver, $opts,
-					   $desc, $url, $suser, $spass);
+					   $desc, $url, $suser, $spass,
+					   $ok < 0 ? $msg : undef);
 
 			# Config web server for PHP
 			if (&indexof("php", @{$script->{'uses'}}) >= 0) {

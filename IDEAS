@@ -66,8 +66,6 @@
  - make FTP chrooting with proftpd easier to configure
 	- master admin can set for all/some domains
 
- - handle partly-installed scripts
+ - for wordpress, wpmu and bbpress, use Virtualmin script site in preference
 
- - script updates from command line and 'newdb'
-
-  - bbpress installer fix - FS bug
+ - bbpress installer fix - FS bug

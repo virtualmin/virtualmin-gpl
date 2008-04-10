@@ -24,6 +24,12 @@ print &ui_table_row($text{'scripts_iname'}, $script->{'desc'});
 print &ui_table_row($text{'scripts_iversion'},
 	$script->{'vdesc'}->{$sinfo->{'version'}} || $sinfo->{'version'});
 
+# Show error, if any
+if ($sinfo->{'partial'}) {
+	print &ui_table_row($text{'scripts_ipartial'},
+		"<font color=#ff0000>$sinfo->{'partial'}</font>");
+	}
+
 # Show install URL
 if ($sinfo->{'url'}) {
 	print &ui_table_row($text{'scripts_iurl'},

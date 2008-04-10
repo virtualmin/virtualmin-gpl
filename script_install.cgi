@@ -158,7 +158,7 @@ print $msg,"<p>\n";
 if ($ok && $script->{'site'}) {
 	print &text('scripts_sitelink', $script->{'site'}),"<p>\n";
 	}
-if ($ok && !$sinfo) {
+if ($ok > 0 && !$sinfo) {
 	# Show login details
 	if ($suser && $spass) {
 		print &text('scripts_userpass',
@@ -173,7 +173,8 @@ if ($ok && !$sinfo) {
 	}
 &$outdent_print();
 if ($ok) {
-	&$second_print($text{'setup_done'});
+	&$second_print($ok < 0 ? $text{'scripts_epartial'}
+			       : $text{'setup_done'});
 
 	# Record script install in domain
 	if ($sinfo) {
@@ -181,7 +182,8 @@ if ($ok) {
 		}
 	&add_domain_script($d, $sname, $ver, $opts, $desc, $url,
 			   $sinfo ? ( $sinfo->{'user'}, $sinfo->{'pass'} )
-				  : ( $suser, $spass ));
+				  : ( $suser, $spass ),
+			   $ok < 0 ? $msg : undef);
 
 	# Config web server for PHP
 	if (&indexof("php", @{$script->{'uses'}}) >= 0) {

@@ -81,9 +81,13 @@ if (@got) {
 		else {
 			$dbdesc = "<i>$text{'scripts_nodb'}</i>";
 			}
+		$desc = $script->{'desc'};
+		if ($sinfo->{'partial'}) {
+			$desc = "<i>$desc</i>";
+			}
 		print &ui_checked_columns_row([
 			"<a href='edit_script.cgi?dom=$in{'dom'}&".
-			"script=$sinfo->{'id'}'>$script->{'desc'}</a>",
+			 "script=$sinfo->{'id'}'>$desc</a>",
 			$script->{'vdesc'}->{$sinfo->{'version'}} ||
 			  $sinfo->{'version'},
 			$sinfo->{'url'} ? 

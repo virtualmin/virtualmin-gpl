@@ -164,18 +164,19 @@ return @rv;
 }
 
 # add_domain_script(&domain, name, version, &opts, desc, url,
-#		    [login, password])
+#		    [login, password], [partial-failure])
 # Records the installation of a script for a domains
 sub add_domain_script
 {
-local ($d, $name, $version, $opts, $desc, $url, $user, $pass) = @_;
+local ($d, $name, $version, $opts, $desc, $url, $user, $pass, $partial) = @_;
 local %info = ( 'id' => time().$$,
 		'name' => $name,
 		'version' => $version,
 		'desc' => $desc,
 		'url' => $url,
 		'user' => $user,
-		'pass' => $pass );
+		'pass' => $pass,
+		'partial' => $partial );
 local $o;
 foreach $o (keys %$opts) {
 	$info{'opts_'.$o} = $opts->{$o};
