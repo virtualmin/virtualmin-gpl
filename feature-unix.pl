@@ -346,10 +346,15 @@ return undef if ($d->{'parent'});	# sub-servers have no user
 local @users = &list_all_users();
 local ($user) = grep { $_->{'user'} eq $d->{'user'} } @users;
 return &text('validate_euser', $d->{'user'}) if (!$user);
+return &text('validate_euid', $d->{'user'}, $d->{'uid'}, $user->{'uid'})
+	if ($d->{'uid'} != $user->{'uid'});
 if (&mail_system_needs_group() || $d->{'gid'} == $d->{'ugid'}) {
 	local @groups = &list_all_groups();
 	local ($group) = grep { $_->{'group'} eq $d->{'group'} } @groups;
 	return &text('validate_egroup', $d->{'group'}) if (!$group);
+	return &text('validate_egid', $d->{'group'}, $d->{'gid'},
+				      $group->{'gid'})
+		if ($d->{'gid'} != $group->{'gid'});
 	}
 return undef;
 }
