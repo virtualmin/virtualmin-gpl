@@ -146,11 +146,15 @@ if ($opts->{'db'}) {
 	@dbs = &domain_databases($d);
 	($db) = grep { $_->{'type'} eq $dbtype &&
 		       $_->{'name'} eq $dbname } @dbs;
-	if (!$opts->{'newdb'}) {
-		$db || &usage("$dbtype database $dbname does not exist");
-		}
-	else {
-		$db && &usage("$dbtype database $dbname already exists");
+	if (!$sinfo) {
+		if (!$opts->{'newdb'}) {
+			$db ||
+			    &usage("$dbtype database $dbname does not exist");
+			}
+		else {
+			$db &&
+			    &usage("$dbtype database $dbname already exists");
+			}
 		}
 	}
 if (defined(&{$script->{'check_func'}}) && !$sinfo) {

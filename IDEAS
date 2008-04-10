@@ -65,3 +65,9 @@
 
  - make FTP chrooting with proftpd easier to configure
 	- master admin can set for all/some domains
+
+ - handle partly-installed scripts
+
+ - script updates from command line and 'newdb'
+
+  - bbpress installer fix - FS bug
