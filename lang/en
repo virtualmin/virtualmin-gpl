@@ -2534,6 +2534,7 @@ database_manage=Manage Database
 database_disc=Disassociate With Server
 database_size=Size on disk
 database_tables=Number of tables
+database_scripts=Used by scripts
 database_err=Failed to create database
 database_emax=You are not allowed to add any more databases
 database_ename=Missing or invalid database name - only letters, numbers and _ are allowed

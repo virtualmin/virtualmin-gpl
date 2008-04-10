@@ -67,6 +67,23 @@ if (!$in{'new'}) {
 	if ($tables ne "") {
 		print &ui_table_row($text{'database_tables'}, $tables);
 		}
+
+	# Show scripts that use it
+	if (defined(&list_domain_scripts)) {
+		@slist = ( );
+		foreach $sinfo (&list_domain_scripts($d)) {
+			($dbtype, $dbname) =
+				split(/_/, $sinfo->{'opts'}->{'db'}, 2);
+			if ($dbtype eq $in{'type'} && $dbname eq $in{'name'}) {
+				$script = &get_script($sinfo->{'name'});
+				push(@slist, "<a href='edit_script.cgi?dom=$d->{'id'}&script=$sinfo->{'id'}'>$script->{'desc'} $sinfo->{'version'}</a>");
+				}
+			}
+		if (@slist) {
+			print &ui_table_row($text{'database_scripts'},
+				join("<br>\n", @slist));
+			}
+		}
 	}
 
 # Type-specific creation options
