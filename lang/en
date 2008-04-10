@@ -194,6 +194,7 @@ form_title2=Create Virtual Sub-Server
 form_title3=Create Alias Server
 form_title4=Create Virtual Sub-Domain
 form_ecannot=You are not allowed to create virtual servers
+form_enomore=You are not allowed to create any more virtual servers of any type
 form_desc=
 form_genericmode=New virtual server type:
 form_generic_master=Top-level server

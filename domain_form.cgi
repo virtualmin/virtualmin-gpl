@@ -84,6 +84,7 @@ if ($in{'generic'}) {
 	if (!defined($in{'genericmode'})) {
 		$in{'genericmode'} = 0;
 		}
+	@generics || &error($text{'form_enomore'});
 
 	# Force inputs to match selected generic type 
 	$generic = $generics[$in{'genericmode'}];
