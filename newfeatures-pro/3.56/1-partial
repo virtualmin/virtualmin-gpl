@@ -1,0 +1,6 @@
+desc=Partial script failures
+html=When a script does not get fully installed (perhaps due to Virtualmin not being able to call its setup wizard), it is marked as a partial failure rather than a complete failure. This allows it be easily removed without leaving files behind.
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}
