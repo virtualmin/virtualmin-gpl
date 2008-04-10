@@ -288,7 +288,15 @@ foreach my $f (@files) {
 		else {
 			push(@urls, $f->{'url'});
 			}
-		push(@urls, "http://$script_download_host:$script_download_port$script_download_dir$f->{'file'}");
+		local $vurl = "http://$script_download_host:$script_download_port$script_download_dir$f->{'file'}";
+		if ($f->{'virtualmin'}) {
+			# Use Virtualmin site first, for scripts that don't
+			# have a version-specific name
+			unshift(@urls, $vurl);
+			}
+		else {
+			push(@urls, $vurl);
+			}
 
 		# Try each URL
 		local $firsterror;

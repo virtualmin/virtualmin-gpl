@@ -66,6 +66,4 @@
  - make FTP chrooting with proftpd easier to configure
 	- master admin can set for all/some domains
 
- - for wordpress, wpmu and bbpress, use Virtualmin script site in preference
-
  - bbpress installer fix - FS bug
