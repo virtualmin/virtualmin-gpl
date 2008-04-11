@@ -66,8 +66,6 @@
  - make FTP chrooting with proftpd easier to configure
 	- master admin can set for all/some domains
 
- - bbpress installer fix - FS bug
-
  - re-factor script installer posts
 	- check for www.domain.com vs domain.com
 
