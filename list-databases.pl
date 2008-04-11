@@ -44,6 +44,9 @@ if ($type) {
 	}
 if ($multi) {
 	# Show each database on a separate line
+	if (defined(&list_domain_scripts)) {
+		@scripts = &list_domain_scripts($d);
+		}
 	foreach $db (@dbs) {
 		print "$db->{'name'}\n";
 		print "    Type: $db->{'type'}\n";
@@ -52,6 +55,21 @@ if ($multi) {
 			print "    Size: ",&nice_size($size),"\n";
 			}
 		print "    Tables: $tables\n";
+
+		# Show scripts that use it
+		@slist = ( );
+		foreach $sinfo (@scripts) {
+			($dbtype, $dbname) =
+				split(/_/, $sinfo->{'opts'}->{'db'}, 2);
+			if ($dbtype eq $db->{'type'} &&
+			    $dbname eq $db->{'name'}) {
+				push(@slist, $sinfo->{'name'}." ".
+					     $sinfo->{'version'});
+				}
+			}
+		if (@slist) {
+			print "    Used by scripts: ",join(", ", @slist),"\n";
+			}
 		}
 	}
 elsif ($nameonly) {
