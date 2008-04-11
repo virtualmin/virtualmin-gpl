@@ -69,7 +69,3 @@
  - re-factor script installer posts
 	- check for www.domain.com vs domain.com
 
- - use dedicated 'anonymous' user for anonymous module access
-	- virtualmin-mailman
-	- virtualmin-password-recovery
-	- virtualmin-multi-login
