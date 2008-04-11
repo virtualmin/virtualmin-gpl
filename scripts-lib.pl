@@ -1641,6 +1641,13 @@ if ($copydir) {
 	$out = undef if ($out !~ /\S/);
 	return "<pre>".&html_escape($out || "Exit status $?")."</pre>" if ($?);
 
+	# Copy any dot-files too
+	if (-d $path) {
+		$out = &run_as_domain_user($d, "cp -r ".quotemeta($dir).
+				   ($subdir ? "/$subdir/.??*" : "/.??*").
+				   " ".quotemeta($copydir)." 2>&1");
+		}
+
 	# Make dest files non-world-readable and user writable, unless we don't
 	# add Apache to a group, or if the home is world-readable
 	local $tmpl = &get_template($d->{'template'});
