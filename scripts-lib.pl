@@ -303,13 +303,18 @@ foreach my $f (@files) {
 		foreach my $url (@urls) {
 			local $error;
 			$progress_callback_url = $url;
+			local %headers;
+			if ($f->{'referer'}) {
+				$headers{'Referer'} = $f->{'referer'};
+				}
 			if ($url =~ /^http/) {
 				# Via HTTP
 				my ($host, $port, $page, $ssl) =
 					&parse_http_url($url);
 				&http_download($host, $port, $page, $temp,
 					       \$error, $cb, $ssl, undef, undef,
-					       undef, 0, $f->{'nocache'});
+					       undef, 0, $f->{'nocache'},
+					       \%headers);
 				}
 			elsif ($url =~ /^ftp:\/\/([^\/]+)(\/.*)/) {
 				# Via FTP

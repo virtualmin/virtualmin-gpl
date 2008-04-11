@@ -885,4 +885,4 @@ Link from the Edit Database page to scripts that use the DB.
 When a script does not get fully installed (perhaps due to Virtualmin not being able to call its setup wizard), it is marked as a partial failure rather than a complete failure. This allows it be easily removed without leaving files behind.
 Wordpress, WPMU and bbPress are now downloaded from the Virtualmin website in preference to their developer's sites, as there is no way to fetch specific older versions from the original site.
 The alias to bounce all mail to unknown addresses in a domain is no longer created when using Postfix, as it does not appear to be necessary.
-Updated the phpPgAdmin script installer to version 4.2.
+Updated the phpPgAdmin script installer to version 4.2, and phpCOIN to 1.4.1.
