@@ -404,7 +404,7 @@ else {
 $prefix ||= &compute_prefix($domain);
 $prefix =~ /^[a-z0-9\.\-]+$/i || &usage($text{'setup_eprefix'});
 $pclash = &get_domain_by("prefix", $prefix);
-$pclash && &usage($text{'setup_eprefix2'});
+$pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 
 # Build up domain object
 %dom = ( 'id', &domain_id(),

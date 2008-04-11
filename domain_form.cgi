@@ -307,8 +307,8 @@ if (!$parentuser) {
 		}
 	}
 
-if (!$aliasdom && &max_username_length()) {
-	# Show input for mail username prefix, if needed
+if (!$aliasdom) {
+	# Show input for mail username prefix
 	print &ui_table_row(&hlink($text{'form_prefix'}, "prefixname"),
 		&ui_opt_textbox("prefix", undef, 15,
 				$text{'form_auto'}),

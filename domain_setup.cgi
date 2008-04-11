@@ -168,8 +168,6 @@ if (!$aliasdom) {
 	if (!$in{'prefix_def'}) {
 		$in{'prefix'} =~ /^[a-z0-9\.\-]+$/i ||
 			&error($text{'setup_eprefix'});
-		$pclash = &get_domain_by("prefix", $in{'prefix'});
-		$pclash && &error($text{'setup_eprefix2'});
 		}
 	if (&database_feature() && &can_edit_databases() && !$in{'db_def'} &&
 	    !$subdom) {
@@ -239,6 +237,8 @@ else {
 	}
 $prefix = $in{'prefix_def'} ? &compute_prefix($in{'dom'}, $group, $parentdom)
 			    : $in{'prefix'};
+$pclash = &get_domain_by("prefix", $prefix);
+$pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 
 # Build up domain object
 %dom = ( 'id', &domain_id(),
