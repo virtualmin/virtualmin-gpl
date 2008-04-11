@@ -292,8 +292,10 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 			}
 		if ($tmpl->{'dom_aliases_bounce'} &&
 		    !$acreate{"\@$_[0]->{'dom'}"} &&
-		    !$gotvirt{'@'.$_[0]->{'dom'}}) {
-			# Add bounce alias
+		    !$gotvirt{'@'.$_[0]->{'dom'}} &&
+		    $config{'mail_system'} != 0) {
+			# Add bounce alias, if there isn't one yet, and if
+			# we are not running Postfix.
 			local $v = { 'from' => "\@$_[0]->{'dom'}",
 				     'to' => [ 'BOUNCE' ] };
 			&create_virtuser($v);
@@ -3546,11 +3548,14 @@ foreach my $a (@aliases, undef, undef) {
 	$i++;
 	}
 $atable .= &ui_columns_end();
-$atable .= &ui_checkbox("bouncealias", 1,
-		        &hlink("<b>$text{'tmpl_bouncealias'}</b>",
-		               "template_bouncealias"),
-		        $tmpl->{'dom_aliases_bounce'});
-push(@dafields, "bouncealias");
+if ($config{'mail_system'} != 0) {
+	# Bounce-all alias, not shown for Postfix
+	$atable .= &ui_checkbox("bouncealias", 1,
+				&hlink("<b>$text{'tmpl_bouncealias'}</b>",
+				       "template_bouncealias"),
+				$tmpl->{'dom_aliases_bounce'});
+	push(@dafields, "bouncealias");
+	}
 print &ui_table_row(&hlink($text{'tmpl_domaliases'},
                            "template_domaliases_mode"),
 		    &none_def_input("domaliases", $tmpl->{'dom_aliases'},
@@ -3674,7 +3679,7 @@ else {
 	@aliases || &error(&text('tmpl_ealiases'));
 	$tmpl->{'dom_aliases'} = join("\t", @aliases);
 	}
-if ($in{'domaliases_mode'} != 1) {
+if ($in{'domaliases_mode'} != 1 && $config{'mail_system'} != 0) {
 	$tmpl->{'dom_aliases_bounce'} = $in{'bouncealias'};
 	}
 if ($supports_aliascopy) {
