@@ -19,7 +19,7 @@ return "A browser-based PostgreSQL database management interface.";
 # script_phppgadmin_versions()
 sub script_phppgadmin_versions
 {
-return ( "4.1.3" );
+return ( "4.2" );
 }
 
 sub script_phppgadmin_category
@@ -100,7 +100,8 @@ sub script_phppgadmin_check
 {
 local ($d, $ver, $opts, $upgrade) = @_;
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
-$opts->{'db'} || return "Missing database";
+#$opts->{'db'} || return "Missing database";
+$opts->{'db'} ||= "template1";
 if (-r "$opts->{'dir'}/conf/config.inc.php") {
 	return "phpPgAdmin appears to be already installed in the selected directory";
 	}

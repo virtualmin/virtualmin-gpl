@@ -379,6 +379,8 @@ for(my $i=0; $i<@sp1 || $i<@sp2; $i++) {
 		}
 	else {
 		# String compare
+		$v1 = 0 if ($v1 eq '');
+		$v2 = 0 if ($v2 eq '');
 		$comp = $v1 cmp $v2;
 		}
 	return $comp if ($comp);

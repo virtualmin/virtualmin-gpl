@@ -1,5 +1,5 @@
 html=New script installers
-desc=Added a script insaller for poMMo, a new web-based mailing list manager.
+desc=Added a script insaller for poMMo, a new web-based mailing list manager. Updated the phpPgAdmin script installer to version 4.2.
 master=1
 reseller=1
 domain=1
