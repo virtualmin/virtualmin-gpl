@@ -210,7 +210,7 @@ else {
 	}
 
 # Make sure domain is under parent, if required
-local $derr = &valid_domain_name($parentdom, $in{'dom'});
+local $derr = &allowed_domain_name($parentdom, $in{'dom'});
 &error($derr) if ($derr);
 
 if ($parentuser) {

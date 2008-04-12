@@ -18,7 +18,8 @@ print &ui_hidden("dom", $d->{'id'}),"\n";
 print &ui_table_start($text{'move_header'}, undef, 2, [ "width=30%" ]);
 
 # Domain being moved
-print &ui_table_row($text{'move_dom'}, "<tt>$d->{'dom'}</tt>");
+print &ui_table_row($text{'move_dom'},
+	"<tt>".&show_domain_name($d)."</tt>");
 
 # New parent
 @pdoms = sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) }

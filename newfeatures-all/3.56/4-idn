@@ -1,0 +1,6 @@
+desc=International domain names
+html=International domain names are now automatically converted to the IDN xn-- format when creating, and converted back for display.
+link=domain_form.cgi
+master=1
+reseller=1
+owner=1

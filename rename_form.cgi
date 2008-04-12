@@ -19,8 +19,13 @@ print &ui_table_start($text{'rename_header'}, "width=100%", 2);
 # Old and new domain name
 print &ui_table_row($text{'rename_domain'},
 		    "<tt>$d->{'dom'}</tt>");
+$dname = &show_domain_name($d);
+if ($dname ne $d->{'dom'}) {
+	print &ui_table_row($text{'rename_xndomain'},
+			    "<tt>$dname</tt>");
+	}
 print &ui_table_row($text{'rename_new'},
-		    &ui_textbox("new", $d->{'dom'}, 30));
+		    &ui_textbox("new", $dname, 30));
 
 if ($d->{'unix'} && &can_rename_domains() == 2) {
 	# Rename user option

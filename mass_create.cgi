@@ -223,7 +223,7 @@ foreach $line (@lines) {
 
 	# Make sure domain is under parent, if required
 	if ($parentdom) {
-		local $derr = &valid_domain_name($parentdom, $dname);
+		local $derr = &allowed_domain_name($parentdom, $dname);
 		if ($derr) {
 			&line_error($derr);
 			next;

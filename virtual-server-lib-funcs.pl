@@ -8504,10 +8504,10 @@ if (defined($user->{'dbs'})) {
 &unlock_file("$initial_users_dir/$dom->{'id'}");
 }
 
-# valid_domain_name(&parent, newdomain)
+# allowed_domain_name(&parent, newdomain)
 # Returns an error message if some domain name is invalid, or undef if OK.
 # Checks domain-owner subdomain and reseller subdomain limits.
-sub valid_domain_name
+sub allowed_domain_name
 {
 if ($_[0] && $access{'forceunder'}) {
 	local $pd = $_[0]->{'dom'};
@@ -8526,9 +8526,6 @@ if (!&master_admin()) {
 			return $text{'setup_edenieddomain'};
 			}
 		}
-	}
-if ($_[1] =~ /^(www|ftp)\./i) {
-	return &text('setup_edomainprefix', "$1");
 	}
 return undef;
 }
@@ -10316,6 +10313,9 @@ $name =~ /^[A-Za-z0-9\.\-]+$/ || return $text{'setup_edomain'};
 $name =~ /^\./ && return $text{'setup_edomain2'};
 $name =~ /\.$/ && return $text{'setup_edomain2'};
 $name =~ /\.xn--([^\.]+)$/ && return $text{'setup_edomain3'};
+if ($name =~ /^(www|ftp)\./i) {
+	return &text('setup_edomainprefix', "$1");
+	}
 return undef;
 }
 

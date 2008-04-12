@@ -889,3 +889,4 @@ Updated the phpPgAdmin script installer to version 4.2, phpCOIN to 1.4.1, TikiWi
 Added a Module Config option to prevent creation of the deniedssh group.
 Reduced the memory needed to migrated Plesk backups, by not reading the whole source file into RAM for parsing.
 When creating a sub-server whose prefix is in use by another domain, a non-clashing prefix for users is automatically selected.
+International domain names are now automatically converted to the IDN xn-- format when creating, and converted back for display.

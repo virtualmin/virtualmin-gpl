@@ -66,8 +66,3 @@
  - make FTP chrooting with proftpd easier to configure
 	- master admin can set for all/some domains
 
- - IDN support for domain names
-	- FS#3828
-	- Convert at create time, and when displaying?
-	- All pages that show domain name have to be updated
-	- CHANGELOG
