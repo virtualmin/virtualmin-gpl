@@ -888,4 +888,4 @@ The alias to bounce all mail to unknown addresses in a domain is no longer creat
 Updated the phpPgAdmin script installer to version 4.2, phpCOIN to 1.4.1, TikiWiki to 1.9.11, bbPress to 0.9.0.1, and SugarCRM to 5.0.0c.
 Added a Module Config option to prevent creation of the deniedssh group.
 Reduced the memory needed to migrated Plesk backups, by not reading the whole source file into RAM for parsing.
-When creating a sub-server whose suffix is in use by another domain, a non-clashing suffix is automatically selected.
+When creating a sub-server whose prefix is in use by another domain, a non-clashing prefix for users is automatically selected.
