@@ -66,11 +66,9 @@
  - make FTP chrooting with proftpd easier to configure
 	- master admin can set for all/some domains
 
- - re-factor script installer posts
-	- check for www.domain.com vs domain.com
-
  - IDN support for domain names
 	- FS#3828
 	- IDNA::Punycode
 	- Convert at create time, and when displaying?
 	- Has to be done on a per-domain-component basis
+

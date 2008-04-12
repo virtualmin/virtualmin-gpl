@@ -1694,7 +1694,8 @@ if (@dbs) {
 if (!$nocreate) {
 	# Can we create one?
 	local ($dleft, $dreason, $dmax) = &count_feature("dbs");
-	if ($dleft != 0 && &can_edit_databases()) {
+	local @ftypes = grep { $d->{$_} } @$types;
+	if (@ftypes && $dleft != 0 && &can_edit_databases()) {
 		return 1;
 		}
 	}
