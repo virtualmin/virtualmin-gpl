@@ -163,3 +163,4 @@ bw_nomailout=0
 show_nf=master,reseller,domain
 from_reseller=0
 collect_interval=5
+nodeniedssh=0

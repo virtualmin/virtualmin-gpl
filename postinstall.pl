@@ -202,7 +202,7 @@ if (!@doms && !defined($config{'backup_feature_all'})) {
 &build_domain_maps();
 
 # If supported by OpenSSH, create a group of users to deny SSH for
-if (&foreign_installed("sshd")) {
+if (&foreign_installed("sshd") && !$config{'nodeniedssh'}) {
 	# Add to SSHd config
 	&foreign_require("sshd", "sshd-lib.pl");
 	local $conf = &sshd::get_sshd_config();

@@ -615,6 +615,7 @@ return @rv;
 sub build_denied_ssh_group
 {
 local ($newd, $deld) = @_;
+return 0 if ($config{'nodeniedssh'});	# Disabled in config
 
 # First make sure the group exists
 &obtain_lock_unix($_[0]);

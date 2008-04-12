@@ -65,7 +65,7 @@ passwd_length=Length of randomly generated password,3,Default (15 characters),5
 webalizer_nocron=Setup Webalizer Cron job for each virtual server?,1,0-Yes,1-No
 limitnoalias=Include alias servers in limits?,1,0-Yes,1-No
 allow_subdoms=Allow creation of sub-domains?,1,1-Yes,0-No,-Decide automatically
-denied_domains=Regular expressions for disallowed domains,0
+denied_domains=Regular expressions for disallowed domain names,0
 
 line2.1=SSL settings,11
 key_size=Default SSL key size,3,Webmin default (512 bits),6,,bits
@@ -87,6 +87,7 @@ alias_post_command=Command to run after making changes to an alias,0
 other_users=Notify other modules when updating server administrator Unix users?,1,1-Yes,0-No
 other_doms=Notify other modules when updating mailbox Unix users?,1,1-Yes,0-No
 check_apache=Check Apache configuration before applying?,1,1-Yes,0-No
+nodeniedssh=Add users with no SSH access to <tt>deniedssh</tt> group?,1,0-Yes,0-No
 
 line4.5=Qmail+LDAP options,11
 ldap_host=LDAP server,0
