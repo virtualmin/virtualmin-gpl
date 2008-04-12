@@ -887,3 +887,4 @@ Wordpress, WPMU and bbPress are now downloaded from the Virtualmin website in pr
 The alias to bounce all mail to unknown addresses in a domain is no longer created when using Postfix, as it does not appear to be necessary.
 Updated the phpPgAdmin script installer to version 4.2, phpCOIN to 1.4.1, TikiWiki to 1.9.11, bbPress to 0.9.0.1, and SugarCRM to 5.0.0c.
 Added a Module Config option to prevent creation of the deniedssh group.
+Reduced the memory needed to migrated Plesk backups, by not reading the whole source file into RAM for parsing.

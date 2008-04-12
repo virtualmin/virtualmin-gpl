@@ -866,7 +866,7 @@ if ($cf == 4) {
 	&execute_command("cd ".quotemeta($dir)." && unzip ".quotemeta($file));
 	}
 else {
-	# Read in the backup as a fake mail object
+	# Read the backup file, parsing it into files as we go
 	&foreign_require("mailboxes", "mailboxes-lib.pl");
 	local $mail = { };
 	if ($cf == 0) {
@@ -877,31 +877,89 @@ else {
 		# Gzipped MIME file
 		open(FILE, "gunzip -c ".quotemeta($file)." |") || return undef;
 		}
+
+	# Read base mail headers
+	local %baseheaders;
 	while(<FILE>) {
 		s/\r|\n//g;
 		if (/^(\S+):\s+(.*)/) {
-			$mail->{'header'}->{lc($1)} = $2;
-			push(@{$mail->{'headers'}}, [ $1, $2 ]);
+			$baseheaders{lc($1)} = $2;
 			}
 		else {
-			last;	# End of 'headers'
+			last;
 			}
 		}
-	while(read(FILE, $buf, 1024) > 0) {
-		$mail->{'body'} .= $buf;
-		}
-	close(FILE);
+	$baseheaders{'content-type'} =~ /boundary\s*=\s*"([^"]+)"/i ||
+	    $baseheaders{'content-type'} =~ /boundary\s*=\s*(\S+)/i ||
+		return (0, "Missing Content-Type boundary");
+	local $bound = $1;
 
-	# Parse out the attachments and save each one off
-	&mailboxes::parse_mail($mail, undef, undef, 1);
+	# Skip to start of first section
+	while(<FILE>) {
+		s/\r|\n//g;
+		last if ($_ eq "--".$bound);
+		}
+
+	# Read sections in turn
+	local $alldone = 0;
 	local $count = 0;
-	foreach my $a (@{$mail->{'attach'}}) {
-		if ($a->{'filename'}) {
-			open(ATTACH, ">$dir/$a->{'filename'}");
-			print ATTACH $a->{'data'};
-			close(ATTACH);
-			$count++;
+	while(!$alldone) {
+		# Headers first
+		local %sheaders;
+		while(<FILE>) {
+			s/\r|\n//g;
+			if (/^(\S+):\s+(.*)/) {
+				$sheaders{lc($1)} = $2;
+				}
+			else {
+				last;
+				}
 			}
+		local $cd = $sheaders{'content-disposition'};
+		local $ct = $sheaders{'content-type'};
+		local $filename;
+		if ($cd =~ /filename\s*=\s*"([^"]+)"/i || 
+		    $cd =~ /filename\s*=\s*(\S+)/i) {
+			$filename = $1;
+			}
+		elsif ($cd =~ /name\s*=\s*"([^"]+)"/i || 
+		       $cd =~ /name\s*=\s*(\S+)/i) {
+			$filename = $1;
+			}
+		$filename || return (0, "Missing filename for section");
+		local $enc = $sheaders{'content-transfer-encoding'} || 'binary';
+
+		# Read body till the boundary end
+		&open_tempfile(ATTACH, ">$dir/$filename", 0, 1);
+		while(<FILE>) {
+			if ($_ eq "--".$bound."\n" ||
+			    $_ eq "--".$bound."\r\n") {
+				# End of this block
+				last;
+				}
+			elsif ($_ eq "--".$bound."--\n" ||
+			       $_ eq "--".$bound."--\r\n") {
+				# End of the whole mess
+				$alldone = 1;
+				last;
+				}
+			if ($enc eq 'binary' || $enc eq '7bit') {
+				&print_tempfile(ATTACH, $_);
+				}
+			elsif ($enc eq 'base64') {
+				&print_tempfile(ATTACH,
+					&mailboxes::b64decode($_));
+				}
+			elsif ($enc eq 'quoted-printable') {
+				&print_tempfile(ATTACH,
+					&mailboxes::quoted_decode($_));
+				}
+			else {
+				return (0, "Unknown encoding $enc");
+				}
+			}
+		&close_tempfile(ATTACH);
+		$count++;
 		}
 	return (0, "No attachments found in MIME data") if (!$count);
 	}
