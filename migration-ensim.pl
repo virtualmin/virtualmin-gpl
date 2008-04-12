@@ -55,7 +55,7 @@ local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
 local ($ok, $root) = &extract_ensim_dir($file);
 
 # Check for prefix clash
-$prefix ||= &compute_prefix($dom, undef, $parent);
+$prefix ||= &compute_prefix($dom, undef, $parent, 1);
 local $pclash = &get_domain_by("prefix", $prefix);
 $pclash && &error("A virtual server using the prefix $prefix already exists");
 
@@ -165,7 +165,7 @@ local $oldip = $ii ? $ii->{'config'}->{'nbaddr'} : undef;
 
 # Create the virtual server object
 local %dom;
-$prefix ||= &compute_prefix($dom, $group, $parent);
+$prefix ||= &compute_prefix($dom, $group, $parent, 1);
 %dom = ( 'id', &domain_id(),
 	 'dom', $dom,
          'user', $duser,

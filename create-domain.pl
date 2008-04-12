@@ -401,7 +401,7 @@ else {
 	}
 
 # Work out prefix if needed, and check it
-$prefix ||= &compute_prefix($domain);
+$prefix ||= &compute_prefix($domain, $group, $parent, 1);
 $prefix =~ /^[a-z0-9\.\-]+$/i || &usage($text{'setup_eprefix'});
 $pclash = &get_domain_by("prefix", $prefix);
 $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));

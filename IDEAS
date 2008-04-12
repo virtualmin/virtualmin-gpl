@@ -68,8 +68,6 @@
 
  - IDN support for domain names
 	- FS#3828
-	- IDNA::Punycode
 	- Convert at create time, and when displaying?
-	- Has to be done on a per-domain-component basis
-	- Call valid_domain_name everywhere
 	- All pages that show domain name have to be updated
+	- CHANGELOG

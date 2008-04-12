@@ -234,7 +234,7 @@ else {
 		$ugroup = $in{'group'};
 		}
 	}
-$prefix = $in{'prefix_def'} ? &compute_prefix($in{'dom'}, $group, $parentdom)
+$prefix = $in{'prefix_def'} ? &compute_prefix($in{'dom'}, $group, $parentdom, 1)
 			    : $in{'prefix'};
 $pclash = &get_domain_by("prefix", $prefix);
 $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));

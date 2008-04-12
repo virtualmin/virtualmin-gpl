@@ -64,7 +64,7 @@ if (!$in{'prefix_def'}) {
 	}
 else {
 	$prefix = &compute_prefix($in{'dom'}, $in{'crgroup'} || $in{'group'},
-				  $parent);
+				  $parent, 1);
 	}
 
 # Validate regexp

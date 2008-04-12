@@ -3144,12 +3144,15 @@ $ENV{'VIRTUALSERVER_ACTION'} = $action;
 foreach my $e (keys %$d) {
 	$ENV{'VIRTUALSERVER_'.uc($e)} = $d->{$e};
 	}
+$ENV{'VIRTUALSERVER_IDNDOM'} = &show_domain_name($d->{'dom'});
 if ($newd) {
 	# Set details of virtual server being changed to. This is only
 	# done in the pre-modify call
 	foreach my $e (keys %$newd) {
 		$ENV{'VIRTUALSERVER_NEWSERVER_'.uc($e)} = $newd->{$e};
 		}
+	$ENV{'VIRTUALSERVER_NEWSERVER_IDNDOM'} =
+		&show_domain_name($newd->{'dom'});
 	}
 if ($d->{'reseller'} && defined(&get_reseller)) {
 	local $resel = &get_reseller($d->{'reseller'});
@@ -9194,11 +9197,11 @@ else {
 return ($home-$dbq, $mail, $db);
 }
 
-# compute_prefix(domain-name, group, [&parent])
+# compute_prefix(domain-name, group, [&parent], [creating-flag])
 # Given a domain name, returns the prefix for usernames
 sub compute_prefix
 {
-local ($name, $group, $parent) = @_;
+local ($name, $group, $parent, $creating) = @_;
 $name =~ s/^xn--//;	# Strip IDN part
 if ($config{'longname'} == 1) {
 	# Prefix is same as domain name
@@ -9209,9 +9212,21 @@ elsif ($group && !$parent && $config{'longname'} == 0) {
 	return $group;
 	}
 else {
-	# Otherwise, prefix comes from first part of domain
-	$name =~ /^([^\.]+)/;
-	return $1;
+	# Otherwise, prefix comes from first part of domain. If this clashes,
+	# use the second part too and so on
+	local @p = split(/\./, $name);
+	local $prefix;
+	if ($creating) {
+		for(my $i=0; $i<@p; $i++) {
+			local $testp = join("-", @p[0..$i]);
+			local $pclash = &get_domain_by("prefix", $testp);
+			if (!$pclash) {
+				$prefix = $testp;
+				last;
+				}
+			}
+		}
+	return $prefix || $p[0];
 	}
 }
 
@@ -11522,6 +11537,7 @@ sub substitute_domain_template
 local ($str, $d) = @_;
 local %hash = %$d;
 delete($hash{''});
+$hash{'idndom'} = &show_domain_name($d->{'dom'});	# With unicode
 if ($d->{'parent'}) {
 	local $parent = &get_domain($d->{'parent'});
 	foreach my $k (keys %$parent) {

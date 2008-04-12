@@ -36,7 +36,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--domain") {
 		$domain = shift(@ARGV);
-		$domain =~ /^[a-z0-9\.\-\_]+$/i || &usage("Invalid domain name $domain");
+		$domain = lc(&parse_domain_name($domain));
+		$err = &valid_domain_name($domain);
+		&usage($err) if ($err);
 		}
 	elsif ($a eq "--user") {
 		$user = shift(@ARGV);

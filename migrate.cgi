@@ -19,7 +19,9 @@ if ($in{'dom_def'}) {
 	$domain = undef;
 	}
 else {
-	$in{'dom'} =~ /^[a-z0-9\.\-\_]+$/i || &error($text{'migrate_edom'});
+	$in{'dom'} = lc(&parse_domain_name($in{'dom'}));
+	$err = &valid_domain_name($in{'dom'});
+	&error($err) if ($err);
 	$domain = $in{'dom'};
 	}
 if (!$in{'user_def'}) {

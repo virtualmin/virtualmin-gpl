@@ -245,7 +245,7 @@ foreach $line (@lines) {
 		$gid = $gid = $uid = undef;
 		$ugroup = $group;
 		}
-	local $prefix = &compute_prefix($dname, $group, $parentdom);
+	local $prefix = &compute_prefix($dname, $group, $parentdom, 1);
 
 	# Work out options that may come from template
 	local ($quota, $uquota, $bw, $mailboxlimit, $aliaslimit, $dbslimit,

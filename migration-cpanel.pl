@@ -116,7 +116,7 @@ local $datastore = "$root/.cpanel-datastore";
 local $tmpl = &get_template($template);
 
 # Check for prefix clash
-$prefix ||= &compute_prefix($dom, undef, $parent);
+$prefix ||= &compute_prefix($dom, undef, $parent, 1);
 local $pclash = &get_domain_by("prefix", $prefix);
 $pclash && &error("A virtual server using the prefix $prefix already exists");
 
@@ -315,7 +315,7 @@ elsif (-r "$datastore/quota_-v") {
 
 # Create the virtual server object
 local %dom;
-$prefix ||= &compute_prefix($dom, $group, $parent);
+$prefix ||= &compute_prefix($dom, $group, $parent, 1);
 %dom = ( 'id', &domain_id(),
 	 'dom', $dom,
          'user', $duser,
