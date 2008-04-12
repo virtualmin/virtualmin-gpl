@@ -10,8 +10,9 @@ $d = &get_domain($in{'dom'});
 &can_rename_domains() || &error($text{'rename_ecannot'});
 
 # Validate inputs
-$in{'new'} =~ /^[A-Za-z0-9\.\-]+$/ || &error($text{'rename_enew'});
-$in{'new'} = lc($in{'new'});
+$in{'new'} = lc(&parse_domain_name($in{'new'}));
+$err = &valid_domain_name($in{'new'});
+&error($err) if ($err);
 $newdom = $in{'new'} ne $d->{'dom'} ? 1 : 0;
 if (!$d->{'parent'} && &can_rename_domains() == 2 &&
     ($in{'user_mode'} == 2 || $newdom)) {

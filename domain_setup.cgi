@@ -43,10 +43,9 @@ if ($in{'subdom'}) {
 &error(&text('setup_emax', $dmax)) if ($dleft == 0);
 
 # Validate inputs (check domain name to see if in use)
-$in{'dom'} =~ /^[A-Za-z0-9\.\-]+$/ || &error($text{'setup_edomain'});
-$in{'dom'} =~ /^\./ && &error($text{'setup_edomain'});
-$in{'dom'} =~ /\.$/ && &error($text{'setup_edomain'});
-$in{'dom'} = lc($in{'dom'});
+$in{'dom'} = lc(&parse_domain_name($in{'dom'}));
+$err = &valid_domain_name($in{'dom'});
+&error($err) if ($err);
 &lock_domain_name($in{'dom'});
 if ($subdom) {
 	# Append super-domain

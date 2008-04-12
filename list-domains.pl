@@ -92,6 +92,10 @@ if ($multi) {
 		print "    Type: ",($d->{'alias'} ? "Alias" :
 				    $d->{'parent'} ? "Sub-server" :
 						     "Top-level server"),"\n";
+		$dname = &show_domain_name($d);
+		if ($dname ne $d->{'dom'}) {
+			print "    International domain name: $dname\n";
+			}
 		if ($d->{'alias'}) {
 			$aliasdom = &get_domain_by("id", $d->{'alias'});
 			print "    Real domain: $aliasdom->{'dom'}\n";

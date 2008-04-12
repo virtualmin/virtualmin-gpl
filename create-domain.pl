@@ -27,7 +27,7 @@ $virt = 0;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
-		$domain = lc(shift(@ARGV));
+		$domain = shift(@ARGV);
 		}
 	elsif ($a eq "--desc") {
 		$owner = shift(@ARGV);
@@ -216,9 +216,9 @@ if ($subdomain) {
 	}
 
 # Validate args and work out defaults for those unset
-$domain =~ /^[A-Za-z0-9\.\-]+$/ || &usage($text{'setup_edomain'});
-$domain =~ /^\./ && &usage($text{'setup_edomain'});
-$domain =~ /\.$/ && &usage($text{'setup_edomain'});
+$domain = lc(&parse_domain_name($domain));
+$err = &valid_domain_name($domain);
+&usage($err) if ($err);
 &lock_domain_name($domain);
 foreach $d (&list_domains()) {
         usage($text{'setup_edomain2'}) if (lc($d->{'dom'}) eq lc($domain));

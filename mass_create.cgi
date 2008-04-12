@@ -58,7 +58,7 @@ foreach $line (@lines) {
 	$lnum++;
 	next if ($line !~ /\S/);
 	local ($dname, $owner, $pass, $user, $pname, $ip, $aname) = split(/:/, $line, -1);
-	$dname = lc($dname);
+	$dname = lc(&parse_domain_name($dname));
 	$user = lc($user);
 
 	# Validate domain details
@@ -66,8 +66,9 @@ foreach $line (@lines) {
 		&line_error($text{'cmass_edname'});
 		next;
 		}
-	if ($dname !~ /^[A-Za-z0-9\.\-]+$/) {
-		&line_error($text{'setup_edomain'});
+	$err = &valid_domain_name($dname);
+	if ($err) {
+		&line_error($err);
 		next;
 		}
 	if ($owner =~ /:/) {

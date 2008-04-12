@@ -30,9 +30,15 @@ print &ui_hidden_table_start($text{'edit_header'}, "width=100%", 4,
 			     "basic", 1);
 
 # Domain name, with link
+$dname = &show_domain_name($d);
 print &ui_table_row($text{'edit_domain'},
-	$d->{'web'} ? "<tt><a href=http://$d->{'dom'}/>$d->{'dom'}</a></tt>"
-		    : "<tt>$d->{'dom'}</tt>", undef, \@tds);
+	$d->{'web'} ? "<tt><a href=http://$d->{'dom'}/>$dname</a></tt>"
+		    : "<tt>$dname</tt>", undef, \@tds);
+
+if ($dname ne $d->{'dom'}) {
+	print &ui_table_row($text{'edit_xndomain'},
+		"<tt>$d->{'dom'}</tt>");
+	}
 
 # Username
 print &ui_table_row($text{'edit_user'},

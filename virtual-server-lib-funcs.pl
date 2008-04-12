@@ -1856,7 +1856,7 @@ print "<center><font size=+1>",&domain_in($_[0]),"</font></center>\n";
 # domain_in(&domain)
 sub domain_in
 {
-return &text('indom', "<tt>$_[0]->{'dom'}</tt>");
+return &text('indom', "<tt>".&show_domain_name($_[0])."</tt>");
 }
 
 # copy_skel_files(basedir, &user, home, [group], [&for-domain])
@@ -6324,7 +6324,9 @@ return $db;
 # Returns a Unix username for some domain, or undef if none can be found
 sub unixuser_name
 {
-$_[0] =~ /^([^\.]+)/;
+local ($dname) = @_;
+$dname =~ s/^xn--//;
+$dname =~ /^([^\.]+)/;
 local ($try1, $user) = ($1, $1);
 if (defined(getpwnam($try1)) || $config{'longname'}) {
 	$user = $_[0];
@@ -6348,6 +6350,7 @@ if ($user && $config{'groupsame'}) {
 		}
 	return (undef, $user, $user);
 	}
+$dname =~ s/^xn--//;
 $dname =~ /^([^\.]+)/;
 local ($try1, $group) = ($1, $1);
 if (defined(getgrnam($try1)) || $config{'longname'}) {
@@ -9196,6 +9199,7 @@ return ($home-$dbq, $mail, $db);
 sub compute_prefix
 {
 local ($name, $group, $parent) = @_;
+$name =~ s/^xn--//;	# Strip IDN part
 if ($config{'longname'} == 1) {
 	# Prefix is same as domain name
 	return $name;
@@ -10244,7 +10248,7 @@ $config{'mx_servers'} =
 sub shorten_domain_name
 {
 local ($d) = @_;
-local $show = $d->{'showdom'} || $d->{'dom'};
+local $show = &show_domain_name($d->{'showdom'} || $d->{'dom'});
 local $rv;
 if ($config{'name_max'} && length($show) > $config{'name_max'}) {
 	# Show first and last max/2 chars, with ... between
@@ -10256,6 +10260,48 @@ else {
 	}
 $rv =~ s/ /&nbsp;/g;
 return $rv;
+}
+
+# show_domain_name(&dom|dname)
+# Converts a domain name to human-readable form for display. Currently this
+# takes IDN encoding into account
+sub show_domain_name
+{
+local $name = ref($_[0]) ? $_[0]->{'dom'} : $_[0];
+if ($name =~ /^xn--/ || $name =~ /\.xn--/) {
+	# Convert xn-- parts to unicode
+	eval "use IDNA::Punycode";
+	$name = join(".",
+		  map { decode_punycode($_) } split(/\./, $name));
+	}
+return $name;
+}
+
+# parse_domain_name(input)
+# Returns an IDN-encoding domain name, where needed
+sub parse_domain_name
+{
+local $name = $_[0];
+if ($name !~ /^[a-z0-9\.\-\_]+$/i) {
+	# Convert unicode to xn-- format
+	eval "use IDNA::Punycode";
+	$name = join(".",
+		  map { encode_punycode($_) } split(/\./, $name));
+	}
+return $name;
+}
+
+# valid_domain_name(input)
+# Returns an error message if a domain name is not valid, undef if OK.
+# Expects parse_domain_name to have been already called.
+sub valid_domain_name
+{
+local ($name) = @_;
+$name =~ /^[A-Za-z0-9\.\-]+$/ || return $text{'setup_edomain'};
+$name =~ /^\./ && return $text{'setup_edomain2'};
+$name =~ /\.$/ && return $text{'setup_edomain2'};
+$name =~ /\.xn--([^\.]+)$/ && return $text{'setup_edomain3'};
+return undef;
 }
 
 # change_home_directory(&domain, newhome)
