@@ -3482,6 +3482,7 @@ massu_enone=None selected
 massu_rusure=Are you sure you want to un-install the $1 selected scripts, which use $2 of disk space?
 massu_rusuredb=Data from $1 databases will also be deleted.
 massu_rusurehome=Because one of the scripts is installed into the virtual server's top-level web directory, <b>all</b> files under <tt>$1</tt> will be deleted when it is un-installed!
+massu_sel=Selected scripts: $1
 
 usage_title=Disk Usage
 usage_summaryheader=Summary of disk usage and limits for this virtual server.

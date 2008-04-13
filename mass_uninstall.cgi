@@ -76,7 +76,9 @@ else {
 		print &ui_hidden("d", $id),"\n";
 		}
 	$sz = $dbcount = 0;
+	@descs = ( );
 	foreach $sinfo (@del) {
+		$script = &get_script($sinfo->{'name'});
 		$opts = $sinfo->{'opts'};
 		$sz += &disk_usage_kb($opts->{'dir'})*1024;
 		if ($opts->{'db'}) {
@@ -87,6 +89,7 @@ else {
 		if ($opts->{'dir'} eq &public_html_dir($d)) {
 			$delhtml = 1;
 			}
+		push(@descs, $script->{'desc'}." ".$sinfo->{'version'});
 		}
 	print &text('massu_rusure', scalar(@d), &nice_size($sz)),"\n";
 	if ($dbcount) {
@@ -98,7 +101,8 @@ else {
 		      "<p>\n";
 		}
 	print &ui_submit($text{'scripts_uok2'}, "confirm"),"<br>\n";
-	print &ui_form_end();
+	print &ui_form_end(),"<br>\n";
+	print &text('massu_sel', join(", ", @descs)),"<p>\n";
 	print "</center>\n";
 	}
 
