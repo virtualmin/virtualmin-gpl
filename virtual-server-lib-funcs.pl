@@ -2418,7 +2418,14 @@ print &ui_columns_start(\@cols, "100", undef, \@tds);
 local $d;
 local %done;
 local $sortfield = $config{'domains_sort'} || "user";
-foreach $d (sort { $a->{$sortfield} cmp $b->{$sortfield} ||
+local %sortkey;
+if ($sortfield eq 'dom') {
+	%sortkey = map { $_->{'id'}, &show_domain_name($_) } @$doms;
+	}
+else {
+	%sortkey = map { $_->{'id'}, $_->{$sortfield} } @$doms;
+	}
+foreach $d (sort { $sortkey{$a->{'id'}} cmp $sortkey{$b->{'id'}} ||
 		   $a->{'parent'} <=> $b->{'parent'} ||
 		   $a->{'created'} <=> $b->{'created'} } @$doms) {
 	$done{$d->{'id'}}++;
