@@ -29,11 +29,13 @@ if (!$in{'confirm'}) {
 	print &check_clicks_function();
 	if ($d->{'unix'}) {
 		$sz = &disk_usage_kb($d->{'home'});
-		print "<p>",&text('delete_rusure2', "<tt>$d->{'dom'}</tt>",
+		print "<p>",&text('delete_rusure2',
+				  "<tt>".&show_domain_name($d)."</tt>",
 				  &nice_size($sz*1024)),"<p>\n";
 		}
 	else {
-		print "<p>",&text('delete_rusure3', "<tt>$d->{'dom'}</tt>"),"<p>\n";
+		print "<p>",&text('delete_rusure3',
+				  "<tt>".&show_domain_name($d)."</tt>"),"<p>\n";
 		}
 
 	$pfx = $d->{'parent'} ? "sublosing_" : "losing_";
@@ -57,12 +59,14 @@ if (!$in{'confirm'}) {
 
 	if (@subs) {
 		print "<p><font size=+1>",&text('delete_subs',
-			join(", ", map { "<tt>$_->{'dom'}</tt>" } @subs)),
+			join(", ", map { "<tt>".&show_domain_name($_)."</tt>" }
+				       @subs)),
 			"</font><p>\n";
 		}
 	if (@aliasdoms) {
 		print "<p><font size=+1>",&text('delete_aliasdoms',
-			join(", ", map { "<tt>$_->{'dom'}</tt>" } @aliasdoms)),
+			join(", ", map { "<tt>".&show_domain_name($_)."</tt>" }
+				       @aliasdoms)),
 			"</font><p>\n";
 		}
 

@@ -6870,7 +6870,7 @@ local @aliasdoms = grep { $_->{'parent'} != $d->{'id'} } @aliasdoms;
 foreach my $dd (@aliasdoms, @subs, $d) {
 	if ($dd ne $d) {
 		# Show domain name
-		&$first_print(&text('delete_dom', $dd->{'dom'}));
+		&$first_print(&text('delete_dom', &show_domain_name($dd)));
 		&$indent_print();
 		}
 
@@ -7001,7 +7001,7 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 		}
 
 	# Delete domain file
-	&$first_print(&text('delete_domain', $dd->{'dom'}));
+	&$first_print(&text('delete_domain', &show_domain_name($dd)));
 	&delete_domain($dd);
 	&$second_print($text{'setup_done'});
 
