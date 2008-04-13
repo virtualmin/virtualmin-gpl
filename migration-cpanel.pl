@@ -608,7 +608,8 @@ if ($got{'mail'}) {
 		local ($muser, $mdummy, $muid, $mgid, $mreal, $mdir, $mshell) =
 			split(/:/, $_);
 		next if (!$muser);
-		next if ($muser =~ /_logs$/);	# Special logs user
+		next if ($muser =~ /_logs$/);		# Special logs user
+		next if ($muser eq $user && !$parent);	# Domain owner
 		local $uinfo = &create_initial_user(\%dom);
 		$uinfo->{'user'} = &userdom_name($muser, \%dom);
 		$uinfo->{'pass'} = $pass{$muser};
