@@ -10061,7 +10061,7 @@ local @tmpls = ( 'features', 'tmpl', 'user', 'update',
    &has_home_quotas() && !&has_quota_commands() ? ( 'quotacheck' ) : ( ),
 #   &can_show_history() ? ( 'history' ) : ( ),
    $virtualmin_pro ? ( 'mxs' ) : ( ),
-   'validate',
+   'validate', 'chroot',
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
    );
 local %tmplcat = (
@@ -10089,6 +10089,7 @@ local %tmplcat = (
 	'links' => 'custom',
 	'styles' => 'custom',
 	'shells' => 'custom',
+	'chroot' => 'check',
 	);
 local %nonew = ( 'history', 1 );
 local @tlinks = map { $nonew{$_} ? "history.cgi"

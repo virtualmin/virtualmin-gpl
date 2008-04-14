@@ -517,6 +517,73 @@ foreach my $u ("ftp", "anonymous") {
 return undef;
 }
 
+# Returns 1 if we can configure FTP chroot directories. Assume yes if proftpd
+# is being used
+sub has_ftp_chroot
+{
+return $config{'ftp'};
+}
+
+# list_ftp_chroots()
+# Returns a list of chroot directories. Each is a hash ref with keys :
+#  group - A group to restrict, or undef for all
+#  neg - Negative if to apply to everyone except that group
+#  dir - The chroot directory, or ~ for users' homes
+sub list_ftp_chroots
+{
+local @rv;
+&require_proftpd();
+local $conf = &proftpd::get_config();
+$proftpd::conf = $conf;		# get_or_create is broken in Webmin 1.410
+local $gconf = &proftpd::get_or_create_global($conf);
+foreach my $dr (&proftpd::find_directive_struct("DefaultRoot", $gconf)) {
+	local $chroot = { 'dr' => $dr,
+			  'dir' => $dr->{'words'}->[0] };
+	if ($dr->{'words'}->[1] eq '') {
+		# Applies to all groups
+		}
+	elsif ($dr->{'words'}->[1] =~ /,/) {
+		# Applies to many .. too complex to support
+		next;
+		}
+	elsif ($dr->{'words'}->[1] =~ /^(\!?)(\S+)$/) {
+		$chroot->{'neg'} = $1;
+		$chroot->{'group'} = $2;
+		}
+	push(@rv, $chroot);
+	}
+return @rv;
+}
+
+# save_ftp_chroots(&chroots)
+# Updates the list of chroot'd directories. 
+sub save_ftp_chroots
+{
+local ($chroots) = @_;
+&require_proftpd();
+local $conf = &proftpd::get_config();
+$proftpd::conf = $conf;
+local $gconf = &proftpd::get_or_create_global($conf);
+
+# Find old directives that we can't configure yet
+local @old = &proftpd::find_directive_struct("DefaultRoot", $gconf);
+local @keep = grep { $_->{'words'}->[1] =~ /,/ } @old;
+local @newv = map { $_->{'value'} } @keep;
+
+# Add new ones
+foreach my $chroot (@$chroots) {
+	local @w = ( $chroot->{'dir'} );
+	if ($chroot->{'group'}) {
+		push(@w, ($chroot->{'neg'} ? "!" : "").$chroot->{'group'});
+		}
+	push(@newv, join(" ", @w));
+	}
+&proftpd::save_directive("DefaultRoot", \@newv, $gconf, $conf);
+&flush_file_lines();
+
+&register_post_action(\&restart_proftpd);
+}
+
 # Lock the ProFTPd config file
 sub obtain_lock_ftp
 {

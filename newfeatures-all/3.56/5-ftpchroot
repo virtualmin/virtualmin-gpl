@@ -1,0 +1,4 @@
+desc=FTP Directory Restrictions
+html=The Virtualmin master administrator can now control which domains and users are limited to their home directories when logging in via FTP, using the new FTP Directory Restrictions page.
+master=1
+link=edit_newchroot.cgi

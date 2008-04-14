@@ -1,0 +1,35 @@
+<header>FTP Directory Restrictions</header>
+
+This page allows you to configure which directories virtual server owners and
+users with FTP access can see when logging in via FTP. By default, FTP
+clients can access the entire filesystem, including directories like
+<tt>/etc</tt> and <tt>/home</tt>. However, this may give away information
+that you'd prefer users not to be able to see. <p>
+
+Each row in the table on this page defines the virtual server or servers to
+match, and the directory they are limited to. In the <b>Apply to server and
+sub-servers</b> column, you can either choose all virtual servers, or a single
+domain (which will include all it's sub-servers automatically). If the latter
+option is chosen and the <b>All except server</b> box is checked, the
+restriction will effect servers other than the one chosen. <p>
+
+The <b>Restrict to directory</b> column determines where matching virtual
+servers are limited to when logging in via FTP. The most commonly used option
+is <b>Users' home directories</b>, which will limit the domain owner to 
+the virtual server's home, and any FTP users to their own sub-directories,
+typically under <tt>homes</tt>. <p>
+
+<hr>
+
+In a standard Virtualmin installation, every domain's home directory has
+<tt>750</tt> permissions, which prevents users from other domains accessing
+it, regardless of FTP directory restrictions. So locking down FTP users on
+this page does not add that much to the security of your system. <p>
+
+In addition, the restrictions on this page do not apply to PHP scripts, CGI
+programs or virtual server owners logging in via SSH. At the present time,
+there is no way to lock them down, although home directory permissions do
+still apply. <p>
+
+<footer>
+

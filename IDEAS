@@ -63,6 +63,3 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - make FTP chrooting with proftpd easier to configure
-	- master admin can set for all/some domains
-
