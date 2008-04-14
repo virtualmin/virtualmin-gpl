@@ -205,6 +205,10 @@ else {
 		}
 
 	# Save extra email addresses
+	%oldextra = ( );
+	if (!$in{'new'}) {
+		%oldextra = map { $_, 1 } @{$old{'extraemail'}};
+		}
 	$eu = $mailbox ? $d->{'user'} : $in{'mailuser'};
 	@extra = split(/\s+/, $in{'extra'});
 	%donextra = ( );
@@ -222,7 +226,8 @@ else {
 		local ($eu, $ed) = ($1, $2);
 		local $edom = &get_domain_by("dom", $ed);
 		$edom && $edom->{'mail'} || &error(&text('user_eextra2', $ed));
-		&can_edit_domain($edom) || &error(&text('user_eextra3', $ed));
+		&can_edit_domain($edom) || $oldextra{$e} ||
+			&error(&text('user_eextra3', $ed));
 		$donextra{lc($e)}++ && &error(&text('user_eextra6', $e));
 		}
 	$user->{'extraemail'} = \@extra;
