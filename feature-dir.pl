@@ -127,8 +127,27 @@ if (-d $_[0]->{'home'} && $_[0]->{'home'} ne "/") {
 	if (defined(&set_php_wrappers_writable)) {
 		&set_php_wrappers_writable($_[0], 1);
 		}
-	&system_logged("rm -rf ".quotemeta($_[0]->{'home'}));
-	&$second_print($text{'setup_done'});
+	local $err = &backquote_logged("rm -rf ".quotemeta($_[0]->{'home'}).
+				       " 2>&1");
+	if ($?) {
+		# Try again after running chattr
+		if (&has_command("chattr")) {
+			&system_logged("chattr -i -R ".
+				       quotemeta($_[0]->{'home'}));
+			$err = &backquote_logged(
+				"rm -rf ".quotemeta($_[0]->{'home'})." 2>&1");
+			$err = undef if (!$?);
+			}
+		}
+	else {
+		$err = undef;
+		}
+	if ($err) {
+		&$second_print(&text('delete_ehome', &html_escape($err)));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
 	}
 }
 

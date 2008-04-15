@@ -892,3 +892,4 @@ When creating a sub-server whose prefix is in use by another domain, a non-clash
 International domain names are now automatically converted to the IDN xn-- format when creating, and converted back for display.
 When upgrading scripts in multiple domains at once, added a confirmation page top display and select the domains that will be effected.
 The Virtualmin master administrator can now control which domains and users are limited to their home directories when logging in via FTP, using the new FTP Directory Restrictions page.
+Cpanel sub-domains are now re-created when migrating their backups.

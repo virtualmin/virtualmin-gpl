@@ -426,6 +426,7 @@ if ($err) {
 else {
 	&$second_print(".. done");
 	}
+local @rvdoms = ( \%dom );
 
 # Migrate Apache configuration
 if ($got{'web'} && -d $daily) {
@@ -1026,7 +1027,6 @@ if ($aliasdom) {
 	}
 
 # Actually create alias doms
-local @rvdoms;
 foreach my $pdom (&unique(@parked)) {
 	if ($pdom eq $aliasdom) {
 		&$first_print("Creating alias domain $pdom ..");
@@ -1074,6 +1074,81 @@ foreach my $pdom (&unique(@parked)) {
 	push(@rvdoms, \%alias);
 	}
 
+# Create sub-domains, from vf directory
+opendir(VF, "$userdir/vf");
+foreach my $vf (readdir(VF)) {
+	local ($clash) = grep { $_->{'dom'} eq $vf } @rvdoms;
+	next if ($vf eq "." || $vf eq ".." || $clash);
+	&$first_print("Creating sub-domain $vf ..");
+	if ($vf !~ /^(\S+)\.\Q$dom\E$/) {
+		&$second_print(".. skipping, as not a sub-domain of $dom");
+		next;
+		}
+	local $subprefix = $1;
+	&$indent_print();
+	local %subd = ( 'id', &domain_id(),
+			'dom', $vf,
+			'user', $dom{'user'},
+			'group', $dom{'group'},
+			'prefix', $dom{'prefix'},
+			'ugroup', $dom{'ugroup'},
+			'pass', $dom{'pass'},
+			'subdom', $dom{'id'},
+		        'subprefix', $subprefix,
+			'uid', $dom{'uid'},
+			'gid', $dom{'gid'},
+			'ugid', $dom{'ugid'},
+			'owner', "Migrated cPanel sub-domain",
+			'email', $dom{'email'},
+			'name', 1,
+			'ip', $dom{'ip'},
+			'virt', 0,
+			'source', $dom{'source'},
+			'parent', $dom{'id'},
+			'template', $dom{'template'},
+			'reseller', $dom{'reseller'},
+			'nocreationmail', 1,
+			'nocopyskel', 1,
+			'no_tmpl_aliases', 1,
+			);
+	foreach my $f (@subdom_features) {
+		if ($f eq 'mail') {
+			$subd{$f} = $dom{$f} && -r "$userdir/va/$vf";
+			}
+		elsif ($f eq 'ssl') {
+			# Off for sub-domains, for now
+			$subd{$f} = 0;
+			}
+		else {
+			$subd{$f} = $dom{$f};
+			}
+		}
+	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+					  : \%dom;
+	$subd{'home'} = &server_home_directory(\%subd, $parentdom);
+	&complete_domain(\%subd);
+
+	# Set cgi directories to cpanel standard
+	$subd{'cgi_bin_dir'} =
+		"../../$dom{'public_html_dir'}/$subprefix/cgi-bin";
+	$subd{'cgi_bin_path'} =
+		"$dom{'public_html_path'}/$subprefix/cgi-bin";
+
+	&create_virtual_server(\%subd, $parentdom, $parentdom->{'user'});
+
+	# Cpanel sub-domains always seem to forward mail to the parent
+	if ($subd{'mail'}) {
+		local $virt = { 'from' => "\@$vf",
+				'to' => [ "%1\@$dom" ] };
+		&create_virtuser($virt);
+		}
+
+	&$outdent_print();
+	&$second_print($text{'setup_done'});
+	push(@rvdoms, \%subd);
+	}
+closedir(VF);
+
 if ($got{'webalizer'}) {
 	# Copy existing Weblizer stats to ~/public_html/stats
 	&$first_print("Copying Weblizer data files ..");
@@ -1101,7 +1176,7 @@ if ($parent) {
 	}
 
 &sync_alias_virtuals(\%dom);
-return (\%dom, @rvdoms);
+return @rvdoms;
 }
 
 # extract_cpanel_dir(file)
