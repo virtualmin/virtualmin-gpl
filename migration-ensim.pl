@@ -439,6 +439,7 @@ if ($got{'mail'}) {
 	&foreign_require("sendmail", "sendmail-lib.pl");
 	&foreign_require("sendmail", "aliases-lib.pl");
 	local @srcaliases = &sendmail::list_aliases([ "$root/etc/aliases" ]);
+	local %already = map { $_->{'from'}, $_ } &list_virtusers();
 	foreach my $src (@srcaliases) {
 		local $n = $src->{'name'};
 		$n = "" if ($n eq "catch-all");
@@ -457,6 +458,7 @@ if ($got{'mail'}) {
 		local $virt = { 'from' => $n.'@'.$dom{'dom'},
 				'to' => \@to,
 			      };
+		next if ($already{$virt->{'from'}}++);
 		&create_virtuser($virt);
 		$acount++;
 		}
