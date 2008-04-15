@@ -174,15 +174,19 @@ else {
 		&add_proxy_allow_directives($_[0]);
 		}
 
-	# Create empty access and error log files, world-readable
+	# Create empty access and error log files, world-readable and owned
+	# by the user Apache runs as.
 	local $log = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}, 0);
 	local $elog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}, 1);
 	local $l;
+	local $web_user = &get_apache_user($_[0]);
 	foreach $l ($log, $elog) {
 		if ($l && !-r $l) {
 			&open_tempfile(LOG, ">$l");
 			&close_tempfile(LOG);
-			&set_ownership_permissions(undef, undef, 0644, $l);
+			local @ug = $web_user && $web_user ne 'none' ?
+				( $web_user, undef ) : ( undef, undef );
+			&set_ownership_permissions(@ug, 0644, $l);
 			}
 		}
 	$_[0]->{'alias_mode'} = 0;
