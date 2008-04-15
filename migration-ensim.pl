@@ -65,7 +65,12 @@ local $service = $manifest->{'siteIdent'}->{'service'};
 local ($si) = grep { $_->{'serviceName'} eq 'siteinfo' } @$service;
 local $origuser = $si->{'config'}->{'admin_user'};
 $user ||= $origuser;
-local $group = $manifest->{'userIdent'}->{'group'} || $user;
+local $group;
+if ($user eq $si->{'config'}->{'admin_user'}) {
+	# If username was automatically detected, stick to group from backup
+	$group = $manifest->{'userIdent'}->{'group'};
+	}
+$group ||= $user;
 local $ugroup = $group;
 
 # Get shells for users
