@@ -63,7 +63,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Sets the version of PHP to be used in some web directory.\n";
 print "\n";
 print "usage: set-php-directory.pl   --domain domain.name\n";
-print "                              --dir directory|url-path\n";
+print "                              --dir directory|url-path|\".\"\n";
 print "                              --version num\n";
 exit(1);
 }
