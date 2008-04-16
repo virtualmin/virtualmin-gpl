@@ -41,6 +41,9 @@ while(@ARGV > 0) {
 		$children > 0 || &usage("Invalid number of PHP sub-processes");
 		$children > $max_php_fcgid_children && &usage("Too many PHP sub-processes - maximum is $max_php_fcgid_children");
 		}
+	elsif ($a eq "--php-version") {
+		$version = shift(@ARGV);
+		}
 	elsif ($a eq "--proxy") {
 		$proxy = shift(@ARGV);
 		$proxy =~ /^(http|https):\/\/\S+$/ ||
@@ -78,7 +81,8 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || usage();
 $mode || $rubymode || defined($proxy) || defined($framefwd) ||
-  defined($suexec) || $stylename || $children || &usage("Nothing to do");
+  defined($suexec) || $stylename || $children || $version ||
+  &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate style
@@ -131,6 +135,13 @@ foreach $d (@doms) {
 	@supp = &supported_php_modes($d);
 	!$mode || &indexof($mode, @supp) >= 0 ||
 		&usage("The selected PHP exection mode cannot be used with $d->{'dom'}");
+	if ($version) {
+		$mode eq "mod_php" &&
+			&usage("The PHP version cannot be set for $d->{'dom'}, as it is using mod_php");
+		@avail = map { $_->[0] } &list_available_php_versions($d);
+		&indexof($version, @avail) >= 0 ||
+			&usage("Only the following PHP version are available for $d->{'dom'} : ".join(" ", @avail));
+		}
 	@rubysupp = &supported_ruby_modes($d);
 	!$rubymode || $rubymode eq "none" ||
 	    &indexof($rubymode, @rubysupp) >= 0 ||
@@ -155,6 +166,11 @@ foreach $d (@doms) {
 	# Update PHP fCGId children
 	if ($children && !$d->{'alias'}) {
 		&save_domain_php_children($d, $children);
+		}
+
+	# Update PHP version
+	if ($version && !$d->{'alias'}) {
+		&save_domain_php_directory($d,  &public_html_dir($d), $version);
 		}
 
 	# Update Ruby mode
@@ -237,6 +253,7 @@ print "\n";
 print "usage: modify-web.pl [--domain name] | [--all-domains]\n";
 print "                     [--mode mod_php | cgi | fcgid]\n";
 print "                     [--php-children number]\n";
+print "                     [--php-version num]\n";
 print "                     [--ruby-mode none | mod_ruby | cgi | fcgid]\n";
 print "                     [--suexec | --no-suexec]\n";
 print "                     [--proxy http://... | --no-proxy]\n";
