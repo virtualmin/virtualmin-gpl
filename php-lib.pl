@@ -651,7 +651,7 @@ sub cleanup_php_cgi_processes
 if (&foreign_check("proc")) {
 	&foreign_require("proc", "proc-lib.pl");
 	local @procs = &proc::list_processes();
-	local @cgis = grep { $_->{'args'} =~ /^\S+php(4|5|)-cgi/ &&
+	local @cgis = grep { $_->{'args'} =~ /^\S+php(4|5|)(-cgi)?/ &&
 			     $_->{'ppid'} == 1 } @procs;
 	foreach my $p (@cgis) {
 		kill('KILL', $p->{'pid'});
