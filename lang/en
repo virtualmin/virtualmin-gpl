@@ -1934,6 +1934,7 @@ restore_mailusers=Re-creating mail and FTP users ..
 restore_mailusers2=Re-creating mailbox user $1 ..
 restore_mailfiles=Restoring mail files ..
 restore_mailfiles3=Restoring mail file for $1 ..
+restore_movemove=Moving mail files ..
 restore_mailcrons=Restoring mail and FTP user Cron jobs ..
 restore_mailexists=User $1 already exists.
 restore_mailerrs=.. some errors occurred : $1.

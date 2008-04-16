@@ -2570,6 +2570,14 @@ if (!$_[2]->{'mailuser'}) {
 	&$second_print($text{'setup_done'});
 	}
 
+# Get users whose mail files may need to be moved
+&foreign_require("mailboxes", "mailboxes-lib.pl");
+local @users = &list_domain_users($_[0]);
+if ($_[2]->{'mailuser'}) {
+	@users = grep { $_->{'user'} eq $foundmailuser } @users;
+	}
+
+
 if (-r "$_[1]_files" && $_[2]->{'mailfiles'} &&
     (!$_[2]->{'mailuser'} || $foundmailuser)) {
 	local $xtract;
@@ -2601,17 +2609,8 @@ if (-r "$_[1]_files" && $_[2]->{'mailfiles'} &&
 				     "<pre>$out</pre>"));
 		return 0;
 		}
-	else {
-		&$second_print($text{'setup_done'});
-		}
-
 	if (&mail_under_home()) {
-		# Move mail from temp directory to homes
-		&foreign_require("mailboxes", "mailboxes-lib.pl");
-		local @users = &list_domain_users($_[0]);
-		if ($_[2]->{'mailuser'}) {
-			@users = grep { $_->{'user'} eq $foundmailuser } @users;
-			}
+		# Move mail from /var/mail to ~/Maildir
 		foreach my $u (@users) {
 			local $path = "$xtract/$u->{'user'}";
 			local $sf = { 'type' => -d $path ? 1 : 0,
@@ -2622,8 +2621,38 @@ if (-r "$_[1]_files" && $_[2]->{'mailfiles'} &&
 			&mailboxes::mailbox_copy_folder($sf, $df);
 			}
 		}
+	&$second_print($text{'setup_done'});
 	}
-# XXX deal with case where old system used ~/Maildir and this one uses /var/mail
+elsif (!&mail_under_home()) {
+	# If the users have ~/Maildir directories and no mail files
+	# at the new locations, move them over
+	local $doneprint;
+	foreach my $u (@users) {
+		local ($df) = &mailboxes::list_user_folders($u->{'user'});
+		next if (-e $df->{'file'});
+		local $sf;
+		if (-d "$u->{'home'}/Maildir") {
+			$sf = { 'type' => 1,
+				'file' => "$u->{'home'}/Maildir" };
+			}
+		elsif (-r "$u->{'home'}/Mailbox") {
+			$sf = { 'type' => 0,
+				'file' => "$u->{'home'}/Mailbox" };
+			}
+		else {
+			next;
+			}
+		nest if ($sf->{'file'} eq $df->{'file'});
+		if (!$doneprint) {
+			&$first_print($text{'restore_movemove'});
+			$doneprint++;
+			}
+		&mailboxes::mailbox_move_folder($sf, $df);
+		}
+	if ($doneprint) {
+		&$second_print($text{'setup_done'});
+		}
+	}
 
 # Restore Cron job files
 if (-r "$_[1]_cron") {

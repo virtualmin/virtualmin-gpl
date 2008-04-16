@@ -63,8 +63,3 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - Maildir -> mbox migration and mail files
-
- - Disabled website HTML should return 503 status, if IE supports it
-
- - set-php-directory.pl should support --all-domains and root option
