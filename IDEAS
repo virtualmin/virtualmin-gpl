@@ -75,6 +75,5 @@
 	- Update /etc/security/limits.conf
 
  - Nicer chooser for styles
-	- Heavy load in IE!
-	- Browser should be able to cache
+	- Test in IE
 	- newfeatures file
