@@ -73,3 +73,8 @@
 	- FS#3850
 	- Use ulimit in CGI wrappers
 	- Update /etc/security/limits.conf
+
+ - Nicer chooser for styles
+	- Heavy load in IE!
+	- Browser should be able to cache
+	- newfeatures file
