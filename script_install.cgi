@@ -125,23 +125,9 @@ $ferr = &fetch_script_files($d, $ver, $opts, $sinfo, \%gotfiles);
 print "<br>\n";
 
 # Install needed PHP and Perl modules
-$modok = &setup_php_modules($d, $script, $ver, $phpver, $opts);
-if ($modok) {
-	$modok = &setup_pear_modules($d, $script, $ver, $phpver, $opts);
-	}
-if ($modok) {
-	$modok = &setup_perl_modules($d, $script, $ver, $opts);
-	}
-if ($modok) {
-	$modok = &setup_ruby_modules($d, $script, $ver, $opts);
-	}
-if ($modok) {
-	$modok = &setup_noproxy_path($d, $script, $ver, $opts);
-	}
-if (!$modok) {
+if (&setup_script_requirements($d, $script, $ver, $phpver, $opts)) {
 	&ui_print_footer("list_scripts.cgi?dom=$in{'dom'}",
-			 $text{'scripts_return'},
-			 &domain_footer_link($d));
+			 $text{'scripts_return'}, &domain_footer_link($d));
 	exit;
 	}
 

@@ -118,6 +118,7 @@ local $rv = { 'name' => $name,
 	      'pear_mods_func' => "script_${name}_pear_modules",
 	      'perl_mods_func' => "script_${name}_perl_modules",
 	      'perl_opt_mods_func' => "script_${name}_opt_perl_modules",
+	      'python_mods_func' => "script_${name}_python_modules",
 	      'latest_func' => "script_${name}_latest",
 	      'check_latest_func' => "script_${name}_check_latest",
 	      'commands_func' => "script_${name}_commands",
@@ -674,6 +675,16 @@ eval "use $mod";
 return $@ ? 0 : 1;
 }
 
+# check_python_module(mod, &domain)
+# Checks if some Python module exists
+sub check_python_module
+{
+local ($mod, $d) = @_;
+local $out = &backquote_command("echo import ".quotemeta($mod).
+				" | python 2>&1");
+return $? ? 0 : 1;
+}
+
 # check_php_version(&domain, [number])
 # Returns true if the given version of PHP is supported by Apache. If no version
 # is given, any is allowed.
@@ -976,7 +987,7 @@ foreach my $m (@mods) {
 			$mp =~ s/::/\-/g;
 			$pkg = "lib$mp-perl";
 			}
-		if ($software::config{'package_system'} eq 'pkgadd') {
+		elsif ($software::config{'package_system'} eq 'pkgadd') {
 			$mp = lc($mp);
 			$mp =~ s/:://g;
 			$pkg = "pm_$mp";
@@ -1023,6 +1034,78 @@ foreach my $m (@mods) {
 	}
 return 1;
 }
+
+# setup_python_modules(&domain, &script, version, &opts)
+# If possible, downloads Python needed by the given script. Progress
+# of the install is written to STDOUT. Returns 1 if successful, 0 if not.
+# At the moment, auto-install of modules is done only from APT or YUM.
+sub setup_python_modules
+{
+local ($d, $script, $ver, $opts) = @_;
+local $modfunc = $script->{'perl_mods_func'};
+return 1 if (!defined(&$modfunc));
+local @mods = &$modfunc($d, $ver, $opts);
+
+# Check if the software module is installed and can do update
+local $canpkgs = 0;
+if (&foreign_installed("software")) {
+	&foreign_require("software", "software-lib.pl");
+	if (defined(&software::update_system_install)) {
+		$canpkgs = 1;
+		}
+	}
+
+foreach my $m (@mods) {
+	next if (&check_python_module($m, $d) == 1);
+	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
+	&$first_print(&text('scripts_needpythonmod', "<tt>$m</tt>"));
+	if (!$canpkgs) {
+		&$second_print($text{'scripts_epythonmod'});
+		return 0;
+		}
+
+	# Work out the package name
+	local $pkg;
+	local $done = 0;
+	local $mp = $m;
+	if ($software::config{'package_system'} eq 'rpm' ||
+	    $software::config{'package_system'} eq 'debian') {
+		# For both APT and YUM, the package name is python- followed
+		# by the lower-case module name
+		$mp = lc($mp);
+		$pkg = "python-".$mp;
+		}
+	elsif ($software::config{'package_system'} eq 'pkgadd') {
+		# For CSW, the package is py_ and the module name. Very few
+		# seem to be packaged though
+		$mp = lc($mp);
+		$mp =~ s/:://g;
+		$pkg = "py_$mp";
+		}
+	else {
+		&$second_print($text{'scripts_epythonmod'});
+		return 0;
+		}
+
+	# Install the RPM, Debian or CSW package
+	&$first_print(&text('scripts_softwaremod', "<tt>$pkg</tt>"));
+	&$indent_print();
+	&software::update_system_install($pkg);
+	&$outdent_print();
+	@pinfo = &software::package_info($pkg);
+	if (@pinfo && $pinfo[0] eq $pkg) {
+		# Yep, it worked
+		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$second_print($text{'scripts_epythoninst'});
+		return 0;
+		}
+	}
+return 1;
+}
+
+
 
 # get_global_php_ini(phpver, mode)
 # Returns the full path to the global PHP config file
@@ -1800,6 +1883,21 @@ foreach my $p (@proxies) {
 		}
 	}
 return 0;
+}
+
+# setup_script_requirements(&domain, &script, &phpver, &opts)
+# Install any needed PHP modules or other dependencies for some script.
+# Returns 1 on success, 0 on failure. May print stuff.
+sub setup_script_requirements
+{
+local ($d, $script, $phpver, $opts) = @_;
+&setup_php_modules($d, $script, $ver, $phpver, $opts) || return 0;
+&setup_pear_modules($d, $script, $ver, $phpver, $opts) || return 0;
+&setup_perl_modules($d, $script, $ver, $opts) || return 0;
+&setup_ruby_modules($d, $script, $ver, $opts) || return 0;
+&setup_python_modules($d, $script, $ver, $opts) || return 0;
+&setup_noproxy_path($d, $script, $ver, $opts) || return 0;
+return 1;
 }
 
 1;

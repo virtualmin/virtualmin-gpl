@@ -2827,6 +2827,9 @@ scripts_optperlmod=Perl module $1 is recommended ..
 scripts_eperlsoftware=.. Virtualmin cannot work which software package contains this Perl module
 scripts_perlmod=Installing Perl module $1 from CPAN ..
 scripts_eperlmod=.. CPAN failed! See the error message above for details
+scripts_needpythonmod=Python module $1 is required ..
+scripts_epythonmod=.. automatic Python module installation is not supported on your system
+scripts_epythoninst=.. automatic Python module installation failed
 scripts_installgem=Installing Ruby Gems package ..
 scripts_mmax=(At most $1)
 scripts_sitelink=More information on using this script can be found at <a href='$1' target=_new>$1</a>.

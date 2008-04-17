@@ -226,21 +226,7 @@ else {
 	}
 
 # Install needed PHP and Perl modules
-if (!&setup_php_modules($d, $script, $ver, $phpver, $opts)) {
-	exit(1);
-	}
-if (!&setup_pear_modules($d, $script, $ver, $phpver, $opts)) {
-	exit(1);
-	}
-if (!&setup_perl_modules($d, $script, $ver, $opts)) {
-	exit(1);
-	}
-if (!&setup_ruby_modules($d, $script, $ver, $opts)) {
-	exit(1);
-	}
-if (!&setup_noproxy_path($d, $script, $ver, $opts)) {
-	exit(1);
-	}
+&setup_script_requirements($d, $script, $ver, $phpver, $opts) || exit(1);
 
 # Apply Apache config if needed, for new PHP version or modules or settings
 &run_post_actions();

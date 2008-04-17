@@ -87,24 +87,9 @@ if ($in{'confirm'}) {
 					}
 				}
 
-			# Install needed PHP modules
-			$modok = &setup_php_modules($d, $script, $ver, $phpver,
-						    $opts);
-			if ($modok) {
-				$modok = &setup_pear_modules($d, $script, $ver,
-							     $phpver, $opts);
-				}
-			$modok || next;
-
-			# Install needed Perl modules
-			if (!&setup_perl_modules($d, $script, $ver, $opts)) {
-				next;
-				}
-
-			# Install needed Ruby modules
-			if (!&setup_ruby_modules($d, $script, $ver, $opts)) {
-				next;
-				}
+			# Install needed PHP/perl/ruby modules
+			&setup_script_requirements($d, $script, $ver, $phpver,
+						   $opts) || next;
 
 			# Work out login and password
 			$domuser = $sinfo->{'user'} || $d->{'user'};

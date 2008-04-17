@@ -68,6 +68,7 @@
 	- need flup from http://trac.saddi.com/flup
 	- install all under django directory
 	- start myproject as part of installer (allow user to choose)
+	- postgresql support
 
  - CPU / memory / process count limits
 	- FS#3850

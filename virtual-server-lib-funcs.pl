@@ -6721,18 +6721,8 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			}
 
 		# Install needed PHP modules
-		local $modok = &setup_php_modules($dom, $script, $ver, $phpver,
-						  $opts);
-		next if (!$modok);
-		$modok = &setup_pear_modules($dom, $script, $ver, $phpver,
-					     $opts);
-		next if (!$modok);
-		$modok = &setup_perl_modules($d, $script, $ver, $opts);
-		next if (!$modok);
-		$modok = &setup_ruby_modules($d, $script, $ver, $opts);
-		next if (!$modok);
-		$modok = &setup_noproxy_path($d, $script, $ver, $opts);
-		next if (!$modok);
+		&setup_script_requirements($d, $script, $ver, $phpver, $opts) ||
+			next;
 
 		# Find the database, if requested
 		if ($sinfo->{'db'}) {
