@@ -75,6 +75,4 @@
 	- Use ulimit in CGI wrappers
 	- Update /etc/security/limits.conf
 
- - Nicer chooser for styles
-	- Test in IE
-	- newfeatures file
+ - Make php child processes default to unset by default
