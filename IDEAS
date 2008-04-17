@@ -63,7 +63,11 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - Jango support in script installers
+ - Django support in script installers
+	- use wrapper script documented on http://www.djangoproject.com/documentation/fastcgi/
+	- need flup from http://trac.saddi.com/flup
+	- install all under django directory
+	- start myproject as part of installer (allow user to choose)
 
  - CPU / memory / process count limits
 	- FS#3850
