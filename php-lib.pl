@@ -320,11 +320,11 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 				"umask 022\n";
 		if ($mode eq "fcgid") {
 			local $defchildren = $tmpl->{'web_phpchildren'};
-			if (!$defchildren || $defchildren eq "none") {
-				$defchildren = $default_php_fcgid_children;
+			$defchildren = undef if ($defchildren eq "none");
+			if ($defchildren) {
+				$common .= "PHP_FCGI_CHILDREN=$defchildren\n";
 				}
-			$common .= "PHP_FCGI_CHILDREN=$defchildren\n".
-				   "export PHP_FCGI_CHILDREN\n";
+			$common .= "export PHP_FCGI_CHILDREN\n";
 			}
 		&print_tempfile(PHP, $common);
 		if ($v->[1] =~ /-cgi$/) {
@@ -339,10 +339,9 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 	&close_tempfile(PHP);
 	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755,
 				   "$dest/php$v->[0].$suffix");
-	if ($children > 0) {
-		# Put back the old number of child processes
-		&save_domain_php_children($d, $children, 1);
-		}
+
+	# Put back the old number of child processes
+	&save_domain_php_children($d, $children, 1);
 
 	# Also copy the .fcgi wrapper to public_html, which is needed due to
 	# broken-ness on some Debian versions!
@@ -707,7 +706,7 @@ else {
 
 # get_domain_php_children(&domain)
 # For a domain using fcgi to run PHP, returns the number of child processes.
-# Returns -1 if not set.
+# Returns 0 if not set, -2 if not supported
 sub get_domain_php_children
 {
 local ($d) = @_;
@@ -734,17 +733,46 @@ local $count = 0;
 foreach my $ver (&list_available_php_versions($d, "fcgi")) {
 	local $wrapper = "$d->{'home'}/fcgi-bin/php$ver->[0].fcgi";
 	next if (!-r $wrapper);
+
+	# Find the current line
 	local $lref = &read_file_lines($wrapper);
-	foreach my $l (@$lref) {
-		if ($l =~ s/PHP_FCGI_CHILDREN\s*=\s*\d+/PHP_FCGI_CHILDREN=$children/g) {
-			$count++;
+	local $idx;
+	for(my $i=0; $i<@$lref; $i++) {
+		if ($lref->[$i] =~ /PHP_FCGI_CHILDREN\s*=\s*\d+/) {
+			$idx = $i;
+			}
+		}
+
+	# Update, remove or add
+	if ($children && defined($idx)) {
+		$lref->[$idx] = "PHP_FCGI_CHILDREN=$children";
+		}
+	elsif (!$children && defined($idx)) {
+		splice(@$lref, $idx, 1);
+		}
+	elsif ($children && !defined($idx)) {
+		# Add before export line
+		local $found = 0;
+		for(my $e=0; $i<@$lref; $e++) {
+			if ($lref->[$e] =~ /^export\s+PHP_FCGI_CHILDREN/) {
+				splice(@$lref, $e, 0,
+				       "PHP_FCGI_CHILDREN=$children");
+				$found++;
+				last;
+				}
+			}
+		if (!$found) {
+			# Add both lines at top
+			splice(@$lref, 1, 0,
+			       "PHP_FCGI_CHILDREN=$children",
+			       "export PHP_FCGI_CHILDREN");
 			}
 		}
 	&flush_file_lines($wrapper);
 	}
 &set_php_wrappers_writable($d, 0) if (!$nowritable);
 &register_post_action(\&restart_apache);
-return $count;
+return 1;
 }
 
 1;

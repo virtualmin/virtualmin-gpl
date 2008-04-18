@@ -1850,7 +1850,7 @@ if ($virtualmin_pro) {
 	print &ui_table_row(
 	    &hlink($text{'tmpl_phpchildren'}, "template_phpchildren"),
 	    &ui_opt_textbox("web_phpchildren", $tmpl->{'web_phpchildren'},
-		    5, $text{'default'}." ($default_php_fcgid_children)"));
+		    5, $text{'tmpl_phpchildrennone'}));
 
 	# Source php.ini files
 	foreach my $phpver (@all_possible_php_versions) {

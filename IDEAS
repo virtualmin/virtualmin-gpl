@@ -70,3 +70,5 @@
 
  - Make php child processes default to unset by default
 	- FS#3851
+	- all use of save_domain_php_children
+	- changelog

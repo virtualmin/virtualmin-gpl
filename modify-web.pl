@@ -41,6 +41,9 @@ while(@ARGV > 0) {
 		$children > 0 || &usage("Invalid number of PHP sub-processes");
 		$children > $max_php_fcgid_children && &usage("Too many PHP sub-processes - maximum is $max_php_fcgid_children");
 		}
+	elsif ($a eq "--no-php-children") {
+		$children = 0;
+		}
 	elsif ($a eq "--php-version") {
 		$version = shift(@ARGV);
 		}
@@ -81,7 +84,7 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || usage();
 $mode || $rubymode || defined($proxy) || defined($framefwd) ||
-  defined($suexec) || $stylename || $children || $version ||
+  defined($suexec) || $stylename || defined($children) || $version ||
   &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
@@ -164,7 +167,7 @@ foreach $d (@doms) {
 		}
 
 	# Update PHP fCGId children
-	if ($children && !$d->{'alias'}) {
+	if (defined($children) && !$d->{'alias'}) {
 		&save_domain_php_children($d, $children);
 		}
 
@@ -252,7 +255,7 @@ print "Changes web server settings for one or more domains.\n";
 print "\n";
 print "usage: modify-web.pl [--domain name] | [--all-domains]\n";
 print "                     [--mode mod_php | cgi | fcgid]\n";
-print "                     [--php-children number]\n";
+print "                     [--php-children number | --no-php-children]\n";
 print "                     [--php-version num]\n";
 print "                     [--ruby-mode none | mod_ruby | cgi | fcgid]\n";
 print "                     [--suexec | --no-suexec]\n";

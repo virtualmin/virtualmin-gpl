@@ -27,10 +27,11 @@ print &ui_table_row(&hlink($text{'phpmode_mode'}, "phpmode"),
 # PHP fcgi sub-processes
 if (&indexof("fcgid", @modes) >= 0) {
 	$children = &get_domain_php_children($d);
-	if ($children > 0) {
+	if ($children >= 0) {
 		print &ui_table_row(&hlink($text{'phpmode_children'},
 					   "phpmode_children"),
-				    &ui_textbox("children", $children, 5));
+				    &ui_opt_textbox("children", $children, 5,
+						$text{'tmpl_phpchildrennone'}));
 		}
 	}
 
