@@ -276,7 +276,12 @@ elsif ($config{'delete_indom'}) {
 				$default_web_port;
 		if ($sn =~ /\Q$_[0]->{'dom'}\E$/ &&
 		    $vp != $d->{'web_sslport'}) {
-			&delete_web_virtual_server($v);
+			# Check if a real sub-domain corresponds to this
+			# virtualhost
+			local $real = &get_domain_by("dom", $sn);
+			if (!$real || $real->{'id'} == $d->{'id'}) {
+				&delete_web_virtual_server($v);
+				}
 			}
 		}
 	&release_lock_web($_[0]);

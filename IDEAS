@@ -72,3 +72,4 @@
 	- FS#3851
 	- all use of save_domain_php_children
 	- changelog
+	- test UI
