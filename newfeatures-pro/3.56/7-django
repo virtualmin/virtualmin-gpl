@@ -1,0 +1,6 @@
+desc=Django Script Installer
+html=Added a script installer for Django, a development framework for Python applications. This performs all the Python and Apache setup steps for you automatically.
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}

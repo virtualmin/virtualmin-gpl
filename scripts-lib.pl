@@ -1042,7 +1042,7 @@ return 1;
 sub setup_python_modules
 {
 local ($d, $script, $ver, $opts) = @_;
-local $modfunc = $script->{'perl_mods_func'};
+local $modfunc = $script->{'python_mods_func'};
 return 1 if (!defined(&$modfunc));
 local @mods = &$modfunc($d, $ver, $opts);
 
@@ -1068,12 +1068,25 @@ foreach my $m (@mods) {
 	local $pkg;
 	local $done = 0;
 	local $mp = $m;
-	if ($software::config{'package_system'} eq 'rpm' ||
-	    $software::config{'package_system'} eq 'debian') {
-		# For both APT and YUM, the package name is python- followed
+	if ($software::config{'package_system'} eq 'debian') {
+		# For APT, the package name is python- followed
 		# by the lower-case module name
 		$mp = lc($mp);
 		$pkg = "python-".$mp;
+		}
+	elsif ($software::config{'package_system'} eq 'rpm') {
+		# For YUM, naming is less standard .. the MySQLdb package
+		# is in MySQL-python
+		if ($m eq "MySQLdb") {
+			$pkg = "MySQL-python";
+			}
+		elsif ($m eq "setuptools") {
+			$pkg = "setuptools";
+			}
+		else {
+			$mp = lc($mp);
+			$pkg = "python-".$mp;
+			}
 		}
 	elsif ($software::config{'package_system'} eq 'pkgadd') {
 		# For CSW, the package is py_ and the module name. Very few
@@ -1890,7 +1903,7 @@ return 0;
 # Returns 1 on success, 0 on failure. May print stuff.
 sub setup_script_requirements
 {
-local ($d, $script, $phpver, $opts) = @_;
+local ($d, $script, $ver, $phpver, $opts) = @_;
 &setup_php_modules($d, $script, $ver, $phpver, $opts) || return 0;
 &setup_pear_modules($d, $script, $ver, $phpver, $opts) || return 0;
 &setup_perl_modules($d, $script, $ver, $opts) || return 0;

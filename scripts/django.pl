@@ -30,7 +30,7 @@ sub script_django_python_modules
 {
 local ($d, $ver, $opts) = @_;
 local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-return ( $dbtype eq "mysql" ? "MySQLdb" : "psycopg" );
+return ( "setuptools", $dbtype eq "mysql" ? "MySQLdb" : "psycopg" );
 }
 
 # script_django_depends(&domain, version)
@@ -138,8 +138,8 @@ local @files = (
 	   'file' => "Django-$ver.tar.gz",
 	   'url' => "http://www.djangoproject.com/download/$ver/tarball/" },
 	 { 'name' => "flup",
-	   'file' => "flup-0.5.tar.gz",
-	   'url' => "http://www.saddi.com/software/flup/dist/flup-0.5.tar.gz" },
+	   'file' => "flup-1.0.tar.gz",
+	   'url' => "http://www.saddi.com/software/flup/dist/flup-1.0.tar.gz" },
 	);
 return @files;
 }
@@ -182,27 +182,30 @@ if (!-d $opts->{'dir'}) {
 		return (0, "Failed to create directory : <tt>$out</tt>.");
 	}
 
+# Create python base dir
+$ENV{'PYTHONPATH'} = "$opts->{'dir'}/lib/python";
+&run_as_domain_user($d, "mkdir -p ".quotemeta($ENV{'PYTHONPATH'}));
+
 # Extract the source, then install to the target dir
 local $temp = &transname();
 local $err = &extract_script_archive($files->{'source'}, $temp, $d);
 $err && return (0, "Failed to extract Django source : $err");
 local $icmd = "cd ".quotemeta("$temp/Django-$ver")." && ".
-	      "python setup.py install --home ".quotemeta($opts->{'dir'});
+      "python setup.py install --home ".quotemeta($opts->{'dir'})." 2>&1";
 local $out = &run_as_domain_user($d, $icmd);
 if ($?) {
 	return (0, "Django source install failed : ".
 		   "<pre>".&html_escape($out)."</pre>");
 	}
-$ENV{'PYTHONPATH'} = "$opts->{'dir'}/lib/python";
 
-# Extract and install the flup source
+# Extract and copy the flup source
 local $err = &extract_script_archive($files->{'flup'}, $temp, $d);
 $err && return (0, "Failed to extract flup source : $err");
-local $icmd = "cd ".quotemeta("$temp/flup-0.5")." && ".
-	      "python setup.py install --home ".quotemeta($opts->{'dir'});
-local $out = &run_as_domain_user($d, $icmd);
+local $out = &run_as_domain_user($d, 
+	"cp -r ".quotemeta("$temp/flup-1.0/flup").
+	" ".quotemeta("$opts->{'dir'}/lib/python"));
 if ($?) {
-	return (0, "flup source install failed : ".
+	return (0, "flup source copy failed : ".
 		   "<pre>".&html_escape($out)."</pre>");
 	}
 
@@ -210,7 +213,7 @@ if (!$upgrade) {
 	# Create the initial project
 	local $icmd = "cd ".quotemeta($opts->{'dir'})." && ".
 		      "./bin/django-admin.py startproject ".
-		      quotemeta($opts->{'project'});
+		      quotemeta($opts->{'project'})." 2>&1";
 	local $out = &run_as_domain_user($d, $icmd);
 	if ($?) {
 		return (0, "Project initialization install failed : ".
@@ -379,11 +382,11 @@ if ($dbtype eq 'mysql') {
 		}
 	}
 else {
-	&require_postgresql();
+	&require_postgres();
 	foreach $t (&postgresql::list_tables($dbname)) {
 		if ($t =~ /^(django|auth)_/) {
 			&postgresql::execute_sql_logged($dbname,
-				"drop table ".&postgresql::quote_table($t));
+				"drop table ".&postgresql::quote_table($t)." cascade");
 			}
 		}
 	}

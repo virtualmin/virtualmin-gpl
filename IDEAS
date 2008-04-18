@@ -63,10 +63,6 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - Django support in script installers
-	- test on CentOS
-	- CHANGELOG / newfeatures
-
  - CPU / memory / process count limits
 	- FS#3850
 	- Use ulimit in CGI wrappers
