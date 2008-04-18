@@ -127,6 +127,28 @@ $domains_tests = [
 	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_user.' -e "select version()"',
 	},
 
+	# Check PHP execution
+	{ 'command' => 'echo "<?php phpinfo(); ?>" >~'.
+		       $test_domain_user.'/public_html/test.php',
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
+	  'grep' => 'PHP Version',
+	},
+
+	# Switch PHP mode
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'mode', 'cgi' ] ],
+	},
+
+	# Check PHP running via CGI
+	{ 'command' => 'echo "<?php system(\'id -a\'); ?>" >~'.
+		       $test_domain_user.'/public_html/test.php',
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
+	  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+	},
+
 	# Disable a feature
 	{ 'command' => 'disable-feature.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
