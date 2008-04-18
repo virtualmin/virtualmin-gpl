@@ -28,7 +28,9 @@ return "Development";
 
 sub script_django_python_modules
 {
-return ( "MySQLdb" );
+local ($d, $ver, $opts) = @_;
+local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+return ( $dbtype eq "mysql" ? "MySQLdb" : "psycopg" );
 }
 
 # script_django_depends(&domain, version)
@@ -38,9 +40,14 @@ sub script_django_depends
 local ($d, $ver) = @_;
 &has_command("python") || return "The python command is not installed";
 &require_apache();
+local $conf = &apache::get_config();
+local $got_rewrite;
+foreach my $l (&apache::find_directive("LoadModule", $conf)) {
+	$got_rewrite++ if ($l =~ /mod_rewrite/);
+	}
 $apache::httpd_modules{'mod_fcgid'} ||
 	return "Apache does not have the mod_fcgid module";
-$apache::httpd_modules{'mod_rewrite'} ||
+$apache::httpd_modules{'mod_rewrite'} || $got_rewrite ||
 	return "Apache does not have the mod_rewrite module";
 return undef;
 }
@@ -64,7 +71,7 @@ if ($upgrade) {
 	}
 else {
 	# Show editable install options
-	local @dbs = &domain_databases($d, [ "mysql" ]);
+	local @dbs = &domain_databases($d, [ "mysql", "postgres" ]);
 	$rv .= &ui_table_row("Django database",
 		     &ui_database_select("db", undef, \@dbs, $d, "phpbb"));
 	$rv .= &ui_table_row("Initial project name",
@@ -108,9 +115,15 @@ else {
 sub script_django_check
 {
 local ($d, $ver, $opts, $upgrade) = @_;
+$opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
+$opts->{'db'} || return "Missing database";
 if (-r "$opts->{'dir'}/django.fcgi") {
 	return "Django appears to be already installed in the selected directory";
 	}
+$opts->{'project'} ||
+	return "Missing initial project name";
+$opts->{'project'} =~ /^[a-z0-9]+$/ ||
+	return "Project name can only contain letters and numbers";
 return undef;
 }
 
@@ -151,14 +164,16 @@ if ($opts->{'newdb'} && !$upgrade) {
 	return (0, "Database creation failed : $err") if ($err);
 	}
 local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-local $dbuser = &mysql_user($d);
-local $dbpass = &mysql_pass($d);
+local $dbuser = $dbtype eq "mysql" ? &mysql_user($d) : &postgres_user($d);
+local $dbpass = $dbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
 local $dbhost = &get_database_host($dbtype);
+$dbhost = undef if ($dbhost eq "localhost" || $dbhost eq "127.0.0.1");
 if ($dbtype) {
 	local $dberr = &check_script_db_connection($dbtype, $dbname,
 						   $dbuser, $dbpass);
 	return (0, "Database connection failed : $dberr") if ($dberr);
 	}
+local $python = &has_command("python");
 
 # Create target dir
 if (!-d $opts->{'dir'}) {
@@ -173,7 +188,7 @@ local $err = &extract_script_archive($files->{'source'}, $temp, $d);
 $err && return (0, "Failed to extract Django source : $err");
 local $icmd = "cd ".quotemeta("$temp/Django-$ver")." && ".
 	      "python setup.py install --home ".quotemeta($opts->{'dir'});
-local $out = &run_as_domain_user($d, $cmd);
+local $out = &run_as_domain_user($d, $icmd);
 if ($?) {
 	return (0, "Django source install failed : ".
 		   "<pre>".&html_escape($out)."</pre>");
@@ -183,9 +198,9 @@ $ENV{'PYTHONPATH'} = "$opts->{'dir'}/lib/python";
 # Extract and install the flup source
 local $err = &extract_script_archive($files->{'flup'}, $temp, $d);
 $err && return (0, "Failed to extract flup source : $err");
-local $icmd = "cd ".quotemeta("$temp/flup-$ver")." && ".
+local $icmd = "cd ".quotemeta("$temp/flup-0.5")." && ".
 	      "python setup.py install --home ".quotemeta($opts->{'dir'});
-local $out = &run_as_domain_user($d, $cmd);
+local $out = &run_as_domain_user($d, $icmd);
 if ($?) {
 	return (0, "flup source install failed : ".
 		   "<pre>".&html_escape($out)."</pre>");
@@ -196,7 +211,7 @@ if (!$upgrade) {
 	local $icmd = "cd ".quotemeta($opts->{'dir'})." && ".
 		      "./bin/django-admin.py startproject ".
 		      quotemeta($opts->{'project'});
-	local $out = &run_as_domain_user($d, $cmd);
+	local $out = &run_as_domain_user($d, $icmd);
 	if ($?) {
 		return (0, "Project initialization install failed : ".
 			   "<pre>".&html_escape($out)."</pre>");
@@ -207,9 +222,15 @@ if (!$upgrade) {
 	local $sfile = "$pdir/settings.py";
 	-r $sfile || return (0, "Project settings file $sfile was not found");
 	local $lref = &read_file_lines($sfile);
+	my $i = 0;
 	foreach my $l (@$lref) {
 		if ($l =~ /DATABASE_ENGINE\s*=/) {
-			$l = "DATABASE_ENGINE = 'mysql'";
+			if ($dbtype eq "mysql") {
+				$l = "DATABASE_ENGINE = 'mysql'";
+				}
+			else {
+				$l = "DATABASE_ENGINE = 'postgresql'";
+				}
 			}
 		if ($l =~ /DATABASE_NAME\s*=/) {
 			$l = "DATABASE_NAME = '$dbname'";
@@ -223,6 +244,11 @@ if (!$upgrade) {
 		if ($l =~ /DATABASE_HOST\s*=/) {
 			$l = "DATABASE_HOST = '$dbhost'";
 			}
+		if ($l =~ /INSTALLED_APPS\s*=\s*\(/) {
+			splice(@$lref, $i+1, 0,
+			       "    'django.contrib.admin',");
+			}
+		$i++;
 		}
 	&flush_file_lines($sfile);
 
@@ -238,18 +264,30 @@ if (!$upgrade) {
 
 	# Initialize the DB
 	# Input is 'yes', username, email, password, password again
-	local $qfile = &transname();
-	&open_tempfile(QFILE, ">$qfile", 0, 1);
-	&print_tempfile(QFILE, "yes\n");
-	&print_tempfile(QFILE, "$domuser\n");
-	&print_tempfile(QFILE, "$d->{'emailto'}\n");
-	&print_tempfile(QFILE, "$dompass\n");
-	&print_tempfile(QFILE, "$dompass\n");
-	&close_tempfile(QFILE);
-	local $icmd = "cd ".quotemeta($pdir)." && ".
-		      "$python manage.py syncdb <$qfile";
-	local $out = &run_as_domain_user($d, $cmd);
-	if ($?) {
+	local $icmd = &command_as_user($d->{'user'}, 0,
+				       "$python manage.py syncdb");
+	local $pwd = &get_current_dir();
+	&foreign_require("proc", "proc-lib.pl");
+	chdir($pdir);
+	local ($fh, $fpid) = &proc::pty_process_exec($icmd);
+	chdir($pwd);
+	local $out;
+	foreach my $w ([ "yes.no", "yes" ],
+		       [ "Username", $domuser ],
+		       [ "E-mail address", $d->{'emailto'} ],
+		       [ "Password", $dompass ],
+		       [ "Password", $dompass ]) {
+		local $rv = &wait_for($fh, $w->[0]);
+		if ($rv < 0) {
+			return (0, "Database initialization failed : ".
+			   "<pre>".&html_escape($wait_for_input)."</pre>");
+			}
+		&sysprint($fh, $w->[1]."\n");
+		$out .= $wait_for_input;
+		}
+	&wait_for($fh, 'EOF');		# Wait till done
+	local $ex = close($fh);
+	if ($ex || $out =~ /error/i) {
 		return (0, "Database initialization failed : ".
 			   "<pre>".&html_escape($out)."</pre>");
 		}
@@ -258,7 +296,6 @@ if (!$upgrade) {
 # Create fcgi wrapper script
 local $fcgi = "$opts->{'dir'}/django.fcgi";
 local $wrapper = "$opts->{'dir'}/django.fcgi.py";
-local $python = &has_command("python");
 &open_tempfile(FCGI, ">$fcgi");
 &print_tempfile(FCGI, "#!/bin/sh\n");
 &print_tempfile(FCGI, "export PYTHONPATH=$opts->{'dir'}/lib/python\n");
@@ -291,7 +328,8 @@ foreach my $port (@ports) {
 	local @locs = &apache::find_directive_struct("Location", $vconf);
 	local ($loc) = grep { $_->{'words'}->[0] eq $opts->{'path'} } @locs;
 	next if ($loc);
-	local $pfx = $opts->{'path'} eq '/' ? '' : $opts->{'path'};
+	local $reldir = $opts->{'dir'};
+	$reldir =~ s/^\Q$d->{'home'}\/\E//;
 	local $loc = { 'name' => 'Location',
 		       'value' => $opts->{'path'},
 		       'type' => 1,
@@ -303,10 +341,10 @@ foreach my $port (@ports) {
 			{ 'name' => 'RewriteCond',
 			  'value' => '%{REQUEST_FILENAME} !django.fcgi' },
 			{ 'name' => 'RewriteRule',
-			  'value' => "${pfx}(.*) ${pfx}django.fcgi/\$1 [L]" },
+			  'value' => "$reldir(.*) django.fcgi/\$1 [L]" },
 			]
 		     };
-	&apache::save_directive_struct(undef, $dir, $vconf, $conf);
+	&apache::save_directive_struct(undef, $loc, $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	}
 &register_post_action(\&restart_apache);
@@ -315,7 +353,7 @@ local $url = &script_path_url($d, $opts);
 local $adminurl = $url."admin/";
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
-return (1, "Initial Django installation complete. Go to <a target=_new href='$adminurl'>$adminurl</a> to manage it. Rails is a development environment, so it doesn't do anything by itself!", "Under $rp", $url, $domuser, $dompass);
+return (1, "Initial Django installation complete. Go to <a target=_new href='$adminurl'>$adminurl</a> to manage it. Django is a development environment, so it doesn't do anything by itself!", "Under $rp", $url, $domuser, $dompass);
 }
 
 # script_django_uninstall(&domain, version, &opts)
@@ -329,19 +367,58 @@ local ($d, $version, $opts) = @_;
 local $derr = &delete_script_install_directory($d, $opts);
 return (0, $derr) if ($derr);
 
-# XXX delete database?
+# Remove base Django tables from the database
+local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+if ($dbtype eq 'mysql') {
+	&require_mysql();
+	foreach $t (&mysql::list_tables($dbname)) {
+		if ($t =~ /^(django|auth)_/) {
+			&mysql::execute_sql_logged($dbname,
+				"drop table ".&mysql::quotestr($t));
+			}
+		}
+	}
+else {
+	&require_postgresql();
+	foreach $t (&postgresql::list_tables($dbname)) {
+		if ($t =~ /^(django|auth)_/) {
+			&postgresql::execute_sql_logged($dbname,
+				"drop table ".&postgresql::quote_table($t));
+			}
+		}
+	}
 
 # Remove <Location> block
-# XXX
+&require_apache();
+local $conf = &apache::get_config();
+local @ports = ( $d->{'web_port'},
+		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+foreach my $port (@ports) {
+	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+	next if (!$virt);
+	local @locs = &apache::find_directive_struct("Location", $vconf);
+	local ($loc) = grep { $_->{'words'}->[0] eq $opts->{'path'} } @locs;
+	next if (!$loc);
+	&apache::save_directive_struct($loc, undef, $vconf, $conf);
+	&flush_file_lines($virt->{'file'});
+	}
+&register_post_action(\&restart_apache);
 
-return (1, "Django directory deleted.");
+# Take out the DB
+if ($opts->{'newdb'}) {
+	&delete_script_database($d, $opts->{'db'});
+	}
+
+return (1, "Django directory and tables deleted.");
 }
 
-sub script_django_check_latest
+# script_django_latest(version)
+# Returns a URL and regular expression or callback func to get the version
+sub script_django_latest
 {
 local ($ver) = @_;
-# XXX
-return undef;
+return ( "http://www.djangoproject.com/download/",
+	 "Django-([0-9\\.]+).tar.gz" );
 }
 
 sub script_django_site

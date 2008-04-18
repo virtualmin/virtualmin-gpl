@@ -64,11 +64,8 @@
 	- how can lookup-domain work? Via network?
 
  - Django support in script installers
-	- use wrapper script documented on http://www.djangoproject.com/documentation/fastcgi/
-	- need flup from http://trac.saddi.com/flup
-	- install all under django directory
-	- start myproject as part of installer (allow user to choose)
-	- postgresql support
+	- test on CentOS
+	- CHANGELOG / newfeatures
 
  - CPU / memory / process count limits
 	- FS#3850
@@ -76,3 +73,4 @@
 	- Update /etc/security/limits.conf
 
  - Make php child processes default to unset by default
+	- FS#3851
