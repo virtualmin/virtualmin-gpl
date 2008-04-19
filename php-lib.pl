@@ -43,6 +43,100 @@ local ($d, $mode, $port, $newdom) = @_;
 &require_apache();
 local $tmpl = &get_template($d->{'template'});
 local $conf = &apache::get_config();
+
+# Work out source php.ini files
+local (%srcini, %subs_ini);
+local @vers = &list_available_php_versions($d, $mode);
+foreach my $ver (@vers) {
+	$subs_ini{$ver->[0]} = 0;
+	local $srcini = $tmpl->{'web_php_ini_'.$ver->[0]};
+	if (!$srcini || $srcini eq "none" || !-r $srcini) {
+		$srcini = &get_global_php_ini($ver->[0], $mode);
+		}
+	else {
+		$subs_ini{$ver->[0]} = 1;
+		}
+	$srcini{$ver->[0]} = $srcini;
+	}
+local @srcinis = &unique(values %srcini);
+
+# Copy php.ini file into etc directory, for later per-site modification
+local $etc = "$d->{'home'}/etc";
+if (!-d $etc) {
+	&make_dir($etc, 0755);
+	&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'},
+				   0755, $etc);
+	}
+local $defver = $vers[0]->[0];
+local $defini;
+foreach my $ver (@vers) {
+	# Create separate .ini file for each PHP version, if missing
+	local $subs_ini = $subs_ini{$ver->[0]};
+	local $srcini = $srcini{$ver->[0]};
+	local $inidir = "$etc/php$ver->[0]";
+	if ($srcini && !-r "$inidir/php.ini") {
+		# Copy file, set permissions, fix session.save_path, and
+		# clear out extension_dir (because it can differ between
+		# PHP versions)
+		if (!-d $inidir) {
+			&make_dir($inidir, 0755);
+			&set_ownership_permissions(
+				$_[0]->{'uid'}, $_[0]->{'ugid'},
+				0755, $inidir);
+			}
+		if (-r "$etc/php.ini" && !-l "$etc/php.ini") {
+			# We are converting from the old style of a single
+			# php.ini file to the new multi-version one .. just
+			# copy the existing file for all versions, which is
+			# assumed to be working
+			&copy_source_dest("$etc/php.ini", "$inidir/php.ini");
+			}
+		elsif ($subs_ini) {
+			# Perform substitions on config file
+			local $inidata = &read_file_contents($srcini);
+			$inidata = &substitute_template($inidata, $d);
+			&open_tempfile(INIDATA, ">$inidir/php.ini");
+			&print_tempfile(INIDATA, $inidata);
+			&close_tempfile(INIDATA);
+			}
+		else {
+			# Just copy verbatim
+			&copy_source_dest($srcini, "$inidir/php.ini");
+			}
+		local ($uid, $gid) = (0, 0);
+		if (!$tmpl->{'web_php_noedit'}) {
+			($uid, $gid) = ($d->{'uid'}, $d->{'ugid'});
+			}
+		&set_ownership_permissions($uid, $gid, 0755, "$inidir/php.ini");
+		if (&foreign_check("phpini")) {
+			# Fix up session save path and extension_dir
+			&foreign_require("phpini", "phpini-lib.pl");
+			local $pconf = &phpini::get_config("$inidir/php.ini");
+			&phpini::save_directive($pconf, "session.save_path",
+						&create_server_tmp($d));
+			if (scalar(@srcinis) == 1 && scalar(@vers) > 1) {
+				# Only if the same source is used for multiple
+				# PHP versions.
+				&phpini::save_directive($pconf, "extension_dir",
+							undef);
+				}
+			&flush_file_lines("$inidir/php.ini");
+			}
+		}
+
+	# Is this the default of PHP, remember the path for later linking
+	if ($ver->[0] eq $defver) {
+		$defini = "php$ver->[0]/php.ini";
+		}
+	}
+
+# Link ~/etc/php.ini to the per-version ini file
+if ($defini && !-l "$etc/php.ini") {
+	&unlink_file("$etc/php.ini");
+	&symlink_file($defini, "$etc/php.ini");
+	}
+
+# Add the appropriate directives to the Apache config
 local @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 @ports = ( $port ) if ($port);	# Overridden to just do SSL or non-SSL
@@ -175,104 +269,33 @@ foreach my $p (@ports) {
 		}
 	&apache::save_directive("RemoveHandler", \@remove, $vconf, $conf);
 
+	# For fcgid mode, set IPCCommTimeout to the PHP max execution
+	# time + 1, so that scripts run via fastCGI aren't disconnected
+	if ($mode eq "fcgid") {
+		local $inifile = &get_domain_php_ini($d, $ver);
+		if (-r $inifile) {
+			&foreign_require("phpini", "phpini-lib.pl");
+			local $iniconf = &phpini::get_config($inifile);
+			local $maxex = &phpini::find_value(
+				"max_execution_time", $iniconf);
+			if ($maxex) {
+				&apache::save_directive("IPCCommTimeout",
+					[ $maxex+1 ], $vconf, $conf);
+				}
+			}
+		}
+	else {
+		# For other modes, don't set
+		&apache::save_directive("IPCCommTimeout", [ ],
+					$vconf, $conf);
+		}
+
 	&flush_file_lines();
 	}
 
 # Create wrapper scripts
 if ($mode ne "mod_php") {
 	&create_php_wrappers($d, $mode);
-	}
-
-# Work out source php.ini files
-local (%srcini, %subs_ini);
-local @vers = &list_available_php_versions($d, $mode);
-foreach my $ver (@vers) {
-	$subs_ini{$ver->[0]} = 0;
-	local $srcini = $tmpl->{'web_php_ini_'.$ver->[0]};
-	if (!$srcini || $srcini eq "none" || !-r $srcini) {
-		$srcini = &get_global_php_ini($ver->[0], $mode);
-		}
-	else {
-		$subs_ini{$ver->[0]} = 1;
-		}
-	$srcini{$ver->[0]} = $srcini;
-	}
-local @srcinis = &unique(values %srcini);
-
-# Copy php.ini file into etc directory, for later per-site modification
-local $etc = "$d->{'home'}/etc";
-if (!-d $etc) {
-	&make_dir($etc, 0755);
-	&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'},
-				   0755, $etc);
-	}
-local $defver = $vers[0]->[0];
-local $defini;
-foreach my $ver (@vers) {
-	# Create separate .ini file for each PHP version, if missing
-	local $subs_ini = $subs_ini{$ver->[0]};
-	local $srcini = $srcini{$ver->[0]};
-	local $inidir = "$etc/php$ver->[0]";
-	if ($srcini && !-r "$inidir/php.ini") {
-		# Copy file, set permissions, fix session.save_path, and
-		# clear out extension_dir (because it can differ between
-		# PHP versions)
-		if (!-d $inidir) {
-			&make_dir($inidir, 0755);
-			&set_ownership_permissions(
-				$_[0]->{'uid'}, $_[0]->{'ugid'},
-				0755, $inidir);
-			}
-		if (-r "$etc/php.ini" && !-l "$etc/php.ini") {
-			# We are converting from the old style of a single
-			# php.ini file to the new multi-version one .. just
-			# copy the existing file for all versions, which is
-			# assumed to be working
-			&copy_source_dest("$etc/php.ini", "$inidir/php.ini");
-			}
-		elsif ($subs_ini) {
-			# Perform substitions on config file
-			local $inidata = &read_file_contents($srcini);
-			$inidata = &substitute_template($inidata, $d);
-			&open_tempfile(INIDATA, ">$inidir/php.ini");
-			&print_tempfile(INIDATA, $inidata);
-			&close_tempfile(INIDATA);
-			}
-		else {
-			# Just copy verbatim
-			&copy_source_dest($srcini, "$inidir/php.ini");
-			}
-		local ($uid, $gid) = (0, 0);
-		if (!$tmpl->{'web_php_noedit'}) {
-			($uid, $gid) = ($d->{'uid'}, $d->{'ugid'});
-			}
-		&set_ownership_permissions($uid, $gid, 0755, "$inidir/php.ini");
-		if (&foreign_check("phpini")) {
-			# Fix up session save path and extension_dir
-			&foreign_require("phpini", "phpini-lib.pl");
-			local $pconf = &phpini::get_config("$inidir/php.ini");
-			&phpini::save_directive($pconf, "session.save_path",
-						&create_server_tmp($d));
-			if (scalar(@srcinis) == 1 && scalar(@vers) > 1) {
-				# Only if the same source is used for multiple
-				# PHP versions.
-				&phpini::save_directive($pconf, "extension_dir",
-							undef);
-				}
-			&flush_file_lines("$inidir/php.ini");
-			}
-		}
-
-	# Is this the default of PHP, remember the path for later linking
-	if ($ver->[0] eq $defver) {
-		$defini = "php$ver->[0]/php.ini";
-		}
-	}
-
-# Link ~/etc/php.ini to the per-version ini file
-if ($defini && !-l "$etc/php.ini") {
-	&unlink_file("$etc/php.ini");
-	&symlink_file($defini, "$etc/php.ini");
 	}
 
 &register_post_action(\&restart_apache);
