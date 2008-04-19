@@ -170,6 +170,7 @@ if (&can_edit_phpmode()) {
 	print &ui_table_row($text{'massdomains_phpchildren'},
 		&ui_radio("phpchildren_def", 1,
 			  [ [ 1, $text{'massdomains_leave'} ],
+			    [ 2, $text{'tmpl_phpchildrennone'} ],
 			    [ 0, &ui_textbox("phpchildren", undef, 5) ] ]));
 	}
 

@@ -243,10 +243,11 @@ foreach $d (@doms) {
 		}
 
 	# Check the PHP child processes ..
-	if (&can_edit_phpmode() && !$in{'phpchildren_def'} &&
+	if (&can_edit_phpmode() && $in{'phpchildren_def'} != 1 &&
 	    $d->{'web'} && !$d->{'alias'}) {
 		&$first_print($text{'massdomains_phpchildrening'});
-		&save_domain_php_children($d, $in{'phpchildren'});
+		&save_domain_php_children($d,
+			$in{'phpchildren_def'} == 2 ? 0 : $in{'phpchildren'});
 		&$second_print($text{'setup_done'});
 		}
 

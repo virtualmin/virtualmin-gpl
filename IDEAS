@@ -67,9 +67,6 @@
 	- FS#3850
 	- Use ulimit in CGI wrappers
 	- Update /etc/security/limits.conf
+	- Part of template system
+	- What about non-Linux?
 
- - Make php child processes default to unset by default
-	- FS#3851
-	- all use of save_domain_php_children
-	- changelog
-	- test UI

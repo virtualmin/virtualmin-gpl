@@ -897,3 +897,4 @@ The default PHP version for one or more virtual servers can be changed with --ph
 When migrating backups from Postfix-style ~/Maildir inboxes to Sendmail-style /var/mail, mail files are properly copied across.
 Changed the content style chooser to display thumbnail images in the drop-down menu.
 Added a script installer for Django, a development framework for Python applications.
+By default, new virtual servers will no longer have the PHP_FCGI_CHILDREN environment variable set in the fCGI wrapper files. This avoids a PHP bug that causes stale php-cgi processes to be left running, but may slightly reduce the performance of PHP applications.

@@ -221,6 +221,7 @@ if ($multi) {
 		    defined(&get_domain_php_children)) {
 			$childs = &get_domain_php_children($d);
 			print "    PHP fCGId subprocesses: ",
+				$childs < 0 ? "Not set" :
 				$childs == 0 ? "None" : $childs,"\n";
 			}
 		if ($config{'web'} && $d->{'web'} &&

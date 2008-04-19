@@ -30,8 +30,8 @@ if (&indexof("fcgid", @modes) >= 0) {
 	if ($children >= 0) {
 		print &ui_table_row(&hlink($text{'phpmode_children'},
 					   "phpmode_children"),
-				    &ui_opt_textbox("children", $children, 5,
-						$text{'tmpl_phpchildrennone'}));
+				    &ui_opt_textbox("children", $children || '',
+					 5, $text{'tmpl_phpchildrennone'}));
 		}
 	}
 

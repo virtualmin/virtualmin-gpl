@@ -341,7 +341,9 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 				   "$dest/php$v->[0].$suffix");
 
 	# Put back the old number of child processes
-	&save_domain_php_children($d, $children, 1);
+	if ($children >= 0) {
+		&save_domain_php_children($d, $children, 1);
+		}
 
 	# Also copy the .fcgi wrapper to public_html, which is needed due to
 	# broken-ness on some Debian versions!
@@ -706,14 +708,14 @@ else {
 
 # get_domain_php_children(&domain)
 # For a domain using fcgi to run PHP, returns the number of child processes.
-# Returns 0 if not set, -2 if not supported
+# Returns 0 if not set, -1 if the file doesn't even exist, -2 if not supported
 sub get_domain_php_children
 {
 local ($d) = @_;
 local ($ver) = &list_available_php_versions($d, "fcgi");
 return -2 if (!$ver);
-local $childs = -1;
-open(WRAPPER, "$d->{'home'}/fcgi-bin/php$ver->[0].fcgi") || return -2;
+local $childs = 0;
+open(WRAPPER, "$d->{'home'}/fcgi-bin/php$ver->[0].fcgi") || return -1;
 while(<WRAPPER>) {
 	if (/^PHP_FCGI_CHILDREN\s*=\s*(\d+)/) {
 		$childs = $1;

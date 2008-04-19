@@ -17,7 +17,7 @@ if ($in{'suexec'} && $apache::httpd_modules{'core'} >= 2.0 &&
     !$apache::httpd_modules{'mod_suexec'}) {
 	&error($text{'phpmode_emodsuexec'});
 	}
-if (defined($in{'children'}) && !$in{'children_def'} &&
+if (defined($in{'children_def'}) && !$in{'children_def'} &&
     ($in{'children'} < 1 || $in{'children'} > $max_php_fcgid_children)) {
 	&error(&text('phpmode_echildren', $max_php_fcgid_children));
 	}
@@ -37,9 +37,9 @@ if ($oldmode ne $in{'mode'}) {
 
 # Save PHP fcgi children
 $nc = $in{'children_def'} ? 0 : $in{'children'};
-if (defined($in{'children'}) &&
+if (defined($in{'children_def'}) &&
     $nc != &get_domain_php_children($d)) {
-	&$first_print($nc ? &text('phpmode_kidding', $in{'children'})
+	&$first_print($nc ? &text('phpmode_kidding', $nc)
 			  : $text{'phpmode_nokids'});
 	&save_domain_php_children($d, $nc);
 	&$second_print($text{'setup_done'});
