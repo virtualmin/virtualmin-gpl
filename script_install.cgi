@@ -125,7 +125,7 @@ $ferr = &fetch_script_files($d, $ver, $opts, $sinfo, \%gotfiles);
 print "<br>\n";
 
 # Install needed PHP and Perl modules
-if (&setup_script_requirements($d, $script, $ver, $phpver, $opts)) {
+if (!&setup_script_requirements($d, $script, $ver, $phpver, $opts)) {
 	&ui_print_footer("list_scripts.cgi?dom=$in{'dom'}",
 			 $text{'scripts_return'}, &domain_footer_link($d));
 	exit;
