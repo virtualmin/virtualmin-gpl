@@ -1,0 +1,4 @@
+desc=Disk quota monitoring thresholds
+html=Multiple warning thresholds and an interval between sending a notification for each domain can now be configured on the Disk Quota Monitoring page.
+master=1
+link=edit_newquotas.cgi

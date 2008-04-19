@@ -1,4 +1,4 @@
-desc=Fewer PHP Child Processes
+desc=Fewer PHP child processes
 html=By default, new virtual servers will no longer have the PHP_FCGI_CHILDREN environment variable set in the fCGI wrapper files. This avoids a PHP bug that causes stale php-cgi processes to be left running, but may slightly reduce the performance of PHP applications.
 link=edit_phpmode.cgi?dom=${ID}
 master=1

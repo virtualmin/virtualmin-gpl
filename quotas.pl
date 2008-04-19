@@ -7,9 +7,14 @@ $main::no_acl_check++;
 $no_virtualmin_plugins = 1;
 require './virtual-server-lib.pl';
 
+if ($ARGV[0] eq "--debug") {
+	$debug_mode = 1;
+	}
+
 # For each server, first find its total usage
 $homesize = &quota_bsize("home");
 $mailsize = &quota_bsize("mail");
+$now = time();
 foreach $d (&list_domains()) {
 	next if ($d->{'parent'} || $d->{'alias'});
 	next if (!$d->{'quota'});
@@ -22,14 +27,41 @@ foreach $d (&list_domains()) {
 
 	# Compare to server's limit
 	$limit = $d->{'quota'}*$homesize;
+	$msg = undef;
 	if ($usage >= $limit) {
 		# Over!
-		push(@msgs, [ $d, $usage, $limit ]);
+		$msg = [ $d, $usage, $limit, undef, 100 ];
 		}
-	elsif ($config{'quota_warn'} &&
-	       $usage > $limit*$config{'quota_warn'}/100) {
-		# Passed warning level
-		push(@msgs, [ $d, $usage, $limit, int($usage*100/$limit) ]);
+	elsif ($config{'quota_warn'}) {
+		# Check if passed some threshold
+		@warn = sort { $b <=> $a } split(/\s+/, $config{'quota_warn'});
+		foreach $w (@warn) {
+			if ($usage > $limit*$w/100) {
+				$msg = [ $d, $usage, $limit,
+					 int($usage*100/$limit), $w ];
+				last;
+				}
+			}
+		}
+
+	# Don't send if we have already sent one for this limit within the
+	# configured minimum period
+	if ($msg) {
+		if ($config{'quota_interval'}) {
+			# When as the last time we emailed at this level or
+			# higher?
+			($lastt, $lastw) = split(/\s+/, $d->{'quota_notify'});
+			if ($lastt &&
+			    $now - $lastt < $config{'quota_interval'}*60*60 &&
+			    $lastw >= $msg->[4]) {
+				$msg = undef;
+				}
+			}
+		}
+	if ($msg) {
+		$d->{'quota_notify'} = $now." ".$msg->[4];
+		&save_domain($d);
+		push(@msgs, $msg);
 		}
 	}
 
@@ -54,6 +86,13 @@ if (@msgs) {
 				 [ 'Subject' => 'Disk Quota Monitoring' ],
 				 [ 'Content-type', 'text/plain' ] ],
 		  'body' => $body };
-	&mailboxes::send_mail($mail);
+	if ($debug_mode) {
+		print "From: ",&get_global_from_address(),"\n";
+		print "To: ",$config{'quota_email'},"\n";
+		print $body;
+		}
+	else {
+		&mailboxes::send_mail($mail);
+		}
 	}
 

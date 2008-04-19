@@ -20,10 +20,17 @@ print &ui_table_start($text{'newquotas_header'}, undef, 2, [ "width=30%" ]);
 print &ui_table_row($text{'newquotas_email'},
 		    &ui_textbox("email", $config{'quota_email'}, 40));
 
-# Warning level
+# Warning levels
 print &ui_table_row($text{'newquotas_warn'},
-		    &ui_opt_textbox("warn", $config{'quota_warn'}, 4,
-				    $text{'newquotas_nowarn'})." %");
+		    &ui_opt_textbox("warn", $config{'quota_warn'}, 20,
+				    $text{'newquotas_nowarn'},
+				    $text{'newquotas_warnlist'})." %");
+
+# Interval between warnings
+print &ui_table_row($text{'newquotas_interval'},
+		    &ui_opt_textbox("interval", $config{'quota_interval'},
+				    5, $text{'newquotas_noint'})." ".
+		    $text{'newquotas_hours'});
 
 # Scheduled checking enabled?
 $job = &find_quotas_job();

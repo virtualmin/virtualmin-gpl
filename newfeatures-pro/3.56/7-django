@@ -1,4 +1,4 @@
-desc=Django Script Installer
+desc=Django script installer
 html=Added a script installer for Django, a development framework for Python applications. This performs all the Python and Apache setup steps for you automatically.
 master=1
 reseller=1

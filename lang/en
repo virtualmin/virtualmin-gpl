@@ -3012,7 +3012,7 @@ remote_eprogram2=Remote program $1 does not exist
 
 newquotas_title=Disk Quota Monitoring
 newquotas_ecannot=You are not allowed to set up disk quota monitoring
-newquotas_desc=This page allows you to set up automatic email notification when a virtual server exceeds its disk quota. Because group quotas are enabled, this can only happen when a server has too much data in one of its databases, as database sizes are not enforced by Unix disk quotas.
+newquotas_desc=This page allows you to set up automatic email notification when a virtual server exceeds or gets close to its disk quota. Because group quotas are enabled, this can only happen when a server has too much data in one of its databases, as database sizes are not enforced by Unix disk quotas.
 newquotas_desc2=This page allows you to set up automatic email notification when a virtual server exceeds its disk quota. Because group quotas are not enabled, it is possible for the space used by server owners, mailbox users and databases to exceed the limit set in Virtualmin.
 newquotas_header=Scheduled quota monitoring options
 newquotas_email=Send quota report to
@@ -3022,8 +3022,14 @@ newquotas_sched=Scheduled quota checking enabled?
 newquotas_schedyes=Yes, at times selected below ..
 newquotas_ok=Save and Apply
 newquotas_err=Failed to save quota monitoring
-newquotas_ewarn=Missing or invalid warning percentage
+newquotas_ewarn2=No warning percentages entered
+newquotas_ewarn3=Warning percentages must be numbers between 1 and 99
 newquotas_eemail=Missing or invalid email address
+newquotas_interval=Time between notifications for a domain
+newquotas_noint=No minimum
+newquotas_hours=hours
+newquotas_einterval=Missing or invalid number of hours between notifications
+newquotas_warnlist=Thresholds
 
 mass_title=Modify Multiple Users
 mass_desc=This page allows you to change selected settings for the $1 chosen users in this virtual server at once.

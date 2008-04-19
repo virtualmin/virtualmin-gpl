@@ -1,4 +1,4 @@
-desc=Improved Style Chooser
+desc=Improved style chooser
 html=Changed the content style chooser to display thumbnail images in the drop-down menu.
 link=domain_form.cgi
 master=1

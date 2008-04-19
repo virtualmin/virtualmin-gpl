@@ -13,12 +13,24 @@ $job ||= { 'user' => 'root',
 	   'command' => $quotas_cron_cmd };
 if ($in{'sched'}) {
 	$in{'email'} =~ /^\S+\@\S+$/ || &error($text{'newquotas_eemail'});
-	$in{'warn_def'} || $in{'warn'} > 0 && $in{'warn'} < 100 ||
-		&error($text{'newquotas_ewarn'});
+	if (!$in{'warn_def'}) {
+		$in{'warn'} || &error($text{'newquotas_ewarn2'});
+		foreach $w (split(/\s+/, $in{'warn'})) {
+			$w =~ /^\d+$/ && $w > 0 && $w < 100 ||
+				&error($text{'newquotas_ewarn3'});
+			}
+		}
 	&cron::parse_times_input($job, \%in);
 	}
 $config{'quota_email'} = $in{'email'};
 $config{'quota_warn'} = $in{'warn_def'} ? undef : $in{'warn'};
+if ($in{'interval_def'}) {
+	delete($config{'quota_interval'});
+	}
+else {
+	$in{'interval'} =~ /^[1-9]\d*$/ || &error($text{'newquotas_einterval'});
+	$config{'quota_interval'} = $in{'interval'};
+	}
 &cron::delete_cron_job($oldjob) if ($oldjob);
 &cron::create_wrapper($quotas_cron_cmd, $module_name, "quotas.pl");
 if ($in{'sched'}) {
