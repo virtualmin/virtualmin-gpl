@@ -392,6 +392,9 @@ foreach $db (@dbs) {
 	local $dbfile = $_[1]."_".$db;
 	local $err = &mysql::backup_database($db, $dbfile, 0, 1, 0,
 					     undef, undef, undef, undef);
+	if (!$err) {
+		$err = &validate_mysql_backup($dbfile);
+		}
 	if ($err) {
 		&$second_print(&text('backup_mysqldumpfailed',
 				     "<pre>$err</pre>"));
@@ -469,6 +472,20 @@ foreach $db (@dbs) {
 		}
 	}
 return 1;
+}
+
+# validate_mysql_backup(file)
+# Returns an error message if a file doesn't look like a valid MySQL backup
+sub validate_mysql_backup
+{
+local ($dbfile) = @_;
+open(DBFILE, $dbfile);
+local $first = <DBFILE>;
+close(DBFILE);
+if ($first =~ /^mysqldump:.*error/) {
+	return $first;
+	}
+return undef;
 }
 
 # mysql_user(&domain, [always-new])

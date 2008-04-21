@@ -4196,12 +4196,12 @@ DOMAIN: foreach $d (@$doms) {
 	foreach $f (@backupfeatures) {
 		local $bfunc = "backup_$f";
 		local $fok;
+		local $ffile;
 		if (&indexof($f, @backup_plugins) < 0 &&
 		    defined(&$bfunc) &&
 		    ($d->{$f} || $f eq "virtualmin" ||
 		     $f eq "mail" && &can_domain_have_users($d))) {
 			# Call core feature backup function
-			local $ffile;
 			if ($homefmt && $f eq "dir") {
 				# For a home format backup, write the home
 				# itself to the backup destination
@@ -4215,13 +4215,23 @@ DOMAIN: foreach $d (@$doms) {
 		elsif (&indexof($f, @backup_plugins) >= 0 &&
 		       $d->{$f}) {
 			# Call plugin backup function
-			local $ffile = "$backupdir/$d->{'dom'}_$f";
+			$ffile = "$backupdir/$d->{'dom'}_$f";
 			local $fok = &plugin_call($f, "feature_backup",
 					  $d, $ffile, $opts->{$f}, $homefmt);
 			}
 		if (defined($fok)) {
 			# See if it worked or not
-			$dok = 0 if (!$fok);
+			if (!$fok) {
+				# Didn't work .. remove failed file, so we
+				# don't have partial data
+				if ($ffile && $f ne "dir") {
+					foreach my $ff ($ffile,
+						glob("${ffile}_*")) {
+						&unlink_file($ff);
+						}
+					}
+				$dok = 0;
+				}
 			if (!$fok && !$skip) {
 				$ok = 0;
 				$errcount++;
