@@ -70,3 +70,5 @@
 	- Part of template system
 	- What about non-Linux?
 
+ - Installer for http://piwik.org/
+	- Tie in with analytics module, auto-setup?

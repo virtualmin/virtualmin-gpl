@@ -41,6 +41,7 @@ $test_backup_file = "/tmp/$test_domain.tar.gz";
 $test_email_dir = "/usr/local/webadmin/virtualmin/testmail";
 $spam_email_file = "$test_email_dir/spam.txt";
 $virus_email_file = "$test_email_dir/virus.txt";
+$supports_fcgid = &indexof("fcgid", &supported_php_modes()) >= 0;
 
 @create_args = ( [ 'limits-from-template' ],
 		 [ 'no-email' ],
@@ -135,7 +136,7 @@ $domains_tests = [
 	  'grep' => 'PHP Version',
 	},
 
-	# Switch PHP mode
+	# Switch PHP mode to CGI
 	{ 'command' => 'modify-web.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
 		      [ 'mode', 'cgi' ] ],
@@ -148,6 +149,19 @@ $domains_tests = [
 	{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
 	  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
 	},
+
+	$supports_fcgid ? (
+		# Switch PHP mode to fCGId
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain' => $test_domain ],
+			      [ 'mode', 'fcgid' ] ],
+		},
+
+		# Check PHP running via fCGId
+		{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
+		  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+		},
+		) : ( ),
 
 	# Disable a feature
 	{ 'command' => 'disable-feature.pl',
