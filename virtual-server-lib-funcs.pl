@@ -10291,8 +10291,10 @@ local $name = ref($_[0]) ? $_[0]->{'dom'} : $_[0];
 if ($name =~ /^xn--/ || $name =~ /\.xn--/) {
 	# Convert xn-- parts to unicode
 	eval "use IDNA::Punycode";
-	$name = join(".",
-		  map { decode_punycode($_) } split(/\./, $name));
+	if (!$@) {
+		$name = join(".",
+			  map { decode_punycode($_) } split(/\./, $name));
+		}
 	}
 return $name;
 }
@@ -10305,8 +10307,10 @@ local $name = $_[0];
 if ($name !~ /^[a-z0-9\.\-\_]+$/i) {
 	# Convert unicode to xn-- format
 	eval "use IDNA::Punycode";
-	$name = join(".",
-		  map { encode_punycode($_) } split(/\./, $name));
+	if (!$@) {
+		$name = join(".",
+			  map { encode_punycode($_) } split(/\./, $name));
+		}
 	}
 return $name;
 }
