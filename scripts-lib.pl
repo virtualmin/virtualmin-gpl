@@ -383,6 +383,14 @@ for(my $i=0; $i<@sp1 || $i<@sp2; $i++) {
 		local ($v2n, $v2s) = ($1, $2);
 		$comp = $v1n <=> $v2n || $v1s cmp $v2s;
 		}
+	elsif ($v1 =~ /^\d+$/ && $v2 =~ /^rc\d+$/i) {
+		# N is always newer than rcN
+		return 1;
+		}
+	elsif ($v1 =~ /^rc\d+$/i && $v2 =~ /^\d+$/) {
+		# rcN is always older than N
+		return -1;
+		}
 	else {
 		# String compare
 		$v1 = 0 if ($v1 eq '');

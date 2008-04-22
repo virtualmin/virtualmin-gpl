@@ -21,7 +21,7 @@ return "RoundCube Webmail is a browser-based multilingual IMAP client with an ap
 # script_roundcube_versions()
 sub script_roundcube_versions
 {
-return ( "0.1-rc2" );
+return ( "0.1.1" );
 }
 
 sub script_roundcube_category
@@ -160,6 +160,9 @@ if (!$upgrade) {
 	foreach my $l (@$lref) {
 		if ($l =~ /^\$rcmail_config\['db_dsnw'\]\s+=/) {
 			$l = "\$rcmail_config['db_dsnw'] = 'mysql://$dbuser:$dbpass\@$dbhost/$dbname';";
+			}
+		elsif ($l =~ /^\$rcmail_config\['db_backend'\]\s+=/) {
+			$l = "\$rcmail_config['db_backend'] = 'db';";
 			}
 		}
 	&flush_file_lines($dbcfile);
