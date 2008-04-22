@@ -80,7 +80,7 @@ if ($config{'last_check'} < time()) {
 &unlock_file($module_config_file);
 
 # Update the miniserv preload list, which includes plugins
-if ($virtualmin_pro && $oldplugins ne $config{'plugins'}) {
+if ($oldplugins ne $config{'plugins'}) {
 	&update_miniserv_preloads($config{'preload_mode'});
 	&restart_miniserv();
 	}

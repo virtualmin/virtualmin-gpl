@@ -49,7 +49,7 @@ if ($webminchanged) {
 &update_domain_owners_group();
 
 # Update preload settings if changed
-if ($virtualmin_pro && $config{'preload_mode'} != $lastconfig{'preload_mode'}) {
+if ($config{'preload_mode'} != $lastconfig{'preload_mode'}) {
 	&$first_print($text{'check_preload'});
 	&update_miniserv_preloads($config{'preload_mode'});
 	&restart_miniserv();
