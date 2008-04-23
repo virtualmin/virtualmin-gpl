@@ -119,13 +119,14 @@ if ($max) {
 			    @doms) {
 			$usage = $in{'mode'} == 1 ? $usage_only{$d->{'id'}}
 						  : $usage{$d->{'id'}};
+			$dname = &show_domain_name($d);
 			if ($in{'dom'}) {
-				print "<tr> <td>$d->{'dom'}</td> <td nowrap>\n";
+				print "<tr> <td>$dname</td> <td nowrap>\n";
 				}
 			else {
 				print "<tr> <td><a href='bwgraph.cgi?",
 				      "dom=$d->{'id'}&mago=$in{'mago'}'>",
-				      "$d->{'dom'}</td> <td nowrap>\n";
+				      "$dname</td> <td nowrap>\n";
 				}
 
 			# Show nothing if this domain is disabled
@@ -168,8 +169,9 @@ if ($max) {
 			$space = $d->{'bw_usage_only'};
 			foreach $sd (grep { !$_->{'alias'} }
 				         &get_domain_by("parent", $d->{'id'})) {
+				$dname = &show_domain_name($sd);
 				print "<tr> <td>&nbsp;&nbsp;&nbsp;",
-				      "$sd->{'dom'}</td> <td>\n";
+				      "$dname</td> <td>\n";
 
 				# Show nothing if this domain is disabled
 				if (!&can_monitor_bandwidth($sd)) {
