@@ -8779,7 +8779,7 @@ if ($ago == 0) {
 local $sday = &bandwidth_period_start($ago);
 if ($config{'bw_past'} eq 'week') {
 	# 6 days after start
-	return $day + 6;
+	return $sday + 6;
 	}
 elsif ($config{'bw_past'} eq 'month') {
 	# End of the month
@@ -8790,7 +8790,7 @@ elsif ($config{'bw_past'} eq 'year') {
 	return &bandwidth_period_start($ago-1)-1;
 	}
 else {
-	return $day + $config{'bw_period'} - 1;
+	return $sday + $config{'bw_period'} - 1;
 	}
 }
 

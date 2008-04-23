@@ -2464,7 +2464,10 @@ bwgraph_mode_2=By date
 bwgraph_mode_3=By month
 bwgraph_return=bandwidth usage for all servers
 bwgraph_dis=Monitoring disabled
-bwgraph_mago=Show statistics for month:
+bwgraph_mago_week=Show statistics for month:
+bwgraph_mago_month=Show statistics for month:
+bwgraph_mago_year=Show statistics for year:
+bwgraph_mago_=Show statistics for period:
 bwgraph_mok=Show
 
 plugconfig_title=Plugin Configuration

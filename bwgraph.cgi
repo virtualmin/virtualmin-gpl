@@ -329,7 +329,7 @@ if ($max) {
 		print &ui_form_start("bwgraph.cgi");
 		print &ui_hidden("mode", $in{'mode'});
 		print &ui_hidden("dom", $in{'dom'});
-		print "<b>$text{'bwgraph_mago'}</b>\n";
+		print "<b>",$text{'bwgraph_mago_'.$config{'bw_past'}},"</b>\n";
 		@mago = ( );
 		@tm = localtime(time());
 		for($i=0; $i<24; $i++) {
