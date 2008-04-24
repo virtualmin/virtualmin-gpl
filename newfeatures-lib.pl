@@ -121,9 +121,16 @@ local ($d) = @_;
 local @nf = &should_show_new_features();
 return undef if (!@nf);
 local (@rv, @modvers, %modvers);
-local $me = !defined(&master_admin) ? undef :	# For VM2
-	    &master_admin() ? 'master' :
-	    &reseller_admin() ? 'reseller' : 'domain';
+local $me;
+if (defined(&master_admin)) {
+	# In Virtualmin
+	$me = &master_admin() ? 'master' :
+	      &reseller_admin() ? 'reseller' : 'domain';
+	}
+else {
+	# In VM2
+	$me = $access{'owner'} ? 'owner' : 'master';
+	}
 local %shownf = map { $_, 1 } split(/,/, $config{'show_nf'});
 return undef if ($me && !$shownf{$me});
 local %donemod;
