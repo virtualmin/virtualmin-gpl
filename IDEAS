@@ -72,3 +72,7 @@
 
  - Installer for http://piwik.org/
 	- Tie in with analytics module, auto-setup?
+
+ - Installer for phpLedMailer
+	- FS#3877
+	- Ask for list at install time
