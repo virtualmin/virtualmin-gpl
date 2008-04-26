@@ -6797,15 +6797,6 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			&add_domain_script($dom, $name, $ver, $opts,
 					   $desc, $url, $suser, $spass,
 					   $ok < 0 ? $msg : undef);
-
-			# Config web server for PHP
-			if (&indexof("php", @{$script->{'uses'}}) >= 0) {
-				if (&setup_web_for_php($dom, $script, $phpver)){
-					&$first_print($text{'scripts_apache'});
-					&$second_print($text{'setup_done'});
-					&register_post_action(\&restart_apache);
-					}
-				}
 			}
 		else {
 			&$second_print(&text('setup_scriptfailed', $msg));

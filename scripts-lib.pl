@@ -545,10 +545,12 @@ if ($apache::httpd_modules{'mod_php4'} ||
 
 		# Get PHP variables from template
 		local @oldphpv = @phpv;
+		local $changed;
 		foreach my $pv (@tmplphpvars) {
 			local ($n, $v) = split(/=/, $pv, 2);
 			if (!$got{$n}) {
 				push(@phpv, "$n $v");
+				$changed++;
 				}
 			}
 		if ($script && defined(&{$script->{'php_vars_func'}})) {
@@ -556,12 +558,13 @@ if ($apache::httpd_modules{'mod_php4'} ||
 			foreach my $v (&{$script->{'php_vars_func'}}($d)) {
 				if (!$got{$v->[0]}) {
 					push(@phpv, "$v->[0] $v->[1]");
+					$changed++;
 					}
 				}
 			}
 
 		# Update if needed
-		if (scalar(@oldphpv) != scalar(@phpv)) {
+		if ($changed) {
 			&apache::save_directive("php_value",
 						\@phpv, $vconf, $conf);
 			$any++;
@@ -590,11 +593,19 @@ if (-r $phpini && &foreign_check("phpini")) {
 	# it is set by default to a directory only writable by Apache
 	push(@todo, [ 'session.save_path', &create_server_tmp($d) ]);
 
-	# Make and needed changes
+	# Make any needed changes. Variables can be either forced to a
+	# particular value, or have maximums or minumums
 	foreach my $t (@todo) {
-		local ($n, $v) = @$t;
-		if (&phpini::find_value($n, $conf) ne $v) {
+		local ($n, $v, $diff) = @$t;
+		local $ov = &phpini::find_value($n, $conf);
+		local $change = $diff eq '' && $ov ne $v ||
+				$diff eq '+' && &php_value_diff($ov, $v) < 0 ||
+				$diff eq '-' && &php_value_diff($ov, $v) > 0;
+		if ($change) {
 			&phpini::save_directive($conf, $n, $v);
+			if ($n eq "max_execution_time") {
+				&set_fcgid_max_execution_time($d, $v);
+				}
 			$any++;
 			}
 		}
@@ -603,6 +614,21 @@ if (-r $phpini && &foreign_check("phpini")) {
 	}
 
 return $any;
+}
+
+# php_value_diff(value1, value2)
+# Compares two values like 32 and 64 or 8M and 32M. Returns -1 if v1 is < v2,
+# +1 if v1 > v2, or 0 if same
+sub php_value_diff
+{
+local ($v1, $v2) = @_;
+$v1 = $v1 =~ /^(\d+)k/i ? $1*1024 :
+      $v1 =~ /^(\d+)M/i ? $1*1024*1024 :
+      $v1 =~ /^(\d+)G/i ? $1*1024*1024*1024 : $v1;
+$v2 = $v2 =~ /^(\d+)k/i ? $1*1024 :
+      $v2 =~ /^(\d+)M/i ? $1*1024*1024 :
+      $v2 =~ /^(\d+)G/i ? $1*1024*1024*1024 : $v2;
+return $v1 <=> $v2;
 }
 
 # check_pear_module(mod, [php-version], [&domain])
@@ -1918,6 +1944,17 @@ local ($d, $script, $ver, $phpver, $opts) = @_;
 &setup_ruby_modules($d, $script, $ver, $opts) || return 0;
 &setup_python_modules($d, $script, $ver, $opts) || return 0;
 &setup_noproxy_path($d, $script, $ver, $opts) || return 0;
+# Setup PHP variables
+if (&indexof("php", @{$script->{'uses'}}) >= 0) {
+	&$first_print($text{'scripts_apache'});
+	if (&setup_web_for_php($d, $script, $phpver)) {
+		&$second_print($text{'setup_done'});
+		&register_post_action(\&restart_apache);
+		}
+	else {
+		&$second_print($text{'scripts_aalready'});
+		}
+	}
 return 1;
 }
 

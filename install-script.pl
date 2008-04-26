@@ -269,19 +269,6 @@ if ($ok) {
 			   $sinfo ? ( $sinfo->{'user'}, $sinfo->{'pass'} )
 				  : ( $suser, $spass ),
 			   $ok < 0 ? $msg : undef);
-
-	# Config web server for PHP
-	if (&indexof("php", @{$script->{'uses'}}) >= 0) {
-		&$first_print($text{'scripts_apache'});
-		if (&setup_web_for_php($d, $script, $phpver)) {
-			&$second_print($text{'setup_done'});
-			&restart_apache();
-			}
-		else {
-			&$second_print($text{'scripts_aalready'});
-			}
-		}
-
 	&run_post_actions();
 	}
 else {

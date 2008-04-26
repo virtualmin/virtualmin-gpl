@@ -279,8 +279,8 @@ foreach my $p (@ports) {
 			local $maxex = &phpini::find_value(
 				"max_execution_time", $iniconf);
 			if ($maxex) {
-				&apache::save_directive("IPCCommTimeout",
-					[ $maxex+1 ], $vconf, $conf);
+				&set_fcgid_max_execution_time(
+					$d, $maxex, $mode, $p);
 				}
 			}
 		}
@@ -299,6 +299,24 @@ if ($mode ne "mod_php") {
 	}
 
 &register_post_action(\&restart_apache);
+}
+
+# set_fcgid_max_execution_time(&domain, value, [mode], [port])
+# Set the IPCCommTimeout directive to follow the given PHP max execution time
+sub set_fcgid_max_execution_time
+{
+local ($d, $max, $mode, $port) = @_;
+$mode ||= &get_domain_php_mode($d);
+return 0 if ($mode ne "fcgid");
+local @ports = ( $d->{'web_port'},
+		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+@ports = ( $port ) if ($port);	# Overridden to just do SSL or non-SSL
+local $conf = &apache::get_config();
+foreach my $p (@ports) {
+        local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
+        next if (!$vconf);
+	&apache::save_directive("IPCCommTimeout", [ $max+1 ], $vconf, $conf);
+	}
 }
 
 # create_php_wrappers(&domain, phpmode)

@@ -901,4 +901,4 @@ By default, new virtual servers will no longer have the PHP_FCGI_CHILDREN enviro
 Multiple warning thresholds and an interval between sending a notification for each domain can now be configured on the Disk Quota Monitoring page.
 For virtual servers using fcgid to run PHP scripts, the IPCCommTimeout is set to the PHP maximum execution time, to avoid long-running scripts not being able to send their output.
 ---- Changes since 3.56 ----
-Updated the eTicket script installer to version 1.5.7.
+Updated the eTicket script installer to version 1.5.7, and SugarCRM to 5.0.0d.
