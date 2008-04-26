@@ -885,7 +885,7 @@ Link from the Edit Database page to scripts that use the DB.
 When a script does not get fully installed (perhaps due to Virtualmin not being able to call its setup wizard), it is marked as a partial failure rather than a complete failure. This allows it be easily removed without leaving files behind.
 Wordpress, WPMU and bbPress are now downloaded from the Virtualmin website in preference to their developer's sites, as there is no way to fetch specific older versions from the original site.
 The alias to bounce all mail to unknown addresses in a domain is no longer created when using Postfix, as it does not appear to be necessary.
-Updated the phpPgAdmin script installer to version 4.2, phpCOIN to 1.4.1, TikiWiki to 1.9.11, bbPress to 0.9.0.1, Coppermine to 1.4.18, Joomla to 1.5.2, OpenX to 2.4.5, and SugarCRM to 5.0.0c.
+Updated the phpPgAdmin script installer to version 4.2, phpCOIN to 1.4.1, TikiWiki to 1.9.11, bbPress to 0.9.0.1, Coppermine to 1.4.18, Joomla to 1.5.2, OpenX to 2.4.5, WordPress to 2.5.1, and SugarCRM to 5.0.0c.
 Added a Module Config option to prevent creation of the deniedssh group.
 Reduced the memory needed to migrated Plesk backups, by not reading the whole source file into RAM for parsing.
 When creating a sub-server whose prefix is in use by another domain, a non-clashing prefix for users is automatically selected.
