@@ -903,3 +903,4 @@ For virtual servers using fcgid to run PHP scripts, the IPCCommTimeout is set to
 ---- Changes since 3.56 ----
 Updated the eTicket script installer to version 1.5.7, WordPress to 2.5.1, bbPress to 0.9.0.2, and SugarCRM to 5.0.0d.
 Added an alias for /media/ in the Django installer, so that CSS and images used by the admin servlet appear.
+Added a script installer for phpLedMailer 1.8, a simple single-mailing-list manager.
