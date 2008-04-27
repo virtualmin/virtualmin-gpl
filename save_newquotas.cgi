@@ -15,6 +15,7 @@ if ($in{'sched'}) {
 	$in{'email'} =~ /^\S+\@\S+$/ || &error($text{'newquotas_eemail'});
 	if (!$in{'warn_def'}) {
 		$in{'warn'} || &error($text{'newquotas_ewarn2'});
+		$in{'warn'} =~ s/,/ /g;		# Allow commas
 		foreach $w (split(/\s+/, $in{'warn'})) {
 			$w =~ /^\d+$/ && $w > 0 && $w < 100 ||
 				&error($text{'newquotas_ewarn3'});
