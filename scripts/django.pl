@@ -73,7 +73,7 @@ else {
 	# Show editable install options
 	local @dbs = &domain_databases($d, [ "mysql", "postgres" ]);
 	$rv .= &ui_table_row("Django database",
-		     &ui_database_select("db", undef, \@dbs, $d, "phpbb"));
+		     &ui_database_select("db", undef, \@dbs, $d, "django"));
 	$rv .= &ui_table_row("Initial project name",
 		     &ui_textbox("project", "myproject", 30));
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
@@ -342,7 +342,8 @@ foreach my $port (@ports) {
 			{ 'name' => 'RewriteEngine',
 			  'value' => 'On' },
 			{ 'name' => 'RewriteCond',
-			  'value' => '%{REQUEST_FILENAME} !django.fcgi' },
+			  'value' =>
+				'%{REQUEST_FILENAME} !django.fcgi|/media/' },
 			{ 'name' => 'RewriteRule',
 			  'value' => "$reldir(.*) django.fcgi/\$1 [L]" },
 			]
@@ -350,6 +351,22 @@ foreach my $port (@ports) {
 	&apache::save_directive_struct(undef, $loc, $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	}
+
+# All /media alias to Apache config
+local $mpath = $opts->{'path'} eq '/' ? "/media/"
+				      : "$opts->{'path'}/media/";
+local $mdir = "$opts->{'dir'}/lib/python/django/contrib/admin/media/";
+foreach my $port (@ports) {
+	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+	next if (!$virt);
+	local @al = &apache::find_directive("Alias", $vconf);
+	local ($media) = grep { $_ =~ /^\Q$mpath\E\s/ } @al;
+	next if ($media);
+	push(@al, "$mpath $mdir");
+	&apache::save_directive("Alias", \@al, $vconf, $conf);
+	&flush_file_lines($virt->{'file'});
+	}
+
 &register_post_action(\&restart_apache);
 
 local $url = &script_path_url($d, $opts);
@@ -405,6 +422,21 @@ foreach my $port (@ports) {
 	&apache::save_directive_struct($loc, undef, $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	}
+
+# Media /media lias
+local $mpath = $opts->{'path'} eq '/' ? "/media/"
+				      : "$opts->{'path'}/media/";
+foreach my $port (@ports) {
+	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+	next if (!$virt);
+	local @al = &apache::find_directive("Alias", $vconf);
+	local ($media) = grep { $_ =~ /^\Q$mpath\E\s/ } @al;
+	next if (!$media);
+	@al = grep { $_ ne $media } @al;
+	&apache::save_directive("Alias", \@al, $vconf, $conf);
+	&flush_file_lines($virt->{'file'});
+	}
+
 &register_post_action(\&restart_apache);
 
 # Take out the DB

@@ -1,5 +1,5 @@
 desc=New script installers
-html=Updated the eTicket script installer to version 1.5.7, and SugarCRM to 5.0.0d.
+html=Updated the eTicket script installer to version 1.5.7, WordPress to 2.5.1, bbPress to 0.9.0.2, and SugarCRM to 5.0.0d. Also, added an alias for /media/ in the Django installer, so that CSS and images used by the admin servlet appear.
 master=1
 reseller=1
 domain=1
