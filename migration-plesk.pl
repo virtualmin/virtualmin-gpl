@@ -926,6 +926,16 @@ else {
 		       $cd =~ /name\s*=\s*(\S+)/i) {
 			$filename = $1;
 			}
+		if ($sheaders{'content-type'} =~ /boundary\s*=\s*"([^"]+)"/i ||
+		    $sheaders{'content-type'} =~ /boundary\s*=\s*(\S+)/i) {
+			# Start of a new multi-part section, such as when
+			# the backup is signed
+			$bound = $1;
+			while(<FILE>) {
+				last if (/\S/);
+				}
+			next;
+			}
 		$filename || return (0, "Missing filename for section");
 		local $enc = $sheaders{'content-transfer-encoding'} || 'binary';
 
