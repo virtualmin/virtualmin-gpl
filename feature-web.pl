@@ -1808,7 +1808,7 @@ print &ui_table_row(&hlink($text{'newweb_statsedit'}, "template_statsedit"),
 print &ui_table_row(&hlink($text{'tmpl_alias'}, "template_alias_mode"),
 	&ui_radio("alias_mode", int($tmpl->{'web_alias'}),
 		  [ [ 0, $text{'tmpl_alias0'}."<br>" ],
-		    [ 0, $text{'tmpl_alias4'}."<br>" ],
+		    [ 4, $text{'tmpl_alias4'}."<br>" ],
 		    [ 2, $text{'tmpl_alias2'}."<br>" ],
 		    [ 1, $text{'tmpl_alias1'} ] ]));
 
