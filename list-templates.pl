@@ -33,9 +33,9 @@ if ($nameonly) {
 	}
 else {
 	# More details
-	$fmt = "%-10.10s %-60.60s\n";
+	$fmt = "%-18.18s %-60.60s\n";
 	printf $fmt, "ID", "Description";
-	printf $fmt, ("-" x 10), ("-" x 60);
+	printf $fmt, ("-" x 18), ("-" x 60);
 	foreach $tmpl (@tmpls) {
 		printf $fmt, $tmpl->{'id'}, $tmpl->{'name'};
 		}
