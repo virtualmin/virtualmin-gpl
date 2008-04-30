@@ -296,17 +296,8 @@ if (!$upgrade) {
 		}
 	}
 
-# Create fcgi wrapper script
-local $fcgi = "$opts->{'dir'}/django.fcgi";
-local $wrapper = "$opts->{'dir'}/django.fcgi.py";
-&open_tempfile(FCGI, ">$fcgi");
-&print_tempfile(FCGI, "#!/bin/sh\n");
-&print_tempfile(FCGI, "export PYTHONPATH=$opts->{'dir'}/lib/python\n");
-&print_tempfile(FCGI, "exec $python $wrapper\n");
-&close_tempfile(FCGI);
-&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755, $fcgi);
-
-# Create python fcgi wrapper
+# Create python fcgi wrapper script
+local $wrapper = "$opts->{'dir'}/django.fcgi";
 if (!-r $wrapper) {
 	&open_tempfile(WRAPPER, ">$wrapper");
 	&print_tempfile(WRAPPER, "#!$python\n");
