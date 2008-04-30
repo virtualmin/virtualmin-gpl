@@ -49,8 +49,6 @@ else {
 # Show attributes on multiple lines
 @fields = &list_custom_fields();
 foreach $d (@doms) {
-	local @users = &list_domain_users($d, 0, 1, 0, 1);
-	local ($duser) = grep { $_->{'user'} eq $d->{'user'} } @users;
 	print "$d->{'dom'}\n";
 	foreach $f (@fields) {
 		$v = $d->{'field_'.$f->{'name'}};
