@@ -44,6 +44,14 @@ $noiplinkurl = "/$module_name/link.cgi/";
 $| = 1;
 $meth = $ENV{'REQUEST_METHOD'};
 
+# Alternate host for redirects
+if ($host =~ /^www\.(.*)$/) {
+	$althost = $1;
+	}
+else {
+	$althost = "www.$host";
+	}
+
 if ($config{'loginmode'} == 2) {
 	# Login is variable .. check if we have it yet
 	if ($ENV{'HTTP_COOKIE'} =~ /tunnel=([^\s;]+)/) {
@@ -104,6 +112,8 @@ $cl = $ENV{'CONTENT_LENGTH'};
 &write_http_connection($con, "Content-length: $cl\r\n") if ($cl);
 &write_http_connection($con, "Content-type: $ENV{'CONTENT_TYPE'}\r\n")
 	if ($ENV{'CONTENT_TYPE'});
+&write_http_connection($con, "Cookie: $ENV{'HTTP_COOKIE'}\r\n")
+	if ($ENV{'HTTP_COOKIE'});
 &write_http_connection($con, "\r\n");
 if ($cl) {
 	if (defined(&read_fully)) {
@@ -128,6 +138,9 @@ while(1) {
 $defport = $ssl ? 443 : 80;
 if ($header{'location'} =~ /^(http|https):\/\/$host:$port$page(.*)$/ ||
     $header{'location'} =~ /^(http|https):\/\/$host$page(.*)/ &&
+    $port == $defport ||
+    $header{'location'} =~ /^(http|https):\/\/$althost:$port$page(.*)$/ ||
+    $header{'location'} =~ /^(http|https):\/\/$althost$page(.*)/ &&
     $port == $defport) {
 	# fix a redirect to the same site
         ($lproto, $lpage) = ($1, $2);
@@ -136,21 +149,23 @@ if ($header{'location'} =~ /^(http|https):\/\/$host:$port$page(.*)$/ ||
                 $url =~ s/\/(http|https)/\/$lproto/;
                 }
 	$url =~ s/\/$//;
-        &redirect("$url/$lpage");
+        &redirect($linkurl.$header{'location'});
 	exit;
 	}
-else {
-	# just output the headers
-	print $headers,"\n";
-	}
+
+# Fix up cookies using the old path
+$headers =~ s/(Set-Cookie:.*path=)(\/\S+)/$1$linkurl$baseurl$2/gi;
+
+# Output the headers
+print $headers,"\n";
 
 # read back the rest of the page
 if ($header{'content-type'} =~ /text\/html/ && !$header{'x-no-links'}) {
 	while($_ = &read_http_connection($con)) {
 		# Fix absolute image links like <img src=/foo.gif>
-		s/src='(\/[^']*)'/src='$baseurl$1'/gi;
-		s/src="(\/[^"]*)"/src="$baseurl$1"/gi;
-		s/src=(\/[^ "'>]*)/src=$baseurl$1/gi;
+		s/src='(\/[^']*)'/src='$linkurl$baseurl$1'/gi;
+		s/src="(\/[^"]*)"/src="$linkurl$baseurl$1"/gi;
+		s/src=(\/[^ "'>]*)/src=$linkurl$baseurl$1/gi;
 
 		# Fix offsite image links <img src=http://www.blah.com/foo.gif>
 		s/src='((http|https):\/\/[^']*)'/src='$noiplinkurl$1'/gi;
@@ -158,9 +173,9 @@ if ($header{'content-type'} =~ /text\/html/ && !$header{'x-no-links'}) {
 		s/src=((http|https):\/\/[^ "'>]*)/src=$noiplinkurl$1/gi;
 
 		# Fix absolute hrefs like <a href=/foo.html>
-		s/href='(\/[^']*)'/href='$baseurl$1'/gi;
-		s/href="(\/[^"]*)"/href="$baseurl$1"/gi;
-		s/href=(\/[^ "'>]*)/href=$baseurl$1/gi;
+		s/href='(\/[^']*)'/href='$linkurl$baseurl$1'/gi;
+		s/href="(\/[^"]*)"/href="$linkurl$baseurl$1"/gi;
+		s/href=(\/[^ "'>]*)/href=$linkurl$baseurl$1/gi;
 
 		# Fix offsite hrefs like <a href=http://www.blah.com/>
 		s/href='((http|https):\/\/[^']*)'/href='$noiplinkurl$1'/gi;
@@ -168,9 +183,9 @@ if ($header{'content-type'} =~ /text\/html/ && !$header{'x-no-links'}) {
 		s/href=((http|https):\/\/[^ "'>]*)/href=$noiplinkurl$1/gi;
 
 		# Fix absolute form actions like <form action=/foo>
-		s/action='(\/[^']*)'/action='$baseurl$1'/gi;
-		s/action="(\/[^"]*)"/action="$baseurl$1"/gi;
-		s/action=(\/[^ "'>]*)/action=$baseurl$1/gi;
+		s/action='(\/[^']*)'/action='$linkurl$baseurl$1'/gi;
+		s/action="(\/[^"]*)"/action="$linkurl$baseurl$1"/gi;
+		s/action=(\/[^ "'>]*)/action=$linkurl$baseurl$1/gi;
 
 		# Fix offsite form actions
 		s/action='((http|https):\/\/[^']*)'/action='$noiplinkurl$1'/gi;
@@ -178,8 +193,8 @@ if ($header{'content-type'} =~ /text\/html/ && !$header{'x-no-links'}) {
 		s/action=((http|https):\/\/[^ "'>]*)/action=$noiplinkurl$1/gi;
 
 		# Fix CSS imports
-		s/\@import '(\/[^']*)'/\@import '$baseurl$1'/gi;
-		s/\@import "(\/[^']*)"/\@import "$baseurl$1"/gi;
+		s/\@import '(\/[^']*)'/\@import '$linkurl$baseurl$1'/gi;
+		s/\@import "(\/[^']*)"/\@import "$linkurl$baseurl$1"/gi;
 
 		print;
 		}
