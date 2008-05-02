@@ -40,13 +40,14 @@ if ($config{'spam'}) {
 if ($config{'virus'}) {
 	# Virus scanner
 	$scanner = &get_global_virus_scanner();
+	$mode = $scanner eq 'clamscan' ? 0 :
+	        $scanner eq 'clamdscan' ? 1 : 2;
 	print &ui_table_row(&hlink($text{'spam_scanner'}, 'spam_scanner'),
-		&ui_radio('scanner', $scanner eq 'clamscan' ? 0 :
-				     $scanner eq 'clamdscan' ? 1 : 2,
+		&ui_radio('scanner', $mode,
 		  [ [ 0, $text{'spam_scanner0'}."<br>" ],
 		    [ 1, $text{'spam_scanner1'}."<br>" ],
 		    [ 2, &text('spam_scanner2',
-				&ui_textbox("scanprog", $scanner, 40)) ] ]));
+		&ui_textbox("scanprog", $mode == 2 ? $scanner : "", 40)) ] ]));
 	}
 
 print &ui_table_end();
