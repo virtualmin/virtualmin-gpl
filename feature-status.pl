@@ -259,6 +259,9 @@ local ($tmpl) = @_;
 
 local @status_fields = ( "status", "statusonly", "statustimeout",
 			 "statustimeout_def" );
+if (defined(&status::list_templates)) {
+	push(@status_fields, "statustmpl");
+	}
 print &ui_table_row(
 	&hlink($text{'tmpl_status'}, "template_status"),
 	&none_def_input("status", $tmpl->{'status'},

@@ -73,3 +73,5 @@
  - Installer for http://piwik.org/
 	- Tie in with analytics module, auto-setup?
 
+ - Incremental backups
+	- FS#3909
