@@ -88,6 +88,7 @@ foreach $d (&list_domains()) {
 				foreach $m (@mail) {
 					$time = &mailboxes::parse_mail_date(
 						$m->{'header'}->{'date'});
+					$time ||= $m->{'time'};
 					if ($time && $time < $cutoff) {
 						#print STDERR "deleting $m->{'header'}->{'subject'} dated $time\n";
 						push(@delmail, $m);
