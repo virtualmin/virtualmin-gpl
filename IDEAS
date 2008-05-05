@@ -72,6 +72,8 @@
 
  - Installer for http://piwik.org/
 	- Tie in with analytics module, auto-setup?
+	- Set default URL when installing script
+	- Help pages
 
  - Incremental backups
 	- FS#3909
