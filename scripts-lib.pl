@@ -1409,7 +1409,8 @@ if ($headers) {
 # Read back the results
 $post_http_headers = undef;
 $post_http_headers_array = undef;
-&complete_http_download($h, $out, $err, \&capture_http_headers, 0, $host,$port);
+&complete_http_download($h, $out, $err, \&capture_http_headers, 0, $host,
+			$port, $headers);
 if ($returnheaders && $post_http_headers) {
 	%$returnheaders = %$post_http_headers;
 	}

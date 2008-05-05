@@ -71,9 +71,7 @@
 	- What about non-Linux?
 
  - Installer for http://piwik.org/
-	- Tie in with analytics module, auto-setup?
-	- Set default URL when installing script
-	- Help pages
+	- Test some more
 
  - Incremental backups
 	- FS#3909
