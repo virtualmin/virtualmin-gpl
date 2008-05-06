@@ -381,9 +381,17 @@ sub postgres_size
 {
 &require_postgres();
 local $size;
-local $d = &postgresql::execute_sql($_[1], "select sum(relpages) from pg_class where relname not like 'pg_%'");
-$size = $d->{'data'}->[0]->[0]*1024*2;
-local @tables = $_[2] ? ( ) : &postgresql::list_tables($_[1], 1);
+local @tables;
+eval {
+	# Make sure DBI errors don't cause a total failure
+	local $main::error_must_die = 1;
+	local $postgresql::force_nodbi = 1;
+	local $d = &postgresql::execute_sql($_[1], "select sum(relpages) from pg_class where relname not like 'pg_%'");
+	$size = $d->{'data'}->[0]->[0]*1024*2;
+	if (!$_[2]) {
+		@tables = &postgresql::list_tables($_[1], 1);
+		}
+	};
 return ($size, scalar(@tables));
 }
 
@@ -506,8 +514,15 @@ return $postgres::config{'host'} || 'localhost';
 sub sysinfo_postgres
 {
 &require_postgres();
-local $ver = &postgresql::get_postgresql_version();
-return ( [ $text{'sysinfo_postgresql'}, $ver ] );
+local @rv;
+eval {
+	# Protect against DBI errors
+	local $main::error_must_die = 1;
+	local $postgresql::force_nodbi = 1;
+	local $ver = &postgresql::get_postgresql_version();
+	@rv = ( [ $text{'sysinfo_postgresql'}, $ver ] );
+	};
+return @rv;
 }
 
 sub startstop_postgres

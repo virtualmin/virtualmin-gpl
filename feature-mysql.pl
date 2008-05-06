@@ -575,7 +575,14 @@ if ($dd) {
 		$qsize = $size;
 		}
 	}
-local @tables = $_[2] ? () : &mysql::list_tables($_[1], 1);
+local @tables;
+if (!$_[2]) {
+	eval {
+		# Make sure DBI errors don't cause a total failure
+		local $main::error_must_die = 1;
+		@tables = &mysql::list_tables($_[1], 1);
+		};
+	}
 return ($size, scalar(@tables), $qsize);
 }
 
