@@ -70,8 +70,5 @@
 	- Part of template system
 	- What about non-Linux?
 
- - Installer for http://piwik.org/
-	- Test some more
-
  - Incremental backups
 	- FS#3909
