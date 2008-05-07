@@ -66,7 +66,7 @@ if ($d) {
 
 	# Run the after command
 	&run_post_actions();
-	&set_domain_envs($d, "MODIFY_DOMAIN");
+	&set_domain_envs($d, "MODIFY_DOMAIN", undef, \%oldd);
 	&made_changes();
 	&reset_domain_envs($d);
 	&webmin_log("pass", "domain", $d->{'dom'}, $d);

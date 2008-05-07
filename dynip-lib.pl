@@ -145,7 +145,7 @@ foreach my $d (&list_domains()) {
 		&$second_print($text{'setup_done'});
 
 		# Run the after command
-		&set_domain_envs($d, "MODIFY_DOMAIN");
+		&set_domain_envs($d, "MODIFY_DOMAIN", undef, \%oldd);
 		&made_changes();
 		&reset_domain_envs($d);
 		$dc++;

@@ -3139,13 +3139,13 @@ if (-d $sendmail::config{'smrsh_dir'} &&
 	}
 }
 
-# set_domain_envs(&domain, action, [&new-domain])
+# set_domain_envs(&domain, action, [&new-domain], [&old-domain])
 # Sets up VIRTUALSERVER_ environment variables for a domain update or some kind,
 # prior to calling making_changes or made_changes. action must be one of
 # CREATE_DOMAIN, MODIFY_DOMAIN or DELETE_DOMAIN
 sub set_domain_envs
 {
-local ($d, $action, $newd) = @_;
+local ($d, $action, $newd, $oldd) = @_;
 &reset_domain_envs();
 $ENV{'VIRTUALSERVER_ACTION'} = $action;
 foreach my $e (keys %$d) {
@@ -3160,6 +3160,14 @@ if ($newd) {
 		}
 	$ENV{'VIRTUALSERVER_NEWSERVER_IDNDOM'} =
 		&show_domain_name($newd->{'dom'});
+	}
+if ($oldd) {
+	# Set details of virtual server being changed from, in post-modify
+	foreach my $e (keys %$oldd) {
+		$ENV{'VIRTUALSERVER_OLDSERVER_'.uc($e)} = $oldd->{$e};
+		}
+	$ENV{'VIRTUALSERVER_OLDSERVER_IDNDOM'} =
+		&show_domain_name($oldd->{'dom'});
 	}
 if ($d->{'reseller'} && defined(&get_reseller)) {
 	local $resel = &get_reseller($d->{'reseller'});
@@ -10478,7 +10486,7 @@ for(my $i=0; $i<@doms; $i++) {
 &$second_print($text{'setup_done'});
 
 # Run the after command
-&set_domain_envs($d, "MODIFY_DOMAIN");
+&set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
 &made_changes();
 &reset_domain_envs($d);
 
@@ -10633,7 +10641,7 @@ for(my $i=0; $i<@doms; $i++) {
 &$second_print($text{'setup_done'});
 
 # Run the after command
-&set_domain_envs($d, "MODIFY_DOMAIN");
+&set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
 &made_changes();
 &reset_domain_envs($d);
 

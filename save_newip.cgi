@@ -32,6 +32,7 @@ if ($d->{'web'}) {
 
 # Build new domain object
 $newdom = { %$d };
+$oldd = { %$d };
 if ($newdom->{'virt'}) {
 	$newdom->{'ip'} = $in{'ip'};
 	delete($newdom->{'defip'});
@@ -100,7 +101,7 @@ foreach $sd (@doms) {
 
 # Run the after command
 &run_post_actions();
-&set_domain_envs($d, "MODIFY_DOMAIN");
+&set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
 &made_changes();
 &reset_domain_envs($d);
 &webmin_log("newip", "domain", $d->{'dom'}, $d);

@@ -256,7 +256,7 @@ for($i=0; $i<@doms; $i++) {
 print $text{'setup_done'},"<p>\n";
 
 # Run the after command
-&set_domain_envs($d, "MODIFY_DOMAIN");
+&set_domain_envs($d, "MODIFY_DOMAIN", undef, \%oldd);
 &made_changes();
 &reset_domain_envs($d);
 &webmin_log("rename", "domain", $oldd{'dom'}, $d);

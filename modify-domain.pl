@@ -322,7 +322,7 @@ if (@add_excludes || @remove_excludes) {
 
 # Run the after command
 &run_post_actions();
-&set_domain_envs($d, "MODIFY_DOMAIN");
+&set_domain_envs($d, "MODIFY_DOMAIN", undef, $old);
 &made_changes();
 &reset_domain_envs($d);
 print "All done\n";

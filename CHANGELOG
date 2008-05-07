@@ -906,3 +906,4 @@ Added an alias for /media/ in the Django installer, so that CSS and images used 
 Added a script installer for phpLedMailer 1.8, a simple single-mailing-list manager.
 Updated the Drupal script installer to support version 6.2.
 Added a script installer for Piwik, an open-source web analytics tool.
+Post-change scripts have access to the settings of a virtual server before it was changed in the VIRTUALSERVER_OLDSERVER_* environment variables.
