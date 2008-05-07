@@ -7011,6 +7011,10 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 		&refresh_webmin_user($parentdom);
 		}
 
+	# Call post script
+	&set_domain_envs($dd, "DELETE_DOMAIN");
+	&made_changes();
+
 	if ($dd ne $d) {
 		&$outdent_print();
 		&$second_print($text{'setup_done'});
@@ -7023,7 +7027,6 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 if (!$nopost) {
 	&run_post_actions();
 	}
-&made_changes();
 
 return undef;
 }

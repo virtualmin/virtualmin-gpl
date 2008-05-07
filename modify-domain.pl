@@ -118,6 +118,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--remove-exclude") {
 		push(@remove_excludes, shift(@ARGV));
 		}
+	elsif ($a eq "--pre-command") {
+		$precommand = shift(@ARGV);
+		}
+	elsif ($a eq "--post-command") {
+		$postcommand = shift(@ARGV);
+		}
 	else {
 		usage();
 		}
@@ -269,6 +275,8 @@ if (defined($resel)) {
 	}
 
 # Run the before script
+$config{'pre_command'} = $precommand if ($precommand);
+$config{'post_command'} = $postcommand if ($postcommand);
 &set_domain_envs($old, "MODIFY_DOMAIN", $dom);
 $merr = &making_changes();
 &reset_domain_envs($old);

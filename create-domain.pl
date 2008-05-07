@@ -164,6 +164,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-secondaries") {
 		$nosecondaries = 1;
 		}
+	elsif ($a eq "--pre-command") {
+		$precommand = shift(@ARGV);
+		}
+	elsif ($a eq "--post-command") {
+		$postcommand = shift(@ARGV);
+		}
 	else {
 		&usage("Unknown option $a");
 		}
@@ -480,8 +486,10 @@ $derr = &virtual_server_depends(\%dom);
 $cerr = &virtual_server_clashes(\%dom);
 &usage($cerr) if ($cerr);
 
+# Do it
 print "Beginning server creation ..\n\n";
-
+$config{'pre_command'} = $precommand if ($precommand);
+$config{'post_command'} = $postcommand if ($postcommand);
 $err = &create_virtual_server(\%dom, $parent,
 			      $parent ? $parent->{'user'} : undef);
 if ($err) {

@@ -26,6 +26,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--only") {
 		$only = 1;
 		}
+	elsif ($a eq "--pre-command") {
+		$precommand = shift(@ARGV);
+		}
+	elsif ($a eq "--post-command") {
+		$postcommand = shift(@ARGV);
+		}
 	else {
 		&usage("Unknown option $a");
 		}
@@ -38,6 +44,8 @@ $dom || &usage("Virtual server $domain does not exist");
 
 # Kill it!
 print "Deleting virtual server $domain ..\n\n";
+$config{'pre_command'} = $precommand if ($precommand);
+$config{'post_command'} = $postcommand if ($postcommand);
 $err = &delete_virtual_server($dom, $only);
 if ($err) {
 	print "$err\n";

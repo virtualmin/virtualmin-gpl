@@ -1034,6 +1034,58 @@ $mail_tests = [
         },
 	];
 
+$prepost_tests = [
+	# Create a domain just to see if scripts run
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ],
+		      [ 'pre-command' => 'echo BEFORE $VIRTUALSERVER_DOM >/tmp/prepost-test.out' ],
+		      [ 'post-command' => 'echo AFTER $VIRTUALSERVER_DOM >>/tmp/prepost-test.out' ],
+		      @create_args, ],
+	},
+
+	# Make sure pre and post creation scripts run
+	{ 'command' => 'cat /tmp/prepost-test.out',
+	  'grep' => [ 'BEFORE '.$test_domain,
+		      'AFTER '.$test_domain ],
+	},
+	{ 'command' => 'rm -f /tmp/prepost-test.out' },
+
+	# Change the password
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'pass', 'quux' ],
+		      [ 'pre-command' => 'echo BEFORE $VIRTUALSERVER_PASS $VIRTUALSERVER_NEWSERVER_PASS >/tmp/prepost-test.out' ],
+		      [ 'post-command' => 'echo AFTER $VIRTUALSERVER_PASS $VIRTUALSERVER_OLDSERVER_PASS >>/tmp/prepost-test.out' ],
+		    ],
+	},
+
+	# Make sure the pre and post change scripts run
+	{ 'command' => 'cat /tmp/prepost-test.out',
+	  'grep' => [ 'BEFORE smeg quux',
+		      'AFTER quux smeg' ],
+	},
+	{ 'command' => 'rm -f /tmp/prepost-test.out' },
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'pre-command' => 'echo BEFORE $VIRTUALSERVER_DOM >/tmp/prepost-test.out' ],
+		      [ 'post-command' => 'echo AFTER $VIRTUALSERVER_DOM >>/tmp/prepost-test.out' ],
+		    ],
+	  'cleanup' => 1,
+        },
+
+	# Check the pre and post deletion scripts
+	{ 'command' => 'cat /tmp/prepost-test.out',
+	  'grep' => [ 'BEFORE '.$test_domain,
+		      'AFTER '.$test_domain ],
+	},
+	{ 'command' => 'rm -f /tmp/prepost-test.out' },
+	];
+
 $alltests = { 'domains' => $domains_tests,
 	      'mailbox' => $mailbox_tests,
 	      'alias' => $alias_tests,
@@ -1045,6 +1097,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'move' => $move_tests,
 	      'backup' => $backup_tests,
               'mail' => $mail_tests,
+	      'prepost' => $prepost_tests,
 	    };
 
 # Run selected tests
