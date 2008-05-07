@@ -1511,9 +1511,21 @@ local $ver = $apache::httpd_modules{'core'};
 $ver =~ s/^(\d+)\.(\d)(\d+)$/$1.$2.$3/;
 local @rv = ( [ $text{'sysinfo_apache'}, $ver ] );
 if (defined(&list_available_php_versions)) {
-	local @avail = map { $_->[0] } &list_available_php_versions();
-	if (@avail) {
-		push(@rv, [ $text{'sysinfo_php'}, join(", ", @avail) ]);
+	local @avail = &list_available_php_versions();
+	local @vers;
+	foreach my $a (@avail) {
+		&clean_environment();
+		local $out = &backquote_command("$a->[1] -v 2>&1 </dev/null");
+		&reset_environment();
+		if ($out =~ /PHP\s+([0-9\.]+)/) {
+			push(@vers, $1);
+			}
+		else {
+			push(@vers, $a->[0]);
+			}
+		}
+	if (@vers) {
+		push(@rv, [ $text{'sysinfo_php'}, join(", ", @vers) ]);
 		}
 	}
 return @rv;
