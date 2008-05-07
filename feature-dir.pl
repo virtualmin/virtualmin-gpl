@@ -143,6 +143,13 @@ if (-d $_[0]->{'home'} && $_[0]->{'home'} ne "/") {
 		$err = undef;
 		}
 	if ($err) {
+		# Ignore an error deleting a mount point
+		local ($mtab, $fstab) = &mount_point($_[0]->{'home'});
+		if ($mtab && $mtab->[0] eq $_[0]->{'home'}) {
+			$err = undef;
+			}
+		}
+	if ($err) {
 		&$second_print(&text('delete_ehome', &html_escape($err)));
 		}
 	else {
