@@ -840,6 +840,7 @@ elsif ($_[0]->{'vpopmail'}) {
 else {
 	# Add the Unix user
 	if ($config{'ldap_mail'}) {
+		$_[0]->{'ldap_attrs'} = [ ];
 		if ($_[0]->{'email'}) {
 			push(@{$_[0]->{'ldap_attrs'}}, "mail",$_[0]->{'email'});
 			}
@@ -1097,6 +1098,7 @@ else {
 
 	# Update the unix user
 	if ($config{'ldap_mail'}) {
+		$_[0]->{'ldap_attrs'} = [ ];
 		if ($_[0]->{'email'}) {
 			push(@{$_[0]->{'ldap_attrs'}}, "mail",$_[0]->{'email'});
 			}
