@@ -2720,6 +2720,7 @@ $rv =~ s/<tt>|<\/tt>//g;
 $rv =~ s/<b>|<\/b>//g;
 $rv =~ s/<i>|<\/i>//g;
 $rv =~ s/<u>|<\/u>//g;
+$rv =~ s/<a[^>]*>|<\/a>//g;
 $rv =~ s/<pre>|<\/pre>//g;
 $rv =~ s/<br>/\n/g;
 $rv =~ s/<p>/\n\n/g;
@@ -10980,16 +10981,30 @@ if ($config{'ssl'}) {
 
 if ($config{'mysql'}) {
 	# Make sure MySQL is installed
+	&require_mysql();
 	&foreign_installed("mysql", 1) == 2 ||
 		return &text('index_emysql', "/mysql/", $clink);
-	&$second_print($text{'check_mysqlok'});
+	if ($mysql::mysql_pass eq '') {
+		&$second_print(&text('check_mysqlnopass', '/mysql/'));
+		}
+	else {
+		&$second_print($text{'check_mysqlok'});
+		}
 	}
 
 if ($config{'postgres'}) {
 	# Make sure PostgreSQL is installed
+	&require_postgres();
 	&foreign_installed("postgresql", 1) == 2 ||
 		return &text('index_epostgres', "/postgresql/", $clink);
-	&$second_print($text{'check_postgresok'});
+	if (!$postgresql::postgres_sameunix &&
+	    $postgresql::postgres_pass eq '') {
+		&$second_print(&text('check_postgresnopass', '/postgresql/',
+				      $postgresql::postgres_login || 'root'));
+		}
+	else {
+		&$second_print($text{'check_postgresok'});
+		}
 	}
 
 if ($config{'ftp'}) {

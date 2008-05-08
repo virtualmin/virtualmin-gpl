@@ -1494,7 +1494,9 @@ check_ftpok=ProFTPd is installed.
 check_dnsok=BIND DNS server is installed, and the system is configured to use it.
 check_dnsok2=BIND DNS server is installed.
 check_mysqlok=MySQL is installed and running.
+check_mysqlnopass=MySQL is installed and running, but does not have any <tt>root</tt> password set! <b>This should be changed immediately in the <a href='$1'>MySQL Database</a> module</b>.
 check_postgresok=PostgreSQL is installed and running.
+check_postgresnopass=PostgreSQL is installed and running, but does not have any <tt>$2</tt> password set! <b>This should be changed immediately in the <a href='$1'>PostgreSQL Database</a> module</b>.
 check_webalizerok=Webalizer is installed.
 check_ifaceok=Using network interface $1 for virtual IPs.
 check_ifacezone=Network interface will be detected automatically at virtual server creation time.

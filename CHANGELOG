@@ -907,3 +907,4 @@ Added a script installer for phpLedMailer 1.8, a simple single-mailing-list mana
 Updated the Drupal script installer to support version 6.2.
 Added a script installer for Piwik, an open-source web analytics tool.
 Post-change scripts have access to the settings of a virtual server before it was changed in the VIRTUALSERVER_OLDSERVER_* environment variables.
+If MySQL or PostgreSQL have no root password set, display a warning during the configuration check.
