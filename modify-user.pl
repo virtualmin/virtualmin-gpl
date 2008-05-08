@@ -208,6 +208,7 @@ foreach $e (@addemails) {
 		}
 	($got) = grep { $_ eq $e } @{$user->{'extraemail'}};
 	$got && &usage("Email address $e is already associated with this user");
+	$user->{'email'} eq $e && &usage("Email address $e is already the user's primary address");
 	push(@{$user->{'extraemail'}}, $e);
 	}
 foreach $e (@delemails) {
