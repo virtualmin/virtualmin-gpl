@@ -197,6 +197,7 @@ foreach my $p (@ports) {
 	# Update all of the directories
 	local @avail = map { $_->[0] }
 			   &list_available_php_versions($d, $mode);
+	local %allvers = map { $_, 1 } @all_possible_php_versions;
 	foreach my $phpstr (@phpconfs) {
 		# Remove all Action and AddType directives for suexec PHP
 		local $phpconf = $phpstr->{'members'};
@@ -210,10 +211,12 @@ foreach my $p (@ports) {
 		# Remove all AddHandler and FCGIWrapper directives for fcgid
 		local @handlers = &apache::find_directive("AddHandler",
 							  $phpconf);
-		@handlers = grep { $_ !~ /^fcgid-script/ } @handlers;
+		@handlers = grep { !(/^fcgid-script\s+\.php(.*)$/ &&
+				     ($1 eq '' || $allvers{$1})) } @handlers;
 		local @wrappers = &apache::find_directive("FCGIWrapper",
 							  $phpconf);
-		@wrappers = grep { $_ !~ /^\Q$fdest\E\/php.\.fcgi/ } @wrappers;
+		@wrappers = grep { !(/^\Q$fdest\E\/php.\.fcgi\s+\.php(.*)$/ &&
+				     ($1 eq '' || $allvers{$1})) } @wrappers;
 
 		# Add needed Apache directives. Don't add the AddHandler,
 		# Alias and Directory if already there.
@@ -260,7 +263,8 @@ foreach my $p (@ports) {
 	# For non-mod_php mode, we need a RemoveHandler .php directive at
 	# the <virtualhost> level to supress mod_php which may still be active
 	local @remove = &apache::find_directive("RemoveHandler", $vconf);
-	@remove = grep { $_ !~ /^\.php/ } @remove;
+	@remove = grep { !(/^\.php(.*)$/ && ($1 eq '' || $allvers{$1})) }
+		       @remove;
 	if ($mode ne "mod_php") {
 		push(@remove, ".php");
 		foreach my $v (@avail) {
@@ -562,6 +566,7 @@ return 0 if ($mode eq "mod_php");
 local @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 local $any = 0;
+local %allvers = map { $_, 1 } @all_possible_php_versions;
 foreach my $p (@ports) {
 	local $conf = &apache::get_config();
 	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
@@ -592,8 +597,9 @@ foreach my $p (@ports) {
 			local $dest = "$d->{'home'}/fcgi-bin";
 			local @wrappers = &apache::find_directive(
 				"FCGIWrapper", $dirstr->{'members'});
-			@wrappers = grep { $_ !~ /^\Q$dest\E\/php.\.fcgi/ }
-					 @wrappers;
+			@wrappers = grep {
+				!(/^\Q$dest\E\/php.\.fcgi\s+\.php(.*)$/ &&
+				 ($1 eq '' || $allvers{$1})) } @wrappers;
 			foreach my $v (&list_available_php_versions($d)) {
 				push(@wrappers,
 				     "$dest/php$v->[0].fcgi .php$v->[0]");
