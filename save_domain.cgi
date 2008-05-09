@@ -91,7 +91,7 @@ if (!$d->{'disabled'}) {
 if (!$config{'all_namevirtual'} && !$d->{'alias'} && &can_use_feature("virt")) {
 	$newdom{'virt'} = $in{'virt'};
 	}
-$derr = &virtual_server_depends(\%newdom, $oldd);
+$derr = &virtual_server_depends(\%newdom, undef, $oldd);
 &error($derr) if ($derr);
 $cerr = &virtual_server_clashes(\%newdom, \%check);
 &error($cerr) if ($cerr);
