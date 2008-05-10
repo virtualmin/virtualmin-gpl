@@ -400,6 +400,11 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 		}
 	}
 
+# Re-apply resource limits
+if (&supports_resource_limits()) {
+	&set_php_wrapper_ulimits($d, &get_domain_resource_limits($d));
+	}
+
 # Make wrappers immutable, to prevent deletion by users (which can crash Apache)
 &set_php_wrappers_writable($d, 0);
 }
@@ -417,6 +422,44 @@ if (&has_command("chattr")) {
 				    ($writable ? "-i" : "+i")." ".quotemeta($f));
 				}
 			}
+		}
+	}
+}
+
+# set_php_wrapper_ulimits(&domain, &resource-limits)
+# Add, update or remove ulimit lines to set RAM and process restrictions
+sub set_php_wrapper_ulimits
+{
+local ($d, $rv) = @_;
+foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
+	foreach my $f (glob("$dir/php?.*cgi")) {
+		local $lref = &read_file_lines($f);
+		foreach my $u ([ 'v', int($rv->{'mem'}/1024) ],
+			       [ 'u', $rv->{'procs'} ],
+			       [ 't', $rv->{'time'}*60 ]) {
+			# Find current line
+			local $lnum;
+			for(my $i=0; $i<@$lref; $i++) {
+				if ($lref->[$i] =~ /^ulimit\s+\-(\S)\s+(\d+)/ &&
+				    $1 eq $u->[0]) {
+					$lnum = $i;
+					last;
+					}
+				}
+			if ($lnum && $u->[1]) {
+				# Set value
+				$lref->[$lnum] = "ulimit -$u->[0] $u->[1]";
+				}
+			elsif ($lnum && !$u->[1]) {
+				# Remove limit
+				splice(@$lref, $lnum, 1);
+				}
+			elsif (!$lnum && $u->[1]) {
+				# Add at top of file
+				splice(@$lref, 1, 0, "ulimit -$u->[0] $u->[1]");
+				}
+			}
+		&flush_file_lines($f);
 		}
 	}
 }

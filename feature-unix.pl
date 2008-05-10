@@ -154,6 +154,9 @@ else {
 	&$second_print($text{'setup_done'});
 	}
 
+# Setup resource limits from template
+# XXX
+
 &release_lock_unix($_[0]);
 return 1;
 }
@@ -767,6 +770,13 @@ if ($main::got_lock_unix == 0) {
 	undef(%main::used_home_quota);
 	undef(%main::soft_mail_quota);
 	undef(%main::hard_mail_quota);
+	if (defined(&supports_resource_limits)) {
+		# Lock resource limits file too
+		if ($gconfig{'os_type'} =~ /-linux$/) {
+			&lock_file($linux_limits_config);
+			undef(@get_linux_limits_config_cache);
+			}
+		}
 	}
 $main::got_lock_unix++;
 }
@@ -777,6 +787,11 @@ sub release_lock_unix
 if ($main::got_lock_unix == 1) {
 	&require_useradmin();
 	&foreign_call($usermodule, "unlock_user_files");
+	if (defined(&supports_resource_limits)) {
+		if ($gconfig{'os_type'} =~ /-linux$/) {
+			&unlock_file($linux_limits_config);
+			}
+		}
 	}
 $main::got_lock_unix-- if ($main::got_lock_unix);
 &release_lock_anything();

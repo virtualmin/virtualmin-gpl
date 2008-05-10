@@ -62,11 +62,10 @@
 
  - CPU / memory / process count limits
 	- FS#3850
-	- Use ulimit in CGI wrappers
-	- Update /etc/security/limits.conf
 	- Part of template system
 	- Need to fix up when renaming / re-parenting
-	- Command line API
+	- Verify that it works for PHP
+	- Apache / CGIs too
 
  - Incremental backups
 	- FS#3909

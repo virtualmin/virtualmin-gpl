@@ -84,6 +84,7 @@ if ($without) {
 if ($multi) {
 	# Show attributes on multiple lines
 	@shells = grep { $_->{'owner'} } &list_available_shells();
+	($resok) = &supports_resource_limits();
 	foreach $d (@doms) {
 		local @users = &list_domain_users($d, 0, 1, 0, 1);
 		local ($duser) = grep { $_->{'user'} eq $d->{'user'} } @users;
@@ -289,6 +290,19 @@ if ($multi) {
 				print "    Login permissions: $shell->{'desc'}\n";
 				}
 			print "    Shell command: $duser->{'shell'}\n";
+			}
+
+		# Show resource limits
+		if (!$d->{'parent'} && $resok) {
+			$rv = &get_domain_resource_limits($d);
+			print "    Maximum processes: ",
+				$rv->{'procs'} || "Unlimited","\n";
+			print "    Maximum size per process: ",
+				$rv->{'mem'} ? &nice_size($rv->{'mem'})
+					     : "Unlimited","\n";
+			print "    Maximum CPU time per process: ",
+				$rv->{'time'} ? $rv->{'time'}." mins"
+					      : "Unlimited","\n";
 			}
 
 		# Show backup excludes

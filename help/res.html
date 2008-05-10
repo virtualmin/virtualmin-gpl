@@ -1,0 +1,27 @@
+<header>Resource Limits</header>
+
+This page allows you to define limits on CPU and memory use that apply
+to this virtual server and all sub-servers. Limits apply to both PHP
+scripts, and commands run via an SSH login. They can be used to prevent
+any one domain owner from overloading the system with a fork bomb or
+commands that use an excessive amount of RAM. <p>
+
+The available limit types are :<br>
+<dl>
+<dt><b>Maximum number of processes</b>
+<dd>Attempting to launch more processes running as the server's Unix user
+    than the limit set here will fail. This applies to concurrent PHP scripts
+    too.<p>
+
+<dt><b>Maximum size per process</b>
+<dd>Any single process that tries to allocate more memory that this limit will
+    be terminated. However, the sum total of all processes owned by the server
+    can still exceed the limit.<p>
+
+<dt><b>Maximum CPU time per process</b>
+<dd>Any process whose time spent actually using the CPU (not waiting for IO
+    or sleeping) exceeds this limit will be killed.<p>
+</dl>
+
+<footer>
+

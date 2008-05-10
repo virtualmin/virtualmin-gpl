@@ -754,6 +754,7 @@ return 0;
 sub restart_apache
 {
 &$first_print($_[0] ? $text{'setup_webpid2'} : $text{'setup_webpid'});
+&require_apache();
 if ($config{'check_apache'}) {
 	# Do a config check first
 	local $err = &apache::test_config();

@@ -2135,6 +2135,14 @@ return &master_admin() ||
        &reseller_admin() && &can_edit_domain($_[0]);
 }
 
+# can_edit_res(&domain)
+# Returns 1 if memory / process limits can be edited in some domain
+sub can_edit_res
+{
+return &master_admin() ||
+       &reseller_admin() && &can_edit_domain($_[0]);
+}
+
 # can_config_domain(&domain)
 # Returns 1 if the current user can change the settings for a domain (like the
 # password, real name and so on)
@@ -9831,6 +9839,18 @@ if ($d->{'unix'} && &can_edit_limits($d) && !$d->{'alias'}) {
 		    'desc' => $text{'edit_limitsdesc'},
 		    'cat' => 'admin',
 		  });
+	}
+
+if ($d->{'unix'} && defined(&supports_resource_limits)) {
+	local ($ok) = &supports_resource_limits();
+	if ($ok) {
+		# Resource limits button
+		push(@rv, { 'page' => 'edit_res.cgi',
+			    'title' => $text{'edit_res'},
+			    'desc' => $text{'edit_resdesc'},
+			    'cat' => 'admin',
+			  });
+		}
 	}
 
 if (!$d->{'parent'} && &can_edit_admins($d)) {

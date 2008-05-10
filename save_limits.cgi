@@ -1,6 +1,5 @@
 #!/usr/local/bin/perl
-# edit_limits.cgi
-# Display access control and usage limits for this domain's user
+# Update access control and usage limits for this domain's user
 
 require './virtual-server-lib.pl';
 &ReadParse();
