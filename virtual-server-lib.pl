@@ -260,5 +260,7 @@ $install_times_file = "$module_config_directory/installtimes";
 $disabled_website = "$module_config_directory/disabled.html";
 $disabled_website_dir = "$module_config_directory/disabledweb";
 
+$linux_limits_config = "/etc/security/limits.conf";
+
 1;
 

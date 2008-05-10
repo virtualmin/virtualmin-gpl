@@ -65,7 +65,8 @@
 	- Use ulimit in CGI wrappers
 	- Update /etc/security/limits.conf
 	- Part of template system
-	- What about non-Linux?
+	- Need to fix up when renaming / re-parenting
+	- Command line API
 
  - Incremental backups
 	- FS#3909

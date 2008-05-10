@@ -14,7 +14,7 @@ if (!$virtual_server_root) {
 	}
 foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
 		 "php", "ruby", "vui", "dynip", "collect", "maillog",
-		 "balancer", "newfeatures") {
+		 "balancer", "newfeatures", "resources") {
 	do "$virtual_server_root/$lib-lib.pl";
 	if ($@ && -r "$virtual_server_root/$lib-lib.pl") {
 		print STDERR "failed to load $lib-lib.pl : $@\n";
@@ -11361,6 +11361,14 @@ foreach my $bcmd (@bcmds) {
 		}
 	}
 &$second_print(&text('check_bcmdok'));
+
+# Check if resource limits are supported
+if (defined(&supports_resource_limits)) {
+	local ($rok, $rmsg) = &supports_resource_limits(1);
+	&$second_print(!$rok ? &text('check_reserr', $rmsg) :
+		       $rmsg ? &text('check_reswarn', $rmsg) :
+			       $text{'check_resok'});
+	}
 
 # All looks OK .. save the config
 $config{'last_check'} = time()+1;

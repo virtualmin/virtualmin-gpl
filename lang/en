@@ -1566,6 +1566,9 @@ check_ecanonical_maps=A problem was found with your Postfix canonical maps, used
 check_ebcc_maps=A problem was found with your Postfix sender BCC maps : $1
 check_elogrotateconf=Current logrotate configuration is not valid : $1. This must be fixed, or log file rotation will not be done.
 check_espamsiteconfig=The <tt>spamassassin</tt> command does not support the <tt>--siteconfigpath</tt> parameter, which is needed by Virtualmin. The version installed is $1 - version 3.0 or later is recommended.
+check_reserr=Resource limits are not supported on your system : $1
+check_reswarn=Resource limits are supported, but not fully configured : $1
+check_resok=Resource limits are supported and configured correctly.
 
 checkmap_enone=No map sources were found in the <a href='$1'>Postfix configuration</a>
 checkmap_esupport=The map source <tt>$1</tt> is not supported by Postfix - you may need to install Postfix libraries for it, or re-compile
@@ -4153,3 +4156,8 @@ chroot_eneg=The virtual server's home directory option cannot be selected when <
 chroot_edom=Could not find virtual server for group $1
 chroot_edir=Missing or invalid directory in row $1
 chroot_saving=Updating FTP server configuration ..
+
+res_elinux=Resource limits are only supported on Linux
+res_elinuxconf=The resource limits configuration file $1 was not found
+res_epamssh=The PAM service for SSH could not be found, so verification of resource limits is not complete
+res_epamlimits=The SSH PAM service does not use the <tt>pam_limits</tt> module. Resource limits will not be enforced for users logging in via SSH.
