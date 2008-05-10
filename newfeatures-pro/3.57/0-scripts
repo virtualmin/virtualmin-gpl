@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the eTicket script installer to version 1.5.7, WordPress to 2.5.1, bbPress to 0.9.0.2, Kronolith to 2.1.8, phpMyAdmin to 2.11.6, Joomla 1.5.3, SMF to 1.1.5, Magento to 1.0.19700, phpCOIN to 1.4.2, DokuWiki to 2008-05-05, Bugzilla to 3.1.4, and SugarCRM to 5.0.0d.<br>Added an alias for /media/ in the Django installer, so that CSS and images used by the admin servlet appear.<br>Added a script installer for phpLedMailer 1.8, a simple single-mailing-list manager.<br>Updated the Drupal script installer to support version 6.2.<br>Added a script installer for Piwik, an open-source web analytics tool.
+html=Updated the eTicket script installer to version 1.5.7, WordPress to 2.5.1, bbPress to 0.9.0.2, Kronolith to 2.1.8, phpMyAdmin to 2.11.6, Joomla 1.5.3, SMF to 1.1.5, Magento to 1.0.19870, phpCOIN to 1.4.2, DokuWiki to 2008-05-05, Bugzilla to 3.1.4, and SugarCRM to 5.0.0d.<br>Added an alias for /media/ in the Django installer, so that CSS and images used by the admin servlet appear.<br>Added a script installer for phpLedMailer 1.8, a simple single-mailing-list manager.<br>Updated the Drupal script installer to support version 6.2.<br>Added a script installer for Piwik, an open-source web analytics tool.
 master=1
 reseller=1
 domain=1
