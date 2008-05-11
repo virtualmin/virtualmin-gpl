@@ -371,10 +371,6 @@ if (!$gotlog) {
 	my $rec0 = { 'name' => 'LOGFILE',
 		     'value' => $procmail_log_file };
 	&procmail::create_recipe_before($rec0, $recipes[0]);
-	if (!-r $procmail_log_file) {
-		open(LOG, ">$procmail_log_file");
-		close(LOG);
-		}
 	}
 if (!$gottrap) {
 	# Add TRAP, which specifies a command to output logging info about
@@ -474,6 +470,11 @@ if ($config{'logrotate'} && &foreign_installed("logrotate")) {
 		&logrotate::save_directive($parent, undef, $lconf);
 		&flush_file_lines($lconf->{'file'});
 		&unlock_file($lconf->{'file'});
+		}
+	# Make sure file exists, so logrotate doesn't complain
+	if (!-r $procmail_log_file) {
+		open(LOG, ">$procmail_log_file");
+		close(LOG);
 		}
 	}
 &release_lock_spam();
