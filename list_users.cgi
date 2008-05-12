@@ -62,7 +62,7 @@ if (@users) {
 	}
 
 if ($virtualmin_pro) {
-	print "<hr>\n";
+	print &ui_hr();
 	print &ui_buttons_start();
 
 	if ($d->{'mail'}) {

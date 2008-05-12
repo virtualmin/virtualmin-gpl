@@ -72,7 +72,7 @@ if ($config{'localgroup'} && &can_edit_local()) {
 		}
 	print "<a href='edit_user.cgi?new=1&dom=0'>",
 	      "$text{'index_uadd'}</a><p>\n";
-	print "<hr>\n";
+	print &ui_hr();
 	}
 
 # Display domains
@@ -164,7 +164,7 @@ if ($current_theme eq "virtual-server-theme" ||
 
 # Show icons for editing various global settings
 if (&can_edit_templates()) {
-	print "<hr>\n";
+	print &ui_hr();
 	print &ui_subheading($text{'index_header3'});
 	($tlinks, $ttitles, $ticons) = &get_template_pages();
 	&icons_table($tlinks, $ttitles, $ticons, 5);
@@ -172,7 +172,7 @@ if (&can_edit_templates()) {
 
 # Show current status
 if (&can_view_status()) {
-	print "<hr>\n";
+	print &ui_hr();
 	print &ui_subheading($text{'index_sheader'});
 	print "<table width=100%>\n";
 
@@ -236,7 +236,7 @@ if (&can_view_status()) {
 
 # Show system information
 if (&can_view_sysinfo()) {
-	print "<hr>\n";
+	print &ui_hr();
 	print &ui_subheading($text{'index_header5'});
 	print "<table width=100%>\n";
 	foreach my $f ("virtualmin", @features) {
@@ -256,7 +256,7 @@ if (&can_view_sysinfo()) {
 
 # Show backup and restore buttons
 if (&can_backup_domains()) {
-	print "<hr>\n";
+	print &ui_hr();
 	print &ui_subheading($text{'index_header4'});
 	print &ui_buttons_start();
 
@@ -280,7 +280,7 @@ if (&can_backup_domains()) {
 if (&can_stop_servers()) {
 	@ss = &get_startstop_links();
 	if (@ss) {
-		print "<hr>\n";
+		print &ui_hr();
 		print &ui_buttons_start();
 		foreach $status (@ss) {
 			print &ui_buttons_row($status->{'status'} ?

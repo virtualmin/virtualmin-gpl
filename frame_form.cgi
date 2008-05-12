@@ -32,7 +32,7 @@ print &ui_form_end([ [ "ok", $text{'frame_ok'} ] ]);
 
 # Show button for 'expert' mode
 if ($d->{'proxy_pass_mode'}) {
-	print "<hr>\n";
+	print &ui_hr();
 	print &ui_buttons_start();
 
 	print &ui_buttons_row("expframe_form.cgi", $text{'edit_expframe'},

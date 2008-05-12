@@ -114,7 +114,7 @@ print "</tr></table>\n";
 print "<div id='history' style='height: 300px;'></div>\n";
 
 # Checkboxes for statistics to show
-print "<hr>\n";
+print &ui_hr();
 print "<b>$text{'history_showsel'}</b><br>\n";
 print &ui_form_start("history.cgi");
 print &ui_hidden("start", $start);

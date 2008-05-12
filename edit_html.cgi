@@ -116,7 +116,7 @@ if ($editing) {
 		}
 
 	# Show form for editing
-	print "<hr>\n";
+	print &ui_hr();
 	print "<b>";
 	if ($editing == 1) {
 		print &text('html_editing', "<a href='http://$d->{'dom'}$port/$in{'edit'}' target=_new><tt>$in{'edit'}</tt></a>");

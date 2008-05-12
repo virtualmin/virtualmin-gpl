@@ -64,7 +64,7 @@ print &ui_columns_end();
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 
 # Show link category form
-print "<hr>\n";
+print &ui_hr();
 
 print "$text{'newlinks_catdesc'}<p>\n";
 print &ui_form_start("save_linkcats.cgi", "post");
