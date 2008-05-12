@@ -99,6 +99,11 @@ foreach my $sm ([ "logrotate", "logrotate" ],
 		}
 	}
 
+# Don't enable logrotate if no Apache
+if (&indexof("web", @got) < 0) {
+	@got = grep { $_ ne "logrotate" } @got;
+	}
+
 # Tell the user what we have got
 local %pconfig = map { $_, 1 } @feature_plugins;
 @got = grep { $config{$_} || $pconfig{$_} } @got;
