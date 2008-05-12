@@ -11,31 +11,7 @@ $d = &get_domain($in{'dom'});
 # Validate and store inputs
 &error_setup($text{'res_err'});
 $rv = &get_domain_resource_limits($d);
-if ($in{'procs_def'}) {
-	delete($rv->{'procs'});
-	}
-else {
-	$in{'procs'} =~ /^\d+$/ || &error($text{'res_eprocs'});
-	$in{'procs'} > 1 || &error($text{'res_eprocs2'});
-	$rv->{'procs'} = $in{'procs'};
-	}
-if ($in{'mem_def'}) {
-	delete($rv->{'mem'});
-	}
-else {
-	$in{'mem'} =~ /^\d+$/ || &error($text{'res_emem'});
-	$in{'mem'} *= $in{'mem_units'};
-	$in{'mem'} > 1024*1024 || &error($text{'res_emem2'});
-	$rv->{'mem'} = $in{'mem'};
-	}
-if ($in{'time_def'}) {
-	delete($rv->{'time'});
-	}
-else {
-	$in{'time'} =~ /^\d+$/ || &error($text{'res_etime'});
-	$in{'time'} > 0 || &error($text{'res_etime2'});
-	$rv->{'time'} = $in{'time'};
-	}
+&parse_resource_limit_inputs($rv, \%in);
 &save_domain_resource_limits($d, $rv);
 
 &set_all_null_print();

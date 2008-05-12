@@ -62,10 +62,8 @@
 
  - CPU / memory / process count limits
 	- FS#3850
-	- Part of template system
 	- Need to fix up when renaming / re-parenting
-	- Verify that it works for PHP
-	- Apache / CGIs too
+	- CHANGELOG
 
  - Incremental backups
 	- FS#3909

@@ -2409,6 +2409,7 @@ tmpl_editmode_virtualmin=Virtual server creation
 tmpl_editmode_plugins=Plugin options
 tmpl_editmode_limits=Default domain owner limits
 tmpl_editmode_phpwrappers=PHP wrapper scripts
+tmpl_editmode_resources=CPU and memory resource limits
 tmpl_noplugins=No plugins have defined any template options.
 tmpl_editmode_scripts=Default script installers
 tmpl_cnext=Create and Next
@@ -2444,6 +2445,9 @@ tmpl_ephp4cgi=Missing or invalid CGI wrapper for PHP 4
 tmpl_ephp5cgi=Missing or invalid CGI wrapper for PHP 5
 tmpl_ephp4fcgi=Missing or invalid FastCGI wrapper for PHP 4
 tmpl_ephp5fcgi=Missing or invalid FastCGI wrapper for PHP 5
+tmpl_resources=CPU and memory limits for new domains
+tmpl_resources1=No limits
+tmpl_resources0=Set below ..
 
 newplugin_title=Plugin Modules
 newplugin_desc=Plugins are Webmin modules which provided additional server and mailbox features for Virtualmin. Unlike the core features, they can be installed separately and written by third-party developers.

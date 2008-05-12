@@ -7454,6 +7454,7 @@ push(@rv, { 'id' => 0,
 	    'nodbname' => $config{'defnodbname'},
 	    'norename' => $config{'defnorename'},
 	    'forceunder' => $config{'defforceunder'},
+	    'resources' => $config{'defresources'} || "none",
 	    'ranges' => $config{'ip_ranges'} || "none",
 	    'mailgroup' => $config{'mailgroup'} || "none",
 	    'ftpgroup' => $config{'ftpgroup'} || "none",
@@ -7695,6 +7696,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'defnodbname'} = $tmpl->{'nodbname'};
 	$config{'defnorename'} = $tmpl->{'norename'};
 	$config{'defforceunder'} = $tmpl->{'forceunder'};
+	$config{'defresources'} = $tmpl->{'resources'};
 	&uncat_file("framefwd-template", $tmpl->{'frame'});
 	$config{'ip_ranges'} = $tmpl->{'ranges'} eq 'none' ? undef :
 			       $tmpl->{'ranges'};
@@ -7802,6 +7804,7 @@ if (!$tmpl->{'default'}) {
 		    "php", "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "namedconf",
 		    "nodbname", "norename", "forceunder", "aliascopy", "bccto",
+		    "resources",
 		    @plugins,
 		    @php_wrapper_templates,
 		    "capabilities",

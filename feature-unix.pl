@@ -155,7 +155,14 @@ else {
 	}
 
 # Setup resource limits from template
-# XXX
+if (defined(&supports_resource_limits) && $tmpl->{'resources'} ne 'none') {
+	local ($ok) = &supports_resource_limits();
+	if ($ok) {
+		local $rv = { map { split(/=/, $_) }
+			split(/\s+/, $tmpl->{'resources'}) };
+		&save_domain_resource_limits($_[0], $rv, 1);
+		}
+	}
 
 &release_lock_unix($_[0]);
 return 1;
@@ -307,6 +314,14 @@ if (!$_[0]->{'parent'}) {
 	# Delete his mail file
 	if ($uinfo && !$uinfo->{'nomailfile'}) {
 		&delete_mail_file($uinfo);
+		}
+
+	# Clear any resource limits
+	if (defined(&supports_resource_limits)) {
+		local ($ok) = &supports_resource_limits();
+		if ($ok) {
+			&save_domain_resource_limits($_[0], { });
+			}
 		}
 
 	# Delete unix user

@@ -359,7 +359,8 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 		}
 	else {
 		# Automatically generate
-		local $common = "#!/bin/sh\n".
+		local $shell = -r "/bin/bash" ? "/bin/bash" : "/bin/sh";
+		local $common = "#!$shell\n".
 				"PHPRC=\$$dirvar/../etc/php$v->[0]\n".
 				"export PHPRC\n".
 				"umask 022\n";
@@ -401,8 +402,10 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 	}
 
 # Re-apply resource limits
-if (&supports_resource_limits()) {
-	&set_php_wrapper_ulimits($d, &get_domain_resource_limits($d));
+local ($ok) = &supports_resource_limits();
+if ($ok) {
+	local $pd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+	&set_php_wrapper_ulimits($d, &get_domain_resource_limits($pd));
 	}
 
 # Make wrappers immutable, to prevent deletion by users (which can crash Apache)
@@ -457,6 +460,19 @@ foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
 			elsif (!$lnum && $u->[1]) {
 				# Add at top of file
 				splice(@$lref, 1, 0, "ulimit -$u->[0] $u->[1]");
+				}
+			}
+		# If using process limits, we can't exec PHP as there will
+		# be no chance for the limit to be applied :(
+		local $ll = scalar(@$lref) - 1;
+		if ($lref->[$ll] =~ /php/) {
+			if ($rv->{'procs'} && $lref->[$ll] =~ /^exec\s+(.*)/) {
+				# Remove exec
+				$lref->[$ll] = $1;
+				}
+			elsif (!$rv->{'procs'} && $lref->[$ll] !~ /^exec\s+/) {
+				# Add exec
+				$lref->[$ll] = "exec ".$lref->[$ll];
 				}
 			}
 		&flush_file_lines($f);

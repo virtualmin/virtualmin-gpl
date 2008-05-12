@@ -229,6 +229,17 @@ if (!$_[0]->{'alias'} && $_[0]->{'dir'}) {
 	&add_script_language_directives($_[0], $tmpl, $_[0]->{'web_port'});
 	}
 
+# Re-apply limits, so that Apache directives are updated
+if (defined(&supports_resource_limits)) {
+	local ($ok) = &supports_resource_limits();
+	if ($ok) {
+		local $pd = $_[0]->{'parent'} ? &get_domain($_[0]->{'parent'})
+					      : $_[0];
+		local $rv = &get_domain_resource_limits($pd);
+		&save_domain_resource_limits($_[0], $rv, 1);
+		}
+	}
+
 &release_lock_web($lockdom);
 }
 
