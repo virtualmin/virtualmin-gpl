@@ -59,15 +59,10 @@ if ($in{'confirm'}) {
 			&$second_print(&text('massscript_ever',
 					     $sinfo->{'version'}));
 			}
-		elsif ($derr = &{$script->{'depends_func'}}($d, $ver, $sinfo)) {
+		elsif ($derr = &check_script_depends($script,
+						     $d, $ver, $sinfo)) {
 			# Failed depends
 			&$second_print(&text('massscript_edep', $derr));
-			}
-		elsif (@missing = &check_script_required_commands($d, $script,
-					$ver, $sinfo->{'opts'})) {
-			# Missing commands
-			&$second_print(&text('massscript_ecommands',
-					     join(" ", @missing)));
 			}
 		else {
 			# Get locks

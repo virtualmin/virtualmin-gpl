@@ -1,0 +1,6 @@
+desc=Script dependency checking
+html=When a script has dependencies, all are checked and reported at once rather than being displayed one at a time. This makes complex applications like Rails easier to setup.
+master=1
+reseller=1
+owner=1
+link=list_scripts.cgi?dom=${ID}

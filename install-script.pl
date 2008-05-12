@@ -172,21 +172,9 @@ if (!$sinfo) {
 
 # Check dependencies
 &$first_print("Checking dependencies ..");
-$derr = &{$script->{'depends_func'}}($d, $ver, $sinfo);
+$derr = &check_script_depends($script, $d, $ver, $sinfo);
 if ($derr) {
 	&$second_print(".. failed : $derr");
-	exit(1);
-	}
-else {
-	&$second_print(".. done");
-	}
-
-# Check for needed commands
-&$first_print("Checking for required commands ..");
-@missing = &check_script_required_commands($d, $script, $ver, $opts);
-if (@missing) {
-	&$second_print(".. the following commands are missing : ".
-		       join(" ", @missing));
 	exit(1);
 	}
 else {

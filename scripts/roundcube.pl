@@ -34,13 +34,6 @@ sub script_roundcube_php_vers
 return ( 4, 5 );
 }
 
-# script_roundcube_depends(&domain, version)
-sub script_roundcube_depends
-{
-local ($d, $ver) = @_;
-return undef;
-}
-
 # script_roundcube_params(&domain, version, &upgrade-info)
 # Returns HTML for table rows for options for installing PHP-NUKE
 sub script_roundcube_params

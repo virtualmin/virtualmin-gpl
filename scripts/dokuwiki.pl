@@ -35,7 +35,7 @@ return ( 4, 5 );
 sub script_dokuwiki_depends
 {
 local ($d, $ver) = @_;
-return undef;
+return ( );
 }
 
 # script_dokuwiki_params(&domain, version, &upgrade-info)

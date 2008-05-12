@@ -2868,6 +2868,7 @@ scripts_addover=Overriding proxying for path $1 ..
 scripts_delproxy=Removing proxying for path $1 ..
 scripts_proxyfailed=.. proxy setup failed : $1
 scripts_epartial=.. installation was only partially complete.
+scripts_icommand=Missing command $1
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:

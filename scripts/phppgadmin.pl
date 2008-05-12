@@ -42,8 +42,8 @@ sub script_phppgadmin_depends
 {
 local ($d, $ver) = @_;
 &has_domain_databases($d, [ "postgres" ], 1) ||
-	return "phpPgAdmin requires a PostgreSQL database";
-return undef;
+	return ("phpPgAdmin requires a PostgreSQL database");
+return ( );
 }
 
 # script_phppgadmin_params(&domain, version, &upgrade-info)

@@ -34,17 +34,10 @@ $ver =~ /^\S+$/ || &error($text{'scripts_eversion'});
 	&error($text{'scripts_eversion2'});
 
 # Check dependencies
-$derr = &{$script->{'depends_func'}}($d, $ver, $sinfo);
+$derr = &check_script_depends($script, $d, $ver, $sinfo);
 $ok = 1;
 if ($derr) {
 	print &text('scripts_edep', $derr),"<p>\n";
-	$ok = 0;
-	}
-
-# Check for commands
-@missing = &check_script_required_commands($d, $script, $ver, $opts);
-if (@missing) {
-	print &text('scripts_ecommands', join(' ', @missing)),"<p>\n";
 	$ok = 0;
 	}
 

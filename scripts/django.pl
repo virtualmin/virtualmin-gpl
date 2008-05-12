@@ -38,7 +38,8 @@ return ( "setuptools", $dbtype eq "mysql" ? "MySQLdb" : "psycopg" );
 sub script_django_depends
 {
 local ($d, $ver) = @_;
-&has_command("python") || return "The python command is not installed";
+local @rv;
+&has_command("python") || push(@rv, "The python command is not installed");
 &require_apache();
 local $conf = &apache::get_config();
 local $got_rewrite;
@@ -46,10 +47,10 @@ foreach my $l (&apache::find_directive("LoadModule", $conf)) {
 	$got_rewrite++ if ($l =~ /mod_rewrite/);
 	}
 $apache::httpd_modules{'mod_fcgid'} ||
-	return "Apache does not have the mod_fcgid module";
+	push(@rv, "Apache does not have the mod_fcgid module");
 $apache::httpd_modules{'mod_rewrite'} || $got_rewrite ||
-	return "Apache does not have the mod_rewrite module";
-return undef;
+	push(@rv, "Apache does not have the mod_rewrite module");
+return @rv;
 }
 
 # script_django_params(&domain, version, &upgrade-info)

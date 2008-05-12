@@ -63,5 +63,3 @@
  - Incremental backups
 	- FS#3909
 
- - Check all dependencies at once in scripts, and return full list
-	- FS#3933

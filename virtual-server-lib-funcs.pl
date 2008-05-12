@@ -6719,18 +6719,9 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			}
 
 		# Check dependencies
-		local $derr = &{$script->{'depends_func'}}($dom, $ver);
+		local $derr = &check_script_depends($script, $dom, $ver,$sinfo);
 		if ($derr) {
 			&$second_print(&text('setup_scriptdeps', $derr));
-			next;
-			}
-
-		# Check for needed commands
-		local @missing = &check_script_required_commands($d, $script,
-								 $ver, $opts);
-		if (@missing) {
-			&$second_print(&text('setup_scriptcommands',
-				    join(' ', @missing)));
 			next;
 			}
 

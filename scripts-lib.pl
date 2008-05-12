@@ -1599,7 +1599,7 @@ return 1;
 }
 
 # check_script_required_commands(&domain, &script, version)
-# Checks for commands required by some script, and returns an list of those
+# Checks for commands required by some script, and returns a list of those
 # that are missing.
 sub check_script_required_commands
 {
@@ -1957,6 +1957,21 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 		}
 	}
 return 1;
+}
+
+# check_script_depends(&script, &domain, &ver, [&upgrade-info])
+# Returns a list of dependency problems found for this script, including
+# missing commands.
+sub check_script_depends
+{
+local ($script, $d, $ver, $sinfo) = @_;
+local @rv;
+if (defined(&{$script->{'depends_func'}}) {
+	push(@rv, grep { $_ } &{$script->{'depends_func'}}($d, $ver, $sinfo));
+	}
+push(@rv, map { &text('scripts_icommand', $_) }
+      &check_script_required_commands($d, $script, $ver, $sinfo->{'opts'}));
+return wantarray ? @rv : join(", ", @rv);
 }
 
 1;

@@ -43,13 +43,6 @@ local ($d, $opts) = @_;
 return $opts->{'db'} ? ( "DB" ) : ( );
 }
 
-# script_squirrelmail_depends(&domain, version)
-sub script_squirrelmail_depends
-{
-local ($d, $ver) = @_;
-return undef;
-}
-
 # script_squirrelmail_params(&domain, version, &upgrade-info)
 # Returns HTML for table rows for options for installing PHP-NUKE
 sub script_squirrelmail_params

@@ -53,8 +53,8 @@ sub script_phpmyadmin_depends
 {
 local ($d, $ver) = @_;
 &has_domain_databases($d, [ "mysql" ], 1) ||
-	return "phpMyAdmin requires a MySQL database";
-return undef;
+	return ("phpMyAdmin requires a MySQL database");
+return ( );
 }
 
 # script_phpmyadmin_params(&domain, version, &upgrade-info)

@@ -910,3 +910,4 @@ Post-change scripts have access to the settings of a virtual server before it wa
 If MySQL or PostgreSQL have no root password set, display a warning during the configuration check.
 AddHandler, FCGIWrapper and RemoveHandler directives not related to PHP versions Virtualmin knows about are not touched when changing PHP settings.
 Limits on the number of processes and amount of RAM and CPU time a process can use can be defined for each virtual server. These apply to CGI and PHP scripts, and when the domain owner logs in via SSH. They are particularly useful for preventing fork bombs and other intentional or accidental denial of service attacks.
+When a script has dependencies, all are checked and reported at once rather than being displayed one at a time. This makes complex applications like Rails easier to setup.

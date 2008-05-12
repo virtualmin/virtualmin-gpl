@@ -43,12 +43,8 @@ else {
 	}
 
 # Check depends again
-$derr = &{$script->{'depends_func'}}($d, $ver, $sinfo);
+$derr = &check_script_depends($script, $d, $ver, $sinfo);
 &error(&text('scripts_edep', $derr)) if ($derr);
-
-# Check for commands
-@missing = &check_script_required_commands($d, $script, $ver, $opts);
-&error(&text('scripts_ecommands', join(' ', @missing))) if (@missing);
 
 # Parse inputs
 %incopy = %in;
