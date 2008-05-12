@@ -1966,7 +1966,7 @@ sub check_script_depends
 {
 local ($script, $d, $ver, $sinfo) = @_;
 local @rv;
-if (defined(&{$script->{'depends_func'}}) {
+if (defined(&{$script->{'depends_func'}})) {
 	push(@rv, grep { $_ } &{$script->{'depends_func'}}($d, $ver, $sinfo));
 	}
 push(@rv, map { &text('scripts_icommand', $_) }
