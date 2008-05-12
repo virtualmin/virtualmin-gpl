@@ -1,0 +1,5 @@
+desc=CPU and RAM resource limits
+html=Limits on the number of processes and amount of RAM and CPU time a process can use can be defined for each virtual server. These apply to CGI and PHP scripts, and when the domain owner logs in via SSH. They are particularly useful for preventing fork bombs and other intentional or accidental denial of service attacks.
+master=1
+reseller=1
+link=edit_res.cgi?dom=${ID}

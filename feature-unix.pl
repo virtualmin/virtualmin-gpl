@@ -155,13 +155,11 @@ else {
 	}
 
 # Setup resource limits from template
-if (defined(&supports_resource_limits) && $tmpl->{'resources'} ne 'none') {
-	local ($ok) = &supports_resource_limits();
-	if ($ok) {
-		local $rv = { map { split(/=/, $_) }
-			split(/\s+/, $tmpl->{'resources'}) };
-		&save_domain_resource_limits($_[0], $rv, 1);
-		}
+if (defined(&supports_resource_limits) && $tmpl->{'resources'} ne 'none' &&
+    &supports_resource_limits()) {
+	local $rv = { map { split(/=/, $_) }
+		split(/\s+/, $tmpl->{'resources'}) };
+	&save_domain_resource_limits($_[0], $rv, 1);
 	}
 
 &release_lock_unix($_[0]);
@@ -189,6 +187,15 @@ if (!$_[0]->{'parent'}) {
 	&require_useradmin();
 	local @allusers = &list_domain_users($_[1]);
 	local ($uinfo) = grep { $_->{'user'} eq $_[1]->{'user'} } @allusers;
+	local $rv;
+	if (defined(&supports_resource_limits) &&
+	    &supports_resource_limits() &&
+	    ($_[0]->{'user'} ne $_[1]->{'user'} ||
+	     $_[0]->{'group'} ne $_[1]->{'group'})) {
+		# Get old resource limits, and clear
+		$rv = &get_domain_resource_limits($_[1]);
+		&save_domain_resource_limits($_[1], { });
+		}
 	if ($uinfo) {
 		local %old = %$uinfo;
 		&$first_print($text{'save_user'});
@@ -267,6 +274,11 @@ if (!$_[0]->{'parent'}) {
 		&foreign_call($usermodule, "made_changes");
 		&$second_print($text{'setup_done'});
 		}
+
+	if ($rv) {
+		# Put back resource limits, perhaps under new name
+		&save_domain_resource_limits($_[0], $rv);
+		}
 	&release_lock_unix($_[0]);
 	}
 elsif ($_[0]->{'parent'} && !$_[1]->{'parent'}) {
@@ -317,11 +329,8 @@ if (!$_[0]->{'parent'}) {
 		}
 
 	# Clear any resource limits
-	if (defined(&supports_resource_limits)) {
-		local ($ok) = &supports_resource_limits();
-		if ($ok) {
-			&save_domain_resource_limits($_[0], { });
-			}
+	if (defined(&supports_resource_limits) && &supports_resource_limits()) {
+		&save_domain_resource_limits($_[0], { });
 		}
 
 	# Delete unix user

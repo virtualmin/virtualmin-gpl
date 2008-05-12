@@ -60,11 +60,6 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - CPU / memory / process count limits
-	- FS#3850
-	- Need to fix up when renaming / re-parenting
-	- CHANGELOG
-
  - Incremental backups
 	- FS#3909
 

@@ -909,3 +909,4 @@ Added a script installer for Piwik, an open-source web analytics tool.
 Post-change scripts have access to the settings of a virtual server before it was changed in the VIRTUALSERVER_OLDSERVER_* environment variables.
 If MySQL or PostgreSQL have no root password set, display a warning during the configuration check.
 AddHandler, FCGIWrapper and RemoveHandler directives not related to PHP versions Virtualmin knows about are not touched when changing PHP settings.
+Limits on the number of processes and amount of RAM and CPU time a process can use can be defined for each virtual server. These apply to CGI and PHP scripts, and when the domain owner logs in via SSH. They are particularly useful for preventing fork bombs and other intentional or accidental denial of service attacks.

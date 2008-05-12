@@ -84,7 +84,7 @@ if ($without) {
 if ($multi) {
 	# Show attributes on multiple lines
 	@shells = grep { $_->{'owner'} } &list_available_shells();
-	($resok) = &supports_resource_limits();
+	$resok = &supports_resource_limits();
 	foreach $d (@doms) {
 		local @users = &list_domain_users($d, 0, 1, 0, 1);
 		local ($duser) = grep { $_->{'user'} eq $d->{'user'} } @users;

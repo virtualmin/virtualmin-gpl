@@ -9844,16 +9844,14 @@ if ($d->{'unix'} && &can_edit_limits($d) && !$d->{'alias'}) {
 		  });
 	}
 
-if ($d->{'unix'} && defined(&supports_resource_limits)) {
-	local ($ok) = &supports_resource_limits();
-	if ($ok) {
-		# Resource limits button
-		push(@rv, { 'page' => 'edit_res.cgi',
-			    'title' => $text{'edit_res'},
-			    'desc' => $text{'edit_resdesc'},
-			    'cat' => 'admin',
-			  });
-		}
+if ($d->{'unix'} && defined(&supports_resource_limits) &&
+    &supports_resource_limits()) {
+	# Resource limits button
+	push(@rv, { 'page' => 'edit_res.cgi',
+		    'title' => $text{'edit_res'},
+		    'desc' => $text{'edit_resdesc'},
+		    'cat' => 'admin',
+		  });
 	}
 
 if (!$d->{'parent'} && &can_edit_admins($d)) {
@@ -10505,14 +10503,20 @@ if ($oldparent) {
 	&modify_webmin($oldparent, $oldparent);
 	}
 
-&run_post_actions();
-
 # Save the domain objects
 &$first_print($text{'save_domain'});
 for(my $i=0; $i<@doms; $i++) {
         &save_domain($doms[$i]);
         }
 &$second_print($text{'setup_done'});
+
+# Re-apply the parent's resource limits, if any
+if (defined(&supports_resource_limits) && &supports_resource_limits()) {
+	local $rv = &get_domain_resource_limits($parent);
+	&save_domain_resource_limits($parent, $rv);
+	}
+
+&run_post_actions();
 
 # Run the after command
 &set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
@@ -10660,14 +10664,20 @@ foreach $f (@feature_plugins) {
 $first_print = $old_first_print if ($old_first_print);
 &modify_webmin($oldparent, $oldparent);
 
-&run_post_actions();
-
 # Save the domain objects
 &$first_print($text{'save_domain'});
 for(my $i=0; $i<@doms; $i++) {
         &save_domain($doms[$i]);
         }
 &$second_print($text{'setup_done'});
+
+# Re-apply resource limits, to update Apache and PHP configs
+if (defined(&supports_resource_limits) && &supports_resource_limits()) {
+	local $rv = &get_domain_resource_limits($d);
+	&save_domain_resource_limits($d, $rv);
+	}
+
+&run_post_actions();
 
 # Run the after command
 &set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
