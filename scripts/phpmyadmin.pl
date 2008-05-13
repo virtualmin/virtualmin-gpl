@@ -48,7 +48,7 @@ sub script_phpmyadmin_php_optional_modules
 return ("mcrypt");
 }
 
-# script_phpmyadmin_depends(&domain, version)
+# Must have at least one existing DB
 sub script_phpmyadmin_depends
 {
 local ($d, $ver) = @_;

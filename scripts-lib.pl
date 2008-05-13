@@ -101,6 +101,7 @@ local $rv = { 'name' => $name,
 	      'site' => defined(&$sitefunc) ? &$sitefunc() : undef,
 	      'dir' => $sdir,
 	      'depends_func' => "script_${name}_depends",
+	      'dbs_func' => "script_${name}_dbs",
 	      'params_func' => "script_${name}_params",
 	      'parse_func' => "script_${name}_parse",
 	      'check_func' => "script_${name}_check",
@@ -1968,6 +1969,17 @@ local ($script, $d, $ver, $sinfo) = @_;
 local @rv;
 if (defined(&{$script->{'depends_func'}})) {
 	push(@rv, grep { $_ } &{$script->{'depends_func'}}($d, $ver, $sinfo));
+	}
+if (defined(&{$script->{'dbs_func'}})) {
+	local @dbs = &{$script->{'dbs_func'}}($d, $ver);
+	if (!&has_domain_databases($d, \@dbs)) {
+		local @dbnames = map { $text{'databases_'.$_} || $_ } @dbs;
+		local $dbneed = @dbnames == 1 ?
+			$dbnames[0] :
+			&text('scripts_idbneedor', @dbnames[0..$#dbnames-1],
+						   $dbnames[$#dbnames]);
+		push(@rv, &text('scripts_idbneed', $dbneed));
+		}
 	}
 push(@rv, map { &text('scripts_icommand', $_) }
       &check_script_required_commands($d, $script, $ver, $sinfo->{'opts'}));

@@ -37,7 +37,7 @@ sub script_phppgadmin_php_modules
 return ("pgsql");
 }
 
-# script_phppgadmin_depends(&domain, version)
+# Must have at least one existing DB
 sub script_phppgadmin_depends
 {
 local ($d, $ver) = @_;
