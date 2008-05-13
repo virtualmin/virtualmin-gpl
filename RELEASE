@@ -1,6 +1,7 @@
  x run functional-test.pl
 
  x Create tar.gz file
+	./gpl-virtual-server/createvirtualminmodule.sh $ver /tmp/virtual-server-$ver.tar.gz
 
  x build RPM and .deb
 	./makemodulerpm.pl --sign --dir virtual-server gpl-virtual-server
@@ -8,7 +9,7 @@
 	./makemoduledeb.pl --dir virtual-server gpl-virtual-server
 	./makemoduledeb.pl virtual-server-theme
 
- x Upload to download.webmin.com
+ x Upload to download.webmin.com:htdocs/download/virtualmin/
 
  x Add to website
 

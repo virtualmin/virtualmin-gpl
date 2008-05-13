@@ -227,7 +227,7 @@ $err = &valid_domain_name($domain);
 &usage($err) if ($err);
 &lock_domain_name($domain);
 foreach $d (&list_domains()) {
-        usage($text{'setup_edomain2'}) if (lc($d->{'dom'}) eq lc($domain));
+        usage($text{'setup_edomain4'}) if (lc($d->{'dom'}) eq lc($domain));
         }
 if ($parentdomain) {
 	$parent = &get_domain_by("dom", $parentdomain);

@@ -56,7 +56,7 @@ if ($subdom) {
 $in{'owner'} =~ s/\r|\n//g;
 $in{'owner'} =~ /:/ && &error($text{'setup_eowner'});
 foreach $d (&list_domains()) {
-	&error($text{'setup_edomain2'}) if (lc($d->{'dom'}) eq lc($in{'dom'}));
+	&error($text{'setup_edomain4'}) if (lc($d->{'dom'}) eq lc($in{'dom'}));
 	}
 $tmpl = &get_template($in{'template'});
 if (!$parentuser) {

@@ -77,7 +77,7 @@ foreach $line (@lines) {
 		}
 	local $clash = &get_domain_by("dom", $dname);
 	if ($clash) {
-		&line_error($text{'setup_edomain2'});
+		&line_error($text{'setup_edomain4'});
 		next;
 		}
 	local $parentdom;
