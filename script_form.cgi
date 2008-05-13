@@ -89,6 +89,12 @@ if ($ok) {
 			"$script->{'site'}</a>");
 		}
 
+	# Show installer author
+	if ($script->{'author'}) {
+		print &ui_table_row($text{'scripts_iauthor'}, 
+			$script->{'author'});
+		}
+
 	# Show parameters
 	$opts = &{$script->{'params_func'}}($d, $ver, $sinfo);
 	print $opts;

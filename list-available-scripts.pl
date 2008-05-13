@@ -46,6 +46,9 @@ if ($multi) {
 		if ($script->{'site'}) {
 			print "    Website: $script->{'site'}\n";
 			}
+		if ($script->{'author'}) {
+			print "    Installer author: $script->{'author'}\n";
+			}
 		}
 	}
 else {

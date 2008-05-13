@@ -2749,6 +2749,7 @@ scripts_ipartial=Partial installation error
 scripts_idesc=Script description
 scripts_iuses=Programming language
 scripts_isite=Original website
+scripts_iauthor=Script installer author
 scripts_iuses_perl=Perl
 scripts_iuses_php=PHP
 scripts_iuses_ruby=Ruby on Rails

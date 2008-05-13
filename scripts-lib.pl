@@ -86,6 +86,7 @@ local $vdfunc = "script_${name}_version_desc";
 local $catfunc = "script_${name}_category";
 local $disfunc = "script_${name}_disabled";
 local $sitefunc = "script_${name}_site";
+local $authorfunc = "script_${name}_author";
 local %unavail;
 &read_file_cached($scripts_unavail_file, \%unavail);
 local $disabled;
@@ -99,6 +100,7 @@ local $rv = { 'name' => $name,
 	      'uses' => defined(&$ufunc) ? [ &$ufunc() ] : [ ],
 	      'category' => defined(&$catfunc) ? &$catfunc() : undef,
 	      'site' => defined(&$sitefunc) ? &$sitefunc() : undef,
+	      'author' => defined(&$authorfunc) ? &$authorfunc() : undef,
 	      'dir' => $sdir,
 	      'depends_func' => "script_${name}_depends",
 	      'dbs_func' => "script_${name}_dbs",
