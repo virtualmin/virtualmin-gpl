@@ -912,3 +912,4 @@ AddHandler, FCGIWrapper and RemoveHandler directives not related to PHP versions
 Limits on the number of processes and amount of RAM and CPU time a process can use can be defined for each virtual server. These apply to CGI and PHP scripts, and when the domain owner logs in via SSH. They are particularly useful for preventing fork bombs and other intentional or accidental denial of service attacks.
 When a script has dependencies, all are checked and reported at once rather than being displayed one at a time. This makes complex applications like Rails easier to setup.
 When scheduled backups are sent to their domain owners as well, each owner only receives the backup messages related to the domains they own.
+Added script installers for Trac and MoinMoin, contributed by Jannis Leidel.
