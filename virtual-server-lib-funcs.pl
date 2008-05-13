@@ -4036,13 +4036,14 @@ return $rv;
 }
 
 # backup_domains(file, &domains, &features, dir-format, skip-errors, &options,
-#		 home-format, &virtualmin-backups, mkdir, onebyone, as-owner)
+#		 home-format, &virtualmin-backups, mkdir, onebyone, as-owner,
+#		 &callback-func)
 # Perform a backup of one or more domains into a single tar.gz file. Returns
 # an OK flag and the size of the backup file
 sub backup_domains
 {
 local ($desturl, $doms, $features, $dirfmt, $skip, $opts, $homefmt, $vbs,
-       $mkdir, $onebyone, $asowner) = @_;
+       $mkdir, $onebyone, $asowner, $cbfunc) = @_;
 local $backupdir;
 local $transferred_sz;
 
@@ -4206,6 +4207,7 @@ DOMAIN: foreach $d (@$doms) {
 		system("rm -rf ".quotemeta($backupdir));
 		&make_dir($backupdir, 0777);
 		}
+	&$cbfunc($d, 0, $backupdir) if ($cbfunc);
 	&$first_print(&text('backup_fordomain', $d->{'dom'}));
 	&$second_print();
 	&$indent_print();
@@ -4276,6 +4278,7 @@ DOMAIN: foreach $d (@$doms) {
 		# Transfer this domain now
 		local $err;
 		local $df = "$d->{'dom'}.$hfsuffix";
+		&$cbfunc($d, 1, "$dest/$df") if ($cbfunc);
 		if ($mode == 2) {
 			# Via SCP
 			&$first_print($text{'backup_upload2'});
@@ -4312,6 +4315,7 @@ DOMAIN: foreach $d (@$doms) {
 		}
 
 	&$outdent_print();
+	&$cbfunc($d, 2, "$dest/$df") if ($cbfunc);
 	}
 
 # Add all requested Virtualmin config information

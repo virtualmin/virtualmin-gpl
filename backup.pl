@@ -4,6 +4,11 @@
 package virtual_server;
 $main::no_acl_check++;
 require './virtual-server-lib.pl';
+$host = &get_system_hostname();
+if (&foreign_check("mailboxes")) {
+	&foreign_require("mailboxes", "mailboxes-lib.pl");
+	$has_mailboxes++;
+	}
 
 # Work out what will be backed up
 if ($config{'backup_all'} == 1) {
@@ -55,24 +60,19 @@ else {
 	$dest = $config{'backup_dest'};
 	}
 $start_time = time();
+$current_id = undef;
 ($ok, $size) = &backup_domains($dest, \@doms, \@do_features,
 			       $config{'backup_fmt'},
 			       $config{'backup_errors'}, \%options,
 			       $config{'backup_fmt'} == 2,
 			       \@vbs,
 			       $config{'backup_mkdir'},
-			       $config{'backup_onebyone'});
-
-# Work out who might get emailed
-@emails = ( );
-push(@emails, $config{'backup_email'}) if ($config{'backup_email'});
-if ($config{'backup_email_doms'}) {
-	push(@emails, map { $_->{'emailto'} } @doms);
-	}
-@emails = &unique(@emails);
+			       $config{'backup_onebyone'},
+			       0,
+			       \&backup_cbfunc);
 
 # Send an email to the recipient, if there are any
-if (@emails && &foreign_check("mailboxes") &&
+if ($config{'backup_email'} && $has_mailboxes &&
     (!$ok || !$config{'backup_email_err'})) {
 	if ($ok) {
 		$output .= &text('backup_done', &nice_size($size))." ";
@@ -82,17 +82,9 @@ if (@emails && &foreign_check("mailboxes") &&
 		}
 	$total_time = time() - $start_time;
 	$output .= &text('backup_time', &nice_hour_mins_secs($total_time))."\n";
-	&foreign_require("mailboxes", "mailboxes-lib.pl");
-	$host = &get_system_hostname();
-	if ($emails[0] eq $config{'backup_email'}) {
-		# Sent To: the master admin, bcc everyone else
-		$to = shift(@emails);
-		}
-	$bcc = join(", ", @emails);
 	$mail = { 'headers' => [ [ 'From', &get_global_from_address() ],
 				 [ 'Subject', "Backup of Virtualmin on $host" ],
-				 [ 'To', $to ],
-				 [ 'Bcc', $bcc ] ],
+				 [ 'To', $config{'backup_email'} ] ],
 		  'attach'  => [ { 'headers' => [ [ 'Content-type',
 						    'text/plain' ] ],
 				   'data' => &entities_to_ascii($output) } ]
@@ -100,9 +92,53 @@ if (@emails && &foreign_check("mailboxes") &&
 	&mailboxes::send_mail($mail);
 	}
 
-sub first_save_print { $output .= $indent_text.join("", @_)."\n"; }
-sub second_save_print { $output .= $indent_text.join("", @_)."\n\n"; }
-sub indent_save_print { $indent_text .= "    "; }
-sub outdent_save_print { $indent_text = substr($indent_text, 4); }
+# Send email to domain owners too, if selected
+if ($config{'backup_email_doms'} && $has_mailboxes &&
+    (!$ok || !$config{'backup_email_err'})) {
+	@emails = &unique(map { $_->{'emailto'} } @doms);
+	foreach $email (@emails) {
+		@edoms = grep { $_->{'emailto'} eq $email } @doms;
+		$eoutput = join("", map { $domain_output{$_->{'id'}} } @edoms);
+		$mail = {
+		  'headers' =>
+			[ [ 'From', &get_global_from_address($edoms[0]) ],
+			  [ 'Subject', "Backup of Virtualmin on $host" ],
+			  [ 'To', $email ] ],
+		  'attach'  =>
+			[ { 'headers' => [ [ 'Content-type', 'text/plain' ] ],
+			    'data' => &entities_to_ascii($eoutput) } ]
+			};
+		if ($eoutput) {
+			&mailboxes::send_mail($mail);
+			}
+		}
+	}
 
+sub first_save_print {
+$output .= $indent_text.join("", @_)."\n";
+$domain_output{$current_id} .= $indent_text.join("", @_)."\n"
+	if ($current_id);
+}
+sub second_save_print {
+$output .= $indent_text.join("", @_)."\n\n";
+$domain_output{$current_id} .= $indent_text.join("", @_)."\n\n"
+	if ($current_id);
+}
+sub indent_save_print {
+$indent_text .= "    ";
+}
+sub outdent_save_print {
+$indent_text = substr($indent_text, 4);
+}
 
+# Called during the backup process for each domain
+sub backup_cbfunc
+{
+local ($d, $step, $info) = @_;
+if ($step == 0) {
+	$current_id = $d->{'id'};
+	}
+elsif ($step == 2) {
+	$current_id = undef;
+	}
+}
