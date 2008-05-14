@@ -1122,6 +1122,7 @@ else {
 			# Found him .. fix up
 			$extrauser = { %{$_[0]} };
 			$extrauser->{'user'} = &replace_atsign($_[0]->{'user'});
+			$extrauser->{'dn'} = $oldextrauser->{'dn'};
 			&foreign_call($usermodule, "set_user_envs", $extrauser,
 					'MODIFY_USER', $_[0]->{'plainpass'},
 					undef, $oldextrauser,
