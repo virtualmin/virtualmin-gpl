@@ -57,7 +57,7 @@ print &ui_form_end([ [ undef, $text{'save'} ] ]);
 if ($config{'virus'}) {
 	$cs = &check_clamd_status();
 	if ($cs != -1) {
-		print &ui_hr();
+		print &virtualmin_ui_hr();
 		print &ui_buttons_start();
 		if ($cs) {
 			print &ui_buttons_row("disable_clamd.cgi",
