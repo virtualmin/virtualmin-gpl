@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-# Show a domain's password
+# Show a domain's or user's password
 
 $trust_unknown_referers = 1;
 require './virtual-server-lib.pl';
@@ -7,16 +7,33 @@ use POSIX;
 &ReadParse();
 $d = &get_domain($in{'dom'});
 $d || &error($text{'edit_egone'});
-&can_edit_domain($d) || &error($text{'edit_ecannot'});
 &can_show_pass() || &error($text{'showpass_ecannot'});
+if ($in{'user'}) {
+	# Showing for mailbox user
+	@users = &list_domain_users($d, 0, 1, 1, 1);
+	($user) = grep { $_->{'user'} eq $in{'user'} } @users;
+	$user || &error($text{'showpass_egone'});
+	$username = $user->{'user'};
+	$pass = $user->{'plainpass'};
+	$msg1 = $text{'showpass_useru'};
+	$msg2 = $text{'showpass_passu'};
+	}
+else {
+	# For a domain
+	&can_edit_domain($d) || &error($text{'edit_ecannot'});
+	$username = $d->{'user'};
+	$pass = $d->{'pass'};
+	$msg1 = $text{'showpass_user'};
+	$msg2 = $text{'showpass_pass'};
+	}
 
 &popup_header($text{'showpass_title'});
 
 print "<center><table>\n";
-print "<tr> <td><b>$text{'showpass_user'}</b></td> ",
-      "<td><tt>$d->{'user'}</tt></td> </tr>\n";
-print "<tr> <td><b>$text{'showpass_pass'}</b></td> ",
-      "<td><tt>$d->{'pass'}</tt></td> </tr>\n";
+print "<tr> <td><b>$msg1</b></td> ",
+      "<td><tt>$username</tt></td> </tr>\n";
+print "<tr> <td><b>$msg2</b></td> ",
+      "<td><tt>$pass</tt></td> </tr>\n";
 print "</table></center>\n";
 
 &popup_footer();

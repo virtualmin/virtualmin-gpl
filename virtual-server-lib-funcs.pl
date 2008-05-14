@@ -12013,13 +12013,17 @@ else {
 
 }
 
-# show_password_popup(&domain)
+# show_password_popup(&domain, [&user])
 # Returns HTML for a link that pops up a password display window
 sub show_password_popup
 {
-local ($d) = @_;
+local ($d, $user) = @_;
 if (&can_show_pass()) {
-	return "(<a href='showpass.cgi?dom=$d->{'id'}' onClick='window.open(\"showpass.cgi?dom=$d->{'id'}\", \"showpass\", \"toolbar=no,menubar=no,scrollbar=no,width=300,height=70\"); return false'>$text{'edit_showpass'}</a>)";
+	local $link = "showpass.cgi?dom=$d->{'id'}";
+	if ($user) {
+		$link .= "&user=".&urlize($user->{'user'});
+		}
+	return "(<a href='$link' onClick='window.open(\"$link\", \"showpass\", \"toolbar=no,menubar=no,scrollbar=no,width=300,height=70\"); return false'>$text{'edit_showpass'}</a>)";
 	}
 else {
 	return "";

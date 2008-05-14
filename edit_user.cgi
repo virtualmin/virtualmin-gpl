@@ -79,10 +79,8 @@ if (!$mailbox) {
 		# For an existing user, offer to change password
 		$pwfield = &ui_opt_textbox("mailpass", undef, 13,
 			$text{'user_passdef'}."\n".
-			(!&can_show_pass() ? "" :
-			 $user->{'plainpass'} ? "($user->{'plainpass'})" :
-			 defined($user->{'plainpass'}) ?
-			   "(<i>$text{'user_none'}</i>)" : ""),
+			(defined($user->{'plainpass'}) ?
+			  &show_password_popup($d, $user) : ""),
 			$text{'user_passset'});
 		if ($user->{'unix'} && $user->{'change'}) {
 			local $tm = timelocal(gmtime($user->{'change'} *

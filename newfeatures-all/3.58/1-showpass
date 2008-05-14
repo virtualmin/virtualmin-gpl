@@ -1,0 +1,6 @@
+desc=Password in popup window
+html=Mailbox users' passwords are now shown in a separate popup window, rather than on the Edit Mailbox page where anyone can see them.
+master=1
+reseller=1
+owner=1
+link=list_users.cgi?dom=${ID}
