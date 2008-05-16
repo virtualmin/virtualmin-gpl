@@ -125,7 +125,8 @@ else {
 		$err = &valid_mailbox_name($in{'mailuser'});
 		&error($err) if ($err);
 		if ($user->{'person'}) {
-			$in{'real'} =~ /^[^:]*$/ || &error($text{'user_ereal'});
+			$in{'real'} =~ /^[^:\r\n]*$/ ||
+				&error($text{'user_ereal'});
 			$user->{'real'} = $in{'real'};
 			}
 		if (!$in{'new'} && $in{'mailpass_def'}) {
