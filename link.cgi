@@ -167,30 +167,32 @@ if ($header{'content-type'} =~ /text\/html/ && !$header{'x-no-links'}) {
 		s/src="(\/[^"]*)"/src="$linkurl$baseurl$1"/gi;
 		s/src=(\/[^ "'>]*)/src=$linkurl$baseurl$1/gi;
 
-		# Fix offsite image links <img src=http://www.blah.com/foo.gif>
-		s/src='((http|https):\/\/[^']*)'/src='$noiplinkurl$1'/gi;
-		s/src="((http|https):\/\/[^"]*)"/src="$noiplinkurl$1"/gi;
-		s/src=((http|https):\/\/[^ "'>]*)/src=$noiplinkurl$1/gi;
+		# Fix full links to the same host, like 
+		# <img src=http://mydomain.com/blah.gif>
+		s/src='((http|https):\/\/(\Q$host\E|\Q$althost\E)[^']*)'/src='$linkurl$1'/gi;
+		s/src="((http|https):\/\/(\Q$host\E|\Q$althost\E)[^"]*)"/src="$linkurl$1"/gi;
+		s/src=((http|https):\/\/(\Q$host\E|\Q$althost\E)[^ "'>]*)/src=$linkurl$1/gi;
 
 		# Fix absolute hrefs like <a href=/foo.html>
 		s/href='(\/[^']*)'/href='$linkurl$baseurl$1'/gi;
 		s/href="(\/[^"]*)"/href="$linkurl$baseurl$1"/gi;
 		s/href=(\/[^ "'>]*)/href=$linkurl$baseurl$1/gi;
 
-		# Fix offsite hrefs like <a href=http://www.blah.com/>
-		s/href='((http|https):\/\/[^']*)'/href='$noiplinkurl$1'/gi;
-		s/href="((http|https):\/\/[^"]*)"/href="$noiplinkurl$1"/gi;
-		s/href=((http|https):\/\/[^ "'>]*)/href=$noiplinkurl$1/gi;
+		# Fix full links to the same domain, like
+		# <a href=http://mydomain.com/blah.html>
+		s/href='((http|https):\/\/(\Q$host\E|\Q$althost\E)[^']*)'/href='$linkurl$1'/gi;
+		s/href="((http|https):\/\/(\Q$host\E|\Q$althost\E)[^"]*)"/href="$linkurl$1"/gi;
+		s/href=((http|https):\/\/(\Q$host\E|\Q$althost\E)[^ "'>]*)/href=$linkurl$1/gi;
 
 		# Fix absolute form actions like <form action=/foo>
 		s/action='(\/[^']*)'/action='$linkurl$baseurl$1'/gi;
 		s/action="(\/[^"]*)"/action="$linkurl$baseurl$1"/gi;
 		s/action=(\/[^ "'>]*)/action=$linkurl$baseurl$1/gi;
 
-		# Fix offsite form actions
-		s/action='((http|https):\/\/[^']*)'/action='$noiplinkurl$1'/gi;
-		s/action="((http|https):\/\/[^"]*)"/action="$noiplinkurl$1"/gi;
-		s/action=((http|https):\/\/[^ "'>]*)/action=$noiplinkurl$1/gi;
+		# Fix full form form actions
+		s/action='((http|https):\/\/(\Q$host\E|\Q$althost\E)[^']*)'/action='$linkurl$1'/gi;
+		s/action="((http|https):\/\/(\Q$host\E|\Q$althost\E)[^"]*)"/action="$linkurl$1"/gi;
+		s/action=((http|https):\/\/(\Q$host\E|\Q$althost\E)[^ "'>]*)/action=$linkurl$1/gi;
 
 		# Fix CSS imports
 		s/\@import '(\/[^']*)'/\@import '$linkurl$baseurl$1'/gi;
