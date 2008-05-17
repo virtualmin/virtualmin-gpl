@@ -8,8 +8,8 @@ require './virtual-server-lib.pl';
 &require_mail() if ($config{'mail'});
 &ReadParse();
 $d = &get_domain($in{'dom'});
-$d && $d->{'uid'} && ($d->{'gid'} || $d->{'ugid'}) ||
-	&error("Domain $in{'dom'} does not exist!");
+$d && &error("Domain $in{'dom'} does not exist!");
+$d->{'dom'} || &error("Domain $in{'dom'} is not valid!");
 &can_delete_domain($d) || &error($text{'delete_ecannot'});
 
 if ($in{'confirm'}) {
