@@ -1661,6 +1661,7 @@ if ($virtualmin_pro) {
 		    'desc' => $text{'links_website'},
 		    'page' => "link.cgi/$d->{'ip'}/http://www.$d->{'dom'}$pt/",
 		    'cat' => 'services',
+		    'target' => '_new',
 		  });
 	}
 if ($config{'avail_syslog'} && &get_webmin_version() >= 1.305) {
