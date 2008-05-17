@@ -1709,18 +1709,22 @@ sub startstop_web
 local ($typestatus) = @_;
 local $apid = defined($typestatus->{'apache'}) ?
 		$typestatus->{'apache'} == 1 : &get_apache_pid();
+local @links = &foreign_available("apache") ?
+		( "<a href='/apache/'>$text{'index_amanage'}</a>" ) : ( );
 if ($apid) {
 	return ( { 'status' => 1,
 		   'name' => $text{'index_aname'},
 		   'desc' => $text{'index_astop'},
 		   'restartdesc' => $text{'index_arestart'},
-		   'longdesc' => $text{'index_astopdesc'} } );
+		   'longdesc' => $text{'index_astopdesc'},
+		   'links' => \@links } );
 	}
 else {
 	return ( { 'status' => 0,
 		   'name' => $text{'index_aname'},
 		   'desc' => $text{'index_astart'},
-		   'longdesc' => $text{'index_astartdesc'} } );
+		   'longdesc' => $text{'index_astartdesc'},
+		   'links' => \@links } );
 	}
 }
 

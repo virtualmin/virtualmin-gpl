@@ -253,6 +253,59 @@ foreach my $q (@{$info->{'quota'}}) {
 	}
 push(@stats, [ "quotalimit", $qlimit ]);
 push(@stats, [ "quotaused", $qused ]);
+
+# Get mail since the last collection time
+if (-r $procmail_log_file) {
+	# Get last seek position
+	local $lastinfo = &read_file_contents("$historic_info_dir/procmailpos");
+	local @st = stat($procmail_log_file);
+	local $now = time();
+	local ($lastpos, $lastinode, $lasttime);
+	if (defined($lastinfo)) {
+		($lastpos, $lastinode, $lasttime) = split(/\s+/, $lastinfo);
+		}
+	else {
+		# For the first run, start at the end of the file
+		$lastpos = $st[7];
+		$lastinode = $st[1];
+		$lasttime = now();
+		}
+
+	open(PROCMAILLOG, $procmail_log_file);
+	if ($st[1] == $lastinode && $lastpos) {
+		seek(PROCMAILLOG, $lastpos, 0);
+		}
+	else {
+		$lastpos = 0;
+		}
+	local ($mailcount, $spamcount, $viruscount) = (0, 0, 0);
+	while(<PROCMAILLOG>) {
+		$lastpos += length($_);
+		s/\r|\n//g;
+		local %log = map { split(/:/, $_, 2) } split(/\s+/, $_);
+		if ($log{'User'}) {
+			$mailcount++;
+			}
+		if ($log{'Mode'} eq 'Spam') {
+			$spamcount++;
+			}
+		elsif ($log{'Mode'} eq 'Virus') {
+			$viruscount++;
+			}
+		}
+	close(PROCMAILLOG);
+	local $mins = ($now - $lasttime) / 60.0;
+	push(@stats, [ "mailcount", $mailcount / $mins ]);
+	push(@stats, [ "spamcount", $spamcount / $mins ]);
+	push(@stats, [ "viruscount", $viruscount / $mins ]);
+
+	# Save last seek
+	&open_tempfile(PROCMAILPOS, ">$historic_info_dir/procmailpos");
+	&print_tempfile(PROCMAILPOS, $lastpos," ",$st[1]," ",$now."\n");
+	&close_tempfile(PROCMAILPOS);
+	}
+
+# Write to the file
 foreach my $stat (@stats) {
 	open(HISTORY, ">>$historic_info_dir/$stat->[0]");
 	print HISTORY $time," ",$stat->[1],"\n";
@@ -342,7 +395,7 @@ sub list_historic_stats
 local @rv;
 opendir(HISTDIR, $historic_info_dir);
 foreach my $f (readdir(HISTDIR)) {
-	if ($f =~ /^[a-z]+[0-9]*$/ && $f ne "maxes") {
+	if ($f =~ /^[a-z]+[0-9]*$/ && $f ne "maxes" && $f ne "procmailpos") {
 		push(@rv, $f);
 		}
 	}

@@ -1,0 +1,4 @@
+desc=Mail delivery statistics
+html=The number of email messages delivered per minute and the number classified as spam or viruses can now be graphed on the System Statistics page.
+master=1
+link=history.cgi?stat=mailcount&period=3600
