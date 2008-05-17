@@ -11016,7 +11016,10 @@ if ($config{'mysql'}) {
 	&foreign_installed("mysql", 1) == 2 ||
 		return &text('index_emysql', "/mysql/", $clink);
 	if ($mysql::mysql_pass eq '') {
-		&$second_print(&text('check_mysqlnopass', '/mysql/'));
+		local $myd = &root_directory("mysql");
+		local $link = -r "$myd/root_form.cgi" ? '/mysql/root_form.cgi'
+						      : '/mysql/';
+		&$second_print(&text('check_mysqlnopass', $link));
 		}
 	else {
 		&$second_print($text{'check_mysqlok'});
