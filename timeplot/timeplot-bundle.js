@@ -1164,7 +1164,7 @@ if((this._minValue==null)||((this._minValue!=null)&&(range.min<this._minValue)))
 this._minValue=range.min;
 }
 if((this._maxValue==null)||((this._maxValue!=null)&&(range.max*1.05>this._maxValue))){
-this._maxValue=range.max*1.05;
+this._maxValue=Math.round(range.max*1.05)+1;
 }
 
 this._updateMappedValues();

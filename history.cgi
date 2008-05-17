@@ -161,6 +161,7 @@ foreach $stat (@stats) {
 	print "        axisLabelsPlacement: 'top'\n";
 	print "      }),\n";
 	print "      showValues: true,\n";
+	print "      roundValues: false,\n";
 	if (@stats == 1) {
 		print "      fillColor: '#dadaf8',\n";
 		}
@@ -191,6 +192,8 @@ function onResize() {
 }
 </script>
 EOF
+
+print "<a href='history_data.cgi?$statsparams&start=$start&end=$end&nice=1'>data</a><p>\n";
 
 &ui_print_footer("", $text{'index_return'});
 
