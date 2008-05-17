@@ -3167,19 +3167,29 @@ local $msn = $config{'mail_system'} == 0 ? "postfix" :
 	     $config{'mail_system'} == 1 ? "sendmail" : "qmailadmin";
 local $ms = $text{'mail_system_'.$config{'mail_system'}};
 local @rv;
+local @links;
+push(@links, { 'link' => "/$msn/", 'desc' => $text{'index_mmanage'} });
+if (&can_show_history() &&
+    &indexof("mailcount", &list_historic_stats()) >= 0) {
+	foreach my $s ("mailcount", "spamcount", "viruscount") {
+		push(@links, { 'stat' => $s });
+		}
+	}
 if (defined($typestatus->{$msn}) ? $typestatus->{$msn} == 1
 				 : &is_mail_running()) {
 	push(@rv,{ 'status' => 1,
 		   'name' => &text('index_mname', $ms),
 		   'desc' => $text{'index_mstop'},
 		   'restartdesc' => $text{'index_mrestart'},
-		   'longdesc' => $text{'index_mstopdesc'} } );
+		   'longdesc' => $text{'index_mstopdesc'},
+		   'links' => \@links } );
 	}
 else {
 	push(@rv,{ 'status' => 0,
 		   'name' => &text('index_mname', $ms),
 		   'desc' => $text{'index_mstart'},
-		   'longdesc' => $text{'index_mstartdesc'} } );
+		   'longdesc' => $text{'index_mstartdesc'},
+		   'links' => \@links } );
 	}
 if (&foreign_installed("dovecot")) {
 	# Add status for Dovecot

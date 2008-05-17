@@ -533,18 +533,22 @@ return ( ) if (!&postgresql::is_postgresql_local());
 local $r = defined($typestatus->{'postgresql'}) ?
                 $typestatus->{'postgresql'} == 1 :
 		&postgresql::is_postgresql_running();
+local @links = ( { 'link' => '/postgresql/',
+		    'desc' => $text{'index_pgmanage'} } );
 if ($r == 1) {
 	return ( { 'status' => 1,
 		   'name' => $text{'index_pgname'},
 		   'desc' => $text{'index_pgstop'},
 		   'restartdesc' => $text{'index_pgrestart'},
-		   'longdesc' => $text{'index_pgstopdesc'} } );
+		   'longdesc' => $text{'index_pgstopdesc'},
+		   'links' => \@links } );
 	}
 elsif ($r == 0) {
 	return ( { 'status' => 0,
 		   'name' => $text{'index_pgname'},
 		   'desc' => $text{'index_pgstart'},
-		   'longdesc' => $text{'index_pgstartdesc'} } );
+		   'longdesc' => $text{'index_pgstartdesc'},
+		   'links' => \@links } );
 	}
 else {
 	return ( );

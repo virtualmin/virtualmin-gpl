@@ -1083,18 +1083,22 @@ sub startstop_dns
 local ($typestatus) = @_;
 local $bpid = defined($typestatus{'bind8'}) ?
 		$typestatus{'bind8'} == 1 : &get_bind_pid();
+local @links = ( { 'link' => '/bind8/',
+		   'desc' => $text{'index_bmanage'} } );
 if ($bpid && kill(0, $bpid)) {
 	return ( { 'status' => 1,
 		   'name' => $text{'index_bname'},
 		   'desc' => $text{'index_bstop'},
 		   'restartdesc' => $text{'index_brestart'},
-		   'longdesc' => $text{'index_bstopdesc'} } );
+		   'longdesc' => $text{'index_bstopdesc'},
+		   'links' => \@links } );
 	}
 else {
 	return ( { 'status' => 0,
 		   'name' => $text{'index_bname'},
 		   'desc' => $text{'index_bstart'},
-		   'longdesc' => $text{'index_bstartdesc'} } );
+		   'longdesc' => $text{'index_bstartdesc'},
+		   'links' => \@links } );
 	}
 }
 

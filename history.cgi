@@ -22,8 +22,8 @@ require './virtual-server-lib.pl';
 @stats = split(/\0/, $in{'stat'});
 @stats = ( "load" ) if (!@stats);
 $statsparams = join("&", map { "stat=$_" } @stats);
-$start = $in{'start'} || time()-24*60*60;
 $period = $in{'period'} || 24*60*60;
+$start = $in{'start'} || time()-$period;
 $end = $start + $period;
 ($first, $last) = &get_historic_first_last($stats[0]);
 if (!$first) {

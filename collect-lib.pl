@@ -285,12 +285,12 @@ if (-r $procmail_log_file) {
 		local %log = map { split(/:/, $_, 2) } split(/\s+/, $_);
 		if ($log{'User'}) {
 			$mailcount++;
-			}
-		if ($log{'Mode'} eq 'Spam') {
-			$spamcount++;
-			}
-		elsif ($log{'Mode'} eq 'Virus') {
-			$viruscount++;
+			if ($log{'Mode'} eq 'Spam') {
+				$spamcount++;
+				}
+			elsif ($log{'Mode'} eq 'Virus') {
+				$viruscount++;
+				}
 			}
 		}
 	close(PROCMAILLOG);

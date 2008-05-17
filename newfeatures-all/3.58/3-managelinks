@@ -1,0 +1,3 @@
+desc=Server manage links
+html=Added links from the Status section of the System Information page to the Webmin modules for their particular servers, and additional stats where available.
+master=1

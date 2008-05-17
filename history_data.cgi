@@ -61,7 +61,10 @@ for($i=0; $i<scalar(@$first); $i++) {
 				$v *= 100;
 				}
 			}
-		$v = int($v);
+		if ($v ne int($v)) {
+			# Two decimal places only
+			$v = sprintf("%.2f", $v);
+			}
 		push(@values, $v);
 		}
 	print strftime("%Y-%m-%d %H:%M:%S", localtime($first->[$i]->[0])),",",

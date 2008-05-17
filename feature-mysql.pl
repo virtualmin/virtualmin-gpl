@@ -875,18 +875,22 @@ return ( ) if (!&mysql::is_mysql_local());	# cannot stop/start remote
 local $r = defined($typestatus->{'mysql'}) ?
 		$typestatus->{'mysql'} == 1 :
 		&mysql::is_mysql_running();
+local @links = ( { 'link' => '/mysql/',
+		    'desc' => $text{'index_mymanage'} } );
 if ($r == 1) {
 	return ( { 'status' => 1,
 		   'name' => $text{'index_myname'},
 		   'desc' => $text{'index_mystop'},
 		   'restartdesc' => $text{'index_myrestart'},
-		   'longdesc' => $text{'index_mystopdesc'} } );
+		   'longdesc' => $text{'index_mystopdesc'},
+		   'links' => \@links } );
 	}
 elsif ($r == 0) {
 	return ( { 'status' => 0,
 		   'name' => $text{'index_myname'},
 		   'desc' => $text{'index_mystart'},
-		   'longdesc' => $text{'index_mystartdesc'} } );
+		   'longdesc' => $text{'index_mystartdesc'},
+		   'links' => \@links } );
 	}
 else {
 	return ( );

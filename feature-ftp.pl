@@ -403,18 +403,22 @@ if (defined($typestatus->{'proftpd'})) {
 else {
 	$status = &proftpd::get_proftpd_pid();
 	}
+local @links = ( { 'link' => '/proftpd/',
+		   'desc' => $text{'index_fmanage'} } );
 if ($status) {
 	return ( { 'status' => 1,
 		   'name' => $text{'index_fname'},
 		   'desc' => $text{'index_fstop'},
 		   'restartdesc' => $text{'index_frestart'},
-		   'longdesc' => $text{'index_fstopdesc'} } );
+		   'longdesc' => $text{'index_fstopdesc'},
+		   'links' => \@links } );
 	}
 else {
 	return ( { 'status' => 0,
 		   'name' => $text{'index_fname'},
 		   'desc' => $text{'index_fstart'},
-		   'longdesc' => $text{'index_fstartdesc'} } );
+		   'longdesc' => $text{'index_fstartdesc'},
+		   'links' => \@links } );
 	}
 }
 
