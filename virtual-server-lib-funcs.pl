@@ -12608,6 +12608,26 @@ else {
 	}
 }
 
+# show_check_migration_features(feature, ...)
+# Shows a message about features found in a migration, plus any that are
+# not supported. Returns only those that are supported.
+sub show_check_migration_features
+{
+local @got = @_;
+local %pconfig = map { $_, 1 } @feature_plugins;
+local @notgot = grep { !$config{$_} && !$pconfig{$_} } @got;
+@got = grep { $config{$_} || $pconfig{$_} } @got;
+local @gotmsg = map { $text{'feature_'.$_} ||
+		      &plugin_call($_, "feature_name") || $_ } @got;
+local @notgotmsg = map { $text{'feature_'.$_} ||
+		         &plugin_call($_, "feature_name") || $_ } @notgot;
+&$second_print(".. found ",join(", ", @gotmsg),".");
+if (@notgot) {
+	&$second_print("<b>However, the follow features are not supported or enabled on your system : ",join(", ", @notgotmsg).". Some functions of the migrated virtual server may not work.");
+	}
+return @got;
+}
+
 # obtain_lock_everything(&domain)
 # Obtain locks on everything lockable that this domain has enabled
 sub obtain_lock_everything

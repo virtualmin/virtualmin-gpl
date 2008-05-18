@@ -105,11 +105,7 @@ if (&indexof("web", @got) < 0) {
 	}
 
 # Tell the user what we have got
-local %pconfig = map { $_, 1 } @feature_plugins;
-@got = grep { $config{$_} || $pconfig{$_} } @got;
-&$second_print(".. found ".
-	       join(", ", map { $text{'feature_'.$_} ||
-				&plugin_call($_, "feature_name") } @got).".");
+@got = &show_check_migration_features(@got);
 local %got = map { $_, 1 } @got;
 
 # Work out user and group IDs
