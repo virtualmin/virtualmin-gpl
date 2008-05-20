@@ -915,7 +915,7 @@ When scheduled backups are sent to their domain owners as well, each owner only 
 Added script installers for Trac and MoinMoin, contributed by Jannis Leidel.
 ---- Changes since 3.57 ----
 Mailbox users' passwords are now shown in a separate popup window, rather than on the Edit Mailbox page where anyone can see them.
-Updated the SugarCRM installer to 5.0.0e, ZenPhoto to 1.1.6, and Piwik to 0.1.9.
+Updated the SugarCRM installer to 5.0.0e, ZenPhoto to 1.1.6, and Piwik to 0.2.1.
 Modified the 'View website via Webmin' feature to not munge offsite links, only those to the same domain.
 The number of email messages delivered per minute and the number classified as spam or viruses can now be graphed on the System Statistics page.
 Added links from the Status section of the System Information page to the Webmin modules for their particular servers, and additional stats where available.
