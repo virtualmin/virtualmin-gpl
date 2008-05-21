@@ -86,7 +86,8 @@ if (!-r $_[0]->{'ssl_cert'} && !-r $_[0]->{'ssl_key'}) {
 		return 0;
 		}
 	else {
-		&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'}, 0755, $_[0]->{'ssl_cert'}, $_[0]->{'ssl_key'});
+		&set_certificate_permissions($_[0], $_[0]->{'ssl_cert'});
+		&set_certificate_permissions($_[0], $_[0]->{'ssl_key'});
 		if (&has_command("chcon")) {
 			&execute_command("chcon -R -t httpd_config_t ".quotemeta($_[0]->{'ssl_cert'}).">/dev/null 2>&1");
 			&execute_command("chcon -R -t httpd_config_t ".quotemeta($_[0]->{'ssl_key'}).">/dev/null 2>&1");
@@ -645,6 +646,14 @@ return $config{$mode.'_tmpl'} ?
 	    &absolute_domain_path($d,
 	     &substitute_domain_template($config{$mode.'_tmpl'}, $d)) :
 	    "$d->{'home'}/ssl.".$mode;
+}
+
+# set_certificate_permissions(&domain, file)
+# Set permissions on a cert file so that Apache can read them.
+sub set_certificate_permissions
+{
+local ($d, $file) = @_;
+&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0700, $file);
 }
 
 # obtain_lock_ssl(&domain)

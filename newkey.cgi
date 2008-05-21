@@ -42,7 +42,7 @@ $d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
 $cert =~ s/\r//g;
 &print_tempfile(CERT, $cert);
 &close_tempfile(CERT);
-&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0750, $d->{'ssl_cert'});
+&set_certificate_permissions($d, $d->{'ssl_cert'});
 &unlock_file($d->{'ssl_cert'});
 
 &lock_file($d->{'ssl_key'});
@@ -51,7 +51,7 @@ $cert =~ s/\r//g;
 $newkey =~ s/\r//g;
 &print_tempfile(CERT, $newkey);
 &close_tempfile(CERT);
-&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0750, $d->{'ssl_key'});
+&set_certificate_permissions($d, $d->{'ssl_key'});
 &unlock_file($d->{'ssl_key'});
 &$second_print($text{'setup_done'});
 

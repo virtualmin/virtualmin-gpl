@@ -2325,6 +2325,25 @@ if ($virt) {
 	}
 }
 
+# apache_in_domain_group(&domain)
+# Returns 1 if the user Apache runs as is in the group for some domain,
+# indicating that it can read files that are group-readable only
+sub apache_in_domain_group
+{
+local ($d) = @_;
+local $tmpl = &get_template($d->{'template'});
+local $web_user = &get_apache_user($d);
+if ($tmpl->{'web_user'} ne 'none' && $web_user) {
+	# An Apache user is defined.. but does is it a group member?
+	local @uinfo = getpwnam($web_user);
+	if ($uinfo[3] == $d->{'gid'} ||
+            &indexof($d->{'group'}, &other_groups($web_user)) >= 0) {
+		return 1;
+		}
+	}
+return 0;
+}
+
 # obtain_lock_web(&domain)
 # Lock the Apache config file for some domain
 sub obtain_lock_web
