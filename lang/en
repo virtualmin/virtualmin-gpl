@@ -1697,6 +1697,10 @@ log_delete_balancers=Deleted $2 proxy paths in $1
 log_sv=Updated spam and virus scanners
 log_shells1=Reverted custom shells to defaults
 log_shells0=Modified custom shells
+log_cmd=Ran API command $1
+log_cmd_l=Ran API command $1 $2
+log_remote=Called remote API $1
+log_remote_l=Called remote API $1 $2
 
 backup_title=Backup Virtual Servers
 backup_title2=Scheduled Backup

@@ -12670,6 +12670,53 @@ sub release_lock_anything
 local ($d) = @_;
 }
 
+# virtualmin_api_log(&argv, [&domain])
+# Log an action taken by a Virtualmin command-line API call
+sub virtualmin_api_log
+{
+local ($argv, $d) = @_;
+
+# Parse into flags hash
+local (%flags, $lastflag);
+local @argv = @$argv;
+while(@argv) {
+	local $a = shift(@argv);
+	if ($a =~ /^\-+(\S+)$/) {
+		# A new flag
+		$lastflag = $1;
+		$flags{$lastflag} = "";
+		}
+	elsif ($lastflag) {
+		# A flag value
+		if ($flags{$lastflag} ne "") {
+			$flags{$lastflag} .= " ";
+			}
+		$flags{$lastflag} .= $a;
+		}
+	if ($a =~ /^[^"' ]+$/) {
+		push(@qargv, $a);
+		}
+	elsif ($a !~ /"/) {
+		push(@qargv, "\"$a\"");
+		}
+	elsif ($a !~ /'/) {
+		push(@qargv, "'$a'");
+		}
+	else {
+		push(@qargv, quotameta($a));
+		}
+	}
+$flags{'argv'} = &urlize(join(" ", @qargv));
+
+# Log it
+local $script = $0;
+$script =~ s/^.*\///;
+local $remote_user = "root";
+local $ENV{'REMOTE_HOST'} ||= "127.0.0.1";
+&webmin_log($main::virtualmin_remote_api ? "remote" : "cmd",
+	    $script, $d ? $d->{'dom'} : undef, \%flags);
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;
