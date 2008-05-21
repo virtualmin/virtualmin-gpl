@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-user.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 # Get shells
 @ashells = grep { $_->{'mailbox'} && $_->{'avail'} } &list_available_shells();
@@ -318,6 +319,7 @@ if ($config{'other_users'}) {
 &run_post_actions();
 &release_lock_mail($d);
 &release_lock_unix($d);
+&virtualmin_api_log(\@OLDARGV, $d);
 print "User $user->{'user'} updated successfully\n";
 
 sub usage

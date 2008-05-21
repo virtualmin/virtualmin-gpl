@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-database.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -84,6 +85,7 @@ else {
 &save_domain($d);
 &refresh_webmin_user($d);
 &run_post_actions();
+&virtualmin_api_log(\@OLDARGV, $d);
 print "Database $name created successfully\n";
 
 sub usage

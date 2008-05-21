@@ -15,6 +15,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-domain.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 $first_print = \&first_text_print;
 $second_print = \&second_text_print;
@@ -509,6 +510,7 @@ if ($style && $dom{'web'}) {
 	&$second_print($text{'setup_done'});
 	}
 
+&virtualmin_api_log(\@OLDARGV, \%dom);
 print "All done!\n";
 
 sub usage

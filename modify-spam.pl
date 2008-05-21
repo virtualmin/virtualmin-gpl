@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-spam.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 $config{'spam'} || &usage("Spam filtering is not enabled for Virtualmin");
 
 $first_print = \&first_text_print;
@@ -153,6 +154,7 @@ foreach $d (@doms) {
 	}
 
 &run_post_actions();
+&virtualmin_api_log(\@OLDARGV);
 
 sub usage
 {

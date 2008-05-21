@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-limits.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 # Parse command-line args
 @all_allow = (@opt_features, "virt", @feature_plugins);
@@ -185,6 +186,7 @@ if ($shell && $dom->{'unix'}) {
 	}
 
 &run_post_actions();
+&virtualmin_api_log(\@OLDARGV, $dom);
 print "Successfully updated limits for $dom->{'user'}\n";
 
 sub usage

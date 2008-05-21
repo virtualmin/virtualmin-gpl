@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "delete-alias.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -49,6 +50,7 @@ if (defined(&get_simple_alias)) {
 &delete_virtuser($virt);
 &sync_alias_virtuals($d);
 &release_lock_mail($d);
+&virtualmin_api_log(\@OLDARGV, $d);
 print "Alias for $email deleted successfully\n";
 
 sub usage

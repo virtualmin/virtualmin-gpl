@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-custom.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 use POSIX;
 
 # Parse command-line args
@@ -50,6 +51,7 @@ foreach $f (@set) {
 	}
 
 &save_domain($dom);
+&virtualmin_api_log(\@OLDARGV, $dom);
 print "Custom field values in $domain successfully updated\n";
 
 sub usage

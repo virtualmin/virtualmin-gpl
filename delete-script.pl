@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "delete-script.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 
 $first_print = \&first_text_print;
@@ -81,6 +82,7 @@ if ($ok) {
 	&remove_domain_script($d, $sinfo);
 
 	&run_post_actions();
+	&virtualmin_api_log(\@OLDARGV, $d);
 	}
 else {
 	&$second_print($text{'scripts_failed'});

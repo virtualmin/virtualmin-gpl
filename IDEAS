@@ -69,7 +69,3 @@
  - Functional tests should include some wget calls to Webmin
 	- and call remote.cgi
 
- - Command line scripts should log
-	- get old argv
-	- virtualmin_api_log(\@oldargv)
-		- logs parsed args, original command line, if remote.cgi call

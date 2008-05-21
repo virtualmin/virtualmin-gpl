@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "set-php-directory.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 # Parse command-line args
 $owner = 1;
@@ -56,6 +57,7 @@ elsif ($dir !~ /^\//) {
 &save_domain_php_directory($d, $dir, $version);
 &release_lock_web($d);
 &run_post_actions();
+&virtualmin_api_log(\@OLDARGV, $d);
 
 sub usage
 {

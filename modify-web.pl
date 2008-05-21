@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-web.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 $config{'web'} || &usage("Web serving is not enabled for Virtualmin");
 
 $first_print = \&first_text_print;
@@ -247,6 +248,7 @@ foreach $d (@doms) {
 	&release_lock_web($d);
 	}
 &run_post_actions();
+&virtualmin_api_log(\@OLDARGV);
 
 sub usage
 {

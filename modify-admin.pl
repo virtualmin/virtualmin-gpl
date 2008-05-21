@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-admin.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -115,6 +116,7 @@ foreach $e (@cannotedits) {
 # Save him
 &modify_extra_admin($admin, $old, $d);
 &release_lock_webmin();
+&virtualmin_api_log(\@OLDARGV, $d);
 print "Extra administrator $name modified successfully\n";
 
 sub usage

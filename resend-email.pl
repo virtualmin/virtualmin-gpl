@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "resend-email.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 $first_print = \&first_text_print;
 $second_print = \&second_text_print;
@@ -36,6 +37,7 @@ $dom || usage("Virtual server $domain does not exist");
 
 if (&will_send_domain_email($dom)) {
 	&send_domain_email($dom);
+	&virtualmin_api_log(\@OLDARGV, $dom);
 	}
 else {
 	print "Signup email is not enabled for this domain\n";

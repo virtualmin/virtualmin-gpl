@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "delete-domain.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 &set_all_text_print();
 
@@ -51,6 +52,7 @@ if ($err) {
 	print "$err\n";
 	exit 1;
 	}
+&virtualmin_api_log(\@OLDARGV, $dom);
 print "All done!\n";
 
 sub usage

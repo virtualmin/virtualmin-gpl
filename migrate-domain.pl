@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "migrate-domain.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 &require_migration();
 
@@ -169,6 +170,7 @@ $mfunc = "migration_${type}_migrate";
 # Show the result
 if (@doms) {
 	print "The following servers were successfully migrated : ",join(" ", map { $_->{'dom'} } @doms),"\n";
+	&virtualmin_api_log(\@OLDARGV, $doms[0]);
 	}
 else {
 	print "Migration failed! See the error output above.\n";

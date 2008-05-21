@@ -15,6 +15,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-user.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 # Get shells
 @ashells = grep { $_->{'mailbox'} && $_->{'avail'} } &list_available_shells();
@@ -263,6 +264,7 @@ if (!$nocreationmail) {
 
 &release_lock_unix($d);
 &release_lock_mail($d);
+&virtualmin_api_log(\@OLDARGV, $d);
 print "User $user->{'user'} created successfully\n";
 
 sub usage

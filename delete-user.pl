@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "delete-user.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -75,6 +76,7 @@ if ($config{'other_users'}) {
 
 &release_lock_mail($d);
 &release_lock_unix($d);
+&virtualmin_api_log(\@OLDARGV, $d);
 print "User $user->{'user'} deleted successfully\n";
 
 sub usage

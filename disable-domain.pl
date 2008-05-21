@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "disable-domain.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 $first_print = \&first_text_print;
 $second_print = \&second_text_print;
@@ -81,6 +82,7 @@ $d->{'disabled_why'} = $why;
 &set_domain_envs($d, "DISABLE_DOMAIN");
 &made_changes();
 &reset_domain_envs($d);
+&virtualmin_api_log(\@OLDARGV, $d);
 print "All done!\n";
 
 sub usage

@@ -1,0 +1,4 @@
+desc=Actions logging by API commands
+html=All Virtualmin command-line and remote API programs now participate in Webmin logging, so their invocation and changes can be viewed in the Webmin Actions Log module.
+master=1
+link=/webminlog/

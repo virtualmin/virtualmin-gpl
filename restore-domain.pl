@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "restore-domain.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 $first_print = \&first_text_print;
 $second_print = \&second_text_print;
@@ -194,6 +195,7 @@ $opts{'fix'} = $fix;
 $ok = &restore_domains($src, \@doms, \@rfeats, \%opts, \@vbs, $onlyfeats,
 		       $ipinfo);
 &run_post_actions();
+&virtualmin_api_log(\@OLDARGV, $doms[0]);
 if ($ok) {
 	&$second_print("Restore completed successfully.");
 	}

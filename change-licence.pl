@@ -16,6 +16,7 @@ if (!$module_name) {
 	$< == 0 || die "change-licence.pl must be run as root";
 	}
 &set_all_text_print();
+@OLDARGV = @ARGV;
 
 # Parse args
 while(@ARGV > 0) {
@@ -118,6 +119,7 @@ if ($webmin::config{'upsource'} =~ /\Q$upgrade_virtualmin_host\E/) {
 &write_env_file($virtualmin_license_file, \%lfile);
 &unlock_file($virtualmin_license_file);
 &$second_print(".. done");
+&virtualmin_api_log(\@OLDARGV);
 
 sub usage
 {

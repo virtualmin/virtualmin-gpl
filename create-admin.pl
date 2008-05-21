@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-admin.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 # Parse command-line args
 $norename = 1;
@@ -85,6 +86,7 @@ foreach $e (@edits) {
 # Create the admin
 &create_extra_admin($admin, $d);
 &release_lock_webmin();
+&virtualmin_api_log(\@OLDARGV, $d);
 print "Extra administrator $name created successfully\n";
 
 sub usage

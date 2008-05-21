@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "delete-php-directory.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 # Parse command-line args
 $owner = 1;
@@ -47,6 +48,7 @@ if ($dir eq &public_html_dir($d)) {
 &set_all_null_print();
 &delete_domain_php_directory($d, $dir);
 &release_lock_web($d);
+&virtualmin_api_log(\@OLDARGV, $d);
 &run_post_actions();
 
 sub usage

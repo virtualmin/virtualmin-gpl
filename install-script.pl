@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "install-script.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 &set_all_text_print();
@@ -258,6 +259,7 @@ if ($ok) {
 				  : ( $suser, $spass ),
 			   $ok < 0 ? $msg : undef);
 	&run_post_actions();
+	&virtualmin_api_log(\@OLDARGV, $d);
 	}
 else {
 	&$second_print($text{'scripts_failed'});

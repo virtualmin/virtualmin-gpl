@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-simple-alias.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 # Parse command-line args
 &require_mail();
@@ -103,6 +104,7 @@ $virt = { 'from' => $email,
 &release_lock_mail($d);
 &switch_to_domain_user($d);
 &write_simple_autoreply($d, $simple);
+&virtualmin_api_log(\@OLDARGV, $d);
 print "Alias for $email created successfully\n";
 
 sub usage

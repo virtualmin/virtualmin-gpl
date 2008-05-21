@@ -14,6 +14,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "fetch-script-files.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 # Parse command-line args
 while(@ARGV) {
