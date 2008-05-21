@@ -193,8 +193,6 @@ function onResize() {
 </script>
 EOF
 
-print "<a href='history_data.cgi?$statsparams&start=$start&end=$end&nice=1'>data</a><p>\n";
-
 &ui_print_footer("", $text{'index_return'});
 
 sub period_to_name
