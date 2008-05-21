@@ -48,7 +48,7 @@ if (!$in{'self'}) {
 	$rv = $?;
 	$out = `cat $outtemp`;
 	unlink($outtemp);
-	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755,
+	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0750,
 				   $d->{'ssl_csr'});
 	&unlock_file($d->{'ssl_csr'});
 	if (!-r $d->{'ssl_csr'} || $rv) {
@@ -113,13 +113,13 @@ else {
 	&unlink_logged($d->{'ssl_cert'});
 	&lock_file($d->{'ssl_cert'});
 	&system_logged("mv ".quotemeta($ctemp)." ".quotemeta($d->{'ssl_cert'}));
-	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755, $d->{'ssl_cert'});
+	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0750, $d->{'ssl_cert'});
 	&unlock_file($d->{'ssl_cert'});
 
 	&unlink_logged($d->{'ssl_key'});
 	&lock_file($d->{'ssl_key'});
 	&system_logged("mv ".quotemeta($ktemp)." ".quotemeta($d->{'ssl_key'}));
-	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755, $d->{'ssl_key'});
+	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0750, $d->{'ssl_key'});
 	&unlock_file($d->{'ssl_key'});
 	&$second_print($text{'setup_done'});
 
