@@ -447,6 +447,13 @@ if ($certificate) {
 		&print_tempfile(CERT, $key);
 		&close_tempfile(CERT);
 		}
+	local $ca = &cleanup_plesk_cert($certificate->{'ca-certificate'});
+	if ($ca) {
+		$dom{'ssl_chain'} ||= &default_certificate_file(\%dom, 'chain');
+		&open_tempfile(CERT, ">$dom{'ssl_chain'}");
+		&print_tempfile(CERT, $ca);
+		&close_tempfile(CERT);
+		}
 	&$second_print($cert && $key ? ".. done" :
 		       !$cert && $key ? ".. missing certificate" :
 		       $cert && !$key ? ".. missing key" :

@@ -46,7 +46,7 @@ if (!$in{'self'}) {
 	print CA ".\n";
 	close(CA);
 	$rv = $?;
-	$out = `cat $outtemp`;
+	$out = &read_file_contents($outtemp);
 	unlink($outtemp);
 	&set_certificate_permissions($d, $d->{'ssl_csr'});
 	&unlock_file($d->{'ssl_csr'});
@@ -64,10 +64,12 @@ if (!$in{'self'}) {
 	print "$text{'csr_done'}<p>\n";
 
 	print &text('csr_csr', "<tt>$d->{'ssl_csr'}</tt>"),"\n";
-	print "<pre>",`cat $d->{'ssl_csr'}`,"</pre>\n";
+	print "<pre>",&html_escape(
+			&read_file_contents($d->{'ssl_csr'})),"</pre>\n";
 
 	print &text('csr_key', "<tt>$d->{'ssl_newkey'}</tt>"),"\n";
-	print "<pre>",`cat $d->{'ssl_newkey'}`,"</pre>\n";
+	print "<pre>",&html_escape(
+			&read_file_contents($d->{'ssl_newkey'})),"</pre>\n";
 	}
 else {
 	# Create key file

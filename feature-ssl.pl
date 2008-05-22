@@ -582,6 +582,9 @@ local @dirs;
 push(@dirs, "SSLEngine on");
 push(@dirs, "SSLCertificateFile $d->{'ssl_cert'}");
 push(@dirs, "SSLCertificateKeyFile $d->{'ssl_key'}");
+if ($d->{'ssl_chain'}) {
+	push(@dirs, "SSLCACertificateFile $d->{'ssl_chain'}");
+	}
 return @dirs;
 }
 

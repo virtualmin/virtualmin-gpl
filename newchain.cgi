@@ -47,6 +47,8 @@ elsif ($in{'mode'} == 2) {
 # Apply it
 &set_all_null_print();
 &save_chained_certificate_file($d, $chain);
+$d->{'ssl_chain'} = $chain;
+&save_domain($d);
 &run_post_actions();
 &domain_redirect($d);
 
