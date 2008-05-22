@@ -262,5 +262,7 @@ $disabled_website_dir = "$module_config_directory/disabledweb";
 
 $linux_limits_config = "/etc/security/limits.conf";
 
+$scheduled_backups_dir = "$module_config_directory/backups";
+
 1;
 

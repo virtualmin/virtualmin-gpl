@@ -65,4 +65,4 @@
 	- Multiple schedules
 	- Allow backups and restores and schedules by server owners
 	- Purge old backups
-
+	- Crossport to GPL version
