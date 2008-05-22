@@ -1,8 +1,6 @@
 # Functions for migrating a plesk backup. These appear to be in MIME format,
 # with each part (home dir, settings, etc) in a separate 'attachment'
 
-# XXX how to find regular aliases?
-
 # migration_plesk_validate(file, domain, [user], [&parent], [prefix], [pass])
 # Make sure the given file is a Plesk backup, and contains the domain
 sub migration_plesk_validate

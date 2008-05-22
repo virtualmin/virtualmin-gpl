@@ -72,10 +72,17 @@ while(@ARGV > 0) {
 	elsif ($a eq "--migrate") {
 		$migrate = shift(@ARGV);
 		}
+	elsif ($a eq "--user") {
+		$webmin_user = shift(@ARGV);
+		}
+	elsif ($a eq "--pass") {
+		$webmin_pass = shift(@ARGV);
+		}
 	else {
 		&usage();
 		}
 	}
+$webmin_wget_command = "wget -O - --cache=off --proxy=off --http-user=$webmin_user --http-passwd=$webmin_pass --user-agent=Webmin ";
 
 $prefix = &compute_prefix($test_domain);
 $test_full_user = &userdom_name($test_user, { 'dom' => $test_domain,
@@ -1086,6 +1093,58 @@ $prepost_tests = [
 	{ 'command' => 'rm -f /tmp/prepost-test.out' },
 	];
 
+$webmin_tests = [
+	# Make sure the main Virtualmin page can be displayed
+	{ 'command' => $webmin_wget_command.
+		       "http://localhost:10000/virtual-server/",
+	  'grep' => [ 'Virtualmin Virtual Servers', 'Delete Selected' ],
+	},
+
+	# Create a test domain
+	{ 'command' => $webmin_wget_command.
+		       "'http://localhost:10000/virtual-server/domain_setup.cgi?dom=$test_domain&vpass=smeg&template=0&vuser_def=1&email_def=1&mgroup_def=1&group_def=1&prefix_def=1&db_def=1&quota=100&quota_units=1048576&uquota=120&uquota_units=1048576&bwlimit_def=0&bwlimit=100&bwlimit_units=MB&mailboxlimit_def=1&aliaslimit_def=0&aliaslimit=34&dbslimit_def=0&dbslimit=10&domslimit_def=0&domslimit=3&nodbname=0&field_purpose=&field_amicool=&unix=1&dir=1&logrotate=1&mail=1&dns=1&web=1&webalizer=1&mysql=1&webmin=1&proxy_def=1&fwdto_def=1&virt=0&ip=&content_def=1'",
+	  'grep' => [ 'Adding new virtual website', 'Saving server details' ],
+	},
+
+	# Make sure the domain was created
+	{ 'command' => 'list-domains.pl',
+	  'grep' => "^$test_domain",
+	},
+
+	# Delete the domain
+	{ 'command' => $webmin_wget_command.
+		       "http://localhost:10000/virtual-server/delete_domain.cgi\\?dom=`./list-domains.pl --domain $test_domain --id-only`\\&confirm=1",
+	  'grep' => [ 'Deleting virtual website', 'Deleting server details' ],
+	  'cleanup' => 1,
+	},
+
+	];
+
+$remote_tests = [
+	# Test domain creation via remote API
+	{ 'command' => $webmin_wget_command.
+		       "'http://localhost:10000/virtual-server/remote.cgi?program=create-domain&domain=$test_domain&pass=smeg&dir=&unix=&web=&dns=&mail=&webalizer=&mysql=&logrotate=&".join("&", map { $_->[0]."=" } @create_args)."'",
+	  'grep' => 'Exit status: 0',
+	},
+
+	# Make sure it was created
+	{ 'command' => $webmin_wget_command.
+		       "'http://localhost:10000/virtual-server/remote.cgi?program=list-domains'",
+	  'grep' => [ "^$test_domain", 'Exit status: 0' ],
+	},
+
+	# Delete the domain
+	{ 'command' => $webmin_wget_command.
+		       "'http://localhost:10000/virtual-server/remote.cgi?program=delete-domain&domain=$test_domain'",
+	  'grep' => [ 'Exit status: 0' ],
+	},
+	];
+
+if (!$webmin_user || !$webmin_pass) {
+	$webmin_tests = [ { 'command' => 'echo Webmin tests cannot be run unless the --user and --pass parameters are given' } ];
+	$remote_tests = [ { 'command' => 'echo Remote API tests cannot be run unless the --user and --pass parameters are given' } ];
+	}
+
 $alltests = { 'domains' => $domains_tests,
 	      'mailbox' => $mailbox_tests,
 	      'alias' => $alias_tests,
@@ -1098,6 +1157,8 @@ $alltests = { 'domains' => $domains_tests,
 	      'backup' => $backup_tests,
               'mail' => $mail_tests,
 	      'prepost' => $prepost_tests,
+	      'webmin' => $webmin_tests,
+	      'remote' => $remote_tests,
 	    };
 
 # Run selected tests

@@ -66,6 +66,3 @@
 	- Allow backups and restores and schedules by server owners
 	- Purge old backups
 
- - Functional tests should include some wget calls to Webmin
-	- and call remote.cgi
-
