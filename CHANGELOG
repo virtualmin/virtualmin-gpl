@@ -922,3 +922,4 @@ Added links from the Status section of the System Information page to the Webmin
 If a migrated domain needs features that are not supported by the system, a warning message is displayed.
 All new SSL certificate and key files how have 700 permissions, so that only the domain owner and Apache (which starts as root) can read them.
 All Virtualmin command-line and remote API programs now participate in Webmin logging, so their invocation and changes can be viewed in the Webmin Actions Log module.
+Plesk sub-domains are now imported as Virtualmin sub-servers.

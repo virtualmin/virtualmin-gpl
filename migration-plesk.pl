@@ -715,7 +715,7 @@ foreach my $adom (keys %$aliasdoms) {
 	push(@rvdoms, \%alias);
 	}
 
-# Migrate sub-domains
+# Migrate sub-domains (as Virtualmin sub-servers)
 local $subdoms = $domain->{'phosting'}->{'subdomain'};
 if (!$subdoms) {
 	$subdoms = { };
@@ -735,8 +735,7 @@ foreach my $sdom (keys %$subdoms) {
 			'prefix', $dom{'prefix'},
 			'ugroup', $dom{'ugroup'},
 			'pass', $dom{'pass'},
-			'subdom', $dom{'id'},
-			'subprefix', $sdom,
+			'parent', $dom{'id'},
 			'uid', $dom{'uid'},
 			'gid', $dom{'gid'},
 			'ugid', $dom{'ugid'},
