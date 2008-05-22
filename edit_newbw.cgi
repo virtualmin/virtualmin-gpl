@@ -145,7 +145,7 @@ print &ui_hidden_table_end("table3");
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 
 # Button to show graph
-print &virtualmin_ui_hr();
+print &ui_hr();
 print &ui_buttons_start();
 print &ui_buttons_row("bwgraph.cgi", $text{'newbw_graphbutton'},
 				     $text{'newbw_graphdesc'});

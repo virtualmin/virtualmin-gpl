@@ -87,16 +87,5 @@ $rv =~ s/\n/ /g;
 return $tag ? "$tag='$rv'" : $rv;
 }
 
-# Temporary compatability function
-sub virtualmin_ui_hr
-{
-if (defined(&ui_hr)) {
-	return &ui_hr();
-	}
-else {
-	return "<hr>\n";
-	}
-}
-
 1;
 
