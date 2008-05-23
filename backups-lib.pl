@@ -47,9 +47,29 @@ foreach my $b (readdir(BACKUPS)) {
 closedir(BACKUPS);
 
 # Merge in cron jobs to see which are enabled
-# XXX
+&foreign_require("cron", "cron-lib.pl");
+local @jobs = &cron::list_cron_jobs();
+foreach my $j (@jobs) {
+	if ($j->{'user'} eq 'root' &&
+	    $j->{'command'} =~ /^\Q$backup_cron_cmd\E(\s+\-\-id\s+(\d+))?/) {
+		local $id = $2 || 1;
+		local ($backup) = grep { $_->{'id'} eq $id } @rv;
+		if ($backup) {
+			$backup->{'enabled'} = 1;
+			&copy_cron_sched_keys($job, $backup);
+			}
+		}
+	}
 
 return @rv;
+}
+
+sub copy_cron_sched_keys
+{
+local ($src, $dst) = @_;
+foreach my $k ('mins', 'hours', 'days', 'months', 'years', 'special') {
+	$dst->{$k} = $src->{$k};
+	}
 }
 
 # save_scheduled_backup(&backup)
@@ -57,6 +77,7 @@ return @rv;
 sub save_scheduled_backup
 {
 local ($backup) = @_;
+local $wasnew = !$backup->{'id'};
 
 if ($backup->{'id'} == 1) {
 	# Update schedule in Virtualmin config
@@ -64,17 +85,54 @@ if ($backup->{'id'} == 1) {
 	}
 else {
 	# Update or create separate file
-	# XXX
+	&make_dir($scheduled_backups_dir, 0700) if (!-d $scheduled_backups_dir);
+	$backup->{'id'} ||= &domain_id();
+	$backup->{'file'} = "$scheduled_backups_dir/$backup->{'id'}";
+	&write_file($backup->{'file'}, $backup);
 	}
 
 # Update or delete cron job
-# XXX
+&foreign_require("cron", "cron-lib.pl");
+local $cmd = $backup_cron_cmd;
+$cmd .= " --id $backup->{'id'}" if ($backup->{'id'} != 1);
+local $job;
+if (!$wasnew) {
+	$job = &find_virtualmin_cron_job($cmd);
+	}
+if ($backup->{'enabled'} && $job) {
+	# Fix job schedule
+	&copy_cron_sched_keys($backup, $job);
+	&cron::change_cron_job($job);
+	}
+elsif ($backup->{'enabled'} && !$job) {
+	# Create cron job
+	$job = { 'user' => 'root',
+		 'enabled' => 1,
+		 'command' => $cmd };
+	&copy_cron_sched_keys($backup, $job);
+	&cron::create_cron_job($job);
+	}
+elsif (!$backup->{'enabled'} && $job) {
+	# Delete cron job
+	&cron::delete_cron_job($job);
+	}
 }
 
 # delete_scheduled_backup(&backup)
 # Remove one existing backup, and its cron job.
 sub delete_scheduled_backup
 {
+local ($backup) = @_;
+$backup->{'id'} == 1 && &error("The default backup cannot be deleted!");
+&unlink_file($backup->{'file'});
+
+# Delete cron too
+&foreign_require("cron", "cron-lib.pl");
+local $cmd = $backup_cron_cmd." --id $backup->{'id'}";
+local $job = &find_virtualmin_cron_job($cmd);
+if ($job) {
+	&cron::delete_cron_job($job);
+	}
 }
 
 # backup_domains(file, &domains, &features, dir-format, skip-errors, &options,

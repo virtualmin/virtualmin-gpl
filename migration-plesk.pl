@@ -699,6 +699,7 @@ foreach my $adom (keys %$aliasdoms) {
 			 'nocreationmail', 1,
 			 'nocopyskel', 1,
 			);
+	$alias{'dom'} =~ s/^www\.//;
 	foreach my $f (@alias_features) {
 		local $want = $f eq 'web' ? $aliasdom->{'web'} eq 'true' :
 			      $f eq 'dns' ? $aliasdom->{'dns'} eq 'true' : 1;
