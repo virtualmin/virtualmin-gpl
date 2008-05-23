@@ -18,7 +18,7 @@ if ($config{'backup_dest'}) {
 			  'parent' => $config{'backup_parent'},
 			  'all' => $config{'backup_all'},
 			  'doms' => $config{'backup_doms'},
-			  'features_all' => $config{'backup_feature_all'},
+			  'feature_all' => $config{'backup_feature_all'},
 			  'email' => $config{'backup_email'},
 			  'email_err' => $config{'backup_email_err'},
 			  'email_doms' => $config{'backup_email_doms'},
@@ -81,7 +81,25 @@ local $wasnew = !$backup->{'id'};
 
 if ($backup->{'id'} == 1) {
 	# Update schedule in Virtualmin config
-	# XXX
+	$config{'backup_dest'} = $backup->{'dest'};
+	$config{'backup_fmt'} = $backup->{'fmt'};
+	$config{'backup_mkdir'} = $backup->{'mkdir'};
+	$config{'backup_errors'} = $backup->{'errors'};
+	$config{'backup_strftime'} = $backup->{'strftime'};
+	$config{'backup_onebyone'} = $backup->{'onebyone'};
+	$config{'backup_parent'} = $backup->{'parent'};
+	$config{'backup_all'} = $backup->{'all'};
+	$config{'backup_doms'} = $backup->{'doms'};
+	$config{'backup_feature_all'} = $backup->{'feature_all'};
+	$config{'backup_email'} = $backup->{'email'};
+	$config{'backup_email_err'} = $backup->{'email_err'};
+	$config{'backup_email_doms'} = $backup->{'email_doms'};
+	$config{'backup_virtualmin'} = $backup->{'virtualmin'};
+	local @bf = split(/\s+/, $backup->{'features'});
+	foreach $f (&get_available_backup_features(), @backup_plugins) {
+		$config{'backup_feature_'.$f} = &indexof($f, @bf) >= 0 ? 1 : 0;
+		$config{'backup_opts_'.$f} = $backup->{'opts_'.$f};
+		}
 	}
 else {
 	# Update or create separate file
@@ -1610,7 +1628,30 @@ else {
 	}
 }
 
-
+# can_backup_sched([&sched])
+# Returns 1 if the current user can create scheduled backups, or edit some
+# existing schedule.
+sub can_backup_sched
+{
+local ($sched) = @_;
+if (&master_admin()) {
+	# Master admin can do anything
+	return 1;
+	}
+elsif (&reseller_admin()) {
+	# Resellers can do their own domains
+	}
+else {
+	# Regular users can only edit their own schedules
+	return 0 if (!$access{'edit_sched'});
+	if ($sched) {
+		return 0 if (!$sched->{'owner'});	# Master admin's backup
+		local $myd = &get_domain_by_user($base_remote_user);
+		return 0 if (!$myd || $myd->{'id'} != $sched->{'owner'});
+		}
+	return 1;
+	}
+}
 
 1;
 

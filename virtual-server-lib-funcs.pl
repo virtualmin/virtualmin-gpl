@@ -287,6 +287,26 @@ local %donedomain;
 return @doms;
 }
 
+# get_domain_by_user(username)
+# Given a domain owner's Webmin login, return his top-level domain
+sub get_domain_by_user
+{
+local ($user) = @_;
+if ($access{'admin'}) {
+	# Extra admin
+	local $d = &get_domain($access{'admin'});
+	if ($d && $d->{'parent'}) {
+		$d = &get_domain($d->{'parent'});
+		}
+	return $d;
+	}
+else {
+	# Domain owner
+	local $d = &get_domain_by("user", $user, "parent", "");
+	return $d;
+	}
+}
+
 # domain_id()
 # Returns a new unique domain ID
 sub domain_id

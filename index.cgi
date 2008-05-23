@@ -265,8 +265,8 @@ if (&can_backup_domains()) {
 			      $text{'index_backupdesc'});
 
 	# Button to setup scheduled backups
-	print &ui_buttons_row("list_sched.cgi", $text{'index_sched2'},
-			      $text{'index_scheddesc'});
+	print &ui_buttons_row("list_sched.cgi", $text{'index_scheds'},
+			      $text{'index_schedsdesc'});
 
 	# Button to restore
 	print &ui_buttons_row("restore_form.cgi", $text{'index_restore'},
