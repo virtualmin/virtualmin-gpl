@@ -4217,3 +4217,5 @@ sched_all=All virtual servers
 sched_virtualmin=Virtualmin configurations
 sched_nothing=Nothing
 sched_none=No scheduled backups have been created yet.
+sched_add=Add a new backup schedule.
+sched_delete=Delete Selected Schedules
