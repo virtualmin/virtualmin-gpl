@@ -154,7 +154,8 @@ if (&can_import_servers()) {
 			}
 		}
 	@avail = grep { !$inuse{$_->{'type'},$_->{'name'}} &&
-		        !$_->{'special'} } @all;
+		        !$_->{'special'} &&
+			$d->{$_->{'type'}} } @all;
 	@avail = sort { $a->{'name'} cmp $b->{'name'} } @avail;
 	print &ui_tabs_start_tab("databasemode", "import") if (@tabs > 1);
 	print "$text{'databases_desc4'}<p>\n";
