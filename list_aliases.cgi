@@ -48,7 +48,7 @@ foreach $a (sort { $a->{'from'} cmp $b->{'from'} } @aliases) {
 			}
 		else {
 			$alines .= &text("aliases_type$anum",
-			   "<tt>".&html_escape($astr)."</tt>")."<br>\n";
+			   "<tt>".&html_escape($astr)."</tt>");
 			}
 		}
 	if (!@{$a->{'to'}}) {
