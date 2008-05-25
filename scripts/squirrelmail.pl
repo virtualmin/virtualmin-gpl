@@ -18,7 +18,7 @@ return "SquirrelMail is a standards-based webmail package written in PHP";
 # script_squirrelmail_versions()
 sub script_squirrelmail_versions
 {
-return ( "1.4.13" );
+return ( "1.4.15" );
 }
 
 sub script_squirrelmail_version_desc
@@ -181,9 +181,20 @@ if (!$upgrade) {
 		&sysprint($fh, "$cmd->[1]\n");
 		}
 	close($fh);
-	kill('KILL', $fpid);
+
+	# Kill off conf.pl
+	if (&foreign_check("proc")) {
+		&foreign_require("proc", "proc-lib.pl");
+		local ($cproc) = grep { $_->{'user'} eq $d->{'user'} &&
+				        $_->{'args'} =~ /conf\.pl/ }
+				      &proc::list_processes();
+		if ($cproc) {
+			kill('KILL', $cproc->{'pid'});
+			}
+		}
+
 	local $cfile = "$opts->{'dir'}/config/config.php";
-	-r $cfile || return (0, "Failed to create config file");
+	-r $cfile || return (-1, "Failed to create config file");
 
 	# Create data directories
 	local $data_dir = "$opts->{'dir'}/data";
