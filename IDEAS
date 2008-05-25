@@ -67,5 +67,3 @@
 	- Purge old backups
 	- Crossport to GPL version
 
- - index.cgi call to users_table is wrong
-
