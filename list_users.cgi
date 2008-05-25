@@ -13,53 +13,32 @@ $webinit = &create_initial_user($d, undef, 1);
 
 # Create select / add links
 ($mleft, $mreason, $mmax, $mhide) = &count_feature("mailboxes");
-@links = ( &select_all_link("d"),
-	   &select_invert_link("d") );
 if ($mleft != 0) {
-	push(@links, "<a href='edit_user.cgi?new=1&dom=$in{'dom'}'>".
-		     "$text{'users_add'}</a>");
+	push(@links, [ "edit_user.cgi?new=1&dom=$in{'dom'}",
+		       $text{'users_add'} ]);
 	}
-@rlinks = ( );
 if ($virtualmin_pro) {
-	push(@rlinks, "<a href='mass_ucreate_form.cgi?dom=$in{'dom'}'>".
-		      "$text{'users_batch2'}</a>");
+	push(@links, [ "mass_ucreate_form.cgi?dom=$in{'dom'}",
+		       $text{'users_batch2'}, "right" ]);
 	}
 if ($mleft != 0 && $webinit->{'webowner'}) {
-	push(@rlinks, "<a href='edit_user.cgi?new=1&web=1&".
-		      "dom=$in{'dom'}'>$text{'users_addweb'}</a>");
+	push(@links, [ "edit_user.cgi?new=1&web=1&dom=$in{'dom'}",
+		       $text{'users_addweb'}, "right" ]);
 	}
 
-if (@users) {
-	print &ui_form_start("change_users.cgi");
-	print &ui_hidden("dom", $in{'dom'}),"\n";
-	print "<table cellpadding=0 cellspacing=0 width=100%><tr><td>\n";
-	if ($mleft != 0 && $mleft != -1 && !$mhide) {
-		print "<b>",&text('users_canadd'.$mreason, $mleft),"</b><p>\n";
-		}
-	elsif ($mleft == 0) {
-		print "<b>",&text('users_noadd'.$mreason, $mmax),"</b><p>\n";
-		}
-	print &ui_links_row(\@links);
-	print "</td> <td align=right>\n";
-	print &ui_links_row(\@rlinks);
-	print "</td> </tr></table>\n";
-	&users_table(\@users, $d, 1);
+# Show message about why cannot
+if ($mleft != 0 && $mleft != -1 && !$mhide) {
+	print "<b>",&text('users_canadd'.$mreason, $mleft),"</b><p>\n";
 	}
-else {
-	print "<b>$text{'users_none'}</b><p>\n";
-	shift(@links); shift(@links);
+elsif ($mleft == 0) {
+	print "<b>",&text('users_noadd'.$mreason, $mmax),"</b><p>\n";
 	}
 
-# Show below-table links
-print "<table cellpadding=0 cellspacing=0 width=100%><tr><td>\n";
-print &ui_links_row(\@links);
-print "</td> <td align=right>\n";
-print &ui_links_row(\@rlinks);
-print "</td> </tr></table>\n";
-if (@users) {
-	print &ui_form_end([ [ "delete", $text{'users_delete'} ],
-	     $virtualmin_pro ? ( [ "mass", $text{'users_mass'} ] ) : ( ) ]);
-	}
+# Generate the table
+&users_table(\@users, $d, "change_users.cgi", 
+	     [ [ "delete", $text{'users_delete'} ],
+	       $virtualmin_pro ? ( [ "mass", $text{'users_mass'} ] ) : ( ) ],
+	     \@links, $text{'users_none'});
 
 if ($virtualmin_pro) {
 	print &ui_hr();

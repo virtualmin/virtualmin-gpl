@@ -3761,48 +3761,50 @@ else {
 	}
 }
 
-# users_table(&users, &dom, checkboxes?)
+# users_table(&users, &dom, cgi, &buttons, &links, empty-msg)
 # Output a table of mailbox users
 sub users_table
 {
+local ($users, $d, $cgi, $buttons, $links, $empty) = @_;
+
 local $can_quotas = &has_home_quotas() || &has_mail_quotas();
 local $can_qquotas = $config{'mail_system'} == 4 || $config{'mail_system'} == 5;
-local @ashells = &list_available_shells($_[1]);
+local @ashells = &list_available_shells($d);
 
 # Work out table header
-local @cols;
-push(@cols, "") if ($_[2]);
-push(@cols, $text{'users_name'},
-	    $_[1]->{'mail'} ? $text{'users_pop3'} : $text{'users_pop3f'},
+local @headers;
+push(@headers, "") if ($cgi);
+push(@headers, $text{'users_name'},
+	    $d->{'mail'} ? $text{'users_pop3'} : $text{'users_pop3f'},
 	    $text{'users_real'} );
 if ($can_quotas) {
-	push(@cols, $text{'users_quota'}, $text{'users_uquota'});
+	push(@headers, $text{'users_quota'}, $text{'users_uquota'});
 	}
 if ($can_qquotas) {
-	push(@cols, $text{'users_qquota'});
+	push(@headers, $text{'users_qquota'});
 	}
-if ($config{'show_mailsize'} && $_[1]->{'mail'}) {
-	push(@cols, $text{'users_size'});
+if ($config{'show_mailsize'} && $d->{'mail'}) {
+	push(@headers, $text{'users_size'});
 	}
-push(@cols, $text{'users_ushell'});
-if ($_[1]->{'mysql'} || $_[1]->{'postgres'}) {
-	push(@cols, $text{'users_db'});
+push(@headers, $text{'users_ushell'});
+if ($d->{'mysql'} || $d->{'postgres'}) {
+	push(@headers, $text{'users_db'});
 	}
 local ($f, %plugcol);
 foreach $f (@mail_plugins) {
-	local $col = &plugin_call($f, "mailbox_header", $_[1]);
+	local $col = &plugin_call($f, "mailbox_header", $d);
 	if ($col) {
 		$plugcol{$f} = $col;
-		push(@cols, $col);
+		push(@headers, $col);
 		}
 	}
-print &ui_columns_start(\@cols, "100", 0);
 
+# Build table contents
 local $u;
-local $did = $_[1] ? $_[1]->{'id'} : 0;
-foreach $u (@{$_[0]}) {
-	local $pop3 = $_[1] ? &remove_userdom($u->{'user'}, $_[1])
-			    : $u->{'user'};
+local $did = $d ? $d->{'id'} : 0;
+local @table;
+foreach $u (@$users) {
+	local $pop3 = $d ? &remove_userdom($u->{'user'}, $d) : $u->{'user'};
 	local @cols;
 	push(@cols, "<a href='edit_user.cgi?dom=$did&".
 	      "user=$u->{'user'}&unix=$u->{'unix'}'>".
@@ -3838,14 +3840,14 @@ foreach $u (@{$_[0]}) {
 		push(@cols, "");
 		}
 
-	if ($config{'show_mailsize'} && $_[1]->{'mail'}) {
+	if ($config{'show_mailsize'} && $d->{'mail'}) {
 		# Mailbox link, if this user has email enabled or is the owner
 		if (!$u->{'nomailfile'} &&
 		    ($u->{'email'} || @{$u->{'extraemail'}} ||
 		     $u->{'domainowner'})) {
 			local ($sz) = &mail_file_size($u);
 			$sz = $sz ? &nice_size($sz) : $text{'users_empty'};
-			local $lnk = &read_mail_link($u, $_[1]);
+			local $lnk = &read_mail_link($u, $d);
 			if ($lnk) {
 				push(@cols, "<a href='$lnk'>$sz</a>");
 				}
@@ -3863,31 +3865,36 @@ foreach $u (@{$_[0]}) {
 	push(@cols, !$u->{'shell'} ? $text{'users_qmail'} :
 		    !$shell ? &text('users_shell', "<tt>$u->{'shell'}</tt>") :
 		    $shell->{'desc'});
-	if ($_[1]->{'mysql'} || $_[1]->{'postgres'}) {
+	if ($d->{'mysql'} || $d->{'postgres'}) {
 		push(@cols, $u->{'domainowner'} ? $text{'users_all'} :
 					   @{$u->{'dbs'}} ? $text{'yes'}
 					   		  : $text{'no'});
 		}
 	foreach $f (grep { $plugcol{$_} } @mail_plugins) {
-		push(@cols, &plugin_call($f, "mailbox_column", $u, $_[1]));
+		push(@cols, &plugin_call($f, "mailbox_column", $u, $d));
 		}
-	if ($_[2]) {
-		if ($u->{'domainowner'}) {
-			# Domain owner cannot be mass updated/deleted
-			print &ui_columns_row([ "", @cols ]);
-			}
-		else {
-			# Other users can be mass changed
-			print &ui_checked_columns_row(\@cols, undef, "d",
-					int($u->{'unix'})."/".$u->{'user'});
-			}
+
+	# Insert checkbox, if needed
+	if ($cgi) {
+		unshift(@cols, { 'type' => 'checkbox',
+				 'name' => 'd',
+				 'value' => int($u->{'unix'})."/".$u->{'user'},
+				 'disabled' => $u->{'domainowner'} });
 		}
-	else {
-		# Mass operations disabled
-		print &ui_checked_columns_row(\@cols);
-		}
+	push(@table, \@cols);
 	}
-print &ui_columns_end();
+
+# Generate the table, perhaps with a form
+if ($cgi) {
+	print &ui_form_columns_table($cgi, $buttons, 1, $links,
+				     $d ? [ [ "dom", $d->{'id'} ] ] : undef,
+				     \@headers,
+				     100, \@table, undef, 0, undef, $empty);
+	}
+else {
+	print &ui_columns_start(\@headers, 100, \@table, undef, 0, undef,
+				$empty);
+	}
 }
 
 # quota_bsize(filesystem|"home"|"mail", [for-filesys])
