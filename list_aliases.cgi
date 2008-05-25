@@ -11,84 +11,74 @@ $d = &get_domain($in{'dom'});
 
 # Create select / add links
 ($mleft, $mreason, $mmax, $mhide) = &count_feature("aliases");
-@links = ( &select_all_link("d"),
-	   &select_invert_link("d") );
 if ($mleft != 0) {
-	push(@links, "<a href='edit_alias.cgi?new=1&dom=$in{'dom'}'>".
-		     "$text{'aliases_add'}</a>");
+	push(@links, [ "edit_alias.cgi?new=1&dom=$in{'dom'}",
+		       $text{'aliases_add'} ]);
 	}
-push(@rlinks, "<a href='mass_aedit_form.cgi?dom=$in{'dom'}'>".
-	      "$text{'aliases_emass'}</a>");
+push(@links, [ "mass_aedit_form.cgi?dom=$in{'dom'}",
+	       $text{'aliases_emass'}, 'right' ]);
 
-if (@aliases) {
-	print &ui_form_start("delete_aliases.cgi");
-	print &ui_hidden("dom", $in{'dom'}),"\n";
-	print "<table cellpadding=0 cellspacing=0 width=100%><tr><td>\n";
-	if ($mleft != 0 && $mleft != -1 && !$mhide) {
-		print "<b>",&text('aliases_canadd'.$mreason,$mleft),"</b><p>\n";
-		}
-	elsif ($mleft == 0) {
-		print "<b>",&text('aliases_noadd'.$mreason, $mmax),"</b><p>\n";
-		}
-	print &ui_links_row(\@links);
-	print "</td> <td align=right>\n";
-	print &ui_links_row(\@rlinks);
-	print "</td> </tr></table>\n";
-	if ($can_alias_comments) {
-		($anycmt) = grep { $_->{'cmt'} } @aliases;
-		}
-	print &ui_columns_start([ "", $text{'aliases_name'},
-				      $text{'aliases_domain'},
-				      $text{'aliases_dests'},
-				      $anycmt ? ( $text{'aliases_cmt'} ) : ( )
-				], 100, 0,
-				[ "width=5" ]);
-	foreach $a (sort { $a->{'from'} cmp $b->{'from'} } @aliases) {
-		$name = $a->{'from'};
-		$name =~ s/\@\S+$//;
-		$name = "<i>$text{'alias_catchall'}</i>" if ($name eq "");
-		$alines = "";
-		$simple = &get_simple_alias($d, $a);
-		foreach $v (@{$a->{'to'}}) {
-			($anum, $astr) = &alias_type($v);
-			if ($anum == 5 && $simple) {
-				$msg = $simple->{'autotext'};
-				$msg = substr($msg, 0, 100)." ..."
-					if (length($msg) > 100);
-				$alines .= &text('aliases_reply',
-					"<i>".&html_escape($msg)."</i>");
-				}
-			else {
-				$alines .= &text("aliases_type$anum",
-				   "<tt>".&html_escape($astr)."</tt>")."<br>\n";
-				}
+# Show reason why aliases cannot be added
+if ($mleft != 0 && $mleft != -1 && !$mhide) {
+	print "<b>",&text('aliases_canadd'.$mreason,$mleft),"</b><p>\n";
+	}
+elsif ($mleft == 0) {
+	print "<b>",&text('aliases_noadd'.$mreason, $mmax),"</b><p>\n";
+	}
+
+# Make the table data
+@table = ( );
+if ($can_alias_comments) {
+	($anycmt) = grep { $_->{'cmt'} } @aliases;
+	}
+foreach $a (sort { $a->{'from'} cmp $b->{'from'} } @aliases) {
+	$name = $a->{'from'};
+	$name =~ s/\@\S+$//;
+	$name = "<i>$text{'alias_catchall'}</i>" if ($name eq "");
+	$alines = "";
+	$simple = &get_simple_alias($d, $a);
+	foreach $v (@{$a->{'to'}}) {
+		($anum, $astr) = &alias_type($v);
+		if ($anum == 5 && $simple) {
+			$msg = $simple->{'autotext'};
+			$msg = substr($msg, 0, 100)." ..."
+				if (length($msg) > 100);
+			$alines .= &text('aliases_reply',
+				"<i>".&html_escape($msg)."</i>");
 			}
-		if (!@{$a->{'to'}}) {
-			$alines = "<i>$text{'aliases_dnone'}</i>\n";
+		else {
+			$alines .= &text("aliases_type$anum",
+			   "<tt>".&html_escape($astr)."</tt>")."<br>\n";
 			}
-		print &ui_checked_columns_row([
-			"<a href='edit_alias.cgi?dom=$in{'dom'}&".
-			"alias=$a->{'from'}'>$name</a>",
-			$d->{'dom'},
-			$alines,
-			$anycmt ? ( $a->{'cmt'} ) : ( ) ],
-			[ "width=5", "valign=top", "valign=top" ],
-			"d", $a->{'from'});
 		}
-	print &ui_columns_end();
+	if (!@{$a->{'to'}}) {
+		$alines = "<i>$text{'aliases_dnone'}</i>\n";
+		}
+	push(@table, [
+		{ 'type' => 'checkbox', 'name' => 'd',
+		  'value' => $a->{'from'} },
+		"<a href='edit_alias.cgi?dom=$in{'dom'}&".
+		"alias=$a->{'from'}'>$name</a>",
+		$d->{'dom'},
+		$alines,
+		$anycmt ? ( $a->{'cmt'} ) : ( ),
+		]);
 	}
-else {
-	print "<b>$text{'aliases_none'}</b><p>\n";
-	shift(@links); shift(@links);
-	}
-print "<table cellpadding=0 cellspacing=0 width=100%><tr><td>\n";
-print &ui_links_row(\@links);
-print "</td> <td align=right>\n";
-print &ui_links_row(\@rlinks);
-print "</td> </tr></table>\n";
-if (@aliases) {
-	print &ui_form_end([ [ "delete", $text{'aliases_delete'} ] ]);
-	}
+
+# Generate the table
+print &ui_form_columns_table(
+	"delete_aliases.cgi",
+	[ [ "delete", $text{'aliases_delete'} ] ],
+	1,
+	\@links,
+	[ [ "dom", $in{'dom'} ] ],
+	[ "", $text{'aliases_name'},
+	  $text{'aliases_domain'}, $text{'aliases_dests'},
+          $anycmt ? ( $text{'aliases_cmt'} ) : ( ) ],
+	100,
+	\@table,
+	undef, 0, undef,
+	$text{'aliases_none'});
 
 if ($single_domain_mode) {
 	&ui_print_footer(&domain_footer_link($d),

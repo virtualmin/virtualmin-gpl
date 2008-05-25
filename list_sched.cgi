@@ -51,6 +51,7 @@ print &ui_form_columns_table(
 	[ [ undef, $text{'sched_delete'} ] ],
 	1,
 	[ [ "backup_form.cgi?new=1", $text{'sched_add'} ] ],
+	undef,
 	[ "", $text{'sched_dest'}, $text{'sched_doms'},
 	  $text{'sched_enabled'} ],
 	100, \@table, [ '', 'string', 'string' ],
