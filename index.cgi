@@ -62,16 +62,9 @@ $formno++ if ($lerr =~ /<\s*form/i);
 if ($config{'localgroup'} && &can_edit_local()) {
 	print &ui_subheading($text{'index_header1'});
 	@lusers = &list_domain_users(undef, 0, 1);
-	if (@lusers) {
-		print "<a href='edit_user.cgi?new=1&dom=0'>",
-		      "$text{'index_uadd'}</a><br>\n";
-		&users_table(\@lusers);
-		}
-	else {
-		print "<b>$text{'index_nousers'}</b><p>\n";
-		}
-	print "<a href='edit_user.cgi?new=1&dom=0'>",
-	      "$text{'index_uadd'}</a><p>\n";
+	&users_table(\@lusers, undef, undef, undef,
+		     [ [ 'edit_user.cgi?new=1&dom=0', $text{'index_uadd'} ] ],
+		     $text{'index_nousers'});
 	print &ui_hr();
 	}
 

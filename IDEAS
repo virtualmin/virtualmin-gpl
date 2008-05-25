@@ -66,3 +66,6 @@
 	- Allow backups and restores and schedules by server owners
 	- Purge old backups
 	- Crossport to GPL version
+
+ - index.cgi call to users_table is wrong
+
