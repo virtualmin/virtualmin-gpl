@@ -41,6 +41,7 @@ foreach my $b (readdir(BACKUPS)) {
 		&read_file("$scheduled_backups_dir/$b", \%backup);
 		$backup{'id'} = $b;
 		$backup{'file'} = "$scheduled_backups_dir/$b";
+		delete($backup{'enabled'});	# Worked out below
 		push(@rv, \%backup);
 		}
 	}
@@ -56,7 +57,7 @@ foreach my $j (@jobs) {
 		local ($backup) = grep { $_->{'id'} eq $id } @rv;
 		if ($backup) {
 			$backup->{'enabled'} = 1;
-			&copy_cron_sched_keys($job, $backup);
+			&copy_cron_sched_keys($j, $backup);
 			}
 		}
 	}
@@ -67,7 +68,7 @@ return @rv;
 sub copy_cron_sched_keys
 {
 local ($src, $dst) = @_;
-foreach my $k ('mins', 'hours', 'days', 'months', 'years', 'special') {
+foreach my $k ('mins', 'hours', 'days', 'months', 'weekdays', 'special') {
 	$dst->{$k} = $src->{$k};
 	}
 }
@@ -125,7 +126,7 @@ if ($backup->{'enabled'} && $job) {
 elsif ($backup->{'enabled'} && !$job) {
 	# Create cron job
 	$job = { 'user' => 'root',
-		 'enabled' => 1,
+		 'active' => 1,
 		 'command' => $cmd };
 	&copy_cron_sched_keys($backup, $job);
 	&cron::create_cron_job($job);
@@ -134,6 +135,7 @@ elsif (!$backup->{'enabled'} && $job) {
 	# Delete cron job
 	&cron::delete_cron_job($job);
 	}
+&cron::create_wrapper($backup_cron_cmd, $module_name, "backup.pl");
 }
 
 # delete_scheduled_backup(&backup)
@@ -235,7 +237,9 @@ elsif ($mode == 0) {
 	if ($dirfmt && !-d $desturl) {
 		# Looking for a directory
 		if ($mkdir) {
-			&make_dir($desturl, 0755, 1);
+			if (!-d $desturl) {
+				&make_dir($desturl, 0755, 1);
+				}
 			}
 		else {
 			&$first_print(&text('backup_edirtest',
@@ -260,7 +264,9 @@ elsif ($mode == 0) {
 if (!$homefmt) {
 	# Create a temp dir for the backup, to be tarred up later
 	$backupdir = &transname();
-	&make_dir($backupdir, 0755);
+	if (!-d $backupdir) {
+		&make_dir($backupdir, 0755);
+		}
 	}
 else {
 	# A home-format backup can only be used if the home directory is
@@ -297,7 +303,7 @@ else {
 	# Can write direct to destination
 	$dest = $path;
 	}
-if ($dirfmt) {
+if ($dirfmt && !-d $dest) {
 	&make_dir($dest, 0755);
 	}
 
@@ -473,7 +479,9 @@ if ($ok) {
 	elsif ($dirfmt) {
 		# Create one tar file in the destination for each domain
 		&$first_print($text{'backup_final2'});
-		&make_dir($dest, 0755);
+		if (!-d $dest) {
+			&make_dir($dest, 0755);
+			}
 
 		foreach $d (&unique(@donedoms)) {
 			# Work out dest file and compression command
@@ -1432,33 +1440,39 @@ if ($rv[0] && $rv[3] =~ /^(\S+):(\d+)$/) {
 return @rv;
 }
 
-# nice_backup_url(string)
+# nice_backup_url(string, [caps-first])
 # Converts a backup URL to a nice human-readable format
 sub nice_backup_url
 {
-local ($url) = @_;
+local ($url, $caps) = @_;
 local ($proto, $user, $pass, $host, $path, $port) = &parse_backup_url($url);
+local $rv;
 if ($proto == 1) {
-	return &text('backup_niceftp', "<tt>$path</tt>", "<tt>$host</tt>");
+	$rv = &text('backup_niceftp', "<tt>$path</tt>", "<tt>$host</tt>");
 	}
 elsif ($proto == 2) {
-	return &text('backup_nicescp', "<tt>$path</tt>", "<tt>$host</tt>");
+	$rv = &text('backup_nicescp', "<tt>$path</tt>", "<tt>$host</tt>");
 	}
 elsif ($proto == 3) {
-	return &text('backup_nices3', "<tt>$host</tt>");
+	$rv = &text('backup_nices3', "<tt>$host</tt>");
 	}
 elsif ($proto == 0) {
-	return &text('backup_nicefile', "<tt>$path</tt>");
+	$rv = &text('backup_nicefile', "<tt>$path</tt>");
 	}
 elsif ($proto == 4) {
-	return $text{'backup_nicedownload'};
+	$rv = $text{'backup_nicedownload'};
 	}
 elsif ($proto == 5) {
-	return $text{'backup_niceupload'};
+	$rv = $text{'backup_niceupload'};
 	}
 else {
-	return $url;
+	$rv = $url;
 	}
+if ($caps && !$current_lang_info->{'charset'} && $rv ne $url) {
+	# Make first letter upper case
+	$rv = ucfirst($rv);
+	}
+return $rv;
 }
 
 # show_backup_destination(name, value, no-local, [&domain], [no-download],

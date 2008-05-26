@@ -10,23 +10,45 @@ if (&foreign_check("mailboxes")) {
 	$has_mailboxes++;
 	}
 
+# Get the schedule being used
+$id = 1;
+$backup_debug = 0;
+while(@ARGV > 0) {
+	local $a = shift(@ARGV);
+	if ($a eq "--id") {
+		$id = shift(@ARGV);
+		$id || &usage("Missing backup schedule ID");
+		}
+	elsif ($a eq "--debug") {
+		$backup_debug = 1;
+		}
+	else {
+		&usage();
+		}
+	}
+($sched) = grep { $_->{'id'} == $id } &list_scheduled_backups();
+$sched || &usage("No scheduled backup with ID $id exists");
+
 # Work out what will be backed up
-if ($config{'backup_all'} == 1) {
+if ($sched->{'all'} == 1) {
+	# All domains
 	@doms = &list_domains();
 	}
-elsif ($config{'backup_all'} == 2) {
-	%exc = map { $_, 1 } split(/\s+/, $config{'backup_doms'});
+elsif ($sched->{'all'} == 2) {
+	# All except some domains
+	%exc = map { $_, 1 } split(/\s+/, $sched->{'doms'});
 	@doms = grep { !$exc{$_->{'id'}} } &list_domains();
-	if ($in{'parent'}) {
+	if ($sched->{'parent'}) {
 		@doms = grep { !$_->{'parent'} || !$ext{$_->{'parent'}} } @doms;
 		}
 	}
 else {
-	foreach $d (split(/\s+/, $config{'backup_doms'})) {
+	# Selected domains
+	foreach $d (split(/\s+/, $sched->{'doms'})) {
 		local $dinfo = &get_domain($d);
 		if ($dinfo) {
 			push(@doms, $dinfo);
-			if (!$dinfo->{'parent'} && $in{'parent'}) {
+			if (!$dinfo->{'parent'} && $sched->{'parent'}) {
 				push(@doms, &get_domain_by("parent", $d));
 				}
 			}
@@ -34,46 +56,47 @@ else {
 	@doms = grep { !$donedom{$_->{'id'}}++ } @doms;
 	}
 
+# XXX limit to backup's owner?
+
 # Work out features and options
-if ($config{'backup_feature_all'}) {
+if ($sched->{'feature_all'}) {
 	@do_features = ( &get_available_backup_features(), @backup_plugins );
 	}
 else {
-	@do_features = grep { $config{'backup_feature_'.$_} }
-			    (@backup_features, @backup_plugins);
+	@do_features = split(/\s+/, $sched->{'features'});
 	}
 foreach $f (@do_features) {
 	$options{$f} = { map { split(/=/, $_) }
-			  split(/,/, $config{'backup_opts_'.$f}) };
+			  split(/,/, $sched->{'opts_'.$f}) };
 	}
-@vbs = split(/\s+/, $config{'backup_virtualmin'});
+@vbs = split(/\s+/, $sched->{'virtualmin'});
 
 # Do the backup, capturing any output
 $first_print = \&first_save_print;
 $second_print = \&second_save_print;
 $indent_print = \&indent_save_print;
 $outdent_print = \&outdent_save_print;
-if ($config{'backup_strftime'}) {
-	$dest = &backup_strftime($config{'backup_dest'});
+if ($sched->{'strftime'}) {
+	$dest = &backup_strftime($sched->{'dest'});
 	}
 else {
-	$dest = $config{'backup_dest'};
+	$dest = $sched->{'dest'};
 	}
 $start_time = time();
 $current_id = undef;
 ($ok, $size) = &backup_domains($dest, \@doms, \@do_features,
-			       $config{'backup_fmt'},
-			       $config{'backup_errors'}, \%options,
-			       $config{'backup_fmt'} == 2,
+			       $sched->{'fmt'},
+			       $sched->{'errors'}, \%options,
+			       $sched->{'fmt'} == 2,
 			       \@vbs,
-			       $config{'backup_mkdir'},
-			       $config{'backup_onebyone'},
+			       $sched->{'mkdir'},
+			       $sched->{'onebyone'},
 			       0,
 			       \&backup_cbfunc);
 
 # Send an email to the recipient, if there are any
-if ($config{'backup_email'} && $has_mailboxes &&
-    (!$ok || !$config{'backup_email_err'})) {
+if ($sched->{'email'} && $has_mailboxes &&
+    (!$ok || !$sched->{'email_err'})) {
 	if ($ok) {
 		$output .= &text('backup_done', &nice_size($size))." ";
 		}
@@ -84,7 +107,7 @@ if ($config{'backup_email'} && $has_mailboxes &&
 	$output .= &text('backup_time', &nice_hour_mins_secs($total_time))."\n";
 	$mail = { 'headers' => [ [ 'From', &get_global_from_address() ],
 				 [ 'Subject', "Backup of Virtualmin on $host" ],
-				 [ 'To', $config{'backup_email'} ] ],
+				 [ 'To', $sched->{'email'} ] ],
 		  'attach'  => [ { 'headers' => [ [ 'Content-type',
 						    'text/plain' ] ],
 				   'data' => &entities_to_ascii($output) } ]
@@ -93,8 +116,8 @@ if ($config{'backup_email'} && $has_mailboxes &&
 	}
 
 # Send email to domain owners too, if selected
-if ($config{'backup_email_doms'} && $has_mailboxes &&
-    (!$ok || !$config{'backup_email_err'})) {
+if ($sched->{'email_doms'} && $has_mailboxes &&
+    (!$ok || !$sched->{'email_err'})) {
 	@emails = &unique(map { $_->{'emailto'} } @doms);
 	foreach $email (@emails) {
 		@edoms = grep { $_->{'emailto'} eq $email } @doms;
@@ -118,11 +141,13 @@ sub first_save_print {
 $output .= $indent_text.join("", @_)."\n";
 $domain_output{$current_id} .= $indent_text.join("", @_)."\n"
 	if ($current_id);
+print $indent_text.join("", @_)."\n" if ($backup_debug);
 }
 sub second_save_print {
 $output .= $indent_text.join("", @_)."\n\n";
 $domain_output{$current_id} .= $indent_text.join("", @_)."\n\n"
 	if ($current_id);
+print $indent_text.join("", @_)."\n" if ($backup_debug);
 }
 sub indent_save_print {
 $indent_text .= "    ";
@@ -142,3 +167,14 @@ elsif ($step == 2) {
 	$current_id = undef;
 	}
 }
+
+sub usage
+{
+print "$_[0]\n\n" if ($_[0]);
+print "Runs one scheduled Virtualmin backup. Usually called automatically from Cron.\n";
+print "\n";
+print "usage: backup.pl [--id number]\n";
+exit(1);
+}
+
+

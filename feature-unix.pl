@@ -827,7 +827,7 @@ sub obtain_lock_cron
 {
 local ($d) = @_;
 &obtain_lock_anything($d);
-foreach my $u ($d->{'user'}, 'root') {
+foreach my $u ($d ? ( $d->{'user'} ) : ( ), 'root') {
 	if ($main::got_lock_cron_user{$u} == 0) {
 		&foreign_require("cron", "cron-lib.pl");
 		&lock_file(&cron::cron_file({ 'user' => $u }));
@@ -841,7 +841,7 @@ foreach my $u ($d->{'user'}, 'root') {
 sub release_lock_cron
 {
 local ($d) = @_;
-foreach my $u ($d->{'user'}, 'root') {
+foreach my $u ($d ? ( $d->{'user'} ) : ( ), 'root') {
 	if ($main::got_lock_cron_user{$u} == 1) {
 		&foreign_require("cron", "cron-lib.pl");
 		&unlock_file(&cron::cron_file({ 'user' => $u }));

@@ -16,8 +16,9 @@ foreach $s (@scheds) {
 	my @row;
 	push(@row, { 'type' => 'checkbox', 'name' => 'd',
 	     'value' => $s->{'id'}, 'disabled' => $s->{'id'}==1 });
-	push(@row, &nice_backup_url($s->{'dest'}));
-	if ($s->{'all'}) {
+	push(@row, "<a href='backup_form.cgi?sched=$s->{'id'}'>".
+		   &nice_backup_url($s->{'dest'}, 1)."</a>");
+	if ($s->{'all'} == 1) {
 		push(@row, "<i>$text{'sched_all'}</i>");
 		}
 	elsif ($s->{'doms'}) {
@@ -26,12 +27,10 @@ foreach $s (@scheds) {
 			local $d = &get_domain($did);
 			push(@dnames, &show_domain_name($d)) if ($d);
 			}
-		if (@dnames > 4) {
-			push(@row, join(", ", @dnames).", ...");
-			}
-		else {
-			push(@row, join(", ", @dnames));
-			}
+		local $msg = @dnames > 4 ? join(", ", @dnames).", ..."
+					 : join(", ", @dnames);
+		push(@row, $s->{'all'} == 2 ? &text('sched_except', $msg)
+					    : $msg);
 		}
 	elsif ($s->{'virtualmin'}) {
 		push(@row, $text{'sched_virtualmin'});
@@ -55,6 +54,7 @@ print &ui_form_columns_table(
 	[ "", $text{'sched_dest'}, $text{'sched_doms'},
 	  $text{'sched_enabled'} ],
 	100, \@table, [ '', 'string', 'string' ],
+	0, undef,
 	$text{'sched_none'});
 
 &ui_print_footer("", $text{'index_return'});

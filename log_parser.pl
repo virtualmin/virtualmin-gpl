@@ -89,8 +89,12 @@ elsif ($action eq "backup" || $action eq "restore") {
 		return &text('log_'.$action, scalar(@doms));
 		}
 	}
-elsif ($action eq "sched") {
-	return $text{'log_sched_'.$type};
+elsif ($type eq "sched") {
+	local $msg = $object eq 'all' ? $text{'log_sched_all'} :
+		     $object eq 'none' ? $text{'log_sched_none'} :
+		     $object eq 'virtualmin' ? $text{'log_sched_virtualmin'} :
+					       &text('log_sched_doms', $object);
+	return &text('log_'.$action.'_sched', $msg);
 	}
 elsif ($action eq "notify" || $action eq "mailusers") {
 	return &text('log_'.$action, scalar(split(/\0/, $p->{'to'})));

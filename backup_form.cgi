@@ -8,19 +8,34 @@ if ($in{'dom'}) {
 	($cbmode = &can_backup_domain($d)) || &error($text{'backup_ecannot'});
 	$msg = &domain_in($d);
 	}
+@scheds = grep { &can_backup_sched($_) } &list_scheduled_backups();
 
 if ($in{'sched'}) {
-	&ui_print_header($msg, $text{'backup_title2'}, "");
+	# Editing existing scheduled backup
+	($sched) = grep { $_->{'id'} == $in{'sched'} } @scheds;
+	$sched || &error($text{'backup_egone'});
+	&ui_print_header($msg, $text{'backup_title2'}, "", "backupsched");
 	print &ui_form_start("backup_sched.cgi", "post");
+	print &ui_hidden("sched", $in{'sched'});
+	}
+elsif ($in{'new'}) {
+	# Creating new scheduled backup
+	&ui_print_header($msg, $text{'backup_title3'}, "", "backupnew");
+	print &ui_form_start("backup_sched.cgi", "post");
+	print &ui_hidden("new", 1);
 	}
 else {
-	&ui_print_header($msg, $text{'backup_title'}, "");
+	# Doing a one-off backup
+	&ui_print_header($msg, $text{'backup_title'}, "", "backupnow");
 	print &ui_form_start("backup.cgi/backup.tgz", "post");
+	$sched = $scheds[0];
 	}
+$sched ||= { 'all' => 1,		# Sensible defaults
+	     'feature_all' => 1,
+	     'parent' => 1 };
 @tds = ( "width=30% ");
 
 # Work out default backup selection
-$dest = $config{'backup_dest'};
 $backup_fmt = $config{'backup_fmt'};
 $backup_mkdir = $config{'backup_mkdir'};
 $backup_errors = $config{'backup_errors'};
@@ -29,6 +44,7 @@ $backup_onebyone = $config{'backup_onebyone'};
 $backup_parent = $config{'backup_parent'};
 if ($d) {
 	# Just one domain
+	# XXX broken
 	if (defined($d->{'backup_dest'})) {
 		$dest = $d->{'backup_dest'};
 		}
@@ -56,17 +72,16 @@ else {
 	print &ui_hidden_table_start($text{'backup_headerdoms'}, "width=100%",
 				     2, "doms", 1, \@tds);
 	($cbmode = &can_backup_domain()) || &error($text{'backup_ecannot'});
-	$backup_all = int($config{'backup_all'});
-	@bak = split(/\s+/, $config{'backup_doms'});
+	@bak = split(/\s+/, $sched->{'doms'});
 	@doms = &list_domains();
-	$dsel = &ui_radio("all", $backup_all,
+	$dsel = &ui_radio("all", int($sched->{'all'}),
 			[ [ 1, $text{'backup_all'} ],
 			  [ 0, $text{'backup_sel'} ],
 			  [ 2, $text{'backup_exc'} ] ])."<br>\n".
 		&servers_input("doms", \@bak, \@doms);
 	$dsel .= "<br>".&ui_checkbox(
 		"parent", 1, &hlink($text{'backup_parent'}, 'backup_parent'),
-		$backup_parent);
+		$sched->{'parent'});
 	print &ui_table_row(&hlink($text{'backup_doms'}, "backup_doms"),
 			    $dsel);
 	print &ui_hidden_table_end("doms");
@@ -76,19 +91,20 @@ else {
 print &ui_hidden_table_start($text{'backup_headerfeatures'}, "width=100%", 2,
 			     "features", 0, \@tds);
 $ftable = "";
-$ftable .= &ui_radio("feature_all", int($config{'backup_feature_all'}),
+$ftable .= &ui_radio("feature_all", int($sched->{'feature_all'}),
 		[ [ 1, $text{'backup_allfeatures'} ],
 		  [ 0, $text{'backup_selfeatures'} ] ])."<br>\n";
 @links = ( &select_all_link("feature"), &select_invert_link("feature") );
 $ftable .= &ui_links_row(\@links);
+@schedfeats = split(/\s+/, $sched->{'features'});
 foreach $f (&get_available_backup_features()) {
 	$ftable .= &ui_checkbox("feature", $f,
 		$text{'backup_feature_'.$f} || $text{'feature_'.$f},
-		$config{'backup_feature_'.$f})."\n";
+		&indexof($f, @schedfeats) >= 0)."\n";
 	local $ofunc = "show_backup_$f";
 	if (defined(&$ofunc)) {
 		local %opts = map { split(/=/, $_) }
-				 split(/,/, $config{'backup_opts_'.$f});
+				 split(/,/, $sched->{'backup_opts_'.$f});
 		$ftable .= &$ofunc(\%opts);
 		}
 	$ftable .= "<br>\n";
@@ -97,10 +113,10 @@ foreach $f (@backup_plugins) {
 	$ftable .= &ui_checkbox("feature", $f,
 		&plugin_call($f, "feature_backup_name") ||
 		    &plugin_call($f, "feature_name"),
-		$config{'backup_feature_'.$f})."\n";
+		&indexof($f, @schedfeats) >= 0)."\n";
 	if (&plugin_defined($f, "feature_backup_opts")) {
 		local %opts = map { split(/=/, $_) }
-				 split(/,/, $config{'backup_opts_'.$f});
+				 split(/,/, $sched->{'backup_opts_'.$f});
 		$ftable .= &plugin_call($f, "feature_backup_opts", \%opts);
 		}
 	$ftable .= "<br>\n";
@@ -112,7 +128,7 @@ print &ui_table_row(&hlink($text{'backup_features'}, "backup_features"),
 if (&can_backup_virtualmin() && !defined($in{'dom'})) {
 	# Show virtualmin object backup options
 	$vtable = "";
-	%virts = map { $_, 1 } split(/\s+/, $config{'backup_virtualmin'});
+	%virts = map { $_, 1 } split(/\s+/, $sched->{'virtualmin'});
 	foreach $vo (@virtualmin_backups) {
 		$vtable .= &ui_checkbox("virtualmin", $vo,
 				$text{'backup_v'.$vo}, $virts{$vo})."<br>\n";
@@ -126,78 +142,86 @@ print &ui_hidden_table_end("features");
 print &ui_hidden_table_start($text{'backup_headerdest'}, "width=100%", 2,
 			     "dest", 1, \@tds);
 print &ui_table_row(&hlink($text{'backup_dest'}, "backup_dest"),
-	    &show_backup_destination("dest", $dest, $cbmode == 2, $d, !$d, 1).
+	    &show_backup_destination("dest", $sched->{'dest'},
+				     $cbmode == 2, $d, !$d, 1).
 	    "\n".
 	    &ui_checkbox("strftime", 1,
 			 &hlink($text{'backup_strftime'}, "backup_strftime"),
-			 $backup_strftime)."<br>\n".
+			 $sched->{'strftime'})."<br>\n".
 	    ($d ? "" :
 	      &ui_checkbox("onebyone", 1,
 			   &hlink($text{'backup_onebyone'}, "backup_onebyone"),
-			   $backup_onebyone)));
+			   $sched->{'onebyone'})));
 
 # Single/multiple file mode
 if (!$d) {
 	print &ui_table_row(&hlink($text{'backup_fmt'}, "backup_fmt"),
-		&ui_radio("fmt", int($backup_fmt),
+		&ui_radio("fmt", int($sched->{'fmt'}),
 			  [ [ 0, $text{'backup_fmt0'} ],
 			    [ 1, $text{'backup_fmt1'} ],
 			    [ 2, $text{'backup_fmt2'} ] ])."<br>".
 		&ui_checkbox("mkdir", 1, $text{'backup_mkdir'},
-			     int($backup_mkdir)));
+			     int($sched->{'mkdir'})));
 	}
 elsif ($cbmode == 1) {
 	print &ui_table_row(&hlink($text{'backup_mkdir'}, "backup_mkdir"),
-		&ui_yesno_radio("mkdir", int($backup_mkdir)));
+		&ui_yesno_radio("mkdir", int($sched->{'mkdir'})));
 	}
 
 # Show error mode
 print &ui_table_row(&hlink($text{'backup_errors'}, "backup_errors"),
-		    &ui_radio("errors", int($backup_errors),
+		    &ui_radio("errors", int($sched->{'errors'}),
 			      [ [ 0, $text{'backup_errors0'} ],
 				[ 1, $text{'backup_errors1'} ] ]));
 
 # For a single domain, show option to add sub-servers
 if ($d) {
 	print &ui_table_row(&hlink($text{'backup_parent2'}, "backup_parent2"),
-			    &ui_yesno_radio("parent", $backup_parent ? 1 : 0));
+		    &ui_yesno_radio("parent", $sched->{'parent'} ? 1 : 0));
 	}
 
 print &ui_hidden_table_end("dest");
 
-if ($in{'sched'}) {
+if ($in{'sched'} || $in{'new'}) {
 	# Show schedule inputs
 	print &ui_hidden_table_start($text{'backup_headersched'}, "width=100%",
 				     2, "sched", 0, \@tds);
-	local $job = &find_virtualmin_cron_job($backup_cron_cmd);
 
 	# Email input
 	print &ui_table_row(&hlink($text{'backup_email'}, "backup_email"),
-			    &ui_textbox("email", $config{'backup_email'}, 40).
+			    &ui_textbox("email", $sched->{'email'}, 40).
 			    "<br>\n".
 			    &ui_checkbox("email_err", 1,
 					 $text{'backup_email_err'},
-					 $config{'backup_email_err'}).
+					 $sched->{'email_err'}).
 			    "<br>\n".
 			    &ui_checkbox("email_doms", 1,
 					 $text{'backup_email_doms'},
-					 $config{'backup_email_doms'})
+					 $sched->{'email_doms'})
 			    );
 
 	# Enabled/disabled input
 	print &ui_table_row(&hlink($text{'backup_enabled'}, "backup_enabled"),
-			    &ui_radio("enabled", $job ? 1 : 0,
+			    &ui_radio("enabled", $sched->{'enabled'} ? 1 : 0,
 				[ [ 0, $text{'no'} ],
 				  [ 1, $text{'backup_enabledyes'} ] ]));
 
 	# Times input
-	$job ||= { 'special' => 'daily' };
+	$sched->{'special'} = 'daily' if (!$sched->{'enabled'});
 	&foreign_require("cron", "cron-lib.pl");
-	$croninput = &capture_function_output(\&cron::show_times_input, $job);
+	$croninput = &capture_function_output(\&cron::show_times_input, $sched);
 	print &ui_table_row(undef, "<table border>$croninput</table>", 2);
 	print &ui_hidden_table_end("sched");
 
-	print &ui_form_end([ [ "save", $text{'backup_save'} ] ]);
+	# Save buttons
+	if ($in{'new'}) {
+		print &ui_form_end([ [ "save", $text{'backup_create'} ] ]);
+		}
+	else {
+		print &ui_form_end([ [ "save", $text{'backup_save'} ],
+			$in{'sched'} == 1 ? ( ) :
+				( [ "delete", $text{'backup_delete'} ] ) ]);
+		}
 	}
 else {
 	print &ui_form_end([ [ "now", $text{'backup_now'} ] ]);
