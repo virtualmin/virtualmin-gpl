@@ -1934,7 +1934,7 @@ foreach my $p (@proxies) {
 return 0;
 }
 
-# setup_script_requirements(&domain, &script, &phpver, &opts)
+# setup_script_requirements(&domain, &script, ver, &phpver, &opts)
 # Install any needed PHP modules or other dependencies for some script.
 # Returns 1 on success, 0 on failure. May print stuff.
 sub setup_script_requirements

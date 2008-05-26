@@ -1,0 +1,6 @@
+desc=New Horde installer
+html=Updated the Horde script installer to version 3.2, and all its associated sub-applications to their latest releases.
+master=1
+reseller=1
+owner=1
+link=list_scripts.cgi?dom=${ID}
