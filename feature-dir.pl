@@ -204,11 +204,11 @@ sub check_dir_clash
 return 0;
 }
 
-# backup_dir(&domain, file, &options, home-format)
+# backup_dir(&domain, file, &options, home-format, incremental)
 # Backs up the server's home directory in tar format to the given file
 sub backup_dir
 {
-&$first_print($text{'backup_dirtar'});
+&$first_print($_[4] ?  $text{'backup_dirtarinc'} : $text{'backup_dirtar'});
 local $out;
 local $cmd;
 local $gzip = $_[3] && &has_command("gzip");
@@ -242,18 +242,32 @@ if ($gconfig{'os_type'} eq 'solaris') {
 	}
 &close_tempfile(XTEMP);
 
+# Work out incremental flags
+local $iargs;
+if (&has_incremental_tar()) {
+	if (!-d $incremental_backups_dir) {
+		&make_dir($incremental_backups_dir, 0700);
+		}
+	local $ifile = "$incremental_backups_dir/$_[0]->{'id'}";
+	if (!$_[4]) {
+		# Force full backup
+		&unlink_file($ifile);
+		}
+	$iargs = "--listed-incremental=$ifile";
+	}
+
 # Do the backup
 if ($_[3] && $config{'compression'} == 0) {
 	# With gzip
-	$cmd = "tar cfX - $xtemp . | gzip -c >".quotemeta($_[1]);
+	$cmd = "tar cfX - $xtemp $iargs . | gzip -c >".quotemeta($_[1]);
 	}
 elsif ($_[3] && $config{'compression'} == 1) {
 	# With bzip
-	$cmd = "tar cfX - $xtemp . | bzip2 -c >".quotemeta($_[1]);
+	$cmd = "tar cfX - $xtemp $iargs . | bzip2 -c >".quotemeta($_[1]);
 	}
 else {
 	# Plain tar
-	$cmd = "tar cfX ".quotemeta($_[1])." $xtemp .";
+	$cmd = "tar cfX ".quotemeta($_[1])." $xtemp $iargs .";
 	}
 &execute_command("cd ".quotemeta($_[0]->{'home'})." && $cmd",
 		 undef, \$out, \$out);
@@ -316,6 +330,10 @@ else {
 	if (defined(&set_php_wrappers_writable)) {
 		&set_php_wrappers_writable($_[0], 0);
 		}
+	
+	# Incremental file is no longer valid, so clear it
+	local $ifile = "$incremental_backups_dir/$_[0]->{'id'}";
+	&unlink_file($ifile);
 
 	return 1;
 	}

@@ -181,10 +181,13 @@ if ($d) {
 	}
 
 # Show incremental option
-print &ui_table_row(&hlink($text{'backup_increment'}, "backup_increment"),
-		    &ui_radio("increment", int($sched->{'increment'}),
-			      [ [ 0, $text{'backup_increment0'} ],
-				[ 1, $text{'backup_increment1'} ] ]));
+if (&has_incremental_tar()) {
+	print &ui_table_row(
+		&hlink($text{'backup_increment'}, "backup_increment"),
+			    &ui_radio("increment", int($sched->{'increment'}),
+				      [ [ 0, $text{'backup_increment0'} ],
+					[ 1, $text{'backup_increment1'} ] ]));
+	}
 
 print &ui_hidden_table_end("dest");
 

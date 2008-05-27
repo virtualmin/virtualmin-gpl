@@ -98,6 +98,7 @@ while(@ARGV > 0) {
 		@vbs = @virtualmin_backups;
 		}
 	elsif ($a eq "--incremental") {
+		&has_incremental_tar() || &error("The tar command on this system does not support incremental backups");
 		$increment = 1;
 		}
 	else {
@@ -169,6 +170,7 @@ if ($test) {
 			       \@vbs,
 			       $mkdir,
 			       $onebyone,
+			       0,
 			       undef,
 			       $increment);
 if ($ok) {
@@ -197,7 +199,9 @@ print "                                           [--except-feature name]\n";
 print "                        [--ignore-errors]\n";
 print "                        [--separate] | [--newformat]\n";
 print "                        [--onebyone]\n";
-print "                        [--incremental]\n";
+if (&has_incremental_tar()) {
+	print "                        [--incremental]\n";
+	}
 print "                        [--all-virtualmin] | [--virtualmin config]\n";
 print "                        [--option feature name value]\n";
 print "                        [--mailfiles]\n";

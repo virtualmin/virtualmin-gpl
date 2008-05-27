@@ -266,5 +266,7 @@ $linux_limits_config = "/etc/security/limits.conf";
 
 $scheduled_backups_dir = "$module_config_directory/backups";
 
+$incremental_backups_dir = "$module_config_directory/incremental";
+
 1;
 

@@ -1831,6 +1831,7 @@ backup_es3nopath=You must specify a filename when backing up to a single file on
 backup_es3path=You cannot specify a filename when backing up to multiple files on S3
 
 backup_dirtar=Creating TAR file of home directory ..
+backup_dirtarinc=Creating incremental TAR file of home directory ..
 backup_dirtarfailed=.. TAR failed! $1
 backup_virtualmincp=Copying virtual server configuration ..
 backup_apachecp=Copying Apache virtual host configuration ..
@@ -4233,6 +4234,12 @@ sched_nothing=Nothing
 sched_none=No scheduled backups have been created yet.
 sched_add=Add a new backup schedule.
 sched_delete=Delete Selected Schedules
+sched_level=Level
+sched_inc=Incremental
+sched_full=Full
+sched_actions=Actions
+sched_now=Backup
+sched_restore=Restore..
 
 cron_special=Simple schedule
 cron_complex=Complex schedule

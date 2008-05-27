@@ -1671,5 +1671,12 @@ else {
 	}
 }
 
+# Returns 1 if tar supports incremental backups
+sub has_incremental_tar
+{
+local $out = &backquote_command("tar --help 2>&1 </dev/null");
+return $out =~ /--listed-incremental/;
+}
+
 1;
 

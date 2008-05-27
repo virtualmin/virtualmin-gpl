@@ -11,6 +11,7 @@ require './virtual-server-lib.pl';
 @scheds = grep { &can_backup_sched($_) } @scheds;
 
 # Build table of backups
+$hasinc = &has_incremental_tar();
 @table = ( );
 foreach $s (@scheds) {
 	my @row;
@@ -41,6 +42,17 @@ foreach $s (@scheds) {
 	push(@row, $s->{'enabled'} ?
 		&text('sched_yes', &cron::when_text($s)) :
 		$text{'no'});
+	if ($hasinc) {
+		push(@row, $s->{'increment'} ? $text{'sched_inc'}
+					     : $text{'sched_full'});
+		}
+	# Action links
+	@links = (
+	    "<a href='backup.cgi?sched=$s->{'id'}'>$text{'sched_now'}</a>",
+	    "<a href='restore_form.cgi?sched=$s->{'id'}'>".
+	     "$text{'sched_restore'}</a>",
+	    );
+	push(@row, &ui_links_row(\@links));
 	push(@table, \@row);
 	}
 
@@ -52,7 +64,9 @@ print &ui_form_columns_table(
 	[ [ "backup_form.cgi?new=1", $text{'sched_add'} ] ],
 	undef,
 	[ "", $text{'sched_dest'}, $text{'sched_doms'},
-	  $text{'sched_enabled'} ],
+	  $text{'sched_enabled'},
+	  $hasinc ? ( $text{'sched_level'} ) : ( ),
+	  $text{'sched_actions'} ],
 	100, \@table, [ '', 'string', 'string' ],
 	0, undef,
 	$text{'sched_none'});
