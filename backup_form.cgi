@@ -201,16 +201,8 @@ if ($in{'sched'} || $in{'new'}) {
 			    );
 
 	# Enabled/disabled input
-	print &ui_table_row(&hlink($text{'backup_enabled'}, "backup_enabled"),
-			    &ui_radio("enabled", $sched->{'enabled'} ? 1 : 0,
-				[ [ 0, $text{'no'} ],
-				  [ 1, $text{'backup_enabledyes'} ] ]));
-
-	# Times input
-	$sched->{'special'} = 'daily' if (!$sched->{'enabled'});
-	&foreign_require("cron", "cron-lib.pl");
-	$croninput = &capture_function_output(\&cron::show_times_input, $sched);
-	print &ui_table_row(undef, "<table border>$croninput</table>", 2);
+	print &ui_table_row(&hlink($text{'backup_when'}, "backup_when"),
+		&virtualmin_ui_show_cron_time("enabled", $sched->{'enabled'} ? $sched : undef, $text{'backup_disabled'}));
 	print &ui_hidden_table_end("sched");
 
 	# Save buttons

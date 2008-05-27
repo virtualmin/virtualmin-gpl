@@ -99,7 +99,7 @@ else {
 		}
 	$sched->{'enabled'} = $in{'enabled'};
 	if ($in{'enabled'}) {
-		&cron::parse_times_input($sched, \%in);
+		&virtualmin_ui_parse_cron_time("enabled", $sched, \%in);
 		}
 
 	# Save the schedule and thus the cron job

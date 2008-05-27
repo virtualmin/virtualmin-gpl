@@ -1662,7 +1662,7 @@ else {
 		return 0 if (!$sched->{'owner'});	# Master admin's backup
 		local $myd = &get_domain_by_user($base_remote_user);
 		return 0 if (!$myd || $myd->{'id'} != $sched->{'owner'});
-		}
+	}
 	return 1;
 	}
 }
