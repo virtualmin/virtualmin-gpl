@@ -87,6 +87,7 @@ else {
 	$sched->{'email_err'} = $in{'email_err'};
 	$sched->{'email_doms'} = $in{'email_doms'};
 	$sched->{'errors'} = $in{'errors'};
+	$sched->{'increment'} = $in{'increment'};
 	$sched->{'strftime'} = $in{'strftime'};
 	$sched->{'onebyone'} = $in{'onebyone'};
 	foreach $f (keys %options) {

@@ -111,7 +111,8 @@ if ($dest eq "download:") {
 	($ok, $size) = &backup_domains($temp, \@doms, \@do_features,
 				       $in{'fmt'}, $in{'errors'}, \%options,
 				       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
-				       $in{'onebyone'}, $cbmode == 2);
+				       $in{'onebyone'}, $cbmode == 2,
+				       undef, $in{'increment'});
 	&run_post_actions();
 	if ($ok) {
 		@st = stat($temp);
@@ -143,7 +144,8 @@ else {
 	($ok, $size) = &backup_domains($dest, \@doms, \@do_features,
 				       $in{'fmt'}, $in{'errors'}, \%options,
 				       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
-				       $in{'onebyone'}, $cbmode == 2);
+				       $in{'onebyone'}, $cbmode == 2,
+				       undef, $in{'increment'});
 	&run_post_actions();
 	if (!$ok) {
 		#&unlink_file($dest);

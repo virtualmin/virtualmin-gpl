@@ -92,7 +92,8 @@ $current_id = undef;
 			       $sched->{'mkdir'},
 			       $sched->{'onebyone'},
 			       0,
-			       \&backup_cbfunc);
+			       \&backup_cbfunc,
+			       $increment);
 
 # Send an email to the recipient, if there are any
 if ($sched->{'email'} && $has_mailboxes &&

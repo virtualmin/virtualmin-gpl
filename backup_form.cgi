@@ -180,6 +180,12 @@ if ($d) {
 		    &ui_yesno_radio("parent", $sched->{'parent'} ? 1 : 0));
 	}
 
+# Show incremental option
+print &ui_table_row(&hlink($text{'backup_increment'}, "backup_increment"),
+		    &ui_radio("increment", int($sched->{'increment'}),
+			      [ [ 0, $text{'backup_increment0'} ],
+				[ 1, $text{'backup_increment1'} ] ]));
+
 print &ui_hidden_table_end("dest");
 
 if ($in{'sched'} || $in{'new'}) {

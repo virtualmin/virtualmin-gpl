@@ -13,6 +13,7 @@ if ($config{'backup_dest'}) {
 			  'fmt' => $config{'backup_fmt'},
 			  'mkdir' => $config{'backup_mkdir'},
 			  'errors' => $config{'backup_errors'},
+			  'increment' => $config{'backup_increment'},
 			  'strftime' => $config{'backup_strftime'},
 			  'onebyone' => $config{'backup_onebyone'},
 			  'parent' => $config{'backup_parent'},
@@ -157,13 +158,13 @@ if ($job) {
 
 # backup_domains(file, &domains, &features, dir-format, skip-errors, &options,
 #		 home-format, &virtualmin-backups, mkdir, onebyone, as-owner,
-#		 &callback-func)
+#		 &callback-func, incremental)
 # Perform a backup of one or more domains into a single tar.gz file. Returns
 # an OK flag and the size of the backup file
 sub backup_domains
 {
 local ($desturl, $doms, $features, $dirfmt, $skip, $opts, $homefmt, $vbs,
-       $mkdir, $onebyone, $asowner, $cbfunc) = @_;
+       $mkdir, $onebyone, $asowner, $cbfunc, $increment) = @_;
 local $backupdir;
 local $transferred_sz;
 
@@ -355,14 +356,16 @@ DOMAIN: foreach $d (@$doms) {
 			else {
 				$ffile = "$backupdir/$d->{'dom'}_$f";
 				}
-			$fok = &$bfunc($d, $ffile, $opts->{$f}, $homefmt);
+			$fok = &$bfunc($d, $ffile, $opts->{$f}, $homefmt,
+				       $increment);
 			}
 		elsif (&indexof($f, @backup_plugins) >= 0 &&
 		       $d->{$f}) {
 			# Call plugin backup function
 			$ffile = "$backupdir/$d->{'dom'}_$f";
 			local $fok = &plugin_call($f, "feature_backup",
-					  $d, $ffile, $opts->{$f}, $homefmt);
+					  $d, $ffile, $opts->{$f}, $homefmt,
+					  $increment);
 			}
 		if (defined($fok)) {
 			# See if it worked or not

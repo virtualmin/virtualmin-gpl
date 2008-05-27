@@ -1,0 +1,20 @@
+<header>Backup Level</header>
+
+By default, Virtualmin backups will include all files in the selected domains'
+home directories. However, if you regularly backup large virtual servers,
+a lot of time may be spent copying files that have not changed recently. <p>
+
+If the <b>Incremental</b> option is selected here, only those files that
+have changed or were created since the last full backup will be included.
+This is most useful when you have two scheduled backups, such as a weekly
+full backup and a daily incremental. Assuming that most files in a domain
+are un-changed day to day, this will substantially reduce the size and
+time of daily backups. <p>
+
+Be aware that when restoring, you will need to restore first the full backup
+and then the incremental to recover all files. Also, other data such as 
+Apache configurations and databases is not incrementally backed up, and
+so will always be included regardless of this option. <p>
+
+<footer>
+

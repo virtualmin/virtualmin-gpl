@@ -97,6 +97,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--all-virtualmin") {
 		@vbs = @virtualmin_backups;
 		}
+	elsif ($a eq "--incremental") {
+		$increment = 1;
+		}
 	else {
 		&usage();
 		}
@@ -165,7 +168,9 @@ if ($test) {
 			       $newformat,
 			       \@vbs,
 			       $mkdir,
-			       $onebyone);
+			       $onebyone,
+			       undef,
+			       $increment);
 if ($ok) {
 	&$second_print("Backup completed successfully. Final size was ".
 		       &nice_size($size));
@@ -192,6 +197,7 @@ print "                                           [--except-feature name]\n";
 print "                        [--ignore-errors]\n";
 print "                        [--separate] | [--newformat]\n";
 print "                        [--onebyone]\n";
+print "                        [--incremental]\n";
 print "                        [--all-virtualmin] | [--virtualmin config]\n";
 print "                        [--option feature name value]\n";
 print "                        [--mailfiles]\n";
