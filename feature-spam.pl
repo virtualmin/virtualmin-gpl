@@ -617,7 +617,7 @@ sub find_spam_recipe
 local ($recs) = @_;
 local @rv;
 for(my $i=0; $i<@$recs; $i++) {
-	if ($recs->[$i]->{'action'} =~ /spamassassin|spamc/) {
+	if ($recs->[$i]->{'action'} =~ /(spamassassin|spamc)($|\s)/) {
 		# Found spamassassin
 		$rv[0] = $recs->[$i];
 		}
