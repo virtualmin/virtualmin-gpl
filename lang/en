@@ -3059,6 +3059,8 @@ newquotas_warn=Send warning when usage reaches
 newquotas_nowarn=Do not send warnings
 newquotas_sched=Scheduled quota checking enabled?
 newquotas_schedyes=Yes, at times selected below ..
+newquotas_when=Check quotas on schedule
+newquotas_whenno=Disabled
 newquotas_ok=Save and Apply
 newquotas_err=Failed to save quota monitoring
 newquotas_ewarn2=No warning percentages entered
@@ -4230,6 +4232,7 @@ sched_delete=Delete Selected Schedules
 
 cron_special=Simple schedule
 cron_complex=Complex schedule
+cron_cron=Cron specification
 cron_title=Select Schedule
 cron_ok=OK
 cron_ehidden=No complex schedule was selected

@@ -121,6 +121,8 @@ return &ui_radio_table($name, $mode,
 # schedule was chosen, 0 if not.
 sub virtualmin_ui_parse_cron_time
 {
+return &theme_virtualmin_ui_parse_cron_time(@_)
+	if (defined(&theme_virtualmin_ui_parse_cron_time));
 local ($name, $job, $in) = @_;
 if ($in{$name} == 0) {
 	# Disabled

@@ -34,18 +34,9 @@ print &ui_table_row($text{'newquotas_interval'},
 
 # Scheduled checking enabled?
 $job = &find_quotas_job();
-print &ui_table_row($text{'newquotas_sched'},
-		    &ui_radio("sched", $job ? 1 : 0,
-			      [ [ 0, $text{'no'} ],
-				[ 1, $text{'newquotas_schedyes'} ] ]));
-print "<tr> <td colspan=2><table border width=100%>\n";
-$job ||= { 'mins' => 0,
-	   'hours' => 0,
-	   'days' => '*',
-	   'months' => '*',
-	   'weekdays' => '*' };
-&cron::show_times_input($job);
-print "</table></td> </tr>\n";
+print &ui_table_row($text{'newquotas_when'},
+	&virtualmin_ui_show_cron_time("sched", $job,
+				      $text{'newquotas_whenno'}));
 
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'newquotas_ok'} ] ]);

@@ -21,7 +21,7 @@ if ($in{'sched'}) {
 				&error($text{'newquotas_ewarn3'});
 			}
 		}
-	&cron::parse_times_input($job, \%in);
+	&virtualmin_ui_parse_cron_time("sched", $job, \%in);
 	}
 $config{'quota_email'} = $in{'email'};
 $config{'quota_warn'} = $in{'warn_def'} ? undef : $in{'warn'};
