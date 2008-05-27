@@ -4151,7 +4151,7 @@ foreach my $tmpl (&list_templates()) {
 	}
 &execute_command("cp $template_scripts_dir/* $temp");
 &execute_command("cd ".quotemeta($temp)." && tar cf ".quotemeta($file)." .");
-&execute_command("rm -rf ".quotemeta($temp));
+&unlink_file($temp);
 }
 
 # virtualmin_restore_templates(file, &vbs)
@@ -4186,6 +4186,50 @@ foreach my $t (readdir(DIR)) {
 closedir(DIR);
 
 &execute_command("rm -rf ".quotemeta($temp));
+}
+
+# virtualmin_backup_scheds(file, &vbs)
+# Create a tar file of all scheduled backups
+sub virtualmin_backup_scheds
+{
+local ($file, $vbs) = @_;
+local $temp = &transname();
+mkdir($temp, 0700);
+foreach my $sched (&list_scheduled_backups()) {
+	&write_file("$temp/$sched->{'id'}", $sched);
+	}
+&execute_command("cd ".quotemeta($temp)." && tar cf ".quotemeta($file)." .");
+&unlink_file($temp);
+}
+
+# virtualmin_restore_scheds(file, vbs)
+# Re-create all scheduled backups
+sub virtualmin_restore_scheds
+{
+local ($file, $vbs) = @_;
+
+# Extract backup file
+local $temp = &transname();
+mkdir($temp, 0700);
+&execute_command("cd ".quotemeta($temp)." && tar xf ".quotemeta($file));
+
+# Delete all current non-default schedules
+foreach my $sched (&list_scheduled_backups()) {
+	if ($sched->{'id'} != 1) {
+		&delete_scheduled_backup($sched);
+		}
+	}
+
+# Re-create the restored ones 
+opendir(BACKUPDIR, $temp);
+foreach my $t (readdir(BACKUPDIR)) {
+        next if ($t eq "." || $t eq "..");
+	local %sched;
+	&read_file("$temp/$t", \%sched);
+	delete($sched{'file'});
+	&save_scheduled_backup(\%sched);
+	}
+closedir(BACKUPDIR);
 }
 
 # virtualmin_backup_resellers(file, &vbs)

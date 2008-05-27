@@ -62,7 +62,7 @@
 
  - Incremental backups
 	- FS#3909
-	- Multiple schedules
+	- Incremental support
 	- Allow backups and restores and schedules by server owners
 	- Purge old backups
 	- Crossport to GPL version
@@ -71,4 +71,4 @@
 		- Domain owners can create schedules
 		- 'all domains' should mean only his
 	- Help pages on backup and schedules form
-	- Backup the backups
+	- Verify that old backups still work

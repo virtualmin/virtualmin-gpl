@@ -1270,7 +1270,9 @@ local ($cont, $doms) = @_;
 # Work out all features in the backup
 local @allfeatures;
 foreach my $dname (keys %$cont) {
-	push(@allfeatures, @{$cont->{$dname}});
+	if ($dname ne "virtualmin") {
+		push(@allfeatures, @{$cont->{$dname}});
+		}
 	}
 if ($doms) {
 	foreach my $d (@$doms) {
@@ -1291,7 +1293,6 @@ if ($doms) {
 
 local @rv;
 foreach my $f (@allfeatures) {
-	next if ($f eq 'virtualmin');	# Not a feature
 	if (&indexof($f, @features) >= 0) {
 		if (!$config{$f}) {
 			# Missing feature

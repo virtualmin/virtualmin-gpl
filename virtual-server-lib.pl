@@ -188,7 +188,8 @@ if (!$virtualmin_pro) {
 @virtualmin_backups = ( 'config', 'templates',
 			$virtualmin_pro ? ( 'resellers' ) : ( ),
 			'email', 'custom',
-			$virtualmin_pro ? ( 'scripts', 'styles' ) : ( ) );
+			$virtualmin_pro ? ( 'scripts', 'styles' ) : ( ),
+		        'scheds' );
 
 @limit_types = ("mailboxlimit", "aliaslimit", "dbslimit", "domslimit",
             	"aliasdomslimit", "realdomslimit");
