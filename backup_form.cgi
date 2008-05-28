@@ -3,30 +3,25 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
-if ($in{'dom'}) {
-	$d = &get_domain($in{'dom'});
-	($cbmode = &can_backup_domain($d)) || &error($text{'backup_ecannot'});
-	$msg = &domain_in($d);
-	}
 @scheds = grep { &can_backup_sched($_) } &list_scheduled_backups();
 
 if ($in{'sched'}) {
 	# Editing existing scheduled backup
 	($sched) = grep { $_->{'id'} == $in{'sched'} } @scheds;
 	$sched || &error($text{'backup_egone'});
-	&ui_print_header($msg, $text{'backup_title2'}, "", "backupsched");
+	&ui_print_header(undef, $text{'backup_title2'}, "", "backupsched");
 	print &ui_form_start("backup_sched.cgi", "post");
 	print &ui_hidden("sched", $in{'sched'});
 	}
 elsif ($in{'new'}) {
 	# Creating new scheduled backup
-	&ui_print_header($msg, $text{'backup_title3'}, "", "backupnew");
+	&ui_print_header(undef, $text{'backup_title3'}, "", "backupnew");
 	print &ui_form_start("backup_sched.cgi", "post");
 	print &ui_hidden("new", 1);
 	}
 else {
 	# Doing a one-off backup
-	&ui_print_header($msg, $text{'backup_title'}, "", "backupnow");
+	&ui_print_header(undef, $text{'backup_title'}, "", "backupnow");
 	print &ui_form_start("backup.cgi/backup.tgz", "post");
 	$sched = $scheds[0];
 	}
@@ -35,57 +30,23 @@ $sched ||= { 'all' => 1,		# Sensible defaults
 	     'parent' => 1 };
 @tds = ( "width=30% ");
 
-# Work out default backup selection
-$backup_fmt = $config{'backup_fmt'};
-$backup_mkdir = $config{'backup_mkdir'};
-$backup_errors = $config{'backup_errors'};
-$backup_strftime = $config{'backup_strftime'};
-$backup_onebyone = $config{'backup_onebyone'};
-$backup_parent = $config{'backup_parent'};
-if ($d) {
-	# Just one domain
-	# XXX broken
-	if (defined($d->{'backup_dest'})) {
-		$dest = $d->{'backup_dest'};
-		}
-	elsif ($config{'backup_fmt'} == 0 && $dest) {
-		$dest .= "/$d->{'dom'}.tar.gz";
-		}
-	$backup_fmt = $d->{'backup_fmt'}
-		if (defined($d->{'backup_fmt'}));
-	$backup_mkdir = $d->{'backup_mkdir'}
-		if (defined($d->{'backup_mkdir'}));
-	$backup_errors = $d->{'backup_errors'}
-		if (defined($d->{'backup_errors'}));
-	$backup_strftime = $d->{'backup_strftime'}
-		if (defined($d->{'backup_strftime'}));
-	$backup_onebyone = $d->{'backup_onebyone'}
-		if (defined($d->{'backup_onebyone'}));
-	$backup_parent = $d->{'backup_parent'}
-		if (defined($d->{'backup_parent'}));
-	print &ui_hidden("dom", $in{'dom'}),"\n";
-	print &ui_hidden("doms", $in{'dom'}),"\n";
-	print &ui_hidden("backup_all", 0),"\n";
-	}
-else {
-	# User can select which domains
-	print &ui_hidden_table_start($text{'backup_headerdoms'}, "width=100%",
-				     2, "doms", 1, \@tds);
-	($cbmode = &can_backup_domain()) || &error($text{'backup_ecannot'});
-	@bak = split(/\s+/, $sched->{'doms'});
-	@doms = &list_domains();
-	$dsel = &ui_radio("all", int($sched->{'all'}),
-			[ [ 1, $text{'backup_all'} ],
-			  [ 0, $text{'backup_sel'} ],
-			  [ 2, $text{'backup_exc'} ] ])."<br>\n".
-		&servers_input("doms", \@bak, \@doms);
-	$dsel .= "<br>".&ui_checkbox(
-		"parent", 1, &hlink($text{'backup_parent'}, 'backup_parent'),
-		$sched->{'parent'});
-	print &ui_table_row(&hlink($text{'backup_doms'}, "backup_doms"),
-			    $dsel);
-	print &ui_hidden_table_end("doms");
-	}
+# Fields to select domains
+print &ui_hidden_table_start($text{'backup_headerdoms'}, "width=100%",
+			     2, "doms", 1, \@tds);
+($cbmode = &can_backup_domain()) || &error($text{'backup_ecannot'});
+@bak = split(/\s+/, $sched->{'doms'});
+@doms = &list_domains();
+$dsel = &ui_radio("all", int($sched->{'all'}),
+		[ [ 1, $text{'backup_all'} ],
+		  [ 0, $text{'backup_sel'} ],
+		  [ 2, $text{'backup_exc'} ] ])."<br>\n".
+	&servers_input("doms", \@bak, \@doms);
+$dsel .= "<br>".&ui_checkbox(
+	"parent", 1, &hlink($text{'backup_parent'}, 'backup_parent'),
+	$sched->{'parent'});
+print &ui_table_row(&hlink($text{'backup_doms'}, "backup_doms"),
+		    $dsel);
+print &ui_hidden_table_end("doms");
 
 # Show feature and plugin selection boxes
 print &ui_hidden_table_start($text{'backup_headerfeatures'}, "width=100%", 2,

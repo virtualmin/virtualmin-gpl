@@ -106,8 +106,7 @@ if ($config{'display_max'} && @doms > $config{'display_max'}) {
 elsif (@doms) {
 	# Show domains in a table
 	print &ui_form_start("domain_form.cgi");
-	if ($current_theme ne "virtual-server-theme" &&
-	    !$main::nocreate_virtualmin_menu) {
+	if (!$main::nocreate_virtualmin_menu) {
 		&create_links(1);
 		}
 	foreach $d (@doms) {
@@ -150,8 +149,7 @@ print &ui_form_end();
 print "<p>\n";
 
 # When using the Virtualmin Pro framed theme, the rest of the page is not needed
-if ($current_theme eq "virtual-server-theme" ||
-    $main::basic_virtualmin_menu) {
+if ($main::basic_virtualmin_menu) {
 	goto PAGEEND;
 	}
 
@@ -248,23 +246,15 @@ if (&can_view_sysinfo()) {
 	}
 
 # Show backup and restore buttons
-if (&can_backup_domains()) {
+($blinks, $btitles, $bdescs) = &get_backup_actions();
+if (@$blinks) {
 	print &ui_hr();
 	print &ui_subheading($text{'index_header4'});
 	print &ui_buttons_start();
-
-	# Button to backup now
-	print &ui_buttons_row("backup_form.cgi", $text{'index_backup'},
-			      $text{'index_backupdesc'});
-
-	# Button to setup scheduled backups
-	print &ui_buttons_row("list_sched.cgi", $text{'index_scheds'},
-			      $text{'index_schedsdesc'});
-
-	# Button to restore
-	print &ui_buttons_row("restore_form.cgi", $text{'index_restore'},
-			      $text{'index_restoredesc'});
-
+	for($i=0; $i<@$blinks; $i++) {
+		print &ui_buttons_row($blinks->[$i], $btitles->[$i],
+				      $bdescs->[$i]);
+		}
 	print &ui_buttons_end();
 	}
 

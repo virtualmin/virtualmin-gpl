@@ -1656,7 +1656,8 @@ else {
 
 # can_backup_sched([&sched])
 # Returns 1 if the current user can create scheduled backups, or edit some
-# existing schedule.
+# existing schedule. If sched is set, checks if the user is allowed to create
+# schedules at all.
 sub can_backup_sched
 {
 local ($sched) = @_;
@@ -1665,7 +1666,16 @@ if (&master_admin()) {
 	return 1;
 	}
 elsif (&reseller_admin()) {
-	# Resellers can do their own domains
+	# Resellers can edit schedules for their domains' users
+	return 0 if (!$sched->{'owner'});       # Master admin's backup
+	if ($sched) {
+		return 1 if ($sched->{'owner'} eq $base_remote_user);
+		foreach my $d (&get_domain_by("reseller", $base_remote_user)) {
+			return 1 if ($d->{'id'} eq $sched->{'owner'});
+			}
+		return 0;
+		}
+	return 1;
 	}
 else {
 	# Regular users can only edit their own schedules
@@ -1673,8 +1683,8 @@ else {
 	if ($sched) {
 		return 0 if (!$sched->{'owner'});	# Master admin's backup
 		local $myd = &get_domain_by_user($base_remote_user);
-		return 0 if (!$myd || $myd->{'id'} != $sched->{'owner'});
-	}
+		return 0 if (!$myd || $myd->{'id'} ne $sched->{'owner'});
+		}
 	return 1;
 	}
 }
@@ -1684,6 +1694,92 @@ sub has_incremental_tar
 {
 local $out = &backquote_command("tar --help 2>&1 </dev/null");
 return $out =~ /--listed-incremental/;
+}
+
+# get_backup_actions()
+# Returns a list of arrays for backup / restore actions that the current
+# user is allowed to do. The first is links, the second titles, the third
+# long descriptions.
+sub get_backup_actions
+{
+local (@links, @titles, @descs);
+if (&can_backup_domain()) {
+	if (&can_backup_sched()) {
+		# Can do scheduled backups, so show list
+		push(@links, "list_sched.cgi");
+		push(@titles, $text{'index_scheds'});
+		push(@descs, $text{'index_schedsdesc'});
+		}
+	# Can do immediate
+	push(@links, "backup_form.cgi");
+	push(@titles, $text{'index_backup'});
+	push(@descs, $text{'index_backupdesc'});
+	}
+if (&can_restore_domain()) {
+	push(@links, "restore_form.cgi");
+	push(@titles, $text{'index_restore'});
+	push(@descs, $text{'index_restoredesc'});
+	}
+return (\@links, \@titles, \@descs);
+}
+
+# Returns 1 if the user can backup and restore all domains
+# Deprecated, but kept for old theme users
+sub can_backup_domains
+{
+return &master_admin();
+}
+
+# Returns 1 if the user can backup and restore core Virtualmin settings, like
+# the config, resellers and so on
+sub can_backup_virtualmin
+{
+return &master_admin();
+}
+
+# can_backup_domain([&domain])
+# Returns 0 if no backups are allowed, 1 if they are, 2 if only backups to
+# remote or a file under the domain are allowed. If a domain is given, checks
+# if backups of that domain are allowed.
+sub can_backup_domain
+{
+local ($d) = @_;
+if (&master_admin()) {
+	return 1;
+	}
+else {
+	# XXX what about resellers?
+	return 0 if (!$access{'edit_backup'});
+	if ($d) {
+		return &can_edit_domain($d);
+		}
+	return 1;
+	}
+}
+
+# can_restore_domain([&domain])
+# Returns 1 if the user is allowed to perform full restores, 2 if only
+# dir/mysql restores are allowed, 0 if nothing
+sub can_restore_domain
+{
+local ($d) = @_;
+if (&master_admin()) {
+	return 1;
+	}
+else {
+	# XXX what about resellers?
+	return 0 if (!$access{'edit_restore'});
+	if ($d) {
+		return &can_edit_domain($d) ? 2 : 0;
+		}
+	return 2;
+	}
+}
+
+# Returns 1 if the current user can backup to Amazon's S3 service
+sub can_use_s3
+{
+return $virtualmin_pro;
 }
 
 1;

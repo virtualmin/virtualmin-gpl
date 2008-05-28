@@ -2026,42 +2026,6 @@ sub can_edit_local
 return $access{'local'};
 }
 
-# Returns 1 if the user can backup and restore all domains
-sub can_backup_domains
-{
-return &master_admin();
-}
-
-# Returns 1 if the user can backup and restore core Virtualmin settings, like
-# the config, resellers and so on
-sub can_backup_virtualmin
-{
-return &master_admin();
-}
-
-# can_backup_domain([&domain])
-# Returns 0 if no backups are allowed, 1 if they are, 2 if only backups to
-# remote are allowed
-sub can_backup_domain
-{
-if (!$_[0]) {
-	return &master_admin() ? 1 : 0;
-	}
-elsif ($_[0] && &can_edit_domain($_[0]) &&
-       ($access{'edit_backup'} || &master_admin())) {
-	return &master_admin() ? 1 : 2;
-	}
-else {
-	return 0;
-	}
-}
-
-# Returns 1 if the current user can backup to Amazon's S3 service
-sub can_use_s3
-{
-return $virtualmin_pro;
-}
-
 # Returns 1 if the user can create new top-level servers or child servers
 sub can_create_master_servers
 {
@@ -8575,28 +8539,8 @@ if ($virtualmin_pro && $config{'mail'} && $config{'mail_system'} <= 1 &&
 		  });
 	}
 
-# Buttons to backup and restore this server
-local $cb = &can_backup_domain($d);
-if (!$d->{'alias'} && $cb) {
-	# Users can backup their domains
-	push(@rv, { 'page' => 'backup_form.cgi',
-		    'title' => $text{'edit_backup'},
-		    'desc' => $cb == 1 ? $text{'edit_backupdesc'}
-				       : $text{'edit_backupdesc2'},
-		    'cat' => 'backup',
-		  });
-
-	if ($cb == 1) {
-		# Restore is only available to the master admin
-		push(@rv, { 'page' => 'restore_form.cgi',
-			    'title' => $text{'edit_restore'},
-			    'desc' => $text{'edit_restoredesc'},
-			    'cat' => 'backup',
-			  });
-		}
-	}
+# Link to edit excluded directories
 if (!$d->{'alias'} && &can_edit_exclude()) {
-	# Anyone can edit excludes
 	push(@rv, { 'page' => 'edit_exclude.cgi',
 		    'title' => $text{'edit_exclude'},
 		    'desc' => $text{'edit_excludedesc'},
