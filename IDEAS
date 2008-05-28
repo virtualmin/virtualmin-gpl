@@ -72,4 +72,8 @@
 	- Help pages on backup and schedules form
 	- Verify that old backups still work
 	- Links from schedule list to immediate backup and restore form
+	- Complain if doing an incremental restore before a full
 	- CHANGELOG for incremental, multiple schedules, user backups
+
+ - Backport spam and virus to GPL
+

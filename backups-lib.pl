@@ -784,7 +784,8 @@ if ($ok) {
 			$extract = ".backup";
 			}
 
-		&execute_command("cd '$restoredir' && ($comp $q | tar xf - $extract)", undef, \$out, \$out);
+		&execute_command("cd '$restoredir' && ".
+			"($comp $q | tar xf - $extract)", undef, \$out, \$out);
 		if ($?) {
 			&$second_print(&text('restore_firstfailed',
 					     "<tt>$f</tt>", "<pre>$out</pre>"));
@@ -795,7 +796,9 @@ if ($ok) {
 		if ($homeformat{$f}) {
 			# Move the .backup contents to the restore dir, as
 			# expected by later code
-			&execute_command("mv ".quotemeta("$restoredir/.backup")."/* ".quotemeta($restoredir));
+			&execute_command(
+				"mv ".quotemeta("$restoredir/.backup")."/* ".
+				      quotemeta($restoredir));
 			}
 		}
 	&$second_print($text{'setup_done'}) if ($ok);
@@ -805,7 +808,8 @@ if ($ok) {
 foreach $d (@{$_[1]}) {
 	if ($d->{'missing'}) {
 		if (!-r "$restoredir/$d->{'dom'}_virtualmin") {
-			&$second_print(&text('restore_missinginfo', $d->{'dom'}));
+			&$second_print(&text('restore_missinginfo',
+					     $d->{'dom'}));
 			$ok = 0;
 			last;
 			}
@@ -820,25 +824,28 @@ if ($_[3]->{'reuid'}) {
 local $vcount = 0;
 if ($ok) {
 	# Fill in missing domain details
-	foreach $d (@{$_[1]}) {
-		if ($d->{'missing'}) {
-			$d = &get_domain(undef,
-				"$restoredir/$d->{'dom'}_virtualmin");
-			if ($_[3]->{'fix'}) {
-				# We can just use the domains file from the
-				# backup and import it
-				&save_domain($d, 1);
-				}
-			else {
-				# We will be re-creating the server
-				$d->{'missing'} = 1;
-				}
+	foreach $d (grep { $_->{'missing'} } @$doms) {
+		$d = &get_domain(undef,
+			"$restoredir/$d->{'dom'}_virtualmin");
+		if ($_[3]->{'fix'}) {
+			# We can just use the domains file from the
+			# backup and import it
+			&save_domain($d, 1);
 			}
+		else {
+			# We will be re-creating the server
+			$d->{'missing'} = 1;
+			}
+		}
+
+	# Check for restores of missing domains from partial backups
+	foreach $d (grep { $_->{'missing'} } @$doms) {
+		# XXX not done yet
 		}
 
 	# Now restore each of the domain/feature files
 	local $d;
-	DOMAIN: foreach $d (sort { $a->{'parent'} <=> $b->{'parent'} } @{$_[1]}) {
+	DOMAIN: foreach $d (sort { $a->{'parent'} <=> $b->{'parent'} } @$doms) {
 		if ($d->{'missing'}) {
 			# This domain doesn't exist yet - need to re-create it
 			$missing{$d->{'id'}} = $d;
@@ -884,7 +891,7 @@ if ($ok) {
 				}
 			elsif ($_[3]->{'reuid'}) {
 				# Re-allocate the UID and GID
-				local ($samegid) = ($d->{'gid'} == $d->{'ugid'});
+				local ($samegid) = ($d->{'gid'}==$d->{'ugid'});
 				local (%gtaken, %taken);
 				&build_group_taken(\%gtaken);
 				$d->{'gid'} = &allocate_gid(\%gtaken);
@@ -1296,6 +1303,7 @@ if ($doms) {
 
 local @rv;
 foreach my $f (@allfeatures) {
+	next if ($f eq 'virtualmin');
 	if (&indexof($f, @features) >= 0) {
 		if (!$config{$f}) {
 			# Missing feature

@@ -243,7 +243,7 @@ if ($gconfig{'os_type'} eq 'solaris') {
 &close_tempfile(XTEMP);
 
 # Work out incremental flags
-local $iargs;
+local ($iargs, $iflag);
 if (&has_incremental_tar()) {
 	if (!-d $incremental_backups_dir) {
 		&make_dir($incremental_backups_dir, 0700);
@@ -252,6 +252,14 @@ if (&has_incremental_tar()) {
 	if (!$_[4]) {
 		# Force full backup
 		&unlink_file($ifile);
+		}
+	else {
+		# Add a flag file indicating that this was an incremental backup
+		if (-r $ifile) {
+			$iflag = "$_[0]->{'home'}/.incremental";
+			&open_tempfile(IFLAG, ">$iflag", 0, 1);
+			&close_tempfile(IFLAG);
+			}
 		}
 	$iargs = "--listed-incremental=$ifile";
 	}
@@ -269,9 +277,10 @@ else {
 	# Plain tar
 	$cmd = "tar cfX ".quotemeta($_[1])." $xtemp $iargs .";
 	}
-&execute_command("cd ".quotemeta($_[0]->{'home'})." && $cmd",
-		 undef, \$out, \$out);
-if ($?) {
+local $ex = &execute_command("cd ".quotemeta($_[0]->{'home'})." && $cmd",
+			     undef, \$out, \$out);
+&unlink_file($iflag) if ($iflag);
+if ($ex) {
 	&$second_print(&text('backup_dirtarfailed', "<pre>$out</pre>"));
 	return 0;
 	}
