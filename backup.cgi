@@ -3,17 +3,20 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+$cbmode = &can_backup_domain();
+$cbmode || &error($text{'backup_ecannot'});
 
 # Validate inputs
 &error_setup($text{'backup_err'});
 if ($in{'all'} == 1) {
 	# All domains
-	@doms = &list_domains();
+	@doms = grep { &can_backup_domain($_) } &list_domains();
 	}
 elsif ($in{'all'} == 2) {
 	# All except selected
 	%exc = map { $_, 1 } split(/\0/, $in{'doms'});
-	@doms = grep { !$exc{$_->{'id'}} } &list_domains();
+	@doms = grep { &can_backup_domain($_) &&
+		       !$exc{$_->{'id'}} } &list_domains();
 	if ($in{'parent'}) {
 		@doms = grep { !$_->{'parent'} || !$ext{$_->{'parent'}} } @doms;
 		}
@@ -22,7 +25,7 @@ else {
 	# Only selected
 	foreach $d (split(/\0/, $in{'doms'})) {
 		local $dinfo = &get_domain($d);
-		if ($dinfo) {
+		if ($dinfo && &can_backup_domain($dinfo)) {
 			push(@doms, $dinfo);
 			if (!$dinfo->{'parent'} && $in{'parent'}) {
 				push(@doms, &get_domain_by("parent", $d));
@@ -31,14 +34,10 @@ else {
 		}
 	@doms = grep { !$donedom{$_->{'id'}}++ } @doms;
 	}
-if (@doms) {
-	foreach my $bd (@doms) {
-		$cbmode ||= &can_backup_domain($bd);
-		}
-	$cbmode || &error($text{'backup_ecannot'});
-	}
-else {
-	$cbmode = &can_backup_domain();
+
+# Work out the current user's main domain, if needed
+if ($cbmode == 2) {
+	$d = &get_domain_by_user($base_remote_user);
 	}
 
 if ($in{'feature_all'}) {
@@ -48,7 +47,7 @@ else {
 	@do_features = split(/\0/, $in{'feature'});
 	}
 @do_features || &error($text{'backup_efeatures'});
-$dest = &parse_backup_destination("dest", \%in, $cbmode == 2, $doms[0]);
+$dest = &parse_backup_destination("dest", \%in, $cbmode == 3, $d);
 if ($dest eq "download:" && $in{'fmt'}) {
 	&error($text{'backup_edownloadfmt'});
 	}
@@ -144,7 +143,7 @@ else {
 	($ok, $size) = &backup_domains($dest, \@doms, \@do_features,
 				       $in{'fmt'}, $in{'errors'}, \%options,
 				       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
-				       $in{'onebyone'}, $cbmode == 2,
+				       $in{'onebyone'}, $cbmode >= 2,
 				       undef, $in{'increment'});
 	&run_post_actions();
 	if (!$ok) {

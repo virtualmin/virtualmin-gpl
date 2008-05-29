@@ -5,6 +5,7 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 &can_backup_sched() || &error($text{'sched_ecannot'});
+&can_backup_domain() || &error($text{'backup_ecannot'});
 &ui_print_header(undef, $text{'sched_title'}, "");
 
 @scheds = &list_scheduled_backups();

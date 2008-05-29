@@ -1499,18 +1499,18 @@ local $serverport = $port && $port != $defport ? "$server:$port" : $server;
 local $rv;
 
 local @opts;
-if (!$nolocal) {
-	# Local file field (can be anywhere)
-	push(@opts, [ 0, $text{'backup_mode0'},
-	       &ui_textbox($name."_file", $mode == 0 ? $path : "", 50)." ".
-	       &file_chooser_button($name."_file")."<br>\n" ]);
-	}
-elsif ($d && $d->{'dir'}) {
+if ($d && $d->{'dir'}) {
 	# Limit local file to under virtualmin-backups
 	push(@opts, [ 0, $text{'backup_mode0a'},
 	       &ui_textbox($name."_file",
 		  $mode == 0 && $path =~ /virtualmin-backup\/(.*)$/ ? $1 : "",
 		  50)."<br>\n" ]);
+	}
+elsif (!$nolocal) {
+	# Local file field (can be anywhere)
+	push(@opts, [ 0, $text{'backup_mode0'},
+	       &ui_textbox($name."_file", $mode == 0 ? $path : "", 50)." ".
+	       &file_chooser_button($name."_file")."<br>\n" ]);
 	}
 
 # FTP file fields
@@ -1589,56 +1589,57 @@ return &ui_table_start(undef, 2).
 # Returns a backup destination string, or calls error
 sub parse_backup_destination
 {
-local %in = %{$_[1]};
-local $mode = $in{"$_[0]_mode"};
-if ($mode == 0 && !$_[2]) {
-	# Any local file
-	$in{"$_[0]_file"} =~ /^\/\S/ || &error($text{'backup_edest'});
-	$in{"$_[0]_file"} =~ s/\/+$//;	# No need for trailing /
-	return $in{"$_[0]_file"};
-	}
-elsif ($mode == 0 && $_[2]) {
+local ($name, $in, $nolocal, $d) = @_;
+local %in = %$in;
+local $mode = $in{$name."_mode"};
+if ($mode == 0 && $d) {
 	# Local file under virtualmin-backup directory
-	$in{"$_[0]_file"} =~ /^\S+$/ || &error($text{'backup_edest2'});
-	$in{"$_[0]_file"} =~ /\.\./ && &error($text{'backup_edest3'});
-	$in{"$_[0]_file"} =~ s/\/+$//;
-	return "$_[3]->{'home'}/virtualmin-backup/".$in{"$_[0]_file"};
+	$in{$name."_file"} =~ /^\S+$/ || &error($text{'backup_edest2'});
+	$in{$name."_file"} =~ /\.\./ && &error($text{'backup_edest3'});
+	$in{$name."_file"} =~ s/\/+$//;
+	return "$d->{'home'}/virtualmin-backup/".$in{$name."_file"};
+	}
+elsif ($mode == 0 && !$nolocal) {
+	# Any local file
+	$in{$name."_file"} =~ /^\/\S/ || &error($text{'backup_edest'});
+	$in{$name."_file"} =~ s/\/+$//;	# No need for trailing /
+	return $in{$name."_file"};
 	}
 elsif ($mode == 1) {
 	# FTP server
-	local ($server, $port) = split(/:/, $in{"$_[0]_server"});
+	local ($server, $port) = split(/:/, $in{$name."_server"});
 	gethostbyname($server) || &error($text{'backup_eserver1'});
 	$port =~ /^\d*$/ || &error($text{'backup_eport'});
-	$in{"$_[0]_path"} =~ /^\/\S/ || &error($text{'backup_epath'});
-	$in{"$_[0]_user"} =~ /^[^:\/]*$/ || &error($text{'backup_euser'});
-	$in{"$_[0]_path"} =~ s/\/+$//;
-	return "ftp://".$in{"$_[0]_user"}.":".$in{"$_[0]_pass"}."\@".
-	       $in{"$_[0]_server"}.$in{"$_[0]_path"};
+	$in{$name."_path"} =~ /^\/\S/ || &error($text{'backup_epath'});
+	$in{$name."_user"} =~ /^[^:\/]*$/ || &error($text{'backup_euser'});
+	$in{$name."_path"} =~ s/\/+$//;
+	return "ftp://".$in{$name."_user"}.":".$in{$name."_pass"}."\@".
+	       $in{$name."_server"}.$in{$name."_path"};
 	}
 elsif ($mode == 2) {
 	# SSH server
-	local ($server, $port) = split(/:/, $in{"$_[0]_sserver"});
+	local ($server, $port) = split(/:/, $in{$name."_sserver"});
 	gethostbyname($server) || &error($text{'backup_eserver2'});
 	$port =~ /^\d*$/ || &error($text{'backup_eport'});
-	$in{"$_[0]_spath"} =~ /\S/ || &error($text{'backup_epath'});
-	$in{"$_[0]_suser"} =~ /^[^:\/]*$/ || &error($text{'backup_euser2'});
-	$in{"$_[0]_spath"} =~ s/\/+$//;
-	return "ssh://".$in{"$_[0]_suser"}.":".$in{"$_[0]_spass"}."\@".
-	       $in{"$_[0]_sserver"}.":".$in{"$_[0]_spath"};
+	$in{$name."_spath"} =~ /\S/ || &error($text{'backup_epath'});
+	$in{$name."_suser"} =~ /^[^:\/]*$/ || &error($text{'backup_euser2'});
+	$in{$name."_spath"} =~ s/\/+$//;
+	return "ssh://".$in{$name."_suser"}.":".$in{$name."_spass"}."\@".
+	       $in{$name."_sserver"}.":".$in{$name."_spath"};
 	}
 elsif ($mode == 3 && &can_use_s3()) {
 	# Amazon S3 service
 	local $cerr = &check_s3();
 	$cerr && &error($cerr);
-	$in{$_[0].'_bucket'} =~ /^\S+$/ || &error($text{'backup_ebucket'});
-	$in{$_[0].'_akey'} =~ /^\S+$/i || &error($text{'backup_eakey'});
-	$in{$_[0].'_skey'} =~ /^\S+$/i || &error($text{'backup_eskey'});
-	$in{"$_[0]_s3file_def"} ||
-		$in{"$_[0]_s3file"} =~ /^[a-z0-9\-\_\.]+$/i ||
+	$in{$name.'_bucket'} =~ /^\S+$/ || &error($text{'backup_ebucket'});
+	$in{$name.'_akey'} =~ /^\S+$/i || &error($text{'backup_eakey'});
+	$in{$name.'_skey'} =~ /^\S+$/i || &error($text{'backup_eskey'});
+	$in{$name."_s3file_def"} ||
+		$in{$name."_s3file"} =~ /^[a-z0-9\-\_\.]+$/i ||
 		&error($text{'backup_euser'});
-	return "s3://".$in{$_[0].'_akey'}.":".$in{$_[0].'_skey'}."\@".
-	       $in{$_[0].'_bucket'}.
-	       ($in{"$_[0]_s3file_def"} ? "" : "/".$in{"$_[0]_s3file"});
+	return "s3://".$in{$name.'_akey'}.":".$in{$name.'_skey'}."\@".
+	       $in{$name.'_bucket'}.
+	       ($in{$name."_s3file_def"} ? "" : "/".$in{$name."_s3file"});
 	}
 elsif ($mode == 4) {
 	# Just download
@@ -1646,7 +1647,7 @@ elsif ($mode == 4) {
 	}
 elsif ($mode == 5) {
 	# Uploaded file
-	$in{$_[0]."_upload"} || &error($text{'backup_eupload'});
+	$in{$name."_upload"} || &error($text{'backup_eupload'});
 	return "upload:";
 	}
 else {
@@ -1739,21 +1740,29 @@ return &master_admin();
 
 # can_backup_domain([&domain])
 # Returns 0 if no backups are allowed, 1 if they are, 2 if only backups to
-# remote or a file under the domain are allowed. If a domain is given, checks
-# if backups of that domain are allowed.
+# remote or a file under the domain are allowed, 3 if only remote is allowed.
+# If a domain is given, checks if backups of that domain are allowed.
 sub can_backup_domain
 {
 local ($d) = @_;
 if (&master_admin()) {
+	# Master admin can do anything
 	return 1;
 	}
+elsif (&reseller_admin()) {
+	# Resellers can only backup their domains, to remote
+	if ($d) {
+		return 0 if (!&can_edit_domain($d));
+		}
+	return 3;
+	}
 else {
-	# XXX what about resellers?
+	# Domain owners can only backup to their dir, or remote
 	return 0 if (!$access{'edit_backup'});
 	if ($d) {
-		return &can_edit_domain($d);
+		return 0 if (!&can_edit_domain($d));
 		}
-	return 1;
+	return 2;
 	}
 }
 

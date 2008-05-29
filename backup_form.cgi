@@ -3,6 +3,8 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+$cbmode = &can_backup_domain();
+$cbmode || &error($text{'backup_ecannot'});
 @scheds = grep { &can_backup_sched($_) } &list_scheduled_backups();
 
 if ($in{'sched'}) {
@@ -30,12 +32,17 @@ $sched ||= { 'all' => 1,		# Sensible defaults
 	     'parent' => 1 };
 @tds = ( "width=30% ");
 
+# Work out the current user's main domain, if needed
+if ($cbmode == 2) {
+	$d = &get_domain_by_user($base_remote_user);
+	}
+print "cbmode=$cbmode d=$d<p>\n";
+
 # Fields to select domains
 print &ui_hidden_table_start($text{'backup_headerdoms'}, "width=100%",
 			     2, "doms", 1, \@tds);
-($cbmode = &can_backup_domain()) || &error($text{'backup_ecannot'});
 @bak = split(/\s+/, $sched->{'doms'});
-@doms = &list_domains();
+@doms = grep { &can_backup_domain($_) } &list_domains();
 $dsel = &ui_radio("all", int($sched->{'all'}),
 		[ [ 1, $text{'backup_all'} ],
 		  [ 0, $text{'backup_sel'} ],
@@ -86,7 +93,7 @@ $ftable .= &ui_links_row(\@links);
 print &ui_table_row(&hlink($text{'backup_features'}, "backup_features"),
 		    $ftable);
 
-if (&can_backup_virtualmin() && !defined($in{'dom'})) {
+if (&can_backup_virtualmin()) {
 	# Show virtualmin object backup options
 	$vtable = "";
 	%virts = map { $_, 1 } split(/\s+/, $sched->{'virtualmin'});
@@ -104,30 +111,23 @@ print &ui_hidden_table_start($text{'backup_headerdest'}, "width=100%", 2,
 			     "dest", 1, \@tds);
 print &ui_table_row(&hlink($text{'backup_dest'}, "backup_dest"),
 	    &show_backup_destination("dest", $sched->{'dest'},
-				     $cbmode == 2, $d, !$d, 1).
+				     $cbmode == 3, $d, !$d, 1).
 	    "\n".
 	    &ui_checkbox("strftime", 1,
 			 &hlink($text{'backup_strftime'}, "backup_strftime"),
 			 $sched->{'strftime'})."<br>\n".
-	    ($d ? "" :
-	      &ui_checkbox("onebyone", 1,
-			   &hlink($text{'backup_onebyone'}, "backup_onebyone"),
-			   $sched->{'onebyone'})));
+	    &ui_checkbox("onebyone", 1,
+			 &hlink($text{'backup_onebyone'}, "backup_onebyone"),
+			 $sched->{'onebyone'}));
 
 # Single/multiple file mode
-if (!$d) {
-	print &ui_table_row(&hlink($text{'backup_fmt'}, "backup_fmt"),
-		&ui_radio("fmt", int($sched->{'fmt'}),
-			  [ [ 0, $text{'backup_fmt0'} ],
-			    [ 1, $text{'backup_fmt1'} ],
-			    [ 2, $text{'backup_fmt2'} ] ])."<br>".
-		&ui_checkbox("mkdir", 1, $text{'backup_mkdir'},
-			     int($sched->{'mkdir'})));
-	}
-elsif ($cbmode == 1) {
-	print &ui_table_row(&hlink($text{'backup_mkdir'}, "backup_mkdir"),
-		&ui_yesno_radio("mkdir", int($sched->{'mkdir'})));
-	}
+print &ui_table_row(&hlink($text{'backup_fmt'}, "backup_fmt"),
+	&ui_radio("fmt", int($sched->{'fmt'}),
+		  [ [ 0, $text{'backup_fmt0'} ],
+		    [ 1, $text{'backup_fmt1'} ],
+		    [ 2, $text{'backup_fmt2'} ] ])."<br>".
+	&ui_checkbox("mkdir", 1, $text{'backup_mkdir'},
+		     int($sched->{'mkdir'})));
 
 # Show error mode
 print &ui_table_row(&hlink($text{'backup_errors'}, "backup_errors"),
