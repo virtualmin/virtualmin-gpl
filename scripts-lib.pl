@@ -285,13 +285,8 @@ foreach my $f (@files) {
 		# and from Virtualmin
 		local @urls;
 		my $temp = &transname($f->{'file'});
-		if (defined(&convert_osdn_url)) {
-			local $newurl = &convert_osdn_url($f->{'url'});
-			push(@urls, $newurl || $f->{'url'});
-			}
-		else {
-			push(@urls, $f->{'url'});
-			}
+		local $newurl = &convert_osdn_url($f->{'url'});
+		push(@urls, $newurl || $f->{'url'});
 		local $vurl = "http://$script_download_host:$script_download_port$script_download_dir$f->{'file'}";
 		if ($f->{'virtualmin'}) {
 			# Use Virtualmin site first, for scripts that don't
