@@ -10166,6 +10166,18 @@ if ($d->{'reseller'} && defined(&get_reseller)) {
 		$hash{'reseller_'.$a} = $acl->{$a};
 		}
 	}
+# Add DNS serial number, for use in DNS templates
+if ($config{'dns'}) {
+	&require_bind();
+	if ($bind8::config{'soa_style'} == 1) {
+		$hash{'dns_serial'} = &bind8::date_serial().
+			sprintf("%2.2d", $bind8::config{'soa_start'});
+		}
+	else {
+		# Use Unix time for date and running number serials
+		$hash{'dns_serial'} = time();
+		}
+	}
 return &substitute_template($str, \%hash);
 }
 
