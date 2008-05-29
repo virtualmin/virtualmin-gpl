@@ -2043,8 +2043,6 @@ limits_shell_ssh=SSH and FTP
 limits_unshell=Using unknown shell $1
 
 rename_title=Change Domain Name
-rename_desc=This form can be used to change the domain name of an existing virtual server, and possibly the name of its administration user and home directory as well.
-rename_desc2=You can also change the home directory or administrative username without changing the domain name at all.
 rename_header=Virtual server domain name change options
 rename_domain=Old domain name
 rename_xndomain=International domain name

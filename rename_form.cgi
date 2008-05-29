@@ -7,10 +7,7 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
 &can_rename_domains() || &error($text{'rename_ecannot'});
-&ui_print_header(&domain_in($d), $text{'rename_title'}, "");
-
-print "$text{'rename_desc'}\n";
-print "$text{'rename_desc2'}<p>\n";
+&ui_print_header(&domain_in($d), $text{'rename_title'}, "", "rename");
 
 print &ui_form_start("rename.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
