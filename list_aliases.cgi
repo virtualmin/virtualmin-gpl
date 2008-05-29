@@ -9,7 +9,7 @@ $d = &get_domain($in{'dom'});
 @aliases = &list_domain_aliases($d, 1);
 &ui_print_header(&domain_in($d), $text{'aliases_title'}, "");
 
-# Create select / add links
+# Create add links
 ($mleft, $mreason, $mmax, $mhide) = &count_feature("aliases");
 if ($mleft != 0) {
 	push(@links, [ "edit_alias.cgi?new=1&dom=$in{'dom'}",

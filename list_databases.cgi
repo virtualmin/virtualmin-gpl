@@ -34,13 +34,11 @@ if (@tabs > 1) {
 			     $in{'databasemode'} || "list", 1);
 	}
 
-# Create select / add links
+# Create add links
 ($dleft, $dreason, $dmax, $dhide) = &count_feature("dbs");
-@links = ( &select_all_link("d"),
-	   &select_invert_link("d") );
 if ($dleft != 0) {
-	push(@links, "<a href='edit_database.cgi?dom=$in{'dom'}&new=1'>".
-		     $text{'databases_add'}."</a>");
+	push(@links, ["edit_database.cgi?dom=$in{'dom'}&new=1",
+		     $text{'databases_add'}]);
 	}
 
 # Build and show DB list
@@ -48,35 +46,40 @@ print &ui_tabs_start_tab("databasemode", "list") if (@tabs > 1);
 print "$text{'databases_desc1'}<p>\n";
 @dbs = &domain_databases($d);
 if (@dbs) {
-	print &ui_form_start("delete_databases.cgi", "post");
-	print &ui_hidden("dom", $in{'dom'}),"\n";
-	print &ui_links_row(\@links);
-	print &ui_columns_start([ "", $text{'databases_db'},
-				  $text{'databases_type'},
-				  $text{'databases_action'} ], undef, 0,
-				[ "width=5" ]);
 	foreach $db (sort { $a->{'name'} cmp $b->{'name'} } @dbs) {
 		local $action;
 		if ($db->{'link'}) {
 			$action = "<a href='$db->{'link'}'>".
 				  "$text{'databases_man'}</a>";
 			}
-		print &ui_checked_columns_row([
+		push(@table, [
+			{ 'type' => 'checkbox', 'name' => 'd',
+			  'value' => $a->{'from'} },
 			"<a href='edit_database.cgi?dom=$in{'dom'}&name=$db->{'name'}&type=$db->{'type'}'>$db->{'name'}</a>",
 			$db->{'desc'},
-			$action ],
-			[ "width=5" ],
-			"d", $db->{'type'}."_".$db->{'name'});
+			$action
+			]);
 		}
-	print &ui_columns_end();
+
+# Generate the table
+print &ui_form_columns_table(
+	"edit_database.cgi",
+	[ [ "delete", $text{'aliases_delete'} ] ],
+	1,
+	\@links,
+	[ [ "dom", $in{'dom'} ] ],
+	[ "", $text{'databases_db'},
+	$text{'databases_type'},
+	$text{'databases_action'}],
+	100,
+	\@table,
+	undef, 0, undef,
+	$text{'databases_none'});
+
 	}
 else {
 	print "<b>$text{'databases_none'}</b><p>\n";
 	shift(@links); shift(@links);
-	}
-print &ui_links_row(\@links);
-if (@dbs) {
-	print &ui_form_end([ [ "delete", $text{'databases_delete'} ] ]);
 	}
 if ($dleft != 0 && $dleft != -1 && !$dhide) {
 	print "<b>",&text('databases_canadd'.$dreason, $dleft),"</b><p>\n";
