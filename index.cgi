@@ -106,7 +106,8 @@ if ($config{'display_max'} && @doms > $config{'display_max'}) {
 elsif (@doms) {
 	# Show domains in a table
 	print &ui_form_start("domain_form.cgi");
-	if (!$main::nocreate_virtualmin_menu) {
+	if ($current_theme ne "virtual-server-theme" &&
+	    !$main::nocreate_virtualmin_menu) {
 		&create_links(1);
 		}
 	foreach $d (@doms) {
@@ -149,7 +150,8 @@ print &ui_form_end();
 print "<p>\n";
 
 # When using the Virtualmin Pro framed theme, the rest of the page is not needed
-if ($main::basic_virtualmin_menu) {
+if ($current_theme eq "virtual-server-theme" ||
+    $main::basic_virtualmin_menu) {
 	goto PAGEEND;
 	}
 
