@@ -126,8 +126,7 @@ if (defined(&proc::get_memory_info)) {
 		$lowmem = 1;
 		}
 	}
-if (&running_in_zone() || defined(&running_in_vserver) &&
-			  &running_in_vserver()) {
+if (&running_in_zone() || &running_in_vserver()) {
 	# Assume that zones and vservers don't have a lot of memory
 	$lowmem = 1;
 	}

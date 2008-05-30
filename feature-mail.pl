@@ -40,46 +40,32 @@ elsif ($config{'mail_system'} == 0) {
 		$canonical_maps = &postfix::get_real_value($canonical_type);
 		@canonical_map_files =&postfix::get_maps_files($canonical_maps);
 		}
-	if (defined(&postfix::get_maps_types_files)) {
-		# Work out storage type for Postfix
-		@virtual_map_backends = map { $_->[0] }
-			&postfix::get_maps_types_files($virtual_maps);
-		@alias_backends = map { $_->[0] }
-			&postfix::get_maps_types_files(
-				&postfix::get_real_value("alias_maps"));
-		@canonical_backends = map { $_->[0] }
-				&postfix::get_maps_types_files($canonical_maps);
-		}
-	else {
-		# Assume hash
-		@virtual_map_backends = ( "hash" );
-		@alias_backends = ( "hash" );
-		@canonical_backends = $canonical_maps ? ( "hash" ) : ( );
-		}
+
+	# Work out storage type for Postfix
+	@virtual_map_backends = map { $_->[0] }
+		&postfix::get_maps_types_files($virtual_maps);
+	@alias_backends = map { $_->[0] }
+		&postfix::get_maps_types_files(
+			&postfix::get_real_value("alias_maps"));
+	@canonical_backends = map { $_->[0] }
+			&postfix::get_maps_types_files($canonical_maps);
+
 	$can_alias_types{9} = 0;	# bounce not yet supported for postfix
 	$can_alias_comments = $virtualmin_pro &&
 			      &get_webmin_version() >= 1.294;
 	if ($can_alias_comments &&
 	    $virtual_maps !~ /^hash:/ &&
-	    defined(&postfix::can_map_comments) &&
 	    !&postfix::can_map_comments($virtual_type)) {
 		# Comments not supported by map backend, such as MySQL
 		$can_alias_comments = 0;
 		}
-	if (defined(&postfix::create_postfix_alias)) {
-		# New functions that can use maps
-		$postfix_list_aliases = \&postfix::list_postfix_aliases;
-		$postfix_create_alias = \&postfix::create_postfix_alias;
-		$postfix_modify_alias = \&postfix::modify_postfix_alias;
-		$postfix_delete_alias = \&postfix::delete_postfix_alias;
-		}
-	else {
-		# Old functions that use files only
-		$postfix_list_aliases = \&postfix::list_aliases;
-		$postfix_create_alias = \&postfix::create_alias;
-		$postfix_modify_alias = \&postfix::modify_alias;
-		$postfix_delete_alias = \&postfix::delete_alias;
-		}
+
+	# New functions that can use maps
+	$postfix_list_aliases = \&postfix::list_postfix_aliases;
+	$postfix_create_alias = \&postfix::create_postfix_alias;
+	$postfix_modify_alias = \&postfix::modify_postfix_alias;
+	$postfix_delete_alias = \&postfix::delete_postfix_alias;
+
 	# Work out if we can turn on automatic bcc'ing
 	if ($config{'bccs'}) {
 		$sender_bcc_maps = &postfix::get_real_value("sender_bcc_maps");
@@ -1769,9 +1755,7 @@ if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 
 # Remove mailboxes moduile indexes
 &foreign_require("mailboxes", "mailboxes-lib.pl");
-if (defined(&mailboxes::delete_user_index_files)) {
-	&mailboxes::delete_user_index_files($_[0]->{'user'});
-	}
+&mailboxes::delete_user_index_files($_[0]->{'user'});
 
 # Remove clamav temp files
 opendir(TEMP, "/tmp");

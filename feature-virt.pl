@@ -170,8 +170,7 @@ if ($config{'all_namevirtual'}) {
 else {
 	# An IP can be selected, perhaps private, shared or default
 	local ($t, $anyalloc, $anychoose, $anyzone);
-	if (&running_in_zone() ||
-	    (defined(&running_in_vserver) && &running_in_vserver())) {
+	if (&running_in_zone() || &running_in_vserver()) {
 		# When running in a Solaris zone or VServer, you MUST select an
 		# existing active IP, as they are controlled from the host.
 		$anyzone = 1;
@@ -284,8 +283,7 @@ elsif ($in{'virt'} == 3 && &can_edit_sharedips()) {
 		&error(&text('setup_evirtnoshared'));
 	return ($in{'sharedip'}, 0, 0);
 	}
-elsif ($in{'virt'} == 4 && (&running_in_zone() ||
-		    defined(&running_in_vserver) && &running_in_vserver())) {
+elsif ($in{'virt'} == 4 && (&running_in_zone() || &running_in_vserver())) {
 	# On an active IP on a virtual machine that cannot bring up its
 	# own IP.
 	&check_ipadress($in{'zoneip'}) || &error($text{'setup_eip'});

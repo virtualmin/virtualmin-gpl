@@ -10443,11 +10443,9 @@ return $err if ($err);
 if ($webmin) {
 	# Check ACL module too
 	&foreign_require("acl", "acl-lib.pl");
-	if (defined(&acl::check_password_restrictions)) {
-		$err = &acl::check_password_restrictions(
-				$user->{'user'}, $user->{'plainpass'});
-		return $err if ($err);
-		}
+	$err = &acl::check_password_restrictions(
+			$user->{'user'}, $user->{'plainpass'});
+	return $err if ($err);
 	}
 return undef;
 }

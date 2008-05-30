@@ -259,9 +259,7 @@ local ($tmpl) = @_;
 
 local @status_fields = ( "status", "statusonly", "statustimeout",
 			 "statustimeout_def" );
-if (defined(&status::list_templates)) {
-	push(@status_fields, "statustmpl");
-	}
+push(@status_fields, "statustmpl");
 print &ui_table_row(
 	&hlink($text{'tmpl_status'}, "template_status"),
 	&none_def_input("status", $tmpl->{'status'},
@@ -283,14 +281,12 @@ print &ui_table_row(
 			5, &text('tmpl_statustimeoutdef', 10)));
 
 # Default email template
-if (defined(&status::list_templates)) {
-	local @stmpls = &status::list_templates();
-	print &ui_table_row(
-		&hlink($text{'tmpl_statustmpl'}, "template_statustmpl"),
-		&ui_select("statustmpl", $tmpl->{'statustmpl'},
-			   [ [ '', "&lt;$status::text{'mon_notmpl'}&gt;" ],
-			     map { [ $_->{'id'}, $_->{'desc'} ] } @stmpls ]));
-	}
+local @stmpls = &status::list_templates();
+print &ui_table_row(
+	&hlink($text{'tmpl_statustmpl'}, "template_statustmpl"),
+	&ui_select("statustmpl", $tmpl->{'statustmpl'},
+		   [ [ '', "&lt;$status::text{'mon_notmpl'}&gt;" ],
+		     map { [ $_->{'id'}, $_->{'desc'} ] } @stmpls ]));
 }
 
 # parse_template_status(&tmpl)
