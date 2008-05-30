@@ -167,10 +167,19 @@ local ($desturl, $doms, $features, $dirfmt, $skip, $opts, $homefmt, $vbs,
        $mkdir, $onebyone, $asowner, $cbfunc, $increment) = @_;
 local $backupdir;
 local $transferred_sz;
+local $asd;
+if ($asowner) {
+	($asd) = grep { !$_->{'parent'} } @$doms;
+	$asd ||= $doms->[0];
+	}
 
 # See if we can actually connect to the remote server
 local ($mode, $user, $pass, $server, $path, $port) =
 	&parse_backup_url($desturl);
+if ($mode == 0 && $asd) {
+	# Always create virtualmin-backup directory
+	$mkdir = 1;
+	}
 if ($mode == 1) {
 	# Try FTP login
 	local $ftperr;
@@ -239,7 +248,7 @@ elsif ($mode == 0) {
 		# Looking for a directory
 		if ($mkdir) {
 			if (!-d $desturl) {
-				&make_dir($desturl, 0755, 1);
+				&make_backup_dir($desturl, 0755, 1, $asd);
 				}
 			}
 		else {
@@ -257,7 +266,7 @@ elsif ($mode == 0) {
 		local $dirdest = $desturl;
 		$dirdest =~ s/\/[^\/]+$//;
 		if ($dirdest && !-d $dirdest) {
-			&make_dir($dirdest, 0755);
+			&make_backup_dir($dirdest, 0755, 0, $asd);
 			}
 		}
 	}
@@ -305,7 +314,7 @@ else {
 	$dest = $path;
 	}
 if ($dirfmt && !-d $dest) {
-	&make_dir($dest, 0755);
+	&make_backup_dir($dest, 0755, 1, $asd);
 	}
 
 # For a home-format backup, the home has to be last
@@ -330,7 +339,7 @@ DOMAIN: foreach $d (@$doms) {
 		# Backup goes to a sub-dir of the home
 		$backupdir = "$d->{'home'}/.backup";
 		system("rm -rf ".quotemeta($backupdir));
-		&make_dir($backupdir, 0777);
+		&make_backup_dir($backupdir, 0777, 0, $asd);
 		}
 	&$cbfunc($d, 0, $backupdir) if ($cbfunc);
 	&$first_print(&text('backup_fordomain', $d->{'dom'}));
@@ -357,7 +366,7 @@ DOMAIN: foreach $d (@$doms) {
 				$ffile = "$backupdir/$d->{'dom'}_$f";
 				}
 			$fok = &$bfunc($d, $ffile, $opts->{$f}, $homefmt,
-				       $increment);
+				       $increment, $asd);
 			}
 		elsif (&indexof($f, @backup_plugins) >= 0 &&
 		       $d->{$f}) {
@@ -365,7 +374,7 @@ DOMAIN: foreach $d (@$doms) {
 			$ffile = "$backupdir/$d->{'dom'}_$f";
 			local $fok = &plugin_call($f, "feature_backup",
 					  $d, $ffile, $opts->{$f}, $homefmt,
-					  $increment);
+					  $increment, $asd);
 			}
 		if (defined($fok)) {
 			# See if it worked or not
@@ -483,7 +492,7 @@ if ($ok) {
 		# Create one tar file in the destination for each domain
 		&$first_print($text{'backup_final2'});
 		if (!-d $dest) {
-			&make_dir($dest, 0755);
+			&make_backup_dir($dest, 0755, 0, $asd);
 			}
 
 		foreach $d (&unique(@donedoms)) {
@@ -499,9 +508,9 @@ if ($ok) {
 				$comp = "bzip2 -c";
 				}
 			local $writer = "cat >$dest/$destfile";
-			if ($asowner) {
+			if ($asd) {
 				$writer = &command_as_user(
-					$doms[0]->{'user'}, 0, $writer);
+					$asd->{'user'}, 0, $writer);
 				}
 
 			&execute_command("cd $backupdir && (tar cf - $d->{'dom'}_* | $comp) 2>&1 | $writer", undef, \$out);
@@ -526,9 +535,9 @@ if ($ok) {
 			$comp = "bzip2 -c";
 			}
 		local $writer = "cat >$dest";
-		if ($asowner) {
+		if ($asd) {
 			$writer = &command_as_user(
-					$doms[0]->{'user'}, 0, $writer);
+					$asd->{'user'}, 0, $writer);
 			&open_tempfile(DEST, ">$dest", 0, 1);
 			&close_tempfile(DEST);
 			&set_ownership_permissions(
@@ -691,6 +700,37 @@ if ($ok) {
 	}
 
 return ($ok, $sz);
+}
+
+# make_backup_dir(dir, perms, recursive, &as-domain)
+# Create the directory for a backup destination, perhaps as the domain owner.
+# Returns undef if OK, or an error message if failed.
+# If under the temp directory, this is always done as root.
+sub make_backup_dir
+{
+local ($dir, $perms, $recur, $d) = @_;
+local $cmd = "mkdir".($recur ? " -p" : "")." ".quotemeta($dir)." 2>&1";
+local $out;
+local $tempbase = $gconfig{'tempdir_'.$module_name} ||
+		  $gconfig{'tempdir'} ||
+		  "/tmp/.webmin";
+if ($d && !&is_under_directory($tempbase, $dir)) {
+	# As domain owner if possible
+	$out = &run_as_domain_user($d, $cmd, 0);
+	}
+else {
+	# As root, but make owned by user if given
+	$out = &backquote_command($cmd);
+	if (!$? && $d) {
+		&set_ownership_permissions($d->{'uid'}, $d->{'ugid'},
+					   undef, $dir);
+		}
+	}
+# Set requested permissions
+if (!$?) {
+	&set_ownership_permissions(undef, undef, $perms, $dir);
+	}
+return $? ? $out : undef;
 }
 
 # restore_domains(file, &domains, &features, &options, &vbs,

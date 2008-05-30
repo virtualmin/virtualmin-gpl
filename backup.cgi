@@ -23,12 +23,12 @@ elsif ($in{'all'} == 2) {
 	}
 else {
 	# Only selected
-	foreach $d (split(/\0/, $in{'doms'})) {
-		local $dinfo = &get_domain($d);
+	foreach $did (split(/\0/, $in{'doms'})) {
+		local $dinfo = &get_domain($did);
 		if ($dinfo && &can_backup_domain($dinfo)) {
 			push(@doms, $dinfo);
 			if (!$dinfo->{'parent'} && $in{'parent'}) {
-				push(@doms, &get_domain_by("parent", $d));
+				push(@doms, &get_domain_by("parent", $did));
 				}
 			}
 		}
@@ -79,28 +79,6 @@ else {
 	@vbs = ( );
 	}
 @doms || @vbs || &error($text{'backup_edoms'});
-
-if (defined($in{'dom'})) {
-	# Save domain-specific backup options
-	$d = &get_domain($in{'dom'});
-	$d->{'backup_dest'} = $origdest;
-	$d->{'backup_fmt'} = $in{'fmt'};
-	$d->{'backup_mkdir'} = $in{'mkdir'};
-	$d->{'backup_errors'} = $in{'backup_errors'};
-	$d->{'backup_strftime'} = $in{'backup_strftime'};
-	$d->{'backup_onebyone'} = $in{'backup_onebyone'};
-	$d->{'backup_parent'} = $in{'parent'};
-	&save_domain($d);
-
-	# Create virtualmin-backup directory
-	$homebk = "$d->{'home'}/virtualmin-backup";
-	if ($in{'dest_mode'} == 0 && &can_backup_domain($d) == 2 &&
-	    $d->{'dir'} && !-d $homebk) {
-		&make_dir($homebk, 0700);
-		&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0700,
-					   $homebk);
-		}
-	}
 
 if ($dest eq "download:") {
 	# Special case .. we backup to a temp file and output in the browser

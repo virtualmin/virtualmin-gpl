@@ -76,9 +76,6 @@
 	- Complain if doing an incremental restore before a full
 	- CHANGELOG for incremental, multiple schedules, user backups
 	- Test backups created by resellers
-	- Backups as domain owners need to be always as the domain owner
-		- Even when in new format
-		- mkdir too (should be on by default?)
 
  - Backport spam and virus to GPL
 

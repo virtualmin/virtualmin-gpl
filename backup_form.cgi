@@ -7,6 +7,11 @@ $cbmode = &can_backup_domain();
 $cbmode || &error($text{'backup_ecannot'});
 @scheds = grep { &can_backup_sched($_) } &list_scheduled_backups();
 
+# Work out the current user's main domain, if needed
+if ($cbmode == 2) {
+	$d = &get_domain_by_user($base_remote_user);
+	}
+
 if ($in{'sched'}) {
 	# Editing existing scheduled backup
 	($sched) = grep { $_->{'id'} == $in{'sched'} } @scheds;
@@ -29,14 +34,9 @@ else {
 	}
 $sched ||= { 'all' => 1,		# Sensible defaults
 	     'feature_all' => 1,
-	     'parent' => 1 };
+	     'parent' => 1,
+	     'email' => $cbmode == 2 ? $d->{'emailto'} : undef };
 @tds = ( "width=30% ");
-
-# Work out the current user's main domain, if needed
-if ($cbmode == 2) {
-	$d = &get_domain_by_user($base_remote_user);
-	}
-print "cbmode=$cbmode d=$d<p>\n";
 
 # Fields to select domains
 print &ui_hidden_table_start($text{'backup_headerdoms'}, "width=100%",
@@ -165,9 +165,10 @@ if ($in{'sched'} || $in{'new'}) {
 					 $text{'backup_email_err'},
 					 $sched->{'email_err'}).
 			    "<br>\n".
-			    &ui_checkbox("email_doms", 1,
-					 $text{'backup_email_doms'},
-					 $sched->{'email_doms'})
+			    ($cbmode != 2 ?
+			       &ui_checkbox("email_doms", 1,
+					    $text{'backup_email_doms'},
+					    $sched->{'email_doms'}) : "")
 			    );
 
 	# Enabled/disabled input

@@ -204,7 +204,7 @@ sub check_dir_clash
 return 0;
 }
 
-# backup_dir(&domain, file, &options, home-format, incremental)
+# backup_dir(&domain, file, &options, home-format, incremental, [&as-domain])
 # Backs up the server's home directory in tar format to the given file
 sub backup_dir
 {
@@ -264,18 +264,25 @@ if (&has_incremental_tar()) {
 	$iargs = "--listed-incremental=$ifile";
 	}
 
+# Create the writer command. This will be run as the domain owner if this
+# is the final step of the backup process, and if the owner is doing the backup.
+local $writer = "cat >".quotemeta($_[1]);
+if ($_[5] && $_[3]) {
+	$writer = &command_as_user($_[5]->{'user'}, 0, $writer);
+	}
+
 # Do the backup
 if ($_[3] && $config{'compression'} == 0) {
 	# With gzip
-	$cmd = "tar cfX - $xtemp $iargs . | gzip -c >".quotemeta($_[1]);
+	$cmd = "tar cfX - $xtemp $iargs . | gzip -c | $writer";
 	}
 elsif ($_[3] && $config{'compression'} == 1) {
 	# With bzip
-	$cmd = "tar cfX - $xtemp $iargs . | bzip2 -c >".quotemeta($_[1]);
+	$cmd = "tar cfX - $xtemp $iargs . | bzip2 -c | $writer";
 	}
 else {
 	# Plain tar
-	$cmd = "tar cfX ".quotemeta($_[1])." $xtemp $iargs .";
+	$cmd = "tar cfX - $xtemp $iargs . | $writer";
 	}
 local $ex = &execute_command("cd ".quotemeta($_[0]->{'home'})." && $cmd",
 			     undef, \$out, \$out);

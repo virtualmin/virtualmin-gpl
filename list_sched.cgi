@@ -11,9 +11,15 @@ require './virtual-server-lib.pl';
 @scheds = &list_scheduled_backups();
 @scheds = grep { &can_backup_sched($_) } @scheds;
 
-# Build table of backups
+# Work out what to show
 $hasinc = &has_incremental_tar();
 @table = ( );
+$hasowner = 0;
+if (&can_backup_domain() == 1) {
+	($hasowner) = grep { $_->{'owner'} } @scheds;
+	}
+
+# Build table of backups
 foreach $s (@scheds) {
 	my @row;
 	push(@row, { 'type' => 'checkbox', 'name' => 'd',
@@ -43,9 +49,20 @@ foreach $s (@scheds) {
 	push(@row, $s->{'enabled'} ?
 		&text('sched_yes', &cron::when_text($s)) :
 		$text{'no'});
+	# Incremental level
 	if ($hasinc) {
 		push(@row, $s->{'increment'} ? $text{'sched_inc'}
 					     : $text{'sched_full'});
+		}
+	# Creator of the backup
+	if ($hasowner) {
+		if ($s->{'owner'}) {
+			$od = &get_domain($s->{'owner'});
+			push(@row, $od ? $od->{'user'} : $s->{'owner'});
+			}
+		else {
+			push(@row, "");
+			}
 		}
 	# Action links
 	@links = (
@@ -67,6 +84,7 @@ print &ui_form_columns_table(
 	[ "", $text{'sched_dest'}, $text{'sched_doms'},
 	  $text{'sched_enabled'},
 	  $hasinc ? ( $text{'sched_level'} ) : ( ),
+	  $hasowner ? ( $text{'sched_owner'} ) : ( ),
 	  $text{'sched_actions'} ],
 	100, \@table, [ '', 'string', 'string' ],
 	0, undef,

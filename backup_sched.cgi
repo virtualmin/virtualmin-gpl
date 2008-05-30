@@ -2,8 +2,9 @@
 # Create, update or delete a scheduled backup
 
 require './virtual-server-lib.pl';
-&can_backup_domains() || &error($text{'backup_ecannot'});
 &ReadParse();
+&can_backup_sched() || &error($text{'backup_ecannot2'});
+$cbmode = &can_backup_domain();
 
 # Get the current backup object
 &obtain_lock_cron();
@@ -17,6 +18,11 @@ else {
 	# Create a new empty one
 	$sched = { };
 	$sched->{'owner'} = $base_remote_user if (!&master_admin());
+	}
+
+# Work out the current user's main domain, if needed
+if ($cbmode == 2) {
+	$d = &get_domain_by_user($base_remote_user);
 	}
 
 if ($in{'delete'}) {
@@ -34,8 +40,8 @@ else {
 		@doms = grep { !$exc{$_->{'id'}} } &list_domains();
 		}
 	else {
-		foreach $d (split(/\0/, $in{'doms'})) {
-			push(@doms, &get_domain($d));
+		foreach $did (split(/\0/, $in{'doms'})) {
+			push(@doms, &get_domain($did));
 			}
 		}
 	@doms || &error($text{'backup_edoms'});
@@ -47,7 +53,7 @@ else {
 		@do_features = split(/\0/, $in{'feature'});
 		}
 	@do_features || &error($text{'backup_efeatures'});
-	$dest = &parse_backup_destination("dest", \%in);
+	$dest = &parse_backup_destination("dest", \%in, $cbmode == 3, $d);
 	if ($in{'onebyone'}) {
 		$in{'dest_mode'} > 0 || &error($text{'backup_eonebyone1'});
 		$in{'fmt'} == 2 || &error($text{'backup_eonebyone2'});
@@ -101,6 +107,12 @@ else {
 		$sched->{'virtualmin'} = join(" ", @vbs);
 		}
 	$sched->{'enabled'} = $in{'enabled'};
+	if ($cbmode != 1) {
+		# Record the owner of this scheduled backup, which controls
+		# who it runs as
+		$sched->{'owner'} = &reseller_admin() ? $base_remote_user
+			      : &get_domain_by_user($base_remote_user)->{'id'};
+		}
 	if ($in{'enabled'}) {
 		&virtualmin_ui_parse_cron_time("enabled", $sched, \%in);
 		}
