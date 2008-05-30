@@ -35,21 +35,34 @@ if ($d->{'unix'} && &can_rename_domains() == 2) {
 			     &ui_textbox("user", undef, 20) ] ]));
 	}
 
+# Work out what can be done
 $rh = &can_rehome_domains();
+$parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
+$newhome = &server_home_directory($d, $parent);
+$home_contains_domain = $newhome =~ /\Q$d->{'dom'}\E/ ? 1 : 0;
+
 if (!$rh) {
 	# Cannot change home at all
 	print &ui_hidden("home_mode", 0),"\n";
 	}
 elsif ($d->{'dir'}) {
 	# Change home dir option
-	print &ui_table_row($text{'rename_home'},
-	    &ui_radio("home_mode", 1,
+	if ($rh == 2 || $home_contains_domain) {
+		# Show leave, automatic and perhaps manual option
+		print &ui_table_row($text{'rename_home'},
+		    &ui_radio("home_mode", 1,
 		      [ [ 0, &text('rename_home0',
 				   "<tt>$d->{'home'}</tt>")."<br>" ],
 			[ 1, $text{'rename_home1'}."<br>" ],
 			$rh == 2 ? ( [ 2, &text('rename_home2',
 				&ui_textbox("home", undef, 30)) ] ) : ( ),
 		      ]));
+		}
+	else {
+		# Since the user cannot select an arbitrary dir and cannot
+		# change the username, do nothing
+		print &ui_hidden("home_mode", 0),"\n";
+		}
 	}
 else {
 	# Always change home, since there is none!
