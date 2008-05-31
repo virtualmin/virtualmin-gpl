@@ -325,6 +325,9 @@ else {
 
 # Copy web files
 &$first_print("Copying web pages ..");
+if (defined(&set_php_wrappers_writable)) {
+	&set_php_wrappers_writable(\%dom, 1);
+	}
 local $hdir = &public_html_dir(\%dom);
 if (-d "$root/$dom/httpdocs") {
 	# Windows format
@@ -372,6 +375,9 @@ if (-r $cgis) {
 	}
 else {
 	&$second_print(".. not found in Plesk backup");
+	}
+if (defined(&set_php_wrappers_writable)) {
+	&set_php_wrappers_writable(\%dom, 0);
 	}
 
 # Re-create DNS records
@@ -488,8 +494,17 @@ foreach my $name (keys %$mailusers) {
 	$uinfo->{'gid'} = $dom{'gid'};
 	$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$name";
 	$uinfo->{'shell'} = $nologin_shell->{'shell'};
+	$uinfo->{'to'} = [ ];
 	if ($mailuser->{'mailbox'}->{'enabled'} eq 'true') {
-		$uinfo->{'email'} = $name."\@".$dom;
+		# Add delivery to user's mailbox
+		local $escuser = $uinfo->{'user'};
+		if ($config{'mail_system'} == 0 && $escuser =~ /\@/) {
+			$escuser = &replace_atsign($escuser);
+			}
+		else {
+			$escuser = &escape_user($escuser);
+			}
+		push(@{$uinfo->{'to'}}, "\\".$escuser);
 		}
 	if (&has_home_quotas()) {
 		local $q = $mailuser->{'mailbox-quota'} < 0 ? undef :
@@ -497,6 +512,41 @@ foreach my $name (keys %$mailusers) {
 		$uinfo->{'qquota'} = $q;
 		$uinfo->{'quota'} = $q / &quota_bsize("home");
 		$uinfo->{'mquota'} = $q / &quota_bsize("home");
+		}
+	# Add mail aliases
+	local $alias = $mailuser->{'alias'};
+	if ($alias) {
+		$alias = [ $alias ] if (ref($alias) ne 'ARRAY');
+		foreach my $a (@$alias) {
+			$a = $a->{'content'} if (ref($a));
+			$a .= "@".$dom{'dom'} if ($a !~ /\@/);
+			push(@{$uinfo->{'extraemail'}}, $a);
+			}
+		}
+	# Add forwarding
+	local $redirect = $mailuser->{'redirect'};
+	if ($redirect) {
+		$redirect = [ $redirect ] if (ref($redirect) ne 'ARRAY');
+		foreach my $r (@$redirect) {
+			$r = $r->{'content'} if (ref($r));
+			$r .= "@".$dom{'dom'} if ($r !~ /\@/);
+			push(@{$uinfo->{'to'}}, $r);
+			}
+		}
+	# Add mail group members (which are really just forwards)
+	local $mailgroup = $mailuser->{'mailgroup-member'};
+	if ($mailgroup) {
+		$mailgroup = [ $mailgroup ] if (ref($mailgroup) ne 'ARRAY');
+		foreach my $r (@$mailgroup) {
+			$r = $r->{'content'} if (ref($r));
+			$r .= "@".$dom{'dom'} if ($r !~ /\@/);
+			push(@{$uinfo->{'to'}}, $r);
+			}
+		}
+	if (@{$uinfo->{'to'}}) {
+		# Only enable mail if there is at least one destination, which
+		# would be his own mailbox or offsite
+		$uinfo->{'email'} = $name."\@".$dom;
 		}
 	&create_user($uinfo, \%dom);
 	&create_user_home($uinfo, \%dom);
