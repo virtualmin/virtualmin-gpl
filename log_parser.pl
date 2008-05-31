@@ -96,6 +96,9 @@ elsif ($type eq "sched") {
 					       &text('log_sched_doms', $object);
 	return &text('log_'.$action.'_sched', $msg);
 	}
+elsif ($type eq "scheds") {
+	return &text('log_'.$action.'_scheds', $object);
+	}
 elsif ($action eq "notify" || $action eq "mailusers") {
 	return &text('log_'.$action, scalar(split(/\0/, $p->{'to'})));
 	}

@@ -363,6 +363,14 @@ if (defined(&get_autoreply_file_dir)) {
 		}
 	closedir(AUTODIR);
 	}
+
+# Delete scheduled backups
+foreach my $sched (&list_scheduled_backups()) {
+	if ($sched->{'owner'} eq $id) {
+		&delete_scheduled_backup($sched);
+		}
+	}
+
 delete($main::get_domain_cache{$_[0]->{'id'}});
 &build_domain_maps();
 }

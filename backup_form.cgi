@@ -16,21 +16,31 @@ if ($in{'sched'}) {
 	# Editing existing scheduled backup
 	($sched) = grep { $_->{'id'} == $in{'sched'} } @scheds;
 	$sched || &error($text{'backup_egone'});
-	&ui_print_header(undef, $text{'backup_title2'}, "", "backupsched");
+	$omsg = undef;
+	if ($sched->{'owner'}) {
+		# Make owner message
+		$od = &get_domain($sched->{'owner'});
+		$omsg = $od ? &text('backup_odom', "<tt>$od->{'user'}</tt>")
+			    : &text('backup_oresel', "<tt>$od</tt>");
+		}
+	&ui_print_header($omsg, $text{'backup_title2'}, "", "backupsched");
 	print &ui_form_start("backup_sched.cgi", "post");
 	print &ui_hidden("sched", $in{'sched'});
+	$nodownload = 1;
 	}
 elsif ($in{'new'}) {
 	# Creating new scheduled backup
 	&ui_print_header(undef, $text{'backup_title3'}, "", "backupnew");
 	print &ui_form_start("backup_sched.cgi", "post");
 	print &ui_hidden("new", 1);
+	$nodownload = 1;
 	}
 else {
 	# Doing a one-off backup
 	&ui_print_header(undef, $text{'backup_title'}, "", "backupnow");
 	print &ui_form_start("backup.cgi/backup.tgz", "post");
 	$sched = $scheds[0];
+	$nodownload = 0;
 	}
 $sched ||= { 'all' => 1,		# Sensible defaults
 	     'feature_all' => 1,
@@ -111,7 +121,7 @@ print &ui_hidden_table_start($text{'backup_headerdest'}, "width=100%", 2,
 			     "dest", 1, \@tds);
 print &ui_table_row(&hlink($text{'backup_dest'}, "backup_dest"),
 	    &show_backup_destination("dest", $sched->{'dest'},
-				     $cbmode == 3, $d, !$d, 1).
+				     $cbmode == 3, $d, $nodownload, 1).
 	    "\n".
 	    &ui_checkbox("strftime", 1,
 			 &hlink($text{'backup_strftime'}, "backup_strftime"),

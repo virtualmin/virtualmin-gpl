@@ -65,11 +65,12 @@ foreach $s (@scheds) {
 			}
 		}
 	# Action links
-	@links = (
-	    "<a href='backup.cgi?sched=$s->{'id'}'>$text{'sched_now'}</a>",
-	    "<a href='restore_form.cgi?sched=$s->{'id'}'>".
-	     "$text{'sched_restore'}</a>",
-	    );
+	@links = ( );
+	push(@links, "<a href='backup.cgi?sched=$s->{'id'}'>".
+		     "$text{'sched_now'}</a>");
+	push(@links, "<a href='restore_form.cgi?sched=$s->{'id'}'>".
+		     "$text{'sched_restore'}</a>") if (&can_restore_domain());
+
 	push(@row, &ui_links_row(\@links));
 	push(@table, \@row);
 	}

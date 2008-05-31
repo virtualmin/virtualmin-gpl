@@ -2,27 +2,21 @@
 # Show a form for restoring a single virtual server, or a bunch
 
 require './virtual-server-lib.pl';
-&can_backup_domains() || &error($text{'restore_ecannot'});
+&can_restore_domain() || &error($text{'restore_ecannot'});
 &ui_print_header(undef, $text{'restore_title'}, "");
 &ReadParse();
+
+# Get the schedule being restored from
+if ($in{'sched'}) {
+	($sched) = grep { $_->{'id'} eq $in{'sched'} &&
+			  &can_backup_sched($_) } &list_scheduled_backups();
+	$dest = $sched->{'dest'};
+	}
 
 @tds = ( "width=30%" );
 print &ui_form_start("restore.cgi", "post");
 print &ui_hidden_table_start($text{'restore_sourceheader'}, "width=100%", 2,
 			     "source", 1, \@tds);
-
-# Get source 
-$dest = $config{'backup_dest'};
-if (defined($in{'dom'})) {
-	$d = &get_domain($in{'dom'});
-	if ($d->{'backup_dest'}) {
-		$dest = $d->{'backup_dest'};
-		}
-	elsif ($config{'backup_fmt'} == 0 && $dest) {
-		$dest .= "/$d->{'dom'}.tar.gz";
-		}
-	print &ui_hidden("onedom", $d->{'id'}),"\n";
-	}
 
 # Show source file field
 if ($dest eq "download:") {
@@ -37,7 +31,7 @@ print &ui_hidden_table_end("source");
 print &ui_hidden_table_start($text{'restore_headerfeatures'}, "width=100%", 2,
 			     "features", 0, \@tds);
 $ftable = "";
-$ftable .= &ui_radio("feature_all", int($config{'backup_feature_all'}),
+$ftable .= &ui_radio("feature_all", int($sched->{'feature_all'}),
 		[ [ 1, $text{'restore_allfeatures'} ],
 		  [ 0, $text{'backup_selfeatures'} ] ])."<br>\n";
 @links = ( &select_all_link("feature"), &select_invert_link("feature") );
@@ -45,10 +39,10 @@ $ftable .= &ui_links_row(\@links);
 foreach $f (&get_available_backup_features()) {
 	$ftable .= &ui_checkbox("feature", $f,
 		$text{'backup_feature_'.$f} || $text{'feature_'.$f},
-		$config{'backup_feature_'.$f});
+		$sched->{'feature_'.$f});
 	local $ofunc = "show_restore_$f";
 	local %opts = map { split(/=/, $_) }
-			split(/,/, $config{'backup_opts_'.$f});
+			split(/,/, $sched->{'opts_'.$f});
 	local $ohtml;
 	if (defined(&$ofunc) && ($ohtml = &$ofunc(\%opts, $d)) &&
 	    $ohtml =~ /type=(text|radio|check)/i) {
@@ -66,16 +60,16 @@ foreach $f (@backup_plugins) {
 	$ftable .= &ui_checkbox("feature", $f,
 		&plugin_call($f, "feature_backup_name") ||
 		    &plugin_call($f, "feature_name"),
-		$config{'backup_feature_'.$f})."\n";
+		$sched->{'feature_'.$f})."\n";
 	$ftable .= "<br>\n";
 	}
 $ftable .= &ui_links_row(\@links);
 print &ui_table_row($text{'restore_features'}, $ftable);
 
-if (&can_backup_virtualmin() && !defined($in{'dom'})) {
+if (&can_backup_virtualmin()) {
 	# Show virtualmin object backup options
 	$vtable = "";
-	%virts = map { $_, 1 } split(/\s+/, $config{'backup_virtualmin'});
+	%virts = map { $_, 1 } split(/\s+/, $sched->{'virtualmin'});
 	foreach $vo (@virtualmin_backups) {
 		$vtable .= &ui_checkbox("virtualmin", $vo,
 				$text{'backup_v'.$vo}, $virts{$vo})."<br>\n";

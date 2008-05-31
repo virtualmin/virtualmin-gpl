@@ -56,7 +56,18 @@ else {
 	@doms = grep { !$donedom{$_->{'id'}}++ } @doms;
 	}
 
-# XXX limit to backup's owner?
+# Work out who the schedule is being run for
+if ($sched->{'owner'}) {
+	$asd = &get_domain($sched->{'owner'});
+	$owner = $asd ? $asd->{'user'} : $sched->{'owner'};
+	local %access = &get_module_acl($owner);
+	$cbmode = &can_backup_domain();		# Uses %access override
+	@doms = grep { &can_backup_domain($_) } @doms;
+	}
+else {
+	# Master admin
+	$cbmode = 1;
+	}
 
 # Work out features and options
 if ($sched->{'feature_all'}) {
@@ -91,7 +102,7 @@ $current_id = undef;
 			       \@vbs,
 			       $sched->{'mkdir'},
 			       $sched->{'onebyone'},
-			       0,
+			       $cbmode == 2,
 			       \&backup_cbfunc,
 			       $sched->{'increment'});
 
