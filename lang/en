@@ -4249,6 +4249,7 @@ sched_owner=Owner
 sched_actions=Actions
 sched_now=Backup..
 sched_restore=Restore..
+sched_return=scheduled backups
 
 cron_special=Simple schedule
 cron_complex=Complex schedule

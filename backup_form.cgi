@@ -209,5 +209,8 @@ else {
 					   : ( ) ]);
 	}
 
-&ui_print_footer("", $text{'index_return'});
+&ui_print_footer(
+	$in{'sched'} || $in{'new'} ?
+		( "list_sched.cgi", $text{'sched_return'} ) : ( ),
+	"", $text{'index_return'});
 
