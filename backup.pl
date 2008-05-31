@@ -22,6 +22,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--debug") {
 		$backup_debug = 1;
 		}
+	elsif ($a eq "--force-email") {
+		$force_email = 1;
+		}
 	else {
 		&usage();
 		}
@@ -97,7 +100,8 @@ $start_time = time();
 $current_id = undef;
 ($ok, $size) = &backup_domains($dest, \@doms, \@do_features,
 			       $sched->{'fmt'},
-			       $sched->{'errors'}, \%options,
+			       $sched->{'errors'},
+			       \%options,
 			       $sched->{'fmt'} == 2,
 			       \@vbs,
 			       $sched->{'mkdir'},
@@ -108,7 +112,7 @@ $current_id = undef;
 
 # Send an email to the recipient, if there are any
 if ($sched->{'email'} && $has_mailboxes &&
-    (!$ok || !$sched->{'email_err'})) {
+    (!$ok || !$sched->{'email_err'} || $force_email)) {
 	if ($ok) {
 		$output .= &text('backup_done', &nice_size($size))." ";
 		}
@@ -129,7 +133,7 @@ if ($sched->{'email'} && $has_mailboxes &&
 
 # Send email to domain owners too, if selected
 if ($sched->{'email_doms'} && $has_mailboxes &&
-    (!$ok || !$sched->{'email_err'})) {
+    (!$ok || !$sched->{'email_err'} || $force_email)) {
 	@emails = &unique(map { $_->{'emailto'} } @doms);
 	foreach $email (@emails) {
 		@edoms = grep { $_->{'emailto'} eq $email } @doms;
@@ -186,6 +190,8 @@ print "$_[0]\n\n" if ($_[0]);
 print "Runs one scheduled Virtualmin backup. Usually called automatically from Cron.\n";
 print "\n";
 print "usage: backup.pl [--id number]\n";
+print "                 [--debug]\n";
+print "                 [--force-email]\n";
 exit(1);
 }
 

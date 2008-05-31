@@ -1743,6 +1743,7 @@ backup_email_doms=Also send email to owners of backed-up servers
 backup_strftime=Do <tt>strftime</tt>-style time substitutions on file or directory name
 backup_onebyone=Transfer each virtual server after it is backed up
 backup_now=Backup Now
+backup_bg=Backup In Background
 backup_save=Save Schedule
 backup_create=Create Schedule
 backup_delete=Delete Schedule
@@ -1886,6 +1887,9 @@ backup_selfeatures=Only those selected below ..
 backup_edownloadfmt=Only backups to a single file can be downloaded in your browser
 backup_edownloadfailed=Backup failed - try again to a file on the server to see the full error message
 backup_egone=Scheduled backup no longer exists!
+backup_starting=Starting background backup to $1 ..
+backup_started=.. completion email will be sent to $1.
+backup_started2=.. started.
 
 restore_title=Restore Virtual Servers
 restore_header=Options for restoring backup
@@ -4243,7 +4247,7 @@ sched_inc=Incremental
 sched_full=Full
 sched_owner=Owner
 sched_actions=Actions
-sched_now=Backup
+sched_now=Backup..
 sched_restore=Restore..
 
 cron_special=Simple schedule

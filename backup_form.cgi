@@ -39,7 +39,14 @@ else {
 	# Doing a one-off backup
 	&ui_print_header(undef, $text{'backup_title'}, "", "backupnow");
 	print &ui_form_start("backup.cgi/backup.tgz", "post");
-	$sched = $scheds[0];
+	print &ui_hidden("oneoff", $in{'oneoff'});
+	if ($in{'oneoff'}) {
+		($sched) = grep { $_->{'id'} == $in{'oneoff'} } @scheds;
+		$sched || &error($text{'backup_egone'});
+		}
+	else {
+		$sched = $scheds[0];
+		}
 	$nodownload = 0;
 	}
 $sched ||= { 'all' => 1,		# Sensible defaults
@@ -197,7 +204,9 @@ if ($in{'sched'} || $in{'new'}) {
 		}
 	}
 else {
-	print &ui_form_end([ [ "now", $text{'backup_now'} ] ]);
+	print &ui_form_end([ [ "now", $text{'backup_now'} ],
+			     $in{'oneoff'} ? ( [ "bg", $text{'backup_bg'} ] )
+					   : ( ) ]);
 	}
 
 &ui_print_footer("", $text{'index_return'});

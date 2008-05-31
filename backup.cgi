@@ -3,11 +3,34 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&error_setup($text{'backup_err'});
 $cbmode = &can_backup_domain();
 $cbmode || &error($text{'backup_ecannot'});
 
+if ($in{'bg'}) {
+	# Background backup of previous scheduled request .. launch it
+	($sched) = grep { $_->{'id'} eq $in{'oneoff'} &&
+			  &can_backup_sched($_) } &list_scheduled_backups();
+	$sched || &error($text{'backup_egone'});
+
+	&ui_print_unbuffered_header(undef, $text{'backup_title'}, "");
+
+	$nice = &nice_backup_url($sched->{'dest'});
+	&$first_print(&text('backup_starting', $nice));
+	$cmd = "$backup_cron_cmd --id $sched->{'id'} --force-email";
+	&execute_command("$cmd >/dev/null 2>&1 </dev/null &");
+	if ($sched->{'email'}) {
+		&$second_print(&text('backup_started', $sched->{'email'}));
+		}
+	else {
+		&$second_print($text{'backup_started2'});
+		}
+
+	&ui_print_footer("", $text{'index_return'});
+	exit;
+	}
+
 # Validate inputs
-&error_setup($text{'backup_err'});
 if ($in{'all'} == 1) {
 	# All domains
 	@doms = grep { &can_backup_domain($_) } &list_domains();
@@ -134,12 +157,6 @@ else {
 			    { 'doms' => [ map { $_->{'dom'} } @doms ] });
 		}
 
-	if (defined($in{'dom'})) {
-		# Link is back to view/edit form
-		&ui_print_footer(&domain_footer_link(&get_domain($in{'dom'})));
-		}
-	else {
-		&ui_print_footer("", $text{'index_return'});
-		}
+	&ui_print_footer("", $text{'index_return'});
 	}
 

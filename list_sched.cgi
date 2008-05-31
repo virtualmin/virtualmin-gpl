@@ -66,7 +66,7 @@ foreach $s (@scheds) {
 		}
 	# Action links
 	@links = ( );
-	push(@links, "<a href='backup.cgi?sched=$s->{'id'}'>".
+	push(@links, "<a href='backup_form.cgi?oneoff=$s->{'id'}'>".
 		     "$text{'sched_now'}</a>");
 	push(@links, "<a href='restore_form.cgi?sched=$s->{'id'}'>".
 		     "$text{'sched_restore'}</a>") if (&can_restore_domain());

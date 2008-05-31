@@ -71,6 +71,7 @@
 	- Complain if doing an incremental restore before a full
 	- CHANGELOG for incremental, multiple schedules, user backups
 	- Test backups created by resellers
+	- Restore needs to work for domain owners
 
  - Backport spam and virus to GPL
 
