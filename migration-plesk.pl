@@ -712,6 +712,71 @@ if ($got{'mysql'}) {
 
 &sync_alias_virtuals(\%dom);
 
+# Migrate protected directories as .htaccess files
+local $pdir = $domain->{'phosting'}->{'pdir'};
+if ($pdir && &foreign_check("htaccess-htpasswd")) {
+	&$first_print("Re-creating protected directories ..");
+	&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
+	local $hdir = &public_html_dir(\%dom);
+	local $etc = "$dom{'home'}/etc";
+	if (!-d $etc) {
+		# Create ~/etc dir
+		&make_dir($etc, 0755);
+		&set_ownership_permissions($dom{'uid'}, $dom{'gid'},
+					   undef, $etc);
+		}
+
+	# Migrate each one, by creating a .htaccess file
+	local $pcount = 0;
+	if ($pdir->{'name'}) {
+		$pdir = { $pdir->{'name'} => $pdir };
+		}
+	local @htdirs = &htaccess_htpasswd::list_directories();
+	foreach my $name (keys %$pdir) {
+		# Make .htaccess file
+		local $p = $pdir->{$name};
+		local $dir = "$hdir/$name";
+		local $htaccess = "$dir/$htaccess_htpasswd::config{'htaccess'}";
+		$name =~ s/\//-/g;
+		local $htpasswd = "$etc/.htpasswd-$name";
+		&open_tempfile(HTACCESS, ">$htaccess");
+		&print_tempfile(HTACCESS, "AuthName \"$p->{'title'}\"\n");
+		&print_tempfile(HTACCESS, "AuthType Basic\n");
+		&print_tempfile(HTACCESS, "AuthUserFile $htpasswd\n");
+		&print_tempfile(HTACCESS, "require valid-user\n");
+		&close_tempfile(HTACCESS);
+
+		# Add users to .htpasswd file
+		&open_tempfile(HTPASSWD, ">$htpasswd");
+		&close_tempfile(HTPASSWD);
+		local $pduser = $p->{'pduser'};
+		if ($pduser) {
+			$pduser = [ $pduser ] if (ref($pduser) ne 'ARRAY');
+			foreach my $u (@$pduser) {
+				local $huinfo = { 'user' => $u->{'name'},
+						  'enabled' => 1 };
+				local $pass = $u->{'password'}->{'content'};
+				if ($u->{'password'}->{'type'} eq 'plain') {
+					$huinfo->{'pass'} = &htaccess_htpasswd::encrypt_password($pass);
+					}
+				else {
+					$huinfo->{'pass'} = $pass;
+					}
+				&htaccess_htpasswd::create_user($huinfo,
+								$htpasswd);
+				}
+			}
+		&set_ownership_permissions($dom{'uid'}, $dom{'gid'}, 0755,
+					   $htaccess, $htpasswd);
+
+		# Add to protected directories module
+		push(@htdirs, [ $dir, $htpasswd, 0, 0, undef ]);
+		$pcount++;
+		}
+	&htaccess_htpasswd::save_directories(\@htdirs);
+	&$second_print(".. done (migrated $pcount)");
+	}
+
 # Migrate alias domains
 local $aliasdoms = $domain->{'domain-alias'};
 if (!$aliasdoms) {

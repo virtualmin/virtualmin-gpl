@@ -1,0 +1,4 @@
+desc=Plesk migration improvements
+html=Improved the migration of Plesk mailbox aliases and forwarding, and protected directories.
+master=1
+link=migrate_form.cgi
