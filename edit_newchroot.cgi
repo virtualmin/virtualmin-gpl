@@ -20,7 +20,7 @@ print &ui_columns_start([ $text{'chroot_active'},
 			  $text{'chroot_who'},
 			  $text{'chroot_dir'} ], 100, 0, \@tds);
 $i = 0;
-foreach $chroot (@chroots, { }) {
+foreach $chroot (@chroots, { 'dir' => '~' }) {
 	$d = $chroot->{'group'} && !$chroot->{'neg'} ?
 		&get_domain_by("group", $chroot->{'group'}, "parent", "") :
 		undef;
@@ -42,7 +42,7 @@ foreach $chroot (@chroots, { }) {
 			    [ 0, &text('chroot_path',
 				   &ui_textbox("dir_$i",
 					$mode ? "" : $chroot->{'dir'}, 40)) ] ]),
-		], \@tds, "enabled_$i", 1, $chroot->{'dir'} ? 1 : 0);
+		], \@tds, "enabled_$i", 1, &indexof($chroot, @chroots) >= 0);
 		
 	$i++;
 	}

@@ -271,7 +271,8 @@ if ($config{'spam'}) {
 		!$d->{'spam'} ? $text{'user_spamdis'} :
 			&ui_radio("nospam", int($user->{'nospam'}),
 				  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]).
-			$awl_link);
+			$awl_link,
+		2, \@tds);
 	}
 
 if ($hasemail) {
