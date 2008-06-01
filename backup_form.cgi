@@ -23,21 +23,21 @@ if ($in{'sched'}) {
 		$omsg = $od ? &text('backup_odom', "<tt>$od->{'user'}</tt>")
 			    : &text('backup_oresel', "<tt>$od</tt>");
 		}
-	&ui_print_header($omsg, $text{'backup_title2'}, "", "backupsched");
+	&ui_print_header($omsg, $text{'backup_title2'}, "");
 	print &ui_form_start("backup_sched.cgi", "post");
 	print &ui_hidden("sched", $in{'sched'});
 	$nodownload = 1;
 	}
 elsif ($in{'new'}) {
 	# Creating new scheduled backup
-	&ui_print_header(undef, $text{'backup_title3'}, "", "backupnew");
+	&ui_print_header(undef, $text{'backup_title3'}, "");
 	print &ui_form_start("backup_sched.cgi", "post");
 	print &ui_hidden("new", 1);
 	$nodownload = 1;
 	}
 else {
 	# Doing a one-off backup
-	&ui_print_header(undef, $text{'backup_title'}, "", "backupnow");
+	&ui_print_header(undef, $text{'backup_title'}, "");
 	print &ui_form_start("backup.cgi/backup.tgz", "post");
 	print &ui_hidden("oneoff", $in{'oneoff'});
 	if ($in{'oneoff'}) {

@@ -1,12 +1,11 @@
 #!/usr/local/bin/perl
 # Show a list of all scheduled backups
-# XXX allow domain owners to use too
 
 require './virtual-server-lib.pl';
 &ReadParse();
 &can_backup_sched() || &error($text{'sched_ecannot'});
 &can_backup_domain() || &error($text{'backup_ecannot'});
-&ui_print_header(undef, $text{'sched_title'}, "");
+&ui_print_header(undef, $text{'sched_title'}, "", "sched");
 
 @scheds = &list_scheduled_backups();
 @scheds = grep { &can_backup_sched($_) } @scheds;

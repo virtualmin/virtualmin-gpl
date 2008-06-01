@@ -65,9 +65,7 @@
 	- Purge old backups
 	- Crossport to GPL version
 	- Command line UI for scheduled backups
-	- Help pages on backup and schedules form
 	- Verify that old backups still work
-	- Links from schedule list to immediate backup and restore form
 	- Complain if doing an incremental restore before a full
 	- CHANGELOG for incremental, multiple schedules, user backups
 	- Test backups created by resellers
