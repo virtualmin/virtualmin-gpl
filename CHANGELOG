@@ -927,3 +927,4 @@ Updated the Horde script installer to version 3.2, and all its associated sub-ap
 The $DNS_SERIAL variable can be used in templates, as an initial serial for new domains.
 When a domain's home directory is changed, update session.save_path in its php.ini files to match.
 Improved the migration of Plesk mailbox aliases and forwarding, and protected directories.
+Fixed support for international domain names using non-european character sets (like Chinese and Cyrillic) in newer versions of Perl.

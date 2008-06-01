@@ -3654,7 +3654,9 @@ sub server_home_directory
 &require_useradmin();
 if ($_[0]->{'parent'}) {
 	# Owned by some existing user, so under his home
-	return "$_[1]->{'home'}/domains/$_[0]->{'dom'}";
+	local $dname = $_[0]->{'dom'};
+	$dname =~ s/^xn(-+)//;
+	return "$_[1]->{'home'}/domains/$dname";
 	}
 elsif ($config{'home_format'}) {
 	# Use the template from the module config
@@ -4937,7 +4939,7 @@ return $db;
 sub unixuser_name
 {
 local ($dname) = @_;
-$dname =~ s/^xn--//;
+$dname =~ s/^xn(-+)//;
 $dname =~ /^([^\.]+)/;
 local ($try1, $user) = ($1, $1);
 if (defined(getpwnam($try1)) || $config{'longname'}) {
@@ -4962,7 +4964,7 @@ if ($user && $config{'groupsame'}) {
 		}
 	return (undef, $user, $user);
 	}
-$dname =~ s/^xn--//;
+$dname =~ s/^xn(-+)//;
 $dname =~ /^([^\.]+)/;
 local ($try1, $group) = ($1, $1);
 if (defined(getgrnam($try1)) || $config{'longname'}) {
@@ -7786,7 +7788,7 @@ return ($home-$dbq, $mail, $db);
 sub compute_prefix
 {
 local ($name, $group, $parent, $creating) = @_;
-$name =~ s/^xn--//;	# Strip IDN part
+$name =~ s/^xn(-+)//;	# Strip IDN part
 if ($config{'longname'} == 1) {
 	# Prefix is same as domain name
 	return $name;
@@ -8552,7 +8554,7 @@ if (!$d->{'alias'} && &can_edit_exclude()) {
 	push(@rv, { 'page' => 'edit_exclude.cgi',
 		    'title' => $text{'edit_exclude'},
 		    'desc' => $text{'edit_excludedesc'},
-		    'cat' => 'backup',
+		    'cat' => 'admin',
 		  });
 	}
 
@@ -8839,11 +8841,27 @@ sub shorten_domain_name
 {
 local ($d) = @_;
 local $show = &show_domain_name($d->{'showdom'} || $d->{'dom'});
+
+# Split into characters, some of which may be HTML entities that are multiple
+# letters in the string (like &foo; or &#55;) but appear as one letter
+local @chars;
+local $tosplit = $show;
+if ($tosplit =~ /\&|;/) {
+	while($tosplit =~ s/^(\&[^;]+;)// ||
+	      $tosplit =~ s/^(.)//) {
+		push(@chars, $1);
+		}
+	}
+else {
+	@chars = split(//, $tosplit);
+	}
+
 local $rv;
-if ($config{'name_max'} && length($show) > $config{'name_max'}) {
-	# Show first and last max/2 chars, with ... between
+if ($config{'name_max'} && scalar(@chars) > $config{'name_max'}) {
+	# Show first and last max/2 chars, with ... between.
 	local $s = int($config{'name_max'} / 2);
-	$rv = substr($show, 0, $s)."...".substr($show, -$s);
+	$rv = join("", @chars[0 .. $s-1])."...".
+	      join("", @chars[$#chars-$s .. $#chars]);
 	}
 else {
 	$rv = $show;
@@ -8858,22 +8876,35 @@ return $rv;
 sub show_domain_name
 {
 local $name = ref($_[0]) ? $_[0]->{'dom'} : $_[0];
+local $spacer;
+if ($name =~ s/^(\s+)//) {
+	$spacer = $1;
+	}
 if ($name =~ /^xn--/ || $name =~ /\.xn--/) {
 	# Convert xn-- parts to unicode
 	eval "use IDNA::Punycode";
 	if (!$@) {
 		$name = join(".",
 			  map { decode_punycode($_) } split(/\./, $name));
+		if ($ENV{'MINISERV_CONFIG'}) {
+			# In browser, so convert to entity format for HTML
+			local $ename;
+			foreach my $c (split(//, $name)) {
+				local $o = ord($c);
+				$ename .= $o > 255 ? "&#$o;" : $c;
+				}
+			$name = $ename;
+			}
 		}
 	}
-return $name;
+return $spacer.$name;
 }
 
 # parse_domain_name(input)
 # Returns an IDN-encoding domain name, where needed
 sub parse_domain_name
 {
-local $name = $_[0];
+local $name = &entities_to_ascii($_[0]);
 if ($name !~ /^[a-z0-9\.\-\_]+$/i) {
 	# Convert unicode to xn-- format
 	eval "use IDNA::Punycode";
@@ -8894,7 +8925,7 @@ local ($name) = @_;
 $name =~ /^[A-Za-z0-9\.\-]+$/ || return $text{'setup_edomain'};
 $name =~ /^\./ && return $text{'setup_edomain2'};
 $name =~ /\.$/ && return $text{'setup_edomain2'};
-$name =~ /\.xn--([^\.]+)$/ && return $text{'setup_edomain3'};
+$name =~ /\.xn(-+)([^\.]+)$/ && return $text{'setup_edomain3'};
 if ($name =~ /^(www|ftp)\./i) {
 	return &text('setup_edomainprefix', "$1");
 	}
@@ -10895,7 +10926,7 @@ else {
 sub nice_domains_list
 {
 local ($doms) = @_;
-local @ttdoms = map { "<tt>$_->{'dom'}</tt>" } @$doms;
+local @ttdoms = map { "<tt>".&show_domain_name($_)."</tt>" } @$doms;
 if (@ttdoms > 10) {
 	@ttdoms = ( @ttdoms[0..9], &text('index_dmore', @ttdoms-10) );
 	}

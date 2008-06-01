@@ -167,7 +167,7 @@ foreach $d (@doms) {
 	}
 
 foreach $d (@doms) {
-	&$first_print(&text('massdomains_dom', $d->{'dom'}));
+	&$first_print(&text('massdomains_dom', &show_domain_name($d)));
 	&$indent_print();
 
 	$oldd = $oldd_map{$d->{'id'}};

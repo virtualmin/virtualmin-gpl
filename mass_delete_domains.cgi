@@ -93,7 +93,7 @@ else {
 
 	foreach $d (@doms) {
 		# Go ahead and delete this domain and all sub-domains ..
-		&$first_print(&text('massdelete_doing', $d->{'dom'}));
+		&$first_print(&text('massdelete_doing', &show_domain_name($d)));
 		&$indent_print();
 		$in{'only'} = 0 if (!&can_import_servers());
 		$err = &delete_virtual_server($d, $in{'only'}, 1);
