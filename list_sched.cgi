@@ -15,7 +15,12 @@ $hasinc = &has_incremental_tar();
 @table = ( );
 $hasowner = 0;
 if (&can_backup_domain() == 1) {
+	# For master admin, show it if any schedule has a non-master owner
 	($hasowner) = grep { $_->{'owner'} } @scheds;
+	}
+elsif (&can_backup_domain() == 3) {
+	# For resellers, always show owner column
+	$hasowner = 1;
 	}
 
 # Build table of backups

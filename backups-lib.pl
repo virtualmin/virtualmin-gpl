@@ -1533,7 +1533,8 @@ return $rv;
 sub show_backup_destination
 {
 local ($name, $value, $nolocal, $d, $nodownload, $noupload) = @_;
-local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($_[1]);
+local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($value);
+$mode = 1 if (!$value && $nolocal);	# Default to FTP
 local $defport = $mode == 1 ? 21 : $mode == 2 ? 22 : undef;
 local $serverport = $port && $port != $defport ? "$server:$port" : $server;
 local $rv;
@@ -1708,8 +1709,9 @@ if (&master_admin()) {
 	}
 elsif (&reseller_admin()) {
 	# Resellers can edit schedules for their domains' users
-	return 0 if (!$sched->{'owner'});       # Master admin's backup
+	return 0 if ($access{'backups'} != 2);
 	if ($sched) {
+		return 0 if (!$sched->{'owner'});       # Master admin's backup
 		return 1 if ($sched->{'owner'} eq $base_remote_user);
 		foreach my $d (&get_domain_by("reseller", $base_remote_user)) {
 			return 1 if ($d->{'id'} eq $sched->{'owner'});
@@ -1791,6 +1793,7 @@ if (&master_admin()) {
 	}
 elsif (&reseller_admin()) {
 	# Resellers can only backup their domains, to remote
+	return 0 if (!$access{'backups'});
 	if ($d) {
 		return 0 if (!&can_edit_domain($d));
 		}
