@@ -1,0 +1,4 @@
+desc=Multiple scheduled backups
+html=More than one backup schedule and destination can now be defined, each with its own list of domains and target directory. Each can either be a full or incremental backup, which can speed up the time it takes to take snapshots of large but infrequently changing virtual servers.
+master=1
+link=list_sched.cgi

@@ -928,3 +928,4 @@ The $DNS_SERIAL variable can be used in templates, as an initial serial for new 
 When a domain's home directory is changed, update session.save_path in its php.ini files to match.
 Improved the migration of Plesk mailbox aliases and forwarding, and protected directories.
 Fixed support for international domain names using non-european character sets (like Chinese and Cyrillic) in newer versions of Perl.
+Completely re-designed the Virtualmin backup UI, to support multiple backup schedules and allow domain owners and resellers to schedule their own backups (subject to limits configured by the master administrator). Domain owners can now also restore backups of their home directories and databases. Backups can either be full or incremental, to speed up the process of backing up large but infrequently-changing sites.

@@ -1,0 +1,6 @@
+desc=Backups and restores by domain owners
+html=Resellers and individual virtual server owners can now schedule and restore backups, subject to limitations imposed by the master administrator.
+master=1
+reseller=1
+owner=1
+link=backup_form.cgi
