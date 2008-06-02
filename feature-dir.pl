@@ -243,22 +243,26 @@ if ($gconfig{'os_type'} eq 'solaris') {
 &close_tempfile(XTEMP);
 
 # Work out incremental flags
-local ($iargs, $iflag);
+local ($iargs, $iflag, $ifile, $ifilecopy);
 if (&has_incremental_tar()) {
 	if (!-d $incremental_backups_dir) {
 		&make_dir($incremental_backups_dir, 0700);
 		}
-	local $ifile = "$incremental_backups_dir/$_[0]->{'id'}";
+	$ifile = "$incremental_backups_dir/$_[0]->{'id'}";
 	if (!$_[4]) {
 		# Force full backup
 		&unlink_file($ifile);
 		}
 	else {
-		# Add a flag file indicating that this was an incremental backup
+		# Add a flag file indicating that this was an incremental,
+		# and take a copy of the file so we can put it back as before
+		# the backup (as tar modifies it)
 		if (-r $ifile) {
 			$iflag = "$_[0]->{'home'}/.incremental";
 			&open_tempfile(IFLAG, ">$iflag", 0, 1);
 			&close_tempfile(IFLAG);
+			$ifilecopy = &transname();
+			&copy_source_dest($ifile, $ifilecopy);
 			}
 		}
 	$iargs = "--listed-incremental=$ifile";
@@ -287,6 +291,7 @@ else {
 local $ex = &execute_command("cd ".quotemeta($_[0]->{'home'})." && $cmd",
 			     undef, \$out, \$out);
 &unlink_file($iflag) if ($iflag);
+&copy_source_dest($ifilecopy, $ifile) if ($ifilecopy);
 if ($ex) {
 	&$second_print(&text('backup_dirtarfailed', "<pre>$out</pre>"));
 	return 0;

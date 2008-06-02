@@ -293,7 +293,7 @@ else {
 	foreach my $d (@$doms) {
 		if (!$d->{'dir'} && !$skip) {
 			&$first_print(&text('backup_ehomeformat3',
-					    $d->{'dom'}));
+					    &show_domain_name($d)));
 			return (0, 0);
 			}
 		}
@@ -342,7 +342,7 @@ DOMAIN: foreach $d (@$doms) {
 		&make_backup_dir($backupdir, 0777, 0, $asd);
 		}
 	&$cbfunc($d, 0, $backupdir) if ($cbfunc);
-	&$first_print(&text('backup_fordomain', $d->{'dom'}));
+	&$first_print(&text('backup_fordomain', &show_domain_name($d)));
 	&$second_print();
 	&$indent_print();
 	local $f;
@@ -849,7 +849,7 @@ foreach $d (@{$_[1]}) {
 	if ($d->{'missing'}) {
 		if (!-r "$restoredir/$d->{'dom'}_virtualmin") {
 			&$second_print(&text('restore_missinginfo',
-					     $d->{'dom'}));
+					     &show_domain_name($d)));
 			$ok = 0;
 			last;
 			}
@@ -890,7 +890,7 @@ if ($ok) {
 			# This domain doesn't exist yet - need to re-create it
 			$missing{$d->{'id'}} = $d;
 			&$first_print(&text('restore_createdomain',
-				      $d->{'dom'}));
+				      &show_domain_name($d)));
 
 			# Only features in the backup are enabled
 			if ($onlyfeats) {
@@ -1021,7 +1021,8 @@ if ($ok) {
 			}
 
 		# Now do the actual restore
-		&$first_print(&text('restore_fordomain', $d->{'dom'}));
+		&$first_print(&text('restore_fordomain',
+				    &show_domain_name($d)));
 		&$indent_print();
 		local $f;
 		local %oldd;
@@ -1163,7 +1164,8 @@ if (defined(&list_domain_scripts) && $ok && scalar(keys %missing)) {
 		# Some scripts needed missing PHP versions!
 		my $badlist = $text{'restore_phpbad'}."<br>\n";
 		foreach my $b (@phpbad) {
-			$badlist .= &text('restore_phpbad2', $b->[0]->{'dom'},
+			$badlist .= &text('restore_phpbad2',
+					  &show_domain_name($b->[0]),
 					  $b->[2]->{'desc'}, $b->[3])."<br>\n";
 			}
 		&$second_print($badlist);
