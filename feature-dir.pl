@@ -324,6 +324,8 @@ return { 'dirnologs' => !$in{'dir_logs'} };
 sub restore_dir
 {
 &$first_print($text{'restore_dirtar'});
+local $iflag = "$_[0]->{'home'}/.incremental";
+&unlink_file($iflag);
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable($_[0], 1);
 	}
@@ -340,7 +342,16 @@ if ($?) {
 	return 0;
 	}
 else {
-	&$second_print($text{'setup_done'});
+	# Check for incremental restore of new-created domain, which indicates
+	# that is is not complete
+	if ($_[0]->{'wasmissing'} && -r $iflag) {
+		&$second_print($text{'restore_wasmissing'});
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	&unlink_file($iflag);
+
 	if ($_[0]->{'unix'}) {
 		# Set ownership on extracted home directory, apart from
 		# content of ~/homes

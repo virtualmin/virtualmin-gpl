@@ -773,7 +773,6 @@ else {
 
 local $restoredir;
 local %homeformat;
-local %missing;
 if ($ok) {
 	# Create a temp dir for the backup archive contents
 	$restoredir = &transname();
@@ -824,7 +823,7 @@ if ($ok) {
 			$extract = ".backup";
 			}
 
-		&execute_command("cd '$restoredir' && ".
+		&execute_command("cd ".quotemeta($restoredir)." && ".
 			"($comp $q | tar xf - $extract)", undef, \$out, \$out);
 		if ($?) {
 			&$second_print(&text('restore_firstfailed',
@@ -878,17 +877,11 @@ if ($ok) {
 			}
 		}
 
-	# Check for restores of missing domains from partial backups
-	foreach $d (grep { $_->{'missing'} } @$doms) {
-		# XXX not done yet
-		}
-
 	# Now restore each of the domain/feature files
 	local $d;
 	DOMAIN: foreach $d (sort { $a->{'parent'} <=> $b->{'parent'} } @$doms) {
 		if ($d->{'missing'}) {
 			# This domain doesn't exist yet - need to re-create it
-			$missing{$d->{'id'}} = $d;
 			&$first_print(&text('restore_createdomain',
 				      &show_domain_name($d)));
 
@@ -1006,6 +999,7 @@ if ($ok) {
 			# Finally, create it
 			&$indent_print();
 			delete($d->{'missing'});
+			$d->{'wasmissing'} = 1;
 			$d->{'nocreationmail'} = 1;
 			$d->{'nocreationscripts'} = 1;
 			$d->{'nocopyskel'} = 1;
@@ -1100,11 +1094,12 @@ if ($ok) {
 	}
 
 # If any created restored domains had scripts, re-verify their dependencies
-if (defined(&list_domain_scripts) && $ok && scalar(keys %missing)) {
+local @wasmissing = grep { $_->{'wasmissing'} } @$doms;
+if (defined(&list_domain_scripts) && $ok && scalar(@wasmissing)) {
 	&$first_print($text{'restore_phpmods'});
 	local %scache;
 	local (@phpinstalled, $phpanyfailed, @phpbad);
-	foreach my $d (grep { $missing{$_->{'id'}} } @$doms) {
+	foreach my $d (@wasmissing) {
 		local @sinfos = &list_domain_scripts($d);
 		foreach my $sinfo (@sinfos) {
 			# Get the script, with caching
@@ -1169,6 +1164,14 @@ if (defined(&list_domain_scripts) && $ok && scalar(keys %missing)) {
 					  $b->[2]->{'desc'}, $b->[3])."<br>\n";
 			}
 		&$second_print($badlist);
+		}
+	}
+
+# Clear any missing flags
+foreach my $d (@$doms) {
+	if ($d->{'wasmissing'}) {
+		delete($d->{'wasmissing'});
+		&save_domain($d);
 		}
 	}
 
