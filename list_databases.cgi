@@ -54,7 +54,7 @@ if (@dbs) {
 			}
 		push(@table, [
 			{ 'type' => 'checkbox', 'name' => 'd',
-			  'value' => $a->{'from'} },
+			  'value' => $db->{'name'} },
 			"<a href='edit_database.cgi?dom=$in{'dom'}&name=$db->{'name'}&type=$db->{'type'}'>$db->{'name'}</a>",
 			$db->{'desc'},
 			$action
