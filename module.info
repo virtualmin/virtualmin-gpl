@@ -10,3 +10,4 @@ readonly=1
 feedback=feedback@webmin.com
 virtualmin=pro
 desc_tr=Virtualmin Sanal Sunucular&#305;
+desc_nl=Virtualmin Virtuele Servers
