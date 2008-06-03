@@ -415,7 +415,7 @@ foreach $db (@dbs) {
 return 1;
 }
 
-# restore_mysql(&domain, file)
+# restore_mysql(&domain, file,  &opts, &allopts, homeformat, &oldd, asowner)
 # Restores this domain's mysql database from a backup file, and re-creates
 # the mysql user.
 sub restore_mysql
@@ -461,7 +461,16 @@ foreach $db (@dbs) {
 			}
 		$db->[1] =~ s/\.gz$//;
 		}
-	local ($ex, $out) = &mysql::execute_sql_file($db->[0], $db->[1]);
+	local ($ex, $out);
+	if ($_[6]) {
+		# As the domain owner
+		($ex, $out) = &mysql::execute_sql_file($db->[0], $db->[1],
+				&mysql_user($_[0]), &mysql_pass($_[1], 1));
+		}
+	else {
+		# As master admin
+		($ex, $out) = &mysql::execute_sql_file($db->[0], $db->[1]);
+		}
 	if ($ex) {
 		&$second_print(&text('restore_mysqlloadfailed',
 				     "<pre>$out</pre>"));

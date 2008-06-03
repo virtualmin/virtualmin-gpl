@@ -319,8 +319,11 @@ local %in = %{$_[0]};
 return { 'dirnologs' => !$in{'dir_logs'} };
 }
 
-# restore_dir(&domain, file, &options, homeformat?)
+# restore_dir(&domain, file, &options, homeformat?, &oldd, asowner)
 # Extracts the given tar file into server's home directory
+# XXX run tar as domain owner
+# XXX chown mailbox user files too
+#	XXX only for those who are not the domain owner's UID
 sub restore_dir
 {
 &$first_print($text{'restore_dirtar'});

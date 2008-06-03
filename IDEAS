@@ -68,6 +68,11 @@
 	- Test backups created by resellers
 		- What if domain owner is backing up to local??
 	- Restore needs to work for domain owners
+		- Make sure tar file doesn't contain setuid/root files
+		- MySQL restore should be done as domain owner
+		- Cannot restore non-existing domains
+		- Only allow restore from remote or safe dir
+		- Disallow restores of non-owned domains
 
  - Backport spam and virus to GPL
 

@@ -2,7 +2,8 @@
 # Show a form for restoring a single virtual server, or a bunch
 
 require './virtual-server-lib.pl';
-&can_restore_domain() || &error($text{'restore_ecannot'});
+$crmode = &can_restore_domain();
+$crmode || &error($text{'restore_ecannot'});
 &ui_print_header(undef, $text{'restore_title'}, "");
 &ReadParse();
 
@@ -36,7 +37,7 @@ $ftable .= &ui_radio("feature_all", int($sched->{'feature_all'}),
 		  [ 0, $text{'backup_selfeatures'} ] ])."<br>\n";
 @links = ( &select_all_link("feature"), &select_invert_link("feature") );
 $ftable .= &ui_links_row(\@links);
-foreach $f (&get_available_backup_features()) {
+foreach $f (&get_available_backup_features($crmode == 2)) {
 	$ftable .= &ui_checkbox("feature", $f,
 		$text{'backup_feature_'.$f} || $text{'feature_'.$f},
 		$sched->{'feature_'.$f});
@@ -44,7 +45,7 @@ foreach $f (&get_available_backup_features()) {
 	local %opts = map { split(/=/, $_) }
 			split(/,/, $sched->{'opts_'.$f});
 	local $ohtml;
-	if (defined(&$ofunc) && ($ohtml = &$ofunc(\%opts, $d)) &&
+	if (defined(&$ofunc) && ($ohtml = &$ofunc(\%opts)) &&
 	    $ohtml =~ /type=(text|radio|check)/i) {
 		$ftable .= "<table><tr><td>\n";
 		$ftable .= ("&nbsp;" x 5);
@@ -56,12 +57,16 @@ foreach $f (&get_available_backup_features()) {
 		$ftable .= "<br>\n";
 		}
 	}
+
+# Add boxes for plugins which are known to be safe
 foreach $f (@backup_plugins) {
-	$ftable .= &ui_checkbox("feature", $f,
-		&plugin_call($f, "feature_backup_name") ||
-		    &plugin_call($f, "feature_name"),
-		$sched->{'feature_'.$f})."\n";
-	$ftable .= "<br>\n";
+	if ($crmode == 1 || &plugin_call($f, "feature_backup_safe")) {
+		$ftable .= &ui_checkbox("feature", $f,
+			&plugin_call($f, "feature_backup_name") ||
+			    &plugin_call($f, "feature_name"),
+			$sched->{'feature_'.$f})."\n";
+		$ftable .= "<br>\n";
+		}
 	}
 $ftable .= &ui_links_row(\@links);
 print &ui_table_row($text{'restore_features'}, $ftable);
@@ -78,34 +83,34 @@ if (&can_backup_virtualmin()) {
 	}
 print &ui_hidden_table_end("features");
 
-# Creation options
-print &ui_hidden_table_start($text{'restore_headeropts'}, "width=100%", 2,
-			     "opts", 0, \@tds);
+if ($crmode == 1) {
+	# Creation options
+	print &ui_hidden_table_start($text{'restore_headeropts'}, "width=100%",
+				     2, "opts", 0, \@tds);
 
-# Re-allocate UIDs
-print &ui_table_row(&hlink($text{'restore_reuid'}, "restore_reuid"),
-		    &ui_yesno_radio("reuid", 1));
+	# Re-allocate UIDs
+	print &ui_table_row(&hlink($text{'restore_reuid'}, "restore_reuid"),
+			    &ui_yesno_radio("reuid", 1));
 
-# Just re-import, to fix missing domains file
-print &ui_table_row(&hlink($text{'restore_fix'}, "restore_fix"),
-		    &ui_yesno_radio("fix", 0));
+	# Just re-import, to fix missing domains file
+	print &ui_table_row(&hlink($text{'restore_fix'}, "restore_fix"),
+			    &ui_yesno_radio("fix", 0));
 
-if (!$d) {
 	# Limit features to those in backup
 	print &ui_table_row(&hlink($text{'restore_only'}, "restore_only"),
 			    &ui_yesno_radio("only", 0));
+
+	# IP address for restored domains
+	if (&can_select_ip()) {
+		@cantmpls = ( &get_template(0) );
+		print &ui_table_row(&hlink($text{'restore_newip'},
+					   "restore_newip"),
+				&virtual_ip_input(\@cantmpls, undef, 1));
+		}
+
+	print &ui_hidden_table_end("opts");
 	}
 
-# IP address for restored domains
-if (&can_select_ip()) {
-	@cantmpls = ( &get_template(0) );
-	print &ui_table_row(&hlink($text{'restore_newip'}, "restore_newip"),
-			&virtual_ip_input(\@cantmpls, undef, 1));
-	}
-
-print &ui_hidden_table_end("opts");
-
-print &ui_table_end();
 print &ui_form_end([ [ "", $text{'restore_now'} ] ]);
 
 &ui_print_footer("", $text{'index_return'});

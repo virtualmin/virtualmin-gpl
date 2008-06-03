@@ -10671,12 +10671,13 @@ if (defined(&list_resellers)) {
 return 0;
 }
 
-# get_available_backup_features()
+# get_available_backup_features([safe-only])
 # Returns a list of features for which backups are possible
 sub get_available_backup_features
 {
+local ($safe) = @_;
 local @rv;
-foreach my $f (@backup_features) {
+foreach my $f ($safe ? @safe_backup_features : @backup_features) {
 	local $bfunc = "backup_$f";
 	if (defined(&$bfunc) &&
 	    ($config{$f} || $f eq "unix" || $f eq "virtualmin")) {

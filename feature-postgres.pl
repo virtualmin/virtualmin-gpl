@@ -295,7 +295,7 @@ foreach $db (@dbs) {
 return 1;
 }
 
-# restore_postgres(&domain, file)
+# restore_postgres(&domain, file,  &opts, &allopts, homeformat, &oldd, asowner)
 # Restores this domain's postgresql database from a backup file, and re-creates
 # the postgresql user.
 sub restore_postgres
@@ -340,8 +340,17 @@ foreach $db (@dbs) {
 						   undef, $db->[1]);
 			}
 		}
-	$postgresql::in{'db'} = $db->[0];	# XXX bug work-around
-	local $err = &postgresql::restore_database($db->[0], $db->[1], 0, 0);
+	local $err;
+	if ($_[6]) {
+		# As domain owner
+		local $postgresql::postgres_login = &postgres_user($_[0]);
+		local $postgresql::postgres_pass = &postgres_pass($_[0], 1);
+		$err = &postgresql::restore_database($db->[0], $db->[1], 0, 0);
+		}
+	else {
+		# As master admin
+		$err = &postgresql::restore_database($db->[0], $db->[1], 0, 0);
+		}
 	if ($err) {
 		&$second_print(&text('restore_mysqlloadfailed', "<pre>$err</pre>"));
 		return 0;

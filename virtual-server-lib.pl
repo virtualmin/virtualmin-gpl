@@ -92,6 +92,7 @@ if ($no_virtualmin_plugins) {
 @vital_features = ( 'dir', 'unix' );
 @features = ( @opt_features );
 @backup_features = ( 'virtualmin', @features );
+@safe_backup_features = ( 'dir', 'mysql', 'postgres' );
 @opt_alias_features = ( 'dir', 'mail', 'dns', 'web' );
 @opt_subdom_features = ( 'dir', 'dns', 'web', 'ssl' );
 @alias_features = ( @opt_alias_features );

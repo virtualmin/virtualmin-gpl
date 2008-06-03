@@ -734,11 +734,11 @@ return $? ? $out : undef;
 }
 
 # restore_domains(file, &domains, &features, &options, &vbs,
-#		  [only-backup-features], [&ip-address-info])
+#		  [only-backup-features], [&ip-address-info], [as-owner])
 # Restore multiple domains from the given file
 sub restore_domains
 {
-local ($file, $doms, $features, $opts, $vbs, $onlyfeats, $ipinfo) = @_;
+local ($file, $doms, $features, $opts, $vbs, $onlyfeats, $ipinfo, $asowner) =@_;
 
 # Work out where the backup is located
 local $ok = 1;
@@ -1050,7 +1050,8 @@ if ($ok) {
 				if (-r $ffile) {
 					# Call the restore function
 					$fok = &$rfunc($d, $ffile,
-					     $_[3]->{$f}, $_[3], $hft, \%oldd);
+					     $_[3]->{$f}, $_[3], $hft, \%oldd,
+					     $asowner);
 					}
 				}
 			elsif (&indexof($f, @backup_plugins) >= 0 &&
@@ -1060,7 +1061,8 @@ if ($ok) {
 				if (-r $ffile) {
 					$fok = &plugin_call($f,
 					    "feature_restore", $d, $ffile,
-					    $_[3]->{$f}, $_[3], $hft, \%oldd);
+					    $_[3]->{$f}, $_[3], $hft, \%oldd,
+					    $asowner);
 					}
 				}
 			if (defined($fok) && !$fok) {
