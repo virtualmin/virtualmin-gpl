@@ -206,6 +206,7 @@ if ($can_allowed_hosts) {
 		@hosts = &$afunc($d);
 		print &ui_form_start("save_dbhosts.cgi", "post");
 		print &ui_hidden("type", $f);
+		print &ui_hidden("dom", $in{'dom'});
 		print &ui_table_start(
 		  &text('databases_ahosts', $text{'databases_'.$f}), undef, 2);
 		print &ui_table_row(undef,

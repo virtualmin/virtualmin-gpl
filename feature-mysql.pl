@@ -41,14 +41,13 @@ local $tmpl = &get_template($d->{'template'});
 # Create the user
 $d->{'mysql_user'} = &mysql_user($d);
 local $user = $d->{'mysql_user'};
-local @hosts = &get_mysql_hosts($d);
+local @hosts = &get_mysql_hosts($d, 1);
 local $wild = &substitute_domain_template($tmpl->{'mysql_wild'}, $d);
 if (!$d->{'parent'}) {
 	&$first_print($text{'setup_mysqluser'});
 	local $cfunc = sub {
 		local $encpass = &encrypted_mysql_pass($d);
-		local $h;
-		foreach $h (@hosts) {
+		foreach my $h (@hosts) {
 			&mysql::execute_sql_logged($mysql::master_db, "insert into user (host, user, password) values ('$h', '$user', $encpass)");
 			if ($wild && $wild ne $d->{'db'}) {
 				&add_db_table($h, $wild, $user);
@@ -735,18 +734,28 @@ return undef if ($mysql::config{'host'} &&
 return "$mysql::config{'mysql_data'}/$db";
 }
 
-# get_mysql_hosts(&domain)
-# Returns the allowed MySQL hosts for some domain, to be used when creating
+# get_mysql_hosts(&domain, [always-from-template])
+# Returns the allowed MySQL hosts for some domain, to be used when creating.
+# Uses hosts the user has currently by default, or those from the template.
 sub get_mysql_hosts
 {
+local ($d, $always) = @_;
 &require_mysql();
-local $tmpl = &get_template($_[0]->{'template'});
-local @hosts = $tmpl->{'mysql_hosts'} eq "none" ? ( ) :
-    split(/\s+/, &substitute_domain_template($tmpl->{'mysql_hosts'}, $_[0]));
-@hosts = ( 'localhost' ) if (!@hosts);
-if ($mysql::config{'host'} && $mysql::config{'host'} ne 'localhost') {
-	# Add this host too, as we are talking to a remote server
-	push(@hosts, &get_system_hostname());
+local @hosts;
+if (!$always) {
+	@hosts = &get_mysql_allowed_hosts($d);
+	}
+if (!@hosts) {
+	# Fall back to those from template
+	local $tmpl = &get_template($d->{'template'});
+	@hosts = $tmpl->{'mysql_hosts'} eq "none" ? ( ) :
+	    split(/\s+/, &substitute_domain_template(
+				$tmpl->{'mysql_hosts'}, $d));
+	@hosts = ( 'localhost' ) if (!@hosts);
+	if ($mysql::config{'host'} && $mysql::config{'host'} ne 'localhost') {
+		# Add this host too, as we are talking to a remote server
+		push(@hosts, &get_system_hostname());
+		}
 	}
 return &unique(@hosts);
 }
@@ -1059,6 +1068,7 @@ return $opts;
 sub get_mysql_allowed_hosts
 {
 local ($d) = @_;
+&require_mysql();
 local $data = &mysql::execute_sql($mysql::master_db, "select distinct host from user where user = ?", &mysql_user($d));
 return map { $_->[0] } @{$data->{'data'}};
 }
@@ -1066,22 +1076,65 @@ return map { $_->[0] } @{$data->{'data'}};
 # save_mysql_allowed_hosts(&domain, &hosts)
 # Sets the list of hosts from which this domain's MySQL user can connect.
 # Returns undef on success, or an error message on failure.
-# XXX update host, db tables for main user and others for domain
-# 	XXX sub-domains too?
-# XXX apply to new DBs too
 sub save_mysql_allowed_hosts
 {
 local ($d, $hosts) = @_;
+&require_mysql();
+local $user = &mysql_user($d);
+local @dbs = &domain_databases($d, [ 'mysql' ]);
+foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
+	push(@dbs, &domain_databases($sd, [ 'mysql' ]));
+	}
 
-# Update the user table entry for the main user
-# XXX
+local $ufunc = sub {
+	# Update the user table entry for the main user
+	local $encpass = &encrypted_mysql_pass($d);
+	&mysql::execute_sql_logged($mysql::master_db,
+		"delete from user where user = '$user'");
+	&mysql::execute_sql_logged($mysql::master_db,
+		"delete from db where user = '$user'");
+	foreach my $h (@$hosts) {
+		&mysql::execute_sql_logged($mysql::master_db,
+			"insert into user (host, user, password) ".
+			"values ('$h', '$user', $encpass)");
+		foreach my $db (@dbs) {
+			&add_db_table($h, $db->{'name'}, $user);
+			}
+		}
+	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
+	};
+&execute_for_all_mysql_servers($ufunc);
 
 # Add db table entries for all users, and user table entries for mailboxes
-# XXX
-foreach my $db (&domain_databases($d, [ 'mysql' ])) {
-	foreach my $u (&list_mysql_database_users($d, $db->{'name'})) {
+local $ufunc = sub {
+	my %allusers;
+	foreach my $db (@dbs) {
+		foreach my $u (&list_mysql_database_users($d, $db->{'name'})) {
+			# Re-populate db table for this db and user
+			next if ($u->[0] eq $user);
+			&mysql::execute_sql_logged($mysql::master_db,
+				"delete from db where user = '$u->[0]' and db = '$db->{'name'}'");
+			foreach my $h (@$hosts) {
+				&add_db_table($h, $db->{'name'}, $u->[0]);
+				}
+			$allusers{$u->[0]} = $u;
+			}
 		}
-	}
+	# Re-populate user table
+	foreach my $u (values %allusers) {
+		&mysql::execute_sql_logged($mysql::master_db,
+			"delete from user where user = '$u->[0]'");
+		foreach my $h (@$hosts) {
+			&mysql::execute_sql_logged($mysql::master_db,
+				"insert into user (host, user, password) ".
+				"values ('$h', '$u->[0]', '$u->[1]')");
+			}
+		}
+	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
+	};
+&execute_for_all_mysql_servers($ufunc);
+
+return undef;
 }
 
 # has_mysql_quotas()

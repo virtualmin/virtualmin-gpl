@@ -311,6 +311,18 @@ if ($multi) {
 				print "    Backup exclusion: $e\n";
 				}
 			}
+
+		# Show allowed DB hosts
+		if (!$d->{'parent'}) {
+			foreach $f (@database_features) {
+				$gfunc = "get_".$f."_allowed_hosts";
+				if (defined(&$gfunc)) {
+					@hosts = &$gfunc($d);
+					print "    Allowed $f hosts: ",
+					      join(" ", @hosts),"\n";
+					}
+				}
+			}
 		}
 	}
 elsif ($nameonly) {

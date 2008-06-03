@@ -71,6 +71,3 @@
 
  - Convert all tables to new function
 
- - Easier management of allowed remote MySQL hosts
-	- Command line API
-	- list-domains.pl
