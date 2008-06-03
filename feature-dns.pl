@@ -48,9 +48,10 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 		push(@{$dir->{'members'}},
 		     &text_to_named_conf($tmpl->{'namedconf'}));
 		}
+
+	# Also notify slave servers, unless already added
 	local @slaves = &bind8::list_slave_servers();
 	if (@slaves) {
-		# Also notify slave servers, unless already added
 		local ($also) = grep { $_->{'name'} eq 'also-notify' }
 				     @{$dir->{'members'}};
 		if (!$also) {
@@ -67,6 +68,22 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 				  'values' => [ 'yes' ] });
 			}
 		}
+
+	# Allow only localhost and slaves to transfer
+	local @trans = ( { 'name' => '127.0.0.1' },
+			 { 'name' => 'localnets' }, );
+	foreach my $s (@slaves) {
+		push(@trans, { 'name' => &to_ipaddress($s->{'host'}) });
+		}
+	local ($trans) = grep { $_->{'name'} eq 'allow-transfer' }
+			      @{$dir->{'members'}};
+	if (!$trans) {
+		$trans = { 'name' => 'allow-transfer',
+			   'type' => 1,
+			   'members' => \@trans };
+		push(@{$dir->{'members'}}, $trans);
+		}
+
 	local $pconf;
 	local $indent = 0;
 	if ($tmpl->{'dns_view'}) {
