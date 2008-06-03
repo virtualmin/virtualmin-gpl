@@ -12,15 +12,18 @@ if ($in{'src'}) {
 	$src = $in{'src'};
 	}
 else {
-	$src = &parse_backup_destination("src", \%in);
+	$src = &parse_backup_destination("src", \%in, $crmode == 2);
 	}
 ($mode) = &parse_backup_url($src);
 $mode > 0 || -r $src || -d $src || &error($text{'restore_esrc'});
 
 # Parse features
 if ($in{'feature_all'}) {
-	@do_features = ( &get_available_backup_features($crmode == 2),
-			 @backup_plugins );
+	@do_features = &get_available_backup_features($crmode == 2);
+	foreach my $f (@backup_plugins) {
+		push(@do_features, $f)
+			if (&plugin_call($f, "feature_backup_safe"));
+		}
 	}
 else {
 	@do_features = split(/\0/, $in{'feature'});

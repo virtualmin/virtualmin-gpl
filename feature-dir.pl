@@ -321,9 +321,6 @@ return { 'dirnologs' => !$in{'dir_logs'} };
 
 # restore_dir(&domain, file, &options, homeformat?, &oldd, asowner)
 # Extracts the given tar file into server's home directory
-# XXX run tar as domain owner
-# XXX chown mailbox user files too
-#	XXX only for those who are not the domain owner's UID
 sub restore_dir
 {
 &$first_print($text{'restore_dirtar'});
@@ -339,8 +336,16 @@ local $comp = $cf == 1 ? "gunzip -c" :
 	      $cf == 3 ? "bunzip2 -c" : "cat";
 local $q = quotemeta($_[1]);
 local $qh = quotemeta($_[0]->{'home'});
-&execute_command("cd $qh && $comp $q | tar xf -", undef, \$out, \$out);
+local $tarcmd = "tar xf -";
+#if ($_[6]) {
+#	# Run as domain owner - disabled, as this prevents some files from
+#	# being written to by tar
+#	$tarcmd = &command_as_user($_[0]->{'user'}, 0, $tarcmd);
+#	}
+&execute_command("cd $qh && $comp $q | $tarcmd", undef, \$out, \$out);
 if ($?) {
+	# Errors about utime in the tar extract are ignored when running
+	# as the domain owner
 	&$second_print(&text('backup_dirtarfailed', "<pre>$out</pre>"));
 	return 0;
 	}
@@ -357,9 +362,13 @@ else {
 
 	if ($_[0]->{'unix'}) {
 		# Set ownership on extracted home directory, apart from
-		# content of ~/homes
+		# content of ~/homes - unless running as the domain owner,
+		# in which case ~/homes is set too
 		&$first_print($text{'restore_dirchowning'});
 		&set_home_ownership($_[0]);
+		if ($_[6]) {
+			&set_mailbox_homes_ownership($_[0]);
+			}
 		&$second_print($text{'setup_done'});
 		}
 	if (defined(&set_php_wrappers_writable)) {
@@ -379,11 +388,34 @@ else {
 # the homes directory which is used by mail users
 sub set_home_ownership
 {
+local ($d) = @_;
 local $hd = $config{'homes_dir'};
 $hd =~ s/^\.\///;
-local $gid = $_[0]->{'gid'} || $_[0]->{'ugid'};
-&system_logged("find ".quotemeta($_[0]->{'home'})." | grep -v '$_[0]->{'home'}/$hd/' | sed -e 's/^/\"/' | sed -e 's/\$/\"/' | xargs chown $_[0]->{'uid'}:$gid");
-&system_logged("chown $_[0]->{'uid'}:$gid ".quotemeta($_[0]->{'home'})."/".$config{'homes_dir'});
+local $gid = $d->{'gid'} || $d->{'ugid'};
+&system_logged("find ".quotemeta($d->{'home'}).
+	       " | grep -v ".quotemeta("$d->{'home'}/$hd/").
+	       " | sed -e 's/^/\"/' | sed -e 's/\$/\"/' ".
+	       " | xargs chown $d->{'uid'}:$gid");
+&system_logged("chown $d->{'uid'}:$gid ".
+	       quotemeta($d->{'home'})."/".$config{'homes_dir'});
+}
+
+# set_mailbox_homes_ownership(&domain)
+# Set the owners of all directories under ~/homes to their mailbox users
+sub set_mailbox_homes_ownership
+{
+local ($d) = @_;
+local $hd = $config{'homes_dir'};
+$hd =~ s/^\.\///;
+local $homes = "$d->{'home'}/$hd";
+foreach my $user (&list_domain_users($d, 1, 1, 1, 1)) {
+	if (&is_under_directory($homes, $user->{'home'}) &&
+	    !$user->{'webowner'} && $user->{'home'}) {
+		&system_logged("find ".quotemeta($user->{'home'}).
+			       " | sed -e 's/^/\"/' | sed -e 's/\$/\"/' ".
+			       " | xargs chown $user->{'uid'}:$user->{'gid'}");
+		}
+	}
 }
 
 # virtual_server_directories(&dom)

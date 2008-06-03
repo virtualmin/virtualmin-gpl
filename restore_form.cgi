@@ -11,8 +11,15 @@ $crmode || &error($text{'restore_ecannot'});
 if ($in{'sched'}) {
 	($sched) = grep { $_->{'id'} eq $in{'sched'} &&
 			  &can_backup_sched($_) } &list_scheduled_backups();
-	$dest = $sched->{'dest'};
 	}
+else {
+	# Sensible defaults
+	$sched = { 'feature_all' => 1 };
+	if ($crmode == 2) {
+		$sched->{'dest'} = "upload:";
+		}
+	}
+$dest = $sched->{'dest'};
 
 @tds = ( "width=30%" );
 print &ui_form_start("restore.cgi", "post");
@@ -25,7 +32,7 @@ if ($dest eq "download:") {
 	$dest = "/";
 	}
 print &ui_table_row($text{'restore_src'},
-		    &show_backup_destination("src", $dest, 0, undef, 1, 1));
+	&show_backup_destination("src", $dest, $crmode == 2, undef, 1, 0));
 print &ui_hidden_table_end("source");
 
 # Show feature selection boxes
