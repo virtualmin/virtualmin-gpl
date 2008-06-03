@@ -8911,6 +8911,8 @@ if ($name !~ /^[a-z0-9\.\-\_]+$/i) {
 	if (!$@) {
 		$name = join(".",
 			  map { encode_punycode($_) } split(/\./, $name));
+		$name =~ s/^xn---/xn--/g;	# IDNA::Punycode gets this wrong
+		$name =~ s/\.xn---/\.xn--/g;
 		}
 	}
 return $name;
