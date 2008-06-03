@@ -736,7 +736,7 @@ return "$mysql::config{'mysql_data'}/$db";
 }
 
 # get_mysql_hosts(&domain)
-# Returns the allowed MySQL hosts for some domain
+# Returns the allowed MySQL hosts for some domain, to be used when creating
 sub get_mysql_hosts
 {
 &require_mysql();
@@ -1051,6 +1051,37 @@ sub creation_parse_mysql
 local ($d, $in) = @_;
 local $opts = { 'charset' => $in->{'mysql_charset'} };
 return $opts;
+}
+
+# get_mysql_allowed_hosts(&domain)
+# Returns a list of hostnames or IP addresses from which a domain's user is
+# allowed to connect to MySQL.
+sub get_mysql_allowed_hosts
+{
+local ($d) = @_;
+local $data = &mysql::execute_sql($mysql::master_db, "select distinct host from user where user = ?", &mysql_user($d));
+return map { $_->[0] } @{$data->{'data'}};
+}
+
+# save_mysql_allowed_hosts(&domain, &hosts)
+# Sets the list of hosts from which this domain's MySQL user can connect.
+# Returns undef on success, or an error message on failure.
+# XXX update host, db tables for main user and others for domain
+# 	XXX sub-domains too?
+# XXX apply to new DBs too
+sub save_mysql_allowed_hosts
+{
+local ($d, $hosts) = @_;
+
+# Update the user table entry for the main user
+# XXX
+
+# Add db table entries for all users, and user table entries for mailboxes
+# XXX
+foreach my $db (&domain_databases($d, [ 'mysql' ])) {
+	foreach my $u (&list_mysql_database_users($d, $db->{'name'})) {
+		}
+	}
 }
 
 # has_mysql_quotas()

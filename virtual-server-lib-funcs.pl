@@ -7420,6 +7420,12 @@ sub can_chained_cert_path
 return &master_admin();
 }
 
+# Returns 1 if the current user can edit allowed remote DB hosts
+sub can_allowed_db_hosts
+{
+return &master_admin();
+}
+
 # has_proxy_balancer(&domain)
 # Returns 2 if some domain supports proxy balancing to multiple URLs, 1 for
 # proxying to a single URL, 0 if neither.

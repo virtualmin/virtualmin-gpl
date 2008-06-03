@@ -79,7 +79,7 @@ print &ui_table_row(&hlink($text{'limits_forceunder'}, "limits_forceunder"),
 # Mongrel instances
 if ($virtualmin_pro) {
 	print &ui_table_row(&hlink($text{'limits_mongrels'}, "limits_mongrels"),
-		&ui_opt_textbox("mongrels", $d->{'mongrelslimit'}, 5,
+		&ui_opt_textbox("mongrels", $d->{'mongrelslimit'} || "", 5,
 				$text{'form_unlimit'}));
 	}
 

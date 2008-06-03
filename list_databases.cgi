@@ -15,6 +15,15 @@ if (&can_import_servers()) {
 	&resync_all_databases($d, \@all);
 	}
 
+# Work out if allowed hosts can be edited
+$can_allowed_hosts = 0;
+foreach $f (@database_features) {
+	$afunc = "get_".$f."_allowed_hosts";
+	$can_allowed_hosts = 1 if ($d->{$f} && defined(&$afunc));
+	}
+$can_allowed_hosts = $can_allowed_hosts && !$d->{'parent'} &&
+		     &can_allowed_db_hosts();
+
 # Start tabs for various options, if appropriate
 @tabs = ( [ "list", $text{'databases_tablist'} ] );
 if (!$d->{'parent'}) {
@@ -25,6 +34,9 @@ if (!$d->{'parent'}) {
 	}
 if (&can_import_servers()) {
 	push(@tabs, [ "import", $text{'databases_tabimport'} ]);
+	}
+if ($can_allowed_hosts) {
+	push(@tabs, [ "hosts", $text{'databases_tabhosts'} ]);
 	}
 foreach $t (@tabs) {
 	$t->[2] = "list_databases.cgi?dom=$in{'dom'}&databasemode=$t->[0]";
@@ -179,6 +191,27 @@ if (&can_import_servers()) {
 		}
 	else {
 		print "$text{'databases_noimport'}<p>\n";
+		}
+	print &ui_tabs_end_tab() if (@tabs > 1);
+	}
+
+# Show allowed remote hosts list
+if ($can_allowed_hosts) {
+	print &ui_tabs_start_tab("databasemode", "hosts") if (@tabs > 1);
+	print "$text{'databases_desc5'}<p>\n";
+	foreach $f (@database_features) {
+		# One for each DB type (really only MySQL for now)
+		next if (!$d->{$f});
+		$afunc = "get_".$f."_allowed_hosts";
+		@hosts = &$afunc($d);
+		print &ui_form_start("save_dbhosts.cgi", "post");
+		print &ui_hidden("type", $f);
+		print &ui_table_start(
+		  &text('databases_ahosts', $text{'databases_'.$f}), undef, 2);
+		print &ui_table_row(undef,
+			&ui_textarea("hosts", join("\n", @hosts), 5, 40), 2);
+		print &ui_table_end();
+		print &ui_form_end([ [ undef, $text{'save'} ] ]);
 		}
 	print &ui_tabs_end_tab() if (@tabs > 1);
 	}
