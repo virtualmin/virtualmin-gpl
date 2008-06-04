@@ -63,7 +63,6 @@
  - Incremental backups
 	- FS#3909
 	- Purge old backups
-	- Command line UI for scheduled backups
 	- Test backups created by resellers
 		- What if domain owner is backing up to local??
 
