@@ -110,6 +110,17 @@ else {
 	if (defined(@vbs) && &can_backup_virtualmin()) {
 		$sched->{'virtualmin'} = join(" ", @vbs);
 		}
+	if (!$in{'purge_def'}) {
+		# Make sure purging can be used
+		($mode, undef, undef, undef, $path) = &parse_backup_url($dest);
+		$mode == 0 || $mode == 3 || &error($text{'backup_epurgemode'});
+		$in{'strftime'} || &error($text{'backup_epurgetime'});
+		$path =~ /%/ || &error($text{'backup_epurgetime'});
+		($basepath, $pattern) = &extract_purge_path($dest);
+		$basepath || &error($text{'backup_epurgepath'});
+		$in{'purge'} =~ /^\d+$/ || &error($text{'backup_epurge'});
+		}
+	$sched->{'purge'} = $in{'purge_def'} ? undef : $in{'purge'};
 	$sched->{'enabled'} = $in{'enabled'};
 	if ($cbmode != 1 && !$sched->{'owner'}) {
 		# Record the owner of this scheduled backup, which controls

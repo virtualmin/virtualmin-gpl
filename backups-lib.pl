@@ -24,6 +24,7 @@ if ($config{'backup_dest'}) {
 			  'email_err' => $config{'backup_email_err'},
 			  'email_doms' => $config{'backup_email_doms'},
 			  'virtualmin' => $config{'backup_virtualmin'},
+			  'purge' => $config{'backup_purge'},
 			 );
 	local @bf;
 	foreach $f (&get_available_backup_features(), @backup_plugins) {
@@ -63,6 +64,7 @@ foreach my $j (@jobs) {
 		}
 	}
 
+@rv = sort { $a->{'id'} <=> $b->{'id'} } @rv;
 return @rv;
 }
 
@@ -97,6 +99,7 @@ if ($backup->{'id'} == 1) {
 	$config{'backup_email_err'} = $backup->{'email_err'};
 	$config{'backup_email_doms'} = $backup->{'email_doms'};
 	$config{'backup_virtualmin'} = $backup->{'virtualmin'};
+	$config{'backup_purge'} = $backup->{'purge'};
 	local @bf = split(/\s+/, $backup->{'features'});
 	foreach $f (&get_available_backup_features(), @backup_plugins) {
 		$config{'backup_feature_'.$f} = &indexof($f, @bf) >= 0 ? 1 : 0;
@@ -1823,16 +1826,90 @@ sub can_restore_domain
 {
 local ($d) = @_;
 if (&master_admin()) {
+	# Master admin always can
 	return 1;
 	}
 else {
-	# XXX what about resellers?
-	return 0 if (!$access{'edit_restore'});
+	if (&reseller_admin()) {
+		# Resellers cannot restore for now
+		return 0;
+		}
+	else {
+		# Domain owners can only restore if allowed
+		return 0 if (!$access{'edit_restore'});
+		}
 	if ($d) {
 		return &can_edit_domain($d) ? 2 : 0;
 		}
 	return 2;
 	}
+}
+
+# extract_purge_path(dest)
+# Given a backup URL with a path like /backup/%d-%m-%Y, return the base
+# directory (like /backup) and the regexp matching the date-based filename
+# (like .*-.*-.*)
+sub extract_purge_path
+{
+local ($dest) = @_;
+local ($mode, undef, undef, undef, $path) = &parse_backup_url($dest);
+if ($path =~ /^(\S+)\/([^%]*%.*)$/) {
+	local ($base, $date) = ($1, $2);
+	$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
+	return ($base, $date);
+	}
+return ( );
+}
+
+# purge_domain_backups(dest, days, [time-now])
+# Searches a backup destination for backup files or directories older than
+# same number of days, and deletes them. May print stuff using first_print.
+sub purge_domain_backups
+{
+local ($dest, $days, $start) = @_;
+&$first_print(&text('backup_purging', $days));
+local ($mode, $user, $pass, $host, $path, $port) = &parse_backup_url($dest);
+local ($base, $re) = &extract_purge_path($path);
+if (!$base) {
+	&$second_print($text{'backup_purgenobase'});
+	return 0;
+	}
+
+&$indent_print();
+$start ||= time();
+local $cutoff = $start - $days*24*60*60;
+local $pcount = 0;
+if ($mode == 0) {
+	# Just search a local directory for matching files, and remove them
+	opendir(PURGEDIR, $base);
+	foreach my $f (readdir(PURGEDIR)) {
+		local $path = "$base/$f";
+		local @st = stat($path);
+		if ($f ne "." && $f ne ".." && $f =~ /^$re$/ &&
+		    $st[9] < $cutoff) {
+			# Found one to delete
+			local $old = int((time() - $st[9]) / (24*60*60));
+			&$first_print(&text(-d $path ? 'backup_deletingdir'
+					             : 'backup_deletingfile',
+				            "<tt>$path</tt>", $old));
+			local $sz = &nice_size(&disk_usage_kb($path)*1024);
+			&unlink_file($path);
+			&$second_print(&text('backup_deleted', $sz));
+			$pcount++;
+			}
+		}
+	closedir(PURGEDIR);
+	}
+
+elsif ($mode == 3) {
+	# Scan S3 bucket
+	# XXX
+	}
+&$outdent_print();
+
+&$second_print($pcount ? &text('backup_purged', $pcount)
+		       : $text{'backup_purgednone'});
+return 1;
 }
 
 # Returns 1 if the current user can backup to Amazon's S3 service

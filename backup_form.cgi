@@ -203,6 +203,13 @@ if ($in{'sched'} || $in{'new'}) {
 	# Enabled/disabled input
 	print &ui_table_row(&hlink($text{'backup_when'}, "backup_when"),
 		&virtualmin_ui_show_cron_time("enabled", $sched->{'enabled'} ? $sched : undef, $text{'backup_disabled'}));
+
+	# Purge old backups
+	print &ui_table_row(&hlink($text{'backup_purge'}, "backup_purge"),
+		&ui_opt_textbox("purge", $sched->{'purge'}, 5,
+			$text{'backup_purgeno'}, $text{'backup_purgeyes'})." ".
+		$text{'newbw_days'});
+
 	print &ui_hidden_table_end("sched");
 
 	# Save buttons

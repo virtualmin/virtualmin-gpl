@@ -60,11 +60,9 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - Incremental backups
-	- FS#3909
-	- Purge old backups
-
  - Backport spam and virus to GPL
 
  - Convert all tables to new function
 
+ - Scheduled backup option to purge old
+	- Only if in strftime-format directories

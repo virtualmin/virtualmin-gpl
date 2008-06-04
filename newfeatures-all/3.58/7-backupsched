@@ -1,4 +1,4 @@
 desc=Multiple scheduled backups
-html=More than one backup schedule and destination can now be defined, each with its own list of domains and target directory. Each can either be a full or incremental backup, which can speed up the time it takes to take snapshots of large but infrequently changing virtual servers.
+html=More than one backup schedule and destination can now be defined, each with its own list of domains and target directory. Each can either be a full or incremental backup, which can speed up the time it takes to take snapshots of large but infrequently changing virtual servers.<br>Old local file and S3 backups created using date-based filenames can now be automatically deleted if older than a selected number of days, configurable on the Scheduled Backups page.
 master=1
 link=list_sched.cgi

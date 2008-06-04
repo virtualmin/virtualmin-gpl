@@ -1,0 +1,12 @@
+<header>Delete old backups</header>
+
+If you are backing up to a local directory or S3 bucket whose path is based
+on the backup time, this option can be used to delete backups older than some
+number of days. This can be useful to reduce the amount of disk space needed
+to store old data. <p>
+
+However, this is only usable when the backup destination directory is named
+like <tt>/backup/%d-%m-%Y</tt>, or the filename is named like <tt>/backup/virtualmin-%d-%m-%Y.tar.gz</tt>. This is required for Virtualmin to be able to work out which files and directories were created by the backup process. <p>
+
+<footer>
+

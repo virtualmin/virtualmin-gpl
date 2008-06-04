@@ -110,6 +110,14 @@ $current_id = undef;
 			       \&backup_cbfunc,
 			       $sched->{'increment'});
 
+# If purging old backups, do that now
+if ($ok && $sched->{'purge'}) {
+	$current_id = undef;
+	$pok = &purge_domain_backups(
+		$sched->{'dest'}, $sched->{'purge'}, $start_time);
+	$ok = 0 if (!$pok);
+	}
+
 # Send an email to the recipient, if there are any
 if ($sched->{'email'} && $has_mailboxes &&
     (!$ok || !$sched->{'email_err'} || $force_email)) {
@@ -153,22 +161,29 @@ if ($sched->{'email_doms'} && $has_mailboxes &&
 		}
 	}
 
-sub first_save_print {
-$output .= $indent_text.join("", @_)."\n";
-$domain_output{$current_id} .= $indent_text.join("", @_)."\n"
+# Override print functions to capture output
+sub first_save_print
+{
+local @msg = map { &html_tags_to_text(&entities_to_ascii($_)) } @_;
+$output .= $indent_text.join("", @msg)."\n";
+$domain_output{$current_id} .= $indent_text.join("", @msg)."\n"
 	if ($current_id);
-print $indent_text.join("", @_)."\n" if ($backup_debug);
+print $indent_text.join("", @msg)."\n" if ($backup_debug);
 }
-sub second_save_print {
-$output .= $indent_text.join("", @_)."\n\n";
-$domain_output{$current_id} .= $indent_text.join("", @_)."\n\n"
+sub second_save_print
+{
+local @msg = map { &html_tags_to_text(&entities_to_ascii($_)) } @_;
+$output .= $indent_text.join("", @msg)."\n\n";
+$domain_output{$current_id} .= $indent_text.join("", @msg)."\n\n"
 	if ($current_id);
-print $indent_text.join("", @_)."\n" if ($backup_debug);
+print $indent_text.join("", @msg)."\n" if ($backup_debug);
 }
-sub indent_save_print {
+sub indent_save_print
+{
 $indent_text .= "    ";
 }
-sub outdent_save_print {
+sub outdent_save_print
+{
 $indent_text = substr($indent_text, 4);
 }
 
