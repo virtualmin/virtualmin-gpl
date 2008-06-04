@@ -62,6 +62,16 @@ else {
 if ($cbmode == 2) {
 	$d = &get_domain_by_user($base_remote_user);
 	}
+elsif ($cbmode == 3 && $in{'dest_mode'} == 0) {
+	# A reseller running a backup to a local file, created by one of
+	# his domains.
+	$sid = $in{'sched'} || $in{'oneoff'};
+	($sched) = grep { $_->{'id'} eq $sid &&
+			  &can_backup_sched($_) } &list_scheduled_backups();
+	if ($sched && $sched->{'owner'}) {
+		$d = &get_domain($sched->{'owner'});
+		}
+	}
 
 if ($in{'feature_all'}) {
 	@do_features = ( &get_available_backup_features(), @backup_plugins );

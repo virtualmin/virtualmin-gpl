@@ -49,10 +49,22 @@ else {
 		}
 	$nodownload = 0;
 	}
-$sched ||= { 'all' => 1,		# Sensible defaults
+
+if ($cbmode == 3 && ($in{'sched'} || $in{'oneoff'})) {
+	# If this backup is to a domain's directory but the current
+	# user is a reseller, use that domain
+	($mode) = &parse_backup_url($sched->{'dest'});
+	if ($mode == 0) {
+		$d = &get_domain($sched->{'owner'});
+		}
+	}
+
+# Use sensible defaults for new schedules
+$sched ||= { 'all' => 1,
 	     'feature_all' => 1,
 	     'parent' => 1,
-	     'email' => $cbmode == 2 ? $d->{'emailto'} : undef };
+	     'email' => $cbmode == 2 ? $d->{'emailto'} :
+			$cbmode == 3 ? $access{'email'} : undef };
 @tds = ( "width=30% ");
 
 # Fields to select domains

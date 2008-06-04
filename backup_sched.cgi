@@ -17,12 +17,16 @@ if (!$in{'new'}) {
 else {
 	# Create a new empty one
 	$sched = { };
-	$sched->{'owner'} = $base_remote_user if (!&master_admin());
 	}
 
 # Work out the current user's main domain, if needed
 if ($cbmode == 2) {
 	$d = &get_domain_by_user($base_remote_user);
+	}
+elsif ($cbmode == 3 && $in{'dest_mode'} == 0 && !$in{'new'}) {
+	# A reseller saving a backup to a local file, created by one of
+	# his domains.
+	$d = &get_domain($sched->{'owner'});
 	}
 
 if ($in{'delete'}) {
@@ -107,7 +111,7 @@ else {
 		$sched->{'virtualmin'} = join(" ", @vbs);
 		}
 	$sched->{'enabled'} = $in{'enabled'};
-	if ($cbmode != 1) {
+	if ($cbmode != 1 && !$sched->{'owner'}) {
 		# Record the owner of this scheduled backup, which controls
 		# who it runs as
 		$sched->{'owner'} = &reseller_admin() ? $base_remote_user
