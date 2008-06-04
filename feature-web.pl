@@ -2329,6 +2329,10 @@ if ($virt) {
 		if ($d->{'public_html_path'} =~ /^\Q$d->{'home'}\E\/(.*)$/) {
 			$d->{'public_html_dir'} = $1;
 			}
+		elsif ($d->{'public_html_path'} eq $d->{'home'}) {
+			# Same as home directory!
+			$d->{'public_html_dir'} = ".";
+			}
 		else {
 			delete($d->{'public_html_dir'});
 			}

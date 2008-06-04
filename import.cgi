@@ -277,6 +277,7 @@ if ($in{'confirm'}) {
 
 	# Create the domain details
 	&complete_domain(\%dom);
+	&find_html_cgi_dirs(\%dom);
 	print $text{'setup_save'},"<br>\n";
 	&save_domain(\%dom, 1);
 	print $text{'setup_done'},"<p>\n";
