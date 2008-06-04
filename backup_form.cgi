@@ -21,7 +21,7 @@ if ($in{'sched'}) {
 		# Make owner message
 		$od = &get_domain($sched->{'owner'});
 		$omsg = $od ? &text('backup_odom', "<tt>$od->{'user'}</tt>")
-			    : &text('backup_oresel', "<tt>$od</tt>");
+		    : &text('backup_oresel', "<tt>$sched->{'owner'}</tt>");
 		}
 	&ui_print_header($omsg, $text{'backup_title2'}, "");
 	print &ui_form_start("backup_sched.cgi", "post");

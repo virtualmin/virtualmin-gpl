@@ -1,4 +1,4 @@
 desc=Remote database hosts
 html=The remote hosts from which connections to MySQL are allowed can be easily edited on a per-domain basis on the Edit Databases page, in the new <b>Remote hosts</b> tab. These apply to the domain owner and any mailboxes with database access.
 master=1
-link=edit_databases.cgi?dom=${ID}&databasemode=hosts
+link=list_databases.cgi?dom=${ID}&databasemode=hosts
