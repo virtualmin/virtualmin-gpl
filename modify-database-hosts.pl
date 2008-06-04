@@ -52,7 +52,7 @@ if (@sethosts) {
 
 # Get domains to update
 if ($all_doms) {
-	@doms = grep { !$_->{'parent'} && $d->{$type} } &list_domains();
+	@doms = grep { !$_->{'parent'} && $_->{$type} } &list_domains();
 	}
 else {
 	foreach $n (@dnames) {
@@ -65,6 +65,7 @@ else {
 		push(@doms, $d);
 		}
 	}
+@doms || &usage("No domains to set remote $type hosts on specified");
 
 # Do all the domains
 $gfunc = "get_".$type."_allowed_hosts";
