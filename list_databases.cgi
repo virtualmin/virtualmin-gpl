@@ -210,7 +210,8 @@ if ($can_allowed_hosts) {
 		print &ui_table_start(
 		  &text('databases_ahosts', $text{'databases_'.$f}), undef, 2);
 		print &ui_table_row(undef,
-			&ui_textarea("hosts", join("\n", @hosts), 5, 40), 2);
+			&ui_textarea("hosts", join("\n", @hosts), 5, 40).
+			"<br>".$text{'databases_hosts_'.$f}, 2);
 		print &ui_table_end();
 		print &ui_form_end([ [ undef, $text{'save'} ] ]);
 		}
