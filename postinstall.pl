@@ -59,12 +59,12 @@ if ($virtualmin_pro) {
 &setup_licence_cron();
 
 # Fix up Procmail default delivery
-if ($config{'spam'} && $virtualmin_pro) {
+if ($config{'spam'}) {
 	&setup_default_delivery();
 	}
 
 # Enable logging in Procmail, if we are using it
-if ($config{'spam'} && $virtualmin_pro) {
+if ($config{'spam'}) {
 	&enable_procmail_logging();
 
 	# And setup cron job to periodically process mail logs
@@ -88,31 +88,12 @@ if ($config{'spam'} && $virtualmin_pro) {
 
 # Setup Cron job to periodically re-sync links in domains' spamassassin config
 # directories, and to clean up old /tmp/clamav-* files
-if ($config{'spam'} && $virtualmin_pro) {
-	local $job = &find_virtualmin_cron_job($spamconfig_cron_cmd);
-	if (!$job) {
-		# Create, and run for the first time
-		$job = { 'mins' => int(rand()*60),
-			 'hours' => '*',
-			 'days' => '*',
-			 'months' => '*',
-			 'weekdays' => '*',
-			 'user' => 'root',
-			 'active' => 1,
-			 'command' => $spamconfig_cron_cmd };
-		&cron::create_cron_job($job);
-		&cron::create_wrapper($spamconfig_cron_cmd, $module_name,
-				      "spamconfig.pl");
-		}
-
-	# And run now, just in case spamassassin was upgraded recently
-	foreach my $d (grep { $_->{'spam'} } &list_domains()) {
-		&create_spam_config_links($d);
-		}
+if ($config{'spam'}) {
+	&setup_spam_config_job();
 	}
 
 # Fix up old procmail scripts that don't call the clam wrapper
-if ($config{'virus'} && $virtualmin_pro) {
+if ($config{'virus'}) {
 	&fix_clam_wrapper();
 	}
 
@@ -154,22 +135,8 @@ if (&check_pid_file($miniserv{'pidfile'})) {
 	}
 
 # Setup lookup domain daemon
-if ($virtualmin_pro) {
-	&foreign_require("init", "init-lib.pl");
-	&foreign_require("proc", "proc-lib.pl");
-	local $pidfile = "$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid";
-	&init::enable_at_boot(
-	      "lookup-domain",
-	      "Daemon for quickly looking up Virtualmin ".
-	      "servers from procmail",
-	      "$module_root_directory/lookup-domain-daemon.pl",
-	      "kill `cat $pidfile`",
-	      undef);
-	if (&check_pid_file($pidfile)) {
-		&init::stop_action("lookup-domain");
-		sleep(5);	# Let port free up
-		}
-	&init::start_action("lookup-domain");
+if ($config{'spam'}) {
+	&setup_lookup_domain_daemon();
 	}
 
 # Force a restart of Apache, to apply writelogs.pl changes

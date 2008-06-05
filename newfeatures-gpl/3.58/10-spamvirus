@@ -1,0 +1,4 @@
+desc=Per-domain spam and virus filtering
+html=Backported the per-domain spam and virus filtering features from Virtualmin Pro. These allow you to configure the destinations for email processed by SpamAssassin and ClamAV (if installed), setup the automatic deletion of spam, and lets domain owners define their own SpamAssassin rules.
+master=1
+link=edit_newfeatures.cgi

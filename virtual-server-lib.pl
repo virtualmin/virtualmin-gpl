@@ -60,11 +60,11 @@ else {
 	}
 }
 
+# For the GPL version, force some features off and don't try to show
+# missing help pages
 $virtualmin_pro = $module_info{'virtualmin'} eq 'pro' ? 1 : 0;
 if (!$virtualmin_pro) {
 	$config{'status'} = 0;
-	$config{'spam'} = 0;
-	$config{'virus'} = 0;
 	$original_hlink = $main::{'hlink'} ||
 			  $virtual_server::{'hlink'} ||
 			  $gpl_virtual_server::{'hlink'};
@@ -86,8 +86,8 @@ if ($no_virtualmin_plugins) {
 	@confplugins = ( );
 	}
 @opt_features = ( 'unix', 'dir', 'mail', 'dns', 'web', 'webalizer', 'ssl',
-		  'logrotate', 'mysql', 'postgres', 'ftp',
-		  $virtualmin_pro ? ( 'spam', 'virus', 'status' ) : ( ),
+		  'logrotate', 'mysql', 'postgres', 'ftp', 'spam', 'virus',
+		  $virtualmin_pro ? ( 'status' ) : ( ),
 		  'webmin' );
 @vital_features = ( 'dir', 'unix' );
 @features = ( @opt_features );

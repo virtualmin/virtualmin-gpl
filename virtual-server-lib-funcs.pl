@@ -8689,7 +8689,7 @@ foreach my $p (@plugins) {
 		}
 	}
 
-return (\@tlinks, \@ttitles, \@ticons, $virtualmin_pro ? \@tcats : undef);
+return (\@tlinks, \@ttitles, \@ticons, \@tcats);
 }
 
 # get_startstop_links([live])

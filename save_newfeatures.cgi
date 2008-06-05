@@ -66,9 +66,18 @@ $config{'plugins_inactive'} = join(" ", @inactive);
 $cerr = &check_virtual_server_config();
 &error($cerr) if ($cerr);
 
-# Update the procmail setting for default delivery
+# Update the procmail setting for default delivery, turn on logging, and 
+# create cron job to link up files
 if ($config{'spam'}) {
+	&setup_lookup_domain_daemon();
 	&setup_default_delivery();
+	&enable_procmail_logging();
+	&setup_spam_config_job();
+	}
+
+# Fix up old procmail scripts that don't call the clam wrapper
+if ($config{'virus'}) {
+	&fix_clam_wrapper();
 	}
 
 # Save the config

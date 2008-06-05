@@ -268,7 +268,7 @@ if (-r $procmail_log_file) {
 		# For the first run, start at the end of the file
 		$lastpos = $st[7];
 		$lastinode = $st[1];
-		$lasttime = now();
+		$lasttime = time();
 		}
 
 	open(PROCMAILLOG, $procmail_log_file);
@@ -295,9 +295,9 @@ if (-r $procmail_log_file) {
 		}
 	close(PROCMAILLOG);
 	local $mins = ($now - $lasttime) / 60.0;
-	push(@stats, [ "mailcount", $mailcount / $mins ]);
-	push(@stats, [ "spamcount", $spamcount / $mins ]);
-	push(@stats, [ "viruscount", $viruscount / $mins ]);
+	push(@stats, [ "mailcount", $mins ? $mailcount / $mins : 0 ]);
+	push(@stats, [ "spamcount", $mins ? $spamcount / $mins : 0 ]);
+	push(@stats, [ "viruscount", $mins ? $viruscount / $mins : 0 ]);
 
 	# Save last seek
 	&open_tempfile(PROCMAILPOS, ">$historic_info_dir/procmailpos");
