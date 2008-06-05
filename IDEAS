@@ -61,6 +61,11 @@
 	- how can lookup-domain work? Via network?
 
  - Backport spam and virus to GPL
+	- Use of 'spam' in postinstall
+		- Should be off by default in GPL, unless using installer
+	- separate config file
+	- all code that checks for pro before allowing spam features
+	- CHANGELOG
 
  - Convert all tables to new function
 

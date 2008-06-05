@@ -184,8 +184,8 @@ $initial_users_dir = "$module_config_directory/initial";
 	 	'backup', 'sched', 'restore', 'sharedips', 'catchall', 'html',
 		'disable', 'delete');
 if (!$virtualmin_pro) {
-	@edit_limits = grep { $_ ne 'scripts' &&
-			      $_ ne 'spam' && $_ ne 'phpver' } @edit_limits;
+	@edit_limits = grep { $_ ne 'scripts' && $_ ne 'html' &&
+			      $_ ne 'phpver' } @edit_limits;
 	}
 
 @virtualmin_backups = ( 'config', 'templates',

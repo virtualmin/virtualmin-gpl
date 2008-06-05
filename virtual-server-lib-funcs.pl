@@ -2192,7 +2192,6 @@ return $d->{'webmin'} &&
 
 sub can_edit_spam
 {
-return 0 if (!$virtualmin_pro);
 return &master_admin() || &reseller_admin() || $access{'edit_spam'};
 }
 
@@ -8634,7 +8633,7 @@ local @tmpls = ( 'features', 'tmpl', 'user', 'update',
 		       'reseller', 'notify', 'scripts', 'styles' )
 		   : ( 'fields', 'sharedips', 'dynip' ),
    'shells',
-   $virtualmin_pro && ($config{'spam'} || $config{'virus'}) ? ( 'sv' ) : ( ),
+   $config{'spam'} || $config{'virus'} ? ( 'sv' ) : ( ),
    &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
    &has_home_quotas() && !&has_quota_commands() ? ( 'quotacheck' ) : ( ),
 #   &can_show_history() ? ( 'history' ) : ( ),
