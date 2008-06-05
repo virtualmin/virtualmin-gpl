@@ -3,8 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
-
-$d=&get_domain($in{'dom'});
+$d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'newbw_ecannot'});
 
 $subh = &domain_in($d);
@@ -97,7 +96,8 @@ foreach $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 				}
 			}
 		push(@userusage,
-		     [ &remove_userdom($u->{'user'}, $sd), $sd->{'dom'},
+		     [ &remove_userdom($u->{'user'}, $sd),
+		       &show_domain_name($sd),
 		       $uusage ]);
 		}
 	}
@@ -111,7 +111,7 @@ print &ui_tabs_end_tab();
 foreach $sd (@subs) {
 	next if (!$sd->{'dir'});
 	($susage) = &recursive_disk_usage_mtime($sd->{'home'});
-	push(@subusage, [ $sd->{'dom'}, $susage ]);
+	push(@subusage, [ &show_domain_name($sd), $susage ]);
 	}
 print &ui_tabs_start_tab("mode", "subs");
 &usage_table(\@subusage, $text{'usage_sub'}, 10, $text{'usage_subheader'});
@@ -122,7 +122,7 @@ $dbtotal = 0;
 foreach $sd ($d, @subs) {
 	foreach $db (&domain_databases($sd)) {
 		($dbu, $dbq) = &get_one_database_usage($sd, $db);
-		push(@dbusage, [ $db->{'name'}, $sd->{'dom'}, $dbu ]);
+		push(@dbusage, [ $db->{'name'}, &show_domain_name($sd), $dbu ]);
 		$dbtotal += $dbu;
 		}
 	}
@@ -138,33 +138,38 @@ print &ui_tabs_end(1);
 sub usage_table
 {
 local ($list, $type, $max, $title, $type2) = @_;
-print "$title<p>\n";
-if (@$list) {
-	print &ui_columns_start([ $type,
-				  $type2 ? ( $type2 ) : ( ),
-				  $text{'usage_size'} ]);
-	my $i = 0;
-	my $total = 0;
-	foreach my $l (sort { $b->[@$b-1] <=> $a->[@$a-1] } @$list) {
-		local @rest = @$l;
-		local $sz = pop(@rest);
-		print &ui_columns_row([ @rest, &nice_size($sz) ]);
-		$i++;
-		last if ($max && $i > $max);
-		}
-	foreach my $l (@$list) {
-		$total += $l->[@$l-1];
-		}
-	print &ui_columns_row([ "<b>$text{'usage_total'}</b>",
-				$type2 ? ( "" ) : ( ),
-				"<b>".&nice_size($total)."</b>" ]);
-	print &ui_columns_end();
-	if ($max && @$list > $max) {
-		print "<i>",&text('usage_max', $max),"</i><br>\n";
-		}
+local @table;
+
+# Make the data
+my $i = 0;
+my $total = 0;
+foreach my $l (sort { $b->[@$b-1] <=> $a->[@$a-1] } @$list) {
+	local @rest = @$l;
+	local $sz = pop(@rest);
+	push(@table, [ @rest, &nice_size($sz) ]);
+	$i++;
+	last if ($max && $i > $max);
 	}
-else {
-	print "<i>$text{'usage_none'}</i><br>\n";
+foreach my $l (@$list) {
+	$total += $l->[@$l-1];
+	}
+push(@table, [ "<b>$text{'usage_total'}</b>",
+		$type2 ? ( "" ) : ( ),
+		"<b>".&nice_size($total)."</b>" ]);
+
+# Show the table
+print $title,"<p>\n";
+print &ui_columns_table(
+	[ $type, $type2 ? ( $type2 ) : ( ), $text{'usage_size'} ],
+	undef,
+	\@table,
+	undef,
+	0,
+	undef,
+	$text{'usage_none'},
+	);
+if ($max && @$list > $max) {
+	print "<i>",&text('usage_max', $max),"</i><br>\n";
 	}
 }
 
