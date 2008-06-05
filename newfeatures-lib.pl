@@ -207,7 +207,6 @@ local $modvers = @modvers <= 1 ? join(", ", @modvers) :
 		 	&text('nf_and', join(", ", @modvers[0..$#modvers-1]),
 					$modvers[$#modvers]);
 $rv .= &text('nf_header', $modvers)."<br>\n";
-#$rv .= &ui_columns_start([ $text{'nf_desc'}, $text{'nf_html'} ]);
 $rv .= "<dl>\n";
 foreach my $nf (@rv) {
 	local $link;
@@ -231,8 +230,6 @@ foreach my $nf (@rv) {
 				}
 			}
 		}
-	#$rv .= &ui_columns_row([ $link ? "<a href='$link'>$nf->{'desc'}</a>"
-	#			       : $nf->{'desc'}, $nf->{'html'} ]);
 	$rv .= "<dt><b>$nf->{'desc'}</b>\n";
 	if ($link) {
 		$rv .= " | <a href='$link'>$text{'nf_try'}</a>\n";
@@ -240,7 +237,6 @@ foreach my $nf (@rv) {
 	$rv .= "<dd>$nf->{'html'}<p>\n";
 	}
 $rv .= "</dl>\n";
-#$rv .= &ui_table_end();
 $rv .= &ui_form_start("$gconfig{'webprefix'}/$module_name/seen_newfeatures.cgi");
 $rv .= &ui_form_end([ [ undef, $text{'nf_seen'} ] ]);
 

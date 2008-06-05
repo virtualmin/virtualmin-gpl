@@ -118,31 +118,43 @@ if ($in{'confirm'}) {
 	}
 else {
 	# Tell the user which domains will be done, and let him select
-	print &ui_form_start("mass_scripts.cgi");
-	print &ui_hidden("script", $sname." ".$ver);
-	print &text('massscript_rusure', $script->{'desc'}, $ver),"<p>\n";
 
-	@tds = ( "width=5" );
-	print &ui_columns_start([ "", $text{'massscript_dom'},
-				  $text{'massscript_ver'},
-				  $text{'massscript_path'},
-				  $text{'massscript_utype'} ], 100, 0, \@tds);
+	# Build table data
+	@table = ( );
 	foreach my $sinfo (@sinfos) {
 		$path = $sinfo->{'opts'}->{'path'};
 		$utype = &indexof($sinfo->{'version'},
 				  @{$script->{'versions'}}) > 0 ?
 		    $text{'massscript_upgrade'} : $text{'massscript_update'}; 
-		print &ui_checked_columns_row([
+		push(@table, [
+			{ 'type' => 'checkbox',
+			  'name' => 'servers',
+			  'value' => $sinfo->{'dom'}->{'id'},
+			  'checked' => 1 },
 			&show_domain_name($sinfo->{'dom'}),
 			$sinfo->{'version'},
 			$sinfo->{'url'} ?
 			    "<a href='$sinfo->{'url'}' target=_new>$path</a>" :
 			    $path,
-			$utype ], \@tds, "servers", $sinfo->{'dom'}->{'id'}, 1);
+			$utype,
+			]);
 		}
-	print &ui_columns_end();
 
-	print &ui_form_end([ [ "confirm", $text{'massscript_ok'} ] ]);
+	# Output the table of scripts
+	print &text('massscript_rusure', $script->{'desc'}, $ver),"<p>\n";
+	print &ui_form_columns_table(
+		"mass_scripts.cgi",
+		[ [ "confirm", $text{'massscript_ok'} ] ],
+		0,
+		undef,
+		[ [ "script", $sname." ".$ver ] ],
+		[ "", $text{'massscript_dom'},
+		  $text{'massscript_ver'},
+		  $text{'massscript_path'},
+		  $text{'massscript_utype'} ],
+		100,
+		\@table,
+		);
 	}
 
 &ui_print_footer("", $text{'index_return'});
