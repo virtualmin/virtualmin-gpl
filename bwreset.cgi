@@ -3,7 +3,6 @@
 # selected features
 
 require './virtual-server-lib.pl';
-use Time::Local;
 &ReadParse();
 &error_setup($text{'bwreset_err'});
 &can_edit_templates() || &error($text{'newbw_ecannot'});

@@ -64,5 +64,3 @@
 
  - Convert all tables to new function
 
- - Scheduled backup option to purge old
-	- Only if in strftime-format directories

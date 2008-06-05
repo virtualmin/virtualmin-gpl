@@ -52,7 +52,7 @@ foreach $s (@scheds) {
 		}
 	push(@row, $s->{'enabled'} ?
 		&text('sched_yes', &cron::when_text($s)) :
-		$text{'no'});
+		"<font color=#ff0000>$text{'no'}</font>");
 	# Incremental level
 	if ($hasinc) {
 		push(@row, $s->{'increment'} ? $text{'sched_inc'}

@@ -1686,8 +1686,8 @@ elsif ($mode == 3 && &can_use_s3()) {
 	$in{$name.'_akey'} =~ /^\S+$/i || &error($text{'backup_eakey'});
 	$in{$name.'_skey'} =~ /^\S+$/i || &error($text{'backup_eskey'});
 	$in{$name."_s3file_def"} ||
-		$in{$name."_s3file"} =~ /^[a-z0-9\-\_\.]+$/i ||
-		&error($text{'backup_euser'});
+		$in{$name."_s3file"} =~ /^[a-z0-9\-\_\.\%]+$/i ||
+		&error($text{'backup_esfile'});
 	return "s3://".$in{$name.'_akey'}.":".$in{$name.'_skey'}."\@".
 	       $in{$name.'_bucket'}.
 	       ($in{$name."_s3file_def"} ? "" : "/".$in{$name."_s3file"});
@@ -1852,11 +1852,17 @@ else {
 sub extract_purge_path
 {
 local ($dest) = @_;
-local ($mode, undef, undef, undef, $path) = &parse_backup_url($dest);
-if ($path =~ /^(\S+)\/([^%]*%.*)$/) {
+local ($mode, undef, undef, $host, $path) = &parse_backup_url($dest);
+if ($mode == 0 && $path =~ /^(\S+)\/([^%]*%.*)$/) {
+	# Local file like /backup/%d-%m-%Y
 	local ($base, $date) = ($1, $2);
 	$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($base, $date);
+	}
+elsif ($mode == 3 && $host =~ /%/) {
+	# S3 bucket which is date-based
+	$host =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
+	return (undef, $host);
 	}
 return ( );
 }
@@ -1869,8 +1875,8 @@ sub purge_domain_backups
 local ($dest, $days, $start) = @_;
 &$first_print(&text('backup_purging', $days));
 local ($mode, $user, $pass, $host, $path, $port) = &parse_backup_url($dest);
-local ($base, $re) = &extract_purge_path($path);
-if (!$base) {
+local ($base, $re) = &extract_purge_path($dest);
+if (!$base && !$re) {
 	&$second_print($text{'backup_purgenobase'});
 	return 0;
 	}
@@ -1879,6 +1885,8 @@ if (!$base) {
 $start ||= time();
 local $cutoff = $start - $days*24*60*60;
 local $pcount = 0;
+local $ok = 1;
+
 if ($mode == 0) {
 	# Just search a local directory for matching files, and remove them
 	opendir(PURGEDIR, $base);
@@ -1902,14 +1910,47 @@ if ($mode == 0) {
 	}
 
 elsif ($mode == 3) {
-	# Scan S3 bucket
-	# XXX
+	# Search S3 for S3 buckets matching the regexp
+	local $buckets = &s3_list_buckets($user, $pass);
+	if (!ref($buckets)) {
+		&$second_print(&text('backup_purgeebuckets', $buckets));
+		return 0;
+		}
+	foreach my $b (@$buckets) {
+		local $ctime = &s3_parse_date($b->{'CreationDate'});
+		if ($b->{'Name'} =~ /^$re$/ && $ctime && $ctime < $cutoff) {
+			# Found one to delete
+			local $old = int((time() - $ctime) / (24*60*60));
+			&$first_print(&text('backup_deletingbucket',
+					    "<tt>$b->{'Name'}</tt>", $old));
+			# Sum up size of files
+			local $files = &s3_list_files($user, $pass,
+						      $b->{'Name'});
+			local $sz = 0;
+			if (ref($files)) {
+				foreach my $f (@$files) {
+					$sz += $f->{'Size'};
+					}
+				}
+			local $err = &s3_delete_bucket($user, $pass,
+						       $b->{'Name'});
+			if ($err) {
+				&$second_print(&text('backup_edelbucket',$err));
+				$ok = 0;
+				}
+			else {
+				&$second_print(&text('backup_deleted',
+						     &nice_size($sz)));
+				$pcount++;
+				}
+			}
+		}
 	}
 &$outdent_print();
 
 &$second_print($pcount ? &text('backup_purged', $pcount)
 		       : $text{'backup_purgednone'});
-return 1;
+return $ok;
 }
 
 # Returns 1 if the current user can backup to Amazon's S3 service

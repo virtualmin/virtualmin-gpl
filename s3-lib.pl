@@ -38,7 +38,7 @@ local $response = $conn->list_all_my_buckets();
 if ($response->http_response->code != 200) {
 	return &text('s3_elist', &extract_s3_message($response));
 	}
-local ($got) = grep { $_->{'name'} eq $bucket } @{$response->entries};
+local ($got) = grep { $_->{'Name'} eq $bucket } @{$response->entries};
 if (!$got) {
 	# Create the bucket
 	$response = $conn->create_bucket($bucket);
@@ -147,6 +147,92 @@ foreach my $f (@{$response->entries}) {
 		}
 	}
 return $rv;
+}
+
+# s3_list_buckets(access-key, secret-key)
+# Returns an array ref of all buckets under some account, or an error message.
+# Each is a hash ref with keys 'Name' and 'CreationDate'
+sub s3_list_buckets
+{
+&require_s3();
+local ($akey, $skey, $bucket) = @_;
+local $conn = S3::AWSAuthConnection->new($akey, $skey);
+return $text{'s3_econn'} if (!$conn);
+local $response = $conn->list_all_my_buckets();
+if ($response->http_response->code != 200) {
+	return &text('s3_elist', &extract_s3_message($response));
+	}
+return $response->entries;
+}
+
+# s3_list_files(access-key, secret-key, bucket)
+# Returns a list of all files in an S3 bucket as an array ref, or an error
+# message string. Each is a hash ref with keys like 'Key', 'Size', 'Owner'
+# and 'LastModified'
+sub s3_list_files
+{
+local ($akey, $skey, $bucket) = @_;
+&require_s3();
+local $conn = S3::AWSAuthConnection->new($akey, $skey);
+return $text{'s3_econn'} if (!$conn);
+local $response = $conn->list_bucket($bucket);
+if ($response->http_response->code != 200) {
+	return &text('s3_elistfiles', &extract_s3_message($response));
+	}
+return $response->entries;
+}
+
+# s3_delete_file(access-key, secret-key, bucket, file)
+# Delete one file from an S3 bucket
+sub s3_delete_file
+{
+local ($akey, $skey, $bucket, $file) = @_;
+&require_s3();
+local $conn = S3::AWSAuthConnection->new($akey, $skey);
+return $text{'s3_econn'} if (!$conn);
+local $response = $conn->delete($bucket, $file);
+if ($response->http_response->code < 200 ||
+    $response->http_response->code >= 300) {
+        return &text('s3_edeletefile', &extract_s3_message($response));
+        }
+return undef;
+}
+
+# s3_parse_date(string)
+# Converts an S3 date string like 2007-09-30T05:58:39.000Z into a Unix time
+sub s3_parse_date
+{
+local ($str) = @_;
+if ($str =~ /^(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)/) {
+	local $rv = eval { timelocal($6, $5, $4, $3, $2-1, $1-1900); };
+	return $@ ? undef : $rv;
+	}
+return undef;
+}
+
+# s3_delete_bucket(access-key, secret-key, bucket)
+# Deletes an S3 bucket and all contents
+sub s3_delete_bucket
+{
+local ($akey, $skey, $bucket) = @_;
+&require_s3();
+local $conn = S3::AWSAuthConnection->new($akey, $skey);
+return $text{'s3_econn'} if (!$conn);
+
+# Get and delete files first
+local $files = &s3_list_files($akey, $skey, $bucket);
+return $files if (!ref($files));
+foreach my $f (@$files) {
+	local $err = &s3_delete_file($akey, $skey, $bucket, $f->{'Key'});
+	return $err if ($err);
+	}
+
+local $response = $conn->delete_bucket($bucket);
+if ($response->http_response->code < 200 ||
+    $response->http_response->code >= 300) {
+        return &text('s3_edelete', &extract_s3_message($response));
+        }
+return undef;
 }
 
 # s3_download(access-key, secret-key, bucket, file, destfile)

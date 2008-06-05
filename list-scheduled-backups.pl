@@ -86,6 +86,10 @@ if ($multi) {
 			$s->{'email_err'} ? "Only on failure" : "Always","\n";
 		print "    Notify domain owners: ",
 			$s->{'email_doms'} ? "Yes" : "No","\n";
+		if ($s->{'purge'}) {
+			print "    Delete old backups after: ",
+			      "$s->{'purge'} days\n";
+			}
 		}
 	}
 else {
