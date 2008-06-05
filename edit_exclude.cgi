@@ -17,7 +17,8 @@ print &ui_table_start($text{'exclude_header'}, undef, 2, [ "width=30%" ]);
 
 @exclude = &get_backup_excludes($d);
 print &ui_table_row($text{'exclude_dirs'},
-		    &ui_textarea("dirs", join("\n", @exclude)."\n", 5, 50));
+		    &ui_textarea("dirs", join("\n", @exclude)."\n", 5, 50).
+		    " ".&file_chooser_button("dirs", 1, undef, $d->{'home'},1));
 
 print &ui_table_end();
 print &ui_form_end([ [ "save", $text{'save'} ] ]);

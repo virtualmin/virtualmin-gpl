@@ -10,6 +10,7 @@ $d = &get_domain($in{'dom'});
 
 # Validate and save inputs
 @exclude = grep { /\S/ } split(/\r?\n/, $in{'dirs'});
+@exclude = map { s/^\///; $_ } @exclude;	# Strip leading /s
 foreach $e (@exclude) {
 	$e !~ /^\// || &error(&text('exclude_eabs', $e));
 	$e !~ /\.\./ || &error(&text('exclude_edot', $e));

@@ -60,8 +60,6 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - Backport spam and virus to GPL
-	- CHANGELOG
-
  - Convert all tables to new function
 
+ - Document IP allocation
