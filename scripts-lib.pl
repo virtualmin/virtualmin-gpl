@@ -1252,15 +1252,12 @@ push(@dbopts, [ "mysql", $text{'databases_mysql'} ]) if ($config{'mysql'});
 push(@dbopts, [ "postgres", $text{'databases_postgres'} ]) if ($config{'postgres'});
 
 # Show table of scripts
-$stable .= &ui_columns_start([ $text{'tscripts_name'},
-			  $text{'tscripts_path'},
-			  $text{'tscripts_db'},
-			  $text{'tscripts_dbtype'} ]);
 local $i = 0;
+local @table;
 foreach $script (@list) {
 	$db_def = $script->{'db'} eq '${DB}' ? 1 :
                         $script->{'db'} ? 2 : 0;
-	$stable .= &ui_columns_row([
+	push(@table, [
 		&ui_select("name_$i", $script->{'name'},
 		  [ [ undef, "&nbsp;" ], @opts ]),
 		&ui_textbox("path_$i", $script->{'path'}, 25),
@@ -1272,11 +1269,19 @@ foreach $script (@list) {
 			       &ui_textbox("db_$i",
 				$db_def == 1 ? "" : $script->{'db'}, 10) ] ]),
 		&ui_select("dbtype_$i", $script->{'dbtype'}, \@dbopts),
-		], [ "valign=top", "valign=top", "nowrap", "valign=top" ]);
-		    
+		]);
 	$i++;
 	}
-$stable .= &ui_columns_end();
+$stable .= &ui_columns_table(
+	[ $text{'tscripts_name'}, $text{'tscripts_path'},
+	  $text{'tscripts_db'}, $text{'tscripts_dbtype'} ],
+	undef,
+	\@table,
+	undef,
+	0,
+	undef,
+	undef,
+	);
 
 print &ui_table_row(undef, $stable, 2);
 }
