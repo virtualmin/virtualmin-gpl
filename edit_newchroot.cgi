@@ -14,12 +14,8 @@ require './virtual-server-lib.pl';
 print $text{'newchroot_desc'},"<p>\n";
 
 @chroots = &list_ftp_chroots();
-print &ui_form_start("save_newchroot.cgi", "post");
-@tds = ( "width=10 valign=top", "valign=top", "valign=top" );
-print &ui_columns_start([ $text{'chroot_active'},
-			  $text{'chroot_who'},
-			  $text{'chroot_dir'} ], 100, 0, \@tds);
 $i = 0;
+@table = ( );
 foreach $chroot (@chroots, { 'dir' => '~' }) {
 	$d = $chroot->{'group'} && !$chroot->{'neg'} ?
 		&get_domain_by("group", $chroot->{'group'}, "parent", "") :
@@ -27,7 +23,10 @@ foreach $chroot (@chroots, { 'dir' => '~' }) {
 	$mode = $chroot->{'dir'} eq '/' ? 2 :
 		$chroot->{'dir'} eq '~' ? 1 :
 		$d && $chroot->{'dir'} eq $d->{'home'} ? 3 : 0;
-	print &ui_checked_columns_row([
+	push(@table, [
+		{ 'type' => 'checkbox', 'name' => "enabled_$i",
+		  'value' => 1,
+		  'checked' => &indexof($chroot, @chroots) >= 0 },
 		&ui_radio("all_$i", $chroot->{'group'} ? 0 : 1,
 		  [ [ 1, $text{'chroot_all'}."<br>" ],
 		    [ 0, &text('chroot_gsel',
@@ -42,11 +41,23 @@ foreach $chroot (@chroots, { 'dir' => '~' }) {
 			    [ 0, &text('chroot_path',
 				   &ui_textbox("dir_$i",
 					$mode ? "" : $chroot->{'dir'}, 40)) ] ]),
-		], \@tds, "enabled_$i", 1, &indexof($chroot, @chroots) >= 0);
+		]);
 		
 	$i++;
 	}
-print &ui_columns_end();
-print &ui_form_end([ [ undef, $text{'save'} ] ]);
+
+# Output the table
+print &ui_form_columns_table(
+	"save_newchroot.cgi",
+	[ [ undef, $text{'save'} ] ],
+	0,
+	undef,
+	undef,
+	[ $text{'chroot_active'}, $text{'chroot_who'}, $text{'chroot_dir'} ],
+	100,
+	\@table,
+	undef,
+	1,
+	);
 
 &ui_print_footer("", $text{'index_return'});
