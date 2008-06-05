@@ -82,34 +82,36 @@ if ($in{'search'}) {
 	if (@logs) {
 		print "<b>",&text('maillog_results', scalar(@logs)),
 		      "</b><br>\n";
-		print &ui_columns_start([
-			$text{'maillog_date'},
-			$text{'maillog_time'},
-			$text{'maillog_from'},
-			$text{'maillog_to'},
-			$text{'maillog_user'},
-			$text{'maillog_action'},
+		}
+	@table = ( );
+	foreach $l (@logs) {
+		@tm = localtime($l->{'time'});
+		$dest = &maillog_destination($l);
+		$link = "view_maillog.cgi?cid=$l->{'cid'}";
+		push(@table, [
+			"<a href='$link'>".
+				strftime("%Y-%m-%d", @tm)."</a>",
+			"<a href='$link'>".
+				strftime("%H:%M:%S", @tm)."</a>",
+			$l->{'from'},
+			$l->{'to'},
+			$l->{'user'},
+			$dest
 			]);
-		foreach $l (@logs) {
-			@tm = localtime($l->{'time'});
-			$dest = &maillog_destination($l);
-			$link = "view_maillog.cgi?cid=$l->{'cid'}";
-			print &ui_columns_row([
-				"<a href='$link'>".
-					strftime("%Y-%m-%d", @tm)."</a>",
-				"<a href='$link'>".
-					strftime("%H:%M:%S", @tm)."</a>",
-				$l->{'from'},
-				$l->{'to'},
-				$l->{'user'},
-				$dest
-				]);
-			}
-		print &ui_columns_end();
 		}
-	else {
-		print "<b>$text{'maillog_none'}</b><p>\n";
-		}
+
+	# Print the table
+	print &ui_columns_table(
+		[ $text{'maillog_date'}, $text{'maillog_time'},
+		  $text{'maillog_from'}, $text{'maillog_to'},
+		  $text{'maillog_user'}, $text{'maillog_action'}, ],
+		100,
+		\@table,
+		undef,
+		0,
+		undef,
+		$text{'maillog_none'},
+		);
 	}
 
 &ui_print_footer($d ? ( &domain_footer_link($d) ) : ( ),

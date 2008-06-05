@@ -13,31 +13,33 @@ $d = &get_domain($in{'dom'});
 	   &select_invert_link("d"),
 	   "<a href='edit_admin.cgi?dom=$in{'dom'}&new=1'>$text{'admins_add'}</a>" );
 
+# Make table data
 @admins = &list_extra_admins($d);
-if (@admins) {
-	print &ui_form_start("delete_admins.cgi", "post");
-	print &ui_hidden("dom", $in{'dom'}),"\n";
-	print &ui_links_row(\@links);
-	@tds = ( "width=5" );
-	print &ui_columns_start([
-		"", $text{'admins_name'},
-		$text{'admins_desc'}
-		], \@tds);
-	foreach $a (sort { $a->{'name'} cmp $b->{'name'} } @admins) {
-		print &ui_checked_columns_row([
-			"<a href='edit_admin.cgi?dom=$in{'dom'}&name=".
-			&urlize($a->{'name'})."'>".$a->{'name'}."</a>",
-			$a->{'desc'}
-			], \@tds, "d", $a->{'name'});
-		}
-	print &ui_columns_end();
-	print &ui_links_row(\@links);
-	print &ui_form_end([ [ "delete", $text{'admins_delete'} ] ]);
+foreach $a (sort { $a->{'name'} cmp $b->{'name'} } @admins) {
+	push(@table, [
+		{ 'type' => 'checkbox', 'name' => 'd',
+		  'value' => $a->{'name'} },
+		"<a href='edit_admin.cgi?dom=$in{'dom'}&name=".
+		&urlize($a->{'name'})."'>".$a->{'name'}."</a>",
+		$a->{'desc'}
+		]);
 	}
-else {
-	print "<b>$text{'admins_none'}</b><p>\n";
-	print &ui_links_row([ $links[2] ]);
-	}
+
+# Render the table
+print &ui_form_columns_table(
+	"delete_admins.cgi",
+	[ [ "delete", $text{'admins_delete'} ] ],
+	1,
+	[ [ "edit_admin.cgi?dom=$in{'dom'}&new=1", $text{'admins_add'} ] ],
+	[ [ "dom", $in{'dom'} ] ],
+	[ "", $text{'admins_name'}, $text{'admins_desc'} ],
+	100,
+	\@table,
+	undef,
+	0,
+	undef,
+	$text{'admins_none'},
+	);
 
 &ui_print_footer(&domain_footer_link($d),
 		 "", $text{'index_return'});
