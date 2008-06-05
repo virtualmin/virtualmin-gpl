@@ -8,17 +8,6 @@ require './virtual-server-lib.pl';
 print &ui_form_start("save_newfeatures.cgi", "post");
 print "$text{'features_desc'}<p>\n";
 
-# Start the table
-@tds = ( "width=5 align=center", "width=65%", "width=10%", undef, "width=5%",
-	 "width=10% nowrap" );
-print &ui_columns_start([ "",
-			  $text{'features_name'},
-			  $text{'features_type'},
-			  $text{'newplugin_version'},
-			  $text{'newplugin_def'},
-			  $text{'newplugin_acts'} ], 100, 0, \@tds);
-$tds[4] .= " align=center";
-
 # Add rows for core features
 foreach $f (@features) {
 	local @acts;
@@ -29,28 +18,32 @@ foreach $f (@features) {
 	if ($vital) {
 		# Some features are *never* disabled, but may be not checked
 		# by default
-		print &ui_columns_row([
+		push(@table, [
 			"<img src=images/tick.gif>",
 			$text{'feature_'.$f},
 			$text{'features_feature'},
 			$module_info{'version'},
-			&ui_checkbox("factive", $f, "", $config{$f} == 3),
+			{ 'type' => 'checkbox', 'name' => 'factive',
+			  'value' => $f, 'checked' => $config{$f} == 3 },
 			&ui_links_row(\@acts)
-			], \@tds);
+			]);
 		}
 	else {
 		# Other features can be disabled
-		print &ui_checked_columns_row([
+		push(@table, [
+			{ 'type' => 'checkbox', 'name' => 'fmods',
+			  'value' => $f, 'checked' => $config{$f} != 0 },
 			$text{'feature_'.$f},
 			$text{'features_feature'},
 			$module_info{'version'},
-			&ui_checkbox("factive", $f, "", $config{$f} != 2),
+			{ 'type' => 'checkbox', 'name' => 'factive',
+			  'value' => $f, 'checked' => $config{$f} != 2 },
 			&ui_links_row(\@acts)
-			], \@tds, "fmods", $f, $config{$f} != 0);
+			]);
 		}
 	}
 
-# Show rows for all plugins
+# Add rows for all plugins
 %plugins = map { $_, 1 } @plugins;
 %inactive = map { $_, 1 } split(/\s+/, $config{'plugins_inactive'});
 foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
@@ -70,20 +63,35 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 			print &ui_columns_row([ "<hr>" ],
 					      [ "colspan=".(scalar(@tds)+1) ]);
 			}
-		print &ui_checked_columns_row([
+		push(@table, [
+			{ 'type' => 'checkbox', 'name' => 'mods',
+			  'value' => $m->{'dir'},
+			  'checked' => $plugins{$m->{'dir'}} },
 			&plugin_call($m->{'dir'}, "feature_name"),
 			$text{'features_plugin'},
 			$m->{'version'},
-			&ui_checkbox("active", $m->{'dir'}, "",
-				     !$inactive{$m->{'dir'}}),
+			{ 'type' => 'checkbox', 'name' => 'active',
+			  'value' => $m->{'dir'},
+			  'checked' => !$inactive{$m->{'dir'}} },
 			&ui_links_row(\@acts)
-			], \@tds, "mods", $m->{'dir'}, $plugins{$m->{'dir'}}
-			);
-		print &ui_hidden("allplugins", $m->{'dir'});
+			]);
+		push(@hiddens, [ "allplugins", $m->{'dir'} ]);
 		}
 	}
-print &ui_columns_end();
-print &ui_links_row(\@links);
-print &ui_form_end([ [ "save", $text{'save'} ] ]);
+
+# Actually generate the table
+print &ui_form_columns_table(
+	"save_newfeatures.cgi",
+	[ [ "save", $text{'save'} ] ],
+	0,
+	undef,
+	\@hiddens,
+	[ "", $text{'features_name'}, $text{'features_type'},
+	      $text{'newplugin_version'}, $text{'newplugin_def'},
+	      $text{'newplugin_acts'} ],
+	100,
+	\@table,
+	undef,
+	1);
 
 &ui_print_footer("", $text{'index_return'});
