@@ -18,6 +18,12 @@ if (&foreign_check("proc")) {
 	if (defined(&proc::get_memory_info)) {
 		local @m = &proc::get_memory_info();
 		$info->{'mem'} = \@m;
+		if ($m[0] > 128*1024*1024 && $gconfig{'os_type'} eq 'freebsd') {
+			# Some Webmin versions overstated memory by a factor
+			# of 1k on FreeBSD - fix it
+			$m[0] /= 1024;
+			$m[1] /= 1024;
+			}
 		}
 	if (&foreign_check("mount")) {
 		&require_useradmin();
