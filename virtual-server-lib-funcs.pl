@@ -8892,6 +8892,8 @@ if ($name =~ s/^(\s+)//) {
 	}
 if ($name =~ /^xn--/ || $name =~ /\.xn--/) {
 	# Convert xn-- parts to unicode
+	push(@INC, $module_root_directory)
+		if (&indexof($module_root_directory, @INC) < 0);
 	eval "use IDNA::Punycode";
 	if (!$@) {
 		$name = join(".",
