@@ -10,63 +10,72 @@ $d = &get_domain($in{'dom'});
 @avail > 1 || &error($text{'phpver_eavail'});
 
 &ui_print_header(&domain_in($d), $text{'phpver_title'}, "", "phpver");
+@hiddens = ( [ "dom", $in{'dom'} ] );
 
-print &ui_form_start("save_phpver.cgi");
-print &ui_hidden("dom", $d->{'id'}),"\n";
-
-# Start of table
-@tds = ( "width=5" );
+# Build data for existing directories
 @dirs = &list_domain_php_directories($d);
-if (@dirs > 1) {
-	@links = ( &select_all_link("d"), &select_invert_link("d") );
-	}
-print &ui_links_row(\@links);
-print &ui_columns_start([ "",
-			  $text{'phpver_dir'},
-			  $text{'phpver_ver'} ], undef, 0, \@tds);
-
-# Show existing directories
 $pub = &public_html_dir($d);
 $i = 0;
+@table = ( );
+$anydelete = 0;
 foreach $dir (@dirs) {
 	$ispub = $dir->{'dir'} eq $pub;
 	$sel = &ui_select("ver_$i", $dir->{'version'},
 			  [ map { [ $_->[0] ] } @avail ]);
-	print &ui_hidden("dir_$i", $dir->{'dir'}),"\n";
+	push(@hiddens, [ "dir_$i", $dir->{'dir'} ]);
 	if ($ispub) {
 		# Can only change version for public html
-		print &ui_columns_row([ &ui_checkbox("d", 1, "", 0, undef, 1),
-					"<i>$text{'phpver_pub'}</i>",
-					$sel ], \@tds);
+		push(@table, [
+			{ 'type' => 'checkbox', 'name' => 'd',
+			  'value' => $dir->{'dir'}, 'disabled' => 1 },
+			"<i>$text{'phpver_pub'}</i>",
+			$sel
+			]);
 		}
 	elsif (substr($dir->{'dir'}, 0, length($pub)) eq $pub) {
 		# Show directory relative to public_html
-		print &ui_checked_columns_row([
+		push(@table, [
+			{ 'type' => 'checkbox', 'name' => 'd',
+			  'value' => $dir->{'dir'} },
 			"<tt>".substr($dir->{'dir'}, length($pub)+1)."</tt>",
-			$sel ], \@tds, "d", $dir->{'dir'});
+			$sel
+			]);
+		$anydelete++;
 		}
 	else {
 		# Show full path
-		print &ui_checked_columns_row([
+		push(@table, [
+			{ 'type' => 'checkbox', 'name' => 'd',
+			  'value' => $dir->{'dir'} },
 			"<tt>$dir->{'dir'}</tt>",
-			$sel ], \@tds, "d", $dir->{'dir'});
+			$sel
+			]);
+		$anydelete++;
 		}
 	$i++;
 	}
 
-# Show row for new dir
-print &ui_columns_row([ &ui_checkbox("d", 1, "", 0, undef, 1),
-			&ui_textbox("newdir", undef, 30),
-			&ui_select("newver", $dir->{'version'},
-				  [ map { [ $_->[0] ] } @avail ])
-		      ], \@tds);
-print &ui_columns_end();
-print &ui_links_row(\@links);
+# Add row for new dir
+push(@table, [ { 'type' => 'checkbox', 'name' => 'd',
+		 'value' => 1, 'disabled' => 1 },
+	       &ui_textbox("newdir", undef, 30),
+	       &ui_select("newver", $dir->{'version'},
+			  [ map { [ $_->[0] ] } @avail ]),
+	     ]);
 
-print &ui_table_end();
-print &ui_form_end([ @dirs > 1 ? ( [ "delete", $text{'phpver_delete'} ], undef )
-			       : ( ),
-		     [ "save", $text{'phpver_save'} ] ]);
+# Generate the table
+print &ui_form_columns_table(
+	"save_phpver.cgi",
+	[ @dirs > 1 ? ( [ "delete", $text{'phpver_delete'} ], undef ) : ( ),
+	  [ "save", $text{'phpver_save'} ] ],
+	$anydelete,
+	undef,
+	\@hiddens,
+	[ "", $text{'phpver_dir'}, $text{'phpver_ver'} ],
+	undef,
+	\@table,
+	undef,
+	1);
 
 &ui_print_footer(&domain_footer_link($d),
 		 "", $text{'index_return'});
