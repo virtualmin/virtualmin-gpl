@@ -27,19 +27,13 @@ print &ui_radio("defs", $defs,
 		[ [ 1, $text{'newshells_defs1'}, $js1 ],
 		  [ 0, $text{'newshells_defs0'}, $js0 ] ]),"<p>\n";
 
-# Custom shells
-@tds = ( "width=5%", "width=25%", "width=40%", "width=5%", "width=5%", "width=5%" );
-print &ui_columns_start([ $text{'newshells_avail'},
-			  $text{'newshells_shell'},
-			  $text{'newshells_desc'},
-			  $text{'newshells_owner'},
-			  $text{'newshells_mailbox'},
-			  $text{'newshells_default'},
-			  $text{'newshells_id'},
-			 ]);
+# Build custom shells table rows
 $i = 0;
 foreach $s (@shells, { }) {
-	print &ui_checked_columns_row([
+	push(@table, [
+		{ 'type' => 'checkbox', 'name' => "avail_$i",
+		  'value' => 1, 'checked' => $s->{'avail'},
+		  'disabled' => $defs },
 		&ui_textbox("shell_$i", $s->{'shell'}, 25, $defs),
 		&ui_textbox("desc_$i", $s->{'desc'}, 40, $defs),
 		&ui_checkbox("owner_$i", 1, " ", $s->{'owner'}, undef, $defs),
@@ -51,10 +45,21 @@ foreach $s (@shells, { }) {
 			   [ [ 'nologin', $text{'limits_shell_nologin'} ],
 			     [ 'ftp', $text{'limits_shell_ftp'} ],
 			     [ 'ssh', $text{'limits_shell_ssh'} ] ]),
-		], \@tds, "avail_$i", 1, $s->{'avail'}, $defs);
+		]);
 	$i++;
 	}
-print &ui_columns_end();
+
+# Render the table
+print &ui_columns_table(
+	[ $text{'newshells_avail'}, $text{'newshells_shell'},
+	  $text{'newshells_desc'}, $text{'newshells_owner'},
+	  $text{'newshells_mailbox'}, $text{'newshells_default'},
+	  $text{'newshells_id'}, ],
+	100,
+	\@table,
+	undef,
+	1);
+
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
 &ui_print_footer("", $text{'index_return'});
