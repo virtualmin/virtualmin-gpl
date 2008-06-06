@@ -25,95 +25,98 @@ if (&can_unsupported_scripts()) {
 print &ui_tabs_start(\@tabs, "scriptsmode",
 	$in{'scriptsmode'} ? $in{'scriptsmode'} : @got ? "existing" : "new", 1);
 
-# Show table of installed scripts (if any)
+# Build table of installed scripts (if any)
 print &ui_tabs_start_tab("scriptsmode", "existing");
-if (@got) {
-	$ratings = &get_script_ratings();
-	$upcount = 0;
-	print $text{'scripts_desc3'},"<p>\n";
-	@tds = ( "width=5", undef, undef, undef, undef, "nowrap" );
-	print &ui_form_start("mass_uninstall.cgi", "post");
-	print &ui_hidden("dom", $in{'dom'});
-	@links = ( &select_all_link("d"), &select_invert_link("d") );
-	print &ui_links_row(\@links);
-	print &ui_columns_start([ "",
-				  $text{'scripts_name'},
-				  $text{'scripts_ver'},
-				  $text{'scripts_path'},
-				  $text{'scripts_db'},
-				  $text{'scripts_status'},
-				  $text{'scripts_rating'} ], undef, 0, \@tds);
-	foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
-			       lc($smap{$b->{'name'}}->{'desc'}) } @got) {
-		# Check if a newer version exists
-		$script = $smap{$sinfo->{'name'}};
-		@vers = grep { &can_script_version($script, $_) }
-			     @{$script->{'versions'}};
-		if (&indexof($sinfo->{'version'}, @vers) < 0) {
-			@better = grep { &compare_versions($_, $sinfo->{'version'}) > 0 } @vers;
-			if (@better) {
-				$status = "<font color=#ffaa00>".
-				  &text('scripts_newer', $better[$#better]).
-				  "</font>";
-				$upcount++;
-				}
-			else {
-				$status = $text{'scripts_nonewer'};
-				}
+@table = ( );
+$ratings = &get_script_ratings();
+$upcount = 0;
+foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
+		       lc($smap{$b->{'name'}}->{'desc'}) } @got) {
+	# Check if a newer version exists
+	$script = $smap{$sinfo->{'name'}};
+	@vers = grep { &can_script_version($script, $_) }
+		     @{$script->{'versions'}};
+	if (&indexof($sinfo->{'version'}, @vers) < 0) {
+		@better = grep { &compare_versions($_, $sinfo->{'version'}) > 0 } @vers;
+		if (@better) {
+			$status = "<font color=#ffaa00>".
+			  &text('scripts_newer', $better[$#better]).
+			  "</font>";
+			$upcount++;
 			}
 		else {
-			$status = "<font color=#00aa00>".
-				  $text{'scripts_newest'}."</font>";
+			$status = $text{'scripts_nonewer'};
 			}
-		$path = $sinfo->{'opts'}->{'path'};
-		($dbtype, $dbname) = split(/_/, $sinfo->{'opts'}->{'db'}, 2);
-		if ($dbtype && $dbname) {
-			$dbdesc = &text('scripts_idbname2',
-			      "edit_database.cgi?dom=$in{'dom'}&type=$dbtype&".
-				"name=$dbname",
-			      $text{'databases_'.$dbtype}, "<tt>$dbname</tt>");
-			}
-		elsif ($sinfo->{'opts'}->{'db'}) {
-			# Just a DB name, perhaps for a script that can only
-			# use a single type
-			$dbdesc = "<tt>$sinfo->{'opts'}->{'db'}</tt>";
-			}
-		else {
-			$dbdesc = "<i>$text{'scripts_nodb'}</i>";
-			}
-		$desc = $script->{'desc'};
-		if ($sinfo->{'partial'}) {
-			$desc = "<i>$desc</i>";
-			}
-		print &ui_checked_columns_row([
-			"<a href='edit_script.cgi?dom=$in{'dom'}&".
-			 "script=$sinfo->{'id'}'>$desc</a>",
-			$script->{'vdesc'}->{$sinfo->{'version'}} ||
-			  $sinfo->{'version'},
-			$sinfo->{'url'} ? 
-			  "<a href='$sinfo->{'url'}' target=_new>$path</a>" :
-			  $path,
-			$dbdesc,
-			$status,
-			&virtualmin_ui_rating_selector(
-				$sinfo->{'name'}, $ratings->{$sinfo->{'name'}},
-				5, "rate_script.cgi?dom=$in{'dom'}")
-			], \@tds, "d", $sinfo->{'id'});
 		}
-	print &ui_columns_end();
-	print &ui_links_row(\@links);
-	print &ui_form_end([
-		     [ "uninstall", $text{'scripts_uninstalls'} ],
-		     $upcount ? ( [ "upgrade", $text{'scripts_upgrades'} ] )
-			      : ( ) ]);
+	else {
+		$status = "<font color=#00aa00>".
+			  $text{'scripts_newest'}."</font>";
+		}
+	$path = $sinfo->{'opts'}->{'path'};
+	($dbtype, $dbname) = split(/_/, $sinfo->{'opts'}->{'db'}, 2);
+	if ($dbtype && $dbname) {
+		$dbdesc = &text('scripts_idbname2',
+		      "edit_database.cgi?dom=$in{'dom'}&type=$dbtype&".
+			"name=$dbname",
+		      $text{'databases_'.$dbtype}, "<tt>$dbname</tt>");
+		}
+	elsif ($sinfo->{'opts'}->{'db'}) {
+		# Just a DB name, perhaps for a script that can only
+		# use a single type
+		$dbdesc = "<tt>$sinfo->{'opts'}->{'db'}</tt>";
+		}
+	else {
+		$dbdesc = "<i>$text{'scripts_nodb'}</i>";
+		}
+	$desc = $script->{'desc'};
+	if ($sinfo->{'partial'}) {
+		$desc = "<i>$desc</i>";
+		}
+	push(@table, [
+		{ 'type' => 'checkbox', 'name' => 'd',
+		  'value' => $sinfo->{'id'} },
+		"<a href='edit_script.cgi?dom=$in{'dom'}&".
+		 "script=$sinfo->{'id'}'>$desc</a>",
+		$script->{'vdesc'}->{$sinfo->{'version'}} ||
+		  $sinfo->{'version'},
+		$sinfo->{'url'} ? 
+		  "<a href='$sinfo->{'url'}' target=_new>$path</a>" :
+		  $path,
+		$dbdesc,
+		$status,
+		&virtualmin_ui_rating_selector(
+			$sinfo->{'name'}, $ratings->{$sinfo->{'name'}},
+			5, "rate_script.cgi?dom=$in{'dom'}")
+		]);
 	}
-else {
-	print "<b>$text{'scripts_noexisting'}</b><p>\n";
+
+# Show table of scripts
+if (@got) {
+	print $text{'scripts_desc3'},"<p>\n";
 	}
+print &ui_form_columns_table(
+	"mass_uninstall.cgi",
+	[ [ "uninstall", $text{'scripts_uninstalls'} ],
+	  $upcount ? ( [ "upgrade", $text{'scripts_upgrades'} ] ) : ( ) ],
+	1,
+	undef,
+	[ [ "dom", $in{'dom'} ] ], 
+	[ "", $text{'scripts_name'}, $text{'scripts_ver'},
+	  $text{'scripts_path'}, $text{'scripts_db'},
+	  $text{'scripts_status'}, $text{'scripts_rating'} ],
+	100,
+	\@table,
+	undef,
+	0,
+	undef,
+	$text{'scripts_noexisting'}
+	);
+
 print &ui_tabs_end_tab();
 
 # Show table for installing scripts, by category
 print &ui_tabs_start_tab("scriptsmode", "new");
+@allscripts = @scripts;
 if (@scripts) {
 	# Show search form
 	print &ui_form_start("list_scripts.cgi");
@@ -123,80 +126,79 @@ if (@scripts) {
 	      &ui_textbox("search", $in{'search'}, 30)," ",
 	      &ui_submit($text{'scripts_findok'});
 	print &ui_form_end();
+	}
 
-	if ($in{'search'}) {
-		# Limit to matches
-		$search = $in{'search'};
-		@scripts = grep { $_->{'desc'} =~ /\Q$search\E/i ||
-				  $_->{'longdesc'} =~ /\Q$search\E/i ||
-				  $_->{'category'} =~ /\Q$search\E/i } @scripts;
+if ($in{'search'}) {
+	# Limit to matches
+	$search = $in{'search'};
+	@scripts = grep { $_->{'desc'} =~ /\Q$search\E/i ||
+			  $_->{'longdesc'} =~ /\Q$search\E/i ||
+			  $_->{'category'} =~ /\Q$search\E/i } @scripts;
+	}
+
+# Build table of available scripts
+@table = ( );
+foreach $script (@scripts) {
+	$script->{'sortcategory'} = $script->{'category'} ||
+				    "zzz";
+	}
+$overall = &get_overall_script_ratings();
+foreach $script (sort { $a->{'sortcategory'} cmp
+				$b->{'sortcategory'} ||
+			lc($a->{'desc'}) cmp lc($b->{'desc'}) }
+		      @scripts) {
+	$cat = $script->{'category'} || $text{'scripts_nocat'};
+	@vers = grep { &can_script_version($script, $_) }
+		     @{$script->{'versions'}};
+	next if (!@vers);	# No allowed versions!
+	if ($cat ne $lastcat) {
+		# Supress row color alternating
+		push(@table, [ { 'type' => 'group',
+				 'desc' => $cat } ]);
+		$lastcat = $cat;
 		}
-
-	if (@scripts) {
-		# Show table of available
-		print &ui_form_start("script_form.cgi");
-		print &ui_hidden("dom", $in{'dom'}),"\n";
-		@tds = ( "width=5", "nowrap", undef, undef, "nowrap" );
-		print &ui_columns_start([ "",
-					  $text{'scripts_name'},
-					  $text{'scripts_ver'},
-					  $text{'scripts_longdesc'},
-					  $text{'scripts_overall'} ],
-					undef, 0, \@tds);
-		foreach $script (@scripts) {
-			$script->{'sortcategory'} = $script->{'category'} ||
-						    "zzz";
-			}
-		$overall = &get_overall_script_ratings();
-		foreach $script (sort { $a->{'sortcategory'} cmp
-						$b->{'sortcategory'} ||
-					lc($a->{'desc'}) cmp lc($b->{'desc'}) }
-				      @scripts) {
-			$cat = $script->{'category'} || $text{'scripts_nocat'};
-			@vers = grep { &can_script_version($script, $_) }
-				     @{$script->{'versions'}};
-			next if (!@vers);	# No allowed versions!
-			if ($cat ne $lastcat) {
-				# Supress row color alternating
-				$theme_ui_columns_row_toggle = 0;
-				print &ui_columns_row([ "<b>$cat</b>" ],
-						      [ "colspan=5" ]);
-				$lastcat = $cat;
-				}
-			if (@vers > 1) {
-				$vsel = &ui_select("ver_".$script->{'name'},
-				    undef,
-				    [ map { [ $_, $script->{'vdesc'}->{$_} ] }
-				          @vers ]);
-				}
-			else {
-				$vsel = ($script->{'vdesc'}->{$vers[0]} ||
-					 $vers[0]).
-					&ui_hidden("ver_".$script->{'name'},
-						   $vers[0]);
-				}
-			$r = $overall->{$script->{'name'}};
-			print &ui_radio_columns_row([
-			    $script->{'desc'},
-			    $vsel,
-			    $script->{'longdesc'},
-			    $r ? &virtualmin_ui_rating_selector(undef, $r, 5)
-			       : "",
-			    ], \@tds, "script", $script->{'name'},
-			       $in{'search'} && @scripts == 1);
-			}
-		print &ui_columns_end();
-		print &ui_submit($text{'scripts_ok'});
-		print &ui_form_end();
-		print &ui_tabs_end_tab();
+	if (@vers > 1) {
+		$vsel = &ui_select("ver_".$script->{'name'},
+		    undef,
+		    [ map { [ $_, $script->{'vdesc'}->{$_} ] }
+			  @vers ]);
 		}
 	else {
-		print "<b>$text{'scripts_nomatch'}</b><p>\n";
+		$vsel = ($script->{'vdesc'}->{$vers[0]} ||
+			 $vers[0]).
+			&ui_hidden("ver_".$script->{'name'},
+				   $vers[0]);
 		}
+	$r = $overall->{$script->{'name'}};
+	push(@table, [
+	    { 'type' => 'radio', 'name' => 'script',
+	      'value' => $script->{'name'},
+	      'checked' => $in{'search'} && @scripts == 1 },
+	    $script->{'desc'},
+	    $vsel,
+	    $script->{'longdesc'},
+	    $r ? &virtualmin_ui_rating_selector(undef, $r, 5)
+	       : "",
+	    ]);
 	}
-else {
-	print "<b>$text{'scripts_nonew'}</b><p>\n";
-	}
+
+# Show table of available scripts
+print &ui_form_columns_table(
+	"script_form.cgi",
+	[ [ undef, $text{'scripts_ok'} ] ],
+	0,
+	undef,
+	[ [ "dom", $in{'dom'} ] ],
+	[ "", $text{'scripts_name'}, $text{'scripts_ver'},
+	  $text{'scripts_longdesc'}, $text{'scripts_overall'} ],
+	100,
+	\@table,
+	undef,
+	0,
+	undef,
+	!@allscripts ? $text{'scripts_nonew'} : $text{'scripts_nomatch'}
+	);
+
 print &ui_tabs_end_tab();
 
 # Show form for installing a non-standard version

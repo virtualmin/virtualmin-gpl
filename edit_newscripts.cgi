@@ -36,12 +36,8 @@ print &ui_tabs_end_tab();
 print &ui_tabs_start_tab("mode", "enable");
 print "$text{'newscripts_desc2'}\n";
 print "$text{'newscripts_desc2b'}<p>\n";
-print &ui_form_start("disable_scripts.cgi", "post");
-print &ui_columns_start([ "",
-			  $text{'newscripts_name'},
-			  $text{'newscripts_longdesc'},
-			  $text{'newscripts_src'},
-			  $text{'newscripts_minver'} ]);
+
+# Build data for table
 foreach $s (&list_scripts()) {
 	$script = &get_script($s);
 	$script->{'sortcategory'} = $script->{'category'} || "zzz";
@@ -52,12 +48,16 @@ foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 		      @scripts) {
 	$cat = $script->{'category'} || $text{'scripts_nocat'};
 	if ($cat ne $lastcat) {
-		print &ui_columns_row([ "<b>$cat</b>" ],
-				      [ "colspan=5]" ]);
+		push(@table, [ { 'type' => 'group',
+			         'desc' => $cat } ]);
 		$lastcat = $cat;
 		}
 	@v = sort { &compare_versions($b, $a) } @{$script->{'versions'}};
-	print &ui_checked_columns_row([
+	@v = map { $script->{'vdesc'}->{$_} || $_ } @v;
+	push(@table, [
+		{ 'type' => 'checkbox', 'name' => 'd',
+		  'value' => $script->{'name'},
+		  'checked' => $script->{'avail'} },
 		$script->{'desc'},
 		$script->{'longdesc'},
 		$script->{'dir'} eq "$module_root_directory/scripts" ?
@@ -68,10 +68,21 @@ foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 				  (map { [ "$_", ">= $_" ] } @v),
 				  (map { [ "<=$_", "<= $_" ] } @v) ],
 				1, 0, 1) : "",
-		], undef, "d", $script->{'name'}, $script->{'avail'});
+		]);
 	}
-print &ui_columns_end();
-print &ui_form_end([ [ "save", $text{'newscripts_save'} ] ]);
+
+# Generate the table of scripts
+print &ui_form_columns_table(
+	"disable_scripts.cgi",
+	[ [ "save", $text{'newscripts_save'} ] ],
+	0,
+	undef,
+	undef,
+	[ "", $text{'newscripts_name'}, $text{'newscripts_longdesc'},
+	  $text{'newscripts_src'}, $text{'newscripts_minver'} ],
+	100,
+	\@table);
+
 print &ui_tabs_end_tab();
 
 # Show form to mass upgrade scripts
