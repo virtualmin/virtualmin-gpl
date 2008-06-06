@@ -11,42 +11,28 @@ print "$text{'newlinks_descr'}<p>\n";
 &print_subs_table("DOM", "IP", "USER", "EMAILTO");
 print &ui_hidden_end(),"<p>\n";
 
+# Make the table data
 @links = &list_custom_links();
 @cats = &list_custom_link_categories();
-@tds = ( undef, undef, undef, undef, "width=32" );
 print &ui_form_start("save_newlinks.cgi", "post");
-print &ui_columns_start([ $text{'newlinks_desc'},
-			  $text{'newlinks_url'},
-			  $text{'newlinks_open'},
-			  $text{'newlinks_who'},
-			  @cats ? ( $text{'newlinks_cat'} ) : ( ),
-			  @links > 1 ? ( $text{'newlinks_move'} ) : ( ), ],
-			100, 0, \@tds);
 $i = 0;
+@table = ( );
 $spacer = "<img src=images/gap.gif>";
 foreach $l (@links, { }, { }) {
 	$updown = "";
 	if (%$l) {
 		# Create move up / down links
-		if ($l eq $links[@links-1]) {
-			$updown .= $spacer;
-			}
-		else {
-			$updown .= "<a href='move_newlinks.cgi?idx=$i&down=1'>".
-				   "<img src=images/movedown.gif border=0></a>";
-			}
-		if ($l eq $links[0]) {
-			$updown .= $spacer;
-			}
-		else {
-			$updown .= "<a href='move_newlinks.cgi?idx=$i&up=1'>".
-				   "<img src=images/moveup.gif border=0></a>";
-			}
+		$updown = &ui_up_down_arrows(
+			"move_newlinks.cgi?idx=$i&up=1",
+			"move_newlinks.cgi?idx=$i&down=1",
+			$l ne $links[0],
+			$l ne $links[@links-1],
+			);
 		}
 	$catsel = &ui_select("cat_$i", $l->{'cat'},
 	    [ [ "", $text{'newlinks_nocat'} ],
 	      map { [ $_->{'id'}, &shorten_category($_->{'desc'}) ] } @cats ]);
-	print &ui_columns_row([
+	push(@table, [
 		&ui_textbox("desc_$i", $l->{'desc'}, 20),
 		&ui_textbox("url_$i", $l->{'url'}, 60),
 		&ui_radio("open_$i", int($l->{'open'}),
@@ -57,25 +43,50 @@ foreach $l (@links, { }, { }) {
 			      ('master', 'domain', 'reseller')),
 		@cats ? ( $catsel ) : ( ),
 		@links > 1 ? ( $updown ) : ( ),
-		], \@tds);
+		]);
 	$i++;	
 	}
-print &ui_columns_end();
-print &ui_form_end([ [ "save", $text{'save'} ] ]);
 
-# Show link category form
+# Generate the table
+print ui_form_columns_table(
+	"save_newlinks.cgi",
+	[ [ "save", $text{'save'} ] ],
+	0,
+	undef,
+	undef,
+	[ $text{'newlinks_desc'}, $text{'newlinks_url'},
+	  $text{'newlinks_open'}, $text{'newlinks_who'},
+	  @cats ? ( $text{'newlinks_cat'} ) : ( ),
+	  @links > 1 ? ( $text{'newlinks_move'} ) : ( ), ],
+	100,
+	\@table,
+	1,
+	);
+
 print &ui_hr();
 
+# Show link category form
 print "$text{'newlinks_catdesc'}<p>\n";
-print &ui_form_start("save_linkcats.cgi", "post");
-print &ui_columns_start([ $text{'newlinks_catname'} ]);
 $i = 0;
+@table = ( );
+@hiddens = ( );
 foreach $c (@cats, { }, { }) {
-	print &ui_columns_row([ &ui_textbox("desc_$i", $c->{'desc'}, 50).
-				&ui_hidden("id_$i", $c->{'id'}) ]);
+	push(@table, [ &ui_textbox("desc_$i", $c->{'desc'}, 50,
+			 	   0, undef, "style='width:100%'") ]);
+	push(@hiddens, [ "id_$i", $c->{'id'} ]);
 	$i++;
 	}
-print &ui_form_end([ [ undef, $text{'save'} ] ]);
+print &ui_form_columns_table(
+	"save_linkcats.cgi",
+	[ [ undef, $text{'save'} ] ],
+	0,
+	undef,
+	\@hiddens,
+	[ $text{'newlinks_catname'} ],
+	undef,
+	\@table,
+	undef,
+	1);
 
 if ($in{'refresh'}) {
 	# Update left frame after changing custom links
