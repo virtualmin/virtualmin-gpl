@@ -2396,28 +2396,28 @@ local @table_features = $config{'show_features'} ?
     (grep { $_ ne 'webmin' && $_ ne 'mail' &&
 	    $_ ne 'unix' && $_ ne 'dir' } @features) : ( );
 local $showchecks = $checks && &can_config_domain($_[0]->[0]);
-local @tds;
-local @cols;
+
+# Generate headers
+local @heads;
 if ($showchecks) {
-	push(@tds, "width=5");
-	push(@cols, "");
+	push(@heads, "");
 	}
-push(@cols, $text{'index_domain'}, $text{'index_user'},
+push(@heads, $text{'index_domain'}, $text{'index_user'},
 	    $text{'index_owner'} );
 local $f;
 local $qshow = &has_home_quotas() && $config{'show_quotas'};
 foreach $f (@table_features) {
-	push(@cols, $text{'index_'.$f}) if ($config{$f});
+	push(@heads, $text{'index_'.$f}) if ($config{$f});
 	}
-push(@cols, $text{'index_mail'});
+push(@heads, $text{'index_mail'});
 if ($config{'mail'}) {
-	push(@cols, $text{'index_alias'});
+	push(@heads, $text{'index_alias'});
 	}
 if ($qshow) {
-	push(@cols, $text{'index_quota'}, $text{'index_uquota'});
+	push(@heads, $text{'index_quota'}, $text{'index_uquota'});
 	}
-print &ui_columns_start(\@cols, "100", undef, \@tds);
-local $d;
+
+# Generate the table contents
 local %done;
 local $sortfield = $config{'domains_sort'} || "user";
 local %sortkey;
@@ -2427,9 +2427,10 @@ if ($sortfield eq 'dom') {
 else {
 	%sortkey = map { $_->{'id'}, $_->{$sortfield} } @$doms;
 	}
-foreach $d (sort { $sortkey{$a->{'id'}} cmp $sortkey{$b->{'id'}} ||
-		   $a->{'parent'} <=> $b->{'parent'} ||
-		   $a->{'created'} <=> $b->{'created'} } @$doms) {
+local @table;
+foreach my $d (sort { $sortkey{$a->{'id'}} cmp $sortkey{$b->{'id'}} ||
+		      $a->{'parent'} <=> $b->{'parent'} ||
+		      $a->{'created'} <=> $b->{'created'} } @$doms) {
 	$done{$d->{'id'}}++;
 	local $dn = &shorten_domain_name($d);
 	$dn = $d->{'disabled'} ? "<i>$dn</i>" : $dn;
@@ -2528,13 +2529,17 @@ foreach $d (sort { $sortkey{$a->{'id'}} cmp $sortkey{$b->{'id'}} ||
 			}
 		}
 	if (&can_config_domain($d) && $showchecks) {
-		print &ui_checked_columns_row(\@cols, \@tds, "d", $d->{'id'});
+		unshift(@cols, { 'type' => 'checkbox',
+				 'name' => 'd', 'value' => $d->{'id'} });
 		}
-	else {
-		print &ui_columns_row(\@cols, \@tds);
-		}
+	push(@table, \@cols);
 	}
-print &ui_columns_end();
+
+# Output the table
+print &ui_columns_table(
+	\@heads,
+	100,
+	\@table);
 }
 
 # userdom_name(name, &domain)
@@ -3865,7 +3870,7 @@ if ($cgi) {
 				     100, \@table, undef, 0, undef, $empty);
 	}
 else {
-	print &ui_columns_start(\@headers, 100, \@table, undef, 0, undef,
+	print &ui_columns_table(\@headers, 100, \@table, undef, 0, undef,
 				$empty);
 	}
 }

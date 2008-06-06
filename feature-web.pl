@@ -1951,21 +1951,24 @@ print &ui_table_hr();
 
 # PHP variables for scripts
 if ($virtualmin_pro) {
-	$ptable = &ui_columns_start([ $text{'tmpl_phpname'},
-				      $text{'tmpl_phpval'} ] );
 	local $i = 0;
 	local @pv = $tmpl->{'php_vars'} eq "none" ? ( ) :
 		split(/\t+/, $tmpl->{'php_vars'});
 	local @pfields;
+	local @table;
 	foreach $pv (@pv, "", "") {
 		local ($n, $v) = split(/=/, $pv, 2);
-		$ptable .= &ui_columns_row([
-			&ui_textbox("phpname_$i", $n, 25),
-			&ui_textbox("phpval_$i", $v, 35) ]);
+		push(@table, [ &ui_textbox("phpname_$i", $n, 25),
+			       &ui_textbox("phpval_$i", $v, 35) ]);
 		push(@pfields, "phpname_$i", "phpval_$i");
 		$i++;
 		}
-	$ptable .= &ui_columns_end();
+	local $ptable = &ui_columns_table(
+		[ $text{'tmpl_phpname'}, $text{'tmpl_phpval'} ],
+		undef,
+		\@table,
+		undef,
+		1);
 	print &ui_table_row(
 		&hlink($text{'tmpl_php_vars'}, "template_php_vars"),
 		&none_def_input("php_vars", $tmpl->{'php_vars'},

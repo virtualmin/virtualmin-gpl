@@ -314,17 +314,19 @@ local @rfields = map { ("ranges_start_".$_, "ranges_end_".$_) }
 		     (0..scalar(@ranges)+1);
 $rtable = &none_def_input("ranges", $tmpl->{'ranges'},
 			 $text{'tmpl_rangesbelow'}, 0, 0, undef, \@rfields);
-$rtable .= &ui_columns_start([ $text{'tmpl_ranges_start'},
-			  $text{'tmpl_ranges_end'} ]);
+local @table;
 $i = 0;
 foreach $r (@ranges, [ ], [ ]) {
-	$rtable .= &ui_columns_row([
-		&ui_textbox("ranges_start_$i", $r->[0], 20),
-		&ui_textbox("ranges_end_$i", $r->[1], 20),
-		]);
+	push(@table, [ &ui_textbox("ranges_start_$i", $r->[0], 20),
+		       &ui_textbox("ranges_end_$i", $r->[1], 20) ]);
 	$i++;
 	}
-$rtable .= &ui_columns_end();
+$rtable .= &ui_columns_table(
+	[ $text{'tmpl_ranges_start'}, $text{'tmpl_ranges_end'} ],
+	undef,
+	\@table,
+	undef,
+	1);
 print &ui_table_row(&hlink($text{'tmpl_ranges'},"template_ranges_mode"),
 		    $rtable);
 }
