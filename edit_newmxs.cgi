@@ -6,37 +6,39 @@ require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newmxs_ecannot'});
 &ui_print_header(undef, $text{'newmxs_title'}, "", "newmxs");
 
+# Make the table data
 @servers = grep { $_->{'user'} } &servers::list_servers();
 %mxs = map { $_->{'id'}, $_ } &list_mx_servers();
-if (@servers) {
-	print &ui_form_start("save_newmxs.cgi", "post");
-
-	# Server selector
-	@tds = ( "width=5" );
-	$stable = &ui_columns_start([ "",
-				      $text{'newmxs_server'},
-				      $text{'newmxs_mxname'} ], undef,0, \@tds);
-	foreach $s (@servers) {
-		$mx = $mxs{$s->{'id'}};
-		$stable .= &ui_checked_columns_row(
-		  [ $s->{'desc'} || $s->{'host'},
-		    &ui_opt_textbox("mxname_".$s->{'id'},
-				    $mx ? $mx->{'mxname'} : undef, 30,
-				    $text{'newmxs_same'}) ],
-		  \@tds, "servers", $s->{'id'}, $mx);
-		}
-	$stable .= &ui_columns_end(),"<br>\n";
-	print $stable;
-
-	# Option to add existing mail domains to secondary
-	print &ui_checkbox("addexisting", 1, &hlink($text{'newmxs_add'},
-						    "newmxs_add")),"<p>\n";
-
-	print &ui_form_end([ [ "save", $text{'save'} ] ]);
+foreach $s (@servers) {
+	$mx = $mxs{$s->{'id'}};
+	push(@table, [
+	  { 'type' => 'checkbox', 'name' => 'servers',
+	    'value' => $s->{'id'}, 'checked' => $mx },
+	  $s->{'desc'} || $s->{'host'},
+	  &ui_opt_textbox("mxname_".$s->{'id'},
+			  $mx ? $mx->{'mxname'} : undef, 30,
+			  $text{'newmxs_same'}),
+	  ]);
 	}
-else {
-	print "<b>$text{'newmxs_none'}</b><p>\n";
-	}
+
+# Render the table
+print &ui_form_columns_table(
+	"save_newmxs.cgi",
+	[ [ "save", $text{'save'} ],
+	  [ "addexisting", $text{'newmxs_saveadd'} ] ],
+	0,
+	undef,
+	undef,
+	[ "", $text{'newmxs_server'}, $text{'newmxs_mxname'} ],
+	100,
+	\@table,
+	undef,
+	1,
+	undef,
+	&foreign_available("servers") ?
+		&text('newmxs_none2', "../servers/") :
+		$text{'newmxs_none'},
+	);
 
 &ui_print_footer("", $text{'index_return'});
 

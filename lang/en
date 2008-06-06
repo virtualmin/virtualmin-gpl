@@ -3283,6 +3283,7 @@ newmxs_title=Secondary Mail Servers
 newmxs_header=Automatic secondary mail servers
 newmxs_servers=Servers to setup as secondary MXs
 newmxs_none=No usable servers have been defined in the Webmin Servers Index module yet.
+newmxs_none2=No usable servers have been defined in the <a href='$1'>Webmin Servers Index</a> module yet.
 newmxs_err=Failed to save secondary mail servers
 newmxs_evirtualmin=.. server $1 does not have Virtualmin installed
 newmxs_eversion=Server $1 has Virtualmin $3, but version $2 or later is needed
@@ -3296,7 +3297,7 @@ newmxs_server=Webmin server
 newmxs_mxname=Hostname for MX record
 newmxs_same=Same as hostname
 newmxs_emxname=Invalid hostname for MX record for $1
-newmxs_add=Add all existing mail domains to new secondary MX servers?
+newmxs_saveadd=Save, and add existing domains to new secondaries
 newmxs_doing=Testing secondary MX server $1 ..
 newmxs_dom=Updating virtual server $1 ..
 newmxs_adding=Adding secondary domain on $1 ..
