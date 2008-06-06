@@ -3559,18 +3559,22 @@ print &ui_table_row(&hlink($text{'tmpl_aliases'}, "template_aliases_mode"),
 # Aliases for new domains
 local @aliases = $tmpl->{'dom_aliases'} eq "none" ? ( ) :
 			split(/\t+/, $tmpl->{'dom_aliases'});
-local $atable = &ui_columns_start([ $text{'tmpl_aliasfrom'}, $text{'tmpl_aliasto'} ]);
+local @atable;
 local $i = 0;
 local @dafields;
 foreach my $a (@aliases, undef, undef) {
 	local ($from, $to) = split(/=/, $a, 2);
-	$atable .= &ui_columns_row([
-		&ui_textbox("alias_from_$i", $from, 20),
-		&ui_textbox("alias_to_$i", $to, 40) ]);
+	push(@atable, [ &ui_textbox("alias_from_$i", $from, 20),
+			&ui_textbox("alias_to_$i", $to, 40) ]);
 	push(@dafields, "alias_from_$i", "alias_to_$i");
 	$i++;
 	}
-$atable .= &ui_columns_end();
+local $atable = &ui_columns_table(
+	[ $text{'tmpl_aliasfrom'}, $text{'tmpl_aliasto'} ],
+	undef,
+	\@atable,
+	undef,
+	1);
 if ($config{'mail_system'} != 0) {
 	# Bounce-all alias, not shown for Postfix
 	$atable .= &ui_checkbox("bouncealias", 1,
