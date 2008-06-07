@@ -128,7 +128,7 @@ foreach my $u (@{$domain->{'user'}}) {
 	if ($u->{'spamassassin'}) {
 		$has_spam = 1;
 		}
-	if ($u ne $uinfo) {
+	if ($u->{'login'}->{'name'} ne $uinfo->{'login'}->{'name'}) {
 		push(@mailusers, $u);
 		}
 	}
@@ -297,6 +297,24 @@ if ($certificate && $certificate->{'pub_key'}->{'src'} &&
 					".. not found in backup");
 	}
 
+# Move the domain owner's mailbox (if needed) and cron jobs
+if (!$parent) {
+	local $srcfolder = { 'file' => $dom{'home'}.'/Maildir', 'type' => 1 };
+	local $duser = &get_domain_owner(\%dom);
+	if ($duser) {
+		# Move inbox
+		local ($ofile, $otype) = &user_mail_file($duser);
+		local $dstfolder = { 'file' => $ofile, 'type' => $otype };
+		if ($srcfolder->{'file'} ne $dstfolder->{'file'}) {
+			&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
+			&set_mailfolder_owner($dstfolder, $duser);
+			}
+
+		# Copy crontab
+		# XXX
+		}
+	}
+
 # Lock the user DB and build list of used IDs
 &obtain_lock_unix(\%dom);
 &obtain_lock_mail(\%dom);
@@ -308,106 +326,91 @@ local (%taken, %utaken);
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 local $mcount = 0;
 foreach my $mailuser (@mailusers) {
-	local $uinfo = &create_initial_user(\%dom);
-	$uinfo->{'user'} = &userdom_name($mailuser->{'login'}->{'name'}, \%dom);
+	local $muinfo = &create_initial_user(\%dom);
+	$muinfo->{'user'} = &userdom_name($mailuser->{'login'}->{'name'},\%dom);
 	if ($mailuser->{'login'}->{'PW_TYPE'} eq 'plain') {
-		$uinfo->{'plainpass'} = $mailuser->{'login'}->{'password'};
-		$uinfo->{'pass'} = &encrypt_user_password(
-					$uinfo, $uinfo->{'plainpass'});
+		$muinfo->{'plainpass'} = $mailuser->{'login'}->{'password'};
+		$muinfo->{'pass'} = &encrypt_user_password(
+					$muinfo, $muinfo->{'plainpass'});
 		}
 	else {
-		$uinfo->{'pass'} = $mailuser->{'login'}->{'password'};
+		$muinfo->{'pass'} = $mailuser->{'login'}->{'password'};
 		}
-	$uinfo->{'uid'} = &allocate_uid(\%taken);
-	$uinfo->{'gid'} = $dom{'gid'};
-	$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$name";
-	$uinfo->{'shell'} = $nologin_shell->{'shell'};
-	$uinfo->{'to'} = [ ];
-	if ($mailuser->{'mailbox'}->{'enabled'} eq 'true') {
+	$muinfo->{'uid'} = &allocate_uid(\%taken);
+	$muinfo->{'gid'} = $dom{'gid'};
+	$muinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$name";
+	$muinfo->{'shell'} = $nologin_shell->{'shell'};
+	$muinfo->{'to'} = [ ];
+	if ($mailuser->{'services'}->{'postbox'} eq 'true') {
 		# Add delivery to user's mailbox
-		# XXX
-		local $escuser = $uinfo->{'user'};
+		local $escuser = $muinfo->{'user'};
 		if ($config{'mail_system'} == 0 && $escuser =~ /\@/) {
 			$escuser = &replace_atsign($escuser);
 			}
 		else {
 			$escuser = &escape_user($escuser);
 			}
-		push(@{$uinfo->{'to'}}, "\\".$escuser);
+		push(@{$muinfo->{'to'}}, "\\".$escuser);
 		}
 	if (&has_home_quotas()) {
 		local $q = $mailuser->{'login'}->{'quota'};
-		$uinfo->{'qquota'} = $q;
-		$uinfo->{'quota'} = $q / &quota_bsize("home");
-		$uinfo->{'mquota'} = $q / &quota_bsize("home");
-		}
-	# Add mail aliases
-	# XXX
-	local $alias = $mailuser->{'alias'};
-	if ($alias) {
-		$alias = [ $alias ] if (ref($alias) ne 'ARRAY');
-		foreach my $a (@$alias) {
-			$a = $a->{'content'} if (ref($a));
-			$a .= "@".$dom{'dom'} if ($a !~ /\@/);
-			push(@{$uinfo->{'extraemail'}}, $a);
-			}
+		$muinfo->{'qquota'} = $q;
+		$muinfo->{'quota'} = $q / &quota_bsize("home");
+		$muinfo->{'mquota'} = $q / &quota_bsize("home");
 		}
 	# Add forwarding
-	# XXX
-	local $redirect = $mailuser->{'redirect'};
-	if ($redirect) {
-		$redirect = [ $redirect ] if (ref($redirect) ne 'ARRAY');
-		foreach my $r (@$redirect) {
-			$r = $r->{'content'} if (ref($r));
-			$r .= "@".$dom{'dom'} if ($r !~ /\@/);
-			push(@{$uinfo->{'to'}}, $r);
+	local $forwarding = $mailuser->{'services'}->{'forwarding'};
+	if ($forwarding) {
+		$forwarding = [ $forwarding ] if (ref($forwarding) ne 'ARRAY');
+		foreach my $f (@$forwarding) {
+			local $email = $f->{'email'};
+			next if (!$email);
+			$email = [ $email ] if (!ref($email));
+			foreach my $r (@$email) {
+				$r .= "@".$dom{'dom'} if ($r !~ /\@/);
+				push(@{$muinfo->{'to'}}, $r);
+				}
 			}
 		}
-	# Add mail group members (which are really just forwards)
+	# Add any autoresponder
+	local $auto = $mailuser->{'autoresponder'};
 	# XXX
-	local $mailgroup = $mailuser->{'mailgroup-member'};
-	if ($mailgroup) {
-		$mailgroup = [ $mailgroup ] if (ref($mailgroup) ne 'ARRAY');
-		foreach my $r (@$mailgroup) {
-			$r = $r->{'content'} if (ref($r));
-			$r .= "@".$dom{'dom'} if ($r !~ /\@/);
-			push(@{$uinfo->{'to'}}, $r);
-			}
-		}
-	if (@{$uinfo->{'to'}}) {
+	if (@{$muinfo->{'to'}}) {
 		# Only enable mail if there is at least one destination, which
 		# would be his own mailbox or offsite
-		$uinfo->{'email'} = $name."\@".$dom;
+		$muinfo->{'email'} = $name."\@".$dom;
 		}
-	&create_user($uinfo, \%dom);
-	&create_user_home($uinfo, \%dom);
-	$taken{$uinfo->{'uid'}}++;
-	local ($crfile, $crtype) = &create_mail_file($uinfo);
+	&create_user($muinfo, \%dom);
+	&create_user_home($muinfo, \%dom);
+	$taken{$muinfo->{'uid'}}++;
+	local ($crfile, $crtype) = &create_mail_file($muinfo);
 
-	# Copy mail into user's inbox
-	# XXX dir with Maildir sub-directory
-	local $mfile = $mailuser->{'mailbox'}->{'cid'};
-	local $mpath = "$root/$mfile";
-	if ($mfile && -r $mpath) {
-		local $fmt = &compression_format($mpath);
-		if ($fmt) {
-			# Extract the maildir first
-			local $temp = &transname();
-			&make_dir($temp, 0700);
-			&extract_compressed_file($mpath, $temp);
-			$mpath = $temp;
+	# Extract mail user's home directory
+	local $hmsrc = $root."/".&remove_cid_prefix($mailuser->{'src'});
+	if ($mailuser->{'src'} && -r $hmsrc) {
+		local $err = &extract_compressed_file($hmsrc,$muinfo->{'home'});
+		if ($err) {
+			&$first_print("Failed to extract home for $muinfo->{'user'} : $err");
 			}
-		local $srcfolder = {
-		  'file' => $mpath,
-		  'type' => $mailuser->{'mailbox'}->{'type'} eq 'mdir' ? 1 : 0,
-		  };
 		local $dstfolder = { 'file' => $crfile, 'type' => $crtype };
-		&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
-		&set_mailfolder_owner($dstfolder, $uinfo);
+		local $srcfolder = { 'file' => $muinfo->{'home'}.'/Maildir',
+				     'type' => 1 };
+		if ($srcfolder->{'file'} ne $dstfolder->{'file'}) {
+			# Need to move mail file too
+			&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
+			&set_mailfolder_owner($dstfolder, $muinfo);
+			}
 		}
+	else {
+		&$first_print("No home contents found for $muinfo->{'user'}");
+		}
+
+	# Copy users' crontabs
+	# XXX
 
 	$mcount++;
 	}
+&set_mailbox_homes_ownership(\%dom);
 &$second_print(".. done (migrated $mcount users)");
 
 # Re-create MySQL databases
@@ -492,6 +495,7 @@ if ($got{'mysql'}) {
 goto DONE;
 
 # Migrate protected directories as .htaccess files
+# XXX
 local $pdir = $domain->{'phosting'}->{'pdir'};
 if ($pdir && &foreign_check("htaccess-htpasswd")) {
 	&$first_print("Re-creating protected directories ..");
