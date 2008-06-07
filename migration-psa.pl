@@ -1,86 +1,57 @@
-# Functions for migrating a plesk backup. These appear to be in MIME format,
+# Functions for migrating a plesk 7 backup. These appear to be in MIME format,
 # with each part (home dir, settings, etc) in a separate 'attachment'
 
-# migration_plesk_validate(file, domain, [user], [&parent], [prefix], [pass])
+# migration_psa_validate(file, domain, [user], [&parent], [prefix], [pass])
 # Make sure the given file is a Plesk backup, and contains the domain
-sub migration_plesk_validate
+sub migration_psa_validate
 {
 local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
-local ($ok, $root) = &extract_plesk_dir($file, 8);
+local ($ok, $root) = &extract_plesk_dir($file, 7);
 $ok || return ("Not a Plesk 8 backup file : $root");
 local $xfile = "$root/dump.xml";
-local $windows = 0;
-if (!-r $xfile) {
-	$xfile = "$root/info.xml";
-	$windows = 1;
-	}
--r $xfile || return ("Not a complete Plesk 8 backup file - missing dump.xml or info.xml");
+-r $xfile || return ("Not a complete Plesk 7 backup file - missing XML data");
 
 # Check if the domain is in there
 local $dump = &read_plesk_xml($xfile);
 ref($dump) || return ($dump);
-if (!$windows) {
-	# Linux Plesk format
-	if (!$dom) {
-		# Work out domain name
-		$dom = $dump->{'domain'}->{'name'};
-		$dom || return ("Could not work out domain name from backup");
-		}
-	local $domain = $dump->{'domain'}->{$dom};
-	if (!$domain && $dump->{'domain'}->{'name'} eq $dom) {
-		$domain = $dump->{'domain'};
-		}
-	$domain || return ("Backup does not contain the domain $dom");
-
-	if (!$parent && !$user) {
-		# Check if we can work out the user
-		$user = $domain->{'phosting'}->{'sysuser'}->{'name'};
-		$user ||
-		    return ("Could not work out original username from backup");
-		}
-
-	if (!$parent && !$pass) {
-		# Check if we can work out the password
-		$pass = $domain->{'phosting'}->{'sysuser'}->{'password'}->{'content'} ||
-			$domain->{'domainuser'}->{'password'}->{'content'};
-		$pass ||
-		    return ("Could not work out original password from backup");
-		}
+if (!$dom) {
+	# Work out domain name
+	$dom = $dump->{'sites'}->{'domain'}->{'name'};
+	$dom || return ("Could not work out domain name from backup");
 	}
-else {
-	# On Windows, domain details are in a different place in the XML
-	if (!$dom) {
-		# Work out domain name
-		$dom = $dump->{'clients'}->{'client'}->{'domain'}->{'name'};
-		$dom || return ("Could not work out domain name from backup");
-		}
-	local $domain = $dump->{'clients'}->{'client'}->{'domain'};
-	$domain->{'name'} eq $dom ||
-		return ("Backup does not contain the domain $dom");
+local $domain = $dump->{'sites'}->{'domain'}->{$dom};
+if (!$domain && $dump->{'sites'}->{'domain'}->{'name'} eq $dom) {
+	$domain = $dump->{'sites'}->{'domain'};
+	}
+$domain || return ("Backup does not contain the domain $dom");
 
-	if (!$parent && !$user) {
-		# Check if we can work out the user
-		$user = $domain->{'hosting'}->{'sys_user'}->{'login'};
-		$user ||
-		    return ("Could not work out original username from backup");
-		}
+local $uinfo = ref($domain->{'user'}) eq 'ARRAY' ?
+		$domain->{'user'}->[0] : $domain->{'user'};
+if (!$parent && !$user) {
+	# Check if we can work out the user
+	local $user = $uinfo->{'login'}->{'name'};
+	$user ||
+	    return ("Could not work out original username from backup");
+	}
 
-	if (!$parent && !$pass) {
-		# We must have the password
-		$pass || return ("A password must be supplied when migrating ".
-				 "a Plesk backup");
+if (!$parent && !$pass) {
+	# Check if we can work out the password
+	if ($uinfo->{'login'}->{'PW_TYPE'} eq 'plain') {
+		$pass = $uinfo->{'login'}->{'password'};
 		}
+	$pass ||
+	    return ("Could not work out original password from backup");
 	}
 
 return (undef, $dom, $user, $pass);
 }
 
-# migration_plesk_migrate(file, domain, username, create-webmin, template-id,
+# migration_psa_migrate(file, domain, username, create-webmin, template-id,
 #			   ip-address, virtmode, pass, [&parent], [prefix],
 #			   virt-already, [email])
 # Actually extract the given Plesk backup, and return the list of domains
 # created.
-sub migration_plesk_migrate
+sub migration_psa_migrate
 {
 local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
        $prefix, $virtalready, $email) = @_;
@@ -97,34 +68,21 @@ $nologin_shell ||= $def_shell;
 $ftp_shell ||= $def_shell;
 
 # Extract backup and read the dump file
-local ($ok, $root) = &extract_plesk_dir($file, 8);
-local $windows = 0;
+local ($ok, $root) = &extract_plesk_dir($file, 7);
 local $xfile = "$root/dump.xml";
-if (!-r $xfile) {
-	$xfile = "$root/info.xml";
-	$windows = 1;
-	}
 local $dump = &read_plesk_xml($xfile);
 
-local $domain;
-if (!$windows) {
-	# Linux format
-	$domain = $dump->{'domain'}->{$dom};
-	if (!$domain && $dump->{'domain'}->{'name'} eq $dom) {
-		$domain = $dump->{'domain'};
-		}
-
-	# Work out user and group
-	if (!$user) {
-		$user = $domain->{'phosting'}->{'sysuser'}->{'name'};
-		}
+# Get domain object
+local $domain = $dump->{'sites'}->{'domain'}->{$dom};
+if (!$domain && $dump->{'sites'}->{'domain'}->{'name'} eq $dom) {
+	$domain = $dump->{'sites'}->{'domain'};
 	}
-else {
-	# Windows format
-	$domain = $dump->{'clients'}->{'client'}->{'domain'};
-	if (!$user) {
-		$user = $domain->{'hosting'}->{'sys_user'}->{'login'};
-		}
+
+# Work out user and group
+local $uinfo = ref($domain->{'user'}) eq 'ARRAY' ?
+		$domain->{'user'}->[0] : $domain->{'user'};
+if (!$user) {
+	$user = $uinfo->{'login'}->{'name'};
 	}
 local $group = $user;
 local $ugroup = $group;
@@ -133,37 +91,28 @@ local $ugroup = $group;
 &$first_print("Checking for Plesk features ..");
 local @got = ( "dir", $parent ? () : ("unix"), "web" );
 push(@got, "webmin") if ($webmin && !$parent);
-if (exists($domain->{'mailsystem'}->{'status'}->{'enabled'}) ||
-    $domain->{'mail'}) {
-	push(@got, "mail");
-	}
-if ($domain->{'dns-zone'} || $domain->{'dns_zone'}) {
+push(@got, "mail");	# Assume that all domains have mail
+if ($domain->{'dns'}) {
 	push(@got, "dns");
 	}
-if ($domain->{'www'} eq 'true' || -d "$root/$dom/httpdocs") {
-	push(@got, "web");
-	}
-if ($domain->{'ip'}->{'ip-type'} eq 'exclusive' && $virt) {
+push(@got, "web");	# Assume has website
+if ($uinfo->{'services'}->{'ssl'} eq 'true') {
 	push(@got, "ssl");
 	}
-if ($domain->{'phosting'}->{'logrotation'}->{'enabled'} eq 'true' ||
-    $windows && &indexof("web", @got) >= 0) {
-	push(@got, "logrotate");
-	}
-if ($domain->{'phosting'}->{'webalizer'}) {
+if ($uinfo->{'services'}->{'webstat'} eq 'true') {
 	push(@got, "webalizer");
+	}
+if (&indexof("web", @got) >= 0) {
+	push(@got, "logrotate");
 	}
 
 # Check for MySQL databases
-local $databases = $domain->{'phosting'}->{'sapp-installed'}->{'database'};
-if (!$databases) {
-        $databases = $domain->{'database'};
-        }
+local $databases = $domain->{'data_bases'};
 if (!$databases) {
 	$databases = { };
 	}
-elsif ($databases->{'version'}) {
-	# Just one database
+elsif ($databases->{'name'}) {
+	# Just one DB
 	$databases = { $databases->{'name'} => $databases };
 	}
 local @mysqldbs = grep { $databases->{$_}->{'type'} eq 'mysql' }
@@ -172,43 +121,17 @@ if (@mysqldbs) {
 	push(@got, "mysql");
 	}
 
-local $mailusers;
+# Check for mail users
+local @mailusers;
 local ($has_spam, $has_virus);
-if (!$windows) {
-	# Check for Linux mail users
-	$mailusers = $domain->{'mailsystem'}->{'mailuser'};
-	if (!$mailusers) {
-		$mailusers = { };
+foreach my $u (@{$domain->{'user'}}) {
+	if ($u->{'spamassassin'}) {
+		$has_spam = 1;
 		}
-	elsif ($mailusers->{'mailbox-quota'}) {
-		# Just one user
-		$mailusers = { $mailusers->{'name'} => $mailusers };
-		}
-	foreach my $name (keys %$mailusers) {
-		local $mailuser = $mailusers->{$name};
-		if ($mailuser->{'spamassassin'}->{'status'} eq 'on') {
-			$has_spam++;
-			}
-		if ($mailuser->{'virusfilter'}->{'state'} eq 'inout' ||
-		    $mailuser->{'virusfilter'}->{'state'} eq 'in') {
-			$has_virus++;
-			}
+	if ($u ne $uinfo) {
+		push(@mailusers, $u);
 		}
 	}
-else {
-	# Check for Windows mail users
-	$mailusers = $domain->{'mail'};
-	if (!$mailusers) {
-		$mailusers = { };
-		}
-	foreach my $mid (keys %$mailusers) {
-		local $mailuser = $mailusers->{$mid};
-		if ($mailuser->{'sa_conf'}) {
-			$has_spam++;
-			}
-		}
-	}
-
 push(@got, "spam") if ($has_spam);
 push(@got, "virus") if ($has_virus);
 
@@ -237,11 +160,7 @@ else {
 local $bsize = &has_home_quotas() ? &quota_bsize("home") : undef;
 local $quota;
 if (!$parent && &has_home_quotas()) {
-	$quota = $domain->{'phosting'}->{'sysuser'}->{'quota'} / $bsize;
-	}
-if (!$parent && !$pass) {
-	$pass = $domain->{'phosting'}->{'sysuser'}->{'password'}->{'content'} ||
-		$domain->{'domainuser'}->{'password'}->{'content'};
+	$quota = $domain->{'limits'}->{'mbox_quota'} / $bsize;
 	}
 
 # Create the virtual server object
@@ -289,6 +208,10 @@ foreach my $f (@features, @feature_plugins) {
 	}
 &set_featurelimits_from_template(\%dom, $tmpl);
 $dom{'home'} = &server_home_directory(\%dom, $parent);
+$dom{'public_html_dir'} = 'httpdocs';			# Plesk 7 style
+$dom{'public_html_path'} = $dom{'home'}.'/httpdocs';
+$dom{'cgi_bin_dir'} = 'cgi-bin';
+$dom{'cgi_bin_path'} = $dom{'home'}.'/cgi-bin';
 &complete_domain(\%dom);
 
 # Check for various clashes
@@ -319,48 +242,20 @@ else {
 	&$second_print(".. done");
 	}
 
-# Copy web files
-&$first_print("Copying web pages ..");
+# Copy web files, which are the main's users home 
+&$first_print("Copying home directory ..");
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable(\%dom, 1);
 	}
-local $hdir = &public_html_dir(\%dom);
-if (-d "$root/$dom/httpdocs") {
-	# Windows format
-	&copy_source_dest("$root/$dom/httpdocs", $hdir);
-	&set_home_ownership(\%dom);
-	&$second_print(".. done");
+local $htsrc = $root."/".&remove_cid_prefix($uinfo->{'src'});
+if (!$uinfo->{'src'}) {
+	&$second_print(".. not defined in XML");
+	}
+elsif (!-r $htsrc) {
+	&$second_print(".. not found in backup");
 	}
 else {
-	# Linux format (a tar file)
-	local $htdocs = "$root/$dom.httpdocs";
-	if (!-r $htdocs) {
-		$htdocs = "$root/$dom.htdocs";
-		}
-	if (-r $htdocs) {
-		local $err = &extract_compressed_file($htdocs, $hdir);
-		if ($err) {
-			&$second_print(".. failed : $err");
-			}
-		else {
-			&set_home_ownership(\%dom);
-			&$second_print(".. done");
-			}
-		}
-	else {
-		&$second_print(".. not found in Plesk backup");
-		}
-	}
-
-# Copy CGI files
-&$first_print("Copying CGI scripts ..");
-local $cgis = "$root/$dom.cgi-bin";
-if (!-r $cgis) {
-	$cgis = "$root/$dom.cgi";
-	}
-if (-r $cgis) {
-	local $cdir = &cgi_bin_dir(\%dom);
-	local $err = &extract_compressed_file($cgis, $cdir);
+	local $err = &extract_compressed_file($htsrc, $dom{'home'});
 	if ($err) {
 		&$second_print(".. failed : $err");
 		}
@@ -369,91 +264,31 @@ if (-r $cgis) {
 		&$second_print(".. done");
 		}
 	}
-else {
-	&$second_print(".. not found in Plesk backup");
-	}
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable(\%dom, 0);
 	}
 
-# Re-create DNS records
-local $oldip = $domain->{'ip'}->{'ip-address'};
-if ($got{'dns'}) {
-	&$first_print("Copying and fixing DNS records ..");
-	local $zonexml = $domain->{'dns-zone'};
-	local $newzone = &get_bind_zone($dom);
-	if (!$newzone) {
-		&$second_print(".. could not find new DNS zone!");
-		}
-	elsif (!$zonexml) {
-		&$second_print(".. could not find zone in backup");
-		}
-	else {
-		local $rcount = 0;
-		local $zdstfile = &bind8::find_value("file",
-						     $newzone->{'members'});
-		local @recs = &bind8::read_zone_file($zdstfile, $dom);
-		foreach my $rec (@{$zonexml->{'dnsrec'}}) {
-			local $recname = $rec->{'src'};
-			$recname .= ".".$dom."." if ($recname !~ /\.$/);
-			local ($oldrec) = grep { $_->{'name'} eq $recname }
-					       @recs;
-			if (!$oldrec) {
-				# Found one we need to add
-				local $recvalue = $rec->{'dst'};
-				local $rectype = $rec->{'type'};
-				if ($rectype eq "A" && $recvalue eq $oldip) {
-					# Use new IP address
-					$recvalue = $ip;
-					}
-				if ($rectype eq "MX") {
-					# Include priority in value
-					$recvalue = $rec->{'opt'}." ".$recvalue;
-					}
-				if ($rectype eq "PTR") {
-					# Not migratable
-					next;
-					}
-				&bind8::create_record($zdstfile,
-						      $recname,
-						      undef,
-						      "IN",
-						      $rectype,
-						      $recvalue);
-				$rcount++;
-				}
-			}
-		if ($rcount) {
-			&bind8::bump_soa_record($zdstfile, \@recs);
-			&register_post_action(\&restart_bind);
-			}
-		&$second_print(".. done (added $rcount records)");
-		}
-	}
-
 # Migrate SSL certs
-local $certificate = $domain->{'certificate'};
-if ($certificate) {
+local $certificate =$domain->{'server'}->{'certificates_list'}->{'certificate'};
+if ($certificate && $certificate->{'pub_key'}->{'src'} &&
+		    $certificate->{'pvt_key'}->{'src'}) {
 	&$first_print("Migrating SSL certificate and key ..");
-	local $cert = &cleanup_plesk_cert($certificate->{'certificate-data'});
+	local $certfile = $root."/".&remove_cid_prefix(
+					$certificate->{'pub_key'}->{'src'});
+	local $cert = &cleanup_plesk_cert(&read_file_contents($certfile));
 	if ($cert) {
 		$dom{'ssl_cert'} ||= &default_certificate_file(\%dom, 'cert');
 		&open_tempfile(CERT, ">$dom{'ssl_cert'}");
 		&print_tempfile(CERT, $cert);
 		&close_tempfile(CERT);
 		}
-	local $key = &cleanup_plesk_cert($certificate->{'private-key'});
+	local $keyfile = $root."/".&remove_cid_prefix(
+					$certificate->{'pvt_key'}->{'src'});
+	local $key = &cleanup_plesk_cert(&read_file_contents($keyfile));
 	if ($key) {
 		$dom{'ssl_key'} ||= &default_certificate_file(\%dom, 'key');
 		&open_tempfile(CERT, ">$dom{'ssl_key'}");
 		&print_tempfile(CERT, $key);
-		&close_tempfile(CERT);
-		}
-	local $ca = &cleanup_plesk_cert($certificate->{'ca-certificate'});
-	if ($ca) {
-		$dom{'ssl_chain'} ||= &default_certificate_file(\%dom, 'chain');
-		&open_tempfile(CERT, ">$dom{'ssl_chain'}");
-		&print_tempfile(CERT, $ca);
 		&close_tempfile(CERT);
 		}
 	&$second_print($cert && $key ? ".. done" :
@@ -472,19 +307,16 @@ local (%taken, %utaken);
 &$first_print("Re-creating mail users ..");
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 local $mcount = 0;
-# Linux mailboxes
-foreach my $name (keys %$mailusers) {
-	next if ($windows);
-	local $mailuser = $mailusers->{$name};
+foreach my $mailuser (@mailusers) {
 	local $uinfo = &create_initial_user(\%dom);
-	$uinfo->{'user'} = &userdom_name($name, \%dom);
-	if ($mailuser->{'password'}->{'type'} eq 'plain') {
-		$uinfo->{'plainpass'} = $mailuser->{'password'}->{'content'};
+	$uinfo->{'user'} = &userdom_name($mailuser->{'login'}->{'name'}, \%dom);
+	if ($mailuser->{'login'}->{'PW_TYPE'} eq 'plain') {
+		$uinfo->{'plainpass'} = $mailuser->{'login'}->{'password'};
 		$uinfo->{'pass'} = &encrypt_user_password(
 					$uinfo, $uinfo->{'plainpass'});
 		}
 	else {
-		$uinfo->{'pass'} = $mailuser->{'password'}->{'content'};
+		$uinfo->{'pass'} = $mailuser->{'login'}->{'password'};
 		}
 	$uinfo->{'uid'} = &allocate_uid(\%taken);
 	$uinfo->{'gid'} = $dom{'gid'};
@@ -493,6 +325,7 @@ foreach my $name (keys %$mailusers) {
 	$uinfo->{'to'} = [ ];
 	if ($mailuser->{'mailbox'}->{'enabled'} eq 'true') {
 		# Add delivery to user's mailbox
+		# XXX
 		local $escuser = $uinfo->{'user'};
 		if ($config{'mail_system'} == 0 && $escuser =~ /\@/) {
 			$escuser = &replace_atsign($escuser);
@@ -503,13 +336,13 @@ foreach my $name (keys %$mailusers) {
 		push(@{$uinfo->{'to'}}, "\\".$escuser);
 		}
 	if (&has_home_quotas()) {
-		local $q = $mailuser->{'mailbox-quota'} < 0 ? undef :
-				$mailuser->{'mailbox-quota'}*1024;
+		local $q = $mailuser->{'login'}->{'quota'};
 		$uinfo->{'qquota'} = $q;
 		$uinfo->{'quota'} = $q / &quota_bsize("home");
 		$uinfo->{'mquota'} = $q / &quota_bsize("home");
 		}
 	# Add mail aliases
+	# XXX
 	local $alias = $mailuser->{'alias'};
 	if ($alias) {
 		$alias = [ $alias ] if (ref($alias) ne 'ARRAY');
@@ -520,6 +353,7 @@ foreach my $name (keys %$mailusers) {
 			}
 		}
 	# Add forwarding
+	# XXX
 	local $redirect = $mailuser->{'redirect'};
 	if ($redirect) {
 		$redirect = [ $redirect ] if (ref($redirect) ne 'ARRAY');
@@ -530,6 +364,7 @@ foreach my $name (keys %$mailusers) {
 			}
 		}
 	# Add mail group members (which are really just forwards)
+	# XXX
 	local $mailgroup = $mailuser->{'mailgroup-member'};
 	if ($mailgroup) {
 		$mailgroup = [ $mailgroup ] if (ref($mailgroup) ne 'ARRAY');
@@ -550,6 +385,7 @@ foreach my $name (keys %$mailusers) {
 	local ($crfile, $crtype) = &create_mail_file($uinfo);
 
 	# Copy mail into user's inbox
+	# XXX dir with Maildir sub-directory
 	local $mfile = $mailuser->{'mailbox'}->{'cid'};
 	local $mpath = "$root/$mfile";
 	if ($mfile && -r $mpath) {
@@ -572,82 +408,7 @@ foreach my $name (keys %$mailusers) {
 
 	$mcount++;
 	}
-# Windows mail users
-foreach my $mid (keys %$mailusers) {
-	next if (!$windows);
-	local $mailuser = $mailusers->{$mid};
-	next if ($mailuser->{'mail_group'} eq 'true');
-	local $name = $mailuser->{'mail_name'};
-	local $uinfo = &create_initial_user(\%dom);
-	$uinfo->{'user'} = &userdom_name($name, \%dom);
-	if ($mailuser->{'account'}->{'type'} eq 'plain') {
-		$uinfo->{'plainpass'} = $mailuser->{'account'}->{'password'};
-		$uinfo->{'pass'} = &encrypt_user_password(
-					$uinfo, $uinfo->{'plainpass'});
-		}
-	else {
-		$uinfo->{'pass'} = $mailuser->{'account'}->{'password'};
-		}
-	$uinfo->{'uid'} = &allocate_uid(\%taken);
-	$uinfo->{'gid'} = $dom{'gid'};
-	$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$name";
-	$uinfo->{'shell'} = $nologin_shell->{'shell'};
-	$uinfo->{'email'} = $name."\@".$dom;
-	if (&has_home_quotas()) {
-		local $q = $mailuser->{'mbox_quota'} < 0 ? undef :
-				$mailuser->{'mbox_quota'}*1024;
-		$uinfo->{'qquota'} = $q;
-		$uinfo->{'quota'} = $q / &quota_bsize("home");
-		$uinfo->{'mquota'} = $q / &quota_bsize("home");
-		}
-	foreach my $r (values %{$mailuser->{'mail_redir'}}) {
-		if ($r->{'address'}) {
-			push(@{$uinfo->{'to'}}, $r->{'address'});
-			}
-		}
-	&create_user($uinfo, \%dom);
-	&create_user_home($uinfo, \%dom);
-	$taken{$uinfo->{'uid'}}++;
-	local ($crfile, $crtype) = &create_mail_file($uinfo);
-	$mcount++;
-	}
 &$second_print(".. done (migrated $mcount users)");
-
-# Re-create mail aliases
-local $acount = 0;
-&$first_print("Re-creating mail aliases ..");
-&set_alias_programs();
-# Linux catch all
-local $ca = $domain->{'mailsystem'}->{'catch-all'};
-if ($ca) {
-	local @to;
-	if ($ca =~ /^bounce:(.*)/) {
-		push(@to, "BOUNCE $1");
-		}
-	else {
-		push(@to, $ca);
-		}
-	local $virt = { 'from' => "\@$dom",
-			'to' => \@to };
-	&create_virtuser($virt);
-	$acount++;
-	}
-# Windows mail aliases
-foreach my $mid (keys %$mailusers) {
-	next if (!$windows);
-	local $mailuser = $mailusers->{$mid};
-	next if ($mailuser->{'mail_group'} eq 'false');
-	local $virt = { 'from' => $mailuser->{'mail_name'}.'@'.$dom,
-			'to' => [ ] };
-	foreach my $r (values %{$mailuser->{'mail_redir'}}) {
-		if ($r->{'address'}) {
-			push(@{$virt->{'to'}}, $r->{'address'});
-			}
-		}
-	&create_virtuser($virt);
-	$acount++;
-	}
-&$second_print(".. done (migrated $acount aliases)");
 
 # Re-create MySQL databases
 if ($got{'mysql'}) {
@@ -663,23 +424,44 @@ if ($got{'mysql'}) {
 		&$indent_print();
 		&create_mysql_database(\%dom, $name);
 		&save_domain(\%dom, 1);
-		local ($ex, $out) = &mysql::execute_sql_file($name,
-			"$root/$database->{'cid'}");
+		local $mysrc = $root.'/'.&remove_cid_prefix($database->{'src'});
+		if (!$database->{'src'} || !-r $mysrc) {
+			&$first_print("Data source for $name not found");
+			}
+		local $myplain = &transname();
+		if (&compression_format($mysrc) == 0) {
+			# Plain SQL
+			$myplain = $mysrc;
+			}
+		elsif (&compression_format($mysrc) == 1) {
+			local $err = &backquote_command(
+				"gunzip -c ".quotemeta($mysrc).
+				" 2>&1 >".quotemeta($myplain));
+			if ($?) {
+				&$first_print("Error un-compressing source for $name : $err");
+				}
+			}
+		else {
+			&$first_print("Unknown compression format for $name");
+			}
+		local ($ex, $out) = &mysql::execute_sql_file($name, $myplain);
 		if ($ex) {
-			&$first_print("Error loading $db : $out");
+			&$first_print("Error loading $name : $out");
 			}
 
 		# Create any DB users as domain users
-		local $dbusers = $database->{'dbuser'};
-		$dbusers = !$dbusers ? { } :
-		   $dbusers->{'password'} ? { $dbusers->{'name'} => $dbusers } :
-					    $dbusers;
-		foreach my $mname (keys %$dbusers) {
-			next if ($mname eq $user);	# Domain owner
+		local $dbusers = $database->{'user'};
+		if (!$dbusers) {
+			$dbusers = [ ];
+			}
+		elsif (ref($dbusers) ne 'ARRAY') {
+			$dbusers = [ $dbusers ];
+			}
+		foreach my $dbuser (@$dbusers) {
 			local $myuinfo = &create_initial_user(\%dom);
-			$myuinfo->{'user'} = $mname;
+			$myuinfo->{'user'} = $dbuser->{'login'}->{'name'};
 			$myuinfo->{'plainpass'} =
-				$dbusers->{$mname}->{'password'}->{'content'};
+				$dbuser->{'login'}->{'password'};
 			$myuinfo->{'pass'} = &encrypt_user_password($myuinfo,
 						$myuinfo->{'plainpass'});
 			$myuinfo->{'uid'} = &allocate_uid(\%taken);
@@ -707,6 +489,7 @@ if ($got{'mysql'}) {
 &release_lock_mail(\%dom);
 
 &sync_alias_virtuals(\%dom);
+goto DONE;
 
 # Migrate protected directories as .htaccess files
 local $pdir = $domain->{'phosting'}->{'pdir'};
@@ -949,207 +732,15 @@ foreach my $sdom (keys %$subdoms) {
 	&$second_print(".. created $sucount");
 	}
 
+DONE:
 return (\%dom, @rvdoms);
 }
 
-# extract_plesk_dir(file, version)
-# Extracts all attachments from a plesk backup in MIME format to a temp
-# directory, and returns the path. Version can be one of 7 or 8
-sub extract_plesk_dir
+sub remove_cid_prefix
 {
-local ($file, $version) = @_;
-if ($main::plesk_dir_cache{$file} && -d $main::plesk_dir_cache{$file}) {
-	# Use cached extract from this session
-	return (1, $main::plesk_dir_cache{$file});
-	}
-local $dir = &transname();
-&make_dir($dir, 0700);
-
-# Is this compressed?
-local $cf = &compression_format($file);
-if ($cf != 0 && $cf != 1 && $cf != 4) {
-	return (0, "Unknown compression format");
-	}
-
-if ($cf == 4) {
-	# Windows Plesk backup, which is a ZIP file
-	&has_command("unzip") || return (0, "The unzip command is needed to ".
-					    "extract Plesk Windows backups");
-	&execute_command("cd ".quotemeta($dir)." && unzip ".quotemeta($file));
-	}
-else {
-	# Read the backup file, parsing it into files as we go
-	&foreign_require("mailboxes", "mailboxes-lib.pl");
-	local $mail = { };
-	if ($cf == 0) {
-		# MIME format file
-		open(FILE, $file) || return undef;
-		}
-	else {
-		# Gzipped MIME file
-		open(FILE, "gunzip -c ".quotemeta($file)." |") || return undef;
-		}
-
-	# Read base mail headers
-	local %baseheaders;
-	while(<FILE>) {
-		s/\r|\n//g;
-		if (/^(\S+):\s+(.*)/) {
-			$baseheaders{lc($1)} = $2;
-			}
-		else {
-			last;
-			}
-		}
-	$baseheaders{'content-type'} =~ /boundary\s*=\s*"([^"]+)"/i ||
-	    $baseheaders{'content-type'} =~ /boundary\s*=\s*(\S+)/i ||
-		return (0, "Missing Content-Type boundary");
-	local $bound = $1;
-	if ($baseheaders{'dumped-psa-version'} =~ /^7\./ && $version == 8) {
-		return (0, "This is a Plesk 7 backup, which uses a different format. You must use the Plesk 7 (psa) migration type");
-		}
-	elsif ($baseheaders{'dumped-psa-version'} !~ /^7\./ && $version == 7) {
-		return (0, "This is a Plesk 8 backup, which uses a different format. You must use the Plesk 8 (plesk) migration type");
-		}
-
-	# Skip to start of first section
-	local $lnum = 0;
-	while(<FILE>) {
-		$lnum++;
-		s/\r|\n//g;
-		last if ($_ eq "--".$bound);
-		}
-
-	# Read sections in turn
-	local $alldone = 0;
-	local $count = 0;
-	while(!$alldone) {
-		# Headers first
-		local %sheaders;
-		while(<FILE>) {
-			$lnum++;
-			s/\r|\n//g;
-			if (/^(\S+):\s+(.*)/) {
-				$sheaders{lc($1)} = $2;
-				}
-			else {
-				last;
-				}
-			}
-		local $cd = $sheaders{'content-disposition'};
-		local $ct = $sheaders{'content-type'};
-		local $filename;
-		if ($version == 8) {
-			# For Plesk 8, each section has a filename that we can
-			# use later to refer to them
-			if ($cd =~ /filename\s*=\s*"([^"]+)"/i || 
-			    $cd =~ /filename\s*=\s*(\S+)/i) {
-				$filename = $1;
-				}
-			elsif ($cd =~ /name\s*=\s*"([^"]+)"/i || 
-			       $cd =~ /name\s*=\s*(\S+)/i) {
-				$filename = $1;
-				}
-			if ($sheaders{'content-type'} =~
-				/boundary\s*=\s*"([^"]+)"/i ||
-			    $sheaders{'content-type'} =~
-				/boundary\s*=\s*(\S+)/i) {
-				# Start of a new multi-part section, such as
-				# when the backup is signed
-				$bound = $1;
-				while(<FILE>) {
-					$lnum++;
-					last if (/\S/);
-					}
-				next;
-				}
-			$filename ||
-				return (0, "Missing filename at line $lnum");
-			}
-		elsif ($version == 7) {
-			# For Plesk 7, sections have a content ID apart from the
-			# XML file
-			if ($ct =~ /^text\/xml/) {
-				$filename = "dump.xml";
-				}
-			else {
-				$filename = $sheaders{'content-id'};
-				}
-			$filename ||
-				return (0, "Missing content ID at line $lnum");
-			}
-		local $enc = $sheaders{'content-transfer-encoding'} || 'binary';
-
-		# Read body till the boundary end
-		&open_tempfile(ATTACH, ">$dir/$filename", 0, 1);
-		while(<FILE>) {
-			$lnum++;
-			if ($_ eq "--".$bound."\n" ||
-			    $_ eq "--".$bound."\r\n") {
-				# End of this block
-				last;
-				}
-			elsif ($_ eq "--".$bound."--\n" ||
-			       $_ eq "--".$bound."--\r\n") {
-				# End of the whole mess
-				$alldone = 1;
-				last;
-				}
-			if ($enc eq 'binary' || $enc eq '7bit') {
-				&print_tempfile(ATTACH, $_);
-				}
-			elsif ($enc eq 'base64') {
-				&print_tempfile(ATTACH,
-					&mailboxes::b64decode($_));
-				}
-			elsif ($enc eq 'quoted-printable') {
-				&print_tempfile(ATTACH,
-					&mailboxes::quoted_decode($_));
-				}
-			else {
-				return (0,
-				  "Unknown encoding $enc at line $lnum");
-				}
-			}
-		&close_tempfile(ATTACH);
-		$count++;
-		}
-	return (0, "No attachments found in MIME data") if (!$count);
-	}
-
-$main::plesk_dir_cache{$file} = $dir;
-return (1, $dir);
-}
-
-# read_plesk_xml(file)
-# Use XML::Simple to read a Plesk XML file. Returns the object on success, or
-# an error message on failure.
-sub read_plesk_xml
-{
-local ($file) = @_;
-eval "use XML::Simple";
-if ($@) {
-	return "XML::Simple Perl module is not installed";
-	}
-local $ref;
-eval {
-	local $xs = XML::Simple->new();
-	$ref = $xs->XMLin($file);
-	};
-$ref || return "Failed to read XML file : $@";
-return $ref;
-}
-
-# cleanup_plesk_cert(data)
-# Removes extra spacing from a Plesk cert
-sub cleanup_plesk_cert
-{
-local ($data) = @_;
-local @lines = grep { /\S/ } split(/\n/, $data);
-foreach my $l (@lines) {
-	$l =~ s/^\s+//;
-	}
-return join("", map { $_."\n" } @lines);
+local ($cid) = @_;
+$cid =~ s/^cid://;
+return $cid;
 }
 
 1;

@@ -135,6 +135,20 @@ else {
 				}
 			}
 		}
+	elsif ($_[0]->{'public_html_path'}) {
+		# If a custom HTML directory was requested, set it up
+		local $mydir;
+		foreach my $d (@dirs) {
+			if ($d =~ /^\s*DocumentRoot\s+"([^"]+)"/ ||
+			    $d =~ /^\s*DocumentRoot\s+(\S+)/) {
+				$mydir = $1;
+				$d = "DocumentRoot $_[0]->{'public_html_path'}";
+				}
+			elsif ($d =~ /^\s*<Directory\s+\Q$mydir\E>/ && $mydir) {
+				$d = "<Directory $_[0]->{'public_html_path'}>";
+				}
+			}
+		}
 
 	# Work out where in the file to add.
 	# If this domain is foo.bar.com and a virtual host for *.bar.com exists

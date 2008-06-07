@@ -124,7 +124,7 @@ foreach my $pname (@confplugins) {
 @startstop_plugins = grep { &plugin_defined($_, "feature_startstop") } @plugins;
 @backup_plugins = grep { &plugin_defined($_, "feature_backup") } @plugins;
 @script_plugins = grep { &plugin_defined($_, "scripts_list") } @plugins;
-@migration_types = ( "cpanel", "ensim", "plesk" );
+@migration_types = ( "cpanel", "ensim", "plesk", "psa" );
 @allow_features = (@opt_features, "virt", @feature_plugins);
 @startstop_features = ("web", "dns", "mail", "ftp", "unix", "virus",
 		       "mysql", "postgres");
