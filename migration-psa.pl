@@ -306,12 +306,23 @@ if (!$parent) {
 		local ($ofile, $otype) = &user_mail_file($duser);
 		local $dstfolder = { 'file' => $ofile, 'type' => $otype };
 		if ($srcfolder->{'file'} ne $dstfolder->{'file'}) {
+			&$first_print("Copying domain owner's mailbox ..");
 			&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
 			&set_mailfolder_owner($dstfolder, $duser);
+			&$second_print(".. done");
 			}
 
-		# Copy crontab
-		# XXX
+		# Append crontab to users current jobs
+		local $crsrc = $root."/".
+			&remove_cid_prefix($uinfo->{'crontab'}->{'src'});
+		if ($uinfo->{'crontab'}->{'src'} && -r $crsrc) {
+			&$first_print("Copying domain owner's cron jobs ..");
+			$cron::cron_temp_file = &transname();
+			&cron::copy_cron_temp({ 'user' => $duser->{'user'} });
+			&execute_command("cat $crsrc >>$cron::cron_temp_file");
+			&cron::copy_crontab($duser->{'user'});
+			&$second_print(".. done");
+			}
 		}
 	}
 
@@ -405,9 +416,6 @@ foreach my $mailuser (@mailusers) {
 		&$first_print("No home contents found for $muinfo->{'user'}");
 		}
 
-	# Copy users' crontabs
-	# XXX
-
 	$mcount++;
 	}
 &set_mailbox_homes_ownership(\%dom);
@@ -492,12 +500,14 @@ if ($got{'mysql'}) {
 &release_lock_mail(\%dom);
 
 &sync_alias_virtuals(\%dom);
-goto DONE;
 
 # Migrate protected directories as .htaccess files
 # XXX
-local $pdir = $domain->{'phosting'}->{'pdir'};
-if ($pdir && &foreign_check("htaccess-htpasswd")) {
+local $pdirs = $uinfo->{'protected_dir'};
+if ($pdirs && ref($pdirs) ne 'ARRAY') {
+	$pdirs = [ $pdirs ];
+	}
+if (@$pdirs && &foreign_check("htaccess-htpasswd")) {
 	&$first_print("Re-creating protected directories ..");
 	&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
 	local $hdir = &public_html_dir(\%dom);
@@ -511,19 +521,17 @@ if ($pdir && &foreign_check("htaccess-htpasswd")) {
 
 	# Migrate each one, by creating a .htaccess file
 	local $pcount = 0;
-	if ($pdir->{'name'}) {
-		$pdir = { $pdir->{'name'} => $pdir };
-		}
 	local @htdirs = &htaccess_htpasswd::list_directories();
-	foreach my $name (keys %$pdir) {
+	foreach my $p (@$pdirs) {
 		# Make .htaccess file
-		local $p = $pdir->{$name};
+		local $name = $p->{'path'};
 		local $dir = "$hdir/$name";
 		local $htaccess = "$dir/$htaccess_htpasswd::config{'htaccess'}";
 		$name =~ s/\//-/g;
 		local $htpasswd = "$etc/.htpasswd-$name";
+		local $realm = $p->{'realm'}->{'desc'} || $name;
 		&open_tempfile(HTACCESS, ">$htaccess");
-		&print_tempfile(HTACCESS, "AuthName \"$p->{'title'}\"\n");
+		&print_tempfile(HTACCESS, "AuthName \"$realm\"\n");
 		&print_tempfile(HTACCESS, "AuthType Basic\n");
 		&print_tempfile(HTACCESS, "AuthUserFile $htpasswd\n");
 		&print_tempfile(HTACCESS, "require valid-user\n");
@@ -532,14 +540,17 @@ if ($pdir && &foreign_check("htaccess-htpasswd")) {
 		# Add users to .htpasswd file
 		&open_tempfile(HTPASSWD, ">$htpasswd");
 		&close_tempfile(HTPASSWD);
-		local $pduser = $p->{'pduser'};
-		if ($pduser) {
-			$pduser = [ $pduser ] if (ref($pduser) ne 'ARRAY');
-			foreach my $u (@$pduser) {
-				local $huinfo = { 'user' => $u->{'name'},
-						  'enabled' => 1 };
-				local $pass = $u->{'password'}->{'content'};
-				if ($u->{'password'}->{'type'} eq 'plain') {
+		local $pdusers = $p->{'user'};
+		if ($pdusers && ref($pdusers) ne 'ARRAY') {
+			$pdusers = [ $pdusers ];
+			}
+		if (@$pdusers) {
+			foreach my $u (@$pdusers) {
+				local $huinfo = {
+					'user' => $u->{'login'}->{'name'},
+					'enabled' => 1 };
+				local $pass = $u->{'login'}->{'password'};
+				if ($u->{'login'}->{'PW_TYPE'} eq 'plain') {
 					$huinfo->{'pass'} = &htaccess_htpasswd::encrypt_password($pass);
 					}
 				else {
@@ -559,60 +570,7 @@ if ($pdir && &foreign_check("htaccess-htpasswd")) {
 	&htaccess_htpasswd::save_directories(\@htdirs);
 	&$second_print(".. done (migrated $pcount)");
 	}
-
-# Migrate alias domains
-local $aliasdoms = $domain->{'domain-alias'};
-if (!$aliasdoms) {
-	$aliasdoms = { };
-	}
-elsif ($aliasdoms->{'web'}) {
-	# Just one alias
-	$aliasdoms = { $aliasdoms->{'name'} => $aliasdoms };
-	}
-local @rvdoms;
-foreach my $adom (keys %$aliasdoms) {
-	local $aliasdom = $aliasdoms->{$adom};
-	&$first_print("Creating alias domain $adom ..");
-	&$indent_print();
-	local %alias = ( 'id', &domain_id(),
-			 'dom', $adom,
-			 'user', $dom{'user'},
-			 'group', $dom{'group'},
-			 'prefix', $dom{'prefix'},
-			 'ugroup', $dom{'ugroup'},
-			 'pass', $dom{'pass'},
-			 'alias', $dom{'id'},
-			 'uid', $dom{'uid'},
-			 'gid', $dom{'gid'},
-			 'ugid', $dom{'ugid'},
-			 'owner', "Migrated Plesk alias for $dom{'dom'}",
-			 'email', $dom{'email'},
-			 'name', 1,
-			 'ip', $dom{'ip'},
-			 'virt', 0,
-			 'source', $dom{'source'},
-			 'parent', $dom{'id'},
-			 'template', $dom{'template'},
-			 'reseller', $dom{'reseller'},
-			 'nocreationmail', 1,
-			 'nocopyskel', 1,
-			);
-	$alias{'dom'} =~ s/^www\.//;
-	foreach my $f (@alias_features) {
-		local $want = $f eq 'web' ? $aliasdom->{'web'} eq 'true' :
-			      $f eq 'dns' ? $aliasdom->{'dns'} eq 'true' : 1;
-		$alias{$f} = $dom{$f} && $want;
-		}
-	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
-					  : \%dom;
-	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
-	&complete_domain(\%alias);
-	&create_virtual_server(\%alias, $parentdom,
-			       $parentdom->{'user'});
-	&$outdent_print();
-	&$second_print($text{'setup_done'});
-	push(@rvdoms, \%alias);
-	}
+goto DONE;
 
 # Migrate sub-domains (as Virtualmin sub-servers)
 local $subdoms = $domain->{'phosting'}->{'subdomain'};
