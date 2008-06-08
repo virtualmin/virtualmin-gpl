@@ -1,23 +1,24 @@
- - run functional-test.pl
+ x run functional-test.pl
 
- - Create tar.gz file
+ x Create tar.gz file
 	./gpl-virtual-server/createvirtualminmodule.sh $ver /tmp/virtual-server-$ver.tar.gz
 
- - build RPM and .deb
+ x build RPM and .deb
 	./makemodulerpm.pl --sign --dir virtual-server gpl-virtual-server
 	./makemodulerpm.pl --sign virtual-server-theme
 	./makemoduledeb.pl --dir virtual-server gpl-virtual-server
 	./makemoduledeb.pl virtual-server-theme
 
- - Upload to download.webmin.com:htdocs/download/virtualmin/
+ x Upload to download.webmin.com:htdocs/download/virtualmin/
 
  - Add to website
+	- Mention plugins too
 
  - Add the freshmeat.net
 
  - Announce on mailing list
 
- - Add to updates.txt
+ x Add to updates.txt
 
  - Release plugins
 

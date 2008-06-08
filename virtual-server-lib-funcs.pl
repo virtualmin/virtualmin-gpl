@@ -2982,6 +2982,8 @@ if (!$to) {
 	$cc = undef;
 	}
 &foreign_require("mailboxes", "mailboxes-lib.pl");
+local $ctype = $template =~ /<html[^>]>|<body[^>]>/i ? "text/html"
+						     : "text/plain";
 local $mail = { 'headers' => [ [ 'From', $from ||
 					 $config{'from_addr'} ||
 					 &mailboxes::get_from_address() ],
@@ -2989,7 +2991,7 @@ local $mail = { 'headers' => [ [ 'From', $from ||
 			       $cc ? ( [ 'Cc', $cc ] ) : ( ),
 			       $bcc ? ( [ 'Bcc', $bcc ] ) : ( ),
 			       [ 'Subject', &entities_to_ascii($subject) ],
-			       [ 'Content-type', 'text/plain' ] ],
+			       [ 'Content-type', $ctype ] ],
 		'body' => $template };
 &mailboxes::send_mail($mail);
 return (1, &text('mail_ok', $to));

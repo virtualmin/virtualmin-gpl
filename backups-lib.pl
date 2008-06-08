@@ -192,11 +192,16 @@ if ($mode == 1) {
 		return (0, 0);
 		}
 	if ($dirfmt) {
-		# Also create the destination directory now (ignoring any error,
-		# as it may already exist)
-		local $mkdirerr;
-		&ftp_onecommand($server, "MKD $path", \$mkdirerr, $user, $pass,
-				$port);
+		# Also create the destination directory and all parents now
+		# (ignoring any error, as it may already exist)
+		local @makepath = split(/\//, $path);
+		shift(@makepath) if ($makepath[0] eq '');
+		for(my $i=0; $i<@makepath; $i++) {
+			local $makepath = "/".join("/", @makepath[0..$i]);
+			local $mkdirerr;
+			&ftp_onecommand($server, "MKD $makepath", \$mkdirerr,
+					$user, $pass, $port);
+			}
 		}
 	}
 elsif ($mode == 2) {
