@@ -48,6 +48,14 @@ if (&foreign_check("proc")) {
 		}
 	}
 
+# CPU and kernel
+local $out = &backquote_command(
+	"uname -r 2>/dev/null ; uname -m 2>/dev/null ; uname -s 2>/dev/null");
+local ($r, $m, $o) = split(/\r?\n/, $out);
+$info->{'kernel'} = { 'version' => $r,
+		      'arch' => $m,
+		      'os' => $o };
+
 # Available package updates
 if (&foreign_check("security-updates")) {
 	&foreign_require("security-updates", "security-updates-lib.pl");
