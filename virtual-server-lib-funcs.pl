@@ -1731,6 +1731,10 @@ foreach my $j (@jobs) {
 		&cron::delete_cron_job($j);
 		}
 	}
+if ($cron::config{'cron_dir'} && $username) {
+	# Make sure file is gone
+	&unlink_file($cron::config{'cron_dir'}."/".$username);
+	}
 &unlock_file($cronfile) if ($cronfile);
 }
 

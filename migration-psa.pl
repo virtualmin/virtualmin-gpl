@@ -502,7 +502,6 @@ if ($got{'mysql'}) {
 &sync_alias_virtuals(\%dom);
 
 # Migrate protected directories as .htaccess files
-# XXX
 local $pdirs = $uinfo->{'protected_dir'};
 if ($pdirs && ref($pdirs) ne 'ARRAY') {
 	$pdirs = [ $pdirs ];
