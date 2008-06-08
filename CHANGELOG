@@ -933,3 +933,5 @@ By default, new DNS zones only allow localhost, hosts on the local network and k
 All text in the Virtualmin user interface is now available in Dutch, thanks to Gandyman.
 The remote hosts from which connections to MySQL are allowed can be easily edited on a per-domain basis on the Edit Databases page, in the new 'Remote hosts' tab. These apply to the domain owner and any mailboxes with database access. The modify-database-hosts.pl command can also be used to edit them from the shell or API.
 Old local file and S3 backups created using date-based filenames can now be automatically deleted if older than a selected number of days, configurable on the Scheduled Backups page.
+---- Changes since 3.58 ----
+The PHP modules and Pear modules available for each domain are now displayed on the Website Options page.

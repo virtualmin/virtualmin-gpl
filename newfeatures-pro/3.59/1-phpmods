@@ -1,0 +1,6 @@
+desc=PHP modules display
+html=The PHP modules and Pear modules available for each domain are now displayed on the Website Options page.
+master=1
+reseller=1
+owner=1
+link=edit_phpmode.cgi?dom=${ID}

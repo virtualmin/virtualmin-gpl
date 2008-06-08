@@ -3670,6 +3670,9 @@ phpmode_suexecoff=Disabling CGI scripts as domain owner ..
 phpmode_writeon=Turning on logging via script ..
 phpmode_writeoff=Turning off logging via script ..
 phpmode_nothing=No configuration changes were made!
+phpmode_header2=PHP information
+phpmode_mods=Modules for PHP $1
+phpmode_pears=Pear modules for PHP $1
 
 spf_title=DNS Options
 spf_enable=Enabling SPF ..

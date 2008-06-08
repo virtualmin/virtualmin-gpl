@@ -668,34 +668,8 @@ $verinfo ||= $vers[0];
 return -1 if (!$verinfo);
 local $cmd = $verinfo->[1];
 &has_command($cmd) || return -1;
-if (!defined($php_modules{$ver})) {
-	if ($mode eq "mod_php") {
-		# Use global PHP config, since with mod_php we can't do
-		# per-domain configurations
-		local $gini = &get_global_php_ini($ver, $mode);
-		if ($gini) {
-			$gini =~ s/\/php.ini$//;
-			$ENV{'PHPRC'} = $gini;
-			}
-		}
-	elsif ($d) {
-		# Use domain's php.ini
-		$ENV{'PHPRC'} = &get_domain_php_ini($d, $ver, 1);
-		}
-	&clean_environment();
-	local $_;
-	&open_execute_command(PHP, "$cmd -m", 1);
-	while(<PHP>) {
-		s/\r|\n//g;
-		if (/^\S+$/ && !/\[/) {
-			$php_modules{$ver}->{$_} = 1;
-			}
-		}
-	close(PHP);
-	&reset_environment();
-	delete($ENV{'PHPRC'});
-	}
-return $php_modules{$ver}->{$mod} ? 1 : 0;
+local @mods = &list_php_modules($d, $verinfo->[0], $verinfo->[1]);
+return &indexof($mod, @mods) >= 0 ? 1 : 0;
 }
 
 # check_perl_module(mod, &domain)

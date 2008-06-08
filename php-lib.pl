@@ -882,5 +882,42 @@ foreach my $ver (&list_available_php_versions($d, "fcgi")) {
 return 1;
 }
 
+# list_php_modules(&domain, php-version, php-command)
+# Returns a list of PHP modules available for some domain. Uses caching.
+sub list_php_modules
+{
+local ($d, $ver, $cmd) = @_;
+local $mode = &get_domain_php_mode($d);
+if (!defined($main::php_modules{$ver})) {
+	$main::php_modules{$ver} = [ ];
+	if ($mode eq "mod_php") {
+		# Use global PHP config, since with mod_php we can't do
+		# per-domain configurations
+		local $gini = &get_global_php_ini($ver, $mode);
+		if ($gini) {
+			$gini =~ s/\/php.ini$//;
+			$ENV{'PHPRC'} = $gini;
+			}
+		}
+	elsif ($d) {
+		# Use domain's php.ini
+		$ENV{'PHPRC'} = &get_domain_php_ini($d, $ver, 1);
+		}
+	&clean_environment();
+	local $_;
+	&open_execute_command(PHP, "$cmd -m", 1);
+	while(<PHP>) {
+		s/\r|\n//g;
+		if (/^\S+$/ && !/\[/) {
+			push(@{$main::php_modules{$ver}}, $_);
+			}
+		}
+	close(PHP);
+	&reset_environment();
+	delete($ENV{'PHPRC'});
+	}
+return @{$main::php_modules{$ver}};
+}
+
 1;
 
