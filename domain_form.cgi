@@ -471,7 +471,9 @@ if (!$aliasdom && &can_select_ip()) {
 		undef, \@tds);
 	}
 
-print &ui_hidden_table_end();
+if (!$aliasdom) {
+	print &ui_hidden_table_end();
+	}
 
 if (!$aliasdom && $config{'web'} && $virtualmin_pro) {
 	# Show field for initial content
