@@ -1,0 +1,4 @@
+desc=Plesk 7 migration
+html=Plesk 7 backups can now be migrated as Virtualmin domains, using a new backup file type on the migration page.
+master=1
+link=migrate_form.cgi

@@ -935,3 +935,4 @@ The remote hosts from which connections to MySQL are allowed can be easily edite
 Old local file and S3 backups created using date-based filenames can now be automatically deleted if older than a selected number of days, configurable on the Scheduled Backups page.
 ---- Changes since 3.58 ----
 The PHP modules and Pear modules available for each domain are now displayed on the Website Options page.
+Plesk 7 backups can now be migrated as Virtualmin domains, using a new backup file type on the migration page.

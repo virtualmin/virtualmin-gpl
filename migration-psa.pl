@@ -256,11 +256,11 @@ elsif (!-r $htsrc) {
 	}
 else {
 	local $err = &extract_compressed_file($htsrc, $dom{'home'});
+	&set_home_ownership(\%dom);
 	if ($err) {
 		&$second_print(".. failed : $err");
 		}
 	else {
-		&set_home_ownership(\%dom);
 		&$second_print(".. done");
 		}
 	}
@@ -471,7 +471,8 @@ if ($got{'mysql'}) {
 			}
 		foreach my $dbuser (@$dbusers) {
 			local $myuinfo = &create_initial_user(\%dom);
-			$myuinfo->{'user'} = $dbuser->{'login'}->{'name'};
+			local $mname = $dbuser->{'login'}->{'name'};
+			$myuinfo->{'user'} = $mname;
 			$myuinfo->{'plainpass'} =
 				$dbuser->{'login'}->{'password'};
 			$myuinfo->{'pass'} = &encrypt_user_password($myuinfo,
@@ -570,14 +571,13 @@ if (@$pdirs && &foreign_check("htaccess-htpasswd")) {
 	&htaccess_htpasswd::save_directories(\@htdirs);
 	&$second_print(".. done (migrated $pcount)");
 	}
-goto DONE;
 
 # Migrate sub-domains (as Virtualmin sub-servers)
-local $subdoms = $domain->{'phosting'}->{'subdomain'};
+local $subdoms = $uinfo->{'subdomains'};
 if (!$subdoms) {
 	$subdoms = { };
 	}
-elsif ($subdoms->{'cid_conf'}) {
+elsif ($subdoms->{'name'}) {
 	# Just one sub-domain
 	$subdoms = { $subdoms->{'name'} => $subdoms };
 	}
@@ -615,83 +615,39 @@ foreach my $sdom (keys %$subdoms) {
 	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
 					  : \%dom;
 	$subd{'home'} = &server_home_directory(\%subd, $parentdom);
+	$subd{'public_html_dir'} = 'httpdocs';			# Plesk 7 style
+	$subd{'public_html_path'} = $subd{'home'}.'/httpdocs';
+	$subd{'cgi_bin_dir'} = 'cgi-bin';
+	$subd{'cgi_bin_path'} = $subd{'home'}.'/cgi-bin';
 	&complete_domain(\%subd);
 	&create_virtual_server(\%subd, $parentdom,
 			       $parentdom->{'user'});
 	&$outdent_print();
-	&$second_print($text{'setup_done'});
+	&$second_print(".. done");
 	push(@rvdoms, \%subd);
 
-	# Extract sub-domain's HTML directory
-	local $htdocs = "$root/$subd{'dom'}.httpdocs";
-	if (!-r $htdocs) {
-		$htdocs = "$root/$subd{'dom'}.htdocs";
+	# Extract directory for sub-domains
+	&$first_print("Copying home directory for sub-domain $subd{'dom'} ..");
+	if (defined(&set_php_wrappers_writable)) {
+		&set_php_wrappers_writable(\%subd, 1);
 		}
-	local $hdir = &public_html_dir(\%subd);
-	if (-r $htdocs) {
-		&$first_print(
-			"Copying web pages for sub-domain $subd{'dom'} ..");
-		local $err = &extract_compressed_file($htdocs, $hdir);
+	local $htsrc = $root."/".&remove_cid_prefix($subdom->{'src'});
+	if ($subdom->{'src'} && -r $htsrc) {
+		local $err = &extract_compressed_file($htsrc, $subd{'home'});
+		&set_home_ownership(\%subd);
 		if ($err) {
 			&$second_print(".. failed : $err");
 			}
 		else {
-			&set_home_ownership(\%dom);
 			&$second_print(".. done");
 			}
 		}
-
-	# Extract sub-domains CGI directory
-	local $cgis = "$root/$subd{'dom'}.cgi-bin";
-	if (!-r $cgis) {
-		$cgis = "$root/$subd{'dom'}.cgi";
+	else {
+		&$second_print(".. not found in backup");
 		}
-	if (-r $cgis) {
-		&$first_print(
-			"Copying CGI scripts for sub-domain $subd{'dom'} ..");
-		local $cdir = &cgi_bin_dir(\%subd);
-		local $err = &extract_compressed_file($cgis, $cdir);
-		if ($err) {
-			&$second_print(".. failed : $err");
-			}
-		else {
-			&set_home_ownership(\%dom);
-			&$second_print(".. done");
-			}
+	if (defined(&set_php_wrappers_writable)) {
+		&set_php_wrappers_writable(\%subd, 0);
 		}
-
-	# Re-create users for sub-domains
-	&$first_print("Re-creating sub-domain users ..");
-	local $sysusers = $subdom->{'sysuser'};
-	if (!$sysusers) {
-		$sysusers = { };
-		}
-	elsif ($sysusers->{'name'}) {
-		# Just one user
-		$sysusers = { $sysusers->{'name'} => $sysusers };
-		}
-	local $sucount = 0;
-	foreach my $name (keys %$sysusers) {
-		local $mailuser = $sysusers->{$name};
-		local $uinfo = &create_initial_user(\%dom, 0, 1);
-		$uinfo->{'user'} = &userdom_name($name, \%dom);
-		if ($mailuser->{'password'}->{'type'} eq 'plain') {
-			$uinfo->{'plainpass'} =
-				$mailuser->{'password'}->{'content'};
-			$uinfo->{'pass'} = &encrypt_user_password(
-						$uinfo, $uinfo->{'plainpass'});
-			}
-		else {
-			$uinfo->{'pass'} = $mailuser->{'password'}->{'content'};
-			}
-		$uinfo->{'uid'} = $dom{'uid'};
-		$uinfo->{'gid'} = $dom{'gid'};
-		$uinfo->{'home'} = $hdir;
-		$uinfo->{'shell'} = $ftp_shell->{'shell'};
-		&create_user($uinfo, \%dom);
-		$sucount++;
-		}
-	&$second_print(".. created $sucount");
 	}
 
 DONE:
