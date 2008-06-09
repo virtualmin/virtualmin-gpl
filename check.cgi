@@ -68,6 +68,11 @@ if ($config{'collect_interval'} ne $lastconfig{'collect_interval'}) {
 	&$second_print($text{'setup_done'});
 	}
 
+# Restart lookup-domain daemon, if need
+if ($config{'spam'}) {
+	&setup_lookup_domain_daemon();
+	}
+
 &webmin_log("check");
 
 # Call any theme post command
