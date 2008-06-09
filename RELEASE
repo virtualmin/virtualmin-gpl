@@ -1,7 +1,7 @@
  x run functional-test.pl
 
  x Create tar.gz file
-	./gpl-virtual-server/createvirtualminmodule.sh $ver /tmp/virtual-server-$ver.tar.gz
+	./gpl-virtual-server/createvirtualminmodule.sh $ver /tmp/virtual-server-$ver.wbm.gz
 
  x build RPM and .deb
 	./makemodulerpm.pl --sign --dir virtual-server gpl-virtual-server
@@ -20,5 +20,5 @@
 
  x Add to updates.txt
 
- - Release plugins
+ x Release plugins
 

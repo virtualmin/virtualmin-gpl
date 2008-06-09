@@ -60,7 +60,5 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - Plesk 7 migration
-
  - Allow default shell to be set in templates
 	- FS#4108 - custom shell and custom links
