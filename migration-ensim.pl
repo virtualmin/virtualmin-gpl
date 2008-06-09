@@ -377,14 +377,14 @@ if ($userident->{$origuser}) {
 
 		# Create the extra user
 		local $uinfo = &create_initial_user(\%dom);
-		$uinfo->{'user'} = $mu.'@'.$dom;
+		$uinfo->{'user'} = lc($mu).'@'.$dom;
 		$uinfo->{'pass'} = $uu->{'config'}->{'password'};
 		$uinfo->{'uid'} = &allocate_uid(\%taken);
 		$uinfo->{'gid'} = $dom{'gid'};
 		$uinfo->{'real'} = $uu->{'config'}->{'fullname'};
-		$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$mu";
+		$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/".lc($mu);
 		$uinfo->{'shell'} = $nologin_shell->{'shell'};
-		$uinfo->{'email'} = $mu.'@'.$dom;
+		$uinfo->{'email'} = lc($mu).'@'.$dom;
 		if ($qu) {
 			$uinfo->{'quota'} = $uinfo->{'mquota'} =
 			  $uinfo->{'qquota'} =

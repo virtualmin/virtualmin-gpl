@@ -131,7 +131,7 @@ local $lconf = &get_logrotate_section($_[0]);
 if ($lconf) {
 	local $parent = &logrotate::get_config_parent();
 	&logrotate::save_directive($parent, $lconf, undef);
-	&flush_file_lines();
+	&flush_file_lines($lconf->{'file'});
 	undef($logrotate::get_config_parent_cache);
 	undef($logrotate::get_config_cache);
 	&$second_print($text{'setup_done'});

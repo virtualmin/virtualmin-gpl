@@ -338,7 +338,8 @@ local (%taken, %utaken);
 local $mcount = 0;
 foreach my $mailuser (@mailusers) {
 	local $muinfo = &create_initial_user(\%dom);
-	$muinfo->{'user'} = &userdom_name($mailuser->{'login'}->{'name'},\%dom);
+	local $name = $mailuser->{'login'}->{'name'};
+	$muinfo->{'user'} = &userdom_name(lc($name), \%dom);
 	if ($mailuser->{'login'}->{'PW_TYPE'} eq 'plain') {
 		$muinfo->{'plainpass'} = $mailuser->{'login'}->{'password'};
 		$muinfo->{'pass'} = &encrypt_user_password(
@@ -349,7 +350,7 @@ foreach my $mailuser (@mailusers) {
 		}
 	$muinfo->{'uid'} = &allocate_uid(\%taken);
 	$muinfo->{'gid'} = $dom{'gid'};
-	$muinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$name";
+	$muinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/".lc($name);
 	$muinfo->{'shell'} = $nologin_shell->{'shell'};
 	$muinfo->{'to'} = [ ];
 	if ($mailuser->{'services'}->{'postbox'} eq 'true') {
@@ -389,7 +390,7 @@ foreach my $mailuser (@mailusers) {
 	if (@{$muinfo->{'to'}}) {
 		# Only enable mail if there is at least one destination, which
 		# would be his own mailbox or offsite
-		$muinfo->{'email'} = $name."\@".$dom;
+		$muinfo->{'email'} = lc($name)."\@".$dom;
 		}
 	&create_user($muinfo, \%dom);
 	&create_user_home($muinfo, \%dom);

@@ -608,14 +608,15 @@ if ($got{'mail'}) {
 		next if ($muser =~ /_logs$/);		# Special logs user
 		next if ($muser eq $user && !$parent);	# Domain owner
 		local $uinfo = &create_initial_user(\%dom);
-		$uinfo->{'user'} = &userdom_name($muser, \%dom);
+		$uinfo->{'user'} = &userdom_name(lc($muser), \%dom);
 		$uinfo->{'pass'} = $pass{$muser};
 		$uinfo->{'uid'} = &allocate_uid(\%taken);
 		$uinfo->{'gid'} = $dom{'gid'};
 		$uinfo->{'real'} = $mreal;
-		$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$muser";
+		$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/".
+				   lc($muser);
 		$uinfo->{'shell'} = $nologin_shell->{'shell'};
-		$uinfo->{'email'} = "$muser\@$dom";
+		$uinfo->{'email'} = lc($muser)."\@$dom";
 		$uinfo->{'qquota'} = $quota{$muser};
 		$uinfo->{'quota'} = $quota{$muser};
 		$uinfo->{'mquota'} = $quota{$muser};

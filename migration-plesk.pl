@@ -477,7 +477,7 @@ foreach my $name (keys %$mailusers) {
 	next if ($windows);
 	local $mailuser = $mailusers->{$name};
 	local $uinfo = &create_initial_user(\%dom);
-	$uinfo->{'user'} = &userdom_name($name, \%dom);
+	$uinfo->{'user'} = &userdom_name(lc($name), \%dom);
 	if ($mailuser->{'password'}->{'type'} eq 'plain') {
 		$uinfo->{'plainpass'} = $mailuser->{'password'}->{'content'};
 		$uinfo->{'pass'} = &encrypt_user_password(
@@ -488,7 +488,7 @@ foreach my $name (keys %$mailusers) {
 		}
 	$uinfo->{'uid'} = &allocate_uid(\%taken);
 	$uinfo->{'gid'} = $dom{'gid'};
-	$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$name";
+	$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/".lc($name);
 	$uinfo->{'shell'} = $nologin_shell->{'shell'};
 	$uinfo->{'to'} = [ ];
 	if ($mailuser->{'mailbox'}->{'enabled'} eq 'true') {
@@ -542,7 +542,7 @@ foreach my $name (keys %$mailusers) {
 	if (@{$uinfo->{'to'}}) {
 		# Only enable mail if there is at least one destination, which
 		# would be his own mailbox or offsite
-		$uinfo->{'email'} = $name."\@".$dom;
+		$uinfo->{'email'} = lc($name)."\@".$dom;
 		}
 	&create_user($uinfo, \%dom);
 	&create_user_home($uinfo, \%dom);
@@ -579,7 +579,7 @@ foreach my $mid (keys %$mailusers) {
 	next if ($mailuser->{'mail_group'} eq 'true');
 	local $name = $mailuser->{'mail_name'};
 	local $uinfo = &create_initial_user(\%dom);
-	$uinfo->{'user'} = &userdom_name($name, \%dom);
+	$uinfo->{'user'} = &userdom_name(lc($name), \%dom);
 	if ($mailuser->{'account'}->{'type'} eq 'plain') {
 		$uinfo->{'plainpass'} = $mailuser->{'account'}->{'password'};
 		$uinfo->{'pass'} = &encrypt_user_password(
@@ -590,9 +590,9 @@ foreach my $mid (keys %$mailusers) {
 		}
 	$uinfo->{'uid'} = &allocate_uid(\%taken);
 	$uinfo->{'gid'} = $dom{'gid'};
-	$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$name";
+	$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/".lc($name);
 	$uinfo->{'shell'} = $nologin_shell->{'shell'};
-	$uinfo->{'email'} = $name."\@".$dom;
+	$uinfo->{'email'} = lc($name)."\@".$dom;
 	if (&has_home_quotas()) {
 		local $q = $mailuser->{'mbox_quota'} < 0 ? undef :
 				$mailuser->{'mbox_quota'}*1024;
