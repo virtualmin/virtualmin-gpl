@@ -135,6 +135,12 @@ foreach my $u (@{$domain->{'user'}}) {
 push(@got, "spam") if ($has_spam);
 push(@got, "virus") if ($has_virus);
 
+# Add 'web users'
+local $webusers = $uinfo->{'user'};
+$webusers = !$webusers ? [ ] :
+	    ref($webusers) ne 'ARRAY' ? [ $webusers ] : $webusers;
+push(@mailusers, @$webusers);
+
 # Tell the user what we have got
 @got = &show_check_migration_features(@got);
 local %got = map { $_, 1 } @got;
@@ -351,7 +357,13 @@ foreach my $mailuser (@mailusers) {
 	$muinfo->{'uid'} = &allocate_uid(\%taken);
 	$muinfo->{'gid'} = $dom{'gid'};
 	$muinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/".lc($name);
-	$muinfo->{'shell'} = $nologin_shell->{'shell'};
+	if ($mailuser->{'type'} eq 'web_users') {
+		# Has FTP access
+		$muinfo->{'shell'} = $ftp_shell->{'shell'};
+		}
+	else {
+		$muinfo->{'shell'} = $nologin_shell->{'shell'};
+		}
 	$muinfo->{'to'} = [ ];
 	if ($mailuser->{'services'}->{'postbox'} eq 'true') {
 		# Add delivery to user's mailbox
@@ -407,7 +419,8 @@ foreach my $mailuser (@mailusers) {
 		local $dstfolder = { 'file' => $crfile, 'type' => $crtype };
 		local $srcfolder = { 'file' => $muinfo->{'home'}.'/Maildir',
 				     'type' => 1 };
-		if ($srcfolder->{'file'} ne $dstfolder->{'file'}) {
+		if ($srcfolder->{'file'} ne $dstfolder->{'file'} &&
+		    -d $srcfolder->{'file'}) {
 			# Need to move mail file too
 			&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
 			&set_mailfolder_owner($dstfolder, $muinfo);
