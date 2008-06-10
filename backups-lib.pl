@@ -105,6 +105,7 @@ if ($backup->{'id'} == 1) {
 		$config{'backup_feature_'.$f} = &indexof($f, @bf) >= 0 ? 1 : 0;
 		$config{'backup_opts_'.$f} = $backup->{'opts_'.$f};
 		}
+	&save_module_config();
 	}
 else {
 	# Update or create separate file
