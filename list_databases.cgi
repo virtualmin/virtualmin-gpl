@@ -203,6 +203,7 @@ if ($can_allowed_hosts) {
 		# One for each DB type (really only MySQL for now)
 		next if (!$d->{$f});
 		$afunc = "get_".$f."_allowed_hosts";
+		next if (!defined(&$afunc));
 		@hosts = &$afunc($d);
 		print &ui_form_start("save_dbhosts.cgi", "post");
 		print &ui_hidden("type", $f);
