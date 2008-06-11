@@ -62,3 +62,16 @@
 
  - Allow default shell to be set in templates
 	- FS#4108 - custom shell and custom links
+
+ - Allow HTML editor to be theme-overridable, in vui-lib.pl
+	- Also clean up that page
+
+ - Making theming easier
+	- One function to get visible domains
+	- Get domain-level actions
+	- Get global actions
+	- Get other links
+		- Module config, logout, etc..
+	- Webmin modules in categories
+		- Set others category
+		- Hidden modules

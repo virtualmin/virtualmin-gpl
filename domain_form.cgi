@@ -68,14 +68,14 @@ if ($in{'generic'}) {
 		if (!$gparent->{'alias'} && $adleft) {
 			# Alias domain
 			push(@generics, [ &text('form_generic_alias',
-						$gparent->{'dom'}),
+						&show_domain_name($gparent)),
 					  'to='.$gparent->{'id'} ]);
 			}
 		if (!$gparent->{'alias'} && !$gparent->{'subdom'} &&
 		    &can_create_sub_domains() && $rdleft) {
 			# Sub-domain
 			push(@generics, [ &text('form_generic_subdom',
-						$gparent->{'dom'}),
+						&show_domain_name($gparent)),
 					  'add1=1&parentuser1='.
 					  $gparent->{'user'}.'&subdom='.
 					  $gparent->{'id'} ]);
