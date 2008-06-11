@@ -15,8 +15,11 @@ if (!$_[1] || $_[1] eq 'db') {
 	local @dblist = &postgresql::list_databases();
 	return 1 if (&indexof($_[0]->{'db'}, @dblist) >= 0);
 	}
-if (!$_[0]->{'parent'} && (!$_[1] || $_[1] eq 'db')) {
+if (!$_[0]->{'parent'} && (!$_[1] || $_[1] eq 'user')) {
+	# Check for user clash, or special user
 	return 1 if (&postgres_user_exists($_[0]) ? 1 : 0);
+	local $user = &postgres_user($_[0]);
+	return 1 if ($user eq 'binary');
 	}
 return 0;
 }
