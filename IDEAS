@@ -60,9 +60,6 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - Allow HTML editor to be theme-overridable, in vui-lib.pl
-	- Also clean up that page
-
  - Making theming easier
 	- One function to get visible domains
 	- Get domain-level actions

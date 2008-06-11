@@ -148,5 +148,55 @@ else {
 	}
 }
 
+# virtualmin_ui_html_editor_bodytags(name)
+# Returns any extra tags needed in the <body> section by the editor returned
+# by the function below.
+sub virtualmin_ui_html_editor_bodytags
+{
+return &theme_virtualmin_ui_html_editor_bodytags(@_)
+	if (defined(&theme_virtualmin_ui_html_editor_bodytags));
+return "onload='initEditor()'";
+}
+
+# virtualmin_ui_show_html_editor(name, html, baseurl)
+# Returns HTML for an HTML editor with the given name, and showing the
+# given text initially.
+sub virtualmin_ui_show_html_editor
+{
+return &theme_virtualmin_ui_show_html_editor(@_)
+	if (defined(&theme_virtualmin_ui_show_html_editor));
+local ($name, $html, $baseurl) = @_;
+local $rv;
+
+# Javascript for making the editor
+local $mbroot = &module_root_directory("mailboxes");
+local $prog = -d "$mbroot/xinha" ? "xinha" : "htmlarea";
+$rv .= <<EOF;
+<script type="text/javascript">
+  _editor_url = "$gconfig{'webprefix'}/mailboxes/$prog/";
+  _editor_lang = "en";
+</script>
+<script type="text/javascript" src="../mailboxes/$prog/htmlarea.js"></script>
+
+<script type="text/javascript">
+var editor = null;
+function initEditor() {
+  editor = new HTMLArea("body");
+  editor.config.baseHref = "$baseurl";
+  editor.config.baseURL = "$baseurl";
+  editor.config.getHtmlMethod = "TransformInnerHTML";
+  editor.generate();
+  return false;
+}
+</script>
+EOF
+
+# The actual textbox
+$rv .= "<textarea rows=20 cols=80 style='width:100%;height:70%' name=$name id=$name>";
+$rv .= &html_escape($html);
+$rv .= "</textarea>\n";
+return $rv;
+}
+
 1;
 

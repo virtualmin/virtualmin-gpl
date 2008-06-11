@@ -10,7 +10,8 @@ $d = &get_domain($in{'dom'});
 $editing = $in{'editok'} ? 1 :
 	   $in{'createok'} || $in{'create'} ? 2 : 0;
 &ui_print_header(&domain_in($d), $text{'html_title'}, "", undef, 0, 0, 0,
-		 undef, undef, $editing ? "onload='initEditor()'" : undef);
+		 undef, undef,
+		 $editing ? &virtualmin_ui_html_editor_bodytags() : undef);
 
 # Find web pages in server's directory
 $pub = &public_html_dir($d);
@@ -77,29 +78,6 @@ if ($in{'saved'}) {
 	print "<p><b>",&text('html_saved', "<a href='http://$d->{'dom'}$port/$in{'edit'}' target=_new><tt>$in{'edit'}</tt></a>"),"</b><p>\n";
 	}
 
-# Output HTMLarea init code
-$mbroot = &module_root_directory("mailboxes");
-$prog = -d "$mbroot/xinha" ? "xinha" : "htmlarea";
-print <<EOF;
-<script type="text/javascript">
-  _editor_url = "$gconfig{'webprefix'}/mailboxes/$prog/";
-  _editor_lang = "en";
-</script>
-<script type="text/javascript" src="../mailboxes/$prog/htmlarea.js"></script>
-
-<script type="text/javascript">
-var editor = null;
-function initEditor() {
-  editor = new HTMLArea("body");
-  editor.config.baseHref = "http://$d->{'dom'}/";
-  editor.config.baseURL = "http://$d->{'dom'}/";
-  editor.config.getHtmlMethod = "TransformInnerHTML";
-  editor.generate();
-  return false;
-}
-</script>
-EOF
-
 if ($editing) {
 	&switch_to_domain_user($d);
 	if ($editing == 1) {
@@ -128,9 +106,8 @@ if ($editing) {
 	print &ui_form_start("save_html.cgi", "form-data");
 	print &ui_hidden("dom", $in{'dom'}),"\n";
 	print &ui_hidden("file", $editing == 1 ? $in{'edit'} : $in{'create'});
-	print "<textarea rows=20 cols=80 style='width:100%;height:70%' name=body id=body>";
-	print &html_escape($data);
-	print "</textarea>\n";
+	print &virtualmin_ui_show_html_editor("body", $data,
+					      "http://$d->{'dom'}/");
 
 	if ($in{'editok'}) {
 		print &ui_form_end([ [ "save", $text{'save'} ],
