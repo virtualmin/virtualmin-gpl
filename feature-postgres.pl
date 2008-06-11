@@ -18,8 +18,6 @@ if (!$_[1] || $_[1] eq 'db') {
 if (!$_[0]->{'parent'} && (!$_[1] || $_[1] eq 'user')) {
 	# Check for user clash, or special user
 	return 1 if (&postgres_user_exists($_[0]) ? 1 : 0);
-	local $user = &postgres_user($_[0]);
-	return 1 if ($user eq 'binary');
 	}
 return 0;
 }
@@ -424,8 +422,9 @@ sub create_postgres_database
 &require_postgres();
 local $user = &postgres_user($_[0]);
 local $owner = &postgresql::get_postgresql_version() >= 7 ?
-		"with owner=\"$user\"" : "";
-&postgresql::execute_sql_logged($qconfig{'basedb'}, "create database $_[1] $owner");
+		" with owner=\"$user\"" : "";
+&postgresql::execute_sql_logged($qconfig{'basedb'},
+	"create database ".&postgresql::quote_table($_[1]).$owner);
 local @dbs = split(/\s+/, $_[0]->{'db_postgres'});
 push(@dbs, $_[1]);
 $_[0]->{'db_postgres'} = join(" ", @dbs);
@@ -455,7 +454,8 @@ local @dbs = split(/\s+/, $_[0]->{'db_postgres'});
 local @missing;
 foreach my $db (@_[1..$#_]) {
 	if (&indexof($db, @dblist) >= 0) {
-		&postgresql::execute_sql_logged($qconfig{'basedb'}, "drop database $db");
+		&postgresql::execute_sql_logged($qconfig{'basedb'},
+			"drop database ".&postgresql::quote_table($db));
 		}
 	else {
 		push(@missing, $db);
