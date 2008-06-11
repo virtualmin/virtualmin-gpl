@@ -938,3 +938,4 @@ The PHP modules and Pear modules available for each domain are now displayed on 
 Plesk 7 backups can now be migrated as Virtualmin domains, using a new backup file type on the migration page.
 Updated the Piwik script installer to version 0.2.3, Magento to 1.0.19870.1, and Trac to version 0.11rc2.
 Added a script installer for Zikula, a new content management system written in PHP.
+Allow the default shell to be set on a per-template basis.

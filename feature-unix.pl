@@ -66,6 +66,12 @@ else {
 	delete($_[0]->{'group'});
 	}
 
+# Work out the shell, which can come from the template
+local $shell = $tmpl->{'ushell'};
+if ($shell eq 'none' || !$shell) {
+	$shell = &default_available_shell('owner');
+	}
+
 # Then the user
 &$first_print(&text('setup_user', $_[0]->{'user'}));
 %uinfo = ( 'user', $_[0]->{'user'},
@@ -76,7 +82,7 @@ else {
 				 $_[0]->{'pass'}),
 	   'real', $_[0]->{'owner'},
 	   'home', $_[0]->{'home'},
-	   'shell', &default_available_shell('owner'),
+	   'shell', $shell,
 	   'mailbox', $_[0]->{'user'},
 	   'dom', $_[0]->{'dom'},
 	   'dom_prefix', substr($_[0]->{'dom'}, 0, 1),
@@ -571,6 +577,14 @@ print &ui_table_row(&hlink($text{'tmpl_ugroup'}, "template_ugroup_mode"),
     &ui_textbox("ugroup", $tmpl->{'ugroup'} eq "none" ?
 				"" : $tmpl->{'ugroup'}, 13)."\n".
     &group_chooser_button("ugroup", 0, 1));
+
+# Default shell
+print &ui_table_row(&hlink($text{'tmpl_ushell'}, "template_ushell"),
+    &none_def_input("ushell", $tmpl->{'ushell'},
+	&available_shells_menu("ushell",
+		$tmpl->{'ushell'} eq "none" ? undef : $tmpl->{'ushell'},
+		"owner", 1),
+	0, 0, $text{'tmpl_ushelldef'}, [ "ushell" ]));
 }
 
 # parse_template_unix(&tmpl)
@@ -597,6 +611,9 @@ $tmpl->{'ugroup'} = &parse_none_def("ugroup");
 if ($in{"ugroup_mode"} == 2) {
 	getgrnam($in{'ugroup'}) || &error($text{'tmpl_eugroup'});
 	}
+
+# Save initial shell
+$tmpl->{'ushell'} = &parse_none_def("ushell");
 }
 
 # get_unix_shells()

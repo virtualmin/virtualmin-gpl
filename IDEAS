@@ -60,9 +60,6 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - Allow default shell to be set in templates
-	- FS#4108 - custom shell and custom links
-
  - Allow HTML editor to be theme-overridable, in vui-lib.pl
 	- Also clean up that page
 

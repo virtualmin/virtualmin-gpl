@@ -6006,6 +6006,7 @@ push(@rv, { 'id' => 0,
 	    'ugroup' => $config{'defugroup'} || "none",
 	    'quota' => $config{'defquota'} || "none",
 	    'uquota' => $config{'defuquota'} || "none",
+	    'ushell' => $config{'defushell'} || "none",
 	    'mailboxlimit' => $config{'defmailboxlimit'} eq "" ? "none" :
 			      $config{'defmailboxlimit'},
 	    'aliaslimit' => $config{'defaliaslimit'} eq "" ? "none" :
@@ -6250,6 +6251,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'defugroup'} = $tmpl->{'ugroup'};
 	$config{'defquota'} = $tmpl->{'quota'};
 	$config{'defuquota'} = $tmpl->{'uquota'};
+	$config{'defushell'} = $tmpl->{'ushell'};
 	$config{'defmailboxlimit'} = $tmpl->{'mailboxlimit'} eq 'none' ? undef :
 				     $tmpl->{'mailboxlimit'};
 	$config{'defaliaslimit'} = $tmpl->{'aliaslimit'} eq 'none' ? undef :
@@ -6370,7 +6372,8 @@ if (!$tmpl->{'default'}) {
 	local %done;
 	foreach $p ("dns_spf", "dns_sub", "dns_master",
 		    "web", "dns", "ftp", "frame", "user_aliases",
-		    "ugroup", "quota", "uquota", "mailboxlimit", "domslimit",
+		    "ugroup", "quota", "uquota", "ushell",
+		    "mailboxlimit", "domslimit",
 		    "dbslimit", "aliaslimit", "bwlimit", "mongrelslimit","skel",
 		    "mysql_hosts", "mysql_mkdb", "mysql_suffix", "mysql_chgrp",
 		    "mysql_nopass", "mysql_wild", "mysql", "webalizer",
@@ -11074,11 +11077,11 @@ else {
 	}
 }
 
-# available_shells_menu(name, [value], 'owner'|'mailbox')
+# available_shells_menu(name, [value], 'owner'|'mailbox', [show-cmd])
 # Returns HTML for selecting a shell for a mailbox or domain owner
 sub available_shells_menu
 {
-local ($name, $value, $type) = @_;
+local ($name, $value, $type, $showcmd) = @_;
 local @tshells = grep { $_->{$type} } &list_available_shells();
 local @ashells = grep { $_->{'avail'} } @tshells;
 if (defined($value)) {
@@ -11108,7 +11111,9 @@ else {
 	$value = $def ? $def->{'shell'} : undef;
 	}
 return &ui_select($name, $value,
-		  [ map { [ $_->{'shell'}, $_->{'desc'} ] } @ashells ]);
+	  [ map { [ $_->{'shell'},
+		    $_->{'desc'}.($showcmd ? " ($_->{'shell'})" : "") ] }
+	  @ashells ]);
 }
 
 # default_available_shell('owner'|'mailbox')
