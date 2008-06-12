@@ -166,7 +166,7 @@ else {
 local $bsize = &has_home_quotas() ? &quota_bsize("home") : undef;
 local $quota;
 if (!$parent && &has_home_quotas()) {
-	$quota = $domain->{'limits'}->{'mbox_quota'} / $bsize;
+	$quota = $domain->{'limits'}->{'disk_space'} / $bsize;
 	}
 
 # Create the virtual server object
