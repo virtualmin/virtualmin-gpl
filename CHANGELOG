@@ -939,3 +939,4 @@ Plesk 7 backups can now be migrated as Virtualmin domains, using a new backup fi
 Updated the Piwik script installer to version 0.2.3, Magento to 1.0.19870.1, and Trac to version 0.11rc2.
 Added a script installer for Zikula, a new content management system written in PHP.
 Allow the default shell to be set on a per-template basis.
+Added a complete Spanish translation, contributed by Ignacio.
