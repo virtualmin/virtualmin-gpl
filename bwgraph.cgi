@@ -32,13 +32,17 @@ if ($max) {
 		     	     &get_domain_by("parent", $doms[0]->{'id'});
 		}
 	@links = ( );
-	foreach $m (0, 1, 2, 3) {
+	foreach $m (0, 4, 1, 2, 3) {
+		if ($m == 4 && $in{'dom'}) {
+			# Just one domain, so no need for over-limit mode
+			next;
+			}
 		if ($m == 1 && $in{'dom'}) {
 			# Don't show sub-server if none
 			next if (!@subs);
 			$t = $text{'bwgraph_mode_'.$m};
 			}
-		elsif ($m == 0 && $in{'dom'}) {
+		elsif (($m == 0 || $m == 4) && $in{'dom'}) {
 			$t = @subs ? $text{'bwgraph_mode_'.$m.'two'}
 				   : $text{'bwgraph_mode_'.$m.'one'};
 			}
@@ -58,7 +62,7 @@ if ($max) {
 	# Show table
 	$width = 500;
 	print "<table>\n";
-	if ($in{'mode'} == 0 || $in{'mode'} == 1) {
+	if ($in{'mode'} == 0 || $in{'mode'} == 1 || $in{'mode'} == 4) {
 		# By domain .. start by computing usage for the selected
 		# period for each domain
 		%usage = ( );
@@ -106,14 +110,25 @@ if ($max) {
 				}
 			}
 
+		# Only show those that are over the limit
+		if ($in{'mode'} == 4) {
+			@doms = grep { $usage{$_->{'id'}} > $_->{'bw_limit'} &&
+				       $_->{'bw_limit'} } @doms;
+			if (!@doms) {
+				print "<tr> <td><b>$text{'newbw_allunder'}</b></td> </tr>\n";
+				}
+			}
+
 		# Show the table of domains
-		print "<tr> <td><b>$text{'newbw_dom'}</b></td>\n";
-		print "<td><b>",&text('edit_bwpast_'.$config{'bw_past'},
+		if (@doms) {
+			print "<tr> <td><b>$text{'newbw_dom'}</b></td>\n";
+			print "<td><b>",&text('edit_bwpast_'.$config{'bw_past'},
 			      $text{'newbw_graph'}, $config{'bw_period'}),
-		      "</b></td>\n";
-		print "<td><b>$text{'newbw_glimit'}</b></td>\n";
-		print "<td><b>$text{'newbw_gusage'}</b></td>\n";
-		print "</tr>\n";
+			      "</b></td>\n";
+			print "<td><b>$text{'newbw_glimit'}</b></td>\n";
+			print "<td><b>$text{'newbw_gusage'}</b></td>\n";
+			print "</tr>\n";
+			}
 		foreach $d (sort { $usage{$b->{'id'}} <=> $usage{$a->{'id'}} }
 			    grep { !$_->{'parent'} }
 			    @doms) {

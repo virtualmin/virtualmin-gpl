@@ -72,3 +72,5 @@
 
  - UCC SSL certs (with multiple domain names)
 	- Support name-based on port 443
+	- Wildcard for multiple domains
+	- FS#4136

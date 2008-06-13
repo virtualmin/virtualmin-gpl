@@ -2188,6 +2188,7 @@ newbw_ecannot=You are not allowed to edit bandwidth monitoring
 newbw_template=Email message to send when over limit
 newbw_subject=Bandwidth limit exceeded for $1
 newbw_warnsubject=Bandwidth limit approaching for $1
+newbw_allunder=All virtual servers are under their bandwidth limits.
 newbw_dom=Server
 newbw_graph=Bandwidth <font color=#ff0000>limit</font> and <font color=#0000ff>usage</font>
 newbw_gusage=Usage
@@ -2534,6 +2535,7 @@ bwgraph_mode_0two=Parent limit and usage
 bwgraph_mode_1=Parent and sub-servers
 bwgraph_mode_2=By date
 bwgraph_mode_3=By month
+bwgraph_mode_4=Servers over limit
 bwgraph_return=bandwidth usage for all servers
 bwgraph_dis=Monitoring disabled
 bwgraph_mago_week=Show statistics for month:

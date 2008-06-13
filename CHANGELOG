@@ -940,3 +940,4 @@ Updated the Piwik script installer to version 0.2.3, Magento to 1.0.19870.1, PHP
 Added a script installer for Zikula, a new content management system written in PHP.
 Allow the default shell to be set on a per-template basis.
 Added a complete Spanish translation, contributed by Ignacio.
+The bandwidth usage graphs can be restricted to showing just servers that are over their limits, using a new mode link.
