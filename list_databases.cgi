@@ -66,7 +66,7 @@ if (@dbs) {
 			}
 		push(@table, [
 			{ 'type' => 'checkbox', 'name' => 'd',
-			  'value' => $db->{'name'} },
+			  'value' => $db->{'type'}.'_'.$db->{'name'} },
 			"<a href='edit_database.cgi?dom=$in{'dom'}&name=$db->{'name'}&type=$db->{'type'}'>$db->{'name'}</a>",
 			$db->{'desc'},
 			$action
@@ -75,8 +75,8 @@ if (@dbs) {
 
 # Generate the table
 print &ui_form_columns_table(
-	"edit_database.cgi",
-	[ [ "delete", $text{'aliases_delete'} ] ],
+	"delete_databases.cgi",
+	[ [ "delete", $text{'databases_delete'} ] ],
 	1,
 	\@links,
 	[ [ "dom", $in{'dom'} ] ],
