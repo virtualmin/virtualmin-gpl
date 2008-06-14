@@ -936,7 +936,7 @@ Old local file and S3 backups created using date-based filenames can now be auto
 ---- Changes since 3.58 ----
 The PHP modules and Pear modules available for each domain are now displayed on the Website Options page.
 Plesk 7 backups can now be migrated as Virtualmin domains, using a new backup file type on the migration page.
-Updated the Piwik script installer to version 0.2.3, Magento to 1.0.19870.1, PHPCoin to 1.4.3, Gallery to 2.2.5, and Trac to version 0.11rc2.
+Updated the Piwik script installer to version 0.2.3, Magento to 1.0.19870.1, PHPCoin to 1.4.3, Gallery to 2.2.5, Horde to 3.2.1, Turba to 2.2.1, and Trac to version 0.11rc2.
 Added a script installer for Zikula, a new content management system written in PHP.
 Allow the default shell to be set on a per-template basis.
 Added a complete Spanish translation, contributed by Ignacio.
