@@ -142,7 +142,7 @@ if ($opts->{'path'}) {
 		&usage($perr) if ($perr);
 		}
 	}
-if ($opts->{'db'}) {
+if ($opts->{'db'} && $sname !~ /^php\S+admin$/i) {
 	($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
 	@dbs = &domain_databases($d);
 	($db) = grep { $_->{'type'} eq $dbtype &&

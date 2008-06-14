@@ -54,7 +54,7 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 		}
 	$path = $sinfo->{'opts'}->{'path'};
 	($dbtype, $dbname) = split(/_/, $sinfo->{'opts'}->{'db'}, 2);
-	if ($dbtype && $dbname) {
+	if ($dbtype && $dbname && $script->{'name'} !~ /^php(\S+)admin$/i) {
 		$dbdesc = &text('scripts_idbname2',
 		      "edit_database.cgi?dom=$in{'dom'}&type=$dbtype&".
 			"name=$dbname",

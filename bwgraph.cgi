@@ -327,17 +327,20 @@ if ($max) {
 	print "</table>\n";
 
 	# Show colour keys
-	print "<br>\n";
-	foreach $f (@features) {
-		if ($donecolour{$f}) {
-			print "<img src=images/usage-$f.gif width=10 height=10>\n";
-			local $label = $text{'bandwidth_'.$f} ||
-				       $text{'feature_'.$f};
-			print $label," (",
-			      &nice_size($donecolour{$f}),")\n";
+	if (@features) {
+		print "<br>\n";
+		foreach $f (@features) {
+			if ($donecolour{$f}) {
+				print "<img src=images/usage-$f.gif ",
+				      "width=10 height=10>\n";
+				local $label = $text{'bandwidth_'.$f} ||
+					       $text{'feature_'.$f};
+				print $label," (",
+				      &nice_size($donecolour{$f}),")\n";
+				}
 			}
+		print "<br>\n";
 		}
-	print "<br>\n";
 
 	# Show month selector
 	if ($in{'mode'} != 3) {

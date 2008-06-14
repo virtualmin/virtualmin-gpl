@@ -46,7 +46,7 @@ if ($opts->{'dir'}) {
 
 # Show DB, if we have it
 ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-if ($dbtype) {
+if ($dbtype && $script->{'name'} !~ /^php(\S+)admin$/i) {
 	print &ui_table_row($text{'scripts_idb'},
 		&text('scripts_idbname',
 		      "edit_database.cgi?dom=$in{'dom'}&type=$dbtype&".
