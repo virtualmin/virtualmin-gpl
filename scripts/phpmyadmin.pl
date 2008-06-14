@@ -166,8 +166,7 @@ sub script_phpmyadmin_install
 {
 local ($d, $ver, $opts, $files, $upgrade) = @_;
 local ($out, $ex);
-local @dbs = map { my ($dbtype, $dbname) = split(/_/, $_, 2); $dbname }
-		 split(/\s+/, $opts->{'db'});
+local @dbs = split(/\s+/, $opts->{'db'});
 local $dbuser = &mysql_user($d);
 local $dbpass = &mysql_pass($d);
 local $dbhost = &get_database_host("mysql");
@@ -192,6 +191,7 @@ local $lref = &read_file_lines($cfile);
 local $l;
 local $url = &script_path_url($d, $opts);
 local $dbs = join(" ", @dbs);
+local $dbsarray = "Array(".join(", ", map { "'$_'" } @dbs).")";
 foreach $l (@$lref) {
 	# These are for phpMyAdmin 2.6+
 	if ($opts->{'auto'}) {
@@ -211,7 +211,7 @@ foreach $l (@$lref) {
 			}
 		}
 	if ($l =~ /^\$cfg\['Servers'\]\[\$i\]\['only_db'\]/) {
-		$l = "\$cfg['Servers'][\$i]['only_db'] = '$dbs';";
+		$l = "\$cfg['Servers'][\$i]['only_db'] = $dbsarray;";
 		}
 
 	# These are for version 2.2.7
