@@ -167,16 +167,29 @@ else {
 		local %info = %minfo ? %minfo : %tinfo;
 		local $current_ver = &round_hundred($info{'version'});
 		local $new_ver = &round_hundred($ver);
-		if (%info && ($current_ver > $new_ver ||
-			      $current_ver == $new_ver &&
-			      $info{'version'} !~ /gpl/)) {
-			&$second_print(&text('upgrade_gotver',
-					     $info{'version'}));
-			if ($mod eq "virtual-server") {
-				$errors++;
-				goto PAGEEND;
+		if (%info) {
+			# Already installed .. but can we upgrade?
+			$can_upgrade = 0;
+			if ($mod eq "virtual-server" &&
+			    $info{'version'} =~ /gpl/i &&
+			    $ver !~ /gpl/i) {
+				# GPL upgrading to pro - always do it
+				$can_upgrade = 1;
 				}
-			next;
+			elsif ($new_ver >= $current_ver) {
+				# Module from pro repo is higher version or
+				# same .. upgrade
+				$can_upgrade = 1;
+				}
+			if (!$can_upgrade) {
+				&$second_print(&text('upgrade_gotver',
+						     $info{'version'}));
+				if ($mod eq "virtual-server") {
+					$errors++;
+					goto PAGEEND;
+					}
+				next;
+				}
 			}
 
 		# Download the file
