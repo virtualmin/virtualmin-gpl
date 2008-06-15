@@ -10638,7 +10638,7 @@ if (&can_show_pass()) {
 	if ($user) {
 		$link .= "&user=".&urlize($user->{'user'});
 		}
-	return "(<a href='$link' onClick='window.open(\"$link\", \"showpass\", \"toolbar=no,menubar=no,scrollbar=no,width=300,height=70\"); return false'>$text{'edit_showpass'}</a>)";
+	return "(<a href='$link' onClick='window.open(\"$link\", \"showpass\", \"toolbar=no,menubar=no,scrollbar=no,width=500,height=70,resizable=yes\"); return false'>$text{'edit_showpass'}</a>)";
 	}
 else {
 	return "";
