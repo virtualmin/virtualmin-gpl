@@ -10525,7 +10525,8 @@ else {
 	foreach my $a (@$doms) {
 		my $prog = &can_config_domain($a) ? "edit_domain.cgi"
 					          : "view_domain.cgi";
-		push(@alinks, "<a href='$prog?dom=$a->{'id'}'>$a->{'dom'}</a>");
+		push(@alinks, "<a href='$prog?dom=$a->{'id'}'>".
+			      &show_domain_name($a)."</a>");
 		}
 	local $lr = &ui_links_row(\@alinks);
 	$lr =~ s/<br>$//;

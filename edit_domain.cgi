@@ -93,13 +93,13 @@ if ($aliasdom) {
 	# Show link to aliased domain
 	print &ui_table_row($text{'edit_aliasto'},
 			    "<a href='edit_domain.cgi?dom=$d->{'alias'}'>".
-			    "$aliasdom->{'dom'}</a>", 3, \@tds);
+			    &show_domain_name($aliasdom)."</a>", 3, \@tds);
 	}
 elsif ($parentdom) {
 	# Show link to parent domain
 	print &ui_table_row($text{'edit_parent'},
 			    "<a href='edit_domain.cgi?dom=$d->{'parent'}'>".
-			    "$parentdom->{'dom'}</a>", 3, \@tds);
+			    &show_domain_name($parentdom)."</a>", 3, \@tds);
 	}
 
 print &ui_hidden_table_end("basic");

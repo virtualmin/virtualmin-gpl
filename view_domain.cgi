@@ -104,7 +104,8 @@ if ($d->{'proxy_pass_mode'} && $d->{'proxy_pass'} && $d->{'web'}) {
 if ($aliasdom) {
 	# Alias destination
 	print &ui_table_row($text{'edit_aliasto'},
-	   "<a href='view_domain.cgi?dom=$d->{'alias'}'>$aliasdom->{'dom'}</a>",
+	   "<a href='view_domain.cgi?dom=$d->{'alias'}'>".
+	    &show_domain_name($aliasdom)."</a>",
 	   3, \@tds);
 	}
 elsif (!$parentdom) {
@@ -114,7 +115,8 @@ elsif (!$parentdom) {
 else {
 	# Show link to parent domain
 	print &ui_table_row($text{'edit_parent'},
-	    "<a href='view_domain.cgi?dom=$d->{'parent'}'>$parentdom->{'dom'}</a>",
+	    "<a href='view_domain.cgi?dom=$d->{'parent'}'>".
+	     &show_domain_name($parentdom)."</a>",
 	    3, \@tds);
 	}
 
