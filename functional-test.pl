@@ -25,6 +25,7 @@ $test_target_domain = "exampletarget.com";
 $test_subdomain = "example.net";
 $test_user = "testy";
 $test_alias = "testing";
+$test_alias_two = "yetanothertesting";
 $test_reseller = "testsel";
 $timeout = 60;			# Longest time a test should take
 $wget_command = "wget -O - --cache=off --proxy=off ";
@@ -368,6 +369,13 @@ $alias_tests = [
 		      '^ *nobody@virtualmin.com' ],
 	},
 
+	# Create another alias
+	{ 'command' => 'create-alias.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'from', $test_alias_two ],
+		      [ 'to', 'nobody@webmin.com' ] ],
+	},
+
 	# Make sure the mail server sees it
 	{ 'command' => 'test-smtp.pl',
 	  'args' => [ [ 'to', $test_alias.'@'.$test_domain ] ],
@@ -383,6 +391,13 @@ $alias_tests = [
 	{ 'command' => 'test-smtp.pl',
 	  'args' => [ [ 'to', $test_alias.'@'.$test_domain ] ],
 	  'fail' => 1,
+	},
+
+	# Make sure the other alias still exists
+	{ 'command' => 'list-aliases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => '^'.$test_alias_two.'@'.$test_domain,
 	},
 
 	# Create a simple autoreply alias
