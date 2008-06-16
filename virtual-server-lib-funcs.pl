@@ -9000,12 +9000,7 @@ foreach $f (@feature_plugins) {
 		}
 	}
 
-# Update old and new Webmin users
 $first_print = $old_first_print if ($old_first_print);
-&modify_webmin($parent, $parent);
-if ($oldparent) {
-	&modify_webmin($oldparent, $oldparent);
-	}
 
 # Save the domain objects
 &$first_print($text{'save_domain'});
@@ -9013,6 +9008,12 @@ for(my $i=0; $i<@doms; $i++) {
         &save_domain($doms[$i]);
         }
 &$second_print($text{'setup_done'});
+
+# Update old and new Webmin users
+&modify_webmin($parent, $parent);
+if ($oldparent) {
+	&modify_webmin($oldparent, $oldparent);
+	}
 
 # Re-apply the parent's resource limits, if any
 if (defined(&supports_resource_limits) && &supports_resource_limits()) {
@@ -9164,9 +9165,7 @@ foreach $f (@feature_plugins) {
 		}
 	}
 
-# Update old Webmin user
 $first_print = $old_first_print if ($old_first_print);
-&modify_webmin($oldparent, $oldparent);
 
 # Save the domain objects
 &$first_print($text{'save_domain'});
@@ -9174,6 +9173,9 @@ for(my $i=0; $i<@doms; $i++) {
         &save_domain($doms[$i]);
         }
 &$second_print($text{'setup_done'});
+
+# Update old Webmin user
+&modify_webmin($oldparent, $oldparent);
 
 # Re-apply resource limits, to update Apache and PHP configs
 if (defined(&supports_resource_limits) && &supports_resource_limits()) {
