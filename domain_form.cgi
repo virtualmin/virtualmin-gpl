@@ -273,7 +273,7 @@ if (!$parentuser) {
 print &ui_hidden_table_end("basic");
 
 # Start of advanced section
-$has_advanced = $aliasdom || $subdom ? 0 : 1;
+$has_advanced = $aliasdom ? 0 : 1;
 if ($has_advanced) {
 	print &ui_hidden_table_start($text{'form_advanced'}, "width=100%", 2,
 				     "advanced", 0);
