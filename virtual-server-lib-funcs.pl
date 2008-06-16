@@ -4417,7 +4417,10 @@ if (!$_[3]->{'fix'}) {
 	if (-r $_[1]."_admins") {
 		# Also restore extra admins
 		&execute_command("rm -rf ".quotemeta("$extra_admins_dir/$_[0]->{'id'}"));
-		mkdir("$extra_admins_dir/$_[0]->{'id'}", 0755);
+		if (!-d $extra_admins_dir) {
+			&make_dir($extra_admins_dir, 755);
+			}
+		&make_dir("$extra_admins_dir/$_[0]->{'id'}", 0755);
 		&execute_command("cd ".quotemeta("$extra_admins_dir/$_[0]->{'id'}")." && tar xf ".quotemeta($_[1]."_admins")." .");
 		}
 	if ($config{'bw_active'} && -r $_[1]."_bw") {
@@ -4429,7 +4432,10 @@ if (!$_[3]->{'fix'}) {
 		# Also restore script logs
 		&execute_command("rm -rf ".quotemeta("$script_log_directory/$_[0]->{'id'}"));
 		if (-s $_[1]."_scripts") {
-			mkdir("$script_log_directory/$_[0]->{'id'}", 0755);
+			if (!-d $script_log_directory) {
+				&make_dir($script_log_directory, 0755);
+				}
+			&make_dir("$script_log_directory/$_[0]->{'id'}", 0755);
 			&execute_command("cd ".quotemeta("$script_log_directory/$_[0]->{'id'}")." && tar xf ".quotemeta($_[1]."_scripts")." .");
 			}
 		}
