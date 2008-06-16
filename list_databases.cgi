@@ -57,21 +57,20 @@ if ($dleft != 0) {
 print &ui_tabs_start_tab("databasemode", "list") if (@tabs > 1);
 print "$text{'databases_desc1'}<p>\n";
 @dbs = &domain_databases($d);
-if (@dbs) {
-	foreach $db (sort { $a->{'name'} cmp $b->{'name'} } @dbs) {
-		local $action;
-		if ($db->{'link'}) {
-			$action = "<a href='$db->{'link'}'>".
-				  "$text{'databases_man'}</a>";
-			}
-		push(@table, [
-			{ 'type' => 'checkbox', 'name' => 'd',
-			  'value' => $db->{'type'}.'_'.$db->{'name'} },
-			"<a href='edit_database.cgi?dom=$in{'dom'}&name=$db->{'name'}&type=$db->{'type'}'>$db->{'name'}</a>",
-			$db->{'desc'},
-			$action
-			]);
+foreach $db (sort { $a->{'name'} cmp $b->{'name'} } @dbs) {
+	local $action;
+	if ($db->{'link'}) {
+		$action = "<a href='$db->{'link'}'>".
+			  "$text{'databases_man'}</a>";
 		}
+	push(@table, [
+		{ 'type' => 'checkbox', 'name' => 'd',
+		  'value' => $db->{'type'}.'_'.$db->{'name'} },
+		"<a href='edit_database.cgi?dom=$in{'dom'}&name=$db->{'name'}&type=$db->{'type'}'>$db->{'name'}</a>",
+		$db->{'desc'},
+		$action
+		]);
+	}
 
 # Generate the table
 print &ui_form_columns_table(
@@ -88,11 +87,7 @@ print &ui_form_columns_table(
 	undef, 0, undef,
 	$text{'databases_none'});
 
-	}
-else {
-	print "<b>$text{'databases_none'}</b><p>\n";
-	shift(@links); shift(@links);
-	}
+# Show how many more can be added
 if ($dleft != 0 && $dleft != -1 && !$dhide) {
 	print "<b>",&text('databases_canadd'.$dreason, $dleft),"</b><p>\n";
 	}
