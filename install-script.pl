@@ -85,6 +85,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--pass") {
 		$dompass = shift(@ARGV);
 		}
+	elsif ($a eq "--log-only") {
+		$logonly = 1;
+		}
 	else {
 		&usage();
 		}
@@ -221,16 +224,31 @@ else {
 &run_post_actions();
 
 # Call the install function
-&$first_print(&text('scripts_installing', $script->{'desc'}, $ver));
-($ok, $msg, $desc, $url, $suser, $spass) =
-	&{$script->{'install_func'}}($d, $ver, $opts, \%gotfiles, $sinfo,
-				     $domuser, $dompass);
-if ($msg =~ /</) {
-	$msg = &mailboxes::html_to_text($msg);
-	$msg =~ s/^\s+//;
-	$msg =~ s/\s+$//;
+if ($logonly) {
+	# Just pretend
+	&$first_print(&text('scripts_faking', $script->{'desc'}, $ver));
+	$ok = 1;
+	$msg = "";
+	$rp = $opts->{'dir'};
+	$rp =~ s/^$d->{'home'}\///;
+	$desc = "Under $rp";
+	$url = &script_path_url($d, $opts);
+	$suser = $domuser;
+	$spass = $dompass;
 	}
-print "$msg\n";
+else {
+	# Really do it
+	&$first_print(&text('scripts_installing', $script->{'desc'}, $ver));
+	($ok, $msg, $desc, $url, $suser, $spass) =
+		&{$script->{'install_func'}}($d, $ver, $opts, \%gotfiles,
+					     $sinfo, $domuser, $dompass);
+	if ($msg =~ /</) {
+		$msg = &mailboxes::html_to_text($msg);
+		$msg =~ s/^\s+//;
+		$msg =~ s/\s+$//;
+		}
+	print "$msg\n";
+	}
 
 if ($ok) {
 	&$second_print($ok < 0 ? $text{'scripts_epartial'}
@@ -282,6 +300,7 @@ print "                         [--opt name value]\n";
 print "                         [--upgrade id]\n";
 print "                         [--force-dir directory]\n";
 print "                         [--mongrels number]\n";
+print "                         [--log-only]\n";
 exit(1);
 }
 

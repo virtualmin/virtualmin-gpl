@@ -2841,6 +2841,7 @@ scripts_edownload2=Download of $1 is not an archive file - perhaps an error page
 scripts_eurl=Unsupported URL $1
 scripts_ierr=Failed to install script
 scripts_installing=Now installing $1 version $2 ..
+scripts_faking=Faking install of $1 version $2 ..
 scripts_failed=.. failed! See the error message above for the reason why.
 scripts_utitle=Un-Install Script
 scripts_rusure=Are you sure you want to un-install the script $1 version $2? All files under <tt>$3</tt> will be deleted ($4).
