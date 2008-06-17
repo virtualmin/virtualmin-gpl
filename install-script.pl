@@ -161,7 +161,7 @@ if ($opts->{'db'} && $sname !~ /^php\S+admin$/i) {
 			}
 		}
 	}
-if (defined(&{$script->{'check_func'}}) && !$sinfo) {
+if (defined(&{$script->{'check_func'}}) && !$sinfo && !$logonly) {
 	$oerr = &{$script->{'check_func'}}($d, $ver, $opts, $sinfo);
 	if ($oerr) {
 		&usage("Options problem detected : $oerr");
