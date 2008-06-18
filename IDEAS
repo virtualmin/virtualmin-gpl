@@ -65,6 +65,7 @@
 	- Get global actions
 	- Get other links
 		- Module config, logout, etc..
+	- Use in mobile theme too
 
  - UCC SSL certs (with multiple domain names)
 	- Support name-based on port 443

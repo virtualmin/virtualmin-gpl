@@ -949,10 +949,24 @@ sub backup_webmin
 local ($d, $file, $opts) = @_;
 &$first_print($text{'backup_webmin'});
 local @files;
-push(@files, "$d->{'user'}.acl", "*/$d->{'user'}.acl");
-foreach my $admin (&list_extra_admins($d)) {
-	push(@files, "$admin->{'name'}.acl", "*/$admin->{'name'}.acl");
+
+# Add .acl files for domain owner
+push(@files, "$d->{'user'}.acl");
+local @otheracls = glob("$config_directory/*/$d->{'user'}.acl");
+if (@otheracls) {
+	push(@files, "*/$d->{'user'}.acl");
 	}
+
+# Add .acl files for extra admins
+foreach my $admin (&list_extra_admins($d)) {
+	push(@files, "$admin->{'name'}.acl");
+	local @otheracls = glob("$config_directory/*/$admin->{'name'}.acl");
+	if (@otheracls) {
+		push(@files, "*/$admin->{'name'}.acl");
+		}
+	}
+
+# Tar them all up
 local $out = &backquote_command("cd $config_directory && tar cf ".quotemeta($file)." ".join(" ", @files)." 2>&1");
 if ($?) {
 	&$second_print(&text('backup_webminfailed', "<pre>$out</pre>"));
