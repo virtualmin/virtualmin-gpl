@@ -8639,6 +8639,7 @@ return @rv;
 #  cat - Category code
 #  catname - Category human-readable name
 #  target - Frame to open in (right or _new), defaults to right
+#  icon - Unique code for this link
 sub get_all_domain_links
 {
 local ($d) = @_;
@@ -8650,7 +8651,8 @@ local $vm = "$gconfig{'webprefix'}/$module_name";
 push(@rv, { 'url' => $canconfig ? "$vm/edit_domain.cgi?dom=$d->{'id'}"
 				: "$vm/view_domain.cgi?dom=$d->{'id'}",
 	    'title' => $canconfig ? $text{'edit_title'} : $text{'view_title'},
-	    'cat' => 'objects' });
+	    'cat' => 'objects',
+	    'icon' => $canconfig ? 'edit' : 'view' });
 
 # Add actions and links
 foreach my $l (&get_domain_actions($d), &feature_links($d)) {
@@ -8675,6 +8677,11 @@ if (defined(&list_visible_custom_links)) {
 		delete($l->{'desc'});
 		$l->{'target'} = $l->{'open'} ? "_new" : "right";
 		delete($l->{'open'});
+		if (!$l->{'icon'}) {
+			# Make a unique ID
+			$l->{'icon'} = lc($l->{'title'});
+			$l->{'icon'} =~ s/\s/_/g;
+			}
 		push(@rv, $l);
 		# Pick a category code, based on a match by name with an
 		# existing category or a lower-cased version of the category
@@ -8712,8 +8719,8 @@ sub domain_redirect
 }
 
 # get_template_pages()
-# Returns three array references, for template/reseller/etc links, titles
-# and icons
+# Returns five array references, for template/reseller/etc links, titles,
+# categories and codes
 sub get_template_pages
 {
 local @tmpls = ( 'features', 'tmpl', 'user', 'update',
@@ -8779,7 +8786,99 @@ foreach my $p (@plugins) {
 		}
 	}
 
-return (\@tlinks, \@ttitles, \@ticons, \@tcats);
+return (\@tlinks, \@ttitles, \@ticons, \@tcats, \@tmpls);
+}
+
+# get_all_global_links()
+# Returns a list of links for global actions, including those from 'templates'
+# create/migrate, backup/restore and module config. Each element has the same
+# keys as get_all_domain_links
+sub get_all_global_links
+{
+my @rv;
+my $vm = "$gconfig{'webprefix'}/$module_name";
+
+# Add template pages
+if (&can_edit_templates()) {
+	my ($tlinks, $ttitles, undef, $tcats, $tcodes) = &get_template_pages();
+	$tcats = [ map { "setting" } @$tlinks ] if (!$tcats);
+	for(my $i=0; $i<@$tlinks; $i++) {
+		push(@rv, { 'url' => $tlinks[$i] =~ /\// ?
+				$gconfig{'webprefix'}.$tlinks[$i] :
+				$vm."/".$tlinks[$i],
+			    'title' => $ttitles[$i],
+			    'cat' => $tcats[$i],
+			    'icon' => $tcodes[$i],
+			  });
+		}
+	}
+
+# Add module config page
+if (!$access{'noconfig'}) {
+	push(@rv, { 'url' => "$gconfig{'webprefix'}/config.cgi?$module_name",
+		    'title' => $text{'header_config'},
+		    'cat' => 'setting',
+		    'icon' => 'config' });
+	}
+
+# Add re-check config page
+if (&can_edit_templates()) {
+	push(@rv, { 'url' => "$vm/check.cgi",
+		    'title' => $text{'index_srefresh2'},
+		    'cat' => 'setting',
+		    'icon' => 'recheck' });
+	}
+
+# Add creation-related links
+my ($dleft, $dreason, $dmax, $dhide) = &count_domains("realdoms");
+my ($aleft, $areason, $amax, $ahide) = &count_domains("aliasdoms");
+my $nobatch = !&can_create_batch();
+if ((&can_create_sub_servers() || &can_create_master_servers()) &&
+    $dleft && $virtualmin_pro && !$nobatch) {
+	# Batch create
+	push(@rv, { 'url' => "$vm/mass_create_form.cgi",
+		    'title' => $text{'index_batch'},
+		    'cat' => 'add',
+		    'icon' => 'batch' });
+	}
+if (&can_import_servers()) {
+	# Import domain
+	push(@rv, { 'url' => "$vm/import_form.cgi",
+		    'title' => $text{'index_import'},
+		    'cat' => 'add',
+		    'icon' => 'import' });
+	}
+if (&can_migrate_servers()) {
+	# Migrate domain
+	push(@rv, { 'url' => "$vm/migrate_form.cgi",
+		    'title' => $text{'index_migrate'},
+		    'cat' => 'add',
+		    'icon' => 'migrate' });
+	}
+
+# Add backup/restore links
+my ($blinks, $btitles, undef, $bcodes) = &get_backup_actions();
+for(my $i=0; $i<@$blinks; $i++) {
+	push(@rv, { 'url' => $vm."/".$blinks->[$i],
+		    'title' => $btitles[$i],
+		    'cat' => 'backup',
+		    'icon' => $bcodes->[$i] });
+	}
+
+# Top-level links
+push(@rv, { 'url' => $vm.'/index.cgi',
+	    'title' => $text{'index_link'},
+	    'icon' => 'index' });
+# XXX bw? password?
+
+# Set category names
+foreach my $l (@rv) {
+	if ($l->{'cat'}) {
+		$l->{'catname'} ||= $text{'cat_'.$l->{'cat'}};
+		}
+	}
+
+return @rv;
 }
 
 # get_startstop_links([live])

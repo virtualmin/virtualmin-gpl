@@ -1758,28 +1758,31 @@ return $out =~ /--listed-incremental/;
 # get_backup_actions()
 # Returns a list of arrays for backup / restore actions that the current
 # user is allowed to do. The first is links, the second titles, the third
-# long descriptions.
+# long descriptions, the fourth is codes.
 sub get_backup_actions
 {
-local (@links, @titles, @descs);
+local (@links, @titles, @descs, @codes);
 if (&can_backup_domain()) {
 	if (&can_backup_sched()) {
 		# Can do scheduled backups, so show list
 		push(@links, "list_sched.cgi");
 		push(@titles, $text{'index_scheds'});
 		push(@descs, $text{'index_schedsdesc'});
+		push(@codes, 'sched');
 		}
 	# Can do immediate
 	push(@links, "backup_form.cgi");
 	push(@titles, $text{'index_backup'});
 	push(@descs, $text{'index_backupdesc'});
+	push(@codes, 'backup');
 	}
 if (&can_restore_domain()) {
 	push(@links, "restore_form.cgi");
 	push(@titles, $text{'index_restore'});
 	push(@descs, $text{'index_restoredesc'});
+	push(@codes, 'restore');
 	}
-return (\@links, \@titles, \@descs);
+return (\@links, \@titles, \@descs, \@codes);
 }
 
 # Returns 1 if the user can backup and restore all domains

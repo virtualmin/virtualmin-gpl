@@ -1,4 +1,5 @@
 index_title=Virtualmin Virtual Servers
+index_link=List Virtual Servers
 index_title2=Virtual Email
 index_add1=Add new virtual server
 index_add2=Add new virtual server, owned by:
@@ -166,6 +167,7 @@ index_squotas4g=Active for users and groups on home directories filesystem $1, a
 index_squotas5=Active for users only on home directories and email filesystem $1.
 index_squotas5g=Active for users and groups on home directories and email filesystem $1.
 index_srefresh=Re-check and refresh configuration
+index_srefresh2=Re-Check Config
 index_featuresb=Manage Enabled Features and Plugins
 index_tmpls=Edit Server Templates
 index_smail=Mail server
@@ -3498,6 +3500,12 @@ cat_logs=Logs and Reports
 cat_webmin=Webmin Modules
 cat_dns=Domain Registration
 cat_links=Custom Links
+cat_add=Add Servers
+cat_setting=System Settings
+cat_email=Email Messages
+cat_ip=Addresses and Networking
+cat_check=Limits and Validation
+cat_custom=System Customization
 
 pass_title=Change Password
 pass_ecannot=You are not allowed to change the password for this domain
