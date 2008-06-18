@@ -61,10 +61,6 @@
 	- how can lookup-domain work? Via network?
 
  - Making theming easier
-	- Get create links
-	- Get global actions
-	- Get other links
-		- Module config, logout, etc..
 	- Use in mobile theme too
 
  - UCC SSL certs (with multiple domain names)
