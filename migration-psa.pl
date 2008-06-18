@@ -218,6 +218,10 @@ $dom{'public_html_dir'} = 'httpdocs';			# Plesk 7 style
 $dom{'public_html_path'} = $dom{'home'}.'/httpdocs';
 $dom{'cgi_bin_dir'} = 'cgi-bin';
 $dom{'cgi_bin_path'} = $dom{'home'}.'/cgi-bin';
+if ($domain->{'forwarding'} && $domain->{'forwarding'}->{'redirect'}) {
+	$dom{'proxy_pass_mode'} = 2;
+	$dom{'proxy_pass'} = $domain->{'forwarding'}->{'redirect'};
+	}
 &complete_domain(\%dom);
 
 # Check for various clashes
@@ -270,6 +274,10 @@ else {
 		&$second_print(".. done");
 		}
 	}
+# Fix perms tar may have messed up
+&create_standard_directories(\%dom);
+&set_ownership_permissions(undef, undef, oct($uconfig{'homedir_perms'}),
+			   $dom{'home'});
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable(\%dom, 0);
 	}
@@ -663,7 +671,9 @@ foreach my $sdom (keys %$subdoms) {
 		}
 	}
 
-DONE:
+# Save original Plesk 7 XML file
+&save_plesk_xml_files(\%dom, $xfile, $dump);
+
 return (\%dom, @rvdoms);
 }
 

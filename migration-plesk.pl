@@ -949,6 +949,9 @@ foreach my $sdom (keys %$subdoms) {
 	&$second_print(".. created $sucount");
 	}
 
+# Save original Plesk 8 XML file
+&save_plesk_xml_files(\%dom, $xfile, $dump);
+
 return (\%dom, @rvdoms);
 }
 
@@ -1150,6 +1153,30 @@ foreach my $l (@lines) {
 	$l =~ s/^\s+//;
 	}
 return join("", map { $_."\n" } @lines);
+}
+
+# save_plesk_xml_files(&domain, xmlfile, &xmldata)
+# Called after a Plesk migration to save the original data files
+sub save_plesk_xml_files
+{
+local ($d, $xmlfile, $xmldata) = @_;
+local $etcdir = "$d->{'home'}/etc";
+if (!-d $etcdir) {
+	# Make sure ~/etc exists
+	&make_dir($etcdir, 0750);
+	&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, undef, $etcdir);
+	}
+local $xmldump = "$etcdir/plesk.xml";
+&copy_source_dest($xmlfile, $xmldump);
+&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, 0700, $xmldump);
+eval "use Data::Dumper";
+if (!$@) {
+	local $perldump = "$etcdir/plesk.perl";
+	&open_tempfile(PERLDUMP, ">$perldump");
+	&print_tempfile(PERLDUMP, Dumper($xmldata));
+	&close_tempfile(PERLDUMP);
+	&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, 0700, $perldump);
+	}
 }
 
 1;

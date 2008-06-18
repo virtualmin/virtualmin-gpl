@@ -26,10 +26,14 @@ if ($_[0]->{'unix'} && !$uinfo) {
 	}
 
 # Create and populate home directory
-&system_logged("mkdir $qh") if (!-d $_[0]->{'home'});
-&system_logged("chmod '$uconfig{'homedir_perms'}' $qh");
+if (!-d $_[0]->{'home'}) {
+	&make_dir($_[0]->{'home'}, oct($uconfig{'homedir_perms'}));
+	}
+&set_ownership_permissions(undef, undef, oct($uconfig{'homedir_perms'}),
+			   $_[0]->{'home'});
 if ($uinfo) {
-	&system_logged("chown $uinfo->{'uid'}:$uinfo->{'gid'} $qh");
+	&set_ownership_permissions($uinfo->{'uid'}, $uinfo->{'gid'}, undef,
+				   $_[0]->{'home'});
 	}
 if ($tmpl->{'skel'} ne "none" && !$_[0]->{'nocopyskel'}) {
 	&copy_skel_files(&substitute_domain_template($tmpl->{'skel'}, $_[0]),
@@ -52,14 +56,7 @@ if ($_[0]->{'subdom'}) {
 	}
 
 # Setup sub-directories
-local $d;
-foreach $d (&virtual_server_directories($_[0])) {
-        &system_logged("mkdir -p $qh/$d->[0] 2>/dev/null");
-        &system_logged("chmod $d->[1] $qh/$d->[0]");
-	if ($uinfo) {
-		&system_logged("chown $uinfo->{'uid'}:$uinfo->{'gid'} $qh/$d->[0]");
-		}
-        }
+&create_standard_directories($_[0]);
 &$second_print($text{'setup_done'});
 
 # Create mail file
@@ -81,6 +78,26 @@ if (!$_[0]->{'parent'}) {
 	}
 
 return 1;
+}
+
+# create_standard_directories(&domain)
+# Create and set permissions on standard directories
+sub create_standard_directories
+{
+local ($d) = @_;
+foreach my $dir (&virtual_server_directories($d)) {
+	local $path = "$d->{'home'}/$dir->[0]";
+	&lock_file($path);
+	if (!-d $path) {
+		&make_dir($path, oct($dir->[1]), 1);
+		}
+	&set_ownership_permissions(undef, undef, oct($dir->[1]), $path);
+	if ($d->{'uid'} && ($d->{'unix'} || $d->{'parent'})) {
+		&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
+					   undef, $path);
+		}
+	&unlock_file($path);
+        }
 }
 
 # modify_dir(&domain, &olddomain)

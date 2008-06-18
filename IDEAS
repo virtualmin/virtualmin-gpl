@@ -66,8 +66,6 @@
 	- Get global actions
 	- Get other links
 		- Module config, logout, etc..
-	- Webmin modules in categories
-		- Call from mscstyle3 and index.cgi
 
  - UCC SSL certs (with multiple domain names)
 	- Support name-based on port 443
