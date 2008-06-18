@@ -61,8 +61,7 @@
 	- how can lookup-domain work? Via network?
 
  - Making theming easier
-	- One function to get visible domains
-	- Get domain-level actions
+	- Get create links
 	- Get global actions
 	- Get other links
 		- Module config, logout, etc..
@@ -72,3 +71,6 @@
 	- Wildcard for multiple domains
 		- NameVirtualHost for port 443
 	- FS#4136
+
+ - Docs for API in SVN, auto-upload to wiki
+	- Ask Joe where they go?

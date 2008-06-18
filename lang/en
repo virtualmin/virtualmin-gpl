@@ -3497,6 +3497,7 @@ cat_services=Services
 cat_logs=Logs and Reports
 cat_webmin=Webmin Modules
 cat_dns=Domain Registration
+cat_links=Custom Links
 
 pass_title=Change Password
 pass_ecannot=You are not allowed to change the password for this domain

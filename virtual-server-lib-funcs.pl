@@ -65,6 +65,13 @@ closedir(DIR);
 return @rv;
 }
 
+# list_visible_domains()
+# Returns a list of domain structures the current user can see
+sub list_visible_domains
+{
+return grep { &can_edit_domain($_) } &list_domains();
+}
+
 # get_domain(id, [file], [force-reread])
 # Looks up a domain object by ID
 sub get_domain
@@ -8618,6 +8625,68 @@ if (!&can_config_domain($d)) {
 		    'desc' => $text{'edit_changepassdesc'},
 		    'cat' => 'server',
 		  });
+	}
+
+return @rv;
+}
+
+# get_all_domain_links(&domain)
+# Returns a list of all links for a domain, including actions, feature links
+# and custom links. Each has the following keys :
+#  url - URL to link to
+#  title - Short name for link
+#  desc - Longer name for link (optional)
+#  cat - Category code
+#  catname - Category human-readable name
+#  target - Frame to open in (right or _new), defaults to right
+sub get_all_domain_links
+{
+local ($d) = @_;
+local @rv;
+
+# Always start with edit/view link
+my $canconfig = &can_config_domain($d);
+local $vm = "$gconfig{'webprefix'}/$module_name";
+push(@rv, { 'url' => $canconfig ? "$vm/edit_domain.cgi?dom=$d->{'id'}"
+				: "$vm/view_domain.cgi?dom=$d->{'id'}",
+	    'title' => $canconfig ? $text{'edit_title'} : $text{'view_title'},
+	    'cat' => 'objects' });
+
+# Add actions and links
+foreach my $l (&get_domain_actions($d), &feature_links($d)) {
+	if ($l->{'mod'}) {
+		$l->{'url'} = "$gconfig{'webprefix'}/$l->{'mod'}/$l->{'page'}";
+		}
+	else {
+		$l->{'url'} = "$vm/$l->{'page'}".
+			      "?dom=".$d->{'id'}."&".
+			      join("&", map { $_->[0]."=".&urlize($_->[1]) }
+                                            @{$l->{'hidden'}});
+		}
+	$l->{'catname'} ||= $text{'cat_'.$l->{'cat'}};
+	push(@rv, $l);
+	}
+my %catmap = map { $_->{'catname'}, $_->{'cat'} } @rv;
+
+# Add custom links
+if (defined(&list_visible_custom_links)) {
+	foreach my $l (&list_visible_custom_links($d)) {
+		$l->{'title'} = $l->{'desc'};
+		delete($l->{'desc'});
+		$l->{'target'} = $l->{'open'} ? "_new" : "right";
+		delete($l->{'open'});
+		push(@rv, $l);
+		# Pick a category code, based on a match by name with an
+		# existing category or a lower-cased version of the category
+		if ($l->{'catname'}) {
+			$l->{'cat'} = $catmap{$l->{'catname'}} ||
+				      lc($l->{'catname'});
+			}
+		else {
+			$l->{'cat'} = 'objects';
+			$l->{'catname'} = $text{'cat_objects'};
+			}
+		}
 	}
 
 return @rv;
