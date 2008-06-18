@@ -84,9 +84,13 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 		  $path,
 		$dbdesc,
 		$status,
-		&virtualmin_ui_rating_selector(
-			$sinfo->{'name'}, $ratings->{$sinfo->{'name'}},
-			5, "rate_script.cgi?dom=$in{'dom'}")
+		{ 'type' => 'string',
+		  'nowrap' => 1,
+		  'value' => 
+			&virtualmin_ui_rating_selector(
+				$sinfo->{'name'}, $ratings->{$sinfo->{'name'}},
+				5, "rate_script.cgi?dom=$in{'dom'}")
+		},
 		]);
 	}
 
@@ -177,8 +181,10 @@ foreach $script (sort { $a->{'sortcategory'} cmp
 	    $script->{'desc'},
 	    $vsel,
 	    $script->{'longdesc'},
-	    $r ? &virtualmin_ui_rating_selector(undef, $r, 5)
-	       : "",
+	    { 'type' => 'string',
+	      'nowrap' => 1,
+	      'value' => $r ? &virtualmin_ui_rating_selector(undef, $r, 5) : "",
+	    },
 	    ]);
 	}
 

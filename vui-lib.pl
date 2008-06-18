@@ -12,7 +12,7 @@ $value ||= 0;
 local $rv;
 if (!$main::done_virtualmin_ui_rating_selector++) {
 	# Generate highlighting Javascript code
-	$rv .= &virtualmin_ui_rating_selector_javascript();
+	#$rv .= &virtualmin_ui_rating_selector_javascript();
 	}
 for($i=1; $i<=$max; $i++) {
 	local $img = $i <= $value ? "staron.gif" : "staroff.gif";
