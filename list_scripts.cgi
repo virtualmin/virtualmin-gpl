@@ -151,8 +151,8 @@ foreach $script (sort { $a->{'sortcategory'} cmp
 	@vers = grep { &can_script_version($script, $_) }
 		     @{$script->{'versions'}};
 	next if (!@vers);	# No allowed versions!
-	if ($cat ne $lastcat) {
-		# Supress row color alternating
+	if ($cat ne $lastcat && @scripts > 1) {
+		# Start of new group
 		push(@table, [ { 'type' => 'group',
 				 'desc' => $cat } ]);
 		$lastcat = $cat;
