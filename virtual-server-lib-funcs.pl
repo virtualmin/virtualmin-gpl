@@ -8803,12 +8803,12 @@ if (&can_edit_templates()) {
 	my ($tlinks, $ttitles, undef, $tcats, $tcodes) = &get_template_pages();
 	$tcats = [ map { "setting" } @$tlinks ] if (!$tcats);
 	for(my $i=0; $i<@$tlinks; $i++) {
-		push(@rv, { 'url' => $tlinks[$i] =~ /\// ?
-				$gconfig{'webprefix'}.$tlinks[$i] :
-				$vm."/".$tlinks[$i],
-			    'title' => $ttitles[$i],
-			    'cat' => $tcats[$i],
-			    'icon' => $tcodes[$i],
+		push(@rv, { 'url' => $tlinks->[$i] =~ /\// ?
+				$gconfig{'webprefix'}.$tlinks->[$i] :
+				$vm."/".$tlinks->[$i],
+			    'title' => $ttitles->[$i],
+			    'cat' => $tcats->[$i],
+			    'icon' => $tcodes->[$i],
 			  });
 		}
 	}
@@ -8860,7 +8860,7 @@ if (&can_migrate_servers()) {
 my ($blinks, $btitles, undef, $bcodes) = &get_backup_actions();
 for(my $i=0; $i<@$blinks; $i++) {
 	push(@rv, { 'url' => $vm."/".$blinks->[$i],
-		    'title' => $btitles[$i],
+		    'title' => $btitles->[$i],
 		    'cat' => 'backup',
 		    'icon' => $bcodes->[$i] });
 	}
@@ -8869,7 +8869,18 @@ for(my $i=0; $i<@$blinks; $i++) {
 push(@rv, { 'url' => $vm.'/index.cgi',
 	    'title' => $text{'index_link'},
 	    'icon' => 'index' });
-# XXX bw? password?
+if (&reseller_admin()) {
+	# Change password for resellers
+	push(@rv, { 'url' => $vm."/edit_pass.cgi",
+		    'title' => $text{'edit_changepass'},
+		    'icon' => 'pass' });
+	}
+if (&reseller_admin() && $config{'bw_active'}) {
+	# Bandwidth for resellers
+	push(@rv, { 'url' => $vm."/bwgraph.cgi",
+		    'title' => $text{'edit_bwgraph'},
+		    'icon' => 'bw' });
+	}
 
 # Set category names
 foreach my $l (@rv) {
