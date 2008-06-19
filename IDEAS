@@ -60,9 +60,6 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - Making theming easier
-	- Use in mobile theme too
-
  - UCC SSL certs (with multiple domain names)
 	- Support name-based on port 443
 	- Wildcard for multiple domains
