@@ -1,5 +1,14 @@
 #!/usr/local/bin/perl
-# Enables all disabled features in a domain
+
+=head1 enable-domain.pl
+
+Re-enable one virtual server
+
+This program reverses the disable process done by disable-domain.pl , or in
+the Virtualmin web interface. It will restore the server to the state it was
+in before being disabled.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

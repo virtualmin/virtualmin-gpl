@@ -1,5 +1,26 @@
 #!/usr/local/bin/perl
-# Modifies a virtual domain, based on command-line parameters
+
+=head2 modify-domain.pl
+
+Change parameters of a virtual server
+
+This command can be used to modify various settings for an existing virtual
+server from the command line. The only mandatory parameter is C<--domain>, which
+must be followed by the domain name of the server to update. The actual
+changes to make are specified by the other optional parameters, such as C<--pass>
+to set a new password, C<--desc> to change the server description, and C<--quota> and C<--uquota> to change the disk quota.
+
+To add a private IP address to a virtual server that currently does not have
+one, the C<--ip> or C<--allocate-ip> options can be used, as described in the
+section on create-domain.pl.
+
+To change a server's domain name, the C<--newdomain> option can be used. It must
+be followed by a new domain name, which of course cannot be used by any
+existing virtual server. When changing the domain name, you may also want to
+use the C<--user> option to update the administration username for the server.
+Both of these options will effect sub-servers as well, where appropriate.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

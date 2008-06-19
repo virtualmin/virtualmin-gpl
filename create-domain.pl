@@ -1,6 +1,40 @@
 #!/usr/local/bin/perl
-# create-domain.pl
-# Adds a new virtual host, based on command-line parameters
+
+=head1 create-domain.pl
+
+Create a virtual server
+
+This program can be used to create a new top-level, child or alias virtual
+server. It is typically called with parameters something like :
+
+   create-domain.pl --domain foo.com --pass smeg --desc "The server for foo" --unix --dir --webmin --web --dns --mail --limits-from-template
+
+This would create a server called foo.com , with the Unix login, home directory, Webmin login, website, DNS domain and email features enabled, and disk quotas
+based on those set in the default template. If you run this program with the --help option, you can see all of the
+other command-line options that it supports. The most commonly used are those
+for enabling features for the new server, such as --mysql and --logrotate.
+
+To create a virtual server with a private IP address, you can use the --ip
+option to specify it explicitly. If your Virtualmin is configured to
+automatically allocate IP addresses, use the --allocate-ip option instead, to
+have a free address chosen from the allocation ranges. If you want to
+use a virtual IP that is already active on the system, you must add the
+--ip-already command-line option.
+
+To create a server that is owned by an existing user, use the --parent option,
+followed by the name of the virtual server to create under. In this case, the --pass , --unix , --webmin and --quota options are not needed, as a user for the new server already exists.
+
+To create an alias of an existing virtual server, use the --alias option,
+followed by the domain name of the target server. For alias servers, the
+--pass , --unix , --webmin , --dir and --quota options are not needed.
+
+You can specify limits on the number of aliases, sub-servers, mailboxes and
+databases for the new domain owner using the --max-aliases, --max-doms,
+--max-mailboxes and --max-dbs options. Alternately, you can choose to have
+all limits (including quotas) set based on the template using the
+--limits-from-template command line flag.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

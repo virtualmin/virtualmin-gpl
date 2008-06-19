@@ -1,5 +1,17 @@
 #!/usr/local/bin/perl
-# Disables all features in a domain
+
+=head1 disable-domain.pl
+
+When a server is disabled, it will become temporarily unavailable without
+being completely deleted. This program can be used to disable one server,
+specified with the C<--domain> option. The exact features that will be disabled
+for the server are set on the module configuration page.
+
+The optional C<--why> parameter can be followed by a description explaining
+why the domain has been disabled, which will be shown when anyone tries to
+edit it in Virtualmin.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

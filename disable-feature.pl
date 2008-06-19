@@ -1,5 +1,15 @@
 #!/usr/local/bin/perl
-# Disable some features from the command line
+
+=head1 disable-feature.pl
+
+Turn off some features for a virtual server
+
+This program is very similar to C<enable-feature.pl>, and takes the same command
+line parameters, but disables the specified features instead. Be careful when
+using it, as it will not prompt for confirmation before disabling features
+that may result in the loss of configuration files and other data.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

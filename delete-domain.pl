@@ -1,5 +1,19 @@
 #!/usr/local/bin/perl
-# Deletes a single domain and all sub-domains
+
+=head1 delete-domain.pl
+
+Delete one virtual server
+
+To delete a server (and all of its sub-servers and alias domains) from the
+system, use this program. Its only required parameter is C<--domain> , which must
+be followed by the domain name of the server to remove. The C<--only> option can
+be used to not actually delete the server, but instead simply remove it from
+the control of Virtualmin.
+
+Be careful with this program, as unlike the server deletion function in the
+Virtualmin web interface, it will NOT prompt for confirmation!
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

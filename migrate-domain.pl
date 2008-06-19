@@ -1,5 +1,42 @@
 #!/usr/local/bin/perl
-# Migrate a domain from some other server
+
+=head1 migrate-domain.pl
+
+Imports a virtual server from some other product
+
+Virtualmin has the capability to import servers from other hosting programs,
+such as cPanel and Plesk. This program can perform an import from the command line,
+which will create a new server in Virtualmin with all the same settings and
+content as the original server.
+
+The C<--source> parameter must be followed by the name of the backup or export
+file to migrate from. The C<--type> parameter must be followed by the short name of the product that originally created the backup, such as C<cpanel>,
+C<ensim>, C<plesk> or C<psa> (for Plesk 7).
+
+By default, Virtualmin will attempt to work out the domain name from the
+backup automatically. However, this can be overridden with the C<--domain>
+parameter, which must be followed by a domain name. Similarly, the original
+username and password will be used unless set with C<--user> and C<--pass>
+respectively. Some migration formats do not contain the password, in which
+case C<--pass> must be given (and an error will be displayed if it is missing).
+
+To migrate a server under the ownership of an existing Virtualmin user, use
+the C<--parent> parameter to specify the name of the parent domain. The optional
+C<--webmin> parameter will cause a Webmin login to be created for the migrated
+server, which is typically what you want unless using C<--parent>.
+
+If the original server had a private IP address, either the C<--ip> or
+C<--allocate-ip> parameter should be used to create an IP for the new virtual
+server. Failure to do this may cause the migration attempt to be rejected, or
+for features of the migrated server to not work properly (such as its SSL
+virtual website). If you want to use a virtual IP that is already active on
+the system, you must add the C<--ip-already> command-line option.
+
+The C<--template> parameter can be used to specify a Virtualmin template by
+name to use when creating the migrated virtual server. If not given, the
+I<default settings> template will be used.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {
