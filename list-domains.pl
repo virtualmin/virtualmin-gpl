@@ -1,5 +1,29 @@
 #!/usr/local/bin/perl
-# Lists all virtual servers
+
+=head1 list-domains.pl
+
+Lists all virtual servers.
+
+This program does not modify the system, but instead simply outputs a list of
+all existing virtual servers. By default, the list is a reader-friendly
+format, but the C<--multiline> option can be used to display more details for
+each server, in a format suitable for parsing by other programs. The C<--domain>
+option can be used to specify a single virtual server to list, in cases where
+you know exactly which server you are interested in.
+
+To limit the domains to those owned by a single user, the C<--user> parameter
+can be given, following by a domain owner's name. You can also limit it to
+particular server types with the C<--alias>, C<--subserver>, C<--toplevel>
+and C<--subdomain> parameters. Or to only show domains with a particular feature
+active, use the C<--with-feature> parameter followed by a feature code like
+C<dns> or C<web>. Alternately, C<--without-feature> can be used to show
+only domains without some feature enabled.
+
+To get a list of domain names only, use the C<--name-only> parameter. To get
+just Virtualmin domain IDs, use C<--id-only>. These are useful when iterating
+through domains in a script.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {
