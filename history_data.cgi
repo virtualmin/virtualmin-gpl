@@ -26,8 +26,8 @@ foreach $stat (@stats) {
 $first = $infomap{$stats[0]};
 if (scalar(@$first) > 1024) {
 	$step = int(scalar(@$first) / 1024);
-	my @newinfo;
 	foreach $stat (@stats) {
+		my @newinfo;
 		for($i=0; $i<scalar(@$first); $i+=$step) {
 			push(@newinfo, $infomap{$stat}->[$i]);
 			}

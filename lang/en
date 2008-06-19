@@ -4111,6 +4111,7 @@ history_none=No historic system statistics have been recorded yet.
 history_showsel=Select historic statistics to show :
 history_ok=Show Selected
 history_pc=percent
+history_rawdata=Download raw data..
 
 sv_title=Spam and Virus Scanning
 newsv_title=$sv_title

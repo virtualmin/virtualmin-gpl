@@ -112,6 +112,7 @@ print "</td>\n";
 # The graph itself
 print "</tr></table>\n";
 print "<div id='history' style='height: 300px;'></div>\n";
+print "<a href='history_data.cgi?$statsparams&start=$start&end=$end&nice=1'>$text{'history_rawdata'}</a><br>\n";
 
 # Checkboxes for statistics to show
 print &ui_hr();
