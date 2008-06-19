@@ -79,8 +79,11 @@ if (!$domain && $dump->{'sites'}->{'domain'}->{'name'} eq $dom) {
 	}
 
 # Work out user and group
-local $uinfo = ref($domain->{'user'}) eq 'ARRAY' ?
-		$domain->{'user'}->[0] : $domain->{'user'};
+local $users = $domain->{'user'};
+$users = !$users ? [ ] :
+	 ref($users) eq 'ARRAY' ? $users : [ $users ];
+local $uinfo = $users->[0];
+$uinfo || &error("No primary user details found in backup");
 if (!$user) {
 	$user = $uinfo->{'login'}->{'name'};
 	}
@@ -124,7 +127,7 @@ if (@mysqldbs) {
 # Check for mail users
 local @mailusers;
 local ($has_spam, $has_virus);
-foreach my $u (@{$domain->{'user'}}) {
+foreach my $u (@$users) {
 	if ($u->{'spamassassin'}) {
 		$has_spam = 1;
 		}
