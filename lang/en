@@ -1383,6 +1383,8 @@ newdns_ewww=A <tt>www</tt> A record for the domain must exist in the template
 newdns_view=Create new domains in view
 newdns_noview=Top level (not in any view)
 newdns_enamedconf=No valid BIND named.conf directives were entered
+newdns_ensip=Additional nameserver $1 is an IP address instead of a hostname
+newdns_enshost=Additional nameserver $1 does not exist
 
 sub_DOM=The domain name, such as <tt>foo.com</tt>
 sub_HOME=The domain user's home directory, such as <tt>/home/foo</tt>
@@ -2298,6 +2300,7 @@ tmpl_webbelow=Apache directives below ..
 tmpl_logrotate=Logrotate directives for new servers
 tmpl_logrotatenone=Automatic
 tmpl_dns=BIND DNS records for new domains
+tmpl_dnsns=Additional manually configured nameservers
 tmpl_dnsbelow=Records below ..
 tmpl_replace=Record mode
 tmpl_replace0=Add above to automatically generated records

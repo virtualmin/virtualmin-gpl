@@ -625,6 +625,8 @@ if (!$tmpl->{'dns_replace'}) {
 			     "\t\t\t$zd{'minimum'}$zd{'minunit'} )";
 		&bind8::create_record($file, "@", undef, "IN",
 				      "SOA", $soa);
+
+		# Add NS records for master and auto-configured slaves
 		&bind8::create_record($file, "@", undef, "IN",
 				      "NS", $master);
 		local $slave;
@@ -635,6 +637,13 @@ if (!$tmpl->{'dns_replace'}) {
 			local $full = "$bn[0].";
 			&bind8::create_record($file, "@", undef, "IN",
 					      "NS", "$bn[0].");
+			}
+
+		# Add NS records from template
+		foreach my $ns (split(/\s+/, $tmpl->{'dns_ns'})) {
+			$ns .= "." if ($ns !~ /\.$/);
+			&bind8::create_record($file, "@", undef, "IN",
+					      "NS", $ns);
 			}
 		}
 	
@@ -1142,7 +1151,8 @@ local @views = &bind8::find("view", $conf);
 
 # DNS records
 local $ndi = &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'}, 1,
-     0, undef, [ "dns", "bind_replace", @views ? ( "newdns_view" ) : ( ) ]);
+     0, undef, [ "dns", "bind_replace", "dnsns",
+		 @views ? ( "newdns_view" ) : ( ) ]);
 print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
 	$ndi."<br>\n".
 	&ui_textarea("dns", $tmpl->{'dns'} eq "none" ? "" :
@@ -1151,7 +1161,11 @@ print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
 	&ui_radio("bind_replace", int($tmpl->{'dns_replace'}),
 		  [ [ 0, $text{'tmpl_replace0'} ],
 		    [ 1, $text{'tmpl_replace1'} ] ]));
-	
+
+# Manual NS records
+print &ui_table_row(&hlink($text{'tmpl_dnsns'}, "template_dns_ns"),
+	&ui_textarea("dnsns", join("\n", split(/\s+/, $tmpl->{'dns_ns'})),
+		     3, 50));
 
 # Option for view to add to, for BIND 9
 if (@views) {
@@ -1263,6 +1277,15 @@ if ($in{"dns_mode"} == 2) {
 		# Make sure SOA doesn't exist
 		$soa && &error($text{'newdns_esoa2'});
 		}
+
+	# Save additional nameservers
+	$in{'dnsns'} =~ s/\r//g;
+	local @ns = split(/\n+/, $in{'dnsns'});
+	foreach my $n (@ns) {
+		&check_ipaddress($n) && &error(&text('newdns_ensip', $n));
+		gethostbyname($n) || &error(&text('newdns_enshost', $n));
+		}
+	$tmpl->{'dns_ns'} = join(" ", @ns);
 	}
 
 # Save NS hostname

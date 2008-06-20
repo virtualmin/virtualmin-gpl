@@ -5975,6 +5975,7 @@ push(@rv, { 'id' => 0,
 	    'dns_spfall' => $config{'bind_spfall'},
 	    'dns_sub' => $config{'bind_sub'} || "none",
 	    'dns_master' => $config{'bind_master'} || "none",
+	    'dns_ns' => $config{'dns_ns'},
 	    'namedconf' => $config{'namedconf'} || "none",
 	    'ftp' => $config{'proftpd_config'},
 	    'ftp_dir' => $config{'ftp_dir'},
@@ -6202,6 +6203,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'bind_master'} = $tmpl->{'dns_master'} eq 'none' ? undef
 						   : $tmpl->{'dns_master'};
 	$config{'dns_view'} = $tmpl->{'dns_view'};
+	$config{'dns_ns'} = $tmpl->{'dns_ns'};
 	$config{'namedconf'} = $tmpl->{'namedconf'} eq 'none' ? undef :
 							$tmpl->{'namedconf'};
 	delete($config{'mx_server'});
