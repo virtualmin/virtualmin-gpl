@@ -1,5 +1,14 @@
 #!/usr/local/bin/perl
-# Delete an extra admin from some virtual server
+
+=head2 delete-admin.pl
+
+Deletes an extra administrator from a virtual server
+
+This command removes one extra administrator from a virtual server. The
+required parameters are C<--domain> followed by the domain name, and C<--name>
+followed by the administrator account name.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

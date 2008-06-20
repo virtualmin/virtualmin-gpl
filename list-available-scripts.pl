@@ -1,5 +1,15 @@
 #!/usr/local/bin/perl
-# Lists all scripts that are available for install
+
+=head1 list-available-scripts.pl
+
+List known scripts
+
+This command simply outputs a list of scripts that can potentially installed
+into Virtualmin servers. By default it displays a nicely formatted table, but
+if the C<--multiline> option is given it will use a more machine-readable format
+which shows more information.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

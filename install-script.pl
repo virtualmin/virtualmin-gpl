@@ -1,5 +1,48 @@
 #!/usr/local/bin/perl
-# Installs a new script into a virtual server
+
+=head1 install-script.pl
+
+Install one third-party script
+
+This program performs the actual upgrade or install of a script into a virtual
+server. The required parameters are C<--domain> (followed by the domain name),
+C<--type> (followed by the script's short name, like drupal or squirrelmail), and
+C<--version> (followed by the version number or the word I<latest>). Don't use the script's longer
+description with the C<--type> parameter - only the short name (as shown by
+C<list-available-scripts.pl --multiline>) will work.
+
+All scripts will also need the C<--path> parameter, which must be followed by a
+URL path such as /drupal. This determines the directory where the script is
+installed. The directory can be overridden by the C<--force-dir> option though,
+which must be followed by a full path. However, this is not recommended, and
+should only be used when you have a web server alias setup to map the path
+to the forced directory.
+
+Those that use a database require the C<--db> parameter, which must be
+followed by the database type and name, such as C<--db mysql foo>. If this
+is missing and the script requires it, the C<install-script.pl> command will
+fail with an error message. By default the database must already exist
+under the virtual server, but if the C<--newdb> parameter is given it will
+be created as part of the script installation process.
+
+If upgrading an existing script in this virtual server, you must supply the
+C<--upgrade> parameter, followed by the install ID. This can be found from the
+list-scripts.pl program, documented below.
+
+If the script makes use of the Ruby on Rails framework and your system supports
+multiple proxy balancer backends (as in Apache 2), the C<--mongrels> flag 
+can be given, followed by the number of C<mongrel_rails> processes to configure
+and start to serve the script.
+
+Most application that Virtualmin can install have an initial username and
+password for administration. By default these are taken from the domain's
+Virtualmin login and password, but they can be overridden with the 
+C<--user> and C<--pass> flags.
+
+When the command is run it will display the progress of the installation
+process as the needed files are downloaded, validated and installed.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {
@@ -300,6 +343,7 @@ print "                         [--opt name value]\n";
 print "                         [--upgrade id]\n";
 print "                         [--force-dir directory]\n";
 print "                         [--mongrels number]\n";
+print "                         [--user username --pass password]\n";
 print "                         [--log-only]\n";
 exit(1);
 }

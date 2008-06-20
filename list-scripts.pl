@@ -1,5 +1,21 @@
 #!/usr/local/bin/perl
-# Lists all scripts installed into some virtual server
+
+=head1 list-scripts.pl
+
+Display script installed into some virtual server
+
+The virtual servers to display scripts for can be specified with the 
+C<--domain> parameter, which must be followed by a domain name and can appear
+multiple times. Alternately you can use C<--all-domains> to select all of them,
+or C<--user> to show scripts for virtual servers owned by a specific 
+Virtualmin administrator.
+
+The program displays a table of all scripts
+currently installed, including their install IDs and version numbers. To get
+more details in a program-friendly format, use the C<--multiline> parameter.
+To just get a list of script names, use C<--name-only>.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

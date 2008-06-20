@@ -1,5 +1,26 @@
 #!/usr/local/bin/perl
-# Updates an extra admin associated with some virtual server
+
+=head2 modify-admin.pl
+
+Updates an extra administrator for a virtual server
+
+This program can be used to change the details of an extra administrator.
+The required parameters are C<--domain> followed by the domain name, and C<--name>
+followed by the administrator account name, which specify the account to
+change.
+
+You can then use the C<--pass> parameter to set a new password, C<--desc> to change
+the description, and C<--newname> to change the login name. The admin can be
+allowed to denied the ability to create servers, rename domains, manage
+features and use other Webmin modules with the C<--can-create>, C<--cannot-create>,
+C<--can-rename>, C<--cannot-rename>, C<--can-features>, C<--cannot-features>,
+C<--can-modules> and C<--cannot-modules> options respectively.
+
+Editing capabilities can be granted to the user with the C<--can-edit> option
+followed by a capability name. Similarly, they can be taken away with the
+C<--cannot-edit> option.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

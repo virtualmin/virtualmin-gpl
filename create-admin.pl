@@ -1,5 +1,28 @@
 #!/usr/local/bin/perl
-# Adds an extra administrator to a virtual server
+
+=head2 create-admin.pl
+
+Creates an extra administrator for a virtual server
+
+This command creates a new administrator associated with an existing
+virtual server.  You must supply the C<--domain> parameter to
+specify the server and C<--name> to set the admin login name. The C<--pass> and
+C<--desc> options should also be given, to specify the initial password and
+a description for the account respectively.
+
+Basic permissions for the account can be added using the C<--create>, C<--rename>, C<--features> and C<--modules> parameters. These allow the admin to create new
+servers, rename servers, use Webmin modules for server features, and use other Webmin modules, respectively.
+
+The extra admin's editing capabilities for virtual servers can be set using
+the C<--edit> parameter, followed by a capability name (like users or aliases).
+This can be given multiple times, as in the command below :
+
+  create-admin.pl --domain foo.com --name fooadmin --pass smeg --desc "Extra administrator" --edit users --edit aliases
+
+That command would create an extra administrator account who can only edit
+mail users and mail aliases in the virtual server I<foo.com> and any sub-servers.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {
