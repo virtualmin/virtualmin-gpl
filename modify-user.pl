@@ -1,5 +1,51 @@
 #!/usr/local/bin/perl
-# Makes some changes to a mailbox user
+
+=head1 modify-user.pl
+
+Change attributes of a mail, FTP or database user
+
+After a user has been created from the command line or web interface, you can
+use this program to modify or rename him. The virtual server and user to
+change must be specified with the C<--domain> and C<--user> parameters, which are
+followed by the server domain name and username respectively.
+
+To change the user's password, use the C<--pass> parameter followed by the new
+password. To modify his real name, use the C<--real> option followed by the new
+name (which must typically be quoted, in case it contains a space). If you
+want to change the user's login name, use the C<--newuser> option, followed by
+the new short username (without a suffix).
+
+A user can be temporarily disabled with the C<--disable> option, or re-enabled
+with the C<--enable> option. This will not effect his files or password, but will
+prevent FTP, IMAP and other logins.
+
+To set the user's disk quota, the C<--quota> option must be used, followed by the
+disk quota in 1 kB blocks. An unlimited quota can be set with the parameters
+C<--quota UNLIMITED> instead (although of course the user will still be limited
+by total server quotas).
+
+A user can be granted or denied FTP access with the C<--enable-ftp> and
+C<--disable-ftp> options respectively. Similarly, his primary email address can
+be turned on or off with the C<--enable-email> and C<--disable-email> options.
+
+Extra email addresses can be added and removed with the C<--add-email> and
+C<--remove-email> options. Both of these must be followed by an address to add or
+remove, and both can occur multiple times on the command line.
+
+Access to MySQL databases in the domain can be granted with the 
+C<--add-mysql> flag, followed by a database name. Similarly, access can be
+removed with the C<--remove-mysql> flag.
+
+To turn off spam checking for the user, the C<--no-check-spam> flag can be
+given. This is useful for mailboxes that are supposed to receive all the
+spam for some domain. To turn spam filtering back on, use the C<--check-spam>
+command-line flag.
+
+The user can also be added to secondary Unix groups with the C<--add-group>
+flag, followed by a group name. To remove him from a group, use the
+C<--del-group> parameter followed by the group to take him out of.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

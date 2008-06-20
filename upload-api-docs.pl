@@ -8,7 +8,8 @@ $wiki_pages_dir = "/home/virtualmin/domains/jdev.virtualmin.com/public_html/comp
 @api_categories = (
 	[ "Virtual servers", "*-domain.pl", "*-domains.pl",
 			     "enable-feature.pl", "disable-feature.pl" ],
-	[ "Mail and FTP users", "*-user.pl", "*-users.pl" ],
+	[ "Mail and FTP users", "*-user.pl", "*-users.pl",
+				"list-available-shells.pl" ],
 	[ "Mail aliases", "*-alias.pl", "*-aliases.pl",
 			  "create-simple-alias.pl", "list-simple-aliases.pl" ],
 	[ "Server owner limits", "*-limit.pl", "*-limits.pl" ],

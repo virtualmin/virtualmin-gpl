@@ -1,6 +1,46 @@
 #!/usr/local/bin/perl
-# create-user.pl
-# Adds a new mailbox user, based on command-line parameters
+
+=head1 create-user.pl
+
+Create a mail, FTP or database user
+
+This program adds a new user to an existing virtual server. It is typically
+called with parameters like :
+
+  create-user.pl --domain foo.com --user jimmy --pass smeg --quota 1024 --real "Jimmy Smith"
+
+This command would add a user to the server I<foo.com> named I<jimmy> with password
+I<smeg> and a disk quota of 1MB. The actual POP3 and FTP username may end up as
+jimmy.foo, depending on whether or not domain suffix are always appended to
+usernames, and what suffix format is used.
+
+The C<--ftp> option can be used to give the new user an FTP login as well - by
+default, he will only be given an email account. The C<--noemail> option turns
+off the default email account, which is useful for creating FTP or
+database-only users.
+
+Extra email addresses for the new user can be specified with the C<--extra>
+option, followed by an email address within the virtual server. This option
+can be given multiple times if you wish.
+
+The new user can be granted access to MySQL databases associated with the
+virtual server with the C<--mysql> option, which must be followed by a database
+name. This option can occur multiple times in order to grant access to more
+than one database. Unfortunately, there is no way to grant access to
+PostgreSQL databases.
+
+To create a user who has only FTP access to the domain's website, use the
+C<--web> flag. To turn off spam checking for the new user, include
+C<--no-check-spam> on the command line. To add the user to additional secondary
+Unix groups, the C<--group> flag followed by a group name can be given
+multiple times.
+
+For more control over the user's login abilities (FTP, SSH or email only),
+use the C<--shell> parameter followed by a full path to a Unix shell, such
+as C</usr/bin/scponly>. Available shells can be displayed using the 
+C<list-available-shells.pl> command.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

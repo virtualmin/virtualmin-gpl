@@ -1,5 +1,34 @@
 #!/usr/local/bin/perl
-# Restore some domains from some file
+
+=head1 restore-domain.pl
+
+Restore one or more virtual servers
+
+To restore a Virtualmin backup from the command line, you will need to use
+this program. It takes very similar parameters to C<backup-domain.pl>, with the
+exceptions that C<--dest> is replace with C<--source>, and the C<--separate> and
+C<--ignore-errors> options are not used. The extra option C<--reuid> can be
+specified to force the re-allocation of Unix UIDs and GIDs for virtual servers
+that are created by the restore process, which is usually a good idea as the
+IDs in the backup file may already be in use.
+
+Specific features to restore can be selected with the C<--feature> flag,
+followed by a feature name like C<dns> to just restore a domain's DNS records.
+However in most cases you will want to a full restore, in which case the
+C<--all-features> parameter should be given.
+
+If a virtual server that does not currently exist is selected to be restored,
+it will be created as part of the restore process. Be careful using this
+program, as it will not prompt for confirmation before restoring, which will
+over-write the contents of restored directories, databases and configuration
+files.
+
+To restore core Virtualmin settings (if included in the backup), the
+C<--all-virtualmin> option can be specified as well. Alternately, you can select
+exactly which settings to include with the C<--virtualmin> parameter. For example,
+C<--virtualmin config> would only restore the module configuration.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

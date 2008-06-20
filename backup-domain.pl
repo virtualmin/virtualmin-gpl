@@ -1,5 +1,49 @@
 #!/usr/local/bin/perl
-# Backup servers from the command line
+
+=head1 backup-domain.pl
+
+Backup one or more virtual servers
+
+This program is analogous to the Backup Virtual Servers page in the Virtualmin web interface. It will create either a single backup file or multiple separate files containing the domains specified on the command line, either locally or on a remote SCP or FTP server.
+
+The C<--dest> option sets the backup destination, and can be a simple path like
+C</backup/virtualmin.tgz> , an FTP URL like
+C<ftp://user:pass@server:/backup/virtualmin.tgz> , or an SCP URL like
+C<ssh://user:pass@server:/backup/virtualmin.tgz> . When backing up to a single
+file, the path specifies a file that will be created. When creating one backup
+per domain, it specifies a directory instead.
+
+The C<--domain> and C<--all-domains> options can be used to control which virtual
+servers are included in the backup. The C<--domain> parameter followed by a
+domain name can be given multiple times, to select more than one server.
+
+Typically the C<--all-features> option will be used to include all virtual server
+features in the backup, but you can instead use the C<--feature> option one or
+more times to control exactly what gets included. In this case, it is wise to
+use at least C<--feature dir> to include each server's home directory.
+
+The C<--separate> option tells the backup program to create a separate file for
+each virtual server. The C<--newformat> also causes multiple files to be created,
+but using the format supported by Virtualmin versions 2.86 and above which
+puts all information into each domain's home directory, and thus avoids the
+need to create a large file in C</tmp> during the backup process.
+
+Using the C<--ignore-errors> option means than any errors
+encountered backing up one feature or server will be reported and ignored,
+rather than terminating the whole backup as happens by default.
+
+To include core Virtualmin settings in the backup, the C<--all-virtualmin>
+option can be specified as well. Alternately, you can select exactly which
+settings to include with the C<--virtualmin> parameter. For example,
+C<--virtualmin config> would only backup the module configuration.
+
+By default, backups include all files in each domain's home directory. However,
+if you use the C<--incremental> parameter, only those changed since the last
+non-incremental backup will be included. This allows you to reduce the size of
+backups for large websites that rarely change, but means that when restoring
+both the full and incremental backups are needed.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

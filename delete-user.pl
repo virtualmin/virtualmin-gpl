@@ -1,5 +1,14 @@
 #!/usr/local/bin/perl
-# Deletes a mailbox user, based on command-line parameters
+
+=head1 delete-user.pl
+
+Delete a user
+
+This command deletes one mail, FTP or database user from a virtual server,
+along with him home directory. It takes only two parameters, both mandatory :
+C<--domain> followed by the domain name, and C<--user> followed by the full or short username. Be careful with this program, as it does not prompt for confirmation before deleting.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

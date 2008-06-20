@@ -1,5 +1,18 @@
 #!/usr/local/bin/perl
-# List all shells for use with domain owners and mailboxes
+
+=head1 list-available-shells.pl
+
+List all shells for use with domain owners and mailboxes
+
+When run with no flags, this command outputs a table of shells for use
+by domain owners and mailbox users. To limit it to just domain owners,
+the C<--owner> flag can be given. Or to show only shells designated for use
+by mailboxes, add C<--mailbox> to the command line.
+
+To get a more parsable format with full details for each shell, use the
+C<--multiline> parameter. Or to only output shell paths, use C<--name-only>.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {
@@ -27,6 +40,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mailbox") {
 		$type = "mailbox";
 		}
+	elsif ($a eq "--name-only") {
+		$nameonly = 1;
+		}
 	else {
 		&usage();
 		}
@@ -52,6 +68,12 @@ if ($multi) {
 			($shell->{'avail'} ? "Yes" : "No"),"\n";
 		print "    Default: ",
 			($shell->{'default'} ? "Yes" : "No"),"\n";
+		}
+	}
+elsif ($nameonly) {
+	# Just shell commands
+	foreach $shell (@shells) {
+		print $shell->{'shell'},"\n";
 		}
 	}
 else {
