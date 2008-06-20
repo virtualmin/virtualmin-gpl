@@ -1,5 +1,15 @@
 #!/usr/local/bin/perl
-# Delete a database from some virtual server
+
+=head1 delete-database.pl
+
+Deletes one database
+
+To remove a single database from a virtual server and delete all of its
+contents, you can use this command. It takes the exact same parameters as the
+create-database.pl program : C<--domain>, C<--name> and C<--type>. Be careful using
+it, as the complete contents of the specified database will be removed without any prompting for confirmation.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

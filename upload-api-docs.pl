@@ -62,6 +62,8 @@ foreach my $f (readdir(DIR)) {
 		}
 	}
 
+# XXX warn about missed scripts
+
 # XXX identify categories (domains, users, etc..)
 # XXX category summaries?
 

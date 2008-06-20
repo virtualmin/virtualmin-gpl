@@ -1,5 +1,22 @@
 #!/usr/local/bin/perl
-# Adds a database to a virtual server
+
+=head1 create-database.pl
+
+Creates a database for a virtual server
+
+This command creates a new MySQL or PostgreSQL database, and associates it
+with an existing virtual server. You must supply the C<--domain> parameter to
+specify the server, C<--name> to set the database name, and C<--type> followed by
+either C<mysql>, C<postgres> or some plugin database type. It would typically be run
+something like :
+
+  create-database.pl --domain foo.com --name foo_phpbb --type mysql
+
+Some database types support additional creation-time options, specified using the C<--opt> flag. At the time of writing, those available for MySQL are :
+
+C<--opt charset name> - Sets the default character set (like latin2 or euc-jp) for the new database
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

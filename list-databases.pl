@@ -1,5 +1,16 @@
 #!/usr/local/bin/perl
-# Lists all databases in some virtual server
+
+=head1 list-databases.pl
+
+Lists databases for some virtual server
+
+This program simply displays a list of MySQL and PostgreSQL databases that are owned by one server. You must supply the C<--domain> flag followed by the domain name of the server to list. By default the output is in a reader-friendly table, but the C<--multiline> option can be used to switch to a format more suitable for reading by programs (and containing more information).
+
+To output just a list of database names, use the C<--name-only> flag. To limit
+the list to databases of a particular type, use C<--type> followed by a code
+like C<mysql> or C<postgres>.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {
