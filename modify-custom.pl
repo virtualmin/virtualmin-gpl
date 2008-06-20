@@ -1,5 +1,16 @@
 #!/usr/local/bin/perl
-# Sets the value of a custom field for some server
+
+=head1 modify-custom.pl
+
+Modify custom fields for a virtual server
+
+This program updates the value of one or more fields for a single virtual
+server. The parameter C<--domain> must be given, and must be followed by the
+domain name of the server to update. You must also supply the C<--set> parameter
+at least once, which has to be followed by the code for the field to update
+and the new value.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {
@@ -26,7 +37,14 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--set") {
 		$field = shift(@ARGV);
-		$value = shift(@ARGV);
+		if ($field =~ /^(\S+)\s+(.*)$/) {
+			# Name and value in one parameter, such as from HTTP API
+			$field = $1;
+			$value = $2;
+			}
+		else {
+			$value = shift(@ARGV);
+			}
 		$field && defined($value) || &usage();
 		push(@set, [ $field, $value ]);
 		}

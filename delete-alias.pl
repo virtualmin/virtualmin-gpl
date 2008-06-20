@@ -1,5 +1,19 @@
 #!/usr/local/bin/perl
-# Deletes a mail alias in some domain
+
+=head1 delete-alias.pl
+
+Delete a mail alias
+
+This program simply removes a single mail alias from a virtual server. It
+takes only two parameters, C<--domain> to specify the server domain name, and
+C<--from> to specify the part of the alias before the @. Be careful using it, as
+it does not prompt for confirmation before deleting.
+
+No program exists for updating existing aliases, but the same thing can be
+achieved by using the C<delete-alias.pl> and C<create-alias.pl> commands to remove
+and re-create an alias with new settings.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

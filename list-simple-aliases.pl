@@ -1,5 +1,15 @@
 #!/usr/local/bin/perl
-# Lists simple mail aliases for some domain
+
+=head1 list-simple-aliases.pl
+
+Lists mail aliases in a simple format for some domain
+
+This program is similar to C<list-aliases.pl>, and takes all the same
+command-line parameters. However, it simplifies the display of aliases using
+autoreponders to show the reply content, instead of just the path to the
+autoreply file.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

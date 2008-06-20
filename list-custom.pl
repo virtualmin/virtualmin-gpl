@@ -1,5 +1,15 @@
 #!/usr/local/bin/perl
-# Lists custom fields for some or all servers
+
+=head1 list-custom.pl
+
+List custom fields for virtual servers
+
+When this command is run with no parameters, it will display all custom fields
+set for all virtual servers. The C<--domain> parameter can be used to limit the
+display to a single named server, while the C<--names> parameter will switch the
+display to show field codes rather than their full descriptions.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

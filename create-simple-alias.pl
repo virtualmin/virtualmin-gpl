@@ -1,5 +1,28 @@
 #!/usr/local/bin/perl
-# Adds a mail alias to some domain, with simple parameters
+
+=head1 create-simple-alias.pl
+
+Adds a mail alias to some domain, with simple parameters
+
+This command allows aliases using autoresponders or other more complex
+destination types to be created more easily. You must supply at least the
+C<--domain> and C<--from> parameters, followed by a domain name and alias
+name (without the @) respectively. The optional C<--desc> parameter can be
+used to set a comment or description for the alias.
+
+To just forward email to some other address, the C<--forward> parameter can
+be used. It can be given multiple times, and each instance must be followed by an email address.
+
+To deliver directly to the inbox of some user (bypassing other forwarding),
+use the C<--local> parameter, followed by a full username like C<jamie.somedomain>.
+
+To bouce mail back to the sender, use the C<--bounce> flag. This is useful if you have a catchall address setup for the domain.
+
+To setup an autoresponder, use the C<--autoreply> parameter followed by the text of the automatic reply message. The from address for automatica replies can be set with the optional (but highly recommended) C<--autoreply-from> flag, and the interval in hours between replies to the same address with the C<--autoreply-period> flag. For example :
+
+  create-simple-alias.pl --domain something.com --from jamie --autoreply "Gone fishing" --autoreply-from jamie@something.com --autoreply-period 24
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

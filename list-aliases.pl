@@ -1,5 +1,32 @@
 #!/usr/local/bin/perl
-# Lists mail aliases in some domain
+
+=head1 list-aliases.pl
+
+List aliases for a virtual server =====
+
+This program displays a list of mail aliases that exist in the virtual server
+specified by the C<--domain> command line option. This may be given multiple
+times to select more than one domain, or you can have aliases in all virtual
+servers output using the C<--all-domains> flag. To output aliases in all
+domains owned by some administrator the C<--user> parameter can be given,
+followed by a Virtualmin username.
+
+To get more details about each alias, use the C<--multiline> flag, which
+switches the output to a format more easily parsed by other programs. To just
+list the alias email addresses, using the C<--name-only> parameter.
+
+In the regular table-format output mode, if an alias has an associated description and multiline mode is enabled,
+it will be displayed after the alias's from address, separated by a #
+character.
+
+Some aliases managed by Virtualmin are not created by users directly,
+but are instead created as part of some other process, such as the addition
+of a mailing list. Such aliases are not displayed by default, as editing
+them can cause problems with the associated mailing list. To include these
+aliases in the list produced by C<list-aliases.pl>, use the C<--plugins> command
+line flag.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

@@ -1,5 +1,31 @@
 #!/usr/local/bin/perl
-# Adds a mail alias to some domain
+
+=head1 create-alias.pl
+
+Create a new mail alias
+
+This command can be used to add a new email alias to a
+virtual server. It takes three mandatory parameters : C<--domain> followed by the
+domain name, C<--from> followed by the name of the alias within that domain, and
+C<--to> followed by a destination address. For example, to create an alias for
+sales@foo.com that delivers mail to the user joe, you could run :
+
+  create-alias.pl --domain foo.com --from sales --to joe@foo.com
+
+The C<--to> option can be given multiple times, to create more than one
+destination for the alias. To create an alias for all addresses in the domain
+that are not matched by another alias or mail user, use the option C<--from "*">
+.
+
+Aliases can have short descriptions associated with them, to explain
+what the alias is for. To set one when creating, you can use the --desc
+option followed by a one-line description.
+
+To more easily create aliases with autoresponders, you should use the 
+C<create-simple-alias.pl> script, which is analagous to the simple alias
+creation form in Virtualmin's web UI.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {
