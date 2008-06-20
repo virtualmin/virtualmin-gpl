@@ -1,5 +1,17 @@
 #!/usr/local/bin/perl
-# Lists all configuration templates
+
+=head1 list-templates.pl
+
+List available templates for new domains
+
+The command simply outputs a list of available templates for use when
+creating new virtual servers. For each the ID number and description
+are diplayed.
+
+To just display the template names, you can give the C<--name-only> parameter.
+This is useful when iterating through them in other scripts.
+
+=cut
 
 $no_acl_check++;
 $ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

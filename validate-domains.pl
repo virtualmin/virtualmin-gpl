@@ -1,5 +1,18 @@
 #!/usr/local/bin/perl
-# Calls the validation function on selected domains and virtual servers
+
+=head1 validate-domains.pl
+
+Check the configuration of virtual servers
+
+This program can be used to generate a report on selected features for selected virtual servers, to ensure that they are setup correctly. Validation is useful for detecting things such as manually removed Apache virtual hosts or BIND domains, wrong permissions and missing configuration files.
+
+To specify the servers to check, you can either supply the C<--all-domains>
+parameter, or C<--domain> followed by the domain name. Similar, you can select
+features to check with the C<--feature> parameter followed by a feature name
+(like web or dns), or the C<--all-features> option. Both C<--domain> and
+C<--feature> can be given multiple times.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {
