@@ -1,5 +1,28 @@
 #!/usr/local/bin/perl
-# Change DNS settings for some domains
+
+=head1 modify-dns.pl
+
+Change DNS settings for virtual servers
+
+This program updates DNS-related options for one or more servers, selected using the C<--domain> or C<--all-domains> flags. Or you can select all domains that
+don't have their own private IP address with C<--all-nonvirt-domains>.
+
+To enable SPF for a domain, using C<--spf> option, and to turn it off use C<--no-spf>. By default, the SPF record will be created using the settings from the DNS section of the domain's server template.
+
+To add allowed hostname, MX domains or IP addresses, use the C<--spf-add-a>, C<--spf-add-mx> and C<--spf-add-ip4> options respectively. Each of which must be followed by a single host, domain or IP address.
+
+Similarly, the C<--spf-remove-a>, C<--spf-remove-mx> and C<--spf-remove-ip4> options will remove the following host, domain or IP address from the allowed list for the specified domains.
+
+To control how SPF treats senders not in the allowed hosts list, use one of the C<--spf-all-disallow>, C<--spf-all-discourage>, C<--spf-all-neutral>, C<--spf-all-allow> or C<--spf-all-default> parameters.
+
+If your system is on an internal network and made available to the Internet
+via a router doing NAT, the IP address of a domain in DNS may be different
+from it's IP on the actual system. To set this, the C<--dns-ip> flag can
+be given, followed by the external IP address to use. To revert to using the
+real IP in DNS, use C<--no-dns-ip> instead. In both cases, the actual
+DNS records managed by Virtualmin will be updated.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

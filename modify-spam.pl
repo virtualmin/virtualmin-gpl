@@ -1,5 +1,41 @@
 #!/usr/local/bin/perl
-# Change the spam and virus delivery for some domains
+
+=head1 modify-spam.pl
+
+Change spam filtering and delivery settings for a virtual server
+
+This command can be used to change the location than email tagged as spam or
+virus-laden is delivered to for one or more virtual servers. The servers to act
+on can be either specified with the C<--domain> parameter, or all domains with
+spam filtering enabled can be selected with C<--all-domains>.
+
+The following parameters control what happens to messages identified as spam :
+
+C<--spam-delete> Delete all spam mail.
+C<--spam-deliver> Deliver to user's mailbox normally.
+C<--spam-normal> Write to user's C<~/mail/spam> file in mbox format.
+C<--spam-maildir> Write to user's C<~/Maildir/.spam> file in Maildir format.
+C<--spam-file> Write to the file following this parameter, which must be relative to the user's home directory.
+C<--spam-email> Forward to the email address following this parameter.
+C<--spam-dest> Write to the absolute file following the parameter.
+
+A similar set of options exist for virus filtering, but starting with C<--virus>
+instead of C<--spam>.
+
+Virtualmin has the ability to delete spam from the spam folders of all users
+in a domain once it passes some threshold, such as age or size. You can
+enable this with the C<--spamclear-days> parameter followed by the maximum
+age in days, or C<--spamclear-size> followed by a size in bytes. Or to turn
+off spam deletion, use the C<--spamclear-none> parameter.
+
+SpamAssassin gives each message it scans a numeric score, and typically anything
+above 5 is considered spam and placed in a separate user folder. However, you
+can choose to simply delete all incoming spam with a score above some higher
+threshold (such as 10) using the C<--spam-delete-level> parameter, which must
+be followed by a number. To turn this behaviour off again, use the 
+C<--spam-no-delete-level> flag.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

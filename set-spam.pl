@@ -1,5 +1,30 @@
 #!/usr/local/bin/perl
-# Change the spam and virus scanners for all domains
+
+=head1 set-spam.pl
+
+Change the spam and virus scanners for all domains
+
+By default, Virtualmin uses the stand-alone ClamAV and SpamAssassin programs
+for virus and spam scanning, named C<clamscan> and C<spamassassin> respectively.
+However, on a system that receives a large amount of email, running these
+programs for each incoming message can generate significant CPU load.
+
+This command can tell Virtualmin to use the background scanning daemons
+C<clamd> and C<spamd> instead, which are faster but consume additional memory
+as then run all the time. To enable the ClamAV server, run it like so :
+
+  set-spam.pl --enable-clamd
+  set-spam.pl --use-clamdscan
+
+To use SpamAssassin daemon process, you must first start it manually and then
+run :
+
+  set-spam.pl --use-spamc
+
+However, using C<spamc> makes it impossible to have separate per-domain
+SpamAssassin configurations in Virtualmin.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

@@ -1,5 +1,35 @@
 #!/usr/local/bin/perl
-# Change web server settings for some domain
+
+=head1 modify-web.pl
+
+Change a virtual server's web configuration
+
+This script can update the PHP and web forwarding settings for one or more virtual servers. Like other scripts, the servers to change are selecting using the C<--domain> or C<--all-domains> parameters.
+
+To change the method Virtualmin uses to run CGI scripts, use the C<--mode>
+parameter followed by one of C<--mod_php>, C<--cgi> or C<--fcgid>. To enable
+or disable the use of Suexec for running CGI scripts, give either the
+C<--suexec> or C<--no-suexec> parameter.
+
+The C<--proxy> parameter can be used to have the website proxy all requests to another URL, which must follow C<--proxy>. To disable this, the C<--no-proxy> parameter must be given.
+
+The C<--framefwd> parameter similarly can be used to forward requests to the virtual server to another URL, using a hidden frame rather than proxying. To turn it off, using the C<--no-framefwd> option. To specify a title for the forwarding frame page, use C<--frametitle>.
+
+If your system has more than one version of PHP installed, the version to use
+for a domain can be set with the C<--php-version> parameter, followed by a
+number (4 or 5).
+
+If Ruby is installed, the execution mode for scripts in that language can be
+set with the C<--ruby-mode> flag, followed by either C<--mod_ruby>, C<--cgi> or
+C<--fcgid>. This has no effect on scripts using the Rails framework though,
+as they always run via a Mongrel proxy.
+
+You can also replace a website's pages using one of Virtualmin's content
+styles, specified using the C<--style> parameter and a style name (which
+C<list-styles.pl> can provide). If so the C<--content> parameter must also
+be given, followed by the text to use in the style-generated web pages.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {
