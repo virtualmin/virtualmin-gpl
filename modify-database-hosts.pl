@@ -1,5 +1,27 @@
 #!/usr/local/bin/perl
-# Adds or removes an allowed MySQL host for all domains
+
+=head1 modify-database-hosts.pl
+
+Adds or removes an allowed MySQL host for all domains
+
+This command can change the remote hosts that are allowed to login to the MySQL
+databases owned by some virtual servers and all their sub-servers. The domains
+to modify are selected with the C<--domain> flag, or you can select all (with
+MySQL enabled) with the C<--all-domains> command-line parameter. The
+C<--type> flag must be given, and followed by a database type to modify.
+Currently, only C<mysql> databases support configuration of allowed remote
+hosts.
+
+To add a remote system to allowed list, use the C<--add-host> flag followed
+by a hostname, IP address or IP pattern like I<192.168.1.%>. To take away
+a host, use C<--remove-host>. To clear all existing remote hosts and specify
+a new list, use C<--set-host>. All of these flags may appear multiple times,
+but if you use C<--set-host> the other two cannot be used.
+
+Access from the system running Virtualmin is always granted, and cannot be
+removed.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

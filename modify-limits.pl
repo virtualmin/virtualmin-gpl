@@ -1,5 +1,58 @@
 #!/usr/local/bin/perl
-# Changes the owner limits for some virtual server
+
+=head1 modify-limits.pl
+
+Changes the owner limits for some virtual server
+
+This command allows you to change various limits that apply to the owner
+of a virtual server when they are logged into the web interface. The domain
+to effect is selected with the C<--domain> or C<--user> flag, which must be
+followed by a top-level domain name or administrator's username respectively.
+
+To grant the domain owner access to some Virtualmin feature (such as C<mysql>
+or C<webalizer>), use the C<--allow> flag followed by the feature code. To
+prevent access, use C<--disallow> instead. Both flags can be given multiple
+times.
+
+To change the number of domains that can be created, use the C<--max-doms>
+flag followed by a number or the word C<UNLIMITED>. To prevent him from
+creating domains at all, use C<--max-doms NONE>. Separate limits can be imposed
+on the number of alias and non-alias domains with the C<--max-aliasdoms> and
+C<--max-realdoms> flags.
+
+Limits on the numbers of databases, mailboxes and mail aliases that can be
+created are set with the C<--max-dbs>, C<--max-mailboxes> and C<--max-aliases>
+flags respectively. Each must be followed either with a number, or the word
+C<UNLIMITED>.
+
+To grant the domain owner access to Virtualmin UI capabilities such as editing
+aliases or users, the C<--can-edit> flag should be used, followed by a
+capability code. Supported codes and their meanings are :
+
+C<domain> - Edit Virtual server details such as the description and password
+C<users> - Manage mail / FTP users
+C<aliases> - Manage email aliases
+C<dbs> - Manage databases
+C<scripts> - List and install scripts
+C<ip> - Change the IP address of virtual servers
+C<ssl> - Generate and upload SSL certificates
+C<forward> - Setup proxying and frame forwarding
+C<admins> - Manage extra administrators
+C<spam> - Edit spam filtering, delivery and clearing settings
+C<phpver> - Change PHP versions
+C<mail> - Edit email-related settings
+C<backup> - Backup virtual servers
+C<sched> - Schedule automatic backups
+C<restore> - Restore virtual servers (databases and home directories only)
+C<sharedips> - Move to different shared IP addresses
+C<catchall> - Create catchall email aliases
+C<html> - Use the HTML editor
+C<disable> - Disable virtual servers
+C<delete> - Delete virtual servers
+
+Access to capabilities can also be taken away with the C<--cannot-edit> flag.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

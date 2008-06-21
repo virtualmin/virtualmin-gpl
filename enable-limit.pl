@@ -1,5 +1,20 @@
 #!/usr/local/bin/perl
-# Enable some limit for a domain from the command line
+
+=head1 enable-limit.pl
+
+Grants access to some feature or edit capability for some virtual servers
+
+This command can be used to grant the owner of some or all virtual servers
+access to some functions in the Virtualmin user interface. The domains that
+it applies to can be selected with the C<--domain> flag (which can be given
+multiple times), or with C<--all-domains>.
+
+To allow owners of matching domans to enable or disablesome feature,
+use the feature code as a flag, such as C<--ssl> or C<--virtualmin-awstats>.
+To grant access to some capability, use flags like C<--can-edit-users>
+or C<--can-edit-dbs>.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {
