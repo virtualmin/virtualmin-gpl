@@ -1,5 +1,16 @@
 #!/usr/local/bin/perl
-# List all directories in which a specific version of PHP has been activated
+
+=head1 list-php-directories.pl
+
+List all directories in which a specific version of PHP has been activated
+
+By default this command outputs a table of directories for the virtual server
+specified with the C<--domain> parameter. However, the C<--multiline> flag
+can be used to output more detail about each directory in a format more
+easily parsed by other programs. Or if you just want a list of directories,
+use the C<--name-only> flag.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

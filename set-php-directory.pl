@@ -1,5 +1,21 @@
 #!/usr/local/bin/perl
-# Set the version of PHP to run in some directory
+
+=head1 set-php-directory.pl
+
+Set the version of PHP to run in some directory
+
+If more than one version of PHP is installed on your system and either CGI
+or fCGId is used to run PHP scripts in some virtual server, it can be configured
+to run a different PHP version on a per-directory basis. This is most useful
+when running PHP applications that only support specific versions, like an
+old script that only runs under version 4.
+
+To set a PHP directory, the C<--domain> flag must be used to specify the
+directory, C<--dir> to set the path (like C<horde> or C</home/domain/public_html/horde>),
+and C<--version> to set the version number. At the time of writing, only
+versions 4 and 5 are supported.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

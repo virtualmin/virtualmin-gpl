@@ -1,5 +1,15 @@
 #!/usr/local/bin/perl
-# Remove any custom version of PHP for some directory
+
+=head1 delete-php-directory.pl
+
+Remove any custom version of PHP for some directory
+
+If a specific version of PHP has been configured for some directory, it
+can be removed with this command. The required parameters are C<--domain>
+followed by a domain name, and C<--dir> followed by a full directory like
+C</home/domain/public_html/horde>. 
+
+=cut
 
 package virtual_server;
 if (!$module_name) {
