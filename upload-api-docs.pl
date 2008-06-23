@@ -59,18 +59,61 @@ foreach my $f (readdir(DIR)) {
 				      'data' => $data,
 				      'cat' => $catmap{$f} });
 			}
+		elsif ($data =~ /WEBMIN_CONFIG/) {
+			print STDERR "$f is missing POD documentation\n";
+			}
 		}
 	}
 
-# XXX warn about missed scripts
+# Detect any pattern matches
+
 
 # XXX identify categories (domains, users, etc..)
 # XXX category summaries?
 
-# XXX convert to wiki format
+# Convert to wiki format
+foreach $a (@apis) {
+	$a->{'wiki'} = &convert_to_wiki($a->{'data'});
+	}
 
-# XXX extract command-line args summary
+# Extract command-line args summary, by running with --help flag
+foreach $a (@apis) {
+	$pkg = $a->{'file'};
+	$pkg =~ s/[^a-z]//gi;
+	socketpair(SOCKET2, SOCKET1, AF_UNIX, SOCK_STREAM, PF_UNSPEC);
+	local $old = select(SOCKET1);
+	eval "package $pkg; local \$module_name = \$pkg; \@ARGV = '--help'; do '$a->{'path'}';";
+	select($old);
+	close(SOCKET1);
+	local $out;
+	local $_;
+	while(<SOCKET2>) {
+      	$out .= $_;
+        	}
+	close(SOCKET2);
+	$a->{'wiki'} .= "---++ Command Line Arguments\n";
+	$a->{'wiki'} .= "\n";
+	$a->{'wiki'} .= "<code>$out</code>";
+	}
+
+# Write pages to temp dir
+$tempdir = "/tmp/virtualmin-api";
+mkdir($tempdir, 0755);
+foreach $a (@apis) {
+	$a->{'wikiname'} = $a->{'file'};
+	$a->{'wikiname'} =~ s/\.pl$/\.txt/;
+	$a->{'wikiname'} =~ s/\-/_/g;
+	open(WIKI, ">$tempdir/$a->{'wikiname'}");
+	print WIKI $a->{'wiki'};
+	close(WIKI);
+	}
 
 # XXX upload
 
 # XXX create index pages and upload
+
+sub convert_to_wiki
+{
+local ($data) = @_;
+
+}
