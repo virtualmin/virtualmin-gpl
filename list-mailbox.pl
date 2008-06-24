@@ -1,5 +1,17 @@
 #!/usr/local/bin/perl
-# Dump the email for one user
+
+=head1 list-mailbox.pl
+
+Dump inbox email for one user
+
+This program is primarily for debugging and testing. It finds the email inbox
+for the user in the virtual server identified by the C<--domain> flag whose
+login is set with the C<--user> parameter, and outputs the contents in
+C<mbox> format. Alternatley you can use the C<--filesonly> flag to just have
+it print all the files containing the user's mail (typically just one if
+the system using C<mbox> format, or many if C<Maildir> is in use).
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

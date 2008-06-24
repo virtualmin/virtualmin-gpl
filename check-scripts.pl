@@ -247,5 +247,6 @@ print "$_[0]\n\n" if ($_[0]);
 print "Verifies that Virtualmin scripts are available\n";
 print "\n";
 print "usage: check-scripts.pl [--debug] [scriptname]*\n";
+exit(1);
 }
 

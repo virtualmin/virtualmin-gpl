@@ -1,5 +1,24 @@
 #!/usr/local/bin/perl
-# Checks if the mail server can rcpt to some address
+
+=head1 test-smtp.pl
+
+Checks if the mail server can RCPT to some address
+
+This command is debugging tool for mailboxes and aliases - it can be used
+to check if some address is accepted by your mail server, and if SMTP
+authentication is working.
+
+The C<--server> flag specifies the mail server to test, which defaults to
+C<localhost>. The C<--from> flag sets the email address used in the 
+C<MAIL FROM> SMTP operation, which defaults to C<nobody@virtualmin.com>.
+The C<--to> flag is mandatory, and sets the destination email address.
+
+To have it try SMTP authentication, use the C<--user> and C<--pass> flags
+which must be followed a username and password respectively. The C<--auth>
+flag can be used to set the SMTP authentication type, which defaults to
+C<Plain>.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

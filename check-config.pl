@@ -1,5 +1,18 @@
 #!/usr/local/bin/perl
-# Run the Virtualmin config check
+
+=head1 check-config.pl
+
+Run the Virtualmin config check
+
+This program checks your system's Virtualmin configuration, outputting the
+progress of the check as it goes. If any serious problems are found it will
+halt and display the error found.
+
+Unlike the I<Re-check Config> page in the Virtualmin web UI, it will not
+perform any system changes triggered by configuration changes, such as updating
+the Webmin modules available to domain owners.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

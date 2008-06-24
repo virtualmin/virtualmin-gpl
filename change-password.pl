@@ -113,5 +113,6 @@ print "$_[0]\n\n" if ($_[0]);
 print "Changes the password of a Virtualmin user\n";
 print "\n";
 print "usage: change-password.pl [username]\n";
+exit(1);
 }
 

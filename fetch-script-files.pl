@@ -22,8 +22,11 @@ while(@ARGV) {
 	if ($a eq "--dest") {
 		$dest = shift(@ARGV);
 		}
-	else {
+	elsif ($a !~ /^\-/) {
 		push(@scripts, $a);
+		}
+	else {
+		&usage();
 		}
 	}
 
@@ -90,4 +93,13 @@ foreach $s (@scripts) {
 			}
 		}
 	}
+
+sub usage
+{
+print "$_[0]\n\n" if ($_[0]);
+print "Download files for some script.\n";
+print "\n";
+print "usage: fetch-script-files.pl\n";
+exit(1);
+}
 

@@ -1,5 +1,33 @@
 #!/usr/local/bin/perl
-# Change mail-related settings for some domains
+
+=head1 modify-mail.pl
+
+Change mail-related settings for some domains
+
+This command can be used to configure BCCing of outgoing email and set the
+alias mode for one or more virtual servers. The domains to effect are set
+by the C<--domain> flag, which can occur multiple times and must be followed
+by a virtual server name. Or you can use C<--user> followed by an 
+administrator's username to get all his domains, or C<--all-domains> to modify
+all those on the system with mail enabled.
+
+If your mail server supports it, BCCing of relayed email by all users in
+the selected domains can  be enabled with the C<--bcc> flag, which must be
+followed by an email address. To turn this off again, use the C<--no-bcc>
+flag.
+
+By default, Virtualmin implements mail alias domains with catchall aliases,
+which forward all email to addresses in the alias domain to the same address
+in the target. However, when using Postfix this prevents email to invalid
+addresses in the alias from being bounced at the SMTP conversation stage -
+instead, a bounce eamil is sent, which is regarded as poor mail server practice
+and can be abused by spammers.
+
+To prevent this, the C<--alias-copy> flag can be used to duplicate Postfix
+C<virtual> table entries into the alias domain. To revert to the default
+mode, use the C<--alias-catchall> flag.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

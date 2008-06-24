@@ -29,6 +29,12 @@ $wiki_pages_dir = "/home/virtualmin/domains/jdev.virtualmin.com/public_html/comp
 	[ "Other scripts", "*.pl" ],
 	);
 
+@skip_scripts = ( "upload-api-docs.pl",
+		  "functional-test.pl",
+		  "generate-script-sites.pl",
+		  "check-scripts.pl",
+		  "fetch-script-files.pl" );
+
 # Go to script's directory
 if ($0 =~ /^(.*\/)[^\/]+$/) {
 	chdir($1);
@@ -50,7 +56,7 @@ foreach my $c (@api_categories) {
 @apis = ( );
 opendir(DIR, $pwd);
 foreach my $f (readdir(DIR)) {
-	if ($f =~ /\.pl$/) {
+	if ($f =~ /\.pl$/ && &indexof($f, @skip_scripts) < 0) {
 		local $/ = undef;
 		open(FILE, "$pwd/$f");
 		my $data = <FILE>;
@@ -87,22 +93,17 @@ foreach $a (@apis) {
 # Extract command-line args summary, by running with --help flag
 print "Adding command-line flags ..\n";
 foreach $a (@apis) {
-	$pkg = $a->{'file'};
-	$pkg =~ s/[^a-z]//gi;
-	socketpair(SOCKET2, SOCKET1, AF_UNIX, SOCK_STREAM, PF_UNSPEC);
-	local $old = select(SOCKET1);
-	eval "package $pkg; local \$module_name = \$pkg; \@ARGV = '--help'; do '$a->{'path'}';";
-	select($old);
-	close(SOCKET1);
-	local $out;
-	local $_;
-	while(<SOCKET2>) {
-      	$out .= $_;
-        	}
-	close(SOCKET2);
-	$a->{'wiki'} .= "---++ Command Line Arguments\n";
-	$a->{'wiki'} .= "\n";
-	$a->{'wiki'} .= "<code>$out</code>";
+	print STDERR "doing $a->{'file'}\n";
+	$out = `$a->{'path'} --help 2>&1`;
+	if ($out =~ /usage:/) {
+		$out =~ s/^.*\n\n//;	# Strip description
+		$a->{'wiki'} .= "====== Command Line Arguments ======\n";
+		$a->{'wiki'} .= "\n";
+		$a->{'wiki'} .= "<code>$out</code>";
+		}
+	else {
+		print STDERR "Failed to get args for $a->{'file'}\n";
+		}
 	}
 
 # Write pages to temp dir
@@ -153,6 +154,16 @@ foreach $e (@_) {
 	if (!$found{$e}++) { push(@rv, $e); }
 	}
 return @rv;
+}
+
+# indexof(string, array)
+# Returns the index of some value in an array, or -1
+sub indexof {
+  local($i);
+  for($i=1; $i <= $#_; $i++) {
+    if ($_[$i] eq $_[0]) { return $i - 1; }
+  }
+  return -1;
 }
 
 

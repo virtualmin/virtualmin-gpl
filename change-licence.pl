@@ -1,6 +1,16 @@
 #!/usr/local/bin/perl
-# Update all files that we know contain a Virtualmin licence key with a new
-# serial and key
+
+=head1 change-licence.pl
+
+Change a system's Virtualmin license key
+
+This program updates all files that we know contain a Virtualmin licence key
+with a new serial and key. The two required parameters are C<--serial>
+and C<--key>, which of course are followed by a valid Virtualmin Pro serial
+number and key code respectively. If these are not actually valid the
+program will refuse to apply them unless the C<--no-check> flag is given.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {
