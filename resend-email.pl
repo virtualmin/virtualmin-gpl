@@ -1,5 +1,13 @@
 #!/usr/local/bin/perl
-# Re-send the signup email for a domain
+
+=head1 resend-email.pl
+
+Re-send the signup email for a domain
+
+This command re-sends the initial signup email to a virtual server's owner.
+It takes only one parameter, C<--domain> followed by a domain name.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

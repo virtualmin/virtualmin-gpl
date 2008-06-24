@@ -1,5 +1,24 @@
 #!/usr/local/bin/perl
-# Shows bandwidth usage for some domain over a date range
+
+=head1 list-bandwidth.pl
+
+Shows bandwidth usage for some domain over a date range
+
+This command is useful for dumping Virtualmin's bandwidth data (usually used
+to draw graphs) in CSV format for importing into other programs. This is
+useful for implementing your own billing system, or generating your own graphs.
+
+The domains to dump stats for are selected by either the C<--domain> parameter,
+which can occur multiple times and which must be followed by a virtual server
+domain name, or C<--all-domains> to show them all. To include usage by
+sub-servers of the selected domains, use the C<--include-subservers> flag.
+
+The date range to output stats for are selected with the optional C<--start> and
+C<--end> flags, each of which must be followed by a date formatted like
+I<2001-09-16>. If omitted, all available bandwidth information for the domains
+selected is displayed.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

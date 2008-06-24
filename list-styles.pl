@@ -1,5 +1,14 @@
 #!/usr/local/bin/perl
-# Lists all configuration templates
+
+=head1 list-styles.pl
+
+Lists all configuration templates
+
+By default, this program outputs a table of content styles available for use
+when creating a virtual server or replacing it's web content. To get a list of
+just style names, use the C<--name-only> parameter.
+
+=cut
 
 $no_acl_check++;
 $ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

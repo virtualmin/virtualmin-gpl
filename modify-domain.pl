@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 
-=head2 modify-domain.pl
+=head1 modify-domain.pl
 
 Change parameters of a virtual server
 

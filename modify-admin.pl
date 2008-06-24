@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 
-=head2 modify-admin.pl
+=head1 modify-admin.pl
 
 Updates an extra administrator for a virtual server
 

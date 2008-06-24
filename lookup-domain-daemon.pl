@@ -1,12 +1,23 @@
 #!/usr/local/bin/perl
-# A server process that listens on port 11000 for requests from
-# lookup-domain-client.pl, and returns the following information for each
-# user:
-# domain ID
-# domain name
-# spam-enabled?
-# using-spamc?
-# quota-remaining (UNLIMITED for no quota)
+
+=head1 lookup-domain-daemon.pl
+
+A background process for looking up user details.
+
+This is a server process that listens on port 11000 for requests from
+C<lookup-domain.pl>. Each request is just a username followed by a newline,
+and the response is a line containing the following tab-separated fields :
+
+domain ID
+domain name
+spam-enabled?
+using-spamc?
+quota-remaining (UNLIMITED for no quota)
+
+Generally, there is no need for you to ever run this script manually - it is
+typically started by C</etc/init.d/lookup-domain>.
+
+=cut
 
 package virtual_server;
 $main::no_acl_check++;
@@ -22,6 +33,10 @@ require './virtual-server-lib.pl';
 $< == 0 || die "lookup-domain-daemon.pl must be run as root";
 use POSIX;
 use Socket;
+
+if (@ARGV) {
+	&usage();
+	}
 
 # Attempt to open the socket
 $proto = getprotobyname('tcp');
@@ -118,5 +133,14 @@ if ($st[7] > 10*1024*1024) {
 	close(STDERR);
 	open(STDERR, ">$daemon_logfile");
 	}
+}
+
+sub usage
+{
+print "$_[0]\n\n" if ($_[0]);
+print "Daemon process for looking up Virtualmin users.\n";
+print "\n";
+print "usage: lookup-domain-daemon.pl\n";
+exit(1);
 }
 

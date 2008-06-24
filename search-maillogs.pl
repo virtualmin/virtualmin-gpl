@@ -1,5 +1,30 @@
 #!/usr/local/bin/perl
-# Searches mail server and procmail logs
+
+=head1 search-maillogs.pl
+
+Searches mail server and procmail logs
+
+This is the command-line equivant of the Search Mail Logs page in the Virtualmin
+web UI. It can find email messages delivered or relayed through the system by
+several different criteria, specified by command-line flags.
+
+To search by recipient, use the C<--dest> flag followed by an email address,
+domain name or Unix username. To search by sender, use the C<--source> flag
+followed by a sender's email address.
+
+To limit the search to a particular date range, use the C<--start> and/or
+C<--end> flags. Both can be followed by either a date formatted like
+I<2001-09-16>, a date and time like I<2001-09-16 17:00>, or an offset in days
+into the past from the current time like I<-5>.
+
+To filter out spam or viruses from the output, use the C<--no-spam> or 
+C<--no-virus> flags respectively. 
+
+By default, the output is in a human-readable table format. To switch to one
+that shows more details and is more easily parsed by other programs, use the
+C<--multiline> flag.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {
