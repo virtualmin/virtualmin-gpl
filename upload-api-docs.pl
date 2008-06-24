@@ -71,12 +71,19 @@ foreach my $f (readdir(DIR)) {
 # XXX identify categories (domains, users, etc..)
 # XXX category summaries?
 
+# Write out category pages
+foreach $c (&unique(map { $_->{'cat'} } @apis)) {
+	next if (!$c);
+	}
+
 # Convert to wiki format
+print "Converting to Wiki format ..\n";
 foreach $a (@apis) {
 	$a->{'wiki'} = &convert_to_wiki($a->{'data'});
 	}
 
 # Extract command-line args summary, by running with --help flag
+print "Adding command-line flags ..\n";
 foreach $a (@apis) {
 	$pkg = $a->{'file'};
 	$pkg =~ s/[^a-z]//gi;
@@ -97,20 +104,25 @@ foreach $a (@apis) {
 	}
 
 # Write pages to temp dir
+print "Writing out wiki format files ..\n";
 $tempdir = "/tmp/virtualmin-api";
 mkdir($tempdir, 0755);
 foreach $a (@apis) {
 	$a->{'wikiname'} = $a->{'file'};
 	$a->{'wikiname'} =~ s/\.pl$/\.txt/;
 	$a->{'wikiname'} =~ s/\-/_/g;
-	open(WIKI, ">$tempdir/$a->{'wikiname'}");
+	$a->{'wikiname'} = "virtualmin_api_".$a->{'wikiname'};
+	$a->{'wikifile'} = "$tempdir/$a->{'wikiname'}";
+	open(WIKI, ">$a->{'wikifile'}");
 	print WIKI $a->{'wiki'};
 	close(WIKI);
 	}
 
-# XXX upload
-
-# XXX create index pages and upload
+# Upload to server
+print "Uploading to Wiki server $wiki_pages_host ..\n";
+foreach $a (@apis) {
+	#system("scp $a->{'wikifile'} $wiki_pages_user\@$wiki_pages_host:$wiki_pages_dir/$a->{'wikiname'}");
+	}
 
 sub convert_to_wiki
 {
