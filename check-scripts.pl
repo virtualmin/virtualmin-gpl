@@ -244,8 +244,8 @@ return $size;
 sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
-print "Changes the password of a Virtualmin user\n";
+print "Verifies that Virtualmin scripts are available\n";
 print "\n";
-print "usage: change-password.pl [username]\n";
+print "usage: check-scripts.pl [--debug] [scriptname]*\n";
 }
 

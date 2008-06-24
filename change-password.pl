@@ -110,8 +110,8 @@ exit(1);
 sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
-print "Verifies that Virtualmin scripts are available\n";
+print "Changes the password of a Virtualmin user\n";
 print "\n";
-print "usage: check-scripts.pl [--debug] [scriptname]*\n";
+print "usage: change-password.pl [username]\n";
 }
 
