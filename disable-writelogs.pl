@@ -1,5 +1,15 @@
 #!/usr/local/bin/perl
-# Disable logging via program 
+
+=head1 disable-writelogs.pl
+
+Disable logging via program 
+
+This command is the opposite C<enable-writelogs.pl>. The domains that it
+operates on are specified either using the C<--domain> flag (which can appear
+multiple times), or C<--all-domains> to turn off logging via script for all
+of them.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {

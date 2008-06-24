@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 
-=head2 list-admins.pl
+=head1 list-admins.pl
 
 Lists administrators belonging to a virtual server
 

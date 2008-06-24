@@ -1,5 +1,24 @@
 #!/usr/local/bin/perl
-# Enable logging via program 
+
+=head1 enable-writelogs.pl
+
+Enable logging via program 
+
+By default, Virtualmin configures Apache to log to files in each virtual
+server's home directory, under the C<logs> sub-directory. However, if the
+domain owner deletes that directory, Apache will be unable to log and will
+fail to start! To avoid this, Virtualmin can turn on logging via a wrapper
+script which ignores this problem, which contains the damage. The only
+cost is a little more memory used by the wrapper programs.
+
+The domains that it
+operates on are specified either using the C<--domain> flag (which can appear
+multiple times), or C<--all-domains> to turn off logging via script for all
+of them.
+
+=cut
+
+
 
 package virtual_server;
 if (!$module_name) {
