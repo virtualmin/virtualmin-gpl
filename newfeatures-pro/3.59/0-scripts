@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Piwik script installer to version 0.2.3, Magento to 1.0.19870.4, PHPCoin to 1.4.3, Gallery to 2.2.5, Horde to 3.2.1, Turba to 2.2.1, Mantis to 1.1.2, SugarCRM to 5.0.0f, Movable Type to 4.12, OpenX to 2.4.7, and Trac to version 0.11rc2.<br>Added a script installer for Zikula, a new content management system written in PHP.
+html=Updated the Piwik script installer to version 0.2.3, Magento to 1.0.19870.4, PHPCoin to 1.4.3, Gallery to 2.2.5, Horde to 3.2.1, Turba to 2.2.1, Mantis to 1.1.2, SugarCRM to 5.0.0f, Movable Type to 4.12, OpenX to 2.4.7, phpScheduleIt to 1.2.9, and Trac to version 0.11rc2.<br>Added a script installer for Zikula, a new content management system written in PHP.
 master=1
 reseller=1
 domain=1
