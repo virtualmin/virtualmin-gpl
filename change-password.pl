@@ -1,6 +1,14 @@
 #!/usr/local/bin/perl
-# Changes the password of some Virtualmin user. Designed to be called from
-# Usermin's Change Passwords module.
+
+=head1 change-password.pl
+
+Changes the password of some Virtualmin user.
+
+Designed to be called from Usermin's Change Passwords module. If you want to
+change a password from the command line, use the C<modify-domain.pl> script
+instead.
+
+=cut
 
 $no_acl_check++;
 $ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
@@ -15,6 +23,7 @@ $< == 0 || die "change-password.pl must be run as root";
 
 # Read inputs
 $| = 1;
+&usage() if ($ARGV[0] eq "--help");
 if ($ARGV[0]) {
 	$username = $ARGV[0];
 	}
@@ -97,3 +106,12 @@ sub error_exit
 print STDERR @_,"\n";
 exit(1);
 }
+
+sub usage
+{
+print "$_[0]\n\n" if ($_[0]);
+print "Verifies that Virtualmin scripts are available\n";
+print "\n";
+print "usage: check-scripts.pl [--debug] [scriptname]*\n";
+}
+

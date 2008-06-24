@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 
-=head2 delete-admin.pl
+=head1 delete-admin.pl
 
 Deletes an extra administrator from a virtual server
 

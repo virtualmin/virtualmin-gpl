@@ -2,6 +2,8 @@
 # Convert all Virtualmin API POD docs into Wiki format, and upload them to
 # virtualmin.com.
 
+use Pod::Simple::Wiki;
+
 $wiki_pages_host = "virtualmin.com";
 $wiki_pages_user = "virtualmin";
 $wiki_pages_dir = "/home/virtualmin/domains/jdev.virtualmin.com/public_html/components/com_openwiki/data/pages";
@@ -127,5 +129,30 @@ foreach $a (@apis) {
 sub convert_to_wiki
 {
 local ($data) = @_;
-
+my $parser = Pod::Simple::Wiki->new('dokuwiki');
+local $infile = "/tmp/pod2wiki.in";
+local $outfile = "/tmp/pod2wiki.out";
+open(INFILE, ">$infile");
+print INFILE $data;
+close(INFILE);
+open(INFILE, "<$infile");
+open(OUTFILE, ">$outfile");
+$parser->output_fh(*OUTFILE);
+$parser->parse_file(*INFILE);
+close(INFILE);
+close(OUTFILE);
+return `cat $outfile`;
 }
+
+# unique
+# Returns the unique elements of some array
+sub unique
+{
+local(%found, @rv, $e);
+foreach $e (@_) {
+	if (!$found{$e}++) { push(@rv, $e); }
+	}
+return @rv;
+}
+
+

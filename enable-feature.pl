@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 
-=head2 enable-feature.pl
+=head1 enable-feature.pl
 
 Turn on some features for a virtual server
 

@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 
-=head2 create-admin.pl
+=head1 create-admin.pl
 
 Creates an extra administrator for a virtual server
 

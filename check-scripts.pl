@@ -1,6 +1,14 @@
 #!/usr/local/bin/perl
-# Makes sure all scripts installers have valid files, and that the
-# latest version is available in Virtualmin.
+
+=head1 check-scripts.pl
+
+Verify scripts available in Virtualmin
+
+Makes sure all scripts installers have valid files, and that the latest
+version is available in Virtualmin. This is for internal use, and shouldn't
+be called.
+
+=cut
 
 package virtual_server;
 if (!$module_name) {
@@ -22,8 +30,11 @@ while(@ARGV) {
 	if ($a eq "--debug") {
 		$debug = 1;
 		}
-	else {
+	elsif ($a !~ /^\-/) {
 		push(@scripts, $a);
+		}
+	else {
+		&usage();
 		}
 	}
 
@@ -228,5 +239,13 @@ local $size = &ftp_command("SIZE $file", 2, \$error);
 
 &ftp_command("QUIT", 2, \$error) || return 0;
 return $size;
+}
+
+sub usage
+{
+print "$_[0]\n\n" if ($_[0]);
+print "Changes the password of a Virtualmin user\n";
+print "\n";
+print "usage: change-password.pl [username]\n";
 }
 
