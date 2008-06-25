@@ -28,6 +28,10 @@ if (!$module_name) {
 	$< == 0 || die "check-scripts.pl must be run as root";
 	}
 
+if (@ARGV) {
+	&usage();
+	}
+
 &set_all_text_print();
 $cerr = &html_tags_to_text(&check_virtual_server_config());
 if ($cerr) {
@@ -39,4 +43,12 @@ else {
 	exit(0);
 	}
 
+sub usage
+{
+print "$_[0]\n\n" if ($_[0]);
+print "Checks the current Virtualmin configuration.\n";
+print "\n";
+print "usage: check-config.pl\n";
+exit(1);
+}
 
