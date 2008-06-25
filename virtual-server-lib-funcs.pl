@@ -3017,6 +3017,7 @@ sub send_notify_email
 {
 local ($from, $recips, $d, $subject, $body, $attach, $attachfile, $attachtype)
 	= @_;
+local %done;
 foreach my $r (@$recips) {
 	# Work out recipient type
 	local ($email, %hash);
@@ -3030,6 +3031,7 @@ foreach my $r (@$recips) {
 		$email = $r->{'email'} || $r->{'user'};
 		%hash = &make_user_substitutions($r, $d);
 		}
+	next if ($done{$email}++);
 	local $mail = { 'headers' =>
 		[ [ 'From' => $from ],
 		  [ 'To' => $email ],

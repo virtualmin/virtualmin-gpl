@@ -22,6 +22,7 @@ $in{'body'} =~ /\S/ || &error($text{'newnotify_ebody'});
 
 # Construct and send the email
 @to = map { $_->{'emailto'} } @doms;
+@to = &unique(@to);
 &send_notify_email($in{'from'}, \@doms, undef, $in{'subject'}, $in{'body'},
 		   $in{'attach'}, $in{"attach_filename"},
 		   $in{"attach_content_type"});
