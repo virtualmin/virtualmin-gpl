@@ -66,7 +66,3 @@
 		- NameVirtualHost for port 443
 	- FS#4136
 
- - /usr/bin/virtualmin script to call API
-	- support help flag
-	- VM2 too
-	- CHANGELOG

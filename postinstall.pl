@@ -314,17 +314,27 @@ WEBMIN_CONFIG=$config_directory
 WEBMIN_VAR=$var_directory
 export WEBMIN_CONFIG WEBMIN_VAR
 cd $module_root_directory
-if [ "\$1" = "" ]; then
+if [ "\$1" = "" -o "\$1" = "help" -a "\$2" = "" ]; then
 	echo "usage: $api_helper_command <command> [args..]"
+	echo "   or: $api_helper_command help <command>"
 	exit 1
 fi
 COMMAND=\$1
 shift
+if [ "\$COMMAND" = "help" ]; then
+	help=1
+	COMMAND=\$1
+	shift
+fi
 echo \$COMMAND | fgrep .pl >/dev/null
 if [ "\$?" != "0" ]; then
 	COMMAND="\$COMMAND.pl"
 fi
-exec $module_root_directory/\$COMMAND "\$@"
+if [ "\$help" = "1" ]; then
+	perldoc $module_root_directory/\$COMMAND
+else
+	exec $module_root_directory/\$COMMAND "\$@"
+fi
 EOF
 	&close_tempfile(HELPER);
 	&set_ownership_permissions(undef, undef, 0755, $api_helper_command);
