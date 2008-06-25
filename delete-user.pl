@@ -2,7 +2,7 @@
 
 =head1 delete-user.pl
 
-Delete a user
+Delete a mail, FTP or database user
 
 This command deletes one mail, FTP or database user from a virtual server,
 along with him home directory. It takes only two parameters, both mandatory :

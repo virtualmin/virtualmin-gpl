@@ -9,15 +9,19 @@ $wiki_pages_user = "virtualmin";
 $wiki_pages_dir = "/home/virtualmin/domains/jdev.virtualmin.com/public_html/components/com_openwiki/data/pages";
 $wiki_pages_su = "jcameron";
 @api_categories = (
-	[ "Virtual servers", "*-domain.pl", "*-domains.pl",
-			     "enable-feature.pl", "disable-feature.pl" ],
-	[ "Mail and FTP users", "*-user.pl", "*-users.pl",
-				"list-available-shells.pl" ],
-	[ "Mail aliases", "*-alias.pl", "*-aliases.pl",
-			  "create-simple-alias.pl", "list-simple-aliases.pl" ],
-	[ "Server owner limits", "*-limit.pl", "*-limits.pl" ],
 	[ "Backup and restore", "backup-domain.pl", "list-scheduled-backups.pl",
 				"restore-domain.pl" ],
+	[ "Virtual servers", "*-domain.pl", "*-domains.pl",
+			     "enable-feature.pl", "disable-feature.pl",
+			     "modify-dns.pl", "modify-spam.pl", "modify-web.pl",
+			     "modify-mail.pl", "resend-email.pl" ],
+	[ "Mail and FTP users", "*-user.pl", "*-users.pl",
+				"list-available-shells.pl",
+				"list-mailbox.pl" ],
+	[ "Mail aliases", "*-alias.pl", "*-aliases.pl",
+			  "create-simple-alias.pl", "list-simple-aliases.pl" ],
+	[ "Server owner limits", "*-limit.pl", "*-limits.pl",
+				 "modify-resources.pl" ],
 	[ "Extra administrators", "*-admin.pl", "*-admins.pl" ],
 	[ "Custom fields", "*-custom.pl" ],
 	[ "Databases", "*-database.pl", "*-databases.pl",
@@ -87,13 +91,20 @@ are setup through the web interface, but they can be managed by the following
 command-line programs as well.",
 
 "Proxies and balancers",
-"XXX",
+"A proxy maps some URL on a virtual server to another webserver. This means
+that requests for any page under that URL path will be forwarded to the
+other site, which could be a separate machine or another webserver process
+on the same system (such as Tomcat for Java or Mongrel for Ruby on Rails).",
 
 "PHP versions",
-"XXX",
+"If more than one version of PHP is installed on your system and either CGI
+or fCGId is used to run PHP scripts in some virtual server, it can be configured
+to run a different PHP version on a per-directory basis. This is most useful
+when running PHP applications that only support specific versions, like an
+old script that only runs under version 4.",
 
 "Other scripts",
-"XXX",
+"Programs in this section don't fall into any of the other categories.",
 	);
 
 @skip_scripts = ( "upload-api-docs.pl",
@@ -145,37 +156,25 @@ $tempdir = "/tmp/virtualmin-api";
 mkdir($tempdir, 0755);
 foreach $a (@apis) {
 	$a->{'wikiname'} = $a->{'file'};
-	$a->{'wikiname'} =~ s/\.pl$/\.txt/;
+	$a->{'wikiname'} =~ s/\.pl$//;
 	$a->{'wikiname'} =~ s/\-/_/g;
 	$a->{'wikiname'} = "virtualmin_api_".$a->{'wikiname'};
-	$a->{'wikifile'} = "$tempdir/$a->{'wikiname'}";
+	$a->{'wikifile'} = "$tempdir/$a->{'wikiname'}.txt";
 	@wst = stat($a->{'wikifile'});
 	@cst = stat($a->{'path'});
 	if (@wst && $wst[9] >= $cst[9]) {
 		# New enough
 		$a->{'done'} = 1;
+		$a->{'wiki'} = `cat $a->{'wikifile'}`;
+		$a->{'title'} = &extract_wiki_title($a->{'wiki'});
 		}
-	}
-
-# Write out category pages
-foreach $c (&unique(map { $_->{'cat'} } @apis)) {
-	next if (!$c);
-	$catname = $c;
-	$catname =~ s/ /_/g;
-	$catname = lc($catname);
-	$catname = "virtualmin_cat_".$catname;
-	$catfile = "$tempdir/$catname";
-	open(CAT, ">>$catfile");
-	# XXX summary
-	# XXX links to scripts
-	close(CAT);
 	}
 
 # Convert to wiki format
 print "Converting to Wiki format ..\n";
 foreach $a (@apis) {
 	next if ($a->{'done'});
-	$a->{'wiki'} = &convert_to_wiki($a->{'data'});
+	($a->{'wiki'}, $a->{'title'}) = &convert_to_wiki($a->{'data'});
 	}
 
 # Extract command-line args summary, by running with --help flag
@@ -204,12 +203,36 @@ foreach $a (@apis) {
 	close(WIKI);
 	}
 
+# Write out category pages
+print "Creating category pages ..\n";
+foreach $c (&unique(map { $_->{'cat'} } @apis)) {
+	next if (!$c);
+	$catname = $c;
+	$catname =~ s/ /_/g;
+	$catname = lc($catname);
+	$catname = "virtualmin_cat_".$catname;
+	$catfile = "$tempdir/$catname.txt";
+	open(CAT, ">$catfile");
+	print CAT "====== $c ======\n\n";
+	print CAT $category_descs{$c},"\n\n";
+	@incat = grep { $_->{'cat'} eq $c } @apis;
+	foreach $a (@incat) {
+		print CAT "   * [[$a->{'wikiname'}|$a->{'file'}]] - $a->{'title'}\n";
+		}
+	print CAT "\n";
+	close(CAT);
+	}
+
 # Upload to server
 print "Uploading to Wiki server $wiki_pages_host ..\n";
 foreach $a (@apis) {
 	#system("su $wiki_pages_su -c 'scp $a->{'wikifile'} $wiki_pages_user\@$wiki_pages_host:$wiki_pages_dir/$a->{'wikiname'}'");
 	}
+system("su $wiki_pages_su -c 'scp $tempdir/* $wiki_pages_user\@$wiki_pages_host:$wiki_pages_dir/'");
 
+# convert_to_wiki(pod-text)
+# Converts a POD-format text into Dokuwiki format, and returns that and
+# the program summary line.
 sub convert_to_wiki
 {
 local ($data) = @_;
@@ -225,7 +248,17 @@ $parser->output_fh(*OUTFILE);
 $parser->parse_file(*INFILE);
 close(INFILE);
 close(OUTFILE);
-return `cat $outfile`;
+local $wiki = `cat $outfile`;
+return ($wiki, &extract_wiki_title($wiki));
+}
+
+sub extract_wiki_title
+{
+local ($wiki) = @_;
+if ($wiki =~ /^======.*======\n(\S.*)\n/) {
+	return $1;
+	}
+return undef;
 }
 
 # unique

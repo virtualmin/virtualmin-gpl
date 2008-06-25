@@ -2,7 +2,7 @@
 
 =head1 list-aliases.pl
 
-List aliases for a virtual server =====
+List aliases for a virtual server
 
 This program displays a list of mail aliases that exist in the virtual server
 specified by the C<--domain> command line option. This may be given multiple

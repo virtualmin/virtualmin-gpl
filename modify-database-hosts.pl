@@ -2,7 +2,7 @@
 
 =head1 modify-database-hosts.pl
 
-Adds or removes an allowed MySQL host for all domains
+Adds or removes an allowed MySQL host for some or all domains
 
 This command can change the remote hosts that are allowed to login to the MySQL
 databases owned by some virtual servers and all their sub-servers. The domains

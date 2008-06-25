@@ -2,6 +2,8 @@
 
 =head1 disable-domain.pl
 
+Temporarily disable a virtual server
+
 When a server is disabled, it will become temporarily unavailable without
 being completely deleted. This program can be used to disable one server,
 specified with the C<--domain> option. The exact features that will be disabled

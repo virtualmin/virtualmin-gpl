@@ -66,6 +66,3 @@
 		- NameVirtualHost for port 443
 	- FS#4136
 
- - Docs for API in SVN, auto-upload to wiki
-	- Ask Joe where they go?
-	- POD format, in source code
