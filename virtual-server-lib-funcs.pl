@@ -8448,7 +8448,7 @@ if ($d->{'unix'} && &can_edit_limits($d) && !$d->{'alias'}) {
 	}
 
 if ($d->{'unix'} && defined(&supports_resource_limits) &&
-    &supports_resource_limits()) {
+    &supports_resource_limits() && &can_edit_res($d)) {
 	# Resource limits button
 	push(@rv, { 'page' => 'edit_res.cgi',
 		    'title' => $text{'edit_res'},
