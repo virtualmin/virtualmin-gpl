@@ -21,6 +21,11 @@ if (&check_pid_file($pidfile)) {
 	&init::stop_action("lookup-domain");
 	}
 &init::disable_at_boot("lookup-domain");
+
+# Delete API helper
+if (-r $api_helper_command && !-d $api_helper_command) {
+	&unlink_file($api_helper_command);
+	}
 }
 
 1;

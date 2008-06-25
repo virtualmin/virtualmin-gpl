@@ -68,4 +68,5 @@
 
  - /usr/bin/virtualmin script to call API
 	- support help flag
-	- generate at install
+	- VM2 too
+	- CHANGELOG

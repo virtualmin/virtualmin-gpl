@@ -236,7 +236,8 @@ elsif ($virt) {
 	}
 
 # Make sure all needed args are set
-$domain && ($parentdomain || $pass) || &usage("Missing password");
+$domain || &usage("Missing domain name");
+$parentdomain || $pass || &usage("Missing password");
 if (&has_home_quotas() && !$parentdomain) {
 	$quota && $uquota || $tlimit || &usage("No quota specified");
 	}

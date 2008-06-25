@@ -304,6 +304,32 @@ foreach my $m ("mysql", "postgresql", "ldap-client", "ldap-server",
 		}
 	}
 
+# Create API helper script /usr/bin/virtualmin
+local $bash = &has_command("bash");
+if ($bash) {
+	&open_tempfile(HELPER, ">$api_helper_command", 1, 0);
+	&print_tempfile(HELPER, <<EOF);
+#!$bash
+WEBMIN_CONFIG=$config_directory
+WEBMIN_VAR=$var_directory
+export WEBMIN_CONFIG WEBMIN_VAR
+cd $module_root_directory
+if [ "\$1" = "" ]; then
+	echo "usage: $api_helper_command <command> [args..]"
+	exit 1
+fi
+COMMAND=\$1
+shift
+echo \$COMMAND | fgrep .pl >/dev/null
+if [ "\$?" != "0" ]; then
+	COMMAND="\$COMMAND.pl"
+fi
+exec $module_root_directory/\$COMMAND "\$@"
+EOF
+	&close_tempfile(HELPER);
+	&set_ownership_permissions(undef, undef, 0755, $api_helper_command);
+	}
+
 # Record the install time for this version
 local %itimes;
 &read_file($install_times_file, \%itimes);
