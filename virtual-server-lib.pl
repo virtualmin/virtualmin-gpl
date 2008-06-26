@@ -271,7 +271,7 @@ $scheduled_backups_dir = "$module_config_directory/backups";
 
 $incremental_backups_dir = "$module_config_directory/incremental";
 
-$api_helper_command = "/usr/bin/virtualmin";
+$api_helper_command = "/usr/sbin/virtualmin";
 
 1;
 

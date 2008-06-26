@@ -1,3 +1,3 @@
 desc=API helper command
-html=Added the Virtualmin API helper command <tt>/usr/bin/virtualmin</tt>, which lets you more easily call API scripts with a command like <i>virtualmin list-domains --multiline</i>. Help on commands can also be displayed with a statement like <i>virtualmin help list-domains</i>.
+html=Added the Virtualmin API helper command <tt>/usr/sbin/virtualmin</tt>, which lets you more easily call API scripts with a command like <i>virtualmin list-domains --multiline</i>. Help on commands can also be displayed with a statement like <i>virtualmin help list-domains</i>.
 master=1
