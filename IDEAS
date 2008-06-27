@@ -66,3 +66,5 @@
 		- NameVirtualHost for port 443
 	- FS#4136
 
+ - Purging on FTP and SSH backups
+	- FS#4191

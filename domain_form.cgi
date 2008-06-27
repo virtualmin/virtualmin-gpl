@@ -161,17 +161,32 @@ print &ui_hidden_table_start($text{'form_header'}, "width=100%", 2,
 
 # Domain name
 if ($subdom) {
+	# Under top-level domain
 	print &ui_table_row(&hlink($text{'form_domain'}, "domainname"),
 		&ui_textbox("dom", undef, 20).".$subdom->{'dom'}",
 		undef, \@tds);
 	}
 else {
+	# Full domain name
 	local $force = $access{'forceunder'} && $parentdom ?
 			".$parentdom->{'dom'}" :
 		       $access{'subdom'} ? ".$access{'subdom'}" : undef;
 	print &ui_table_row(&hlink($text{'form_domain'}, "domainname"),
-	      &ui_textbox("dom", $force, 50),
+	      &ui_textbox("dom", $force, 50, 0, undef,
+			  "onBlur='domain_change(this)'"),
 	      undef, \@tds);
+
+	# Javascript to append domain name if needed
+	print "<script>\n";
+	print "function domain_change(field)\n";
+	print "{\n";
+	if ($parentdom && !$aliasdom) {
+		print "if (field.value.indexOf('.') < 0) {\n";
+		print "    field.value += '.".$parentdom->{'dom'}."';\n";
+		print "    }\n";
+		}
+	print "}\n";
+	print "</script>\n";
 	}
 
 # Description / owner
