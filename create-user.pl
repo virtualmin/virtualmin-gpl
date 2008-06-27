@@ -40,6 +40,11 @@ use the C<--shell> parameter followed by a full path to a Unix shell, such
 as C</usr/bin/scponly>. Available shells can be displayed using the 
 C<list-available-shells.pl> command.
 
+If you only have a pre-encrypted password that you want the new user
+to use, the C<--encpass> flag can be ysed to set it instead of C<--pass>.
+However, this will prevent Virtualmin from enabling MySQL access for the user,
+as it needs to know the plaintext password to re-hash it for MySQL.
+
 =cut
 
 package virtual_server;
@@ -76,6 +81,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--pass") {
 		$pass = shift(@ARGV);
+		}
+	elsif ($a eq "--encpass") {
+		$encpass = shift(@ARGV);
 		}
 	elsif ($a eq "--real" || $a eq "--desc") {
 		$real = shift(@ARGV);
@@ -132,7 +140,7 @@ while(@ARGV > 0) {
 		&usage();
 		}
 	}
-$domain && $username && $pass || &usage();
+$domain && $username && ($pass || $encpass) || &usage();
 
 # Get the initial user
 $d = &get_domain_by("dom", $domain);
@@ -222,9 +230,17 @@ if (!$user->{'fixedhome'}) {
 		$user->{'home'} = "$d->{'home'}/$config{'homes_dir'}/$username";
 		}
 	}
-$user->{'passmode'} = 3;
-$user->{'plainpass'} = $pass;
-$user->{'pass'} = &encrypt_user_password($user, $pass);
+if ($pass) {
+	# Have plain-text password
+	$user->{'passmode'} = 3;
+	$user->{'plainpass'} = $pass;
+	$user->{'pass'} = &encrypt_user_password($user, $pass);
+	}
+else {
+	# Only have encrypted
+	$user->{'passmode'} = 2;
+	$user->{'pass'} = $encpass;
+	}
 if ($disable) {
 	&set_pass_disable($user, 1);
 	}
@@ -314,7 +330,8 @@ print "Adds a new mailbox user to an existing Virtualmin domain.\n";
 print "\n";
 print "usage: create-user.pl    --domain domain.name\n";
 print "                         --user new-username\n";
-print "                         --pass password-for-new-user\n";
+print "                         --pass password-for-new-user |\n";
+print "                         --encpass encrypted-password\n";
 if (&has_home_quotas()) {
 	print "                        [--quota quota-in-blocks]\n";
 	}
