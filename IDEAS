@@ -68,3 +68,5 @@
 
  - Purging on FTP and SSH backups
 	- FS#4191
+
+ - Use new API for webmin modules and categories, when Webmin 1.430 is out

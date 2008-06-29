@@ -4569,7 +4569,7 @@ else {
 		}
 	}
 
-# make the directory
+# Run the command
 local @rv = &ftp_command($_[1], 2, $_[2]);
 @rv || return 0;
 
@@ -4580,8 +4580,10 @@ close(SOCK);
 return $rv[1];
 }
 
-# ftp_listdir(host, dir, [&error], [user, pass], [port])
-# Returns a reference to a list of filenames in a directory
+# ftp_listdir(host, dir, [&error], [user, pass], [port], [longmode])
+# Returns a reference to a list of filenames in a directory, or if longmode
+# is set returns full file details in stat format (with the 13th index being
+# the filename)
 sub ftp_listdir
 {
 local($buf, @n);
@@ -4622,16 +4624,54 @@ defined($pasv) || return 0;
 $pasv =~ /\(([0-9,]+)\)/;
 @n = split(/,/ , $1);
 &open_socket("$n[0].$n[1].$n[2].$n[3]", $n[4]*256 + $n[5], "CON", $_[2]) || return 0;
-&ftp_command("NLST $_[1]", 1, $_[2]) || return 0;
 
-# transfer listing
 local @list;
 local $_;
-while(<CON>) {
-	s/\r|\n//g;
-	push(@list, $_);
+if ($_[6]) {
+	# Ask for full listing
+	&ftp_command("LIST $_[1]", 1, $_[2]) || return 0;
+	local @now = localtime(time());
+	while(<CON>) {
+		s/\r|\n//g;
+		local @w = split(/\s+/, $_);
+		local @st;
+		$st[3] = $w[1];			# Links
+		$st[4] = $w[2];			# UID
+		$st[5] = $w[3];			# GID
+		$st[7] = $w[4];			# Size
+		if ($w[7] =~ /^(\d+):(\d+)$/) {
+			# Time is month day hour:minute
+			local @tm = ( 0, $2, $1, $w[6],
+				      &month_to_number($w[5]), $now[5] );
+			$st[8] = $st[9] = $st[10] = timelocal(@tm);
+			}
+		elsif ($w[7] =~ /^\d+$/) {
+			# Time is month day year
+			local @tm = ( 0, 0, 0, $w[6],
+				      &month_to_number($w[5]), $w[7]-1900 );
+			$st[8] = $st[9] = $st[10] = timelocal(@tm);
+			}
+		$st[2] = 0;			# Permissions
+		local @p = reverse(split(//, $w[0]));
+		for(my $i=0; $i<9; $i++) {
+			if ($p[$i] ne '-') {
+				$st[2] += (1<<$i);
+				}
+			}
+		$st[13] = $w[8];
+		push(@list, \@st);
+		}
+	close(CON);
 	}
-close(CON);
+else {
+	# Just filenames
+	&ftp_command("NLST $_[1]", 1, $_[2]) || return 0;
+	while(<CON>) {
+		s/\r|\n//g;
+		push(@list, $_);
+		}
+	close(CON);
+	}
 
 # finish off..
 &ftp_command("", 2, $_[3]) || return 0;

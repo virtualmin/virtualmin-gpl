@@ -113,9 +113,11 @@ else {
 	if (!$in{'purge_def'}) {
 		# Make sure purging can be used
 		($mode, undef, undef, $host, $path) = &parse_backup_url($dest);
-		$mode == 0 || $mode == 3 || &error($text{'backup_epurgemode'});
+		$mode == 0 || $mode == 3 || $mode == 1 ||
+			&error($text{'backup_epurgemode'});
 		$in{'strftime'} || &error($text{'backup_epurgetime'});
 		$mode == 0 && $path =~ /%/ ||
+		    $mode == 1 && $path =~ /%/ ||
 		    $mode == 3 && $host =~ /%/ ||
 			&error($text{'backup_epurgetime'});
 		($basepath, $pattern) = &extract_purge_path($dest);

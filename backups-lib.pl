@@ -1862,8 +1862,8 @@ sub extract_purge_path
 {
 local ($dest) = @_;
 local ($mode, undef, undef, $host, $path) = &parse_backup_url($dest);
-if ($mode == 0 && $path =~ /^(\S+)\/([^%]*%.*)$/) {
-	# Local file like /backup/%d-%m-%Y
+if (($mode == 0 || $mode == 1) && $path =~ /^(\S+)\/([^%]*%.*)$/) {
+	# Local or FTP file like /backup/%d-%m-%Y
 	local ($base, $date) = ($1, $2);
 	$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($base, $date);
@@ -1916,6 +1916,34 @@ if ($mode == 0) {
 			}
 		}
 	closedir(PURGEDIR);
+	}
+
+elsif ($mode == 1) {
+	# List parent directory via FTP
+	local $err;
+	local @dir = &ftp_listdir($host, $base, \$err, $user, $pass, $port, 1);
+	if ($err) {
+		&$second_print(&text('backup_purgeelistdir', $err));
+		return 0;
+		}
+	foreach my $f (@dir) {
+		if ($f->[13] =~ /^$re$/ && $f->[9] && $f->[9] < $cutoff) {
+			local $old = int((time() - $ctime) / (24*60*60));
+			&$first_print(&text('backup_deletingftp',
+					    "<tt>$f->[13]</tt>", $old));
+			# XXX
+
+			if ($err) {
+				&$second_print(&text('backup_edelftp', $err));
+				$ok = 0;
+				}
+			else {
+				&$second_print(&text('backup_deleted',
+						     &nice_size($sz)));
+				$pcount++;
+				}
+			}
+		}
 	}
 
 elsif ($mode == 3) {
