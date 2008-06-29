@@ -4681,20 +4681,64 @@ close(SOCK);
 return \@list;
 }
 
+# ftp_deletefile(host, file, &error, [user, pass], [port])
+# Delete some file or directory from an FTP server. This is done recursively
+# if needed. Returns the size of any deleted sub-directories.
+sub ftp_deletefile
+{
+local ($host, $file, $err, $user, $pass, $port) = @_;
+local $sz = 0;
+
+# Check if we can chdir to it
+local $cwderr;
+local $isdir = &ftp_onecommand($host, "CWD $file", \$cwderr,
+			       $user, $pass, $port);
+if ($isdir) {
+	# Yes .. so delete recursively first
+	local @files = &ftp_listdir($host, $file, $err, $user, $pass, $port, 1);
+	@files = grep { $_->[13] ne "." && $_->[13] ne ".." } @files;
+	if (!$err || !$$err) {
+		foreach my $f (@files) {
+			$sz += $f->[7];
+			$sz += &ftp_deletefile($host, "$file/$f->[13]", $err,
+					       $user, $pass, $port);
+			last if ($err && $$err);
+			}
+		&ftp_onecommand($host, "RMD $file", $err, $user, $pass, $port);
+		}
+	}
+else {
+	# Just delete the file
+	&ftp_onecommand($host, "DELE $file", $err, $user, $pass, $port);
+	}
+return $sz;
+}
+
 # scp_copy(source, dest, password, &error, port)
 # Copies a file from some source to a destination. One or the other can be
 # a server, like user@foo:/path/to/bar/
 sub scp_copy
 {
+local ($src, $dest, $pass, $err, $port) = @_;
+local $cmd = "scp -r ".($port ? "-P $port " : "").
+	     quotemeta($src)." ".quotemeta($dest);
+&run_ssh_command($cmd, $pass, $err);
+}
+
+# run_ssh_command(command, pass, &error)
+# Attempt to run some command that uses ssh or scp, feeding in a password.
+# Returns the output, and sets the error variable ref if failed.
+sub run_ssh_command
+{
+local ($cmd, $pass, $err) = @_;
 &foreign_require("proc", "proc-lib.pl");
-local $cmd = "scp -r ".($_[4] ? "-P $_[4] " : "").$_[0]." ".$_[1];
 local ($fh, $fpid) = &proc::pty_process_exec($cmd);
 local $out;
 while(1) {
 	local $rv = &wait_for($fh, "password:", "yes\\/no", ".*\n");
 	$out .= $wait_for_input;
 	if ($rv == 0) {
-		syswrite($fh, "$_[2]\n");
+		syswrite($fh, "$pass\n");
 		}
 	elsif ($rv == 1) {
 		syswrite($fh, "yes\n");
@@ -4706,8 +4750,9 @@ while(1) {
 close($fh);
 local $got = waitpid($fpid, 0);
 if ($? || $out =~ /permission\s+denied/i || $out =~ /connection\s+refused/i) {
-	${$_[3]} = "scp failed : <pre>$out</pre>";
+	$$err = $out;
 	}
+return $out;
 }
 
 # free_ip_address(&template|&acl)

@@ -1862,8 +1862,9 @@ sub extract_purge_path
 {
 local ($dest) = @_;
 local ($mode, undef, undef, $host, $path) = &parse_backup_url($dest);
-if (($mode == 0 || $mode == 1) && $path =~ /^(\S+)\/([^%]*%.*)$/) {
-	# Local or FTP file like /backup/%d-%m-%Y
+if (($mode == 0 || $mode == 1 || $mode == 2) &&
+    $path =~ /^(\S+)\/([^%]*%.*)$/) {
+	# Local, FTP or SSH file like /backup/%d-%m-%Y
 	local ($base, $date) = ($1, $2);
 	$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($base, $date);
@@ -1926,13 +1927,21 @@ elsif ($mode == 1) {
 		&$second_print(&text('backup_purgeelistdir', $err));
 		return 0;
 		}
+	@dir = grep { $_->[13] ne "." && $_->[13] ne ".." } @dir;
+	if (@dir && !$dir[0]->[9]) {
+		# No times in output
+		&$second_print(&text('backup_purgeelisttimes', $base));
+		return 0;
+		}
 	foreach my $f (@dir) {
 		if ($f->[13] =~ /^$re$/ && $f->[9] && $f->[9] < $cutoff) {
 			local $old = int((time() - $ctime) / (24*60*60));
 			&$first_print(&text('backup_deletingftp',
 					    "<tt>$f->[13]</tt>", $old));
-			# XXX
-
+			local $err;
+			local $sz = $f->[7];
+			$sz += &ftp_deletefile($host, "$base/$f->[13]",
+					       \$err, $user, $pass, $port);
 			if ($err) {
 				&$second_print(&text('backup_edelftp', $err));
 				$ok = 0;
@@ -1944,6 +1953,20 @@ elsif ($mode == 1) {
 				}
 			}
 		}
+	}
+
+elsif ($mode == 2) {
+	# Use ls -l via SSH to list the directory
+	local $sshcmd = "ssh".($port ? "-p $port" : "").
+			" ".$user."\@".$host;
+	local $lscmd = $sshcmd." ls -l ".quotemeta($base);
+	local $err;
+	local $lsout = &run_ssh_command($lscmd, $pass, \$err);
+	if ($err) {
+		&$second_print(&text('backup_purgeesshls', $err));
+		return 0;
+		}
+	# XXX
 	}
 
 elsif ($mode == 3) {
