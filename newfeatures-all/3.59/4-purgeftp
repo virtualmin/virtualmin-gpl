@@ -1,0 +1,4 @@
+desc=Purging of backups from FTP and SSH servers
+html=Purging of old backups made to FTP or SSH servers is now supported, for FTP servers that use Unix directory listings and SSH servers that allow commands to be run.
+master=1
+link=list_sched.cgi

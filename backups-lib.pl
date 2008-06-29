@@ -1922,22 +1922,22 @@ if ($mode == 0) {
 elsif ($mode == 1) {
 	# List parent directory via FTP
 	local $err;
-	local @dir = &ftp_listdir($host, $base, \$err, $user, $pass, $port, 1);
+	local $dir = &ftp_listdir($host, $base, \$err, $user, $pass, $port, 1);
 	if ($err) {
 		&$second_print(&text('backup_purgeelistdir', $err));
 		return 0;
 		}
-	@dir = grep { $_->[13] ne "." && $_->[13] ne ".." } @dir;
-	if (@dir && !$dir[0]->[9]) {
+	$dir = [ grep { $_->[13] ne "." && $_->[13] ne ".." } @$dir ];
+	if (@$dir && !$dir->[0]->[9]) {
 		# No times in output
 		&$second_print(&text('backup_purgeelisttimes', $base));
 		return 0;
 		}
-	foreach my $f (@dir) {
+	foreach my $f (@$dir) {
 		if ($f->[13] =~ /^$re$/ && $f->[9] && $f->[9] < $cutoff) {
 			local $old = int((time() - $f->[9]) / (24*60*60));
 			&$first_print(&text('backup_deletingftp',
-					    "<tt>$f->[13]</tt>", $old));
+					    "<tt>$base/$f->[13]</tt>", $old));
 			local $err;
 			local $sz = $f->[7];
 			$sz += &ftp_deletefile($host, "$base/$f->[13]",
@@ -1957,7 +1957,7 @@ elsif ($mode == 1) {
 
 elsif ($mode == 2) {
 	# Use ls -l via SSH to list the directory
-	local $sshcmd = "ssh".($port ? "-p $port" : "").
+	local $sshcmd = "ssh".($port ? " -p $port" : "").
 			" ".$user."\@".$host;
 	local $lscmd = $sshcmd." ls -l ".quotemeta($base);
 	local $err;
@@ -1972,7 +1972,7 @@ elsif ($mode == 2) {
 		if ($st[13] =~ /^$re$/ && $st[9] && $st[9] < $cutoff) {
 			local $old = int((time() - $st[9]) / (24*60*60));
 			&$first_print(&text('backup_deletingssh',
-					    "<tt>$f->[13]</tt>", $old));
+					    "<tt>$base/$st[13]</tt>", $old));
 			local $rmcmd = $sshcmd.
 				       " rm -rf ".quotemeta("$base/$st[13]");
 			local $rmerr;
@@ -1983,7 +1983,7 @@ elsif ($mode == 2) {
 				}
 			else {
 				&$second_print(&text('backup_deleted',
-						     &nice_size($sz)));
+						     &nice_size($st[7])));
 				$pcount++;
 				}
 			}

@@ -4664,7 +4664,7 @@ sub parse_lsl_line
 local @w = split(/\s+/, $_[0]);
 local @now = localtime(time());
 local @st;
-return ( ) if ($w[0] !~ /^[rwxdst\-]+{10}$/);
+return ( ) if ($w[0] !~ /^[rwxdst\-]{10}$/);
 $st[3] = $w[1];			# Links
 $st[4] = $w[2];			# UID
 $st[5] = $w[3];			# GID
@@ -4709,10 +4709,10 @@ local $isdir = &ftp_onecommand($host, "CWD $file", \$cwderr,
 			       $user, $pass, $port);
 if ($isdir) {
 	# Yes .. so delete recursively first
-	local @files = &ftp_listdir($host, $file, $err, $user, $pass, $port, 1);
-	@files = grep { $_->[13] ne "." && $_->[13] ne ".." } @files;
+	local $files = &ftp_listdir($host, $file, $err, $user, $pass, $port, 1);
+	$files = [ grep { $_->[13] ne "." && $_->[13] ne ".." } @$files ];
 	if (!$err || !$$err) {
-		foreach my $f (@files) {
+		foreach my $f (@$files) {
 			$sz += $f->[7];
 			$sz += &ftp_deletefile($host, "$file/$f->[13]", $err,
 					       $user, $pass, $port);
