@@ -4630,36 +4630,10 @@ local $_;
 if ($_[6]) {
 	# Ask for full listing
 	&ftp_command("LIST $_[1]", 1, $_[2]) || return 0;
-	local @now = localtime(time());
 	while(<CON>) {
 		s/\r|\n//g;
-		local @w = split(/\s+/, $_);
-		local @st;
-		$st[3] = $w[1];			# Links
-		$st[4] = $w[2];			# UID
-		$st[5] = $w[3];			# GID
-		$st[7] = $w[4];			# Size
-		if ($w[7] =~ /^(\d+):(\d+)$/) {
-			# Time is month day hour:minute
-			local @tm = ( 0, $2, $1, $w[6],
-				      &month_to_number($w[5]), $now[5] );
-			$st[8] = $st[9] = $st[10] = timelocal(@tm);
-			}
-		elsif ($w[7] =~ /^\d+$/) {
-			# Time is month day year
-			local @tm = ( 0, 0, 0, $w[6],
-				      &month_to_number($w[5]), $w[7]-1900 );
-			$st[8] = $st[9] = $st[10] = timelocal(@tm);
-			}
-		$st[2] = 0;			# Permissions
-		local @p = reverse(split(//, $w[0]));
-		for(my $i=0; $i<9; $i++) {
-			if ($p[$i] ne '-') {
-				$st[2] += (1<<$i);
-				}
-			}
-		$st[13] = $w[8];
-		push(@list, \@st);
+		local @st = &parse_lsl_line($_);
+		push(@list, \@st) if (scalar(@st));
 		}
 	close(CON);
 	}
@@ -4679,6 +4653,46 @@ else {
 close(SOCK);
 
 return \@list;
+}
+
+# parse_lsl_line(text)
+# Given a line from ls -l output, parse it into a stat() format array. Not all
+# fields are set, as not all are available. Returns an empty array if the line
+# doesn't look like ls -l output.
+sub parse_lsl_line
+{
+local @w = split(/\s+/, $_[0]);
+local @now = localtime(time());
+local @st;
+return ( ) if ($w[0] !~ /^[rwxdst\-]+{10}$/);
+$st[3] = $w[1];			# Links
+$st[4] = $w[2];			# UID
+$st[5] = $w[3];			# GID
+$st[7] = $w[4];			# Size
+if ($w[7] =~ /^(\d+):(\d+)$/) {
+	# Time is month day hour:minute
+	local @tm = ( 0, $2, $1, $w[6], &month_to_number($w[5]), $now[5] );
+	$st[8] = $st[9] = $st[10] = timelocal(@tm);
+	}
+elsif ($w[7] =~ /^\d+$/) {
+	# Time is month day year
+	local @tm = ( 0, 0, 0, $w[6],
+		      &month_to_number($w[5]), $w[7]-1900 );
+	$st[8] = $st[9] = $st[10] = timelocal(@tm);
+	}
+else {
+	# Unknown format??
+	return ( );
+	}
+$st[2] = 0;			# Permissions
+local @p = reverse(split(//, $w[0]));
+for(my $i=0; $i<9; $i++) {
+	if ($p[$i] ne '-') {
+		$st[2] += (1<<$i);
+		}
+	}
+$st[13] = join(" ", @w[8..$#w]);
+return @st;
 }
 
 # ftp_deletefile(host, file, &error, [user, pass], [port])

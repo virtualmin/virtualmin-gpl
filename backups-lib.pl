@@ -1935,7 +1935,7 @@ elsif ($mode == 1) {
 		}
 	foreach my $f (@dir) {
 		if ($f->[13] =~ /^$re$/ && $f->[9] && $f->[9] < $cutoff) {
-			local $old = int((time() - $ctime) / (24*60*60));
+			local $old = int((time() - $f->[9]) / (24*60*60));
 			&$first_print(&text('backup_deletingftp',
 					    "<tt>$f->[13]</tt>", $old));
 			local $err;
@@ -1966,7 +1966,28 @@ elsif ($mode == 2) {
 		&$second_print(&text('backup_purgeesshls', $err));
 		return 0;
 		}
-	# XXX
+	foreach my $l (split(/\r?\n/, $lsout)) {
+		local @st = &parse_lsl_line($l);
+		next if (!scalar(@st));
+		if ($st[13] =~ /^$re$/ && $st[9] && $st[9] < $cutoff) {
+			local $old = int((time() - $st[9]) / (24*60*60));
+			&$first_print(&text('backup_deletingssh',
+					    "<tt>$f->[13]</tt>", $old));
+			local $rmcmd = $sshcmd.
+				       " rm -rf ".quotemeta("$base/$st[13]");
+			local $rmerr;
+			&run_ssh_command($rmcmd, $pass, \$rmerr);
+			if ($rmerr) {
+				&$second_print(&text('backup_edelssh', $rmerr));
+				$ok = 0;
+				}
+			else {
+				&$second_print(&text('backup_deleted',
+						     &nice_size($sz)));
+				$pcount++;
+				}
+			}
+		}
 	}
 
 elsif ($mode == 3) {

@@ -1916,6 +1916,9 @@ backup_purgeelistdir=.. failed to list FTP directory : $1
 backup_purgeelisttimes=.. FTP server listing of $1 does not include file times
 backup_deletingftp=Deleting FTP file $1, which is $2 days old ..
 backup_edelftp=.. FTP deletion failed : $1
+backup_purgeesshls=.. failed to list directory via SSH : $1
+backup_deletingssh=Deleting file $1 via SSH, which is $2 days old ..
+backup_edelssh=.. SSH deletion failed : $1
 
 restore_title=Restore Virtual Servers
 restore_header=Options for restoring backup
