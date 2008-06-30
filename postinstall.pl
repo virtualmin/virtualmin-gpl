@@ -251,9 +251,9 @@ if ($virtualmin_pro) {
 			 'active' => 1,
 			 'command' => $fcgiclear_cron_cmd };
 		&cron::create_cron_job($job);
-		&cron::create_wrapper($fcgiclear_cron_cmd, $module_name,
-				      "fcgiclear.pl");
 		}
+	&cron::create_wrapper($fcgiclear_cron_cmd, $module_name,
+			      "fcgiclear.pl");
 	}
 
 # Add ftp user to the groups for all domains that have FTP enabled

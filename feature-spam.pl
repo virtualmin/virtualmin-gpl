@@ -1073,9 +1073,9 @@ if (!$job) {
 		 'active' => 1,
 		 'command' => $spamconfig_cron_cmd };
 	&cron::create_cron_job($job);
-	&cron::create_wrapper($spamconfig_cron_cmd, $module_name,
-			      "spamconfig.pl");
 	}
+&cron::create_wrapper($spamconfig_cron_cmd, $module_name,
+		      "spamconfig.pl");
 
 # And run now, just in case spamassassin was upgraded recently
 foreach my $d (grep { $_->{'spam'} } &list_domains()) {
