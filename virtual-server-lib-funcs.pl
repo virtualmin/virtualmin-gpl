@@ -10027,7 +10027,6 @@ elsif ($config{'quotas'}) {
 		$qerr = &text('index_ezone');
 		}
 	else {
-		&foreign_require("mount", "mount-lib.pl");
 		local $mail_base = &simplify_path(&resolve_links(
 				&mail_system_base()));
 		local ($home_mtab, $home_fstab) = &mount_point($home_base);
@@ -10210,6 +10209,7 @@ return undef;
 sub mount_point
 {
 local $dir = &resolve_links($_[0]);
+&foreign_require("mount", "mount-lib.pl");
 local @mounts = &mount::list_mounts();
 local @mounted = &mount::list_mounted();
 local @realmounts = grep { $_->[0] ne 'none' && $_->[0] !~ /^swap/ &&
