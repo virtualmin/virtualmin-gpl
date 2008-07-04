@@ -237,7 +237,7 @@ if ($max) {
 		$max ||= 1;
 		for($i=$day; $i>=$start_day; $i--) {
 			print "<tr>\n";
-			print "<td>",strftime("%d/%m/%Y", localtime($i*24*60*60)),"</td>\n";
+			print "<td>",&make_date($i*24*60*60, 1),"</td>\n";
 			print "<td>";
 			local $usage = 0;
 			foreach $f (@features) {
