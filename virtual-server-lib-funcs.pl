@@ -2452,9 +2452,9 @@ foreach my $d (sort { $sortkey{$a->{'id'}} cmp $sortkey{$b->{'id'}} ||
 	$pfx .= "&nbsp;&nbsp;" if ($d->{'alias'} && $done{$d->{'alias'}} &&
 				   $sortfield eq "user");
 	local @cols;
-	local $proxy = $d->{'proxy_pass_mode'} == 1 ?
+	local $proxy = $d->{'proxy_pass_mode'} == 2 ?
 		 " <a href='frame_form.cgi?dom=$d->{'id'}'>(F)</a>" :
-		$d->{'proxy_pass_mode'} == 2 ?
+		$d->{'proxy_pass_mode'} == 1 ?
 		 " <a href='proxy_form.cgi?dom=$d->{'id'}'>(P)</a>" : "";
 	if (&can_config_domain($d)) {
 		push(@cols, "$pfx<a href='edit_domain.cgi?dom=$d->{'id'}'>$dn</a>$proxy");
