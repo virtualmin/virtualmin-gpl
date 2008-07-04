@@ -15,7 +15,13 @@ if (&foreign_check("proc")) {
 		}
 	local @procs = &proc::list_processes();
 	$info->{'procs'} = scalar(@procs);
-	if (defined(&proc::get_memory_info)) {
+	if ($config{'mem_cmd'}) {
+		# Get from custom command
+		local $out = &backquote_command($config{'mem_cmd'});
+		local @lines = split(/\r?\n/, $out);
+		$info->{'mem'} = [ map { $_/1024 } @lines ];
+		}
+	elsif (defined(&proc::get_memory_info)) {
 		local @m = &proc::get_memory_info();
 		$info->{'mem'} = \@m;
 		if ($m[0] > 128*1024*1024 && $gconfig{'os_type'} eq 'freebsd') {
