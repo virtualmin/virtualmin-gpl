@@ -67,3 +67,6 @@
 	- FS#4136
 
  - Use new API for webmin modules and categories, when Webmin 1.430 is out
+
+ - Show bandwidth graph on right frame
+	-  FS#1649
