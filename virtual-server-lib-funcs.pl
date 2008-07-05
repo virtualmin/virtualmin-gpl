@@ -4735,7 +4735,7 @@ sub scp_copy
 {
 local ($src, $dest, $pass, $err, $port) = @_;
 local $cmd = "scp -r ".($port ? "-P $port " : "").
-	     quotemeta($src)." ".quotemeta($dest);
+	     $src." ".quotemeta($dest);
 &run_ssh_command($cmd, $pass, $err);
 }
 

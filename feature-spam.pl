@@ -113,8 +113,6 @@ if (!$gotvirt) {
 		&procmail::create_recipe($var2);
 		}
 	&foreign_require("cron", "cron-lib.pl");
-	&cron::create_wrapper($domain_lookup_cmd, $module_name,
-			      "lookup-domain.pl");
 
 	# Fix up bad quoted VIRTUAMIN= line, introduced by Webmin 1.410
 	local $lref = &read_file_lines($procmail::procmailrc);
@@ -125,6 +123,8 @@ if (!$gotvirt) {
 		}
 	&flush_file_lines($procmail::procmailrc);
 	}
+&cron::create_wrapper($domain_lookup_cmd, $module_name,
+		      "lookup-domain.pl");
 
 # Build spamassassin command to call
 local $cmd = &spamassassin_client_command($_[0]);

@@ -641,10 +641,13 @@ elsif ($ok && $mode == 2 && (@destfiles || !$dirfmt)) {
 	local $r = ($user ? "$user\@" : "")."$server:$path";
 	if ($dirfmt) {
 		# Need to upload entire directory
+		print STDERR "copying $dest/* to $r\n";
 		&scp_copy("$dest/*", $r, $pass, \$err, $port);
+		print STDERR "err=$err\n";
 		if ($err) {
 			# Target dir didn't exist, so scp just the directory
 			$err = undef;
+			print STDERR "copying $dest to $r\n";
 			&scp_copy($dest, $r, $pass, \$err, $port);
 			}
 		}
