@@ -191,7 +191,7 @@ local $lref = &read_file_lines($cfile);
 local $l;
 local $url = &script_path_url($d, $opts);
 local $dbs = join(" ", @dbs);
-local $dbsarray = "Array(".join(", ", map { "'$_'" } @dbs).")";
+local $dbsarray = @dbs ? "Array(".join(", ", map { "'$_'" } @dbs).")" : "''";
 foreach $l (@$lref) {
 	# These are for phpMyAdmin 2.6+
 	if ($opts->{'auto'}) {
