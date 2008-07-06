@@ -51,6 +51,8 @@ $d || &usage("Virtual server $domain does not exist");
 # Go ahead and do it
 print "Enabling virtual server $domain ..\n\n";
 %enable = map { $_, 1 } @enable;
+delete($d->{'disabled_reason'});
+delete($d->{'disabled_why'});
 
 # Run the before command
 &set_domain_envs($d, "ENABLE_DOMAIN");
@@ -75,8 +77,6 @@ foreach $f (@feature_plugins) {
 # Save new domain details
 &$first_print($text{'save_domain'});
 delete($d->{'disabled'});
-delete($d->{'disabled_reason'});
-delete($d->{'disabled_why'});
 &save_domain($d);
 &$second_print($text{'setup_done'});
 

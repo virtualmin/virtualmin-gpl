@@ -59,6 +59,8 @@ $d->{'disabled'} && &usage("Virtual server $domain is already disabled");
 # Disable it
 print "Disabling virtual server $domain ..\n\n";
 %disable = map { $_, 1 } @disable;
+$d->{'disabled_reason'} = 'manual';
+$d->{'disabled_why'} = $why;
 
 # Run the before command
 &set_domain_envs($d, "DISABLE_DOMAIN");
@@ -86,8 +88,6 @@ foreach $f (@feature_plugins) {
 # Save new domain details
 &$first_print($text{'save_domain'});
 $d->{'disabled'} = join(",", @disabled);
-$d->{'disabled_reason'} = 'manual';
-$d->{'disabled_why'} = $why;
 &save_domain($d);
 &$second_print($text{'setup_done'});
 

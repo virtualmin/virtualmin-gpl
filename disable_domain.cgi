@@ -54,6 +54,8 @@ elsif (!$in{'confirm'}) {
 else {
 	# Go ahead and do it ..
 	%disable = map { $_, 1 } @disable;
+	$d->{'disabled_reason'} = 'manual';
+	$d->{'disabled_why'} = $in{'why'};
 
 	# Run the before command
 	&set_domain_envs($d, "DISABLE_DOMAIN");
@@ -81,8 +83,6 @@ else {
 	# Save new domain details
 	print $text{'save_domain'},"<br>\n";
 	$d->{'disabled'} = join(",", @disabled);
-	$d->{'disabled_reason'} = 'manual';
-	$d->{'disabled_why'} = $in{'why'};
 	&save_domain($d);
 	print $text{'setup_done'},"<p>\n";
 

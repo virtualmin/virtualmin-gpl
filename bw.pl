@@ -188,6 +188,7 @@ foreach $d (@doms) {
 			# Save new domain details
 			$d->{'disabled'} = join(",", @disabled);
 			$d->{'disabled_reason'} = 'bw';
+			$d->{'disabled_why'} = "Exceeded bandwidth limit";
 
 			# Run the after command
 			&run_post_actions();
@@ -241,6 +242,8 @@ foreach $d (@doms) {
 		&set_all_null_print();
 		@enable = &get_enable_features($d);
 		%enable = map { $_, 1 } @enable;
+		delete($d->{'disabled_reason'});
+		delete($d->{'disabled_why'});
 
 		# Run the before command
 		&set_domain_envs($d, "ENABLE_DOMAIN");
@@ -264,8 +267,6 @@ foreach $d (@doms) {
 
 		# Save new domain details
 		delete($d->{'disabled'});
-		delete($d->{'disabled_reason'});
-		delete($d->{'disabled_why'});
 		&save_domain($d);
 
 		# Run the after command

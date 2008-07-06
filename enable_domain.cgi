@@ -45,6 +45,8 @@ if (!$in{'confirm'}) {
 else {
 	# Go ahead and do it
 	%enable = map { $_, 1 } @enable;
+	delete($d->{'disabled_reason'});
+	delete($d->{'disabled_why'});
 
 	# Run the before command
 	&set_domain_envs($d, "ENABLE_DOMAIN");
@@ -69,8 +71,6 @@ else {
 	# Save new domain details
 	print $text{'save_domain'},"<br>\n";
 	delete($d->{'disabled'});
-	delete($d->{'disabled_reason'});
-	delete($d->{'disabled_why'});
 	&save_domain($d);
 	print $text{'setup_done'},"<p>\n";
 
