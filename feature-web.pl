@@ -687,6 +687,10 @@ return undef;
 # Adds a directive to force all requests to show an error page
 sub disable_web
 {
+if ($_[0]->{'alias'} && $_[0]->{'alias_mode'} == 1) {
+	# Just a ServerAlias in a real domain, so don't disable
+	return 1;
+	}
 &$first_print($text{'disable_apache'});
 &require_apache();
 &obtain_lock_web($_[0]);
@@ -750,6 +754,10 @@ return "$disabled_website_dir/$_[0]->{'id'}.html";
 # Deletes the special error page directive
 sub enable_web
 {
+if ($_[0]->{'alias'} && $_[0]->{'alias_mode'} == 1) {
+	# Just a ServerAlias in a real domain, so no need to do anything
+	return 1;
+	}
 &$first_print($text{'enable_apache'});
 &require_apache();
 &obtain_lock_web($_[0]);
