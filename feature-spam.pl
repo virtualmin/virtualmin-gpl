@@ -123,8 +123,13 @@ if (!$gotvirt) {
 		}
 	&flush_file_lines($procmail::procmailrc);
 	}
+
+# Create the lookup-domain.pl wrapper script, and hack it to turn off setuid
 &cron::create_wrapper($domain_lookup_cmd, $module_name,
 		      "lookup-domain.pl");
+local $lref = &read_file_lines($domain_lookup_cmd);
+splice(@$lref, 1, 0, "\$< = \$>;", "\$( = \$);");
+&flush_file_lines($domain_lookup_cmd);
 
 # Build spamassassin command to call
 local $cmd = &spamassassin_client_command($_[0]);
@@ -1012,8 +1017,8 @@ elsif (!$job && %spamclear) {
 		 'months' => '*',
 		 'weekdays' => '*' };
 	&cron::create_cron_job($job);
-	&cron::create_wrapper($spamclear_cmd, $module_name, "spamclear.pl");
 	}
+&cron::create_wrapper($spamclear_cmd, $module_name, "spamclear.pl");
 }
 
 # create_spam_config_links(&domain)
