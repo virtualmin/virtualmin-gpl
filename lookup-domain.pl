@@ -12,8 +12,12 @@ while($got = read(STDIN, $buf, 1024)) {
 	}
 $margin = $size*2+5*1024*1024;
 
-# First, try connecting to the lookup-domain-daemon.pl process
+# First, try connecting to the lookup-domain-daemon.pl process. Only wait for
+# 30 seconds, in case it has hung.
+$connect_timed_out = 0;
+local $SIG{ALRM} = sub { $connect_timed_out = 1 };
 socket(DAEMON, PF_INET, SOCK_STREAM, getprotobyname("tcp"));
+alarm(30);
 $rv = connect(DAEMON, pack_sockaddr_in(11000, inet_aton("127.0.0.1")));
 if ($rv) {
 	select(DAEMON); $| = 1; select(STDOUT);
@@ -22,7 +26,11 @@ if ($rv) {
 	$fromdaemon =~ s/\r|\n//g;
 	close(DAEMON);
 	}
-if ($fromdaemon) {
+alarm(0);
+if ($connect_timed_out) {
+	print STDERR "Timeout connecting to lookup-domain-daemon.pl\n";
+	}
+if ($fromdaemon && !$connect_timed_out) {
 	# We have an answer from the server process
 	($did, $dname, $spam, $spamc, $quotaleft) = split(/\t/, $fromdaemon);
 	if (!$did || !$spam) {
