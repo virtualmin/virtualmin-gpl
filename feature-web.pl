@@ -618,16 +618,16 @@ else {
 			&foreign_require("phpini", "phpini-lib.pl");
 			&$first_print($text{'save_apache10'});
 			foreach my $i (&list_domain_php_inis($_[0])) {
-				print STDERR "ini = $i->[0] $i->[1]\n";
 				local $pconf = &phpini::get_config($i->[1]);
-				local $sp = &phpini::find_value(
-						"session.save_path", $pconf);
-				if ($sp =~ /\Q$_[1]->{'home'}\E/) {
-					$sp =~ s/\Q$_[1]->{'home'}\E/$_[0]->{'home'}/g;
-					&phpini::save_directive($pconf,
-						"session.save_path", $sp);
-					&flush_file_lines($i->[1]);
-					print STDERR "new sp=$sp\n";
+				foreach my $n ("session.save_path",
+					       "upload_tmp_dir") {
+					local $sp = &phpini::find_value($n,
+									$pconf);
+					if ($sp =~ s/\Q$_[1]->{'home'}\E/$_[0]->{'home'}/g) {
+						&phpini::save_directive($pconf,
+							$n, $sp);
+						&flush_file_lines($i->[1]);
+						}
 					}
 				}
 			$rv++;

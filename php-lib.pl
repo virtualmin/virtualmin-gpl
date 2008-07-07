@@ -112,8 +112,10 @@ foreach my $ver (@vers) {
 			# Fix up session save path and extension_dir
 			&foreign_require("phpini", "phpini-lib.pl");
 			local $pconf = &phpini::get_config("$inidir/php.ini");
+			local $tmp = &create_server_tmp($d);
 			&phpini::save_directive($pconf, "session.save_path",
-						&create_server_tmp($d));
+						$tmp);
+			&phpini::save_directive($pconf, "upload_tmp_dir", $tmp);
 			if (scalar(@srcinis) == 1 && scalar(@vers) > 1) {
 				# Only if the same source is used for multiple
 				# PHP versions.
