@@ -14,13 +14,24 @@ $spf = &get_domain_spf($d);
 if ($in{'enabled'}) {
 	$spf ||= &default_domain_spf($d);
 	$defspf = &default_domain_spf($d);
-	foreach $t ('a', 'mx', 'ip4') {
+	foreach $t ('a', 'mx', 'ip4', 'include') {
 		local @v = split(/\s+/, $in{'extra_'.$t});
 		foreach my $v (@v) {
-			if (($t eq "a" || $t eq "mx") &&
-			    $v !~ /^[a-z0-9\.\-\_]+$/i ||
-			    $t eq "ip4" && !&check_ipaddress($v)) {
-				&error(&text('spf_e'.$t, $v));
+			if ($a eq 'a' || $t eq 'mx' || $t eq 'include') {
+				# Must be a valid hostname
+				$v =~ /^[a-z0-9\.\-\_]+$/i ||
+					&error(&text('spf_e'.$t, $v));
+				}
+			elsif ($a eq "ip4") {
+				# Must be a valid IP or IP/cidr or IP/mask
+				&check_ipaddress($v) ||
+				  ($v =~ /^([0-9\.]+)\/(\d+)$/ &&
+				   $2 > 0 && $2 <= 32 &&
+				   &check_ipaddress("$1")) ||
+				  ($v =~ /^([0-9\.]+)\/([0-9\.]+)$/ &&
+				   &check_ipaddress("$1") &&
+				   &check_ipaddress("$2")) ||
+					&error(&text('spf_e'.$t, $v));
 				}
 			}
 		$spf->{$t.':'} = \@v;

@@ -20,7 +20,7 @@ print &ui_table_row(&hlink($text{'spf_enabled'}, 'spf_enabled'),
 
 # Extra a, mx and ip4
 $edspf = $spf || $defspf;
-foreach $t ('a', 'mx', 'ip4') {
+foreach $t ('a', 'mx', 'ip4', 'include') {
 	print &ui_table_row(&hlink($text{'spf_'.$t}, 'spf_'.$t),
 		&ui_textarea('extra_'.$t,
 			     join("\n", @{$edspf->{$t.':'}}), 3, 40));
