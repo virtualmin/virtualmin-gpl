@@ -949,3 +949,4 @@ Purging of old backups made to FTP or SSH servers is now supported, for FTP serv
 ---- Changes since 3.58 ----
 Updated the Piwik script installer to version 0.2.5, ZenPhoto to 1.1.7, eTicket to 1.7.1 and HelpCenter to 2.1.7.
 Added a Module Config field for a custom command to get memory and swap information.
+Included domains can now be specified when editing SPF information, and IP networks can be entered.

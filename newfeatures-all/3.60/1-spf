@@ -1,0 +1,6 @@
+desc=More SPF information
+html=Included domains can now be specified when editing SPF information, and IP networks can be entered.
+master=1
+reseller=1
+domain=1
+link=edit_spf.cgi?dom=${ID}
