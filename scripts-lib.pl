@@ -517,8 +517,8 @@ sub setup_web_for_php
 local ($d, $script, $phpver) = @_;
 local $tmpl = &get_template($d->{'template'});
 local $any = 0;
-local @tmplphpvars = $tmpl->{'php_vars'} eq 'none' ? ( ) :
-			split(/\t+/, $tmpl->{'php_vars'});
+local $varstr = &substitute_domain_template($tmpl->{'php_vars'}, $d);
+local @tmplphpvars = $varstr eq 'none' ? ( ) : split(/\t+/, $varstr);
 
 if ($apache::httpd_modules{'mod_php4'} ||
     $apache::httpd_modules{'mod_php5'}) {
