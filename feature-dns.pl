@@ -1242,7 +1242,8 @@ if ($in{"dns_mode"} == 2) {
 	local $recs = &substitute_template(
 			join("\n", split(/\t+/, $in{'dns'}))."\n",
 			{ 'ip' => $fakeip,
-			  'dom' => $fakedom });
+			  'dom' => $fakedom,
+		 	  'web' => 1, });
 	local $temp = &transname();
 	&open_tempfile(TEMP, ">$temp");
 	&print_tempfile(TEMP, $recs);
