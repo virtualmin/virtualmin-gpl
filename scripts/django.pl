@@ -283,14 +283,17 @@ if (!$upgrade) {
 		       [ "Password", $dompass ]) {
 		local $rv = &wait_for($fh, $w->[0]);
 		if ($rv < 0) {
-			return (0, "Database initialization failed : ".
+			return (0,
+			   "Database initialization failed at $w->[0] : ".
 			   "<pre>".&html_escape($wait_for_input)."</pre>");
 			}
 		&sysprint($fh, $w->[1]."\n");
 		$out .= $wait_for_input;
 		}
 	&wait_for($fh, 'EOF');		# Wait till done
-	local $ex = close($fh);
+	close($fh);
+	waitpid($fpid, 0);
+	local $ex = $?;
 	if ($ex || $out =~ /error/i) {
 		return (0, "Database initialization failed : ".
 			   "<pre>".&html_escape($out)."</pre>");
