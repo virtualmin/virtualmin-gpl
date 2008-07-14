@@ -421,6 +421,9 @@ else {
 						       undef, "user", $d);
 				$user->{'to'} = @values ? \@values : undef;
 				}
+
+			# Check for alias loop
+			&check_email_to_loop();
 			}
 
 		# Now we have the username, check the password
@@ -526,6 +529,9 @@ else {
 						$old{'to'}, "user", $d);
 				$user->{'to'} = @values ? \@values : undef;
 				}
+
+			# Check for alias loop
+			&check_email_to_loop();
 			}
 
 		# Validate plugins
@@ -634,4 +640,14 @@ else {
 		}
 	}
 &redirect($d ? "list_users.cgi?dom=$in{'dom'}" : "index.cgi");
+
+# Call error if the user's forwarding address is his own address
+sub check_email_to_loop
+{
+foreach my $t (@{$user->{'to'}}) {
+	if ($t eq $user->{'email'}) {
+		&error($text{'user_eloop'});
+		}
+	}
+}
 

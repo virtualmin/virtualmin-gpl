@@ -64,6 +64,13 @@ else {
 			}
 		}
 
+	# Make sure alias doesn't forward to itself
+	foreach my $t (@{$virt->{'to'}}) {
+		if ($t eq $virt->{'from'}) {
+			&error($text{'alias_eloop'});
+			}
+		}
+
 	if ($in{'new'}) {
 		# Check for a clash
 		if (&check_clash($name, $d->{'dom'})) {

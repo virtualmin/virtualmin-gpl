@@ -662,6 +662,7 @@ user_faction=Action
 user_eshell=Selected shell is not available for mail / FTP users
 user_ehomeexists=Home directory must be an existing directory for website FTP users
 user_awl=Manage auto-whitelist
+user_eloop=A user cannot forward email to his own address
 
 aliases_ecannot=You are not allowed to edit aliases in this domain
 aliases_title=Mail Aliases
@@ -737,6 +738,7 @@ alias_etype8=Missing or invalid destination domain
 alias_ecatchall=The 'Same mailbox in domain' alias destination can only be used for 'All mailbox' aliases
 alias_ecatchall2=The 'Same mailbox in domain' alias destination cannot be combined with other destinations
 alias_ebounce=The 'Bounce mail' alias destination cannot be combined with any other
+alias_eloop=An email alias cannot forward mail to itself
 alias_enone=No destinations entered
 alias_afile=Edit..
 alias_return=alias
