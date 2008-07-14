@@ -1674,14 +1674,14 @@ if ($mf) {
 		# Create the mailbox, owned by the user
 		if ($mfreal) {
 			# Create real file, and link to it
-			&open_tempfile(MF, ">$mfreal");
+			&open_tempfile(MF, ">$mfreal", 1);
 			&close_tempfile(MF);
 			&set_ownership_permissions($uid, $gid, undef, $mfreal);
 			&symlink_file($mfreal, $mf);
 			}
 		else {
 			# Just one file
-			&open_tempfile(MF, ">$mf");
+			&open_tempfile(MF, ">$mf", 1);
 			&close_tempfile(MF);
 			&set_ownership_permissions($uid, $gid, undef, $mf);
 			}
