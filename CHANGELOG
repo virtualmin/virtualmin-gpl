@@ -951,3 +951,4 @@ Updated the Piwik script installer to version 0.2.5, ZenPhoto to 1.1.7, eTicket 
 Added a Module Config field for a custom command to get memory and swap information.
 Included domains can now be specified when editing SPF information, and IP networks can be entered.
 The default limit on the number of non-alias domains can now be set in server templates.
+Added a script installer for Z-push, which implements the Microsoft activesync protocol.
