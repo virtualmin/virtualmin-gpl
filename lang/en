@@ -2367,6 +2367,7 @@ tmpl_atmost=At most
 tmpl_dbslimit=Default limit on number of databases
 tmpl_domslimit=Default limit on number of virtual servers
 tmpl_aliasdomslimit=Default limit on number of alias servers
+tmpl_realdomslimit=Default limit on number of non-alias servers
 tmpl_bwlimit=Default bandwidth limit
 tmpl_mongrelslimit=Default limit on number of Mongrel instances
 tmpl_emailboxlimit=Missing or invalid default limit on number of mailboxes

@@ -10562,7 +10562,7 @@ print &ui_table_row(&hlink($text{'tmpl_featurelimits'},
 print &ui_table_hr();
 
 # Show limits on numbers of things
-foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms", "bw",
+foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms", "realdoms", "bw",
 	       $virtualmin_pro ? ( "mongrels" ) : ( )) {
 	my $limit = $tmpl->{$l.'limit'} eq "none" ? undef : $tmpl->{$l.'limit'};
 	print &ui_table_row(&hlink($text{'tmpl_'.$l.'limit'},
@@ -10629,7 +10629,7 @@ else {
 	}
 
 # Save limits on various objects
-foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms",
+foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms", "realdoms",
 	       $virtualmin_pro ? ( "mongrels" ) : ( )) {
 	$tmpl->{$l.'limit'} = &parse_none_def($l.'limit');
 	if ($in{$l."limit_mode"} == 2) {
