@@ -1,0 +1,4 @@
+desc=Hosting provider image
+html=An image with an optional link can be set on the Module Config page for display in the top-left corner when using the Virtualmin framed theme, such as a hosting provider's logo
+link=../config.cgi?virtual-server
+master=1

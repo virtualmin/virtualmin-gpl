@@ -5695,7 +5695,13 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 	foreach $f ($only ? ( "webmin" ) : reverse(@features)) {
 		if ($config{$f} && $dd->{$f} || $f eq 'unix') {
 			local $dfunc = "delete_$f";
-			if (!&try_function($f, $dfunc, $dd)) {
+			local @args;
+			if ($f eq "mail") {
+				# Don't delete mail aliases, because we have
+				# already done so above
+				push(@args, 1);
+				}
+			if (!&try_function($f, $dfunc, $dd, @args)) {
 				$dd->{$f} = 1;
 				}
 			}
@@ -8906,9 +8912,20 @@ if (&can_edit_templates()) {
 	my ($tlinks, $ttitles, undef, $tcats, $tcodes) = &get_template_pages();
 	$tcats = [ map { "setting" } @$tlinks ] if (!$tcats);
 	for(my $i=0; $i<@$tlinks; $i++) {
-		push(@rv, { 'url' => $tlinks->[$i] =~ /\// ?
-				$gconfig{'webprefix'}.$tlinks->[$i] :
-				$vm."/".$tlinks->[$i],
+		local $url;
+		if ($tcodes->[$i] eq 'upgrade' && $config{'upgrade_link'}) {
+			# Special link for upgrading GPL to Pro
+			$url = $config{'upgrade_link'};
+			}
+		elsif ($tlinks->[$i] =~ /\//) {
+			# Outside virtualmin module
+			$url = $gconfig{'webprefix'}.$tlinks->[$i];
+			}
+		else {
+			# Inside virtualmin
+			$url = $vm."/".$tlinks->[$i];
+			}
+		push(@rv, { 'url' => $url,
 			    'title' => $ttitles->[$i],
 			    'cat' => $tcats->[$i],
 			    'icon' => $tcodes->[$i],
