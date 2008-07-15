@@ -1073,7 +1073,6 @@ local $extrauser;
 if ($_[1]->{'qmail'}) {
 	# Update user in Qmail LDAP
 	local $ldap = &connect_qmail_ldap();
-	local $_[0]->{'dn'} = "uid=$_[0]->{'user'},$config{'ldap_base'}";
 	local ($attrs, $delattrs) = &qmail_user_to_dn($_[0],
 		[ $_[1]->{'ldap'}->get_value("objectClass") ], $_[2]);
 	@$delattrs = grep { defined($_[1]->{'ldap'}->get_value($_))} @$delattrs;
@@ -1081,16 +1080,19 @@ if ($_[1]->{'qmail'}) {
 	for($i=0; $i<@$attrs; $i+=2) {
 		$attrs{$attrs->[$i]} = $attrs->[$i+1];
 		}
-	local $rv = $ldap->modify($_[1]->{'dn'},
-				  replace => \%attrs,
-				  delete => $delattrs);
-	&error($rv->error) if ($rv->code);
-	if ($_[0]->{'dn'} ne $_[1]->{'dn'}) {
-		# Re-named too!
+	local $newdn = "uid=$_[0]->{'user'},$config{'ldap_base'}";
+	if (!&same_dn($newdn, $_[1]->{'dn'})) {
+		# Renamed, so change DN
 		$rv = $ldap->moddn($_[1]->{'dn'},
 				   newrdn => "uid=$_[0]->{'user'}");
 		&error($rv->error) if ($rv->code);
+		$_[0]->{'dn'} = $newdn;
 		}
+	# Update other attributes
+	local $rv = $ldap->modify($_[0]->{'dn'},
+				  replace => \%attrs,
+				  delete => $delattrs);
+	&error($rv->error) if ($rv->code);
 	$ldap->unbind();
 	}
 elsif ($_[1]->{'vpopmail'}) {

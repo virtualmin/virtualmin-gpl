@@ -1294,23 +1294,25 @@ elsif ($config{'mail_system'} == 2) {
 	$_[1]->{'alias'} = $alias;
 	}
 elsif ($config{'mail_system'} == 4) {
-	# Update the Qmail pseudo-user
+	# Update the Qmail+LDAP pseudo-user
 	local $ldap = &connect_qmail_ldap();
 	$_[1]->{'from'} =~ /^(\S*)\@(\S+)$/;
 	local ($box, $dom) = ($1 || "catchall", $2);
-	local $_[1]->{'dn'} = "uid=$box-$dom,$config{'ldap_base'}";
-	local $attrs = [ "uid" => "$box-$dom",
-			 "mail" => $box."\@".$dom,
-			 "mailForwardingAddress" => $_[1]->{'to'} ];
-	local $rv = $ldap->modify($_[0]->{'dn'},
-				  replace => $attrs);
-	&error($rv->error) if ($rv->code);
-	if ($_[0]->{'dn'} ne $_[1]->{'dn'}) {
-		# Re-named too!
+	local $newdn = "uid=$box-$dom,$config{'ldap_base'}";
+	if (!&same_dn($_[0]->{'dn'}, $newdn)) {
+		# Re-named, so use new DN first
 		$rv = $ldap->moddn($_[0]->{'dn'},
 				   newrdn => "uid=$box-$dom");
 		&error($rv->error) if ($rv->code);
+		$_[1]->{'dn'} = $newdn;
 		}
+	# Update other attributes
+	local $attrs = [ "uid" => "$box-$dom",
+			 "mail" => $box."\@".$dom,
+			 "mailForwardingAddress" => $_[1]->{'to'} ];
+	local $rv = $ldap->modify($_[1]->{'dn'},
+				  replace => $attrs);
+	&error($rv->error) if ($rv->code);
 	$ldap->unbind();
 	}
 elsif ($config{'mail_system'} == 5) {
@@ -4189,6 +4191,15 @@ if (-d $ddir) {
 else {
 	return glob("$config{'vpopmail_dir'}/domains/?/$dname");
 	}
+}
+
+# same_dn(dn1, dn2)
+# Returns 1 if two DNs are the same
+sub same_dn
+{
+local $dn0 = join(",", split(/,\s*/, $_[0]));
+local $dn1 = join(",", split(/,\s*/, $_[1]));
+return lc($dn0) eq lc($dn1);
 }
 
 $done_feature_script{'mail'} = 1;
