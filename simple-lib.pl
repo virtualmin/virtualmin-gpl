@@ -336,6 +336,9 @@ else {
 	if ($in->{'local'}) {
 		$in->{'localto'} =~ /^\S+$/ ||
 			&error(&text('alias_etype7', $in->{'local'}));
+		$in->{'localto'} !~ /\@/ || 
+		  defined(getpwnam($in->{'localto'})) ||
+		  &error(&text('alias_elocaluser', $in->{'localto'}));
 		$simple->{'local'} = $in->{'localto'};
 		}
 	else {

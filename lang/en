@@ -763,6 +763,7 @@ alias_fromauto=Determine automatically
 alias_complexmode=Advanced mode
 alias_simplemode=Basic mode
 alias_eforward=No forwarding address entered
+alias_elocaluser=The local user '$1' does not exist
 alias_eforward2=A single forwarding address must be entered, like <tt>foo@bar.com</tt>
 alias_eautotext=No automatic reply text entered
 alias_efrom=Missing From: address
