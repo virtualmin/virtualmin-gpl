@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Piwik script installer to version 0.2.5, ZenPhoto to 1.1.7, eTicket to 1.7.2, Joomla to 1.5.4, Drupal to 6.3 and 6.8, phpBB to 3.0.2, WordPress to 2.6, and HelpCenter to 2.1.7.<br>Added a script installer for Z-push, which implements the Microsoft activesync protocol.
+html=Updated the Piwik script installer to version 0.2.5, ZenPhoto to 1.1.7, eTicket to 1.7.2, Joomla to 1.5.4, Drupal to 6.3 and 6.8, phpBB to 3.0.2, WordPress to 2.6, phpMyAdmin to 2.11.7.1, and HelpCenter to 2.1.7.<br>Added a script installer for Z-push, which implements the Microsoft activesync protocol.
 master=1
 reseller=1
 domain=1
