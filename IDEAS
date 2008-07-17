@@ -69,3 +69,7 @@
  - Use new API for webmin modules and categories, when Webmin 1.430 is out
 
  - Drupal 6.3 installer fix
+
+ - Add directs (using mod_rewrite?) for webmail.$DOM and admin.$DOM to
+   :20000 and :10000
+	- FS#4308

@@ -553,12 +553,18 @@ ins\//);
 				local $amapped = $attr_map{$attr};
 				$user->{$amapped} = $value if ($amapped);
 				if ($amapped eq "qquota") {
+					# Convert quota to virtualmin format
 					if ($value eq "NOQUOTA") {
 						$user->{$amapped} = 0;
 						}
 					else {
 						$user->{$amapped} = int($value);
 						}
+					}
+				if ($amapped eq "user") {
+					# Email is fixed with vpopmail
+					$user->{'email'} =
+						$value."\@".$_[0]->{'dom'};
 					}
 				}
 			}
