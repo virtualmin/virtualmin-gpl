@@ -413,11 +413,11 @@ if (&supports_resource_limits()) {
 &set_php_wrappers_writable($d, 0);
 }
 
-# set_php_wrappers_writable(&domain, flag)
+# set_php_wrappers_writable(&domain, flag, [subdomains-too])
 # If possible, make PHP wrapper scripts mutable or immutable
 sub set_php_wrappers_writable
 {
-local ($d, $writable) = @_;
+local ($d, $writable, $subs) = @_;
 if (&has_command("chattr")) {
 	foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
 		foreach my $f (glob("$dir/php?.*cgi")) {
@@ -425,6 +425,13 @@ if (&has_command("chattr")) {
 				&system_logged("chattr ".
 				    ($writable ? "-i" : "+i")." ".quotemeta($f));
 				}
+			}
+		}
+	if ($subs) {
+		# Also do sub-domains, as their CGI directories are under
+		# parent's domain.
+		foreach my $sd (&get_domain_by("subdom", $d->{'id'})) {
+			&set_php_wrappers_writable($sd, $writable);
 			}
 		}
 	}

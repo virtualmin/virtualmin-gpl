@@ -344,7 +344,7 @@ sub restore_dir
 local $iflag = "$_[0]->{'home'}/.incremental";
 &unlink_file($iflag);
 if (defined(&set_php_wrappers_writable)) {
-	&set_php_wrappers_writable($_[0], 1);
+	&set_php_wrappers_writable($_[0], 1, 1);
 	}
 local $out;
 local $cf = &compression_format($_[1]);
@@ -389,7 +389,7 @@ else {
 		&$second_print($text{'setup_done'});
 		}
 	if (defined(&set_php_wrappers_writable)) {
-		&set_php_wrappers_writable($_[0], 0);
+		&set_php_wrappers_writable($_[0], 0, 1);
 		}
 	
 	# Incremental file is no longer valid, so clear it
