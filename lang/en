@@ -1361,6 +1361,13 @@ newweb_esslport2=SSL and normal virtual host port numbers cannot be the same
 newweb_euser=Missing or invalid Apache user
 newweb_webmin=Configure Webmin to use same SSL cert for IP?
 newweb_usermin=Configure Usermin to use same SSL cert for IP?
+newweb_webmail=Redirect <tt>webmail.domain</tt> to Usermin?
+newweb_webmaildom=URL for <tt>webmail</tt> redirect
+newweb_webmailsame=Use domain name
+newweb_admin=Redirect <tt>admin.domain</tt> to Virtualmin?
+newweb_admindom=URL for <tt>admin</tt> redirect
+newweb_ewebmaildom=Missing or invalid URL for webmail redirect
+newweb_eadmindom=Missing or invalid URL for admin redirect
 
 newftp_title=ProFTPd Server Template
 newftp_ecannot=You are not allowed to edit the ProFTPd template

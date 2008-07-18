@@ -183,9 +183,14 @@ else {
 		&find_html_cgi_dirs($_[0]);
 		}
 
+	# Add <Proxy *> section, to ensure that proxypass works
 	if ($proxying) {
-		# Add <Proxy *> section, to ensure that proxypass works
 		&add_proxy_allow_directives($_[0]);
+		}
+
+	# Redirect webmail and admin to Usermin and Webmin
+	if (&has_webmail_rewrite()) {
+		&add_webmail_redirect_directives($_[0], $tmpl);
 		}
 
 	# Create empty access and error log files, world-readable and owned
@@ -963,7 +968,8 @@ return &check_pid_file(&apache::get_pid_file());
 }
 
 # apache_template(text, &domain, suexec)
-# Returns a suitably substituted Apache template
+# Returns a suitably substituted Apache template, as a list of directive
+# text lines
 sub apache_template
 {
 local $dirs = $_[0];
@@ -1808,6 +1814,10 @@ local @webfields = ( "web", "suexec", "writelogs", "user_def", "user",
 		     "stats_dir", "stats_hdir", "statspass", "statsnoedit",
 		     "alias_mode", "web_port", "web_sslport",
 		     "web_webmin_ssl", "web_usermin_ssl" );
+if (&has_webmail_rewrite()) {
+	push(@webfields, "webmail", "webmaildom", "webmaildom_def",
+			 "admin", "admindom", "admindom_def");
+	}
 if ($virtualmin_pro) {
 	push(@webfields, "web_php_suexec", "web_phpver", "web_phpchildren",
 			 "web_php_noedit", "web_ruby_suexec" );
@@ -1825,16 +1835,13 @@ print &ui_table_row(&hlink($text{'tmpl_web'}, "template_web"),
 				join("\n", split(/\t/, $tmpl->{'web'})),
 		     10, 60));
 
-
 # Input for adding suexec directives
 print &ui_table_row(&hlink($text{'newweb_suexec'}, "template_suexec"),
-	&ui_radio("suexec", $tmpl->{'web_suexec'} ? 1 : 0,
-	       [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+	&ui_yesno_radio("suexec", $tmpl->{'web_suexec'} ? 1 : 0));
 
 # Input for logging via program
 print &ui_table_row(&hlink($text{'newweb_writelogs'}, "template_writelogs"),
-	&ui_radio("writelogs", $tmpl->{'web_writelogs'} ? 1 : 0,
-	       [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+	&ui_yesno_radio("writelogs", $tmpl->{'web_writelogs'} ? 1 : 0));
 
 # Input for Apache user to add to domain's group
 print &ui_table_row(&hlink($text{'newweb_user'}, "template_user_def"),
@@ -1909,6 +1916,23 @@ print &ui_table_row(&hlink($text{'newweb_usermin'},
 	&ui_radio("web_usermin_ssl",
 		  $tmpl->{'web_usermin_ssl'} ? 1 : 0,
 		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+
+# Add rewrites for webmail and admin
+if (&has_webmail_rewrite()) {
+	print &ui_table_hr();
+	foreach my $r ('webmail', 'admin') {
+		print &ui_table_row(&hlink($text{'newweb_'.$r},
+					   "template_".$r),
+			&ui_yesno_radio($r, $tmpl->{'web_'.$r} ? 1 : 0));
+
+		# Domain name to use in webmail redirect
+		print &ui_table_row(&hlink($text{'newweb_'.$r.'dom'},
+					   "template_".$r."dom"),
+			&ui_opt_textbox($r."dom",
+					$tmpl->{'web_'.$r.'dom'}, 40,
+					$text{'newweb_webmailsame'}));
+		}
+	}
 
 if ($virtualmin_pro) {
 	print &ui_table_hr();
@@ -2096,6 +2120,20 @@ if ($in{"web_mode"} == 2) {
 	if (&get_webmin_version() >= 1.201) {
 		$tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};
 		$tmpl->{'web_usermin_ssl'} = $in{'web_usermin_ssl'};
+		}
+	if (&has_webmail_rewrite()) {
+		# Parse webmail redirect
+		foreach my $r ('webmail', 'admin') {
+			$tmpl->{'web_'.$r} = $in{$r};
+			if ($in{$r.'dom_def'}) {
+				delete($tmpl->{'web_'.$r.'dom'});
+				}
+			else {
+				$in{$r.'dom'} =~ /^(http|https):\/\/\S+$/ ||
+					&error($text{'newweb_e'.$r.'dom'});
+				$tmpl->{'web_'.$r.'dom'} = $in{$r.'dom'};
+				}
+			}
 		}
 	if ($virtualmin_pro) {
 		&require_apache();
@@ -2337,6 +2375,101 @@ foreach my $port (@ports) {
 		}
 	}
 return $added;
+}
+
+# add_webmail_redirect_directives(&domain, &template)
+# Add mod_rewrite directives to direct webmail.$DOM and admin.$DOM to
+# Usermin and Webmin. Also updates the ServerAlias if needed.
+sub add_webmail_redirect_directives
+{
+local ($d, $tmpl) = @_;
+$tmpl ||= &get_template($d->{'template'});
+
+foreach my $r ('webmail', 'admin') {
+	next if (!$tmpl->{'web_'.$r});
+
+	# Get directives we will be changing
+	local $conf = &apache::get_config();
+	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+						    $d->{'web_port'});
+	local @reng = &apache::find_directive("RewriteEngine", $vconf);
+	local @rcond = &apache::find_directive("RewriteCond", $vconf);
+	local @rrule = &apache::find_directive("RewriteRule", $vconf);
+	local @sa = &apache::find_directive("ServerAlias", $vconf);
+
+	# Work out the URL to redirect to
+	local $url = $tmpl->{'web_'.$r.'dom'};
+	if ($url) {
+		# Sub in any template
+		$url = &substitute_domain_template($url, $d);
+		}
+	else {
+		# Work out URL
+		local ($port, $proto);
+		if ($r eq 'webmail') {
+			# From Usermin
+			if (&foreign_installed("usermin")) {
+				&foreign_require("usermin", "usermin-lib.pl");
+				local %miniserv;
+				&usermin::get_usermin_miniserv_config(
+					\%miniserv);
+				$proto = $miniserv{'ssl'} ? 'https' : 'http';
+				$port = $miniserv{'port'};
+				}
+			# Fall back to standard defaults
+			$proto ||= "http";
+			$port ||= 20000;
+			}
+		else {
+			# From Webmin
+			($port, $proto) = &get_miniserv_port_proto();
+			}
+		$url = "$proto://$d->{'dom'}:$port/";
+		}
+
+	# Add the mod_rewrite directives
+	local $rhost = "$r.$d->{'dom'}";
+	local ($ron) = grep { lc($_) eq "on" } @ron;
+	push(@ron, "on") if (!$ron);
+	local $condv = "\%{HTTP_HOST} =$rhost";
+	local ($rcond) = grep { $_ eq $condv } @rcond;
+	push(@rcond, $condv) if (!$rcond);
+	local $rulev = "^(.*) $url [R]";
+	local $rrule = grep { $_ eq $rulev } @rrule;
+	push(@rrule, $rulev) if (!$rrule);
+
+	# Add the ServerAlias
+	local $foundsa;
+	foreach my $s (@sa) {
+		$foundsa++ if (&indexof($rhost, split(/\s+/, $s)) >= 0);
+		}
+	push(@sa, $rhost) if (!$foundsa);
+
+	# Update Apache config
+	&apache::save_directive("RewriteEngine", \@ron, $vconf, $conf);
+	&apache::save_directive("RewriteCond", \@rcond, $vconf, $conf);
+	&apache::save_directive("RewriteRule", \@rrule, $vconf, $conf);
+	&apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
+
+	# Fix the Apache config for the domain so that the last RewriteCond
+	# appears just before last RewriteRule. This is needed until Webmin
+	# 1.430, as older versions always put same-named directives after
+	# each other.
+	local $lref = &read_file_lines($virt->{'file'});
+	local ($lcond, $lrule);
+	for(my $i=$virt->{'line'}; $i <= $virt->{'eline'}; $i++) {
+		if ($lref->[$i] =~ /^RewriteCond\s/) { $lcond = $i; }
+		if ($lref->[$i] =~ /^RewriteRule\s/) { $lrule = $i; }
+		}
+	if ($lcond && $lrule && @rcond > 1 && @rrule > 1) {
+		splice(@$lref, $lrule, 0, $lref->[$lcond]);
+		splice(@$lref, $lcond, 1);
+		}
+
+	# Write out config
+	&flush_file_lines($virt->{'file'});
+	undef(@apache::get_config_cache);
+	}
 }
 
 # find_html_cgi_dirs(&domain)

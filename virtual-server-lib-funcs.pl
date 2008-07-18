@@ -2961,6 +2961,24 @@ sub ensure_template
 	if (!-r "$module_config_directory/$_[0]");
 }
 
+# get_miniserv_port_proto()
+# Returns the port number and protocol (http or https) for Webmin
+sub get_miniserv_port_proto
+{
+if ($ENV{'SERVER_PORT'}) {
+	# Running under miniserv
+	return ( $ENV{'SERVER_PORT'},
+		 $ENV{'HTTPS'} eq 'ON' ? 'https' : 'http' );
+	}
+else {
+	# Get from miniserv config
+	local %miniserv;
+	&get_miniserv_config(\%miniserv);
+	return ( $miniserv{'port'},
+		 $miniserv{'ssl'} ? 'https' : 'http' );
+	}
+}
+
 # send_template_email(data, address, &substitions, subject, cc, bcc,
 #		      [&domain], [from])
 # Sends the given file to the specified address, with the substitions from
@@ -2973,19 +2991,8 @@ local ($template, $to, $subs, $subject, $cc, $bcc, $d, $from) = @_;
 local %hash = %$subs;
 
 # Add in Webmin info to the hash
-if ($ENV{'SERVER_PORT'}) {
-	# Running under miniserv
-	$hash{'webmin_port'} = $ENV{'SERVER_PORT'};
-	$hash{'webmin_proto'} = $ENV{'HTTPS'} eq 'ON' ? 'https' : 'http';
-	}
-else {
-	# Get from miniserv config
-	local %miniserv;
-	&get_miniserv_config(\%miniserv);
-	$hash{'webmin_port'} = $miniserv{'port'};
-	$hash{'webmin_proto'} = $miniserv{'ssl'} ? 'https' : 'http';
-	}
 $template = &substitute_template($template, \%hash);
+($hash{'webmin_port'}, $hash{'webmin_proto'}) = &get_miniserv_port_proto();
 
 # Work out the From: address - if a domain is given, user it's email address.
 if (!$from && $remote_user && !&master_admin() && $d) {
@@ -6072,6 +6079,10 @@ push(@rv, { 'id' => 0,
 	    'web_alias' => $config{'alias_mode'},
 	    'web_webmin_ssl' => $config{'webmin_ssl'},
 	    'web_usermin_ssl' => $config{'usermin_ssl'},
+	    'web_webmail' => $config{'web_webmail'},
+	    'web_webmaildom' => $config{'web_webmaildom'},
+	    'web_admin' => $config{'web_admin'},
+	    'web_admindom' => $config{'web_admindom'},
 	    'php_vars' => $config{'php_vars'} || "none",
 	    'web_php_suexec' => int($config{'php_suexec'}),
 	    'web_ruby_suexec' => $config{'ruby_suexec'} eq '' ? -1 :
@@ -6289,6 +6300,10 @@ if ($tmpl->{'id'} == 0) {
 	$config{'web_sslport'} = $tmpl->{'web_sslport'};
 	$config{'webmin_ssl'} = $tmpl->{'web_webmin_ssl'};
 	$config{'usermin_ssl'} = $tmpl->{'web_usermin_ssl'};
+	$config{'web_webmail'} = $tmpl->{'web_webmail'};
+	$config{'web_webmaildom'} = $tmpl->{'web_webmaildom'};
+	$config{'web_admin'} = $tmpl->{'web_admin'};
+	$config{'web_admindom'} = $tmpl->{'web_admindom'};
 	$config{'php_vars'} = $tmpl->{'php_vars'} eq "none" ? "" :
 				$tmpl->{'php_vars'};
 	$config{'php_suexec'} = $tmpl->{'web_php_suexec'};
@@ -7596,6 +7611,15 @@ sub has_proxy_none
 {
 &require_apache();
 return $apache::httpd_modules{'mod_proxy'} >= 2.0;
+}
+
+# has_webmail_rewrite()
+# Returns 1 if this system has mod_rewrite, needed for redirecting webmail.$DOM
+# to port 20000
+sub has_webmail_rewrite
+{
+&require_apache();
+return $apache::httpd_modules{'mod_rewrite'};
 }
 
 # require_licence()

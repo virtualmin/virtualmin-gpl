@@ -669,6 +669,17 @@ if (!$tmpl->{'dns_replace'}) {
 				      "IN", "A", "127.0.0.1");
 		}
 
+	# If requested, add webmail and admin records
+	if ($d->{'web'} && &has_webmail_rewrite()) {
+		foreach my $r ('webmail', 'admin') {
+			local $n = "$r.$withdot";
+			if ($tmpl->{'web_'.$r} && !$already{$n}) {
+				&bind8::create_record($file, $n, undef,
+						      "IN", "A", $ip);
+				}
+			}
+		}
+
 	# For mail domains, add MX to this server
 	if ($d->{'mail'}) {
 		&create_mx_records($file, $d, $ip);
