@@ -81,12 +81,14 @@ if ($in{'delete'}) {
 		$ind = $d ? &domain_in($d) : undef;
 		&ui_print_header($ind, $text{'user_delete'}, "");
 
-		print &check_clicks_function();
-		print "<center><form action=save_user.cgi>\n";
-		print "<input type=hidden name=dom value='$in{'dom'}'>\n";
-		print "<input type=hidden name=old value='$in{'old'}'>\n";
-		print "<input type=hidden name=unix value='$in{'unix'}'>\n";
-		print "<input type=hidden name=delete value=1>\n";
+		print "<center>\n";
+		print &ui_form_start("save_user.cgi");
+		print &ui_hidden("dom", $in{'dom'});
+		print &ui_hidden("old", $in{'old'});
+		print &ui_hidden("unix", $in{'unix'});
+		print &ui_hidden("delete", 1);
+
+		# Count up home directory size
 		local ($mailsz) = &mail_file_size($user);
 		local ($homesz) = &disk_usage_kb($user->{'home'});
 		local $msg = $user->{'nocreatehome'} || !$user->{'home'} ?
@@ -97,10 +99,23 @@ if ($in{'delete'}) {
 			  	  &nice_size($mailsz),
 				  &nice_size($homesz*1024),
 				  "<tt>$user->{'home'}</tt>"),"<p>\n";
-		print "<center><input type=submit name=confirm ",
-		      "value='$text{'user_deleteok'}' ",
-		      "onClick='check_clicks(form)'></center>\n";
-		print "</form></center>\n";
+
+		# Check for home directory clash
+		if (!$user->{'nocreatehome'} && $user->{'home'} &&
+		    !$user->{'webowner'}) {
+			local @hclash = grep {
+				(&same_file($_->{'home'}, $user->{'home'}) ||
+				 &is_under_directory($user->{'home'},
+						     $_->{'home'})) &&
+				$_ ne $user } @users;
+			if (@hclash) {
+				print "<b>",&text('user_hclash',
+					join(" ", map { "<tt>$_->{'user'}</tt>" } @hclash)),"</b><p>\n";
+				}
+			}
+
+		print &ui_form_end([ [ "confirm", $text{'user_deleteok'} ] ]);
+		print "</center>\n";
 
 		if ($d) {
 			&ui_print_footer("list_users.cgi?dom=$in{'dom'}",

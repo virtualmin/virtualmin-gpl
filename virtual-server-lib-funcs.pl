@@ -7982,19 +7982,19 @@ sub new_password_input
 local ($name) = @_;
 if ($config{'passwd_mode'} == 1) {
 	# Random but editable password
-	return &ui_textbox($name, &random_password(), 40);
+	return &ui_textbox($name, &random_password(), 13);
 	}
 elsif ($config{'passwd_mode'} == 0) {
 	# One hidden password
-	return &ui_password($name, undef, 40);
+	return &ui_password($name, undef, 13);
 	}
 elsif ($config{'passwd_mode'} == 2) {
 	# Two hidden passwords
 	return "<table>\n".
 	       "<tr><td>$text{'form_passf'}</td> ".
-	       "<td>".&ui_password($name, undef, 40)."</td> </tr>\n".
+	       "<td>".&ui_password($name, undef, 13)."</td> </tr>\n".
 	       "<tr><td>$text{'form_passa'}</td> ".
-	       "<td>".&ui_password($name."_again", undef, 40)."</td> </tr>\n".
+	       "<td>".&ui_password($name."_again", undef, 13)."</td> </tr>\n".
 	       "</table>";
 	}
 }

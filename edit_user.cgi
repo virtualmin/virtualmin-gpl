@@ -65,7 +65,7 @@ else {
 if ($user->{'person'}) {
 	print &ui_table_row(&hlink($text{'user_real'}, "realname"),
 		$mailbox ? $user->{'real'} :
-			   &ui_textbox("real", $user->{'real'}, 25),
+			   &ui_textbox("real", $user->{'real'}, 40),
 		2, \@tds);
 	}
 
