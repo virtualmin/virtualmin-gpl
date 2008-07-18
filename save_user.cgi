@@ -110,7 +110,8 @@ if ($in{'delete'}) {
 				$_ ne $user } @users;
 			if (@hclash) {
 				print "<b>",&text('user_hclash',
-					join(" ", map { "<tt>$_->{'user'}</tt>" } @hclash)),"</b><p>\n";
+				    join(" ", map { "<tt>$_->{'user'}</tt>" }
+						  @hclash)),"</b><p>\n";
 				}
 			}
 

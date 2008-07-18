@@ -76,6 +76,9 @@ else {
 	foreach $du (@del) {
 		print &ui_hidden("d", $du),"\n";
 		}
+
+	# Sum up home directories, and check for clashes
+	@hclash = ( );
 	foreach $user (@dusers) {
 		if (!$user->{'nomailfile'} && !&mail_under_home()) {
 			local ($mailsz) = &mail_file_size($user);
@@ -85,10 +88,26 @@ else {
 			local $homesz = &disk_usage_kb($user->{'home'});
 			$total += $homesz*1024;
 			}
+
+		if (!$user->{'nocreatehome'} && $user->{'home'} &&
+		    !$user->{'webowner'}) {
+			push(@hclash, grep {
+                                (&same_file($_->{'home'}, $user->{'home'}) ||
+                                 &is_under_directory($user->{'home'},
+                                                     $_->{'home'})) &&
+                                &indexof($_, @dusers) < 0 } @users);
+			}
 		}
+
+	# Show the warning
 	print "<center>\n";
 	print &text($total ? 'users_drusure' : 'users_drusure2',
 			scalar(@dusers), &nice_size($total)),"<p>\n";
+	if (@hclash) {
+		print "<b>",&text('user_hclash',
+		    join(" ", map { "<tt>$_->{'user'}</tt>" }
+				  @hclash)),"</b><p>\n";
+		}
 	print &ui_form_end([ [ "confirm", $text{'users_dconfirm'} ] ]);
 	print "</center>\n";
 	&ui_print_footer("list_users.cgi?dom=$in{'dom'}",
