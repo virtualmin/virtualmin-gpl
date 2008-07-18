@@ -483,8 +483,10 @@ else {
 
 		# For any user except the domain owner, update his home and shel
 		if (!$mailbox) {
-			# Check if new homedir exists
-			if (-e $home && $user->{'home'} ne $home &&
+			# Check if new homedir already exists, if changed
+			if (-e $home &&
+			    &simplify_path($user->{'home'}) ne
+			     &simplify_path($home) &&
 			    !$user->{'nocreatehome'}) {
 				&error(&text('user_emkhome', $home));
 				}
