@@ -707,6 +707,28 @@ if ($tmpl->{'dns'} && (!$d->{'dns_submode'} || !$tmpl->{'dns_replace'})) {
 	}
 }
 
+# add_webmail_dns_records(&domain, [&tmpl], [file])
+# Adds the webmail and admin DNS records, if requested in the template
+sub add_webmail_dns_records
+{
+local ($d, $tmpl) = @_;
+$tmpl ||= &get_template($d->{'template'});
+foreach my $r ('webmail', 'admin') {
+	local $n = "$r.$d->{'dom'}.";
+	if ($tmpl->{'web_'.$r} && !$already{$n}) {
+		&bind8::create_record($file, $n, undef,
+				      "IN", "A", $ip);
+		}
+	}
+}
+
+# remove_webmail_dns_records(&domain)
+# Remove the webmail and admin DNS records
+sub remove_webmail_dns_records
+{
+local ($d) = @_;
+}
+
 # validate_dns(&domain)
 # Check for the DNS domain and records file
 sub validate_dns

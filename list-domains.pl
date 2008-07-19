@@ -255,6 +255,13 @@ if ($multi) {
 			print "    Ruby execution mode: $p\n";
 			}
 
+		# Show webmail redirects
+		if (&has_webmail_rewrite() && $d->{'web'} && !$d->{'alias'}) {
+			@wm = &get_webmail_redirect_directives($d);
+			print "    Webmail redirects: ",
+				(@wm ? "Yes" : "No"),"\n";
+			}
+
 		# Show DNS SPF mode
 		if ($config{'dns'} && $d->{'dns'} && !$d->{'dns_submode'}) {
 			$spf = &get_domain_spf($d);

@@ -2384,6 +2384,7 @@ sub add_webmail_redirect_directives
 {
 local ($d, $tmpl) = @_;
 $tmpl ||= &get_template($d->{'template'});
+&require_apache();
 
 foreach my $r ('webmail', 'admin') {
 	next if (!$tmpl->{'web_'.$r});
@@ -2392,6 +2393,7 @@ foreach my $r ('webmail', 'admin') {
 	local $conf = &apache::get_config();
 	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
 						    $d->{'web_port'});
+	next if (!$virt);
 	local @reng = &apache::find_directive("RewriteEngine", $vconf);
 	local @rcond = &apache::find_directive("RewriteCond", $vconf);
 	local @rrule = &apache::find_directive("RewriteRule", $vconf);
@@ -2469,7 +2471,64 @@ foreach my $r ('webmail', 'admin') {
 	# Write out config
 	&flush_file_lines($virt->{'file'});
 	undef(@apache::get_config_cache);
+	&register_post_action(\&restart_apache);
 	}
+}
+
+# remove_webmail_redirect_directives(&domain)
+# Take out webmail and admin redirects from the Apache config
+sub remove_webmail_redirect_directives
+{
+local ($d) = @_;
+
+# Get directives we will be changing
+&require_apache();
+local $conf = &apache::get_config();
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+return 0 if (!$virt);
+local @rcond = &apache::find_directive("RewriteCond", $vconf);
+local @rrule = &apache::find_directive("RewriteRule", $vconf);
+local @sa = &apache::find_directive("ServerAlias", $vconf);
+
+# Filter out redirect rules
+@rcond = grep { !/^\%{HTTP_HOST}/ } @rcond;
+@rrule = grep { !/^\^\(\.\*\)\s+(http|https):/ } @rrule;
+&apache::save_directive("RewriteCond", \@rcond, $vconf, $conf);
+&apache::save_directive("RewriteRule", \@rrule, $vconf, $conf);
+
+# Fix up the ServerAlias
+local @newsa;
+foreach my $s (@sa) {
+	local @sav = split(/\s+/, $s);
+	@sav = grep { $_ ne "webmail.$d->{'dom'}" &&
+		      $_ ne "admin.$d->{'dom'}" } @sav;
+	if (@sav) {
+		push(@newsa, join(" ", @sav));
+		}
+	}
+&apache::save_directive("ServerAlias", \@newsa, $vconf, $conf);
+
+&flush_file_lines($virt->{'file'});
+&register_post_action(\&restart_apache);
+return 1;
+}
+
+# get_webmail_redirect_directives(&domain)
+# Returns the list of hostnames if a domain has webmail redirects configured
+sub get_webmail_redirect_directives
+{
+local ($d) = @_;
+&require_apache();
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+return ( ) if (!$virt);
+local @rcond = &apache::find_directive("RewriteCond", $vconf);
+local @rv;
+foreach my $r (@rcond) {
+	if ($r =~ /^\%{HTTP_HOST}\s+=(\S+)/) {
+		push(@rv, $1);
+		}
+	}
+return @rv;
 }
 
 # find_html_cgi_dirs(&domain)

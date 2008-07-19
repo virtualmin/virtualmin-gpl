@@ -29,6 +29,11 @@ styles, specified using the C<--style> parameter and a style name (which
 C<list-styles.pl> can provide). If so the C<--content> parameter must also
 be given, followed by the text to use in the style-generated web pages.
 
+To enable the webmail and admin DNS entries for the selected domains
+(which redirect to Usermin and Webmin by default), the C<--webmail> flag
+can be used. This will make both the DNS and Apache configuration changes
+needed. To turn them off, use the C<--no-webmail> flag.
+
 =cut
 
 package virtual_server;
@@ -109,6 +114,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--content") {
 		$content = shift(@ARGV);
 		}
+	elsif ($a eq "--webmail") {
+		$webmail = 1;
+		}
+	elsif ($a eq "--no-webmail") {
+		$webmail = 0;
+		}
 	else {
 		&usage();
 		}
@@ -116,7 +127,7 @@ while(@ARGV > 0) {
 @dnames || $all_doms || usage();
 $mode || $rubymode || defined($proxy) || defined($framefwd) ||
   defined($suexec) || $stylename || defined($children) || $version ||
-  &usage("Nothing to do");
+  defined($webmail) || &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate style
@@ -130,6 +141,11 @@ if ($stylename) {
 		}
 	$content =~ s/\r//g;
 	$content =~ s/\\n/\n/g;
+	}
+
+# Check if webmail is supported
+if (defined($webmail) && !&has_webmail_rewrite()) {
+	&usage("This system does not support mod_rewrite, needed for webmail redirects");
 	}
 
 # Get domains to update
@@ -258,6 +274,23 @@ foreach $d (@doms) {
 		&$second_print($text{'setup_done'});
 		}
 
+	if (defined($webmail) && $d->{'web'} && !$d->{'alias'}) {
+		# Enable or disable webmail redirects
+		local @oldwm = &get_webmail_redirect_directives($d);
+		if ($webmail && !@oldwm) {
+			&$first_print("Adding webmail and admin redirects ..");
+			&add_webmail_redirect_directives($d);
+			# XXX DNS
+			&$second_print(".. done");
+			}
+		elsif (!$webmail && @oldwm) {
+			&$first_print(
+				"Removing webmail and admin redirects ..");
+			&remove_webmail_redirect_directives($d);
+			&$second_print(".. done");
+			}
+		}
+
 	if (defined($proxy) || defined($framefwd)) {
 		# Save the domain
 		&modify_web($d, $oldd);
@@ -296,6 +329,9 @@ print "                     [--framefwd http://... | --no-framefwd]\n";
 print "                     [--framefwd \"title\" ]\n";
 print "                     [--style name]\n";
 print "                     [--content text|filename]\n";
+if (&has_webmail_rewrite()) {
+	print "                     [--webmail | --no-webmail]\n";
+	}
 exit(1);
 }
 

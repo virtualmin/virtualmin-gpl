@@ -73,7 +73,5 @@
  - Add directs (using mod_rewrite?) for webmail.$DOM and admin.$DOM to
    :20000 and :10000
 	- FS#4308
-	- Make domain name configurable (test this)
 	- Help pages
-	- Apply to existing domains?
-	- CHANGELOG
+	- Does this work for sub-domains? DNS? 

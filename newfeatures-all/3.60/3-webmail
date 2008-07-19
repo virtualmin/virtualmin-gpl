@@ -1,0 +1,3 @@
+desc=Webmail and admin DNS entries
+html=DNS aliases named 'webmail' and 'admin' are now created in all new virtual servers by default, and Apache is configured to redirect requests for them to Usermin and Webmin by default. This can be disabled or the redirect URL changed on the Server Templates page.
+master=1
