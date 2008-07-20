@@ -1,0 +1,13 @@
+<header>Redirect admin.domain to Usermin?</header>
+
+When this field is set to <b>Yes</b> (as it is by default), any new virtual
+servers will have an <tt>admin</tt> entry added to their DNS domains, with
+the same IP address as the server's website. When <tt>http://admin.thedomain.com/</tt> is accessed, the browser will be redirected to Virtualmin on port 10000
+of the same domain, to access the administration web interface. <p>
+
+If you want to use a different URL for Virtualmin access (such as one that
+you have an SSL certificate for) the redirect URL can be configured in the
+following <b>URL for admin redirect</b> field. <p>
+
+<footer>
+

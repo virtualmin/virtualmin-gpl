@@ -280,13 +280,18 @@ foreach $d (@doms) {
 		if ($webmail && !@oldwm) {
 			&$first_print("Adding webmail and admin redirects ..");
 			&add_webmail_redirect_directives($d);
-			# XXX DNS
+			if ($d->{'dns'}) {
+				&add_webmail_dns_records($d);
+				}
 			&$second_print(".. done");
 			}
 		elsif (!$webmail && @oldwm) {
 			&$first_print(
 				"Removing webmail and admin redirects ..");
 			&remove_webmail_redirect_directives($d);
+			if ($d->{'dns'}) {
+				&remove_webmail_dns_records($d);
+				}
 			&$second_print(".. done");
 			}
 		}

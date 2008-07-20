@@ -70,8 +70,3 @@
 
  - Drupal 6.3 installer fix
 
- - Add directs (using mod_rewrite?) for webmail.$DOM and admin.$DOM to
-   :20000 and :10000
-	- FS#4308
-	- Help pages
-	- Does this work for sub-domains? DNS? 

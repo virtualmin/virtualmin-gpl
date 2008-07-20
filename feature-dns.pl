@@ -671,13 +671,7 @@ if (!$tmpl->{'dns_replace'}) {
 
 	# If requested, add webmail and admin records
 	if ($d->{'web'} && &has_webmail_rewrite()) {
-		foreach my $r ('webmail', 'admin') {
-			local $n = "$r.$withdot";
-			if ($tmpl->{'web_'.$r} && !$already{$n}) {
-				&bind8::create_record($file, $n, undef,
-						      "IN", "A", $ip);
-				}
-			}
+		&add_webmail_dns_records($d, $tmpl, $file, \%already);
 		}
 
 	# For mail domains, add MX to this server
@@ -707,19 +701,30 @@ if ($tmpl->{'dns'} && (!$d->{'dns_submode'} || !$tmpl->{'dns_replace'})) {
 	}
 }
 
-# add_webmail_dns_records(&domain, [&tmpl], [file])
+# add_webmail_dns_records(&domain, [&tmpl], [file], [&already-got])
 # Adds the webmail and admin DNS records, if requested in the template
 sub add_webmail_dns_records
 {
-local ($d, $tmpl) = @_;
+local ($d, $tmpl, $file, $already) = @_;
 $tmpl ||= &get_template($d->{'template'});
+$file ||= &get_domain_dns_file($d);
+return 0 if (!$file);
+local $count = 0;
+local $ip = $d->{'dns_ip'} || $d->{'ip'};
 foreach my $r ('webmail', 'admin') {
 	local $n = "$r.$d->{'dom'}.";
-	if ($tmpl->{'web_'.$r} && !$already{$n}) {
+	if ($tmpl->{'web_'.$r} && (!$already || !$already->{$n})) {
 		&bind8::create_record($file, $n, undef,
 				      "IN", "A", $ip);
+		$count++;
 		}
 	}
+if ($count) {
+	local @recs = &bind8::read_zone_file($file, $d->{'dom'});
+	&bind8::bump_soa_record($file, \@recs);
+	&register_post_action(\&restart_bind);
+	}
+return $count;
 }
 
 # remove_webmail_dns_records(&domain)
@@ -727,6 +732,23 @@ foreach my $r ('webmail', 'admin') {
 sub remove_webmail_dns_records
 {
 local ($d) = @_;
+local $file = &get_domain_dns_file($d);
+return 0 if (!$file);
+local @recs = &bind8::read_zone_file($file, $d->{'dom'});
+local $count = 0;
+foreach my $r (reverse('webmail', 'admin')) {
+	local $n = "$r.$d->{'dom'}.";
+	local ($rec) = grep { $_->{'name'} eq $n } @recs;
+	if ($rec) {
+		&bind8::delete_record($file, $rec);
+		$count++;
+		}
+	}
+if ($count) {
+	&bind8::bump_soa_record($file, \@recs);
+	&register_post_action(\&restart_bind);
+	}
+return $count;
 }
 
 # validate_dns(&domain)
@@ -1410,13 +1432,31 @@ if ($bump) {
 sub get_domain_dns_records
 {
 local ($d) = @_;
-&require_bind();
-local $z = &get_bind_zone($d->{'dom'});
-return ( ) if (!$z);
-local $file = &bind8::find("file", $z->{'members'});
-return ( ) if (!$file);
-local $fn = $file->{'values'}->[0];
+local $fn = &get_domain_dns_file($d);
+return ( ) if (!$fn);
 return &bind8::read_zone_file($fn, $d->{'dom'});
+}
+
+# get_domain_dns_file(&domain)
+# Returns the chroot-relative path to a domain's DNS records
+sub get_domain_dns_file
+{
+local ($d) = @_;
+&require_bind();
+local $z;
+if ($d->{'dns_submode'} && $d->{'subdom'}) {
+	# Records are in super-domain
+	local $parent = &get_domain($d->{'subdom'});
+	$z = &get_bind_zone($parent->{'dom'});
+	}
+else {
+	# In this domain
+	$z = &get_bind_zone($d->{'dom'});
+	}
+return undef if (!$z);
+local $file = &bind8::find("file", $z->{'members'});
+return undef if (!$file);
+return $file->{'values'}->[0];
 }
 
 # default_domain_spf(&domain)
