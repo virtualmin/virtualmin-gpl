@@ -1724,6 +1724,8 @@ log_cmd=Ran API command $1
 log_cmd_l=Ran API command $1 $2
 log_remote=Called remote API $1
 log_remote_l=Called remote API $1 $2
+log_chroot=Changed FTP directory restrictions
+log_global=Changed global template variables
 
 backup_title=Backup Virtual Servers
 backup_title2=Edit Scheduled Backup
@@ -4349,3 +4351,12 @@ dbhosts_title=Update Database Hosts
 dbhosts_doing=Setting allowed $1 database hosts to $2 ..
 dbhosts_failed=.. failed : $1
 dbhosts_done=.. set for $1 and other users with database access.
+
+newglobal_title=Global Variables
+newglobal_desc=The variables defined on this page can be used in any domain or user-level template in Virtualmin. To add a variable, just fill in the name and value in the empty row at the bottom of the table. To remove one, clear out its name field. To temporarily disable a variable, un-check its box in the enabled column.
+newglobal_ecannot=You are not allowed to edit global variables
+newglobal_enabled=Enabled?
+newglobal_name=Variable name
+newglobal_value=Variable value
+newglobal_err=Failed to save global variables
+newglobal_ename=Invalid variable name in row $1 - only letters, numbers and underscore are allowed

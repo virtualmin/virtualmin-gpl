@@ -4160,6 +4160,15 @@ foreach my $tmpl (&list_templates()) {
 	}
 &execute_command("cp $template_scripts_dir/* $temp");
 &execute_command("cd ".quotemeta($temp)." && tar cf ".quotemeta($file)." .");
+# Save global variables file
+if (-r $global_template_variables_file) {
+	&copy_source_dest($global_template_variables_file, $file."_global");
+	}
+else {
+	# Create empty, as an indicator that it exists
+	&open_tempfile(GLOBAL, ">".$file."_global", 0, 1);
+	&close_tempfile(GLOBAL);
+	}
 &unlink_file($temp);
 }
 
@@ -4193,8 +4202,12 @@ foreach my $t (readdir(DIR)) {
 		}
 	}
 closedir(DIR);
-
 &execute_command("rm -rf ".quotemeta($temp));
+
+# Restore global variables
+if (-r $file."_global") {
+	&copy_source_dest($file."_global", $global_template_variables_file);
+	}
 }
 
 # virtualmin_backup_scheds(file, &vbs)
@@ -8876,7 +8889,7 @@ local @tmpls = ( 'features', 'tmpl', 'user', 'update',
    &has_home_quotas() && !&has_quota_commands() ? ( 'quotacheck' ) : ( ),
 #   &can_show_history() ? ( 'history' ) : ( ),
    $virtualmin_pro ? ( 'mxs' ) : ( ),
-   'validate', 'chroot',
+   'validate', 'chroot', 'global',
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
    );
 local %tmplcat = (
@@ -8905,6 +8918,7 @@ local %tmplcat = (
 	'styles' => 'custom',
 	'shells' => 'custom',
 	'chroot' => 'check',
+	'global' => 'custom',
 	);
 local %nonew = ( 'history', 1 );
 local @tlinks = map { $nonew{$_} ? "history.cgi"
@@ -11596,7 +11610,7 @@ local @rv;
 while(<GLOBAL>) {
 	s/\r|\n//g;
 	local $dis;
-	$dis = 1 if (s/^\#*\s*//);
+	$dis = 1 if (s/^\#+\s*//);
 	local ($n, $v) = split(/\s+/, $_, 2);
 	push(@rv, { 'name' => $n,
 		    'value' => $v,
@@ -11615,7 +11629,7 @@ local ($vars) = @_;
 foreach my $v (@$vars) {
 	&print_tempfile(GLOBAL,
 		($v->{'enabled'} ? "" : "#").
-		$v->{'name'}." ".$v->{'value'});
+		$v->{'name'}." ".$v->{'value'}."\n");
 	}
 &close_tempfile(GLOBAL);
 }

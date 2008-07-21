@@ -1,0 +1,4 @@
+desc=Global template variables
+html=Added the Global Variables page under the System Customization category, for creating variables that can be used in all templates.
+master=1
+link=edit_newglobal.cgi
