@@ -2991,8 +2991,8 @@ local ($template, $to, $subs, $subject, $cc, $bcc, $d, $from) = @_;
 local %hash = %$subs;
 
 # Add in Webmin info to the hash
-$template = &substitute_template($template, \%hash);
 ($hash{'webmin_port'}, $hash{'webmin_proto'}) = &get_miniserv_port_proto();
+$template = &substitute_virtualmin_template($template, \%hash);
 
 # Work out the From: address - if a domain is given, user it's email address.
 if (!$from && $remote_user && !&master_admin() && $d) {
@@ -3000,8 +3000,8 @@ if (!$from && $remote_user && !&master_admin() && $d) {
 	}
 
 # Actually send using the mailboxes module
-local $subject = &substitute_template($subject, \%hash);
-local $cc = &substitute_template($cc, \%hash);
+local $subject = &substitute_virtualmin_template($subject, \%hash);
+local $cc = &substitute_virtualmin_template($cc, \%hash);
 if (!$to) {
 	# This can happen when a mailbox is not notified about its
 	# own update or creation
@@ -3051,11 +3051,11 @@ foreach my $r (@$recips) {
 		[ [ 'From' => $from ],
 		  [ 'To' => $email ],
 		  [ 'Subject' => &entities_to_ascii(
-				  &substitute_template($subject, \%hash)) ] ],
+		      &substitute_virtualmin_template($subject, \%hash)) ] ],
 		  'attach' =>
 		[ { 'headers' => [ [ 'Content-type', 'text/plain' ] ],
 		    'data' => &entities_to_ascii(
-				&substitute_template($body, \%hash)) } ] };
+		      &substitute_virtualmin_template($body, \%hash)) } ] };
 	if ($attach) {
 		local $filename = $attachfile;
 		$filename =~ s/^.*(\\|\/)//;
@@ -7119,7 +7119,7 @@ return wantarray ? ( \@rv, \@delrv ) : \@rv;
 sub split_props
 {
 local %pmap;
-foreach $p (split(/\t+/, &substitute_template($_[0], $_[1]))) {
+foreach $p (split(/\t+/, &substitute_virtualmin_template($_[0], $_[1]))) {
 	if ($p =~ /^(\S+):\s*(.*)/) {
 		push(@{$pmap{$1}}, $2);
 		}
@@ -10479,7 +10479,22 @@ if ($config{'dns'}) {
 		$hash{'dns_serial'} = time();
 		}
 	}
-return &substitute_template($str, \%hash);
+return &substitute_virtualmin_template($str, \%hash);
+}
+
+# substitute_virtualmin_template(string, &hash)
+# Just calls the standard substitute_template function, but with global
+# variables added to the hash
+sub substitute_virtualmin_template
+{
+local ($str, $hash) = @_;
+local %ghash = %$hash;
+foreach my $v (&get_global_template_variables()) {
+	if ($v->{'enabled'}) {
+		$ghash{$v->{'name'}} = $v->{'value'};
+		}
+	}
+return &substitute_template($str, \%ghash);
 }
 
 # absolute_domain_path(&domain, path)
@@ -11574,7 +11589,6 @@ local $ENV{'REMOTE_HOST'} ||= "127.0.0.1";
 
 # get_global_template_variables()
 # Returns an array of hash refs containing global variable names and values
-# XXX need common function to merge these
 sub get_global_template_variables
 {
 local @rv;

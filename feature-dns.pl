@@ -1294,7 +1294,7 @@ if ($in{"dns_mode"} == 2) {
 	&require_bind();
 	local $fakeip = "1.2.3.4";
 	local $fakedom = "foo.com";
-	local $recs = &substitute_template(
+	local $recs = &substitute_virtualmin_template(
 			join("\n", split(/\t+/, $in{'dns'}))."\n",
 			{ 'ip' => $fakeip,
 			  'dom' => $fakedom,

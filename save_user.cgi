@@ -411,7 +411,8 @@ else {
 		if ($user->{'qmail'}) {
 			&userdom_substitutions($user, $d);
 			$user->{'mailstore'} =
-			 &substitute_template($config{'ldap_mailstore'}, $user);
+			    &substitute_virtualmin_template(
+				$config{'ldap_mailstore'}, $user);
 			}
 
 		if (!$user->{'noalias'}) {
@@ -589,7 +590,7 @@ else {
 
 			# Set mail file location
 			if ($user->{'qmail'}) {
-				local $store = &substitute_template(
+				local $store = &substitute_virtualmin_template(
 					$config{'ldap_mailstore'}, $user);
 				$user->{'mailstore'} = $store;
 				}

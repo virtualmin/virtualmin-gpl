@@ -303,7 +303,7 @@ if (defined($newusername)) {
 
 	# Set mail file location
 	if ($user->{'qmail'}) {
-		local $store = &substitute_template(
+		local $store = &substitute_virtualmin_template(
 			$config{'ldap_mailstore'}, $user);
 		$user->{'mailstore'} = $store;
 		}

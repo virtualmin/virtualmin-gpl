@@ -199,7 +199,7 @@ elsif (!$d && defined(&list_managed_servers)) {
 # Select template function for Virtualmin or VM2
 local $subs = defined(&substitute_domain_template) ?
 	\&substitute_domain_template :
-	\&substitute_template;
+	\&substitute_virtualmin_template;
 
 # Make the HTML
 local $rv;

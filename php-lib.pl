@@ -94,7 +94,7 @@ foreach my $ver (@vers) {
 		elsif ($subs_ini) {
 			# Perform substitions on config file
 			local $inidata = &read_file_contents($srcini);
-			$inidata = &substitute_template($inidata, $d);
+			$inidata = &substitute_virtualmin_template($inidata,$d);
 			&open_tempfile(INIDATA, ">$inidir/php.ini");
 			&print_tempfile(INIDATA, $inidata);
 			&close_tempfile(INIDATA);
