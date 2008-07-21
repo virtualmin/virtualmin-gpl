@@ -10504,7 +10504,7 @@ sub substitute_virtualmin_template
 local ($str, $hash) = @_;
 local %ghash = %$hash;
 foreach my $v (&get_global_template_variables()) {
-	if ($v->{'enabled'}) {
+	if ($v->{'enabled'} && !defined($ghash{$v->{'name'}})) {
 		$ghash{$v->{'name'}} = $v->{'value'};
 		}
 	}
