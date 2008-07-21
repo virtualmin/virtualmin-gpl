@@ -11572,6 +11572,40 @@ local $ENV{'REMOTE_HOST'} ||= "127.0.0.1";
 	    $script, $d ? $d->{'dom'} : undef, \%flags);
 }
 
+# get_global_template_variables()
+# Returns an array of hash refs containing global variable names and values
+# XXX need common function to merge these
+sub get_global_template_variables
+{
+local @rv;
+&open_readfile(GLOBAL, $global_template_variables_file);
+while(<GLOBAL>) {
+	s/\r|\n//g;
+	local $dis;
+	$dis = 1 if (s/^\#*\s*//);
+	local ($n, $v) = split(/\s+/, $_, 2);
+	push(@rv, { 'name' => $n,
+		    'value' => $v,
+		    'enabled' => !$dis });
+	}
+close(GLOBAL);
+return @rv;
+}
+
+# save_global_template_variables(&variables)
+# Write out the array ref of hash refs of global variables to a file
+sub save_global_template_variables
+{
+local ($vars) = @_;
+&open_tempfile(GLOBAL, ">$global_template_variables_file");
+foreach my $v (@$vars) {
+	&print_tempfile(GLOBAL,
+		($v->{'enabled'} ? "" : "#").
+		$v->{'name'}." ".$v->{'value'});
+	}
+&close_tempfile(GLOBAL);
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;
