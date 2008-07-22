@@ -1,15 +1,15 @@
  x run functional-test.pl
 
- - Create tar.gz file
+ x Create tar.gz file
 	./gpl-virtual-server/createvirtualminmodule.sh $ver /tmp/virtual-server-$ver.wbm.gz
 
- - build RPM and .deb
+ x build RPM and .deb
 	./makemodulerpm.pl --sign --dir virtual-server --allow-overwrite gpl-virtual-server
 	./makemodulerpm.pl --sign --allow-overwrite virtual-server-theme
-	./makemoduledeb.pl --dir virtual-server gpl-virtual-server
+	./makemoduledeb.pl --dir virtual-server --allow-overwrite gpl-virtual-server
 	./makemoduledeb.pl virtual-server-theme
 
- - Upload to download.webmin.com:htdocs/download/virtualmin/
+ x Upload to download.webmin.com:htdocs/download/virtualmin/
 	- scp /tmp/virtual-server-$ver.wbm.gz download.webmin.com:htdocs/download/virtualmin/
 	- scp /usr/src/OpenLinux/RPMS/noarch/wbm-virtual-server-$ver-1.noarch.rpm /usr/src/OpenLinux/SRPMS/wbm-virtual-server-$ver-1.src.rpm download.webmin.com:htdocs/download/virtualmin/
 	- scp /tmp/webmin-virtual-server_${ver}_all.deb download.webmin.com:htdocs/download/virtualmin/
