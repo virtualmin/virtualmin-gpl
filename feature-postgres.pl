@@ -423,8 +423,15 @@ sub create_postgres_database
 local $user = &postgres_user($_[0]);
 local $owner = &postgresql::get_postgresql_version() >= 7 ?
 		" with owner=\"$user\"" : "";
+local $qt = &postgresql::quote_table($_[1]);
 &postgresql::execute_sql_logged($qconfig{'basedb'},
-	"create database ".&postgresql::quote_table($_[1]).$owner);
+	"create database ".$qt.$owner);
+eval {
+	# Make sure nobody else can access it
+	local $main::error_must_die = 1;
+	&postgresql::execute_sql_logged($qconfig{'basedb'},
+		"revoke all on database $qt from public");
+	};
 local @dbs = split(/\s+/, $_[0]->{'db_postgres'});
 push(@dbs, $_[1]);
 $_[0]->{'db_postgres'} = join(" ", @dbs);
