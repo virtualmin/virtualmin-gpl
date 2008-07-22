@@ -41,12 +41,6 @@
  - use new Apache module function for block updates instead of directly
    modifying config file, when Webmin 1.380 is out
 
- - only load plugins on demand, to save on memory
-	 - check and cache which functions are supported, to avoid need for
-	   plugin_defined call
-	 - no need for preloading their libs
-	 - no need for variable to not load plugins
-
  - faster mass alias domain creation
 	- cache httpd.conf and mail files in memory
 	- only update Webmin at end
@@ -67,6 +61,4 @@
 	- FS#4136
 
  - Use new API for webmin modules and categories, when Webmin 1.430 is out
-
- - Drupal 6.3 installer fix
 
