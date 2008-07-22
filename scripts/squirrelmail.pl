@@ -183,6 +183,7 @@ if (!$upgrade) {
 	close($fh);
 
 	# Kill off conf.pl
+	kill('KILL', $fpid);
 	if (&foreign_check("proc")) {
 		&foreign_require("proc", "proc-lib.pl");
 		local ($cproc) = grep { $_->{'user'} eq $d->{'user'} &&
