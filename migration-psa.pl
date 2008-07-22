@@ -83,8 +83,8 @@ local $users = $domain->{'user'};
 $users = !$users ? [ ] :
 	 ref($users) eq 'ARRAY' ? $users : [ $users ];
 local $uinfo = $users->[0];
-$uinfo || &error("No primary user details found in backup");
-if (!$user) {
+$uinfo || $parent || &error("No primary user details found in backup");
+if (!$user && $uinfo) {
 	$user = $uinfo->{'login'}->{'name'};
 	}
 local $group = $user;
@@ -92,17 +92,17 @@ local $ugroup = $group;
 
 # First work out what features we have
 &$first_print("Checking for Plesk features ..");
-local @got = ( "dir", $parent ? () : ("unix"), "web" );
+local @got = ( "dir", $parent ? () : ("unix") );
 push(@got, "webmin") if ($webmin && !$parent);
 push(@got, "mail");	# Assume that all domains have mail
 if ($domain->{'dns'}) {
 	push(@got, "dns");
 	}
 push(@got, "web");	# Assume has website
-if ($uinfo->{'services'}->{'ssl'} eq 'true') {
+if ($uinfo && $uinfo->{'services'}->{'ssl'} eq 'true') {
 	push(@got, "ssl");
 	}
-if ($uinfo->{'services'}->{'webstat'} eq 'true') {
+if ($uinfo && $uinfo->{'services'}->{'webstat'} eq 'true') {
 	push(@got, "webalizer");
 	}
 if (&indexof("web", @got) >= 0) {
@@ -131,7 +131,7 @@ foreach my $u (@$users) {
 	if ($u->{'spamassassin'}) {
 		$has_spam = 1;
 		}
-	if ($u->{'login'}->{'name'} ne $uinfo->{'login'}->{'name'}) {
+	if (!$uinfo || $u->{'login'}->{'name'} ne $uinfo->{'login'}->{'name'}) {
 		push(@mailusers, $u);
 		}
 	}
@@ -139,10 +139,12 @@ push(@got, "spam") if ($has_spam);
 push(@got, "virus") if ($has_virus);
 
 # Add 'web users'
-local $webusers = $uinfo->{'user'};
-$webusers = !$webusers ? [ ] :
-	    ref($webusers) ne 'ARRAY' ? [ $webusers ] : $webusers;
-push(@mailusers, @$webusers);
+if ($uinfo) {
+	local $webusers = $uinfo->{'user'};
+	$webusers = !$webusers ? [ ] :
+		    ref($webusers) ne 'ARRAY' ? [ $webusers ] : $webusers;
+	push(@mailusers, @$webusers);
+	}
 
 # Tell the user what we have got
 @got = &show_check_migration_features(@got);
@@ -256,33 +258,35 @@ else {
 	}
 
 # Copy web files, which are the main's users home 
-&$first_print("Copying home directory ..");
-if (defined(&set_php_wrappers_writable)) {
-	&set_php_wrappers_writable(\%dom, 1);
-	}
-local $htsrc = $root."/".&remove_cid_prefix($uinfo->{'src'});
-if (!$uinfo->{'src'}) {
-	&$second_print(".. not defined in XML");
-	}
-elsif (!-r $htsrc) {
-	&$second_print(".. not found in backup");
-	}
-else {
-	local $err = &extract_compressed_file($htsrc, $dom{'home'});
-	&set_home_ownership(\%dom);
-	if ($err) {
-		&$second_print(".. failed : $err");
+if ($uinfo) {
+	&$first_print("Copying home directory ..");
+	if (defined(&set_php_wrappers_writable)) {
+		&set_php_wrappers_writable(\%dom, 1);
+		}
+	local $htsrc = $root."/".&remove_cid_prefix($uinfo->{'src'});
+	if (!$uinfo->{'src'}) {
+		&$second_print(".. not defined in XML");
+		}
+	elsif (!-r $htsrc) {
+		&$second_print(".. not found in backup");
 		}
 	else {
-		&$second_print(".. done");
+		local $err = &extract_compressed_file($htsrc, $dom{'home'});
+		&set_home_ownership(\%dom);
+		if ($err) {
+			&$second_print(".. failed : $err");
+			}
+		else {
+			&$second_print(".. done");
+			}
 		}
-	}
-# Fix perms tar may have messed up
-&create_standard_directories(\%dom);
-&set_ownership_permissions(undef, undef, oct($uconfig{'homedir_perms'}),
-			   $dom{'home'});
-if (defined(&set_php_wrappers_writable)) {
-	&set_php_wrappers_writable(\%dom, 0);
+	# Fix perms tar may have messed up
+	&create_standard_directories(\%dom);
+	&set_ownership_permissions(undef, undef, oct($uconfig{'homedir_perms'}),
+				   $dom{'home'});
+	if (defined(&set_php_wrappers_writable)) {
+		&set_php_wrappers_writable(\%dom, 0);
+		}
 	}
 
 # Migrate SSL certs
@@ -328,8 +332,10 @@ if (!$parent) {
 			&set_mailfolder_owner($dstfolder, $duser);
 			&$second_print(".. done");
 			}
+		}
 
-		# Append crontab to users current jobs
+	if ($duser && $uinfo) {
+		# Append crontab to user's current jobs
 		local $crsrc = $root."/".
 			&remove_cid_prefix($uinfo->{'crontab'}->{'src'});
 		if ($uinfo->{'crontab'}->{'src'} && -r $crsrc) {
@@ -350,9 +356,11 @@ local (%taken, %utaken);
 &build_taken(\%taken, \%utaken);
 
 # Re-create mail users and copy mail files
-&$first_print("Re-creating mail users ..");
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+if (@mailusers) {
+	&$first_print("Re-creating mail users ..");
+	}
 local $mcount = 0;
+&foreign_require("mailboxes", "mailboxes-lib.pl");
 foreach my $mailuser (@mailusers) {
 	local $muinfo = &create_initial_user(\%dom);
 	local $name = $mailuser->{'login'}->{'name'};
@@ -443,8 +451,10 @@ foreach my $mailuser (@mailusers) {
 
 	$mcount++;
 	}
-&set_mailbox_homes_ownership(\%dom);
-&$second_print(".. done (migrated $mcount users)");
+if (@mailusers) {
+	&set_mailbox_homes_ownership(\%dom);
+	&$second_print(".. done (migrated $mcount users)");
+	}
 
 # Re-create MySQL databases
 if ($got{'mysql'}) {
@@ -528,7 +538,7 @@ if ($got{'mysql'}) {
 &sync_alias_virtuals(\%dom);
 
 # Migrate protected directories as .htaccess files
-local $pdirs = $uinfo->{'protected_dir'};
+local $pdirs = $uinfo ? $uinfo->{'protected_dir'} : [ ];
 if ($pdirs && ref($pdirs) ne 'ARRAY') {
 	$pdirs = [ $pdirs ];
 	}
@@ -597,7 +607,7 @@ if (@$pdirs && &foreign_check("htaccess-htpasswd")) {
 	}
 
 # Migrate sub-domains (as Virtualmin sub-servers)
-local $subdoms = $uinfo->{'subdomains'};
+local $subdoms = $uinfo ? $uinfo->{'subdomains'} : { };
 if (!$subdoms) {
 	$subdoms = { };
 	}
