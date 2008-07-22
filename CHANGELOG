@@ -947,7 +947,7 @@ Converted all command-line API scripts to use POD format documentation.
 Added the Virtualmin API helper command /usr/sbin/virtualmin, which lets you more easily call API scripts with a command like "virtualmin list-domains --multiline". Help on commands can also be displayed with like "virtualmin help list-domains".
 Purging of old backups made to FTP or SSH servers is now supported, for FTP servers that use Unix directory listings and SSH servers that allow commands to be run.
 ---- Changes since 3.59 ----
-Updated the Piwik script installer to version 0.2.5, ZenPhoto to 1.1.7, eTicket to 1.7.2, Joomla to 1.5.4, Drupal to 6.3 and 6.8, phpBB to 3.0.2, phpMyAdmin to 2.11.7.1, WordPress to 2.6, Zikula to 1.0.1, phpScheduleIt to 1.2.10, OpenX to 2.4.8, PiWik to 0.2.7, MoinMoin to 1.7.1, and HelpCenter to 2.1.7.
+Updated the Piwik script installer to version 0.2.5, ZenPhoto to 1.1.7, eTicket to 1.7.2, Joomla to 1.5.4, Drupal to 6.3 and 6.8, phpBB to 3.0.2, phpMyAdmin to 2.11.7.1, WordPress to 2.6, Zikula to 1.0.1, phpScheduleIt to 1.2.10, OpenX to 2.6.0, PiWik to 0.2.7, MoinMoin to 1.7.1, and HelpCenter to 2.1.7.
 Added a Module Config field for a custom command to get memory and swap information.
 Included domains can now be specified when editing SPF information, and IP networks can be entered.
 The default limit on the number of non-alias domains can now be set in server templates.

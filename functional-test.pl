@@ -1307,6 +1307,7 @@ print "                           [--skip-test type]*\n";
 print "                           [--no-cleanup]\n";
 print "                           [--output]\n";
 print "                           [--migrate $mig]\n";
+print "                           [--user webmin-login --pass password]\n";
 exit(1);
 }
 
