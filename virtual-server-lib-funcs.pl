@@ -7703,8 +7703,8 @@ if (&require_licence()) {
 
 # check_licence_expired()
 # Returns 0 if the licence is valid, 1 if not, or 2 if could not be checked,
-# 3 if expired, the expiry date, error message, number of domain and number
-# of servers.
+# 3 if expired, the expiry date, error message, number of domain, number
+# of servers, and auto-renewal flag
 sub check_licence_expired
 {
 return 0 if (!&require_licence());
@@ -7716,14 +7716,15 @@ if (time() - $licence{'last'} > 3*24*60*60) {
 	&write_file($licence_status, \%licence);
 	}
 return ($licence{'status'}, $licence{'expiry'},
-	$licence{'err'}, $licence{'doms'}, $licence{'servers'});
+	$licence{'err'}, $licence{'doms'}, $licence{'servers'},
+	$licence{'autorenew'});
 }
 
 # update_licence_from_site(&licence)
 sub update_licence_from_site
 {
 local ($licence) = @_;
-local ($status, $expiry, $err, $doms, $servers, $max_servers) =
+local ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew) =
 	&check_licence_site();
 $licence->{'last'} = time();
 delete($licence->{'warn'});
@@ -7743,6 +7744,7 @@ else {
 	}
 $licence->{'status'} = $status;
 $licence->{'expiry'} = $expiry;
+$licence->{'autorenew'} = $autorenew;
 $licence->{'err'} = $err;
 if (defined($doms)) {
 	# Only store the max domains if we got something valid back
@@ -7758,13 +7760,14 @@ if (defined($servers)) {
 # check_licence_site()
 # Calls the function to actually validate the licence, which must return 0 if
 # valid, 1 if not, or 2 if could not be checked, 3 if expired, the expiry
-# date, any error message, and the max number of domains.
+# date, any error message, the max number of domains, number of servers,
+# maximum servers, and the auto-renewal flag
 sub check_licence_site
 {
 return (0) if (!&require_licence());
 local $id = &get_licence_hostid();
 
-local ($status, $expiry, $err, $doms, $max_servers, $servers) =
+local ($status, $expiry, $err, $doms, $max_servers, $servers, $autorenew) =
 	&licence_scheduled($id);
 if ($status == 0 && $doms) {
 	# A domains limit exists .. check if we have exceeded it
@@ -7781,7 +7784,7 @@ if ($status == 0 && $max_servers && !$err) {
 		$err = &text('licence_maxservers', $max_servers, $servers);
 		}
 	}
-return ($status, $expiry, $err, $doms, $servers, $max_servers);
+return ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew);
 }
 
 # get_licence_hostid()
@@ -7811,7 +7814,8 @@ return $id;
 sub licence_warning_message
 {
 return undef if (!&master_admin());
-local ($status, $expiry, $err) = &check_licence_expired();
+local ($status, $expiry, $err, undef, undef, $autorenew) =
+	&check_licence_expired();
 local $expirytime;
 if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
 	# Make Unix time
@@ -7831,7 +7835,7 @@ if ($status != 0) {
 		}
 	$rv .= "</td></tr></table>\n";
 	}
-elsif ($expirytime && $expirytime - time() < 7*24*60*60) {
+elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 	# One week to expiry .. tell the user
 	local $days = int(($expirytime - time()) / (24*60*60));
 	local $hours = int(($expirytime - time()) / (60*60));

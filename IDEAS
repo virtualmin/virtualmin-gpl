@@ -62,3 +62,4 @@
 
  - Use new API for webmin modules and categories, when Webmin 1.430 is out
 
+ - Update license.cgi once 3.60 is out, to add autorenew flag

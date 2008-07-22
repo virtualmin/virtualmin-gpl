@@ -9,8 +9,8 @@ $virtualmin_renewal_url = "http://www.virtualmin.com/shop/";
 
 # licence_scheduled(hostid, [serial, key])
 # Returns a status code (0=OK, 1=Invalid, 2=Down, 3=Expired), the expiry date,
-# an error message, the number of domains max, the number of servers max, and
-# the number of servers used.
+# an error message, the number of domains max, the number of servers max,
+# the number of servers used, and the auto-renewal flag
 sub licence_scheduled
 {
 local ($hostid, $serial, $key) = @_;
@@ -28,6 +28,8 @@ return $out =~ /^EXP\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?
 	(3, $1, "The licence for this server expired on $1", $2, $3, $4) :
        $out =~ /^ERR\s+(.*)/ ?
 	(2, undef, "An error occurred checking the licence : $1", undef) :
+       $out =~ /^OK\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\d+)/ ?
+	(0, $1, undef, $2, $3, $4, $5) :	# Auto-renewal flag
        $out =~ /^OK\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?
 	(0, $1, undef, $2, $3, $4) :
 	(1, undef, "No valid licence was found for your host ID $_[0] and serial number $serial{'LicenseKey'}", undef);
