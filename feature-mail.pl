@@ -1651,10 +1651,14 @@ elsif ($config{'mail_system'} == 4) {
 	if (!$_[0]->{'unix'}) {
 		# For non-NSS Qmail+LDAP users, set the ownership based on
 		# LDAP control files
+		local $quid = &qmailadmin::get_control_file("qmailuid");
+		local $qgid = &qmailadmin::get_control_file("qmailgid");
 		local $cuid = &qmailadmin::get_control_file("ldapuid");
 		local $cgid = &qmailadmin::get_control_file("ldapgid");
-		$uid = $cuid if (defined($cuid));
-		$gid = $cgid if (defined($cgid));
+		$uid = defined($quid) ? $quid :
+		       defined($cuid) ? $cuid : $uid;
+		$gid = defined($qgid) ? $qgid :
+		       defined($cgid) ? $cgid : $gid;
 		}
 	}
 elsif ($config{'mail_system'} == 5) {
