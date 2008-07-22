@@ -59,6 +59,7 @@ $outdent_print = \&outdent_text_print;
 # Parse command-line args
 $name = 1;
 $virt = 0;
+$anylimits = 0;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -79,9 +80,11 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--quota") {
 		$quota = shift(@ARGV);
+		$anylimits = 1;
 		}
 	elsif ($a eq "--uquota") {
 		$uquota = shift(@ARGV);
+		$anylimits = 1;
 		}
 	elsif ($a =~ /^--(\S+)$/ &&
 	       &indexof($1, @features) >= 0) {
@@ -129,21 +132,27 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--mailboxlimit" || $a eq "--max-mailboxes") {
 		$mailboxlimit = shift(@ARGV);
+		$anylimits = 1;
 		}
 	elsif ($a eq "--dbslimit" || $a eq "--max-dbs") {
 		$dbslimit = shift(@ARGV);
+		$anylimits = 1;
 		}
 	elsif ($a eq "--domslimit" || $a eq "--max-doms") {
 		$domslimit = shift(@ARGV);
+		$anylimits = 1;
 		}
 	elsif ($a eq "--aliaslimit" || $a eq "--max-aliases") {
 		$aliaslimit = shift(@ARGV);
+		$anylimits = 1;
 		}
 	elsif ($a eq "--aliasdomslimit" || $a eq "--max-aliasdoms") {
 		$aliasdomslimit = shift(@ARGV);
+		$anylimits = 1;
 		}
 	elsif ($a eq "--realdomslimit" || $a eq "--max-realdoms") {
 		$realdomslimit = shift(@ARGV);
+		$anylimits = 1;
 		}
 	elsif ($a eq "--template") {
 		$templatename = shift(@ARGV);
@@ -157,6 +166,7 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--bandwidth") {
 		$bw = shift(@ARGV);
+		$anylimits = 1;
 		}
 	elsif ($a eq "--limits-from-template") {
 		$tlimit = 1;
@@ -233,6 +243,11 @@ if ($ip eq "allocate") {
 elsif ($virt) {
 	# Make sure manual IP specification is allowed
 	$tmpl->{'ranges'} eq "none" || $config{'all_namevirtual'} || &usage("The --ip option cannot be used when automatic IP allocation is enabled - use --allocate-ip instead");
+	}
+
+# If no limit-related flags are given, assume from template
+if (!$tlimit && !$anylimits) {
+	$tlimit = 1;
 	}
 
 # Make sure all needed args are set
