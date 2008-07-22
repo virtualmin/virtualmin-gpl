@@ -980,13 +980,11 @@ $mail_tests = [
 		       $test_user.'@'.$test_domain,
 	},
 
-	# Give the mail server 10 seconds to deliver
-	{ 'command' => 'sleep 10',
-	},
-
-	# Check procmail log for delivery
-	{ 'command' => 'tail -5 /var/log/procmail.log | grep '.
-		       'To:'.$test_user.'@'.$test_domain,
+	# Check procmail log for delivery, for at most 60 seconds
+	{ 'command' => 'while [ "`tail -5 /var/log/procmail.log | grep '.
+		       'To:'.$test_user.'@'.$test_domain.'`" = "" ]; do '.
+		       'sleep 5; done',
+	  'timeout' => 60,
 	},
 	{ 'command' => 'tail -5 /var/log/procmail.log | grep '.
 		       'User:'.$test_full_user,
@@ -1004,14 +1002,12 @@ $mail_tests = [
 		{ 'command' => 'sendmail -t <'.$virus_email_file,
 		},
 
-		# Wait 10 seconds for it to be processed
-		{ 'command' => 'sleep 10',
-		},
-
 		# Check procmail log for virus detection
-		{ 'command' => 'tail -5 /var/log/procmail.log | grep '.
-			       'To:'.$test_user.'@'.$test_domain.' | grep '.
-			       'Mode:Virus'
+		{ 'command' => 'while [ "`tail -5 /var/log/procmail.log |grep '.
+			       'To:'.$test_user.'@'.$test_domain.
+			       ' | grep Mode:Virus`" = "" ]; do '.
+			       'sleep 5; done',
+		  'timeout' => 60,
 		},
 
 		# Make sure it was NOT delivered
@@ -1034,14 +1030,12 @@ $mail_tests = [
 		{ 'command' => 'sendmail -t <'.$spam_email_file,
 		},
 
-		# Wait 10 seconds for it to be processed
-		{ 'command' => 'sleep 10',
-		},
-
 		# Check procmail log for spam detection
-		{ 'command' => 'tail -5 /var/log/procmail.log | grep '.
-			       'To:'.$test_user.'@'.$test_domain.' | grep '.
-			       'Mode:Spam'
+		{ 'command' => 'while [ "`tail -5 /var/log/procmail.log |grep '.
+			       'To:'.$test_user.'@'.$test_domain.
+			       ' | grep Mode:Spam`" = "" ]; do '.
+			       'sleep 5; done',
+		  'timeout' => 60,
 		},
 
 		# Make sure it went to the spam folder

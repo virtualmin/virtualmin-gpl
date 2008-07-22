@@ -35,6 +35,7 @@ sub setup_spam
 {
 &$first_print($text{'setup_spam'});
 &require_spam();
+&foreign_require("cron", "cron-lib.pl");
 
 # Create the needed directories now, so we can lock files in them
 if (!-d $procmail_spam_dir) {
@@ -112,8 +113,6 @@ if (!$gotvirt) {
 		&procmail::create_recipe($var1);
 		&procmail::create_recipe($var2);
 		}
-	&foreign_require("cron", "cron-lib.pl");
-
 	# Fix up bad quoted VIRTUAMIN= line, introduced by Webmin 1.410
 	local $lref = &read_file_lines($procmail::procmailrc);
 	foreach my $l (@$lref) {
