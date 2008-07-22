@@ -986,9 +986,6 @@ $mail_tests = [
 		       'sleep 5; done',
 	  'timeout' => 60,
 	},
-	{ 'command' => 'tail -5 /var/log/procmail.log | grep '.
-		       'User:'.$test_full_user,
-	},
 
 	# Check if the mail arrived
 	{ 'command' => 'list-mailbox.pl',
