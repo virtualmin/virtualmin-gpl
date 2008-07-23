@@ -111,7 +111,9 @@ old script that only runs under version 4.",
 		  "functional-test.pl",
 		  "generate-script-sites.pl",
 		  "check-scripts.pl",
-		  "fetch-script-files.pl" );
+		  "fetch-script-files.pl",
+		  "postinstall.pl",
+		 );
 
 # Go to script's directory
 if ($0 =~ /^(.*\/)[^\/]+$/) {
