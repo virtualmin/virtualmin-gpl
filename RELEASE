@@ -10,9 +10,9 @@
 	./makemoduledeb.pl virtual-server-theme
 
  x Upload to download.webmin.com:htdocs/download/virtualmin/
-	- scp /tmp/virtual-server-$ver.wbm.gz download.webmin.com:htdocs/download/virtualmin/
-	- scp /usr/src/OpenLinux/RPMS/noarch/wbm-virtual-server-$ver-1.noarch.rpm /usr/src/OpenLinux/SRPMS/wbm-virtual-server-$ver-1.src.rpm download.webmin.com:htdocs/download/virtualmin/
-	- scp /tmp/webmin-virtual-server_${ver}_all.deb download.webmin.com:htdocs/download/virtualmin/
+	scp /tmp/virtual-server-$ver.wbm.gz download.webmin.com:htdocs/download/virtualmin/
+	scp /usr/src/OpenLinux/RPMS/noarch/wbm-virtual-server-$ver-1.noarch.rpm /usr/src/OpenLinux/SRPMS/wbm-virtual-server-$ver-1.src.rpm download.webmin.com:htdocs/download/virtualmin/
+	scp /tmp/webmin-virtual-server_${ver}_all.deb download.webmin.com:htdocs/download/virtualmin/
 
  - Add to website
 	- Mention plugins too
