@@ -94,6 +94,7 @@ if ($config{'spam'}) {
 
 # Fix up old procmail scripts that don't call the clam wrapper
 if ($config{'virus'}) {
+	&copy_clam_wrapper();
 	&fix_clam_wrapper();
 	}
 

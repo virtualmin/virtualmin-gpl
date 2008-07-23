@@ -29,8 +29,7 @@ if (@clamrec) {
 	}
 else {
 	# Copy the wrapper program
-	&copy_source_dest("$module_root_directory/clam-wrapper.pl", $clam_wrapper_cmd);
-	&set_ownership_permissions(undef, undef, 0755, $clam_wrapper_cmd);
+	&copy_clam_wrapper();
 
 	# Add the recipe
 	local $recipe0 = { 'flags' => [ 'c', 'w' ],
@@ -98,6 +97,14 @@ else {
 &release_lock_virus($_[0]);
 }
 
+# copy_clam_wrapper()
+# Copies the clamav wrapper script into place
+sub copy_clam_wrapper
+{
+&copy_source_dest("$module_root_directory/clam-wrapper.pl", $clam_wrapper_cmd);
+&set_ownership_permissions(undef, undef, 0755, $clam_wrapper_cmd);
+}
+
 # validate_virus(&domain)
 # Make sure the domain's procmail config file calls ClamAV
 sub validate_virus
@@ -153,7 +160,6 @@ return ( [ $text{'sysinfo_virus'}, $vers ] );
 sub fix_clam_wrapper
 {
 &require_spam();
-&copy_source_dest("$module_root_directory/clam-wrapper.pl", $clam_wrapper_cmd);
 foreach my $d (grep { $_->{'virus'} } &list_domains()) {
 	local $spamrc = "$procmail_spam_dir/$d->{'id'}";
 	local @recipes = &procmail::parse_procmail_file($spamrc);
