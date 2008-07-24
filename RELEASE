@@ -14,15 +14,15 @@
 	scp /usr/src/OpenLinux/RPMS/noarch/wbm-virtual-server-$ver-1.noarch.rpm /usr/src/OpenLinux/SRPMS/wbm-virtual-server-$ver-1.src.rpm download.webmin.com:htdocs/download/virtualmin/
 	scp /tmp/webmin-virtual-server_${ver}_all.deb download.webmin.com:htdocs/download/virtualmin/
 
- - Add to website
-	- Mention plugins too
+ x Add to website
+	x Mention plugins too
 
  - Add the freshmeat.net
 
  - Announce on mailing list
 
- - Add to updates.txt
+ x Add to updates.txt
 
- - Release plugins
+ x Release plugins
 
- - Rebuild API files
+ x Rebuild API files
