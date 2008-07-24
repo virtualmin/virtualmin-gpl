@@ -67,5 +67,6 @@ foreach $d (@doms) {
 	}
 print "</dl>\n";
 
-&ui_print_footer("", $text{'index_return'});
+&ui_print_footer("", $text{'index_return'},
+		 "edit_newvalidate.cgi", $text{'newvalidate_return'});
 

@@ -3406,6 +3406,7 @@ newvalidate_good=All features OK
 newvalidate_all=All features
 newvalidate_sel=Only selected ..
 newvalidate_doing=Beginning validation of selected virtual servers. Any problems found will be shown in red ..
+newvalidate_return=validation form
 
 validate_edir=Home directory $1 does not exist
 validate_ediruser=Home directory $1 is owned by $2 instead of $3
