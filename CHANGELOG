@@ -956,4 +956,4 @@ DNS aliases named 'webmail' and 'admin' are now created in all new virtual serve
 Added the Global Variables page under the System Customization category, for creating variables that can be used in all templates.
 If the virus scanner fails to return a response within 30 seconds, email will be delivered normally. This avoids problems with the procmail timeout, which can cause even non-infected email to be dropped if clamav is too slow.
 ---- Changes since 3.59 ----
-Updated the Piwik script installer to version 0.2.9.
+Updated the Piwik script installer to version 0.2.9, and Drupal to 5.9.

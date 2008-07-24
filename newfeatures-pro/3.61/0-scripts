@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Piwik script installer to version 0.2.9.
+html=Updated the Piwik script installer to version 0.2.9, and Drupal to 5.9.
 master=1
 reseller=1
 domain=1
