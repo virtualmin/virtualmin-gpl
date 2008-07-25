@@ -8846,6 +8846,7 @@ if (defined(&list_visible_custom_links)) {
 		if ($l->{'catname'}) {
 			$l->{'cat'} = $catmap{$l->{'catname'}} ||
 				      lc($l->{'catname'});
+			$l->{'cat'} =~ s/\s/_/g;
 			}
 		else {
 			$l->{'cat'} = 'objects';
