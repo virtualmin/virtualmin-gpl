@@ -957,3 +957,4 @@ Added the Global Variables page under the System Customization category, for cre
 If the virus scanner fails to return a response within 30 seconds, email will be delivered normally. This avoids problems with the procmail timeout, which can cause even non-infected email to be dropped if clamav is too slow.
 ---- Changes since 3.59 ----
 Updated the Piwik script installer to version 0.2.9, and Drupal to 5.9.
+When the virtualmin --help command is run, it now outputs a list of all available API commands with short descriptions, broken down into categories.

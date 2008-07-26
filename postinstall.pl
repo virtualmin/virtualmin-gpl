@@ -318,9 +318,13 @@ cd $module_root_directory
 if [ "\$1" = "" -o "\$1" = "help" -a "\$2" = "" -o "\$1" = "--help" -a "\$2" = "" -o "\$1" = "-help" -a "\$2" = "" ]; then
 	echo "usage: $api_helper_command <command> [args..]"
 	echo "   or: $api_helper_command help <command>"
-	exit 1
+	echo ""
+	echo "Available commands :"
+	echo ""
+	COMMAND=list-commands
+else
+	COMMAND=\$1
 fi
-COMMAND=\$1
 shift
 if [ "\$COMMAND" = "help" ]; then
 	help=1

@@ -1,0 +1,3 @@
+desc=More detailed API help
+html=When the <tt>virtualmin --help</tt> command is run, it now outputs a list of all available API commands with short descriptions, broken down into categories.
+master=1
