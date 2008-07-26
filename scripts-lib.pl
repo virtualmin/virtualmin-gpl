@@ -1071,27 +1071,27 @@ foreach my $m (@mods) {
 		}
 
 	# Work out the package name
-	local $pkg;
+	local @pkgs;
 	local $done = 0;
 	local $mp = $m;
 	if ($software::config{'package_system'} eq 'debian') {
 		# For APT, the package name is python- followed
 		# by the lower-case module name
 		$mp = lc($mp);
-		$pkg = "python-".$mp;
+		push(@pkgs, "python-".$mp);
 		}
 	elsif ($software::config{'package_system'} eq 'rpm') {
 		# For YUM, naming is less standard .. the MySQLdb package
 		# is in MySQL-python
 		if ($m eq "MySQLdb") {
-			$pkg = "MySQL-python";
+			push(@pkgs, "MySQL-python");
 			}
 		elsif ($m eq "setuptools") {
-			$pkg = "setuptools";
+			push(@pkgs, "setuptools", "python-setuptools");
 			}
 		else {
 			$mp = lc($mp);
-			$pkg = "python-".$mp;
+			push(@pkgs, "python-".$mp);
 			}
 		}
 	elsif ($software::config{'package_system'} eq 'pkgadd') {
@@ -1099,27 +1099,32 @@ foreach my $m (@mods) {
 		# seem to be packaged though
 		$mp = lc($mp);
 		$mp =~ s/:://g;
-		$pkg = "py_$mp";
+		push(@pkgs, "py_$mp");
 		}
 	else {
 		&$second_print($text{'scripts_epythonmod'});
 		return 0;
 		}
 
-	# Install the RPM, Debian or CSW package
-	&$first_print(&text('scripts_softwaremod', "<tt>$pkg</tt>"));
-	&$indent_print();
-	&software::update_system_install($pkg);
-	&$outdent_print();
-	@pinfo = &software::package_info($pkg);
-	if (@pinfo && $pinfo[0] eq $pkg) {
-		# Yep, it worked
-		&$second_print($text{'setup_done'});
+	# Install the RPM, Debian or CSW package. If any work, then we are done
+	local $anyok;
+	foreach my $pkg (@pkgs) {
+		&$first_print(&text('scripts_softwaremod', "<tt>$pkg</tt>"));
+		&$indent_print();
+		&software::update_system_install($pkg);
+		&$outdent_print();
+		local @pinfo = &software::package_info($pkg);
+		if (@pinfo && $pinfo[0] eq $pkg) {
+			# Yep, it worked
+			&$second_print($text{'setup_done'});
+			$anyok = 1;
+			last;
+			}
+		else {
+			&$second_print($text{'scripts_epythoninst'});
+			}
 		}
-	else {
-		&$second_print($text{'scripts_epythoninst'});
-		return 0;
-		}
+	return 0 if (!$anyok);
 	}
 return 1;
 }
