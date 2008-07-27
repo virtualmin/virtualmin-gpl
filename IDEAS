@@ -68,3 +68,9 @@
 	- FS#4324
 
  - Domain owner should get DAV and SVN access by default (for top-level domains)
+
+ - Extra admin email address
+	- command line API
+	- help
+	- include in email of domain owners
+

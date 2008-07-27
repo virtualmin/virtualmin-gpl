@@ -64,6 +64,14 @@ else {
 		$admin->{'pass'} = $in{'pass'};
 		}
 	$admin->{'desc'} = $in{'desc'};
+	if ($in{'email_def'}) {
+		delete($admin->{'email'});
+		}
+	else {
+		$in{'email'} =~ /^\S+\@\S+$/ ||
+			&error($text{'admin_eemail'});
+		$admin->{'email'} = $in{'email'};
+		}
 
 	# Save edit options
 	$admin->{'create'} = $in{'create'};

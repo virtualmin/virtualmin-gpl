@@ -8,7 +8,8 @@ This command creates a new administrator associated with an existing
 virtual server.  You must supply the C<--domain> parameter to
 specify the server and C<--name> to set the admin login name. The C<--pass> and
 C<--desc> options should also be given, to specify the initial password and
-a description for the account respectively.
+a description for the account respectively. To specify a contact email address
+for the admin, use the C<--email> flag followed by the address.
 
 Basic permissions for the account can be added using the C<--create>, C<--rename>, C<--features> and C<--modules> parameters. These allow the admin to create new
 servers, rename servers, use Webmin modules for server features, and use other Webmin modules, respectively.
@@ -53,6 +54,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--desc") {
 		$desc = shift(@ARGV);
+		}
+	elsif ($a eq "--email") {
+		$email = shift(@ARGV);
 		}
 	elsif ($a eq "--pass") {
 		$pass = shift(@ARGV);
@@ -105,6 +109,7 @@ $admin = { 'name' => $name,
 foreach $e (@edits) {
 	$admin->{'edit_'.$e} = 1;
 	}
+$admin->{'email'} = $email if ($email);
 
 # Create the admin
 &create_extra_admin($admin, $d);
@@ -121,7 +126,7 @@ print "usage: create-admin.pl --domain domain.name\n";
 print "                       --name login\n";
 print "                       [--pass password]\n";
 print "                       [--desc description]\n";
-print "                       [--desc description]\n";
+print "                       [--email user\@domain]\n";
 print "                       [--create] [--rename] [--features] [--modules]\n";
 print "                       [--edit capability]*\n";
 exit(1);

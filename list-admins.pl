@@ -52,6 +52,9 @@ if ($multi) {
 	foreach $admin (@admins) {
 		print "$admin->{'name'}\n";
 		print "    Description: $admin->{'desc'}\n";
+		if ($admin->{'email'}) {
+			print "    Email: $admin->{'email'}\n";
+			}
 		print "    Password: $admin->{'pass'}\n";
 		print "    Create servers: ",($admin->{'create'} ? "Yes" : "No"),"\n";
 		print "    Rename servers: ",($admin->{'norename'} ? "No" : "Yes"),"\n";

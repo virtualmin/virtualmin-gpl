@@ -1,0 +1,5 @@
+desc=Extra administrator email addresses
+html=Extra administrators can now have contact email addresses, which can be used when sending email to all domain owners. These can be set via the web interface, or the command-line API.
+master=1
+owner=1
+link=list_admins.cgi?dom=${ID}

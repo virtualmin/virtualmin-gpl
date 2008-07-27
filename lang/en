@@ -2985,6 +2985,7 @@ newnotify_ebody=Missing body for email
 newnotify_done=The specified email message has been sent to the following addresses :
 newnotify_edoms=No servers selected
 newnotify_attach=Optional attached file
+newnotify_admins=Also email extra administrators in selected domains
 
 mailusers_title=Email All Mailboxes
 mailusers_desc=This form can be used to send email to all mailboxes in this domain, or those you selected. The following substitions can be used in the message body and subject:
@@ -3359,6 +3360,8 @@ admin_header=Details of extra administrator
 admin_name=Administrator username
 admin_pass=Password for username
 admin_desc=Real name or description
+admin_email=Contact email address
+admin_none=None set
 admin_egone=Administrator no longer exists!
 admin_err=Failed to save extra administrator
 admin_ename=Missing or invalid username
@@ -3368,6 +3371,7 @@ admin_features=Can configure server features?
 admin_modules=Can access other Webmin modules?
 admin_switch=Switch to Extra Admin
 admin_switching=Switching to extra admin $1 ..
+admin_eemail=Missing or invalid ontact email address - must be like <tt>user@domain.com</tt>
 
 dadmins_err=Failed to delete extra administrators
 dadmins_enone=None selected

@@ -20,7 +20,8 @@ print &ui_table_row($text{'newnotify_servers'},
 		    &ui_radio("servers_def", 1,
 			[ [ 1, $text{'newips_all'} ],
 			  [ 0, $text{'newips_sel'} ] ])."<br>\n".
-		    &servers_input("servers", [ ], \@doms));
+		    &servers_input("servers", [ ], \@doms)."<br>".
+		    &ui_checkbox("admins", 1, $text{'newnotify_admins'}, 1));
 
 # Message subject
 print &ui_table_row($text{'newnotify_subject'},

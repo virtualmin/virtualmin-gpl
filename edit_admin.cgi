@@ -53,12 +53,19 @@ else {
 			    &ui_textbox("name", $admin->{'name'}, 20), 2);
 	}
 
+# Password
 print &ui_table_row(&hlink($text{'admin_pass'}, "admin_pass"),
     $in{'new'} ? &ui_textbox("pass", undef, 20)
 	       : &ui_opt_textbox("pass", undef, 20, $text{'resel_leave'}), 2);
 
+# Description
 print &ui_table_row(&hlink($text{'admin_desc'}, "admin_desc"),
 		    &ui_textbox("desc", $admin->{'desc'}, 40), 2);
+
+# Contact email address
+print &ui_table_row(&hlink($text{'admin_email'}, "admin_email"),
+		    &ui_opt_textbox("email", $admin->{'email'}, 40,
+				    $text{'admin_none'}), 2);
 
 print &ui_table_hr();
 

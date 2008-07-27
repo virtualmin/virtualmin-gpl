@@ -16,6 +16,10 @@ features and use other Webmin modules with the C<--can-create>, C<--cannot-creat
 C<--can-rename>, C<--cannot-rename>, C<--can-features>, C<--cannot-features>,
 C<--can-modules> and C<--cannot-modules> options respectively.
 
+The extra admin's contact email address can be set or changed with the 
+C<--email> flag (followed by an address), or removed with the C<--no-email>
+parameter.
+
 Editing capabilities can be granted to the user with the C<--can-edit> option
 followed by a capability name. Similarly, they can be taken away with the
 C<--cannot-edit> option.
@@ -54,6 +58,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--desc") {
 		$desc = shift(@ARGV);
+		}
+	elsif ($a eq "--email") {
+		$email = shift(@ARGV);
+		}
+	elsif ($a eq "--no-email") {
+		$email = "";
 		}
 	elsif ($a eq "--can-edit" || $a eq "--cannot-edit") {
 		$edit = shift(@ARGV);
@@ -115,6 +125,14 @@ if (defined($pass)) {
 if (defined($desc)) {
 	$admin->{'desc'} = $desc;
 	}
+if (defined($email)) {
+	if ($email) {
+		$admin->{'email'} = $email;
+		}
+	else {
+		delete($admin->{'email'});
+		}
+	}
 if (defined($create)) {
 	$admin->{'create'} = $create;
 	}
@@ -150,6 +168,7 @@ print "                       --name login\n";
 print "                       [--newname login]\n";
 print "                       [--pass password]\n";
 print "                       [--desc description]\n";
+print "                       [--email user\@domain | --no-email]\n";
 print "                       [--can-create] | [--cannot-create]\n";
 print "                       [--can-rename] | [--cannot-rename]\n";
 print "                       [--can-features] | [--cannot-features]\n";

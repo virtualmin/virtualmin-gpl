@@ -3025,49 +3025,60 @@ return (1, &text('mail_ok', $to));
 }
 
 # send_notify_email(from, &doms|&users, [&dom], subject, body,
-#		    [attach, attach-filename, attach-type])
+#		    [attach, attach-filename, attach-type], [extra-admins])
 # Sends a single email to multiple recipients. These can be Virtualmin domains
 # or users.
 sub send_notify_email
 {
-local ($from, $recips, $d, $subject, $body, $attach, $attachfile, $attachtype)
-	= @_;
+local ($from, $recips, $d, $subject, $body, $attach, $attachfile, $attachtype,
+       $admins) = @_;
 local %done;
 foreach my $r (@$recips) {
-	# Work out recipient type
-	local ($email, %hash);
+	# Work out recipient type and addresses
+	local (@emails, %hash);
 	if ($r->{'id'}) {
 		# A domain
-		$email = $r->{'emailto'};
+		push(@emails, $r->{'emailto'});
 		%hash = &make_domain_substitions($r);
+		if ($admins) {
+			# And extra admins
+			push(@emails, map { $_->{'email'} }
+					grep { $_->{'email'} }
+					   &list_extra_admins($r));
+			}
 		}
 	else {
 		# A mailbox user
-		$email = $r->{'email'} || $r->{'user'};
+		push(@emails, $r->{'email'} || $r->{'user'});
 		%hash = &make_user_substitutions($r, $d);
 		}
-	next if ($done{$email}++);
-	local $mail = { 'headers' =>
-		[ [ 'From' => $from ],
-		  [ 'To' => $email ],
-		  [ 'Subject' => &entities_to_ascii(
-		      &substitute_virtualmin_template($subject, \%hash)) ] ],
-		  'attach' =>
-		[ { 'headers' => [ [ 'Content-type', 'text/plain' ] ],
-		    'data' => &entities_to_ascii(
-		      &substitute_virtualmin_template($body, \%hash)) } ] };
-	if ($attach) {
-		local $filename = $attachfile;
-		$filename =~ s/^.*(\\|\/)//;
-		local $type = $attachtype." name=\"$filename\"";
-		local $disp = "inline; filename=\"$filename\"";
-		push(@{$mail->{'attach'}},
-		     { 'data' => $in{'attach'},
-		       'headers' => [ [ 'Content-type', $type ],
-			      [ 'Content-Disposition', $disp ],
-			      [ 'Content-Transfer-Encoding', 'base64' ] ] });
+
+	# Send to them
+	foreach my $email (@emails) {
+		next if ($done{$email}++);
+		local $mail = { 'headers' =>
+		    [ [ 'From' => $from ],
+		      [ 'To' => $email ],
+		      [ 'Subject' => &entities_to_ascii(
+		         &substitute_virtualmin_template($subject, \%hash)) ] ],
+		      'attach' =>
+		    [ { 'headers' => [ [ 'Content-type', 'text/plain' ] ],
+		        'data' => &entities_to_ascii(
+		          &substitute_virtualmin_template($body, \%hash)) } ] };
+		if ($attach) {
+			local $filename = $attachfile;
+			$filename =~ s/^.*(\\|\/)//;
+			local $type = $attachtype." name=\"$filename\"";
+			local $disp = "inline; filename=\"$filename\"";
+			push(@{$mail->{'attach'}},
+			     { 'data' => $in{'attach'},
+			       'headers' => [
+				 [ 'Content-type', $type ],
+				 [ 'Content-Disposition', $disp ],
+				 [ 'Content-Transfer-Encoding', 'base64' ] ] });
+			}
+		&mailboxes::send_mail($mail);
 		}
-	&mailboxes::send_mail($mail);
 	}
 }
 
