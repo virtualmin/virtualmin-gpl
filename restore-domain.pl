@@ -28,6 +28,19 @@ C<--all-virtualmin> option can be specified as well. Alternately, you can select
 exactly which settings to include with the C<--virtualmin> parameter. For example,
 C<--virtualmin config> would only restore the module configuration.
 
+When restoring a virtual server that originally had a private IP address,
+the same address will be used by default. However, this may not be what you
+want if you are restoring a domain on a different system that is not on the
+same network. To use a different IP address, the C<--ip> flag can be given
+followed by an address. Or you can use the C<--allocate-ip> flag to have
+Virtualmin select one automatically, assuming that an allocation range is
+defined in the template used.
+
+When the restored server was on a shared address, it will by default be
+given the system's default shared IP. However, if you have defined additional
+shared addresses, a different one can be selected with the C<--shared-ip>
+flag followed by an address.
+
 =cut
 
 package virtual_server;
@@ -249,6 +262,7 @@ print "                  [--fix]\n";
 print "                  [--option feature name value]\n";
 print "                  [--all-virtualmin] | [--virtualmin config]\n";
 print "                  [--only-features]\n";
+print "                  [--shared-ip address | --ip address | --allocate-ip]\n";
 print "\n";
 print "Multiple domains may be specified with multiple --domain parameters.\n";
 print "Features must be specified using their short names, like web and dns.\n";
