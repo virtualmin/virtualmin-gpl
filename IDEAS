@@ -62,15 +62,8 @@
 
  - Use new API for webmin modules and categories, when Webmin 1.430 is out
 
- - Update license.cgi once 3.60 is out, to add autorenew flag
-
  - Per-domain or per-template custom links
 	- FS#4324
 
  - Domain owner should get DAV and SVN access by default (for top-level domains)
-
- - Extra admin email address
-	- command line API
-	- help
-	- include in email of domain owners
 
