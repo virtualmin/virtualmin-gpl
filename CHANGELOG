@@ -956,6 +956,6 @@ DNS aliases named 'webmail' and 'admin' are now created in all new virtual serve
 Added the Global Variables page under the System Customization category, for creating variables that can be used in all templates.
 If the virus scanner fails to return a response within 30 seconds, email will be delivered normally. This avoids problems with the procmail timeout, which can cause even non-infected email to be dropped if clamav is too slow.
 ---- Changes since 3.60 ----
-Updated the Piwik script installer to version 0.2.9, and Drupal to 5.9.
+Updated the Piwik script installer to version 0.2.9, phpCOIN to 1.4.4, and Drupal to 5.9.
 When the virtualmin --help command is run, it now outputs a list of all available API commands with short descriptions, broken down into categories.
 Extra administrators can now have contact email addresses, which can be used when sending email to all domain owners. These can be set via the web interface, or the command-line API.
