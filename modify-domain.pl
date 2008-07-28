@@ -14,6 +14,10 @@ To add a private IP address to a virtual server that currently does not have
 one, the C<--ip> or C<--allocate-ip> options can be used, as described in the
 section on create-domain.pl.
 
+To revert a server with a private IP back to the system's default shared
+address, use the C<--default-ip> flag. If the system has more than one shared
+address, the C<--shared-ip> flag can be used to change it.
+
 To change a server's domain name, the C<--newdomain> option can be used. It must
 be followed by a new domain name, which of course cannot be used by any
 existing virtual server. When changing the domain name, you may also want to
@@ -115,6 +119,10 @@ while(@ARGV > 0) {
 		# Allocating an IP
 		$ip = "allocate";
 		}
+	elsif ($a eq "--default-ip") {
+		# Fall back to the default shared IP
+		$defaultip = 1;
+		}
 	elsif ($a eq "--reseller") {
 		# Changing the reseller
 		$resel = shift(@ARGV);
@@ -164,6 +172,8 @@ if ($dom->{'parent'}) {
 	defined($pass) && &usage("The password cannot be changed for a sub-domain");
 	(defined($quota) || defined($uquota)) && &usage("Quotas cannot be changed for a sub-domain");
 	}
+
+# Validate IP change options
 if ($ip && $dom->{'alias'}) {
 	&usage("An IP address cannot be added to a virtual domain");
 	}
@@ -188,6 +198,13 @@ elsif (!$dom->{'virt'} && $ip eq "allocate") {
 if ($dom->{'virt'} && defined($sharedip)) {
 	&usage("The shared IP address cannot be changed for a virtual server with a private IP");
 	}
+if (!$dom->{'virt'} && $defaultip) {
+	&usage("The --default-ip flag can only be used when the virtual server has a private address");
+	}
+if (($defaultip || $sharedip) && $ip) {
+	&usage("The --default-ip and --shared-ip flags cannot be combined with --ip or --allocate-ip");
+	}
+
 if (defined($resel)) {
 	$dom->{'parent'} && &usage("Reseller cannot be set for a sub-server");
 	@resels = &list_resellers();
@@ -288,6 +305,15 @@ if (defined($ip)) {
 		$dom->{'virtalready'} = 0;
 		}
 	}
+if ($defaultip) {
+	# Falling back to default IP
+	$dom->{'ip'} = &get_default_ip($dom->{'reseller'});
+	$dom->{'defip'} = $dom->{'ip'} eq &get_default_ip();
+	$dom->{'virt'} = 0;
+	$dom->{'virtalready'} = 0;
+	$dom->{'name'} = 1;
+	delete($dom->{'dns_ip'});
+	}
 if (defined($sharedip)) {
 	# Just change the shared IP address
 	$dom->{'ip'} = $sharedip;
@@ -310,6 +336,9 @@ if ($dom->{'virt'} && !$old->{'virt'}) {
 	}
 elsif ($dom->{'virt'} && $old->{'virt'}) {
 	&modify_virt($dom, $dom);
+	}
+elsif (!$dom->{'virt'} && $old->{'virt'}) {
+	&delete_virt($old);
 	}
 
 # Actually update the domains
@@ -378,7 +407,7 @@ if ($config{'bw_disable'}) {
 	}
 print "                        [--resel reseller|NONE]\n";
 print "                        [--ip address] | [--allocate-ip] |\n";
-print "                        [--shared-ip address]\n";
+print "                        [--default-ip | --shared-ip address]\n";
 print "                        [--prefix name]\n";
 print "                        [--template name|id]\n";
 print "                        [--add-exclude directory]*\n";
