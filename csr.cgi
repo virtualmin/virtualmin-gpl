@@ -126,6 +126,7 @@ else {
 
 	# Re-start Apache
 	&register_post_action(\&restart_apache, 1);
+	&save_domain($d);
 	&run_post_actions();
 	&webmin_log("newself", "domain", $d->{'dom'}, $d);
 	}

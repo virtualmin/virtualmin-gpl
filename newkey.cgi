@@ -61,6 +61,7 @@ if ($d->{'ssl_newkey'}) {
 	if ($newkeyfile eq $newkey) {
 		&unlink_logged($d->{'ssl_newkey'});
 		delete($d->{'ssl_newkey'});
+		delete($d->{'ssl_csr'});
 		&save_domain($d);
 		}
 	}

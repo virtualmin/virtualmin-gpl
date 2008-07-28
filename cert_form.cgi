@@ -44,6 +44,13 @@ print &ui_tabs_start_tab("mode", "csr");
 print "$text{'cert_desc1'}<br>\n";
 print "$text{'cert_desc4'}<p>\n";
 
+# Show warning if there is a CSR outstanding
+if ($d->{'ssl_csr'}) {
+	print "<b>",&text('cert_csrwarn', "<tt>$d->{'ssl_csr'}</tt>",
+			  "<tt>$d->{'ssl_newkey'}</tt>"),"</b><p>\n";
+	}
+# XXX need to clear when installed, or cert is generated
+
 print &ui_form_start("csr.cgi");
 print &ui_hidden("dom", $in{'dom'});
 print &ui_table_start($text{'cert_header1'}, undef, 2);
