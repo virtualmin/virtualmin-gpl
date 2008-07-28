@@ -201,6 +201,7 @@ foreach $d (@doms) {
 # Lock them all
 foreach $d (@doms) {
 	&obtain_lock_web($d);
+	&obtain_lock_dns($d) if (defined($webmail));
 	}
 
 # Do it for all domains
@@ -313,6 +314,7 @@ foreach $d (@doms) {
 	}
 
 foreach $d (@doms) {
+	&release_lock_dns($d) if (defined($webmail));
 	&release_lock_web($d);
 	}
 &run_post_actions();
