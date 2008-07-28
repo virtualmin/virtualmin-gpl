@@ -11,7 +11,7 @@ $d = &get_domain($in{'dom'});
 @cert_attributes = ('cn', 'o', 'issuer_cn', 'issuer_o', 'notafter', 'type');
 
 # Show tabs
-$prog = "cert_form.cgi?d=$in{'dom'}&mode=";
+$prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 @tabs = ( [ "current", $text{'cert_tabcurrent'}, $prog."current" ],
 	  [ "csr", $text{'cert_tabcsr'}, $prog."csr" ],
 	  [ "new", $text{'cert_tabnew'}, $prog."new" ],
