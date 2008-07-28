@@ -1595,6 +1595,9 @@ check_espamsiteconfig=The <tt>spamassassin</tt> command does not support the <tt
 check_reserr=Resource limits are not supported on your system : $1
 check_reswarn=Resource limits are supported, but not fully configured : $1
 check_resok=Resource limits are supported and configured correctly.
+check_apicmd=Creating API helper command ..
+check_apicmdok=.. created <tt>$1</tt>
+check_apicmderr=.. failed : $1
 
 checkmap_enone=No map sources were found in the <a href='$1'>Postfix configuration</a>
 checkmap_esupport=The map source <tt>$1</tt> is not supported by Postfix - you may need to install Postfix libraries for it, or re-compile

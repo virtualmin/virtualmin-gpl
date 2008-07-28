@@ -68,6 +68,14 @@ if ($config{'collect_interval'} ne $lastconfig{'collect_interval'}) {
 	&$second_print($text{'setup_done'});
 	}
 
+# Re-create API helper command
+if ($config{'api_helper'} ne $lastconfig{'api_helper'}) {
+	&$first_print($text{'check_apicmd'});
+	local ($ok, $path) = &create_api_helper_command();
+	&$second_print(&text($ok ? 'check_apicmdok' : 'check_apicmderr',
+			     $path));
+	}
+
 # Restart lookup-domain daemon, if need
 if ($config{'spam'}) {
 	&setup_lookup_domain_daemon();

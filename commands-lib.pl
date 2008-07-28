@@ -115,5 +115,79 @@ return ( "upload-api-docs.pl",
 	 );
 }
 
+# get_api_helper_command()
+# Returns the path to the API wrapper command
+sub get_api_helper_command
+{
+if ($config{'api_helper'}) {
+	return $config{'api_helper'};
+	}
+else {
+	# Try some directories for writing
+	foreach my $dir ("/usr/sbin", "/usr/local/sbin", "/opt/csw/bin") {
+		-d $dir || next;
+		open(APIWRAPPERTEST, ">$dir/.virtualmin-test") || next;
+		close(APIWRAPPERTEST);
+		unlink("$dir/.virtualmin-test");
+		return "$dir/virtualmin";
+		}
+	return undef;
+	}
+}
+
+# create_api_helper_command()
+# Creates the API helper command. Returns either 1 and the path, or 0 and
+# an error message.
+sub create_api_helper_command
+{
+local $api_helper_command = &get_api_helper_command();
+if (!$api_helper_command) {
+	return (0, "No writable path configured or auto-detected");
+	}
+local $bash = &has_command("bash");
+if ($bash) {
+	&open_tempfile(HELPER, ">$api_helper_command", 1, 0) ||
+		return (0, "Failed to write to $api_helper_command : $!");
+	&print_tempfile(HELPER, <<EOF);
+#!$bash
+WEBMIN_CONFIG=$config_directory
+WEBMIN_VAR=$var_directory
+export WEBMIN_CONFIG WEBMIN_VAR
+cd $module_root_directory
+if [ "\$1" = "" -o "\$1" = "help" -a "\$2" = "" -o "\$1" = "--help" -a "\$2" = "" -o "\$1" = "-help" -a "\$2" = "" ]; then
+	echo "usage: $api_helper_command <command> [args..]"
+	echo "   or: $api_helper_command help <command>"
+	echo ""
+	echo "Available commands :"
+	echo ""
+	COMMAND=list-commands
+else
+	COMMAND=\$1
+fi
+shift
+if [ "\$COMMAND" = "help" ]; then
+	help=1
+	COMMAND=\$1
+	shift
+fi
+echo \$COMMAND | fgrep .pl >/dev/null
+if [ "\$?" != "0" ]; then
+	COMMAND="\$COMMAND.pl"
+fi
+if [ "\$help" = "1" ]; then
+	perldoc $module_root_directory/\$COMMAND
+else
+	exec $module_root_directory/\$COMMAND "\$@"
+fi
+EOF
+	&close_tempfile(HELPER);
+	&set_ownership_permissions(undef, undef, 0755, $api_helper_command);
+	return (1, $api_helper_command);
+	}
+else {
+	return (0, "bash was not found");
+	}
+}
+
 1;
 

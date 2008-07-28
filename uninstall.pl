@@ -23,6 +23,7 @@ if (&check_pid_file($pidfile)) {
 &init::disable_at_boot("lookup-domain");
 
 # Delete API helper
+local $api_helper_command = &get_api_helper_command();
 if (-r $api_helper_command && !-d $api_helper_command) {
 	&unlink_file($api_helper_command);
 	}
