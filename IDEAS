@@ -1,17 +1,8 @@
- - separate backup schedule for each domain (or group of domains?)
-	- behave like templates, with first stored in config and others in files
-	- need to be able to backup backup schedules
-
  - NIS support for users DB
 	- Cluster mode - each feature on a separate server
 
  - Allow resellers and domain owners to use remote API
 	- Need access control enforcement in .pl scripts
-
- - pre-load ui-lib.pl ?
-
- - templates for new mailing list configs
-	- http://www.virtualmin.com/bug-tracker/bug?bug%5fnumber=739
 
  - script installers for
 	- phpmyfamily (bug 800)
@@ -37,9 +28,6 @@
 	SetHandler fcgid-script
 	</Location>
 	 FS#3421
-
- - use new Apache module function for block updates instead of directly
-   modifying config file, when Webmin 1.380 is out
 
  - faster mass alias domain creation
 	- cache httpd.conf and mail files in memory
