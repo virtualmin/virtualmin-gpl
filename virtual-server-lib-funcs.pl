@@ -5716,7 +5716,7 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 	my $f;
 	$dd->{'deleting'} = 1;		# so that features know about delete
 	if (!$only) {
-		# Delete all plugins
+		# Delete all plugins, with error handling
 		foreach $f (@feature_plugins) {
 			if ($dd->{$f}) {
 				local $main::error_must_die = 1;
@@ -9352,11 +9352,19 @@ foreach $f (@features) {
 			}
 		}
 	}
+
+# Do move for plugins, with error handling
 foreach $f (@feature_plugins) {
 	for(my $i=0; $i<@doms; $i++) {
 		if ($doms[$i]->{$f}) {
 			$doing_dom = $doms[$i];
-			&plugin_call($f, "feature_modify", $doms[$i], $olddoms[$i]);
+			local $main::error_must_die = 1;
+			eval { &plugin_call($f, "feature_modify",
+				     	    $doms[$i], $olddoms[$i]) };
+			if ($@) {
+				&$second_print(&text('setup_failure',
+					&plugin_call($f, "feature_name"), $@));
+				}
 			}
 		}
 	}
@@ -9521,7 +9529,13 @@ foreach $f (@feature_plugins) {
 	for(my $i=0; $i<@doms; $i++) {
 		if ($doms[$i]->{$f}) {
 			$doing_dom = $doms[$i];
-			&plugin_call($f, "feature_modify", $doms[$i], $olddoms[$i]);
+			local $main::error_must_die = 1;
+			eval { &plugin_call($f, "feature_modify",
+					    $doms[$i], $olddoms[$i]) };
+			if ($@) {
+				&$second_print(&text('setup_failure',
+					&plugin_call($f, "feature_name"), $@));
+				}
 			}
 		}
 	}
