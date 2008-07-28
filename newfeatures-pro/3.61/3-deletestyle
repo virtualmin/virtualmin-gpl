@@ -1,0 +1,4 @@
+desc=Delete content styles
+html=Third-party content styles can now be deleted by the master admin from the Content Styles page.
+master=1
+link=edit_newstyles.cgi

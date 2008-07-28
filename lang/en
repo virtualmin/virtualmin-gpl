@@ -3905,6 +3905,11 @@ newstyles_tabadd=Install Style
 newstyles_tabenable=Enabled Styles
 newstyles_ecannot=You are not allowed to manage content styles
 newstyles_return=list of styles
+newstyles_tabdelete=Delete Style
+newstyles_desc3=Select a third-party content style from the list below to remove. Styles built into Virtualmin cannot be removed. Any websites using the style will not be effected.
+newstyles_dstyle=Style to delete
+newstyles_del=Delete Now
+newstyles_edelete=Selected content style no longer exists!
 
 addstyle_title=Install Style
 addstyle_err=Failed to install new style
