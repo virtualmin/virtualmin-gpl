@@ -1020,7 +1020,7 @@ if ($z) {
 				   $_->{'name'} eq '@') } @recs;
 	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 	local $baseip = $baserec ? $baserec->{'values'}->[0] : undef;
-	&modify_records_ip_address(\@recs, $fn, $baseip, $_[0]->{'ip'});
+	&modify_records_ip_address(\@recs, $fn, $baseip, $ip);
 
 	# Replace NS records with those from new system
 	if (!$_[2]->{'wholefile'}) {
