@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Piwik script installer to version 0.2.9, phpCOIN to 1.4.4, Joomla to 1.5.5, phpMyAdmin to 2.11.8.1, and Drupal to 5.9.
+html=Updated the Piwik script installer to version 0.2.9, phpCOIN to 1.4.4, Joomla to 1.5.5, phpMyAdmin to 2.11.8.1, Wordpress MU 2.6, and Drupal to 5.9.
 master=1
 reseller=1
 domain=1
