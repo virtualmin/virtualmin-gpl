@@ -1456,7 +1456,9 @@ $opts->{'dir'} || return "Missing install directory!";
 &is_under_directory($d->{'home'}, $opts->{'dir'}) ||
 	return "Invalid install directory $opts->{'dir'}";
 local $out = &backquote_logged("rm -rf ".quotemeta($opts->{'dir'})."/* ".
-			       quotemeta($opts->{'dir'})."/.htaccess* 2>&1");
+			       quotemeta($opts->{'dir'})."/.htaccess* ".
+			       quotemeta($opts->{'dir'})."/.svn* ".
+			       quotemeta($opts->{'dir'})."/.cvs* 2>&1");
 $? && return "Failed to delete files : <tt>$out</tt>";
 
 if ($opts->{'dir'} ne &public_html_dir($d, 0)) {
