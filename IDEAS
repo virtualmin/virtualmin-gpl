@@ -53,5 +53,5 @@
  - Per-domain or per-template custom links
 	- FS#4324
 
- - Document webmail feature
+ - *.domain.com alias virtual servers
 
