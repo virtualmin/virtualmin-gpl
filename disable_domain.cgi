@@ -36,20 +36,18 @@ elsif (!$in{'confirm'}) {
 		$dislast = pop(@distext);
 		$distext = &text('disable_and', join(", ", @distext), $dislast);
 		}
-
-	print &check_clicks_function();
-	print "<p>",&text('disable_rusure2', "<tt>$d->{'dom'}</tt>",
-			  $distext),"<p>\n";
+	print &text('disable_rusure2', "<tt>$d->{'dom'}</tt>",
+				       $distext),"<p>\n";
 	print $text{'disable_undo'},"<p>\n";
-	print "<form action=disable_domain.cgi>\n";
+
+	# Show the OK button
+	print "<center>\n";
+	print &ui_form_start("disable_domain.cgi");
 	print "<b>$text{'disable_why'}</b>\n",
 	      &ui_textbox("why", undef, 50),"<p>\n";
-	print "<center>\n";
-	print "<input type=hidden name=dom value='$in{'dom'}'>\n";
-	print "<input type=submit name=confirm ",
-	      "value='$text{'disable_ok'}' onClick='check_clicks(form)'>\n";
+	print &ui_hidden("dom", $in{'dom'});
+	print &ui_form_end([ [ "confirm", $text{'disable_ok'} ] ]);
 	print "</center>\n";
-	print "</form>\n";
 	}
 else {
 	# Go ahead and do it ..
@@ -92,6 +90,11 @@ else {
 	&made_changes();
 	&reset_domain_envs($d);
 	&webmin_log("disable", "domain", $d->{'dom'}, $d);
+
+	# Call any theme post command
+	if (defined(&theme_post_save_domain)) {
+		&theme_post_save_domain($d, 'modify');
+		}
 	}
 
 &ui_print_footer(&domain_footer_link($d),

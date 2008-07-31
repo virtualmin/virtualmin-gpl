@@ -26,16 +26,15 @@ else {
 @aliasdoms = grep { $_->{'parent'} != $d->{'id'} } @aliasdoms;
 if (!$in{'confirm'}) {
 	# Ask the user if he is sure
-	print &check_clicks_function();
 	if ($d->{'unix'}) {
 		$sz = &disk_usage_kb($d->{'home'});
-		print "<p>",&text('delete_rusure2',
-				  "<tt>".&show_domain_name($d)."</tt>",
-				  &nice_size($sz*1024)),"<p>\n";
+		print &text('delete_rusure2',
+			    "<tt>".&show_domain_name($d)."</tt>",
+			    &nice_size($sz*1024)),"<p>\n";
 		}
 	else {
-		print "<p>",&text('delete_rusure3',
-				  "<tt>".&show_domain_name($d)."</tt>"),"<p>\n";
+		print &text('delete_rusure3',
+			    "<tt>".&show_domain_name($d)."</tt>"),"<p>\n";
 		}
 
 	$pfx = $d->{'parent'} ? "sublosing_" : "losing_";
@@ -52,8 +51,17 @@ if (!$in{'confirm'}) {
 			     &plugin_call($f, "feature_losing"),"<br>\n";
 			}
 		}
-	if (@users || @aliases) {
-		print "<li>",&text('delete_mailboxes', scalar(@users), scalar(@aliases)),"<br>\n";
+	if (@users && @aliases) {
+		print "<li>",&text('delete_mailboxes',
+				   scalar(@users), scalar(@aliases)),"<br>\n";
+		}
+	elsif (@users) {
+		print "<li>",&text('delete_mailboxes2',
+				   scalar(@users)),"<br>\n";
+		}
+	elsif (@aliases) {
+		print "<li>",&text('delete_mailboxes3',
+				   scalar(@aliases)),"<br>\n";
 		}
 	print "</ul>\n";
 
@@ -70,15 +78,15 @@ if (!$in{'confirm'}) {
 			"</font><p>\n";
 		}
 
-	print "<center><form action=delete_domain.cgi>\n";
-	print "<input type=hidden name=dom value='$in{'dom'}'>\n";
-	print "<input type=submit name=confirm ",
-	      "value='$text{'delete_ok'}' onClick='check_clicks(form)'>\n";
+	# Show the OK button
+	print "<center>\n";
+	print &ui_form_start("delete_domain.cgi");
+	print &ui_hidden("dom", $in{'dom'});
 	if (&can_import_servers() && !$virtualmin_pro) {
-		print "<p><input type=checkbox name=only value=1> ",
-		      "$text{'delete_only'}<br>\n";
+		print &ui_checkbox("only", 1, $text{'delete_only'}, 0),"<br>\n";
 		}
-	print "</form></center>\n";
+	print &ui_form_end([ [ "confirm", $text{'delete_ok'} ] ]);
+	print "</center>\n";
 
 	&ui_print_footer(&domain_footer_link($d),
 		"", $text{'index_return'});

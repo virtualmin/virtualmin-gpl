@@ -32,15 +32,14 @@ if (!$in{'confirm'}) {
 		$dislast = pop(@distext);
 		$distext = &text('disable_and', join(", ", @distext), $dislast);
 		}
+	print &text('enable_rusure2', "<tt>$d->{'dom'}</tt>", $distext),"<p>\n";
 
-	print &check_clicks_function();
-	print "<p>",&text('enable_rusure2', "<tt>$d->{'dom'}</tt>",
-			  $distext),"<p>\n";
-	print "<center><form action=enable_domain.cgi>\n";
-	print "<input type=hidden name=dom value='$in{'dom'}'>\n";
-	print "<input type=submit name=confirm ",
-	      "value='$text{'enable_ok'}' onClick='check_clicks(form)'>\n";
-	print "</form></center>\n";
+	# Show OK button
+	print "<center>\n";
+	print &ui_form_start("enable_domain.cgi");
+	print &ui_hidden("dom", $in{'dom'});
+	print &ui_form_end([ [ "confirm", $text{'enable_ok'} ] ]);
+	print "</center>\n";
 	}
 else {
 	# Go ahead and do it
@@ -80,6 +79,11 @@ else {
 	&made_changes();
 	&reset_domain_envs($d);
 	&webmin_log("enable", "domain", $d->{'dom'}, $d);
+
+	# Call any theme post command
+	if (defined(&theme_post_save_domain)) {
+		&theme_post_save_domain($d, 'modify');
+		}
 	}
 
 &ui_print_footer(&domain_footer_link($d),
