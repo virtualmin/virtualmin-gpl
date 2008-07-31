@@ -44,10 +44,18 @@ print &ui_tabs_start_tab("mode", "csr");
 print "$text{'cert_desc1'}<br>\n";
 print "$text{'cert_desc4'}<p>\n";
 
-# Show warning if there is a CSR outstanding
+# Show warning if there is a CSR outstanding or an existing key
 if ($d->{'ssl_csr'} && -r $d->{'ssl_csr'}) {
-	print "<b>",&text('cert_csrwarn', "<tt>$d->{'ssl_csr'}</tt>",
-			  "<tt>$d->{'ssl_newkey'}</tt>"),"</b><p>\n";
+	print "<b>",&text('cert_csrwarn',
+		"<tt>".&home_relative_path($d, $d->{'ssl_csr'})."</tt>",
+		"<tt>".&home_relative_path($d, $d->{'ssl_newkey'})."</tt>"),
+	      "</b><p>\n";
+	}
+elsif ($d->{'ssl_key'} && -r $d->{'ssl_key'}) {
+	print "<b>",&text('cert_keywarn',
+		"<tt>".&home_relative_path($d, $d->{'ssl_cert'})."</tt>",
+		"<tt>".&home_relative_path($d, $d->{'ssl_key'})."</tt>"),
+	      "</b><p>\n";
 	}
 
 print &ui_form_start("csr.cgi");

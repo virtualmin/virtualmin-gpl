@@ -11664,6 +11664,18 @@ foreach my $v (@$vars) {
 &close_tempfile(GLOBAL);
 }
 
+# home_relative_path(&domain, path)
+# Returns a path relative to a domain's home, if possible
+sub home_relative_path
+{
+local ($d, $file) = @_;
+local $l = length($d->{'home'});
+if (substr($file, 0, $l+1) eq $d->{'home'}."/") {
+	return substr($file, $l+1);
+	}
+return $file;
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;
