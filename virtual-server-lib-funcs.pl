@@ -11635,19 +11635,22 @@ local $ENV{'REMOTE_HOST'} ||= "127.0.0.1";
 # Returns an array of hash refs containing global variable names and values
 sub get_global_template_variables
 {
-local @rv;
-&open_readfile(GLOBAL, $global_template_variables_file);
-while(<GLOBAL>) {
-	s/\r|\n//g;
-	local $dis;
-	$dis = 1 if (s/^\#+\s*//);
-	local ($n, $v) = split(/\s+/, $_, 2);
-	push(@rv, { 'name' => $n,
-		    'value' => $v,
-		    'enabled' => !$dis });
+if (!defined(@global_template_variables_cache)) {
+	local @rv = ( );
+	&open_readfile(GLOBAL, $global_template_variables_file);
+	while(<GLOBAL>) {
+		s/\r|\n//g;
+		local $dis;
+		$dis = 1 if (s/^\#+\s*//);
+		local ($n, $v) = split(/\s+/, $_, 2);
+		push(@rv, { 'name' => $n,
+			    'value' => $v,
+			    'enabled' => !$dis });
+		}
+	close(GLOBAL);
+	@global_template_variables_cache = @rv;
 	}
-close(GLOBAL);
-return @rv;
+return @global_template_variables_cache;
 }
 
 # save_global_template_variables(&variables)
@@ -11662,6 +11665,7 @@ foreach my $v (@$vars) {
 		$v->{'name'}." ".$v->{'value'}."\n");
 	}
 &close_tempfile(GLOBAL);
+@global_template_variables_cache = @$vars;
 }
 
 # home_relative_path(&domain, path)
