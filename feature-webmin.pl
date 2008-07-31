@@ -421,7 +421,7 @@ local %acl = ( 'noconfig' => 1,
 	       'admin' => $_[2] ? $_[0]->{'id'} : undef,
 	      );
 if ($_[0]->{'domslimit'}) {
-	foreach $f (@opt_features, @feature_plugins) {
+	foreach $f (@opt_features, @feature_plugins, 'virt') {
 		$acl{"feature_$f"} = $_[0]->{"limit_$f"};
 		}
 	}

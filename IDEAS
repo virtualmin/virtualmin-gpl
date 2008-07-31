@@ -56,3 +56,5 @@
  - Domain owner should get DAV and SVN access by default (for top-level domains)
 
  - Document webmail feature
+
+ - Disable and delete forms don't use ui_submit !
