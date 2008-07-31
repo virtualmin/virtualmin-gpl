@@ -53,7 +53,5 @@
  - Per-domain or per-template custom links
 	- FS#4324
 
- - Domain owner should get DAV and SVN access by default (for top-level domains)
-
  - Document webmail feature
 
