@@ -123,10 +123,10 @@ print &ui_form_end([
 		 "", $text{'index_return'});
 
 # none_def_input(name, value, final-option, no-none, no-default, none-text,
-#		 &disable-fields)
+#		 &disable-fields, [no-disable-on-none])
 sub none_def_input
 {
-local ($name, $value, $final, $nonone, $nodef, $nonemsg, $dis) = @_;
+local ($name, $value, $final, $nonone, $nodef, $nonemsg, $dis, $nodisnone) = @_;
 local $rv;
 local $mode = $value eq "none" ? 0 :
 	      $value eq "" ? 1 : 2;
@@ -139,7 +139,10 @@ if (@opts > 1) {
 	local $dis1 = @$dis ? &js_disable_inputs($dis, [ ]) : undef;
 	local $dis2 = @$dis ? &js_disable_inputs([ ], $dis) : undef;
 	foreach $m (@opts) {
-		local $disn = $m == 2 ? $dis2 : $dis1;
+		local $disn = $m == 2 ? $dis2 :
+			      $m == 0 && $nodisnone ? $dis2 :
+			      $m == 0 && !$nodisnone ? $dis1 :
+				        $dis1;
 		$rv .= &ui_oneradio($name."_mode", $m,
 			$m == 0 ? ($nonemsg || $text{'newtmpl_none'}) :
 			$m == 1 ? $text{'tmpl_default'} : $final,

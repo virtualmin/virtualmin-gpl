@@ -264,7 +264,7 @@ print &ui_table_row(
 	&hlink($text{'tmpl_status'}, "template_status"),
 	&none_def_input("status", $tmpl->{'status'},
 			$text{'tmpl_statusemail'}, 0, 0, undef,
-			\@status_fields)."\n".
+			\@status_fields, 1)."\n".
 	&ui_textbox("status", $tmpl->{'status'} eq "none" ? undef :
 				$tmpl->{'status'}, 50));
 
@@ -297,8 +297,10 @@ local ($tmpl) = @_;
 
 # Save status monitoring settings
 $tmpl->{'status'} = &parse_none_def("status");
-if ($in{'status_mode'} == 2) {
-	$in{'status'} =~ /\S/ || &error($text{'tmpl_estatus'});
+if ($in{'status_mode'} != 1) {
+	if ($in{'status_mode'} == 2) {
+		$in{'status'} =~ /\S/ || &error($text{'tmpl_estatus'});
+		}
 	$tmpl->{'statusonly'} = $in{'statusonly'};
 	$in{'statustimeout_def'} || $in{'statustimeout'} =~ /^\d+$/ ||
 		&error($text{'tmpl_estatustimeout'});
