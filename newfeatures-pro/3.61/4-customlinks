@@ -1,0 +1,4 @@
+desc=Custom links and templates
+html=Custom links can be limited to virtual servers with a specific template if you have any custom templates defined, for more control over when each link is displayed.
+master=1
+link=edit_newlinks.cgi

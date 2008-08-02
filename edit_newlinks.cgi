@@ -5,10 +5,15 @@ require './virtual-server-lib.pl';
 &ReadParse();
 &can_edit_templates() || &error($text{'newlinks_ecannot'});
 &ui_print_header(undef, $text{'newlinks_title'}, "", "custom_links");
+@tmpls = &list_templates();
+@ctmpls = grep { !$_->{'standard'} } @tmpls;
 
 print &ui_hidden_start($text{'newuser_docs'}, "docs", 0);
 print "$text{'newlinks_descr'}<p>\n";
 &print_subs_table("DOM", "IP", "USER", "EMAILTO");
+if (@ctmpls) {
+	print "$text{'newlinks_descr2'}<p>\n";
+	}
 print &ui_hidden_end(),"<p>\n";
 
 # Make the table data
@@ -33,15 +38,23 @@ foreach $l (@links, { }, { }) {
 	    [ [ "", $text{'newlinks_nocat'} ],
 	      map { [ $_->{'id'}, &shorten_category($_->{'desc'}) ] } @cats ]);
 	push(@table, [
-		&ui_textbox("desc_$i", $l->{'desc'}, 20),
-		&ui_textbox("url_$i", $l->{'url'}, 60),
-		&ui_radio("open_$i", int($l->{'open'}),
+		&ui_textbox("desc_$i", $l->{'desc'}, 20, 0, undef,
+			    "style='width:100%'"),
+		&ui_textbox("url_$i", $l->{'url'}, 60, 0, undef,
+			    "style='width:100%'"),
+		&ui_select("open_$i", int($l->{'open'}),
 			  [ [ 0, $text{'newlinks_same'} ],
 			    [ 1, $text{'newlinks_new'} ] ]),
-		join(" ", map { &ui_checkbox("who_$i", $_,
+		join("<br>\n", map { &ui_checkbox("who_$i", $_,
 				$text{'newlinks_'.$_}, $l->{'who'}->{$_}) }
 			      ('master', 'domain', 'reseller')),
 		@cats ? ( $catsel ) : ( ),
+		@ctmpls ? (
+		  &ui_select("tmpl_$i", $l->{'tmpl'},
+		     [ [ "", "&lt;$text{'newlinks_any'}&gt;" ],
+		       map { [ $_->{'id'},
+			     &shorten_category($_->{'name'}, 30) ] } @tmpls ])
+			) : ( ),
 		@links > 1 ? ( $updown ) : ( ),
 		]);
 	$i++;	
@@ -57,6 +70,7 @@ print ui_form_columns_table(
 	[ $text{'newlinks_desc'}, $text{'newlinks_url'},
 	  $text{'newlinks_open'}, $text{'newlinks_who'},
 	  @cats ? ( $text{'newlinks_cat'} ) : ( ),
+	  @ctmpls ? ( $text{'newlinks_tmpl'} ) : ( ),
 	  @links > 1 ? ( $text{'newlinks_move'} ) : ( ), ],
 	100,
 	\@table,
@@ -99,9 +113,10 @@ if ($in{'refresh'}) {
 
 sub shorten_category
 {
-local ($desc) = @_;
-if (length($desc) > 12) {
-	return substr($desc, 0, 10)."...";
+local ($desc, $max) = @_;
+$max ||= 12;
+if (length($desc) > $max) {
+	return substr($desc, 0, $max-2)."...";
 	}
 return $desc;
 }

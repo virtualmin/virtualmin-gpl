@@ -3765,6 +3765,7 @@ switch_eadmin=The specified extra administrator does not exist!
 
 newlinks_title=Custom Links
 newlinks_descr=This form can be used to create links that are available on the left menu when a virtual server is selected. The following substitions can be used in the URL and link title :
+newlinks_descr2=Links can be limited to virtual servers using a particular template, by selecting one from the <b>For template</b> menu. Otherwise they will be displayed for all domains.
 newlinks_desc=Link title
 newlinks_url=Destination URL
 newlinks_who=Visible to
@@ -3775,7 +3776,7 @@ newlinks_err=Failed to save custom links
 newlinks_ecannot=You are not allowed to edit custom links
 newlinks_eurl=No URL entered in line $1
 newlinks_ewho=No visible user types selected in line $1
-newlinks_open=Open in window
+newlinks_open=Window
 newlinks_same=Same
 newlinks_new=New
 newlinks_move=Move
@@ -3783,6 +3784,8 @@ newlinks_catdesc=You can group custom links into categories by entering them int
 newlinks_catname=Category name
 newlinks_cat=Category
 newlinks_nocat=&lt;None&gt;
+newlinks_tmpl=For template
+newlinks_any=Any
 
 postsave_title=Virtual Server Modified
 postsave_done=The virtual server $1 has been successfully updated. Use the links below to continue managing it.

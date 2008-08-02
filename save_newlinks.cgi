@@ -16,6 +16,7 @@ for($i=0; defined($in{"desc_$i"}); $i++) {
 		    'open' => $in{"open_$i"},
 		    'who' => \%who,
 		    'cat' => $in{"cat_$i"},
+		    'tmpl' => $in{"tmpl_$i"},
 		   });
 	}
 &save_custom_links(\@rv);

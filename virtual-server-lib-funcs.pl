@@ -6789,6 +6789,7 @@ while(<LINKS>) {
 		    'who' => { map { $_ => 1 } split(/:/, $a[2]) },
 		    'open' => $a[3],
 		    'cat' => $a[4],
+		    'tmpl' => $a[5] eq '-' ? undef : $a[5],
 		  });
 	}
 close(LINKS);
@@ -6803,7 +6804,8 @@ sub save_custom_links
 foreach my $a (@{$_[0]}) {
 	&print_tempfile(LINKS, $a->{'desc'}."\t".$a->{'url'}."\t".
 			       join(":", keys %{$a->{'who'}})."\t".
-			       int($a->{'open'})."\t".$a->{'cat'}."\n");
+			       int($a->{'open'})."\t".$a->{'cat'}."\t".
+			       ($a->{'tmpl'} eq "" ? "-" : $a->{'tmpl'})."\n");
 	}
 &close_tempfile(LINKS);
 }
@@ -6845,17 +6847,23 @@ local $me = &master_admin() ? 'master' :
 	    &reseller_admin() ? 'reseller' : 'domain';
 local %cats = map { $_->{'id'}, $_->{'desc'} } &list_custom_link_categories();
 foreach my $l (&list_custom_links()) {
-	if ($l->{'who'}->{$me}) {
-		local $nl = {
-			'desc' => &substitute_domain_template($l->{'desc'}, $d),
-			'url' => &substitute_domain_template($l->{'url'}, $d),
-			'open' => $l->{'open'},
-			'catname' => $cats{$l->{'cat'}},
-			'cat' => $l->{'cat'}, 
-			};
-		if ($nl->{'desc'} && $nl->{'url'}) {
-			push(@rv, $nl);
-			}
+	if (!$l->{'who'}->{$me}) {
+		# Not for you
+		next;
+		}
+	if ($l->{'tmpl'} && $d->{'template'} ne $l->{'tmpl'}) {
+		# Not for this domain
+		next;
+		}
+	local $nl = {
+		'desc' => &substitute_domain_template($l->{'desc'}, $d),
+		'url' => &substitute_domain_template($l->{'url'}, $d),
+		'open' => $l->{'open'},
+		'catname' => $cats{$l->{'cat'}},
+		'cat' => $l->{'cat'}, 
+		};
+	if ($nl->{'desc'} && $nl->{'url'}) {
+		push(@rv, $nl);
 		}
 	}
 return @rv;
