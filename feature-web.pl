@@ -54,7 +54,7 @@ if ($_[0]->{'alias'} && $tmpl->{'web_alias'} == 1) {
 			}
 		}
 	&apache::save_directive("ServerAlias", \@sa, $pconf, $conf);
-	&flush_file_lines();
+	&flush_file_lines($pvirt->{'file'});
 	$_[0]->{'alias_mode'} = 1;
 	}
 else {
@@ -169,7 +169,7 @@ else {
 	splice(@$lref, $pos, 0, "<VirtualHost $vip:$web_port>",
 				@dirs,
 				"</VirtualHost>");
-	&flush_file_lines();
+	&flush_file_lines($f);
 	$_[0]->{'web_port'} = $web_port;
 
 	# Create a link from another Apache dir
@@ -259,6 +259,14 @@ if (defined(&supports_resource_limits)) {
 		}
 	}
 
+# If any alias domains with web already exist, re-set them up
+local @adoms = &get_domain_by("alias", $_[0]->{'id'},
+			      "web", 1,
+			      "alias_mode", 1);
+foreach my $ad (@adoms) {
+	&setup_web($ad);
+	}
+
 &release_lock_web($lockdom);
 }
 
@@ -283,7 +291,7 @@ if ($_[0]->{'alias_mode'}) {
 	local @sa = &apache::find_directive("ServerAlias", $pconf);
 	@sa = grep { !/\Q$_[0]->{'dom'}\E$/ } @sa;
 	&apache::save_directive("ServerAlias", \@sa, $pconf, $conf);
-	&flush_file_lines();
+	&flush_file_lines($pvirt->{'file'});
 	&release_lock_web($alias);
 	&register_post_action(\&restart_apache);
 	&$second_print($text{'setup_done'});
@@ -362,7 +370,7 @@ sub delete_web_virtual_server
 &require_apache();
 local $lref = &read_file_lines($_[0]->{'file'});
 splice(@$lref, $_[0]->{'line'}, $_[0]->{'eline'} - $_[0]->{'line'} + 1);
-&flush_file_lines();
+&flush_file_lines($_[0]->{'file'});
 if (&is_empty($lref)) {
 	# Don't keep around empty web files
 	&unlink_file($_[0]->{'file'});
@@ -411,7 +419,7 @@ if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
 				}
 			&apache::save_directive("ServerAlias", \@sa, $pconf,
 						$conf);
-			&flush_file_lines();
+			&flush_file_lines($pvirt->{'file'});
 			&$second_print($text{'setup_done'});
 			$rv++;
 			}
@@ -440,7 +448,7 @@ else {
 			     $nvstar ? "*" : $_[0]->{'ip'};
 		$lref->[$virt->{'line'}] =
 			"<VirtualHost $vip:$_[0]->{'web_port'}>";
-		&flush_file_lines();
+		&flush_file_lines($virt->{'file'});
 		undef(@apache::get_config_cache);
 		($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
 						      $_[1]->{'web_port'});
@@ -455,7 +463,7 @@ else {
 		for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
 			$lref->[$i] =~ s/$_[1]->{'home'}/$_[0]->{'home'}/g;
 			}
-		&flush_file_lines();
+		&flush_file_lines($virt->{'file'});
 		undef(@apache::get_config_cache);
 		($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
 						      $_[1]->{'web_port'});
@@ -474,7 +482,7 @@ else {
 				$lref->[$i] =~ s/$_[3]->{'dom'}/$_[2]->{'dom'}/g;
 				}
 			}
-		&flush_file_lines();
+		&flush_file_lines($virt->{'file'});
 		undef(@apache::get_config_cache);
 		($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
 						      $_[1]->{'web_port'});
@@ -493,7 +501,7 @@ else {
 				$lref->[$i] =~ s/$_[1]->{'proxy_pass'}/$_[0]->{'proxy_pass'}/g;
 				}
 			}
-		&flush_file_lines();
+		&flush_file_lines($virt->{'file'});
 		undef(@apache::get_config_cache);
 		($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
 						      $_[1]->{'web_port'});
@@ -724,7 +732,7 @@ if ($tmpl->{'disabled_url'} eq 'none') {
 	local $dis = &disabled_website_html($d);
 	&apache::save_directive("AliasMatch",
 				[ @am, "^/.*\$ $dis" ], $vconf, $conf);
-	&flush_file_lines();
+	&flush_file_lines($virt->{'file'});
 	local $msg = $tmpl->{'disabled_web'} eq 'none' ?
 		"<h1>Website Disabled</h1>\n" :
 		join("\n", split(/\t/, $tmpl->{'disabled_web'}));
@@ -740,7 +748,7 @@ else {
 	local $url = &substitute_domain_template($tmpl->{'disabled_url'}, $d);
 	&apache::save_directive("RedirectMatch",
 			[ @rm, "^/.*\$ $url" ], $vconf, $conf);
-	&flush_file_lines();
+	&flush_file_lines($virt->{'file'});
 	}
 }
 
@@ -797,7 +805,7 @@ local @rm = &apache::find_directive("RedirectMatch", $vconf);
 @rm = grep { substr($_, 0, 5) ne "^/.*\$" } @rm;
 &apache::save_directive("RedirectMatch", \@rm, $vconf, $conf);
 
-&flush_file_lines();
+&flush_file_lines($virt->{'file'});
 }
 
 # check_web_clash(&domain, [field])
@@ -1171,7 +1179,7 @@ if ($virt) {
 			$dstlref->[$i] =~ s/\Q$_[5]->{'home'}\E/$_[0]->{'home'}/g;
 			}
 		}
-	&flush_file_lines();
+	&flush_file_lines($virt->{'file'});
 	undef(@apache::get_config_cache);
 
 	# Re-generate PHP wrappers to match this system
@@ -2310,7 +2318,7 @@ else {
 	&apache::save_directive("Group",
 		$mode ? [ "\"#$pdom->{'gid'}\"" ] : [ ], $vconf, $conf);
 	}
-&flush_file_lines();
+&flush_file_lines($virt->{'file'});
 &register_post_action(\&restart_apache);
 }
 
