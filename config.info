@@ -76,7 +76,7 @@ alias_post_command=Command to run after making changes to an alias,0
 other_users=Notify other modules when updating server administrator Unix users?,1,1-Yes,0-No
 other_doms=Notify other modules when updating mailbox Unix users?,1,1-Yes,0-No
 check_apache=Check Apache configuration before applying?,1,1-Yes,0-No
-nodeniedssh=Add users with no SSH access to <tt>deniedssh</tt> group?,1,0-Yes,0-No
+nodeniedssh=Add users with no SSH access to <tt>deniedssh</tt> group?,1,0-Yes,1-No
 
 line4.5=Qmail+LDAP options,11
 ldap_host=LDAP server,0
