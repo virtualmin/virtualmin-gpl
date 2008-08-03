@@ -7083,10 +7083,16 @@ return %user;
 # add/update and to delete
 sub qmail_user_to_dn
 {
+&require_mail();
 local $pfx = $_[0]->{'pass'} =~ /^\{[a-z0-9]+\}/i ? undef : "{crypt}";
 local @ee = @{$_[0]->{'extraemail'}};
 local @to = @{$_[0]->{'to'}};
 local @delrv;
+local $mailhost;
+if (defined(&qmailadmin::get_control_file)) {
+	$mailhost = &qmailadmin::get_control_file("me");
+	}
+$mailhost ||= &get_system_hostname();
 local @rv = (
 	 "uid" => $_[0]->{'user'},
 	 "qmailUID" => $_[0]->{'uid'},
@@ -7096,7 +7102,7 @@ local @rv = (
 	 "mailMessageStore" => $_[0]->{'mailstore'},
 	 "mailQuotaSize" => $_[0]->{'qquota'},
 	 "mail" => $_[0]->{'email'},
-	 "mailHost" => &get_system_hostname(),
+	 "mailHost" => $mailhost,
 	 "accountStatus" => "active",
 	);
 if (@ee) {
