@@ -1659,8 +1659,11 @@ foreach my $l (@listen) {
 	}
 if (!$lfound && @listen > 0) {
 	# Apache is listening on some IP addresses and ports, but not the
-	# needed one.
-	local $ip = $d->{'virt'} ? $d->{'ip'} : "*";
+	# needed one. Add a listen for that IP specifically.
+	# Listening on * is no longer done, as it can cause conflicts with
+	# other servers on port 443 or 80 and other IPs.
+	#local $ip = $d->{'virt'} ? $d->{'ip'} : "*";
+	local $ip = $d->{'ip'};
 	&apache::save_directive("Listen", [ @listen, "$ip:$web_port" ],
 				$conf, $conf);
 	&flush_file_lines();
