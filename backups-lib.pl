@@ -920,6 +920,19 @@ if ($ok) {
 			# Does the template exist?
 			local $tmpl = &get_template($d->{'template'});
 			if (!$tmpl) {
+				# No .. does the backup have it?
+				local $tmplfile =
+				  "$restoredir/$d->{'dom'}_virtualmin_template";
+				if (-r $tmplfile) {
+					# Yes - create on this system and use
+					&copy_source_dest(
+					    $tmplfile,
+					    "$templates_dir/$d->{'template'}");
+					undef(@list_templates_cache);
+					$tmpl = &get_template($d->{'template'});
+					}
+				}
+			if (!$tmpl) {
 				&$second_print($text{'restore_etemplate'});
 				$ok = 0;
 				last DOMAIN;

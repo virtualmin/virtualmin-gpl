@@ -4119,6 +4119,11 @@ if ($virtualmin_pro) {
 		&close_tempfile(EMPTY);
 		}
 	}
+local ($tmpl) = grep { $_->{'id'} == $_[0]->{'template'} } &list_templates();
+if (!$tmpl->{'standard'}) {
+	# Custom template, in case the restore target doesn't have it
+	&copy_source_dest($tmpl->{'file'}, $_[1]."_template");
+	}
 &$second_print($text{'setup_done'});
 return 1;
 }
@@ -6254,6 +6259,7 @@ while(defined($f = readdir(DIR))) {
 	if ($f ne "." && $f ne "..") {
 		local %tmpl;
 		&read_file("$templates_dir/$f", \%tmpl);
+		$tmpl{'file'} = "$templates_dir/$f";
 		$tmpl{'mail'} =~ s/\t/\n/g;
 		$tmpl{'resellers'} = '*' if (!defined($tmpl{'resellers'}));
 		if ($tmpl{'id'} == 1 || $tmpl{'id'} == 0) {
