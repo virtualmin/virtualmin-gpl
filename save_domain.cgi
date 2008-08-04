@@ -291,11 +291,15 @@ if ($d->{'parent'}) {
 # Update custom fields
 &parse_custom_fields($d, \%in);
 
-# Update alias copy mode
 # Save new domain details
 print $text{'save_domain'},"<br>\n";
 &save_domain($d);
 print $text{'setup_done'},"<p>\n";
+
+# If the IP has changed, update any alias domains too
+if ($d->{'ip'} ne $oldd->{'ip'}) {
+	&update_alias_domain_ips($d, $oldd);
+	}
 
 # Run the after command
 &run_post_actions();

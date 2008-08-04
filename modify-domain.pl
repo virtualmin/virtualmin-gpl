@@ -322,6 +322,14 @@ if (defined($resel)) {
 	$dom->{'reseller'} = $resel eq "NONE" ? undef : $resel;
 	}
 
+# Update the IP in alias domains too
+if ($dom->{'ip'} ne $old->{'ip'}) {
+	@aliases = grep { $_->{'alias'} eq $dom->{'id'} } @doms;
+	foreach my $adom (@aliases) {
+		$adom->{'ip'} = $dom->{'ip'};
+		}
+	}
+
 # Run the before script
 $config{'pre_command'} = $precommand if ($precommand);
 $config{'post_command'} = $postcommand if ($postcommand);
@@ -375,7 +383,6 @@ if (@add_excludes || @remove_excludes) {
 	&save_backup_excludes($dom, \@excludes);
 	&$second_print($text{'setup_done'});
 	}
-
 
 &refresh_webmin_user($dom);
 

@@ -1125,6 +1125,7 @@ save_etemplate=Invalid template selected
 save_fixvirts=Changing domain name in mail aliases ..
 save_aliascopy0=Switching to catchall alias mode ..
 save_aliascopy1=Switching to alias copy mode ..
+save_aliasip=Changing IP address of alias server $1 to $2 ..
 
 luser_err=Failed to save local mailbox
 luser_etaken=A user with the same name already exists

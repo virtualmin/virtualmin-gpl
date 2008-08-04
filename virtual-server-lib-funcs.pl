@@ -11718,6 +11718,37 @@ if (substr($file, 0, $l+1) eq $d->{'home'}."/") {
 return $file;
 }
 
+# update_alias_domain_ips(&domain, &old-domain)
+# Called when a domain's IP is changed by adding or removing a virtual IP, to
+# update the IPs of an alias domains too. May print stuff.
+sub update_alias_domain_ips
+{
+local ($d, $oldd) = @_;
+local @aliases = &get_domain_by("alias", $d->{'id'});
+return 0 if (!@aliases);
+foreach my $ad (@aliases) {
+	next if ($ad->{'ip'} ne $oldd->{'ip'});
+	my $oldad = { %$ad };
+	$ad->{'ip'} = $d->{'ip'};
+	&$first_print(&text('save_aliasip', $ad->{'dom'}, $d->{'ip'}));
+	&$indent_print();
+	foreach my $f (@features) {
+		local $mfunc = "modify_$f";
+		if ($config{$f} && $ad->{$f}) {
+			&try_function($f, $mfunc, $ad, $oldad);
+			}
+		}
+	foreach my $f (@feature_plugins) {
+		if ($ad->{$f}) {
+			&plugin_call($f, "feature_modify", $ad, $oldad);
+			}
+		}
+	&$outdent_print();
+	&save_domain($ad);
+	&$second_print($text{'setup_done'});
+	}
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;
