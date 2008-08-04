@@ -203,6 +203,11 @@ if (!$aliasdom) {
 		print &ui_table_row($text{'edit_virt'}, $ipfield, 1, \@tds);
 		}
 	}
+else {
+	# Show alias domain's IP
+	print &ui_table_row($text{'edit_ip'},
+		  "<tt>$d->{'ip'}</tt> ".$text{'edit_fromparent'});
+	}
 
 # Show description
 print &ui_table_row($text{'edit_owner'},

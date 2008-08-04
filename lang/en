@@ -884,6 +884,7 @@ edit_private=(Private to this server)
 edit_shared=(Shared by all servers)
 edit_shared2=(Non-default shared address)
 edit_rshared=(Shared by customers of reseller $1)
+edit_fromparent=(Same as target server)
 edit_virt=Virtual interface
 edit_virtoff=Remove now
 edit_virton=Keep interface $1
