@@ -317,16 +317,52 @@ return undef;
 }
 
 # check_ssl_clash(&domain, [field])
-# Returns 1 if an SSL Apache webserver already exists for some domain
+# Returns 1 if an SSL Apache webserver already exists for some domain, or if
+# port 443 on the domain's IP is in use by Webmin or Usermin
 sub check_ssl_clash
 {
+local $tmpl = &get_template($_[0]->{'template'});
 if (!$_[1] || $_[1] eq 'dom') {
-	local $tmpl = &get_template($_[0]->{'template'});
+	# Check for <virtualhost> clash by domain name
 	local $web_sslport = $tmpl->{'web_sslport'} || 443;
 	local ($cvirt, $cconf) = &get_apache_virtual($_[0]->{'dom'}, $web_sslport);
-	return $cvirt ? 1 : 0;
+	return 1 if ($cvirt);
+	}
+if (!$_[1] || $_[1] eq 'ip') {
+	# Check for clash by IP and port with Webmin or Usermin
+	local $web_port = $tmpl->{'web_port'} || 80;
+	return 1 if (&check_webmin_port_clash($_[0], $web_port));
 	}
 return 0;
+}
+
+# check_webmin_port_clash(&domain, port)
+# Returns 1 if Webmin or Usermin is using some IP and port
+sub check_webmin_port_clash
+{
+my ($d, $port) = @_;
+foreign_require("webmin", "webmin-lib.pl");
+my @checks;
+my %miniserv;
+&get_miniserv_config(\%miniserv);
+push(@checks, [ \%miniserv, "Webmin" ]);
+if (&foreign_installed("usermin")) {
+	my %uminiserv;
+	foreign_require("usermin", "usermin-lib.pl");
+	&usermin::get_usermin_miniserv_config(\%uminiserv);
+	push(@checks, [ \%uminiserv, "Usermin" ]);
+	}
+foreach my $c (@checks) {
+	my @sockets = &webmin::get_miniserv_sockets($c->[0]);
+	foreach my $s (@sockets) {
+		if (($s->[0] eq '*' || $s->[0] eq $d->{'ip'}) &&
+		    $s->[1] == $port) {
+			return &text('setup_esslportclash',
+				     $d->{'ip'}, $port, $c->[1]);
+			}
+		}
+	}
+return undef;
 }
 
 # disable_ssl(&domain)
