@@ -322,16 +322,17 @@ return undef;
 sub check_ssl_clash
 {
 local $tmpl = &get_template($_[0]->{'template'});
+local $web_sslport = $tmpl->{'web_sslport'} || 443;
 if (!$_[1] || $_[1] eq 'dom') {
 	# Check for <virtualhost> clash by domain name
-	local $web_sslport = $tmpl->{'web_sslport'} || 443;
-	local ($cvirt, $cconf) = &get_apache_virtual($_[0]->{'dom'}, $web_sslport);
+	local ($cvirt, $cconf) = &get_apache_virtual($_[0]->{'dom'},
+						     $web_sslport);
 	return 1 if ($cvirt);
 	}
 if (!$_[1] || $_[1] eq 'ip') {
 	# Check for clash by IP and port with Webmin or Usermin
-	local $web_port = $tmpl->{'web_port'} || 80;
-	return 1 if (&check_webmin_port_clash($_[0], $web_port));
+	local $err = &check_webmin_port_clash($_[0], $web_sslport);
+	return $err if ($err);
 	}
 return 0;
 }

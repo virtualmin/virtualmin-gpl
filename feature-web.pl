@@ -812,11 +812,17 @@ local @rm = &apache::find_directive("RedirectMatch", $vconf);
 # Returns 1 if an Apache webserver already exists for some domain
 sub check_web_clash
 {
+local $tmpl = &get_template($_[0]->{'template'});
+local $web_port = $tmpl->{'web_port'} || 80;
 if (!$_[1] || $_[1] eq 'dom') {
-	local $tmpl = &get_template($_[0]->{'template'});
-	local $web_port = $tmpl->{'web_port'} || 80;
+	# Check for <virtualhost> clash by domain name
 	local ($cvirt, $cconf) = &get_apache_virtual($_[0]->{'dom'}, $web_port);
-	return $cvirt ? 1 : 0;
+	return 1 if ($cvirt);
+	}
+if (!$_[1] || $_[1] eq 'ip') {
+	# Check for clash by IP and port with Webmin or Usermin
+	local $err = &check_webmin_port_clash($_[0], $web_port);
+	return $err if ($err);
 	}
 return 0;
 }
