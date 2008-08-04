@@ -139,6 +139,10 @@ if ($multi) {
 		print "    Mailbox username prefix: $d->{'prefix'}\n";
 		print "    Password: $d->{'pass'}\n";
 		print "    Home directory: $d->{'home'}\n";
+		if ($d->{'web'}) {
+			print "    HTML directory: ",&public_html_dir($d),"\n";
+			print "    CGI directory: ",&cgi_bin_dir($d),"\n";
+			}
 		print "    Contact email: $d->{'emailto'}\n";
 		print "    Created on: ",&make_date($d->{'created'}),"\n";
 		if ($d->{'creator'}) {
