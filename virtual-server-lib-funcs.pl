@@ -4088,7 +4088,25 @@ return $rv;
 sub backup_virtualmin
 {
 &$first_print($text{'backup_virtualmincp'});
+
+# Record parent's domain name, which can be used when restoring
+if ($_[0]->{'parent'}) {
+	local $parent = &get_domain($_[0]->{'parent'});
+	$_[0]->{'backup_parent_dom'} = $parent->{'dom'};
+	if ($_[0]->{'alias'}) {
+		local $alias = &get_domain($_[0]->{'alias'});
+		$_[0]->{'backup_alias_dom'} = $alias->{'dom'};
+		}
+	if ($_[0]->{'subdom'}) {
+		local $subdom = &get_domain($_[0]->{'subdom'});
+		$_[0]->{'backup_subdom_dom'} = $subdom->{'dom'};
+		}
+	&save_domain($_[0]);
+	}
+
+# Save the domain's data file
 &copy_source_dest($_[0]->{'file'}, $_[1]);
+
 if (-r "$initial_users_dir/$_[0]->{'id'}") {
 	# Initial user settings
 	&copy_source_dest("$initial_users_dir/$_[0]->{'id'}", $_[1]."_initial");

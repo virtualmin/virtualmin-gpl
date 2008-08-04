@@ -910,7 +910,11 @@ if ($ok) {
 				# Does the parent exist?
 				$parentdom = &get_domain($d->{'parent'});
 				if (!$parentdom) {
-					&$second_print($text{'restore_epar'});
+					&$second_print(
+					    $d->{'backup_parent_dom'} ?
+						&text('restore_epardom',
+						    $d->{'backup_parent_dom'}) :
+						$text{'restore_epar'});
 					$ok = 0;
 					last DOMAIN;
 					}
