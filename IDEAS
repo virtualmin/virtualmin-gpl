@@ -50,7 +50,10 @@
 
  - Use new API for webmin modules and categories, when Webmin 1.430 is out
 
- - *.domain.com alias virtual servers
+ - option to accept *.domain.com via Apache
+	- also add DNS record
+	- command-line
+	- edit_phpmode.cgi
 
  - More domain registrars
 	- gandi.net

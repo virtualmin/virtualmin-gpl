@@ -2661,6 +2661,56 @@ if ($conf) {
 &release_lock_anything($d);
 }
 
+# get_domain_web_star(&domain)
+# Returns 1 if the webserver is configured to accept requests for any
+# sub-domain under the domain, with a *.domain.com serveralias
+sub get_domain_web_star
+{
+local ($d) = @_;
+&require_apache();
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+local @sa = &apache::find_directive("ServerAlias", $pconf);
+my $withstar = "*.".$d->{'dom'};
+foreach my $sa (@sa) {
+	foreach my $saw (split(/\s+/, $sa)) {
+		return 1 if (&indexoflc($withstar, @saw) >= 0);
+		}
+	}
+return 0;
+}
+
+# save_domain_web_star(&domain, star-mode)
+# Toggle accepting of *.domain.com requests on or off
+sub save_domain_web_star
+{
+local ($d, $star) = @_;
+&require_apache();
+my $conf = &apache::get_config();
+my @ports = ( $d->{'web_port'},
+	      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+my $withstar = "*.".$d->{'dom'};
+foreach my $p (@ports) {
+	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
+	my @sa = &apache::find_directive("ServerAlias", $pconf);
+	my $found;
+	foreach my $sa (@sa) {
+		local @saw = split(/\s+/, $sa);
+		$found++ if (&indexoflc($withstar, @saw) >= 0);
+		}
+	if (!$found) {
+		# Need to add
+		push(@sa, $withstar);
+		&apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
+		&flush_file_lines($virt->{'file'});
+		$any++;
+		}
+	}
+if ($any) {
+	&register_post_action(\&restart_apache);
+	}
+# XXX update DNS (maybe separate function?)
+}
+
 $done_feature_script{'web'} = 1;
 
 1;

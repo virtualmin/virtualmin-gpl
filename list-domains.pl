@@ -266,6 +266,13 @@ if ($multi) {
 				(@wm ? "Yes" : "No"),"\n";
 			}
 
+		# Show star web server alias
+		if ($d->{'web'} && !$d->{'alias'}) {
+			$star = &get_domain_web_star($d);
+			print "    Match all web sub-domains: ",
+			      ($star ? "Yes" : "No"),"\n";
+			}
+
 		# Show DNS SPF mode
 		if ($config{'dns'} && $d->{'dns'} && !$d->{'dns_submode'}) {
 			$spf = &get_domain_spf($d);

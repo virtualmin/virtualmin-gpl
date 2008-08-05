@@ -34,6 +34,10 @@ To enable the webmail and admin DNS entries for the selected domains
 can be used. This will make both the DNS and Apache configuration changes
 needed. To turn them off, use the C<--no-webmail> flag.
 
+To have Apache configured to accept requests for any sub-domain, use the
+C<--matchall> command-line flag. This will also add a C<*> DNS entry if needed.
+To turn this feature off, use the C<--no-matchall> flag.
+
 =cut
 
 package virtual_server;
@@ -120,6 +124,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-webmail") {
 		$webmail = 0;
 		}
+	elsif ($a eq "--matchall") {
+		$matchall = 1;
+		}
+	elsif ($a eq "--no-matchall") {
+		$matchall = 0;
+		}
 	else {
 		&usage();
 		}
@@ -127,7 +137,7 @@ while(@ARGV > 0) {
 @dnames || $all_doms || usage();
 $mode || $rubymode || defined($proxy) || defined($framefwd) ||
   defined($suexec) || $stylename || defined($children) || $version ||
-  defined($webmail) || &usage("Nothing to do");
+  defined($webmail) || defined($matchall) || &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate style
@@ -201,7 +211,7 @@ foreach $d (@doms) {
 # Lock them all
 foreach $d (@doms) {
 	&obtain_lock_web($d);
-	&obtain_lock_dns($d) if (defined($webmail));
+	&obtain_lock_dns($d) if (defined($webmail) || defined($matchall));
 	}
 
 # Do it for all domains
@@ -314,7 +324,7 @@ foreach $d (@doms) {
 	}
 
 foreach $d (@doms) {
-	&release_lock_dns($d) if (defined($webmail));
+	&release_lock_dns($d) if (defined($webmail) || defined($matchall));
 	&release_lock_web($d);
 	}
 &run_post_actions();
@@ -339,6 +349,7 @@ print "                     [--content text|filename]\n";
 if (&has_webmail_rewrite()) {
 	print "                     [--webmail | --no-webmail]\n";
 	}
+print "                     [--matchall | --no-matchall]\n";
 exit(1);
 }
 
