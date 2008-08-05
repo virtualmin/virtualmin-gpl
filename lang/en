@@ -3726,6 +3726,9 @@ phpmode_nothing=No configuration changes were made!
 phpmode_header2=PHP information
 phpmode_mods=Modules for PHP $1
 phpmode_pears=Pear modules for PHP $1
+phpmode_matchall=Website matches all sub-domains?
+phpmode_matchallon=Adding all sub-domains to Apache config ..
+phpmode_matchalloff=Removing all sub-domains from Apache config ..
 
 spf_title=DNS Options
 spf_enable=Enabling SPF ..

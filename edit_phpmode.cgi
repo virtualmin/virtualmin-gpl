@@ -14,19 +14,23 @@ print &ui_hidden("dom", $d->{'id'}),"\n";
 print &ui_hidden_table_start($text{'phpmode_header'}, undef, 2,
 			     "phpmode", 1, [ "width=30%" ]);
 
-# Use suexec
-print &ui_table_row(&hlink($text{'phpmode_suexec'}, "phpmode_suexec"),
-		    &ui_yesno_radio("suexec", &get_domain_suexec($d)));
+if (!$d->{'alias'}) {
+	# Use suexec
+	print &ui_table_row(&hlink($text{'phpmode_suexec'}, "phpmode_suexec"),
+			    &ui_yesno_radio("suexec", &get_domain_suexec($d)));
+	}
 
-# PHP execution mode
-@modes = &supported_php_modes($d);
-print &ui_table_row(&hlink($text{'phpmode_mode'}, "phpmode"),
-		    &ui_radio("mode", &get_domain_php_mode($d),
+if (!$d->{'alias'}) {
+	# PHP execution mode
+	@modes = &supported_php_modes($d);
+	print &ui_table_row(&hlink($text{'phpmode_mode'}, "phpmode"),
+			    &ui_radio("mode", &get_domain_php_mode($d),
 			      [ map { [ $_, $text{'phpmode_'.$_}."<br>" ] }
 				    @modes ]));
+	}
 
 # PHP fcgi sub-processes
-if (&indexof("fcgid", @modes) >= 0) {
+if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0) {
 	$children = &get_domain_php_children($d);
 	if ($children >= 0) {
 		print &ui_table_row(&hlink($text{'phpmode_children'},
@@ -38,7 +42,7 @@ if (&indexof("fcgid", @modes) >= 0) {
 
 # Ruby execution mode
 @rubys = &supported_ruby_modes($d);
-if (@rubys) {
+if (!$d->{'alias'} && @rubys) {
 	print &ui_table_row(&hlink($text{'phpmode_rubymode'}, "rubymode"),
 		    &ui_radio("rubymode", &get_domain_ruby_mode($d),
 			      [ [ "", $text{'phpmode_noruby'}."<br>" ],
@@ -47,13 +51,20 @@ if (@rubys) {
 	}
 
 # Write logs via program
-print &ui_table_row(&hlink($text{'newweb_writelogs'}, "template_writelogs"),
-		    &ui_yesno_radio("writelogs", &get_writelogs_status($d)));
+if (!$d->{'alias'} || $d->{'alias_mode'} != 1) {
+	print &ui_table_row(
+		&hlink($text{'newweb_writelogs'}, "template_writelogs"),
+		&ui_yesno_radio("writelogs", &get_writelogs_status($d)));
+	}
+
+# Match all sub-domains
+print &ui_table_row(&hlink($text{'phpmode_matchall'}, "matchall"),
+		    &ui_yesno_radio("matchall", &get_domain_web_star($d)));
 
 print &ui_table_end();
 
 # Show PHP information
-if (defined(&list_php_modules)) {
+if (defined(&list_php_modules) && !$d->{'alias'}) {
 	print &ui_hidden_table_start($text{'phpmode_header2'}, undef,
 				     2, "phpinfo", 0, [ "width=30%" ]);
 

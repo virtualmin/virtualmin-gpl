@@ -965,3 +965,4 @@ Added the --default-ip flag to modify-domain.pl, to revert to a shared IP addres
 Custom links can be limited to virtual servers with a specific template if you have any custom templates defined, for more control over when each link is displayed.
 Backups now include any custom template used to create virtual servers, which allow domains to be restored even on systems that do not yet have the original templates.
 When a virtual server's IP address is changed, the addresses of all alias domains are updated to match.
+The Website Options page now has a field to enable matching all sub-domains for the virtual server's website, via a *.domain.com DNS entry and Apache server alias directive. This can also be enabled for some or all domains using the modify-web.pl command-line API.

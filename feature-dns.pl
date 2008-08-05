@@ -767,10 +767,12 @@ if ($star && !$r) {
 	# Need to add
 	my $ip = $d->{'dns_ip'} || $d->{'ip'};
 	&bind8::create_record($file, $withstar, undef, "IN", "A", $ip);
+	$any++;
 	}
 elsif (!$star && $r) {
 	# Need to remove
 	&bind8::delete_record($file, $r);
+	$any++;
 	}
 if ($any) {
 	&bind8::bump_soa_record($file, \@recs);

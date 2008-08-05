@@ -307,7 +307,7 @@ foreach $d (@doms) {
 			}
 		}
 
-	if (defined($matchall) && $d->{'web'} && !$d->{'alias'}) {
+	if (defined($matchall) && $d->{'web'}) {
 		# Enable or disable *.domain.com serveralias
 		local $oldmatchall = &get_domain_web_star($d);
 		if ($matchall && !$oldmatchall) {
