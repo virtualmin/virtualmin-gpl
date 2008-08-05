@@ -2669,12 +2669,11 @@ sub get_domain_web_star
 local ($d) = @_;
 &require_apache();
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-local @sa = &apache::find_directive("ServerAlias", $pconf);
+local @sa = &apache::find_directive("ServerAlias", $vconf);
 my $withstar = "*.".$d->{'dom'};
 foreach my $sa (@sa) {
-	foreach my $saw (split(/\s+/, $sa)) {
-		return 1 if (&indexoflc($withstar, @saw) >= 0);
-		}
+	my @saw = split(/\s+/, $sa);
+	return 1 if (&indexoflc($withstar, @saw) >= 0);
 	}
 return 0;
 }
@@ -2691,15 +2690,24 @@ my @ports = ( $d->{'web_port'},
 my $withstar = "*.".$d->{'dom'};
 foreach my $p (@ports) {
 	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
-	my @sa = &apache::find_directive("ServerAlias", $pconf);
+	my @sa = &apache::find_directive("ServerAlias", $vconf);
 	my $found;
 	foreach my $sa (@sa) {
 		local @saw = split(/\s+/, $sa);
 		$found++ if (&indexoflc($withstar, @saw) >= 0);
 		}
-	if (!$found) {
+	my $done;
+	if ($star && !$found) {
 		# Need to add
 		push(@sa, $withstar);
+		$done++;
+		}
+	elsif (!$star && $found) {
+		# Take away
+		@sa = grep { lc($_) ne $withstar } @sa;
+		$done++;
+		}
+	if ($done) {
 		&apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
 		&flush_file_lines($virt->{'file'});
 		$any++;
@@ -2708,7 +2716,6 @@ foreach my $p (@ports) {
 if ($any) {
 	&register_post_action(\&restart_apache);
 	}
-# XXX update DNS (maybe separate function?)
 }
 
 $done_feature_script{'web'} = 1;

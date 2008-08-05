@@ -52,8 +52,8 @@
 
  - option to accept *.domain.com via Apache
 	- also add DNS record
-	- command-line
 	- edit_phpmode.cgi
+	- alias domains?
 
  - More domain registrars
 	- gandi.net

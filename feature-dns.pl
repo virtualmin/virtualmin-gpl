@@ -751,6 +751,34 @@ if ($count) {
 return $count;
 }
 
+# save_domain_matchall_record(&domain, star)
+# Add or remove a *.domain.com wildcard DNS record, pointing to the main
+# IP address. Used in conjuction with save_domain_web_star.
+sub save_domain_matchall_record
+{
+local ($d, $star) = @_;
+local $file = &get_domain_dns_file($d);
+return 0 if (!$file);
+local @recs = &bind8::read_zone_file($file, $d->{'dom'});
+local $withstar = "*.".$d->{'dom'}.".";
+local ($r) = grep { $_->{'name'} eq $withstar } @recs;
+local $any = 0;
+if ($star && !$r) {
+	# Need to add
+	my $ip = $d->{'dns_ip'} || $d->{'ip'};
+	&bind8::create_record($file, $withstar, undef, "IN", "A", $ip);
+	}
+elsif (!$star && $r) {
+	# Need to remove
+	&bind8::delete_record($file, $r);
+	}
+if ($any) {
+	&bind8::bump_soa_record($file, \@recs);
+	&register_post_action(\&restart_bind);
+	}
+return $any;
+}
+
 # validate_dns(&domain)
 # Check for the DNS domain and records file
 sub validate_dns

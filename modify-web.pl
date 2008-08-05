@@ -307,6 +307,29 @@ foreach $d (@doms) {
 			}
 		}
 
+	if (defined($matchall) && $d->{'web'} && !$d->{'alias'}) {
+		# Enable or disable *.domain.com serveralias
+		local $oldmatchall = &get_domain_web_star($d);
+		if ($matchall && !$oldmatchall) {
+			&$first_print(
+			    "Adding all sub-domains to Apache config ..");
+			&save_domain_web_star($d, 1);
+			if ($d->{'dns'}) {
+				&save_domain_matchall_record($d, 1);
+				}
+			&$second_print(".. done");
+			}
+		elsif (!$matchall && $oldmatchall) {
+			&$first_print(
+			    "Removing all sub-domains from Apache config ..");
+			&save_domain_web_star($d, 0);
+			if ($d->{'dns'}) {
+				&save_domain_matchall_record($d, 0);
+				}
+			&$second_print(".. done");
+			}
+		}
+
 	if (defined($proxy) || defined($framefwd)) {
 		# Save the domain
 		&modify_web($d, $oldd);
