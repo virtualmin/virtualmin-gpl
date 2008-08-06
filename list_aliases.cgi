@@ -44,11 +44,11 @@ foreach $a (sort { $a->{'from'} cmp $b->{'from'} } @aliases) {
 			$msg = substr($msg, 0, 100)." ..."
 				if (length($msg) > 100);
 			$alines .= &text('aliases_reply',
-				"<i>".&html_escape($msg)."</i>");
+				"<i>".&html_escape($msg)."</i>")."<br>\n";
 			}
 		else {
 			$alines .= &text("aliases_type$anum",
-			   "<tt>".&html_escape($astr)."</tt>");
+			   "<tt>".&html_escape($astr)."</tt>")."<br>\n";
 			}
 		}
 	if (!@{$a->{'to'}}) {
@@ -59,7 +59,6 @@ foreach $a (sort { $a->{'from'} cmp $b->{'from'} } @aliases) {
 		  'value' => $a->{'from'} },
 		"<a href='edit_alias.cgi?dom=$in{'dom'}&".
 		"alias=$a->{'from'}'>$name</a>",
-		$d->{'dom'},
 		$alines,
 		$anycmt ? ( $a->{'cmt'} ) : ( ),
 		]);
@@ -73,7 +72,7 @@ print &ui_form_columns_table(
 	\@links,
 	[ [ "dom", $in{'dom'} ] ],
 	[ "", $text{'aliases_name'},
-	  $text{'aliases_domain'}, $text{'aliases_dests'},
+	  $text{'aliases_dests'},
           $anycmt ? ( $text{'aliases_cmt'} ) : ( ) ],
 	100,
 	\@table,

@@ -270,13 +270,12 @@ print &ui_table_row(&hlink($text{$sfx.'_auto'}, $sfx."_auto"),
 				 5, 60),
 		    undef, $tds);
 
-if (defined(&ui_hidden_table_row_start)) {
-	my $aopts = $simple->{'replies'} ||
-		    $simple->{'autoreply_start'} ||
-		    $simple->{'autoreply_end'} ||
-		    $simple->{'from'};
-	print &ui_hidden_table_row_start($text{'alias_aopts'}, "aopts", $aopts);
-	}
+# Hidden section for autoreply options
+my $aopts = $simple->{'replies'} ||
+	    $simple->{'autoreply_start'} ||
+	    $simple->{'autoreply_end'} ||
+	    $simple->{'from'};
+print &ui_hidden_table_row_start($text{'alias_aopts'}, "aopts", $aopts);
 
 # Autoreply period
 $period = $simple->{'replies'} && $simple->{'period'} ?
@@ -315,9 +314,8 @@ if (!$nofrom) {
 		undef, $tds);
 	}
 
-if (defined(&ui_hidden_table_row_end)) {
-	print &ui_hidden_table_row_end("aopts");
-	}
+# End of hidden
+print &ui_hidden_table_row_end("aopts");
 }
 
 # parse_simple_form(&simple, &in, &domain, [no-reply-from], [no-local],

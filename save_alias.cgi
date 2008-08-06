@@ -28,16 +28,17 @@ if ($in{'delete'}) {
 	}
 else {
 	# Verify and store core inputs
+	$sfx = $in{'simplemode'};
 	if ($in{'new'}) {
 		($mleft, $mreason, $mmax) = &count_feature("aliases");
 		$mleft == 0 && &error($text{'alias_ealiaslimit'});
 		}
-	$in{'name_def'} || $in{'name'} =~ /^[A-Za-z0-9\.\-\_]+$/ ||
+	$in{$sfx.'name_def'} || $in{$sfx.'name'} =~ /^[A-Za-z0-9\.\-\_]+$/ ||
 		&error($text{'alias_ename'});
-	$name = $in{'name_def'} ? "" : $in{'name'};
+	$name = $in{$sfx.'name_def'} ? "" : $in{$sfx.'name'};
 	$virt->{'from'} = $name."\@".$d->{'dom'};
 	if ($can_alias_comments) {
-		$virt->{'cmt'} = $in{'cmt'};
+		$virt->{'cmt'} = $in{$sfx.'cmt'};
 		}
 
 	if ($in{'simplemode'} eq 'complex') {
