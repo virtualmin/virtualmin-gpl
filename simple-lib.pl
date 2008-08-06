@@ -274,7 +274,7 @@ print &ui_table_row(&hlink($text{$sfx.'_auto'}, $sfx."_auto"),
 my $aopts = $simple->{'replies'} ||
 	    $simple->{'autoreply_start'} ||
 	    $simple->{'autoreply_end'} ||
-	    $simple->{'from'};
+	    $simple->{'from'} && !$nofrom;
 print &ui_hidden_table_row_start($text{'alias_aopts'}, "aopts", $aopts);
 
 # Autoreply period

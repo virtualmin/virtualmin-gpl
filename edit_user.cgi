@@ -279,7 +279,7 @@ if ($hasemail) {
 	print &ui_hidden_table_end("table2a");
 	}
 
-# Show forwarding setup for this user (can use the simple or complex forms)
+# Show forwarding setup for this user, using simple form if possible
 if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
 	print &ui_hidden_table_start($text{'user_header3'}, "width=100%", 2,
 				     "table3", 0);
@@ -297,39 +297,18 @@ if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
 		# Local and bounce delivery are not allowed on the simple form
 		$simple = undef;
 		}
-	if ($simple) {
-		# Show simple / advanced tabs
-		$prog = "edit_user.cgi?dom=$in{'dom'}&new=$in{'new'}&".
-			"user=$in{'user'}&unix=$in{'unix'}&web=$in{'web'}";
-		@tabs = ( [ "simple", $text{'alias_simplemode'},
-			    "$prog&simplemode=simple" ],
-			  [ "complex", $text{'alias_complexmode'},
-			    "$prog&simplemode=complex" ] );
-		print &ui_table_row(
-			undef, &ui_tabs_start(\@tabs, "simplemode",
-				$in{'simplemode'} || "simple"), 2);
-		}
-	else {
-		print &ui_hidden("simplemode", "complex"),"\n";
-		}
 
 	if ($simple) {
 		# Show simple form
-		print &ui_tabs_start_tabletab("simplemode", "simple");
+		print &ui_hidden("simplemode", "simple");
 		&show_simple_form($simple, 1, 1, 1, \@tds, "user");
-		print &ui_tabs_end_tabletab();
 		}
-
-	# Show complex form
-	if ($simple) {
-		print &ui_tabs_start_tabletab("simplemode", "complex");
-		}
-	&alias_form($user->{'to'},
-		    &hlink($text{'user_aliases'}, "userdest"),
-		    $d, "user", $in{'user'}, \@tds);
-	if ($simple) {
-		print &ui_tabs_end_tabletab();
-		print &ui_tabs_end(0);
+	else {
+		# Show complex form
+		print &ui_hidden("simplemode", "complex");
+		&alias_form($user->{'to'},
+			    &hlink($text{'user_aliases'}, "userdest"),
+			    $d, "user", $in{'user'}, \@tds);
 		}
 
 	print &ui_hidden_table_end("table3");
