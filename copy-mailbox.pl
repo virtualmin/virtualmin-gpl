@@ -74,6 +74,10 @@ if ($delete) {
 else {
 	&mailboxes::mailbox_copy_folder($srcfolder, $destfolder);
 	}
+
+# Fix ownership
+@st = stat($srcfolder->{'file'});
+&execute_command("chown -R $st[4]:$st[5] ".quotemeta($destfolder->{'file'}));
 print "... done\n";
 
 sub usage
