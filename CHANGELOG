@@ -956,7 +956,7 @@ DNS aliases named 'webmail' and 'admin' are now created in all new virtual serve
 Added the Global Variables page under the System Customization category, for creating variables that can be used in all templates.
 If the virus scanner fails to return a response within 30 seconds, email will be delivered normally. This avoids problems with the procmail timeout, which can cause even non-infected email to be dropped if clamav is too slow.
 ---- Changes since 3.60 ----
-Updated the Piwik script installer to version 0.2.9, phpCOIN to 1.4.4, Joomla to 1.5.5, phpMyAdmin to 2.11.8.1, dotProject to 2.1.2, SugarCRM to 5.0.0g, Wordpress MU 2.6, Gallery to 2.3-rc-1, TWiki to 4.2.1, Coppermine to 1.4.19, and Drupal to 5.9.
+Updated the Piwik script installer to version 0.2.9, phpCOIN to 1.4.4, Joomla to 1.5.5, phpMyAdmin to 2.11.8.1, dotProject to 2.1.2, SugarCRM to 5.0.0g, Wordpress MU 2.6, Gallery to 2.3-rc-1 and 1.5.8, TWiki to 4.2.1, Coppermine to 1.4.19, Trac to 0.11.1, and Drupal to 5.9.
 When the virtualmin --help command is run, it now outputs a list of all available API commands with short descriptions, broken down into categories.
 Extra administrators can now have contact email addresses, which can be used when sending email to all domain owners. These can be set via the web interface, or the command-line API.
 Added a Module Config option in the advanced section to change the path for the API helper command, and improved automatic selection of a path if the default directory /usr/sbin is not writable.
