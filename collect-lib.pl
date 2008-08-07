@@ -37,12 +37,22 @@ if (&foreign_check("proc")) {
 		local @mounted = &mount::list_mounted();
 		local $total = 0;
 		local $free = 0;
+		local $donezone;
 		foreach my $m (@mounted) {
 			if ($m->[2] eq "ext2" || $m->[2] eq "ext3" ||
 			    $m->[2] eq "reiserfs" || $m->[2] eq "ufs" ||
 			    $m->[2] eq "zfs" || $m->[2] eq "simfs" ||
 			    $m->[2] eq "xfs" ||
 			    $m->[1] =~ /^\/dev\// || $m->[1] eq $home_base) {
+				if ($m->[1] =~ /^zones\/([^\/]+)/ &&
+				    $m->[2] eq "zfs" &&
+				    $donezone{$1}++) {
+					# Only count each zone once, as there
+					# may be mounts from zones/foo/bar
+					# and zones/foo/smeg that really refer
+					# to the zone source.
+					next;
+					}
 				local ($t, $f) =
 					&mount::disk_space($m->[2], $m->[0]);
 				$total += $t*1024;
