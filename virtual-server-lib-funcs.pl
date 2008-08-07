@@ -6180,6 +6180,7 @@ push(@rv, { 'id' => 0,
 	    'mysql_mkdb' => $config{'mysql_mkdb'},
 	    'mysql_nopass' => $config{'mysql_nopass'},
 	    'mysql_chgrp' => $config{'mysql_chgrp'},
+	    'mysql_charset' => $config{'mysql_charset'},
 	    'skel' => $config{'virtual_skel'} || "none",
 	    'skel_subs' => int($config{'virtual_skel_subs'}),
 	    'frame' => &cat_file("framefwd-template"),
@@ -6431,6 +6432,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'mysql_mkdb'} = $tmpl->{'mysql_mkdb'};
 	$config{'mysql_nopass'} = $tmpl->{'mysql_nopass'};
 	$config{'mysql_chgrp'} = $tmpl->{'mysql_chgrp'};
+	$config{'mysql_charset'} = $tmpl->{'mysql_charset'};
 	$config{'virtual_skel'} = $tmpl->{'skel'} eq "none" ? "" :
 				  $tmpl->{'skel'};
 	$config{'virtual_skel_subs'} = $tmpl->{'skel_subs'};
@@ -6570,7 +6572,8 @@ if (!$tmpl->{'default'}) {
 		    "mailboxlimit", "domslimit",
 		    "dbslimit", "aliaslimit", "bwlimit", "mongrelslimit","skel",
 		    "mysql_hosts", "mysql_mkdb", "mysql_suffix", "mysql_chgrp",
-		    "mysql_nopass", "mysql_wild", "mysql", "webalizer",
+		    "mysql_nopass", "mysql_wild", "mysql_charset", "mysql",
+		    "webalizer",
 		    "dom_aliases", "ranges", "mailgroup", "ftpgroup", "dbgroup",
 		    "othergroups", "defmquota", "quotatype", "append_style",
 		    "domalias", "logrotate", "disabled_web", "disabled_url",

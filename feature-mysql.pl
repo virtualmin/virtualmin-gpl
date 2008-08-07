@@ -62,7 +62,11 @@ if (!$d->{'parent'}) {
 
 # Create the initial DB (if requested)
 if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
-	&create_mysql_database($d, $d->{'db'});
+	my %opts;
+	if ($tmpl->{'mysql_charset'} && $tmpl->{'mysql_charset'} ne 'none') {
+		$opts{'charset'} = $tmpl->{'mysql_charset'};
+		}
+	&create_mysql_database($d, $d->{'db'}, \%opts);
 	}
 else {
 	# No DBs can exist
@@ -944,11 +948,13 @@ sub show_template_mysql
 local ($tmpl) = @_;
 &require_mysql();
 
+# Default database name template
 print &ui_table_row(&hlink($text{'tmpl_mysql'}, "template_mysql"),
 	&none_def_input("mysql", $tmpl->{'mysql'}, $text{'tmpl_mysqlpat'}, 1,
 			0, undef, [ "mysql" ]).
 	&ui_textbox("mysql", $tmpl->{'mysql'}, 20));
 
+# Enforced suffix for database names
 print &ui_table_row(&hlink($text{'tmpl_mysql_suffix'}, "template_mysql_suffix"),
 	&none_def_input("mysql_suffix", $tmpl->{'mysql_suffix'},
 		        $text{'tmpl_mysqlpat'}, 0, 0, undef,
@@ -956,12 +962,14 @@ print &ui_table_row(&hlink($text{'tmpl_mysql_suffix'}, "template_mysql_suffix"),
 	&ui_textbox("mysql_suffix", $tmpl->{'mysql_suffix'} eq "none" ?
 					undef : $tmpl->{'mysql_suffix'}, 20));
 
+# Additional host wildcards to add
 print &ui_table_row(&hlink($text{'tmpl_mysql_wild'}, "template_mysql_wild"),
 	&none_def_input("mysql_wild", $tmpl->{'mysql_wild'},
 			$text{'tmpl_mysqlpat'}, 1, 0, undef,
 			[ "mysql_wild" ]).
 	&ui_textbox("mysql_wild", $tmpl->{'mysql_wild'}, 20));
 
+# Additonal allowed hosts
 print &ui_table_row(&hlink($text{'tmpl_mysql_hosts'}, "template_mysql_hosts"),
 	&none_def_input("mysql_hosts", $tmpl->{'mysql_hosts'},
 			$text{'tmpl_mysqlh'}, 0, 0, undef,
@@ -969,16 +977,19 @@ print &ui_table_row(&hlink($text{'tmpl_mysql_hosts'}, "template_mysql_hosts"),
 	&ui_textbox("mysql_hosts", $tmpl->{'mysql_hosts'} eq "none" ? "" :
 					$tmpl->{'mysql_hosts'}, 40));
 
+# Create DB at virtual server creation?
 print &ui_table_row(&hlink($text{'tmpl_mysql_mkdb'}, "template_mysql_mkdb"),
 	&ui_radio("mysql_mkdb", $tmpl->{'mysql_mkdb'},
 		[ [ 1, $text{'yes'} ], [ 0, $text{'no'} ],
 		  ($tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ) )]));
 
+# Update MySQL password to match domain?
 print &ui_table_row(&hlink($text{'tmpl_mysql_nopass'}, "template_mysql_nopass"),
 	&ui_radio("mysql_nopass", $tmpl->{'mysql_nopass'},
 		[ [ 0, $text{'yes'} ], [ 1, $text{'no'} ],
 		  ($tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ) )]));
 
+# Make MySQL DBs group-owned by domain, for quotas?
 if (-d $mysql::config{'mysql_data'}) {
 	print &ui_table_row(&hlink($text{'tmpl_mysql_chgrp'},
 				   "template_mysql_chgrp"),
@@ -987,6 +998,17 @@ if (-d $mysql::config{'mysql_data'}) {
 			  [ 0, $text{'no'} ],
 			  ($tmpl->{'default'} ? ( ) :
 				( [ "", $text{'default'} ] ) )]));
+	}
+
+# Default MySQL character set
+if ($mysql::mysql_version >= 4.1) {
+	print &ui_table_row(&hlink($text{'tmpl_mysql_charset'},
+				   "template_mysql_charset"),
+	    &ui_select("mysql_charset",  $tmpl->{'mysql_charset'},
+		[ $tmpl->{'default'} ? ( ) :
+		    ( [ "", "&lt;$text{'tmpl_mysql_charsetdef'}&gt;" ] ),
+		  [ "none", "&lt;$text{'tmpl_mysql_charsetnone'}&gt;" ],
+		  &mysql::list_character_sets() ]));
 	}
 }
 
@@ -1037,6 +1059,9 @@ $tmpl->{'mysql_nopass'} = $in{'mysql_nopass'};
 if (-d $mysql::config{'mysql_data'}) {
 	$tmpl->{'mysql_chgrp'} = $in{'mysql_chgrp'};
 	}
+if ($mysql::mysql_version >= 4.1) {
+	$tmpl->{'mysql_charset'} = $in{'mysql_charset'};
+	}
 }
 
 # creation_form_mysql(&domain)
@@ -1045,8 +1070,11 @@ sub creation_form_mysql
 {
 &require_mysql();
 if ($mysql::mysql_version >= 4.1) {
+	local $tmpl = &get_template($_[0]->{'template'});
+	local $cs = $tmpl->{'mysql_charset'};
+	$cs = "" if ($cs eq "none");
 	return &ui_table_row($text{'database_charset'},
-			     &ui_select("mysql_charset", undef,
+			     &ui_select("mysql_charset", $cs,
 					[ [ undef, "&lt;$text{'default'}&gt;" ],
 					  &mysql::list_character_sets() ]));
 	}
