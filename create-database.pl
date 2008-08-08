@@ -14,7 +14,11 @@ something like :
 
 Some database types support additional creation-time options, specified using the C<--opt> flag. At the time of writing, those available for MySQL are :
 
-C<--opt charset name> - Sets the default character set (like latin2 or euc-jp) for the new database
+C<--opt charset name> - Sets the character set (like latin2 or euc-jp) for the new database.
+
+And for PostgreSQL, the options are :
+
+C<--opt encoding name> - Sets the text encoding (like LATIN2 or EUC_JP) for the new database.
 
 =cut
 

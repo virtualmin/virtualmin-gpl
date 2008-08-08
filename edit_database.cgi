@@ -40,8 +40,9 @@ print &ui_table_row($text{'database_name'},
 
 # Database type
 @types = ( );
-push(@types, [ "mysql", $text{'databases_mysql'} ]) if ($d->{'mysql'});
-push(@types, [ "postgres", $text{'databases_postgres'} ]) if ($d->{'postgres'});
+foreach my $t (@database_features) {
+	push(@types, [ $t, $text{'databases_'.$t} ]) if ($d->{$t});
+	}
 foreach $p (@database_plugins) {
 	push(@types, [ $p, &plugin_call($p, "database_name") ]) if ($d->{$p});
 	}
@@ -87,10 +88,14 @@ if (!$in{'new'}) {
 	}
 
 # Type-specific creation options
-foreach $t ('mysql', 'postgres') {
+foreach $t (@database_features) {
 	$ofunc = "creation_form_$t";
 	if ($in{'new'} && $d->{$t} && defined(&$ofunc)) {
+		print &ui_hidden_table_row_start(
+			&text('database_opts', $text{'databases_'.$t}),
+			"opts_$t", 0);
 		print &$ofunc($d);
+		print &ui_hidden_table_row_end("opts_".$t);
 		}
 	}
 foreach $p (@database_plugins) {

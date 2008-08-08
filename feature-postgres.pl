@@ -660,6 +660,9 @@ if (!defined(@postgres_encodings_cache)) {
 	while(<ENCS>) {
 		s/\r|\n//g;
 		local @w = split(/\t/, $_);
+		if ($w[2] !~ /\Q$w[0]\E/i) {
+			$w[2] .= " ($w[0])";
+			}
 		push(@postgres_encodings_cache, [ $w[0], $w[2] ]);
 		}
 	close(ENCS);
@@ -676,11 +679,23 @@ sub show_template_postgres
 local ($tmpl) = @_;
 &require_postgres();
 
-# XXX
+# Default encoding
+print &ui_table_row(&hlink($text{'tmpl_postgres_encoding'},
+			   "template_postgres_encoding"),
+    &ui_select("postgres_encoding",  $tmpl->{'postgres_encoding'},
+	[ $tmpl->{'default'} ? ( ) :
+	    ( [ "", "&lt;$text{'tmpl_postgres_encodingdef'}&gt;" ] ),
+	  [ "none", "&lt;$text{'tmpl_postgres_encodingnone'}&gt;" ],
+	  &list_postgres_encodings() ]));
 }
 
+# parse_template_postgres(&tmpl)
+# Updates PostgreSQL related template options from %in
 sub parse_template_postgres
 {
+local ($tmpl) = @_;
+&require_postgres();
+$tmpl->{'postgres_encoding'} = $in{'postgres_encoding'};
 }
 
 $done_feature_script{'postgres'} = 1;
