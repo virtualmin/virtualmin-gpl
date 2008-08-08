@@ -4101,8 +4101,18 @@ if ($_[0]->{'parent'}) {
 		local $subdom = &get_domain($_[0]->{'subdom'});
 		$_[0]->{'backup_subdom_dom'} = $subdom->{'dom'};
 		}
-	&save_domain($_[0]);
 	}
+
+# Record sub-directory for mail folders, used during mail restores
+local %mconfig = &foreign_config("mailboxes");
+if ($mconfig{'mail_usermin'}) {
+	$_[0]->{'backup_mail_folders'} = $mconfig{'mail_usermin'};
+	}
+else {
+	delete($_[0]->{'backup_mail_folders'});
+	}
+
+&save_domain($_[0]);
 
 # Save the domain's data file
 &copy_source_dest($_[0]->{'file'}, $_[1]);
