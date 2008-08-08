@@ -574,6 +574,7 @@ else {
 
 		# Add the Apache user to the group for the new domain
 		local $web_user = &get_apache_user($_[0]);
+		local $tmpl = &get_template($_[0]->{'template'});
 		if ($tmpl->{'web_user'} ne 'none' && $web_user) {
 			&add_user_to_domain_group($_[0], $web_user,
 						  'setup_webuser');
