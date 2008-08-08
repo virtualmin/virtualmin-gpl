@@ -59,3 +59,5 @@
  - Default character set and timezone for mysql and postgresql
 	- http://www.postgresql.org/docs/current/static/sql-createdatabase.html
 	- CHANGELOG
+
+ - mail -> Maildir conversion on restore

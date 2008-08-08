@@ -2675,6 +2675,7 @@ database_title4=Disassociate Database
 database_rusure=Are you sure you want to delete the database $1? All data that it contains will be lost.
 database_ok=Delete Now
 database_charset=Character set for MySQL database
+database_encoding=Encoding for PostgreSQL database
 
 vfile_title=Edit Autoresponder File
 vfile_ecannot=You are not allowed to edit autoresponder files
