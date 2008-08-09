@@ -442,7 +442,8 @@ DOMAIN: foreach $d (@$doms) {
 			local $binfo = { $d->{'dom'} =>
 					 $donefeatures{$d->{'dom'}} };
 			$err = &s3_upload($user, $pass, $server,
-					  "$dest/$df", $df, $binfo);
+					  "$dest/$df", $df, $binfo,
+					  $s3_upload_tries);
 			}
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
@@ -670,7 +671,7 @@ elsif ($ok && $mode == 3 && (@destfiles || !$dirfmt)) {
 						      : $d->{'dom'};
 			local $binfo = { $n => $donefeatures{$n} };
 			$err = &s3_upload($user, $pass, $server, "$dest/$df",
-					  $df, $binfo);
+					  $df, $binfo, $s3_upload_tries);
 			if ($err) {
 				&$second_print(
 					&text('backup_uploadfailed', $err));
@@ -683,7 +684,7 @@ elsif ($ok && $mode == 3 && (@destfiles || !$dirfmt)) {
 		# Upload one file to the bucket
 		local %donebydname;
 		$err = &s3_upload($user, $pass, $server, $dest,
-				  $path, \%donefeatures);
+				  $path, \%donefeatures, $s3_upload_tries);
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
 			$ok = 0;

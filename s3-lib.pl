@@ -1,6 +1,7 @@
 # Functions for talking to Amazon's S3 service
 
 @s3_perl_modules = ( "S3::AWSAuthConnection", "S3::QueryStringAuthGenerator" );
+$s3_upload_tries = 3;
 
 # check_s3()
 # Returns an error message if S3 cannot be used
@@ -58,56 +59,75 @@ if ($response->body() =~ /<Message>(.*)<\/Message>/i) {
 return undef;
 }
 
-# s3_upload(access-key, secret-key, bucket, source-file, dest-filename, [&info])
+# s3_upload(access-key, secret-key, bucket, source-file, dest-filename, [&info],
+#           attempts)
 # Upload some file to S3, and return undef on success or an error message on
 # failure. Unfortunately we cannot simply use S3's put method, as it takes
 # a scalar for the content, which could be huge.
 sub s3_upload
 {
-local ($akey, $skey, $bucket, $sourcefile, $destfile, $info) = @_;
+local ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $tries) = @_;
+$tries ||= 1;
 &require_s3();
-local $conn = S3::AWSAuthConnection->new($akey, $skey);
-return $text{'s3_econn'} if (!$conn);
-local $object = S3::S3Object->new("");
 
-# Delete any .info file first, as it will no longer be valid
-$conn->delete($bucket, $destfile.".info");
+my $err;
+for(my $i=0; $i<$tries; $i++) {
+	$err = undef;
+	local $conn = S3::AWSAuthConnection->new($akey, $skey);
+	if (!$conn) {
+		$err = $text{'s3_econn'};
+		next;
+		}
+	local $object = S3::S3Object->new("");
 
-# Use the S3 library to create a request object, but use Webmin's HTTP
-# function to open it.
-my $path = "$bucket/$destfile";
-local $req = &s3_make_request($conn, $path, "PUT", "dummy");
-local ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
-local $h = &make_http_connection($host, $port, $ssl, $req->method, $page);
-local @st = stat($sourcefile);
-&write_http_connection($h, "Content-length: $st[7]\r\n");
-foreach my $hfn ($req->header_field_names) {
-	&write_http_connection($h, $hfn.": ".$req->header($hfn)."\r\n");
-	}
-&write_http_connection($h, "\r\n");
+	# Delete any .info file first, as it will no longer be valid
+	$conn->delete($bucket, $destfile.".info");
 
-# Send the backup file contents
-local $buf;
-open(BACKUP, $sourcefile);
-while(read(BACKUP, $buf, 1024) > 0) {
-	&write_http_connection($h, $buf);
-	}
-close(BACKUP);
+	# Use the S3 library to create a request object, but use Webmin's HTTP
+	# function to open it.
+	my $path = "$bucket/$destfile";
+	local $req = &s3_make_request($conn, $path, "PUT", "dummy");
+	local ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
+	local $h = &make_http_connection(
+		$host, $port, $ssl, $req->method, $page);
+	local @st = stat($sourcefile);
+	&write_http_connection($h, "Content-length: $st[7]\r\n");
+	foreach my $hfn ($req->header_field_names) {
+		&write_http_connection($h, $hfn.": ".$req->header($hfn)."\r\n");
+		}
+	&write_http_connection($h, "\r\n");
 
-# Read back response
-local ($out, $err);
-&complete_http_download($h, \$out, \$err);
-&close_http_connection($h);
+	# Send the backup file contents
+	local $buf;
+	open(BACKUP, $sourcefile);
+	while(read(BACKUP, $buf, 1024) > 0) {
+		&write_http_connection($h, $buf);
+		}
+	close(BACKUP);
 
-if (!$err && $info) {
-	# Write out the info file, if given
-	local $response = $conn->put($bucket, $destfile.".info",
-				     &serialise_variable($info));
-	if ($response->http_response->code != 200) {
-		return &text('s3_einfo', &extract_s3_message($response));
+	# Read back response
+	local $out;
+	&complete_http_download($h, \$out, \$err);
+	&close_http_connection($h);
+
+	if (!$err && $info) {
+		# Write out the info file, if given
+		local $response = $conn->put($bucket, $destfile.".info",
+					     &serialise_variable($info));
+		if ($response->http_response->code != 200) {
+			$err = &text('s3_einfo',
+				     &extract_s3_message($response));
+			}
+		}
+	if ($err) {
+		# Wait a little before re-trying
+		sleep(10);
+		}
+	else {
+		# Worked .. end of the job
+		last;
 		}
 	}
-
 return $err;
 }
 
