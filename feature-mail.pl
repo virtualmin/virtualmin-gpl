@@ -2615,7 +2615,7 @@ if (-r "$_[1]_files" && $_[2]->{'mailfiles'} &&
 	}
 elsif (!&mail_under_home()) {
 	# If the users have ~/Maildir directories and no mail files
-	# at the new locations, move them over
+	# at the new locations (typically /var/mail), move them over
 	local $doneprint;
 	foreach my $u (@users) {
 		local ($df) = &mailboxes::list_user_folders($u->{'user'});
@@ -2642,6 +2642,58 @@ elsif (!&mail_under_home()) {
 	if ($doneprint) {
 		&$second_print($text{'setup_done'});
 		}
+	}
+
+# Check if the location for additional folders differs between systems,
+# and if so copy them across
+local %mconfig = &foreign_config("mailboxes");
+local $newdir = $mconfig{'mail_usermin'};
+local $olddir = $_[0]->{'backup_mail_folders'};
+if ($newdir && $olddir && $newdir ne $olddir && @users) {
+	# Need to migrate, such as when moving from a system using ~/mail/mbox
+	# to ~/Maildir/.dir
+	&$first_print(&text('restore_mailmove2'));
+	foreach my $u (@users) {
+		local $mailboxes::config{'mail_usermin'} = $olddir;
+		local @folders = &mailboxes::list_user_folders($u->{'user'});
+		local $newbase = "$u->{'home'}/$newdir";
+		local $oldbase = "$u->{'home'}/$olddir";
+		if (!-d $newbase) {
+			# Create folders dir
+			&make_dir($newbase, 0755);
+			&set_ownership_permissions($u->{'uid'}, $u->{'gid'},
+						   undef, $newbase);
+			}
+		foreach my $oldf (@folders) {
+			next if (!&is_under_directory("$u->{'home'}/$olddir",
+						      $oldf->{'file'}));
+			local $newf = { };
+			local $oldname = $oldf->{'file'};
+			$oldname =~ s/^\Q$oldbase\E\///;  # Get folder name,
+			local $oldnameorig = $oldname;
+			$oldname =~ s/^\.//;		  # with no dots before
+			$oldname =~ s/\/\./\//;		  # path elements
+			if ($newdir eq "Maildir") {
+				# Assume Maildir++ format for dest
+				$newf->{'type'} = 1;
+				$oldname =~ s/\//\.\//g;  # Put back Maildir++
+				$oldname = ".$oldname";   # dots before elements
+				$newf->{'file'} = "$newbase/$oldname";
+				}
+			elsif ($newdir eq "mail") {
+				# Assume mbox
+				$newf->{'type'} = 0;
+				$newf->{'file'} = "$newbase/$oldname";
+				}
+			else {
+				# Keep the same
+				$newf->{'type'} = $oldf->{'type'};
+				$newf->{'file'} = "$newbase/$oldnameorig";
+				}
+			&mailboxes::mailbox_move_folder($oldf, $newf);
+			}
+		}
+	&$second_print($text{'setup_done'});
 	}
 
 # Restore Cron job files
