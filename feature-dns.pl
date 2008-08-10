@@ -150,8 +150,9 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 	if (@slaves && !$_[0]->{'noslaves'}) {
 		local $slaves = join(" ", map { $_->{'host'} } @slaves);
 		&$first_print(&text('setup_bindslave', $slaves));
-		local @slaveerrs = &bind8::create_on_slaves($_[0]->{'dom'},
-							    $myip);
+		local @slaveerrs = &bind8::create_on_slaves(
+			$_[0]->{'dom'}, $myip, undef, undef,
+			$tmpl->{'dns_view'});
 		if (@slaveerrs) {
 			&$second_print($text{'setup_eslaves'});
 			foreach $sr (@slaveerrs) {
