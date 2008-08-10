@@ -33,8 +33,12 @@ else {
 		($mleft, $mreason, $mmax) = &count_feature("aliases");
 		$mleft == 0 && &error($text{'alias_ealiaslimit'});
 		}
-	$in{$sfx.'name_def'} || $in{$sfx.'name'} =~ /^[A-Za-z0-9\.\-\_]+$/ ||
-		&error($text{'alias_ename'});
+	if (!$in{$sfx.'name_def'}) {
+		my $nerr = &valid_mailbox_name($in{$sfx.'name'});
+		if ($nerr || $in{$sfx.'name'} =~ /\@/) {
+			&error($text{'alias_ename'});
+			}
+		}
 	$name = $in{$sfx.'name_def'} ? "" : $in{$sfx.'name'};
 	$virt->{'from'} = $name."\@".$d->{'dom'};
 	if ($can_alias_comments) {

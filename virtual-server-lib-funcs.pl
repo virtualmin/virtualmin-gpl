@@ -3827,7 +3827,7 @@ foreach $u (@$users) {
 	local $pop3 = $d ? &remove_userdom($u->{'user'}, $d) : $u->{'user'};
 	local @cols;
 	push(@cols, "<a href='edit_user.cgi?dom=$did&".
-	      "user=$u->{'user'}&unix=$u->{'unix'}'>".
+	      "user=".&urlize($u->{'user'})."&unix=$u->{'unix'}'>".
 	      ($u->{'domainowner'} ? "<b>$pop3</b>" :
 	       $u->{'webowner'} &&
 	        $u->{'pass'} =~ /^\!/ ? "<u><i>$pop3</i></u>" :

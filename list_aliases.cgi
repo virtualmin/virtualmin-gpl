@@ -58,7 +58,7 @@ foreach $a (sort { $a->{'from'} cmp $b->{'from'} } @aliases) {
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $a->{'from'} },
 		"<a href='edit_alias.cgi?dom=$in{'dom'}&".
-		"alias=$a->{'from'}'>$name</a>",
+		"alias=".&urlize($a->{'from'})."'>$name</a>",
 		$alines,
 		$anycmt ? ( $a->{'cmt'} ) : ( ),
 		]);
