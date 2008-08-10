@@ -117,6 +117,7 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 				$dir->{'file'} = $addfile;
 				$pconf = &bind8::get_config_parent($addfile);
 				}
+			$_[0]->{'dns_view'} = $tmpl->{'dns_view'};
 			}
 		else {
 			&error(&text('setup_ednsview', $tmpl->{'dns_view'}));
@@ -248,7 +249,8 @@ if (!$_[0]->{'dns_submode'}) {
 		# Delete from slave servers too
 		&$first_print(&text('delete_bindslave', $_[0]->{'dns_slave'}));
 		local @slaveerrs = &bind8::delete_on_slaves(
-					$_[0]->{'dom'}, \@slaves);
+				$_[0]->{'dom'}, \@slaves,
+				$_[0]->{'dns_view'} || $tmpl->{'dns_view'});
 		if (@slaveerrs) {
 			&$second_print($text{'delete_bindeslave'});
 			foreach $sr (@slaveerrs) {
