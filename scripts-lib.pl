@@ -787,6 +787,11 @@ foreach my $m (@mods) {
 		}
 	else {
 		@poss = ( "php".$phpver."-".$m, "php-".$m );
+		if ($software::update_system eq "apt" &&
+		    $m eq "pdo_mysql") {
+			# On Debian, the pdo_mysql module is in the mysql module
+			push(@poss, "php".$phpver."-mysql", "php-mysql");
+			}
 		}
 	foreach my $pkg (@poss) {
 		local @pinfo = &software::package_info($pkg);
@@ -870,9 +875,9 @@ foreach my $m (@mods) {
 		}
 
 	# Finally re-check to make sure it worked (but this is only possible
-	# CGI mode)
+	# in CGI mode)
 	&$outdent_print();
-	undef(%php_modules);
+	undef(%main::php_modules);
 	if (&check_php_module($m, $phpver, $d) != 1) {
 		&$second_print($text{'scripts_einstallmod'});
 		if ($opt) { next; }
