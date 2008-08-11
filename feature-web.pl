@@ -589,17 +589,19 @@ else {
 		local @sa = map { s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g; $_ }
 				&apache::find_directive("ServerAlias", $vconf);
 		&apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
+
+		# Update log paths
 		foreach my $ld ("ErrorLog", "TransferLog", "CustomLog") {
 			local @ldv = &apache::find_directive($ld, $vconf);
 			next if (!@ldv);
 			foreach my $l (@ldv) {
-				local $oldl = $l;
+				my $oldl = $l;
 				if ($l =~ /\/[^\/]*\Q$_[1]->{'dom'}\E[^\/]*$/ &&
 				    !$_[0]->{'subdom'}) {
 					$l =~ s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g;
 					}
 				if ($l ne $oldl) {
-					# Rename file too
+					# Rename log file too
 					local @wl = &apache::wsplit($l);
 					local @woldl = &apache::wsplit($oldl);
 					&rename_file($woldl[0], $wl[0]);
@@ -607,6 +609,18 @@ else {
 				}
 			&apache::save_directive($ld, \@ldv, $vconf, $conf);
 			}
+
+		# Update RewriteCond / RewriteRule directives for
+		# webmail redirects
+		foreach my $ld ("RewriteCond", "RewriteRule") {
+			local @ldv = &apache::find_directive($ld, $vconf);
+			next if (!@ldv);
+			foreach my $l (@ldv) {
+				$l =~ s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g;
+				}
+			&apache::save_directive($ld, \@ldv, $vconf, $conf);
+			}
+
 		&flush_file_lines();
 		$rv++;
 		if ($virt->{'file'} =~ /$_[1]->{'dom'}/) {
