@@ -22,7 +22,7 @@ if ($dname ne $d->{'dom'}) {
 			    "<tt>$dname</tt>");
 	}
 print &ui_table_row($text{'rename_new'},
-		    &ui_textbox("new", $dname, 30));
+		    &ui_textbox("new", $dname, 40));
 
 if ($d->{'unix'} && &can_rename_domains() == 2) {
 	# Rename user option
@@ -32,7 +32,7 @@ if ($d->{'unix'} && &can_rename_domains() == 2) {
 				   "<tt>$d->{'user'}</tt>")."<br>" ],
 			[ 1, $text{'rename_user1'}."<br>" ],
 			[ 2, $text{'rename_user2'}." ".
-			     &ui_textbox("user", undef, 20) ] ]));
+			     &ui_textbox("user", undef, 40) ] ]));
 	}
 
 # Work out what can be done
@@ -55,7 +55,7 @@ elsif ($d->{'dir'}) {
 				   "<tt>$d->{'home'}</tt>")."<br>" ],
 			[ 1, $text{'rename_home1'}."<br>" ],
 			$rh == 2 ? ( [ 2, &text('rename_home2',
-				&ui_textbox("home", undef, 30)) ] ) : ( ),
+				&ui_textbox("home", undef, 40)) ] ) : ( ),
 		      ]));
 		}
 	else {

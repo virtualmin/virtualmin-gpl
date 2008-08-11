@@ -103,6 +103,11 @@ foreach my $ver (@vers) {
 			# Just copy verbatim
 			&copy_source_dest($srcini, "$inidir/php.ini");
 			}
+
+		# Clear any caching on file
+		&unflush_file_lines("$inidir/php.ini");
+		undef($phpini::get_config_cache{"$inidir/php.ini"});
+
 		local ($uid, $gid) = (0, 0);
 		if (!$tmpl->{'web_php_noedit'}) {
 			($uid, $gid) = ($d->{'uid'}, $d->{'ugid'});
@@ -423,7 +428,7 @@ if (&has_command("chattr")) {
 		foreach my $f (glob("$dir/php?.*cgi")) {
 			if (-r $f) {
 				&system_logged("chattr ".
-				    ($writable ? "-i" : "+i")." ".quotemeta($f));
+				   ($writable ? "-i" : "+i")." ".quotemeta($f));
 				}
 			}
 		}
@@ -820,6 +825,44 @@ else {
 	}
 }
 
+# get_global_php_ini(phpver, mode)
+# Returns the full path to the global PHP config file
+sub get_global_php_ini
+{
+local ($ver, $mode) = @_;
+foreach my $i ("/etc/php.ini",
+	       $mode eq "mod_php" ? ("/etc/php$ver/apache/php.ini",
+				     "/etc/php$ver/apache2/php.ini")
+				  : ("/etc/php$ver/cgi/php.ini"),
+	       "/opt/csw/php$ver/lib/php.ini",
+	       "/usr/local/lib/php.ini") {
+	return $i if (-r $i);
+	}
+return undef;
+}
+
+# get_php_mysql_socket(&domain)
+# Returns the PHP mysql socket path to use for some domain, from the
+# global config file. Returns 'none' if not possible, or an empty string
+# if not set.
+sub get_php_mysql_socket
+{
+local ($d) = @_;
+return 'none' if (!&foreign_check("phpini"));
+local $mode = &get_domain_php_mode($d);
+local @vers = &list_available_php_versions($d, $mode);
+return 'none' if (!@vers);
+local $tmpl = &get_template($d->{'template'});
+local $inifile = $tmpl->{'web_php_ini_'.$vers[0]->[0]};
+if (!$inifile || $inifile eq "none" || !-r $inifile) {
+	$inifile = &get_global_php_ini($vers[0]->[0], $mode);
+	}
+&foreign_require("phpini", "phpini-lib.pl");
+local $gconf = &phpini::get_config($inifile);
+local $sock = &phpini::find_value("mysql.default_socket", $gconf);
+return $sock;
+}
+
 # get_domain_php_children(&domain)
 # For a domain using fcgi to run PHP, returns the number of child processes.
 # Returns 0 if not set, -1 if the file doesn't even exist, -2 if not supported
@@ -926,6 +969,52 @@ if (!defined($main::php_modules{$ver})) {
 	delete($ENV{'PHPRC'});
 	}
 return @{$main::php_modules{$ver}};
+}
+
+# fix_php_ini_files(&domain, &fixes)
+# Updates values in all php.ini files in a domain. The fixes parameter is
+# a list of array refs, containing old values, new value and regexp flag.
+# If the old value is undef, anything matches. May print stuff. Returns the
+# number of changes made.
+sub fix_php_ini_files
+{
+local ($d, $fixes) = @_;
+local ($mode, $rv);
+if (defined(&get_domain_php_mode) &&
+    ($mode = &get_domain_php_mode($d)) && $mode ne "mod_php" &&
+    &foreign_check("phpini")) {
+	&foreign_require("phpini", "phpini-lib.pl");
+	&$first_print($text{'save_apache10'});
+	foreach my $i (&list_domain_php_inis($d)) {
+		&unflush_file_lines($i->[1]);	# In case cached
+		undef($phpini::get_config_cache{$i->[1]});
+		local $pconf = &phpini::get_config($i->[1]);
+		foreach my $f (@$fixes) {
+			local $ov = &phpini::find_value($f->[0], $pconf);
+			local $nv = $ov;
+			if (!defined($f->[1])) {
+				# Always change
+				$nv = $f->[2];
+				}
+			elsif ($f->[3] && $ov =~ /\Q$f->[1]\E/) {
+				# Regexp change
+				$nv =~ s/\Q$f->[1]\E/$f->[2]/g;
+				}
+			elsif (!$f->[3] && $ov eq $f->[1]) {
+				# Exact match change
+				$nv = $f->[2];
+				}
+			if ($nv ne $ov) {
+				# Update in file
+				&phpini::save_directive($pconf, $f->[0], $nv);
+				&flush_file_lines($i->[1]);
+				$rv++;
+				}
+			}
+		}
+	&$second_print($text{'setup_done'});
+	}
+return $rv;
 }
 
 1;

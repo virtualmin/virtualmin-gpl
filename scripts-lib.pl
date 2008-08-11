@@ -1134,24 +1134,6 @@ foreach my $m (@mods) {
 return 1;
 }
 
-
-
-# get_global_php_ini(phpver, mode)
-# Returns the full path to the global PHP config file
-sub get_global_php_ini
-{
-local ($ver, $mode) = @_;
-foreach my $i ("/etc/php.ini",
-	       $mode eq "mod_php" ? ("/etc/php$ver/apache/php.ini",
-				     "/etc/php$ver/apache2/php.ini")
-				  : ("/etc/php$ver/cgi/php.ini"),
-	       "/opt/csw/php$ver/lib/php.ini",
-	       "/usr/local/lib/php.ini") {
-	return $i if (-r $i);
-	}
-return undef;
-}
-
 # validate_script_path(&opts, &script, &domain)
 # Checks the 'path' in script options, and sets 'dir' and possibly
 # modifies 'path'. Returns an error message if the path is not valid

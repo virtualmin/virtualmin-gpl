@@ -622,31 +622,13 @@ else {
 			}
 		&$second_print($text{'setup_done'});
 		}
-	if ($_[0]->{'home'} ne $_[1]->{'home'}) {
-		# Update session dir in php.ini files
-		local $mode;
-		if (defined(&get_domain_php_mode) &&
-		    ($mode = &get_domain_php_mode($_[0])) &&
-		    $mode ne "mod_php" &&
-		    &foreign_check("phpini")) {
-			&foreign_require("phpini", "phpini-lib.pl");
-			&$first_print($text{'save_apache10'});
-			foreach my $i (&list_domain_php_inis($_[0])) {
-				local $pconf = &phpini::get_config($i->[1]);
-				foreach my $n ("session.save_path",
-					       "upload_tmp_dir") {
-					local $sp = &phpini::find_value($n,
-									$pconf);
-					if ($sp =~ s/\Q$_[1]->{'home'}\E/$_[0]->{'home'}/g) {
-						&phpini::save_directive($pconf,
-							$n, $sp);
-						&flush_file_lines($i->[1]);
-						}
-					}
-				}
-			$rv++;
-			&$second_print($text{'setup_done'});
-			}
+	if ($_[0]->{'home'} ne $_[1]->{'home'} && defined(&fix_php_ini_files)) {
+		# Update session dir and upload path in php.ini files
+		local @fixes = (
+		  [ "session.save_path", $_[1]->{'home'}, $_[0]->{'home'}, 1 ],
+		  [ "upload_tmp_dir", $_[1]->{'home'}, $_[0]->{'home'}, 1 ],
+		  );
+		&fix_php_ini_files($_[0], \@fixes);
 		}
 	&release_lock_web($_[0]);
 	&create_framefwd_file($_[0]);
@@ -1214,6 +1196,19 @@ if ($virt) {
 			&$second_print(&text('restore_okmode',
 					$text{'phpmode_short_'.$mode}));
 			}
+		}
+
+	# Correct system-specific entries in PHP config files
+	if (defined(&fix_php_ini_files)) {
+		local $sock = &get_php_mysql_socket($_[0]);
+		local @fixes = (
+		  [ "session.save_path", $_[5]->{'home'}, $_[0]->{'home'}, 1 ],
+		  [ "upload_tmp_dir", $_[5]->{'home'}, $_[0]->{'home'}, 1 ],
+		  );
+		if ($sock ne 'none') {
+			push(@fixes, [ "mysql.default_socket", undef, $sock ]);
+			}
+		&fix_php_ini_files($_[0], \@fixes);
 		}
 
 	# Set new public_html and cgi-bin paths
