@@ -1175,13 +1175,32 @@ if ($virt) {
 			       "Group \"#$pdom->{'ugid'}\"");
 			}
 		}
+
+	# Fix up any DocumentRoot or other file-related directives
 	if ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
-		# Fix up any DocumentRoot or other file-related directives
 		local $i;
-		foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
-			$dstlref->[$i] =~ s/\Q$_[5]->{'home'}\E/$_[0]->{'home'}/g;
+		foreach $i ($virt->{'line'} ..
+			    $virt->{'line'}+scalar(@$srclref)-1) {
+			$dstlref->[$i] =~
+				s/\Q$_[5]->{'home'}\E/$_[0]->{'home'}/g;
 			}
 		}
+
+	# Fix up AuthDigestFile / AuthUserFile change between Apache 2.0 and 2.2
+	my ($oldn, $newn);
+	if ($apache::httpd_modules{'core'} >= 2.2) {
+		($oldn, $newn) = ('AuthDigestFile', 'AuthUserFile');
+		}
+	else {
+		($oldn, $newn) = ('AuthUserFile', 'AuthDigestFile');
+		}
+	local $i;
+	foreach $i ($virt->{'line'} ..  $virt->{'line'}+scalar(@$srclref)-1) {
+		if ($dstlref->[$i] =~ /^\Q$oldn\E\s+(.*)$/) {
+			$dstlref->[$i] = "$newn $1";
+			}
+		}
+
 	&flush_file_lines($virt->{'file'});
 	undef(@apache::get_config_cache);
 
