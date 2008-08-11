@@ -799,19 +799,32 @@ else {
 	# Domain has its own records file
 	$z = &get_bind_zone($d->{'dom'});
 	}
+
+# Make sure the zone and file exists
 return &text('validate_edns', "<tt>$d->{'dom'}</tt>") if (!$z);
 local $file = &bind8::find("file", $z->{'members'});
 return &text('validate_ednsfile', "<tt>$d->{'dom'}</tt>") if (!$file);
 local $zonefile = &bind8::make_chroot(
 			&bind8::absolute_path($file->{'values'}->[0]));
 return &text('validate_ednsfile2', "<tt>$zonefile</tt>") if (!-r $zonefile);
+
+# Check for critical records
 local @recs = &bind8::read_zone_file($file->{'values'}->[0], $d->{'dom'});
 local %got;
 foreach my $r (@recs) {
-	$got{lc($r->{'type'})}++;
+	$got{uc($r->{'type'})}++;
 	}
-$got{'SOA'} || &text('validate_ednssoa', "<tt>$zonefile</tt>");
-$got{'A'} || &text('validate_ednsa', "<tt>$zonefile</tt>");
+$got{'SOA'} || return &text('validate_ednssoa', "<tt>$zonefile</tt>");
+$got{'A'} || return &text('validate_ednsa', "<tt>$zonefile</tt>");
+
+# If possible, run named-checkzone
+if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone()) {
+	local @errs = &bind8::check_zone_records($z);
+	if (@errs) {
+		return &text('validate_ednscheck',
+			join("<br>", map { &html_escape($_) } @errs));
+		}
+	}
 return undef;
 }
 
