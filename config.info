@@ -151,3 +151,4 @@ webalizer_nocron=Setup Webalizer Cron job for each virtual server?,1,0-Yes,1-No
 allow_subdoms=Allow creation of sub-domains?,1,1-Yes,0-No,-Decide automatically
 mem_cmd=Command to get memory usage,3,Query operating system
 api_helper=Path to create API helper command,3,Determine automatically
+fcgid_max=Maximum fcgid execution time,10,-From PHP configuration,*-Don't set,Time in seconds

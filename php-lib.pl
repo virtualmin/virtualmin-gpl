@@ -280,19 +280,31 @@ foreach my $p (@ports) {
 		}
 	&apache::save_directive("RemoveHandler", \@remove, $vconf, $conf);
 
-	# For fcgid mode, set IPCCommTimeout to the PHP max execution
-	# time + 1, so that scripts run via fastCGI aren't disconnected
+	# For fcgid mode, set IPCCommTimeout to either the configured value
+	# or the PHP max execution time + 1, so that scripts run via fastCGI
+	# aren't disconnected
 	if ($mode eq "fcgid") {
-		local $inifile = &get_domain_php_ini($d, $ver);
-		if (-r $inifile) {
-			&foreign_require("phpini", "phpini-lib.pl");
-			local $iniconf = &phpini::get_config($inifile);
-			local $maxex = &phpini::find_value(
-				"max_execution_time", $iniconf);
-			if ($maxex) {
-				&set_fcgid_max_execution_time(
-					$d, $maxex, $mode, $p);
+		local $maxex;
+		if ($config{'fcgid_max'} eq "*") {
+			# Don't set
+			$maxex = undef;
+			}
+		elsif ($config{'fcgid_max'} eq "") {
+			# From PHP config
+			local $inifile = &get_domain_php_ini($d, $ver);
+			if (-r $inifile) {
+				&foreign_require("phpini", "phpini-lib.pl");
+				local $iniconf = &phpini::get_config($inifile);
+				$maxex = &phpini::find_value(
+					"max_execution_time", $iniconf);
 				}
+			}
+		else {
+			# Fixed number
+			$maxex = int($config{'fcgid_max'})-1;
+			}
+		if (defined($maxex)) {
+			&set_fcgid_max_execution_time($d, $maxex, $mode, $p);
 			}
 		}
 	else {

@@ -601,7 +601,8 @@ if (-r $phpini && &foreign_check("phpini")) {
 				$diff eq '-' && &php_value_diff($ov, $v) > 0;
 		if ($change) {
 			&phpini::save_directive($conf, $n, $v);
-			if ($n eq "max_execution_time") {
+			if ($n eq "max_execution_time" &&
+			    $config{'fcgid_max'} eq "") {
 				&set_fcgid_max_execution_time($d, $v);
 				}
 			$any++;
