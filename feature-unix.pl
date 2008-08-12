@@ -376,11 +376,15 @@ sub validate_unix
 {
 local ($d) = @_;
 return undef if ($d->{'parent'});	# sub-servers have no user
+
+# Make sure user exists and has right UID
 local @users = &list_all_users();
 local ($user) = grep { $_->{'user'} eq $d->{'user'} } @users;
 return &text('validate_euser', $d->{'user'}) if (!$user);
 return &text('validate_euid', $d->{'user'}, $d->{'uid'}, $user->{'uid'})
 	if ($d->{'uid'} != $user->{'uid'});
+
+# Make sure group exists and has right ID
 if (&mail_system_needs_group() || $d->{'gid'} == $d->{'ugid'}) {
 	local @groups = &list_all_groups();
 	local ($group) = grep { $_->{'group'} eq $d->{'group'} } @groups;
@@ -389,6 +393,15 @@ if (&mail_system_needs_group() || $d->{'gid'} == $d->{'ugid'}) {
 				      $group->{'gid'})
 		if ($d->{'gid'} != $group->{'gid'});
 	}
+
+# Make sure encrypted password matches
+local $encmd5 = &encrypt_user_password($user, $d->{'pass'});
+local $encdes = &unix_crypt($d->{'pass'}, $user->{'pass'});
+if ($user->{'pass'} ne $encmd5 && $user->{'pass'} ne $encdes &&
+    !$d->{'disabled'}) {
+	return &text('validate_eenc', $user->{'user'});
+	}
+
 return undef;
 }
 
@@ -467,6 +480,8 @@ if (-r $cronfile) {
 	&$second_print($text{'setup_done'});
 	}
 else {
+	&open_tempfile(TOUCH, ">$file", 0, 1);
+	&close_tempfile(TOUCH);
 	&$second_print($text{'backup_cronnone'});
 	}
 return 1;
@@ -495,7 +510,17 @@ if ($uinfo && !$d->{'parent'}) {
 	$uinfo->{'real'} = $d->{'owner'};
 	local $enc = &foreign_call($usermodule, "encrypt_password",
 			$d->{'pass'});
-	$uinfo->{'pass'} = $enc;
+	if ($d->{'backup_encpass'} &&
+	    ($enc =~ /^\$1\$/ || $d->{'backup_encpass'} !~ /^\$1\$/ ||
+	     $uinfo->{'pass'} =~ /^\$1\$/)) {
+		# Use saved encrypted password, if available and if either
+		# we support MD5 or the password isn't in MD5
+		$uinfo->{'pass'} = $d->{'backup_encpass'};
+		}
+	else {
+		# Use re-hashed pass
+		$uinfo->{'pass'} = $enc;
+		}
 	&set_pass_change($uinfo);
 	&foreign_call($usermodule, "set_user_envs",
 		      $uinfo, 'MODIFY_USER', $d->{'pass'}, undef, $olduinfo);

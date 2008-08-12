@@ -968,3 +968,4 @@ When a virtual server's IP address is changed, the addresses of all alias domain
 The Website Options page now has a field to enable matching all sub-domains for the virtual server's website, via a *.domain.com DNS entry and Apache server alias directive. This can also be enabled for some or all domains using the modify-web.pl command-line API.
 If a backup is taken on a system that uses ~/mail for user folders and restored on one using ~/Maildir, they will be properly converted during the restore (and vice-versa).
 When a domain is restored on a new system, the MySQL socket file path and options that reference the home directory in its php.ini file are updated to match the new system.
+Preserve encrypted passwords when backing up domains, in case they don't match the plaintext password stored by Virtualmin. Also, have validation report an error in the case of a mismatch.

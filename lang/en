@@ -3442,6 +3442,7 @@ validate_euser=Administration user $1 does not exist
 validate_euid=Administration user $1 has UID $3, but the domain's UID is $2
 validate_egroup=Administration group $1 does not exist
 validate_egid=Administration group $1 has GID $3, but the domain's GID is $2
+validate_eenc=Encrypted password for Unix user $1 does not match virtual server
 validate_edns=No DNS zone found for domain $1
 validate_ednsfile=No DNS zone file set for domain $1
 validate_ednsfile2=DNS zone file $1 does not exist

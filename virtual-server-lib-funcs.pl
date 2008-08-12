@@ -4112,6 +4112,16 @@ else {
 	delete($_[0]->{'backup_mail_folders'});
 	}
 
+# Record encrypted Unix password
+delete($_[0]->{'backup_encpass'});
+if ($_[0]->{'unix'} && !$_[0]->{'parent'} && !$_[0]->{'disabled'}) {
+	local @users = &list_all_users();
+	local ($user) = grep { $_->{'user'} eq $_[0]->{'user'} } @users;
+	if ($user) {
+		$_[0]->{'backup_encpass'} = $user->{'pass'};
+		}
+	}
+
 &save_domain($_[0]);
 
 # Save the domain's data file
