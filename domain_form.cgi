@@ -466,7 +466,7 @@ if (!$aliasdom) {
 	}
 
 # Show inputs for setting up a proxy-only virtual server
-if ($config{'proxy_pass'} && !$aliasdom) {
+if ($can_feature{'web'} && $config{'proxy_pass'} && !$aliasdom) {
 	print &frame_fwd_input();
 	}
 
@@ -490,7 +490,7 @@ if (!$aliasdom) {
 	print &ui_hidden_table_end();
 	}
 
-if (!$aliasdom && $config{'web'} && $virtualmin_pro) {
+if ($can_feature{'web'} && !$aliasdom && $config{'web'} && $virtualmin_pro) {
 	# Show field for initial content
 	print &ui_hidden_table_start($text{'form_park'}, "width=100%", 2,
 				     "park", 0);

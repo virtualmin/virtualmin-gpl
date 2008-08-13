@@ -160,7 +160,8 @@ if (!$parentuser) {
 	}
 if (!$aliasdom) {
 	# Validate non-alias domain inputs
-	if ($config{'proxy_pass'} && $in{'web'} && !$in{'proxy_def'}) {
+	if ($config{'proxy_pass'} && $in{'web'} && !$in{'proxy_def'} &&
+	    defined($in{'proxy'})) {
 		($proxy = $in{'proxy'}) =~ /^(http|https):\/\/\S+$/ ||
 			&error($text{'setup_eproxy'});
 		}
