@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-# Display all custom links for domains
+# Display all custom links for domains, and link categories
 
 require './virtual-server-lib.pl';
 &ReadParse();
@@ -22,8 +22,7 @@ print &ui_hidden_end(),"<p>\n";
 print &ui_form_start("save_newlinks.cgi", "post");
 $i = 0;
 @table = ( );
-$spacer = "<img src=images/gap.gif>";
-foreach $l (@links, { }, { }) {
+foreach $l (@links) {
 	$updown = "";
 	if (%$l) {
 		# Create move up / down links
@@ -34,47 +33,35 @@ foreach $l (@links, { }, { }) {
 			$l ne $links[@links-1],
 			);
 		}
-	$catsel = &ui_select("cat_$i", $l->{'cat'},
-	    [ [ "", $text{'newlinks_nocat'} ],
-	      map { [ $_->{'id'}, &shorten_category($_->{'desc'}) ] } @cats ]);
 	push(@table, [
-		&ui_textbox("desc_$i", $l->{'desc'}, 20, 0, undef,
-			    "style='width:100%'"),
-		&ui_textbox("url_$i", $l->{'url'}, 60, 0, undef,
-			    "style='width:100%'"),
-		&ui_select("open_$i", int($l->{'open'}),
-			  [ [ 0, $text{'newlinks_same'} ],
-			    [ 1, $text{'newlinks_new'} ] ]),
-		join("<br>\n", map { &ui_checkbox("who_$i", $_,
-				$text{'newlinks_'.$_}, $l->{'who'}->{$_}) }
-			      ('master', 'domain', 'reseller')),
-		@cats ? ( $catsel ) : ( ),
-		@ctmpls ? (
-		  &ui_select("tmpl_$i", $l->{'tmpl'},
-		     [ [ "", "&lt;$text{'newlinks_any'}&gt;" ],
-		       map { [ $_->{'id'},
-			     &shorten_category($_->{'name'}, 30) ] } @tmpls ])
-			) : ( ),
+		"<a href='edit_link.cgi?idx=$i'>".
+		  $l->{'desc'}."</a>",
+		$l->{'url'},
+		$l->{'open'} ? $text{'newlinks_same'} : $text{'newlinks_new'},
+		join(", ", map { $text{'newlinks_'.$_} }
+			      grep { $l->{'who'}->{$_} }
+				   ('master', 'domain', 'reseller') ),
 		@links > 1 ? ( $updown ) : ( ),
 		]);
 	$i++;	
 	}
 
 # Generate the table
-print ui_form_columns_table(
-	"save_newlinks.cgi",
-	[ [ "save", $text{'save'} ] ],
-	0,
+print &ui_form_columns_table(
 	undef,
+	undef,
+	0,
+	[ [ "edit_link.cgi?new=1", $text{'newlinks_add'} ] ],
 	undef,
 	[ $text{'newlinks_desc'}, $text{'newlinks_url'},
 	  $text{'newlinks_open'}, $text{'newlinks_who'},
-	  @cats ? ( $text{'newlinks_cat'} ) : ( ),
-	  @ctmpls ? ( $text{'newlinks_tmpl'} ) : ( ),
 	  @links > 1 ? ( $text{'newlinks_move'} ) : ( ), ],
 	100,
 	\@table,
-	1,
+	undef,
+	0,
+	undef,
+	$text{'newlinks_none'},
 	);
 
 print &ui_hr();
