@@ -951,8 +951,11 @@ local ($d, $file, $opts) = @_;
 local @files;
 
 # Add .acl files for domain owner
-push(@files, "$d->{'user'}.acl");
+if (-r "$config_directory/$d->{'user'}.acl") {
+	push(@files, "$d->{'user'}.acl");
+	}
 local @otheracls = glob("$config_directory/*/$d->{'user'}.acl");
+@otheracls = grep { !/\*/ } @otheracls;
 if (@otheracls) {
 	push(@files, "*/$d->{'user'}.acl");
 	}
@@ -961,6 +964,7 @@ if (@otheracls) {
 foreach my $admin (&list_extra_admins($d)) {
 	push(@files, "$admin->{'name'}.acl");
 	local @otheracls = glob("$config_directory/*/$admin->{'name'}.acl");
+	@otheracls = grep { !/\*/ } @otheracls;
 	if (@otheracls) {
 		push(@files, "*/$admin->{'name'}.acl");
 		}
