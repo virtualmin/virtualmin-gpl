@@ -16,19 +16,12 @@ else {
 	$link = $links[$in{'idx'}];
 	}
 @tmpls = &list_templates();
+@cats = &list_custom_link_categories();
 
-# Get all possible categories
-@cats = ( );
-foreach my $t (keys %text) {
-	if ($t =~ /^cat_(\S+)$/ && $1 ne 'objects') {
-		push(@cats, { 'id' => $1, 'desc' => $text{$t} });
-		}
-	}
-@ccats = &list_custom_link_categories();
-if (@ccats) {
-	push(@cats, { 'id' => '-', 'desc' => '---------------' });
-	push(@cats, @ccats);
-	}
+print &ui_hidden_start($text{'newuser_docs'}, "docs", 0);
+print "$text{'newlinks_descr'}<p>\n";
+&print_subs_table("DOM", "IP", "USER", "EMAILTO");
+print &ui_hidden_end(),"<p>\n";
 
 # Start of link details section
 print &ui_form_start("save_link.cgi", "post");
@@ -54,7 +47,7 @@ print &ui_table_row($text{'elink_open'},
 # Category on menu
 print &ui_table_row($text{'elink_cat'},
 	&ui_select("cat", $link->{'cat'},
-		   [ [ undef, "&lt;$text{'newlinks_any'}&gt;" ],
+		   [ [ undef, $text{'newlinks_nocat'} ],
 		     map { [ $_->{'id'}, $_->{'desc'} ] } @cats ]));
 
 print &ui_hidden_table_end();

@@ -6839,6 +6839,7 @@ while(<LINKS>) {
 		    'open' => $a[3],
 		    'cat' => $a[4],
 		    'tmpl' => $a[5] eq '-' ? undef : $a[5],
+		    'feature' => $a[6] eq '-' ? undef : $a[6],
 		  });
 	}
 close(LINKS);
@@ -6851,10 +6852,13 @@ sub save_custom_links
 {
 &open_lock_tempfile(LINKS, ">$custom_links_file");
 foreach my $a (@{$_[0]}) {
-	&print_tempfile(LINKS, $a->{'desc'}."\t".$a->{'url'}."\t".
-			       join(":", keys %{$a->{'who'}})."\t".
-			       int($a->{'open'})."\t".$a->{'cat'}."\t".
-			       ($a->{'tmpl'} eq "" ? "-" : $a->{'tmpl'})."\n");
+	&print_tempfile(LINKS,
+		$a->{'desc'}."\t".$a->{'url'}."\t".
+		join(":", keys %{$a->{'who'}})."\t".
+		int($a->{'open'})."\t".$a->{'cat'}."\t".
+		($a->{'tmpl'} eq "" ? "-" : $a->{'tmpl'})."\t".
+		($a->{'feature'} eq "" ? "-" : $a->{'feature'})."\t".
+		"\n");
 	}
 &close_tempfile(LINKS);
 }
@@ -6901,7 +6905,11 @@ foreach my $l (&list_custom_links()) {
 		next;
 		}
 	if ($l->{'tmpl'} && $d->{'template'} ne $l->{'tmpl'}) {
-		# Not for this domain
+		# Not for this domain template
+		next;
+		}
+	if ($l->{'feature'} && !$d->{$l->{'feature'}}) {
+		# Not for this domain feature
 		next;
 		}
 	local $nl = {

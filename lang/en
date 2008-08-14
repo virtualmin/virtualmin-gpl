@@ -1734,6 +1734,9 @@ log_remote=Called remote API $1
 log_remote_l=Called remote API $1 $2
 log_chroot=Changed FTP directory restrictions
 log_global=Changed global template variables
+log_create_link=Created custom link $1
+log_modify_link=Modified custom link $1
+log_delete_link=Deleted custom link $1
 
 backup_title=Backup Virtual Servers
 backup_title2=Edit Scheduled Backup
@@ -3782,8 +3785,7 @@ switch_ecannot=You are not allowed to switch to the admin of this domain
 switch_eadmin=The specified extra administrator does not exist!
 
 newlinks_title=Custom Links
-newlinks_descr=This form can be used to create links that are available on the left menu when a virtual server is selected. The following substitions can be used in the URL and link title :
-newlinks_descr2=Links can be limited to virtual servers using a particular template, by selecting one from the <b>For template</b> menu. Otherwise they will be displayed for all domains.
+newlinks_descr=This form can be used to create a link that is available on the left menu when a virtual server is selected. The following substitions can be used in the URL and link title :
 newlinks_desc=Link title
 newlinks_url=Destination URL
 newlinks_who=Visible to

@@ -96,6 +96,9 @@ elsif ($type eq "sched") {
 					       &text('log_sched_doms', $object);
 	return &text('log_'.$action.'_sched', $msg);
 	}
+elsif ($type eq "link") {
+	return &text('log_'.$action.'_link', &html_escape($p->{'desc'}));
+	}
 elsif ($type eq "scheds") {
 	return &text('log_'.$action.'_scheds', $object);
 	}

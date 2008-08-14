@@ -969,3 +969,4 @@ The Website Options page now has a field to enable matching all sub-domains for 
 If a backup is taken on a system that uses ~/mail for user folders and restored on one using ~/Maildir, they will be properly converted during the restore (and vice-versa).
 When a domain is restored on a new system, the MySQL socket file path and options that reference the home directory in its php.ini file are updated to match the new system.
 Preserve encrypted passwords when backing up domains, in case they don't match the plaintext password stored by Virtualmin. Also, have validation report an error in the case of a mismatch.
+Re-organized the custom links page to move editing of each link into a separate form, and allow links to be limited to virtual servers with some feature enabled.

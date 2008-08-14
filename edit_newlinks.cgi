@@ -8,14 +8,6 @@ require './virtual-server-lib.pl';
 @tmpls = &list_templates();
 @ctmpls = grep { !$_->{'standard'} } @tmpls;
 
-print &ui_hidden_start($text{'newuser_docs'}, "docs", 0);
-print "$text{'newlinks_descr'}<p>\n";
-&print_subs_table("DOM", "IP", "USER", "EMAILTO");
-if (@ctmpls) {
-	print "$text{'newlinks_descr2'}<p>\n";
-	}
-print &ui_hidden_end(),"<p>\n";
-
 # Make the table data
 @links = &list_custom_links();
 @cats = &list_custom_link_categories();
