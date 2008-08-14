@@ -412,7 +412,8 @@ if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
 			&$second_print($text{'setup_ewebalias'});
 			}
 		else {
-			local @sa = &apache::find_directive("ServerAlias", $pconf);
+			local @sa = &apache::find_directive("ServerAlias",
+							    $pconf);
 			local $s;
 			foreach $s (@sa) {
 				$s =~ s/\Q$_[1]->{'dom'}\E($|\s)/$_[0]->{'dom'}$1/g;
@@ -438,7 +439,12 @@ else {
 		# Name-based hosting mode or IP has changed .. update the
 		# Listen directives, and the virtual host definition
 		&$first_print($text{'save_apache'});
-		local $nvstar = &add_name_virtual($_[0], $conf, $_[0]->{'web_port'});
+		if (!$virt) {
+			&$second_print($text{'delete_noapache'});
+			goto VIRTFAILED;
+			}
+		local $nvstar = &add_name_virtual($_[0], $conf,
+						  $_[0]->{'web_port'});
 		&add_listen($_[0], $conf, $_[0]->{'web_port'});
 
 		local $lref = &read_file_lines($virt->{'file'});
@@ -459,6 +465,10 @@ else {
 		# Home directory has changed .. update any directives that
 		# referred to the old directory
 		&$first_print($text{'save_apache3'});
+		if (!$virt) {
+			&$second_print($text{'delete_noapache'});
+			goto VIRTFAILED;
+			}
 		local $lref = &read_file_lines($virt->{'file'});
 		for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
 			$lref->[$i] =~ s/$_[1]->{'home'}/$_[0]->{'home'}/g;
@@ -475,6 +485,10 @@ else {
 		# This is an alias, and the domain it is aliased to has changed.
 		# update all Proxy* and Redirect directives
 		&$first_print($text{'save_apache4'});
+		if (!$virt) {
+			&$second_print($text{'delete_noapache'});
+			goto VIRTFAILED;
+			}
 		local $lref = &read_file_lines($virt->{'file'});
 		for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
 			if ($lref->[$i] =~
@@ -495,6 +509,10 @@ else {
 		# This is a proxying forwarding website and the URL has
 		# changed - update all Proxy* directives
 		&$first_print($text{'save_apache6'});
+		if (!$virt) {
+			&$second_print($text{'delete_noapache'});
+			goto VIRTFAILED;
+			}
 		local $lref = &read_file_lines($virt->{'file'});
 		for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
 			if ($lref->[$i] =~ /^\s*ProxyPass(Reverse)?\s/) {
@@ -516,6 +534,10 @@ else {
 			      $_[1]->{'proxy_pass_mode'};
 		&$first_print($mode == 2 ? $text{'save_apache8'}
 					 : $text{'save_apache9'});
+		if (!$virt) {
+			&$second_print($text{'delete_noapache'});
+			goto VIRTFAILED;
+			}
 
 		# Take out old proxy directives and block
 		local $lref = &read_file_lines($virt->{'file'});
@@ -584,6 +606,10 @@ else {
 		# Domain name has changed .. update ServerName and ServerAlias,
 		# and any log files that contain the domain name
 		&$first_print($text{'save_apache2'});
+		if (!$virt) {
+			&$second_print($text{'delete_noapache'});
+			goto VIRTFAILED;
+			}
 		&apache::save_directive("ServerName", [ $_[0]->{'dom'} ],
 					$vconf, $conf);
 		local @sa = map { s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g; $_ }
@@ -636,6 +662,10 @@ else {
 			}
 		&$second_print($text{'setup_done'});
 		}
+
+	# If any other rename step fails becuase no <virtualhost> was found,
+	# the code will jump to here.
+	VIRTFAILED:
 	if ($_[0]->{'home'} ne $_[1]->{'home'} && defined(&fix_php_ini_files)) {
 		# Update session dir and upload path in php.ini files
 		local @fixes = (
