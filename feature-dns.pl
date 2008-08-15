@@ -149,7 +149,8 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 	local $myip = $bconfig{'this_ip'} ||
 		      &to_ipaddress(&get_system_hostname());
 	if (@slaves && !$_[0]->{'noslaves'}) {
-		local $slaves = join(" ", map { $_->{'host'} } @slaves);
+		local $slaves = join(" ", map { $_->{'nsname'} ||
+						$_->{'host'} } @slaves);
 		&$first_print(&text('setup_bindslave', $slaves));
 		local @slaveerrs = &bind8::create_on_slaves(
 			$_[0]->{'dom'}, $myip, undef, undef,
@@ -157,8 +158,9 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 		if (@slaveerrs) {
 			&$second_print($text{'setup_eslaves'});
 			foreach $sr (@slaveerrs) {
-				&$second_print($sr->[0]->{'host'}." : ".
-					       $sr->[1]);
+				&$second_print(
+				  ($sr->[0]->{'nsname'} || $sr->[0]->{'host'}).
+				  " : ".$sr->[1]);
 				}
 			}
 		else {
@@ -254,8 +256,9 @@ if (!$_[0]->{'dns_submode'}) {
 		if (@slaveerrs) {
 			&$second_print($text{'delete_bindeslave'});
 			foreach $sr (@slaveerrs) {
-				&$second_print($sr->[0]->{'host'}." : ".
-					       $sr->[1]);
+				&$second_print(
+				  ($sr->[0]->{'nsname'} || $sr->[0]->{'host'}).
+				  " : ".$sr->[1]);
 				}
 			}
 		else {
@@ -401,8 +404,9 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 			if (@slaveerrs) {
 				&$second_print($text{'save_bindeslave'});
 				foreach $sr (@slaveerrs) {
-					&$second_print($sr->[0]->{'host'}." : ".
-						       $sr->[1]);
+					&$second_print(
+					  ($sr->[0]->{'nsname'} ||
+					   $sr->[0]->{'host'}." : ".$sr->[1]);
 					}
 				}
 			else {
