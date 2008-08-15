@@ -13,7 +13,7 @@ $d = &get_domain($in{'dom'});
 
 print &ui_form_start("save_limits.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
-print &ui_hidden_table_start($text{'limits_header'}, "100%", 2,
+print &ui_hidden_table_start($text{'limits_header'}, "width=100%", 2,
 			     "limits", 1, [ "width=30%" ]);
 
 # Maximum allowed mailboxes
