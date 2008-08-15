@@ -90,7 +90,7 @@ foreach $f (@feature_plugins) {
 	}
 
 print &ui_hidden_table_end("limits");
-print &ui_hidden_table_start($text{'limits_header2'}, "100%", 2,
+print &ui_hidden_table_start($text{'limits_header2'}, "width=100%", 2,
 			     "features", 0, [ "width=30%" ]);
 
 # Capabilities when editing a server
@@ -123,7 +123,7 @@ print &ui_table_row(&hlink($text{'limits_features'}, "limits_features"),
 		    $ftable);
 
 print &ui_hidden_table_end("limits");
-print &ui_hidden_table_start($text{'limits_header3'}, "100%", 2,
+print &ui_hidden_table_start($text{'limits_header3'}, "width=100%", 2,
 			     "other", 0, [ "width=30%" ]);
 
 # Demo mode
