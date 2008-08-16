@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Piwik script installer to version 0.2.9, phpCOIN to 1.4.4, Joomla to 1.5.6, phpMyAdmin to 2.11.8.1, dotProject to 2.1.2, SugarCRM to 5.0.0g, Wordpress MU 2.6, Gallery to 2.3-rc-1 and 1.5.8, TWiki to 4.2.2, Coppermine to 1.4.19, Trac to 0.11.1, Bugzilla to 3.2rc1, Movable Type to 4.2, Zikula to 1.0.2, WordPress to 2.6.1, MediaWiki to 1.13.0, and Drupal to 5.10 and 6.4.
+html=Updated the Piwik script installer to version 0.2.9, phpCOIN to 1.4.4, Joomla to 1.5.6, phpMyAdmin to 2.11.8.1, dotProject to 2.1.2, SugarCRM to 5.0.0g, Wordpress MU 2.6, Gallery to 2.3-rc-1 and 1.5.8, TWiki to 4.2.2, Coppermine to 1.4.19, Trac to 0.11.1, Bugzilla to 3.2rc1, Movable Type to 4.2, Zikula to 1.0.2, WordPress to 2.6.1, MediaWiki to 1.13.0, Drupal to 5.10 and 6.4, and ZenPhoto to 1.2.
 master=1
 reseller=1
 domain=1
