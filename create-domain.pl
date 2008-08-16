@@ -34,6 +34,13 @@ databases for the new domain owner using the --max-aliases, --max-doms,
 all limits (including quotas) set based on the template using the
 --limits-from-template command line flag.
 
+If the virtual server has the MySQL or PostgreSQL features enabled, by default
+the password for the server's accounts will be the same as its administration
+login. However, you can specify a different password with the --mysql-pass or
+--postgres-pass flags, each of which are followed by the password to set for
+that database type. These options are only available for top-level virtual
+servers though.
+
 =cut
 
 package virtual_server;
@@ -77,6 +84,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--pass") {
 		$pass = shift(@ARGV);
+		}
+	elsif ($a eq "--mysql-pass") {
+		$mysqlpass = shift(@ARGV);
+		}
+	elsif ($a eq "--postgres-pass") {
+		$postgrespass = shift(@ARGV);
 		}
 	elsif ($a eq "--quota") {
 		$quota = shift(@ARGV);
@@ -529,6 +542,14 @@ foreach $f (@feature_plugins) {
 
 # Work out home directory
 $dom{'home'} = &server_home_directory(\%dom, $parent);
+if (defined($mysqlpass) && $config{'mysql'}) {
+	$dom{'parent'} && &usage("The --mysql-pass flag can only be used for top-level virtual servers");
+	&set_mysql_pass(\%dom, $mysqlpass);
+	}
+if (defined($postgrespass) && $config{'postgres'}) {
+	$dom{'parent'} && &usage("The --postgres-pass flag can only be used for top-level virtual servers");
+	&set_postgres_pass(\%dom, $postgrespass);
+	}
 &complete_domain(\%dom);
 
 # Check for various clashes
@@ -608,6 +629,12 @@ print "                        [--reseller name]\n";
 if ($virtualmin_pro) {
 	print "                        [--style name]\n";
 	print "                        [--content text|filename]\n";
+	}
+if ($config{'mysql'}) {
+	print "                        [--mysql-pass password]\n";
+	}
+if ($config{'postgres'}) {
+	print "                        [--postgres-pass password]\n";
 	}
 exit(1);
 }
