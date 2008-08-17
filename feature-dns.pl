@@ -406,7 +406,7 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 				foreach $sr (@slaveerrs) {
 					&$second_print(
 					  ($sr->[0]->{'nsname'} ||
-					   $sr->[0]->{'host'}." : ".$sr->[1]);
+					   $sr->[0]->{'host'})." : ".$sr->[1]);
 					}
 				}
 			else {
