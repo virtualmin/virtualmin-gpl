@@ -1109,6 +1109,7 @@ save_ssl3=Changing home directory in SSL website configuration ..
 save_ssl6=Changing proxy destination in SSL website configuration ..
 save_ssl8=Updating SSL frame forwarding ..
 save_ssl9=Updating SSL website proxying ..
+save_ssl10=Changing username in SSL website configuration ..
 save_webalizer=Updating domain name in Webalizer configuration ..
 save_webalizerhome=Updating home directory in Webalizer configuration ..
 save_webalizeruser=Updating username in Webalizer configuration ..

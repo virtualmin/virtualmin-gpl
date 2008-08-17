@@ -155,33 +155,14 @@ sub modify_ssl
 local $rv = 0;
 &require_apache();
 &obtain_lock_web($_[0]);
-local $conf = &apache::get_config();
-local ($virt, $vconf) = &get_apache_virtual($_[1]->{'dom'},
-                                            $_[1]->{'web_sslport'});
+
+# Get objects for SSL and non-SSL virtual hosts
+local ($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
+                                                   $_[1]->{'web_sslport'});
+local ($nonvirt, $nonvconf) = &get_apache_virtual($_[0]->{'dom'},
+						  $_[0]->{'web_port'});
 local $tmpl = &get_template($_[0]->{'template'});
-if ($_[0]->{'home'} ne $_[1]->{'home'}) {
-	# Home directory has changed .. update any directives that referred
-	# to the old directory
-	&$first_print($text{'save_ssl3'});
-	local $lref = &read_file_lines($virt->{'file'});
-	for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
-		$lref->[$i] =~ s/$_[1]->{'home'}/$_[0]->{'home'}/g;
-		}
-	&flush_file_lines();
-	$rv++;
-	&$second_print($text{'setup_done'});
-	}
-if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
-        # Domain name has changed
-        &$first_print($text{'save_ssl2'});
-        &apache::save_directive("ServerName", [ $_[0]->{'dom'} ], $vconf,$conf);
-        local @sa = map { s/$_[1]->{'dom'}/$_[0]->{'dom'}/g; $_ }
-                        &apache::find_directive("ServerAlias", $vconf);
-        &apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
-        &flush_file_lines();
-        $rv++;
-        &$second_print($text{'setup_done'});
-        }
+
 if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
     $_[0]->{'web_sslport'} != $_[1]->{'web_sslport'}) {
 	# IP address or port has changed .. update VirtualHost
@@ -193,6 +174,24 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
 		"<VirtualHost $_[0]->{'ip'}:$_[1]->{'web_sslport'}>";
 	&flush_file_lines();
 	$rv++;
+	undef(@apache::get_config_cache);
+	($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
+					      	     $_[1]->{'web_sslport'});
+	&$second_print($text{'setup_done'});
+	}
+if ($_[0]->{'home'} ne $_[1]->{'home'}) {
+	# Home directory has changed .. update any directives that referred
+	# to the old directory
+	&$first_print($text{'save_ssl3'});
+	local $lref = &read_file_lines($virt->{'file'});
+	for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
+		$lref->[$i] =~ s/$_[1]->{'home'}/$_[0]->{'home'}/g;
+		}
+	&flush_file_lines();
+	$rv++;
+	undef(@apache::get_config_cache);
+	($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
+					      	     $_[1]->{'web_sslport'});
 	&$second_print($text{'setup_done'});
 	}
 if ($_[0]->{'proxy_pass_mode'} == 1 &&
@@ -218,8 +217,6 @@ if ($_[0]->{'proxy_pass_mode'} != $_[1]->{'proxy_pass_mode'}) {
 		      $_[1]->{'proxy_pass_mode'};
 	&$first_print($mode == 2 ? $text{'save_ssl8'}
 				 : $text{'save_ssl9'});
-	local ($nonvirt, $nonvconf) = &get_apache_virtual($_[1]->{'dom'},
-						          $_[1]->{'web_port'});
 	local $lref = &read_file_lines($virt->{'file'});
 	local $nonlref = &read_file_lines($nonvirt->{'file'});
 	local $tmpl = &get_template($_[0]->{'tmpl'});
@@ -229,8 +226,35 @@ if ($_[0]->{'proxy_pass_mode'} != $_[1]->{'proxy_pass_mode'}) {
 	       $virt->{'eline'} - $virt->{'line'} - 1, @dirs);
 	&flush_file_lines($virt->{'file'});
 	$rv++;
+	undef(@apache::get_config_cache);
+	($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
+					      	     $_[1]->{'web_sslport'});
 	&$second_print($text{'setup_done'});
 	}
+if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+	# Username has changed .. copy suexec directives from parent
+	&$first_print($text{'save_ssl10'});
+	foreach my $dir ("User", "Group", "SuexecUserGroup") {
+		local @vals = &apache::find_directive($dir, $nonvconf);
+		&apache::save_directive($dir, \@vals, $vconf, $conf);
+		}
+	&flush_file_lines($virt->{'file'});
+	$rv++;
+	&$second_print($text{'setup_done'});
+	}
+if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
+        # Domain name has changed
+        &$first_print($text{'save_ssl2'});
+        &apache::save_directive("ServerName", [ $_[0]->{'dom'} ], $vconf,$conf);
+        local @sa = map { s/$_[1]->{'dom'}/$_[0]->{'dom'}/g; $_ }
+                        &apache::find_directive("ServerAlias", $vconf);
+        &apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
+        &flush_file_lines($virt->{'file'});
+        $rv++;
+        &$second_print($text{'setup_done'});
+        }
+
+# Changes for Webmin and Usermin
 if ($_[0]->{'ip'} ne $_[1]->{'ip'}) {
         # IP address has changed .. fix per-IP SSL cert
 	if ($tmpl->{'web_webmin_ssl'}) {
@@ -443,10 +467,11 @@ sub restore_ssl
 # Restore the Apache directives
 local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 					    $_[0]->{'web_sslport'});
-local $srclref = &read_file_lines($_[1]);
+local $srclref = &read_file_lines($_[1], 1);
 local $dstlref = &read_file_lines($virt->{'file'});
 splice(@$dstlref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1,
        @$srclref[1 .. @$srclref-2]);
+
 # Fix ip address in <Virtualhost> section (if needed)
 if ($dstlref->[$virt->{'line'}] =~
     /^(.*<Virtualhost\s+)([0-9\.]+)(.*)$/i) {
@@ -459,7 +484,7 @@ if ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
 		$dstlref->[$i] =~ s/\Q$_[5]->{'home'}\E/$_[0]->{'home'}/g;
 		}
 	}
-&flush_file_lines();
+&flush_file_lines($virt->{'file'});
 undef(@apache::get_config_cache);
 
 # Copy suexec-related directives from non-SSL virtual host
@@ -472,7 +497,7 @@ if ($nvirt) {
 		local @vals = &apache::find_directive($dir, $nvconf);
 		&apache::save_directive($dir, \@vals, $vconf, $conf);
 		}
-	&flush_file_lines();
+	&flush_file_lines($virt->{'file'});
 	}
 
 # Restore the cert and key, if any and if saved
