@@ -3541,7 +3541,7 @@ spam_scanner1=Server scanner (<tt>clamdscan</tt>)
 spam_scanner2=Other program $1
 spam_escanner=Missing or invalid virus scanning program
 spam_eclamdscan=The server virus scanner cannot be selected unless the <tt>clamd</tt> virus scanning server is running
-spam_procmail=Allow mailbox users to configure procmail?
+spam_procmail=Allow mailbox users to create mail filters?
 
 cat_objects=Server Objects
 cat_server=Server Configuration
