@@ -229,8 +229,8 @@ foreach my $p (@ports) {
 		# Alias and Directory if already there.
 		local $ver = $pdirs{$phpstr->{'words'}->[0]} ||
 			     $tmpl->{'web_phpver'} ||
-			     $avail[0];
-		$ver = $avail[0] if (&indexof($ver, @avail) < 0);
+			     $avail[$#avail];
+		$ver = $avail[$#avail] if (&indexof($ver, @avail) < 0);
 		if ($mode eq "cgi") {
 			foreach my $v (@avail) {
 				push(@actions, "application/x-httpd-php$v ".
