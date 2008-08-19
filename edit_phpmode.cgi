@@ -61,7 +61,7 @@ if (!$d->{'alias'} || $d->{'alias_mode'} != 1) {
 print &ui_table_row(&hlink($text{'phpmode_matchall'}, "matchall"),
 		    &ui_yesno_radio("matchall", &get_domain_web_star($d)));
 
-print &ui_table_end();
+print &ui_hidden_table_end();
 
 # Show PHP information
 if (defined(&list_php_modules) && !$d->{'alias'}) {
