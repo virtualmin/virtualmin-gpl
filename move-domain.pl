@@ -87,6 +87,12 @@ else {
 	$derr = &virtual_server_clashes($newd, undef, 'user') ||
 		&virtual_server_clashes($newd, undef, 'group');
 	&usage($derr) if ($derr);
+
+	# Check if the domain already has a user with that name
+	@dusers = &list_domain_users($d, 0, 1, 1, 1);
+	($clash) = grep { $_->{'user'} eq $newuser ||
+		  &remove_userdom($_->{'user'}, $d) eq $newuser } @dusers;
+	$clash && &usage("A user named $newuser already exists in $d->{'dom'}");
 	}
 
 # Check if this is a sub-domain

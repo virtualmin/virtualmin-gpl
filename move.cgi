@@ -28,6 +28,12 @@ else {
 	$derr = &virtual_server_clashes($newd, undef, 'user') ||
 		&virtual_server_clashes($newd, undef, 'group');
 	&error($derr) if ($derr);
+
+	# Check if the domain already has a user with that name
+	@dusers = &list_domain_users($d, 0, 1, 1, 1);
+	($clash) = grep { $_->{'user'} eq $in{'newuser'} ||
+		  &remove_userdom($_->{'user'}, $d) eq $in{'newuser'} } @dusers;
+	$clash && &error(&text('move_euserclash', $in{'newuser'}));
 	}
 
 &ui_print_unbuffered_header(&domain_in($d), $text{'move_title'}, "");
