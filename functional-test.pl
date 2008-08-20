@@ -992,6 +992,10 @@ $mail_tests = [
 		      [ 'no-creation-mail' ] ],
 	},
 
+	# Add empty lines to procmail.log, to prevent later false matches
+	{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
+	},
+
         # Send some reasonable mail to him
 	{ 'command' => 'echo Hello World | mail -s "Test mail" '.
 		       $test_user.'@'.$test_domain,
@@ -1012,6 +1016,10 @@ $mail_tests = [
 	},
 
 	-r $virus_email_file ? (
+		# Add empty lines to procmail.log
+		{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
+		},
+
 		# Send a virus message, if we have one
 		{ 'command' => 'sendmail -t <'.$virus_email_file,
 		},
@@ -1040,7 +1048,11 @@ $mail_tests = [
 			       ' --id-only`/virtualmin.cf',
 		},
 
-		# Send a virus message, if we have one
+		# Add empty lines to procmail.log
+		{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
+		},
+
+		# Send a spam message, if we have one
 		{ 'command' => 'sendmail -t <'.$spam_email_file,
 		},
 
