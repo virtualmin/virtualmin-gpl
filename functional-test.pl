@@ -28,7 +28,7 @@ $test_alias = "testing";
 $test_alias_two = "yetanothertesting";
 $test_reseller = "testsel";
 $timeout = 60;			# Longest time a test should take
-$wget_command = "wget -O - --cache=off --proxy=off ";
+$wget_command = "wget -O - --cache=off --proxy=off  ";
 $migration_dir = "/usr/local/webadmin/virtualmin/migration";
 $migration_ensim_domain = "apservice.org";
 $migration_ensim = "$migration_dir/$migration_ensim_domain.ensim.tar.gz";
@@ -84,6 +84,19 @@ while(@ARGV > 0) {
 		}
 	}
 $webmin_wget_command = "wget -O - --cache=off --proxy=off --http-user=$webmin_user --http-passwd=$webmin_pass --user-agent=Webmin ";
+&get_miniserv_config(\%miniserv);
+$webmin_proto = "http";
+if ($miniserv{'ssl'}) {
+	eval "use Net::SSLeay";
+	if (!$@) {
+		$webmin_proto = "https";
+		}
+	}
+$webmin_port = $miniserv{'port'};
+$webmin_url = "$webmin_proto://localhost:$webmin_port";
+if ($webmin_proto eq "https") {
+	$webmin_wget_command .= "--no-check-certificate ";
+	}
 
 $prefix = &compute_prefix($test_domain);
 $test_full_user = &userdom_name($test_user, { 'dom' => $test_domain,
@@ -129,7 +142,8 @@ $domains_tests = [
 
 	# Check Webmin login
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
-		       'http://'.$test_domain_user.':smeg@localhost:10000/',
+		       $webmin_proto.'://'.$test_domain_user.':smeg@localhost:'.
+		       $webmin_port.'/',
 	},
 
 	# Check MySQL login
@@ -204,7 +218,8 @@ $domains_tests = [
 
 	# Check new Webmin password
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
-		       'http://'.$test_domain_user.':newpass@localhost:10000/',
+		       $webmin_proto.'://'.$test_domain_user.
+		       ':newpass@localhost:'.$webmin_port.'/',
 	},
 
 	# Disable the whole domain
@@ -441,7 +456,8 @@ $reseller_tests = [
 
 	# Check Webmin login
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
-		       'http://'.$test_reseller.':smeg@localhost:10000/',
+		       $webmin_proto.'://'.$test_reseller.
+		       ':smeg@localhost:'.$webmin_port.'/',
 	},
 
 	# Make changes
@@ -866,7 +882,8 @@ $move_tests = [
 
 	# Check Webmin login
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
-		       'http://'.$test_domain_user.':smeg@localhost:10000/',
+		       $webmin_proto.'://'.$test_domain_user.
+		       ':smeg@localhost:'.$webmin_port.'/',
 	},
 
 	# Check MySQL login
@@ -1102,13 +1119,14 @@ $prepost_tests = [
 $webmin_tests = [
 	# Make sure the main Virtualmin page can be displayed
 	{ 'command' => $webmin_wget_command.
-		       "http://localhost:10000/virtual-server/",
+		       "${webmin_proto}://localhost:${webmin_port}".
+		       "/virtual-server/",
 	  'grep' => [ 'Virtualmin Virtual Servers', 'Delete Selected' ],
 	},
 
 	# Create a test domain
 	{ 'command' => $webmin_wget_command.
-		       "'http://localhost:10000/virtual-server/domain_setup.cgi?dom=$test_domain&vpass=smeg&template=0&vuser_def=1&email_def=1&mgroup_def=1&group_def=1&prefix_def=1&db_def=1&quota=100&quota_units=1048576&uquota=120&uquota_units=1048576&bwlimit_def=0&bwlimit=100&bwlimit_units=MB&mailboxlimit_def=1&aliaslimit_def=0&aliaslimit=34&dbslimit_def=0&dbslimit=10&domslimit_def=0&domslimit=3&nodbname=0&field_purpose=&field_amicool=&unix=1&dir=1&logrotate=1&mail=1&dns=1&web=1&webalizer=1&mysql=1&webmin=1&proxy_def=1&fwdto_def=1&virt=0&ip=&content_def=1'",
+		       "'${webmin_proto}://localhost:${webmin_port}/virtual-server/domain_setup.cgi?dom=$test_domain&vpass=smeg&template=0&vuser_def=1&email_def=1&mgroup_def=1&group_def=1&prefix_def=1&db_def=1&quota=100&quota_units=1048576&uquota=120&uquota_units=1048576&bwlimit_def=0&bwlimit=100&bwlimit_units=MB&mailboxlimit_def=1&aliaslimit_def=0&aliaslimit=34&dbslimit_def=0&dbslimit=10&domslimit_def=0&domslimit=3&nodbname=0&field_purpose=&field_amicool=&unix=1&dir=1&logrotate=1&mail=1&dns=1&web=1&webalizer=1&mysql=1&webmin=1&proxy_def=1&fwdto_def=1&virt=0&ip=&content_def=1'",
 	  'grep' => [ 'Adding new virtual website', 'Saving server details' ],
 	},
 
@@ -1119,7 +1137,7 @@ $webmin_tests = [
 
 	# Delete the domain
 	{ 'command' => $webmin_wget_command.
-		       "http://localhost:10000/virtual-server/delete_domain.cgi\\?dom=`./list-domains.pl --domain $test_domain --id-only`\\&confirm=1",
+		       "${webmin_proto}://localhost:${webmin_port}/virtual-server/delete_domain.cgi\\?dom=`./list-domains.pl --domain $test_domain --id-only`\\&confirm=1",
 	  'grep' => [ 'Deleting virtual website', 'Deleting server details' ],
 	  'cleanup' => 1,
 	},
@@ -1129,19 +1147,19 @@ $webmin_tests = [
 $remote_tests = [
 	# Test domain creation via remote API
 	{ 'command' => $webmin_wget_command.
-		       "'http://localhost:10000/virtual-server/remote.cgi?program=create-domain&domain=$test_domain&pass=smeg&dir=&unix=&web=&dns=&mail=&webalizer=&mysql=&logrotate=&".join("&", map { $_->[0]."=" } @create_args)."'",
+		       "'${webmin_proto}://localhost:${webmin_port}/virtual-server/remote.cgi?program=create-domain&domain=$test_domain&pass=smeg&dir=&unix=&web=&dns=&mail=&webalizer=&mysql=&logrotate=&".join("&", map { $_->[0]."=" } @create_args)."'",
 	  'grep' => 'Exit status: 0',
 	},
 
 	# Make sure it was created
 	{ 'command' => $webmin_wget_command.
-		       "'http://localhost:10000/virtual-server/remote.cgi?program=list-domains'",
+		       "'${webmin_proto}://localhost:${webmin_port}/virtual-server/remote.cgi?program=list-domains'",
 	  'grep' => [ "^$test_domain", 'Exit status: 0' ],
 	},
 
 	# Delete the domain
 	{ 'command' => $webmin_wget_command.
-		       "'http://localhost:10000/virtual-server/remote.cgi?program=delete-domain&domain=$test_domain'",
+		       "'${webmin_proto}://localhost:${webmin_port}/virtual-server/remote.cgi?program=delete-domain&domain=$test_domain'",
 	  'grep' => [ 'Exit status: 0' ],
 	},
 	];
