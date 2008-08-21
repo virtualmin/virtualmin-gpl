@@ -903,7 +903,7 @@ $backup_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ], [ 'mail' ],
-		      [ 'mysql' ], [ 'spam' ], [ 'virus' ],
+		      [ 'mysql' ], [ 'spam' ], [ 'virus' ], [ 'webmin' ],
 		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
