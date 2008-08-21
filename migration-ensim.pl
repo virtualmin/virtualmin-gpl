@@ -320,12 +320,18 @@ else {
 
 # Fix up ownership and permissions
 &$first_print("Fixing home directory permissions ..");
+if (defined(&set_php_wrappers_writable)) {
+	&set_php_wrappers_writable(\%dom, 1);
+	}
 &set_home_ownership(\%dom);
 &system_logged("chmod '$uconfig{'homedir_perms'}' ".
 	       quotemeta($dom{'home'}));
 foreach my $sd (&virtual_server_directories(\%dom)) {
 	&system_logged("chmod $sd->[1] ".
 		       quotemeta("$dom{'home'}/$sd->[0]"));
+	}
+if (defined(&set_php_wrappers_writable)) {
+	&set_php_wrappers_writable(\%dom, 0);
 	}
 &$second_print(".. done");
 
