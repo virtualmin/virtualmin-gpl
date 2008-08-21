@@ -5268,11 +5268,14 @@ sub virtual_server_limits
 {
 local ($d, $oldd) = @_;
 local ($left, $reason, $max);
+local $tmpl = &get_template($d->{'template'});
 
 # Check database limit
 local $newdbs = 0;
-$newdbs++ if ($d->{'mysql'} && (!$oldd || !$oldd->{'mysql'}));
-$newdbs++ if ($d->{'postgres'} && (!$oldd || !$oldd->{'postgres'}));
+$newdbs++ if ($d->{'mysql'} && (!$oldd || !$oldd->{'mysql'}) &&
+	      $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'});
+$newdbs++ if ($d->{'postgres'} && (!$oldd || !$oldd->{'postgres'}) &&
+	      $tmpl->{'mysql_mkdb'});
 if ($newdbs) {
 	($left, $reason, $max) = &count_feature("dbs");
 	if ($left == 0 || $newdbs == 2 && $left == 1) {
