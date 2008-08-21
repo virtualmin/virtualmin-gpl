@@ -1,6 +1,6 @@
 desc=Website matching all sub-domains
 html=The Website Options page now has a field to enable matching all sub-domains for the virtual server's website, via a *.domain.com DNS entry and Apache server alias directive.
 master=1
-owner=1
+domain=1
 reseller=1
 link=edit_phpmode.cgi?dom=${ID}

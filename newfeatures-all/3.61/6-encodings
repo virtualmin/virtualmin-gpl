@@ -2,5 +2,5 @@ desc=MySQL and PostgreSQL encodings
 html=The default character encodings for both MySQL and PostgreSQL can be set in the server templates, and selected when creating a new database on the Edit Databases page.
 master=1
 reseller=1
-owner=1
+domain=1
 link=list_databases.cgi?dom=${ID}
