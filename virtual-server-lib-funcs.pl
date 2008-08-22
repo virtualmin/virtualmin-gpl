@@ -4711,7 +4711,7 @@ local @list;
 local $_;
 if ($_[6]) {
 	# Ask for full listing
-	&ftp_command("LIST $_[1]", 1, $_[2]) || return 0;
+	&ftp_command("LIST $_[1]/", 1, $_[2]) || return 0;
 	while(<CON>) {
 		s/\r|\n//g;
 		local @st = &parse_lsl_line($_);
@@ -4721,7 +4721,7 @@ if ($_[6]) {
 	}
 else {
 	# Just filenames
-	&ftp_command("NLST $_[1]", 1, $_[2]) || return 0;
+	&ftp_command("NLST $_[1]/", 1, $_[2]) || return 0;
 	while(<CON>) {
 		s/\r|\n//g;
 		push(@list, $_);

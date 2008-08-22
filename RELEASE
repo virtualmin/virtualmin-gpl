@@ -15,7 +15,7 @@
 	scp /tmp/webmin-virtual-server_${ver}_all.deb download.webmin.com:htdocs/download/virtualmin/
 
  x Add to website
-	x Mention plugins too
+	- Mention plugins too
 
  - Add the freshmeat.net
 
@@ -23,6 +23,6 @@
 
  x Add to updates.txt
 
- x Release plugins
+ - Release plugins
 
  x Rebuild API files
