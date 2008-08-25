@@ -2777,6 +2777,64 @@ if ($any) {
 	}
 }
 
+# get_suexec_path()
+# Returns the full path to the Apache suexec command, if installed, or undef
+sub get_suexec_path
+{
+&require_apache();
+local $httpd_dir = &apache::find_httpd();
+$httpd_dir =~ s/\/[^\/]+$//;
+foreach my $p ("suexec", "suexec2",		# In path
+	       "/usr/lib/apache2/suexec",	# Debian
+	       "/usr/lib/apache/suexec",
+	       "/usr/local/bin/suexec",		# FreeBSD
+	       "/usr/local/sbin/suexec",
+	       "/opt/csw/apache2/sbin/suexec",	# Solaris CSW
+	       "/opt/csw/apache/sbin/suexec",
+	       "$httpd_dir/suexec",		# Same dir as httpd
+	       "$httpd_dir/suexec2",
+	      ) {
+	local $fp = &has_command($p);
+	return $fp if ($fp);
+	}
+return undef;
+}
+
+# get_suexec_document_root()
+# Returns the directory under which suexec will run binaries, or undef 
+# if unknown
+sub get_suexec_document_root
+{
+local $suexec = &get_suexec_path();
+return undef if (!$suexec);
+local $out = &backquote_command("$suexec -V 2>&1 </dev/null");
+if ($out =~ /AP_DOC_ROOT="([^"]+)"/) {
+	return $1;
+	}
+return undef;
+} 
+
+# check_suexec_install(&template)
+# Returns an error message if suexec does not appear to be installed properly.
+sub check_suexec_install
+{
+local ($tmpl) = @_;
+&require_useradmin();
+local $suexec = &get_suexec_path();
+local $suhome = &get_suexec_document_root();
+local $suerr;
+if ($tmpl->{'web_suexec'} && !$suexec) {
+	return $text{'check_ewebsuexecbin'};
+	}
+if ($tmpl->{'web_suexec'} && $suhome &&
+    !&same_file($suhome, $home_base) &&
+    !&is_under_directory($suhome, $home_base)) {
+	return &text('check_ewebsuexechome',
+		     "<tt>$home_base</tt>", "<tt>$suhome</tt>");
+	}
+return undef;
+}
+
 $done_feature_script{'web'} = 1;
 
 1;

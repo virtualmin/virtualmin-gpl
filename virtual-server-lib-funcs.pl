@@ -9911,7 +9911,21 @@ if ($config{'web'}) {
 		return $text{'tmpl_ephpmode2'};
 		}
 
-	&$second_print($text{'check_webok'});
+	# Make sure suexec is installed, if enabled. Also check home path.
+	local $err = &check_suexec_install($tmpl);
+	if ($err) {
+		if ($tmpl->{'web_suexec'}) {
+			# Absolutely needed for PHP run via CGI or fCGId
+			return $err;
+			}
+		else {
+			# Just a warning
+			&$second_print($err);
+			}
+		}
+	else {
+		&$second_print($text{'check_webok'});
+		}
 	}
 
 if ($config{'webalizer'}) {

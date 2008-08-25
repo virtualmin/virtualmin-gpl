@@ -26,6 +26,13 @@ if (!$d->{'alias'}) {
 		}
 	}
 
+# Check for working suexec for PHP
+if (!$d->{'alias'} && ($in{'mode'} eq 'cgi' || $in{'mode'} eq 'fcgid')) {
+	$tmpl = &get_template($d->{'template'});
+	$err = &check_suexec_install($tmpl);
+	&error($err) if ($err);
+	}
+
 # Start telling the user what is being done
 &ui_print_unbuffered_header(&domain_in($d), $text{'phpmode_title'}, "");
 &obtain_lock_web($d);
