@@ -3860,6 +3860,7 @@ phpver_enone=None selected
 html_title=Edit Web Pages
 html_edit=Edit existing file:
 html_editok=Edit
+html_textok=Edit as Text
 html_create=Create new file:
 html_createok=Create
 html_efile=Invalid filename!

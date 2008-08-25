@@ -52,22 +52,25 @@ else {
 	$data =~ s/\r//g;
 	$data || &error($text{'html_enone'});
 
-	# Get the original file, and use its header
+	# Get the original file, and use its header - unless in text mode, in
+	# which this can never happen
 	&switch_to_domain_user($d);
-	$olddata = &read_file_contents("$pub/$in{'file'}");
-	if ($olddata && $data !~ /<body[\000-\377]*>/i) {
-		($oldhead, $oldbody, $oldfoot) =
-			&html_extract_head_body($olddata);
-		$data = $oldhead.$data.$oldfoot;
-		}
-	elsif (!$olddata && $data !~ /<body.*>/i) {
-		# Page is missing a body .. use head and body from template
-		# file from style, or from default
-		$tmpldata = &read_file_contents("$pub/template.html") ||
+	if (!$in{'text'}) {
+		$olddata = &read_file_contents("$pub/$in{'file'}");
+		if ($olddata && $data !~ /<body[\000-\377]*>/i) {
+			($oldhead, $oldbody, $oldfoot) =
+				&html_extract_head_body($olddata);
+			$data = $oldhead.$data.$oldfoot;
+			}
+		elsif (!$olddata && $data !~ /<body.*>/i) {
+			# Page is missing a body .. use head and body from
+			# template file from style, or from default
+			$tmpldata = &read_file_contents("$pub/template.html") ||
 			    "<html>\n<head></head>\n<body></body>\n</html>\n";
-		($tmplhead, $tmplbody, $tmplfoot) =
-			&html_extract_head_body($tmpldata);
-		$data = $tmplhead.$data.$tmplfoot;
+			($tmplhead, $tmplbody, $tmplfoot) =
+				&html_extract_head_body($tmpldata);
+			$data = $tmplhead.$data.$tmplfoot;
+			}
 		}
 
 	# Write out the file

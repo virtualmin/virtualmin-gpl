@@ -972,3 +972,4 @@ Preserve encrypted passwords when backing up domains, in case they don't match t
 Re-organized the custom links page to move editing of each link into a separate form, and allow links to be limited to virtual servers with some feature enabled.
 ---- Changes since 3.61 ----
 Updated the Nucleus script installer to version 3.33, and Movable Type to 4.21.
+Added a button to edit pages as text (without the HTML editor) to the Edit Web Pages feature.

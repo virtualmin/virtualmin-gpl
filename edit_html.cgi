@@ -7,7 +7,7 @@ $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
 &can_edit_html() || &error($text{'edit_ecannot'});
 
-$editing = $in{'editok'} ? 1 :
+$editing = $in{'editok'} || $in{'textok'} ? 1 :
 	   $in{'createok'} || $in{'create'} ? 2 : 0;
 &ui_print_header(&domain_in($d), $text{'html_title'}, "", undef, 0, 0, 0,
 		 undef, undef,
@@ -41,7 +41,8 @@ if (@html) {
 	print "<td><b>$text{'html_edit'}</b></td>\n";
 	print "<td>",&ui_select("edit", $in{'edit'},
 				[ map { [ $_ ] } @html ]),"</td>\n";
-	print "<td>",&ui_submit($text{'html_editok'}, 'editok'),"</td>\n";
+	print "<td>",&ui_submit($text{'html_editok'}, 'editok')," ",
+		     &ui_submit($text{'html_textok'}, 'textok'),"</td>\n";
 	print "</tr>\n";
 	}
 
@@ -106,10 +107,19 @@ if ($editing) {
 	print &ui_form_start("save_html.cgi", "form-data");
 	print &ui_hidden("dom", $in{'dom'}),"\n";
 	print &ui_hidden("file", $editing == 1 ? $in{'edit'} : $in{'create'});
-	print &virtualmin_ui_show_html_editor("body", $data,
-					      "http://$d->{'dom'}/");
 
-	if ($in{'editok'}) {
+	# Show editor, which may be text only
+	if ($in{'textok'}) {
+		print &ui_hidden("text", 1);
+		print &ui_textarea("body", $data, 20, 80, undef, 0,
+				   "style='width:100%;height:70%'");
+		}
+	else {
+		print &virtualmin_ui_show_html_editor("body", $data,
+						      "http://$d->{'dom'}/");
+		}
+
+	if ($in{'editok'} || $in{'textok'}) {
 		print &ui_form_end([ [ "save", $text{'save'} ],
 				     [ "cancel", $text{'html_cancel'} ],
 				     undef,
