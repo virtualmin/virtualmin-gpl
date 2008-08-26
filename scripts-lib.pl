@@ -1306,12 +1306,30 @@ local ($alldata, $err);
 &http_download($osdn_download_host, $osdn_download_port, "/$project/",
 	       \$alldata, \$err);
 return ( ) if ($err);
+
+# Search for extra download links
+local @data = ( $alldata );
+local $data = $alldata;
+local %donepackage;
+while($data =~ /(\/project\/showfiles.php\?group_id=(\d+)(\&|\&amp;)package_id=(\d+)[^'" ]*)(.*)/is) {
+	$data = $5;
+	local ($spath, $sgroup, $spackage) = ($1, $2, $4);
+	$spath =~ s/\&amp;/\&/g;
+	next if ($donepackage{$sgroup,$spackage}++);
+	local $sdata;
+	&http_download($osdn_download_host, $osdn_download_port, $spath, \$sdata, \$err);
+	push(@data, $sdata) if (!$err);
+	}
+
+# Check them all for files
 local @vers;
-foreach my $re (@res) {
-	local $data = $alldata;
-	while($data =~ /$re(.*)/is) {
-		push(@vers, $1);
-		$data = $2;
+foreach my $alldata (@data) {
+	foreach my $re (@res) {
+		local $data = $alldata;
+		while($data =~ /$re(.*)/is) {
+			push(@vers, $1);
+			$data = $2;
+			}
 		}
 	}
 @vers = sort { &compare_versions($b, $a) } &unique(@vers);
