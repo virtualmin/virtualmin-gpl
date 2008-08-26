@@ -2763,7 +2763,11 @@ foreach my $p (@ports) {
 		}
 	elsif (!$star && $found) {
 		# Take away
-		@sa = grep { lc($_) ne $withstar } @sa;
+		foreach my $sa (@sa) {
+			local @saw = split(/\s+/, $sa);
+			@saw = grep { lc($_) ne $withstar } @saw;
+			$sa = join(" ", @saw);
+			}
 		$done++;
 		}
 	if ($done) {
