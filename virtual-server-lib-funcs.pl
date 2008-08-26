@@ -72,6 +72,40 @@ sub list_visible_domains
 return grep { &can_edit_domain($_) } &list_domains();
 }
 
+# sort_indent_domains()
+# Returns a list of all domains sorted according to the module config setting.
+# Those that should be indented have the 'indent' field set to some number.
+sub sort_indent_domains
+{
+local @doms = @{$_[0]};
+local $sortfield = $config{'domains_sort'} || "user";
+local %sortkey;
+if ($sortfield eq 'dom' || $sortfield eq 'sub') {
+	%sortkey = map { $_->{'id'}, &show_domain_name($_) } @doms;
+	}
+else {
+	%sortkey = map { $_->{'id'}, $_->{$sortfield} } @doms;
+	}
+@doms = sort { $sortkey{$a->{'id'}} cmp $sortkey{$b->{'id'}} ||
+               $a->{'created'} <=> $b->{'created'} } @doms;
+foreach my $d (@doms) {
+	$d->{'indent'} = 0;
+	}
+if ($sortfield eq 'user' || $sortfield eq 'sub') {
+	# Re-categorize by owner
+	local @catdoms;
+	foreach my $d (grep { !$_->{'parent'} } @doms) {
+		push(@catdoms, $d);
+		foreach my $sd (grep { $_->{'parent'} eq $d->{'id'} } @doms) {
+			$sd->{'indent'} = $_->{'alias'} ? 2 : 1;
+			push(@catdoms, $sd);
+			}
+		}
+	@doms = @catdoms;
+	}
+return @doms;
+}
+
 # get_domain(id, [file], [force-reread])
 # Looks up a domain object by ID
 sub get_domain
@@ -2438,27 +2472,12 @@ if ($qshow) {
 	}
 
 # Generate the table contents
-local %done;
-local $sortfield = $config{'domains_sort'} || "user";
-local %sortkey;
-if ($sortfield eq 'dom') {
-	%sortkey = map { $_->{'id'}, &show_domain_name($_) } @$doms;
-	}
-else {
-	%sortkey = map { $_->{'id'}, $_->{$sortfield} } @$doms;
-	}
 local @table;
-foreach my $d (sort { $sortkey{$a->{'id'}} cmp $sortkey{$b->{'id'}} ||
-		      $a->{'parent'} <=> $b->{'parent'} ||
-		      $a->{'created'} <=> $b->{'created'} } @$doms) {
+foreach my $d (&sort_indent_domains($doms)) {
 	$done{$d->{'id'}}++;
 	local $dn = &shorten_domain_name($d);
 	$dn = $d->{'disabled'} ? "<i>$dn</i>" : $dn;
-	local $pfx;
-	$pfx .= "&nbsp;&nbsp;" if ($d->{'parent'} && $done{$d->{'parent'}} &&
-				   $sortfield eq "user");
-	$pfx .= "&nbsp;&nbsp;" if ($d->{'alias'} && $done{$d->{'alias'}} &&
-				   $sortfield eq "user");
+	local $pfx = "&nbsp;" x ($d->{'indent'} * 2);
 	local @cols;
 	local $proxy = $d->{'proxy_pass_mode'} == 2 ?
 		 " <a href='frame_form.cgi?dom=$d->{'id'}'>(F)</a>" :

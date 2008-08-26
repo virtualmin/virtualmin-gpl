@@ -1,0 +1,4 @@
+desc=New domain sorting mode
+html=Added a new sort mode (used by default for new installs) to order virtual servers by domain name, but with sub-servers indented under them. This can be set on the Module Config page.
+master=1
+link=../config.cgi?module=virtual-server&section=line1.4
