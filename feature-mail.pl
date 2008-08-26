@@ -2734,16 +2734,16 @@ return 1;
 # Returns HTML for mail backup option inputs
 sub show_backup_mail
 {
+local ($opts) = @_;
 if (&mail_under_home()) {
 	# Option makes no sense in this case, as the home directories backup
 	# will catch it
-	return "<input type=hidden name=mail_mailfiles value='$opts{'mailfiles'}'>";
+	return &ui_hidden("mail_mailfiles", $opts->{'mailfiles'});
 	}
 else {
 	# Offer to backup mail files
-	return sprintf
-		"(<input type=checkbox name=mail_mailfiles value=1 %s> %s)",
-		$opts{'mailfiles'} ? "checked" : "", $text{'backup_mailfiles2'};
+	return &ui_checkbox("mail_mailfiles", 1, $text{'backup_mailfiles2'},
+			    $opts->{'mailfiles'});
 	}
 }
 
