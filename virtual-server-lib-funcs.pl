@@ -92,13 +92,24 @@ foreach my $d (@doms) {
 	$d->{'indent'} = 0;
 	}
 if ($sortfield eq 'user' || $sortfield eq 'sub') {
-	# Re-categorize by owner
+	# Re-categorize by owner, with sub-servers indented one and alias
+	# servers indented two under their targets
 	local @catdoms;
 	foreach my $d (grep { !$_->{'parent'} } @doms) {
 		push(@catdoms, $d);
-		foreach my $sd (grep { $_->{'parent'} eq $d->{'id'} } @doms) {
-			$sd->{'indent'} = $_->{'alias'} ? 2 : 1;
+		foreach my $ad (grep { $_->{'alias'} eq $d->{'id'} } @doms) {
+			$ad->{'indent'} = 2;
+			push(@catdoms, $ad);
+			}
+		foreach my $sd (grep { $_->{'parent'} eq $d->{'id'} &&
+				       !$_->{'alias'} } @doms) {
+			$sd->{'indent'} = 1;
 			push(@catdoms, $sd);
+			foreach my $ad (grep { $_->{'alias'} eq $sd->{'id'} }
+					     @doms) {
+				$ad->{'indent'} = 2;
+				push(@catdoms, $ad);
+				}
 			}
 		}
 	@doms = @catdoms;
