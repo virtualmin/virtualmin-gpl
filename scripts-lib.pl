@@ -1317,6 +1317,7 @@ while($data =~ /(\/project\/showfiles.php\?group_id=(\d+)(\&|\&amp;)package_id=(
 	$spath =~ s/\&amp;/\&/g;
 	next if ($donepackage{$sgroup,$spackage}++);
 	local $sdata;
+	local $err;
 	&http_download($osdn_download_host, $osdn_download_port, $spath, \$sdata, \$err);
 	push(@data, $sdata) if (!$err);
 	}
