@@ -2735,13 +2735,8 @@ return 1;
 sub show_backup_mail
 {
 local ($opts) = @_;
-if (&mail_under_home()) {
-	# Option makes no sense in this case, as the home directories backup
-	# will catch it
-	return &ui_hidden("mail_mailfiles", $opts->{'mailfiles'});
-	}
-else {
-	# Offer to backup mail files
+if (!&mail_under_home()) {
+	# Offer to backup mail files, if not under home
 	return &ui_checkbox("mail_mailfiles", 1, $text{'backup_mailfiles2'},
 			    $opts->{'mailfiles'});
 	}
@@ -2752,7 +2747,7 @@ else {
 sub parse_backup_mail
 {
 local %in = %{$_[0]};
-return { 'mailfiles' => $in{'mail_mailfiles'} };
+return { 'mailfiles' => &mail_under_home() ? 1 : $in{'mail_mailfiles'} };
 }
 
 # show_restore_mail(&options, &domain)
@@ -2760,13 +2755,8 @@ return { 'mailfiles' => $in{'mail_mailfiles'} };
 sub show_restore_mail
 {
 local $rv;
-if (&mail_under_home()) {
-	# Option makes no sense in this case, as the home directories backup
-	# will catch it
-	$rv = &ui_hidden("mail_mailfiles", $_[0]->{'mailfiles'});
-	}
-else {
-	# Offer to restore mail files
+if (!&mail_under_home()) {
+	# Offer to restore mail files, if not under home
 	$rv = &ui_checkbox("mail_mailfiles", 1, $text{'restore_mailfiles2'},
 			   $_[0]->{'mailfiles'});
 	}
@@ -2782,7 +2772,7 @@ return $rv;
 sub parse_restore_mail
 {
 local %in = %{$_[0]};
-return { 'mailfiles' => $in{'mail_mailfiles'},
+return { 'mailfiles' => &mail_under_home() ? 1 : $in{'mail_mailfiles'},
 	 'mailuser' => $in{'mail_mailuser'} };
 }
 
