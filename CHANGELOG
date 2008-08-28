@@ -971,7 +971,7 @@ When a domain is restored on a new system, the MySQL socket file path and option
 Preserve encrypted passwords when backing up domains, in case they don't match the plaintext password stored by Virtualmin. Also, have validation report an error in the case of a mismatch.
 Re-organized the custom links page to move editing of each link into a separate form, and allow links to be limited to virtual servers with some feature enabled.
 ---- Changes since 3.61 ----
-Updated the Nucleus script installer to version 3.33, Xoops to 2.0.18.2, SugarCRM to 5.1.0, and Movable Type to 4.21.
+Updated the Nucleus script installer to version 3.33, Xoops to 2.0.18.2, SugarCRM to 5.1.0, OpenX to 2.6.1, and Movable Type to 4.21.
 Added a button to edit pages as text (without the HTML editor) to the Edit Web Pages feature.
 The configuration check now detects a missing or incorrect suexec, to easier find problems with the base directory that will break PHP and CGI scripts.
 Added a new sort mode (used by default for new installs) to order virtual servers by domain name, but with sub-servers indented under them.

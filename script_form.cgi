@@ -110,7 +110,7 @@ if ($ok) {
 			[ [ 1, $text{'scripts_passmodedef1'}."<br>" ],
 			  [ 0, &text('scripts_passmode1',
 			     &ui_textbox("passmodeuser", $d->{'user'}, 20),
-			     &ui_textbox("passmodepass", $d->{'pass'}, 20)) ]
+			     &ui_password("passmodepass", $d->{'pass'}, 20)) ]
 			]));
 		}
 	elsif ($passmode == 2) {
@@ -119,7 +119,7 @@ if ($ok) {
 		      &ui_radio("passmode_def", 1,
 			[ [ 1, $text{'scripts_passmodedef2'}."<br>" ],
 			  [ 0, &text('scripts_passmode2',
-			     &ui_textbox("passmodepass", $d->{'pass'}, 20)) ]
+			     &ui_password("passmodepass", $d->{'pass'}, 20)) ]
 			]));
 		}
 	elsif ($passmode == 3) {
