@@ -3637,6 +3637,7 @@ umass_help2=If you just want to create a single user, <a href='$1'>click here</a
 umass_format=username:realname:password:ftp-flag:email-flag:quota:[extras]:[forwards]:[databases]
 umass_eshell=No suitable shell found for specified FTP mode
 umass_eshell2=Shell $1 is not available for mail / FTP users
+umass_encpass=Passwords are already encrypted?
 
 amass_title=Batch Create Aliases
 amass_header=Create multiple email aliases from batch file

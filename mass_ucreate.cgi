@@ -188,9 +188,17 @@ USER: foreach $line (@lines) {
 			}
 		$user->{'shell'} = $shell->{'shell'};
 		}
-	$user->{'passmode'} = 3;
-	$user->{'plainpass'} = $pass;
-	$user->{'pass'} = &encrypt_user_password($user, $pass);
+	if ($in{'encpass'}) {
+		# Password is already encrypted
+		$user->{'passmode'} = 2;
+		$user->{'pass'} = $pass;
+		}
+	else {
+		# Encrypt now
+		$user->{'passmode'} = 3;
+		$user->{'plainpass'} = $pass;
+		$user->{'pass'} = &encrypt_user_password($user, $pass);
+		}
 	if (!$user->{'noextra'}) {
 		$user->{'extraemail'} = \@extra;
 		}

@@ -27,6 +27,10 @@ push(@sopts, [ 2, &text('cmass_text', &ui_textarea("text", "", 5, 60))."<br>"]);
 print &ui_table_row($text{'cmass_file'},
 		    &ui_radio("file_def", 0, \@sopts));
 
+# Password format (encrypted or not)
+print &ui_table_row($text{'cmass_encpass'},
+		    &ui_yesno_radio("encpass", 0));
+
 print &ui_table_end();
 print &ui_form_end([ [ "create", $text{'create'} ] ]);
 
