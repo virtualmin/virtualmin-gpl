@@ -118,10 +118,10 @@ else {
 			elsif ($d =~ /^\s*<Directory\s+\Q$mycgi\E>/) {
 				$d = "<Directory $subcgi>";
 				}
-			elsif ($d =~ /^ErrorLog/ && $elog) {
+			elsif ($d =~ /^\s*ErrorLog/ && $elog) {
 				$d = "ErrorLog $elog";
 				}
-			elsif ($d =~ /^CustomLog\s+(.*)\s+(\S+)$/ && $clog) {
+			elsif ($d =~ /^\s*CustomLog\s+(.*)\s+(\S+)$/ && $clog) {
 				$d = "CustomLog $clog $2";
 				}
 			}
@@ -542,10 +542,10 @@ else {
 		# Take out old proxy directives and block
 		local $lref = &read_file_lines($virt->{'file'});
 		local @lines = @$lref[$virt->{'line'}+1 .. $virt->{'eline'}-1];
-		@lines = grep { !/^ProxyPass\s+\/\s/ &&
-				!/^ProxyPassReverse\s+\/\s/ &&
-				!/^AliasMatch\s+\^\/\.\*\$\s/ &&
-				!/^SSLProxyEngine\s/ } @lines;
+		@lines = grep { !/^\s*ProxyPass\s+\/\s/ &&
+				!/^\s*ProxyPassReverse\s+\/\s/ &&
+				!/^\s*AliasMatch\s+\^\/\.\*\$\s/ &&
+				!/^\s*SSLProxyEngine\s/ } @lines;
 		for(my $i=0; $i<@lines; $i++) {
 			if ($lines[$i] eq "<Proxy *>" &&
 			    $lines[$i+2] eq "</Proxy>") {
@@ -952,10 +952,10 @@ local ($dom, $error) = @_;
 local $tmpl = &get_template($dom->{'template'});
 local @dirs = &apache_template($tmpl->{'web'}, $dom, $tmpl->{'web_suexec'});
 foreach my $l (@dirs) {
-	if ($error && $l =~ /^ErrorLog\s+(\S+)/) {
+	if ($error && $l =~ /^\s*ErrorLog\s+(\S+)/) {
 		$log = $1;
 		}
-	elsif (!$error && $l =~ /^(TransferLog|CustomLog)\s+(\S+)/) {
+	elsif (!$error && $l =~ /^\s*(TransferLog|CustomLog)\s+(\S+)/) {
 		$log = $2;
 		}
 	}
@@ -1044,7 +1044,7 @@ if (!$ppdir && $_[1]->{'proxy_pass'}) {
 if ($tmpl->{'web_writelogs'}) {
 	# Fix any CustomLog or ErrorLog directives to write via writelogs.pl
 	foreach $d (@dirs) {
-		if ($d =~ /^(CustomLog|ErrorLog)\s+(\S+)(\s*\S*)/) {
+		if ($d =~ /^\s*(CustomLog|ErrorLog)\s+(\S+)(\s*\S*)/) {
 			$d = "$1 \"|$writelogs_cmd $_[1]->{'id'} $2\"$3";
 			}
 		}
@@ -1099,7 +1099,7 @@ if ($virt) {
 	local %adoms = map { $_->{'dom'}, 1 } @adoms;
 	&open_tempfile(FILE, ">$_[1]");
 	foreach $l (@$lref[$virt->{'line'} .. $virt->{'eline'}]) {
-		if ($l =~ /^ServerAlias\s+(.*)/i) {
+		if ($l =~ /^\s*ServerAlias\s+(.*)/i) {
 			local @sa = split(/\s+/, $1);
 			@sa = grep { !($adoms{$_} ||
 				       /^([^\.]+)\.(\S+)/ && $adoms{$2}) } @sa;
@@ -1157,13 +1157,13 @@ if ($virt) {
 		# Fix up any UID or GID in suexec lines
 		local $i;
 		foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
-			if ($dstlref->[$i] =~ /^SuexecUserGroup\s/) {
+			if ($dstlref->[$i] =~ /^\s*SuexecUserGroup\s/) {
 				$dstlref->[$i] = "SuexecUserGroup \"#$_[0]->{'uid'}\" \"#$_[0]->{'ugid'}\"";
 				}
-			elsif ($dstlref->[$i] =~ /^User\s/) {
+			elsif ($dstlref->[$i] =~ /^\s*User\s/) {
 				$dstlref->[$i] = "User \"#$_[0]->{'uid'}\"";
 				}
-			elsif ($dstlref->[$i] =~ /^Group\s/) {
+			elsif ($dstlref->[$i] =~ /^\s*Group\s/) {
 				$dstlref->[$i] = "Group \"#$_[0]->{'ugid'}\"";
 				}
 			}
@@ -1172,7 +1172,7 @@ if ($virt) {
 		# Remove suexec directives if not supported on this server
 		foreach $i ($virt->{'line'} ..
 			    $virt->{'line'}+scalar(@$srclref)-1) {
-			if ($dstlref->[$i] =~ /^(SuexecUserGroup|User|Group)\s/) {
+			if ($dstlref->[$i] =~ /^\s*(SuexecUserGroup|User|Group)\s/) {
 				splice(@$dstlref, $i--, 1);
 				}
 			}
@@ -1184,9 +1184,9 @@ if ($virt) {
 		foreach $i ($virt->{'line'} ..
 			    $virt->{'line'}+scalar(@$srclref)-1) {
 			local $l = $dstlref->[$i];
-			$uline = $i if ($l =~ /^User\s/);
-			$gline = $i if ($l =~ /^Group\s/);
-			$suline = $i if ($l =~ /^SuexecUserGroup\s/);
+			$uline = $i if ($l =~ /^\s*User\s/);
+			$gline = $i if ($l =~ /^\s*Group\s/);
+			$suline = $i if ($l =~ /^\s*SuexecUserGroup\s/);
 			}
 		local $pdom = $_[0]->{'parent'} ?
 				&get_domain($_[0]->{'parent'}) : $_[0];
@@ -1226,7 +1226,7 @@ if ($virt) {
 		}
 	local $i;
 	foreach $i ($virt->{'line'} ..  $virt->{'line'}+scalar(@$srclref)-1) {
-		if ($dstlref->[$i] =~ /^\Q$oldn\E\s+(.*)$/) {
+		if ($dstlref->[$i] =~ /^\s*\Q$oldn\E\s+(.*)$/) {
 			$dstlref->[$i] = "$newn $1";
 			}
 		}
