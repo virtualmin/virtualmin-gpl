@@ -3107,6 +3107,7 @@ newscripts_desc2b=You can also limit available scripts to those of at least some
 newscripts_desc3=This form allows you to upgrade a script to the latest version on some or all virtual servers at once. It should be used when security problems are found in older scripts.
 newscripts_desc4=This form can be used to send out automatic email messages to virtual server owners or the master administrator, notifying them of updates available to installed scripts.
 newscripts_wenabled=Send available upgrade notifications?
+newscripts_wsched=Notifcation schedule
 newscripts_wemail=Send upgrade notifications to
 newscripts_wowner=Virtual server owners
 newscripts_wreseller=Virtual server resellers
@@ -3119,6 +3120,9 @@ newscripts_wurl=Webmin base URL for email
 newscripts_wurldef=Automatic
 newscripts_ewurl=Missing or invalid Webmin base URL
 newscripts_noup=None of the virtual servers on this system have any upgradable scripts installed.
+newscripts_wnotify=Send notfication
+newscripts_wnotify0=Every time
+newscripts_wnotify1=Only once per domain for each script
 
 addscripts_err=Failed to add script installer
 addscripts_elocal=Local file does not exist

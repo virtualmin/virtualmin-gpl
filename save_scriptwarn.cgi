@@ -26,6 +26,7 @@ else {
 		&error($text{'newscripts_ewurl'});
 	$config{'scriptwarn_url'} = $in{'wurl'};
 	}
+$config{'scriptwarn_notify'} = $in{'wnotify'};
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
@@ -43,20 +44,43 @@ elsif (!$job && $in{'enabled'}) {
 	# Create daily job
 	$job = { 'user' => 'root',
 		 'command' => $scriptwarn_cron_cmd,
-		 'active' => 1,
-		 'mins' => int(rand()*60),
-		 'hours' => 0,
-		 'days' => '*',
-		 'months' => '*',
-		 'weekdays' => '*' };
+		 'active' => 1 };
+	&apply_warning_schedule($job, $in{'wsched'} || 'daily');
 	&lock_file(&cron::cron_file($job));
 	&cron::create_cron_job($job);
 	&unlock_file(&cron::cron_file($job));
-	&cron::create_wrapper($scriptwarn_cron_cmd, $module_name,
-			      "scriptwarn.pl");
 	}
+elsif ($job && $in{'enabled'} && $in{'wsched'} &&
+       $in{'wsched'} ne $in{'old_wsched'}) {
+	# Update schedule if possible
+	&apply_warning_schedule($job, $in{'wsched'});
+	&lock_file(&cron::cron_file($job));
+	&cron::change_cron_job($job);
+	&unlock_file(&cron::cron_file($job));
+	}
+&cron::create_wrapper($scriptwarn_cron_cmd, $module_name,
+		      "scriptwarn.pl");
 
 # Return
 &webmin_log("warn", "scripts");
 &redirect("edit_newscripts.cgi?mode=warn");
+
+# Set the schedule based on the user's selections
+sub apply_warning_schedule
+{
+my ($job, $sched) = @_;
+$job->{'mins'} = int(rand()*60);
+$job->{'hours'} = 0;
+if ($sched eq 'daily') {
+	$job->{'days'} = $job->{'months'} = $job->{'weekdays'} = '*';
+	}
+elsif ($sched eq 'weekly') {
+	$job->{'weekdays'} = '1';
+	$job->{'months'} = $job->{'days'} = '*';
+	}
+elsif ($sched eq 'monthly') {
+	$job->{'days'} = '1';
+	$job->{'months'} = $job->{'weekdays'} = '*';
+	}
+}
 

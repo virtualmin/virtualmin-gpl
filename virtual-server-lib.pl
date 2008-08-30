@@ -237,6 +237,7 @@ $script_fetch_ratings_page = "/cgi-bin/getratings.cgi";
 $script_download_host = "scripts.virtualmin.com";
 $script_download_port = 80;
 $script_download_dir = "/";
+$script_warnings_file = "$module_config_directory/script-warnings-sent";
 
 $upgrade_virtualmin_host = "software.virtualmin.com";
 $upgrade_virtualmin_port = 80;

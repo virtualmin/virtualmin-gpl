@@ -975,3 +975,4 @@ Updated the Nucleus script installer to version 3.33, Xoops to 2.0.18.2, SugarCR
 Added a button to edit pages as text (without the HTML editor) to the Edit Web Pages feature.
 The configuration check now detects a missing or incorrect suexec, to easier find problems with the base directory that will break PHP and CGI scripts.
 Added a new sort mode (used by default for new installs) to order virtual servers by domain name, but with sub-servers indented under them.
+The frequency of script update notifications and whether to send the same notification twice can now be configured on the Script Installers configuration page.

@@ -424,6 +424,16 @@ foreach my $sched (&list_scheduled_backups()) {
 		}
 	}
 
+# Delete any script notifications logs
+if (-r $script_warnings_file) {
+	&read_file($script_warnings_file, \%warnsent);
+	foreach my $key (keys %warnsent) {
+		my ($keyid) = split(/\//, $key);
+		delete($warnsent{$key}) if ($keyid eq $id);
+		}
+	&write_file($script_warnings_file, \%warnsent);
+	}
+
 delete($main::get_domain_cache{$_[0]->{'id'}});
 &build_domain_maps();
 }

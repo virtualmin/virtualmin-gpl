@@ -14,6 +14,19 @@ if ($ARGV[0] eq "-debug" || $ARGV[0] eq "--debug") {
 # Find scripts that need updating
 @doms = &list_domains();
 @updates = &list_script_upgrades(\@doms);
+foreach my $u (@updates) {
+	$u->{'key'} = join("/", $u->{'dom'}->{'dom'}, $u->{'sinfo'}->{'name'},
+			 	$u->{'ver'});
+	}
+
+# Filter out notifications that have already been sent, on a per domain, script
+# and version basis.
+&read_file($script_warnings_file, \%warnsent);
+if ($config{'scriptwarn_notify'}) {
+	print STDERR "Total updates = ",scalar(@updates),"\n";
+	@updates = grep { !$warnsent{$_->{'key'}} } @updates;
+	print STDERR "New updates = ",scalar(@updates),"\n";
+	}
 
 # Find the Webmin protocol and port
 &get_miniserv_config(\%miniserv);
@@ -47,7 +60,7 @@ if (@updates) {
 		&send_scriptwarn_email($email, [ $other ]);
 		}
 	else {
-		# Send one per domain with any
+		# Send one per domain with any notifications
 		foreach $d (@doms) {
 			# Construct the message
 			@dupdates = grep { $_->{'dom'} eq $d } @updates;
@@ -92,11 +105,17 @@ if (@updates) {
 		}
 	}
 
+# Save sent notifications, for filtering
+foreach my $u (@updates) {
+	$warnsent{$u->{'key'}} ||= time();
+	}
+&write_file($script_warnings_file, \%warnsent);
+
 sub send_scriptwarn_email
 {
 local ($text, $emailto, $d) = @_;
 local $mail = { 'headers' => [ [ 'From', &get_global_from_address($d) ],
-			       [ 'To', join(", ", @$emailto) ],
+			       [ 'To', join(", ", &unique(@$emailto)) ],
 			       [ 'Subject', $text{'scriptwarn_subject'} ],
 			       [ 'Content-type', 'text/plain' ] ],
 		'body' => $text };

@@ -1,0 +1,4 @@
+desc=Script upgrade notification improvements
+html=The frequency of script update notifications and whether to send the same notification twice can now be configured on the Script Installers configuration page.
+master=1
+link=edit_newscripts.cgi?mode=warn

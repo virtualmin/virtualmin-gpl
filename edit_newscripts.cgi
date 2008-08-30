@@ -117,8 +117,7 @@ foreach $sname (grep { $used{$_} } @scripts) {
 if (@opts) {
 	# Script selector
 	print &ui_form_start("mass_scripts.cgi", "post");
-	print &ui_table_start($text{'newscripts_mheader'}, undef, 2,
-			      [ "width=30%" ]);
+	print &ui_table_start($text{'newscripts_mheader'}, undef, 2);
 	print &ui_table_row($text{'newscripts_script'},
 			    &ui_select("script", undef, \@opts));
 
@@ -146,13 +145,35 @@ print &ui_tabs_end_tab();
 print &ui_tabs_start_tab("mode", "warn");
 print "$text{'newscripts_desc4'}<p>\n";
 print &ui_form_start("save_scriptwarn.cgi", "post");
-print &ui_table_start($text{'newscripts_wheader'}, undef, 2,
-		      [ "width=30%" ]);
+print &ui_table_start($text{'newscripts_wheader'}, undef, 2);
 
 # Warning enabled and schedule
 $job = &find_scriptwarn_job();
 print &ui_table_row($text{'newscripts_wenabled'},
 		    &ui_yesno_radio("enabled", $job ? 1 : 0));
+
+# Notification schedule
+$sched = !$job ? 'daily' :
+	 $job->{'hours'} eq '0' && $job->{'days'} eq '*' &&
+	  $job->{'months'} eq '*' && $job->{'weekdays'} eq '*' ? 'daily' :
+	 $job->{'days'} eq '1' &&
+	  $job->{'months'} eq '*' && $job->{'weekdays'} eq '*' ? 'monthly' :
+	 $job->{'days'} eq '*' &&
+	  $job->{'months'} eq '*' && $job->{'weekdays'} eq '1' ? 'weekly' :
+								 undef;
+if ($sched) {
+	print &ui_table_row($text{'newscripts_wsched'},
+		&ui_select("wsched", $sched,
+			   [ map { [ $_, $cron::text{'edit_special_'.$_} ] }
+				 ( 'daily', 'weekly', 'monthly' ) ]));
+	print &ui_hidden("old_wsched", $sched);
+	}
+
+# Notify each person only once?
+print &ui_table_row($text{'newscripts_wnotify'},
+	&ui_radio("wnotify", int($config{'scriptwarn_notify'}),
+		  [ [ 1, $text{'newscripts_wnotify1'} ],
+		    [ 0, $text{'newscripts_wnotify0'} ] ]));
 
 # Send email to
 %email = map { $_, 1 } split(/\s+/, $config{'scriptwarn_email'});
