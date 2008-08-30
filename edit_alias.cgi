@@ -30,12 +30,12 @@ if ($in{'new'} || &get_simple_alias($d, $virt)) {
 # Show tabs, perhaps only one if simple mode isn't supported
 $prog = "edit_alias.cgi?dom=$in{'dom'}&".
 	($in{'new'} ? "new=1" : "alias=$in{'alias'}");
-@tabs = ( [ "simple", $text{'alias_simplemode'},
-	    "$prog&simplemode=simple" ] );
 if ($can_simple) {
-	push(@tabs, [ "complex", $text{'alias_complexmode'},
-		      "$prog&simplemode=complex" ] );
+	@tabs = ( [ "simple", $text{'alias_simplemode'},
+		    "$prog&simplemode=simple" ] );
 	}
+push(@tabs, [ "complex", $text{'alias_complexmode'},
+	      "$prog&simplemode=complex" ] );
 print &ui_tabs_start(\@tabs, "simplemode",
 		     $in{'simplemode'} || $tabs[0]->[0], 1);
 
