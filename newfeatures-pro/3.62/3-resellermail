@@ -1,0 +1,4 @@
+desc=Resellers can read mailboxes
+html=Resellers can now read mail in all mailboxes under domains they control, if allowed on the Module Config page under <b>Extra modules</b>.
+master=1
+reseller=1
