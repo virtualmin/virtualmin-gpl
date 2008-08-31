@@ -977,3 +977,4 @@ The configuration check now detects a missing or incorrect suexec, to easier fin
 Added a new sort mode (used by default for new installs) to order virtual servers by domain name, but with sub-servers indented under them.
 The frequency of script update notifications and whether to send the same notification twice can now be configured on the Script Installers configuration page.
 Resellers can now read mail in all mailboxes under domains they control, if allowed on the Module Config page under 'Extra modules'.
+Included domains for SPF for new virtual servers can now be set in server templates.

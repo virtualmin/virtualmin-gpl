@@ -1303,6 +1303,11 @@ print &ui_table_row(&hlink($text{'tmpl_spfhosts'},
 			   "template_dns_spfhosts"),
 	&ui_textbox("dns_spfhosts", $tmpl->{'dns_spfhosts'}, 40));
 
+# Extra SPF includes
+print &ui_table_row(&hlink($text{'tmpl_spfincludes'},
+			   "template_dns_spfincludes"),
+	&ui_textbox("dns_spfincludes", $tmpl->{'dns_spfincludes'}, 40));
+
 # SPF ~all mode
 print &ui_table_row(&hlink($text{'tmpl_spfall'},
 			   "template_dns_spfall"),
@@ -1405,6 +1410,7 @@ $tmpl->{'dns_master'} = $in{'dns_master_mode'} == 0 ? "none" :
 $tmpl->{'dns_spf'} = $in{'dns_spf_mode'} == 0 ? "none" :
 		     $in{'dns_spf_mode'} == 1 ? undef : "yes";
 $tmpl->{'dns_spfhosts'} = $in{'dns_spfhosts'};
+$tmpl->{'dns_spfincludes'} = $in{'dns_spfincludes'};
 $tmpl->{'dns_spfall'} = $in{'dns_spfall'};
 
 # Save sub-domain DNS mode
@@ -1528,6 +1534,10 @@ foreach my $h (split(/\s+/, $hosts)) {
 	else {
 		push(@{$spf->{'a:'}}, $h);
 		}
+	}
+local $includes = &substitute_domain_template($tmpl->{'dns_spfincludes'}, $d);
+foreach my $i (split(/\s+/, $includes)) {
+	push(@{$spf->{'include:'}}, $i);
 	}
 if ($d->{'dns_ip'}) {
 	push(@{$spf->{'ip4:'}}, $d->{'dns_ip'});

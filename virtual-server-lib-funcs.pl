@@ -6208,6 +6208,7 @@ push(@rv, { 'id' => 0,
 	    'dns_view' => $config{'dns_view'},
 	    'dns_spf' => $config{'bind_spf'} || "none",
 	    'dns_spfhosts' => $config{'bind_spfhosts'},
+	    'dns_spfincludes' => $config{'bind_spfincludes'},
 	    'dns_spfall' => $config{'bind_spfall'},
 	    'dns_sub' => $config{'bind_sub'} || "none",
 	    'dns_master' => $config{'bind_master'} || "none",
@@ -6440,6 +6441,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'bind_spf'} = $tmpl->{'dns_spf'} eq 'none' ? undef
 							   : $tmpl->{'dns_spf'};
 	$config{'bind_spfhosts'} = $tmpl->{'dns_spfhosts'};
+	$config{'bind_spfincludes'} = $tmpl->{'dns_spfincludes'};
 	$config{'bind_spfall'} = $tmpl->{'dns_spfall'};
 	$config{'bind_sub'} = $tmpl->{'dns_sub'} eq 'none' ? undef
 							   : $tmpl->{'dns_sub'};
