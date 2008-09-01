@@ -3438,7 +3438,8 @@ local @servers = &list_mx_servers();
 return if (!@servers);
 local @okservers;
 &$first_print(&text('setup_mxs',
-		join(", ", map { "<tt>$_->{'host'}</tt>" } @servers)));
+	join(", ", map { "<tt>".($_->{'mxname'} || $_->{'host'})."</tt>" }
+		       @servers)));
 local @errs;
 foreach my $s (@servers) {
 	local $err = &setup_one_secondary($dom, $s);
@@ -3487,7 +3488,8 @@ local %ids = map { $_, 1 } split(/\s+/, $dom->{'mx_servers'});
 local @servers = grep { $ids{$_->{'id'}} } &list_mx_servers();
 return if (!@servers);
 &$first_print(&text('delete_mxs',
-		join(", ", map { "<tt>$_->{'host'}</tt>" } @servers)));
+	join(", ", map { "<tt>".($_->{'mxname'} || $_->{'host'})."</tt>" }
+		       @servers)));
 local @errs;
 foreach my $s (@servers) {
 	local $err = &delete_one_secondary($dom, $s);
