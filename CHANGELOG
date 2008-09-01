@@ -978,3 +978,4 @@ Added a new sort mode (used by default for new installs) to order virtual server
 The frequency of script update notifications and whether to send the same notification twice can now be configured on the Script Installers configuration page.
 Resellers can now read mail in all mailboxes under domains they control, if allowed on the Module Config page under 'Extra modules'.
 Included domains for SPF for new virtual servers can now be set in server templates.
+Added a button to the Edit Mailbox page for logging into Usermin as a user without having to enter their password. Requires Webmin 1.440 or later though.

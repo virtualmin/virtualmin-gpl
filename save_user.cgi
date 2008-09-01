@@ -37,7 +37,15 @@ else {
 
 &build_taken(\%taken, \%utaken);
 
-if ($in{'delete'}) {
+if ($in{'switch'}) {
+	# Auto-login to Usermin
+	&foreign_require("usermin", "usermin-lib.pl");
+	($cookie, $url) = &usermin::switch_to_usermin_user($user->{'user'});
+	print "Set-Cookie: $cookie\n";
+	&redirect($url);
+	return;
+	}
+elsif ($in{'delete'}) {
 	# Just deleting a user
 	if ($in{'confirm'}) {
 		# Get rid of his mail file

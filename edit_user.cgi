@@ -404,21 +404,41 @@ if ($anyother) {
 	print &ui_hidden_table_end("table4");
 	}
 
-if ($in{'new'}) {
-	print &ui_form_end([ [ "create", $text{'create'} ] ]);
-	}
-else {
-	print &ui_form_end([ [ "save", $text{'save'} ],
-		     $mailbox ? ( ) : ( [ "delete", $text{'delete'} ] ) ]);
+# Work out if switching to Usermin is allowed
+$usermin = 0;
+if ($user->{'unix'} && &foreign_installed("usermin", 1)) {
+	&foreign_require("usermin", "usermin-lib.pl");
+	local %uminiserv;
+	&usermin::get_usermin_miniserv_config(\%uminiserv);
+	if (defined(&usermin::switch_to_usermin_user) &&
+	    $uminiserv{'session'}) {
+		$usermin = 1;
+		}
 	}
 
+# Form create/delete buttons
+if ($in{'new'}) {
+	print &ui_form_end(
+	   [ [ "create", $text{'create'} ] ]);
+	}
+else {
+	print &ui_form_end(
+	   [ [ "save", $text{'save'} ],
+	     $usermin ? ( [ "switch", $text{'user_switch'}, undef, undef,
+			    "onClick='form.target = \"_new\"'" ] ) : ( ),
+	     $mailbox ? ( ) : ( [ "delete", $text{'delete'} ] ) ]);
+	}
+
+# Link back to user list and/or main menu
 if ($d) {
 	if ($single_domain_mode) {
-		&ui_print_footer("list_users.cgi?dom=$in{'dom'}", $text{'users_return'},
+		&ui_print_footer(
+			"list_users.cgi?dom=$in{'dom'}", $text{'users_return'},
 			"", $text{'index_return2'});
 		}
 	else {
-		&ui_print_footer("list_users.cgi?dom=$in{'dom'}", $text{'users_return'},
+		&ui_print_footer(
+			"list_users.cgi?dom=$in{'dom'}", $text{'users_return'},
 			&domain_footer_link($d),
 			"", $text{'index_return'});
 		}

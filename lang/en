@@ -665,6 +665,7 @@ user_eshell=Selected shell is not available for mail / FTP users
 user_ehomeexists=Home directory must be an existing directory for website FTP users
 user_awl=Manage auto-whitelist
 user_eloop=A user cannot forward email to his own address
+user_switch=Login to Usermin
 
 aliases_ecannot=You are not allowed to edit aliases in this domain
 aliases_title=Mail Aliases
