@@ -389,6 +389,7 @@ $d->{'id'} ||= &domain_id();
 &unlock_file("$domains_dir/$d->{'id'}");
 $main::get_domain_cache{$d->{'id'}} = $d;
 &build_domain_maps();
+&set_ownership_permissions(undef, undef, 0700, "$domains_dir/$d->{'id'}");
 return 1;
 }
 
