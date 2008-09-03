@@ -19,6 +19,7 @@
 	- OTRS (863)
 	- phpMySites
 	- counters (FS 3348)
+	- opengoo
 
  - new fcgid mode, as suggested by filip
 	Action php5-fcgi /fcgi-bin/php5-fcgi

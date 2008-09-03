@@ -1082,9 +1082,15 @@ foreach my $m (@mods) {
 	local $mp = $m;
 	if ($software::config{'package_system'} eq 'debian') {
 		# For APT, the package name is python- followed
-		# by the lower-case module name
+		# by the lower-case module name, except for the svn module
+		# which is in python-subversion
 		$mp = lc($mp);
-		push(@pkgs, "python-".$mp);
+		if ($mp eq "svn") {
+			push(@pkgs, "python-subversion");
+			}
+		else {
+			push(@pkgs, "python-".$mp);
+			}
 		}
 	elsif ($software::config{'package_system'} eq 'rpm') {
 		# For YUM, naming is less standard .. the MySQLdb package
