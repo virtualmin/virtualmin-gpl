@@ -176,6 +176,11 @@ if ($asowner) {
 	($asd) = grep { !$_->{'parent'} } @$doms;
 	$asd ||= $doms->[0];
 	}
+local $tar = &get_tar_command();
+if (!$tar) {
+	&$first_print($text{'backup_etarcmd'});
+	return (0);
+	}
 
 # See if we can actually connect to the remote server
 local ($mode, $user, $pass, $server, $path, $port) =
@@ -523,7 +528,7 @@ if ($ok) {
 					$asd->{'user'}, 0, $writer);
 				}
 
-			&execute_command("cd $backupdir && (tar cf - $d->{'dom'}_* | $comp) 2>&1 | $writer", undef, \$out);
+			&execute_command("cd $backupdir && ($tar cf - $d->{'dom'}_* | $comp) 2>&1 | $writer", undef, \$out);
 			push(@destfiles, $destfile);
 			$destfiles_map{$destfile} = $d;
 			if ($?) {
@@ -554,7 +559,7 @@ if ($ok) {
 			  $doms[0]->{'uid'}, $doms[0]->{'ugid'}, undef, $dest);
 		 	}
 		&$first_print($text{'backup_final'});
-		&execute_command("cd $backupdir && (tar cf - . | $comp) 2>&1 | $writer", undef, \$out);
+		&execute_command("cd $backupdir && ($tar cf - . | $comp) 2>&1 | $writer", undef, \$out);
 		if ($?) {
 			&$second_print(&text('backup_finalfailed', "<pre>$out</pre>"));
 			$ok = 0;
@@ -568,11 +573,11 @@ if ($ok) {
 	# config backups
 	if (@$vbs && ($homefmt || $dirfmt)) {
 		if (&has_command("gzip")) {
-			&execute_command("cd $backupdir && (tar cf - virtualmin_* | gzip -c) 2>&1 >$dest/virtualmin.tar.gz", undef, \$out, \$out);
+			&execute_command("cd $backupdir && ($tar cf - virtualmin_* | gzip -c) 2>&1 >$dest/virtualmin.tar.gz", undef, \$out, \$out);
 			push(@destfiles, "virtualmin.tar.gz");
 			}
 		else {
-			&execute_command("cd $backupdir && tar cf $dest/virtualmin.tar virtualmin_* 2>&1", undef, \$out, \$out);
+			&execute_command("cd $backupdir && $tar cf $dest/virtualmin.tar virtualmin_* 2>&1", undef, \$out, \$out);
 			push(@destfiles, "virtualmin.tar");
 			}
 		$destfiles_map{$destfiles[$#destfiles]} = "virtualmin";
@@ -749,6 +754,7 @@ return $? ? $out : undef;
 sub restore_domains
 {
 local ($file, $doms, $features, $opts, $vbs, $onlyfeats, $ipinfo, $asowner) =@_;
+local $tar = &get_tar_command();
 
 # Work out where the backup is located
 local $ok = 1;
@@ -816,7 +822,7 @@ if ($ok) {
 		local $comp = $cf == 1 ? "gunzip -c" :
 			      $cf == 2 ? "uncompress -c" :
 			      $cf == 3 ? "bunzip2 -c" : "cat";
-		&execute_command("$comp $q | tar tf -", undef, \$lout, \$lout);
+		&execute_command("$comp $q | $tar tf -", undef, \$lout, \$lout);
 		local @lines = split(/\n/, $lout);
 		local $extract;
 		if (&indexof("./.backup/", @lines) >= 0 ||
@@ -834,7 +840,7 @@ if ($ok) {
 			}
 
 		&execute_command("cd ".quotemeta($restoredir)." && ".
-			"($comp $q | tar xf - $extract)", undef, \$out, \$out);
+			"($comp $q | $tar xf - $extract)", undef, \$out, \$out);
 		if ($?) {
 			&$second_print(&text('restore_firstfailed',
 					     "<tt>$f</tt>", "<pre>$out</pre>"));
@@ -1225,6 +1231,7 @@ sub backup_contents
 local ($file, $wantdoms) = @_;
 local $backup;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($file);
+local $tar = &get_tar_command();
 local $doms;
 if ($mode == 3) {
 	# For S3, just download the backup contents files
@@ -1293,7 +1300,7 @@ else {
 	local $comp = $cf == 1 ? "gunzip -c" :
 		      $cf == 2 ? "uncompress -c" :
 		      $cf == 3 ? "bunzip2 -c" : "cat";
-	$out = `($comp $q | tar tf -) 2>&1`;
+	$out = `($comp $q | $tar tf -) 2>&1`;
 	if ($?) {
 		return $text{'restore_etar'};
 		}
@@ -1329,7 +1336,7 @@ else {
 		local $vftemp = &transname();
 		&make_dir($vftemp, 0700);
 		local $qvirtfiles = join(" ", map { quotemeta($_) } @virtfiles);
-		$out = `cd $vftemp ; ($comp $q | tar xvf - $qvirtfiles) 2>&1`;
+		$out = `cd $vftemp ; ($comp $q | $tar xvf - $qvirtfiles) 2>&1`;
 		if (!$?) {
 			$doms = [ ];
 			foreach my $f (@virtfiles) {
@@ -1769,8 +1776,27 @@ else {
 # Returns 1 if tar supports incremental backups
 sub has_incremental_tar
 {
-local $out = &backquote_command("tar --help 2>&1 </dev/null");
+my $tar = &get_tar_command();
+my $out = &backquote_command("$tar --help 2>&1 </dev/null");
 return $out =~ /--listed-incremental/;
+}
+
+# get_tar_command()
+# Returns the full path to the tar command, which may be 'gtar' on BSD
+sub get_tar_command
+{
+my @cmds = ( "tar" );
+if ($gconfig{'os_type'} eq 'freebsd') {
+	unshift(@cmds, "gtar");
+	}
+else {
+	push(@cmds, "gtar");
+	}
+foreach my $c (@cmds) {
+	my $p = &has_command($c);
+	return $p if ($p);
+	}
+return undef;
 }
 
 # get_backup_actions()
