@@ -18,7 +18,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-return ( "0.96.3" );
+return ( "1.0" );
 }
 
 sub script_django_category
@@ -260,8 +260,15 @@ if (!$upgrade) {
 	local $ufile = "$pdir/urls.py";
 	local $lref = &read_file_lines($ufile);
 	foreach my $l (@$lref) {
-		if ($l =~ /^(\s*)#(.*django.contrib.admin.urls.*)/) {
+		if ($l =~ /^(\s*)#(.*django.contrib.admin.urls.*)/ ||
+		    $l =~ /^(\s*)#(.*admin.site.root.*)/) {
+			# Un-comment /admin/ path
 			$l = $1.$2;
+			}
+		elsif ($l =~ /^\s*#\s*(from django.contrib import admin)/ ||
+		       $l =~ /^\s*#\s*(admin.autodiscover\(\))/) {
+			# Un-comment admin includes
+			$l = $1;
 			}
 		}
 	&flush_file_lines($ufile);
