@@ -580,12 +580,24 @@ sub mysql_size
 local ($size, $qsize);
 local $dd = &get_mysql_database_dir($_[1]);
 if ($dd) {
+	# Can check actual on-disk size
 	$size = &disk_usage_kb($dd)*1024;
 	local @dst = stat($dd);
 	if (&has_group_quotas() && &has_mysql_quotas() &&
             $dst[5] == $_[0]->{'gid'}) {
 		$qsize = $size;
 		}
+	}
+else {
+	# Use 'show table status'
+	$size = 0;
+	eval {
+		local $main::error_must_die = 1;
+		my $rv = &mysql::execute_sql($_[1], "show table status");
+		foreach my $r (@{$rv->{'data'}}) {
+			$size += $r->[6];
+			}
+		};
 	}
 local @tables;
 if (!$_[2]) {
