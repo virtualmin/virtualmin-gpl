@@ -23,9 +23,7 @@ if (!$module_name) {
 	$< == 0 || die "resend-email.pl must be run as root";
 	}
 @OLDARGV = @ARGV;
-
-$first_print = \&first_text_print;
-$second_print = \&second_text_print;
+&set_all_text_print();
 
 # Parse command-line args
 while(@ARGV > 0) {
