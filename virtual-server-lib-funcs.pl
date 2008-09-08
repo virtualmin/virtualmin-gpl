@@ -9383,6 +9383,12 @@ if (!$d->{'parent'}) {
 		push(@doms, $sd);
 		push(@olddoms, $oldsd);
 		}
+
+	# The template may no longer be valid if it was for a top-level server
+	local $tmpl = &get_template($d->{'template'});
+	if (!$tmpl->{'for_sub'}) {
+		$d->{'template'} = &get_init_template(1);
+		}
 	}
 else {
 	# Find any alias domains that also need to be re-parented. Also find
@@ -9547,6 +9553,12 @@ $d->{'ugid'} = $d->{'gid'};
 &change_home_directory($d, &server_home_directory($d));
 push(@doms, $d);
 push(@olddoms, $oldd);
+
+# The template may no longer be valid if it was for a sub-server
+local $tmpl = &get_template($d->{'template'});
+if (!$tmpl->{'for_parent'}) {
+	$d->{'template'} = &get_init_template(0);
+	}
 
 # Copy all quotas and limits from the old parent
 $d->{'quota'} = $oldparent->{'quota'};
@@ -10891,7 +10903,7 @@ $tmpl->{'norename'} = $in{'norename'};
 $tmpl->{'forceunder'} = $in{'forceunder'};
 }
 
-# get_init_template(subdom)
+# get_init_template(for-subdom)
 # Returns the ID of the initially selected template
 sub get_init_template
 {
