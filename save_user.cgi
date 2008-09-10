@@ -637,9 +637,12 @@ else {
 			}
 		}
 
-	# Send email about update or creation
-	@erv = &send_user_email($d, $user, $emailmailbox ? $newmailto : "none",
-				$in{'new'} ? 0 : 1);
+	# Send email about update or creation, unless autoreplying
+	if (!$simple || !$simple->{'auto'}) {
+		@erv = &send_user_email($d, $user,
+					$emailmailbox ? $newmailto : "none",
+					$in{'new'} ? 0 : 1);
+		}
 
 	# Call other module functions
 	if ($config{'other_users'}) {
