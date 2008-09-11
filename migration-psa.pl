@@ -445,7 +445,7 @@ foreach my $mailuser (@mailusers) {
 			&set_mailfolder_owner($dstfolder, $muinfo);
 			}
 		}
-	else {
+	elsif ($mailuser->{'type'} ne 'domain_level') {
 		&$first_print("No home contents found for $muinfo->{'user'}");
 		}
 
