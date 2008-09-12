@@ -6,6 +6,7 @@ $domain_lookup_cmd = "$module_config_directory/lookup-domain.pl";
 $procmail_spam_dir = "$module_config_directory/procmail";
 $spam_config_dir = "$module_config_directory/spam";
 $quota_spam_margin = 5*1024*1024;
+$spamassassin_lock_file = "/tmp/virtualmin.spamassassin";
 }
 
 sub require_spam
@@ -142,6 +143,10 @@ local $recipe1 = { 'flags' => [ 'f', 'w' ],	# Call spamassassin
 		   'type' => '|',
 		   'action' => $cmd,
 		 };
+if ($config{'spam_lock'}) {
+	# Add locking to prevent concurrent runs
+	$recipe1->{'lockfile'} = $spamassassin_lock_file;
+	}
 local ($recipe2, $recipe3);
 local $varon = { 'name' => 'SPAMMODE', 'value' => 1 };
 if ($config{'spam_level'}) {
