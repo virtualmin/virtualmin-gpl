@@ -3,9 +3,9 @@
 When this field is set to <b>No</b> as it is by default, Virtualmin will run
 multiple concurrent <tt>spamassassin</tt> processes if several email messages
 arrive at the same time. However, this may use excessive CPU and RAM on a 
-small system. If you select <b>Yes</b>, any virtual servers created or with
-spam filtering enabled from now on will have their Procmail configuration files
-created to run only one copy of <tt>spamassassin</tt> at a time. <p>
+small system. If you select <b>Yes</b>, any virtual servers with
+spam filtering enabled will have their Procmail configuration files
+updated to run only one copy of <tt>spamassassin</tt> at a time. <p>
 
 This restriction applies across all virtual servers, so even if two messages to
 different domains arrive at the same time, there will only ever be one 

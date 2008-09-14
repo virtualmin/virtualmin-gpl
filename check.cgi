@@ -68,6 +68,14 @@ if ($config{'collect_interval'} ne $lastconfig{'collect_interval'}) {
 	&$second_print($text{'setup_done'});
 	}
 
+# Update spamassassin lock files
+if ($config{'spam_lock'} != $lastconfig{'spam_lock'}) {
+	&$first_print($config{'spam_lock'} ? $text{'check_spamlockon'}
+					   : $text{'check_spamlockoff'});
+	&save_global_spam_lockfile($config{'spam_lock'});
+	&$second_print($text{'setup_done'});
+	}
+
 # Re-create API helper command
 if ($config{'api_helper'} ne $lastconfig{'api_helper'}) {
 	&$first_print($text{'check_apicmd'});

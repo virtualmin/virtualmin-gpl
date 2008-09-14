@@ -588,6 +588,28 @@ if (-r $_[1]."_auto") {
 return 1;
 }
 
+# save_global_spam_lockfile(enable)
+# Adds or removes a lockfile to all domains' spamassassin calls
+sub save_global_spam_lockfile
+{
+local ($enabled) = @_;
+foreach my $d (&get_domain_by("spam", 1)) {
+	local $spamrc = "$procmail_spam_dir/$d->{'id'}";
+	local @recipes = &procmail::parse_procmail_file($spamrc);
+	local @spamrec = &find_spam_recipe(\@recipes);
+	if ($spamrec[0]) {
+		# Found it .. modify
+		if ($enabled) {
+			$spamrec[0]->{'lockfile'} = $spamassassin_lock_file;
+			}
+		else {
+			delete($spamrec[0]->{'lockfile'});
+			}
+		&procmail::modify_recipe($spamrec[0]);
+		}
+	}
+}
+
 # sysinfo_spam()
 # Returns the SpamAssassin version
 sub sysinfo_spam
