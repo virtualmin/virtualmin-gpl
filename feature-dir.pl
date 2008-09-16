@@ -112,6 +112,9 @@ if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 	# part of parent
 	if (-d $_[1]->{'home'}) {
 		&$first_print($text{'save_dirhome'});
+		if (defined(&set_php_wrappers_writable)) {
+			&set_php_wrappers_writable($_[0], 1);
+			}
 		local $out = &backquote_logged("mv ".quotemeta($_[1]->{'home'}).
 			       " ".quotemeta($_[0]->{'home'})." 2>&1");
 		if ($?) {
@@ -119,6 +122,9 @@ if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 			}
 		else {
 			&$second_print($text{'setup_done'});
+			}
+		if (defined(&set_php_wrappers_writable)) {
+			&set_php_wrappers_writable($_[0], 0);
 			}
 		}
 	}
