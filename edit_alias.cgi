@@ -105,7 +105,8 @@ if (&can_edit_catchall() || ($name eq "" && !$in{'new'})) {
 			      $name eq "" && !$in{'new'} ? 1 : 0,
 			       [ [ 1, $text{'alias_catchall'} ],
 				 [ 0, $text{'alias_mailbox'} ] ])."\n".
-		    &ui_textbox($sfx."name", $name, 20)."\@".$d->{'dom'},
+		    &ui_textbox($sfx."name", $name, 20)."\@".
+		     &show_domain_name($d),
 		    undef, \@tds);
 	}
 else {

@@ -52,7 +52,7 @@ else {
 		&remove_userdom($user->{'user'}, $d) : $user->{'user'};
 	print &ui_table_row($ulabel,
 		&ui_textbox("mailuser", $pop3, 13).
-		($d ? "\@$d->{'dom'}" : "")."\n".
+		($d ? "\@".&show_domain_name($d) : "")."\n".
 		($pop3 ne $user->{'user'} ?
 			" ".&text($d->{'mail'} ? 'user_pop3' : 'user_pop3f',
 				  "<tt>$user->{'user'}</tt>") :

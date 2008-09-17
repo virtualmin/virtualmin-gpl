@@ -43,34 +43,10 @@ if (!defined($first_print)) {
 	$outdent_print = \&outdent_html_print;
 	}
 
-# hlink(text, page, [module], [width], [height])
-# This is an override for the standard hlink function which checks if the
-# file really exists.
-sub checked_hlink
-{
-local ($text, $page, $mod, $width, $height) = @_;
-$mod ||= $module_name;
-if (!-r &help_file($mod, $page)) {
-	return $text;
-	}
-else {
-	$width ||= $tconfig{'help_width'} || $gconfig{'help_width'} || 400;
-	$height ||= $tconfig{'help_height'} || $gconfig{'help_height'} || 300;
-	return "<a onClick='window.open(\"$gconfig{'webprefix'}/help.cgi/$mod/$_[1]\", \"help\", \"toolbar=no,menubar=no,scrollbars=yes,width=$width,height=$height,resizable=yes\"); return false' href=\"$gconfig{'webprefix'}/help.cgi/$mod/$_[1]\">$_[0]</a>";
-	}
-}
-
-# For the GPL version, force some features off and don't try to show
-# missing help pages
+# For the GPL version, force some features off.
 $virtualmin_pro = $module_info{'virtualmin'} eq 'pro' ? 1 : 0;
 if (!$virtualmin_pro) {
 	$config{'status'} = 0;
-	$original_hlink = $main::{'hlink'} ||
-			  $virtual_server::{'hlink'} ||
-			  $gpl_virtual_server::{'hlink'};
-	$main::{'hlink'} = \&checked_hlink;
-	$virtual_server::{'hlink'} = \&checked_hlink;
-	$gpl_virtual_server::{'hlink'} = \&checked_hlink;
 	}
 
 @used_webmin_modules = ( "acl", "apache", "bind8", "cron", "htaccess-htpasswd",
