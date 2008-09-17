@@ -1918,6 +1918,11 @@ elsif ($mode == 3 && $host =~ /%/) {
 	$host =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return (undef, $host);
 	}
+elsif ($mode == 3 && $path =~ /%/) {
+	# S3 filename which is date-based
+	$path =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
+	return ($host, $path);
+	}
 return ( );
 }
 
@@ -2034,7 +2039,7 @@ elsif ($mode == 2) {
 		}
 	}
 
-elsif ($mode == 3) {
+elsif ($mode == 3 && $host =~ /\%/) {
 	# Search S3 for S3 buckets matching the regexp
 	local $buckets = &s3_list_buckets($user, $pass);
 	if (!ref($buckets)) {
@@ -2048,6 +2053,7 @@ elsif ($mode == 3) {
 			local $old = int((time() - $ctime) / (24*60*60));
 			&$first_print(&text('backup_deletingbucket',
 					    "<tt>$b->{'Name'}</tt>", $old));
+
 			# Sum up size of files
 			local $files = &s3_list_files($user, $pass,
 						      $b->{'Name'});
@@ -2071,6 +2077,38 @@ elsif ($mode == 3) {
 			}
 		}
 	}
+
+elsif ($mode == 3 && $path =~ /\%/) {
+	# Search for S3 files under the bucket
+	local $files = &s3_list_files($user, $pass, $host);
+	if (!ref($files)) {
+		&$second_print(&text('backup_purgeefiles', $files));
+		return 0;
+		}
+	foreach my $f (@$files) {
+		local $ctime = &s3_parse_date($f->{'LastModified'});
+		if ($f->{'Key'} =~ /^$re$/ && $ctime && $ctime < $cutoff) {
+			# Found one to delete
+			local $old = int((time() - $ctime) / (24*60*60));
+			&$first_print(&text('backup_deletingfile',
+					    "<tt>$f->{'Key'}</tt>", $old));
+			local $err = &s3_delete_file($user, $pass, $host,
+						     $f->{'Key'});
+			if ($err) {
+				&$second_print(&text('backup_edelbucket',$err));
+				$ok = 0;
+				}
+			else {
+				&s3_delete_file($user, $pass, $host,
+						$f->{'Key'}.".info");
+				&$second_print(&text('backup_deleted',
+						     &nice_size($f->{'Size'})));
+				$pcount++;
+				}
+			}
+		}
+	}
+
 &$outdent_print();
 
 &$second_print($pcount ? &text('backup_purged', $pcount)

@@ -223,7 +223,11 @@ return undef;
 sub s3_parse_date
 {
 local ($str) = @_;
-if ($str =~ /^(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)/) {
+if ($str =~ /^(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)\.000Z/) {
+	local $rv = eval { timegm($6, $5, $4, $3, $2-1, $1-1900); };
+	return $@ ? undef : $rv;
+	}
+elsif ($str =~ /^(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)/) {
 	local $rv = eval { timelocal($6, $5, $4, $3, $2-1, $1-1900); };
 	return $@ ? undef : $rv;
 	}

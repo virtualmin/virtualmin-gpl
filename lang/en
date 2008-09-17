@@ -1941,6 +1941,7 @@ backup_deleted=.. deleted $1.
 backup_purged=.. deleted $1 old backups
 backup_purgednone=.. no backups to delete were found
 backup_purgeebuckets=.. failed to list S3 buckets : $1
+backup_purgeefiles=.. failed to list S3 files : $1
 backup_deletingbucket=Deleting S3 bucket $1, which is $2 days old ..
 backup_edelbucket=.. deletion failed : $1
 backup_purgeelistdir=.. failed to list FTP directory : $1
