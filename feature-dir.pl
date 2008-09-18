@@ -415,12 +415,18 @@ local ($d) = @_;
 local $hd = $config{'homes_dir'};
 $hd =~ s/^\.\///;
 local $gid = $d->{'gid'} || $d->{'ugid'};
+if (defined(&set_php_wrappers_writable)) {
+	&set_php_wrappers_writable($d, 1);
+	}
 &system_logged("find ".quotemeta($d->{'home'}).
 	       " | grep -v ".quotemeta("$d->{'home'}/$hd/").
 	       " | sed -e 's/^/\"/' | sed -e 's/\$/\"/' ".
 	       " | xargs chown $d->{'uid'}:$gid");
 &system_logged("chown $d->{'uid'}:$gid ".
 	       quotemeta($d->{'home'})."/".$config{'homes_dir'});
+if (defined(&set_php_wrappers_writable)) {
+	&set_php_wrappers_writable($d, 0);
+	}
 }
 
 # set_mailbox_homes_ownership(&domain)

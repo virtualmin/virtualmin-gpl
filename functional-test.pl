@@ -521,7 +521,7 @@ $script_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'type', 'wordpress' ],
 		      [ 'path', '/wordpress' ],
-		      [ 'db', 'mysql '.$test_domain_user ],
+		      [ 'db', 'mysql '.$test_domain_db ],
 		      [ 'version', 'latest' ] ],
 	},
 
