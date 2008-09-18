@@ -98,11 +98,16 @@ if ($webmin_proto eq "https") {
 	$webmin_wget_command .= "--no-check-certificate ";
 	}
 
-$prefix = &compute_prefix($test_domain);
-$test_full_user = &userdom_name($test_user, { 'dom' => $test_domain,
-					      'prefix' => $prefix });
 ($test_domain_user) = &unixuser_name($test_domain);
+$prefix = &compute_prefix($test_domain, $test_domain_user, undef, undef, 1);
+%test_domain = ( 'dom' => $test_domain,
+		 'prefix' => $prefix,
+		 'user' => $test_domain_user,
+		 'group' => $test_domain_user,
+		 'template' => &get_init_template() );
+$test_full_user = &userdom_name($test_user, \%test_domain);
 ($test_target_domain_user) = &unixuser_name($test_target_domain);
+$test_domain_db = &database_name(\%test_domain);
 
 # Build list of test types
 $domains_tests = [
@@ -142,12 +147,14 @@ $domains_tests = [
 
 	# Check Webmin login
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
 		       $webmin_proto.'://'.$test_domain_user.':smeg@localhost:'.
 		       $webmin_port.'/',
 	},
 
 	# Check MySQL login
-	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_user.' -e "select version()"',
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.' -e "select version()"',
 	},
 
 	# Check PHP execution
@@ -218,6 +225,8 @@ $domains_tests = [
 
 	# Check new Webmin password
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
 		       $webmin_proto.'://'.$test_domain_user.
 		       ':newpass@localhost:'.$webmin_port.'/',
 	},
@@ -341,7 +350,7 @@ $mailbox_tests = [
 	},
 
 	# Check user's MySQL login
-	{ 'command' => 'mysql -u '.$test_full_user.' -pnewpass '.$test_domain_user.' -e "select version()"',
+	{ 'command' => 'mysql -u '.$test_full_user.' -pnewpass '.$test_domain_db.' -e "select version()"',
 	},
 
 	# Delete the user
@@ -456,6 +465,8 @@ $reseller_tests = [
 
 	# Check Webmin login
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
 		       $webmin_proto.'://'.$test_reseller.
 		       ':smeg@localhost:'.$webmin_port.'/',
 	},
@@ -550,7 +561,7 @@ $database_tests = [
 	},
 
 	# Check that we can login to MySQL
-	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_user.'_extra -e "select version()"',
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.'_extra -e "select version()"',
 	},
 
 	# Create a PostgreSQL database
@@ -882,12 +893,14 @@ $move_tests = [
 
 	# Check Webmin login
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
 		       $webmin_proto.'://'.$test_domain_user.
 		       ':smeg@localhost:'.$webmin_port.'/',
 	},
 
 	# Check MySQL login
-	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_user.' -e "select version()"',
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.' -e "select version()"',
 	},
 
 	# Make sure the mailbox still exists
