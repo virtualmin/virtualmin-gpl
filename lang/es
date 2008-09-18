@@ -3739,7 +3739,7 @@ upgrade_sched=Configurando Webmin para actualizar autom&#225;ticamente m&#243;du
 upgrade_schednot=.. hecho, pero la actualizaci&#243;n autom&#225;tica no est&#225; habilitada. Utilice el m&#243;dulo <a href='$1'>$2</a> para habilitarla.
 upgrade_schedok=.. hecho. Las actualizaciones ser&#225;n instaladas autom&#225;ticamente.
 upgrade_serial=N&#250;mero de serie
-upgrade_step1=Vaya a <a href='http://$1/'>$1</a> y compre una licencia para Virtualmin Pro.
+upgrade_step1=Vaya a <a href='$1'>$1</a> y compre una licencia para Virtualmin Pro.
 upgrade_step2=Ingrese su n&#250;mero de serie y clave de licencia en el formulario debajo.
 upgrade_step3=Click en el bot&#243;n <b>Upgrade</b>. Esto bajar&#225; todos los &#250;ltimos m&#243;dulos de Virtualmin y los agregara a la instalaci&#243;n de Webmin. Todas sus configuraciones existentes no ser&#225;n modificadas y no se instalar&#225; ning&#250;n software.
 upgrade_theme=Habilitando tema <i>$1</i> ..

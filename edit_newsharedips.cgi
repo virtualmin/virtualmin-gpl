@@ -7,7 +7,7 @@ require './virtual-server-lib.pl';
 
 print "$text{'sharedips_desc'}<p>\n";
 print &ui_form_start("save_newsharedips.cgi", "post");
-print &ui_table_start($text{'sharedips_header'}, undef, 2, [ "width=30%" ]);
+print &ui_table_start($text{'sharedips_header'}, undef, 2);
 
 # Current default IP
 print &ui_table_row($text{'sharedips_def'},

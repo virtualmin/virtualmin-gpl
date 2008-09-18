@@ -3335,7 +3335,7 @@ thumb_ethumb=内容风格$1没有预览图像。
 upgrade_title=升级到Virtualmin Pro
 newupgrade_title=$upgrade_title
 upgrade_desc1=如果你已使用并喜欢Virtualmin GPL并且想升级到Pro版，可以使用本页面进行自动升级。按照以下的步骤：
-upgrade_step1=去<a href='http://$1/'>$1</a>购买Virtualmin Pro的许可。
+upgrade_step1=去<a href='$1'>$1</a>购买Virtualmin Pro的许可。
 upgrade_step2=在下表中输入你的序列号和许可证密码。
 upgrade_step3=点击<b>升级</b>按钮下载Virtualmin模块的最新版本，并将它们添加到你的Webmin安装中。你已有的设置将全部保留，并且不会安装另外的软件。
 upgrade_header=Virtualmin Pro许可证

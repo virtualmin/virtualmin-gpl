@@ -3906,7 +3906,7 @@ upgrade_sched=Webmin zo configureren dat hij automatisch de Virtualmin Pro modul
 upgrade_schednot=.. klaar, maar automatische update installatie is niet aangezet. gebruik de <a href='$1'>$2</a> module om hem aan te zetten.
 upgrade_schedok=.. klaar. Updates zullen automatisch geinstalleerd worden.
 upgrade_serial=Serie nummer
-upgrade_step1=Ga naar <a href='http://$1/'>$1</a> en koop een licentie voor Virtualmin Pro.
+upgrade_step1=Ga naar <a href='$1'>$1</a> en koop een licentie voor Virtualmin Pro.
 upgrade_step2=Invullen van uw serie nummer en licentie sleutel in het formulier hieronder.
 upgrade_step3=Klik op de <b>Upgrade</b> knop. Dit zal de laatste Virtualmin modules downloaden en ze toevoegen aan uw Webmin installatie. Al uw huidige settings zullen onveranderd blijven en er word geen andere software geinstalleerd.
 upgrade_theme=Aanzetten theme <i>$1</i> ..

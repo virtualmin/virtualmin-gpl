@@ -3989,7 +3989,7 @@ thumb_ethumb=The content style $1 does not have a preview image.
 upgrade_title=Upgrade to Virtualmin Pro
 newupgrade_title=$upgrade_title
 upgrade_desc1=If you have enjoyed using Virtualmin GPL and want to take the next step to the Pro version, this page can be used to perform the upgrade process automatically. The steps to do this are :
-upgrade_step1=Go to <a href='http://$1/'>$1</a> and purchase a licence for Virtualmin Pro.
+upgrade_step1=Go to <a href='$1'>$1</a> and purchase a licence for Virtualmin Pro.
 upgrade_step2=Enter your serial number and license key in the form below.
 upgrade_step3=Click the <b>Upgrade</b> button. This will download all of the latest Virtualmin modules, and add them to your Webmin install. All of your existing settings will be left un-changed, and no other software installed.
 upgrade_header=Virtualmin Pro license

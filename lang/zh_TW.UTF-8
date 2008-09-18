@@ -130,7 +130,7 @@ backup_features=備份的功能
 newnotify_done=指定郵件已被發送到以下地址：
 newmxs_doing=正在測試第二MX服務器$1 ..
 sysinfo_mailprog=郵件注入命令
-upgrade_step1=去<a href='http://$1/'>$1</a>購買Virtualmin Pro的許可。
+upgrade_step1=去<a href='$1'>$1</a>購買Virtualmin Pro的許可。
 licence_ecannot=你不運行重新檢查Virtualmin許可証
 upgrade_step2=在下表中輸入你的序列號和許可証密碼。
 ffile_title=編輯過濾文件
