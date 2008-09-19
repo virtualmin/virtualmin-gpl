@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Nucleus installer to version 3.33, Xoops to 2.0.18.2, SugarCRM to 5.1.0, OpenX to 2.6.1, phpMyAdmin to 2.11.9, phpPgAdmin to 4.2.1, WordPress MU to 2.6.1, Magento to 1.0.19870.6, Django to 1.0, MediaWiki to 1.13.1, SMF to 1.1.6, Z-push to 1.2, WordPress to 2.6.1, Joomla to 1.5.7, Horde to 3.2.2, and Movable Type to 4.21.
+html=Updated the Nucleus installer to version 3.33, Xoops to 2.0.18.2, SugarCRM to 5.1.0, OpenX to 2.6.1, phpMyAdmin to 2.11.9.1, phpPgAdmin to 4.2.1, WordPress MU to 2.6.1, Magento to 1.0.19870.6, Django to 1.0, MediaWiki to 1.13.1, SMF to 1.1.6, Z-push to 1.2, WordPress to 2.6.1, Joomla to 1.5.7, Horde to 3.2.2, Gallery to 1.5.9, Rails to 2.1.1, Radiant to 0.6.9, and Movable Type to 4.21.
 master=1
 reseller=1
 domain=1
