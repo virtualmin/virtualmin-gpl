@@ -52,7 +52,7 @@ if (!$nocheck && defined(&licence_scheduled)) {
 	&$first_print("Checking serial $serial and key $key ..");
 	$hostid = &get_licence_hostid();
 	($status, $exp, $err, $doms, $server) =
-		&licence_scheduled($hostid, $serial, $key);
+		&licence_scheduled($hostid, $serial, $key, &get_vps_type());
 	if ($status) {
 		&$second_print(".. license is not valid : $err");
 		exit(1);

@@ -7896,7 +7896,7 @@ return (0) if (!&require_licence());
 local $id = &get_licence_hostid();
 
 local ($status, $expiry, $err, $doms, $max_servers, $servers, $autorenew) =
-	&licence_scheduled($id);
+	&licence_scheduled($id, undef, undef, &get_vps_type());
 if ($status == 0 && $doms) {
 	# A domains limit exists .. check if we have exceeded it
 	local @doms = grep { !$_->{'alias'} } &list_domains();
@@ -7934,6 +7934,16 @@ if (!$id) {
 	$id = &get_system_hostname();
 	}
 return $id;
+}
+
+# get_vps_type()
+# If running under some kind of VPS, return a type code for it. This can be
+# one of 'xen', 'vserver', 'zones' or undef for none.
+sub get_vps_type
+{
+return defined(&running_in_zone) && &running_in_zone() ? 'zones' :
+       defined(&running_in_vserver) && &running_in_vserver() ? 'vserver' :
+       defined(&running_in_xen) && &running_in_xen() ? 'xen' : undef;
 }
 
 # licence_warning_message()
