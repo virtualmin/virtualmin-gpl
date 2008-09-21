@@ -984,3 +984,5 @@ When MySQL is on a remote system, the 'show table status' command is used to get
 Added the notify-domains.pl command line script, for sending email to some or all virtual server owners.
 Added a Module Config option to have only one spamassassin process run at a time.
 S3 backups to date-based filenames are now supported, and can be properly purged.
+---- Changes since 3.62 ----
+Updated the TWiki script installer to version 4.2.3.
