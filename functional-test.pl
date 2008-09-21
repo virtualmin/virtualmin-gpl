@@ -908,6 +908,16 @@ $move_tests = [
 	  'args' => [ [ 'domain' => $test_domain ] ],
 	  'grep' => "^$test_user",
 	},
+
+	# Test DNS lookup of sub-domain
+	{ 'command' => 'host '.$test_subdomain,
+	  'grep' => &get_default_ip(),
+	},
+
+	# Test HTTP get of sub-domain
+	{ 'command' => $wget_command.'http://'.$test_subdomain,
+	  'grep' => 'Test home page',
+	},
 	);
 $backup_tests = [
 	# Create a parent domain to be backed up
@@ -932,9 +942,22 @@ $backup_tests = [
 		      [ 'mail-quota', 100*1024 ] ],
 	},
 
+	# Create a sub-server to be included
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+	},
+
 	# Backup to a temp file
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
 		      [ 'all-features' ],
 		      [ 'dest', $test_backup_file ] ],
 	},
@@ -946,6 +969,7 @@ $backup_tests = [
 	# Restore with the domain still in place
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
 		      [ 'all-features' ],
 		      [ 'source', $test_backup_file ] ],
 	},
@@ -961,6 +985,7 @@ $backup_tests = [
 	# Re-create from backup
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
 		      [ 'all-features' ],
 		      [ 'source', $test_backup_file ] ],
 	},
