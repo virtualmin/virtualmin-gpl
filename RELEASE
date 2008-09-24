@@ -7,7 +7,7 @@
 	./makemodulerpm.pl --sign --dir virtual-server --allow-overwrite gpl-virtual-server
 	./makemodulerpm.pl --sign --allow-overwrite virtual-server-theme
 	./makemoduledeb.pl --dir virtual-server --allow-overwrite gpl-virtual-server
-	./makemoduledeb.pl virtual-server-theme
+	./makemoduledeb.pl --allow-overwrite virtual-server-theme
 
  x Upload to download.webmin.com:htdocs/download/virtualmin/
 	scp /tmp/virtual-server-$ver.wbm.gz download.webmin.com:htdocs/download/virtualmin/
