@@ -5416,8 +5416,9 @@ foreach $f (@feature_plugins) {
 		local $main::error_must_die = 1;
 		eval { &plugin_call($f, "feature_setup", $dom) };
 		if ($@) {
+			local $err = $@;
 			&$second_print(&text('setup_failure',
-				&plugin_call($f, "feature_name"), $@));
+				&plugin_call($f, "feature_name"), $err));
 			$dom->{$f} = 0;
 			}
 		}
@@ -5810,10 +5811,11 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 				eval { &plugin_call($f,
 					"feature_delete",$dd) };
 				if ($@) {
+					local $err = $@;
 					&$second_print(
 					    &text('delete_failure',
 					    &plugin_call($f,
-						"feature_name"), $@));
+						"feature_name"), $err));
 					}
 				}
 			}
@@ -9496,8 +9498,9 @@ foreach $f (@feature_plugins) {
 			eval { &plugin_call($f, "feature_modify",
 				     	    $doms[$i], $olddoms[$i]) };
 			if ($@) {
+				local $err = $@;
 				&$second_print(&text('setup_failure',
-					&plugin_call($f, "feature_name"), $@));
+					&plugin_call($f, "feature_name"),$err));
 				}
 			}
 		}
@@ -9673,8 +9676,9 @@ foreach $f (@feature_plugins) {
 			eval { &plugin_call($f, "feature_modify",
 					    $doms[$i], $olddoms[$i]) };
 			if ($@) {
+				local $err = $@;
 				&$second_print(&text('setup_failure',
-					&plugin_call($f, "feature_name"), $@));
+					&plugin_call($f, "feature_name"),$err));
 				}
 			}
 		}
