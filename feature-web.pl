@@ -2788,7 +2788,7 @@ sub get_suexec_path
 &require_apache();
 local $httpd_dir = &apache::find_httpd();
 $httpd_dir =~ s/\/[^\/]+$//;
-foreach my $p ("suexec", "suexec2",		# In path
+foreach my $p ("suexec",			# In path
 	       "/usr/lib/apache2/suexec",	# Debian
 	       "/usr/lib/apache/suexec",
 	       "/usr/local/bin/suexec",		# FreeBSD
@@ -2796,9 +2796,8 @@ foreach my $p ("suexec", "suexec2",		# In path
 	       "/opt/csw/apache2/sbin/suexec",	# Solaris CSW
 	       "/opt/csw/apache/sbin/suexec",
 	       "$httpd_dir/suexec",		# Same dir as httpd
-	       "$httpd_dir/suexec2",
 	      ) {
-	local $fp = &has_command($p);
+	local $fp = &has_command($p) || &has_command($p."2");
 	return $fp if ($fp);
 	}
 return undef;
