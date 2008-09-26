@@ -122,6 +122,36 @@ foreach $c (&unique(map { $_->{'cat'} } @apis)) {
 	close(CAT);
 	}
 
+# Create a special page for scripts
+print "Creating scripts page ..\n";
+open(SCRIPTS, "./list-available-scripts.pl --multiline --source core |");
+while(<SCRIPTS>) {
+	s/\r|\n//g;
+	if (/^(\S+)$/) {
+		$script = { 'id' => $1 };
+		push(@scripts, $script);
+		}
+	elsif (/^\s+(\S+):\s*(.*)/) {
+		$script->{lc($1)} = $2;
+		}
+	}
+close(SCRIPTS);
+open(PAGE, ">$tempdir/virtualmin_script_installers.txt");
+print PAGE "====== Virtualmin Script Installers ======\n";
+print PAGE "\n";
+print PAGE "The following scripts can be installed by the latest version of ";
+print PAGE "Virtualmin professional :\n\n";
+$hfmt = "^ %-20.20s ^ %-80.80s ^ %-20.20s ^\n";
+($rfmt = $hfmt) =~ s/\^/\|/g;
+printf PAGE $hfmt, "Name", "Description", "Versions";
+foreach $s (sort { lc($a->{'name'}) cmp lc($b->{'name'}) } @scripts) {
+	next if ($s->{'available'} ne 'Yes');
+	next if ($s->{'description'} eq '');
+	$s->{'versions'} =~ s/ / , /g;
+	printf PAGE $rfmt, $s->{'name'}, $s->{'description'}, $s->{'versions'};
+	}
+close(PAGE);
+
 # Upload to server
 print "Uploading to Wiki server $wiki_pages_host ..\n";
 foreach $a (@apis) {
