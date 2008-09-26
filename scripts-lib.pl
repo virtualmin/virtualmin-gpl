@@ -47,14 +47,17 @@ foreach $s (@scripts_directories) {
 	local $spath = "$s/$name.pl";
 	local @st = stat($spath);
 	if (@st) {
-		push(@sfiles, [ $spath, $st[9],&guess_script_version($spath) ]);
+		push(@sfiles, [ $spath, $st[9],
+			&guess_script_version($spath),
+			$s eq $scripts_directories[0] ? 'custom' : 'core' ]);
 		}
 	}
 foreach my $p (@script_plugins) {
 	local $spath = &module_root_directory($p)."/$name.pl";
 	local @st = stat($spath);
 	if (@st) {
-		push(@sfiles, [ $spath, $st[9],&guess_script_version($spath) ]);
+		push(@sfiles, [ $spath, $st[9],
+			&guess_script_version($spath), 'plugin' ]);
 		}
 	}
 return undef if (!@sfiles);
@@ -102,6 +105,7 @@ local $rv = { 'name' => $name,
 	      'site' => defined(&$sitefunc) ? &$sitefunc() : undef,
 	      'author' => defined(&$authorfunc) ? &$authorfunc() : undef,
 	      'dir' => $sdir,
+	      'source' => $sfiles[0]->[3],
 	      'depends_func' => "script_${name}_depends",
 	      'dbs_func' => "script_${name}_dbs",
 	      'params_func' => "script_${name}_params",

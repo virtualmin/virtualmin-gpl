@@ -9,6 +9,11 @@ into Virtualmin servers. By default it displays a nicely formatted table, but
 if the C<--multiline> option is given it will use a more machine-readable format
 which shows more information.
 
+By default all scripts available are listed, but you can limit the output
+to only those built into Virtualmin with the C<--source core> parameter. Or
+show only those you have installed separately with C<--source custom>, or
+those from plugins with C<--source plugin>.
+
 =cut
 
 package virtual_server;
@@ -31,12 +36,20 @@ while(@ARGV > 0) {
 	if ($a eq "--multiline") {
 		$multi = 1;
 		}
+	elsif ($a eq "--source") {
+		$source = shift(@ARGV);
+		}
 	else {
 		&usage();
 		}
 	}
 
+# Get and filter scripts
 @scripts = map { &get_script($_) } &list_scripts();
+if ($source) {
+	@scripts = grep { $_->{'source'} eq $source } @scripts;
+	}
+
 if ($multi) {
 	# Show each script on a separate line
 	$overall = &get_overall_script_ratings();
@@ -59,6 +72,7 @@ if ($multi) {
 		if ($script->{'author'}) {
 			print "    Installer author: $script->{'author'}\n";
 			}
+		print "    Source: $script->{'source'}\n";
 		}
 	}
 else {
@@ -79,6 +93,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Lists the third-party scripts available for installation.\n";
 print "\n";
 print "usage: list-available-scripts.pl [--multiline]\n";
+print "                                 [--source core|custom|plugin]\n";
 exit(1);
 }
 
