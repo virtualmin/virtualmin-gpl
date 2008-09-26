@@ -21,8 +21,7 @@ $mode > 0 || -r $src || -d $src || &error($text{'restore_esrc'});
 if ($in{'feature_all'}) {
 	@do_features = &get_available_backup_features($crmode == 2);
 	foreach my $f (@backup_plugins) {
-		push(@do_features, $f)
-			if (&plugin_call($f, "feature_backup_safe"));
+		push(@do_features, $f);
 		}
 	}
 else {
