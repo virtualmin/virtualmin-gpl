@@ -217,8 +217,11 @@ foreach my $nf (@rv) {
 			# some type, limit to them
 			if ($module_name =~ /^server-manager/ &&
 			    $nf->{'managers'}) {
-				($d) = grep { &match_server_manager($_,
+				local @mans = grep { &match_server_manager($_,
 					        $nf->{'managers'}) } @servers;
+				@mans = sort { &sort_server_manager($a, $b) }
+					     @mans;
+				$d = $mans[0];
 				}
 
 			# Convert the link template into a real link
@@ -251,6 +254,31 @@ foreach my $m (split(/\s+/, $managers)) {
 	return 1 if ($server->{'manager'} eq $m);
 	}
 return 0;
+}
+
+# Sort VM2 systems so that those which are up come first
+sub sort_server_manager
+{
+local ($a, $b) = @_;
+local $ao = &order_server_manager_status($a->{'status'});
+local $bo = &order_server_manager_status($b->{'status'});
+return $ao - $bo;
+}
+
+sub order_server_manager_status
+{
+local ($s) = @_;
+return $s eq 'nohost' ? 0 :
+       $s eq 'down' ? 10 :
+       $s eq 'paused' ? 15 :
+       $s eq 'nossh' ? 20 :
+       $s eq 'alive' ? 25 :
+       $s eq 'nosshlogin' ? 30 :
+       $s eq 'nowebminlogin' ? 40 :
+       $s eq 'nowebmin' ? 50 :
+       $s eq 'downwebmin' ? 60 :
+       $s eq 'novirt' ? 70 :
+       $s eq 'virt' ? 80 : undef;
 }
 
 1;

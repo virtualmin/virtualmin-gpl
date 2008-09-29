@@ -11629,6 +11629,7 @@ local $msc = $ENV{'MINISERV_CONFIG'} || "$config_directory/miniserv.conf";
 local %miniserv;
 &get_miniserv_config(\%miniserv);
 local @preload;
+local $oldpreload = $miniserv{'preload'};
 if ($mode == 0) {
 	# Nothing to load
 	@preload = ( );
@@ -11658,6 +11659,7 @@ else {
 $miniserv{'preload'} = join(" ", &unique(@preload));
 &put_miniserv_config(\%miniserv);
 &unlock_file($msc);
+return $oldpreload ne $miniserv{'preload'};
 }
 
 # nice_hour_mins_secs(unixtime)

@@ -6,6 +6,7 @@ do 'virtual-server-lib.pl';
 sub module_install
 {
 &foreign_require("cron", "cron-lib.pl");
+local $need_restart;
 
 # Remember the first version we installed, to avoid showing new features
 # from before it
@@ -122,16 +123,19 @@ if ($gconfig{'no_virtualmin_preload'}) {
 	$config{'preload_mode'} = 0;
 	}
 &save_module_config();
-&update_miniserv_preloads($config{'preload_mode'});
+$need_restart ||= &update_miniserv_preloads($config{'preload_mode'});
 
 # Run in package eval mode, to avoid loading the same module twice
 local %miniserv;
 &get_miniserv_config(\%miniserv);
-if ($virtualmin_pro) {
+if ($virtualmin_pro && !$miniserv{'eval_package'}) {
 	$miniserv{'eval_package'} = 1;
+	$need_restart = 1;
 	}
 &put_miniserv_config(\%miniserv);
-if (&check_pid_file($miniserv{'pidfile'})) {
+
+# Restart Webmin if needed
+if (&check_pid_file($miniserv{'pidfile'}) && $need_restart) {
 	&restart_miniserv();
 	}
 

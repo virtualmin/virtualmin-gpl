@@ -54,3 +54,6 @@
  - More domain registrars
 	- Distribute IT for Michael
 
+ - Domain process limits effecting Apache, which in turn breaks su apache as
+   it is a member of the group! Need unlimited setting for Apache higher in
+   the file.
