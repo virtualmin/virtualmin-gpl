@@ -2823,15 +2823,30 @@ sub check_suexec_install
 {
 local ($tmpl) = @_;
 &require_useradmin();
+
+# Make sure suexec is actually installed
 local $suexec = &get_suexec_path();
 local $suhome = &get_suexec_document_root();
 local $suerr;
 if ($tmpl->{'web_suexec'} && !$suexec) {
 	return $text{'check_ewebsuexecbin'};
 	}
+
+# Work out CGI base directory
+local @dirs = split(/\t/, $tmpl->{'web'});
+local $cgibase;
+foreach my $l (@dirs) {
+	if ($l =~ /^\s*ScriptAlias\s+\/cgi-bin\/?\s+(\/[^\$]*)/) {
+		$cgibase = $1;
+		}
+	}
+$cgibase =~ s/\/$//;
+
+# Make sure home base is under base directory, or template CGI directory is
 if ($tmpl->{'web_suexec'} && $suhome &&
     !&same_file($suhome, $home_base) &&
-    !&is_under_directory($suhome, $home_base)) {
+    !&is_under_directory($suhome, $home_base) &&
+    (!$cgibase || !&is_under_directory($suhome, $cgibase))) {
 	return &text('check_ewebsuexechome',
 		     "<tt>$home_base</tt>", "<tt>$suhome</tt>");
 	}
