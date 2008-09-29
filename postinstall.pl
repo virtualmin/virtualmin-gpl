@@ -312,6 +312,14 @@ foreach my $m ("mysql", "postgresql", "ldap-client", "ldap-server",
 # Create API helper script /usr/bin/virtualmin
 &create_api_helper_command();
 
+# If resource limits are supported, make sure the Apache user isn't limited
+if (defined(&supports_resource_limits) &&
+    &supports_resource_limits()) {
+	&obtain_lock_unix();
+	&setup_apache_resource_unlimited();
+	&release_lock_unix();
+	}
+
 # Record the install time for this version
 local %itimes;
 &read_file($install_times_file, \%itimes);
