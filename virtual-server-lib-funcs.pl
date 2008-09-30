@@ -72,7 +72,7 @@ sub list_visible_domains
 return grep { &can_edit_domain($_) } &list_domains();
 }
 
-# sort_indent_domains()
+# sort_indent_domains(&domains)
 # Returns a list of all domains sorted according to the module config setting.
 # Those that should be indented have the 'indent' field set to some number.
 sub sort_indent_domains
@@ -110,6 +110,14 @@ if ($sortfield eq 'user' || $sortfield eq 'sub') {
 				$ad->{'indent'} = 2;
 				push(@catdoms, $ad);
 				}
+			}
+		}
+	# Any domains that we missed due to their parent not being included
+	# should appear at the top level
+	my %incatdoms = map { $_->{'id'}, $_ } @catdoms;
+	foreach my $d (@doms) {
+		if (!$incatdoms{$d->{'id'}}) {
+			push(@catdoms, $d);
 			}
 		}
 	@doms = @catdoms;
