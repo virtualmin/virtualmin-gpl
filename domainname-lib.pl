@@ -73,6 +73,8 @@ return $spacer.$name;
 sub parse_domain_name
 {
 local $name = &entities_to_ascii($_[0]);
+$name =~ s/^\s+//;	# Strip leading and trailing spaces from user input
+$name =~ s/\s+$//;
 if ($name !~ /^[a-z0-9\.\-\_]+$/i) {
 	# Convert unicode to xn-- format
 	eval "use IDNA::Punycode";
