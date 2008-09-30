@@ -990,3 +990,4 @@ Updated the Horde installer to version 3.3, and all related applications to thei
 Added the --source parameter to list-available-scripts.pl, and include script source in full output.
 Ensure that resource limits (CPU, RAM and procesess) are never set for the Apache user, even when it is a member of a domain's group for which limits are set.
 Plugins can now define additional inputs to appear on the Create Virtual Server page and accepted by create-domain.pl, for options specific to the plugin's feature.
+The master administrator can now grant himself access to scripts disabled for regular users, with a new form on the Script Installers page.

@@ -31,6 +31,7 @@ if (!$module_name) {
 	}
 
 # Parse command-line args
+@types = ( );
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--multiline") {
@@ -39,13 +40,17 @@ while(@ARGV > 0) {
 	elsif ($a eq "--source") {
 		$source = shift(@ARGV);
 		}
+	elsif ($a eq "--type") {
+		push(@types, shift(@ARGV));
+		}
 	else {
 		&usage();
 		}
 	}
 
 # Get and filter scripts
-@scripts = map { &get_script($_) } &list_scripts();
+@types = &list_scripts() if (!@types);
+@scripts = map { &get_script($_) } @types;
 if ($source) {
 	@scripts = grep { $_->{'source'} eq $source } @scripts;
 	}
@@ -59,8 +64,11 @@ if ($multi) {
 		if ($script->{'category'}) {
 			print "    Category: $script->{'category'}\n";
 			}
-		print "    Versions: ",join(" ", @{$script->{'versions'}}),"\n";
 		print "    Available: ",$script->{'avail'} ? "Yes" : "No","\n";
+		print "    Versions: ",join(" ", @{$script->{'versions'}}),"\n";
+		print "    Available versions: ",
+			join(" ", grep { &can_script_version($script, $_) }
+				       @{$script->{'versions'}}),"\n";
 		print "    Description: $script->{'longdesc'}\n";
 		print "    Uses: ",join(" ", @{$script->{'uses'}}),"\n";
 		if ($overall->{$script->{'name'}}) {
@@ -94,6 +102,7 @@ print "Lists the third-party scripts available for installation.\n";
 print "\n";
 print "usage: list-available-scripts.pl [--multiline]\n";
 print "                                 [--source core|custom|plugin]\n";
+print "                                 [--type name]*\n";
 exit(1);
 }
 

@@ -31,7 +31,10 @@ sub list_available_scripts
 local %unavail;
 &read_file_cached($scripts_unavail_file, \%unavail);
 local @rv = &list_scripts();
-return grep { !$unavail{$_} } @rv;
+if (!&master_admin() || !$unavail{'allowmaster'}) {
+	@rv = grep { !$unavail{$_} } @rv;
+	}
+return @rv;
 }
 
 # get_script(name)
@@ -96,6 +99,10 @@ local $disabled;
 if (defined(&$disfunc)) {
 	$disabled = &$disfunc();
 	}
+local $allowmaster;
+if (&master_admin()) {
+	($allowmaster) = &get_script_master_permissions();
+	}
 local $rv = { 'name' => $name,
 	      'desc' => &$dfunc(),
 	      'longdesc' => defined(&$lfunc) ? &$lfunc() : undef,
@@ -130,7 +137,7 @@ local $rv = { 'name' => $name,
 	      'check_latest_func' => "script_${name}_check_latest",
 	      'commands_func' => "script_${name}_commands",
 	      'passmode_func' => "script_${name}_passmode",
-	      'avail' => !$unavail{$name} && !$disabled,
+	      'avail' => !$unavail{$name} && !$disabled || $allowmaster,
 	      'enabled' => !$disabled,
 	      'minversion' => $unavail{$name."_minversion"},
 	    };
@@ -1348,10 +1355,17 @@ foreach my $alldata (@data) {
 return @vers;
 }
 
+# can_script_version(&script, version-number)
+# Returns 1 if the current user can install some version of a script
 sub can_script_version
 {
 local ($script, $ver) = @_;
-if (!$script->{'minversion'}) {
+local ($allowmaster, $allowvers) = &get_script_master_permissions();
+if (&master_admin() && $allowvers) {
+	# No limits for master admin
+	return 1;
+	}
+elsif (!$script->{'minversion'}) {
 	return 1;	# No restrictions
 	}
 elsif ($script->{'minversion'} =~ /^<=(.*)$/) {
@@ -1360,7 +1374,7 @@ elsif ($script->{'minversion'} =~ /^<=(.*)$/) {
 elsif ($script->{'minversion'} =~ /^=(.*)$/) {
 	return $ver eq $1;				# At exact version
 	}
-elsif ($script->{'minversion'} =~ /^<=(.*)$/ ||
+elsif ($script->{'minversion'} =~ /^>=(.*)$/ ||
        $script->{'minversion'} =~ /^(.*)$/) {
 	return &compare_versions($ver, "$1") >= 0;	# At or above
 	}
@@ -1983,6 +1997,29 @@ if (defined(&{$script->{'dbs_func'}})) {
 push(@rv, map { &text('scripts_icommand', $_) }
       &check_script_required_commands($d, $script, $ver, $sinfo->{'opts'}));
 return wantarray ? @rv : join(", ", @rv);
+}
+
+# get_script_master_permissions()
+# Returns flags indicating if the master admin is allowed to use
+# disabled scripts or versions
+sub get_script_master_permissions
+{
+local %unavail;
+&read_file_cached($scripts_unavail_file, \%unavail);
+return ($unavail{'allowmaster'}, $unavail{'allowvers'});
+}
+
+# save_script_master_permissions(allow-disabled, allow-versions)
+# Updates flags indicating what the master is allow to do for disabled scripts
+sub save_script_master_permissions
+{
+local ($allow, $allowvers) = @_;
+local %unavail;
+&lock_file($scripts_unavail_file);
+&read_file_cached($scripts_unavail_file, \%unavail);
+($unavail{'allowmaster'}, $unavail{'allowvers'}) = ($allow, $allowvers);
+&write_file($scripts_unavail_file, \%unavail);
+&unlock_file($scripts_unavail_file);
 }
 
 1;

@@ -1,0 +1,4 @@
+desc=Master administrator and disabled scripts
+html=Whether or not the master administrator (typically <tt>root</tt>) can install disabled scripts or use disabled versions can now be configured on the Script Installers page.
+master=1
+link=edit_newscripts.cgi?mode=enable#allow

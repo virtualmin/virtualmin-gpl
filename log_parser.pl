@@ -55,7 +55,7 @@ elsif ($type eq "script") {
 		     "<tt>$p->{'dom'}</tt>");
 	}
 elsif ($type eq "scripts" && ($action eq "upgrade" || $action eq "uninstall" ||
-			      $action eq "warn")) {
+			      $action eq "warn" || $action eq "allow")) {
 	return &text('log_'.$action.'_scripts', $object);
 	}
 elsif ($type eq "scripts") {

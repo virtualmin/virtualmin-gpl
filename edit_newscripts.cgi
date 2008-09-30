@@ -36,6 +36,7 @@ print &ui_tabs_end_tab();
 print &ui_tabs_start_tab("mode", "enable");
 print "$text{'newscripts_desc2'}\n";
 print "$text{'newscripts_desc2b'}<p>\n";
+print "$text{'newscripts_desc2c'}<p>\n";
 
 # Build data for table
 foreach $s (&list_scripts()) {
@@ -53,20 +54,19 @@ foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 		$lastcat = $cat;
 		}
 	@v = sort { &compare_versions($b, $a) } @{$script->{'versions'}};
-	@v = map { $script->{'vdesc'}->{$_} || $_ } @v;
+	@v = map { [ $_, $script->{'vdesc'}->{$_} || $_ ] } @v;
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $script->{'name'},
 		  'checked' => $script->{'avail'} },
 		$script->{'desc'},
 		$script->{'longdesc'},
-		$script->{'dir'} eq "$module_root_directory/scripts" ?
-			$text{'newscripts_inc'} : $text{'newscripts_third'},
+		$text{'newscripts_'.$script->{'source'}},
 		@v > 1 ? &ui_select($script->{'name'}."_minversion",
 				$script->{'minversion'},
 				[ [ undef, $text{'newscripts_any'} ],
-				  (map { [ "$_", ">= $_" ] } @v),
-				  (map { [ "<=$_", "<= $_" ] } @v) ],
+				  (map { [ $_->[0], ">= $_->[1]" ] } @v),
+				  (map { [ "<=$_->[0]", "<= $_->[1]" ] } @v) ],
 				1, 0, 1) : "",
 		]);
 	}
@@ -82,6 +82,24 @@ print &ui_form_columns_table(
 	  $text{'newscripts_src'}, $text{'newscripts_minver'} ],
 	100,
 	\@table);
+
+# Show form to allow master admin
+print &ui_hr();
+print "<a name=allow>\n";
+($allowmaster, $allowvers) = &get_script_master_permissions();
+print &ui_form_start("save_scriptallow.cgi");
+print &ui_table_start($text{'newscripts_allowheader'}, undef, 2);
+
+# Can install any script?
+print &ui_table_row($text{'newscripts_allowmaster'},
+	&ui_yesno_radio("allowmaster", $allowmaster));
+
+# Can install any version?
+print &ui_table_row($text{'newscripts_allowvers'},
+	&ui_yesno_radio("allowvers", $allowvers));
+
+print &ui_table_end();
+print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
 print &ui_tabs_end_tab();
 
