@@ -302,6 +302,7 @@ form_style=Style for initial content
 form_showstyle=(Larger preview..)
 form_limits=Quotas and limits
 form_proxysect=IP address and forwarding
+form_inputssect=Additional feature options
 
 setup_err=Failed to create virtual server
 setup_evital=Critical feature $1 was not properly created - Virtual server creation halted.

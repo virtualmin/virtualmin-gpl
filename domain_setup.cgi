@@ -328,6 +328,14 @@ foreach my $f (@features, @feature_plugins) {
 $dom{'home'} = &server_home_directory(\%dom, $parentdom);
 &complete_domain(\%dom);
 
+# Parse extra feature inputs
+foreach $f (@feature_plugins) {
+	if ($dom{$f}) {
+		$err = &plugin_call($f, "feature_inputs_parse", \%dom, \%in);
+		&error($err) if ($err);
+		}
+	}
+
 # Check for various clashes
 $derr = &virtual_server_depends(\%dom);
 &error($derr) if ($derr);

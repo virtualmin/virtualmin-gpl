@@ -63,6 +63,17 @@ $second_print = \&second_text_print;
 $indent_print = \&indent_text_print;
 $outdent_print = \&outdent_text_print;
 
+# Build args used by plugins
+%plugin_args = ( );
+foreach $f (@feature_plugins) {
+	if (&plugin_defined($f, "feature_args")) {
+		foreach $a (&plugin_call($f, "feature_args")) {
+			$a->{'feature'} = $f;
+			$plugin_args{$a->{'name'}} = $a;
+			}
+		}
+	}
+
 # Parse command-line args
 $name = 1;
 $virt = 0;
@@ -227,6 +238,15 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--post-command") {
 		$postcommand = shift(@ARGV);
+		}
+	elsif ($a =~ /^\-\-(.*)$/ && $plugin_args{$1}) {
+		# Plugin-specific arg
+		if ($plugin_args{$1}->{'novalue'}) {
+			$plugin_values{$1} = "";
+			}
+		else {
+			$plugin_values{$1} = shift(@ARGV);
+			}
 		}
 	else {
 		&usage("Unknown option $a");
@@ -552,6 +572,15 @@ if (defined($postgrespass) && $config{'postgres'}) {
 	}
 &complete_domain(\%dom);
 
+# Set plugin-defined command line args
+foreach $f (@feature_plugins) {
+	if ($dom{$f}) {
+		$err = &plugin_call($f, "feature_args_parse",
+				    \%dom, \%plugin_values);
+		&usage($err) if ($err);
+		}
+	}
+
 # Check for various clashes
 $derr = &virtual_server_depends(\%dom);
 &usage($derr) if ($derr);
@@ -635,6 +664,17 @@ if ($config{'mysql'}) {
 	}
 if ($config{'postgres'}) {
 	print "                        [--postgres-pass password]\n";
+	}
+foreach $f (@feature_plugins) {
+	if (&plugin_defined($f, "feature_args")) {
+		foreach $a (&plugin_call($f, "feature_args")) {
+			print "                        [--$a->{'name'}";
+			if (!$a->{'novalue'}) {
+				print " $a->{'value'}";
+				}
+			print "]\n";
+			}
+		}
 	}
 exit(1);
 }

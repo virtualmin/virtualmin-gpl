@@ -443,6 +443,7 @@ foreach $f ($aliasdom ? @opt_alias_features :
 
 # Show checkboxes for plugins
 %inactive = map { $_, 1 } split(/\s+/, $config{'plugins_inactive'});
+@input_plugins = ( );
 foreach $f (@feature_plugins) {
 	next if (!&plugin_call($f, "feature_suitable",
 				$parentdom, $aliasdom, $subdom));
@@ -453,16 +454,29 @@ foreach $f (@feature_plugins) {
 	$hlink = &plugin_call($f, "feature_hlink");
 	$label = &hlink($label, $hlink, $f) if ($hlink);
 	push(@grid, &ui_checkbox($f, 1, "", !$inactive{$f})." ".$label);
+	if (&plugin_call($f, "feature_inputs_show", undef)) {
+		push(@input_plugins, $f);
+		}
 	}
 $ftable = &ui_grid_table(\@grid, 2, 100,
 	[ "width=30% align=left", "width=70% align=left" ]);
 print &ui_table_row(undef, $ftable, 4);
 print &ui_hidden_table_end("feature");
 
+# Show section for extra plugin options
+if (@input_plugins) {
+	print &ui_hidden_table_start($text{'form_inputssect'}, "width=100%", 2,
+				     "inputs", 0, [ "width=30%" ]);
+	foreach $f (@input_plugins) {
+		print &plugin_call($f, "feature_inputs", undef);
+		}
+	print &ui_hidden_table_end("inputs");
+	}
+
 # Start section for proxy and IP
 if (!$aliasdom) {
 	print &ui_hidden_table_start($text{'form_proxysect'}, "width=100%", 2,
-				     "proxy", 0);
+				     "proxy", 0, [ "width=30%" ]);
 	}
 
 # Show inputs for setting up a proxy-only virtual server

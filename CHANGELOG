@@ -989,3 +989,4 @@ Updated the TWiki script installer to version 4.2.3, TikiWiki to 2.1, Xoops to 2
 Updated the Horde installer to version 3.3, and all related applications to their corresponding latest versions.
 Added the --source parameter to list-available-scripts.pl, and include script source in full output.
 Ensure that resource limits (CPU, RAM and procesess) are never set for the Apache user, even when it is a member of a domain's group for which limits are set.
+Plugins can now define additional inputs to appear on the Create Virtual Server page and accepted by create-domain.pl, for options specific to the plugin's feature.
