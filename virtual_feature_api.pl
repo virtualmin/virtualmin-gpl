@@ -91,6 +91,51 @@ sub feature_enable
 {
 }
 
+# feature_inputs_show([&domain])
+# Returns 1 if feature inputs should be shown for this domain, this may be
+# undef if it doesn't exist yet.
+# (optional)
+sub feature_inputs_show
+{
+}
+
+# feature_inputs([&domain])
+# Returns HTML for use in a ui_table block for additional options that are
+# available when adding or editing this feature in a domain. The domain object
+# may be undef if it doesn't exist yet.
+# (optional)
+sub feature_inputs
+{
+}
+
+# feature_inputs_parse(&domain, &in)
+# Updates a domain object based on form parameters from feature_inputs. If any
+# errors are detected, returns an error message. If all OK, returns undef.
+# These values can then be used in feature_setup
+# (optional)
+sub feature_inputs_parse
+{
+}
+
+# feature_args(&domain)
+# Returns a list of hash refs for extra command-line arguments for this feature,
+# for use in create-domain.pl. Each must contain the keys 'name' (the full arg
+# name), 'desc' (a description of it), 'value' (a short name for the value)
+# and 'opt' (if not manadatory).
+# (optional)
+sub feature_args
+{
+}
+
+# feature_args_parse(&domain, &args)
+# Updates a domain object based on argument values as defined by feature_args.
+# Should set the same fields in the domain object as feature_inputs_parse.
+# If all OK, returns undef.
+# (optional)
+sub feature_args_parse
+{
+}
+
 # feature_bandwidth(&domain, start, &bw-hash)
 # Searches through log files for records after some date, and updates the
 # day counters in the given hash

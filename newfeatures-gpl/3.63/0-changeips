@@ -1,0 +1,4 @@
+desc=Change IP Addresses page
+html=Ported the Change IP Addresses page from Virtualmin GPL, to allow updating multiple domains at the same time.
+master=1
+link=edit_newips.cgi
