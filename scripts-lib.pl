@@ -444,7 +444,8 @@ if ($newsuffix) {
 		}
 	}
 return &ui_select($name, $value,
-	[ (map { [ $_->{'type'}."_".$_->{'name'},
+	[ sort { $a->[0] cmp $b->[0] }
+	  (map { [ $_->{'type'}."_".$_->{'name'},
 		   $_->{'name'}." (".$_->{'desc'}.")" ] } @$dbs),
 	  $newdbname ? ( [ "*".$newdbtype."_".$newdbname,
 			   &text('scripts_newdb', $newdbname, $newdbdesc) ] )
