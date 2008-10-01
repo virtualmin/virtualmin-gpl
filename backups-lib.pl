@@ -289,7 +289,7 @@ if (!$homefmt) {
 	# Create a temp dir for the backup, to be tarred up later
 	$backupdir = &transname();
 	if (!-d $backupdir) {
-		&make_dir($backupdir, 0755);
+		&make_dir($backupdir, 0700);
 		}
 	}
 else {
@@ -514,6 +514,7 @@ if ($ok) {
 			# Work out dest file and compression command
 			local $destfile = "$d->{'dom'}.tar";
 			local $comp = "cat";
+			local $qf = quotemeta("$dest/$destfile");
 			if ($config{'compression'} == 0) {
 				$destfile .= ".gz";
 				$comp = "gzip -c";
@@ -522,12 +523,21 @@ if ($ok) {
 				$destfile .= ".bz2";
 				$comp = "bzip2 -c";
 				}
-			local $writer = "cat >$dest/$destfile";
+			local $writer = "cat >$qf";
 			if ($asd) {
 				$writer = &command_as_user(
 					$asd->{'user'}, 0, $writer);
 				}
 
+			# Create the dest file with strict permissions
+			local $toucher = "touch $qf && chmod 700 $qf";
+			if ($asd) {
+				$toucher = &command_as_user(
+					$asd->{'user'}, 0, $toucher);
+				}
+			&execute_command($toucher);
+
+			# Start the tar command
 			&execute_command("cd $backupdir && ($tar cf - $d->{'dom'}_* | $comp) 2>&1 | $writer", undef, \$out);
 			push(@destfiles, $destfile);
 			$destfiles_map{$destfile} = $d;
@@ -550,14 +560,17 @@ if ($ok) {
 			$comp = "bzip2 -c";
 			}
 		local $writer = "cat >$dest";
+		&open_tempfile(DEST, ">$dest", 0, 1);
+		&close_tempfile(DEST);
 		if ($asd) {
 			$writer = &command_as_user(
 					$asd->{'user'}, 0, $writer);
-			&open_tempfile(DEST, ">$dest", 0, 1);
-			&close_tempfile(DEST);
 			&set_ownership_permissions(
 			  $doms[0]->{'uid'}, $doms[0]->{'ugid'}, undef, $dest);
 		 	}
+		&set_ownership_permissions(undef, undef, 0700, $dest);
+
+		# Start the tar command
 		&$first_print($text{'backup_final'});
 		&execute_command("cd $backupdir && ($tar cf - . | $comp) 2>&1 | $writer", undef, \$out);
 		if ($?) {

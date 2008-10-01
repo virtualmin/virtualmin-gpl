@@ -65,6 +65,7 @@ $indent_print = \&indent_text_print;
 $outdent_print = \&outdent_text_print;
 
 # Parse command-line args
+$asowner = 0;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--dest") {
@@ -131,6 +132,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mailfiles") {
 		# Convenience flag for --option mail mailfiles 1
 		$opts{'mail'}->{'mailfiles'} = 1;
+		}
+	elsif ($a eq "--as-owner") {
+		# Run as domain owner
+		$asowner = 1;
 		}
 	elsif ($a eq "--virtualmin") {
 		$v = shift(@ARGV);
@@ -214,7 +219,7 @@ if ($test) {
 			       \@vbs,
 			       $mkdir,
 			       $onebyone,
-			       0,
+			       $asowner,
 			       undef,
 			       $increment);
 if ($ok) {
@@ -249,6 +254,7 @@ if (&has_incremental_tar()) {
 print "                        [--all-virtualmin] | [--virtualmin config]\n";
 print "                        [--option feature name value]\n";
 print "                        [--mailfiles]\n";
+print "                        [--as-owner]\n";
 print "\n";
 print "Multiple domains may be specified with multiple --domain parameters.\n";
 print "Features must be specified using their short names, like web and dns.\n";
