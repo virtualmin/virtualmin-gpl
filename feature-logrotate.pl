@@ -96,10 +96,16 @@ local $oldalog = &get_old_apache_log($alog, $_[0], $_[1]);
 local $elog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}, 1);
 local $oldelog = &get_old_apache_log($elog, $_[0], $_[1]);
 
+# Stop here if nothing to do
+return if ($alog eq $oldalog && $elog eq $oldelog &&
+	   $_[0]->{'user'} eq $_[1]->{'user'} &&
+	   $_[0]->{'group'} eq $_[1]->{'group'});
+&require_logrotate();
+&obtain_lock_logrotate($_[0]);
+
+# Change log paths if needed
 if ($alog ne $oldalog || $elog ne $oldelog) {
-	&require_logrotate();
 	&$first_print($text{'save_logrotate'});
-	&obtain_lock_logrotate($_[0]);
 
 	# Fix up the logrotate section for the old file
 	local $lconf = &get_logrotate_section($oldalog);
@@ -116,8 +122,36 @@ if ($alog ne $oldalog || $elog ne $oldelog) {
 	else {
 		&$second_print($text{'setup_nologrotate'});
 		}
-	&release_lock_logrotate($_[0]);
 	}
+
+# Change references to user or group
+if ($_[0]->{'user'} ne $_[1]->{'user'} ||
+    $_[0]->{'group'} ne $_[1]->{'group'}) {
+	&$first_print($text{'save_logrotateuser'});
+	local $lconf = &get_logrotate_section($alog);
+	if ($lconf) {
+		local $create = &logrotate::find_value(
+			"create", $lconf->{'members'});
+		if ($create =~ /^(\d+)\s+(\S+)\s+(\S+)$/) {
+			local ($p, $u, $g) = ($1, $2, $3);
+			$u = $_[0]->{'user'} if ($u eq $_[1]->{'user'});
+			$g = $_[0]->{'group'} if ($g eq $_[1]->{'group'});
+			&logrotate::save_directive($lconf, "create",
+				{ 'name' => 'create',
+				  'value' => join(" ", $p, $u, $g) }, "\t");
+			&flush_file_lines($lconf->{'file'});
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			&$second_print($text{'save_nologrotatecreate'});
+			}
+		}
+	else {
+		&$second_print($text{'setup_nologrotate'});
+		}
+	}
+
+&release_lock_logrotate($_[0]);
 }
 
 # delete_logrotate(&domain)
