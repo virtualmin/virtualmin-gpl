@@ -26,28 +26,39 @@ foreach my $m (@s3_perl_modules) {
 	}
 }
 
-# init_s3_bucket(access-key, secret-key, bucket)
+# init_s3_bucket(access-key, secret-key, bucket, attempts)
 # Connect to S3 and create a bucket (if needed). Returns undef on success or
 # an error message on failure.
 sub init_s3_bucket
 {
 &require_s3();
-local ($akey, $skey, $bucket) = @_;
-local $conn = S3::AWSAuthConnection->new($akey, $skey);
-return $text{'s3_econn'} if (!$conn);
-local $response = $conn->list_all_my_buckets();
-if ($response->http_response->code != 200) {
-	return &text('s3_elist', &extract_s3_message($response));
-	}
-local ($got) = grep { $_->{'Name'} eq $bucket } @{$response->entries};
-if (!$got) {
-	# Create the bucket
-	$response = $conn->create_bucket($bucket);
+local ($akey, $skey, $bucket, $tries) = @_;
+$tries ||= 1;
+my $err;
+for(my $i=0; $i<$tries; $i++) {
+	$err = undef;
+	local $conn = S3::AWSAuthConnection->new($akey, $skey);
+	return $text{'s3_econn'} if (!$conn);
+	local $response = $conn->list_all_my_buckets();
 	if ($response->http_response->code != 200) {
-		return &text('s3_ecreate', &extract_s3_message($response));
+		$err = &text('s3_elist', &extract_s3_message($response));
+		sleep(10);
+		next;
 		}
+	local ($got) = grep { $_->{'Name'} eq $bucket } @{$response->entries};
+	if (!$got) {
+		# Create the bucket
+		$response = $conn->create_bucket($bucket);
+		if ($response->http_response->code != 200) {
+			$err = &text('s3_ecreate',
+				     &extract_s3_message($response));
+			sleep(10);
+			next;
+			}
+		}
+	last;
 	}
-return undef;
+return $err;
 }
 
 sub extract_s3_message

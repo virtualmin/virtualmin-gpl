@@ -250,7 +250,7 @@ elsif ($mode == 3) {
 		&$first_print($cerr);
 		return (0, 0);
 		}
-	local $err = &init_s3_bucket($user, $pass, $server);
+	local $err = &init_s3_bucket($user, $pass, $server, $s3_upload_tries);
 	if ($err) {
 		&$first_print($err);
 		return (0, 0);
