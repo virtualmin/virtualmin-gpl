@@ -373,7 +373,8 @@ if (&init::action_status("clamdscan-clamd")) {
 elsif (&init::action_status("clamav-daemon")) {
 	return 0;	# Ubuntu
 	}
-elsif (&init::action_status("clamd-wrapper")) {
+elsif (&init::action_status("clamd-wrapper") ||
+       &init::action_status("clamd-virtualmin")) {
 	return 0;	# Redhat, not setup yet
 	}
 elsif (-r "/opt/csw/etc/clamd.conf.CSW") {
@@ -476,14 +477,12 @@ elsif (&init::action_status("clamd-wrapper")) {
 			}
 		}
 
-	# Fix the init wrapper script
-	local $ifile = &init::action_filename("clamd-wrapper");
+	# Copy and fix the init wrapper script
+	local $srcifile = &init::action_filename("clamd-wrapper");
+	local $ifile = &init::action_filename("clamd-virtualmin");
 	&$first_print(&text('clamd_initscript', "<tt>$ifile</tt>"));
-	local $ilink = readlink($ifile);
-	if ($ilink) {
-		# Init script is a link .. copy it first
-		&unlink_file($ifile);
-		&copy_source_dest($ilink, $ifile);
+	if (-r $srcifile && !-r $ifile) {
+		&copy_source_dest($srcifile, $ifile);
 		}
 	local $lref = &read_file_lines($ifile);
 	local ($already) = grep { /^CLAMD_SERVICE=/ } @$lref;
@@ -493,7 +492,16 @@ elsif (&init::action_status("clamd-wrapper")) {
 	else {
 		&lock_file($ifile);
 		for(my $i=0; $i<@$lref; $i++) {
-			if ($lref->[$i] !~ /^#/) {
+			if ($lref->[$i] =~ /^\#\s*Xchkconfig:\s+\-\s+(\d+)\s+(\d+)/) {
+				# Fix chkconfig line
+				$lref->[$i] = "# chkconfig: 2345 $1 $2";
+				}
+			elsif ($lref->[$i] =~ /^\#\s*Xdescription:(.*)/) {
+				# Fix description line
+				$lref->[$i] = "# description:$1";
+				}
+			elsif ($lref->[$i] !~ /^#/) {
+				# Specify service name at top of file
 				splice(@$lref, $i, 0, "CLAMD_SERVICE=$service");
 				last;
 				}
@@ -519,7 +527,8 @@ elsif (&init::action_status("clamd-wrapper")) {
 
 	# Start the daemon, and enable at boot
 	&$first_print(&text('clamd_start'));
-	&init::enable_at_boot("clamd-wrapper");
+	&init::enable_at_boot("clamd-virtualmin");
+	&init::disable_at_boot("clamd-wrapper");
 	local $out = &backquote_logged("$ifile start 2>&1");
 	if ($? || $out =~ /failed|error/i) {
 		&$second_print(&text('clamd_estart',
@@ -601,8 +610,8 @@ return 1;
 sub disable_clamd
 {
 &foreign_require("init", "init-lib.pl");
-foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-wrapper",
-		  "clamd-csw") {
+foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-virtualmin",
+		  "clamd-wrapper", "clamd-csw") {
 	if (&init::action_status($init)) {
 		&$first_print(&text('clamd_stop'));
 		local $ifile = &init::action_filename($init);
@@ -663,8 +672,8 @@ return $rv ? undef : $text{'clamd_estartmsg'};
 sub stop_service_virus
 {
 &foreign_require("init", "init-lib.pl");
-foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-wrapper",
-		  "clamd-csw") {
+foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-virtualmin",
+		  "clamd-wrapper", "clamd-csw") {
 	if (&init::action_status($init)) {
 		local $ifile = &init::action_filename($init);
 		local $out = &backquote_logged("$ifile stop 2>&1");
