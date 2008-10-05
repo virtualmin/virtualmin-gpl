@@ -372,7 +372,9 @@ else {
 # Returns a new unique domain ID
 sub domain_id
 {
-return time().$$;
+local $rv = time().$$.$main::domain_id_count;
+$main::domain_id_count++;
+return $rv;
 }
 
 # save_domain(&domain, [creating])
@@ -442,6 +444,9 @@ if (-r $script_warnings_file) {
 		}
 	&write_file($script_warnings_file, \%warnsent);
 	}
+
+# Delete script install logs
+&unlink_file("$script_log_directory/$id");
 
 delete($main::get_domain_cache{$_[0]->{'id'}});
 &build_domain_maps();

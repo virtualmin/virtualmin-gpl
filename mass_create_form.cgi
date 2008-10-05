@@ -80,6 +80,8 @@ foreach $f (@feature_plugins) {
 	next if (!&can_use_feature($f));
 
 	$label = &plugin_call($f, "feature_label", 0);
+	$hlink = &plugin_call($f, "feature_hlink");
+	$label = &hlink($label, $hlink, $f) if ($hlink);
 	push(@grid, &ui_checkbox($f, 1, "", !$inactive{$f})." ".
 		    "<b>$label</b>");
 	}

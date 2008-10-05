@@ -184,7 +184,8 @@ return @rv;
 sub add_domain_script
 {
 local ($d, $name, $version, $opts, $desc, $url, $user, $pass, $partial) = @_;
-local %info = ( 'id' => time().$$,
+$main::add_domain_script_count++;
+local %info = ( 'id' => time().$$.$main::add_domain_script_count,
 		'name' => $name,
 		'version' => $version,
 		'desc' => $desc,
