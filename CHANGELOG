@@ -985,7 +985,7 @@ Added the notify-domains.pl command line script, for sending email to some or al
 Added a Module Config option to have only one spamassassin process run at a time.
 S3 backups to date-based filenames are now supported, and can be properly purged.
 ---- Changes since 3.62 ----
-Updated the TWiki script installer to version 4.2.3, TikiWiki to 2.1, Xoops to 2.3.0, Squirrelmail to 1.4.16, WebCalendar to 1.2.0, WordPress MU to 2.6.2, Magento to 1.1.6, Gallery to 2.3-rc-2, MediaWiki to 1.13.2, ZenPhoto to 1.2.1, and phpMyAdmin to 2.11.9.2.
+Updated the TWiki script installer to version 4.2.3, TikiWiki to 2.1, Xoops to 2.3.0, Squirrelmail to 1.4.16, WebCalendar to 1.2.0, WordPress MU to 2.6.2, Magento to 1.1.6, Gallery to 2.3-rc-2, MediaWiki to 1.13.2, ZenPhoto to 1.2.1, SugarCRM to 5.1.0a, and phpMyAdmin to 2.11.9.2.
 Updated the Horde installer to version 3.3, and all related applications to their corresponding latest versions.
 Added the --source parameter to list-available-scripts.pl, and include script source in full output.
 Ensure that resource limits (CPU, RAM and procesess) are never set for the Apache user, even when it is a member of a domain's group for which limits are set.
