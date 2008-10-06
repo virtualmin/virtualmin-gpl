@@ -16,6 +16,9 @@ foreach $tn (@d) {
 	($t, $n) = split(/_/, $tn, 2);
 	($db) = grep { $_->{'type'} eq $t && $_->{'name'} eq $n } @dbs;
 	$db || &error(&text('ddatabases_edb', $t, $n));
+	if ($db->{'name'} eq $d->{'db'} && !&can_edit_database_name()) {
+		&error(&text('ddatabases_edbdef', $t, $n));
+		}
 	push(@deldbs, $db);
 	}
 

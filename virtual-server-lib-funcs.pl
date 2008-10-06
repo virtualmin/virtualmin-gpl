@@ -2268,8 +2268,13 @@ return &master_admin() || &reseller_admin() || $access{'edit_aliases'};
 # Returns 1 if the current user can edit databases
 sub can_edit_databases
 {
-return &master_admin() || &reseller_admin() ||
-       $access{'edit_dbs'} && !$access{'nodbname'};
+return &master_admin() || &reseller_admin() || $access{'edit_dbs'};
+}
+
+# Returns 1 if the current user can change this name of his default DB
+sub can_edit_database_name
+{
+return &master_admin() || &reseller_admin() || !$access{'nodbname'};
 }
 
 sub can_edit_admins

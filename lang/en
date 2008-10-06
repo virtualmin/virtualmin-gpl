@@ -2697,6 +2697,7 @@ database_ok=Delete Now
 database_charset=Character set for new database
 database_encoding=Encoding for new database
 database_opts=Additional options for $1
+database_edbdef=You are not allowed to delete the default database for a domain
 
 vfile_title=Edit Autoresponder File
 vfile_ecannot=You are not allowed to edit autoresponder files
@@ -3383,6 +3384,7 @@ newmxs_removing=Removing secondary domain on $1 ..
 
 ddatabases_title=Delete Databases
 ddatabases_edb=$1 database $2 no longer exists!
+ddatabases_edbdef=You are not allowed to remove the default $1 database $2
 ddatabases_rusure2=Are you sure you want to delete the $1 selected databases? $2 tables containing $3 of data will be deleted forever.
 ddatabases_rusure3=Are you sure you want to delete the $1 selected databases? They do not contain any tables.
 ddatabases_dbs=Databases to delete: $1

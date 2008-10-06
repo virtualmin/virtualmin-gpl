@@ -52,7 +52,6 @@ key_tmpl=Vzor pro cestu k privatnimu klici,3,Vychozi (<tt>~/ssl.key</tt>)
 cert_tmpl=Vzor pro cestu k certifikatu,3,Vychozi (<tt>~/ssl.cert</tt>)
 ca_tmpl=Vzor pro cestu k CA certifikatu,3,Vychozi (<tt>~/ssl.ca</tt>)
 line6=Rozsirene nastaveni,11
-defnodbname=Vychozi omezeni nazvu databaze,1,0-Lze,1-Nelze
 limitnoalias=Zahrnout alias servery do omezeni?,1,0-Ano,1-Ne
 line4=Akce po vytvoreni serveru a uzivatelu,11
 from_addr=Odesilatel pro emaily odeslane Virtualminem,3,Vychozi

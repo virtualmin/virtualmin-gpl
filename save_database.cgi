@@ -81,6 +81,10 @@ elsif ($in{'delete'} && !$in{'confirm'}) {
 	}
 elsif ($in{'delete'}) {
 	# Delete now
+	if ($in{'name'} eq $d->{'db'} && !&can_edit_database_name()) {
+		# Not allowed according to nodbname
+		&error($text{'database_edbdef'});
+		}
 	&ui_print_header(&domain_in($d), $text{'database_title3'}, "");
 	if (&indexof($in{'type'}, @database_plugins) >= 0) {
 		&plugin_call($in{'type'}, "database_delete", $d, $in{'name'});

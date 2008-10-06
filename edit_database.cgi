@@ -26,7 +26,7 @@ if (!$in{'new'}) {
 else {
 	print &ui_hidden("new", 1),"\n";
 	}
-print &ui_table_start($text{'database_header'}, undef, 2, [ "width=30%" ]);
+print &ui_table_start($text{'database_header'}, undef, 2);
 
 # Database name
 if ($in{'new'} && $tmpl->{'mysql_suffix'} ne "none") {
@@ -110,7 +110,9 @@ if ($in{'new'}) {
 	print &ui_form_end([ [ "create", $text{'create'} ] ]);
 	}
 else {
-	print &ui_form_end([ [ "delete", $text{'database_delete'} ],
+	print &ui_form_end([
+	     $db->{'name'} eq $d->{'db'} && !&can_edit_database_name() ?
+		( ) : ( [ "delete", $text{'database_delete'} ] ),
 	     &can_import_servers() ? ( [ "disc", $text{'database_disc'} ] )
 				   : ( ),
 	     $db->{'link'} ? ( [ "manage", $text{'database_manage'} ] )

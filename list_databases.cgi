@@ -63,9 +63,11 @@ foreach $db (sort { $a->{'name'} cmp $b->{'name'} } @dbs) {
 		$action = "<a href='$db->{'link'}'>".
 			  "$text{'databases_man'}</a>";
 		}
+	local $dis = $db->{'name'} eq $d->{'db'} && !&can_edit_database_name();
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
-		  'value' => $db->{'type'}.'_'.$db->{'name'} },
+		  'value' => $db->{'type'}.'_'.$db->{'name'},
+		  'disabled' => $dis },
 		"<a href='edit_database.cgi?dom=$in{'dom'}&name=$db->{'name'}&type=$db->{'type'}'>$db->{'name'}</a>",
 		$db->{'desc'},
 		$action

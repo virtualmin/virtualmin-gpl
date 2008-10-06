@@ -994,3 +994,4 @@ The master administrator can now grant himself access to scripts disabled for re
 When the user or group for a domain is changed, references to the old user or group in lgorotate.conf are updated to the new values.
 Re-try S3 bucket creation three times if at first it fails, to avoid temporary outages or network problems.
 When setting up clamd, the provided example init script is copied instead of bring modified, so that it can be safely replaced by RPM upgrades.
+Changed the meaning of the 'Can choose database names?' server owner restriction to just prevent modification of the domain's default database, instead of blocking all database management.
