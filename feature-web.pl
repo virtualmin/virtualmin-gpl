@@ -1815,7 +1815,7 @@ if ($config{'avail_syslog'} && &get_webmin_version() >= 1.305) {
 if ($config{'avail_phpini'}) {
 	# Links to edit PHP configs
 	if (defined(&get_domain_php_mode) &&
-	    &get_domain_php_mode($d) ne "mod_cgi") {
+	    &get_domain_php_mode($d) ne "mod_php") {
 		foreach my $ini (&list_domain_php_inis($d)) {
 			push(@rv, { 'mod' => 'phpini',
 				    'desc' => $ini->[0] ?
