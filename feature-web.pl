@@ -1794,7 +1794,7 @@ if ($virtualmin_pro) {
 		    'target' => '_new',
 		  });
 	}
-if ($config{'avail_syslog'} && &get_webmin_version() >= 1.305) {
+if ($config{'avail_syslog'}) {
 	# Links to logs
 	foreach my $log ([ 0, $text{'links_alog'} ],
 			 [ 1, $text{'links_elog'} ]) {

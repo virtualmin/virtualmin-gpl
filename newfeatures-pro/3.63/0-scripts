@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the TWiki script installer to version 4.2.3, TikiWiki to 2.1, Xoops to 2.3.0, Squirrelmail to 1.4.16, WebCalendar to 1.2.0, WordPress MU to 2.6.2, Gallery to 2.3-rc-2, MediaWiki to 1.13.2, ZenPhoto to 1.2.1, SugarCRM to 5.1.0a, OpenX to 2.6.2, osCommerce to 2.2rc2a, and phpMyAdmin to 2.11.9.2. Also, updated the Horde installer to version 3.3, Magento to 1.1.6, and all related applications to their corresponding latest versions.
+html=Updated the TWiki script installer to version 4.2.3, TikiWiki to 2.1, Xoops to 2.3.0, Squirrelmail to 1.4.16, WebCalendar to 1.2.0, WordPress MU to 2.6.2, Gallery to 2.3-rc-2, MediaWiki to 1.13.2, ZenPhoto to 1.2.1, SugarCRM to 5.1.0a, OpenX to 2.6.2, osCommerce to 2.2rc2a, Drupal to 5.11/6.5, and phpMyAdmin to 2.11.9.2. Also, updated the Horde installer to version 3.3, Magento to 1.1.6, and all related applications to their corresponding latest versions.
 master=1
 reseller=1
 domain=1
