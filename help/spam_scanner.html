@@ -9,6 +9,9 @@ The possible options for this field are :
 <dt><b>Server scanner (<tt>clamdscan</tt>)</b>
 <dd>This option can be selected if the <tt>clamd</tt> virus scanning server is running on your system. It is generally superior, as the ClamAV virus database is quite large, and the server only needs to load it into memory once.
 
+<dt><b>Remote server scanner (<tt>clamd-stream-client</tt>)</b>
+<dd>This option can be selected if the <tt>clamd</tt> virus scanning server is running on a remote system, and has been configured to accept network connections from other hosts. It is useful for offloading the task of scanning to a different system from the one that accepts email.
+
 <dt><b>Other program</b>
 <dd>This option lets you tell Virtualmin to use some completely different program, such as your own wrapper script for ClamAV.
 </dl>

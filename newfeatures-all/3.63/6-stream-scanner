@@ -1,0 +1,4 @@
+desc=Remote Clamd server
+html=The clamd-stream-client virus scanner can be selected to offload the actual scanning process to clamd on a remote system, if you have it installed.
+master=1
+link=edit_newsv.cgi

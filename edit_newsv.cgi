@@ -39,15 +39,22 @@ if ($config{'spam'}) {
 # Virus scanning program
 if ($config{'virus'}) {
 	# Virus scanner
-	$scanner = &get_global_virus_scanner();
+	($scanner, $vhost) = &get_global_virus_scanner();
 	$mode = $scanner eq 'clamscan' ? 0 :
-	        $scanner eq 'clamdscan' ? 1 : 2;
+	        $scanner eq 'clamdscan' ? 1 :
+	        $scanner eq 'clamd-stream-client' ? 3 : 2;
 	print &ui_table_row(&hlink($text{'spam_scanner'}, 'spam_scanner'),
 		&ui_radio('scanner', $mode,
 		  [ [ 0, $text{'spam_scanner0'}."<br>" ],
 		    [ 1, $text{'spam_scanner1'}."<br>" ],
+		    [ 3, $text{'spam_scanner3'}."<br>" ],
 		    [ 2, &text('spam_scanner2',
 		&ui_textbox("scanprog", $mode == 2 ? $scanner : "", 40)) ] ]));
+
+	# Clamd host
+	print &ui_table_row(
+		&hlink($text{'tmpl_virus_host'}, 'template_virus_host'),
+		&ui_opt_textbox("vhost", $vhost, 30, "<tt>localhost</tt>"));
 	}
 
 print &ui_table_end();

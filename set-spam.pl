@@ -41,6 +41,10 @@ if (!$module_name) {
 	}
 @OLDARGV = @ARGV;
 
+# Get current config
+($old_virus_scanner, $old_virus_host) = &get_global_virus_scanner();
+($old_spam_client, $old_spam_host, $old_spam_max) = &get_global_spam_client();
+
 $config{'spam'} || &usage("Spam filtering is not enabled for Virtualmin");
 &set_all_text_print();
 
@@ -62,11 +66,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-spamc-max") {
 		$spam_max = 0;
 		}
-	elsif ($a =~ /^--use-(clamscan|clamdscan)$/) {
+	elsif ($a =~ /^--use-(clamscan|clamdscan|clamd-stream-client)$/) {
 		$virus_scanner = $1;
 		}
 	elsif ($a eq "--use-virus") {
 		$virus_scanner = shift(@ARGV);
+		}
+	elsif ($a eq "--clamd-host") {
+		$virus_host = shift(@ARGV);
 		}
 	elsif ($a eq "--show") {
 		$show = 1;
@@ -83,22 +90,32 @@ while(@ARGV > 0) {
 	}
 
 # Validate inputs
-$virus_scanner || $spam_client || $show || defined($clamd) ||
+$virus_scanner || $virus_host || $spam_client || $show || defined($clamd) ||
 	&usage("Nothing to do");
 if ($spam_client) {
 	&has_command($spam_client) ||
 	    &usage("SpamAssassin client program $spam_client does not exist");
 	}
-if ($virus_scanner) {
-	local ($cmd, @args) = &split_quoted_string($virus_scanner);
+
+# Work out new commands
+$new_virus_scanner = defined($virus_scanner) ? $virus_scanner
+					     : $old_virus_scanner;
+$new_virus_host = defined($virus_host) ? $virus_host
+				       : $old_virus_host;
+
+# Make sure the new virus scanner works
+if ($virus_scanner || $virus_host) {
+	local ($cmd, @args) = &split_quoted_string($new_virus_scanner);
 	&has_command($cmd) ||
 		&usage("Virus scanning command $cmd does not exist");
-	if (!$clamd || $virus_scanner ne "clamdscan") {
+	if (!$clamd || $new_virus_scanner ne "clamdscan") {
 		# Only test if we aren't enabling clamd anyway
-		$err = &test_virus_scanner($virus_scanner);
+		$err = &test_virus_scanner($new_virus_scanner, $new_virus_host);
 		$err && &usage("Virus scanner failed : $err");
 		}
 	}
+
+# Make sure clamd can be enabled
 if (defined($clamd)) {
 	$cs = &check_clamd_status();
 	$cs >= 0 || &usage("Virtualmin does not know how to enable clamd on ".
@@ -109,8 +126,6 @@ if (defined($clamd)) {
 
 if ($spam_client || $spam_host || $spam_max) {
 	print "Updating all virtual servers with new SpamAssassin client ..\n";
-	($old_spam_client, $old_spam_host, $old_spam_max) =
-		&get_global_spam_client();
 	$spam_client = $old_spam_client if (!defined($spam_client));
 	$spam_host = $old_spam_host if (!defined($spam_host));
 	$spam_max = $old_spam_max if (!defined($spam_max));
@@ -135,7 +150,7 @@ if (defined($clamd)) {
 
 if ($virus_scanner) {
 	print "Updating all virtual servers with new virus scanner ..\n";
-	&save_global_virus_scanner($virus_scanner);
+	&save_global_virus_scanner($virus_scanner, $virus_host);
 	print ".. done\n\n";
 	}
 
@@ -171,7 +186,8 @@ print "usage: set-spam.pl [--use-spamassassin | --use-spamc]\n";
 print "                   [--spamc-host hostname | --no-spamc-host]\n";
 print "                   [--spamc-max bytes | --no-spamc-max]\n";
 print "                   [--use-clamscan | --use-clamdscan |\n";
-print "                    --use-virus command]\n";
+print "                    --use-clamd-stream-client | --use-virus command]\n";
+print "                   [--clamd-host hostname]\n";
 if (&check_clamd_status() >= 0) {
 	print "                   [--enable-clamd | --disable-clamd]\n";
 	}

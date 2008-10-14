@@ -255,11 +255,15 @@ local @clamrec = &find_clam_recipe(\@recipes);
 if (@clamrec) {
 	local $rv = $clamrec[0]->{'action'};
 	$rv =~ s/^\Q$clam_wrapper_cmd\E\s+//;
+	local @rvs = &split_quoted_string($rv);
 	if ($rv eq &has_command("clamscan")) {
 		$rv = "clamscan";
 		}
 	elsif ($rv eq &has_command("clamdscan")) {
 		$rv = "clamdscan";
+		}
+	elsif ($rvs[0] eq &has_command("clamd-stream-client")) {
+		$rv = "clamd-stream-client";
 		}
 	return $rv;
 	}
@@ -284,18 +288,25 @@ if (@clamrec) {
 	elsif ($prog eq "clamdscan") {
 		$prog = &has_command("clamdscan");
 		}
+	elsif ($prog eq "clamd-stream-client") {
+		$prog = &has_command("clamd-stream-client");
+		if ($config{'clamscan_host'}) {
+			$prog .= " -d ".$config{'clamscan_host'};
+			}
+		}
 	$clamrec[0]->{'action'} = "$clam_wrapper_cmd $prog";
 	&procmail::modify_recipe($clamrec[0]);
 	}
 }
 
 # get_global_virus_scanner()
-# Returns the virus scanning program used by all domains
+# Returns the virus scanning program used by all domains, and possibly also
+# the clamd hostname
 sub get_global_virus_scanner
 {
 if ($config{'clamscan_cmd_global'}) {
 	# We know it from the module config
-	return $config{'clamscan_cmd'};
+	return ($config{'clamscan_cmd'}, $config{'clamscan_host'});
 	}
 else {
 	# Find the most used one for all domains
@@ -313,13 +324,14 @@ else {
 	}
 }
 
-# save_global_virus_scanner(command)
+# save_global_virus_scanner(command, scanner-host)
 # Update all domains to use a new scanning command
 sub save_global_virus_scanner
 {
-local ($cmd) = @_;
+local ($cmd, $host) = @_;
 $config{'clamscan_cmd'} = $cmd;
 $config{'clamscan_cmd_global'} = 1;
+$config{'clamscan_host'} = $host;
 $config{'last_check'} = time()+1;
 &save_module_config();
 foreach my $d (grep { $_->{'virus'} } &list_domains()) {
@@ -327,22 +339,33 @@ foreach my $d (grep { $_->{'virus'} } &list_domains()) {
 	}
 }
 
-# test_virus_scanner(command)
+# test_virus_scanner(command, [host])
 # Tests some virus scanning command. Returns an error message on failure, undef
 # on success. If clamscan takes more than 10 seconds, this typically assumes
 # that it is working but slow.
 sub test_virus_scanner
 {
-local ($cmd) = @_;
+local ($cmd, $host) = @_;
+local $fullcmd = $cmd;
+if ($cmd eq "clamd-stream-client") {
+	# Set remote host
+	if ($host) {
+		$fullcmd .= " -d ".$host;
+		}
+	}
+else {
+	# Tell command to use stdin
+	$fullcmd .= " -";
+	}
 local ($out, $timed_out) =
-	&backquote_with_timeout("$cmd - </dev/null 2>&1", 10, 1);
+	&backquote_with_timeout("$fullcmd </dev/null 2>&1", 10, 1);
 if ($timed_out) {
 	return undef;
 	}
 elsif ($?) {
 	return "<pre>".&html_escape($out)."</pre>";
 	}
-elsif ($out !~ /OK/) {
+elsif ($cmd ne "clamd-stream-client" && $out !~ /OK/) {
 	return $text{'sv_etestok'};
 	}
 else {
@@ -634,7 +657,9 @@ return 0;
 # and long descriptions for the action to switch statuses
 sub startstop_virus
 {
-if (&get_global_virus_scanner() ne 'clamdscan') {
+local ($scanner, $host) = &get_global_virus_scanner();
+if (!($scanner eq 'clamdscan' ||
+      $scanner eq 'clamd-stream-client' && !$host)) {
 	# Clamd isn't being used
 	return ( );
 	}

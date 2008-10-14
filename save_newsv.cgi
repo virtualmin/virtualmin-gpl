@@ -45,7 +45,15 @@ if ($config{'virus'}) {
 		&has_command("clamscan") || &error($text{'sv_eclamscan'});
 		$fullcmd = "clamscan";
 		}
-	$err = &test_virus_scanner($fullcmd);
+	elsif ($in{'scanner'} == 3) {
+		&has_command("clamd-stream-client") ||
+			&error($text{'sv_estream'});
+		$fullcmd = "clamd-stream-client";
+		}
+	$in{'vhost_def'} || gethostbyname($in{'vhost'}) ||
+		&error($text{'sv_evhost'});
+	$err = &test_virus_scanner($fullcmd,
+				   $in{'vhost_def'} ? undef : $in{'vhost'});
 	if ($err) {
 		&error(&text('sv_etest', $err));
 		}
@@ -76,9 +84,8 @@ if ($config{'spam'}) {
 
 # Update virus scanner
 if ($config{'virus'}) {
-	&save_global_virus_scanner(
-		$in{'scanner'} == 0 ? "clamscan" :
-		$in{'scanner'} == 1 ? "clamdscan" : $in{'scanprog'});
+	&save_global_virus_scanner($fullcmd,
+				   $in{'vhost_def'} ? undef : $in{'vhost'});
 	}
 
 &release_lock_spam_all();

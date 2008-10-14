@@ -6,9 +6,17 @@ $prog = join(" ", map { quotemeta($_) } @ARGV);
 $temp = "/tmp/clamwrapper.$$";
 unlink($temp);
 
+# Check if we are using the streaming client, which has slightly different
+# semantics
+$stream_client = $ARGV[0] =~ /clamd-stream-client/ ? 1 : 0;
+$fullprog = $prog;
+if (!$stream_client) {
+	$fullprog .= " -";
+	}
+
 # Feel email to clamscan
 $SIG{'PIPE'} = 'ignore';
-$clampid = open(INPUT, "|$prog - >$temp");
+$clampid = open(INPUT, "|$fullprog >$temp");
 while(read(STDIN, $buf, 1024) > 0) {
 	print INPUT $buf;
 	}
@@ -33,7 +41,13 @@ while(<OUTPUT>) {
 	}
 close(OUTPUT);
 unlink($temp);
-if ($out =~ /FOUND/) {
+if ($stream_client && $out =~ /\S/) {
+	# Using clamd-stream-client - output contains a virus name if found
+	exit(1);
+	}
+elsif (!$stream_client && $out =~ /FOUND/) {
+	# Using clamscan or clamdscan - output contains FOUND if a virus
+	# was detected
 	exit(1);
 	}
 else {

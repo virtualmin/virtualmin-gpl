@@ -9,7 +9,7 @@ print $text{'sv_disabling'},"<br>\n";
 &$indent_print();
 $ok = &disable_clamd();
 if ($ok) {
-	$scanner = &get_global_virus_scanner();
+	($scanner) = &get_global_virus_scanner();
 	if ($scanner eq "clamdscan") {
 		&$first_print("<b>".$text{'sv_warning'}."</b>");
 		}
