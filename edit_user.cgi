@@ -102,13 +102,18 @@ if (!$mailbox) {
 
 print &ui_hidden_table_end();
 
-if (!$mailbox) {
+$showmailquota = !$mailbox && $user->{'mailquota'};
+$showquota = !$mailbox && $user->{'unix'} && !$user->{'noquota'};
+$showhome = &can_mailbox_home() && $d && $d->{'home'} &&
+	    !$mailbox && !$user->{'fixedhome'};
+
+if ($showmailquota || $showquota || $showhome) {
 	# Start quota and home table
 	print &ui_hidden_table_start($text{'user_header2'}, "width=100%", 2,
 				     "table2", 0);
 	}
 
-if (!$mailbox && $user->{'mailquota'}) {
+if ($showmailquota) {
 	# Show Qmail/VPOPMail quota field
 	$user->{'qquota'} = "" if ($user->{'qquota'} eq "none");
 	print &ui_table_row(&hlink($text{'user_qquota'},"qmailquota"),
@@ -120,7 +125,7 @@ if (!$mailbox && $user->{'mailquota'}) {
 		2, \@tds);
 	}
 
-if (!$mailbox && $user->{'unix'} && !$user->{'noquota'}) {
+if ($showquota) {
 	# Show quotas field(s)
 	if (&has_home_quotas()) {
 		print &ui_table_row(
@@ -138,8 +143,7 @@ if (!$mailbox && $user->{'unix'} && !$user->{'noquota'}) {
 		}
 	}
 
-if (&can_mailbox_home() && $d && $d->{'home'} &&
-    !$mailbox && !$user->{'fixedhome'}) {
+if ($showhome) {
 	# Show home directory editing field
 	local $reshome = &resolve_links($user->{'home'});
 	local $helppage = "userhome";
@@ -175,7 +179,7 @@ if (&can_mailbox_home() && $d && $d->{'home'} &&
 			    2, \@tds);
 	}
 
-if (!$mailbox) {
+if ($showmailquota || $showquota || $showhome) {
 	print &ui_hidden_table_end("table2");
 	}
 
