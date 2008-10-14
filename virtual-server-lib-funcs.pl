@@ -3928,13 +3928,20 @@ foreach $u (@$users) {
 	       $u->{'pass'} =~ /^\!/ ? "<i>$pop3</i>" : $pop3)."</a>\n");
 	push(@cols, $u->{'user'});
 	push(@cols, $u->{'real'});
+
+	# Add columns for quotas
 	local $quota;
 	$quota += $u->{'quota'} if (&has_home_quotas());
 	$quota += $u->{'mquota'} if (&has_mail_quotas());
 	local $uquota;
 	$uquota += $u->{'uquota'} if (&has_home_quotas());
 	$uquota += $u->{'muquota'} if (&has_mail_quotas());
-	if (defined($quota)) {
+	if ($u->{'webowner'}) {
+		# Website owners have no real quota
+		push(@cols, $text{'users_same'}, "");
+		}
+	elsif (defined($quota)) {
+		# Has Unix quotas
 		push(@cols, $quota ? &quota_show($quota, "home")
 				   : $text{'form_unlimit'});
 		if ($u->{'spam_quota'}) {
