@@ -53,3 +53,9 @@
 
  - Complete Xoops installer
 
+ - clamd-stream-client support
+
+ - forward to everyone in domain
+	- complex form too
+	- test on Sendmail and Postfix
+	- FS#4582

@@ -301,6 +301,11 @@ if ($supports_bcc && $tmpl->{'bccto'} ne 'none') {
 if (!$_[0]->{'nosecondaries'}) {
 	&setup_on_secondaries($_[0]);
 	}
+
+# Create file containing all users' email addresses
+if (!$_[0]->{'alias'}) {
+	&create_everyone_file($_[0]);
+	}
 &release_lock_mail($_[0]);
 }
 
@@ -423,6 +428,9 @@ if ($supports_bcc) {
 
 # Remove any secondary MX servers
 &delete_on_secondaries($_[0]);
+
+# Delete file containing all users' aliases
+&delete_everyone_file($_[0]);
 &release_lock_mail($_[0]);
 }
 
@@ -629,6 +637,11 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 		}
 
 	&$second_print($text{'setup_done'});
+	}
+
+# Re-write the file containing all users' addresses, in case the domain changed 
+if (!$_[0]->{'alias'}) {
+	&create_everyone_file($_[0]);
 	}
 
 # Unlock mail and unix DBs the same number of times we locked them
@@ -4091,6 +4104,32 @@ foreach my $ad (&get_domain_by("alias", $d->{'id'})) {
 	}
 }
 
+# create_everyone_file(&domain)
+# Create the file containing the email address of every user in a domain, for
+# use in everyone include
+sub create_everyone_file
+{
+local ($d) = @_;
+if (!-d $everyone_alias_dir) {
+	&make_dir($everyone_alias_dir, 0755);
+	}
+&open_tempfile(EVERYONE, ">$everyone_alias_dir/$d->{'id'}");
+foreach my $u (&list_domain_users($d, 0, 0, 1, 1)) {
+	if ($u->{'email'}) {
+		&print_tempfile(EVERYONE, $u->{'email'},"\n");
+		}
+	}
+&close_tempfile(EVERYONE);
+}
+
+# delete_everyone_file(&domain)
+# Remove the file containing the email address of every user in a domain
+sub delete_everyone_file
+{
+local ($d) = @_;
+&unlink_file("$everyone_alias_dir/$d->{'id'}");
+}
+
 # get_domain_sender_bcc(&domain)
 # If a domain has automatic BCCing enabled, return the address to which mail
 # is sent. Otherwise, return undef.
@@ -4204,6 +4243,10 @@ if ($main::got_lock_mail == 0) {
 		push(@main::got_lock_mail_files,
 		     "$qmailadmin::qmail_control_dir/rcpthosts",
 		     "$qmailadmin::qmail_control_dir/locals");
+		}
+	if (-d $everyone_alias_dir && $_[0] && !$_[0]->{'alias'}) {
+		push(@main::got_lock_mail_files,
+		     "$everyone_alias_dir/$_[0]->{'id'}");
 		}
 	@main::got_lock_mail_files = grep { /^\// } @main::got_lock_mail_files;
 	foreach my $f (@main::got_lock_mail_files) {

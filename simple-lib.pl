@@ -28,6 +28,10 @@ foreach my $v (@{$a->{'to'}}) {
 		# To this user
 		$simple->{'tome'} = 1;
 		}
+	elsif ($atype == 13 && $aval eq $d->{'id'}) {
+		# To everyone in domain
+		$simple->{'everyone'} = 1;
+		}
 	elsif ($atype == 5) {
 		# Autoreply program
 		return undef if ($simple->{'autoreply'});
@@ -149,6 +153,9 @@ if ($simple->{'auto'}) {
 	local $link = &convert_autoreply_file($d, $simple->{'autoreply'});
 	push(@v, "|$module_config_directory/autoreply.pl $simple->{'autoreply'} $who $link");
 	}
+if ($simple->{'everyone'}) {
+	push(@v, ":include:$everyone_alias_dir/$d->{'id'}");
+	}
 $alias->{'to'} = \@v;
 $alias->{'cmt'} = $simple->{'cmt'};
 }
@@ -262,6 +269,11 @@ print &ui_table_row(&hlink($text{$sfx.'_forward'}, $sfx."_forward"),
 		    &ui_textarea("forwardto", join("\n", @fwd), 3, 40),
 		    undef, $tds);
 
+# Forward to everyone in domain
+print &ui_table_row(&hlink($text{$sfx.'_everyone'}, $sfx."_everyone"),
+		    &ui_checkbox("everyone", 1, $text{'alias_everyoneyes'},
+				 $simple->{'everyone'}));
+
 # Autoreply active and text
 print &ui_table_row(&hlink($text{$sfx.'_auto'}, $sfx."_auto"),
 		    &ui_checkbox("auto", 1,$text{'alias_autoyes'},
@@ -353,6 +365,7 @@ if ($in->{'forward'}) {
 else {
 	delete($simple->{'forward'});
 	}
+$simple->{'everyone'} = $in->{'everyone'};
 $in->{'autotext'} =~ s/\r//g;
 if ($in->{'autotext'}) {
 	$simple->{'autotext'} = $in->{'autotext'};

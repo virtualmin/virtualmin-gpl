@@ -1131,7 +1131,15 @@ if ($_[0]->{'nospam'}) {
 # Update cache of existing usernames
 $unix_user{&escape_alias($_[0]->{'user'})}++;
 
-&sync_alias_virtuals($_[1]);
+# Copy virtusers into alias domains
+if ($_[1]) {
+	&sync_alias_virtuals($_[1]);
+	}
+
+# Create everyone file for domain
+if ($_[1] && $_[1]->{'mail'}) {
+	&create_everyone_file($_[1]);
+	}
 }
 
 # modify_user(&user, &old, &domain, [noaliases])
@@ -1591,6 +1599,11 @@ if ($_[0]->{'shell'} ne $_[1]->{'shell'}) {
 if ($_[0]->{'domainowner'}) {
 	&update_domain_owners_group();
 	}
+
+# Create everyone file for domain
+if ($_[2] && $_[2]->{'mail'}) {
+	&create_everyone_file($_[2]);
+	}
 }
 
 # delete_user(&user, domain)
@@ -1751,6 +1764,11 @@ delete($spam{$_[0]->{'user'}});
 
 # Update cache of existing usernames
 $unix_user{&escape_alias($_[0]->{'user'})} = 0;
+
+# Create everyone file for domain, minus the user
+if ($_[1] && $_[1]->{'mail'}) {
+	&create_everyone_file($_[1]);
+	}
 
 &sync_alias_virtuals($_[1]);
 }
@@ -3171,7 +3189,20 @@ return $_[0];
 }
 
 # alias_type(string, [alias-name])
-# Return the type and destination of some alias string
+# Return the type and destination of some alias string. Type codes are:
+# 1 - Email address
+# 2 - Include file of addresses
+# 3 - Write to file
+# 4 - Pipe to program
+# 5 - Virtualmin autoreply
+# 6 - Webmin filter
+# 7 - Mailbox of user
+# 8 - Same address at other domain
+# 9 - Bounce, possibly with message
+# 10- Current user's mailbox
+# 11- Throw away
+# 12- VPopMail autoreply
+# 13- Everyone in some domain
 sub alias_type
 {
 local @rv;
@@ -3196,6 +3227,9 @@ elsif ($_[0] eq "/dev/null") {
 elsif ($_[0] =~ /^(\/.*)$/ || $_[0] =~ /^\.\//) {
         @rv = (3, $_[0]);
         }
+elsif ($_[0] =~ /^:include:\Q$everyone_alias_dir\E\/(\S+)$/) {
+	return (13, $1);
+	}
 elsif ($_[0] =~ /^:include:(.*)$/) {
         @rv = (2, $1);
         }

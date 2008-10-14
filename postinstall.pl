@@ -320,6 +320,13 @@ if (defined(&supports_resource_limits) &&
 	&release_lock_unix();
 	}
 
+# Create files listing all addresses in domain, for domains with mail
+foreach my $d (@doms) {
+	if ($d->{'mail'} && !$d->{'alias'}) {
+		&create_everyone_file($d);
+		}
+	}
+
 # Record the install time for this version
 local %itimes;
 &read_file($install_times_file, \%itimes);

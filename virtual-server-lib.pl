@@ -250,5 +250,7 @@ $incremental_backups_dir = "$module_config_directory/incremental";
 
 $global_template_variables_file = "$module_config_directory/globals";
 
+$everyone_alias_dir = "$module_config_directory/everyone";
+
 1;
 

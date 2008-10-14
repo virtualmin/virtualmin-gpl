@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-# Runs clamd, an exits with 1 if the program reports a virus was found
+# Runs clamdscan, and exits with 1 if the program reports a virus was found
 # or 0 if not was found or some error happened
 
 $prog = join(" ", map { quotemeta($_) } @ARGV);
