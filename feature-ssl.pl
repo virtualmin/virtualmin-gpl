@@ -514,6 +514,9 @@ if ($key && -r "$_[1]_key" && $key ne $cert) {
 	&unlock_file($key);
 	}
 
+# Re-setup any SSL passphrase
+&save_domain_passphrase($_[0]);
+
 &$second_print($text{'setup_done'});
 
 &release_lock_web($_[0]);
@@ -587,6 +590,43 @@ if ($pass) {
 		}
 	}
 return 0;
+}
+
+# save_domain_passphrase(&domain)
+# Configure Apache to use the right passphrase for a domain, if one is needed.
+# Otherwise, remove the passphrase config.
+sub save_domain_passphrase
+{
+local ($d) = @_;
+local $pass_script = "$ssl_passphrase_dir/$d->{'id'}";
+&lock_file($pass_script);
+local @pps = &apache::find_directive("SSLPassPhraseDialog", $conf);
+local @pps_str = &apache::find_directive_struct("SSLPassPhraseDialog", $conf);
+&lock_file(@pps_str ? $pps_str[0]->{'file'} : $conf->[0]->{'file'});
+local ($pps) = grep { $_ eq "exec:$pass_script" } @pps;
+if ($d->{'ssl_pass'}) {
+	# Create script, add to Apache config
+	if (!-d $ssl_passphrase_dir) {
+		&make_dir($ssl_passphrase_dir, 0700);
+		}
+	&open_tempfile(SCRIPT, ">$pass_script");
+	&print_tempfile(SCRIPT, "#!/bin/sh\n");
+	&print_tempfile(SCRIPT, "echo ".quotemeta($d->{'ssl_pass'})."\n");
+	&close_tempfile(SCRIPT);
+	&set_ownership_permissions(undef, undef, 0700, $pass_script);
+	push(@pps, "exec:$pass_script");
+	}
+else {
+	# Remove script and from Apache config
+	if ($pps) {
+		@pps = grep { $_ ne $pps } @pps;
+		}
+	&unlink_file($pass_script);
+	}
+&lock_file(@pps_str ? $pps_str[0]->{'file'} : $conf->[0]->{'file'});
+&apache::save_directive("SSLPassPhraseDialog", \@pps, $conf, $conf);
+&flush_file_lines();
+&register_post_action(\&restart_apache, 1);
 }
 
 # cert_pem_data(&domain)

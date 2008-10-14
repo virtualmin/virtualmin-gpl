@@ -109,6 +109,10 @@ else {
 	&flush_file_lines();
 	&unlock_file($virt->{'file'});
 
+	# Remove any SSL passphrase
+	$d->{'ssl_pass'} = undef;
+	&save_domain_passphrase($d);
+
 	# Save the cert and private keys
 	&$first_print($text{'newkey_saving'});
 	&unlink_logged($d->{'ssl_cert'});

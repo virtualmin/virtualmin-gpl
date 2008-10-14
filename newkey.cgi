@@ -39,39 +39,12 @@ $d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
 			$vconf, $conf);
 &flush_file_lines($virt->{'file'});
 &unlock_file($virt->{'file'});
+&register_post_action(\&restart_apache, 1);
 
 # If a passphrase is needed, add it to the top-level Apache config. This is
 # done by creating a small script that outputs the passphrase
-$pass_script = "$ssl_passphrase_dir/$d->{'id'}";
-&lock_file($pass_script);
-@pps = &apache::find_directive("SSLPassPhraseDialog", $conf);
-@pps_str = &apache::find_directive_struct("SSLPassPhraseDialog", $conf);
-&lock_file(@pps_str ? $pps_str[0]->{'file'} : $conf->[0]->{'file'});
-($pps) = grep { $_ eq "exec:$pass_script" } @pps;
-if ($passok == 2) {
-	# Create script, add to Apache config
-	if (!-d $ssl_passphrase_dir) {
-		&make_dir($ssl_passphrase_dir, 0700);
-		}
-	&open_tempfile(SCRIPT, ">$pass_script");
-	&print_tempfile(SCRIPT, "#!/bin/sh\n");
-	&print_tempfile(SCRIPT, "echo ".quotemeta($in{'pass'})."\n");
-	&close_tempfile(SCRIPT);
-	&set_ownership_permissions(undef, undef, 0700, $pass_script);
-	push(@pps, "exec:$pass_script");
-	$d->{'ssl_pass'} = $in{'pass'};
-	}
-else {
-	# Remove script and from Apache config
-	if ($pps) {
-		@pps = grep { $_ ne $pps } @pps;
-		}
-	delete($d->{'ssl_pass'});
-	&unlink_file($pass_script);
-	}
-&lock_file(@pps_str ? $pps_str[0]->{'file'} : $conf->[0]->{'file'});
-&apache::save_directive("SSLPassPhraseDialog", \@pps, $conf, $conf);
-&flush_file_lines();
+$d->{'ssl_pass'} = $passok == 2 ? $in{'pass'} : undef;
+&save_domain_passphrase($d);
 
 # Save the cert and private keys
 &$first_print($text{'newkey_saving'});
@@ -104,7 +77,6 @@ if ($d->{'ssl_newkey'}) {
 	}
 
 # Re-start Apache
-&register_post_action(\&restart_apache, 1);
 &run_post_actions();
 &webmin_log("newkey", "domain", $d->{'dom'}, $d);
 

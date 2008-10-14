@@ -1,0 +1,4 @@
+desc=SSL keys with passphrases
+html=SSL keys with passphrases can now be installed on the Manage SSL Certificate page, and trying to use a key that needs a passphrase without one being entered will display an error.
+manager=1
+link=cert_form.cgi?dom=${ID}
