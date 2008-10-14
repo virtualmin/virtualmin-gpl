@@ -155,6 +155,7 @@ if ($simple->{'auto'}) {
 	}
 if ($simple->{'everyone'}) {
 	push(@v, ":include:$everyone_alias_dir/$d->{'id'}");
+	&create_everyone_file($d);
 	}
 $alias->{'to'} = \@v;
 $alias->{'cmt'} = $simple->{'cmt'};
@@ -231,11 +232,12 @@ if ($simple->{'auto'} &&
 	}
 }
 
-# show_simple_form(&simple, [no-reply-from], [no-local], [no-bounce], [&tds])
+# show_simple_form(&simple, [no-reply-from], [no-local], [no-bounce],
+#		   [no-everyone], [&tds], suffix)
 # Outputs ui_table_row entries for a simple mail forwarding form
 sub show_simple_form
 {
-local ($simple, $nofrom, $nolocal, $nobounce, $tds, $sfx) = @_;
+local ($simple, $nofrom, $nolocal, $nobounce, $noeveryone, $tds, $sfx) = @_;
 $sfx ||= "alias";
 
 if ($nolocal) {
@@ -270,9 +272,11 @@ print &ui_table_row(&hlink($text{$sfx.'_forward'}, $sfx."_forward"),
 		    undef, $tds);
 
 # Forward to everyone in domain
-print &ui_table_row(&hlink($text{$sfx.'_everyone'}, $sfx."_everyone"),
+if (!$noeveryone) {
+	print &ui_table_row(&hlink($text{$sfx.'_everyone'}, $sfx."_everyone"),
 		    &ui_checkbox("everyone", 1, $text{'alias_everyoneyes'},
 				 $simple->{'everyone'}));
+	}
 
 # Autoreply active and text
 print &ui_table_row(&hlink($text{$sfx.'_auto'}, $sfx."_auto"),

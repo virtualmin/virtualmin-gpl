@@ -40,11 +40,18 @@ foreach $a (sort { $a->{'from'} cmp $b->{'from'} } @aliases) {
 	foreach $v (@{$a->{'to'}}) {
 		($anum, $astr) = &alias_type($v);
 		if ($anum == 5 && $simple) {
+			# Show shortened autoreply message
 			$msg = $simple->{'autotext'};
 			$msg = substr($msg, 0, 100)." ..."
 				if (length($msg) > 100);
 			$alines .= &text('aliases_reply',
 				"<i>".&html_escape($msg)."</i>")."<br>\n";
+			}
+		elsif ($anum == 13) {
+			# Show everyone domain
+			$ed = &get_domain($astr);
+			$alines .= &text("aliases_type$anum",
+			   "<tt>".&show_domain_name($ed)."</tt>")."<br>\n";
 			}
 		else {
 			$alines .= &text("aliases_type$anum",

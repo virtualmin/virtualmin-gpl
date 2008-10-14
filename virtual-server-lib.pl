@@ -32,7 +32,7 @@ if (!&master_admin()) {
 	}
 else {
 	# All types are allowed
-	%can_alias_types = map { $_, 1 } (0 .. 11);
+	%can_alias_types = map { $_, 1 } (0 .. 13);
 	}
 
 # Only set defaults if not already set

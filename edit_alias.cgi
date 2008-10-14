@@ -44,7 +44,7 @@ if ($can_simple) {
 	print &ui_tabs_start_tab("simplemode", "simple");
 	&alias_form_start("simple");
 	$simple = $in{'new'} ? { } : &get_simple_alias($d, $virt);
-	&show_simple_form($simple, 0, 0, 0, \@tds);
+	&show_simple_form($simple, 0, 0, 0, 0, \@tds);
 	print &ui_table_end();
 	print &ui_tabs_end_tab();
 	}

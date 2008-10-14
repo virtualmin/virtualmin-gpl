@@ -3449,7 +3449,7 @@ sub alias_form
 {
 local ($to, $left, $d, $mode, $who, $tds) = @_;
 &require_mail();
-local @typenames = map { $text{"alias_type$_"} } (0 .. 12);
+local @typenames = map { $text{"alias_type$_"} } (0 .. 13);
 $typenames[0] = "&lt;$typenames[0]&gt;";
 
 local @values = @$to;
@@ -3468,6 +3468,8 @@ for(my $i=0; $i<=@values+2; $i++) {
 							# valid for aliases
 		next if ($j == 9 && $_[3] eq "user");	# bounce is not valid
 							# for users
+		next if ($j == 13 && $_[3] eq "user");	# everyone is not valid
+							# for users
 		if ($j == 0 || $can_alias_types{$j} || $type == $j) {
 			push(@opts, [ $j, $typenames[$j] ]);
 			}
@@ -3475,6 +3477,13 @@ for(my $i=0; $i<=@values+2; $i++) {
 	local $f = &ui_select("type_$i", $type, \@opts);
 	if ($type == 7) {
 		$val = &unescape_user($val);
+		}
+	elsif ($type == 13) {
+		# Everyone in some domain
+		local $d = &get_domain($val);
+		if ($d) {
+			$val = $d->{'dom'};
+			}
 		}
 	$f .= &ui_textbox("val_$i", $val, 30)."\n";
 	if (&can_edit_afiles()) {
@@ -3525,6 +3534,9 @@ for($i=0; defined($t = $in{"type_$i"}); $i++) {
 		}
 	elsif ($t == 8 && !$_[0]) {
 		&error(&text('alias_ecatchall', $v));
+		}
+	elsif ($t == 13 && !&get_domain_by("dom", $v)) {
+		&error(&text('alias_eeveryone', $v));
 		}
 	if ($t == 1 || $t == 3) { push(@values, $v); }
 	elsif ($t == 2) {
@@ -3610,6 +3622,12 @@ for($i=0; defined($t = $in{"type_$i"}); $i++) {
 			@av = ( 10000, 5, $v, $vdir );
 			}
 		push(@values, "|$config{'vpopmail_auto'} ".join(" ", @av));
+		}
+	elsif ($t == 13) {
+		# Work out ID for everyone file
+		local $d = &get_domain_by("dom", $v);
+		&create_everyone_file($d);
+		push(@values, ":include:$everyone_alias_dir/$d->{'id'}");
 		}
 	}
 if (@values > 1 && $anysame) {

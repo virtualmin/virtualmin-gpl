@@ -995,3 +995,4 @@ When the user or group for a domain is changed, references to the old user or gr
 Re-try S3 bucket creation three times if at first it fails, to avoid temporary outages or network problems.
 When setting up clamd, the provided example init script is copied instead of bring modified, so that it can be safely replaced by RPM upgrades.
 Changed the meaning of the 'Can choose database names?' server owner restriction to just prevent modification of the domain's default database, instead of blocking all database management.
+Mail aliases that forward to all users in a domain can now be created, using the Edit Mail Aliases page or create-simple-alias.pl.

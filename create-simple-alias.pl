@@ -63,6 +63,9 @@ while(@ARGV > 0) {
 		defined(getpwnam($local)) ||
 			&usage("Missing or invalid local user for --local");
 		}
+	elsif ($a eq "--everyone") {
+		$everyone = 1;
+		}
 	elsif ($a eq "--autoreply") {
 		$autotext = shift(@ARGV);
 		$autotext || &usage("Missing parameter for --autoreply");
@@ -85,7 +88,7 @@ while(@ARGV > 0) {
 		&usage();
 		}
 	}
-$bounce || $local || @forward || $autotext || &usage();
+$bounce || $local || @forward || $autotext || $everyone || &usage();
 
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
@@ -103,6 +106,7 @@ $clash && &usage("An alias for the same email address already exists");
 # Create the simple object
 $simple = { };
 $simple->{'bounce'} = 1 if ($bounce);
+$simple->{'everyone'} = 1 if ($everyone);
 $simple->{'local'} = $local if ($local);
 $simple->{'forward'} = \@forward;
 if ($autotext) {
@@ -140,6 +144,7 @@ print "                                --from mailbox\n";
 print "                                [--forward user\@domain]*\n";
 print "                                [--local local-user]\n";
 print "                                [--bounce]\n";
+print "                                [--everyone]\n";
 print "                                [--autoreply \"some message\"]\n";
 print "                                [--autoreply-period hours]\n";
 print "                                [--autoreply-from user\@domain]\n";

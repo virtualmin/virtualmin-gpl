@@ -305,7 +305,7 @@ if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
 	if ($simple) {
 		# Show simple form
 		print &ui_hidden("simplemode", "simple");
-		&show_simple_form($simple, 1, 1, 1, \@tds, "user");
+		&show_simple_form($simple, 1, 1, 1, 1, \@tds, "user");
 		}
 	else {
 		# Show complex form

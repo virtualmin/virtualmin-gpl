@@ -1,0 +1,6 @@
+desc=Email aliases to everyone
+html=Mail aliases that forward to all users in a domain can now be created, using the Edit Mail Aliases page.
+master=1
+owner=1
+reseller=1
+link=list_aliases.cgi?dom=${ID}

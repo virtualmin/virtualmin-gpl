@@ -76,6 +76,9 @@ foreach $d (@doms) {
 			if ($simple->{'local'}) {
 				print "    Local user: $simple->{'local'}\n";
 				}
+			if ($simple->{'everyone'}) {
+				print "    Everyone: Yes\n";
+				}
 			if ($simple->{'auto'}) {
 				$msg = $simple->{'autotext'};
 				$msg =~ s/\n/\\n/g;
@@ -104,6 +107,7 @@ foreach $d (@doms) {
 			push(@to, "Bounce") if ($simple->{'bounce'});
 			push(@to, $simple->{'local'}) if ($simple->{'local'});
 			push(@to, "Autoreply") if ($simple->{'auto'});
+			push(@to, "Everyone") if ($simple->{'everyone'});
 			printf $fmt, &nice_from($a->{'from'}),
 				     join(", ", @to);
 			}
