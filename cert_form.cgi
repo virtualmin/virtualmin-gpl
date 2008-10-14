@@ -96,7 +96,7 @@ print &ui_form_end([ [ "ok", $text{'cert_csrok'} ],
 		     [ "self", $text{'cert_self'} ] ]);
 print &ui_tabs_end_tab();
 
-# New key and cert form
+# New key and cert form, for using existing key
 print &ui_tabs_start_tab("mode", "new");
 print "$text{'cert_desc3'}<p>\n";
 
@@ -104,11 +104,13 @@ print &ui_form_start("newkey.cgi", "form-data");
 print &ui_hidden("dom", $in{'dom'});
 print &ui_table_start($text{'cert_header3'}, undef, 2);
 
+# Cert
 print &ui_table_row($text{'cert_cert'},
 		    &ui_textarea("cert", undef, 8, 70)."<br>\n".
 		    "<b>$text{'cert_upload'}</b>\n".
 		    &ui_upload("certupload"));
 
+# Key
 if (-r $d->{'ssl_newkey'}) {
 	$newkey = &read_file_contents($d->{'ssl_newkey'});
 	}
@@ -116,6 +118,10 @@ print &ui_table_row($text{'cert_newkey'},
 		    &ui_textarea("newkey", $newkey, 8, 70)."<br>\n".
 		    "<b>$text{'cert_upload'}</b>\n".
 		    &ui_upload("newkeyupload"));
+
+# Passphrase on key
+print &ui_table_row($text{'cert_pass'},
+		    &ui_opt_textbox("pass", undef, 20, $text{'cert_nopass'}));
 
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'cert_newok'} ] ]);

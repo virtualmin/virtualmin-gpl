@@ -564,6 +564,31 @@ $rv{'type'} = $rv{'o'} eq $rv{'issuer_o'} ? $text{'cert_typeself'}
 return \%rv;
 }
 
+# check_passphrase(key-data, passphrase)
+# Returns 0 if a passphrase is needed by not given, 1 if not needed, 2 if OK
+sub check_passphrase
+{
+local ($newkey, $pass) = @_;
+local $temp = &transname();
+&open_tempfile(KEY, ">$temp", 0, 1);
+&set_ownership_permissions(undef, undef, 0700, $temp);
+&print_tempfile(KEY, $newkey);
+&close_tempfile(KEY);
+local $rv = &execute_command("openssl rsa -in ".quotemeta($temp).
+			     " -text -passin pass:NONE");
+if (!$rv) {
+	return 1;
+	}
+if ($pass) {
+	local $rv = &execute_command("openssl rsa -in ".quotemeta($temp).
+				     " -text -passin pass:".quotemeta($pass));
+	if (!$rv) {
+		return 2;
+		}
+	}
+return 0;
+}
+
 # cert_pem_data(&domain)
 # Returns a domain's cert in PEM format
 sub cert_pem_data

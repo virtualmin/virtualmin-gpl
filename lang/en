@@ -2188,6 +2188,8 @@ cert_header3=New certificate details
 cert_cert=Signed SSL certificate
 cert_upload=Or from uploaded file
 cert_newkey=Matching private key
+cert_pass=Private key password
+cert_nopass=None needed
 cert_newok=Install Now
 cert_self=Generate Self-Signed Key
 cert_tabcurrent=Current Certificate
@@ -2223,6 +2225,7 @@ newkey_err=Failed to install certificate
 newkey_ecert=Missing or invalid signed SSL certificate
 newkey_enewkey=Missing or invalid SSL private key
 newkey_saving=Saving certificate and private key ..
+newkey_epass=Private key is password-protected, but either none was entered or the password was incorrect
 
 newbw_title=Bandwidth Monitoring
 newbw_desc=This page can be used to enable bandwidth accounting for virtual servers, to notify server owners and the master administrator when a server exceeds its allowed bandwidth.

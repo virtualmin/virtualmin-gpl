@@ -55,3 +55,6 @@
 
  - clamd-stream-client support
 
+ - passphrase for SSL keys
+	- backup/restore
+	- CHANGELOG

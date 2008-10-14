@@ -252,5 +252,7 @@ $global_template_variables_file = "$module_config_directory/globals";
 
 $everyone_alias_dir = "$module_config_directory/everyone";
 
+$ssl_passphrase_dir = "$module_config_directory/sslpass";
+
 1;
 
