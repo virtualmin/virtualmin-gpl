@@ -38,10 +38,19 @@ if (!$module_name) {
 $server = "localhost";
 $from = "nobody\@virtualmin.com";
 $auth = "Plain";
+$port = 25;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--server") {
 		$server = shift(@ARGV);
+		}
+	elsif ($a eq "--port") {
+		$port = shift(@ARGV);
+		if ($port !~ /^\d+$/) {
+			$oldport = $port;
+			$port = getservbyname($oldport, "tcp");
+			$port || &usage("Port $oldport is not valid");
+			}
 		}
 	elsif ($a eq "--from") {
 		$from = shift(@ARGV);
@@ -68,7 +77,7 @@ $to || &usage();
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 $main::error_must_die = 1;
 eval {
-	&mailboxes::open_socket($server, 25, MAIL);
+	&mailboxes::open_socket($server, $port, MAIL);
 	&mailboxes::smtp_command(MAIL);
 	&mailboxes::smtp_command(MAIL, "helo ".&get_system_hostname()."\r\n");
 
@@ -150,6 +159,7 @@ print "Make a test SMTP connection to a mail server.\n";
 print "\n";
 print "usage: test-smtp.pl --to address\n";
 print "                    [--server hostname]\n";
+print "                    [--port number|name]\n";
 print "                    [--from address]\n";
 print "                    [--user login --pass password]\n";
 print "                    [--auth method]\n";
