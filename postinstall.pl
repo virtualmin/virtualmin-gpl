@@ -123,7 +123,8 @@ if ($gconfig{'no_virtualmin_preload'}) {
 	$config{'preload_mode'} = 0;
 	}
 &save_module_config();
-$need_restart ||= &update_miniserv_preloads($config{'preload_mode'});
+&update_miniserv_preloads($config{'preload_mode'});
+$need_restart = 1 if ($config{'preload_mode'});		# To apply .pl changes
 
 # Run in package eval mode, to avoid loading the same module twice
 local %miniserv;
