@@ -1619,6 +1619,9 @@ check_apicmdok=.. created <tt>$1</tt>
 check_apicmderr=.. failed : $1
 check_spamlockon=Adding lockfile to all domains' spamassassin calls ..
 check_spamlockoff=Removing lockfile from all domains' spamassassin calls ..
+check_spamwrapperuser=The procmail command <tt>$1</tt> is owned by user $2, when it should be owned by <tt>root</tt>. Email may not be properly delivered or checked for spam.
+check_spamwrappergroup=The procmail command <tt>$1</tt> is owned by group $2, when it should be owned by <tt>root</tt>. Email may not be properly delivered or checked for spam.
+check_spamwrapperperms=The procmail command <tt>$1</tt> has $2 permissions, when it should be setuid and setgid to root. Email may not be properly delivered or checked for spam.
 
 checkmap_enone=No map sources were found in the <a href='$1'>Postfix configuration</a>
 checkmap_esupport=The map source <tt>$1</tt> is not supported by Postfix - you may need to install Postfix libraries for it, or re-compile

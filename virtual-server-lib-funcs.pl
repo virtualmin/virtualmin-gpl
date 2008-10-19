@@ -10208,7 +10208,8 @@ if ($config{'spam'}) {
 			return &text('check_espamsiteconfig', $ver);
 			}
 		}
-	if (&mail_system_has_procmail()) {
+	local $hasprocmail = &mail_system_has_procmail();
+	if ($hasprocmail) {
 		&$second_print($text{'check_spamok'});
 		}
 	else {
@@ -10222,6 +10223,31 @@ if ($config{'spam'}) {
 		if ($r->{'action'} =~ /spamassassin|spamc/) {
 			return &text('check_spamglobal',
 				     "<tt>$procmail::procmailrc</tt>");
+			}
+		}
+
+	# If using Postfix, procmail-wrapper must be used and setuid root
+	if ($hasprocmail && $config{'mail_system'} == 0) {
+		&require_mail();
+		local $mbc = &postfix::get_real_value("mailbox_command");
+		local @mbc = &split_quoted_string($mbc);
+		local @st = stat($mbc[0]);
+		if ($st[4] != 0) {
+			# User is not root
+			local $user = getpwuid($st[4]);
+			return &text('check_spamwrapperuser', $mbc[0],
+				     $user || "UID $st[4]");
+			}
+		if ($st[5] != 0) {
+			# Group is not root
+			local $group = getgrgid($st[5]);
+			return &text('check_spamwrappergroup', $mbc[0],
+				     $group || "GID $st[5]");
+			}
+		if (($st[2] & 06000) != 06000) {
+			# Not setuid and setgid
+			return &text('check_spamwrapperperms', $mbc[0],
+				     sprintf("%o", $st[2]));
 			}
 		}
 	}
