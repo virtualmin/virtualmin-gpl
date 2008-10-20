@@ -479,6 +479,11 @@ else {
 						      $_[1]->{'web_port'});
 		$rv++;
 		&find_html_cgi_dirs($_[0]);
+
+		# Re-create wrapper scripts, which contain home
+		if (defined(&create_php_wrappers) && !$_[0]->{'alias'}) {
+			&create_php_wrappers($_[0]);
+			}
 		&$second_print($text{'setup_done'});
 		}
 	if ($_[0]->{'alias'} && $_[2] && $_[2]->{'dom'} ne $_[3]->{'dom'}) {
