@@ -715,11 +715,25 @@ sub revoke_mysql_database
 {
 local ($d, $dbname) = @_;
 &require_mysql();
+local @oldusers = &list_mysql_database_users($d, $dbname);
 
 # Take away MySQL permissions
 local $dfunc = sub {
 	local $qdbname = &quote_mysql_database($dbname);
 	&mysql::execute_sql_logged($mysql::master_db, "delete from db where db = '$dbname' or db = '$qdbname'");
+	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
+	};
+&execute_for_all_mysql_servers($dfunc);
+
+# If any users had access to this DB only, remove them too
+local $dfunc = sub {
+	local $duser = &mysql_user($d);
+	foreach my $up (grep { $_->[0] ne $duser } @oldusers) {
+		local $o = &mysql::execute_sql($mysql::master_db, "select user from db where user = '$up->[0]'");
+		if (!@{$o->{'data'}}) {
+			&mysql::execute_sql_logged($mysql::master_db, "delete from user where user = '$up->[0]'");
+			}
+		}
 	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
 	};
 &execute_for_all_mysql_servers($dfunc);
