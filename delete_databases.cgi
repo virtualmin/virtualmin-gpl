@@ -48,8 +48,16 @@ else {
 
 	# Work out the total size
 	foreach $db (@deldbs) {
-		$szfunc = $db->{'type'}."_size";
-		($size, $tables) = &$szfunc($d, $db->{'name'});
+		if (&indexof($db->{'type'}, @database_plugins) >= 0) {
+			# Get size from plugin
+			($size, $tables) = &plugin_call($db->{'type'},
+				"database_size", $d, $db->{'name'});
+			}
+		else {
+			# From core DB call
+			$szfunc = $db->{'type'}."_size";
+			($size, $tables) = &$szfunc($d, $db->{'name'});
+			}
 		$totalsize += $size;
 		$totaltables += $tables;
 		}
