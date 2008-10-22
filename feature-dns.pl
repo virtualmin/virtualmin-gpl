@@ -151,22 +151,7 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 	if (@slaves && !$_[0]->{'noslaves'}) {
 		local $slaves = join(" ", map { $_->{'nsname'} ||
 						$_->{'host'} } @slaves);
-		&$first_print(&text('setup_bindslave', $slaves));
-		local @slaveerrs = &bind8::create_on_slaves(
-			$_[0]->{'dom'}, $myip, undef, undef,
-			$tmpl->{'dns_view'});
-		if (@slaveerrs) {
-			&$second_print($text{'setup_eslaves'});
-			foreach $sr (@slaveerrs) {
-				&$second_print(
-				  ($sr->[0]->{'nsname'} || $sr->[0]->{'host'}).
-				  " : ".$sr->[1]);
-				}
-			}
-		else {
-			&$second_print($text{'setup_done'});
-			}
-		$_[0]->{'dns_slave'} = $slaves;
+		&create_zone_on_slaves($_[0], $slaves);
 		}
 
 	&release_lock_dns($_[0], 1);
@@ -246,26 +231,7 @@ if (!$_[0]->{'dns_submode'}) {
 		&$second_print($text{'save_nobind'});
 		}
 
-	local @slaves = split(/\s+/, $_[0]->{'dns_slave'});
-	if (@slaves) {
-		# Delete from slave servers too
-		&$first_print(&text('delete_bindslave', $_[0]->{'dns_slave'}));
-		local @slaveerrs = &bind8::delete_on_slaves(
-				$_[0]->{'dom'}, \@slaves,
-				$_[0]->{'dns_view'} || $tmpl->{'dns_view'});
-		if (@slaveerrs) {
-			&$second_print($text{'delete_bindeslave'});
-			foreach $sr (@slaveerrs) {
-				&$second_print(
-				  ($sr->[0]->{'nsname'} || $sr->[0]->{'host'}).
-				  " : ".$sr->[1]);
-				}
-			}
-		else {
-			&$second_print($text{'setup_done'});
-			}
-		delete($_[0]->{'dns_slave'});
-		}
+	&delete_zone_on_slaves($_[0]);
 	&release_lock_dns($_[0], 1);
 	}
 else {
@@ -296,6 +262,62 @@ else {
 	$_[0]->{'dns_submode'} = 0;
 	}
 &register_post_action(\&restart_bind);
+}
+
+# create_zone_on_slaves(&domain, slaves)
+# Create a zone on all specified slaves, and updates the dns_slave key.
+# May print messages.
+sub create_zone_on_slaves
+{
+local ($d, $slaves) = @_;
+&require_bind();
+local $myip = $bconfig{'this_ip'} ||
+	      &to_ipaddress(&get_system_hostname());
+&$first_print(&text('setup_bindslave', $slaves));
+local @slaveerrs = &bind8::create_on_slaves(
+	$d->{'dom'}, $myip, undef, $slaves,
+	$d->{'dns_view'} || $tmpl->{'dns_view'});
+if (@slaveerrs) {
+	&$second_print($text{'setup_eslaves'});
+	foreach my $sr (@slaveerrs) {
+		&$second_print(
+		  ($sr->[0]->{'nsname'} || $sr->[0]->{'host'}).
+		  " : ".$sr->[1]);
+		}
+	}
+else {
+	&$second_print($text{'setup_done'});
+	}
+$d->{'dns_slave'} = $slaves;
+}
+
+# delete_zone_on_slaves(&domain)
+# Delete a zone on all slave servers, from the dns_slave key. May print messages
+sub delete_zone_on_slaves
+{
+local ($d) = @_;
+local @slaves = split(/\s+/, $d->{'dns_slave'});
+&require_bind();
+if (@slaves) {
+	# Delete from slave servers too
+	&$first_print(&text('delete_bindslave', $d->{'dns_slave'}));
+	local $tmpl = &get_template($d->{'template'});
+	local @slaveerrs = &bind8::delete_on_slaves(
+			$d->{'dom'}, \@slaves,
+			$d->{'dns_view'} || $tmpl->{'dns_view'});
+	if (@slaveerrs) {
+		&$second_print($text{'delete_bindeslave'});
+		foreach my $sr (@slaveerrs) {
+			&$second_print(
+			  ($sr->[0]->{'nsname'} || $sr->[0]->{'host'}).
+			  " : ".$sr->[1]);
+			}
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	delete($d->{'dns_slave'});
+	}
 }
 
 # modify_dns(&domain, &olddomain)
@@ -873,6 +895,10 @@ if ($z) {
 	undef(@bind8::list_zone_names_cache);
 	&$second_print($text{'setup_done'});
 	&register_post_action(\&restart_bind);
+
+	# If on any slaves, delete there too
+	$_[0]->{'old_dns_slave'} = $_[0]->{'dns_slave'};
+	&delete_zone_on_slaves($_[0]);
 	}
 else {
 	&$second_print($text{'save_nobind'});
@@ -922,6 +948,11 @@ if ($z) {
 	undef(@bind8::list_zone_names_cache);
 	&$second_print($text{'setup_done'});
 	&register_post_action(\&restart_bind);
+
+	# If it used to be on any slaves, enable too
+	$_[0]->{'dns_slave'} = $_[0]->{'old_dns_slave'};
+	&create_zone_on_slaves($_[0], $_[0]->{'dns_slave'});
+	delete($_[0]->{'old_dns_slave'});
 	}
 else {
 	&$second_print($text{'save_nobind'});

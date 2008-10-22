@@ -53,5 +53,3 @@
 
  - Selective restore shouldn't create domain with un-selected features
 
- - DNS domain disable should delete on slaves
-
