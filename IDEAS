@@ -51,5 +51,3 @@
 
  - Use new API for webmin modules and categories, when Webmin 1.430 is out
 
- - Selective restore shouldn't create domain with un-selected features
-
