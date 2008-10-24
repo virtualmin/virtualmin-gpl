@@ -2,6 +2,7 @@
 # Runs all Virtualmin tests
 
 package virtual_server;
+$no_virtualmin_plugins = 1;	# Save memory
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
