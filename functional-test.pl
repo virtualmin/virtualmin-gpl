@@ -100,7 +100,7 @@ if ($webmin_proto eq "https") {
 	}
 
 ($test_domain_user) = &unixuser_name($test_domain);
-$prefix = &compute_prefix($test_domain, $test_domain_user, undef, undef, 1);
+$prefix = &compute_prefix($test_domain, $test_domain_user, undef, 1);
 %test_domain = ( 'dom' => $test_domain,
 		 'prefix' => $prefix,
 		 'user' => $test_domain_user,
