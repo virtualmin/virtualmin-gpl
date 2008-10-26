@@ -29,6 +29,16 @@ sub script_roundcube_category
 return "Email";
 }
 
+sub script_roundcube_php_modules
+{
+return ("mysql");
+}
+
+sub script_roundcube_dbs
+{
+return ("mysql");
+}
+
 sub script_roundcube_php_vers
 {
 return ( 4, 5 );
