@@ -3954,7 +3954,7 @@ foreach $u (@$users) {
 	local $uquota;
 	$uquota += $u->{'uquota'} if (&has_home_quotas());
 	$uquota += $u->{'muquota'} if (&has_mail_quotas());
-	if ($u->{'webowner'}) {
+	if ($u->{'webowner'} && defined($quota)) {
 		# Website owners have no real quota
 		push(@cols, $text{'users_same'}, "");
 		}

@@ -52,3 +52,6 @@
  - Use new API for webmin modules and categories, when Webmin 1.430 is out
 
  - Verify Drupal 5.12 on lentor
+
+ - Fix eticket installer
+
