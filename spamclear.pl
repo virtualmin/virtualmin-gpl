@@ -77,9 +77,8 @@ foreach $d (&list_domains()) {
 				}
 
 			# Get email in the folder, and check criteria.
-			# Messages are processed 100 at a time, to avoid loading
-			# a huge amount into memory.
-			# XXX need to shift $i back by delcount ??
+			# Messages are processed 1000 at a time, to avoid
+			# loading a huge amount into memory.
 			$count = &mailboxes::mailbox_folder_size($folder);
 			print STDERR "  $u->{'user'}: mail count ",
 				     $count,"\n" if ($debug);
@@ -90,9 +89,9 @@ foreach $d (&list_domains()) {
 				print STDERR "  $u->{'user'}: need to delete ",
 					     "$needsize bytes\n" if ($debug);
 				}
-			for($i=0; $i<$count; $i+=100) {
+			for($i=0; $i<$count; $i+=1000) {
 				last if (!$auto->{'days'} && $needsize <= 0);
-				$endi = $i+100-1;
+				$endi = $i+1000-1;
 				$endi = $count-1 if ($endi >= $count);
 				my @mail = &mailboxes::mailbox_list_mails(
 					$i, $endi, $folder, 1);
@@ -105,7 +104,7 @@ foreach $d (&list_domains()) {
 				if ($delcount) {
 					# Shift back pointer, as some new
 					# messages will be in the range now
-					$i -= 100;
+					$i -= 1000;
 					}
 				}
 			}
