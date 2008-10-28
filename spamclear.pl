@@ -76,49 +76,83 @@ foreach $d (&list_domains()) {
 					}
 				}
 
-			# Get email in the folder, and check criteria
-			my @mail = &mailboxes::mailbox_list_mails(
-				undef, undef, $folder, 1);
+			# Get email in the folder, and check criteria.
+			# Messages are processed 100 at a time, to avoid loading
+			# a huge amount into memory.
+			# XXX need to shift $i back by delcount ??
+			$count = &mailboxes::mailbox_folder_size($folder);
 			print STDERR "  $u->{'user'}: mail count ",
-				     scalar(@mail),"\n" if ($debug);
-			my @delmail;
-			if ($auto->{'days'}) {
-				# Find mail older than some number of days
-				$cutoff = time() - $auto->{'days'}*24*60*60;
-				foreach $m (@mail) {
-					$time = &mailboxes::parse_mail_date(
-						$m->{'header'}->{'date'});
-					$time ||= $m->{'time'};
-					if ($time && $time < $cutoff) {
-						#print STDERR "deleting $m->{'header'}->{'subject'} dated $time\n";
-						push(@delmail, $m);
-						}
-					}
-				}
-			else {
-				# Find oldest mail that is too large
+				     $count,"\n" if ($debug);
+			if (!$auto->{'days'}) {
 				$needsize = &mailboxes::folder_size($folder) -
 					    $auto->{'size'};
-				print STDERR "  $u->{'user'}: mail size ",
-					&mailboxes::folder_size($folder),"\n"
-					if ($debug);
-				foreach $m (@mail) {
-					last if ($needsize <= 0);
-					push(@delmail, $m);
-					#print STDERR "deleting $m->{'header'}->{'subject'} with size $m->{'size'}\n";
-					$needsize -= $m->{'size'};
-					}
+				$needsize = 0 if ($needsize < 0);
+				print STDERR "  $u->{'user'}: need to delete ",
+					     "$needsize bytes\n" if ($debug);
 				}
-
-			# Delete any mail found
-			if (@delmail) {
-				print STDERR "  $u->{'user'}: deleting ",
-					scalar(@delmail)," messages\n"
-					if ($debug);
-				&mailboxes::mailbox_delete_mail(
-					$folder, reverse(@delmail));
+			for($i=0; $i<$count; $i+=100) {
+				last if (!$auto->{'days'} && $needsize <= 0);
+				$endi = $i+100-1;
+				$endi = $count-1 if ($endi >= $count);
+				my @mail = &mailboxes::mailbox_list_mails(
+					$i, $endi, $folder, 1);
+				@mail = @mail[$i .. $endi];
+				print STDERR "  $u->{'user'}: processing ",
+					     "range $i to $endi\n" if ($debug);
+				($needsize, $delcount) = &process_spam_mails(
+					\@mail, $auto, $folder, $needsize);
+				$count -= $delcount;
+				if ($delcount) {
+					# Shift back pointer, as some new
+					# messages will be in the range now
+					$i -= 100;
+					}
 				}
 			}
 		}
 	}
 
+# process_spam_mails(&mail)
+# Given a set of messages that are spam, delete them if they meet the criteria.
+# Needsize is the amount of spam that needs to be deleted, and is returned
+# after being reduced.
+sub process_spam_mails
+{
+local ($mail, $auto, $folder, $needsize) = @_;
+my @delmail;
+if ($auto->{'days'}) {
+	# Find mail older than some number of days
+	my $cutoff = time() - $auto->{'days'}*24*60*60;
+	foreach my $m (@$mail) {
+		my $time = &mailboxes::parse_mail_date(
+			   $m->{'header'}->{'date'});
+		$time ||= $m->{'time'};
+		if ($time && $time < $cutoff) {
+			#print STDERR "deleting $m->{'header'}->{'subject'} dated $time\n";
+			push(@delmail, $m);
+			}
+		}
+	}
+else {
+	# Find oldest mail that is too large
+	print STDERR "  $u->{'user'}: mail size ",
+		&mailboxes::folder_size($folder),"\n"
+		if ($debug);
+	foreach my $m (@$mail) {
+		last if ($needsize <= 0);
+		push(@delmail, $m);
+		#print STDERR "deleting $m->{'header'}->{'subject'} with size $m->{'size'}\n";
+		$needsize -= $m->{'size'};
+		}
+	}
+
+# Delete any mail found
+if (@delmail) {
+	print STDERR "  $u->{'user'}: deleting ",scalar(@delmail)," messages\n"
+		if ($debug);
+	&mailboxes::mailbox_delete_mail(
+		$folder, reverse(@delmail));
+	}
+
+return ($needsize, scalar(@delmail));
+}
