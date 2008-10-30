@@ -47,7 +47,7 @@ else {
 
 	if ($in{'simplemode'} eq 'complex') {
 		# Verify and store complex inputs
-		@values = &parse_alias($in{'name_def'}, $in{'name'},
+		@values = &parse_alias($in{$sfx.'name_def'}, $in{$sfx.'name'},
 			       %oldvirt ? $oldvirt{'to'} : undef, "alias", $d);
 		@values || &error($text{'alias_enone'});
 		$virt->{'to'} = \@values;
