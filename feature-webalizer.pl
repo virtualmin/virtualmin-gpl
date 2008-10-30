@@ -88,7 +88,7 @@ if (!-r $lcn || !-r $cfile) {
 		}
 	else {
 		# Copy webalizer.conf into place for site, and update
-		&execute_command("cp $wconfig{'webalizer_conf'} $cfile");
+		&copy_source_dest($wconfig{'webalizer_conf'}, $cfile);
 		local $wconf = &webalizer::get_config($alog);
 		&webalizer::save_directive($wconf, "HistoryName", "$stats/webalizer.hist");
 		&webalizer::save_directive($wconf, "IncrementalName", "$stats/webalizer.current");
