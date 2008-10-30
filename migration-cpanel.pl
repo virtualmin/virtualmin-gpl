@@ -532,9 +532,9 @@ if ($got{'dns'} && -d $daily) {
 	}
 
 local $out;
+local $ht = &public_html_dir(\%dom);
 if ($waschild) {
 	# Migrate web directory
-	local $ht = &public_html_dir(\%dom);
 	local $qht = quotemeta($ht);
 	local $qhtsrc = "$homesrc/public_html/$wasuser";
 	&$first_print("Copying web pages to $ht ..");
@@ -990,10 +990,16 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 			}
 		else {
 			# Create new FTP-only user
-			local $fuinfo = &create_initial_user(\%dom);
+			local $fuinfo = &create_initial_user(\%dom, 0,
+							     $fhome eq $ht);
 			$fuinfo->{'user'} = $fuser;
 			$fuinfo->{'pass'} = $fpass;
-			$fuinfo->{'uid'} = &allocate_uid(\%taken);
+			if ($fuinfo->{'webowner'}) {
+				$fuinfo->{'uid'} = $dom{'uid'};
+				}
+			else {
+				$fuinfo->{'uid'} = &allocate_uid(\%taken);
+				}
 			$fuinfo->{'gid'} = $dom{'gid'};
 			$fuinfo->{'real'} = "FTP user";
 			$fuinfo->{'home'} = $fhome;
@@ -1001,8 +1007,12 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 			delete($fuinfo->{'email'});
 			$usermap{$fuser} = $fuinfo;
 			&create_user($fuinfo, \%dom);
-			&create_user_home($fuinfo, \%dom);
-			&create_mail_file($fuinfo);
+			if (!$user->{'nocreatehome'}) {
+				&create_user_home($fuinfo, \%dom);
+				}
+			if (!$user->{'nomailfile'}) {
+				&create_mail_file($fuinfo);
+				}
 			$taken{$fuinfo->{'uid'}}++;
 			$fcount++;
 			}
