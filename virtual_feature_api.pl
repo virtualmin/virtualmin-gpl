@@ -45,6 +45,14 @@ sub feature_depends
 {
 }
 
+# feature_warnings(&domain, [&old-domain])
+# Called before a virtual server is created or modified. If any potential but
+# non-fatal problems are found, should return a warning message. If not,
+# returns undef
+sub feature_warnings
+{
+}
+
 # feature_clash(&domain)
 # Returns undef if there is no clash for this domain for this feature, or
 # an error message if so

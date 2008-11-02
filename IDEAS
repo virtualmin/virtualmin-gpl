@@ -48,4 +48,6 @@
 	- Wildcard for multiple domains
 		- NameVirtualHost for port 443
 	- FS#4136
+	- Need warning when saving a domain that SSL cert isn't valid?
 
+ - Gandi / Distribute contact management

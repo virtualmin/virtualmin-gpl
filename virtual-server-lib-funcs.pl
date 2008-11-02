@@ -5436,6 +5436,60 @@ if (!$oldd) {
 return undef;
 }
 
+# virtual_server_warnings(&domain, [&old-domain])
+# Returns a list of warning messages related to the creation or modification
+# of some virtual server.
+sub virtual_server_warnings
+{
+local ($d, $oldd) = @_;
+local @rv;
+
+# Check core features
+foreach my $f (grep { $d->{$_} } @features) {
+	local $wfunc = "check_warnings_$f";
+	if (defined(&$wfunc)) {
+		local $err = &$wfunc($d, $oldd);
+		push(@rv, $err) if ($err);
+		}
+	}
+
+# Check plugins that are enabled
+foreach $f (grep { $d->{$_} } @feature_plugins) {
+	local $err = &plugin_call($f, "feature_warnings", $d, $oldd);
+	push(@rv, $err) if ($err);
+	}
+return @rv;
+}
+
+# show_virtual_server_warnings(&domain, [&old-domain], &in)
+# Checks if there are any warnings for the creation or modification of some
+# domain, and if so shows a confirmation form - unless $in{'confirm_warnings'}
+# is set. Returns 1 if the warning form was shown, 0 if not.
+sub show_virtual_server_warnings
+{
+local ($d, $oldd, $in) = @_;
+return 0 if ($in->{'confirm_warnings'});
+local @warns = &virtual_server_warnings($d, $oldd);
+return 0 if (!@warns);
+
+my @hids;
+foreach my $i (keys %$in) {
+	foreach my $v (split(/\0/, $in->{$i})) {
+		push(@hids, [ $i, $v ]);
+		}
+	}
+print &ui_confirmation_form(
+	$script_name,
+	($oldd ? $text{'setup_warnings2'} : $text{'setup_warnings1'})."<p>\n".
+	join("<br>\n", @warns)."<p>\n".
+	$text{'setup_warnrusure'},
+	\@hids,
+	[ [ 'confirm_warnings', $oldd ? $text{'setup_warnok2'}
+				      : $text{'setup_warnok1'} ] ],
+	);
+return 1;
+}
+
 # create_virtual_server(&domain, [&parent-domain], [parent-user], [no-scripts],
 #			[no-post-actions])
 # Given a complete domain object, setup all it's features
