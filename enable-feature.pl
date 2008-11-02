@@ -58,6 +58,9 @@ while(@ARGV > 0) {
 	       &indexof($1, @feature_plugins) >= 0) {
 		$plugin{$1}++;
 		}
+	elsif ($a eq "--skip-warnings") {
+		$skipwarnings = 1;
+		}
 	else {
 		&usage();
 		}
@@ -101,6 +104,18 @@ foreach $d (@doms) {
 	if ($cerr) {
 		&$second_print($cerr);
 		next;
+		}
+
+	# Check for warnings
+	@warns = &virtual_server_warnings(\%newdom, $oldd);
+	if (@warns) {
+		foreach my $w (@warns) {
+			&$first_print("Warning: $w");
+			}
+		if (!$skipwarnings) {
+			&$second_print(".. this virtual server will not be updated unless the --skip-warnings flag is given");
+			next;
+			}
 		}
 
 	# Run the before command
@@ -172,6 +187,7 @@ foreach $f (@features) {
 foreach $f (@feature_plugins) {
 	print "                         [--$f]\n";
 	}
+print "                         [--skip-warnings]\n";
 exit(1);
 }
 

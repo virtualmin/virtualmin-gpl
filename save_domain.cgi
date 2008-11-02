@@ -192,6 +192,12 @@ if (!$in{'confirm'} && !$d->{'disabled'}) {
 # Make the changes
 &ui_print_unbuffered_header(&domain_in($d), $text{'save_title'}, "");
 
+# Check if this change would trigger any warnings
+if (&show_virtual_server_warnings(\%newdom, $oldd, \%in)) {
+	&ui_print_footer("", $text{'index_return'});
+	return;
+	}
+
 # Run the before command
 &set_domain_envs($d, "MODIFY_DOMAIN", \%newdom);
 $merr = &making_changes();

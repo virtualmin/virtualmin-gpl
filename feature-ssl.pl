@@ -314,7 +314,7 @@ sub delete_ssl
 &obtain_lock_web($_[0]);
 local $conf = &apache::get_config();
 
-# Remove the custom Listen directive added for the domain
+# Remove the custom Listen directive added for the domain, if any
 &remove_listen($d, $conf, $d->{'web_sslport'});
 
 # Remove the <virtualhost>
@@ -343,6 +343,32 @@ if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin")) {
 		      \&usermin::put_usermin_miniserv_config,
 		      \&restart_usermin);
 	}
+
+# If any other domains were using this one's SSL cert or key, break the linkage
+foreach my $od (&get_domain_by("ssl_same", $_[0]->{'id'})) {
+	foreach my $k ('cert', 'key', 'ca') {
+		if ($od->{'ssl_'.$k}) {
+			$od->{'ssl_'.$k} = &default_certificate_file($od, $k);
+			&copy_source_dest($d->{'ssl_'.$k}, $od->{'ssl_'.$k});
+			}
+		}
+	local ($ovirt, $ovconf, $conf) = &get_apache_virtual(
+		$od->{'dom'}, $od->{'web_sslport'});
+	if ($ovirt) {
+		&apache::save_directive("SSLCertificateFile",
+			[ $od->{'ssl_cert'} ], $ovconf, $conf);
+		&apache::save_directive("SSLCertificateKeyFile",
+			$od->{'ssl_key'} ? [ $od->{'ssl_key'} ] : [ ],
+			$ovconf, $conf);
+		&apache::save_directive("SSLCACertificateFile",
+			$od->{'ssl_chain'} ? [ $od->{'ssl_chain'} ] : [ ],
+			$ovconf, $conf);
+		&flush_file_lines($ovirt->{'file'});
+		}
+	delete($od->{'ssl_same'});
+	&save_domain($od);
+	}
+
 &release_lock_web($_[0]);
 }
 
@@ -476,11 +502,11 @@ foreach $l (@$lref[$virt->{'line'} .. $virt->{'eline'}]) {
 # Save the cert and key, if any
 local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
 if ($cert) {
-	&execute_command("cp ".quotemeta($cert)." ".quotemeta("$_[1]_cert"));
+	&copy_source_dest($cert, "$_[1]_cert");
 	}
 local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf, 1);
 if ($key && $key ne $cert) {
-	&execute_command("cp ".quotemeta($key)." ".quotemeta("$_[1]_key"));
+	&copy_source_dest($key, "$_[1]_key");
 	}
 
 &$second_print($text{'setup_done'});

@@ -133,6 +133,7 @@ else {
 	foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 		$od->{'ssl_pass'} = undef;
 		&save_domain_passphrase($od);
+		&save_domain($od);
 		}
 
 	# Re-start Apache

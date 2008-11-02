@@ -44,13 +44,7 @@
 	- how can lookup-domain work? Via network?
 
  - UCC SSL certs (with multiple domain names)
-	- Support name-based on port 443
-	- Wildcard for multiple domains
-		- NameVirtualHost for port 443
 	- FS#4136
-	- save_domain.cgi and enable-feature.pl too 
-	- Don't allow deletion if another domain shares same cert
-		- in delete_ssl, break linkages
 	- CHANGELOG
 	- Documentation
 	- UCC support too
