@@ -131,6 +131,9 @@ if (&can_backup_virtualmin()) {
 		$vtable .= &ui_checkbox("virtualmin", $vo,
 				$text{'backup_v'.$vo}, $virts{$vo})."<br>\n";
 		}
+	@links = ( &select_all_link("virtualmin"),
+		   &select_invert_link("virtualmin") );
+	$vtable .= &ui_links_row(\@links);
 	print &ui_table_row(&hlink($text{'backup_virtualmin'},
 				   "backup_virtualmin"), $vtable);
 	}

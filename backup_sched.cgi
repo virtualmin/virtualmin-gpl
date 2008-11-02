@@ -48,7 +48,6 @@ else {
 			push(@doms, &get_domain($did));
 			}
 		}
-	@doms || &error($text{'backup_edoms'});
 	if ($in{'feature_all'}) {
 		@do_features = ( &get_available_backup_features(),
 				 @backup_plugins );
@@ -81,6 +80,7 @@ else {
 	if (&can_backup_virtualmin()) {
 		@vbs = split(/\0/, $in{'virtualmin'});
 		}
+	@doms || @vbs || &error($text{'backup_edoms'});
 
 	# Update the schedule object
 	$sched->{'all'} = $in{'all'};
