@@ -999,7 +999,7 @@ Mail aliases that forward to all users in a domain can now be created, using the
 SSL keys with passphrases can now be installed on the Manage SSL Certificate page, and trying to use a key that needs a passphrase without one being entered will display an error.
 The clamd-stream-client virus scanner can be selected to offload the actual scanning process to clamd on a remote system, if you have it installed.
 ---- Changes since 3.63 ----
-Updated the TikiWiki script installer to version 2.2, Mantis to 1.1.4, Drupal to 6.6 and 5.12, WordPress to 2.6.3, WPMU to 2.6.3, PHPCoin to 1.4.5, Rails to 2.1.2, PHPList to 2.10.7, phpMyAdmin to 2.11.9.3, SugarCRM to 5.1.0b, and Gallery to 2.3.
+Updated the TikiWiki script installer to version 2.2, Mantis to 1.1.4, Drupal to 6.6 and 5.12, WordPress to 2.6.3, WPMU to 2.6.3, PHPCoin to 1.4.5, Rails to 2.1.2, PHPList to 2.10.7, phpMyAdmin to 2.11.9.3, SugarCRM to 5.1.0b, MoinMoin to 1.8.0, and Gallery to 2.3.
 On systems running Postfix with spam filtering enabled, the ownership and permissions on the procmail wrapper command are validated as part of the configuration check to ensure that it is setuid and setgid to root.
 When a virtual server with slave DNS zones is disabled, then will be removed from slave servers to properly prevent DNS resolution of the domain. When it is re-enabled, the slave zones will be re-created.
 Optimized the spam and virus deletion screen to deal better with large folders, by processing only 100 messages at a time.

@@ -49,5 +49,6 @@
 		- NameVirtualHost for port 443
 	- FS#4136
 	- Need warning when saving a domain that SSL cert isn't valid?
+	- Command line API too
 
  - Gandi / Distribute contact management
