@@ -5,9 +5,10 @@ $feature_depends{'ssl'} = [ 'web', 'dir' ];
 $default_web_sslport = $config{'web_sslport'} || 443;
 }
 
-# check_depends_ssl(&dom)
-# An SSL website requires either a private IP, or private port
-sub check_depends_ssl
+# check_warnings_ssl(&dom)
+# An SSL website should have either a private IP, or private port, UNLESS
+# the clashing domain's cert can be used for this domain.
+sub check_warnings_ssl
 {
 local ($d, $oldd) = @_;
 local $tmpl = &get_template($d->{'template'});
@@ -28,7 +29,10 @@ else {
 				   $_->{'ssl'} &&
 				   $_->{'id'} ne $d->{'id'}} &list_domains();
 	if ($sslclash) {
-		return &text('setup_edepssl3', $d->{'ip'});
+		# Clash .. but is the cert OK?
+		if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
+			return &text('setup_edepssl5', $d->{'ip'});
+			}
 		}
 	# Check for <virtualhost> on the IP, if we are turning on SSL
 	if (!$oldd || !$oldd->{'ssl'}) {
@@ -784,6 +788,28 @@ sub set_certificate_permissions
 {
 local ($d, $file) = @_;
 &set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0700, $file);
+}
+
+# check_domain_certificate(domain-name, &domain-with-cert)
+# Returns 1 if some virtual server's certificate can be used for a particular
+# domain, 0 if not. Based on the common names, including wildcards and UCC
+sub check_domain_certificate
+{
+local ($dname, $d) = @_;
+local $info = &cert_info($d);
+if (lc($info->{'cn'}) eq lc($dname)) {
+	# Exact match
+	return 1;
+	}
+elsif ($info->{'cn'} =~ /^\*\.(\S+)$/ &&
+       (lc($dname) eq lc($1) || $dname =~ /\.\Q$1\E$/i)) {
+	# Matches wildcard
+	return 1;
+	}
+else {
+	# What about UCC??
+	return 0;
+	}
 }
 
 # obtain_lock_ssl(&domain)
