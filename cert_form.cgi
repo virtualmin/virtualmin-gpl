@@ -10,6 +10,19 @@ $d = &get_domain($in{'dom'});
 &ui_print_header(&domain_in($d), $text{'cert_title'}, "");
 @cert_attributes = ('cn', 'o', 'issuer_cn', 'issuer_o', 'notafter', 'type');
 
+# If this domain shares a cert file with another, link to it's page
+if ($d->{'ssl_same'}) {
+	$same = &get_domain($d->{'ssl_same'});
+	print "<b>",&text('cert_same', &show_domain_name($same)),"\n";
+	if (&can_edit_domain($same)) {
+		print &text('cert_samelink', "cert_form.cgi?dom=$same->{'id'}");
+		}
+	print "</b><p>\n";
+	&ui_print_footer(&domain_footer_link($d),
+			 "", $text{'index_return'});
+	return;
+	}
+
 # Show tabs
 $prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 @tabs = ( [ "current", $text{'cert_tabcurrent'}, $prog."current" ],
@@ -29,13 +42,26 @@ foreach $i (@cert_attributes) {
 		print &ui_table_row($text{'cert_'.$i}, $info->{$i});
 		}
 	}
+
+# Other domains using same cert, such as via wildcards or UCC
+@others = &get_domain_by("ssl_same", $d->{'id'});
+if (@others) {
+	print &ui_table_row($text{'cert_also'},
+		&ui_links_row([
+			map { $l = &can_config_domain($_) ? "edit_domain.cgi"
+							  : "view_domain.cgi";
+			      "<a href='$l?dom=$_->{'id'}'>".
+			        &show_domain_name($_)."</a>" } @others ]), 3);
+	}
+
+# Links to download
 @dlinks = (
 	"<a href='download_cert.cgi/cert.pem?dom=$in{'dom'}'>".
 	"$text{'cert_pem'}</a>",
 	"<a href='download_cert.cgi/cert.p12?dom=$in{'dom'}'>".
 	"$text{'cert_pkcs12'}</a>",
 	);
-print &ui_table_row($text{'cert_download'}, &ui_links_row(\@dlinks));
+print &ui_table_row($text{'cert_download'}, &ui_links_row(\@dlinks), 3);
 print &ui_table_end();
 print &ui_tabs_end_tab();
 
@@ -137,7 +163,6 @@ print &ui_hidden("dom", $in{'dom'});
 print &ui_table_start($text{'cert_header4'}, undef, 2);
 
 # Where cert is stored
-# XXX if changed by regular user, force to home dir
 print &ui_table_row($text{'cert_chain'},
 	&ui_radio("mode", $chain ? 1 : 0,
 	  [ [ 0, $text{'cert_chain0'}."<br>" ],
@@ -166,6 +191,11 @@ print &ui_form_end([ [ "ok", $text{'cert_chainok'} ] ]);
 print &ui_tabs_end_tab();
 
 print &ui_tabs_end(1);
+
+# Make sure the left menu is showing this domain
+if (defined(&theme_select_domain)) {
+	&theme_select_domain($d);
+	}
 
 &ui_print_footer(&domain_footer_link($d),
 		 "", $text{'index_return'});

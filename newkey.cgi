@@ -76,6 +76,16 @@ if ($d->{'ssl_newkey'}) {
 		}
 	}
 
+# Copy SSL directives to domains using same cert
+foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
+	$od->{'ssl_cert'} = $d->{'ssl_cert'};
+	$od->{'ssl_key'} = $d->{'ssl_key'};
+	$od->{'ssl_newkey'} = $d->{'ssl_newkey'};
+	$od->{'ssl_csr'} = $d->{'ssl_csr'};
+	$od->{'ssl_pass'} = $d->{'ssl_pass'};
+	&save_domain_passphrase($od);
+	}
+
 # Re-start Apache
 &run_post_actions();
 &webmin_log("newkey", "domain", $d->{'dom'}, $d);

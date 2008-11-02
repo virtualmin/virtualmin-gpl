@@ -86,7 +86,7 @@ else {
 	print CA ($in{'emailAddress'} || "."),"\n";
 	close(CA);
 	$rv = $?;
-	$out = `cat $outtemp`;
+	$out = &read_file_contents($outtemp);
 	unlink($outtemp);
 	if (!-r $ctemp || !-r $ktemp || $?) {
 		&error(&text('csr_ekey', "<pre>$out</pre>"));
@@ -127,6 +127,13 @@ else {
 	&set_certificate_permissions($d, $d->{'ssl_key'});
 	&unlock_file($d->{'ssl_key'});
 	&$second_print($text{'setup_done'});
+
+	# Copy to other domains using same cert. Only the password needs to be
+	# copied though, as the cert file isn't changing
+	foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
+		$od->{'ssl_pass'} = undef;
+		&save_domain_passphrase($od);
+		}
 
 	# Re-start Apache
 	&register_post_action(\&restart_apache, 1);

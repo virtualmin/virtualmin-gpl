@@ -44,11 +44,17 @@ elsif ($in{'mode'} == 2) {
 	&unlock_file($chain);
 	}
 
-# Apply it
+# Apply it, including domains that share a cert
 &set_all_null_print();
 &save_chained_certificate_file($d, $chain);
 $d->{'ssl_chain'} = $chain;
 &save_domain($d);
+foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
+	$od->{'ssl_chain'} = $chain;
+	&save_chained_certificate_file($od, $chain);
+	&save_domain($od);
+	}
+
 &run_post_actions();
 &domain_redirect($d);
 

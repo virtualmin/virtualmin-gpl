@@ -352,7 +352,7 @@ $lerr = &virtual_server_limits(\%dom);
 &ui_print_unbuffered_header(&domain_in(\%dom), $text{'setup_title'}, "");
 
 # Check for and show any warnings
-if (&virtual_server_warnings(\%dom, undef, \%in)) {
+if (&show_virtual_server_warnings(\%dom, undef, \%in)) {
 	&ui_print_footer("", $text{'index_return'});
 	return;
 	}

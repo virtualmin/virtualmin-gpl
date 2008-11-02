@@ -239,6 +239,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--post-command") {
 		$postcommand = shift(@ARGV);
 		}
+	elsif ($a eq "--skip-warnings") {
+		$skipwarnings = 1;
+		}
 	elsif ($a =~ /^\-\-(.*)$/ && $plugin_args{$1}) {
 		# Plugin-specific arg
 		if ($plugin_args{$1}->{'novalue'}) {
@@ -587,6 +590,21 @@ $derr = &virtual_server_depends(\%dom);
 $cerr = &virtual_server_clashes(\%dom);
 &usage($cerr) if ($cerr);
 
+# Check for warnings, unless overriding
+@warns = &virtual_server_warnings(\%dom);
+if (@warns) {
+	print "The following possible problems were detected :\n\n";
+	foreach $w (@warns) {
+		print "  $w\n";
+		}
+	if (!$skipwarnings) {
+		print "\n";
+		print "The virtual server will not be created unless the --skip-warnings\n";
+		print "flag is given.\n";
+		exit(5);
+		}
+	}
+
 # Do it
 print "Beginning server creation ..\n\n";
 $config{'pre_command'} = $precommand if ($precommand);
@@ -676,6 +694,7 @@ foreach $f (@feature_plugins) {
 			}
 		}
 	}
+print "                        [--skip-warnings]\n";
 exit(1);
 }
 

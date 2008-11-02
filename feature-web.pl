@@ -1687,15 +1687,23 @@ local ($d, $conf, $web_port) = @_;
 local $nvstar;
 if ($d->{'name'}) {
 	local ($found, $found_no_port);
+	local $defport = &apache::find_directive("Port", $conf);
+	$defport ||= 80;
 	local @nv = &apache::find_directive("NameVirtualHost", $conf);
 	local $canstar = $apache::httpd_modules{'core'} < 2.2;
 	foreach my $nv (@nv) {
-		$found++ if ($nv =~ /^(\S+):(\S+)/ && $1 eq $d->{'ip'} ||
-			     $nv eq '*' && $canstar ||
-			     $nv =~ /^\*:(\d+)$/ && $1 == $web_port);
+		$found++ if ($nv =~ /^(\S+):(\S+)/ &&   # Like x.x.x.x:80
+			      $1 eq $d->{'ip'} &&
+			      $2 == $web_port ||
+			     $nv eq '*' && $canstar &&	# Like *
+			      $defport == $web_port ||
+			     $nv =~ /^\*:(\d+)$/	# Like *:80
+			      && $1 == $web_port);
 		$found_no_port++ if ($nv eq $d->{'ip'});
-		$nvstar++ if ($nv eq '*' && $canstar ||
-			      $nv =~ /^\*:(\d+)$/ && $1 == $web_port);
+		$nvstar++ if ($nv eq '*' && $canstar && # Like *
+			       $defport == $web_port ||
+			      $nv =~ /^\*:(\d+)$/ &&    # Like *:80
+			       $1 == $web_port);
 		}
 	if (!$found) {
 		@nv = grep { $_ ne $d->{'ip'} } @nv if ($found_no_port);

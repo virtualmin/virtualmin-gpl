@@ -33,6 +33,9 @@ else {
 		if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
 			return &text('setup_edepssl5', $d->{'ip'});
 			}
+		else {
+			return undef;
+			}
 		}
 	# Check for <virtualhost> on the IP, if we are turning on SSL
 	if (!$oldd || !$oldd->{'ssl'}) {
@@ -61,6 +64,21 @@ local $web_sslport = $_[0]->{'web_sslport'} || $tmpl->{'web_sslport'} || 443;
 &obtain_lock_web($_[0]);
 local $conf = &apache::get_config();
 local $f = &get_website_file($_[0]);
+
+# Find out if this domain will share a cert with another
+local $chained;
+local ($sslclash) = grep { $_->{'ip'} eq $_[0]->{'ip'} &&
+			   $_->{'ssl'} &&
+			   $_->{'id'} ne $_[0]->{'id'}} &list_domains();
+if ($sslclash && &check_domain_certificate($_[0]->{'dom'}, $sslclash)) {
+	# Yes - so just use it. In practice this doesn't really matter, as
+	# Apache will pick up the first domain's cert anyway.
+	$_[0]->{'ssl_cert'} = $sslclash->{'ssl_cert'};
+	$_[0]->{'ssl_key'} = $sslclash->{'ssl_key'};
+	$_[0]->{'ssl_same'} = $sslclash->{'id'};
+	$chained = &get_chained_certificate_file($sslclash);
+	$_[0]->{'ssl_chain'} = $chained;
+	}
 
 # Create a self-signed cert and key, if needed
 $_[0]->{'ssl_cert'} ||= &default_certificate_file($_[0], 'cert');
@@ -101,6 +119,10 @@ if (!-r $_[0]->{'ssl_cert'} && !-r $_[0]->{'ssl_key'}) {
 	&unlock_file($_[0]->{'ssl_cert'});
 	&unlock_file($_[0]->{'ssl_key'});
 	}
+
+# Add NameVirtualHost if needed, and if there is more than one SSL site on
+# this IP address
+local $nvstar = &add_name_virtual($_[0], $conf, $web_sslport);
 
 # Add a Listen directive if needed
 &add_listen($_[0], $conf, $web_sslport);
@@ -145,6 +167,11 @@ if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin") &&
 	&setup_ipkeys($_[0], \&usermin::get_usermin_miniserv_config,
 		      \&usermin::put_usermin_miniserv_config,
 		      \&restart_usermin);
+	}
+
+# Copy chained CA cert in from domain with same IP, if any
+if ($chained) {
+	&save_chained_certificate_file($_[0], $chained);
 	}
 
 &release_lock_web($_[0]);

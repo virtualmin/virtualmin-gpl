@@ -2209,6 +2209,7 @@ cert_download=Download certificate
 cert_pem=PEM format
 cert_pkcs12=PKCS12 format
 cert_pkcs7=PKCS7 format
+cert_also=Also used by domains
 cert_edownload=No SSL certificate found!
 cert_eformat=Could not work out requested certificate format
 cert_header4=Certificate authority details
@@ -2219,6 +2220,8 @@ cert_chain2=Uploaded file $1
 cert_desc5=If your virtual server's SSL certificate is from a certificate authority that is not directly known to major browsers, you may need to upload the CA's certificate using this form.
 cert_chainok=Save Certificate
 cert_esubject=Certficate does not appear to have a common name
+cert_same=This virtual server shares its SSL certificate with <tt>$1</tt>, so it cannot be edited on this page.
+cert_samelink=Use its <a href='$1'>Manage SSL Certificate</a> page to change SSL settings.
 
 csr_title=Generating CSR
 csr_title2=Generating Certificate
