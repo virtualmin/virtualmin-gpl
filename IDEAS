@@ -48,5 +48,7 @@
 	- CHANGELOG
 	- Documentation
 	- UCC support too
+		- Allow creation of UCC cert and CSR
+		- http://www.orenosv.com/orenosp/certvendor_en.txt
 
  - Gandi / Distribute contact management

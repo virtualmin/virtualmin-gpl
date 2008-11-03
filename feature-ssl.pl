@@ -865,6 +865,19 @@ else {
 	}
 }
 
+# find_openssl_config_file()
+# Returns the full path to the OpenSSL config file, or undef if not found
+sub find_openssl_config_file
+{
+foreach my $p ("/etc/ssl/openssl.cnf",
+	       "/etc/openssl.cnf",
+               "/usr/local/etc/openssl.cnf",
+	       "/etc/pki/tls/openssl.cnf") {
+	return $p if (-r $p);
+	}
+return undef;
+}
+
 # obtain_lock_ssl(&domain)
 # Lock the Apache config file for some domain, and the Webmin config
 sub obtain_lock_ssl
