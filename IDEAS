@@ -44,11 +44,10 @@
 	- how can lookup-domain work? Via network?
 
  - UCC SSL certs (with multiple domain names)
-	- FS#4136
-	- CHANGELOG
 	- Documentation
 	- UCC support too
-		- Allow creation of UCC cert and CSR
 		- http://www.orenosv.com/orenosp/certvendor_en.txt
+		- check on xencentos
+		- check with real browser
 
  - Gandi / Distribute contact management

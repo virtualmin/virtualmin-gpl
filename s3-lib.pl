@@ -38,7 +38,11 @@ my $err;
 for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
 	local $conn = S3::AWSAuthConnection->new($akey, $skey);
-	return $text{'s3_econn'} if (!$conn);
+	if (!$conn) {
+		$err = $text{'s3_econn'};
+		sleep(10);
+		next;
+		}
 	local $response = $conn->list_all_my_buckets();
 	if ($response->http_response->code != 200) {
 		$err = &text('s3_elist', &extract_s3_message($response));

@@ -595,7 +595,7 @@ sub cert_file_info
 local ($file) = @_;
 local %rv;
 local $_;
-open(OUT, "openssl x509 -in ".quotemeta($file)." -issuer -subject -enddate |");
+open(OUT, "openssl x509 -in ".quotemeta($file)." -issuer -subject -enddate -text |");
 while(<OUT>) {
 	s/\r|\n//g;
 	s/http:\/\//http:\|\|/g;	# So we can parse with regexp
@@ -613,6 +613,15 @@ while(<OUT>) {
 		}
 	if (/notAfter=(.*)/) {
 		$rv{'notafter'} = $1;
+		}
+	if (/Subject\s+Alternative\s+Name/i) {
+		local $alts = <OUT>;
+		$alts =~ s/^\s+//;
+		foreach my $a (split(/[, ]+/, $alts)) {
+			if ($a =~ /^DNS:(\S+)/) {
+				push(@{$rv{'alt'}}, $1);
+				}
+			}
 		}
 	}
 close(OUT);
@@ -860,7 +869,14 @@ elsif ($info->{'cn'} =~ /^\*\.(\S+)$/ &&
 	return 1;
 	}
 else {
-	# What about UCC??
+	# Check for subjectAltNames match (as seen in UCC certs)
+	foreach my $a (@{$info->{'alt'}}) {
+		if (lc($a) eq $dname ||
+		    $a =~ /^\*\.(\S+)$/ &&
+		    (lc($dname) eq lc($1) || $dname =~ /\.\Q$a\E$/i)) {
+			return 1;
+			}
+		}
 	return 0;
 	}
 }
@@ -869,11 +885,16 @@ else {
 # Returns the full path to the OpenSSL config file, or undef if not found
 sub find_openssl_config_file
 {
-foreach my $p ("/etc/ssl/openssl.cnf",
+foreach my $p ($config{'openssl_cnf'},		# Module config
+	       "/etc/ssl/openssl.cnf",		# Debian and FreeBSD
 	       "/etc/openssl.cnf",
                "/usr/local/etc/openssl.cnf",
-	       "/etc/pki/tls/openssl.cnf") {
-	return $p if (-r $p);
+	       "/etc/pki/tls/openssl.cnf",	# Redhat
+	       "/opt/csw/ssl/openssl.cnf",	# Solaris CSW
+	       "/opt/csw/etc/ssl/openssl.cnf",	# Solaris CSW
+	       "/System/Library/OpenSSL/openssl.cnf", # OSX
+	      ) {
+	return $p if ($p && -r $p);
 	}
 return undef;
 }

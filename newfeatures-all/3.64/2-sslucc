@@ -1,0 +1,6 @@
+desc=Multi-domain (UCC) SSL certificates
+html=When creating a self-signed certificate or signing request for a virtual server with SSL enabled, multiple additional domain names can be entered for inclusion in the certificate. This allows the same cert to be shared by several virtual servers on the same IP address.
+master=1
+reseller=1
+owner=1
+link=cert_form.cgi?dom=${ID}

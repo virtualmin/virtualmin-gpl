@@ -8,7 +8,8 @@ $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_ssl() || &error($text{'edit_ecannot'});
 &foreign_require("webmin", "webmin-lib.pl");
 &ui_print_header(&domain_in($d), $text{'cert_title'}, "");
-@cert_attributes = ('cn', 'o', 'issuer_cn', 'issuer_o', 'notafter', 'type');
+@cert_attributes = ('cn', 'o', 'issuer_cn', 'issuer_o', 'notafter',
+		    'type', 'alt');
 
 # If this domain shares a cert file with another, link to it's page
 if ($d->{'ssl_same'}) {
@@ -38,8 +39,13 @@ print "$text{'cert_desc2'}<p>\n";
 print &ui_table_start($text{'cert_header2'}, undef, 4);
 $info = &cert_info($d);
 foreach $i (@cert_attributes) {
-	if ($info->{$i}) {
-		print &ui_table_row($text{'cert_'.$i}, $info->{$i});
+	$v = $info->{$i};
+	if (ref($v)) {
+		print &ui_table_row($text{'cert_'.$i},
+			&ui_links_row($v), 3);
+		}
+	elsif ($v) {
+		print &ui_table_row($text{'cert_'.$i}, $v);
 		}
 	}
 
@@ -90,6 +96,10 @@ print &ui_table_start($text{'cert_header1'}, undef, 2);
 
 print &ui_table_row($webmin::text{'ssl_cn'},
 		    &ui_textbox("commonName", "www.$d->{'dom'}", 30));
+
+$alts = join("\n", map { "www.".$_->{'dom'} } @others);
+print &ui_table_row($text{'cert_alt'},
+		    &ui_textarea("subjectAltName", $alts, 5, 30));
 
 print &ui_table_row($webmin::text{'ca_email'},
 		    &ui_textbox("emailAddress", $d->{'emailto'}, 30));

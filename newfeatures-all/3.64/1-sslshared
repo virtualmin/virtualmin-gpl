@@ -1,0 +1,5 @@
+desc=SSL on shared IP addresses
+html=Virtualmin now allows you to create multiple virtual servers with SSL enabled on the same IP address. However, unless the first such server has an SSL certificate that matches new domains, a warning message will be displayed. This makes it possible to use wildcard and UCC (multi-domain) certificates.
+master=1
+reseller=1
+owner=1
