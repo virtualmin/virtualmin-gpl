@@ -31,7 +31,9 @@ else {
 	if ($sslclash) {
 		# Clash .. but is the cert OK?
 		if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
-			return &text('setup_edepssl5', $d->{'ip'});
+			local @certdoms = &list_domain_certificate($sslclash);
+			return &text('setup_edepssl5', $d->{'ip'},
+				join(", ", map { "<tt>$_</tt>" } @certdoms));
 			}
 		else {
 			return undef;
@@ -382,6 +384,7 @@ local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
 					    $d->{'web_sslport'});
 return &text('validate_essl', "<tt>$d->{'dom'}</tt>") if (!$virt);
 
+# Make sure cert file exists
 local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
 if (!$cert) {
 	return &text('validate_esslcert');
@@ -390,10 +393,49 @@ elsif (!-r $cert) {
 	return &text('validate_esslcertfile', "<tt>$cert</tt>");
 	}
 
+# Make sure key exists
 local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf, 1);
 if ($key && !-r $key) {
 	return &text('validate_esslkeyfile', "<tt>$key</tt>");
 	}
+
+# Make sure this domain or www.domain matches cert
+if (!&check_domain_certificate($d->{'dom'}, $d) &&
+    !&check_domain_certificate("www.".$d->{'dom'}, $d)) {
+	return &text('validate_essldom',
+		     "<tt>".$d->{'dom'}."</tt>",
+		     "<tt>"."www.".$d->{'dom'}."</tt>",
+		     join(", ", map { "<tt>$_</tt>" }
+			            &list_domain_certificate($d)));
+	}
+
+# Make sure the first virtualhost on this IP serves the same cert
+&require_apache();
+local $conf = &apache::get_config();
+local $firstcert;
+foreach my $v (&apache::find_directive_struct("VirtualHost",
+					      $conf)) {
+	local ($vip, $vport) = split(/:/, $v->{'words'}->[0]);
+	if ($vip eq $d->{'ip'} && $vport == $d->{'web_sslport'}) {
+		# Found first one .. is it's cert OK?
+		$firstcert = &apache::find_directive("SSLCertificateFile",
+			$v->{'members'}, 1);
+		last;
+		}
+	}
+if ($firstcert) {
+	local $info = &cert_file_info($firstcert);
+	if (!&check_domain_certificate($d->{'dom'}, $info) &&
+	    !&check_domain_certificate("www.".$d->{'dom'}, $info)) {
+		return &text('validate_esslfirst',
+			     "<tt>".$d->{'dom'}."</tt>",
+			     "<tt>"."www.".$d->{'dom'}."</tt>",
+			     join(", ", map { "<tt>$_</tt>" }
+					    &list_domain_certificate($info)),
+			     $d->{'ip'});
+		}
+	}
+
 return undef;
 }
 
@@ -852,13 +894,13 @@ local ($d, $file) = @_;
 &set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0700, $file);
 }
 
-# check_domain_certificate(domain-name, &domain-with-cert)
+# check_domain_certificate(domain-name, &domain-with-cert|&cert-info)
 # Returns 1 if some virtual server's certificate can be used for a particular
 # domain, 0 if not. Based on the common names, including wildcards and UCC
 sub check_domain_certificate
 {
-local ($dname, $d) = @_;
-local $info = &cert_info($d);
+local ($dname, $d_or_info) = @_;
+local $info = $d_or_info->{'dom'} ? &cert_info($d_or_info) : $d_or_info;
 if (lc($info->{'cn'}) eq lc($dname)) {
 	# Exact match
 	return 1;
@@ -879,6 +921,18 @@ else {
 		}
 	return 0;
 	}
+}
+
+# list_domain_certificate(&domain|&cert-info)
+# Returns a list of domain names that are in the cert for a domain
+sub list_domain_certificate
+{
+local ($d_or_info) = @_;
+local $info = $d_or_info->{'dom'} ? &cert_info($d_or_info) : $d_or_info;
+local @rv;
+push(@rv, $info->{'cn'});
+push(@rv, @{$info->{'alt'}});
+return &unique(@rv);
 }
 
 # find_openssl_config_file()
