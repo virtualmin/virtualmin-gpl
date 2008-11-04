@@ -49,5 +49,12 @@
 		- http://www.orenosv.com/orenosp/certvendor_en.txt
 		- check on xencentos
 		- check with real browser
+	- Validation
+
+ - Fix PiWik installer wizard
 
  - Gandi / Distribute contact management
+
+ - Missing config backups
+	-  FS#4724
+
