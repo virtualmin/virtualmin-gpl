@@ -400,6 +400,8 @@ sub modify_web
 local $rv = 0;
 &require_apache();
 local $conf = &apache::get_config();
+local $need_restart = 0;
+
 if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
 	# Possibly just updating parent virtual server
 	if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
@@ -459,6 +461,7 @@ else {
 		($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
 						      $_[1]->{'web_port'});
 		$rv++;
+		$need_restart = 1;
 		&$second_print($text{'setup_done'});
 		}
 	if ($_[0]->{'home'} ne $_[1]->{'home'}) {
@@ -681,10 +684,14 @@ else {
 		}
 	&release_lock_web($_[0]);
 	&create_framefwd_file($_[0]);
-	if (!$_[0]->{'ssl'}) {
+	if (!$_[0]->{'ssl'} && $need_restart && $rv) {
 		# Only re-start here if we won't re-start later after
 		# changing SSL
-		&register_post_action(\&restart_apache, 1) if ($rv);
+		&register_post_action(\&restart_apache, 1);
+		}
+	elsif (!$need_restart && $rv) {
+		# Just do a soft config apply
+		&register_post_action(\&restart_apache, 0);
 		}
 	}
 return $rv;

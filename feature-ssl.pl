@@ -28,7 +28,7 @@ else {
 	local ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
 				   $_->{'ssl'} &&
 				   $_->{'id'} ne $d->{'id'}} &list_domains();
-	if ($sslclash) {
+	if ($sslclash && (!$oldd || !$oldd->{'ssl'})) {
 		# Clash .. but is the cert OK?
 		if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
 			local @certdoms = &list_domain_certificate($sslclash);
