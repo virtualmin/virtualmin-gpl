@@ -6,34 +6,46 @@ $crmode = &can_restore_domain();
 $crmode || &error($text{'restore_ecannot'});
 &ReadParse();
 
+# Work out the current user's main domain, if needed
+if ($crmode == 2) {
+	$d = &get_domain_by_user($base_remote_user);
+	}
+
 # Validate inputs, starting with source
 &error_setup($text{'restore_err'});
 if ($in{'src'}) {
 	$src = $in{'src'};
 	}
 else {
-	$src = &parse_backup_destination("src", \%in, $crmode == 2);
+	$src = &parse_backup_destination("src", \%in, $crmode == 2, $d);
 	}
 ($mode) = &parse_backup_url($src);
 $mode > 0 || -r $src || -d $src || &error($text{'restore_esrc'});
 
 # Parse features
 if ($in{'feature_all'}) {
+	# All features usable by current user
 	@do_features = &get_available_backup_features($crmode == 2);
 	foreach my $f (@backup_plugins) {
 		push(@do_features, $f);
 		}
+	if ($crmode == 2) {
+		@do_features = grep {
+			&indexof($_, @safe_backup_features) >= 0 ||
+			&plugin_call($_, "feature_backup_safe") } @do_features;
+		}
 	}
 else {
+	# Selected features
 	@do_features = split(/\0/, $in{'feature'});
-	}
-@do_features || &error($text{'restore_efeatures'});
-if ($crmode == 2) {
-	# Make sure they are all safe
-	foreach my $f (@do_features) {
-		&indexof($f, @safe_backup_features) >= 0 ||
-		  &plugin_call($f, "feature_backup_safe") ||
-		    &error(&text('restore_eunsafe', $f));
+	@do_features || &error($text{'restore_efeatures'});
+	if ($crmode == 2) {
+		# Make sure they are all safe
+		foreach my $f (@do_features) {
+			&indexof($f, @safe_backup_features) >= 0 ||
+			  &plugin_call($f, "feature_backup_safe") ||
+			    &error(&text('restore_eunsafe', $f));
+			}
 		}
 	}
 %do_features = map { $_, 1 } @do_features;

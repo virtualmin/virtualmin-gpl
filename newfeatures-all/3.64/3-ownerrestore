@@ -1,0 +1,5 @@
+desc=Domain owner local restores
+html=Domain owners can now restore from files under their <tt>virtualmin-backup</tt> directory, as long as they have permissions to read those files.
+domain=1
+master=1
+link=restore_form.cgi

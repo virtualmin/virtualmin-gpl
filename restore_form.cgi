@@ -21,6 +21,11 @@ else {
 	}
 $dest = $sched->{'dest'};
 
+# Work out the current user's main domain, if needed
+if ($crmode == 2) {
+	$d = &get_domain_by_user($base_remote_user);
+	}
+
 @tds = ( "width=30%" );
 print &ui_form_start("restore.cgi", "post");
 print &ui_hidden_table_start($text{'restore_sourceheader'}, "width=100%", 2,
@@ -32,7 +37,7 @@ if ($dest eq "download:") {
 	$dest = "/";
 	}
 print &ui_table_row($text{'restore_src'},
-	&show_backup_destination("src", $dest, $crmode == 2, undef, 1, 0));
+	&show_backup_destination("src", $dest, $crmode == 2, $d, 1, 0));
 print &ui_hidden_table_end("source");
 
 # Show feature selection boxes

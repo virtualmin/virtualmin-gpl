@@ -835,7 +835,13 @@ if ($ok) {
 		local $comp = $cf == 1 ? "gunzip -c" :
 			      $cf == 2 ? "uncompress -c" :
 			      $cf == 3 ? "bunzip2 -c" : "cat";
-		&execute_command("$comp $q | $tar tf -", undef, \$lout, \$lout);
+		local $reader = "$comp $q";
+		if ($asowner && $mode == 0) {
+			# Read as domain owner, to prevent access to other files
+			$reader = &command_as_user(
+				$doms[0]->{'user'}, 0, $reader);
+			}
+		&execute_command("$reader | $tar tf -", undef, \$lout, \$lout);
 		local @lines = split(/\n/, $lout);
 		local $extract;
 		if (&indexof("./.backup/", @lines) >= 0 ||
@@ -853,7 +859,7 @@ if ($ok) {
 			}
 
 		&execute_command("cd ".quotemeta($restoredir)." && ".
-			"($comp $q | $tar xf - $extract)", undef, \$out, \$out);
+			"($reader | $tar xf - $extract)", undef, \$out, \$out);
 		if ($?) {
 			&$second_print(&text('restore_firstfailed',
 					     "<tt>$f</tt>", "<pre>$out</pre>"));
