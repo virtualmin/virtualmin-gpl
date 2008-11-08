@@ -261,8 +261,8 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 		  !$in{'email_def'} ? $in{'email'} : undef,
 	 'name', !$virt,
 	 'ip', $ip,
-	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :
-		   $config{'dns_ip'},
+	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef
+						       : &get_dns_ip(),
 	 'virt', $virt,
 	 'virtalready', $virtalready,
 	 'source', 'domain_setup.cgi',

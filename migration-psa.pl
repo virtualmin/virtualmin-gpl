@@ -190,7 +190,7 @@ $prefix ||= &compute_prefix($dom, $group, $parent, 1);
          'name', !$virt,
          'ip', $ip,
 	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :
-		$config{'dns_ip'},
+						       : &get_dns_ip(),
          'virt', $virt,
          'virtalready', $virtalready,
 	 $parent ? ( 'pass', $parent->{'pass'} )

@@ -3978,6 +3978,7 @@ newdynip_off=Dynamic IP updating has been disabled. Changes to the system's IP a
 newdynip_never=Not updated yet
 newdynip_notify=Email IP update notifications to
 newdynip_none=Nobody
+newdynip_eext=Failed to work out externally visible IP address
 
 dynip_dyndns=DynDNS
 

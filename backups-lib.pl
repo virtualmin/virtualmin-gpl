@@ -1038,7 +1038,7 @@ if ($ok) {
 			# DNS external IP is always reset to match this system,
 			# as the old setting is unlikely to be correct.
 			$d->{'dns_ip'} = $virt || $config{'all_namevirtual'} ?
-				undef : $config{'dns_ip'};
+				undef : &get_dns_ip();
 
 			# Check for clashes
 			local $cerr = &virtual_server_clashes($d);

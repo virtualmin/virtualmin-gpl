@@ -515,8 +515,8 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	       $virt ? $ip :
 	       $alias ? $ip :
 	       $sharedip ? $sharedip : $defip,
-	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :
-		$config{'dns_ip'},
+	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef
+						       : &get_dns_ip(),
          'virt', $virt,
          'virtalready', $virtalready,
 	 $parent ? ( 'pass', $parent->{'pass'} )

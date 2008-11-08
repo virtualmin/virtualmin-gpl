@@ -12035,6 +12035,21 @@ foreach my $ad (@aliases) {
 	}
 }
 
+# get_dns_ip()
+# Returns the IP address for use in DNS records, or undef to use the domain's IP
+sub get_dns_ip
+{
+if ($config{'dns_ip'} eq '*') {
+	local $rv = &get_external_ip_address();
+	$rv || &error($text{'newdynip_eext'});
+	return $rv;
+	}
+elsif ($config{'dns_ip'}) {
+	return $config{'dns_ip'};
+	}
+return undef;
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;
