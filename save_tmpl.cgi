@@ -11,13 +11,15 @@ if (!$in{'new'}) {
 	}
 elsif ($in{'cloneof'}) {
 	# Fetch source for clone
-	($tmpl) = grep { $_->{'id'} == $in{'cloneof'} } @tmpls;
+	($cloneof) = grep { $_->{'id'} == $in{'cloneof'} } @tmpls;
+	$tmpl = { %$cloneof };
 	$tmpl->{'id'} = undef;
 	$tmpl->{'standard'} = 0;
 	}
 elsif ($in{'cp'}) {
 	# Fetch source for copy
-	($tmpl) = grep { $_->{'id'} == 0 } @tmpls;
+	($cloneof) = grep { $_->{'id'} == 0 } @tmpls;
+	$tmpl = { %$cloneof };
 	$tmpl->{'id'} = undef;
 	$tmpl->{'standard'} = 0;
 	$tmpl->{'default'} = 0;
@@ -47,6 +49,11 @@ $pfunc = "parse_template_".$in{'editmode'};
 
 # Create or update the template
 &save_template($tmpl);
+if ($in{'cloneof'} || $in{'cp'}) {
+	# Also copy template scripts
+	$scripts = &list_template_scripts($cloneof);
+	&save_template_scripts($tmpl, $scripts);
+	}
 
 # Update the module config for the default template
 if ($in{'init'}) {

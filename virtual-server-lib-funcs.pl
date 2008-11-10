@@ -4330,8 +4330,11 @@ foreach my $tmpl (&list_templates()) {
 		}
 	&write_file("$temp/$tmpl->{'id'}", \%tmplquoted);
 	}
+
+# Save template scripts
 &execute_command("cp $template_scripts_dir/* $temp");
 &execute_command("cd ".quotemeta($temp)." && tar cf ".quotemeta($file)." .");
+
 # Save global variables file
 if (-r $global_template_variables_file) {
 	&copy_source_dest($global_template_variables_file, $file."_global");
