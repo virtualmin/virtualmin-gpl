@@ -43,10 +43,10 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - Fix PiWik installer wizard
-
- - Gandi / Distribute contact management
-
  - Missing config backups
-	-  FS#4724
+	- FS#4724
+	- FTP directory restrictions
+	- template scripts
+	- disabled scripts and versions
+	- BW status
 
