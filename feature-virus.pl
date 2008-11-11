@@ -150,7 +150,7 @@ return ( );
 # Returns the ClamAV version
 sub sysinfo_virus
 {
-local $out = &backquote_command("$config{'clamscan_cmd'} -V", 1);
+local $out = &backquote_command("$config{'clamscan_cmd'} -V 2>/dev/null", 1);
 local $vers = $out =~ /ClamAV\s+([0-9\.]+)/i ? $1 : "Unknown";
 return ( [ $text{'sysinfo_virus'}, $vers ] );
 }
