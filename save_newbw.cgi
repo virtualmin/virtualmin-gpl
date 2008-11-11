@@ -69,24 +69,8 @@ $in{'warnbw_template'} =~ s/\r//g;
 &print_tempfile(FILE, $in{'warnbw_template'});
 &close_tempfile(FILE);
 
-$job = &find_bandwidth_job();
-if ($job) {
-	&lock_file(&cron::cron_file($job));
-	&cron::delete_cron_job($job);
-	}
-if ($in{'bw_active'}) {
-	$job = { 'user' => 'root',
-		 'command' => $bw_cron_cmd,
-		 'active' => 1,
-		 'mins' => '0',
-		 'hours' => '*',
-		 'days' => '*',
-		 'weekdays' => '*',
-		 'months' => '*' };
-	&lock_file(&cron::cron_file($job));
-	&cron::create_wrapper($bw_cron_cmd, $module_name, "bw.pl");
-	&cron::create_cron_job($job);
-	}
+# Setup the cron job
+&setup_bandwidth_job($in{'bw_active'});
 &unlock_all_files();
 
 &webmin_log("newbw");

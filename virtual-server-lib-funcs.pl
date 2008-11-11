@@ -4307,6 +4307,7 @@ foreach my $t (@tmpls) {
 		&save_template($t);
 		}
 	}
+
 # Put back site-specific settings, as those in the backup are unlikely to
 # be correct.
 $config{'iface'} = $oldconfig{'iface'};
@@ -4314,6 +4315,9 @@ $config{'home_quotas'} = $oldconfig{'home_quotas'};
 $config{'mail_quotas'} = $oldconfig{'mail_quotas'};
 $config{'group_quotas'} = $oldconfig{'group_quotas'};
 &save_module_config();
+
+# If bandwidth checking was enabled in the backup, re-enable it now
+&setup_bandwidth_job($config{'bw_active'});
 }
 
 # virtualmin_backup_templates(file, &vbs)
@@ -12052,6 +12056,33 @@ elsif ($config{'dns_ip'}) {
 	return $config{'dns_ip'};
 	}
 return undef;
+}
+
+# setup_bandwidth_job(enabled)
+# Create or delete the bandwidth monitoring cron job
+sub setup_bandwidth_job
+{
+local ($active) = @_;
+&foreign_require("cron", "cron-lib.pl");
+local $job = &find_bandwidth_job();
+if ($job) {
+	&lock_file(&cron::cron_file($job));
+	&cron::delete_cron_job($job);
+	}
+if ($active) {
+	$job = { 'user' => 'root',
+		 'command' => $bw_cron_cmd,
+		 'active' => 1,
+		 'mins' => '0',
+		 'hours' => '*',
+		 'days' => '*',
+		 'weekdays' => '*',
+		 'months' => '*' };
+	&lock_file(&cron::cron_file($job));
+	&cron::create_wrapper($bw_cron_cmd, $module_name, "bw.pl");
+	&cron::create_cron_job($job);
+	&unlock_file(&cron::cron_file($job));
+	}
 }
 
 $done_virtual_server_lib_funcs = 1;

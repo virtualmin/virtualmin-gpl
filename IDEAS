@@ -46,8 +46,6 @@
  - Missing config backups
 	- FS#4724
 	- FTP directory restrictions
-	- disabled scripts and versions
-	- BW status
 
  - templates for resellers
 	- limited functions
