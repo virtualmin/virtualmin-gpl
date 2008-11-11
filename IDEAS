@@ -46,7 +46,12 @@
  - Missing config backups
 	- FS#4724
 	- FTP directory restrictions
-	- template scripts
 	- disabled scripts and versions
 	- BW status
+
+ - templates for resellers
+	- limited functions
+	- can see only own
+	- reseller-level option to enable
+	- FS#4752
 

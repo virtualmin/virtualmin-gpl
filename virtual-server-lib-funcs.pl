@@ -4553,6 +4553,7 @@ elsif (-r $file."_shells") {
 sub virtualmin_backup_scripts
 {
 local ($file, $vbs) = @_;
+mkdir("$module_config_directory/scripts", 0755);
 &execute_command("cd $module_config_directory/scripts && tar cf ".quotemeta($file)." .");
 &copy_source_dest($scripts_unavail_file, $file."_unavail");
 }
