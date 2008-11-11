@@ -4595,6 +4595,39 @@ if (-r $file."_unavail") {
 	}
 }
 
+# virtualmin_backup_chroot(file, &vbs)
+# Create a file of FTP directory restrictions
+sub virtualmin_backup_chroot
+{
+local ($file, $vbs) = @_;
+local @chroots = &list_ftp_chroots();
+&open_tempfile(CHROOT, ">$file");
+foreach my $c (@chroots) {
+	&print_tempfile(CHROOT,
+		join(" ", map { $_."=".&urlize($c->{$_}) }
+			      grep { $_ ne 'dr' } keys %$c),"\n");
+	}
+&close_tempfile(CHROOT);
+}
+
+# virtualmin_restore_chroot(file, &vbs)
+# Restore all chroot'd directories from a backup file
+sub virtualmin_restore_chroot
+{
+local ($file, $vbs) = @_;
+local @chroots;
+open(CHROOT, $file);
+while(<CHROOT>) {
+	s/\r|\n//g;
+	local %c = map { my ($n, $v) = split(/=/, $_, 2);
+			 ($n, &un_urlize($v)) }
+		       split(/\s+/, $_);
+	push(@chroots, \%c);
+	}
+close(CHROOT);
+&save_ftp_chroots(\@chroots);
+}
+
 # restore_virtualmin(&domain, file, &opts, &allopts)
 # Restore the settings for a domain, such as quota, password and so on. Only
 # selected settings are copied from the backup, such as limits.

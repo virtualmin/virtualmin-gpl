@@ -168,7 +168,8 @@ if (!$virtualmin_pro) {
 			$virtualmin_pro ? ( 'resellers' ) : ( ),
 			'email', 'custom',
 			$virtualmin_pro ? ( 'scripts', 'styles' ) : ( ),
-		        'scheds' );
+		        'scheds',
+			&has_ftp_chroot() ? ( 'chroot' ) : ( ) );
 
 @limit_types = ("mailboxlimit", "aliaslimit", "dbslimit", "domslimit",
             	"aliasdomslimit", "realdomslimit");
