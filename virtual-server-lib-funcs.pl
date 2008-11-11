@@ -4615,6 +4615,7 @@ foreach my $c (@chroots) {
 sub virtualmin_restore_chroot
 {
 local ($file, $vbs) = @_;
+&obtain_lock_ftp();
 local @chroots;
 open(CHROOT, $file);
 while(<CHROOT>) {
@@ -4626,6 +4627,7 @@ while(<CHROOT>) {
 	}
 close(CHROOT);
 &save_ftp_chroots(\@chroots);
+&release_lock_ftp();
 }
 
 # restore_virtualmin(&domain, file, &opts, &allopts)
