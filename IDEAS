@@ -54,6 +54,3 @@
 	- FS#4752
 
  - support module docs
-	- email on login setup (with IP and port)
-	- bug priority
-	- check if root SSH login is allowed

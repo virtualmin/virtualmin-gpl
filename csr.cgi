@@ -151,7 +151,7 @@ else {
 	&open_execute_command(CA, "openssl req $cflag $eflag -newkey rsa:$size -x509 -nodes -out $ctemp -keyout $ktemp -days $in{'days'} >$outtemp 2>&1", 0);
 	print CA ($in{'countryName'} || "."),"\n";
 	print CA ($in{'stateOrProvinceName'} || "."),"\n";
-	print CA ".\n";
+	print CA ($in{'cityName'} || "."),"\n";
 	print CA ($in{'organizationName'} || "."),"\n";
 	print CA ($in{'organizationalUnitName'} || "."),"\n";
 	print CA ($in{'commonName'} || "*"),"\n";
