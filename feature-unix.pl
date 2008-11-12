@@ -724,7 +724,7 @@ return 1;
 }
 
 # update_domain_owners_group([&new-domain], [&deleting-domain])
-# If configure, update the member list of a secondary group which should
+# If configured, update the member list of a secondary group which should
 # contain all domain owners.
 sub update_domain_owners_group
 {

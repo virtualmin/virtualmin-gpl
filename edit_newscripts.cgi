@@ -171,14 +171,8 @@ print &ui_table_row($text{'newscripts_wenabled'},
 		    &ui_yesno_radio("enabled", $job ? 1 : 0));
 
 # Notification schedule
-$sched = !$job ? 'daily' :
-	 $job->{'hours'} eq '0' && $job->{'days'} eq '*' &&
-	  $job->{'months'} eq '*' && $job->{'weekdays'} eq '*' ? 'daily' :
-	 $job->{'days'} eq '1' &&
-	  $job->{'months'} eq '*' && $job->{'weekdays'} eq '*' ? 'monthly' :
-	 $job->{'days'} eq '*' &&
-	  $job->{'months'} eq '*' && $job->{'weekdays'} eq '1' ? 'weekly' :
-								 undef;
+$sched = $job ? &parse_cron_schedule($job)
+	      : $config{'scriptwarn_wsched'} || 'daily';
 if ($sched) {
 	print &ui_table_row($text{'newscripts_wsched'},
 		&ui_select("wsched", $sched,

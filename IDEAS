@@ -45,12 +45,20 @@
 
  - Missing config backups
 	- FS#4724
-	- Any more?
+	- script notifications
+	- other cron jobs??
 
  - templates for resellers
 	- limited functions
 	- can see only own
 	- reseller-level option to enable
 	- FS#4752
+	- extract stuff into plans, make into separate objects
+	- ability to change plan after creation
 
  - support module docs
+
+ - reseller-level nameservers
+	- FS#4762
+
+

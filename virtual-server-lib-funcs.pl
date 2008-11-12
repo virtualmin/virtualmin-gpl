@@ -4316,8 +4316,11 @@ $config{'mail_quotas'} = $oldconfig{'mail_quotas'};
 $config{'group_quotas'} = $oldconfig{'group_quotas'};
 &save_module_config();
 
-# If bandwidth checking was enabled in the backup, re-enable it now
-&setup_bandwidth_job($config{'bw_active'});
+# Apply any new config settings
+&push_all_print();
+&set_all_null_print();
+&run_post_config_actions(\%oldconfig);
+&pop_all_print();
 }
 
 # virtualmin_backup_templates(file, &vbs)
@@ -10660,6 +10663,67 @@ $config{'disable'} =~ s/user/unix/g;	# changed since last release
 &write_file("$module_config_directory/last-config", \%config);
 
 return undef;
+}
+
+# run_post_config_actions(&lastconfig)
+# Make various changes to the system as specified by a new module config.
+# May print stuff.
+sub run_post_config_actions
+{
+local %lastconfig = %{$_[0]};
+
+# Update the domain owner's group
+&update_domain_owners_group();
+
+# Update preload settings if changed
+if ($config{'preload_mode'} != $lastconfig{'preload_mode'}) {
+	&$first_print($text{'check_preload'});
+	&update_miniserv_preloads($config{'preload_mode'});
+	&restart_miniserv();
+	&$second_print($text{'setup_done'});
+	}
+
+# Update collectinfo.pl run time
+if ($config{'collect_interval'} ne $lastconfig{'collect_interval'}) {
+	if ($config{'collect_interval'} eq 'none') {
+		&$first_print($text{'check_collectoff'});
+		}
+	else {
+		&$first_print($text{'check_collect'});
+		}
+	&setup_collectinfo_job();
+	&$second_print($text{'setup_done'});
+	}
+
+# Update spamassassin lock files
+if ($config{'spam_lock'} != $lastconfig{'spam_lock'}) {
+	&$first_print($config{'spam_lock'} ? $text{'check_spamlockon'}
+					   : $text{'check_spamlockoff'});
+	&save_global_spam_lockfile($config{'spam_lock'});
+	&$second_print($text{'setup_done'});
+	}
+
+# Re-create API helper command
+if ($config{'api_helper'} ne $lastconfig{'api_helper'}) {
+	&$first_print($text{'check_apicmd'});
+	local ($ok, $path) = &create_api_helper_command();
+	&$second_print(&text($ok ? 'check_apicmdok' : 'check_apicmderr',
+			     $path));
+	}
+
+# Restart lookup-domain daemon, if need
+if ($config{'spam'}) {
+	&setup_lookup_domain_daemon();
+	}
+
+# If bandwidth checking was enabled in the backup, re-enable it now
+&setup_bandwidth_job($config{'bw_active'});
+
+# Re-setup script warning job, if it was enabled
+if (defined(&setup_scriptwarn_job) && defined($config{'scriptwarn_enabled'})) {
+	&setup_scriptwarn_job($config{'scriptwarn_enabled'},
+			      $config{'scriptwarn_wsched'});
+	}
 }
 
 # mount_point(dir)

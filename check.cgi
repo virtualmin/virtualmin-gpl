@@ -45,49 +45,8 @@ if ($webminchanged) {
 # Setup the licence cron job (if needed)
 &setup_licence_cron();
 
-# Update the domain owner's group
-&update_domain_owners_group();
-
-# Update preload settings if changed
-if ($config{'preload_mode'} != $lastconfig{'preload_mode'}) {
-	&$first_print($text{'check_preload'});
-	&update_miniserv_preloads($config{'preload_mode'});
-	&restart_miniserv();
-	&$second_print($text{'setup_done'});
-	}
-
-# Update collectinfo.pl run time
-if ($config{'collect_interval'} ne $lastconfig{'collect_interval'}) {
-	if ($config{'collect_interval'} eq 'none') {
-		&$first_print($text{'check_collectoff'});
-		}
-	else {
-		&$first_print($text{'check_collect'});
-		}
-	&setup_collectinfo_job();
-	&$second_print($text{'setup_done'});
-	}
-
-# Update spamassassin lock files
-if ($config{'spam_lock'} != $lastconfig{'spam_lock'}) {
-	&$first_print($config{'spam_lock'} ? $text{'check_spamlockon'}
-					   : $text{'check_spamlockoff'});
-	&save_global_spam_lockfile($config{'spam_lock'});
-	&$second_print($text{'setup_done'});
-	}
-
-# Re-create API helper command
-if ($config{'api_helper'} ne $lastconfig{'api_helper'}) {
-	&$first_print($text{'check_apicmd'});
-	local ($ok, $path) = &create_api_helper_command();
-	&$second_print(&text($ok ? 'check_apicmdok' : 'check_apicmderr',
-			     $path));
-	}
-
-# Restart lookup-domain daemon, if need
-if ($config{'spam'}) {
-	&setup_lookup_domain_daemon();
-	}
+# Apply the new config
+&run_post_config_actions(\%lastconfig);
 
 &webmin_log("check");
 

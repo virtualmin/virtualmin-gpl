@@ -2023,5 +2023,75 @@ local %unavail;
 &unlock_file($scripts_unavail_file);
 }
 
+# setup_scriptwarn_job(enabled, when)
+# Create, update or delete the cron job that sends script update notifications
+sub setup_scriptwarn_job
+{
+local ($enabled, $when) = @_;
+&foreign_require("cron", "cron-lib.pl");
+local $job = &find_scriptwarn_job();
+if ($job && !$enabled) {
+	# Delete job
+	&lock_file(&cron::cron_file($job));
+	&cron::delete_cron_job($job);
+	&unlock_file(&cron::cron_file($job));
+	}
+elsif (!$job && $enabled) {
+	# Create daily job
+	$job = { 'user' => 'root',
+		 'command' => $scriptwarn_cron_cmd,
+		 'active' => 1 };
+	&apply_cron_schedule($job, $when || 'daily');
+	&lock_file(&cron::cron_file($job));
+	&cron::create_cron_job($job);
+	&unlock_file(&cron::cron_file($job));
+	}
+elsif ($job && $enabled && $when &&
+       $when ne &parse_cron_schedule($job)) {
+	# Update schedule if needed
+	&apply_cron_schedule($job, $when);
+	&lock_file(&cron::cron_file($job));
+	&cron::change_cron_job($job);
+	&unlock_file(&cron::cron_file($job));
+	}
+&cron::create_wrapper($scriptwarn_cron_cmd, $module_name, "scriptwarn.pl");
+}
+
+# apply_cron_schedule(&job, 'daily'|'weekly'|'monthly')
+# Sets attributes of a Cron job to match some named schedule
+sub apply_cron_schedule
+{
+my ($job, $sched) = @_;
+$job->{'mins'} = int(rand()*60);
+$job->{'hours'} = 0;
+if ($sched eq 'daily') {
+	$job->{'days'} = $job->{'months'} = $job->{'weekdays'} = '*';
+	}
+elsif ($sched eq 'weekly') {
+	$job->{'weekdays'} = '1';
+	$job->{'months'} = $job->{'days'} = '*';
+	}
+elsif ($sched eq 'monthly') {
+	$job->{'days'} = '1';
+	$job->{'months'} = $job->{'weekdays'} = '*';
+	}
+}
+
+# parse_cron_schedule(&job)
+# Returns 'daily', 'weekly', 'monthly' or undef depending on how often a Cron
+# job runs
+sub parse_cron_schedule
+{
+my ($job) = @_;
+return $job->{'hours'} eq '0' && $job->{'days'} eq '*' &&
+	 $job->{'months'} eq '*' && $job->{'weekdays'} eq '*' ? 'daily' :
+       $job->{'days'} eq '1' &&
+	  $job->{'months'} eq '*' && $job->{'weekdays'} eq '*' ? 'monthly' :
+       $job->{'days'} eq '*' &&
+	  $job->{'months'} eq '*' && $job->{'weekdays'} eq '1' ? 'weekly' :
+								 undef;
+}
+
+
 1;
 
