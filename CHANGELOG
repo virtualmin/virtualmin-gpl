@@ -1008,3 +1008,4 @@ Multiple virtual servers with SSL enabled can now share the same IP address. How
 UCC certificates and CSRs can now be created and displayed on the Manage SSL Certificate page.
 Domain owners can now restore from files under their virtualmin-backup directory, subject to regular Unix permissions.
 FTP directory restrictions can now be included in Virtualmin configuration backups.
+Custom nameservers can now be defined for resellers, so that domains they create can appear to be hosted on a server separate from other resellers or the master admin.

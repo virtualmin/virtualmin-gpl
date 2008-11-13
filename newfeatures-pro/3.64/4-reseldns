@@ -1,0 +1,4 @@
+desc=Reseller nameservers
+html=Custom nameservers can now be defined for resellers, so that domains they create can appear to be hosted on a server separate from other resellers or the master admin.
+master=1
+link=edit_newresels.cgi
