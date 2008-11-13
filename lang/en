@@ -2871,6 +2871,12 @@ resel_linknone=None
 resel_linkurl=To URL
 resel_elogo=Missing or invalid-looking company logo URL
 resel_elink=Missing or invalid-looking logo link URL
+resel_defns=Nameserver hostnames
+resel_defns1=System default
+resel_defns0=Override all nameservers with those listed below ..
+resel_edefnsnone=No reseller nameservers entered
+resel_edefnsip=Nameserver '$1' is an IP address, not a hostname
+resel_edefns=Nameserver '$1' is not valid
 
 licence_err=A problem was detected with your Virtualmin license :
 licence_soon=Notice - Your Virtualmin license will expire in $1 days.

@@ -43,11 +43,6 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - Missing config backups
-	- FS#4724
-	- script notifications
-	- other cron jobs??
-
  - templates for resellers
 	- limited functions
 	- can see only own
@@ -60,5 +55,7 @@
 
  - reseller-level nameservers
 	- FS#4762
+	- test UI
+	- CHANGELOG
 
 

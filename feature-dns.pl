@@ -655,24 +655,44 @@ if (!$tmpl->{'dns_replace'}) {
 		&bind8::create_record($file, "@", undef, "IN",
 				      "SOA", $soa);
 
-		# Add NS records for master and auto-configured slaves
-		&bind8::create_record($file, "@", undef, "IN",
-				      "NS", $master);
-		local $slave;
-		local @slaves = &bind8::list_slave_servers();
-		foreach $slave (@slaves) {
-			local @bn = $slave->{'nsname'} ||
-				    gethostbyname($slave->{'host'});
-			local $full = "$bn[0].";
-			&bind8::create_record($file, "@", undef, "IN",
-					      "NS", "$bn[0].");
+		# Get nameservers from reseller, if any
+		my @reselns;
+		if ($d->{'reseller'}) {
+			my $resel = &get_reseller($d->{'reseller'});
+			if ($resel->{'acl'}->{'defns'}) {
+				@reselns = split(/\s+/,
+					$resel->{'acl'}->{'defns'});
+				}
 			}
 
-		# Add NS records from template
-		foreach my $ns (split(/\s+/, $tmpl->{'dns_ns'})) {
-			$ns .= "." if ($ns !~ /\.$/);
+		if (@reselns) {
+			# NS records come from reseller
+			foreach my $ns (@reselns) {
+				$ns .= "." if ($ns !~ /\.$/);
+				&bind8::create_record($file, "@", undef, "IN",
+						      "NS", $ns);
+				}
+			}
+		else {
+			# Add NS records for master and auto-configured slaves
 			&bind8::create_record($file, "@", undef, "IN",
-					      "NS", $ns);
+					      "NS", $master);
+			local $slave;
+			local @slaves = &bind8::list_slave_servers();
+			foreach $slave (@slaves) {
+				local @bn = $slave->{'nsname'} ||
+					    gethostbyname($slave->{'host'});
+				local $full = "$bn[0].";
+				&bind8::create_record($file, "@", undef, "IN",
+						      "NS", "$bn[0].");
+				}
+
+			# Add NS records from template
+			foreach my $ns (split(/\s+/, $tmpl->{'dns_ns'})) {
+				$ns .= "." if ($ns !~ /\.$/);
+				&bind8::create_record($file, "@", undef, "IN",
+						      "NS", $ns);
+				}
 			}
 		}
 	
