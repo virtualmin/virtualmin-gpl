@@ -4431,6 +4431,7 @@ res_eprocs2=Maximum number of processes must be 2 or more
 res_emem=Missing or invalid maximum process size
 res_emem2=Maximum process size must be at least 1M
 res_mins=minutes
+res_secs=seconds
 res_time=Maximum CPU time per process
 res_etime=Missing or invalid maximum CPU time per process
 res_etime2=Maximum CPU time per process must be 1 minute or more
