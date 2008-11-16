@@ -40,6 +40,15 @@ if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0) {
 		}
 	}
 
+# PHP max execution time, for fcgi mode
+if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0) {
+	$max = &get_fcgid_max_execution_time($d);
+	print &ui_table_row(&hlink($text{'phpmode_maxtime'}, "phpmode_maxtime"),
+			    &ui_opt_textbox("maxtime", $max, 5,
+					    $text{'form_unlimit'})." ".
+			    $text{'rfile_secs'});
+	}
+
 # Ruby execution mode
 @rubys = &supported_ruby_modes($d);
 if (!$d->{'alias'} && @rubys) {

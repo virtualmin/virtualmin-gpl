@@ -24,6 +24,10 @@ if (!$d->{'alias'}) {
 	     $in{'children'} > $max_php_fcgid_children)) {
 		&error(&text('phpmode_echildren', $max_php_fcgid_children));
 		}
+	if (defined($in{'maxtime_def'}) && !$in{'maxtime_def'} &&
+	    $in{'maxtime'} !~ /^[1-9]\d*$/) {
+		&error($text{'phpmode_emaxtime'});
+		}
 	}
 
 # Check for working suexec for PHP
@@ -56,6 +60,18 @@ if (defined($in{'children_def'}) &&
 	&save_domain_php_children($d, $nc);
 	&$second_print($text{'setup_done'});
 	$anything++;
+	}
+
+# Save max PHP run time (in both Apache and PHP configs)
+$max = $in{'maxtime_def'} ? 0 : $in{'maxtime'};
+if (defined($in{'maxtime_def'}) &&
+    &get_fcgid_max_execution_time($d) != $max) {
+	&$first_print($max ? &text('phpmode_maxing', $max)
+			   : $text{'phpmode_nomax'});
+	&set_fcgid_max_execution_time($d, $max);
+	&set_php_max_execution_time($d, $max);
+	&$second_print($text{'setup_done'});
+        $anything++;
 	}
 
 # Save Ruby execution mode

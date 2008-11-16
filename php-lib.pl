@@ -338,7 +338,38 @@ local $conf = &apache::get_config();
 foreach my $p (@ports) {
         local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
         next if (!$vconf);
-	&apache::save_directive("IPCCommTimeout", [ $max+1 ], $vconf, $conf);
+	if ($max) {
+		&apache::save_directive("IPCCommTimeout", [ $max+1 ],
+					$vconf, $conf);
+		}
+	else {
+		&apache::save_directive("IPCCommTimeout", [  ], $vconf, $conf);
+		}
+	&flush_file_lines($virt->{'file'});
+	}
+&register_post_action(\&restart_apache);
+}
+
+# get_fcgid_max_execution_time(&domain)
+# Returns the current max FCGId execution time, or undef if not set
+sub get_fcgid_max_execution_time
+{
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+local $v = &apache::find_directive("IPCCommTimeout", $vconf);
+return $v ? $v-1 : undef;
+}
+
+# set_php_max_execution_time(&domain, max)
+# Updates the max execution time in all php.ini files
+sub set_php_max_execution_time
+{
+local ($d, $max) = @_;
+&foreign_require("phpini", "phpini-lib.pl");
+foreach my $ini (&list_domain_php_inis($d)) {
+	local $f = $ini->[1];
+	local $conf = &phpini::get_config($f);
+	&phpini::save_directive($conf, "max_execution_time", $max);
+	&flush_file_lines($f);
 	}
 }
 
