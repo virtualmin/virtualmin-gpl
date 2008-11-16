@@ -1491,6 +1491,7 @@ $opts->{'dir'} || return "Missing install directory!";
 local $out = &backquote_logged("rm -rf ".quotemeta($opts->{'dir'})."/* ".
 			       quotemeta($opts->{'dir'})."/.htaccess* ".
 			       quotemeta($opts->{'dir'})."/.svn* ".
+			       quotemeta($opts->{'dir'})."/.project* ".
 			       quotemeta($opts->{'dir'})."/.cvs* 2>&1");
 $? && return "Failed to delete files : <tt>$out</tt>";
 
