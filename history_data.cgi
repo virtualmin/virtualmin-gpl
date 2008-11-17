@@ -9,11 +9,12 @@ use POSIX;
 
 # Get the stats, and fill in missing section to the left. All stats need
 # to have the same time range.
+$gap = 0;
 foreach $stat (@stats) {
 	my @info = &list_historic_collected_info($stat,
 			$in{'start'} || undef, $in{'end'} || undef);
 	if ($in{'start'} && @info > 1) {
-		$gap = $info[1]->[0] - $info[0]->[0];
+		$gap ||= &compute_average_gap(\@info);
 		while($info[0]->[0] > $in{'start'}+$gap) {
 			unshift(@info, [ $info[0]->[0]-$gap, undef ]);
 			}
@@ -71,3 +72,22 @@ for($i=0; $i<scalar(@$first); $i++) {
 	      join(",", @values),"\n";
 	}
 
+# compute_average_gap(&info-list)
+# Given a list of time,value pairs, compute the average gap between times
+sub compute_average_gap
+{
+local ($info) = @_;
+local $totalgap = 0;
+local $totalcount = 0;
+for(my $i=0; $i<@$info-1; $i++) {
+	local $gap = $info[$i+1]->[0] - $info[$i]->[0];
+	if ($gap > 0) {
+		$totalgap += $gap;
+		$totalcount++;
+		}
+	}
+if ($totalcount) {
+	return $totalgap / $totalcount;
+	}
+return 5*60;
+}
