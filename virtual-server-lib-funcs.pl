@@ -4765,8 +4765,9 @@ while(read(PFILE, $buf, 1024) > 0) {
 close(PFILE);
 close(CON);
 if ($got != $st[7]) {
-	if ($_[3]) { ${$_[3]} = "Upload incomplete"; return 0; }
-	else { &error("Upload incomplete"); }
+	local $msg = "Upload incomplete - file size is $st[7], but sent $got";
+	if ($_[3]) { ${$_[3]} = $got; return 0; }
+	else { &error($got); }
 	}
 &$cbfunc(4) if ($cbfunc);
 
