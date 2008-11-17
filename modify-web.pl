@@ -19,6 +19,12 @@ If your system has more than one version of PHP installed, the version to use
 for a domain can be set with the C<--php-version> parameter, followed by a
 number (4 or 5).
 
+If Virtualmin runs PHP via fastCGI, you can set the number of PHP sub-processes
+with the C<--php-children> parameter, or turn off the automatic startup of
+sub-processes with C<--no-php-children>. Similarly, the maximum run-time of 
+a PHP script can be set with C<--php-timeout>, or set to unlimited with
+C<--no-php-timeout>.
+
 If Ruby is installed, the execution mode for scripts in that language can be
 set with the C<--ruby-mode> flag, followed by either C<--mod_ruby>, C<--cgi> or
 C<--fcgid>. This has no effect on scripts using the Rails framework though,
@@ -84,6 +90,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-php-children") {
 		$children = 0;
 		}
+	elsif ($a eq "--php-timeout") {
+		$timeout = shift(@ARGV);
+		$timeout =~ /^[1-9]\d*$/ ||
+			&usage("Invalid PHP script timeout in seconds");
+		}
+	elsif ($a eq "--no-php-timeout") {
+		$timeout = 0;
+		}
 	elsif ($a eq "--php-version") {
 		$version = shift(@ARGV);
 		}
@@ -137,8 +151,22 @@ while(@ARGV > 0) {
 @dnames || $all_doms || usage();
 $mode || $rubymode || defined($proxy) || defined($framefwd) ||
   defined($suexec) || $stylename || defined($children) || $version ||
-  defined($webmail) || defined($matchall) || &usage("Nothing to do");
+  defined($webmail) || defined($matchall) || defined($timeout) ||
+  &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
+
+# Validate fastCGI options
+@modes = &supported_php_modes($d);
+if (defined($timeout)) {
+	&indexof("fcgid", @modes) >= 0 ||
+		&usage("The PHP script timeout can only be set on systems ".
+		       "that support fcgid");
+	}
+if (defined($children)) {
+	&indexof("fcgid", @modes) >= 0 ||
+		&usage("The number of PHP children can only be set on systems ".
+		       "that support fcgid");
+	}
 
 # Validate style
 if ($stylename) {
@@ -227,6 +255,15 @@ foreach $d (@doms) {
 	# Update PHP fCGId children
 	if (defined($children) && !$d->{'alias'}) {
 		&save_domain_php_children($d, $children);
+		}
+
+	# Update PHP maximum time
+	if (defined($timeout) && !$d->{'alias'}) {
+		$oldtimeout = &get_fcgid_max_execution_time($d);
+		if ($timeout != $oldtimeout) {
+			&set_fcgid_max_execution_time($d, $timeout);
+			&set_php_max_execution_time($d, $timeout);
+			}
 		}
 
 	# Update PHP version
@@ -362,6 +399,7 @@ print "usage: modify-web.pl [--domain name] | [--all-domains]\n";
 print "                     [--mode mod_php | cgi | fcgid]\n";
 print "                     [--php-children number | --no-php-children]\n";
 print "                     [--php-version num]\n";
+print "                     [--php-timeout seconds | --no-php-timeout]\n";
 print "                     [--ruby-mode none | mod_ruby | cgi | fcgid]\n";
 print "                     [--suexec | --no-suexec]\n";
 print "                     [--proxy http://... | --no-proxy]\n";
