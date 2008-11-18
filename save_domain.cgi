@@ -310,7 +310,8 @@ if ($d->{'ip'} ne $oldd->{'ip'}) {
 # Run the after command
 &run_post_actions();
 &set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
-&made_changes();
+local $merr = &made_changes();
+&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($d);
 &webmin_log("modify", "domain", $d->{'dom'}, $d);
 

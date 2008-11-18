@@ -5858,7 +5858,8 @@ if (!$nopost) {
 	&run_post_actions();
 	}
 &set_domain_envs($dom, "CREATE_DOMAIN");
-&made_changes();
+local $merr = &made_changes();
+&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($dom);
 
 return undef;
@@ -6033,7 +6034,9 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 
 	# Call post script
 	&set_domain_envs($dd, "DELETE_DOMAIN");
-	&made_changes();
+	local $merr = &made_changes();
+	&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
+		if (defined($merr));
 
 	if ($dd ne $d) {
 		&$outdent_print();
@@ -9715,7 +9718,8 @@ if (defined(&supports_resource_limits) && &supports_resource_limits()) {
 
 # Run the after command
 &set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
-&made_changes();
+local $merr = &made_changes();
+&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($d);
 
 return 1;
@@ -9890,7 +9894,8 @@ if (defined(&supports_resource_limits) && &supports_resource_limits()) {
 
 # Run the after command
 &set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
-&made_changes();
+local $merr = &made_changes();
+&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($d);
 
 return 1;

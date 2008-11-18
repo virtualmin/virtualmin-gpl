@@ -94,7 +94,8 @@ $d->{'disabled'} = join(",", @disabled);
 # Run the after command
 &run_post_actions();
 &set_domain_envs($d, "DISABLE_DOMAIN");
-&made_changes();
+local $merr = &made_changes();
+&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($d);
 &virtualmin_api_log(\@OLDARGV, $d);
 print "All done!\n";

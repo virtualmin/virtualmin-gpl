@@ -70,7 +70,9 @@ if ($in{'confirm'}) {
 
 			# Run the after command
 			&set_domain_envs($d, "DISABLE_DOMAIN");
-			&made_changes();
+			local $merr = &made_changes();
+			&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
+				if (defined($merr));
 			&reset_domain_envs($d);
 
 			&$outdent_print();

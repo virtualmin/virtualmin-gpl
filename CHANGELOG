@@ -1012,3 +1012,4 @@ FTP directory restrictions can now be included in Virtualmin configuration backu
 Custom nameservers can now be defined for resellers, so that domains they create can appear to be hosted on a server separate from other resellers or the master admin.
 The CPU time resource limit can now be entered in seconds, rather than minutes. However, this will be rounded down to the nearest minute when applied to SSH logins, due to the format of the /etc/security/limits.conf file.
 Added a field to the Website Options page for setting the maximum run-time for PHP scripts.
+If the post-modification or creation script for a domain fails, its output is now displayed as an error message.
