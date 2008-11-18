@@ -4758,7 +4758,13 @@ $pasv =~ /\(([0-9,]+)\)/;
 local $got;
 open(PFILE, $_[2]);
 while(read(PFILE, $buf, 1024) > 0) {
-	print CON $buf;
+	local $ok = print CON $buf;
+	if ($ok <= 0) {
+		# Write failed!
+		local $msg = "FTP write failed : $!";
+		if ($_[3]) { ${$_[3]} = $got; return 0; }
+		else { &error($got); }
+		}
 	$got += length($buf);
 	&$cbfunc(3, $got) if ($cbfunc);
 	}
