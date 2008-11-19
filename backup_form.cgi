@@ -64,6 +64,7 @@ $sched ||= { 'all' => 1,
 	     'feature_all' => 1,
 	     'parent' => 1,
 	     'fmt' => 2,
+	     'onebyone' => 1,
 	     'email' => $cbmode == 2 ? $d->{'emailto'} :
 			$cbmode == 3 ? $access{'email'} : undef };
 @tds = ( "width=30% ");
