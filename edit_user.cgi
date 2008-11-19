@@ -383,17 +383,19 @@ foreach $f (@mail_plugins) {
 
 # Show allowed databases
 if (@dbs) {
-	@userdbs = map { $_->{'type'}."_".$_->{'name'} } @{$user->{'dbs'}};
+	@userdbs = map { [ $_->{'type'}."_".$_->{'name'},
+			   $_->{'name'}." ($_->{'desc'})" ] } @{$user->{'dbs'}};
+	@alldbs = map { [ $_->{'type'}."_".$_->{'name'},
+			  $_->{'name'}." ($_->{'desc'})" ] } @dbs;
+	if ($user->{'mysql_user'} &&
+             $user->{'mysql_user'} ne $user->{'user'}) {
+		$usermsg = "<br>".&text('user_mysqluser',
+                             "<tt>$user->{'mysql_user'}</tt>");
+		}
 	print &ui_table_row(&hlink($text{'user_dbs'},"userdbs"),
-	  &ui_select("dbs", \@userdbs,
-	    [ map { [ $_->{'type'}."_".$_->{'name'},
-		      $_->{'name'}." ($_->{'desc'})" ] }
-		  @dbs ], 5, 1).
-	    ($user->{'mysql_user'} &&
-	     $user->{'mysql_user'} ne $user->{'user'} ?
-		"<br>".&text('user_mysqluser',
-			     "<tt>$user->{'mysql_user'}</tt>") : ""),
-	  2, \@tds);
+	  &ui_multi_select("dbs", \@userdbs, \@alldbs, 5, 1, 0,
+			   $text{'user_dbsall'}, $text{'user_dbssel'}).
+	  $usermsg, 2, \@tds);
 	}
 
 # Show secondary groups

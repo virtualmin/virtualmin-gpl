@@ -7528,7 +7528,8 @@ if ($_[0]) {
 		foreach $db (split(/\t+/, $init{'dbs'})) {
 			local ($type, $name) = split(/_/, $db, 2);
 			push(@dbs, { 'type' => $type,
-				     'name' => $name });
+				     'name' => $name,
+				     'desc' => $text{'databases_'.$type} });
 			}
 		$user->{'dbs'} = \@dbs;
 		}

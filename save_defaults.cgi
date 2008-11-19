@@ -65,7 +65,7 @@ else {
 	}
 
 # Save databases
-foreach $db (split(/\0/, $in{'dbs'})) {
+foreach $db (split(/\r?\n/, $in{'dbs'})) {
 	local ($type, $name) = split(/_/, $db, 2);
 	push(@dbs, { 'type' => $type, 'name' => $name });
 	}

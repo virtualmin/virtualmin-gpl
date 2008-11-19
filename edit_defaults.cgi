@@ -56,12 +56,13 @@ print &ui_table_row($text{'user_aliases'},
 # Databases
 @dbs = grep { $_->{'type'} eq 'mysql' } &domain_databases($d);
 if (@dbs) {
-	@userdbs = map { $_->{'type'}."_".$_->{'name'} } @{$user->{'dbs'}};
+	@userdbs = map { [ $_->{'type'}."_".$_->{'name'},
+			   $_->{'name'}." ($_->{'desc'})" ] } @{$user->{'dbs'}};
+	@alldbs = map { [ $_->{'type'}."_".$_->{'name'},
+			  $_->{'name'}." ($_->{'desc'})" ] } @dbs;
 	print &ui_table_row($text{'user_dbs'},
-	  &ui_select("dbs", \@userdbs,
-            [ map { [ $_->{'type'}."_".$_->{'name'},
-                      $_->{'name'}." (".$text{'databases_'.$_->{'type'}}.")" ] }
-                  @dbs ], 5, 1), 1);
+	  &ui_multi_select("dbs", \@userdbs, \@alldbs, 5, 1, 0,
+			   $text{'user_dbsall'}, $text{'user_dbssel'}), 1);
 	}
 
 # Secondary groups
