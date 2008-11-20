@@ -121,7 +121,14 @@ local $cmd = $backup_cron_cmd;
 $cmd .= " --id $backup->{'id'}" if ($backup->{'id'} != 1);
 local $job;
 if (!$wasnew) {
-	$job = &find_virtualmin_cron_job($cmd);
+	local @jobs = &find_virtualmin_cron_job($cmd);
+	if ($backup->{'id'} == 1) {
+		# The find_virtualmin_cron_job function will match
+		# backup.pl --id xxx when looking for backup.pl, so we have
+		# to filter it out
+		@jobs = grep { $_->{'command'} !~ /\-\-id/ } @jobs;
+		}
+	$job = $jobs[0];
 	}
 if ($backup->{'enabled'} && $job) {
 	# Fix job schedule
@@ -154,9 +161,12 @@ $backup->{'id'} == 1 && &error("The default backup cannot be deleted!");
 # Delete cron too
 &foreign_require("cron", "cron-lib.pl");
 local $cmd = $backup_cron_cmd." --id $backup->{'id'}";
-local $job = &find_virtualmin_cron_job($cmd);
-if ($job) {
-	&cron::delete_cron_job($job);
+local @jobs = &find_virtualmin_cron_job($cmd);
+if ($backup->{'id'} == 1) {
+	@jobs = grep { $_->{'command'} !~ /\-\-id/ } @jobs;
+	}
+if (@jobs) {
+	&cron::delete_cron_job($jobs[0]);
 	}
 }
 

@@ -51,3 +51,7 @@
 	- extract stuff into plans, make into separate objects
 	- ability to change plan after creation
 
+ - IPv6 support
+	- FS#4239
+	- Concurrent with v4, so that a domain can also have a v6 address
+	- Use in DNS, Apache
