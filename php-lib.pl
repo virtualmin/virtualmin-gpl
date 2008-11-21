@@ -114,7 +114,8 @@ foreach my $ver (@vers) {
 			}
 		&set_ownership_permissions($uid, $gid, 0755, "$inidir/php.ini");
 		if (&foreign_check("phpini")) {
-			# Fix up session save path and extension_dir
+			# Fix up session save path, extension_dir and
+			# gc_probability / gc_divisor
 			&foreign_require("phpini", "phpini-lib.pl");
 			local $pconf = &phpini::get_config("$inidir/php.ini");
 			local $tmp = &create_server_tmp($d);
@@ -127,6 +128,18 @@ foreach my $ver (@vers) {
 				&phpini::save_directive($pconf, "extension_dir",
 							undef);
 				}
+
+			# On some systems, these are not set and so sessions are
+			# never cleaned up.
+			local $prob = &phpini::find_value(
+				"session.gc_probability", $pconf);
+			local $div = &phpini::find_value(
+				"session.gc_divisor", $pconf);
+			&phpini::save_directive($pconf,
+				"session.gc_probability", 1) if (!$prob);
+			&phpini::save_directive($pconf,
+				"session.gc_divisor", 100) if (!$div);
+
 			&flush_file_lines("$inidir/php.ini");
 			}
 		}
