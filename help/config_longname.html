@@ -3,4 +3,18 @@
 This option determines whether the domain name used in usernames that contain the domain will be the full domain name, i.e. "virtualmin.com", just the first part, i.e. "virtualmin", or the user/group name for the domain. By default, the group name is used for new top-level servers, and the first part of the domain is used for sub-servers. <p>
 
 In some environments, it may be easier for users to understand a username like "joeuser@virtualmin.com" for their POP/IMAP or FTP login name than "joeuser.virtualmin". <p>
+
+This field also determines how a new virtual server's prefix is computed. The
+options are :
+
+<dl>
+<dt><b>Full domain name</b>
+<dd>The prefx is always the same as the domain name.<p>
+
+<dt><b>Username or first part of domain</b>
+<dd>The prefix is the same as virtual server's Unix group name, if it is a top-level virtual server. Otherwise, the following option applies. <p>
+
+<dt><b>First part of domain</b>
+<dd>The prefix is the first part of the domain, unless another virtual server is already using that prefix. So for the domain <tt>foo.com.au</tt>, the prefix would be (in order of preference) <tt>foo</tt>, <tt>foo.com</tt> or <tt>foo.com.au</tt>. <p>
+
 <footer>
