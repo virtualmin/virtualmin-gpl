@@ -1,2 +1,8 @@
 <header>Wildcard for additional allowed MySQL databases</header>
- If the domain owner is allowed to create new databases, you may specify a wildcard expression to restrict the names that may be used.
+
+This field is for entering a MySQL wildcard pattern that grants access to additional databases - perhaps something like <tt>${DB}_%</tt>. For a domain like <tt>example.com</tt>, this would be expanded to <tt>example_%</tt>, which would allow access to all databases starting with <tt>example_</tt>. <p>
+
+Because Virtualmin creates MySQL access rules for all databases it creates, this field can usually be left blank. It only needs to be filled in if you are creating additional databases via some other method outside of Virtualmin's control. <p>
+
+<footer>
+
