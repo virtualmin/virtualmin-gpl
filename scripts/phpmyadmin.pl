@@ -19,7 +19,7 @@ return "A browser-based MySQL database management interface.";
 # script_phpmyadmin_versions()
 sub script_phpmyadmin_versions
 {
-return ( "2.11.9.3", "2.9.2", "2.8.2.4" );
+return ( "3.0.1.1", "2.9.2", "2.8.2.4" );
 }
 
 sub script_phpmyadmin_version_desc
@@ -279,7 +279,7 @@ sub script_phpmyadmin_latest
 local ($ver) = @_;
 if (&compare_versions($ver, "2.10") > 0) {
 	return ( "http://www.phpmyadmin.net/home_page/index.php",
-		 "http://prdownloads.sourceforge.net/phpmyadmin/phpMyAdmin-([0-9\\.]+)-all-languages-utf-8-only\\.zip" );
+		 "http://prdownloads.sourceforge.net/phpmyadmin/phpMyAdmin-([0-9\\.]+)-all-languages\\.zip" );
 	}
 else {
 	return ( );
