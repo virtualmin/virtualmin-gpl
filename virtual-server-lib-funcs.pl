@@ -3513,7 +3513,7 @@ for($i=0; defined($t = $in{"type_$i"}); $i++) {
 	local $v = $in{"val_$i"};
 	$v =~ s/^\s+//;
 	$v =~ s/\s+$//;
-	if ($t == 1 && $v !~ /^(\S+)$/) {
+	if ($t == 1 && $v !~ /^([^\|\:\"\' \t\/\\\%]\S*)$/) {
 		&error(&text('alias_etype1', $v));
 		}
 	elsif ($t == 3 && $v !~ /^\/(\S+)$/ && $v !~ /^\.\//) {

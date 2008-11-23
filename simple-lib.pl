@@ -365,6 +365,10 @@ if (!$nobounce) {
 if ($in->{'forward'}) {
 	$in->{'forwardto'} || &error($text{'alias_eforward'});
 	$simple->{'forward'} = [ split(/\s+/, $in->{'forwardto'}) ];
+	foreach my $f (@{$simple->{'forward'}}) {
+		$f =~ /^([^\|\:\"\' \t\/\\\%]\S*)$/ ||
+			&error(&text('alias_etype1', $f));
+		}
 	}
 else {
 	delete($simple->{'forward'});
