@@ -356,11 +356,13 @@ sub check_mysql_clash
 if (!$_[1] || $_[1] eq 'db') {
 	&require_mysql();
 	local @dblist = &mysql::list_databases();
-	return 1 if (&indexof($_[0]->{'db'}, @dblist) >= 0);
+	return &text('setup_emysqldb', $_[0]->{'db'})
+		if (&indexof($_[0]->{'db'}, @dblist) >= 0);
 	}
 if (!$_[0]->{'parent'} && (!$_[1] || $_[1] eq 'user')) {
 	&require_mysql();
-	return 1 if (&mysql_user_exists($_[0]));
+	return &text('setup_emysqluser', &mysql_user($_[0]))
+		if (&mysql_user_exists($_[0]));
 	}
 return 0;
 }
