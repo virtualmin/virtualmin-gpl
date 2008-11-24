@@ -167,8 +167,8 @@ if (-d $_[0]->{'home'} && $_[0]->{'home'} ne "/") {
 		}
 	if ($err) {
 		# Ignore an error deleting a mount point
-		local ($mtab, $fstab) = &mount_point($_[0]->{'home'});
-		if ($mtab && $mtab->[0] eq $_[0]->{'home'}) {
+		local @subs = &sub_mount_points($_[0]->{'home'});
+		if (@subs) {
 			$err = undef;
 			}
 		}

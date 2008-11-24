@@ -10768,6 +10768,22 @@ print STDERR "Failed to find mount point for $dir\n";
 return ( );
 }
 
+# sub_mount_points(dir)
+# Returns the mtab entries for mounts at or under some directory
+sub sub_mount_points
+{
+local $dir = &resolve_links($_[0]);
+&foreign_require("mount", "mount-lib.pl");
+local @mounted = &mount::list_mounted();
+local @rv;
+foreach my $m (@mounted) {
+	if ($dir eq $m->[0] || &is_under_directory($dir, $m->[0])) {
+		push(@rv, $m);
+		}
+	}
+return @rv;
+}
+
 # show_template_basic(&tmpl)
 # Outputs HTML for editing basic template options (like the name)
 sub show_template_basic
