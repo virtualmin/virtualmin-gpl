@@ -9181,6 +9181,7 @@ if (defined(&list_visible_custom_links)) {
 			$l->{'cat'} = 'objects';
 			$l->{'catname'} = $text{'cat_objects'};
 			}
+		$l->{'nosort'} = 1;
 		}
 	}
 
