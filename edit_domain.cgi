@@ -356,6 +356,13 @@ else {
 			next;
 			}
 
+		# Don't show dir option for alias domains if not needed
+		if ($f eq 'dir' && $config{$f} == 3 && $d->{'alias'} &&
+		    $tmpl->{'aliascopy'}) {
+			print &ui_hidden($f, $d->{$f}),"\n";
+			next;
+			}
+
 		# Don't show features that are globally disabled
 		next if (!$config{$f} && defined($config{$f}));
 
