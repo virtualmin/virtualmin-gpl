@@ -915,6 +915,67 @@ foreach $u (@users) {
 return @users;
 }
 
+# list_all_groups_quotas([no-quotas])
+# Returns a list of all Unix groups, with quota info
+sub list_all_groups_quotas
+{
+# Get quotas for all groups
+&require_useradmin($_[0]);
+if (&has_quota_commands()) {
+	# Get from user quota command
+	if (!defined(%main::gsoft_home_quota) && !$_[0]) {
+		local $out = &run_quota_command("list_groups");
+		foreach my $l (split(/\r?\n/, $out)) {
+			local ($group, $used, $soft, $hard) = split(/\s+/, $l);
+			$main::gsoft_home_quota{$group} = $soft;
+			$main::ghard_home_quota{$group} = $hard;
+			$main::gused_home_quota{$group} = $used;
+			}
+		}
+	}
+else {
+	# Get from real quota system
+	if (!defined(%main::gsoft_home_quota) && &has_home_quotas() && !$_[0]) {
+		local $n = &quota::filesystem_groups($config{'home_quotas'});
+		local $i;
+		for($i=0; $i<$n; $i++) {
+			$main::gsoft_home_quota{$quota::group{$i,'group'}} =
+				$quota::group{$i,'sblocks'};
+			$main::ghard_home_quota{$quota::group{$i,'group'}} =
+				$quota::group{$i,'hblocks'};
+			$main::gused_home_quota{$quota::group{$i,'group'}} =
+				$quota::group{$i,'ublocks'};
+			}
+		}
+	if (!defined(%main::gsoft_mail_quota) && &has_mail_quotas() && !$_[0]) {
+		local $n = &quota::filesystem_groups($config{'mail_quotas'});
+		local $i;
+		for($i=0; $i<$n; $i++) {
+			$main::gsoft_mail_quota{$quota::group{$i,'group'}} =
+				$quota::group{$i,'sblocks'};
+			$main::ghard_mail_quota{$quota::group{$i,'group'}} =
+				$quota::group{$i,'hblocks'};
+			$main::gused_mail_quota{$quota::group{$i,'group'}} =
+				$quota::group{$i,'ublocks'};
+			}
+		}
+	}
+
+# Get group list and add in quota info
+local @groups = &foreign_call($usermodule, "list_groups");
+local $u;
+foreach $u (@groups) {
+	$u->{'module'} = $usermodule;
+	$u->{'softquota'} = $main::gsoft_home_quota{$u->{'group'}};
+	$u->{'hardquota'} = $main::ghard_home_quota{$u->{'group'}};
+	$u->{'uquota'} = $main::gused_home_quota{$u->{'group'}};
+	$u->{'softmquota'} = $main::gsoft_mail_quota{$u->{'group'}};
+	$u->{'hardmquota'} = $main::ghard_mail_quota{$u->{'group'}};
+	$u->{'umquota'} = $main::gused_mail_quota{$u->{'group'}};
+	}
+return @groups;
+}
+
 # create_user(&user, [&domain])
 # Create a mailbox or local user, his virtuser and possibly his alias
 sub create_user

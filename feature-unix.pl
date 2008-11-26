@@ -378,16 +378,17 @@ local ($d) = @_;
 return undef if ($d->{'parent'});	# sub-servers have no user
 
 # Make sure user exists and has right UID
-local @users = &list_all_users();
+local @users = &list_all_users_quotas(0);
 local ($user) = grep { $_->{'user'} eq $d->{'user'} } @users;
 return &text('validate_euser', $d->{'user'}) if (!$user);
 return &text('validate_euid', $d->{'user'}, $d->{'uid'}, $user->{'uid'})
 	if ($d->{'uid'} != $user->{'uid'});
 
 # Make sure group exists and has right ID
+local $group;
 if (&mail_system_needs_group() || $d->{'gid'} == $d->{'ugid'}) {
-	local @groups = &list_all_groups();
-	local ($group) = grep { $_->{'group'} eq $d->{'group'} } @groups;
+	local @groups = &list_all_groups_quotas(0);
+	($group) = grep { $_->{'group'} eq $d->{'group'} } @groups;
 	return &text('validate_egroup', $d->{'group'}) if (!$group);
 	return &text('validate_egid', $d->{'group'}, $d->{'gid'},
 				      $group->{'gid'})
@@ -400,6 +401,36 @@ local $encdes = &unix_crypt($d->{'pass'}, $user->{'pass'});
 if ($user->{'pass'} ne $encmd5 && $user->{'pass'} ne $encdes &&
     !$d->{'disabled'}) {
 	return &text('validate_eenc', $user->{'user'});
+	}
+
+# Compare the domain's user and group quotas with reality
+if (&has_home_quotas()) {
+	# Domain owner's Unix quota
+	local $want = $tmpl->{'quotatype'} eq 'hard' ? $user->{'hardquota'}
+						     : $user->{'softquota'};
+	local $bsize = &quota_bsize("home");
+	if ($want != $d->{'uquota'}) {
+		return &text('validate_euquota',
+		     $user->{'user'},
+		     $want ? &nice_size($want*$bsize)
+			   : $text{'form_unlimit'},
+		     $d->{'uquota'} ? &nice_size($d->{'uquota'}*$bsize)
+				    : $text{'form_unlimit'});
+		}
+
+	# Domain group's quota
+	if ($group) {
+		local $want = $tmpl->{'quotatype'} eq 'hard' ?
+			$group->{'hardquota'} : $group->{'softquota'};
+		if ($want != $d->{'quota'}) {
+			return &text('validate_egquota',
+			     $group->{'group'},
+			     $want ? &nice_size($want*$bsize)
+				   : $text{'form_unlimit'},
+			     $d->{'quota'} ? &nice_size($d->{'quota'}*$bsize)
+					   : $text{'form_unlimit'});
+			}
+		}
 	}
 
 return undef;
