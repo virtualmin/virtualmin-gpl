@@ -29,7 +29,7 @@ $test_alias = "testing";
 $test_alias_two = "yetanothertesting";
 $test_reseller = "testsel";
 $timeout = 60;			# Longest time a test should take
-$wget_command = "wget -O - --cache=off --proxy=off  ";
+$wget_command = "wget -O - --cache=off --proxy=off --no-check-certificate  ";
 $migration_dir = "/usr/local/webadmin/virtualmin/migration";
 $migration_ensim_domain = "apservice.org";
 $migration_ensim = "$migration_dir/$migration_ensim_domain.ensim.tar.gz";
@@ -1220,6 +1220,68 @@ if (!$webmin_user || !$webmin_pass) {
 	$remote_tests = [ { 'command' => 'echo Remote API tests cannot be run unless the --user and --pass parameters are given' } ];
 	}
 
+$ssl_tests = [
+	# Create a domain with SSL and a private IP
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test SSL domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
+		      [ 'allocate-ip' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test SSL home page' ],
+		      @create_args, ],
+        },
+
+	# Test DNS lookup
+	{ 'command' => 'host '.$test_domain,
+	  'antigrep' => &get_default_ip(),
+	},
+
+	# Test HTTP get
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test SSL home page',
+	},
+
+	# Test HTTPS get
+	{ 'command' => $wget_command.'https://'.$test_domain,
+	  'grep' => 'Test SSL home page',
+	},
+
+	# Test SSL cert
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Check PHP execution via HTTPS
+	{ 'command' => 'echo "<?php phpinfo(); ?>" >~'.
+		       $test_domain_user.'/public_html/test.php',
+	},
+	{ 'command' => $wget_command.'https://'.$test_domain.'/test.php',
+	  'grep' => 'PHP Version',
+	},
+
+	# Switch PHP mode to CGI
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'mode', 'cgi' ] ],
+	},
+
+	# Check PHP running via CGI via HTTPS
+	{ 'command' => 'echo "<?php system(\'id -a\'); ?>" >~'.
+		       $test_domain_user.'/public_html/test.php',
+	},
+	{ 'command' => $wget_command.'https://'.$test_domain.'/test.php',
+	  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { 'domains' => $domains_tests,
 	      'mailbox' => $mailbox_tests,
 	      'alias' => $alias_tests,
@@ -1234,12 +1296,13 @@ $alltests = { 'domains' => $domains_tests,
 	      'prepost' => $prepost_tests,
 	      'webmin' => $webmin_tests,
 	      'remote' => $remote_tests,
+	      'ssl' => $ssl_tests,
 	    };
 
 # Run selected tests
 $total_failed = 0;
 if (!@tests) {
-	@tests = keys %$alltests;
+	@tests = sort { $a cmp $b } (keys %$alltests);
 	}
 @tests = grep { &indexof($_, @skips) < 0 } @tests;
 foreach $tt (@tests) {
