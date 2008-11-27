@@ -145,6 +145,42 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 		}
 	&$second_print($text{'setup_done'});
 
+	# If DNSSEC was requested, set it up
+	if ($tmpl->{'dnssec'} eq 'yes') {
+		&$first_print($text{'setup_dnssec'});
+		local $zone = &get_bind_zone($_[0]->{'dom'});
+		if (!defined(&bind8::supports_dnssec) ||
+		    !&bind8::supports_dnssec()) {
+			# Not supported
+			&$second_print($text{'setup_enodnssec'});
+			}
+		else {
+			local ($ok, $size) = &bind8::compute_dnssec_key_size(
+				$tmpl->{'dnssec_alg'}, 1);
+			local $err;
+			if (!$ok) {
+				# Key size failed
+				&$second_print(
+					&text('setup_ednssecsize', $size));
+				}
+			elsif ($err = &bind8::create_dnssec_key(
+					$zone, $tmpl->{'dnssec_alg'}, $size)) {
+				# Key generation failed
+				&$second_print(
+					&text('setup_ednsseckey', $err));
+				}
+			elsif ($err = &bind8::sign_dnssec_zone($zone)) {
+				# Zone signing failed
+				&$second_print(
+					&text('setup_ednssecsign', $err));
+				}
+			else {
+				# All done!
+				&$second_print($text{'setup_done'});
+				}
+			}
+		}
+
 	# Create on slave servers
 	local $myip = $bconfig{'this_ip'} ||
 		      &to_ipaddress(&get_system_hostname());
@@ -179,7 +215,7 @@ else {
 	local $ipdom = $_[0]->{'virt'} ? $_[0] : $parent;
 	local $ip = $ipdom->{'dns_ip'} || $ipdom->{'ip'};
 	&create_standard_records($fn, $_[0], $ip);
-        &bind8::bump_soa_record($nfn, \@recs);
+	&post_records_change($parent, \@recs);
 
 	&release_lock_dns($parent);
 	&$second_print($text{'setup_done'});
@@ -202,6 +238,12 @@ if (!$_[0]->{'dns_submode'}) {
 	&obtain_lock_dns($_[0], 1);
 	local $z = &get_bind_zone($_[0]->{'dom'});
 	if ($z) {
+		# Delete any dnssec key
+		if (defined(&bind8::supports_dnssec) &&
+		    &bind8::supports_dnssec()) {
+			&bind8::delete_dnssec_key($z);
+			}
+
 		# Delete the records file
 		local $file = &bind8::find("file", $z->{'members'});
 		if ($file) {
@@ -256,7 +298,7 @@ else {
 			 $_[0]->{'dns_subalready'});
 		&bind8::delete_record($fn, $r);
 		}
-        &bind8::bump_soa_record($fn, \@recs);
+	&post_records_change($parent, \@recs);
 	&release_lock_dns($parent);
 	&$second_print($text{'setup_done'});
 	$_[0]->{'dns_submode'} = 0;
@@ -407,7 +449,7 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
                 }
 
         # Update SOA record
-        &bind8::bump_soa_record($nfn, \@recs);
+	&post_records_change($_[0], \@recs);
 	&unlock_file(&bind8::make_chroot($nfn));
 	$rv++;
 
@@ -449,7 +491,7 @@ if ($oldip ne $newip) {
 	&modify_records_ip_address(\@recs, $fn, $oldip, $newip);
 
 	# Update SOA record
-	&bind8::bump_soa_record($fn, \@recs);
+	&post_records_change($_[0], \@recs);
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}
@@ -468,7 +510,7 @@ if ($_[0]->{'mail'} && !$_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 		&$first_print($text{'save_dns4'});
 		local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 		&create_mx_records($fn, $_[0], $ip);
-		&bind8::bump_soa_record($fn, \@recs);
+		&post_records_change($_[0], \@recs);
 		&$second_print($text{'setup_done'});
 		$rv++;
 		}
@@ -507,7 +549,7 @@ elsif (!$_[0]->{'mail'} && $_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 		foreach my $r (reverse(@mx)) {
 			&bind8::delete_record($fn, $r);
 			}
-		&bind8::bump_soa_record($fn, \@recs);
+		&post_records_change($_[0], \@recs);
 		&$second_print($text{'setup_done'});
 		$rv++;
 		}
@@ -568,7 +610,7 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'} && $_[0]->{'mail'}) {
 		&bind8::delete_record($fn, $r);
 		}
 
-	&bind8::bump_soa_record($fn, \@recs);
+	&post_records_change($_[0], \@recs);
 	&$second_print($text{'setup_done'});
 	$rv++;
 	}
@@ -770,7 +812,7 @@ foreach my $r ('webmail', 'admin') {
 	}
 if ($count) {
 	local @recs = &bind8::read_zone_file($file, $d->{'dom'});
-	&bind8::bump_soa_record($file, \@recs);
+	&post_records_change($_[0], \@recs);
 	&register_post_action(\&restart_bind);
 	}
 return $count;
@@ -794,7 +836,7 @@ foreach my $r (reverse('webmail', 'admin')) {
 		}
 	}
 if ($count) {
-	&bind8::bump_soa_record($file, \@recs);
+	&post_records_change($_[0], \@recs);
 	&register_post_action(\&restart_bind);
 	}
 return $count;
@@ -824,7 +866,7 @@ elsif (!$star && $r) {
 	$any++;
 	}
 if ($any) {
-	&bind8::bump_soa_record($file, \@recs);
+	&post_records_change($d, \@recs);
 	&register_post_action(\&restart_bind);
 	}
 return $any;
@@ -1112,7 +1154,7 @@ if ($z) {
 
 	# Need to bump SOA
 	local @recs = &bind8::read_zone_file($fn, $_[0]->{'dom'});
-	&bind8::bump_soa_record($file->{'values'}->[0], \@recs);
+	&post_records_change($_[0], \@recs);
 
 	# Need to update IP addresses
 	local $r;
@@ -1381,6 +1423,21 @@ print &ui_table_row(&hlink($text{'tmpl_namedconf'}, "namedconf"),
 		 $tmpl->{'namedconf'} eq 'none' ? '' :
 			join("\n", split(/\t/, $tmpl->{'namedconf'})),
 		 5, 60));
+
+# DNSSEC for new domains
+if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec()) {
+	print &ui_table_hr();
+
+	# Setup for new domains?
+	print &ui_table_row(&hlink($text{'tmpl_dnssec'}, "dnssec"),
+		&none_def_input("dnssec", $tmpl->{'dnssec'}, $text{'yes'}, 0, 0,
+				$text{'no'}, [ "dnssec_alg" ]));
+
+	# Encryption algorithm
+	print &ui_table_row(&hlink($text{'tmpl_dnssec_alg'}, "dnssec_alg"),
+		&ui_select("dnssec_alg", $tmpl->{'dnssec_alg'} || "DSA",
+			   [ &bind8::list_dnssec_algorithms() ]));
+	}
 }
 
 # parse_template_dns(&tmpl)
@@ -1477,6 +1534,13 @@ if ($in{'namedconf_mode'} == 2) {
 		&error($text{'newdns_enamedconf'});
 		}
 	}
+
+# Save DNSSEC
+if (defined($in{'dnssec_mode'})) {
+	$tmpl->{'dnssec'} = $in{'dnssec_mode'} == 0 ? "none" :
+			    $in{'dnssec_mode'} == 1 ? undef : "yes";
+	$tmpl->{'dnssec_alg'} = $in{'dnssec_alg'};
+	}
 }
 
 # get_domain_spf(&domain)
@@ -1528,7 +1592,7 @@ else {
 	$bump = 0;
 	}
 if ($bump) {
-	&bind8::bump_soa_record($recs[0]->{'file'}, \@recs);
+	&post_records_change($d, \@recs);
 	&register_post_action(\&restart_bind);
 	}
 }
@@ -1618,6 +1682,32 @@ local @rv = grep { $_->{'name'} ne 'dummy' }
 	    &bind8::read_config_file($temp, 0);
 undef($bind8::get_chroot_cache);		# reset cache back
 return @rv;
+}
+
+# post_records_change(&domain, &recs)
+# Called after some records in a domain are changed, to bump to SOA
+# and possibly re-sign
+sub post_records_change
+{
+local ($d, $recs) = @_;
+&require_bind();
+local $z = &get_bind_zone($d->{'dom'});
+return "Failed to find zone for $d->{'dom'}" if (!$z);
+local $file = &bind8::find("file", $z->{'members'});
+return "Failed to find records file for $d->{'dom'}" if (!$file);
+&bind8::bump_soa_record($file, $recs);
+if (defined(&bind8::supports_dnssec) &&
+    &bind8::supports_dnssec()) {
+	# Re-sign too
+	eval {
+		local $main::error_must_die = 1;
+		&bind8::sign_dnssec_zone_if_key($z, $recs, 0);
+		};
+	if ($@) {
+		return "DNSSEC signing failed : $@";
+		}
+	}
+return undef;
 }
 
 # obtain_lock_dns(&domain, [named-conf-too])

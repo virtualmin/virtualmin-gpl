@@ -1,0 +1,12 @@
+<header>Create DNSSEC key and sign new domains?</header>
+
+When this option is enabled, Virtualmin will create a DNSSEC key for any new
+virtual server DNS domains, and use it to sign their records. Any time records
+are changed using Webmin or Virtualmin, the signatures will be automatically
+updated to match. <p>
+
+For DNSSEC to be truly useful, the public key for any new domains must be
+submitted to the registrar or owner of the parent DNS domain. <p>
+
+<footer>
+

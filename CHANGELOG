@@ -1014,3 +1014,4 @@ The CPU time resource limit can now be entered in seconds, rather than minutes. 
 Added a field to the Website Options page for setting the maximum run-time for PHP scripts.
 If the post-modification or creation script for a domain fails, its output is now displayed as an error message.
 Validation now checks that each domain's Unix user and group quotas match what Virtualmin expects.
+Added a DNS template option to have a DNSSEC key generated for new domains, and records automatically signed.

@@ -375,6 +375,7 @@ if (!$_[0]->{'parent'}) {
 sub validate_unix
 {
 local ($d) = @_;
+local $tmpl = &get_template($d->{'template'});
 return undef if ($d->{'parent'});	# sub-servers have no user
 
 # Make sure user exists and has right UID

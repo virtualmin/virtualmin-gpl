@@ -6464,6 +6464,8 @@ push(@rv, { 'id' => 0,
 	    'dns_sub' => $config{'bind_sub'} || "none",
 	    'dns_master' => $config{'bind_master'} || "none",
 	    'dns_ns' => $config{'dns_ns'},
+	    'dnssec' => $config{'dnssec'} || "none",
+	    'dnssec_alg' => $config{'dnssec_alg'},
 	    'namedconf' => $config{'namedconf'} || "none",
 	    'ftp' => $config{'proftpd_config'},
 	    'ftp_dir' => $config{'ftp_dir'},
@@ -6702,6 +6704,9 @@ if ($tmpl->{'id'} == 0) {
 	$config{'dns_ns'} = $tmpl->{'dns_ns'};
 	$config{'namedconf'} = $tmpl->{'namedconf'} eq 'none' ? undef :
 							$tmpl->{'namedconf'};
+	$config{'dnssec'} = $tmpl->{'dnssec'} eq 'none' ? undef
+							: $tmpl->{'dnssec'};
+	$config{'dnssec_alg'} = $tmpl->{'dnssec_alg'};
 	delete($config{'mx_server'});
 	$config{'proftpd_config'} = $tmpl->{'ftp'};
 	$config{'ftp_dir'} = $tmpl->{'ftp_dir'};
@@ -6898,7 +6903,7 @@ if (!$tmpl->{'default'}) {
 		    "php", "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "namedconf",
 		    "nodbname", "norename", "forceunder", "aliascopy", "bccto",
-		    "resources",
+		    "resources", "dnssec",
 		    @plugins,
 		    @php_wrapper_templates,
 		    "capabilities",

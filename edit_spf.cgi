@@ -10,7 +10,8 @@ $d = &get_domain($in{'dom'});
 
 print &ui_form_start("save_spf.cgi");
 print &ui_hidden("dom", $d->{'id'}),"\n";
-print &ui_table_start($text{'spf_header'}, undef, 2);
+@tds = ( "width=30%" );
+print &ui_table_start($text{'spf_header'}, "width=100%", 2, \@tds);
 
 # SPF enabled
 $spf = &get_domain_spf($d);
@@ -43,6 +44,24 @@ print &ui_table_row(&hlink($text{'spf_dnsip'}, 'dns_ip'),
 				    &text('spf_default', $d->{'ip'})));
 
 print &ui_table_end();
+
+# DNSSEC key details
+&require_bind();
+if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec()) {
+	$key = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+	if ($key) {
+		print &ui_hidden_table_start($text{'spf_header2'}, "width=100%",
+					     2, "dnssec", 0, \@tds);
+		print &ui_table_row($text{'spf_public'},
+			&ui_textarea("keyline", $key->{'publictext'}, 2, 80,
+				     "off", 0, "readonly"));
+		print &ui_table_row($text{'spf_private'},
+			&ui_textarea("keyline", $key->{'privatetext'}, 10, 80,
+				     "off", 0, "readonly"));
+		print &ui_hidden_table_end();
+		}
+	}
+
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 
 &ui_print_footer(&domain_footer_link($d),
