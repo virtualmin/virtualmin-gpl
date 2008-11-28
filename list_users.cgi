@@ -59,6 +59,11 @@ if ($virtualmin_pro) {
 	print &ui_buttons_end();
 	}
 
+# Make sure the left menu is showing this domain
+if (defined(&theme_select_domain)) {
+	&theme_select_domain($d);
+	}
+
 if ($single_domain_mode) {
 	&ui_print_footer(&domain_footer_link($d),
 			 "", $text{'index_return2'});
