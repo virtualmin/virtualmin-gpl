@@ -3147,8 +3147,20 @@ if (!$to) {
 	$cc = undef;
 	}
 &foreign_require("mailboxes", "mailboxes-lib.pl");
+
+# Set content type and encoding based on whether the email contains HTML
+# and/or non-ascii characters
 local $ctype = $template =~ /<html[^>]>|<body[^>]>/i ? "text/html"
 						     : "text/plain";
+local $cs = &get_charset();
+local $attach = $template =~ /[\177-\377]/ ?
+	{ 'headers' => [ [ 'Content-Type', $ctype.'; charset='.$cs ],
+		         [ 'Content-Transfer-Encoding', 'quoted-printable' ] ],
+          'data' => &mailboxes::quoted_encode($template) } :
+	{ 'headers' => [ [ 'Content-type', 'text/plain' ] ],
+	  'data' => &entities_to_ascii($template) };
+
+# Construct and send the email object
 local $mail = { 'headers' => [ [ 'From', $from ||
 					 $config{'from_addr'} ||
 					 &mailboxes::get_from_address() ],
@@ -3156,8 +3168,8 @@ local $mail = { 'headers' => [ [ 'From', $from ||
 			       $cc ? ( [ 'Cc', $cc ] ) : ( ),
 			       $bcc ? ( [ 'Bcc', $bcc ] ) : ( ),
 			       [ 'Subject', &entities_to_ascii($subject) ],
-			       [ 'Content-type', $ctype ] ],
-		'body' => $template };
+			     ],
+		'attach' => [ $attach ] };
 &mailboxes::send_mail($mail);
 return (1, &text('mail_ok', $to));
 }
