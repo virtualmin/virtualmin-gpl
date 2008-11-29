@@ -459,7 +459,7 @@ foreach $f (@feature_plugins) {
 		}
 	}
 $ftable = &ui_grid_table(\@grid, 2, 100,
-	[ "width=30% align=left", "width=70% align=left" ]);
+	[ "align=left", "align=left" ]);
 print &ui_table_row(undef, $ftable, 4);
 print &ui_hidden_table_end("feature");
 
