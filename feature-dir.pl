@@ -352,6 +352,22 @@ local $iflag = "$_[0]->{'home'}/.incremental";
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable($_[0], 1, 1);
 	}
+
+# Create exclude file, to skip local system-specific files
+local $xtemp = &transname();
+&open_tempfile(XTEMP, ">$xtemp");
+&print_tempfile(XTEMP, "cgi-bin/lang\n");	# Used by AWstats, and created
+&print_tempfile(XTEMP, "./cgi-bin/lang\n");	# locally .. so no need to
+&print_tempfile(XTEMP, "cgi-bin/lib\n");	# include in restore.
+&print_tempfile(XTEMP, "./cgi-bin/lib\n");
+&print_tempfile(XTEMP, "cgi-bin/plugins\n");
+&print_tempfile(XTEMP, "./cgi-bin/plugins\n");
+&print_tempfile(XTEMP, "public_html/icon\n");
+&print_tempfile(XTEMP, "./public_html/icon\n");
+&print_tempfile(XTEMP, "public_html/awstats-icon\n");
+&print_tempfile(XTEMP, "./public_html/awstats-icon\n");
+&close_tempfile(XTEMP);
+
 local $out;
 local $cf = &compression_format($_[1]);
 local $comp = $cf == 1 ? "gunzip -c" :
@@ -359,7 +375,7 @@ local $comp = $cf == 1 ? "gunzip -c" :
 	      $cf == 3 ? "bunzip2 -c" : "cat";
 local $q = quotemeta($_[1]);
 local $qh = quotemeta($_[0]->{'home'});
-local $tarcmd = "tar xf -";
+local $tarcmd = "tar xfX - $xtemp";
 #if ($_[6]) {
 #	# Run as domain owner - disabled, as this prevents some files from
 #	# being written to by tar

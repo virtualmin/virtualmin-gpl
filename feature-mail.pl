@@ -2662,6 +2662,7 @@ elsif (!&mail_under_home()) {
 local %mconfig = &foreign_config("mailboxes");
 local $newdir = $mconfig{'mail_usermin'};
 local $olddir = $_[0]->{'backup_mail_folders'};
+print STDERR "newdir=$newdir olddir=$olddir\n";
 if ($newdir && $olddir && $newdir ne $olddir && @users) {
 	# Need to migrate, such as when moving from a system using ~/mail/mbox
 	# to ~/Maildir/.dir
@@ -2702,6 +2703,13 @@ if ($newdir && $olddir && $newdir ne $olddir && @users) {
 				# Keep the same
 				$newf->{'type'} = $oldf->{'type'};
 				$newf->{'file'} = "$newbase/$oldnameorig";
+				}
+			if ($newf->{'type'} == 1 && !-d $newf->{'file'}) {
+				# Create Maildir if missing
+				&make_dir($newf->{'file'}, 0755);
+				&set_ownership_permissions(
+					$u->{'uid'}, $u->{'gid'}, 0755,
+					$newf->{'file'});
 				}
 			&mailboxes::mailbox_move_folder($oldf, $newf);
 			}
