@@ -59,6 +59,4 @@
  - Functional tests for SSL
 	- Script to allocate a shared IP address
 	- Test for regular sites on shared IP, SSL on shared IP
-
- - restore-domain.pl doesn't return correct code on clash
-
+	- CHANGELOG
