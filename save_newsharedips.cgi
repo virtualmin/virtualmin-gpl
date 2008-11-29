@@ -33,6 +33,18 @@ foreach $ip (@oldips) {
 		}
 	}
 
+# If requested, allocate a new one and bring it up
+if ($in{'alloc'}) {
+	&obtain_lock_virt();
+	$tmpl = &get_template(&get_init_template(0));
+	$newip = &free_ip_address($tmpl);
+	$newip || &error(&text('sharedips_ealloc', $tmpl->{'ranges'}));
+	$err = &activate_shared_ip($newip);
+	&error($err) if ($err);
+	push(@ips, $newip);
+	&release_lock_virt();
+	}
+
 # Save them
 &lock_file($module_config_file);
 &save_shared_ips(@ips);

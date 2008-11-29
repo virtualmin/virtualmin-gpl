@@ -32,6 +32,13 @@ print &ui_table_row($text{'sharedips_ips'},
 		    &ui_textarea("ips", join("\n", &list_shared_ips()),
 				 5, 20));
 
+# Allocate a new one from the default template
+$tmpl = &get_template(&get_init_template(0));
+if ($tmpl->{'ranges'}) {
+	print &ui_table_row(" ",
+		&ui_checkbox("alloc", 1, $text{'sharedips_alloc'}, 0));
+	}
+
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'sharedips_ok'} ] ]);
 

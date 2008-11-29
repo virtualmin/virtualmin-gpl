@@ -11530,6 +11530,39 @@ if (defined(&list_resellers)) {
 return 0;
 }
 
+# activate_shared_ip(address)
+# Create a new virtual interface using some IP address. Returns undef on success
+# or an error message on failure.
+sub activate_shared_ip
+{
+local ($ip) = @_;
+&obtain_lock_virt();
+&foreign_require("net", "net-lib.pl");
+local @boot = &net::active_interfaces();
+local ($iface) = grep { $_->{'fullname'} eq $config{'iface'} } @boot;
+if (!$iface) {
+	return &text('sharedips_missing', $config{'iface'});
+	}
+local $vmax = $config{'iface_base'} || int($net::min_virtual_number);
+foreach my $b (@boot) {
+	$vmax = $b->{'virtual'} if ($b->{'name'} eq $iface->{'name'} &&
+				    $b->{'virtual'} > $vmax);
+	}
+local $virt = { 'address' => $ip,
+		'netmask' => $net::virtual_netmask || $iface->{'netmask'},
+		'broadcast' => $net::virtual_netmask eq "255.255.255.255" ?
+				$ip : $iface->{'broadcast'},
+		'name' => $iface->{'name'},
+		'virtual' => $vmax+1,
+		'up' => 1,
+		'desc' => "Virtualmin shared address",
+	      };
+$virt->{'fullname'} = $virt->{'name'}.":".$virt->{'virtual'};
+&net::save_interface($virt);
+&net::activate_interface($virt);
+return undef;
+}
+
 # get_available_backup_features([safe-only])
 # Returns a list of features for which backups are possible
 sub get_available_backup_features

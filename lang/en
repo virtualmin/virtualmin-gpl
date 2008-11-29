@@ -3974,6 +3974,7 @@ sharedips_header=IP addresses shared by virtual servers
 sharedips_def=Default shared address
 sharedips_rips=Shared addresses for resellers
 sharedips_ips=Shared addresses for any servers
+sharedips_alloc=Allocate a new shared IP address
 sharedips_ok=Save
 sharedips_desc=This page displays existing shared IP addresses on the system, and allows you to enter others that can be used by multiple virtual servers.
 sharedips_err=Failed to save shared IP addresses
@@ -3983,6 +3984,8 @@ sharedips_erip='$1' is already a shared IP address for a reseller
 sharedips_edom='$1' is a private IP address for virtual server $2
 sharedips_eactive='$1' is not currently active on the system - use the Network Configuration module to enable it
 sharedips_eaway='$1' cannot be removed from the shared address list, as it is used by virtual server $2
+sharedips_ealloc=No free IP addresses were found in the allocation range $1
+sharedips_missing=Parent interface $1 does not exist!
 
 newdynip_title=Dynamic IP Update
 newdynip_enabled=Dynamic update enabled?
