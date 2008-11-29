@@ -28,6 +28,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-shared-address.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 use POSIX;
 
 # Parse command-line args
@@ -79,8 +80,10 @@ if ($ip eq "allocate") {
 
 # Activate if required, otherwise ensure it is on the system
 if ($activate) {
+	&obtain_lock_virt();
 	$err = &activate_shared_ip($ip);
-	&usage($err) if ($err);
+	&usage("Activation failed : $err") if ($err);
+	&release_lock_virt();
 	}
 else {
 	%active = map { $_->{'address'}, $_ } &net::active_interfaces();
@@ -93,6 +96,7 @@ else {
 &save_shared_ips(@oldips, $ip);
 &unlock_file($module_config_file);
 print "Created shared IP address $ip\n";
+&virtualmin_api_log(\@OLDARGV);
 
 sub usage
 {

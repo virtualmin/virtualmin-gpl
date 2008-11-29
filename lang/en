@@ -3986,6 +3986,9 @@ sharedips_eactive='$1' is not currently active on the system - use the Network C
 sharedips_eaway='$1' cannot be removed from the shared address list, as it is used by virtual server $2
 sharedips_ealloc=No free IP addresses were found in the allocation range $1
 sharedips_missing=Parent interface $1 does not exist!
+sharedips_eboot=Failed to find boot-time configuration for IP address
+sharedips_ebootreal=IP address is not virtual
+sharedips_eactive=Failed to find activate configuration for IP address
 
 newdynip_title=Dynamic IP Update
 newdynip_enabled=Dynamic update enabled?

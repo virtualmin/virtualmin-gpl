@@ -11536,7 +11536,6 @@ return 0;
 sub activate_shared_ip
 {
 local ($ip) = @_;
-&obtain_lock_virt();
 &foreign_require("net", "net-lib.pl");
 local @boot = &net::active_interfaces();
 local ($iface) = grep { $_->{'fullname'} eq $config{'iface'} } @boot;
@@ -11560,6 +11559,26 @@ local $virt = { 'address' => $ip,
 $virt->{'fullname'} = $virt->{'name'}.":".$virt->{'virtual'};
 &net::save_interface($virt);
 &net::activate_interface($virt);
+return undef;
+}
+
+# deactivate_shared_ip(address)
+# Removes the virtual interface using some IP address. Returns undef on success
+# or an error message on failure.
+sub deactivate_shared_ip
+{
+local ($ip) = @_;
+&foreign_require("net", "net-lib.pl");
+local @boot = &net::boot_interfaces();
+local @active = &net::active_interfaces();
+local ($b) = grep { $_->{'address'} eq $ip } @boot;
+$b || return $text{'sharedips_eboot'};
+$b->{'virtual'} eq '' && return $text{'sharedips_ebootreal'};
+local ($a) = grep { $_->{'address'} eq $ip } @active;
+$a || return $text{'sharedips_eactive'};
+$a->{'virtual'} eq '' && return $text{'sharedips_ebootreal'};
+&net::delete_interface($b);
+&net::deactivate_interface($a);
 return undef;
 }
 

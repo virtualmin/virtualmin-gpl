@@ -1017,3 +1017,4 @@ Validation now checks that each domain's Unix user and group quotas match what V
 Added a DNS template option to have a DNSSEC key generated for new domains, and records automatically signed.
 Email sent to domain owners is now properly encoded so that non-ASCII characters can be included.
 Added a checkbox to the Shared IP Addresses page to allocate a new shared IP, if allocation ranges have been defined.
+Shared IP addresses can now be listed, added and removed from the command line using the new list-shared-addresses.pl, create-shared-address.pl and delete-shared-address.pl scripts.
