@@ -1282,6 +1282,64 @@ $ssl_tests = [
 	  'cleanup' => 1 },
 	];
 
+# Shared IP address tests
+$shared_tests = [
+	# Allocate a shared IP
+	{ 'command' => 'create-shared-address.pl',
+	  'args' => [ [ 'allocate-ip' ], [ 'activate' ] ],
+	},
+
+	# Get the IP
+	{ 'command' => './list-shared-addresses.pl --name-only | tail -1',
+	  'save' => 'SHARED_IP',
+	},
+
+	# Create a domain on the shared IP
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test shared domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ],
+		      [ 'shared-ip', '$SHARED_IP' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test shared home page' ],
+		      @create_args, ],
+        },
+
+	# Test DNS and website
+	{ 'command' => 'host '.$test_domain,
+	  'grep' => '$SHARED_IP',
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test shared home page',
+	},
+	
+	# Change to the default IP
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'shared-ip', &get_default_ip() ] ],
+	},
+
+	# Test DNS and website again
+	{ 'command' => 'host '.$test_domain,
+	  'grep' => &get_default_ip(),
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test shared home page',
+	},
+
+	# Remove the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+
+	# Remove the shared IP
+	{ 'command' => 'delete-shared-address.pl',
+	  'args' => [ [ 'ip', '$SHARED_IP' ], [ 'deactivate' ] ],
+	  'cleanup' => 1,
+	},
+	];
+
 $alltests = { 'domains' => $domains_tests,
 	      'mailbox' => $mailbox_tests,
 	      'alias' => $alias_tests,
@@ -1297,6 +1355,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'webmin' => $webmin_tests,
 	      'remote' => $remote_tests,
 	      'ssl' => $ssl_tests,
+	      'shared' => $shared_tests,
 	    };
 
 # Run selected tests
@@ -1382,6 +1441,7 @@ if ($t->{'grep'}) {
 	# One line must match all regexps
 	local @greps = ref($t->{'grep'}) ? @{$t->{'grep'}} : ( $t->{'grep'} );
 	foreach my $grep (@greps) {
+		$grep = &substitute_template($grep, \%saved_vars);
 		local $match = 0;
 		foreach my $l (split(/\r?\n/, $out)) {
 			if ($l =~ /$grep/) {
@@ -1400,6 +1460,7 @@ if ($t->{'antigrep'}) {
 	local @greps = ref($t->{'antigrep'}) ? @{$t->{'antigrep'}}
 					     : ( $t->{'antigrep'} );
 	foreach my $grep (@greps) {
+		$grep = &substitute_template($grep, \%saved_vars);
 		local $match = 0;
 		foreach my $l (split(/\r?\n/, $out)) {
 			if ($l =~ /$grep/) {
@@ -1414,6 +1475,13 @@ if ($t->{'antigrep'}) {
 		}
 	}
 print $out if ($output);
+if ($t->{'save'}) {
+	# Save output to variable
+	$out =~ s/^\s*//;
+	$out =~ s/\s*$//;
+	$ENV{$t->{'save'}} = $out;
+	$saved_vars{$t->{'save'}} = $out;
+	}
 print "    .. success\n";
 return 1;
 }
