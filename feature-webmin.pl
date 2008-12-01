@@ -12,7 +12,7 @@ sub setup_webmin
 &$first_print($text{'setup_webmin'});
 &obtain_lock_webmin($_[0]);
 &require_acl();
-local ($wuser) = grep { $_->{'name'} eq $_[1]->{'user'} }
+local ($wuser) = grep { $_->{'name'} eq $_[0]->{'user'} }
 		      &acl::list_users();
 if ($wuser) {
 	# Update the modules for this Webmin user
