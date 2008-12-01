@@ -58,3 +58,4 @@
 
  - Functional tests for SSL
 	- Test for regular sites on shared IP, SSL on shared IP
+	- find_free_ip doesn't ping other machines
