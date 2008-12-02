@@ -926,7 +926,8 @@ local $r = defined($typestatus->{'mysql'}) ?
 		$typestatus->{'mysql'} == 1 :
 		&mysql::is_mysql_running();
 local @links = ( { 'link' => '/mysql/',
-		    'desc' => $text{'index_mymanage'} } );
+		   'desc' => $text{'index_mymanage'},
+		   'manage' => 1 } );
 if ($r == 1) {
 	return ( { 'status' => 1,
 		   'name' => $text{'index_myname'},

@@ -1860,7 +1860,8 @@ local ($typestatus) = @_;
 local $apid = defined($typestatus->{'apache'}) ?
 		$typestatus->{'apache'} == 1 : &get_apache_pid();
 local @links = ( { 'link' => '/apache/',
-		   'desc' => $text{'index_amanage'} } );
+		   'desc' => $text{'index_amanage'},
+		   'manage' => 1 } );
 if ($apid) {
 	return ( { 'status' => 1,
 		   'name' => $text{'index_aname'},

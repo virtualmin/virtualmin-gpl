@@ -569,7 +569,8 @@ local $r = defined($typestatus->{'postgresql'}) ?
                 $typestatus->{'postgresql'} == 1 :
 		&postgresql::is_postgresql_running();
 local @links = ( { 'link' => '/postgresql/',
-		    'desc' => $text{'index_pgmanage'} } );
+		   'desc' => $text{'index_pgmanage'},
+		   'manage' => 1 } );
 if ($r == 1) {
 	return ( { 'status' => 1,
 		   'name' => $text{'index_pgname'},

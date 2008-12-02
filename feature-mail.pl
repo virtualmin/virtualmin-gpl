@@ -3221,7 +3221,9 @@ local $msn = $config{'mail_system'} == 0 ? "postfix" :
 local $ms = $text{'mail_system_'.$config{'mail_system'}};
 local @rv;
 local @links;
-push(@links, { 'link' => "/$msn/", 'desc' => $text{'index_mmanage'} });
+push(@links, { 'link' => "/$msn/",
+	       'desc' => $text{'index_mmanage'},
+	       'manage' => 1 });
 if (&can_show_history() &&
     &indexof("mailcount", &list_historic_stats()) >= 0) {
 	foreach my $s ("mailcount", "spamcount", "viruscount") {

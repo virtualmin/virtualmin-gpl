@@ -404,7 +404,8 @@ else {
 	$status = &proftpd::get_proftpd_pid();
 	}
 local @links = ( { 'link' => '/proftpd/',
-		   'desc' => $text{'index_fmanage'} } );
+		   'desc' => $text{'index_fmanage'},
+	 	   'manage' => 1 } );
 if ($status) {
 	return ( { 'status' => 1,
 		   'name' => $text{'index_fname'},
