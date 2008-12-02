@@ -3250,9 +3250,9 @@ if (&foreign_installed("dovecot")) {
 	# Add status for Dovecot
 	&foreign_require("dovecot", "dovecot-lib.pl");
 	local @dlinks;
-	push(@links, { 'link' => "/dovecot/",
-		       'desc' => $text{'index_dmanage'},
-		       'manage' => 1 });
+	push(@dlinks, { 'link' => "/dovecot/",
+		        'desc' => $text{'index_dmanage'},
+		        'manage' => 1 });
 	if (&dovecot::is_dovecot_running()) {
 		push(@rv,{ 'status' => 1,
 			   'feature' => 'dovecot',
