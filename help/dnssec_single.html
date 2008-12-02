@@ -1,0 +1,11 @@
+<header>Number of DNSSEC keys</header>
+
+Recommended DNSSEC practice is for every zone to have two keys - one for
+signing the records (the zone key), and the other for signing just the
+zone key. However, you can use this option to change the default number
+of keys for new zones to just one, if that makes more sense for your
+system. This avoids the overhead of having to periodically re-generate and
+re-sign the zone key. <p>
+
+<footer>
+

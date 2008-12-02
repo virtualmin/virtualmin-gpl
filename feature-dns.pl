@@ -165,7 +165,8 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 					&text('setup_ednssecsize', $size));
 				}
 			elsif ($err = &bind8::create_dnssec_key(
-					$zone, $tmpl->{'dnssec_alg'}, $size)) {
+					$zone, $tmpl->{'dnssec_alg'}, $size,
+					$tmpl->{'dnssec_single'})) {
 				# Key generation failed
 				&$second_print(
 					&text('setup_ednsseckey', $err));
@@ -1433,12 +1434,18 @@ if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec()) {
 	# Setup for new domains?
 	print &ui_table_row(&hlink($text{'tmpl_dnssec'}, "dnssec"),
 		&none_def_input("dnssec", $tmpl->{'dnssec'}, $text{'yes'}, 0, 0,
-				$text{'no'}, [ "dnssec_alg" ]));
+			$text{'no'}, [ "dnssec_alg", "dnssec_single" ]));
 
 	# Encryption algorithm
 	print &ui_table_row(&hlink($text{'tmpl_dnssec_alg'}, "dnssec_alg"),
 		&ui_select("dnssec_alg", $tmpl->{'dnssec_alg'} || "DSA",
 			   [ &bind8::list_dnssec_algorithms() ]));
+
+	# One key or two?
+	print &ui_table_row(&hlink($text{'tmpl_dnssec_single'},"dnssec_single"),
+		&ui_radio("dnssec_single", $tmpl->{'dnssec_single'} ? 1 : 0,
+			  [ [ 0, $bind8::text{'zonedef_two'} ],
+			    [ 1, $bind8::text{'zonedef_one'} ] ]));
 	}
 }
 
@@ -1542,6 +1549,7 @@ if (defined($in{'dnssec_mode'})) {
 	$tmpl->{'dnssec'} = $in{'dnssec_mode'} == 0 ? "none" :
 			    $in{'dnssec_mode'} == 1 ? undef : "yes";
 	$tmpl->{'dnssec_alg'} = $in{'dnssec_alg'};
+	$tmpl->{'dnssec_single'} = $in{'dnssec_single'};
 	}
 }
 

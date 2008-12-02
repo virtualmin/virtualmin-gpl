@@ -2393,6 +2393,7 @@ tmpl_namedconf=Additional <tt>named.conf</tt> directives for new zones
 tmpl_namedconfbelow=Directives below ..
 tmpl_dnssec=Create DNSSEC key and sign new domains?
 tmpl_dnssec_alg=DNSSEC cryptographic algorithm
+tmpl_dnssec_single=Number of DNSSEC keys
 tmpl_alias=Create alias websites by
 tmpl_alias2=Creating ProxyPass virtual host
 tmpl_alias1=Adding ServerAlias to parent
