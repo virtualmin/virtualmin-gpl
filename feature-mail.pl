@@ -3249,20 +3249,26 @@ else {
 if (&foreign_installed("dovecot")) {
 	# Add status for Dovecot
 	&foreign_require("dovecot", "dovecot-lib.pl");
+	local @dlinks;
+	push(@links, { 'link' => "/dovecot/",
+		       'desc' => $text{'index_dmanage'},
+		       'manage' => 1 });
 	if (&dovecot::is_dovecot_running()) {
 		push(@rv,{ 'status' => 1,
 			   'feature' => 'dovecot',
 			   'name' => &text('index_dname', $ms),
 			   'desc' => $text{'index_dstop'},
 			   'restartdesc' => $text{'index_drestart'},
-			   'longdesc' => $text{'index_dstopdesc'} } );
+			   'longdesc' => $text{'index_dstopdesc'},
+			   'links' => \@dlinks } );
 		}
 	else {
 		push(@rv,{ 'status' => 0,
 			   'feature' => 'dovecot',
 			   'name' => &text('index_dname', $ms),
 			   'desc' => $text{'index_dstart'},
-			   'longdesc' => $text{'index_dstartdesc'} } );
+			   'longdesc' => $text{'index_dstartdesc'},
+			   'links' => \@dlinks } );
 		}
 	}
 return @rv;
