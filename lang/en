@@ -2197,7 +2197,6 @@ cert_esconf=Virtualmin could not find the <tt>openssl.cnf</tt> file on your syst
 cert_ealt=Invalid other domain name : $1
 cert_header2=Current SSL certificate details
 cert_cn=Web server hostname
-cert_alt=Alternate hostnames
 cert_ccn=Certificate authority name
 cert_o=Organization
 cert_city=City or locality
@@ -3990,7 +3989,7 @@ sharedips_ealloc=No free IP addresses were found in the allocation range $1
 sharedips_missing=Parent interface $1 does not exist!
 sharedips_eboot=Failed to find boot-time configuration for IP address
 sharedips_ebootreal=IP address is not virtual
-sharedips_eactive=Failed to find activate configuration for IP address
+sharedips_eactives=Failed to find active configuration for IP address
 
 newdynip_title=Dynamic IP Update
 newdynip_enabled=Dynamic update enabled?

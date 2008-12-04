@@ -11575,7 +11575,7 @@ local ($b) = grep { $_->{'address'} eq $ip } @boot;
 $b || return $text{'sharedips_eboot'};
 $b->{'virtual'} eq '' && return $text{'sharedips_ebootreal'};
 local ($a) = grep { $_->{'address'} eq $ip } @active;
-$a || return $text{'sharedips_eactive'};
+$a || return $text{'sharedips_eactives'};
 $a->{'virtual'} eq '' && return $text{'sharedips_ebootreal'};
 &net::delete_interface($b);
 &net::deactivate_interface($a);
