@@ -209,6 +209,7 @@ else {
 		}
 	}
 
+$has_spam++ if ($has_virus);	# Dependency
 push(@got, "spam") if ($has_spam);
 push(@got, "virus") if ($has_virus);
 
