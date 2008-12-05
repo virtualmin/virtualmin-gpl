@@ -18,7 +18,7 @@ return "SquirrelMail is a standards-based webmail package written in PHP";
 # script_squirrelmail_versions()
 sub script_squirrelmail_versions
 {
-return ( "1.4.16" );
+return ( "1.4.17" );
 }
 
 sub script_squirrelmail_version_desc
