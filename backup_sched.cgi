@@ -58,7 +58,6 @@ else {
 	@do_features || &error($text{'backup_efeatures'});
 	$dest = &parse_backup_destination("dest", \%in, $cbmode == 3, $d);
 	if ($in{'onebyone'}) {
-		$in{'dest_mode'} > 0 || &error($text{'backup_eonebyone1'});
 		$in{'fmt'} == 2 || &error($text{'backup_eonebyone2'});
 		}
 

@@ -87,7 +87,6 @@ if ($dest eq "download:" && $in{'fmt'}) {
 $origdest = $dest;
 $dest = &backup_strftime($dest) if ($in{'strftime'});
 if ($in{'onebyone'}) {
-	$in{'dest_mode'} > 0 || &error($text{'backup_eonebyone1'});
 	$in{'fmt'} == 2 || &error($text{'backup_eonebyone2'});
 	}
 
