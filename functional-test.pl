@@ -1340,6 +1340,97 @@ $shared_tests = [
 	},
 	];
 
+# Tests with SSL on shared IP
+$wildcard_tests = [
+	# Allocate a shared IP
+	{ 'command' => 'create-shared-address.pl',
+	  'args' => [ [ 'allocate-ip' ], [ 'activate' ] ],
+	},
+
+	# Get the IP
+	{ 'command' => './list-shared-addresses.pl --name-only | tail -1',
+	  'save' => 'SHARED_IP',
+	},
+
+	# Create a domain with SSL on the shared IP
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test SSL shared domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
+		      [ 'shared-ip', '$SHARED_IP' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test SSL shared home page' ],
+		      @create_args, ],
+        },
+
+	# Test DNS and website
+	{ 'command' => 'host '.$test_domain,
+	  'grep' => '$SHARED_IP',
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test SSL shared home page',
+	},
+
+	# Test SSL cert
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test SSL shared domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Create a sub-domain with SSL on the shared IP
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', "sslsub.".$test_domain ],
+		      [ 'desc', 'Test SSL shared sub-domain' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
+		      [ 'parent', $test_domain ],
+		      [ 'shared-ip', '$SHARED_IP' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test SSL shared sub-domain home page' ],
+		      @create_args, ],
+        },
+
+	# Test DNS and website for the sub-domain
+	{ 'command' => 'host '.'sslsub.'.$test_domain,
+	  'grep' => '$SHARED_IP',
+	},
+	{ 'command' => $wget_command.'http://sslsub.'.$test_domain,
+	  'grep' => 'Test SSL shared sub-domain home page',
+	},
+
+	# Test sub-domain SSL cert
+	{ 'command' => 'openssl s_client -host '.'sslsub.'.$test_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test SSL shared domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Try to create a domain on the same IP with a conflicting name,
+	# which should fail.
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'desc', 'Test SSL shared clash' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
+		      [ 'parent', $test_domain ],
+		      [ 'shared-ip', '$SHARED_IP' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test SSL shared clash' ],
+		      @create_args, ],
+	  'fail' => 1,
+        },
+
+	# Remove the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
+
+	# Remove the shared IP
+	{ 'command' => 'delete-shared-address.pl',
+	  'args' => [ [ 'ip', '$SHARED_IP' ], [ 'deactivate' ] ],
+	  'cleanup' => 1,
+	},
+	];
+
 $alltests = { 'domains' => $domains_tests,
 	      'mailbox' => $mailbox_tests,
 	      'alias' => $alias_tests,
@@ -1356,6 +1447,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'remote' => $remote_tests,
 	      'ssl' => $ssl_tests,
 	      'shared' => $shared_tests,
+	      'wildcard' => $wildcard_tests,
 	    };
 
 # Run selected tests
@@ -1393,12 +1485,14 @@ foreach $tt (@tests) {
 		$count++;
 		}
 	if (!$allok && ($count || $lastt->{'always_cleanup'}) && !$no_cleanup) {
-		# Run cleanup
-		($cleaner) = grep { $_->{'cleanup'} &&
+		# Run cleanups
+		@cleaners = grep { $_->{'cleanup'} &&
 				    $_->{'index'} >= $lastt->{'index'} } @tts;
-		if ($cleaner && $cleaner ne $lastt) {
-			$total++;
-			&run_test($cleaner);
+		foreach $cleaner (@cleaners) {
+			if ($cleaner ne $lastt) {
+				$total++;
+				&run_test($cleaner);
+				}
 			}
 		}
 	$skip = @tts - $total;
@@ -1482,7 +1576,8 @@ if ($t->{'save'}) {
 	$ENV{$t->{'save'}} = $out;
 	$saved_vars{$t->{'save'}} = $out;
 	}
-print "    .. success\n";
+print $t->{'fail'} ? "    .. successfully failed\n"
+		   : "    .. success\n";
 return 1;
 }
 
