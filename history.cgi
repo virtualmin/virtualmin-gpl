@@ -123,8 +123,11 @@ print &ui_hidden("period", $period);
 @grid = ( );
 foreach $s (sort { $text{'history_stat_'.$a} cmp
 		   $text{'history_stat_'.$b} } &list_historic_stats()) {
-	push(@grid, &ui_checkbox("stat", $s, $text{'history_stat_'.$s},
-			   	 &indexof($s, @stats) >= 0));
+	$link = "history.cgi?start=".&urlize($start).
+		"&period=".&urlize($period)."&stat=$s";
+	push(@grid, &ui_checkbox("stat", $s,
+			"<a href='$link'>".$text{'history_stat_'.$s}."</a>",
+			&indexof($s, @stats) >= 0));
 	}
 print &ui_grid_table(\@grid, 4);
 print &ui_form_end([ [ undef, $text{'history_ok'} ] ]);

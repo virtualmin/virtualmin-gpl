@@ -9460,6 +9460,12 @@ if (&reseller_admin() && $config{'bw_active'}) {
 		    'title' => $text{'edit_bwgraph'},
 		    'icon' => 'bw' });
 	}
+if (&can_show_history()) {
+	# History graphs
+	push(@rv, { 'url' => $vm."/history.cgi",
+		    'title' => $text{'edit_history'},
+		    'icon' => 'history' });
+	}
 
 # Set category names
 foreach my $l (@rv) {

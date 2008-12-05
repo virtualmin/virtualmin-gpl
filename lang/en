@@ -965,6 +965,7 @@ edit_weba=Webalizer Report
 edit_webadesc=Click this button to show the most recently generated Webalizer report for this virtual server.
 edit_bwgraph=Bandwidth Graph
 edit_bwgraphdesc=Click this button to display a graph of total bandwidth use for this virtual server and any sub-servers.
+edit_history=System Statistics
 edit_databases=Edit Databases
 edit_databasesdesc=View, create and delete databases associated with this virtual server.
 edit_scripts=Install Scripts
