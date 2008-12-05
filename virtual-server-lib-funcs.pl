@@ -5096,7 +5096,8 @@ return $out;
 }
 
 # free_ip_address(&template|&acl)
-# Returns an IP address within the allocation range which is not currently used
+# Returns an IP address within the allocation range which is not currently used.
+# Checks this system's configured interfaces, and does pings.
 sub free_ip_address
 {
 local ($tmpl) = @_;
@@ -5111,11 +5112,24 @@ foreach $r (@ranges) {
 	local $j;
 	for($j=$s; $j<=$e; $j++) {
 		local $try = "$base.$j";
-		return $try if (!$taken{$try});
+		return $try if (!$taken{$try} && !&ping_ip_address($try));
 		}
 	}
 return undef;
 }
+
+# ping_ip_address(hostname|ip)
+# Returns 1 if some host responds to a ping in 1 second
+sub ping_ip_address
+{
+local ($host) = @_;
+local $pingcmd = $gconfig{'os_type'} =~ /-linux$/ ? "ping -c 1 -t 1" : "ping";
+local ($out, $timed_out) = &backquote_with_timeout(
+	$pingcmd." ".$host." 2>&1", 1, 1);
+return !$timed_out && !$?;
+}
+
+
 
 # parse_ip_ranges(ranges)
 # Returns a list of all IP allocation ranges, each of which is a 2-element array

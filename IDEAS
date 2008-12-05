@@ -56,6 +56,3 @@
 	- Concurrent with v4, so that a domain can also have a v6 address
 	- Use in DNS, Apache
 
- - Functional tests for SSL
-	- Test for regular sites on shared IP, SSL on shared IP
-	- find_free_ip doesn't ping other machines
