@@ -3025,6 +3025,7 @@ scripts_optperlmod=Perl module $1 is recommended ..
 scripts_eperlsoftware=.. Virtualmin cannot work which software package contains this Perl module
 scripts_perlmod=Installing Perl module $1 from CPAN ..
 scripts_eperlmod=.. CPAN failed! See the error message above for details
+scripts_ecpan=.. the CPAN Perl module is not installed on your system.
 scripts_needpythonmod=Python module $1 is required ..
 scripts_epythonmod=.. automatic Python module installation is not supported on your system
 scripts_epythoninst=.. automatic Python module installation failed
