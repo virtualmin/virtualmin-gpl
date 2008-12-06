@@ -9240,8 +9240,8 @@ foreach my $l (&get_domain_actions($d), &feature_links($d)) {
 		}
 	else {
 		$l->{'url'} = "$vm/$l->{'page'}".
-			      "?dom=".$d->{'id'}."&".
-			      join("&", map { $_->[0]."=".&urlize($_->[1]) }
+			      "?dom=".$d->{'id'}."&amp;".
+			      join("&amp;", map { $_->[0]."=".&urlize($_->[1]) }
                                             @{$l->{'hidden'}});
 		}
 	$l->{'catname'} ||= $text{'cat_'.$l->{'cat'}};
@@ -9478,7 +9478,7 @@ if (&can_show_history()) {
 	# History graphs
 	push(@rv, { 'url' => $vm."/history.cgi",
 		    'title' => $text{'edit_history'},
-		    'icon' => 'history' });
+		    'icon' => 'graph' });
 	}
 
 # Set category names
