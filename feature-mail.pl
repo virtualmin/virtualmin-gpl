@@ -2662,7 +2662,6 @@ elsif (!&mail_under_home()) {
 local %mconfig = &foreign_config("mailboxes");
 local $newdir = $mconfig{'mail_usermin'};
 local $olddir = $_[0]->{'backup_mail_folders'};
-print STDERR "newdir=$newdir olddir=$olddir\n";
 if ($newdir && $olddir && $newdir ne $olddir && @users) {
 	# Need to migrate, such as when moving from a system using ~/mail/mbox
 	# to ~/Maildir/.dir

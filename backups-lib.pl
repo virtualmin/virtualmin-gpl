@@ -867,19 +867,38 @@ if ($ok) {
 
 		# See if this is a home-format backup, by looking for a .backup
 		# sub-directory
-		local $lout;
+		local ($lout, @lines, $reader);
 		local $cf = &compression_format($f);
-		local $comp = $cf == 1 ? "gunzip -c" :
-			      $cf == 2 ? "uncompress -c" :
-			      $cf == 3 ? "bunzip2 -c" : "cat";
-		local $reader = "$comp $q";
-		if ($asowner && $mode == 0) {
-			# Read as domain owner, to prevent access to other files
-			$reader = &command_as_user(
-				$doms[0]->{'user'}, 0, $reader);
+		if ($cf == 4) {
+			# ZIP files are extracted with a single command
+			$reader = "unzip -l $q";
+			if ($asowner && $mode == 0) {
+				# Read as domain owner, to prevent access to
+				# other files
+				$reader = &command_as_user(
+					$doms[0]->{'user'}, 0, $reader);
+				}
+			&execute_command($reader, undef, \$lout, \$lout);
+			foreach my $l (split(/\r?\n/, $lout)) {
+				if ($l =~ /^\s*(\d+)\s*\d+\-\d+\-\d+\s+\d+:\d+\s+(.*)/) {
+					push(@lines, $2);
+					}
+				}
 			}
-		&execute_command("$reader | $tar tf -", undef, \$lout, \$lout);
-		local @lines = split(/\n/, $lout);
+		else {
+			# Other formats use uncompress | tar
+			local $comp = $cf == 1 ? "gunzip -c" :
+				      $cf == 2 ? "uncompress -c" :
+				      $cf == 3 ? "bunzip2 -c" : "cat";
+			$reader = "$comp $q";
+			if ($asowner && $mode == 0) {
+				$reader = &command_as_user(
+					$doms[0]->{'user'}, 0, $reader);
+				}
+			&execute_command("$reader | $tar tf -", undef,
+					 \$lout, \$lout);
+			@lines = split(/\n/, $lout);
+			}
 		local $extract;
 		if (&indexof("./.backup/", @lines) >= 0 ||
 		    &indexof("./.backup", @lines) >= 0) {
@@ -895,8 +914,20 @@ if ($ok) {
 			$extract = ".backup";
 			}
 
-		&execute_command("cd ".quotemeta($restoredir)." && ".
-			"($reader | $tar xf - $extract)", undef, \$out, \$out);
+		# Do the actual extraction
+		if ($cf == 4) {
+			# Using unzip command
+			$reader =~ s/ -l / /;
+			&execute_command("cd ".quotemeta($restoredir)." && ".
+				$reader, undef,
+				\$out, \$out);
+			}
+		else {
+			# Using tar pipeline
+			&execute_command("cd ".quotemeta($restoredir)." && ".
+				"($reader | $tar xf - $extract)", undef,
+				\$out, \$out);
+			}
 		if ($?) {
 			&$second_print(&text('restore_firstfailed',
 					     "<tt>$f</tt>", "<pre>$out</pre>"));

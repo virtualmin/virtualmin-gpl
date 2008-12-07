@@ -231,10 +231,12 @@ return 0;
 # Backs up the server's home directory in tar format to the given file
 sub backup_dir
 {
-&$first_print($_[4] ?  $text{'backup_dirtarinc'} : $text{'backup_dirtar'});
+&$first_print($_[3] && $config{'compression'} == 3 ? $text{'backup_dirzip'} :
+	      $_[4] ?  $text{'backup_dirtarinc'} : $text{'backup_dirtar'});
 local $out;
 local $cmd;
 local $gzip = $_[3] && &has_command("gzip");
+local $tar = &get_tar_command(); 
 
 # Create exclude file
 $xtemp = &transname();
@@ -301,22 +303,28 @@ if ($_[5] && $_[3]) {
 # Do the backup
 if ($_[3] && $config{'compression'} == 0) {
 	# With gzip
-	$cmd = "tar cfX - $xtemp $iargs . | gzip -c | $writer";
+	$cmd = "$tar cfX - $xtemp $iargs . | gzip -c | $writer";
 	}
 elsif ($_[3] && $config{'compression'} == 1) {
 	# With bzip
-	$cmd = "tar cfX - $xtemp $iargs . | bzip2 -c | $writer";
+	$cmd = "$tar cfX - $xtemp $iargs . | bzip2 -c | $writer";
+	}
+elsif ($_[3] && $config{'compression'} == 3) {
+	# ZIP archive
+	$cmd = "zip -r -x\@$xtemp - . | $writer";
 	}
 else {
 	# Plain tar
-	$cmd = "tar cfX - $xtemp $iargs . | $writer";
+	$cmd = "$tar cfX - $xtemp $iargs . | $writer";
 	}
 local $ex = &execute_command("cd ".quotemeta($_[0]->{'home'})." && $cmd",
 			     undef, \$out, \$out);
 &unlink_file($iflag) if ($iflag);
 &copy_source_dest($ifilecopy, $ifile) if ($ifilecopy);
 if ($ex) {
-	&$second_print(&text('backup_dirtarfailed', "<pre>$out</pre>"));
+	&$second_print(&text($cmd =~ /^\S*zip/ ? 'backup_dirzipfailed'
+					       : 'backup_dirtarfailed',
+			     "<pre>".&html_escape($out)."</pre>"));
 	return 0;
 	}
 else {

@@ -57,9 +57,8 @@
 	- Use in DNS, Apache
 
  - ZIP format backups
-	- feature-dir.pl
 	- home-format backups / single file
+	- home-format restore - $extract not being set or used
 	- restore
-	- config check
 	- CHANGELOG
 	- gpl
