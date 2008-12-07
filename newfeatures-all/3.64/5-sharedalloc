@@ -1,0 +1,4 @@
+desc=Shared IP address allocation
+html=Added a checkbox to the Shared IP Addresses page to allocate a new shared IP, if allocation ranges have been defined.
+master=1
+link=edit_newsharedips.cgi
