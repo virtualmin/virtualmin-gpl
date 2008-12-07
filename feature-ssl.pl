@@ -737,6 +737,40 @@ else {
 &register_post_action(\&restart_apache, 1);
 }
 
+# check_cert_key_match(cert-text, key-text)
+# Checks if the modulus for a cert and key match and are valid. Returns undef 
+# on success or an error message on failure.
+sub check_cert_key_match
+{
+local ($certtext, $keytext) = @_;
+local $certfile = &transname();
+local $keyfile = &transname();
+foreach $tf ([ $certtext, $certfile ], [ $keytext, $keyfile ]) {
+	&open_tempfile(CERTOUT, ">$tf->[1]", 0, 1);
+	&print_tempfile(CERTOUT, $tf->[0]);
+	&close_tempfile(CERTOUT);
+	}
+# Get certificate modulus
+local $certmodout = &backquote_command(
+	"openssl x509 -noout -modulus -in $certfile 2>&1");
+$certmodout =~ /Modulus=([A-F0-9]+)/i ||
+	return "Certificate data is not valid : $certmodout";
+local $certmod = $1;
+
+# Get key modulus
+local $keymodout = &backquote_command(
+	"openssl rsa -noout -modulus -in $keyfile 2>&1");
+$keymodout =~ /Modulus=([A-F0-9]+)/i ||
+	return "Key data is not valid : $keymodout";
+local $keymod = $1;
+
+# Make sure they match
+$certmod eq $keymod ||
+	return "Certificate and private key do not match";
+
+return undef;
+}
+
 # cert_pem_data(&domain)
 # Returns a domain's cert in PEM format
 sub cert_pem_data

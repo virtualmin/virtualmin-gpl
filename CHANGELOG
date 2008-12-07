@@ -1019,3 +1019,4 @@ Email sent to domain owners is now properly encoded so that non-ASCII characters
 Added a checkbox to the Shared IP Addresses page to allocate a new shared IP, if allocation ranges have been defined.
 Shared IP addresses can now be listed, added and removed from the command line using the new list-shared-addresses.pl, create-shared-address.pl and delete-shared-address.pl scripts.
 Virtual server backups can now be in ZIP format, by changing the 'Backup compression format' option on the Module Config page. TAR format is still recommended though, as it better preserves Unix filesystem attributes.
+When submitting a new SSL certificate and key, they are checked to ensure a modulus match, ensuring that they were generated and can be used together.

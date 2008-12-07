@@ -22,6 +22,10 @@ $newkey =~ s/\r//g;
 $passok = &check_passphrase($newkey, $in{'pass_def'} ? undef : $in{'pass'});
 $passok || &error($text{'newkey_epass'});
 
+# Check that the cert and key match
+$certerr = &check_cert_key_match($cert, $newkey);
+$certerr && &error(&text('newkey_ematch', $certerr));
+
 &ui_print_header(&domain_in($d), $text{'newkey_title'}, "");
 
 # Make sure Apache is setup to use the right key files

@@ -2256,6 +2256,7 @@ newkey_ecert=Missing or invalid signed SSL certificate
 newkey_enewkey=Missing or invalid SSL private key
 newkey_saving=Saving certificate and private key ..
 newkey_epass=Private key is password-protected, but either none was entered or the password was incorrect
+newkey_ematch=Certificate problem detected : $1
 
 newbw_title=Bandwidth Monitoring
 newbw_desc=This page can be used to enable bandwidth accounting for virtual servers, to notify server owners and the master administrator when a server exceeds its allowed bandwidth.
