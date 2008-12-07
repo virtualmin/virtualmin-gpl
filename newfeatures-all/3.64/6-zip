@@ -1,0 +1,4 @@
+desc=ZIP format backups
+html=Virtual server backups can now be in ZIP format, by changing the 'Backup compression format' option on the Module Config page. TAR format is still recommended though, as it better preserves Unix filesystem attributes.
+master=1
+link=../config.cgi?virtual-server

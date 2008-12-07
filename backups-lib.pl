@@ -913,11 +913,20 @@ if ($ok) {
 			$homeformat{$f} = $f;
 			$extract = ".backup";
 			}
+		elsif (&indexof(".backup/", @lines) >= 0) {
+			# Home format as in ZIP file
+			$homeformat{$f} = $f;
+			$extract = ".backup/*";
+			}
 
 		# Do the actual extraction
 		if ($cf == 4) {
 			# Using unzip command
-			$reader =~ s/ -l / /;
+			$reader = "unzip $q $extract";
+			if ($asowner && $mode == 0) {
+				$reader = &command_as_user(
+					$doms[0]->{'user'}, 0, $reader);
+				}
 			&execute_command("cd ".quotemeta($restoredir)." && ".
 				$reader, undef,
 				\$out, \$out);

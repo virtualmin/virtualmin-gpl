@@ -378,18 +378,25 @@ local $xtemp = &transname();
 
 local $out;
 local $cf = &compression_format($_[1]);
-local $comp = $cf == 1 ? "gunzip -c" :
-	      $cf == 2 ? "uncompress -c" :
-	      $cf == 3 ? "bunzip2 -c" : "cat";
 local $q = quotemeta($_[1]);
 local $qh = quotemeta($_[0]->{'home'});
-local $tarcmd = "tar xfX - $xtemp";
-#if ($_[6]) {
-#	# Run as domain owner - disabled, as this prevents some files from
-#	# being written to by tar
-#	$tarcmd = &command_as_user($_[0]->{'user'}, 0, $tarcmd);
-#	}
-&execute_command("cd $qh && $comp $q | $tarcmd", undef, \$out, \$out);
+if ($cf == 4) {
+	# Unzip command does un-compression and un-archiving
+	# XXX ZIP doesn't support excludes of paths :-(
+	&execute_command("cd $qh && unzip -o $q", undef, \$out, \$out);
+	}
+else {
+	local $comp = $cf == 1 ? "gunzip -c" :
+		      $cf == 2 ? "uncompress -c" :
+		      $cf == 3 ? "bunzip2 -c" : "cat";
+	local $tarcmd = "tar xfX - $xtemp";
+	#if ($_[6]) {
+	#	# Run as domain owner - disabled, as this prevents some files
+	#	# from being written to by tar
+	#	$tarcmd = &command_as_user($_[0]->{'user'}, 0, $tarcmd);
+	#	}
+	&execute_command("cd $qh && $comp $q | $tarcmd", undef, \$out, \$out);
+	}
 if ($?) {
 	# Errors about utime in the tar extract are ignored when running
 	# as the domain owner
