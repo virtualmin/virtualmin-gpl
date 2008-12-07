@@ -40,6 +40,7 @@ $migration_plesk = "$migration_dir/$migration_plesk_domain.plesk.txt";
 $migration_plesk_windows_domain = "sbcher.com";
 $migration_plesk_windows = "$migration_dir/$migration_plesk_windows_domain.plesk_windows.psa";
 $test_backup_file = "/tmp/$test_domain.tar.gz";
+$test_backup_dir = "/tmp/functional-test-backups";
 $test_email_dir = "/usr/local/webadmin/virtualmin/testmail";
 $spam_email_file = "$test_email_dir/spam.txt";
 $virus_email_file = "$test_email_dir/virus.txt";
@@ -49,6 +50,10 @@ $supports_fcgid = &indexof("fcgid", &supported_php_modes()) >= 0;
 		 [ 'no-email' ],
 		 [ 'no-slaves' ],
 	  	 [ 'no-secondaries' ] );
+
+# Cleanup backup dir
+system("rm -rf $test_backup_dir");
+system("mkdir -p $test_backup_dir");
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -1000,6 +1005,86 @@ $backup_tests = [
 	  'cleanup' => 1 },
 	];
 
+$multibackup_tests = [
+	# Create a parent domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ], [ 'mail' ],
+		      [ 'mysql' ], [ 'spam' ], [ 'virus' ], [ 'webmin' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Add a user to the domain being backed up
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
+	# Create a sub-server to be included
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+	},
+
+	# Back them both up to a directory
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $test_backup_dir ] ],
+	},
+
+	# Delete web page
+	{ 'command' => 'rm -f ~'.$test_domain_user.'/public_html/index.*',
+	},
+
+	# Restore with the domain still in place
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'all-domains' ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_dir ] ],
+	},
+
+	# Test that everything will works
+	@post_restore_tests,
+
+	# Delete the domains, in preparation for re-creation
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Restore with the domain still in place
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'all-domains' ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_dir ] ],
+	},
+
+	# Run various tests again
+	@post_restore_tests,
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+
+	];
+
 $mail_tests = [
 	# Create a domain to get spam
 	{ 'command' => 'create-domain.pl',
@@ -1441,6 +1526,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'migrate' => $migrate_tests,
 	      'move' => $move_tests,
 	      'backup' => $backup_tests,
+	      'multibackup' => $multibackup_tests,
               'mail' => $mail_tests,
 	      'prepost' => $prepost_tests,
 	      'webmin' => $webmin_tests,
