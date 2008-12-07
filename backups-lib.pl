@@ -347,7 +347,8 @@ local $hfsuffix;
 if ($homefmt) {
 	@backupfeatures = ((grep { $_ ne "dir" } @$features), "dir");
 	$hfsuffix = $config{'compression'} == 0 ? "tar.gz" :
-		    $config{'compression'} == 1 ? "tar.bz2" : "tar";
+		    $config{'compression'} == 1 ? "tar.bz2" :
+		    $config{'compression'} == 3 ? "zip" : "tar";
 	}
 
 # Go through all the domains, and for each feature call the backup function
@@ -524,7 +525,6 @@ if ($ok) {
 			# Work out dest file and compression command
 			local $destfile = "$d->{'dom'}.tar";
 			local $comp = "cat";
-			local $qf = quotemeta("$dest/$destfile");
 			if ($config{'compression'} == 0) {
 				$destfile .= ".gz";
 				$comp = "gzip -c";
@@ -533,6 +533,10 @@ if ($ok) {
 				$destfile .= ".bz2";
 				$comp = "bzip2 -c";
 				}
+			elsif ($config{'compression'} == 3) {
+				$destfile =~ s/\.tar$/\.zip/;
+				}
+			local $qf = quotemeta("$dest/$destfile");
 			local $writer = "cat >$qf";
 			if ($asd) {
 				$writer = &command_as_user(
@@ -548,7 +552,19 @@ if ($ok) {
 			&execute_command($toucher);
 
 			# Start the tar command
-			&execute_command("cd $backupdir && ($tar cf - $d->{'dom'}_* | $comp) 2>&1 | $writer", undef, \$out);
+			if ($config{'compression'} == 3) {
+				# ZIP does both archiving and compression
+				&execute_command("cd $backupdir && ".
+					 "zip -r - $d->{'dom'}_* | ".
+					 $writer,
+					 undef, \$out);
+				}
+			else {
+				&execute_command("cd $backupdir && ".
+						 "($tar cf - $d->{'dom'}_* | ".
+						 "$comp) 2>&1 | $writer",
+						 undef, \$out);
+				}
 			push(@destfiles, $destfile);
 			$destfiles_map{$destfile} = $d;
 			if ($?) {
@@ -582,9 +598,20 @@ if ($ok) {
 
 		# Start the tar command
 		&$first_print($text{'backup_final'});
-		&execute_command("cd $backupdir && ($tar cf - . | $comp) 2>&1 | $writer", undef, \$out);
+		if ($dest =~ /\.zip$/i) {
+			# Use zip command to archive and compress
+			&execute_command("cd $backupdir && ".
+					 "zip -r - . | $writer",
+					 undef, \$out);
+			}
+		else {
+			&execute_command("cd $backupdir && ".
+					 "($tar cf - . | $comp) 2>&1 | $writer",
+					 undef, \$out);
+			}
 		if ($?) {
-			&$second_print(&text('backup_finalfailed', "<pre>$out</pre>"));
+			&$second_print(&text('backup_finalfailed',
+					     "<pre>$out</pre>"));
 			$ok = 0;
 			}
 		else {
@@ -1326,10 +1353,16 @@ else {
 	local $out;
 	local $q = quotemeta($backup);
 	local $cf = &compression_format($backup);
-	local $comp = $cf == 1 ? "gunzip -c" :
-		      $cf == 2 ? "uncompress -c" :
-		      $cf == 3 ? "bunzip2 -c" : "cat";
-	$out = `($comp $q | $tar tf -) 2>&1`;
+	if ($cf == 4) {
+		# Special handling for zip
+		$out = `unzip -l $q 2>&1`;
+		}
+	else {
+		local $comp = $cf == 1 ? "gunzip -c" :
+			      $cf == 2 ? "uncompress -c" :
+			      $cf == 3 ? "bunzip2 -c" : "cat";
+		$out = `($comp $q | $tar tf -) 2>&1`;
+		}
 	if ($?) {
 		return $text{'restore_etar'};
 		}
@@ -1337,12 +1370,12 @@ else {
 	# Look for a home-format backup first
 	local ($l, %rv, %done, $dotbackup, @virtfiles);
 	foreach $l (split(/\n/, $out)) {
-		if ($l =~ /^(.\/)?.backup\/([^_]+)_([a-z0-9\-]+)$/) {
+		if ($l =~ /(^|\s)(.\/)?.backup\/([^_ ]+)_([a-z0-9\-]+)$/) {
 			# Found a .backup/domain_feature file
-			push(@{$rv{$2}}, $3) if (!$done{$2,$3}++);
-			push(@{$rv{$2}}, "dir") if (!$done{$2,"dir"}++);
-			if ($3 eq 'virtualmin') {
-				push(@virtfiles, $l);
+			push(@{$rv{$3}}, $4) if (!$done{$3,$4}++);
+			push(@{$rv{$3}}, "dir") if (!$done{$3,"dir"}++);
+			if ($4 eq 'virtualmin') {
+				push(@virtfiles, $2);
 				}
 			$dotbackup = 1;
 			}
@@ -1350,11 +1383,11 @@ else {
 	if (!$dotbackup) {
 		# Look for an old-format backup
 		foreach $l (split(/\n/, $out)) {
-			if ($l =~ /^(.\/)?([^_]+)_([a-z0-9\-]+)$/) {
+			if ($l =~ /(^|\s)(.\/)?([^_ ]+)_([a-z0-9\-]+)$/) {
 				# Found a domain_feature file
-				push(@{$rv{$2}}, $3) if (!$done{$2,$3}++);
-				if ($3 eq 'virtualmin') {
-					push(@virtfiles, $l);
+				push(@{$rv{$3}}, $4) if (!$done{$3,$4}++);
+				if ($4 eq 'virtualmin') {
+					push(@virtfiles, $2);
 					}
 				}
 			}
@@ -1365,7 +1398,14 @@ else {
 		local $vftemp = &transname();
 		&make_dir($vftemp, 0700);
 		local $qvirtfiles = join(" ", map { quotemeta($_) } @virtfiles);
-		$out = `cd $vftemp ; ($comp $q | $tar xvf - $qvirtfiles) 2>&1`;
+		if ($cf == 4) {
+			$out = &backquote_command("cd $vftemp && ".
+				"unzip $q $qvirtfiles 2>&1");
+			}
+		else {
+			$out = &backquote_command("cd $vftemp && ".
+				"($comp $q | $tar xvf - $qvirtfiles) 2>&1");
+			}
 		if (!$?) {
 			$doms = [ ];
 			foreach my $f (@virtfiles) {

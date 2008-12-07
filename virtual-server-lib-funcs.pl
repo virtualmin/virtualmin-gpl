@@ -10749,8 +10749,9 @@ if ($config{'unix'}) {
 if (!&has_command("tar")) {
 	return &text('check_ebcmd', "<tt>tar</tt>");
 	}
-local @bcmds = $config{'compression'} == 0 ? ( "gzip", "gunzip" )
-					   : ( "bzip2", "bunzip2" );
+local @bcmds = $config{'compression'} == 0 ? ( "gzip", "gunzip" ) :
+	       $config{'compression'} == 3 ? ( "zip", "unzip" ) :
+					     ( "bzip2", "bunzip2" );
 foreach my $bcmd (@bcmds) {
 	if (!&has_command($bcmd)) {
 		return &text('check_ebcmd', "<tt>$bcmd</tt>");
