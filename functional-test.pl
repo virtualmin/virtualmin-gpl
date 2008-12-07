@@ -1085,6 +1085,108 @@ $multibackup_tests = [
 
 	];
 
+$ssh_backup_prefix = "ssh://$test_target_domain_user:smeg\@localhost".
+		     "/home/$test_target_domain_user";
+$ftp_backup_prefix = "ftp://$test_target_domain_user:smeg\@localhost".
+		     "/home/$test_target_domain_user";
+$remotebackup_tests = [
+	# Create a domain for the backup target
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'desc', 'Test target domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ],
+		      @create_args, ],
+        },
+	
+	# Create a simple domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ], [ 'mail' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Backup via SSH
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$ssh_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+
+	# Restore via SSH
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', "$ssh_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+
+	# Delete the backups file
+	{ 'command' => "rm -rf /home/$test_target_domain_user/$test_domain.tar.gz" },
+
+	# Backup via FTP
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$ftp_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+
+	# Restore via FTP
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', "$ftp_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+
+	# Backup via SSH in home format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', "$ssh_backup_prefix/backups" ] ],
+	},
+
+	# Restore via SSH in home format
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', "$ssh_backup_prefix/backups" ] ],
+	},
+
+	# Delete the backups dir
+	{ 'command' => "rm -rf /home/$test_target_domain_user/backups" },
+
+	# Backup via FTP in home format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', "$ftp_backup_prefix/backups" ] ],
+	},
+
+	# Restore via FTP in home format
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', "$ftp_backup_prefix/backups" ] ],
+	},
+
+	# Cleanup the target domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ] ],
+	  'cleanup' => 1,
+	},
+
+	# Cleanup the backup domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
+	];
+
 $mail_tests = [
 	# Create a domain to get spam
 	{ 'command' => 'create-domain.pl',
@@ -1527,6 +1629,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'move' => $move_tests,
 	      'backup' => $backup_tests,
 	      'multibackup' => $multibackup_tests,
+	      'remotebackup' => $remotebackup_tests,
               'mail' => $mail_tests,
 	      'prepost' => $prepost_tests,
 	      'webmin' => $webmin_tests,

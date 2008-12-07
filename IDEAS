@@ -56,5 +56,3 @@
 	- Concurrent with v4, so that a domain can also have a v6 address
 	- Use in DNS, Apache
 
- - ZIP format backups
-	- backup functional tests for remote and home format
