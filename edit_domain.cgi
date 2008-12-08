@@ -62,12 +62,13 @@ else {
 	print &ui_table_row(" ", " ");	# End of row
 	}
 
-# Show creator
+# Show creator and date
 print &ui_table_row($text{'edit_created'},
-	$d->{'creator'} ? &text('edit_createdby',
-				&make_date($d->{'created'}), $d->{'creator'})
-			: &make_date($d->{'created'}),
-	undef, \@tds);
+		    &make_date($d->{'created'}), undef, \@tds);
+if ($d->{'creator'}) {
+	print &ui_table_row($text{'edit_createdwho'},
+			    "<tt>$d->{'creator'}</tt>", undef, \@tds);
+	}
 
 if ($virtualmin_pro) {
 	# Show reseller
