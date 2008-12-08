@@ -13,7 +13,7 @@ print $text{'exclude_desc'},"<p>\n";
 
 print &ui_form_start("save_exclude.cgi");
 print &ui_hidden("dom", $d->{'id'}),"\n";
-print &ui_table_start($text{'exclude_header'}, undef, 2, [ "width=30%" ]);
+print &ui_table_start($text{'exclude_header'}, undef, 2);
 
 @exclude = &get_backup_excludes($d);
 print &ui_table_row($text{'exclude_dirs'},

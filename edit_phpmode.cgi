@@ -11,7 +11,8 @@ $d = &get_domain($in{'dom'});
 
 print &ui_form_start("save_phpmode.cgi");
 print &ui_hidden("dom", $d->{'id'}),"\n";
-print &ui_hidden_table_start($text{'phpmode_header'}, undef, 2, "phpmode", 1);
+print &ui_hidden_table_start($text{'phpmode_header'}, "width=100%", 2,
+			     "phpmode", 1);
 
 if (!$d->{'alias'}) {
 	# Use suexec
@@ -73,7 +74,7 @@ print &ui_hidden_table_end();
 
 # Show PHP information
 if (defined(&list_php_modules) && !$d->{'alias'}) {
-	print &ui_hidden_table_start($text{'phpmode_header2'}, undef,
+	print &ui_hidden_table_start($text{'phpmode_header2'}, "width=100%",
 				     2, "phpinfo", 0);
 
 	# PHP modules for the domain
