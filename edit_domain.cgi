@@ -26,14 +26,14 @@ $tmpl = &get_template($d->{'template'});
 @tds = ( "width=30%" );
 print &ui_form_start("save_domain.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
-print &ui_hidden_table_start($text{'edit_header'}, "width=100%", 4,
-			     "basic", 1);
+print &ui_hidden_table_start($text{'edit_header'}, "width=100%", 2,
+			     "basic", 1, \@tds);
 
 # Domain name, with link
 $dname = &show_domain_name($d);
 print &ui_table_row($text{'edit_domain'},
 	$d->{'web'} ? "<tt><a target=_new href=http://$d->{'dom'}/>$dname</a></tt>"
-		    : "<tt>$dname</tt>", undef, \@tds);
+		    : "<tt>$dname</tt>");
 
 if ($dname ne $d->{'dom'}) {
 	print &ui_table_row($text{'edit_xndomain'},
@@ -42,65 +42,57 @@ if ($dname ne $d->{'dom'}) {
 
 # Username
 print &ui_table_row($text{'edit_user'},
-		    "<tt>$d->{'user'}</tt>",
-		    undef, \@tds);
+		    "<tt>$d->{'user'}</tt>");
 
 # Group name
-print &ui_table_row($text{'edit_group'},
-		    ($d->{'unix'} || $d->{'parent'}) && $d->{'group'} ?
-			"<tt>$d->{'group'}</tt>" : $text{'edit_nogroup'},
-		    undef, \@tds);
+if (($d->{'unix'} || $d->{'parent'}) && $d->{'group'}) {
+	print &ui_table_row($text{'edit_group'},
+			    "<tt>$d->{'group'}</tt>");
+	}
 
 if (!$aliasdom) {
 	# Only show database name/count for non-alias domains
 	@dbs = &domain_databases($d);
 	print &ui_table_row($text{'edit_dbs'},
-		@dbs > 0 ? scalar(@dbs) : $text{'edit_nodbs'},
-		undef, \@tds);
-	}
-else {
-	print &ui_table_row(" ", " ");	# End of row
+		@dbs > 0 ? scalar(@dbs) : $text{'edit_nodbs'});
 	}
 
 # Show creator and date
 print &ui_table_row($text{'edit_created'},
-		    &make_date($d->{'created'}), undef, \@tds);
-if ($d->{'creator'}) {
-	print &ui_table_row($text{'edit_createdwho'},
-			    "<tt>$d->{'creator'}</tt>", undef, \@tds);
-	}
+		    &text('edit_createdby',
+			  &make_date($d->{'created'}),
+			  $d->{'creator'} ? "<tt>$d->{'creator'}</tt>"
+				          : $text{'maillog_unknown'}));
 
-if ($virtualmin_pro) {
+if ($virtualmin_pro && $d->{'reseller'}) {
 	# Show reseller
 	print &ui_table_row($text{'edit_reseller'},
-			    $d->{'reseller'} ? "<tt>$d->{'reseller'}</tt>"
-					     : $text{'edit_noreseller'},
-			    undef, \@tds);
+			    "<tt>$d->{'reseller'}</tt>");
 	}
 
 if (!$aliasdom && $d->{'dir'}) {
 	# Show home directory
 	print &ui_table_row($text{'edit_home'},
-			    "<tt>$d->{'home'}</tt>", 3, \@tds);
+			    "<tt>$d->{'home'}</tt>");
 	}
 
 if ($d->{'proxy_pass_mode'} && $d->{'proxy_pass'} && $d->{'web'}) {
 	# Show forwarding / proxy destination
 	print &ui_table_row($text{'edit_proxy'.$d->{'proxy_pass_mode'}},
-			    "<tt>$d->{'proxy_pass'}</tt>", 3, \@tds);
+			    "<tt>$d->{'proxy_pass'}</tt>");
 	}
 
 if ($aliasdom) {
 	# Show link to aliased domain
 	print &ui_table_row($text{'edit_aliasto'},
 			    "<a href='edit_domain.cgi?dom=$d->{'alias'}'>".
-			    &show_domain_name($aliasdom)."</a>", 3, \@tds);
+			    &show_domain_name($aliasdom)."</a>");
 	}
 elsif ($parentdom) {
 	# Show link to parent domain
 	print &ui_table_row($text{'edit_parent'},
 			    "<a href='edit_domain.cgi?dom=$d->{'parent'}'>".
-			    &show_domain_name($parentdom)."</a>", 3, \@tds);
+			    &show_domain_name($parentdom)."</a>");
 	}
 
 print &ui_hidden_table_end("basic");
@@ -108,7 +100,7 @@ print &ui_hidden_table_end("basic");
 
 # Configuration settings section
 print &ui_hidden_table_start($text{'edit_headerc'}, "width=100%", 2,
-			     "config", 0);
+			     "config", 0, \@tds);
 
 # Show username prefix, with option to change
 if (!$aliasdom) {
@@ -118,8 +110,7 @@ if (!$aliasdom) {
 	print &ui_table_row($text{$msg},
 		@users ? "<tt>$d->{'prefix'}</tt> (".
 			  &text('edit_noprefix', scalar(@users)).")"
-		       : &ui_textbox("prefix", $d->{'prefix'}, 30),
-		undef, \@tds);
+		       : &ui_textbox("prefix", $d->{'prefix'}, 30));
 	}
 
 # Show active template
@@ -136,8 +127,7 @@ foreach $t (&list_templates()) {
 push(@cantmpls, $tmpl) if (!$gottmpl);
 print &ui_table_row($text{'edit_tmpl'},
 		    &ui_select("template", $tmpl->{'id'},
-			[ map { [ $_->{'id'}, $_->{'name'} ] } @cantmpls ]),
-		    undef, \@tds);
+			[ map { [ $_->{'id'}, $_->{'name'} ] } @cantmpls ]));
 
 if (!$aliasdom) {
 	# Show IP-related options
@@ -153,8 +143,7 @@ if (!$aliasdom) {
 		   $d->{'ip'} eq $reselip ? &text('edit_rshared',
 						  "<tt>$resel->{'name'}</tt>") :
 		   $d->{'ip'} eq &get_default_ip() ? $text{'edit_shared'}
-						   : $text{'edit_shared2'}), 1,
-		  \@tds);
+						   : $text{'edit_shared2'}));
 
 	if ($d->{'virt'}) {
 		# Got a virtual IP .. show option to remove
@@ -201,7 +190,7 @@ if (!$aliasdom) {
 			}
 		}
 	if (&can_use_feature("virt")) {
-		print &ui_table_row($text{'edit_virt'}, $ipfield, 1, \@tds);
+		print &ui_table_row($text{'edit_virt'}, $ipfield);
 		}
 	}
 else {
@@ -212,21 +201,19 @@ else {
 
 # Show description
 print &ui_table_row($text{'edit_owner'},
-		    &ui_textbox("owner", $d->{'owner'}, 50), 1, \@tds);
+		    &ui_textbox("owner", $d->{'owner'}, 50));
 
 if (!$parentdom) {
 	# Show owner's email address and password
 	print &ui_table_row($text{'edit_email'},
 		$d->{'unix'} ? &ui_opt_textbox("email", $d->{'email'}, 30,
 					       $text{'edit_email_def'})
-			     : &ui_textbox("email", $d->{'email'}, 30), 1,
-		\@tds);
+			     : &ui_textbox("email", $d->{'email'}, 30));
 
 	print &ui_table_row($text{'edit_passwd'},
 		&ui_opt_textbox("passwd", undef, 20,
 				$text{'edit_lv'}." ".&show_password_popup($d),
-				$text{'edit_set'}), 1,
-		\@tds);
+				$text{'edit_set'}));
 	}
 
 print &ui_hidden_table_end("config");
@@ -235,22 +222,20 @@ print &ui_hidden_table_end("config");
 @aliasdoms = &get_domain_by("alias", $d->{'id'});
 @subdoms = &get_domain_by("parent", $d->{'id'}, "alias", undef);
 if (@aliasdoms || @subdoms) {
-	print &ui_hidden_table_start($text{'edit_headers'}, "width=100%", 4,
-				     "subs", 0);
+	print &ui_hidden_table_start($text{'edit_headers'}, "width=100%", 2,
+				     "subs", 0, \@tds);
 	}
 
 # Show any sub-servers
 if (@subdoms) {
 	print &ui_table_row($text{'edit_subdoms'},
-		&domains_list_links(\@subdoms, "parent", $d->{'dom'}), 3,
-		\@tds);
+		&domains_list_links(\@subdoms, "parent", $d->{'dom'}));
 	}
 
 # Show any alias domains
 if (@aliasdoms) {
 	print &ui_table_row($text{'edit_aliasdoms'},
-		&domains_list_links(\@aliasdoms, "alias", $d->{'dom'}), 3,
-		\@tds);
+		&domains_list_links(\@aliasdoms, "alias", $d->{'dom'}));
 	}
 
 if (@aliasdoms || @subdoms) {
@@ -264,22 +249,22 @@ $limits_section = !$parentdom &&
 		  $config{'bw_active'});
 if ($limits_section) {
 	print &ui_hidden_table_start($text{'edit_limitsect'}, "width=100%", 2,
-				     "limits", 0);
+				     "limits", 0, \@tds);
 	}
 
 # Show user and group quota editing inputs
 if (&has_home_quotas() && !$parentdom && &can_edit_quotas()) {
 	print &ui_table_row($text{'edit_quota'},
-		&opt_quota_input("quota", $d->{'quota'}, "home"), 3, \@tds);
+		&opt_quota_input("quota", $d->{'quota'}, "home"));
 	print &ui_table_row($text{'edit_uquota'},
-		&opt_quota_input("uquota", $d->{'uquota'}, "home"), 3, \@tds);
+		&opt_quota_input("uquota", $d->{'uquota'}, "home"));
 	}
 
 if ($config{'bw_active'} && !$parentdom) {
 	# Show bandwidth limit and usage
 	if (&can_edit_bandwidth()) {
 		print &ui_table_row($text{'edit_bw'},
-			    &bandwidth_input("bw", $d->{'bw_limit'}), 3, \@tds);
+			    &bandwidth_input("bw", $d->{'bw_limit'}));
 
 		# If bandwidth disabling is enabled, show option to turn off
 		# for this domain
@@ -296,7 +281,7 @@ if ($config{'bw_active'} && !$parentdom) {
 		  $d->{'bw_limit'} ?
 		    &text('edit_bwpast_'.$config{'bw_past'},
 		        &nice_size($d->{'bw_limit'}), $config{'bw_period'}) :
-		    $text{'edit_bwnone'}, 3, \@tds);
+		    $text{'edit_bwnone'});
 		}
 	}
 
@@ -318,7 +303,7 @@ if ($limits_section) {
 $fields = &show_custom_fields($d, \@tds);
 if ($fields) {
 	print &ui_hidden_table_start($text{'edit_customsect'}, "width=100%", 2,
-				     "custom", 0);
+				     "custom", 0, \@tds);
 	print $fields;
 	print &ui_hidden_table_end("custom");
 	}
@@ -403,7 +388,7 @@ else {
 
 	$ftable = &ui_grid_table(\@grid, 2, 100,
 			[ "align=left", "align=left" ]);
-	print &ui_table_row(undef, $ftable, 4);
+	print &ui_table_row(undef, $ftable, 2);
 	print &ui_hidden_table_end("feature");
 	}
 

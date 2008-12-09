@@ -11,15 +11,15 @@
 
  x Upload to download.webmin.com:htdocs/download/virtualmin/
 	scp /tmp/virtual-server-$ver.wbm.gz download.webmin.com:htdocs/download/virtualmin/
-	scp /usr/src/OpenLinux/RPMS/noarch/wbm-virtual-server-$ver-1.noarch.rpm /usr/src/OpenLinux/SRPMS/wbm-virtual-server-$ver-1.src.rpm download.webmin.com:htdocs/download/virtualmin/
+	scp /usr/src/redhat/RPMS/noarch/wbm-virtual-server-$ver-1.noarch.rpm /usr/src/redhat/SRPMS/wbm-virtual-server-$ver-1.src.rpm download.webmin.com:htdocs/download/virtualmin/
 	scp /tmp/webmin-virtual-server_${ver}_all.deb download.webmin.com:htdocs/download/virtualmin/
 
  x Add to website
 	x Mention plugins too
 
- x Add to freshmeat.net
+ - Add to freshmeat.net
 
- x Announce on mailing list
+ - Announce on mailing list
 
  x Add to updates.txt
 
