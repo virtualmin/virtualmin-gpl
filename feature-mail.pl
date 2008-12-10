@@ -4010,6 +4010,7 @@ return \%rv;
 sub copy_alias_virtuals
 {
 local ($d, $aliasdom) = @_;
+local (%need, %already);
 &obtain_lock_mail($_[0]);
 if ($config{'mail_system'} == 1) {
 	# Find existing Sendmail virtusers in the alias domain
