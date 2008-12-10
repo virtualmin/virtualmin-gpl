@@ -439,6 +439,7 @@ if ($acls) {
 # Set global ACL options
 local %acl = ( 'feedback' => 0,
 	       'rpc' => 0,
+	       'negative' => 1,
 	       'readonly' => $_[0]->{'demo'},
 	       'fileunix' => $_[0]->{'user'} );
 $acl{'root'} = &resolve_links(
