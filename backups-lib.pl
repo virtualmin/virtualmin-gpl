@@ -630,6 +630,8 @@ if ($ok) {
 			&execute_command("cd $backupdir && $tar cf $dest/virtualmin.tar virtualmin_* 2>&1", undef, \$out, \$out);
 			push(@destfiles, "virtualmin.tar");
 			}
+		&set_ownership_permissions(undef, undef, 0700,
+					   $dest."/".$destfiles[$#destfiles]);
 		$destfiles_map{$destfiles[$#destfiles]} = "virtualmin";
 		}
 	$donefeatures{"virtualmin"} = $vbs;
