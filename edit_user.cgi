@@ -189,8 +189,8 @@ $hasmailfile = !$in{'new'} && ($user->{'email'} || @{$user->{'extraemail'}}) &&
 	       !$user->{'nomailfile'};
 $hasextra = !$user->{'noextra'};
 $hassend = $in{'new'} && &will_send_user_email($d) || !$in{'new'};
-$hasemail = $hasprimary || $hasmailfile || $hasextra || $hassend ||
-	    $config{'spam'};
+$hasspam = $config{'spam'} && $hasprimary;
+$hasemail = $hasprimary || $hasmailfile || $hasextra || $hassend || $hasspam;
 if ($hasemail) {
 	print &ui_hidden_table_start($text{'user_header2a'}, "width=100%", 2,
 				     "table2a", 0);
@@ -257,7 +257,7 @@ elsif (!$in{'new'}) {
 	}
 
 # Show spam check flag
-if ($config{'spam'}) {
+if ($hasspam) {
 	$awl_link = undef;
 	if (!$in{'new'} && &foreign_available("spam")) {
 		# Create AWL link
@@ -371,7 +371,8 @@ if ($anyother) {
 if (&can_mailbox_ftp() && !$mailbox && $user->{'unix'}) {
 	# Show FTP shell field
 	print &ui_table_row(&hlink($text{'user_ushell'}, "ushell"),
-		&available_shells_menu("shell", $user->{'shell'}, "mailbox"),
+		&available_shells_menu("shell", $user->{'shell'}, "mailbox",
+				       0, $user->{'webowner'}),
 		2, \@tds);
 	}
 

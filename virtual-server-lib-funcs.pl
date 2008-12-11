@@ -11986,13 +11986,18 @@ else {
 	}
 }
 
-# available_shells_menu(name, [value], 'owner'|'mailbox', [show-cmd])
+# available_shells_menu(name, [value], 'owner'|'mailbox', [show-cmd],
+# 			[must-ftp])
 # Returns HTML for selecting a shell for a mailbox or domain owner
 sub available_shells_menu
 {
-local ($name, $value, $type, $showcmd) = @_;
+local ($name, $value, $type, $showcmd, $mustftp) = @_;
 local @tshells = grep { $_->{$type} } &list_available_shells();
 local @ashells = grep { $_->{'avail'} } @tshells;
+if ($mustftp) {
+	# Only show shells with FTP access or better
+	@ashells = grep { $_->{'id'} ne 'nologin' } @ashells;
+	}
 if (defined($value)) {
 	# Is current shell on the list?
 	local ($got) = grep { $_->{'shell'} eq $value } @ashells;
