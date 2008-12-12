@@ -806,6 +806,11 @@ foreach my $m (@mods) {
 			# On Debian, the pdo_mysql module is in the mysql module
 			push(@poss, "php".$phpver."-mysql", "php-mysql");
 			}
+		elsif ($software::update_system eq "yum" &&
+		       ($m eq "domxml" || $m eq "dom") && $phpver >= 5) {
+			# On Redhat, the domxml module is in php-domxml
+			push(@poss, "php".$phpver."-xml", "php-xml");
+			}
 		}
 	foreach my $pkg (@poss) {
 		local @pinfo = &software::package_info($pkg);
