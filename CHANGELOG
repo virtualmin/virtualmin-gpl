@@ -1021,4 +1021,4 @@ Shared IP addresses can now be listed, added and removed from the command line u
 Virtual server backups can now be in ZIP format, by changing the 'Backup compression format' option on the Module Config page. TAR format is still recommended though, as it better preserves Unix filesystem attributes.
 When submitting a new SSL certificate and key, they are checked to ensure a modulus match, ensuring that they were generated and can be used together.
 ---- Changes since 3.63 ----
-Updated the PHPlist script installer to version 2.10.8, bbPress to 0.9.0.3, Wordpress to 2.7, Drupal to 5.13, Horde to 3.3.2, IMP to 4.3.2, Turba to 2.3.1, SugarCRM to 5.1.0c, and phpMyAdmin to 3.1.1.
+Updated the PHPlist script installer to version 2.10.8, bbPress to 0.9.0.3, Wordpress to 2.7, Drupal to 6.8, Horde to 3.3.2, IMP to 4.3.2, Turba to 2.3.1, SugarCRM to 5.1.0c, and phpMyAdmin to 3.1.1.
