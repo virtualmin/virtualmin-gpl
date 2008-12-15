@@ -435,7 +435,7 @@ DOMAIN: foreach $d (@$doms) {
 		push(@errdoms, $d->{'dom'});
 		}
 
-	if ($onebyone && $homefmt && $dok) {
+	if ($onebyone && $homefmt && $dok && $mode != 0) {
 		# Transfer this domain now
 		local $err;
 		local $df = "$d->{'dom'}.$hfsuffix";
