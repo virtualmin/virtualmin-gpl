@@ -312,12 +312,16 @@ local ($conn, $path, $method, $data) = @_;
 my $object = S3::S3Object->new($data);
 my $headers = { };
 my $metadata = $object->metadata;
-my $http_headers = $conn->merge_meta($headers, $metadata);
-$conn->_add_auth_header($http_headers, $method, $path);
+my $merged = $conn->merge_meta($headers, $metadata);
+$conn->_add_auth_header($merged, $method, $path);
 my $protocol = $conn->{IS_SECURE} ? 'https' : 'http';
 my $url = "$protocol://$conn->{SERVER}:$conn->{PORT}/$path";
 
-local $req = HTTP::Request->new($method, $url, $http_headers);
+my @http_headers;
+foreach my $h ($merged->header_field_names()) {
+	push(@http_headers, lc($h), $merged->header($h));
+	}
+local $req = HTTP::Request->new($method, $url, \@http_headers);
 $req->content($object->data);
 return $req;
 }
