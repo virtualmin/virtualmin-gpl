@@ -10463,7 +10463,7 @@ if ($config{'spam'}) {
 			return &text('check_spamwrappergroup', $mbc[0],
 				     $group || "GID $st[5]");
 			}
-		if (($st[2] & 06000) != 06000) {
+		if (($st[2] & 04000) != 04000) {
 			# Not setuid and setgid
 			return &text('check_spamwrapperperms', $mbc[0],
 				     sprintf("%o", $st[2]));
