@@ -346,7 +346,10 @@ sub mysql_user_exists
 &require_mysql();
 local $user = &mysql_user($_[0]);
 local $u = &mysql::execute_sql($mysql::master_db, "select password from user where user = '$user'");
-return @{$u->{'data'}} ? $u->{'data'}->[0]->[0] : undef;
+foreach my $r (@{$u->{'data'}}) {
+	return $r->[0] if ($r->[0]);
+	}
+return undef;
 }
 
 # check_mysql_clash(&domain, [field])
