@@ -1581,6 +1581,9 @@ check_edepssl=SSL cannot be enabled in Virtualmin's <a href='$1'>module configur
 check_eshell=Shell $1 for non-FTP users is included in $2, which may allow FTP access.
 check_eftpshell=Shell $1 for FTP users is not included in $2, which may prevent FTP access.
 check_enscd=Warning - the name service caching daemon (NSCD) is running on your system. This may prevent Virtualmin from properly creating new Unix users and groups.
+check_emysqlsync=Synchronization between Unix and MySQL users is enabled in the <a href='$1'>MySQL Database</a> module. This is not necessary, as Virtualmin creates MySQL accounts for domain owners when needed, and so must be turned off.
+check_equotasync=Default disk quotas for new users are enabled on the filesystems : $1. This is not necessary, as Virtualmin sets quotas for new domains, and so must be disabled in the <a href='$2'>Disk Quotas</a> module.
+check_egquotasync=Default disk quotas for new groups are enabled on the filesystems : $1. This is not necessary, as Virtualmin sets quotas for new domains, and so must be disabled in the <a href='$2'>Disk Quotas</a> module.
 check_enscd2=You can disable NSCD in the <a href='$1'>Bootup and Shutdown Actions</a> module.
 check_allwebmin=Updating all Webmin users with new settings..
 check_allresel=Updating all resellers with new settings..
