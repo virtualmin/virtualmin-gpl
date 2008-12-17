@@ -239,7 +239,7 @@ if (defined(&list_domain_scripts)) {
 				    if ($sinfo->{'url'} =~
 					s/\Q$olddname\E/$newdname/);
 				}
-			&save_domain_script($d, $sinfo) if ($changed);
+			&save_domain_script($doms[$i], $sinfo) if ($changed);
 			}
 		}
 	&$second_print($text{'setup_done'});
