@@ -110,6 +110,7 @@ if ($multi) {
 	@shells = grep { $_->{'owner'} } &list_available_shells();
 	$resok = defined(&supports_resource_limits) &&
 		 &supports_resource_limits();
+	@tmpls = &list_templates();
 	foreach $d (@doms) {
 		local @users = &list_domain_users($d, 0, 1, 0, 1);
 		local ($duser) = grep { $_->{'user'} eq $d->{'user'} } @users;
@@ -133,6 +134,11 @@ if ($multi) {
 			print "    Parent domain: $parentdom->{'dom'}\n";
 			}
 		print "    Description: $d->{'owner'}\n";
+		print "    Template ID: $d->{'template'}\n";
+		($tmpl) = grep { $_->{'id'} eq $d->{'template'} } @tmpls;
+		if ($tmpl) {
+			print "    Template: $tmpl->{'name'}\n";
+			}
 		print "    Username: $d->{'user'}\n";
 		print "    User ID: $d->{'uid'}\n";
 		print "    Group name: $d->{'group'}\n";
