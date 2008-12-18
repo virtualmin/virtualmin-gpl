@@ -4432,7 +4432,7 @@ nf_try=Try it ..
 
 chroot_title=FTP Directory Restrictions
 newchroot_title=$chroot_title
-newchroot_desc=This page allows you to configure which directories users logging in via FTP can access. Restrictions apply to the owners of selected virtual serves, and all their users with FTP access. Server owners that do not have any matching restriction will be able to see files outside their homes, although permissions will generally prevent them from accessing other virtual servers' directories.
+newchroot_desc=This page allows you to configure which directories users logging in via FTP can access. Restrictions apply to the owners of selected virtual servers, and all their users with FTP access. Server owners that do not have any matching restriction will be able to see files outside their homes, although permissions will generally prevent them from accessing other virtual servers' directories.
 chroot_ecannot=You are not allowed to configure FTP directory restrictions
 chroot_esupport=FTP directory restrictions can only be configured when the ProFTPd server is installed and in use
 chroot_active=Active?
