@@ -224,6 +224,10 @@ if (!$_[0]->{'parent'}) {
 			&set_pass_change($uinfo);
 			&set_usermin_imap_password($uinfo);
 			}
+		else {
+			# Password not changing
+			$uinfo->{'passmode'} = 4;
+			}
 
 		if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 			# Unix user was re-named

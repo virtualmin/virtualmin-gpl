@@ -104,10 +104,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--quota") {
 		$quota = shift(@ARGV);
+		$quota = 0 if ($quota eq "UNLIMITED");
 		$anylimits = 1;
 		}
 	elsif ($a eq "--uquota") {
 		$uquota = shift(@ARGV);
+		$uquota = 0 if ($uquota eq "UNLIMITED");
 		$anylimits = 1;
 		}
 	elsif ($a =~ /^--(\S+)$/ &&
@@ -661,8 +663,8 @@ print "                        [--max-mailboxes boxes]\n";
 print "                        [--max-dbs databases]\n";
 print "                        [--max-aliases aliases]\n";
 if (&has_home_quotas()) {
-	print "                        [--quota quota-for-domain]\n";
-	print "                        [--uquota quota-for-unix-user]\n";
+	print "                        [--quota quota-for-domain|UNLIMITED]\n";
+	print "                        [--uquota quota-for-unix-user|UNLIMITED]\n";
 	}
 if ($config{'bw_active'}) {
 	print "                        [--bandwidth bytes]\n";

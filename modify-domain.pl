@@ -64,10 +64,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--quota") {
 		$quota = shift(@ARGV);
+		$quota = 0 if ($quota eq 'UNLIMITED');
 		$quota =~ /^\d+$/ || &usage("Quota must be a number of blocks");
 		}
 	elsif ($a eq "--uquota") {
 		$uquota = shift(@ARGV);
+		$uquota = 0 if ($uquota eq 'UNLIMITED');
 		$uquota =~ /^\d+$/ ||&usage("Quota must be a number of blocks");
 		}
 	elsif ($a eq "--user") {
@@ -406,8 +408,8 @@ print "                        [--desc new-description]\n";
 print "                        [--user new-username]\n";
 print "                        [--pass new-password]\n";
 print "                        [--email new-email]\n";
-print "                        [--quota new-quota]\n";
-print "                        [--uquota new-unix-quota]\n";
+print "                        [--quota new-quota|UNLIMITED]\n";
+print "                        [--uquota new-unix-quota|UNLIMITED]\n";
 print "                        [--newdomain new-name]\n";
 print "                        [--bw bytes|NONE]\n";
 if ($config{'bw_disable'}) {
