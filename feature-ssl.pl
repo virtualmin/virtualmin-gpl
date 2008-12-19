@@ -533,26 +533,32 @@ sub backup_ssl
 # Save the apache directives
 local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 					    $_[0]->{'web_sslport'});
-local $lref = &read_file_lines($virt->{'file'});
-local $l;
-&open_tempfile(FILE, ">$_[1]");
-foreach $l (@$lref[$virt->{'line'} .. $virt->{'eline'}]) {
-	&print_tempfile(FILE, "$l\n");
-	}
-&close_tempfile(FILE);
+if ($virt) {
+	local $lref = &read_file_lines($virt->{'file'});
+	local $l;
+	&open_tempfile(FILE, ">$_[1]");
+	foreach $l (@$lref[$virt->{'line'} .. $virt->{'eline'}]) {
+		&print_tempfile(FILE, "$l\n");
+		}
+	&close_tempfile(FILE);
 
-# Save the cert and key, if any
-local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
-if ($cert) {
-	&copy_source_dest($cert, "$_[1]_cert");
-	}
-local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf, 1);
-if ($key && $key ne $cert) {
-	&copy_source_dest($key, "$_[1]_key");
-	}
+	# Save the cert and key, if any
+	local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
+	if ($cert) {
+		&copy_source_dest($cert, "$_[1]_cert");
+		}
+	local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf,1);
+	if ($key && $key ne $cert) {
+		&copy_source_dest($key, "$_[1]_key");
+		}
 
-&$second_print($text{'setup_done'});
-return 1;
+	&$second_print($text{'setup_done'});
+	return 1;
+	}
+else {
+	&$second_print($text{'delete_noapache'});
+	return 0;
+	}
 }
 
 # restore_ssl(&domain, file, &options)

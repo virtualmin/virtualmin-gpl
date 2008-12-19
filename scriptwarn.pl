@@ -28,11 +28,6 @@ if ($config{'scriptwarn_notify'}) {
 	print STDERR "New updates = ",scalar(@updates),"\n";
 	}
 
-# Find the Webmin protocol and port
-&get_miniserv_config(\%miniserv);
-$proto = $miniserv{'ssl'} ? 'https' : 'http';
-$port = $miniserv{'port'};
-
 # Send out an email for each domain
 %email = map { $_, 1 } split(/\s+/, $config{'scriptwarn_email'});
 ($other) = grep { /\@/ } (keys %email);
@@ -81,7 +76,7 @@ if (@updates) {
 				}
 			$email .= "\n";
 			$email .= &text('scriptwarn_where2',
-				&get_webmin_url($d)."/$module_name/".
+				&get_virtualmin_url($d)."/$module_name/".
 				"list_scripts.cgi?dom=$d->{'id'}")."\n\n";
 			$email =~ s/\\n/\n/g;
 
@@ -126,18 +121,6 @@ if ($debug_mode) {
 	}
 else {
 	&mailboxes::send_mail($mail);
-	}
-}
-
-sub get_webmin_url
-{
-local ($d) = @_;
-if ($config{'scriptwarn_url'}) {
-	$d ||= { 'dom' => &get_system_hostname() };
-	return &substitute_domain_template($config{'scriptwarn_url'}, $d);
-	}
-else {
-	return $proto."://$d->{'dom'}:$port";
 	}
 }
 

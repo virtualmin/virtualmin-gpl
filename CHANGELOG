@@ -1025,3 +1025,4 @@ Updated the PHPlist script installer to version 2.10.8, bbPress to 0.9.0.3, Word
 Mail files are now included by default in backups made and restored using backup-domain.pl and restore-domain.pl. This can be disabled with the --no-mailfiles parameter.
 Added validation to the configuration check to detect MySQL or disk quota synchronization that conflicts with Virtualmin.
 If a script like Wordpress has been upgraded outside of Virtualmin, it's new version will be detected to prevent false warnings about needing to upgrade.
+Script update notification, quota and backup emails now contain a link to Virtualmin, using a URL configurable on the Module Config page.

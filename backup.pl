@@ -129,6 +129,8 @@ if ($sched->{'email'} && $has_mailboxes &&
 		}
 	$total_time = time() - $start_time;
 	$output .= &text('backup_time', &nice_hour_mins_secs($total_time))."\n";
+	$output .= "\n";
+	$output .= &text('backup_fromvirt', &get_virtualmin_url())."\n";
 	$mail = { 'headers' => [ [ 'From', &get_global_from_address() ],
 				 [ 'Subject', "Backup of Virtualmin on $host" ],
 				 [ 'To', $sched->{'email'} ] ],
@@ -146,6 +148,9 @@ if ($sched->{'email_doms'} && $has_mailboxes &&
 	foreach $email (@emails) {
 		@edoms = grep { $_->{'emailto'} eq $email } @doms;
 		$eoutput = join("", map { $domain_output{$_->{'id'}} } @edoms);
+		$eoutput .= "\n";
+		$eoutput .= &text('backup_fromvirt',
+				&get_virtualmin_url($edoms[0]))."\n";
 		$mail = {
 		  'headers' =>
 			[ [ 'From', &get_global_from_address($edoms[0]) ],

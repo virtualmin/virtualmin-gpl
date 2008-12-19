@@ -12394,6 +12394,27 @@ if ($active) {
 	}
 }
 
+# get_virtualmin_url([&domain])
+# Returns a URL for accessing Virtualmin. Never has a trailing /
+sub get_virtualmin_url
+{
+local ($d) = @_;
+$d ||= { 'dom' => &get_system_hostname() };
+if ($config{'scriptwarn_url'}) {
+	# From module config
+	local $rv = &substitute_domain_template($config{'scriptwarn_url'}, $d);
+	$rv =~ s/\/$//;
+	return $rv;
+	}
+else {
+	# Work out from miniserv
+	&get_miniserv_config(\%miniserv);
+	$proto = $miniserv{'ssl'} ? 'https' : 'http';
+	$port = $miniserv{'port'};
+	return $proto."://$d->{'dom'}:$port";
+	}
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;

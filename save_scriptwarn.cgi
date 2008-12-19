@@ -18,14 +18,6 @@ if ($in{'enabled'}) {
 	@email || &error($text{'newscripts_ewnone'});
 	}
 $config{'scriptwarn_email'} = join(" ", @email);
-if ($in{'wurl_def'}) {
-	delete($config{'scriptwarn_url'});
-	}
-else {
-	$in{'wurl'} =~ /^(http|https):\/\/\S+$/ ||
-		&error($text{'newscripts_ewurl'});
-	$config{'scriptwarn_url'} = $in{'wurl'};
-	}
 $config{'scriptwarn_notify'} = $in{'wnotify'};
 $config{'scriptwarn_enabled'} = $in{'enabled'} ? 1 : 0;
 $config{'scriptwarn_wsched'} = $in{'wsched'};

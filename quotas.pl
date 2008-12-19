@@ -71,13 +71,17 @@ if (@msgs) {
 	$body = "The following Virtualmin servers have reached or are approaching\ntheir disk quota limits:\n\n";
 	$body .= sprintf($fmt, "Server", "Quota", "Usage", "Status");
 	$body .= sprintf($fmt, "-" x 20, "-" x 15, "-" x 15, "-" x 20);
+	$emaild = undef;
 	foreach $m (@msgs) {
 		$msg = $m->[3] ? "Reached $m->[3] %" : "Over quota";
+		$emaild ||= $m->[0];
 		$body .= sprintf($fmt, $m->[0]->{'dom'},
 				       &nice_size($m->[2]),
 				       &nice_size($m->[1]),
 				       $msg);
 		}
+	$body .= "\n";
+	$body .= "Sent by Virtualmin at: ".&get_virtualmin_url($emaild)."\n";
 
 	# Send the email
 	&foreign_require("mailboxes", "mailboxes-lib.pl");

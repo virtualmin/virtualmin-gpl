@@ -1989,6 +1989,7 @@ backup_edelftp=.. FTP deletion failed : $1
 backup_purgeesshls=.. failed to list directory via SSH : $1
 backup_deletingssh=Deleting file $1 via SSH, which is $2 days old ..
 backup_edelssh=.. SSH deletion failed : $1
+backup_fromvirt=Sent by Virtualmin at: $1
 
 restore_title=Restore Virtual Servers
 restore_header=Options for restoring backup

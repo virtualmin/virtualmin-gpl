@@ -39,6 +39,8 @@ if ($oldip ne $newip || $oldwhen < time()-28*24*60*60) {
 					"An attempt to update the dynamic IP ".
 					"for $h to $newip with ".
 					"$svc->{'desc'} failed: $err\n", 75))
+				"Sent by Virtualmin at: ".
+					&get_virtualmin_url()."\n"
 				);
 			}
 		exit(1);
@@ -77,7 +79,8 @@ if ($ip && $ip ne $oldip) {
 				"The IP address of $h has been successfully ".
 				"updated to $ip with $svc->{'desc'}. $dc ".
 				"virtual servers have been configured to use ".
-				"the new IP address\n", 75))
+				"the new IP address\n", 75))."\n".
+			"Sent by Virtualmin at: ".&get_virtualmin_url()."\n"
 			);
 		}
 	}
