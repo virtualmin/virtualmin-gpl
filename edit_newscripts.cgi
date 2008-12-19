@@ -109,6 +109,7 @@ print "$text{'newscripts_desc3'}<p>\n";
 
 # Find those we actually use, and the minimum version of each installed
 foreach $d (&list_domains()) {
+	&detect_real_script_versions($d);
 	foreach my $sinfo (&list_domain_scripts($d)) {
 		$n = $sinfo->{'name'};
 		$used{$n}++;

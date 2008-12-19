@@ -66,6 +66,7 @@ else {
 @doms || &usage("None of the selected virtual servers can have scripts");
 
 foreach my $d (@doms) {
+	&detect_real_script_versions($d);
 	@scripts = &list_domain_scripts($d);
 
 	if ($multi) {

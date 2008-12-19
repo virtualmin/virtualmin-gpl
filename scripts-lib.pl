@@ -120,6 +120,7 @@ local $rv = { 'name' => $name,
 	      'check_func' => "script_${name}_check",
 	      'install_func' => "script_${name}_install",
 	      'uninstall_func' => "script_${name}_uninstall",
+	      'realversion_func' => "script_${name}_realversion",
 	      'stop_func' => "script_${name}_stop",
 	      'stop_server_func' => "script_${name}_stop_server",
 	      'start_server_func' => "script_${name}_start_server",
@@ -202,7 +203,7 @@ foreach $o (keys %$opts) {
 &write_file("$script_log_directory/$d->{'id'}/$info{'id'}.script", \%info);
 }
 
-# save_domain_script(&domin, &sinfo)
+# save_domain_script(&domain, &sinfo)
 # Updates a script object for a domain on disk
 sub save_domain_script
 {
@@ -2124,6 +2125,26 @@ return $job->{'hours'} eq '0' && $job->{'days'} eq '*' &&
 								 undef;
 }
 
+# detect_real_script_versions(&domain)
+# Scan the list of installed scripts for some domain, and update the real
+# version number where necessary. Used to detect scripts that have been updated
+# manually via some internal function, like Wordpress
+sub detect_real_script_versions
+{
+local ($d) = @_;
+foreach my $sinfo (&list_domain_scripts($d)) {
+	my $script = &get_script($sinfo->{'name'});
+	my $rfunc = $script->{'realversion_func'};
+	if (defined(&$rfunc)) {
+		local $realver = &$rfunc($d, $sinfo->{'opts'}, $sinfo);
+		if ($realver ne $sinfo->{'version'}) {
+			# Version has changed .. fix
+			$sinfo->{'version'} = $realver;
+			&save_domain_script($d, $sinfo);
+			}
+		}
+	}
+}
 
 1;
 
