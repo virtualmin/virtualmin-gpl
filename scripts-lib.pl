@@ -1721,6 +1721,7 @@ sub list_script_upgrades
 local ($doms) = @_;
 local (%scache, @rv);
 foreach my $d (@$doms) {
+	&detect_real_script_versions($d);
 	foreach my $sinfo (&list_domain_scripts($d)) {
 		# Find the lowest version better or equal to the one we have
 		$script = $scache{$sinfo->{'name'}} ||
