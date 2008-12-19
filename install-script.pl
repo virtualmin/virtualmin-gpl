@@ -115,7 +115,12 @@ while(@ARGV > 0) {
 		$opts->{$oname} = $ovalue;
 		}
 	elsif ($a eq "--upgrade") {
-		$id = shift(@ARGV);
+		if (@ARGV && $ARGV[0] !~ /^\-/) {
+			$id = shift(@ARGV);
+			}
+		else {
+			$id = "";
+			}
 		}
 	elsif ($a eq "--mongrels") {
 		$opts->{'mongrels'} = shift(@ARGV);
@@ -156,11 +161,26 @@ else {
 		      "Available versions are : ".
 		      join(" ", @{$script->{'versions'}}));
 	}
-if ($id) {
+if (defined($id)) {
 	# Find script being upgraded
 	@scripts = &list_domain_scripts($d);
-	($sinfo) = grep { $_->{'id'} eq $id } @scripts;
-	$sinfo || &usage("No script install to upgrade with ID $id was found");
+	if ($id) {
+		($sinfo) = grep { $_->{'id'} eq $id } @scripts;
+		$sinfo || &usage("No script install to upgrade with ".
+				 "ID $id was found");
+		$sinfo->{'name'} eq $sname ||
+			&usage("Script with ID $id is of type ".
+			    "$sinfo->{'name'}, but type to install is $sname");
+		}
+	else {
+		# Assume same type
+		@sinfos = grep { $_->{'name'} eq $sname } @scripts;
+		@sinfos || &usage("No installed script of type $sname ".
+				  "was found");
+		@sinfos == 1 || &usage("More than one installed script of ".
+				       "type $sname was found");
+		$sinfo = $sinfos[0];
+		}
 	$opts = $sinfo->{'opts'};
 	$domuser = $sinfo->{'user'} || $d->{'user'};
 	$dompass = $sinfo->{'pass'} || $d->{'pass'};
