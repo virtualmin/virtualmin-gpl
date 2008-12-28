@@ -35,7 +35,8 @@ if ($uinfo) {
 	&set_ownership_permissions($uinfo->{'uid'}, $uinfo->{'gid'}, undef,
 				   $_[0]->{'home'});
 	}
-if ($tmpl->{'skel'} ne "none" && !$_[0]->{'nocopyskel'}) {
+if ($tmpl->{'skel'} ne "none" && !$_[0]->{'nocopyskel'} &&
+    !$_[0]->{'alias'}) {
 	&copy_skel_files(&substitute_domain_template($tmpl->{'skel'}, $_[0]),
 			 $uinfo, $_[0]->{'home'},
 			 $_[0]->{'group'} || $_[0]->{'ugroup'}, $_[0]);
