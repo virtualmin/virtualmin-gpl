@@ -63,3 +63,6 @@
  - Re-generate SSL cert when renaming a domain
 	- If self-signed
 
+ - For a sub-domain, copy /etc/skel/public_html to correct dir
+
+

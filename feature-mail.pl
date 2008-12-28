@@ -4188,6 +4188,7 @@ if ($config{'mail_server'} == 0) {
 					 { 'name' => '@'.$d->{'dom'},
 					   'value' => $email });
 		}
+	&postfix::regenerate_bcc_table();
 	}
 else {
 	return $text{'bcc_emailserver'};
