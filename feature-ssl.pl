@@ -93,20 +93,12 @@ if (!-r $_[0]->{'ssl_cert'} && !-r $_[0]->{'ssl_key'}) {
 	&lock_file($_[0]->{'ssl_cert'});
 	&lock_file($_[0]->{'ssl_key'});
 	local $size = $config{'key_size'} || $webmin::default_key_size;
-	&open_execute_command(CA, "openssl req -newkey rsa:$size -x509 -nodes -out $_[0]->{'ssl_cert'} -keyout $_[0]->{'ssl_key'} -days 1825 >$temp 2>&1", 0);
-	print CA ".\n";
-	print CA ".\n";
-	print CA ".\n";
-	print CA "$_[0]->{'owner'}\n";
-	print CA ".\n";
-	print CA "*.$_[0]->{'dom'}\n";
-	print CA ($_[0]->{'email'} || "."),"\n";
-	close(CA);
-	local $rv = $?;
-	local $out = `cat $temp`;
-	unlink($temp);
-	if (!-r $_[0]->{'ssl_cert'} || !-r $_[0]->{'ssl_key'} || $?) {
-		&$second_print(&text('setup_eopenssl', "<pre>$out</pre>"));
+	local $err = &generate_self_signed_cert(
+		$_[0]->{'ssl_cert'}, $_[0]->{'ssl_key'}, $size, 1825,
+		undef, undef, undef, $_[0]->{'owner'}, undef,
+		"*.$_[0]->{'dom'}", $_[0]->{'emailto'}, undef);
+	if ($err) {
+		&$second_print(&text('setup_eopenssl', $err));
 		return 0;
 		}
 	else {
@@ -276,7 +268,7 @@ if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 	&$second_print($text{'setup_done'});
 	}
 if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
-        # Domain name has changed
+        # Domain name has changed .. fix up Apache config
         &$first_print($text{'save_ssl2'});
         &apache::save_directive("ServerName", [ $_[0]->{'dom'} ], $vconf,$conf);
         local @sa = map { s/$_[1]->{'dom'}/$_[0]->{'dom'}/g; $_ }
@@ -286,6 +278,37 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
         $rv++;
         &$second_print($text{'setup_done'});
         }
+if ($_[0]->{'dom'} ne $_[1]->{'dom'} && &self_signed_cert($_[0]) &&
+    !&check_domain_certificate($_[0]->{'dom'}, $_[0])) {
+	# Domain name has changed .. re-generate self-signed cert
+	&$first_print($text{'save_ssl11'});
+	&foreign_require("webmin", "webmin-lib.pl");
+	local $info = &cert_info($_[0]);
+	&lock_file($_[0]->{'ssl_cert'});
+	&lock_file($_[0]->{'ssl_key'});
+	local $err = &generate_self_signed_cert(
+		$_[0]->{'ssl_cert'}, $_[0]->{'ssl_key'},
+		$config{'key_size'} || $webmin::default_key_size,
+		1825,
+		$info->{'c'},
+		$info->{'st'},
+		$info->{'l'},
+		$info->{'o'},
+		$info->{'ou'},
+		"*.$_[0]->{'dom'}",
+		$_[0]->{'emailto'},
+		$info->{'alt'},
+		);
+	&unlock_file($_[0]->{'ssl_key'});
+	&unlock_file($_[0]->{'ssl_cert'});
+	if ($err) {
+		&$second_print(&text('setup_eopenssl', $err));
+		}
+	else {
+		$rv++;
+		&$second_print($text{'setup_done'});
+		}
+	}
 
 # Changes for Webmin and Usermin
 if ($_[0]->{'ip'} ne $_[1]->{'ip'}) {
@@ -317,11 +340,11 @@ sub delete_ssl
 local $conf = &apache::get_config();
 
 # Remove the custom Listen directive added for the domain, if any
-&remove_listen($d, $conf, $d->{'web_sslport'});
+&remove_listen($d, $conf, $d->{'web_sslport'} || $default_web_sslport);
 
 # Remove the <virtualhost>
 local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
-					    $_[0]->{'web_sslport'});
+			    $_[0]->{'web_sslport'} || $default_web_sslport);
 local $tmpl = &get_template($_[0]->{'template'});
 if ($virt) {
 	&delete_web_virtual_server($virt);
@@ -651,17 +674,48 @@ open(OUT, "openssl x509 -in ".quotemeta($file)." -issuer -subject -enddate -text
 while(<OUT>) {
 	s/\r|\n//g;
 	s/http:\/\//http:\|\|/g;	# So we can parse with regexp
-	if (/subject=.*CN=([^\/]+)/) {
-		$rv{'cn'} = $1;
+	if (/subject=.*C=([^\/]+)/) {
+		$rv{'c'} = $1;
+		}
+	if (/subject=.*ST=([^\/]+)/) {
+		$rv{'st'} = $1;
+		}
+	if (/subject=.*L=([^\/]+)/) {
+		$rv{'l'} = $1;
 		}
 	if (/subject=.*O=([^\/]+)/) {
 		$rv{'o'} = $1;
 		}
-	if (/issuer=.*CN=([^\/]+)/) {
-		$rv{'issuer_cn'} = $1;
+	if (/subject=.*OU=([^\/]+)/) {
+		$rv{'ou'} = $1;
+		}
+	if (/subject=.*CN=([^\/]+)/) {
+		$rv{'cn'} = $1;
+		}
+	if (/subject=.*emailAddress=([^\/]+)/) {
+		$rv{'email'} = $1;
+		}
+
+	if (/issuer=.*C=([^\/]+)/) {
+		$rv{'issuer_c'} = $1;
+		}
+	if (/issuer=.*ST=([^\/]+)/) {
+		$rv{'issuer_st'} = $1;
+		}
+	if (/issuer=.*L=([^\/]+)/) {
+		$rv{'issuer_l'} = $1;
 		}
 	if (/issuer=.*O=([^\/]+)/) {
 		$rv{'issuer_o'} = $1;
+		}
+	if (/issuer=.*OU=([^\/]+)/) {
+		$rv{'issuer_ou'} = $1;
+		}
+	if (/issuer=.*CN=([^\/]+)/) {
+		$rv{'issuer_cn'} = $1;
+		}
+	if (/issuer=.*emailAddress=([^\/]+)/) {
+		$rv{'issuer_email'} = $1;
 		}
 	if (/notAfter=(.*)/) {
 		$rv{'notafter'} = $1;
@@ -979,6 +1033,16 @@ push(@rv, @{$info->{'alt'}});
 return &unique(@rv);
 }
 
+# self_signed_cert(&domain)
+# Returns 1 if some domain has a self-signed certificate
+sub self_signed_cert
+{
+local ($d) = @_;
+local $info = &cert_info($d);
+return $info->{'issuer_cn'} eq $info->{'cn'} &&
+       $info->{'issuer_o'} eq $info->{'o'};
+}
+
 # find_openssl_config_file()
 # Returns the full path to the OpenSSL config file, or undef if not found
 sub find_openssl_config_file
@@ -995,6 +1059,112 @@ foreach my $p ($config{'openssl_cnf'},		# Module config
 	return $p if ($p && -r $p);
 	}
 return undef;
+}
+
+# generate_self_signed_cert(certfile, keyfile, size, days, country, state,
+# 			    city, org, orgunit, commonname, email, &altnames)
+# Generates a new self-signed cert, and stores it in the given cert and key
+# files (or just one file if the keyfile is undef). Returns undef on success,
+# or an error message on failure.
+sub generate_self_signed_cert
+{
+local ($certfile, $keyfile, $size, $days, $country, $state, $city, $org,
+       $orgunit, $common, $email, $altnames) = @_;
+
+# Prepare for SSL alt names
+local $flag;
+if ($altnames && @$altnames) {
+	$flag = &setup_openssl_altnames([ @$altnames, $common ], 1);
+	}
+
+# Call openssl and write to temp files
+local $outtemp = &transname();
+&open_execute_command(CA, "openssl req $flag -newkey rsa:$size -x509 -nodes -out $certfile -keyout $keyfile -days $days >$outtemp 2>&1", 0);
+print CA ($country || "."),"\n";
+print CA ($state || "."),"\n";
+print CA ($city || "."),"\n";
+print CA ($org || "."),"\n";
+print CA ($orgunit || "."),"\n";
+print CA ($common || "*"),"\n";
+print CA ($email || "."),"\n";
+close(CA);
+local $rv = $?;
+local $out = &read_file_contents($outtemp);
+unlink($outtemp);
+if (!-r $certfile || !-r $keyfile || $?) {
+	# Failed .. return error
+	return &text('csr_ekey', "<pre>$out</pre>");
+	}
+return undef;
+}
+
+# setup_openssl_altnames(&altnames, self-signed)
+# Creates a temporary openssl.cnf file for generating a cert with alternate
+# names. Returns the additional command line parameters for openssl to use it.
+sub setup_openssl_altnames
+{
+local ($altnames, $self) = @_;
+local @alts = &unique(@$altnames);
+local $temp = &transname();
+local $sconf = &find_openssl_config_file();
+$sconf || &error($text{'cert_esconf'});
+&copy_source_dest($sconf, $temp);
+
+# Make sure subjectAltNames is set in .cnf file, in the right places
+local $lref = &read_file_lines($temp);
+local $i = 0;
+local $found_req = 0;
+local $found_ca = 0;
+local $altline = "subjectAltName=".join(",", map { "DNS:$_" } @alts);
+foreach my $l (@$lref) {
+	if ($l =~ /^\s*\[\s*v3_req\s*\]/ && !$found_req) {
+		splice(@$lref, $i+1, 0, $altline);
+		$found_req = 1;
+		}
+	if ($l =~ /^\s*\[\s*v3_ca\s*\]/ && !$found_ca) {
+		splice(@$lref, $i+1, 0, $altline);
+		$found_ca = 1;
+		}
+	$i++;
+	}
+# If v3_req or v3_ca sections are missing, add at end
+if (!$found_req) {
+	push(@$lref, "[ v3_req ]", $altline);
+	}
+if (!$found_ca) {
+	push(@$lref, "[ v3_ca ]", $altline);
+	}
+
+# Add copyall line if needed
+local $i = 0;
+local $found_copy = 0;
+local $copyline = "copy_extensions=copyall";
+foreach my $l (@$lref) {
+	if (/^\s*\#*\s*copy_extensions\s*=/) {
+		$l = $copyline;
+		$found_copy = 1;
+		last;
+		}
+	elsif (/^\s*\[\s*CA_default\s*\]/) {
+		$found_ca = $i;
+		}
+	$i++;
+	}
+if (!$found_copy) {
+	if ($found_ca) {
+		splice(@$lref, $found_ca+1, 0, $copyline);
+		}
+	else {
+		push(@$lref, "[ CA_default ]", $copyline);
+		}
+	}
+
+&flush_file_lines($temp);
+local $flag = "-config $temp -reqexts v3_req";
+if ($self) {
+	$flag .= " -reqexts v3_ca";
+	}
+return $flag;
 }
 
 # obtain_lock_ssl(&domain)

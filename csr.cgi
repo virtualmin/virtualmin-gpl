@@ -25,67 +25,6 @@ if ($in{'subjectAltName'}) {
 			&error(&text('cert_ealt', $a));
 		}
 	push(@alts, $in{'commonName'});
-	@alts = &unique(@alts);
-	$temp = &transname();
-	$sconf = &find_openssl_config_file();
-	$sconf || &error($text{'cert_esconf'});
-	&copy_source_dest($sconf, $temp);
-
-	# Make sure subjectAltNames is set in .cnf file, in the right places
-	$lref = &read_file_lines($temp);
-	$i = 0;
-	$found_req = 0;
-	$found_ca = 0;
-	$altline = "subjectAltName=".join(",", map { "DNS:$_" } @alts);
-	foreach $l (@$lref) {
-		if ($l =~ /^\s*\[\s*v3_req\s*\]/ && !$found_req) {
-			splice(@$lref, $i+1, 0, $altline);
-			$found_req = 1;
-			}
-		if ($l =~ /^\s*\[\s*v3_ca\s*\]/ && !$found_ca) {
-			splice(@$lref, $i+1, 0, $altline);
-			$found_ca = 1;
-			}
-		$i++;
-		}
-	# If v3_req or v3_ca sections are missing, add at end
-	if (!$found_req) {
-		push(@$lref, "[ v3_req ]", $altline);
-		}
-	if (!$found_ca) {
-		push(@$lref, "[ v3_ca ]", $altline);
-		}
-
-	# Add copyall line if needed
-	$i = 0;
-	$found_copy = 0;
-	$copyline = "copy_extensions=copyall";
-	foreach $l (@$lref) {
-		if (/^\s*\#*\s*copy_extensions\s*=/) {
-			$l = $copyline;
-			$found_copy = 1;
-			last;
-			}
-		elsif (/^\s*\[\s*CA_default\s*\]/) {
-			$found_ca = $i;
-			}
-		$i++;
-		}
-	if (!$found_copy) {
-		if ($found_ca) {
-			splice(@$lref, $found_ca+1, 0, $copyline);
-			}
-		else {
-			push(@$lref, "[ CA_default ]", $copyline);
-			}
-		}
-
-	&flush_file_lines($temp);
-	$cflag = "-config $temp";
-	$eflag = "-reqexts v3_req";
-	if ($in{'self'}) {
-		$eflag .= " -reqexts v3_ca";
-		}
 	}
 
 if (!$in{'self'}) {
@@ -106,7 +45,10 @@ if (!$in{'self'}) {
 	$outtemp = &transname();
 	&lock_file($d->{'ssl_csr'});
 	&unlink_file($d->{'ssl_csr'});
-	&open_execute_command(CA, "openssl req $cflag $eflag -new -key ".quotemeta($d->{'ssl_newkey'})." -out ".quotemeta($d->{'ssl_csr'})." >$outtemp 2>&1", 0);
+	if (@alts) {
+		$flag = &setup_openssl_altnames(\@alts, 0);
+		}
+	&open_execute_command(CA, "openssl req $flag -new -key ".quotemeta($d->{'ssl_newkey'})." -out ".quotemeta($d->{'ssl_csr'})." >$outtemp 2>&1", 0);
 	print CA ($in{'countryName'} || "."),"\n";
 	print CA ($in{'stateOrProvinceName'} || "."),"\n";
 	print CA ($in{'cityName'} || "."),"\n";
@@ -144,25 +86,19 @@ if (!$in{'self'}) {
 			&read_file_contents($d->{'ssl_newkey'})),"</pre>\n";
 	}
 else {
-	# Create key file
+	# Create key and cert files
 	$ctemp = &transname();
 	$ktemp = &transname();
-	$outtemp = &transname();
-	&open_execute_command(CA, "openssl req $cflag $eflag -newkey rsa:$size -x509 -nodes -out $ctemp -keyout $ktemp -days $in{'days'} >$outtemp 2>&1", 0);
-	print CA ($in{'countryName'} || "."),"\n";
-	print CA ($in{'stateOrProvinceName'} || "."),"\n";
-	print CA ($in{'cityName'} || "."),"\n";
-	print CA ($in{'organizationName'} || "."),"\n";
-	print CA ($in{'organizationalUnitName'} || "."),"\n";
-	print CA ($in{'commonName'} || "*"),"\n";
-	print CA ($in{'emailAddress'} || "."),"\n";
-	close(CA);
-	$rv = $?;
-	$out = &read_file_contents($outtemp);
-	unlink($outtemp);
-	if (!-r $ctemp || !-r $ktemp || $?) {
-		&error(&text('csr_ekey', "<pre>$out</pre>"));
-		}
+	$err = &generate_self_signed_cert($ctemp, $ktemp, $size, $in{'days'},
+				   $in{'countryName'},
+				   $in{'stateOrProvinceName'},
+				   $in{'cityName'},
+				   $in{'organizationName'},
+				   $in{'organizationalUnitName'},
+				   $in{'commonName'},
+				   $in{'emailAddress'},
+				   \@alts);
+	&error($err) if ($err);
 
 	&ui_print_header(&domain_in($d), $text{'csr_title2'}, "");
 	

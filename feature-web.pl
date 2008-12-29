@@ -704,10 +704,9 @@ sub validate_web
 local ($d) = @_;
 if ($d->{'alias_mode'}) {
 	# Find alias target
-	local $alias = &get_domain($d->{'alias'});
-	local ($pvirt, $pconf) = &get_apache_virtual($alias->{'dom'},
-						     $alias->{'web_port'});
-	return &text('validate_eweb', "<tt>$alias->{'dom'}</tt>") if (!$pvirt);
+	local ($pvirt, $pconf) = &get_apache_virtual($d->{'dom'},
+						     $d->{'web_port'});
+	return &text('validate_eweb', "<tt>$d->{'dom'}</tt>") if (!$pvirt);
 	}
 else {
 	# Find real domain
