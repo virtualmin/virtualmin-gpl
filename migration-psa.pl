@@ -135,9 +135,11 @@ foreach my $u (@$users) {
 		push(@mailusers, $u);
 		}
 	}
-$has_spam++ if ($has_virus);	# Dependency
-push(@got, "spam") if ($has_spam);
-push(@got, "virus") if ($has_virus);
+if (&indexof("mail", @got) >= 0) {
+	$has_spam++ if ($has_virus);	# Dependency
+	push(@got, "spam") if ($has_spam);
+	push(@got, "virus") if ($has_virus);
+	}
 
 # Add 'web users'
 if ($uinfo) {
