@@ -61,11 +61,7 @@ if (!$module_name) {
 	}
 @OLDARGV = @ARGV;
 $config{'web'} || &usage("Web serving is not enabled for Virtualmin");
-
-$first_print = \&first_text_print;
-$second_print = \&second_text_print;
-$indent_print = \&indent_text_print;
-$outdent_print = \&outdent_text_print;
+&set_all_text_print();
 
 # Parse command-line args
 while(@ARGV > 0) {
