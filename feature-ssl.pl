@@ -87,14 +87,12 @@ $_[0]->{'ssl_cert'} ||= &default_certificate_file($_[0], 'cert');
 $_[0]->{'ssl_key'} ||= &default_certificate_file($_[0], 'key');
 if (!-r $_[0]->{'ssl_cert'} && !-r $_[0]->{'ssl_key'}) {
 	# Need to do it
-	&foreign_require("webmin", "webmin-lib.pl");
 	local $temp = &transname();
 	&$first_print($text{'setup_openssl'});
 	&lock_file($_[0]->{'ssl_cert'});
 	&lock_file($_[0]->{'ssl_key'});
-	local $size = $config{'key_size'} || $webmin::default_key_size;
 	local $err = &generate_self_signed_cert(
-		$_[0]->{'ssl_cert'}, $_[0]->{'ssl_key'}, $size, 1825,
+		$_[0]->{'ssl_cert'}, $_[0]->{'ssl_key'}, undef, 1825,
 		undef, undef, undef, $_[0]->{'owner'}, undef,
 		"*.$_[0]->{'dom'}", $_[0]->{'emailto'}, undef);
 	if ($err) {
@@ -282,13 +280,12 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && &self_signed_cert($_[0]) &&
     !&check_domain_certificate($_[0]->{'dom'}, $_[0])) {
 	# Domain name has changed .. re-generate self-signed cert
 	&$first_print($text{'save_ssl11'});
-	&foreign_require("webmin", "webmin-lib.pl");
 	local $info = &cert_info($_[0]);
 	&lock_file($_[0]->{'ssl_cert'});
 	&lock_file($_[0]->{'ssl_key'});
 	local $err = &generate_self_signed_cert(
 		$_[0]->{'ssl_cert'}, $_[0]->{'ssl_key'},
-		$config{'key_size'} || $webmin::default_key_size,
+		undef,
 		1825,
 		$info->{'c'},
 		$info->{'st'},
@@ -1070,6 +1067,8 @@ sub generate_self_signed_cert
 {
 local ($certfile, $keyfile, $size, $days, $country, $state, $city, $org,
        $orgunit, $common, $email, $altnames) = @_;
+&foreign_require("webmin", "webmin-lib.pl");
+$size ||= $config{'key_size'} || $webmin::default_key_size;
 
 # Prepare for SSL alt names
 local $flag;

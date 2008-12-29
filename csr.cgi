@@ -14,7 +14,7 @@ $in{'commonName'} =~ /^[A-Za-z0-9\.\-\*]+$/ ||
 $in{'size_def'} || $in{'size'} =~ /^\d+$/ ||
 	&error($webmin::text{'newkey_esize'});
 $in{'days'} =~ /^\d+$/ || &error($webmin::text{'newkey_edays'});
-$size = $in{'size_def'} ? $webmin::default_key_size : $in{'size'};
+$size = $in{'size_def'} ? undef : $in{'size'};
 
 # Copy openssl.cnf if needed to add alternate names field
 if ($in{'subjectAltName'}) {
@@ -33,6 +33,7 @@ if (!$in{'self'}) {
 	$d->{'ssl_newkey'} ||= "$d->{'home'}/ssl.newkey";
 	&lock_file($d->{'ssl_newkey'});
 	&unlink_file($d->{'ssl_newkey'});
+	$size ||= $webmin::default_key_size;
 	$out = &backquote_logged("openssl genrsa -out ".quotemeta($d->{'ssl_newkey'})." $size 2>&1 </dev/null");
 	$rv = $?;
 	&set_certificate_permissions($d, $d->{'ssl_newkey'});
@@ -103,19 +104,19 @@ else {
 	&ui_print_header(&domain_in($d), $text{'csr_title2'}, "");
 	
 	# Make sure Apache is setup to use the right key files
+	&obtain_lock_ssl($d);
 	&require_apache();
 	$conf = &apache::get_config();
 	($virt, $vconf) = &get_apache_virtual($d->{'dom'},
 					      $d->{'web_sslport'});
-	$d->{'ssl_cert'} ||= "$d->{'home'}/ssl.cert";
-	$d->{'ssl_key'} ||= "$d->{'home'}/ssl.key";
-	&lock_file($virt->{'file'});
+	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
+	$d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
 	&apache::save_directive("SSLCertificateFile", [ $d->{'ssl_cert'} ],
 				$vconf, $conf);
 	&apache::save_directive("SSLCertificateKeyFile", [ $d->{'ssl_key'} ],
 				$vconf, $conf);
 	&flush_file_lines();
-	&unlock_file($virt->{'file'});
+	&release_lock_ssl($d);
 
 	# Remove any SSL passphrase
 	$d->{'ssl_pass'} = undef;
@@ -139,9 +140,11 @@ else {
 	# Copy to other domains using same cert. Only the password needs to be
 	# copied though, as the cert file isn't changing
 	foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
+		&obtain_lock_ssl($od);
 		$od->{'ssl_pass'} = undef;
 		&save_domain_passphrase($od);
 		&save_domain($od);
+		&release_lock_ssl($od);
 		}
 
 	# Re-start Apache

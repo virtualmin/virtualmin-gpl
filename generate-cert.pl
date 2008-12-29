@@ -4,6 +4,8 @@
 
 Generate a new self-signed cert or CSR for a virtual server.
 
+XXX
+
 =cut
 
 package virtual_server;
@@ -34,8 +36,15 @@ while(@ARGV > 0) {
 	elsif ($a eq "--csr") {
 		$csr = 1;
 		}
+	elsif ($a eq "--cn" || $a eq "--c" || $a eq "--st" || $a eq "--l" ||
+	       $a eq "--o" || $a eq "--ou" || $a eq "--email") {
+		$subject{substr($a, 2)} = shift(@ARGV);
+		}
+	elsif ($a eq "--alt") {
+		push(@alts, shift(@ARGV));
+		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 $dname || &usage("Missing --domain parameter");
@@ -45,13 +54,59 @@ $d || &usage("No virtual server named $dname found");
 $d->{'ssl'} || &usage("Virtual server $dname does not have SSL enabled");
 
 if ($self) {
-	# Generate the self-signed cert
-	# XXX
-	$err = &generate_self_signed_cert
+	# Generate the self-signed cert, over-writing the existing file
+	&$first_print("Generating new self-signed certificate ..");
+	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
+	$d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
+	&lock_file($d->{'ssl_cert'});
+	&lock_file($d->{'ssl_key'});
+	&obtain_lock_ssl($d);
+	$err = &generate_self_signed_cert(
+		$d->{'ssl_cert'}, $d->{'ssl_key'}, undef, 1825,
+		$subject{'c'},
+		$subject{'st'},
+		$subject{'l'},
+		$subject{'o'},
+		$subject{'ou'},
+		$subject{'cn'} || "*.$d->{'dom'}",
+		$subject{'email'} || $d->{'emailto'},
+		\@alts,
+		);
+	if ($err) {
+		&$second_print(".. failed : $err");
+		exit(1);
+		}
+	&$second_print(".. done");
+
+	# Remove any SSL passphrase on this domain
+	&$first_print("Configuring Apache to use it ..");
+	$d->{'ssl_pass'} = undef;
+	&save_domain_passphrase($d);
+	&save_domain($d);
+	&release_lock_ssl($d);
+	&unlock_file($d->{'ssl_key'});
+	&unlock_file($d->{'ssl_cert'});
+
+	# Remove SSL passphrase on other domains sharing the cert
+	foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
+		&obtain_lock_ssl($od);
+                $od->{'ssl_pass'} = undef;
+                &save_domain_passphrase($od);
+                &save_domain($od);
+		&release_lock_ssl($od);
+                }
+	&$second_print(".. done");
+
+	# Re-start Apache
+	&register_post_action(\&restart_apache, 1);
+	&run_post_actions();
 	}
 else {
 	# Generate the CSR
+	# XXX
 	}
+
+&virtualmin_api_log(\@OLDARGV, $d);
 
 sub usage
 {
