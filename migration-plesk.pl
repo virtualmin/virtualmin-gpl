@@ -735,6 +735,7 @@ if ($pdir && &foreign_check("htaccess-htpasswd")) {
 		# Make .htaccess file
 		local $p = $pdir->{$name};
 		local $dir = "$hdir/$name";
+		next if (!-d $dir);	# Protected dir is missing
 		local $htaccess = "$dir/$htaccess_htpasswd::config{'htaccess'}";
 		$name =~ s/\//-/g;
 		local $htpasswd = "$etc/.htpasswd-$name";
