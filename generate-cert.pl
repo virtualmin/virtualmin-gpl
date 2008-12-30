@@ -4,7 +4,46 @@
 
 Generate a new self-signed cert or CSR for a virtual server.
 
-XXX
+A self-signed certificate is one that can be used immediately to protect
+a virtual server with SSL, but is not validated by a certificate authority.
+As such, browsers will typically warn the user that it cannot be validated,
+and thus provides not protection against man-in-the-middle attacks. All 
+Virtualmin server with SSL enabled have a self-signed cert by default, but
+this command can be used to create a new one, perhaps with different hostnames
+or more information about the owner.
+
+The virtual server to create a cert for must be specified with the 
+C<--domain> parameter, followed by a domain name. You must also supply the
+C<--self> flag, to indicate that a self-signed cert is being created.
+Additional details about the certificate's owner can be set with the following
+optional flags :
+
+C<--o> - Followed by the name of the organization or person who owns the domain.
+
+C<--ou> - Sets the department or group within the organization. 
+
+C<--c> - Sets the country.
+
+C<--st> - Sets the state or province.
+
+C<--l> - Sets the city or locality.
+
+C<--email> - Sets the contact email address.
+
+C<--cn> - Specifies the domain name in the certificate.
+
+When run, the command will create certificate and private key files, and
+configure Apache to use them. Any existing files will be overwritten.
+
+This command can also create a CSR, or certificate signing request. This is
+a file that is sent to a certificate authority like Verisign or Thawte along
+with payment and a request to validate the owner of a domain. The command is
+run in the same way, except that the C<--csr> flag is used instead of C<--self>,
+and the generated files are different.
+
+Once the CA has validated the certificate, they will send you back a signed
+cert that can be installed using the C<--install-cert> command or the
+Virtualmin web interface.
 
 =cut
 
@@ -43,6 +82,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--alt") {
 		push(@alts, shift(@ARGV));
 		}
+	elsif ($a eq "--size") {
+		$size = shift(@ARGV);
+		}
+	elsif ($a eq "--days") {
+		$days = shift(@ARGV);
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -62,7 +107,7 @@ if ($self) {
 	&lock_file($d->{'ssl_key'});
 	&obtain_lock_ssl($d);
 	$err = &generate_self_signed_cert(
-		$d->{'ssl_cert'}, $d->{'ssl_key'}, undef, 1825,
+		$d->{'ssl_cert'}, $d->{'ssl_key'}, $size, $days,
 		$subject{'c'},
 		$subject{'st'},
 		$subject{'l'},
@@ -127,6 +172,8 @@ else {
 		}
 	&set_certificate_permissions($d, $d->{'ssl_csr'});
 	&set_certificate_permissions($d, $d->{'ssl_newkey'});
+	&unlock_file($d->{'ssl_newkey'});
+	&unlock_file($d->{'ssl_csr'});
 	&$second_print(".. done");
 
 	# Save the domain
@@ -143,6 +190,8 @@ print "Generates a new self-signed certificate or CSR.\n";
 print "\n";
 print "usage: generate-cert.pl --domain name\n";
 print "                        --self | --csr\n";
+print "                        [--size bits]\n";
+print "                        [--days expiry-days]\n";
 print "                        [--cn domain-name]\n";
 print "                        [--c country]\n";
 print "                        [--st state]\n";

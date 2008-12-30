@@ -1068,6 +1068,7 @@ local ($certfile, $keyfile, $size, $days, $country, $state, $city, $org,
        $orgunit, $common, $email, $altnames) = @_;
 &foreign_require("webmin", "webmin-lib.pl");
 $size ||= $config{'key_size'} || $webmin::default_key_size;
+$days ||= 1825;
 
 # Prepare for SSL alt names
 local $flag;
@@ -1106,6 +1107,7 @@ local ($csrfile, $keyfile, $size, $days, $country, $state, $city, $org,
        $orgunit, $common, $email, $altnames) = @_;
 &foreign_require("webmin", "webmin-lib.pl");
 $size ||= $config{'key_size'} || $webmin::default_key_size;
+$days ||= 1825;
 
 # Prepare for SSL alt names
 local $flag;
@@ -1115,7 +1117,7 @@ if ($altnames && @$altnames) {
 
 # Generate the key
 &unlink_file($keyfile);
-local $out = &backquote_logged("openssl genrsa -out ".quotemeta($keyfile)." $size 2>&1 </dev/null");
+local $out = &backquote_command("openssl genrsa -out ".quotemeta($keyfile)." $size 2>&1 </dev/null");
 local $rv = $?;
 if (!-r $keyfile || $rv) {
 	return &text('csr_ekey', "<pre>$out</pre>");

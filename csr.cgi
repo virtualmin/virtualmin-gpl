@@ -52,6 +52,7 @@ if (!$in{'self'}) {
 	# Save the domain
 	&save_domain($d);
 	&run_post_actions();
+	&webmin_log("newcsr", "domain", $d->{'dom'}, $d);
 
 	# Show the output
 	&ui_print_header(&domain_in($d), $text{'csr_title'}, "");

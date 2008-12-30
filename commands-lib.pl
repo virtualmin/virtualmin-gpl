@@ -24,6 +24,7 @@ return ([ "Backup and restore", "backup-domain.pl", "list-scheduled-backups.pl",
 			       "list-scripts.pl", "list-available-scripts.pl" ],
 	[ "Proxies and balancers", "*-proxy.pl", "*-proxies.pl" ],
 	[ "PHP versions", "*-php-directory.pl", "*-php-directories.pl" ],
+	[ "SSL certificates", "list-certs.pl", "*-cert.pl" ],
 	[ "Other scripts", "*.pl" ],
 	);
 }
@@ -98,6 +99,10 @@ or fCGId is used to run PHP scripts in some virtual server, it can be configured
 to run a different PHP version on a per-directory basis. This is most useful
 when running PHP applications that only support specific versions, like an
 old script that only runs under version 4.",
+
+"SSL certificates",
+"Commands in this section can be used to list SSL certificates, generate
+new certs, keys and signing requests, and install a signed cert from a CA.",
 
 "Other scripts",
 "Programs in this section don't fall into any of the other categories.",
