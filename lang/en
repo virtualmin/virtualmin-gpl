@@ -2259,8 +2259,8 @@ csr_key=The new private key for this virtual server, saved in $1, is :
 
 newkey_title=Installing Certificate
 newkey_err=Failed to install certificate
-newkey_ecert=Missing or invalid signed SSL certificate
-newkey_enewkey=Missing or invalid SSL private key
+newkey_ecert2=Missing or invalid signed SSL certificate : $1
+newkey_enewkey2=Missing or invalid SSL private key : $1
 newkey_saving=Saving certificate and private key ..
 newkey_epass=Private key is password-protected, but either none was entered or the password was incorrect
 newkey_ematch=Certificate problem detected : $1

@@ -832,6 +832,35 @@ $certmod eq $keymod ||
 return undef;
 }
 
+# validate_cert_format(data|file, type)
+# Checks if some file or string contains valid cert or key data, and returns
+# an error message if not. The type can be one of 'key', 'cert', 'ca' or 'csr'
+sub validate_cert_format
+{
+local ($data, $type) = @_;
+if ($data =~ /^\//) {
+	$data = &read_file_contents($data);
+	}
+local %headers = ( 'key' => 'RSA PRIVATE KEY',
+		   'cert' => 'CERTIFICATE',
+		   'ca' => 'CERTIFICATE',
+		   'csr' => 'CERTIFICATE REQUEST',
+		   'newkey' => 'RSA PRIVATE KEY' );
+local $h = $headers{$type};
+$h || return "Unknown SSL file type $type";
+local @lines = grep { /\S/ } split(/\r?\n/, $data);
+local $begin = "-----BEGIN ".$h."-----";
+local $end = "-----END ".$h."-----";
+$lines[0] eq $begin || return "Data does not start with line $begin";
+$lines[$#lines] eq $end || return "Data does not end with line $begin";
+for(my $i=1; $i<$#lines; $i++) {
+	$lines[$i] =~ /^[A-Za-z0-9\+\/=]+$/ ||
+		return "Line ".($i+1)." does not look like PEM format";
+	}
+@lines > 4 || return "Data only has ".scalar(@lines)." lines";
+return undef;
+}
+
 # cert_pem_data(&domain)
 # Returns a domain's cert in PEM format
 sub cert_pem_data
@@ -1112,7 +1141,7 @@ $days ||= 1825;
 # Prepare for SSL alt names
 local $flag;
 if ($altnames && @$altnames) {
-	$flag = &setup_openssl_altnames([ @$altnames, $common ], 1);
+	$flag = &setup_openssl_altnames([ @$altnames, $common ], 0);
 	}
 
 # Generate the key
@@ -1141,7 +1170,7 @@ local $rv = $?;
 local $out = &read_file_contents($outtemp);
 unlink($outtemp);
 if (!-r $csrfile || $rv) {
-	&error(&text('csr_ecsr', "<pre>$out</pre>"));
+	return &text('csr_ecsr', "<pre>$out</pre>");
 	}
 return undef;
 }

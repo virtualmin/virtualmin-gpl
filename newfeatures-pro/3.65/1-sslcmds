@@ -1,0 +1,3 @@
+desc=SSL command line API
+html=Added command-line scripts to list, generate and install SSL keys and certificates. These are <tt>list-certs.pl</tt>, <tt>generate-cert.pl</tt> and <tt>install-cert.pl</tt> respectively.
+master=1

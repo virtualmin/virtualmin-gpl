@@ -1028,3 +1028,4 @@ If a script like Wordpress has been upgraded outside of Virtualmin, it's new ver
 Script update notification, quota and backup emails now contain a link to Virtualmin, using a URL configurable on the Module Config page.
 When alias virtual servers are created, files from /etc/skel are no longer copied into their home directories as they are not needed.
 When a virtual server with a self-signed SSL certificate is renamed, the certificate is re-generated to match the new domain name.
+Added command-line scripts to list, generate and install SSL keys and certificates. These are list-certs.pl, generate-cert.pl and install-cert.pl respectively.

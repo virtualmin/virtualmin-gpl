@@ -11,12 +11,12 @@ $d = &get_domain($in{'dom'});
 &error_setup($text{'newkey_err'});
 $cert = $in{'cert'} || $in{'certupload'};
 $newkey = $in{'newkey'} || $in{'newkeyupload'};
-$cert =~ /BEGIN CERTIFICATE/ &&
-  $cert =~ /END CERTIFICATE/ || &error($text{'newkey_ecert'});
-$newkey =~ /BEGIN RSA PRIVATE KEY/ &&
-  $newkey =~ /END RSA PRIVATE KEY/ || &error($text{'newkey_enewkey'});
 $cert =~ s/\r//g;
 $newkey =~ s/\r//g;
+$err = &validate_cert_format($cert, "cert");
+$err && &error(&text('newkey_ecert2', $err));
+$err = &validate_cert_format($newkey, "key");
+$err && &error(&text('newkey_enewkey2', $err));
 
 # Check if a passphrase is needed
 $passok = &check_passphrase($newkey, $in{'pass_def'} ? undef : $in{'pass'});
@@ -29,6 +29,7 @@ $certerr && &error(&text('newkey_ematch', $certerr));
 &ui_print_header(&domain_in($d), $text{'newkey_title'}, "");
 
 # Make sure Apache is setup to use the right key files
+&obtain_lock_ssl($d);
 &require_apache();
 $conf = &apache::get_config();
 ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
@@ -36,13 +37,12 @@ $conf = &apache::get_config();
 
 $d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 $d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
-&lock_file($virt->{'file'});
 &apache::save_directive("SSLCertificateFile", [ $d->{'ssl_cert'} ],
 			$vconf, $conf);
 &apache::save_directive("SSLCertificateKeyFile", [ $d->{'ssl_key'} ],
 			$vconf, $conf);
 &flush_file_lines($virt->{'file'});
-&unlock_file($virt->{'file'});
+&release_lock_ssl($d);
 &register_post_action(\&restart_apache, 1);
 
 # If a passphrase is needed, add it to the top-level Apache config. This is

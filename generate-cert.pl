@@ -150,7 +150,7 @@ if ($self) {
 	}
 else {
 	# Generate the CSR
-	&$first_print("Generating new self-signed certificate ..");
+	&$first_print("Generating new certificate signing request ..");
 	$d->{'ssl_csr'} ||= &default_certificate_file($d, 'csr');
 	$d->{'ssl_newkey'} ||= &default_certificate_file($d, 'newkey');
 	&lock_file($d->{'ssl_csr'});

@@ -60,9 +60,6 @@
  - Update Gem when installing Rails
 	- http://intertwingly.net/blog/2008/11/23/RubyGems-1-3-1-on-Ubuntu-8-10
 
- - Re-generate SSL cert when renaming a domain
-	- Command to install a signed cert (from a file or parameter)
-
  - Email addresses for forwarding spam to, for black/white listing
 	- Also updates bayes DB?
 	- FS#4947
