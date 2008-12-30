@@ -1061,8 +1061,7 @@ return undef;
 # generate_self_signed_cert(certfile, keyfile, size, days, country, state,
 # 			    city, org, orgunit, commonname, email, &altnames)
 # Generates a new self-signed cert, and stores it in the given cert and key
-# files (or just one file if the keyfile is undef). Returns undef on success,
-# or an error message on failure.
+# files. Returns undef on success, or an error message on failure.
 sub generate_self_signed_cert
 {
 local ($certfile, $keyfile, $size, $days, $country, $state, $city, $org,
@@ -1093,6 +1092,54 @@ unlink($outtemp);
 if (!-r $certfile || !-r $keyfile || $?) {
 	# Failed .. return error
 	return &text('csr_ekey', "<pre>$out</pre>");
+	}
+return undef;
+}
+
+# generate_certificate_request(csrfile, keyfile, size, days, country, state,
+# 			     city, org, orgunit, commonname, email, &altnames)
+# Generates a new self-signed cert, and stores it in the given csr and key
+# files. Returns undef on success, or an error message on failure.
+sub generate_certificate_request
+{
+local ($csrfile, $keyfile, $size, $days, $country, $state, $city, $org,
+       $orgunit, $common, $email, $altnames) = @_;
+&foreign_require("webmin", "webmin-lib.pl");
+$size ||= $config{'key_size'} || $webmin::default_key_size;
+
+# Prepare for SSL alt names
+local $flag;
+if ($altnames && @$altnames) {
+	$flag = &setup_openssl_altnames([ @$altnames, $common ], 1);
+	}
+
+# Generate the key
+&unlink_file($keyfile);
+local $out = &backquote_logged("openssl genrsa -out ".quotemeta($keyfile)." $size 2>&1 </dev/null");
+local $rv = $?;
+if (!-r $keyfile || $rv) {
+	return &text('csr_ekey', "<pre>$out</pre>");
+	}
+
+# Generate the matching CSR
+local $outtemp = &transname();
+&unlink_file($csrfile);
+&open_execute_command(CA, "openssl req $flag -new -key ".quotemeta($keyfile)." -out ".quotemeta($csrfile)." >$outtemp 2>&1", 0);
+print CA ($country || "."),"\n";
+print CA ($state || "."),"\n";
+print CA ($city || "."),"\n";
+print CA ($org || "."),"\n";
+print CA ($orgunit || "."),"\n";
+print CA ($common || "*"),"\n";
+print CA ($email || "."),"\n";
+print CA ".\n";
+print CA ".\n";
+close(CA);
+local $rv = $?;
+local $out = &read_file_contents($outtemp);
+unlink($outtemp);
+if (!-r $csrfile || $rv) {
+	&error(&text('csr_ecsr', "<pre>$out</pre>"));
 	}
 return undef;
 }

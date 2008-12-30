@@ -62,6 +62,8 @@
 
  - Re-generate SSL cert when renaming a domain
 	- Command to generate CSR
+		- Test new re-factor
+		- Set size and days from command line
 	- Command to install a signed cert (from a file or parameter)
 
  - Email addresses for forwarding spam to, for black/white listing

@@ -76,6 +76,8 @@ if ($self) {
 		&$second_print(".. failed : $err");
 		exit(1);
 		}
+	&set_certificate_permissions($d, $d->{'ssl_cert'});
+	&set_certificate_permissions($d, $d->{'ssl_key'});
 	&$second_print(".. done");
 
 	# Remove any SSL passphrase on this domain
@@ -103,7 +105,33 @@ if ($self) {
 	}
 else {
 	# Generate the CSR
-	# XXX
+	&$first_print("Generating new self-signed certificate ..");
+	$d->{'ssl_csr'} ||= &default_certificate_file($d, 'csr');
+	$d->{'ssl_newkey'} ||= &default_certificate_file($d, 'newkey');
+	&lock_file($d->{'ssl_csr'});
+	&lock_file($d->{'ssl_newkey'});
+	$err = &generate_certificate_request(
+		$d->{'ssl_csr'}, $d->{'ssl_newkey'}, undef, 1825,
+		$subject{'c'},
+		$subject{'st'},
+		$subject{'l'},
+		$subject{'o'},
+		$subject{'ou'},
+		$subject{'cn'} || "*.$d->{'dom'}",
+		$subject{'email'} || $d->{'emailto'},
+		\@alts,
+		);
+	if ($err) {
+		&$second_print(".. failed : $err");
+		exit(1);
+		}
+	&set_certificate_permissions($d, $d->{'ssl_csr'});
+	&set_certificate_permissions($d, $d->{'ssl_newkey'});
+	&$second_print(".. done");
+
+	# Save the domain
+	&save_domain($d);
+	&run_post_actions();
 	}
 
 &virtualmin_api_log(\@OLDARGV, $d);

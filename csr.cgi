@@ -28,46 +28,26 @@ if ($in{'subjectAltName'}) {
 	}
 
 if (!$in{'self'}) {
-	# Generate the private key
-	$d->{'ssl_csr'} ||= "$d->{'home'}/ssl.csr";
-	$d->{'ssl_newkey'} ||= "$d->{'home'}/ssl.newkey";
-	&lock_file($d->{'ssl_newkey'});
-	&unlink_file($d->{'ssl_newkey'});
-	$size ||= $webmin::default_key_size;
-	$out = &backquote_logged("openssl genrsa -out ".quotemeta($d->{'ssl_newkey'})." $size 2>&1 </dev/null");
-	$rv = $?;
-	&set_certificate_permissions($d, $d->{'ssl_newkey'});
-	&unlock_file($d->{'ssl_newkey'});
-	if (!-r $d->{'ssl_newkey'} || $rv) {
-		&error(&text('csr_ekey', "<pre>$out</pre>"));
-		}
-
-	# Generate the CSR
-	$outtemp = &transname();
+	# Generate the private key and CSR
+	$d->{'ssl_csr'} ||= &default_certificate_file($d, "csr");
+	$d->{'ssl_newkey'} ||= &default_certificate_file($d, "newkey");
 	&lock_file($d->{'ssl_csr'});
-	&unlink_file($d->{'ssl_csr'});
-	if (@alts) {
-		$flag = &setup_openssl_altnames(\@alts, 0);
-		}
-	&open_execute_command(CA, "openssl req $flag -new -key ".quotemeta($d->{'ssl_newkey'})." -out ".quotemeta($d->{'ssl_csr'})." >$outtemp 2>&1", 0);
-	print CA ($in{'countryName'} || "."),"\n";
-	print CA ($in{'stateOrProvinceName'} || "."),"\n";
-	print CA ($in{'cityName'} || "."),"\n";
-	print CA ($in{'organizationName'} || "."),"\n";
-	print CA ($in{'organizationalUnitName'} || "."),"\n";
-	print CA ($in{'commonName'} || "*"),"\n";
-	print CA ($in{'emailAddress'} || "."),"\n";
-	print CA ".\n";
-	print CA ".\n";
-	close(CA);
-	$rv = $?;
-	$out = &read_file_contents($outtemp);
-	unlink($outtemp);
+	&lock_file($d->{'ssl_newkey'});
+	$err = &generate_certificate_request(
+		$d->{'ssl_csr'}, $d->{'ssl_newkey'}, $size, $in{'days'},
+		$in{'countryName'},
+		$in{'stateOrProvinceName'},
+		$in{'cityName'},
+		$in{'organizationName'},
+		$in{'organizationalUnitName'},
+		$in{'commonName'},
+		$in{'emailAddress'},
+		\@alts);
+	&error($err) if ($err);
+	&set_certificate_permissions($d, $d->{'ssl_newkey'});
 	&set_certificate_permissions($d, $d->{'ssl_csr'});
+	&unlock_file($d->{'ssl_newkey'});
 	&unlock_file($d->{'ssl_csr'});
-	if (!-r $d->{'ssl_csr'} || $rv) {
-		&error(&text('csr_ecsr', "<pre>$out</pre>"));
-		}
 
 	# Save the domain
 	&save_domain($d);
