@@ -5755,6 +5755,7 @@ if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$_[0]->{'alias'}) {
 		$aliasname =~ s/\..*$//;
 		}
 	$aliasname .= ".".$tmpl->{'domalias'};
+	$_[0]->{'autoalias'} = $aliasname;
 	if ($aliasname ne $_[0]->{'dom'}) {
 		&$first_print(&text('setup_domalias', $aliasname));
 		&$indent_print();
