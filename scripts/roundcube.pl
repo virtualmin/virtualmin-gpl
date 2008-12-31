@@ -21,7 +21,7 @@ return "RoundCube Webmail is a browser-based multilingual IMAP client with an ap
 # script_roundcube_versions()
 sub script_roundcube_versions
 {
-return ( "0.1.1" );
+return ( "0.2-stable" );
 }
 
 sub script_roundcube_category
@@ -210,7 +210,7 @@ if (!$upgrade) {
 	# Run SQL setup script
 	&require_mysql();
 	local $sqlfile;
-	if ($mysql::mysql_version >= 5) {
+	if ($mysql::mysql_version >= 5 && $ver < 0.2) {
 		$sqlfile = "$opts->{'dir'}/SQL/mysql5.initial.sql";
 		}
 	else {
@@ -218,7 +218,7 @@ if (!$upgrade) {
 		}
 	local ($ex, $out) = &mysql::execute_sql_file($dbname, $sqlfile,
 					       	     $dbuser, $dbpass);
-	$ex && return (0, "Failed to run database setup script : <tt>$out</tt>.");
+	$ex && return (-1, "Failed to run database setup script : <tt>$out</tt>.");
 	}
 
 # Return a URL for the user

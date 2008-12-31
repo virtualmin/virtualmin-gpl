@@ -1021,7 +1021,7 @@ Shared IP addresses can now be listed, added and removed from the command line u
 Virtual server backups can now be in ZIP format, by changing the 'Backup compression format' option on the Module Config page. TAR format is still recommended though, as it better preserves Unix filesystem attributes.
 When submitting a new SSL certificate and key, they are checked to ensure a modulus match, ensuring that they were generated and can be used together.
 ---- Changes since 3.64 ----
-Updated the PHPlist script installer to version 2.10.8, bbPress to 0.9.0.3, Wordpress to 2.7, Drupal to 6.8 and 5.14, Horde to 3.3.2, IMP to 4.3.2, Turba to 2.3.1, SugarCRM to 5.2.0, phpBB to 3.0.4, LimeSurvey to 1.72 and 1.80RC2, phpPgAdmin to 4.2.2, MediaWiki to 1.13.3, Zikula to 1.1.0, MoinMoin to 1.8.1, PHP-Calendar to 1.0, Piwik to 0.2.28, OpenGoo to 1.1, Magento to 1.2.0.1, and phpMyAdmin to 3.1.1.
+Updated the PHPlist script installer to version 2.10.8, bbPress to 0.9.0.3, Wordpress to 2.7, Drupal to 6.8 and 5.14, Horde to 3.3.2, IMP to 4.3.2, Turba to 2.3.1, SugarCRM to 5.2.0, phpBB to 3.0.4, LimeSurvey to 1.72 and 1.80RC2, phpPgAdmin to 4.2.2, MediaWiki to 1.13.3, Zikula to 1.1.0, MoinMoin to 1.8.1, PHP-Calendar to 1.0, Piwik to 0.2.28, OpenGoo to 1.1, Magento to 1.2.0.1, RoundCube to 0.2-stable, and phpMyAdmin to 3.1.1.
 Mail files are now included by default in backups made and restored using backup-domain.pl and restore-domain.pl. This can be disabled with the --no-mailfiles parameter.
 Added validation to the configuration check to detect MySQL or disk quota synchronization that conflicts with Virtualmin.
 If a script like Wordpress has been upgraded outside of Virtualmin, it's new version will be detected to prevent false warnings about needing to upgrade.
