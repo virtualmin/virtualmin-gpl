@@ -8006,7 +8006,7 @@ return &master_admin();
 # Returns 1 if the current user can edit allowed remote DB hosts
 sub can_allowed_db_hosts
 {
-return &master_admin();
+return &master_admin() || &reseller_admin() || $access{'edit_allowedhosts'};
 }
 
 # has_proxy_balancer(&domain)
