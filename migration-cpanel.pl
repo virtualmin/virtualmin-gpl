@@ -424,6 +424,24 @@ else {
 	}
 local @rvdoms = ( \%dom );
 
+# Extra homedir.tar if needed
+local $hometar = "$userdir/homedir.tar";
+if (-r $hometar) {
+	&$first_print("Extracting home directory TAR file ..");
+	local $out;
+	if (!-d $homesrc) {
+		&make_dir($homesrc, 0755);
+		}
+	&execute_command("cd ".quotemeta($homesrc)." && ".
+			 "tar xf ".quotemeta($hometar), undef, \$out, \$out);
+	if ($?) {
+		&$second_print(".. TAR failed : <tt>$out</tt>");
+		}
+	else {
+		&$second_print(".. done");
+		}
+	}
+
 # Migrate Apache configuration
 if ($got{'web'} && -d $daily) {
 	&$first_print("Copying Apache directives ..");
@@ -1205,7 +1223,8 @@ if ($main::cpanel_dir_cache{$file} && -d $main::cpanel_dir_cache{$file}) {
 	# Use cached extract from this session
 	return (1, $main::cpanel_dir_cache{$file});
 	}
-local $temp = &transname();
+#local $temp = &transname();
+local $temp = &tempname();
 mkdir($temp, 0700);
 local $err = &extract_compressed_file($file, $temp);
 if ($err) {
