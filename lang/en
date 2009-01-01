@@ -4527,3 +4527,6 @@ newglobal_name=Variable name
 newglobal_value=Variable value
 newglobal_err=Failed to save global variables
 newglobal_ename=Invalid variable name in row $1 - only letters, numbers and underscore are allowed
+
+spamtrap_already=Spam trap aliases already exist for this virtual server
+spamtrap_clash=Spam trap aliases cannot be created, as the following conflicting aliases already exist : $1

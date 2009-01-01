@@ -1136,26 +1136,110 @@ if (&check_pid_file($pidfile)) {
 &init::start_action("lookup-domain");
 }
 
+# spam_alias_name(&domain)
+# Returns the full email address for the spam alias, like spamtrap@foo.com
+sub spam_alias_name
+{
+local ($d) = @_;
+return 'spamtrap'.'\@'.$d->{'dom'};
+}
+
+# ham_alias_name(&domain)
+# Returns the full email address for the ham alias, like hamtrap@foo.com
+sub ham_alias_name
+{
+local ($d) = @_;
+return 'hamtrap'.'\@'.$d->{'dom'};
+}
+
+# spam_alias_file(&domain)
+# Returns the file in which spam is stored for some domain
+sub spam_alias_file
+{
+local ($d) = @_;
+return $spam_alias_dir."/".$d->{'id'};
+}
+
+# ham_alias_file(&domain)
+# Returns the file in which ham is stored for some domain
+sub ham_alias_file
+{
+local ($d) = @_;
+return $ham_alias_dir."/".$d->{'id'};
+}
+
 # get_spamtrap_aliases(&domain)
 # Returns 1 if spamtrap and hamtrap aliases exist, 0 if not, -1 if cannot be
-# created due to clashes.
+# created due to clashes. If called in an array context, returns the spam and
+# ham aliases too.
 sub get_spamtrap_aliases
 {
 local ($d) = @_;
+local (%got, $clash);
+foreach my $a (&list_domain_aliases($d)) {
+	if ($a->{'from'} eq &spam_alias_name($d)) {
+		# Spam alias .. make sure it goes to the right file
+		if (@{$a->{'to'}} == 1 &&
+		    $a->{'to'}->[0] &spam_alias_file($d)) {
+			$got{'spam'} = $a;
+			}
+		else {
+			$clash = 1;
+			}
+		}
+	elsif ($a->{'from'} eq &ham_alias_name($d)) {
+		# Ham alias
+		if (@{$a->{'to'}} == 1 &&
+		    $a->{'to'}->[0] &ham_alias_file($d)) {
+			$got{'ham'} = $a;
+			}
+		else {
+			$clash = 1;
+			}
+		}
+	}
+local $rv = $clash ? -1 : $got{'spam'} && $got{'ham'} ? 1 : 0;
+return ($rv, $got{'spam'}, $got{'ham'});
 }
 
 # setup_spamtrap_aliases(&domain)
 # Create aliases in a domain for spamtrap and hamtrap, which deliver to files
-# under /var/webmin/spamtrap/$ID
+# under /var/webmin/spamtrap/$ID. Returns undef on success, or an error message
+# on failure.
 sub setup_spamtrap_aliases
 {
 local ($d) = @_;
 
 # Check for aliases already
-# XXX
+local ($ok, $spama, $hama) = &get_spamtrap_aliases($d);
+if ($ok == 1) {
+	return $text{'spamtrap_already'};
+	}
+elsif ($ok < 0) {
+	return &text('spamtrap_clash',
+		     join(", ", $spama ? ( $spama->{'from'} ) : ( ),
+			        $hama ? ( $hama->{'from'} ) : ( )));
+	}
 
-# Create missing
-# XXX
+# Create the directories and mail files
+&make_dir($trap_base_dir, 0755) if (!-d $trap_base_dir);
+&make_dir($spam_alias_dir, 0755) if (!-d $spam_alias_dir);
+&make_dir($ham_alias_dir, 0755) if (!-d $ham_alias_dir);
+local $spamfile = &spam_alias_file($d);
+local $hamfile = &ham_alias_file($d);
+foreach my $f ($spamfile, $hamfile) {
+	if (!-r $f) {
+		&open_tempfile(SPAMFILE, ">$f", 0, 1);
+		&close_tempfile(SPAMFILE);
+		&set_ownership_permissions(undef, undef, 0777, $f);
+		}
+	}
+
+# Create aliases
+$spama = { 'from' => &spam_alias_name($d), 'to' => [ $spamfile ] };
+$hama = { 'from' => &ham_alias_name($d), 'to' => [ $hamfile ] };
+&create_virtuser($spama);
+&create_virtuser($hama);
 
 # Setup cron job? Or in separate function?
 # XXX

@@ -255,5 +255,9 @@ $everyone_alias_dir = "$module_config_directory/everyone";
 
 $ssl_passphrase_dir = "$module_config_directory/sslpass";
 
+$trap_base_dir = "$ENV{'WEBMIN_VAR'}/traps";
+$spam_alias_dir = "$trap_base_dir/spam";
+$ham_alias_dir = "$trap_base_dir/ham";
+
 1;
 
