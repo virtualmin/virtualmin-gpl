@@ -1221,7 +1221,27 @@ elsif ($ok < 0) {
 			        $hama ? ( $hama->{'from'} ) : ( )));
 	}
 
-# Create the directories and mail files
+# Create dirs and empty files
+&setup_spamtrap_directories($d);
+
+# Create aliases
+local $spamfile = &spam_alias_file($d);
+local $hamfile = &ham_alias_file($d);
+$spama = { 'from' => &spam_alias_name($d), 'to' => [ $spamfile ] };
+$hama = { 'from' => &ham_alias_name($d), 'to' => [ $hamfile ] };
+&create_virtuser($spama);
+&create_virtuser($hama);
+
+# Setup cron job
+&setup_spamtrap_cron();
+return undef;
+}
+
+# setup_spamtrap_directories(&domain)
+# Create the spamtrap directories and mail files for a domain
+sub setup_spamtrap_directories
+{
+local ($d) = @_;
 &make_dir($trap_base_dir, 0755) if (!-d $trap_base_dir);
 &make_dir($spam_alias_dir, 0755) if (!-d $spam_alias_dir);
 &make_dir($ham_alias_dir, 0755) if (!-d $ham_alias_dir);
@@ -1234,16 +1254,27 @@ foreach my $f ($spamfile, $hamfile) {
 		&set_ownership_permissions(undef, undef, 0777, $f);
 		}
 	}
+}
 
-# Create aliases
-$spama = { 'from' => &spam_alias_name($d), 'to' => [ $spamfile ] };
-$hama = { 'from' => &ham_alias_name($d), 'to' => [ $hamfile ] };
-&create_virtuser($spama);
-&create_virtuser($hama);
-
-# Setup cron job? Or in separate function?
-# XXX
-# XXX re-create on restore
+# setup_spamtrap_cron()
+# Create the cron job that blacklists trapped spam, if needed
+sub setup_spamtrap_cron
+{
+local $job = &find_virtualmin_cron_job($spamtrap_cron_cmd);
+if (!$job) {
+	$job = { 'user' => 'root',
+		 'command' => $spamtrap_cron_cmd,
+		 'active' => 1,
+		 'mins' => int(rand()*60),
+		 'hours' => '*',
+                 'days' => '*',
+                 'weekdays' => '*',
+                 'months' => '*' };
+	&lock_file(&cron::cron_file($job));
+	&cron::create_cron_job($job);
+        &unlock_file(&cron::cron_file($job));
+	}
+&cron::create_cron_wrapper($spamtrap_cron_cmd, $module_name, "spamtrap.pl");
 }
 
 # delete_spamtrap_aliases(&domain)
@@ -1251,6 +1282,24 @@ $hama = { 'from' => &ham_alias_name($d), 'to' => [ $hamfile ] };
 sub delete_spamtrap_aliases
 {
 local ($d) = @_;
+
+# Get the aliases, and remove them
+local ($ok, $spama, $hama) = &get_spamtrap_aliases($d);
+if ($ok == 1) {
+	&delete_virtuser($spama);
+	&delete_virtuser($hama);
+	}
+else {
+	return $text{'spamtrap_noaliases'};
+	}
+
+# Delete the mail files
+local $spamfile = &spam_alias_file($d);
+local $hamfile = &ham_alias_file($d);
+&unlink_file($spamfile);
+&unlink_file($hamfile);
+
+return undef;
 }
 
 # obtain_lock_spam(&domain)
