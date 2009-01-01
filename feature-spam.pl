@@ -1136,6 +1136,39 @@ if (&check_pid_file($pidfile)) {
 &init::start_action("lookup-domain");
 }
 
+# get_spamtrap_aliases(&domain)
+# Returns 1 if spamtrap and hamtrap aliases exist, 0 if not, -1 if cannot be
+# created due to clashes.
+sub get_spamtrap_aliases
+{
+local ($d) = @_;
+}
+
+# setup_spamtrap_aliases(&domain)
+# Create aliases in a domain for spamtrap and hamtrap, which deliver to files
+# under /var/webmin/spamtrap/$ID
+sub setup_spamtrap_aliases
+{
+local ($d) = @_;
+
+# Check for aliases already
+# XXX
+
+# Create missing
+# XXX
+
+# Setup cron job? Or in separate function?
+# XXX
+# XXX re-create on restore
+}
+
+# delete_spamtrap_aliases(&domain)
+# Remove the spamtrap and hamtrap aliases for a domain, and any mail files
+sub delete_spamtrap_aliases
+{
+local ($d) = @_;
+}
+
 # obtain_lock_spam(&domain)
 # Lock a domain's spamassassin config file and procmail file
 sub obtain_lock_spam

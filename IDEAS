@@ -64,3 +64,10 @@
 	- Also updates bayes DB?
 	- FS#4947
 	- spamtrap@ and hamtrap@
+	- Implement as file aliases that spam delivered to, which are regularly
+	  processed by cron jobs
+		- Spam filtering off for users
+		- Clear mail when processing
+	- Template option to enable for new domains
+	- Hide from aliases list
+	- Option on spam/virus per-domain page
