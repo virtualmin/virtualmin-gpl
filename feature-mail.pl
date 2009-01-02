@@ -2976,10 +2976,13 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 				}
 			}
 		elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(\S+):\s+to=(\S+),(\s+orig_to=(\S+))?/) {
-			# A To: line that has the local recipient
-			local $ltime = timelocal($5, $4, $3, $2,
-			    $apache_mmap{lc($1)}, $tm[5]);
-			if ($ltime > $now+(24*60*60)) {
+			# A To: line that has the local recipient.
+			# The date doesn't have the year, so we need to try
+			# the day and month for this year and last year.
+			local $ltime;
+			eval { $ltime = timelocal($5, $4, $3, $2,
+			    $apache_mmap{lc($1)}, $tm[5]); };
+			if (!$ltime || $ltime > $now+(24*60*60)) {
 				# Must have been last year!
 				$ltime = timelocal($5, $4, $3, $2,
 				     $apache_mmap{lc($1)}, $tm[5]-1);
