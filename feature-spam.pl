@@ -1199,7 +1199,7 @@ foreach my $a (&list_domain_aliases($d)) {
 		}
 	}
 local $rv = $clash ? -1 : $got{'spam'} && $got{'ham'} ? 1 : 0;
-return ($rv, $got{'spam'}, $got{'ham'});
+return wantarray ? ($rv, $got{'spam'}, $got{'ham'}) : $rv;
 }
 
 # setup_spamtrap_aliases(&domain)

@@ -35,6 +35,11 @@ threshold (such as 10) using the C<--spam-delete-level> parameter, which must
 be followed by a number. To turn this behaviour off again, use the 
 C<--spam-no-delete-level> flag.
 
+To enable the spamtrap and hamtrap aliases for the selected virtual servers,
+you can use the C<--spamtrap> command-line flag. Similarly, to remove them
+use the C<--no-spamtrap> flag. When enabled, users will be able to forward
+spam to spamtrap@theirdomain.com for adding to the domain's blacklist.
+
 =cut
 
 package virtual_server;
@@ -126,6 +131,12 @@ while(@ARGV > 0) {
 	elsif ($a =~ /^--use-(clamscan|clamdscan)$/) {
 		$virus_scanner = $1;
 		}
+	elsif ($a eq "--spamtrap") {
+		$spamtrap = 1;
+		}
+	elsif ($a eq "--no-spamtrap") {
+		$spamtrap = 0;
+		}
 	else {
 		&usage();
 		}
@@ -133,7 +144,7 @@ while(@ARGV > 0) {
 @dnames || $all_doms || usage();
 defined($mode{'spam'}) || defined($mode{'virus'}) || $spam_client ||
     $virus_scanner || defined($auto) || defined($spamlevel) ||
-	 &usage("Nothing to do");
+    defined($spamtrap) || &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms) {
@@ -178,6 +189,22 @@ foreach $d (@doms) {
 	if (defined($virus_scanner)) {
 		&save_domain_virus_scanner($d, $virus_scanner);
 		}
+	if (defined($spamtrap)) {
+		$st = &get_spamtrap_aliases($d);
+		if ($st < 0) {
+			&$first_print("Spam trap aliases already exist");
+			}
+		elsif ($st && !$spamtrap) {
+			&$first_print("Removing spam trap aliases ..");
+			$err = &delete_spamtrap_aliases($d);
+			&$second_print($err ? ".. failed : $err" : ".. done");
+			}
+		elsif (!$st && $spamtrap) {
+			&$first_print("Adding spam trap aliases ..");
+			$err = &setup_spamtrap_aliases($d);
+			&$second_print($err ? ".. failed : $err" : ".. done");
+			}
+		}
 
 	&$outdent_print();
 	&release_lock_spam($d);
@@ -209,6 +236,7 @@ print "                      [--spamclear-none |\n";
 print "                       --spamclear-days days\n";
 print "                       --spamclear-size bytes]\n";
 print "                      [--use-clamscan | --use-clamdscan]\n";
+print "                      [--spamtrap | --no-spamtrap]\n";
 print "\n";
 print "Warning - modifying the SpamAssassin or virus scanning client for\n";
 print "individual domains is deprecated.\n";

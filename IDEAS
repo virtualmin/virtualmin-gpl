@@ -68,6 +68,9 @@
 	  processed by cron jobs
 		- Spam filtering off for users
 		- Clear mail when processing
+		- Needs to parse real mail out of forwarded message
+		- Only allow mail from same domain
 	- Template option to enable for new domains
 	- Hide from aliases list
 	- Option on spam/virus per-domain page
+	- Backup and restore
