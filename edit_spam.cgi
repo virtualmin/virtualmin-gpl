@@ -68,6 +68,12 @@ print &ui_table_row(&hlink($text{'spam_clear'}, 'spam_clear'),
 			     &ui_bytesbox("size", $auto->{'size'})) ],
 		]));
 
+# Show spamtrap option
+$st = &get_spamtrap_aliases($d);
+print &ui_table_row(&hlink($text{'spam_trap'}, 'spam_trap'),
+	$st < 0 ? $text{'spam_trapcannot'} :
+		  &ui_yesno_radio("trap", $st ? 1 : 0));
+
 print &ui_table_end();
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 

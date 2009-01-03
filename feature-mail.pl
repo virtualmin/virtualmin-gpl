@@ -149,6 +149,16 @@ if ($_[1]) {
 			}
 		}
 	}
+if ($_[1] && $_[0]->{'spam'}) {
+	# Skip spamtrap and hamtrap aliases
+	foreach my $v (@virts) {
+		if ($v->{'from'} =~ /^(spamtrap|hamtrap)\@/ &&
+		    @{$v->{'to'}} == 1 &&
+		    $v->{'to'}->[0] =~ /^\Q$trap_base_dir\E\//) {
+			$ignore{lc($v->{'from'})} = 1;
+			}
+		}
+	}
 
 # Return only virtusers that match this domain,
 # which are not for forwarding email for users in the domain,

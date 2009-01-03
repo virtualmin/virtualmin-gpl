@@ -52,6 +52,7 @@ local $spamdir = "$spam_config_dir/$_[0]->{'id'}";
 &set_ownership_permissions(undef, undef, 0755, $spamdir);
 
 &obtain_lock_spam($_[0]);
+&obtain_lock_cron($_[0]);
 
 # Add the procmail entry to get the VIRTUALMIN variable
 local @recipes = &procmail::get_procmailrc();
@@ -197,6 +198,14 @@ if ($cmode eq 'days' || $cmode eq 'size') {
 	&save_domain_spam_autoclear($_[0], { $cmode => $cnum });
 	}
 
+# Setup spamtrap aliases, if requested
+if ($tmpl->{'spamtrap'} eq 'yes') {
+	&obtain_lock_mail($_[0]);
+	&setup_spamtrap_aliases($_[0]);
+	&release_lock_mail($_[0]);
+	}
+
+&release_lock_cron($_[0]);
 &release_lock_spam($_[0]);
 &$second_print($text{'setup_done'});
 }
@@ -935,6 +944,14 @@ print &ui_table_row(&hlink($text{'tmpl_spamclear'}, 'template_spamclear'),
 		  [ "size", &text('spam_clearsize',
 			     &ui_bytesbox("spamclear_size", $csize)) ],
 		]));
+
+# Spamtrap default
+print &ui_table_row(&hlink($text{'tmpl_spamtrap'}, 'template_spamtrap'),
+	    &ui_radio("spamtrap", $tmpl->{'spamtrap'},
+		      [ $tmpl->{'default'} ? ( )
+				   : ( [ "", $text{'default'}."<br>" ] ),
+		 	[ "yes", $text{'yes'} ],
+		        [ "none", $text{'no'} ] ]));
 }
 
 # parse_template_spam(&tmpl)
@@ -961,6 +978,9 @@ elsif ($in{'spamclear'} eq 'size') {
 	$tmpl->{'spamclear'} = 'size '.($in{'spamclear_size'}*
 					$in{'spamclear_size_units'});
 	}
+
+# Parse spam trap
+$tmpl->{'spamtrap'} = $in{'spamtrap'};
 }
 
 # clear_lookup_domain_cache(&domain, [&user])
@@ -1141,7 +1161,7 @@ if (&check_pid_file($pidfile)) {
 sub spam_alias_name
 {
 local ($d) = @_;
-return 'spamtrap'.'\@'.$d->{'dom'};
+return 'spamtrap'.'@'.$d->{'dom'};
 }
 
 # ham_alias_name(&domain)
@@ -1149,7 +1169,7 @@ return 'spamtrap'.'\@'.$d->{'dom'};
 sub ham_alias_name
 {
 local ($d) = @_;
-return 'hamtrap'.'\@'.$d->{'dom'};
+return 'hamtrap'.'@'.$d->{'dom'};
 }
 
 # spam_alias_file(&domain)
@@ -1251,7 +1271,7 @@ foreach my $f ($spamfile, $hamfile) {
 	if (!-r $f) {
 		&open_tempfile(SPAMFILE, ">$f", 0, 1);
 		&close_tempfile(SPAMFILE);
-		&set_ownership_permissions(undef, undef, 0777, $f);
+		&set_ownership_permissions(undef, undef, 0666, $f);
 		}
 	}
 }
@@ -1260,6 +1280,7 @@ foreach my $f ($spamfile, $hamfile) {
 # Create the cron job that blacklists trapped spam, if needed
 sub setup_spamtrap_cron
 {
+&foreign_require("cron", "cron-lib.pl");
 local $job = &find_virtualmin_cron_job($spamtrap_cron_cmd);
 if (!$job) {
 	$job = { 'user' => 'root',
@@ -1274,7 +1295,7 @@ if (!$job) {
 	&cron::create_cron_job($job);
         &unlock_file(&cron::cron_file($job));
 	}
-&cron::create_cron_wrapper($spamtrap_cron_cmd, $module_name, "spamtrap.pl");
+&cron::create_wrapper($spamtrap_cron_cmd, $module_name, "spamtrap.pl");
 }
 
 # delete_spamtrap_aliases(&domain)

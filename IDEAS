@@ -63,14 +63,12 @@
  - Email addresses for forwarding spam to, for black/white listing
 	- Also updates bayes DB?
 	- FS#4947
-	- spamtrap@ and hamtrap@
 	- Implement as file aliases that spam delivered to, which are regularly
 	  processed by cron jobs
 		- Spam filtering off for users
 		- Clear mail when processing
 		- Needs to parse real mail out of forwarded message
 		- Only allow mail from same domain
-	- Template option to enable for new domains
-	- Hide from aliases list
-	- Option on spam/virus per-domain page
+		- Update bayes auto-whitelist DB!
 	- Backup and restore
+		- Re-create directories and cron job

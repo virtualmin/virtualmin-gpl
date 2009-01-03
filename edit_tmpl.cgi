@@ -82,7 +82,7 @@ print &ui_hidden("cp", $in{'cp'}),"\n";
 print &ui_hidden("editmode", $in{'editmode'}),"\n";
 $emode = $text{'feature_'.$in{'editmode'}} ||
 	 $text{'tmpl_editmode_'.$in{'editmode'}};
-print &ui_table_start($text{'tmpl_header'}." (".$emode.")", "100%", 2,
+print &ui_table_start($text{'tmpl_header'}." (".$emode.")", "width=100%", 2,
 		      [ "width=30%" ]);
 
 # Show selected options type

@@ -58,6 +58,8 @@ foreach $w (@what) {
 
 &obtain_lock_spam($d);
 &obtain_lock_cron($d);
+&obtain_lock_mail($d);
+
 if ($d->{'spam'}) {
 	$d->{'spam_white'} = $in{'spam_white'};
 	&update_spam_whitelist($d);
@@ -76,6 +78,21 @@ elsif ($in{'clear'} == 2) {
 	$auto = { 'size' => $in{'size'}*$in{'size_units'} };
 	}
 &save_domain_spam_autoclear($d, $auto);
+
+# Save spamtrap setting
+if (defined($in{'trap'})) {
+	$st = &get_spamtrap_aliases($d);
+	$err = undef;
+	if ($st && !$in{'trap'}) {
+		$err = &delete_spamtrap_aliases($d);
+		}
+	elsif (!$st && $in{'trap'}) {
+		$err = &setup_spamtrap_aliases($d);
+		}
+	&error($err) if ($err);
+	}
+
+&release_lock_mail($d);
 &release_lock_spam($d);
 &release_lock_cron($d);
 

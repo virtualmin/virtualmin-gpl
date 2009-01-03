@@ -6513,6 +6513,7 @@ push(@rv, { 'id' => 0,
 	    'aliascopy' => $config{'aliascopy'} || 0,
 	    'bccto' => $config{'bccto'} || 'none',
 	    'spamclear' => $config{'spamclear'} || 'none',
+	    'spamtrap' => $config{'spamtrap'} || 'none',
 	    'defmquota' => $config{'defmquota'} || "none",
 	    'user_aliases' => $config{'newuser_aliases'} || "none",
 	    'dom_aliases' => $config{'newdom_aliases'} || "none",
@@ -6765,6 +6766,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'aliascopy'} = $tmpl->{'aliascopy'};
 	$config{'bccto'} = $tmpl->{'bccto'};
 	$config{'spamclear'} = $tmpl->{'spamclear'};
+	$config{'spamtrap'} = $tmpl->{'spamtrap'};
 	$config{'defmquota'} = $tmpl->{'defmquota'} eq "none" ?
 					"" : $tmpl->{'defmquota'};
 	$config{'newuser_aliases'} = $tmpl->{'user_aliases'} eq "none" ?
@@ -6928,7 +6930,7 @@ if (!$tmpl->{'default'}) {
 		    "othergroups", "defmquota", "quotatype", "append_style",
 		    "domalias", "logrotate", "disabled_web", "disabled_url",
 		    "php", "status", "extra_prefix", "capabilities",
-		    "webmin_group", "spamclear", "namedconf",
+		    "webmin_group", "spamclear", "spamtrap", "namedconf",
 		    "nodbname", "norename", "forceunder", "aliascopy", "bccto",
 		    "resources", "dnssec",
 		    @plugins,
