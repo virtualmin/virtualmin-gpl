@@ -12,12 +12,25 @@ require './virtual-server-lib.pl';
 # Find the sa-learn command
 $salearn = &has_command($spam::config{'sa_learn'} || "sa-learn");
 
-if ($ARGV[0] eq "-debug" || $ARGV[0] eq "--debug") {
-	$debug_mode = 1;
+# Parse command line
+while(@ARGV) {
+	$a = shift(@ARGV);
+	if ($a eq "--debug") {
+		$debug = 1;
+		}
+	elsif ($a eq "--no-delete") {
+		$nodelete = 1;
+		}
+	else {
+		$dnames{$a} = 1;
+		}
 	}
 
 # For each domain with spam enabled and with the aliases, process the files
 foreach $d (&list_domains()) {
+	# Skip if this domain wasn't on the list given
+	next if (%dnames && !$dnames{$d->{'dom'}});
+
 	# Is this domain suitable
 	if (!$d->{'spam'}) {
 		print STDERR "$d->{'dom'}: spam filtering is not enabled\n"
@@ -37,8 +50,9 @@ foreach $d (&list_domains()) {
 		exit(1);
 		}
 
-	# Get users in the domain
+	# Get users and alias domains for the domain
 	@users = &list_domain_users($d, 0, 0, 1, 1);
+	@aliasdoms = &get_domain_by("alias", $d->{'id'});
 
 	# Find and read the spam folder and ham folder
 	print STDERR "$d->{'dom'}: processing spam file\n" if ($debug);
@@ -54,20 +68,21 @@ foreach $d (&list_domains()) {
 	print STDERR "$d->{'dom'}: processing ham file\n" if ($debug);
 	$hamf = { 'file' => &ham_alias_file($d),
 		  'type' => 0 };
-	@hammails = &mailboxes::mailbox_list_mails(undef, undef, $spamf);
+	@hammails = &mailboxes::mailbox_list_mails(undef, undef, $hamf);
 	print STDERR "$d->{'dom'}: ",scalar(@hammails)," messages in ",
 		     $hamf->{'file'},"\n" if ($debug);
 	push(@mails, @hammails);
 
 	foreach $m (@mails) {
 		# Find the Virtualmin user for the sender or recipient
-		print STDERR "$d->{'dom'}: subject ",
-			     "$m->{'header'}->{'subject'}\n" if ($debug);
+		print STDERR "$d->{'dom'}: id=",
+			     "$m->{'header'}->{'message-id'}\n" if ($debug);
 		$user = undef;
 		foreach $h ('from', 'to', 'cc') {
 			@sp = &mailboxes::split_addresses($m->{'header'}->{$h});
 			foreach $e (map { $_->[0] } @sp) {
-				$user ||= &find_user_by_email($e, $users);
+				$user ||= &find_user_by_email(
+						$e, \@users, \@aliasdoms);
 				last if ($user);
 				}
 			if ($user) {
@@ -82,44 +97,64 @@ foreach $d (&list_domains()) {
 		# For each message, find the attached mail if there is one and
 		# if this email was forwarded by a Virtualmin user.
 		&mailboxes::parse_mail($m, undef, 1);
-		if ($what eq 'from' && @{$m->{'attach'}} >= 1) {
-			$a = $m->{'attach'}->[0];
-			if ($a->{'type'} eq 'message/rfc822') {
-				$m = &mailboxes::extract_mail($a->{'data'});
+		@learnm = ( );
+		if ($what eq 'from') {
+			foreach $a (@{$m->{'attach'}}) {
+				if ($a->{'type'} eq 'message/rfc822') {
+					$lm = &mailboxes::extract_mail(
+						$a->{'data'});
+					push(@learnm, $lm);
+					}
 				}
 			}
+		@learnm = ( $m ) if (!@learnm);
 
 		# Feed to sa-learn --spam or --ham, run as the sender
-		local $cmd = $m->{'spamtrap'} ? "$salearn --spam"
-					      : "$salearn --ham";
-		$cmd = &command_as_user($cmd, 0, $cmd);
-		$temp = &transname();
-		&mailboxes::send_mail($m, $temp);
-		&set_ownership_permissions($user->{'uid'}, $user->{'gid'},
-					   0700, $temp);
-		$out = &backquote_command("$cmd <$temp 2>&1");
-		$ex = $?;
-		&unlink_file($temp);
-		# XXX check output
+		foreach $lm (@learnm) {
+			print STDERR "$d->{'dom'}: $user->{'user'}: subject=",
+				   "$lm->{'header'}->{'subject'}\n" if ($debug);
+			local $cmd = $m->{'spamtrap'} ? "$salearn --spam"
+						      : "$salearn --ham";
+			$cmd = &command_as_user($user->{'user'}, 0, $cmd);
+			$temp = &transname();
+			&mailboxes::send_mail($lm, $temp);
+			&set_ownership_permissions(
+				$user->{'uid'}, $user->{'gid'}, 0700, $temp);
+			$out = &backquote_command("$cmd <$temp 2>&1");
+			$ex = $?;
+			&unlink_file($temp);
+			if ($debug) {
+				$out =~ s/\r?\n/ /g;
+				print STDERR "$d->{'dom'}: $user->{'user'}: ",
+					($ex ? "ERROR" : "OK")," $out","\n";
+				}
+			}
 
 		# XXX global blacklist??
 		}
 
 	# Delete both folders
-	# XXX
+	if (!$nodelete) {
+		&mailboxes::mailbox_empty_folder($spamf);
+		&mailboxes::mailbox_empty_folder($hamf);
+		}
 	}
 
 # find_user_by_email(email, &users)
 sub find_user_by_email
 {
-local ($e, $users) = @_;
+local ($e, $users, $aliasdoms) = @_;
 foreach my $u (@$users) {
-	if ($u->{'email'} eq $e) {
-		return $u;
-		}
-	foreach my $ee (@{$u->{'extraemail'}}) {
+	foreach my $ee ($u->{'email'}, @{$u->{'extraemail'}}) {
 		if ($ee eq $e) {
 			return $u;
+			}
+		# Check for same email address in alias domain
+		local ($mb, $dname) = split(/\@/, $ee);
+		foreach my $ad (@aliasdoms) {
+			if ($e eq $mb."\@".$ad->{'dom'}) {
+				return $u;
+				}
 			}
 		}
 	}
