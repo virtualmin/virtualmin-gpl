@@ -1,0 +1,13 @@
+<header>Adding senders of non-spam sent to hamtrap to whitelist?</header>
+
+By default when the <tt>hamtrap</tt> alias is enabled for a virtual server,
+any email sent to it will be added to SpamAssassin's learning database for
+the user who forwarded it. However, this option can be used to also add the
+original senders of the messages to the system-wide or domain-level whitelists,
+so they are never classified as spammers in future. <p>
+
+This can be useful if you have legitimate senders who are being incorrectly
+classified as spammers. <p>
+
+<footer>
+

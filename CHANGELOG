@@ -1030,3 +1030,4 @@ When alias virtual servers are created, files from /etc/skel are no longer copie
 When a virtual server with a self-signed SSL certificate is renamed, the certificate is re-generated to match the new domain name.
 Added command-line scripts to list, generate and install SSL keys and certificates. These are list-certs.pl, generate-cert.pl and install-cert.pl respectively.
 Domain owners can now be granted permissions to edit the remote MySQL client hosts for the databases they manage.
+Added an option on the Spam and Virus Delivery page to enable spamtrap and hamtrap aliases on a per-domain level, to which spam and non-spam can be forwarded by users for addition to SpamAssassin's learning engine. These can also be enabled for new domains in server templates, and changed using the modify-spam command-line API.

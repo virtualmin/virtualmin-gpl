@@ -1,0 +1,6 @@
+desc=Spam trap mail alias
+html=Added an option on the Spam and Virus Delivery page to enable <tt>spamtrap</tt> and <tt>hamtrap</tt> aliases on a per-domain level, to which spam and non-spam can be forwarded by users for addition to SpamAssassin's learning engine. These can also be enabled for new domains in server templates.
+link=edit_spam.cgi?dom=${ID}
+master=1
+reseller=1
+owner=1

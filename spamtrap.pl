@@ -110,6 +110,7 @@ foreach $d (&list_domains()) {
 		@learnm = ( $m ) if (!@learnm);
 
 		# Feed to sa-learn --spam or --ham, run as the sender
+		@senders = ( );
 		foreach $lm (@learnm) {
 			print STDERR "$d->{'dom'}: $user->{'user'}: subject=",
 				   "$lm->{'header'}->{'subject'}\n" if ($debug);
@@ -128,10 +129,43 @@ foreach $d (&list_domains()) {
 				print STDERR "$d->{'dom'}: $user->{'user'}: ",
 					($ex ? "ERROR" : "OK")," $out","\n";
 				}
+			push(@senders, map { $_->[0] }
+					&mailboxes::split_addresses(
+					  $lm->{'header'}->{'from'}));
 			}
 
-		# XXX global blacklist??
+		# Update black or white list, for senders who are not local
+		$cf = $m->{'spamtrap'} ? 'spam_trap_black' : 'ham_trap_white';
+		$dir = $m->{'spamtrap'} ? 'blacklist_from' : 'whitelist_from';
+		if ($config{$cf}) {
+			$spamcfile = "$spam_config_dir/$d->{'id'}/".
+				     "virtualmin.cf";
+			$conf = &spam::get_config($config{$cf} == 2 ? undef :
+						   $spamcfile);
+			@from = map { @{$_->{'words'}} }
+				    &spam::find($dir, $conf);
+			%already = map { $_, 1 } @from;
+			$added = 0;
+			foreach $e (&unique(@senders)) {
+				$euser = &find_user_by_email(
+					$e, \@users, \@aliases);
+				if (!$euser && !$already{$e}) {
+					push(@from, $e);
+					print STDERR "$d->{'dom'}: Adding $e",
+					  " to $dir\n" if ($debug);
+					$added++;
+					}
+				}
+			if ($added) {
+				if ($config{$cf} == 1) {
+					# So adding is to right file
+					$spam::add_cf = $spamcfile;
+					}
+				&spam::save_directives($conf, $dir, \@from, 1);
+				}
+			}
 		}
+	&flush_file_lines();
 
 	# Delete both folders
 	if (!$nodelete) {
@@ -140,7 +174,7 @@ foreach $d (&list_domains()) {
 		}
 	}
 
-# find_user_by_email(email, &users)
+# find_user_by_email(email, &users, &aliases)
 sub find_user_by_email
 {
 local ($e, $users, $aliasdoms) = @_;

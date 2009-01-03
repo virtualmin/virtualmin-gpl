@@ -1,0 +1,13 @@
+<header>Adding senders of spam sent to spamtrap to blacklist?</header>
+
+By default when the <tt>spamtrap</tt> alias is enabled for a virtual server,
+any email sent to it will be added to SpamAssassin's learning database for
+the user who forwarded it. However, this option can be used to also add the
+original senders of spam to the system-wide or domain-level blacklists. <p>
+
+This can be useful if you receive a lot of spam sent from the same address.
+However, since spammers often vary or fake the from address in email,
+blacklisting them is typically not very effective. <p>
+
+<footer>
+
