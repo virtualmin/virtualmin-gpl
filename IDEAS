@@ -70,5 +70,3 @@
 		- Needs to parse real mail out of forwarded message
 		- Only allow mail from same domain
 		- Update bayes auto-whitelist DB!
-	- Backup and restore
-		- Re-create directories and cron job

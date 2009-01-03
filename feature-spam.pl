@@ -592,6 +592,13 @@ if (-r $_[1]."_auto") {
 		}
 	}
 
+# If spamtrap aliases exist, make sure the files and cron job do
+local $st = &get_spamtrap_aliases($_[0]);
+if ($st > 0) {
+	&setup_spamtrap_directories($_[0]);
+	&setup_spamtrap_cron();
+	}
+
 &release_lock_spam($_[0]);
 &$second_print($text{'setup_done'});
 return 1;
