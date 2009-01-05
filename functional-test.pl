@@ -113,7 +113,10 @@ $prefix = &compute_prefix($test_domain, $test_domain_user, undef, 1);
 		 'template' => &get_init_template() );
 $test_full_user = &userdom_name($test_user, \%test_domain);
 ($test_target_domain_user) = &unixuser_name($test_target_domain);
+$test_domain{'home'} = &server_home_directory(\%test_domain);
 $test_domain_db = &database_name(\%test_domain);
+$test_domain_cert = &default_certificate_file(\%test_domain, "cert");
+$test_domain_key = &default_certificate_file(\%test_domain, "key");
 
 # Build list of test types
 $domains_tests = [
@@ -1463,6 +1466,60 @@ $ssl_tests = [
 	  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
 	},
 
+	# Test generation of a new self-signed cert
+	{ 'command' => 'generate-cert.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'self' ],
+		      [ 'size', 1024 ],
+		      [ 'days', 365 ],
+		      [ 'cn', $test_domain ],
+		      [ 'c', 'US' ],
+		      [ 'st', 'California' ],
+		      [ 'l', 'Santa Clara' ],
+		      [ 'o', 'Virtualmin' ],
+		      [ 'ou', 'Testing' ],
+		      [ 'email', 'example@'.$test_domain ],
+		      [ 'alt', 'test_subdomain' ] ],
+	},
+
+	# Test generated SSL cert
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'C=US', 'ST=California', 'L=Santa Clara',
+		      'O=Virtualmin', 'OU=Testing', 'CN='.$test_domain ],
+	},
+
+	# Test generation of a CSR
+	{ 'command' => 'generate-cert.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'csr' ],
+		      [ 'size', 1024 ],
+		      [ 'days', 365 ],
+		      [ 'cn', $test_domain ],
+		      [ 'c', 'US' ],
+		      [ 'st', 'California' ],
+		      [ 'l', 'Santa Clara' ],
+		      [ 'o', 'Virtualmin' ],
+		      [ 'ou', 'Testing' ],
+		      [ 'email', 'example@'.$test_domain ],
+		      [ 'alt', 'test_subdomain' ] ],
+	},
+
+	# Testing listing of keys, certs and CSR
+	{ 'command' => 'list-certs.pl',
+	  'args' => [ [ 'domain' => $test_domain ] ],
+	  'grep' => [ 'BEGIN CERTIFICATE', 'END CERTIFICATE',
+		      'BEGIN RSA PRIVATE KEY', 'END RSA PRIVATE KEY',
+		      'BEGIN CERTIFICATE REQUEST', 'END CERTIFICATE REQUEST' ],
+	},
+
+	# Test re-installation of the cert and key
+	{ 'command' => 'install-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'cert', $test_domain_cert ],
+		      [ 'key', $test_domain_key ] ],
+	},
+
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
@@ -1637,6 +1694,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'ssl' => $ssl_tests,
 	      'shared' => $shared_tests,
 	      'wildcard' => $wildcard_tests,
+	      'parallel' => $parallel_tests,
 	    };
 
 # Run selected tests
