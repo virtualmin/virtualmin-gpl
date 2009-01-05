@@ -1,6 +1,7 @@
 #!/usr/local/bin/perl
 # Runs all Virtualmin tests
 
+use POSIX;
 package virtual_server;
 $no_virtualmin_plugins = 1;	# Save memory
 if (!$module_name) {
@@ -24,6 +25,8 @@ $ENV{'ftp_proxy'} = undef;
 $test_domain = "example.com";	# Never really exists
 $test_target_domain = "exampletarget.com";
 $test_subdomain = "example.net";
+$test_parallel_domain1 = "example1.net";
+$test_parallel_domain2 = "example2.net";
 $test_user = "testy";
 $test_alias = "testing";
 $test_alias_two = "yetanothertesting";
@@ -1675,6 +1678,91 @@ $wildcard_tests = [
 	},
 	];
 
+# Tests for concurrent domain creation
+$parallel_tests = [
+	# Create a domain not in parallel
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test serial domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ],
+		      [ 'mail' ], [ 'mysql' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test serial home page' ],
+		      @create_args, ],
+        },
+
+	# Create two domains in background processes
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_parallel_domain1 ],
+		      [ 'desc', 'Test parallel domain 1' ],
+		      [ 'parent', $test_domain ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ],
+		      [ 'mail' ], [ 'mysql' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test parallel 1 home page' ],
+		      @create_args, ],
+	  'background' => 1,
+        },
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_parallel_domain2 ],
+		      [ 'desc', 'Test parallel domain 2' ],
+		      [ 'parent', $test_domain ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ],
+		      [ 'mail' ], [ 'mysql' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test parallel 2 home page' ],
+		      @create_args, ],
+	  'background' => 2,
+        },
+
+	# Wait for background processes to complete
+	{ 'wait' => [ 1, 2 ] },
+
+	# Make sure the domains were created
+	{ 'command' => 'list-domains.pl',
+	  'grep' => [ "^$test_parallel_domain1", "^$test_parallel_domain2" ],
+	},
+
+	# Validate all the domains
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'domain' => $test_parallel_domain1 ],
+		      [ 'domain' => $test_parallel_domain2 ],
+		      [ 'all-features' ] ],
+	},
+
+	# Delete the two domains in background processes
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_parallel_domain1 ] ],
+	  'background' => 3,
+	},
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_parallel_domain2 ] ],
+	  'background' => 4,
+	},
+
+	# Wait for background processes to complete
+	{ 'wait' => [ 3, 4 ] },
+
+	# Make sure the domains were deleted
+	{ 'command' => 'list-domains.pl',
+	  'antigrep' => [ "^$test_parallel_domain1",
+			  "^$test_parallel_domain2" ],
+	},
+
+	# Validate the parent domain
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Remove the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { 'domains' => $domains_tests,
 	      'mailbox' => $mailbox_tests,
 	      'alias' => $alias_tests,
@@ -1755,6 +1843,53 @@ exit($total_failed);
 sub run_test
 {
 local ($t) = @_;
+if ($t->{'wait'}) {
+	# Wait for a background process to exit
+	local @waits = ref($t->{'wait'}) ? @{$t->{'wait'}} : ( $t->{'wait'} );
+	local $ok = 1;
+	foreach my $w (@waits) {
+		print "    Waiting for background process $w ..\n";
+		local $pid = $backgrounds{$w};
+		if (!$pid) {
+			print "    .. already exited, or never started!\n";
+			$ok = 0;
+			}
+		waitpid($pid, 0);
+		if ($?) {
+			print "    .. PID $pid failed : $?\n";
+			$ok = 0;
+			}
+		else {
+			print "    .. PID $pid done\n";
+			}
+		delete($backgrounds{$w});
+		}
+	return $ok;
+	}
+elsif ($t->{'background'}) {
+	# Run a test, but in the background
+	print "    Backgrounding test ..\n";
+	local $pid = fork();
+	if ($pid < 0) {
+		print "    .. fork failed : $!\n";
+		return 0;
+		}
+	if (!$pid) {
+		local $rv = &run_test_command($t);
+		exit($rv ? 0 : 1);
+		}
+	$backgrounds{$t->{'background'}} = $pid;
+	print "    .. backgrounded as $pid\n";
+	return 1;
+	}
+else {
+	# Run a regular test command
+	return &run_test_command($t);
+	}
+}
+
+sub run_test_command
+{
 local $cmd = "$t->{'command'}";
 foreach my $a (@{$t->{'args'}}) {
 	if (defined($a->[1])) {
