@@ -2,13 +2,15 @@
 
 =head1 delete-domain.pl
 
-Delete one virtual server
+Delete one or more virtual servers.
 
-To delete a server (and all of its sub-servers and alias domains) from the
-system, use this program. Its only required parameter is C<--domain> , which must
-be followed by the domain name of the server to remove. The C<--only> option can
-be used to not actually delete the server, but instead simply remove it from
-the control of Virtualmin.
+To delete one or many servers (and all of their sub-servers and alias domains)
+from the system, use this program. The domains to remove can be specified with
+the C<--domain> flag, must can be given multiple times. Alternately, you can
+select virtual servers by username, using the C<--user> flag.
+
+The C<--only> option can be used to not actually delete the servers, but
+instead simply remove them from the control of Virtualmin.
 
 Be careful with this program, as unlike the server deletion function in the
 Virtualmin web interface, it will NOT prompt for confirmation!
@@ -36,7 +38,10 @@ if (!$module_name) {
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
-		$domain = lc(shift(@ARGV));
+		push(@domains, shift(@ARGV));
+		}
+	elsif ($a eq "--user") {
+		push(@users, shift(@ARGV));
 		}
 	elsif ($a eq "--only") {
 		$only = 1;
@@ -52,22 +57,29 @@ while(@ARGV > 0) {
 		}
 	}
 
-# Find the domain
-$domain || usage();
-$dom = &get_domain_by("dom", $domain);
-$dom || &usage("Virtual server $domain does not exist");
+# Find the domains, minus any sub-domains of already selected parents
+@domains || @users || usage();
+@doms = &get_domains_by_names_users(\@domains, \@users, \&usage);
+foreach $d (@doms) {
+	$idmap{$d->{'id'}} = $d;
+	}
+@doms = grep { !$_->{'parent'} || !$idmap{$_->{'parent'}} } @doms;
 
-# Kill it!
-print "Deleting virtual server $domain ..\n\n";
+# Kill them
 $config{'pre_command'} = $precommand if ($precommand);
 $config{'post_command'} = $postcommand if ($postcommand);
-$err = &delete_virtual_server($dom, $only);
-if ($err) {
-	print "$err\n";
-	exit 1;
+foreach $d (@doms) {
+	print "Deleting virtual server $d->{'dom'} ..\n";
+	&$indent_print();
+	$err = &delete_virtual_server($d, $only);
+	&$outdent_print();
+	if ($err) {
+		print "$err\n";
+		exit 1;
+		}
+	print ".. deleted\n\n";
 	}
-&virtualmin_api_log(\@OLDARGV, $dom);
-print "All done!\n";
+&virtualmin_api_log(\@OLDARGV, $doms[0]);
 
 sub usage
 {
@@ -75,7 +87,8 @@ print $_[0],"\n\n" if ($_[0]);
 print "Deletes an existing Virtualmin virtual server and all sub-servers,\n";
 print "mailboxes and alias domains.\n";
 print "\n";
-print "usage: delete-domain.pl  --domain domain.name\n";
+print "usage: delete-domain.pl  [--domain domain.name]*\n";
+print "                         [--user username]*\n";
 print "                         [--only]\n";
 exit(1);
 }
