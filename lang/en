@@ -3066,6 +3066,7 @@ scripts_epartial=.. installation was only partially complete.
 scripts_icommand=Missing command $1
 scripts_idbneed=A $1 database is needed
 scripts_idbneedor=$1 or $2
+scripts_gemver=Updating Ruby Gem to latest version from $1 ..
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:
@@ -3694,6 +3695,7 @@ cmass_eupload=Missing uploaded file
 cmass_etext=No batch file text entered
 cmass_edname=Domain name and description must be given
 cmass_eparent=Parent server $1 does not exist
+cmass_ealias=Alias target server $1 does not exist
 cmass_done=Created server $1
 cmass_uploaded=uploaded file
 cmass_texted=pasted text
