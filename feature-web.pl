@@ -193,21 +193,12 @@ else {
 		&add_webmail_redirect_directives($_[0], $tmpl);
 		}
 
-	# Create empty access and error log files, world-readable and owned
-	# by the user Apache runs as.
+	# Create empty access and error log files, owned by the domain's user.
+	# Apache opens them as root, so it will be able to write.
 	local $log = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}, 0);
 	local $elog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}, 1);
-	local $l;
-	local $web_user = &get_apache_user($_[0]);
-	foreach $l ($log, $elog) {
-		if ($l && !-r $l) {
-			&open_tempfile(LOG, ">$l");
-			&close_tempfile(LOG);
-			local @ug = $web_user && $web_user ne 'none' ?
-				( $web_user, undef ) : ( undef, undef );
-			&set_ownership_permissions(@ug, 0644, $l);
-			}
-		}
+	&setup_apache_logs($_[0], $log, $elog);
+	&link_apache_logs($_[0], $log, $elog);
 	$_[0]->{'alias_mode'} = 0;
 	}
 &create_framefwd_file($_[0]);
@@ -602,6 +593,17 @@ else {
 			&$second_print($text{'setup_done'});
 			}
 
+		# Set owner on log files
+		local $auser = &get_apache_user($_[0]);
+		local $gid = $auser && $auser ne 'none' ? $auser
+							: $_[0]->{'gid'};
+		foreach my $ld ("ErrorLog", "TransferLog", "CustomLog") {
+			local @ldv = &apache::find_directive($ld, $vconf);
+			next if (!@ldv);
+			&set_ownership_permissions($_[0]->{'uid'}, $gid, undef,
+						   @ldv);
+			}
+
 		# Add the Apache user to the group for the new domain
 		local $web_user = &get_apache_user($_[0]);
 		local $tmpl = &get_template($_[0]->{'template'});
@@ -636,9 +638,9 @@ else {
 					}
 				if ($l ne $oldl) {
 					# Rename log file too
-					local @wl = &apache::wsplit($l);
-					local @woldl = &apache::wsplit($oldl);
-					&rename_file($woldl[0], $wl[0]);
+					local $wl = &apache::wsplit($l);
+					local $woldl = &apache::wsplit($oldl);
+					&rename_file($woldl->[0], $wl->[0]);
 					}
 				}
 			&apache::save_directive($ld, \@ldv, $vconf, $conf);
@@ -668,6 +670,9 @@ else {
 			($virt, $vconf, $conf) = &get_apache_virtual(
 				$_[0]->{'dom'}, $_[0]->{'web_port'});
 			}
+
+		# Re-link Apache logs
+		&link_apache_logs($_[0]);
 		&$second_print($text{'setup_done'});
 		}
 
@@ -1288,6 +1293,9 @@ if ($virt) {
 	# Set new public_html and cgi-bin paths
 	&find_html_cgi_dirs($_[0]);
 
+	# Create empty log files if needed
+	&setup_apache_logs($_[0]);
+
 	# Copy back log files if they were in the backup
 	if (-r $_[1]."_alog") {
 		&$first_print($text{'restore_apachelog'});
@@ -1301,6 +1309,9 @@ if ($virt) {
 			}
 		&$second_print($text{'setup_done'});
 		}
+
+	# Re-link Apache logs if needed
+	&link_apache_logs($_[0]);
 
 	&register_post_action(\&restart_apache);
 	$rv = 1;
@@ -2871,6 +2882,54 @@ if ($tmpl->{'web_suexec'} && $suhome &&
 		     "<tt>$home_base</tt>", "<tt>$suhome</tt>");
 	}
 return undef;
+}
+
+# setup_apache_logs(&domain, [access-log, error-log])
+# Create empty Apache log files for a domain, and set their ownership
+sub setup_apache_logs
+{
+local ($d, $log, $elog) = @_;
+$log ||= &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0);
+$elog ||= &get_apache_log($d->{'dom'}, $d->{'web_port'}, 1);
+local $auser = &get_apache_user($d);
+local $gid = $auser && $auser ne 'none' ? $auser : $d->{'gid'};
+foreach my $l ($log, $elog) {
+	if ($l && !-r $l) {
+		local $dir = $l;
+		$dir =~ s/\/([^\/]+)$//;
+		if (!-d $dir) {
+			# Create parent dir, such as /var/log/virtualmin
+			&make_dir($dir, 0711, 1);
+			}
+		&open_tempfile(LOG, ">$l", 0, 1);
+		&close_tempfile(LOG);
+		}
+	&set_ownership_permissions($d->{'uid'}, $auser, 0660, $l);
+	}
+}
+
+# link_apache_logs(&domain, [access-log, error-log])
+# If a domain's logs are not under it's home, create symlinks from the logs
+# directory to the actual location.
+sub link_apache_logs
+{
+local ($d, $log, $elog) = @_;
+$log ||= &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0);
+$elog ||= &get_apache_log($d->{'dom'}, $d->{'web_port'}, 1);
+local $loglink = "$d->{'home'}/logs/access_log";
+local $eloglink = "$d->{'home'}/logs/error_log";
+if ($log && (!-e $loglink || -l $loglink)) {
+	&lock_file($loglink);
+	&unlink_file($loglink);
+	&symlink_file($log, $loglink);
+	&unlock_file($loglink);
+	}
+if ($elog && (!-e $eloglink || -l $eloglink)) {
+	&lock_file($eloglink);
+	&unlink_file($eloglink);
+	&symlink_file($elog, $eloglink);
+	&unlock_file($eloglink);
+	}
 }
 
 $done_feature_script{'web'} = 1;
