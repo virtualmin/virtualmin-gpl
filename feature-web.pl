@@ -594,18 +594,17 @@ else {
 			}
 
 		# Set owner on log files
-		local $auser = &get_apache_user($_[0]);
-		local $gid = $auser && $auser ne 'none' ? $auser
+		local $web_user = &get_apache_user($_[0]);
+		local $gid = $web_user && $web_user ne 'none' ? $web_user
 							: $_[0]->{'gid'};
 		foreach my $ld ("ErrorLog", "TransferLog", "CustomLog") {
-			local @ldv = &apache::find_directive($ld, $vconf);
+			local @ldv = &apache::find_directive($ld, $vconf, 1);
 			next if (!@ldv);
 			&set_ownership_permissions($_[0]->{'uid'}, $gid, undef,
 						   @ldv);
 			}
 
 		# Add the Apache user to the group for the new domain
-		local $web_user = &get_apache_user($_[0]);
 		local $tmpl = &get_template($_[0]->{'template'});
 		if ($tmpl->{'web_user'} ne 'none' && $web_user) {
 			&add_user_to_domain_group($_[0], $web_user,
@@ -659,8 +658,9 @@ else {
 
 		&flush_file_lines();
 		$rv++;
-		if ($virt->{'file'} =~ /$_[1]->{'dom'}/) {
+		if ($virt->{'file'} =~ /\Q$_[1]->{'dom'}\E/) {
 			# Filename contains domain name .. need to re-name
+			# the Apache .conf file
 			&apache::delete_webfile_link($virt->{'file'});
 			local $nfn = $virt->{'file'};
 			$nfn =~ s/$_[1]->{'dom'}/$_[0]->{'dom'}/;
@@ -914,12 +914,17 @@ if ($virt) {
 	local $log;
 	if ($_[2]) {
 		# Looking for error log
-		$log = &apache::find_directive("ErrorLog", $vconf, 1);
+		$log = &apache::find_directive("ErrorLog", $vconf);
 		}
 	else {
 		# Looking for normal log
-		$log = &apache::find_directive("TransferLog", $vconf, 1) ||
-		       &apache::find_directive("CustomLog", $vconf, 1);
+		$log = &apache::find_directive("TransferLog", $vconf) ||
+		       &apache::find_directive("CustomLog", $vconf);
+		}
+	if ($log) {
+		# Work-around for a bug that didn't update words in
+		# apache::save_directive. Undo when Webmin 1.450 is out.
+		$log = &apache::wsplit($log)->[0];
 		}
 	if ($log =~ /^\|\Q$writelogs_cmd\E\s+(\S+)\s+(\S+)/) {
 		# Via writelogs .. return real path
@@ -951,11 +956,11 @@ sub get_old_apache_log
 {
 local ($alog, $d, $oldd) = @_;
 if ($d->{'home'} ne $oldd->{'home'}) {
-	$alog =~ s/$d->{'home'}/$oldd->{'home'}/;
+	$alog =~ s/\Q$d->{'home'}\E/$oldd->{'home'}/;
 	}
 if ($d->{'dom'} ne $oldd->{'dom'} && 
     !&is_under_directory($d->{'home'}, $alog)) {
-	$alog =~ s/$d->{'dom'}/$oldd->{'dom'}/;
+	$alog =~ s/\Q$d->{'dom'}\E/$oldd->{'dom'}/;
 	}
 return $alog;
 }
@@ -2918,13 +2923,15 @@ $log ||= &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0);
 $elog ||= &get_apache_log($d->{'dom'}, $d->{'web_port'}, 1);
 local $loglink = "$d->{'home'}/logs/access_log";
 local $eloglink = "$d->{'home'}/logs/error_log";
-if ($log && (!-e $loglink || -l $loglink)) {
+if ($log && (!-e $loglink || -l $loglink) &&
+    !&is_under_directory($d->{'home'}, $log)) {
 	&lock_file($loglink);
 	&unlink_file($loglink);
 	&symlink_file($log, $loglink);
 	&unlock_file($loglink);
 	}
-if ($elog && (!-e $eloglink || -l $eloglink)) {
+if ($elog && (!-e $eloglink || -l $eloglink) &&
+    !&is_under_directory($d->{'home'}, $elog)) {
 	&lock_file($eloglink);
 	&unlink_file($eloglink);
 	&symlink_file($elog, $eloglink);

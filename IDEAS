@@ -59,10 +59,5 @@
 
  - Default apache logs to /var/log/virtualmin
 	- Need to change template in config-* files
-	- Permissions on log file
-	- Chown when changing domain user
-	- Make logs writable by Apache user too? Some systems don't open logs
-	  as root :-(
-	- logrotate not being updated on domain rename?
-		- links not being updated on domain rename
+	- Test backups and restore when directory does not exist
 	- CHANGELOG
