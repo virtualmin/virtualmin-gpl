@@ -3070,6 +3070,7 @@ scripts_gemver=Updating Ruby Gems to latest version from $1 ..
 scripts_gemverfailed=.. Gems update failed : $1
 scripts_geminstall=Installing Ruby Gem $1 ..
 scripts_gemfailed=.. Gem install failed : $1
+scripts_gemlink=Linking Gem command $1 to new version $2 ..
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:

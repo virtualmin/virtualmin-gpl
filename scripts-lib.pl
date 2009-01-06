@@ -1523,10 +1523,7 @@ $opts->{'dir'} || return "Missing install directory!";
 &is_under_directory($d->{'home'}, $opts->{'dir'}) ||
 	return "Invalid install directory $opts->{'dir'}";
 local $out = &backquote_logged("rm -rf ".quotemeta($opts->{'dir'})."/* ".
-			       quotemeta($opts->{'dir'})."/.htaccess* ".
-			       quotemeta($opts->{'dir'})."/.svn* ".
-			       quotemeta($opts->{'dir'})."/.project* ".
-			       quotemeta($opts->{'dir'})."/.cvs* 2>&1");
+			       quotemeta($opts->{'dir'})."/.??* 2>&1");
 $? && return "Failed to delete files : <tt>$out</tt>";
 
 if ($opts->{'dir'} ne &public_html_dir($d, 0)) {
@@ -1614,8 +1611,9 @@ return undef;
 sub setup_ruby_modules
 {
 local ($d, $script, $ver, $opts) = @_;
-return 1 if (&indexof("ruby", @{$script->{'uses'}}) < 0);
-if (!&has_command("gem")) {
+
+if (!&has_command("gem") &&
+    &indexof("ruby", @{$script->{'uses'}}) >= 0) {
 	# Try to install gem from YUM or APT
 	&$first_print($text{'scripts_installgem'});
 
@@ -1639,7 +1637,6 @@ if (!&has_command("gem")) {
 	local @pinfo = &software::package_info($newpkg);
 	if (@pinfo && $pinfo[0] eq $newpkg) {
 		# Worked
-		&execute_command("gem list --remote");	# Force cache init
 		&$second_print($text{'setup_done'});
 		}
 	else {
@@ -1647,6 +1644,65 @@ if (!&has_command("gem")) {
 		return 0;
 		}
 	}
+
+# Check if a Gem version was requested, and if so update to it
+local $vfunc = $script->{'gem_version_func'};
+if (defined(&$vfunc)) {
+	local $needver = &$vfunc($d, $ver, $opts);
+	local $gotver = &get_gem_version();
+	if (&compare_versions($needver, $gotver) > 0) {
+		# Need a newer Gem version! Try to update
+		&$first_print(&text('scripts_gemver', $gotver));
+		local $gempath = &has_command("gem");
+		local $rver = &get_ruby_version();
+		$rver =~ s/^(\d+\.\d+).*/$1/;	# Make it like just 1.8
+		local $oldgemverpath = &has_command("gem".$rver);
+		$out = &backquote_logged(
+			"gem update --system 2>&1 </dev/null");
+		if ($?) {
+			&$second_print(&text('scripts_gemverfailed',
+					   "<tt>".&html_escape($out)."</tt>"));
+			return 0;
+			}
+		else {
+			&$second_print($text{'setup_done'});
+
+			# If the update installed gem1.8, link the old gem
+			# command to it instead
+			local $newgemverpath = &has_command("gem".$rver);
+			if ($newgemverpath && !$oldgemverpath &&
+			    $gempath &&
+			    !&same_file($gempath, $newgemverpath)) {
+				&$first_print(&text('scripts_gemlink',
+						"<tt>$gempath</tt>",
+						"<tt>$newgemverpath</tt>"));
+				&unlink_file($gempath);
+				&symlink_file($newgemverpath, $gempath);
+				&$second_print($text{'setup_done'});
+				}
+			}
+		}
+	}
+
+# Check if any Gems were needed
+local $gfunc = $script->{'gems_func'};
+if (defined(&$gfunc)) {
+	local @gems = &$gfunc($d, $ver, $opts);
+	foreach my $g (@gems) {
+		local ($name, $version, $nore) = @$g;
+		&$first_print(&text('scripts_geminstall', "<tt>$name</tt>"));
+		local $err = &install_ruby_gem($name, $version, $nore);
+		if ($err) {
+			&$second_print(&text('scripts_gemfailed',
+					"<tt>".&html_escape($err)."</tt>"));
+			return 0;
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
+		}
+	}
+
 return 1;
 }
 
@@ -1996,7 +2052,6 @@ local ($d, $script, $ver, $phpver, $opts) = @_;
 &setup_pear_modules($d, $script, $ver, $phpver, $opts) || return 0;
 &setup_perl_modules($d, $script, $ver, $opts) || return 0;
 &setup_ruby_modules($d, $script, $ver, $opts) || return 0;
-&setup_ruby_gems($d, $script, $ver, $opts) || return 0;
 &setup_python_modules($d, $script, $ver, $opts) || return 0;
 &setup_noproxy_path($d, $script, $ver, $opts) || return 0;
 
