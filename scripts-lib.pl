@@ -134,6 +134,8 @@ local $rv = { 'name' => $name,
 	      'perl_mods_func' => "script_${name}_perl_modules",
 	      'perl_opt_mods_func' => "script_${name}_opt_perl_modules",
 	      'python_mods_func' => "script_${name}_python_modules",
+	      'gem_version_func' => "script_${name}_gem_version",
+	      'gems_func' => "script_${name}_gems",
 	      'latest_func' => "script_${name}_latest",
 	      'check_latest_func' => "script_${name}_check_latest",
 	      'commands_func' => "script_${name}_commands",
@@ -1988,12 +1990,16 @@ return 0;
 sub setup_script_requirements
 {
 local ($d, $script, $ver, $phpver, $opts) = @_;
+
+# Install modules needed for various scripting languages
 &setup_php_modules($d, $script, $ver, $phpver, $opts) || return 0;
 &setup_pear_modules($d, $script, $ver, $phpver, $opts) || return 0;
 &setup_perl_modules($d, $script, $ver, $opts) || return 0;
 &setup_ruby_modules($d, $script, $ver, $opts) || return 0;
+&setup_ruby_gems($d, $script, $ver, $opts) || return 0;
 &setup_python_modules($d, $script, $ver, $opts) || return 0;
 &setup_noproxy_path($d, $script, $ver, $opts) || return 0;
+
 # Setup PHP variables
 if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 	&$first_print($text{'scripts_apache'});
@@ -2005,6 +2011,7 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 		&$second_print($text{'scripts_aalready'});
 		}
 	}
+
 return 1;
 }
 

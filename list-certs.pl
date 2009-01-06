@@ -84,7 +84,9 @@ foreach $d (@doms) {
 		$data = $d->{'ssl_'.$t} ? &read_file_contents($d->{'ssl_'.$t})
 					: undef;
 		if ($data) {
-			print "$d->{'dom'} - $t :\n";
+			print "$d->{'dom'}:\n";
+			print "    Type: $t\n";
+			print "    File: ",$d->{'ssl_'.$t},"\n";
 			$data =~ s/\s*$//g;
 			$data .= "\n";
 			print $data;
