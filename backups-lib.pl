@@ -360,6 +360,11 @@ local ($okcount, $errcount) = (0, 0);
 local @errdoms;
 local %donefeatures;				# Map from domain name->features
 DOMAIN: foreach $d (@$doms) {
+	# Make sure there are no databases that don't really exist, as these
+	# can cause database feature backups to fail.
+	my @alldbs = &all_databases($d);
+        &resync_all_databases($d, \@alldbs);
+
 	if ($homefmt) {
 		# Backup goes to a sub-dir of the home
 		$backupdir = "$d->{'home'}/.backup";
@@ -1137,6 +1142,12 @@ if ($ok) {
 			&create_virtual_server($d, $parentdom,
 			       $parentdom ? $parentdom->{'user'} : undef, 1);
 			&$outdent_print();
+			}
+		else {
+			# Make sure there are no databases that don't really
+			# exist, to avoid failures on restore.
+			my @alldbs = &all_databases($d);
+			&resync_all_databases($d, \@alldbs);
 			}
 
 		# Users need to be restored last
