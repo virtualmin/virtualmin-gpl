@@ -174,7 +174,8 @@ if (@jobs) {
 #		 home-format, &virtualmin-backups, mkdir, onebyone, as-owner,
 #		 &callback-func, incremental)
 # Perform a backup of one or more domains into a single tar.gz file. Returns
-# an OK flag and the size of the backup file
+# an OK flag, the size of the backup file, and a list of domains for which
+# something went wrong.
 sub backup_domains
 {
 local ($desturl, $doms, $features, $dirfmt, $skip, $opts, $homefmt, $vbs,
@@ -189,7 +190,7 @@ if ($asowner) {
 local $tar = &get_tar_command();
 if (!$tar) {
 	&$first_print($text{'backup_etarcmd'});
-	return (0);
+	return (0, 0, $doms);
 	}
 
 # See if we can actually connect to the remote server
@@ -205,7 +206,7 @@ if ($mode == 1) {
 	&ftp_onecommand($server, "CWD /", \$ftperr, $user, $pass, $port);
 	if ($ftperr) {
 		&$first_print(&text('backup_eftptest', $ftperr));
-		return (0, 0);
+		return (0, 0, $doms);
 		}
 	if ($dirfmt) {
 		# Also create the destination directory and all parents now
@@ -231,7 +232,7 @@ elsif ($mode == 2) {
 	&scp_copy($temp, $r, $pass, \$scperr, $port);
 	if ($scperr) {
 		&$first_print(&text('backup_escptest', $scperr));
-		return (0, 0);
+		return (0, 0, $doms);
 		}
 	if ($dirfmt && $path ne "/") {
 		# Also create the destination directory now, by scping an
@@ -249,21 +250,21 @@ elsif ($mode == 3) {
 	# Connect to S3 service and create bucket
 	if ($path && $dirfmt) {
 		&$first_print($text{'backup_es3path'});
-		return (0, 0);
+		return (0, 0, $doms);
 		}
 	elsif (!$path && !$dirfmt) {
 		&$first_print($text{'backup_es3nopath'});
-		return (0, 0);
+		return (0, 0, $doms);
 		}
 	local $cerr = &check_s3();
 	if ($cerr) {
 		&$first_print($cerr);
-		return (0, 0);
+		return (0, 0, $doms);
 		}
 	local $err = &init_s3_bucket($user, $pass, $server, $s3_upload_tries);
 	if ($err) {
 		&$first_print($err);
-		return (0, 0);
+		return (0, 0, $doms);
 		}
 	}
 elsif ($mode == 0) {
@@ -278,12 +279,12 @@ elsif ($mode == 0) {
 		else {
 			&$first_print(&text('backup_edirtest',
 					    "<tt>$desturl</tt>"));
-			return (0, 0);
+			return (0, 0, $doms);
 			}
 		}
 	elsif (!$dirfmt && -d $desturl) {
 		&$first_print(&text('backup_enotdirtest', "<tt>$desturl</tt>"));
-		return (0, 0);
+		return (0, 0, $doms);
 		}
 	if (!$dirfmt && $mkdir) {
 		# Create parent directories if requested
@@ -308,17 +309,17 @@ else {
 	# *have* a home directory
 	if (!$dirfmt) {
 		&$first_print($text{'backup_ehomeformat'});
-		return (0, 0);
+		return (0, 0, $doms);
 		}
 	if (&indexof("dir", @$features) == -1) {
 		&$first_print($text{'backup_ehomeformat2'});
-		return (0, 0);
+		return (0, 0, $doms);
 		}
 	foreach my $d (@$doms) {
 		if (!$d->{'dir'} && !$skip) {
 			&$first_print(&text('backup_ehomeformat3',
 					    &show_domain_name($d)));
-			return (0, 0);
+			return (0, 0, $doms);
 			}
 		}
 	# Skip any that don't have directories
@@ -402,7 +403,7 @@ DOMAIN: foreach $d (@$doms) {
 		       $d->{$f}) {
 			# Call plugin backup function
 			$ffile = "$backupdir/$d->{'dom'}_$f";
-			local $fok = &plugin_call($f, "feature_backup",
+			$fok = &plugin_call($f, "feature_backup",
 					  $d, $ffile, $opts->{$f}, $homefmt,
 					  $increment, $asd);
 			}
@@ -771,7 +772,7 @@ if ($ok) {
 		}
 	}
 
-return ($ok, $sz);
+return ($ok, $sz, \@errdoms);
 }
 
 # make_backup_dir(dir, perms, recursive, &as-domain)

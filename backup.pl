@@ -98,7 +98,7 @@ else {
 	}
 $start_time = time();
 $current_id = undef;
-($ok, $size) = &backup_domains($dest, \@doms, \@do_features,
+($ok, $size, $errdoms) = &backup_domains($dest, \@doms, \@do_features,
 			       $sched->{'fmt'},
 			       $sched->{'errors'},
 			       \%options,
@@ -123,16 +123,18 @@ if ($sched->{'email'} && $has_mailboxes &&
     (!$ok || !$sched->{'email_err'} || $force_email)) {
 	if ($ok) {
 		$output .= &text('backup_done', &nice_size($size))." ";
+		$subject = &text('backup_donesubject', $host);
 		}
 	else {
 		$output .= $text{'backup_failed'}." ";
+		$subject = &text('backup_failedsubject', $host);
 		}
 	$total_time = time() - $start_time;
 	$output .= &text('backup_time', &nice_hour_mins_secs($total_time))."\n";
 	$output .= "\n";
 	$output .= &text('backup_fromvirt', &get_virtualmin_url())."\n";
 	$mail = { 'headers' => [ [ 'From', &get_global_from_address() ],
-				 [ 'Subject', "Backup of Virtualmin on $host" ],
+				 [ 'Subject', $subject ],
 				 [ 'To', $sched->{'email'} ] ],
 		  'attach'  => [ { 'headers' => [ [ 'Content-type',
 						    'text/plain' ] ],
@@ -142,19 +144,31 @@ if ($sched->{'email'} && $has_mailboxes &&
 	}
 
 # Send email to domain owners too, if selected
+%errdoms = map { $_->{'id'}, $_ } @$errdoms;
 if ($sched->{'email_doms'} && $has_mailboxes &&
     (!$ok || !$sched->{'email_err'} || $force_email)) {
 	@emails = &unique(map { $_->{'emailto'} } @doms);
 	foreach $email (@emails) {
+		# Find the domains for this email address, and their output
 		@edoms = grep { $_->{'emailto'} eq $email } @doms;
 		$eoutput = join("", map { $domain_output{$_->{'id'}} } @edoms);
 		$eoutput .= "\n";
 		$eoutput .= &text('backup_fromvirt',
 				&get_virtualmin_url($edoms[0]))."\n";
+
+		# Check if any of the domains failed
+		@failededoms = grep { $errdoms{$_->{'id'}} } @edoms;
+		if (@failededoms) {
+			$subject = &text('backup_failedsubject', $host);
+			}
+		else {
+			$subject = &text('backup_donesubject', $host);
+			}
+
 		$mail = {
 		  'headers' =>
 			[ [ 'From', &get_global_from_address($edoms[0]) ],
-			  [ 'Subject', "Backup of Virtualmin on $host" ],
+			  [ 'Subject', $subject ],
 			  [ 'To', $email ] ],
 		  'attach'  =>
 			[ { 'headers' => [ [ 'Content-type', 'text/plain' ] ],
