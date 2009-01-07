@@ -57,7 +57,3 @@
 	- Concurrent with v4, so that a domain can also have a v6 address
 	- Use in DNS, Apache
 
- - Default apache logs to /var/log/virtualmin
-	- Need to change template in config-* files
-	- Test backups and restore when directory does not exist
-	- CHANGELOG
