@@ -237,6 +237,17 @@ if (!$nofeatures) {
 		}
 	}
 
+# Work out which extra (non feature-related) modules are available
+local @extramods = map { /^avail_(\S+)/; $1 }
+		    grep { $config{$_} }
+		       grep { /^avail_/ } (keys %config);
+if ($noextras) {
+	@extramods = ( );
+	}
+local %extramods = map { $_, $config{"avail_".$_} }
+		       grep { my $m=$_; { local $_; &foreign_check($m) } }
+			@extramods;
+
 # Grant access to BIND module if needed
 if ($features{'dns'} && $config{'avail_dns'}) {
 	# Allow user to manage just this domain
@@ -344,8 +355,13 @@ if ($features{'web'} && $config{'avail_web'}) {
 				(0 .. 7, 9 .. 16,
 				 18 .. $apache::directive_type_count)),
 		       'dirsmode' => 2,
-		       'dirs' => 'ServerName ServerAlias SSLEngine SSLCertificateFile SSLCertificateKeyFile',
+		       'dirs' => 'ServerName ServerAlias SSLEngine SSLCertificateFile SSLCertificateKeyFile SSLCACertificateFile',
 		      );
+	if (!$extramods{'phpini'}) {
+		# If cannot access the php.ini module, deny access to PHP
+		# directives in Apache too
+		$acl{'dirs'} .= ' php_value php_flag php_admin_value php_admin_flag';
+		}
 	local @ssldoms = grep { $_->{'ssl'} } @webdoms;
 	if (@ssldoms) {
 		$acl{'virts'} .= " ".join(" ",
@@ -458,17 +474,6 @@ if (!$_[0]->{'domslimit'}) {
 	$acl{'desc_'.$module_name} = $text{'index_title2'};
 	}
 &save_module_acl_logged(\%acl, $_[1]->{'name'}, ".");
-
-# Work out which extra (non feature-related) modules are available
-local @extramods = map { /^avail_(\S+)/; $1 }
-		    grep { $config{$_} }
-		       grep { /^avail_/ } (keys %config);
-if ($noextras) {
-	@extramods = ( );
-	}
-local %extramods = map { $_, $config{"avail_".$_} }
-		       grep { my $m=$_; { local $_; &foreign_check($m) } }
-			@extramods;
 
 if ($extramods{'file'} && $_[0]->{'unix'}) {
 	# Limit file manager to user's directory, as unix user
