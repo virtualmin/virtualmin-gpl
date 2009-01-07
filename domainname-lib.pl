@@ -98,7 +98,7 @@ $name =~ /^[A-Za-z0-9\.\-]+$/ || return $text{'setup_edomain'};
 $name =~ /^\./ && return $text{'setup_edomain2'};
 $name =~ /\.$/ && return $text{'setup_edomain2'};
 $name =~ /\.xn(-+)([^\.]+)$/ && return $text{'setup_edomain3'};
-if ($name =~ /^(www|ftp)\./i) {
+if ($name =~ /^(www)\./i) {
 	return &text('setup_edomainprefix', "$1");
 	}
 return undef;
