@@ -1,0 +1,6 @@
+desc=View Website via Webmin link
+html=Added the 'View website via Webmin' link on the left menu, for viewing a domain's website before it has been registered in DNS.
+master=1
+reseller=1
+owner=1
+link=link.cgi/${IP}/http://www.${dom}/
