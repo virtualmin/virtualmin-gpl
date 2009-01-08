@@ -995,11 +995,15 @@ print &ui_table_row(&hlink($text{'tmpl_mysql_suffix'}, "template_mysql_suffix"),
 					undef : $tmpl->{'mysql_suffix'}, 20));
 
 # Additional host wildcards to add
-print &ui_table_row(&hlink($text{'tmpl_mysql_wild'}, "template_mysql_wild"),
-	&none_def_input("mysql_wild", $tmpl->{'mysql_wild'},
-			$text{'tmpl_mysqlpat'}, 1, 0, undef,
-			[ "mysql_wild" ]).
-	&ui_textbox("mysql_wild", $tmpl->{'mysql_wild'}, 20));
+# Deprecated, so only show if already set
+if ($tmpl->{'mysql_wild'}) {
+	print &ui_table_row(&hlink($text{'tmpl_mysql_wild'},
+				   "template_mysql_wild"),
+		&none_def_input("mysql_wild", $tmpl->{'mysql_wild'},
+				$text{'tmpl_mysqlpat'}, 1, 0, undef,
+				[ "mysql_wild" ]).
+		&ui_textbox("mysql_wild", $tmpl->{'mysql_wild'}, 20));
+	}
 
 # Additonal allowed hosts
 print &ui_table_row(&hlink($text{'tmpl_mysql_hosts'}, "template_mysql_hosts"),
@@ -1059,12 +1063,15 @@ else {
 	$in{'mysql'} =~ /^\S+$/ || &error($text{'tmpl_emysql'});
 	$tmpl->{'mysql'} = $in{'mysql'};
 	}
-if ($in{'mysql_wild_mode'} == 1) {
-	$tmpl->{'mysql_wild'} = undef;
-	}
-else {
-	$in{'mysql_wild'} =~ /^\S*$/ || &error($text{'tmpl_emysql_wild'});
-	$tmpl->{'mysql_wild'} = $in{'mysql_wild'};
+if (defined($in{'mysql_wild_mode'})) {
+	if ($in{'mysql_wild_mode'} == 1) {
+		$tmpl->{'mysql_wild'} = undef;
+		}
+	else {
+		$in{'mysql_wild'} =~ /^\S*$/ ||
+			&error($text{'tmpl_emysql_wild'});
+		$tmpl->{'mysql_wild'} = $in{'mysql_wild'};
+		}
 	}
 if ($in{'mysql_hosts_mode'} == 0) {
 	$tmpl->{'mysql_hosts'} = "none";
