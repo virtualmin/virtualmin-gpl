@@ -335,8 +335,12 @@ foreach $dbfile (glob("$_[1]_*")) {
 # Finally, import the data
 local $db;
 foreach $db (@dbs) {
-	&create_postgres_database($_[0], $db->[0]);
 	&$first_print(&text('restore_postgresload', $db->[0]));
+	if (&check_postgres_clash($_[0], $db->[0])) {
+		&$second_print(&text('restore_postgresclash'));
+		return 0;
+		}
+	&create_postgres_database($_[0], $db->[0]);
 	if ($postgresql::postgres_sameunix) {
 		# Restore is running as the postgres user - make the backup
 		# file owned by him

@@ -456,8 +456,12 @@ foreach $dbfile (glob("$_[1]_*")) {
 # Finally, import the data
 local $db;
 foreach $db (@dbs) {
-	&create_mysql_database($_[0], $db->[0]);
 	&$first_print(&text('restore_mysqlload', $db->[0]));
+	if (&check_mysql_database_clash($_[0], $db->[0])) {
+		&$second_print(&text('restore_mysqlclash'));
+		return 0;
+		}
+	&create_mysql_database($_[0], $db->[0]);
 	if ($db->[1] =~ /\.gz$/) {
 		# Need to uncompress first
 		local $out = &backquote_logged(
