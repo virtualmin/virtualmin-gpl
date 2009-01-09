@@ -12,6 +12,7 @@ else {
 	print "$text{'newquotas_desc2'}\n";
 	}
 print "<p>\n";
+print "$text{'newquotas_desc3'}<p>\n";
 
 print &ui_form_start("save_newquotas.cgi", "post");
 print &ui_table_start($text{'newquotas_header'}, undef, 2);
@@ -19,6 +20,14 @@ print &ui_table_start($text{'newquotas_header'}, undef, 2);
 # Email results to
 print &ui_table_row($text{'newquotas_email'},
 		    &ui_textbox("email", $config{'quota_email'}, 40));
+
+# Email admins too
+print &ui_table_row($text{'newquotas_users'},
+		    &ui_yesno_radio("users", $config{'quota_users'}));
+
+# Also check mailbox quotas?
+print &ui_table_row($text{'newquotas_mailbox'},
+		    &ui_yesno_radio("mailbox", $config{'quota_mailbox'}));
 
 # Warning levels
 print &ui_table_row($text{'newquotas_warn'},

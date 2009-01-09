@@ -261,5 +261,7 @@ $trap_base_dir = "/var/virtualmin-traps";
 $spam_alias_dir = "$trap_base_dir/spam";
 $ham_alias_dir = "$trap_base_dir/ham";
 
+$user_quota_warnings_file = "$module_config_directory/quotas-warnings";
+
 1;
 

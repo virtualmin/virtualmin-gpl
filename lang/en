@@ -3247,6 +3247,7 @@ newquotas_title=Disk Quota Monitoring
 newquotas_ecannot=You are not allowed to set up disk quota monitoring
 newquotas_desc=This page allows you to set up automatic email notification when a virtual server exceeds or gets close to its disk quota. Because group quotas are enabled, this can only happen when a server has too much data in one of its databases, as database sizes are not enforced by Unix disk quotas.
 newquotas_desc2=This page allows you to set up automatic email notification when a virtual server exceeds its disk quota. Because group quotas are not enabled, it is possible for the space used by server owners, mailbox users and databases to exceed the limit set in Virtualmin.
+newquotas_desc3=You can also choose to have mail and FTP users who are approaching or have exceeded their quotas notified as well.
 newquotas_header=Scheduled quota monitoring options
 newquotas_email=Send quota report to
 newquotas_warn=Send warning when usage reaches
@@ -3265,6 +3266,8 @@ newquotas_noint=No minimum
 newquotas_hours=hours
 newquotas_einterval=Missing or invalid number of hours between notifications
 newquotas_warnlist=Thresholds
+newquotas_mailbox=Also check mail and FTP user quotas?
+newquotas_users=Also notify admins who are over quota?
 
 mass_title=Modify Multiple Users
 mass_desc=This page allows you to change selected settings for the $1 chosen users in this virtual server at once.

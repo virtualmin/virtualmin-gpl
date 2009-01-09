@@ -24,6 +24,8 @@ if ($in{'sched'}) {
 	&virtualmin_ui_parse_cron_time("sched", $job, \%in);
 	}
 $config{'quota_email'} = $in{'email'};
+$config{'quota_mailbox'} = $in{'mailbox'};
+$config{'quota_users'} = $in{'users'};
 $config{'quota_warn'} = $in{'warn_def'} ? undef : $in{'warn'};
 if ($in{'interval_def'}) {
 	delete($config{'quota_interval'});
