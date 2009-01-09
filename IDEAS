@@ -57,3 +57,7 @@
 	- Concurrent with v4, so that a domain can also have a v6 address
 	- Use in DNS, Apache
 
+ - External connectivity test
+	- CGI on www.virtualmin.com
+	- DNS, ping, HTTP (with random file), FTP, SSH
+
