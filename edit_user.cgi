@@ -465,7 +465,9 @@ if (&can_mailbox_quota()) {
 	$rv .= &opt_quota_input($_[0], $quota, $_[3]);
 	$rv .= "\n";
 	if (!$in{'new'}) {
-		$rv .= &text('user_used', &quota_show($_[2], $_[3])),"\n";
+		$rv .= $_[2] ? &text('user_used', &quota_show($_[2], $_[3]))
+			     : &text('user_noneused');
+		$rv .= "\n";
 		}
 	}
 else {
