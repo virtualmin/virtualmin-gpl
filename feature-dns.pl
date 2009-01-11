@@ -898,11 +898,20 @@ local $zonefile = &bind8::make_chroot(
 			&bind8::absolute_path($file->{'values'}->[0]));
 return &text('validate_ednsfile2', "<tt>$zonefile</tt>") if (!-r $zonefile);
 
-# Check for critical records
+# Check for critical records, and that www.$dom and $dom resolve to the
+# expected IP address
+local $bind8::config{'short_names'} = 0;
 local @recs = &bind8::read_zone_file($file->{'values'}->[0], $d->{'dom'});
 local %got;
 foreach my $r (@recs) {
 	$got{uc($r->{'type'})}++;
+	if ($r->{'type'} eq 'A' &&
+	    ($r->{'name'} eq $d->{'dom'}.'.' ||
+	     $r->{'name'} eq 'www.'.$d->{'dom'}.'.') &&
+	    $r->{'values'}->[0] ne $d->{'ip'}) {
+		return &text('validate_ednsip', "<tt>$r->{'name'}</tt>",
+		     "<tt>$r->{'values'}->[0]</tt>", "<tt>$d->{'ip'}</tt>");
+		}
 	}
 $got{'SOA'} || return &text('validate_ednssoa', "<tt>$zonefile</tt>");
 $got{'A'} || return &text('validate_ednsa', "<tt>$zonefile</tt>");
