@@ -192,8 +192,7 @@ $prefix ||= &compute_prefix($dom, $group, $parent, 1);
          'email', $email ? $email : $parent ? $parent->{'email'} : undef,
          'name', !$virt,
          'ip', $ip,
-	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :
-						       : &get_dns_ip(),
+	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef : &get_dns_ip(),
          'virt', $virt,
          'virtalready', $virtalready,
 	 $parent ? ( 'pass', $parent->{'pass'} )
