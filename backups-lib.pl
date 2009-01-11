@@ -272,8 +272,12 @@ elsif ($mode == 0) {
 	if ($dirfmt && !-d $desturl) {
 		# Looking for a directory
 		if ($mkdir) {
-			if (!-d $desturl) {
-				&make_backup_dir($desturl, 0755, 1, $asd);
+			local $derr = &make_backup_dir($desturl, 0755, 1, $asd)
+				if (!-d $desturl);
+			if ($derr) {
+				&$first_print(&text('backup_emkdir',
+						   "<tt>$desturl</tt>", $derr));
+				return (0, 0, $doms);
 				}
 			}
 		else {
@@ -291,7 +295,12 @@ elsif ($mode == 0) {
 		local $dirdest = $desturl;
 		$dirdest =~ s/\/[^\/]+$//;
 		if ($dirdest && !-d $dirdest) {
-			&make_backup_dir($dirdest, 0755, 0, $asd);
+			local $derr = &make_backup_dir($dirdest, 0755, 0, $asd);
+			if ($derr) {
+				&$first_print(&text('backup_emkdir',
+						   "<tt>$dirdest</tt>", $derr));
+				return (0, 0, $doms);
+				}
 			}
 		}
 	}
@@ -339,7 +348,11 @@ else {
 	$dest = $path;
 	}
 if ($dirfmt && !-d $dest) {
-	&make_backup_dir($dest, 0755, 1, $asd);
+	local $derr = &make_backup_dir($dest, 0755, 1, $asd);
+	if ($derr) {
+		&$first_print(&text('backup_emkdir', "<tt>$dest</tt>", $derr));
+		return (0, 0, $doms);
+		}
 	}
 
 # For a home-format backup, the home has to be last
@@ -366,19 +379,28 @@ DOMAIN: foreach $d (@$doms) {
 	my @alldbs = &all_databases($d);
         &resync_all_databases($d, \@alldbs);
 
+	# Begin doing this domain
+	&$cbfunc($d, 0, $backupdir) if ($cbfunc);
+	&$first_print(&text('backup_fordomain', &show_domain_name($d)));
+	local $f;
+	local $dok = 1;
+	local @donefeatures;
+
 	if ($homefmt) {
 		# Backup goes to a sub-dir of the home
 		$backupdir = "$d->{'home'}/.backup";
 		system("rm -rf ".quotemeta($backupdir));
-		&make_backup_dir($backupdir, 0777, 0, $asd);
+		local $derr = &make_backup_dir($backupdir, 0777, 0, $asd);
+		if ($derr) {
+			&$second_print(&text('backup_ebackupdir',
+				"<tt>$backupdir</tt>", $derr));
+			$dok = 1;
+			goto DOMAINFAILED;
+			}
 		}
-	&$cbfunc($d, 0, $backupdir) if ($cbfunc);
-	&$first_print(&text('backup_fordomain', &show_domain_name($d)));
+
 	&$second_print();
 	&$indent_print();
-	local $f;
-	local $dok = 1;
-	local @donefeatures;
 	foreach $f (@backupfeatures) {
 		local $bfunc = "backup_$f";
 		local $fok;
@@ -432,6 +454,8 @@ DOMAIN: foreach $d (@$doms) {
 			push(@donefeatures, $f);
 			}
 		}
+
+	DOMAINFAILED:
 	$donefeatures{$d->{'dom'}} = \@donefeatures;
 	if ($dok) {
 		$okcount++;
