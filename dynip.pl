@@ -38,7 +38,7 @@ if ($oldip ne $newip || $oldwhen < time()-28*24*60*60) {
 				join("\n", &mailboxes::wrap_lines(
 					"An attempt to update the dynamic IP ".
 					"for $h to $newip with ".
-					"$svc->{'desc'} failed: $err\n", 75))
+					"$svc->{'desc'} failed: $err\n", 75)).
 				"Sent by Virtualmin at: ".
 					&get_virtualmin_url()."\n"
 				);
