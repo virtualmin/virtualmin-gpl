@@ -136,8 +136,6 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 	undef(@bind8::get_config_cache);
 
 	# Create the records file
-	local %zd;
-	&bind8::get_zone_defaults(\%zd);
 	local $rootfile = &bind8::make_chroot($file);
 	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 	if (!-r $rootfile) {
@@ -671,6 +669,8 @@ local $tmpl = &get_template($d->{'template'});
 local $serial = $bconfig{'soa_style'} ?
 	&bind8::date_serial().sprintf("%2.2d", $bconfig{'soa_start'}) :
 	time();
+local %zd;
+&bind8::get_zone_defaults(\%zd);
 if (!$tmpl->{'dns_replace'}) {
 	# Create records that are appropriate for this domain
 	if (!$d->{'dns_submode'}) {
