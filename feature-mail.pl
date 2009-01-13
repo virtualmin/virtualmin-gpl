@@ -4096,7 +4096,8 @@ elsif ($config{'mail_system'} == 0) {
 # alias copy mode.
 sub delete_alias_virtuals
 {
-&obtain_lock_mail($_[0]);
+local ($d) = @_;
+&obtain_lock_mail($d);
 if ($config{'mail_system'} == 1) {
 	# Remove virtusers in Sendmail
 	foreach my $virt (&sendmail::list_virtusers($sendmail_vfile)) {
@@ -4118,6 +4119,7 @@ elsif ($config{'mail_system'} == 0) {
 			}
 		}
 	}
+&release_lock_mail($d);
 }
 
 # sync_alias_virtuals(&domain)
