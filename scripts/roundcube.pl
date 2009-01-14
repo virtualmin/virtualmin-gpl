@@ -44,6 +44,24 @@ sub script_roundcube_php_vers
 return ( 4, 5 );
 }
 
+# script_roundcube_depends(&domain, version)
+sub script_roundcube_depends
+{
+local ($d, $ver) = @_;
+local @rv;
+
+# Check for PHP 5.2+
+local $phpv = &get_php_version(5, $d);
+if (!$phpv) {
+	push(@rv, "Could not work out exact PHP version");
+	}
+elsif ($phpv < 5.2) {
+	push(@rv, "Roundcube requires PHP version 5.2 or later");
+	}
+
+return @rv;
+}
+
 # script_roundcube_params(&domain, version, &upgrade-info)
 # Returns HTML for table rows for options for installing PHP-NUKE
 sub script_roundcube_params

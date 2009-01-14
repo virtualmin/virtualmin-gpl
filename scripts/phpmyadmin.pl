@@ -51,26 +51,25 @@ sub script_phpmyadmin_php_optional_modules
 return ("mcrypt");
 }
 
-# Must have at least one existing DB
+# Must have at least one existing DB, and PHP 5.2
 sub script_phpmyadmin_depends
 {
 local ($d, $ver) = @_;
+local @rv;
+
 &has_domain_databases($d, [ "mysql" ], 1) ||
-	return ("phpMyAdmin requires a MySQL database");
-local ($php5) = grep { $_->[0] == 5 } &list_available_php_versions($d);
-if ($ver >= 3.1 && $php5) {
-	# Check for PHP 5.2+
-	&clean_environment();
-        local $out = &backquote_command("$php5->[1] -v 2>&1 </dev/null");
-        &reset_environment();
-	if ($out !~ /PHP\s+([0-9\.]+)/) {
-		push(@rv, "Could not work out exact PHP version from command $php5->[1] -v");
-		}
-	elsif ($1 < 5.2) {
-		push(@rv, "phpMyAdmin requires PHP version 5.2 or later");
-		}
+	push(@rv, "phpMyAdmin requires a MySQL database");
+
+# Check for PHP 5.2+
+local $phpv = &get_php_version(5, $d);
+if (!$phpv) {
+	push(@rv, "Could not work out exact PHP version");
 	}
-return ( );
+elsif ($phpv < 5.2) {
+	push(@rv, "phpMyAdmin requires PHP version 5.2 or later");
+	}
+
+return @rv;
 }
 
 # script_phpmyadmin_params(&domain, version, &upgrade-info)

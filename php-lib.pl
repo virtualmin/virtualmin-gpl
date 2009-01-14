@@ -621,7 +621,7 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 	# What version is the php command? If it is a version we don't have
 	# a command for yet, use it.
 	&clean_environment();
-	local $out = `$php -v 2>&1 </dev/null`;
+	local $out = &backquote_command("$php -v 2>&1 </dev/null");
 	&reset_environment();
 	if ($out =~ /PHP\s+(\d+)\./ && !$vercmds{$1}) {
 		$vercmds{$1} = $php;
@@ -630,6 +630,27 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 
 # Return results as list
 return map { [ $_, $vercmds{$_} ] } sort { $a <=> $b } (keys %vercmds);
+}
+
+# get_php_version(number|command, [&domain])
+# Given a PHP based version like 4 or 5, or a path to PHP, return the real
+# version number, like 5.2.
+sub get_php_version
+{
+local ($cmd, $d) = @_;
+if ($cmd !~ /^\//) {
+	local ($phpn) = grep { $_->[0] == $cmd }
+			     &list_available_php_versions($d);
+	return undef if (!$phpn);
+	$cmd = $phpn->[1];
+	}
+&clean_environment();
+local $out = &backquote_command("$cmd -v 2>&1 </dev/null");
+&reset_environment();
+if ($out =~ /PHP\s+([0-9\.]+)/) {
+	return $1;
+	}
+return undef;
 }
 
 # list_domain_php_directories(&domain)
