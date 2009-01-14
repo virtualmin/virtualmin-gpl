@@ -19,6 +19,9 @@ local $gconfig{'logfullfiles'} = 0;
 
 $info = &collect_system_info();
 if ($info) {
+	if ($config{'collect_restart'}) {
+		&restart_collected_services($info);
+		}
 	&save_collected_info($info);
 	&add_historic_collected_info($info, $start);
 	}

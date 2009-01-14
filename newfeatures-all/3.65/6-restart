@@ -1,0 +1,4 @@
+desc=Automatic service restart
+html=Added a Module Config option to have down services automatically restarted by the regular status collection job.
+master=1
+link=../config.cgi?module=virtual-server&section=line7

@@ -1035,3 +1035,4 @@ Added an option on the Spam and Virus Delivery page to enable spamtrap and hamtr
 The delete-domain.pl command-line script now accepts multiple --domain parameters, and can also delete virtual servers by username with the --user parameter.
 For new Virtualmin installs, Apache logs are now stored under /var/log/virtualmin and just linked from the ~/logs directory. This avoids problems with Apache crashing when the logs directory is deleted.
 The Disk Quota Monitoring page can now also be used to find mailboxes that are approaching or over their quota, and can send email to domain owners and individual mailboxes as well as the master admin.
+Added a Module Config option to have down services automatically restarted by the regular status collection job.

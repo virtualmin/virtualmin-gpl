@@ -9509,20 +9509,6 @@ sub get_startstop_links
 local ($live) = @_;
 local @rv;
 local %typestatus;
-#if (&foreign_check("status")) {
-#	# Get scheduled monitoring status (Disabled due to inaccuracy)
-#	&foreign_require("status", "status-lib.pl");
-#	local %oldstatus;
-#	if ($status::config{'sched_mode'} &&
-#	    &read_file($status::oldstatus_file, \%oldstatus)) {
-#		# Can use scheduled status
-#		foreach my $s (&status::list_services()) {
-#			local $stat = &status::expand_oldstatus(
-#					$oldstatus{$s->{'id'}});
-#			$typestatus{$s->{'type'}} = $stat->{'*'};
-#			}
-#		}
-#	}
 foreach my $f (@startstop_features) {
 	if ($config{$f}) {
 		local $sfunc = "startstop_".$f;

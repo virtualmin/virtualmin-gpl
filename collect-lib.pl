@@ -477,5 +477,35 @@ elsif ($job && $config{'collect_interval'} eq 'none') {
 &cron::create_wrapper($collect_cron_cmd, $module_name, "collectinfo.pl");
 }
 
+# restart_collected_services(&info)
+# If any services are detected as down, try to restart them. Re-check the status
+# afterwards, and update the info hash.
+sub restart_collected_services
+{
+local ($info) = @_;
+my $count = 0;
+foreach my $ss (@{$info->{'startstop'}}) {
+	if (!$ss->{'status'}) {
+		# Down .. need to restart
+		my $err;
+		if (&indexof($ss->{'feature'}, @plugins) < 0) {
+			# Core feature
+			my $sfunc = "start_service_".$ss->{'feature'};
+			$err = &$sfunc();
+			}
+		else {
+			# From plugin
+			$err = &plugin_call($ss->{'feature'},
+					    "feature_start_service");
+			}
+		$count++;
+		}
+	}
+if ($count) {
+	$info->{'startstop'} = [ &get_startstop_links() ];
+	}
+return $count;
+}
+
 1;
 
