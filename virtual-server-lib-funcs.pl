@@ -3365,14 +3365,18 @@ local ($d, $action, $newd, $oldd) = @_;
 &reset_domain_envs();
 $ENV{'VIRTUALSERVER_ACTION'} = $action;
 foreach my $e (keys %$d) {
-	$ENV{'VIRTUALSERVER_'.uc($e)} = $d->{$e};
+	local $env = uc($e);
+	$env =~ s/\-/_/g;
+	$ENV{'VIRTUALSERVER_'.$env} = $d->{$e};
 	}
 $ENV{'VIRTUALSERVER_IDNDOM'} = &show_domain_name($d->{'dom'});
 if ($newd) {
 	# Set details of virtual server being changed to. This is only
 	# done in the pre-modify call
 	foreach my $e (keys %$newd) {
-		$ENV{'VIRTUALSERVER_NEWSERVER_'.uc($e)} = $newd->{$e};
+		local $env = uc($e);
+		$env =~ s/\-/_/g;
+		$ENV{'VIRTUALSERVER_NEWSERVER_'.$env} = $newd->{$e};
 		}
 	$ENV{'VIRTUALSERVER_NEWSERVER_IDNDOM'} =
 		&show_domain_name($newd->{'dom'});
@@ -3380,7 +3384,9 @@ if ($newd) {
 if ($oldd) {
 	# Set details of virtual server being changed from, in post-modify
 	foreach my $e (keys %$oldd) {
-		$ENV{'VIRTUALSERVER_OLDSERVER_'.uc($e)} = $oldd->{$e};
+		local $env = uc($e);
+		$env =~ s/\-/_/g;
+		$ENV{'VIRTUALSERVER_OLDSERVER_'.$env} = $oldd->{$e};
 		}
 	$ENV{'VIRTUALSERVER_OLDSERVER_IDNDOM'} =
 		&show_domain_name($oldd->{'dom'});
@@ -3392,7 +3398,9 @@ if ($d->{'reseller'} && defined(&get_reseller)) {
 	$ENV{'RESELLER_THEME'} = $resel->{'theme'};
 	$ENV{'RESELLER_MODULES'} = join(" ", @{$resel->{'modules'}});
 	foreach my $a (keys %$acl) {
-		$ENV{'RESELLER_'.uc($a)} = $acl->{$a};
+		local $env = uc($a);
+		$env =~ s/\-/_/g;
+		$ENV{'RESELLER_'.$env} = $acl->{$a};
 		}
 	}
 }
