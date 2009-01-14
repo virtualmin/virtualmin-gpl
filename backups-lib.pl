@@ -231,6 +231,13 @@ elsif ($mode == 2) {
 	close(TEMP);
 	&scp_copy($temp, $r, $pass, \$scperr, $port);
 	if ($scperr) {
+		# Copy to /tmp failed .. try current dir instead
+		$scperr = undef;
+		$r = ($user ? "$user\@" : "").
+		     "$server:virtualmin-copy-test.$user";
+		&scp_copy($temp, $r, $pass, \$scperr, $port);
+		}
+	if ($scperr) {
 		&$first_print(&text('backup_escptest', $scperr));
 		return (0, 0, $doms);
 		}
