@@ -43,12 +43,22 @@ for(my $i=0; $i<$tries; $i++) {
 		sleep(10);
 		next;
 		}
+
+	# Check if the bucket already exists, by trying to list it
+	local $response = $conn->list_bucket($bucket);
+	if ($response->http_response->code == 200) {
+		last;
+		}
+
+	# Try to fetch my buckets
 	local $response = $conn->list_all_my_buckets();
 	if ($response->http_response->code != 200) {
 		$err = &text('s3_elist', &extract_s3_message($response));
 		sleep(10);
 		next;
 		}
+
+	# Check if given bucket is in the list
 	local ($got) = grep { $_->{'Name'} eq $bucket } @{$response->entries};
 	if (!$got) {
 		# Create the bucket
