@@ -3976,7 +3976,7 @@ phpver_pub=Default HTML directory
 phpver_delete=Remove Selected
 phpver_save=Save Versions
 phpver_err=Failed to save PHP versions
-phpver_enewdir=Invalid website subdirectory
+phpver_enewdir=Invalid website subdirectory - must be like <tt>myapp</tt> or <tt>programs/myapp</tt>
 phpver_derr=Failed to remove PHP versions
 phpver_enone=None selected
 

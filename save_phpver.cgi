@@ -34,6 +34,8 @@ else {
 	if ($in{'newdir'}) {
 		$in{'newdir'} =~ /^[^\/]\S+$/ ||
 			&error($text{'phpver_enewdir'});
+		$in{'newdir'} =~ /^(http|https|ftp):/ &&
+			&error($text{'phpver_enewdir'});
 		&save_domain_php_directory($d, &public_html_dir($d)."/".
 					       $in{'newdir'}, $in{'newver'});
 		}
