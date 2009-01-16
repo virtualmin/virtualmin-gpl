@@ -367,6 +367,13 @@ if (@slaves) {
 # IP to the new.
 sub modify_dns
 {
+if (!$_[0]->{'subdom'} && $_[1]->{'subdom'} && $_[0]->{'dns_submode'}) {
+	# Converting from a sub-domain to top-level .. just delete and re-create
+	&delete_dns($_[1]);
+	delete($_[0]->{'dns_submode'});
+	&setup_dns($_[0]);
+	}
+
 &require_bind();
 local $tmpl = &get_template($_[0]->{'template'});
 local $z;

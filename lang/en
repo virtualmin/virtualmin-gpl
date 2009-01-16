@@ -4561,6 +4561,6 @@ spamtrap_noaliases=Spam trap aliases do not exist for this virtual server
 
 unsub_title=Convert Sub-Domain
 unsub_rusure=Are you sure you want to convert this sub-domain into a sub-server? Its web contents will not be effected, and any DNS records will be moved into their own domain.
-unsub_ok=Convert to sub-server
+unsub_ok=Convert to Sub-Server
 unsub_doing=Converting $1 to sub-server ..
 unsub_failed=.. conversion failed!
