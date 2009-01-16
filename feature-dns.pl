@@ -372,6 +372,7 @@ if (!$_[0]->{'subdom'} && $_[1]->{'subdom'} && $_[0]->{'dns_submode'}) {
 	&delete_dns($_[1]);
 	delete($_[0]->{'dns_submode'});
 	&setup_dns($_[0]);
+	return 1;
 	}
 
 &require_bind();
