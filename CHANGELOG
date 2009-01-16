@@ -1037,3 +1037,4 @@ For new Virtualmin installs, Apache logs are now stored under /var/log/virtualmi
 The Disk Quota Monitoring page can now also be used to find mailboxes that are approaching or over their quota, and can send email to domain owners and individual mailboxes as well as the master admin.
 Added a Module Config option to have down services automatically restarted by the regular status collection job.
 Added a script installer for Horde Webmail, version 1.2.1.
+Plugins can now export content styles, allowing multiple styles to be easily installed from a single separate plugin.
