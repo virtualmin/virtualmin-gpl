@@ -97,7 +97,7 @@ else {
 
 # Check if this is a sub-domain
 if ($d->{'subdom'}) {
-	&usage("Sub-domains cannot be moved independently");
+	&usage("Sub-domains cannot be moved independently - use unsub-domain.pl first");
 	}
 
 # Call the move function

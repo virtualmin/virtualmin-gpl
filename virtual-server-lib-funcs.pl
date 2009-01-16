@@ -8965,6 +8965,16 @@ if (&can_move_domain($d) && !$d->{'alias'} && !$d->{'subdom'}) {
 		  });
 	}
 
+if (&can_move_domain($d) && $d->{'subdom'}) {
+	# Turn sub-server into sub-domain
+	push(@rv, { 'page' => 'unsub.cgi',
+		    'title' => $text{'edit_unsub'},
+		    'desc' => $text{'edit_unsubdesc'},
+		    'cat' => 'server',
+		    'icon' => 'arrow_right',
+		  });
+	}
+
 if (&can_change_ip($d) && !$d->{'alias'}) {
 	# Change IP / port button
 	push(@rv, { 'page' => 'newip_form.cgi',
