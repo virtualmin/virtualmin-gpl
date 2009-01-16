@@ -61,3 +61,7 @@
 	- CGI on www.virtualmin.com
 	- DNS, ping, HTTP (with random file), FTP, SSH
 
+
+ - Sub-domain to sub-server conversion
+	- DNS records
+

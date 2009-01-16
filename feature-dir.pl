@@ -136,6 +136,19 @@ if ($_[0]->{'unix'} && !$_[1]->{'unix'} ||
 	&set_home_ownership($_[0]);
 	&$second_print($text{'setup_done'});
 	}
+if (!$_[0]->{'subdom'} && $_[1]->{'subdom'}) {
+	# No longer a sub-domain .. move the HTML dir
+	local $phsrc = &public_html_dir($_[1]);
+	local $phdst = &public_html_dir($_[0]);
+	&copy_source_dest($phsrc, $phdst);
+	&unlink_file($phsrc);
+
+	# And the CGI directory
+	local $cgisrc = &cgi_bin_dir($_[1]);
+	local $cgidst = &cgi_bin_dir($_[0]);
+	&copy_source_dest($cgisrc, $cgidst);
+	&unlink_file($cgisrc);
+	}
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable($_[0], 0);
 	}

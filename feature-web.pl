@@ -480,6 +480,48 @@ else {
 			}
 		&$second_print($text{'setup_done'});
 		}
+	if (!$_[0]->{'subdom'} && $_[1]->{'subdom'}) {
+		# No longer a sub-domain .. fix up any references to the old
+		# HTML and CGI directories, and log files
+		&$first_print($text{'save_apache11'});
+		if (!$virt) {
+			&$second_print($text{'delete_noapache'});
+			goto VIRTFAILED;
+			}
+		local $phsrc = &public_html_dir($_[1]);
+		local $phdst = &public_html_dir($_[0]);
+		local $cgisrc = &cgi_bin_dir($_[1]);
+		local $cgidst = &cgi_bin_dir($_[0]);
+		local $lref = &read_file_lines($virt->{'file'});
+		local $alogsrc = &get_apache_log($_[1]->{'dom'},
+						 $_[1]->{'web_port'}, 0);
+		local $elogsrc = &get_apache_log($_[1]->{'dom'},
+						 $_[1]->{'web_port'}, 1);
+		local $alogdst = &get_apache_template_log($_[0], 0);
+		local $elogdst = &get_apache_template_log($_[0], 1);
+		for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
+			if ($phsrc && $phdst) {
+				$lref->[$i] =~ s/\Q$phsrc\E/$phdst/g;
+				}
+			if ($cgisrc && $cgidst) {
+				$lref->[$i] =~ s/\Q$cgisrc\E/$cgidst/g;
+				}
+			if ($alogsrc && $alogdst) {
+				$lref->[$i] =~ s/\Q$alogsrc\E/$alogdst/g;
+				}
+			if ($elogsrc && $elogdst) {
+				$lref->[$i] =~ s/\Q$elogsrc\E/$elogdst/g;
+				}
+			}
+		&flush_file_lines($virt->{'file'});
+		undef(@apache::get_config_cache);
+		($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
+						      $_[1]->{'web_port'});
+		&setup_apache_logs($_[0], $alogdst, $elogdst);
+		&link_apache_logs($_[0], $alogdst, $elogdst);
+		$rv++;
+		&$second_print($text{'setup_done'});
+		}
 	if ($_[0]->{'alias'} && $_[2] && $_[2]->{'dom'} ne $_[3]->{'dom'}) {
 		# This is an alias, and the domain it is aliased to has changed.
 		# update all Proxy* and Redirect directives
@@ -2919,6 +2961,7 @@ foreach my $l ($log, $elog) {
 sub link_apache_logs
 {
 local ($d, $log, $elog) = @_;
+return if ($d->{'subdom'});	# Sub-domains have no separate logs
 $log ||= &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0);
 $elog ||= &get_apache_log($d->{'dom'}, $d->{'web_port'}, 1);
 local $loglink = "$d->{'home'}/logs/access_log";

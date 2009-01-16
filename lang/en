@@ -1109,6 +1109,7 @@ save_apache7=Changing username in website configuration ..
 save_apache8=Updating frame forwarding ..
 save_apache9=Updating website proxying ..
 save_apache10=Updating home directory in PHP configuration ..
+save_apache11=Updating document directory in website configuration ..
 save_dns=Changing IP address in DNS domain ..
 save_dns2=Changing DNS domain name ..
 save_dns3=Changing slave domain on $1 ..
