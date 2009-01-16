@@ -581,7 +581,7 @@ if ($ok) {
 				}
 
 			# Create the dest file with strict permissions
-			local $toucher = "touch $qf && chmod 700 $qf";
+			local $toucher = "touch $qf && chmod 600 $qf";
 			if ($asd) {
 				$toucher = &command_as_user(
 					$asd->{'user'}, 0, $toucher);
@@ -631,7 +631,7 @@ if ($ok) {
 			&set_ownership_permissions(
 			  $doms[0]->{'uid'}, $doms[0]->{'ugid'}, undef, $dest);
 		 	}
-		&set_ownership_permissions(undef, undef, 0700, $dest);
+		&set_ownership_permissions(undef, undef, 0600, $dest);
 
 		# Start the tar command
 		&$first_print($text{'backup_final'});
@@ -667,7 +667,7 @@ if ($ok) {
 			&execute_command("cd $backupdir && $tar cf $dest/virtualmin.tar virtualmin_* 2>&1", undef, \$out, \$out);
 			push(@destfiles, "virtualmin.tar");
 			}
-		&set_ownership_permissions(undef, undef, 0700,
+		&set_ownership_permissions(undef, undef, 0600,
 					   $dest."/".$destfiles[$#destfiles]);
 		$destfiles_map{$destfiles[$#destfiles]} = "virtualmin";
 		}
