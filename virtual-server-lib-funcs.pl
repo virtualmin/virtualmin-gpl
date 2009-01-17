@@ -4433,6 +4433,18 @@ else {
 	&close_tempfile(GLOBAL);
 	}
 &unlink_file($temp);
+
+# Save skeleton directories for all templates
+local %done;
+foreach my $tmpl (&list_templates()) {
+	if ($tmpl->{'skel'} && $tmpl->{'skel'} ne 'none' &&
+	    !$done{$tmpl->{'skel'}}++ &&
+	    -d $tmpl->{'skel'}) {
+		local $skelfile = $file.'_skel_'.$tmpl->{'id'};
+		&execute_command("cd ".quotemeta($tmpl->{'skel'}).
+				 " && tar cf ".quotemeta($skelfile)." .");
+		}
+	}
 }
 
 # virtualmin_restore_templates(file, &vbs)
@@ -4470,6 +4482,22 @@ closedir(DIR);
 # Restore global variables
 if (-r $file."_global") {
 	&copy_source_dest($file."_global", $global_template_variables_file);
+	}
+
+# Restore skeleton directories
+local %done;
+foreach my $tmpl (&list_templates()) {
+	if ($tmpl->{'skel'} && $tmpl->{'skel'} ne 'none' &&
+	    !$done{$tmpl->{'skel'}}++) {
+		local $skelfile = $file.'_skel_'.$tmpl->{'id'};
+		if (-r $skelfile) {
+			# Delete and re-create skel directory
+			&unlink_file($tmpl->{'skel'});
+			&make_dir($tmpl->{'skel'}, 0755);
+			&execute_command("cd ".quotemeta($tmpl->{'skel'}).
+					 " && tar xf ".quotemeta($skelfile));
+			}
+		}
 	}
 }
 

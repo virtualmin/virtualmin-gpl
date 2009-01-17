@@ -1038,3 +1038,4 @@ The Disk Quota Monitoring page can now also be used to find mailboxes that are a
 Added a Module Config option to have down services automatically restarted by the regular status collection job.
 Added a script installer for Horde Webmail, version 1.2.1.
 Plugins can now export content styles, allowing multiple styles to be easily installed from a single separate plugin.
+Directories containing initial files for virtual servers (like /etc/skel) are now included in Virtualmin template backups.
