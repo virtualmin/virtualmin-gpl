@@ -33,9 +33,10 @@ else {
 	# Changing to/from a reseller IP
 	local @canips;
 	push(@canips, [ &get_default_ip(), $text{'newip_shared'} ]);
-	if ($d->{'reseller'}) {
-		push(@canips, [ &get_default_ip($d->{'reseller'}),
-			&text('newip_resel', $d->{'reseller'}) ]);
+	$rd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+	if ($rd->{'reseller'}) {
+		push(@canips, [ &get_default_ip($rd->{'reseller'}),
+			&text('newip_resel', $rd->{'reseller'}) ]);
 		}
 	push(@canips, map { [ $_, $text{'newip_shared2'} ] }
 			  &list_shared_ips());
