@@ -57,10 +57,7 @@ if (!$virtualmin_pro) {
 			 $virtualmin_pro ? ( "spam", "status", "phpini" ) : ( ),
 			 "syslog", "useradmin", "usermin", "webalizer",
 			 "webmin", "filter" );
-@confplugins = split(/\s+/, $config{'plugins'});
-if ($no_virtualmin_plugins) {
-	@confplugins = ( );
-	}
+&generate_plugins_list($no_virtualmin_plugins ? '' : $config{'plugins'});
 @opt_features = ( 'unix', 'dir', 'mail', 'dns', 'web', 'webalizer', 'ssl',
 		  'logrotate', 'mysql', 'postgres', 'ftp', 'spam', 'virus',
 		  $virtualmin_pro ? ( 'status' ) : ( ),
@@ -87,20 +84,6 @@ foreach my $fname (@features, "virt") {
 	local $ifunc = "init_$fname";
 	&$ifunc() if (defined(&$ifunc));
 	}
-@plugins = ( );
-foreach my $pname (@confplugins) {
-	if (&foreign_check($pname)) {
-		&foreign_require($pname, "virtual_feature.pl");
-		push(@plugins, $pname);
-		}
-	}
-@feature_plugins = grep { &plugin_defined($_, "feature_setup") } @plugins;
-@mail_plugins = grep { &plugin_defined($_, "mailbox_inputs") } @plugins;
-@database_plugins = grep { &plugin_defined($_, "database_name") } @plugins;
-@startstop_plugins = grep { &plugin_defined($_, "feature_startstop") } @plugins;
-@backup_plugins = grep { &plugin_defined($_, "feature_backup") } @plugins;
-@script_plugins = grep { &plugin_defined($_, "scripts_list") } @plugins;
-@style_plugins = grep { &plugin_defined($_, "styles_list") } @plugins;
 @migration_types = ( "cpanel", "ensim", "plesk", "psa" );
 @allow_features = (@opt_features, "virt", @feature_plugins);
 @startstop_features = ("web", "dns", "mail", "ftp", "unix", "virus",
@@ -263,6 +246,29 @@ $spam_alias_dir = "$trap_base_dir/spam";
 $ham_alias_dir = "$trap_base_dir/ham";
 
 $user_quota_warnings_file = "$module_config_directory/quotas-warnings";
+
+# generate_plugins_list([list])
+# Creates the confplugins, plugins and other arrays based on the module config
+# or given space-separated string.
+sub generate_plugins_list
+{
+local $str = defined($_[0]) ? $_[0] : $config{'plugins'};
+@confplugins = split(/\s+/, $config{'plugins'});
+@plugins = ( );
+foreach my $pname (@confplugins) {
+	if (&foreign_check($pname)) {
+		&foreign_require($pname, "virtual_feature.pl");
+		push(@plugins, $pname);
+		}
+	}
+@feature_plugins = grep { &plugin_defined($_, "feature_setup") } @plugins;
+@mail_plugins = grep { &plugin_defined($_, "mailbox_inputs") } @plugins;
+@database_plugins = grep { &plugin_defined($_, "database_name") } @plugins;
+@startstop_plugins = grep { &plugin_defined($_, "feature_startstop") } @plugins;
+@backup_plugins = grep { &plugin_defined($_, "feature_backup") } @plugins;
+@script_plugins = grep { &plugin_defined($_, "scripts_list") } @plugins;
+@style_plugins = grep { &plugin_defined($_, "styles_list") } @plugins;
+}
 
 1;
 

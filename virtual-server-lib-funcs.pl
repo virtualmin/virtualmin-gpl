@@ -4395,6 +4395,10 @@ $config{'iface'} = $oldconfig{'iface'};
 $config{'home_quotas'} = $oldconfig{'home_quotas'};
 $config{'mail_quotas'} = $oldconfig{'mail_quotas'};
 $config{'group_quotas'} = $oldconfig{'group_quotas'};
+
+# Remove plugins that aren't on the new system
+&generate_plugins_list($config{'plugins'});
+$config{'plugins'} = join(' ', @plugins);
 &save_module_config();
 
 # Apply any new config settings
