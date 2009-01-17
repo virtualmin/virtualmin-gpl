@@ -67,6 +67,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--auth") {
 		$auth = shift(@ARGV);
 		}
+	elsif ($a eq "--data") {
+		$datafile = shift(@ARGV);
+		}
 	else {
 		&usage();
 		}
@@ -139,6 +142,14 @@ eval {
 	# Send from and to
 	&mailboxes::smtp_command(MAIL, "mail from: <$from>\r\n");
 	&mailboxes::smtp_command(MAIL, "rcpt to: <$to>\r\n");
+	if ($datafile) {
+		$data = &read_file_contents($datafile);
+		$data || die "Failed to read $datafile : $!";
+		$data =~ s/^From\s.*\r?\n//;	# Remove From line
+		$r = &mailboxes::smtp_command(MAIL, "data\r\n");
+		print mailboxes::MAIL $data;
+		$r = &mailboxes::smtp_command(MAIL, ".\r\n");
+		}
 	&mailboxes::smtp_command(MAIL, "quit\r\n");
 	close(MAIL);
 	};
@@ -163,6 +174,7 @@ print "                    [--port number|name]\n";
 print "                    [--from address]\n";
 print "                    [--user login --pass password]\n";
 print "                    [--auth method]\n";
+print "                    [--data mail-file]\n";
 exit(1);
 }
 

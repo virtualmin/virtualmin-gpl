@@ -47,6 +47,7 @@ $test_backup_dir = "/tmp/functional-test-backups";
 $test_email_dir = "/usr/local/webadmin/virtualmin/testmail";
 $spam_email_file = "$test_email_dir/spam.txt";
 $virus_email_file = "$test_email_dir/virus.txt";
+$ok_email_file = "$test_email_dir/ok.txt";
 $supports_fcgid = &indexof("fcgid", &supported_php_modes()) >= 0;
 
 @create_args = ( [ 'limits-from-template' ],
@@ -1228,9 +1229,20 @@ $mail_tests = [
 	{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
 	},
 
+	# Send one email to him, so his mailbox gets created and then procmail
+	# runs as the right user. This is to work around a procmail bug where
+	# it can drop privs too soon!
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'from', 'jcameron@webmin.com' ],
+		      [ 'to', $test_user.'@'.$test_domain ],
+		      [ 'data', $ok_email_file ] ],
+	},
+
         # Send some reasonable mail to him
-	{ 'command' => 'echo Hello World | mail -s "Test mail" '.
-		       $test_user.'@'.$test_domain,
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'from', 'jcameron@webmin.com' ],
+		      [ 'to', $test_user.'@'.$test_domain ],
+		      [ 'data', $ok_email_file ] ],
 	},
 
 	# Check procmail log for delivery, for at most 60 seconds
@@ -1253,7 +1265,10 @@ $mail_tests = [
 		},
 
 		# Send a virus message, if we have one
-		{ 'command' => 'sendmail -t <'.$virus_email_file,
+		{ 'command' => 'test-smtp.pl',
+		  'args' => [ [ 'from', 'virus@virus.com' ],
+			      [ 'to', $test_user.'@'.$test_domain ],
+			      [ 'data', $virus_email_file ] ],
 		},
 
 		# Check procmail log for virus detection
@@ -1285,7 +1300,10 @@ $mail_tests = [
 		},
 
 		# Send a spam message, if we have one
-		{ 'command' => 'sendmail -t <'.$spam_email_file,
+		{ 'command' => 'test-smtp.pl',
+		  'args' => [ [ 'from', 'spam@spam.com' ],
+			      [ 'to', $test_user.'@'.$test_domain ],
+			      [ 'data', $spam_email_file ] ],
 		},
 
 		# Check procmail log for spam detection
