@@ -81,7 +81,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--home") {
 		$home = shift(@ARGV);
 		$home =~ /^\/\S+$/ || &usage("Home directory must be an absolute path");
-		-d $home || &usage("New home directory already exists");
+		-d $home && &usage("New home directory already exists");
 		}
 	elsif ($a eq "--newdomain") {
 		$newdomain = shift(@ARGV);

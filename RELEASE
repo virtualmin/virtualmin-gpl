@@ -2,6 +2,7 @@
 
  x Create tar.gz file
 	./gpl-virtual-server/createvirtualminmodule.sh $ver /tmp/virtual-server-$ver.wbm.gz
+	./create-module.pl virtualmin/virtual-server-theme-$themever.wbt.gz virtual-server-theme
 
  x build RPM and .deb
 	./makemodulerpm.pl --sign --dir virtual-server --allow-overwrite gpl-virtual-server
@@ -10,19 +11,24 @@
 	./makemoduledeb.pl --allow-overwrite virtual-server-theme
 
  x Upload to download.webmin.com:htdocs/download/virtualmin/
-	scp /tmp/virtual-server-$ver.wbm.gz download.webmin.com:htdocs/download/virtualmin/
+	scp /tmp/virtual-server-$ver.wbm.gz virtualmin/virtual-server-theme-$ver.wbt.gz download.webmin.com:htdocs/download/virtualmin/
 	scp /usr/src/redhat/RPMS/noarch/wbm-virtual-server-$ver-1.noarch.rpm /usr/src/redhat/SRPMS/wbm-virtual-server-$ver-1.src.rpm download.webmin.com:htdocs/download/virtualmin/
 	scp /tmp/webmin-virtual-server_${ver}_all.deb download.webmin.com:htdocs/download/virtualmin/
 
- x Add to website
-	x Mention plugins too
+ x Upload theme
+	scp virtualmin/virtual-server-theme-$themever.wbt.gz download.webmin.com:htdocs/download/virtualmin/
+	scp /usr/src/redhat/RPMS/noarch/wbt-virtual-server-theme-$themever-1.noarch.rpm download.webmin.com:htdocs/download/virtualmin/
+	scp /tmp/webmin-virtual-server-theme_${themever}_all.deb download.webmin.com:htdocs/download/virtualmin/
 
- x Add to freshmeat.net
+ - Add to website
+	- Mention plugins too
 
- x Announce on mailing list
+ - Add to freshmeat.net
 
- x Add to updates.txt
+ - Announce on mailing list
 
- x Release plugins
+ - Add to updates.txt
 
- x Rebuild API files
+ - Release plugins
+
+ - Rebuild API files
