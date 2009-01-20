@@ -63,5 +63,4 @@
 
  - Command line template management
 	- New API docs category
-	- Need modify-template, delete-template, get-template
-	- Parameter for get-template to output a single value
+	- Need modify-template, delete-template
