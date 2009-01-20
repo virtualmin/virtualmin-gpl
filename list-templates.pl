@@ -13,16 +13,19 @@ This is useful when iterating through them in other scripts.
 
 =cut
 
-$no_acl_check++;
-$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
-$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
-if ($0 =~ /^(.*\/)[^\/]+$/) {
-	chdir($1);
+package virtual_server;
+if (!$module_name) {
+	$main::no_acl_check++;
+	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
+	$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
+	if ($0 =~ /^(.*\/)[^\/]+$/) {
+		chdir($1);
+		}
+	chop($pwd = `pwd`);
+	$0 = "$pwd/list-templates.pl";
+	require './virtual-server-lib.pl';
+	$< == 0 || die "list-templates.pl must be run as root";
 	}
-chop($pwd = `pwd`);
-$0 = "$pwd/list-templates.pl";
-require './virtual-server-lib.pl';
-$< == 0 || die "list-templates.pl must be run as root";
 
 # Parse command-line args
 $owner = 1;

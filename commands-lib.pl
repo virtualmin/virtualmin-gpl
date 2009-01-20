@@ -25,6 +25,7 @@ return ([ "Backup and restore", "backup-domain.pl", "list-scheduled-backups.pl",
 	[ "Proxies and balancers", "*-proxy.pl", "*-proxies.pl" ],
 	[ "PHP versions", "*-php-directory.pl", "*-php-directories.pl" ],
 	[ "SSL certificates", "list-certs.pl", "*-cert.pl" ],
+	[ "Virtual server templates", "*-template.pl", "*-templates.pl" ],
 	[ "Other scripts", "*.pl" ],
 	);
 }

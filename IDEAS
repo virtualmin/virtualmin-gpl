@@ -60,3 +60,8 @@
  - External connectivity test
 	- CGI on www.virtualmin.com
 	- DNS, ping, HTTP (with random file), FTP, SSH
+
+ - Command line template management
+	- New API docs category
+	- Need modify-template, delete-template, get-template
+	- Parameter for get-template to output a single value

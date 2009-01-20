@@ -57,11 +57,7 @@ if (!$module_name) {
 	$< == 0 || die "create-domain.pl must be run as root";
 	}
 @OLDARGV = @ARGV;
-
-$first_print = \&first_text_print;
-$second_print = \&second_text_print;
-$indent_print = \&indent_text_print;
-$outdent_print = \&outdent_text_print;
+&set_all_text_print();
 
 # Build args used by plugins
 %plugin_args = ( );
