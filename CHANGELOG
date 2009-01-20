@@ -1041,3 +1041,4 @@ Plugins can now export content styles, allowing multiple styles to be easily ins
 Directories containing initial files for virtual servers (like /etc/skel) are now included in Virtualmin template backups.
 ---- Changes since 3.65 ----
 Added API commands to create, modify, delete and extract settings from virtual server templates.
+Updated the phpMyAdmin script installer to version 3.1.2.

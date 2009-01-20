@@ -1,0 +1,6 @@
+desc=Updated script installers
+html=Updated the phpMyAdmin installer to version 3.1.2.
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}
