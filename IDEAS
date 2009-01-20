@@ -63,4 +63,5 @@
 
  - Command line template management
 	- New API docs category
-	- Need modify-template, delete-template
+	- CHANGELOG
+	- Need modify-template
