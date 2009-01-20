@@ -1,0 +1,3 @@
+desc=Command line API for templates
+html=Added API commands to create, modify, delete and extract settings from virtual server templates. These can be used in shell scripts, or called remotely by other program.
+master=1

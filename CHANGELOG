@@ -1039,3 +1039,5 @@ Added a Module Config option to have down services automatically restarted by th
 Added a script installer for Horde Webmail, version 1.2.1.
 Plugins can now export content styles, allowing multiple styles to be easily installed from a single separate plugin.
 Directories containing initial files for virtual servers (like /etc/skel) are now included in Virtualmin template backups.
+---- Changes since 3.65 ----
+Added API commands to create, modify, delete and extract settings from virtual server templates.

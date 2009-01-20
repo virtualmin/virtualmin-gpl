@@ -18,7 +18,7 @@ By default all settings are output, formatted like :
   etc..
 
 Any newlines in multi-line values are converted to \n for the output. However,
-if you select to output just a single setting with the C<--value> option
+if you select to output just a single setting with the C<--setting> option
 followed by a setting name, newlines in it's value will B<not> be converted.
 
 =cut
@@ -50,7 +50,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--inherited") {
 		$inherited = 1;
 		}
-	elsif ($a eq "--value") {
+	elsif ($a eq "--setting") {
 		$keyname = shift(@ARGV);
 		}
 	else {
@@ -96,7 +96,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Outputs all settings in some virtual server template.\n";
 print "\n";
 print "usage: get-template.pl --name template-name | --id template-id\n";
-print "                       [--value name]\n";
+print "                       [--setting name]\n";
 print "                       [--inherited]\n";
 exit(1);
 }

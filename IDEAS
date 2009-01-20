@@ -61,7 +61,3 @@
 	- CGI on www.virtualmin.com
 	- DNS, ping, HTTP (with random file), FTP, SSH
 
- - Command line template management
-	- New API docs category
-	- CHANGELOG
-	- Need modify-template
