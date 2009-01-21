@@ -105,11 +105,12 @@ local $hidden = $mode == 2 ?
 		  $job->{'days'}, $job->{'months'}, $job->{'weekdays'}) : "";
 return &ui_radio_table($name, $mode,
 	 [ $offmsg ? ( [ 0, $offmsg ] ) : ( ),
+	   $cron::config{'vixie_cron'} ? (
 	   [ 1, $text{'cron_special'},
 		   &ui_select($name."_special", $job->{'special'},
 		      [ map { [ $_, $cron::text{'edit_special_'.$_} ] }
 			    ('hourly', 'daily', 'weekly', 'monthly', 'yearly')
-		      ]) ],
+		      ]) ] ) : ( ),
 	   [ 2, $text{'cron_complex'},
 		   &ui_textbox($name."_complex", $complex, 40, 0, undef,
 				  "readonly=true")." ".$button ],
