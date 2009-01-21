@@ -20,15 +20,15 @@
 	scp /usr/src/redhat/RPMS/noarch/wbt-virtual-server-theme-$themever-1.noarch.rpm download.webmin.com:htdocs/download/virtualmin/
 	scp /tmp/webmin-virtual-server-theme_${themever}_all.deb download.webmin.com:htdocs/download/virtualmin/
 
- - Add to website
-	- Mention plugins too
+ x Add to website
+	x Mention plugins too
 
  - Add to freshmeat.net
 
  - Announce on mailing list
 
- - Add to updates.txt
+ x Add to updates.txt
 
- - Release plugins
+ x Release plugins
 
- - Rebuild API files
+ x Rebuild API files

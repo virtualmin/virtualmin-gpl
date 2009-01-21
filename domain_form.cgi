@@ -252,7 +252,6 @@ print "</script>\n";
 
 # Show template selection field
 foreach $t (&list_available_templates($parentdom, $aliasdom)) {
-	$firsttemplate ||= $t;
 	push(@opts, [ $t->{'id'}, $t->{'name'} ]);
 	push(@cantmpls, $t);
 	}
@@ -527,7 +526,7 @@ if ($can_feature{'web'} && !$aliasdom && $config{'web'} && $virtualmin_pro) {
 
 print &ui_form_end([ [ "ok", $text{'form_ok'} ] ]);
 if (!$config{'template_auto'}) {
-	print "<script>select_template($firsttemplate->{'id'});</script>\n";
+	print "<script>select_template($deftmpl->{'id'});</script>\n";
 	}
 
 &ui_print_footer("", $text{'index_return'});
