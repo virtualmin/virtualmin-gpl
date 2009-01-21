@@ -10595,7 +10595,8 @@ if ($config{'virus'}) {
 		}
 	local $err;
 	if ($config{'clamscan_cmd_tested'} ne $config{'clamscan_cmd'}) {
-		$err = &test_virus_scanner($config{'clamscan_cmd'});
+		$err = &test_virus_scanner($config{'clamscan_cmd'},
+					   $config{'clamscan_host'});
 		}
 	if ($err) {
 		# Failed .. but this can often be due to the ClamAV database
@@ -10607,7 +10608,8 @@ if ($config{'virus'}) {
 			}
 		if (-x $freshclam) {
 			local $cout = &backquote_with_timeout($freshclam, 180);
-			$err = &test_virus_scanner($config{'clamscan_cmd'});
+			$err = &test_virus_scanner($config{'clamscan_cmd'},
+						   $config{'clamscan_host'});
 			}
 		}
 	if ($err) {
