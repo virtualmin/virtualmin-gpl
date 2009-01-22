@@ -60,13 +60,15 @@ local @rv;
 &has_domain_databases($d, [ "mysql" ], 1) ||
 	push(@rv, "phpMyAdmin requires a MySQL database");
 
-# Check for PHP 5.2+
-local $phpv = &get_php_version(5, $d);
-if (!$phpv) {
-	push(@rv, "Could not work out exact PHP version");
-	}
-elsif ($phpv < 5.2) {
-	push(@rv, "phpMyAdmin requires PHP version 5.2 or later");
+# Check for PHP 5.2+, if needed
+if (&compare_versions($ver, "3.1") > 0) {
+	local $phpv = &get_php_version(5, $d);
+	if (!$phpv) {
+		push(@rv, "Could not work out exact PHP version");
+		}
+	elsif ($phpv < 5.2) {
+		push(@rv, "phpMyAdmin requires PHP version 5.2 or later");
+		}
 	}
 
 return @rv;
