@@ -414,6 +414,12 @@ if ($features{'spam'} && $config{'avail_spam'} && @spamassassin_doms) {
 		       'file' => "$spam_config_dir/$sd->{'id'}/virtualmin.cf",
 		       'awl_groups' => $_[0]->{'group'},
 		     );
+	$acl{'files'} = join(' ',
+			     map { "$spam_config_dir/$_->{'id'}/virtualmin.cf" }
+			         @spamassassin_doms);
+	$acl{'procmailrcs'} = join(' ',
+			     map { "$procmail_spam_dir/$_->{'id'}" }
+			         @spamassassin_doms);
 	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "spam")
 		if (!$hasmods{'spam'});
 	}

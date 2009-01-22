@@ -642,7 +642,7 @@ if ($cmd !~ /^\//) {
 	local ($phpn) = grep { $_->[0] == $cmd }
 			     &list_available_php_versions($d);
 	return undef if (!$phpn);
-	$cmd = $phpn->[1];
+	$cmd = $phpn->[1] || &has_command("php$cmd") || &has_command("php");
 	}
 &clean_environment();
 local $out = &backquote_command("$cmd -v 2>&1 </dev/null");
