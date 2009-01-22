@@ -857,7 +857,7 @@ if ($mode > 0) {
 	if ($mode == 3) {
 		local $cerr = &check_s3();
 		if ($cerr) {
-			&$second_print($err);
+			&$second_print($cerr);
 			return 0;
 			}
 		}
