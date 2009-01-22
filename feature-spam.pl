@@ -640,7 +640,7 @@ sub links_spam
 local ($d) = @_;
 if ($config{'avail_spam'}) {
 	local %acl = &get_module_acl(undef, "spam");
-	if ($acl{'file'}) {
+	if ($acl{'file'} || &get_webmin_version() >= 1.450) {
 		return ( { 'mod' => 'spam',
 			   'desc' => $text{'links_spam'},
 			   'page' => 'index.cgi?file='.&urlize(

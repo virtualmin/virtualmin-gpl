@@ -409,7 +409,7 @@ if ($features{'spam'} && $config{'avail_spam'} && @spamassassin_doms) {
 	push(@mods, "spam");
 	local $sd = $spamassassin_doms[0];
 	local %acl = ( 'noconfig' => 1,
-		       'avail' => 'white,score,report,user,header,procmail,awl',
+		       'avail' => 'white,score,report,user,header,awl',
 		       'procmailrc' => "$procmail_spam_dir/$sd->{'id'}",
 		       'file' => "$spam_config_dir/$sd->{'id'}/virtualmin.cf",
 		       'awl_groups' => $_[0]->{'group'},
