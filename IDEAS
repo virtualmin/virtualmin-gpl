@@ -61,5 +61,3 @@
 	- CGI on www.virtualmin.com
 	- DNS, ping, HTTP (with random file), FTP, SSH
 
- - Spam config editing for multiple domains
-	- FS#5068
