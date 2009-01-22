@@ -22,12 +22,86 @@ if (!$module_name) {
 	$< == 0 || die "info.pl must be run as root";
 	}
 
-@ARGV && &usage("No command line parameters are needed");
+foreach $a (@ARGV) {
+	if ($a eq "--help") {
+		&usage();
+		}
+	elsif ($a eq "--search") {
+		push(@searches, shift(@ARGV));
+		}
+	else {
+		push(@searches, $a);
+		}
+	}
 
 $info = &get_collected_info();
-# XXX core system info
+%tinfo = &get_theme_info($current_theme);
+$info->{'host'} = { 'hostname', &get_system_hostname(),
+		    'os' => $gconfig{'real_os_type'}.' '.
+			    $gconfig{'real_os_version'},
+		    'webmin version' => &get_webmin_version(),
+		    'virtualmin version' => $module_info{'version'},
+		    'theme version' => $tinfo{'version'},
+		    'root' => $root_directory,
+		    'module root' => $module_root_directory,
+		  };
+delete($info->{'startstop'});
+delete($info->{'quota'});
+delete($info->{'inst'}) if (!@{$info->{'inst'}});
+delete($info->{'poss'}) if (!@{$info->{'poss'}});
+delete($info->{'fextra'});
+delete($info->{'fhide'});
+delete($info->{'fmax'});
+foreach my $k (keys %$info) {
+	delete($info->{$k}) if (!&info_search_match($k));
+	}
+&recursive_info_dump($info, "");
 
-# XXX collected stuff
+sub recursive_info_dump
+{
+local ($info, $indent) = @_;
+
+# Dump object, depending on type
+if (ref($info) eq "ARRAY") {
+	foreach $k (@$info) {
+		print $indent,"* ";
+		if (ref($k)) {
+			print "\n";
+			&recursive_info_dump($k, $indent."    ");
+			}
+		else {
+			print $k,"\n";
+			}
+		}
+	}
+elsif (ref($info) eq "HASH") {
+	foreach $k (sort { $a cmp $b } keys %$info) {
+		print $indent,$k,": ";
+		if (ref($info->{$k})) {
+			print "\n";
+			&recursive_info_dump($info->{$k}, $indent."    ");
+			}
+		else {
+			print $info->{$k},"\n";
+			}
+		}
+	}
+else {
+	print $indent,$info,"\n";
+	}
+}
+
+sub info_search_match
+{
+local ($i) = @_;
+if (@searches && !ref($i)) {
+	foreach my $s (@searches) {
+		return 1 if ($i =~ /\Q$s\E/i);
+		}
+	return 0;
+	}
+return 1;
+}
 
 sub usage
 {
