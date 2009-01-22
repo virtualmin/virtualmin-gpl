@@ -1,8 +1,6 @@
 #!/usr/local/bin/perl
 # Check the total disk usage for all virtual servers, and email a report to
 # the admin for those that are over.
-# XXX mailboxes too
-# XXX send email to domain owners separately .. option for this
 
 package virtual_server;
 $main::no_acl_check++;
@@ -222,6 +220,7 @@ if ($debug_mode) {
 else {
 	&mailboxes::send_text_mail($msg->[0]->{'emailto'},
 				   $email,
+				   undef,
 				   'Virtualmin User Disk Quota Monitoring',
 				   $body);
 	}
