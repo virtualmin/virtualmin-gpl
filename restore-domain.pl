@@ -23,6 +23,11 @@ program, as it will not prompt for confirmation before restoring, which will
 over-write the contents of restored directories, databases and configuration
 files.
 
+You can limit the restore to only domains that do not yet exist yet with
+the C<--only-missing> flag. Conversely, you can specify only domains that
+already exist with the C<--only-existing> flag, to prevent any new virtual
+servers in the backup from being created.
+
 To restore core Virtualmin settings (if included in the backup), the
 C<--all-virtualmin> option can be specified as well. Alternately, you can select
 exactly which settings to include with the C<--virtualmin> parameter. For example,
@@ -136,6 +141,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--only-features") {
 		$onlyfeats = 1;
 		}
+	elsif ($a eq "--only-missing") {
+		$onlymissing = 1;
+		}
+	elsif ($a eq "--only-existing") {
+		$onlyexisting = 1;
+		}
 
 	# Alternate IP options
 	elsif ($a eq "--shared-ip") {
@@ -170,6 +181,7 @@ if (@rdoms || $all_doms) {
 	}
 ($mode) = &parse_backup_url($src);
 $mode > 0 || -r $src || -d $src || &usage("Missing or invalid restore file");
+$onlymissing && $onlyexisting && &usage("The --only-missing and --only-existing flags are mutually exclusive");
 
 # Find the selected domains
 ($cont, $contdoms) = &backup_contents($src, 1);
@@ -191,6 +203,14 @@ foreach $dname (@rdoms) {
 		push(@doms, { 'dom' => $dname,
 			      'missing' => 1 });
 		}
+	}
+
+# Filter by missing or existing flags
+if ($onlymissing) {
+	@doms = grep { $_->{'missing'} } @doms;
+	}
+elsif ($onlyexisting) {
+	@doms = grep { !$_->{'missing'} } @doms;
 	}
 
 # Check for missing features
@@ -270,6 +290,7 @@ print "                  [--no-mailfiles]\n";
 print "                  [--all-virtualmin] | [--virtualmin config]\n";
 print "                  [--only-features]\n";
 print "                  [--shared-ip address | --ip address | --allocate-ip]\n";
+print "                  [--only-missing | --only-existing]\n";
 print "\n";
 print "Multiple domains may be specified with multiple --domain parameters.\n";
 print "Features must be specified using their short names, like web and dns.\n";
