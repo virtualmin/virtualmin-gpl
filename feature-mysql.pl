@@ -461,7 +461,9 @@ foreach $db (@dbs) {
 		&$second_print(&text('restore_mysqlclash'));
 		return 0;
 		}
+	&$indent_print();
 	&create_mysql_database($_[0], $db->[0]);
+	&$outdent_print();
 	if ($db->[1] =~ /\.gz$/) {
 		# Need to uncompress first
 		local $out = &backquote_logged(

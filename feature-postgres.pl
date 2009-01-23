@@ -340,7 +340,9 @@ foreach $db (@dbs) {
 		&$second_print(&text('restore_postgresclash'));
 		return 0;
 		}
+	&$indent_print();
 	&create_postgres_database($_[0], $db->[0]);
+	&$outdent_print();
 	if ($postgresql::postgres_sameunix) {
 		# Restore is running as the postgres user - make the backup
 		# file owned by him
