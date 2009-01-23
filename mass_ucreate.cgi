@@ -231,8 +231,10 @@ USER: foreach $line (@lines) {
 
 	if ($user->{'unix'}) {
 		# Check for a Unix clash
+		$mclash = &check_clash($username, $d->{'dom'});
 		if ($utaken{$user->{'user'}} ||
-		    &check_clash($username, $d->{'dom'})) {
+		    $user->{'email'} && $mclash ||
+		    !$user->{'email'} && $mclash == 2) {
 			&line_error($text{'user_eclash'});
 			next USER;
 			}
