@@ -390,8 +390,10 @@ else {
 
 		if ($d && $user->{'unix'}) {
 			# Check for a Unix clash
+			$mclash = &check_clash($in{'mailuser'}, $d->{'dom'});
 			if ($utaken{$user->{'user'}} ||
-			    &check_clash($in{'mailuser'}, $d->{'dom'})) {
+			    $user->{'email'} && $mclash ||
+			    !$user->{'email'} && $mclash == 2) {
 				&error($text{'user_eclash'});
 				}
 			}
