@@ -1963,7 +1963,7 @@ sub show_template_web
 local ($tmpl) = @_;
 
 # Work out fields to disable
-local @webfields = ( "web", "suexec", "writelogs", "user_def", "user",
+local @webfields = ( "web", "suexec", "writelogs", "user_def",
 		     "html_dir", "html_dir_def", "html_perms", "stats_mode",
 		     "stats_dir", "stats_hdir", "statspass", "statsnoedit",
 		     "alias_mode", "web_port", "web_sslport",
@@ -2000,10 +2000,10 @@ print &ui_table_row(&hlink($text{'newweb_writelogs'}, "template_writelogs"),
 # Input for Apache user to add to domain's group
 print &ui_table_row(&hlink($text{'newweb_user'}, "template_user_def"),
 	&ui_radio("user_def", $tmpl->{'web_user'} eq 'none' ? 2 :
-				   $tmpl->{'web_user'} ? 0 : 1,
+				   $tmpl->{'web_user'} ? 1 : 0,
 	       [ [ 2, $text{'no'}."<br>" ],
-		 [ 1, $text{'newweb_userdef'}."<br>" ],
-		 [ 0, $text{'newweb_useryes'}." ".
+		 [ 0, $text{'newweb_userdef'}."<br>" ],
+		 [ 1, $text{'newweb_useryes'}." ".
 		      &ui_user_textbox("user", $tmpl->{'web_user'} eq 'none' ?
 						'' : $tmpl->{'web_user'}) ] ]));
 
@@ -2251,7 +2251,7 @@ if ($in{"web_mode"} == 2) {
 		}
 	$tmpl->{'web_stats_pass'} = $in{'statspass'};
 	$tmpl->{'web_stats_noedit'} = $in{'statsnoedit'};
-	if ($in{'user_def'} == 1) {
+	if ($in{'user_def'} == 0) {
 		delete($tmpl->{'web_user'});
 		}
 	elsif ($in{'user_def'} == 2) {
