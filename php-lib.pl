@@ -484,7 +484,8 @@ if (&has_command("chattr")) {
 		foreach my $f (glob("$dir/php?.*cgi")) {
 			if (-r $f) {
 				&system_logged("chattr ".
-				   ($writable ? "-i" : "+i")." ".quotemeta($f));
+				   ($writable ? "-i" : "+i")." ".quotemeta($f).
+				   " >/dev/null 2>&1");
 				}
 			}
 		}
