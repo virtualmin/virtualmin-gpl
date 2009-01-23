@@ -61,3 +61,7 @@
 	- CGI on www.virtualmin.com
 	- DNS, ping, HTTP (with random file), FTP, SSH
 
+ - More permissions for resellers
+	- DB management
+	- Apache?
+	- FS#5122

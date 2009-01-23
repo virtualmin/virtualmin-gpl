@@ -1044,3 +1044,4 @@ Added API commands to create, modify, delete and extract settings from virtual s
 Updated the phpMyAdmin script installer to version 3.1.2, and phpMyFAQ to 2.0.11.
 Added the info.pl command line script, for dumping general information about Virtualmin.
 Links to per-domain SpamAssassin configurations now include the domain's config file, which allows each domain's settings to be separately managed.
+Automatic spam and virus folder clearing now respects custom folder names.

@@ -38,6 +38,22 @@ foreach $d (&list_domains()) {
 		}
 	print STDERR "$d->{'dom'}: finding mailboxes\n" if ($debug);
 
+	# Work out the spam folders for this domain
+	local $sfname = "spam";
+	local $vfname = "virus";
+	local $fd = $mailboxes::config{'mail_usermin'};
+	local ($sdmode, $sdpath) = &get_domain_spam_delivery($d);
+	if ($sdmode == 1 && $sdpath =~ /^\Q$fd\E\/(.+)$/) {
+		$sfname = lc($1);
+		$sfname =~ s/^\.//;
+		}
+	local ($vdmode, $vdpath) = &get_domain_virus_delivery($d);
+	if ($vdmode == 1 && $vdpath =~ /^\Q$fd\E\/(.+)$/) {
+		$vfname = lc($1);
+		$vfname =~ s/^\.//;
+		}
+	print STDERR "$d->{'dom'}: spam=$sfname virus=$vfname\n" if ($debug);
+
 	# Check all mailboxes
 	@users = &list_domain_users($d, 0, 1, 1, 1);
 	foreach $u (@users) {
@@ -48,7 +64,7 @@ foreach $d (&list_domains()) {
 			   $u->{'gid'}, undef, undef, $u->{'real'},
 			   $u->{'home'}, $u->{'shell'} );
 		@folders = &mailboxes::list_user_folders(@uinfo);
-		foreach $fn ("spam", "virus") {
+		foreach $fn (&unique($sfname, $vfname)) {
 			($folder) = grep { $_->{'file'} =~ /\/(\.?)\Q$fn\E$/i &&
 					   $_->{'index'} != 0 } @folders;
 			if (!$folder) {
