@@ -10911,6 +10911,24 @@ if (defined(&supports_resource_limits)) {
 			       $text{'check_resok'});
 	}
 
+# Check if software packages work, for pro
+if ($virtualmin_pro && &foreign_check("software")) {
+	&foreign_require("software", "software-lib.pl");
+	if (defined(&software::check_package_system)) {
+		local $err = &software::check_package_system();
+		local $uerr = &software::check_update_system();
+		if ($err) {
+			&$second_print(&text('check_packageerr', $err));
+			}
+		elsif ($uerr) {
+			&$second_print(&text('check_updateerr', $err));
+			}
+		else {
+			&$second_print(&text('check_packageok'));
+			}
+		}
+	}
+
 # All looks OK .. save the config
 $config{'last_check'} = time()+1;
 $config{'disable'} =~ s/user/unix/g;	# changed since last release
