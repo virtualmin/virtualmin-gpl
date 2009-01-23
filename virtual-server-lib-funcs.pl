@@ -5038,7 +5038,13 @@ $st[7] = $w[4];			# Size
 if ($w[7] =~ /^(\d+):(\d+)$/) {
 	# Time is month day hour:minute
 	local @tm = ( 0, $2, $1, $w[6], &month_to_number($w[5]), $now[5] );
-	$st[8] = $st[9] = $st[10] = timelocal(@tm);
+	local $ut = timelocal(@tm);
+	if ($ut > time()+(24*60*60)) {
+		# Must have been last year!
+		$tm[5]--;
+		$ut = timelocal(@tm);
+		}
+	$st[8] = $st[9] = $st[10] = $ut;
 	}
 elsif ($w[7] =~ /^\d+$/) {
 	# Time is month day year
