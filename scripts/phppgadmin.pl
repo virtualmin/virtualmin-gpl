@@ -170,7 +170,7 @@ if (!-r $cfile) {
 local $url = &script_path_url($d, $opts);
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
-return (1, "phpPgAdmin installation complete. It can be accessed at <a target=_new href='$url'>$url</a>.", "Under $rp", $url);
+return (1, "phpPgAdmin installation complete. It can be accessed at <a target=_new href='$url'>$url</a>.", "Under $rp", $url, $dbuser, $dbpass);
 }
 
 # script_phppgadmin_uninstall(&domain, version, &opts)
