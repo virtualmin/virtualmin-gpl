@@ -31,7 +31,7 @@ if (!$in{'program'}) {
 
 # Build the arg list
 $main::virtualmin_remote_api = 1;
-$in{'program'} =~ /^[a-z0-9\.-]+$/i || &error($text{'remote_eprogram'});
+$in{'program'} =~ /^[a-z0-9\.\-]+$/i || &error($text{'remote_eprogram'});
 $cmd = "$module_root_directory/$in{'program'}.pl";
 -x $cmd || &error(&text('remote_eprogram2', "<tt>".&html_escape($cmd)."</tt>"));
 @args = ( );
