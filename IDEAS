@@ -65,3 +65,5 @@
 	- DB management
 	- Apache?
 	- FS#5122
+
+ - Migration from systems using ~/logs to /var/log/virtualmin

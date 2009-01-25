@@ -1209,6 +1209,17 @@ local $tmpl = &get_template($_[0]->{'template'});
 if ($virt) {
 	local $srclref = &read_file_lines($_[1]);
 	local $dstlref = &read_file_lines($virt->{'file'});
+
+	# Extract old logging-based directives before we change them, so they
+	# can be restored later to match *this* system
+	local %lmap;
+	foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
+		if ($dstlref->[$i] =~
+		    /^\s*(CustomLog|ErrorLog|TransferLog)\s+(.*)/i) {
+			$lmap{lc($1)} = $2;
+			}
+		}
+
 	splice(@$dstlref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1,
 	       @$srclref[1 .. @$srclref-2]);
 	# Fix IP address in <Virtualhost> section (if needed)
@@ -1276,6 +1287,16 @@ if ($virt) {
 			    $virt->{'line'}+scalar(@$srclref)-1) {
 			$dstlref->[$i] =~
 				s/\Q$_[5]->{'home'}\E/$_[0]->{'home'}/g;
+			}
+		}
+
+	# Change and CustomLog, ErrorLog or TransferLog directives to match
+	# this system
+	foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
+		if ($dstlref->[$i] =~
+		    /^\s*(CustomLog|ErrorLog|TransferLog)\s/i &&
+		    $lmap{lc($1)}) {
+			$dstlref->[$i] = $1." ".$lmap{lc($1)};
 			}
 		}
 

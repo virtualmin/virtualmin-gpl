@@ -189,6 +189,7 @@ return undef;
 }
 
 # get_logrotate_section(&domain|log-file)
+# Returns the Logrotate configuration block for some domain or log file
 sub get_logrotate_section
 {
 &require_logrotate();
