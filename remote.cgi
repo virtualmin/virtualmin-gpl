@@ -6,7 +6,7 @@ package virtual_server;
 $trust_unknown_referers = 1;
 require './virtual-server-lib.pl';
 &ReadParse();
-&can_remote() || &error($text{'remote_ecannot'});
+&can_remote() || &api_error($text{'remote_ecannot'});
 use subs qw(exit);
 
 if (!$in{'program'}) {
@@ -31,9 +31,9 @@ if (!$in{'program'}) {
 
 # Build the arg list
 $main::virtualmin_remote_api = 1;
-$in{'program'} =~ /^[a-z0-9\.\-]+$/i || &error($text{'remote_eprogram'});
+$in{'program'} =~ /^[a-z0-9\.\-]+$/i || &api_error($text{'remote_eprogram'});
 $cmd = "$module_root_directory/$in{'program'}.pl";
--x $cmd || &error(&text('remote_eprogram2', "<tt>".&html_escape($cmd)."</tt>"));
+-x $cmd || &api_error(&text('remote_eprogram2', $cmd));
 @args = ( );
 foreach $i (keys %in) {
 	next if ($i eq "program");
@@ -61,4 +61,11 @@ print "Content-type: text/plain\n\n";
 do $cmd;
 print "\n";
 print "Exit status: 0\n";
+
+sub api_error
+{
+print "Content-type: text/plain\n\n";
+print "ERROR: ",@_,"\n";
+CORE::exit(0);
+}
 
