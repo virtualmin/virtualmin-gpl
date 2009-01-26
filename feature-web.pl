@@ -768,11 +768,13 @@ else {
 			local $dest = $mode eq "fcgid" ? "$d->{'home'}/fcgi-bin"
 						       : &cgi_bin_dir($_[0]);
 			local $suffix = $mode eq "fcgid" ? "fcgi" : "cgi";
-			foreach my $v (&list_available_php_versions($d,$mode)) {
-				local $path = "$dest/php$v->[0].$suffix";
+			foreach my $dir (&list_domain_php_directories($d)) {
+				local $path = "$dest/php".
+					      $dir->{'version'}.".$suffix";
 				if (!-x $path) {
 					return &text('validate_ewebphp',
-						     $v->[0], "<tt>$path</tt>");
+						     $dir->{'version'},
+						     "<tt>$path</tt>");
 					}
 				}
 			}
