@@ -1,0 +1,3 @@
+desc=Full API available
+html=Ported all API scripts for functions supported by Virtualmin GPL to the Pro version, to allow almost any action that can be performed via the web UI to be done on the command line or via an HTTP request.
+master=1
