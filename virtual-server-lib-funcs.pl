@@ -1876,6 +1876,7 @@ if (-d "$user->{'home'}/.usermin/mailbox") {
 		$inbox{'user'} = $user->{'user'};
 		}
 	$inbox{'pass'} = $user->{'plainpass'};
+	$inbox{'nologout'} = 1;
 	&write_file("$user->{'home'}/.usermin/mailbox/inbox.imap", \%inbox);
 	}
 }
