@@ -237,9 +237,12 @@ sub restart_proftpd
 local $conf = &proftpd::get_config();
 local $st = &proftpd::find_directive("ServerType", $conf);
 if (lc($st) ne "inetd") {
-	&$first_print($text{'setup_proftpdpid'});
 	# Call proftpd restart function
+	&$first_print($text{'setup_proftpdpid'});
+	local $proftpdlock = "$module_config_directory/proftpd-restart";
+	&lock_file($proftpdlock);
 	local $err = &proftpd::apply_configuration();
+	&unlock_file($proftpdlock);
 	&$second_print($err ? &text('setup_proftpdfailed', $err)
 			    : $text{'setup_done'});
 	return $err ? 0 : 1;

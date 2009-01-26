@@ -1064,6 +1064,8 @@ return $z;
 sub restart_bind
 {
 &$first_print($text{'setup_bindpid'});
+local $bindlock = "$module_config_directory/bind-restart";
+&lock_file($bindlock);
 local $pid = &get_bind_pid();
 if ($pid) {
 	if ($bconfig{'restart_cmd'}) {
@@ -1093,6 +1095,7 @@ if (&bind8::list_slave_servers()) {
 		&$second_print($text{'setup_done'});
 		}
 	}
+&unlock_file($bindlock);
 return $rv;
 }
 

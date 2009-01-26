@@ -928,6 +928,8 @@ if ($config{'check_apache'}) {
 		return 0;
 		}
 	}
+local $apachelock = "$module_config_directory/apache-restart";
+&lock_file($apachelock);
 local $pid = &get_apache_pid();
 if (!$pid || !kill(0, $pid)) {
 	&$second_print($text{'setup_notrun'});
@@ -944,6 +946,7 @@ else {
 	&apache::restart_apache();
 	}
 &cleanup_php_cgi_processes() if (defined(&cleanup_php_cgi_processes));
+&unlock_file($apachelock);
 &$second_print($text{'setup_done'});
 return 1;
 }
