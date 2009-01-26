@@ -1046,3 +1046,4 @@ Added the info.pl command line script, for dumping general information about Vir
 Links to per-domain SpamAssassin configurations now include the domain's config file, which allows each domain's settings to be separately managed.
 Automatic spam and virus folder clearing now respects custom folder names.
 When a domain is restore on a system with a different Apache log file location, its virtualhost is updated to use the target system's paths.
+Add parameters to the modify-dns.pl command-line API to add and remove DNS records for multiple domains at once.
