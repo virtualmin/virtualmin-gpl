@@ -133,6 +133,8 @@ $styles_unavail_file = "$module_config_directory/stylesunavail";
 
 @reseller_maxes = ("doms", "aliasdoms", "realdoms", "quota", "mailboxes", "aliases", "dbs", "bw");
 
+@reseller_modules = ("webminlog", "mailboxes");
+
 @all_template_files = ( "domain-template", "subdomain-template",
 			"user-template", "local-template", "bw-template",
 			"warnbw-template", "framefwd-template",
