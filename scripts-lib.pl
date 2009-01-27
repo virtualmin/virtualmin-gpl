@@ -781,22 +781,62 @@ foreach my $m (@mods) {
 	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
 	&$first_print(&text($opt ? 'scripts_optmod' : 'scripts_needmod',
 			    "<tt>$m</tt>"));
+	&$indent_print();
+
+	# Configure the domain's php.ini to load it, if needed
+	&foreign_require("phpini", "phpini-lib.pl");
+	local $mode = &get_domain_php_mode($d);
+	local $inifile = $mode eq "mod_php" ?
+			&get_global_php_ini($phpver, $mode) :
+			&get_domain_php_ini($d, $phpver);
+	local $pconf = &phpini::get_config($inifile);
+	local @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
+	local @exts = grep { $_->{'enabled'} } @allexts;
+	local ($got) = grep { $_->{'value'} eq "$m.so" } @exts;
+	if (!$got) {
+		# Needs to be enabled
+		&$first_print($text{'scripts_addext'});
+		local $lref = &read_file_lines($inifile);
+		if (@exts) {
+			# After current extensions
+			splice(@$lref, $exts[$#exts]->{'line'}+1, 0,
+			       "extension=$m.so");
+			}
+		elsif (@allexts) {
+			# After commented out extensions
+			splice(@$lref, $allexts[$#allexts]->{'line'}+1, 0,
+			       "extension=$m.so");
+			}
+		else {
+			# At end of file (should never happen, but..)
+			push(@$lref, "extension=$m.so");
+			}
+		&flush_file_lines($inifile);
+		undef($phpini::get_config_cache{$inifile});
+		undef(%main::php_modules);
+		&$second_print($text{'setup_done'});
+		if (&check_php_module($m, $phpver, $d) == 1) {
+			# We have it now!
+			goto GOTMODULE;
+			}
+		}
 
 	# Make sure the software module is installed and can do updates
 	if (!&foreign_installed("software")) {
+		&$outdent_print();
 		&$second_print($text{'scripts_esoftware'});
 		if ($opt) { next; }
 		else { return 0; }
 		}
 	&foreign_require("software", "software-lib.pl");
 	if (!defined(&software::update_system_install)) {
+		&$outdent_print();
 		&$second_print($text{'scripts_eupdate'});
 		if ($opt) { next; }
 		else { return 0; }
 		}
 
 	# Check if the package is already installed
-	&$indent_print();
 	local $iok = 0;
 	local @poss;
 	if ($software::update_system eq "csw") {
@@ -863,41 +903,9 @@ foreach my $m (@mods) {
 		else { return 0; }
 		}
 
-	# Configure the domain's php.ini to load it, if needed
-	&foreign_require("phpini", "phpini-lib.pl");
-	local $mode = &get_domain_php_mode($d);
-	local $inifile = $mode eq "mod_php" ?
-			&get_global_php_ini($phpver, $mode) :
-			&get_domain_php_ini($d, $phpver);
-	local $pconf = &phpini::get_config($inifile);
-	local @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
-	local @exts = grep { $_->{'enabled'} } @allexts;
-	local ($got) = grep { $_->{'value'} eq "$m.so" } @exts;
-	if (!$got) {
-		# Needs to be enabled
-		&$first_print($text{'scripts_addext'});
-		local $lref = &read_file_lines($inifile);
-		if (@exts) {
-			# After current extensions
-			splice(@$lref, $exts[$#exts]->{'line'}+1, 0,
-			       "extension=$m.so");
-			}
-		elsif (@allexts) {
-			# After commented out extensions
-			splice(@$lref, $allexts[$#allexts]->{'line'}+1, 0,
-			       "extension=$m.so");
-			}
-		else {
-			# At end of file (should never happen, but..)
-			push(@$lref, "extension=$m.so");
-			}
-		&flush_file_lines($inifile);
-		undef($phpini::get_config_cache{$inifile});
-		&$second_print($text{'setup_done'});
-		}
-
 	# Finally re-check to make sure it worked (but this is only possible
 	# in CGI mode)
+	GOTMODULE:
 	&$outdent_print();
 	undef(%main::php_modules);
 	if (&check_php_module($m, $phpver, $d) != 1) {

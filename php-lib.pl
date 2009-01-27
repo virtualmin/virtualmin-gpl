@@ -1018,7 +1018,7 @@ sub list_php_modules
 {
 local ($d, $ver, $cmd) = @_;
 local $mode = &get_domain_php_mode($d);
-if (!defined($main::php_modules{$ver})) {
+if (!defined($main::php_modules{$ver,$d->{'id'}})) {
 	$main::php_modules{$ver} = [ ];
 	if ($mode eq "mod_php") {
 		# Use global PHP config, since with mod_php we can't do
@@ -1039,14 +1039,14 @@ if (!defined($main::php_modules{$ver})) {
 	while(<PHP>) {
 		s/\r|\n//g;
 		if (/^\S+$/ && !/\[/) {
-			push(@{$main::php_modules{$ver}}, $_);
+			push(@{$main::php_modules{$ver,$d->{'id'}}}, $_);
 			}
 		}
 	close(PHP);
 	&reset_environment();
 	delete($ENV{'PHPRC'});
 	}
-return @{$main::php_modules{$ver}};
+return @{$main::php_modules{$ver,$d->{'id'}}};
 }
 
 # fix_php_ini_files(&domain, &fixes)
