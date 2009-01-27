@@ -60,6 +60,3 @@
  - External connectivity test
 	- CGI on www.virtualmin.com
 	- DNS, ping, HTTP (with random file), FTP, SSH
-
- - Re-factor function used by scripts to make GET requests
-	- Deal with DNS entry not being registered yet

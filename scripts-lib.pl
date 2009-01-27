@@ -1426,22 +1426,16 @@ else {
 	}
 }
 
-# post_http_connection(&hostname, port, page, &cgi-params, &out, &err,
+# post_http_connection(&domain, page, &cgi-params, &out, &err,
 #		       &moreheaders, &returnheaders, &returnheaders-array)
 # Makes an HTTP post to some URL, sending the given CGI parameters as data.
 sub post_http_connection
 {
-local ($host, $port, $page, $params, $out, $err, $headers,
+local ($d, $page, $params, $out, $err, $headers,
        $returnheaders, $returnheaders_array) = @_;
-
-# Find the Virtualmin domain for the hostname, so we can get the IP
-local ($d) = &get_domain_by("dom", $host);
-if (!$d) {
-	local $nowww = $host;
-	$nowww =~ s/^www\.//g;
-	($d) = &get_domain_by("dom", $nowww);
-	}
-local $ip = $d ? $d->{'ip'} : $host;
+local $ip = $d->{'ip'};
+local $host = "www.".$d->{'dom'};
+local $port = $d->{'web_port'};
 
 local $oldproxy = $gconfig{'http_proxy'};	# Proxies mess up connection
 $gconfig{'http_proxy'} = '';			# to the IP explicitly
@@ -1482,6 +1476,46 @@ if ($_[0] == 4) {
 	$post_http_headers = \%header;
 	$post_http_headers_array = \@headers;
 	}
+}
+
+# get_http_connection(&domain, page, &output, [&error], [&callback],
+#  [sslmode], [user, pass], [timeout], [osdn-convert], [no-cache], [&headers])
+# Does effectively the same thing as http_download, but connects to the right
+# IP, hostname and port. For use by scripts needing to call wizards and such.
+sub get_http_connection
+{
+local ($d, $page, $dest, $error, $cbfunc, $ssl, $user, $pass,
+       $timeout, $osdn, $nocache, $headers) = @_;
+local $ip = $d->{'ip'};
+local $host = "www.".$d->{'dom'};
+local $port = $d->{'web_port'};
+
+# Build headers
+local @headers;
+push(@headers, [ "Host", $host ]);
+push(@headers, [ "User-agent", "Webmin" ]);
+if ($user) {
+	local $auth = &encode_base64("$user:$pass");
+	$auth =~ tr/\r\n//d;
+	push(@headers, [ "Authorization", "Basic $auth" ]);
+	}
+foreach my $hname (keys %$headers) {
+	push(@headers, [ $hname, $headers->{$hname} ]);
+	}
+
+# Actually download it
+$download_timed_out = undef;
+local $SIG{ALRM} = "download_timeout";
+alarm($timeout || 60);
+local $h = &make_http_connection($ip, $port, $ssl, "GET", $page, \@headers);
+alarm(0);
+$h = $download_timed_out if ($download_timed_out);
+if (!ref($h)) {
+	if ($error) { $$error = $h; return; }
+	else { &error($h); }
+	}
+&complete_http_download($h, $dest, $error, $cbfunc, $osdn, $host, $port,
+			$headers);
 }
 
 # make_file_php_writable(&domain, file, [dir-only], [owner-too])

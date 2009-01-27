@@ -384,6 +384,7 @@ elsif ($deffeatures || $templatefeatures && !$tfl) {
 			}
 		}
 	}
+scalar(keys %feature) || &usage("No virtual server features enabled");
 
 if (!$parent) {
 	# Make sure alias, database, etc limits are set properly
