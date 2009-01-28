@@ -4567,3 +4567,5 @@ unsub_rusure=Are you sure you want to convert this sub-domain into a sub-server?
 unsub_ok=Convert to Sub-Server
 unsub_doing=Converting $1 to sub-server ..
 unsub_failed=.. conversion failed!
+
+connect_echeck=Failed to check connectivity

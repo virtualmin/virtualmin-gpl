@@ -209,6 +209,10 @@ $upgrade_virtualmin_port = 80;
 $upgrade_virtualmin_testpage = "/licence-test.txt";
 $upgrade_virtualmin_updates = "/wbm/updates.txt";
 
+$connectivity_check_host = "software.virtualmin.com";
+$connectivity_check_port = 80;
+$connectivity_check_page = "/cgi-bin/connectivity.cgi";
+
 $virtualmin_license_file = "/etc/virtualmin-license";
 $virtualmin_yum_repo = "/etc/yum.repos.d/virtualmin.repo";
 
