@@ -62,3 +62,4 @@
 	- DNS, ping, HTTP (with random file), FTP, SSH
 	- Detailed diagnosis report in UI
 	- What if directory index is not allowed?
+	- Make sure alias domains work too
