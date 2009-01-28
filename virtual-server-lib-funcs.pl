@@ -9221,6 +9221,15 @@ if ($virtualmin_pro && $config{'mail'} && $config{'mail_system'} <= 1 &&
 		  });
 	}
 
+# Button to validate connectivity
+if ($virtualmin_pro) {
+	push(@rv, { 'page' => 'connectivity.cgi',
+		    'title' => $text{'edit_connect'},
+		    'desc' => $text{'edit_connectdesc'},
+		    'cat' => 'logs',
+		  });
+	}
+
 # Link to edit excluded directories
 if (!$d->{'alias'} && &can_edit_exclude()) {
 	push(@rv, { 'page' => 'edit_exclude.cgi',

@@ -1,0 +1,6 @@
+desc=External connectivity check
+html=External web, DNS and mail connectivity for virtual servers can now be checked by Virtualmin, to diagnose common networking and configuration problems.
+master=1
+reseller=1
+owner=1
+link=connectivity.cgi?dom=${ID}
