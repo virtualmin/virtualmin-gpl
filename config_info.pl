@@ -31,29 +31,5 @@ local ($value, $desc, $type, $func, $name) = @_;
 return $in{$name};
 }
 
-sub show_shells
-{
-local ($value, $desc, $type, $func, $name) = @_;
-local @shells = ("/bin/sh", "/bin/csh");
-local $_;
-open(SHELLS, "/etc/shells");
-while(<SHELLS>) {
-	s/\r|\n//g;
-	s/#.*$//;
-	push(@shells, $_) if (/\S/);
-	}
-close(SHELLS);
-push(@shells, $value) if ($value);
-@shells = &unique(@shells);
-return &ui_select($name, $value,
-		  [ map { [ $_, $shellname{$_} || $_ ] } @shells ]);
-}
-
-sub parse_shells
-{
-local ($value, $desc, $type, $func, $name) = @_;
-return $in{$name};
-}
-
 1;
 
