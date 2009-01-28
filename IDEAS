@@ -63,3 +63,5 @@
 	- Detailed diagnosis report in UI
 	- What if directory index is not allowed?
 	- Make sure alias domains work too
+	- SSL check
+	- Custom web ports
