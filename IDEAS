@@ -60,3 +60,5 @@
  - External connectivity test
 	- CGI on www.virtualmin.com
 	- DNS, ping, HTTP (with random file), FTP, SSH
+	- Detailed diagnosis report in UI
+	- What if directory index is not allowed?

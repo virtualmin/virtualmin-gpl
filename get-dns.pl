@@ -62,19 +62,19 @@ elsif ($multiline) {
 	# Full details
 	foreach $r (@recs) {
 		print $r->{'name'},"\n";
-		print "  Type: $r->{'type'}\n";
-		print "  Class: $r->{'class'}\n";
+		print "    Type: $r->{'type'}\n";
+		print "    Class: $r->{'class'}\n";
 		if ($r->{'ttl'}) {
-			print "  TTL: $r->{'ttl'}\n";
+			print "    TTL: $r->{'ttl'}\n";
 			}
 		@v = @{$r->{'values'}};
 		if (@v > 1) {
 			for(my $i=1; @v; $i++) {
-				print "  Value${i}: ",shift(@v),"\n";
+				print "    Value${i}: ",shift(@v),"\n";
 				}
 			}
 		else {
-			print "  Value: $v[0]\n";
+			print "    Value: $v[0]\n";
 			}
 		}
 	}
