@@ -499,6 +499,10 @@ if (!$aliasdom && &can_select_ip()) {
 		undef, \@tds);
 	}
 
+# Show DNS IP address field
+print &ui_table_row(&hlink($text{'edit_dnsip'}, "edit_dnsip"),
+	&ui_opt_textbox("dns_ip", $d->{'dns_ip'}, 20, $text{'spf_default2'}));
+
 if (!$aliasdom) {
 	print &ui_hidden_table_end();
 	}

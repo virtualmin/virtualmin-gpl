@@ -210,6 +210,11 @@ else {
 	($ip, $virt, $virtalready) = &parse_virtual_ip($tmpl, $resel);
 	}
 
+# Validate the DNS IP
+if (!$in{'dns_ip_def'}) {
+	&check_ipaddress($in{'dns_ip'}) || &error($text{'save_ednsip'});
+	}
+
 # Make sure domain is under parent, if required
 local $derr = &allowed_domain_name($parentdom, $in{'dom'});
 &error($derr) if ($derr);
@@ -261,7 +266,8 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 		  !$in{'email_def'} ? $in{'email'} : undef,
 	 'name', !$virt,
 	 'ip', $ip,
-	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef
+	 'dns_ip', !$in{'dns_ip_def'} ? $in{'dns_ip'} :
+		   $virt || $config{'all_namevirtual'} ? undef
 						       : &get_dns_ip(),
 	 'virt', $virt,
 	 'virtalready', $virtalready,

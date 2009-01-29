@@ -1049,3 +1049,5 @@ When a domain is restore on a system with a different Apache log file location, 
 Add parameters to the modify-dns.pl command-line API to add and remove DNS records for multiple domains at once.
 Added the get-dns.pl command-line script to dump DNS records for a virtual server.
 External web, DNS and mail connectivity for virtual servers can now be checked by Virtualmin, to diagnose common networking and configuration problems.
+Moved the field for setting the external IP address (typically for use in DNS records) from the DNS Options page to Edit Virtual Server.
+Moved the --dns-ip and --no-dns-ip options from the modify-dns.pl API script to modify-domain.pl and create-domain.pl.

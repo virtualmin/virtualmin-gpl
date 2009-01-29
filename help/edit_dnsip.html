@@ -1,0 +1,16 @@
+<header>External IP address</header>
+
+If your irtualmin server is on an internal private network,
+and all HTTP traffic is forwarded to it via a firewall or proxy, you should
+set this field to the IP address via which it is accessed externally, such
+as that of your firewall or router. When this option is set, the address
+entered will be used for all DNS records that would normally contain the real
+address, such as <tt>www</tt>, <tt>mail</tt> and <tt>ftp</tt>. <p>
+
+By default, the DNS records automatically generated for this virtual server
+will contain the IP address that it is assigned by Virtualmin. However, in 
+some cases this address may not actually be the one you want web and mail
+clients on the Internet to connect to. <p>
+
+<footer>
+

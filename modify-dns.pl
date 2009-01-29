@@ -15,13 +15,6 @@ Similarly, the C<--spf-remove-a>, C<--spf-remove-mx> and C<--spf-remove-ip4> opt
 
 To control how SPF treats senders not in the allowed hosts list, use one of the C<--spf-all-disallow>, C<--spf-all-discourage>, C<--spf-all-neutral>, C<--spf-all-allow> or C<--spf-all-default> parameters.
 
-If your system is on an internal network and made available to the Internet
-via a router doing NAT, the IP address of a domain in DNS may be different
-from it's IP on the actual system. To set this, the C<--dns-ip> flag can
-be given, followed by the external IP address to use. To revert to using the
-real IP in DNS, use C<--no-dns-ip> instead. In both cases, the actual
-DNS records managed by Virtualmin will be updated.
-
 This command can also be used to add and remove DNS records from all the
 selected domains. Adding is done with the C<--add-record> flag, which must
 be followed by a single parameter containing the record name, type and value.
@@ -258,7 +251,6 @@ print "                     [--spf-remove-ip4 address]*\n";
 print "                     [--spf-all-disallow | --spf-all-discourage |\n";
 print "                      --spf-all-neutral | --spf-all-allow |\n";
 print "                      --spf-all-default]\n";
-print "                     [--dns-ip address | --no-dns-ip]\n";
 print "                     [--add-record \"name type value\"]\n";
 print "                     [--remove-record \"name type\"]\n";
 exit(1);

@@ -39,6 +39,15 @@ if ($d->{'template'} != $tmpl->{'id'}) {
 	}
 $in{'owner'} =~ /:/ && &error($text{'setup_eowner'});
 
+# Save external IP
+if ($in{'dns_ip_def'}) {
+	delete($d->{'dns_ip'});
+	}
+else {
+	&check_ipaddress($in{'dns_ip'}) || &error($text{'save_ednsip'});
+	$d->{'dns_ip'} = $in{'dns_ip'};
+	}
+
 # Check if the prefix has been changed
 if (defined($in{'prefix'})) {
 	$in{'prefix'} =~ /^[a-z0-9\.\-]+$/i ||

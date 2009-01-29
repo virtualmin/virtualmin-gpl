@@ -152,6 +152,14 @@ while(@ARGV > 0) {
 		&indexof($sharedip, &list_shared_ips()) >= 0 ||
 		    &usage("$sharedip is not in the shared IP addresses list");
 		}
+	elsif ($a eq "--dns-ip") {
+		$dns_ip = shift(@ARGV);
+		&check_ipaddress($dns_ip) ||
+			&usage("--dns-ip must be followed by an IP address");
+		}
+	elsif ($a eq "--no-dns-ip") {
+		$dns_ip = "";
+		}
 	elsif ($a eq "--mailboxlimit" || $a eq "--max-mailboxes") {
 		$mailboxlimit = shift(@ARGV);
 		$anylimits = 1;
@@ -514,7 +522,8 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	       $virt ? $ip :
 	       $alias ? $ip :
 	       $sharedip ? $sharedip : $defip,
-	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef
+	 'dns_ip', defined($dns_ip) ? $dns_ip :
+		   $virt || $config{'all_namevirtual'} ? undef
 						       : &get_dns_ip(),
          'virt', $virt,
          'virtalready', $virtalready,
@@ -653,6 +662,7 @@ print "                        [--default-features]\n";
 print "                        [--allocate-ip | --ip virtual.ip.address |\n";
 print "                         --shared-ip existing.ip.address]\n";
 print "                        [--ip-already]\n";
+print "                        [--dns-ip address | --no-dns-ip]\n";
 print "                        [--max-doms domains|*]\n";
 print "                        [--max-aliasdoms domains]\n";
 print "                        [--max-realdoms domains]\n";

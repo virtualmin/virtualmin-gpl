@@ -36,13 +36,6 @@ print &ui_table_row(&hlink($text{'spf_all'}, 'spf_all'),
 			         [ 1, $text{'spf_all1'} ],
 			         [ 0, $text{'spf_all0'} ] ]));
 
-print &ui_table_hr();
-
-# IP address for DNS
-print &ui_table_row(&hlink($text{'spf_dnsip'}, 'dns_ip'),
-		    &ui_opt_textbox("dns_ip", $d->{'dns_ip'}, 20,
-				    &text('spf_default', $d->{'ip'})));
-
 print &ui_table_end();
 
 # DNSSEC key details

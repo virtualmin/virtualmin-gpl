@@ -44,14 +44,6 @@ else {
 	&save_domain_spf($d, undef);
 	}
 
-# Save DNS IP address
-if ($in{'dns_ip_def'}) {
-	delete($d->{'dns_ip'});
-	}
-else {
-	&check_ipaddress($in{'dns_ip'}) || &error($text{'spf_ednsip'});
-	$d->{'dns_ip'} = $in{'dns_ip'};
-	}
 &modify_dns($d, $oldd);
 &release_lock_dns($d);
 &save_domain($d);

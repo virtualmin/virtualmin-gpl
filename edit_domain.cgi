@@ -199,6 +199,11 @@ else {
 		  "<tt>$d->{'ip'}</tt> ".$text{'edit_fromparent'});
 	}
 
+# Show the external IP
+print &ui_table_row(&hlink($text{'edit_dnsip'}, "edit_dnsip"),
+	&ui_opt_textbox("dns_ip", $d->{'dns_ip'}, 20,
+			&text('spf_default', $d->{'ip'})));
+
 # Show description
 print &ui_table_row($text{'edit_owner'},
 		    &ui_textbox("owner", $d->{'owner'}, 50));

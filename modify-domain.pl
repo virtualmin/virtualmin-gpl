@@ -24,6 +24,13 @@ existing virtual server. When changing the domain name, you may also want to
 use the C<--user> option to update the administration username for the server.
 Both of these options will effect sub-servers as well, where appropriate.
 
+If your system is on an internal network and made available to the Internet
+via a router doing NAT, the IP address of a domain in DNS may be different
+from it's IP on the actual system. To set this, the C<--dns-ip> flag can
+be given, followed by the external IP address to use. To revert to using the
+real IP in DNS, use C<--no-dns-ip> instead. In both cases, the actual
+DNS records managed by Virtualmin will be updated.
+
 =cut
 
 package virtual_server;
@@ -155,6 +162,14 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--post-command") {
 		$postcommand = shift(@ARGV);
+		}
+	elsif ($a eq "--dns-ip") {
+		$dns_ip = shift(@ARGV);
+		&check_ipaddress($dns_ip) ||
+			&usage("--dns-ip must be followed by an IP address");
+		}
+	elsif ($a eq "--no-dns-ip") {
+		$dns_ip = "";
 		}
 	else {
 		usage();
@@ -323,6 +338,16 @@ if (defined($sharedip)) {
 if (defined($resel)) {
 	$dom->{'reseller'} = $resel eq "NONE" ? undef : $resel;
 	}
+if (defined($dns_ip)) {
+	if ($dns_ip) {
+		# Changing IP address for DNS
+		$dom->{'dns_ip'} = $dns_ip;
+		}
+	else {
+		# Resetting DNS IP address to default
+		delete($dom->{'dns_ip'});
+		}
+	}
 
 # Update the IP in alias domains too
 if ($dom->{'ip'} ne $old->{'ip'}) {
@@ -422,6 +447,7 @@ print "                        [--prefix name]\n";
 print "                        [--template name|id]\n";
 print "                        [--add-exclude directory]*\n";
 print "                        [--remove-exclude directory]*\n";
+print "                        [--dns-ip address | --no-dns-ip]\n";
 exit(1);
 }
 
