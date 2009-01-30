@@ -685,8 +685,15 @@ if (!$tmpl->{'dns_replace'}) {
 		# Only add SOA and NS if this is a new file, not a sub-domain
 		&open_tempfile(RECS, ">$rootfile");
 		if ($bconfig{'master_ttl'}) {
-			&print_tempfile(RECS,
-			    "\$ttl $zd{'minimum'}$zd{'minunit'}\n");
+			# Add a default TTL
+			if ($tmpl->{'dns_ttl'} eq '') {
+				&print_tempfile(RECS,
+				    "\$ttl $zd{'minimum'}$zd{'minunit'}\n");
+				}
+			elsif ($tmpl->{'dns_ttl'} ne 'none') {
+				&print_tempfile(RECS,
+				    "\$ttl $tmpl->{'dns_ttl'}\n");
+				}
 			}
 		&close_tempfile(RECS);
 		local $tmaster = $tmpl->{'dns_master'} eq 'none' ? undef :
@@ -1372,7 +1379,7 @@ local @views = &bind8::find("view", $conf);
 
 # DNS records
 local $ndi = &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'}, 1,
-     0, undef, [ "dns", "bind_replace", "dnsns",
+     0, undef, [ "dns", "bind_replace", "dnsns", "dns_ttl_def", "dns_ttl",
 		 @views ? ( "newdns_view" ) : ( ) ]);
 print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
 	$ndi."<br>\n".
@@ -1382,6 +1389,18 @@ print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
 	&ui_radio("bind_replace", int($tmpl->{'dns_replace'}),
 		  [ [ 0, $text{'tmpl_replace0'} ],
 		    [ 1, $text{'tmpl_replace1'} ] ]));
+
+# Default TTL
+local $tmode = $tmpl->{'dns_ttl'} eq 'none' ? 0 :
+	       $tmpl->{'dns_ttl'} eq 'skip' ? 1 : 2;
+print &ui_table_row(&hlink($text{'tmpl_dnsttl'}, "template_dns_ttl"),
+	&ui_radio("dns_ttl_def", $tmpl->{'dns_ttl'} eq '' ? 0 :
+				 $tmpl->{'dns_ttl'} eq 'none' ? 1 : 2,
+	  [ [ 0, $text{'tmpl_dnsttl0'} ],
+	    [ 1, $text{'tmpl_dnsttl1'} ],
+	    [ 2, $text{'tmpl_dnsttl2'}." ".
+	      &ui_textbox("dns_ttl", $tmode == 2 ? $tmpl->{'dns_ttl'} : "", 15)
+	    ] ]));
 
 # Manual NS records
 print &ui_table_row(&hlink($text{'tmpl_dnsns'}, "template_dns_ns"),
@@ -1406,6 +1425,8 @@ print &ui_table_row(&hlink($text{'tmpl_dnsmaster'},
 			$text{'tmpl_dnsmauto'}."<br>", [ "dns_master" ])." ".
 	&ui_textbox("dns_master", $tmpl->{'dns_master'} eq 'none' ? '' :
 					$tmpl->{'dns_master'}, 40));
+
+print &ui_table_hr();
 
 # Option for SPF record
 print &ui_table_row(&hlink($text{'tmpl_spf'},
@@ -1435,9 +1456,9 @@ print &ui_table_row(&hlink($text{'tmpl_dns_sub'},
 	&none_def_input("dns_sub", $tmpl->{'dns_sub'},
 		        $text{'yes'}, 0, 0, $text{'no'}));
 
-# Extra named.conf directives
 print &ui_table_hr();
 
+# Extra named.conf directives
 print &ui_table_row(&hlink($text{'tmpl_namedconf'}, "namedconf"),
     &none_def_input("namedconf", $tmpl->{'namedconf'},
 		    $text{'tmpl_namedconfbelow'}, 0, 0, undef,
@@ -1524,6 +1545,19 @@ if ($in{"dns_mode"} == 2) {
 	else {
 		# Make sure SOA doesn't exist
 		$soa && &error($text{'newdns_esoa2'});
+		}
+
+	# Save default TTL
+	if ($in{'dns_ttl_def'} == 0) {
+		$tmpl->{'dns_ttl'} = '';
+		}
+	elsif ($in{'dns_ttl_def'} == 1) {
+		$tmpl->{'dns_ttl'} = 'none';
+		}
+	else {
+		$in{'dns_ttl'} =~ /^\d+(h|d|m|y|w|)$/i ||
+			&error($text{'tmpl_ednsttl'});
+		$tmpl->{'dns_ttl'} = $in{'dns_ttl'};
 		}
 
 	# Save additional nameservers
