@@ -56,6 +56,7 @@ if ($user->{'domainowner'}) {
 	foreach my $d (&get_domain_by("user", $username)) {
 		$oldd = { %$d };
 		$d->{'pass'} = $newpass;
+		$d->{'pass_set'} = 1;
 		if ($d->{'disabled'}) {
 			# Clear any saved passwords, as they should
 			# be reset at this point
