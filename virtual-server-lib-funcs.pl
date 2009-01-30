@@ -15,7 +15,7 @@ if (!$virtual_server_root) {
 foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
 		 "php", "ruby", "vui", "dynip", "collect", "maillog",
 		 "balancer", "newfeatures", "resources", "backups",
-		 "domainname", "commands", "connectivity") {
+		 "domainname", "commands", "connectivity", "plans") {
 	do "$virtual_server_root/$lib-lib.pl";
 	if ($@ && -r "$virtual_server_root/$lib-lib.pl") {
 		print STDERR "failed to load $lib-lib.pl : $@\n";

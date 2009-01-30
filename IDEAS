@@ -44,15 +44,17 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - templates for resellers
+ - plans for resellers
 	- limited functions
 	- can see only own
 	- reseller-level option to enable
 	- FS#4752
 	- extract stuff into plans, make into separate objects
 	- ability to change plan after creation
+	- Command-line API to manage
 
  - IPv6 support
 	- FS#4239
 	- Concurrent with v4, so that a domain can also have a v6 address
 	- Use in DNS, Apache
+
