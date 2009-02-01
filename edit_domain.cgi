@@ -247,14 +247,31 @@ if (@aliasdoms || @subdoms) {
 	print &ui_hidden_table_end("subs");
 	}
 
-
 # Start of collapsible section for limits
 $limits_section = !$parentdom &&
 		  (&has_home_quotas() && (&can_edit_quotas() || $d->{'unix'}) ||
 		  $config{'bw_active'});
 if ($limits_section) {
+	# Check if the domain is over any limits, show open by default if so
+	$overlimits = 0;
+	if ($d->{'bw_limit'} && $d->{'bw_usage'} > $d->{'bw_limit'}) {
+		$overlimits++;
+		}
+	if ($d->{'quota'}) {
+		($totalhomequota, $totalmailquota) = &get_domain_quota($d);
+		if ($totalhomequota > $d->{'quota'}) {
+			$overlimits++;
+			}
+		}
+	if ($d->{'uquota'}) {
+		$duser = &get_domain_owner($d);
+		if ($duser && $duser->{'uquota'} > $d->{'uquota'}) {
+			$overlimits++;
+			}
+		}
+
 	print &ui_hidden_table_start($text{'edit_limitsect'}, "width=100%", 2,
-				     "limits", 0, \@tds);
+				     "limits", $overlimits, \@tds);
 	}
 
 # Show user and group quota editing inputs

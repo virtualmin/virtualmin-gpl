@@ -11575,11 +11575,17 @@ local $bsize = &quota_bsize("home");
 $totalhomequota -= $dbquota_home/$bsize;
 
 # Show home directory file usage, for total, unix user and mail users
+local $tmsg = &nice_size($totalhomequota*$bsize);
+if ($d->{'quota'} && $totalhomequota > $d->{'quota'}) {
+	$tmsg = "<font color=#ff0000><b>$tmsg</b></font>";
+	}
+local $umsg = &nice_size($duser->{'uquota'}*$bsize);
+if ($d->{'uquota'} && $duser->{'uquota'} > $d->{'uquota'}) {
+	$umsg = "<font color=#ff0000><b>$umsg</b></font>";
+	}
+local $mmsg = &nice_size(($homequota+$subhomequota)*$bsize);
 print &ui_table_row($text{'edit_allquotah'},
-   &text('edit_quotaby',
-	&nice_size($totalhomequota*$bsize),
-	&nice_size($duser->{'uquota'}*$bsize),
-	&nice_size(($homequota+$subhomequota)*$bsize)), 3);
+   &text('edit_quotaby', $tmsg, $umsg, $mmsg), 3);
 $tcount++;
 $total += $totalhomequota*$bsize;
 

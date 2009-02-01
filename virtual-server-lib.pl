@@ -175,6 +175,7 @@ $domains_dir = "$module_config_directory/domains";
 $templates_dir = "$module_config_directory/templates";
 $domainnames_dir = "$module_config_directory/names";
 $spamclear_file = "$module_config_directory/spamclear";
+$plans_dir = "$module_config_directory/plans";
 
 $extra_admins_dir = "$module_config_directory/admins";
 @all_possible_php_versions = (4, 5);
