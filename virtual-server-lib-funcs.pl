@@ -8060,6 +8060,13 @@ sub can_allowed_db_hosts
 return &master_admin() || &reseller_admin() || $access{'edit_allowedhosts'};
 }
 
+# Returns 2 if the current user can manage all plans, 1 if his own only,
+# 0 if cannot manage any
+sub can_manage_plans
+{
+return &master_admin() ? 2 : &reseller_admin() ? 1 : 0;
+}
+
 # has_proxy_balancer(&domain)
 # Returns 2 if some domain supports proxy balancing to multiple URLs, 1 for
 # proxying to a single URL, 0 if neither.
@@ -9375,7 +9382,7 @@ sub domain_redirect
 # categories and codes
 sub get_template_pages
 {
-local @tmpls = ( 'features', 'tmpl', 'user', 'update',
+local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    $config{'localgroup'} ? ( 'local' ) : ( ),
    'bw',
    $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'dynip', 'resels',
@@ -9406,6 +9413,7 @@ local %tmplcat = (
 	'validate' => 'check',
 	'quotacheck' => 'check',
 	'tmpl' => 'setting',
+	'plan' => 'setting',
 	'bw' => 'setting',
 	'plugin' => 'setting',
 	'scripts' => 'setting',
@@ -9544,6 +9552,12 @@ if (&reseller_admin() && $config{'bw_active'}) {
 	push(@rv, { 'url' => $vm."/bwgraph.cgi",
 		    'title' => $text{'edit_bwgraph'},
 		    'icon' => 'bw' });
+	}
+if (&reseller_admin()) {
+	# Add plans for resellers
+	push(@rv, { 'url' => $vm."/edit_newplan.cgi",
+		    'title' => $text{'plans_title'},
+		    'icon' => 'newplan' });
 	}
 if (&can_show_history()) {
 	# History graphs

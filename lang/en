@@ -4600,3 +4600,16 @@ cfix_ssl=Make sure your system's web server is running, that port 443 is not blo
 cfix_smtptimeout=Check if your system's firewall is blocking port 25.
 cfix_smtp=Make sure your system's mail server is running and listening on the external network interface.
 cfix_smtpto=Make sure your mail server is configured to accept email for this domain.
+
+plans_title=Account Plans
+plans_desc=XXX
+plans_name=Plan name
+plans_quota=Disk quota
+plans_bw=Bandwidth limit
+plans_doms=Domains
+plans_mailboxes=Mailboxes
+plans_aliases=Mail aliases
+plans_none=No account plans have been created yet.
+plans_none2=You have not created any account plans yet.
+plans_add=Add a new account plan.
+plans_delete=Delete Selected Plans

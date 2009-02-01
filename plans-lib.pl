@@ -82,11 +82,37 @@ if (@list_plans_cache) {
 # installation time, to handle upgrades.
 sub convert_plans
 {
-# For each template with limits, create a plan
-# XXX
+# For each template, create a plan
+local %planmap;
+foreach my $ltmpl (&list_templates()) {
+	local $tmpl = &get_template($ltmpl->{'id'});
+	local $got = &get_plan($tmpl->{'id'});
+	next if ($got);		# Already converted
+
+	# Extract plan-related settings
+	$plan = { 'id' => $tmpl->{'id'} };
+	$plan->{'featurelimits'} = $tmpl->{'featurelimits'};
+	foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms",
+		       "realdoms", "bw", "mongrels") {
+		$plan->{$l.'limit'} = $tmpl->{$l.'limit'} eq 'none' ? '' :
+					$tmpl->{$l.'limit'};
+		}
+	$plan->{'capabilities'} = $tmpl->{'capabilities'};
+	foreach my $n ('nodbname', 'norename', 'forceunder') {
+		$plan->{$n} = $tmpl->{$n};
+		}
+	&save_plan($plan);
+	$planmap{$tmpl->{'id'}} = $plan;
+	}
 
 # For each domain, map it's template to the created plan
-# XXX
+foreach my $d (&list_domains()) {
+	if ($d->{'plan'} eq '') {
+		local $plan = $planmap{$d->{'template'}};
+		$d->{'plan'} = $plan ? $plan->{'id'} : '0';
+		&save_domain($d);
+		}
+	}
 }
 
 1;
