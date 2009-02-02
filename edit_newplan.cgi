@@ -24,11 +24,11 @@ foreach $plan (@plans) {
 				     : $text{'form_unlimit'});
 	push(@cols, $plan->{'bw'} ? &nice_size($plan->{'bw'})
 				  : $text{'form_unlimit'});
-	push(@cols, $plan->{'domslimit'} eq '' ? text{'form_unlimit'}
+	push(@cols, $plan->{'domslimit'} eq '' ? $text{'form_unlimit'}
 					       : $plan->{'domslimit'});
-	push(@cols, $plan->{'mailboxlimit'} eq '' ? text{'form_unlimit'}
+	push(@cols, $plan->{'mailboxlimit'} eq '' ? $text{'form_unlimit'}
 					          : $plan->{'mailboxlimit'});
-	push(@cols, $plan->{'aliaslimit'} eq '' ? text{'form_unlimit'}
+	push(@cols, $plan->{'aliaslimit'} eq '' ? $text{'form_unlimit'}
 					        : $plan->{'aliaslimit'});
 	push(@table, \@cols);
 	}

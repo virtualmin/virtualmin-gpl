@@ -18,7 +18,7 @@ if (!@list_plans_cache) {
 			}
 		}
 	closedir(DIR);
-	@list_plans_cache = @rv;
+	@list_plans_cache = sort { lc($a->{'name'}) cmp lc($b->{'name'}) } @rv;
 	}
 return @list_plans_cache;
 }
@@ -81,7 +81,7 @@ sub save_plan
 {
 local ($plan) = @_;
 local $newplan;
-if (!$plan->{'id'}) {
+if ($plan->{'id'} eq '') {
 	$plan->{'id'} = &domain_id();
 	$newplan = 1;
 	}
@@ -130,11 +130,13 @@ local %planmap;
 foreach my $ltmpl (&list_templates()) {
 	local $tmpl = &get_template($ltmpl->{'id'});
 	local $got = &get_plan($tmpl->{'id'});
-	next if ($got);		# Already converted
+	next if ($got);				# Already converted
+	next if ($tmpl->{'id'} eq '1');		# Sub-servers don't have plans!
 
 	# Extract plan-related settings
 	$plan = { 'id' => $tmpl->{'id'},
-		  'name' => $tmpl->{'name'} };
+		  'name' => $tmpl->{'id'} eq '0' ? 'Default Plan'
+						 : $tmpl->{'name'} };
 	$plan->{'featurelimits'} = $tmpl->{'featurelimits'};
 	foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms",
 		       "realdoms", "bw", "mongrels") {
@@ -151,12 +153,17 @@ foreach my $ltmpl (&list_templates()) {
 	$planmap{$tmpl->{'id'}} = $plan;
 	}
 
-# For each domain, map it's template to the created plan
-foreach my $d (&list_domains()) {
-	if ($d->{'plan'} eq '') {
+# For each top-level domain, map it's template to the created plan
+foreach my $d (grep { !$_->{'parent'} } &list_domains()) {
+	if ($d->{'plan'} eq '' || !&get_plan($d->{'plan'})) {
 		local $plan = $planmap{$d->{'template'}};
 		$d->{'plan'} = $plan ? $plan->{'id'} : '0';
 		&save_domain($d);
+		}
+	# Filter down to sub-servers, even though they don't really use plans
+	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
+		$sd->{'plan'} = $d->{'plan'};
+		&save_domain($sd);
 		}
 	}
 }

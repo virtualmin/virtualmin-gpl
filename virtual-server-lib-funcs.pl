@@ -6646,7 +6646,7 @@ if (!defined(getpwnam($rv[0]->{'web_user'})) &&
 	$rv[0]->{'web_user'} = &get_apache_user();
 	}
 push(@rv, { 'id' => 1,
-	    'name' => 'Defaults Settings For Sub-Servers',
+	    'name' => 'Default Settings For Sub-Servers',
 	    'standard' => 1,
 	    'mail_on' => $config{'subdomain_template'} eq "none" ? "none" :
 			 $config{'subdomain_template'} eq "" ? "" : "yes",
