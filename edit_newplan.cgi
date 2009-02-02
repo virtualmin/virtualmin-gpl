@@ -14,7 +14,12 @@ foreach $plan (@plans) {
 	local @cols;
 	push(@cols, { 'type' => 'checkbox', 'name' => 'd',
 		      'value' => $plan->{'id'} });
-	push(@cols, &html_escape($plan->{'name'}));
+	push(@cols, "<a href='edit_plan.cgi?id=$plan->{'id'}'>".
+		    &html_escape($plan->{'name'})."</a>");
+	if ($canplans == 2) {
+		push(@cols, $plan->{'owner'} ||
+			    "<i>$text{'plans_noresel'}</i>");
+		}
 	push(@cols, $plan->{'quota'} ? &nice_size($plan->{'quota'}*$bsize)
 				     : $text{'form_unlimit'});
 	push(@cols, $plan->{'bw'} ? &nice_size($plan->{'bw'})
@@ -35,7 +40,9 @@ print &ui_form_columns_table(
 	1,
 	[ [ "edit_plan.cgi?new=1", $text{'plans_add'} ] ],
 	undef,
-	[ "", $text{'plans_name'}, $text{'plans_quota'}, $text{'plans_bw'},
+	[ "", $text{'plans_name'},
+	  $canplans == 2 ? ( $text{'plans_resel'} ) : ( ),
+	  $text{'plans_quota'}, $text{'plans_bw'},
 	  $text{'plans_doms'}, $text{'plans_mailboxes'},
 	  $text{'plans_aliases'} ],
 	100,

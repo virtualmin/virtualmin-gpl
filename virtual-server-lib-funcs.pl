@@ -8062,7 +8062,7 @@ return &master_admin() || &reseller_admin() || $access{'edit_allowedhosts'};
 
 # Returns 2 if the current user can manage all plans, 1 if his own only,
 # 0 if cannot manage any
-sub can_manage_plans
+sub can_edit_plans
 {
 return &master_admin() ? 2 : &reseller_admin() ? 1 : 0;
 }

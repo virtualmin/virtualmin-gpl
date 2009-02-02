@@ -23,6 +23,46 @@ if (!@list_plans_cache) {
 return @list_plans_cache;
 }
 
+# list_editable_plans()
+# Returns a list of plans the current user can edit
+sub list_editable_plans
+{
+local $canmode = &can_edit_plans();
+if ($canmode == 0) {
+	return ( );
+	}
+elsif ($canmode == 1) {
+	return grep { $_->{'owner'} eq $base_remote_user } &list_plans();
+	}
+else {
+	return &list_plans();
+	}
+}
+
+# list_available_plans()
+# Returns a list of plans the current user can use
+sub list_available_plans
+{
+local $canmode = &can_edit_plans();
+local @plans = &list_plans();
+if (&master_admin()) {
+	# Master admin can use all
+	return @plans;
+	}
+elsif (&reseller_admin()) {
+	# Resellers can use their plans, and those granted to them by the 
+	# master admin.
+	return grep { $_->{'owner'} eq $base_remote_user ||
+		      !$_->{'resellers'} ||
+		      &indexof($base_remote_user,
+			       split(/\s+/, $_->{'resellers'})) >= 0 } @plans;
+	}
+else {
+	# Domain owners? Can't happen ..
+	return ( );
+	}
+}
+
 # get_plan(id)
 # Returns the hash ref for the plan with some ID
 sub get_plan
@@ -45,11 +85,14 @@ if (!$plan->{'id'}) {
 	$plan->{'id'} = &domain_id();
 	$newplan = 1;
 	}
-&plan->{'file'} = "$plans_dir/$plan->{'id'}";
+$plan->{'file'} = "$plans_dir/$plan->{'id'}";
+if (!-d $plans_dir) {
+	&make_dir($plans_dir, 0700);
+	}
 &lock_file($plan->{'file'});
 &write_file($plan->{'file'}, $plan);
 &unlock_file($plan->{'file'});
-if (@list_plans_cache) {
+if (@list_plans_cache && $newplan) {
 	push(@list_plans_cache, $plan);
 	}
 }
@@ -90,13 +133,16 @@ foreach my $ltmpl (&list_templates()) {
 	next if ($got);		# Already converted
 
 	# Extract plan-related settings
-	$plan = { 'id' => $tmpl->{'id'} };
+	$plan = { 'id' => $tmpl->{'id'},
+		  'name' => $tmpl->{'name'} };
 	$plan->{'featurelimits'} = $tmpl->{'featurelimits'};
 	foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms",
 		       "realdoms", "bw", "mongrels") {
 		$plan->{$l.'limit'} = $tmpl->{$l.'limit'} eq 'none' ? '' :
 					$tmpl->{$l.'limit'};
 		}
+	$plan->{'quota'} = $tmpl->{'quota'} eq 'none' ? '' : $tmpl->{'quota'};
+	$plan->{'uquota'} = $tmpl->{'uquota'} eq 'none' ? '' :$tmpl->{'uquota'};
 	$plan->{'capabilities'} = $tmpl->{'capabilities'};
 	foreach my $n ('nodbname', 'norename', 'forceunder') {
 		$plan->{$n} = $tmpl->{$n};

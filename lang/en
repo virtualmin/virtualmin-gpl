@@ -4602,6 +4602,7 @@ cfix_smtp=Make sure your system's mail server is running and listening on the ex
 cfix_smtpto=Make sure your mail server is configured to accept email for this domain.
 
 plans_title=Account Plans
+newplan_title=$plans_title
 plans_desc=XXX
 plans_name=Plan name
 plans_quota=Disk quota
@@ -4613,3 +4614,5 @@ plans_none=No account plans have been created yet.
 plans_none2=You have not created any account plans yet.
 plans_add=Add a new account plan.
 plans_delete=Delete Selected Plans
+plans_resel=Reseller
+plans_noresel=None
