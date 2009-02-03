@@ -4616,3 +4616,14 @@ plans_add=Add a new account plan.
 plans_delete=Delete Selected Plans
 plans_resel=Reseller
 plans_noresel=None
+plans_ecannot=You are not allowed to manage plans
+
+plan_title1=Create Account Plan
+plan_title2=Edit Account Plan
+plan_header1=Basic plan details
+plan_header2=Allowed virtual server features
+plan_header3=Allowed capabilities
+plan_header4=Visible to resellers
+plan_resellers=Resellers
+plan_ecannot=You are not allowed to edit this plan, or it does not exist
+plan_name=Plan name

@@ -27,29 +27,38 @@ print &ui_table_row($text{'plan_name'},
 	&ui_textbox("name", $plan->{'name'}, 40));
 
 # Show quota limits
-# XXX
+# Default domain quota
+print &ui_table_row(&hlink($text{'tmpl_quota'}, "template_quota"),
+    &ui_radio("quota_def", $tmpl->{'quota'} ? 0 : 1,
+	      [ [ 1, $text{'form_unlimit'} ],
+		[ 0, $text{'tmpl_quotasel'} ] ])." ".
+    &quota_input("quota", $tmpl->{'quota'}, "home"));
+
+# Default admin user quota
+print &ui_table_row(&hlink($text{'tmpl_uquota'}, "template_uquota"),
+    &ui_radio("uquota_def", $tmpl->{'uquota'} ? 0 : 1,
+	      [ [ 1, $text{'form_unlimit'} ],
+		[ 0, $text{'tmpl_quotasel'} ] ])." ".
+    &quota_input("uquota", $tmpl->{'uquota'}, "home"));
 
 # Show limits on numbers of things
 foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms", "realdoms", "bw",
 	       $virtualmin_pro ? ( "mongrels" ) : ( )) {
 	print &ui_table_row(&hlink($text{'tmpl_'.$l.'limit'},
 				   "template_".$l."limit"),
-	    &ui_radio($l.'limit_def', $tmpl->{$l.'limit'} eq '' ? 1 : 0,
+	    &ui_radio($l.'limit_def', $plan->{$l.'limit'} eq '' ? 1 : 0,
 		      [ [ 1, $text{'form_unlimit'} ],
 			[ 0, $text{'tmpl_atmost'} ] ])."\n".
 	    ($l eq "bw" ? 
-		&bandwidth_input($l.'limit', $limit, 1) :
-		&ui_textbox($l.'limit', $limit, 10)));
+		&bandwidth_input($l.'limit', $plan->{$l.'limit'}, 1) :
+		&ui_textbox($l.'limit', $plan->{$l.'limit'}, 10)));
 	}
 
 # Rename and DB name limits
-# XXX
 foreach my $n ('nodbname', 'norename', 'forceunder') {
 	print &ui_table_row(&hlink($text{'limits_'.$n}, 'limits_'.$n),
-		&ui_radio($n, $tmpl->{$n},
-			  [ $tmpl->{'default'} ? ( ) :
-				( [ "", $text{'default'} ] ),
-			    [ 0, $text{'yes'} ],
+		&ui_radio($n, $plan->{$n},
+			  [ [ 0, $text{'yes'} ],
 			    [ 1, $text{'no'} ] ]));
 	}
 
@@ -59,9 +68,9 @@ print &ui_hidden_table_end();
 print &ui_hidden_table_start($text{'plan_header2'}, 'width=100%', 2,
 			     1, 'features');
 
-%flimits = map { $_, 1 } split(/\s+/, $tmpl->{'featurelimits'});
+%flimits = map { $_, 1 } split(/\s+/, $plan->{'featurelimits'});
 $ftable = &ui_radio('featurelimits_def',
-		    $tmpl->{'featurelimits'} eq 'none' ? 1 : 0,
+		    $plan->{'featurelimits'} eq 'none' ? 1 : 0,
 		    [ [ 1, $text{'tmpl_featauto'} ],
 		      [ 0, $text{'tmpl_below'} ] ])."<br>\n";
 @grid = ( );
@@ -84,13 +93,12 @@ print &ui_hidden_table_end();
 print &ui_hidden_table_start($text{'plan_header3'}, 'width=100%', 2,
                              1, 'caps');
 
-%caps = map { $_, 1 } split(/\s+/, $tmpl->{'capabilities'});
-$etable = 
-local $etable;
-$etable .= &none_def_input("capabilities", $tmpl->{'capabilities'},
-	   $text{'tmpl_below'}, 0, 0, $text{'tmpl_capauto'},
-	   [ "capabilities" ])."<br>\n";
-local @grid;
+%caps = map { $_, 1 } split(/\s+/, $plan->{'capabilities'});
+$etable = &ui_radio('capabilities_def',
+		    $plan->{'capabilities'} eq 'none' ? 1 : 0,
+		    [ [ 1, $text{'tmpl_capauto'} ],
+		      [ 0, $text{'tmpl_below'} ] ])."<br>\n";
+@grid = ( );
 foreach my $ed (@edit_limits) {
 	push(@grid, &ui_checkbox("capabilities", $ed,
 				 $text{'limits_edit_'.$ed} || $ed,
@@ -102,9 +110,28 @@ print &ui_table_row(&hlink($text{'tmpl_capabilities'},
 
 print &ui_hidden_table_end();
 
-
 # Granted to resellers (for master admin)
-# XXX
+@resels = $virtualmin_pro ? &list_resellers() : ( );
+if ($canplans == 2 && @resels) {
+	print &ui_hidden_table_start($text{'plan_header4'}, 'width=100%', 2,
+				     1, 'resellers');
+
+	print &ui_table_row(
+		&hlink($text{'plan_resellers'}, "plan_resellers"),
+		&ui_radio("resellers_def", $plan->{'resellers'} eq "" ? 1 :
+					 $plan->{'resellers'} eq "none" ? 0 : 2,
+			[ [ 1, $text{'tmpl_resellers_all'} ],
+			  [ 2, $text{'tmpl_resellers_none'} ],
+			  [ 0, $text{'tmpl_resellers_sel'} ] ])."<br>\n".
+		&ui_select("resellers", [ split(/\s+/, $plan->{'resellers'}) ],
+			 [ map { [ $_->{'name'},
+				   $_->{'name'}.
+				    ($_->{'acl'}->{'desc'} ?
+					" ($_->{'acl'}->{'desc'})" : "") ] }
+			       @resels ], 5, 1));
+
+	print &ui_hidden_table_end();
+	}
 
 
 # Form end and buttons

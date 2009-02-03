@@ -640,11 +640,14 @@ ins\//);
 		close(UINFO);
 		}
 
-	# Find users with broken home dir
+	# Find users with broken home dir (not under homes, or
+	# domain's home, or public_html (for web ftp users))
+	local $phd = &public_html_dir($d);
 	foreach my $u (@users) {
+		local $homebase = $u->{'webowner'} ? $phd : $d->{'home'};
 		if ($u->{'home'} &&
 		    $u->{'home'} !~ /^$d->{'home'}\/$config{'homes_dir'}\// &&
-		    !&is_under_directory($d->{'home'}, $u->{'home'})) {
+		    !&is_under_directory($homebase, $u->{'home'})) {
 			$u->{'brokenhome'} = 1;
 			}
 		}
