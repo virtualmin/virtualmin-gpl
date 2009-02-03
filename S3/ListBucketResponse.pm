@@ -28,7 +28,8 @@ sub new {
     $self->{COMMON_PREFIXES} = $doc->{CommonPrefixes} || [];
     $self->{MARKER} = $doc->{Marker};
     $self->{PREFIX} = $doc->{Prefix};
-    $self->{IS_TRUNCATED} = $doc->{IsTruncated} eq 'true';
+    $self->{IS_TRUNCATED} = defined($doc->{IsTruncated}) &&
+			    $doc->{IsTruncated} eq 'true';
     $self->{DELIMITER} = $doc->{Delimiter};
     $self->{NAME} = $doc->{Name};
     $self->{MAX_KEYS} = $doc->{MaxKeys};
