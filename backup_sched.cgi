@@ -121,6 +121,10 @@ else {
 		}
 	$sched->{'purge'} = $in{'purge_def'} ? undef : $in{'purge'};
 	$sched->{'enabled'} = $in{'enabled'};
+	if (&can_backup_commands()) {
+		$sched->{'before'} = $in{'before_def'} ? undef : $in{'before'};
+		$sched->{'after'} = $in{'after_def'} ? undef : $in{'after'};
+		}
 	if ($cbmode != 1 && !$sched->{'owner'}) {
 		# Record the owner of this scheduled backup, which controls
 		# who it runs as

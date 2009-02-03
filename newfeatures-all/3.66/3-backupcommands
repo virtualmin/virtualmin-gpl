@@ -1,0 +1,4 @@
+desc=Pre and post-backup commands
+html=Shell commands or scripts to run before or after a scheduled backup can now be specified on the Edit Scheduled Backup page.
+master=1
+link=list_sched.cgi

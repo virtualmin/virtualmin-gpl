@@ -25,6 +25,8 @@ if ($config{'backup_dest'}) {
 			  'email_doms' => $config{'backup_email_doms'},
 			  'virtualmin' => $config{'backup_virtualmin'},
 			  'purge' => $config{'backup_purge'},
+			  'before' => $config{'backup_before'},
+			  'after' => $config{'backup_after'},
 			 );
 	local @bf;
 	foreach $f (&get_available_backup_features(), @backup_plugins) {
@@ -100,6 +102,8 @@ if ($backup->{'id'} == 1) {
 	$config{'backup_email_doms'} = $backup->{'email_doms'};
 	$config{'backup_virtualmin'} = $backup->{'virtualmin'};
 	$config{'backup_purge'} = $backup->{'purge'};
+	$config{'backup_before'} = $backup->{'before'};
+	$config{'backup_after'} = $backup->{'after'};
 	local @bf = split(/\s+/, $backup->{'features'});
 	foreach $f (&get_available_backup_features(), @backup_plugins) {
 		$config{'backup_feature_'.$f} = &indexof($f, @bf) >= 0 ? 1 : 0;
@@ -1925,6 +1929,12 @@ else {
 		}
 	return 1;
 	}
+}
+
+# Returns 1 if the current user can define pre and post-backup commands
+sub can_backup_commands
+{
+return &master_admin();
 }
 
 # Returns 1 if tar supports incremental backups

@@ -85,11 +85,30 @@ foreach $f (@do_features) {
 	}
 @vbs = split(/\s+/, $sched->{'virtualmin'});
 
-# Do the backup, capturing any output
+# Start capturing output
 $first_print = \&first_save_print;
 $second_print = \&second_save_print;
 $indent_print = \&indent_save_print;
 $outdent_print = \&outdent_save_print;
+
+# Run any before command
+if ($sched->{'before'}) {
+	&$first_print("Running pre-backup command ..");
+	$out .= &backquote_command("($sched->{'before'}) 2>&1 </dev/null");
+	print $out;
+	$output .= $out;
+	if ($?) {
+		&$second_print(".. failed!");
+		$ok = 0;
+		$size = 0;
+		goto PREFAILED;
+		}
+	else {
+		&$second_print(".. done");
+		}
+	}
+
+# Execute the backup
 if ($sched->{'strftime'}) {
 	$dest = &backup_strftime($sched->{'dest'});
 	}
@@ -117,6 +136,22 @@ if ($ok && $sched->{'purge'}) {
 		$sched->{'dest'}, $sched->{'purge'}, $start_time);
 	$ok = 0 if (!$pok);
 	}
+
+# Run any after command
+if ($sched->{'after'}) {
+	&$first_print("Running post-backup command ..");
+	$out = &backquote_command("($sched->{'after'}) 2>&1 </dev/null");
+	print $out;
+	$output .= $out;
+	if ($?) {
+		&$second_print(".. failed!");
+		}
+	else {
+		&$second_print(".. done");
+		}
+	}
+
+PREFAILED:
 
 # Send an email to the recipient, if there are any
 if ($sched->{'email'} && $has_mailboxes &&

@@ -215,6 +215,19 @@ if ($in{'sched'} || $in{'new'}) {
 			$text{'backup_purgeno'}, $text{'backup_purgeyes'})." ".
 		$text{'newbw_days'});
 
+	# Commands to run before and after
+	if (&can_backup_commands()) {
+		print &ui_table_row(
+			&hlink($text{'backup_before'}, "backup_before"),
+			&ui_opt_textbox("before", $sched->{'before'}, 40,
+					$text{'backup_none'}));
+
+		print &ui_table_row(
+			&hlink($text{'backup_after'}, "backup_after"),
+			&ui_opt_textbox("after", $sched->{'after'}, 40,
+					$text{'backup_none'}));
+		}
+
 	print &ui_hidden_table_end("sched");
 
 	# Save buttons
