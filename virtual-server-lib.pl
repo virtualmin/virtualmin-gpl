@@ -71,7 +71,7 @@ if (!$virtualmin_pro) {
 @alias_features = ( @opt_alias_features );
 @subdom_features = ( @opt_subdom_features );
 @database_features = ( 'mysql', 'postgres' );
-@template_features = ( 'basic', 'limits', 'resources', @features, 'virt',
+@template_features = ( 'basic', 'resources', @features, 'virt',
 		       $virtualmin_pro ? ( 'virtualmin' ) : ( ),
 		       'plugins',
 		       $virtualmin_pro ? ( 'scripts', 'phpwrappers' ) : ( ) );
