@@ -41,7 +41,7 @@ return ("mysql");
 
 sub script_roundcube_php_vers
 {
-return ( 4, 5 );
+return ( 5 );
 }
 
 # script_roundcube_depends(&domain, version)
