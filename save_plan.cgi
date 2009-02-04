@@ -15,6 +15,9 @@ if (!$in{'new'}) {
 	}
 else {
 	$plan = { };
+	if ($canplans == 1) {
+		$plan->{'owner'} = $base_remote_user;
+		}
 	}
 
 if ($in{'delete'}) {

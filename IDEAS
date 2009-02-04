@@ -46,8 +46,6 @@
 
  - plans for resellers
 	- limited functions
-	- can see only own
-	- reseller-level option to enable
 	- FS#4752
 	- ability to change plan after creation of domain, and apply
 	- Command-line API to manage
