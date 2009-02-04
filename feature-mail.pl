@@ -1207,11 +1207,15 @@ if ($config{'mail_system'} == 1) {
 	local $an = ($1 || "default")."-".$2;
 	if (&needs_alias(@smto) && !$alias) {
 		# Alias needs to be created and virtuser updated
+		local $clash = &check_alias_clash($an);
 		local $alias = { "name" => $an,
 				 "enabled" => 1,
 				 "values" => \@smto };
 		$_[1]->{'alias'} = $alias;
 		&sendmail::lock_alias_files($sendmail_afiles);
+		if ($clash) {
+			&sendmail::delete_alias($clash);  # Overwrite clash
+			}
 		&sendmail::create_alias($alias, $sendmail_afiles);
 		&sendmail::unlock_alias_files($sendmail_afiles);
 		local $virt = { "from" => $_[1]->{'from'},
@@ -1260,11 +1264,15 @@ elsif ($config{'mail_system'} == 0) {
 	local $an = ($1 || "default")."-".$2;
 	if (&needs_alias(@psto) && !$alias) {
 		# Alias needs to be created and virtuser updated
+		local $clash = &check_alias_clash($an);
 		local $alias = { "name" => $an,
 				 "enabled" => 1,
 				 "values" => \@psto };
 		$_[1]->{'alias'} = $alias;
 		&postfix::lock_alias_files($postfix_afiles);
+		if ($clash) {
+			&$postfix_delete_alias($clash);   # Overwrite clash
+			}
 		&$postfix_create_alias($alias, $postfix_afiles);
 		&postfix::unlock_alias_files($postfix_afiles);
 		&postfix::regenerate_aliases();
@@ -1377,12 +1385,15 @@ if ($config{'mail_system'} == 1) {
 		# Need to create an alias, named address-domain
 		$_[0]->{'from'} =~ /^(\S*)\@(\S+)$/;
 		local $an = ($1 || "default")."-".$2;
-		&check_alias_clash($an) && &error(&text('alias_eclash2', $an));
+		local $clash = &check_alias_clash($an);
 		local $alias = { "name" => $an,
 				 "enabled" => 1,
 				 "values" => \@smto };
 		$_[0]->{'alias'} = $alias;
 		&sendmail::lock_alias_files($sendmail_afiles);
+		if ($clash) {
+			&sendmail::delete_alias($clash);  # Overwrite clash
+			}
 		&sendmail::create_alias($alias, $sendmail_afiles);
 		&sendmail::unlock_alias_files($sendmail_afiles);
 		$virt = { "from" => $_[0]->{'from'},
@@ -1407,12 +1418,15 @@ elsif ($config{'mail_system'} == 0) {
 		# Need to create an alias, named address-domain
 		$_[0]->{'from'} =~ /^(\S*)\@(\S+)$/;
 		local $an = ($1 || "default")."-".$2;
-		&check_alias_clash($an) && &error(&text('alias_eclash2', $an));
+		local $clash = &check_alias_clash($an);
 		local $alias = { "name" => $an,
 				 "enabled" => 1,
 				 "values" => \@psto };
 		$_[0]->{'alias'} = $alias;
 		&postfix::lock_alias_files($postfix_afiles);
+		if ($clash) {
+			&$postfix_delete_alias($clash);   # Overwrite clash
+			}
 		&$postfix_create_alias($alias, $postfix_afiles);
 		&postfix::unlock_alias_files($postfix_afiles);
 		&postfix::regenerate_aliases();
@@ -2192,7 +2206,7 @@ return -x "$config{'vpopmail_dir'}/bin/vadddomain";
 }
 
 # check_alias_clash(name)
-# Checks if an alias with the given name already exists
+# Checks if an alias with the given name already exists, and returns it
 sub check_alias_clash
 {
 &require_mail();
@@ -2569,13 +2583,18 @@ if (!$_[2]->{'mailuser'}) {
 					'to' => [ split(/,/, $2) ] };
 			if ($virt->{'to'}->[0] =~ /^(\S+)\\@(\S+)$/ &&
 			    $config{'mail_system'} == 0) {
-				# Virtusers is to a local user with an @ in
+				# Virtuser is to a local user with an @ in
 				# the name, like foo\@bar.com. But on Postfix
 				# this won't work - instead, we need to use the
 				# alternate foo-bar.com format.
 				$virt->{'to'}->[0] = $1."-".$2;
 				}
-			&create_virtuser($virt);
+			eval {
+				# Alias creation can fail if a clash exists..
+				# but just skip it
+				local $main::error_must_die = 1;
+				&create_virtuser($virt);
+				};
 			}
 		}
 	close(AFILE);
