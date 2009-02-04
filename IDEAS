@@ -49,12 +49,9 @@
 	- can see only own
 	- reseller-level option to enable
 	- FS#4752
-	- extract stuff into plans, make into separate objects
 	- ability to change plan after creation of domain, and apply
 	- Command-line API to manage
-	- Include plans in template backups
-	- Include plans in domain backups
-	- help page
+	- help pages
 	- Remove all use of set_limits_from_template,
 	  set_featurelimits_from_template and set_capabilities_from_template
 

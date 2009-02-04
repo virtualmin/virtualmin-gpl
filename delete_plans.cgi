@@ -11,9 +11,12 @@ $canplans || &error($text{'plans_ecannot'});
 @d = split(/\0/, $in{'d'});
 @d || &error($text{'dplans_enone'});
 @plans = &list_editable_plans();
+@allplans = &list_plans();
 foreach $d (@d) {
 	($plan) = grep { $_->{'id'} eq $d } @plans;
 	if ($plan) {
+		@allplans = grep { $_->{'id'} ne $d } @allplans;
+		@allplans || &error($text{'dplans_eall'});
 		&delete_plan($plan);
 		}
 	}

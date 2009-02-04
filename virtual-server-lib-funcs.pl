@@ -237,6 +237,11 @@ if (!defined($dom->{'template'})) {
 	# assume default parent or sub-server template
 	$dom->{'template'} = $dom->{'parent'} ? 1 : 0;
 	}
+if (!defined($dom->{'plan'})) {
+	# assume default plan
+	local @plans = sort { $a->{'id'} <=> $b->{'id'} } &list_plans();
+	$dom->{'plan'} = $plans[0]->{'id'};
+	}
 if (!defined($dom->{'db_mysql'}) && $dom->{'mysql'}) {
 	# Assume just one MySQL DB
 	$dom->{'db_mysql'} = $dom->{'db'};
@@ -4360,11 +4365,19 @@ if ($virtualmin_pro) {
 		&close_tempfile(EMPTY);
 		}
 	}
+
+# Include template, in case the restore target doesn't have it
 local ($tmpl) = grep { $_->{'id'} == $_[0]->{'template'} } &list_templates();
 if (!$tmpl->{'standard'}) {
-	# Custom template, in case the restore target doesn't have it
 	&copy_source_dest($tmpl->{'file'}, $_[1]."_template");
 	}
+
+# Include plan too
+local $plan = &get_plan($_[0]->{'plan'});
+if ($plan) {
+	&copy_source_dest($plan->{'file'}, $_[0]."_plan");
+	}
+
 &$second_print($text{'setup_done'});
 return 1;
 }
@@ -4430,6 +4443,7 @@ foreach my $tmpl (&list_templates()) {
 # Save template scripts
 &execute_command("cp $template_scripts_dir/* $temp");
 &execute_command("cd ".quotemeta($temp)." && tar cf ".quotemeta($file)." .");
+&unlink_file($temp);
 
 # Save global variables file
 if (-r $global_template_variables_file) {
@@ -4440,7 +4454,6 @@ else {
 	&open_tempfile(GLOBAL, ">".$file."_global", 0, 1);
 	&close_tempfile(GLOBAL);
 	}
-&unlink_file($temp);
 
 # Save skeleton directories for all templates
 local %done;
@@ -4453,6 +4466,11 @@ foreach my $tmpl (&list_templates()) {
 				 " && tar cf ".quotemeta($skelfile)." .");
 		}
 	}
+
+# Save plans
+&make_dir($plans_dir, 0700);
+&execute_command("cd ".quotemeta($plans_dir).
+		 " && tar cf ".quotemeta($file."_plans")." .");
 }
 
 # virtualmin_restore_templates(file, &vbs)
@@ -4506,6 +4524,12 @@ foreach my $tmpl (&list_templates()) {
 					 " && tar xf ".quotemeta($skelfile));
 			}
 		}
+	}
+
+# Restore plans, if included
+if (-r $file."_plans") {
+	&execute_command("cd ".quotemeta($plans_dir)." && ".
+			 "tar xf ".quotemeta($file."_plans"));
 	}
 }
 

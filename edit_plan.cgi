@@ -7,6 +7,7 @@ $canplans = &can_edit_plans();
 $canplans || &error($text{'plans_ecannot'});
 
 if (!$in{'new'}) {
+	@allplans = &list_plans();
 	@plans = &list_editable_plans();
 	($plan) = grep { $_->{'id'} eq $in{'id'} } @plans;
 	$plan || &error($text{'plan_ecannot'});
@@ -160,8 +161,10 @@ if ($in{'new'}) {
 	}
 else {
 	print &ui_form_end([ [ undef, $text{'save'} ],
-			     [ 'apply', $text{'plan_apply'} ],
-			     [ 'delete', $text{'delete'} ] ]);
+			     @doms ? ( [ 'apply', $text{'plan_apply'} ] )
+				   : ( ),
+			     @allplans > 1 ? ( [ 'delete', $text{'delete'} ] )
+					   : ( ) ]);
 	}
 
 &ui_print_footer("edit_newplan.cgi", $text{'plans_return'},

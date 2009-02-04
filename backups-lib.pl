@@ -1075,6 +1075,7 @@ if ($ok) {
 				  "$restoredir/$d->{'dom'}_virtualmin_template";
 				if (-r $tmplfile) {
 					# Yes - create on this system and use
+					&make_dir($templates_dir, 0700);
 					&copy_source_dest(
 					    $tmplfile,
 					    "$templates_dir/$d->{'template'}");
@@ -1086,6 +1087,19 @@ if ($ok) {
 				&$second_print($text{'restore_etemplate'});
 				$ok = 0;
 				last DOMAIN;
+				}
+
+			# Does the plan exist? If not, get it from the backup
+			local $plan = &get_plan($d->{'plan'});
+			if (!$plan) {
+				local $planfile =
+				  "$restoredir/$d->{'dom'}_virtualmin_plan";
+				if (-r $planfile) {
+					&make_dir($plans_dir, 0700);
+					&copy_source_dest(
+					  $planfile, "$plans_dir/$d->{'plan'}");
+					undef(@list_plans_cache);
+					}
 				}
 
 			if ($parentdom) {

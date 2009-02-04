@@ -4643,3 +4643,4 @@ plan_ename=Missing plan name
 
 dplans_err=Failed to delete plans
 dplans_enone=None selected
+dplans_eall=At least one plan must exist
