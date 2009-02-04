@@ -22,8 +22,8 @@ foreach $plan (@plans) {
 		}
 	push(@cols, $plan->{'quota'} ? &nice_size($plan->{'quota'}*$bsize)
 				     : $text{'form_unlimit'});
-	push(@cols, $plan->{'bw'} ? &nice_size($plan->{'bw'})
-				  : $text{'form_unlimit'});
+	push(@cols, $plan->{'bwlimit'} ? &nice_size($plan->{'bwlimit'})
+				       : $text{'form_unlimit'});
 	push(@cols, $plan->{'domslimit'} eq '' ? $text{'form_unlimit'}
 					       : $plan->{'domslimit'});
 	push(@cols, $plan->{'mailboxlimit'} eq '' ? $text{'form_unlimit'}

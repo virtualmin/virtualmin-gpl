@@ -112,7 +112,16 @@ else {
 
 	if (!$in{'new'} && $in{'apply'}) {
 		# Apply to all domains on the plan
-		# XXX
+		&set_all_null_print();
+		foreach my $d (&get_domain_by("plan", $plan->{'id'})) {
+			next if ($d->{'parent'});
+			local $oldd = { %$d };
+			&set_limits_from_plan($d, $plan);
+			&set_featurelimits_from_plan($d, $plan);
+			&set_capabilities_from_plan($d, $plan);
+			&modify_webmin($d, $oldd);
+			}
+		&run_post_actions();
 		}
 
 	&webmin_log($in{'new'} ? 'create' : 'modify', 'plan',

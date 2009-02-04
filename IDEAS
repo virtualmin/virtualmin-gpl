@@ -51,13 +51,12 @@
 	- FS#4752
 	- extract stuff into plans, make into separate objects
 	- ability to change plan after creation of domain, and apply
-	- what about default quotas? bandwidth limits?
 	- Command-line API to manage
 	- Include plans in template backups
 	- Include plans in domain backups
-	- Remove from templates UI
-	- master admin can decide who sees templates
 	- help page
+	- Remove all use of set_limits_from_template,
+	  set_featurelimits_from_template and set_capabilities_from_template
 
  - IPv6 support
 	- FS#4239

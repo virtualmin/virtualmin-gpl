@@ -137,7 +137,8 @@ foreach my $ltmpl (&list_templates()) {
 	$plan = { 'id' => $tmpl->{'id'},
 		  'name' => $tmpl->{'id'} eq '0' ? 'Default Plan'
 						 : $tmpl->{'name'} };
-	$plan->{'featurelimits'} = $tmpl->{'featurelimits'};
+	$plan->{'featurelimits'} = $tmpl->{'featurelimits'} eq 'none' ? '' :
+				    $tmpl->{'featurelimits'};
 	foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms",
 		       "realdoms", "bw", "mongrels") {
 		$plan->{$l.'limit'} = $tmpl->{$l.'limit'} eq 'none' ? '' :
@@ -145,7 +146,8 @@ foreach my $ltmpl (&list_templates()) {
 		}
 	$plan->{'quota'} = $tmpl->{'quota'} eq 'none' ? '' : $tmpl->{'quota'};
 	$plan->{'uquota'} = $tmpl->{'uquota'} eq 'none' ? '' :$tmpl->{'uquota'};
-	$plan->{'capabilities'} = $tmpl->{'capabilities'};
+	$plan->{'capabilities'} = $tmpl->{'capabilities'} eq 'none' ? '' :
+				   $tmpl->{'capabilities'};
 	foreach my $n ('nodbname', 'norename', 'forceunder') {
 		$plan->{$n} = $tmpl->{$n};
 		}
@@ -164,6 +166,63 @@ foreach my $d (grep { !$_->{'parent'} } &list_domains()) {
 	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
 		$sd->{'plan'} = $d->{'plan'};
 		&save_domain($sd);
+		}
+	}
+}
+
+# set_limits_from_template(&domain, &plan)
+# Set initial owner limits on a domain from the given plan
+sub set_limits_from_plan
+{
+local ($d, $plan) = @_;
+$d->{'quota'} = $plan->{'quota'};
+$d->{'uquota'} = $plan->{'uquota'};
+$d->{'bw_limit'} = $plan->{'bwlimit'};
+$d->{'mailboxlimit'} = $plan->{'mailboxlimit'};
+$d->{'aliaslimit'} = $plan->{'aliaslimit'};
+$d->{'dbslimit'} = $plan->{'dbslimit'};
+$d->{'domslimit'} = $plan->{'domslimit'} eq '' ? '*' :
+		     $plan->{'domslimit'};
+$d->{'aliasdomslimit'} = $plan->{'aliasdomslimit'} eq '' ? '*' :
+			  $plan->{'aliasdomslimit'};
+$d->{'realdomslimit'} = $plan->{'realdomslimit'} eq '' ? '*' :
+			 $plan->{'realdomslimit'};
+$d->{'mongrelslimit'} = $plan->{'mongrelslimit'};
+$d->{'nodbname'} = $plan->{'nodbname'};
+$d->{'norename'} = $plan->{'norename'};
+$d->{'forceunder'} = $plan->{'forceunder'};
+}
+
+# set_featurelimits_from_plan(&domain, &plan)
+# Updates a virtual server's limit_ variables based on either the enabled
+# features or limits defined in the plan.
+sub set_featurelimits_from_plan
+{
+local ($d, $plan) = @_;
+if ($plan->{'featurelimits'}) {
+	# From template
+	local %flimits = map { $_, 1 } split(/\s+/, $plan->{'featurelimits'});
+	foreach my $f (@features, @feature_plugins) {
+		$d->{'limit_'.$f} = int($flimits{$f});
+		}
+	}
+else {
+	# From domain
+	foreach my $f (@features, @feature_plugins) {
+		$d->{'limit_'.$f} = $f eq "webmin" ? 0 : int($d->{$f});
+		}
+	}
+}
+
+# set_capabilities_from_plan(&domain, &template)
+# Set initial owner editing capabilities on a domain from the given plan
+sub set_capabilities_from_plan
+{
+local ($d, $tmpl) = @_;
+if ($plan->{'capabilities'} ne 'none') {
+	local %caps = map { $_, 1 } split(/\s+/, $plan->{'capabilities'});
+	foreach my $ed (@edit_limits) {
+		$d->{'edit_'.$ed} = $caps{$ed} ? 1 : 0;
 		}
 	}
 }

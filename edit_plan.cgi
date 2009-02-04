@@ -30,17 +30,17 @@ print &ui_table_row(&hlink($text{'plan_name'}, "plan_name"),
 
 # Default domain quota
 print &ui_table_row(&hlink($text{'tmpl_quota'}, "template_quota"),
-    &ui_radio("quota_def", $tmpl->{'quota'} ? 0 : 1,
+    &ui_radio("quota_def", $plan->{'quota'} ? 0 : 1,
 	      [ [ 1, $text{'form_unlimit'} ],
 		[ 0, $text{'tmpl_quotasel'} ] ])." ".
-    &quota_input("quota", $tmpl->{'quota'}, "home"));
+    &quota_input("quota", $plan->{'quota'}, "home"));
 
 # Default admin user quota
 print &ui_table_row(&hlink($text{'tmpl_uquota'}, "template_uquota"),
-    &ui_radio("uquota_def", $tmpl->{'uquota'} ? 0 : 1,
+    &ui_radio("uquota_def", $plan->{'uquota'} ? 0 : 1,
 	      [ [ 1, $text{'form_unlimit'} ],
 		[ 0, $text{'tmpl_quotasel'} ] ])." ".
-    &quota_input("uquota", $tmpl->{'uquota'}, "home"));
+    &quota_input("uquota", $plan->{'uquota'}, "home"));
 
 # Show limits on numbers of things
 foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms", "realdoms", "bw",
@@ -58,7 +58,7 @@ foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms", "realdoms", "bw",
 # Rename and DB name limits
 foreach my $n ('nodbname', 'norename', 'forceunder') {
 	print &ui_table_row(&hlink($text{'limits_'.$n}, 'limits_'.$n),
-		&ui_radio($n, $plan->{$n},
+		&ui_radio($n, int($plan->{$n}),
 			  [ [ 0, $text{'yes'} ],
 			    [ 1, $text{'no'} ] ]));
 	}
@@ -71,7 +71,7 @@ print &ui_hidden_table_start($text{'plan_header2'}, 'width=100%', 2,
 
 %flimits = map { $_, 1 } split(/\s+/, $plan->{'featurelimits'});
 $ftable = &ui_radio('featurelimits_def',
-		    $plan->{'featurelimits'} eq 'none' ? 1 : 0,
+		    $plan->{'featurelimits'} ? 0 : 1,
 		    [ [ 1, $text{'tmpl_featauto'} ],
 		      [ 0, $text{'tmpl_below'} ] ])."<br>\n";
 @grid = ( );
@@ -84,7 +84,9 @@ foreach my $f (@feature_plugins) {
 	push(@grid, &ui_checkbox("featurelimits", $f,
 			 &plugin_call($f, "feature_name"), $flimits{$f}));
 	}
-$ftable .= &ui_grid_table(\@grid, 2);
+$ftable .= &ui_grid_table(\@grid, 2).
+	   &ui_links_row([ &select_all_link("featurelimits"),
+			   &select_invert_link("featurelimits") ]);
 print &ui_table_row(&hlink($text{'tmpl_featurelimits'},
 			   "template_featurelimits"), $ftable);
 
@@ -96,7 +98,7 @@ print &ui_hidden_table_start($text{'plan_header3'}, 'width=100%', 2,
 
 %caps = map { $_, 1 } split(/\s+/, $plan->{'capabilities'});
 $etable = &ui_radio('capabilities_def',
-		    $plan->{'capabilities'} eq 'none' ? 1 : 0,
+		    $plan->{'capabilities'} ? 0 : 1,
 		    [ [ 1, $text{'tmpl_capauto'} ],
 		      [ 0, $text{'tmpl_below'} ] ])."<br>\n";
 @grid = ( );
@@ -105,7 +107,9 @@ foreach my $ed (@edit_limits) {
 				 $text{'limits_edit_'.$ed} || $ed,
 				 $caps{$ed}));
 	}
-$etable .= &ui_grid_table(\@grid, 2);
+$etable .= &ui_grid_table(\@grid, 2).
+	   &ui_links_row([ &select_all_link("capabilities"),
+			   &select_invert_link("capabilities") ]);
 print &ui_table_row(&hlink($text{'tmpl_capabilities'},
 			   "template_capabilities"), $etable);
 
