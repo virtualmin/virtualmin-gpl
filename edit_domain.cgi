@@ -129,6 +129,26 @@ print &ui_table_row($text{'edit_tmpl'},
 		    &ui_select("template", $tmpl->{'id'},
 			[ map { [ $_->{'id'}, $_->{'name'} ] } @cantmpls ]));
 
+# Show plan, with option to change
+if (!$parentdom) {
+	$plan = &get_plan($d->{'plan'});
+	@plans = sort { $a->{'name'} cmp $b->{'name'} } &list_available_plans();
+	if (@plans) {
+		# Can select one
+		($onlist) = grep { $_->{'id'} eq $plan->{'id'} } @plans;
+		push(@plans, $plan) if (!$onlist);
+		print &ui_table_row($text{'edit_plan'},
+			&ui_select("plan", $plan->{'id'},
+			  [ map { [ $_->{'id'}, $_->{'name'} ] } @plans ])." ".
+			&ui_checkbox("applyplan", 1,
+				     $text{'edit_applyplan'}, 1));
+		}
+	else {
+		# Just show current plan
+		print &ui_table_row($text{'edit_plan'}, $plan->{'desc'});
+		}
+	}
+
 if (!$aliasdom) {
 	# Show IP-related options
 	if ($d->{'reseller'}) {

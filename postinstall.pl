@@ -328,6 +328,9 @@ foreach my $d (@doms) {
 		}
 	}
 
+# Convert all templates to plans, if needed
+&convert_plans();
+
 # Record the install time for this version
 local %itimes;
 &read_file($install_times_file, \%itimes);

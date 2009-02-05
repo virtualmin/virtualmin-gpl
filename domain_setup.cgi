@@ -286,7 +286,7 @@ if (!$parentuser) {
 	# Set initial limits
 	if ($config{'template_auto'}) {
 		# From template
-		&set_limits_from_template(\%dom, $tmpl);
+		&set_limits_from_plan(\%dom, $plan);
 		}
 	else {
 		# From user inputs
@@ -298,9 +298,9 @@ if (!$parentuser) {
 		$dom{'nodbname'} = $nodbname;
 		$dom{'quota'} = $quota;
 		$dom{'uquota'} = $uquota;
-		$dom{'norename'} = $tmpl->{'norename'};	# No input for this
+		$dom{'norename'} = $plan->{'norename'};	# No input for this
 		}
-	&set_capabilities_from_template(\%dom, $tmpl);
+	&set_capabilities_from_plan(\%dom, $plan);
 	}
 $dom{'emailto'} = $parentdom ? $parentdom->{'emailto'} :
 		  $dom{'email'} ? $dom{'email'} :
@@ -333,7 +333,9 @@ foreach my $f (@features, @feature_plugins) {
                  $tmpl->{'aliascopy'});
 	$dom{$f} = &can_use_feature($f) && int($in{$f});
 	}
-&set_featurelimits_from_template(\%dom, $tmpl);
+if (!$parentdom) {
+	&set_featurelimits_from_plan(\%dom, $plan);
+	}
 &set_chained_features(\%dom, undef);
 $dom{'home'} = &server_home_directory(\%dom, $parentdom);
 &complete_domain(\%dom);

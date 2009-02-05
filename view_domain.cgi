@@ -62,6 +62,12 @@ print &ui_table_row($text{'edit_created'},
 # Template
 print &ui_table_row($text{'edit_tmpl'}, $tmpl->{'name'}, undef, \@tds);
 
+# Show plan, read-only
+if (!$parentdom) {
+	$plan = &get_plan($d->{'plan'});
+	print &ui_table_row($text{'edit_plan'}, $plan->{'desc'});
+	}
+
 # Reseller
 if ($virtualmin_pro) {
 	print &ui_table_row($text{'edit_reseller'},

@@ -54,7 +54,7 @@ else {
 			}
 		else {
 			$in{$l.'limit'} =~ /^\d+$/ ||
-				&error($text{'plan_e'.$l.'limit'});
+				&error($text{'tmpl_e'.$l.'limit'});
 			$plan->{$l.'limit'} = $in{$l.'limit'};
 			}
 		}
@@ -63,7 +63,7 @@ else {
 		}
 	else {
 		$plan->{'bwlimit'} = &parse_bandwidth("bwlimit",
-					$text{'plan_e'.$l.'limit'}, 1);
+					$text{'tmpl_e'.$l.'limit'}, 1);
 		}
 
 	# Save no database name and no rename
@@ -78,7 +78,7 @@ else {
 		}
 	else {
 		# Explicitly selected
-		$in{'featurelimits'} || &error($text{'plan_efeaturelimits'});
+		$in{'featurelimits'} || &error($text{'tmpl_efeaturelimits'});
 		$plan->{'featurelimits'} =
 			join(" ", split(/\0/, $in{'featurelimits'}));
 		}

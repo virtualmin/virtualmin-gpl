@@ -225,7 +225,7 @@ print "}\n";
 print "</script>\n";
 
 # Generate Javascript for plan change
-@availplans = sort { $a->{'desc'} <=> $b->{'desc'} } &list_available_plans();
+@availplans = sort { $a->{'name'} <=> $b->{'name'} } &list_available_plans();
 $defplan = &get_default_plan();
 print "<script>\n";
 print "function select_plan(num)\n";
