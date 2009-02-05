@@ -266,6 +266,7 @@ form_bytes=bytes
 form_unavail=Not available
 form_mailbox=Create email address for unix user?
 form_template=Server configuration template
+form_plan=Account plan
 form_mailboxlimit=Maximum allowed mail / FTP users
 form_aliaslimit=Maximum allowed aliases
 form_dbslimit=Maximum allowed databases
@@ -307,6 +308,7 @@ form_proxysect=IP address and forwarding
 form_inputssect=Additional feature options
 
 setup_err=Failed to create virtual server
+setup_eplan=Selected plan does not exist or is not available
 setup_evital=Critical feature $1 was not properly created - Virtual server creation halted.
 setup_edomain=Missing or invalid domain name - only letters, numbers and the dot, dash and underscore characters are allowed
 setup_edomain2=Domain names cannot start or end with a .

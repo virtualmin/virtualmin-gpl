@@ -202,49 +202,59 @@ if (!$parentuser) {
 	}
 
 # Generate Javascript for template change
-print "<script>\n";
-print "function select_template(num)\n";
-print "{\n";
 @availtmpls = &list_available_templates($parentdom, $aliasdom);
 $deftmplid = &get_init_template($parentdom);
 ($deftmpl) = grep { $_->{'id'} == $deftmplid } @availtmpls;
 $deftmpl ||= $availtmpls[0];
+print "<script>\n";
+print "function select_template(num)\n";
+print "{\n";
 foreach $t (@availtmpls) {
 	local $tmpl = &get_template($t->{'id'});
 	print "if (num == $tmpl->{'id'}) {\n";
-	if (!$parentdom) {
+	if (!$parentdom && &can_choose_ugroup()) {
 		# Set group for unix user
-		if (&can_choose_ugroup()) {
-			$num = $tmpl->{'ugroup'} eq "none" ? 0 : 1;
-			$val = $tmpl->{'ugroup'} eq "none" ? "" : $tmpl->{'ugroup'};
-			print "    document.forms[0].group_def[$num].checked = true;\n";
-			print "    document.forms[0].group.value = \"$val\";\n";
-			}
-
-		# Set quotas
-		print &quota_javascript("quota", $tmpl->{'quota'}, "home", 0);
-		print &quota_javascript("uquota", $tmpl->{'uquota'}, "home", 0);
-
-		# Set limits
-		print &quota_javascript("mailboxlimit", $tmpl->{'mailboxlimit'},
-					"none", 1);
-		print &quota_javascript("aliaslimit", $tmpl->{'aliaslimit'},
-					"none", 1);
-		print &quota_javascript("dbslimit", $tmpl->{'dbslimit'},
-					"none", 1);
-		if ($config{'bw_active'}) {
-			print &quota_javascript("bwlimit", $tmpl->{'bwlimit'},
-						"bw", 1);
-			}
-		$num = $tmpl->{'domslimit'} eq "none" ? 1 :
-		       $tmpl->{'domslimit'} eq "0" ? 0 : 2;
-		$val = $num == 2 ? $tmpl->{'domslimit'} : "";
-		print "    document.forms[0].domslimit_def[$num].checked = true;\n";
-		print "    document.forms[0].domslimit.value = \"$val\";\n";
-
-		# Set no database name
-		print "    document.forms[0].nodbname[$tmpl->{'nodbname'}].checked = true;\n";
+		$num = $tmpl->{'ugroup'} eq "none" ? 0 : 1;
+		$val = $tmpl->{'ugroup'} eq "none" ? "" : $tmpl->{'ugroup'};
+		print "    document.forms[0].group_def[$num].checked = true;\n";
+		print "    document.forms[0].group.value = \"$val\";\n";
 		}
+	print "    }\n";
+	}
+print "}\n";
+print "</script>\n";
+
+# Generate Javascript for plan change
+@availplans = sort { $a->{'desc'} <=> $b->{'desc'} } &list_available_plans();
+$defplan = &get_default_plan();
+print "<script>\n";
+print "function select_plan(num)\n";
+print "{\n";
+foreach $plan (@availplans) {
+	print "if (num == $plan->{'id'}) {\n";
+	# Set quotas
+	print &quota_javascript("quota", $plan->{'quota'}, "home", 0);
+	print &quota_javascript("uquota", $plan->{'uquota'}, "home", 0);
+
+	# Set limits
+	print &quota_javascript("mailboxlimit", $plan->{'mailboxlimit'},
+				"none", 1);
+	print &quota_javascript("aliaslimit", $plan->{'aliaslimit'},
+				"none", 1);
+	print &quota_javascript("dbslimit", $plan->{'dbslimit'},
+				"none", 1);
+	if ($config{'bw_active'}) {
+		print &quota_javascript("bwlimit", $plan->{'bwlimit'},
+					"bw", 1);
+		}
+	$num = $plan->{'domslimit'} eq "" ? 1 :
+	       $plan->{'domslimit'} eq "0" ? 0 : 2;
+	$val = $num == 2 ? $plan->{'domslimit'} : "";
+	print "    document.forms[0].domslimit_def[$num].checked = true;\n";
+	print "    document.forms[0].domslimit.value = \"$val\";\n";
+
+	# Set no database name
+	print "    document.forms[0].nodbname[$plan->{'nodbname'}].checked = true;\n";
 	print "    }\n";
 	}
 print "}\n";
@@ -260,6 +270,18 @@ print &ui_table_row(&hlink($text{'form_template'},"template"),
 		   0, 0, $config{'template_auto'} ? "" :
 		"onChange='select_template(options[selectedIndex].value)'"),
 	undef, \@tds);
+
+# Show plan selection field, for top-level domains
+if (!$parentdom) {
+	foreach $p (&list_available_plans()) {
+		push(@popts, [ $p->{'id'}, $p->{'name'} ]);
+		}
+	print &ui_table_row(&hlink($text{'form_plan'}, "plan"),
+		&ui_select("plan", $defplan->{'id'}, \@popts, 1, 0,
+			   0, 0, $config{'template_auto'} ? "" :
+			"onChange='select_plan(options[selectedIndex].value)'"),
+		undef, \@tds);
+	}
 
 if ($aliasdom) {
 	# Show destination of alias

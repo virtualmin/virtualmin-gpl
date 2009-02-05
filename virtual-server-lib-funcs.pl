@@ -4245,7 +4245,7 @@ local $bsize = $fs eq "none" ? 0 : $fs eq "bw" ? 1 : &quota_bsize($fs);
 local $rv;
 if ($bsize) {
 	# Set value and units
-	local $val = $value eq "none" ?  "" : $value*$bsize;
+	local $val = $value eq "" ? "" : $value*$bsize;
 	local $index;
 	if ($val >= 1024*1024*1024) {
 		$val = $val/(1024*1024*1024);
@@ -4269,11 +4269,10 @@ if ($bsize) {
 	}
 else  {
 	# Just set blocks value
-	local $val = $value eq "none" ?  "" : $value;
-	$rv .= "    document.forms[0].${name}.value = \"$val\";\n";
+	$rv .= "    document.forms[0].${name}.value = \"$value\";\n";
 	}
 if ($unlimited) {
-	if ($value eq "none") {
+	if ($value eq "") {
 		$rv .= "    document.forms[0].${name}_def[0].checked = true;\n";
 		$rv .= "    document.forms[0].${name}.disabled = true;\n";
 		$rv .= "    if (document.forms[0].${name}_units) {\n";

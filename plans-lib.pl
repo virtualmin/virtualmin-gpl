@@ -63,6 +63,37 @@ else {
 	}
 }
 
+# can_use_plan(&plan)
+# Returns 1 if the current user can use a plan
+sub can_use_plan
+{
+local ($plan) = @_;
+if (&master_admin()) {
+	# Masters can use all plans
+	return 1;
+	}
+elsif (&reseller_admin()) {
+	# Resellers can use their plans, and granted
+	return $plan->{'owner'} eq $base_remote_user ||
+	       !$plan->{'resellers'} ||
+	       &indexof($base_remote_user,
+                        split(/\s+/, $plan->{'resellers'})) >= 0;
+	}
+else {
+	# Domain owners can use none
+	return 0;
+	}
+}
+
+# get_default_plan()
+# Returns the default plan for the current user
+sub get_default_plan
+{
+local @plans = sort { $a->{'id'} <=> $b->{'id'} } &list_available_plans();
+local ($defplan) = grep { $_->{'default'} } @plans;
+return $defplan || $plans[0];
+}
+
 # get_plan(id)
 # Returns the hash ref for the plan with some ID
 sub get_plan

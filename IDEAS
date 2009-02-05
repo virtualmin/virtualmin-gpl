@@ -46,12 +46,16 @@
 
  - plans for resellers
 	- limited functions
+	- can select at domain creation time
 	- FS#4752
 	- ability to change plan after creation of domain, and apply
 	- Command-line API to manage
 	- help pages
 	- Remove all use of set_limits_from_template,
 	  set_featurelimits_from_template and set_capabilities_from_template
+	- All domain creation needs to set plan (batch, import, migrate,
+	  command-line)
+	- Way to set default plan
 
  - IPv6 support
 	- FS#4239

@@ -59,6 +59,10 @@ foreach $d (&list_domains()) {
 	&error($text{'setup_edomain4'}) if (lc($d->{'dom'}) eq lc($in{'dom'}));
 	}
 $tmpl = &get_template($in{'template'});
+if (!$parentdom) {
+	$plan = &get_plan($in{'plan'});
+	$plan && &can_use_plan($plan) || &error($text{'setup_eplan'});
+	}
 if (!$parentuser) {
 	# Validate user and password-related inputs for top-level domain
 	$in{'email_def'} || $in{'email'} =~ /\S/ ||
