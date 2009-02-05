@@ -96,9 +96,12 @@ $tries ||= 1;
 &require_s3();
 
 my $err;
+my $endpoint;
 for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
-	local $conn = S3::AWSAuthConnection->new($akey, $skey);
+	print STDERR "endpoint=$endpoint\n";
+	local $conn = S3::AWSAuthConnection->new($akey, $skey, undef,
+						 $endpoint);
 	if (!$conn) {
 		$err = $text{'s3_econn'};
 		next;
@@ -112,13 +115,16 @@ for(my $i=0; $i<$tries; $i++) {
 	# function to open it.
 	my $path = "$bucket/$destfile";
 	local $req = &s3_make_request($conn, $path, "PUT", "dummy");
+	#print STDERR "uri=",$req->uri,"\n";
 	local ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
 	local $h = &make_http_connection(
 		$host, $port, $ssl, $req->method, $page);
 	local @st = stat($sourcefile);
 	&write_http_connection($h, "Content-length: $st[7]\r\n");
+	local %headers;
 	foreach my $hfn ($req->header_field_names) {
 		&write_http_connection($h, $hfn.": ".$req->header($hfn)."\r\n");
+		$headers{$hfn} = $req->header($hfn);
 		}
 	&write_http_connection($h, "\r\n");
 
@@ -130,10 +136,44 @@ for(my $i=0; $i<$tries; $i++) {
 		}
 	close(BACKUP);
 
-	# Read back response
+	# Read back response .. this needs to be our own code, as S3 does
+	# some wierd redirects
+	local $line = &read_http_connection($h);
+	$line =~ s/\r|\n//g;
+	local %rheader;
 	local $out;
-	&complete_http_download($h, \$out, \$err);
-	&close_http_connection($h);
+	if ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
+		$err = "Download failed : $line";
+		}
+	else {
+		# Read the headers
+		local $rcode = $1;
+		while(1) {
+			local $hline = &read_http_connection($h);
+			$hline =~ s/\r\n//g;
+			$hline =~ /^(\S+):\s+(.*)$/ || last;
+			$rheader{lc($1)} = $2;
+			}
+
+		# Read the body
+		while(defined($buf = &read_http_connection($h, 1024))) {
+			$out .= $buf;
+			}
+		&close_http_connection($out);
+		#print STDERR "line=$line out=\n".$out."\n";
+
+		if ($rcode >= 300 && $rcode < 400) {
+			# Follow the SOAP redirect
+			if ($out =~ /<Endpoint>([^<]+)<\/Endpoint>/) {
+				$endpoint = $1;
+				$err = "Redirected to $endpoint";
+				}
+			else {
+				$err = "Missing new endpoint in redirect : ".
+				        &html_escape($out);
+				}
+			}
+		}
 
 	if (!$err && $info) {
 		# Write out the info file, if given
