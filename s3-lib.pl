@@ -94,10 +94,13 @@ sub s3_upload
 local ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $tries) = @_;
 $tries ||= 1;
 &require_s3();
+local @st = stat($sourcefile);
+my $can_use_write = &get_webmin_version() >= 1.451;
 
 my $err;
-my $endpoint;
+my $endpoint = undef;
 for(my $i=0; $i<$tries; $i++) {
+	local $newendpoint;
 	$err = undef;
 	print STDERR "endpoint=$endpoint\n";
 	local $conn = S3::AWSAuthConnection->new($akey, $skey, undef,
@@ -113,26 +116,31 @@ for(my $i=0; $i<$tries; $i++) {
 
 	# Use the S3 library to create a request object, but use Webmin's HTTP
 	# function to open it.
-	my $path = "$bucket/$destfile";
-	local $req = &s3_make_request($conn, $path, "PUT", "dummy");
-	#print STDERR "uri=",$req->uri,"\n";
+	my $path = $endpoint ? $destfile : "$bucket/$destfile";
+	print STDERR "path=$path\n";
+	local $req = &s3_make_request($conn, $path, "PUT", "dummy",
+				      { 'Content-Length' => $st[7],
+					'Host' => $host });
+	print STDERR "uri=",$req->uri,"\n";
 	local ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
 	local $h = &make_http_connection(
 		$host, $port, $ssl, $req->method, $page);
-	local @st = stat($sourcefile);
-	&write_http_connection($h, "Content-length: $st[7]\r\n");
-	local %headers;
 	foreach my $hfn ($req->header_field_names) {
 		&write_http_connection($h, $hfn.": ".$req->header($hfn)."\r\n");
-		$headers{$hfn} = $req->header($hfn);
+		print STDERR "sending header ".$hfn.": ".$req->header($hfn)."\n";
 		}
 	&write_http_connection($h, "\r\n");
 
 	# Send the backup file contents
+	local $SIG{'PIPE'} = 'IGNORE';
 	local $buf;
+	local $writefailed;
 	open(BACKUP, $sourcefile);
 	while(read(BACKUP, $buf, 1024) > 0) {
-		&write_http_connection($h, $buf);
+		if (!&write_http_connection($h, $buf) && $can_use_write) {
+			$writefailed = $!;
+			last;
+			}
 		}
 	close(BACKUP);
 
@@ -140,59 +148,78 @@ for(my $i=0; $i<$tries; $i++) {
 	# some wierd redirects
 	local $line = &read_http_connection($h);
 	$line =~ s/\r|\n//g;
-	local %rheader;
 	local $out;
-	if ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
-		$err = "Download failed : $line";
+
+	# Read the headers
+	local %rheader;
+	while(1) {
+		local $hline = &read_http_connection($h);
+		$hline =~ s/\r\n//g;
+		print STDERR "header: $hline\n";
+		$hline =~ /^(\S+):\s+(.*)$/ || last;
+		$rheader{lc($1)} = $2;
 		}
-	else {
-		# Read the headers
-		local $rcode = $1;
-		while(1) {
-			local $hline = &read_http_connection($h);
-			$hline =~ s/\r\n//g;
-			$hline =~ /^(\S+):\s+(.*)$/ || last;
-			$rheader{lc($1)} = $2;
-			}
 
-		# Read the body
-		while(defined($buf = &read_http_connection($h, 1024))) {
-			$out .= $buf;
-			}
-		&close_http_connection($out);
-		#print STDERR "line=$line out=\n".$out."\n";
+	# Read the body
+	while(defined($buf = &read_http_connection($h, 1024))) {
+		$out .= $buf;
+		}
+	&close_http_connection($out);
 
-		if ($rcode >= 300 && $rcode < 400) {
-			# Follow the SOAP redirect
-			if ($out =~ /<Endpoint>([^<]+)<\/Endpoint>/) {
+	if ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
+		$err = "Upload failed : $line";
+		}
+	elsif ($1 >= 300 && $1 < 400) {
+		# Follow the SOAP redirect
+		if ($out =~ /<Endpoint>([^<]+)<\/Endpoint>/) {
+			if ($endpoint ne $1) {
 				$endpoint = $1;
 				$err = "Redirected to $endpoint";
+				$newendpoint = 1;
 				}
 			else {
-				$err = "Missing new endpoint in redirect : ".
-				        &html_escape($out);
+				$err = "Redirected to same endpoint $endpoint";
 				}
 			}
+		else {
+			$err = "Missing new endpoint in redirect : ".
+				&html_escape($out);
+			}
 		}
+	elsif ($writefailed) {
+		$err = "HTTP transfer failed : $writefailed";
+		}
+	print STDERR "line=$line err=$err out=\n".$out."\n";
 
 	if (!$err && $info) {
 		# Write out the info file, if given
-		local $response = $conn->put($bucket, $destfile.".info",
+		local $iconn = S3::AWSAuthConnection->new($akey, $skey);
+		local $response = $iconn->put($bucket, $destfile.".info",
 					     &serialise_variable($info));
+		print STDERR "info response=",$response->http_response->code,"\n";
 		if ($response->http_response->code != 200) {
-			$err = &text('s3_einfo',
-				     &extract_s3_message($response));
 			}
 		}
 	if ($err) {
 		# Wait a little before re-trying
-		sleep(10);
+		sleep(10) if (!$newendpoint);
 		}
 	else {
 		# Worked .. end of the job
 		last;
 		}
 	}
+
+# If it worked, save the info file too
+if (!$err && $info) {
+	local $itemp = &transname();
+	&open_tempfile(ITEMP, ">$itemp", 0, 1);
+	&print_tempfile(ITEMP, &serialise_variable($info));
+	&close_tempfile(ITEMP);
+	$err = &s3_upload($akey, $skey, $bucket, $itemp,
+			  $destfile.".info", undef, $tries);
+	}
+
 return $err;
 }
 
@@ -354,13 +381,13 @@ local ($out, $err);
 return $err;
 }
 
-# s3_make_request(conn, path, method, data)
+# s3_make_request(conn, path, method, data, [&headers])
 # Create a HTTP::Request object for talking to S3, 
 sub s3_make_request
 {
-local ($conn, $path, $method, $data) = @_;
+local ($conn, $path, $method, $data, $headers) = @_;
 my $object = S3::S3Object->new($data);
-my $headers = { };
+$headers ||= { };
 my $metadata = $object->metadata;
 my $merged = $conn->merge_meta($headers, $metadata);
 $conn->_add_auth_header($merged, $method, $path);
