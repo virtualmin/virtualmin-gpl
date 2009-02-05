@@ -66,3 +66,6 @@
 	- Test restores
 	- Test all other operations (bucket list, etc)
 	- Fix X-Amz-Meta bug
+
+ - AWstats plugin improvements for configuration
+	- FS#5199 

@@ -8832,9 +8832,10 @@ if (!$rv) {
 return $rv;
 }
 
-# extract_compressed_file(file, destdir)
+# extract_compressed_file(file, [destdir])
 # Extracts the contents of some compressed file to the given directory. Returns
 # undef if OK, or an error message on failure.
+# If the directory is not given, a test extraction is done instead.
 sub extract_compressed_file
 {
 local ($file, $dir) = @_;
@@ -8850,13 +8851,27 @@ foreach my $n (@{$needs[$format]}) {
 	&has_command($n) || return &text('addstyle_ecmd', "<tt>$m</tt>");
 	}
 local ($qfile, $qdir) = ( quotemeta($file), quotemeta($dir) );
-local @cmds = ( undef,
-		"cd $qdir && gunzip -c $qfile | tar xf -",
-		"cd $qdir && uncompress -c $qfile | tar xf -",
-		"cd $qdir && bunzip2 -c $qfile | tar xf -",
-		"cd $qdir && unzip $qfile",
-		"cd $qdir && tar xf $qfile",
-	       );
+local @cmds;
+if ($dir) {
+	# Actually extract
+	@cmds = ( undef,
+		  "cd $qdir && gunzip -c $qfile | tar xf -",
+	  	  "cd $qdir && uncompress -c $qfile | tar xf -",
+		  "cd $qdir && bunzip2 -c $qfile | tar xf -",
+		  "cd $qdir && unzip $qfile",
+		  "cd $qdir && tar xf $qfile",
+		  );
+	}
+else {
+	# Just do a test listing
+	@cmds = ( undef,
+		  "gunzip -c $qfile | tar tf -",
+	  	  "uncompress -c $qfile | tar tf -",
+		  "bunzip2 -c $qfile | tar tf -",
+		  "unzip -l $qfile",
+		  "tar tf $qfile",
+		  );
+	}
 $cmds[$format] || return "Unknown compression format";
 local $out = &backquote_command("($cmds[$format]) 2>&1 </dev/null");
 return $? ? &text('addstyle_ecmdfailed',

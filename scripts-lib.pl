@@ -362,6 +362,16 @@ foreach my $f (@files) {
 				next;
 				}
 
+			# Check that it is a valid compressed file
+			if ($fmt) {
+				local $e = &extract_compressed_file($temp);
+				if ($e) {
+					$firsterror ||=
+					  &text('scripts_edownload3', $url, $e);
+					next;
+					}
+				}
+
 			# If we got this far, it must have worked!
 			$firsterror = undef;
 			last;

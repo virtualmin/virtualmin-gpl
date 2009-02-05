@@ -2997,6 +2997,7 @@ scripts_ephpvers=This script cannot be installed, as it requires PHP version $1.
 scripts_return=list of scripts
 scripts_edownload=Download of $2 failed : $1
 scripts_edownload2=Download of $1 is not an archive file - perhaps an error page
+scripts_edownload3=Download of $1 is an incomplete archive file : $2
 scripts_eurl=Unsupported URL $1
 scripts_ierr=Failed to install script
 scripts_installing=Now installing $1 version $2 ..

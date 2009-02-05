@@ -344,6 +344,7 @@ if ($ok) {
 	}
 else {
 	&$second_print($text{'scripts_failed'});
+	exit(1);
 	}
 
 &release_lock_web($d);
