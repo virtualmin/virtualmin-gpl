@@ -149,6 +149,7 @@ foreach my $d (@doms) {
 	$ipcount{$d->{'ip'}}++;
 	$ipdom{$d->{'ip'}} ||= $d;
 	}
+local %doneip;
 if (keys %ipdom > 1) {
 	local $defip = &get_default_ip();
 	if (defined(&list_resellers)) {
@@ -177,6 +178,28 @@ if (keys %ipdom > 1) {
 			     $ipcount{$ip}, $ipdom{$ip}->{'dom'} ]);
 		}
 	$info->{'ips'} = \@ips;
+	}
+
+# IP ranges available
+local $tmpl = &get_template(0);
+local @ranges = split(/\s+/, $tmpl->{'ranges'});
+local @ipranges;
+local %taken = &interface_ip_addresses();
+foreach my $r (@ranges) {
+	$r =~ /^(\d+\.\d+\.\d+)\.(\d+)\-(\d+)$/ || next;
+        local ($base, $s, $e) = ($1, $2, $3);
+	local ($ipcount, $usedcount) = (0, 0);
+	for(my $j=$s; $j<=$e; $j++) {
+		local $try = "$base.$j";
+		if ($doneip{$try} || $taken{$try}) {
+			$usedcount++;
+			}
+		$ipcount++;
+		}
+	push(@ipranges, [ $r, $ipcount, $usedcount ]);
+	}
+if (@ipranges) {
+	$info->{'ipranges'} = \@ipranges;
 	}
 
 # Program information

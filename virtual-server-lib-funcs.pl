@@ -5174,21 +5174,28 @@ return $out;
 sub free_ip_address
 {
 local ($tmpl) = @_;
-&foreign_require("net", "net-lib.pl");
-local %taken = map { $_->{'address'}, $_ } (&net::boot_interfaces(),
-					    &net::active_interfaces());
+local %taken = &interface_ip_addresses();
 local @ranges = split(/\s+/, $tmpl->{'ranges'});
 local $r;
 foreach $r (@ranges) {
 	$r =~ /^(\d+\.\d+\.\d+)\.(\d+)\-(\d+)$/ || next;
 	local ($base, $s, $e) = ($1, $2, $3);
-	local $j;
-	for($j=$s; $j<=$e; $j++) {
+	for(my $j=$s; $j<=$e; $j++) {
 		local $try = "$base.$j";
 		return $try if (!$taken{$try} && !&ping_ip_address($try));
 		}
 	}
 return undef;
+}
+
+# interface_ip_addresses()
+# Returns a hash of IP addresses that are in use by network interfaces
+sub interface_ip_addresses
+{
+&foreign_require("net", "net-lib.pl");
+local %taken = map { $_->{'address'}, $_ } (&net::boot_interfaces(),
+					    &net::active_interfaces());
+return %taken;
 }
 
 # ping_ip_address(hostname|ip)
