@@ -76,7 +76,7 @@ $d->{'aliascopy'} && &usage("Aliases cannot be edited in alias domains in copy m
 # Check for clash
 &obtain_lock_mail($d);
 @aliases = &list_domain_aliases($d);
-$email = $from eq "*" ? "%1\@$domain" : "$from\@$domain";
+$email = $from eq "*" ? "\@$domain" : "$from\@$domain";
 ($clash) = grep { $_->{'from'} eq $email } @aliases;
 $clash && &usage("An alias for the same email address already exists");
 
@@ -96,7 +96,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Adds a mail alias to a virtual server.\n";
 print "\n";
 print "usage: create-alias.pl   --domain domain.name\n";
-print "                         --from mailbox\n";
+print "                         --from mailbox|\"*\"\n";
 print "                         --to address [--to address ...]\n";
 if ($can_alias_comments) {
 	print "                         [--desc \"Comment text\"]\n";

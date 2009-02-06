@@ -117,7 +117,7 @@ sub nice_from
 {
 local $f = $_[0];
 $f =~ s/\@\Q$d->{'dom'}\E$//;
-return $f eq "%1" ? "*" : $f;
+return $f eq "" ? "*" : $f;
 }
 
 sub usage

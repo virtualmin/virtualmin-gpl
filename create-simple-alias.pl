@@ -8,7 +8,8 @@ This command allows aliases using autoresponders or other more complex
 destination types to be created more easily. You must supply at least the
 C<--domain> and C<--from> parameters, followed by a domain name and alias
 name (without the @) respectively. The optional C<--desc> parameter can be
-used to set a comment or description for the alias.
+used to set a comment or description for the alias. To create an alias that
+matches all email in the domain, use the option C<--from "*">.
 
 To just forward email to some other address, the C<--forward> parameter can
 be used. It can be given multiple times, and each instance must be followed by an email address.
@@ -99,7 +100,7 @@ $d->{'aliascopy'} && &usage("Aliases cannot be edited in alias domains in copy m
 # Check for clash
 &obtain_lock_mail($d);
 @aliases = &list_domain_aliases($d);
-$email = $from eq "*" ? "%1\@$domain" : "$from\@$domain";
+$email = $from eq "*" ? "\@$domain" : "$from\@$domain";
 ($clash) = grep { $_->{'from'} eq $email } @aliases;
 $clash && &usage("An alias for the same email address already exists");
 
@@ -140,7 +141,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Adds a simple mail alias to a virtual server.\n";
 print "\n";
 print "usage: create-simple-alias.pl   --domain domain.name\n";
-print "                                --from mailbox\n";
+print "                                --from mailbox|\"*\"\n";
 print "                                [--forward user\@domain]*\n";
 print "                                [--local local-user]\n";
 print "                                [--bounce]\n";
