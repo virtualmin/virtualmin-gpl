@@ -301,20 +301,30 @@ foreach my $f (@files) {
 		local @urls;
 		my $temp = &transname($f->{'file'});
 		local $newurl = &convert_osdn_url($f->{'url'});
-		push(@urls, $newurl || $f->{'url'});
+		push(@urls, [ $newurl || $f->{'url'}, $f->{'nocache'} ]);
 		local $vurl = "http://$script_download_host:$script_download_port$script_download_dir$f->{'file'}";
 		if ($f->{'virtualmin'}) {
 			# Use Virtualmin site first, for scripts that don't
 			# have a version-specific name
-			unshift(@urls, $vurl);
+			unshift(@urls, [ $vurl, $f->{'nocache'} ]);
 			}
 		else {
-			push(@urls, $vurl);
+			push(@urls, [ $vurl, $f->{'nocache'} ]);
+			}
+
+		# Add to URL list attempts with no cache, for cached URLs
+		my @firsturls = @urls;
+		foreach my $urlcache (@firsturls) {
+			if (&check_in_http_cache($urlcache->[0]) &&
+			    !$urlcache->[1]) {
+				push(@urls, [ $urlcache->[0], 1 ]);
+				}
 			}
 
 		# Try each URL
 		local $firsterror;
-		foreach my $url (@urls) {
+		foreach my $urlcache (@urls) {
+			my ($url, $nocache) = @$urlcache;
 			local $error;
 			$progress_callback_url = $url;
 			local %headers;
@@ -327,7 +337,7 @@ foreach my $f (@files) {
 					&parse_http_url($url);
 				&http_download($host, $port, $page, $temp,
 					       \$error, $cb, $ssl, undef, undef,
-					       undef, 0, $f->{'nocache'},
+					       undef, 0, $nocache,
 					       \%headers);
 				}
 			elsif ($url =~ /^ftp:\/\/([^\/]+)(\/.*)/) {
