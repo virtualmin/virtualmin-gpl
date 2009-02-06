@@ -102,33 +102,31 @@ my $endpoint = undef;
 for(my $i=0; $i<$tries; $i++) {
 	local $newendpoint;
 	$err = undef;
-	print STDERR "endpoint=$endpoint\n";
 	local $conn = S3::AWSAuthConnection->new($akey, $skey, undef,
 						 $endpoint);
 	if (!$conn) {
 		$err = $text{'s3_econn'};
 		next;
 		}
-	local $object = S3::S3Object->new("");
+	my $path = $endpoint ? $destfile : "$bucket/$destfile";
+	my $authpath = "$bucket/$destfile";
 
-	# Delete any .info file first, as it will no longer be valid
-	$conn->delete($bucket, $destfile.".info");
+	# Delete any .info file first, as it will no longer be valid. Only needs
+	# to be done the first time.
+	if (!$endpoint) {
+		$conn->delete($bucket, $destfile.".info");
+		}
 
 	# Use the S3 library to create a request object, but use Webmin's HTTP
 	# function to open it.
-	my $path = $endpoint ? $destfile : "$bucket/$destfile";
-	my $authpath = "$bucket/$destfile";
-	print STDERR "path=$path\n";
 	local $req = &s3_make_request($conn, $path, "PUT", "dummy",
 				      { 'Content-Length' => $st[7] },
 				      $authpath);
-	print STDERR "uri=",$req->uri,"\n";
 	local ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
 	local $h = &make_http_connection(
 		$host, $port, $ssl, $req->method, $page);
 	foreach my $hfn ($req->header_field_names) {
 		&write_http_connection($h, $hfn.": ".$req->header($hfn)."\r\n");
-		print STDERR "sending header ".$hfn.": ".$req->header($hfn)."\n";
 		}
 	&write_http_connection($h, "\r\n");
 
@@ -149,19 +147,18 @@ for(my $i=0; $i<$tries; $i++) {
 	# some wierd redirects
 	local $line = &read_http_connection($h);
 	$line =~ s/\r|\n//g;
-	local $out;
 
 	# Read the headers
 	local %rheader;
 	while(1) {
 		local $hline = &read_http_connection($h);
 		$hline =~ s/\r\n//g;
-		print STDERR "header: $hline\n";
 		$hline =~ /^(\S+):\s+(.*)$/ || last;
 		$rheader{lc($1)} = $2;
 		}
 
 	# Read the body
+	local $out;
 	while(defined($buf = &read_http_connection($h, 1024))) {
 		$out .= $buf;
 		}
@@ -177,6 +174,7 @@ for(my $i=0; $i<$tries; $i++) {
 				$endpoint = $1;
 				$err = "Redirected to $endpoint";
 				$newendpoint = 1;
+				$i--;	# Doesn't count as a try
 				}
 			else {
 				$err = "Redirected to same endpoint $endpoint";
@@ -190,15 +188,15 @@ for(my $i=0; $i<$tries; $i++) {
 	elsif ($writefailed) {
 		$err = "HTTP transfer failed : $writefailed";
 		}
-	print STDERR "line=$line err=$err out=\n".$out."\n";
 
 	if (!$err && $info) {
 		# Write out the info file, if given
 		local $iconn = S3::AWSAuthConnection->new($akey, $skey);
 		local $response = $iconn->put($bucket, $destfile.".info",
 					     &serialise_variable($info));
-		print STDERR "info response=",$response->http_response->code,"\n";
 		if ($response->http_response->code != 200) {
+			$err = &text('s3_einfo',
+                                     &extract_s3_message($response));
 			}
 		}
 	if ($err) {
@@ -357,27 +355,97 @@ return undef;
 # success or an error message on failure.
 sub s3_download
 {
-local ($akey, $skey, $bucket, $file, $destfile) = @_;
+local ($akey, $skey, $bucket, $file, $destfile, $tries) = @_;
+$tries ||= 1;
 &require_s3();
-local $conn = S3::AWSAuthConnection->new($akey, $skey);
-return $text{'s3_econn'} if (!$conn);
 
-# Use the S3 library to create a request object, but use Webmin's HTTP
-# function to open it.
-my $path = "$bucket/$file";
-local $req = &s3_make_request($conn, $path, "GET", "");
-local ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
-local $h = &make_http_connection($host, $port, $ssl, $req->method, $page);
-local @st = stat($sourcefile);
-foreach my $hfn ($req->header_field_names) {
-	&write_http_connection($h, $hfn.": ".$req->header($hfn)."\r\n");
+my $err;
+my $endpoint = undef;
+for(my $i=0; $i<$tries; $i++) {
+	local $newendpoint;
+	$err = undef;
+
+	# Connect to S3
+	local $conn = S3::AWSAuthConnection->new($akey, $skey, undef,
+						 $endpoint);
+	if (!$conn) {
+		$err = $text{'s3_econn'};
+		next;
+		}
+
+	# Use the S3 library to create a request object, but use Webmin's HTTP
+	# function to open it.
+	my $path = $endpoint ? $file : "$bucket/$file";
+	my $authpath = "$bucket/$file";
+	local $req = &s3_make_request($conn, $path, "GET", "dummy",
+				      undef, $authpath);
+	local ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
+	local $h = &make_http_connection(
+		$host, $port, $ssl, $req->method, $page);
+	local @st = stat($sourcefile);
+	foreach my $hfn ($req->header_field_names) {
+		&write_http_connection($h, $hfn.": ".$req->header($hfn)."\r\n");
+		}
+	&write_http_connection($h, "\r\n");
+
+	# Read back response .. this needs to be our own code, as S3 does
+	# some wierd redirects
+	local $line = &read_http_connection($h);
+	$line =~ s/\r|\n//g;
+
+	# Read the headers
+	local %rheader;
+	while(1) {
+		local $hline = &read_http_connection($h);
+		$hline =~ s/\r\n//g;
+		$hline =~ /^(\S+):\s+(.*)$/ || last;
+		$rheader{lc($1)} = $2;
+		}
+
+	if ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
+		$err = "Download failed : $line";
+		}
+	elsif ($1 >= 300 && $1 < 400) {
+		# Read the body for the redirect
+		local $out;
+		while(defined($buf = &read_http_connection($h, 1024))) {
+			$out .= $buf;
+			}
+		if ($out =~ /<Endpoint>([^<]+)<\/Endpoint>/) {
+			if ($endpoint ne $1) {
+				$endpoint = $1;
+				$err = "Redirected to $endpoint";
+				$newendpoint = 1;
+				$i--;	# Doesn't count as a try
+				}
+			else {
+				$err = "Redirected to same endpoint $endpoint";
+				}
+			}
+		else {
+			$err = "Missing new endpoint in redirect : ".
+				&html_escape($out);
+			}
+		}
+	else {
+		# Read the actual data to the file
+		&open_tempfile(S3SAVE, ">$destfile");
+		while(defined($buf = &read_http_connection($h, 1024))) {
+			&print_tempfile(S3SAVE, $buf);
+			}
+		&close_tempfile(S3SAVE);
+		}
+	&close_http_connection($h);
+
+	if ($err) {
+		# Wait a little before re-trying
+		sleep(10) if (!$newendpoint);
+		}
+	else {
+		# Worked .. end of the job
+		last;
+		}
 	}
-&write_http_connection($h, "\r\n");
-
-# Read back response
-local ($out, $err);
-&complete_http_download($h, $destfile, \$err);
-&close_http_connection($h);
 
 return $err;
 }

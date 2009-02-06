@@ -169,7 +169,6 @@ sub _make_request {
     $data ||= '';
     $metadata ||= {};
 
-    print STDERR "_make_request for $method $path to ",$self->{SERVER},"\n";
     my $http_headers = merge_meta($headers, $metadata);
 
     $self->_add_auth_header($http_headers, $method, $authpath);
@@ -178,7 +177,6 @@ sub _make_request {
     my $request = HTTP::Request->new($method, $url, $http_headers);
     $request->content($data);
     my $response = $self->{AGENT}->request($request);
-    print STDERR "response = ",$response->content,"\n";
     if ($response->code >= 300 && $response->code < 400) {
       # S3 redirect .. read the new endpoint from the content
       if ($response->content =~ /<Endpoint>([^<]*)<\/Endpoint>/i) {

@@ -78,7 +78,6 @@ sub canonical_string {
     # don't include anything after the first ? in the resource...
     $path =~ /^([^?]*)/;
     $buf .= "/$1";
-    print STDERR "buf=$buf\n";
 
     # ...unless there is an acl or torrent parameter
     if ($path =~ /[&?]acl($|=|&)/) {
@@ -123,7 +122,6 @@ sub merge_meta {
         $http_header->header($k => $v);
     }
     while (my ($k, $v) = each %$metadata) {
-        print STDERR "merging $k : $v\n";
         $http_header->header("$METADATA_PREFIX$k" => $v);
     }
 
