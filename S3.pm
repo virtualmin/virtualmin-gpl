@@ -78,6 +78,7 @@ sub canonical_string {
     # don't include anything after the first ? in the resource...
     $path =~ /^([^?]*)/;
     $buf .= "/$1";
+    print STDERR "buf=$buf\n";
 
     # ...unless there is an acl or torrent parameter
     if ($path =~ /[&?]acl($|=|&)/) {

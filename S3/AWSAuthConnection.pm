@@ -161,21 +161,47 @@ sub list_all_my_buckets {
 }
 
 sub _make_request {
-    my ($self, $method, $path, $headers, $data, $metadata) = @_;
+    my ($self, $method, $path, $headers, $data, $metadata, $authpath) = @_;
+    $authpath ||= $path;
     croak 'must specify method' unless $method;
     croak 'must specify path' unless defined $path;
     $headers ||= {};
     $data ||= '';
     $metadata ||= {};
 
+    print STDERR "_make_request for $method $path to ",$self->{SERVER},"\n";
     my $http_headers = merge_meta($headers, $metadata);
 
-    $self->_add_auth_header($http_headers, $method, $path);
+    $self->_add_auth_header($http_headers, $method, $authpath);
     my $protocol = $self->{IS_SECURE} ? 'https' : 'http';
     my $url = "$protocol://$self->{SERVER}:$self->{PORT}/$path";
     my $request = HTTP::Request->new($method, $url, $http_headers);
     $request->content($data);
-    return $self->{AGENT}->request($request);
+    my $response = $self->{AGENT}->request($request);
+    print STDERR "response = ",$response->content,"\n";
+    if ($response->code >= 300 && $response->code < 400) {
+      # S3 redirect .. read the new endpoint from the content
+      if ($response->content =~ /<Endpoint>([^<]*)<\/Endpoint>/i) {
+	my $oldserver = $self->{SERVER};
+	$self->{SERVER} = $1;
+	my $newpath = $path;
+	$newpath =~ s/^([^\/]+)//;
+	if ($newpath eq "") {
+	  # When requesting a bucket like /foo originally, we have to
+	  # request ? from foo.s3.amazonaws.com instead. HOWEVER, the path
+	  # to sign is still like /foo/
+	  $newpath = "?";
+	  $path .= "/";
+	}
+	# If the new path ends up like /bar.com.tar.gz, it must be converted
+	# to bar.com.tar.gz for the HTTP request
+        $newpath =~ s/^\///;
+        $response = $self->_make_request($method, $newpath, $headers,
+					 $data, $metadata, $path);
+	$self->{SERVER} = $oldserver;
+      }
+    }
+    return $response;
 }
 
 sub _add_auth_header {

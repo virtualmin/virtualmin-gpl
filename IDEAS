@@ -63,8 +63,7 @@
 	- Use in DNS, Apache
 
  - S3 and europe
-	- Test restores
-	- Test all other operations (bucket list, etc)
+	- Fix redirects in restores
 	- Remove STDERR debugging
 
  - AWstats plugin improvements for configuration
