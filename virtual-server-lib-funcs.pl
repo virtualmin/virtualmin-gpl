@@ -10555,6 +10555,13 @@ if ($config{'mysql'}) {
 	else {
 		&$second_print($text{'check_mysqlok'});
 		}
+
+	# If MYSQL_PWD doesn't work, disable it
+	if (defined(&mysql::working_env_pass) &&
+	    !&mysql::working_env_pass()) {
+		$mysql::config{'nopwd'} = 1;
+		&mysql::save_module_config();
+		}
 	}
 
 if ($config{'postgres'}) {
