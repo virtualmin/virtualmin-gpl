@@ -295,6 +295,7 @@ else {
 				# Custom home directory for mailbox user
 				$home = "$d->{'home'}/$in{'home'}";
 				}
+			$user->{'maybecreatehome'} = 1;
 			}
 		elsif ($d) {
 			if ($user->{'webowner'}) {
@@ -303,13 +304,15 @@ else {
 				}
 			else {
 				# Auto home directory for mailbox user
-				$home = "$d->{'home'}/$config{'homes_dir'}/$in{'mailuser'}";
+				$home = "$d->{'home'}/$config{'homes_dir'}/".
+					$in{'mailuser'};
 				}
 			}
 		else {
 			# Auto home directory for local user
 			$home = &useradmin::auto_home_dir(
-				$home_base, $in{'mailuser'}, $config{'localgroup'});
+				$home_base, $in{'mailuser'},
+				$config{'localgroup'});
 			}
 
 		# Make sure home exists, for web owner user
@@ -413,7 +416,8 @@ else {
 			}
 
 		# Check if home directory already exists
-		if (-e $home && !$user->{'nocreatehome'}) {
+		if (-e $home && !$user->{'nocreatehome'} &&
+		    !$user->{'maybecreatehome'}) {
 			&error(&text('user_emkhome', $home));
 			}
 
@@ -472,8 +476,10 @@ else {
 		# Create the user and virtusers and alias
 		&create_user($user, $d);
 
-		if ($home && !$user->{'nocreatehome'}) {
-			# Create his homedir
+		if ($home && !$user->{'nocreatehome'} &&
+		    (!$user->{'maybecreatehome'} || !-d $home)) {
+			# Create his homedir, unless either this is a user
+			# who has none, or it already exists
 			&create_user_home($user, $d);
 			}
 

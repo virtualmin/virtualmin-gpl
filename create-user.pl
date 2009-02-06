@@ -217,9 +217,7 @@ if (!$user->{'fixedhome'}) {
 			$home = "$d->{'home'}/$home";
 			}
 		$user->{'home'} = $home;
-		if (-d $home && !$user->{'nocreatehome'}) {
-			&usage(&text('user_emkhome', $home));
-			}
+		$user->{'maybecreatehome'} = 1;
 		}
 	elsif ($user->{'webowner'}) {
 		# Automatic public_html home
@@ -305,7 +303,8 @@ if ($lerr = &too_long($user->{'user'})) {
 # Create the user and virtusers and alias
 &create_user($user, $d);
 
-if ($user->{'home'} && !$user->{'nocreatehome'}) {
+if ($user->{'home'} && !$user->{'nocreatehome'} &&
+    (!$user->{'maybecreatehome'} || !-d $user->{'home'})) {
 	# Create his homedir
 	&create_user_home($user, $d);
 	}
