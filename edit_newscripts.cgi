@@ -86,7 +86,7 @@ print &ui_form_columns_table(
 # Show form to allow master admin
 print &ui_hr();
 print "<a name=allow>\n";
-($allowmaster, $allowvers) = &get_script_master_permissions();
+($allowmaster, $allowvers, $denydefault) = &get_script_master_permissions();
 print &ui_form_start("save_scriptallow.cgi");
 print &ui_table_start($text{'newscripts_allowheader'}, undef, 2);
 
@@ -97,6 +97,10 @@ print &ui_table_row($text{'newscripts_allowmaster'},
 # Can install any version?
 print &ui_table_row($text{'newscripts_allowvers'},
 	&ui_yesno_radio("allowvers", $allowvers));
+
+# Deny new scripts by default?
+print &ui_table_row($text{'newscripts_denydefault'},
+	&ui_yesno_radio("denydefault", $denydefault));
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);

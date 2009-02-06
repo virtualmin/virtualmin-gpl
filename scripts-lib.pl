@@ -32,7 +32,8 @@ local %unavail;
 &read_file_cached($scripts_unavail_file, \%unavail);
 local @rv = &list_scripts();
 if (!&master_admin() || !$unavail{'allowmaster'}) {
-	@rv = grep { !$unavail{$_} } @rv;
+	@rv = grep { $unavail{$_} eq '0' ||
+		     $unavail{$_} eq '' && !$unavail{'denydefault'} } @rv;
 	}
 return @rv;
 }
@@ -103,6 +104,8 @@ local $allowmaster;
 if (&master_admin()) {
 	($allowmaster) = &get_script_master_permissions();
 	}
+local $avail = $unavail{$name} eq '0' ||
+	       $unavail{$name} eq '' && !$unavail{'denydefault'};
 local $rv = { 'name' => $name,
 	      'desc' => &$dfunc(),
 	      'longdesc' => defined(&$lfunc) ? &$lfunc() : undef,
@@ -140,7 +143,7 @@ local $rv = { 'name' => $name,
 	      'check_latest_func' => "script_${name}_check_latest",
 	      'commands_func' => "script_${name}_commands",
 	      'passmode_func' => "script_${name}_passmode",
-	      'avail' => !$unavail{$name} && !$disabled || $allowmaster,
+	      'avail' => $avail && !$disabled || $allowmaster,
 	      'enabled' => !$disabled,
 	      'minversion' => $unavail{$name."_minversion"},
 	    };
@@ -264,10 +267,12 @@ local ($scripts) = @_;
 &read_file_cached($scripts_unavail_file, \%unavail);
 foreach my $script (@$scripts) {
 	local $n = $script->{'name'};
-	delete($unavail{$n});
 	delete($unavail{$n."_minversion"});
 	if (!$script->{'avail'}) {
 		$unavail{$n} = 1;
+		}
+	else {
+		$unavail{$n} = 0;
 		}
 	if ($script->{'minversion'}) {
 		$unavail{$n."_minversion"} = $script->{'minversion'};
@@ -2160,23 +2165,25 @@ return wantarray ? @rv : join(", ", @rv);
 
 # get_script_master_permissions()
 # Returns flags indicating if the master admin is allowed to use
-# disabled scripts or versions
+# disabled scripts or versions, and if new scripts are denied by default
 sub get_script_master_permissions
 {
 local %unavail;
 &read_file_cached($scripts_unavail_file, \%unavail);
-return ($unavail{'allowmaster'}, $unavail{'allowvers'});
+return ($unavail{'allowmaster'}, $unavail{'allowvers'},
+	$unavail{'denydefault'});
 }
 
-# save_script_master_permissions(allow-disabled, allow-versions)
+# save_script_master_permissions(allow-disabled, allow-versions, deny-default)
 # Updates flags indicating what the master is allow to do for disabled scripts
 sub save_script_master_permissions
 {
-local ($allow, $allowvers) = @_;
+local ($allow, $allowvers, $denydefault) = @_;
 local %unavail;
 &lock_file($scripts_unavail_file);
 &read_file_cached($scripts_unavail_file, \%unavail);
-($unavail{'allowmaster'}, $unavail{'allowvers'}) = ($allow, $allowvers);
+($unavail{'allowmaster'}, $unavail{'allowvers'},
+ $unavail{'denydefault'}) = ($allow, $allowvers, $denydefault);
 &write_file($scripts_unavail_file, \%unavail);
 &unlock_file($scripts_unavail_file);
 }

@@ -3243,6 +3243,7 @@ newscripts_wnotify1=Only once per domain for each script
 newscripts_allowheader=Master administrator restrictions
 newscripts_allowmaster=Can install disabled scripts?
 newscripts_allowvers=Can install disallowed versions?
+newscripts_denydefault=New scripts are un-available by default?
 
 addscripts_err=Failed to add script installer
 addscripts_elocal=Local file does not exist
