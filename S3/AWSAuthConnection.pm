@@ -184,6 +184,9 @@ sub _add_auth_header {
     if (not $headers->header('Date')) {
         $headers->header(Date => time2str(time));
     }
+    if (not $headers->header('Host')) {
+        $headers->header(Host => $self->{SERVER});
+    }
     my $canonical_string = S3::canonical_string($method, $path, $headers);
     my $encoded_canonical = S3::encode($self->{AWS_SECRET_ACCESS_KEY}, $canonical_string);
     $headers->header(Authorization => "AWS $self->{AWS_ACCESS_KEY_ID}:$encoded_canonical");

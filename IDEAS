@@ -65,7 +65,7 @@
  - S3 and europe
 	- Test restores
 	- Test all other operations (bucket list, etc)
-	- Fix X-Amz-Meta bug
+	- Remove STDERR debugging
 
  - AWstats plugin improvements for configuration
 	- FS#5199 

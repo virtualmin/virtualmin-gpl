@@ -122,6 +122,7 @@ sub merge_meta {
         $http_header->header($k => $v);
     }
     while (my ($k, $v) = each %$metadata) {
+        print STDERR "merging $k : $v\n";
         $http_header->header("$METADATA_PREFIX$k" => $v);
     }
 

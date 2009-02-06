@@ -117,10 +117,11 @@ for(my $i=0; $i<$tries; $i++) {
 	# Use the S3 library to create a request object, but use Webmin's HTTP
 	# function to open it.
 	my $path = $endpoint ? $destfile : "$bucket/$destfile";
+	my $authpath = "$bucket/$destfile";
 	print STDERR "path=$path\n";
 	local $req = &s3_make_request($conn, $path, "PUT", "dummy",
-				      { 'Content-Length' => $st[7],
-					'Host' => $host });
+				      { 'Content-Length' => $st[7] },
+				      $authpath);
 	print STDERR "uri=",$req->uri,"\n";
 	local ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
 	local $h = &make_http_connection(
@@ -381,16 +382,17 @@ local ($out, $err);
 return $err;
 }
 
-# s3_make_request(conn, path, method, data, [&headers])
+# s3_make_request(conn, path, method, data, [&headers], [authpath])
 # Create a HTTP::Request object for talking to S3, 
 sub s3_make_request
 {
-local ($conn, $path, $method, $data, $headers) = @_;
+local ($conn, $path, $method, $data, $headers, $authpath) = @_;
 my $object = S3::S3Object->new($data);
 $headers ||= { };
+$authpath ||= $path;
 my $metadata = $object->metadata;
-my $merged = $conn->merge_meta($headers, $metadata);
-$conn->_add_auth_header($merged, $method, $path);
+my $merged = S3::merge_meta($headers, $metadata);
+$conn->_add_auth_header($merged, $method, $authpath);
 my $protocol = $conn->{IS_SECURE} ? 'https' : 'http';
 my $url = "$protocol://$conn->{SERVER}:$conn->{PORT}/$path";
 
