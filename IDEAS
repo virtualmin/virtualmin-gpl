@@ -55,7 +55,6 @@
 	  set_featurelimits_from_template and set_capabilities_from_template
 	- All domain creation needs to set plan (batch, import, migrate,
 	  command-line)
-	- Way to set default plan
 
  - IPv6 support
 	- FS#4239

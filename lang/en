@@ -1803,6 +1803,8 @@ log_delete_link=Deleted custom link $1
 log_create_plan=Created account plan $1
 log_modify_plan=Modified account plan $1
 log_delete_plan=Deleted account plan $1
+log_default_plan=Change default account plan to $1
+log_nodefault_plan=Cleared default account plan
 log_delete_plans=Deleted $1 account plans
 
 backup_title=Backup Virtual Servers
@@ -4631,6 +4633,10 @@ plans_resel=Reseller
 plans_noresel=None
 plans_ecannot=You are not allowed to manage plans
 plans_return=list of plans
+plans_setdef=Set default plan to:
+plans_nodef=None - use first in list
+plans_savedef=Change Default
+plans_esetdef=Selected plan does not exist or is not available to you
 
 plan_title1=Create Account Plan
 plan_title2=Edit Account Plan

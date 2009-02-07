@@ -85,13 +85,39 @@ else {
 	}
 }
 
-# get_default_plan()
-# Returns the default plan for the current user
+# get_default_plan([allow-undef])
+# Returns the default plan for the current user - may be undef if none is set
 sub get_default_plan
 {
+local ($allowundef) = @_;
 local @plans = sort { $a->{'id'} <=> $b->{'id'} } &list_available_plans();
-local ($defplan) = grep { $_->{'default'} } @plans;
-return $defplan || $plans[0];
+local $defplan;
+if (&reseller_admin()) {
+	($defplan) = grep { $_->{'id'} eq $access{'defplan'} } @plans;
+	}
+if (!$defplan) {
+	($defplan) = grep { $_->{'id'} eq $config{'init_plan'} } @plans;
+	}
+if (!$defplan && !$allowundef) {
+	$defplan = $plans[0];
+	}
+return $defplan;
+}
+
+# set_default_plan(&plan)
+# Sets the default plan for the current user. If he is a reseller, then this
+# sets a reseller-level option .. otherwise, the global default iset
+sub set_default_plan
+{
+local ($plan) = @_;
+if (&reseller_admin()) {
+	$access{'defplan'} = $plan ? $plan->{'id'} : undef;
+	&save_module_acl(\%access);
+	}
+else {
+	$config{'init_plan'} = $plan ? $plan->{'id'} : undef;
+	&save_module_config();
+	}
 }
 
 # get_plan(id)

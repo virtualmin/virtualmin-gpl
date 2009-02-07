@@ -52,4 +52,18 @@ print &ui_form_columns_table(
 	undef,
 	$canplans == 2 ? $text{'plans_none'} : $text{'plans_none2'});
 
+# Show form for setting the default
+@aplans = &list_available_plans();
+if (@aplans) {
+	print &ui_hr();
+	$defplan = &get_default_plan(1);
+	print &ui_form_start("save_defplan.cgi");
+	print "<b>$text{'plans_setdef'}</b>\n";
+	print &ui_select("plan", $defplan ? $defplan->{'id'} : '',
+			 [ [ '', "&lt;$text{'plans_nodef'}&gt;" ],
+			   map { [ $_->{'id'}, $_->{'name'} ] } @aplans ]);
+	print &ui_submit($text{'plans_savedef'});
+	print &ui_form_end();
+	}
+
 &ui_print_footer("", $text{'index_return'});
