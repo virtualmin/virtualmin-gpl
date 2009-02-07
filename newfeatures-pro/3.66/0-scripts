@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin installer to version 3.1.2, TextPattern to 4.0.8, Magento to 1.2.1, Typo to 5.2, Moodle to 1.9.4 and 1.7.7, phpList to 2.10.9, SugarCRM to 5.2.0a, WordPress MU to 2.7, Horde Webmail to 1.2.2, Horde to 3.3.3, IMP to 4.3.3, OpenX to 2.6.4, ZenPhoto to 1.2.3, Zikula to 1.1.1, Coppermine to 1.4.20, SMF to 1.1.8, and phpMyFAQ to 2.0.11.
+html=Updated the phpMyAdmin installer to version 3.1.2, TextPattern to 4.0.8, Magento to 1.2.1, Typo to 5.2, Moodle to 1.9.4 and 1.7.7, phpList to 2.10.9, SugarCRM to 5.2.0a, WordPress MU to 2.7, Horde Webmail to 1.2.2, Horde to 3.3.3, IMP to 4.3.3, OpenX to 2.6.4, ZenPhoto to 1.2.3, Zikula to 1.1.1, Coppermine to 1.4.20, SMF to 1.1.8, MediaWiki to 1.13.4, and phpMyFAQ to 2.0.11.
 master=1
 reseller=1
 domain=1
