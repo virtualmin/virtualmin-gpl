@@ -239,6 +239,7 @@ $d->{'mailboxlimit'} = $plan->{'mailboxlimit'};
 $d->{'aliaslimit'} = $plan->{'aliaslimit'};
 $d->{'dbslimit'} = $plan->{'dbslimit'};
 $d->{'domslimit'} = $plan->{'domslimit'} eq '' ? '*' :
+		     $plan->{'domslimit'} eq '0' ? '' :
 		     $plan->{'domslimit'};
 $d->{'aliasdomslimit'} = $plan->{'aliasdomslimit'} eq '' ? '*' :
 			  $plan->{'aliasdomslimit'};
@@ -276,7 +277,7 @@ else {
 sub set_capabilities_from_plan
 {
 local ($d, $tmpl) = @_;
-if ($plan->{'capabilities'} ne 'none') {
+if ($plan->{'capabilities'}) {
 	local %caps = map { $_, 1 } split(/\s+/, $plan->{'capabilities'});
 	foreach my $ed (@edit_limits) {
 		$d->{'edit_'.$ed} = $caps{$ed} ? 1 : 0;

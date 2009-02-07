@@ -273,7 +273,8 @@ print &ui_table_row(&hlink($text{'form_template'},"template"),
 
 # Show plan selection field, for top-level domains
 if (!$parentdom) {
-	foreach $p (&list_available_plans()) {
+	foreach $p (sort { $a->{'name'} cmp $b->{'name'} }
+			 &list_available_plans()) {
 		push(@popts, [ $p->{'id'}, $p->{'name'} ]);
 		}
 	print &ui_table_row(&hlink($text{'form_plan'}, "plan"),

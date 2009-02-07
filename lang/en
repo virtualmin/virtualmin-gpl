@@ -1169,6 +1169,8 @@ save_fixvirts=Changing domain name in mail aliases ..
 save_aliascopy0=Switching to catchall alias mode ..
 save_aliascopy1=Switching to alias copy mode ..
 save_aliasip=Changing IP address of alias server $1 to $2 ..
+save_applyplan=Changing plan to <i>$1</i>, and applying new limits ..
+save_plan=Changing plan to <i>$1</i> ..
 
 luser_err=Failed to save local mailbox
 luser_etaken=A user with the same name already exists
@@ -3735,6 +3737,7 @@ cmass_upload=Uploaded file $1
 cmass_text=Batch lines below..<br>$1
 cmass_ptmpl=Template for parent domains
 cmass_stmpl=Template for sub-domains
+cmass_plan=Plan for parent domains
 cmass_err=Failed to batch create servers
 cmass_eline=Error on line $1 : $2
 cmass_eline2=Error on line $1 for $3 : $2

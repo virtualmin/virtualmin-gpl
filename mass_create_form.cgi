@@ -42,6 +42,14 @@ print &ui_table_row($text{'cmass_stmpl'},
 		       [ map { [ $_->{'id'}, $_->{'name'} ] } @stmpls ]),
 	    1, \@tds);
 
+# Plan for parent domains
+@plans = sort { $a->{'name'} cmp $b->{'name'} } &list_available_plans();
+if (&can_create_master_servers() && @plans) {
+	print &ui_table_row($text{'cmass_plan'},
+		&ui_select("plan", $defplan->{'id'},
+			   [ map { [ $_->{'id'}, $_->{'name'} ] } @plans ]));
+	}
+
 # Owning reseller
 @resels = sort { $a->{'name'} cmp $b->{'name'} } &list_resellers();
 if (@resels && &master_admin()) {

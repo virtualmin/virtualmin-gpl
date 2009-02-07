@@ -38,6 +38,10 @@ if ($d->{'template'} != $tmpl->{'id'}) {
 		}
 	}
 $in{'owner'} =~ /:/ && &error($text{'setup_eowner'});
+if (!$d->{'parent'} && defined($in{'plan'})) {
+	$plan = &get_plan($in{'plan'});
+	&can_use_plan($plan) || &error($text{'setup_eplan'});
+	}
 
 # Save external IP
 if ($in{'dns_ip_def'}) {
@@ -274,6 +278,23 @@ if (&can_use_feature("virt")) {
 		$aliasdom = &get_domain($d->{'alias'});
 		$d->{'ip'} = $aliasdom->{'ip'};
 		}
+	}
+
+# Update plan if changed
+if ($plan && $plan->{'id'} ne $d->{'plan'}) {
+	if ($in{'applyplan'}) {
+		print &text('save_applyplan',
+			    &html_escape($plan->{'name'})),"<br>\n";
+		&set_limits_from_plan($d, $plan);
+		&set_featurelimits_from_plan($d, $plan);
+		&set_capabilities_from_plan($d, $plan);
+		}
+	else {
+		print &text('save_plan',
+			    &html_escape($plan->{'name'})),"<br>\n";
+		}
+	$d->{'plan'} = $plan->{'id'};
+	print $text{'setup_done'},"<p>\n";
 	}
 
 if (!$d->{'disabled'}) {

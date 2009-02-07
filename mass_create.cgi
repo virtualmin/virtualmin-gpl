@@ -247,21 +247,17 @@ foreach $line (@lines) {
 		}
 	local $prefix = &compute_prefix($dname, $group, $parentdom, 1);
 
-	# Work out options that may come from template
-	local ($quota, $uquota, $bw, $mailboxlimit, $aliaslimit, $dbslimit,
-	       $domslimit, $nodbname);
-	$quota = $tmpl->{'quota'} eq 'none' ? undef : $tmpl->{'quota'};
-	$uquota = $tmpl->{'uquota'} eq 'none' ? undef : $tmpl->{'uquota'};
-	$bw = $tmpl->{'bwlimit'} eq 'none' ? undef : $tmpl->{'bwlimit'};
-	$mailboxlimit = $tmpl->{'mailboxlimit'} eq 'none' ? undef :
-				$tmpl->{'mailboxlimit'};
-	$aliaslimit = $tmpl->{'aliaslimit'} eq 'none' ? undef :
-				$tmpl->{'aliaslimit'};
-	$dbslimit = $tmpl->{'dbslimit'} eq 'none' ? undef :
-				$tmpl->{'dbslimit'};
-	$domslimit = $tmpl->{'domslimit'} eq 'none' ? '*' :
-				$tmpl->{'domslimit'};
-	$nodbname = 0;
+	# Work out the plan
+	if ($parentdom) {
+		$plan = &get_plan($parentdom->{'plan'});
+		}
+	elsif (defined($in{'plan'})) {
+		$plan = &get_plan($in{'plan'});
+		&can_use_plan($plan) || &error($text{'setup_eplan'});
+		}
+	else {
+		$plan = &get_default_plan();
+		}
 
 	# Build up domain object
 	local %dom;
@@ -273,9 +269,7 @@ foreach $line (@lines) {
 		 'ugroup', $ugroup,
 		 $parentdom ?
 			( 'pass', $parentdom->{'pass'} ) :
-			( 'quota', $quota,
-			  'uquota', $uquota,
-			  'pass', $pass ),
+			( 'pass', $pass ),
 		 'uid', $uid,
 		 'gid', $gid,
 		 'ugid', $ugid,
@@ -289,17 +283,10 @@ foreach $line (@lines) {
 		 'virtalready', $virtalready,
 		 'source', 'mass_create.cgi',
 		 'proxy_pass_mode', 0,
-		 $parentdom ? ( ) :
-			( 'mailboxlimit', $mailboxlimit,
-			  'aliaslimit', $aliaslimit,
-			  'dbslimit', $dbslimit,
-			  'bw_limit', $bw,
-			  'domslimit', $domslimit,
-			  'nodbname', $nodbname,
-			),
 		 'parent', $parentdom ? $parentdom->{'id'} : "",
 		 'alias', $aliasdom ? $aliasdom->{'id'} : "",
 		 'template', $tmpl->{'id'},
+		 'plan', $plan->{'id'},
 		 'reseller', $resel,
 		);
 	$dom{'emailto'} = $dom{'email'} ||
@@ -319,7 +306,9 @@ foreach $line (@lines) {
 			}
 		$dom{$f} = &can_use_feature($f) && int($in{$f});
 		}
-	&set_featurelimits_from_template(\%dom, $tmpl);
+	&set_limits_from_plan(\%dom, $plan);
+	&set_featurelimits_from_plan(\%dom, $plan);
+	&set_capabilities_from_plan(\%dom, $plan);
 	$dom{'home'} = &server_home_directory(\%dom, $parentdom);
 	&complete_domain(\%dom);
 

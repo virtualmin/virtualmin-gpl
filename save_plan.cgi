@@ -122,7 +122,10 @@ else {
 			&set_limits_from_plan($d, $plan);
 			&set_featurelimits_from_plan($d, $plan);
 			&set_capabilities_from_plan($d, $plan);
-			&modify_webmin($d, $oldd);
+			foreach $f (&domain_features($d), @feature_plugins) {
+				&call_feature_func($f, $d, $oldd);
+				}
+			&save_domain($d);
 			}
 		&run_post_actions();
 		}

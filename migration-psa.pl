@@ -180,6 +180,7 @@ if (!$parent && &has_home_quotas()) {
 # Create the virtual server object
 local %dom;
 $prefix ||= &compute_prefix($dom, $group, $parent, 1);
+local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
 %dom = ( 'id', &domain_id(),
 	 'dom', $dom,
          'user', $duser,
@@ -199,6 +200,7 @@ $prefix ||= &compute_prefix($dom, $group, $parent, 1);
 		 : ( 'pass', $pass ),
 	 'source', 'migrate.cgi',
 	 'template', $template,
+	 'plan', $plan->{'id'},
 	 'parent', undef,
 	 'prefix', $prefix,
 	 'no_tmpl_aliases', 1,

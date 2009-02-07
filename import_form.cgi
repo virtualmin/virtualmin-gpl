@@ -27,8 +27,7 @@ form.group_def[1].disabled = dis;
 form.pass.disabled = dis;
 form.webmin[0].disabled = dis;
 form.webmin[1].disabled = dis;
-form.quota.disabled = dis;
-form.quota_units.disabled = dis;
+form.plan.disabled = dis;
 }
 </script>
 EOF
@@ -92,19 +91,24 @@ print &ui_table_row($text{'import_webmin'},
 $defip = &get_default_ip();
 print &ui_table_row($text{'import_ip'},
 		    &ui_textbox("ip", $defip, 15));
-
 print &ui_table_row($text{'import_hasvirt'},
 		    &ui_yesno_radio("virt", 0));
 
-if (&has_home_quotas()) {
-	print &ui_table_row($text{'form_quota'},
-		    &quota_input("quota", $config{'defquota'}, "home"));
-	}
+# Default plan
+$defplan = &get_default_plan();
+print &ui_table_row($text{'form_plan'},
+		    &ui_select("plan", $defplan->{'id'},
+			[ map { [ $_->{'id'}, $_->{'name'} ] }
+			   sort { $a->{'name'} cmp $b->{'name'} }
+			     &list_available_plans() ]));
 
+# MySQL database names
 if ($config{'mysql'}) {
 	print &ui_table_row($text{'import_db_mysql'},
 			    &ui_textbox("db_mysql", undef, 40));
 	}
+
+# PostgreSQL database names
 if ($config{'postgres'}) {
 	print &ui_table_row($text{'import_db_postgres'},
 			    &ui_textbox("db_postgres", undef, 40));

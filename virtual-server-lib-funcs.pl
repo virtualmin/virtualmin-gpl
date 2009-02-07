@@ -238,7 +238,7 @@ if (!defined($dom->{'template'})) {
 	$dom->{'template'} = $dom->{'parent'} ? 1 : 0;
 	}
 if (!defined($dom->{'plan'})) {
-	# assume default plan
+	# assume first plan
 	local @plans = sort { $a->{'id'} <=> $b->{'id'} } &list_plans();
 	$dom->{'plan'} = $plans[0]->{'id'};
 	}
@@ -5859,6 +5859,7 @@ if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$_[0]->{'alias'}) {
 				 'source', $dom->{'source'},
 				 'parent', $dom->{'id'},
 				 'template', $dom->{'template'},
+				 'plan', $dom->{'plan'},
 				 'reseller', $dom->{'reseller'},
 				);
 		foreach my $f (@alias_features) {
@@ -9999,6 +10000,7 @@ foreach my $f (@opt_features, "virt", @feature_plugins) {
 	}
 $d->{'demo'} = $oldparent->{'demo'};
 $d->{'webmin_modules'} = $oldparent->{'webmin_modules'};
+$d->{'plan'} = $oldparent->{'plan'};
 
 # Find any alias domains that also need to be re-parented. Also find
 # any sub-domains

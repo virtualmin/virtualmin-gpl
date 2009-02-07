@@ -63,6 +63,9 @@ if (!$parentdom) {
 	$plan = &get_plan($in{'plan'});
 	$plan && &can_use_plan($plan) || &error($text{'setup_eplan'});
 	}
+else {
+	$plan = &get_plan($parentdom->{'plan'});
+	}
 if (!$parentuser) {
 	# Validate user and password-related inputs for top-level domain
 	$in{'email_def'} || $in{'email'} =~ /\S/ ||
@@ -280,6 +283,7 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'proxy_pass_mode', $proxy ? $config{'proxy_pass'} : 0,
 	 'parent', $parentdom ? $parentdom->{'id'} : "",
 	 'template', $in{'template'},
+	 'plan', $plan->{'id'},
 	 'reseller', $resel,
 	);
 if (!$parentuser) {

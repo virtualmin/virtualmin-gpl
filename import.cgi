@@ -25,12 +25,6 @@ if (!$parent) {
 		&error_exit($text{'setup_euser2'});
 	$in{'group_def'} || $in{'group'} =~ /^[^\t :]+$/ ||
 		&error_exit($text{'import_egroup'});
-
-	# Validate quota
-	if (&has_home_quotas()) {
-		if ($in{'quota'} == -1) { $in{'quota'} = $in{'otherquota'} };
-		$in{'quota'} =~ /^[0-9\.]+$/ ||  &error($text{'setup_equota'});
-		}
 	}
 
 # Make sure IP is valid
@@ -95,6 +89,7 @@ if ($in{'confirm'}) {
 		$ugid = $uinfo ? $uinfo->{'gid'} : $gid;
 		$ugroup = $uinfo ? getgrgid($uinfo->{'gid'}) : $crgroup;
 		$owner = $uinfo ? $uinfo->{'real'} : "Imported domain $in{'dom'}";
+		$plan = &get_plan($in{'plan'});
 		}
 	else {
 		# All details come from parent
@@ -105,6 +100,7 @@ if ($in{'confirm'}) {
 		$ugid = $parent->{'ugid'};
 		$ugroup = $parent->{'ugroup'};
 		$owner = "Imported domain $in{'dom'}";
+		$plan = &get_plan($parent->{'plan'});
 		}
 
 	# Create domain details
@@ -146,16 +142,16 @@ if ($in{'confirm'}) {
 		 'source', 'import.cgi',
 		 'parent', $parent ? $parent->{'id'} : undef,
 		 'template', 0,
+		 'plan', $plan->{'id'},
 		 'reseller', undef,
 		);
 	foreach $f (@feature_plugins) {
 		$dom{$f} = int($found{$f});
 		}
-	$tmpl = &get_template(0);
 	if (!$parent) {
-		&set_limits_from_template(\%dom, $tmpl);
-		$dom{'quota'} = $dom{'uquota'} = &quota_parse('quota', "home");
-		&set_capabilities_from_template(\%dom, $tmpl);
+		&set_limits_from_plan(\%dom, $plan);
+		&set_capabilities_from_plan(\%dom, $plan);
+		&set_featurelimits_from_plan(\%dom, $plan);
 		}
 	$dom{'emailto'} = $dom{'email'} ||
 			  $dom{'user'}.'@'.&get_system_hostname();
