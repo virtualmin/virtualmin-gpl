@@ -320,7 +320,12 @@ foreach my $f (@files) {
 		# Add to URL list attempts with no cache, for cached URLs
 		my @firsturls = @urls;
 		foreach my $urlcache (@firsturls) {
-			if (&check_in_http_cache($urlcache->[0]) &&
+			next if ($urlcache->[0] !~ /^(http|https):/);
+			my ($host, $port, $page, $ssl) =
+				&parse_http_url($urlcache->[0]);
+			my $canonical = ($ssl ? "https" : "http")."://".
+					$host.":".$port.$page;
+			if (&check_in_http_cache($canonical) &&
 			    !$urlcache->[1]) {
 				push(@urls, [ $urlcache->[0], 1 ]);
 				}
