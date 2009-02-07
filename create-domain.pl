@@ -7,10 +7,10 @@ Create a virtual server
 This program can be used to create a new top-level, child or alias virtual
 server. It is typically called with parameters something like :
 
-   create-domain.pl --domain foo.com --pass smeg --desc "The server for foo" --unix --dir --webmin --web --dns --mail --limits-from-template
+   create-domain.pl --domain foo.com --pass smeg --desc "The server for foo" --unix --dir --webmin --web --dns --mail --limits-from-plan
 
 This would create a server called foo.com , with the Unix login, home directory, Webmin login, website, DNS domain and email features enabled, and disk quotas
-based on those set in the default template. If you run this program with the --help option, you can see all of the
+based on those set in the default plan. If you run this program with the --help option, you can see all of the
 other command-line options that it supports. The most commonly used are those
 for enabling features for the new server, such as --mysql and --logrotate.
 
@@ -31,8 +31,8 @@ followed by the domain name of the target server. For alias servers, the
 You can specify limits on the number of aliases, sub-servers, mailboxes and
 databases for the new domain owner using the --max-aliases, --max-doms,
 --max-mailboxes and --max-dbs options. Alternately, you can choose to have
-all limits (including quotas) set based on the template using the
---limits-from-template command line flag.
+all limits (including quotas) set based on the plan using the
+--limits-from-plan command line flag.
 
 If the virtual server has the MySQL or PostgreSQL features enabled, by default
 the password for the server's accounts will be the same as its administration
@@ -120,8 +120,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--default-features") {
 		$deffeatures = 1;
 		}
-	elsif ($a eq "--features-from-template") {
-		$templatefeatures = 1;
+	elsif ($a eq "--features-from-template" ||
+	       $a eq "--features-from-plan") {
+		$planfeatures = 1;
 		}
 	elsif ($a eq "--ip") {
 		$ip = shift(@ARGV);
@@ -194,11 +195,22 @@ while(@ARGV > 0) {
 			}
 		$template eq "" && &usage("Unknown template name");
 		}
+	elsif ($a eq "--plan") {
+		$planname = shift(@ARGV);
+		foreach $p (&list_plans()) {
+			if ($p->{'name'} eq $planname ||
+			    $p->{'name'} eq $planname) {
+				$planid = $p->{'id'};
+				}
+			}
+		$planid eq "" && &usage("Unknown plan name");
+		}
 	elsif ($a eq "--bandwidth") {
 		$bw = shift(@ARGV);
 		$anylimits = 1;
 		}
-	elsif ($a eq "--limits-from-template") {
+	elsif ($a eq "--limits-from-template" ||
+	       $a eq "--limits-from-plan") {
 		$tlimit = 1;
 		}
 	elsif ($a eq "--prefix") {
@@ -265,6 +277,8 @@ if ($template eq "") {
 	$template = &get_init_template($parentdomain);
 	}
 $tmpl = &get_template($template);
+$plan = $planid ne '' ? &get_plan($planid) : &get_default_plan();
+$plan || &usage("Plan does not exist");
 
 if ($ip eq "allocate") {
 	# Allocate IP now
@@ -287,7 +301,7 @@ elsif ($virt) {
 	$tmpl->{'ranges'} eq "none" || $config{'all_namevirtual'} || &usage("The --ip option cannot be used when automatic IP allocation is enabled - use --allocate-ip instead");
 	}
 
-# If no limit-related flags are given, assume from template
+# If no limit-related flags are given, assume from plan
 if (!$tlimit && !$anylimits) {
 	$tlimit = 1;
 	}
@@ -325,6 +339,7 @@ foreach $d (&list_domains()) {
 if ($parentdomain) {
 	$parent = &get_domain_by("dom", $parentdomain);
 	$parent || &usage("Parent domain does not exist");
+	$plan = &get_plan($parent->{'plan'});	# Parent overrides any selection
 	$alias = $parent if ($aliasdomain);
 	$subdom = $parent if ($subdomain);
 	if ($subdomain) {
@@ -357,12 +372,11 @@ if (!$parent) {
 $owner ||= $domain;
 
 # Work out features, if using automatic mode.
-# If the user asked for features from the template but it doesn't define any,
+# If the user asked for features from the plan but it doesn't define any,
 # fall back to the global defaults.
-$tfl = $tmpl->{'featurelimits'};
-$tfl = "" if ($tfl eq "none");
-if ($templatefeatures && $tfl) {
-	# From limits on selected template
+$tfl = $plan->{'featurelimits'};
+if ($planfeatures && $tfl) {
+	# From limits on selected plan
 	%flimits = map { $_, 1 } split(/\s+/, $tfl);
 	%feature = ( 'virt' => $feature{'virt'} );
 	%plugin = ( );
@@ -377,7 +391,7 @@ if ($templatefeatures && $tfl) {
 			}
 		}
 	}
-elsif ($deffeatures || $templatefeatures && !$tfl) {
+elsif ($deffeatures || $planfeatures && !$tfl) {
 	# From global configured defaults
 	%feature = ( 'virt' => $feature{'virt'} );
 	%plugin = ( );
@@ -535,6 +549,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'subdom', $subdom ? $subdom->{'id'} : undef,
 	 'source', 'create-domain.pl',
 	 'template', $template,
+	 'plan', $plan->{'id'},
 	 'parent', $parent ? $parent->{'id'} : "",
 	 $parent ? ( )
 		 : ( 'mailboxlimit', $mailboxlimit,
@@ -553,9 +568,9 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
         );
 if (!$parent) {
 	if ($tlimit) {
-		&set_limits_from_template(\%dom, $tmpl);
+		&set_limits_from_plan(\%dom, $plan);
 		}
-	&set_capabilities_from_template(\%dom, $tmpl);
+	&set_capabilities_from_plan(\%dom, $plan);
 	}
 $dom{'db'} = $db || &database_name(\%dom);
 $dom{'emailto'} = $parent ? $parent->{'emailto'} :
@@ -568,7 +583,7 @@ foreach $f (@features) {
 foreach $f (@feature_plugins) {
 	$dom{$f} = $plugin{$f} ? 1 : 0;
 	}
-&set_featurelimits_from_template(\%dom, $tmpl);
+&set_featurelimits_from_plan(\%dom, $plan);
 &set_chained_features(\%dom, undef);
 
 # Work out home directory
@@ -658,7 +673,7 @@ foreach $f (@features) {
 foreach $f (@feature_plugins) {
 	print "                        [--$f]\n";
 	}
-print "                        [--default-features]\n";
+print "                        [--default-features] | [--features-from-plan]\n";
 print "                        [--allocate-ip | --ip virtual.ip.address |\n";
 print "                         --shared-ip existing.ip.address]\n";
 print "                        [--ip-already]\n";
@@ -677,7 +692,8 @@ if ($config{'bw_active'}) {
 	print "                        [--bandwidth bytes]\n";
 	}
 print "                        [--template \"name\"]\n";
-print "                        [--limits-from-template]\n";
+print "                        [--plan \"name\"]\n";
+print "                        [--limits-from-pla]\n";
 print "                        [--prefix username-prefix]\n";
 print "                        [--db database-name]\n";
 print "                        [--fwdto email-address]\n";
