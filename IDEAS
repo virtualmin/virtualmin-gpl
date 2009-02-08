@@ -47,9 +47,11 @@
  - plans for resellers
 	- FS#4752
 	- Command-line API to manage
+		- GPL links
 	- help pages
 	- Functional tests for plan
 	- Test with resellers, and domain form with auto-field-fillin
+	- CHANGELOG
 
  - IPv6 support
 	- FS#4239

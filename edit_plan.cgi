@@ -44,8 +44,7 @@ print &ui_table_row(&hlink($text{'tmpl_uquota'}, "template_uquota"),
     &quota_input("uquota", $plan->{'uquota'}, "home"));
 
 # Show limits on numbers of things
-foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms", "realdoms", "bw",
-	       $virtualmin_pro ? ( "mongrels" ) : ( )) {
+foreach my $l (@plan_maxes) {
 	print &ui_table_row(&hlink($text{'tmpl_'.$l.'limit'},
 				   "template_".$l."limit"),
 	    &ui_radio($l.'limit_def', $plan->{$l.'limit'} eq '' ? 1 : 0,
@@ -57,7 +56,7 @@ foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms", "realdoms", "bw",
 	}
 
 # Rename and DB name limits
-foreach my $n ('nodbname', 'norename', 'forceunder') {
+foreach my $n (@plan_restrictions) {
 	print &ui_table_row(&hlink($text{'limits_'.$n}, 'limits_'.$n),
 		&ui_radio($n, int($plan->{$n}),
 			  [ [ 0, $text{'yes'} ],

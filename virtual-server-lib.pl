@@ -132,6 +132,9 @@ $scripts_unavail_file = "$module_config_directory/scriptsunavail";
 $styles_unavail_file = "$module_config_directory/stylesunavail";
 
 @reseller_maxes = ("doms", "aliasdoms", "realdoms", "quota", "mailboxes", "aliases", "dbs", "bw");
+@plan_maxes = ("mailbox", "alias", "dbs", "doms", "aliasdoms", "realdoms", "bw",
+               $virtualmin_pro ? ( "mongrels" ) : ( ));
+@plan_restrictions = ('nodbname', 'norename', 'forceunder');
 
 @reseller_modules = ("webminlog", "mailboxes");
 

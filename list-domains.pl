@@ -19,6 +19,11 @@ active, use the C<--with-feature> parameter followed by a feature code like
 C<dns> or C<web>. Alternately, C<--without-feature> can be used to show
 only domains without some feature enabled.
 
+To limit the list to virtual servers on some plan, use the C<--plan> flag
+followed by a plan name or ID. Similarly, you can select only virtual servers
+created using some template with the C<--template> flag, followed by an ID
+or name.
+
 To get a list of domain names only, use the C<--name-only> parameter. To get
 just Virtualmin domain IDs, use C<--id-only>. These are useful when iterating
 through domains in a script.
@@ -77,6 +82,27 @@ while(@ARGV > 0) {
 	elsif ($a eq "--subdomain") {
 		$must_subdomain = 1;
 		}
+	elsif ($a eq "--plan") {
+		$planid = shift(@ARGV);
+		$must_plan = &get_plan($planid);
+		if (!$must_plan) {
+			($must_plan) = grep { $_->{'name'} eq $planid }
+				       	    &list_plans();
+			}
+		$must_plan ||
+			&usage("No plan with ID or name $planid was found");
+		$must_toplevel = 1;
+		}
+	elsif ($a eq "--template") {
+		$tmplid = shift(@ARGV);
+		$must_tmpl = &get_template($tmplid);
+		if (!$must_tmpl) {
+			($must_tmpl) = grep { $_->{'name'} eq $tmplid }
+					    &list_templates();
+			}
+		$must_tmpl ||
+			&usage("No template with ID or name $planid was found");
+		}
 	else {
 		&usage();
 		}
@@ -103,6 +129,14 @@ if ($with) {
 	}
 if ($without) {
 	@doms = grep { !$_->{$without} } @doms;
+	}
+
+# Limit to those on some plan
+if ($must_plan) {
+	@doms = grep { $_->{'plan'} eq $must_plan->{'id'} } @doms;
+	}
+if ($must_tmpl) {
+	@doms = grep { $_->{'template'} eq $must_tmpl->{'id'} } @doms;
 	}
 
 if ($multi) {
@@ -413,6 +447,7 @@ print "                         [--with-feature feature]\n";
 print "                         [--without-feature feature]\n";
 print "                         [--alias | --subserver |\n";
 print "                          --toplevel | --subdomain]\n";
+print "                         [--plan ID|\"plan name\"]\n";
 exit(1);
 }
 

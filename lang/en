@@ -4655,6 +4655,7 @@ plan_name=Plan name
 plan_err=Failed to save plan
 plan_eresellers=No resellers selected
 plan_ename=Missing plan name
+plan_eclash=A plan with the same name already exists
 
 dplans_err=Failed to delete plans
 dplans_enone=None selected

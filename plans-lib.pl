@@ -196,8 +196,7 @@ foreach my $ltmpl (&list_templates()) {
 						 : $tmpl->{'name'} };
 	$plan->{'featurelimits'} = $tmpl->{'featurelimits'} eq 'none' ? '' :
 				    $tmpl->{'featurelimits'};
-	foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms",
-		       "realdoms", "bw", "mongrels") {
+	foreach my $l (@plan_maxes) {
 		$plan->{$l.'limit'} = $tmpl->{$l.'limit'} eq 'none' ? '' :
 					$tmpl->{$l.'limit'};
 		}

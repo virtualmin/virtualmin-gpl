@@ -26,6 +26,7 @@ return ([ "Backup and restore", "backup-domain.pl", "list-scheduled-backups.pl",
 	[ "PHP versions", "*-php-directory.pl", "*-php-directories.pl" ],
 	[ "SSL certificates", "list-certs.pl", "*-cert.pl" ],
 	[ "Virtual server templates", "*-template.pl", "*-templates.pl" ],
+	[ "Account plans", "*-plan.pl", "*-plans.pl" ],
 	[ "Other scripts", "*.pl" ],
 	);
 }
@@ -104,6 +105,15 @@ old script that only runs under version 4.",
 "SSL certificates",
 "Commands in this section can be used to list SSL certificates, generate
 new certs, keys and signing requests, and install a signed cert from a CA.",
+
+"Virtual server templates",
+"These commands can be list to list, create and modify Virtualmin templates,
+which in turn define the initial configuration for virtual servers.",
+
+"Account plans",
+"Plans define the quota, allowed functions and other limits on virtual server
+owners. These commands can be used to list existing plans, modify their
+limits, create new plans, and delete them.",
 
 "Other scripts",
 "Programs in this section don't fall into any of the other categories.",

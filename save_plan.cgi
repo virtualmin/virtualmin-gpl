@@ -28,6 +28,11 @@ if ($in{'delete'}) {
 else {
 	# Validate and store inputs
 	$in{'name'} =~ /\S/ || &error($text{'plan_ename'});
+	if ($in{'new'} || $plan->{'name'} ne $in{'name'}) {
+		($clash) = grep { lc($_->{'name'}) eq lc($in{'name'}) }
+				&list_plans();
+		$clash && &error($text{'plan_eclash'});
+		}
 	$plan->{'name'} = $in{'name'};
 
 	# Save quota limits
@@ -47,10 +52,13 @@ else {
 		}
 
 	# Save limits on various objects
-	foreach my $l ("mailbox", "alias", "dbs", "doms", "aliasdoms",
-		       "realdoms", $virtualmin_pro ? ( "mongrels" ) : ( )) {
+	foreach my $l (@plan_maxes) {
 		if ($in{$l."limit_def"}) {
 			$plan->{$l.'limit'} = undef;
+			}
+		elsif ($l eq "bw") {
+			$plan->{'bwlimit'} = &parse_bandwidth("bwlimit",
+						$text{'tmpl_e'.$l.'limit'}, 1);
 			}
 		else {
 			$in{$l.'limit'} =~ /^\d+$/ ||
@@ -58,18 +66,11 @@ else {
 			$plan->{$l.'limit'} = $in{$l.'limit'};
 			}
 		}
-	if ($in{"bwlimit_def"} == 1) {
-		$plan->{'bwlimit'} = undef;
-		}
-	else {
-		$plan->{'bwlimit'} = &parse_bandwidth("bwlimit",
-					$text{'tmpl_e'.$l.'limit'}, 1);
-		}
 
 	# Save no database name and no rename
-	$plan->{'nodbname'} = $in{'nodbname'};
-	$plan->{'norename'} = $in{'norename'};
-	$plan->{'forceunder'} = $in{'forceunder'};
+	foreach my $n (@plan_restrictions) {
+		$plan->{$n} = $in{$n};
+		}
 
 	# Save feature limits
 	if ($in{'featurelimits_def'} == 1) {
