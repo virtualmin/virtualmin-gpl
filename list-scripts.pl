@@ -121,6 +121,7 @@ foreach my $d (@doms) {
 			$script = &get_script($sinfo->{'name'});
 			$path = $sinfo->{'url'};
 			$path =~ s/^http:\/\/([^\/]+)//;
+			$path ||= $sinfo->{'path'};
 			printf $fmt, $sinfo->{'id'},
 				     $script->{'desc'},
 				     $sinfo->{'version'},
