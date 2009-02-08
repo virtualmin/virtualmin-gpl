@@ -1041,7 +1041,7 @@ Plugins can now export content styles, allowing multiple styles to be easily ins
 Directories containing initial files for virtual servers (like /etc/skel) are now included in Virtualmin template backups.
 ---- Changes since 3.65 ----
 Added API commands to create, modify, delete and extract settings from virtual server templates.
-Updated the phpMyAdmin script installer to version 3.1.2, TextPattern to 4.0.8, Magento to 1.2.1, Typo to 5.2, Moodle to 1.9.4 and 1.7.7, phpList to 2.10.9, SugarCRM to 5.2.0a, WordPress MU to 2.7, Horde Webmail to 1.2.2, Horde to 3.3.3, IMP to 4.3.3, OpenX to 2.6.4, ZenPhoto to 1.2.3, Zikula to 1.1.1, Coppermine to 1.4.20, SMF to 1.1.8, MediaWiki to 1.13.4, Radiant to 0.7.0, and phpMyFAQ to 2.0.11.
+Updated the phpMyAdmin script installer to version 3.1.2, TextPattern to 4.0.8, Magento to 1.2.1, Typo to 5.2, Moodle to 1.9.4 and 1.7.7, phpList to 2.10.9, SugarCRM to 5.2.0a, WordPress MU to 2.7, Horde Webmail to 1.2.2, Horde to 3.3.3, IMP to 4.3.3, OpenX to 2.6.4, ZenPhoto to 1.2.3, Zikula to 1.1.1, Coppermine to 1.4.20, SMF to 1.1.8, MediaWiki to 1.13.4, Radiant to 0.7.0, Bugzilla to 3.2.2, and phpMyFAQ to 2.0.11.
 Added the info.pl command line script, for dumping general information about Virtualmin.
 Links to per-domain SpamAssassin configurations now include the domain's config file, which allows each domain's settings to be separately managed.
 Automatic spam and virus folder clearing now respects custom folder names.
