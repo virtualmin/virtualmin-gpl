@@ -24,6 +24,11 @@ existing virtual server. When changing the domain name, you may also want to
 use the C<--user> option to update the administration username for the server.
 Both of these options will effect sub-servers as well, where appropriate.
 
+To change a virtual server's plan and apply quota and other limits from the
+new plan, use the C<--apply-plan> parameter followed by the plan name or ID.
+Alternately, you can switch the plan without applying any of it's limits
+with the C<--plan> flag.
+
 If your system is on an internal network and made available to the Internet
 via a router doing NAT, the IP address of a domain in DNS may be different
 from it's IP on the actual system. To set this, the C<--dns-ip> flag can
@@ -150,6 +155,18 @@ while(@ARGV > 0) {
 				}
 			}
 		$template eq "" && &usage("Unknown template name");
+		}
+	elsif ($a eq "--plan" || $a eq "--apply-plan") {
+		# Changing the plan
+		$planname = shift(@ARGV);
+		foreach $p (&list_plans()) {
+			if ($p->{'name'} eq $planname ||
+			    $p->{'name'} eq $planname) {
+				$planid = $p->{'id'};
+				$plan = $p;
+				}
+			}
+		$planapply = 1 if ($a eq "--apply-plan");
 		}
 	elsif ($a eq "--add-exclude") {
 		push(@add_excludes, shift(@ARGV));
@@ -349,6 +366,16 @@ if (defined($dns_ip)) {
 		}
 	}
 
+# Change the plan and limits, if given
+if ($plan) {
+	$dom->{'plan'} = $plan->{'id'};
+	if ($planapply) {
+		&set_limits_from_plan($dom, $plan);
+		&set_featurelimits_from_plan($dom, $plan);
+		&set_capabilities_from_plan($dom, $plan);
+		}
+	}
+
 # Update the IP in alias domains too
 if ($dom->{'ip'} ne $old->{'ip'}) {
 	@aliases = grep { $_->{'alias'} eq $dom->{'id'} } @doms;
@@ -445,6 +472,7 @@ print "                        [--ip address] | [--allocate-ip] |\n";
 print "                        [--default-ip | --shared-ip address]\n";
 print "                        [--prefix name]\n";
 print "                        [--template name|id]\n";
+print "                        [--plan name|id | --apply-plan name|id]\n";
 print "                        [--add-exclude directory]*\n";
 print "                        [--remove-exclude directory]*\n";
 print "                        [--dns-ip address | --no-dns-ip]\n";
