@@ -85,7 +85,9 @@ if ($virtualmin_pro) {
 
 # Show limits from plugins
 foreach $f (@feature_plugins) {
+	&plugin_call($f, "load_theme_library");
 	$input = &plugin_call($f, "feature_limits_input", $d);
+	print &ui_table_hr() if ($input && !$done_plugins_hr++);
 	print $input;
 	}
 
