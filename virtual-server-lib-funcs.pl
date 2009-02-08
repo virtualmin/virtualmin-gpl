@@ -11364,69 +11364,6 @@ else {
 	}
 }
 
-# set_limits_from_template(&domain, &template)
-# Set initial owner limits on a domain from the given template
-sub set_limits_from_template
-{
-local ($d, $tmpl) = @_;
-$d->{'quota'} = $tmpl->{'quota'} eq 'none' ? undef : $tmpl->{'quota'};
-$d->{'uquota'} = $tmpl->{'uquota'} eq 'none' ? undef : $tmpl->{'uquota'};
-$d->{'bw_limit'} = $tmpl->{'bwlimit'} eq 'none' ? undef : $tmpl->{'bwlimit'};
-$d->{'mailboxlimit'} = $tmpl->{'mailboxlimit'} eq 'none' ? undef :
-			$tmpl->{'mailboxlimit'};
-$d->{'aliaslimit'} = $tmpl->{'aliaslimit'} eq 'none' ? undef :
-			$tmpl->{'aliaslimit'};
-$d->{'dbslimit'} = $tmpl->{'dbslimit'} eq 'none' ? undef :
-			$tmpl->{'dbslimit'};
-$d->{'domslimit'} = $tmpl->{'domslimit'} eq 'none' ? '*' :
-			$tmpl->{'domslimit'};
-$d->{'aliasdomslimit'} = $tmpl->{'aliasdomslimit'} eq 'none' ? '*' :
-			$tmpl->{'aliasdomslimit'};
-$d->{'realdomslimit'} = $tmpl->{'realdomslimit'} eq 'none' ? '*' :
-			$tmpl->{'realdomslimit'};
-if ($virtualmin_pro) {
-	$d->{'mongrelslimit'} = $tmpl->{'mongrelslimit'} eq 'none' ? undef :
-				$tmpl->{'mongrelslimit'};
-	}
-$d->{'nodbname'} = $tmpl->{'nodbname'};
-$d->{'norename'} = $tmpl->{'norename'};
-$d->{'forceunder'} = $tmpl->{'forceunder'};
-}
-
-# set_featurelimits_from_template(&domain, &template)
-# Updates a virtual server's limit_ variables based on either the enabled
-# features or limits defined in the template.
-sub set_featurelimits_from_template
-{
-local ($d, $tmpl) = @_;
-if ($tmpl->{'featurelimits'} && $tmpl->{'featurelimits'} ne 'none') {
-	# From template
-	local %flimits = map { $_, 1 } split(/\s+/, $tmpl->{'featurelimits'});
-	foreach my $f (@features, @feature_plugins) {
-		$d->{'limit_'.$f} = int($flimits{$f});
-		}
-	}
-else {
-	# From domain
-	foreach my $f (@features, @feature_plugins) {
-		$d->{'limit_'.$f} = $f eq "webmin" ? 0 : int($d->{$f});
-		}
-	}
-}
-
-# set_capabilities_from_template(&domain, &template)
-# Set initial owner editing capabilities on a domain from the given template
-sub set_capabilities_from_template
-{
-local ($d, $tmpl) = @_;
-if ($tmpl->{'capabilities'} ne 'none') {
-	local %caps = map { $_, 1 } split(/\s+/, $tmpl->{'capabilities'});
-	foreach my $ed (@edit_limits) {
-		$d->{'edit_'.$ed} = $caps{$ed} ? 1 : 0;
-		}
-	}
-}
-
 # get_init_template(for-subdom)
 # Returns the ID of the initially selected template
 sub get_init_template

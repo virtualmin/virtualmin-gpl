@@ -49,8 +49,6 @@
 	- FS#4752
 	- Command-line API to manage
 	- help pages
-	- Remove all use of set_limits_from_template,
-	  set_featurelimits_from_template and set_capabilities_from_template
 	- Functional tests for plan
 	- Test with resellers, and domain form with auto-field-fillin
 

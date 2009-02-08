@@ -204,14 +204,14 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
 	 'parent', $parent ? $parent->{'id'} : undef,
         );
 if (!$parent) {
-	&set_limits_from_template(\%dom, $tmpl);
+	&set_limits_from_plan(\%dom, $plan);
 	if (defined($quota)) {
 		$dom{'quota'} = $dom{'uquota'} = $quota;
 		}
 	if (defined($bw_limit)) {
 		$dom{'bw_limit'} = $bw_limit;
 		}
-	&set_capabilities_from_template(\%dom, $tmpl);
+	&set_capabilities_from_plan(\%dom, $plan);
 	}
 $dom{'db'} = $db || &database_name(\%dom);
 $dom{'emailto'} = $dom{'email'} ||
@@ -219,7 +219,7 @@ $dom{'emailto'} = $dom{'email'} ||
 foreach my $f (@features, @feature_plugins) {
 	$dom{$f} = $got{$f} ? 1 : 0;
 	}
-&set_featurelimits_from_template(\%dom, $tmpl);
+&set_featurelimits_from_plan(\%dom, $plan);
 $dom{'home'} = &server_home_directory(\%dom, $parent);
 &complete_domain(\%dom);
 

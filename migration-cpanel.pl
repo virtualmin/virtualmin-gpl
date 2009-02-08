@@ -343,10 +343,10 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
 	 'parent', $parent ? $parent->{'id'} : undef,
         );
 if (!$parent) {
-	&set_limits_from_template(\%dom, $tmpl);
+	&set_limits_from_plan(\%dom, $plan);
 	$dom{'quota'} = $quota;
 	$dom{'uquota'} = $quota;
-	&set_capabilities_from_template(\%dom, $tmpl);
+	&set_capabilities_from_plan(\%dom, $plan);
 	}
 $dom{'db'} = $db || &database_name(\%dom);
 $dom{'emailto'} = $dom{'email'} ||
@@ -354,7 +354,7 @@ $dom{'emailto'} = $dom{'email'} ||
 foreach my $f (@features, @feature_plugins) {
 	$dom{$f} = $got{$f} ? 1 : 0;
 	}
-&set_featurelimits_from_template(\%dom, $tmpl);
+&set_featurelimits_from_plan(\%dom, $plan);
 
 # Work out the master admin MySQL password
 if (open(MYSQL, "$userdir/mysql.sql")) {

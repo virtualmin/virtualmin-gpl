@@ -227,7 +227,7 @@ foreach my $d (grep { !$_->{'parent'} } &list_domains()) {
 	}
 }
 
-# set_limits_from_template(&domain, &plan)
+# set_limits_from_plan(&domain, &plan)
 # Set initial owner limits on a domain from the given plan
 sub set_limits_from_plan
 {
