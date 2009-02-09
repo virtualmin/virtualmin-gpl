@@ -46,6 +46,7 @@
 		- GPL links
 	- help pages
 	- Functional tests for plan
+	- Test on xencentos, lentor
 	- CHANGELOG
 
  - IPv6 support

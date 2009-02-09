@@ -1963,12 +1963,18 @@ return $out =~ /--listed-incremental/;
 # Returns the full path to the tar command, which may be 'gtar' on BSD
 sub get_tar_command
 {
-my @cmds = ( "tar" );
-if ($gconfig{'os_type'} eq 'freebsd') {
-	unshift(@cmds, "gtar");
+my @cmds;
+if ($config{'tar_cmd'}) {
+	@cmds = ( $config{'tar_cmd'} );
 	}
 else {
-	push(@cmds, "gtar");
+	@cmds = ( "tar" );
+	if ($gconfig{'os_type'} eq 'freebsd') {
+		unshift(@cmds, "gtar");
+		}
+	else {
+		push(@cmds, "gtar");
+		}
 	}
 foreach my $c (@cmds) {
 	my $p = &has_command($c);
