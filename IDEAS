@@ -1,6 +1,3 @@
- - NIS support for users DB
-	- Cluster mode - each feature on a separate server
-
  - Allow resellers and domain owners to use remote API
 	- Need access control enforcement in .pl scripts
 
@@ -19,7 +16,6 @@
 	- OTRS (863)
 	- phpMySites
 	- counters (FS 3348)
-	- opengoo
 	- shortly
 
  - new fcgid mode, as suggested by filip

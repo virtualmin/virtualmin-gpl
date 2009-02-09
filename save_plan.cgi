@@ -110,6 +110,10 @@ else {
 				&error($text{'plan_eresellers'});
 			}
 		}
+	elsif ($canplans == 1 && $in{'new'}) {
+		# Reseller plans are granted to themselves only
+		$plan->{'resellers'} = $plan->{'owner'};
+		}
 
 	# Save the plan object
 	&save_plan($plan);

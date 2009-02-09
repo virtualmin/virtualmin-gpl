@@ -46,7 +46,7 @@ while(@ARGV > 0) {
 		$planname = shift(@ARGV);
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 
@@ -114,9 +114,9 @@ elsif ($multiline) {
 			$plan->{'forceunder'} ? "No" : "Yes","\n";
 
 		# Allowed features
-		print "    Features: ",
+		print "    Allowed features: ",
 			($plan->{'featurelimits'} || "Automatic"),"\n";
-		print "    Capabilities: ",
+		print "    Edit capabilities: ",
 			($plan->{'capabilities'} || "Automatic"),"\n";
 
 		# Available to resellers

@@ -124,7 +124,7 @@ if ($canplans == 2 && @resels) {
 	print &ui_table_row(
 		&hlink($text{'plan_resellers'}, "plan_resellers"),
 		&ui_radio("resellers_def", $plan->{'resellers'} eq "" ? 1 :
-					 $plan->{'resellers'} eq "none" ? 0 : 2,
+					 $plan->{'resellers'} eq "none" ? 2 : 0,
 			[ [ 1, $text{'tmpl_resellers_all'} ],
 			  [ 2, $text{'tmpl_resellers_none'} ],
 			  [ 0, $text{'tmpl_resellers_sel'} ] ])."<br>\n".
