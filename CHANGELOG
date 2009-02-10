@@ -1056,3 +1056,4 @@ Added commands to be run before and after scheduled backups, settable on the Edi
 Added an option to the Script Installers page to deny access to new script types by default.
 Backups and restores to S3 buckets in Europe are now fully supported.
 Added a Module Config field under Advanced options for specifying the path to an alternate tar command.
+Added an option for email-based ticket submission to the eTicket installer.
