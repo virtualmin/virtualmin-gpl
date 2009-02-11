@@ -1,0 +1,6 @@
+desc=Account Plans
+html=Extracted all settings related to default quotas and limits from templates, and moved them into the new Account Plan objects. These can be created by both the master admin and resellers, and selected for new or existing virtual servers.
+master=1
+reseller=1
+link=edit_newplan.cgi
+

@@ -45,7 +45,6 @@
 	- help pages
 	- Test on xencentos, lentor
 	- GPL version tests
-	- CHANGELOG
 
  - IPv6 support
 	- FS#4239
