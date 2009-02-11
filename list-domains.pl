@@ -219,10 +219,14 @@ if ($multi) {
 			$ms = &quota_bsize("mail");
 			print "    Server quota: ",
 			      &quota_show($d->{'quota'}, "home"),"\n";
+			print "    Server block quota: ",
+			      ($d->{'quota'} || "Unlimited"),"\n";
 			print "    Server quota used: ",
 			      &nice_size($qhome*$hs + $qmail*$ms),"\n";
 			print "    User quota: ",
 			      &quota_show($d->{'uquota'}, "home"),"\n";
+			print "    User block quota: ",
+			      ($d->{'uquota'} || "Unlimited"),"\n";
 			print "    User quota used: ",
 			      &nice_size($duser->{'uquota'}*$hs +
 					 $duser->{'umquota'}*$ms),"\n";

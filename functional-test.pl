@@ -31,6 +31,7 @@ $test_user = "testy";
 $test_alias = "testing";
 $test_alias_two = "yetanothertesting";
 $test_reseller = "testsel";
+$test_plan = "Test plan";
 $timeout = 60;			# Longest time a test should take
 $wget_command = "wget -O - --cache=off --proxy=off --no-check-certificate  ";
 $migration_dir = "/usr/local/webadmin/virtualmin/migration";
@@ -1781,6 +1782,134 @@ $parallel_tests = [
 	  'cleanup' => 1 },
 	];
 
+$plans_tests = [
+	# Create a test plan
+	{ 'command' => 'create-plan.pl',
+	  'args' => [ [ 'name', $test_plan ],
+		      [ 'quota', 7777 ],
+		      [ 'admin-quota', 8888 ],
+		      [ 'max-doms', 7 ],
+		      [ 'max-bw', 77777777 ],
+		      [ 'features', 'mail dns web' ],
+		      [ 'capabilities', 'users aliases scripts' ],
+		      [ 'nodbname' ] ],
+	},
+
+	# Make sure it worked
+	{ 'command' => 'list-plans.pl',
+	  'args' => [ [ 'name', $test_plan ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Server block quota: 7777',
+		      'Administrator block quota: 8888',
+		      'Maximum doms: 7',
+		      'Maximum bw: 77777777',
+		      'Allowed features: mail dns web',
+		      'Edit capabilities: users aliases scripts',
+		      'Can choose database names: No' ],
+	},
+
+	# Modify the plan
+	{ 'command' => 'modify-plan.pl',
+	  'args' => [ [ 'name', $test_plan ],
+		      [ 'quota', 8888 ],
+		      [ 'no-admin-quota' ],
+		      [ 'max-doms', 8 ],
+		      [ 'auto-features' ],
+		      [ 'auto-capabilities' ],
+		      [ 'no-nodbname' ] ],
+	},
+
+	# Make sure the modification worked
+	{ 'command' => 'list-plans.pl',
+	  'args' => [ [ 'name', $test_plan ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Server block quota: 8888',
+		      'Administrator block quota: Unlimited',
+		      'Maximum doms: 8',
+		      'Maximum bw: 77777777',
+		      'Allowed features: Automatic',
+		      'Edit capabilities: Automatic',
+		      'Can choose database names: Yes' ],
+	},
+
+	# Delete the plan
+	{ 'command' => 'delete-plan.pl',
+	  'args' => [ [ 'name', $test_plan ] ],
+	},
+
+	# Make sure it is gone
+	{ 'command' => 'list-plans.pl',
+	  'antigrep' => $plan_name,
+	},
+
+	# Re-create it
+	{ 'command' => 'create-plan.pl',
+	  'args' => [ [ 'name', $test_plan ],
+		      [ 'quota', 7777 ],
+		      [ 'admin-quota', 8888 ],
+		      [ 'max-doms', 7 ],
+		      [ 'max-bw', 77777777 ],
+		      [ 'features', 'mail dns web' ],
+		      [ 'capabilities', 'users aliases scripts' ],
+		      [ 'nodbname' ] ],
+	},
+	
+	# Create a domain on the plan
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ],
+		      [ 'plan', $test_plan ],
+		      @create_args, ],
+        },
+
+	# Make sure the plan limits were applied
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Server block quota: 7777',
+		      'User block quota: 8888',
+		      'Maximum sub-servers: 7',
+		      'Bandwidth limit: 74.17',
+		      'Allowed features: mail dns web',
+		      'Edit capabilities: users aliases scripts',
+		      'Can choose database names: No' ],
+	},
+
+	# Modify the plan and apply
+	{ 'command' => 'modify-plan.pl',
+	  'args' => [ [ 'name', $test_plan ],
+		      [ 'quota', 8888 ],
+		      [ 'no-admin-quota' ],
+		      [ 'max-doms', 8 ],
+		      [ 'max-bw', 88888888 ],
+		      [ 'features', 'mail dns web webalizer' ],
+		      [ 'no-nodbname' ],
+		      [ 'apply' ] ],
+	},
+
+	# Verify the new limits on the domain
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Server block quota: 8888',
+		      'User block quota: Unlimited',
+		      'Maximum sub-servers: 8',
+		      'Bandwidth limit: 84.77',
+		      'Allowed features: mail dns web webalizer',
+		      'Can choose database names: Yes' ],
+	},
+
+	# Remove the domain and plan
+	{ 'command' => 'delete-plan.pl',
+	  'args' => [ [ 'name', $test_plan ] ],
+	  'cleanup' => 1 },
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { 'domains' => $domains_tests,
 	      'mailbox' => $mailbox_tests,
 	      'alias' => $alias_tests,
@@ -1801,6 +1930,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'shared' => $shared_tests,
 	      'wildcard' => $wildcard_tests,
 	      'parallel' => $parallel_tests,
+	      'plans' => $plans_tests,
 	    };
 
 # Run selected tests

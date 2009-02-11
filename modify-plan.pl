@@ -101,7 +101,7 @@ while(@ARGV > 0) {
 			}
 		$newplan->{'featurelimits'} = join(" ", @fl);
 		}
-	elsif ($a eq "--all-features") {
+	elsif ($a eq "--auto-features") {
 		# Allow all features
 		$newplan->{'featurelimits'} = '';
 		}
@@ -116,7 +116,7 @@ while(@ARGV > 0) {
 			}
 		$newplan->{'capabilities'} = join(" ", @cl);
 		}
-	elsif ($a eq "--all-features") {
+	elsif ($a eq "--auto-capabilities") {
 		# Allow all capabilities
 		$newplan->{'capabilities'} = '';
 		}
@@ -214,9 +214,9 @@ foreach $r (@plan_restrictions) {
 	print "                      [--$r | --no-$r]\n";
 	}
 print "                      [--features \"web dns mail ...\" |\n";
-print "                       --all-features]\n";
+print "                       --auto-features]\n";
 print "                      [--capabilities \"domain users aliases ...\" |\n";
-print "                       --all-capabilities]\n";
+print "                       --auto-capabilities]\n";
 if (defined(&list_resellers)) {
 	print "                      [--no-resellers | --resellers \"name name..\" |\n";
 	print "                       --all-resellers]\n";

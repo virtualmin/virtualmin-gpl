@@ -43,8 +43,8 @@
  - plans for resellers
 	- FS#4752
 	- help pages
-	- Functional tests for plan
 	- Test on xencentos, lentor
+	- GPL version tests
 	- CHANGELOG
 
  - IPv6 support
