@@ -45,7 +45,6 @@ print &ui_table_row($text{'migrate_webmin'},
 # Template to use
 foreach $t (&list_templates()) {
 	next if ($t->{'deleted'});
-	next if (!$t->{'for_parent'});	# XXX
 	push(@tmpls, $t);
 	}
 print &ui_table_row($text{'migrate_template'},

@@ -36,6 +36,12 @@ $tmpl = &get_template($in{'template'});
 if (!$in{'parent_def'}) {
 	$parent = &get_domain_by("user", $in{'parent'}, "parent", "");
 	}
+if ($parent && !$tmpl->{'for_sub'}) {
+	&error($text{'migrate_etmplsub'});
+	}
+elsif (!$parent && !$tmpl->{'for_parent'}) {
+	&error($text{'migrate_etmplparent'});
+	}
 ($ip, $virt, $virtalready) = &parse_virtual_ip($tmpl,
 			$parent ? $parent->{'reseller'} :
 			&reseller_admin() ? $base_remote_user : undef);

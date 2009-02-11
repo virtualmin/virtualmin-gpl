@@ -421,7 +421,6 @@ foreach my $mailuser (@mailusers) {
 		}
 	# Add any autoresponder
 	local $auto = $mailuser->{'autoresponder'};
-	# XXX
 	if (@{$muinfo->{'to'}}) {
 		# Only enable mail if there is at least one destination, which
 		# would be his own mailbox or offsite
