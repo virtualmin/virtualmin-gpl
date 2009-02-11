@@ -40,11 +40,6 @@
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
 
- - plans for resellers
-	- FS#4752
-	- Test on xencentos
-	- Test GPL version
-
  - IPv6 support
 	- FS#4239
 	- Concurrent with v4, so that a domain can also have a v6 address
