@@ -28,7 +28,7 @@ if ($in{'delete'}) {
 else {
 	# Validate and store inputs
 	$in{'name'} =~ /\S/ || &error($text{'plan_ename'});
-	if ($in{'new'} || $plan->{'name'} ne $in{'name'}) {
+	if ($in{'new'} || lc($plan->{'name'}) ne lc($in{'name'})) {
 		($clash) = grep { lc($_->{'name'}) eq lc($in{'name'}) }
 				&list_plans();
 		$clash && &error($text{'plan_eclash'});

@@ -42,8 +42,6 @@
 
  - plans for resellers
 	- FS#4752
-	- Command-line API to manage
-		- GPL links
 	- help pages
 	- Functional tests for plan
 	- Test on xencentos, lentor
