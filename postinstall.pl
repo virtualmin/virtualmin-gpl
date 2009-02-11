@@ -8,6 +8,9 @@ sub module_install
 &foreign_require("cron", "cron-lib.pl");
 local $need_restart;
 
+# Convert all templates to plans, if needed
+&convert_plans();
+
 # Remember the first version we installed, to avoid showing new features
 # from before it
 $config{'first_version'} ||= &get_base_module_version();
@@ -327,9 +330,6 @@ foreach my $d (@doms) {
 		&create_everyone_file($d);
 		}
 	}
-
-# Convert all templates to plans, if needed
-&convert_plans();
 
 # Record the install time for this version
 local %itimes;

@@ -42,9 +42,8 @@
 
  - plans for resellers
 	- FS#4752
-	- help pages
 	- Test on xencentos, lentor
-	- GPL version tests
+	- Test GPL version
 
  - IPv6 support
 	- FS#4239

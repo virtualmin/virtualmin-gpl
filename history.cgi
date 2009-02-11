@@ -1,6 +1,5 @@
 #!/usr/local/bin/perl
 # Show a historic graph of one or more collected stats
-# XXX command-line API to get data
 
 require './virtual-server-lib.pl';
 &can_show_history() || &error($text{'history_ecannot'});
