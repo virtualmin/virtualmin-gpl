@@ -237,7 +237,7 @@ if (!defined($dom->{'template'})) {
 	# assume default parent or sub-server template
 	$dom->{'template'} = $dom->{'parent'} ? 1 : 0;
 	}
-if (!defined($dom->{'plan'})) {
+if (!defined($dom->{'plan'}) && !$main::no_auto_plan) {
 	# assume first plan
 	local @plans = sort { $a->{'id'} <=> $b->{'id'} } &list_plans();
 	$dom->{'plan'} = $plans[0]->{'id'};

@@ -182,6 +182,8 @@ if (@list_plans_cache) {
 # installation time, to handle upgrades.
 sub convert_plans
 {
+local $main::no_auto_plan = 1;	# So plans don't get set by complete_domain
+
 # For each template, create a plan
 local %planmap;
 foreach my $ltmpl (&list_templates()) {
