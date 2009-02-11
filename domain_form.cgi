@@ -363,6 +363,17 @@ if (!$aliasdom && &database_feature() && &can_edit_databases() && !$subdom) {
 		undef, \@tds);
 	}
 
+# Show reseller selection field
+if (&can_edit_templates() && defined(&list_resellers) && !$parentdom) {
+	@resels = &list_resellers();
+	if (@resels) {
+		 print &ui_table_row(&hlink($text{'form_reseller'},"dreseller"),
+			&ui_select("reseller", undef,
+				[ [ '', $text{'form_noreseller'} ],
+				  map { $_->{'name'} } @resels ]));
+		}
+	}
+
 if ($has_advanced) {
 	print &ui_hidden_table_end("advanced");
 	}

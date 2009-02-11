@@ -203,7 +203,7 @@ if (defined($in{'content'})) {
 
 # Work out the virtual IP
 $resel = $parentdom ? $parentdom->{'reseller'} :
-	 &reseller_admin() ? $base_remote_user : undef;
+	 &reseller_admin() ? $base_remote_user : $in{'reseller'};
 $defip = &get_default_ip($resel);
 if ($aliasdom) {
 	$ip = $aliasdom->{'ip'};

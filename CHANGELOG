@@ -1058,3 +1058,4 @@ Backups and restores to S3 buckets in Europe are now fully supported.
 Added a Module Config field under Advanced options for specifying the path to an alternate tar command.
 Added an option for email-based ticket submission to the eTicket installer.
 Extracted all settings related to default quotas and limits from templates, and moved them into the new Account Plan objects. These can be created by both the master admin and resellers, and selected for new or existing virtual servers. Also added a command-line API for plan management.
+The master admin can select a reseller to own a new top-level virtual server when it is created.
