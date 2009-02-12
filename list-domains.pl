@@ -304,6 +304,13 @@ if ($multi) {
 				$childs == 0 ? "None" : $childs,"\n";
 			}
 		if ($config{'web'} && $d->{'web'} &&
+		    defined(&list_domain_php_directories)) {
+			($dir) = &list_domain_php_directories($d);
+			if ($dir) {
+				print "    PHP version: $dir->{'version'}\n";
+				}
+			}
+		if ($config{'web'} && $d->{'web'} &&
 		    defined(&get_domain_ruby_mode)) {
 			$p = &get_domain_ruby_mode($d) || "none";
 			print "    Ruby execution mode: $p\n";
