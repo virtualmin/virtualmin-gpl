@@ -1,0 +1,20 @@
+licence_maxservers=Your serial number is licenced for only $1 servers, but is being used on $2.
+index_noadd3=No more servers can be added, the system has reached its licenced maximum of $1.
+upgrade_header=Virtualmin Pro licence
+licence_warn=However, a temporary problem occurred during this licence check : $1.
+licence_soon2=Notice - Your Virtualmin licence will expire in $1 hours.
+upgrade_key=Licence key
+upgrade_step2=Enter your serial number and licence key in the form below.
+licence_ecannot=You are not allowed to re-check the Virtualmin licence
+licence_ok2=.. licence is OK! It is valid for $1 Virtualmin domains, and for use on $2 systems.
+licence_soon=Notice - Your Virtualmin licence will expire in $1 days.
+licence_recheck=Re-check Licence Status
+licence_title=Re-Check Licence
+licence_err=A problem was detected with your Virtualmin licence :
+upgrade_file=Creating Virtualmin licence file ..
+licence_maxdoms=Your system is licenced for only $1 servers, but you have $2.
+upgrade_ekey=Missing or invalid-looking licence key
+upgrade_eamazon=This licence key cannot be used for upgrades
+upgrade_step1=Go to <a href='$1'>$1</a> and purchase a licence for Virtualmin Pro.
+licence_doing=Now re-checking your Virtualmin licence ..
+upgrade_elogin=Your serial number and licence key were not recogized by the Virtualmin Pro website
