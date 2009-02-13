@@ -1,7 +1,9 @@
  x run functional-test.pl
 	x fudu
 	x lentor
-	- xencentos
+	x xencentos
+
+ x branch in SVN
 
  x Generate british english with :
 	cd /usr/local/webadmin
@@ -9,28 +11,28 @@
 	./fix-english.pl --svn "English conversion" gpl-virtual-server
 	./fix-english.pl --svn "English conversion" virtual-server-theme
 
- - Create tar.gz file
+ x Create tar.gz file
 	./gpl-virtual-server/createvirtualminmodule.sh $ver /tmp/virtual-server-$ver.wbm.gz
 	./create-module.pl virtualmin/virtual-server-theme-$themever.wbt.gz virtual-server-theme
 
- - build RPM and .deb
+ x build RPM and .deb
 	./makemodulerpm.pl --sign --dir virtual-server --allow-overwrite gpl-virtual-server
 	./makemodulerpm.pl --sign --allow-overwrite virtual-server-theme
 	./makemoduledeb.pl --dir virtual-server --allow-overwrite gpl-virtual-server
 	./makemoduledeb.pl --allow-overwrite virtual-server-theme
 
- - Upload to download.webmin.com:htdocs/download/virtualmin/
-	scp /tmp/virtual-server-$ver.wbm.gz virtualmin/virtual-server-theme-$ver.wbt.gz download.webmin.com:htdocs/download/virtualmin/
+ x Upload to download.webmin.com:htdocs/download/virtualmin/
+	scp /tmp/virtual-server-$ver.wbm.gz download.webmin.com:htdocs/download/virtualmin/
 	scp /usr/src/redhat/RPMS/noarch/wbm-virtual-server-$ver-1.noarch.rpm /usr/src/redhat/SRPMS/wbm-virtual-server-$ver-1.src.rpm download.webmin.com:htdocs/download/virtualmin/
 	scp /tmp/webmin-virtual-server_${ver}_all.deb download.webmin.com:htdocs/download/virtualmin/
 
- - Upload theme
+ x Upload theme
 	scp virtualmin/virtual-server-theme-$themever.wbt.gz download.webmin.com:htdocs/download/virtualmin/
 	scp /usr/src/redhat/RPMS/noarch/wbt-virtual-server-theme-$themever-1.noarch.rpm download.webmin.com:htdocs/download/virtualmin/
 	scp /tmp/webmin-virtual-server-theme_${themever}_all.deb download.webmin.com:htdocs/download/virtualmin/
 
  - Add to website
-	x Mention plugins too
+	- Mention plugins too
 
  - Add to freshmeat.net
 

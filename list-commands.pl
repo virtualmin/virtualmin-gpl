@@ -69,7 +69,7 @@ foreach my $c (&list_api_categories()) {
 		while (length($desc) + $maxlen > 79) {
 			# Line is too long - wrap it by taking off a word
 			$desc =~ s/\s(\S+)$//;
-			$wrap .= $1." ";
+			$wrap = $1." ".$wrap;
 			}
 		if (!$donehead) {
 			# Category header
