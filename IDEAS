@@ -44,6 +44,3 @@
 	- FS#4239
 	- Concurrent with v4, so that a domain can also have a v6 address
 	- Use in DNS, Apache
-
- - AWstats plugin improvements for configuration
-	- FS#5199 
