@@ -1,0 +1,6 @@
+desc=Updated script installers
+html=Updated the DokuWiki script installer to version 2009-02-14.
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}
