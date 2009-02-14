@@ -9,7 +9,7 @@ require './virtual-server-lib.pl';
 print &ui_form_start("save_newuser.cgi", "form-data");
 $file = $config{'user_template'};
 $file = "$module_config_directory/user-template"
-	if ($file eq "none" || $file eq 'default');
+	if ($file eq 'none' || $file eq 'default');
 
 $text{'sub_USER'} = $text{'sub_POP3'};
 $text{'sub_HOME'} = $text{'sub_POP3HOME'};

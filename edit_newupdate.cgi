@@ -8,7 +8,7 @@ require './virtual-server-lib.pl';
 print &ui_form_start("save_newupdate.cgi", "form-data");
 $file = $config{'update_template'};
 $file = "$module_config_directory/update-template"
-	if ($file eq "none" || $file eq 'default');
+	if ($file eq 'none' || $file eq 'default');
 
 $text{'sub_USER'} = $text{'sub_POP3'};
 $text{'sub_HOME'} = $text{'sub_POP3HOME'};
