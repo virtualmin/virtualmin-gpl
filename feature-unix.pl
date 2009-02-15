@@ -123,7 +123,7 @@ if (&has_home_quotas()) {
 eval {
 	# Create virtuser pointing to new user, and possibly generics entry
 	local $main::error_must_die = 1;
-	if ($_[0]->{'mail'}) {
+	if ($_[0]->{'mail'} && $config{'mail_system'} != 5) {
 		local @virts = &list_virtusers();
 		local $email = $_[0]->{'user'}."\@".$_[0]->{'dom'};
 		local ($virt) = grep { $_->{'from'} eq $email } @virts;

@@ -5792,16 +5792,6 @@ if (!$nopost) {
 	&run_post_actions();
 	}
 
-# Add a virtuser for the unix user, if requested
-if ($in{'mailbox'}) {
-	&$first_print($text{'setup_mailbox'});
-	local $virt = { 'from' => $user."\@".$dom->{'dom'},
-			'to' => [ $user ] };
-	&create_virtuser($virt);
-	&sync_alias_virtuals($dom);
-	&$second_print($text{'setup_done'});
-	}
-
 # Save domain details
 &$first_print($text{'setup_save'});
 &save_domain($dom, 1);
