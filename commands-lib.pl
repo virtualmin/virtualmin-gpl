@@ -160,7 +160,7 @@ local $api_helper_command = &get_api_helper_command();
 if (!$api_helper_command) {
 	return (0, "No writable path configured or auto-detected");
 	}
-local $bash = &has_command("bash");
+local $bash = &has_command("bash") || &has_command("sh");
 if ($bash) {
 	&open_tempfile(HELPER, ">$api_helper_command", 1, 0) ||
 		return (0, "Failed to write to $api_helper_command : $!");

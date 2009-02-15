@@ -46,4 +46,7 @@
 	- Use in DNS, Apache
 
  - FreeBSD testing
-	- nsswitch.conf or hosts.conf? Bug by Joe
+	- Test all features ... functional test too
+
+ - Spamtrap docs
+
