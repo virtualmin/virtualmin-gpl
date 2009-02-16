@@ -1061,3 +1061,4 @@ Extracted all settings related to default quotas and limits from templates, and 
 The master admin can select a reseller to own a new top-level virtual server when it is created.
 ---- Changes since 3.66 ----
 Updated the DokuWiki script installer to version 2009-02-14, Radiant to 0.7.1, Trac to 0.11.3, and Nucleus to 3.40.
+The bandwidth limit and using variables in all email templates (BW_LIMIT and BW_USAGE) are now formatted in MB or GB, instead of just being a number of bytes.

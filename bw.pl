@@ -129,10 +129,7 @@ foreach $d (@doms) {
 			$tmpl = $config{'bw_template'} eq 'default' ?
 				"$module_config_directory/bw-template" :
 				$config{'bw_template'};
-			%tkeys = %$d;
-			$tkeys{'bw_limit'} = &nice_size($tkeys{'bw_limit'});
-			$tkeys{'bw_usage'} = &nice_size($tkeys{'bw_usage'});
-			$tkeys{'bw_period'} = $config{'bw_period'};
+			%tkeys = &make_domain_substitions($d);
 			$tkeys{'bw_percent'} = int(100*$usage/$d->{'bw_limit'});
 			foreach $k (keys %usage) {
 				$tkeys{'bw_usage_'.$k} =

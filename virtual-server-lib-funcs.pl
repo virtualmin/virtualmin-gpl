@@ -2973,7 +2973,7 @@ else {
 }
 
 # make_domain_substitions(&domain)
-# Returns a hash of substitions for eamil to a virtual server
+# Returns a hash of substitions for email to a virtual server
 sub make_domain_substitions
 {
 local ($d) = @_;
@@ -2983,6 +2983,15 @@ if ($hash{'quota'}) {
 	}
 if ($hash{'uquota'}) {
 	$hash{'uquota'} = &nice_size($d->{'uquota'}*&quota_bsize("home"));
+	}
+if ($hash{'bw_limit'}) {
+	$hash{'bw_limit'} = &nice_size($d->{'bw_limit'});
+	}
+if ($hash{'bw_usage'}) {
+	$hash{'bw_usage'} = &nice_size($d->{'bw_usage'});
+	}
+if ($config{'bw_period'}) {
+	$tkeys{'bw_period'} = $config{'bw_period'};
 	}
 return %hash;
 }
