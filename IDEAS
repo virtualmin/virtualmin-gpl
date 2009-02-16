@@ -45,8 +45,3 @@
 	- Concurrent with v4, so that a domain can also have a v6 address
 	- Use in DNS, Apache
 
- - Spamtrap docs
-
- - FreeBSD usermin
-	- Order for $< and $>
-	- Insecure dependency in piped open
