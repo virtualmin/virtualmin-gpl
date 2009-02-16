@@ -132,7 +132,8 @@ $domains_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
 		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
-		      [ 'postgres' ], [ 'spam' ], [ 'virus' ], [ 'webmin' ],
+		      $config{'postgresl'} ? ( [ 'postgres' ] ) : ( ),
+		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
 		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
@@ -279,7 +280,8 @@ $domains_tests = [
 		      [ 'desc', 'Test sub-domain' ],
 		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
 		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
-		      [ 'postgres' ], [ 'spam' ], [ 'virus' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
+		      [ 'spam' ], [ 'virus' ],
 		      @create_args, ],
 	},
 
@@ -327,7 +329,9 @@ $mailbox_tests = [
 	},
 
 	# Check Unix account
-	{ 'command' => 'su -s /bin/sh '.$test_full_user.' -c "id -a"',
+	{ 'command' => $gconfig{'os_type'} =~ /-linux/ ? 
+			'su -s /bin/sh '.$test_full_user.' -c "id -a"' :
+			'id -a '.$test_full_user,
 	  'grep' => 'uid=',
 	},
 
@@ -563,7 +567,8 @@ $database_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
-		      [ 'dir' ], [ 'unix' ], [ 'mysql' ], [ 'postgres' ],
+		      [ 'dir' ], [ 'unix' ], [ 'mysql' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
 		      @create_args, ],
         },
 
@@ -578,19 +583,11 @@ $database_tests = [
 	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.'_extra -e "select version()"',
 	},
 
-	# Create a PostgreSQL database
-	{ 'command' => 'create-database.pl',
-	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'type', 'postgres' ],
-		      [ 'name', $test_domain_user.'_extra2' ] ],
-	},
-
-	# Make sure both databases appear in the list
+	# Make sure the MySQL database appears
 	{ 'command' => 'list-databases.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
-	  'grep' => [ '^'.$test_domain_user.'_extra',
-		      '^'.$test_domain_user.'_extra2' ],
+	  'grep' => '^'.$test_domain_user.'_extra',
 	},
 
 	# Drop the MySQL database
@@ -600,12 +597,29 @@ $database_tests = [
 		      [ 'name', $test_domain_user.'_extra' ] ],
 	},
 
-	# Drop the PostgreSQL database
-	{ 'command' => 'delete-database.pl',
-	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'type', 'postgres' ],
-		      [ 'name', $test_domain_user.'_extra2' ] ],
-	},
+	$config{'postgres'} ?
+	(
+		# Create a PostgreSQL database
+		{ 'command' => 'create-database.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'type', 'postgres' ],
+			      [ 'name', $test_domain_user.'_extra2' ] ],
+		},
+
+		# Make sure the PostgreSQL database appears
+		{ 'command' => 'list-databases.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'multiline' ] ],
+		  'grep' => '^'.$test_domain_user.'_extra2',
+		},
+
+		# Drop the PostgreSQL database
+		{ 'command' => 'delete-database.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'type', 'postgres' ],
+			      [ 'name', $test_domain_user.'_extra2' ] ],
+		},
+	) : ( ),
 
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
