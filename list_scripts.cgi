@@ -214,8 +214,7 @@ if (&can_unsupported_scripts()) {
 	print $text{'scripts_unsupdesc'},"<p>\n";
 	print &ui_form_start("script_form.cgi");
 	print &ui_hidden("dom", $in{'dom'}),"\n";
-	print &ui_table_start($text{'scripts_unsupheader'}, undef, 2,
-			      [ "width=30%" ]);
+	print &ui_table_start($text{'scripts_unsupheader'}, undef, 2);
 
 	# Script type
 	print &ui_table_row($text{'scripts_unsupname'},
