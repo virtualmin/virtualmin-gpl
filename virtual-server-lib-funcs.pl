@@ -7182,6 +7182,21 @@ else {
 	}
 }
 
+# try_plugin_call(module, function, [arg, ...])
+# Like plugin_call, but catches and prints errors
+sub try_plugin_call
+{
+local ($mod, $func, @args) = @_;
+local $main::error_must_die = 1;
+eval { &plugin_call($mod, $func, @args) };
+if ($@) {
+        &$second_print(&text('setup_failure',
+			&plugin_call($f, "feature_name")));
+        return 0;
+        }
+return 1;
+}
+
 # plugin_defined(module, function)
 # Returns 1 if some function is defined in a plugin
 sub plugin_defined
@@ -9705,13 +9720,13 @@ if (&indexof($f, @features) >= 0 && $config{$f}) {
 elsif (&indexof($f, @feature_plugins) >= 0) {
 	# A plugin feature
 	if ($d->{$f} && !$oldd->{$f}) {
-		&plugin_call($f, "feature_setup", $d);
+		&try_plugin_call($f, "feature_setup", $d);
 		}
 	elsif (!$d->{$f} && $oldd->{$f}) {
-		&plugin_call($f, "feature_delete", $oldd);
+		&try_plugin_call($f, "feature_delete", $oldd);
 		}
 	elsif ($d->{$f}) {
-		&plugin_call($f, "feature_modify", $d, $oldd);
+		&try_plugin_call($f, "feature_modify", $d, $oldd);
 		}
 	}
 }

@@ -113,25 +113,8 @@ foreach $d (@doms) {
 			$d->{$f} = 0;
 			}
 		}
-	foreach $f (@dom_features) {
-		if ($config{$f}) {
-			local $dfunc = "delete_$f";
-			local $mfunc = "modify_$f";
-			if ($feature{$f} && $oldd->{$f}) {
-				&$dfunc($oldd);
-				}
-			elsif ($oldd->{$f}) {
-				&$mfunc($d, $oldd);
-				}
-			}
-		}
-	foreach $f (@feature_plugins) {
-		if ($plugin{$f} && $oldd->{$f}) {
-			&plugin_call($f, "feature_delete", $oldd);
-			}
-		elsif ($oldd->{$f}) {
-			&plugin_call($f, "feature_modify", $d, $oldd);
-			}
+	foreach $f (@dom_features, @feature_plugins) {
+		&call_feature_func($f, $d, $oldd);
 		}
 
 	# Save new domain details
