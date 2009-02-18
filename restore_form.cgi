@@ -37,7 +37,7 @@ if ($dest eq "download:") {
 	$dest = "/";
 	}
 print &ui_table_row($text{'restore_src'},
-	&show_backup_destination("src", $dest, $crmode == 2, $d, 1, 0));
+	&show_backup_destination("src", $dest, $crmode == 2, $d, 1, 1));
 print &ui_hidden_table_end("source");
 
 # Show feature selection boxes
