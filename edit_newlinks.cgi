@@ -29,7 +29,7 @@ foreach $l (@links) {
 		"<a href='edit_link.cgi?idx=$i'>".
 		  $l->{'desc'}."</a>",
 		$l->{'url'},
-		$l->{'open'} ? $text{'newlinks_same'} : $text{'newlinks_new'},
+		$l->{'open'} ? $text{'newlinks_new'} : $text{'newlinks_same'},
 		join(", ", map { $text{'newlinks_'.$_} }
 			      grep { $l->{'who'}->{$_} }
 				   ('master', 'domain', 'reseller') ),
