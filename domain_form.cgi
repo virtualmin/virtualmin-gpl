@@ -254,7 +254,8 @@ foreach $plan (@availplans) {
 	print "    document.forms[0].domslimit.value = \"$val\";\n";
 
 	# Set no database name
-	print "    document.forms[0].nodbname[$plan->{'nodbname'}].checked = true;\n";
+	print "    document.forms[0].nodbname[".int($plan->{'nodbname'}).
+	      "].checked = true;\n";
 	print "    }\n";
 	}
 print "}\n";
