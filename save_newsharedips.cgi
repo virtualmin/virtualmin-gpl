@@ -21,7 +21,9 @@ foreach $ip (@ips) {
 	&indexof($ip, @rips) < 0 || &error(&text('sharedips_erip', $ip));
 	$d = &get_domain_by("ip", $ip, "virt", 1);
 	$d && error(&text('sharedips_edom', $ip, $d->{'dom'}));
-	&indexof($ip, @active) >= 0 || &error(&text('sharedips_eactive', $ip));
+	@users = &get_domain_by("ip", $ip);
+	&indexof($ip, @active) >= 0 || @users ||
+		&error(&text('sharedips_eactive', $ip));
 	}
 
 # Check if one taken away was in use
