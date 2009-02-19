@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the DokuWiki script installer to version 2009-02-14, Radiant to 0.7.1, Trac to 0.11.3, OpenGoo to 1.2.0.1, phpMyFAQ to 2.0.12, and Nucleus to 3.40.
+html=Updated the DokuWiki script installer to version 2009-02-14, Radiant to 0.7.1, Trac to 0.11.3, OpenGoo to 1.2.0.1, phpMyFAQ to 2.0.12, Piwik to 0.2.30, and Nucleus to 3.40.
 master=1
 reseller=1
 domain=1
