@@ -7844,11 +7844,13 @@ return @dbs;
 }
 
 # all_databases([&domain])
-# Returns a list of all known databases on the system
+# Returns a list of all known databases on the system, possibly limited to
+# those relevant for some domain.
 sub all_databases
 {
+local ($d) = @_;
 local @rv;
-if ($config{'mysql'}) {
+if ($config{'mysql'} && (!$d || $d->{'mysql'})) {
 	&require_mysql();
 	push(@rv, map { { 'name' => $_,
 			  'type' => 'mysql',
@@ -7856,7 +7858,7 @@ if ($config{'mysql'}) {
 			  'special' => $_ eq "mysql" } }
 		      &mysql::list_databases());
 	}
-if ($config{'postgres'}) {
+if ($config{'postgres'} && (!$d || $d->{'postgres'})) {
 	&require_postgres();
 	push(@rv, map { { 'name' => $_,
 			  'type' => 'postgres',
@@ -7865,7 +7867,9 @@ if ($config{'postgres'}) {
 		      &postgresql::list_databases());
 	}
 foreach my $f (@database_plugins) {
-	push(@rv, &plugin_call($f, "databases_all", $_[0]));
+	if (!$d || $d->{$f}) {
+		push(@rv, &plugin_call($f, "databases_all", $d));
+		}
 	}
 return @rv;
 }
@@ -7875,6 +7879,8 @@ return @rv;
 sub resync_all_databases
 {
 local ($d, $all) = @_;
+return ( ) if (!@$all);		# If no DBs were found on the system, do nothing
+				# to avoid mass dis-association
 local %all = map { ("$_->{'type'} $_->{'name'}", $_) } @$all;
 local $removed = 0;
 foreach my $k (keys %$d) {
