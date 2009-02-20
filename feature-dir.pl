@@ -116,8 +116,13 @@ if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 		if (defined(&set_php_wrappers_writable)) {
 			&set_php_wrappers_writable($_[0], 1);
 			}
-		local $out = &backquote_logged("mv ".quotemeta($_[1]->{'home'}).
-			       " ".quotemeta($_[0]->{'home'})." 2>&1");
+		local $cmd = $config{'move_command'} || "mv";
+		$cmd .= " ".quotemeta($_[1]->{'home'}).
+			" ".quotemeta($_[0]->{'home'});
+		$cmd .= " 2>&1 </dev/null";
+		&set_domain_envs($_[1], "MODIFY_DOMAIN", $_[0]);
+		local $out = &backquote_logged($cmd);
+		&reset_domain_envs($_[1]);
 		if ($?) {
 			&$second_print(&text('save_dirhomefailed', "<tt>$out</tt>"));
 			}

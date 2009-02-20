@@ -1062,3 +1062,4 @@ The master admin can select a reseller to own a new top-level virtual server whe
 ---- Changes since 3.66 ----
 Updated the DokuWiki script installer to version 2009-02-14, Radiant to 0.7.1, Trac to 0.11.3, OpenGoo to 1.2.0.1, phpMyFAQ to 2.0.12, Piwik to 0.2.30, and Nucleus to 3.40.
 The bandwidth limit and using variables in all email templates (BW_LIMIT and BW_USAGE) are now formatted in MB or GB, instead of just being a number of bytes.
+Added a Module Config option for an alternate command to use when moving a virtual server's home directory, instead of mv.

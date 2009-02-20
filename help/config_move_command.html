@@ -1,0 +1,14 @@
+<header>Command to run to move a domain's home directory</header>
+
+By default, Virtualmin will just use the <tt>mv</tt> command to move a domain's
+home directory when needed, such as when a domain is renamed. However, this may
+not be appropriate in cases where each virtual server is on it's own filesystem,
+such as a ZFS mount. <p>
+
+In cases like this, you can set this field to a command or script that will
+be passed the old and new home directories as parameters. It will also have
+access to all the environment variables normally passed to pre- and post-
+modification commands. <p>
+
+<footer>
+
