@@ -147,9 +147,17 @@ if (!$in{'new'}) {
 if (@doms) {
 	print &ui_hidden_table_start($text{'plan_header5'}, 'width=100%', 2,
                                      'doms', 0, \@tds);
-	local $config{'show_quotas'} = 1;
-	print &ui_table_row(undef,
-		&capture_function_output(\&domains_table, \@doms), 2);
+	if ($config{'display_max'} && @doms > $config{'display_max'}) {
+		# Too many to show
+		print &ui_table_row(undef, &text('plan_toomany', scalar(@doms),
+					         $config{'display_max'}), 2);
+		}
+	else {
+		# Show the domains
+		local $config{'show_quotas'} = 1;
+		print &ui_table_row(undef,
+			&capture_function_output(\&domains_table, \@doms), 2);
+		}
 	print &ui_hidden_table_end();
 	}
 

@@ -4660,6 +4660,7 @@ plan_err=Failed to save plan
 plan_eresellers=No resellers selected
 plan_ename=Missing plan name
 plan_eclash=A plan with the same name already exists
+plan_toomany=This plan has $1 virtual servers on it, which is higher than Virtualmin's display limit of $2.
 
 dplans_err=Failed to delete plans
 dplans_enone=None selected
