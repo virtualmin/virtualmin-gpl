@@ -53,6 +53,7 @@ $SIG{'TERM'} = 'IGNORE';	# Stop process from being killed on upgrade
 %lfile = ( 'SerialNumber' => $in{'serial'},
 	   'LicenseKey' => $in{'key'} );
 &write_env_file($virtualmin_license_file, \%lfile);
+&set_ownership_permissions(undef, undef, 0700, $virtualmin_license_file);
 &unlock_file($virtualmin_license_file);
 &$second_print($text{'setup_done'});
 
