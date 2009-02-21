@@ -1415,6 +1415,12 @@ if (@views) {
 			  map { [ $_->{'values'}->[0] ] } @views ]));
 	}
 
+# Add sub-domains to parent domain DNS
+print &ui_table_row(&hlink($text{'tmpl_dns_sub'},
+                           "template_dns_sub"),
+	&none_def_input("dns_sub", $tmpl->{'dns_sub'},
+		        $text{'yes'}, 0, 0, $text{'no'}));
+
 print &ui_table_hr();
 
 # Master NS hostnames
@@ -1449,12 +1455,6 @@ print &ui_table_row(&hlink($text{'tmpl_spfincludes'},
 print &ui_table_row(&hlink($text{'tmpl_spfall'},
 			   "template_dns_spfall"),
 	&ui_yesno_radio("dns_spfall", $tmpl->{'dns_spfall'} ? 1 : 0));
-
-# Add sub-domains to parent domain DNS
-print &ui_table_row(&hlink($text{'tmpl_dns_sub'},
-                           "template_dns_sub"),
-	&none_def_input("dns_sub", $tmpl->{'dns_sub'},
-		        $text{'yes'}, 0, 0, $text{'no'}));
 
 print &ui_table_hr();
 

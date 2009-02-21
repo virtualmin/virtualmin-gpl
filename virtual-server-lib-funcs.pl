@@ -7023,6 +7023,7 @@ if (!$tmpl->{'default'}) {
 		if ($tmpl->{$p} eq "") {
 			local $k;
 			foreach $k (keys %$def) {
+				next if ($p eq "dns" && $k =~ /^dns_spf/);
 				if (!$done{$k} &&
 				    ($k =~ /^\Q$p\E_/ || $k eq $p)) {
 					$tmpl->{$k} = $def->{$k};
