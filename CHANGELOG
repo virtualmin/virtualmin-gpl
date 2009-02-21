@@ -1060,6 +1060,6 @@ Added an option for email-based ticket submission to the eTicket installer.
 Extracted all settings related to default quotas and limits from templates, and moved them into the new Account Plan objects. These can be created by both the master admin and resellers, and selected for new or existing virtual servers. Also added a command-line API for plan management.
 The master admin can select a reseller to own a new top-level virtual server when it is created.
 ---- Changes since 3.66 ----
-Updated the DokuWiki script installer to version 2009-02-14, Radiant to 0.7.1, Trac to 0.11.3, OpenGoo to 1.2.0.1, phpMyFAQ to 2.0.12, Piwik to 0.2.30, and Nucleus to 3.40.
+Updated the DokuWiki script installer to version 2009-02-14, Radiant to 0.7.1, Trac to 0.11.3, OpenGoo to 1.2.0.1, phpMyFAQ to 2.0.12, Piwik to 0.2.30, phpScheduleIt to 1.2.11, and Nucleus to 3.40.
 The bandwidth limit and using variables in all email templates (BW_LIMIT and BW_USAGE) are now formatted in MB or GB, instead of just being a number of bytes.
 Added a Module Config option for an alternate command to use when moving a virtual server's home directory, instead of mv.
