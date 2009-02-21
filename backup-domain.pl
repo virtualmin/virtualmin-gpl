@@ -66,7 +66,6 @@ $outdent_print = \&outdent_text_print;
 
 # Parse command-line args
 $asowner = 0;
-$opts{'mail'}->{'mailfiles'} = 1;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--dest") {
@@ -133,11 +132,6 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mailfiles") {
 		# Convenience flag for --option mail mailfiles 1
 		# Deprecated, as this is on by default now
-		$opts{'mail'}->{'mailfiles'} = 1;
-		}
-	elsif ($a eq "--no-mailfiles") {
-		# Convenience flag for --option mail mailfiles 0
-		$opts{'mail'}->{'mailfiles'} = 0;
 		}
 	elsif ($a eq "--as-owner") {
 		# Run as domain owner
@@ -259,7 +253,6 @@ if (&has_incremental_tar()) {
 	}
 print "                        [--all-virtualmin] | [--virtualmin config]\n";
 print "                        [--option feature name value]\n";
-print "                        [--no-mailfiles]\n";
 print "                        [--as-owner]\n";
 print "\n";
 print "Multiple domains may be specified with multiple --domain parameters.\n";

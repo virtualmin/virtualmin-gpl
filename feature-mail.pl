@@ -2321,7 +2321,7 @@ if ($supports_bcc) {
 
 &$second_print($text{'setup_done'});
 
-if (!&mail_under_home() && $_[2]->{'mailfiles'}) {
+if (!&mail_under_home()) {
 	# Backup actual mail files too..
 	local $mbase = &mail_system_base();
 	local @mfiles;
@@ -2610,7 +2610,7 @@ if ($_[2]->{'mailuser'}) {
 	}
 
 
-if (-r "$_[1]_files" && $_[2]->{'mailfiles'} &&
+if (-r "$_[1]_files" &&
     (!$_[2]->{'mailuser'} || $foundmailuser)) {
 	local $xtract;
 	if (!&mail_under_home()) {
@@ -2779,37 +2779,13 @@ if (defined(&create_autoreply_alias_links)) {
 return 1;
 }
 
-# show_backup_mail(&options)
-# Returns HTML for mail backup option inputs
-sub show_backup_mail
-{
-local ($opts) = @_;
-if (!&mail_under_home()) {
-	# Offer to backup mail files, if not under home
-	return &ui_checkbox("mail_mailfiles", 1, $text{'backup_mailfiles2'},
-			    $opts->{'mailfiles'});
-	}
-}
-
-# parse_backup_mail(&in)
-# Parses the inputs for mail backup options
-sub parse_backup_mail
-{
-local %in = %{$_[0]};
-return { 'mailfiles' => &mail_under_home() ? 1 : $in{'mail_mailfiles'} };
-}
-
 # show_restore_mail(&options, &domain)
 # Returns HTML for mail restore option inputs
 sub show_restore_mail
 {
 local $rv;
-if (!&mail_under_home()) {
-	# Offer to restore mail files, if not under home
-	$rv = &ui_checkbox("mail_mailfiles", 1, $text{'restore_mailfiles2'},
-			   $_[0]->{'mailfiles'});
-	}
 if ($_[1] && !&mail_under_home()) {
+	# Offer to restore just one user
 	$rv .= "<br>".$text{'restore_mailuser'}." ".
 		&ui_textbox("mail_mailuser", $_[0]->{'mailuser'}, 15);
 	}
@@ -2821,8 +2797,7 @@ return $rv;
 sub parse_restore_mail
 {
 local %in = %{$_[0]};
-return { 'mailfiles' => &mail_under_home() ? 1 : $in{'mail_mailfiles'},
-	 'mailuser' => $in{'mail_mailuser'} };
+return { 'mailuser' => $in{'mail_mailuser'} };
 }
 
 # check_clash(name, dom)
