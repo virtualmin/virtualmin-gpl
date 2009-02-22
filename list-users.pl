@@ -13,8 +13,9 @@ C<--domain-user> flag, which must be followed by an administrator's username.
 
 By default, it will output a
 reader-friendly table of users, but you can use the C<--multiline> option to show
-more detail in a format that is suitable for reading by other programs. Or to
-just show the usernames, use the C<--name-only> flag.
+more detail in a format that is suitable for reading by other programs. To
+just show the usernames, use the C<--name-only> flag. Or to list all email
+addresses for all users, use the C<--email-only> flag.
 
 By default the server owner is not included in the list of users, but if you
 add the C<--include-owner> command line option, he will be. Also by default the
@@ -59,6 +60,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
+		}
+	elsif ($a eq "--email-only") {
+		$emailonly = 1;
 		}
 	elsif ($a eq "--include-owner") {
 		$owner = 0;
@@ -174,6 +178,15 @@ foreach $d (@doms) {
 			print $u->{'user'},"\n";
 			}
 		}
+	elsif ($emailonly) {
+		# Just show addresses, where they exist
+		foreach $u (@users) {
+			print $u->{'email'},"\n" if ($u->{'email'});
+			foreach $e (@{$u->{'extraemail'}}) {
+				print $e,"\n";
+				}
+			}
+		}
 	else {
 		# Show all on one line
 		if (@doms > 1) {
@@ -209,7 +222,7 @@ print "Lists the mail, FTP and database users in one or more virtual servers.\n"
 print "\n";
 print "usage: list-users.pl   [--all-domains] | [--domain domain.name] |\n";
 print "                       [--domain-user username]*\n";
-print "                       [--multiline | --name-only]\n";
+print "                       [--multiline | --name-only | --email-only]\n";
 print "                       [--include-owner]\n";
 print "                       [--user name]\n";
 exit(1);

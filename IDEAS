@@ -45,6 +45,5 @@
 	- Concurrent with v4, so that a domain can also have a v6 address
 	- Use in DNS, Apache
 
- - Different default features for sub-servers
-	- Based on template perhaps?
-	- FS#5295
+ - Plan cloning
+	- Bug  FS#5326

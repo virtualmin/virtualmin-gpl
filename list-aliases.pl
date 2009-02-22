@@ -13,7 +13,8 @@ followed by a Virtualmin username.
 
 To get more details about each alias, use the C<--multiline> flag, which
 switches the output to a format more easily parsed by other programs. To just
-list the alias email addresses, using the C<--name-only> parameter.
+list the alias names, use the C<--name-only> parameter. To list full email
+addresses, use the C<--email-only> flag.
 
 In the regular table-format output mode, if an alias has an associated description and multiline mode is enabled,
 it will be displayed after the alias's from address, separated by a #
@@ -60,6 +61,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
 		}
+	elsif ($a eq "--email-only") {
+		$emailonly = 1;
+		}
 	elsif ($a eq "--plugins") {
 		$plugins = 1;
 		}
@@ -95,6 +99,12 @@ foreach $d (@doms) {
 			print &nice_from($a->{'from'}),"\n";
 			}
 		}
+	elsif ($emailonly) {
+		# Just show emails
+		foreach $a (@aliases) {
+			print $a->{'from'},"\n";
+			}
+		}
 	else {
 		# Show all on one line
 		if (@doms > 1) {
@@ -127,7 +137,7 @@ print "Lists the mail aliases in one or more virtual servers.\n";
 print "\n";
 print "usage: list-aliases.pl   [--all-domains] | [--domain domain.name] |\n";
 print "                         [--user username]*\n";
-print "                         [--multiline | --name-only]\n";
+print "                         [--multiline | --name-only | --email-only]\n";
 print "                         [--plugins]\n";
 exit(1);
 }
