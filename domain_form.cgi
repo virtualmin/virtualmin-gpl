@@ -388,18 +388,18 @@ if (!$parentuser && !$config{'template_auto'}) {
 # Only display quota inputs if enabled, and if not creating a subdomain
 if (&has_home_quotas() && !$parentuser && !$config{'template_auto'}) {
 	print &ui_table_row(&hlink($text{'form_quota'}, "websitequota"),
-		&opt_quota_input("quota", $config{'defquota'}, "home"),
+		&opt_quota_input("quota", $defplan->{'quota'}, "home"),
 		undef, \@tds);
 
 	print &ui_table_row(&hlink($text{'form_uquota'}, "unixuserquota"),
-		&opt_quota_input("uquota", $config{'defuquota'}, "home"),
+		&opt_quota_input("uquota", $defplan->{'uquota'}, "home"),
 		undef, \@tds);
 	}
 
 if (!$parentdom && $config{'bw_active'} && !$config{'template_auto'}) {
 	# Show bandwidth limit field
 	print &ui_table_row(&hlink($text{'edit_bw'}, "bwlimit"),
-			    &bandwidth_input("bwlimit", 0),
+			    &bandwidth_input("bwlimit", $defplan->{'bwlimit'}),
 			    undef, \@tds);
 	}
 
@@ -408,7 +408,8 @@ if (!$parentuser && !$config{'template_auto'}) {
 	foreach $l ("mailbox", "alias", "dbs") {
 		print &ui_table_row(
 			&hlink($text{'form_'.$l.'limit'}, $l.'limit'),
-			&ui_opt_textbox($l.'limit', $config{'def'.$l.'limit'},
+			&ui_opt_textbox($l.'limit',
+					$defplan->{$l.'limit'},
 					4, $text{'form_unlimit'},
 					$text{'form_atmost'}),
 			undef, \@tds);
@@ -416,8 +417,8 @@ if (!$parentuser && !$config{'template_auto'}) {
 
 	# Show input for restriction of number of sub-domains this domain
 	# owner can create
-	local $dlm = $config{'defdomslimit'} eq "" ? 1 :
-		     $config{'defdomslimit'} eq "*" ? 2 : 0;
+	local $dlm = $defplan->{'domslimit'} eq '' ? 2 :
+		     $defplan->{'domslimit'} eq '0' ? 1 : 2;
 	print &ui_table_row(&hlink($text{'form_domslimit'}, "domslimit"),
 		&ui_radio("domslimit_def", $dlm,
 			  [ [ 1, $text{'form_nocreate'} ],
@@ -429,7 +430,7 @@ if (!$parentuser && !$config{'template_auto'}) {
 
 	# Show input for default database name limit
 	print &ui_table_row(&hlink($text{'limits_nodbname'}, "nodbname"),
-		&ui_radio("nodbname", $config{'defnodbname'} ? 1 : 0,
+		&ui_radio("nodbname", $defplan->{'nodbname'},
 			  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]),
 		undef, \@tds);
 	}
@@ -566,6 +567,7 @@ if ($can_feature{'web'} && !$aliasdom && $config{'web'} && $virtualmin_pro) {
 print &ui_form_end([ [ "ok", $text{'form_ok'} ] ]);
 if (!$config{'template_auto'}) {
 	print "<script>select_template($deftmpl->{'id'});</script>\n";
+	print "<script>select_plan($defplan->{'id'});</script>\n";
 	}
 
 &ui_print_footer("", $text{'index_return'});
