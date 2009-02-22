@@ -109,6 +109,10 @@ else {
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
 			     &ui_opt_textbox("dir", "phpmyadmin", 30,
 					     "At top level"));
+	if ($ver >= 3) {
+		$rv .= &ui_table_row("Include all languages?",
+				     &ui_yesno_radio("all_langs", 0));
+		}
 	}
 return $rv;
 }
@@ -134,7 +138,8 @@ else {
 				       : join(" ", split(/\0/, $in->{'db'})),
 		 'dir' => $dir,
 		 'path' => $in->{'dir_def'} ? "/" : "/$in->{'dir'}",
-		 'auto' => $in->{'auto'} };
+		 'auto' => $in->{'auto'},
+		 'all_langs' => $in->{'all_langs'} };
 	}
 }
 
@@ -160,7 +165,12 @@ if (&compare_versions($ver, 2.2) < 0) {
 	$ver = $ver."-php";
 	}
 elsif (&compare_versions($ver, "2.9.1.1") >= 0) {
-	$ver = $ver."-english";
+	if ($opts->{'all_langs'}) {
+		$ver = $ver."-all-languages";
+		}
+	else {
+		$ver = $ver."-english";
+		}
 	}
 elsif (&compare_versions($ver, "2.10.0") >= 0) {
 	$ver = $ver."--all-languages-utf-8-only";
@@ -190,7 +200,7 @@ local $dbhost = &get_database_host("mysql");
 
 # Extract tar file to temp dir and copy to target
 local $verdir = &compare_versions($ver, "2.9.1.1") >= 0 ?
-	"phpMyAdmin-$ver-english" : "phpMyAdmin-$ver";
+	"phpMyAdmin-$ver-*" : "phpMyAdmin-$ver";
 local $temp = &transname();
 local $err = &extract_script_archive($files->{'source'}, $temp, $d,
                                      $opts->{'dir'}, $verdir);
