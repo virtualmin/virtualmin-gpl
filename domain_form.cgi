@@ -589,7 +589,9 @@ print &ui_form_end([ [ "ok", $text{'form_ok'} ] ]);
 if (!$config{'template_auto'}) {
 	print "<script>select_template($deftmpl->{'id'});</script>\n";
 	}
-print "<script>select_plan($defplan->{'id'});</script>\n";
+if (!$parentdom) {
+	print "<script>select_plan($defplan->{'id'});</script>\n";
+	}
 
 &ui_print_footer("", $text{'index_return'});
 
