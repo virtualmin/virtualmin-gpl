@@ -50,4 +50,4 @@
 	- FS#5295
 	- When a plan is selected with specified features, the checked features
 	  should change via Javascript
-
+	- On creation form, allow unlimited quota

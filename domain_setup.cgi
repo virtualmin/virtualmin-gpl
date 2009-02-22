@@ -129,12 +129,14 @@ if (!$parentuser) {
 		&error(&text('setup_eusername', $user, $uerr));
 		}
 	if (&has_home_quotas() && !$config{'template_auto'}) {
-		if ($in{'quota'} == -1) { $in{'quota'} = $in{'otherquota'} };
-		if ($in{'uquota'} == -1) { $in{'uquota'} = $in{'otheruquota'} }; 
-		$in{'quota'} =~ /^[0-9\.]+$/ ||  &error($text{'setup_equota'});
-		$in{'uquota'} =~ /^[0-9\.]+$/ ||  &error($text{'setup_euquota'});
-		$quota = &quota_parse('quota', "home");
-		$uquota = &quota_parse('uquota', "home");
+		$in{'quota_def'} || $in{'quota'} =~ /^[0-9\.]+$/ ||
+			&error($text{'setup_equota'});
+		$in{'uquota_def'} || $in{'uquota'} =~ /^[0-9\.]+$/ ||
+			&error($text{'setup_euquota'});
+		$quota = $in{'quota_def'} ? '' :
+				&quota_parse('quota', "home");
+		$uquota = $in{'uquota_def'} ? '' :
+				&quota_parse('uquota', "home");
 		}
 	if (!$config{'template_auto'}) {
 		if ($config{'bw_active'} && !$config{'template_auto'}) {

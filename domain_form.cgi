@@ -233,8 +233,8 @@ print "{\n";
 foreach $plan (@availplans) {
 	print "if (num == $plan->{'id'}) {\n";
 	# Set quotas
-	print &quota_javascript("quota", $plan->{'quota'}, "home", 0);
-	print &quota_javascript("uquota", $plan->{'uquota'}, "home", 0);
+	print &quota_javascript("quota", $plan->{'quota'}, "home", 1);
+	print &quota_javascript("uquota", $plan->{'uquota'}, "home", 1);
 
 	# Set limits
 	print &quota_javascript("mailboxlimit", $plan->{'mailboxlimit'},
@@ -388,11 +388,11 @@ if (!$parentuser && !$config{'template_auto'}) {
 # Only display quota inputs if enabled, and if not creating a subdomain
 if (&has_home_quotas() && !$parentuser && !$config{'template_auto'}) {
 	print &ui_table_row(&hlink($text{'form_quota'}, "websitequota"),
-		&quota_input("quota", $config{'defquota'}, "home"),
+		&opt_quota_input("quota", $config{'defquota'}, "home"),
 		undef, \@tds);
 
 	print &ui_table_row(&hlink($text{'form_uquota'}, "unixuserquota"),
-		&quota_input("uquota", $config{'defuquota'}, "home"),
+		&opt_quota_input("uquota", $config{'defuquota'}, "home"),
 		undef, \@tds);
 	}
 
