@@ -154,9 +154,8 @@ if (@doms) {
 		}
 	else {
 		# Show the domains
-		local $config{'show_quotas'} = 1;
-		print &ui_table_row(undef,
-			&capture_function_output(\&domains_table, \@doms), 2);
+		local $config{'show_quotas'} = scalar(@doms) > 100 ? 0 : 1;
+		print &ui_table_row(undef, &domains_table(\@doms, 0, 1), 2);
 		}
 	print &ui_hidden_table_end();
 	}

@@ -2567,11 +2567,11 @@ else {
 	}
 }
 
-# domains_table(&domains, [checkboxes])
+# domains_table(&domains, [checkboxes], [return-html])
 # Display a list of domains in a table, with links for editing
 sub domains_table
 {
-local ($doms, $checks) = @_;
+local ($doms, $checks, $noprint) = @_;
 local $usercounts = &count_domain_users();
 local $aliascounts = &count_domain_aliases(1);
 local @table_features = $config{'show_features'} ?
@@ -2703,10 +2703,13 @@ foreach my $d (&sort_indent_domains($doms)) {
 	}
 
 # Output the table
-print &ui_columns_table(
-	\@heads,
-	100,
-	\@table);
+local $rv = &ui_columns_table(\@heads, 100, \@table);
+if ($noprint) {
+	return $rv;
+	}
+else {
+	print $rv;
+	}
 }
 
 # userdom_name(name, &domain)
