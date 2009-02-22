@@ -1,0 +1,5 @@
+desc=Plans can set default features
+html=If a plan specifies features to be granted to domain owners, those features will be enabled on the Create Virtual Server page when the plan is selected. Otherwise, defaults set on the Features and Plugins page will be used.
+master=1
+reseller=1
+link=domain_form.cgi

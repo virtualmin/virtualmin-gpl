@@ -224,6 +224,13 @@ foreach $t (@availtmpls) {
 print "}\n";
 print "</script>\n";
 
+# Work out which features are enabled by default
+@dom_features = $aliasdom ? @opt_alias_features :
+		$subdom ? @opt_subdom_features : @opt_features;
+%plugins_inactive = map { $_, 1 } split(/\s+/, $config{'plugins_inactive'});
+@def_features = grep { $config{$_} == 1 || $config{$_} == 3 } @dom_features;
+push(@def_features, grep { !$plugins_inactive{$_} } @feature_plugins);
+
 # Generate Javascript for plan change
 @availplans = sort { $a->{'name'} <=> $b->{'name'} } &list_available_plans();
 $defplan = &get_default_plan();
@@ -232,30 +239,46 @@ print "function select_plan(num)\n";
 print "{\n";
 foreach $plan (@availplans) {
 	print "if (num == $plan->{'id'}) {\n";
-	# Set quotas
-	print &quota_javascript("quota", $plan->{'quota'}, "home", 1);
-	print &quota_javascript("uquota", $plan->{'uquota'}, "home", 1);
+	if (!$config{'template_auto'}) {
+		# Limits are only set if the fields exists
 
-	# Set limits
-	print &quota_javascript("mailboxlimit", $plan->{'mailboxlimit'},
-				"none", 1);
-	print &quota_javascript("aliaslimit", $plan->{'aliaslimit'},
-				"none", 1);
-	print &quota_javascript("dbslimit", $plan->{'dbslimit'},
-				"none", 1);
-	if ($config{'bw_active'}) {
-		print &quota_javascript("bwlimit", $plan->{'bwlimit'},
-					"bw", 1);
+		# Set quotas
+		print &quota_javascript("quota", $plan->{'quota'}, "home", 1);
+		print &quota_javascript("uquota", $plan->{'uquota'}, "home", 1);
+
+		# Set limits
+		print &quota_javascript("mailboxlimit", $plan->{'mailboxlimit'},
+					"none", 1);
+		print &quota_javascript("aliaslimit", $plan->{'aliaslimit'},
+					"none", 1);
+		print &quota_javascript("dbslimit", $plan->{'dbslimit'},
+					"none", 1);
+		if ($config{'bw_active'}) {
+			print &quota_javascript("bwlimit", $plan->{'bwlimit'},
+						"bw", 1);
+			}
+		$num = $plan->{'domslimit'} eq "" ? 1 :
+		       $plan->{'domslimit'} eq "0" ? 0 : 2;
+		$val = $num == 2 ? $plan->{'domslimit'} : "";
+		print "    var f = document.forms[0];\n";
+		print "    f.domslimit_def[$num].checked = true;\n";
+		print "    f.domslimit.value = \"$val\";\n";
+
+		# Set no database name
+		print "    f.nodbname[".int($plan->{'nodbname'}).
+		      "].checked = true;\n";
 		}
-	$num = $plan->{'domslimit'} eq "" ? 1 :
-	       $plan->{'domslimit'} eq "0" ? 0 : 2;
-	$val = $num == 2 ? $plan->{'domslimit'} : "";
-	print "    document.forms[0].domslimit_def[$num].checked = true;\n";
-	print "    document.forms[0].domslimit.value = \"$val\";\n";
 
-	# Set no database name
-	print "    document.forms[0].nodbname[".int($plan->{'nodbname'}).
-	      "].checked = true;\n";
+	# Set features always
+	local @fl = $plan->{'featurelimits'} ?
+			split(/\s+/, $plan->{'featurelimits'}) :
+			@def_features;
+	foreach $f (@dom_features, @feature_plugins) {
+		print "    if (document.forms[0]['$f']) {\n";
+		print "        document.forms[0]['$f'].checked = ",
+			(&indexof($f, @fl) >= 0 ? 1 : 0),";\n";
+		print "    }\n";
+		}
 	print "    }\n";
 	}
 print "}\n";
@@ -279,8 +302,7 @@ if (!$parentdom) {
 		push(@popts, [ $p->{'id'}, $p->{'name'} ]);
 		}
 	print &ui_table_row(&hlink($text{'form_plan'}, "plan"),
-		&ui_select("plan", $defplan->{'id'}, \@popts, 1, 0,
-			   0, 0, $config{'template_auto'} ? "" :
+		&ui_select("plan", $defplan->{'id'}, \@popts, 1, 0, 0, 0,
 			"onChange='select_plan(options[selectedIndex].value)'"),
 		undef, \@tds);
 	}
@@ -453,8 +475,7 @@ print &ui_hidden_table_start($text{'edit_featuresect'}, "width=100%", 2,
 			     "feature", 0);
 @grid = ( );
 $i = 0;
-foreach $f ($aliasdom ? @opt_alias_features :
-	    $subdom ? @opt_subdom_features : @opt_features) {
+foreach $f (@dom_features) {
 	# Don't allow access to features that this user hasn't been
 	# granted for his subdomains.
 	next if (!&can_use_feature($f));
@@ -477,7 +498,6 @@ foreach $f ($aliasdom ? @opt_alias_features :
 	}
 
 # Show checkboxes for plugins
-%inactive = map { $_, 1 } split(/\s+/, $config{'plugins_inactive'});
 @input_plugins = ( );
 foreach $f (@feature_plugins) {
 	next if (!&plugin_call($f, "feature_suitable",
@@ -488,7 +508,7 @@ foreach $f (@feature_plugins) {
 	$label = "<b>$label</b>";
 	$hlink = &plugin_call($f, "feature_hlink");
 	$label = &hlink($label, $hlink, $f) if ($hlink);
-	push(@grid, &ui_checkbox($f, 1, "", !$inactive{$f})." ".$label);
+	push(@grid, &ui_checkbox($f, 1, "", !$plugins_inactive{$f})." ".$label);
 	if (&plugin_call($f, "feature_inputs_show", undef)) {
 		push(@input_plugins, $f);
 		}
@@ -503,6 +523,7 @@ if (@input_plugins) {
 	print &ui_hidden_table_start($text{'form_inputssect'}, "width=100%", 2,
 				     "inputs", 0, [ "width=30%" ]);
 	foreach $f (@input_plugins) {
+		&plugin_call($f, "load_theme_library");
 		print &plugin_call($f, "feature_inputs", undef);
 		}
 	print &ui_hidden_table_end("inputs");
@@ -567,8 +588,8 @@ if ($can_feature{'web'} && !$aliasdom && $config{'web'} && $virtualmin_pro) {
 print &ui_form_end([ [ "ok", $text{'form_ok'} ] ]);
 if (!$config{'template_auto'}) {
 	print "<script>select_template($deftmpl->{'id'});</script>\n";
-	print "<script>select_plan($defplan->{'id'});</script>\n";
 	}
+print "<script>select_plan($defplan->{'id'});</script>\n";
 
 &ui_print_footer("", $text{'index_return'});
 
