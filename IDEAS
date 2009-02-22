@@ -48,4 +48,6 @@
  - Different default features for sub-servers
 	- Based on template perhaps?
 	- FS#5295
+	- When a plan is selected with specified features, the checked features
+	  should change via Javascript
 
