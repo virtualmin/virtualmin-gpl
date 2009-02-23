@@ -7,6 +7,12 @@ $canplans = &can_edit_plans();
 $canplans || &error($text{'plans_ecannot'});
 &error_setup($text{'plan_err'});
 
+# Just redirect to edit form in clone mode
+if ($in{'clone'}) {
+	&redirect("edit_plan.cgi?new=1&clone=".&urlize($in{'id'}));
+	return;
+	}
+
 # Get the plan being edited
 if (!$in{'new'}) {
 	@plans = &list_editable_plans();

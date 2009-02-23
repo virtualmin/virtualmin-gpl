@@ -7,10 +7,18 @@ $canplans = &can_edit_plans();
 $canplans || &error($text{'plans_ecannot'});
 
 if (!$in{'new'}) {
+	# Get the plan to edit
 	@allplans = &list_plans();
 	@plans = &list_editable_plans();
 	($plan) = grep { $_->{'id'} eq $in{'id'} } @plans;
 	$plan || &error($text{'plan_ecannot'});
+	}
+elsif ($in{'clone'} ne '') {
+	# Cloning some existing plan
+	$clone = &get_plan($in{'clone'});
+	$plan = { %$clone };
+	delete($plan->{'id'});
+	$plan->{'name'} = "Clone of $clone->{'name'}";
 	}
 
 &ui_print_header(undef, $in{'new'} ? $text{'plan_title1'}
@@ -169,6 +177,7 @@ else {
 	print &ui_form_end([ [ undef, $text{'save'} ],
 			     @doms ? ( [ 'apply', $text{'plan_apply'} ] )
 				   : ( ),
+			     [ 'clone', $text{'plan_clone'} ],
 			     @allplans > 1 ? ( [ 'delete', $text{'delete'} ] )
 					   : ( ) ]);
 	}
