@@ -4386,7 +4386,7 @@ if (!$tmpl->{'standard'}) {
 # Include plan too
 local $plan = &get_plan($_[0]->{'plan'});
 if ($plan) {
-	&copy_source_dest($plan->{'file'}, $_[0]."_plan");
+	&copy_source_dest($plan->{'file'}, $_[1]."_plan");
 	}
 
 &$second_print($text{'setup_done'});
