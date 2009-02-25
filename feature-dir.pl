@@ -322,20 +322,21 @@ if ($_[5] && $_[3]) {
 # Do the backup
 if ($_[3] && $config{'compression'} == 0) {
 	# With gzip
-	$cmd = "$tar cfX - $xtemp $iargs . | gzip -c | $writer";
+	$cmd = "$tar cfX - $xtemp $iargs . | gzip -c $config{'zip_args'}";
 	}
 elsif ($_[3] && $config{'compression'} == 1) {
 	# With bzip
-	$cmd = "$tar cfX - $xtemp $iargs . | bzip2 -c | $writer";
+	$cmd = "$tar cfX - $xtemp $iargs . | bzip2 -c $config{'zip_args'}";
 	}
 elsif ($_[3] && $config{'compression'} == 3) {
 	# ZIP archive
-	$cmd = "zip -r -x\@$xtemp - . | $writer";
+	$cmd = "zip -r -x\@$xtemp - .";
 	}
 else {
 	# Plain tar
-	$cmd = "$tar cfX - $xtemp $iargs . | $writer";
+	$cmd = "$tar cfX - $xtemp $iargs .";
 	}
+$cmd .= " | $writer";
 local $ex = &execute_command("cd ".quotemeta($_[0]->{'home'})." && $cmd",
 			     undef, \$out, \$out);
 &unlink_file($iflag) if ($iflag);

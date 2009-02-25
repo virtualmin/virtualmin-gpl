@@ -568,11 +568,11 @@ if ($ok) {
 			local $comp = "cat";
 			if ($config{'compression'} == 0) {
 				$destfile .= ".gz";
-				$comp = "gzip -c";
+				$comp = "gzip -c $config{'zip_args'}";
 				}
 			elsif ($config{'compression'} == 1) {
 				$destfile .= ".bz2";
-				$comp = "bzip2 -c";
+				$comp = "bzip2 -c $config{'zip_args'}";
 				}
 			elsif ($config{'compression'} == 3) {
 				$destfile =~ s/\.tar$/\.zip/;
@@ -621,10 +621,10 @@ if ($ok) {
 		# Tar up the directory into the final file
 		local $comp = "cat";
 		if ($dest =~ /\.(gz|tgz)$/i) {
-			$comp = "gzip -c";
+			$comp = "gzip -c $config{'zip_args'}";
 			}
 		elsif ($dest =~ /\.(bz2|tbz2)$/i) {
-			$comp = "bzip2 -c";
+			$comp = "bzip2 -c $config{'zip_args'}";
 			}
 		local $writer = "cat >$dest";
 		&open_tempfile(DEST, ">$dest", 0, 1);
@@ -664,7 +664,7 @@ if ($ok) {
 	# config backups
 	if (@$vbs && ($homefmt || $dirfmt)) {
 		if (&has_command("gzip")) {
-			&execute_command("cd $backupdir && ($tar cf - virtualmin_* | gzip -c) 2>&1 >$dest/virtualmin.tar.gz", undef, \$out, \$out);
+			&execute_command("cd $backupdir && ($tar cf - virtualmin_* | gzip -c $config{'zip_args'}) 2>&1 >$dest/virtualmin.tar.gz", undef, \$out, \$out);
 			push(@destfiles, "virtualmin.tar.gz");
 			}
 		else {
