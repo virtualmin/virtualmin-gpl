@@ -52,6 +52,7 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 
 	# Also notify slave servers, unless already added
 	local @slaves = &bind8::list_slave_servers();
+	local @extra_slaves = split(/\s+/, $tmpl->{'dns_ns'});
 	if (@slaves) {
 		local ($also) = grep { $_->{'name'} eq 'also-notify' }
 				     @{$dir->{'members'}};
@@ -62,6 +63,10 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 			foreach my $s (@slaves) {
 				push(@{$also->{'members'}},
 				     { 'name' => &to_ipaddress($s->{'host'}) });
+				}
+			foreach my $s (@extra_slaves) {
+				push(@{$also->{'members'}},
+                                     { 'name' => &to_ipaddress($s) });
 				}
 			push(@{$dir->{'members'}}, $also);
 			push(@{$dir->{'members'}}, 
@@ -75,6 +80,9 @@ if (!$_[0]->{'subdom'} || $tmpl->{'dns_sub'} ne 'yes') {
 			 { 'name' => 'localnets' }, );
 	foreach my $s (@slaves) {
 		push(@trans, { 'name' => &to_ipaddress($s->{'host'}) });
+		}
+	foreach my $s (@extra_slaves) {
+		push(@trans, { 'name' => &to_ipaddress($s) });
 		}
 	local ($trans) = grep { $_->{'name'} eq 'allow-transfer' }
 			      @{$dir->{'members'}};
