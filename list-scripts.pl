@@ -15,6 +15,9 @@ currently installed, including their install IDs and version numbers. To get
 more details in a program-friendly format, use the C<--multiline> parameter.
 To just get a list of script names, use C<--name-only>.
 
+To limit the output to just scripts of some type, use the C<--type> flag
+followed by a script code name, like C<phpmyadmin>.
+
 =cut
 
 package virtual_server;
@@ -39,6 +42,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--user") {
 		push(@users, shift(@ARGV));
+		}
+	elsif ($a eq "--type") {
+		$scripttype = shift(@ARGV);
 		}
 	elsif ($a eq "--all-domains") {
 		$all = 1;
@@ -68,6 +74,9 @@ else {
 foreach my $d (@doms) {
 	&detect_real_script_versions($d);
 	@scripts = &list_domain_scripts($d);
+	if ($scripttype) {
+		@scripts = grep { $_->{'name'} eq $scripttype } @scripts;
+		}
 
 	if ($multi) {
 		# Show each script on a separate line
@@ -141,6 +150,7 @@ print "\n";
 print "usage: list-scripts.pl   [--all-domains] | [--domain domain.name] |\n";
 print "                         [--user username]*\n";
 print "                         [--multiline | --name-only]\n";
+print "                         [--type script]\n";
 exit(1);
 }
 
