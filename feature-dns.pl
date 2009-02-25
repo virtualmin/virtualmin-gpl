@@ -918,14 +918,15 @@ return &text('validate_ednsfile2', "<tt>$zonefile</tt>") if (!-r $zonefile);
 local $bind8::config{'short_names'} = 0;
 local @recs = &bind8::read_zone_file($file->{'values'}->[0], $d->{'dom'});
 local %got;
+local $ip = $d->{'dns_ip'} || $d->{'ip'};
 foreach my $r (@recs) {
 	$got{uc($r->{'type'})}++;
 	if ($r->{'type'} eq 'A' &&
 	    ($r->{'name'} eq $d->{'dom'}.'.' ||
 	     $r->{'name'} eq 'www.'.$d->{'dom'}.'.') &&
-	    $r->{'values'}->[0] ne $d->{'ip'}) {
+	    $r->{'values'}->[0] ne $ip) {
 		return &text('validate_ednsip', "<tt>$r->{'name'}</tt>",
-		     "<tt>$r->{'values'}->[0]</tt>", "<tt>$d->{'ip'}</tt>");
+		     "<tt>$r->{'values'}->[0]</tt>", "<tt>$ip</tt>");
 		}
 	}
 $got{'SOA'} || return &text('validate_ednssoa', "<tt>$zonefile</tt>");
