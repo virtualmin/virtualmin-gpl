@@ -1,6 +1,6 @@
 # Functions for managing a virtual FTP server
 
-$feature_depends{'ftp'} = [ 'dir', 'virt' ];
+$feature_depends{'ftp'} = [ 'dir' ];
 
 sub require_proftpd
 {
