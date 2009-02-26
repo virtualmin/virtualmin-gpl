@@ -254,13 +254,7 @@ sub script_roundcube_uninstall
 local ($d, $version, $opts) = @_;
 
 # Remove roundcube tables from the database
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-&require_mysql();
-foreach my $t (&mysql::list_tables($dbname)) {
-	if (&indexof($t, @roundcube_tables) >= 0) {
-		&mysql::execute_sql_logged($dbname, "drop table $t");
-		}
-	}
+&cleanup_script_database($d, $opts->{'db'}, \@roundcube_tables);
 
 # Remove the contents of the target directory
 local $derr = &delete_script_install_directory($d, $opts);

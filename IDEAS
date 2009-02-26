@@ -45,5 +45,3 @@
 	- Concurrent with v4, so that a domain can also have a v6 address
 	- Use in DNS, Apache
 
- - Re-factor script DB table deletion
-	- Handle case where DB is already gone

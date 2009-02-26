@@ -390,25 +390,7 @@ local $derr = &delete_script_install_directory($d, $opts);
 return (0, $derr) if ($derr);
 
 # Remove base Django tables from the database
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-if ($dbtype eq 'mysql') {
-	&require_mysql();
-	foreach $t (&mysql::list_tables($dbname)) {
-		if ($t =~ /^(django|auth)_/) {
-			&mysql::execute_sql_logged($dbname,
-				"drop table ".&mysql::quotestr($t));
-			}
-		}
-	}
-else {
-	&require_postgres();
-	foreach $t (&postgresql::list_tables($dbname)) {
-		if ($t =~ /^(django|auth)_/) {
-			&postgresql::execute_sql_logged($dbname,
-				"drop table ".&postgresql::quote_table($t)." cascade");
-			}
-		}
-	}
+&cleanup_script_database($d, $opts->{'db'}, "(django|auth)_");
 
 # Remove <Location> block
 &require_apache();

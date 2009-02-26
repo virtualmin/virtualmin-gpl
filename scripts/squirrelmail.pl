@@ -312,17 +312,8 @@ sub script_squirrelmail_uninstall
 local ($d, $version, $opts) = @_;
 
 # Remove squirrelmail tables from the database
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-if ($dbname) {
-	# Delete from MySQL
-	&require_mysql();
-	foreach my $t (&mysql::list_tables($dbname)) {
-		if ($t eq "address" || $t eq "global_abook" ||
-		    $t eq "userprefs") {
-			&mysql::execute_sql_logged($dbname, "drop table $t");
-			}
-		}
-	}
+&cleanup_script_database($d, $opts->{'db'},
+			 [ "address", "global_abook", "userprefs" ]);
 
 # Remove the contents of the target directory
 local $derr = &delete_script_install_directory($d, $opts);

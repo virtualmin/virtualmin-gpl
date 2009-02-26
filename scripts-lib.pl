@@ -529,6 +529,50 @@ else {
 return undef;
 }
 
+# cleanup_script_database(&domain, dbspec, &tables|table-re)
+# Delete all tables in some database owned by some script. Returns an error
+# on failure, or undef on success.
+sub cleanup_script_database
+{
+local ($d, $dbspec, $tables) = @_;
+local ($dbtype, $dbname) = split(/_/, $dbspec, 2);
+local $droperr;
+eval {
+	local $main::error_must_die = 1;
+	if ($dbtype eq "mysql") {
+		# Delete from MySQL
+		&require_mysql();
+		foreach my $t (&mysql::list_tables($dbname)) {
+			if (ref($tables) && &indexoflc($t, @$tables) >= 0 ||
+			    !ref($tables) && $t =~ /^$tables/i) {
+				eval {
+					&mysql::execute_sql_logged($dbname,
+						"drop table ".
+						&mysql::quotestr($t));
+					};
+				$droperr ||= $@;
+				}
+			}
+		}
+	elsif ($dbtype eq "postgres") {
+		# Delete from PostgreSQL
+		&require_postgres();
+		foreach my $t (&postgresql::list_tables($dbname)) {
+			if (ref($tables) && &indexoflc($t, @$tables) >= 0 ||
+			    !ref($tables) && $t =~ /^$tables/i) {
+				eval {
+					&postgresql::execute_sql_logged($dbname,
+						"drop table ".
+						&postgresql::quote_table($t));
+					};
+				$droperr ||= $@;
+				}
+			}
+		}
+	};
+return $@ || $droperr;
+}
+
 # delete_script_database(&domain, dbspec)
 # Deletes the database that was created for some script, if it is empty
 sub delete_script_database
