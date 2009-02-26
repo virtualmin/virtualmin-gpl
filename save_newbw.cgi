@@ -19,7 +19,7 @@ $in{'bw_notify'} =~ /^\d+$/ && $in{'bw_notify'} > 0 ||
 	&error($text{'newbw_ewarn'});
 $in{'ftplog_def'} || -r $in{'ftplog'} ||
 	&error($text{'newbw_eftplog'});
-$in{'maillog_def'} != 1 || -r $in{'maillog'} ||
+$in{'maillog_def'} != 0 || -r $in{'maillog'} ||
 	&error($text{'newbw_emaillog'});
 if ($in{'serversmode'}) {
 	@servers = split(/\0/, $in{'servers'});
