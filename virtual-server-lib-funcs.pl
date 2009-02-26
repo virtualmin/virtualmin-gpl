@@ -10676,6 +10676,10 @@ if ($config{'spam'}) {
 		local $mbc = &postfix::get_real_value("mailbox_command");
 		local @mbc = &split_quoted_string($mbc);
 		local @st = stat($mbc[0]);
+		if (!&has_command($mbc[0])) {
+			# Procmail does not exist
+			return &text('check_spamwrappercmd', $mbc[0]);
+			}
 		if ($st[4] != 0) {
 			# User is not root
 			local $user = getpwuid($st[4]);
