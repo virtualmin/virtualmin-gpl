@@ -4018,7 +4018,7 @@ sub copy_alias_virtuals
 {
 local ($d, $aliasdom) = @_;
 local (%need, %already);
-&obtain_lock_mail($_[0]);
+&obtain_lock_mail($d);
 if ($config{'mail_system'} == 1) {
 	# Find existing Sendmail virtusers in the alias domain
 	foreach my $virt (&sendmail::list_virtusers($sendmail_vfile)) {
@@ -4083,6 +4083,7 @@ elsif ($config{'mail_system'} == 0) {
 		&postfix::delete_mapping($virtual_type, $virt);
 		}
 	}
+&release_lock_mail($d);
 }
 
 # delete_alias_virtuals(&dom)
