@@ -1659,7 +1659,10 @@ sub backup_strftime
 eval "use POSIX";
 eval "use posix" if ($@);
 local @tm = localtime(time());
-return strftime($_[0], @tm);
+&clear_time_locale() if (defined(&clear_time_locale));
+local $rv = strftime($_[0], @tm);
+&reset_time_locale() if (defined(&reset_time_locale));
+return $rv;
 }
 
 # parse_backup_url(string)
