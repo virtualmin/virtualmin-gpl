@@ -755,7 +755,8 @@ if (!$_[2]) {
 			if (@{$v->{'to'}} == 1 &&
 			    ($v->{'to'}->[0] eq $escuser ||
 			     $v->{'to'}->[0] eq $escalias ||
-			     $v->{'to'}->[0] eq $email ||
+			     ($v->{'to'}->[0] eq $email &&
+			      $config{'mail_system'} != 5) ||
 			     $v->{'from'} eq $email &&
 			      $v->{'to'}->[0] =~ /^BOUNCE/) &&
 			    (!$_[0] || $v->{'from'} ne $_[0]->{'dom'})) {
