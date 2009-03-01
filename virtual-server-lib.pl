@@ -263,7 +263,7 @@ $user_quota_warnings_file = "$module_config_directory/quotas-warnings";
 sub generate_plugins_list
 {
 local $str = defined($_[0]) ? $_[0] : $config{'plugins'};
-@confplugins = split(/\s+/, $config{'plugins'});
+@confplugins = split(/\s+/, $str);
 @plugins = ( );
 foreach my $pname (@confplugins) {
 	if (&foreign_check($pname)) {
