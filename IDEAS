@@ -45,3 +45,5 @@
 	- Concurrent with v4, so that a domain can also have a v6 address
 	- Use in DNS, Apache
 
+ - Plesk 9 support
+	- FS#5380

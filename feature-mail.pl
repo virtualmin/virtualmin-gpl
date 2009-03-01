@@ -1112,6 +1112,7 @@ sub vpopmail_to_qmail
 {
 local $ddir = &domain_vpopmail_dir($_[1]);
 if ($_[0] =~ /^\S+\@\S+$/) {
+	# A full email address .. just leave as is
 	return $_[0];
 	}
 elsif ($_[0] eq "BOUNCE") {
@@ -1124,6 +1125,7 @@ elsif ($_[0] =~ /^\\(\S+)$/) {
 	return "| $vpopbin/vdelivermail '' $ddir/$1";
 	}
 elsif ($_[0] =~ /^[a-z0-9\.\-\_]+$/) {
+	# A username - deliver to him
 	return "| $vpopbin/vdelivermail '' $_[0]\@$_[1]";
 	}
 else {
