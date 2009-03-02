@@ -64,6 +64,9 @@ $config{'web'} || &usage("Web serving is not enabled for Virtualmin");
 &set_all_text_print();
 
 # Parse command-line args
+$supports_php = defined(&supported_php_modes);
+$supports_ruby = defined(&supported_ruby_modes);
+$supports_styles = defined(&list_content_style);
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -72,29 +75,29 @@ while(@ARGV > 0) {
 	elsif ($a eq "--all-domains") {
 		$all_doms = 1;
 		}
-	elsif ($a eq "--mode") {
+	elsif ($a eq "--mode" && $supports_php) {
 		$mode = shift(@ARGV);
 		}
-	elsif ($a eq "--ruby-mode") {
+	elsif ($a eq "--ruby-mode" && $supports_ruby) {
 		$rubymode = shift(@ARGV);
 		}
-	elsif ($a eq "--php-children") {
+	elsif ($a eq "--php-children" && $supports_php) {
 		$children = shift(@ARGV);
 		$children > 0 || &usage("Invalid number of PHP sub-processes");
 		$children > $max_php_fcgid_children && &usage("Too many PHP sub-processes - maximum is $max_php_fcgid_children");
 		}
-	elsif ($a eq "--no-php-children") {
+	elsif ($a eq "--no-php-children" && $supports_php) {
 		$children = 0;
 		}
-	elsif ($a eq "--php-timeout") {
+	elsif ($a eq "--php-timeout" && $supports_php) {
 		$timeout = shift(@ARGV);
 		$timeout =~ /^[1-9]\d*$/ ||
 			&usage("Invalid PHP script timeout in seconds");
 		}
-	elsif ($a eq "--no-php-timeout") {
+	elsif ($a eq "--no-php-timeout" && $supports_php) {
 		$timeout = 0;
 		}
-	elsif ($a eq "--php-version") {
+	elsif ($a eq "--php-version" && $supports_php) {
 		$version = shift(@ARGV);
 		}
 	elsif ($a eq "--proxy") {
@@ -122,10 +125,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-suexec") {
 		$suexec = 0;
 		}
-	elsif ($a eq "--style") {
+	elsif ($a eq "--style" && $supports_styles) {
 		$stylename = shift(@ARGV);
 		}
-	elsif ($a eq "--content") {
+	elsif ($a eq "--content" && $supports_styles) {
 		$content = shift(@ARGV);
 		}
 	elsif ($a eq "--webmail") {
@@ -152,7 +155,7 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) ||
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
-if (defined(&supported_php_modes)) {
+if ($supports_php) {
 	@modes = &supported_php_modes();
 	}
 if (defined($timeout)) {
@@ -400,21 +403,23 @@ print "$_[0]\n\n" if ($_[0]);
 print "Changes web server settings for one or more domains.\n";
 print "\n";
 print "usage: modify-web.pl [--domain name] | [--all-domains]\n";
-if (defined(&supported_php_modes)) {
+if ($supports_php) {
 	print "                     [--mode mod_php | cgi | fcgid]\n";
 	print "                     [--php-children number | --no-php-children]\n";
 	print "                     [--php-version num]\n";
 	print "                     [--php-timeout seconds | --no-php-timeout]\n";
 	}
-if (defined(&supported_ruby_modes)) {
+if ($supports_ruby) {
 	print "                     [--ruby-mode none | mod_ruby | cgi | fcgid]\n";
 	}
 print "                     [--suexec | --no-suexec]\n";
 print "                     [--proxy http://... | --no-proxy]\n";
 print "                     [--framefwd http://... | --no-framefwd]\n";
-print "                     [--framefwd \"title\" ]\n";
-print "                     [--style name]\n";
-print "                     [--content text|filename]\n";
+print "                     [--frametitle \"title\" ]\n";
+if ($supports_styles) {
+	print "                     [--style name]\n";
+	print "                     [--content text|filename]\n";
+	}
 if (&has_webmail_rewrite()) {
 	print "                     [--webmail | --no-webmail]\n";
 	}
