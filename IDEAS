@@ -47,3 +47,5 @@
 
  - Plesk 9 support
 	- FS#5380
+
+ - Aliases broken when enabling email for existing domain

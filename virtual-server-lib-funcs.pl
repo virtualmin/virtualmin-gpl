@@ -12168,6 +12168,7 @@ local %miniserv;
 &get_miniserv_config(\%miniserv);
 local @preload;
 local $oldpreload = $miniserv{'preload'};
+delete($miniserv{'premodules'});
 if ($mode == 0) {
 	# Nothing to load
 	@preload = ( );
@@ -12181,15 +12182,23 @@ else {
 		push(@preload, "virtual-server=$file");
 		}
 
-	# Do web-lib-funcs.pl in modules we call and plugins
-	local $file = "web-lib-funcs.pl";
-	push(@preload, "virtual-server=$file");
-	if ($mode == 2) {
-		foreach my $minfo (&get_all_module_infos()) {
-			local $mdir = &module_root_directory($minfo->{'dir'});
-			if (&indexof($minfo->{'dir'},
+	if (&get_webmin_version() >= 1.455) {
+		# Do new perl module version of Webmin API
+		$miniserv{'premodules'} = "WebminCore";
+		}
+	else {
+		# Do web-lib-funcs.pl in modules we call and plugins
+		# XXX retire this eventually
+		local $file = "web-lib-funcs.pl";
+		push(@preload, "virtual-server=$file");
+		if ($mode == 2) {
+			foreach my $minfo (&get_all_module_infos()) {
+				local $mdir = &module_root_directory(
+						$minfo->{'dir'});
+				if (&indexof($minfo->{'dir'},
 				     @used_webmin_modules, @plugins) >= 0) {
-				push(@preload, "$minfo->{'dir'}=$file");
+					push(@preload, "$minfo->{'dir'}=$file");
+					}
 				}
 			}
 		}

@@ -1,9 +1,15 @@
 # virtual-server-lib.pl
 # Common functions for Virtualmin
 
-do '../web-lib.pl';
+BEGIN { push(@INC, ".."); };
+eval "use WebminCore;";
+if ($@) {
+	# Old Webmin version
+	do '../web-lib.pl';
+	do '../ui-lib.pl';
+	}
+
 &init_config();
-do '../ui-lib.pl';
 use Time::Local;
 %access = &get_module_acl();
 
@@ -53,8 +59,8 @@ if (!$virtualmin_pro) {
 			 "init", "ldap-useradmin", "logrotate", "mailboxes",
 			 "mount", "mysql", "net", "postfix", "postgresql",
 			 "proc", "procmail", "qmailadmin", "quota", "sendmail",
-			 "servers", "software",
-			 $virtualmin_pro ? ( "spam", "status", "phpini" ) : ( ),
+			 "servers", "software", "spam",
+			 $virtualmin_pro ? ( "status", "phpini" ) : ( ),
 			 "syslog", "useradmin", "usermin", "webalizer",
 			 "webmin", "filter" );
 &generate_plugins_list($no_virtualmin_plugins ? '' : $config{'plugins'});
