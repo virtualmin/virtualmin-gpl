@@ -80,9 +80,9 @@ $to || &usage();
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 $main::error_must_die = 1;
 eval {
-	&mailboxes::open_socket($server, $port, MAIL);
-	&mailboxes::smtp_command(MAIL);
-	&mailboxes::smtp_command(MAIL, "helo ".&get_system_hostname()."\r\n");
+	&mailboxes::open_socket($server, $port, mailboxes::MAIL);
+	&mailboxes::smtp_command(mailboxes::MAIL);
+	&mailboxes::smtp_command(mailboxes::MAIL, "helo ".&get_system_hostname()."\r\n");
 
 	if ($user) {
 		# Login to SMTP server
@@ -97,7 +97,7 @@ eval {
 						'pass' => $pass } );
 		&error("Failed to create Authen::SASL object") if (!$sasl);
 		local $conn = $sasl->client_new("smtp", &get_system_hostname());
-		local $arv = &mailboxes::smtp_command(MAIL, "auth $auth\r\n", 1);
+		local $arv = &mailboxes::smtp_command(mailboxes::MAIL, "auth $auth\r\n", 1);
 		if ($arv =~ /^(334)\s+(.*)/) {
 			# Server says to go ahead
 			$extra = $2;
@@ -106,7 +106,7 @@ eval {
 			if ($initial) {
 				local $enc = &encode_base64($initial);
 				$enc =~ s/\r|\n//g;
-				$arv = &mailboxes::smtp_command(MAIL, "$enc\r\n", 1);
+				$arv = &mailboxes::smtp_command(mailboxes::MAIL, "$enc\r\n", 1);
 				if ($arv =~ /^(\d+)\s+(.*)/) {
 					if ($1 == 235) {
 						$auth_ok = 1;
@@ -122,7 +122,7 @@ eval {
 				local $return = $conn->client_step($message);
 				local $enc = &encode_base64($return);
 				$enc =~ s/\r|\n//g;
-				$arv = &mailboxes::smtp_command(MAIL, "$enc\r\n", 1);
+				$arv = &mailboxes::smtp_command(mailboxes::MAIL, "$enc\r\n", 1);
 				if ($arv =~ /^(\d+)\s+(.*)/) {
 					if ($1 == 235) {
 						$auth_ok = 1;
@@ -140,17 +140,17 @@ eval {
 		}
 
 	# Send from and to
-	&mailboxes::smtp_command(MAIL, "mail from: <$from>\r\n");
-	&mailboxes::smtp_command(MAIL, "rcpt to: <$to>\r\n");
+	&mailboxes::smtp_command(mailboxes::MAIL, "mail from: <$from>\r\n");
+	&mailboxes::smtp_command(mailboxes::MAIL, "rcpt to: <$to>\r\n");
 	if ($datafile) {
 		$data = &read_file_contents($datafile);
 		$data || die "Failed to read $datafile : $!";
 		$data =~ s/^From\s.*\r?\n//;	# Remove From line
-		$r = &mailboxes::smtp_command(MAIL, "data\r\n");
+		$r = &mailboxes::smtp_command(mailboxes::MAIL, "data\r\n");
 		print mailboxes::MAIL $data;
-		$r = &mailboxes::smtp_command(MAIL, ".\r\n");
+		$r = &mailboxes::smtp_command(mailboxes::MAIL, ".\r\n");
 		}
-	&mailboxes::smtp_command(MAIL, "quit\r\n");
+	&mailboxes::smtp_command(mailboxes::MAIL, "quit\r\n");
 	close(MAIL);
 	};
 if ($@) {
