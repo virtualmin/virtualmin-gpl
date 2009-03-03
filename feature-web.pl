@@ -2920,14 +2920,16 @@ if ($out =~ /AP_DOC_ROOT="([^"]+)"/ ||
 	return $1;
 	}
 # Try new Debian-style suexec config files
+local $user = &get_apache_user();
 if ($out =~ /SUEXEC_CONFIG_DIR="([^"]+)"/ ||
     $out =~ /SUEXEC_CONFIG_DIR=(\S+)/) {
-	my $cf = "$1/www-data";
-	if (open(SUEXECCF, $cf)) {
-		my $basedir = <SUEXECCF>;
-		close(SUEXECCF);
-		$basedir =~ s/\r|\n//g;
-		return $basedir if ($basedir);
+	foreach my $cf ("$1/$user", "$1/www-data") {
+		if (open(SUEXECCF, $cf)) {
+			my $basedir = <SUEXECCF>;
+			close(SUEXECCF);
+			$basedir =~ s/\r|\n//g;
+			return $basedir if ($basedir);
+			}
 		}
 	}
 return undef;
