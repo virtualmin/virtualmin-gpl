@@ -2,10 +2,13 @@
 # link.cgi
 # Forward the URL from path_info on to another webmin server
 
-require '../web-lib.pl';
+BEGIN { push(@INC, ".."); };
+eval "use WebminCore;";
+if ($@) {
+	do '../web-lib.pl';
+	}
+
 &init_config();
-#$ENV{'PATH_INFO'} =~ /^\/(.*)$/ ||
-#	&error("Bad PATH_INFO : $ENV{'PATH_INFO'}");
 if ($ENV{'PATH_INFO'} =~ /^\/([0-9\.]+)\/(http|https):\/+([^:\/]+)(:(\d+))?(.*)$/) {
 	# Version with IP and URL
 	$ip = $1;
