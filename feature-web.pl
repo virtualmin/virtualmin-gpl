@@ -2918,6 +2918,16 @@ local $out = &backquote_command("$suexec -V 2>&1 </dev/null");
 if ($out =~ /AP_DOC_ROOT="([^"]+)"/) {
 	return $1;
 	}
+# Try new Debian-style suexec config files
+foreach my $cf ("/etc/apache2/suexec/www-data",
+		"/etc/apache/suexec/www-data") {
+	if (open(SUEXECCF, $cf)) {
+		my $basedir = <SUEXECCF>;
+		close(SUEXECCF);
+		$basedir =~ s/\r|\n//g;
+		return $basedir if ($basedir);
+		}
+	}
 return undef;
 } 
 
