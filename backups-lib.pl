@@ -314,6 +314,7 @@ elsif ($mode == 0) {
 				}
 			}
 		}
+	$onebyone = 0;	# Local backups are always written directly
 	}
 
 if (!$homefmt) {
