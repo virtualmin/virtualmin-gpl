@@ -937,6 +937,16 @@ $move_tests = [
 	  'grep' => "^$test_user",
 	},
 
+	# Make sure the mailbox has the same settings
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'multiline' ],
+		      [ 'user' => $test_user ] ],
+	  'grep' => [ 'Password: smeg',
+		      'Email address: '.$test_user.'@'.$test_domain,
+		      'Home quota: 777' ],
+	},
+
 	# Test DNS lookup of sub-domain
 	{ 'command' => 'host '.$test_subdomain,
 	  'grep' => &get_default_ip(),
@@ -966,8 +976,8 @@ $backup_tests = [
 		      [ 'user', $test_user ],
 		      [ 'pass', 'smeg' ],
 		      [ 'desc', 'Test user' ],
-		      [ 'quota', 100*1024 ],
-		      [ 'mail-quota', 100*1024 ] ],
+		      [ 'quota', 777*1024 ],
+		      [ 'mail-quota', 777*1024 ] ],
 	},
 
 	# Create a sub-server to be included
