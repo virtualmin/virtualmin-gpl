@@ -2915,12 +2915,14 @@ sub get_suexec_document_root
 local $suexec = &get_suexec_path();
 return undef if (!$suexec);
 local $out = &backquote_command("$suexec -V 2>&1 </dev/null");
-if ($out =~ /AP_DOC_ROOT="([^"]+)"/) {
+if ($out =~ /AP_DOC_ROOT="([^"]+)"/ ||
+    $out =~ /AP_DOC_ROOT=(\S+)/) {
 	return $1;
 	}
 # Try new Debian-style suexec config files
-foreach my $cf ("/etc/apache2/suexec/www-data",
-		"/etc/apache/suexec/www-data") {
+if ($out =~ /SUEXEC_CONFIG_DIR="([^"]+)"/ ||
+    $out =~ /SUEXEC_CONFIG_DIR=(\S+)/) {
+	my $cf = "$1/www-data";
 	if (open(SUEXECCF, $cf)) {
 		my $basedir = <SUEXECCF>;
 		close(SUEXECCF);
