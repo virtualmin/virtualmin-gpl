@@ -669,11 +669,16 @@ ins\//);
 		    defined($plain{$u->{'user'}})) {
 			# Check if the plain password is valid, in case the
 			# crypted password was changed behind our back
+			local $uc;
+			eval {
+				local $main::error_must_die = 1;
+				$uc = &unix_crypt($plain{$u->{'user'}},
+						  $u->{'pass'});
+				};
 			if ($plain{$u->{'user'}." encrypted"} eq $u->{'pass'} ||
 			    &encrypt_user_password($u, $plain{$u->{'user'}}) eq
 			    $u->{'pass'} ||
-			    &unix_crypt($plain{$u->{'user'}}, $u->{'pass'}) eq
-			    $u->{'pass'}) {
+			    $uc eq $u->{'pass'}) {
 				# Valid - we can use it
 				$u->{'plainpass'} = $plain{$u->{'user'}};
 				if (!defined($plain{$u->{'user'}." encrypted"})) {
