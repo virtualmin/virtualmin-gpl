@@ -825,7 +825,7 @@ local $tempbase = $gconfig{'tempdir_'.$module_name} ||
 		  "/tmp/.webmin";
 if ($d && !&is_under_directory($tempbase, $dir)) {
 	# As domain owner if possible
-	$out = &run_as_domain_user($d, $cmd, 0);
+	$out = &run_as_domain_user($d, $cmd, 0, 1);
 	}
 else {
 	# As root, but make owned by user if given

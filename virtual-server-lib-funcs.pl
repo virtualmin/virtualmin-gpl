@@ -3499,15 +3499,15 @@ $ENV{'USER'} = $ENV{'LOGNAME'} = $_[0]->{'user'};
 $ENV{'HOME'} = $_[0]->{'home'};
 }
 
-# run_as_domain_user(&domain, command, background)
+# run_as_domain_user(&domain, command, background, [never-su])
 # Runs some command as the owner of a virtual server, and returns the output
 sub run_as_domain_user
 {
-local ($d, $cmd, $bg) = @_;
+local ($d, $cmd, $bg, $nosu) = @_;
 &foreign_require("proc", "proc-lib.pl");
 local @uinfo = getpwnam($_[0]->{'user'});
-if ($uinfo[8] =~ /\/(sh|bash|tcsh|csh)$/ ||
-    $gconfig{'os_type'} =~ /-linux$/) {
+if (($uinfo[8] =~ /\/(sh|bash|tcsh|csh)$/ ||
+     $gconfig{'os_type'} =~ /-linux$/) && !$nosu) {
 	# Usable shell .. use su
 	local $cmd = &command_as_user($_[0]->{'user'}, 0, $_[1]);
 	if ($bg) {
