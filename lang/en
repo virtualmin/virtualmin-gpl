@@ -4617,7 +4617,6 @@ cfix_nsip=Verify with your DNS registrar that nameservers for the domain are set
 cfix_ns=Check that your DNS domain has been registered.
 cfix_web=Make sure your system's web server is running, that port 80 is not blocked by a firewall, and that the domain has a valid index page.
 cfix_webfile=Check the Apache configuration to ensure that this virtual server's &lt;virtualhost&gt; block is on the correct IP address.
-cfix_webfile=Check the Apache configuration to ensure that this virtual server's &lt;virtualhost&gt; block is on the correct IP address.
 cfix_ping=Verify firewall and routing settings between your system and the Internet.
 cfix_ssl=Make sure your system's web server is running, that port 443 is not blocked by a firewall, and that the domain has a valid index page.
 cfix_smtptimeout=Check if your system's firewall is blocking port 25.
