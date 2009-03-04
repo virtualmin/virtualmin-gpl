@@ -175,6 +175,7 @@ sub setup_mail
 {
 &$first_print($text{'setup_doms'});
 &obtain_lock_mail($_[0]);
+&complete_domain($_[0]);
 &require_mail();
 local $tmpl = &get_template($_[0]->{'template'});
 if ($config{'mail_system'} == 1) {
