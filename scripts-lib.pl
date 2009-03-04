@@ -1508,7 +1508,7 @@ sub post_http_connection
 local ($d, $page, $params, $out, $err, $headers,
        $returnheaders, $returnheaders_array) = @_;
 local $ip = $d->{'ip'};
-local $host = "www.".$d->{'dom'};
+local $host = &get_domain_http_hostname($d);
 local $port = $d->{'web_port'};
 
 local $oldproxy = $gconfig{'http_proxy'};	# Proxies mess up connection
@@ -1563,7 +1563,7 @@ sub get_http_connection
 local ($d, $page, $dest, $error, $cbfunc, $ssl, $user, $pass,
        $timeout, $osdn, $nocache, $headers) = @_;
 local $ip = $d->{'ip'};
-local $host = "www.".$d->{'dom'};
+local $host = &get_domain_http_hostname($d);
 local $port = $d->{'web_port'};
 
 # Build headers
@@ -1592,6 +1592,21 @@ if (!ref($h)) {
 	}
 &complete_http_download($h, $dest, $error, $cbfunc, $osdn, $host, $port,
 			$headers);
+}
+
+# get_domain_http_hostname(&domain)
+# Returns the best hostname for making HTTP requests to some domain, like
+# www.$DOM or just $DOM
+sub get_domain_http_hostname
+{
+my ($d) = @_;
+foreach my $h ("www.$d->{'dom'}", $d->{'dom'}) {
+	my $ip = &to_ipaddress($h);
+	if ($ip && $ip eq $d->{'ip'}) {
+		return $h;
+		}
+	}
+return $d->{'dom'};	# Fallback
 }
 
 # make_file_php_writable(&domain, file, [dir-only], [owner-too])
