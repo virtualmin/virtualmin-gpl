@@ -90,7 +90,7 @@ foreach my $fname (@features, "virt") {
 	local $ifunc = "init_$fname";
 	&$ifunc() if (defined(&$ifunc));
 	}
-@migration_types = ( "cpanel", "ensim", "plesk", "psa" );
+@migration_types = ( "cpanel", "ensim", "psa", "plesk", "plesk9" );
 @allow_features = (@opt_features, "virt", @feature_plugins);
 @startstop_features = ("web", "dns", "mail", "ftp", "unix", "virus",
 		       "mysql", "postgres");

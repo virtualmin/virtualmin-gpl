@@ -47,3 +47,5 @@
 
  - Plesk 9 support
 	- FS#5380
+	- CHANGELOG
+	- Functional tests
