@@ -1056,8 +1056,8 @@ $multibackup_tests = [
 		      [ 'user', $test_user ],
 		      [ 'pass', 'smeg' ],
 		      [ 'desc', 'Test user' ],
-		      [ 'quota', 100*1024 ],
-		      [ 'mail-quota', 100*1024 ] ],
+		      [ 'quota', 777*1024 ],
+		      [ 'mail-quota', 777*1024 ] ],
 	},
 
 	# Create a sub-server to be included
