@@ -8,68 +8,38 @@ sub migration_plesk9_validate
 local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
 local ($ok, $root) = &extract_plesk9_dir($file, 8);
 $ok || return ("Not a Plesk 9 backup file : $root");
-local $xfile = "$root/dump.xml";
-local $windows = 0;
-if (!-r $xfile) {
-	$xfile = "$root/info.xml";
-	$windows = 1;
-	}
--r $xfile || return ("Not a complete Plesk 8 backup file - missing dump.xml or info.xml");
+local ($xfile) = glob("$root/*.xml");
+$xfile && -r $xfile || return ("Not a complete Plesk 8 backup file - missing XML file");
 
 # Check if the domain is in there
 local $dump = &read_plesk_xml($xfile);
 ref($dump) || return ($dump);
-if (!$windows) {
-	# Linux Plesk format
-	if (!$dom) {
-		# Work out domain name
-		$dom = $dump->{'domain'}->{'name'};
-		$dom || return ("Could not work out domain name from backup");
-		}
-	local $domain = $dump->{'domain'}->{$dom};
-	if (!$domain && $dump->{'domain'}->{'name'} eq $dom) {
-		$domain = $dump->{'domain'};
-		}
-	$domain || return ("Backup does not contain the domain $dom");
-
-	if (!$parent && !$user) {
-		# Check if we can work out the user
-		$user = $domain->{'phosting'}->{'sysuser'}->{'name'};
-		$user ||
-		    return ("Could not work out original username from backup");
-		}
-
-	if (!$parent && !$pass) {
-		# Check if we can work out the password
-		$pass = $domain->{'phosting'}->{'sysuser'}->{'password'}->{'content'} ||
-			$domain->{'domainuser'}->{'password'}->{'content'};
-		$pass ||
-		    return ("Could not work out original password from backup");
-		}
+local $mig = $dump->{'Data'}->{'migration-dump'};
+$mig || return ("Missing migration-dump section in XML file");
+if (!$dom) {
+	# Work out domain name
+	$dom = $mig->{'domain'}->{'name'};
+	$dom || return ("Could not work out domain name from backup");
 	}
-else {
-	# On Windows, domain details are in a different place in the XML
-	if (!$dom) {
-		# Work out domain name
-		$dom = $dump->{'clients'}->{'client'}->{'domain'}->{'name'};
-		$dom || return ("Could not work out domain name from backup");
-		}
-	local $domain = $dump->{'clients'}->{'client'}->{'domain'};
-	$domain->{'name'} eq $dom ||
-		return ("Backup does not contain the domain $dom");
+local $domain = $mig->{'domain'}->{$dom};
+if (!$domain && $mig->{'domain'}->{'name'} eq $dom) {
+	$domain = $mig->{'domain'};
+	}
+$domain || return ("Backup does not contain the domain $dom");
 
-	if (!$parent && !$user) {
-		# Check if we can work out the user
-		$user = $domain->{'hosting'}->{'sys_user'}->{'login'};
-		$user ||
-		    return ("Could not work out original username from backup");
-		}
+if (!$parent && !$user) {
+	# Check if we can work out the user
+	$user = $domain->{'phosting'}->{'preferences'}->{'sysuser'}->{'name'};
+	$user ||
+	    return ("Could not work out original username from backup");
+	}
 
-	if (!$parent && !$pass) {
-		# We must have the password
-		$pass || return ("A password must be supplied when migrating ".
-				 "a Plesk backup");
-		}
+if (!$parent && !$pass) {
+	# Check if we can work out the password
+	$pass = $domain->{'phosting'}->{'preferences'}->{'sysuser'}->{'password'}->{'content'} ||
+		$domain->{'domainuser'}->{'password'}->{'content'};
+	$pass ||
+	    return ("Could not work out original password from backup");
 	}
 
 return (undef, $dom, $user, $pass);
@@ -97,34 +67,21 @@ $nologin_shell ||= $def_shell;
 $ftp_shell ||= $def_shell;
 
 # Extract backup and read the dump file
-local ($ok, $root) = &extract_plesk_dir($file, 8);
-local $windows = 0;
-local $xfile = "$root/dump.xml";
-if (!-r $xfile) {
-	$xfile = "$root/info.xml";
-	$windows = 1;
-	}
+local ($ok, $root) = &extract_plesk9_dir($file);
+local ($xfile) = glob("$root/*.xml");
 local $dump = &read_plesk_xml($xfile);
+ref($dump) || &error($dump);
+local $mig = $dump->{'Envelope'}->{'migration-dump'};
 
-local $domain;
-if (!$windows) {
-	# Linux format
-	$domain = $dump->{'domain'}->{$dom};
-	if (!$domain && $dump->{'domain'}->{'name'} eq $dom) {
-		$domain = $dump->{'domain'};
-		}
-
-	# Work out user and group
-	if (!$user) {
-		$user = $domain->{'phosting'}->{'sysuser'}->{'name'};
-		}
+# Get the domain object from the XML
+$domain = $mig->{'domain'}->{$dom};
+if (!$domain && $mig->{'domain'}->{'name'} eq $dom) {
+	$domain = $mig->{'domain'};
 	}
-else {
-	# Windows format
-	$domain = $dump->{'clients'}->{'client'}->{'domain'};
-	if (!$user) {
-		$user = $domain->{'hosting'}->{'sys_user'}->{'login'};
-		}
+
+# Work out user and group
+if (!$user) {
+	$user = $domain->{'phosting'}->{'preferences'}->{'sysuser'}->{'name'};
 	}
 local $group = $user;
 local $ugroup = $group;
@@ -133,28 +90,29 @@ local $ugroup = $group;
 &$first_print("Checking for Plesk features ..");
 local @got = ( "dir", $parent ? () : ("unix"), "web" );
 push(@got, "webmin") if ($webmin && !$parent);
-if (exists($domain->{'mailsystem'}->{'status'}->{'enabled'}) ||
+if (exists($domain->{'mailsystem'}->{'properties'}->{'status'}->{'enabled'}) ||
     $domain->{'mail'}) {
 	push(@got, "mail");
 	}
-if ($domain->{'dns-zone'} || $domain->{'dns_zone'}) {
+if ($domain->{'properties'}->{'dns-zone'}) {
 	push(@got, "dns");
 	}
 if ($domain->{'www'} eq 'true' || -d "$root/$dom/httpdocs") {
 	push(@got, "web");
 	}
-if ($domain->{'ip'}->{'ip-type'} eq 'exclusive' && $virt) {
+if ($domain->{'properties'}->{'ip'}->{'ip-type'} eq 'exclusive' && $virt) {
 	push(@got, "ssl");
 	}
-if ($domain->{'phosting'}->{'logrotation'}->{'enabled'} eq 'true' ||
+if ($domain->{'phosting'}->{'preferences'}->{'logrotation'}->{'enabled'} eq 'true' ||
     $windows && &indexof("web", @got) >= 0) {
 	push(@got, "logrotate");
 	}
-if ($domain->{'phosting'}->{'webalizer'}) {
+if ($domain->{'phosting'}->{'preferences'}->{'webalizer'}) {
 	push(@got, "webalizer");
 	}
 
 # Check for MySQL databases
+# XXX
 local $databases = $domain->{'phosting'}->{'sapp-installed'}->{'database'};
 if (!$databases) {
         $databases = $domain->{'database'};
@@ -323,6 +281,8 @@ if ($err) {
 else {
 	&$second_print(".. done");
 	}
+
+goto SKIP;
 
 # Copy web files
 &$first_print("Copying web pages ..");
@@ -955,6 +915,8 @@ foreach my $sdom (keys %$subdoms) {
 	&$second_print(".. created $sucount");
 	}
 
+SKIP:
+
 # Save original Plesk 8 XML file
 &save_plesk_xml_files(\%dom, $xfile, $dump);
 
@@ -962,227 +924,22 @@ return (\%dom, @rvdoms);
 }
 
 # extract_plesk9_dir(file, version)
-# Extracts all attachments from a plesk backup in MIME format to a temp
-# directory, and returns the path. Version can be one of 7 or 8
+# Extracts a Plesk 9 tar.gz file into a temporary directory
 sub extract_plesk9_dir
 {
 local ($file, $version) = @_;
-if ($main::plesk_dir_cache{$file} && -d $main::plesk_dir_cache{$file}) {
+if ($main::plesk9_dir_cache{$file} && -d $main::plesk9_dir_cache{$file}) {
 	# Use cached extract from this session
-	return (1, $main::plesk_dir_cache{$file});
+	return (1, $main::plesk9_dir_cache{$file});
 	}
 local $dir = &transname();
 &make_dir($dir, 0700);
-
-# Is this compressed?
-local $cf = &compression_format($file);
-if ($cf != 0 && $cf != 1 && $cf != 4) {
-	return (0, "Unknown compression format");
+local $err = &extract_compressed_file($file, $dir);
+if ($err) {
+	return (0, $err);
 	}
-
-if ($cf == 4) {
-	# Windows Plesk backup, which is a ZIP file
-	&has_command("unzip") || return (0, "The unzip command is needed to ".
-					    "extract Plesk Windows backups");
-	&execute_command("cd ".quotemeta($dir)." && unzip ".quotemeta($file));
-	}
-else {
-	# Read the backup file, parsing it into files as we go
-	&foreign_require("mailboxes", "mailboxes-lib.pl");
-	local $mail = { };
-	if ($cf == 0) {
-		# MIME format file
-		open(FILE, $file) || return undef;
-		}
-	else {
-		# Gzipped MIME file
-		open(FILE, "gunzip -c ".quotemeta($file)." |") || return undef;
-		}
-
-	# Read base mail headers
-	local %baseheaders;
-	while(<FILE>) {
-		s/\r|\n//g;
-		if (/^(\S+):\s+(.*)/) {
-			$baseheaders{lc($1)} = $2;
-			}
-		else {
-			last;
-			}
-		}
-	$baseheaders{'content-type'} =~ /boundary\s*=\s*"([^"]+)"/i ||
-	    $baseheaders{'content-type'} =~ /boundary\s*=\s*(\S+)/i ||
-		return (0, "Missing Content-Type boundary");
-	local $bound = $1;
-	if ($baseheaders{'dumped-psa-version'} =~ /^7\./ && $version == 8) {
-		return (0, "This is a Plesk 7 backup, which uses a different format. You must use the Plesk 7 (psa) migration type");
-		}
-	elsif ($baseheaders{'dumped-psa-version'} !~ /^7\./ && $version == 7) {
-		return (0, "This is a Plesk 8 backup, which uses a different format. You must use the Plesk 8 (plesk) migration type");
-		}
-
-	# Skip to start of first section
-	local $lnum = 0;
-	while(<FILE>) {
-		$lnum++;
-		s/\r|\n//g;
-		last if ($_ eq "--".$bound);
-		}
-
-	# Read sections in turn
-	local $alldone = 0;
-	local $count = 0;
-	while(!$alldone) {
-		# Headers first
-		local %sheaders;
-		while(<FILE>) {
-			$lnum++;
-			s/\r|\n//g;
-			if (/^(\S+):\s+(.*)/) {
-				$sheaders{lc($1)} = $2;
-				}
-			else {
-				last;
-				}
-			}
-		local $cd = $sheaders{'content-disposition'};
-		local $ct = $sheaders{'content-type'};
-		local $filename;
-		if ($version == 8) {
-			# For Plesk 8, each section has a filename that we can
-			# use later to refer to them
-			if ($cd =~ /filename\s*=\s*"([^"]+)"/i || 
-			    $cd =~ /filename\s*=\s*(\S+)/i) {
-				$filename = $1;
-				}
-			elsif ($cd =~ /name\s*=\s*"([^"]+)"/i || 
-			       $cd =~ /name\s*=\s*(\S+)/i) {
-				$filename = $1;
-				}
-			if ($sheaders{'content-type'} =~
-				/boundary\s*=\s*"([^"]+)"/i ||
-			    $sheaders{'content-type'} =~
-				/boundary\s*=\s*(\S+)/i) {
-				# Start of a new multi-part section, such as
-				# when the backup is signed
-				$bound = $1;
-				while(<FILE>) {
-					$lnum++;
-					last if (/\S/);
-					}
-				next;
-				}
-			$filename ||
-				return (0, "Missing filename at line $lnum");
-			}
-		elsif ($version == 7) {
-			# For Plesk 7, sections have a content ID apart from the
-			# XML file
-			if ($ct =~ /^text\/xml/) {
-				$filename = "dump.xml";
-				}
-			else {
-				$filename = $sheaders{'content-id'};
-				}
-			$filename ||
-				return (0, "Missing content ID at line $lnum");
-			}
-		local $enc = $sheaders{'content-transfer-encoding'} || 'binary';
-
-		# Read body till the boundary end
-		&open_tempfile(ATTACH, ">$dir/$filename", 0, 1);
-		while(<FILE>) {
-			$lnum++;
-			if ($_ eq "--".$bound."\n" ||
-			    $_ eq "--".$bound."\r\n") {
-				# End of this block
-				last;
-				}
-			elsif ($_ eq "--".$bound."--\n" ||
-			       $_ eq "--".$bound."--\r\n") {
-				# End of the whole mess
-				$alldone = 1;
-				last;
-				}
-			if ($enc eq 'binary' || $enc eq '7bit') {
-				&print_tempfile(ATTACH, $_);
-				}
-			elsif ($enc eq 'base64') {
-				&print_tempfile(ATTACH,
-					&mailboxes::b64decode($_));
-				}
-			elsif ($enc eq 'quoted-printable') {
-				&print_tempfile(ATTACH,
-					&mailboxes::quoted_decode($_));
-				}
-			else {
-				return (0,
-				  "Unknown encoding $enc at line $lnum");
-				}
-			}
-		&close_tempfile(ATTACH);
-		$count++;
-		}
-	return (0, "No attachments found in MIME data") if (!$count);
-	}
-
-$main::plesk_dir_cache{$file} = $dir;
+$main::plesk9_dir_cache{$file} = $dir;
 return (1, $dir);
-}
-
-# read_plesk_xml(file)
-# Use XML::Simple to read a Plesk XML file. Returns the object on success, or
-# an error message on failure.
-sub read_plesk_xml
-{
-local ($file) = @_;
-eval "use XML::Simple";
-if ($@) {
-	return "XML::Simple Perl module is not installed";
-	}
-local $ref;
-eval {
-	local $xs = XML::Simple->new();
-	$ref = $xs->XMLin($file);
-	};
-$ref || return "Failed to read XML file : $@";
-return $ref;
-}
-
-# cleanup_plesk_cert(data)
-# Removes extra spacing from a Plesk cert
-sub cleanup_plesk_cert
-{
-local ($data) = @_;
-local @lines = grep { /\S/ } split(/\n/, $data);
-foreach my $l (@lines) {
-	$l =~ s/^\s+//;
-	}
-return join("", map { $_."\n" } @lines);
-}
-
-# save_plesk_xml_files(&domain, xmlfile, &xmldata)
-# Called after a Plesk migration to save the original data files
-sub save_plesk_xml_files
-{
-local ($d, $xmlfile, $xmldata) = @_;
-local $etcdir = "$d->{'home'}/etc";
-if (!-d $etcdir) {
-	# Make sure ~/etc exists
-	&make_dir($etcdir, 0750);
-	&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, undef, $etcdir);
-	}
-local $xmldump = "$etcdir/plesk.xml";
-&copy_source_dest($xmlfile, $xmldump);
-&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, 0700, $xmldump);
-eval "use Data::Dumper";
-if (!$@) {
-	local $perldump = "$etcdir/plesk.perl";
-	&open_tempfile(PERLDUMP, ">$perldump");
-	&print_tempfile(PERLDUMP, Dumper($xmldata));
-	&close_tempfile(PERLDUMP);
-	&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, 0700, $perldump);
-	}
 }
 
 1;
