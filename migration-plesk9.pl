@@ -264,73 +264,54 @@ else {
 
 # Extract the tar.gz file containing additional content
 &$first_print("Finding contents files ..");
-local $cids = $domain->{'content'}->{'cid'};
+local $cids = $domain->{'phosting'}->{'content'}->{'cid'};
 if (!$cids) {
 	&$second_print(".. no contents data found!");
 	return ( \%dom );
 	}
-elsf ($cids->{'unpacksize'}) {
+elsif (ref($cids) eq 'HASH') {
 	# Just one file (unlikely)
-	$cids = { $cids->{'type'} => $cids };
+	$cids = [ $cids ];
 	}
 &$second_print(".. done");
 
-goto SKIP;
-
 # Copy home directory files
-# XXX function to extract specific sub-directory based on CID type
 &$first_print("Copying web pages ..");
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable(\%dom, 1);
 	}
 local $hdir = &public_html_dir(\%dom);
-local $htdocs = "$root/$dom.httpdocs";
-if (!-r $htdocs) {
-	$htdocs = "$root/$dom.htdocs";
-	}
-if (-r $htdocs) {
-	local $err = &extract_compressed_file($htdocs, $hdir);
-	if ($err) {
-		&$second_print(".. failed : $err");
-		}
-	else {
-		&set_home_ownership(\%dom);
-		&$second_print(".. done");
-		}
+local $docroot_files = &extract_plesk9_cid($root, $cids, "docroot");
+if ($docroot_files) {
+	&copy_source_dest($docroot_files, $hdir);
+	&set_home_ownership(\%dom);
+	&$second_print(".. done");
 	}
 else {
-	&$second_print(".. not found in Plesk backup");
+	&$second_print(".. no docroot data found");
 	}
 
 # Copy CGI files
 &$first_print("Copying CGI scripts ..");
-local $cgis = "$root/$dom.cgi-bin";
-if (!-r $cgis) {
-	$cgis = "$root/$dom.cgi";
-	}
-if (-r $cgis) {
-	local $cdir = &cgi_bin_dir(\%dom);
-	local $err = &extract_compressed_file($cgis, $cdir);
-	if ($err) {
-		&$second_print(".. failed : $err");
-		}
-	else {
-		&set_home_ownership(\%dom);
-		&$second_print(".. done");
-		}
+local $cdir = &cgi_bin_dir(\%dom);
+local $cgi_files =  &extract_plesk9_cid($root, $cids, "cgi");
+if ($cgi_files) {
+	&copy_source_dest($cgi_files, $cdir);
+	&set_home_ownership(\%dom);
+	&$second_print(".. done");
 	}
 else {
-	&$second_print(".. not found in Plesk backup");
+	&$second_print(".. no cgi data found");
 	}
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable(\%dom, 0);
 	}
 
 # Re-create DNS records
-local $oldip = $domain->{'ip'}->{'ip-address'};
+local $oldip = $domain->{'properties'}->{'ip'}->{'ip-address'};
 if ($got{'dns'}) {
 	&$first_print("Copying and fixing DNS records ..");
-	local $zonexml = $domain->{'dns-zone'};
+	local $zonexml = $domain->{'properties'}->{'dns-zone'};
 	local $newzone = &get_bind_zone($dom);
 	if (!$newzone) {
 		&$second_print(".. could not find new DNS zone!");
@@ -382,7 +363,7 @@ if ($got{'dns'}) {
 	}
 
 # Migrate SSL certs
-local $certificate = $domain->{'certificate'};
+local $certificate = $domain->{'certificates'}->{'certificate'};
 if ($certificate) {
 	&$first_print("Migrating SSL certificate and key ..");
 	local $cert = &cleanup_plesk_cert($certificate->{'certificate-data'});
@@ -411,8 +392,10 @@ if ($certificate) {
 		       $cert && !$key ? ".. missing key" :
 					".. not found in backup");
 	}
+goto SKIP;
 
 # Lock the user DB and build list of used IDs
+# XXX
 &obtain_lock_unix(\%dom);
 &obtain_lock_mail(\%dom);
 local (%taken, %utaken);
@@ -933,7 +916,7 @@ return (1, $dir);
 sub extract_plesk9_cid
 {
 local ($basedir, $cids, $type) = @_;
-local ($cid) = grep { $_->{'type'} eq $type } values %$cids;
+local ($cid) = grep { $_->{'type'} eq $type } @$cids;
 return undef if (!$cid);
 local $file = $basedir."/".$cid->{'content-file'}->{'content'};
 -r $file || return undef;
@@ -946,7 +929,7 @@ if (!$dir) {
 	return undef if ($err);
 	$main::extract_plesk9_cid_cache{$file} = $dir;
 	}
-return $dir;
+return $dir."/".$cid->{'offset'};
 }
 
 1;
