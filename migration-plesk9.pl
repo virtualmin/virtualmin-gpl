@@ -71,10 +71,10 @@ local ($ok, $root) = &extract_plesk9_dir($file);
 local ($xfile) = glob("$root/*.xml");
 local $dump = &read_plesk_xml($xfile);
 ref($dump) || &error($dump);
-local $mig = $dump->{'Envelope'}->{'migration-dump'};
+local $mig = $dump->{'Data'}->{'migration-dump'};
 
 # Get the domain object from the XML
-$domain = $mig->{'domain'}->{$dom};
+local $domain = $mig->{'domain'}->{$dom};
 if (!$domain && $mig->{'domain'}->{'name'} eq $dom) {
 	$domain = $mig->{'domain'};
 	}
@@ -97,7 +97,7 @@ if (exists($domain->{'mailsystem'}->{'properties'}->{'status'}->{'enabled'}) ||
 if ($domain->{'properties'}->{'dns-zone'}) {
 	push(@got, "dns");
 	}
-if ($domain->{'www'} eq 'true' || -d "$root/$dom/httpdocs") {
+if ($domain->{'www'} eq 'true') {
 	push(@got, "web");
 	}
 if ($domain->{'properties'}->{'ip'}->{'ip-type'} eq 'exclusive' && $virt) {
@@ -112,11 +112,7 @@ if ($domain->{'phosting'}->{'preferences'}->{'webalizer'}) {
 	}
 
 # Check for MySQL databases
-# XXX
-local $databases = $domain->{'phosting'}->{'sapp-installed'}->{'database'};
-if (!$databases) {
-        $databases = $domain->{'database'};
-        }
+local $databases = $domain->{'databases'}->{'database'};
 if (!$databases) {
 	$databases = { };
 	}
@@ -130,40 +126,24 @@ if (@mysqldbs) {
 	push(@got, "mysql");
 	}
 
-local $mailusers;
+# Check for mail users
 local ($has_spam, $has_virus);
-if (!$windows) {
-	# Check for Linux mail users
-	$mailusers = $domain->{'mailsystem'}->{'mailuser'};
-	if (!$mailusers) {
-		$mailusers = { };
-		}
-	elsif ($mailusers->{'mailbox-quota'}) {
-		# Just one user
-		$mailusers = { $mailusers->{'name'} => $mailusers };
-		}
-	foreach my $name (keys %$mailusers) {
-		local $mailuser = $mailusers->{$name};
-		if ($mailuser->{'spamassassin'}->{'status'} eq 'on') {
-			$has_spam++;
-			}
-		if ($mailuser->{'virusfilter'}->{'state'} eq 'inout' ||
-		    $mailuser->{'virusfilter'}->{'state'} eq 'in') {
-			$has_virus++;
-			}
-		}
+local $mailusers = $domain->{'mailsystem'}->{'mailusers'}->{'mailuser'};
+if (!$mailusers) {
+	$mailusers = { };
 	}
-else {
-	# Check for Windows mail users
-	$mailusers = $domain->{'mail'};
-	if (!$mailusers) {
-		$mailusers = { };
+elsif ($mailusers->{'mailbox-quota'}) {
+	# Just one user
+	$mailusers = { $mailusers->{'name'} => $mailusers };
+	}
+foreach my $name (keys %$mailusers) {
+	local $mailuser = $mailusers->{$name};
+	if ($mailuser->{'spamassassin'}->{'status'} eq 'on') {
+		$has_spam++;
 		}
-	foreach my $mid (keys %$mailusers) {
-		local $mailuser = $mailusers->{$mid};
-		if ($mailuser->{'sa_conf'}) {
-			$has_spam++;
-			}
+	if ($mailuser->{'virusfilter'}->{'state'} eq 'inout' ||
+	    $mailuser->{'virusfilter'}->{'state'} eq 'in') {
+		$has_virus++;
 		}
 	}
 
@@ -282,40 +262,45 @@ else {
 	&$second_print(".. done");
 	}
 
-goto SKIP;
+# Extract the tar.gz file containing additional content
+&$first_print("Finding contents files ..");
+local $cids = $domain->{'content'}->{'cid'};
+if (!$cids) {
+	&$second_print(".. no contents data found!");
+	return ( \%dom );
+	}
+elsf ($cids->{'unpacksize'}) {
+	# Just one file (unlikely)
+	$cids = { $cids->{'type'} => $cids };
+	}
+&$second_print(".. done");
 
-# Copy web files
+# Copy home directory files
+# XXX function to extract specific sub-directory based on CID type
 &$first_print("Copying web pages ..");
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable(\%dom, 1);
 	}
 local $hdir = &public_html_dir(\%dom);
-if (-d "$root/$dom/httpdocs") {
-	# Windows format
-	&copy_source_dest("$root/$dom/httpdocs", $hdir);
-	&set_home_ownership(\%dom);
-	&$second_print(".. done");
+local $htdocs = "$root/$dom.httpdocs";
+if (!-r $htdocs) {
+	$htdocs = "$root/$dom.htdocs";
 	}
-else {
-	# Linux format (a tar file)
-	local $htdocs = "$root/$dom.httpdocs";
-	if (!-r $htdocs) {
-		$htdocs = "$root/$dom.htdocs";
-		}
-	if (-r $htdocs) {
-		local $err = &extract_compressed_file($htdocs, $hdir);
-		if ($err) {
-			&$second_print(".. failed : $err");
-			}
-		else {
-			&set_home_ownership(\%dom);
-			&$second_print(".. done");
-			}
+if (-r $htdocs) {
+	local $err = &extract_compressed_file($htdocs, $hdir);
+	if ($err) {
+		&$second_print(".. failed : $err");
 		}
 	else {
-		&$second_print(".. not found in Plesk backup");
+		&set_home_ownership(\%dom);
+		&$second_print(".. done");
 		}
 	}
+else {
+	&$second_print(".. not found in Plesk backup");
+	}
+
+goto SKIP;
 
 # Copy CGI files
 &$first_print("Copying CGI scripts ..");
