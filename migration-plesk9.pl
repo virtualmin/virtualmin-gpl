@@ -275,6 +275,8 @@ elsf ($cids->{'unpacksize'}) {
 	}
 &$second_print(".. done");
 
+goto SKIP;
+
 # Copy home directory files
 # XXX function to extract specific sub-directory based on CID type
 &$first_print("Copying web pages ..");
@@ -299,8 +301,6 @@ if (-r $htdocs) {
 else {
 	&$second_print(".. not found in Plesk backup");
 	}
-
-goto SKIP;
 
 # Copy CGI files
 &$first_print("Copying CGI scripts ..");
@@ -925,6 +925,28 @@ if ($err) {
 	}
 $main::plesk9_dir_cache{$file} = $dir;
 return (1, $dir);
+}
+
+# extract_plesk9_cid(basedir, &cids, type)
+# Returns a temp dir containing the contents of some extracted Plesk content,
+# or undef if not found
+sub extract_plesk9_cid
+{
+local ($basedir, $cids, $type) = @_;
+local ($cid) = grep { $_->{'type'} eq $type } values %$cids;
+return undef if (!$cid);
+local $file = $basedir."/".$cid->{'content-file'}->{'content'};
+-r $file || return undef;
+local $dir = $main::extract_plesk9_cid_cache{$file};
+if (!$dir) {
+	# Need to extract
+	$dir = &transname();
+	&make_dir($dir, 0700);
+	local $err = &extract_compressed_file($file, $dir);
+	return undef if ($err);
+	$main::extract_plesk9_cid_cache{$file} = $dir;
+	}
+return $dir;
 }
 
 1;
