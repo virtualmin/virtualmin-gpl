@@ -549,6 +549,9 @@ foreach my $name (keys %$mailusers) {
 		# would be his own mailbox or offsite
 		$uinfo->{'email'} = lc($name)."\@".$dom;
 		}
+	else {
+		delete($uinfo->{'email'});
+		}
 	&create_user($uinfo, \%dom);
 	&create_user_home($uinfo, \%dom);
 	$taken{$uinfo->{'uid'}}++;
@@ -628,6 +631,9 @@ if ($ca) {
 	local @to;
 	if ($ca =~ /^bounce:(.*)/) {
 		push(@to, "BOUNCE $1");
+		}
+	elsif ($ca eq "reject") {
+		push(@to, "BOUNCE");
 		}
 	else {
 		push(@to, $ca);
@@ -884,6 +890,9 @@ foreach my $sdom (keys %$subdoms) {
 	push(@rvdoms, \%subd);
 
 	# Extract sub-domain's HTML directory
+	if (defined(&set_php_wrappers_writable)) {
+		&set_php_wrappers_writable(\%subd, 1);
+		}
 	local $htdocs = "$root/$subd{'dom'}.httpdocs";
 	if (!-r $htdocs) {
 		$htdocs = "$root/$subd{'dom'}.htdocs";
@@ -919,6 +928,9 @@ foreach my $sdom (keys %$subdoms) {
 			&set_home_ownership(\%dom);
 			&$second_print(".. done");
 			}
+		}
+	if (defined(&set_php_wrappers_writable)) {
+		&set_php_wrappers_writable(\%subd, 0);
 		}
 
 	# Re-create users for sub-domains

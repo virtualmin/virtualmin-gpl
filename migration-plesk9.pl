@@ -392,10 +392,8 @@ if ($certificate) {
 		       $cert && !$key ? ".. missing key" :
 					".. not found in backup");
 	}
-goto SKIP;
 
 # Lock the user DB and build list of used IDs
-# XXX
 &obtain_lock_unix(\%dom);
 &obtain_lock_mail(\%dom);
 local (%taken, %utaken);
@@ -411,13 +409,14 @@ foreach my $name (keys %$mailusers) {
 	local $mailuser = $mailusers->{$name};
 	local $uinfo = &create_initial_user(\%dom);
 	$uinfo->{'user'} = &userdom_name(lc($name), \%dom);
-	if ($mailuser->{'password'}->{'type'} eq 'plain') {
-		$uinfo->{'plainpass'} = $mailuser->{'password'}->{'content'};
+	local $pinfo = $mailuser->{'properties'}->{'password'};
+	if ($pinfo->{'type'} eq 'plain') {
+		$uinfo->{'plainpass'} = $pinfo->{'content'};
 		$uinfo->{'pass'} = &encrypt_user_password(
 					$uinfo, $uinfo->{'plainpass'});
 		}
 	else {
-		$uinfo->{'pass'} = $mailuser->{'password'}->{'content'};
+		$uinfo->{'pass'} = $pinfo->{'content'};
 		}
 	$uinfo->{'uid'} = &allocate_uid(\%taken);
 	$uinfo->{'gid'} = $dom{'gid'};
@@ -443,7 +442,7 @@ foreach my $name (keys %$mailusers) {
 		$uinfo->{'mquota'} = $q / &quota_bsize("home");
 		}
 	# Add mail aliases
-	local $alias = $mailuser->{'alias'};
+	local $alias = $mailuser->{'preferences'}->{'alias'};
 	if ($alias) {
 		$alias = [ $alias ] if (ref($alias) ne 'ARRAY');
 		foreach my $a (@$alias) {
@@ -453,7 +452,7 @@ foreach my $name (keys %$mailusers) {
 			}
 		}
 	# Add forwarding
-	local $redirect = $mailuser->{'redirect'};
+	local $redirect = $mailuser->{'preferences'}->{'redirect'};
 	if ($redirect) {
 		$redirect = [ $redirect ] if (ref($redirect) ne 'ARRAY');
 		foreach my $r (@$redirect) {
@@ -463,7 +462,7 @@ foreach my $name (keys %$mailusers) {
 			}
 		}
 	# Add mail group members (which are really just forwards)
-	local $mailgroup = $mailuser->{'mailgroup-member'};
+	local $mailgroup = $mailuser->{'preferences'}->{'mailgroup-member'};
 	if ($mailgroup) {
 		$mailgroup = [ $mailgroup ] if (ref($mailgroup) ne 'ARRAY');
 		foreach my $r (@$mailgroup) {
@@ -477,27 +476,19 @@ foreach my $name (keys %$mailusers) {
 		# would be his own mailbox or offsite
 		$uinfo->{'email'} = lc($name)."\@".$dom;
 		}
+	else {
+		delete($uinfo->{'email'});
+		}
 	&create_user($uinfo, \%dom);
 	&create_user_home($uinfo, \%dom);
 	$taken{$uinfo->{'uid'}}++;
 	local ($crfile, $crtype) = &create_mail_file($uinfo);
 
 	# Copy mail into user's inbox
-	local $mfile = $mailuser->{'mailbox'}->{'cid'};
-	local $mpath = "$root/$mfile";
-	if ($mfile && -r $mpath) {
-		local $fmt = &compression_format($mpath);
-		if ($fmt) {
-			# Extract the maildir first
-			local $temp = &transname();
-			&make_dir($temp, 0700);
-			&extract_compressed_file($mpath, $temp);
-			$mpath = $temp;
-			}
-		local $srcfolder = {
-		  'file' => $mpath,
-		  'type' => $mailuser->{'mailbox'}->{'type'} eq 'mdir' ? 1 : 0,
-		  };
+	local $cids = [ $mailuser->{'preferences'}->{'mailbox'}->{'content'}->{'cid'} ];
+	local $srcdir = &extract_plesk9_cid($root, $cids, "mailbox");
+	if ($srcdir) {
+		local $srcfolder = { 'file' => $srcdir, 'type' => 1 };
 		local $dstfolder = { 'file' => $crfile, 'type' => $crtype };
 		&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
 		&set_mailfolder_owner($dstfolder, $uinfo);
@@ -505,78 +496,26 @@ foreach my $name (keys %$mailusers) {
 
 	$mcount++;
 	}
-# Windows mail users
-foreach my $mid (keys %$mailusers) {
-	next if (!$windows);
-	local $mailuser = $mailusers->{$mid};
-	next if ($mailuser->{'mail_group'} eq 'true');
-	local $name = $mailuser->{'mail_name'};
-	local $uinfo = &create_initial_user(\%dom);
-	$uinfo->{'user'} = &userdom_name(lc($name), \%dom);
-	if ($mailuser->{'account'}->{'type'} eq 'plain') {
-		$uinfo->{'plainpass'} = $mailuser->{'account'}->{'password'};
-		$uinfo->{'pass'} = &encrypt_user_password(
-					$uinfo, $uinfo->{'plainpass'});
-		}
-	else {
-		$uinfo->{'pass'} = $mailuser->{'account'}->{'password'};
-		}
-	$uinfo->{'uid'} = &allocate_uid(\%taken);
-	$uinfo->{'gid'} = $dom{'gid'};
-	$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/".lc($name);
-	$uinfo->{'shell'} = $nologin_shell->{'shell'};
-	$uinfo->{'email'} = lc($name)."\@".$dom;
-	if (&has_home_quotas()) {
-		local $q = $mailuser->{'mbox_quota'} < 0 ? undef :
-				$mailuser->{'mbox_quota'}*1024;
-		$uinfo->{'qquota'} = $q;
-		$uinfo->{'quota'} = $q / &quota_bsize("home");
-		$uinfo->{'mquota'} = $q / &quota_bsize("home");
-		}
-	foreach my $r (values %{$mailuser->{'mail_redir'}}) {
-		if ($r->{'address'}) {
-			push(@{$uinfo->{'to'}}, $r->{'address'});
-			}
-		}
-	&create_user($uinfo, \%dom);
-	&create_user_home($uinfo, \%dom);
-	$taken{$uinfo->{'uid'}}++;
-	local ($crfile, $crtype) = &create_mail_file($uinfo);
-	$mcount++;
-	}
 &$second_print(".. done (migrated $mcount users)");
 
-# Re-create mail aliases
+# Re-create mail aliases / catchall
 local $acount = 0;
 &$first_print("Re-creating mail aliases ..");
 &set_alias_programs();
-# Linux catch all
-local $ca = $domain->{'mailsystem'}->{'catch-all'};
+local $ca = $domain->{'mailsystem'}->{'preferences'}->{'catch-all'};
 if ($ca) {
 	local @to;
 	if ($ca =~ /^bounce:(.*)/) {
 		push(@to, "BOUNCE $1");
+		}
+	elsif ($ca eq "reject") {
+		push(@to, "BOUNCE");
 		}
 	else {
 		push(@to, $ca);
 		}
 	local $virt = { 'from' => "\@$dom",
 			'to' => \@to };
-	&create_virtuser($virt);
-	$acount++;
-	}
-# Windows mail aliases
-foreach my $mid (keys %$mailusers) {
-	next if (!$windows);
-	local $mailuser = $mailusers->{$mid};
-	next if ($mailuser->{'mail_group'} eq 'false');
-	local $virt = { 'from' => $mailuser->{'mail_name'}.'@'.$dom,
-			'to' => [ ] };
-	foreach my $r (values %{$mailuser->{'mail_redir'}}) {
-		if ($r->{'address'}) {
-			push(@{$virt->{'to'}}, $r->{'address'});
-			}
-		}
 	&create_virtuser($virt);
 	$acount++;
 	}
@@ -596,10 +535,21 @@ if ($got{'mysql'}) {
 		&$indent_print();
 		&create_mysql_database(\%dom, $name);
 		&save_domain(\%dom, 1);
-		local ($ex, $out) = &mysql::execute_sql_file($name,
-			"$root/$database->{'cid'}");
-		if ($ex) {
-			&$first_print("Error loading $db : $out");
+		local $cids = [ $database->{'content'}->{'cid'} ];
+		local $sqldir = &extract_plesk9_cid($root, $cids, "sqldump");
+		local ($sqlfile) = glob("$sqldir/backup_*");
+		if (!$sqldir) {
+			&$first_print("No database content found");
+			}
+		elsif (!$sqlfile || !-r $sqlfile) {
+			&$first_print("Database content missing SQL file");
+			}
+		else {
+			local ($ex, $out) = &mysql::execute_sql_file($name,
+								     $sqlfile);
+			if ($ex) {
+				&$first_print("Error loading $db : $out");
+				}
 			}
 
 		# Create any DB users as domain users
@@ -642,7 +592,7 @@ if ($got{'mysql'}) {
 &sync_alias_virtuals(\%dom);
 
 # Migrate protected directories as .htaccess files
-local $pdir = $domain->{'phosting'}->{'pdir'};
+local $pdir = $domain->{'phosting'}->{'preferences'}->{'pdir'};
 if ($pdir && &foreign_check("htaccess-htpasswd")) {
 	&$first_print("Re-creating protected directories ..");
 	&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
@@ -708,7 +658,7 @@ if ($pdir && &foreign_check("htaccess-htpasswd")) {
 	}
 
 # Migrate alias domains
-local $aliasdoms = $domain->{'domain-alias'};
+local $aliasdoms = $domain->{'preferences'}->{'domain-alias'};
 if (!$aliasdoms) {
 	$aliasdoms = { };
 	}
@@ -762,11 +712,11 @@ foreach my $adom (keys %$aliasdoms) {
 	}
 
 # Migrate sub-domains (as Virtualmin sub-servers)
-local $subdoms = $domain->{'phosting'}->{'subdomain'};
+local $subdoms = $domain->{'phosting'}->{'subdomains'}->{'subdomain'};
 if (!$subdoms) {
 	$subdoms = { };
 	}
-elsif ($subdoms->{'cid_conf'}) {
+elsif ($subdoms->{'name'}) {
 	# Just one sub-domain
 	$subdoms = { $subdoms->{'name'} => $subdoms };
 	}
@@ -812,41 +762,32 @@ foreach my $sdom (keys %$subdoms) {
 	push(@rvdoms, \%subd);
 
 	# Extract sub-domain's HTML directory
-	local $htdocs = "$root/$subd{'dom'}.httpdocs";
-	if (!-r $htdocs) {
-		$htdocs = "$root/$subd{'dom'}.htdocs";
+	if (defined(&set_php_wrappers_writable)) {
+		&set_php_wrappers_writable(\%subd, 1);
 		}
 	local $hdir = &public_html_dir(\%subd);
-	if (-r $htdocs) {
+	local $cids = $subdom->{'content'}->{'cid'};
+	local $docroot_files = &extract_plesk9_cid($root, $cids, "docroot");
+	if ($docroot_files) {
 		&$first_print(
 			"Copying web pages for sub-domain $subd{'dom'} ..");
-		local $err = &extract_compressed_file($htdocs, $hdir);
-		if ($err) {
-			&$second_print(".. failed : $err");
-			}
-		else {
-			&set_home_ownership(\%dom);
-			&$second_print(".. done");
-			}
+		&copy_source_dest($docroot_files, $hdir);
+		&set_home_ownership(\%dom);
+		&$second_print(".. done");
 		}
 
 	# Extract sub-domains CGI directory
-	local $cgis = "$root/$subd{'dom'}.cgi-bin";
-	if (!-r $cgis) {
-		$cgis = "$root/$subd{'dom'}.cgi";
-		}
-	if (-r $cgis) {
+	local $cdir = &cgi_bin_dir(\%subd);
+	local $cgi_files = &extract_plesk9_cid($root, $cids, "cgi");
+	if ($cgi_files) {
 		&$first_print(
 			"Copying CGI scripts for sub-domain $subd{'dom'} ..");
-		local $cdir = &cgi_bin_dir(\%subd);
-		local $err = &extract_compressed_file($cgis, $cdir);
-		if ($err) {
-			&$second_print(".. failed : $err");
-			}
-		else {
-			&set_home_ownership(\%dom);
-			&$second_print(".. done");
-			}
+		&copy_source_dest($cgi_files, $cdir);
+		&set_home_ownership(\%dom);
+		&$second_print(".. done");
+		}
+	if (defined(&set_php_wrappers_writable)) {
+		&set_php_wrappers_writable(\%subd, 0);
 		}
 
 	# Re-create users for sub-domains
@@ -864,14 +805,15 @@ foreach my $sdom (keys %$subdoms) {
 		local $mailuser = $sysusers->{$name};
 		local $uinfo = &create_initial_user(\%dom, 0, 1);
 		$uinfo->{'user'} = &userdom_name($name, \%dom);
-		if ($mailuser->{'password'}->{'type'} eq 'plain') {
-			$uinfo->{'plainpass'} =
-				$mailuser->{'password'}->{'content'};
+		local $pinfo = $mailuser->{'properties'}->{'password'} ||
+			       $mailuser->{'password'};
+		if ($pinfo->{'type'} eq 'plain') {
+			$uinfo->{'plainpass'} = $pinfo->{'content'};
 			$uinfo->{'pass'} = &encrypt_user_password(
 						$uinfo, $uinfo->{'plainpass'});
 			}
 		else {
-			$uinfo->{'pass'} = $mailuser->{'password'}->{'content'};
+			$uinfo->{'pass'} = $pinfo->{'content'};
 			}
 		$uinfo->{'uid'} = $dom{'uid'};
 		$uinfo->{'gid'} = $dom{'gid'};
@@ -882,8 +824,6 @@ foreach my $sdom (keys %$subdoms) {
 		}
 	&$second_print(".. created $sucount");
 	}
-
-SKIP:
 
 # Save original Plesk 8 XML file
 &save_plesk_xml_files(\%dom, $xfile, $dump);
@@ -918,7 +858,7 @@ sub extract_plesk9_cid
 local ($basedir, $cids, $type) = @_;
 local ($cid) = grep { $_->{'type'} eq $type } @$cids;
 return undef if (!$cid);
-local $file = $basedir."/".$cid->{'content-file'}->{'content'};
+local $file = $basedir."/".$cid->{'path'}."/".$cid->{'content-file'}->{'content'};
 -r $file || return undef;
 local $dir = $main::extract_plesk9_cid_cache{$file};
 if (!$dir) {

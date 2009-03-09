@@ -1,0 +1,4 @@
+desc=Plesk 9 migration
+html=Added support for migrating Plesk 9 backups, which have a different format to Plesk 7 and 8.
+master=1
+link=migrate_form.cgi
