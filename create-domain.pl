@@ -198,7 +198,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--plan") {
 		$planname = shift(@ARGV);
 		foreach $p (&list_plans()) {
-			if ($p->{'name'} eq $planname ||
+			if ($p->{'id'} eq $planname ||
 			    $p->{'name'} eq $planname) {
 				$planid = $p->{'id'};
 				}

@@ -1073,3 +1073,4 @@ Re-factored code for deleting tables created by installed scripts, and better ha
 Converted libraries to use Webmin's new WebminCore module, where available. This leads to a signficant improvement in memory use and speed.
 Added support for migrating Plesk 9 backups, which have a different format to Plesk 7 and 8.
 Allowed script installers can now be set at the plan level and on the Edit Owner Limits page. They can also be set on the command line with create-plan, modify-plan and modify-limits commands.
+Added the --plan flag to the create-reseller API command, to copy limits from a plan.

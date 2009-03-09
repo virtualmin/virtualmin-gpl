@@ -252,6 +252,25 @@ $d->{'norename'} = $plan->{'norename'};
 $d->{'forceunder'} = $plan->{'forceunder'};
 }
 
+# set_reseller_limits_from_plan(&reseller, &plan)
+# Set initial limits for a reseller based on relevant ones from a plan
+sub set_reseller_limits_from_plan
+{
+local ($resel, $plan) = @_;
+local %lmap = ( 'domslimit' => 'max_doms',
+		'aliasdomslimit' => 'max_aliasdoms',
+		'realdomslimit' => 'max_realdoms',
+		'quota' => 'max_quota',
+		'uquota' => 'max_quota',
+		'mailboxlimit' => 'max_mailboxes',
+		'aliaslimit' => 'max_aliases',
+		'dbslimit' => 'max_dbs',
+		'bw_limit' => 'max_bw' );
+foreach my $m (keys %lmap) {
+	$resel->{'acl'}->{$lmap{$m}} = $plan->{$m};
+	}
+}
+
 # set_featurelimits_from_plan(&domain, &plan)
 # Updates a virtual server's limit_ variables based on either the enabled
 # features or limits defined in the plan.
@@ -270,6 +289,17 @@ else {
 	foreach my $f (@features, @feature_plugins) {
 		$d->{'limit_'.$f} = $f eq "webmin" ? 0 : int($d->{$f});
 		}
+	}
+}
+
+# set_reseller_featurelimits_from_plan(&reseller, &plan)
+# Set limits on allowed features for a reseller from a plan
+sub set_reseller_featurelimits_from_plan
+{
+local ($resel, $plan) = @_;
+local %flimits = map { $_, 1 } split(/\s+/, $plan->{'featurelimits'});
+foreach my $f (@features, @feature_plugins) {
+	$resel->{'acl'}->{'feature_'.$f} = int($flimits{$f});
 	}
 }
 
