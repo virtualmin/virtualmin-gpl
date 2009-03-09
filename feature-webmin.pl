@@ -449,6 +449,7 @@ foreach $f (@opt_features, @feature_plugins, 'virt') {
 foreach my $ed (@edit_limits) {
 	$acl{'edit_'.$ed} = $_[0]->{'edit_'.$ed};
 	}
+$acl{'allowedscripts'} = $_[0]->{'allowedscripts'};
 if ($acls) {
 	foreach my $k (keys %$acls) {
 		$acl{$k} = $acls->{$k};

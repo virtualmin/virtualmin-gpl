@@ -274,16 +274,18 @@ else {
 }
 
 # set_capabilities_from_plan(&domain, &template)
-# Set initial owner editing capabilities on a domain from the given plan
+# Set initial owner editing capabilities and allowed scripts on a domain from
+# the given plan
 sub set_capabilities_from_plan
 {
-local ($d, $tmpl) = @_;
+local ($d, $plan) = @_;
 if ($plan->{'capabilities'}) {
 	local %caps = map { $_, 1 } split(/\s+/, $plan->{'capabilities'});
 	foreach my $ed (@edit_limits) {
 		$d->{'edit_'.$ed} = $caps{$ed} ? 1 : 0;
 		}
 	}
+$d->{'allowedscripts'} = $plan->{'scripts'};
 }
 
 1;

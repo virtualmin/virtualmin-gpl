@@ -60,6 +60,17 @@ foreach $f (@feature_plugins) {
 	&error($err) if ($err);
 	}
 
+# Save allowed scripts
+if (defined(&list_scripts)) {
+	if ($in{'scripts_def'}) {
+		$d->{'allowedscripts'} = undef;
+		}
+	else {
+		$d->{'allowedscripts'} =
+			join(' ', split(/\r?\n/, $in{'scripts'}));
+		}
+	}
+
 # Update files
 &set_all_null_print();
 &save_domain($d);

@@ -124,6 +124,31 @@ $ftable = &ui_grid_table(\@grid, 2);
 print &ui_table_row(&hlink($text{'limits_features'}, "limits_features"),
 		    $ftable);
 
+if (defined(&list_scripts)) {
+	# Allowed scripts
+	print &ui_table_hr();
+
+	$stable = &ui_radio('scripts_def',
+			    $d->{'allowedscripts'} ? 0 : 1,
+			    [ [ 1, $text{'plan_scriptsall'} ],
+			      [ 0, $text{'tmpl_below'} ] ])."<br>\n";
+	@scripts = &list_scripts();
+	foreach $s (@scripts) {
+		$script = &get_script($s);
+		$scriptname{$s} = $script->{'desc'} if ($script);
+		}
+	@scripts = sort { lc($scriptname{$a}) cmp lc($scriptname{$b}) }@scripts;
+	$stable .= &ui_multi_select("scripts",
+		[ map { [ $_, $scriptname{$_} ] }
+		      $d->{'allowedscripts'} ?
+				split(/\s+/, $d->{'allowedscripts'}) :
+				@scripts ],
+		[ map { [ $_, $scriptname{$_} ] } @scripts ],
+		10, 1, 0, $text{'plan_scriptsopts'}, $text{'plan_scriptssel'});
+	print &ui_table_row(&hlink($text{'plan_scripts'}, "limits_scripts"),
+			    $stable);
+	}
+
 print &ui_hidden_table_end("limits");
 print &ui_hidden_table_start($text{'limits_header3'}, "width=100%", 2,
 			     "other", 0, [ "width=30%" ]);

@@ -18,11 +18,15 @@ can be set with the C<--max-doms>, C<--max-mailbox>, C<--max-alias> and
 C<--max-dbs> parameters, followed by a number. By default, all of these are
 unlimited.
 
-Allow features for new virtual servers can be set with the C<--features> flag,
+Allowed features for new virtual servers can be set with the C<--features> flag,
 followed by a space-separated feature code list like I<web dns mail>. Similarly,
 allowed editing capabilities can be set with C<--capabilities> followed by
 a list of codes like I<domain users aliases>. In both cases, the lists must
 be a single quoted parameter.
+
+Scripts that virtual servers on the plan can install can be restricted by
+the C<--scripts> flag, followed by a quoted list of script codes. To find
+available codes, use the C<list-available-scripts> API command.
 
 To create a plan that is owned by a reseller, use the C<--owner> flag followed
 by an existing reseller name. To limit use of the plan to only some resellers,
@@ -98,6 +102,15 @@ while(@ARGV > 0) {
 			}
 		$plan->{'capabilities'} = join(" ", @cl);
 		}
+	elsif ($a eq "--scripts") {
+		# Allowed scripts
+		@sc = split(/\s+/, shift(@ARGV));
+		foreach $s (@sc) {
+			&get_script($s) ||
+				&usage("Unknown script code $s");
+			}
+		$plan->{'scripts'} = join(" ", @sc);
+		}
 	elsif ($a eq "--no-resellers") {
 		$plan->{'resellers'} = 'none';
 		}
@@ -140,6 +153,9 @@ foreach $r (@plan_restrictions) {
 	}
 print "                      [--features \"web dns mail ...\"]\n";
 print "                      [--capabilities \"domain users aliases ...\"]\n";
+if (defined(&list_scripts)) {
+	print "                      [--scripts \"name name ...\"]\n";
+	}
 if (defined(&list_resellers)) {
 	print "                      [--no-resellers | --resellers \"name name..\"]\n";
 	}

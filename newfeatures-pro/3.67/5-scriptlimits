@@ -1,0 +1,5 @@
+desc=Virtual server allowed scripts
+html=Allowed script installers can now be set at the plan level and on the Edit Owner Limits page. They can also be set on the command line with create-plan, modify-plan and modify-limits commands.
+master=1
+reseller=1
+link=edit_newplan.cgi

@@ -32,8 +32,14 @@ local %unavail;
 &read_file_cached($scripts_unavail_file, \%unavail);
 local @rv = &list_scripts();
 if (!&master_admin() || !$unavail{'allowmaster'}) {
+	# Remove globally disabled scripts
 	@rv = grep { $unavail{$_} eq '0' ||
 		     $unavail{$_} eq '' && !$unavail{'denydefault'} } @rv;
+	}
+if ($access{'allowedscripts'}) {
+	# Remove per-user disallowed scripts
+	local %allow = map { $_, 1 } split(/\s+/, $access{'allowedscripts'});
+	@rv = grep { $allow{$_} } @rv;
 	}
 return @rv;
 }
@@ -106,6 +112,10 @@ if (&master_admin()) {
 	}
 local $avail = $unavail{$name} eq '0' ||
 	       $unavail{$name} eq '' && !$unavail{'denydefault'};
+if ($access{'allowedscripts'}) {
+	local %allow = map { $_, 1 } split(/\s+/, $access{'allowedscripts'});
+	$avail = 0 if (!$allow{$name});
+	}
 local $rv = { 'name' => $name,
 	      'desc' => &$dfunc(),
 	      'longdesc' => defined(&$lfunc) ? &$lfunc() : undef,

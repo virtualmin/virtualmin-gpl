@@ -119,6 +119,10 @@ elsif ($multiline) {
 		print "    Edit capabilities: ",
 			($plan->{'capabilities'} || "Automatic"),"\n";
 
+		# Allowed scripts
+		print "    Allowed scripts: ",
+			($plan->{'scripts'} || "All"),"\n";
+
 		# Available to resellers
 		print "    Resellers: ",
 			($plan->{'resellers'} eq 'none' ? "None" :

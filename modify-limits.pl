@@ -52,6 +52,11 @@ C<delete> - Delete virtual servers
 
 Access to capabilities can also be taken away with the C<--cannot-edit> flag.
 
+To restrict the virtual server owner to only installing certain scripts 
+(when using Virtualmin Pro), you can use the C<--scripts> flag followed by
+a quoted list of script codes. To grant access to all script installers, use
+the C<--all-scripts> flag instead.
+
 =cut
 
 package virtual_server;
@@ -151,6 +156,17 @@ while(@ARGV > 0) {
 		&indexof($edit, @edit_limits) >= 0 || &usage("Capability to disallow editing of $edit is not valid : ".join(" ", @edit_limits));
 		push(@cannotedit, $edit);
 		}
+	elsif ($a eq "--scripts") {
+		$allowedscripts = shift(@ARGV);
+		@sc = split(/\s+/, $allowedscripts);
+		foreach $s (@sc) {
+			&get_script($s) ||
+				&usage("Unknown script code $s");
+			}
+		}
+	elsif ($a eq "--all-scripts") {
+		$allowedscripts = "";
+		}
 	elsif ($a eq "--shell") {
 		$shellmode = shift(@ARGV);
 		@shells = grep { $_->{'owner'} } &list_available_shells();
@@ -221,6 +237,9 @@ foreach $e (@canedit) {
 	}
 foreach $e (@cannotedit) {
 	$dom->{'edit_'.$e} = 0;
+	}
+if (defined($allowedscripts)) {
+	$dom->{'allowedscripts'} = $allowedscripts;
 	}
 
 # Save domain object

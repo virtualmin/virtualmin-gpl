@@ -104,6 +104,7 @@ print &ui_hidden_table_end();
 print &ui_hidden_table_start($text{'plan_header3'}, 'width=100%', 2,
                              'caps', 0, \@tds);
 
+# Edit capabilities
 %caps = map { $_, 1 } split(/\s+/, $plan->{'capabilities'});
 $etable = &ui_radio('capabilities_def',
 		    $plan->{'capabilities'} ? 0 : 1,
@@ -120,6 +121,28 @@ $etable .= &ui_grid_table(\@grid, 2).
 			   &select_invert_link("capabilities") ]);
 print &ui_table_row(&hlink($text{'tmpl_capabilities'},
 			   "template_capabilities"), $etable);
+
+# Allowed scripts
+if (defined(&list_scripts)) {
+	$stable = &ui_radio('scripts_def',
+			    $plan->{'scripts'} ? 0 : 1,
+			    [ [ 1, $text{'plan_scriptsall'} ],
+			      [ 0, $text{'tmpl_below'} ] ])."<br>\n";
+	@scripts = &list_scripts();
+	foreach $s (@scripts) {
+		$script = &get_script($s);
+		$scriptname{$s} = $script->{'desc'} if ($script);
+		}
+	@scripts = sort { lc($scriptname{$a}) cmp lc($scriptname{$b}) }@scripts;
+	$stable .= &ui_multi_select("scripts",
+		[ map { [ $_, $scriptname{$_} ] }
+		      $plan->{'scripts'} ? split(/\s+/, $plan->{'scripts'})
+					 : @scripts ],
+		[ map { [ $_, $scriptname{$_} ] } @scripts ],
+		10, 1, 0, $text{'plan_scriptsopts'}, $text{'plan_scriptssel'});
+	print &ui_table_row(&hlink($text{'plan_scripts'}, "plan_scripts"),
+			    $stable);
+	}
 
 print &ui_hidden_table_end();
 

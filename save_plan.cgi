@@ -101,6 +101,17 @@ else {
 			join(" ", split(/\0/, $in{'capabilities'}));
 		}
 
+	# Save allowed scripts
+	if (defined(&list_scripts)) {
+		if ($in{'scripts_def'}) {
+			$plan->{'scripts'} = undef;
+			}
+		else {
+			$plan->{'scripts'} =
+				join(' ', split(/\r?\n/, $in{'scripts'}));
+			}
+		}
+
 	# Save resellers it is visible to
 	if (defined($in{'resellers_def'})) {
 		if ($in{'resellers_def'} == 1) {

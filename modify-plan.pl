@@ -121,6 +121,20 @@ while(@ARGV > 0) {
 		$newplan->{'capabilities'} = '';
 		}
 
+	elsif ($a eq "--scripts") {
+		# Allowed scripts
+		@sc = split(/\s+/, shift(@ARGV));
+		foreach $s (@sc) {
+			&get_script($s) ||
+				&usage("Unknown script code $s");
+			}
+		$newplan->{'scripts'} = join(" ", @sc);
+		}
+	elsif ($a eq "--all-scripts") {
+		# Allow all scripts
+		$newplan->{'scripts'} = '';
+		}
+
 	elsif ($a eq "--no-resellers") {
 		# Not for any resellers
 		$newplan->{'resellers'} = 'none';
@@ -202,7 +216,7 @@ sub usage
 print $_[0],"\n\n" if ($_[0]);
 print "Updates an existing Virtualmin account plan with the given limits.\n";
 print "\n";
-print "usage: modify-plan.pl --name plan-name\n";
+print "usage: modify-plan.pl --name plan-name | --id number\n";
 print "                      [--new-name plan-name]\n";
 print "                      [--owner reseller | --no-owner]\n";
 print "                      [--quota blocks | --no-quota]\n";

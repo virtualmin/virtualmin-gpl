@@ -381,6 +381,8 @@ if ($multi) {
 				join(" ", grep { $d->{'limit_'.$_} } @allow_features),"\n";
 			print "    Edit capabilities: ",
 				join(" ", grep { $d->{'edit_'.$_} } @edit_limits),"\n";
+			print "    Allowed scripts: ",
+				($d->{'allowedscripts'} || "All"),"\n";
 
 			($shell) = grep { $_->{'shell'} eq $duser->{'shell'} }
 					@shells;

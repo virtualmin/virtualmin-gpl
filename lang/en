@@ -4663,6 +4663,10 @@ plan_ename=Missing plan name
 plan_eclash=A plan with the same name already exists
 plan_toomany=This plan has $1 virtual servers on it, which is higher than Virtualmin's display limit of $2.
 plan_clone=Clone
+plan_scripts=Allowed scripts
+plan_scriptsall=All except those disabled globally
+plan_scriptsopts=All scripts
+plan_scriptssel=Allowed
 
 dplans_err=Failed to delete plans
 dplans_enone=None selected
