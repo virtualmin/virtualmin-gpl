@@ -45,6 +45,6 @@
 	- Concurrent with v4, so that a domain can also have a v6 address
 	- Use in DNS, Apache
 
- - CMS made simple
-	- FS#5451
-
+ - Only load plugins when needed
+	- at first plugin_call or plugin_defined
+	- @*_plugins lists should be replaced by functions

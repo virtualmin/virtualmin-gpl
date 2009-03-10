@@ -1062,6 +1062,7 @@ The master admin can select a reseller to own a new top-level virtual server whe
 ---- Changes since 3.66 ----
 Updated the DokuWiki script installer to version 2009-02-14, Radiant to 0.7.1, Trac to 0.11.3, OpenGoo to 1.2.1, phpMyFAQ to 2.0.12, Piwik to 0.2.32, phpScheduleIt to 1.2.11, MediaWiki to 1.14.0, phpWebsite to 1.6.1, Magento to 1.2.1.2, Instiki to 0.16.3, Drupal to 5.16, phpMyAdmin to 3.1.3, Movable Type to 4.24, Mambo to 4.6.5, CopperMine to 1.4.21, and Nucleus to 3.40. Removed old phpMyAdmin versions, which are no longer available.
 Added an option to download the all-languages version of phpMyAdmin.
+Added a script installer for CMS Made Simple, version 1.5.3.
 The bandwidth limit and using variables in all email templates (BW_LIMIT and BW_USAGE) are now formatted in MB or GB, instead of just being a number of bytes.
 Added a Module Config option for an alternate command to use when moving a virtual server's home directory, instead of mv.
 Mail files are now always included in backups and restores, even when under /var/mail.
