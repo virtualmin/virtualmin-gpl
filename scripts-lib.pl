@@ -1449,7 +1449,7 @@ sub osdn_package_versions
 local ($project, @res) = @_;
 local ($alldata, $err);
 &http_download($osdn_download_host, $osdn_download_port, "/$project/",
-	       \$alldata, \$err);
+	       \$alldata, \$err, undef, 0, undef, undef, undef, 0, 1);
 return ( ) if ($err);
 
 # Search for extra download links
@@ -1463,7 +1463,8 @@ while($data =~ /(\/project\/showfiles.php\?group_id=(\d+)(\&|\&amp;)package_id=(
 	next if ($donepackage{$sgroup,$spackage}++);
 	local $sdata;
 	local $err;
-	&http_download($osdn_download_host, $osdn_download_port, $spath, \$sdata, \$err);
+	&http_download($osdn_download_host, $osdn_download_port, $spath,
+		       \$sdata, \$err, undef, 0, undef, undef, undef, 0, 1);
 	push(@data, $sdata) if (!$err);
 	}
 

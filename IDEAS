@@ -48,3 +48,5 @@
  - Only load plugins when needed
 	- at first plugin_call or plugin_defined
 	- @*_plugins lists should be replaced by functions
+
+ - Connectivity check should compare all IPs on the system against nameservers
