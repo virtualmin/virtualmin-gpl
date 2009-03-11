@@ -1591,12 +1591,12 @@ foreach my $hname (keys %$headers) {
 	}
 
 # Actually download it
-$download_timed_out = undef;
-local $SIG{ALRM} = "download_timeout";
+$main::download_timed_out = undef;
+local $SIG{ALRM} = \&download_timeout;
 alarm($timeout || 60);
 local $h = &make_http_connection($ip, $port, $ssl, "GET", $page, \@headers);
 alarm(0);
-$h = $download_timed_out if ($download_timed_out);
+$h = $main::download_timed_out if ($main::download_timed_out);
 if (!ref($h)) {
 	if ($error) { $$error = $h; return; }
 	else { &error($h); }

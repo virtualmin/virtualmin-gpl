@@ -4864,16 +4864,16 @@ sub ftp_upload
 local($buf, @n);
 local $cbfunc = $_[4];
 
-$download_timed_out = undef;
-local $SIG{ALRM} = "download_timeout";
+$main::download_timed_out = undef;
+local $SIG{ALRM} = \&download_timeout;
 alarm(60);
 
 # connect to host and login
 &open_socket($_[0], $_[7] || 21, "SOCK", $_[3]) || return 0;
 alarm(0);
-if ($download_timed_out) {
-	if ($_[3]) { ${$_[3]} = $download_timed_out; return 0; }
-	else { &error($download_timed_out); }
+if ($main::download_timed_out) {
+	if ($_[3]) { ${$_[3]} = $main::download_timed_out; return 0; }
+	else { &error($main::download_timed_out); }
 	}
 &ftp_command("", 2, $_[3]) || return 0;
 if ($_[5]) {
@@ -4950,16 +4950,16 @@ sub ftp_onecommand
 {
 local($buf, @n);
 
-$download_timed_out = undef;
-local $SIG{ALRM} = "download_timeout";
+$main::download_timed_out = undef;
+local $SIG{ALRM} = \&download_timeout;
 alarm(60);
 
 # connect to host and login
 &open_socket($_[0], $_[5] || 21, "SOCK", $_[2]) || return 0;
 alarm(0);
-if ($download_timed_out) {
-	if ($_[2]) { ${$_[2]} = $download_timed_out; return 0; }
-	else { &error($download_timed_out); }
+if ($main::download_timed_out) {
+	if ($_[2]) { ${$_[2]} = $main::download_timed_out; return 0; }
+	else { &error($main::download_timed_out); }
 	}
 &ftp_command("", 2, $_[2]) || return 0;
 if ($_[3]) {
@@ -4999,16 +4999,16 @@ sub ftp_listdir
 {
 local($buf, @n);
 
-$download_timed_out = undef;
-local $SIG{ALRM} = "download_timeout";
+$main::download_timed_out = undef;
+local $SIG{ALRM} = \&download_timeout;
 alarm(60);
 
 # connect to host and login
 &open_socket($_[0], $_[5] || 21, "SOCK", $_[2]) || return 0;
 alarm(0);
-if ($download_timed_out) {
-	if ($_[2]) { ${$_[2]} = $download_timed_out; return 0; }
-	else { &error($download_timed_out); }
+if ($main::download_timed_out) {
+	if ($_[2]) { ${$_[2]} = $main::download_timed_out; return 0; }
+	else { &error($main::download_timed_out); }
 	}
 &ftp_command("", 2, $_[2]) || return 0;
 if ($_[3]) {
