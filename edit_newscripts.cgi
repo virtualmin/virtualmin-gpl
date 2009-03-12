@@ -59,7 +59,9 @@ foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $script->{'name'},
 		  'checked' => $script->{'avail'} },
-		$script->{'desc'},
+		$script->{'site'} ? 
+			"<a href='$script->{'site'}' target=_new>".
+			"$script->{'desc'}</a>" : $script->{'desc'},
 		$script->{'longdesc'},
 		$text{'newscripts_'.$script->{'source'}},
 		@v > 1 ? &ui_select($script->{'name'}."_minversion",

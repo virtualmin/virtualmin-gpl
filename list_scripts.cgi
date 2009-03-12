@@ -179,7 +179,8 @@ foreach $script (sort { $a->{'sortcategory'} cmp
 	    { 'type' => 'radio', 'name' => 'script',
 	      'value' => $script->{'name'},
 	      'checked' => $in{'search'} && @scripts == 1 },
-	    $script->{'desc'},
+	    $script->{'site'} ? "<a href='$script->{'site'}' target=_new>".
+				"$script->{'desc'}</a>" : $script->{'desc'},
 	    $vsel,
 	    $script->{'longdesc'},
 	    { 'type' => 'string',
