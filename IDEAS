@@ -48,6 +48,3 @@
  - Only load plugins when needed
 	- at first plugin_call or plugin_defined
 	- @*_plugins lists should be replaced by functions
-
- - vTiger CRM
-	- FS#5503
