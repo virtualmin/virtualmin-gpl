@@ -68,7 +68,7 @@ if ($in{'initsub'}) {
 
 if ($in{'next'}) {
 	# And go to next section
-	@editmodes = &list_template_editmodes();
+	@editmodes = &list_template_editmodes($tmpl);
 	$idx = &indexof($in{'editmode'}, @editmodes);
 	if ($idx == @editmodes-1) {
 		$nextmode = $editmodes[0];

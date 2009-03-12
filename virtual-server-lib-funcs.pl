@@ -11312,14 +11312,20 @@ if ($in{'domalias_mode'} == 2) {
 	}
 }
 
-# list_template_editmodes()
+# list_template_editmodes([&template])
 # Returns a list of available template sections for editing
 sub list_template_editmodes
 {
-return grep { $sfunc = "show_template_".$_;
-              defined(&$sfunc) &&
-               ($config{$_} || !$isfeature{$_} || $_ eq 'mail') }
-            @template_features;
+local ($tmpl) = @_;
+local @rv = grep { $sfunc = "show_template_".$_;
+                   defined(&$sfunc) &&
+                    ($config{$_} || !$isfeature{$_} || $_ eq 'mail') }
+                 @template_features;
+if ($tmpl && $tmpl->{'id'} == 1) {
+	# For sub-servers only
+	@rv = grep { $_ ne 'resources' && $_ ne 'unix' } @rv;
+	}
+return @rv;
 }
 
 # substitute_domain_template(string, &domain)

@@ -44,7 +44,7 @@ else {
 $in{'editmode'} ||= 'basic';
 if (!$in{'new'}) {
 	# Work out template section to edit
-	@editmodes = &list_template_editmodes();
+	@editmodes = &list_template_editmodes($tmpl);
 	$idx = &indexof($in{'editmode'}, @editmodes);
 	if ($in{'nprev'}) {
 		$idx--;
