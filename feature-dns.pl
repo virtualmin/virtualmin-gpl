@@ -571,7 +571,8 @@ elsif (!$_[0]->{'mail'} && $_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 		}
 	}
 
-if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'} && $_[0]->{'mail'}) {
+if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'} && $_[0]->{'mail'} &&
+    !$config{'secmx_nodns'}) {
 	# Secondary MX servers have been changed - add or remove MX records
 	&$first_print($text{'save_dns7'});
 	local @newmxs = split(/\s+/, $_[0]->{'mx_servers'});
@@ -662,16 +663,18 @@ local $withdot = $d->{'dom'}.".";
 &bind8::create_record($file, $withdot, undef,
 		      "IN", "MX", "5 mail.$withdot");
 
-# Add MX records for slaves
-local %ids = map { $_, 1 }
-	split(/\s+/, $d->{'mx_servers'});
-local @servers = grep { $ids{$_->{'id'}} } &list_mx_servers();
-local $n = 10;
-foreach my $s (@servers) {
-	local $mxhost = $s->{'mxname'} || $s->{'host'};
-	&bind8::create_record($file, $withdot, undef,
-		      "IN", "MX", "$n $mxhost.");
-	$n += 5;
+# Add MX records for slaves, if enabled
+if (!$config{'secmx_nodns'}) {
+	local %ids = map { $_, 1 }
+		split(/\s+/, $d->{'mx_servers'});
+	local @servers = grep { $ids{$_->{'id'}} } &list_mx_servers();
+	local $n = 10;
+	foreach my $s (@servers) {
+		local $mxhost = $s->{'mxname'} || $s->{'host'};
+		&bind8::create_record($file, $withdot, undef,
+			      "IN", "MX", "$n $mxhost.");
+		$n += 5;
+		}
 	}
 }
 

@@ -165,3 +165,4 @@ mem_cmd=Command to get memory usage,3,Query operating system
 api_helper=Path to create API helper command,3,Determine automatically
 fcgid_max=Maximum fcgid execution time,10,-From PHP configuration,*-Don't set,Time in seconds
 tar_cmd=Full path to tar command,3,Detect automatically
+secmx_nodns=Add DNS MX records for secondary mail servers?,1,0-Yes,1-No
