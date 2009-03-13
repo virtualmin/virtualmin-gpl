@@ -145,7 +145,7 @@ if ($in{'confirm'}) {
 		 'plan', $plan->{'id'},
 		 'reseller', undef,
 		);
-	foreach $f (@feature_plugins) {
+	foreach $f (&list_feature_plugins()) {
 		$dom{$f} = int($found{$f});
 		}
 	if (!$parent) {
@@ -545,7 +545,7 @@ else {
 		}
 
 	# Check for plugin features
-	foreach $f (@feature_plugins) {
+	foreach $f (&list_feature_plugins()) {
 		$pname = &plugin_call($f, "feature_name");
 		if (&plugin_call($f, "feature_import", $in{'dom'},
 				 $user || $in{'user'},

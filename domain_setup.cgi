@@ -334,7 +334,7 @@ else {
 # Set selected features in domain object
 # Special magic - if the dir feature is enabled by default and this is an alias
 # domain, don't set it
-foreach my $f (@features, @feature_plugins) {
+foreach my $f (@features, &list_feature_plugins()) {
 	next if ($f eq 'dir' && $config{$f} == 3 && $aliasdom &&
                  $tmpl->{'aliascopy'});
 	$dom{$f} = &can_use_feature($f) && int($in{$f});
@@ -347,7 +347,7 @@ $dom{'home'} = &server_home_directory(\%dom, $parentdom);
 &complete_domain(\%dom);
 
 # Parse extra feature inputs
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	if ($dom{$f}) {
 		$err = &plugin_call($f, "feature_inputs_parse", \%dom, \%in);
 		&error($err) if ($err);

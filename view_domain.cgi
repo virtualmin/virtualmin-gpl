@@ -198,7 +198,7 @@ else {
 				     "feature", 0);
 	@grid = ( );
 	$i = 0;
-	foreach $f (@features, @feature_plugins) {
+	foreach $f (@features, &list_feature_plugins()) {
 		if ($d->{$f}) {
 			local $txt = $text{'feature_'.$f};
 			push(@grid, $txt);

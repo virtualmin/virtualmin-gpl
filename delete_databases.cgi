@@ -27,7 +27,7 @@ if ($in{'confirm'}) {
 	&ui_print_unbuffered_header(&domain_in($d),
 				    $text{'ddatabases_title'}, "");
 	foreach $db (@deldbs) {
-		if (&indexof($db->{'type'}, @database_plugins) >= 0) {
+		if (&indexof($db->{'type'}, &list_database_plugins()) >= 0) {
 			&plugin_call($db->{'type'}, "database_delete", $d,
 				     $db->{'name'});
 			}
@@ -48,7 +48,7 @@ else {
 
 	# Work out the total size
 	foreach $db (@deldbs) {
-		if (&indexof($db->{'type'}, @database_plugins) >= 0) {
+		if (&indexof($db->{'type'}, &list_database_plugins()) >= 0) {
 			# Get size from plugin
 			($size, $tables) = &plugin_call($db->{'type'},
 				"database_size", $d, $db->{'name'});

@@ -49,7 +49,7 @@ while(@ARGV > 0) {
 		$feature{$1}++;
 		}
 	elsif ($a =~ /^--(\S+)$/ &&
-	       &indexof($1, @feature_plugins) >= 0) {
+	       &indexof($1, &list_feature_plugins()) >= 0) {
 		$plugin{$1}++;
 		}
 	else {
@@ -78,7 +78,7 @@ foreach $d (@doms) {
 	%newdom = %$d;
 	$oldd = { %$d };
 	my $f;
-	foreach $f (@dom_features, @feature_plugins) {
+	foreach $f (@dom_features, &list_feature_plugins()) {
 		if ($feature{$f} || $plugin{$f}) {
 			$newdom{$f} = 0;
 			if (!$d->{$f}) {
@@ -108,12 +108,12 @@ foreach $d (@doms) {
 
 	# Do it!
 	&$indent_print();
-	foreach $f (@dom_features, @feature_plugins) {
+	foreach $f (@dom_features, &list_feature_plugins()) {
 		if ($feature{$f} || $plugin{$f}) {
 			$d->{$f} = 0;
 			}
 		}
-	foreach $f (@dom_features, @feature_plugins) {
+	foreach $f (@dom_features, &list_feature_plugins()) {
 		&call_feature_func($f, $d, $oldd);
 		}
 
@@ -148,7 +148,7 @@ print "                          [--all-domains]\n";
 foreach $f (@features) {
 	print "                         [--$f]\n" if ($config{$f});
 	}
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	print "                         [--$f]\n";
 	}
 exit(1);

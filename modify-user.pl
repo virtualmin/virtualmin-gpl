@@ -346,7 +346,7 @@ if ($user->{'email'} && !$user->{'nomailfile'}) {
 	}
 
 # Call plugin save functions
-foreach $f (@mail_plugins) {
+foreach $f (&list_mail_plugins()) {
 	&plugin_call($f, "mailbox_modify", $user, \%old, $d);
 	}
 

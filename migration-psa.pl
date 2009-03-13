@@ -218,7 +218,7 @@ if (!$parent) {
 $dom{'db'} = $db || &database_name(\%dom);
 $dom{'emailto'} = $dom{'email'} ||
 		  $dom{'user'}.'@'.&get_system_hostname();
-foreach my $f (@features, @feature_plugins) {
+foreach my $f (@features, &list_feature_plugins()) {
 	$dom{$f} = $got{$f} ? 1 : 0;
 	}
 &set_featurelimits_from_plan(\%dom, $plan);

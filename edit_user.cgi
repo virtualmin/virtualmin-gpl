@@ -355,7 +355,7 @@ if ($d && !$mailbox) {
 	@dbs = grep { $_->{'users'} } &domain_databases($d);
 	}
 @sgroups = &allowed_secondary_groups($d);
-foreach $f (@mail_plugins) {
+foreach $f (&list_mail_plugins()) {
 	$anyplugins++ if (&plugin_defined($f, "mailbox_inputs"));
 	}
 $anyother = &can_mailbox_ftp() && !$mailbox && $user->{'unix'} ||
@@ -377,7 +377,7 @@ if (&can_mailbox_ftp() && !$mailbox && $user->{'unix'}) {
 	}
 
 # Find and show all plugin features
-foreach $f (@mail_plugins) {
+foreach $f (&list_mail_plugins()) {
 	$input = &plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d);
 	print $input;
 	}

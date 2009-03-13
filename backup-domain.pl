@@ -74,7 +74,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--feature") {
 		local $f = shift(@ARGV);
 		$f eq "virtualmin" || $config{$f} ||
-		   &indexof($f, @backup_plugins) >= 0 ||
+		   &indexof($f, &list_backup_plugins()) >= 0 ||
 			&usage("Feature $f is not enabled");
 		push(@bfeats, $f);
 		}
@@ -87,7 +87,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--all-features") {
 		@bfeats = grep { $config{$_} || $_ eq 'virtualmin' }
 			       @backup_features;
-		push(@bfeats, @backup_plugins);
+		push(@bfeats, &list_backup_plugins());
 		}
 	elsif ($a eq "--except-feature") {
 		local $f = shift(@ARGV);
@@ -190,7 +190,7 @@ if ($test) {
 		print "\n";
 		print "The following features will be backed up :\n";
 		foreach $f (@bfeats) {
-			if (&indexof($f, @backup_plugins) >= 0) {
+			if (&indexof($f, &list_backup_plugins()) >= 0) {
 				$fn = &plugin_call($f, "feature_backup_name") ||
 				      &plugin_call($f, "feature_name");
 				}

@@ -105,7 +105,7 @@ else {
 sub get_db_size
 {
 local ($db) = @_;
-if (&indexof($db->{'type'}, @database_plugins) >= 0) {
+if (&indexof($db->{'type'}, &list_database_plugins()) >= 0) {
 	return &plugin_call($db->{'type'}, "database_size", $d, $db->{'name'});
 	}
 else {

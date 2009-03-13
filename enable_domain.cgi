@@ -61,7 +61,7 @@ else {
 			&try_function($f, $efunc, $d);
 			}
 		}
-	foreach $f (@feature_plugins) {
+	foreach $f (&list_feature_plugins()) {
 		if ($d->{$f} && $enable{$f}) {
 			&plugin_call($f, "feature_enable", $d);
 			}

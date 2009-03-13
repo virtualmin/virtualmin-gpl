@@ -43,18 +43,18 @@ print &ui_table_row($text{'database_name'},
 foreach my $t (@database_features) {
 	push(@types, [ $t, $text{'databases_'.$t} ]) if ($d->{$t});
 	}
-foreach $p (@database_plugins) {
+foreach $p (&list_database_plugins()) {
 	push(@types, [ $p, &plugin_call($p, "database_name") ]) if ($d->{$p});
 	}
 print &ui_table_row($text{'database_type'},
     $in{'new'} ? &ui_select("type", $types[0]->[0], \@types) :
-    &indexof($in{'type'}, @database_plugins) >= 0 ?
+    &indexof($in{'type'}, &list_database_plugins()) >= 0 ?
 	&plugin_call($in{'type'}, "database_name") :
 	       $text{'databases_'.$in{'type'}});
 
 if (!$in{'new'}) {
 	# Show database size and tables
-	if (&indexof($in{'type'}, @database_plugins) >= 0) {
+	if (&indexof($in{'type'}, &list_database_plugins()) >= 0) {
 		($size, $tables) = &plugin_call($in{'type'}, "database_size",
 						$d, $in{'name'});
 		}
@@ -98,7 +98,7 @@ foreach $t (@database_features) {
 		print &ui_hidden_table_row_end("opts_".$t);
 		}
 	}
-foreach $p (@database_plugins) {
+foreach $p (&list_database_plugins()) {
 	if ($in{'new'} && $d->{$p} && &plugin_defined($p, "creation_form")) {
 		print &plugin_call($p, "creation_form", $d);
 		}

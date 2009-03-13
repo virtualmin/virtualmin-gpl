@@ -26,7 +26,7 @@ $mode > 0 || -r $src || -d $src || &error($text{'restore_esrc'});
 if ($in{'feature_all'}) {
 	# All features usable by current user
 	@do_features = &get_available_backup_features($crmode == 2);
-	foreach my $f (@backup_plugins) {
+	foreach my $f (&list_backup_plugins()) {
 		push(@do_features, $f);
 		}
 	if ($crmode == 2) {
@@ -138,7 +138,7 @@ if (!$in{'confirm'}) {
 	# Show domains with features below them
 	@links = ( &select_all_link("dom", 0), &select_invert_link("dom", 0) );
 	print &ui_links_row(\@links);
-	%plugins = map { $_, 1 } @backup_plugins;
+	%plugins = map { $_, 1 } &list_backup_plugins();
 	print "<dl>\n";
 	foreach $d (sort { $a cmp $b } keys %$cont) {
 		next if ($d eq "virtualmin");

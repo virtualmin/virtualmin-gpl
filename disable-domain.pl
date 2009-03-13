@@ -78,7 +78,7 @@ foreach $f (@features) {
 			}
 		}
 	}
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	if ($d->{$f} && $disable{$f}) {
 		&plugin_call($f, "feature_disable", $d);
 		push(@disabled, $f);

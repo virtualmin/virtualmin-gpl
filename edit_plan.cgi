@@ -88,7 +88,7 @@ foreach my $f (@opt_features, "virt") {
 				 $text{'feature_'.$f} || $f,
 				 $flimits{$f}));
 	}
-foreach my $f (@feature_plugins) {
+foreach my $f (&list_feature_plugins()) {
 	push(@grid, &ui_checkbox("featurelimits", $f,
 			 &plugin_call($f, "feature_name"), $flimits{$f}));
 	}

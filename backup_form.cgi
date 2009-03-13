@@ -108,7 +108,7 @@ foreach $f (&get_available_backup_features()) {
 		}
 	$ftable .= "<br>\n";
 	}
-foreach $f (@backup_plugins) {
+foreach $f (&list_backup_plugins()) {
 	$ftable .= &ui_checkbox("feature", $f,
 		&plugin_call($f, "feature_backup_name") ||
 		    &plugin_call($f, "feature_name"),

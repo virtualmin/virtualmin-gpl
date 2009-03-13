@@ -789,7 +789,7 @@ if (!$_[4] && $_[0]) {
 	foreach $db (@dbs) {
 		local @dbu;
 		local $ufunc;
-		if (&indexof($db->{'type'}, @database_plugins) < 0) {
+		if (&indexof($db->{'type'}, &list_database_plugins()) < 0) {
 			# Core database
 			local $dfunc = "list_".$db->{'type'}."_database_users";
 			next if (!defined(&$dfunc));
@@ -827,7 +827,7 @@ if (!$_[4] && $_[0]) {
 	# Add plugin databases
 	local @dbs = &domain_databases($_[0]);
 	foreach $db (@dbs) {
-		next if (&indexof($db->{'type'}, @database_plugins) == -1);
+		next if (&indexof($db->{'type'}, &list_database_plugins()) == -1);
 		}
 	}
 
@@ -1138,13 +1138,13 @@ if ($_[1] && !$_[0]->{'domainowner'}) {
 	foreach $dt (&unique(map { $_->{'type'} } &domain_databases($_[1]))) {
 		local @dbs = map { $_->{'name'} }
 				 grep { $_->{'type'} eq $dt } @{$_[0]->{'dbs'}};
-		if (@dbs && &indexof($dt, @database_plugins) < 0) {
+		if (@dbs && &indexof($dt, &list_database_plugins()) < 0) {
 			# Create in core database
 			local $crfunc = "create_${dt}_database_user";
 			&$crfunc($_[1], \@dbs, $_[0]->{'user'},
 				 $_[0]->{'plainpass'}, $_[0]->{$dt.'_pass'});
 			}
-		elsif (@dbs && &indexof($dt, @database_plugins) >= 0) {
+		elsif (@dbs && &indexof($dt, &list_database_plugins()) >= 0) {
 			# Create in plugin database
 			&plugin_call($dt, "database_create_user",
 				     $_[1], \@dbs, $_[0]->{'user'},
@@ -1526,7 +1526,7 @@ if ($_[2] && !$_[0]->{'domainowner'} && $newdbstr ne $olddbstr) {
 				 grep { $_->{'type'} eq $dt } @{$_[0]->{'dbs'}};
 		local @olddbs = map { $_->{'name'} }
 				 grep { $_->{'type'} eq $dt } @{$_[1]->{'dbs'}};
-		local $plugin = &indexof($dt, @database_plugins) >= 0;
+		local $plugin = &indexof($dt, &list_database_plugins()) >= 0;
 		if (@dbs && !@olddbs) {
 			# Need to add database user
 			if (!$plugin) {
@@ -1782,12 +1782,12 @@ if ($_[1] && !$_[0]->{'domainowner'}) {
 	foreach $dt (&unique(map { $_->{'type'} } &domain_databases($_[1]))) {
 		local @dbs = map { $_->{'name'} }
 				 grep { $_->{'type'} eq $dt } @{$_[0]->{'dbs'}};
-		if (@dbs && &indexof($dt, @database_plugins) < 0) {
+		if (@dbs && &indexof($dt, &list_database_plugins()) < 0) {
 			# Delete from core database
 			local $dlfunc = "delete_${dt}_database_user";
 			&$dlfunc($_[1], $_[0]->{'user'});
 			}
-		elsif (@dbs && &indexof($dt, @database_plugins) >= 0) {
+		elsif (@dbs && &indexof($dt, &list_database_plugins()) >= 0) {
 			# Delete from plugin database
 			&plugin_call($dt, "delete_database_user",
 				     $_[1], $_[0]->{'user'});
@@ -4030,7 +4030,7 @@ if ($d->{'mysql'} || $d->{'postgres'}) {
 	push(@headers, $text{'users_db'});
 	}
 local ($f, %plugcol);
-foreach $f (@mail_plugins) {
+foreach $f (&list_mail_plugins()) {
 	local $col = &plugin_call($f, "mailbox_header", $d);
 	if ($col) {
 		$plugcol{$f} = $col;
@@ -4116,7 +4116,7 @@ foreach $u (@$users) {
 					   @{$u->{'dbs'}} ? $text{'yes'}
 					   		  : $text{'no'});
 		}
-	foreach $f (grep { $plugcol{$_} } @mail_plugins) {
+	foreach $f (grep { $plugcol{$_} } &list_mail_plugins()) {
 		push(@cols, &plugin_call($f, "mailbox_column", $u, $d));
 		}
 
@@ -4812,7 +4812,7 @@ if (!$_[3]->{'fix'}) {
 	$_[0]->{'nodbname'} = $oldd{'nodbname'};
 	$_[0]->{'norename'} = $oldd{'norename'};
 	$_[0]->{'forceunder'} = $oldd{'forceunder'};
-	foreach my $f (@opt_features, @feature_plugins, "virt") {
+	foreach my $f (@opt_features, &list_feature_plugins(), "virt") {
 		$_[0]->{'limit_'.$f} = $oldd{'limit_'.$f};
 		}
 	$_[0]->{'owner'} = $oldd{'owner'};
@@ -5563,7 +5563,7 @@ foreach $f (@features) {
 			}
 		}
 	}
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	if ($dom->{$f} && (!$check || $check->{$f})) {
 		local $cerr = &plugin_call($f, "feature_clash", $dom, $field);
 		return $cerr if ($cerr);
@@ -5597,7 +5597,7 @@ foreach $f (grep { $d->{$_} } @features) {
 	}
 
 # Check plugins that are enabled
-foreach $f (grep { $d->{$_} } @feature_plugins) {
+foreach $f (grep { $d->{$_} } &list_feature_plugins()) {
 	next if ($feat && $f ne $feat);
 	local $derr = &plugin_call($f, "feature_depends", $d, $oldd);
 	return $derr if ($derr);
@@ -5692,7 +5692,7 @@ foreach my $f (grep { $d->{$_} } @features) {
 	}
 
 # Check plugins that are enabled
-foreach $f (grep { $d->{$_} } @feature_plugins) {
+foreach $f (grep { $d->{$_} } &list_feature_plugins()) {
 	local $err = &plugin_call($f, "feature_warnings", $d, $oldd);
 	push(@rv, $err) if ($err);
 	}
@@ -5779,7 +5779,7 @@ foreach $f (@dof) {
 	}
 
 # Set up all the selected plugins
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	if ($dom->{$f}) {
 		# Failure can be ignored
 		local $main::error_must_die = 1;
@@ -6016,7 +6016,7 @@ if ($dom->{'alias'}) {
 			&try_function($f, $safunc, $aliasdom, $dom);
 			}
 		}
-	foreach $f (@feature_plugins) {
+	foreach $f (&list_feature_plugins()) {
 		if ($aliasdom->{$f} &&
 		    &plugin_defined($f, "feature_setup_alias")) {
 			local $main::error_must_die = 1;
@@ -6146,7 +6146,7 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 				&try_function($f, $dafunc, $aliasdom, $dd);
 				}
 			}
-		foreach $f (@feature_plugins) {
+		foreach $f (&list_feature_plugins()) {
 			if ($aliasdom->{$f} &&
 			    &plugin_defined($f, "feature_delete_alias")) {
 				local $main::error_must_die = 1;
@@ -6167,7 +6167,7 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 	$dd->{'deleting'} = 1;		# so that features know about delete
 	if (!$only) {
 		# Delete all plugins, with error handling
-		foreach $f (@feature_plugins) {
+		foreach $f (&list_feature_plugins()) {
 			if ($dd->{$f}) {
 				local $main::error_must_die = 1;
 				eval { &plugin_call($f,
@@ -7176,6 +7176,7 @@ local $path = $_[0] =~ /^\// ? $_[0] : "$module_config_directory/$_[0]";
 sub plugin_call
 {
 local ($mod, $func, @args) = @_;
+&load_plugin_libraries($mod);
 if (&plugin_defined($mod, $func)) {
 	if ($main::module_name ne "virtual_server") {
 		# Set up virtual_server package
@@ -7211,9 +7212,10 @@ return 1;
 # Returns 1 if some function is defined in a plugin
 sub plugin_defined
 {
-local $pkg = $_[0];
-$pkg =~ s/[^A-Za-z0-9]/_/g;
-local $func = "${pkg}::$_[1]";
+local ($mod, $func) = @_;
+&load_plugin_libraries($mod);
+$mod =~ s/[^A-Za-z0-9]/_/g;
+local $func = "${mod}::$func";
 return defined(&$func);
 }
 
@@ -7222,7 +7224,7 @@ return defined(&$func);
 sub database_feature
 {
 local $ok = 0;
-foreach my $f ('mysql', 'postgres', @database_plugins) {
+foreach my $f ('mysql', 'postgres', &list_database_plugins()) {
 	$ok = 1 if ($config{$f} &&
 		    (!$_[0] || $_[0]->{$f}));
 	}
@@ -7842,7 +7844,7 @@ if ($_[0]->{'postgres'}) {
 			     'desc' => $text{'databases_postgres'} });
 		}
 	}
-foreach my $f (@database_plugins) {
+foreach my $f (&list_database_plugins()) {
 	push(@dbs, &plugin_call($f, "database_list", $_[0]));
 	}
 if ($_[1]) {
@@ -7876,12 +7878,21 @@ if ($config{'postgres'} && (!$d || $d->{'postgres'})) {
 			  'special' => ($_ =~ /^template/i) } }
 		      &postgresql::list_databases());
 	}
-foreach my $f (@database_plugins) {
+foreach my $f (&list_database_plugins()) {
 	if (!$d || $d->{$f}) {
 		push(@rv, &plugin_call($f, "databases_all", $d));
 		}
 	}
 return @rv;
+}
+
+# all_database_types()
+# Returns a list of all database types on the system
+sub all_database_types
+{
+return ( $config{'mysql'} ? ("mysql") : ( ),
+	 $config{'postgres'} ? ("postgres") : ( ),
+	 &list_database_plugins() );
 }
 
 # resync_all_databases(&domain, &all-dbs)
@@ -7921,7 +7932,7 @@ if (&indexof($type, @features) >= 0) {
 	local $hfunc = "get_database_host_".$type;
 	$rv = &$hfunc();
 	}
-elsif (&indexof($type, @database_plugins) >= 0) {
+elsif (&indexof($type, &list_database_plugins()) >= 0) {
 	# From plugin
 	$rv = &plugin_call($type, "database_host");
 	}
@@ -8606,7 +8617,7 @@ push(@disable, "ssl") if (&indexof("web", @disable) >= 0 && $d->{'ssl'});
 push(@disable, "status") if (&indexof("web", @disable) >= 0 && $d->{'status'});
 @disable = grep { $_ ne "unix" } @disable if ($d->{'parent'});
 push(@disable, grep { $d->{$_} &&
-	      &plugin_defined($_, "feature_disable") } @feature_plugins);
+	      &plugin_defined($_, "feature_disable") } &list_feature_plugins());
 return &unique(@disable);
 }
 
@@ -8622,7 +8633,7 @@ local %disabled = map { $_, 1 } @disabled;
 push(@enable, "ssl") if (&indexof("web", @enable) >= 0 && $d->{'ssl'});
 @enable = grep { $_ ne "unix" } @enable if ($d->{'parent'});
 push(@enable, grep { $d->{$_} && $disabled{$_} &&
-		     &plugin_defined($_, "feature_enable") } @feature_plugins);
+		     &plugin_defined($_, "feature_enable") } &list_feature_plugins());
 return &unique(@enable);
 }
 
@@ -8698,7 +8709,7 @@ return wantarray ? ($rv, $qrv) : $rv;
 sub get_one_database_usage
 {
 local ($d, $db) = @_;
-if (&indexof($db->{'type'}, @database_plugins) >= 0) {
+if (&indexof($db->{'type'}, &list_database_plugins()) >= 0) {
 	# Get size from plugin
 	local ($size, $tables, $qsize) = &plugin_call($db->{'type'}, 
 		      "database_size", $d, $db->{'name'}, 1);
@@ -9673,7 +9684,7 @@ foreach my $f (@startstop_features) {
 			}
 		}
 	}
-foreach my $f (@startstop_plugins) {
+foreach my $f (&list_startstop_plugins()) {
 	local $status = &plugin_call($f, "feature_startstop");
 	$status->{'feature'} ||= $f;
 	$status->{'plugin'} = 1;
@@ -9733,7 +9744,7 @@ if (&indexof($f, @features) >= 0 && $config{$f}) {
 		&try_function($f, $mfunc, $d, $oldd);
 		}
 	}
-elsif (&indexof($f, @feature_plugins) >= 0) {
+elsif (&indexof($f, &list_feature_plugins()) >= 0) {
 	# A plugin feature
 	if ($d->{$f} && !$oldd->{$f}) {
 		&try_plugin_call($f, "feature_setup", $d);
@@ -9927,7 +9938,7 @@ foreach $f (@features) {
 	}
 
 # Do move for plugins, with error handling
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	for(my $i=0; $i<@doms; $i++) {
 		if ($doms[$i]->{$f}) {
 			$doing_dom = $doms[$i];
@@ -10025,7 +10036,7 @@ $d->{'forceunder'} = $oldparent->{'forceunder'};
 foreach my $ed (@edit_limits) {
 	$d->{'edit_'.$ed} = $oldparent->{'edit_'.$ed};
 	}
-foreach my $f (@opt_features, "virt", @feature_plugins) {
+foreach my $f (@opt_features, "virt", &list_feature_plugins()) {
 	$d->{'limit_'.$f} = $oldparent->{'limit_'.$f};
 	}
 $d->{'demo'} = $oldparent->{'demo'};
@@ -10107,7 +10118,7 @@ foreach $f (@features) {
 			}
 		}
 	}
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	for(my $i=0; $i<@doms; $i++) {
 		if ($doms[$i]->{$f}) {
 			$doing_dom = $doms[$i];
@@ -10194,7 +10205,7 @@ foreach my $f (@features) {
 	}
 
 # Update all enabled plugins
-foreach my $f (@feature_plugins) {
+foreach my $f (&list_feature_plugins()) {
 	if ($d->{$f}) {
 		local $main::error_must_die = 1;
 		eval { &plugin_call($f, "feature_modify", $d, $oldd) };
@@ -11769,7 +11780,7 @@ local @rv = map { { 'feature' => $_,
 
 # Add plugin features
 local @plug = grep { &plugin_call($_, "feature_suitable",
-			$parentdom, $aliasdom, $subdom) } @feature_plugins;
+			$parentdom, $aliasdom, $subdom) } &list_feature_plugins();
 @plug = grep { &can_use_feature($_) } @plug;
 if ($aliasdom) {
 	@plug = grep { $aliasdom->{$_} } @plug;
@@ -11783,6 +11794,14 @@ push(@rv, map { { 'feature' => $_,
 		  'enabled' => 1 } } @plug);
 
 return @rv;
+}
+
+# list_allowable_features()
+# Returns a list of feature and plugin codes that resellers and domain owners
+# can be allowed access to
+sub list_allowable_features
+{
+return ( @opt_features, "virt", &list_feature_plugins() );
 }
 
 # count_domain_users()
@@ -12246,7 +12265,7 @@ else {
 sub show_check_migration_features
 {
 local @got = @_;
-local %pconfig = map { $_, 1 } @feature_plugins;
+local %pconfig = map { $_, 1 } &list_feature_plugins();
 local @notgot = grep { !$config{$_} && !$pconfig{$_} } @got;
 @got = grep { $config{$_} || $pconfig{$_} } @got;
 local @gotmsg = map { $text{'feature_'.$_} ||
@@ -12418,7 +12437,7 @@ foreach my $ad (@aliases) {
 			&try_function($f, $mfunc, $ad, $oldad);
 			}
 		}
-	foreach my $f (@feature_plugins) {
+	foreach my $f (&list_feature_plugins()) {
 		if ($ad->{$f}) {
 			&plugin_call($f, "feature_modify", $ad, $oldad);
 			}
@@ -12490,6 +12509,77 @@ else {
 	$port = $miniserv{'port'};
 	return $proto."://$d->{'dom'}:$port";
 	}
+}
+
+# load_plugin_libraries([plugin, ...])
+# Call foreign_require on some or all plugins, just once
+sub load_plugin_libraries
+{
+local @load = @_;
+@load = @plugins if (!@load);
+local $loaded = 0;
+foreach my $pname (@load) {
+	if (!$main::done_load_plugin_libraries{$pname}++) {
+		&foreign_require($pname, "virtual_feature.pl");
+		$loaded++;
+		}
+	}
+if ($loaded) {
+	print STDERR "Plugins loaded from:\n";
+	for(my $i=0; my @stack = caller($i); $i++) {
+		print STDERR "File: $stack[1] Line: $stack[2] ",
+			     "Function: $stack[3]\n";
+		}
+	}
+}
+
+# Returns a list of all plugins that define features
+sub list_feature_plugins
+{
+&load_plugin_libraries();
+return grep { &plugin_defined($_, "feature_setup") } @plugins;
+}
+
+# Returns a list of all plugins that add mailbox-level options
+sub list_mail_plugins
+{
+&load_plugin_libraries();
+return grep { &plugin_defined($_, "mailbox_inputs") } @plugins;
+}
+
+# Returns a list of all plugins that add a new database type
+sub list_database_plugins
+{
+&load_plugin_libraries();
+return grep { &plugin_defined($_, "database_name") } @plugins;
+}
+
+# Returns a list of all plugins that add a service that can be started
+sub list_startstop_plugins
+{
+&load_plugin_libraries();
+return grep { &plugin_defined($_, "feature_startstop") } @plugins;
+}
+
+# Returns a list of all plugins that have a backupable feature
+sub list_backup_plugins
+{
+&load_plugin_libraries();
+return grep { &plugin_defined($_, "feature_backup") } @plugins;
+}
+
+# Returns a list of all plugins that define new script installers
+sub list_script_plugins
+{
+&load_plugin_libraries();
+return grep { &plugin_defined($_, "scripts_list") } @plugins;
+}
+
+# Returns a list of all plugins that define content styles
+sub list_style_plugins
+{
+&load_plugin_libraries();
+return grep { &plugin_defined($_, "styles_list") } @plugins;
 }
 
 $done_virtual_server_lib_funcs = 1;

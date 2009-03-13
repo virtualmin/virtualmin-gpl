@@ -58,7 +58,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--all-features") {
 		# Validating all features and capable plugins
 		@feats = @features;
-		foreach $f (@feature_plugins) {
+		foreach $f (&list_feature_plugins()) {
 			if (&plugin_defined($f, "feature_validate")) {
 				push(@feats, $f);
 				}
@@ -84,7 +84,7 @@ foreach $d (@doms) {
 	$count = 0;
 	foreach $f (@feats) {
 		next if (!$d->{$f});
-		if (&indexof($f, @feature_plugins) < 0) {
+		if (&indexof($f, &list_feature_plugins()) < 0) {
 			# Core feature
 			next if (!$config{$f});
 			$vfunc = "validate_$f";

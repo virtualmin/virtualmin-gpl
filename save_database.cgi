@@ -27,7 +27,7 @@ if ($in{'new'}) {
 		&error($text{'database_ename'});
 
 	# Parse type-specific options
-	if (&indexof($in{'type'}, @database_plugins) < 0) {
+	if (&indexof($in{'type'}, &list_database_plugins()) < 0) {
 		# Core DB type
 		$ofunc = "creation_parse_$in{'type'}";
 		if ($in{'new'} && defined(&$ofunc)) {
@@ -43,7 +43,7 @@ if ($in{'new'}) {
 			}
 		}
 
-	if (&indexof($in{'type'}, @database_plugins) >= 0) {
+	if (&indexof($in{'type'}, &list_database_plugins()) >= 0) {
 		&plugin_call($in{'type'}, "database_clash", $d, $in{'name'}) &&
 			&error($text{'database_eclash'});
 		}
@@ -55,7 +55,7 @@ if ($in{'new'}) {
 
 	# Go for it
 	&ui_print_header(&domain_in($d), $text{'database_title1'}, "");
-	if (&indexof($in{'type'}, @database_plugins) >= 0) {
+	if (&indexof($in{'type'}, &list_database_plugins()) >= 0) {
 		&plugin_call($in{'type'}, "database_create", $d, $in{'name'},
 			     $opts);
 		}
@@ -86,7 +86,7 @@ elsif ($in{'delete'}) {
 		&error($text{'database_edbdef'});
 		}
 	&ui_print_header(&domain_in($d), $text{'database_title3'}, "");
-	if (&indexof($in{'type'}, @database_plugins) >= 0) {
+	if (&indexof($in{'type'}, &list_database_plugins()) >= 0) {
 		&plugin_call($in{'type'}, "database_delete", $d, $in{'name'});
 		}
 	else {

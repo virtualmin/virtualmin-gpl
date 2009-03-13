@@ -54,7 +54,7 @@ while(@ARGV > 0) {
 		$feature{$1}++;
 		}
 	elsif ($a =~ /^--(\S+)$/ &&
-	       &indexof($1, @feature_plugins) >= 0) {
+	       &indexof($1, &list_feature_plugins()) >= 0) {
 		$plugin{$1}++;
 		}
 	elsif ($a =~ /^--can-edit-(\S+)$/ &&
@@ -87,7 +87,7 @@ foreach $d (@doms) {
 					 @features;
 
 	# Enable access to a bunch of features
-	foreach $f (@dom_features, @feature_plugins) {
+	foreach $f (@dom_features, &list_feature_plugins()) {
 		if ($feature{$f} || $plugin{$f}) {
 			$d->{"limit_$f"} = 1;
 			}
@@ -125,7 +125,7 @@ print "                       [--dbname]\n";
 foreach $f (@features) {
 	print "                         [--$f]\n" if ($config{$f});
 	}
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	print "                         [--$f]\n";
 	}
 foreach $f (@edit_limits) {

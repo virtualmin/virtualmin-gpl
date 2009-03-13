@@ -50,7 +50,7 @@ else {
 		}
 	if ($in{'feature_all'}) {
 		@do_features = ( &get_available_backup_features(),
-				 @backup_plugins );
+				 &list_backup_plugins() );
 		}
 	else {
 		@do_features = split(/\0/, $in{'feature'});
@@ -64,11 +64,11 @@ else {
 	# Parse option inputs
 	foreach $f (@do_features) {
 		local $ofunc = "parse_backup_$f";
-		if (&indexof($f, @backup_plugins) < 0 &&
+		if (&indexof($f, &list_backup_plugins()) < 0 &&
 		    defined(&$ofunc)) {
 			$options{$f} = &$ofunc(\%in);
 			}
-		elsif (&indexof($f, @backup_plugins) >= 0 &&
+		elsif (&indexof($f, &list_backup_plugins()) >= 0 &&
 		       &plugin_defined($f, "feature_backup_parse")) {
 			$options{$f} = &plugin_call($f,
 					"feature_backup_parse", \%in);
@@ -88,7 +88,7 @@ else {
 	%sel_features = map { $_, 1 } split(/\0/, $in{'feature'});
 	$sched->{'feature_all'} = $in{'feature_all'};
 	$sched->{'features'} = join(" ",
-		grep { $sel_features{$_} } (@backup_features, @backup_plugins));
+		grep { $sel_features{$_} } (@backup_features, &list_backup_plugins()));
 	$sched->{'dest'} = $dest;
 	$sched->{'fmt'} = $in{'fmt'};
 	$sched->{'mkdir'} = $in{'mkdir'};

@@ -280,13 +280,13 @@ local ($d, $plan) = @_;
 if ($plan->{'featurelimits'}) {
 	# From template
 	local %flimits = map { $_, 1 } split(/\s+/, $plan->{'featurelimits'});
-	foreach my $f (@features, @feature_plugins) {
+	foreach my $f (@features, &list_feature_plugins()) {
 		$d->{'limit_'.$f} = int($flimits{$f});
 		}
 	}
 else {
 	# From domain
-	foreach my $f (@features, @feature_plugins) {
+	foreach my $f (@features, &list_feature_plugins()) {
 		$d->{'limit_'.$f} = $f eq "webmin" ? 0 : int($d->{$f});
 		}
 	}
@@ -298,7 +298,7 @@ sub set_reseller_featurelimits_from_plan
 {
 local ($resel, $plan) = @_;
 local %flimits = map { $_, 1 } split(/\s+/, $plan->{'featurelimits'});
-foreach my $f (@features, @feature_plugins) {
+foreach my $f (@features, &list_feature_plugins()) {
 	$resel->{'acl'}->{'feature_'.$f} = int($flimits{$f});
 	}
 }

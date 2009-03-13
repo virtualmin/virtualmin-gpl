@@ -210,8 +210,8 @@ if ($multi) {
 			print "    IP address: $d->{'ip'} (Shared)\n";
 			}
 		print "    Features: ",join(" ", grep { $d->{$_} } @features),"\n";
-		if (@feature_plugins) {
-			print "    Plugins: ",join(" ", grep { $d->{$_} } @feature_plugins),"\n";
+		if (&list_feature_plugins()) {
+			print "    Plugins: ",join(" ", grep { $d->{$_} } &list_feature_plugins()),"\n";
 			}
 		if (&has_home_quotas() && !$d->{'parent'}) {
 			($qhome, $qmail) = &get_domain_quota($d);
@@ -378,9 +378,11 @@ if ($multi) {
 			print "    Read-only mode: ",
 				($d->{'readonly'} ? "Yes" : "No"),"\n";
 			print "    Allowed features: ",
-				join(" ", grep { $d->{'limit_'.$_} } @allow_features),"\n";
+				join(" ", grep { $d->{'limit_'.$_} }
+					       &list_allowable_features()),"\n";
 			print "    Edit capabilities: ",
-				join(" ", grep { $d->{'edit_'.$_} } @edit_limits),"\n";
+				join(" ", grep { $d->{'edit_'.$_} }
+					       @edit_limits),"\n";
 			print "    Allowed scripts: ",
 				($d->{'allowedscripts'} || "All"),"\n";
 

@@ -84,7 +84,7 @@ if ($tmpl->{'mysql_suffix'} ne "none") {
 $clash && &usage("A database with the same name and type is already associated with this server");
 
 # Check for a global clash
-if (&indexof($type, @database_plugins) >= 0) {
+if (&indexof($type, &list_database_plugins()) >= 0) {
 	&plugin_call($type, "database_clash", $d, $name) &&
 		&usage("A database called $name already exists");
 	}
@@ -96,7 +96,7 @@ else {
 # Do it
 $first_print = \&null_print;
 $second_print = \&null_print;
-if (&indexof($type, @database_plugins) >= 0) {
+if (&indexof($type, &list_database_plugins()) >= 0) {
 	&plugin_call($type, "database_create", $d, $name, \%opts);
 	}
 else {

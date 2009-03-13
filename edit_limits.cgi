@@ -84,7 +84,7 @@ if ($virtualmin_pro) {
 	}
 
 # Show limits from plugins
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	&plugin_call($f, "load_theme_library");
 	$input = &plugin_call($f, "feature_limits_input", $d);
 	print &ui_table_hr() if ($input && !$done_plugins_hr++);
@@ -116,7 +116,7 @@ foreach $f (@opt_features, "virt") {
 		}
 	push(@grid, &ui_checkbox("features", $f, $text{'feature_'.$f} || $f, $d->{"limit_$f"}));
 	}
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	next if (!&can_use_feature($f));
 	push(@grid, &ui_checkbox("features", $f, &plugin_call($f, "feature_name"), $d->{"limit_$f"}));
 	}

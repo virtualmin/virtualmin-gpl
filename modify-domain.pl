@@ -414,7 +414,7 @@ for(my $i=0; $i<@doms; $i++) {
 			&try_function($f, $mfunc, $d, $od);
 			}
 		}
-	foreach $f (@feature_plugins) {
+	foreach $f (&list_feature_plugins()) {
 		if ($d->{$f}) {
 			&plugin_call($f, "feature_modify", $d, $od);
 			}

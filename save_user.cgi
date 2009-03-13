@@ -67,7 +67,7 @@ elsif ($in{'delete'}) {
 			}
 
 		# Delete in plugins
-		foreach $f (@mail_plugins) {
+		foreach $f (&list_mail_plugins()) {
 			&plugin_call($f, "mailbox_delete", $user, $d);
 			}
 
@@ -464,7 +464,7 @@ else {
 			}
 
 		# Validate plugins
-		foreach $f (@mail_plugins) {
+		foreach $f (&list_mail_plugins()) {
 			$err = &plugin_call($f, "mailbox_validate", $user, \%old, \%in, $in{'new'}, $d);
 			&error($err) if ($err);
 			}
@@ -570,7 +570,7 @@ else {
 			}
 
 		# Validate plugins
-		foreach $f (@mail_plugins) {
+		foreach $f (&list_mail_plugins()) {
 			$err = &plugin_call($f, "mailbox_validate", $user, \%old, \%in, $in{'new'}, $d);
 			&error($err) if ($err);
 			}
@@ -633,7 +633,7 @@ else {
 		}
 
 	# Run plugin save functions
-	foreach $f (@mail_plugins) {
+	foreach $f (&list_mail_plugins()) {
 		$dp = &plugin_call($f, "mailbox_save", $user, \%old,
 				   \%in, $in{'new'}, $d);
 		if ($dp eq '1') {

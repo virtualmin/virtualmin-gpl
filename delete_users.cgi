@@ -51,7 +51,7 @@ if ($in{'confirm'}) {
 			}
 
 		# Delete in plugins
-		foreach $f (@mail_plugins) {
+		foreach $f (&list_mail_plugins()) {
 			&plugin_call($f, "mailbox_delete", $user, $d);
 			}
 

@@ -133,7 +133,7 @@ foreach my $d (&list_domains()) {
 				&try_function($f, $mfunc, $d, $oldd);
 				}
 			}
-		foreach my $f (@feature_plugins) {
+		foreach my $f (&list_feature_plugins()) {
 			if ($d->{$f}) {
 				&plugin_call($f, "feature_modify", $d, $oldd);
 				}

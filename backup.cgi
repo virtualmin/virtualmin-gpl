@@ -74,7 +74,7 @@ elsif ($cbmode == 3 && $in{'dest_mode'} == 0) {
 	}
 
 if ($in{'feature_all'}) {
-	@do_features = ( &get_available_backup_features(), @backup_plugins );
+	@do_features = ( &get_available_backup_features(), &list_backup_plugins() );
 	}
 else {
 	@do_features = split(/\0/, $in{'feature'});
@@ -93,11 +93,11 @@ if ($in{'onebyone'}) {
 # Parse option inputs
 foreach $f (@do_features) {
 	local $ofunc = "parse_backup_$f";
-	if (&indexof($f, @backup_plugins) < 0 &&
+	if (&indexof($f, &list_backup_plugins()) < 0 &&
 	    defined(&$ofunc)) {
 		$options{$f} = &$ofunc(\%in);
 		}
-	elsif (&indexof($f, @backup_plugins) >= 0 &&
+	elsif (&indexof($f, &list_backup_plugins()) >= 0 &&
 	       &plugin_defined($f, "feature_backup_parse")) {
 		$options{$f} = &plugin_call($f, "feature_backup_parse", \%in);
 		}

@@ -91,12 +91,8 @@ foreach my $fname (@features, "virt") {
 	&$ifunc() if (defined(&$ifunc));
 	}
 @migration_types = ( "cpanel", "ensim", "psa", "plesk", "plesk9" );
-@allow_features = (@opt_features, "virt", @feature_plugins);
 @startstop_features = ("web", "dns", "mail", "ftp", "unix", "virus",
 		       "mysql", "postgres");
-@all_database_types = ( ($config{'mysql'} ? ("mysql") : ( )),
-		        ($config{'postgres'} ? ("postgres") : ( )),
-		        @database_plugins );
 @banned_usernames = ( 'root' );
 
 $backup_cron_cmd = "$module_config_directory/backup.pl";
@@ -273,17 +269,9 @@ local $str = defined($_[0]) ? $_[0] : $config{'plugins'};
 @plugins = ( );
 foreach my $pname (@confplugins) {
 	if (&foreign_check($pname)) {
-		&foreign_require($pname, "virtual_feature.pl");
 		push(@plugins, $pname);
 		}
 	}
-@feature_plugins = grep { &plugin_defined($_, "feature_setup") } @plugins;
-@mail_plugins = grep { &plugin_defined($_, "mailbox_inputs") } @plugins;
-@database_plugins = grep { &plugin_defined($_, "database_name") } @plugins;
-@startstop_plugins = grep { &plugin_defined($_, "feature_startstop") } @plugins;
-@backup_plugins = grep { &plugin_defined($_, "feature_backup") } @plugins;
-@script_plugins = grep { &plugin_defined($_, "scripts_list") } @plugins;
-@style_plugins = grep { &plugin_defined($_, "styles_list") } @plugins;
 }
 
 1;

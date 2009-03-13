@@ -71,7 +71,7 @@ foreach $f (&get_available_backup_features($crmode == 2)) {
 	}
 
 # Add boxes for plugins which are known to be safe
-foreach $f (@backup_plugins) {
+foreach $f (&list_backup_plugins()) {
 	if ($crmode == 1 || &plugin_call($f, "feature_backup_safe")) {
 		$ftable .= &ui_checkbox("feature", $f,
 			&plugin_call($f, "feature_backup_name") ||

@@ -94,8 +94,8 @@ while(@ARGV > 0) {
 		else {
 			$dbname = shift(@ARGV);
 			}
-		&indexof($dbtype, @all_database_types) >= 0 ||
-			&usage("$dbtype is not a valid database type. Allowed types are : ".join(" ", @all_database_types));
+		&indexof($dbtype, &all_database_types()) >= 0 ||
+			&usage("$dbtype is not a valid database type. Allowed types are : ".join(" ", &all_database_types()));
 		$dbname =~ /^\S+$/ ||
 			&usage("Missing or invalid database name");
 		$opts->{'db'} = $dbtype."_".$dbname;

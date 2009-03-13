@@ -143,7 +143,7 @@ local @virts = &list_virtusers();
 local %ignore;
 if ($_[1]) {
 	# Get a list to ignore from each plugin
-	foreach my $f (@feature_plugins) {
+	foreach my $f (&list_feature_plugins()) {
 		foreach my $i (&plugin_call($f, "virtusers_ignore", $_[0])) {
 			$ignore{lc($i)} = 1;
 			}
@@ -3984,7 +3984,7 @@ foreach my $u (&list_all_users_quotas(1)) {
 local %ignore;
 if ($ignore) {
 	# Get a list to ignore from each plugin
-	foreach my $f (@feature_plugins) {
+	foreach my $f (&list_feature_plugins()) {
 		foreach my $i (&plugin_call($f, "virtusers_ignore", undef)) {
 			$ignore{lc($i)} = 1;
 			}

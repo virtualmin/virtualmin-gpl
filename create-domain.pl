@@ -61,7 +61,7 @@ if (!$module_name) {
 
 # Build args used by plugins
 %plugin_args = ( );
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	if (&plugin_defined($f, "feature_args")) {
 		foreach $a (&plugin_call($f, "feature_args")) {
 			$a->{'feature'} = $f;
@@ -114,7 +114,7 @@ while(@ARGV > 0) {
 		$feature{$1}++;
 		}
 	elsif ($a =~ /^--(\S+)$/ &&
-	       &indexof($1, @feature_plugins) >= 0) {
+	       &indexof($1, &list_feature_plugins()) >= 0) {
 		$plugin{$1}++;
 		}
 	elsif ($a eq "--default-features") {
@@ -580,7 +580,7 @@ $dom{'emailto'} = $parent ? $parent->{'emailto'} :
 foreach $f (@features) {
 	$dom{$f} = $feature{$f} ? 1 : 0;
 	}
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	$dom{$f} = $plugin{$f} ? 1 : 0;
 	}
 &set_featurelimits_from_plan(\%dom, $plan);
@@ -599,7 +599,7 @@ if (defined($postgrespass) && $config{'postgres'}) {
 &complete_domain(\%dom);
 
 # Set plugin-defined command line args
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	if ($dom{$f}) {
 		$err = &plugin_call($f, "feature_args_parse",
 				    \%dom, \%plugin_values);
@@ -670,7 +670,7 @@ print "                        [--user new-unix-user]\n";
 foreach $f (@features) {
 	print "                        [--$f]\n" if ($config{$f});
 	}
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	print "                        [--$f]\n";
 	}
 print "                        [--default-features] | [--features-from-plan]\n";
@@ -708,7 +708,7 @@ if ($config{'mysql'}) {
 if ($config{'postgres'}) {
 	print "                        [--postgres-pass password]\n";
 	}
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	if (&plugin_defined($f, "feature_args")) {
 		foreach $a (&plugin_call($f, "feature_args")) {
 			print "                        [--$a->{'name'}";

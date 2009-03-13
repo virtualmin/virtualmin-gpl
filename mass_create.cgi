@@ -293,9 +293,9 @@ foreach $line (@lines) {
 			  $dom{'user'}.'@'.&get_system_hostname();
 	$dom{'db'} = &database_name(\%dom);
 	my $f;
-	foreach $f (@features, @feature_plugins) {
+	foreach $f (@features, &list_feature_plugins()) {
 		next if ($parentdom && ($f eq 'webmin' || $f eq 'unix'));
-		if (&indexof($f, @feature_plugins) >= 0) {
+		if (&indexof($f, &list_feature_plugins()) >= 0) {
 			# Check if plugin is suitable for domain
 			next if (!&plugin_call($f, "feature_suitable",
                                  $parentdom, $aliasdom, $subdom));

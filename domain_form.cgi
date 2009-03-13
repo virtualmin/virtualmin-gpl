@@ -229,7 +229,7 @@ print "</script>\n";
 		$subdom ? @opt_subdom_features : @opt_features;
 %plugins_inactive = map { $_, 1 } split(/\s+/, $config{'plugins_inactive'});
 @def_features = grep { $config{$_} == 1 || $config{$_} == 3 } @dom_features;
-push(@def_features, grep { !$plugins_inactive{$_} } @feature_plugins);
+push(@def_features, grep { !$plugins_inactive{$_} } &list_feature_plugins());
 
 # Generate Javascript for plan change
 @availplans = sort { $a->{'name'} <=> $b->{'name'} } &list_available_plans();
@@ -273,7 +273,7 @@ foreach $plan (@availplans) {
 	local @fl = $plan->{'featurelimits'} ?
 			split(/\s+/, $plan->{'featurelimits'}) :
 			@def_features;
-	foreach $f (@dom_features, @feature_plugins) {
+	foreach $f (@dom_features, &list_feature_plugins()) {
 		print "    if (document.forms[0]['$f']) {\n";
 		print "        document.forms[0]['$f'].checked = ",
 			(&indexof($f, @fl) >= 0 ? 1 : 0),";\n";
@@ -499,7 +499,7 @@ foreach $f (@dom_features) {
 
 # Show checkboxes for plugins
 @input_plugins = ( );
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	next if (!&plugin_call($f, "feature_suitable",
 				$parentdom, $aliasdom, $subdom));
 	next if (!&can_use_feature($f));

@@ -39,7 +39,7 @@ if ($virtualmin_pro) {
 	}
 $d->{'demo'} = $in{'demo'};
 %sel_features = map { $_, 1 } split(/\0/, $in{'features'});
-foreach $f (@opt_features, "virt", @feature_plugins) {
+foreach $f (@opt_features, "virt", &list_feature_plugins()) {
 	next if (!&can_use_feature($f));
 	next if ($config{$f} == 3);
 	$d->{"limit_".$f} = $sel_features{$f};
@@ -55,7 +55,7 @@ foreach $ed (@edit_limits) {
 	}
 
 # Save plugin inputs
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	$err = &plugin_call($f, "feature_limits_parse", $d, \%in);
 	&error($err) if ($err);
 	}

@@ -208,7 +208,7 @@ foreach $f (@features) {
 	}
 
 # Update plugins in all domains
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	for($i=0; $i<@doms; $i++) {
 		if ($doms[$i]->{$f}) {
 			$doing_dom = $doms[$i];

@@ -83,7 +83,7 @@ foreach $f (@opt_features) {
 
 # Show checkboxes for plugins
 %inactive = map { $_, 1 } split(/\s+/, $config{'plugins_inactive'});
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	next if (!&plugin_call($f, "feature_suitable"));
 	next if (!&can_use_feature($f));
 

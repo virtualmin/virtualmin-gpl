@@ -29,7 +29,7 @@ if ($config{'backup_dest'}) {
 			  'after' => $config{'backup_after'},
 			 );
 	local @bf;
-	foreach $f (&get_available_backup_features(), @backup_plugins) {
+	foreach $f (&get_available_backup_features(), &list_backup_plugins()) {
 		push(@bf, $f) if ($config{'backup_feature_'.$f});
 		$backup{'opts_'.$f} = $config{'backup_opts_'.$f};
 		}
@@ -105,7 +105,7 @@ if ($backup->{'id'} == 1) {
 	$config{'backup_before'} = $backup->{'before'};
 	$config{'backup_after'} = $backup->{'after'};
 	local @bf = split(/\s+/, $backup->{'features'});
-	foreach $f (&get_available_backup_features(), @backup_plugins) {
+	foreach $f (&get_available_backup_features(), &list_backup_plugins()) {
 		$config{'backup_feature_'.$f} = &indexof($f, @bf) >= 0 ? 1 : 0;
 		$config{'backup_opts_'.$f} = $backup->{'opts_'.$f};
 		}
@@ -417,7 +417,7 @@ DOMAIN: foreach $d (@$doms) {
 		local $bfunc = "backup_$f";
 		local $fok;
 		local $ffile;
-		if (&indexof($f, @backup_plugins) < 0 &&
+		if (&indexof($f, &list_backup_plugins()) < 0 &&
 		    defined(&$bfunc) &&
 		    ($d->{$f} || $f eq "virtualmin" ||
 		     $f eq "mail" && &can_domain_have_users($d))) {
@@ -433,7 +433,7 @@ DOMAIN: foreach $d (@$doms) {
 			$fok = &$bfunc($d, $ffile, $opts->{$f}, $homefmt,
 				       $increment, $asd);
 			}
-		elsif (&indexof($f, @backup_plugins) >= 0 &&
+		elsif (&indexof($f, &list_backup_plugins()) >= 0 &&
 		       $d->{$f}) {
 			# Call plugin backup function
 			$ffile = "$backupdir/$d->{'dom'}_$f";
@@ -1044,7 +1044,7 @@ if ($ok) {
 			# Only features in the backup are enabled
 			if ($onlyfeats) {
 				foreach my $f (@backup_features,
-					       @backup_plugins) {
+					       &list_backup_plugins()) {
 					if ($d->{$f} &&
 					    &indexof($f, @$features) < 0) {
 						$d->{$f} = 0;
@@ -1217,7 +1217,7 @@ if ($ok) {
 			# Restore features
 			local $rfunc = "restore_$f";
 			local $fok;
-			if (&indexof($f, @backup_plugins) < 0 &&
+			if (&indexof($f, &list_backup_plugins()) < 0 &&
 			    defined(&$rfunc) &&
 			    ($d->{$f} || $f eq "virtualmin" ||
 			     $f eq "mail" && &can_domain_have_users($d))) {
@@ -1247,7 +1247,7 @@ if ($ok) {
 					     $asowner);
 					}
 				}
-			elsif (&indexof($f, @backup_plugins) >= 0 &&
+			elsif (&indexof($f, &list_backup_plugins()) >= 0 &&
 			       $d->{$f}) {
 				# Restoring a plugin feature
 				local $ffile = "$restoredir/$d->{'dom'}_$f";

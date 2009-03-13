@@ -45,7 +45,7 @@ if (!$in{'confirm'}) {
 				     $text{$pfx.$f},"<br>\n";
 			}
 		}
-	foreach $f (@feature_plugins) {
+	foreach $f (&list_feature_plugins()) {
 		if ($d->{$f}) {
 			print "<li>",&plugin_call($f, "feature_name")," - ",
 			     &plugin_call($f, "feature_losing"),"<br>\n";

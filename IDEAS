@@ -44,7 +44,9 @@
 	- FS#4239
 	- Concurrent with v4, so that a domain can also have a v6 address
 	- Use in DNS, Apache
+	- Net module IPv6 support
+	- /sbin/ifconfig eth0 inet6 add 2001:0db8:0:f101::120/64
 
  - Only load plugins when needed
-	- at first plugin_call or plugin_defined
-	- @*_plugins lists should be replaced by functions
+	- functional test for plugins
+	- cache plugin types, so loading isn't needed just to get lists

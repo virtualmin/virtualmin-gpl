@@ -18,7 +18,7 @@ else {
 	}
 @doms || &error($text{'newvalidate_edoms'});
 if ($in{'features_def'}) {
-	@feats = ( @features, @feature_plugins );
+	@feats = ( @features, &list_feature_plugins() );
 	}
 else {
 	@feats = split(/\0/, $in{'features'});
@@ -37,7 +37,7 @@ foreach $d (@doms) {
 	$count = 0;
 	foreach $f (@feats) {
 		next if (!$d->{$f});
-		if (&indexof($f, @feature_plugins) < 0) {
+		if (&indexof($f, &list_feature_plugins()) < 0) {
 			# Core feature
 			next if (!$config{$f});
 			$vfunc = "validate_$f";

@@ -408,7 +408,7 @@ else {
 			}
 		}
 
-	foreach $f (@feature_plugins) {
+	foreach $f (&list_feature_plugins()) {
 		next if (!&plugin_call($f, "feature_suitable",
 					$parentdom, $aliasdom, $subdom));
 

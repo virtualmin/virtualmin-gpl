@@ -443,7 +443,7 @@ local %acl = ( 'noconfig' => 1,
 	       'domains' => join(" ", map { $_->{'id'} } @doms),
 	       'admin' => $_[2] ? $_[0]->{'id'} : undef,
 	      );
-foreach $f (@opt_features, @feature_plugins, 'virt') {
+foreach $f (@opt_features, &list_feature_plugins(), 'virt') {
 	$acl{"feature_$f"} = $_[0]->{"limit_$f"};
 	}
 foreach my $ed (@edit_limits) {

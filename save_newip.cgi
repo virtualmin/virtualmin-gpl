@@ -83,7 +83,7 @@ foreach $sd (@doms) {
 			&try_function($f, $mfunc, $sd, $oldd);
 			}
 		}
-	foreach $f (@feature_plugins) {
+	foreach $f (&list_feature_plugins()) {
 		if ($d->{$f}) {
 			&plugin_call($f, "feature_modify", $sd, $oldd);
 			}

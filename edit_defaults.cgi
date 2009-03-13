@@ -74,7 +74,7 @@ if (@sgroups) {
 	}
 
 # Plugin defaults
-foreach $f (@mail_plugins) {
+foreach $f (&list_mail_plugins()) {
 	$pi = &plugin_call($f, "mailbox_defaults_inputs", $user, $d);
 	if ($pi) {
 		print &ui_table_hr() if (!$donehr++);

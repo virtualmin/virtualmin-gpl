@@ -72,7 +72,7 @@ if ($user->{'domainowner'}) {
 				}
 			}
 		# Update all plugins
-		foreach my $f (@feature_plugins) {
+		foreach my $f (&list_feature_plugins()) {
 			if ($d->{$f}) {
 				&plugin_call($f, "feature_modify", $d, $oldd);
 				}
@@ -94,7 +94,7 @@ else {
 	&modify_user($user, $olduser, $d);
 
 	# Call plugin save functions
-	foreach $f (@mail_plugins) {
+	foreach $f (&list_mail_plugins()) {
 		&plugin_call($f, "mailbox_modify", $user, $olduser, $d);
 		}
 	}

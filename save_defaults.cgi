@@ -84,7 +84,7 @@ $user->{'secs'} = [ @secs ];
 delete($user->{'email'});
 
 # Save plugin defaults
-foreach $f (@mail_plugins) {
+foreach $f (&list_mail_plugins()) {
 	&plugin_call($f, "mailbox_defaults_parse", $user, $d, \%in);
 	}
 

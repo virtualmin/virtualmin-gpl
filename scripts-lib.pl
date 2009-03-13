@@ -16,7 +16,7 @@ foreach $s (@scripts_directories) {
 	}
 
 # From plugins
-foreach my $p (@script_plugins) {
+foreach my $p (&list_script_plugins()) {
 	push(@rv, &plugin_call($p, "scripts_list"));
 	}
 
@@ -62,7 +62,7 @@ foreach $s (@scripts_directories) {
 			$s eq $scripts_directories[0] ? 'custom' : 'core' ]);
 		}
 	}
-foreach my $p (@script_plugins) {
+foreach my $p (&list_script_plugins()) {
 	local $spath = &module_root_directory($p)."/$name.pl";
 	local @st = stat($spath);
 	if (@st) {
@@ -525,7 +525,7 @@ $cfunc = "check_".$dbtype."_database_clash";
 
 # Do the creation
 &push_all_print();
-if (&indexof($dbtype, @database_plugins) >= 0) {
+if (&indexof($dbtype, &list_database_plugins()) >= 0) {
 	&plugin_call($dbtype, "database_create", $d, $dbname);
 	}
 else {
@@ -1742,7 +1742,7 @@ if (&indexof($dbtype, @database_features) >= 0) {
 		return &$cfunc($dbname, $dbuser, $dbpass);
 		}
 	}
-elsif (&indexof($dbtype, @database_plugins) >= 0) {
+elsif (&indexof($dbtype, &list_database_plugins()) >= 0) {
 	# Plugin database
 	return &plugin_call($dbtype, "feature_database_check_login",
 			    $dbname, $dbuser, $dbpass);

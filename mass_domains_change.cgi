@@ -87,12 +87,12 @@ foreach $d (@doms) {
 
 	# Update features
 	local %check;
-	foreach $f (&domain_features($d), @feature_plugins) {
+	foreach $f (&domain_features($d), &list_feature_plugins()) {
 		# User can't use this feature
 		next if (!&can_use_feature($f));
 
 		# Not suitable for plugin
-		if (&indexof($f, @feature_plugins) >= 0 &&
+		if (&indexof($f, &list_feature_plugins()) >= 0 &&
 		    !&plugin_call($f, "feature_suitable",
 				  $parentdom, $aliasdom, $subdom)) {
 			next;
@@ -200,10 +200,10 @@ foreach $d (@doms) {
 				$d->{$f} = $newdom->{$f};
 				}
 			}
-		foreach $f (@feature_plugins) {
+		foreach $f (&list_feature_plugins()) {
 			$d->{$f} = $newdom->{$f};
 			}
-		foreach $f (&domain_features($d), @feature_plugins) {
+		foreach $f (&domain_features($d), &list_feature_plugins()) {
 			&call_feature_func($f, $d, $oldd);
 			}
 		}
@@ -223,7 +223,7 @@ foreach $d (@doms) {
 		foreach $ed (@edit_limits) {
 			$d->{"edit_".$ed} = $newdom->{"edit_".$ed};
 			}
-		foreach $f (@opt_features, "virt", @feature_plugins) {
+		foreach $f (@opt_features, "virt", &list_feature_plugins()) {
 			$d->{'limit_'.$f} = $newdom->{'limit_'.$f};
 			}
 		&$second_print($text{'setup_done'});

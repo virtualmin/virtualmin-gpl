@@ -84,7 +84,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--features") {
 		# Allowed features
 		@fl = split(/\s+/, shift(@ARGV));
-		@allf = ( @opt_features, "virt", @feature_plugins );
+		@allf = ( @opt_features, "virt", &list_feature_plugins() );
 		foreach $f (@fl) {
 			&indexof($f, @allf) >= 0 ||
 			     &usage("Unknown feature $f - allowed options ".

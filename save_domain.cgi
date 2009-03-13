@@ -88,7 +88,7 @@ if (&has_home_quotas() && !$d->{'parent'} && &can_edit_quotas($d)) {
 				&quota_parse('quota', "home");
 	}
 if (!$d->{'disabled'}) {
-	foreach $f (@dom_features, @feature_plugins) {
+	foreach $f (@dom_features, &list_feature_plugins()) {
 		if ($in{$f}) {
 			$newdom{$f} = 1;
 			if (!$d->{$f}) {
@@ -162,7 +162,7 @@ if (!$in{'confirm'} && !$d->{'disabled'}) {
 			push(@losing, $f);
 			}
 		}
-	foreach $f (@feature_plugins) {
+	foreach $f (&list_feature_plugins()) {
 		if ($d->{$f} && !$newdom{$f}) {
 			push(@plosing, $f);
 			}
@@ -305,10 +305,10 @@ if (!$d->{'disabled'}) {
 			$d->{$f} = $newdom{$f};
 			}
 		}
-	foreach $f (@feature_plugins) {
+	foreach $f (&list_feature_plugins()) {
 		$d->{$f} = $newdom{$f};
 		}
-	foreach $f (@dom_features, @feature_plugins) {
+	foreach $f (@dom_features, &list_feature_plugins()) {
 		&call_feature_func($f, $d, $oldd);
 		}
 	}

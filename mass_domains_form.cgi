@@ -71,7 +71,7 @@ foreach $f (@opt_features) {
 			1, \@tds);
 		}
 	}
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	if (&can_use_feature($f)) {
 		$label = &plugin_call($f, "feature_label", 1);
 		print &ui_table_row($label,
@@ -116,7 +116,7 @@ if (&can_edit_limits($doms[0])) {
 	foreach $f (@opt_features, "virt") {
 		push(@opts, [ $f, $text{'feature_'.$f} ]);
 		}
-	foreach $f (@feature_plugins) {
+	foreach $f (&list_feature_plugins()) {
 		push(@opts, [ $f, &plugin_call($f, "feature_name") ]);
 		}
 	print &ui_table_row($text{'massdomains_features'},

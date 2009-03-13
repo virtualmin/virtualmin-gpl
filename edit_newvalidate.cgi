@@ -21,7 +21,7 @@ print &ui_table_row(&hlink($text{'newvalidate_servers'}, "newvalidate_servers"),
 foreach $f (@features) {
 	push(@fopts, [ $f, $text{'feature_'.$f} ]);
 	}
-foreach $f (@feature_plugins) {
+foreach $f (&list_feature_plugins()) {
 	if (&plugin_defined($f, "feature_validate")) {
 		push(@fopts, [ $f, &plugin_call($f, "feature_name") ]);
 		}
