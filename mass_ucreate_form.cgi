@@ -28,8 +28,12 @@ print &ui_table_row($text{'cmass_file'},
 		    &ui_radio("file_def", 0, \@sopts));
 
 # Password format (encrypted or not)
-print &ui_table_row($text{'cmass_encpass'},
+print &ui_table_row($text{'umass_encpass'},
 		    &ui_yesno_radio("encpass", 0));
+
+# Generate random passwords
+print &ui_table_row($text{'umass_randpass'},
+		    &ui_yesno_radio("randpass", 0));
 
 print &ui_table_end();
 print &ui_form_end([ [ "create", $text{'create'} ] ]);

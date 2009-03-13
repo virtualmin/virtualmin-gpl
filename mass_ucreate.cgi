@@ -188,7 +188,14 @@ USER: foreach $line (@lines) {
 			}
 		$user->{'shell'} = $shell->{'shell'};
 		}
-	if ($in{'encpass'}) {
+	if ($in{'randpass'} && $pass eq '') {
+		# No password given - make one up
+		$user->{'passmode'} = 3;
+                $user->{'plainpass'} = &random_password();
+		$user->{'pass'} = &encrypt_user_password(
+					$user, $user->{'plainpass'});
+		}
+	elsif ($in{'encpass'}) {
 		# Password is already encrypted
 		$user->{'passmode'} = 2;
 		$user->{'pass'} = $pass;

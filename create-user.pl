@@ -82,6 +82,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--pass") {
 		$pass = shift(@ARGV);
 		}
+	elsif ($a eq "--random-pass") {
+		$pass = &random_password();
+		}
 	elsif ($a eq "--encpass") {
 		$encpass = shift(@ARGV);
 		}
@@ -332,7 +335,8 @@ print "\n";
 print "usage: create-user.pl    --domain domain.name\n";
 print "                         --user new-username\n";
 print "                         --pass password-for-new-user |\n";
-print "                         --encpass encrypted-password\n";
+print "                         --encpass encrypted-password |\n";
+print "                         --random-pass\n";
 if (&has_home_quotas()) {
 	print "                        [--quota quota-in-blocks]\n";
 	}
