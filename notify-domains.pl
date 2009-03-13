@@ -14,6 +14,8 @@ virtual servers.
 If the messsage is related to some service such as email or web serving, you
 can use the C<--with-feature> flag followed by a feature code like C<mail> or
 C<web> to limit the servers notified to those with that feature enabled.
+Similarly, you can use C<--without-feature> to select only virtual servers
+that do not have some feature enabled.
 
 The message contents are typically read from a file, specified with the 
 C<--body-file> parameter. Or they can be passed as input to the script if
@@ -58,6 +60,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--with-feature") {
 		$with = shift(@ARGV);
 		}
+	elsif ($a eq "--without-feature") {
+		$without = shift(@ARGV);
+		}
 	elsif ($a eq "--from") {
 		$from = shift(@ARGV);
 		}
@@ -90,6 +95,9 @@ else {
 if ($with) {
 	# Also limit by feature
 	@doms = grep { $_->{$with} } @doms;
+	}
+if ($without) {
+	@doms = grep { !$_->{$without} } @doms;
 	}
 @doms = grep { !$_->{'parent'} } @doms;
 @doms || &usage("No top-level virtual servers selected");
@@ -142,6 +150,7 @@ print "\n";
 print "usage: notify-domains.pl [--domain name]\n";
 print "                         [--user login]\n";
 print "                         [--with-feature code]\n";
+print "                         [--without-feature code]\n";
 print "                         --body-file /path/to/file.txt | --body-stdin\n";
 print "                         --subject \"subject line\"\n";
 print "                         [--from user\@domain]\n";
