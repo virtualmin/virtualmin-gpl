@@ -10,6 +10,9 @@ if ($@) {
 	}
 
 &init_config();
+if (&indexof($module_root_directory, @INC) < 0) {
+	push(@INC, $module_root_directory);
+	}
 use Time::Local;
 %access = &get_module_acl();
 
