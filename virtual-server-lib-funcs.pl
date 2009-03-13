@@ -12524,13 +12524,7 @@ foreach my $pname (@load) {
 		$loaded++;
 		}
 	}
-if ($loaded) {
-	print STDERR "Plugins loaded from:\n";
-	for(my $i=0; my @stack = caller($i); $i++) {
-		print STDERR "File: $stack[1] Line: $stack[2] ",
-			     "Function: $stack[3]\n";
-		}
-	}
+return $loaded;
 }
 
 # Returns a list of all plugins that define features
