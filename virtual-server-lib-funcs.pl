@@ -5755,6 +5755,18 @@ if ($dom->{'ip'} eq &get_default_ip() &&
 	$dom->{'defip'} = 1;
 	}
 
+# Work out the auto-alias domain name
+local $tmpl = &get_template($dom->{'template'});
+local $aliasname;
+if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$dom->{'alias'}) {
+	$aliasname = $dom->{'dom'};
+	if ($tmpl->{'domalias_type'} == 1) {
+		$aliasname =~ s/\..*$//;
+		}
+	$aliasname .= ".".$tmpl->{'domalias'};
+	$dom->{'autoalias'} = $aliasname;
+	}
+
 # Set up all the selected features (except Webmin login)
 my $f;
 local %vital = map { $_, 1 } @vital_features;
@@ -5836,51 +5848,42 @@ if ($remote_user) {
 	}
 
 # Create an automatic alias domain, if specified in template
-local $tmpl = &get_template($dom->{'template'});
-if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$_[0]->{'alias'}) {
-	local $aliasname = $_[0]->{'dom'};
-	if ($tmpl->{'domalias_type'} == 1) {
-		$aliasname =~ s/\..*$//;
+if ($aliasname && $aliasname ne $dom->{'dom'}) {
+	&$first_print(&text('setup_domalias', $aliasname));
+	&$indent_print();
+	local %alias = ( 'id', &domain_id(),
+			 'dom', $aliasname,
+			 'user', $dom->{'user'},
+			 'group', $dom->{'group'},
+			 'prefix', $dom->{'prefix'},
+			 'ugroup', $dom->{'ugroup'},
+			 'pass', $dom->{'pass'},
+			 'alias', $dom->{'id'},
+			 'uid', $dom->{'uid'},
+			 'gid', $dom->{'gid'},
+			 'ugid', $dom->{'ugid'},
+			 'owner', "Automatic alias of $dom->{'dom'}",
+			 'email', $dom->{'email'},
+			 'nocreationmail', 1,
+			 'name', 1,
+			 'ip', $dom->{'ip'},
+			 'virt', 0,
+			 'source', $dom->{'source'},
+			 'parent', $dom->{'id'},
+			 'template', $dom->{'template'},
+			 'plan', $dom->{'plan'},
+			 'reseller', $dom->{'reseller'},
+			);
+	foreach my $f (@alias_features) {
+		$alias{$f} = $dom->{$f};
 		}
-	$aliasname .= ".".$tmpl->{'domalias'};
-	$_[0]->{'autoalias'} = $aliasname;
-	if ($aliasname ne $_[0]->{'dom'}) {
-		&$first_print(&text('setup_domalias', $aliasname));
-		&$indent_print();
-		local %alias = ( 'id', &domain_id(),
-				 'dom', $aliasname,
-				 'user', $dom->{'user'},
-				 'group', $dom->{'group'},
-				 'prefix', $dom->{'prefix'},
-				 'ugroup', $dom->{'ugroup'},
-				 'pass', $dom->{'pass'},
-				 'alias', $dom->{'id'},
-				 'uid', $dom->{'uid'},
-				 'gid', $dom->{'gid'},
-				 'ugid', $dom->{'ugid'},
-				 'owner', "Automatic alias of $dom->{'dom'}",
-				 'email', $dom->{'email'},
-				 'nocreationmail', 1,
-				 'name', 1,
-				 'ip', $dom->{'ip'},
-				 'virt', 0,
-				 'source', $dom->{'source'},
-				 'parent', $dom->{'id'},
-				 'template', $dom->{'template'},
-				 'plan', $dom->{'plan'},
-				 'reseller', $dom->{'reseller'},
-				);
-		foreach my $f (@alias_features) {
-			$alias{$f} = $dom->{$f};
-			}
-		local $parentdom = $dom->{'parent'} ?
-			&get_domain($dom->{'parent'}) : $dom;
-		$alias{'home'} = &server_home_directory(\%alias, $parentdom);
-		&complete_domain(\%alias);
-		&create_virtual_server(\%alias, $parentdom,$parentdom->{'user'});
-		&$outdent_print();
-		&$second_print($text{'setup_done'});
-		}
+	local $parentdom = $dom->{'parent'} ?
+		&get_domain($dom->{'parent'}) : $dom;
+	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
+	&complete_domain(\%alias);
+	&create_virtual_server(\%alias, $parentdom,$parentdom->{'user'});
+	&$outdent_print();
+	&$second_print($text{'setup_done'});
 	}
 
 # Install any scripts specified in the template
