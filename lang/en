@@ -1930,6 +1930,7 @@ backup_epass=Invalid characters in FTP server password - @, : and / cannot be us
 backup_euser2=Invalid characters in SSH server login
 backup_epass2=Invalid characters in SSH server password - @ cannot be used
 backup_ebucket=Missing or invalid S3 bucket name
+backup_ebucket2=Slashes cannot be used in S3 bucket names
 backup_eakey=Missing or invalid S3 authentication key
 backup_eskey=Missing or invalid S3 secret key
 backup_esfile=Invalid characters in S3 filename

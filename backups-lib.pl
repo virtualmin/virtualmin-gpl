@@ -1890,6 +1890,7 @@ elsif ($mode == 3 && &can_use_s3()) {
 	local $cerr = &check_s3();
 	$cerr && &error($cerr);
 	$in{$name.'_bucket'} =~ /^\S+$/ || &error($text{'backup_ebucket'});
+	$in{$name.'_bucket'} =~ /\// && &error($text{'backup_ebucket2'});
 	$in{$name.'_akey'} =~ /^\S+$/i || &error($text{'backup_eakey'});
 	$in{$name.'_skey'} =~ /^\S+$/i || &error($text{'backup_eskey'});
 	$in{$name."_s3file_def"} ||
