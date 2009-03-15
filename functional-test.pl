@@ -1940,6 +1940,8 @@ $plugin_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
 
@@ -1990,6 +1992,56 @@ $plugin_tests = [
 		},
 		) :
 		( { 'command' => 'echo AWstats plugin not enabled' }
+		),
+
+	# Test SVN plugin
+	&indexof('virtualmin-svn', @plugins) >= 0 ? (
+		# Turn on SVN feature
+		{ 'command' => 'enable-feature.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'virtualmin-svn' ] ]
+		},
+
+		# Test SVN URL
+		{ 'command' => $wget_command.'-S http://'.$test_domain.'/svn',
+		  'ignorefail' => 1,
+		  'grep' => 'Authorization Required',
+		},
+
+		# Check for SVN config files
+		{ 'command' => 'cat ~'.$test_domain_user.'/etc/svn-access.conf',
+		},
+		{ 'command' => 'cat ~'.$test_domain_user.'/etc/svn.*.passwd',
+		},
+
+		# Turn off SVN feature
+		{ 'command' => 'disable-feature.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'virtualmin-svn' ] ]
+		},
+		) :
+		( { 'command' => 'echo SVN plugin not enabled' }
+		),
+
+	# Test DAV plugin
+	&indexof('virtualmin-dav', @plugins) >= 0 ? (
+		# Turn on SVN feature
+		{ 'command' => 'enable-feature.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'virtualmin-dav' ] ]
+		},
+
+		# Test DAV URL
+		{ 'command' => $wget_command.'-S http://'.$test_domain_user.':smeg@'.$test_domain.'/dav/',
+		},
+
+		# Turn off SVN feature
+		{ 'command' => 'disable-feature.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'virtualmin-dav' ] ]
+		},
+		) :
+		( { 'command' => 'echo DAV plugin not enabled' }
 		),
 
 	# Get rid of the domain
@@ -2150,10 +2202,12 @@ print "    Running $cmd ..\n";
 sleep($t->{'sleep'});
 local $out = &backquote_with_timeout("($cmd) 2>&1 </dev/null",
 				     $t->{'timeout'} || $timeout);
-if ($? && !$t->{'fail'} || !$? && $t->{'fail'}) {
-	print $out;
-	print "    .. failed : $?\n";
-	return 0;
+if (!$t->{'ignorefail'}) {
+	if ($? && !$t->{'fail'} || !$? && $t->{'fail'}) {
+		print $out;
+		print "    .. failed : $?\n";
+		return 0;
+		}
 	}
 if ($t->{'grep'}) {
 	# One line must match all regexps

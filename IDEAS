@@ -47,8 +47,5 @@
 	- Net module IPv6 support
 	- /sbin/ifconfig eth0 inet6 add 2001:0db8:0:f101::120/64
 
- - Only load plugins when needed
-	- functional test for plugins
-
  - API for plugins
 	- 'virtualmin' command should be able to call it
