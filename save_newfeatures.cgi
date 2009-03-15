@@ -81,6 +81,10 @@ if ($config{'virus'}) {
 	&fix_clam_wrapper();
 	}
 
+# Re-generate helper script, for plugins
+@plugindirs = map { &module_root_directory($_) } @plugins;
+&create_api_helper_command(\@plugindirs);
+
 # Save the config
 &lock_file($module_config_file);
 if ($config{'last_check'} < time()) {

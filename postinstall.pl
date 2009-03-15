@@ -314,7 +314,8 @@ foreach my $m ("mysql", "postgresql", "ldap-client", "ldap-server",
 	}
 
 # Create API helper script /usr/bin/virtualmin
-&create_api_helper_command();
+local @plugindirs = map { &module_root_directory($_) } @plugins;
+&create_api_helper_command(\@plugindirs);
 
 # If resource limits are supported, make sure the Apache user isn't limited
 if (defined(&supports_resource_limits) &&

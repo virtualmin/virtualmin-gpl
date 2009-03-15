@@ -49,3 +49,4 @@
 
  - API for plugins
 	- 'virtualmin' command should be able to call it
+	- Add to API docs

@@ -151,11 +151,15 @@ else {
 	}
 }
 
-# create_api_helper_command()
+# create_api_helper_command([&extra-dirs])
 # Creates the API helper command. Returns either 1 and the path, or 0 and
 # an error message.
 sub create_api_helper_command
 {
+local ($extradirs) = @_;
+local @dirs = ( $module_root_directory );
+push(@dirs, @$extradirs) if ($extradirs);
+local $dirstr = join(" ", @dirs);
 local $api_helper_command = &get_api_helper_command();
 if (!$api_helper_command) {
 	return (0, "No writable path configured or auto-detected");
@@ -190,11 +194,17 @@ echo \$COMMAND | fgrep .pl >/dev/null
 if [ "\$?" != "0" ]; then
 	COMMAND="\$COMMAND.pl"
 fi
-if [ "\$help" = "1" ]; then
-	perldoc $module_root_directory/\$COMMAND
-else
-	exec $module_root_directory/\$COMMAND "\$@"
-fi
+for dir in $dirstr; do
+	if [ -x "\$dir/\$COMMAND" ]; then
+		if [ "\$help" = "1" ]; then
+			exec perldoc \$dir/\$COMMAND
+		else
+			exec \$dir/\$COMMAND "\$@"
+		fi
+	fi
+done
+echo Command \$COMMAND was not found
+exit 1
 EOF
 	&close_tempfile(HELPER);
 	&set_ownership_permissions(undef, undef, 0755, $api_helper_command);
