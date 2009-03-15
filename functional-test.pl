@@ -3,7 +3,6 @@
 
 use POSIX;
 package virtual_server;
-$no_virtualmin_plugins = 1;	# Save memory
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
@@ -1934,6 +1933,71 @@ $plans_tests = [
 	  'cleanup' => 1 },
 	];
 
+$plugin_tests = [
+	# Create a domain on the plan
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      @create_args, ],
+        },
+
+	# Test Mailman plugin enable
+	&indexof('virtualmin-mailman', @plugins) >= 0 ? (
+		# Turn on mailman feature
+		{ 'command' => 'enable-feature.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'virtualmin-mailman' ] ]
+		},
+
+		# Test mailman URL
+		{ 'command' => $wget_command.'http://'.$test_domain.'/mailman/listinfo',
+		  'grep' => 'Mailing Lists',
+		},
+
+		# Turn off mailman feature
+		{ 'command' => 'disable-feature.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'virtualmin-mailman' ] ]
+		},
+		) :
+		( { 'command' => 'echo Mailman plugin not enabled' }
+		),
+
+	# Test AWstats plugin
+	&indexof('virtualmin-awstats', @plugins) >= 0 ? (
+		# Turn on awstats feature
+		{ 'command' => 'enable-feature.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'virtualmin-awstats' ] ]
+		},
+
+		# Test AWstats web UI
+		{ 'command' => $wget_command.'http://'.$test_domain_user.':smeg@'.$test_domain.'/cgi-bin/awstats.pl',
+		  'grep' => 'AWStats',
+		},
+
+		# Check for Cron job
+		{ 'command' => 'crontab -l',
+		  'grep' => 'awstats.pl '.$test_domain
+		},
+
+		# Turn off mailman feature
+		{ 'command' => 'disable-feature.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'virtualmin-awstats' ] ]
+		},
+		) :
+		( { 'command' => 'echo AWstats plugin not enabled' }
+		),
+
+	# Get rid of the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { 'domains' => $domains_tests,
 	      'mailbox' => $mailbox_tests,
 	      'alias' => $alias_tests,
@@ -1955,6 +2019,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'wildcard' => $wildcard_tests,
 	      'parallel' => $parallel_tests,
 	      'plans' => $plans_tests,
+	      'plugin' => $plugin_tests,
 	    };
 
 # Run selected tests

@@ -49,4 +49,6 @@
 
  - Only load plugins when needed
 	- functional test for plugins
-	- cache plugin types, so loading isn't needed just to get lists
+
+ - API for plugins
+	- 'virtualmin' command should be able to call it
