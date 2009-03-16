@@ -1,7 +1,11 @@
 The following virtual server is approaching its bandwidth limit :
 
 Domain name:             ${DOM}
+${IF-BW_PERIOD}
 Accounting period:       ${BW_PERIOD} days
+${ELSE-BW_PERIOD}
+Accounting period:       Last ${BW_PAST}
+${ENDIF-BW_PERIOD}
 Bandwidth limit:         ${BW_LIMIT}
 Bandwidth usage:         ${BW_USAGE} over the last ${BW_PERIOD} days
 Percentage used:         ${BW_PERCENT}%
