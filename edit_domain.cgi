@@ -145,7 +145,7 @@ if (!$parentdom) {
 		}
 	else {
 		# Just show current plan
-		print &ui_table_row($text{'edit_plan'}, $plan->{'desc'});
+		print &ui_table_row($text{'edit_plan'}, $plan->{'name'});
 		}
 	}
 
