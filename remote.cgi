@@ -32,8 +32,16 @@ if (!$in{'program'}) {
 # Build the arg list
 $main::virtualmin_remote_api = 1;
 $in{'program'} =~ /^[a-z0-9\.\-]+$/i || &api_error($text{'remote_eprogram'});
-$cmd = "$module_root_directory/$in{'program'}.pl";
--x $cmd || &api_error(&text('remote_eprogram2', $cmd));
+$cmd = $dir = undef;
+foreach $m ($module_name, @plugins) {
+	$mdir = &module_root_directory($m);
+	$mcmd = "$mdir/$in{'program'}.pl";
+	if (-x $mcmd) {
+		$cmd = $mcmd;
+		$dir = $mdir;
+		}
+	}
+$cmd || &api_error(&text('remote_eprogram2', $in{'program'}));
 @args = ( );
 foreach $i (keys %in) {
 	next if ($i eq "program");
@@ -47,20 +55,38 @@ foreach $i (keys %in) {
 		}
 	}
 
-# Setup handler if script calls exit
+# Setup handler if script calls exit. Only needed for this-module calls
 sub exit
 {
-print "\n";
-print "Exit status: $_[0]\n";
+if ($dir eq $module_root_directory) {
+	print "\n";
+	print "Exit status: $_[0]\n";
+	}
 CORE::exit(0);
 }
 
 # Run the script within this same Perl process
 print "Content-type: text/plain\n\n";
-@ARGV = @args;
-do $cmd;
-print "\n";
-print "Exit status: 0\n";
+if ($dir eq $module_root_directory) {
+	# Can just eval in this module
+	@ARGV = @args;
+	do $cmd;
+	print "\n";
+	print "Exit status: 0\n";
+	}
+else {
+	# Need to call in other module
+	$cmd .= " ".join(" ", map { quotemeta($_) } @args);
+	&clean_environment();
+	&open_execute_command(CMD, $cmd, 1);
+	while(<CMD>) {
+		print;
+		}
+	close(CMD);
+	print "\n";
+	print "Exit status: $?\n";
+	&reset_environment();
+	}
 
 sub api_error
 {
