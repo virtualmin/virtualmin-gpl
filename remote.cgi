@@ -84,7 +84,7 @@ else {
 		}
 	close(CMD);
 	print "\n";
-	print "Exit status: $?\n";
+	print "Exit status: ",int($?/256),"\n";
 	&reset_environment();
 	}
 
