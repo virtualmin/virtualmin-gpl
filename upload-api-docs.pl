@@ -10,6 +10,16 @@ $wiki_pages_dir = "/home/virtualmin/domains/jdev.virtualmin.com/public_html/comp
 $wiki_pages_su = "jcameron";
 require 'commands-lib.pl';
 
+while(@ARGV) {
+	$a = shift(@ARGV);
+	if ($a eq "--no-upload") {
+		$noupload = 1;
+		}
+	else {
+		&usage();
+		}
+	}
+
 # Go to script's directory
 if ($0 =~ /^(.*\/)[^\/]+$/) {
 	chdir($1);
@@ -21,30 +31,36 @@ my %catmap;
 foreach my $c (&list_api_categories()) {
 	my ($cname, @cglobs) = @$c;
 	foreach my $cglob (@cglobs) {
-		foreach $f (glob($cglob)) {
-			$catmap{$f} ||= $cname;
+		foreach my $dir (&list_api_directories($pwd)) {
+			chdir($dir);
+			foreach $f (glob($cglob)) {
+				$catmap{$f} ||= $cname;
+				}
 			}
+		chdir($pwd);
 		}
 	}
 
 # Find all API scripts
 @apis = ( );
 @skip_scripts = &list_api_skip_scripts();
-opendir(DIR, $pwd);
-foreach my $f (readdir(DIR)) {
-	if ($f =~ /\.pl$/ && &indexof($f, @skip_scripts) < 0) {
-		local $/ = undef;
-		open(FILE, "$pwd/$f");
-		my $data = <FILE>;
-		close(FILE);
-		if ($data =~ /=head1/) {
-			push(@apis, { 'file' => $f,
-				      'path' => "$pwd/$f",
-				      'data' => $data,
-				      'cat' => $catmap{$f} });
-			}
-		elsif ($data =~ /WEBMIN_CONFIG/) {
-			print STDERR "$f is missing POD documentation\n";
+foreach my $dir (&list_api_directories($pwd)) {
+	opendir(DIR, $dir);
+	foreach my $f (readdir(DIR)) {
+		if ($f =~ /\.pl$/ && &indexof($f, @skip_scripts) < 0) {
+			local $/ = undef;
+			open(FILE, "$dir/$f");
+			my $data = <FILE>;
+			close(FILE);
+			if ($data =~ /=head1/) {
+				push(@apis, { 'file' => $f,
+					      'path' => "$dir/$f",
+					      'data' => $data,
+					      'cat' => $catmap{$f} });
+				}
+			elsif ($data =~ /WEBMIN_CONFIG/) {
+				print STDERR "$f is missing POD format docs\n";
+				}
 			}
 		}
 	}
@@ -153,11 +169,10 @@ foreach $s (sort { lc($a->{'name'}) cmp lc($b->{'name'}) } @scripts) {
 close(PAGE);
 
 # Upload to server
-print "Uploading to Wiki server $wiki_pages_host ..\n";
-foreach $a (@apis) {
-	#system("su $wiki_pages_su -c 'scp $a->{'wikifile'} $wiki_pages_user\@$wiki_pages_host:$wiki_pages_dir/$a->{'wikiname'}'");
+if (!$noupload) {
+	print "Uploading to Wiki server $wiki_pages_host ..\n";
+	system("su $wiki_pages_su -c 'scp $tempdir/* $wiki_pages_user\@$wiki_pages_host:$wiki_pages_dir/'");
 	}
-system("su $wiki_pages_su -c 'scp $tempdir/* $wiki_pages_user\@$wiki_pages_host:$wiki_pages_dir/'");
 
 # convert_to_wiki(pod-text)
 # Converts a POD-format text into Dokuwiki format, and returns that and
@@ -211,4 +226,9 @@ sub indexof {
   return -1;
 }
 
+sub usage
+{
+print STDERR "upload-api-docs.pl [--no-upload]\n";
+exit(1);
+}
 

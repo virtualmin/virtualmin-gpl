@@ -27,6 +27,7 @@ return ([ "Backup and restore", "backup-domain.pl", "list-scheduled-backups.pl",
 	[ "SSL certificates", "list-certs.pl", "*-cert.pl" ],
 	[ "Virtual server templates", "*-template.pl", "*-templates.pl" ],
 	[ "Account plans", "*-plan.pl", "*-plans.pl" ],
+	[ "SVN repositories", "*-svn-repositor*.pl" ],
 	[ "Other scripts", "*.pl" ],
 	);
 }
@@ -115,6 +116,10 @@ which in turn define the initial configuration for virtual servers.",
 owners. These commands can be used to list existing plans, modify their
 limits, create new plans, and delete them.",
 
+"SVN repositories",
+"For virtual serves with the SVN plugin enabled, these commands can be used
+to list, create and delete SVN repositories.",
+
 "Other scripts",
 "Programs in this section don't fall into any of the other categories.",
 	);
@@ -129,6 +134,16 @@ return ( "upload-api-docs.pl",
 	 "fetch-script-files.pl",
 	 "postinstall.pl",
 	 );
+}
+
+# list_api_directories(pwd)
+# Returns a list of directories to check for API scripts
+sub list_api_directories
+{
+local ($pwd) = @_;
+local $par = $pwd;
+$par =~ s/\/([^\/]+)$//;
+return ( $pwd, glob("$par/virtualmin-*") );
 }
 
 # get_api_helper_command()
