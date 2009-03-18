@@ -1,0 +1,4 @@
+desc=Network traffic graphs
+html=Overall network traffic is now collected regularly, and can be displayed on the System Statistics page.
+master=1
+link=history.cgi?stat=tx

@@ -4360,12 +4360,15 @@ history_stat_aliases=Number of mail aliases
 history_stat_mailcount=Email per minute
 history_stat_spamcount=Spam per minute
 history_stat_viruscount=Viruses per minute
+history_stat_rx=Network traffic received
+history_stat_tx=Network traffic sent
 history_range=$1 from $2 to $3
 history_showing=Showing historic values for : $1
 history_none=No historic system statistics have been recorded yet.
 history_showsel=Select historic statistics to show :
 history_ok=Show Selected
 history_pc=percent
+history_mbsec=MB per second
 history_rawdata=Download raw data..
 
 sv_title=Spam and Virus Scanning

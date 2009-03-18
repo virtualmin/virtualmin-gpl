@@ -145,6 +145,7 @@ avail_phpini=PHP Configuration (for domain's php.ini files),1,1-Yes,0-No
 line7=Status collection,11
 collect_interval=Interval between status collection job runs,10,none-Never run,Minutes
 collect_restart=Restart services that are detected as down?,1,1-Yes,0-No
+collect_ifaces=Network interfaces for traffic graph,3,All Ethernet
 
 line8=Backup and restore,11
 compression=Backup compression format,1,0-gzip,1-bzip2,2-None (tar only),3-ZIP

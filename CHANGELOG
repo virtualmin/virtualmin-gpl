@@ -1080,3 +1080,4 @@ Link script names to their home pages.
 Added option to not add MX records for secondary mail servers.
 Added an option on the Batch Create Users page to generate passwords randomly, and a --random-pass flag to create-user.pl.
 Added a Module Config option to disallow switching to Usermin as a mailbox user by domain owners.
+Overall network traffic is now collected regularly, and can be displayed on the System Statistics page.

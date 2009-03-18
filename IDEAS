@@ -46,5 +46,3 @@
 	- Use in DNS, Apache
 	- Net module IPv6 support
 	- /sbin/ifconfig eth0 inet6 add 2001:0db8:0:f101::120/64
-
- - Include eth0 usage in history graphs

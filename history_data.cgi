@@ -61,6 +61,9 @@ for($i=0; $i<scalar(@$first); $i++) {
 			elsif ($stat =~ /^load(|5|15)$/) {
 				$v *= 100;
 				}
+			elsif ($stat eq 'tx' || $stat eq 'rx') {
+				$v /= 1024*1024;
+				}
 			}
 		if ($v ne int($v)) {
 			# Two decimal places only

@@ -308,11 +308,11 @@ push(@stats, [ "quotalimit", $qlimit ]);
 push(@stats, [ "quotaused", $qused ]);
 
 # Get mail since the last collection time
+local $now = time();
 if (-r $procmail_log_file) {
 	# Get last seek position
 	local $lastinfo = &read_file_contents("$historic_info_dir/procmailpos");
 	local @st = stat($procmail_log_file);
-	local $now = time();
 	local ($lastpos, $lastinode, $lasttime);
 	if (defined($lastinfo)) {
 		($lastpos, $lastinode, $lasttime) = split(/\s+/, $lastinfo);
@@ -356,6 +356,55 @@ if (-r $procmail_log_file) {
 	&open_tempfile(PROCMAILPOS, ">$historic_info_dir/procmailpos");
 	&print_tempfile(PROCMAILPOS, $lastpos," ",$st[1]," ",$now."\n");
 	&close_tempfile(PROCMAILPOS);
+	}
+
+# Get network traffic counts since last run
+if (&foreign_check("net") && $gconfig{'os_type'} =~ /-linux$/) {
+	# Get the current byte count
+	local $rxtotal = 0;
+	local $txtotal = 0;
+	if ($config{'collect_ifaces'}) {
+		# From module config
+		@ifaces = split(/\s+/, $config{'collect_ifaces'});
+		}
+	else {
+		# Get list from net module
+		&foreign_require("net", "net-lib.pl");
+		foreach my $i (&net::active_interfaces()) {
+			if ($i->{'virtual'} eq '' &&
+			    $i->{'name'} =~ /^(eth|ppp|wlan|ath|wlan)/) {
+				push(@ifaces, $i->{'name'});
+				}
+			}
+		}
+	local $ifaces = join(" ", @ifaces);
+	foreach my $iname (@ifaces) {
+		local $out = &backquote_command(
+			"LC_ALL='' LANG='' ifconfig ".
+			quotemeta($iname)." 2>/dev/null");
+		local $rx = $out =~ /RX\s+bytes:\s*(\d+)/i ? $1 : undef;
+		local $tx = $out =~ /TX\s+bytes:\s*(\d+)/i ? $1 : undef;
+		$rxtotal += $rx;
+		$txtotal += $tx;
+		}
+
+	# Work out the diff since the last run, if we have it
+	local %netcounts;
+	if (&read_file("$historic_info_dir/netcounts", \%netcounts) &&
+	    $netcounts{'rx'} && $netcounts{'tx'} &&
+	    $netcounts{'ifaces'} eq $ifaces &&
+	    $rxtotal >= $netcounts{'rx'} && $txtotal >= $netcounts{'tx'}) {
+		local $secs = ($now - $netcounts{'now'}) * 1.0;
+		push(@stats, [ "rx", ($rxtotal - $netcounts{'rx'}) / $secs ]);
+		push(@stats, [ "tx", ($txtotal - $netcounts{'tx'}) / $secs ]);
+		}
+
+	# Save the last counts
+	$netcounts{'rx'} = $rxtotal;
+	$netcounts{'tx'} = $txtotal;
+	$netcounts{'now'} = $now;
+	$netcounts{'ifaces'} = $ifaces;
+	&write_file("$historic_info_dir/netcounts", \%netcounts);
 	}
 
 # Write to the file
@@ -448,7 +497,8 @@ sub list_historic_stats
 local @rv;
 opendir(HISTDIR, $historic_info_dir);
 foreach my $f (readdir(HISTDIR)) {
-	if ($f =~ /^[a-z]+[0-9]*$/ && $f ne "maxes" && $f ne "procmailpos") {
+	if ($f =~ /^[a-z]+[0-9]*$/ && $f ne "maxes" && $f ne "procmailpos" &&
+	    $f ne "netcounts") {
 		push(@rv, $f);
 		}
 	}

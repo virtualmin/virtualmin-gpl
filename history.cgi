@@ -56,6 +56,9 @@ for($i=0; $i<@stats; $i++) {
 	elsif ($stat eq 'load' || $stat eq 'load5' || $stat eq 'load15') {
 		$units = $text{'history_pc'};
 		}
+	elsif ($stat eq 'tx' || $stat eq 'rx') {
+		$units = $text{'history_mbsec'};
+		}
 	else {
 		$units = undef;
 		}
@@ -125,8 +128,8 @@ foreach $s (sort { $text{'history_stat_'.$a} cmp
 	$link = "history.cgi?start=".&urlize($start).
 		"&period=".&urlize($period)."&stat=$s";
 	push(@grid, &ui_checkbox("stat", $s,
-			"<a href='$link'>".$text{'history_stat_'.$s}."</a>",
-			&indexof($s, @stats) >= 0));
+		"<a href='$link'>".($text{'history_stat_'.$s} || $s)."</a>",
+		&indexof($s, @stats) >= 0));
 	}
 print &ui_grid_table(\@grid, 4);
 print &ui_form_end([ [ undef, $text{'history_ok'} ] ]);
