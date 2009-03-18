@@ -691,6 +691,7 @@ user_ehomeexists=Home directory must be an existing directory for website FTP us
 user_awl=Manage auto-whitelist
 user_eloop=A user cannot forward email to his own address
 user_switch=Login to Usermin
+user_eswitch=You are not allowed to login to Usermin
 
 aliases_ecannot=You are not allowed to edit aliases in this domain
 aliases_title=Mail Aliases

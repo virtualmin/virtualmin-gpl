@@ -2559,6 +2559,15 @@ return $virtualmin_pro &&	# Only Pro supports this
 	$admin && &can_edit_domain($d));
 }
 
+# can_switch_usermin(&domain, &user)
+# Returns 1 if the current user is allowed to switch to Usermin
+sub can_switch_usermin
+{
+local ($d, $user) = @_;
+return &can_edit_domain($d) &&
+       &master_admin() || $config{'usermin_switch'};
+}
+
 # Returns 1 if the user can view mail logs for some domain (or all domains if
 # none was given). Also returns 0 if mail logs are not enabled.
 sub can_view_maillog

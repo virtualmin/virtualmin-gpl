@@ -172,3 +172,4 @@ spam_trap_black=0
 ham_trap_white=0
 collect_restart=0
 secmx_nodns=0
+usermin_switch=1

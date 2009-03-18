@@ -413,7 +413,8 @@ if ($anyother) {
 
 # Work out if switching to Usermin is allowed
 $usermin = 0;
-if ($user->{'unix'} && &foreign_installed("usermin", 1)) {
+if (&can_switch_usermin($d, $user) &&
+    $user->{'unix'} && &foreign_installed("usermin", 1)) {
 	&foreign_require("usermin", "usermin-lib.pl");
 	local %uminiserv;
 	&usermin::get_usermin_miniserv_config(\%uminiserv);
