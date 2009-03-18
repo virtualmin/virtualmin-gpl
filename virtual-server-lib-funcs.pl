@@ -5463,8 +5463,22 @@ return $rv;
 # Returns a suitable database name for a domain
 sub database_name
 {
-local $tmpl = &get_template($_[0]->{'template'});
-local $db = &substitute_domain_template($tmpl->{'mysql'}, $_[0]);
+local ($d) = @_;
+local $tmpl = &get_template($d->{'template'});
+local %hash = %$d;
+if (!$hash{'uid'}) {
+	# Fake UID allocation now, in case the template uses it
+	local %taken;
+        &build_taken(\%taken);
+        $hash{'uid'} = &allocate_uid(\%taken);
+	}
+if (!$hash{'gid'}) {
+	# Fake GID allocation
+	local %gtaken;
+	&build_group_taken(\%gtaken);
+	$hash{'gid'} = &allocate_gid(\%gtaken);
+	}
+local $db = &substitute_domain_template($tmpl->{'mysql'}, \%hash);
 $db = lc($db);
 $db ||= $_[0]->{'prefix'};
 $db = &fix_database_name($db);
