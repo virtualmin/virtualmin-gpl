@@ -47,4 +47,4 @@
 	- Net module IPv6 support
 	- /sbin/ifconfig eth0 inet6 add 2001:0db8:0:f101::120/64
 
- - Fix module_name in both themes
+ - Include eth0 usage in history graphs
