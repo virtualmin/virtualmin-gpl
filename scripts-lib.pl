@@ -1835,7 +1835,10 @@ if (defined(&$gfunc)) {
 	local @gems = &$gfunc($d, $ver, $opts);
 	foreach my $g (@gems) {
 		local ($name, $version, $nore) = @$g;
-		&$first_print(&text('scripts_geminstall', "<tt>$name</tt>"));
+		&$first_print(
+		  $version ? &text('scripts_geminstall2',
+				   "<tt>$name</tt>", $version) :
+			     &text('scripts_geminstall', "<tt>$name</tt>"));
 		local $err = &install_ruby_gem($name, $version, $nore);
 		if ($err) {
 			&$second_print(&text('scripts_gemfailed',

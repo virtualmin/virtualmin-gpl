@@ -3115,6 +3115,7 @@ scripts_idbneedor=$1 or $2
 scripts_gemver=Updating Ruby Gems to latest version from $1 ..
 scripts_gemverfailed=.. Gems update failed : $1
 scripts_geminstall=Installing Ruby Gem $1 ..
+scripts_geminstall2=Installing Ruby Gem $1 version $2 ..
 scripts_gemfailed=.. Gem install failed : $1
 scripts_gemlink=Linking Gem command $1 to new version $2 ..
 
