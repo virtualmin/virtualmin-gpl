@@ -303,6 +303,10 @@ if ($lerr = &too_long($user->{'user'})) {
 	usage($lerr);
 	}
 
+# Validate user
+$err = &validate_user($d, $user);
+&usage($err) if ($err);
+
 # Create the user and virtusers and alias
 &create_user($user, $d);
 
