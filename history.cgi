@@ -57,7 +57,12 @@ for($i=0; $i<@stats; $i++) {
 		$units = $text{'history_pc'};
 		}
 	elsif ($stat eq 'tx' || $stat eq 'rx') {
-		$units = $text{'history_mbsec'};
+		if ($maxes->{$stat} < 10*1024) {
+			$units = $text{'history_kbsec'};
+			}
+		else {
+			$units = $text{'history_mbsec'};
+			}
 		}
 	else {
 		$units = undef;
@@ -145,7 +150,7 @@ foreach $stat (@stats) {
 	$color = $historic_graph_colors[
 			($plotno-1) % scalar(@historic_graph_colors)];
 	$maxopt = "";
-	if ($maxes->{$stat}) {
+	if ($maxes->{$stat} && $stat ne 'tx' && $stat ne 'rx') {
 		$maxv = $stat eq "memused" || $stat eq "swapused" ?
 			 $maxes->{$stat}/(1024*1024) :
 			$stat eq "diskused" ?

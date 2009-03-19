@@ -4369,6 +4369,7 @@ history_showsel=Select historic statistics to show :
 history_ok=Show Selected
 history_pc=percent
 history_mbsec=MB per second
+history_kbsec=kB per second
 history_rawdata=Download raw data..
 
 sv_title=Spam and Virus Scanning

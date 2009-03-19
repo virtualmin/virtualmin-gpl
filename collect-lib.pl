@@ -395,8 +395,16 @@ if (&foreign_check("net") && $gconfig{'os_type'} =~ /-linux$/) {
 	    $netcounts{'ifaces'} eq $ifaces &&
 	    $rxtotal >= $netcounts{'rx'} && $txtotal >= $netcounts{'tx'}) {
 		local $secs = ($now - $netcounts{'now'}) * 1.0;
-		push(@stats, [ "rx", ($rxtotal - $netcounts{'rx'}) / $secs ]);
-		push(@stats, [ "tx", ($txtotal - $netcounts{'tx'}) / $secs ]);
+		local $rxscaled = ($rxtotal - $netcounts{'rx'}) / $secs;
+		local $txscaled = ($txtotal - $netcounts{'tx'}) / $secs;
+		if ($rxscaled >= $netcounts{'rx_max'}) {
+			$netcounts{'rx_max'} = $rxscaled;
+			}
+		if ($txscaled >= $netcounts{'tx_max'}) {
+			$netcounts{'tx_max'} = $txscaled;
+			}
+		push(@stats, [ "rx", $rxscaled, $netcounts{'rx_max'} ]);
+		push(@stats, [ "tx", $txscaled, $netcounts{'tx_max'} ]);
 		}
 
 	# Save the last counts
