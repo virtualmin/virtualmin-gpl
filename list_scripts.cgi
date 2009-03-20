@@ -154,7 +154,7 @@ foreach $script (sort { $a->{'sortcategory'} cmp
 		      @scripts) {
 	$cat = $script->{'category'} || $text{'scripts_nocat'};
 	@vers = grep { &can_script_version($script, $_) }
-		     @{$script->{'versions'}};
+		     @{$script->{'install_versions'}};
 	next if (!@vers);	# No allowed versions!
 	if ($cat ne $lastcat && @scripts > 1) {
 		# Start of new group

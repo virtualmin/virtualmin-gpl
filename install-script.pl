@@ -147,16 +147,18 @@ $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 $script = &get_script($sname);
 $script || &usage("Script type $sname is not known");
+@vers = defined($id) ? @{$script->{'versions'}}
+		     : @{$script->{'install_versions'}};
 $ver || &usage("Missing version number. Available versions are : ".
-	       join(" ", @{$script->{'versions'}}));
+	       join(" ", @vers));
 if ($opts->{'mongrels'} > 1 && &has_proxy_balancer($d) != 2) {
 	&error("This virtual server does not support more than one Mongrel");
 	}
 if ($ver eq "latest") {
-	$ver = $script->{'versions'}->[0];
+	$ver = $vers[0];
 	}
 else {
-	&indexof($ver, @{$script->{'versions'}}) >= 0 || $unsupported ||
+	&indexof($ver, @vers) >= 0 || $unsupported ||
 	       &usage("Version $ver is not valid for script. ".
 		      "Available versions are : ".
 		      join(" ", @{$script->{'versions'}}));
