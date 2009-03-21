@@ -13,8 +13,13 @@ if (&test_lock($collected_info_file)) {
 	print "Already running\n";
 	exit(0);
 	}
-local $gconfig{'logfiles'} = 0;		# Don't diff collected file
-local $gconfig{'logfullfiles'} = 0;
+
+# Don't diff collected file
+$gconfig{'logfiles'} = 0;
+$gconfig{'logfullfiles'} = 0;
+$WebminCore::gconfig{'logfiles'} = 0;
+$WebminCore::gconfig{'logfullfiles'} = 0;
+$no_log_file_changes = 1;
 &lock_file($collected_info_file);
 
 $info = &collect_system_info();
