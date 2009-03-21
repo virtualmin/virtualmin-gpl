@@ -117,7 +117,7 @@ else {
 			&error($text{'backup_epurgetime'});
 		($basepath, $pattern) = &extract_purge_path($dest);
 		$basepath || $pattern || &error($text{'backup_epurgepath'});
-		$in{'purge'} =~ /^\d+$/ || &error($text{'backup_epurge'});
+		$in{'purge'} =~ /^[0-9\.]+$/ || &error($text{'backup_epurge'});
 		}
 	$sched->{'purge'} = $in{'purge_def'} ? undef : $in{'purge'};
 	$sched->{'enabled'} = $in{'enabled'};
