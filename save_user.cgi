@@ -289,6 +289,7 @@ else {
 		    $d && $d->{'home'} && !$in{'home_def'}) {
 			$in{'home'} =~ /^\S+$/ && $in{'home'} !~ /\.\./ ||
 				&error($text{'user_ehome'});
+			$in{'home'} =~ /^\// && &error($text{'user_ehome2'});
 			if ($user->{'webowner'}) {
 				# Custom home directory for web FTP user
 				$home = &public_html_dir($d)."/".$in{'home'};

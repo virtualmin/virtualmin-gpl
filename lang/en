@@ -643,6 +643,7 @@ user_home2=Main website directory
 user_homeunder=Subdirectory of server's home
 user_homeunder2=Website subdirectory
 user_ehome=Missing or invalid home directory
+user_ehome2=User's home directory is relative to the domain, and so must not start with a /
 user_emkhome=Home directory $1 already exists
 user_edelete=You cannot delete the virtual server administration user!
 user_aliases=Email forwarding destinations
