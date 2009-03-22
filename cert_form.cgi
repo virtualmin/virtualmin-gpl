@@ -189,7 +189,7 @@ print &ui_table_row($text{'cert_chain'},
 if ($chain) {
 	$info = &cert_file_info($chain);
 	foreach $i (@cert_attributes) {
-		if ($info->{$i}) {
+		if ($info->{$i} && !ref($info->{$i})) {
 			print &ui_table_row($text{'cert_c'.$i} ||
 					    $text{'cert_'.$i}, $info->{$i});
 			}
