@@ -1956,12 +1956,12 @@ return @rv;
 }
 
 # extract_script_archive(file, dir, &domain, [copy-to-dir], [sub-dir],
-#			 [single-file], [ignore-errors])
+#			 [single-file], [ignore-errors], [&skip-files])
 # Attempts to extract a tar.gz or tar or zip file for a script. Returns undef
 # on success, or an HTML error message on failure.
 sub extract_script_archive
 {
-local ($file, $dir, $d, $copydir, $subdir, $single, $ignore) = @_;
+local ($file, $dir, $d, $copydir, $subdir, $single, $ignore, $skip) = @_;
 
 # Create the target dir if missing
 if (!$single && $copydir && !-d $copydir) {
@@ -2019,6 +2019,15 @@ if ($copydir && -e $copydir) {
 if ($copydir) {
 	local $path = "$dir/$subdir";
 	($path) = glob("$dir/$subdir") if (!-e $path);
+
+	# Remove files to skip copying
+	if ($skip) {
+		foreach my $s (@$skip) {
+			&run_as_domain_user($d,
+				"rm -rf ".quotemeta($path)."/".$s);
+			}
+		}
+
 	local $out;
 	if (-f $path) {
 		# Copy one file
@@ -2035,7 +2044,9 @@ if ($copydir) {
 		return "Sub-directory $subdir was not found";
 		}
 	$out = undef if ($out !~ /\S/);
-	return "<pre>".&html_escape($out || "Exit status $?")."</pre>" if ($?);
+	if ($? && !$ignore) {
+		return "<pre>".&html_escape($out || "Exit status $?")."</pre>";
+		}
 
 	# Copy any dot-files too
 	if (-d $path) {
