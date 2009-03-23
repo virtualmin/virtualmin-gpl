@@ -47,7 +47,6 @@
 	- Net module IPv6 support
 	- /sbin/ifconfig eth0 inet6 add 2001:0db8:0:f101::120/64
 
- - Typo3 CMS installer
-	- FS#5568
-	- CHANGELOG
-	- Install password?
+ - Postgrey
+	- FS#5614
+	- Need package for it?
