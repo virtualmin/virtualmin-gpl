@@ -63,7 +63,8 @@ Timeplot.DefaultValueGeometry.prototype = {
             this._minValue = range.min;
         }
         if ((this._maxValue == null) || ((this._maxValue != null) && (range.max * 1.05 > this._maxValue))) {
-            this._maxValue = Math.round(range.max * 1.05)+1; // get a little more head room to avoid hitting the ceiling
+            //this._maxValue = Math.round(range.max * 1.05)+1; // get a little more head room to avoid hitting the ceiling
+            this._maxValue = range.max * 1.05;
         }
 
         this._updateMappedValues();
