@@ -48,7 +48,8 @@ $test_email_dir = "/usr/local/webadmin/virtualmin/testmail";
 $spam_email_file = "$test_email_dir/spam.txt";
 $virus_email_file = "$test_email_dir/virus.txt";
 $ok_email_file = "$test_email_dir/ok.txt";
-$supports_fcgid = &indexof("fcgid", &supported_php_modes()) >= 0;
+$supports_fcgid = defined(&supported_php_modes) &&
+		  &indexof("fcgid", &supported_php_modes()) >= 0;
 
 @create_args = ( [ 'limits-from-template' ],
 		 [ 'no-email' ],

@@ -24,7 +24,13 @@ if ($in{'to'}) {
 	&can_edit_domain($aliasdom) || &error($text{'form_ecannot'});
 	}
 elsif (!&can_create_master_servers()) {
-	$parentuser = $remote_user;
+	if ($access{'admin'}) {
+		$parentdom = &get_domain($access{'admin'});
+		$parentuser = $parentdom->{'user'};
+		}
+	else {
+		$parentuser = $remote_user;
+		}
 	}
 elsif ($in{'parentuser'}) {
 	$parentuser = $in{'parentuser'};
