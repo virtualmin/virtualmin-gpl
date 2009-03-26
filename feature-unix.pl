@@ -776,12 +776,37 @@ if ($group->{'members'} ne $oldgroup->{'members'}) {
 
 sub startstop_unix
 {
+local @rv;
 if (!$config{'ftp'} && &foreign_installed("proftpd")) {
 	# Even if the FTP feature is not enabled, show the proftpd start/stop
 	# buttons.
-	return &startstop_ftp();
+	push(@rv, &startstop_ftp());
 	}
-return ( );
+if (&foreign_installed("sshd")) {
+	# Add SSH server status
+	local @links = ( { 'link' => '/sshd/',
+			   'desc' => $text{'index_sshmanage'},
+			   'manage' => 1 } );
+	&foreign_require("sshd", "sshd-lib.pl");
+	if (&sshd::get_sshd_pid()) {
+		push(@rv, { 'status' => 1,
+			    'feature' => 'sshd',
+			    'name' => $text{'index_sshname'},
+			    'desc' => $text{'index_sshstop'},
+			    'restartdesc' => $text{'index_sshrestart'},
+			    'longdesc' => $text{'index_sshstopdesc'},
+			    'links' => \@links } );
+		}
+	else {
+		push(@rv, { 'status' => 0,
+			    'feature' => 'sshd',
+			    'name' => $text{'index_sshname'},
+			    'desc' => $text{'index_sshstart'},
+			    'longdesc' => $text{'index_sshstartdesc'},
+			    'links' => \@links } );
+		}
+	}
+return @rv;
 }
 
 sub stop_service_unix
@@ -792,6 +817,18 @@ return &stop_service_ftp();
 sub start_service_unix
 {
 return &start_service_ftp();
+}
+
+sub stop_service_sshd
+{
+&foreign_require("sshd", "sshd-lib.pl");
+return &sshd::stop_sshd();
+}
+
+sub start_service_sshd
+{
+&foreign_require("sshd", "sshd-lib.pl");
+return &sshd::start_sshd();
 }
 
 # delete_partial_group(&group)

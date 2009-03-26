@@ -1087,3 +1087,4 @@ Overall network traffic is now collected regularly, and can be displayed on the 
 Updated the phpMyAdmin script installer to versions 3.1.3.1 and 2.11.9.5, and Trac to 0.11.4rc2.
 Updated the Forwards, Passwd, Chora, Vacation and Gollem scripts from the Horde family to their latest versions.
 Global template variables are now also available to pre- and post-domain creation commands, with the GLOBAL_ prefix.
+Added the SSH server status to the System Information page, including the ability to stop and start it.
