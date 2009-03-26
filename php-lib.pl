@@ -510,6 +510,13 @@ foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
 		foreach my $u ([ 'v', int($rv->{'mem'}/1024) ],
 			       [ 'u', $rv->{'procs'} ],
 			       [ 't', $rv->{'time'}*60 ]) {
+			if ($u->[0] eq 't' &&
+			    $dir eq "$d->{'home'}/fcgi-bin") {
+				# CPU time limit makes no sense for fcgi, as it
+				# breaks the long-running php-cgi processes
+				next;
+				}
+
 			# Find current line
 			local $lnum;
 			for(my $i=0; $i<@$lref; $i++) {

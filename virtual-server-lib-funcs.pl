@@ -3428,6 +3428,7 @@ if ($oldd) {
 		&show_domain_name($oldd->{'dom'});
 	}
 if ($d->{'reseller'} && defined(&get_reseller)) {
+	# Set reseller details
 	local $resel = &get_reseller($d->{'reseller'});
 	local $acl = $resel->{'acl'};
 	$ENV{'RESELLER_NAME'} = $resel->{'name'};
@@ -3437,6 +3438,11 @@ if ($d->{'reseller'} && defined(&get_reseller)) {
 		local $env = uc($a);
 		$env =~ s/\-/_/g;
 		$ENV{'RESELLER_'.$env} = $acl->{$a};
+		}
+	}
+foreach my $v (&get_global_template_variables()) {
+	if ($v->{'enabled'}) {
+		$ENV{'GLOBAL_'.uc($v->{'name'})} = $v->{'value'};
 		}
 	}
 }
