@@ -4125,7 +4125,9 @@ foreach $u (@$users) {
 	local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} } @ashells;
 	push(@cols, !$u->{'shell'} ? $text{'users_qmail'} :
 		    !$shell ? &text('users_shell', "<tt>$u->{'shell'}</tt>") :
-		    $shell->{'desc'});
+	            $shell->{'id'} eq 'ftp' && !$u->{'email'} ?
+			$text{'shells_mailboxftp2'} :
+		    	$shell->{'desc'});
 	if ($d->{'mysql'} || $d->{'postgres'}) {
 		push(@cols, $u->{'domainowner'} ? $text{'users_all'} :
 					   @{$u->{'dbs'}} ? $text{'yes'}
