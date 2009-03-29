@@ -595,7 +595,9 @@ users_all=All
 users_same=Same as admin
 
 user_create=Create Mailbox
+user_createweb=Create FTP User
 user_edit=Edit Mailbox
+user_editweb=Edit FTP User
 user_header=Virtual domain user mailbox details
 user_lheader=Local user mailbox details
 user_mheader=Virtual server administration user's mailbox details

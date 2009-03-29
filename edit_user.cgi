@@ -16,15 +16,17 @@ else {
 $din = $d ? &domain_in($d) : undef;
 $tmpl = $d ? &get_template($d->{'template'}) : &get_template(0);
 if ($in{'new'}) {
-	&ui_print_header($din, $text{'user_create'}, "");
+	$suffix = $in{'web'} ? 'web' : '';
+	&ui_print_header($din, $text{'user_create'.$suffix}, "");
 	$user = &create_initial_user($d, undef, $in{'web'});
 	}
 else {
-	&ui_print_header($din, $text{'user_edit'}, "");
 	@users = &list_domain_users($d);
 	($user) = grep { $_->{'user'} eq $in{'user'} &&
 			 $_->{'unix'} == $in{'unix'} } @users;
 	$mailbox = $d && $d->{'user'} eq $user->{'user'} && $user->{'unix'};
+	$suffix = $user->{'webowner'} ? 'web' : '';
+	&ui_print_header($din, $text{'user_edit'.$suffix}, "");
 	}
 
 @tds = ( "width=30%", "width=70%" );
