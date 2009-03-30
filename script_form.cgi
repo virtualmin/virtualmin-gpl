@@ -30,8 +30,10 @@ else {
 
 # Validate version number
 $ver =~ /^\S+$/ || &error($text{'scripts_eversion'});
-&indexof($ver, @{$script->{'versions'}}) >= 0 || &can_unsupported_scripts() ||
-	&error($text{'scripts_eversion2'});
+&indexof($ver, @{$script->{'versions'}}) >= 0 ||
+	&indexof($ver, @{$script->{'install_versions'}}) >= 0 ||
+	&can_unsupported_scripts() ||
+		&error($text{'scripts_eversion2'});
 
 # Check dependencies
 $derr = &check_script_depends($script, $d, $ver, $sinfo);

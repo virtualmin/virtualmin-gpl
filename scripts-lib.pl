@@ -159,7 +159,8 @@ local $rv = { 'name' => $name,
 	      'minversion' => $unavail{$name."_minversion"},
 	    };
 if (defined(&$vdfunc)) {
-	foreach my $ver (@{$rv->{'versions'}}) {
+	foreach my $ver (@{$rv->{'versions'}},
+			 @{$rv->{'install_versions'}}) {
 		$rv->{'vdesc'}->{$ver} = &$vdfunc($ver);
 		}
 	}
