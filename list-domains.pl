@@ -223,6 +223,8 @@ if ($multi) {
 			      ($d->{'quota'} || "Unlimited"),"\n";
 			print "    Server quota used: ",
 			      &nice_size($qhome*$hs + $qmail*$ms),"\n";
+			print "    Server block quota used: ",
+			      ($qhome + $qmail),"\n";
 			print "    User quota: ",
 			      &quota_show($d->{'uquota'}, "home"),"\n";
 			print "    User block quota: ",
@@ -230,6 +232,8 @@ if ($multi) {
 			print "    User quota used: ",
 			      &nice_size($duser->{'uquota'}*$hs +
 					 $duser->{'umquota'}*$ms),"\n";
+			print "    User block quota used: ",
+			      ($duser->{'uquota'} + $duser->{'umquota'}),"\n";
 			}
 		@dbs = &domain_databases($d);
 		if (@dbs) {

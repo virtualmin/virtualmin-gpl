@@ -131,7 +131,7 @@ foreach $c (&unique(map { $_->{'cat'} } @apis)) {
 	print CAT "====== $c ======\n\n";
 	print CAT $category_descs{$c},"\n\n";
 	@incat = grep { $_->{'cat'} eq $c } @apis;
-	foreach $a (@incat) {
+	foreach $a (sort { $a->{'wikiname'} cmp $b->{'wikiname'} } @incat) {
 		print CAT "   * [[$a->{'wikiname'}|$a->{'file'}]] - $a->{'title'}\n";
 		}
 	print CAT "\n";

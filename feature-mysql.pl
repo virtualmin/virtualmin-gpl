@@ -453,13 +453,21 @@ foreach $dbfile (glob("$_[1]_*")) {
 		}
 	}
 
+# Turn off quotas for the domain, to prevent the import failing
+if ($_[0]->{'unix'} && $_[0]->{'quota'}) {
+	local $nqd = { %{$_[0]} };
+	$nqd->{'quota'} = 0;
+	&set_server_quotas($nqd);
+	}
+
 # Finally, import the data
-local $db;
-foreach $db (@dbs) {
+my $rv = 1;
+foreach my $db (@dbs) {
 	&$first_print(&text('restore_mysqlload', $db->[0]));
 	if (&check_mysql_database_clash($_[0], $db->[0])) {
 		&$second_print(&text('restore_mysqlclash'));
-		return 0;
+		$rv = 0;
+		last;
 		}
 	&$indent_print();
 	&create_mysql_database($_[0], $db->[0]);
@@ -471,7 +479,8 @@ foreach $db (@dbs) {
 		if ($?) {
 			&$second_print(&text('restore_mysqlgunzipfailed',
 					     "<pre>$out</pre>"));
-			return 0;
+			$rv = 0;
+			last;
 			}
 		$db->[1] =~ s/\.gz$//;
 		}
@@ -488,13 +497,20 @@ foreach $db (@dbs) {
 	if ($ex) {
 		&$second_print(&text('restore_mysqlloadfailed',
 				     "<pre>$out</pre>"));
-		return 0;
+		$rv = 0;
+		last;
 		}
 	else {
 		&$second_print($text{'setup_done'});
 		}
 	}
-return 1;
+
+# Put quotas back
+if ($_[0]->{'unix'} && $_[0]->{'quota'}) {
+	&set_server_quotas($_[0]);
+	}
+
+return $rv;
 }
 
 # validate_mysql_backup(file)
