@@ -129,7 +129,13 @@ if (!$gotvirt) {
 &cron::create_wrapper($domain_lookup_cmd, $module_name,
 		      "lookup-domain.pl");
 local $lref = &read_file_lines($domain_lookup_cmd);
-splice(@$lref, 1, 0, "\$< = \$>;", "\$( = \$);");
+splice(@$lref, 1, 0, "delete(\$ENV{'IFS'});",
+		     "delete(\$ENV{'CDPATH'});",
+		     "delete(\$ENV{'ENV'});",
+		     "delete(\$ENV{'BASH_ENV'});",
+		     "\$ENV{'PATH'} = '/bin:/usr/bin';",
+		     "\$< = \$>;",
+		     "\$( = \$);");
 &flush_file_lines($domain_lookup_cmd);
 
 # Build spamassassin command to call
