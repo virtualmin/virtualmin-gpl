@@ -148,6 +148,7 @@ local $rv = { 'name' => $name,
 	      'perl_mods_func' => "script_${name}_perl_modules",
 	      'perl_opt_mods_func' => "script_${name}_opt_perl_modules",
 	      'python_mods_func' => "script_${name}_python_modules",
+	      'python_opt_mods_func' => "script_${name}_opt_python_modules",
 	      'gem_version_func' => "script_${name}_gem_version",
 	      'gems_func' => "script_${name}_gems",
 	      'latest_func' => "script_${name}_latest",
@@ -1209,8 +1210,16 @@ sub setup_python_modules
 {
 local ($d, $script, $ver, $opts) = @_;
 local $modfunc = $script->{'python_mods_func'};
-return 1 if (!defined(&$modfunc));
-local @mods = &$modfunc($d, $ver, $opts);
+local $optmodfunc = $script->{'python_opt_mods_func'};
+local (@mods, @optmods);
+if (defined(&$modfunc)) {
+	push(@mods, &$modfunc($d, $ver, $opts));
+	}
+if (defined(&$optmodfunc)) {
+	push(@optmods, &$optmodfunc($d, $ver, $opts));
+	push(@mods, @optmods);
+	}
+return 1 if (!@mods);
 
 # Check if the software module is installed and can do update
 local $canpkgs = 0;
@@ -1224,10 +1233,12 @@ if (&foreign_installed("software")) {
 foreach my $m (@mods) {
 	next if (&check_python_module($m, $d) == 1);
 	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
-	&$first_print(&text('scripts_needpythonmod', "<tt>$m</tt>"));
+	&$first_print(&text($opt ? 'scripts_optpythonmod'
+				 : 'scripts_needpythonmod', "<tt>$m</tt>"));
 	if (!$canpkgs) {
 		&$second_print($text{'scripts_epythonmod'});
-		return 0;
+		if ($opt) { next; }
+		else { return 0; }
 		}
 
 	# Work out the package name
@@ -1269,7 +1280,8 @@ foreach my $m (@mods) {
 		}
 	else {
 		&$second_print($text{'scripts_epythonmod'});
-		return 0;
+		if ($opt) { next; }
+		else { return 0; }
 		}
 
 	# Install the RPM, Debian or CSW package. If any work, then we are done
@@ -1290,7 +1302,7 @@ foreach my $m (@mods) {
 			&$second_print($text{'scripts_epythoninst'});
 			}
 		}
-	return 0 if (!$anyok);
+	return 0 if (!$anyok && !$opt);
 	}
 return 1;
 }
