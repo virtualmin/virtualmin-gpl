@@ -405,6 +405,7 @@ foreach my $f (@files) {
 				}
 
 			# If we got this far, it must have worked!
+			&set_ownership_permissions(undef, undef, 0644, $temp);
 			$firsterror = undef;
 			last;
 			}
