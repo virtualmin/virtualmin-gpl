@@ -1805,6 +1805,7 @@ if (defined(&$vfunc)) {
 		local $rver = &get_ruby_version();
 		$rver =~ s/^(\d+\.\d+).*/$1/;	# Make it like just 1.8
 		local $oldgemverpath = &has_command("gem".$rver);
+		&execute_command("gem list --remote");	# Force cache init
 		$out = &backquote_logged(
 			"gem update --system 2>&1 </dev/null");
 		if ($?) {

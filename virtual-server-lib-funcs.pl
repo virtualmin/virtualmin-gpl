@@ -5309,7 +5309,7 @@ if ($left != 0) {
 			# less than the current limit
 			local $dleft = $ldoms - @doms;
 			if ($left == -1 || $dleft < $left) {
-				# Will hit domains limit
+				# Will hit licensed domains limit
 				return ($dleft, 3, $ldoms, 0);
 				}
 			else {
