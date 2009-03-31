@@ -437,15 +437,27 @@ for(my $i=0; $i<@sp1 || $i<@sp2; $i++) {
 		local ($v1n, $v1s) = ($1, $2);
 		$v2 =~ /^(\d+)(\S*)$/;
 		local ($v2n, $v2s) = ($1, $2);
-		$comp = $v1n <=> $v2n || $v1s cmp $v2s;
+		$comp = $v1n <=> $v2n;
+		if (!$comp) {
+			# X.rcN is always older than X
+			if ($v1s =~ /^rc\d+$/i && $v2s =~ /^\d*$/) {
+				$comp = -1;
+				}
+			elsif ($v1s =~ /^\d*$/ && $v2s =~ /^rc\d+$/i) {
+				$comp = 1;
+				}
+			else {
+				$comp = $v1s cmp $v2s;
+				}
+			}
 		}
 	elsif ($v1 =~ /^\d+$/ && $v2 =~ /^rc\d+$/i) {
 		# N is always newer than rcN
-		return 1;
+		$comp = 1;
 		}
 	elsif ($v1 =~ /^rc\d+$/i && $v2 =~ /^\d+$/) {
 		# rcN is always older than N
-		return -1;
+		$comp = -1;
 		}
 	else {
 		# String compare
