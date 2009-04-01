@@ -5310,7 +5310,8 @@ if ($left != 0) {
 			local $dleft = $ldoms - @doms;
 			if ($left == -1 || $dleft < $left) {
 				# Will hit licensed domains limit
-				return ($dleft, 3, $ldoms, 0);
+				return ($dleft, 3,
+					$max < $ldoms ? $max : $ldoms, 0);
 				}
 			else {
 				# Will hit user or reseller limit
