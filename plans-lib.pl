@@ -267,7 +267,12 @@ local %lmap = ( 'domslimit' => 'max_doms',
 		'dbslimit' => 'max_dbs',
 		'bw_limit' => 'max_bw' );
 foreach my $m (keys %lmap) {
-	$resel->{'acl'}->{$lmap{$m}} = $plan->{$m};
+	if ($plan->{$m} eq '') {
+		delete($resel->{'acl'}->{$lmap{$m}});
+		}
+	else {
+		$resel->{'acl'}->{$lmap{$m}} = $plan->{$m};
+		}
 	}
 }
 
