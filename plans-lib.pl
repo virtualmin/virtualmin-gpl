@@ -1,10 +1,11 @@
 # Functions for managing plans, which are sets of limits separate from templates
 
-# list_plans()
+# list_plans([no-convert])
 # Returns a list of all plans, each of which is a hash ref
 sub list_plans
 {
-if (!-d $plans_dir) {
+local ($noconvert) = @_;
+if (!-d $plans_dir && !$noconvert) {
 	# Somehow hasn't been run yet
 	&convert_plans();
 	}

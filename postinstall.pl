@@ -9,7 +9,10 @@ sub module_install
 local $need_restart;
 
 # Convert all templates to plans, if needed
-&convert_plans();
+local @oldplans = &list_plans(1);
+if (!@oldplans) {
+	&convert_plans();
+	}
 
 # Remember the first version we installed, to avoid showing new features
 # from before it
