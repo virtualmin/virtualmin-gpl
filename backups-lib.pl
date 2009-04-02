@@ -91,6 +91,7 @@ if ($backup->{'id'} == 1) {
 	$config{'backup_fmt'} = $backup->{'fmt'};
 	$config{'backup_mkdir'} = $backup->{'mkdir'};
 	$config{'backup_errors'} = $backup->{'errors'};
+	$config{'backup_increment'} = $backup->{'increment'};
 	$config{'backup_strftime'} = $backup->{'strftime'};
 	$config{'backup_onebyone'} = $backup->{'onebyone'};
 	$config{'backup_parent'} = $backup->{'parent'};
