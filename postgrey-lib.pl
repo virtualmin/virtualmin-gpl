@@ -6,7 +6,7 @@
 sub check_postgrey
 {
 if ($config{'mail_system'} != 0) {
-	return $text{'postgrey_epostfix'});
+	return $text{'postgrey_epostfix'};
 	}
 elsif (!&has_command("postgrey")) {
 	return &text('postgrey_ecmd', "<tt>postgrey</tt>");
