@@ -341,6 +341,11 @@ local $ex = &execute_command("cd ".quotemeta($_[0]->{'home'})." && $cmd",
 			     undef, \$out, \$out);
 &unlink_file($iflag) if ($iflag);
 &copy_source_dest($ifilecopy, $ifile) if ($ifilecopy);
+if (-r $ifile) {
+	# Make owned by domain owner, so tar can read in future
+	&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'gid'},
+				   0700, $ifile);
+	}
 if ($ex) {
 	&$second_print(&text($cmd =~ /^\S*zip/ ? 'backup_dirzipfailed'
 					       : 'backup_dirtarfailed',

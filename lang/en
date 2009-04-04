@@ -4692,6 +4692,7 @@ dplans_enone=None selected
 dplans_eall=At least one plan must exist
 
 postgrey_title=Email Greylisting
+newpostgrey_title=Email Greylisting
 postgrey_epostfix=Postgrey can only be used in conjunction with the Postfix mail server
 postgrey_ecmd=The Postgrey command $1 was not found
 postgrey_euser=The Postgrey user $1 does not exist
@@ -4705,3 +4706,5 @@ postgrey_procalready=.. already running
 postgrey_postfix=Configuring Postfix to use Postgrey ..
 postgrey_postfixalready=.. already configured
 postgrey_postfixdone=.. configured on port $1
+postgrey_title2=Enabling Greylisting
+postgrey_title3=Disabling Greylisting

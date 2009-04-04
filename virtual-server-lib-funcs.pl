@@ -9557,7 +9557,7 @@ local %tmplcat = (
 	'postgrey' => 'email',
 	);
 local %nonew = ( 'history', 1, 'postgrey', 1 );
-local @tlinks = map { $nonew{$_} ? "history.cgi"
+local @tlinks = map { $nonew{$_} ? "${_}.cgi"
 			         : "edit_new${_}.cgi" } @tmpls;
 local @ttitles = map { $nonew{$_} ? $text{"${_}_title"} 
 			          : $text{"new${_}_title"} } @tmpls;
