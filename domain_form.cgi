@@ -270,14 +270,16 @@ foreach $plan (@availplans) {
 		}
 
 	# Set features always
-	local @fl = $plan->{'featurelimits'} ?
-			split(/\s+/, $plan->{'featurelimits'}) :
-			@def_features;
-	foreach $f (@dom_features, &list_feature_plugins()) {
-		print "    if (document.forms[0]['$f']) {\n";
-		print "        document.forms[0]['$f'].checked = ",
-			(&indexof($f, @fl) >= 0 ? 1 : 0),";\n";
-		print "    }\n";
+	if ($config{'plan_auto'}) {
+		local @fl = $plan->{'featurelimits'} ?
+				split(/\s+/, $plan->{'featurelimits'}) :
+				@def_features;
+		foreach $f (@dom_features, &list_feature_plugins()) {
+			print "    if (document.forms[0]['$f']) {\n";
+			print "        document.forms[0]['$f'].checked = ",
+				(&indexof($f, @fl) >= 0 ? 1 : 0),";\n";
+			print "    }\n";
+			}
 		}
 	print "    }\n";
 	}

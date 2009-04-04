@@ -1090,3 +1090,4 @@ Global template variables are now also available to pre- and post-domain creatio
 Added the SSH server status to the System Information page, including the ability to stop and start it.
 Made the docutils Python module optional for MoinMoin installs, as it is missing on CentOS.
 Added a --plan flag to modify-reseller.pl, to allow setting of limits from a plan.
+Added a Module Config option to control if default features come from plan or Features and Plugins page.
