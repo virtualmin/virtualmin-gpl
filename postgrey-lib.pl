@@ -25,45 +25,54 @@ sub get_postgrey_init
 return "postgrey";
 }
 
-# get_postgrey_port()
-# Returns the port on which postgrey listens
-sub get_postgrey_port
+# get_postgrey_args()
+# Returns the Postgrey command-line arguments
+sub get_postgrey_args
 {
 local $ofile = "/etc/default/postgrey";
+local $postgrey = &has_command("postgrey");
 if (-r $ofile) {
 	# Get from options file on Debian
 	my $lref = &read_file_lines($ofile, 1);
 	foreach my $l (@$lref) {
-		if ($l =~ /^\s*POSTGREY_OPTS=".*--inet=(\S+).*"/) {
-			$opts = $1;
+		if ($l =~ /^\s*POSTGREY_OPTS="(.*)"/) {
+			return $1;
 			}
 		}
 	}
 &foreign_require("init", "init-lib.pl");
-if ($init::init_mode eq 'init' && !$opts) {
+if ($init::init_mode eq 'init') {
 	# Next try checking the init script
 	local $ifile = &init::action_filename(&get_postgrey_init());
 	foreach my $l (@$lref) {
-		if ($l =~ /--inet=([a-z0-9\.\-:]+)/i) {
-			$opts = $1;
+		if ($l =~ /\Q$postgrey\E\s+(.*)/i) {
+			return $1;
 			}
 		}
 	}
-if (!$opts) {
-	# Fall back to running process
-	&foreign_require("proc", "proc-lib.pl");
-	foreach my $p (&proc::list_processes()) {
-		if ($p->{'args'} =~ /postgrey.*--inet=(\S+)/) {
-			$opts = $1;
-			}
+# Fall back to running process
+&foreign_require("proc", "proc-lib.pl");
+foreach my $p (&proc::list_processes()) {
+	if ($p->{'args'} =~ /^(postgrey|\Q$postgrey\E)\s+(.*)/) {
+		return $2;
 		}
 	}
-# Parse the options
-if ($opts =~ /^(\S+):(\d+)$/) {
-	return $2;
-	}
-elsif ($opts =~ /^\d+$/) {
-	return $opts;
+return undef;
+}
+
+# get_postgrey_port()
+# Returns the port on which postgrey listens
+sub get_postgrey_port
+{
+local $args = &get_postgrey_args();
+if ($args =~ /--inet=(\S+)/) {
+	local $opts = $1;
+	if ($opts =~ /^(\S+):(\d+)$/) {
+		return $2;
+		}
+	elsif ($opts =~ /^\d+$/) {
+		return $opts;
+		}
 	}
 return undef;
 }
@@ -228,6 +237,69 @@ close(RANDOMSOCK);
 return $port;
 }
 
+# get_postgrey_data_file("clients"|"recipients")
+# Returns the full path to the file containing some Postgrey data, like
+# whitelisted clients or senders
+sub get_postgrey_data_file
+{
+local ($type) = @_;
+local $args = &get_postgrey_args();
+if ($args =~ /--whitelist-\Q$type\E=(\S+)/) {
+	return $1;
+	}
+local $out = &backquote_command("postgrey -h 2>&1");
+if ($out =~ /--whitelist-\Q$type\E=.*default:\s+(\S+)/) {
+	return $1;
+	}
+return undef;
+}
+
+# list_postgrey_data(type)
+# Returns a list of Postgrey configuration entries of some type, as an array ref
+sub list_postgrey_data
+{
+local ($type) = @_;
+local $file = &get_postgrey_data_file($type);
+return undef if (!$file);
+local ($_, @rv, @cmts);
+local $lnum = 0;
+&open_readfile(POSTGREY, $file);
+while(<POSTGREY>) {
+	s/\r|\n//g;
+	if (/^\s*#+\s*(\S.*)$/) {
+		# Comment line
+		push(@cmts, $1);
+		}
+	elsif (/\S/ && !/^\s*#/) {
+		# Actual line
+		push(@rv, { 'line' => $lnum - scalar(@cmts),
+			    'eline' => $lnum,
+			    'file' => $file,
+			    'value' => $_,
+			    'cmts' => [ @cmts ] });
+		@cmts = ( );
+		}
+	else {
+		# Blank line (end of comments)
+		@cmts = ( );
+		}
+	$lnum++;
+	}
+close(POSTGREY);
+return \@rv;
+}
+
+sub create_postgrey_data
+{
+}
+
+sub modify_postgrey_data
+{
+}
+
+sub delete_postgrey_data
+{
+}
 
 1;
 
