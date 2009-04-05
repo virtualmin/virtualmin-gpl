@@ -4736,3 +4736,14 @@ postgrey_cmts=Description
 postgrey_noneclients=No whitelisted clients have been defined yet.
 postgrey_nonerecipients=No whitelisted recipients have been defined yet.
 postgrey_nofile=No configuration file could be found for this whitelist!
+
+editgrey_titleclients=Edit Whitelisted Client
+editgrey_titlerecipients=Edit Whitelisted Recipient
+creategrey_titleclients=Add Whitelisted Client
+creategrey_titlerecipients=Add Whitelisted Recipient
+editgrey_headerclients=Whitelisted SMTP client details
+editgrey_headerrecipients=Whitelisted email recipient details
+editgrey_valueclients=Mail server IP address or hostname
+editgrey_valuerecipients=Destination email address
+editgrey_cmts=Whitelist entry description
+editgrey_re=Regular expression match

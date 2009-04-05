@@ -4,6 +4,7 @@
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'postgrey_ecannot'});
 &ui_print_header(undef, $text{'postgrey_title'}, "", "postgrey");
+&ReadParse();
 
 # Check if can use
 $err = &check_postgrey();

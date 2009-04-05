@@ -276,7 +276,13 @@ while(<POSTGREY>) {
 			    'eline' => $lnum,
 			    'file' => $file,
 			    'value' => $_,
+			    'index' => scalar(@rv),
 			    'cmts' => [ @cmts ] });
+		if ($rv[$#rv]->{'value'} =~ /^\/(.*)\/$/) {
+			# Regular expression
+			$rv[$#rv]->{'value'} = $1;
+			$rv[$#rv]->{'re'} = 1;
+			}
 		@cmts = ( );
 		}
 	else {
