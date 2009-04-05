@@ -12,18 +12,18 @@ if ($err) {
 	}
 
 # Show button to enable / disable
-print $text{'postgrey_desc'},"<p>\";
+print $text{'postgrey_desc'},"<p>\n";
 $ok = &is_postgrey_enabled();
 print &ui_buttons_start();
 if ($ok) {
-	print &ui_buttons_row("enable_postgrey.cgi",
-			      $text{'postgrey_enable'},
-			      $text{'postgrey_enabledesc'});
-	}
-else {
 	print &ui_buttons_row("disable_postgrey.cgi",
 			      $text{'postgrey_disable'},
 			      $text{'postgrey_disabledesc'});
+	}
+else {
+	print &ui_buttons_row("enable_postgrey.cgi",
+			      $text{'postgrey_enable'},
+			      $text{'postgrey_enabledesc'});
 	}
 print &ui_buttons_end();
 

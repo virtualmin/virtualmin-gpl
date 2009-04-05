@@ -39,7 +39,16 @@ if (-r $ofile) {
 			}
 		}
 	}
-# XXX check the init script?
+&foreign_require("init", "init-lib.pl");
+if ($init::init_mode eq 'init' && !$opts) {
+	# Next try checking the init script
+	local $ifile = &init::action_filename(&get_postgrey_init());
+	foreach my $l (@$lref) {
+		if ($l =~ /--inet=([a-z0-9\.\-:]+)/i) {
+			$opts = $1;
+			}
+		}
+	}
 if (!$opts) {
 	# Fall back to running process
 	&foreign_require("proc", "proc-lib.pl");
@@ -51,7 +60,7 @@ if (!$opts) {
 	}
 # Parse the options
 if ($opts =~ /^(\S+):(\d+)$/) {
-	return $1;
+	return $2;
 	}
 elsif ($opts =~ /^\d+$/) {
 	return $opts;
@@ -156,6 +165,49 @@ return 1;
 # print stuff.
 sub disable_postgrey
 {
+# Remove from Postfix configuration
+&$first_print($text{'postgrey_nopostfix'});
+local $port = &get_postgrey_port();
+local $init = &get_postgrey_init();
+&require_mail();
+local $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
+if ($rr =~ /^(.*)\s*check_policy_service\s+inet:\S+:(\d+)(.*)/ && $2 == $port) {
+	$rr = $1.$3;
+	&postfix::set_current_value("smtpd_recipient_restrictions", $rr);
+	&postfix::reload_postfix();
+	&$second_print($text{'postgrey_nopostfixdone'});
+	}
+else {
+	&$second_print($text{'postgrey_nopostfixalready'});
+	}
+
+# Kill the process
+&foreign_require("init", "init-lib.pl");
+local $init = &get_postgrey_init();
+&$first_print($text{'postgrey_noproc'});
+if (&find_byname("postgrey")) {
+	local ($ok, $out) = &init::stop_action($init);
+	if (!$ok) {
+		&$second_print(&text('postgrey_noprocfailed',
+				     "<tt>".&html_escape($out)."</tt>"));
+		}
+	else {
+		&$second_print($text{'postgrey_noprocdone'});
+		}
+	}
+else {
+	&$second_print($text{'postgrey_noprocalready'});
+	}
+
+# Disable at boot
+&$first_print($text{'postgrey_noinit'});
+if (&init::action_status($init) == 2) {
+	&init::disable_at_boot($init);
+	&$second_print($text{'postgrey_noinitdone'});
+	}
+else {
+	&$second_print($text{'postgrey_noinitalready'});
+	}
 }
 
 # allocate_random_port(base)
