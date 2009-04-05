@@ -3012,6 +3012,9 @@ if ($hash{'bw_usage'}) {
 if ($config{'bw_period'}) {
 	$tkeys{'bw_period'} = $config{'bw_period'};
 	}
+if ($config{'bw_past'}) {
+	$tkeys{'bw_past'} = $config{'bw_past'};
+	}
 return %hash;
 }
 
