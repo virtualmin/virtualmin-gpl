@@ -13,6 +13,7 @@ else {
 	&ui_print_header(undef, $text{'editgrey_title'.$in{'type'}}, "");
 	$data = &list_postgrey_data($in{'type'});
 	$d = $data->[$in{'index'}];
+	$d || &error($text{'editgrey_gone'});
 	}
 
 # Start of form block

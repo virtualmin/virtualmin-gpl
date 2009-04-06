@@ -1,6 +1,8 @@
 # Functions for managing Postgrey and Postfix
 # XXX centos support
 
+@postgrey_data_types = ( 'clients', 'recipients' );
+
 # check_postgrey()
 # Returns undef if Postgrey is installed, or an error message if not
 sub check_postgrey
@@ -261,50 +263,164 @@ sub list_postgrey_data
 local ($type) = @_;
 local $file = &get_postgrey_data_file($type);
 return undef if (!$file);
-local ($_, @rv, @cmts);
-local $lnum = 0;
-&open_readfile(POSTGREY, $file);
-while(<POSTGREY>) {
-	s/\r|\n//g;
-	if (/^\s*#+\s*(\S.*)$/) {
-		# Comment line
-		push(@cmts, $1);
-		}
-	elsif (/\S/ && !/^\s*#/) {
-		# Actual line
-		push(@rv, { 'line' => $lnum - scalar(@cmts),
-			    'eline' => $lnum,
-			    'file' => $file,
-			    'value' => $_,
-			    'index' => scalar(@rv),
-			    'cmts' => [ @cmts ] });
-		if ($rv[$#rv]->{'value'} =~ /^\/(.*)\/$/) {
-			# Regular expression
-			$rv[$#rv]->{'value'} = $1;
-			$rv[$#rv]->{'re'} = 1;
+if (!$postgrey_data_cache{$type}) {
+	local ($_, @rv, @cmts);
+	local $lnum = 0;
+	&open_readfile(POSTGREY, $file);
+	while(<POSTGREY>) {
+		s/\r|\n//g;
+		if (/^\s*#+\s*(\S.*)$/) {
+			# Comment line
+			push(@cmts, $1);
 			}
-		@cmts = ( );
+		elsif (/\S/ && !/^\s*#/) {
+			# Actual line
+			push(@rv, { 'line' => $lnum - scalar(@cmts),
+				    'eline' => $lnum,
+				    'file' => $file,
+				    'value' => $_,
+				    'index' => scalar(@rv),
+				    'cmts' => [ @cmts ] });
+			if ($rv[$#rv]->{'value'} =~ /^\/(.*)\/$/) {
+				# Regular expression
+				$rv[$#rv]->{'value'} = $1;
+				$rv[$#rv]->{'re'} = 1;
+				}
+			@cmts = ( );
+			}
+		else {
+			# Blank line (end of comments)
+			@cmts = ( );
+			}
+		$lnum++;
 		}
-	else {
-		# Blank line (end of comments)
-		@cmts = ( );
-		}
-	$lnum++;
+	close(POSTGREY);
+	$postgrey_data_cache{$type} = \@rv;
 	}
-close(POSTGREY);
-return \@rv;
+return $postgrey_data_cache{$type};
 }
 
+# create_postgrey_data(type, &data)
+# Add an entry to a Postgrey whitelist file, and in-memory cache
 sub create_postgrey_data
 {
+local ($type, $data) = @_;
+local $file = &get_postgrey_data_file($type);
+$file || &error("Failed to find file for $type");
+local @newlines = &postgrey_data_lines($data);
+local $lref = &read_file_lines($file);
+if ($postgrey_data_cache{$type}) {
+	# Add to cache and set lines and index
+	$data->{'line'} = scalar(@$lref);
+	$data->{'eline'} = scalar(@$lref) + scalar(@newlines) - 1;
+	$data->{'file'} = $file;
+	$data->{'index'} = scalar(@{$postgrey_data_cache{$type}});
+	push(@{$postgrey_data_cache{$type}}, $data);
+	}
+push(@$lref, @newlines);
+&flush_file_lines($file);
 }
 
+# modify_postgrey_data(type, &data)
+# Modify an entry in a Postgrey whitelist file
 sub modify_postgrey_data
 {
+local ($type, $data) = @_;
+local $file = &get_postgrey_data_file($type);
+$file || &error("Failed to find file for $type");
+local @newlines = &postgrey_data_lines($data);
+local $oldlines = $data->{'eline'} - $data->{'line'} + 1;
+local $lref = &read_file_lines($file);
+splice(@$lref, $data->{'line'}, $oldlines, @newlines);
+$data->{'eline'} = $data->{'line'} + scalar(@newlines) - 1;
+if ($postgrey_data_cache{$type} && scalar(@newlines) != $oldlines) {
+	# Fix lines in cache
+	foreach my $c (@{$postgrey_data_cache{$type}}) {
+		if ($c->{'line'} > $data->{'line'}) {
+			$c->{'line'} += scalar(@newlines) - $oldlines;
+			$c->{'eline'} += scalar(@newlines) - $oldlines;
+			}
+		}
+	}
+&flush_file_lines($file);
 }
 
+# delete_postgrey_data(type, &data)
+# Remove an entry from a Postgrey whitelist file, and in-memory cache
 sub delete_postgrey_data
 {
+local ($type, $data) = @_;
+local $file = &get_postgrey_data_file($type);
+$file || &error("Failed to find file for $type");
+local $lref = &read_file_lines($file);
+local $oldlines = $data->{'eline'} - $data->{'line'} + 1;
+splice(@$lref, $data->{'line'}, $oldlines);
+if ($postgrey_data_cache{$type}) {
+	# Remove from cache and shift other lines and indexes down
+	splice(@{$postgrey_data_cache{$type}}, $data->{'index'}, 1);
+	foreach my $c (@{$postgrey_data_cache{$type}}) {
+		if ($c->{'index'} > $data->{'index'}) {
+			$c->{'index'}--;
+			}
+		if ($c->{'line'} > $data->{'line'}) {
+			$c->{'line'} -= $oldlines;
+			$c->{'eline'} -= $oldlines;
+			}
+		}
+	}
+&flush_file_lines($file);
+}
+
+sub postgrey_data_lines
+{
+local ($data) = @_;
+local @rv;
+push(@rv, map { "# $_" } @{$data->{'cmts'}});
+push(@rv, $data->{'re'} ? "/".$data->{'value'}."/" : $data->{'value'});
+return @rv;
+}
+
+# apply_postgrey_data()
+# Send a HUP signal to have postgrey re-read it's data files
+sub apply_postgrey_data
+{
+local $args = &get_postgrey_args();
+local $pid;
+if ($args =~ /--pidfile=(\S+)/) {
+	local $pidfile = $1;
+	$pid = &check_pid_file($pidfile);
+	}
+($pid) = &find_byname("postgrey") if (!$pid);
+if ($pid) {
+	return &kill_logged('HUP', $pid) ? 1 : 0;
+	}
+return 0;
+}
+
+# Lock all Postgrey configuration files
+sub obtain_lock_postgrey
+{
+&obtain_lock_anything();
+if ($main::got_lock_postgrey == 0) {
+	foreach my $t (@postgrey_data_types) {
+		my $file = &get_postgrey_data_file($t);
+		&lock_file($file) if ($file);
+		}
+	}
+$main::got_lock_postgrey++;
+}
+
+# Un-lock all Postgrey configuration files
+sub release_lock_postgrey
+{
+if ($main::got_lock_postgrey == 1) {
+	foreach my $t (@postgrey_data_types) {
+		my $file = &get_postgrey_data_file($t);
+		&unlock_file($file) if ($file);
+		}
+	}
+$main::got_lock_postgrey-- if ($main::got_lock_postgrey);
+&release_lock_anything();
 }
 
 1;

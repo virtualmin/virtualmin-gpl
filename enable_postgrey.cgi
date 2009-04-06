@@ -7,7 +7,10 @@ $err = &check_postgrey();
 &error($err) if ($err);
 &ui_print_header(undef, $text{'postgrey_title2'}, "");
 
+&obtain_lock_postgrey();
 &enable_postgrey();
+&release_lock_postgrey();
+&webmin_log("enable", "postgrey");
 
 &ui_print_footer("postgrey.cgi", $text{'postgrey_return'});
 

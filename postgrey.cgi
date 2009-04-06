@@ -31,12 +31,12 @@ print &ui_buttons_end();
 if ($ok) {
 	# Show whitelists of emails and clients
 	print &ui_hr();
-	@types = ( 'clients', 'recipients' );
 	@tabs = map { [ $_, $text{'postgrey_tab'.$_},
-			'postgrey.cgi?type='.&urlize($_) ] } @types;
-	print &ui_tabs_start(\@tabs, 'type', $in{'type'} || $types[0], 1);
+			'postgrey.cgi?type='.&urlize($_) ] }
+		    @postgrey_data_types;
+	print &ui_tabs_start(\@tabs, 'type', $in{'type'} || $tabs[0]->[0], 1);
 
-	foreach $t (@types) {
+	foreach $t (@postgrey_data_types) {
 		print &ui_tabs_start_tab('type', $t);
 		$data = &list_postgrey_data($t);
 		if ($data) {
@@ -45,10 +45,11 @@ if ($ok) {
 			foreach $d (@$data) {
 				push(@table, [
 				    { 'type' => 'checkbox', 'name' => 'd',
-				      'value' => $_->{'index'} },
+				      'value' => $d->{'index'} },
 				    "<a href='edit_postgrey.cgi?type=$t&".
 				    "index=$d->{'index'}'>".
 				    &html_escape($d->{'value'})."</a>",
+				    $d->{'re'} ? $text{'yes'} : $text{'no'},
 				    &html_escape(join(" ", @{$d->{'cmts'}})),
 				    ]);
 				}
@@ -60,6 +61,7 @@ if ($ok) {
 				    $text{'postgrey_add'.$t} ] ],
 				[ [ 'type', $t ] ],
 				[ '', $text{'postgrey_head'.$t},
+				  $text{'postgrey_re'}, 
 				  $text{'postgrey_cmts'} ],
 				100,
 				\@table,
