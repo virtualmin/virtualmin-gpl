@@ -1822,6 +1822,16 @@ log_delete_plan=Deleted account plan $1
 log_default_plan=Change default account plan to $1
 log_nodefault_plan=Cleared default account plan
 log_delete_plans=Deleted $1 account plans
+log_postgrey_enable=Enabling email greylisting
+log_postgrey_disable=Disabled email greylisting
+log_postgrey_deletesclients=Deleted $1 client whitelist entries
+log_postgrey_deletesrecipients=Deleted $1 recipient whitelist entries
+log_postgrey_createclients=Created client whitelist entry for $1
+log_postgrey_createrecipients=Created recipient whitelist entry for $1
+log_postgrey_modifyclients=Modified client whitelist entry for $1
+log_postgrey_modifyrecipients=Modified recipient whitelist entry for $1
+log_postgrey_deleteclients=Deleted client whitelist entry for $1
+log_postgrey_deleterecipients=Deleted recipient whitelist entry for $1
 
 backup_title=Backup Virtual Servers
 backup_title2=Edit Scheduled Backup

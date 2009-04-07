@@ -19,7 +19,7 @@ foreach $i (sort { $b <=> $a } @d) {
 &release_lock_postgrey();
 &apply_postgrey_data();
 
-&webmin_log('deletes', 'postgrey', scalar(@d), { 'type' => $in{'delete'} });
+&webmin_log('deletes', 'postgrey', scalar(@d), { 'type' => $in{'type'} });
 
 &redirect("postgrey.cgi?type=$in{'type'}");
 

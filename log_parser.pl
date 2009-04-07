@@ -103,6 +103,18 @@ elsif ($type eq "sched") {
 					       &text('log_sched_doms', $object);
 	return &text('log_'.$action.'_sched', $msg);
 	}
+elsif ($type eq "postgrey") {
+	if ($action eq 'enable' || $action eq 'disable') {
+		return $text{'log_postgrey_'.$action};
+		}
+	elsif ($action eq 'deletes') {
+		return &text('log_postgrey_deletes'.$p->{'type'}, $object);
+		}
+	else {
+		return &text('log_postgrey_'.$action.$p->{'type'},
+			     &html_escape($object));
+		}
+	}
 elsif ($type eq "link") {
 	return &text('log_'.$action.'_link', &html_escape($p->{'desc'}));
 	}

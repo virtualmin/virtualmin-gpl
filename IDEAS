@@ -50,12 +50,11 @@
 
  - Postgrey
 	- FS#5614
-	- Need package for it?
 	- Add to virtualmin.com docs (and tell Joe)
-	- CHANGELOG
-	- Locking and logging
 	- Package auto-install
 	- Test on CentOS
+		- Support socket file with --unix
+		- Need package for it?
 
  - WebNIC registrar support
 	- See email from Winnie Lee

@@ -1091,3 +1091,4 @@ Added the SSH server status to the System Information page, including the abilit
 Made the docutils Python module optional for MoinMoin installs, as it is missing on CentOS.
 Added a --plan flag to modify-reseller.pl, to allow setting of limits from a plan.
 Added a Module Config option to control if default features come from plan or Features and Plugins page.
+Greylisting using Postgrey can now be setup using Virtualmin, via the new Email Greylisting page. In addition, whitelists for SMTP servers and email recipents can be managed.

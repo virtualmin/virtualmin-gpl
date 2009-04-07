@@ -1,0 +1,4 @@
+desc=Email greylisting
+html=Greylisting to to reduce spam can now be setup using Virtualmin, via the new Email Greylisting page. This page can also be used to manage whitelists for SMTP servers and email recipents can be managed.
+master=1
+link=postgrey.cgi
