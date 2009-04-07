@@ -123,6 +123,14 @@ $test_domain_db = &database_name(\%test_domain);
 $test_domain_cert = &default_certificate_file(\%test_domain, "cert");
 $test_domain_key = &default_certificate_file(\%test_domain, "key");
 
+# Create PostgreSQL password file
+$pg_pass_file = "/tmp/pgpass.txt";
+open(PGPASS, ">$pg_pass_file");
+print PGPASS "*:*:*:$test_domain_user:smeg\n";
+close(PGPASS);
+$ENV{'PGPASSFILE'} = $pg_pass_file;
+chmod(0600, $pg_pass_file);
+
 # Build list of test types
 $domains_tests = [
 	# Make sure domain creation works
@@ -132,7 +140,7 @@ $domains_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
 		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
-		      $config{'postgresl'} ? ( [ 'postgres' ] ) : ( ),
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
 		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
 		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
@@ -171,6 +179,11 @@ $domains_tests = [
 	# Check MySQL login
 	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.' -e "select version()"',
 	},
+
+	$config{'postgres'} ? (
+		# Check PostgreSQL login
+		{ 'command' => 'psql -U '.$test_domain_user.' -h localhost '.$test_domain_db },
+		) : ( ),
 
 	# Check PHP execution
 	{ 'command' => 'echo "<?php phpinfo(); ?>" >~'.
@@ -613,6 +626,9 @@ $database_tests = [
 		  'grep' => '^'.$test_domain_user.'_extra2',
 		},
 
+		# Check that we can login
+		{ 'command' => 'psql -U '.$test_domain_user.' -h localhost '.$test_domain_user.'_extra2' },
+
 		# Drop the PostgreSQL database
 		{ 'command' => 'delete-database.pl',
 		  'args' => [ [ 'domain', $test_domain ],
@@ -931,6 +947,11 @@ $move_tests = [
 	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.' -e "select version()"',
 	},
 
+	$config{'postgres'} ? (
+		# Check PostgreSQL login
+		{ 'command' => 'psql -U '.$test_domain_user.' -h localhost '.$test_domain_db },
+		) : ( ),
+
 	# Make sure the mailbox still exists
 	{ 'command' => 'list-users.pl',
 	  'args' => [ [ 'domain' => $test_domain ] ],
@@ -964,7 +985,9 @@ $backup_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ], [ 'mail' ],
-		      [ 'mysql' ], [ 'spam' ], [ 'virus' ], [ 'webmin' ],
+		      [ 'mysql' ], [ 'spam' ], [ 'virus' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
+		      [ 'webmin' ],
 		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
@@ -1044,7 +1067,9 @@ $multibackup_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ], [ 'mail' ],
-		      [ 'mysql' ], [ 'spam' ], [ 'virus' ], [ 'webmin' ],
+		      [ 'mysql' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
+		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
 		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
