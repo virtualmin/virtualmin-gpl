@@ -345,11 +345,14 @@ foreach $db (@dbs) {
 	&$outdent_print();
 	if ($postgresql::postgres_sameunix) {
 		# Restore is running as the postgres user - make the backup
-		# file owned by him
+		# file owned by him, and the parent directory world-accessible
 		local @uinfo = getpwnam($postgresql::postgres_login);
 		if (@uinfo) {
 			&set_ownership_permissions($uinfo[2], $uinfo[3],
 						   undef, $db->[1]);
+			local $dir = $_[1];
+			$dir =~ s/\/[^\/]+$//;
+			&set_ownership_permissions(undef, undef, 0711, $dir);
 			}
 		}
 	local $err;
