@@ -10318,6 +10318,18 @@ if ($config{'dns'}) {
 	&foreign_installed("bind8", 1) == 2 ||
 		return &text('index_ebind', "/bind8/", $clink);
 
+	# Check that primary NS hostname is reasonable
+	&require_bind();
+	local $tmpl = &get_template(0);
+	local $master = $tmpl->{'dns_master'} eq 'none' ? undef :
+                                        $tmpl->{'dns_master'};
+	$master ||= $bind8::config{'default_prins'} ||
+		    &get_system_hostname();
+	if ($master !~ /\./) {
+		&$second_print("<b>".&text('check_dnsmaster',
+					   "<tt>$master</tt>")."</b>");
+		}
+
 	# Make sure this server is configured to use the local BIND
 	if (&foreign_check("net") && $config{'dns_check'}) {
 		&foreign_require("net", "net-lib.pl");
