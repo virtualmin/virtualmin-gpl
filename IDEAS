@@ -52,9 +52,6 @@
  - Postgrey
 	- FS#5614
 	- Add to virtualmin.com docs (and tell Joe)
-	- Package auto-install
-	- Test on CentOS
-		- Need package for it?
 
  - WebNIC registrar support
 	- See email from Winnie Lee

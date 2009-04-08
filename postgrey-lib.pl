@@ -20,6 +20,27 @@ else {
 	}
 }
 
+# can_install_postgrey()
+# Returns 1 if Postgrey can possibly be installed on this OS
+sub can_install_postgrey
+{
+if ($gconfig{'os_type'} eq 'debian-linux' ||
+    $gconfig{'os_type'} eq 'redhat-linux') {
+	&foreign_require("software", "software-lib.pl");
+	return defined(&software::update_system_install);
+	}
+return 0;
+}
+
+# install_postgrey_package()
+# Attempt to install Postgrey, outputting progress messages
+sub install_postgrey_package
+{
+&foreign_require("software", "software-lib.pl");
+local @inst = &software::update_system_install("postgrey");
+return scalar(@inst) || !&check_postgrey();
+}
+
 # Returns the init script name for postgrey's daemon
 sub get_postgrey_init
 {

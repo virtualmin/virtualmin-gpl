@@ -9,7 +9,14 @@ require './virtual-server-lib.pl';
 # Check if can use
 $err = &check_postgrey();
 if ($err) {
-	&ui_print_endpage(&text('postgrey_failed', $err));
+	print &text('postgrey_failed', $err),"<p>\n";
+	if (&can_install_postgrey()) {
+		print &ui_form_start("install_postgrey.cgi");
+		print &text('postgrey_installdesc'),"<p>\n";
+		print &ui_form_end([ [ undef, $text{'postgrey_install'} ] ]);
+		}
+	&ui_print_footer("", $text{'index_return'});
+	return;
 	}
 
 # Show button to enable / disable
