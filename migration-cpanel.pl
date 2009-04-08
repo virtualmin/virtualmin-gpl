@@ -1225,8 +1225,7 @@ if ($main::cpanel_dir_cache{$file} && -d $main::cpanel_dir_cache{$file}) {
 	# Use cached extract from this session
 	return (1, $main::cpanel_dir_cache{$file});
 	}
-#local $temp = &transname();
-local $temp = &tempname();
+local $temp = &transname();
 mkdir($temp, 0700);
 local $err = &extract_compressed_file($file, $temp);
 if ($err) {
