@@ -54,7 +54,6 @@
 	- Add to virtualmin.com docs (and tell Joe)
 	- Package auto-install
 	- Test on CentOS
-		- Support socket file with --unix
 		- Need package for it?
 
  - WebNIC registrar support

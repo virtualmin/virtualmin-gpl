@@ -1,5 +1,4 @@
 # Functions for managing Postgrey and Postfix
-# XXX centos support
 
 @postgrey_data_types = ( 'clients', 'recipients' );
 
@@ -68,6 +67,7 @@ sub get_postgrey_port
 {
 local $args = &get_postgrey_args();
 if ($args =~ /--inet=(\S+)/) {
+	# TCP port
 	local $opts = $1;
 	if ($opts =~ /^(\S+):(\d+)$/) {
 		return $2;
@@ -75,6 +75,10 @@ if ($args =~ /--inet=(\S+)/) {
 	elsif ($opts =~ /^\d+$/) {
 		return $opts;
 		}
+	}
+elsif ($args =~ /--unix=(\/\S+)/) {
+	# Unix socket file
+	return $1;
 	}
 return undef;
 }
@@ -100,7 +104,8 @@ if (!$port) {
 	}
 &require_mail();
 local $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
-if ($rr =~ /check_policy_service\s+inet:\S+:(\d+)/ && $1 == $port) {
+if ($rr =~ /check_policy_service\s+inet:\S+:(\d+)/ && $1 == $port ||
+    $rr =~ /check_policy_service\s+unix:(\S+)/ && $1 eq $port) {
 	return 1;
 	}
 return 0;
@@ -122,9 +127,12 @@ if (&init::action_status($init) != 2) {
 		$port = &allocate_random_port(60000);
 		}
 	local $postgrey = &has_command("postgrey");
-	&init::enable_at_boot($init, 'Start the Postgrey greylisting server',
-			      "$postgrey --inet=$port -d",
-			      "killall -9 postgrey");
+	&init::enable_at_boot(
+		$init,
+		'Start the Postgrey greylisting server',
+		$postgrey." -d ".($port =~ /^\// ? "--unix=$port"
+					         : "--inet=$port"),
+		"killall -9 postgrey");
 	&$second_print(&text('postgrey_initdone', $port));
 	}
 else {
@@ -150,18 +158,21 @@ else {
 &$first_print($text{'postgrey_postfix'});
 &require_mail();
 local $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
-if ($rr =~ /check_policy_service\s+inet:\S+:(\d+)/ && $1 == $port) {
+if ($rr =~ /check_policy_service\s+inet:\S+:(\d+)/ && $1 == $port ||
+    $rr =~ /check_policy_service\s+unix:(\S+)/ && $1 eq $port) {
 	# Already OK
 	&$second_print($text{'postgrey_postfixalready'});
 	}
 else {
-	if ($rr =~ /(.*)check_policy_service\s+inet:\S+:(\d+)(.*)/) {
+	local $wantport = $port =~ /^\// ? "unix:$port"
+					 : "inet:127.0.0.1:$port";
+	if ($rr =~ /(.*)check_policy_service\s+(inet|unix):\S+(.*)/) {
 		# Wrong port?!
-		$rr = $1."check_policy_service inet:127.0.0.1:$port".$3;
+		$rr = $1."check_policy_service ".$wantport.$3;
 		}
 	else {
 		# Need to setup
-		$rr .= " check_policy_service inet:127.0.0.1:$port";
+		$rr .= " check_policy_service ".$wantport;
 		}
 	&postfix::set_current_value("smtpd_recipient_restrictions", $rr);
 	&postfix::reload_postfix();
@@ -182,7 +193,8 @@ local $port = &get_postgrey_port();
 local $init = &get_postgrey_init();
 &require_mail();
 local $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
-if ($rr =~ /^(.*)\s*check_policy_service\s+inet:\S+:(\d+)(.*)/ && $2 == $port) {
+if ($rr =~ /^(.*)\s*check_policy_service\s+inet:\S+:(\d+)(.*)/ && $2 == $port ||
+    $rr =~ /^(.*)\s*check_policy_service\s+unix:(\S+)(.*)/ && $2 eq $port) {
 	$rr = $1.$3;
 	&postfix::set_current_value("smtpd_recipient_restrictions", $rr);
 	&postfix::reload_postfix();
