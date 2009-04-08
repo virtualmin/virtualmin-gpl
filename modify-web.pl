@@ -66,7 +66,7 @@ $config{'web'} || &usage("Web serving is not enabled for Virtualmin");
 # Parse command-line args
 $supports_php = defined(&supported_php_modes);
 $supports_ruby = defined(&supported_ruby_modes);
-$supports_styles = defined(&list_content_style);
+$supports_styles = defined(&list_content_styles);
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -144,10 +144,10 @@ while(@ARGV > 0) {
 		$matchall = 0;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
-@dnames || $all_doms || usage();
+@dnames || $all_doms || usage("No domains to modify specified");
 $mode || $rubymode || defined($proxy) || defined($framefwd) ||
   defined($suexec) || $stylename || defined($children) || $version ||
   defined($webmail) || defined($matchall) || defined($timeout) ||

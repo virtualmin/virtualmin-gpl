@@ -43,6 +43,7 @@ $migration_plesk = "$migration_dir/$migration_plesk_domain.plesk.txt";
 $migration_plesk_windows_domain = "sbcher.com";
 $migration_plesk_windows = "$migration_dir/$migration_plesk_windows_domain.plesk_windows.psa";
 $test_backup_file = "/tmp/$test_domain.tar.gz";
+$test_incremental_backup_file = "/tmp/$test_domain.incremental.tar.gz";
 $test_backup_dir = "/tmp/functional-test-backups";
 $test_email_dir = "/usr/local/webadmin/virtualmin/testmail";
 $spam_email_file = "$test_email_dir/spam.txt";
@@ -1244,6 +1245,91 @@ $remotebackup_tests = [
 	},
 	];
 
+$incremental_tests = [
+	# Create a test domain
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ], [ 'mail' ],
+		      [ 'mysql' ], [ 'webmin' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Install Wordpress to use up some disk
+	{ 'command' => 'install-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'wordpress' ],
+		      [ 'path', '/wordpress' ],
+		      [ 'db', 'mysql '.$test_domain_db ],
+		      [ 'version', 'latest' ] ],
+	},
+
+	# Backup to a temp file
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_file ] ],
+	},
+
+	# Apply a content style change
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'style' => 'rounded' ],
+		      [ 'content' => 'New website content' ] ],
+	},
+
+	# Create an incremental backup
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'incremental' ],
+		      [ 'dest', $test_incremental_backup_file ] ],
+	},
+
+	# Make sure the incremental is smaller than the full
+	{ 'command' =>
+		"full=`du -k $test_backup_file | cut -f 1` ; ".
+		"incr=`du -k $test_incremental_backup_file | cut -f 1` ; ".
+		"test $incr -lt $full"
+	},
+
+	# Delete the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Restore the full backup
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ] ],
+	},
+
+	# Restore the incremental
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_incremental_backup_file ] ],
+	},
+
+	# Verify that the latest files were restored
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'New website content',
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain.'/wordpress/',
+	  'grep' => 'WordPress installation',
+	},
+
+	# Finally delete to clean up
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
+	];
+
 $mail_tests = [
 	# Create a domain to get spam
 	{ 'command' => 'create-domain.pl',
@@ -2088,6 +2174,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'backup' => $backup_tests,
 	      'multibackup' => $multibackup_tests,
 	      'remotebackup' => $remotebackup_tests,
+	      'incremental' => $incremental_tests,
               'mail' => $mail_tests,
 	      'prepost' => $prepost_tests,
 	      'webmin' => $webmin_tests,
