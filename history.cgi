@@ -57,12 +57,7 @@ for($i=0; $i<@stats; $i++) {
 		$units = $text{'history_pc'};
 		}
 	elsif ($stat eq 'tx' || $stat eq 'rx') {
-		if ($maxes->{$stat} < 10*1024) {
-			$units = $text{'history_kbsec'};
-			}
-		else {
-			$units = $text{'history_mbsec'};
-			}
+		$units = $text{'history_kbsec'};
 		}
 	else {
 		$units = undef;

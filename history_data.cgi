@@ -62,12 +62,7 @@ for($i=0; $i<scalar(@$first); $i++) {
 				$v *= 100;
 				}
 			elsif ($stat eq 'tx' || $stat eq 'rx') {
-				if ($maxes->{$stat} < 10*1024) {
-					$v /= 1024;
-					}
-				else {
-					$v /= 1024*1024;
-					}
+				$v /= 1024;
 				}
 			}
 		if ($v ne int($v)) {
