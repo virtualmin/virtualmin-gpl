@@ -1057,6 +1057,10 @@ if ($ok) {
 			if ($d->{'parent'}) {
 				# Does the parent exist?
 				$parentdom = &get_domain($d->{'parent'});
+				if (!$parentdom && $d->{'backup_parent_dom'}) {
+					$parentdom = &get_domain_by(
+					    "dom", $d->{'backup_parent_dom'});
+					}
 				if (!$parentdom) {
 					&$second_print(
 					    $d->{'backup_parent_dom'} ?
