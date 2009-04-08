@@ -3172,7 +3172,7 @@ local %hash = %$subs;
 ($hash{'webmin_port'}, $hash{'webmin_proto'}) = &get_miniserv_port_proto();
 $template = &substitute_virtualmin_template($template, \%hash);
 
-# Work out the From: address - if a domain is given, user it's email address.
+# Work out the From: address - if a domain is given, use it's email address.
 if (!$from && $remote_user && !&master_admin() && $d) {
 	$from = $d->{'emailto'};
 	}

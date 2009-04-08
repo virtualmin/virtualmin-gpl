@@ -49,10 +49,6 @@
 	- /sbin/ifconfig eth0 inet6 add 2001:0db8:0:f101::120/64
 	- Also do IP allocation in templates
 
- - Postgrey
-	- FS#5614
-	- Add to virtualmin.com docs (and tell Joe)
-
  - WebNIC registrar support
 	- See email from Winnie Lee
 
