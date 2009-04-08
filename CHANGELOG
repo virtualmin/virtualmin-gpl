@@ -1092,3 +1092,4 @@ Made the docutils Python module optional for MoinMoin installs, as it is missing
 Added a --plan flag to modify-reseller.pl, to allow setting of limits from a plan.
 Added a Module Config option to control if default features come from plan or Features and Plugins page.
 Greylisting using Postgrey can now be setup using Virtualmin, via the new Email Greylisting page. In addition, whitelists for SMTP servers and email recipents can be managed.
+Added the --no-alias flag to list-domains.pl, to show non-alias domains.

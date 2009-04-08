@@ -13,7 +13,8 @@ you know exactly which server you are interested in.
 
 To limit the domains to those owned by a single user, the C<--user> parameter
 can be given, following by a domain owner's name. You can also limit it to
-particular server types with the C<--alias>, C<--subserver>, C<--toplevel>
+particular server types with the C<--alias>, C<--no-alias>, C<--subserver>,
+C<--toplevel>
 and C<--subdomain> parameters. Or to only show domains with a particular feature
 active, use the C<--with-feature> parameter followed by a feature code like
 C<dns> or C<web>. Alternately, C<--without-feature> can be used to show
@@ -73,6 +74,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--alias") {
 		$must_alias = 1;
 		}
+	elsif ($a eq "--no-alias") {
+		$must_noalias = 1;
+		}
 	elsif ($a eq "--toplevel") {
 		$must_toplevel = 1;
 		}
@@ -116,6 +120,7 @@ else {
 	# Showing all domains, with some limits
 	@doms = &list_domains();
 	@doms = grep { $_->{'alias'} } @doms if ($must_alias);
+	@doms = grep { !$_->{'alias'} } @doms if ($must_noalias);
 	@doms = grep { $_->{'parent'} } @doms if ($must_subserver);
 	@doms = grep { !$_->{'parent'} } @doms if ($must_toplevel);
 	@doms = grep { $_->{'subdom'} } @doms if ($must_subdomain);
@@ -464,7 +469,7 @@ print "                         [--domain name]*\n";
 print "                         [--user name]*\n";
 print "                         [--with-feature feature]\n";
 print "                         [--without-feature feature]\n";
-print "                         [--alias | --subserver |\n";
+print "                         [--alias | --no-alias | --subserver |\n";
 print "                          --toplevel | --subdomain]\n";
 print "                         [--plan ID|\"plan name\"]\n";
 exit(1);
