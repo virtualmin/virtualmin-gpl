@@ -77,7 +77,7 @@ else {
 	}
 
 # Do it for all domains
-foreach $d (@doms) {
+DOMAIN: foreach $d (@doms) {
 	&$first_print("Updating server $d->{'dom'} ..");
 	@dom_features = $d->{'alias'} ? @alias_features :
 			$d->{'parent'} ? ( grep { $_ ne "webmin" } @features ) :
@@ -104,6 +104,18 @@ foreach $d (@doms) {
 	if ($cerr) {
 		&$second_print($cerr);
 		next;
+		}
+
+	# Make sure plugins are suitable
+	$parentdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
+	$aliasdom = $d->{'alias'} ? &get_domain($d->{'alias'}) : undef;
+	$subdom = $d->{'sub'} ? &get_domain($d->{'subdom'}) : undef;
+	foreach my $f (keys %plugin) {
+		if ($check{$f} && !&plugin_call($f, "feature_suitable",
+                                        $parentdom, $aliasdom, $subdom)) {
+			&$second_print(".. the feature $f cannot be enabled for this type of virtual server");
+			next DOMAIN;
+			}
 		}
 
 	# Check for warnings
