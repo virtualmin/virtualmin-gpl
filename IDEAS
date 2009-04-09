@@ -17,7 +17,6 @@
 	- phpMySites
 	- counters (FS 3348)
 	- shortly
-	- simple invoices (FS#5739)
 
  - new fcgid mode, as suggested by filip
 	Action php5-fcgi /fcgi-bin/php5-fcgi
