@@ -71,6 +71,21 @@ if ((!$d->{'alias'} || $d->{'alias_mode'}) != 1 && $can == 2) {
 print &ui_table_row(&hlink($text{'phpmode_matchall'}, "matchall"),
 		    &ui_yesno_radio("matchall", &get_domain_web_star($d)));
 
+# Default website for its IP
+$defd = &get_default_website($d->{'ip'});
+$defweb = $defd->{'id'} eq $d->{'id'} ? 1 : 0;
+if (&can_default_website($d) && !$defweb) {
+	print &ui_table_row(&hlink($text{'phpmode_defweb'}, "defweb"),
+		&ui_radio("defweb", $defweb,
+			  [ [ 1, $text{'yes'} ],
+			    [ 0, &text('phpmode_defno', $defd->{'dom'}) ] ]));
+	}
+else {
+	print &ui_table_row(&hlink($text{'phpmode_defweb'}, "defweb"),
+		$defweb ? $text{'yes'}
+			: &text('phpmode_defno', $defd->{'dom'}));
+	}
+
 print &ui_hidden_table_end();
 
 # Show PHP information

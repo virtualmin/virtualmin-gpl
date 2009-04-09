@@ -3929,6 +3929,8 @@ phpmode_pears=Pear modules for PHP $1
 phpmode_matchall=Website matches all sub-domains?
 phpmode_matchallon=Adding all sub-domains to Apache config ..
 phpmode_matchalloff=Removing all sub-domains from Apache config ..
+phpmode_defweb=Default website for IP address?
+phpmode_defno=No, default is $1
 
 spf_title=DNS Options
 spf_enable=Enabling SPF ..

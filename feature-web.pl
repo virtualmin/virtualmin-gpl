@@ -1048,9 +1048,8 @@ else {
 	# Looking in global Apache config
 	$conf = &apache::get_config();
 	}
-local $v;
 local $sp = $_[1] || $default_web_port;
-foreach $v (&apache::find_directive_struct("VirtualHost", $conf)) {
+foreach my $v (&apache::find_directive_struct("VirtualHost", $conf)) {
 	local $vp = $v->{'words'}->[0] =~ /:(\d+)$/ ? $1 : $default_web_port;
 	next if ($vp != $sp);
         local $sn = &apache::find_directive("ServerName", $v->{'members'});
@@ -3021,6 +3020,52 @@ if ($elog && (!-e $eloglink || -l $eloglink) &&
 	&unlock_file($eloglink);
 	}
 }
+
+# can_default_website(&domain)
+# Returns 1 if the current user can change the default website for an IP.
+# Only true for the master admin, or if he owns all the sites on that IP.
+sub can_default_website
+{
+local ($d) = @_;
+return 1 if (&master_admin());
+local @onip = grep { $_->{'ip'} eq $d->{'ip'} && $d->{'web'} }
+		   &list_domains();
+foreach my $o (@onip) {
+	&can_edit_domain($o) || return 0;
+	}
+return 1;
+}
+
+# list_domains_on_ip(&domain)
+# Returns a list of virtual servers that are using the same IP in the Apache
+# config as this one. If it is name-based (* in the virtualhost), then all
+# similar servers will be matched.
+sub list_domains_on_ip
+{
+local ($d) = @_;
+# XXX will a request to some IP match both domains on that IP, and * ?
+}
+
+# get_default_website(ip)
+# Returns the virtual server hash for the default website for some IP
+sub get_default_website
+{
+local ($ip) = @_;
+&require_web();
+local $conf = &apache::get_config();
+foreach my $v (&apache::find_directive_struct("VirtualHost", $conf)) {
+	# XXX what about name-based servers that aren't on an IP?
+	}
+}
+
+# save_default_website(&domain)
+# Make sure virtual server the default website for its IP, by re-ordering
+# entries in httpd.conf
+sub save_default_website
+{
+local ($d) = @_;
+}
+
 
 $done_feature_script{'web'} = 1;
 
