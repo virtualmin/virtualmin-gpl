@@ -932,16 +932,17 @@ local %got;
 local $ip = $d->{'dns_ip'} || $d->{'ip'};
 foreach my $r (@recs) {
 	$got{uc($r->{'type'})}++;
-	if ($r->{'type'} eq 'A' &&
-	    ($r->{'name'} eq $d->{'dom'}.'.' ||
-	     $r->{'name'} eq 'www.'.$d->{'dom'}.'.') &&
-	    $r->{'values'}->[0] ne $ip) {
-		return &text('validate_ednsip', "<tt>$r->{'name'}</tt>",
-		     "<tt>$r->{'values'}->[0]</tt>", "<tt>$ip</tt>");
-		}
 	}
 $got{'SOA'} || return &text('validate_ednssoa', "<tt>$zonefile</tt>");
 $got{'A'} || return &text('validate_ednsa', "<tt>$zonefile</tt>");
+foreach my $n ($d->{'dom'}.'.', 'www.'.$d->{'dom'}.'.') {
+	my @nips = map { $_->{'values'}->[0] }
+		       grep { $_->{'type'} eq 'A' && $_->{'name'} eq $n } @recs;
+	if (@nips && &indexof($ip, @nips) < 0) {
+		return &text('validate_ednsip', "<tt>$n</tt>",
+		     "<tt>".join(' or ', @nips)."</tt>", "<tt>$ip</tt>");
+		}
+	}
 
 # If possible, run named-checkzone
 if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone()) {
