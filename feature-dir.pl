@@ -380,6 +380,7 @@ return { 'dirnologs' => !$in{'dir_logs'} };
 sub restore_dir
 {
 &$first_print($text{'restore_dirtar'});
+local $tar = &get_tar_command(); 
 local $iflag = "$_[0]->{'home'}/.incremental";
 &unlink_file($iflag);
 if (defined(&set_php_wrappers_writable)) {
@@ -414,7 +415,7 @@ else {
 	local $comp = $cf == 1 ? "gunzip -c" :
 		      $cf == 2 ? "uncompress -c" :
 		      $cf == 3 ? "bunzip2 -c" : "cat";
-	local $tarcmd = "tar xfX - $xtemp";
+	local $tarcmd = "$tar xfX - $xtemp";
 	#if ($_[6]) {
 	#	# Run as domain owner - disabled, as this prevents some files
 	#	# from being written to by tar
