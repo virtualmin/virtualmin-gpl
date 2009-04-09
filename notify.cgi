@@ -32,7 +32,8 @@ if ($in{'admins'}) {
 @to = &unique(@to);
 &send_notify_email($in{'from'}, \@doms, undef, $in{'subject'}, $in{'body'},
 		   $in{'attach'}, $in{"attach_filename"},
-		   $in{"attach_content_type"}, $in{'admins'});
+		   $in{"attach_content_type"}, $in{'admins'},
+		   !$in{'nomany'});
 
 # Tell the user
 &ui_print_header(undef, $text{'newnotify_title'}, "");

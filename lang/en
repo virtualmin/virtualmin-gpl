@@ -3160,6 +3160,7 @@ newnotify_done=The specified email message has been sent to the following addres
 newnotify_edoms=No servers selected
 newnotify_attach=Optional attached file
 newnotify_admins=Also email extra administrators in selected domains
+newnotify_nomany=Only email each domain owner once
 
 mailusers_title=Email All Mailboxes
 mailusers_desc=This form can be used to send email to all mailboxes in this domain, or those you selected. The following substitions can be used in the message body and subject:

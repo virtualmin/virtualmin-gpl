@@ -3218,13 +3218,14 @@ return (1, &text('mail_ok', $to));
 }
 
 # send_notify_email(from, &doms|&users, [&dom], subject, body,
-#		    [attach, attach-filename, attach-type], [extra-admins])
+#		    [attach, attach-filename, attach-type], [extra-admins],
+#		    [send-many])
 # Sends a single email to multiple recipients. These can be Virtualmin domains
 # or users.
 sub send_notify_email
 {
 local ($from, $recips, $d, $subject, $body, $attach, $attachfile, $attachtype,
-       $admins) = @_;
+       $admins, $many) = @_;
 local %done;
 foreach my $r (@$recips) {
 	# Work out recipient type and addresses
@@ -3248,7 +3249,7 @@ foreach my $r (@$recips) {
 
 	# Send to them
 	foreach my $email (@emails) {
-		next if ($done{$email}++);
+		next if (!$many && $done{$email}++);
 		local $mail = { 'headers' =>
 		    [ [ 'From' => $from ],
 		      [ 'To' => $email ],
