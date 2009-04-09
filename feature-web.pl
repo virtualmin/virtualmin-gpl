@@ -3028,44 +3028,92 @@ sub can_default_website
 {
 local ($d) = @_;
 return 1 if (&master_admin());
-local @onip = grep { $_->{'ip'} eq $d->{'ip'} && $d->{'web'} }
-		   &list_domains();
-foreach my $o (@onip) {
-	&can_edit_domain($o) || return 0;
+foreach my $o (&list_domains_on_ip($d)) {
+	if ($o->[1] && !&can_edit_domain($o->[1])) {
+		return 0;
+		}
 	}
 return 1;
 }
 
 # list_domains_on_ip(&domain)
-# Returns a list of virtual servers that are using the same IP in the Apache
-# config as this one. If it is name-based (* in the virtualhost), then all
-# similar servers will be matched.
+# Returns a list of Apache virtualhost hash refs and virtual servers that are
+# using the same IP in the Apache config as this one. If it is name-based
+# (* in the virtualhost), then all similar servers will be matched.
 sub list_domains_on_ip
 {
 local ($d) = @_;
+&require_apache();
+local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+						   $d->{'web_port'});
+return ( ) if (!$virt);		# Cannot find our own site?
+local @rv;
+foreach my $v (&apache::find_directive_struct("VirtualHost", $conf)) {
+	if ($v->{'words'}->[0] eq $virt->{'words'}->[0]) {
+		# Matches IP .. find the domain if we can
+		local $sn = &apache::find_directive("ServerName",
+						    $v->{'members'});
+		local $vd = &get_domain_by("dom", $sn);
+		if (!$vd) {
+			# Search by ServerAlias
+			foreach my $sa (&apache::find_directive_struct(
+					  "ServerAlias", $v->{'members'})) {
+				foreach my $saw (map { lc($_) }
+						     @{$n->{'words'}}) {
+					$vd = &get_domain_by("dom", $saw);
+					last if ($vd);
+					}
+				}
+			}
+		push(@rv, [ $v, $vd ]);
+		}
+	}
+return @rv;
+
 # XXX will a request to some IP match both domains on that IP, and * ?
 }
 
-# get_default_website(ip)
-# Returns the virtual server hash for the default website for some IP
+# get_default_website(&domain)
+# Returns the Apache virtualhost and possibly virtual server hash for the
+# default website on some domain's IP
 sub get_default_website
 {
-local ($ip) = @_;
-&require_web();
-local $conf = &apache::get_config();
-foreach my $v (&apache::find_directive_struct("VirtualHost", $conf)) {
-	# XXX what about name-based servers that aren't on an IP?
-	}
+local ($d) = @_;
+local @onip = &list_domains_on_ip($d);
+return @onip ? @{$onip[0]} : ( );
 }
 
-# save_default_website(&domain)
+# set_default_website(&domain)
 # Make sure virtual server the default website for its IP, by re-ordering
 # entries in httpd.conf
-sub save_default_website
+sub set_default_website
 {
 local ($d) = @_;
+&require_apache();
+local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+						   $d->{'web_port'});
+local ($oldvirt, $oldd) = &get_default_website($d);
+if ($virt && $oldvirt && $virt ne $oldvirt) {
+	if ($virt->{'file'} eq $oldvirt->{'file'}) {
+		# Need to move up in file
+		local $lref = &read_file_lines($virt->{'file'});
+		local @oldl = @$lref[$virt->{'line'} .. $virt->{'eline'}];
+		splice(@$lref, $virt->{'line'},
+		       $virt->{'eline'} - $virt->{'line'} + 1);
+		splice(@$lref, $oldvirt->{'line'}, 0, @oldl);
+		&flush_file_lines($virt->{'file'});
+		}
+	else {
+		# Swap file order
+		# XXX
+		# XXX both have to be in include dir
+		# XXX fix up links too
+		}
+	undef(@apache::get_config_cache);
+	&register_post_action(\&restart_apache);
+	}
+return 0;
 }
-
 
 $done_feature_script{'web'} = 1;
 

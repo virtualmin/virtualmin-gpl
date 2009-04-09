@@ -143,6 +143,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-matchall") {
 		$matchall = 0;
 		}
+	elsif ($a eq "--default-website") {
+		$defwebsite = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -151,7 +154,7 @@ while(@ARGV > 0) {
 $mode || $rubymode || defined($proxy) || defined($framefwd) ||
   defined($suexec) || $stylename || defined($children) || $version ||
   defined($webmail) || defined($matchall) || defined($timeout) ||
-  &usage("Nothing to do");
+  $defwebsite || &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -241,6 +244,10 @@ foreach $d (@doms) {
 	!$rubymode || $rubymode eq "none" ||
 	    &indexof($rubymode, @rubysupp) >= 0 ||
 		&usage("The selected Ruby exection mode cannot be used with $d->{'dom'}");
+	}
+
+if ($defaultwebsite && @doms > 1) {
+	&usage("The --default-website flag can only be applied to a single virtual server");
 	}
 
 # Lock them all
@@ -374,6 +381,18 @@ foreach $d (@doms) {
 			}
 		}
 
+	if ($defwebsite) {
+		# Make this site the default, by re-ordering the Apache config
+		&$first_print("Making website the default ..");
+		if (!$d->{'alias'} || $d->{'alias_mode'} != 1) {
+			&set_default_website($d);
+			&$second_print(".. done");
+			}
+		else {
+			&$second_print(".. not possible for alias domains");
+			}
+		}
+
 	if (defined($proxy) || defined($framefwd)) {
 		# Save the domain
 		&modify_web($d, $oldd);
@@ -424,6 +443,7 @@ if (&has_webmail_rewrite()) {
 	print "                     [--webmail | --no-webmail]\n";
 	}
 print "                     [--matchall | --no-matchall]\n";
+print "                     [--default-website]\n";
 exit(1);
 }
 

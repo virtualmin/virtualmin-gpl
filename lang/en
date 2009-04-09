@@ -3931,6 +3931,7 @@ phpmode_matchallon=Adding all sub-domains to Apache config ..
 phpmode_matchalloff=Removing all sub-domains from Apache config ..
 phpmode_defweb=Default website for IP address?
 phpmode_defno=No, default is $1
+phpmode_defwebon=Making website the default ..
 
 spf_title=DNS Options
 spf_enable=Enabling SPF ..

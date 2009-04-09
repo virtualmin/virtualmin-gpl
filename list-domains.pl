@@ -339,6 +339,15 @@ if ($multi) {
 			      ($star ? "Yes" : "No"),"\n";
 			}
 
+		# Show default website flag
+		if ($d->{'web'} &&
+		    (!$d->{'alias'} || $d->{'alias_mode'} != 1)) {
+			($defvirt, $defd) = &get_default_website($d);
+			print "    Default website for IP: ",
+				($defd && $defd->{'id'} eq $d->{'id'} ?
+					"Yes" : "No"),"\n";
+			}
+
 		# Show DNS SPF mode
 		if ($config{'dns'} && $d->{'dns'} && !$d->{'dns_submode'}) {
 			$spf = &get_domain_spf($d);
