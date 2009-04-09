@@ -2384,9 +2384,12 @@ sub can_edit_spam
 return &master_admin() || &reseller_admin() || $access{'edit_spam'};
 }
 
+# Returns 2 if all website options can be edited, 1 if only non-suexec related
+# settings, 0 if nothing
 sub can_edit_phpmode
 {
-return $virtualmin_pro && &master_admin();
+return $virtualmin_pro && &master_admin() ? 2 :
+       $access{'edit_phpmode'} ? 1 : 0;
 }
 
 sub can_edit_phpver

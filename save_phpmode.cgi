@@ -6,11 +6,12 @@ require './virtual-server-lib.pl';
 &error_setup($text{'phpmode_err'});
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
-&can_edit_phpmode($d) || &error($text{'phpmode_ecannot'});
+$can = &can_edit_phpmode($d);
+$can || &error($text{'phpmode_ecannot'});
 &require_apache();
 
 # Check for option clashes
-if (!$d->{'alias'}) {
+if (!$d->{'alias'} && $can == 2) {
 	if (($in{'mode'} eq 'cgi' || $in{'mode'} eq 'fcgid') &&
 	    !$in{'suexec'}) {
 		&error($text{'phpmode_esuexec'});
@@ -24,6 +25,8 @@ if (!$d->{'alias'}) {
 	     $in{'children'} > $max_php_fcgid_children)) {
 		&error(&text('phpmode_echildren', $max_php_fcgid_children));
 		}
+	}
+if (!$d->{'alias'}) {
 	if (defined($in{'maxtime_def'}) && !$in{'maxtime_def'} &&
 	    $in{'maxtime'} !~ /^[1-9]\d*$/) {
 		&error($text{'phpmode_emaxtime'});
@@ -31,7 +34,8 @@ if (!$d->{'alias'}) {
 	}
 
 # Check for working suexec for PHP
-if (!$d->{'alias'} && ($in{'mode'} eq 'cgi' || $in{'mode'} eq 'fcgid')) {
+if (!$d->{'alias'} && ($in{'mode'} eq 'cgi' || $in{'mode'} eq 'fcgid') &&
+    $can == 2) {
 	$tmpl = &get_template($d->{'template'});
 	$err = &check_suexec_install($tmpl);
 	&error($err) if ($err);
@@ -44,7 +48,7 @@ if (!$d->{'alias'} && ($in{'mode'} eq 'cgi' || $in{'mode'} eq 'fcgid')) {
 
 # Save PHP execution mode
 $oldmode = &get_domain_php_mode($d);
-if (defined($in{'mode'}) && $oldmode ne $in{'mode'}) {
+if (defined($in{'mode'}) && $oldmode ne $in{'mode'} && $can == 2) {
 	&$first_print(&text('phpmode_moding', $text{'phpmode_'.$in{'mode'}}));
 	&save_domain_php_mode($d, $in{'mode'});
 	&$second_print($text{'setup_done'});
@@ -54,7 +58,7 @@ if (defined($in{'mode'}) && $oldmode ne $in{'mode'}) {
 # Save PHP fcgi children
 $nc = $in{'children_def'} ? 0 : $in{'children'};
 if (defined($in{'children_def'}) &&
-    $nc != &get_domain_php_children($d)) {
+    $nc != &get_domain_php_children($d) && $can == 2) {
 	&$first_print($nc ? &text('phpmode_kidding', $nc)
 			  : $text{'phpmode_nokids'});
 	&save_domain_php_children($d, $nc);
@@ -75,7 +79,8 @@ if (defined($in{'maxtime_def'}) &&
 	}
 
 # Save Ruby execution mode
-if (defined($in{'rubymode'}) && &get_domain_ruby_mode($d) ne $in{'rubymode'}) {
+if (defined($in{'rubymode'}) && &get_domain_ruby_mode($d) ne $in{'rubymode'} &&
+    $can == 2) {
 	&$first_print(&text('phpmode_rmoding',
 			    $text{'phpmode_'.$in{'rubymode'}}));
 	&save_domain_ruby_mode($d, $in{'rubymode'});
@@ -84,7 +89,8 @@ if (defined($in{'rubymode'}) && &get_domain_ruby_mode($d) ne $in{'rubymode'}) {
 	}
 
 # Save suexec mode
-if (defined($in{'suexec'}) && $in{'suexec'} != &get_domain_suexec($d)) {
+if (defined($in{'suexec'}) && $in{'suexec'} != &get_domain_suexec($d) &&
+    $can == 2) {
 	&$first_print($in{'suexec'} ? $text{'phpmode_suexecon'}
 				    : $text{'phpmode_suexecoff'});
 	&save_domain_suexec($d, $in{'suexec'});
@@ -93,7 +99,7 @@ if (defined($in{'suexec'}) && $in{'suexec'} != &get_domain_suexec($d)) {
 	}
 
 # Save log writing mode
-if (defined($in{'writelogs'})) {
+if (defined($in{'writelogs'}) && $can == 2) {
 	$wl = &get_writelogs_status($d);
 	if ($in{'writelogs'} && !$wl) {
 		&setup_writelogs($d);

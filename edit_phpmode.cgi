@@ -5,22 +5,23 @@ require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
-&can_edit_phpmode($d) || &error($text{'phpmode_ecannot'});
+$can = &can_edit_phpmode($d);
+$can || &error($text{'phpmode_ecannot'});
 
 &ui_print_header(&domain_in($d), $text{'phpmode_title'}, "");
 
 print &ui_form_start("save_phpmode.cgi");
 print &ui_hidden("dom", $d->{'id'}),"\n";
 print &ui_hidden_table_start($text{'phpmode_header'}, "width=100%", 2,
-			     "phpmode", 1);
+			     "phpmode", 1, [ "width=30%" ]);
 
-if (!$d->{'alias'}) {
+if (!$d->{'alias'} && $can == 2) {
 	# Use suexec
 	print &ui_table_row(&hlink($text{'phpmode_suexec'}, "phpmode_suexec"),
 			    &ui_yesno_radio("suexec", &get_domain_suexec($d)));
 	}
 
-if (!$d->{'alias'}) {
+if (!$d->{'alias'} && $can == 2) {
 	# PHP execution mode
 	@modes = &supported_php_modes($d);
 	print &ui_table_row(&hlink($text{'phpmode_mode'}, "phpmode"),
@@ -30,7 +31,7 @@ if (!$d->{'alias'}) {
 	}
 
 # PHP fcgi sub-processes
-if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0) {
+if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0 && $can == 2) {
 	$children = &get_domain_php_children($d);
 	if ($children >= 0) {
 		print &ui_table_row(&hlink($text{'phpmode_children'},
@@ -51,7 +52,7 @@ if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0) {
 
 # Ruby execution mode
 @rubys = &supported_ruby_modes($d);
-if (!$d->{'alias'} && @rubys) {
+if (!$d->{'alias'} && @rubys && $can == 2) {
 	print &ui_table_row(&hlink($text{'phpmode_rubymode'}, "rubymode"),
 		    &ui_radio("rubymode", &get_domain_ruby_mode($d),
 			      [ [ "", $text{'phpmode_noruby'}."<br>" ],
@@ -60,7 +61,7 @@ if (!$d->{'alias'} && @rubys) {
 	}
 
 # Write logs via program
-if (!$d->{'alias'} || $d->{'alias_mode'} != 1) {
+if ((!$d->{'alias'} || $d->{'alias_mode'}) != 1 && $can == 2) {
 	print &ui_table_row(
 		&hlink($text{'newweb_writelogs'}, "template_writelogs"),
 		&ui_yesno_radio("writelogs", &get_writelogs_status($d)));
@@ -75,7 +76,7 @@ print &ui_hidden_table_end();
 # Show PHP information
 if (defined(&list_php_modules) && !$d->{'alias'}) {
 	print &ui_hidden_table_start($text{'phpmode_header2'}, "width=100%",
-				     2, "phpinfo", 0);
+				     2, "phpinfo", 0, [ "width=30%" ]);
 
 	# PHP modules for the domain
 	foreach $phpver (&list_available_php_versions($d)) {

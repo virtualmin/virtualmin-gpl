@@ -2214,6 +2214,7 @@ limits_edit_ssl=Can manage SSL certificates
 limits_edit_admins=Can manage extra admins
 limits_edit_spam=Can configure spam and virus delivery
 limits_edit_phpver=Can select PHP versions
+limits_edit_phpmode=Can edit website options
 limits_edit_sharedips=Can select shared IPs
 limits_edit_catchall=Can create catchall aliases
 limits_edit_html=Can use web page editor
