@@ -6814,6 +6814,12 @@ if (!defined($tmpl->{'id'})) {
 if ($tmpl->{'id'} == 0) {
 	# Update appropriate config entries
 	$config{'deftmpl_nousers'} = !$tmpl->{'for_users'};
+	if ($tmpl->{'resellers'} eq '*') {
+		delete($config{'tmpl_resellers'});
+		}
+	else {
+		$config{'tmpl_resellers'} = $tmpl->{'resellers'};
+		}
 	$config{'apache_config'} = $tmpl->{'web'};
 	$config{'suexec'} = $tmpl->{'web_suexec'};
 	$config{'web_writelogs'} = $tmpl->{'web_writelogs'};
