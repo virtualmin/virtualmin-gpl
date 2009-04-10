@@ -26,6 +26,7 @@ $test_target_domain = "exampletarget.com";
 $test_subdomain = "example.net";
 $test_parallel_domain1 = "example1.net";
 $test_parallel_domain2 = "example2.net";
+$test_ip_address = &get_default_ip();
 $test_user = "testy";
 $test_alias = "testing";
 $test_alias_two = "yetanothertesting";
@@ -2162,7 +2163,106 @@ $plugin_tests = [
 	  'cleanup' => 1 },
 	];
 
+# Website API tests
+$web_tests = [
+	# Create a domain on the shared IP
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test shared domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test web page' ],
+		      @create_args, ],
+	},
+
+	# Enable matchall
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'matchall' ] ],
+	},
+
+	# Test foo.domain wget
+	{ 'command' => $wget_command.'http://foo.'.$test_domain,
+	  'grep' => 'Test web page',
+	},
+
+	# Disable matchall
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'no-matchall' ] ],
+	},
+
+	# Test foo.domain wget, which should fail now
+	{ 'command' => $wget_command.'http://foo.'.$test_domain,
+	  'fail' => 1,
+	},
+
+	# Enable proxying
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'proxy', 'http://www.google.com/' ] ],
+	},
+
+	# Test wget for proxy
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Google',
+	},
+
+	# Disable proxying
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'no-proxy' ] ],
+	},
+
+	# Test wget to make sure proxy is gone
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'antigrep' => 'Google',
+	},
+
+	# Enable frame forwarding
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'framefwd', 'http://www.google.com/' ] ],
+	},
+
+	# Test wget for frame
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => [ 'http://www.google.com/', 'frame' ],
+	},
+
+	# Disable frame forwarding
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'no-framefwd' ] ],
+	},
+
+	# Test wget to make sure frame is gone
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test web page',
+	},
+
+	# Make this the default website
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'default-website' ] ],
+	},
+
+	# Test request to IP
+	{ 'command' => $wget_command.'http://'.$test_ip_address,
+	  'grep' => 'Test web page',
+	},
+
+	# Get rid of the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1
+        },
+	];
+
+
 $alltests = { 'domains' => $domains_tests,
+	      'web' => $web_tests,
 	      'mailbox' => $mailbox_tests,
 	      'alias' => $alias_tests,
 	      'reseller' => $reseller_tests,
