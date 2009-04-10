@@ -3036,16 +3036,17 @@ foreach my $o (&list_domains_on_ip($d)) {
 return 1;
 }
 
-# list_domains_on_ip(&domain)
+# list_domains_on_ip(&domain, [port])
 # Returns a list of Apache virtualhost hash refs and virtual servers that are
 # using the same IP in the Apache config as this one. If it is name-based
 # (* in the virtualhost), then all similar servers will be matched.
+# XXX will a request to some IP match both domains on that IP, and * ?
 sub list_domains_on_ip
 {
-local ($d) = @_;
+local ($d, $port) = @_;
+$port ||= $d->{'web_port'};
 &require_apache();
-local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
-						   $d->{'web_port'});
+local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 return ( ) if (!$virt);		# Cannot find our own site?
 local @rv;
 foreach my $v (&apache::find_directive_struct("VirtualHost", $conf)) {
@@ -3068,18 +3069,22 @@ foreach my $v (&apache::find_directive_struct("VirtualHost", $conf)) {
 		push(@rv, [ $v, $vd ]);
 		}
 	}
+# If domain files are in a directory, sort by filename as older Webmin's
+# dont do this for us
+if ($apache::config{'virt_file'} && -d $apache::config{'virt_file'} &&
+    &get_webmin_version() < 1.490) {
+	@rv = sort { $a->[0]->{'file'} cmp $b->[0]->{'file'} } @rv;
+	}
 return @rv;
-
-# XXX will a request to some IP match both domains on that IP, and * ?
 }
 
-# get_default_website(&domain)
+# get_default_website(&domain, [port])
 # Returns the Apache virtualhost and possibly virtual server hash for the
 # default website on some domain's IP
 sub get_default_website
 {
-local ($d) = @_;
-local @onip = &list_domains_on_ip($d);
+local ($d, $port) = @_;
+local @onip = &list_domains_on_ip($d, $port);
 return @onip ? @{$onip[0]} : ( );
 }
 
@@ -3090,29 +3095,53 @@ sub set_default_website
 {
 local ($d) = @_;
 &require_apache();
-local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
-						   $d->{'web_port'});
-local ($oldvirt, $oldd) = &get_default_website($d);
-if ($virt && $oldvirt && $virt ne $oldvirt) {
-	if ($virt->{'file'} eq $oldvirt->{'file'}) {
-		# Need to move up in file
-		local $lref = &read_file_lines($virt->{'file'});
-		local @oldl = @$lref[$virt->{'line'} .. $virt->{'eline'}];
-		splice(@$lref, $virt->{'line'},
-		       $virt->{'eline'} - $virt->{'line'} + 1);
-		splice(@$lref, $oldvirt->{'line'}, 0, @oldl);
-		&flush_file_lines($virt->{'file'});
+foreach my $port ($d->{'web_port'},
+		  $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( )) {
+	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
+	$virt || return "No Apache virtualhost found for $d->{'dom'}:$port";
+	local ($oldvirt, $oldd) = &get_default_website($d);
+	if ($virt && $oldvirt && $virt ne $oldvirt) {
+		if ($virt->{'file'} eq $oldvirt->{'file'}) {
+			# Need to move up in file
+			local $lref = &read_file_lines($virt->{'file'});
+			local @oldl = @$lref[$virt->{'line'} .. $virt->{'eline'}];
+			splice(@$lref, $virt->{'line'},
+			       $virt->{'eline'} - $virt->{'line'} + 1);
+			splice(@$lref, $oldvirt->{'line'}, 0, @oldl);
+			&flush_file_lines($virt->{'file'});
+			}
+		else {
+			# Swap file order
+			$virt->{'file'} =~ /^(.*)\/([^\/]+)$/;
+			local ($dir, $file) = ($1, $2);
+			$oldvirt->{'file'} =~ /^(.*)\/([^\/]+)$/;
+			local ($olddir, $oldfile) = ($1, $2);
+			local $adddir = $apache::config{'virt_file'} ?
+			  &apache::server_root($apache::config{'virt_file'}) :
+			  undef;
+			if ($dir eq $olddir && $dir eq $adddir) {
+				# Separate files in the add-to dir
+				&apache::delete_webfile_link("$dir/$file");
+				&rename_logged("$dir/$file", "$dir/0-$file");
+				&apache::create_webfile_link("$dir/0-$file");
+				if ($oldfile =~ /^0-(.*)$/) {
+					&apache::delete_webfile_link(
+							"$dir/$oldfile");
+					&rename_logged("$dir/$oldfile",
+						       "$dir/$1");
+					&apache::create_webfile_link("$dir/$1");
+					}
+				}
+			else {
+				# Cannot handle this case
+				return "Cannot handle swap between $virt->{'file'} and $oldvirt->{'file'}";
+				}
+			}
+		undef(@apache::get_config_cache);
+		&register_post_action(\&restart_apache);
 		}
-	else {
-		# Swap file order
-		# XXX
-		# XXX both have to be in include dir
-		# XXX fix up links too
-		}
-	undef(@apache::get_config_cache);
-	&register_post_action(\&restart_apache);
 	}
-return 0;
+return undef;
 }
 
 $done_feature_script{'web'} = 1;

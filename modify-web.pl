@@ -44,6 +44,11 @@ To have Apache configured to accept requests for any sub-domain, use the
 C<--matchall> command-line flag. This will also add a C<*> DNS entry if needed.
 To turn this feature off, use the C<--no-matchall> flag.
 
+To make a virtual server the default served by Apache for its IP address,
+use the C<--default-website> flag. This lets you control which domain's
+contents appear if someone accesses your system via a URL with only an IP
+address, rather than a domain name.
+
 =cut
 
 package virtual_server;
@@ -385,8 +390,13 @@ foreach $d (@doms) {
 		# Make this site the default, by re-ordering the Apache config
 		&$first_print("Making website the default ..");
 		if (!$d->{'alias'} || $d->{'alias_mode'} != 1) {
-			&set_default_website($d);
-			&$second_print(".. done");
+			$err = &set_default_website($d);
+			if ($err) {
+				&$second_print(".. failed : $err");
+				}
+			else {
+				&$second_print(".. done");
+				}
 			}
 		else {
 			&$second_print(".. not possible for alias domains");

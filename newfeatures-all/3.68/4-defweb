@@ -1,0 +1,6 @@
+desc=Default website option
+html=Added a field on the Website Options page for making a virtual server the default website for its IP address. This will be served if the system is accessed via a URL that contains an IP address instead of a domain name matching a virtual server.
+master=1
+reseller=1
+owner=1
+link=edit_phpmode.cgi?dom=${ID}

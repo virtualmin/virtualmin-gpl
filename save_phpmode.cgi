@@ -129,8 +129,13 @@ if (defined($in{'matchall'}) && $in{'matchall'} != $oldmatchall) {
 # Change default website
 if (&can_default_website($d) && $in{'defweb'}) {
 	&$first_print($text{'phpmode_defwebon'});
-	&set_default_website($d);
-	&$second_print($text{'setup_done'});
+	$err = &set_default_website($d);
+	if ($err) {
+		&$second_print(&text('phpmode_defweberr', $err));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
         $anything++;
 	}
 
