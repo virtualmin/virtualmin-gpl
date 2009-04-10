@@ -12272,7 +12272,7 @@ else {
 	# Do core library and features
 	local $vslf = "virtual-server/virtual-server-lib-funcs.pl";
 	push(@preload, "virtual-server=$vslf");
-	foreach my $f (@features, "virt") {
+	foreach my $f (@features, "virt", "virt6") {
 		local $file = "virtual-server/feature-$f.pl";
 		push(@preload, "virtual-server=$file");
 		}

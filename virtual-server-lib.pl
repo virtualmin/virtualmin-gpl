@@ -86,7 +86,7 @@ if (!$virtualmin_pro) {
 		       $virtualmin_pro ? ( 'scripts', 'phpwrappers' ) : ( ) );
 @template_features_effecting_webmin = ( 'web', 'webmin' );
 @can_always_features = ( 'dir', 'unix', 'logrotate' );
-foreach my $fname (@features, "virt") {
+foreach my $fname (@features, "virt", "virt6") {
 	if (!$done_feature_script{$fname} || $force_load_features) {
 		do "$module_root_directory/feature-$fname.pl";
 		}

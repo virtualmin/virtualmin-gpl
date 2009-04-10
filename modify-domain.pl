@@ -137,6 +137,15 @@ while(@ARGV > 0) {
 		# Fall back to the default shared IP
 		$defaultip = 1;
 		}
+	elsif ($a eq "--ip6" && &supports_ip6()) {
+		# Adding or changing an IPv6 address
+		$ip6 = shift(@ARGV);
+		&check_ip6address($ip) || &usage("Invalid IPv6 address");
+		}
+	elsif ($a eq "--no-ip6" && &supports_ip6()) {
+		# Removing an IPv6 address
+		$noip6 = 1;
+		}
 	elsif ($a eq "--reseller") {
 		# Changing the reseller
 		$resel = shift(@ARGV);
@@ -352,6 +361,16 @@ if (defined($sharedip)) {
 	# Just change the shared IP address
 	$dom->{'ip'} = $sharedip;
 	}
+if ($ip6) {
+	# Adding or changing an IPv6 address
+	$dom->{'ip6'} = $ip6;
+	$dom->{'virt6'} = 1;
+	}
+elsif ($noip6) {
+	# Removing the IPv6 address
+	delete($dom->{'ip6'});
+	$dom->{'virt6'} = 0;
+	}
 if (defined($resel)) {
 	$dom->{'reseller'} = $resel eq "NONE" ? undef : $resel;
 	}
@@ -401,6 +420,17 @@ elsif ($dom->{'virt'} && $old->{'virt'}) {
 	}
 elsif (!$dom->{'virt'} && $old->{'virt'}) {
 	&delete_virt($old);
+	}
+
+# Apply the IPv6 change
+if ($dom->{'virt6'} && !$old->{'virt'6}) {
+	&setup_virt6($dom);
+	}
+elsif ($dom->{'virt6'} && $old->{'virt6'}) {
+	&modify_virt6($dom, $dom);
+	}
+elsif (!$dom->{'virt6'} && $old->{'virt6'}) {
+	&delete_virt6($old);
 	}
 
 # Actually update the domains
@@ -476,6 +506,9 @@ print "                        [--plan name|id | --apply-plan name|id]\n";
 print "                        [--add-exclude directory]*\n";
 print "                        [--remove-exclude directory]*\n";
 print "                        [--dns-ip address | --no-dns-ip]\n";
+if (&supports_ip6()) {
+	print "                        [--ip6 address | --no-ip6]\n";
+	}
 exit(1);
 }
 
