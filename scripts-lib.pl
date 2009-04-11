@@ -1488,9 +1488,14 @@ while($data =~ /(\/project\/showfiles.php\?group_id=(\d+)(\&|\&amp;)package_id=(
 	local ($spath, $sgroup, $spackage) = ($1, $2, $4);
 	$spath =~ s/\&amp;/\&/g;
 	next if ($donepackage{$sgroup,$spackage}++);
-	local $sdata;
-	local $err;
+	local ($sdata, $err);
 	&http_download($osdn_download_host, $osdn_download_port, $spath,
+		       \$sdata, \$err, undef, 0, undef, undef, undef, 0, 1);
+	push(@data, $sdata) if (!$err);
+
+	# Also try sourceforge.net, where they seem to have moved file lists
+	local ($sdata, $err);
+	&http_download($osdn_website_host, $osdn_download_port, $spath,
 		       \$sdata, \$err, undef, 0, undef, undef, undef, 0, 1);
 	push(@data, $sdata) if (!$err);
 	}

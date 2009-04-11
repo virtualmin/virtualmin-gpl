@@ -212,6 +212,7 @@ $script_download_host = "scripts.virtualmin.com";
 $script_download_port = 80;
 $script_download_dir = "/";
 $script_warnings_file = "$module_config_directory/script-warnings-sent";
+$osdn_website_host = "sourceforge.net";
 
 $upgrade_virtualmin_host = "software.virtualmin.com";
 $upgrade_virtualmin_port = 80;
