@@ -1504,15 +1504,90 @@ $prepost_tests = [
 		      [ 'pre-command' => 'echo BEFORE $VIRTUALSERVER_DOM >/tmp/prepost-test.out' ],
 		      [ 'post-command' => 'echo AFTER $VIRTUALSERVER_DOM >>/tmp/prepost-test.out' ],
 		    ],
-	  'cleanup' => 1,
         },
 
-	# Check the pre and post deletion scripts
+	# Check the pre and post deletion scripts for the deletion
 	{ 'command' => 'cat /tmp/prepost-test.out',
 	  'grep' => [ 'BEFORE '.$test_domain,
 		      'AFTER '.$test_domain ],
 	},
 	{ 'command' => 'rm -f /tmp/prepost-test.out' },
+
+	# Create a reseller for the new domain
+	{ 'command' => 'create-reseller.pl',
+	  'args' => [ [ 'name', $test_reseller ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test reseller' ],
+		      [ 'email', $test_reseller.'@'.$test_domain ] ],
+	},
+
+	# Re-create the domain, capturing all variables
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'reseller', $test_reseller ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ],
+		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
+			( [ 'virtualmin-awstats' ] ) : ( ),
+		      [ 'post-command' => 'env >/tmp/prepost-test.out' ],
+		      @create_args, ],
+	},
+
+	# Make sure all important variables were set
+	{ 'command' => 'cat /tmp/prepost-test.out',
+	  'grep' => [ 'VIRTUALSERVER_ACTION=CREATE_DOMAIN',
+		      'VIRTUALSERVER_DOM='.$test_domain,
+		      'VIRTUALSERVER_USER='.$test_domain_user,
+		      'VIRTUALSERVER_OWNER=Test domain',
+		      'VIRTUALSERVER_UID=\d+',
+		      'VIRTUALSERVER_GID=\d+',
+		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
+			( 'VIRTUALSERVER_VIRTUALMIN_AWSTATS=1' ) : ( ),
+		      'RESELLER_NAME='.$test_reseller,
+		      'RESELLER_DESC=Test reseller',
+		      'RESELLER_EMAIL='.$test_reseller.'@'.$test_domain,
+		    ]
+	},
+
+	# Create a sub-server, capturing all variables
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      [ 'post-command' => 'env >/tmp/prepost-test.out' ],
+		      @create_args, ],
+	},
+
+	# Make sure parent variables work
+	{ 'command' => 'cat /tmp/prepost-test.out',
+	  'grep' => [ 'VIRTUALSERVER_ACTION=CREATE_DOMAIN',
+		      'VIRTUALSERVER_DOM='.$test_subdomain,
+		      'VIRTUALSERVER_OWNER=Test sub-domain',
+		      'PARENT_VIRTUALSERVER_USER='.$test_domain_user,
+		      'PARENT_VIRTUALSERVER_DOM='.$test_domain,
+		      'PARENT_VIRTUALSERVER_OWNER=Test domain',
+		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
+			( 'PARENT_VIRTUALSERVER_VIRTUALMIN_AWSTATS=1' ) : ( ),
+		      'RESELLER_NAME='.$test_reseller,
+		      'RESELLER_DESC=Test reseller',
+		      'RESELLER_EMAIL='.$test_reseller.'@'.$test_domain,
+		    ]
+	},
+
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+        },
+
+	# Cleanup the reseller
+	{ 'command' => 'delete-reseller.pl',
+	  'args' => [ [ 'name', $test_reseller ] ],
+	  'cleanup' => 1 },
 	];
 
 $webmin_tests = [

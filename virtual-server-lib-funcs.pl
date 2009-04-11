@@ -3435,18 +3435,33 @@ if ($oldd) {
 	$ENV{'VIRTUALSERVER_OLDSERVER_IDNDOM'} =
 		&show_domain_name($oldd->{'dom'});
 	}
-if ($d->{'reseller'} && defined(&get_reseller)) {
-	# Set reseller details
-	local $resel = &get_reseller($d->{'reseller'});
-	local $acl = $resel->{'acl'};
-	$ENV{'RESELLER_NAME'} = $resel->{'name'};
-	$ENV{'RESELLER_THEME'} = $resel->{'theme'};
-	$ENV{'RESELLER_MODULES'} = join(" ", @{$resel->{'modules'}});
-	foreach my $a (keys %$acl) {
-		local $env = uc($a);
-		$env =~ s/\-/_/g;
-		$ENV{'RESELLER_'.$env} = $acl->{$a};
+local $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
+if (defined(&get_reseller)) {
+	# Set reseller details, if we have one
+	local $resel = $d->{'reseller'} ? &get_reseller($d->{'reseller'}) :
+		       $parent && $parent->{'reseller'} ?
+			   &get_reseller($parent->{'reseller'}) : undef;
+	if ($resel) {
+		local $acl = $resel->{'acl'};
+		$ENV{'RESELLER_NAME'} = $resel->{'name'};
+		$ENV{'RESELLER_THEME'} = $resel->{'theme'};
+		$ENV{'RESELLER_MODULES'} = join(" ", @{$resel->{'modules'}});
+		foreach my $a (keys %$acl) {
+			local $env = uc($a);
+			$env =~ s/\-/_/g;
+			$ENV{'RESELLER_'.$env} = $acl->{$a};
+			}
 		}
+	}
+if ($parent) {
+	# Set parent domain variables
+	foreach my $e (keys %$parent) {
+		local $env = uc($e);
+		$env =~ s/\-/_/g;
+		$ENV{'PARENT_VIRTUALSERVER_'.$env} = $parent->{$e};
+		}
+	$ENV{'PARENT_VIRTUALSERVER_IDNDOM'} =
+		&show_domain_name($parent->{'dom'});
 	}
 foreach my $v (&get_global_template_variables()) {
 	if ($v->{'enabled'}) {

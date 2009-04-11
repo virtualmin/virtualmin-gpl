@@ -423,7 +423,7 @@ elsif (!$dom->{'virt'} && $old->{'virt'}) {
 	}
 
 # Apply the IPv6 change
-if ($dom->{'virt6'} && !$old->{'virt'6}) {
+if ($dom->{'virt6'} && !$old->{'virt6'}) {
 	&setup_virt6($dom);
 	}
 elsif ($dom->{'virt6'} && $old->{'virt6'}) {
