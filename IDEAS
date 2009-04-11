@@ -47,6 +47,7 @@
 	- Net module IPv6 support
 	- /sbin/ifconfig eth0 inet6 add 2001:0db8:0:f101::120/64
 	- Also do IP allocation in templates
+	- domain_setup.cgi, create-domain.pl, save_domain.cgi, modify-domain.pl
 
  - WebNIC registrar support
 	- See email from Winnie Lee

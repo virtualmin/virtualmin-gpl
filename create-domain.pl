@@ -153,6 +153,13 @@ while(@ARGV > 0) {
 		&indexof($sharedip, &list_shared_ips()) >= 0 ||
 		    &usage("$sharedip is not in the shared IP addresses list");
 		}
+	elsif ($a eq "--ip6") {
+		$ip6 = shift(@ARGV);
+		$virt6 = 1;
+		}
+	elsif ($a eq "--ip6-already") {
+		$virt6already = 1;
+		}
 	elsif ($a eq "--dns-ip") {
 		$dns_ip = shift(@ARGV);
 		&check_ipaddress($dns_ip) ||
@@ -461,6 +468,7 @@ if (!$alias) {
 			}
 		}
 	elsif ($virt) {
+		# Validate virtual IP address
 		&check_ipaddress($ip) || &usage($text{'setup_eip'});
 		$clash = &check_virt_clash($ip);
 		if ($virtalready) {
@@ -481,6 +489,20 @@ if (!$alias) {
 		else {
 			# Make sure the IP isn't assigned yet
 			$clash && &usage(&text('setup_evirtclash'));
+			}
+		}
+
+	if ($virt6) {
+		# Validate virtual IPv6 address
+		&check_ip6address($ip6) || &usage($text{'setup_eip6'});
+		$clash = &check_virt6_clash($ip6);
+		if ($virt6already) {
+			# Make sure it is already active
+			$clash || &usage(&text('setup_evirt6clash2'));
+			}
+		else {
+			# Make sure the IP isn't assigned yet
+			$clash && &usage(&text('setup_evirt6clash'));
 			}
 		}
 	}
@@ -541,6 +563,9 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 						       : &get_dns_ip(),
          'virt', $virt,
          'virtalready', $virtalready,
+	 'ip6', $ip6,
+	 'virt6', $virt6,
+         'virt6already', $virt6already,
 	 $parent ? ( 'pass', $parent->{'pass'} )
 		 : ( 'pass', $pass,
          	     'quota', $quota,

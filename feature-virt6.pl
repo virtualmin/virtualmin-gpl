@@ -36,5 +36,24 @@ sub delete_virt6
 {
 }
 
+# check_virt6_clash(ip)
+# Returns 1 if some IPv6 is already in use, 0 if not
+sub check_virt6_clash
+{
+local ($ip6) = @_;
+
+# XXX check interfaces
+
+# Do a quick ping test
+if (&has_command("ping6")) {
+	local $pingcmd = "ping6 -c 1 -t 1";
+	local ($out, $timed_out) = &backquote_with_timeout(
+					$pingcmd." ".$ip6." 2>&1", 2, 1);
+	return 1 if (!$timed_out && !$?);
+	}
+
+return 0;
+}
+
 1;
 

@@ -134,7 +134,7 @@ return undef;
 }
 
 # check_virt_clash(ip)
-# Returns the interface if some IP is already in use
+# Returns 1 if some IP is already in use, 0 if not
 sub check_virt_clash
 {
 return undef if ($config{'iface_manual'});	# no clash for manual mode

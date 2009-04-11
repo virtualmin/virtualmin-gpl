@@ -5857,6 +5857,9 @@ if ($dom->{'webmin'}) {
 if ($dom->{'virt'}) {
 	&setup_virt($dom);
 	}
+if ($dom->{'virt6'}) {
+	&setup_virt6($dom);
+	}
 
 if (!$nopost) {
 	&run_post_actions();
