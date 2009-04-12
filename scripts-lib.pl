@@ -1253,6 +1253,10 @@ foreach my $m (@mods) {
 		if ($mp eq "svn") {
 			push(@pkgs, "python-subversion");
 			}
+		elsif ($mp eq "psycopg") {
+			# Try to install old and new versions on Debian
+			push(@pkgs, "python-psycopg", "python-psycopg2");
+			}
 		else {
 			push(@pkgs, "python-".$mp);
 			}
