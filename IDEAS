@@ -48,6 +48,7 @@
 		- Apache too (Listen ?)
 	- Also do IP allocation in templates
 	- domain_setup.cgi, create-domain.pl, save_domain.cgi, modify-domain.pl
+	- Boot-time interfaces
 
  - WebNIC registrar support
 	- See email from Winnie Lee

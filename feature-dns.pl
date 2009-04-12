@@ -642,17 +642,30 @@ if ($_[0]->{'virt6'} && !$_[1]->{'virt6'}) {
 	# IPv6 enabled
 	&$first_print($text{'save_dnsip6on'});
 	&add_ip6_records($_[0]);
+	local @recs = &get_domain_dns_records($_[0]);
+	&post_records_change($_[0], \@recs);
 	&$second_print($text{'setup_done'});
 	$rv++;
 	}
 elsif (!$_[0]->{'virt6'} && $_[1]->{'virt6'}) {
 	# IPv6 disabled
-	# XXX
+	&$first_print($text{'save_dnsip6off'});
+	&remove_ip6_records($_[0]);
+	local @recs = &get_domain_dns_records($_[0]);
+	&post_records_change($_[0], \@recs);
+	&$second_print($text{'setup_done'});
+	$rv++;
 	}
 elsif ($_[0]->{'virt6'} && $_[1]->{'virt6'} &&
        $_[0]->{'ip6'} ne $_[1]->{'ip6'}) {
 	# IPv6 address changed
-	# XXX
+	&$first_print($text{'save_dnsip6'});
+	local $fn = &get_domain_dns_file($_[0]);
+	local @recs = &get_domain_dns_records($_[0]);
+	&modify_records_ip_address(\@recs, $fn, $_[1]->{'ip6'}, $_[0]->{'ip6'});
+	&post_records_change($_[0], \@recs);
+	$rv++;
+	&$second_print($text{'setup_done'});
 	}
 
 # Release locks
@@ -952,7 +965,7 @@ foreach my $r (reverse(@recs)) {
 	    ($r->{'name'} eq $withdot || $r->{'name'} =~ /\.\Q$withdot\E$/)) {
 		&bind8::delete_record($file, $r);
 		}
-	})
+	}
 }
 
 # save_domain_matchall_record(&domain, star)
@@ -1330,7 +1343,8 @@ local ($recs, $fn, $oldip, $newip) = @_;
 local $count = 0;
 foreach my $r (@$recs) {
 	my $changed = 0;
-	if ($r->{'type'} eq "A" && $r->{'values'}->[0] eq $oldip) {
+	if (($r->{'type'} eq "A" || $r->{'type'} eq "AAAA") &&
+	    $r->{'values'}->[0] eq $oldip) {
 		# Address record - just replace IP
 		$r->{'values'}->[0] = $newip;
 		$changed = 1;

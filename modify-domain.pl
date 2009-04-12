@@ -426,7 +426,7 @@ if ($dom->{'virt6'} && !$old->{'virt6'}) {
 	&setup_virt6($dom);
 	}
 elsif ($dom->{'virt6'} && $old->{'virt6'}) {
-	&modify_virt6($dom, $dom);
+	&modify_virt6($dom, $old);
 	}
 elsif (!$dom->{'virt6'} && $old->{'virt6'}) {
 	&delete_virt6($old);

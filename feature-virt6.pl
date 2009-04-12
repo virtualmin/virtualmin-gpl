@@ -43,8 +43,8 @@ sub modify_virt6
 local ($d, $oldd) = @_;
 if ($d->{'ip6'} ne $oldd->{'ip6'} && !$d->{'virtalready'}) {
 	# Remove and re-add the IPv6 interface
-	&delete_virt($oldd);
-	&setup_virt($d);
+	&delete_virt6($oldd);
+	&setup_virt6($d);
 	}
 }
 
