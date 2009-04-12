@@ -44,7 +44,6 @@
 	- FS#4239
 	- Concurrent with v4, so that a domain can also have a v6 address
 	- Use in DNS, Apache
-		- Finish off DNS
 		- Apache too (Listen ?)
 	- Also do IP allocation in templates
 	- domain_setup.cgi, create-domain.pl, save_domain.cgi, modify-domain.pl

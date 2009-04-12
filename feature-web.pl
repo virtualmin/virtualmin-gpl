@@ -61,11 +61,12 @@ else {
 	# Add the actual <VirtualHost>
 	# We use a * for the address for name-based servers under Apache 2,
 	# if NameVirtualHost * exists.
-	# First build up the directives
 	local $vip = $_[0]->{'name'} &&
 		     $apache::httpd_modules{'core'} >= 1.312 &&
 		     &is_shared_ip($_[0]->{'ip'}) &&
 		     $nvstar ? "*" : $_[0]->{'ip'};
+
+	# First build up the directives in the <VirtualHost>
 	local $proxying;
 	if ($_[0]->{'alias'}) {
 		# Because this is just an alias to an existing virtual server,
@@ -165,8 +166,14 @@ else {
 			}
 		}
 
+	# Work out addresses to match on
+	local @vips = ( "$vip:$web_port" );
+	if ($_[0]->{'virt6'}) {
+		push(@vips, "[$_[0]->{'ip6'}]:$web_port");
+		}
+
 	# Add to the file
-	splice(@$lref, $pos, 0, "<VirtualHost $vip:$web_port>",
+	splice(@$lref, $pos, 0, "<VirtualHost ".join(" ", @vips).">",
 				@dirs,
 				"</VirtualHost>");
 	&flush_file_lines($f);
