@@ -44,8 +44,8 @@
 	- FS#4239
 	- Concurrent with v4, so that a domain can also have a v6 address
 	- Use in DNS, Apache
-	- Net module IPv6 support
-	- /sbin/ifconfig eth0 inet6 add 2001:0db8:0:f101::120/64
+		- Finish off DNS
+		- Apache too (Listen ?)
 	- Also do IP allocation in templates
 	- domain_setup.cgi, create-domain.pl, save_domain.cgi, modify-domain.pl
 

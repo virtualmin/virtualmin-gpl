@@ -418,6 +418,7 @@ local $oldip = $_[1]->{'dns_ip'} || $_[1]->{'ip'};
 local $newip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 local $rv = 0;
 if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
+	# Domain name has changed
 	local $nfn;
 	local $file = &bind8::find("file", $z->{'members'});
 	if (!$_[0]->{'dns_submode'}) {
@@ -637,6 +638,23 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'} && $_[0]->{'mail'} &&
 	$rv++;
 	}
 
+if ($_[0]->{'virt6'} && !$_[1]->{'virt6'}) {
+	# IPv6 enabled
+	&$first_print($text{'save_dnsip6on'});
+	&add_ip6_records($_[0]);
+	&$second_print($text{'setup_done'});
+	$rv++;
+	}
+elsif (!$_[0]->{'virt6'} && $_[1]->{'virt6'}) {
+	# IPv6 disabled
+	# XXX
+	}
+elsif ($_[0]->{'virt6'} && $_[1]->{'virt6'} &&
+       $_[0]->{'ip6'} ne $_[1]->{'ip6'}) {
+	# IPv6 address changed
+	# XXX
+	}
+
 # Release locks
 &release_lock_dns($lockon, $lockconf);
 
@@ -815,8 +833,9 @@ if (!$tmpl->{'dns_replace'}) {
 				      "IN", "TXT", "\"$str\"");
 		}
 	}
+
 if ($tmpl->{'dns'} && (!$d->{'dns_submode'} || !$tmpl->{'dns_replace'})) {
-	# Add or use the user-defined template
+	# Add or use the user-defined records template
 	&open_tempfile(RECS, ">>$rootfile");
 	local %subs = %$d;
 	$subs{'serial'} = $serial;
@@ -826,6 +845,11 @@ if ($tmpl->{'dns'} && (!$d->{'dns_submode'} || !$tmpl->{'dns_replace'})) {
 		join("\n", split(/\t+/, $tmpl->{'dns'}))."\n", \%subs);
 	&print_tempfile(RECS, $recs);
 	&close_tempfile(RECS);
+	}
+
+if ($d->{'virt6'}) {
+	# Create IPv6 records for IPv4
+	&add_ip6_records($d, $file);
 	}
 }
 
@@ -877,6 +901,58 @@ if ($count) {
 	&register_post_action(\&restart_bind);
 	}
 return $count;
+}
+
+# add_ip6_records(&domain, [file])
+# For each A record for the domain whose value is it's IPv4 address, add an
+# AAAA record with the v6 address.
+sub add_ip6_records
+{
+local ($d, $file) = @_;
+&require_bind();
+$file ||= &get_domain_dns_file($d);
+return 0 if (!$file);
+
+# Work out which AAAA records we already have
+local @recs = &bind8::read_zone_file($file, $d->{'dom'});
+local %already;
+foreach my $r (@recs) {
+	if ($r->{'type'} eq 'AAAA' && $r->{'values'}->[0] eq $d->{'ip6'}) {
+		$already{$r->{'name'}}++;
+		}
+	}
+
+# Clone A records
+my $count = 0;
+my $withdot = $d->{'dom'}.".";
+foreach my $r (@recs) {
+	if ($r->{'type'} eq 'A' && $r->{'values'}->[0] eq $d->{'ip'} &&
+	    !$already{$r->{'name'}} &&
+	    ($r->{'name'} eq $withdot || $r->{'name'} =~ /\.\Q$withdot\E$/)) {
+		&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
+				      'IN', 'AAAA', $d->{'ip6'});
+		$count++;
+		}
+	}
+
+return $count;
+}
+
+# remove_ip6_records(&domain)
+# Delete all AAAA records whose value is the domain's IP6 address
+sub remove_ip6_records
+{
+local ($d) = @_;
+&require_bind();
+local $file = &get_domain_dns_file($d);
+local @recs = &bind8::read_zone_file($file, $d->{'dom'});
+my $withdot = $d->{'dom'}.".";
+foreach my $r (reverse(@recs)) {
+	if ($r->{'type'} eq 'AAAA' && $r->{'values'}->[0] eq $d->{'ip6'} &&
+	    ($r->{'name'} eq $withdot || $r->{'name'} =~ /\.\Q$withdot\E$/)) {
+		&bind8::delete_record($file, $r);
+		}
+	})
 }
 
 # save_domain_matchall_record(&domain, star)

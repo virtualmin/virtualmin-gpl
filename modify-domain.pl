@@ -140,7 +140,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--ip6" && &supports_ip6()) {
 		# Adding or changing an IPv6 address
 		$ip6 = shift(@ARGV);
-		&check_ip6address($ip) || &usage("Invalid IPv6 address");
+		&check_ip6address($ip6) || &usage("Invalid IPv6 address");
 		}
 	elsif ($a eq "--no-ip6" && &supports_ip6()) {
 		# Removing an IPv6 address
@@ -368,7 +368,6 @@ if ($ip6) {
 	}
 elsif ($noip6) {
 	# Removing the IPv6 address
-	delete($dom->{'ip6'});
 	$dom->{'virt6'} = 0;
 	}
 if (defined($resel)) {
