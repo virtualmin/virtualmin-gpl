@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to versions 3.1.3.1 and 2.11.9.5, OpenGoo to 1.3.1, Joomla to 1.5.10, Mantis to 1.1.6, Typo to 5.3, Django to 1.0.2, Zenphoto to 1.2.4, Twiki to 4.3.0, Bugzilla to 3.2.3, Magento to 1.3.0, OpenX to 2.8.0, PHPCoin to 1.6.0, PiWiki to 0.2.33, TikiWiki to 2.4, and Trac to 0.11.4.<br>Updated the Forwards, Passwd, Chora, Vacation and Gollem scripts from the Horde family to their latest versions.<br>Added a script installer for Simple Invoices.
+html=Updated the phpMyAdmin script installer to versions 3.1.3.1 and 2.11.9.5, OpenGoo to 1.3.1, Joomla to 1.5.10, Mantis to 1.1.6, Typo to 5.3, Django to 1.0.2, Zenphoto to 1.2.4, Twiki to 4.3.0, Bugzilla to 3.2.3, Magento to 1.3.0, OpenX to 2.8.0, PHPCoin to 1.6.0, PiWiki to 0.2.33, TikiWiki to 2.4, CMS Made Simple to 1.5.4, and Trac to 0.11.4.<br>Updated the Forwards, Passwd, Chora, Vacation and Gollem scripts from the Horde family to their latest versions.<br>Added a script installer for Simple Invoices.
 master=1
 reseller=1
 domain=1
