@@ -472,10 +472,10 @@ if (@add_excludes || @remove_excludes) {
 
 # Run the after command
 &run_post_actions();
-&set_domain_envs($d, "MODIFY_DOMAIN", undef, $old);
+&set_domain_envs($dom, "MODIFY_DOMAIN", undef, $old);
 local $merr = &made_changes();
 &$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
-&reset_domain_envs($d);
+&reset_domain_envs($dom);
 &virtualmin_api_log(\@OLDARGV, $dom);
 print "All done\n";
 

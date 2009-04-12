@@ -1550,6 +1550,13 @@ $prepost_tests = [
 		    ]
 	},
 
+	# Set a custom field
+	{ 'command' => 'modify-custom.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'allow-missing' ],
+		      [ 'set', 'myfield foo' ] ],
+	},
+
 	# Create a sub-server, capturing all variables
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_subdomain ],
@@ -1569,6 +1576,7 @@ $prepost_tests = [
 		      'PARENT_VIRTUALSERVER_USER='.$test_domain_user,
 		      'PARENT_VIRTUALSERVER_DOM='.$test_domain,
 		      'PARENT_VIRTUALSERVER_OWNER=Test domain',
+		      'PARENT_VIRTUALSERVER_FIELD_MYFIELD=foo',
 		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
 			( 'PARENT_VIRTUALSERVER_VIRTUALMIN_AWSTATS=1' ) : ( ),
 		      'RESELLER_NAME='.$test_reseller,
@@ -1576,7 +1584,6 @@ $prepost_tests = [
 		      'RESELLER_EMAIL='.$test_reseller.'@'.$test_domain,
 		    ]
 	},
-
 
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',

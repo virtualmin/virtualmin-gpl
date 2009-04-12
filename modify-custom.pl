@@ -48,6 +48,9 @@ while(@ARGV > 0) {
 		$field && defined($value) || &usage();
 		push(@set, [ $field, $value ]);
 		}
+	elsif ($a eq "--allow-missing") {
+		$allow_missing = 1;
+		}
 	else {
 		&usage();
 		}
@@ -59,16 +62,28 @@ $dom = &get_domain_by("dom", $domain);
 $dom || usage("Virtual server $domain does not exist.");
 $old = { %$dom };
 
+# Run the before script
+&set_domain_envs($old, "MODIFY_DOMAIN", $dom);
+$merr = &making_changes();
+&reset_domain_envs($old);
+&usage($merr) if ($merr);
+
 # Update all fields
 @fields = &list_custom_fields();
 foreach $f (@set) {
 	($field) = grep { $_->{'name'} eq $f->[0] ||
 			  $_->{'desc'} eq $f->[0] } @fields;
-	$field || &usage("No custom field named $f->[0] exists");
-	$dom->{'field_'.$field->{'name'}} = $f->[1];
+	$field || $allow_missing ||
+		&usage("No custom field named $f->[0] exists");
+	$dom->{'field_'.($field->{'name'} || $f->[0])} = $f->[1];
 	}
-
 &save_domain($dom);
+
+# Run the after script
+&set_domain_envs($dom, "MODIFY_DOMAIN", undef, $old);
+&made_changes();
+&reset_domain_envs($dom);
+
 &virtualmin_api_log(\@OLDARGV, $dom);
 print "Custom field values in $domain successfully updated\n";
 
