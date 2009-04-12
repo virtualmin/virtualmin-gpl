@@ -82,7 +82,8 @@ foreach $s (@scripts) {
 				print "Trying $url ..\n";
 				($host, $port, $page, $ssl) = &parse_http_url($url);
 				$h = &make_http_connection(
-					$host, $port, $ssl, "HEAD", $page);
+					$host, $port, $ssl,
+					$f->{'method'} || "HEAD", $page);
 				if (!ref($h)) {
 					print ".. failed : $h\n";
 					push(@errs, [ $script, $v, $url, $h ]);
