@@ -45,6 +45,7 @@
 	- Concurrent with v4, so that a domain can also have a v6 address
 	- Use in DNS, Apache
 		- Apache too (Listen ?)
+		- SSL
 	- Also do IP allocation in templates
 	- domain_setup.cgi, create-domain.pl, save_domain.cgi, modify-domain.pl
 	- Boot-time interfaces

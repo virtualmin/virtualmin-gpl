@@ -61,10 +61,7 @@ else {
 	# Add the actual <VirtualHost>
 	# We use a * for the address for name-based servers under Apache 2,
 	# if NameVirtualHost * exists.
-	local $vip = $_[0]->{'name'} &&
-		     $apache::httpd_modules{'core'} >= 1.312 &&
-		     &is_shared_ip($_[0]->{'ip'}) &&
-		     $nvstar ? "*" : $_[0]->{'ip'};
+	local $vips = &get_apache_vhost_ips($_[0], $nvstar);
 
 	# First build up the directives in the <VirtualHost>
 	local $proxying;
@@ -166,14 +163,8 @@ else {
 			}
 		}
 
-	# Work out addresses to match on
-	local @vips = ( "$vip:$web_port" );
-	if ($_[0]->{'virt6'}) {
-		push(@vips, "[$_[0]->{'ip6'}]:$web_port");
-		}
-
 	# Add to the file
-	splice(@$lref, $pos, 0, "<VirtualHost ".join(" ", @vips).">",
+	splice(@$lref, $pos, 0, "<VirtualHost $vips>",
 				@dirs,
 				"</VirtualHost>");
 	&flush_file_lines($f);
@@ -434,6 +425,8 @@ else {
 						    $_[1]->{'web_port'});
 	if ($_[0]->{'name'} != $_[1]->{'name'} ||
 	    $_[0]->{'ip'} ne $_[1]->{'ip'} ||
+	    $_[0]->{'ip6'} ne $_[1]->{'ip6'} ||
+	    $_[0]->{'virt6'} != $_[1]->{'virt6'} ||
 	    $_[0]->{'ssl'} != $_[1]->{'ssl'} ||
 	    $_[0]->{'web_port'} != $_[1]->{'web_port'}) {
 		# Name-based hosting mode or IP has changed .. update the
@@ -447,14 +440,12 @@ else {
 						  $_[0]->{'web_port'});
 		&add_listen($_[0], $conf, $_[0]->{'web_port'});
 
+		# Change the virtualhost IPs
 		local $lref = &read_file_lines($virt->{'file'});
-		local $vip = $_[0]->{'name'} &&
-			     $apache::httpd_modules{'core'} >= 1.312 &&
-			     &is_shared_ip($_[0]->{'ip'}) &&
-			     $nvstar ? "*" : $_[0]->{'ip'};
 		$lref->[$virt->{'line'}] =
-			"<VirtualHost $vip:$_[0]->{'web_port'}>";
+		    "<VirtualHost ".&get_apache_vhost_ips($_[0], $nvstar).">";
 		&flush_file_lines($virt->{'file'});
+
 		undef(@apache::get_config_cache);
 		($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
 						      $_[1]->{'web_port'});
@@ -3149,6 +3140,23 @@ foreach my $port ($d->{'web_port'},
 		}
 	}
 return undef;
+}
+
+# get_apache_vhost_ips(&domain, star-namevirtualhost)
+# Returns a string listing the IPs for a domain's <virtualhost> block
+sub get_apache_vhost_ips
+{
+local ($d, $nvstar) = @_;
+&require_apache();
+local $vip = $d->{'name'} &&
+	     $apache::httpd_modules{'core'} >= 1.312 &&
+	     &is_shared_ip($d->{'ip'}) &&
+	     $nvstar ? "*" : $d->{'ip'};
+local @vips = ( "$vip:$d->{'web_port'}" );
+if ($d->{'virt6'}) {
+	push(@vips, "[$d->{'ip6'}]:$d->{'web_port'}");
+	}
+return join(" ", @vips);
 }
 
 $done_feature_script{'web'} = 1;
