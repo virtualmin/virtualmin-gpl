@@ -25,6 +25,11 @@ followed by a plan name or ID. Similarly, you can select only virtual servers
 created using some template with the C<--template> flag, followed by an ID
 or name.
 
+To show only domains owned by some reseller, use the C<--reseller> flag followed
+by a reseller name. Or to list those not owned by any reseller, use the
+C<--no-reseller> flag. Finally, to list domains owned by any reseller, you
+can use the C<--any-reseller> option.
+
 To get a list of domain names only, use the C<--name-only> parameter. To get
 just Virtualmin domain IDs, use C<--id-only>. These are useful when iterating
 through domains in a script.
@@ -107,6 +112,15 @@ while(@ARGV > 0) {
 		$must_tmpl ||
 			&usage("No template with ID or name $planid was found");
 		}
+	elsif ($a eq "--reseller") {
+		$resel = shift(@ARGV);
+		}
+	elsif ($a eq "--no-reseller") {
+		$no_resel = 1;
+		}
+	elsif ($a eq "--any-reseller") {
+		$any_resel = 1;
+		}
 	else {
 		&usage();
 		}
@@ -142,6 +156,17 @@ if ($must_plan) {
 	}
 if ($must_tmpl) {
 	@doms = grep { $_->{'template'} eq $must_tmpl->{'id'} } @doms;
+	}
+
+# Limit by reseller
+if ($resel) {
+	@doms = grep { $_->{'reseller'} eq $resel } @doms;
+	}
+elsif ($no_resel) {
+	@doms = grep { !$_->{'reseller'} } @doms;
+	}
+elsif ($any_resel) {
+	@doms = grep { $_->{'reseller'} } @doms;
 	}
 
 if ($multi) {
@@ -481,6 +506,10 @@ print "                         [--without-feature feature]\n";
 print "                         [--alias | --no-alias | --subserver |\n";
 print "                          --toplevel | --subdomain]\n";
 print "                         [--plan ID|\"plan name\"]\n";
+if ($virtualmin_pro) {
+	print "                         [--reseller name | --no-reseller |]\n";
+	print "                          --any-reseller]\n";
+	}
 exit(1);
 }
 

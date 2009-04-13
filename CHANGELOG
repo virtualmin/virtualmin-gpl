@@ -1098,3 +1098,4 @@ Made the Website Options page available to domain owners, although only with lim
 When creating a sub-server that is a sub-domain of it's parent, DNS records for the new domain will be added to the parent's zone.
 Added a field on the Website Options page for making a virtual server the default website for its IP address.
 Parent virtual server details are now available in sub-server post-creation scripts in the $PARENT_VIRTUALSERVER_ environment variables.
+Added --reseller, --no-reseller and --any-reseller flags to list-domains.pl.
