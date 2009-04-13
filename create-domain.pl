@@ -452,10 +452,14 @@ if (&has_home_quotas() && !$parent && !$tlimit) {
 
 # Validate reseller
 if (defined($resel)) {
+	# Set on the command line
 	$parent && &usage("Reseller cannot be set for sub-servers");
 	@resels = &list_resellers();
 	($rinfo) = grep { $_->{'name'} eq $resel } @resels;
 	$rinfo || &usage("Reseller $resel not found");
+	}
+elsif ($parent) {
+	$resel = $parent->{'reseller'};
 	}
 
 $defip = &get_default_ip($resel);

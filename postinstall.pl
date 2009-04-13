@@ -56,6 +56,11 @@ if ($virtualmin_pro) {
 		}
 	}
 
+# Set resellers on sub-servers
+if (defined(&sync_parent_resellers)) {
+	&sync_parent_resellers();
+	}
+
 # Force update of all Webmin users, to set new ACL options
 &modify_all_webmin();
 if ($virtualmin_pro) {

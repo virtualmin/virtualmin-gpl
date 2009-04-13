@@ -36,14 +36,14 @@ $source =~ s/\r//g;
 
 # Work out the reseller
 if (&master_admin()) {
-	$resel = $in{'resel'};
+	$defresel = $in{'resel'};
 	}
 elsif (&reseller_admin()) {
-	$resel = $base_remote_user;
+	$defresel = $base_remote_user;
 	}
 else {
 	$mydom = &get_domain_by("user", $base_remote_user, "parent", undef);
-	$resel = $mydom->{'resel'};
+	$defresel = $mydom->{'resel'};
 	}
 
 &ui_print_unbuffered_header(undef, $text{'cmass_title'}, "", "cmass");
@@ -106,6 +106,9 @@ foreach $line (@lines) {
 		    &line_error(&text('cmass_ecanparent', $aliasdom->{'dom'}));
 		$parentdom ||= $aliasdom;
 		}
+
+	# Get the reseller
+	local $resel = $parentdom ? $parentdom->{'reseller'} : $defresel;
 
 	# Get the template
 	local $tmpl = &get_template($parentdom ? $in{'stemplate'}
