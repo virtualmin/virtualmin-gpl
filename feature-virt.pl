@@ -307,28 +307,31 @@ sub show_template_virt
 {
 local ($tmpl) = @_;
 
-# IP allocation range
-@ranges = &parse_ip_ranges($tmpl->{'ranges'})
-	if ($tmpl->{'ranges'} ne "none");
-local @rfields = map { ("ranges_start_".$_, "ranges_end_".$_) }
-		     (0..scalar(@ranges)+1);
-$rtable = &none_def_input("ranges", $tmpl->{'ranges'},
+# IP allocation ranges (v4 and possibly v6)
+foreach my $ranges ("ranges", &supports_ip6() ? ( "ranges6" ) : ( )) {
+	local @ranges;
+	@ranges = &parse_ip_ranges($tmpl->{$ranges})
+		if ($tmpl->{$ranges} ne "none");
+	local @rfields = map { ($ranges."_start_".$_, $ranges."_end_".$_) }
+			     (0..scalar(@ranges)+1);
+	local $rtable = &none_def_input($ranges, $tmpl->{$ranges},
 			 $text{'tmpl_rangesbelow'}, 0, 0, undef, \@rfields);
-local @table;
-$i = 0;
-foreach $r (@ranges, [ ], [ ]) {
-	push(@table, [ &ui_textbox("ranges_start_$i", $r->[0], 20),
-		       &ui_textbox("ranges_end_$i", $r->[1], 20) ]);
-	$i++;
+	local @table;
+	$i = 0;
+	foreach $r (@ranges, [ ], [ ]) {
+		push(@table, [ &ui_textbox($ranges."_start_$i", $r->[0], 20),
+			       &ui_textbox($ranges."_end_$i", $r->[1], 20) ]);
+		$i++;
+		}
+	$rtable .= &ui_columns_table(
+		[ $text{'tmpl_ranges_start'}, $text{'tmpl_ranges_end'} ],
+		undef,
+		\@table,
+		undef,
+		1);
+	print &ui_table_row(&hlink($text{'tmpl_'.$ranges},
+				   "template_".$ranges."_mode"), $rtable);
 	}
-$rtable .= &ui_columns_table(
-	[ $text{'tmpl_ranges_start'}, $text{'tmpl_ranges_end'} ],
-	undef,
-	\@table,
-	undef,
-	1);
-print &ui_table_row(&hlink($text{'tmpl_ranges'},"template_ranges_mode"),
-		    $rtable);
 }
 
 # parse_template_virt(&tmpl)
@@ -337,32 +340,47 @@ sub parse_template_virt
 {
 local ($tmpl) = @_;
 
-# Save IP allocation ranges
-if ($in{'ranges_mode'} == 0) {
-	$tmpl->{'ranges'} = "none";
-	}
-elsif ($in{'ranges_mode'} == 1) {
-	$tmpl->{'ranges'} = undef;
-	}
-else {
-	for($i=0; defined($start = $in{"ranges_start_$i"}); $i++) {
-		next if (!$start);
-		$end = $in{"ranges_end_$i"};
-		&check_ipaddress($start) ||
-			&error(&text('tmpl_eranges_start', $start));
-		&check_ipaddress($end) ||
-			&error(&text('tmpl_eranges_end', $start));
-		@start = split(/\./, $start);
-		@end = split(/\./, $end);
-		$start[0] == $end[0] && $start[1] == $end[1] &&
-		    $start[2] == $end[2] ||
-			&error(&text('tmpl_eranges_net', $start));
-		$start[3] <= $end[3] ||
-			&error(&text('tmpl_eranges_lower', $start));
-		push(@ranges, [ $start, $end ]);
+# Save IPv4 and possibly v6 allocation ranges
+foreach my $ranges ("ranges", &supports_ip6() ? ( "ranges6" ) : ( )) {
+	if ($in{$ranges.'_mode'} == 0) {
+		$tmpl->{$ranges} = "none";
 		}
-	@ranges || &error($text{'tmpl_eranges'});
-	$tmpl->{'ranges'} = &join_ip_ranges(\@ranges);
+	elsif ($in{$ranges.'_mode'} == 1) {
+		$tmpl->{$ranges} = undef;
+		}
+	else {
+		local (@ranges, $start, $end);
+		for(my $i=0; defined($start = $in{$ranges."_start_$i"}); $i++) {
+			next if (!$start);
+			$end = $in{$ranges."_end_$i"};
+			if ($ranges eq "ranges") {
+				# IPv4 verification
+				&check_ipaddress($start) ||
+				    &error(&text('tmpl_eranges_start', $start));
+				&check_ipaddress($end) ||
+				    &error(&text('tmpl_eranges_end', $start));
+				local @start = split(/\./, $start);
+				local @end = split(/\./, $end);
+				$start[0] == $end[0] && $start[1] == $end[1] &&
+				    $start[2] == $end[2] ||
+					&error(&text('tmpl_eranges_net',
+						     $start));
+				$start[3] <= $end[3] ||
+					&error(&text('tmpl_eranges_lower',
+						     $start));
+				}
+			else {
+				# v6 verification
+				&check_ip6address($start) ||
+				    &error(&text('tmpl_eranges6_start',$start));
+				&check_ip6address($end) ||
+				    &error(&text('tmpl_eranges6_end', $end));
+				}
+			push(@ranges, [ $start, $end ]);
+			}
+		@ranges || &error($text{'tmpl_e'.$ranges});
+		$tmpl->{$ranges} = &join_ip_ranges(\@ranges);
+		}
 	}
 }
 

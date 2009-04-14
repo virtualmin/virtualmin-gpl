@@ -45,6 +45,7 @@
 	- Also do IP allocation in templates
 	- domain_setup.cgi save_domain.cgi
 	- Boot-time interfaces
+	- CHANGELOG
 
  - WebNIC registrar support
 	- See email from Winnie Lee

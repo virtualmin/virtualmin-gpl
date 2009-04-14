@@ -5267,18 +5267,21 @@ local ($out, $timed_out) = &backquote_with_timeout(
 return !$timed_out && !$?;
 }
 
-
-
 # parse_ip_ranges(ranges)
 # Returns a list of all IP allocation ranges, each of which is a 2-element array
 sub parse_ip_ranges
 {
 local @rv;
 local @ranges = split(/\s+/, $_[0]);
-local $r;
-foreach $r (@ranges) {
-	$r =~ /^(\d+\.\d+\.\d+)\.(\d+)\-(\d+)$/ || next;
-	push(@rv, [ "$1.$2", "$1.$3" ]);
+foreach my $r (@ranges) {
+	if ($r =~ /^(\d+\.\d+\.\d+)\.(\d+)\-(\d+)$/) {
+		# IPv4 range
+		push(@rv, [ "$1.$2", "$1.$3" ]);
+		}
+	elsif ($r =~ /^([0-9a-f:]+):([0-9a-f]+)-([0-9a-f]+)$/) {
+		# IPv6 range
+		push(@rv, [ "$1:$2", "$1:$3" ]);
+		}
 	}
 return @rv;
 }
@@ -5288,11 +5291,18 @@ return @rv;
 sub join_ip_ranges
 {
 local @ranges;
-local $r;
-foreach $r (@{$_[0]}) {
-	local @start = split(/\./, $r->[0]);
-	local @end = split(/\./, $r->[1]);
-	push(@ranges, join(".", @start)."-".$end[3]);
+foreach my $r (@{$_[0]}) {
+	if (&check_ipaddress($r->[0])) {
+		# IPv4 range
+		local @start = split(/\./, $r->[0]);
+		local @end = split(/\./, $r->[1]);
+		push(@ranges, join(".", @start)."-".$end[3]);
+		}
+	elsif (&check_ip6address($r->[0])) {
+		# IPv6 range
+		local @end = split(/:/, $r->[1]);
+		push(@ranges, $r->[0]."-".$end[$#end]);
+		}
 	}
 return join(" ", @ranges);
 }
@@ -6719,6 +6729,7 @@ push(@rv, { 'id' => 0,
 	    'forceunder' => $config{'defforceunder'},
 	    'resources' => $config{'defresources'} || "none",
 	    'ranges' => $config{'ip_ranges'} || "none",
+	    'ranges6' => $config{'ip_ranges6'} || "none",
 	    'mailgroup' => $config{'mailgroup'} || "none",
 	    'ftpgroup' => $config{'ftpgroup'} || "none",
 	    'dbgroup' => $config{'dbgroup'} || "none",
@@ -6984,6 +6995,8 @@ if ($tmpl->{'id'} == 0) {
 	&uncat_file("framefwd-template", $tmpl->{'frame'});
 	$config{'ip_ranges'} = $tmpl->{'ranges'} eq 'none' ? undef :
 			       $tmpl->{'ranges'};
+	$config{'ip_ranges6'} = $tmpl->{'ranges6'} eq 'none' ? undef :
+			        $tmpl->{'ranges6'};
 	$config{'mailgroup'} = $tmpl->{'mailgroup'} eq 'none' ? undef :
 			       $tmpl->{'mailgroup'};
 	$config{'ftpgroup'} = $tmpl->{'ftpgroup'} eq 'none' ? undef :
@@ -7084,7 +7097,8 @@ if (!$tmpl->{'default'}) {
 		    "mysql_hosts", "mysql_mkdb", "mysql_suffix", "mysql_chgrp",
 		    "mysql_nopass", "mysql_wild", "mysql_charset", "mysql",
 		    "postgres_encoding", "webalizer",
-		    "dom_aliases", "ranges", "mailgroup", "ftpgroup", "dbgroup",
+		    "dom_aliases", "ranges", "ranges6",
+		    "mailgroup", "ftpgroup", "dbgroup",
 		    "othergroups", "defmquota", "quotatype", "append_style",
 		    "domalias", "logrotate", "disabled_web", "disabled_url",
 		    "php", "status", "extra_prefix", "capabilities",
