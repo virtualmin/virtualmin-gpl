@@ -61,7 +61,7 @@ else {
 	# Add the actual <VirtualHost>
 	# We use a * for the address for name-based servers under Apache 2,
 	# if NameVirtualHost * exists.
-	local $vips = &get_apache_vhost_ips($_[0], $nvstar);
+	local $vips = &get_apache_vhost_ips($_[0], $nvstar, $web_port);
 
 	# First build up the directives in the <VirtualHost>
 	local $proxying;
@@ -729,9 +729,8 @@ else {
 		}
 	&release_lock_web($_[0]);
 	&create_framefwd_file($_[0]);
-	if (!$_[0]->{'ssl'} && $need_restart && $rv) {
-		# Only re-start here if we won't re-start later after
-		# changing SSL
+	if ($need_restart && $rv) {
+		# Need a full restart
 		&register_post_action(\&restart_apache, 1);
 		}
 	elsif (!$need_restart && $rv) {
@@ -1809,29 +1808,30 @@ sub add_listen
 {
 local ($d, $conf, $web_port) = @_;
 &require_apache();
-local $defport = &apache::find_directive("Port", $conf) || 80;
-local @listen = &apache::find_directive("Listen", $conf);
-local $lfound;
-foreach my $l (@listen) {
-	$lfound++ if (($l eq '*' && $web_port == $defport) ||
-		      ($l =~ /^\*:(\d+)$/ && $web_port == $1) ||
-		      ($l =~ /^0\.0\.0\.0:(\d+)$/ && $web_port == $1) ||
-		      ($l =~ /^\d+$/ && $web_port == $l) ||
-		      ($l =~ /^(\S+):(\d+)$/ &&
-		       &to_ipaddress("$1") eq $d->{'ip'} &&
-		       $2 == $web_port) ||
-		      (&to_ipaddress($l) eq $d->{'ip'}));
-	}
-if (!$lfound && @listen > 0) {
-	# Apache is listening on some IP addresses and ports, but not the
-	# needed one. Add a listen for that IP specifically.
-	# Listening on * is no longer done, as it can cause conflicts with
-	# other servers on port 443 or 80 and other IPs.
-	#local $ip = $d->{'virt'} ? $d->{'ip'} : "*";
-	local $ip = $d->{'ip'};
-	&apache::save_directive("Listen", [ @listen, "$ip:$web_port" ],
-				$conf, $conf);
-	&flush_file_lines();
+foreach my $dip ($d->{'ip'}, $d->{'virt6'} ? ( $d->{'ip6'} ) : ( )) {
+	local $defport = &apache::find_directive("Port", $conf) || 80;
+	local @listen = &apache::find_directive("Listen", $conf);
+	local $lfound;
+	foreach my $l (@listen) {
+		$lfound++ if (($l eq '*' && $web_port == $defport) ||
+			      ($l =~ /^\*:(\d+)$/ && $web_port == $1) ||
+			      ($l =~ /^0\.0\.0\.0:(\d+)$/ && $web_port == $1) ||
+			      ($l =~ /^\d+$/ && $web_port == $l) ||
+			      ($l =~ /^(\S+):(\d+)$/ &&
+			       &to_ipaddress("$1") eq $dip &&
+			       $2 == $web_port) ||
+			      (&to_ipaddress($l) eq $dip));
+		}
+	if (!$lfound && @listen > 0) {
+		# Apache is listening on some IP addresses and ports, but not
+		# the needed one. Add a listen for that IP specifically.
+		# Listening on * is no longer done, as it can cause conflicts
+		# with other servers on port 443 or 80 and other IPs.
+		local $ip = &check_ip6address($dip) ? "[$dip]" : $dip;
+		&apache::save_directive("Listen", [ @listen, "$ip:$web_port" ],
+					$conf, $conf);
+		&flush_file_lines();
+		}
 	}
 }
 
@@ -3142,19 +3142,20 @@ foreach my $port ($d->{'web_port'},
 return undef;
 }
 
-# get_apache_vhost_ips(&domain, star-namevirtualhost)
+# get_apache_vhost_ips(&domain, star-namevirtualhost, [port])
 # Returns a string listing the IPs for a domain's <virtualhost> block
 sub get_apache_vhost_ips
 {
-local ($d, $nvstar) = @_;
+local ($d, $nvstar, $port) = @_;
+$port ||= $d->{'web_port'};
 &require_apache();
 local $vip = $d->{'name'} &&
 	     $apache::httpd_modules{'core'} >= 1.312 &&
 	     &is_shared_ip($d->{'ip'}) &&
 	     $nvstar ? "*" : $d->{'ip'};
-local @vips = ( "$vip:$d->{'web_port'}" );
+local @vips = ( "$vip:$port" );
 if ($d->{'virt6'}) {
-	push(@vips, "[$d->{'ip6'}]:$d->{'web_port'}");
+	push(@vips, "[$d->{'ip6'}]:$port");
 	}
 return join(" ", @vips);
 }

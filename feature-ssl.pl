@@ -132,7 +132,7 @@ local $srclref = &read_file_lines($virt->{'file'});
 # Add the actual <VirtualHost>
 local $lref = &read_file_lines($f);
 local @ssldirs = &apache_ssl_directives($_[0], $tmpl);
-push(@$lref, "<VirtualHost $_[0]->{'ip'}:$web_sslport>");
+push(@$lref, "<VirtualHost ".&get_apache_vhost_ips($_[0], 0, $web_sslport).">");
 push(@$lref, @$srclref[$virt->{'line'}+1 .. $virt->{'eline'}-1]);
 push(@$lref, @ssldirs);
 push(@$lref, "</VirtualHost>");
@@ -187,6 +187,8 @@ local ($nonvirt, $nonvconf) = &get_apache_virtual($_[0]->{'dom'},
 local $tmpl = &get_template($_[0]->{'template'});
 
 if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
+    $_[0]->{'ip6'} ne $_[1]->{'ip6'} ||
+    $_[0]->{'virt6'} != $_[1]->{'virt6'} ||
     $_[0]->{'web_sslport'} != $_[1]->{'web_sslport'}) {
 	# IP address or port has changed .. update VirtualHost
 	&$first_print($text{'save_ssl'});
@@ -194,7 +196,8 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
 	&add_listen($_[0], $conf, $_[0]->{'web_sslport'});
 	local $lref = &read_file_lines($virt->{'file'});
 	$lref->[$virt->{'line'}] =
-		"<VirtualHost $_[0]->{'ip'}:$_[1]->{'web_sslport'}>";
+		"<VirtualHost ".
+		&get_apache_vhost_ips($_[0], 0, $_[0]->{'web_sslport'}).">";
 	&flush_file_lines();
 	$rv++;
 	undef(@apache::get_config_cache);
