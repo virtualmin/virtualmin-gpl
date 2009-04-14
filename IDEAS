@@ -42,8 +42,8 @@
 
  - IPv6 support
 	- FS#4239
-	- Also do IP allocation in templates
 	- domain_setup.cgi save_domain.cgi
+	- IP change page
 	- Boot-time interfaces
 	- CHANGELOG
 

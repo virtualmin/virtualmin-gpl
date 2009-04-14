@@ -21,6 +21,12 @@ have a free address chosen from the allocation ranges. If you want to
 use a virtual IP that is already active on the system, you must add the
 --ip-already command-line option.
 
+If your system supports IPv6, Virtualmin can also add a v6 address for a
+new virtual server with the C<--ip6> flag followed by an address in the correct
+format. If you have IPv6 allocation enabled in the server templates, instead
+use the C<--allocate-ip6> flag to have Virtualmin select a free address
+automatically.
+
 To create a server that is owned by an existing user, use the --parent option,
 followed by the name of the virtual server to create under. In this case, the --pass , --unix , --webmin and --quota options are not needed, as a user for the new server already exists.
 
@@ -153,14 +159,14 @@ while(@ARGV > 0) {
 		&indexof($sharedip, &list_shared_ips()) >= 0 ||
 		    &usage("$sharedip is not in the shared IP addresses list");
 		}
-	elsif ($a eq "--ip6") {
+	elsif ($a eq "--ip6" && &supports_ip6()) {
 		$ip6 = shift(@ARGV);
 		$virt6 = 1;
 		}
-	elsif ($a eq "--ip6-already") {
+	elsif ($a eq "--ip6-already" && &supports_ip6()) {
 		$virt6already = 1;
 		}
-	elsif ($a eq "--allocate-ip6") {
+	elsif ($a eq "--allocate-ip6" && &supports_ip6()) {
 		$ip6 = "allocate";
 		$virt6 = 1;
 		}

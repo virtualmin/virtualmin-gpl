@@ -146,6 +146,10 @@ while(@ARGV > 0) {
 		# Removing an IPv6 address
 		$noip6 = 1;
 		}
+	elsif ($a eq "--allocate-ip6" && &supports_ip6()) {
+		# Allocating an IPv6 address
+		$ip6 = "allocate";
+		}
 	elsif ($a eq "--reseller") {
 		# Changing the reseller
 		$resel = shift(@ARGV);
@@ -218,7 +222,7 @@ if ($dom->{'parent'}) {
 
 # Validate IP change options
 if ($ip && $dom->{'alias'}) {
-	&usage("An IP address cannot be added to a virtual domain");
+	&usage("An IP address cannot be added to an alias domain");
 	}
 if ($dom->{'virt'} && $ip eq "allocate") {
 	&usage("An IP address cannot be allocated when one is already active");
@@ -246,6 +250,16 @@ if (!$dom->{'virt'} && $defaultip) {
 	}
 if (($defaultip || $sharedip) && $ip) {
 	&usage("The --default-ip and --shared-ip flags cannot be combined with --ip or --allocate-ip");
+	}
+
+# Validate IPv6 changes
+if ($dom->{'virt6'} && $ip6 eq "allocate") {
+	&usage("An IPv6 address cannot be allocated when one is already active");
+	}
+elsif (!$dom->{'virt6'} && $ip6 eq "allocate") {
+	$tmpl->{'ranges6'} eq "none" && &usage("The --allocate-ip6 option cannot be used unless automatic IP allocation is enabled - use --ip6 instead");
+	$ip6 = &free_ip6_address($tmpl);
+	$ip6 || &usage("Failed to allocate IPv6 address from ranges!");
 	}
 
 if (defined($resel)) {
@@ -499,15 +513,16 @@ if ($config{'bw_disable'}) {
 print "                        [--resel reseller|NONE]\n";
 print "                        [--ip address] | [--allocate-ip] |\n";
 print "                        [--default-ip | --shared-ip address]\n";
+if (&supports_ip6()) {
+	print "                        [--ip6 address | --allocate-ip6 |\n";
+	print "                         --no-ip6]\n";
+	}
 print "                        [--prefix name]\n";
 print "                        [--template name|id]\n";
 print "                        [--plan name|id | --apply-plan name|id]\n";
 print "                        [--add-exclude directory]*\n";
 print "                        [--remove-exclude directory]*\n";
 print "                        [--dns-ip address | --no-dns-ip]\n";
-if (&supports_ip6()) {
-	print "                        [--ip6 address | --no-ip6]\n";
-	}
 exit(1);
 }
 
