@@ -929,6 +929,7 @@ edit_disabled_manual=This server has been manually disabled.
 edit_disabled_why=Reason for disabling : $1
 edit_disabled=Virtual server features such as the website and DNS domain cannot be added or removed while the server is disabled.
 edit_ip=IP address
+edit_ip6=IPv6 address
 edit_private=(Private to this server)
 edit_shared=(Shared by all servers)
 edit_shared2=(Non-default shared address)

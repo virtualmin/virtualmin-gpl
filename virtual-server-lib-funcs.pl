@@ -5234,12 +5234,31 @@ sub free_ip_address
 local ($tmpl) = @_;
 local %taken = &interface_ip_addresses();
 local @ranges = split(/\s+/, $tmpl->{'ranges'});
-local $r;
-foreach $r (@ranges) {
+foreach my $r (@ranges) {
 	$r =~ /^(\d+\.\d+\.\d+)\.(\d+)\-(\d+)$/ || next;
 	local ($base, $s, $e) = ($1, $2, $3);
 	for(my $j=$s; $j<=$e; $j++) {
 		local $try = "$base.$j";
+		return $try if (!$taken{$try} && !&ping_ip_address($try));
+		}
+	}
+return undef;
+}
+
+# free_ip_address(&template|&acl)
+# Returns an IPv6 address within the allocation range which is not currently
+# used. Checks this system's configured interfaces, and does pings.
+sub free_ip6_address
+{
+local ($tmpl) = @_;
+local %taken = &interface_ip_addresses(); 
+local @ranges = split(/\s+/, $tmpl->{'ranges6'});
+foreach my $r (@ranges) {
+	$r =~ /^([0-9a-f:]+):([0-9a-f]+)\-([0-9a-f]+)$/ || next;
+	local ($base, $s, $e) = ($1, $2, $3);
+	for(my $j=$s; $j<=$e; $j++) {
+		local $try = "$base:$j";
+		print STDERR "considering $try\n";
 		return $try if (!$taken{$try} && !&ping_ip_address($try));
 		}
 	}
@@ -5253,15 +5272,22 @@ sub interface_ip_addresses
 &foreign_require("net", "net-lib.pl");
 local %taken = map { $_->{'address'}, $_ } (&net::boot_interfaces(),
 					    &net::active_interfaces());
+if (&supports_ip6()) {
+	%taken = ( %taken, map { $_->{'address'}, $_ }
+			       (&boot_ip6_interfaces(),
+                                &active_ip6_interfaces()) );
+	}
 return %taken;
 }
 
-# ping_ip_address(hostname|ip)
+# ping_ip_address(hostname|ip|ipv6)
 # Returns 1 if some host responds to a ping in 1 second
 sub ping_ip_address
 {
 local ($host) = @_;
-local $pingcmd = $gconfig{'os_type'} =~ /-linux$/ ? "ping -c 1 -t 1" : "ping";
+local $pinger = &check_ip6address($host) ? "ping6" : "ping";
+local $pingcmd = $gconfig{'os_type'} =~ /-linux$/ ? "$pinger -c 1 -t 1"
+						  : $pinger;
 local ($out, $timed_out) = &backquote_with_timeout(
 	$pingcmd." ".$host." 2>&1", 1, 1);
 return !$timed_out && !$?;
@@ -6197,6 +6223,9 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 		# Take down IP
 		if ($dd->{'iface'}) {
 			&delete_virt($dd);
+			}
+		if ($dd->{'virt6'}) {
+			&delete_virt6($dd);
 			}
 		}
 

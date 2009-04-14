@@ -160,6 +160,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--ip6-already") {
 		$virt6already = 1;
 		}
+	elsif ($a eq "--allocate-ip6") {
+		$ip6 = "allocate";
+		$virt6 = 1;
+		}
 	elsif ($a eq "--dns-ip") {
 		$dns_ip = shift(@ARGV);
 		&check_ipaddress($dns_ip) ||
@@ -306,6 +310,17 @@ if ($ip eq "allocate") {
 elsif ($virt) {
 	# Make sure manual IP specification is allowed
 	$tmpl->{'ranges'} eq "none" || $config{'all_namevirtual'} || &usage("The --ip option cannot be used when automatic IP allocation is enabled - use --allocate-ip instead");
+	}
+
+if ($ip6 eq "allocate") {
+	# Allocate an IPv6 address now
+	$virt6already && &usage("The --ip6-already and --allocate-ip6 options are incompatible");
+	$ip6 = &free_ip6_address($tmpl);
+	$ip6 || &usage("Failed to allocate IPv6 address from ranges!");
+	}
+elsif ($virt6) {
+	# Make sure manual IP specification is allowed
+	$tmpl->{'ranges6'} eq "none" || &usage("The --ip6 option cannot be used when automatic IPv6 address allocation is enabled - use --allocate-ip6 instead");
 	}
 
 # If no limit-related flags are given, assume from plan
@@ -706,6 +721,11 @@ print "                        [--default-features] | [--features-from-plan]\n";
 print "                        [--allocate-ip | --ip virtual.ip.address |\n";
 print "                         --shared-ip existing.ip.address]\n";
 print "                        [--ip-already]\n";
+if (&supports_ip6()) {
+	print "                        [--allocate-ip6 |\n";
+	print "                         --ip6 virtual.ip.address]\n";
+	print "                        [--ip6-already]\n";
+	}
 print "                        [--dns-ip address | --no-dns-ip]\n";
 print "                        [--max-doms domains|*]\n";
 print "                        [--max-aliasdoms domains]\n";
