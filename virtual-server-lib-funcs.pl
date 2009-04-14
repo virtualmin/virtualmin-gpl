@@ -12552,9 +12552,15 @@ local ($d, $oldd) = @_;
 local @aliases = &get_domain_by("alias", $d->{'id'});
 return 0 if (!@aliases);
 foreach my $ad (@aliases) {
-	next if ($ad->{'ip'} ne $oldd->{'ip'});
+	next if ($ad->{'ip'} ne $oldd->{'ip'} &&
+		 $ad->{'ip6'} ne $oldd->{'ip6'});
 	my $oldad = { %$ad };
-	$ad->{'ip'} = $d->{'ip'};
+	if ($ad->{'ip'} eq $oldd->{'ip'}) {
+		$ad->{'ip'} = $d->{'ip'};
+		}
+	if ($oldd->{'ip6'} && $ad->{'ip6'} eq $oldd->{'ip6'}) {
+		$ad->{'ip6'} = $d->{'ip6'};
+		}
 	&$first_print(&text('save_aliasip', $ad->{'dom'}, $d->{'ip'}));
 	&$indent_print();
 	foreach my $f (@features) {

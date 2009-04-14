@@ -18,6 +18,10 @@ To revert a server with a private IP back to the system's default shared
 address, use the C<--default-ip> flag. If the system has more than one shared
 address, the C<--shared-ip> flag can be used to change it.
 
+To add an IPv6 address to a virtual server that currently does not have
+one, the C<--ip6> or C<--allocate-ip6> options can be used. To remove a v6
+address, you can use C<--no-ip6> instead.
+
 To change a server's domain name, the C<--newdomain> option can be used. It must
 be followed by a new domain name, which of course cannot be used by any
 existing virtual server. When changing the domain name, you may also want to

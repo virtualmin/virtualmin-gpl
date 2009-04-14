@@ -225,6 +225,32 @@ else {
 	($ip, $virt, $virtalready) = &parse_virtual_ip($tmpl, $resel);
 	}
 
+# Work out the IPv6 address
+if ($aliasdom) {
+	$ip6 = $aliasdom->{'ip6'};
+	$virt6 = 0;
+	}
+elsif (&can_use_feature("virt") && &supports_ip6()) {
+	if ($in{'virt6'} == 1) {
+		# Manually entered
+		$tmpl->{'ranges'} eq 'none' ||
+			&error(&text('setup_evirt6tmpl2'));
+		&check_ip6address($in{'ip6'}) || &error($text{'setup_eip6'});
+		$clash = &check_virt6_clash($in{'ip6'});
+		$clash && &error(&text('setup_evirt6clash'));
+		$ip6 = $in{'ip6'};
+		$virt6 = 1;
+		}
+	elsif ($in{'virt6'} == 2) {
+		# Allocated
+		$tmpl->{'ranges'} ne "none" ||
+			&error(&text('setup_evirt6tmpl'));
+		$ip6 = &free_ip6_address($tmpl);
+		$ip6 || &text('setup_evirt6alloc');
+		$virt6 = 1;
+		}
+	}
+
 # Validate the DNS IP
 if (!$in{'dns_ip_def'}) {
 	&check_ipaddress($in{'dns_ip'}) || &error($text{'save_ednsip'});
@@ -281,10 +307,12 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 		  !$in{'email_def'} ? $in{'email'} : undef,
 	 'name', !$virt,
 	 'ip', $ip,
+	 'ip6', $ip6,
 	 'dns_ip', !$in{'dns_ip_def'} ? $in{'dns_ip'} :
 		   $virt || $config{'all_namevirtual'} ? undef
 						       : &get_dns_ip(),
 	 'virt', $virt,
+	 'virt6', $virt6,
 	 'virtalready', $virtalready,
 	 'source', 'domain_setup.cgi',
 	 'proxy_pass', $proxy,

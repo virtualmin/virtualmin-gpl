@@ -533,6 +533,7 @@ if (!$alias) {
 	}
 else {
 	$ip = $alias->{'ip'};
+	$ip6 = $alias->{'ip6'};
 	}
 
 # Validate style

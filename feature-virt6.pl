@@ -31,6 +31,7 @@ if (!$d->{'virtalready'}) {
 			'address' => $d->{'ip6'} };
 	&save_ip6_interface($virt);
 	&activate_ip6_interface($virt);
+	$d->{'iface6'} = $virt->{'name'};
 	&$second_print(&text('setup_virt6done', $virt->{'name'}));
 	}
 &release_lock_virt($d);

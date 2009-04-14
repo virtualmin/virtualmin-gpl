@@ -149,6 +149,32 @@ if (!$parentdom) {
 		}
 	}
 
+# Show description
+print &ui_table_row($text{'edit_owner'},
+		    &ui_textbox("owner", $d->{'owner'}, 50));
+
+if (!$parentdom) {
+	# Show owner's email address and password
+	print &ui_table_row($text{'edit_email'},
+		$d->{'unix'} ? &ui_opt_textbox("email", $d->{'email'}, 30,
+					       $text{'edit_email_def'})
+			     : &ui_textbox("email", $d->{'email'}, 30));
+
+	print &ui_table_row($text{'edit_passwd'},
+		&ui_opt_textbox("passwd", undef, 20,
+				$text{'edit_lv'}." ".&show_password_popup($d),
+				$text{'edit_set'}));
+	}
+
+print &ui_hidden_table_end("config");
+
+# Start section for IPs
+if (!$aliasdom) {
+	print &ui_hidden_table_start($text{'form_ipsect'}, "width=100%", 2,
+				     "ipsect", 0, [ "width=30%" ]);
+	}
+
+# IP addresses section
 if (!$aliasdom) {
 	# Show IP-related options
 	if ($d->{'reseller'}) {
@@ -213,10 +239,37 @@ if (!$aliasdom) {
 		print &ui_table_row($text{'edit_virt'}, $ipfield);
 		}
 	}
-else {
-	# Show alias domain's IP
-	print &ui_table_row($text{'edit_ip'},
-		  "<tt>$d->{'ip'}</tt> ".$text{'edit_fromparent'});
+
+if (&supports_ip6() && !$aliasdom) {
+	if (&can_use_feature("virt")) {
+		# Show field to add or remove an IPv6 address
+		local @ip6opts = ( [ 0, $text{'edit_virt6off'} ] );
+		if ($d->{'virt6'}) {
+			# Already active, so just show
+			push(@ip6opts, [ 1, $text{'edit_virt6using'},
+					 "<tt>$d->{'ip6'}</tt>" ]);
+			}
+		elsif ($tmpl->{'ranges6'} ne 'none') {
+			# Can allocate
+			local $alloc = &free_ip6_address($tmpl);
+			if ($alloc) {
+				push(@ip6opts, [ 1, $text{'edit_alloc'},
+						 $alloc ]);
+				}
+			}
+		else {
+			# Manually enter, or already active
+			push(@ip6opts, [ 1, $text{'edit_virt6on'},
+					 &ui_textbox("ip6", $d->{'ip6'}, 30) ]);
+			}
+		print &ui_table_row($text{'edit_ip6'},
+			&ui_radio_table("virt6", $d->{'virt6'} ? 1 : 0,
+					\@ip6opts, 1));
+		}
+	elsif ($d->{'virt6'}) {
+		# Show existing address
+		print &ui_table_row($text{'edit_ip6'}, "<tt>$d->{'ip6'}</tt>");
+		}
 	}
 
 # Show the external IP
@@ -224,24 +277,9 @@ print &ui_table_row(&hlink($text{'edit_dnsip'}, "edit_dnsip"),
 	&ui_opt_textbox("dns_ip", $d->{'dns_ip'}, 20,
 			&text('spf_default', $d->{'ip'})));
 
-# Show description
-print &ui_table_row($text{'edit_owner'},
-		    &ui_textbox("owner", $d->{'owner'}, 50));
-
-if (!$parentdom) {
-	# Show owner's email address and password
-	print &ui_table_row($text{'edit_email'},
-		$d->{'unix'} ? &ui_opt_textbox("email", $d->{'email'}, 30,
-					       $text{'edit_email_def'})
-			     : &ui_textbox("email", $d->{'email'}, 30));
-
-	print &ui_table_row($text{'edit_passwd'},
-		&ui_opt_textbox("passwd", undef, 20,
-				$text{'edit_lv'}." ".&show_password_popup($d),
-				$text{'edit_set'}));
+if (!$aliasdom) {
+	print &ui_hidden_table_end();
 	}
-
-print &ui_hidden_table_end("config");
 
 # Related servers section
 @aliasdoms = &get_domain_by("alias", $d->{'id'});

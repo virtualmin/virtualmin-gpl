@@ -187,26 +187,26 @@ else {
 	local @opts;
 	if ($orig) {
 		# For restores - option to use original IP
-		push(@opts, [ -1, $text{'form_origip'}."<br>" ]);
+		push(@opts, [ -1, $text{'form_origip'} ]);
 		}
-	push(@opts, [ 0, &text('form_shared', $defip)."<br>" ]);
+	push(@opts, [ 0, &text('form_shared', $defip) ]);
 	local @shared = &list_shared_ips();
 	if (@shared && &can_edit_sharedips()) {
 		# Can select from extra shared list
-		push(@opts, [ 3, $text{'form_shared2'}." ".
+		push(@opts, [ 3, $text{'form_shared2'},
 				 &ui_select("sharedip", undef,
-					[ map { [ $_ ] } @shared ])."<br>" ]);
+					[ map { [ $_ ] } @shared ]) ]);
 		}
 	if ($anyalloc) {
 		# Can allocate
-		push(@opts, [ 2, &text('form_alloc')."<br>" ]);
+		push(@opts, [ 2, &text('form_alloc') ]);
 		}
 	if ($anychoose) {
 		# Can enter arbitrary IP
-		push(@opts, [ 1, $text{'form_vip'}." ".
+		push(@opts, [ 1, $text{'form_vip'},
 			 &ui_textbox("ip", undef, 20)." (".
 			 &ui_checkbox("virtalready", 1,
-				      $text{'form_virtalready'}).")<br>" ]);
+				      $text{'form_virtalready'}).")" ]);
 		}
 	if ($anyzone) {
 		# Can select an existing active IP
@@ -214,16 +214,16 @@ else {
 		local @act = grep { $_->{'virtual'} ne '' }
 				  &net::active_interfaces();
 		if (@act) {
-			push(@opts, [ 4, $text{'form_activeip'}." ".
+			push(@opts, [ 4, $text{'form_activeip'},
 				 &ui_select("zoneip", undef,
 				  [ map { [ $_->{'address'} ] } @act ]) ]);
 			}
 		else {
-			push(@opts, [ 4, $text{'form_activeip'}." ".
+			push(@opts, [ 4, $text{'form_activeip'},
 					 &ui_textbox("zoneip", undef, 20) ]);
 			}
 		}
-	return &ui_radio("virt", 0, \@opts);
+	return &ui_radio_table("virt", 0, \@opts, 1);
 	}
 }
 

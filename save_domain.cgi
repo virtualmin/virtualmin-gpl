@@ -103,6 +103,9 @@ if (!$d->{'disabled'}) {
 	}
 if (!$config{'all_namevirtual'} && !$d->{'alias'} && &can_use_feature("virt")) {
 	$newdom{'virt'} = $in{'virt'};
+	if (&supports_ip6()) {
+		$newdom{'virt6'} = $in{'virt6'};
+		}
 	}
 $derr = &virtual_server_depends(\%newdom, undef, $oldd);
 &error($derr) if ($derr);
@@ -112,6 +115,7 @@ $lerr = &virtual_server_limits(\%newdom, $oldd);
 &error($lerr) if ($lerr);
 
 if (!$d->{'alias'} && &can_use_feature("virt")) {
+	# Parse IPv4 address inputs
 	if ($config{'all_namevirtual'}) {
 		# Make sure any new IP *is* assigned
 		&check_ipaddress($in{'ip'}) || &error($text{'setup_eip'});
@@ -134,6 +138,7 @@ if (!$d->{'alias'} && &can_use_feature("virt")) {
 			$in{'ip'} || &text('setup_evirtalloc');
 			}
 		else {
+			# Manually entered
 			&check_ipaddress($in{'ip'}) ||
 				&error($text{'setup_eip'});
 			$clash = &check_virt_clash($in{'ip'});
@@ -149,6 +154,24 @@ if (!$d->{'alias'} && &can_use_feature("virt")) {
 				$already && &error(&text('setup_evirtclash4',
 							 $already->{'dom'}));
 				}
+			}
+		}
+	}
+if (!$d->{'alias'} && &can_use_feature("virt") && &supports_ip6()) {
+	# Parse IPv6 address inputs
+	if ($in{'virt6'} && !$d->{'virt6'}) {
+		# An IP is being added
+		if ($tmpl->{'ranges'} ne "none") {
+			# Allocate the IP from the template
+			$in{'ip6'} = &free_ip6_address($tmpl);
+                        $in{'ip6'} || &text('setup_evirt6alloc');
+			}
+		else {
+			# Manually entered
+			&check_ip6address($in{'ip6'}) ||
+				&error($text{'setup_eip6'});
+			$clash = &check_virt6_clash($in{'ip6'});
+			$clash && &error(&text('setup_evirt6clash'));
 			}
 		}
 	}
@@ -280,6 +303,21 @@ if (&can_use_feature("virt")) {
 		}
 	}
 
+if (&can_use_feature("virt") && &supports_ip6()) {
+	if ($in{'virt6'} && !$d->{'virt6'}) {
+		# Need to bring up IPv6 address
+		$d->{'ip6'} = $in{'ip6'};
+		$d->{'virt6'} = 1;
+		&setup_virt6($d);
+		}
+	elsif (!$in{'virt6'} && $d->{'virt6'}) {
+		# Need to take down IPv6 address
+		$d->{'virt6'} = 0;
+		$d->{'virt6already'} = 0;
+		&delete_virt6($oldd);
+		}
+	}
+
 # Update plan if changed
 if ($plan && $plan->{'id'} ne $d->{'plan'}) {
 	if ($in{'applyplan'}) {
@@ -333,7 +371,8 @@ print $text{'save_domain'},"<br>\n";
 print $text{'setup_done'},"<p>\n";
 
 # If the IP has changed, update any alias domains too
-if ($d->{'ip'} ne $oldd->{'ip'}) {
+if ($d->{'ip'} ne $oldd->{'ip'} ||
+    $d->{'ip6'} ne $oldd->{'ip6'}) {
 	&update_alias_domain_ips($d, $oldd);
 	}
 
