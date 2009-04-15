@@ -5132,6 +5132,18 @@ if ($w[7] =~ /^(\d+):(\d+)$/) {
 		}
 	$st[8] = $st[9] = $st[10] = $ut;
 	}
+elsif ($w[5] =~ /^(\d{4})\-(\d+)\-(\d+)$/) {
+	# Time is year-month-day hour:minute
+	local @tm = ( 0, 0, 0, $3, $2-1, $1-1900 );
+	if ($w[6] =~ /^(\d+):(\d+)$/) {
+		$tm[1] = $2;
+		$tm[2] = $1;
+		$st[8] = $st[9] = $st[10] = timelocal(@tm);
+		}
+	else {
+		return ( );
+		}
+	}
 elsif ($w[7] =~ /^\d+$/ && $w[7] > 1000 && $w[7] < 10000) {
 	# Time is month day year
 	local @tm = ( 0, 0, 0, $w[6],
