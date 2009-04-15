@@ -50,16 +50,15 @@ elsif (!$in{'confirm'}) {
 	print "</center>\n";
 	}
 else {
-	# Go ahead and do it ..
-	%disable = map { $_, 1 } @disable;
-	$d->{'disabled_reason'} = 'manual';
-	$d->{'disabled_why'} = $in{'why'};
-
 	# Run the before command
 	&set_domain_envs($d, "DISABLE_DOMAIN");
 	$merr = &making_changes();
 	&reset_domain_envs($d);
 	&error(&text('disable_emaking', "<tt>$merr</tt>")) if (defined($merr));
+
+	%disable = map { $_, 1 } @disable;
+	$d->{'disabled_reason'} = 'manual';
+	$d->{'disabled_why'} = $in{'why'};
 
 	# Disable all configured features
 	my $f;

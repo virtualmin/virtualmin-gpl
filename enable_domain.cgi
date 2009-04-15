@@ -42,16 +42,15 @@ if (!$in{'confirm'}) {
 	print "</center>\n";
 	}
 else {
-	# Go ahead and do it
-	%enable = map { $_, 1 } @enable;
-	delete($d->{'disabled_reason'});
-	delete($d->{'disabled_why'});
-
 	# Run the before command
 	&set_domain_envs($d, "ENABLE_DOMAIN");
 	$merr = &making_changes();
 	&reset_domain_envs($d);
 	&error(&text('enable_emaking', "<tt>$merr</tt>")) if (defined($merr));
+
+	%enable = map { $_, 1 } @enable;
+	delete($d->{'disabled_reason'});
+	delete($d->{'disabled_why'});
 
 	# Enable all disabled features
 	my $f;
