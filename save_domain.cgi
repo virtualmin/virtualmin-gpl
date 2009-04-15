@@ -43,14 +43,9 @@ if (!$d->{'parent'} && defined($in{'plan'})) {
 	&can_use_plan($plan) || &error($text{'setup_eplan'});
 	}
 
-# Save external IP
-if ($in{'dns_ip_def'}) {
-	delete($d->{'dns_ip'});
-	}
-else {
-	&check_ipaddress($in{'dns_ip'}) || &error($text{'save_ednsip'});
-	$d->{'dns_ip'} = $in{'dns_ip'};
-	}
+# Check external IP
+$in{'dns_ip_def'} || &check_ipaddress($in{'dns_ip'}) ||
+	&error($text{'save_ednsip'});
 
 # Check if the prefix has been changed
 if (defined($in{'prefix'})) {
@@ -59,7 +54,6 @@ if (defined($in{'prefix'})) {
 	if ($in{'prefix'} ne $d->{'prefix'}) {
 		$pclash = &get_domain_by("prefix", $in{'prefix'});
                 $pclash && &error($text{'setup_eprefix2'});
-		$d->{'prefix'} = $in{'prefix'};
 		}
 	}
 
@@ -333,6 +327,19 @@ if ($plan && $plan->{'id'} ne $d->{'plan'}) {
 		}
 	$d->{'plan'} = $plan->{'id'};
 	print $text{'setup_done'},"<p>\n";
+	}
+
+# Update DNS IP
+if ($in{'dns_ip_def'}) {
+	delete($d->{'dns_ip'});
+	}
+else {
+	$d->{'dns_ip'} = $in{'dns_ip'};
+	}
+
+# Update prefix
+if (defined($in{'prefix'}) && $in{'prefix'} ne $d->{'prefix'}) {
+	$d->{'prefix'} = $in{'prefix'};
 	}
 
 if (!$d->{'disabled'}) {
