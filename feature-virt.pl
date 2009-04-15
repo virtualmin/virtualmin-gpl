@@ -140,12 +140,8 @@ sub check_virt_clash
 return undef if ($config{'iface_manual'});	# no clash for manual mode
 
 # Check active and boot-time interfaces
-&foreign_require("net", "net-lib.pl");
-local @boot = &net::boot_interfaces();
-local ($boot) = grep { $_->{'address'} eq $_[0] } @boot;
-local @active = &net::active_interfaces();
-local ($active) = grep { $_->{'address'} eq $_[0] } @active;
-return 1 if ($active || $boot);
+local %allips = &interface_ip_addresses();
+return 1 if ($allips{$_[0]});
 
 # Do a quick ping test
 local $pingcmd = $gconfig{'os_type'} =~ /-linux$/ ?

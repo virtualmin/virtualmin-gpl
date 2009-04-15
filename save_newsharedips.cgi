@@ -14,7 +14,7 @@ if (defined(&list_resellers)) {
 	@rips = map { $_->{'acl'}->{'defip'} }
 		    grep { $_->{'acl'}->{'defip'} } &list_resellers();
 	}
-@active = map { $_->{'address'} } &net::active_interfaces();
+@active = &active_ip_addresses();
 foreach $ip (@ips) {
 	&check_ipaddress($ip) || &error(&text('sharedips_eip', $ip));
 	$ip ne $defip || &error(&text('sharedips_edef', $ip));

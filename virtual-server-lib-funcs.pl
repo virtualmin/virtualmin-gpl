@@ -5272,7 +5272,6 @@ foreach my $r (@ranges) {
 	local ($base, $s, $e) = ($1, $2, $3);
 	for(my $j=$s; $j<=$e; $j++) {
 		local $try = "$base:$j";
-		print STDERR "considering $try\n";
 		return $try if (!$taken{$try} && !&ping_ip_address($try));
 		}
 	}
@@ -5280,18 +5279,66 @@ return undef;
 }
 
 # interface_ip_addresses()
-# Returns a hash of IP addresses that are in use by network interfaces
+# Returns a hash of IP addresses that are in use by network interfaces, both
+# active and boot-time
 sub interface_ip_addresses
 {
-&foreign_require("net", "net-lib.pl");
-local %taken = map { $_->{'address'}, $_ } (&net::boot_interfaces(),
-					    &net::active_interfaces());
-if (&supports_ip6()) {
-	%taken = ( %taken, map { $_->{'address'}, $_ }
-			       (&boot_ip6_interfaces(),
-                                &active_ip6_interfaces()) );
+local %taken;
+foreach my $ip (&active_ip_addresses(), &bootup_ip_addresses()) {
+	$taken{$ip} = 1;
 	}
 return %taken;
+}
+
+# active_ip_addresses()
+# Returns a list of IP addresses (v4 and v6) that are active on the system
+# right now.
+sub active_ip_addresses
+{
+&foreign_require("net", "net-lib.pl");
+local @rv;
+push(@rv, map { $_->{'address'} } &net::active_interfaces());
+if (&supports_ip6()) {
+	push(@rv, map { $_->{'address'} } &active_ip6_interfaces());
+	}
+if (&has_command("ip")) {
+	# On Linux, the 'ip' command sometimes includes IPs that are not
+	# shown by ifconfig -a
+	local $out = &backquote_command("ip addr </dev/null 2>/dev/null");
+	foreach my $l (split(/\r?\n/, $out)) {
+		if ($l =~ /inet\s+([0-9\.]+)/) {
+			push(@rv, $1);
+			}
+		if ($l =~ /inet6\s+([a-f0-9:]+)/) {
+			push(@rv, $1);
+			}
+		}
+	}
+return grep { $_ ne '' } &unique(@rv);
+}
+
+# bootup_ip_addresses()
+# Returns a list of IP addresses (v4 and v6) that are activated at boot time
+sub bootup_ip_addresses
+{
+&foreign_require("net", "net-lib.pl");
+local @rv;
+foreach my $i (&net::boot_interfaces()) {
+	if ($i->{'range'} && $i->{'start'} && $i->{'end'}) {
+		local $start = &net::ip_to_integer($i->{'start'});
+		local $end = &net::ip_to_integer($i->{'end'});
+		for(my $j=$start; $j<=$end; $j++) {
+			push(@rv, &net::integer_to_ip($j));
+			}
+		}
+	elsif ($i->{'address'}) {
+		push(@rv, $i->{'address'});
+		}
+	}
+if (&supports_ip6()) {
+	push(@rv, map { $_->{'address'} } &boot_ip6_interfaces());
+	}
+return grep { $_ ne '' } &unique(@rv);
 }
 
 # ping_ip_address(hostname|ip|ipv6)
@@ -10418,8 +10465,7 @@ if ($config{'dns'}) {
 	# Make sure this server is configured to use the local BIND
 	if (&foreign_check("net") && $config{'dns_check'}) {
 		&foreign_require("net", "net-lib.pl");
-		local %ips = map { $_->{'address'}, $_ }
-				 &net::active_interfaces();
+		local %ips = map { $_, 1 } &active_ip_addresses();
 		local $dns = &net::get_dns_config();
 		local $hasdns;
 		foreach my $ns (@{$dns->{'nameserver'}}) {

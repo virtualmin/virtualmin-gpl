@@ -86,7 +86,7 @@ if ($activate) {
 	&release_lock_virt();
 	}
 else {
-	%active = map { $_->{'address'}, $_ } &net::active_interfaces();
+	%active = map { $_, 1 } &active_ip_addresses();
 	$active{$ip} || &usage("IP address $ip does not exist on this system");
 	}
 
