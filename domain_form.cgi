@@ -561,13 +561,13 @@ if (!$aliasdom && &can_select_ip()) {
 # Show IPv6 address allocation section
 if (!$aliasdom && &can_use_feature("virt") && &supports_ip6()) {
 	local @ip6opts = ( [ 0, $text{'edit_virt6off'} ] );
-	local @alloctmpls = grep { $_->{'range6'} ne 'none' } @cantmpls;
+	local @alloctmpls = grep { $_->{'ranges6'} ne 'none' } @cantmpls;
 	if (@alloctmpls) {
 		# Can allocate
 		local $alloc = &free_ip6_address($alloctmpls[0]);
 		push(@ip6opts, [ 2, $text{'edit_alloc'}, $alloc ]);
 		}
-	local @noalloctmpls = grep { $_->{'range6'} eq 'none' } @cantmpls;
+	local @noalloctmpls = grep { $_->{'ranges6'} eq 'none' } @cantmpls;
 	if (@noalloctmpls) {
 		# Can enter
 		push(@ip6opts, [ 1, $text{'edit_virt6on'},

@@ -233,7 +233,7 @@ if ($aliasdom) {
 elsif (&can_use_feature("virt") && &supports_ip6()) {
 	if ($in{'virt6'} == 1) {
 		# Manually entered
-		$tmpl->{'ranges'} eq 'none' ||
+		$tmpl->{'ranges6'} eq 'none' ||
 			&error(&text('setup_evirt6tmpl2'));
 		&check_ip6address($in{'ip6'}) || &error($text{'setup_eip6'});
 		$clash = &check_virt6_clash($in{'ip6'});
@@ -243,7 +243,7 @@ elsif (&can_use_feature("virt") && &supports_ip6()) {
 		}
 	elsif ($in{'virt6'} == 2) {
 		# Allocated
-		$tmpl->{'ranges'} ne "none" ||
+		$tmpl->{'ranges6'} ne "none" ||
 			&error(&text('setup_evirt6tmpl'));
 		$ip6 = &free_ip6_address($tmpl);
 		$ip6 || &text('setup_evirt6alloc');
