@@ -5123,6 +5123,7 @@ $st[7] = $w[4];			# Size
 if ($w[7] =~ /^(\d+):(\d+)$/) {
 	# Time is month day hour:minute
 	local @tm = ( 0, $2, $1, $w[6], &month_to_number($w[5]), $now[5] );
+	return ( ) if ($tm[4] eq '' || $tm[3] < 1 || $tm[3] > 31);
 	local $ut = timelocal(@tm);
 	if ($ut > time()+(24*60*60)) {
 		# Must have been last year!
@@ -5131,10 +5132,11 @@ if ($w[7] =~ /^(\d+):(\d+)$/) {
 		}
 	$st[8] = $st[9] = $st[10] = $ut;
 	}
-elsif ($w[7] =~ /^\d+$/) {
+elsif ($w[7] =~ /^\d+$/ && $w[7] > 1000 && $w[7] < 10000) {
 	# Time is month day year
 	local @tm = ( 0, 0, 0, $w[6],
 		      &month_to_number($w[5]), $w[7]-1900 );
+	return ( ) if ($tm[4] eq '' || $tm[3] < 1 || $tm[3] > 31);
 	$st[8] = $st[9] = $st[10] = timelocal(@tm);
 	}
 else {
@@ -10932,6 +10934,12 @@ if (!$config{'iface'}) {
 	}
 if (!&running_in_zone()) {
 	&$second_print(&text('check_ifaceok', "<tt>$config{'iface'}</tt>"));
+	}
+
+# Tell the user that IPv6 is available
+if (&supports_ip6()) {
+	&$second_print(&text('check_iface6',
+		"<tt>".($config{'iface6'} || $config{'iface'})."</tt>"));
 	}
 
 local $defip = &get_default_ip();
