@@ -2190,6 +2190,7 @@ restore_allfeatures=Restore all features
 restore_checkmode=Checking restored PHP execution mode ..
 restore_okmode=.. mode $1 OK for this system
 restore_badmode=.. mode $1 cannot be used, switching to $2. 
+restore_evirt6=IPv6 address for virtual server
 
 limits_title=Server Owner Limits
 limits_header=Virtualmin limits for server owner

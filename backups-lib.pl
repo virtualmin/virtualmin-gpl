@@ -1462,14 +1462,15 @@ else {
 	local $out;
 	local $q = quotemeta($backup);
 	local $cf = &compression_format($backup);
+	local $comp;
 	if ($cf == 4) {
 		# Special handling for zip
 		$out = `unzip -l $q 2>&1`;
 		}
 	else {
-		local $comp = $cf == 1 ? "gunzip -c" :
-			      $cf == 2 ? "uncompress -c" :
-			      $cf == 3 ? "bunzip2 -c" : "cat";
+		$comp = $cf == 1 ? "gunzip -c" :
+			$cf == 2 ? "uncompress -c" :
+			$cf == 3 ? "bunzip2 -c" : "cat";
 		$out = `($comp $q | $tar tf -) 2>&1`;
 		}
 	if ($?) {
@@ -1484,7 +1485,7 @@ else {
 			push(@{$rv{$3}}, $4) if (!$done{$3,$4}++);
 			push(@{$rv{$3}}, "dir") if (!$done{$3,"dir"}++);
 			if ($4 eq 'virtualmin') {
-				push(@virtfiles, $2);
+				push(@virtfiles, $l);
 				}
 			$dotbackup = 1;
 			}
@@ -1496,7 +1497,7 @@ else {
 				# Found a domain_feature file
 				push(@{$rv{$3}}, $4) if (!$done{$3,$4}++);
 				if ($4 eq 'virtualmin') {
-					push(@virtfiles, $2);
+					push(@virtfiles, $l);
 					}
 				}
 			}
@@ -1586,6 +1587,19 @@ foreach my $f (@allfeatures) {
 			    'desc' => $desc });
 		}
 	}
+
+# Check if any domains use IPv6, but this system doesn't support it
+if ($doms && !&supports_ip6()) {
+	foreach my $d (@$doms) {
+		if ($d->{'virt6'}) {
+			push(@rv, { 'feature' => 'virt6',
+				    'critical' => 1,
+				    'desc' => $text{'restore_evirt6'} });
+			last;
+			}
+		}
+	}
+
 return @rv;
 }
 

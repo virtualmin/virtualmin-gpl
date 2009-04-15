@@ -44,7 +44,6 @@
 	- FS#4239
 	- Boot-time interfaces
 	- Validation?
-	- Restore should test if IPv6 is enabled
 	- functional tests
 	- CHANGELOG
 
