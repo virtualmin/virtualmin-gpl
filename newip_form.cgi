@@ -49,6 +49,15 @@ else {
 		}
 	}
 
+if ($d->{'virt6'} && &supports_ip6()) {
+	# Changing a domain's IPv6 address
+	print &ui_table_row($text{'newip_old6'},
+			    "<tt>$d->{'ip6'}</tt>");
+
+	print &ui_table_row($text{'newips_new6'},
+			    &ui_textbox("ip6", $d->{'ip6'}, 30));
+	}
+
 if ($d->{'web'}) {
 	$tmpl = &get_template($d->{'template'});
 	$d->{'web_port'} ||= $tmpl->{'web_port'} || 80;

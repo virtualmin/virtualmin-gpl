@@ -13,12 +13,24 @@ if ($d->{'virt'}) {
 	&check_ipaddress($in{'ip'}) || &error($text{'newip_eip'});
 	$in{'ip'} ne $d->{'ip'} || &error($text{'newip_esame'});
 	foreach $ed (&list_domains()) {
-		if ($ed->{'virt'} && $e->{'ip'} eq $in{'ip'}) {
-			&error(&text('newip_eclash', $d->{'dom'}));
+		if ($ed->{'id'} ne $d->{'id'} &&
+		    $ed->{'virt'} && $e->{'ip'} eq $in{'ip'}) {
+			&error(&text('newip_eclash', $ed->{'dom'}));
 			}
 		}
 	$in{'ip'} ne &get_default_ip() || &error($text{'newip_edefault'});
 	&check_virt_clash($in{'ip'}) && &error($text{'newip_eused'});
+	}
+if ($d->{'virt6'} && &supports_ip6()) {
+	# Changing IPv6 address
+	&check_ip6address($in{'ip6'}) || &error($text{'newip_eip6'});
+	foreach $ed (&list_domains()) {
+		if ($ed->{'id'} ne $d->{'id'} &&
+		    $ed->{'virt6'} && $e->{'ip6'} eq $in{'ip6'}) {
+			&error(&text('newip_eclash6', $ed->{'dom'}));
+			}
+		}
+	&check_virt6_clash($in{'ip'}) && &error($text{'newip_eused6'});
 	}
 if ($d->{'web'}) {
 	# Changing webserver port
@@ -40,6 +52,9 @@ if ($newdom->{'virt'}) {
 elsif ($in{'ip'}) {
 	$newdom->{'ip'} = $in{'ip'};
 	$newdom->{'defip'} = $newdom->{'ip'} eq &get_default_ip();
+	}
+if ($d->{'virt6'} && &supports_ip6()) {
+	$newdom->{'ip6'} = $in{'ip6'};
 	}
 if ($newdom->{'web'}) {
 	$newdom->{'web_port'} = $in{'port'};
@@ -73,6 +88,10 @@ foreach $sd (@doms) {
 		$sd->{'ip'} = $in{'ip'};
 		$sd->{'defip'} = $sd->{'ip'} eq &get_default_ip();
 		}
+	if ($sd->{'virt6'} && &supports_ip6()) {
+		# Change IPv6 address
+		$sd->{'ip6'} = $in{'ip6'};
+		}
 	if ($sd->{'web'}) {
 		$sd->{'web_port'} = $in{'port'};
 		$sd->{'web_sslport'} = $in{'sslport'};
@@ -87,6 +106,9 @@ foreach $sd (@doms) {
 		if ($d->{$f}) {
 			&plugin_call($f, "feature_modify", $sd, $oldd);
 			}
+		}
+	if ($sd->{'virt6'} && &supports_ip6()) {
+		&modify_virt6($sd, $oldd);
 		}
 
 	# Save new domain details
