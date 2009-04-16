@@ -58,6 +58,10 @@ if (!$virtualmin_pro) {
 	$config{'status'} = 0;
 	}
 
+# The virtual IP features are always active
+$config{'virt'} = 1;
+$config{'virt6'} = 1;
+
 @used_webmin_modules = ( "acl", "apache", "bind8", "cron", "htaccess-htpasswd",
 			 "init", "ldap-useradmin", "logrotate", "mailboxes",
 			 "mount", "mysql", "net", "postfix", "postgresql",

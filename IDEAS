@@ -44,7 +44,6 @@
 	- FS#4239
 	- Boot-time interfaces
 	- functional tests
-	- any use of 'virt' hard-coded in feature lists or with $config
 	- CHANGELOG
 
  - WebNIC registrar support

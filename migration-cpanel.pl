@@ -349,7 +349,7 @@ if (!$parent) {
 	$dom{'uquota'} = $quota;
 	&set_capabilities_from_plan(\%dom, $plan);
 	}
-$dom{'db'} = $db || &database_name(\%dom);
+$dom{'db'} = &database_name(\%dom);
 $dom{'emailto'} = $dom{'email'} ||
 		  $dom{'user'}.'@'.&get_system_hostname();
 foreach my $f (@features, &list_feature_plugins()) {
