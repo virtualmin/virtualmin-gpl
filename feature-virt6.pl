@@ -123,8 +123,29 @@ return @rv;
 # Returns a list of IPv6 addresses activated at boot
 sub boot_ip6_interfaces
 {
-# XXX Debian and Redhat
 local @rv;
+&foreign_require("net", "net-lib.pl");
+if ($gconfig{'os_type'} eq 'debian-linux') {
+	# Read /etc/network/interfaces for inet6 blocks
+	# XXX
+	}
+elsif ($gconfig{'os_type'} eq 'redhat-linux') {
+	# Read ifcfg-* files for IPV6ADDR and IPV6ADDR_SECONDARIES
+	foreach my $b (grep { $_->{'virtual'} eq '' } &net::boot_interfaces()) {
+		local %conf;
+		&read_env_file($b->{'file'}, \%conf);
+		foreach my $a ($conf{'IPV6ADDR'},
+			       split(/\s+/, $conf{'IPV6ADDR_SECONDARIES'})) {
+			local ($addr, $mask) = split(/\//, $a);
+			if ($addr) {
+				$mask ||= $config{'netmask6'} || 64;
+				push(@rv, { 'name' => $a->{'name'},
+					    'address' => $addr,
+					    'netmask' => $mask });
+				}
+			}
+		}
+	}
 return @rv;
 }
 
@@ -146,7 +167,33 @@ return undef;
 sub save_ip6_interface
 {
 local ($iface) = @_;
-# XXX
+&foreign_require("net", "net-lib.pl");
+if ($gconfig{'os_type'} eq 'debian-linux') {
+	# Add to inet6 block in /etc/network/interfaces
+	}
+elsif ($gconfig{'os_type'} eq 'redhat-linux') {
+	# Add to ifcfg-* file in IPV6ADDR_SECONDARIES line
+	local ($boot) = grep { $_->{'fullname'} eq $iface->{'name'} }
+			     &net::boot_interfaces();
+	$boot || &error("No interface file found for $iface->{'name'}");
+	local %conf;
+	&read_env_file($boot->{'file'}, \%conf);
+	if (!$conf{'IPV6ADDR'}) {
+		# Set primary IPv6 address
+		$conf{'IPV6ADDR'} = $iface->{'address'}."/".$iface->{'netmask'};
+		}
+	else {
+		# Append to secondary
+		local @secs = split(/\s+/, $conf{'IPV6ADDR_SECONDARIES'});
+		push(@secs, $iface->{'address'}."/".$iface->{'netmask'});
+		$conf{'IPV6ADDR_SECONDARIES'} = join(" ", @secs);
+		}
+	$conf{'IPV6INIT'} = 'yes' if (lc($conf{'IPV6INIT'}) ne 'yes');
+	&write_env_file($boot->{'file'}, \%conf);
+	}
+else {
+	&error("Unsupported operating system for IPv6");
+	}
 }
 
 # deactivate_ip6_interface(&iface)
