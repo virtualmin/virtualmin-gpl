@@ -12718,8 +12718,10 @@ local @load = @_;
 local $loaded = 0;
 foreach my $pname (@load) {
 	if (!$main::done_load_plugin_libraries{$pname}++) {
-		&foreign_require($pname, "virtual_feature.pl");
-		$loaded++;
+		if (&foreign_check($pname)) {
+			&foreign_require($pname, "virtual_feature.pl");
+			$loaded++;
+			}
 		}
 	}
 return $loaded;

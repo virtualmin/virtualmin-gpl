@@ -18,7 +18,7 @@ print &ui_table_row(&hlink($text{'newvalidate_servers'}, "newvalidate_servers"),
 		    &servers_input("servers", [ ], \@doms));
 
 # Features to check
-foreach $f (@features) {
+foreach $f (@validate_features) {
 	push(@fopts, [ $f, $text{'feature_'.$f} ]);
 	}
 foreach $f (&list_feature_plugins()) {

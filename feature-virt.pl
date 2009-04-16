@@ -119,7 +119,6 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[0]->{'virt'} &&
 sub validate_virt
 {
 local ($d) = @_;
-&foreign_require("net", "net-lib.pl");
 return undef if ($config{'iface_manual'});	# manually setup
 if (!$_[0]->{'virtalready'}) {
 	# Only check boot-time interface if added by Virtualmin

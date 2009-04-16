@@ -43,7 +43,6 @@
  - IPv6 support
 	- FS#4239
 	- Boot-time interfaces
-	- Validation?
 	- functional tests
 	- CHANGELOG
 

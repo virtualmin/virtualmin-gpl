@@ -75,6 +75,25 @@ if (!$d->{'virtalready'}) {
 &release_lock_virt($d);
 }
 
+# validate_virt6(&domain)
+# Check for boot-time and active IP6 network interfaces
+sub validate_virt6
+{
+local ($d) = @_;
+if (!$_[0]->{'virtalready'}) {
+	# Only check boot-time interface if added by Virtualmin
+	local @boots = &bootup_ip_addresses();
+	if (&indexof($d->{'ip6'}, @boots) < 0) {
+		return &text('validate_evirt6b', $d->{'ip6'});
+		}
+	}
+local @acts = &active_ip_addresses();
+if (&indexof($d->{'ip6'}, @acts) < 0) {
+	return &text('validate_evirt6a', $d->{'ip6'});
+	}
+return undef;
+}
+
 # check_virt6_clash(ip)
 # Returns 1 if some IPv6 is already in use, 0 if not
 sub check_virt6_clash

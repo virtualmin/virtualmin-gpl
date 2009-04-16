@@ -86,7 +86,7 @@ foreach $d (@doms) {
 		next if (!$d->{$f});
 		if (&indexof($f, &list_feature_plugins()) < 0) {
 			# Core feature
-			next if (!$config{$f});
+			next if (!$config{$f} && $f ne 'virt' && $f ne 'virt6');
 			$vfunc = "validate_$f";
 			$err = &$vfunc($d);
 			$name = $text{'feature_'.$f};
