@@ -1099,3 +1099,4 @@ When creating a sub-server that is a sub-domain of it's parent, DNS records for 
 Added a field on the Website Options page for making a virtual server the default website for its IP address.
 Parent virtual server details are now available in sub-server post-creation scripts in the $PARENT_VIRTUALSERVER_ environment variables.
 Added --reseller, --no-reseller and --any-reseller flags to list-domains.pl.
+Virtual servers can now have IPv6 addresses in addition to v4, on Debian, Ubuntu, Redhat, CentOS and Fedora systems. Virtualmin will configure BIND to add IPv6 address records, and Apache to accept connections to the IPv6 address. All pages that API commands that deal with addresses have new fields and options for an optional IPv6 address.
