@@ -146,9 +146,28 @@ local @rv;
 &foreign_require("net", "net-lib.pl");
 if ($gconfig{'os_type'} eq 'debian-linux') {
 	# Read /etc/network/interfaces for inet6 blocks
-	# XXX via interfaces lines like
-	#     up /sbin/ifconfig eth0 inet6 add 2607:f0d0:2001:000a::3/64
-	# XXX also address in inet6 block
+	local @defs = &net::get_interface_defs();
+	foreach my $i (grep { $_->[1] eq 'inet6' } @defs) {
+		foreach my $o (@{$i->[3]}) {
+			if ($o->[0] eq 'address') {
+				# Primary address
+				local ($mask) = grep { $_->[0] eq 'netmask' }
+						     @{$i->[3]};
+				push(@rv, { 'name' => $i->[0],
+					    'address' => $o->[1],
+					    'netmask' => $mask ? $mask->[1]
+							       : 64 });
+				}
+			elsif ($o->[0] eq 'up' &&
+			       $o->[1] =~ /ifconfig\s+(\S+)\s+inet6\s+add\s+([a-f0-9:]+)\/(\d+)/ &&
+			       $1 eq $i->[0]) {
+				# Extra address
+				push(@rv, { 'name' => $i->[0],
+					    'address' => $2,
+					    'netmask' => $3 });
+				}
+			}
+		}
 	}
 elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 	# Read ifcfg-* files for IPV6ADDR and IPV6ADDR_SECONDARIES
@@ -191,6 +210,24 @@ local ($iface) = @_;
 &foreign_require("net", "net-lib.pl");
 if ($gconfig{'os_type'} eq 'debian-linux') {
 	# Add to inet6 block in /etc/network/interfaces
+	local @defs = &net::get_interface_defs();
+	local ($boot) = grep { $_->[1] eq 'inet6' &&
+			       $_->[0] eq $iface->{'name'} } @defs;
+	local $ifconfig = &has_command("ifconfig");
+	if ($boot) {
+		# Add extra IP to this interface
+		push(@{$boot->[3]},
+		     [ "up", "$ifconfig $iface->{'name'} inet6 add ".
+			     "$iface->{'address'}/$iface->{'netmask'}" ]);
+		&net::modify_interface_def($boot->[0], $boot->[1],
+					   $boot->[2], $boot->[3], 0);
+		}
+	else {
+		# Need to add a new interface
+		&net::new_interface_def($iface->{'name'}, "inet6", "static",
+					[ [ "address", $iface->{'address'} ],
+					  [ "netmask", $iface->{'netmask'} ] ]);
+		}
 	}
 elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 	# Add to ifcfg-* file in IPV6ADDR_SECONDARIES line
@@ -238,7 +275,21 @@ local ($iface) = @_;
 &foreign_require("net", "net-lib.pl");
 if ($gconfig{'os_type'} eq 'debian-linux') {
 	# Remove from inet6 block in /etc/network/interfaces
-	# XXX
+	local @defs = &net::get_interface_defs();
+	local ($boot) = grep { $_->[1] eq 'inet6' &&
+			       $_->[0] eq $iface->{'name'} } @defs;
+	$boot || &error("No interface block found for $iface->{'name'}");
+	local @opts;
+	foreach my $o (@{$boot->[3]}) {
+		if ($o->[0] ne 'up' || $o->[1] !~ /ifconfig\s+(\S+)\s+inet6\s+add\s+([a-f0-9:]+)\/(\d+)/ || $2 ne $iface->{'address'}) {
+			push(@opts, $o);
+			}
+		if ($o->[0] eq 'address' && $o->[1] eq $iface->{'address'}) {
+			&error("Not removing primary IPv6 interface");
+			}
+		}
+	&net::modify_interface_def($boot->[0], $boot->[1],
+				   $boot->[2], \@opts, 0);
 	}
 elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 	# Remove from ifcfg-* file in IPV6ADDR_SECONDARIES line
@@ -248,11 +299,12 @@ elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 	local %conf;
 	&read_env_file($boot->{'file'}, \%conf);
 	local $full = $iface->{'address'}."/".$iface->{'netmask'};
-	local @ips = ( $conf{'IPV6ADDR'},
-		       split(/\s+/, $conf{'IPV6ADDR_SECONDARIES'}) );
-	@ips = grep { $_ ne $full } @ips;
-	$conf{'IPV6ADDR'} = shift(@ips);
-	$conf{'IPV6ADDR_SECONDARIES'} = join(" ", @ips);
+	if ($conf{'IPV6ADDR'} eq $full) {
+		&error("Not removing primary IPv6 interface");
+		}
+	local @secs = split(/\s+/, $conf{'IPV6ADDR_SECONDARIES'});
+	@secs = grep { $_ ne $full } @secs;
+	$conf{'IPV6ADDR_SECONDARIES'} = join(" ", @secs);
 	&write_env_file($boot->{'file'}, \%conf);
 	}
 else {

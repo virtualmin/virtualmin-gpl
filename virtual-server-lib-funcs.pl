@@ -6283,10 +6283,10 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 
 		# Take down IP
 		if ($dd->{'iface'}) {
-			&delete_virt($dd);
+			&try_function("virt", "delete_virt", $dd);
 			}
 		if ($dd->{'virt6'}) {
-			&delete_virt6($dd);
+			&try_function("virt6", "delete_virt6", $dd);
 			}
 		}
 
