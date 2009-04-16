@@ -239,6 +239,9 @@ if ($multi) {
 		else {
 			print "    IP address: $d->{'ip'} (Shared)\n";
 			}
+		if ($d->{'virt6'}) {
+			print "    IPv6 address: $d->{'ip6'}\n";
+			}
 		print "    Features: ",join(" ", grep { $d->{$_} } @features),"\n";
 		if (&list_feature_plugins()) {
 			print "    Plugins: ",join(" ", grep { $d->{$_} } &list_feature_plugins()),"\n";

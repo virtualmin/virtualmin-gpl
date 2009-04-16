@@ -45,7 +45,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--feature") {
 		# Add a feature to validate
 		$f = shift(@ARGV);
-		if (&indexof($f, @features) >= 0) {
+		if (&indexof($f, @validate_features) >= 0) {
 			push(@feats, $f);
 			}
 		elsif (&plugin_defined($f, "feature_validate")) {
@@ -57,7 +57,7 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--all-features") {
 		# Validating all features and capable plugins
-		@feats = @features;
+		@feats = @validate_features;
 		foreach $f (&list_feature_plugins()) {
 			if (&plugin_defined($f, "feature_validate")) {
 				push(@feats, $f);

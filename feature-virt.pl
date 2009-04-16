@@ -123,13 +123,15 @@ local ($d) = @_;
 return undef if ($config{'iface_manual'});	# manually setup
 if (!$_[0]->{'virtalready'}) {
 	# Only check boot-time interface if added by Virtualmin
-	local ($biface) = grep { $_->{'address'} eq $d->{'ip'} }
-			       &net::boot_interfaces();
-	return &text('validate_evirtb', $d->{'ip'}) if (!$biface);
+	local @boots = &bootup_ip_addresses();
+	if (&indexof($d->{'ip'}, @boots) < 0) {
+		return &text('validate_evirtb', $d->{'ip'});
+		}
 	}
-local ($aiface) = grep { $_->{'address'} eq $d->{'ip'} }
-		       &net::active_interfaces();
-return &text('validate_evirta', $d->{'ip'}) if (!$aiface);
+local @acts = &active_ip_addresses();
+if (&indexof($d->{'ip'}, @acts) < 0) {
+	return &text('validate_evirta', $d->{'ip'});
+	}
 return undef;
 }
 
@@ -388,10 +390,16 @@ sub obtain_lock_virt
 &obtain_lock_anything();
 if ($main::got_lock_virt == 0) {
 	&foreign_require("net", "net-lib.pl");
-	local $main::got_lock_virt_file = $net::network_interfaces_config ||
-					  $net::network_config ||
-					  "$module_config_directory/virtlock";
+	$main::got_lock_virt_file = $net::network_interfaces_config ||
+				    $net::network_config ||
+				    "$module_config_directory/virtlock";
 	&lock_file($main::got_lock_virt_file);
+	if (&supports_ip6()) {
+		# Also lock file for IPv6
+		$main::got_lock_virt6_file = &ip6_interfaces_file();
+		&lock_file($main::got_lock_virt6_file)
+			if ($main::got_lock_virt6_file);
+		}
 	}
 $main::got_lock_virt++;
 }
@@ -401,6 +409,8 @@ sub release_lock_virt
 {
 # Unlock the network config directory or file
 if ($main::got_lock_virt == 1) {
+	&unlock_file($main::got_lock_virt6_file)
+		if ($main::got_lock_virt6_file);
 	&unlock_file($main::got_lock_virt_file);
 	}
 $main::got_lock_virt-- if ($main::got_lock_virt);

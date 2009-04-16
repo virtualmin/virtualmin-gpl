@@ -127,7 +127,9 @@ local @rv;
 &foreign_require("net", "net-lib.pl");
 if ($gconfig{'os_type'} eq 'debian-linux') {
 	# Read /etc/network/interfaces for inet6 blocks
-	# XXX
+	# XXX via interfaces lines like
+	#     up /sbin/ifconfig eth0 inet6 add 2607:f0d0:2001:000a::3/64
+	# XXX also address in inet6 block
 	}
 elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 	# Read ifcfg-* files for IPV6ADDR and IPV6ADDR_SECONDARIES
@@ -139,7 +141,7 @@ elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 			local ($addr, $mask) = split(/\//, $a);
 			if ($addr) {
 				$mask ||= $config{'netmask6'} || 64;
-				push(@rv, { 'name' => $a->{'name'},
+				push(@rv, { 'name' => $b->{'name'},
 					    'address' => $addr,
 					    'netmask' => $mask });
 				}
@@ -214,7 +216,44 @@ return undef;
 sub delete_ip6_interface
 {
 local ($iface) = @_;
-# XXX
+&foreign_require("net", "net-lib.pl");
+if ($gconfig{'os_type'} eq 'debian-linux') {
+	# Remove from inet6 block in /etc/network/interfaces
+	# XXX
+	}
+elsif ($gconfig{'os_type'} eq 'redhat-linux') {
+	# Remove from ifcfg-* file in IPV6ADDR_SECONDARIES line
+	local ($boot) = grep { $_->{'fullname'} eq $iface->{'name'} }
+			     &net::boot_interfaces();
+	$boot || &error("No interface file found for $iface->{'name'}");
+	local %conf;
+	&read_env_file($boot->{'file'}, \%conf);
+	local $full = $iface->{'address'}."/".$iface->{'netmask'};
+	local @ips = ( $conf{'IPV6ADDR'},
+		       split(/\s+/, $conf{'IPV6ADDR_SECONDARIES'}) );
+	@ips = grep { $_ ne $full } @ips;
+	$conf{'IPV6ADDR'} = shift(@ips);
+	$conf{'IPV6ADDR_SECONDARIES'} = join(" ", @ips);
+	&write_env_file($boot->{'file'}, \%conf);
+	}
+else {
+	&error("Unsupported operating system for IPv6");
+	}
+}
+
+# ip6_interfaces_file()
+# Returns the file in which IPv6 interfaces are stored, for locking purposes,
+# if it is separate from the primary interfaces file
+sub ip6_interfaces_file
+{
+if ($gconfig{'os_type'} eq 'redhat-linux') {
+	# On redhat, this is typically the ifcfg-eth0 file
+	local $ifacename = $config{'iface6'} || $config{'iface'};
+	local ($boot) = grep { $_->{'fullname'} eq $ifacename }
+			     &net::boot_interfaces();
+	return $boot->{'file'} if ($boot);
+	}
+return undef;
 }
 
 1;
