@@ -2342,6 +2342,73 @@ $web_tests = [
         },
 	];
 
+$ip6_tests = [
+	# Create a domain with an IPv6 address
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test IPv6 domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ],
+		      [ 'allocate-ip6' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test IPv6 home page' ],
+		      @create_args, ],
+	},
+
+	# Delay needed for v6 address to become routable
+	{ 'command' => 'sleep 10' },
+
+	# Test DNS lookup for v6 entry
+	{ 'command' => 'host '.$test_domain,
+	  'grep' => 'IPv6 address',
+	},
+
+	# Test HTTP get to v6 address
+	{ 'command' => $wget_command.' --inet6 http://'.$test_domain,
+	  'grep' => 'Test IPv6 home page',
+	},
+
+	# Test removal of v6 address
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'no-ip6' ] ],
+	},
+
+	# Make sure DNS entries are gone
+	{ 'command' => 'host '.$test_domain,
+	  'antigrep' => 'IPv6 address',
+	},
+
+	# Make sure HTTP get to v6 address no longer works
+	{ 'command' => $wget_command.' --inet6 http://'.$test_domain,
+	  'fail' => 1,
+	},
+
+	# But v4 address should still work
+	{ 'command' => $wget_command.' --inet4 http://'.$test_domain,
+	  'grep' => 'Test IPv6 home page',
+	},
+
+	# Re-allocate an address
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'allocate-ip6' ] ],
+	},
+
+	# Re-check HTTP get
+	{ 'command' => $wget_command.' --inet6 http://'.$test_domain,
+	  'grep' => 'Test IPv6 home page',
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1
+        },
+	];
+if (!&supports_ip6()) {
+	$ip6_tests = [ { 'comand' => 'echo IPv6 is not supported' } ];
+	}
 
 $alltests = { 'domains' => $domains_tests,
 	      'web' => $web_tests,
@@ -2367,6 +2434,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'parallel' => $parallel_tests,
 	      'plans' => $plans_tests,
 	      'plugin' => $plugin_tests,
+	      'ip6' => $ip6_tests,
 	    };
 
 # Run selected tests
