@@ -43,6 +43,12 @@ non-incremental backup will be included. This allows you to reduce the size of
 backups for large websites that rarely change, but means that when restoring
 both the full and incremental backups are needed.
 
+To have Virtualmin automatically replace strftime-style date formatting
+characters in the backup destination, you can use the C<--strftime> flag.
+When this is enabled, the C<--purge> flag can also be given, followed by a 
+number of days. The command will then delete backups in the same desination
+directory older than the specified number of days.
+
 =cut
 
 package virtual_server;
@@ -115,6 +121,9 @@ while(@ARGV > 0) {
 		$separate = 1;
 		$newformat = 1;
 		}
+	elsif ($a eq "--strftime") {
+		$strftime = 1;
+		}
 	elsif ($a eq "--option") {
 		$optf = shift(@ARGV);
 		if ($optf =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
@@ -150,6 +159,10 @@ while(@ARGV > 0) {
 		&has_incremental_tar() || &error("The tar command on this system does not support incremental backups");
 		$increment = 1;
 		}
+	elsif ($a eq "--purge") {
+		$purge = shift(@ARGV);
+		$purge =~ /^[0-9\.]+$/ || &usage("--purge must be followed by a number");
+		}
 	else {
 		&usage();
 		}
@@ -159,7 +172,7 @@ $dest || usage();
 if (@bdoms || @users || $all_doms) {
 	@bfeats || usage();
 	}
-($bmode) = &parse_backup_url($dest);
+($bmode, undef, undef, $host, $path) = &parse_backup_url($dest);
 if ($bmode && $mkdir) {
 	&usage("--mkdir option can only be used for local backups");
 	}
@@ -168,6 +181,15 @@ if ($onebyone && !$newformat) {
 	}
 if ($onebyone && !$bmode) {
 	&usage("--onebyone option can only be used with remote backups");
+	}
+
+# Validate purging
+if ($purge) {
+	$strftime || &usage("The --purge flag can only be used in conjunction with --strftime");
+	$path =~ /%/ || $host =~ /%/ ||
+		&usage("The --purge flag can only be used for backup destinations containing strftime substitutions");
+	($basepath, $pattern) = &extract_purge_path($dest);
+	$basepath || $pattern || &usage("The --purge flag can only be used when a base directory can be extracted from the backup path, like /backup/virtualmin-%d-%m-%Y");
 	}
 
 # Work out what will be backed up
@@ -211,7 +233,9 @@ if ($test) {
 
 # Do the backup, printing any output
 &$first_print("Starting backup..");
-($ok, $size) = &backup_domains($dest, \@doms, \@bfeats,
+$start_time = time();
+$strfdest = $strftime ? &backup_strftime($dest) : $dest;
+($ok, $size) = &backup_domains($strfdest, \@doms, \@bfeats,
 			       $separate,
 			       $ignore_errors,
 			       \%opts,
@@ -231,6 +255,14 @@ else {
 	exit(2);
 	}
 
+# Purge if requested
+if ($purge) {
+	$pok = &purge_domain_backups($dest, $purge, $start_time);
+	if (!$pok) {
+		exit(3);
+		}
+	}
+
 sub usage
 {
 if ($_[0]) {
@@ -248,6 +280,7 @@ print "                                           [--except-feature name]\n";
 print "                        [--ignore-errors]\n";
 print "                        [--separate] | [--newformat]\n";
 print "                        [--onebyone]\n";
+print "                        [--strftime [--purge days]]\n";
 if (&has_incremental_tar()) {
 	print "                        [--incremental]\n";
 	}
