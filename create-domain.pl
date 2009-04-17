@@ -321,6 +321,7 @@ elsif ($virt) {
 if ($ip6 eq "allocate") {
 	# Allocate an IPv6 address now
 	$virt6already && &usage("The --ip6-already and --allocate-ip6 options are incompatible");
+	$tmpl->{'ranges'} ne "none" || &usage("The --allocate-ip6 option cannot be used unless automatic IPv6 allocation is enabled - use --ip6 instead");
 	$ip6 = &free_ip6_address($tmpl);
 	$ip6 || &usage("Failed to allocate IPv6 address from ranges!");
 	}
