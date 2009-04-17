@@ -5131,6 +5131,7 @@ if ($w[7] =~ /^(\d+):(\d+)$/) {
 		$ut = timelocal(@tm);
 		}
 	$st[8] = $st[9] = $st[10] = $ut;
+	$st[13] = join(" ", @w[8..$#w]);
 	}
 elsif ($w[5] =~ /^(\d{4})\-(\d+)\-(\d+)$/) {
 	# Time is year-month-day hour:minute
@@ -5143,6 +5144,7 @@ elsif ($w[5] =~ /^(\d{4})\-(\d+)\-(\d+)$/) {
 	else {
 		return ( );
 		}
+	$st[13] = join(" ", @w[7..$#w]);
 	}
 elsif ($w[7] =~ /^\d+$/ && $w[7] > 1000 && $w[7] < 10000) {
 	# Time is month day year
@@ -5150,6 +5152,7 @@ elsif ($w[7] =~ /^\d+$/ && $w[7] > 1000 && $w[7] < 10000) {
 		      &month_to_number($w[5]), $w[7]-1900 );
 	return ( ) if ($tm[4] eq '' || $tm[3] < 1 || $tm[3] > 31);
 	$st[8] = $st[9] = $st[10] = timelocal(@tm);
+	$st[13] = join(" ", @w[8..$#w]);
 	}
 else {
 	# Unknown format??
@@ -5162,7 +5165,6 @@ for(my $i=0; $i<9; $i++) {
 		$st[2] += (1<<$i);
 		}
 	}
-$st[13] = join(" ", @w[8..$#w]);
 return @st;
 }
 

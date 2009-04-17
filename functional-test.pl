@@ -1,8 +1,8 @@
 #!/usr/local/bin/perl
 # Runs all Virtualmin tests
 
-use POSIX;
 package virtual_server;
+use POSIX;
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
@@ -33,6 +33,8 @@ $test_alias_two = "yetanothertesting";
 $test_reseller = "testsel";
 $test_plan = "Test plan";
 $timeout = 60;			# Longest time a test should take
+$nowdate = strftime("%Y-%m-%d", localtime(time()));
+$yesterdaydate = strftime("%Y-%m-%d", localtime(time()-24*60*60));
 $wget_command = "wget -O - --cache=off --proxy=off --no-check-certificate  ";
 $migration_dir = "/usr/local/webadmin/virtualmin/migration";
 $migration_ensim_domain = "apservice.org";
@@ -1144,10 +1146,11 @@ $multibackup_tests = [
 
 	];
 
+$remote_backup_dir = "/home/$test_target_domain_user";
 $ssh_backup_prefix = "ssh://$test_target_domain_user:smeg\@localhost".
-		     "/home/$test_target_domain_user";
+		     $remote_backup_dir;
 $ftp_backup_prefix = "ftp://$test_target_domain_user:smeg\@localhost".
-		     "/home/$test_target_domain_user";
+		     $remote_backup_dir;
 $remotebackup_tests = [
 	# Create a domain for the backup target
 	{ 'command' => 'create-domain.pl',
@@ -1327,6 +1330,112 @@ $incremental_tests = [
 	# Finally delete to clean up
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
+	];
+
+$purge_tests = [
+	# Create a test domain to backup
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a domain for the backup target via SSH
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'desc', 'Test target domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ],
+		      @create_args, ],
+        },
+
+	# Backup to a date-based directory that is a lie
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'mkdir' ],
+		      [ 'dest', $test_backup_dir.'/1973-12-12' ] ],
+	},
+
+	# Fake the time on that directory
+	{ 'command' => "perl -e 'utime(124531200, 124531200, \"$test_backup_dir/1973-12-12\")'"
+	},
+
+	# Do another strftime-format backup with purging, to remove the old dir
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'mkdir' ],
+		      [ 'strftime' ],
+		      [ 'purge', 30 ],
+		      [ 'dest', $test_backup_dir.'/%Y-%m-%d' ] ],
+	  'grep' => 'Deleting directory',
+	},
+
+	# Make sure the right dir got deleted
+	{ 'command' => 'ls -ld '.$test_backup_dir.'/1973-12-12',
+	  'fail' => 1 },
+	{ 'command' => 'ls -ld '.$test_backup_dir.'/'.$nowdate },
+
+	# Backup via SSH to a date-based directory that is a lie
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', "$ssh_backup_prefix/1973-12-12" ] ],
+	},
+
+	# Fake the time on that directory
+	{ 'command' => "perl -e 'utime(124531200, 124531200, \"$remote_backup_dir/1973-12-12\")'"
+	},
+
+	# Do another SSH strftime-format backup with purging
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'strftime' ],
+		      [ 'purge', 30 ],
+		      [ 'dest', $ssh_backup_prefix.'/%Y-%m-%d' ] ],
+	  'grep' => 'Deleting file',
+	},
+
+	# Backup via FTP to a date-based directory that is a lie, but only
+	# one day ago to exercise the different date format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', "$ssh_backup_prefix/$yesterdaydate" ] ],
+	},
+
+	# Fake the time on that directory
+	{ 'command' => "perl -e 'utime(time()-24*60*60, time()-24*60*60, \"$remote_backup_dir/$yesterdaydate\")'"
+	},
+
+	# Do another FTP strftime-format backup with purging
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'strftime' ],
+		      [ 'purge', '0.5' ],
+		      [ 'dest', $ftp_backup_prefix.'/%Y-%m-%d' ] ],
+	  'grep' => 'Deleting FTP file',
+	},
+
+	# Finally delete to clean up
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_target_domain ] ],
 	  'cleanup' => 1,
 	},
 	];
@@ -2423,6 +2532,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'backup' => $backup_tests,
 	      'multibackup' => $multibackup_tests,
 	      'remotebackup' => $remotebackup_tests,
+	      'purge' => $purge_tests,
 	      'incremental' => $incremental_tests,
               'mail' => $mail_tests,
 	      'prepost' => $prepost_tests,
