@@ -2294,10 +2294,8 @@ if ($in{"web_mode"} == 2) {
 	$in{'web_port'} != $in{'web_sslport'} ||
 			&error($text{'newweb_esslport2'});
 	$tmpl->{'web_sslport'} = $in{'web_sslport'};
-	if (&get_webmin_version() >= 1.201) {
-		$tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};
-		$tmpl->{'web_usermin_ssl'} = $in{'web_usermin_ssl'};
-		}
+	$tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};
+	$tmpl->{'web_usermin_ssl'} = $in{'web_usermin_ssl'};
 	if (&has_webmail_rewrite()) {
 		# Parse webmail redirect
 		foreach my $r ('webmail', 'admin') {

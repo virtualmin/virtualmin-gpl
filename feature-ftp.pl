@@ -489,7 +489,7 @@ sub links_ftp
 {
 local ($d) = @_;
 local @rv;
-if ($config{'avail_syslog'} && &get_webmin_version() >= 1.305) {
+if ($config{'avail_syslog'}) {
 	# Links to FTP log
 	local $lf = &get_proftpd_log($d->{'ip'});
 	if ($lf) {

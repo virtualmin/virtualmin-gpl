@@ -22,7 +22,7 @@ if ($config{'mail_system'} == 1) {
 		($sendmail_gdbm, $sendmail_gdbmtype) =
 			&sendmail::generics_dbm($sendmail_conf);
 		}
-	$can_alias_comments = $virtualmin_pro && &get_webmin_version() >= 1.294;
+	$can_alias_comments = $virtualmin_pro;
 	$supports_aliascopy = 1;
 	}
 elsif ($config{'mail_system'} == 0) {
@@ -51,8 +51,7 @@ elsif ($config{'mail_system'} == 0) {
 			&postfix::get_maps_types_files($canonical_maps);
 
 	$can_alias_types{9} = 0;	# bounce not yet supported for postfix
-	$can_alias_comments = $virtualmin_pro &&
-			      &get_webmin_version() >= 1.294;
+	$can_alias_comments = $virtualmin_pro;
 	if ($can_alias_comments &&
 	    $virtual_maps !~ /^hash:/ &&
 	    !&postfix::can_map_comments($virtual_type)) {

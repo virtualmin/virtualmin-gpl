@@ -674,8 +674,7 @@ else {
 	@mods = grep { $_ ne "webminlog" } @mods;
 	}
 
-if ($extramods{'syslog'} && $_[0]->{'webmin'} &&
-    &get_webmin_version() >= 1.306) {
+if ($extramods{'syslog'} && $_[0]->{'webmin'}) {
 	# Can view log files for Apache and ProFTPd
 	local @extras;
 	local %done;

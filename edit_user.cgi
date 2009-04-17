@@ -324,7 +324,7 @@ if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
 @filters = ( );
 $procmailrc = "$user->{'home'}/.procmailrc" if (!$in{'new'});
 if (!$in{'new'} && $user->{'email'} && $user->{'unix'} && -r $procmailrc &&
-    &foreign_check("filter") && &get_webmin_version() >= 1.333) {
+    &foreign_check("filter")) {
 	&foreign_require("filter", "filter-lib.pl");
 	@filters = &filter::list_filters($procmailrc);
 	}
