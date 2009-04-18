@@ -1,7 +1,7 @@
- - run functional-test.pl
+ x run functional-test.pl
 	x fudu
 	x lentor
-	- xencentos
+	x xencentos
 
  x Generate british english with :
 	cd /usr/local/webadmin
@@ -40,12 +40,10 @@
 
  - Add to freshmeat.net
 
- x Announce on mailing list
+ - Announce on mailing list
 
  x Add to updates.txt
 
  x Release plugins
 
  x Rebuild API files
-
- x ruby-gems and php-pear modules
