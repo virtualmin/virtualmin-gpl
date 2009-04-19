@@ -42,3 +42,10 @@
 
  - WebNIC registrar support
 	- See email from Winnie Lee
+
+ - Post-install wizard
+	- Choose web server and/or mail server
+	- Enable clamd
+	- Set MySQL password
+	- Enable spamd
+	- Should be able to re-run virtualmin-base-standalone.pl ?
