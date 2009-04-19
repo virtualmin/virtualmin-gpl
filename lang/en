@@ -4825,3 +4825,10 @@ copycert_webminconfig=Configuring Webmin to use them ..
 copycert_webminnot=Warning - SSL is not currently enabled in Webmin. To activate it, go to the <a href='$1'>SSL Encryption</a> page.
 copycert_userminconfig=Configuring Usermin to use them ..
 copycert_userminnot=Warning - SSL is not currently enabled in Usermin. To activate it, go to the <a href='$1'>SSL Encryption</a> page.
+
+wizard_title=Post-Installation Wizard
+wizard_title_intro=Introduction
+wizard_intro=This post-installation wizard allows you to configure Virtualmin optimally for your system. To continue, click the <b>Next</b> button below. To skip it and use the default settings, click <b>Cancel</b>.
+wizard_virus=If your system is going to host domains that will receive a large amount of email, scanning incoming messages for viruses can generate high CPU load. This is due to CPU use by the ClamAV virus scanner when it is run, XXX
+wizard_next=Next
+wizard_cancel=Cancel
