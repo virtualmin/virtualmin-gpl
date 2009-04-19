@@ -1,0 +1,4 @@
+desc=Copy SSL certificate to Webmin
+html=Added a buttons to the Manage SSL Certificate page to copy a virtual server's existing SSL certificate for use by the Virtualmin web user interface, or the Usermin webmail interface.
+master=1
+link=cert_form.cgi?dom=${ID}

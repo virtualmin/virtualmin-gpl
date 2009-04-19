@@ -2334,6 +2334,10 @@ cert_chainok=Save Certificate
 cert_esubject=Certficate does not appear to have a common name
 cert_same=This virtual server shares its SSL certificate with <tt>$1</tt>, so it cannot be edited on this page.
 cert_samelink=Use its <a href='$1'>Manage SSL Certificate</a> page to change SSL settings.
+cert_copy=Copy to Webmin
+cert_copydesc=Use this certificate in Webmin, so that it is presented to the master admin and domain owners accessing the Virtualmin web user interface on port $1.
+cert_ucopy=Copy to Usermin
+cert_ucopydesc=Use this certificate in Usermin, so that it is presented to mailbox users accessing the webmail interface on port $1.
 
 csr_title=Generating CSR
 csr_title2=Generating Certificate
@@ -4812,3 +4816,12 @@ editgrey_evaluerecipients=Missing or invalid-looking recipient email address
 
 delgrey_err=Failed to delete whitelist entries
 delgrey_enone=None selected
+
+copycert_title=Copy SSL Certificate
+copycert_ecannot=You are not allowed to copy this virtual server's SSL certificate
+copycert_webmindir=Copying certificate and key to $1 ..
+copycert_epass=Password-protected SSL keys cannot be used by Webmin or Usermin
+copycert_webminconfig=Configuring Webmin to use them ..
+copycert_webminnot=Warning - SSL is not currently enabled in Webmin. To activate it, go to the <a href='$1'>SSL Encryption</a> page.
+copycert_userminconfig=Configuring Usermin to use them ..
+copycert_userminnot=Warning - SSL is not currently enabled in Usermin. To activate it, go to the <a href='$1'>SSL Encryption</a> page.

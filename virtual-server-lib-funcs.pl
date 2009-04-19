@@ -8302,6 +8302,12 @@ sub can_chained_cert_path
 return &master_admin();
 }
 
+# Returns 1 if the user can copy a domain's cert to Webmin
+sub can_webmin_cert
+{
+return &master_admin();
+}
+
 # Returns 1 if the current user can edit allowed remote DB hosts
 sub can_allowed_db_hosts
 {

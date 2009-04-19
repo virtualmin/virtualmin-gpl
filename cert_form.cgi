@@ -69,6 +69,36 @@ if (@others) {
 	);
 print &ui_table_row($text{'cert_download'}, &ui_links_row(\@dlinks), 3);
 print &ui_table_end();
+
+# Buttons to copy cert to Webmin
+if (&can_webmin_cert()) {
+	print &ui_hr();
+	print &ui_buttons_start();
+
+	# Copy to Webmin button
+	&get_miniserv_config(\%miniserv);
+	print &ui_buttons_row(
+		"copy_cert.cgi",
+		$text{'cert_copy'},
+		&text('cert_copydesc', $miniserv{'port'}),
+		&ui_hidden("dom", $in{'dom'}).
+		&ui_hidden("webmin", 1));
+
+	# Copy to Usermin, if installed
+	if (&foreign_installed("usermin")) {
+		&foreign_require("usermin");
+		&usermin::get_usermin_miniserv_config(\%uminiserv);
+		print &ui_buttons_row(
+			"copy_cert.cgi",
+			$text{'cert_ucopy'},
+			&text('cert_ucopydesc', $uminiserv{'port'}),
+			&ui_hidden("dom", $in{'dom'}).
+			&ui_hidden("usermin", 1));
+		}
+
+	print &ui_buttons_end();
+	}
+
 print &ui_tabs_end_tab();
 
 # CSR generation form
