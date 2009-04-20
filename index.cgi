@@ -4,6 +4,13 @@
 
 require './virtual-server-lib.pl';
 
+# Check for wizard re-direct
+$redir = &wizard_redirect();
+if ($redir) {
+	&redirect($redir);	
+	return;
+	}
+
 $vtitle = &text('index_versionmode', $module_info{'version'},
 		&master_admin() ? $text{'index_mastermode'} :
 		&reseller_admin() ? $text{'index_resellermode'} :

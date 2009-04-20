@@ -47,5 +47,6 @@
 	- Choose web server and/or mail server
 	- Enable clamd
 	- Set MySQL password
+	- Select MySQL and/or PostgreSQL
 	- Enable spamd
 	- Should be able to re-run virtualmin-base-standalone.pl ?

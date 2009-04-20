@@ -4827,8 +4827,24 @@ copycert_userminconfig=Configuring Usermin to use them ..
 copycert_userminnot=Warning - SSL is not currently enabled in Usermin. To activate it, go to the <a href='$1'>SSL Encryption</a> page.
 
 wizard_title=Post-Installation Wizard
-wizard_title_intro=Introduction
-wizard_intro=This post-installation wizard allows you to configure Virtualmin optimally for your system. To continue, click the <b>Next</b> button below. To skip it and use the default settings, click <b>Cancel</b>.
-wizard_virus=If your system is going to host domains that will receive a large amount of email, scanning incoming messages for viruses can generate high CPU load. This is due to CPU use by the ClamAV virus scanner when it is run, XXX
 wizard_next=Next
+wizard_prev=Prev
 wizard_cancel=Cancel
+wizard_title_intro=Introduction
+wizard_intro=This post-installation wizard allows you to configure Virtualmin optimally for your system. You can make selections depending on whether you want to host websites, email or databases, and based on your system's memory and CPU power.<p>To continue, click the <b>Next</b> button below. To skip it and use the default settings, click <b>Cancel</b>.
+wizard_virus=If your system is going to host domains that will receive a large amount of email, scanning incoming messages for viruses can generate high CPU load. This is due to CPU use by the ClamAV virus scanner when it is started, which can be avoided by running the ClamAV scanning server <tt>clamd</tt> in the background. This consumes RAM, but reduces CPU load and makes mail processing faster.
+wizard_title_virus=Virus scanning
+wizard_clamd=Run ClamAV server scanner?
+wizard_clamd1=Yes (more RAM used, faster mail processing)
+wizard_clamd0=No (less RAM used, slower mail processing)
+wizard_clamdnone=However, Virtualmin does not know how to enable the ClamAV server scanner on your system. You will need to set it up manually.
+wizard_eclamdenable=Failed to start the ClamAV server scanner. Try enabling it on the <b>$sv_title</b> page to see a more detailed error message.
+wizard_eclamdtest=A problem occurred testing the ClamAV server scanner : $1
+wizard_title_db=Database servers
+wizard_db=Virtualmin supports both the MySQL and PostgreSQL database servers, but you might want to run only one (or neither) on your system. Each consumes RAM when running, even if they are not being used.<p>Depending on the websites and applications you plan to host, running MySQL only may be enough, as most web applications do not support or require PostgreSQL. If your system will only be used for mail or DNS hosting, there is no need to run either.
+wizard_db_mysql=Run MySQL database server?
+wizard_db_mysql1=Yes (more RAM used, needed for most non-static websites)
+wizard_db_mysql0=No (less RAM used)
+wizard_db_postgres=Run PostgreSQL database server?
+wizard_db_postgres1=Yes (more RAM used, needed for some web applications)
+wizard_db_postgres0=No (less RAM used)

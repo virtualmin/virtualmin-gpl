@@ -25,14 +25,19 @@ if ($in{'parse'}) {
 	if (!$err) {
 		# Worked, show next step
 		&redirect("wizard.cgi?step=".($in{'step'}+1));
+		return;
 		}
+	}
+elsif ($in{'prev'}) {
+	# Go back to previous page
+	&redirect("wizard.cgi?step=".($in{'step'}-1));
+	return;
 	}
 
 &ui_print_header($text{'wizard_title_'.$step}, $text{'wizard_title'}, "");
 
 print &ui_form_start("wizard.cgi", "post");
 print &ui_hidden("step", $in{'step'});
-print &ui_hidden("parse", 1);
 if ($err) {
 	print "<b><font color=#ff0000>$err</font></b><p>\n";
 	}
@@ -43,9 +48,13 @@ $ffunc = "wizard_show_".$step;
 &$ffunc();
 
 print &ui_table_end();
-print &ui_form_end([ [ undef, $text{'wizard_next'} ],
+print &ui_form_end([
+		     [ "prev", $text{'wizard_prev'}, undef, !$in{'step'} ],
 		     undef,
-		     [ "cancel", $text{'wizard_cancel'} ] ]);
+		     [ "cancel", $text{'wizard_cancel'} ],
+		     undef,
+		     [ "parse", $text{'wizard_next'} ],
+		   ], "100%");
 
 &ui_print_footer("", $text{'index_return'});
 
