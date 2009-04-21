@@ -16,7 +16,8 @@ sub get_wizard_steps
 return ( "intro",
 	 $config{'virus'} ? ( "virus" ) : ( ),
 	 "db",
-	 $config{'mysql'} ? ( "mysql" ) : ( ) );
+	 $config{'mysql'} ? ( "mysql" ) : ( ),
+	 "done" );
 }
 
 sub wizard_show_intro
@@ -152,13 +153,52 @@ return undef;
 # Show a form to set the MySQL root password
 sub wizard_show_mysql
 {
-print &ui_table_row(undef, $text{'wizard_mysql'}, 2);
-# XXX
+&require_mysql();
+print &ui_table_row(undef, $text{'wizard_mysql'}.
+		   ($mysql::mysql_pass ? $text{'wizard_mysql3'}
+				       : $text{'wizard_mysql2'}), 2);
+if ($mysql::mysql_pass) {
+	print &ui_table_row($text{'wizard_mysql_pass'},
+		&ui_opt_textbox("mypass", undef, 20,
+				$text{'wizard_mysql_pass1'}."<br>",
+				$text{'wizard_mysql_pass0'}));
+	}
+else {
+	print &ui_table_row($text{'wizard_mysql_empty'},
+		&ui_textbox("mypass", undef, 20));
+	}
 }
 
 # Set the MySQL password, if changed
 sub wizard_parse_mysql
 {
+local ($in) = @_;
+&require_mysql();
+if (!$in{'mypass_def'}) {
+	# Change in DB
+	local $esc = &mysql::escapestr($in->{'mypass'});
+	local $user = $mysql::mysql_login || "root";
+	&mysql::execute_sql_logged($mysql::master_db,
+	    "update user set password = $mysql::password_func('$esc') ".
+	    "where user = '$user'");
+	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
+
+	# Update Webmin
+	$mysql::config{'pass'} = $in->{'mypass'};
+	&mysql::save_module_config(\%mysql::config, "mysql");
+	}
+return undef;
+}
+
+sub wizard_show_done
+{
+print &ui_table_row(undef,
+	&text('wizard_done', 'edit_newfeatures.cgi', 'edit_newsv.cgi'), 2);
+}
+
+sub wizard_parse_done
+{
+return undef;	# Always works
 }
 
 1;

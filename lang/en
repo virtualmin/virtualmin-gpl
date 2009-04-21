@@ -4852,3 +4852,13 @@ wizard_emysqlinst=MySQL cannot be enabled, as it is not installed on your system
 wizard_emysqlstart=An error occurred starting MySQL : $1
 wizard_epostgresinst=PostgreSQL cannot be enabled, as it is not installed on your system
 wizard_epostgresstart=An error occurred starting PostgreSQL : $1
+wizard_title_mysql=MySQL password
+wizard_mysql=To prevent other users on your system from managing the MySQL database, a password for the <tt>root</tt> user should be set.
+wizard_mysql2=Currently the MySQL password is not set, which is highly insecure.
+wizard_mysql3=This has already been done, so changing the password here is not mandatory.
+wizard_mysql_pass=Change MySQL password
+wizard_mysql_pass1=Leave un-changed
+wizard_mysql_pass0=Set to
+wizard_mysql_empty=Set MySQL password
+wizard_title_done=All done
+wizard_done=Virtualmin post-installation configuration is now complete!<p>You can adjust the settings you just made on the <a href='$1'>Features and Plugins</a> and <a href='$2'>Spam and Virus Scanning</a> pages.
