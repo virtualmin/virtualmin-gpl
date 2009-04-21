@@ -23,8 +23,15 @@ if ($in{'parse'}) {
 		$err = &$pfunc(\%in);
 		}
 	if (!$err) {
-		# Worked, show next step
-		&redirect("wizard.cgi?step=".($in{'step'}+1));
+		# Worked, show next step, if there is one
+		if ($in{'step'}+1 < scalar(@wizard_steps)) {
+			&redirect("wizard.cgi?step=".($in{'step'}+1));
+			}
+		else {
+			$config{'wizard_run'} = 1;
+			&save_module_config();
+			&redirect("");
+			}
 		return;
 		}
 	}

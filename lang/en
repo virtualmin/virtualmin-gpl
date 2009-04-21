@@ -4848,3 +4848,7 @@ wizard_db_mysql0=No (less RAM used)
 wizard_db_postgres=Run PostgreSQL database server?
 wizard_db_postgres1=Yes (more RAM used, needed for some web applications)
 wizard_db_postgres0=No (less RAM used)
+wizard_emysqlinst=MySQL cannot be enabled, as it is not installed on your system
+wizard_emysqlstart=An error occurred starting MySQL : $1
+wizard_epostgresinst=PostgreSQL cannot be enabled, as it is not installed on your system
+wizard_epostgresstart=An error occurred starting PostgreSQL : $1

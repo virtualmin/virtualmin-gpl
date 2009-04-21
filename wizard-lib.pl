@@ -96,10 +96,69 @@ print &ui_table_row($text{'wizard_db_postgres'},
 }
 
 # Enable or disable MySQL and PostgreSQL, depending on user's selections
+sub wizard_parse_db
+{
+local ($in) = @_;
+&foreign_require("init", "init-lib.pl");
+
+&require_mysql();
+if ($in->{'mysql'}) {
+	# Enable and start MySQL, if possible
+	if (!&foreign_installed("mysql")) {
+		return $text{'wizard_emysqlinst'};
+		}
+	$config{'mysql'} ||= 1;
+	if (&mysql::is_mysql_running() == 0) {
+		local $err = &mysql::start_mysql();
+		return &text('wizard_emysqlstart', $err) if ($err);
+		}
+	if (&init::action_status("mysql")) {
+		&init::enable_at_boot("mysql");
+		}
+	}
+else {
+	# Disable and shut down MySQL
+	$config{'mysql'} = 0;
+	&mysql::stop_mysql();
+	&init::disable_at_boot("mysql");
+	}
+
+&require_postgres();
+if ($in->{'postgres'}) {
+	# Enable and start PostgreSQL
+	if (!&foreign_installed("postgresql")) {
+		return $text{'wizard_epostgresinst'};
+		}
+	$config{'postgres'} ||= 1;
+	if (&postgresql::is_postgresql_running() == 0) {
+		local $err = &postgresql::start_postgresql();
+		return &text('wizard_epostgresstart', $err) if ($err);
+		}
+	if (&init::action_status("postgresql")) {
+		&init::enable_at_boot("postgresql");
+		}
+	}
+else {
+	# Disable and shut down PostgreSQL
+	$config{'postgres'} = 0;
+	&postgresql::stop_postgresql();
+	&init::disable_at_boot("postgresql");
+	}
+&save_module_config();
+
+return undef;
+}
+
+# Show a form to set the MySQL root password
+sub wizard_show_mysql
+{
+print &ui_table_row(undef, $text{'wizard_mysql'}, 2);
+# XXX
+}
+
+# Set the MySQL password, if changed
 sub wizard_parse_mysql
 {
-# XXX shutdown mysql and not start at boot
-# XXX check if actually installed!
 }
 
 1;
