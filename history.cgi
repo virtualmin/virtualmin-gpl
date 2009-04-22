@@ -59,6 +59,9 @@ for($i=0; $i<@stats; $i++) {
 	elsif ($stat eq 'tx' || $stat eq 'rx') {
 		$units = $text{'history_kbsec'};
 		}
+	elsif ($stat eq 'drivetemp') {
+		$units = $text{'history_cel'};
+		}
 	else {
 		$units = undef;
 		}

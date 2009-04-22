@@ -1104,3 +1104,4 @@ Added the --purge and --strftime flags to backup-domain.pl, to allow automatic d
 ---- Changes since 3.68 ----
 Updated the Nag script installer to version 2.3.2, phpMyFAQ to 2.0.13, Wordpress MU to 2.7.1, and Mantis to 1.1.7.
 Added buttons to the Manage SSL Certificate page to copy a domain's cert and key to Webmin or Usermin.
+Added CPU and hard drive temperatures to the System Statistics page.

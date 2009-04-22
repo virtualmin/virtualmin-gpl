@@ -1,0 +1,4 @@
+desc=CPU and drive temperatures
+html=System CPU and hard drive temperatures are now collected on Linux systems where possible, and graphed on the System Statistic page.
+master=1
+link=history.cgi?stat=drivetemp

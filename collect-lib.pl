@@ -415,6 +415,43 @@ if (&foreign_check("net") && $gconfig{'os_type'} =~ /-linux$/) {
 	&write_file("$historic_info_dir/netcounts", \%netcounts);
 	}
 
+# Get drive temperatures
+if (!$config{'collect_notemp'} && $virtualmin_pro &&
+    &foreign_installed("smart-status")) {
+	local ($temptotal, $tempcount);
+	&foreign_require("smart-status");
+	foreach my $d (&smart_status::list_smart_disks_partitions()) {
+		local $st = &smart_status::get_drive_status($d->{'device'}, $d);
+		foreach my $a (@{$st->{'attribs'}}) {
+			if ($a->[0] =~ /^Temperature\s+Celsius$/i &&
+			    $a->[1] > 0) {
+				$temptotal += int($a->[1]);
+				$tempcount++;
+				}
+			}
+		}
+	if ($temptotal) {
+		push(@stats, [ "drivetemp", $temptotal / $tempcount ]);
+		}
+	}
+
+# Get CPU temperature
+if (!$config{'collect_notemp'} && $virtualmin_pro &&
+    $gconfig{'os_type'} =~ /-linux$/ && &has_command("sensors")) {
+	local ($temptotal, $tempcount);
+	&open_execute_command(SENSORS, "sensors </dev/null 2>/dev/null", 1);
+	while(<SENSORS>) {
+		if (/Core\s+(\d+):\s+([\+\-][0-9\.]+)/) {
+			$temptotal += $2;
+			$tempcount++;
+			}
+		}
+	close(SENSORS);
+	if ($temptotal) {
+		push(@stats, [ "cputemp", $temptotal / $tempcount ]);
+		}
+	}
+
 # Write to the file
 foreach my $stat (@stats) {
 	open(HISTORY, ">>$historic_info_dir/$stat->[0]");
