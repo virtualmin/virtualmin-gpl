@@ -1358,6 +1358,81 @@ local $hamfile = &ham_alias_file($d);
 return undef;
 }
 
+# check_spamd_status()
+# Checks if spamd is configured and running on this system. Returns 0 if not,
+# 1 if yes, or -1 if we can't tell (due to a non-supported OS).
+sub check_spamd_status
+{
+local @pids = grep { $_ != $$ } &find_byname("spamd");
+if (@pids) {
+	# Running already, so we assume everything is cool
+	return 1;
+	}
+local $spamd = &has_command("spamd") ||
+	       &has_command("/opt/csw/bin/spamd");
+if (!$spam) {
+	# Not installed
+	return -1;
+	}
+return 0;	# Can be started
+}
+
+# enable_spamd()
+# Do everything needed to configure and start spamd. May print stuff with the
+# standard functions.
+sub enable_spamd
+{
+local $st = &check_spamd_status();
+return 1 if ($st == 1 || $st == -1);
+
+# Find init script
+&foreign_require("init", "init-lib.pl");
+local $init;
+foreach my $i ("spamassassin", "spamd") {
+	if (&init::action_status($i)) {
+		$init = $i;
+		last;
+		}
+	}
+$init ||= "virtualmin-spamassassin";	# Fall back to ours
+
+# Create or enable init script
+&$first_print(&text('spamd_boot'));
+local $spamd = &has_command("spamd") ||
+	       &has_command("/opt/csw/bin/spamd");
+&init::enable_at_boot($init, "Start SpamAssassin filter server",
+	"spamd --pidfile=/var/run/spamd.pid",
+	"kill `cat /var/run/spamd.pid`");
+
+# Update OS-specific config files
+local $dfile = "/etc/default/spamassassin";
+if (-r $dfile) {
+	local %defs;
+	&lock_file($dfile);
+	&read_env_file($dfile, \%defs);
+	if (!$defs{'ENABLED'}) {
+		$defs{'ENABLED'} = 1;
+		&write_env_file($dfile, \%defs);
+		}
+	&unlock_file($dfile);
+	}
+&$second_print($text{'setup_done'});
+
+# Start now
+&$first_print(&text('spamd_start'});
+local ($ok, $out) = &init::start_service($init);
+if ($ok) {
+	&$second_print($text{'setup_done'});
+	}
+else {
+	&$second_print(&text('spamd_startfailed',
+			     "<tt>".&html_escape($out)."</tt>"));
+	return 0;
+	}
+
+return 1;
+}
+
 # obtain_lock_spam(&domain)
 # Lock a domain's spamassassin config file and procmail file
 sub obtain_lock_spam

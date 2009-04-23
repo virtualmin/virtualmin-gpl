@@ -60,12 +60,13 @@ if ($config{'virus'}) {
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
+print &ui_hr();
+print &ui_buttons_start();
+
 # Check if clamd is running, if not offer to set it up
 if ($config{'virus'}) {
 	$cs = &check_clamd_status();
 	if ($cs != -1) {
-		print &ui_hr();
-		print &ui_buttons_start();
 		if ($cs) {
 			print &ui_buttons_row("disable_clamd.cgi",
 				$text{'sv_disable'}, $text{'sv_disabledesc'});
@@ -74,9 +75,25 @@ if ($config{'virus'}) {
 			print &ui_buttons_row("enable_clamd.cgi",
 				$text{'sv_enable'}, $text{'sv_enabledesc'});
 			}
-		print &ui_buttons_end();
 		}
 	}
+
+# Check if spamd is running, if not offer to set it up
+if ($config{'virus'}) {
+	$ss = &check_spamd_status();
+	if ($ss != -1) {
+		if ($ss) {
+			print &ui_buttons_row("disable_spamd.cgi",
+				$text{'sv_sdisable'}, $text{'sv_sdisabledesc'});
+			}
+		else {
+			print &ui_buttons_row("enable_spamd.cgi",
+				$text{'sv_senable'}, $text{'sv_senabledesc'});
+			}
+		}
+	}
+
+print &ui_buttons_end();
 
 &ui_print_footer("", $text{'index_return'});
 

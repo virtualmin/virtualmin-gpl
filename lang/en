@@ -4457,7 +4457,7 @@ sv_etestok=No virus report produced - perhaps this is not a ClamAV program?
 sv_disable=Disable ClamAV Server
 sv_disabledesc=Click this button to shut down the ClamAV virus scanning server. It will no longer be possible to use the <tt>clamdscan</tt> server scanner above.
 sv_enable=Enable ClamAV Server
-sv_enabledesc=Click this button to configure and start the ClamAV virus scanning server <tt>clamd</tt>. This will allow you to select the <tt>clamdscan</tt> server scanner above, which is generally faster when processing a large volume of email.
+sv_enabledesc=Click this button to configure and start the ClamAV virus scanning server <tt>clamd</tt>. This will allow you to select the <tt>clamdscan</tt> server scanner above, which is generally faster when processing a large volumes of email.
 sv_title2=Disable Virus Scanning Server
 sv_title3=Enable Virus Scanning Server
 sv_disabling=Disabling the ClamAV scanning server ..
@@ -4466,6 +4466,10 @@ sv_enabling=Configuring and enabling the ClamAV scanning server ..
 sv_enabledok=.. all done
 sv_notenabled=.. something went wrong!
 sv_warning=Warning! Virtualmin is configured to use the server scanner, but the ClamAV server process is no longer running
+sv_sdisable=Disable SpamAssassin Server
+sv_sdisabledesc=Click this button to shut down the SpamAssassin filter server. It will no longer be possible to use the <tt>spamc</tt> server scanner above.
+sv_senable=Enable SpamAssassin Server
+sv_senabledesc=Click this button to configure and start the SpamAssassin filter server <tt>spamd</tt>. This will allow you to select the <tt>spamc</tt> server filter above, which is generally faster when processing a large volumes of email.
 
 features_title=Features and Plugins
 features_ecannot=You are not allowed to edit enabled features
@@ -4496,6 +4500,10 @@ clamd_lognone=.. could not work out directory from config file
 clamd_estartmsg=The ClamAV virus scanning server could not be started
 clamd_estopmsg=The ClamAV virus scanning server is not running
 clamd_ekillmsg=Failed to kill ClamAV virus scanning server processes : $1
+
+spamd_boot=Enabling SpamAssassin server at boot time ..
+spamd_start=Starting SpamAssassin server ..
+spamd_startfailed=.. failed to start : $1
 
 chain_err=Failed to save CA certificate
 chain_efile=Certificate file does not exist

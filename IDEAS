@@ -43,6 +43,10 @@
  - WebNIC registrar support
 	- See email from Winnie Lee
 
+ - spamd enable
+	- command line
+	- CHANGELOG
+
  - Post-install wizard
 	- Enable spamd
 	- Should be able to re-run virtualmin-base-standalone.pl ?
