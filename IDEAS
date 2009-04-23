@@ -44,8 +44,6 @@
 	- See email from Winnie Lee
 
  - Post-install wizard
-	- Choose web server and/or mail server?
-	- Lookup-domain-daemon
 	- Enable spamd
 	- Should be able to re-run virtualmin-base-standalone.pl ?
 	- CHANGELOG

@@ -1155,7 +1155,6 @@ foreach my $d (grep { $_->{'spam'} } &list_domains()) {
 sub setup_lookup_domain_daemon
 {
 &foreign_require("init", "init-lib.pl");
-&foreign_require("proc", "proc-lib.pl");
 local $pidfile = "$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid";
 &init::enable_at_boot(
       "lookup-domain",
@@ -1168,6 +1167,28 @@ if (&check_pid_file($pidfile)) {
 	sleep(5);	# Let port free up
 	}
 &init::start_action("lookup-domain");
+}
+
+# delete_lookup_domain_daemon()
+# Turn off the background domain-lookup daemon
+sub delete_lookup_domain_daemon
+{
+&foreign_require("init", "init-lib.pl");
+&init::disable_at_boot("lookup-domain");
+local $pidfile = "$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid";
+&init::stop_action("lookup-domain");
+local $pid = &check_pid_file($pidfile);
+if ($pid) {
+	kill('TERM', $pid);
+	}
+}
+
+# check_lookup_domain_daemon()
+# Returns 1 if the domain lookup daemon is running, 0 if not
+sub check_lookup_domain_daemon
+{
+&foreign_require("init", "init-lib.pl");
+return &init::action_status("lookup-domain") == 2 ? 1 : 0;
 }
 
 # spam_alias_name(&domain)

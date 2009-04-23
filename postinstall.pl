@@ -152,7 +152,7 @@ if (&check_pid_file($miniserv{'pidfile'}) && $need_restart) {
 	}
 
 # Setup lookup domain daemon
-if ($config{'spam'}) {
+if ($config{'spam'} && !$config{'no_lookup_domain_daemon'}) {
 	&setup_lookup_domain_daemon();
 	}
 

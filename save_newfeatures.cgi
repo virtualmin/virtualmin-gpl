@@ -69,7 +69,9 @@ $cerr = &check_virtual_server_config();
 # Update the procmail setting for default delivery, turn on logging, and 
 # create cron job to link up files
 if ($config{'spam'}) {
-	&setup_lookup_domain_daemon();
+	if (!$config{'no_lookup_domain_daemon'}) {
+		&setup_lookup_domain_daemon();
+		}
 	&setup_default_delivery();
 	&enable_procmail_logging();
 	&setup_spam_config_job();

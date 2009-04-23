@@ -11315,7 +11315,7 @@ if ($config{'api_helper'} ne $lastconfig{'api_helper'}) {
 	}
 
 # Restart lookup-domain daemon, if need
-if ($config{'spam'}) {
+if ($config{'spam'} && !$config{'no_lookup_domain_daemon'}) {
 	&setup_lookup_domain_daemon();
 	}
 
