@@ -3013,10 +3013,10 @@ if ($hash{'bw_usage'}) {
 	$hash{'bw_usage'} = &nice_size($d->{'bw_usage'});
 	}
 if ($config{'bw_period'}) {
-	$tkeys{'bw_period'} = $config{'bw_period'};
+	$hash{'bw_period'} = $config{'bw_period'};
 	}
 if ($config{'bw_past'}) {
-	$tkeys{'bw_past'} = $config{'bw_past'};
+	$hash{'bw_past'} = $config{'bw_past'};
 	}
 return %hash;
 }
