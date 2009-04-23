@@ -1419,7 +1419,7 @@ if (-r $dfile) {
 &$second_print($text{'setup_done'});
 
 # Start now
-&$first_print(&text('spamd_start'});
+&$first_print($text{'spamd_start'});
 local ($ok, $out) = &init::start_service($init);
 if ($ok) {
 	&$second_print($text{'setup_done'});

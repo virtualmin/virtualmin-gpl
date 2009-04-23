@@ -1137,6 +1137,7 @@ else {
 # Deletes a virtual mail user mapping
 sub delete_virtuser
 {
+return if ($_[0]->{'deleted'});
 &require_mail();
 &execute_before_virtuser($_[0], 'DELETE_ALIAS');
 if ($config{'mail_system'} == 1) {
@@ -1188,6 +1189,7 @@ elsif ($config{'mail_system'} == 6) {
 	&exim::delete_alias($alias);
 	}
 &execute_after_virtuser($_[0], 'DELETE_ALIAS');
+$_[0]->{'deleted'} = 1;		# Prevent double-deletion
 }
 
 # modify_virtuser(&old, &new)
