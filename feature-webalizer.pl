@@ -42,7 +42,7 @@ if ($tmpl->{'web_stats_pass'} && !-r $htaccess_file) {
 	&print_tempfile(HTACCESS, "AuthType Basic\n");
 	&print_tempfile(HTACCESS, "AuthUserFile $passwd_file\n");
 	&print_tempfile(HTACCESS, "require valid-user\n");
-	&print_tempfile(HTACCESS, "<Files .htpasswd>\n");
+	&print_tempfile(HTACCESS, "<Files .stats-htpasswd>\n");
 	&print_tempfile(HTACCESS, "deny from all\n");
 	&print_tempfile(HTACCESS, "</Files>\n");
 	&close_tempfile(HTACCESS);
@@ -217,6 +217,18 @@ if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 	local $lconf = &webalizer::get_log_config($alog);
 	$lconf->{'dir'} =~ s/\Q$_[1]->{'home'}\E/$_[0]->{'home'}/g;
 	&webalizer::save_log_config($alog, $lconf);
+
+	# Change password file path in stats/.htpassswd file
+	local $stats = &webalizer_stats_dir($_[0]);
+	local $htaccess_file = "$stats/.htaccess";
+	if (-r $htaccess_file) {
+		local $lref = &read_file_lines($htaccess_file);
+		foreach my $l (@$lref) {
+			$l =~ s/\Q$_[1]->{'home'}\E/$_[0]->{'home'}/g;
+			}
+		&flush_file_lines($htaccess_file);
+		}
+
 	&$second_print($text{'setup_done'});
 	}
 

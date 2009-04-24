@@ -16,6 +16,7 @@ sub get_wizard_steps
 return ( "intro",
 	 "memory",
 	 $config{'virus'} ? ( "virus" ) : ( ),
+	 $config{'spam'} ? ( "spam" ) : ( ),
 	 "db",
 	 $config{'mysql'} ? ( "mysql" ) : ( ),
 	 "done" );
