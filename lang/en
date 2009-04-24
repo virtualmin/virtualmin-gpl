@@ -4504,6 +4504,9 @@ clamd_ekillmsg=Failed to kill ClamAV virus scanning server processes : $1
 spamd_boot=Enabling SpamAssassin server at boot time ..
 spamd_start=Starting SpamAssassin server ..
 spamd_startfailed=.. failed to start : $1
+spamd_unboot=Disabling SpamAssassin server at boot time ..
+spamd_unbootact=.. no boot-time action found!
+spamd_stop=Stopping SpamAssassin server ..
 
 chain_err=Failed to save CA certificate
 chain_efile=Certificate file does not exist

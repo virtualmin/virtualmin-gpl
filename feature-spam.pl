@@ -1370,7 +1370,7 @@ if (@pids) {
 	}
 local $spamd = &has_command("spamd") ||
 	       &has_command("/opt/csw/bin/spamd");
-if (!$spam) {
+if (!$spamd) {
 	# Not installed
 	return -1;
 	}
@@ -1420,7 +1420,7 @@ if (-r $dfile) {
 
 # Start now
 &$first_print($text{'spamd_start'});
-local ($ok, $out) = &init::start_service($init);
+local ($ok, $out) = &init::start_action($init);
 if ($ok) {
 	&$second_print($text{'setup_done'});
 	}
@@ -1429,6 +1429,41 @@ else {
 			     "<tt>".&html_escape($out)."</tt>"));
 	return 0;
 	}
+
+return 1;
+}
+
+# disable_spamd()
+# Turn off spamd now and at boot time
+sub disable_spamd
+{
+local $st = &check_spamd_status();
+return 1 if ($st == 0 || $st == -1);
+
+# Find init script
+&$first_print(&text('spamd_unboot'));
+&foreign_require("init", "init-lib.pl");
+local $init;
+foreach my $i ("spamassassin", "spamd", "virtualmin-spamassassin") {
+	if (&init::action_status($i)) {
+		$init = $i;
+		last;
+		}
+	}
+if (!$init) {
+	&$second_print($text{'spamd_unbootact'});
+	return 0;
+	}
+&init::disable_at_boot($init);
+&$second_print($text{'setup_done'});
+
+# Stop spamd process
+&$first_print($text{'spamd_stop'});
+local ($ok, $out) = &init::stop_action($init);
+if (!$ok) {
+	&kill_byname_logged('spamd', 'TERM');
+	}
+&$second_print($text{'setup_done'});
 
 return 1;
 }

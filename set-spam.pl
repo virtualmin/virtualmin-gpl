@@ -16,9 +16,9 @@ as then run all the time. To enable the ClamAV server, run it like so :
   set-spam.pl --enable-clamd
   set-spam.pl --use-clamdscan
 
-To use SpamAssassin daemon process, you must first start it manually and then
-run :
+To enable and use the SpamAssassin daemon process, run the commands :
 
+  set-spam.pl --enable-spamd
   set-spam.pl --use-spamc
 
 However, using C<spamc> makes it impossible to have separate per-domain
@@ -84,6 +84,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--disable-clamd") {
 		$clamd = 0;
 		}
+	elsif ($a eq "--enable-spamd") {
+		$spamd = 1;
+		}
+	elsif ($a eq "--disable-spamd") {
+		$spamd = 0;
+		}
 	else {
 		&usage();
 		}
@@ -91,7 +97,7 @@ while(@ARGV > 0) {
 
 # Validate inputs
 $virus_scanner || $virus_host || $spam_client || $show || defined($clamd) ||
-	&usage("Nothing to do");
+  defined($spamd) || &usage("Nothing to do");
 if ($spam_client) {
 	&has_command($spam_client) ||
 	    &usage("SpamAssassin client program $spam_client does not exist");
@@ -122,6 +128,13 @@ if (defined($clamd)) {
 			   "your system");
 	}
 
+# Make sure spamd can be enabled
+if (defined($spamd)) {
+	$cs = &check_spamd_status();
+	$cs >= 0 || &usage("Virtualmin does not know how to enable spamd on ".
+			   "your system");
+	}
+
 &obtain_lock_spam_all();
 
 if ($spam_client || $spam_host || $spam_max) {
@@ -133,6 +146,7 @@ if ($spam_client || $spam_host || $spam_max) {
 	print ".. done\n\n";
 	}
 
+# Enable or disable clamd
 if (defined($clamd)) {
 	if ($clamd) {
 		print "Configuring and enabling clamd ..\n";
@@ -144,6 +158,22 @@ if (defined($clamd)) {
 		print "Disabling clamd ..\n";
 		&$indent_print();
 		&disable_clamd();
+		&$outdent_print();
+		}
+	}
+
+# Enable or disable spamd
+if (defined($spamd)) {
+	if ($spamd) {
+		print "Configuring and enabling spamd ..\n";
+		&$indent_print();
+		&enable_spamd();
+		&$outdent_print();
+		}
+	else {
+		print "Disabling spamd ..\n";
+		&$indent_print();
+		&disable_spamd();
 		&$outdent_print();
 		}
 	}
@@ -190,6 +220,9 @@ print "                    --use-clamd-stream-client | --use-virus command]\n";
 print "                   [--clamd-host hostname]\n";
 if (&check_clamd_status() >= 0) {
 	print "                   [--enable-clamd | --disable-clamd]\n";
+	}
+if (&check_spamd_status() >= 0) {
+	print "                   [--enable-spamd | --disable-spamd]\n";
 	}
 print "                   [--show]\n";
 exit(1);
