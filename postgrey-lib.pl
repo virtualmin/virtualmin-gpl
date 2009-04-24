@@ -1,6 +1,7 @@
 # Functions for managing Postgrey and Postfix
 
 @postgrey_data_types = ( 'clients', 'recipients' );
+use Socket;
 
 # check_postgrey()
 # Returns undef if Postgrey is installed, or an error message if not
@@ -53,6 +54,15 @@ sub get_postgrey_args
 {
 local $ofile = "/etc/default/postgrey";
 local $postgrey = &has_command("postgrey");
+
+# First try running process
+&foreign_require("proc", "proc-lib.pl");
+foreach my $p (&proc::list_processes()) {
+	if ($p->{'args'} =~ /^(postgrey|\Q$postgrey\E)\s+(.*)/) {
+		return $2;
+		}
+	}
+
 if (-r $ofile) {
 	# Get from options file on Debian
 	my $lref = &read_file_lines($ofile, 1);
@@ -62,21 +72,16 @@ if (-r $ofile) {
 			}
 		}
 	}
+
 &foreign_require("init", "init-lib.pl");
 if ($init::init_mode eq 'init') {
-	# Next try checking the init script
+	# Last try checking the init script
 	local $ifile = &init::action_filename(&get_postgrey_init());
+	my $lref = &read_file_lines($ifile, 1);
 	foreach my $l (@$lref) {
 		if ($l =~ /\Q$postgrey\E\s+(.*)/i) {
 			return $1;
 			}
-		}
-	}
-# Fall back to running process
-&foreign_require("proc", "proc-lib.pl");
-foreach my $p (&proc::list_processes()) {
-	if ($p->{'args'} =~ /^(postgrey|\Q$postgrey\E)\s+(.*)/) {
-		return $2;
 		}
 	}
 return undef;
@@ -154,7 +159,7 @@ if (&init::action_status($init) != 2) {
 		$postgrey." -d ".($port =~ /^\// ? "--unix=$port"
 					         : "--inet=$port"),
 		"killall -9 postgrey");
-	&$second_print(&text('postgrey_initdone', $port));
+	&$second_print($text{'postgrey_initdone'});
 	}
 else {
 	&$second_print($text{'postgrey_initalready'});
@@ -164,6 +169,8 @@ else {
 &$first_print($text{'postgrey_proc'});
 if (!&find_byname("postgrey")) {
 	local ($ok, $out) = &init::start_action($init);
+	$port = &get_postgrey_port();	# In case we got it from the running
+					# process after the init script started
 	if (!$ok) {
 		&$second_print(&text('postgrey_procfailed',
 				     "<tt>".&html_escape($out)."</tt>"));
@@ -266,7 +273,7 @@ if (!socket(RANDOMSOCK, PF_INET, SOCK_STREAM, $proto)) {
 setsockopt(RANDOMSOCK, SOL_SOCKET, SO_REUSEADDR, pack("l", 1));
 while(1) {
 	$port++;
-	last if (bind($fh, sockaddr_in($port, INADDR_ANY)));
+	last if (bind(RANDOMSOCK, sockaddr_in($port, INADDR_ANY)));
 	}
 close(RANDOMSOCK);
 return $port;
