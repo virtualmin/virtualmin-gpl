@@ -1475,6 +1475,12 @@ $mail_tests = [
 	{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
 	},
 
+	# If spamd is running, make it restart so that it picks up the new user
+	{ 'command' => $gconfig{'os_type'} eq 'solaris' ?
+			'pkill -HUP spamd' : 'killall -HUP spamd',
+	  'ignorefail' => 1,
+	},
+
 	# Send one email to him, so his mailbox gets created and then procmail
 	# runs as the right user. This is to work around a procmail bug where
 	# it can drop privs too soon!
