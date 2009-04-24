@@ -1105,3 +1105,4 @@ Added the --purge and --strftime flags to backup-domain.pl, to allow automatic d
 Updated the Nag script installer to version 2.3.2, phpMyFAQ to 2.0.13, Wordpress MU to 2.7.1, SugarCRM to 5.2.0d, and Mantis to 1.1.7.
 Added buttons to the Manage SSL Certificate page to copy a domain's cert and key to Webmin or Usermin.
 Added CPU and hard drive temperatures to the System Statistics page.
+SpamAssassin's server filter spamd can now be activated from within Virtualmin, using a new button on the Spam and Virus Scanning page. You can also turn it on with the --enable-spamd flag to the set-spam API script.

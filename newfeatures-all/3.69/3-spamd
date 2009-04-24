@@ -1,0 +1,4 @@
+desc=Button to enable SpamAssassin server <tt>spamd</tt>
+html=SpamAssasssin's filter server <tt>spamd</tt> can now be enabled easily from within Virtualmin, on the <b>Spam and Virus Scanning</b> page. This speeds up spam scanning, but consumes more RAM and prevents the use of per-domain SpamAssassin configurations.
+master=1
+link=edit_newsv.cgi

@@ -44,8 +44,7 @@
 	- See email from Winnie Lee
 
  - spamd enable
-	- verify debian, centos, solaris
-	- CHANGELOG
+	- verify solaris
 
  - Post-install wizard
 	- Enable spamd
