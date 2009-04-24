@@ -1471,10 +1471,6 @@ $mail_tests = [
 		      [ 'no-creation-mail' ] ],
 	},
 
-	# Add empty lines to procmail.log, to prevent later false matches
-	{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
-	},
-
 	# If spamd is running, make it restart so that it picks up the new user
 	{ 'command' => $gconfig{'os_type'} eq 'solaris' ?
 			'pkill -HUP spamd' : 'killall -HUP spamd',
@@ -1488,6 +1484,10 @@ $mail_tests = [
 	  'args' => [ [ 'from', 'jcameron@webmin.com' ],
 		      [ 'to', $test_user.'@'.$test_domain ],
 		      [ 'data', $ok_email_file ] ],
+	},
+
+	# Add empty lines to procmail.log, to prevent later false matches
+	{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
 	},
 
         # Send some reasonable mail to him
