@@ -1605,7 +1605,7 @@ check_webok=Apache is installed.
 check_ftpok=ProFTPd is installed.
 check_dnsok=BIND DNS server is installed, and the system is configured to use it.
 check_dnsok2=BIND DNS server is installed.
-check_dnsmaster=The default master DNS server $1 is not a fully qualified domain name.
+check_dnsmaster=However, the default master DNS server $1 is not a fully qualified domain name.
 check_mysqlok=MySQL is installed and running.
 check_mysqlnopass=MySQL is installed and running, but does not have any <tt>root</tt> password set! <b>This should be changed immediately in the <a href='$1'>MySQL Database</a> module</b>.
 check_postgresok=PostgreSQL is installed and running.

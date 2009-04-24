@@ -10465,9 +10465,9 @@ if ($config{'dns'}) {
                                         $tmpl->{'dns_master'};
 	$master ||= $bind8::config{'default_prins'} ||
 		    &get_system_hostname();
+	local $mastermsg;
 	if ($master !~ /\./) {
-		&$second_print("<b>".&text('check_dnsmaster',
-					   "<tt>$master</tt>")."</b>");
+		$mastermsg = &text('check_dnsmaster', "<tt>$master</tt>");
 		}
 
 	# Make sure this server is configured to use the local BIND
@@ -10485,10 +10485,10 @@ if ($config{'dns'}) {
 			return &text('check_eresolv', '/net/list_dns.cgi',
 						      $clink);
 			}
-		&$second_print($text{'check_dnsok'});
+		&$second_print($text{'check_dnsok'}." ".$mastermsg);
 		}
 	else {
-		&$second_print($text{'check_dnsok2'});
+		&$second_print($text{'check_dnsok2'}." ".$mastermsg);
 		}
 	}
 
