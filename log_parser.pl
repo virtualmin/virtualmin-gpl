@@ -84,6 +84,9 @@ elsif ($type eq "database") {
 elsif ($type eq "links" || $type eq "linkcats" || $type eq "fields") {
 	return $text{'log_'.$action.'_'.$type};
 	}
+elsif ($type eq "clamd" || $type eq "spamd") {
+	return $text{'log_'.$action.'_'.$type};
+	}
 elsif ($action eq "start" || $action eq "stop" || $action eq "restart") {
 	return $text{'log_'.$action.'_'.$type};
 	}

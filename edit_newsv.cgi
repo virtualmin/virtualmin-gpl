@@ -14,9 +14,9 @@ if ($config{'spam'}) {
 	# Spam scanning program
 	($client, $host, $size) = &get_global_spam_client();
 	print &ui_table_row(&hlink($text{'spam_client'}, 'spam_client'),
-		    &ui_select("client", $client,
-			       [ [ "spamassassin", $text{'tmpl_spamassassin'} ],
-				 [ "spamc", $text{'tmpl_spamc'} ] ]));
+		    &ui_radio("client", $client,
+		       [ [ "spamassassin", $text{'tmpl_spamassassin'}."<br>" ],
+			 [ "spamc", $text{'tmpl_spamc'} ] ]));
 
 	# Spamc host
 	print &ui_table_row(

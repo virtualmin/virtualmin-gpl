@@ -13,6 +13,7 @@ if ($ok) {
 	if ($scanner eq "clamdscan") {
 		&$first_print("<b>".$text{'sv_warning'}."</b>");
 		}
+	&webmin_log("disable", "clamd");
 	}
 &$outdent_print();
 
