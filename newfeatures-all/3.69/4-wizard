@@ -1,0 +1,4 @@
+desc=Post-installation wizard
+html=After Virtualmin is installed and the master administrator logs in for the first time, a wizard allowing basic configuration of memory and speed tradeoffs will be displayed. This allows the system to be tuned for web, mail or database hosting, depending on how the admin intends it to be used.
+master=1
+link=wizard.cgi

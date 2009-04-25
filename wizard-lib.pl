@@ -142,6 +142,54 @@ if (defined($in->{'clamd'})) {
 return undef;
 }
 
+# Show a form asking the user if he wants to run spamd
+sub wizard_show_spam
+{
+print &ui_table_row(undef, $text{'wizard_spam'}, 2);
+local $cs = &check_spamd_status();
+if ($cs != -1) {
+	print &ui_table_row($text{'wizard_spamd'},
+		&ui_radio("spamd", $cs ? 1 : 0,
+			  [ [ 1, $text{'wizard_spamd1'}."<br>" ],
+			    [ 0, $text{'wizard_spamd0'} ] ]));
+	}
+else {
+	print &ui_table_row($text{'wizard_spamdnone'});
+	}
+}
+
+# Parse the spamd form, and enable or disable spamd
+sub wizard_parse_spam
+{
+local ($in) = @_;
+if (defined($in->{'spamd'})) {
+	local $cs = &check_spamd_status();
+	if ($in->{'spamd'} && !$cs) {
+		# Enable if needed
+		&push_all_print();
+		&set_all_null_print();
+		local $ok = &enable_spamd();
+		&pop_all_print();
+		if ($ok) {
+			# Switch to spamc
+			&save_global_spam_client("spamc");
+			}
+		else {
+			return $text{'wizard_espamdenable'};
+			}
+		}
+	elsif (!$in->{'spamd'} && $cs) {
+		# Disable if needed
+		&push_all_print();
+		&set_all_null_print();
+		&disable_spamd();
+		&pop_all_print();
+		&save_global_spam_client("spamassassin");
+		}
+	}
+return undef;
+}
+
 # Ask the user if he wants to run MySQL and/or PostgreSQL
 sub wizard_show_db
 {
