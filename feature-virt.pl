@@ -52,6 +52,7 @@ else {
 		}
 	}
 &release_lock_virt($_[0]);
+return 1;
 }
 
 # delete_virt(&domain)

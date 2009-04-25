@@ -35,6 +35,7 @@ if (!$d->{'virtalready'}) {
 	&$second_print(&text('setup_virt6done', $virt->{'name'}));
 	}
 &release_lock_virt($d);
+return 1;
 }
 
 # modify_virt6(&domain, &old-domain)

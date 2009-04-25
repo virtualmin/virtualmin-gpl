@@ -5969,10 +5969,14 @@ if ($dom->{'webmin'}) {
 
 # Add virtual IP address, if needed
 if ($dom->{'virt'}) {
-	&setup_virt($dom);
+	if (!&try_function("virt", "setup_virt", $dom)) {
+		$dom->{'virt'} = 0;
+		}
 	}
 if ($dom->{'virt6'}) {
-	&setup_virt6($dom);
+	if (!&try_function("virt6", "setup_virt6", $dom)) {
+		$dom->{'virt6'} = 0;
+		}
 	}
 
 if (!$nopost) {
