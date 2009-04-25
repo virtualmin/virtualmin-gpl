@@ -1401,7 +1401,7 @@ $init ||= "virtualmin-spamassassin";	# Fall back to ours
 local $spamd = &has_command("spamd") ||
 	       &has_command("/opt/csw/bin/spamd");
 &init::enable_at_boot($init, "Start SpamAssassin filter server",
-	"spamd --pidfile=/var/run/spamd.pid",
+	"spamd --pidfile=/var/run/spamd.pid -d",
 	"kill `cat /var/run/spamd.pid`");
 
 # Update OS-specific config files

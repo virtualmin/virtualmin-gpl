@@ -2679,6 +2679,10 @@ foreach my $a (@{$t->{'args'}}) {
 	}
 print "    Running $cmd ..\n";
 sleep($t->{'sleep'});
+if ($gconfig{'os_type'} !~ /-linux$/ && &has_command("bash")) {
+	# Force use of bash
+	$cmd = "bash -c ".quotemeta($cmd);
+	}
 local $out = &backquote_with_timeout("($cmd) 2>&1 </dev/null",
 				     $t->{'timeout'} || $timeout);
 if (!$t->{'ignorefail'}) {
