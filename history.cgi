@@ -59,7 +59,7 @@ for($i=0; $i<@stats; $i++) {
 	elsif ($stat eq 'tx' || $stat eq 'rx') {
 		$units = $text{'history_kbsec'};
 		}
-	elsif ($stat eq 'drivetemp') {
+	elsif ($stat eq 'drivetemp' || $stat eq 'cputemp') {
 		$units = $text{'history_cel'};
 		}
 	else {
