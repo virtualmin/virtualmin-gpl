@@ -1024,7 +1024,7 @@ local $zonefile = &bind8::make_chroot(
 return &text('validate_ednsfile2', "<tt>$zonefile</tt>") if (!-r $zonefile);
 
 # Check for critical records, and that www.$dom and $dom resolve to the
-# expected IP address
+# expected IP address (if we have a website)
 local $bind8::config{'short_names'} = 0;
 local @recs = &bind8::read_zone_file($file->{'values'}->[0], $d->{'dom'});
 local %got;
@@ -1034,12 +1034,14 @@ foreach my $r (@recs) {
 	}
 $got{'SOA'} || return &text('validate_ednssoa', "<tt>$zonefile</tt>");
 $got{'A'} || return &text('validate_ednsa', "<tt>$zonefile</tt>");
-foreach my $n ($d->{'dom'}.'.', 'www.'.$d->{'dom'}.'.') {
-	my @nips = map { $_->{'values'}->[0] }
+if ($d->{'web'}) {
+	foreach my $n ($d->{'dom'}.'.', 'www.'.$d->{'dom'}.'.') {
+		my @nips = map { $_->{'values'}->[0] }
 		       grep { $_->{'type'} eq 'A' && $_->{'name'} eq $n } @recs;
-	if (@nips && &indexof($ip, @nips) < 0) {
-		return &text('validate_ednsip', "<tt>$n</tt>",
-		     "<tt>".join(' or ', @nips)."</tt>", "<tt>$ip</tt>");
+		if (@nips && &indexof($ip, @nips) < 0) {
+			return &text('validate_ednsip', "<tt>$n</tt>",
+			    "<tt>".join(' or ', @nips)."</tt>", "<tt>$ip</tt>");
+			}
 		}
 	}
 
