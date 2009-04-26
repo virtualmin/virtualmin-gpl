@@ -39,7 +39,7 @@ if (&foreign_check("proc")) {
 		local $free = 0;
 		local $donezone;
 		foreach my $m (@mounted) {
-			if ($m->[2] eq "ext2" || $m->[2] eq "ext3" ||
+			if ($m->[2] =~ /^ext/ ||
 			    $m->[2] eq "reiserfs" || $m->[2] eq "ufs" ||
 			    $m->[2] eq "zfs" || $m->[2] eq "simfs" ||
 			    $m->[2] eq "xfs" || $m->[2] eq "jfs" ||
