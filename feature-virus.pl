@@ -632,7 +632,7 @@ return 1;
 }
 
 # disable_clamd()
-# Shut down the clamd process. May also print stuff.
+# Shut down the clamd process and disable at boot. May also print stuff.
 sub disable_clamd
 {
 &foreign_require("init", "init-lib.pl");
@@ -700,11 +700,10 @@ sub stop_service_virus
 {
 &foreign_require("init", "init-lib.pl");
 foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-virtualmin",
-		  "clamd-wrapper", "clamd-csw") {
+		  "clamd-wrapper", "clamd-csw", "clamav-clamd") {
 	if (&init::action_status($init)) {
-		local $ifile = &init::action_filename($init);
-		local $out = &backquote_logged("$ifile stop 2>&1");
-		return $? ? "<tt>".&html_escape($out)."</tt>" : undef;
+		local ($ok, $out) = &init::stop_action($init);
+		return $ok ? undef : "<tt>".&html_escape($out)."</tt>";
 		}
 	}
 local @pids = grep { $_ != $$ } &find_byname("clamd");

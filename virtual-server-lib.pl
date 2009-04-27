@@ -99,7 +99,7 @@ foreach my $fname (@features, "virt", "virt6") {
 	&$ifunc() if (defined(&$ifunc));
 	}
 @migration_types = ( "cpanel", "ensim", "psa", "plesk", "plesk9" );
-@startstop_features = ("web", "dns", "mail", "ftp", "unix", "virus",
+@startstop_features = ("web", "dns", "mail", "ftp", "unix", "virus", "spam",
 		       "mysql", "postgres");
 @banned_usernames = ( 'root' );
 

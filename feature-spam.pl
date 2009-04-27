@@ -1407,6 +1407,7 @@ local $spamd = &has_command("spamd") ||
 # Update OS-specific config files
 local $dfile = "/etc/default/spamassassin";
 if (-r $dfile) {
+	# Init script won't start on Debian without this flag
 	local %defs;
 	&lock_file($dfile);
 	&read_env_file($dfile, \%defs);
@@ -1415,6 +1416,10 @@ if (-r $dfile) {
 		&write_env_file($dfile, \%defs);
 		}
 	&unlock_file($dfile);
+	}
+if ($init::init_mode eq "rc") {
+	# On FreeBSD, the boot script name differs from the rc.conf entry
+	&init::enable_rc_script("spamd_enable");
 	}
 &$second_print($text{'setup_done'});
 
@@ -1455,6 +1460,10 @@ if (!$init) {
 	return 0;
 	}
 &init::disable_at_boot($init);
+if ($init::init_mode eq "rc") {
+	# On FreeBSD, the boot script name differs from the rc.conf entry
+	&init::disable_rc_script("spamd_enable");
+	}
 &$second_print($text{'setup_done'});
 
 # Stop spamd process
@@ -1466,6 +1475,70 @@ if (!$ok) {
 &$second_print($text{'setup_done'});
 
 return 1;
+}
+
+# startstop_spam([&typestatus])
+# Returns a hash containing the current status of the spamd server and short
+# and long descriptions for the action to switch statuses
+sub startstop_spam
+{
+local ($scanner, $host) = &get_global_spam_client();
+print STDERR "scanner=$scanner host=$host\n";
+if ($scanner ne "spamc" || $host) {
+	# Spamd isn't being used
+	return ( );
+	}
+local @pids = grep { $_ != $$ } &find_byname("spamd");
+if (@pids) {
+	return ( { 'status' => 1,
+		   'name' => $text{'index_spamname'},
+		   'desc' => $text{'index_spamstop'},
+		   'restartdesc' => $text{'index_spamrestart'},
+		   'longdesc' => $text{'index_spamstopdesc'} } );
+	}
+else {
+	return ( { 'status' => 0,
+		   'name' => $text{'index_spamname'},
+		   'desc' => $text{'index_spamstart'},
+		   'longdesc' => $text{'index_spamstartdesc'} } );
+	}
+}
+
+# start_service_spam()
+# Attempts to start the spamd server, returning undef on success or any error
+# message on failure.
+sub start_service_spam
+{
+&push_all_print();
+&set_all_null_print();
+local $rv = &enable_spamd();
+&pop_all_print();
+return $rv ? undef : $text{'spamd_estartmsg'};
+}
+
+# stop_service_spam()
+# Attempts to stop the spamd server, returning undef on success or any error
+# message on failure.
+sub stop_service_spam
+{
+&foreign_require("init", "init-lib.pl");
+foreach my $init ("spamassassin", "spamd", "sa-spamd",
+	          "virtualmin-spamassassin") {
+	if (&init::action_status($init)) {
+		local ($ok, $out) = &init::stop_action($init);
+		return $ok ? undef : "<tt>".&html_escape($out)."</tt>";
+		}
+	}
+local @pids = grep { $_ != $$ } &find_byname("spamd");
+if (@pids) {
+	if (&kill_logged('TERM', @pids)) {
+		return undef;
+		}
+	return &text('spamd_ekillmsg', $!);
+	}
+else {
+	return $text{'spamd_estopmsg'};
+	}
 }
 
 # obtain_lock_spam(&domain)
