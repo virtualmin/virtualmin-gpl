@@ -668,8 +668,7 @@ if ($got{'mail'}) {
 			&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
 			&set_mailfolder_owner($dstfolder, $uinfo);
 			opendir(DIR, $mailsrc);
-			local $mf;
-			while($mf = readdir(DIR)) {
+			while(my $mf = readdir(DIR)) {
 				next if ($mf eq "." || $mf eq ".." ||
 					 $mf !~ /^\./);
 				local $srcfolder = { 'type' => 1,

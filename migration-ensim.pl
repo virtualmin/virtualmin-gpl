@@ -421,6 +421,33 @@ if ($userident->{$origuser}) {
 		&execute_command(
 		  "chown -R $uinfo->{'uid'}:$uinfo->{'gid'} $qhomedest",
 		  undef, \$out, \$out);
+
+		# Copy his ~/mail folders, if that isn't already the location
+		# for mail folders
+		local $mailsrc = "$uinfo->{'home'}/mail";
+		local $sfdir = $mailboxes::config{'mail_usermin'};
+		local $sftype = $sfdir eq 'Maildir' ? 1 : 0;
+		if ($sfdir ne "mail") {
+			opendir(DIR, $mailsrc);
+			while(my $mf = readdir(DIR)) {
+				next if ($mf eq "." || $mf eq "..");
+				local $srcfolder = { 'type' => 0,
+					'file' => "$maildir/$mf" };
+				next if (-d $srcfolder->{'file'});
+				local $dstfolder = { 'type' => $sftype,
+					'file' => "$uinfo->{'home'}/$sfdir/" };
+				if ($sftype == 0) {
+					$dstfolder->{'file'} .= $mf;
+					}
+				else {
+					$dstfolder->{'file'} .= ".".$mf;
+					}
+				&mailboxes::mailbox_move_folder($srcfolder,
+								$dstfolder);
+				&set_mailfolder_owner($dstfolder, $uinfo);
+				}
+			closedir(DIR);
+			}
 		$usercount++;
 		}
 	&$second_print(".. done (created $usercount)");
