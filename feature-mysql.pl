@@ -488,7 +488,7 @@ foreach my $db (@dbs) {
 	if ($_[6]) {
 		# As the domain owner
 		($ex, $out) = &mysql::execute_sql_file($db->[0], $db->[1],
-				&mysql_user($_[0]), &mysql_pass($_[1], 1));
+				&mysql_user($_[0]), &mysql_pass($_[0], 1));
 		}
 	else {
 		# As master admin
