@@ -400,6 +400,9 @@ elsif (&init::action_status("clamd-wrapper") ||
        &init::action_status("clamd-virtualmin")) {
 	return 0;	# Redhat, not setup yet
 	}
+elsif (&init::action_status("clamav-clamd")) {
+	return 0;	# FreeBSD
+	}
 elsif (-r "/opt/csw/etc/clamd.conf.CSW") {
 	return 0;	# Solaris CSW package
 	}
@@ -417,7 +420,7 @@ return 1 if ($st == 1 || $st == -1);
 # Check for simple init scripts
 local $init;
 &foreign_require("init", "init-lib.pl");
-foreach my $i ("clamav-daemon", "clamdscan-clamd") {
+foreach my $i ("clamav-daemon", "clamdscan-clamd", "clamav-clamd") {
 	if (&init::action_status($i)) {
 		$init = $i;
 		last;
@@ -425,12 +428,12 @@ foreach my $i ("clamav-daemon", "clamdscan-clamd") {
 	}
 
 if ($init) {
-	# Ubuntu or Joe's .. all we have to do is enable and start the daemon!
+	# Ubuntu, Joe's or FreeBSD .. all we have to do is enable and
+	# start the daemon!
 	&$first_print(&text('clamd_start'));
-	local $ifile = &init::action_filename($init);
 	&init::enable_at_boot($init);
-	local $out = &backquote_logged("$ifile start 2>&1");
-	if ($? || $out =~ /failed|error/i) {
+	local ($ok, $out) = &init::start_action($init);
+	if (!$ok || $out =~ /failed|error/i) {
 		&$second_print(&text('clamd_estart',
 				"<tt>".&html_escape($out)."</tt>"));
 		}
@@ -634,13 +637,12 @@ sub disable_clamd
 {
 &foreign_require("init", "init-lib.pl");
 foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-virtualmin",
-		  "clamd-wrapper", "clamd-csw") {
+		  "clamd-wrapper", "clamd-csw", "clamav-clamd") {
 	if (&init::action_status($init)) {
 		&$first_print(&text('clamd_stop'));
-		local $ifile = &init::action_filename($init);
 		&init::disable_at_boot($init);
-		local $out = &backquote_logged("$ifile stop 2>&1");
-		if ($? || $out =~ /failed|error/i) {
+		local ($ok, $out) = &init::stop_action($init);
+		if (!$ok || $out =~ /failed|error/i) {
 			&$second_print(&text('clamd_estop',
 					"<tt>".&html_escape($out)."</tt>"));
 			return 0;

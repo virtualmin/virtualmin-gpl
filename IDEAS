@@ -42,10 +42,3 @@
 
  - WebNIC registrar support
 	- See email from Winnie Lee
-
- - Clamd and spamd support on FreeBSD
-	- /usr/local/etc/rc.d/clamav-clamd exists
-	- Need to enable in rc.conf with clamav_clamd_enable=YES
-
-	- /usr/local/etc/rc.d/sa-spamd
-	- rc.conf with spamd_enable=YES
