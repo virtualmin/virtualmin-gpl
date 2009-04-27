@@ -1388,7 +1388,7 @@ return 1 if ($st == 1 || $st == -1);
 # Find init script
 &foreign_require("init", "init-lib.pl");
 local $init;
-foreach my $i ("spamassassin", "spamd") {
+foreach my $i ("spamassassin", "spamd", "sa-spamd") {
 	if (&init::action_status($i)) {
 		$init = $i;
 		last;
@@ -1444,7 +1444,7 @@ return 1 if ($st == 0 || $st == -1);
 &$first_print(&text('spamd_unboot'));
 &foreign_require("init", "init-lib.pl");
 local $init;
-foreach my $i ("spamassassin", "spamd", "virtualmin-spamassassin") {
+foreach my $i ("spamassassin", "spamd", "sa-spamd", "virtualmin-spamassassin") {
 	if (&init::action_status($i)) {
 		$init = $i;
 		last;
