@@ -6640,6 +6640,8 @@ $escuser =~ s/\@/-/g;
 return $escuser;
 }
 
+# replace_atsign(username)
+# Replace an @ in a username with -
 sub replace_atsign
 {
 local $rv = $_[0];

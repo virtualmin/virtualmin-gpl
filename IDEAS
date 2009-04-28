@@ -45,3 +45,6 @@
 
  - Redmine script installer
 	- Give credit to Nick Orr
+
+ - Per-IP-allocation-range netmask for interfaces
+	- For IPv6 too
