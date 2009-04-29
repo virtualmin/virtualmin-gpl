@@ -139,7 +139,7 @@ $tmpl = &get_template($template);
 # Work out the IP, if needed
 if ($ip eq "allocate") {
 	$tmpl->{'ranges'} ne "none" || &usage("The --allocate-ip option cannot be used unless automatic IP allocation is enabled - use --ip instead");
-	$ip = &free_ip_address($tmpl);
+	($ip, $netmask) = &free_ip_address($tmpl);
 	$ip || &usage("Failed to allocate IP address from ranges!");
 	}
 elsif ($ip) {
@@ -201,7 +201,8 @@ print "Starting migration of $domain from $nice ..\n\n";
 &lock_domain_name($domain);
 $mfunc = "migration_${type}_migrate";
 @doms = &$mfunc($src, $domain, $user, $webmin, $template,
-		$ip, $virt, $pass, $parent, $prefix, $virtalready, $email);
+		$ip, $virt, $pass, $parent, $prefix, $virtalready, $email,
+		$netmask);
 &run_post_actions();
 
 # Show the result

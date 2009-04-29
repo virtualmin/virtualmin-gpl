@@ -23,11 +23,12 @@ if (!$config{'iface_manual'} && !$_[0]->{'virtalready'}) {
 			if ($b->{'name'} eq $iface->{'name'} &&
 			    $b->{'virtual'} > $vmax);
 		}
+	local $netmask = $_[0]->{'netmask'} || $net::virtual_netmask ||
+			 $iface->{'netmask'};
 	local $virt = { 'address' => $_[0]->{'ip'},
-			'netmask' => $net::virtual_netmask || $iface->{'netmask'},
-			'broadcast' =>
-				$net::virtual_netmask eq "255.255.255.255" ?
-					$_[0]->{'ip'} : $iface->{'broadcast'},
+			'netmask' => $netmask,
+			'broadcast' => &net::compute_broadcast($_[0]->{'ip'},
+							       $netmask),
 			'name' => $iface->{'name'},
 			'virtual' => $vmax+1,
 			'up' => 1,
@@ -226,8 +227,8 @@ else {
 }
 
 # parse_virtual_ip(&template, reseller)
-# Parses the virtual IP input field, and returns the IP to use and virt flag.
-# May call &error if the input is invalid.
+# Parses the virtual IP input field, and returns the IP to use, virt flag,
+# already flag and netmask. May call &error if the input is invalid.
 sub parse_virtual_ip
 {
 local ($tmpl, $resel) = @_;
@@ -246,15 +247,15 @@ elsif ($in{'virt'} == 2) {
 		# Creating by or under a reseller .. use his range, if any
 		local %acl = &get_reseller_acl($resel);
 		if ($acl{'ranges'}) {
-			local $ip = &free_ip_address(\%acl);
+			local ($ip, $netmask) = &free_ip_address(\%acl);
 			$ip || &error(&text('setup_evirtalloc'));
-			return ($ip, 1);
+			return ($ip, 1, 0, $netmask);
 			}
 		}
 	$tmpl->{'ranges'} ne "none" || &error(&text('setup_evirttmpl'));
-	local $ip = &free_ip_address($tmpl);
+	local ($ip, $netmask) = &free_ip_address($tmpl);
 	$ip || &error(&text('setup_evirtalloc'));
-	return ($ip, 1, 0);
+	return ($ip, 1, 0, $netmask);
 	}
 elsif ($in{'virt'} == 1) {
 	# Manual IP allocation chosen
@@ -315,11 +316,12 @@ foreach my $ranges ("ranges", &supports_ip6() ? ( "ranges6" ) : ( )) {
 	local $rtable = &none_def_input($ranges, $tmpl->{$ranges},
 			 $text{'tmpl_rangesbelow'}, 0, 0, undef, \@rfields);
 	local @table;
-	$i = 0;
-	foreach $r (@ranges, [ ], [ ]) {
+	local $i = 0;
+	local $s = $ranges eq "ranges" ? 20 : 6;
+	foreach my $r (@ranges, [ ], [ ]) {
 		push(@table, [ &ui_textbox($ranges."_start_$i", $r->[0], 20),
 			       &ui_textbox($ranges."_end_$i", $r->[1], 20),
-			       &ui_opt_textbox($ranges."_mask_$i", $r->[1], 15,
+			       &ui_opt_textbox($ranges."_mask_$i", $r->[2], $s,
 					       $text{'default'}) ]);
 		$i++;
 		}

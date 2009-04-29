@@ -73,7 +73,7 @@ if ($ip eq "allocate") {
 	$tmpl = &get_template(&get_init_template(0));
 	$tmpl->{'ranges'} || &usage("The --allocate-ip flag cannot be used ".
 				  "unless IP allocation ranges are configured");
-	$ip = &free_ip_address($tmpl);
+	($ip, $netmask) = &free_ip_address($tmpl);
 	$ip || &usage("Failed to find a free IP address in ".
 		      "range $tmpl->{'ranges'}");
 	}
@@ -81,7 +81,7 @@ if ($ip eq "allocate") {
 # Activate if required, otherwise ensure it is on the system
 if ($activate) {
 	&obtain_lock_virt();
-	$err = &activate_shared_ip($ip);
+	$err = &activate_shared_ip($ip, $netmask);
 	&usage("Activation failed : $err") if ($err);
 	&release_lock_virt();
 	}

@@ -11870,12 +11870,12 @@ if (defined(&list_resellers)) {
 return 0;
 }
 
-# activate_shared_ip(address)
+# activate_shared_ip(address, [netmask])
 # Create a new virtual interface using some IP address. Returns undef on success
 # or an error message on failure.
 sub activate_shared_ip
 {
-local ($ip) = @_;
+local ($ip, $netmask) = @_;
 &foreign_require("net", "net-lib.pl");
 local @boot = &net::active_interfaces();
 local ($iface) = grep { $_->{'fullname'} eq $config{'iface'} } @boot;
@@ -11887,10 +11887,10 @@ foreach my $b (@boot) {
 	$vmax = $b->{'virtual'} if ($b->{'name'} eq $iface->{'name'} &&
 				    $b->{'virtual'} > $vmax);
 	}
+$netmask ||= $net::virtual_netmask || $iface->{'netmask'};
 local $virt = { 'address' => $ip,
-		'netmask' => $net::virtual_netmask || $iface->{'netmask'},
-		'broadcast' => $net::virtual_netmask eq "255.255.255.255" ?
-				$ip : $iface->{'broadcast'},
+		'netmask' => $netmask,
+		'broadcast' => &net::compute_broadcast($ip, $netmask),
 		'name' => $iface->{'name'},
 		'virtual' => $vmax+1,
 		'up' => 1,

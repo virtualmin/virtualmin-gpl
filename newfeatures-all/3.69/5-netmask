@@ -1,0 +1,4 @@
+desc=IP allocation netmasks
+html=Netmasks can now be optionally specified for IP allocation ranges, rather than being always inherited from the primary interface's netmask.
+master=1
+link=edit_tmpl.cgi?id=0&editmode=virt

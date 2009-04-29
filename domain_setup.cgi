@@ -222,7 +222,8 @@ elsif (!&can_select_ip()) {
 	$virt = 0;
 	}
 else {
-	($ip, $virt, $virtalready) = &parse_virtual_ip($tmpl, $resel);
+	($ip, $virt, $virtalready, $netmask) =
+		&parse_virtual_ip($tmpl, $resel);
 	}
 
 # Work out the IPv6 address
@@ -245,7 +246,7 @@ elsif (&can_use_feature("virt") && &supports_ip6()) {
 		# Allocated
 		$tmpl->{'ranges6'} ne "none" ||
 			&error(&text('setup_evirt6tmpl'));
-		$ip6 = &free_ip6_address($tmpl);
+		($ip6, $netmask6) = &free_ip6_address($tmpl);
 		$ip6 || &text('setup_evirt6alloc');
 		$virt6 = 1;
 		}
@@ -307,7 +308,9 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 		  !$in{'email_def'} ? $in{'email'} : undef,
 	 'name', !$virt,
 	 'ip', $ip,
+	 'netmask', $netmask,
 	 'ip6', $ip6,
+	 'netmask6', $netmask6,
 	 'dns_ip', !$in{'dns_ip_def'} ? $in{'dns_ip'} :
 		   $virt || $config{'all_namevirtual'} ? undef
 						       : &get_dns_ip(),

@@ -102,13 +102,13 @@ return (undef, $dom, $user, $pass);
 
 # migration_cpanel_migrate(file, domain, username, create-webmin, template-id,
 #			   ip-address, virtmode, pass, [&parent], [prefix],
-#			   virt-already, [email])
+#			   virt-already, [email], [netmask])
 # Actually extract the given cPanel backup, and return the list of domains
 # created.
 sub migration_cpanel_migrate
 {
 local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
-       $prefix, $virtalready, $email) = @_;
+       $prefix, $virtalready, $email, $netmask) = @_;
 local ($ok, $root) = &extract_cpanel_dir($file);
 $ok || &error("Failed to extract backup : $root");
 local $daily = "$root/backup/cpbackup/daily";
@@ -325,6 +325,7 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
          'email', $email ? $email : $parent ? $parent->{'email'} : undef,
          'name', !$virt,
          'ip', $ip,
+         'netmask', $netmask,
 	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef
 						       : &get_dns_ip(),
          'virt', $virt,

@@ -42,7 +42,7 @@ if ($parent && !$tmpl->{'for_sub'}) {
 elsif (!$parent && !$tmpl->{'for_parent'}) {
 	&error($text{'migrate_etmplparent'});
 	}
-($ip, $virt, $virtalready) = &parse_virtual_ip($tmpl,
+($ip, $virt, $virtalready, $netmask) = &parse_virtual_ip($tmpl,
 			$parent ? $parent->{'reseller'} :
 			&reseller_admin() ? $base_remote_user : undef);
 if (!$in{'prefix_def'}) {
@@ -100,7 +100,8 @@ elsif (&get_domain_by("dom", $domain)) {
 $mfunc = "migration_$in{'type'}_migrate";
 @doms = &$mfunc($src, $domain, $user, $in{'webmin'}, $in{'template'},
 		$ip, $virt, $pass, $parent, $prefix,
-		$virtalready, $in{'email_def'} ? undef : $in{'email'});
+		$virtalready, $in{'email_def'} ? undef : $in{'email'},
+		$netmask);
 &run_post_actions();
 &$outdent_print();
 if (@doms) {

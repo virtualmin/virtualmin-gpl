@@ -43,6 +43,7 @@
  - WebNIC registrar support
 	- See email from Winnie Lee
 
- - Per-IP-allocation-range netmask for interfaces
-	- For IPv6 too
-	- Need to fix free_ip_address
+ - Scheduled / manual backup logs
+	- Web
+	- Cron
+	- Command line

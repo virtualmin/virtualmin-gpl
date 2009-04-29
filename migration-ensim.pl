@@ -45,13 +45,13 @@ return (undef, $dom, $user, $pass);
 
 # migration_ensim_migrate(file, domain, username, create-webmin, template-id,
 #			  ip-address, virtmode, pass, [&parent], [prefix],
-#			  virt-already)
+#			  virt-already, netmask)
 # Actually extract the given ensim backup, and return the list of domains
 # created.
 sub migration_ensim_migrate
 {
 local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
-       $prefix, $virtalready, $defemail) = @_;
+       $prefix, $virtalready, $defemail, $netmask) = @_;
 local ($ok, $root) = &extract_ensim_dir($file);
 
 # Check for prefix clash
@@ -185,6 +185,7 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
          'email', $defemail ? $defemail : $parent ? $parent->{'email'} : $email,
          'name', !$virt,
          'ip', $ip,
+         'netmask', $netmask,
 	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef
 						       : &get_dns_ip(),
          'virt', $virt,

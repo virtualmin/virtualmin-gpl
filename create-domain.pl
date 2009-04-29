@@ -303,13 +303,13 @@ if ($ip eq "allocate") {
 	%racl = $resel ? &get_reseller_acl($resel) : ();
 	if ($racl{'ranges'}) {
 		# Allocating from reseller's range
-		$ip = &free_ip_address(\%racl);
+		($ip, $netmask) = &free_ip_address(\%racl);
 		$ip || &usage("Failed to allocate IP address from reseller's ranges!");
 		}
 	else {
 		# Allocating from template
 		$tmpl->{'ranges'} ne "none" || &usage("The --allocate-ip option cannot be used unless automatic IP allocation is enabled - use --ip instead");
-		$ip = &free_ip_address($tmpl);
+		($ip, $netmask) = &free_ip_address($tmpl);
 		$ip || &usage("Failed to allocate IP address from ranges!");
 		}
 	}
@@ -322,7 +322,7 @@ if ($ip6 eq "allocate") {
 	# Allocate an IPv6 address now
 	$virt6already && &usage("The --ip6-already and --allocate-ip6 options are incompatible");
 	$tmpl->{'ranges'} ne "none" || &usage("The --allocate-ip6 option cannot be used unless automatic IPv6 allocation is enabled - use --ip6 instead");
-	$ip6 = &free_ip6_address($tmpl);
+	($ip6, $netmask6) = &free_ip6_address($tmpl);
 	$ip6 || &usage("Failed to allocate IPv6 address from ranges!");
 	}
 elsif ($virt6) {
@@ -585,12 +585,14 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	       $virt ? $ip :
 	       $alias ? $ip :
 	       $sharedip ? $sharedip : $defip,
+	 'netmask', $netmask,
 	 'dns_ip', defined($dns_ip) ? $dns_ip :
 		   $virt || $config{'all_namevirtual'} ? undef
 						       : &get_dns_ip(),
          'virt', $virt,
          'virtalready', $virtalready,
 	 'ip6', $ip6,
+	 'netmask6', $netmask6,
 	 'virt6', $virt6,
          'virt6already', $virt6already,
 	 $parent ? ( 'pass', $parent->{'pass'} )

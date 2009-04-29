@@ -123,12 +123,12 @@ if (!$d->{'alias'} && &can_use_feature("virt")) {
 			&get_reseller_acl($d->{'reseller'}) : ();
 		if ($racl{'ranges'}) {
 			# Allocate the IP from the server's reseller's range
-			$in{'ip'} = &free_ip_address(\%racl);
+			($in{'ip'}, $netmask) = &free_ip_address(\%racl);
 			$in{'ip'} || &text('setup_evirtalloc2');
 			}
 		elsif ($tmpl->{'ranges'} ne "none") {
 			# Allocate the IP from the template
-			$in{'ip'} = &free_ip_address($tmpl);
+			($in{'ip'}, $netmask) = &free_ip_address($tmpl);
 			$in{'ip'} || &text('setup_evirtalloc');
 			}
 		else {
@@ -157,7 +157,7 @@ if (!$d->{'alias'} && &can_use_feature("virt") && &supports_ip6()) {
 		# An IP is being added
 		if ($tmpl->{'ranges'} ne "none") {
 			# Allocate the IP from the template
-			$in{'ip6'} = &free_ip6_address($tmpl);
+			($in{'ip6'}, $netmask6) = &free_ip6_address($tmpl);
                         $in{'ip6'} || &text('setup_evirt6alloc');
 			}
 		else {
@@ -273,6 +273,7 @@ if (&can_use_feature("virt")) {
 	elsif ($in{'virt'} && !$d->{'virt'}) {
 		# Need to bring up IP
 		$d->{'ip'} = $in{'ip'};
+		$d->{'netmask'} = $netmask;
 		$d->{'virt'} = 1;
 		$d->{'name'} = 0;
 		$d->{'virtalready'} = $in{'virtalready'};
@@ -283,6 +284,7 @@ if (&can_use_feature("virt")) {
 	elsif (!$in{'virt'} && $d->{'virt'}) {
 		# Need to take down IP, and revert to default
 		$d->{'ip'} = &get_default_ip($d->{'reseller'});
+		$d->{'netmask'} = undef;
 		$d->{'defip'} = $d->{'ip'} eq &get_default_ip();
 		$d->{'virt'} = 0;
 		$d->{'virtalready'} = 0;
@@ -301,11 +303,13 @@ if (&can_use_feature("virt") && &supports_ip6()) {
 	if ($in{'virt6'} && !$d->{'virt6'}) {
 		# Need to bring up IPv6 address
 		$d->{'ip6'} = $in{'ip6'};
+		$d->{'netmask6'} = $netmask6;
 		$d->{'virt6'} = 1;
 		&setup_virt6($d);
 		}
 	elsif (!$in{'virt6'} && $d->{'virt6'}) {
 		# Need to take down IPv6 address
+		$d->{'netmask6'} = undef;
 		$d->{'virt6'} = 0;
 		$d->{'virt6already'} = 0;
 		&delete_virt6($oldd);

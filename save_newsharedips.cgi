@@ -39,9 +39,9 @@ foreach $ip (@oldips) {
 if ($in{'alloc'}) {
 	&obtain_lock_virt();
 	$tmpl = &get_template(&get_init_template(0));
-	$newip = &free_ip_address($tmpl);
+	($newip, $newnetmask) = &free_ip_address($tmpl);
 	$newip || &error(&text('sharedips_ealloc', $tmpl->{'ranges'}));
-	$err = &activate_shared_ip($newip);
+	$err = &activate_shared_ip($newip, $newnetmask);
 	&error($err) if ($err);
 	push(@ips, $newip);
 	&release_lock_virt();

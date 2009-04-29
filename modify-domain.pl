@@ -236,13 +236,13 @@ elsif (!$dom->{'virt'} && $ip eq "allocate") {
 	%racl = $d->{'reseller'} ? &get_reseller_acl($d->{'reseller'}) : ( );
 	if ($racl{'ranges'}) {
 		# Allocating IP from reseller's ranges
-		$ip = &free_ip_address(\%racl);
+		($ip, $netmask) = &free_ip_address(\%racl);
 		$ip || &usage("Failed to allocate IP address from reseller's ranges!");
 		}
 	else {
 		# Allocating from template's ranges
 		$tmpl->{'ranges'} eq "none" && &usage("The --allocate-ip option cannot be used unless automatic IP allocation is enabled - use --ip instead");
-		$ip = &free_ip_address($tmpl);
+		($ip, $netmask) = &free_ip_address($tmpl);
 		$ip || &usage("Failed to allocate IP address from ranges!");
 		}
 	}
@@ -262,7 +262,7 @@ if ($dom->{'virt6'} && $ip6 eq "allocate") {
 	}
 elsif (!$dom->{'virt6'} && $ip6 eq "allocate") {
 	$tmpl->{'ranges6'} eq "none" && &usage("The --allocate-ip6 option cannot be used unless automatic IP allocation is enabled - use --ip6 instead");
-	$ip6 = &free_ip6_address($tmpl);
+	($ip6, $netmask6) = &free_ip6_address($tmpl);
 	$ip6 || &usage("Failed to allocate IPv6 address from ranges!");
 	}
 
@@ -359,6 +359,7 @@ if (defined($bw_no_disable)) {
 if (defined($ip)) {
 	# Just change the IP
 	$dom->{'ip'} = $ip;
+	$dom->{'netmask'} = $netmask;
 	delete($dom->{'dns_ip'});
 	if (!$config{'all_namevirtual'}) {
 		$dom->{'virt'} = 1;
@@ -369,6 +370,7 @@ if (defined($ip)) {
 if ($defaultip) {
 	# Falling back to default IP
 	$dom->{'ip'} = &get_default_ip($dom->{'reseller'});
+	$dom->{'netmask'} = undef;
 	$dom->{'defip'} = $dom->{'ip'} eq &get_default_ip();
 	$dom->{'virt'} = 0;
 	$dom->{'virtalready'} = 0;
@@ -382,10 +384,12 @@ if (defined($sharedip)) {
 if ($ip6) {
 	# Adding or changing an IPv6 address
 	$dom->{'ip6'} = $ip6;
+	$dom->{'netmask6'} = $netmask6;
 	$dom->{'virt6'} = 1;
 	}
 elsif ($noip6) {
 	# Removing the IPv6 address
+	$dom->{'netmask6'} = undef;
 	$dom->{'virt6'} = 0;
 	}
 if (defined($resel)) {

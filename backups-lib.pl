@@ -1153,10 +1153,12 @@ if ($ok) {
 				$d->{'ip'} = $ipinfo->{'ip'};
 				$d->{'virt'} = $ipinfo->{'virt'};
 				$d->{'virtalready'} = $ipinfo->{'virtalready'};
+				$d->{'netmask'} = $netmaskinfo->{'netmask'};
 				if ($ipinfo->{'mode'} == 2) {
 					# Re-allocate an IP, as we might be
 					# doing several domains
-					$d->{'ip'} = &free_ip_address($tmpl);
+					($d->{'ip'}, $d->{'netmask'}) =
+						&free_ip_address($tmpl);
 					}
 				if (!$d->{'ip'}) {
 					&$second_print(

@@ -76,9 +76,11 @@ if ($crmode == 1) {
 		}
 	else {
 		$tmpl = &get_template(0);
-		($ip, $virt, $virtalready) = &parse_virtual_ip($tmpl, undef);
+		($ip, $virt, $virtalready, $netmask) =
+			&parse_virtual_ip($tmpl, undef);
 		$ipinfo = { 'ip' => $ip, 'virt' => $virt, 'mode' => $in{'virt'},
-			    'virtalready' => $virtalready };
+			    'virtalready' => $virtalready,
+			    'netmask' => $netmask };
 		}
 	}
 

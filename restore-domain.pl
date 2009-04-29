@@ -160,9 +160,10 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--allocate-ip") {
 		$tmpl = &get_template(0);
-		$ip = &free_ip_address($tmpl);
+		($ip, $netmask) = &free_ip_address($tmpl);
 		$ipinfo = { 'virt' => 1, 'ip' => $ip,
-			    'virtalready' => 0, 'mode' => 2 };
+			    'virtalready' => 0, 'netmask' => $netmask,
+			    'mode' => 2 };
 		}
 	else {
 		&usage();

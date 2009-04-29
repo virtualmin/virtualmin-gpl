@@ -139,7 +139,7 @@ foreach $line (@lines) {
 			%racl = $resel ? &get_reseller_acl($resel) : ();
 			if ($racl{'ranges'}) {
 				# Allocating from reseller's range
-				$ip = &free_ip_address(\%racl);
+				($ip, $netmask) = &free_ip_address(\%racl);
 				if (!$ip) {
 					&line_error($text{'cmass_eipresel'});
 					next;
@@ -151,7 +151,7 @@ foreach $line (@lines) {
 					&line_error($text{'cmass_eiptmpl'});
 					next;
 					}
-				$ip = &free_ip_address($tmpl);
+				($ip, $netmask) = &free_ip_address($tmpl);
 				if (!$ip) {
 					&line_error($text{'cmass_eipalloc'});
 					next;
@@ -280,6 +280,7 @@ foreach $line (@lines) {
 		 'email', $parentdom ? $parentdom->{'email'} : undef,
 		 'name', !$virt,
 		 'ip', $ip,
+		 'netmask', $netmask,
 		 'dns_ip', $virt || $config{'all_namevirtual'} ? undef
 							       : &get_dns_ip(),
 		 'virt', $virt,
