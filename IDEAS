@@ -45,3 +45,4 @@
 
  - Per-IP-allocation-range netmask for interfaces
 	- For IPv6 too
+	- Need to fix free_ip_address

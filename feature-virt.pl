@@ -318,11 +318,14 @@ foreach my $ranges ("ranges", &supports_ip6() ? ( "ranges6" ) : ( )) {
 	$i = 0;
 	foreach $r (@ranges, [ ], [ ]) {
 		push(@table, [ &ui_textbox($ranges."_start_$i", $r->[0], 20),
-			       &ui_textbox($ranges."_end_$i", $r->[1], 20) ]);
+			       &ui_textbox($ranges."_end_$i", $r->[1], 20),
+			       &ui_opt_textbox($ranges."_mask_$i", $r->[1], 15,
+					       $text{'default'}) ]);
 		$i++;
 		}
 	$rtable .= &ui_columns_table(
-		[ $text{'tmpl_ranges_start'}, $text{'tmpl_ranges_end'} ],
+		[ $text{'tmpl_ranges_start'}, $text{'tmpl_ranges_end'},
+		  $text{'tmpl_ranges_mask'} ],
 		undef,
 		\@table,
 		undef,
@@ -351,6 +354,8 @@ foreach my $ranges ("ranges", &supports_ip6() ? ( "ranges6" ) : ( )) {
 		for(my $i=0; defined($start = $in{$ranges."_start_$i"}); $i++) {
 			next if (!$start);
 			$end = $in{$ranges."_end_$i"};
+			$mask = $in{$ranges."_mask_${i}_def"} ? undef :
+				  $in{$ranges."_mask_$i"};
 			if ($ranges eq "ranges") {
 				# IPv4 verification
 				&check_ipaddress($start) ||
@@ -366,6 +371,8 @@ foreach my $ranges ("ranges", &supports_ip6() ? ( "ranges6" ) : ( )) {
 				$start[3] <= $end[3] ||
 					&error(&text('tmpl_eranges_lower',
 						     $start));
+				!$mask || &check_ipaddress($mask) ||
+				    &error(&text('tmpl_eranges_mask', $start));
 				}
 			else {
 				# v6 verification
@@ -373,8 +380,10 @@ foreach my $ranges ("ranges", &supports_ip6() ? ( "ranges6" ) : ( )) {
 				    &error(&text('tmpl_eranges6_start',$start));
 				&check_ip6address($end) ||
 				    &error(&text('tmpl_eranges6_end', $end));
+				!$mask || $mask =~ /^\d+$/ ||
+				    &error(&text('tmpl_eranges_mask', $start));
 				}
-			push(@ranges, [ $start, $end ]);
+			push(@ranges, [ $start, $end, $mask ]);
 			}
 		@ranges || &error($text{'tmpl_e'.$ranges});
 		$tmpl->{$ranges} = &join_ip_ranges(\@ranges);

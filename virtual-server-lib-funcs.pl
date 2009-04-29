@@ -5250,18 +5250,21 @@ sub free_ip_address
 local ($tmpl) = @_;
 local %taken = &interface_ip_addresses();
 local @ranges = split(/\s+/, $tmpl->{'ranges'});
-foreach my $r (@ranges) {
+foreach my $rn (@ranges) {
+	my ($r, $n) = split(/\//, $rn);
 	$r =~ /^(\d+\.\d+\.\d+)\.(\d+)\-(\d+)$/ || next;
 	local ($base, $s, $e) = ($1, $2, $3);
 	for(my $j=$s; $j<=$e; $j++) {
 		local $try = "$base.$j";
-		return $try if (!$taken{$try} && !&ping_ip_address($try));
+		if (!$taken{$try} && !&ping_ip_address($try)) {
+			return wantarray ? ( $try, $n ) : $try;
+			}
 		}
 	}
-return undef;
+return wantarray ? ( ) : undef;
 }
 
-# free_ip_address(&template|&acl)
+# free_ip6_address(&template|&acl)
 # Returns an IPv6 address within the allocation range which is not currently
 # used. Checks this system's configured interfaces, and does pings.
 sub free_ip6_address
@@ -5269,15 +5272,18 @@ sub free_ip6_address
 local ($tmpl) = @_;
 local %taken = &interface_ip_addresses(); 
 local @ranges = split(/\s+/, $tmpl->{'ranges6'});
-foreach my $r (@ranges) {
+foreach my $rn (@ranges) {
+	my ($r, $n) = split(/\//, $rn);
 	$r =~ /^([0-9a-f:]+):([0-9a-f]+)\-([0-9a-f]+)$/ || next;
 	local ($base, $s, $e) = ($1, $2, $3);
 	for(my $j=$s; $j<=$e; $j++) {
 		local $try = "$base:$j";
-		return $try if (!$taken{$try} && !&ping_ip_address($try));
+		if (!$taken{$try} && !&ping_ip_address($try)) {
+			return wantarray ? ( $try, $n ) : $try;
+			}
 		}
 	}
-return undef;
+return wantarray ? ( ) : undef;
 }
 
 # interface_ip_addresses()
@@ -5357,19 +5363,21 @@ return !$timed_out && !$?;
 }
 
 # parse_ip_ranges(ranges)
-# Returns a list of all IP allocation ranges, each of which is a 2-element array
+# Returns a list of all IP allocation ranges, each of which is a 3-element
+# array of starting IP, ending IP and optional netmask
 sub parse_ip_ranges
 {
 local @rv;
 local @ranges = split(/\s+/, $_[0]);
-foreach my $r (@ranges) {
+foreach my $rn (@ranges) {
+	my ($r, $n) = split(/\//, $rn);
 	if ($r =~ /^(\d+\.\d+\.\d+)\.(\d+)\-(\d+)$/) {
 		# IPv4 range
-		push(@rv, [ "$1.$2", "$1.$3" ]);
+		push(@rv, [ "$1.$2", "$1.$3", $n ]);
 		}
 	elsif ($r =~ /^([0-9a-f:]+):([0-9a-f]+)-([0-9a-f]+)$/) {
 		# IPv6 range
-		push(@rv, [ "$1:$2", "$1:$3" ]);
+		push(@rv, [ "$1:$2", "$1:$3", $n ]);
 		}
 	}
 return @rv;
@@ -5385,12 +5393,14 @@ foreach my $r (@{$_[0]}) {
 		# IPv4 range
 		local @start = split(/\./, $r->[0]);
 		local @end = split(/\./, $r->[1]);
-		push(@ranges, join(".", @start)."-".$end[3]);
+		push(@ranges, join(".", @start)."-".$end[3].
+			      ($r->[2] ? "/".$r->[2] : ""));
 		}
 	elsif (&check_ip6address($r->[0])) {
 		# IPv6 range
 		local @end = split(/:/, $r->[1]);
-		push(@ranges, $r->[0]."-".$end[$#end]);
+		push(@ranges, $r->[0]."-".$end[$#end].
+			      ($r->[2] ? "/".$r->[2] : ""));
 		}
 	}
 return join(" ", @ranges);
