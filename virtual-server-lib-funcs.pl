@@ -10774,7 +10774,7 @@ if ($config{'ssl'}) {
 	foreach $l (@loads) {
 		$hasmod++ if ($l->{'words'}->[1] =~ /mod_ssl/);
 		}
-	local ($aver, $amods) = &apache::httpd_info();
+	local ($aver, $amods) = &apache::httpd_info(&apache::find_httpd());
 	$hasmod++ if (&indexof("mod_ssl", @$amods) >= 0);
 	$hasmod++ if ($apache::httpd_modules{'mod_ssl'});
 	$hasmod ||
