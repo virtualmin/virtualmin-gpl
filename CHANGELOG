@@ -1102,7 +1102,7 @@ Added --reseller, --no-reseller and --any-reseller flags to list-domains.pl.
 Virtual servers can now have IPv6 addresses in addition to v4, on Debian, Ubuntu, Redhat, CentOS and Fedora systems. Virtualmin will configure BIND to add IPv6 address records, and Apache to accept connections to the IPv6 address. All pages that API commands that deal with addresses have new fields and options for an optional IPv6 address.
 Added the --purge and --strftime flags to backup-domain.pl, to allow automatic deletion of old backups and date-based backup destinations.
 ---- Changes since 3.68 ----
-Updated the Nag script installer to version 2.3.2, phpMyFAQ to 2.0.13, Wordpress MU to 2.7.1, SugarCRM to 5.2.0d, phpMyAdmin to 3.1.4, MoinMoin to 1.8.3, and Mantis to 1.1.7.
+Updated the Nag script installer to version 2.3.2, phpMyFAQ to 2.0.13, Wordpress MU to 2.7.1, SugarCRM to 5.2.0d, phpMyAdmin to 3.1.4, MoinMoin to 1.8.3, TWiki to 4.3.1, and Mantis to 1.1.7.
 Added a script installer for Redmine 0.8.3, thanks to Nick Orr.
 Added buttons to the Manage SSL Certificate page to copy a domain's cert and key to Webmin or Usermin.
 Added CPU and hard drive temperatures to the System Statistics page.
