@@ -44,6 +44,5 @@
 	- See email from Winnie Lee
 
  - Scheduled / manual backup logs
-	- Web
-	- Cron
-	- Command line
+	- Capture and show full output
+	- CHANGELOG

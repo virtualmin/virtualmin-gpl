@@ -256,6 +256,8 @@ $scheduled_backups_dir = "$module_config_directory/backups";
 
 $incremental_backups_dir = "$module_config_directory/incremental";
 
+$backups_log_dir = "$module_config_directory/backuplogs";
+
 $global_template_variables_file = "$module_config_directory/globals";
 
 $everyone_alias_dir = "$module_config_directory/everyone";

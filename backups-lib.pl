@@ -2030,6 +2030,13 @@ if (&can_backup_domain()) {
 	push(@descs, $text{'index_backupdesc'});
 	push(@codes, 'backup');
 	}
+if (&can_backup_log()) {
+	# Show logged backups
+	push(@links, "backuplog.cgi");
+	push(@titles, $text{'index_backuplog'});
+	push(@descs, $text{'index_backuplogdesc'});
+	push(@codes, 'backuplog');
+	}
 if (&can_restore_domain()) {
 	push(@links, "restore_form.cgi");
 	push(@titles, $text{'index_restore'});
@@ -2106,6 +2113,22 @@ else {
 		}
 	return 2;
 	}
+}
+
+# can_backup_log([&log])
+# Returns 1 if the current user can view backup logs, and if given a specific
+# log entry
+sub can_backup_log
+{
+local ($log) = @_;
+return 0 if (!&can_backup_domain());
+if ($log) {
+	# Only allow non-admins to view their own logs
+	if (!&master_admin() && $log->{'user'} ne $remote_user) {
+		return 0;
+		}
+	}
+return 1;
 }
 
 # extract_purge_path(dest)
@@ -2330,6 +2353,50 @@ return $ok;
 sub can_use_s3
 {
 return $virtualmin_pro;
+}
+
+# write_backup_log(&domains, dest, incremental?, start, size, ok?,
+# 		   "cgi"|"sched"|"api")
+# Record that some backup was made and succeeded or failed
+sub write_backup_log
+{
+local ($doms, $dest, $increment, $start, $size, $ok) = @_;
+if (!-d $backups_log_dir) {
+	&make_dir($backups_log_dir, 0700);
+	}
+local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
+	       'dest' => $dest,
+	       'increment' => $increment,
+	       'start' => $start,
+	       'end' => time(),
+	       'size' => $size,
+	       'ok' => $ok,
+	       'user' => $remote_user,
+	       'mode' => $mode,
+	     );
+$main::backup_log_id_count++;
+$log{'id'} = $log{'end'}."-".$$."-".$main::backup_log_id_count;
+&write_file("$backups_log_dir/$log{'id'}", \%log);
+}
+
+# list_backup_logs([start-time])
+# Returns a list of all backup logs, optionally limited to after some time
+sub list_backup_logs
+{
+local ($start) = @_;
+local @rv;
+opendir(LOGS, $backups_log_dir);
+while(my $id = readdir(LOGS)) {
+	next if ($id eq "." || $id eq "..");
+	my ($time, $pid, $count) = split(/\-/, $id);
+	next if (!$time || !$pid);
+	next if ($start && $time < $start);
+	local %log;
+	&read_file("$backups_log_dir/$id", \%log) || next;
+	push(@rv, \%log);
+	}
+close(LOGS);
+return @rv;
 }
 
 1;

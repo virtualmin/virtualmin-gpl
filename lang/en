@@ -212,6 +212,8 @@ index_scheddesc=Click this button to schedule a regular backup. A form for choos
 index_schedsdesc=Click this button to display a list of existing scheduled backups, and to add new ones or manage those that exist.
 index_restore=Restore Backup
 index_restoredesc=Click the button to restore a previous backup. A form for choosing the backup file, servers to extract and features to restore will be displayed.
+index_backuplog=Backup Logs
+index_backuplogdesc=Show logs of all backups that you have permissions to create, made via the Virtualmin UI, command line or on schedule.
 index_dmore=$1 more ..
 
 form_title=Create Virtual Server
@@ -4911,3 +4913,19 @@ wizard_mysql_pass0=Set to
 wizard_mysql_empty=Set MySQL password
 wizard_title_done=All done
 wizard_done=Virtualmin post-installation configuration is now complete!<p>You can adjust the settings you just made on the <a href='$1'>Features and Plugins</a> and <a href='$2'>Spam and Virus Scanning</a> pages.
+
+backuplog_title=Backup Logs
+backuplg_ecannot=You are not allowed to view Virtualmin backup logs
+backuplog_search=Find logs matching
+backuplog_ok=Search
+backuplog_match=Showing logs matching $1 ..
+backuplog_days=Showing logs from last $1 days ..
+backuplog_when=Started
+backuplog_len=Run time
+backuplog_size=Final size
+backuplog_ok=OK?
+backuplog_nomatch=No backup logs matching your search were found.
+backuplog_none=No backups have been logged yet.
+backuplog_none2=No backups that you have access to have been logged.
+backuplog_doms=$1 domains
+backuplog_nodoms=No domains

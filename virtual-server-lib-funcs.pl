@@ -12456,7 +12456,7 @@ return $oldpreload ne $miniserv{'preload'};
 }
 
 # nice_hour_mins_secs(unixtime)
-# Convert a number of seconds into an HH:MM:SS format
+# Convert a number of seconds into an HH hours, MM minutes, SS seconds format
 sub nice_hour_mins_secs
 {
 local ($time) = @_;
@@ -12473,6 +12473,18 @@ elsif ($days || $hours) {
 else {
 	return &text('nicetime_mins', $mins, $secs);
 	}
+}
+
+# short_nice_hour_mins_secs(unixtime)
+# Convert a number of seconds into an HH:MM:SS format
+sub short_nice_hour_mins_secs
+{
+local ($time) = @_;
+local $days = int($time / (24*60*60));
+local $hours = int($time / (60*60)) % 24;
+local $mins = sprintf("%2.2d", int($time / 60) % 60);
+local $secs = sprintf("%2.2d", int($time) % 60);
+return $days ? $days.":".$mins.":".$secs : $mins.":".$secs;
 }
 
 # show_check_migration_features(feature, ...)

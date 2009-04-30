@@ -246,6 +246,8 @@ $strfdest = $strftime ? &backup_strftime($dest) : $dest;
 			       $asowner,
 			       undef,
 			       $increment);
+&write_backup_log(\@doms, $strfdest, $increment, $start_time,
+		  $size, $ok, "api");
 if ($ok) {
 	&$second_print("Backup completed successfully. Final size was ".
 		       &nice_size($size));
