@@ -2360,7 +2360,7 @@ return $virtualmin_pro;
 # Record that some backup was made and succeeded or failed
 sub write_backup_log
 {
-local ($doms, $dest, $increment, $start, $size, $ok) = @_;
+local ($doms, $dest, $increment, $start, $size, $ok, $mode, $output) = @_;
 if (!-d $backups_log_dir) {
 	&make_dir($backups_log_dir, 0700);
 	}
@@ -2377,6 +2377,11 @@ local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 $main::backup_log_id_count++;
 $log{'id'} = $log{'end'}."-".$$."-".$main::backup_log_id_count;
 &write_file("$backups_log_dir/$log{'id'}", \%log);
+if ($output) {
+	&open_tempfile(OUTPUT, ">$backups_log_dir/$log{'id'}.out");
+	&print_tempfile(OUTPUT, $output);
+	&close_tempfile(OUTPUT);
+	}
 }
 
 # list_backup_logs([start-time])
@@ -2388,15 +2393,28 @@ local @rv;
 opendir(LOGS, $backups_log_dir);
 while(my $id = readdir(LOGS)) {
 	next if ($id eq "." || $id eq "..");
+	next if ($id =~ /\.out$/);
 	my ($time, $pid, $count) = split(/\-/, $id);
 	next if (!$time || !$pid);
 	next if ($start && $time < $start);
 	local %log;
 	&read_file("$backups_log_dir/$id", \%log) || next;
+	$log{'output'} = &read_file_contents("$backups_log_dir/$id.out");
 	push(@rv, \%log);
 	}
 close(LOGS);
 return @rv;
+}
+
+# get_backup_log(id)
+# Read and return a single logged backup
+sub get_backup_log
+{
+local ($id) = @_;
+local %log;
+&read_file("$backups_log_dir/$id", \%log) || return undef;
+$log{'output'} = &read_file_contents("$backups_log_dir/$id.out");
+return \%log;
 }
 
 1;

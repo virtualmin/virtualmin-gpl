@@ -151,13 +151,15 @@ else {
 		print &text('backup_doing2', scalar(@vbs), $nice),"<p>\n";
 		}
 	$start_time = time();
+	&start_print_capture();
 	($ok, $size) = &backup_domains($dest, \@doms, \@do_features,
 				       $in{'fmt'}, $in{'errors'}, \%options,
 				       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
 				       $in{'onebyone'}, $cbmode >= 2,
 				       undef, $in{'increment'});
+	$output = &stop_print_capture();
 	&write_backup_log(\@doms, $dest, $in{'increment'}, $start_time,
-			  $size, $ok, "cgi");
+			  $size, $ok, "cgi", $output);
 	&run_post_actions();
 	if (!$ok) {
 		#&unlink_file($dest);

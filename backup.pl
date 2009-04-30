@@ -151,7 +151,7 @@ if ($sched->{'after'}) {
 		}
 	}
 &write_backup_log(\@doms, $dest, $backup->{'incremental'}, $start_time,
-		  $size, $ok, "sched");
+		  $size, $ok, "sched", $output);
 
 PREFAILED:
 

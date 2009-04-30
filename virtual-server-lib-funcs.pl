@@ -2891,21 +2891,21 @@ return undef;
 }
 
 # Print functions for HTML output
-sub first_html_print { print @_,"<br>\n"; }
-sub second_html_print { print @_,"<p>\n"; }
-sub indent_html_print { print "<ul>\n"; }
-sub outdent_html_print { print "</ul>\n"; }
+sub first_html_print { print_and_capture(@_,"<br>\n"); }
+sub second_html_print { print_and_capture(@_,"<p>\n"); }
+sub indent_html_print { print_and_capture("<ul>\n"); }
+sub outdent_html_print { print_and_capture("</ul>\n"); }
 
 # Print functions for text output
 sub first_text_print
 {
-print $indent_text,
-      (map { &html_tags_to_text(&entities_to_ascii($_)) } @_),"\n";
+print_and_capture($indent_text,
+      (map { &html_tags_to_text(&entities_to_ascii($_)) } @_),"\n");
 }
 sub second_text_print
 {
-print $indent_text,
-      (map { &html_tags_to_text(&entities_to_ascii($_)) } @_),"\n\n";
+print_and_capture($indent_text,
+      (map { &html_tags_to_text(&entities_to_ascii($_)) } @_),"\n\n");
 }
 sub indent_text_print { $indent_text .= "    "; }
 sub outdent_text_print { $indent_text = substr($indent_text, 4); }
@@ -2955,6 +2955,28 @@ sub pop_all_print
 {
 local $p = pop(@print_function_stack);
 ($first_print, $second_print, $indent_print, $outdent_print) = @$p;
+}
+
+# Start capturing output
+sub start_print_capture
+{
+$print_capture = 1;
+$print_output = undef;
+}
+
+# Stop capturing output, and return what we have
+sub stop_print_capture
+{
+$print_capture = 1;
+return $print_output;
+}
+
+sub print_and_capture
+{
+print @_;
+if ($print_capture) {
+	$print_output .= join("", @_);
+	}
 }
 
 # will_send_domain_email(&domain)

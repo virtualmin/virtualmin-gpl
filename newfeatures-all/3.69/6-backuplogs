@@ -1,0 +1,4 @@
+desc=Backup logs
+html=All backups made manually, on schedule or from the command line are now logged, and can be viewed using the new Backup Logs page.
+master=1
+link=backuplogs.cgi

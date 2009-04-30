@@ -44,7 +44,9 @@ if (@logs) {
 				join(", ", @dnames) :
 				&text('backuplog_doms', scalar(@dnames));
 		push(@table, [
-			&nice_backup_url($log->{'dest'}, 1),
+			"<a href='view_backuplog.cgi?id=".&urlize($log->{'id'}).
+			 "&search=".&urlize($in{'search'})."'>".
+			 &nice_backup_url($log->{'dest'}, 1)."</a>",
 			$ddesc,
 			&make_date($log->{'start'}),
 			&short_nice_hour_mins_secs(
