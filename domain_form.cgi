@@ -532,10 +532,8 @@ if (@input_plugins) {
 	}
 
 # Start section for proxy and IP
-if (!$aliasdom) {
-	print &ui_hidden_table_start($text{'form_proxysect'}, "width=100%", 2,
-				     "proxy", 0, [ "width=30%" ]);
-	}
+print &ui_hidden_table_start($text{'form_proxysect'}, "width=100%", 2,
+			     "proxy", 0, [ "width=30%" ]);
 
 # Show inputs for setting up a proxy-only virtual server
 if ($can_feature{'web'} && $config{'proxy_pass'} && !$aliasdom) {
@@ -581,9 +579,7 @@ if (!$aliasdom && &can_use_feature("virt") && &supports_ip6()) {
 print &ui_table_row(&hlink($text{'edit_dnsip'}, "edit_dnsip"),
 	&ui_opt_textbox("dns_ip", $d->{'dns_ip'}, 20, $text{'spf_default2'}));
 
-if (!$aliasdom) {
-	print &ui_hidden_table_end();
-	}
+print &ui_hidden_table_end();
 
 if ($can_feature{'web'} && !$aliasdom && $config{'web'} && $virtualmin_pro) {
 	# Show field for initial content

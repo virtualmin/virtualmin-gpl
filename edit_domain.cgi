@@ -169,10 +169,8 @@ if (!$parentdom) {
 print &ui_hidden_table_end("config");
 
 # Start section for IPs
-if (!$aliasdom) {
-	print &ui_hidden_table_start($text{'form_ipsect'}, "width=100%", 2,
-				     "ipsect", 0, [ "width=30%" ]);
-	}
+print &ui_hidden_table_start($text{'form_ipsect'}, "width=100%", 2,
+			     "ipsect", 0, [ "width=30%" ]);
 
 # IP addresses section
 if (!$aliasdom) {
@@ -277,9 +275,7 @@ print &ui_table_row(&hlink($text{'edit_dnsip'}, "edit_dnsip"),
 	&ui_opt_textbox("dns_ip", $d->{'dns_ip'}, 20,
 			&text('spf_default', $d->{'ip'})));
 
-if (!$aliasdom) {
-	print &ui_hidden_table_end();
-	}
+print &ui_hidden_table_end();
 
 # Related servers section
 @aliasdoms = &get_domain_by("alias", $d->{'id'});

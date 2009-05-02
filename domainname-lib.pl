@@ -1,5 +1,5 @@
 # Functions for checking and manipulating domain names. Used by both Virtualmin
-# and VM2.
+# and Cloudmin.
 
 # shorten_domain_name(&dom)
 # Returns a domain name shorten to the display max

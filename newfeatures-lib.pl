@@ -1,4 +1,4 @@
-# Functions for getting and showing new Virtualmin or VM2 features
+# Functions for getting and showing new Virtualmin or Cloudmin features
 
 # list_new_features(mod, version)
 # Returns a list of new features in a given Virtualmin or plugin version. Each
@@ -128,7 +128,7 @@ if (defined(&master_admin)) {
 	      &reseller_admin() ? 'reseller' : 'domain';
 	}
 else {
-	# In VM2
+	# In Cloudmin
 	$me = $access{'owner'} ? 'owner' : 'master';
 	}
 local %shownf = map { $_, 1 } split(/,/, $config{'show_nf'});
@@ -192,11 +192,11 @@ if (!$d && defined(&list_domains)) {
 		}
 	}
 elsif (!$d && defined(&list_managed_servers)) {
-	# First VM2 server
+	# First Cloudmin server
 	$d = $servers[0];
 	}
 
-# Select template function for Virtualmin or VM2
+# Select template function for Virtualmin or Cloudmin
 local $subs = defined(&substitute_domain_template) ?
 	\&substitute_domain_template :
 	\&substitute_virtualmin_template;
@@ -213,7 +213,7 @@ foreach my $nf (@rv) {
 	if ($nf->{'link'}) {
 		# Create link, with domain substitution
 		if ($d || $nf->{'link'} !~ /\$\{/) {
-			# If this is VM2 and the new feature is only for
+			# If this is Cloudmin and the new feature is only for
 			# some type, limit to them
 			if ($module_name =~ /^server-manager/ &&
 			    $nf->{'managers'}) {
@@ -256,7 +256,7 @@ foreach my $m (split(/\s+/, $managers)) {
 return 0;
 }
 
-# Sort VM2 systems so that those which are up come first
+# Sort Cloudmin systems so that those which are up come first
 sub sort_server_manager
 {
 local ($a, $b) = @_;
