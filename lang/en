@@ -4409,7 +4409,7 @@ scriptwarn_script=Script name
 scriptwarn_oldver=Old version
 scriptwarn_ver=New version
 scriptwarn_dom=Domain name
-scriptwarn_where=Upgrades can be done in Virtualmin, on each domain's Install Scripts page.
+scriptwarn_where3=Upgrades can be done in Virtualmin, on each domain's Install Scripts page or all at once at :\n$1
 scriptwarn_where2=Upgrades can be done in Virtualmin, on the page :\n$1
 scriptwarn_subject=Virtualmin script upgrades available
 

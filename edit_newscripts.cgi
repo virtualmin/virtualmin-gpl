@@ -2,6 +2,7 @@
 # Show a form for installing new third-party scripts, and a list of those
 # currently installed
 
+$trust_unknown_referers = 1;
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newscripts_ecannot'});
 &ui_print_header(undef, $text{'newscripts_title'}, "");

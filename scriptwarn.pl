@@ -23,9 +23,7 @@ foreach my $u (@updates) {
 # and version basis.
 &read_file($script_warnings_file, \%warnsent);
 if ($config{'scriptwarn_notify'}) {
-	print STDERR "Total updates = ",scalar(@updates),"\n";
 	@updates = grep { !$warnsent{$_->{'key'}} } @updates;
-	print STDERR "New updates = ",scalar(@updates),"\n";
 	}
 
 # Send out an email for each domain
@@ -50,7 +48,9 @@ if (@updates) {
 				$u->{'ver'};
 			}
 		$email .= "\n";
-		$email .= $text{'scriptwarn_where'}."\n\n";
+		$url = &get_virtualmin_url($d)."/$module_name/".
+		       "edit_newscripts.cgi?mode=upgrade";
+		$email .= &text('scriptwarn_where3', $url)."\n\n";
 		$email =~ s/\\n/\n/g;
 		&send_scriptwarn_email($email, [ $other ]);
 		}
