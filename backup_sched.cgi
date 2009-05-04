@@ -79,7 +79,7 @@ else {
 	if (&can_backup_virtualmin()) {
 		@vbs = split(/\0/, $in{'virtualmin'});
 		}
-	@doms || @vbs || &error($text{'backup_edoms'});
+	@doms || $in{'all'} || @vbs || &error($text{'backup_edoms'});
 
 	# Update the schedule object
 	$sched->{'all'} = $in{'all'};
