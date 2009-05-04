@@ -17,6 +17,17 @@ if ($email{'other'}) {
 if ($in{'enabled'}) {
 	@email || &error($text{'newscripts_ewnone'});
 	}
+if ($in{'serversmode'} == 0) {
+	delete($config{'scriptwarn_servers'});
+	}
+elsif ($in{'serversmode'} == 2) {
+	$config{'scriptwarn_servers'} =
+		"!".join(" ", split(/\0/, $in{'servers'}));
+	}
+else {
+	$config{'scriptwarn_servers'} =
+		join(" ", split(/\0/, $in{'servers'}));
+	}
 $config{'scriptwarn_email'} = join(" ", @email);
 $config{'scriptwarn_notify'} = $in{'wnotify'};
 $config{'scriptwarn_enabled'} = $in{'enabled'} ? 1 : 0;

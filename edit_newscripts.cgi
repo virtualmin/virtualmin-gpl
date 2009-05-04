@@ -178,6 +178,26 @@ $job = &find_scriptwarn_job();
 print &ui_table_row($text{'newscripts_wenabled'},
 		    &ui_yesno_radio("enabled", $job ? 1 : 0));
 
+# Limit to domains
+if ($config{'scriptwarn_servers'} eq "") {
+	$serversmode = 0;
+	}
+elsif ($config{'scriptwarn_servers'} =~ /^\!(.*)$/) {
+	$serversmode = 2;
+	@servers = split(/\s+/, $1);
+	}
+else {
+	$serversmode = 1;
+	@servers = split(/\s+/, $config{'scriptwarn_servers'});
+	}
+print &ui_table_row($text{'newscripts_wservers'},
+		    &ui_radio("serversmode", $serversmode,
+			      [ [ 0, $text{'newbw_servers0'} ],
+			        [ 1, $text{'newbw_servers1'} ],
+			        [ 2, $text{'newbw_servers2'} ] ])."<br>\n".
+		    &servers_input("servers", \@servers,
+				   [ &list_domains() ]));
+
 # Notification schedule
 $sched = $job ? &parse_cron_schedule($job)
 	      : $config{'scriptwarn_wsched'} || 'daily';

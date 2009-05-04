@@ -11,8 +11,18 @@ if ($ARGV[0] eq "-debug" || $ARGV[0] eq "--debug") {
 	$debug_mode = 1;
 	}
 
-# Find scripts that need updating
+# Find domains
 @doms = &list_domains();
+if ($config{'scriptwarn_servers'} =~ /^\!(.*)$/) {
+	%servers = map { $_, 1 } split(/\s+/, $1);
+	@doms = grep { !$servers{$_->{'id'}} } @doms;
+	}
+elsif ($config{'scriptwarn_servers'}) {
+	%servers = map { $_, 1 } split(/\s+/, $config{'scriptwarn_servers'});
+	@doms = grep { $servers{$_->{'id'}} } @doms;
+	}
+
+# Find scripts that need updating
 @updates = &list_script_upgrades(\@doms);
 foreach my $u (@updates) {
 	$u->{'key'} = join("/", $u->{'dom'}->{'dom'}, $u->{'sinfo'}->{'name'},
