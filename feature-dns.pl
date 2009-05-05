@@ -726,10 +726,13 @@ local $serial = $bconfig{'soa_style'} ?
 	time();
 local %zd;
 &bind8::get_zone_defaults(\%zd);
-if (!$tmpl->{'dns_replace'}) {
-	# Create records that are appropriate for this domain
+if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
+	# Create records that are appropriate for this domain, as long as the
+	# user hasn't selected a completely custom template, or records are
+	# being added to an existing domain
 	if (!$d->{'dns_submode'}) {
 		# Only add SOA and NS if this is a new file, not a sub-domain
+		# in an existing file
 		&open_tempfile(RECS, ">$rootfile");
 		if ($bconfig{'master_ttl'}) {
 			# Add a default TTL
@@ -847,8 +850,9 @@ if (!$tmpl->{'dns_replace'}) {
 		}
 	}
 
-if ($tmpl->{'dns'} && (!$d->{'dns_submode'} || !$tmpl->{'dns_replace'})) {
-	# Add or use the user-defined records template
+if ($tmpl->{'dns'} && !$d->{'dns_submode'}) {
+	# Add or use the user-defined records template, if defined and if this
+	# isn't a sub-domain being added to an existing file.
 	&open_tempfile(RECS, ">>$rootfile");
 	local %subs = %$d;
 	$subs{'serial'} = $serial;
