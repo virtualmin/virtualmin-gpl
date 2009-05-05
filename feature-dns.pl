@@ -1554,7 +1554,7 @@ print &ui_table_row(&hlink($text{'tmpl_spf'},
                            "template_dns_spf_mode"),
 	&none_def_input("dns_spf", $tmpl->{'dns_spf'},
 		        $text{'tmpl_spfyes'}, 0, 0, $text{'no'},
-			[ "dns_spfhosts", "dns_spfall", "dns_sub_mode" ]));
+			[ "dns_spfhosts", "dns_spfall", "dns_spfincludes" ]));
 
 # Extra SPF hosts
 print &ui_table_row(&hlink($text{'tmpl_spfhosts'},

@@ -42,6 +42,3 @@
 
  - WebNIC registrar support
 	- See email from Winnie Lee
-
- - Solaris installer needs to use pkgutil
-	- Test it
