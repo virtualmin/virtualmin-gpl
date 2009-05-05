@@ -850,9 +850,10 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		}
 	}
 
-if ($tmpl->{'dns'} && !$d->{'dns_submode'}) {
+if ($tmpl->{'dns'} && (!$d->{'dns_submode'} || !$tmpl->{'dns_replace'})) {
 	# Add or use the user-defined records template, if defined and if this
-	# isn't a sub-domain being added to an existing file.
+	# isn't a sub-domain being added to an existing file OR if we are just
+	# adding records
 	&open_tempfile(RECS, ">>$rootfile");
 	local %subs = %$d;
 	$subs{'serial'} = $serial;
