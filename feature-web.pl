@@ -2756,7 +2756,7 @@ local ($d) = @_;
 local $tmpl = &get_template($d->{'template'});
 local $web_user = &get_apache_user($d);
 if ($tmpl->{'web_user'} ne 'none' && $web_user) {
-	# An Apache user is defined.. but does is it a group member?
+	# An Apache user is defined.. but is it a group member?
 	local @uinfo = getpwnam($web_user);
 	if ($uinfo[3] == $d->{'gid'} ||
             &indexof($d->{'group'}, &other_groups($web_user)) >= 0) {
