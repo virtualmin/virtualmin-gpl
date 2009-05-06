@@ -31,7 +31,9 @@ for($i=0; defined($in{"all_$i"}); $i++) {
 		$chroot->{'dir'} = $d->{'home'};
 		}
 	elsif ($in{"mode_$i"} == 0) {
+		# Other directory
 		-d $in{"dir_$i"} ||
+		    $in{"dir_$i"} =~ /^\~\/\S+$/ ||
 			&error(&text('chroot_edir', $i+1));
 		$chroot->{'dir'} =  $in{"dir_$i"};
 		}
