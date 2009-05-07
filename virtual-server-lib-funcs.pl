@@ -8482,6 +8482,8 @@ return ($licence{'status'}, $licence{'expiry'},
 }
 
 # update_licence_from_site(&licence)
+# Attempts to validate the license, and updates the given hash ref with
+# license details.
 sub update_licence_from_site
 {
 local ($licence) = @_;
