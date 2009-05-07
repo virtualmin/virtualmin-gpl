@@ -1820,7 +1820,7 @@ foreach my $dip ($d->{'ip'}, $d->{'virt6'} ? ( $d->{'ip6'} ) : ( )) {
 			      ($l =~ /^(\S+):(\d+)$/ &&
 			       &to_ipaddress("$1") eq $dip &&
 			       $2 == $web_port) ||
-			      (&to_ipaddress($l) eq $dip));
+			      ($l !~ /:/ && &to_ipaddress($l) eq $dip));
 		}
 	if (!$lfound && @listen > 0) {
 		# Apache is listening on some IP addresses and ports, but not
