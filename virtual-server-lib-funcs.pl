@@ -9709,7 +9709,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    'validate', 'chroot', 'global',
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
    );
-if ($virtualmin_pro && $config{'mail_system'} == 0) {
+if ($config{'mail_system'} == 0) {
 	push(@tmpls, 'postgrey');
 	}
 local %tmplcat = (
