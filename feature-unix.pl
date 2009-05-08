@@ -625,6 +625,14 @@ print &ui_table_row(&hlink($text{'tmpl_ugroup'}, "template_ugroup_mode"),
 				"" : $tmpl->{'ugroup'}, 13)."\n".
     &group_chooser_button("ugroup", 0, 1));
 
+# Domain owner secondary group
+print &ui_table_row(&hlink($text{'tmpl_sgroup'}, "template_sgroup"),
+    &none_def_input("sgroup", $tmpl->{'sgroup'}, $text{'tmpl_ugroupsel'},
+		    0, 0, undef, [ "sgroup" ])."\n".
+    &ui_textbox("sgroup", $tmpl->{'sgroup'} eq "none" ?
+				"" : $tmpl->{'sgroup'}, 13)."\n".
+    &group_chooser_button("sgroup", 0, 1));
+
 # Default shell
 print &ui_table_row(&hlink($text{'tmpl_ushell'}, "template_ushell"),
     &none_def_input("ushell", $tmpl->{'ushell'},
@@ -647,6 +655,12 @@ $tmpl->{'quotatype'} = $in{'quotatype'};
 $tmpl->{'ugroup'} = &parse_none_def("ugroup");
 if ($in{"ugroup_mode"} == 2) {
 	getgrnam($in{'ugroup'}) || &error($text{'tmpl_eugroup'});
+	}
+
+# Save domain owner secondary group
+$tmpl->{'sgroup'} = &parse_none_def("sgroup");
+if ($in{"sgroup_mode"} == 2) {
+	getgrnam($in{'sgroup'}) || &error($text{'tmpl_esgroup'});
 	}
 
 # Save initial shell
@@ -741,13 +755,15 @@ return 1;
 sub update_domain_owners_group
 {
 local ($newd, $deld) = @_;
-return 0 if (!$config{'domains_group'});
+local $tmpl = $newd ? &get_template($newd->{'template'}) :
+	      $deld ? &get_template($deld->{'template'}) : undef;
+return 0 if (!$tmpl || !$tmpl->{'sgroup'});
 
 # First make sure the group exists
 &obtain_lock_unix($_[0]);
 &require_useradmin();
 local @allgroups = &list_all_groups();
-local ($group) = grep { $_->{'group'} eq $config{'domains_group'} } @allgroups;
+local ($group) = grep { $_->{'group'} eq $tmpl->{'sgroup'} } @allgroups;
 if (!$group) {
 	&release_lock_unix($_[0]);
 	return 0;

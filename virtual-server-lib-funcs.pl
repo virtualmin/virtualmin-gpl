@@ -6830,6 +6830,7 @@ push(@rv, { 'id' => 0,
 	    'webmin_group' => $config{'webmin_group'},
 	    'extra_prefix' => $config{'extra_prefix'} || "none",
 	    'ugroup' => $config{'defugroup'} || "none",
+	    'sgroup' => $config{'domains_group'} || "none",
 	    'quota' => $config{'defquota'} || "none",
 	    'uquota' => $config{'defuquota'} || "none",
 	    'ushell' => $config{'defushell'} || "none",
@@ -7096,6 +7097,8 @@ if ($tmpl->{'id'} == 0) {
 	$config{'extra_prefix'} = $tmpl->{'extra_prefix'} eq "none" ? "" :
 					$tmpl->{'extra_prefix'};
 	$config{'defugroup'} = $tmpl->{'ugroup'};
+	$config{'domains_group'} = $tmpl->{'sgroup'} eq "none" ? "" :
+					$tmpl->{'sgroup'};
 	$config{'defquota'} = $tmpl->{'quota'};
 	$config{'defuquota'} = $tmpl->{'uquota'};
 	$config{'defushell'} = $tmpl->{'ushell'};
@@ -7221,7 +7224,7 @@ if (!$tmpl->{'default'}) {
 	local %done;
 	foreach $p ("dns_spf", "dns_sub", "dns_master",
 		    "web", "dns", "ftp", "frame", "user_aliases",
-		    "ugroup", "quota", "uquota", "ushell",
+		    "ugroup", "sgroup", "quota", "uquota", "ushell",
 		    "mailboxlimit", "domslimit",
 		    "dbslimit", "aliaslimit", "bwlimit", "mongrelslimit","skel",
 		    "mysql_hosts", "mysql_mkdb", "mysql_suffix", "mysql_chgrp",
