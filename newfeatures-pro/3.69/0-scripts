@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Nag script installer to version 2.3.2, phpMyFAQ to 2.0.13, Wordpress MU to 2.7.1, SugarCRM to 5.2.0d, phpMyAdmin to 3.1.4, MoinMoin to 1.8.3, TWiki to 4.3.1, Coppermine to 1.4.22, Drupal to 6.11/5.17, Flyspray to 0.9.9.6, Horde to 3.3.4, Horde Webmail to 1.2.3, phpList to 2.10.10, and Mantis to 1.1.7.<br>Added a script installer for Redmine 0.8.3, thanks to Nick Orr.
+html=Updated the Nag script installer to version 2.3.2, phpMyFAQ to 2.0.13, Wordpress MU to 2.7.1, SugarCRM to 5.2.0e, phpMyAdmin to 3.1.4, MoinMoin to 1.8.3, TWiki to 4.3.1, Coppermine to 1.4.22, Drupal to 6.11/5.17, Flyspray to 0.9.9.6, Horde to 3.3.4, Horde Webmail to 1.2.3, phpList to 2.10.10, and Mantis to 1.1.7.<br>Added a script installer for Redmine 0.8.3, thanks to Nick Orr.
 master=1
 reseller=1
 domain=1
