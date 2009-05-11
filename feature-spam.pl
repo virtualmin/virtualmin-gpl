@@ -1483,7 +1483,6 @@ return 1;
 sub startstop_spam
 {
 local ($scanner, $host) = &get_global_spam_client();
-print STDERR "scanner=$scanner host=$host\n";
 if ($scanner ne "spamc" || $host) {
 	# Spamd isn't being used
 	return ( );
