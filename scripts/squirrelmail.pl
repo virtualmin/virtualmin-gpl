@@ -18,7 +18,7 @@ return "SquirrelMail is a standards-based webmail package written in PHP";
 # script_squirrelmail_versions()
 sub script_squirrelmail_versions
 {
-return ( "1.4.17" );
+return ( "1.4.18" );
 }
 
 sub script_squirrelmail_version_desc
@@ -152,6 +152,11 @@ local $dbhost = &get_database_host($dbtype);
 if ($dbtype) {
 	local $dberr = &check_script_db_connection($dbtype, $dbname, $dbuser, $dbpass);
 	return (0, "Database connection failed : $dberr") if ($dberr);
+	}
+
+# Delete doc/ReleaseNotes, as this changed from a file to a directory!
+if ($upgrade) {
+	&unlink_file("$opts->{'dir'}/doc/ReleaseNotes");
 	}
 
 # Extract tar file to temp dir and copy to target
