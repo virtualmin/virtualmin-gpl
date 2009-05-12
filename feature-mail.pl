@@ -2514,6 +2514,12 @@ while(<UFILE>) {
 			}
 
 		&create_user($uinfo, $_[0]);
+
+		# Create an empty mail file, which may be needed if inbox
+		# location has moved
+		if ($user->{'email'} && !$user->{'nomailfile'}) {
+			&create_mail_file($user);
+			}
 		}
 	}
 close(UFILE);
@@ -2653,8 +2659,10 @@ if (-r "$_[1]_files" &&
 				      'file' => $path };
 			local ($df) =
 				&mailboxes::list_user_folders($u->{'user'});
-			&mailboxes::mailbox_empty_folder($df);
-			&mailboxes::mailbox_copy_folder($sf, $df);
+			if ($df) {
+				&mailboxes::mailbox_empty_folder($df);
+				&mailboxes::mailbox_copy_folder($sf, $df);
+				}
 			}
 		}
 	&$second_print($text{'setup_done'});
