@@ -133,12 +133,12 @@ if (@domains || @users) {
 else {
 	# Showing all domains, with some limits
 	@doms = &list_domains();
-	@doms = grep { $_->{'alias'} } @doms if ($must_alias);
-	@doms = grep { !$_->{'alias'} } @doms if ($must_noalias);
-	@doms = grep { $_->{'parent'} } @doms if ($must_subserver);
-	@doms = grep { !$_->{'parent'} } @doms if ($must_toplevel);
-	@doms = grep { $_->{'subdom'} } @doms if ($must_subdomain);
 	}
+@doms = grep { $_->{'alias'} } @doms if ($must_alias);
+@doms = grep { !$_->{'alias'} } @doms if ($must_noalias);
+@doms = grep { $_->{'parent'} } @doms if ($must_subserver);
+@doms = grep { !$_->{'parent'} } @doms if ($must_toplevel);
+@doms = grep { $_->{'subdom'} } @doms if ($must_subdomain);
 @doms = sort { $a->{'user'} cmp $b->{'user'} ||
 	       $a->{'created'} <=> $b->{'created'} } @doms;
 
