@@ -25,11 +25,14 @@ if (!$module_name) {
 	}
 
 # Parse command-line args
-my $short = 0;
+my $short = 1;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--short") {
 		$short = 1;
+		}
+	elsif ($a eq "--long") {
+		$short = 0;
 		}
 	else {
 		&usage();
