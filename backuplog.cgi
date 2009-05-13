@@ -60,7 +60,7 @@ if (@logs) {
 				  $text{'backuplog_when'},
 				  $text{'backuplog_len'},
 				  $text{'backuplog_size'},
-				  $text{'backuplog_ok'} ],
+				  $text{'backuplog_ok2'} ],
 				100, \@table);
 				  
 	}
