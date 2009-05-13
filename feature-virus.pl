@@ -320,7 +320,7 @@ else {
 				}
 			}
 		}
-	return $maxcmd || $config{'clamscan_cmd'};
+	return ($maxcmd || $config{'clamscan_cmd'}, undef);
 	}
 }
 

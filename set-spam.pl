@@ -202,7 +202,7 @@ if ($show) {
 			}
 		}
 	if ($config{'virus'}) {
-		$scanner = &get_global_virus_scanner();
+		($scanner) = &get_global_virus_scanner();
 		print "Virus scanner: $scanner\n";
 		}
 	}
