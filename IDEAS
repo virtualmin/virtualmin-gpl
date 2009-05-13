@@ -1,5 +1,6 @@
  - Allow resellers and domain owners to use remote API
 	- Need access control enforcement in .pl scripts
+	- Allow non-root to run via HTTP ?
 
  - script installers for
 	- phpmyfamily (bug 800)
