@@ -18,7 +18,7 @@ This command should be used with care when moving a parent server, as
 information that is specific to it such as the password, quotas and bandwidth
 limit will be lost. Instead, the settings from the new parent will apply.
 
-The C<move-domain.pl> script can also be used to convert a sub-server into
+The C<move-domain> command can also be used to convert a sub-server into
 a top-level server. In this case, you must give the C<--newuser> and
 C<--newpass> parameters, which are followed by the username and password for
 the new top-level server respectively. The original owner of the domain will
@@ -123,7 +123,7 @@ print $_[0],"\n\n" if ($_[0]);
 print "Moves a virtual server under a new parent server, or converts it.\n";
 print "into a parent server of its own.\n";
 print "\n";
-print "usage: move-domain.pl --domain domain.name\n";
+print "virtualmin move-domain --domain domain.name\n";
 print "                      [--parent domain.name]\n";
 print "                      [--newuser username]\n";
 print "                      [--newpass password]\n";

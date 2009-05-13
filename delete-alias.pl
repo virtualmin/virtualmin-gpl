@@ -11,7 +11,7 @@ it does not prompt for confirmation before deleting. To delete the catchall
 alias for a domain, use the option C<--from "*">.
 
 No program exists for updating existing aliases, but the same thing can be
-achieved by using the C<delete-alias.pl> and C<create-alias.pl> commands to remove
+achieved by using the C<delete-alias> and C<create-alias> commands to remove
 and re-create an alias with new settings.
 
 =cut
@@ -73,8 +73,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Deletes a mail alias from a virtual server.\n";
 print "\n";
-print "usage: delete-alias.pl   --domain domain.name\n";
-print "                         --from mailbox|\"*\"\n";
+print "virtualmin delete-alias --domain domain.name\n";
+print "                        --from mailbox|\"*\"\n";
 exit(1);
 }
 

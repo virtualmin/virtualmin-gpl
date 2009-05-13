@@ -93,8 +93,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Deletes an existing mail, FTP or database user from a Virtualmin domain.\n";
 print "\n";
-print "usage: delete-user.pl    --domain domain.name\n";
-print "                         --user username\n";
+print "virtualmin delete-user --domain domain.name\n";
+print "                       --user username\n";
 exit(1);
 }
 

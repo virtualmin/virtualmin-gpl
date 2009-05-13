@@ -58,8 +58,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Deletes an extra administrator associated with some virtual server.\n";
 print "\n";
-print "usage: delete-admin.pl --domain domain.name\n";
-print "                       --name login\n";
+print "virtualmin delete-admin --domain domain.name\n";
+print "                        --name login\n";
 exit(1);
 }
 

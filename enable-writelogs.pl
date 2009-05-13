@@ -96,7 +96,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Enables logging via program for one or more domains specified on the\n";
 print "command line.\n";
 print "\n";
-print "usage: enable-writelogs.pl [--domain name] | [--all-domains]\n";
+print "virtualmin enable-writelogs --domain name | --all-domains\n";
 exit(1);
 }
 

@@ -124,7 +124,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Validates the configurations of selected virtual servers.\n";
 print "\n";
-print "usage: validate-domains.pl [--domain name]* | [--all-domains]\n";
+print "virtualmin validate-domains --domain name | --all-domains\n";
 print "                           [--feature name]* | [--all-features]\n";
 print "                           [--problems]\n";
 exit(1);

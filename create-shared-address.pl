@@ -103,7 +103,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Adds a new IP address for use by multiple virtual servers.\n";
 print "\n";
-print "usage: create-shared-address.pl [--ip address | --allocate-ip]\n";
+print "virtualmin create-shared-address --ip address | --allocate-ip\n";
 print "                                [--activate]\n";
 exit(1);
 }

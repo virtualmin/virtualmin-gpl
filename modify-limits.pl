@@ -266,22 +266,22 @@ sub usage
 print $_[0],"\n\n" if ($_[0]);
 print "Changes the restrictions on a virtual server owner.\n";
 print "\n";
-print "usage: modify-limits.pl  --domain domain.name | --user name\n";
-print "                         [--max-doms max|UNLIMITED|NONE]\n";
-print "                         [--max-aliasdoms max|UNLIMITED]\n";
-print "                         [--max-realdoms max|UNLIMITED]\n";
-print "                         [--max-mailboxes max|UNLIMITED]\n";
-print "                         [--max-dbs max|UNLIMITED]\n";
-print "                         [--max-aliases max|UNLIMITED]\n";
-print "                         [--can-dbname] | [--cannot-dbname]\n";
-print "                         [--can-rename] | [--cannot-rename]\n";
-print "                         [--force-under] | [--noforce-under]\n";
-print "                         [--read-only] | [--read-write]\n";
-print "                         [--allow feature] ...\n";
-print "                         [--disallow feature] ...\n";
-print "                         [--can-edit capability] ...\n";
-print "                         [--cannot-edit capability] ...\n";
-print "                         [--shell \"nologin\" | \"ftp\" | \"ssh\"]\n";
+print "virtualmin modify-limits --domain domain.name | --user name\n";
+print "                        [--max-doms max|UNLIMITED|NONE]\n";
+print "                        [--max-aliasdoms max|UNLIMITED]\n";
+print "                        [--max-realdoms max|UNLIMITED]\n";
+print "                        [--max-mailboxes max|UNLIMITED]\n";
+print "                        [--max-dbs max|UNLIMITED]\n";
+print "                        [--max-aliases max|UNLIMITED]\n";
+print "                        [--can-dbname] | [--cannot-dbname]\n";
+print "                        [--can-rename] | [--cannot-rename]\n";
+print "                        [--force-under] | [--noforce-under]\n";
+print "                        [--read-only] | [--read-write]\n";
+print "                        [--allow feature] ...\n";
+print "                        [--disallow feature] ...\n";
+print "                        [--can-edit capability] ...\n";
+print "                        [--cannot-edit capability] ...\n";
+print "                        [--shell \"nologin\" | \"ftp\" | \"ssh\"]\n";
 exit(1);
 }
 

@@ -21,7 +21,7 @@ To bouce mail back to the sender, use the C<--bounce> flag. This is useful if yo
 
 To setup an autoresponder, use the C<--autoreply> parameter followed by the text of the automatic reply message. The from address for automatica replies can be set with the optional (but highly recommended) C<--autoreply-from> flag, and the interval in hours between replies to the same address with the C<--autoreply-period> flag. For example :
 
-  create-simple-alias.pl --domain something.com --from jamie --autoreply "Gone fishing" --autoreply-from jamie@something.com --autoreply-period 24
+  virtualmin create-simple-alias --domain something.com --from jamie --autoreply "Gone fishing" --autoreply-from jamie@something.com --autoreply-period 24
 
 =cut
 
@@ -140,17 +140,17 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Adds a simple mail alias to a virtual server.\n";
 print "\n";
-print "usage: create-simple-alias.pl   --domain domain.name\n";
-print "                                --from mailbox|\"*\"\n";
-print "                                [--forward user\@domain]*\n";
-print "                                [--local local-user]\n";
-print "                                [--bounce]\n";
-print "                                [--everyone]\n";
-print "                                [--autoreply \"some message\"]\n";
-print "                                [--autoreply-period hours]\n";
-print "                                [--autoreply-from user\@domain]\n";
+print "virtualmin create-simple-alias --domain domain.name\n";
+print "                               --from mailbox|\"*\"\n";
+print "                              [--forward user\@domain]*\n";
+print "                              [--local local-user]\n";
+print "                              [--bounce]\n";
+print "                              [--everyone]\n";
+print "                              [--autoreply \"some message\"]\n";
+print "                              [--autoreply-period hours]\n";
+print "                              [--autoreply-from user\@domain]\n";
 if ($can_alias_comments) {
-	print "                                [--desc \"Comment text\"]\n";
+	print "                              [--desc \"Comment text\"]\n";
 	}
 exit(1);
 }

@@ -373,41 +373,41 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Modifies a mail, FTP or database user in a Virtualmin domain.\n";
 print "\n";
-print "usage: modify-user.pl    --domain domain.name\n";
-print "                         --user username\n";
-print "                         [--pass new-password]\n";
-print "                         [--disable | --enable]\n";
-print "                         [--real real-name]\n";
+print "virtualmin modify-user --domain domain.name\n";
+print "                       --user username\n";
+print "                      [--pass new-password]\n";
+print "                      [--disable | --enable]\n";
+print "                      [--real real-name]\n";
 if (&has_home_quotas()) {
-	print "                         [--quota quota-in-blocks]\n";
+	print "                      [--quota quota-in-blocks]\n";
 	}
 if (&has_mail_quotas()) {
-	print "                         [--mail-quota quota-in-blocks]\n";
+	print "                      [--mail-quota quota-in-blocks]\n";
 	}
 if (&has_server_quotas()) {
-	print "                         [--qmail-quota quota-in-bytes]\n";
+	print "                      [--qmail-quota quota-in-bytes]\n";
 	}
 if ($config{'mysql'}) {
-	print "                         [--add-mysql database]\n";
-	print "                         [--remove-mysql database]\n";
+	print "                      [--add-mysql database]\n";
+	print "                      [--remove-mysql database]\n";
 	}
 if ($config{'mail'}) {
-	print "                         [--enable-email]\n";
-	print "                         [--disable-email]\n";
-	print "                         [--add-email address]\n";
-	print "                         [--remove-email address]\n";
+	print "                      [--enable-email]\n";
+	print "                      [--disable-email]\n";
+	print "                      [--add-email address]\n";
+	print "                      [--remove-email address]\n";
 	}
-print "                         [--newuser new-username]\n";
-print "                         [--enable-ftp]\n";
-print "                         [--disable-ftp]\n";
+print "                      [--newuser new-username]\n";
+print "                      [--enable-ftp]\n";
+print "                      [--disable-ftp]\n";
 if ($config{'jail_shell'}) {
-	print "                         [--jail-ftp]\n";
+	print "                      [--jail-ftp]\n";
 	}
-print "                         [--add-group group] ...\n";
-print "                         [--del-group group] ...\n";
-print "                         [--send-update-email]\n";
+print "                      [--add-group group] ...\n";
+print "                      [--del-group group] ...\n";
+print "                      [--send-update-email]\n";
 if ($config{'spam'}) {
-	print "                         [--no-check-spam | --check-spam]\n";
+	print "                      [--no-check-spam | --check-spam]\n";
 	}
 exit(1);
 }

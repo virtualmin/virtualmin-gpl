@@ -92,8 +92,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Sets the values of one or more custom fields for a virtual server\n";
 print "\n";
-print "usage: modify-custom.pl   --domain name\n";
-print "                          --set field value [--set field value] ...\n";
+print "virtualmin modify-custom --domain name\n";
+print "                         --set field value [--set field value] ...\n";
 exit(1);
 }
 

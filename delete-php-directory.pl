@@ -66,8 +66,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Removes any custom PHP version used in some web directory.\n";
 print "\n";
-print "usage: delete-php-directory.pl   --domain domain.name\n";
-print "                                 --dir directory|url-path\n";
+print "virtualmin delete-php-directory --domain domain.name\n";
+print "                                --dir directory|url-path\n";
 exit(1);
 }
 

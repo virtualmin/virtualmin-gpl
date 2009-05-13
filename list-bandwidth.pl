@@ -140,9 +140,9 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Shows bandwidth usage by domain, date and feature\n";
 print "\n";
-print "usage: list-bandwidth.pl [--start yyyy-mm-dd]\n";
+print "virtualmin list-bandwidth --domain name | --all-domains\n";
+print "                         [--start yyyy-mm-dd]\n";
 print "                         [--end yyyy-mm-dd]\n";
-print "                         [--domain name]* | [--all-domains]\n";
 print "                         [--include-subservers]\n";
 exit(1);
 }

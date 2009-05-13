@@ -168,7 +168,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Make a test SMTP connection to a mail server.\n";
 print "\n";
-print "usage: test-smtp.pl --to address\n";
+print "virtualmin test-smtp --to address\n";
 print "                    [--server hostname]\n";
 print "                    [--port number|name]\n";
 print "                    [--from address]\n";

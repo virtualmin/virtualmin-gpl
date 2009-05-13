@@ -147,10 +147,9 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the scripts installed on one or more virtual servers.\n";
 print "\n";
-print "usage: list-scripts.pl   [--all-domains] | [--domain domain.name] |\n";
-print "                         [--user username]*\n";
-print "                         [--multiline | --name-only]\n";
-print "                         [--type script]\n";
+print "virtualmin list-scripts --all-domains | --domain name | --user username\n";
+print "                       [--multiline | --name-only]\n";
+print "                       [--type script]\n";
 exit(1);
 }
 

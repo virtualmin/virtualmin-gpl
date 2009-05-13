@@ -61,7 +61,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the available templates for new virtual servers.\n";
 print "\n";
-print "usage: list-templates.pl [--name-only]\n";
+print "virtualmin list-templates [--name-only]\n";
 exit(1);
 }
 

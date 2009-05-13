@@ -5,7 +5,7 @@
 Restore one or more virtual servers
 
 To restore a Virtualmin backup from the command line, you will need to use
-this program. It takes very similar parameters to C<backup-domain.pl>, with the
+this program. It takes very similar parameters to C<backup-domain>, with the
 exceptions that C<--dest> is replace with C<--source>, and the C<--separate> and
 C<--ignore-errors> options are not used. The extra option C<--reuid> can be
 specified to force the re-allocation of Unix UIDs and GIDs for virtual servers
@@ -273,18 +273,18 @@ print "$_[0]\n\n" if ($_[0]);
 print "Restores a Virtualmin backup, for the domains and features specified\n";
 print "on the command line.\n";
 print "\n";
-print "usage: restore-domain.pl --source file\n";
-print "                  [--test]\n";
-print "                  [--domain name] | [--all-domains]\n";
-print "                  [--feature name] | [--all-features]\n";
-print "                                     [--except-feature name]\n";
-print "                  [--reuid]\n";
-print "                  [--fix]\n";
-print "                  [--option feature name value]\n";
-print "                  [--all-virtualmin] | [--virtualmin config]\n";
-print "                  [--only-features]\n";
-print "                  [--shared-ip address | --ip address | --allocate-ip]\n";
-print "                  [--only-missing | --only-existing]\n";
+print "virtualmin restore-domain --source file\n";
+print "                         [--test]\n";
+print "                         [--domain name] | [--all-domains]\n";
+print "                         [--feature name] | [--all-features]\n";
+print "                         [--except-feature name]\n";
+print "                         [--reuid]\n";
+print "                         [--fix]\n";
+print "                         [--option feature name value]\n";
+print "                         [--all-virtualmin] | [--virtualmin config]\n";
+print "                         [--only-features]\n";
+print "                         [--shared-ip address | --ip address | --allocate-ip]\n";
+print "                         [--only-missing | --only-existing]\n";
 print "\n";
 print "Multiple domains may be specified with multiple --domain parameters.\n";
 print "Features must be specified using their short names, like web and dns.\n";

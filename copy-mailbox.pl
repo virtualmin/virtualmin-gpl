@@ -85,9 +85,9 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Copies or moves mail from one file or directory to another.\n";
 print "\n";
-print "usage: copy-mailbox.pl --source file\n";
-print "                       --dest file\n";
-print "                       [--delete]\n";
+print "virtualmin copy-mailbox --source file\n";
+print "                        --dest file\n";
+print "                        [--delete]\n";
 exit(1);
 }
 

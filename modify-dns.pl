@@ -239,8 +239,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Changes DNS settings for one or more domains.\n";
 print "\n";
-print "usage: modify-dns.pl [--domain name]* | [--all-domains] |\n";
-print "                     [--all-nonvirt-domains]\n";
+print "virtualmin modify-dns --domain name | --all-domains | --all-nonvirt-domains\n";
 print "                     [--spf | --no-spf]\n";
 print "                     [--spf-add-a hostname]*\n";
 print "                     [--spf-add-mx domain]*\n";

@@ -277,7 +277,7 @@ if ($_[0]) {
 print "Creates a Virtualmin backup, for the domains and features specified\n";
 print "on the command line.\n";
 print "\n";
-print "usage: backup-domain.pl --dest file\n";
+print "virtualmin backup-domain --dest file\n";
 print "                        [--test]\n";
 print "                        [--domain name] | [--all-domains]\n";
 print "                        [--user name]\n";

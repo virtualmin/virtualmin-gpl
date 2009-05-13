@@ -87,7 +87,7 @@ print $_[0],"\n\n" if ($_[0]);
 print "Deletes an existing Virtualmin virtual server and all sub-servers,\n";
 print "mailboxes and alias domains.\n";
 print "\n";
-print "usage: delete-domain.pl  [--domain domain.name]*\n";
+print "virtualmin delete-domain [--domain domain.name]*\n";
 print "                         [--user username]*\n";
 print "                         [--only]\n";
 exit(1);

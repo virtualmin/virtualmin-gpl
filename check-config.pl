@@ -48,7 +48,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Checks the current Virtualmin configuration.\n";
 print "\n";
-print "usage: check-config.pl\n";
+print "virtualmin check-config\n";
 exit(1);
 }
 

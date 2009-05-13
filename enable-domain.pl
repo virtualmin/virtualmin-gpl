@@ -4,7 +4,7 @@
 
 Re-enable one virtual server
 
-This program reverses the disable process done by disable-domain.pl , or in
+This program reverses the disable process done by C<disable-domain> , or in
 the Virtualmin web interface. It will restore the server to the state it was
 in before being disabled.
 
@@ -95,7 +95,7 @@ sub usage
 print $_[0],"\n" if ($_[0]);
 print "Enables all disabled features in the specified virtual server.\n";
 print "\n";
-print "usage: enable-domain.pl  --domain domain.name\n";
+print "virtualmin enable-domain --domain domain.name\n";
 exit(1);
 }
 

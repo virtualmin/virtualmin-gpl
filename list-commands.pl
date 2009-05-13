@@ -95,8 +95,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists available command-line API scripts.\n";
 print "\n";
-print "usage: list-commands.pl [--short]\n";
+print "virtualmin list-commands [--short]\n";
 exit(1);
 }
-
 

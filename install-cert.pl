@@ -6,7 +6,7 @@ Replace the SSL certificate or private key for a virtual server.
 
 This command is typically used to install a signed certificate that you
 have received from a CA in response to a signing request, generated with
-C<generate-cert.pl>. However, it can be used to install any certificate,
+C<generate-cert>. However, it can be used to install any certificate,
 private key or CA certificate file into a virtual server.
 
 The server must be specified with the C<--domain> flag, followed by a domain
@@ -177,7 +177,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Installs a certificate, private key, CSR or CA certificate.\n";
 print "\n";
-print "usage: install-cert.pl --domain name\n";
+print "virtualmin install-cert --domain name\n";
 print "                       [--cert file|data]\n";
 print "                       [--key file|data]\n";
 print "                       [--ca file|data]\n";

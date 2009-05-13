@@ -79,8 +79,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the values of custom fields for some or all servers\n";
 print "\n";
-print "usage: list-custom.pl   [--domain name] ...\n";
-print "                        [--names]\n";
+print "virtualmin list-custom [--domain name]*\n";
+print "                       [--names]\n";
 exit(1);
 }
 

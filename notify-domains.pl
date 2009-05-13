@@ -147,14 +147,14 @@ sub usage
 print $_[0],"\n\n" if ($_[0]);
 print "Sends email to some or all virtual server owners\n";
 print "\n";
-print "usage: notify-domains.pl [--domain name]\n";
-print "                         [--user login]\n";
-print "                         [--with-feature code]\n";
-print "                         [--without-feature code]\n";
-print "                         --body-file /path/to/file.txt | --body-stdin\n";
-print "                         --subject \"subject line\"\n";
-print "                         [--from user\@domain]\n";
-print "                         [--admins]\n";
+print "virtualmin notify-domains [--domain name]\n";
+print "                          [--user login]\n";
+print "                          [--with-feature code]\n";
+print "                          [--without-feature code]\n";
+print "                          --body-file /path/to/file.txt | --body-stdin\n";
+print "                          --subject \"subject line\"\n";
+print "                          [--from user\@domain]\n";
+print "                          [--admins]\n";
 exit(1);
 }
 

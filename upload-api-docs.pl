@@ -89,6 +89,7 @@ print "Converting to Wiki format ..\n";
 foreach $a (@apis) {
 	next if ($a->{'done'});
 	($a->{'wiki'}, $a->{'title'}) = &convert_to_wiki($a->{'data'});
+	$a->{'wiki'} =~ s/\.pl\s+======/ ======/;	# Remove .pl from title
 	}
 
 # Extract command-line args summary, by running with --help flag
@@ -97,7 +98,7 @@ foreach $a (@apis) {
 	next if ($a->{'done'});
 	print STDERR "doing $a->{'file'}\n";
 	$out = `$a->{'path'} --help 2>&1`;
-	if ($out =~ /usage:/) {
+	if ($out =~ /usage:|\nvirtualmin/) {
 		$out =~ s/^.*\n\n//;	# Strip description
 		$a->{'wiki'} .= "====== Command Line Help ======\n";
 		$a->{'wiki'} .= "\n";

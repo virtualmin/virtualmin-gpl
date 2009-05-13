@@ -65,7 +65,7 @@ sub usage
 print $_[0],"\n\n" if ($_[0]);
 print "Converts a virtual server that is a sub-domain into a sub-server.\n";
 print "\n";
-print "usage: unsub-domain.pl --domain domain.name\n";
+print "virtualmin unsub-domain --domain domain.name\n";
 exit(1);
 }
 

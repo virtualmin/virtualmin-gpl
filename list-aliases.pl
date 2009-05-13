@@ -24,7 +24,7 @@ Some aliases managed by Virtualmin are not created by users directly,
 but are instead created as part of some other process, such as the addition
 of a mailing list. Such aliases are not displayed by default, as editing
 them can cause problems with the associated mailing list. To include these
-aliases in the list produced by C<list-aliases.pl>, use the C<--plugins> command
+aliases in the list produced by C<list-aliases>, use the C<--plugins> command
 line flag.
 
 =cut
@@ -135,10 +135,9 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the mail aliases in one or more virtual servers.\n";
 print "\n";
-print "usage: list-aliases.pl   [--all-domains] | [--domain domain.name] |\n";
-print "                         [--user username]*\n";
-print "                         [--multiline | --name-only | --email-only]\n";
-print "                         [--plugins]\n";
+print "virtualmin list-aliases --all-domains | --domain name | --user username\n";
+print "                       [--multiline | --name-only | --email-only]\n";
+print "                       [--plugins]\n";
 exit(1);
 }
 

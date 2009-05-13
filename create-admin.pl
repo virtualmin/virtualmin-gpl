@@ -18,7 +18,7 @@ The extra admin's editing capabilities for virtual servers can be set using
 the C<--edit> parameter, followed by a capability name (like users or aliases).
 This can be given multiple times, as in the command below :
 
-  create-admin.pl --domain foo.com --name fooadmin --pass smeg --desc "Extra administrator" --edit users --edit aliases
+  virtualmin create-admin --domain foo.com --name fooadmin --pass smeg --desc "Extra administrator" --edit users --edit aliases
 
 That command would create an extra administrator account who can only edit
 mail users and mail aliases in the virtual server I<foo.com> and any sub-servers.
@@ -122,13 +122,14 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Creates a new extra administrator associated with some virtual server.\n";
 print "\n";
-print "usage: create-admin.pl --domain domain.name\n";
-print "                       --name login\n";
-print "                       [--pass password]\n";
-print "                       [--desc description]\n";
-print "                       [--email user\@domain]\n";
-print "                       [--create] [--rename] [--features] [--modules]\n";
-print "                       [--edit capability]*\n";
+print "virtualmin create-admin --domain domain.name\n";
+print "                        --name login\n";
+print "                        [--pass password]\n";
+print "                        [--desc description]\n";
+print "                        [--email user\@domain]\n";
+print "                        [--create] [--rename]\n";
+print "                        [--features] [--modules]\n";
+print "                        [--edit capability]*\n";
 exit(1);
 }
 

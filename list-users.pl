@@ -220,11 +220,10 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the mail, FTP and database users in one or more virtual servers.\n";
 print "\n";
-print "usage: list-users.pl   [--all-domains] | [--domain domain.name] |\n";
-print "                       [--domain-user username]*\n";
-print "                       [--multiline | --name-only | --email-only]\n";
-print "                       [--include-owner]\n";
-print "                       [--user name]\n";
+print "virtualmin list-users --all-domains | --domain name | --domain-user username\n";
+print "                     [--multiline | --name-only | --email-only]\n";
+print "                     [--include-owner]\n";
+print "                     [--user name]\n";
 exit(1);
 }
 

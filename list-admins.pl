@@ -86,8 +86,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the extra administrators associated with some virtual server.\n";
 print "\n";
-print "usage: list-admins.pl   --domain domain.name\n";
-print "                        [--multiline]\n";
+print "virtualmin list-admins --domain domain.name\n";
+print "                      [--multiline]\n";
 exit(1);
 }
 

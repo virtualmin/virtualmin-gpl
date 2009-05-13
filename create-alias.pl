@@ -10,7 +10,7 @@ domain name, C<--from> followed by the name of the alias within that domain, and
 C<--to> followed by a destination address. For example, to create an alias for
 sales@foo.com that delivers mail to the user joe, you could run :
 
-  create-alias.pl --domain foo.com --from sales --to joe@foo.com
+  virtualmin create-alias --domain foo.com --from sales --to joe@foo.com
 
 The C<--to> option can be given multiple times, to create more than one
 destination for the alias. To create an alias for all addresses in the domain
@@ -22,7 +22,7 @@ what the alias is for. To set one when creating, you can use the --desc
 option followed by a one-line description.
 
 To more easily create aliases with autoresponders, you should use the 
-C<create-simple-alias.pl> script, which is analagous to the simple alias
+C<create-simple-alias> command, which is analagous to the simple alias
 creation form in Virtualmin's web UI.
 
 =cut
@@ -95,11 +95,11 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Adds a mail alias to a virtual server.\n";
 print "\n";
-print "usage: create-alias.pl   --domain domain.name\n";
-print "                         --from mailbox|\"*\"\n";
-print "                         --to address [--to address ...]\n";
+print "virtualmin create-alias --domain domain.name\n";
+print "                        --from mailbox|\"*\"\n";
+print "                        --to address [--to address ...]\n";
 if ($can_alias_comments) {
-	print "                         [--desc \"Comment text\"]\n";
+	print "                        [--desc \"Comment text\"]\n";
 	}
 exit(1);
 }

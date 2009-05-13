@@ -80,8 +80,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Dumps the mailbox for some user.\n";
 print "\n";
-print "usage: list-mailbox.pl --domain domain.name\n";
-print "                       --user name\n";
+print "virtualmin list-mailbox --domain domain.name\n";
+print "                        --user name\n";
 print "                       [--filesonly]\n";
 exit(1);
 }

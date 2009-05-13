@@ -54,7 +54,7 @@ sub usage
 print $_[0],"\n\n" if ($_[0]);
 print "Se-sends the email sent on virtual server creation to its owner.\n";
 print "\n";
-print "usage: resend-email.pl  --domain domain.name\n";
+print "virtualmin resend-email --domain domain.name\n";
 exit(1);
 }
 

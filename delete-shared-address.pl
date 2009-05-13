@@ -74,7 +74,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Removes an IP address that was used by multiple virtual servers.\n";
 print "\n";
-print "usage: delete-shared-address.pl --ip address\n";
+print "virtualmin delete-shared-address --ip address\n";
 print "                                [--deactivate]\n";
 exit(1);
 }

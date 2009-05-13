@@ -4,7 +4,7 @@
 
 Disable logging via program 
 
-This command is the opposite C<enable-writelogs.pl>. The domains that it
+This command is the opposite C<enable-writelogs>. The domains that it
 operates on are specified either using the C<--domain> flag (which can appear
 multiple times), or C<--all-domains> to turn off logging via script for all
 of them.
@@ -87,7 +87,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Disables logging via program for one or more domains specified on the\n";
 print "command line.\n";
 print "\n";
-print "usage: disable-writelogs.pl [--domain name] | [--all-domains]\n";
+print "virtualmin disable-writelogs --domain name | --all-domains\n";
 exit(1);
 }
 

@@ -65,7 +65,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Removes one virtual server template.\n";
 print "\n";
-print "usage: delete-template.pl --name template-name | --id template-id\n";
+print "virtualmin delete-template --name template-name | --id template-id\n";
 exit(1);
 }
 

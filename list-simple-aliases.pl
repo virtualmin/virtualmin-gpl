@@ -4,7 +4,7 @@
 
 Lists mail aliases in a simple format for some domain
 
-This program is similar to C<list-aliases.pl>, and takes all the same
+This program is similar to C<list-aliases>, and takes all the same
 command-line parameters. However, it simplifies the display of aliases using
 autoreponders to show the reply content, instead of just the path to the
 autoreply file.
@@ -129,11 +129,9 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the simple mail aliases in some virtual server.\n";
 print "\n";
-print "usage: list-simple-aliases.pl   [--all-domains] |\n";
-print "                                [--domain domain.name] |\n";
-print "                                [--user username]*\n";
-print "                                [--multiline]\n";
-print "                                [--plugins]\n";
+print "virtualmin list-simple-aliases --all-domains | --domain name | --user username\n";
+print "                              [--multiline]\n";
+print "                              [--plugins]\n";
 exit(1);
 }
 

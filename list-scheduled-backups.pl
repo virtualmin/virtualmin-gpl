@@ -128,10 +128,10 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists some or all scheduled Virtualmin backups.\n";
 print "\n";
-print "usage: list-scheduled-backups.pl [--domain domain.name |\n";
-print "                                  --user name |\n";
-print "                                  --reseller name]\n";
-print "                                 [--multiline]\n";
+print "virtualmin list-scheduled-backups [--domain domain.name |\n";
+print "                                   --user name |\n";
+print "                                   --reseller name]\n";
+print "                                  [--multiline]\n";
 exit(1);
 }
 

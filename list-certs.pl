@@ -99,8 +99,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Outputs the certificates and keys for one or more virtual servers.\n";
 print "\n";
-print "usage: list-certs.pl [--all-domains] | [--domain domain.name] |\n";
-print "                     [--user username]*\n";
+print "virtualmin list-certs --all-domains | --domain name | --user username\n";
 print "                     [".join(" | ", map { "--".$_ } @alltypes)."]\n";
 exit(1);
 }

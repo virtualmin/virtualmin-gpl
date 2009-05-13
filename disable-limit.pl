@@ -120,16 +120,16 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Enables limits for one or more domains specified on the command line.\n";
 print "\n";
-print "usage: disable-limit.pl [--domain name] | [--all-domains]\n";
+print "virtualmin disable-limit --domain name | --all-domains\n";
 print "                        [--dbname]\n";
 foreach $f (@features) {
-	print "                         [--$f]\n" if ($config{$f});
+	print "                        [--$f]\n" if ($config{$f});
 	}
 foreach $f (&list_feature_plugins()) {
-	print "                         [--$f]\n";
+	print "                        [--$f]\n";
 	}
 foreach $f (@edit_limits) {
-	print "                         [--cannot-edit-$f]\n";
+	print "                        [--cannot-edit-$f]\n";
 	}
 exit(1);
 }

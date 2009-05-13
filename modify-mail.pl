@@ -153,9 +153,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Changes email-related settings for one or more domains.\n";
 print "\n";
-print "usage: modify-mail.pl [--domain name]* |\n";
-print "                      [--user name] |\n";
-print "                      [--all-domains]\n";
+print "virtualmin modify-mail --domain name | --user name | --all-domains\n";
 print "                      [--bcc user\@domain] | [--no-bcc]\n";
 print "                      [--alias-copy] | [--alias-catchall]\n";
 exit(1);

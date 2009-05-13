@@ -151,12 +151,12 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Searches the combined mail logs.\n";
 print "\n";
-print "usage: search-mailllogs.pl   [--start yyyy-mm-dd:hh:mm:ss]\n";
-print "                             [--end yyyy-mm-dd:hh:mm:ss]\n";
-print "                             [--dest domain|user\@domain]\n";
-print "                             [--source domain|user\@domain]\n";
-print "                             [--multiline]\n";
-print "                             [--no-spam] [--no-virus]\n";
+print "virtualmin search-mailllogs [--start yyyy-mm-dd:hh:mm:ss]\n";
+print "                            [--end yyyy-mm-dd:hh:mm:ss]\n";
+print "                            [--dest domain|user\@domain]\n";
+print "                            [--source domain|user\@domain]\n";
+print "                            [--multiline]\n";
+print "                            [--no-spam] [--no-virus]\n";
 exit(1);
 }
 

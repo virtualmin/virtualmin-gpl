@@ -222,7 +222,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Changes the spam and virus delivery modes for one or more domains.\n";
 print "\n";
-print "usage: modify-spam.pl [--domain name] | [--all-domains]\n";
+print "virtualmin modify-spam --domain name | --all-domains\n";
 print "                      [--spam-delete | --spam-deliver |\n";
 print "                       --spam-normal | --spam-file file-under-home |\n";
 print "                       --spam-email address | --spam-dest file |\n";

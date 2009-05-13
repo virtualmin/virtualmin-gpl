@@ -96,7 +96,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the DNS records in some domain.\n";
 print "\n";
-print "usage: get-dns.pl --domain name\n";
+print "virtualmin get-dns --domain name\n";
 print "                  [--multiline | --name-only]\n";
 exit(1);
 }

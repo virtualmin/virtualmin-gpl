@@ -88,8 +88,8 @@ print $_[0],"\n\n" if ($_[0]);
 print "Adds a new Virtualmin server template, either empty or copied from\n";
 print "an existing template.\n";
 print "\n";
-print "usage: create-template.pl --name template-name\n";
-print "                          --empty | --clone original-name\n";
+print "virtualmin create-template --name template-name\n";
+print "                           --empty | --clone original-name\n";
 exit(1);
 }
 

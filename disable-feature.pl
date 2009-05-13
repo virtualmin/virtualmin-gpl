@@ -4,7 +4,7 @@
 
 Turn off some features for a virtual server
 
-This program is very similar to C<enable-feature.pl>, and takes the same command
+This program is very similar to C<enable-feature>, and takes the same command
 line parameters, but disables the specified features instead. Be careful when
 using it, as it will not prompt for confirmation before disabling features
 that may result in the loss of configuration files and other data.
@@ -142,14 +142,12 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Enables features for one or more domains specified on the command line.\n";
 print "\n";
-print "usage: disable-feature.pl [--domain name] |\n";
-print "                          [--user name] |\n";
-print "                          [--all-domains]\n";
+print "virtualmin disable-feature --domain name | --user name | --all-domains\n";
 foreach $f (@features) {
-	print "                         [--$f]\n" if ($config{$f});
+	print "                          [--$f]\n" if ($config{$f});
 	}
 foreach $f (&list_feature_plugins()) {
-	print "                         [--$f]\n";
+	print "                          [--$f]\n";
 	}
 exit(1);
 }

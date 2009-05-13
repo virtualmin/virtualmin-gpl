@@ -46,7 +46,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Runs Webalizer for all domains with it enabled, in series.\n";
 print "\n";
-print "usage: run-all-webalizer.pl\n";
+print "usage: $ENV{'WEBMIN_CONFIG'}/run-all-webalizer.pl\n";
 exit(1);
 }
 

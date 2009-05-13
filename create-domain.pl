@@ -7,7 +7,7 @@ Create a virtual server
 This program can be used to create a new top-level, child or alias virtual
 server. It is typically called with parameters something like :
 
-   create-domain.pl --domain foo.com --pass smeg --desc "The server for foo" --unix --dir --webmin --web --dns --mail --limits-from-plan
+   virtualmin create-domain --domain foo.com --pass smeg --desc "The server for foo" --unix --dir --webmin --web --dns --mail --limits-from-plan
 
 This would create a server called foo.com , with the Unix login, home directory, Webmin login, website, DNS domain and email features enabled, and disk quotas
 based on those set in the default plan. If you run this program with the --help option, you can see all of the
@@ -714,7 +714,7 @@ print $_[0],"\n\n" if ($_[0]);
 print "Adds a new Virtualmin virtual server, with the settings and features\n";
 print "specified on the command line.\n";
 print "\n";
-print "usage: create-domain.pl  --domain domain.name\n";
+print "virtualmin create-domain --domain domain.name\n";
 print "                         --pass password-for-unix-user\n";
 print "                        [--parent domain.name | --alias domain.name |\n";
 print "                         --superdom domain.name]\n";

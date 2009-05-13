@@ -119,9 +119,9 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the databases associated with some virtual server.\n";
 print "\n";
-print "usage: list-databases.pl   --domain domain.name\n";
-print "                           [--multiline | --name-only]\n";
-print "                           [--type dbtype]\n";
+print "virtualmin list-databases --domain domain.name\n";
+print "                         [--multiline | --name-only]\n";
+print "                         [--type dbtype]\n";
 exit(1);
 }
 

@@ -9,7 +9,7 @@ server. The required parameters are C<--domain> (followed by the domain name),
 C<--type> (followed by the script's short name, like drupal or squirrelmail), and
 C<--version> (followed by the version number or the word I<latest>). Don't use the script's longer
 description with the C<--type> parameter - only the short name (as shown by
-C<list-available-scripts.pl --multiline>) will work.
+C<list-available-scripts --multiline>) will work.
 
 All scripts will also need the C<--path> parameter, which must be followed by a
 URL path such as /drupal. This determines the directory where the script is
@@ -20,14 +20,14 @@ to the forced directory.
 
 Those that use a database require the C<--db> parameter, which must be
 followed by the database type and name, such as C<--db mysql foo>. If this
-is missing and the script requires it, the C<install-script.pl> command will
+is missing and the script requires it, the C<install-script> command will
 fail with an error message. By default the database must already exist
 under the virtual server, but if the C<--newdb> parameter is given it will
 be created as part of the script installation process.
 
 If upgrading an existing script in this virtual server, you must supply the
 C<--upgrade> parameter, followed by the install ID. This can be found from the
-list-scripts.pl program, documented below.
+C<list-scripts> command, documented below.
 
 If the script makes use of the Ruby on Rails framework and your system supports
 multiple proxy balancer backends (as in Apache 2), the C<--mongrels> flag 
@@ -357,9 +357,9 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Installs a third-party script into some virtual server.\n";
 print "\n";
-print "usage: install-script.pl --domain domain.name\n";
-print "                         --type name\n";
-print "                         --version number|\"latest\" [--unsupported]\n";
+print "virtualmin install-script --domain domain.name\n";
+print "                          --type name\n";
+print "                          --version number|\"latest\" [--unsupported]\n";
 print "                         [--path url-path]\n";
 print "                         [--db type name]\n";
 print "                         [--opt name value]\n";

@@ -65,7 +65,7 @@ sub usage
 print $_[0],"\n\n" if ($_[0]);
 print "Deletes an existing Virtualmin account plan.\n";
 print "\n";
-print "usage: delete-plan.pl --name plan-name | --id plan-id\n";
+print "virtualmin delete-plan --name plan-name | --id plan-id\n";
 exit(1);
 }
 

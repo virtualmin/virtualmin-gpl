@@ -148,8 +148,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the available account plans for virtual servers.\n";
 print "\n";
-print "usage: list-plans.pl [--name-only | --multiline]\n";
-print "                     [--id number | --name \"plan name\"]\n";
+print "virtualmin list-plans [--name-only | --multiline]\n";
+print "                      [--id number | --name \"plan name\"]\n";
 exit(1);
 }
 

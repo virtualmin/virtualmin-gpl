@@ -6,7 +6,7 @@ Deletes one database
 
 To remove a single database from a virtual server and delete all of its
 contents, you can use this command. It takes the exact same parameters as the
-create-database.pl program : C<--domain>, C<--name> and C<--type>. Be careful using
+C<create-database> command : C<--domain>, C<--name> and C<--type>. Be careful using
 it, as the complete contents of the specified database will be removed without any prompting for confirmation.
 
 =cut
@@ -74,9 +74,9 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Deletes a database associated with some virtual server.\n";
 print "\n";
-print "usage: delete-database.pl   --domain domain.name\n";
-print "                            --name database-name\n";
-print "                            --type [mysql|postgres]\n";
+print "virtualmin delete-database --domain domain.name\n";
+print "                           --name database-name\n";
+print "                           --type [mysql|postgres]\n";
 exit(1);
 }
 

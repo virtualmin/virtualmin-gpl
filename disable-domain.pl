@@ -105,8 +105,8 @@ sub usage
 print $_[0],"\n" if ($_[0]);
 print "Disables all features in the specified virtual server.\n";
 print "\n";
-print "usage: disable-domain.pl  --domain domain.name\n";
-print "                          [--why \"explanation for disable\"]\n";
+print "virtualmin disable-domain --domain domain.name\n";
+print "                         [--why \"explanation for disable\"]\n";
 exit(1);
 }
 

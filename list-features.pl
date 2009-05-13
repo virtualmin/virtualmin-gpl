@@ -118,8 +118,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the available features for new virtual servers.\n";
 print "\n";
-print "usage: list-features.pl [--multiline | --name-only]\n";
-print "                        [--parent name | --subdom name | --alias name]\n";
+print "virtualmin list-features [--multiline | --name-only]\n";
+print "                         [--parent name | --subdom name | --alias name]\n";
 exit(1);
 }
 

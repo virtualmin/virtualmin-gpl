@@ -55,7 +55,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the available content styles for new virtual servers.\n";
 print "\n";
-print "usage: list-styles.pl [--name-only]\n";
+print "virtualmin list-styles [--name-only]\n";
 exit(1);
 }
 

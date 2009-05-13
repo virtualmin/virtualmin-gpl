@@ -12,7 +12,7 @@ to set a new password, C<--desc> to change the server description, and C<--quota
 
 To add a private IP address to a virtual server that currently does not have
 one, the C<--ip> or C<--allocate-ip> options can be used, as described in the
-section on create-domain.pl.
+section on C<create-domain>.
 
 To revert a server with a private IP back to the system's default shared
 address, use the C<--default-ip> flag. If the system has more than one shared
@@ -506,7 +506,7 @@ print $_[0],"\n\n" if ($_[0]);
 print "Changes the settings for a Virtualmin server, based on the specified\n";
 print "command-line parameters.\n";
 print "\n";
-print "usage: modify-domain.pl  --domain domain.name\n";
+print "virtualmin modify-domain --domain domain.name\n";
 print "                        [--desc new-description]\n";
 print "                        [--user new-username]\n";
 print "                        [--pass new-password]\n";

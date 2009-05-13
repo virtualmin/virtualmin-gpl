@@ -136,8 +136,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Updates the Virtualmin Pro license for this system.\n";
 print "\n";
-print "usage: change-licence.pl --serial number\n";
-print "                         --key id\n";
+print "virtualmin change-licence --serial number\n";
+print "                          --key id\n";
 print "                         [--no-check]\n";
 exit(1);
 }

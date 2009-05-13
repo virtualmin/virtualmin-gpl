@@ -163,8 +163,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Modifies an extra administrator associated with some virtual server.\n";
 print "\n";
-print "usage: modify-admin.pl --domain domain.name\n";
-print "                       --name login\n";
+print "virtualmin modify-admin --domain domain.name\n";
+print "                        --name login\n";
 print "                       [--newname login]\n";
 print "                       [--pass password]\n";
 print "                       [--desc description]\n";

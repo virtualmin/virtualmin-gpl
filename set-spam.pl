@@ -13,13 +13,13 @@ This command can tell Virtualmin to use the background scanning daemons
 C<clamd> and C<spamd> instead, which are faster but consume additional memory
 as then run all the time. To enable the ClamAV server, run it like so :
 
-  set-spam.pl --enable-clamd
-  set-spam.pl --use-clamdscan
+  virtualmin set-spam --enable-clamd
+  virtualmin set-spam --use-clamdscan
 
 To enable and use the SpamAssassin daemon process, run the commands :
 
-  set-spam.pl --enable-spamd
-  set-spam.pl --use-spamc
+  virtualmin set-spam --enable-spamd
+  virtualmin set-spam --use-spamc
 
 However, using C<spamc> makes it impossible to have separate per-domain
 SpamAssassin configurations in Virtualmin.
@@ -212,19 +212,19 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Changes the spam and virus scanning programs for all domains.\n";
 print "\n";
-print "usage: set-spam.pl [--use-spamassassin | --use-spamc]\n";
-print "                   [--spamc-host hostname | --no-spamc-host]\n";
-print "                   [--spamc-max bytes | --no-spamc-max]\n";
-print "                   [--use-clamscan | --use-clamdscan |\n";
-print "                    --use-clamd-stream-client | --use-virus command]\n";
-print "                   [--clamd-host hostname]\n";
+print "virtualmin set-spam [--use-spamassassin | --use-spamc]\n";
+print "                    [--spamc-host hostname | --no-spamc-host]\n";
+print "                    [--spamc-max bytes | --no-spamc-max]\n";
+print "                    [--use-clamscan | --use-clamdscan |\n";
+print "                     --use-clamd-stream-client | --use-virus command]\n";
+print "                    [--clamd-host hostname]\n";
 if (&check_clamd_status() >= 0) {
-	print "                   [--enable-clamd | --disable-clamd]\n";
+	print "                    [--enable-clamd | --disable-clamd]\n";
 	}
 if (&check_spamd_status() >= 0) {
-	print "                   [--enable-spamd | --disable-spamd]\n";
+	print "                    [--enable-spamd | --disable-spamd]\n";
 	}
-print "                   [--show]\n";
+print "                    [--show]\n";
 exit(1);
 }
 

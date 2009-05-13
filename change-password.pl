@@ -5,7 +5,7 @@
 Changes the password of some Virtualmin user.
 
 Designed to be called from Usermin's Change Passwords module. If you want to
-change a password from the command line, use the C<modify-domain.pl> script
+change a password from the command line, use the C<modify-domain> command
 instead.
 
 =cut
@@ -114,7 +114,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Changes the password of a Virtualmin user\n";
 print "\n";
-print "usage: change-password.pl [username]\n";
+print "virtualmin change-password [username]\n";
 exit(1);
 }
 

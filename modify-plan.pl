@@ -7,7 +7,7 @@ Modifies an existing account plan for use with virtual servers.
 This command allows you to modify the limits for an existing account plan,
 and optionally apply it to all virtual servers currently on that plan
 (with the C<--apply> flag). Its parameters are exactly the same as
-C<create-plan.pl>, so for full documentation you should refer to that script.
+C<create-plan>, so for full documentation you should refer to that command.
 
 To change the name of a plan, use the C<--new-name> flag followed by the
 new name of your choice.
@@ -216,7 +216,7 @@ sub usage
 print $_[0],"\n\n" if ($_[0]);
 print "Updates an existing Virtualmin account plan with the given limits.\n";
 print "\n";
-print "usage: modify-plan.pl --name plan-name | --id number\n";
+print "virtualmin modify-plan --name plan-name | --id number\n";
 print "                      [--new-name plan-name]\n";
 print "                      [--owner reseller | --no-owner]\n";
 print "                      [--quota blocks | --no-quota]\n";

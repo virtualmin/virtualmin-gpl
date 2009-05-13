@@ -501,17 +501,17 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the virtual servers on this system.\n";
 print "\n";
-print "usage: list-domains.pl   [--multiline | --name-only | --id-only]\n";
-print "                         [--domain name]*\n";
-print "                         [--user name]*\n";
-print "                         [--with-feature feature]\n";
-print "                         [--without-feature feature]\n";
-print "                         [--alias | --no-alias | --subserver |\n";
-print "                          --toplevel | --subdomain]\n";
-print "                         [--plan ID|\"plan name\"]\n";
+print "virtualmin list-domains [--multiline | --name-only | --id-only]\n";
+print "                        [--domain name]*\n";
+print "                        [--user name]*\n";
+print "                        [--with-feature feature]\n";
+print "                        [--without-feature feature]\n";
+print "                        [--alias | --no-alias | --subserver |\n";
+print "                         --toplevel | --subdomain]\n";
+print "                        [--plan ID|\"plan name\"]\n";
 if ($virtualmin_pro) {
-	print "                         [--reseller name | --no-reseller |]\n";
-	print "                          --any-reseller]\n";
+	print "                        [--reseller name | --no-reseller |]\n";
+	print "                         --any-reseller]\n";
 	}
 exit(1);
 }

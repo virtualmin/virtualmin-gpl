@@ -100,9 +100,9 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the third-party scripts available for installation.\n";
 print "\n";
-print "usage: list-available-scripts.pl [--multiline]\n";
-print "                                 [--source core|custom|plugin]\n";
-print "                                 [--type name]*\n";
+print "virtualmin list-available-scripts [--multiline]\n";
+print "                                  [--source core|custom|plugin]\n";
+print "                                  [--type name]*\n";
 exit(1);
 }
 

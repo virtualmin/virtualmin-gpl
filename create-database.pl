@@ -114,10 +114,10 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Creates a new database associated with some virtual server.\n";
 print "\n";
-print "usage: create-database.pl   --domain domain.name\n";
-print "                            --name database-name\n";
-print "                            --type [mysql|postgres]\n";
-print "                            [--opt name value]*\n";
+print "virtualmin create-database --domain domain.name\n";
+print "                           --name database-name\n";
+print "                           --type [mysql|postgres]\n";
+print "                           [--opt name value]*\n";
 exit(1);
 }
 

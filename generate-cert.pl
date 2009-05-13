@@ -188,8 +188,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Generates a new self-signed certificate or CSR.\n";
 print "\n";
-print "usage: generate-cert.pl --domain name\n";
-print "                        --self | --csr\n";
+print "virtualmin generate-cert --domain name\n";
+print "                         --self | --csr\n";
 print "                        [--size bits]\n";
 print "                        [--days expiry-days]\n";
 print "                        [--cn domain-name]\n";

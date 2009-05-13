@@ -96,8 +96,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the shells available for mailboxes and domain administrators.\n";
 print "\n";
-print "usage: list-available-shells.pl [--multiline]\n";
-print "                                [--owner | --mailbox]\n";
+print "virtualmin list-available-shells [--multiline]\n";
+print "                                 [--owner | --mailbox]\n";
 exit(1);
 }
 

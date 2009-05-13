@@ -107,7 +107,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Un-installs a third-party script from some virtual server.\n";
 print "\n";
-print "usage: delete-script.pl --domain domain.name\n";
+print "virtualmin delete-script --domain domain.name\n";
 print "                        [--type name] | [--id number]\n";
 exit(1);
 }

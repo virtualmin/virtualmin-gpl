@@ -91,7 +91,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Changes one or more settings in a virtual server template\n";
 print "\n";
-print "usage: modify-template.pl --name template-name | --id template-id\n";
+print "virtualmin modify-template --name template-name | --id template-id\n";
 print "                          [--setting name --value newvalue]+\n";
 exit(1);
 }

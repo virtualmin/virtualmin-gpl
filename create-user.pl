@@ -7,7 +7,7 @@ Create a mail, FTP or database user
 This program adds a new user to an existing virtual server. It is typically
 called with parameters like :
 
-  create-user.pl --domain foo.com --user jimmy --pass smeg --quota 1024 --real "Jimmy Smith"
+  virtualmin create-user --domain foo.com --user jimmy --pass smeg --quota 1024 --real "Jimmy Smith"
 
 This command would add a user to the server I<foo.com> named I<jimmy> with password
 I<smeg> and a disk quota of 1MB. The actual POP3 and FTP username may end up as
@@ -38,7 +38,7 @@ multiple times.
 For more control over the user's login abilities (FTP, SSH or email only),
 use the C<--shell> parameter followed by a full path to a Unix shell, such
 as C</usr/bin/scponly>. Available shells can be displayed using the 
-C<list-available-shells.pl> command.
+C<list-available-shells> command.
 
 If you only have a pre-encrypted password that you want the new user
 to use, the C<--encpass> flag can be ysed to set it instead of C<--pass>.
@@ -336,38 +336,38 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Adds a new mailbox user to an existing Virtualmin domain.\n";
 print "\n";
-print "usage: create-user.pl    --domain domain.name\n";
-print "                         --user new-username\n";
-print "                         --pass password-for-new-user |\n";
-print "                         --encpass encrypted-password |\n";
-print "                         --random-pass\n";
+print "virtualmin create-user --domain domain.name\n";
+print "                       --user new-username\n";
+print "                       --pass password-for-new-user |\n";
+print "                       --encpass encrypted-password |\n";
+print "                       --random-pass\n";
 if (&has_home_quotas()) {
-	print "                        [--quota quota-in-blocks]\n";
+	print "                      [--quota quota-in-blocks]\n";
 	}
 if (&has_mail_quotas()) {
-	print "                        [--mail-quota quota-in-blocks]\n";
+	print "                      [--mail-quota quota-in-blocks]\n";
 	}
 if (&has_server_quotas()) {
-	print "                         --qmail-quota quota-in-bytes\n";
+	print "                       --qmail-quota quota-in-bytes\n";
 	}
 if (!$user || $user->{'person'}) {
-	print "                        [--real real-name-for-new-user]\n";
+	print "                      [--real real-name-for-new-user]\n";
 	}
 if (!$user || $user->{'unix'}) {
-	print "                        [--ftp]\n";
+	print "                      [--ftp]\n";
 	if ($jailed_shell) {
-		print "                        [--jail-ftp]\n";
+		print "                      [--jail-ftp]\n";
 		}
-	print "                        [--shell /path/to/shell]\n";
+	print "                      [--shell /path/to/shell]\n";
 	}
-print "                        [--noemail]\n";
-print "                        [--extra email.address\@some.domain]\n";
-print "                        [--mysql db] ...\n";
-print "                        [--group name] ...\n";
-print "                        [--web]\n";
+print "                      [--noemail]\n";
+print "                      [--extra email.address\@some.domain]\n";
+print "                      [--mysql db] ...\n";
+print "                      [--group name] ...\n";
+print "                      [--web]\n";
 if ($config{'spam'}) {
-	print "                        [--no-check-spam]\n";
+	print "                      [--no-check-spam]\n";
 	}
-print "                        [--no-creation-mail]\n";
+print "                      [--no-creation-mail]\n";
 exit(1);
 }

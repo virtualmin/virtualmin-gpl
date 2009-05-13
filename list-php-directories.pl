@@ -80,8 +80,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists web directories with different PHP versions in a virtual server.\n";
 print "\n";
-print "usage: list-php-directories.pl   --domain domain.name\n";
-print "                                 [--multiline | --name-only]\n";
+print "virtualmin list-php-directories --domain domain.name\n";
+print "                               [--multiline | --name-only]\n";
 exit(1);
 }
 

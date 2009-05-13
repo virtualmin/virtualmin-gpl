@@ -32,7 +32,7 @@ as they always run via a Mongrel proxy.
 
 You can also replace a website's pages using one of Virtualmin's content
 styles, specified using the C<--style> parameter and a style name (which
-C<list-styles.pl> can provide). If so the C<--content> parameter must also
+the C<list-styles> command can provide). If so the C<--content> parameter must also
 be given, followed by the text to use in the style-generated web pages.
 
 To enable the webmail and admin DNS entries for the selected domains
@@ -431,7 +431,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Changes web server settings for one or more domains.\n";
 print "\n";
-print "usage: modify-web.pl [--domain name] | [--all-domains]\n";
+print "virtualmin modify-web --domain name | --all-domains\n";
 if ($supports_php) {
 	print "                     [--mode mod_php | cgi | fcgid]\n";
 	print "                     [--php-children number | --no-php-children]\n";

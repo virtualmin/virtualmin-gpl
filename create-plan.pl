@@ -141,7 +141,7 @@ sub usage
 print $_[0],"\n\n" if ($_[0]);
 print "Creates a new Virtualmin account plan with the given limits.\n";
 print "\n";
-print "usage: create-plan.pl --name plan-name\n";
+print "virtualmin create-plan --name plan-name\n";
 print "                      [--owner reseller]\n";
 print "                      [--quota blocks]\n";
 print "                      [--admin-quota blocks]\n";

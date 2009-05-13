@@ -95,7 +95,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Outputs all settings in some virtual server template.\n";
 print "\n";
-print "usage: get-template.pl --name template-name | --id template-id\n";
+print "virtualmin get-template --name template-name | --id template-id\n";
 print "                       [--setting name]\n";
 print "                       [--inherited]\n";
 exit(1);
