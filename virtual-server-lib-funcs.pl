@@ -9505,7 +9505,7 @@ if ($d->{'mail'} && $config{'mail'} && &can_edit_mail() &&
 	}
 
 # Button to show bandwidth graph
-if ($config{'bw_active'} && !$d->{'parent'} && &can_monitor_bandwidth($d)) {
+if ($config{'bw_active'} && &can_monitor_bandwidth($d)) {
 	push(@rv, { 'page' => 'bwgraph.cgi',
 		    'title' => $text{'edit_bwgraph'},
 		    'desc' => $text{'edit_bwgraphdesc'},

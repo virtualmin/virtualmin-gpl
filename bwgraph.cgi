@@ -8,11 +8,17 @@ use POSIX;
 
 # Work out which domains to show
 if ($in{'dom'}) {
+	# Specific domain
 	@doms = ( $d=&get_domain($in{'dom'}) );
 	&can_edit_domain($d) || &error($text{'newbw_ecannot'});
 	$subh = &domain_in($doms[0]);
+	if ($d->{'parent'}) {
+		# Which is a sub-server
+		$parent = &get_domain($d->{'parent'});
+		}
 	}
 else {
+	# All owned by user
 	@doms = grep { !$_->{'parent'} &&
 		       &can_edit_domain($_) } &list_domains();
 	}
@@ -22,7 +28,11 @@ else {
 $max = 0;
 foreach $d (@doms) {
 	$max = $d->{'bw_usage'} if ($d->{'bw_usage'} > $max);
+	$max = $d->{'bw_usage_only'} if ($d->{'bw_usage_only'} > $max);
 	$max = $d->{'bw_limit'} if ($d->{'bw_limit'} > $max);
+	}
+if ($parent) {
+	$max = $parent->{'bw_limit'} if ($parent->{'bw_limit'} > $max);
 	}
 if ($max) {
 	# Show links for mode
@@ -32,9 +42,17 @@ if ($max) {
 		     	     &get_domain_by("parent", $doms[0]->{'id'});
 		}
 	@links = ( );
+	if ($parent && !$in{'mode'}) {
+		# For sub-servers, default mode is by date
+		$in{'mode'} = 2;
+		}
 	foreach $m (0, 4, 1, 2, 3) {
 		if ($m == 4 && $in{'dom'}) {
 			# Just one domain, so no need for over-limit mode
+			next;
+			}
+		if ($m == 0 && $parent) {
+			# If this is a sub-server, don't show limit
 			next;
 			}
 		if ($m == 1 && $in{'dom'}) {
@@ -61,7 +79,7 @@ if ($max) {
 
 	# Show table
 	$width = 500;
-	print "<table>\n";
+	print "<table width=100%>\n";
 	if ($in{'mode'} == 0 || $in{'mode'} == 1 || $in{'mode'} == 4) {
 		# By domain .. start by computing usage for the selected
 		# period for each domain
@@ -186,7 +204,9 @@ if ($max) {
 				         &get_domain_by("parent", $d->{'id'})) {
 				$dname = &show_domain_name($sd);
 				print "<tr> <td>&nbsp;&nbsp;&nbsp;",
-				      "$dname</td> <td>\n";
+				      "<a href='bwgraph.cgi?dom=$sd->{'id'}&",
+				      "mago=$in{'mago'}'>$dname</a>",
+				      "</td> <td>\n";
 
 				# Show nothing if this domain is disabled
 				if (!&can_monitor_bandwidth($sd)) {
@@ -366,6 +386,10 @@ else {
 	print "<b>$text{'bwgraph_none'}</b><p>\n";
 	}
 
+if ($parent) {
+	push(@rets, "bwgraph.cgi?dom=$parent->{'id'}",
+		    $text{'bwgraph_returnparent'});
+	}
 if ($in{'dom'}) {
 	push(@rets, &domain_footer_link($d));
 	}
