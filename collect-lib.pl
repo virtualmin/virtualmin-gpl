@@ -214,6 +214,12 @@ foreach my $f ("virtualmin", @features) {
 	}
 $info->{'progs'} = \@progs;
 
+# CPU and drive temps
+local @cpu = &get_current_cpu_temps();
+$info->{'cputemps'} = \@cpu if (@cpu);
+local @drive = &get_current_drive_temps();
+$info->{'drivetemps'} = \@drive if (@drive);
+
 return $info;
 }
 
@@ -416,40 +422,23 @@ if (&foreign_check("net") && $gconfig{'os_type'} =~ /-linux$/) {
 	}
 
 # Get drive temperatures
-if (!$config{'collect_notemp'} && $virtualmin_pro &&
-    &foreign_installed("smart-status")) {
-	local ($temptotal, $tempcount);
-	&foreign_require("smart-status");
-	foreach my $d (&smart_status::list_smart_disks_partitions()) {
-		local $st = &smart_status::get_drive_status($d->{'device'}, $d);
-		foreach my $a (@{$st->{'attribs'}}) {
-			if ($a->[0] =~ /^Temperature\s+Celsius$/i &&
-			    $a->[1] > 0) {
-				$temptotal += int($a->[1]);
-				$tempcount++;
-				}
-			}
-		}
-	if ($temptotal) {
-		push(@stats, [ "drivetemp", $temptotal / $tempcount ]);
-		}
+local ($temptotal, $tempcount);
+foreach my $t (@{$info->{'drivetemps'}}) {
+	$temptotal += $t->{'temp'};
+	$tempcount++;
+	}
+if ($temptotal) {
+	push(@stats, [ "drivetemp", $temptotal / $tempcount ]);
 	}
 
 # Get CPU temperature
-if (!$config{'collect_notemp'} && $virtualmin_pro &&
-    $gconfig{'os_type'} =~ /-linux$/ && &has_command("sensors")) {
-	local ($temptotal, $tempcount);
-	&open_execute_command(SENSORS, "sensors </dev/null 2>/dev/null", 1);
-	while(<SENSORS>) {
-		if (/Core\s+(\d+):\s+([\+\-][0-9\.]+)/) {
-			$temptotal += $2;
-			$tempcount++;
-			}
-		}
-	close(SENSORS);
-	if ($temptotal) {
-		push(@stats, [ "cputemp", $temptotal / $tempcount ]);
-		}
+local ($temptotal, $tempcount);
+foreach my $t (@{$info->{'cputemps'}}) {
+	$temptotal += $t->{'temp'};
+	$tempcount++;
+	}
+if ($temptotal) {
+	push(@stats, [ "cputemp", $temptotal / $tempcount ]);
 	}
 
 # Write to the file
@@ -623,6 +612,47 @@ if ($count) {
 	$info->{'startstop'} = [ &get_startstop_links() ];
 	}
 return $count;
+}
+
+# get_current_drive_temps()
+# Returns a list of hashes, containing device and temp keys
+sub get_current_drive_temps
+{
+local @rv;
+if (!$config{'collect_notemp'} && $virtualmin_pro &&
+    &foreign_installed("smart-status")) {
+	&foreign_require("smart-status");
+	foreach my $d (&smart_status::list_smart_disks_partitions()) {
+		local $st = &smart_status::get_drive_status($d->{'device'}, $d);
+		foreach my $a (@{$st->{'attribs'}}) {
+			if ($a->[0] =~ /^Temperature\s+Celsius$/i &&
+			    $a->[1] > 0) {
+				push(@rv, { 'device' => $d->{'device'},
+					    'temp' => int($a->[1]) });
+				}
+			}
+		}
+	}
+return @rv;
+}
+
+# get_current_cpu_temps()
+# Returns a list of hashes containing core and temp keys
+sub get_current_cpu_temps
+{
+local @rv;
+if (!$config{'collect_notemp'} && $virtualmin_pro &&
+    $gconfig{'os_type'} =~ /-linux$/ && &has_command("sensors")) {
+	&open_execute_command(SENSORS, "sensors </dev/null 2>/dev/null", 1);
+	while(<SENSORS>) {
+		if (/Core\s+(\d+):\s+([\+\-][0-9\.]+)/) {
+			push(@rv, { 'core' => $1,
+				    'temp' => $2 });
+			}
+		}
+	close(SENSORS);
+	}
+return @rv;
 }
 
 1;
