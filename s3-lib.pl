@@ -58,6 +58,9 @@ for(my $i=0; $i<$tries; $i++) {
 		next;
 		}
 
+	# Re-open the connection, as sometimes it times out
+	$conn = S3::AWSAuthConnection->new($akey, $skey);
+
 	# Check if given bucket is in the list
 	local ($got) = grep { $_->{'Name'} eq $bucket } @{$response->entries};
 	if (!$got) {

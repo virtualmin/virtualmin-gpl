@@ -46,3 +46,6 @@
 
  - Remove .pl from API commands
 	- VM2
+
+ - Help search should link back to CGIs
+	- So should text matches
