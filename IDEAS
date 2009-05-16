@@ -44,8 +44,8 @@
  - WebNIC registrar support
 	- See email from Winnie Lee
 
- - Remove .pl from API commands
-	- VM2
-
  - Help search should link back to CGIs
 	- So should text matches
+	- Need some way to get valid params, if not skip if ReadParse is called
+	- Get page titles
+	- Script to get CGI urls for some help page

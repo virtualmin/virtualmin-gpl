@@ -1,0 +1,6 @@
+desc=Updated script installers
+html=Updated the Piwik script installer to 0.2.37, and phpMyAdmin to 3.1.5.
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}

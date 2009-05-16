@@ -1114,4 +1114,5 @@ All backups made manually, on schedule or from the command line are now logged, 
 Added a field to the script upgrade notification to limit warnings to only some virtual servers, or to exclude servers.
 Moved the option for a secondary group for domain owners to the template level.
 ---- Changes since 3.69 ----
+Updated the Piwik script installer to 0.2.37, and phpMyAdmin to 3.1.5.
 Bandwidth usage by date or month can now be graphed for sub-servers.
