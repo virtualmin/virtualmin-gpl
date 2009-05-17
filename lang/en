@@ -2028,6 +2028,7 @@ backup_postgresdump=Dumping PostgresSQL database $1 ..
 backup_postgresdumpfailed=.. dump failed! $1
 backup_dnscp=Copying records in DNS domain ..
 backup_dnsnozone=.. domain not found!
+backup_dnsnozonefile=.. records file $1 does not exist!
 backup_mailaliases=Saving mail aliases ..
 backup_mailusers=Saving mail and FTP users ..
 backup_mailfiles=Backing up all mail files ..

@@ -1257,9 +1257,16 @@ if ($z) {
 	local $file = &bind8::find("file", $z->{'members'});
 	local $filename = &bind8::make_chroot(
 		&bind8::absolute_path($file->{'values'}->[0]));
-	&execute_command("cp ".quotemeta($filename)." ".quotemeta($_[1]));
-	&$second_print($text{'setup_done'});
-	return 1;
+	if (-r $filename) {
+		&copy_source_dest($filename, $_[1]);
+		&$second_print($text{'setup_done'});
+		return 1;
+		}
+	else {
+		&$second_print(&text('backup_dnsnozonefile',
+				     "<tt>$filename</tt>"));
+		return 0;
+		}
 	}
 else {
 	&$second_print($text{'backup_dnsnozone'});
