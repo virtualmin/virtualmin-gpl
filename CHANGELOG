@@ -1116,3 +1116,4 @@ Moved the option for a secondary group for domain owners to the template level.
 ---- Changes since 3.69 ----
 Updated the Piwik script installer to 0.2.37, and phpMyAdmin to 3.1.5.
 Bandwidth usage by date or month can now be graphed for sub-servers.
+Partially completed backups (where only some domains failed) are now shown in the backup logs.

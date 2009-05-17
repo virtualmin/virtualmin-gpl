@@ -458,7 +458,7 @@ DOMAIN: foreach $d (@$doms) {
 			if (!$fok && !$skip) {
 				$ok = 0;
 				$errcount++;
-				push(@errdoms, $d->{'dom'});
+				push(@errdoms, $d);
 				last DOMAIN;
 				}
 			push(@donedoms, $d);
@@ -475,7 +475,7 @@ DOMAIN: foreach $d (@$doms) {
 		}
 	else {
 		$errcount++;
-		push(@errdoms, $d->{'dom'});
+		push(@errdoms, $d);
 		}
 
 	if ($onebyone && $homefmt && $dok && $mode != 0) {
@@ -805,7 +805,8 @@ if ($ok) {
 	    &text('backup_finalstatus', $okcount, $errcount) : "")."\n".
 	  ($vcount ? &text('backup_finalstatus2', $vcount) : ""));
 	if ($errcount) {
-		&$first_print(&text('backup_errorsites', join(" ", @errdoms)));
+		&$first_print(&text('backup_errorsites',
+			      join(" ", map { $_->{'dom'} } @errdoms)));
 		}
 	}
 
@@ -2356,15 +2357,18 @@ return $virtualmin_pro;
 }
 
 # write_backup_log(&domains, dest, incremental?, start, size, ok?,
-# 		   "cgi"|"sched"|"api")
+# 		   "cgi"|"sched"|"api", output, &errordoms)
 # Record that some backup was made and succeeded or failed
 sub write_backup_log
 {
-local ($doms, $dest, $increment, $start, $size, $ok, $mode, $output) = @_;
+local ($doms, $dest, $increment, $start, $size, $ok, $mode,
+       $output, $errdoms) = @_;
 if (!-d $backups_log_dir) {
 	&make_dir($backups_log_dir, 0700);
 	}
+print STDERR "errdoms=",join(" ", @$errdoms),"\n";
 local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
+	       'errdoms' => join(' ', map { $_->{'dom'} } @$errdoms),
 	       'dest' => $dest,
 	       'increment' => $increment,
 	       'start' => $start,

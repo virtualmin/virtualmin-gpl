@@ -52,8 +52,10 @@ if (@logs) {
 			&short_nice_hour_mins_secs(
 				$log->{'end'} - $log->{'start'}),
 			&nice_size($log->{'size'}),
-			$log->{'ok'} ? $text{'yes'}
-				: "<font color=#ff0000>$text{'no'}</font>"
+			$log->{'ok'} && !$log->{'errdoms'} ? $text{'yes'} :
+			 $log->{'ok'} && $log->{'errdoms'} ?
+			  "<font color=#ffaa00>$text{'backuplog_part'}</font>" :
+			  "<font color=#ff0000>$text{'no'}</font>"
 			]);
 		}
 	print &ui_columns_table([ $text{'sched_dest'}, $text{'sched_doms'},

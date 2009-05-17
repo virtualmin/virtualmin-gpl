@@ -22,6 +22,13 @@ print &ui_table_row($text{'viewbackup_dest'},
 print &ui_table_row($text{'viewbackup_doms'},
 	join(" , ", @dnames) || $text{'backuplog_nodoms'}, 3);
 
+# Domains that failed, if any
+@dnames = split(/\s+/, $log->{'errdoms'});
+if (@dnames) {
+	print &ui_table_row($text{'viewbackup_errdoms'},
+		    "<font color=#ff0000>".join(" , ", @dnames)."</font>", 3);
+	}
+
 # Execution type
 print &ui_table_row($text{'viewbackup_mode'},
 	$text{'viewbackup_mode_'.$log->{'mode'}});
@@ -51,8 +58,10 @@ print &ui_table_row($text{'viewbackup_inc'},
 
 # Final result
 print &ui_table_row($text{'viewbackup_ok'},
-	$log->{'ok'} ? $text{'viewbackup_success'}
-	     : "<font color=#ff0000>$text{'viewbackup_failure'}</font>");
+	$log->{'ok'} && !$log->{'errdoms'} ? $text{'viewbackup_success'} :
+	$log->{'ok'} && $log->{'errdoms'} ?
+		"<font color=#ffaa00>$text{'viewbackup_partial'}</font>" :
+		"<font color=#ff0000>$text{'viewbackup_failure'}</font>");
 
 print &ui_table_end();
 

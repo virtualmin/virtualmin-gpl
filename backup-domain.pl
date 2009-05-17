@@ -273,7 +273,7 @@ if ($purge && $ok) {
 
 $output = &stop_print_capture();
 &write_backup_log(\@doms, $strfdest, $increment, $start_time,
-		  $size, $ok, "api", $output);
+		  $size, $ok, "api", $output, $errdoms);
 exit($ex);
 
 sub usage
