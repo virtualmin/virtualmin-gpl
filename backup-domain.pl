@@ -236,7 +236,7 @@ if ($test) {
 &$first_print("Starting backup..");
 $start_time = time();
 $strfdest = $strftime ? &backup_strftime($dest) : $dest;
-($ok, $size) = &backup_domains($strfdest, \@doms, \@bfeats,
+($ok, $size, $errdoms) = &backup_domains($strfdest, \@doms, \@bfeats,
 			       $separate,
 			       $ignore_errors,
 			       \%opts,
@@ -247,12 +247,19 @@ $strfdest = $strftime ? &backup_strftime($dest) : $dest;
 			       $asowner,
 			       undef,
 			       $increment);
-if ($ok) {
+if ($ok && !@$errdoms) {
 	&$second_print("Backup completed successfully. Final size was ".
 		       &nice_size($size));
+	$ex = 0;
+	}
+elsif ($ok && @$errdoms) {
+	&$second_print("Backup partially completed. Final size was ".
+		       &nice_size($size));
+	$ex = 4;
 	}
 else {
 	&$second_print("Backup failed!");
+	$ex = 2;
 	}
 
 # Purge if requested
@@ -260,14 +267,14 @@ $pok = 1;
 if ($purge && $ok) {
 	$pok = &purge_domain_backups($dest, $purge, $start_time);
 	if (!$pok) {
-		exit(3);
+		$ex = 3;
 		}
 	}
 
 $output = &stop_print_capture();
 &write_backup_log(\@doms, $strfdest, $increment, $start_time,
 		  $size, $ok, "api", $output);
-exit(!$ok ? 2 : !$pok ? 3 : 0);
+exit($ex);
 
 sub usage
 {

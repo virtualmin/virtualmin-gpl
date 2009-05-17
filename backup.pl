@@ -157,10 +157,14 @@ PREFAILED:
 
 # Send an email to the recipient, if there are any
 if ($sched->{'email'} && $has_mailboxes &&
-    (!$ok || !$sched->{'email_err'} || $force_email)) {
-	if ($ok) {
+    (!$ok || @$errdoms || !$sched->{'email_err'} || $force_email)) {
+	if ($ok && !@$errdoms) {
 		$output .= &text('backup_done', &nice_size($size))." ";
 		$subject = &text('backup_donesubject', $host);
+		}
+	elsif ($ok && @$errdoms) {
+		$output .= &text('backup_partial', &nice_size($size))." ";
+		$subject = &text('backup_partialsubject', $host);
 		}
 	else {
 		$output .= $text{'backup_failed'}." ";
