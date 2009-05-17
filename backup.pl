@@ -128,7 +128,6 @@ $current_id = undef;
 			       $cbmode == 2,
 			       \&backup_cbfunc,
 			       $sched->{'increment'});
-print STDERR "errdoms=",join(" ", @$errdoms),"\n";
 
 # If purging old backups, do that now
 if ($ok && $sched->{'purge'}) {

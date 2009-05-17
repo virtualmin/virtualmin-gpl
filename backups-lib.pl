@@ -2366,7 +2366,6 @@ local ($doms, $dest, $increment, $start, $size, $ok, $mode,
 if (!-d $backups_log_dir) {
 	&make_dir($backups_log_dir, 0700);
 	}
-print STDERR "errdoms=",join(" ", @$errdoms),"\n";
 local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'errdoms' => join(' ', map { $_->{'dom'} } @$errdoms),
 	       'dest' => $dest,
