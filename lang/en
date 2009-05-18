@@ -3037,6 +3037,7 @@ licence_recheck=Re-check License Status
 licence_title=Re-Check License
 licence_doing=Now re-checking your Virtualmin license ..
 licence_ok2=.. license is OK! It is valid for $1 Virtualmin domains, and for use on $2 systems.
+licence_ok3=.. license is OK! It is valid for $1 Virtualmin domains, and for use on $2 systems until $3.
 licence_warn=However, a temporary problem occurred during this license check : $1.
 licence_unlimited=unlimited
 licence_goterr=.. a problem was detected : $1
