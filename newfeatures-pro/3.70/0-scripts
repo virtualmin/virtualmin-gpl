@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Piwik script installer to 0.2.37, Redmine to 0.8.4, SMF to 1.1.9, and phpMyAdmin to 3.1.5.
+html=Updated the Piwik script installer to 0.2.37, Redmine to 0.8.4, SMF to 1.1.9, OpenGoo to 1.4, and phpMyAdmin to 3.1.5.
 master=1
 reseller=1
 domain=1
