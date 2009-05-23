@@ -1883,7 +1883,8 @@ foreach my $dir ($user->{'home'}, "$user->{'home'}/.usermin", "$user->{'home'}/.
 	}
 if (-d "$user->{'home'}/.usermin/mailbox") {
 	local %inbox;
-	&read_file("$user->{'home'}/.usermin/mailbox/inbox.imap", \%inbox);
+	local $imapfile = "$user->{'home'}/.usermin/mailbox/inbox.imap";
+	&read_file($imapfile, \%inbox);
 	if (&usermin::get_usermin_version() >= 1.323) {
 		$inbox{'user'} = '*';
 		}
@@ -1892,7 +1893,9 @@ if (-d "$user->{'home'}/.usermin/mailbox") {
 		}
 	$inbox{'pass'} = $user->{'plainpass'};
 	$inbox{'nologout'} = 1;
-	&write_file("$user->{'home'}/.usermin/mailbox/inbox.imap", \%inbox);
+	&write_file($imapfile, \%inbox);
+	&set_ownership_permissions($user->{'uid'}, $user->{'gid'},
+				   $imapfile, 0600);
 	}
 }
 

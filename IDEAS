@@ -56,3 +56,5 @@
  - Convert alias domain to sub-server
 	- Just delete and re-create almost
 	- Save aliases
+
+ - Make available modules to domain owners templatable
