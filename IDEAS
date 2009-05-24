@@ -50,9 +50,6 @@
 	- Get page titles
 	- Script to get CGI urls for some help page
 
- - Make over-quota message templatable
-	- FS#5966
-
  - Convert alias domain to sub-server
 	- Just delete and re-create almost
 	- Save aliases

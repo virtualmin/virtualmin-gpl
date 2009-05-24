@@ -34,6 +34,8 @@ else {
 	$in{'interval'} =~ /^[1-9]\d*$/ || &error($text{'newquotas_einterval'});
 	$config{'quota_interval'} = $in{'interval'};
 	}
+$in{'msg'} =~ s/\r//g;
+$in{'msg'} =~ /\S/ || &error($text{'newquotas_emsg'});
 &cron::delete_cron_job($oldjob) if ($oldjob);
 &cron::create_wrapper($quotas_cron_cmd, $module_name, "quotas.pl");
 if ($in{'sched'}) {
@@ -41,5 +43,6 @@ if ($in{'sched'}) {
 	}
 $config{'last_check'} = time()+1;	# no need for check.cgi to be run
 &save_module_config();
+&save_quotas_message($in{'msg'});
 &redirect("");
 

@@ -11585,12 +11585,12 @@ if ($tmpl && $tmpl->{'id'} == 1) {
 return @rv;
 }
 
-# substitute_domain_template(string, &domain)
+# substitute_domain_template(string, &domain, [&extra-hash])
 # Does $VAR substitution in a string for a given domain, pulling in
 # PARENT_DOMAIN variables too
 sub substitute_domain_template
 {
-local ($str, $d) = @_;
+local ($str, $d, $extra) = @_;
 local %hash = %$d;
 delete($hash{''});
 $hash{'idndom'} = &show_domain_name($d->{'dom'});	# With unicode
@@ -11622,6 +11622,10 @@ if ($config{'dns'}) {
 		# Use Unix time for date and running number serials
 		$hash{'dns_serial'} = time();
 		}
+	}
+$hash{'virtualmin_url'} = &get_virtualmin_url($d);
+if ($extra) {
+	%hash = ( %hash, %$extra );
 	}
 return &substitute_virtualmin_template($str, \%hash);
 }
@@ -12773,6 +12777,36 @@ else {
 	$port = $miniserv{'port'};
 	return $proto."://$d->{'dom'}:$port";
 	}
+}
+
+# get_quotas_message()
+# Returns the template for email to users who are over quota
+sub get_quotas_message
+{
+local $msg = &read_file_contents($user_quota_msg_file);
+if (!$msg) {
+	$msg = "You have reached or are approaching your disk quota limit:\n".
+	       "\n".
+	       "Username:   \${USER}\n".
+	       "Domain:     \${DOM}\n".
+	       "Email:      \${EMAIL}\n".
+	       "Disk quota: \${QUOTA_LIMIT}\n".
+	       "Disk usage: \${QUOTA_USED}\n".
+	       "Status:     \${IF-QUOTA_PERCENT}Reached \${QUOTA_PERCENT}%\${ELSE-QUOTA_PERCENT}Over quota\${ENDIF-QUOTA_PERCENT}\n".
+	       "\n".
+	       "Sent by Virtualmin at: \${VIRTUALMIN_URL}\n";
+	}
+return $msg;
+}
+
+# save_quotas_message(message)
+# Updates the template for over-quota email message
+sub save_quotas_message
+{
+local ($msg) = @_;
+&open_tempfile(QUOTAMSG, ">$user_quota_msg_file");
+&print_tempfile(QUOTAMSG, $msg);
+&close_tempfile(QUOTAMSG);
 }
 
 # load_plugin_libraries([plugin, ...])

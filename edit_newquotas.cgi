@@ -47,6 +47,10 @@ print &ui_table_row($text{'newquotas_when'},
 	&virtualmin_ui_show_cron_time("sched", $job,
 				      $text{'newquotas_whenno'}));
 
+# Email message template
+print &ui_table_row($text{'newquotas_msg'},
+	&ui_textarea("msg", &get_quotas_message(), 10, 60));
+
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'newquotas_ok'} ] ]);
 

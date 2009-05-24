@@ -151,7 +151,7 @@ $styles_unavail_file = "$module_config_directory/stylesunavail";
 @all_template_files = ( "domain-template", "subdomain-template",
 			"user-template", "local-template", "bw-template",
 			"warnbw-template", "framefwd-template",
-			"update-template",
+			"update-template", "quotas-template",
 			$virtualmin_pro ? ( "reseller-template" ) : ( ) );
 
 $initial_users_dir = "$module_config_directory/initial";
@@ -269,6 +269,7 @@ $spam_alias_dir = "$trap_base_dir/spam";
 $ham_alias_dir = "$trap_base_dir/ham";
 
 $user_quota_warnings_file = "$module_config_directory/quotas-warnings";
+$user_quota_msg_file = "$module_config_directory/quotas-template";
 
 # generate_plugins_list([list])
 # Creates the confplugins, plugins and other arrays based on the module config

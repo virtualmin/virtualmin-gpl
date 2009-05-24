@@ -197,20 +197,12 @@ sub send_single_user_quota_email
 local ($msg) = @_;
 $email = $msg->[5]->{'email'} ||
 	  $msg->[5]->{'user'}.'@'.&get_system_hostname();
-
-local $body = "You have reached or are approaching your disk quota limit:\n\n";
-$body .= "Username:   $msg->[5]->{'user'}\n";
-$body .= "Domain:     $msg->[0]->{'dom'}\n";
-if ($msg->[5]->{'email'}) {
-	$body .= "Email:      $msg->[5]->{'email'}\n";
-	}
-$body .= "Disk quota: ".&nice_size($msg->[2])."\n";
-$body .= "Disk usage: ".&nice_size($msg->[1])."\n";
-$body .= "Status:     ".($msg->[3] ? "Reached $msg->[3] %"
-				   : "Over quota")."\n";
-
-$body .= "\n";
-$body .= "Sent by Virtualmin at: ".&get_virtualmin_url($msg->[0])."\n";
+local $tmpl = &get_quotas_message();
+local %hash = %{$msg->[5]};
+$hash{'quota_limit'} = &nice_size($msg->[2]);
+$hash{'quota_used'} = &nice_size($msg->[1]);
+$hash{'quota_percent'} = $msg->[3] if ($msg->[3]);
+local $body = &substitute_domain_template($tmpl, $msg->[0], \%hash);
 
 # Send the email
 if ($debug_mode) {

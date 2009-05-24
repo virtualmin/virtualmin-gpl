@@ -3396,9 +3396,11 @@ newquotas_interval=Time between notifications for a domain
 newquotas_noint=No minimum
 newquotas_hours=hours
 newquotas_einterval=Missing or invalid number of hours between notifications
+newquotas_emsg=Missing template email message
 newquotas_warnlist=Thresholds
 newquotas_mailbox=Also check mail and FTP user quotas?
 newquotas_users=Also notify admins who are over quota?
+newquotas_msg=Template for email to mail and FTP users
 
 mass_title=Modify Multiple Users
 mass_desc=This page allows you to change selected settings for the $1 chosen users in this virtual server at once.
