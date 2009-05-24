@@ -4,7 +4,7 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
-&can_move_domain($d) || &error($text{'unsub_ecannot'});
+&can_config_domain($d) || &error($text{'unsub_ecannot'});
 
 if ($in{'confirm'}) {
 	# Do it, and show progress

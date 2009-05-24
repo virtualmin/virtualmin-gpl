@@ -9328,11 +9328,21 @@ if (&can_move_domain($d) && !$d->{'alias'} && !$d->{'subdom'}) {
 		  });
 	}
 
-if (&can_move_domain($d) && $d->{'subdom'}) {
-	# Turn sub-server into sub-domain
+if (&can_config_domain($d) && $d->{'subdom'}) {
+	# Turn sub-domain into sub-server
 	push(@rv, { 'page' => 'unsub.cgi',
 		    'title' => $text{'edit_unsub'},
 		    'desc' => $text{'edit_unsubdesc'},
+		    'cat' => 'server',
+		    'icon' => 'arrow_right',
+		  });
+	}
+
+if (&can_config_domain($d) && $d->{'alias'}) {
+	# Turn alias server into sub-server
+	push(@rv, { 'page' => 'unalias.cgi',
+		    'title' => $text{'edit_unalias'},
+		    'desc' => $text{'edit_unaliasdesc'},
 		    'cat' => 'server',
 		    'icon' => 'arrow_right',
 		  });
