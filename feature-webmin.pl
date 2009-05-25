@@ -486,7 +486,7 @@ if ($extramods{'file'} && $_[0]->{'unix'}) {
 	local %acl = ( 'noconfig' => 1,
 		       'uid' => $_[0]->{'uid'},
 		       'follow' => 0,
-		       'root' => $_[0]->{'home'},
+		       'root' => &resolve_links($_[0]->{'home'}),
 		       'home' => 0,
 		       'goto' => 1 );
 	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "file")
