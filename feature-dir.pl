@@ -105,6 +105,22 @@ foreach my $dir (&virtual_server_directories($d)) {
 # Rename home directory if needed
 sub modify_dir
 {
+# Special case .. converting alias to non-alias, so some directories need to
+# be created
+if ($_[1]->{'alias'} && !$_[0]->{'alias'}) {
+	&$first_print($text{'save_dirunalias'});
+	local $tmpl = &get_template($_[0]->{'template'});
+	if ($tmpl->{'skel'} ne "none") {
+		local $uinfo = &get_domain_owner($_[0]);
+		&copy_skel_files(
+			&substitute_domain_template($tmpl->{'skel'}, $_[0]),
+			$uinfo, $_[0]->{'home'},
+			$_[0]->{'group'} || $_[0]->{'ugroup'}, $_[0]);
+		}
+	&create_standard_directories($_[0]);
+	&$second_print($text{'setup_done'});
+	}
+
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable($_[1], 1);
 	}

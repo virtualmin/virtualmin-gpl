@@ -388,6 +388,15 @@ sub modify_web
 {
 local $rv = 0;
 &require_apache();
+
+# Special case - converting an alias domain into a non-alias. Just delete and
+# re-create
+if ($_[1]->{'alias'} && !$_[0]->{'alias'}) {
+	&delete_web($_[1]);
+	&setup_web($_[0]);
+	return 1;
+	}
+
 local $conf = &apache::get_config();
 local $need_restart = 0;
 

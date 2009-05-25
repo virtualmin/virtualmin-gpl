@@ -8790,9 +8790,19 @@ else {
 # Returns the Unix user object for a server's owner
 sub get_domain_owner
 {
-local @users = &list_domain_users($_[0], 0, 0, 0);
-local ($user) = grep { $_->{'user'} eq $_[0]->{'user'} } @users;
-return $user;
+local ($d) = @_;
+if ($d->{'parent'}) {
+	local $parent = &get_domain($d->{'parent'});
+	if ($parent) {
+		return &get_domain_owner($parent);
+		}
+	return undef;
+	}
+else {
+	local @users = &list_domain_users($_[0], 0, 0, 0);
+	local ($user) = grep { $_->{'user'} eq $_[0]->{'user'} } @users;
+	return $user;
+	}
 }
 
 # new_password_input(name)
@@ -10474,6 +10484,91 @@ local $merr = &made_changes();
 
 return 1;
 }
+
+# unalias_virtual_server(&domain)
+# Convert a virtual server from an alias to a sub-server
+sub unalias_virtual_server
+{
+local ($d) = @_;
+local $oldd = { %$d };
+local $parent = &get_domain($d->{'parent'});
+
+# Run the before command
+&set_domain_envs($oldd, "MODIFY_DOMAIN");
+local $merr = &making_changes();
+&reset_domain_envs($oldd);
+&error(&text('rename_emaking', "<tt>$merr</tt>")) if (defined($merr));
+
+# Update the domain object to set the web directory
+delete($d->{'alias'});
+delete($d->{'public_html_dir'});
+delete($d->{'public_html_path'});
+$d->{'public_html_dir'} = &public_html_dir($d, 1);
+$d->{'public_html_path'} = &public_html_dir($d, 0);
+delete($d->{'cgi_bin_dir'});
+delete($d->{'cgi_bin_path'});
+$d->{'cgi_bin_dir'} = &cgi_bin_dir($d, 1);
+$d->{'cgi_bin_path'} = &cgi_bin_dir($d, 0);
+
+# Create the directory, if missing
+if (!$d->{'dir'}) {
+	$d->{'dir'} = 1;
+	local $main::error_must_die = 1;
+	eval { &setup_dir($d); };
+	if ($@) {
+		&$second_print(&text('setup_failure',
+				     $text{'feature_dir'}, $@));
+		}
+	}
+
+# Update all features in the domain
+local %vital = map { $_, 1 } @vital_features;
+foreach my $f (@features) {
+	local $mfunc = "modify_$f";
+	if ($d->{$f} && $config{$f}) {
+		local $main::error_must_die = 1;
+		eval { &$mfunc($d, $oldd); };
+		if ($@) {
+			&$second_print(&text('setup_failure',
+				       $text{'feature_'.$f}, $@));
+			return 0 if ($vital{$f});
+			}
+		}
+	}
+
+# Update all enabled plugins
+foreach my $f (&list_feature_plugins()) {
+	if ($d->{$f}) {
+		local $main::error_must_die = 1;
+		eval { &plugin_call($f, "feature_modify", $d, $oldd) };
+		if ($@) {
+			local $err = $@;
+			&$second_print(&text('setup_failure',
+				&plugin_call($f, "feature_name"), $err));
+			}
+		}
+	}
+
+# Save the domain object
+&$first_print($text{'save_domain'});
+&save_domain($d);
+&$second_print($text{'setup_done'});
+
+# Update parent Webmin user
+&modify_webmin($parent, $parent);
+
+&run_post_actions();
+
+# Run the after command
+&set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
+local $merr = &made_changes();
+&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
+&reset_domain_envs($d);
+
+return 1;
+}
+
+
 
 # set_parent_attributes(&domain, &parent)
 # Update a domain object with attributes inherited from the parent

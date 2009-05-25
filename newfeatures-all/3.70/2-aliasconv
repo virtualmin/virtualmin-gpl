@@ -1,0 +1,5 @@
+desc=Alias virtual server conversion
+html=Added the Convert Alias Server page to change an existing alias virtual server into a sub-server.
+master=1
+reseller=1
+owner=1

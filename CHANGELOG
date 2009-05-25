@@ -1118,3 +1118,4 @@ Updated the Piwik script installer to 0.2.37, Redmine to 0.8.4, SMF to 1.1.9, Op
 Bandwidth usage by date or month can now be graphed for sub-servers.
 Partially completed backups (where only some domains failed) are now shown in the backup logs.
 The email to mailboxes who are approaching or over quota can now be customized on the Disk Quota Monitoring page.
+Added the Convert Alias Server page to change an existing alias virtual server into a sub-server.

@@ -51,9 +51,7 @@
 	- Script to get CGI urls for some help page
 
  - Convert alias domain to sub-server
-	- Create dir
-	- Each feature needs to handle conversion
-	- Save aliases
 	- Functional test
+	- Help
 
  - Make available modules to domain owners templatable

@@ -455,6 +455,29 @@ local $tmpl = &get_template($_[0]->{'template'});
 local $our_mail_locks = 0;
 local $our_unix_locks = 0;
 
+# Special case - conversion of an alias domain to non-alias
+if ($_[1]->{'alias'} && !$_[0]->{'alias'}) {
+	&obtain_lock_mail($_[0]);
+	if ($_[0]->{'aliascopy'}) {
+		# Stop copying mail aliases
+		&$first_print($text{'save_mailunalias1'});
+		$_[0]->{'aliascopy'} = 0;
+		&delete_alias_virtuals($_[0]);
+		}
+	else {
+		# Remove catchall
+		&$first_print($text{'save_mailunalias2'});
+		local ($catchall) = grep { $_->{'from'} eq '@'.$_[0]->{'dom'} }
+					 &list_virtusers();
+		if ($catchall) {
+			&delete_virtuser($catchall);
+			}
+		}
+	&$second_print($text{'setup_done'});
+	&release_lock_mail($_[0]);
+	return 1;
+	}
+
 # Need to update the home directory of all mail users .. but only
 # in the Unix object, as their files will have already been moved
 # as part of the domain's directory.
@@ -713,7 +736,7 @@ local ($d) = @_;
 
 # Check if this server is receiving email
 return &text('validate_email', "<tt>$d->{'dom'}</tt>")
-	if (!&is_local_domain($d->{'dom'}));
+	if (!&is_local_domain($d->{'dom'}) && !$d->{'disabled'});
 
 # Check any secondary MX servers
 local %ids = map { $_, 1 } split(/\s+/, $d->{'mx_servers'});
