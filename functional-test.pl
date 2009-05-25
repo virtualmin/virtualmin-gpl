@@ -921,6 +921,100 @@ $move_tests = [
 	  'cleanup' => 1 },
 	];
 
+# Alias domain tests
+$aliasdom_tests = [
+	# Create a domain to be the alias target
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'desc', 'Test target domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test alias target page' ],
+		      @create_args, ],
+        },
+
+	# Create the alias domain
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'alias', $test_target_domain ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      @create_args, ],
+	},
+
+	# Test DNS lookup
+	{ 'command' => 'host '.$test_domain,
+	  'grep' => &get_default_ip(),
+	},
+
+	# Test HTTP get
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test alias target page',
+	},
+
+	# Enable aliascopy mode
+	{ 'command' => 'modify-mail.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'alias-copy' ] ],
+	},
+
+	# Create a mailbox in the target
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
+	# Test SMTP to him in the alias domain
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'to', $test_user.'@'.$test_domain ] ],
+	},
+
+	# Test SMTP to a missing user
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'to', 'bogus@'.$test_domain ] ],
+	  'fail' => 1,
+	},
+
+	# Convert to sub-server
+	{ 'command' => 'unalias-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Validate to make sure it worked
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Create a web page, and make sure it can be fetched
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test un-aliased page' ] ],
+	},
+
+	# Test HTTP get
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test un-aliased page',
+	},
+
+	# Make sure mail to the user no longer works
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'to', $test_user.'@'.$test_domain ] ],
+	  'fail' => 1,
+	},
+
+	# Cleanup the target domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 # Backup tests
 @post_restore_tests = (
 	# Test DNS lookup
@@ -2529,6 +2623,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'web' => $web_tests,
 	      'mailbox' => $mailbox_tests,
 	      'alias' => $alias_tests,
+	      'aliasdom' => $aliasdom_tests,
 	      'reseller' => $reseller_tests,
 	      'script' => $script_tests,
 	      'database' => $database_tests,

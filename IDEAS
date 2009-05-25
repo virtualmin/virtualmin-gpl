@@ -50,8 +50,4 @@
 	- Get page titles
 	- Script to get CGI urls for some help page
 
- - Convert alias domain to sub-server
-	- Functional test
-	- Help
-
  - Make available modules to domain owners templatable
