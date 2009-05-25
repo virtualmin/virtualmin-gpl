@@ -832,6 +832,7 @@ $move_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ], [ 'mail' ],
+		      [ 'mysql' ],
 		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
@@ -841,8 +842,8 @@ $move_tests = [
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_target_domain ],
 		      [ 'desc', 'Test target domain' ],
-		      [ 'pass', 'smeg' ],
-		      [ 'dir' ], [ 'unix' ],
+		      [ 'pass', 'spod' ],
+		      [ 'dir' ], [ 'unix' ], [ 'mysql' ],
 		      @create_args, ],
         },
 
@@ -870,6 +871,15 @@ $move_tests = [
 	# Make sure the website still works
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'Test home page',
+	},
+
+	# Check MySQL login under new owner
+	{ 'command' => 'mysql -u '.$test_target_domain_user.' -pspod '.$test_domain_db.' -e "select version()"',
+	},
+
+	# Make sure MySQL is gone under old owner
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.' -e "select version()"',
+	  'fail' => 1,
 	},
 
 	# Make sure the parent domain and user are correct
@@ -900,6 +910,10 @@ $move_tests = [
 	# Make sure the website still works
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'Test home page',
+	},
+
+	# Make sure MySQL is back
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.' -e "select version()"',
 	},
 
 	# Make sure the parent domain and user are correct
