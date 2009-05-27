@@ -18,7 +18,7 @@ return "DokuWiki is a standards compliant, simple to use Wiki, mainly aimed at c
 # script_dokuwiki_versions()
 sub script_dokuwiki_versions
 {
-return ( "2009-02-14" );
+return ( "2009-02-14b" );
 }
 
 sub script_dokuwiki_category
@@ -111,8 +111,10 @@ local ($out, $ex);
 
 # Extract tar file to temp dir and copy to target
 local $temp = &transname();
+local $verdir = $ver;
+$verdir =~ s/[a-z]$//;
 local $err = &extract_script_archive($files->{'source'}, $temp, $d,
-                                     $opts->{'dir'}, "dokuwiki-$ver");
+                                     $opts->{'dir'}, "dokuwiki-$verdir");
 $err && return (0, "Failed to extract source : $err");
 local $cfile = "$opts->{'dir'}/doku.php";
 
