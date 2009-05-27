@@ -649,6 +649,10 @@ if (!$config{'collect_notemp'} && $virtualmin_pro &&
 			push(@rv, { 'core' => $1,
 				    'temp' => $2 });
 			}
+		elsif (/CPU:\s+([\+\-][0-9\.]+)/) {
+			push(@rv, { 'core' => 0,
+				    'temp' => $1 });
+			}
 		}
 	close(SENSORS);
 	}
