@@ -789,11 +789,15 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			local $slave;
 			local @slaves = &bind8::list_slave_servers();
 			foreach $slave (@slaves) {
-				local @bn = $slave->{'nsname'} ||
-					    gethostbyname($slave->{'host'});
-				local $full = "$bn[0].";
-				&bind8::create_record($file, "@", undef, "IN",
-						      "NS", "$bn[0].");
+				local @bn = $slave->{'nsname'} ?
+						( $slave->{'nsname'} ) :
+						gethostbyname($slave->{'host'});
+				if ($bn[0]) {
+					local $full = "$bn[0].";
+					&bind8::create_record(
+						$file, "@", undef, "IN",
+						"NS", "$bn[0].");
+					}
 				}
 
 			# Add NS records from template
@@ -1699,7 +1703,8 @@ if ($in{"dns_mode"} == 2) {
 
 # Save NS hostname
 $in{'dns_master_mode'} != 2 ||
-   ($in{'dns_master'} =~ /^[a-z0-9\.\-\_]+$/i && $in{'dns_master'} =~ /\./) ||
+   ($in{'dns_master'} =~ /^[a-z0-9\.\-\_]+$/i && $in{'dns_master'} =~ /\./ &&
+    !&check_ipaddress($in{'dns_master'})) ||
 	&error($text{'tmpl_ednsmaster'});
 $tmpl->{'dns_master'} = $in{'dns_master_mode'} == 0 ? "none" :
 		        $in{'dns_master_mode'} == 1 ? undef : $in{'dns_master'};
