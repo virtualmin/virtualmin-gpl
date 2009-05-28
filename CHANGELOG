@@ -1119,3 +1119,4 @@ Bandwidth usage by date or month can now be graphed for sub-servers.
 Partially completed backups (where only some domains failed) are now shown in the backup logs.
 The email to mailboxes who are approaching or over quota can now be customized on the Disk Quota Monitoring page.
 Added the Convert Alias Server page to change an existing alias virtual server into a sub-server.
+Historic statistics graphs can now be plotted on a log scale, and both axis are used if multiple values are plotted.

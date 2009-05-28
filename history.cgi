@@ -80,7 +80,8 @@ for($i=1; $i<=4; $i*=2) {
 	$s = $i == 1 ? "" : "s";
 	$msg = "&lt;&lt;".&text('history_'.&period_to_name($period).$s, $i);
 	push(@llinks, "<a href='history.cgi?$statsparams&period=$period&".
-		      "start=".($start-$period*$i)."'>$msg</a>");
+		      "start=".($start-$period*$i).
+		      "&logscale=$in{'logscale'}'>$msg</a>");
 	}
 print &ui_links_row(\@llinks);
 print "</td>\n";
@@ -95,7 +96,8 @@ foreach $p (map { [ $text{'history_'.$_->[0]}, $_->[1] ] } @history_periods) {
 	else {
 		$nstart = $end - $p->[1];
 		push(@plinks,"<a href='history.cgi?$statsparams&start=$nstart&".
-			     "period=$p->[1]'>$p->[0]</a>");
+			     "period=$p->[1]&logscale=$in{'logscale'}'>".
+			     $p->[0]."</a>");
 		}
 	}
 print &ui_links_row(\@plinks);
@@ -129,12 +131,17 @@ print &ui_hidden("period", $period);
 foreach $s (sort { $text{'history_stat_'.$a} cmp
 		   $text{'history_stat_'.$b} } &list_historic_stats()) {
 	$link = "history.cgi?start=".&urlize($start).
-		"&period=".&urlize($period)."&stat=$s";
+		"&period=".&urlize($period)."&logscale=".$in{'logscale'}.
+		"&stat=$s";
 	push(@grid, &ui_checkbox("stat", $s,
 		"<a href='$link'>".($text{'history_stat_'.$s} || $s)."</a>",
 		&indexof($s, @stats) >= 0));
 	}
 print &ui_grid_table(\@grid, 4);
+print "<b>$text{'history_logscale'}</b>\n";
+print &ui_radio("logscale", int($in{'logscale'}),
+		[ [ 0, $text{'history_logscale0'} ],
+		  [ 1, $text{'history_logscale1'} ] ]),"<br>\n";
 print &ui_form_end([ [ undef, $text{'history_ok'} ] ]);
 
 # Javascript to generate it
@@ -144,10 +151,13 @@ print "function onLoad() {\n";
 print "  var eventSource = new Timeplot.DefaultEventSource();\n";
 print "  var plotInfo = [\n";
 $plotno = 1;
+$geom = $in{'logscale'} ? 'LogarithmicValueGeometry'
+		        : 'DefaultValueGeometry';
 foreach $stat (@stats) {
 	$color = $historic_graph_colors[
 			($plotno-1) % scalar(@historic_graph_colors)];
 	$maxopt = "";
+	$axis = $plotno%2 == 0 ? 'left' : 'right';
 	if ($maxes->{$stat} && $stat ne 'tx' && $stat ne 'rx') {
 		$maxv = $stat eq "memused" || $stat eq "swapused" ?
 			 $maxes->{$stat}/(1024*1024) :
@@ -159,9 +169,9 @@ foreach $stat (@stats) {
 	print "    Timeplot.createPlotInfo({\n";
 	print "      id: 'plot$plotno',\n";
 	print "      dataSource: new Timeplot.ColumnSource(eventSource, $plotno),\n";
-	print "      valueGeometry: new Timeplot.DefaultValueGeometry({\n";
+	print "      valueGeometry: new Timeplot.$geom({\n";
 	print "        gridColor: '#B3B6B0',\n";
-	print "        axisLabelsPlacement: 'left',\n";
+	print "        axisLabelsPlacement: '$axis',\n";
 	print "        $maxopt\n";
 	print "        min: 0\n";
 	print "      }),\n";

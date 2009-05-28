@@ -4470,6 +4470,9 @@ history_mbsec=MB per second
 history_kbsec=kB per second
 history_cel=degrees celsius
 history_rawdata=Download raw data..
+history_logscale0=Linear
+history_logscale1=Logarithmic
+history_logscale=Vertical axis scaling
 
 sv_title=Spam and Virus Scanning
 newsv_title=$sv_title
