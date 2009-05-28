@@ -338,6 +338,14 @@ else {
 		$user->{'nospam'} = $in{'nospam'};
 		}
 
+	# Work out full email address, perhaps with real name
+	if ($user->{'real'}) {
+		$fullemail = '"'.$user->{'real'}.'" <'.$user->{'email'}.'>';
+		}
+	else {
+		$fullemail = $user->{'email'};
+		}
+
 	# Create or update the user
 	$emailmailbox = 0;
 	if ($in{'new'}) {
@@ -439,7 +447,7 @@ else {
 				$simple = &get_simple_alias($d, $user);
 				&parse_simple_form($simple, \%in, $d, 1, 1, 1,
 						   $user->{'user'});
-				$simple->{'from'} = $user->{'email'};
+				$simple->{'from'} = $fullemail;
 				&save_simple_alias($d, $user, $simple);
 				if (@{$user->{'to'}} == 1 &&
 				    $simple->{'tome'}) {
@@ -552,7 +560,7 @@ else {
 				$simple = &get_simple_alias($d, $user);
 				&parse_simple_form($simple, \%in, $d, 1, 1, 1,
 						   $user->{'user'});
-				$simple->{'from'} = $user->{'email'};
+				$simple->{'from'} = $fullemail;
 				&save_simple_alias($d, $user, $simple);
 				if (@{$user->{'to'}} == 1 &&
 				    $simple->{'tome'}) {
