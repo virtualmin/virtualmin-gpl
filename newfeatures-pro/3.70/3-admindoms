@@ -1,0 +1,6 @@
+desc=Extra administrators with limited domains
+html=Extra administrators can now be limited to a subset of the parent servers domains, either from the Edit Extra Administator page or using the command-line API.
+master=1
+reseller=1
+owner=1
+link=list_admins.cgi?dom=${ID}

@@ -213,10 +213,10 @@ sub restart_usermin
 }
 
 # set_user_modules(&domain, &webminuser, [&acs-for-this-module], [no-features],
-#		   [no-extra], [is-extra-admin])
+#		   [no-extra], [is-extra-admin], [&only-domain-ids])
 sub set_user_modules
 {
-local ($d, $wuser, $acls, $nofeatures, $noextras, $isextra) = @_;
+local ($d, $wuser, $acls, $nofeatures, $noextras, $isextra, $onlydoms) = @_;
 local @mods;
 local $tmpl = &get_template($_[0]->{'template'});
 
@@ -235,6 +235,10 @@ if (!$nofeatures) {
 			$features{$f}++ if ($d->{$f});
 			}
 		}
+	}
+if ($onlydoms) {
+	local %onlydoms = map { $_, 1 } @$onlydoms;
+	@doms = grep { $onlydoms{$_->{'id'}} } @doms;
 	}
 
 # Work out which extra (non feature-related) modules are available
@@ -949,7 +953,9 @@ foreach my $admin (@admins) {
 	$acl{'nodbname'} = $d->{'nodbname'} || $admin->{'nodbname'};
 	$acl{'forceunder'} = $d->{'forceunder'} || $admin->{'forceunder'};
 	&set_user_modules($d, $wuser, \%acl,
-			  !$admin->{'features'}, !$admin->{'modules'}, 1);
+			  !$admin->{'features'}, !$admin->{'modules'}, 1,
+			  $admin->{'doms'} ? [ split(/\s+/, $admin->{'doms'}) ]
+					   : undef);
 	}
 }
 

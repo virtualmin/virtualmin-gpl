@@ -83,6 +83,15 @@ else {
 		$admin->{"edit_".$ed} = $sel_edits{$ed};
 		}
 
+	# Save allowed domains
+	if ($in{'doms_def'}) {
+		delete($admin->{'doms'});
+		}
+	else {
+		$in{'doms'} || &error($text{'admin_edoms'});
+		$admin->{'doms'} = join(" ", split(/\0/, $in{'doms'}));
+		}
+
 	# Save or create the admin
 	if ($in{'new'}) {
 		&create_extra_admin($admin, $d);

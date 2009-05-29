@@ -16,12 +16,25 @@ $d = &get_domain($in{'dom'});
 # Make table data
 @admins = &list_extra_admins($d);
 foreach $a (sort { $a->{'name'} cmp $b->{'name'} } @admins) {
+	if (!$a->{'doms'}) {
+		$domsdesc = $text{'admins_domsall'};
+		}
+	else {
+		@doms = grep { $_ } map { &get_domain($_) }
+				split(/\s+/, $a->{'doms'});
+		@dnames = map { &show_domain_name($_) } @doms;
+		$domsdesc = @dnames > 3 ?
+			join(", ", @dnames[0..2]).", ".&text('admins_more',
+							     @dnames - 3) :
+			join(", ", @dnames);
+		}
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $a->{'name'} },
 		"<a href='edit_admin.cgi?dom=$in{'dom'}&name=".
 		&urlize($a->{'name'})."'>".$a->{'name'}."</a>",
-		$a->{'desc'}
+		$a->{'desc'},
+		$domsdesc,
 		]);
 	}
 
@@ -32,7 +45,8 @@ print &ui_form_columns_table(
 	1,
 	[ [ "edit_admin.cgi?dom=$in{'dom'}&new=1", $text{'admins_add'} ] ],
 	[ [ "dom", $in{'dom'} ] ],
-	[ "", $text{'admins_name'}, $text{'admins_desc'} ],
+	[ "", $text{'admins_name'}, $text{'admins_desc'},
+	  $text{'admins_doms'} ],
 	100,
 	\@table,
 	undef,

@@ -23,7 +23,7 @@ print &ui_form_start("save_admin.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
 print &ui_hidden("new", $in{'new'}),"\n";
 print &ui_hidden("old", $in{'name'}),"\n";
-print &ui_table_start($text{'admin_header'}, "width=100%", 2, [ "width=30%" ]);
+print &ui_hidden_table_start($text{'admin_header'}, "width=100%", 2, "main", 1);
 
 # Show general user information
 if ($tmpl->{'extra_prefix'} ne "none") {
@@ -67,7 +67,8 @@ print &ui_table_row(&hlink($text{'admin_email'}, "admin_email"),
 		    &ui_opt_textbox("email", $admin->{'email'}, 40,
 				    $text{'admin_none'}), 2);
 
-print &ui_table_hr();
+print &ui_hidden_table_end();
+print &ui_hidden_table_start($text{'admin_header2'}, "width=100%", 2, "can", 1);
 
 # Can edit
 print &ui_table_row(&hlink($text{'admin_create'}, "admin_create"),
@@ -94,7 +95,19 @@ foreach $ed (@edit_limits) {
 $etable .= &ui_grid_table(\@grid, 2);
 print &ui_table_row(&hlink($text{'limits_edit'}, "admin_edit"), $etable);
 
-print &ui_table_end();
+print &ui_hidden_table_end();
+print &ui_hidden_table_start($text{'admin_header3'}, "width=100%", 2, "dom", 0);
+
+# Allowed domains
+@doms = &get_domain_by("user", $d->{'user'});
+@aids = split(/\s+/, $admin->{'doms'});
+print &ui_table_row(&hlink($text{'admin_doms'}, "admin_doms"),
+		    &ui_radio("doms_def", $admin->{'doms'} ? 0 : 1,
+			      [ [ 1, $text{'admin_doms1'} ],
+				[ 0, $text{'admin_doms0'} ] ])."<br>\n".
+		    &servers_input("doms", \@aids, \@doms));
+
+print &ui_hidden_table_end();
 if ($in{'new'}) {
 	print &ui_form_end([ [ undef, $text{'create'} ] ]);
 	}

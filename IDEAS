@@ -54,3 +54,4 @@
 
  - Make allowed domains selectable for extra admins
 	- FS#5988
+	- Command-line tools
