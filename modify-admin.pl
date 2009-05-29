@@ -24,6 +24,15 @@ Editing capabilities can be granted to the user with the C<--can-edit> option
 followed by a capability name. Similarly, they can be taken away with the
 C<--cannot-edit> option.
 
+To add a domain to the list of those an extra administrator is allowed to
+manage, use the C<--add-domain> flag followed by a domain name. If all virtual
+servers are currently allowed, this will restrict the extra admin to just that
+virtual server.
+
+To remove a server from the allowed list, use the C<--remove-domain> parameter
+followed by the domain name. To grant access to all virtual servers under
+the parent server, use the C<--all-domains> flag.
+
 =cut
 
 package virtual_server;
@@ -96,6 +105,15 @@ while(@ARGV > 0) {
 	elsif ($a eq "--cannot-modules") {
 		$modules = 0;
 		}
+	elsif ($a eq "--all-domains") {
+		$allowedall = 1;
+		}
+	elsif ($a eq "--add-domain") {
+		push(@allowednames, shift(@ARGV));
+		}
+	elsif ($a eq "--remove-domain") {
+		push(@deniednames, shift(@ARGV));
+		}
 	else {
 		&usage();
 		}
@@ -152,6 +170,32 @@ foreach $e (@cannotedits) {
 	$admin->{'edit_'.$e} = 0;
 	}
 
+# Apply allowed domain changes
+@allowed = split(/\s+/, $admin->{'doms'});
+if ($allowedall) {
+	@allowed = ( );
+	}
+foreach $aname (@allowednames) {
+	$a = &get_domain_by("dom", $aname);
+        $a || &usage("The allowed virtual server $aname does not exist");
+	$a->{'user'} eq $d->{'user'} ||
+                &usage("The allowed virtual server $a->{'dom'} is not owned ".
+                       "by the same user as $d->{'dom'}");
+	push(@allowed, $a->{'id'});
+	}
+foreach $aname (@deniednames) {
+	$a = &get_domain_by("dom", $aname);
+        $a || &usage("The allowed virtual server $aname does not exist");
+	@allowed = grep { $_ ne $a->{'id'} } @allowed;
+	@allowed || &usage("You cannot remove all allowed virtual servers");
+	}
+if (@allowed) {
+        $admin->{'doms'} = join(" ", @allowed);
+        }
+else {
+	delete($admin->{'doms'});
+	}
+
 # Save him
 &modify_extra_admin($admin, $old, $d);
 &release_lock_webmin();
@@ -175,6 +219,8 @@ print "                       [--can-features] | [--cannot-features]\n";
 print "                       [--can-modules] | [--cannot-modules]\n";
 print "                       [--can-edit capability]*\n";
 print "                       [--cannot-edit capability]*\n";
+print "                       [--all-domains]\n";
+print "                       [--add-domain name]* [--remove-domain name]*\n";
 exit(1);
 }
 

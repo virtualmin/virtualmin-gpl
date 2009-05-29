@@ -23,6 +23,12 @@ This can be given multiple times, as in the command below :
 That command would create an extra administrator account who can only edit
 mail users and mail aliases in the virtual server I<foo.com> and any sub-servers.
 
+By default, the extra administrator will have access to all virtual servers
+owned by the top-level server it is created in. However, this can be restricted
+using the C<--allowed-domain> flag followed by a domain name, to which the
+admin will be limited to. It can be given multiple times to allow access to
+more than one virtual server.
+
 =cut
 
 package virtual_server;
@@ -79,6 +85,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--can-modules") {
 		$modules = 1;
 		}
+	elsif ($a eq "--allowed-domain") {
+		push(@allowednames, shift(@ARGV));
+		}
 	else {
 		&usage();
 		}
@@ -97,6 +106,17 @@ $name eq "webmin" && &usage("The login name webmin is reserved");
 ($clash) = grep { $_->{'name'} eq $name } &acl::list_users();
 $clash && &usage("The login name $name is already in use");
 
+# Validate allowed domains
+@allowed = ( );
+foreach $aname (@allowednames) {
+	$a = &get_domain_by("dom", $aname);
+	$a || &usage("The allowed virtual server $aname does not exist");
+	$a->{'user'} eq $d->{'user'} ||
+		&usage("The allowed virtual server $a->{'dom'} is not owned ".
+		       "by the same user as $d->{'dom'}");
+	push(@allowed, $a->{'id'});
+	}
+
 # Create the object
 $admin = { 'name' => $name,
 	   'desc' => $desc,
@@ -110,6 +130,9 @@ foreach $e (@edits) {
 	$admin->{'edit_'.$e} = 1;
 	}
 $admin->{'email'} = $email if ($email);
+if (@allowed) {
+	$admin->{'doms'} = join(" ", @allowed);
+	}
 
 # Create the admin
 &create_extra_admin($admin, $d);
@@ -130,6 +153,7 @@ print "                        [--email user\@domain]\n";
 print "                        [--create] [--rename]\n";
 print "                        [--features] [--modules]\n";
 print "                        [--edit capability]*\n";
+print "                        [--allowed-domain domain]*\n";
 exit(1);
 }
 

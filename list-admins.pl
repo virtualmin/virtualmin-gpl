@@ -62,6 +62,12 @@ if ($multi) {
 		print "    Access Webmin modules: ",($admin->{'modules'} ? "Yes" : "No"),"\n";
 		$caps = join(" ", grep { $admin->{'edit_'.$_} } @edit_limits);
 		print "    Edit capabilities: ",$caps,"\n";
+		if ($admin->{'doms'}) {
+			@doms = grep { $_ } map { &get_domain($_) }
+					split(/\s+/, $admin->{'doms'});
+			print "    Allowed virtual servers: ",
+				join(" ", map { $_->{'dom'} } @doms),"\n";
+			}
 		}
 	}
 elsif ($nameonly) {
