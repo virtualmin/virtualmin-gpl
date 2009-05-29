@@ -175,7 +175,7 @@ print &ui_hidden_table_start($text{'form_ipsect'}, "width=100%", 2,
 # IP addresses section
 if (!$aliasdom) {
 	# Show IP-related options
-	if ($d->{'reseller'}) {
+	if ($d->{'reseller'} && defined(&get_reseller)) {
 		$resel = &get_reseller($d->{'reseller'});
 		if ($resel) {
 			$reselip = $resel->{'acl'}->{'defip'};
@@ -209,7 +209,8 @@ if (!$aliasdom) {
 		$ipfield = &ui_oneradio("virt", 0, $text{'edit_virtnone'}, 1);
 		if ($tmpl->{'ranges'} ne "none") {
 			# Can do automatic allocation
-			local %racl = $d->{'reseller'} ?
+			local %racl = $d->{'reseller'} &&
+					defined(&get_reseller) ?
 				&get_reseller_acl($d->{'reseller'}) : ();
 			local $alloc = $racl{'ranges'} ?
 				&free_ip_address(\%racl) :
