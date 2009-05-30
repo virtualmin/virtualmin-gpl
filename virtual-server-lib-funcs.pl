@@ -3554,10 +3554,18 @@ foreach $e ('SERVER_ROOT', 'SCRIPT_NAME',
 # Changes the current UID and GID to that of the domain's unix user
 sub switch_to_domain_user
 {
-($(, $)) = ( $_[0]->{'ugid'},
-	     "$_[0]->{'ugid'} ".join(" ", $_[0]->{'ugid'},
+if (defined(&switch_to_unix_user)) {
+	# Use new Webmin function that takes care of platform issues
+	&switch_to_unix_user([ $_[0]->{'user'}, undef, $_[0]->{'uid'},
+			       $_[0]->{'ugid'} ]);
+	}
+else {
+	# DIY
+	($(, $)) = ( $_[0]->{'ugid'},
+		     "$_[0]->{'ugid'} ".join(" ", $_[0]->{'ugid'},
 					 &other_groups($_[0]->{'user'})) );
-($<, $>) = ( $_[0]->{'uid'}, $_[0]->{'uid'} );
+	($<, $>) = ( $_[0]->{'uid'}, $_[0]->{'uid'} );
+	}
 $ENV{'USER'} = $ENV{'LOGNAME'} = $_[0]->{'user'};
 $ENV{'HOME'} = $_[0]->{'home'};
 }
