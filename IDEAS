@@ -51,7 +51,3 @@
 	- Script to get CGI urls for some help page
 
  - Make available modules to domain owners templatable
-
- - Make allowed domains selectable for extra admins
-	- FS#5988
-	- Command-line tools

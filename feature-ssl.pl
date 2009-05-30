@@ -269,12 +269,15 @@ if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 	&$second_print($text{'setup_done'});
 	}
 if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
-        # Domain name has changed .. fix up Apache config
+        # Domain name has changed .. fix up Apache config by copying relevant
+        # directives from the real domain
         &$first_print($text{'save_ssl2'});
-        &apache::save_directive("ServerName", [ $_[0]->{'dom'} ], $vconf,$conf);
-        local @sa = map { s/$_[1]->{'dom'}/$_[0]->{'dom'}/g; $_ }
-                        &apache::find_directive("ServerAlias", $vconf);
-        &apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
+	foreach my $dir ("ServerName", "ServerAlias",
+			 "ErrorLog", "TransferLog", "CustomLog",
+			 "RewriteCond", "RewriteRule") {
+		local @vals = &apache::find_directive($dir, $nonvconf);
+		&apache::save_directive($dir, \@vals, $vconf, $conf);
+		}
         &flush_file_lines($virt->{'file'});
         $rv++;
         &$second_print($text{'setup_done'});
