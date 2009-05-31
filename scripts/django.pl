@@ -243,7 +243,8 @@ if (!$upgrade) {
 			$l = "DATABASE_USER = '$dbuser'";
 			}
 		if ($l =~ /DATABASE_PASSWORD\s*=/) {
-			$l = "DATABASE_PASSWORD = '$dbpass'";
+			$l = "DATABASE_PASSWORD = '".
+			     &php_quotemeta($dbpass)."'";
 			}
 		if ($l =~ /DATABASE_HOST\s*=/) {
 			$l = "DATABASE_HOST = '$dbhost'";

@@ -180,7 +180,8 @@ if (!$upgrade) {
 	local $lref = &read_file_lines($dbcfile);
 	foreach my $l (@$lref) {
 		if ($l =~ /^\$rcmail_config\['db_dsnw'\]\s+=/) {
-			$l = "\$rcmail_config['db_dsnw'] = 'mysql://$dbuser:$dbpass\@$dbhost/$dbname';";
+			$l = "\$rcmail_config['db_dsnw'] = 'mysql://$dbuser:".
+			     &php_quotemeta($dbpass)."\@$dbhost/$dbname';";
 			}
 		elsif ($l =~ /^\$rcmail_config\['db_backend'\]\s+=/) {
 			$l = "\$rcmail_config['db_backend'] = 'db';";
