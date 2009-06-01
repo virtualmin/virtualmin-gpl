@@ -5,5 +5,10 @@ option can be used to select the more efficient (but CPU-intensive) bzip2
 format instead. Alternately, you can select to create un-compressed tar format
 backups, which may be useful if writing to tape. <p>
 
+This option is only used when backing up virtual servers to a directory, with
+one file per domain. When backing up to a single file, the filename determines
+the compression format (like <tt>domains.tar.gz</tt> or <tt>domains.tar</tt>).
+<p>
+
 <footer>
 
