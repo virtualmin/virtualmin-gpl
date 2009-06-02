@@ -11220,12 +11220,16 @@ elsif ($config{'quotas'}) {
 		else {
 			# Check if quotas are enabled for home filesystem
 			local $nohome;
-			if (!($home_mtab->[4] = &quota::quota_can(
-				$home_mtab, $home_fstab))%2 ||
-			    !&quota::quota_now($home_mtab, $home_fstab)) {
+			$home_mtab->[4] = &quota::quota_can($home_mtab,
+						            $home_fstab);
+			$home_mtab->[4] ||= &quota::quota_now($home_mtab,
+                                                              $home_fstab);
+			if (!($home_mtab->[4] % 2)) {
+				# User quotas are not active
 				$nohome++;
 				}
 			else {
+				# User quotas are active
 				if ($home_mtab->[4] >= 2) {
 					# Group quotas are active too
 					$config{'group_quotas'} = 1;
@@ -11252,10 +11256,12 @@ elsif ($config{'quotas'}) {
 			else {
 				# Different .. so check mail too
 				local $nomail;
-				if (!($mail_mtab->[4] = &quota::quota_can(
-					$mail_mtab, $mail_fstab)) ||
-				    !&quota::quota_now($mail_mtab,
-						       $mail_fstab)) {
+				$mail_mtab->[4] = &quota::quota_can(
+                                        $mail_mtab, $mail_fstab);
+				$mail_mtab->[4] ||= &quota::quota_now(
+					$mail_mtab, $mail_fstab);
+				if (!$mail_mtab->[4]) {
+					# Mail user quotas are not active
 					$nomail++;
 					}
 				if ($nohome) {
