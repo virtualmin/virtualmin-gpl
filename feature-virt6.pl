@@ -71,7 +71,7 @@ if (!$d->{'virtalready'}) {
 		&$second_print(&text('delete_virt6done', $any->{'name'}));
 		}
 	else {
-		&$second_print(&text('delete_noiface', $d->{'ip6'}));
+		&$second_print(&text('delete_noiface6', $d->{'ip6'}));
 		}
 	}
 &release_lock_virt($d);
