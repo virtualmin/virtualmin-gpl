@@ -644,17 +644,15 @@ return ( [ $text{'sysinfo_spam'}, $vers ] );
 sub links_spam
 {
 local ($d) = @_;
-if ($config{'avail_spam'}) {
-	local %acl = &get_module_acl(undef, "spam");
-	if ($acl{'file'}) {
-		return ( { 'mod' => 'spam',
-			   'desc' => $text{'links_spam'},
-			   'page' => 'index.cgi?file='.&urlize(
-				"$spam_config_dir/$d->{'id'}/virtualmin.cf").
-				'&title='.&urlize(&show_domain_name($d)),
-			   'cat' => 'services',
-			 });
-		}
+local %acl = &get_module_acl(undef, "spam");
+if ($acl{'file'}) {
+	return ( { 'mod' => 'spam',
+		   'desc' => $text{'links_spam'},
+		   'page' => 'index.cgi?file='.&urlize(
+			"$spam_config_dir/$d->{'id'}/virtualmin.cf").
+			'&title='.&urlize(&show_domain_name($d)),
+		   'cat' => 'services',
+		 });
 	}
 return ( );
 }

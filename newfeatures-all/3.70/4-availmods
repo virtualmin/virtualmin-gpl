@@ -1,0 +1,4 @@
+desc=Available Webmin modules in templates
+html=Moved the settings for which Webmin modules are available to virtual server owners from the Module Config page to a new section in server templates, so that it can be adjusted on a per-template basis.
+master=1
+link=edit_tmpl.cgi?id=0&editmode=avail

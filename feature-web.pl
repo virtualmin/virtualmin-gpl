@@ -1865,32 +1865,30 @@ sub links_web
 {
 local ($d) = @_;
 local @rv;
-if ($config{'avail_web'}) {
-	&require_apache();
-	local $conf = &apache::get_config();
+&require_apache();
+local $conf = &apache::get_config();
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+					    $d->{'web_port'});
+if ($virt) {
+	# Link to configure virtual host
+	push(@rv, { 'mod' => 'apache',
+		    'desc' => $text{'links_web'},
+		    'page' => "virt_index.cgi?virt=".
+				&indexof($virt, @$conf),
+		    'cat' => 'services',
+		  });
+	}
+if ($d->{'ssl'}) {
+	# Link to configure SSL virtual host
 	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
-						    $d->{'web_port'});
+						   $d->{'web_sslport'});
 	if ($virt) {
-		# Link to configure virtual host
 		push(@rv, { 'mod' => 'apache',
-			    'desc' => $text{'links_web'},
+			    'desc' => $text{'links_ssl'},
 			    'page' => "virt_index.cgi?virt=".
 					&indexof($virt, @$conf),
 			    'cat' => 'services',
 			  });
-		}
-	if ($d->{'ssl'}) {
-		# Link to configure SSL virtual host
-		local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
-							   $d->{'web_sslport'});
-		if ($virt) {
-			push(@rv, { 'mod' => 'apache',
-				    'desc' => $text{'links_ssl'},
-				    'page' => "virt_index.cgi?virt=".
-						&indexof($virt, @$conf),
-				    'cat' => 'services',
-				  });
-			}
 		}
 	}
 
@@ -1903,40 +1901,38 @@ push(@rv, { 'mod' => $module_name,
 	    'target' => '_new',
 	  });
 
-if ($config{'avail_syslog'}) {
-	# Links to logs
-	foreach my $log ([ 0, $text{'links_alog'} ],
-			 [ 1, $text{'links_elog'} ]) {
-		local $lf = &get_apache_log($d->{'dom'},
-					    $d->{'web_port'}, $log->[0]);
-		if ($lf) {
-			local $param = &master_admin() ? "file"
-						       : "extra";
-			push(@rv, { 'mod' => 'syslog',
-				    'desc' => $log->[1],
-				    'page' => "save_log.cgi?view=1&".
-					      "$param=".&urlize($lf),
-				    'cat' => 'logs',
-				  });
-			}
+# Links to logs
+foreach my $log ([ 0, $text{'links_alog'} ],
+		 [ 1, $text{'links_elog'} ]) {
+	local $lf = &get_apache_log($d->{'dom'},
+				    $d->{'web_port'}, $log->[0]);
+	if ($lf) {
+		local $param = &master_admin() ? "file"
+					       : "extra";
+		push(@rv, { 'mod' => 'syslog',
+			    'desc' => $log->[1],
+			    'page' => "save_log.cgi?view=1&".
+				      "$param=".&urlize($lf),
+			    'cat' => 'logs',
+			  });
 		}
 	}
-if ($config{'avail_phpini'}) {
-	# Links to edit PHP configs
-	if (defined(&get_domain_php_mode) &&
-	    &get_domain_php_mode($d) ne "mod_php") {
-		foreach my $ini (&list_domain_php_inis($d)) {
-			push(@rv, { 'mod' => 'phpini',
-				    'desc' => $ini->[0] ?
-					&text('links_phpini2', $ini->[0]) :
-					&text('links_phpini'),
-				    'page' => 'list_ini.cgi?file='.
-						&urlize($ini->[1]),
-				    'cat' => 'services',
-				  });
-			}
+
+# Links to edit PHP configs
+if (defined(&get_domain_php_mode) &&
+    &get_domain_php_mode($d) ne "mod_php") {
+	foreach my $ini (&list_domain_php_inis($d)) {
+		push(@rv, { 'mod' => 'phpini',
+			    'desc' => $ini->[0] ?
+				&text('links_phpini2', $ini->[0]) :
+				&text('links_phpini'),
+			    'page' => 'list_ini.cgi?file='.
+					&urlize($ini->[1]),
+			    'cat' => 'services',
+			  });
 		}
 	}
+
 return @rv;
 }
 

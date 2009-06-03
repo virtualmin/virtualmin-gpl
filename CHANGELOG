@@ -1121,3 +1121,4 @@ The email to mailboxes who are approaching or over quota can now be customized o
 Added the Convert Alias Server page to change an existing alias virtual server into a sub-server.
 Historic statistics graphs can now be plotted on a log scale, and both axis are used if multiple values are plotted.
 Extra administrators can now be limited to a subset of the parent servers domains, either from the Edit Extra Administator page or using the command-line API.
+Moved the settings for which Webmin modules are available to virtual server owners from the Module Config page to a new section in server templates, so that it can be adjusted on a per-template basis.

@@ -242,18 +242,17 @@ if ($onlydoms) {
 	}
 
 # Work out which extra (non feature-related) modules are available
-local @extramods = map { /^avail_(\S+)/; $1 }
-		    grep { $config{$_} }
-		       grep { /^avail_/ } (keys %config);
+local %avail = map { split(/=/, $_) } split(/\s+/, $tmpl->{'avail'});
+local @extramods = grep { $avail{$_} } keys %avail;
 if ($noextras) {
 	@extramods = ( );
 	}
-local %extramods = map { $_, $config{"avail_".$_} }
+local %extramods = map { $_, $avail{$_} }
 		       grep { my $m=$_; { local $_; &foreign_check($m) } }
 			@extramods;
 
 # Grant access to BIND module if needed
-if ($features{'dns'} && $config{'avail_dns'}) {
+if ($features{'dns'} && $avail{'dns'}) {
 	# Allow user to manage just this domain
 	push(@mods, "bind8");
 	local %acl = ( 'noconfig' => 1,
@@ -288,7 +287,7 @@ else {
 	}
 
 # Grant access to MySQL module if needed
-if ($features{'mysql'} && $config{'avail_mysql'}) {
+if ($features{'mysql'} && $avail{'mysql'}) {
 	# Allow user to manage just the domain's DB
 	push(@mods, "mysql");
 	local %acl = ( 'noconfig' => 1,
@@ -311,7 +310,7 @@ else {
 	}
 
 # Grant access to PostgreSQL module if needed
-if ($features{'postgres'} && $config{'avail_postgres'}) {
+if ($features{'postgres'} && $avail{'postgres'}) {
 	# Allow user to manage just the domain's DB
 	push(@mods, "postgresql");
 	local %acl = ( 'noconfig' => 1,
@@ -335,7 +334,7 @@ else {
 	}
 
 # Grant access to Apache module if needed
-if ($features{'web'} && $config{'avail_web'}) {
+if ($features{'web'} && $avail{'web'}) {
 	# Allow user to manage just this website
 	&require_apache();
 	push(@mods, "apache");
@@ -380,7 +379,7 @@ else {
 	}
 
 # Grant access to Webalizer module if needed
-if ($features{'webalizer'} && $config{'avail_webalizer'}) {
+if ($features{'webalizer'} && $avail{'webalizer'}) {
 	push(@mods, "webalizer");
 	local @logs;
 	local $d;
@@ -409,7 +408,7 @@ if (defined(&get_domain_spam_client)) {
 	@spamassassin_doms = grep { &get_domain_spam_client($_) ne 'spamc' }
 				  grep { $_->{'spam'} } @doms;
 	}
-if ($features{'spam'} && $config{'avail_spam'} && @spamassassin_doms) {
+if ($features{'spam'} && $avail{'spam'} && @spamassassin_doms) {
 	push(@mods, "spam");
 	local $sd = $spamassassin_doms[0];
 	local %acl = ( 'noconfig' => 1,
@@ -1026,14 +1025,12 @@ return $rv;
 sub links_webmin
 {
 local ($d) = @_;
-if ($config{'avail_webminlog'}) {
-	return ( { 'mod' => 'webminlog',
-		   'desc' => $text{'links_webminlog'},
-		   'page' => "search.cgi?uall=0&user=".&urlize($d->{'user'}).
-			     "&mall=1&tall=2&fall=1",
-		   'cat' => 'logs',
-		 } );
-	}
+return ( { 'mod' => 'webminlog',
+	   'desc' => $text{'links_webminlog'},
+	   'page' => "search.cgi?uall=0&user=".&urlize($d->{'user'}).
+		     "&mall=1&tall=2&fall=1",
+	   'cat' => 'logs',
+	 } );
 return ( );
 }
 

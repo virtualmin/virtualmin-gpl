@@ -471,27 +471,25 @@ return ( [ $text{'sysinfo_webalizer'}, $vers ] );
 sub links_webalizer
 {
 local ($d) = @_;
-if ($config{'avail_webalizer'}) {
-	local $log = &resolve_links(&get_apache_log($d->{'dom'}, $d->{'web_port'}));
-	local %waccess = &get_module_acl(undef, "webalizer");
-	if ($waccess{'view'}) {
-		# Can view report only
-		return ( { 'mod' => 'webalizer',
-			   'desc' => $text{'links_webalizer2'},
-			   'page' => 'view_log.cgi/'.&urlize(&urlize($log)).
-						     '/index.html',
-			   'cat' => 'logs',
-			  });
-		}
-	else {
-		# Can edit report
-		return ( { 'mod' => 'webalizer',
-			   'desc' => $text{'links_webalizer'},
-			   'page' => 'edit_log.cgi?file='.
-				&urlize($log).'&type=1',
-			   'cat' => 'logs',
-			 });
-		}
+local $log = &resolve_links(&get_apache_log($d->{'dom'}, $d->{'web_port'}));
+local %waccess = &get_module_acl(undef, "webalizer");
+if ($waccess{'view'}) {
+	# Can view report only
+	return ( { 'mod' => 'webalizer',
+		   'desc' => $text{'links_webalizer2'},
+		   'page' => 'view_log.cgi/'.&urlize(&urlize($log)).
+					     '/index.html',
+		   'cat' => 'logs',
+		  });
+	}
+else {
+	# Can edit report
+	return ( { 'mod' => 'webalizer',
+		   'desc' => $text{'links_webalizer'},
+		   'page' => 'edit_log.cgi?file='.
+			&urlize($log).'&type=1',
+		   'cat' => 'logs',
+		 });
 	}
 return ( );
 }

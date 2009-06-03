@@ -488,20 +488,18 @@ if ($in{"ftp_mode"} == 2) {
 sub links_ftp
 {
 local ($d) = @_;
+# Links to FTP log
 local @rv;
-if ($config{'avail_syslog'}) {
-	# Links to FTP log
-	local $lf = &get_proftpd_log($d->{'ip'});
-	if ($lf) {
-		local $param = &master_admin() ? "file"
-					       : "extra";
-		push(@rv, { 'mod' => 'syslog',
-			    'desc' => $text{'links_flog'},
-			    'page' => "save_log.cgi?view=1&".
-				      "$param=".&urlize($lf),
-			    'cat' => 'logs',
-			  });
-		}
+local $lf = &get_proftpd_log($d->{'ip'});
+if ($lf) {
+	local $param = &master_admin() ? "file"
+				       : "extra";
+	push(@rv, { 'mod' => 'syslog',
+		    'desc' => $text{'links_flog'},
+		    'page' => "save_log.cgi?view=1&".
+			      "$param=".&urlize($lf),
+		    'cat' => 'logs',
+		  });
 	}
 return @rv;
 }

@@ -81,7 +81,7 @@ $config{'virt6'} = 1;
 		       'plugins',
 		       $virtualmin_pro ? ( 'scripts', 'phpwrappers' ) : ( ),
 		       'avail' );
-@template_features_effecting_webmin = ( 'web', 'webmin' );
+@template_features_effecting_webmin = ( 'web', 'webmin', 'avail' );
 @can_always_features = ( 'dir', 'unix', 'logrotate' );
 @validate_features = ( @features, "virt", "virt6" );
 foreach my $fname (@features, "virt", "virt6") {
