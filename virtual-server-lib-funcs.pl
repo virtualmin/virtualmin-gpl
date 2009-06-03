@@ -6903,7 +6903,7 @@ if (!defined(getpwnam($rv[0]->{'web_user'})) &&
 	}
 my @avail;
 foreach my $m (&list_domain_owner_modules()) {
-	push(@avail, $m->[0]) if ($config{'avail_'.$m->[0]});
+	push(@avail, $m->[0]."=".$config{'avail_'.$m->[0]});
 	}
 $rv[0]->{'avail'} = join(' ', @avail);
 push(@rv, { 'id' => 1,
@@ -7162,9 +7162,9 @@ if ($tmpl->{'id'} == 0) {
 	foreach my $w (@php_wrapper_templates) {
 		$config{$w} = $tmpl->{$w};
 		}
-	my %avail = map { $_, 1 } split(/\s+/, $tmpl->{'avail'});
+	my %avail = map { split(/=/, $_) } split(/\s+/, $tmpl->{'avail'});
 	foreach my $m (&list_domain_owner_modules()) {
-		$config{'avail_'.$m->[0]} = $avail{$m->[0]} ? 1 : 0;
+		$config{'avail_'.$m->[0]} = $avail{$m->[0]} || 0;
 		}
 	$save_config = 1;
 	}
@@ -11659,7 +11659,6 @@ foreach my $f (@plugins) {
 # list_domain_owner_modules()
 # Returns a list of modules that can be granted to domain owners, as array refs
 # with module name, description and list of options (optional) entries.
-# XXX gpl version?
 sub list_domain_owner_modules
 {
 return (
@@ -11693,7 +11692,9 @@ return (
         [ 'shell', 'Command Shell (run commands as admin)' ],
         [ 'webminlog', 'Webmin Actions Log (view own actions)' ],
         [ 'syslog', 'System Logs (view Apache and FTP logs)' ],
-        [ 'phpini', 'PHP Configuration (for domain\'s php.ini files)' ],
+	$virtualmin_pro ? 
+           ( [ 'phpini', 'PHP Configuration (for domain\'s php.ini files)' ] ) :
+	   ( ),
 	);
 }
 
@@ -11702,7 +11703,41 @@ return (
 sub show_template_avail
 {
 local ($tmpl) = @_;
-# XXX none-def input?
+local $field;
+if (!$tmpl->{'default'}) {
+	local @inames = map { "avail_".$_->[0] } &list_domain_owner_modules();
+	local $dis1 = &js_disable_inputs(\@inames, [ ], 'onClick');
+	local $dis2 = &js_disable_inputs([ ], \@inames, 'onClick');
+	$field .= &ui_radio("avail_def", $tmpl->{'avail'} ? 0 : 1,
+			    [ [ 1, $text{'tmpl_avail1'}, $dis1 ],
+			      [ 0, $text{'tmpl_avail0'}, $dis2 ] ])."<br>\n";
+	}
+$field .= &ui_columns_start(
+	[ $text{'tmpl_availmod'}, $text{'tmpl_availyes'} ]);
+my $alist;
+if ($tmpl->{'default'} || $tmpl->{'avail'}) {
+	$alist = $tmpl->{'avail'};
+	}
+else {
+	# Initial selection comes from default template
+	my $deftmpl = &get_template(0);
+	$alist = $deftmpl->{'avail'};
+	}
+my %avail = map { split(/=/, $_) } split(/\s+/, $alist);
+foreach my $m (&list_domain_owner_modules()) {
+	my $minp;
+	if ($m->[2]) {
+		$minp = &ui_radio("avail_".$m->[0], int($avail{$m->[0]}),
+				  $m->[2]);
+		}
+	else {
+		$minp = &ui_yesno_radio("avail_".$m->[0], int($avail{$m->[0]}));
+		}
+	$field .= &ui_columns_row([ &hlink($m->[1], "config_avail_".$m->[0]),
+				    $minp ]);
+	}
+$field .= &ui_columns_end();
+print &ui_table_row(&hlink($text{'tmpl_avail'}, "template_avail"), $field);
 }
 
 # parse_template_avail(&tmpl)
@@ -11710,6 +11745,16 @@ local ($tmpl) = @_;
 sub parse_template_avail
 {
 local ($tmpl) = @_;
+if ($in{'avail_def'}) {
+	$tmpl->{'avail'} = undef;
+	}
+else {
+	local @avail;
+	foreach my $m (&list_domain_owner_modules()) {
+		push(@avail, $m->[0].'='.$in{'avail_'.$m->[0]});
+		}
+	$tmpl->{'avail'} = join(' ', @avail);
+	}
 }
 
 # show_template_virtualmin(&tmpl)
