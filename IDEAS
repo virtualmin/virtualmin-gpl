@@ -40,6 +40,3 @@
 	- Need some way to get valid params, if not skip if ReadParse is called
 	- Get page titles
 	- Script to get CGI urls for some help page
-
- - Make available modules to domain owners templatable
-	- CHANGELOG
