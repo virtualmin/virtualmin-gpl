@@ -12585,22 +12585,6 @@ else {
 		# Do new perl module version of Webmin API
 		$miniserv{'premodules'} = "WebminCore";
 		}
-	else {
-		# Do web-lib-funcs.pl in modules we call and plugins
-		# XXX retire this eventually
-		local $file = "web-lib-funcs.pl";
-		push(@preload, "virtual-server=$file");
-		if ($mode == 2) {
-			foreach my $minfo (&get_all_module_infos()) {
-				local $mdir = &module_root_directory(
-						$minfo->{'dir'});
-				if (&indexof($minfo->{'dir'},
-				     @used_webmin_modules, @plugins) >= 0) {
-					push(@preload, "$minfo->{'dir'}=$file");
-					}
-				}
-			}
-		}
 	}
 $miniserv{'preload'} = join(" ", &unique(@preload));
 &put_miniserv_config(\%miniserv);

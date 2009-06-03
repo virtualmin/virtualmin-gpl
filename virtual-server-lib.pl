@@ -62,14 +62,6 @@ if (!$virtualmin_pro) {
 $config{'virt'} = 1;
 $config{'virt6'} = 1;
 
-@used_webmin_modules = ( "acl", "apache", "bind8", "cron", "htaccess-htpasswd",
-			 "init", "ldap-useradmin", "logrotate", "mailboxes",
-			 "mount", "mysql", "net", "postfix", "postgresql",
-			 "proc", "procmail", "qmailadmin", "quota", "sendmail",
-			 "servers", "software", "spam",
-			 $virtualmin_pro ? ( "status", "phpini" ) : ( ),
-			 "syslog", "useradmin", "usermin", "webalizer",
-			 "webmin", "filter" );
 &generate_plugins_list($no_virtualmin_plugins ? '' : $config{'plugins'});
 @opt_features = ( 'unix', 'dir', 'mail', 'dns', 'web', 'webalizer', 'ssl',
 		  'logrotate', 'mysql', 'postgres', 'ftp', 'spam', 'virus',
