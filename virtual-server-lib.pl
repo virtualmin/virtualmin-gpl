@@ -79,7 +79,8 @@ $config{'virt6'} = 1;
 @template_features = ( 'basic', 'resources', @features, 'virt',
 		       $virtualmin_pro ? ( 'virtualmin' ) : ( ),
 		       'plugins',
-		       $virtualmin_pro ? ( 'scripts', 'phpwrappers' ) : ( ) );
+		       $virtualmin_pro ? ( 'scripts', 'phpwrappers' ) : ( ),
+		       'avail' );
 @template_features_effecting_webmin = ( 'web', 'webmin' );
 @can_always_features = ( 'dir', 'unix', 'logrotate' );
 @validate_features = ( @features, "virt", "virt6" );

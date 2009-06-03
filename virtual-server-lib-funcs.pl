@@ -6901,6 +6901,11 @@ if (!defined(getpwnam($rv[0]->{'web_user'})) &&
 	# Apache user is invalid, due to bad Virtualmin install script. Fix it
 	$rv[0]->{'web_user'} = &get_apache_user();
 	}
+my @avail;
+foreach my $m (&list_domain_owner_modules()) {
+	push(@avail, $m->[0]) if ($config{'avail_'.$m->[0]});
+	}
+$rv[0]->{'avail'} = join(' ', @avail);
 push(@rv, { 'id' => 1,
 	    'name' => 'Default Settings For Sub-Servers',
 	    'standard' => 1,
@@ -7157,6 +7162,10 @@ if ($tmpl->{'id'} == 0) {
 	foreach my $w (@php_wrapper_templates) {
 		$config{$w} = $tmpl->{$w};
 		}
+	my %avail = map { $_, 1 } split(/\s+/, $tmpl->{'avail'});
+	foreach my $m (&list_domain_owner_modules()) {
+		$config{'avail_'.$m->[0]} = $avail{$m->[0]} ? 1 : 0;
+		}
 	$save_config = 1;
 	}
 elsif ($tmpl->{'id'} == 1) {
@@ -7248,7 +7257,7 @@ if (!$tmpl->{'default'}) {
 		    "php", "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "spamtrap", "namedconf",
 		    "nodbname", "norename", "forceunder", "aliascopy", "bccto",
-		    "resources", "dnssec",
+		    "resources", "dnssec", "avail",
 		    @plugins,
 		    @php_wrapper_templates,
 		    "capabilities",
@@ -11636,11 +11645,10 @@ else {
 }
 
 # parse_template_plugins(&tmpl)
+# Parse plugin options
 sub parse_template_plugins
 {
 local ($tmpl) = @_;
-
-# Parse plugin options
 foreach my $f (@plugins) {
         if (&plugin_defined($f, "template_parse")) {
 		&plugin_call($f, "template_parse", $tmpl, \%in);
@@ -11648,6 +11656,61 @@ foreach my $f (@plugins) {
 	}
 }
 
+# list_domain_owner_modules()
+# Returns a list of modules that can be granted to domain owners, as array refs
+# with module name, description and list of options (optional) entries.
+# XXX gpl version?
+sub list_domain_owner_modules
+{
+return (
+        [ 'dns', 'BIND DNS Server (for DNS domain)' ],
+        [ 'mail', 'Virtual Email (for mailboxes and aliases)' ],
+        [ 'web', 'Apache Webserver (for virtual host)' ],
+        [ 'webalizer', 'Webalizer Logfile Analysis (for website\'s logs)' ],
+        [ 'mysql', 'MySQL Database Server (for database)' ],
+        [ 'postgres', 'PostgreSQL Database Server (for database)' ],
+        [ 'spam', 'SpamAssassin Mail Filter (for domain\'s config file)' ],
+        [ 'file', 'File Manager (home directory only)' ],
+        [ 'passwd', 'Change Password',
+	  [ [ 2, 'User and mailbox passwords' ],
+	    [ 1, 'User password' ],
+	    [ 0, 'No' ] ] ],
+        [ 'proc', 'Running Processes (user\'s processes only)',
+	  [ [ 2, 'See own processes' ],
+	    [ 1, 'See all processes' ], 
+	    [ 0, 'No' ] ] ],
+        [ 'cron', 'Scheduled Cron Jobs (user\'s Cron jobs)' ],
+        [ 'at', 'Scheduled Commands (user\'s commands)' ],
+        [ 'telnet', 'SSH Login' ],
+        [ 'updown', 'Upload and Download (as user)',
+	  [ [ 1, 'Yes' ],
+	    [ 0, 'No' ],
+	    [ 2, 'Upload only' ] ] ],
+        [ 'change-user', 'Change Language and Theme' ],
+        [ 'htaccess-htpasswd', 'Protected Web Directories (under home directory)' ],
+        [ 'mailboxes', 'Read User Mail (users\' mailboxes)' ],
+        [ 'custom', 'Custom Commands' ],
+        [ 'shell', 'Command Shell (run commands as admin)' ],
+        [ 'webminlog', 'Webmin Actions Log (view own actions)' ],
+        [ 'syslog', 'System Logs (view Apache and FTP logs)' ],
+        [ 'phpini', 'PHP Configuration (for domain\'s php.ini files)' ],
+	);
+}
+
+# show_template_avail(&tmpl)
+# Output HTML for selecting modules available to domain owners
+sub show_template_avail
+{
+local ($tmpl) = @_;
+# XXX none-def input?
+}
+
+# parse_template_avail(&tmpl)
+# Update the list of modules available to domain owners
+sub parse_template_avail
+{
+local ($tmpl) = @_;
+}
 
 # show_template_virtualmin(&tmpl)
 # Outputs HTML for editing core Virtualmin template options
