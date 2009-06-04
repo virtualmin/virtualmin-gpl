@@ -20,7 +20,7 @@ print "<b>$text{'check_done'}</b><p>\n";
 # See if any options effecting Webmin users have changed
 $webminchanged = 0;
 foreach $k (keys %config) {
-	if ($k =~ /^avail_/ || $k eq 'leave_acl' || $k eq 'webmin_modules' ||
+	if ($k eq 'leave_acl' || $k eq 'webmin_modules' ||
 	    &indexof($k, @features) >= 0) {
 		$webminchanged++ if ($config{$k} != $lastconfig{$k});
 		}
