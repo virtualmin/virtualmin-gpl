@@ -186,6 +186,7 @@ if ($virus_scanner) {
 
 &release_lock_spam_all();
 
+&modify_all_webmin();	# Spam setting may have changed
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV);
 

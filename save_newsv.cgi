@@ -91,6 +91,7 @@ if ($config{'virus'}) {
 &release_lock_spam_all();
 
 &set_all_null_print();
+&modify_all_webmin();	# Spam setting may have changed
 &run_post_actions();
 
 # All done
