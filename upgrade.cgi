@@ -29,7 +29,17 @@ if (&webmin::shared_root_directory()) {
 # Verify that the install is one we can upgrade
 chop($itype = &read_file_contents("$module_root_directory/install-type"));
 if ($itype eq "rpm") {
+	# Check for repo file
 	-r $virtualmin_yum_repo || &error($text{'upgrade_eyumrepo'});
+
+	# Make sure YUM works
+	&foreign_require("software", "software-lib.pl");
+	($wvs) = grep { $_->{'name'} eq 'wbm-virtual-server' }
+		      &software::update_system_available();
+	if (!$wvs) {
+		&error(&text('upgrade_eyumlist',
+		 	     '<tt>wbm-virtual-server</tt>'));
+		}
 	}
 elsif ($itype eq "deb") {
 	$sources_list = "/etc/apt/sources.list";

@@ -4285,6 +4285,7 @@ upgrade_complete=Your system has been successfully upgraded to Virtualmin Pro!
 upgrade_theme=Enabling theme <i>$1</i> ..
 upgrade_esharedroot=Your Webmin root directory $1 is shared between multiple systems - module updates are not allowed
 upgrade_eyumrepo=Virtualmin has been installed from an RPM, but not using the Virtualmin GPL repository. Upgrading is not possible at this time.
+upgrade_eyumlist=The $1 RPM package was not found in the list of available packages from YUM. Perhaps one of your current repositories is not working?
 upgrade_edebrepo=Virtualmin has been installed from a Debian package, but not using the Virtualmin GPL repository. Upgrading is not possible at this time.
 upgrade_rpms=Upgrading Virtualmin RPM packages : $1
 upgrade_eyumfile=No Virtualmin GPL repository was found in $1
