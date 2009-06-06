@@ -36,7 +36,5 @@
 	- See email from Winnie Lee
 
  - Help search should link back to CGIs
-	- So should text matches
-	- Need some way to get valid params, if not skip if ReadParse is called
-	- Get page titles
-	- Script to get CGI urls for some help page
+	- Add to Virtualmin too
+	- Script to get CGI urls for some help page, for Joe
