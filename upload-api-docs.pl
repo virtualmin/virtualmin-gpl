@@ -1,12 +1,12 @@
 #!/usr/local/bin/perl
-# Convert all Virtualmin API POD docs into Wiki format, and upload them to
+# Convert all Virtualmin API POD docs into HTML format, and upload them to
 # virtualmin.com.
 
-use Pod::Simple::Wiki;
+use Pod::Simple::HTML;
 
 $wiki_pages_host = "virtualmin.com";
 $wiki_pages_user = "virtualmin";
-$wiki_pages_dir = "/home/virtualmin/domains/jdev.virtualmin.com/public_html/components/com_openwiki/data/pages";
+$wiki_pages_dir = "/home/virtualmin/virtualmin-api";
 $wiki_pages_su = "jcameron";
 require 'commands-lib.pl';
 
@@ -73,23 +73,25 @@ foreach $a (@apis) {
 	$a->{'wikiname'} =~ s/\.pl$//;
 	$a->{'wikiname'} =~ s/\-/_/g;
 	$a->{'wikiname'} = "virtualmin_api_".$a->{'wikiname'};
-	$a->{'wikifile'} = "$tempdir/$a->{'wikiname'}.txt";
+	$a->{'wikifile'} = "$tempdir/$a->{'wikiname'}.html";
 	@wst = stat($a->{'wikifile'});
 	@cst = stat($a->{'path'});
 	if (@wst && $wst[9] >= $cst[9]) {
 		# New enough
 		$a->{'done'} = 1;
 		$a->{'wiki'} = `cat $a->{'wikifile'}`;
-		$a->{'title'} = &extract_wiki_title($a->{'wiki'});
+		$a->{'title'} = &extract_html_title($a->{'wiki'});
 		}
+	$a->{'cmd'} = $a->{'file'};
+	$a->{'cmd'} =~ s/\.pl$//;
 	}
 
 # Convert to wiki format
 print "Converting to Wiki format ..\n";
 foreach $a (@apis) {
 	next if ($a->{'done'});
-	($a->{'wiki'}, $a->{'title'}) = &convert_to_wiki($a->{'data'});
-	$a->{'wiki'} =~ s/\.pl\s+======/ ======/;	# Remove .pl from title
+	($a->{'wiki'}, $a->{'title'}) = &convert_to_html($a->{'data'});
+	$a->{'wiki'} =~ s/\.pl\s+<\/a>/ <\/a>/;		# Remove .pl from title
 	}
 
 # Extract command-line args summary, by running with --help flag
@@ -100,9 +102,10 @@ foreach $a (@apis) {
 	$out = `$a->{'path'} --help 2>&1`;
 	if ($out =~ /usage:|\nvirtualmin/) {
 		$out =~ s/^.*\n\n//;	# Strip description
-		$a->{'wiki'} .= "====== Command Line Help ======\n";
-		$a->{'wiki'} .= "\n";
-		$a->{'wiki'} .= "<code>$out</code>";
+		$usage = "<h1>Command Line Help</h1>\n".
+			 "\n".
+			 "<pre>$out</pre>\n";
+		$a->{'wiki'} =~ s/<\/body>/$usage<\/body>/;
 		}
 	else {
 		print STDERR "Failed to get args for $a->{'file'}\n";
@@ -110,7 +113,7 @@ foreach $a (@apis) {
 	}
 
 # Write pages to temp dir
-print "Writing out wiki format files ..\n";
+print "Writing out HTML format files ..\n";
 foreach $a (@apis) {
 	next if ($a->{'done'});
 	open(WIKI, ">$a->{'wikifile'}");
@@ -127,15 +130,21 @@ foreach $c (&unique(map { $_->{'cat'} } @apis)) {
 	$catname =~ s/ /_/g;
 	$catname = lc($catname);
 	$catname = "virtualmin_cat_".$catname;
-	$catfile = "$tempdir/$catname.txt";
+	$catfile = "$tempdir/$catname.html";
 	open(CAT, ">$catfile");
-	print CAT "====== $c ======\n\n";
-	print CAT $category_descs{$c},"\n\n";
+	print CAT "<html>\n";
+	print CAT "<title>$c</title>\n";
+	print CAT "<body>\n";
+	print CAT "<h1>$c</h1>\n";
+	print CAT "<p>",$category_descs{$c},"</p>\n";
+	print CAT "<ul>\n";
 	@incat = grep { $_->{'cat'} eq $c } @apis;
 	foreach $a (sort { $a->{'wikiname'} cmp $b->{'wikiname'} } @incat) {
-		print CAT "   * [[$a->{'wikiname'}|$a->{'file'}]] - $a->{'title'}\n";
+		print CAT "<li><a href=$a->{'wikiname'}>$a->{'cmd'}</a> - $a->{'title'}</li>\n";
 		}
-	print CAT "\n";
+	print CAT "</ul>\n";
+	print CAT "</body>\n";
+	print CAT "</html>\n";
 	close(CAT);
 	}
 
@@ -153,20 +162,25 @@ while(<SCRIPTS>) {
 		}
 	}
 close(SCRIPTS);
-open(PAGE, ">$tempdir/virtualmin_script_installers.txt");
-print PAGE "====== Virtualmin Script Installers ======\n";
+open(PAGE, ">$tempdir/virtualmin_script_installers.html");
+print PAGE "<html>\n";
+print PAGE "<title>Virtualmin Script Installers</title>\n";
+print PAGE "<body>\n";
+print PAGE "<h1>Virtualmin Script Installers</h1>\n";
 print PAGE "\n";
-print PAGE "The following scripts can be installed by the latest version of ";
-print PAGE "Virtualmin professional :\n\n";
-$hfmt = "^ %-20.20s ^ %-80.80s ^ %-20.20s ^\n";
-($rfmt = $hfmt) =~ s/\^/\|/g;
-printf PAGE $hfmt, "Name", "Description", "Versions";
+print PAGE "<p>The following scripts can be installed by the latest version ";
+print PAGE "of Virtualmin professional :</p>\n\n";
+print PAGE "<table>\n";
+print PAGE "<th> <td>Name</td> <td>Description</td> <td>Versions</td> </th>\n";
 foreach $s (sort { lc($a->{'name'}) cmp lc($b->{'name'}) } @scripts) {
 	next if ($s->{'available'} ne 'Yes');
 	next if ($s->{'description'} eq '');
 	$s->{'versions'} =~ s/ / , /g;
-	printf PAGE $rfmt, $s->{'name'}, $s->{'description'}, $s->{'versions'};
+	print PAGE "<tr> <td>$s->{'name'}</td> <td>$s->{'description'}</td> <td>$s->{'versions'}</td> </tr>\n";
 	}
+print PAGE "</table>\n";
+print PAGE "</body>\n";
+print PAGE "</html>\n";
 close(PAGE);
 
 # Upload to server
@@ -175,15 +189,15 @@ if (!$noupload) {
 	system("su $wiki_pages_su -c 'scp $tempdir/* $wiki_pages_user\@$wiki_pages_host:$wiki_pages_dir/'");
 	}
 
-# convert_to_wiki(pod-text)
-# Converts a POD-format text into Dokuwiki format, and returns that and
+# convert_to_html(pod-text)
+# Converts a POD-format text into HTML format, and returns that and
 # the program summary line.
-sub convert_to_wiki
+sub convert_to_html
 {
 local ($data) = @_;
-my $parser = Pod::Simple::Wiki->new('dokuwiki');
-local $infile = "/tmp/pod2wiki.in";
-local $outfile = "/tmp/pod2wiki.out";
+my $parser = Pod::Simple::HTML->new('dokuwiki');
+local $infile = "/tmp/pod2html.in";
+local $outfile = "/tmp/pod2html.out";
 open(INFILE, ">$infile");
 print INFILE $data;
 close(INFILE);
@@ -193,14 +207,14 @@ $parser->output_fh(*OUTFILE);
 $parser->parse_file(*INFILE);
 close(INFILE);
 close(OUTFILE);
-local $wiki = `cat $outfile`;
-return ($wiki, &extract_wiki_title($wiki));
+local $html = `cat $outfile`;
+return ($html, &extract_html_title($html));
 }
 
-sub extract_wiki_title
+sub extract_html_title
 {
-local ($wiki) = @_;
-if ($wiki =~ /^======.*======\n(\S.*)\n/) {
+local ($html) = @_;
+if ($html =~ /<p>([^<]+)<\/p>/i) {
 	return $1;
 	}
 return undef;
