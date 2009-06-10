@@ -605,6 +605,9 @@ if ($st > 0) {
 	&setup_spamtrap_cron();
 	}
 
+# Re-create all spam links
+&create_spam_config_links($_[0]);
+
 &release_lock_spam($_[0]);
 &$second_print($text{'setup_done'});
 return 1;
