@@ -35,9 +35,6 @@
  - WebNIC registrar support
 	- See email from Winnie Lee
 
- - Help search should link back to CGIs
-	- Add to Virtualmin too
-		- And all plugins
-	- Script to get CGI urls for some help page, for Joe
+ - Script to get CGI urls for some help page, for Joe
 
  - LXadmin migration
