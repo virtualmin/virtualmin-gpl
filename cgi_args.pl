@@ -54,8 +54,17 @@ elsif ($cgi eq 'edit_resel.cgi') {
 # Assume a domain is needed, for some editing page
 return undef if ($cgi =~ /^(save|delete|modify|mass)_/);
 my @alldoms = grep { &can_edit_domain($_) } &list_domains();
-my ($d) = grep { !$_->{'parent'} } @alldoms;
+my $d;
+if ($in{'dom'}) {
+	# From CGI parameter
+	$d = &get_domain($in{'dom'});
+	}
 if (!$d) {
+	# First top-level
+	($d) = grep { !$_->{'parent'} } @alldoms;
+	}
+if (!$d) {
+	# First of any kind
 	$d = $alldoms[0];
 	}
 if ($d) {
