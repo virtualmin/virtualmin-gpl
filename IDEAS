@@ -38,5 +38,4 @@
  - Help search should link back to CGIs
 	- Add to Virtualmin too
 		- And all plugins
-	- CHANGELOG
 	- Script to get CGI urls for some help page, for Joe

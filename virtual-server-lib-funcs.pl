@@ -3007,7 +3007,7 @@ if ($tmpl->{'mail_on'} eq 'none') {
 	}
 &$first_print($text{'setup_email'});
 
-local %hash = &make_domain_substitions($d);
+local %hash = &make_domain_substitions($d, 1);
 local @erv = &send_template_email($mail, $forceto || $d->{'emailto'},
 			    	  \%hash, $subject, $cc, $bcc, undef,
 				  &get_global_from_address($d));
@@ -3019,29 +3019,79 @@ else {
 	}
 }
 
-# make_domain_substitions(&domain)
+# make_domain_substitions(&domain, [nice-sizes])
 # Returns a hash of substitions for email to a virtual server
 sub make_domain_substitions
 {
-local ($d) = @_;
+local ($d, $nice_sizes) = @_;
 local %hash = %$d;
-if ($hash{'quota'}) {
-	$hash{'quota'} = &nice_size($d->{'quota'}*&quota_bsize("home"));
+
+delete($hash{''});
+$hash{'idndom'} = &show_domain_name($d->{'dom'});	# With unicode
+
+# Add parent domain info
+if ($d->{'parent'}) {
+	local $parent = &get_domain($d->{'parent'});
+	foreach my $k (keys %$parent) {
+		$hash{'parent_domain_'.$k} = $parent->{$k};
+		}
+	delete($hash{'parent_domain_'});
 	}
-if ($hash{'uquota'}) {
-	$hash{'uquota'} = &nice_size($d->{'uquota'}*&quota_bsize("home"));
+
+# Add reseller details
+if ($d->{'reseller'} && defined(&get_reseller)) {
+	local $resel = &get_reseller($d->{'reseller'});
+	local $acl = $resel->{'acl'};
+	$hash{'reseller_name'} = $resel->{'name'};
+	$hash{'reseller_theme'} = $resel->{'theme'};
+	$hash{'reseller_modules'} = join(" ", @{$resel->{'modules'}});
+	foreach my $a (keys %$acl) {
+		$hash{'reseller_'.$a} = $acl->{$a};
+		}
 	}
-if ($hash{'bw_limit'}) {
-	$hash{'bw_limit'} = &nice_size($d->{'bw_limit'});
+
+# Add plan details, if any
+local $plan = &get_plan($d->{'plan'});
+if ($plan) {
+	foreach my $k (keys %$plan) {
+		$hash{'plan_'.$k} = $plan->{$k};
+		}
 	}
-if ($hash{'bw_usage'}) {
-	$hash{'bw_usage'} = &nice_size($d->{'bw_usage'});
+
+# Add DNS serial number, for use in DNS templates
+if ($config{'dns'}) {
+	&require_bind();
+	if ($bind8::config{'soa_style'} == 1) {
+		$hash{'dns_serial'} = &bind8::date_serial().
+			sprintf("%2.2d", $bind8::config{'soa_start'});
+		}
+	else {
+		# Use Unix time for date and running number serials
+		$hash{'dns_serial'} = time();
+		}
 	}
-if ($config{'bw_period'}) {
-	$hash{'bw_period'} = $config{'bw_period'};
-	}
-if ($config{'bw_past'}) {
-	$hash{'bw_past'} = $config{'bw_past'};
+$hash{'virtualmin_url'} = &get_virtualmin_url($d);
+
+# Make quotas nicer, if needed
+if ($nice_sizes) {
+	if ($hash{'quota'}) {
+		$hash{'quota'} = &nice_size($d->{'quota'}*&quota_bsize("home"));
+		}
+	if ($hash{'uquota'}) {
+		$hash{'uquota'} = &nice_size($d->{'uquota'}*&quota_bsize("home"));
+		}
+	if ($hash{'bw_limit'}) {
+		$hash{'bw_limit'} = &nice_size($d->{'bw_limit'});
+		}
+	if ($hash{'bw_usage'}) {
+		$hash{'bw_usage'} = &nice_size($d->{'bw_usage'});
+		}
+	if ($config{'bw_period'}) {
+		$hash{'bw_period'} = $config{'bw_period'};
+		}
+	if ($config{'bw_past'}) {
+		$hash{'bw_past'} = $config{'bw_past'};
+		}
 	}
 return %hash;
 }
@@ -3258,7 +3308,7 @@ foreach my $r (@$recips) {
 	if ($r->{'id'}) {
 		# A domain
 		push(@emails, $r->{'emailto'});
-		%hash = &make_domain_substitions($r);
+		%hash = &make_domain_substitions($r, 1);
 		if ($admins) {
 			# And extra admins
 			push(@emails, map { $_->{'email'} }
@@ -11818,39 +11868,7 @@ return @rv;
 sub substitute_domain_template
 {
 local ($str, $d, $extra) = @_;
-local %hash = %$d;
-delete($hash{''});
-$hash{'idndom'} = &show_domain_name($d->{'dom'});	# With unicode
-if ($d->{'parent'}) {
-	local $parent = &get_domain($d->{'parent'});
-	foreach my $k (keys %$parent) {
-		$hash{'parent_domain_'.$k} = $parent->{$k};
-		}
-	delete($hash{'parent_domain_'});
-	}
-if ($d->{'reseller'} && defined(&get_reseller)) {
-	local $resel = &get_reseller($d->{'reseller'});
-	local $acl = $resel->{'acl'};
-	$hash{'reseller_name'} = $resel->{'name'};
-	$hash{'reseller_theme'} = $resel->{'theme'};
-	$hash{'reseller_modules'} = join(" ", @{$resel->{'modules'}});
-	foreach my $a (keys %$acl) {
-		$hash{'reseller_'.$a} = $acl->{$a};
-		}
-	}
-# Add DNS serial number, for use in DNS templates
-if ($config{'dns'}) {
-	&require_bind();
-	if ($bind8::config{'soa_style'} == 1) {
-		$hash{'dns_serial'} = &bind8::date_serial().
-			sprintf("%2.2d", $bind8::config{'soa_start'});
-		}
-	else {
-		# Use Unix time for date and running number serials
-		$hash{'dns_serial'} = time();
-		}
-	}
-$hash{'virtualmin_url'} = &get_virtualmin_url($d);
+local %hash = &make_domain_substitions($d, 0);
 if ($extra) {
 	%hash = ( %hash, %$extra );
 	}
