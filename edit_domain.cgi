@@ -50,13 +50,6 @@ if (($d->{'unix'} || $d->{'parent'}) && $d->{'group'}) {
 			    "<tt>$d->{'group'}</tt>");
 	}
 
-if (!$aliasdom) {
-	# Only show database name/count for non-alias domains
-	@dbs = &domain_databases($d);
-	print &ui_table_row($text{'edit_dbs'},
-		@dbs > 0 ? scalar(@dbs) : $text{'edit_nodbs'});
-	}
-
 # Show creator and date
 print &ui_table_row($text{'edit_created'},
 		    &text('edit_createdby',
@@ -192,9 +185,9 @@ if (!$aliasdom) {
 	if ($d->{'virt'}) {
 		# Got a virtual IP .. show option to remove
 		local $iface = &get_address_iface($d->{'ip'});
-		$ipfield = &ui_radio("virt", 1,
-		    [ [ 0, $text{'edit_virtoff'} ],
-		      [ 1, &text('edit_virton', "<tt>$iface</tt>") ] ]);
+		$ipfield = &ui_radio_table("virt", 1,
+			[ [ 0, $text{'edit_virtoff'} ],
+			  [ 1, &text('edit_virton', "<tt>$iface</tt>") ] ], 1);
 		}
 	elsif ($config{'all_namevirtual'}) {
 		# Always name-based, but IP can be changed
@@ -206,33 +199,20 @@ if (!$aliasdom) {
 		}
 	else {
 		# No IP .. show option to add
-		$ipfield = &ui_oneradio("virt", 0, $text{'edit_virtnone'}, 1);
+		my @opts = ( [ 0, $text{'edit_virtnone'} ] );
 		if ($tmpl->{'ranges'} ne "none") {
 			# Can do automatic allocation
-			local %racl = $d->{'reseller'} &&
-					defined(&get_reseller) ?
-				&get_reseller_acl($d->{'reseller'}) : ();
-			local $alloc = $racl{'ranges'} ?
-				&free_ip_address(\%racl) :
-				&free_ip_address($tmpl);
-			if ($alloc) {
-				$ipfield .= &ui_oneradio("virt", 1,
-					&text('edit_alloc', $alloc), 0);
-				}
-			else {
-				# None left!
-				$ipfield .= $text{'form_noalloc'};
-				}
+			push(@opts, [ 1, $text{'edit_alloc'} ]);
 			}
 		else {
 			# User must enter IP, but has option to use one
 			# that is already active.
-			$ipfield .= &ui_oneradio("virt", 1,
-						 $text{'edit_virtalloc'}, 0).
-				    " ".&ui_textbox("ip", undef, 15)." ".
-				    &ui_checkbox("virtalready", 1,
-					$text{'form_virtalready'});
+			push(@opts, [ 1, $text{'edit_virtalloc'},
+					&ui_textbox("ip", undef, 15)." ".
+				        &ui_checkbox("virtalready", 1,
+						$text{'form_virtalready'}) ]);
 			}
+		$ipfield = &ui_radio_table("virt", 0, \@opts, 1);
 		}
 	if (&can_use_feature("virt")) {
 		print &ui_table_row($text{'edit_virt'}, $ipfield);
@@ -250,11 +230,7 @@ if (&supports_ip6() && !$aliasdom) {
 			}
 		elsif ($tmpl->{'ranges6'} ne 'none') {
 			# Can allocate
-			local $alloc = &free_ip6_address($tmpl);
-			if ($alloc) {
-				push(@ip6opts, [ 1, $text{'edit_alloc'},
-						 $alloc ]);
-				}
+			push(@ip6opts, [ 1, $text{'edit_alloc'} ]);
 			}
 		else {
 			# Manually enter, or already active

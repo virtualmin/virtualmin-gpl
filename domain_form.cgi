@@ -562,8 +562,7 @@ if (!$aliasdom && &can_use_feature("virt") && &supports_ip6()) {
 	local @alloctmpls = grep { $_->{'ranges6'} ne 'none' } @cantmpls;
 	if (@alloctmpls) {
 		# Can allocate
-		local $alloc = &free_ip6_address($alloctmpls[0]);
-		push(@ip6opts, [ 2, $text{'edit_alloc'}, $alloc ]);
+		push(@ip6opts, [ 2, $text{'edit_alloc'} ]);
 		}
 	local @noalloctmpls = grep { $_->{'ranges6'} eq 'none' } @cantmpls;
 	if (@noalloctmpls) {
