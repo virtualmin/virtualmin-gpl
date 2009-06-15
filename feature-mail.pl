@@ -4117,6 +4117,7 @@ elsif ($config{'mail_system'} == 0) {
 	foreach my $virt (values %already) {
 		&postfix::delete_mapping($virtual_type, $virt);
 		}
+	&postfix::regenerate_virtual_table();
 	}
 &release_lock_mail($d);
 }
@@ -4148,6 +4149,7 @@ elsif ($config{'mail_system'} == 0) {
 			&postfix::delete_mapping($virtual_type, $virt);
 			}
 		}
+	&postfix::regenerate_virtual_table();
 	}
 &release_lock_mail($d);
 }
