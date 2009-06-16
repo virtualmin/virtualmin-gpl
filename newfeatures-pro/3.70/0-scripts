@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Piwik script installer to 0.4, Redmine to 0.8.4, SMF to 1.1.9, OpenGoo to 1.4.1, Squirrelmail to 1.4.19, Coppermine to 1.4.24, Magento to 1.3.2.1, phpMyFAQ to 2.0.15, DokuWiki to 2009-02-14b, OpenX to 2.8.1, phpBB to 3.0.5, TikiWiki to 3.0, Joomla to 1.5.11, Zenphoto to 1.2.5, bbPress to 0.9.0.5, phpCOIN to 1.6.2, Mantis to 1.1.8, WordPress to 2.8, and phpMyAdmin to 3.1.5.<br>Added a script installer for eGroupWare 1.6.001.
+html=Updated the Piwik script installer to 0.4, Redmine to 0.8.4, SMF to 1.1.9, OpenGoo to 1.4.1, Squirrelmail to 1.4.19, Coppermine to 1.4.24, Magento to 1.3.2.1, phpMyFAQ to 2.0.15, DokuWiki to 2009-02-14b, OpenX to 2.8.1, phpBB to 3.0.5, TikiWiki to 3.0, Joomla to 1.5.11, Zenphoto to 1.2.5, bbPress to 0.9.0.5, phpCOIN to 1.6.2, Mantis to 1.1.8, WordPress to 2.8, MediaWiki to 1.15.0, and phpMyAdmin to 3.1.5.<br>Added a script installer for eGroupWare 1.6.001.
 master=1
 reseller=1
 domain=1
