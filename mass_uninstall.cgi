@@ -100,9 +100,9 @@ else {
 		print &text('massu_rusurehome', &public_html_dir($d, 1)),
 		      "<p>\n";
 		}
-	print &ui_submit($text{'scripts_uok2'}, "confirm"),"<br>\n";
+	print &ui_submit($text{'scripts_uok2'}, "confirm"),"<p>\n";
+	print &text('massu_sel', join(", ", @descs)),"<br>\n";
 	print &ui_form_end(),"<br>\n";
-	print &text('massu_sel', join(", ", @descs)),"<p>\n";
 	print "</center>\n";
 	}
 

@@ -1114,7 +1114,7 @@ All backups made manually, on schedule or from the command line are now logged, 
 Added a field to the script upgrade notification to limit warnings to only some virtual servers, or to exclude servers.
 Moved the option for a secondary group for domain owners to the template level.
 ---- Changes since 3.69 ----
-Updated the Piwik script installer to 0.4, Redmine to 0.8.4, SMF to 1.1.9, OpenGoo to 1.4.2, Squirrelmail to 1.4.19, Coppermine to 1.4.24, Magento to 1.3.2.1, phpMyFAQ to 2.0.15, DokuWiki to 2009-02-14b, OpenX to 2.8.1, phpBB to 3.0.5, TikiWiki to 3.0, Joomla to 1.5.11, Zenphoto to 1.2.5, bbPress to 0.9.0.5, phpCOIN to 1.6.2, Mantis to 1.1.8, WordPress to 2.8, MediaWiki to 1.15.0, Movable Type to 4.26, and phpMyAdmin to 3.2.0.
+Updated the Piwik script installer to 0.4, Redmine to 0.8.4, SMF to 1.1.9, OpenGoo to 1.4.2, Squirrelmail to 1.4.19, Coppermine to 1.4.24, Magento to 1.3.2.1, phpMyFAQ to 2.0.15, DokuWiki to 2009-02-14b, OpenX to 2.8.1, phpBB to 3.0.5, TikiWiki to 3.0, Joomla to 1.5.11, Zenphoto to 1.2.5, bbPress to 0.9.0.5, phpCOIN to 1.6.2, Mantis to 1.1.8, WordPress to 2.8, MediaWiki to 1.15.0, Movable Type to 4.26, SugarCRM to 5.2.0f, and phpMyAdmin to 3.2.0.
 Added a script installer for eGroupWare 1.6.001.
 Bandwidth usage by date or month can now be graphed for sub-servers.
 Partially completed backups (where only some domains failed) are now shown in the backup logs.
