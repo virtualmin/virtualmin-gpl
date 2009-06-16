@@ -86,10 +86,13 @@ foreach $d (@doms) {
 	next if (!$d);				# Deleted
 	next if ($d->{'parent'});
 
+	# Find domain and sub-domains
+	@alld = ($d, &get_domain_by("parent", $d->{'id'}));
+
 	# Sum up usage for domain and sub-domains
 	$usage = 0;
 	%usage = ( );
-	foreach $dd ($d, &get_domain_by("parent", $d->{'id'})) {
+	foreach $dd (@alld) {
 		$bwinfo = &get_bandwidth($dd);
 		local $usage_only = 0;
 		local %usage_only = ( );
@@ -155,43 +158,48 @@ foreach $d (@doms) {
 			}
 		if (!$d->{'disabled'} && $etime && $config{'bw_disable'} &&
 		    !$d->{'bw_no_disable'}) {
-			# Time to disable
+			# Time to disable this domain and all sub-servers
 			&set_all_null_print();
-			@disable = &get_disable_features($d);
-			%disable = map { $_, 1 } @disable;
 
-			# Run the before command
-			&set_domain_envs($d, "DISABLE_DOMAIN");
-			$merr = &making_changes();
-			&reset_domain_envs($d);
-			next if ($merr);
+			foreach my $dd (@alld) {
+				@disable = &get_disable_features($dd);
+				%disable = map { $_, 1 } @disable;
+				@disabled = ( );
 
-			# Disable all configured features
-			my $f;
-			foreach $f (@features) {
-				if ($d->{$f} && $disable{$f}) {
-					local $dfunc = "disable_$f";
-					&$dfunc($d);
-					push(@disabled, $f);
+				# Run the before command
+				&set_domain_envs($dd, "DISABLE_DOMAIN");
+				$merr = &making_changes();
+				&reset_domain_envs($dd);
+				next if ($merr);
+
+				# Disable all configured features
+				foreach my $f (@features) {
+					if ($dd->{$f} && $disable{$f}) {
+						local $dfunc = "disable_$f";
+						&$dfunc($dd);
+						push(@disabled, $f);
+						}
 					}
-				}
-			foreach $f (&list_feature_plugins()) {
-				if ($d->{$f} && $disable{$f}) {
-					&plugin_call($f, "feature_disable", $d);
-					push(@disabled, $f);
+				foreach my $f (&list_feature_plugins()) {
+					if ($dd->{$f} && $disable{$f}) {
+						&plugin_call($f, "feature_disable", $dd);
+						push(@disabled, $f);
+						}
 					}
+
+				# Save new domain details
+				$dd->{'disabled'} = join(",", @disabled);
+				$dd->{'disabled_reason'} = 'bw';
+				$dd->{'disabled_why'} =
+					"Exceeded bandwidth limit";
+				&save_domain($dd);
+
+				# Run the after command
+				&set_domain_envs($dd, "DISABLE_DOMAIN");
+				&made_changes();
+				&reset_domain_envs($dd);
 				}
-
-			# Save new domain details
-			$d->{'disabled'} = join(",", @disabled);
-			$d->{'disabled_reason'} = 'bw';
-			$d->{'disabled_why'} = "Exceeded bandwidth limit";
-
-			# Run the after command
 			&run_post_actions();
-			&set_domain_envs($d, "DISABLE_DOMAIN");
-			&made_changes();
-			&reset_domain_envs($d);
 			}
 		}
 	elsif ($d->{'bw_limit'} && $config{'bw_warn'} &&
@@ -234,40 +242,42 @@ foreach $d (@doms) {
 	    $d->{'disabled'} && $d->{'disabled_reason'} eq 'bw') {
 		# Falled below the disable limit .. re-enable
 		&set_all_null_print();
-		@enable = &get_enable_features($d);
-		%enable = map { $_, 1 } @enable;
-		delete($d->{'disabled_reason'});
-		delete($d->{'disabled_why'});
 
-		# Run the before command
-		&set_domain_envs($d, "ENABLE_DOMAIN");
-		$merr = &making_changes();
-		&reset_domain_envs($d);
-		next if ($merr);
+		foreach my $dd (@alld) {
+			@enable = &get_enable_features($dd);
+			%enable = map { $_, 1 } @enable;
+			delete($dd->{'disabled_reason'});
+			delete($dd->{'disabled_why'});
 
-		# Enable all disabled features
-		my $f;
-		foreach $f (@features) {
-			if ($d->{$f} && $enable{$f}) {
-				local $efunc = "enable_$f";
-				&try_function($f, $efunc, $d);
+			# Run the before command
+			&set_domain_envs($dd, "ENABLE_DOMAIN");
+			$merr = &making_changes();
+			&reset_domain_envs($dd);
+			next if ($merr);
+
+			# Enable all disabled features
+			foreach my $f (@features) {
+				if ($dd->{$f} && $enable{$f}) {
+					local $efunc = "enable_$f";
+					&try_function($f, $efunc, $dd);
+					}
 				}
-			}
-		foreach $f (&list_feature_plugins()) {
-			if ($d->{$f} && $enable{$f}) {
-				&plugin_call($f, "feature_enable", $d);
+			foreach my $f (&list_feature_plugins()) {
+				if ($dd->{$f} && $enable{$f}) {
+					&plugin_call($f, "feature_enable", $dd);
+					}
 				}
+
+			# Save new domain details
+			delete($dd->{'disabled'});
+			&save_domain($dd);
+
+			# Run the after command
+			&set_domain_envs($dd, "ENABLE_DOMAIN");
+			&made_changes();
+			&reset_domain_envs($dd);
 			}
-
-		# Save new domain details
-		delete($d->{'disabled'});
-		&save_domain($d);
-
-		# Run the after command
 		&run_post_actions();
-		&set_domain_envs($d, "ENABLE_DOMAIN");
-		&made_changes();
-		&reset_domain_envs($d);
 		}
 	&save_domain($d);
 	}
