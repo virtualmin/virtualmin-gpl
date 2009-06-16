@@ -51,7 +51,7 @@ local $serv = { 'id' => $d->{'id'}.($ssl ? "_ssl" : "_web"),
 		'type' => 'http',
 		'desc' => $ssl ? "Website www.$d->{'dom'} (SSL)" 
 				: "Website www.$d->{'dom'}",
-		'fails' => 1,
+		'fails' => 2,
 		'email' => &monitor_email($d),
 		'host' => "www.$d->{'dom'}",
 		'port' => $ssl ? $d->{'web_sslport'} : $d->{'web_port'},
