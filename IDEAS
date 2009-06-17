@@ -38,3 +38,5 @@
  - Script to get CGI urls for some help page, for Joe
 
  - LXadmin migration
+
+ - Functional test for rename, via HTTP call

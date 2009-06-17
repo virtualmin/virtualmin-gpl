@@ -112,10 +112,9 @@ foreach $ad (@aliases) {
 	}
 
 # Check for domain name clash, where the domain, user or group have changed
-my $f;
-foreach $f (@features) {
-	if ($in{$f}) {
-		local $cfunc = "check_${f}_clash";
+foreach my $f (@features) {
+	local $cfunc = "check_${f}_clash";
+	if (defined(&$cfunc) && $dom{$f}) {
 		if ($newdom && &$cfunc($d, 'dom')) {
 			&error(&text('setup_e'.$f, $in{'dom'}, $dom{'db'},
 				     $user, $d->{'group'} || $group));
@@ -125,8 +124,8 @@ foreach $f (@features) {
 				     $user, $d->{'group'} || $group));
 			}
 		if ($group && &$cfunc($d, 'group')) {
-			&error(&text('setup_e'.$f, $in{'dom'},
-				     $dom{'db'}, $user, $group));
+			&error(&text('setup_e'.$f, $in{'dom'}, $dom{'db'},
+				     $user, $group));
 			}
 		}
 	}
@@ -166,13 +165,14 @@ if (@doms > 1) {
 	$first_print = \&first_html_withdom;
 	}
 
-# Update all features in all domains
-my $f;
-foreach $f (@features) {
+# Update all features in all domains. Include the mail feature always, as this
+# covers FTP users
+foreach my $f (&unique(@features, 'mail')) {
 	local $mfunc = "modify_$f";
 	my $i;
 	for($i=0; $i<@doms; $i++) {
-		if ($doms[$i]->{$f} && $config{$f} || $f eq "unix") {
+		if ($doms[$i]->{$f} && $config{$f} ||
+	            $f eq "unix" || $f eq "mail") {
 			$doing_dom = $doms[$i];
 			local $main::error_must_die = 1;
 			eval {
