@@ -659,6 +659,13 @@ if ($got{'mail'}) {
 		local $mailsrc = "$homesrc/mail/$dom/$muser";
 		local $sfdir = $mailboxes::config{'mail_usermin'};
 		local $sftype = $sfdir eq 'Maildir' ? 1 : 0;
+		local $sfpath = "$uinfo->{'home'}/$sfdir";
+		if (!-d $sfpath && !$sftype) {
+			# Create ~/mail if needed
+			&make_dir($sfpath, 0755);
+			&set_ownership_permissions(
+			     $uinfo->{'uid'}, $uinfo->{'gid'}, undef, $sfpath);
+			}
 		if (-d "$mailsrc/cur") {
 			# Mail directory is in Maildir format, and sub-folders
 			# are in Maildir++
@@ -677,7 +684,7 @@ if ($got{'mail'}) {
 				# Remove . if destination is not Maildir++
 				$mf =~ s/^\.// if (!$sftype);
 				local $dstfolder = { 'type' => $sftype,
-				    'file' => "$uinfo->{'home'}/$sfdir/$mf" };
+						     'file' => "$sfpath/$mf" };
 				&mailboxes::mailbox_move_folder($srcfolder,
 								$dstfolder);
 				&set_mailfolder_owner($dstfolder, $uinfo);
@@ -703,8 +710,7 @@ if ($got{'mail'}) {
 					# under ~/Maildir
 					$mf = ".$mf" if ($sftype);
 					$dstfolder = { 'type' => $sftype,
-						'file' =>
-						"$uinfo->{'home'}/$sfdir/$mf" };
+						'file' => "$sfpath/$mf" };
 					}
 				&mailboxes::mailbox_move_folder($srcfolder,
 								$dstfolder);
