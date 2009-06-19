@@ -1,0 +1,5 @@
+desc=Batch mailbox creation
+html=Multiple mail or FTP users can now be created at once from a batch file.
+link=list_users.cgi?dom=${ID}
+master=1
+domain=1
