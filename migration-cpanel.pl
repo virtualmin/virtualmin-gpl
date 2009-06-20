@@ -1116,11 +1116,23 @@ foreach my $pdom (&unique(@parked)) {
 	push(@rvdoms, \%alias);
 	}
 
+# Read addons domain mapping file
+local %addons;
+local $lref = &read_file_lines("$userdir/addons");
+foreach my $l (@$lref) {
+	my ($a, $t) = split(/=/, $l);
+	if ($a && $t) {
+		$t =~ s/_/\./;
+		$addons{$a} = $t;
+		}
+	}
+
 # Create sub-domains, from vf directory
 opendir(VF, "$userdir/vf");
 foreach my $vf (readdir(VF)) {
 	local ($clash) = grep { $_->{'dom'} eq $vf } @rvdoms;
 	next if ($vf eq "." || $vf eq ".." || $clash);
+	next if ($addons{$vf});
 	&$first_print("Creating sub-domain $vf ..");
 	if ($vf !~ /^(\S+)\.\Q$dom\E$/) {
 		&$second_print(".. skipping, as not a sub-domain of $dom");
@@ -1190,6 +1202,57 @@ foreach my $vf (readdir(VF)) {
 	push(@rvdoms, \%subd);
 	}
 closedir(VF);
+
+# Create addon domains
+opendir(VF, "$userdir/vf");
+foreach my $vf (readdir(VF)) {
+	local ($clash) = grep { $_->{'dom'} eq $vf } @rvdoms;
+	next if ($vf eq "." || $vf eq ".." || $clash);
+	next if (!$addons{$vf});
+	&$first_print("Creating addon domain $vf ..");
+	local $target = &get_domain_by("dom", $addons{$vf});
+	if (!$target) {
+		&$second_print(".. skipping, as target $addons{$vf} does not exist");
+		next;
+		}
+	&$indent_print();
+	local %alias = ( 'id', &domain_id(),
+			 'dom', $vf,
+			 'user', $dom{'user'},
+			 'group', $dom{'group'},
+			 'prefix', $dom{'prefix'},
+			 'ugroup', $dom{'ugroup'},
+			 'pass', $dom{'pass'},
+			 'alias', $target->{'id'},
+			 'uid', $dom{'uid'},
+			 'gid', $dom{'gid'},
+			 'ugid', $dom{'ugid'},
+			 'owner', "Migrated cPanel alias for $target->{'dom'}",
+			 'email', $dom{'email'},
+			 'name', 1,
+			 'ip', $target->{'ip'},
+			 'virt', 0,
+			 'source', $dom{'source'},
+			 'parent', $dom{'id'},
+			 'template', $target->{'template'},
+			 'reseller', $target->{'reseller'},
+			 'nocreationmail', 1,
+			 'nocopyskel', 1,
+			);
+	foreach my $f (@alias_features) {
+		$alias{$f} = $target->{$f};
+		}
+	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+					  : \%dom;
+	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
+	&complete_domain(\%alias);
+	&create_virtual_server(\%alias, $parentdom,
+			       $parentdom->{'user'});
+	&$outdent_print();
+	&$second_print($text{'setup_done'});
+	push(@rvdoms, \%alias);
+	}
+
 
 if ($got{'webalizer'}) {
 	# Copy existing Weblizer stats to ~/public_html/stats
