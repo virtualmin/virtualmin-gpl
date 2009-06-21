@@ -18,6 +18,10 @@ ref($filehash) || return "Failed to parse kloxo.file : $filehash";
 local $metahash = &parse_lxadmin_file("$root/kloxo.metadata");
 ref($metahash) || return "Failed to parse kloxo.metadata : $metahash";
 
+use Data::Dumper;
+print Dumper($filehash);
+return ("foo");
+
 if (!$dom) {
 	# Work out the domain
 	}
@@ -72,12 +76,14 @@ return (1, $temp);
 # parse_lxadmin_file(file)
 # Returns a hash ref for the contents of an LXadmin metadata file, which is
 # actually just PHP serialized data. Returns a string on failure.
+# XXX serialize.pm doesn't support O:len:"class":??:{array} format
 sub parse_lxadmin_file
 {
 local ($file) = @_;
 local $ser = &read_file_contents($file);
 $ser || return "$file is missing or empty";
-$ser =~ /0:6:"Remote"/ || return "$file does not appear to contain PHP serialized data";
+$ser =~ /O:6:"Remote"/ || return "$file does not appear to contain PHP serialized data : ".substr($ser, 0, 20);
+$ser = 'O:6:"Remote":4:{s:7:"version";s:3:"6.0";};';
 eval "use serialize";
 $@ && return "Failed to load serialize module : $@";
 local $rv = eval { unserialize($ser) };
