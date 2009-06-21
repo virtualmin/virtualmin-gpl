@@ -24,12 +24,26 @@ foreach $f (@database_features) {
 $can_allowed_hosts = $can_allowed_hosts && !$d->{'parent'} &&
 		     &can_allowed_db_hosts();
 
+# Work out features we can change passwords for
+@pass_features = ( );
+if (!$d->{'parent'}) {
+	foreach my $f (@database_features) {
+		$sfunc = "set_${f}_pass";
+		if ($d->{$f} && defined(&$sfunc) &&
+		    $config{$f} && !$tmpl->{$f.'_nopass'}) {
+			push(@pass_features, $f);
+			}
+		}
+	}
+
 # Start tabs for various options, if appropriate
 @tabs = ( [ "list", $text{'databases_tablist'} ] );
 if (!$d->{'parent'}) {
 	if ($virtualmin_pro) {
 		push(@tabs, [ "usernames", $text{'databases_tabusernames'} ]);
 		}
+	}
+if (@pass_features) {
 	push(@tabs, [ "passwords", $text{'databases_tabpasswords'} ]);
 	}
 if (&can_import_servers()) {
@@ -130,25 +144,23 @@ if (!$d->{'parent'}) {
 	print &ui_hidden("dom", $in{'dom'}),"\n";
 	print &ui_table_start($text{'databases_pheader'}, undef, 2);
 
-	foreach $f (@database_features) {
+	foreach $f (@pass_features) {
 		$sfunc = "set_${f}_pass";
 		$ufunc = "${f}_pass";
 		$efunc = "${f}_enc_pass";
-		if (defined($sfunc) && $config{$f} && $d->{$f}) {
-			$pw = &$ufunc($d, 1);
-			$encpw = defined(&$efunc) ? &$efunc($d) : undef;
-			print &ui_table_row($text{'feature_'.$f},
-			    &ui_radio($f."_def",
-				$encpw ? 2 : $pw eq $d->{'pass'} ? 1 : 0,
-				[ [ 1, $text{'databases_samepass'}."<br>" ],
-				  $encpw ?
-				    ( [ 2, $text{'databases_enc'}."<br>" ] ) :
-				    ( ),
-				  [ 0, $text{'databases_newpass'}." ".
-				       &ui_textbox($f,
-					 $pw eq $d->{'pass'} ? "" : $pw, 20) ]
-				]));
-			}
+		$pw = &$ufunc($d, 1);
+		$encpw = defined(&$efunc) ? &$efunc($d) : undef;
+		print &ui_table_row($text{'feature_'.$f},
+		    &ui_radio($f."_def",
+			$encpw ? 2 : $pw eq $d->{'pass'} ? 1 : 0,
+			[ [ 1, $text{'databases_samepass'}."<br>" ],
+			  $encpw ?
+			    ( [ 2, $text{'databases_enc'}."<br>" ] ) :
+			    ( ),
+			  [ 0, $text{'databases_newpass'}." ".
+			       &ui_textbox($f,
+				 $pw eq $d->{'pass'} ? "" : $pw, 20) ]
+			]));
 		}
 
 	print &ui_table_end();
