@@ -54,7 +54,7 @@ if (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
 	# Also notify slave servers, unless already added
 	local @slaves = &bind8::list_slave_servers();
 	local @extra_slaves = split(/\s+/, $tmpl->{'dns_ns'});
-	if (@slaves) {
+	if (@slaves && !$tmpl->{'namedconf_no_also_notify'}) {
 		local ($also) = grep { $_->{'name'} eq 'also-notify' }
 				     @{$dir->{'members'}};
 		if (!$also) {
@@ -87,7 +87,7 @@ if (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
 		}
 	local ($trans) = grep { $_->{'name'} eq 'allow-transfer' }
 			      @{$dir->{'members'}};
-	if (!$trans) {
+	if (!$trans && !$tmpl->{'namedconf_no_allow_transfer'}) {
 		$trans = { 'name' => 'allow-transfer',
 			   'type' => 1,
 			   'members' => \@trans };
@@ -1593,11 +1593,19 @@ print &ui_table_hr();
 print &ui_table_row(&hlink($text{'tmpl_namedconf'}, "namedconf"),
     &none_def_input("namedconf", $tmpl->{'namedconf'},
 		    $text{'tmpl_namedconfbelow'}, 0, 0, undef,
-		    [ "namedconf" ])."<br>".
+		    [ "namedconf", "namedconf_also_notify",
+		      "namedconf_allow_transfer" ])."<br>".
     &ui_textarea("namedconf",
 		 $tmpl->{'namedconf'} eq 'none' ? '' :
 			join("\n", split(/\t/, $tmpl->{'namedconf'})),
 		 5, 60));
+
+# Add also-notify and allow-transfer
+print &ui_table_row(&hlink($text{'tmpl_dnsalso'}, "template_dns_also"),
+	&ui_checkbox("namedconf_also_notify", 1, 'also-notify',
+		     !$tmpl->{'namedconf_no_also_notify'})." ".
+	&ui_checkbox("namedconf_allow_transfer", 1, 'allow-transfer',
+		     !$tmpl->{'namedconf_no_allow_transfer'}));
 
 # DNSSEC for new domains
 if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec()) {
@@ -1728,6 +1736,13 @@ if ($in{'namedconf_mode'} == 2) {
 	if ($tmpl->{'namedconf'} =~ /\S/ && !@recs) {
 		&error($text{'newdns_enamedconf'});
 		}
+	$tmpl->{'namedconf'} ||= " ";	# So it can be empty
+
+	# Save other auto-add directives
+	$tmpl->{'namedconf_no_also_notify'} =
+		!$in{'namedconf_also_notify'};
+	$tmpl->{'namedconf_no_allow_transfer'} =
+		!$in{'namedconf_allow_transfer'};
 	}
 
 # Save DNSSEC

@@ -2506,6 +2506,7 @@ tmpl_logrotate=Logrotate directives for new servers
 tmpl_logrotatenone=Automatic
 tmpl_dns=BIND DNS records for new domains
 tmpl_dnsns=Additional manually configured nameservers
+tmpl_dnsalso=Automatically add <tt>named.conf</tt> directives
 tmpl_dnsttl=Default TTL for DNS records
 tmpl_dnsttl0=Use BIND module setting
 tmpl_dnsttl1=None

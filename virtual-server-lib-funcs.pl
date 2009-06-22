@@ -6846,6 +6846,10 @@ push(@rv, { 'id' => 0,
 	    'dnssec' => $config{'dnssec'} || "none",
 	    'dnssec_alg' => $config{'dnssec_alg'},
 	    'namedconf' => $config{'namedconf'} || "none",
+	    'namedconf_no_allow_transfer' =>
+		$config{'namedconf_no_allow_transfer'},
+	    'namedconf_no_also_notify' =>
+		$config{'namedconf_no_also_notify'},
 	    'ftp' => $config{'proftpd_config'},
 	    'ftp_dir' => $config{'ftp_dir'},
 	    'logrotate' => $config{'logrotate_config'} || "none",
@@ -7098,6 +7102,10 @@ if ($tmpl->{'id'} == 0) {
 	$config{'dns_ttl'} = $tmpl->{'dns_ttl'};
 	$config{'namedconf'} = $tmpl->{'namedconf'} eq 'none' ? undef :
 							$tmpl->{'namedconf'};
+	$config{'namedconf_no_also_notify'} =
+		$tmpl->{'namedconf_no_also_notify'};
+	$config{'namedconf_no_allow_transfer'} =
+		$tmpl->{'namedconf_no_allow_transfer'};
 	$config{'dnssec'} = $tmpl->{'dnssec'} eq 'none' ? undef
 							: $tmpl->{'dnssec'};
 	$config{'dnssec_alg'} = $tmpl->{'dnssec_alg'};
