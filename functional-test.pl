@@ -22,6 +22,7 @@ $ENV{'http_proxy'} = undef;
 $ENV{'ftp_proxy'} = undef;
 
 $test_domain = "example.com";	# Never really exists
+$test_rename_domain = "examplerename.com";
 $test_target_domain = "exampletarget.com";
 $test_subdomain = "example.net";
 $test_parallel_domain1 = "example1.net";
@@ -55,7 +56,7 @@ $ok_email_file = "$test_email_dir/ok.txt";
 $supports_fcgid = defined(&supported_php_modes) &&
 		  &indexof("fcgid", &supported_php_modes()) >= 0;
 
-@create_args = ( [ 'limits-from-template' ],
+@create_args = ( [ 'limits-from-plan' ],
 		 [ 'no-email' ],
 		 [ 'no-slaves' ],
 	  	 [ 'no-secondaries' ] );
@@ -114,7 +115,10 @@ if ($webmin_proto eq "https") {
 	}
 
 ($test_domain_user) = &unixuser_name($test_domain);
+($test_rename_domain_user) = &unixuser_name($test_rename_domain);
 $prefix = &compute_prefix($test_domain, $test_domain_user, undef, 1);
+$rename_prefix = &compute_prefix($test_rename_domain, $test_rename_domain_user,
+				 undef, 1);
 %test_domain = ( 'dom' => $test_domain,
 		 'prefix' => $prefix,
 		 'user' => $test_domain_user,
@@ -126,6 +130,12 @@ $test_domain{'home'} = &server_home_directory(\%test_domain);
 $test_domain_db = &database_name(\%test_domain);
 $test_domain_cert = &default_certificate_file(\%test_domain, "cert");
 $test_domain_key = &default_certificate_file(\%test_domain, "key");
+%test_rename_domain = ( 'dom' => $test_rename_domain,
+		        'prefix' => $rename_prefix,
+       		        'user' => $test_rename_domain_user,
+		        'group' => $test_rename_domain_user,
+		        'template' => &get_init_template() );
+$test_rename_full_user = &userdom_name($test_user, \%test_drename_omain);
 
 # Create PostgreSQL password file
 $pg_pass_file = "/tmp/pgpass.txt";
@@ -2633,6 +2643,92 @@ if (!&supports_ip6()) {
 	$ip6_tests = [ { 'comand' => 'echo IPv6 is not supported' } ];
 	}
 
+# Tests for renaming a virtual server
+$rename_tests = [
+	# Create a domain that will get renamed
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test rename domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      [ 'mysql' ], [ 'status' ], [ 'spam' ], [ 'virus' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test rename page' ],
+		      @create_args, ],
+	},
+
+	# Create a mailbox
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
+	# Create an alias
+	{ 'command' => 'create-alias.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'from', $test_alias ],
+		      [ 'to', 'nobody@virtualmin.com' ] ],
+	},
+
+	# Get the domain ID
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'id-only' ] ],
+	  'save' => 'DOMID',
+	},
+
+	# Call the rename CGI
+	{ 'command' => $webmin_wget_command.
+		       "${webmin_proto}://localhost:${webmin_port}/virtual-server/rename.cgi\\?dom=\$DOMID\\&new=$test_rename_domain\\&user_mode=1\\&home_mode=1\\&group_mode=1",
+	   'grep' => 'Saving server details',
+	},
+
+	# Validate the domain
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_rename_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Make sure DNS works
+	{ 'command' => 'host '.$test_rename_domain,
+	  'grep' => &get_default_ip(),
+	},
+
+	# Make sure website works
+	{ 'command' => $wget_command.'http://'.$test_rename_domain,
+	  'grep' => 'Test rename page',
+	},
+
+	# Make sure MySQL login works
+	{ 'command' => 'mysql -u '.$test_rename_domain_user.' -psmeg '.$test_domain_db.' -e "select version()"',
+	},
+
+	# Validate renamed mailbox
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_rename_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Unix username: '.$test_rename_full_user ],
+	},
+	
+	# Validate renamed alias
+	{ 'command' => 'list-aliases.pl',
+	  'args' => [ [ 'domain', $test_rename_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^'.$test_alias.'@'.$test_rename_domain ],
+	},
+
+	# Get rid of the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_rename_domain ] ],
+	  'cleanup' => 1
+        },
+	];
+
 $alltests = { 'domains' => $domains_tests,
 	      'web' => $web_tests,
 	      'mailbox' => $mailbox_tests,
@@ -2660,6 +2756,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'plans' => $plans_tests,
 	      'plugin' => $plugin_tests,
 	      'ip6' => $ip6_tests,
+	      'rename' => $rename_tests,
 	    };
 
 # Run selected tests
@@ -2845,6 +2942,7 @@ if ($t->{'save'}) {
 	$out =~ s/\s*$//;
 	$ENV{$t->{'save'}} = $out;
 	$saved_vars{$t->{'save'}} = $out;
+	print "    .. saved $t->{'save'} value $out\n";
 	}
 print $t->{'fail'} ? "    .. successfully failed\n"
 		   : "    .. success\n";

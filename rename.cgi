@@ -6,6 +6,7 @@ require './virtual-server-lib.pl';
 &ReadParse();
 &error_setup($text{'rename_err'});
 $d = &get_domain($in{'dom'});
+$d || &error($text{'edit_egone'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
 &can_rename_domains() || &error($text{'rename_ecannot'});
 
