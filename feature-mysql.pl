@@ -72,6 +72,11 @@ else {
 	# No DBs can exist
 	$d->{'db_mysql'} = "";
 	}
+
+# Save the initial password
+if ($tmpl->{'mysql_nopass'}) {
+	&set_mysql_pass(&mysql_pass($d, 1));
+	}
 }
 
 # add_db_table(host, db, user)
@@ -156,7 +161,8 @@ $d->{'mysql_user'} = $user;
 local $oldencpass = &encrypted_mysql_pass($oldd);
 local $encpass = &encrypted_mysql_pass($d);
 local $tmpl = &get_template($d->{'template'});
-if ($encpass ne $oldencpass && !$d->{'parent'} && !$tmpl->{'mysql_nopass'}) {
+if ($encpass ne $oldencpass && !$d->{'parent'} &&
+    (!$tmpl->{'mysql_nopass'} || $d->{'mysql_pass'})) {
 	# Change MySQL password
 	&$first_print($text{'save_mysqlpass'});
 	if (&mysql_user_exists($d)) {

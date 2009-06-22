@@ -58,6 +58,11 @@ else {
 	# No DBs can exist
 	$_[0]->{'db_postgres'} = "";
 	}
+
+# Save the initial password
+if ($tmpl->{'postgres_nopass'}) {
+	&set_postgres_pass(&postgres_pass($d, 1));
+	}
 }
 
 # set_postgres_pass(&domain, [password])
@@ -96,11 +101,12 @@ sub modify_postgres
 local $changeduser = $_[0]->{'user'} eq $_[1]->{'user'} ? 0 : 1;
 local $user = &postgres_user($_[0], $changeduser);
 local $olduser = &postgres_user($_[1]);
+local $tmpl = &get_template($_[0]->{'template'});
 
 local $pass = &postgres_pass($_[0]);
 local $oldpass = &postgres_pass($_[1]);
-if ($pass ne $oldpass &&
-    !$_[0]->{'parent'} && !$config{'mysql_nopass'}) {
+if ($pass ne $oldpass && !$_[0]->{'parent'} &&
+    (!$tmpl->{'mysql_nopass'} || $_[0]->{'mysql_pass'})) {
 	# Change PostgreSQL password ..
 	&$first_print($text{'save_postgrespass'});
 	if (&postgres_user_exists($_[1])) {

@@ -6,6 +6,7 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
 &can_edit_databases($d) || &error($text{'databases_ecannot'});
+$tmpl = &get_template($d->{'template'});
 
 &ui_print_header(&domain_in($d), $text{'databases_title'}, "", "databases");
 
@@ -26,12 +27,18 @@ $can_allowed_hosts = $can_allowed_hosts && !$d->{'parent'} &&
 
 # Work out features we can change passwords for
 @pass_features = ( );
+@user_features = ( );
 if (!$d->{'parent'}) {
 	foreach my $f (@database_features) {
-		$sfunc = "set_${f}_pass";
-		if ($d->{$f} && defined(&$sfunc) &&
-		    $config{$f} && !$tmpl->{$f.'_nopass'}) {
-			push(@pass_features, $f);
+		$spfunc = "set_${f}_pass";
+		$sufunc = "set_${f}_user";
+		if ($d->{$f} && $config{$f}) {
+			if (defined(&$spfunc)) {
+				push(@pass_features, $f);
+				}
+			if (defined(&$sufunc)) {
+				push(@user_features, $f);
+				}
 			}
 		}
 	}
@@ -120,15 +127,15 @@ if (!$d->{'parent'} && $virtualmin_pro) {
 	print &ui_hidden("dom", $in{'dom'}),"\n";
 	print &ui_table_start($text{'databases_uheader'}, undef, 2);
 
-	foreach $f (@database_features) {
+	foreach $f (@user_features) {
 		$sfunc = "set_${f}_user";
 		$ufunc = "${f}_user";
-		if (defined($sfunc) && $config{$f} && $d->{$f}) {
-			$un = &$ufunc($d);
-			print &ui_table_row($text{'feature_'.$f},
-			    &ui_opt_textbox($f, undef, 20,
-				&text('databases_leave', "<tt>$un</tt>")));
-			}
+		$un = &$ufunc($d);
+		print &ui_table_row($text{'feature_'.$f},
+		    &ui_radio_table($f."_def", 0,
+			[ [ 0, &text('databases_leave', "<tt>$un</tt>") ],
+			  [ 1, $text{'databases_newuser'},
+			    &ui_textbox($f, undef, 20) ] ]));
 		}
 
 	print &ui_table_end();
@@ -150,17 +157,28 @@ if (!$d->{'parent'}) {
 		$efunc = "${f}_enc_pass";
 		$pw = &$ufunc($d, 1);
 		$encpw = defined(&$efunc) ? &$efunc($d) : undef;
-		print &ui_table_row($text{'feature_'.$f},
-		    &ui_radio($f."_def",
-			$encpw ? 2 : $pw eq $d->{'pass'} ? 1 : 0,
-			[ [ 1, $text{'databases_samepass'}."<br>" ],
-			  $encpw ?
-			    ( [ 2, $text{'databases_enc'}."<br>" ] ) :
-			    ( ),
-			  [ 0, $text{'databases_newpass'}." ".
-			       &ui_textbox($f,
-				 $pw eq $d->{'pass'} ? "" : $pw, 20) ]
-			]));
+		@opts = ( );
+		if (!$tmpl->{$f.'_nopass'}) {
+			push(@opts, [ 1, $text{'databases_samepass'} ]);
+			}
+		if ($encpw) {
+			push(@opts, [ 2, $text{'databases_enc'} ]);
+			}
+		push(@opts, [ 0, $text{'databases_newpass'},
+			      &ui_textbox($f,
+                                 $pw eq $d->{'pass'} &&
+				 !$tmpl->{$f.'_nopass'} ? "" : $pw, 20) ]);
+		if (@opts > 1) {
+			print &ui_table_row($text{'feature_'.$f},
+				&ui_radio_table($f."_def",
+				   $encpw ? 2 : $pw eq $d->{'pass'} ? 1 : 0,
+				   \@opts));
+			}
+		else {
+			print &ui_table_row($text{'feature_'.$f},
+				$opts[0]->[2].
+				&ui_hidden($f."_def", $opts[0]->[0]));
+			}
 		}
 
 	print &ui_table_end();

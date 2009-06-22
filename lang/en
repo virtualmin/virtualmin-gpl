@@ -2841,6 +2841,7 @@ databases_man=Manage..
 databases_delete=Delete Selected
 databases_uheader=Change database usernames
 databases_leave=Leave as $1
+databases_newuser=Change to
 databases_pheader=Change database passwords
 databases_samepass=Same as administration password
 databases_enc=Pre-encrypted password
