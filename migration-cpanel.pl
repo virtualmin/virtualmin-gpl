@@ -351,8 +351,6 @@ if (!$parent) {
 	&set_capabilities_from_plan(\%dom, $plan);
 	}
 $dom{'db'} = &database_name(\%dom);
-$dom{'emailto'} = $dom{'email'} ||
-		  $dom{'user'}.'@'.&get_system_hostname();
 foreach my $f (@features, &list_feature_plugins()) {
 	$dom{$f} = $got{$f} ? 1 : 0;
 	}
