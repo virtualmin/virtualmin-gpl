@@ -347,28 +347,73 @@ foreach my $e (@emails) {
 &$second_print(".. done (migrated $mcount mail users)");
 
 # Restore mail aliases
-&$first_print("Re-creating mail aliases ..");
-local $acount = 0;
-local @aliases = keys %{$domhash->{'mmail_o'}->{'mailforward_l'}};
-local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
-foreach my $e (@aliases) {
-	my $a = $domhash->{'mmail_o'}->{'mailforward_l'}->{$e};
-	local $virt = { 'from' => $e, 'to' => [ ] };
-	if ($a->{'forwardaddress'}) {
-		push(@{$virt->{'to'}}, split(/[ ,]/, $a->{'forwardaddress'}));
+if ($got{'mail'}) {
+	&$first_print("Re-creating mail aliases ..");
+	local $acount = 0;
+	local @aliases = keys %{$domhash->{'mmail_o'}->{'mailforward_l'}};
+	local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
+	foreach my $e (@aliases) {
+		my $a = $domhash->{'mmail_o'}->{'mailforward_l'}->{$e};
+		local $virt = { 'from' => $e, 'to' => [ ] };
+		if ($a->{'forwardaddress'}) {
+			push(@{$virt->{'to'}},
+			     split(/[ ,]/, $a->{'forwardaddress'}));
+			}
+		local $clash = $gotvirt{$virt->{'from'}};
+		&delete_virtuser($clash) if ($clash);
+		&create_virtuser($virt);
+		$acount++;
 		}
-	local $clash = $gotvirt{$virt->{'from'}};
-	&delete_virtuser($clash) if ($clash);
-	&create_virtuser($virt);
-	$acount++;
+	&$second_print(".. done (migrated $acount mail aliases)");
 	}
-&$second_print(".. done (migrated $acount mail aliases)");
 
 # Restore mailing lists
-# XXX
+if ($got{'virtualmin-mailman'}) {
+	# XXX
+	}
 
 # Restore MySQL databases
-# XXX
+# XXX in mysqldb_l in bobject
+if ($got{'mysql'}) {
+	&$first_print("Re-creating MySQL databases ..");
+	&require_mysql();
+	local @gotmysql = &mysql::list_databases();
+	local $dcount = 0;
+	local @dbs = keys %{$filehash->{'bobject'}->{'mysqldb_l'}};
+	foreach my $db (@dbs) {
+		next if (&indexof($db, @gotmysql) >= 0);
+
+		# Create the empty DB
+		&$indent_print();
+		&create_mysql_database(\%dom, $db);
+		&save_domain(\%dom, 1);
+
+		# Extract the tar file
+		local ($dbtar) = glob("$root/$db-mysqldb-*");
+		if (!$dbtar) {
+			&$first_print("No TAR file for contents of $db found");
+			&$outdent_print();
+			next;
+			}
+		local $dbdir = &extract_lxadmin_file($dbtar);
+		if (!$dbdir || !-r "$dbdir/mysql-$db.dump") {
+			&$first_print("TAR file for contents of $db does not ".
+				      "contain mysql-$db.dump");
+			&$outdent_print();
+			next;
+			}
+
+		# Load the SQL
+		local ($ex, $out) = &mysql::execute_sql_file($db,
+					"$dbdir/mysql-$db.dump");
+		if ($ex) {
+			&$first_print("Error loading $db : $out");
+			}
+		&$outdent_print();
+		$dcount++;
+		}
+	&$second_print(".. done (migrated $dcount databases)");
+	}
 
 &release_lock_unix(\%dom);
 &release_lock_mail(\%dom);
