@@ -1314,14 +1314,5 @@ local $out = `gunzip -c $qf >$temp`;
 return $? ? undef : $temp;
 }
 
-# set_mailfolder_owner(&folder, &user)
-# Chowns some mail folder to a user
-sub set_mailfolder_owner
-{
-local ($folder, $user) = @_;
-&execute_command("chown -R $user->{'uid'}:$user->{'gid'} ".
-		 quotemeta($folder->{'file'}));
-}
-
 1;
 

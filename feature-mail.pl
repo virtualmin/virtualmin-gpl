@@ -1804,6 +1804,15 @@ else {
 	}
 }
 
+# set_mailfolder_owner(&folder, &user)
+# Chowns some mail folder to a user
+sub set_mailfolder_owner
+{
+local ($folder, $user) = @_;
+&execute_command("chown -R $user->{'uid'}:$user->{'gid'} ".
+		 quotemeta($folder->{'file'}));
+}
+
 # delete_mail_file(&user)
 # Delete's a unix user's mail file, associated indexes, and clamav temp files
 sub delete_mail_file

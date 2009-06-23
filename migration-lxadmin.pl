@@ -254,15 +254,97 @@ if ($got{'web'}) {
 	}
 $dom{'cgi_bin_correct'} = 0;	# So that it is computed from now on
 
+# Extract mailboxes file
+&$first_print("Extracting mailboxes file ..");
+local ($mfile) = glob("$root/$dom-mmail-*.tar");
+local $mdir;
+if (!$mfile) {
+	&$second_print(".. no $dom-mmail-* file found");
+	}
+else {
+	$mdir = &extract_lxadmin_dir($mfile);
+	if (!$mdir) {
+		&$second_print(".. extraction failed");
+		}
+	else {
+		&$second_print(".. done");
+		}
+	}
+
+# Lock the user DB and build list of used IDs
+&obtain_lock_unix(\%dom);
+&obtain_lock_mail(\%dom);
+local (%taken, %utaken);
+&build_taken(\%taken, \%utaken);
+&foreign_require("mailboxes", "mailboxes-lib.pl");
+
 # Restore mailboxes
 &$first_print("Re-creating mailbox users ..");
 local $mcount = 0;
 local @emails = keys %{$domhash->{'mmail_o'}->{'mailaccount_l'}};
-print join(" ", @emails),"\n";
-&$second_print($mcount ? ".. created $mcount" : ".. none found");
-# XXX look for mailaccount_1 map from emails to user details
-# XXX inside mmail_o
-# XXX inside domain name
+foreach my $e (@emails) {
+	my $u = $domhash->{'mmail_o'}->{'mailaccount_l'}->{$e};
+	my ($username) = split(/\@/, $e);
+	local $uinfo = &create_initial_user(\%dom);
+	$uinfo->{'user'} = &userdom_name(lc($username), \%dom);
+	if ($u->{'realpass'}) {
+		$uinfo->{'plainpass'} = $u->{'realpass'};
+		$uinfo->{'pass'} = &encrypt_user_password(
+					$uinfo, $uinfo->{'plainpass'});
+		}
+	else {
+		$uinfo->{'pass'} = $u->{'password'};
+		}
+	$uinfo->{'uid'} = &allocate_uid(\%taken);
+	$uinfo->{'gid'} = $dom{'gid'};
+	$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/".lc($username);
+	$uinfo->{'shell'} = $nologin_shell->{'shell'};
+	$uinfo->{'email'} = lc($e);
+	&create_user($uinfo, \%dom);
+	&create_user_home($uinfo, \%dom);
+	$taken{$uinfo->{'uid'}}++;
+	local ($crfile, $crtype) = &create_mail_file($uinfo);
+
+	# Find original mail directory
+	local $umdir = "$mdir/$username/Maildir";
+	next if (!-d $umdir);
+
+	# Move his mail file
+	local $srcfolder = { 'file' => $umdir, 'type' => 1 };
+	local $dstfolder = { 'file' => $crfile, 'type' => $crtype };
+	if ($srcfolder->{'type'} == 1 && $dstfolder->{'type'} == 1) {
+		# Same format, so can just copy including sub-folders
+		&copy_source_dest($srcfolder->{'file'}, $dstfolder->{'file'});
+		}
+	else {
+		# Move and convert
+		&mailboxes::mailbox_copy_folder($srcfolder, $dstfolder);
+		}
+	&set_mailfolder_owner($dstfolder, $uinfo);
+
+	# Move other mail folders, if not using Maildir
+	if ($dstfolder->{'type'} != 1) {
+		local $dstdir = $uinfo->{'home'}."/".
+				$mailboxes::config{'mail_usermin'};
+		opendir(SRCDIR, $umdir);
+		foreach my $uf (readdir(SRCDIR)) {
+			if ($uf =~ /^\./ && $uf ne "." && $uf ne "..") {
+				local $fname = $uf;
+				$fname =~ s/^\.//;
+				local $srcf = { 'file' => "$umdir/$uf",
+						'type' => 1 };
+				local $dstf = { 'file' => "$dstdir/$fname",
+						'type' => 1 };
+				&mailboxes::mailbox_copy_folder($srcf, $dstf);
+				&set_mailfolder_owner($dstf, $uinfo);
+				}
+			}
+		closedir(SRCDIR);
+		}
+
+	$mcount++;
+	}
+&$second_print(".. done (migrated $mcount mail users)");
 
 # Restore mail aliases
 # XXX look for mailforward_l map from emails to details
@@ -270,6 +352,12 @@ print join(" ", @emails),"\n";
 
 # Restore mailing lists
 # XXX
+
+# Restore MySQL databases
+# XXX
+
+&release_lock_unix(\%dom);
+&release_lock_mail(\%dom);
 
 # Save original metadata files
 &$first_print("Saving LXadmin metadata files ..");
