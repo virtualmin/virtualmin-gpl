@@ -347,8 +347,22 @@ foreach my $e (@emails) {
 &$second_print(".. done (migrated $mcount mail users)");
 
 # Restore mail aliases
-# XXX look for mailforward_l map from emails to details
-# XXX
+&$first_print("Re-creating mail aliases ..");
+local $acount = 0;
+local @aliases = keys %{$domhash->{'mmail_o'}->{'mailforward_l'}};
+local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
+foreach my $e (@aliases) {
+	my $a = $domhash->{'mmail_o'}->{'mailforward_l'}->{$e};
+	local $virt = { 'from' => $e, 'to' => [ ] };
+	if ($a->{'forwardaddress'}) {
+		push(@{$virt->{'to'}}, split(/[ ,]/, $a->{'forwardaddress'}));
+		}
+	local $clash = $gotvirt{$virt->{'from'}};
+	&delete_virtuser($clash) if ($clash);
+	&create_virtuser($virt);
+	$acount++;
+	}
+&$second_print(".. done (migrated $acount mail aliases)");
 
 # Restore mailing lists
 # XXX
