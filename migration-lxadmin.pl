@@ -62,6 +62,9 @@ local ($ok, $root) = &extract_lxadmin_dir($file);
 $ok || &error("Not an LXadmin tar file : $root");
 local $metahash = &parse_lxadmin_file("$root/kloxo.metadata");
 ref($metahash) || &error("Failed to parse kloxo.metadata : $metahash");
+local $filehash = &parse_lxadmin_file("$root/kloxo.file");
+ref($filehash) || &error("Failed to parse kloxo.file : $filehash");
+local $domhash = $filehash->{'bobject'}->{'domain_l'}->{$dom};
 
 # Get shells for users
 local ($nologin_shell, $ftp_shell, undef, $def_shell) =
@@ -69,26 +72,34 @@ local ($nologin_shell, $ftp_shell, undef, $def_shell) =
 $nologin_shell ||= $def_shell;
 $ftp_shell ||= $def_shell;
 
-# Work out the username again
-if (!$user) {
-	$user = $metahash->{'_clean_object'}->{'username'};
-	$user || &error("No username was found in this backup!");
-	}
+# Work out the original username
+local $realuser = $filehash->{'bobject'}->{'username'};
+$realuser || &error("No username was found in this backup!");
+$user ||= $realuser;
 local $group = $user;
 local $ugroup = $group;
 
 &$first_print("Checking for LXadmin features ..");
-local @got = ( "dir", $parent ? () : ("unix"), "web" );
+local @got = ( "dir", $parent ? () : ("unix"), "mail" );
+if ($domhash->{'web_o'}) {
+	push(@got, "web");
+	}
 push(@got, "webmin") if ($webmin && !$parent);
-if ($metahash->{'_clean_object'}->{'used'}->{'mysqldb_num'}) {
+if ($filehash->{'bobject'}->{'used'}->{'mysqldb_num'}) {
 	push(@got, "mysql");
 	}
-my $aw = $metahash->{'_clean_object'}->{'used'}->{'awstats_flag'};
+if ($domhash->{'dns_o'}) {
+	push(@got, "dns");
+	}
+if ($domhash->{'mmail_o'}->{'spam_o'}) {
+	push(@got, "spam", "virus");
+	}
+my $aw = $filehash->{'bobject'}->{'used'}->{'awstats_flag'};
 my @plugins = &list_feature_plugins();
 if ($aw && $aw ne '-' && &indexof('virtualmin-awstats', @plugins) >= 0) {
 	push(@got, 'virtualmin-awstats');
 	}
-if ($metahash->{'_clean_object'}->{'used'}->{'mailinglist_num'} &&
+if ($filehash->{'bobject'}->{'used'}->{'mailinglist_num'} &&
     &indexof('virtualmin-mailman', @plugins) >= 0) {
 	push(@got, 'virtualmin-mailman');
 	}
@@ -164,6 +175,12 @@ foreach my $f (@features, &list_feature_plugins()) {
 	}
 &set_featurelimits_from_plan(\%dom, $plan);
 $dom{'home'} = &server_home_directory(\%dom, $parent);
+
+# Set cgi directories to LXadmin standard
+$dom{'cgi_bin_dir'} = "public_html/cgi-bin";
+$dom{'cgi_bin_path'} = "$dom{'home'}/$dom{'cgi_bin_dir'}";
+$dom{'cgi_bin_correct'} = 1;	# So that setup_web doesn't fix it
+
 &complete_domain(\%dom);
 
 # Check for various clashes
@@ -195,9 +212,87 @@ else {
 	}
 push(@rv, \%dom);
 
-# XXX home directory
+# Extract the client file containing domain homes
+&$first_print("Restoring web directory ..");
+local ($homesfile) = glob("$root/$realuser-client-*");
+local $ht = &public_html_dir(\%dom);
+if (!$homesfile) {
+	&$second_print(".. failed to find $realuser-client-* file!");
+	}
+else {
+	local $homes = &extract_lxadmin_dir($homesfile);
+	if (!$homes) {
+		&$second_print(".. failed to extract web directories file");
+		}
+	else {
+		# Find a sub-dir for this domain
+		local $subdir = "$homes/$dom";
+		if (!-d $subdir) {
+			local @dp = split(/\./, $dom);
+			$subdir = "$homes/$dp[0]";
+			}
+		if (!-d $subdir) {
+			&$second_print(".. failed to find sub-directory for domain");
+			}
+		else {
+			&execute_command("cp -r ".quotemeta($subdir)."/* ".
+					 quotemeta($ht));
+			&set_home_ownership(\%dom);
+			&$second_print(".. done");
+			}
+		}
+	}
 
-# XXX mailing lists?
+if ($got{'web'}) {
+	# Just adjust cgi-bin directory to match LXadmin
+	local ($virt, $vconf, $conf) = &get_apache_virtual($dom, undef);
+	&apache::save_directive("ScriptAlias",
+		[ "/cgi-bin $dom{'home'}/public_html/cgi-bin" ], $vconf, $conf);
+	&flush_file_lines($virt->{'file'});
+	&register_post_action(\&restart_apache);
+	&save_domain(\%dom);
+	}
+$dom{'cgi_bin_correct'} = 0;	# So that it is computed from now on
+
+# Restore mailboxes
+&$first_print("Re-creating mailbox users ..");
+local $mcount = 0;
+local @emails = keys %{$domhash->{'mmail_o'}->{'mailaccount_l'}};
+print join(" ", @emails),"\n";
+&$second_print($mcount ? ".. created $mcount" : ".. none found");
+# XXX look for mailaccount_1 map from emails to user details
+# XXX inside mmail_o
+# XXX inside domain name
+
+# Restore mail aliases
+# XXX look for mailforward_l map from emails to details
+# XXX
+
+# Restore mailing lists
+# XXX
+
+# Save original metadata files
+&$first_print("Saving LXadmin metadata files ..");
+local $etcdir = "$dom{'home'}/etc";
+if (!-d $etcdir) {
+	&make_dir($etcdir, 0755);
+	&set_ownership_permissions($dom{'uid'}, $dom{'gid'}, undef, $etcdir);
+	}
+&copy_source_dest("$root/kloxo.metadata", "$etcdir/kloxo.metadata");
+&copy_source_dest("$root/kloxo.file", "$etcdir/kloxo.file");
+eval "use Data::Dumper";
+if (!$@) {
+	&open_tempfile(DUMP, ">$etcdir/kloxo.metadata.dump");
+	&print_tempfile(DUMP, Dumper($metahash));
+	&close_tempfile(DUMP);
+	&open_tempfile(DUMP, ">$etcdir/kloxo.file.dump");
+	&print_tempfile(DUMP, Dumper($filehash));
+	&close_tempfile(DUMP);
+	}
+&set_ownership_permissions($dom{'uid'}, $dom{'gid'}, 0700,
+		   "$etcdir/kloxo.metadata", "$etcdir/kloxo.file",
+		   "$etcdir/kloxo.metadata.dump", "$etcdir/kloxo.file.dump");
+&$second_print(".. done");
 
 return @rv;
 }
@@ -223,10 +318,21 @@ $main::lxadmin_dir_cache{$file} = $temp;
 return (1, $temp);
 }
 
+# extract_lxadmin_file(file)
+# Extracts a tar file, and returns the filename that is was extracted to
+sub extract_lxadmin_file
+{
+return undef if (!-r $_[0]);
+local $temp = &transname();
+&make_dir($temp, 0700);
+local $qf = quotemeta($_[0]);
+&execute_command("cd $temp && tar xf $qf");
+return $? ? undef : $temp;
+}
+
 # parse_lxadmin_file(file)
 # Returns a hash ref for the contents of an LXadmin metadata file, which is
 # actually just PHP serialized data. Returns a string on failure.
-# XXX serialize.pm doesn't support O:len:"class":??:{array} format
 sub parse_lxadmin_file
 {
 local ($file) = @_;
