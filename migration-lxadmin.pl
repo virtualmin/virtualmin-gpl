@@ -369,11 +369,29 @@ if ($got{'mail'}) {
 
 # Restore mailing lists
 if ($got{'virtualmin-mailman'}) {
-	# XXX
+	# XXX how to migrate members?
+	&$first_print("Re-creating Mailman mailing lists ..");
+	&foreign_require('virtualmin-mailman', 'virtualmin-mailman-lib.pl');
+	local $lcount = 0;
+	local @lists = keys %{$domhash->{'mmail_o'}->{'mailinglist_l'}};
+	foreach my $e (@lists) {
+		my $l = $domhash->{'mmail_o'}->{'mailinglist_l'}->{$e};
+		my $err = &plugin_call("virtualmin-mailman", "create_list",
+				       $l->{'listname'}, $dom,
+				       "Migrated LXadmin mailing list",
+				       undef, $l->{'adminemail'} ||
+						$dom{'emailto'}, $dom{'pass'});
+		if ($err) {
+			&$second_print("Failed to create $ml : $err");
+			}
+		else {
+			$lcount++;
+			}
+		}
+	&$second_print(".. done (migrated $lcount lists)");
 	}
 
 # Restore MySQL databases
-# XXX in mysqldb_l in bobject
 if ($got{'mysql'}) {
 	&$first_print("Re-creating MySQL databases ..");
 	&require_mysql();
