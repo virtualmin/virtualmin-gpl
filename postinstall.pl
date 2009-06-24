@@ -340,6 +340,9 @@ foreach my $d (@doms) {
 		}
 	}
 
+# Update IP list cache
+&build_local_ip_list();
+
 # Record the install time for this version
 local %itimes;
 &read_file($install_times_file, \%itimes);
