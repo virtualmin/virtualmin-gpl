@@ -23,8 +23,7 @@ ref($filehash) || return "Failed to parse kloxo.file : $filehash";
 local $metahash = &parse_lxadmin_file($metaname);
 ref($metahash) || return "Failed to parse kloxo.metadata : $metahash";
 
-local @domfiles = glob("$root/*-mmail-any-*.tar");
-local @doms = map { /\/([a-z0-9\.\-]+)-mmail/i ? ( $1 ) : ( ) } @domfiles;
+local @doms = keys %{$filehash->{'bobject'}->{'domain_l'}};
 if (!$dom) {
 	# Work out the domain
 	@doms || return ("No domains were found in this backup!");
@@ -37,6 +36,7 @@ else {
 	&indexof($dom, @doms) >= 0 ||
 		return ("The domain $dom is not in this backup. Possible domains are : ".join(" ", @doms));
 	}
+local $domhash = $filehash->{'bobject'}->{'domain_l'}->{$dom};
 
 # Work out the username
 if (!$user) {
@@ -44,8 +44,10 @@ if (!$user) {
 	$user || return ("No username was found in this backup!");
 	}
 
+# Work out the password
 if (!$parent && !$pass) {
-	return ("A password must be supplied for LXadmin migrations");
+	$pass = $filehash->{'bobject'}->{'realpass'};
+	$pass || return ("Failed to find original password in backup");
 	}
 
 return (undef, $dom, $user, $pass);
@@ -87,6 +89,9 @@ $realuser || &error("No username was found in this backup!");
 $user ||= $realuser;
 local $group = $user;
 local $ugroup = $group;
+
+# Work out the password
+$pass ||= $filehash->{'object'}->{'realpass'};
 
 &$first_print("Checking for LXadmin features ..");
 local @got = ( "dir", $parent ? () : ("unix"), "mail" );
