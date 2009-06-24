@@ -31,3 +31,7 @@ if ($info) {
 	&add_historic_collected_info($info, $start);
 	}
 &unlock_file($collected_info_file);
+
+# Update IP list cache
+&build_local_ip_list();
+

@@ -52,6 +52,7 @@ else {
 		&$second_print(&text('setup_virtnotdone', $_[0]->{'ip'}));
 		}
 	}
+&build_local_ip_list();
 &release_lock_virt($_[0]);
 return 1;
 }
@@ -80,6 +81,7 @@ if (!$config{'iface_manual'} && !$_[0]->{'virtalready'}) {
 	else {
 		&$second_print(&text('delete_novirt', $biface->{'fullname'}));
 		}
+	&build_local_ip_list();
 	&release_lock_virt($_[0]);
 	}
 delete($_[0]->{'iface'});
@@ -112,6 +114,7 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[0]->{'virt'} &&
 	else {
 		&$second_print(&text('delete_novirt', $_[1]->{'iface'}));
 		}
+	&build_local_ip_list();
 	&release_lock_virt($_[0]);
 	}
 }
@@ -391,6 +394,20 @@ foreach my $ranges ("ranges", &supports_ip6() ? ( "ranges6" ) : ( )) {
 		$tmpl->{$ranges} = &join_ip_ranges(\@ranges);
 		}
 	}
+}
+
+# build_local_ip_list()
+# Create a local cache file of IPs on this system
+sub build_local_ip_list
+{
+&foreign_require("net", "net-lib.pl");
+&open_lock_tempfile(IPCACHE, ">$module_config_directory/localips");
+foreach my $a (&net::active_interfaces()) {
+	if ($a->{'address'}) {
+		&print_tempfile(IPCACHE, $a->{'address'},"\n");
+		}
+	}
+&close_tempfile(IPCACHE);
 }
 
 # obtain_lock_virt(&domain)

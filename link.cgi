@@ -47,6 +47,14 @@ $noiplinkurl = "/$module_name/link.cgi/";
 $| = 1;
 $meth = $ENV{'REQUEST_METHOD'};
 
+# Make sure the IP is on this system
+open(IPCACHE, "$module_config_directory/localips");
+chop(@localips = <IPCACHE>);
+close(IPCACHE);
+&indexof($ip, @localips) >= 0 ||
+	&error("Connections to IP addresses not on this system are ".
+	       "not allowed : $ip");
+
 # Alternate host for redirects
 if ($host =~ /^www\.(.*)$/) {
 	$althost = $1;
