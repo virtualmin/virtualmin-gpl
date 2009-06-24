@@ -1,4 +1,5 @@
 # Functions for migrating an LXadmin backup
+# XXX how to work out admin username?
 
 # migration_cpanel_validate(file, domain, [user], [&parent], [prefix], [pass])
 # Make sure the given file is an LXadmin backup, and contains the domain
@@ -7,15 +8,19 @@ sub migration_lxadmin_validate
 local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
 local ($ok, $root) = &extract_lxadmin_dir($file);
 $ok || return ("Not an LXadmin tar file : $root");
--r "$root/kloxo.file" ||
-	return ("Not an LXadmin backup - missing kloxo.file");
--r "$root/kloxo.metadata" ||
-	return ("Not an LXadmin backup - missing kloxo.metadata");
+local $filename = -r "$root/kloxo.file" ? "$root/kloxo.file"
+					: "$root/lxadmin.file";
+local $metaname = -r "$root/kloxo.metadata" ? "$root/kloxo.metadata"
+					    : "$root/lxadmin.metadata";
+-r $filename || return ("Not an LXadmin backup - missing kloxo.file ".
+			"or lxadmin.file");
+-r $metaname || return ("Not an LXadmin backup - missing kloxo.metadata ".
+			"or lxadmin.metadata");
 
 # Parse data files
-local $filehash = &parse_lxadmin_file("$root/kloxo.file");
+local $filehash = &parse_lxadmin_file($filename);
 ref($filehash) || return "Failed to parse kloxo.file : $filehash";
-local $metahash = &parse_lxadmin_file("$root/kloxo.metadata");
+local $metahash = &parse_lxadmin_file($metaname);
 ref($metahash) || return "Failed to parse kloxo.metadata : $metahash";
 
 local @domfiles = glob("$root/*-mmail-any-*.tar");
@@ -60,9 +65,13 @@ local @rv;
 # Extract the backup
 local ($ok, $root) = &extract_lxadmin_dir($file);
 $ok || &error("Not an LXadmin tar file : $root");
-local $metahash = &parse_lxadmin_file("$root/kloxo.metadata");
+local $filename = -r "$root/kloxo.file" ? "$root/kloxo.file"
+					: "$root/lxadmin.file";
+local $metaname = -r "$root/kloxo.metadata" ? "$root/kloxo.metadata"
+					    : "$root/lxadmin.metadata";
+local $metahash = &parse_lxadmin_file($metaname);
 ref($metahash) || &error("Failed to parse kloxo.metadata : $metahash");
-local $filehash = &parse_lxadmin_file("$root/kloxo.file");
+local $filehash = &parse_lxadmin_file($filename);
 ref($filehash) || &error("Failed to parse kloxo.file : $filehash");
 local $domhash = $filehash->{'bobject'}->{'domain_l'}->{$dom};
 

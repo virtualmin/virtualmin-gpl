@@ -11434,18 +11434,22 @@ if ($config{'unix'} && $config{'other_users'}) {
 		return &text('check_emysqlsync', '../mysql/list_users.cgi');
 		}
 	# User and group default quotas
-	local %qconfig = &foreign_config('quota');
-	local @syncs = map { /^sync_(\S+)/; $1 }
-			   grep { /^sync_/ } (keys %qconfig);
-	if (@syncs) {
-		return &text('check_equotasync',
-		     join(' , ', map { "<tt>$_</tt>" } @syncs), '../quota/');
-		}
-	local @gsyncs = map { /^gsync_(\S+)/; $1 }
-			   grep { /^gsync_/ } (keys %qconfig);
-	if (@gsyncs) {
-		return &text('check_egquotasync',
-		     join(' , ', map { "<tt>$_</tt>" } @gsyncs), '../quota/');
+	if ($config{'home_quotas'}) {
+		local %qconfig = &foreign_config('quota');
+		local @syncs = map { /^sync_(\S+)/; $1 }
+				   grep { /^sync_/ } (keys %qconfig);
+		if (@syncs) {
+			return &text('check_equotasync',
+				     join(' , ', map { "<tt>$_</tt>" } @syncs),
+				     '../quota/');
+			}
+		local @gsyncs = map { /^gsync_(\S+)/; $1 }
+				   grep { /^gsync_/ } (keys %qconfig);
+		if (@gsyncs) {
+			return &text('check_egquotasync',
+				     join(' , ', map { "<tt>$_</tt>" } @gsyncs),
+				     '../quota/');
+			}
 		}
 	}
 
