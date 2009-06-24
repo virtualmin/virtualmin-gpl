@@ -213,7 +213,7 @@ foreach $f (&list_feature_plugins()) {
 	for($i=0; $i<@doms; $i++) {
 		if ($doms[$i]->{$f}) {
 			$doing_dom = $doms[$i];
-			&plugin_call($f, "feature_modify", $doms[$i], $olddoms[$i]);
+			&try_plugin_call($f, "feature_modify", $doms[$i], $olddoms[$i]);
 			}
 		}
 	}
