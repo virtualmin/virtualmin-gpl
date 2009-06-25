@@ -634,8 +634,6 @@ if ($ok) {
 		if ($asd) {
 			$writer = &command_as_user(
 					$asd->{'user'}, 0, $writer);
-			&set_ownership_permissions(
-			  $doms[0]->{'uid'}, $doms[0]->{'ugid'}, undef, $dest);
 		 	}
 		&set_ownership_permissions(undef, undef, 0600, $dest);
 
