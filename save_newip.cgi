@@ -104,11 +104,11 @@ foreach $sd (@doms) {
 		}
 	foreach $f (&list_feature_plugins()) {
 		if ($d->{$f}) {
-			&plugin_call($f, "feature_modify", $sd, $oldd);
+			&try_plugin_call($f, "feature_modify", $sd, $oldd);
 			}
 		}
 	if ($sd->{'virt6'} && &supports_ip6()) {
-		&modify_virt6($sd, $oldd);
+		&try_function("virt6", "modify_virt6", $sd, $oldd);
 		}
 
 	# Save new domain details
