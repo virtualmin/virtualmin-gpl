@@ -16,7 +16,7 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
 		 "php", "ruby", "vui", "dynip", "collect", "maillog",
 		 "balancer", "newfeatures", "resources", "backups",
 		 "domainname", "commands", "connectivity", "plans",
-		 "postgrey", "wizard") {
+		 "postgrey", "wizard", "security") {
 	do "$virtual_server_root/$lib-lib.pl";
 	if ($@ && -r "$virtual_server_root/$lib-lib.pl") {
 		print STDERR "failed to load $lib-lib.pl : $@\n";
@@ -3597,66 +3597,6 @@ foreach $e ('SERVER_ROOT', 'SCRIPT_NAME',
 	    'FOREIGN_MODULE_NAME', 'FOREIGN_ROOT_DIRECTORY',
 	    'SCRIPT_FILENAME') {
 	delete($ENV{$e});
-	}
-}
-
-# switch_to_domain_user(&domain)
-# Changes the current UID and GID to that of the domain's unix user
-sub switch_to_domain_user
-{
-if (defined(&switch_to_unix_user)) {
-	# Use new Webmin function that takes care of platform issues
-	&switch_to_unix_user([ $_[0]->{'user'}, undef, $_[0]->{'uid'},
-			       $_[0]->{'ugid'} ]);
-	}
-else {
-	# DIY
-	($(, $)) = ( $_[0]->{'ugid'},
-		     "$_[0]->{'ugid'} ".join(" ", $_[0]->{'ugid'},
-					 &other_groups($_[0]->{'user'})) );
-	($<, $>) = ( $_[0]->{'uid'}, $_[0]->{'uid'} );
-	}
-$ENV{'USER'} = $ENV{'LOGNAME'} = $_[0]->{'user'};
-$ENV{'HOME'} = $_[0]->{'home'};
-}
-
-# run_as_domain_user(&domain, command, background, [never-su])
-# Runs some command as the owner of a virtual server, and returns the output
-sub run_as_domain_user
-{
-local ($d, $cmd, $bg, $nosu) = @_;
-&foreign_require("proc", "proc-lib.pl");
-local @uinfo = getpwnam($_[0]->{'user'});
-if (($uinfo[8] =~ /\/(sh|bash|tcsh|csh)$/ ||
-     $gconfig{'os_type'} =~ /-linux$/) && !$nosu) {
-	# Usable shell .. use su
-	local $cmd = &command_as_user($_[0]->{'user'}, 0, $_[1]);
-	if ($bg) {
-		# No status available
-		&system_logged("$cmd &");
-		return wantarray ? (undef, 0) : undef;
-		}
-	else {
-		local $out = &backquote_logged($cmd);
-		return wantarray ? ($out, $?) : $out;
-		}
-	}
-else {
-	# Need to run ourselves
-	local $temp = &transname();
-	open(TEMP, ">$temp");
-	&proc::safe_process_exec_logged($_[1], $_[0]->{'uid'}, $_[0]->{'ugid'}, \*TEMP);
-	local $ex = $?;
-	local $out;
-	close(TEMP);
-	local $_;
-	open(TEMP, $temp);
-	while(<TEMP>) {
-		$out .= $_;
-		}
-	close(TEMP);
-	unlink($temp);
-	return wantarray ? ($out, $ex) : $out;
 	}
 }
 
