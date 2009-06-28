@@ -70,7 +70,7 @@ if (&is_readonly_mode()) {
 	print STDERR "Vetoing directory $dir\n";
 	return 1;
 	}
-local $cmd = "mkdir ".($recur ? "-p " : "")."quotemeta($dir);
+local $cmd = "mkdir ".($recur ? "-p " : "").quotemeta($dir);
 if ($perms) {
 	$cmd .= " && chmod ".quotemeta($perms)." ".quotemeta($dir);
 	}
@@ -89,12 +89,90 @@ local ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
 }
 
-sub open_tempfile_as_domain_user
+# symlink_file_as_domain_user(&domain, src, dest)
+# Creates a symbolic link, using ln -s run as the domain owner
+sub symlink_file_as_domain_user
 {
+my ($d, $src, $dest) = @_;
+return 1 if (&is_readonly_mode());
+local $cmd = "ln -s ".quotemeta($src)." ".quotemeta($dest);
+local ($out, $ex) = &run_as_domain_user($d, $cmd);
+return $ex ? 0 : 1;
 }
 
+# open_tempfile_as_domain_user(&domain, handle, file, [no-error],
+# 			       [no-tempfile], [safe?])
+# Like the Webmin open_tempfile function, but in a sub-process that runs as
+# the domain owner.
+sub open_tempfile_as_domain_user
+{
+my ($d, $fh, $file, $noerror, $notemp, $safe) = @_;
+my $tempfile = &open_tempfile($file);
+
+# Create pipes for sending in data and reading back error
+my ($writein, $writeout) = ($fh, "writeout".(++$main::open_tempfile_count));
+my ($readin, $readout) = ("readin".(++$main::open_tempfile_count),
+			  "readout".(++$main::open_tempfile_count));
+pipe($writeout, $writein);
+pipe($readout, $readin);
+
+# Fork the process we will use for writing
+my $pid = fork();
+if (!$pid) {
+	# Close file handles
+	untie(*STDIN);
+	untie(*STDOUT);
+	untie(*STDERR);
+	close(STDIN);
+	close(STDOUT);
+	close(STDERR);
+
+	# Open the temp file and start writing
+	&switch_to_domain_user($d);
+	if ($file =~ /^>\s*(([a-zA-Z]:)?\/.*)$/ && !$notemp) {
+		# Writing to a file, via a tempfile
+		}
+	elsif ($file =~ /^>\s*(([a-zA-Z]:)?\/.*)$/ && $notemp) {
+		# Writing directly
+		}
+	elsif ($file =~ /^>>\s*(([a-zA-Z]:)?\/.*)$/) {
+		# Appending to a file
+		}
+	# XXX open and write what we get from writeout
+	# XXX if any error, send back to readin and exit(1)
+	# XXX stop if no more input
+
+	exit(0);
+	}
+$open_tempfile_as_domain_user_pid{$fh} = $pid;
+}
+
+# close_tempfile_as_domain_user(&domain, fh)
+# Like close_tempfile, but does the final write as the domain owner
 sub close_tempfile_as_domain_user
 {
+my ($d, $fh) = @_;
+delete($open_tempfile_as_domain_user_pid{$fh});
+}
+
+sub open_readfile_as_domain_user
+{
+# XXX
+}
+
+sub close_readfile_as_domain_user
+{
+# XXX
+}
+
+sub read_file_lines_as_domain_user
+{
+# XXX
+}
+
+sub flush_file_lines_as_domain_user
+{
+# XXX
 }
 
 1;
