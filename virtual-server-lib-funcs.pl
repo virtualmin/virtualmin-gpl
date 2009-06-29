@@ -2850,13 +2850,29 @@ else {
 sub first_ethernet_iface
 {
 &foreign_require("net", "net-lib.pl");
-foreach my $a (&net::active_interfaces()) {
+my @active = &net::active_interfaces();
+
+# First try to find a non-virtual Ethernet interface
+foreach my $a (@active) {
 	if ($a->{'up'} && $a->{'virtual'} eq '' &&
+	    $a->{'address'} ne '127.0.0.1' &&
 	    (&net::iface_type($a->{'name'}) =~ /ethernet/i ||
 	     $a->{'name'} =~ /^bond/)) {
 		return $a->{'fullname'};
 		}
 	}
+
+# Failing that, look for a virtual interface. On some VPS systems, the
+# main interface is actually venet0:0
+foreach my $a (@active) {
+	if ($a->{'up'} &&
+	    $a->{'address'} ne '127.0.0.1' &&
+	    (&net::iface_type($a->{'name'}) =~ /ethernet/i ||
+	     $a->{'name'} =~ /^venet/)) {
+		return $a->{'fullname'};
+		}
+	}
+
 return undef;
 }
 
