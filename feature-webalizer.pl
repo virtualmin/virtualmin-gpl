@@ -19,9 +19,7 @@ sub setup_webalizer
 local $tmpl = &get_template($_[0]->{'template'});
 local $stats = &webalizer_stats_dir($_[0]);
 if (!-d $stats) {
-	&make_dir($stats, 0755);
-	&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'},
-				   0755, $stats);
+	&make_dir_as_domain_user($_[0], $stats, 0755);
 	}
 
 &obtain_lock_webalizer($_[0]);
@@ -37,7 +35,7 @@ local $htaccess_file = "$stats/.htaccess";
 local $passwd_file = "$_[0]->{'home'}/.stats-htpasswd";
 if ($tmpl->{'web_stats_pass'} && !-r $htaccess_file) {
 	# Setup .htaccess file for directory
-	&open_tempfile(HTACCESS, ">$htaccess_file");
+	&open_tempfile_as_domain_user($_[0], HTACCESS, ">$htaccess_file");
 	&print_tempfile(HTACCESS, "AuthName \"$_[0]->{'dom'} statistics\"\n");
 	&print_tempfile(HTACCESS, "AuthType Basic\n");
 	&print_tempfile(HTACCESS, "AuthUserFile $passwd_file\n");
@@ -45,9 +43,7 @@ if ($tmpl->{'web_stats_pass'} && !-r $htaccess_file) {
 	&print_tempfile(HTACCESS, "<Files .stats-htpasswd>\n");
 	&print_tempfile(HTACCESS, "deny from all\n");
 	&print_tempfile(HTACCESS, "</Files>\n");
-	&close_tempfile(HTACCESS);
-	&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'gid'},
-				   undef, $htaccess_file);
+	&close_tempfile_as_domain_user($_[0], HTACCESS);
 	}
 if ($tmpl->{'web_stats_pass'}) {
 	&update_create_htpasswd($_[0], $passwd_file, $_[0]->{'user'});
@@ -99,7 +95,7 @@ if (!-r $lcn || !-r $cfile) {
 		&flush_file_lines();
 		}
 	local $group = $_[0]->{'group'} || $_[0]->{'ugroup'};
-	&system_logged("chown $_[0]->{'user'}:$group $cfile");
+	&set_ownership_permissions($_[0]->{'user'}, $group, undef, $cfile);
 	}
 else {
 	# Already exists .. but update
