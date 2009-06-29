@@ -150,9 +150,12 @@ if (!$pid) {
 	close($writein);
 	close($readout);
 	my $oldsel = select($readin); $| = 1; select($oldsel);
+	select(STDERR); $| = 1; select($oldsel);
+	print STDERR "In sub-process $$\n";
 
 	# Open the temp file and start writing
 	&switch_to_domain_user($d);
+	print STDERR "writing to $file\n";
 	if ($file =~ /^>\s*(([a-zA-Z]:)?\/.*)$/ && !$notemp) {
 		# Writing to a file, via a tempfile
 		my $ex = open(FILE, ">$tempfile");
@@ -182,13 +185,18 @@ if (!$pid) {
 		exit(1);
 		}
 	print $readin "OK\n";	# Signal OK
+	print STDERR "reading from ",fileno($writeout),"\n";
+	#$SIG{'PIPE'} = 'ignore';	# Write errors detected by print
+	$SIG{'PIPE'} = sub { print STDERR "ignoring SIGPIPE in $$\n" };
 	while(<$writeout>) {
+		print STDERR "got $_";
 		my $rv = (print FILE $_);
 		if (!$rv) {
 			print $readin "Write to $realfile failed : $!\n";
 			exit(2);
 			}
 		}
+	print STDERR "eof\n";
 	my $ex = close(FILE);
 	if ($ex) {
 		exit(0);
@@ -232,16 +240,8 @@ print STDERR "pid=$pid readout=$readout tempfile=$tempfile realfile=$realfile\n"
 if ($pid) {
 	# Writing was done in a sub-process .. wait for it to exit
 	close($fh);
-	my $exited = waitpid($pid, 1);
-	my $ex;
-	if ($exited == $pid) {
-		# Exited properly .. check status
-		$ex = $?;
-		}
-	else {
-		$ex  = 0;
-		kill('KILL', $pid);
-		}
+	waitpid($pid, 0);
+	my $ex = $?;
 	$err = <$readout>;
 	close($readout);
 
@@ -304,6 +304,31 @@ my $cmd = "chmod ".sprintf("%o", $perms)." ".
 	  join(" ", map { quotemeta($_) } @files);
 my ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
+}
+
+# execute_as_domain_user(&domain, &code)
+# Run some code reference in a sub-process, as the domain's user
+sub execute_as_domain_user
+{
+my ($d, $code) = @_;
+my $pid = fork();
+if (!$pid) {
+	&switch_to_domain_user($d);
+	&$code();
+	exit(0);
+	}
+elsif ($pid < 0) {
+	&error("Fork for execute_as_domain_user failed : $!");
+	}
+else {
+	waitpid($pid, 0);
+	return $? ? 0 : 1;
+	}
+}
+
+sub copy_source_dest_as_domain_user
+{
+# XXX
 }
 
 1;

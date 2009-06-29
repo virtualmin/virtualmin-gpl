@@ -429,29 +429,32 @@ else {
 }
 
 # update_create_htpasswd(&domain, file, old-user)
+# Update or add the domain's user in a .htpasswd file
 sub update_create_htpasswd
 {
+my ($d, $file, $olduser) = @_;
 local $pass;
-if ($_[0]->{'parent'}) {
-	$pass = &get_domain($_[0]->{'parent'})->{'pass'};
+if ($d->{'parent'}) {
+	$pass = &get_domain($d->{'parent'})->{'pass'};
 	}
 else {
-	$pass = $_[0]->{'pass'};
+	$pass = $d->{'pass'};
 	}
 &foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
-local $users = &htaccess_htpasswd::list_users($_[1]);
-local ($user) = grep { $_->{'user'} eq $_[2] } @$users;
+local $users = &htaccess_htpasswd::list_users($file);
+local ($user) = grep { $_->{'user'} eq $olduser } @$users;
 if ($user) {
-	$user->{'user'} = $_[0]->{'user'};
+	$user->{'user'} = $d->{'user'};
 	$user->{'pass'} = &htaccess_htpasswd::encrypt_password($pass);
-	&htaccess_htpasswd::modify_user($user);
+	&execute_as_domain_user($d,
+		sub { &htaccess_htpasswd::modify_user($user) });
 	}
 else {
 	$user = { 'enabled' => 1,
-		  'user' => $_[0]->{'user'},
+		  'user' => $d->{'user'},
 		  'pass' => &htaccess_htpasswd::encrypt_password($pass) };
-	&htaccess_htpasswd::create_user($user, $_[1]);
-	&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'gid'}, undef,$_[1]);
+	&execute_as_domain_user($d,
+		sub { &htaccess_htpasswd::create_user($user, $file); });
 	}
 }
 
