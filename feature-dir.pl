@@ -26,15 +26,25 @@ if ($_[0]->{'unix'} && !$uinfo) {
 	}
 
 # Create and populate home directory
-if (!-d $_[0]->{'home'}) {
-	&make_dir($_[0]->{'home'}, oct($uconfig{'homedir_perms'}));
+local $perms = oct($uconfig{'homedir_perms'});
+if (&has_domain_user($_[0]) && $_[0]->{'parent'}) {
+	# Run as domain owner, as this is a sub-server
+	&make_dir_as_domain_user($_[0], $_[0]->{'home'}, $perms);
+	&set_permissions_as_domain_user($_[0], $perms, $_[0]->{'home'});
 	}
-&set_ownership_permissions(undef, undef, oct($uconfig{'homedir_perms'}),
-			   $_[0]->{'home'});
-if ($uinfo) {
-	&set_ownership_permissions($uinfo->{'uid'}, $uinfo->{'gid'}, undef,
-				   $_[0]->{'home'});
+else {
+	# Run commands as root, as user is missing
+	if (!-d $_[0]->{'home'}) {
+		&make_dir($_[0]->{'home'}, $perms);
+		}
+	&set_ownership_permissions(undef, undef, $perms, $_[0]->{'home'});
+	if ($uinfo) {
+		&set_ownership_permissions($uinfo->{'uid'}, $uinfo->{'gid'},
+					   undef, $_[0]->{'home'});
+		}
 	}
+
+# Populate home dir
 if ($tmpl->{'skel'} ne "none" && !$_[0]->{'nocopyskel'} &&
     !$_[0]->{'alias'}) {
 	&copy_skel_files(&substitute_domain_template($tmpl->{'skel'}, $_[0]),
@@ -89,13 +99,23 @@ local ($d) = @_;
 foreach my $dir (&virtual_server_directories($d)) {
 	local $path = "$d->{'home'}/$dir->[0]";
 	&lock_file($path);
-	if (!-d $path) {
-		&make_dir($path, oct($dir->[1]), 1);
+	if (&has_domain_user($d)) {
+		# Do creation as domain owner
+		if (!-d $path) {
+			&make_dir_as_domain_user($d, $path, oct($dir->[1]), 1);
+			}
+		&set_permissions_as_domain_user($d, oct($dir->[1]), $path);
 		}
-	&set_ownership_permissions(undef, undef, oct($dir->[1]), $path);
-	if ($d->{'uid'} && ($d->{'unix'} || $d->{'parent'})) {
-		&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
-					   undef, $path);
+	else {
+		# Need to run as root
+		if (!-d $path) {
+			&make_dir($path, oct($dir->[1]), 1);
+			}
+		&set_ownership_permissions(undef, undef, oct($dir->[1]), $path);
+		if ($d->{'uid'} && ($d->{'unix'} || $d->{'parent'})) {
+			&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
+						   undef, $path);
+			}
 		}
 	&unlock_file($path);
         }
@@ -542,9 +562,7 @@ local ($d) = @_;
 if ($d->{'dir'}) {
 	local $tmp = "$d->{'home'}/tmp";
 	if (!-d $tmp) {
-		&make_dir($tmp, 0750, 1);
-		&set_ownership_permissions($d->{'uid'}, $d->{'ugid'},
-					   0750, $tmp);
+		&make_dir_as_domain_user($d, $tmp, 0750, 1);
 		}
 	return $tmp;
 	}

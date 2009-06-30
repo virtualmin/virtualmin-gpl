@@ -1,5 +1,18 @@
 # Functions for accessing files and running commands as a domain owner
 
+# has_domain_user(&domain)
+# Returns 1 if some domain has a Unix user
+sub has_domain_user
+{
+my ($d) = @_;
+if ($d->{'parent'}) {
+        $d = &get_domain($d->{'parent'});
+        }
+return 0 if (!$d->{'unix'});
+my @uinfo = getpwnam($d->{'user'});
+return defined(@uinfo) ? 1 : 0;
+}
+
 # switch_to_domain_user(&domain)
 # Changes the current UID and GID to that of the domain's unix user
 sub switch_to_domain_user
@@ -30,6 +43,9 @@ $ENV{'HOME'} = $d->{'home'};
 sub run_as_domain_user
 {
 local ($d, $cmd, $bg, $nosu) = @_;
+if ($d->{'parent'}) {
+	$d = &get_domain($d->{'parent'});
+	}
 &foreign_require("proc", "proc-lib.pl");
 local @uinfo = getpwnam($d->{'user'});
 if (($uinfo[8] =~ /\/(sh|bash|tcsh|csh)$/ ||

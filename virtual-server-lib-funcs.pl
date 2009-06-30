@@ -5449,10 +5449,8 @@ return join(" ", @ranges);
 # Ensures that this virtual server can host sub-servers
 sub setup_for_subdomain
 {
-&system_logged("mkdir '$_[0]->{'home'}/domains' 2>/dev/null");
-&system_logged("chmod 755 '$_[0]->{'home'}/domains'");
-local $gid = $_[0]->{'gid'} || $_[0]->{'ugid'};
-&system_logged("chown $_[0]->{'uid'}:$gid '$_[0]->{'home'}/domains'");
+local ($d, $subuser, $subd) = @_;
+&make_dir_as_domain_user($d, "$_[0]->{'home'}/domains", 0755);
 }
 
 # count_domains([type])

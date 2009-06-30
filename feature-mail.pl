@@ -1744,6 +1744,7 @@ if ($mf) {
 		# Create the mailbox, owned by the user
 		if ($mfreal) {
 			# Create real file, and link to it
+			&unlink_file($mfreal);
 			&open_tempfile(MF, ">$mfreal", 1);
 			&close_tempfile(MF);
 			&set_ownership_permissions($uid, $gid, undef, $mfreal);
@@ -1751,6 +1752,7 @@ if ($mf) {
 			}
 		else {
 			# Just one file
+			&unlink_file($mf);
 			&open_tempfile(MF, ">$mf", 1);
 			&close_tempfile(MF);
 			&set_ownership_permissions($uid, $gid, undef, $mf);
@@ -1762,6 +1764,7 @@ elsif ($md) {
 	if (!-d $md) {
 		# Create the Maildir, owned by the user
 		local $d;
+		&unlink_file($md);
 		foreach $d ($md, "$md/cur", "$md/tmp", "$md/new") {
 			&make_dir($d, 0700, 1);
 			&set_ownership_permissions($uid, $gid, undef, $d);
@@ -1783,7 +1786,7 @@ if (-d $_[0]->{'home'} && $_[0]->{'unix'}) {
 			   \%uconfig);
 		local $umd = $uconfig{'mailbox_dir'} || "mail";
 		local $umail = "$_[0]->{'home'}/$umd";
-		if (!-d $umail) {
+		if (!-e $umail) {
 			&make_dir($umail, 0755);
 			&set_ownership_permissions($uid, $gid, undef, $umail);
 			}
@@ -2744,7 +2747,7 @@ if ($newdir && $olddir && $newdir ne $olddir && @users) {
 		local @folders = &mailboxes::list_user_folders($u->{'user'});
 		local $newbase = "$u->{'home'}/$newdir";
 		local $oldbase = "$u->{'home'}/$olddir";
-		if (!-d $newbase) {
+		if (!-e $newbase) {
 			# Create folders dir
 			&make_dir($newbase, 0755);
 			&set_ownership_permissions($u->{'uid'}, $u->{'gid'},
@@ -2776,7 +2779,7 @@ if ($newdir && $olddir && $newdir ne $olddir && @users) {
 				$newf->{'type'} = $oldf->{'type'};
 				$newf->{'file'} = "$newbase/$oldnameorig";
 				}
-			if ($newf->{'type'} == 1 && !-d $newf->{'file'}) {
+			if ($newf->{'type'} == 1 && !-e $newf->{'file'}) {
 				# Create Maildir if missing
 				&make_dir($newf->{'file'}, 0755);
 				&set_ownership_permissions(
