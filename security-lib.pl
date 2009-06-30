@@ -110,6 +110,27 @@ local ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
 }
 
+# unlink_logged_as_domain_user(&domain, file, ...)
+# Like unlink_file_as_domain_user, but locks the file to log the change
+sub unlink_logged_as_domain_user
+{
+my ($d, @files) = @_;
+my %locked;
+foreach my $f (@file) {
+	if (!&test_lock($f)) {
+		&lock_file($f);
+		$locked{$f} = 1;
+		}
+	}
+my $rv = &unlink_file_as_domain_user($d, @files);
+foreach my $f (@files) {
+	if ($locked{$f}) {
+		&unlock_file($f);
+		}
+	}
+return $rv;
+}
+
 # symlink_file_as_domain_user(&domain, src, dest)
 # Creates a symbolic link, using ln -s run as the domain owner
 sub symlink_file_as_domain_user
@@ -119,6 +140,15 @@ return 1 if (&is_readonly_mode());
 local $cmd = "ln -s ".quotemeta($src)." ".quotemeta($dest);
 local ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
+}
+
+sub symlink_logged_as_domain_user(&domain, src, dest)
+{
+my ($d, $src, $dest) = @_;
+&lock_file($dest);
+my $rv = &symlink_file_as_domain_user($d, $src, $dest);
+&unlock_file($dest);
+return $rv;
 }
 
 # open_tempfile_as_domain_user(&domain, handle, file, [no-error],
