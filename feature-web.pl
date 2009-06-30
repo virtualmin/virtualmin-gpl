@@ -127,9 +127,7 @@ else {
 		$_[0]->{'cgi_bin_dir'} = $subcgi;
 		foreach my $sd ($subdir, $subcgi) {
 			if (!-d $sd) {
-				mkdir($sd, 0755);
-				&set_ownership_permissions(
-				    $_[0]->{'uid'}, $_[0]->{'ugid'}, 0755, $sd);
+				&make_dir_as_domain_user($d, $sd, 0755);
 				}
 			}
 		}
@@ -646,11 +644,15 @@ else {
 		local $web_user = &get_apache_user($_[0]);
 		local $gid = $web_user && $web_user ne 'none' ? $web_user
 							: $_[0]->{'gid'};
+		local @ldv;
 		foreach my $ld ("ErrorLog", "TransferLog", "CustomLog") {
-			local @ldv = &apache::find_directive($ld, $vconf, 1);
-			next if (!@ldv);
-			&set_ownership_permissions($_[0]->{'uid'}, $gid, undef,
-						   @ldv);
+			push(@ldv, &apache::find_directive($ld, $vconf, 1));
+			}
+		foreach my $ldv (@ldv) {
+			if (&safe_domain_file($_[0], $ldv)) {
+				&set_ownership_permissions(
+					$_[0]->{'uid'}, $gid, undef, $ldv);
+				}
 			}
 
 		# Add the Apache user to the group for the new domain
@@ -2984,14 +2986,31 @@ foreach my $l ($log, $elog) {
 	if ($l && !-r $l) {
 		local $dir = $l;
 		$dir =~ s/\/([^\/]+)$//;
-		if (!-d $dir) {
-			# Create parent dir, such as /var/log/virtualmin
-			&make_dir($dir, 0711, 1);
+		if (&is_under_directory($d->{'home'}, $dir)) {
+			# If under home, create as the domain owner
+			if (!-d $dir) {
+				&make_dir_as_domain_user($d, $dir, 0711, 1);
+				}
+			&open_tempfile_as_domain_user($d, LOG, ">$l", 0, 1);
+			&close_tempfile_as_domain_user($d, LOG);
 			}
-		&open_tempfile(LOG, ">$l", 0, 1);
-		&close_tempfile(LOG);
+		else {
+			# Can create as root
+			if (!-d $dir) {
+				# Create parent dir, such as /var/log/virtualmin
+				&make_dir($dir, 0711, 1);
+				}
+			&open_tempfile(LOG, ">$l", 0, 1);
+			&close_tempfile(LOG);
+			}
 		}
-	&set_ownership_permissions($d->{'uid'}, $auser, 0660, $l);
+	# Make non-world-readable
+	if (&is_under_directory($d->{'home'}, $l)) {
+		&set_permissions_as_domain_user($d, 0660, $l);
+		}
+	else {
+		&set_ownership_permissions($d->{'uid'}, $auser, 0660, $l);
+		}
 	}
 }
 
@@ -3009,15 +3028,15 @@ local $eloglink = "$d->{'home'}/logs/error_log";
 if ($log && (!-e $loglink || -l $loglink) &&
     !&is_under_directory($d->{'home'}, $log)) {
 	&lock_file($loglink);
-	&unlink_file($loglink);
-	&symlink_file($log, $loglink);
+	&unlink_file_as_domain_user($d, $loglink);
+	&symlink_file_as_domain_user($d, $log, $loglink);
 	&unlock_file($loglink);
 	}
 if ($elog && (!-e $eloglink || -l $eloglink) &&
     !&is_under_directory($d->{'home'}, $elog)) {
 	&lock_file($eloglink);
-	&unlink_file($eloglink);
-	&symlink_file($elog, $eloglink);
+	&unlink_file_as_domain_user($d, $eloglink);
+	&symlink_file_as_domain_user($d, $elog, $eloglink);
 	&unlock_file($eloglink);
 	}
 }

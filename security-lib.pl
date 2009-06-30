@@ -462,5 +462,15 @@ else {
 return wantarray ? ($ok, $err) : $ok;
 }
 
+# safe_domain_file(&domain, file)
+# Returns 1 if some file is safe for a given domain to manage.
+# Currently just prevents symlinks
+sub safe_domain_file
+{
+my ($d, $file) = @_;
+my $realfile = &resolve_links($file);
+return $realfile eq $file || &same_file($realfile, $file);
+}
+
 1;
 
