@@ -63,9 +63,7 @@ local @srcinis = &unique(values %srcini);
 # Copy php.ini file into etc directory, for later per-site modification
 local $etc = "$d->{'home'}/etc";
 if (!-d $etc) {
-	&make_dir($etc, 0755);
-	&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'},
-				   0755, $etc);
+	&make_dir_as_domain_user($d, $etc, 0755);
 	}
 local $defver = $vers[0]->[0];
 local $defini;
@@ -79,29 +77,29 @@ foreach my $ver (@vers) {
 		# clear out extension_dir (because it can differ between
 		# PHP versions)
 		if (!-d $inidir) {
-			&make_dir($inidir, 0755);
-			&set_ownership_permissions(
-				$_[0]->{'uid'}, $_[0]->{'ugid'},
-				0755, $inidir);
+			&make_dir_as_domain_user($d, $inidir, 0755);
 			}
 		if (-r "$etc/php.ini" && !-l "$etc/php.ini") {
 			# We are converting from the old style of a single
 			# php.ini file to the new multi-version one .. just
 			# copy the existing file for all versions, which is
 			# assumed to be working
-			&copy_source_dest("$etc/php.ini", "$inidir/php.ini");
+			&copy_source_dest_as_domain_user(
+				$d, "$etc/php.ini", "$inidir/php.ini");
 			}
 		elsif ($subs_ini) {
 			# Perform substitions on config file
 			local $inidata = &read_file_contents($srcini);
 			$inidata = &substitute_virtualmin_template($inidata,$d);
-			&open_tempfile(INIDATA, ">$inidir/php.ini");
+			&open_tempfile_as_domain_user(
+				$d, INIDATA, ">$inidir/php.ini");
 			&print_tempfile(INIDATA, $inidata);
-			&close_tempfile(INIDATA);
+			&close_tempfile_as_domain_user($d, INIDATA);
 			}
 		else {
 			# Just copy verbatim
-			&copy_source_dest($srcini, "$inidir/php.ini");
+			&copy_source_dest_as_domain_user(
+				$d, $srcini, "$inidir/php.ini");
 			}
 
 		# Clear any caching on file
@@ -112,7 +110,6 @@ foreach my $ver (@vers) {
 		if (!$tmpl->{'web_php_noedit'}) {
 			($uid, $gid) = ($d->{'uid'}, $d->{'ugid'});
 			}
-		&set_ownership_permissions($uid, $gid, 0755, "$inidir/php.ini");
 		if (&foreign_check("phpini")) {
 			# Fix up session save path, extension_dir and
 			# gc_probability / gc_divisor
@@ -152,8 +149,8 @@ foreach my $ver (@vers) {
 
 # Link ~/etc/php.ini to the per-version ini file
 if ($defini && !-l "$etc/php.ini") {
-	&unlink_file("$etc/php.ini");
-	&symlink_file($defini, "$etc/php.ini");
+	&unlink_file_as_domain_user($d, "$etc/php.ini");
+	&symlink_file_as_domain_user($d, $defini, "$etc/php.ini");
 	}
 
 # Add the appropriate directives to the Apache config
@@ -396,9 +393,7 @@ local $tmpl = &get_template($d->{'template'});
 
 if (!-d $dest) {
 	# Need to create fcgi-bin
-	&make_dir($dest, 0755);
-	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755,
-				   $dest);
+	&make_dir_as_domain_user($d, $dest, 0755);
 	}
 
 local $suffix = $mode eq "fcgid" ? "fcgi" : "cgi";
@@ -411,7 +406,7 @@ local $dirvar = $mode eq "fcgid" ? "PWD" : "DOCUMENT_ROOT";
 local $pub = &public_html_dir($d);
 local $children = &get_domain_php_children($d);
 foreach my $v (&list_available_php_versions($d, $mode)) {
-	&open_tempfile(PHP, ">$dest/php$v->[0].$suffix");
+	&open_tempfile_as_domain_user($d, PHP, ">$dest/php$v->[0].$suffix");
 	local $t = "php".$v->[0].$suffix;
 	if ($tmpl->{$t} && $tmpl->{$t} ne 'none') {
 		# Use custom script from template
@@ -445,9 +440,8 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 			}
 		&print_tempfile(PHP, "exec $v->[1]\n");
 		}
-	&close_tempfile(PHP);
-	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755,
-				   "$dest/php$v->[0].$suffix");
+	&close_tempfile_as_domain_user($d, PHP);
+	&set_permissions_as_domain_user($d, 0755, "$dest/php$v->[0].$suffix");
 
 	# Put back the old number of child processes
 	if ($children >= 0) {
@@ -457,10 +451,11 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 	# Also copy the .fcgi wrapper to public_html, which is needed due to
 	# broken-ness on some Debian versions!
 	if ($mode eq "fcgid" && $gconfig{'os_type'} eq 'debian-linux') {
-		&copy_source_dest("$dest/php$v->[0].$suffix",
-				  "$pub/php$v->[0].$suffix");
-		&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755,
-					   "$pub/php$v->[0].$suffix");
+		&copy_source_dest_as_domain_user(
+			$d, "$dest/php$v->[0].$suffix",
+			"$pub/php$v->[0].$suffix");
+		&set_permissions_as_domain_user(
+			$d, 0755, "$pub/php$v->[0].$suffix");
 		}
 	}
 
@@ -482,7 +477,8 @@ local ($d, $writable, $subs) = @_;
 if (&has_command("chattr")) {
 	foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
 		foreach my $f (glob("$dir/php?.*cgi")) {
-			if (-r $f) {
+			my @st = stat($f);
+			if (-r $f && !-l $f && $st[4] == $d->{'uid'}) {
 				&system_logged("chattr ".
 				   ($writable ? "-i" : "+i")." ".quotemeta($f).
 				   " >/dev/null 2>&1");
@@ -506,7 +502,7 @@ sub set_php_wrapper_ulimits
 local ($d, $rv) = @_;
 foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
 	foreach my $f (glob("$dir/php?.*cgi")) {
-		local $lref = &read_file_lines($f);
+		local $lref = &read_file_lines_as_domain_user($d, $f);
 		foreach my $u ([ 'v', int($rv->{'mem'}/1024) ],
 			       [ 'u', $rv->{'procs'} ],
 			       [ 't', $rv->{'time'}*60 ]) {
@@ -552,7 +548,7 @@ foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
 				$lref->[$ll] = "exec ".$lref->[$ll];
 				}
 			}
-		&flush_file_lines($f);
+		&flush_file_lines_as_domain_user($d, $f);
 		}
 	}
 }
@@ -954,16 +950,17 @@ return $sock;
 sub get_domain_php_children
 {
 local ($d) = @_;
-local ($ver) = &list_available_php_versions($d, "fcgi");
+local ($ver) = &list_available_php_versions($d, "fcgid");
 return -2 if (!$ver);
 local $childs = 0;
-open(WRAPPER, "$d->{'home'}/fcgi-bin/php$ver->[0].fcgi") || return -1;
+&open_readfile_as_domain_user($d, WRAPPER,
+	"$d->{'home'}/fcgi-bin/php$ver->[0].fcgi") || return -1;
 while(<WRAPPER>) {
 	if (/^PHP_FCGI_CHILDREN\s*=\s*(\d+)/) {
 		$childs = $1;
 		}
 	}
-close(WRAPPER);
+&close_readfile_as_domain_user($d, WRAPPER);
 return $childs;
 }
 
@@ -979,7 +976,7 @@ foreach my $ver (&list_available_php_versions($d, "fcgi")) {
 	next if (!-r $wrapper);
 
 	# Find the current line
-	local $lref = &read_file_lines($wrapper);
+	local $lref = &read_file_lines_as_domain_user($d, $wrapper);
 	local $idx;
 	for(my $i=0; $i<@$lref; $i++) {
 		if ($lref->[$i] =~ /PHP_FCGI_CHILDREN\s*=\s*\d+/) {
@@ -1012,7 +1009,7 @@ foreach my $ver (&list_available_php_versions($d, "fcgi")) {
 			       "export PHP_FCGI_CHILDREN");
 			}
 		}
-	&flush_file_lines($wrapper);
+	&flush_file_lines_as_domain_user($d, $wrapper);
 	}
 &set_php_wrappers_writable($d, 0) if (!$nowritable);
 &register_post_action(\&restart_apache);

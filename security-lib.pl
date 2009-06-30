@@ -72,7 +72,7 @@ if (&is_readonly_mode()) {
 	}
 local $cmd = "mkdir ".($recur ? "-p " : "").quotemeta($dir);
 if ($perms) {
-	$cmd .= " && chmod ".sprintf("%o", $perms)." ".quotemeta($dir);
+	$cmd .= " && chmod ".sprintf("%o", $perms & 07777)." ".quotemeta($dir);
 	}
 local ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
@@ -265,24 +265,127 @@ delete($main::open_temphandles{$fh});
 return $rv;
 }
 
+# open_readfile_as_domain_user(&domain, handle, file)
+# Open a file for reading, using a sub-process run as the domain owner
 sub open_readfile_as_domain_user
 {
-# XXX
+my ($d, $fh, $file) = @_;
+my ($readin, $readout) = ("readin".(++$main::open_tempfile_count), $fh);
+pipe($readout, $readin);
+my $pid = fork();
+if ($pid < 0) {
+	return 0;
+	}
+if (!$pid) {
+	# Close file handles
+	untie(*STDIN);
+	untie(*STDOUT);
+	#untie(*STDERR);
+	close(STDIN);
+	close(STDOUT);
+	#close(STDERR);
+	close($readout);
+	my $oldsel = select($readin); $| = 1; select($oldsel);
+
+	# Open the file and start reading
+	&switch_to_domain_user($d);
+	my $ok = open(FILE, $file);
+	if (!$ok) {
+		print $readin "Failed to open $file : $!\n";
+		exit(1);
+		}
+	print $readin "OK\n";   # Signal OK
+	while(<FILE>) {
+		print $readin $_;
+		}
+	close(FILE);
+	exit(0);
+	}
+close($readin);
+my $oldsel = select($readout); $| = 1; select($oldsel);
+my $err = <$readout>;
+chop($err);
+if ($err ne 'OK') {
+	return 0;
+        }
+
+$main::open_readfile_as_domain_user_pid{$fh} = $pid;
+return 1;
 }
 
+# close_readfile_as_domain_user(&domain, handle)
+# Close a file opened by open_readfile_as_domain_user
 sub close_readfile_as_domain_user
 {
-# XXX
+my ($d, $fh) = @_;
+my $pid = $main::open_readfile_as_domain_user_pid{$fh};
+if ($pid) {
+	close($fh);
+	kill('KILL', $pid);
+	waitpid($pid, 0);
+	}
+delete($main::open_readfile_as_domain_user_pid{$fh});
+return 1;
 }
 
+# read_file_lines_as_domain_user(&domain, file, [readonly])
+# Like Webmin's read_file_lines function, but opens the file as a domain owner
 sub read_file_lines_as_domain_user
 {
-# XXX
+my ($d, $file, $ro) = @_;
+if (!$file) {
+	my ($package, $filename, $line) = caller;
+	&error("Missing file to read at ${package}::${filename} line $line\n");
+	}
+if (!$main::file_cache{$file}) {
+        my (@lines, $eol);
+	local $_;
+        &open_readfile_as_domain_user($d, READFILE, $file);
+        while(<READFILE>) {
+		if (!$eol) {
+			$eol = /\r\n$/ ? "\r\n" : "\n";
+			}
+                tr/\r\n//d;
+                push(@lines, $_);
+                }
+        close(READFILE);
+        $main::file_cache{$file} = \@lines;
+	$main::file_cache_noflush{$file} = $ro;
+	$main::file_cache_eol{$file} = $eol || "\n";
+        }
+else {
+	# Make read-write if currently readonly
+	if (!$ro) {
+		$main::file_cache_noflush{$file} = 0;
+		}
+	}
+return $main::file_cache{$file};
 }
 
+# flush_file_lines_as_domain_user(&domain, file, eol)
+# Write out a file read into memory by read_file_lines_as_domain_user
 sub flush_file_lines_as_domain_user
 {
-# XXX
+my ($d, $file, $eol) = @_;
+my ($package, $filename, $line) = caller;
+if (!$file) {
+	&error("Missing file to flush at ${package}::${filename} line $line");
+	}
+if (!$main::file_cache{$file}) {
+	&error("File $file was not opened by read_file_lines_as_domain_user ".
+	       "at ${package}::${filename} line $line");
+	}
+$eol ||= $main::file_cache_eol{$file} || "\n";
+if (!$main::file_cache_noflush{$file}) {
+	&open_tempfile_as_domain_user($d, FLUSHFILE, ">$file");
+	foreach my $line (@{$main::file_cache{$file}}) {
+		(print FLUSHFILE $line,$eol) ||
+			&error(&text("efilewrite", $file, $!));
+		}
+	&close_tempfile_as_domain_user($d, FLUSHFILE);
+	}
+delete($main::file_cache{$file});
+delete($main::file_cache_noflush{$file});
 }
 
 # rename_as_domain_user(&domain, oldfile, newfile)
@@ -290,7 +393,7 @@ sub flush_file_lines_as_domain_user
 sub rename_as_domain_user
 {
 my ($d, $oldfile, $newfile) = @_;
-my $cmd = "mv ".quotemeta($oldfile)." ".quotemeta($newfile);
+my $cmd = "mv -f ".quotemeta($oldfile)." ".quotemeta($newfile);
 my ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
 }
@@ -300,7 +403,7 @@ return $ex ? 0 : 1;
 sub set_permissions_as_domain_user
 {
 my ($d, $perms, @files) = @_;
-my $cmd = "chmod ".sprintf("%o", $perms)." ".
+my $cmd = "chmod ".sprintf("%o", $perms & 07777)." ".
 	  join(" ", map { quotemeta($_) } @files);
 my ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
@@ -326,9 +429,37 @@ else {
 	}
 }
 
+# copy_source_dest_as_domain_user(&domain, source, dest)
+# Copy a file or directory, with commands run as a domain owner
 sub copy_source_dest_as_domain_user
 {
-# XXX
+return (1, undef) if (&is_readonly_mode());
+my ($d, $src, $dst) = @_;
+my $ok = 1;
+my $err;
+if (-d $src) {
+	# A directory .. need to copy with tar command
+	my @st = stat($src);
+	&unlink_file_as_domain_user($d, $dst);
+	&make_dir_as_domain_user($d, $dst, $st[2]);
+	my ($out, $ex) = &run_as_domain_user($d,
+		"(cd ".quotemeta($src)." && tar cf - . | (cd ".
+		quotemeta($dst)." && tar xf -)) 2>&1");
+	if ($ex) {
+		$ok = 0;
+		$err = $out;
+		}
+	}
+else {
+	# Can just copy with cp
+	my ($out, $ex) = &run_as_domain_user($d,
+		"cp -p ".quotemeta($src)." ".quotemeta($dst)." 2>&1");
+	if ($ex) {
+		$ok = 0;
+		$err = $out;
+		}
+	}
+return wantarray ? ($ok, $err) : $ok;
 }
 
 1;
