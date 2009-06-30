@@ -116,10 +116,9 @@ $changed = 0;
 foreach $g (@got) {
 	$d->{'ssl_'.$g->[0]} ||= &default_certificate_file($d, $g->[0]);
 	&lock_file($d->{'ssl_'.$g->[0]});
-	&unlink_file($d->{'ssl_'.$g->[0]});
-	&open_tempfile(SSL, ">".$d->{'ssl_'.$g->[0]});
+	&open_tempfile_as_domain_user($d, SSL, ">".$d->{'ssl_'.$g->[0]});
 	&print_tempfile(SSL, $g->[1]);
-	&close_tempfile(SSL);
+	&close_tempfile_as_domain_user($d, SSL);
 	&set_certificate_permissions($d, $d->{'ssl_'.$g->[0]});
 	&unlock_file($d->{'ssl_'.$g->[0]});
 	if ($g->[0] eq 'cert') {

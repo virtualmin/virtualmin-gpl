@@ -94,7 +94,7 @@ if (!-r $_[0]->{'ssl_cert'} && !-r $_[0]->{'ssl_key'}) {
 	local $err = &generate_self_signed_cert(
 		$_[0]->{'ssl_cert'}, $_[0]->{'ssl_key'}, undef, 1825,
 		undef, undef, undef, $_[0]->{'owner'}, undef,
-		"*.$_[0]->{'dom'}", $_[0]->{'emailto'}, undef);
+		"*.$_[0]->{'dom'}", $_[0]->{'emailto'}, undef, $_[0]);
 	if ($err) {
 		&$second_print(&text('setup_eopenssl', $err));
 		return 0;
@@ -301,6 +301,7 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && &self_signed_cert($_[0]) &&
 		"*.$_[0]->{'dom'}",
 		$_[0]->{'emailto'},
 		$info->{'alt'},
+		$_[0],
 		);
 	&unlock_file($_[0]->{'ssl_key'});
 	&unlock_file($_[0]->{'ssl_cert'});
@@ -639,13 +640,15 @@ if ($nvirt) {
 local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
 if ($cert && -r "$_[1]_cert") {
 	&lock_file($cert);
-	&copy_source_dest("$_[1]_cert", $cert);
+	&set_ownership_permissions($_[0]->{'uid'}, undef, undef, "$_[1]_cert");
+	&copy_source_dest_as_domain_user($_[0], "$_[1]_cert", $cert);
 	&unlock_file($cert);
 	}
 local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf, 1);
 if ($key && -r "$_[1]_key" && $key ne $cert) {
 	&lock_file($key);
-	&copy_source_dest("$_[1]_key", $key);
+	&set_ownership_permissions($_[0]->{'uid'}, undef, undef, "$_[1]_key");
+	&copy_source_dest_as_domain_user($_[0], "$_[1]_key", $key);
 	&unlock_file($key);
 	}
 
@@ -1021,7 +1024,7 @@ return $config{$mode.'_tmpl'} ?
 sub set_certificate_permissions
 {
 local ($d, $file) = @_;
-&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0700, $file);
+&set_permissions_as_domain_user($d, 0700, $file);
 }
 
 # check_domain_certificate(domain-name, &domain-with-cert|&cert-info)
@@ -1094,13 +1097,14 @@ return undef;
 }
 
 # generate_self_signed_cert(certfile, keyfile, size, days, country, state,
-# 			    city, org, orgunit, commonname, email, &altnames)
+# 			    city, org, orgunit, commonname, email, &altnames,
+# 			    &domain)
 # Generates a new self-signed cert, and stores it in the given cert and key
 # files. Returns undef on success, or an error message on failure.
 sub generate_self_signed_cert
 {
 local ($certfile, $keyfile, $size, $days, $country, $state, $city, $org,
-       $orgunit, $common, $email, $altnames) = @_;
+       $orgunit, $common, $email, $altnames, $d) = @_;
 &foreign_require("webmin", "webmin-lib.pl");
 $size ||= $config{'key_size'} || $webmin::default_key_size;
 $days ||= 1825;
@@ -1113,7 +1117,9 @@ if ($altnames && @$altnames) {
 
 # Call openssl and write to temp files
 local $outtemp = &transname();
-&open_execute_command(CA, "openssl req $flag -newkey rsa:$size -x509 -nodes -out $certfile -keyout $keyfile -days $days >$outtemp 2>&1", 0);
+local $keytemp = &transname();
+local $certtemp = &transname();
+&open_execute_command(CA, "openssl req $flag -newkey rsa:$size -x509 -nodes -out $certtemp -keyout $keytemp -days $days >$outtemp 2>&1", 0);
 print CA ($country || "."),"\n";
 print CA ($state || "."),"\n";
 print CA ($city || "."),"\n";
@@ -1125,21 +1131,31 @@ close(CA);
 local $rv = $?;
 local $out = &read_file_contents($outtemp);
 unlink($outtemp);
-if (!-r $certfile || !-r $keyfile || $?) {
+if (!-r $certtemp || !-r $keytemp || $?) {
 	# Failed .. return error
 	return &text('csr_ekey', "<pre>$out</pre>");
 	}
+
+# Save as domain owner
+&open_tempfile_as_domain_user($d, CERT, ">$certfile");
+&print_tempfile(CERT, &read_file_contents($certtemp));
+&close_tempfile_as_domain_user($d, CERT);
+&open_tempfile_as_domain_user($d, KEY, ">$keyfile");
+&print_tempfile(KEY, &read_file_contents($keytemp));
+&close_tempfile_as_domain_user($d, KEY);
+
 return undef;
 }
 
 # generate_certificate_request(csrfile, keyfile, size, days, country, state,
-# 			     city, org, orgunit, commonname, email, &altnames)
+# 			       city, org, orgunit, commonname, email, &altnames,
+# 			       &domain)
 # Generates a new self-signed cert, and stores it in the given csr and key
 # files. Returns undef on success, or an error message on failure.
 sub generate_certificate_request
 {
 local ($csrfile, $keyfile, $size, $days, $country, $state, $city, $org,
-       $orgunit, $common, $email, $altnames) = @_;
+       $orgunit, $common, $email, $altnames, $d) = @_;
 &foreign_require("webmin", "webmin-lib.pl");
 $size ||= $config{'key_size'} || $webmin::default_key_size;
 $days ||= 1825;
@@ -1151,17 +1167,20 @@ if ($altnames && @$altnames) {
 	}
 
 # Generate the key
-&unlink_file($keyfile);
-local $out = &backquote_command("openssl genrsa -out ".quotemeta($keyfile)." $size 2>&1 </dev/null");
+local $keytemp = &transname();
+local $out = &backquote_command("openssl genrsa -out ".quotemeta($keytemp)." $size 2>&1 </dev/null");
 local $rv = $?;
-if (!-r $keyfile || $rv) {
+if (!-r $keytemp || $rv) {
 	return &text('csr_ekey', "<pre>$out</pre>");
 	}
+&open_tempfile_as_domain_user($d, KEY, ">$keyfile");
+&print_tempfile(KEY, &read_file_contents($keytemp));
+&close_tempfile_as_domain_user($d, KEY);
 
 # Generate the matching CSR
 local $outtemp = &transname();
-&unlink_file($csrfile);
-&open_execute_command(CA, "openssl req $flag -new -key ".quotemeta($keyfile)." -out ".quotemeta($csrfile)." >$outtemp 2>&1", 0);
+local $csrtemp = &transname();
+&open_execute_command(CA, "openssl req $flag -new -key ".quotemeta($keytemp)." -out ".quotemeta($csrtemp)." >$outtemp 2>&1", 0);
 print CA ($country || "."),"\n";
 print CA ($state || "."),"\n";
 print CA ($city || "."),"\n";
@@ -1175,9 +1194,14 @@ close(CA);
 local $rv = $?;
 local $out = &read_file_contents($outtemp);
 unlink($outtemp);
-if (!-r $csrfile || $rv) {
+if (!-r $csrtemp || $rv) {
 	return &text('csr_ecsr', "<pre>$out</pre>");
 	}
+
+# Copy into place
+&open_tempfile_as_domain_user($d, CERT, ">$csrfile");
+&print_tempfile(CERT, &read_file_contents($csrtemp));
+&close_tempfile_as_domain_user($d, CERT);
 return undef;
 }
 

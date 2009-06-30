@@ -42,7 +42,8 @@ if (!$in{'self'}) {
 		$in{'organizationalUnitName'},
 		$in{'commonName'},
 		$in{'emailAddress'},
-		\@alts);
+		\@alts,
+		$d);
 	&error($err) if ($err);
 	&set_certificate_permissions($d, $d->{'ssl_newkey'});
 	&set_certificate_permissions($d, $d->{'ssl_csr'});
@@ -69,9 +70,11 @@ if (!$in{'self'}) {
 	}
 else {
 	# Create key and cert files
-	$ctemp = &transname();
-	$ktemp = &transname();
-	$err = &generate_self_signed_cert($ctemp, $ktemp, $size, $in{'days'},
+	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
+	$d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
+	$err = &generate_self_signed_cert(
+				   $d->{'ssl_cert'}, $d->{'ssl_key'},
+				   $size, $in{'days'},
 				   $in{'countryName'},
 				   $in{'stateOrProvinceName'},
 				   $in{'cityName'},
@@ -79,7 +82,8 @@ else {
 				   $in{'organizationalUnitName'},
 				   $in{'commonName'},
 				   $in{'emailAddress'},
-				   \@alts);
+				   \@alts,
+				   $d);
 	&error($err) if ($err);
 
 	&ui_print_header(&domain_in($d), $text{'csr_title2'}, "");
@@ -90,8 +94,6 @@ else {
 	$conf = &apache::get_config();
 	($virt, $vconf) = &get_apache_virtual($d->{'dom'},
 					      $d->{'web_sslport'});
-	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
-	$d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
 	&apache::save_directive("SSLCertificateFile", [ $d->{'ssl_cert'} ],
 				$vconf, $conf);
 	&apache::save_directive("SSLCertificateKeyFile", [ $d->{'ssl_key'} ],
@@ -103,20 +105,9 @@ else {
 	$d->{'ssl_pass'} = undef;
 	&save_domain_passphrase($d);
 
-	# Save the cert and private keys
-	&$first_print($text{'newkey_saving'});
-	&unlink_logged($d->{'ssl_cert'});
-	&lock_file($d->{'ssl_cert'});
-	&system_logged("mv ".quotemeta($ctemp)." ".quotemeta($d->{'ssl_cert'}));
+	# Set permissions
 	&set_certificate_permissions($d, $d->{'ssl_cert'});
-	&unlock_file($d->{'ssl_cert'});
-
-	&unlink_logged($d->{'ssl_key'});
-	&lock_file($d->{'ssl_key'});
-	&system_logged("mv ".quotemeta($ktemp)." ".quotemeta($d->{'ssl_key'}));
 	&set_certificate_permissions($d, $d->{'ssl_key'});
-	&unlock_file($d->{'ssl_key'});
-	&$second_print($text{'setup_done'});
 
 	# Copy to other domains using same cert. Only the password needs to be
 	# copied though, as the cert file isn't changing

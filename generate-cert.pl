@@ -116,6 +116,7 @@ if ($self) {
 		$subject{'cn'} || "*.$d->{'dom'}",
 		$subject{'email'} || $d->{'emailto'},
 		\@alts,
+		$d,
 		);
 	if ($err) {
 		&$second_print(".. failed : $err");
@@ -165,6 +166,7 @@ else {
 		$subject{'cn'} || "*.$d->{'dom'}",
 		$subject{'email'} || $d->{'emailto'},
 		\@alts,
+		$d,
 		);
 	if ($err) {
 		&$second_print(".. failed : $err");

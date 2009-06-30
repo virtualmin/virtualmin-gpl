@@ -4,20 +4,25 @@
 # Changes the current UID and GID to that of the domain's unix user
 sub switch_to_domain_user
 {
+my ($d) = @_;
+if ($d->{'parent'}) {
+	$d = &get_domain($d->{'parent'});
+	}
+return 0 if (!$d->{'unix'});	# Doesn't have a user
 if (defined(&switch_to_unix_user)) {
 	# Use new Webmin function that takes care of platform issues
-	&switch_to_unix_user([ $_[0]->{'user'}, undef, $_[0]->{'uid'},
-			       $_[0]->{'ugid'} ]);
+	&switch_to_unix_user([ $d->{'user'}, undef, $d->{'uid'},
+			       $d->{'ugid'} ]);
 	}
 else {
 	# DIY
-	($(, $)) = ( $_[0]->{'ugid'},
-		     "$_[0]->{'ugid'} ".join(" ", $_[0]->{'ugid'},
-					 &other_groups($_[0]->{'user'})) );
-	($<, $>) = ( $_[0]->{'uid'}, $_[0]->{'uid'} );
+	($(, $)) = ( $d->{'ugid'},
+		     "$d->{'ugid'} ".join(" ", $d->{'ugid'},
+					 &other_groups($d->{'user'})) );
+	($<, $>) = ( $d->{'uid'}, $d->{'uid'} );
 	}
-$ENV{'USER'} = $ENV{'LOGNAME'} = $_[0]->{'user'};
-$ENV{'HOME'} = $_[0]->{'home'};
+$ENV{'USER'} = $ENV{'LOGNAME'} = $d->{'user'};
+$ENV{'HOME'} = $d->{'home'};
 }
 
 # run_as_domain_user(&domain, command, background, [never-su])

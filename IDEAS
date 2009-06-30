@@ -38,12 +38,13 @@
  - Script to get CGI urls for some help page, for Joe
 
  - Audit for writes to files possibly owned by domain owner
-	- open_tempfile_domain function that forks a separate process which
-	  switches UID and then opens
-	- close_tempfile_domain which checks pipe from that sub-process
-	- make_dir_domain
-	- set_permissions_domain
-	- unlink_file_domain
 	- check all code
+	- all scripts
+	- all -lib.pl files
+	- virtual-server-lib-funcs.pl
+		- IMAP login for usermin
+	- remove debugging code
+	- plugins (svn, awstats, dav, ...)
+	- double-check all web SSL functions
 
  - Restore from system using ~/logs should work on system using /var/log

@@ -1483,26 +1483,20 @@ if ($_[0]->{'proxy_pass_mode'} == 2) {
 	&unlink_file($ff);
 	local $text = $template->{'frame'};
 	$text =~ s/\t/\n/g;
-	&open_tempfile(FRAME, ">$ff");
+	&open_tempfile_as_domain_user($d, FRAME, ">$ff");
 	local %subs = %{$_[0]};
 	$subs{'proxy_title'} ||= $tmpl{'owner'};
 	$subs{'proxy_meta'} ||= "";
 	$subs{'proxy_meta'} = join("\n", split(/\t/, $subs{'proxy_meta'}));
 	&print_tempfile(FRAME, &substitute_domain_template($text, \%subs));
-	&close_tempfile(FRAME);
-	if ($_[0]->{'unix'}) {
-		&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'gid'} || $_[0]->{'ugid'}, undef, $ff);
-		}
+	&close_tempfile_as_domain_user($d, FRAME);
 
 	# Create a blank HTML page too, used in the frameset
 	local $bl = &frameblank_file($_[0]);
 	&unlink_file($bl);
-	&open_tempfile(BLANK, ">$bl");
+	&open_tempfile_as_domain_user($d, BLANK, ">$bl");
 	&print_tempfile(BLANK, "<body bgcolor=#ffffff></body>\n");
-	&close_tempfile(BLANK);
-	if ($_[0]->{'unix'}) {
-		&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'gid'} || $_[0]->{'ugid'}, undef, $bl);
-		}
+	&close_tempfile_as_domain_user($d, BLANK);
 	}
 }
 
