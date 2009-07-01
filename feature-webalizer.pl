@@ -446,14 +446,14 @@ local ($user) = grep { $_->{'user'} eq $olduser } @$users;
 if ($user) {
 	$user->{'user'} = $d->{'user'};
 	$user->{'pass'} = &htaccess_htpasswd::encrypt_password($pass);
-	&execute_as_domain_user($d,
+	&write_as_domain_user($d,
 		sub { &htaccess_htpasswd::modify_user($user) });
 	}
 else {
 	$user = { 'enabled' => 1,
 		  'user' => $d->{'user'},
 		  'pass' => &htaccess_htpasswd::encrypt_password($pass) };
-	&execute_as_domain_user($d,
+	&write_as_domain_user($d,
 		sub { &htaccess_htpasswd::create_user($user, $file); });
 	}
 }

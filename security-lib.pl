@@ -484,6 +484,36 @@ else {
 	}
 }
 
+# write_as_domain_user(&domain, &code)
+# Runs some code with the effective UID and GID set to that of the domain user,
+# so that file IO is locked down. Sets it back afterwards.
+sub write_as_domain_user
+{
+my ($d, $code) = @_;
+if ($d->{'parent'}) {
+	$d = &get_domain($d->{'parent'});
+	}
+if ($d->{'unix'}) {
+	$) = $d->{'ugid'}." ".join(" ", $d->{'ugid'},
+                                   &other_groups($d->{'user'}));
+	$> = $d->{'uid'};
+	}
+my @rv;
+eval {
+	local $main::error_must_die = 1;
+	@rv = &$code();
+	};
+my $err = $@;
+if ($d->{'unix'}) {
+	$) = 0;
+	$> = 0;
+	}
+if ($err) {
+	&error($err);
+	}
+return wantarray ? @rv : $rv[0];
+}
+
 # copy_source_dest_as_domain_user(&domain, source, dest)
 # Copy a file or directory, with commands run as a domain owner
 sub copy_source_dest_as_domain_user
