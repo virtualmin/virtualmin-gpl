@@ -87,10 +87,7 @@ else {
 sub make_dir_as_domain_user
 {
 my ($d, $dir, $perms, $recur) = @_;
-if (&is_readonly_mode()) {
-	print STDERR "Vetoing directory $dir\n";
-	return 1;
-	}
+return 1 if (&is_readonly_mode());
 local $cmd = "mkdir ".($recur ? "-p " : "").quotemeta($dir);
 if ($perms) {
 	$cmd .= " && chmod ".sprintf("%o", $perms & 07777)." ".quotemeta($dir);
@@ -160,7 +157,6 @@ sub open_tempfile_as_domain_user
 {
 my ($d, $fh, $file, $noerror, $notemp, $safe) = @_;
 $fh = (caller(0))[0]."::".$fh;
-print STDERR "fh=$fh\n";
 my $realfile = $file;
 $realfile =~ s/^[> ]*//;
 while(-l $realfile) {
@@ -183,7 +179,6 @@ my ($readin, $readout) = ("readin".(++$main::open_tempfile_count),
 			  "readout".(++$main::open_tempfile_count));
 pipe($writeout, $writein);
 pipe($readout, $readin);
-print STDERR "fh fileno=",fileno($fh),"\n";
 
 # Fork the process we will use for writing
 my $pid = fork();
@@ -195,19 +190,16 @@ if (!$pid) {
 	# Close file handles
 	untie(*STDIN);
 	untie(*STDOUT);
-	#untie(*STDERR);
+	untie(*STDERR);
 	close(STDIN);
 	close(STDOUT);
-	#close(STDERR);
+	close(STDERR);
 	close($writein);
 	close($readout);
 	my $oldsel = select($readin); $| = 1; select($oldsel);
-	select(STDERR); $| = 1; select($oldsel);
-	print STDERR "In sub-process $$\n";
 
 	# Open the temp file and start writing
 	&switch_to_domain_user($d);
-	print STDERR "writing to $file\n";
 	if ($file =~ /^>\s*(([a-zA-Z]:)?\/.*)$/ && !$notemp) {
 		# Writing to a file, via a tempfile
 		my $ex = open(FILE, ">$tempfile");
@@ -237,18 +229,14 @@ if (!$pid) {
 		exit(1);
 		}
 	print $readin "OK\n";	# Signal OK
-	print STDERR "reading from ",fileno($writeout),"\n";
-	#$SIG{'PIPE'} = 'ignore';	# Write errors detected by print
-	$SIG{'PIPE'} = sub { print STDERR "ignoring SIGPIPE in $$\n" };
+	$SIG{'PIPE'} = 'ignore';	# Write errors detected by print
 	while(<$writeout>) {
-		print STDERR "got $_";
 		my $rv = (print FILE $_);
 		if (!$rv) {
 			print $readin "Write to $realfile failed : $!\n";
 			exit(2);
 			}
 		}
-	print STDERR "eof\n";
 	my $ex = close(FILE);
 	if ($ex) {
 		exit(0);
@@ -288,7 +276,6 @@ my $readout = $main::open_tempfile_readout{$fh};
 my $realfile = $main::open_temphandles{$fh};
 my $tempfile = $main::open_tempfiles{$realfile};
 my ($rv, $err);
-print STDERR "pid=$pid readout=$readout tempfile=$tempfile realfile=$realfile\n";
 if ($pid) {
 	# Writing was done in a sub-process .. wait for it to exit
 	close($fh);
@@ -332,10 +319,10 @@ if (!$pid) {
 	# Close file handles
 	untie(*STDIN);
 	untie(*STDOUT);
-	#untie(*STDERR);
+	untie(*STDERR);
 	close(STDIN);
 	close(STDOUT);
-	#close(STDERR);
+	close(STDERR);
 	close($readout);
 	my $oldsel = select($readin); $| = 1; select($oldsel);
 
@@ -509,6 +496,7 @@ if ($d->{'unix'}) {
 	$> = 0;
 	}
 if ($err) {
+	$err =~ s/\s+at\s+(\/\S+)\s+line\s+(\d+)\.?//;
 	&error($err);
 	}
 return wantarray ? @rv : $rv[0];
