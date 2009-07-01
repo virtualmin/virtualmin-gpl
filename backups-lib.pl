@@ -824,7 +824,7 @@ local $tempbase = $gconfig{'tempdir_'.$module_name} ||
 		  $gconfig{'tempdir'} ||
 		  "/tmp/.webmin";
 if ($d && !&is_under_directory($tempbase, $dir)) {
-	# As domain owner if possible
+	# As domain owner if not under temp base
 	$out = &run_as_domain_user($d, $cmd, 0, 1);
 	}
 else {
@@ -837,7 +837,12 @@ else {
 	}
 # Set requested permissions
 if (!$?) {
-	&set_ownership_permissions(undef, undef, $perms, $dir);
+	if ($d) {
+		&set_permissions_as_domain_user($d, $perms, $dir);
+		}
+	else {
+		&set_ownership_permissions(undef, undef, $perms, $dir);
+		}
 	}
 return $? ? $out : undef;
 }

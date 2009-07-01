@@ -2018,11 +2018,12 @@ if (!$single && $copydir && !-d $copydir) {
 	elsif (!-d $copydir) {
 		return "Command to create target directory did not work!";
 		}
-	&set_ownership_permissions(undef, undef, 0755, $copydir);
+	&set_permissions_as_domain_user($d, 0755, $copydir);
 	}
 
 # Extract compressed file to a temp dir
 if (!-d $dir) {
+	# Can be done as root, as it is in /tmp
 	&make_dir($dir, 0755);
 	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, undef, $dir);
 	}
