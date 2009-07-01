@@ -178,6 +178,12 @@ if (-d $realfile) {
 	if ($noerror) { return 0; }
 	else { &error("Cannot write to directory $realfile"); }
 	}
+
+if (&is_readonly_mode() && $file =~ />/ && !$safe) {
+	# Read-only mode .. veto all writes
+	return open($fh, ">$null_file");
+	}
+
 # Get the temp file now, before forking
 my $tempfile;
 if ($file =~ /^>\s*(([a-zA-Z]:)?\/.*)$/ && !$notemp) {
@@ -443,6 +449,7 @@ delete($main::file_cache_noflush{$file});
 sub rename_as_domain_user
 {
 my ($d, $oldfile, $newfile) = @_;
+return 1 if (&is_readonly_mode());
 my $cmd = "mv -f ".quotemeta($oldfile)." ".quotemeta($newfile);
 my ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
@@ -453,6 +460,7 @@ return $ex ? 0 : 1;
 sub set_permissions_as_domain_user
 {
 my ($d, $perms, @files) = @_;
+return 1 if (&is_readonly_mode());
 my $cmd = "chmod ".sprintf("%o", $perms & 07777)." ".
 	  join(" ", map { quotemeta($_) } @files);
 my ($out, $ex) = &run_as_domain_user($d, $cmd);
@@ -541,8 +549,8 @@ return wantarray ? @rv : $rv[0];
 # Copy a file or directory, with commands run as a domain owner
 sub copy_source_dest_as_domain_user
 {
-return (1, undef) if (&is_readonly_mode());
 my ($d, $src, $dst) = @_;
+return (1, undef) if (&is_readonly_mode());
 my $ok = 1;
 my $err;
 if (-d $src) {

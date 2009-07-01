@@ -41,9 +41,6 @@
 	- login as domain owner, check all features
 	- all scripts
 	- migration code
-	- double-check all web SSL functions
 	- copy_skel_files
-	- do nothing in readonly mode, including running commands
-	- simple autoreply doesn't need to switch
 
  - Restore from system using ~/logs should work on system using /var/log

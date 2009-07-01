@@ -36,11 +36,11 @@ elsif ($in{'mode'} == 2) {
 	$err && &error(&text('chain_ecert', $err));
 	$chain = &default_certificate_file($d, 'ca');
 	&lock_file($chain);
-	&unlink_file($chain);
-	&open_tempfile(CERT, ">$chain");
+	&unlink_file_as_domain_user($d, $chain);
+	&open_tempfile_as_domain_user($d, CERT, ">$chain");
 	&print_tempfile(CERT, $in{'upload'});
-	&close_tempfile(CERT);
-	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755, $chain);
+	&close_tempfile_as_domain_user($d, CERT);
+	&set_permissions_as_domain_user($d, 0755, $chain);
 	&unlock_file($chain);
 	}
 
