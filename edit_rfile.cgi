@@ -10,9 +10,8 @@ $d = &get_domain($in{'dom'});
 
 &ui_print_header(undef, $text{'rfile_title'}, "");
 
-&switch_to_domain_user($d);
 if (-e $in{'file'}) {
-	open(FILE, $in{'file'}) ||
+	&open_tempfile_as_domain_user($d, FILE, $in{'file'}) ||
 		&error(&text('rfile_eread', $in{'file'}, $d->{'user'}, $!));
 	while(<FILE>) {
 		if (/^Reply-Tracking:\s*(.*)/) {
@@ -25,7 +24,7 @@ if (-e $in{'file'}) {
 			push(@lines, $_);
 			}
 		}
-	close(FILE);
+	&close_tempfile_as_domain_user($d, FILE);
 	}
 
 print &text('rfile_desc', "<tt>$in{'file'}</tt>"),"<p>\n";

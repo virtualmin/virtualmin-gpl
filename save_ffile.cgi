@@ -18,11 +18,12 @@ for($i=0; defined($in{"field_$i"}); $i++) {
 	}
 push(@filter, "2 ".$in{'other'}."\n") if ($in{'other'});
 
-&switch_to_domain_user($d);
-&open_lock_tempfile(FILE, ">$in{'file'}", 1) ||
+&lock_file($in{'file'});
+&open_tempfile_as_domain_user($d, FILE, ">$in{'file'}", 1) ||
 	&error(&text('ffile_ewrite', $in{'file'}, $d->{'user'}, $!));
 &print_tempfile(FILE, @filter);
-&close_tempfile(FILE);
+&close_tempfile_as_domain_user($d, FILE);
+&unlock_file($in{'file'});
 &webmin_log("save", "ffile", $in{'file'});
 
 $what = $in{'alias'} ? 'alias' : 'user';

@@ -13,9 +13,9 @@ $in{'replies_def'} || $in{'replies'} =~ /^\/\S+/ ||
 $in{'period_def'} || $in{'period'} =~ /^\d+$/ ||
 	&error($text{'rfile_eperiod'});
 
-&switch_to_domain_user($d);
 $in{'text'} =~ s/\r//g;
-&open_lock_tempfile(FILE, ">$in{'file'}", 1) ||
+&lock_file($in{'file'});
+&open_tempfile_as_domain_user($d, FILE, ">$in{'file'}", 1) ||
 	&error(&text('rfile_ewrite', $in{'file'}, $dom->{'user'}, $!));
 if (!$in{'replies_def'}) {
 	&print_tempfile(FILE, "Reply-Tracking: $in{'replies'}\n");
@@ -24,7 +24,8 @@ if (!$in{'period_def'}) {
 	&print_tempfile(FILE, "Reply-Period: $in{'period'}\n");
 	}
 &print_tempfile(FILE, $in{'text'});
-&close_tempfile(FILE);
+&close_tempfile_as_domain_user($d, FILE);
+&unlock_file($in{'file'});
 &webmin_log("save", "rfile", $in{'file'});
 
 $what = $in{'alias'} ? 'alias' : 'user';

@@ -20,8 +20,7 @@ if ($in{'cancel'}) {
 elsif ($in{'delete'}) {
 	# Delete, after asking for confirmation
 	if ($in{'confirm'}) {
-		&switch_to_domain_user($d);
-		&unlink_file("$pub/$in{'file'}");
+		&unlink_file_as_domain_user($d, "$pub/$in{'file'}");
 		&redirect("edit_html.cgi?dom=$in{'dom'}");
 		}
 	else {
@@ -54,9 +53,9 @@ else {
 
 	# Get the original file, and use its header - unless in text mode, in
 	# which this can never happen
-	&switch_to_domain_user($d);
 	if (!$in{'text'}) {
-		$olddata = &read_file_contents("$pub/$in{'file'}");
+		$olddata = &read_file_contents_as_domain_user(
+				$d, "$pub/$in{'file'}");
 		if ($olddata && $data !~ /<body[\000-\377]*>/i) {
 			($oldhead, $oldbody, $oldfoot) =
 				&html_extract_head_body($olddata);
@@ -74,9 +73,9 @@ else {
 		}
 
 	# Write out the file
-	&open_tempfile(HTML, ">$pub/$in{'file'}");
+	&open_tempfile_as_domain_user($d, HTML, ">$pub/$in{'file'}");
 	&print_tempfile(HTML, $data);
-	&close_tempfile(HTML);
+	&close_tempfile_as_domain_user($d, HTML);
 
 	&redirect("edit_html.cgi?dom=$in{'dom'}&edit=".
 		  &urlize($in{'file'})."&saved=1");

@@ -80,17 +80,18 @@ if ($in{'saved'}) {
 	}
 
 if ($editing) {
-	&switch_to_domain_user($d);
 	if ($editing == 1) {
 		# Read the selected HTML file
 		$in{'edit'} !~ /\.\./ && $in{'edit'} !~ /\0/ ||
 			&error($text{'html_efile'});
-		$data = &read_file_contents("$pub/$in{'edit'}");
+		$data = &read_file_contents_as_domain_user(
+				$d, "$pub/$in{'edit'}");
 		}
 	else {
 		# Read a template file if one exists
 		if (-r "$pub/template.html") {
-			$data = &read_file_contents("$pub/template.html");
+			$data = &read_file_contents_as_domain_user(
+				$d, "$pub/template.html");
 			}
 		}
 

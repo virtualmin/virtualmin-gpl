@@ -10,26 +10,25 @@ $d = &get_domain($in{'dom'});
 
 &ui_print_header(undef, $text{'afile_title'}, "");
 
-&switch_to_domain_user($d);
 if (-e $in{'file'}) {
-	open(FILE, $in{'file'}) ||
+	&open_readfile_as_domain_user($d, FILE, $in{'file'}) ||
 		&error(&text('afile_eread', $in{'file'}, $d->{'user'}, $!));
 	@lines = <FILE>;
-	close(FILE);
+	&close_readfile_as_domain_user($d, FILE);
 	}
 
 print "<b>",&text('afile_desc', "<tt>$in{'file'}</tt>"),"</b><p>\n";
 
 $what = $in{'alias'} ? 'alias' : 'user';
-print "<form action=save_afile.cgi method=post enctype=multipart/form-data>\n";
-print "<input type=hidden name=file value=\"$in{'file'}\">\n";
-print "<input type=hidden name=$what value=\"",$in{$what},"\">\n";
-print "<input type=hidden name=dom value=\"$in{'dom'}\">\n";
-print "<textarea name=text rows=20 cols=80>",
-	join("", @lines),"</textarea><p>\n";
-print "<input type=submit value=\"$text{'save'}\"> ",
-      "<input type=reset value=\"$text{'afile_undo'}\">\n";
-print "</form>\n";
+print &ui_form_start("save_afile.cgi", "form-data");
+print &ui_hidden("file", $in{'file'});
+print &ui_hidden($what, $in{$what});
+print &ui_hidden("dom", $in{'dom'});
+print &ui_table_start(undef, undef, 2);
+print &ui_table_row(undef,
+	&ui_textarea("text", join("", @lines), 20, 80), 2);
+print &ui_table_end();
+print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
 &ui_print_footer("edit_$what.cgi?dom=$in{'dom'}&$what=$in{$what}",
 	$text{$what.'_return'});

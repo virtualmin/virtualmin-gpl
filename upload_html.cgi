@@ -15,10 +15,9 @@ $in{'upload_filename'} || &error($text{'upload_enone2'});
 
 # Work out filename, and write out
 $in{'upload_filename'} =~ s/^.*[\\\/]//;
-&switch_to_domain_user($d);
-&open_tempfile(UPLOAD, ">$pub/$in{'upload_filename'}");
+&open_tempfile_as_domain_user($d, UPLOAD, ">$pub/$in{'upload_filename'}");
 &print_tempfile(UPLOAD, $in{'upload'});
-&close_tempfile(UPLOAD);
+&close_tempfile_as_domain_user($d, UPLOAD);
 
 if ($in{'upload_filename'} =~ /\.(htm|html)$/i) {
 	# Edit this new file

@@ -7,13 +7,14 @@ $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_forward() || &error($text{'edit_ecannot'});
 
 $ff = &framefwd_file($d);
-&switch_to_domain_user($d);
 $in{'text'} =~ s/\r//g;
 $in{'text'} =~ s/\n*$/\n/;
-&open_lock_tempfile(FILE, ">$ff", 1) ||
+&lock_file($ff);
+&open_tempfile_as_domain_user($d, FILE, ">$ff", 1) ||
 	&error(&text('expframe_ewrite', $ff, $d->{'user'}, $!));
 &print_tempfile(FILE, $in{'text'});
-&close_tempfile(FILE);
+&close_tempfile_as_domain_user($d, FILE);
+&unlock_file($ff);
 
 &webmin_log("frame", "domain", $d->{'dom'}, $d);
 &domain_redirect($d);

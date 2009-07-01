@@ -10,9 +10,8 @@ $d = &get_domain($in{'dom'});
 
 &ui_print_header(undef, $text{'ffile_title'}, "");
 
-&switch_to_domain_user($d);
 if (-e $in{'file'}) {
-	open(FILE, $in{'file'}) ||
+	&open_readfile_as_domain_user($d, FILE, $in{'file'}) ||
 		&error(&text('ffile_eread', $in{'file'}, $d->{'user'}, $!));
 	while(<FILE>) {
 		s/\r|\n//g;
@@ -23,7 +22,7 @@ if (-e $in{'file'}) {
 			$other = $2;
 			}
 		}
-	close(FILE);
+	&close_readfile_as_domain_user($d, FILE);
 	}
 
 print "<b>",&text('ffile_desc', "<tt>$in{'file'}</tt>"),"</b><p>\n";
