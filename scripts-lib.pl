@@ -725,7 +725,9 @@ if (-r $phpini && &foreign_check("phpini")) {
 			}
 		}
 
-	&flush_file_lines();
+	if ($any) {
+		&write_as_domain_user($d, sub { &flush_file_lines($phpini) });
+		}
 	}
 
 return $any;
@@ -911,7 +913,13 @@ foreach my $m (@mods) {
 			# At end of file (should never happen, but..)
 			push(@$lref, "extension=$m.so");
 			}
-		&flush_file_lines($inifile);
+		if ($mode eq "mod_php") {
+			&flush_file_lines($inifile);
+			}
+		else {
+			&write_as_domain_user($d,
+				sub { &flush_file_lines($inifile) });
+			}
 		undef($phpini::get_config_cache{$inifile});
 		undef(%main::php_modules);
 		&$second_print($text{'setup_done'});
@@ -1664,21 +1672,21 @@ sub make_file_php_writable
 local ($d, $file, $dironly, $setowner) = @_;
 local $mode = &get_domain_php_mode($d);
 local $perms = $mode eq "mod_php" ? 0777 : 0755;
+local @st = stat($file);
 if (-d $file && !$dironly) {
-	if ($setowner) {
+	if ($setowner && $st[4] != $d->{'uid'}) {
 		&system_logged(sprintf("chown -R %d:%d %s",
 			$d->{'uid'}, $d->{'gid'}, quotemeta($file)));
 		}
-	&system_logged(sprintf("chmod -R %o %s", $perms, quotemeta($file)));
+	&execute_as_domain_user(
+		$d, sprintf("chmod -R %o %s", $perms, quotemeta($file)));
 	}
 else {
-	if ($setowner) {
+	if ($setowner && $st[4] != $d->{'uid'}) {
 		&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
-					   $perms, $file);
+					   undef, $file);
 		}
-	else {
-		&set_ownership_permissions(undef, undef, $perms, $file);
-		}
+	&set_permissions_as_domain_user($d, $perms, $file);
 	}
 }
 
@@ -1687,10 +1695,10 @@ sub make_file_php_nonwritable
 {
 local ($d, $file, $dironly) = @_;
 if (-d $file && !$dironly) {
-	&system_logged("chmod -R 555 ".quotemeta($file));
+	&execute_as_domain_user($d, "chmod -R 555 ".quotemeta($file));
 	}
 else {
-	&set_ownership_permissions(undef, undef, 0555, $file);
+	&set_permissions_as_domain_user($d, 0555, $file);
 	}
 }
 
