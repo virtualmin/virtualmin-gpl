@@ -165,17 +165,15 @@ foreach $o (keys %oldmap) {
 		}
 	}
 
+# Write out autoreply files
+foreach $simple (@created) {
+	&write_simple_autoreply($d, $simple);
+	}
+
 &sync_alias_virtuals($d);
 print "<p>\n";
 print &text('aedit_complete', $count, $ecount, $mcount, $dcount),"<br>\n";
 &webmin_log("manual", "aliases", $count);
-
-# Write out autoreply files. This has to be done last, as it is done
-# with domain owner permissions
-&switch_to_domain_user($d);
-foreach $simple (@created) {
-	&write_simple_autoreply($d, $simple);
-	}
 
 &ui_print_footer("list_aliases.cgi?dom=$in{'dom'}", $text{'aliases_return'},
 		 "", $text{'index_return'});

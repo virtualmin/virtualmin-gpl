@@ -676,18 +676,17 @@ else {
 			}
 		}
 
+	if ($simple) {
+		# Write out the simple alias autoreply file
+		&write_simple_autoreply($d, $simple);
+		}
+
 	&run_post_actions();
 	$user->{'dom'} = $d->{'dom'};
 	&release_lock_unix($d);
 	&release_lock_mail($d);
 	&webmin_log($in{'new'} ? "create" : "modify", "user",
 		    &remove_userdom($user->{'user'}, $d), $user);
-
-	if ($simple) {
-		# Write out the simple alias autoreply file
-		&switch_to_domain_user($d);
-		&write_simple_autoreply($d, $simple);
-		}
 	}
 &redirect($d ? "list_users.cgi?dom=$in{'dom'}" : "index.cgi");
 

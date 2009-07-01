@@ -130,7 +130,6 @@ $virt = { 'from' => $email,
 &create_virtuser($virt);
 &sync_alias_virtuals($d);
 &release_lock_mail($d);
-&switch_to_domain_user($d);
 &write_simple_autoreply($d, $simple);
 &virtualmin_api_log(\@OLDARGV, $d);
 print "Alias for $email created successfully\n";

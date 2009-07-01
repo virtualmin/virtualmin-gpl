@@ -149,6 +149,17 @@ my $rv = &symlink_file_as_domain_user($d, $src, $dest);
 return $rv;
 }
 
+# link_file_as_domain_user(&domain, src, dest)
+# Creates a hard link, using ln run as the domain owner
+sub link_file_as_domain_user
+{
+my ($d, $src, $dest) = @_;
+return 1 if (&is_readonly_mode());
+local $cmd = "ln ".quotemeta($src)." ".quotemeta($dest);
+local ($out, $ex) = &run_as_domain_user($d, $cmd);
+return $ex ? 0 : 1;
+}
+
 # open_tempfile_as_domain_user(&domain, handle, file, [no-error],
 # 			       [no-tempfile], [safe?])
 # Like the Webmin open_tempfile function, but in a sub-process that runs as

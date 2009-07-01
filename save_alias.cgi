@@ -97,18 +97,16 @@ else {
 		&modify_virtuser(\%oldvirt, $virt);
 		}
 	&sync_alias_virtuals($d);
+	if ($in{'simplemode'} eq 'simple') {
+		# Write out the autoreply file, if any
+		&write_simple_autoreply($d, $simple);
+		}
 	&release_lock_mail($d);
 	if ($in{'new'}) {
 		&webmin_log("create", "alias", $virt->{'from'}, $virt);
 		}
 	else {
 		&webmin_log("modify", "alias", $virt->{'from'}, $virt);
-		}
-
-	if ($in{'simplemode'} eq 'simple') {
-		# Write out the autoreply file, if any
-		&switch_to_domain_user($d);
-		&write_simple_autoreply($d, $simple);
 		}
 	}
 &redirect("list_aliases.cgi?dom=$in{'dom'}");

@@ -168,7 +168,7 @@ sub write_simple_autoreply
 local ($d, $simple) = @_;
 if ($simple->{'autotext'}) {
         # Save autoreply text
-        &open_tempfile(AUTO, ">$simple->{'autoreply'}");
+        &open_tempfile_as_domain_user($d, AUTO, ">$simple->{'autoreply'}");
         if ($simple->{'replies'}) {
                 &print_tempfile(AUTO,
                         "Reply-Tracking: $simple->{'replies'}\n");
@@ -199,14 +199,14 @@ if ($simple->{'autotext'}) {
                 &print_tempfile(AUTO, "From: $simple->{'from'}\n");
                 }
         &print_tempfile(AUTO, $simple->{'autotext'});
-        &close_tempfile(AUTO);
+        &close_tempfile_as_domain_user($d, AUTO);
 
 	# Hard link to the autoreply directory, which is readable by the mail
 	# server, unlike users' homes
 	local $link = &convert_autoreply_file($d, $simple->{'autoreply'});
 	if ($link) {
-		unlink($link);
-		link($simple->{'autoreply'}, $link) ||
+		&unlink_file_as_domain_user($d, $link);
+		&link_file_as_domain_user($d, $simple->{'autoreply'}, $link) ||
 			&error("Failed to link $simple->{'autoreply'} to ",
 			       "$link : $!");
 		}
@@ -226,8 +226,8 @@ if ($simple->{'auto'} &&
 	if ($st[4] == $d->{'uid'}) {
 		local $link = &convert_autoreply_file(
 			$d, $simple->{'autoreply'});
-		unlink($simple->{'autoreply'});
-		unlink($link) if ($link);
+		&unlink_file_as_domain_user($d, $simple->{'autoreply'});
+		&unlink_file_as_domain_user($d, $link) if ($link);
 		}
 	}
 }
