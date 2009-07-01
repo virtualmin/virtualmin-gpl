@@ -125,9 +125,10 @@ local ($d, $ver, $opts, $upgrade) = @_;
 local @files = ( { 'name' => "source",
 	   'file' => "squirrelmail-$ver.tar.gz",
 	   'url' => "http://prdownloads.sourceforge.net/squirrelmail/squirrelmail-$ver.tar.gz" },
-	   { 'name' => 'virtusertable',
-	     'file' => 'virtusertable.tar.gz',
-	     'url' => 'http://www.squirrelmail.org/plugins/virtusertable-0.3.tar.gz' },
+	   { 'name' => 'set_user_data',
+	     'file' => 'set_user_data.tar.gz',
+	     'nofetch' => 1,
+	     'url' => 'http://scripts.virtualmin.com/set_user_data-1.0.tar.gz' },
 	    );
 return @files;
 }
@@ -204,14 +205,14 @@ if (!$upgrade) {
 
 	# Create data directories
 	local $data_dir = "$opts->{'dir'}/data";
-	&make_dir($data_dir, 0700) if (!-d $data_dir);
+	&make_dir_as_domain_user($d, $data_dir, 0700) if (!-d $data_dir);
 	&make_file_php_writable($d, $data_dir, 1, 1);
 	local $attachment_dir = "$opts->{'dir'}/attach";
-	&make_dir($attachment_dir, 0700) if (!-d $attachment_dir);
+	&make_dir_as_domain_user($d, $attachment_dir, 0700) if (!-d $attachment_dir);
 	&make_file_php_writable($d, $attachment_dir, 1, 1);
 
 	# Update the config file
-	local $lref = &read_file_lines($cfile);
+	local $lref = &read_file_lines_as_domain_user($d, $cfile);
 	local $dburl = "$dbphptype://$dbuser:".&php_quotemeta($dbpass).
 		       "\@$dbhost/$dbname";
 	foreach $l (@$lref) {
@@ -240,7 +241,7 @@ if (!$upgrade) {
 			$l = "\$attachment_dir = '$attachment_dir';";
 			}
 		}
-	&flush_file_lines($cfile);
+	&flush_file_lines_as_domain_user($d, $cfile);
 
 	if ($dbname) {
 		# Create the database tables
@@ -276,30 +277,49 @@ if (!$upgrade) {
 			)");
 		}
 
-	# Install the virtusertable plugin
+	# Install the set user data plugin
 	local $vut = &get_mail_virtusertable();
 	if ($vut) {
 		$out = &run_as_domain_user($d,
 			"cd ".quotemeta("$opts->{'dir'}/plugins").
-			" && (gunzip -c $files->{'virtusertable'} | tar xf -)");
-		local $s = "$opts->{'dir'}/plugins/virtusertable/setup.php";
-		-r $s || return (0, "Failed to extract virtusertable plugin : ".
-				    "<tt>$out</tt>.");
+			" && (gunzip -c $files->{'set_user_data'} | tar xf -)");
+		local $sdir = "$opts->{'dir'}/plugins/set_user_data";
+		local $scfilesrc = "$sdir/config.php.sample";
+		-r $scfilesrc ||
+			return (0, "Failed to extract set_user_data plugin : ".
+				   "<tt>$out</tt>.");
 
-		# Setup it's config file
-		local $lref = &read_file_lines($s);
-		foreach my $l (@$lref) {
-			if ($l =~ /^\s*\$filename\s*=/) {
-				$l = "\$filename = '$vut';";
-				}
-			}
-		&flush_file_lines($s);
+		# Setup the config file
+		local $scfile = "$sdir/config.php";
+		&copy_source_dest_as_domain_user($d, $scfilesrc, $scfile);
+		local $sc = &read_file_contents_as_domain_user($d, $scfile);
+		$sc =~ s/'passwd'/'passwd+', 'virtual'/;
+		$sc =~ s/\['loginmode'\]\s*=\s*0/\['loginmode'\] = 1/;
+		$sc =~ s/\['loginmethods'\]\s*=\s*array\(/\['loginmethods'\] = array\('virtual'/;
+		&open_tempfile_as_domain_user($d, CONF, ">$scfile");
+		&print_tempfile(CONF, $sc);
+		&close_tempfile_as_domain_user($d, CONF);
+
+		# Setup passwd and virtual files
+		&copy_source_dest_as_domain_user($d,
+			"$sdir/methods/passwd.php.sample",
+			"$sdir/methods/passwd.php");
+		&copy_source_dest_as_domain_user($d,
+			"$sdir/methods/virtual.php.sample",
+			"$sdir/methods/virtual.php");
+		local $vc = &read_file_contents_as_domain_user($d,
+			"$sdir/methods/virtual.php");
+		$vc =~ s/settings\['file'\]\s*=\s*'.*'/settings\['file'\] = '$vut'/g;
+		&open_tempfile_as_domain_user($d, CONF,
+			">$sdir/methods/virtual.php");
+		&print_tempfile(CONF, $vc);
+		&close_tempfile_as_domain_user($d, CONF);
 
 		# Register in squirrelmail config file
-		local $lref = &read_file_lines($cfile);
+		local $lref = &read_file_lines_as_domain_user($d, $cfile);
 		splice(@$lref, @$lref-1, 0,
-		       "\$plugins[0] = 'virtusertable';");
-		&flush_file_lines($cfile);
+		       "\$plugins[0] = 'set_user_data';");
+		&flush_file_lines_as_domain_user($d, $cfile);
 		}
 	}
 

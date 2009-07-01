@@ -44,6 +44,7 @@ foreach $s (@scripts) {
 	foreach $ver (@{$script->{'versions'}}) {
 		@files = &{$script->{'files_func'}}($d, $ver, undef, undef);
 		foreach $f (grep { $_->{'url'} } @files) {
+			next if ($f->{'nofetch'});
 			local $url = &convert_osdn_url($f->{'url'}) ||
 				     $f->{'url'};
 			local $destfile = "$dest/$f->{'file'}";

@@ -545,5 +545,17 @@ my $realfile = &resolve_links($file);
 return $realfile eq $file || &same_file($realfile, $file);
 }
 
+# read_file_contents_as_domain_user(&domain, file)
+# Returns the full contents of some file, read as the domain owner
+sub read_file_contents_as_domain_user
+{
+my ($d, $file) = @_;
+&open_readfile_as_domain_user($d, FILE, $file) || return undef;
+local $/ = undef;
+my $rv = <FILE>;
+&close_readfile_as_domain_user($d, FILE);
+return $rv;
+}
+
 1;
 
