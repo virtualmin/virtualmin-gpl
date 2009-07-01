@@ -142,7 +142,8 @@ local ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
 }
 
-sub symlink_logged_as_domain_user(&domain, src, dest)
+# symlink_logged_as_domain_user(&domain, src, dest)
+sub symlink_logged_as_domain_user
 {
 my ($d, $src, $dest) = @_;
 &lock_file($dest);
@@ -461,7 +462,8 @@ return $ex ? 0 : 1;
 }
 
 # execute_as_domain_user(&domain, &code)
-# Run some code reference in a sub-process, as the domain's user
+# Run some code reference in a sub-process, as the domain's user. If the
+# function fails (due to calling error), this process will exit too.
 sub execute_as_domain_user
 {
 my ($d, $code) = @_;
@@ -476,7 +478,9 @@ elsif ($pid < 0) {
 	}
 else {
 	waitpid($pid, 0);
-	return $? ? 0 : 1;
+	if ($?) {
+		exit($? / 256);
+		}
 	}
 }
 
