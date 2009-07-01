@@ -41,8 +41,6 @@
 	- login as domain owner, check all features
 	- all scripts
 	- migration code
-	- virtual-server-lib-funcs.pl
-		- IMAP login for usermin
 	- double-check all web SSL functions
 	- copy_skel_files
 	- do nothing in readonly mode, including running commands

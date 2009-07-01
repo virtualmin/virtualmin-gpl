@@ -481,8 +481,8 @@ if ($d->{'parent'}) {
 	$d = &get_domain($d->{'parent'});
 	}
 if ($d->{'unix'}) {
-	$) = $d->{'ugid'}." ".join(" ", $d->{'ugid'},
-                                   &other_groups($d->{'user'}));
+	my $gid = $d->{'ugid'} || $d->{'gid'};
+	$) = $gid." ".join(" ", $gid, &other_groups($d->{'user'}));
 	$> = $d->{'uid'};
 	}
 my @rv;
@@ -495,6 +495,30 @@ if ($d->{'unix'}) {
 	$) = 0;
 	$> = 0;
 	}
+if ($err) {
+	$err =~ s/\s+at\s+(\/\S+)\s+line\s+(\d+)\.?//;
+	&error($err);
+	}
+return wantarray ? @rv : $rv[0];
+}
+
+# write_as_mailbox_user(&user, &code)
+# Runs some code with the effective UID and GID set to that of a mailbox user,
+# so that file IO is locked down. Sets it back afterwards.
+sub write_as_mailbox_user
+{
+my ($user, $code) = @_;
+$) = $user->{'gid'}." ".join(" ", $user->{'gid'},
+				  &other_groups($user->{'user'}));
+$> = $user->{'uid'};
+my @rv;
+eval {
+	local $main::error_must_die = 1;
+	@rv = &$code();
+	};
+my $err = $@;
+$) = 0;
+$> = 0;
 if ($err) {
 	$err =~ s/\s+at\s+(\/\S+)\s+line\s+(\d+)\.?//;
 	&error($err);

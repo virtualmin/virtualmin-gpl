@@ -1881,10 +1881,18 @@ return 0 if ($mconfig{'pop3_server'} ne '' &&
 foreach my $dir ($user->{'home'}, "$user->{'home'}/.usermin", "$user->{'home'}/.usermin/mailbox") {
 	next if ($user->{'webowner'} && $dir eq $user->{'home'});
 	next if ($user->{'domainowner'} && $dir eq $user->{'home'});
-	if (!-d $dir) {
-		&make_dir($dir, 0700);
-		&set_ownership_permissions($user->{'uid'}, $user->{'gid'},
-					   0700, $dir);
+	if (!-e $dir) {
+		if ($dir eq $user->{'home'}) {
+			&make_dir($dir, 0700);
+			&set_ownership_permissions(
+				$user->{'uid'}, $user->{'gid'}, 0700, $dir);
+			}
+		else {
+			&write_as_mailbox_user($user,
+				sub { &make_dir($dir, 0700);
+				      &set_ownership_permissions(undef, undef,
+								 0700, $dir) });
+			}
 		}
 	}
 if (-d "$user->{'home'}/.usermin/mailbox") {
@@ -1899,9 +1907,10 @@ if (-d "$user->{'home'}/.usermin/mailbox") {
 		}
 	$inbox{'pass'} = $user->{'plainpass'};
 	$inbox{'nologout'} = 1;
-	&write_file($imapfile, \%inbox);
-	&set_ownership_permissions($user->{'uid'}, $user->{'gid'},
-				   $imapfile, 0600);
+	&write_as_mailbox_user($user,
+		sub { &write_file($imapfile, \%inbox);
+		      &set_ownership_permissions(undef, undef,
+						 $imapfile, 0600) });
 	}
 }
 
@@ -2049,10 +2058,12 @@ if ($home) {
 	# Create his homedir
 	local @st = $_[1] ? stat($_[1]->{'home'}) : ( undef, undef, 0755 );
 	&lock_file($home);
-	&make_dir($home, $st[2] & 0777);
-	&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'gid'},
-				   $st[2] & 0777, $home);
-	&unlock_file($home);
+	if (!-e $home) {
+		&make_dir($home, $st[2] & 0777);
+		&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'gid'},
+					   $st[2] & 0777, $home);
+		&unlock_file($home);
+		}
 
 	# Copy files into homedir
 	&copy_skel_files(

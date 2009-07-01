@@ -300,10 +300,19 @@ if (!$upgrade) {
 		&print_tempfile(CONF, $sc);
 		&close_tempfile_as_domain_user($d, CONF);
 
-		# Setup passwd and virtual files
+		# Setup passwd config file
 		&copy_source_dest_as_domain_user($d,
 			"$sdir/methods/passwd.php.sample",
 			"$sdir/methods/passwd.php");
+		local $vc = &read_file_contents_as_domain_user($d,
+			"$sdir/methods/passwd.php");
+		$vc =~ s/settings\['posix'\]\s*=\s*0/settings\['posix'\] = 1/;
+		&open_tempfile_as_domain_user($d, CONF,
+			">$sdir/methods/passwd.php");
+		&print_tempfile(CONF, $vc);
+		&close_tempfile_as_domain_user($d, CONF);
+
+		# Setup virtual config file
 		&copy_source_dest_as_domain_user($d,
 			"$sdir/methods/virtual.php.sample",
 			"$sdir/methods/virtual.php");
