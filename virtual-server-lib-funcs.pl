@@ -67,10 +67,16 @@ return @rv;
 }
 
 # list_visible_domains()
-# Returns a list of domain structures the current user can see
+# Returns a list of domain structures the current user can see, for use in
+# domain menus. Excludes those that he doesn't have access to, and perhaps
+# alias domains.
 sub list_visible_domains
 {
-return grep { &can_edit_domain($_) } &list_domains();
+my @rv = grep { &can_edit_domain($_) } &list_domains();
+if ($config{'hide_alias'}) {
+	@rv = grep { !$_->{'alias'} } @rv;
+	}
+return @rv;
 }
 
 # sort_indent_domains(&domains)

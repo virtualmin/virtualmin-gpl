@@ -173,3 +173,4 @@ secmx_nodns=0
 usermin_switch=1
 plan_auto=1
 collect_notemp=0
+hide_alias=0
