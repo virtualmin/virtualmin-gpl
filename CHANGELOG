@@ -1129,3 +1129,4 @@ Added support for migrating cPanel addon domains properly.
 Added a template option to disable addition of also-notify and allow-transfer blocks to new DNS domains.
 LXadmin backups can now be migrated into Virtualmin servers, preserving web content, databases, mailboxes and mail aliases.
 Changed the Squirrelmail script installer to use the new set_user_data plugin via Ian Goldstein, which allows login by email address and sets the from address correctly by default.
+Updated all code that reads or writes to files in a virtual server's home directory to operate with the user's permissions, which prevents use of malicious links to access root-owned files.
