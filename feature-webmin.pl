@@ -324,8 +324,8 @@ if ($features{'postgres'} && $avail{'postgres'}) {
 		       'user' => &postgres_user($_[0]),
 		       'pass' => &postgres_pass($_[0], 1),
 		       'sameunix' => 1,
-		       'backup' => 1,
-		       'restore' => 1 );
+		       'backup' => 0,
+		       'restore' => 0 );
 	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "postgresql")
 		if (!$hasmods{'postgresql'});
 	}
