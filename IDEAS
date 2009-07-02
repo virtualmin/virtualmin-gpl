@@ -41,7 +41,5 @@
 	- login as domain owner, check all features
 	- all scripts
 		- up to phplist
-	- migration code
-	- copy_skel_files
 
  - Restore from system using ~/logs should work on system using /var/log

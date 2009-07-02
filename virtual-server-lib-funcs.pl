@@ -2100,25 +2100,42 @@ sub copy_skel_files
 {
 local ($uf, $user, $home, $group, $d) = @_;
 return if (!$uf);
-&require_useradmin();
-local @copied;
-if ($user) {
-	# We have the domain username
-	local $shell = $user->{'shell'};
-	$shell =~ s/^(.*)\///g;
-	$group = getgrgid($user->{'gid'}) if (!$group);
-	$uf =~ s/\$group/$group/g;
-	$uf =~ s/\$gid/$user->{'gid'}/g;
-	$uf =~ s/\$shell/$shell/g;
-	@copied = &useradmin::copy_skel_files($uf, $home,
-				    $user->{'uid'}, $user->{'gid'});
-	}
-else {
-	# This domain has no user
-	$uf =~ s/\$group/nogroup/g;
-	$uf =~ s/\$gid/100/g;
-	$uf =~ s/\$shell/\/bin\/false/g;
-	@copied = &useradmin::copy_skel_files($uf, $home, 0, 0);
+
+# Find all files under the skeleton dir
+my @files = &find_skel_files($uf);
+my @copied;
+foreach my $f (@files) {
+	local $src = "$uf/$f";		# Needs to be local, for subs
+	local $dst = "$home/$f";
+	my $func;
+	if (-l $src) {
+		# Re-create symlink
+		$func = sub { my $lnk = readlink($src);
+			      &symlink_file($lnk, $dst) };
+		}
+	elsif (-d $src) {
+		# Re-create directory
+		$func = sub { my @st = stat($src);
+			      $st[2] ||= 0755;
+			      &make_dir($dst, $st[2] & 07777) };
+		}
+	else {
+		# Copy file contents
+		$func = sub { my $data = &read_file_contents($src);
+			      my @st = stat($src);
+			      &open_tempfile(SKEL, ">$dst", 0, 1);
+			      &print_tempfile(SKEL, $data);
+			      &close_tempfile(SKEL);
+			      &set_ownership_permissions(
+				undef, undef, $st[2], $dst) };
+		}
+	if ($user) {
+		&write_as_mailbox_user($user, $func);
+		}
+	else {
+		&$func();
+		}
+	push(@copied, $dst);
 	}
 
 # Perform variable substition on the files, if requested
@@ -2127,15 +2144,39 @@ if ($d) {
 	if ($tmpl->{'skel_subs'}) {
 		foreach my $c (@copied) {
 			if (-r $c && !-d $c && !-l $c) {
-				local $data = &read_file_contents($c);
-				&open_tempfile(OUT, ">$c");
+				local $data =
+				    &read_file_contents_as_domain_user($d, $c);
+				&open_tempfile_as_domain_user($d, OUT, ">$c");
 				&print_tempfile(OUT,
 					&substitute_domain_template($data, $d));
-				&close_tempfile(OUT);
+				&close_tempfile_as_domain_user($d, OUT);
 				}
 			}
 		}
 	}
+}
+
+# find_skel_files(dir)
+# Given a directory, recursively finds all files and directories under it and
+# returns their relative paths
+sub find_skel_files
+{
+my ($dir) = @_;
+opendir(SKELDIR, $dir);
+my @files = grep { $_ ne '.' && $_ ne '..' } readdir(SKELDIR);
+closedir(SKELDIR);
+my @rv;
+foreach my $f (@files) {
+	my $path = "$dir/$f";
+	if (-l $path || !-d $path) {
+		push(@rv, $f);
+		}
+	elsif (-d $path) {
+		push(@rv, $f);
+		push(@rv, map { "$f/$_" } &find_skel_files($path));
+		}
+	}
+return @rv;
 }
 
 # can_edit_domain(&domain)
