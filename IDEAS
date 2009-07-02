@@ -37,7 +37,4 @@
 
  - Script to get CGI urls for some help page, for Joe
 
- - Audit for writes to files possibly owned by domain owner
-	- login as domain owner, check all features
-
  - Restore from system using ~/logs should work on system using /var/log
