@@ -693,6 +693,7 @@ if (-r $phpini && &foreign_check("phpini")) {
 	# the variables already set, including those that are commented out.
 	&foreign_require("phpini", "phpini-lib.pl");
 	local $conf = &phpini::get_config($phpini);
+	local $anyini;
 
 	# Find PHP variables from template and from script
 	local @todo;
@@ -722,10 +723,11 @@ if (-r $phpini && &foreign_check("phpini")) {
 				&set_fcgid_max_execution_time($d, $v);
 				}
 			$any++;
+			$anyini++;
 			}
 		}
 
-	if ($any) {
+	if ($anyini) {
 		&write_as_domain_user($d, sub { &flush_file_lines($phpini) });
 		}
 	}

@@ -581,6 +581,27 @@ $script_tests = [
 		      [ 'type', 'wordpress' ] ],
 	},
 
+	# Install SugarCRM
+	{ 'command' => 'install-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'sugarcrm' ],
+		      [ 'path', '/' ],
+		      [ 'db', 'mysql '.$test_domain_db ],
+		      [ 'opt', 'demo 1' ],
+		      [ 'version', 'latest' ] ],
+	},
+
+	# Check that it works
+	{ 'command' => $wget_command.'http://'.$test_domain.'/',
+	  'grep' => 'SugarCRM',
+	},
+
+	# Un-install
+	{ 'command' => 'delete-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'sugarcrm' ] ],
+	},
+
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
