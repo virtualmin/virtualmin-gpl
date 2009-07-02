@@ -438,6 +438,15 @@ local $xtemp = &transname();
 &print_tempfile(XTEMP, "./public_html/awstats-icon\n");
 &close_tempfile(XTEMP);
 
+# Check if Apache logs were links before the restore
+local $alog = "$_[0]->{'home'}/logs/access_log";
+local $elog = "$_[0]->{'home'}/logs/error_log";
+local ($aloglink, $eloglink);
+if ($_[0]->{'web'}) {
+	$aloglink = readlink($alog);
+	$eloglink = readlink($elog);
+	}
+
 local $out;
 local $cf = &compression_format($_[1]);
 local $q = quotemeta($_[1]);
@@ -495,6 +504,24 @@ else {
 	local $ifile = "$incremental_backups_dir/$_[0]->{'id'}";
 	&unlink_file($ifile);
 
+	# Check if logs are links now .. if not, we need to move the files
+	local $new_aloglink = readlink($alog);
+	local $new_eloglink = readlink($elog);
+	if ($_[0]->{'web'} && !$_[0]->{'subdom'} && !$_[0]->{'alias'}) {
+		local $new_alog = &get_apache_log(
+			$_[0]->{'dom'}, $_[0]->{'web_port'}, 0);
+		local $new_elog = &get_apache_log(
+			$_[0]->{'dom'}, $_[0]->{'web_port'}, 1);
+		if ($aloglink && !$new_aloglink) {
+			&system_logged("mv ".quotemeta($alog)." ".
+					     quotemeta($new_alog));
+			}
+		if ($eloglink && !$new_eloglink) {
+			&system_logged("mv ".quotemeta($elog)." ".
+					     quotemeta($new_elog));
+			}
+		}
+
 	return 1;
 	}
 }
@@ -511,7 +538,7 @@ local $gid = $d->{'gid'} || $d->{'ugid'};
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable($d, 1);
 	}
-&system_logged("find ".quotemeta($d->{'home'}).
+&system_logged("find ".quotemeta($d->{'home'})." ! -type l ".
 	       " | grep -v ".quotemeta("$d->{'home'}/$hd/").
 	       " | sed -e 's/^/\"/' | sed -e 's/\$/\"/' ".
 	       " | xargs chown $d->{'uid'}:$gid");
