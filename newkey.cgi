@@ -71,7 +71,8 @@ $d->{'ssl_pass'} = $passok == 2 ? $in{'pass'} : undef;
 
 # Remove the new private key we just installed
 if ($d->{'ssl_newkey'}) {
-	$newkeyfile = &read_file_contents($d->{'ssl_newkey'});
+	$newkeyfile = &read_file_contents_as_domain_user(
+		$d, $d->{'ssl_newkey'});
 	if ($newkeyfile eq $newkey) {
 		&unlink_logged($d->{'ssl_newkey'});
 		delete($d->{'ssl_newkey'});
