@@ -39,7 +39,5 @@
 
  - Audit for writes to files possibly owned by domain owner
 	- login as domain owner, check all features
-	- all scripts
-		- up to phplist
 
  - Restore from system using ~/logs should work on system using /var/log

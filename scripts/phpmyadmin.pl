@@ -214,7 +214,7 @@ if (!-r $cfile) {
 -r $cfile || return (0, "Failed to copy config file");
 
 # Update the config file
-local $lref = &read_file_lines($cfile);
+local $lref = &read_file_lines_as_domain_user($d, $cfile);
 local $l;
 local $url = &script_path_url($d, $opts);
 local $dbs = join(" ", @dbs);
@@ -279,7 +279,7 @@ foreach $l (@$lref) {
 		$l = "\$cfg['blowfish_secret'] = '$rand';";
 		}
 	}
-&flush_file_lines($cfile);
+&flush_file_lines_as_domain_user($d, $cfile);
 
 # Return a URL for the user
 local $rp = $opts->{'dir'};

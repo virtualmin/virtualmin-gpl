@@ -152,7 +152,7 @@ if (!-r $cfile) {
 	# Copy and update the config file
 	&run_as_domain_user($d, "cp ".quotemeta($cfileorig)." ".
 				      quotemeta($cfile));
-	local $lref = &read_file_lines($cfile);
+	local $lref = &read_file_lines_as_domain_user($d, $cfile);
 	local $l;
 	foreach $l (@$lref) {
 		if ($l =~ /^\s*\$conf\['servers'\]\[0\]\['defaultdb'\]/) {
@@ -163,7 +163,7 @@ if (!-r $cfile) {
 			$l = "\$conf['servers'][0]['host'] = '$dbhost';";
 			}
 		}
-	&flush_file_lines($cfile);
+	&flush_file_lines_as_domain_user($d, $cfile);
 	}
 
 # Return a URL for the user

@@ -157,7 +157,7 @@ if ($dbtype) {
 
 # Delete doc/ReleaseNotes, as this changed from a file to a directory!
 if ($upgrade) {
-	&unlink_file("$opts->{'dir'}/doc/ReleaseNotes");
+	&unlink_file_as_domain_user($d, "$opts->{'dir'}/doc/ReleaseNotes");
 	}
 
 # Extract tar file to temp dir and copy to target

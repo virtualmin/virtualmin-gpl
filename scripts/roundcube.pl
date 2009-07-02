@@ -176,8 +176,8 @@ if (!$upgrade) {
 	# Fix up the DB config file
 	local $dbcfileorig = "$opts->{'dir'}/config/db.inc.php.dist";
 	local $dbcfile = "$opts->{'dir'}/config/db.inc.php";
-	&copy_source_dest($dbcfileorig, $dbcfile);
-	local $lref = &read_file_lines($dbcfile);
+	&copy_source_dest_as_domain_user($d, $dbcfileorig, $dbcfile);
+	local $lref = &read_file_lines_as_domain_user($d, $dbcfile);
 	foreach my $l (@$lref) {
 		if ($l =~ /^\$rcmail_config\['db_dsnw'\]\s+=/) {
 			$l = "\$rcmail_config['db_dsnw'] = 'mysql://$dbuser:".
@@ -187,13 +187,13 @@ if (!$upgrade) {
 			$l = "\$rcmail_config['db_backend'] = 'db';";
 			}
 		}
-	&flush_file_lines($dbcfile);
+	&flush_file_lines_as_domain_user($d, $dbcfile);
 
 	# Fix up the main config file
 	local $mcfileorig = "$opts->{'dir'}/config/main.inc.php.dist";
 	local $mcfile = "$opts->{'dir'}/config/main.inc.php";
-	&copy_source_dest($mcfileorig, $mcfile);
-	local $lref = &read_file_lines($mcfile);
+	&copy_source_dest_as_domain_user($d, $mcfileorig, $mcfile);
+	local $lref = &read_file_lines_as_domain_user($d, $mcfile);
 	local $vuf = &get_mail_virtusertable();
 	foreach my $l (@$lref) {
 		if ($l =~ /^\$rcmail_config\['enable_caching'\]\s+=/) {
@@ -224,7 +224,7 @@ if (!$upgrade) {
 			$l = "\$rcmail_config['virtuser_file'] = '$vuf';";
 			}
 		}
-	&flush_file_lines($mcfile);
+	&flush_file_lines_as_domain_user($d, $mcfile);
 
 	# Run SQL setup script
 	&require_mysql();
