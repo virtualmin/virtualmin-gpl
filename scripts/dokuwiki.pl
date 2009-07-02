@@ -119,10 +119,9 @@ $err && return (0, "Failed to extract source : $err");
 local $cfile = "$opts->{'dir'}/doku.php";
 
 # Set permissions
-open(CHANGES, ">$opts->{'dir'}/data/changes.log");
-close(CHANGES);
-&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0777,
-			   "$opts->{'dir'}/data/changes.log");
+&open_tempfile_as_domain_user($d, CHANGES, ">$opts->{'dir'}/data/changes.log", 0, 1);
+&close_tempfile_as_domain_user($d, CHANGES);
+&set_permissions_as_domain_user($d, 0777, "$opts->{'dir'}/data/changes.log");
 &make_file_php_writable($d, "$opts->{'dir'}/data");
 
 local $url = &script_path_url($d, $opts);

@@ -225,7 +225,7 @@ if (!$upgrade) {
 	local $pdir = "$opts->{'dir'}/$opts->{'project'}";
 	local $sfile = "$pdir/settings.py";
 	-r $sfile || return (0, "Project settings file $sfile was not found");
-	local $lref = &read_file_lines($sfile);
+	local $lref = &read_file_lines_as_domain_user($d, $sfile);
 	my $i = 0;
 	foreach my $l (@$lref) {
 		if ($l =~ /DATABASE_ENGINE\s*=/) {
@@ -255,11 +255,11 @@ if (!$upgrade) {
 			}
 		$i++;
 		}
-	&flush_file_lines($sfile);
+	&flush_file_lines_as_domain_user($d, $sfile);
 
 	# Activate the admin site
 	local $ufile = "$pdir/urls.py";
-	local $lref = &read_file_lines($ufile);
+	local $lref = &read_file_lines_as_domain_user($d, $ufile);
 	foreach my $l (@$lref) {
 		if ($l =~ /^(\s*)#(.*django.contrib.admin.urls.*)/ ||
 		    $l =~ /^(\s*)#(.*admin.site.root.*)/) {
@@ -272,7 +272,7 @@ if (!$upgrade) {
 			$l = $1;
 			}
 		}
-	&flush_file_lines($ufile);
+	&flush_file_lines_as_domain_user($d, $ufile);
 
 	# Initialize the DB
 	# Input is 'yes', username, email, password, password again
@@ -311,7 +311,7 @@ if (!$upgrade) {
 # Create python fcgi wrapper script
 local $wrapper = "$opts->{'dir'}/django.fcgi";
 if (!-r $wrapper) {
-	&open_tempfile(WRAPPER, ">$wrapper");
+	&open_tempfile_as_domain_user($d, WRAPPER, ">$wrapper");
 	&print_tempfile(WRAPPER, "#!$python\n");
 	&print_tempfile(WRAPPER, "import sys, os\n");
 	&print_tempfile(WRAPPER, "sys.path.insert(0, \"$opts->{'dir'}/lib/python\")\n");
@@ -320,8 +320,8 @@ if (!-r $wrapper) {
 	&print_tempfile(WRAPPER, "os.environ['DJANGO_SETTINGS_MODULE'] = \"$opts->{'project'}.settings\"\n");
 	&print_tempfile(WRAPPER, "from django.core.servers.fastcgi import runfastcgi\n");
 	&print_tempfile(WRAPPER, "runfastcgi(method=\"threaded\", daemonize=\"false\")\n");
-	&close_tempfile(WRAPPER);
-	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755, $wrapper);
+	&close_tempfile_as_domain_user($d, WRAPPER);
+	&set_permissions_as_domain_user($d, 0755, $wrapper);
 	}
 
 # Add <Location> block to Apache config

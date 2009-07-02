@@ -40,6 +40,7 @@
  - Audit for writes to files possibly owned by domain owner
 	- login as domain owner, check all features
 	- all scripts
+		- up to phplist
 	- migration code
 	- copy_skel_files
 
