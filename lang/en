@@ -3274,6 +3274,7 @@ migrate_etmplsub=The selected template cannot be used for sub-servers
 migrate_etmplparent=The selected template cannot be used for top-level servers
 migrate_eupload=No file selected to upload
 migrate_efile=No file on server selected
+migrate_ecannot=You are not allowed to migrate backups
 migrate_edom=Missing or invalid domain name
 migrate_eclash=The specified domain is already hosted by Virtualmin
 migrate_euser=Missing or invalid username
