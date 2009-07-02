@@ -1678,7 +1678,7 @@ if (-d $file && !$dironly) {
 		&system_logged(sprintf("chown -R %d:%d %s",
 			$d->{'uid'}, $d->{'gid'}, quotemeta($file)));
 		}
-	&execute_as_domain_user(
+	&run_as_domain_user(
 		$d, sprintf("chmod -R %o %s", $perms, quotemeta($file)));
 	}
 else {
