@@ -451,7 +451,7 @@ foreach my $v (&apache::find_directive_struct("VirtualHost",
 		}
 	}
 if ($firstcert) {
-	local $info = &cert_file_info($firstcert);
+	local $info = &cert_file_info($firstcert, $d);
 	if (!&check_domain_certificate($d->{'dom'}, $info) &&
 	    !&check_domain_certificate("www.".$d->{'dom'}, $info)) {
 		return &text('validate_esslfirst',
@@ -666,17 +666,18 @@ return 1;
 # Returns a hash of details of a domain's cert
 sub cert_info
 {
-return &cert_file_info($_[0]->{'ssl_cert'});
+return &cert_file_info($_[0]->{'ssl_cert'}, $_[0]);
 }
 
-# cert_file_info(file)
+# cert_file_info(file, &domain)
 # Returns a hash of details of a cert in some file
 sub cert_file_info
 {
-local ($file) = @_;
+local ($file, $d) = @_;
 local %rv;
 local $_;
-open(OUT, "openssl x509 -in ".quotemeta($file)." -issuer -subject -enddate -text |");
+local $cmd = "openssl x509 -in ".quotemeta($file)." -issuer -subject -enddate -text";
+open(OUT, &command_as_user($d, 0, $cmd)." |");
 while(<OUT>) {
 	s/\r|\n//g;
 	s/http:\/\//http:\|\|/g;	# So we can parse with regexp
@@ -875,7 +876,7 @@ return undef;
 sub cert_pem_data
 {
 local ($d) = @_;
-local $data = &read_file_contents($d->{'ssl_cert'});
+local $data = &read_file_contents_as_domain_user($d, $d->{'ssl_cert'});
 if ($data =~ /(-----BEGIN\s+CERTIFICATE-----\n([A-Za-z0-9\+\/=\n\r]+)-----END\s+CERTIFICATE-----)/) {
 	return $1;
 	}
@@ -887,9 +888,10 @@ return undef;
 sub cert_pkcs12_data
 {
 local ($d) = @_;
-open(OUT, "openssl pkcs12 -in ".quotemeta($d->{'ssl_cert'}).
-          " -inkey ".quotemeta($_[0]->{'ssl_key'}).
-	  " -export -passout pass: -nokeys |");
+local $cmd = "openssl pkcs12 -in ".quotemeta($d->{'ssl_cert'}).
+             " -inkey ".quotemeta($_[0]->{'ssl_key'}).
+	     " -export -passout pass: -nokeys";
+open(OUT, &command_as_user($d->{'user'}, 0, $cmd)." |");
 while(<OUT>) {
 	$data .= $_;
 	}

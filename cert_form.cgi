@@ -178,7 +178,7 @@ print &ui_table_row($text{'cert_cert'},
 
 # Key
 if (-r $d->{'ssl_newkey'}) {
-	$newkey = &read_file_contents($d->{'ssl_newkey'});
+	$newkey = &read_file_contents_as_domain_user($d, $d->{'ssl_newkey'});
 	}
 print &ui_table_row($text{'cert_newkey'},
 		    &ui_textarea("newkey", $newkey, 8, 70)."<br>\n".
@@ -217,7 +217,7 @@ print &ui_table_row($text{'cert_chain'},
 
 # Current details
 if ($chain) {
-	$info = &cert_file_info($chain);
+	$info = &cert_file_info($chain, $d);
 	foreach $i (@cert_attributes) {
 		if ($info->{$i} && !ref($info->{$i})) {
 			print &ui_table_row($text{'cert_c'.$i} ||
