@@ -117,7 +117,6 @@ avail_at=AT&#45;Auftr&#228;ge f&#252;r Benutzer einrichten,1,1-Ja,0-Nein
 avail_telnet=SSH/Telnet&#45;Anmeldung,1,1-Ja,0-Nein
 avail_updown=Upload und Download (als Benutzer),1,1-Ja,0-Nein,2-Nur Upload
 avail_change-user=Sprache und Thema &#228;ndern,1,1-Ja,0-Nein
-avail_htaccess-htpasswd=Gesch&#252;tzte Webverzeichnisse (im Heimatverzeichnis),1,1-Ja,0-Nein
 avail_mailboxes=Lese Benutzermail,1,1-Ja,0-Nein
 avail_custom=Benutzerdefinierte Befehle,1,1-Ja,0-Nein
 avail_shell=Kommandozeile (startet Kommandos als Administrator),1,1-Ja,0-Nein

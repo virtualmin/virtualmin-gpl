@@ -133,7 +133,6 @@ avail_at=Planl&#305; Komutlar (kullan&#305;c&#305;n&#305;n komutlar&#305;),1,1-E
 avail_telnet=SSH/Telnet Logini,1,1-Evet,0-Hay&#305;r
 avail_updown=Yükleme ve &#304;ndirme (kullan&#305;c&#305; olarak),1,1-Evet,0-Hay&#305;r
 avail_change-user=Dil ve Temay&#305; De&#287;i&#351;tir,1,1-Evet,0-Hay&#305;r
-avail_htaccess-htpasswd=Korunan Web Klasörleri (anaklasörün alt&#305;nda),1,1-Evet,0-Hay&#305;r
 avail_mailboxes=Kullan&#305;c&#305; E-postalar&#305;n&#305; Oku (kullan&#305;c&#305;lar&#305;n posta kutular&#305;),1,1-Evet,0-Hay&#305;r
 avail_custom=Özgün Komutlar,1,1-Evet,0-Hay&#305;r
 avail_shell=Komut Kabu&#287;u (komutlar&#305; yönetici olarak çal&#305;&#351;t&#305;r),1,1-Evet,0-Hay&#305;r

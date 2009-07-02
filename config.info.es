@@ -123,7 +123,6 @@ avail_at=Comandos programados (comandos del usuario),1,1-Si,0-No
 avail_telnet=SSH/Telnet Login,1,1-Si,0-No
 avail_updown=Subida y Bajada (como usuario),1,1-Si,0-No,2-Solamente Subida
 avail_change-user=Cambiar idioma y tema,1,1-Si,0-No
-avail_htaccess-htpasswd=Directorios Web protegidos (dentro del directorio home),1,1-Si,0-No
 avail_mailboxes=Leer correo del usuario (casillas de correo de los usuarios),1,1-Si,0-No
 avail_custom=Comandos a medida,1,1-Si,0-No
 avail_shell=L&#237;nea de comando (ejecuta comandos como admin),1,1-Si,0-No

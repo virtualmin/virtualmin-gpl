@@ -64,6 +64,5 @@ avail_at=Commandes planifi&eacute;es (commandes de l'utilisateur seulement),1,1-
 avail_telnet=Connexion SSH/Telnet,1,1-Oui,0-Non
 avail_updown=Envoi et t&eacute;l&eacute;chargement de fichiers (en tant qu'utilisateur),1,1-Oui,0-Non
 avail_change-user=Changer la langue et le th&egrave;me,1,1-Oui,0-Non
-avail_htaccess-htpasswd=R&eacute;pertoires Web prot&eacute;g&eacute;s (dans le r&eacute;pertoire home),1,1-Oui,0-Non
 avail_mailboxes=Lire les mails des utilisateurs (bo&icirc;tes mail des utilisateurs),1,1-Oui,0-Non
 avail_custom=Commandes personnalis&eacute;es,1,1-Oui,0-Non

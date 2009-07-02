@@ -85,10 +85,13 @@ if ($_[0]->{'home'} ne $_[1]->{'home'} && &foreign_check("htaccess-htpasswd")) {
 			# Need to update file too!
 			$d->[1] = "$_[0]->{'home'}/$1";
 			&require_apache();
-			local $conf = &apache::get_htaccess_config(
-				"$d->[0]/$htaccess_htpasswd::config{'htaccess'}");
-			&apache::save_directive("AuthUserFile", [ $d->[1] ], $conf, $conf);
-			&flush_file_lines();
+			local $f = $d->[0]."/".
+				   $htaccess_htpasswd::config{'htaccess'}";
+			local $conf = &apache::get_htaccess_config($f);
+			&apache::save_directive(
+				"AuthUserFile", [ $d->[1] ], $conf, $conf);
+			&write_as_domain_user($_[0],
+				sub { &flush_file_lines($f) });
 			}
 		}
 	&htaccess_htpasswd::save_directories(\@dirs);
@@ -619,18 +622,6 @@ if ($extramods{'updown'} && $_[0]->{'unix'}) {
 if ($extramods{'change-user'}) {
 	# This module is always safe, so no ACL needs to be set
 	push(@mods, "change-user");
-	}
-
-if ($extramods{'htaccess-htpasswd'} && $_[0]->{'unix'}) {
-	# Can create .htaccess files in home dir, as user
-	local %acl = ( 'noconfig' => 1,
-		       'home' => 0,
-		       'dirs' => $_[0]->{'home'},
-		       'sync' => 0,
-		       'user' => '*' );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "htaccess-htpasswd")
-		if (!$hasmods{'htaccess-htpasswd'});
-	push(@mods, "htaccess-htpasswd");
 	}
 
 if ($extramods{'mailboxes'} && $_[0]->{'mail'}) {

@@ -121,7 +121,6 @@ avail_at=Geplande Opdrachten (gebruikers opdrachten),1,1-Ja,0-Nee
 avail_telnet=SSH/Telnet Login,1,1-Ja,0-Nee
 avail_updown=Upload en Download (als gebruiker),1,1-Ja,0-Nee,2-Alleen upload
 avail_change-user=Verander Taal en Theme,1,1-Ja,0-Nee
-avail_htaccess-htpasswd=Beschermde Web Directory's (onder de home directory),1,1-Ja,0-Nee
 avail_mailboxes=Lees Gebruiker Mail (gebruikers mailboxen),1,1-Ja,0-Nee
 avail_custom=Custom Opdrachten,1,1-Ja,0-Nee
 avail_shell=Opdracht Shell (opdrachten uitvoeren als admin),1,1-Ja,0-Nee

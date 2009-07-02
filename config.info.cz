@@ -110,7 +110,6 @@ avail_at=Naplanovane ulohy,1,1-Ano,0-Ne
 avail_telnet=SSH/Telnet prihlaseni,1,1-Ano,0-Ne
 avail_updown=Upload a Download,1,1-Ano,0-Ne
 avail_change-user=Zmenit jazyk a motiv,1,1-Ano,0-Ne
-avail_htaccess-htpasswd=Chranene Web adresare (v ramci domovskeho adresare),1,1-Ano,0-Ne
 avail_mailboxes=Cist postu uzivatelu,1,1-Ano,0-Ne
 avail_custom=Vlastni prikazy,1,1-Ano,0-Ne
 avail_shell=Prikazovy radek,1,1-Ano,0-Ne
