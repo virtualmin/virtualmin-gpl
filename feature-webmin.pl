@@ -752,6 +752,7 @@ if (@pconfs) {
 		       'noconfig' => 1,
 		       'global' => 0,
 		       'anyfile' => 0,
+		       'user' => $_[0]->{'user'},
 		       'manual' => 1 );
 	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "phpini")
 		if (!$hasmods{'phpini'});
