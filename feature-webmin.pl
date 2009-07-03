@@ -86,7 +86,7 @@ if ($_[0]->{'home'} ne $_[1]->{'home'} && &foreign_check("htaccess-htpasswd")) {
 			$d->[1] = "$_[0]->{'home'}/$1";
 			&require_apache();
 			local $f = $d->[0]."/".
-				   $htaccess_htpasswd::config{'htaccess'}";
+				   $htaccess_htpasswd::config{'htaccess'};
 			local $conf = &apache::get_htaccess_config($f);
 			&apache::save_directive(
 				"AuthUserFile", [ $d->[1] ], $conf, $conf);
