@@ -271,6 +271,7 @@ my $oldsel = select($readout); $| = 1; select($oldsel);
 my $err = <$readout>;
 chop($err);
 if ($err ne 'OK') {
+	waitpid($pid, 0);
 	if ($noerror) { return 0; }
 	else { &error($err || "Unknown error in sub-process"); }
 	}
@@ -362,6 +363,7 @@ my $oldsel = select($readout); $| = 1; select($oldsel);
 my $err = <$readout>;
 chop($err);
 if ($err ne 'OK') {
+	waitpid($pid, 0);
 	return 0;
         }
 
@@ -404,7 +406,7 @@ if (!$main::file_cache{$file}) {
                 tr/\r\n//d;
                 push(@lines, $_);
                 }
-        close(READFILE);
+        &close_readfile_as_domain_user($d, READFILE);
         $main::file_cache{$file} = \@lines;
 	$main::file_cache_noflush{$file} = $ro;
 	$main::file_cache_eol{$file} = $eol || "\n";
