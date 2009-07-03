@@ -17,7 +17,7 @@ print &ui_table_start(undef, undef, 2);
 print &ui_table_row(undef,
 	&ui_textarea("text",
 		&read_file_contents_as_domain_user($d, $ff), 20, 80,
-		undef, 0, style='width:100%"), 2);
+		undef, 0, "style='width:100%"), 2);
 print &ui_table_end();
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 
