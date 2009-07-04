@@ -152,7 +152,7 @@ $script || &usage("Script type $sname is not known");
 $ver || &usage("Missing version number. Available versions are : ".
 	       join(" ", @vers));
 if ($opts->{'mongrels'} > 1 && &has_proxy_balancer($d) != 2) {
-	&error("This virtual server does not support more than one Mongrel");
+	&usage("This virtual server does not support more than one Mongrel");
 	}
 if ($ver eq "latest") {
 	$ver = $vers[0];
