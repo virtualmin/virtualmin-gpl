@@ -33,7 +33,7 @@ $test_alias = "testing";
 $test_alias_two = "yetanothertesting";
 $test_reseller = "testsel";
 $test_plan = "Test plan";
-$timeout = 60;			# Longest time a test should take
+$timeout = 120;			# Longest time a test should take
 $nowdate = strftime("%Y-%m-%d", localtime(time()));
 $yesterdaydate = strftime("%Y-%m-%d", localtime(time()-24*60*60));
 $wget_command = "wget -O - --cache=off --proxy=off --no-check-certificate  ";
@@ -2661,7 +2661,7 @@ $ip6_tests = [
         },
 	];
 if (!&supports_ip6()) {
-	$ip6_tests = [ { 'comand' => 'echo IPv6 is not supported' } ];
+	$ip6_tests = [ { 'command' => 'echo IPv6 is not supported' } ];
 	}
 
 # Tests for renaming a virtual server
