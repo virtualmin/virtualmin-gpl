@@ -13028,8 +13028,8 @@ if ($config{'scriptwarn_url'} && !$main::calling_get_virtualmin_url) {
 else {
 	# Work out from miniserv
 	&get_miniserv_config(\%miniserv);
-	$proto = $miniserv{'ssl'} ? 'https' : 'http';
-	$port = $miniserv{'port'};
+	local $proto = $miniserv{'ssl'} ? 'https' : 'http';
+	local $port = $miniserv{'port'};
 	$rv = $proto."://$d->{'dom'}:$port";
 	}
 return $rv;
