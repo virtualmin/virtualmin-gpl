@@ -1713,13 +1713,37 @@ local ($d, $opts) = @_;
 $opts->{'dir'} || return "Missing install directory!";
 &is_under_directory($d->{'home'}, $opts->{'dir'}) ||
 	return "Invalid install directory $opts->{'dir'}";
-local $out = &backquote_logged("rm -rf ".quotemeta($opts->{'dir'})."/* ".
-			       quotemeta($opts->{'dir'})."/.??* 2>&1");
-$? && return "Failed to delete files : <tt>$out</tt>";
 
-if ($opts->{'dir'} ne &public_html_dir($d, 0)) {
-	# Take out the directory too
-	&run_as_domain_user($d, "rmdir ".quotemeta($opts->{'dir'}));
+# Check for overlapping script dirs
+local @others = &list_domain_scripts($d);
+local %overlap;
+foreach my $sinfo (@others) {
+	if ($sinfo->{'opts'}->{'dir'} =~ /^\Q$opts->{'dir'}\E\/(\S+)$/) {
+		$overlap{$1} = 1;
+		}
+	}
+
+if (!scalar(keys %overlap)) {
+	# Delete all sub-directories
+	local $out = &backquote_logged(
+		"rm -rf ".quotemeta($opts->{'dir'})."/* ".
+			  quotemeta($opts->{'dir'})."/.??* 2>&1");
+	$? && return "Failed to delete files : <tt>$out</tt>";
+
+	if ($opts->{'dir'} ne &public_html_dir($d, 0)) {
+		# Take out the directory too
+		&run_as_domain_user($d, "rmdir ".quotemeta($opts->{'dir'}));
+		}
+	}
+else {
+	# Only delete those not belonging to other scripts
+	opendir(DIR, $opts->{'dir'});
+	foreach my $f (readdir(DIR)) {
+		if ($f ne '.' && $f ne '..' && !$overlap{$f}) {
+			&unlink_file_as_domain_user($f, "$opts->{'dir'}/$f");
+			}
+		}
+	closedir(DIR);
 	}
 return undef;
 }
