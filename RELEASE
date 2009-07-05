@@ -39,8 +39,8 @@
  x Create signatures for all new packages
 	~/webmin.com/create-update-sigs.pl
 
- - Add to website
-	- Mention plugins too
+ x Add to website
+	x Mention plugins too
 
  - Add to freshmeat.net
 

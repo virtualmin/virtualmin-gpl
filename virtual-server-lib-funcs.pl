@@ -13017,19 +13017,22 @@ sub get_virtualmin_url
 {
 local ($d) = @_;
 $d ||= { 'dom' => &get_system_hostname() };
-if ($config{'scriptwarn_url'}) {
+local $rv;
+if ($config{'scriptwarn_url'} && !$main::calling_get_virtualmin_url) {
 	# From module config
-	local $rv = &substitute_domain_template($config{'scriptwarn_url'}, $d);
+	$main::calling_get_virtualmin_url = 1;
+	$rv = &substitute_domain_template($config{'scriptwarn_url'}, $d);
 	$rv =~ s/\/$//;
-	return $rv;
+	$main::calling_get_virtualmin_url = 0;
 	}
 else {
 	# Work out from miniserv
 	&get_miniserv_config(\%miniserv);
 	$proto = $miniserv{'ssl'} ? 'https' : 'http';
 	$port = $miniserv{'port'};
-	return $proto."://$d->{'dom'}:$port";
+	$rv = $proto."://$d->{'dom'}:$port";
 	}
+return $rv;
 }
 
 # get_quotas_message()
