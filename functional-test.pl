@@ -1311,11 +1311,26 @@ $remotebackup_tests = [
 		      @create_args, ],
         },
 
+	# Create a sub-server
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      @create_args, ],
+	},
+
 	# Backup via SSH
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'all-features' ],
 		      [ 'dest', "$ssh_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$ssh_backup_prefix/$test_subdomain.tar.gz" ] ],
 	},
 
 	# Restore via SSH
@@ -1323,6 +1338,13 @@ $remotebackup_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'all-features' ],
 		      [ 'source', "$ssh_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+
+	# Restore sub-domain via SSH
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', "$ssh_backup_prefix/$test_subdomain.tar.gz" ] ],
 	},
 
 	# Delete the backups file
@@ -1334,6 +1356,11 @@ $remotebackup_tests = [
 		      [ 'all-features' ],
 		      [ 'dest', "$ftp_backup_prefix/$test_domain.tar.gz" ] ],
 	},
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$ftp_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
 
 	# Restore via FTP
 	{ 'command' => 'restore-domain.pl',
@@ -1342,9 +1369,17 @@ $remotebackup_tests = [
 		      [ 'source', "$ftp_backup_prefix/$test_domain.tar.gz" ] ],
 	},
 
+	# Restore sub-domain via FTP
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', "$ftp_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
 	# Backup via SSH in home format
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
 		      [ 'all-features' ],
 		      [ 'newformat' ],
 		      [ 'dest', "$ssh_backup_prefix/backups" ] ],
@@ -1353,6 +1388,7 @@ $remotebackup_tests = [
 	# Restore via SSH in home format
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
 		      [ 'all-features' ],
 		      [ 'source', "$ssh_backup_prefix/backups" ] ],
 	},
@@ -1363,6 +1399,7 @@ $remotebackup_tests = [
 	# Backup via FTP in home format
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
 		      [ 'all-features' ],
 		      [ 'newformat' ],
 		      [ 'dest', "$ftp_backup_prefix/backups" ] ],
@@ -1371,8 +1408,29 @@ $remotebackup_tests = [
 	# Restore via FTP in home format
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
 		      [ 'all-features' ],
 		      [ 'source', "$ftp_backup_prefix/backups" ] ],
+	},
+
+	# Delete the backups dir
+	{ 'command' => "rm -rf /home/$test_target_domain_user/backups" },
+
+	# Backup via SSH one-by-one
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'onebyone' ],
+		      [ 'newformat' ],
+		      [ 'dest', "$ssh_backup_prefix/backups" ] ],
+	},
+
+	# Restore via SSH, all domains
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'all-domains' ],
+		      [ 'all-features' ],
+		      [ 'source', "$ssh_backup_prefix/backups" ] ],
 	},
 
 	# Cleanup the target domain
