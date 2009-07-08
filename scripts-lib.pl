@@ -2192,12 +2192,12 @@ for(my $i=0; $i<@$lref; $i++) {
 return undef;
 }
 
-# setup_noproxy_path(&domain, &script, ver, &opts)
+# setup_noproxy_path(&domain, &script, ver, &opts, add-even-if-no-clash)
 # If a script isn't using proxying, ensure that it's path is not blocked.
 # Prints messages, and returns 1 on success, 0 on failure.
 sub setup_noproxy_path
 {
-local ($d, $script, $ver, $opts) = @_;
+local ($d, $script, $ver, $opts, $forceadd) = @_;
 
 # Check if the script doesn't use proxying, and if Apache supports negatives
 return 1 if (&indexof("proxy", @{$script->{'uses'}}) >= 0);
@@ -2230,7 +2230,7 @@ if ($clash && $clash->{'path'} eq $opts->{'path'}) {
 	&$first_print(&text('scripts_delproxy', $opts->{'path'}));
 	$err = &delete_proxy_balancer($d, $clash);
 	}
-elsif ($clash) {
+elsif ($clash || $forceadd) {
 	# Add a negative override
 	&$first_print(&text('scripts_addover', $opts->{'path'}));
 	local $over = { 'path' => $opts->{'path'}, 'none' => 1 };
