@@ -299,6 +299,8 @@ foreach $line (@lines) {
 	my $f;
 	foreach $f (@features, &list_feature_plugins()) {
 		next if ($parentdom && ($f eq 'webmin' || $f eq 'unix'));
+		next if ($f eq 'dir' && $config{$f} == 3 && $aliasdom &&
+			 $tmpl->{'aliascopy'});
 		if (&indexof($f, &list_feature_plugins()) >= 0) {
 			# Check if plugin is suitable for domain
 			next if (!&plugin_call($f, "feature_suitable",
