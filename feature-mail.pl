@@ -3003,6 +3003,10 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 	while(<LOG>) {
 		# Sendmail / postfix formats
 		s/\r|\n//g;
+
+		# Remove Solaris extra part like [ID 197553 mail.info]
+		s/\[ID\s+\d+\s+\S+\]\s+//;
+
 		if (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(\S+):\s+from=(\S+),\s+size=(\d+)/) {
 			# The initial From: line that contains the size
 			local ($id, $size, $fromuser) = ($8, $10, $9);
