@@ -629,13 +629,18 @@ if ($ok) {
 			$comp = "bzip2 -c $config{'zip_args'}";
 			}
 		local $writer = "cat >$dest";
-		&open_tempfile(DEST, ">$dest", 0, 1);
-		&close_tempfile(DEST);
 		if ($asd) {
+			&open_tempfile_as_domain_user(
+				$asd, DEST, ">$dest", 0, 1);
+			&close_tempfile_as_domain_user($asd, DEST);
 			$writer = &command_as_user(
 					$asd->{'user'}, 0, $writer);
+			&set_ownership_permissions(undef, undef, 0600, $dest);
 		 	}
-		&set_ownership_permissions(undef, undef, 0600, $dest);
+		else {
+			&open_tempfile(DEST, ">$dest", 0, 1);
+			&close_tempfile(DEST);
+			}
 
 		# Start the tar command
 		&$first_print($text{'backup_final'});
