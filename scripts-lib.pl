@@ -2056,23 +2056,24 @@ if (!-d $dir) {
 local $fmt = &compression_format($file);
 local $qfile = quotemeta($file);
 local $cmd;
+local $tar = &get_tar_command();
 if ($fmt == 0) {
 	return "Not a compressed file";
 	}
 elsif ($fmt == 1) {
-	$cmd = "(gunzip -c $qfile | tar xf -)";
+	$cmd = "(gunzip -c $qfile | $tar xf -)";
 	}
 elsif ($fmt == 2) {
-	$cmd = "(uncompress -c $qfile | tar xf -)";
+	$cmd = "(uncompress -c $qfile | $tar xf -)";
 	}
 elsif ($fmt == 3) {
-	$cmd = "(bunzip2 -c $qfile | tar xf -)";
+	$cmd = "(bunzip2 -c $qfile | $tar xf -)";
 	}
 elsif ($fmt == 4) {
 	$cmd = "unzip $qfile";
 	}
 elsif ($fmt == 5) {
-	$cmd = "tar xf $qfile";
+	$cmd = "$tar xf $qfile";
 	}
 else {
 	return "Unknown compression format";

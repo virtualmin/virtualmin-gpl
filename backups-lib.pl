@@ -2004,7 +2004,10 @@ if ($config{'tar_cmd'}) {
 	}
 else {
 	@cmds = ( "tar" );
-	if ($gconfig{'os_type'} eq 'freebsd') {
+	if ($gconfig{'os_type'} eq 'freebsd' ||
+	    $gconfig{'os_type'} eq 'netbsd' ||
+	    $gconfig{'os_type'} eq 'openbsd' ||
+	    $gconfig{'os_type'} eq 'solaris') {
 		unshift(@cmds, "gtar");
 		}
 	else {
