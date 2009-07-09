@@ -1907,10 +1907,14 @@ if (-d "$user->{'home'}/.usermin/mailbox") {
 		}
 	$inbox{'pass'} = $user->{'plainpass'};
 	$inbox{'nologout'} = 1;
-	&write_as_mailbox_user($user,
-		sub { &write_file($imapfile, \%inbox);
-		      &set_ownership_permissions(undef, undef,
-						 $imapfile, 0600) });
+	eval {
+		# Ignore errors here, in case user is over quota
+		local $main::error_must_die = 1;
+		&write_as_mailbox_user($user,
+			sub { &write_file($imapfile, \%inbox);
+			      &set_ownership_permissions(undef, undef,
+							 $imapfile, 0600) });
+		};
 	}
 }
 
