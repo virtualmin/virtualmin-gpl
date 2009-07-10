@@ -5512,7 +5512,9 @@ return join(" ", @ranges);
 sub setup_for_subdomain
 {
 local ($d, $subuser, $subd) = @_;
-&make_dir_as_domain_user($d, "$_[0]->{'home'}/domains", 0755);
+if (!-d "$_[0]->{'home'}/domains") {
+	&make_dir_as_domain_user($d, "$_[0]->{'home'}/domains", 0755);
+	}
 }
 
 # count_domains([type])
