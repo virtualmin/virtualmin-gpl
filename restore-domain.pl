@@ -69,6 +69,7 @@ $indent_print = \&indent_text_print;
 $outdent_print = \&outdent_text_print;
 
 # Parse command-line args
+$reuid = 1;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--source") {
@@ -101,6 +102,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--reuid") {
 		$reuid = 1;
+		}
+	elsif ($a eq "--no-reuid") {
+		$reuid = 0;
 		}
 	elsif ($a eq "--fix") {
 		$fix = 1;
@@ -278,7 +282,7 @@ print "                         [--test]\n";
 print "                         [--domain name] | [--all-domains]\n";
 print "                         [--feature name] | [--all-features]\n";
 print "                         [--except-feature name]\n";
-print "                         [--reuid]\n";
+print "                         [--reuid | --no-reuid]\n";
 print "                         [--fix]\n";
 print "                         [--option feature name value]\n";
 print "                         [--all-virtualmin] | [--virtualmin config]\n";
