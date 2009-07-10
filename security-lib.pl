@@ -88,9 +88,10 @@ sub make_dir_as_domain_user
 {
 my ($d, $dir, $perms, $recur) = @_;
 return 1 if (&is_readonly_mode());
-local $cmd = "mkdir ".($recur ? "-p " : "").quotemeta($dir);
+local $cmd = "mkdir ".($recur ? "-p " : "").quotemeta($dir)." 2>&1";;
 if ($perms) {
-	$cmd .= " && chmod ".sprintf("%o", $perms & 07777)." ".quotemeta($dir);
+	$cmd .= " && chmod ".sprintf("%o", $perms & 07777)." ".
+			     quotemeta($dir)." 2>&1";;
 	}
 local ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
@@ -102,7 +103,7 @@ sub unlink_file_as_domain_user
 {
 my ($d, @files) = @_;
 return 1 if (&is_readonly_mode());
-local $cmd = "rm -rf ".join(" ", map { quotemeta($_) } @files);
+local $cmd = "rm -rf ".join(" ", map { quotemeta($_) } @files)." 2>&1";
 local ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
 }
@@ -134,7 +135,7 @@ sub symlink_file_as_domain_user
 {
 my ($d, $src, $dest) = @_;
 return 1 if (&is_readonly_mode());
-local $cmd = "ln -s ".quotemeta($src)." ".quotemeta($dest);
+local $cmd = "ln -s ".quotemeta($src)." ".quotemeta($dest)." 2>&1";
 local ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
 }
@@ -155,7 +156,7 @@ sub link_file_as_domain_user
 {
 my ($d, $src, $dest) = @_;
 return 1 if (&is_readonly_mode());
-local $cmd = "ln ".quotemeta($src)." ".quotemeta($dest);
+local $cmd = "ln ".quotemeta($src)." ".quotemeta($dest)." 2>&1";
 local ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
 }
@@ -452,7 +453,7 @@ sub rename_as_domain_user
 {
 my ($d, $oldfile, $newfile) = @_;
 return 1 if (&is_readonly_mode());
-my $cmd = "mv -f ".quotemeta($oldfile)." ".quotemeta($newfile);
+my $cmd = "mv -f ".quotemeta($oldfile)." ".quotemeta($newfile)." 2>&1";
 my ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
 }
@@ -464,7 +465,7 @@ sub set_permissions_as_domain_user
 my ($d, $perms, @files) = @_;
 return 1 if (&is_readonly_mode());
 my $cmd = "chmod ".sprintf("%o", $perms & 07777)." ".
-	  join(" ", map { quotemeta($_) } @files);
+	  join(" ", map { quotemeta($_) } @files)." 2>&1";
 my ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
 }
