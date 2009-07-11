@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Zpush script installer to 1.2.2, Bugzilla to 3.2.4, Wordpress to 2.8.1, and bbPress to 1.0.1.
+html=Updated the Zpush script installer to 1.2.2, Bugzilla to 3.2.4, Wordpress to 2.8.1, Wordpress MU to 2.8.1, and bbPress to 1.0.1.
 master=1
 reseller=1
 domain=1
