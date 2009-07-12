@@ -44,9 +44,9 @@ if (&foreign_check("proc")) {
 			    $m->[2] eq "zfs" || $m->[2] eq "simfs" ||
 			    $m->[2] eq "xfs" || $m->[2] eq "jfs" ||
 			    $m->[1] =~ /^\/dev\// || $m->[1] eq $home_base) {
-				if ($m->[1] =~ /^zones\/([^\/]+)/ &&
+				if ($m->[1] =~ /^(zones|zonas)\/([^\/]+)/ &&
 				    $m->[2] eq "zfs" &&
-				    $donezone{$1}++) {
+				    $donezone{$2}++) {
 					# Only count each zone once, as there
 					# may be mounts from zones/foo/bar
 					# and zones/foo/smeg that really refer
