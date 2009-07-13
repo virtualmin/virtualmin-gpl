@@ -334,12 +334,12 @@ for(my $i=0; $i<@_; $i+=2) {
 return wantarray ? @rv : $rv[0];
 }
 
-# get_domains_by_names_users(&dnames, &usernames, &errorfunc)
-# Given a list of domain names and usernames, returns all matching domains.
-# May callback to the error function if one cannot be resolved.
+# get_domains_by_names_users(&dnames, &usernames, &errorfunc, &plans)
+# Given a list of domain names, usernames and plans, returns all matching
+# domains (unioned). May callback to the error function if one cannot be found
 sub get_domains_by_names_users
 {
-local ($dnames, $users, $efunc) = @_;
+local ($dnames, $users, $efunc, $plans) = @_;
 foreach my $domain (@$dnames) {
 	local $d = &get_domain_by("dom", $domain);
 	$d || &$efunc("Virtual server $domain does not exist");
@@ -353,6 +353,12 @@ foreach my $uname (@$users) {
 		}
 	else {
 		&$efunc("No top-level domain owned by $uname exists");
+		}
+	}
+foreach my $plan (@$plans) {
+	foreach my $dinfo (&get_domain_by("plan", $plan->{'id'})) {
+		push(@doms, $dinfo);
+		push(@doms, &get_domain_by("parent", $dinfo->{'id'}));
 		}
 	}
 local %donedomain;

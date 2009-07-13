@@ -17,6 +17,10 @@ The C<--domain> and C<--all-domains> options can be used to control which virtua
 servers are included in the backup. The C<--domain> parameter followed by a
 domain name can be given multiple times, to select more than one server.
 
+Alternately, virtual servers can be selected with the C<--user> flag followed
+by an administrator's username, or C<--plan> followed by a plan name. In both
+cases, all sub-servers will be included too.
+
 Typically the C<--all-features> option will be used to include all virtual server
 features in the backup, but you can instead use the C<--feature> option one or
 more times to control exactly what gets included. In this case, it is wise to
@@ -72,6 +76,7 @@ $outdent_print = \&outdent_text_print;
 
 # Parse command-line args
 $asowner = 0;
+@allplans = &list_plans();
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--dest") {
@@ -89,6 +94,13 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--user") {
 		push(@users, shift(@ARGV));
+		}
+	elsif ($a eq "--plan") {
+		$planname = shift(@ARGV);
+		($plan) = grep { lc($_->{'name'}) eq lc($planname) ||
+				 $_->{'id'} eq $planname } @allplans;
+		$plan || &usage("No plan with name or ID $planname found");
+		push(@plans, $plan);
 		}
 	elsif ($a eq "--all-features") {
 		@bfeats = grep { $config{$_} || $_ eq 'virtualmin' }
@@ -168,7 +180,7 @@ while(@ARGV > 0) {
 		}
 	}
 $dest || usage();
-@bdoms || @users || $all_doms || @vbs || usage();
+@bdoms || @users || $all_doms || @plans || @vbs || usage();
 if (@bdoms || @users || $all_doms) {
 	@bfeats || usage();
 	}
@@ -199,7 +211,7 @@ if ($all_doms) {
 	}
 else {
 	# Get domains by name and user
-	@doms = &get_domains_by_names_users(\@bdoms, \@users, \&usage);
+	@doms = &get_domains_by_names_users(\@bdoms, \@users, \&usage, \@plans);
 	}
 
 if ($test) {
@@ -288,6 +300,7 @@ print "virtualmin backup-domain --dest file\n";
 print "                        [--test]\n";
 print "                        [--domain name] | [--all-domains]\n";
 print "                        [--user name]\n";
+print "                        [--plan name]\n";
 print "                        [--feature name] | [--all-features]\n";
 print "                                           [--except-feature name]\n";
 print "                        [--ignore-errors]\n";

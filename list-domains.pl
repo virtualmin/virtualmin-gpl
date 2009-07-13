@@ -53,6 +53,7 @@ if (!$module_name) {
 
 # Parse command-line args
 $owner = 1;
+@allplans = &list_plans();
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--multiline") {
@@ -92,15 +93,11 @@ while(@ARGV > 0) {
 		$must_subdomain = 1;
 		}
 	elsif ($a eq "--plan") {
-		$planid = shift(@ARGV);
-		$must_plan = &get_plan($planid);
-		if (!$must_plan) {
-			($must_plan) = grep { $_->{'name'} eq $planid }
-				       	    &list_plans();
-			}
-		$must_plan ||
-			&usage("No plan with ID or name $planid was found");
-		$must_toplevel = 1;
+		$planname = shift(@ARGV);
+		($plan) = grep { lc($_->{'name'}) eq lc($planname) ||
+				 $_->{'id'} eq $planname } @allplans;
+		$plan || &usage("No plan with name or ID $planname found");
+		push(@plans, $plan);
 		}
 	elsif ($a eq "--template") {
 		$tmplid = shift(@ARGV);
@@ -126,9 +123,10 @@ while(@ARGV > 0) {
 		}
 	}
 
-if (@domains || @users) {
+if (@domains || @users || @plans) {
 	# Just showing listed domains or domains owned by some user
-	@doms = &get_domains_by_names_users(\@domains, \@users, \&usage);
+	@doms = &get_domains_by_names_users(\@domains, \@users, \&usage,
+					    \@plans);
 	}
 else {
 	# Showing all domains, with some limits
@@ -150,10 +148,7 @@ if ($without) {
 	@doms = grep { !$_->{$without} } @doms;
 	}
 
-# Limit to those on some plan
-if ($must_plan) {
-	@doms = grep { $_->{'plan'} eq $must_plan->{'id'} } @doms;
-	}
+# Limit to those on some template
 if ($must_tmpl) {
 	@doms = grep { $_->{'template'} eq $must_tmpl->{'id'} } @doms;
 	}
