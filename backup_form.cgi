@@ -84,15 +84,17 @@ $dsel .= "<br>".&ui_checkbox(
 	$sched->{'parent'});
 print &ui_table_row(&hlink($text{'backup_doms'}, "backup_doms"),
 		    $dsel);
+
+# Limit to plan
+if (&can_edit_plans()) {
+	@plans = sort { lc($a->{'name'}) cmp lc($b->{'name'}) } &list_plans();
+	print &ui_table_row(&hlink($text{'backup_plan'}, "backup_plan"),
+		&ui_select("plan", $sched->{'plan'},
+			   [ [ '', "&lt;$text{'backup_anyplan'}&gt;" ],
+			     map { [ $_->{'id'}, $_->{'name'} ] } @plans ]));
+	}
+
 print &ui_hidden_table_end("doms");
-
-# Limit by plan
-print &ui_hidden_table_start($text{'backup_headerplans'}, "width=100%",
-			     2, "plans", 1, \@tds);
-
-# XXX
-
-print &ui_hidden_table_end("plans");
 
 # Show feature and plugin selection boxes
 print &ui_hidden_table_start($text{'backup_headerfeatures'}, "width=100%", 2,

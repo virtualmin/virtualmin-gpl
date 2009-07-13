@@ -84,6 +84,9 @@ else {
 	# Update the schedule object
 	$sched->{'all'} = $in{'all'};
 	$sched->{'doms'} = join(" ", split(/\0/, $in{'doms'}));
+	if (&can_edit_plans()) {
+		$sched->{'plan'} = $in{'plan'};
+		}
 	$sched->{'parent'} = $in{'parent'};
 	%sel_features = map { $_, 1 } split(/\0/, $in{'feature'});
 	$sched->{'feature_all'} = $in{'feature_all'};

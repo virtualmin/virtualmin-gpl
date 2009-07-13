@@ -59,6 +59,14 @@ else {
 	@doms = grep { !$donedom{$_->{'id'}}++ } @doms;
 	}
 
+# Limit to those on some plan, if given
+if ($sched->{'plan'}) {
+	%plandoms = map { $_->{'id'}, 1 }
+		        grep { $_->{'plan'} eq $sched->{'plan'} } @doms;
+	@doms = grep { $plandoms{$_->{'id'}} ||
+		       $plandoms{$_->{'parent'}} } @doms;
+	}
+
 # Work out who the schedule is being run for
 if ($sched->{'owner'}) {
 	$asd = &get_domain($sched->{'owner'});

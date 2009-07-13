@@ -1,0 +1,5 @@
+desc=Backup selection by plan
+html=Virtual servers to backup can now be selected by the plan they are on.
+master=1
+reseller=1
+link=list_sched.cgi

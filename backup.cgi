@@ -58,6 +58,14 @@ else {
 	@doms = grep { !$donedom{$_->{'id'}}++ } @doms;
 	}
 
+# Limit to those on some plan, if given
+if ($in{'plan'} && &can_edit_plans()) {
+	%plandoms = map { $_->{'id'}, 1 }
+		        grep { $_->{'plan'} eq $in{'plan'} } @doms;
+	@doms = grep { $plandoms{$_->{'id'}} ||
+		       $plandoms{$_->{'parent'}} } @doms;
+	}
+
 # Work out the current user's main domain, if needed
 if ($cbmode == 2) {
 	$d = &get_domain_by_user($base_remote_user);
