@@ -1131,4 +1131,4 @@ LXadmin backups can now be migrated into Virtualmin servers, preserving web cont
 Changed the Squirrelmail script installer to use the new set_user_data plugin via Ian Goldstein, which allows login by email address and sets the from address correctly by default.
 Updated all code that reads or writes to files in a virtual server's home directory to operate with the user's permissions, which prevents use of malicious links to access root-owned files.
 ---- Changes since 3.70 ----
-Updated the Zpush script installer to 1.2.2, Bugzilla to 3.2.4, Wordpress to 2.8.1, Wordpress MU to 2.8.1, Typo3 to 4.2.8, and bbPress to 1.0.1.
+Updated the Zpush script installer to 1.2.2, Bugzilla to 3.2.4, Wordpress to 2.8.1, Wordpress MU to 2.8.1, Typo3 to 4.2.8, Trac to 0.11.5rc2, and bbPress to 1.0.1.
