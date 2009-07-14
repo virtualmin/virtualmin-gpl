@@ -1060,6 +1060,7 @@ if ($ok) {
 
 	# Now restore each of the domain/feature files
 	local $d;
+	local @bplugins = &list_backup_plugins();
 	DOMAIN: foreach $d (sort { $a->{'parent'} <=> $b->{'parent'} } @$doms) {
 		if ($d->{'missing'}) {
 			# This domain doesn't exist yet - need to re-create it
@@ -1068,8 +1069,7 @@ if ($ok) {
 
 			# Only features in the backup are enabled
 			if ($onlyfeats) {
-				foreach my $f (@backup_features,
-					       &list_backup_plugins()) {
+				foreach my $f (@backup_features, @bplugins) {
 					if ($d->{$f} &&
 					    &indexof($f, @$features) < 0) {
 						$d->{$f} = 0;
@@ -1238,65 +1238,86 @@ if ($ok) {
 			@rfeatures =((grep { $_ ne "mail" } @$features),"mail");
 			}
 
-		# Now do the actual restore
 		&$first_print(&text('restore_fordomain',
 				    &show_domain_name($d)));
-		&$indent_print();
-		local $f;
-		local %oldd;
-		foreach $f (@rfeatures) {
-			# Restore features
-			local $rfunc = "restore_$f";
-			local $fok;
-			if (&indexof($f, &list_backup_plugins()) < 0 &&
-			    defined(&$rfunc) &&
-			    ($d->{$f} || $f eq "virtualmin" ||
-			     $f eq "mail" && &can_domain_have_users($d))) {
-				local $ffile;
-				local $hft =
-				    $homeformat{"$backup/$d->{'dom'}.tar.gz"} ||
-				    $homeformat{"$backup/$d->{'dom'}.tar.bz2"}||
-				    $homeformat{"$backup/$d->{'dom'}.tar"} ||
-				    $homeformat{$backup};
-				if ($hft && $f eq "dir") {
-					# For a home-format backup, the backup
-					# itself is the home
-					$ffile = $hft;
-					}
-				else {
-					$ffile = "$restoredir/$d->{'dom'}_$f";
-					}
-				if ($f eq "virtualmin") {
-					# If restoring the virtualmin info, keep
-					# the old feature file
-					&read_file($ffile, \%oldd);
-					}
-				if (-r $ffile) {
-					# Call the restore function
-					$fok = &$rfunc($d, $ffile,
-					     $_[3]->{$f}, $_[3], $hft, \%oldd,
-					     $asowner);
-					}
-				}
-			elsif (&indexof($f, &list_backup_plugins()) >= 0 &&
-			       $d->{$f}) {
-				# Restoring a plugin feature
-				local $ffile = "$restoredir/$d->{'dom'}_$f";
-				if (-r $ffile) {
-					$fok = &plugin_call($f,
-					    "feature_restore", $d, $ffile,
-					    $_[3]->{$f}, $_[3], $hft, \%oldd,
-					    $asowner);
-					}
-				}
-			if (defined($fok) && !$fok) {
-				# Handle feature failure
-				$ok = 0;
-				&$outdent_print();
-				last DOMAIN;
-				}
+
+		# Run the before command
+		&set_domain_envs($dom, "RESTORE_DOMAIN");
+		local $merr = &making_changes();
+		&reset_domain_envs($d);
+		if (defined($merr)) {
+			&$second_print(&text('setup_emaking',"<tt>$merr</tt>"));
 			}
-		&save_domain($d);
+		else {
+			# Now do the actual restore
+			&$indent_print();
+			local $f;
+			local %oldd;
+			foreach $f (@rfeatures) {
+				# Restore features
+				local $rfunc = "restore_$f";
+				local $fok;
+				if (&indexof($f, @bplugins) < 0 &&
+				    defined(&$rfunc) &&
+				    ($d->{$f} || $f eq "virtualmin" ||
+				     $f eq "mail" &&
+				     &can_domain_have_users($d))) {
+					local $ffile;
+					local $p = "$backup/$d->{'dom'}.tar";
+					local $hft =
+					    $homeformat{"$p.gz"} ||
+					    $homeformat{"$p.bz2"}||
+					    $homeformat{$p} ||
+					    $homeformat{$backup};
+					if ($hft && $f eq "dir") {
+						# For a home-format backup, the
+						# backup itself is the home
+						$ffile = $hft;
+						}
+					else {
+						$ffile = $restoredir."/".
+							 $d->{'dom'}."_".$f;
+						}
+					if ($f eq "virtualmin") {
+						# If restoring the virtualmin
+						# info, keep old feature file
+						&read_file($ffile, \%oldd);
+						}
+					if (-r $ffile) {
+						# Call the restore function
+						$fok = &$rfunc($d, $ffile,
+						     $_[3]->{$f}, $_[3], $hft,
+						     \%oldd, $asowner);
+						}
+					}
+				elsif (&indexof($f, @bplugins) >= 0 &&
+				       $d->{$f}) {
+					# Restoring a plugin feature
+					local $ffile =
+						"$restoredir/$d->{'dom'}_$f";
+					if (-r $ffile) {
+						$fok = &plugin_call($f,
+						    "feature_restore", $d,
+						    $ffile, $_[3]->{$f}, $_[3],
+						    $hft, \%oldd, $asowner);
+						}
+					}
+				if (defined($fok) && !$fok) {
+					# Handle feature failure
+					$ok = 0;
+					&$outdent_print();
+					last DOMAIN;
+					}
+				}
+			&save_domain($d);
+
+			# Run the post-restore command
+			&set_domain_envs($d, "RESTORE_DOMAIN", undef, \%oldd);
+			local $merr = &made_changes();
+			&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
+				if (defined($merr));
+			&reset_domain_envs($d);
+			}
 
 		# Re-setup Webmin user
 		&refresh_webmin_user($d);
