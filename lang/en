@@ -4601,6 +4601,7 @@ newshells_err=Failed to save custom shells
 newshells_ecannot=You are not allowed to edit custom shells
 newshells_eshell=Non-existant shell in row $1
 newshells_edesc=Missing description in row $1
+newshells_eowner=One or both of the Admin or Mailbox checkboxes must be selected in row $1
 newshells_eowners=No shells were selected for domain administrators
 newshells_emailboxes=No shells were selected for mailboxes
 newshells_eownerdef=Exactly one shell must be the default for domain administrators
