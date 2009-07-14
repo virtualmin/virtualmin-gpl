@@ -339,13 +339,13 @@ else {
 		}
 	foreach my $d (@$doms) {
 		if (!$d->{'dir'} && !$skip) {
-			&$first_print(&text('backup_ehomeformat3',
-					    &show_domain_name($d)));
-			return (0, 0, $doms);
+			#&$first_print(&text('backup_ehomeformat3',
+			#		    &show_domain_name($d)));
+			#return (0, 0, $doms);
 			}
 		}
 	# Skip any that don't have directories
-	$doms = [ grep { $_->{'dir'} } @$doms ];
+	#$doms = [ grep { $_->{'dir'} } @$doms ];
 	}
 
 # Work out where to write the final tar files to
@@ -386,6 +386,7 @@ local @donedoms;
 local ($okcount, $errcount) = (0, 0);
 local @errdoms;
 local %donefeatures;				# Map from domain name->features
+local @cleanuphomes;				# Temporary homes
 DOMAIN: foreach $d (@$doms) {
 	# Make sure there are no databases that don't really exist, as these
 	# can cause database feature backups to fail.
@@ -398,6 +399,13 @@ DOMAIN: foreach $d (@$doms) {
 	local $f;
 	local $dok = 1;
 	local @donefeatures;
+
+	if ($homefmt && !$d->{'dir'}) {
+		# Create temporary home directory
+		&make_dir_as_domain_user($d, $d->{'home'}, 0755);
+		$d->{'dir'} = 1;
+		push(@cleanuphomes, $d);
+		}
 
 	if ($homefmt) {
 		# Backup goes to a sub-dir of the home
@@ -681,6 +689,13 @@ if ($ok) {
 		$destfiles_map{$destfiles[$#destfiles]} = "virtualmin";
 		}
 	$donefeatures{"virtualmin"} = $vbs;
+	}
+
+# Remove any temporary home dirs
+foreach my $d (@cleanuphomes) {
+	&unlink_file($d->{'home'});
+	$d->{'dir'} = 0;
+	&save_domain($d);	# In case it was saved during the backup
 	}
 
 if (!$homefmt) {
