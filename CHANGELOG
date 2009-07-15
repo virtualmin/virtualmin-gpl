@@ -1135,3 +1135,4 @@ Updated the Zpush script installer to 1.2.2, Bugzilla to 3.2.4, Wordpress to 2.8
 Added an option to the backup form for selecting virtual servers by plan. Also added the --plan flag to the backup-domains command.
 Corrected a mis-feature that prevented alias virtual servers with no home directory from being backed up in the new format.
 When a virtual server is restored from a backup, the pre and post-change commands are called with $VIRTUALSERVER_ACTION set to RESTORE_DOMAIN.
+Added the license-info API command for getting the serial number and domain counts for the current Virtualmin install.
