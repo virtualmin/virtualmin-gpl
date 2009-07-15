@@ -4,7 +4,9 @@
 
 Show license counts for this Virtualmin system.
 
-XXX
+This command simply outputs the serial number and license key of the current
+Virtualmin system, and the number of virtual servers that exist and are allowed
+by the license.
 
 =cut
 
