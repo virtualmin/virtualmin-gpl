@@ -32,11 +32,13 @@ print &ui_table_row($text{'migrate_dom'},
 
 # Username, if needed
 print &ui_table_row($text{'migrate_user'},
-		    &ui_opt_textbox("user", undef, 20, $text{'migrate_auto2'}));
+		    &ui_opt_textbox("user", undef, 20, $text{'migrate_auto2'},
+				    undef, 0, undef, 0, "autocomplete=off"));
 
 # Password, if needed
 print &ui_table_row($text{'migrate_pass'},
-		    &ui_opt_textbox("pass", undef, 20, $text{'migrate_auto2'}));
+		    &ui_opt_textbox("pass", undef, 20, $text{'migrate_auto2'},
+				    undef, 0, undef, 0, "autocomplete=off"));
 
 # Create Webmin user?
 print &ui_table_row($text{'migrate_webmin'},
