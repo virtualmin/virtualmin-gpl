@@ -1838,6 +1838,7 @@ elsif (!$nolocal) {
 	}
 
 # FTP file fields
+local $noac = "autocomplete=off";
 local $ft = "<table>\n";
 $ft .= "<tr> <td>$text{'backup_ftpserver'}</td> <td>".
        &ui_textbox($name."_server", $mode == 1 ? $serverport : undef, 20).
@@ -1846,10 +1847,12 @@ $ft .= "<tr> <td>$text{'backup_path'}</td> <td>".
        &ui_textbox($name."_path", $mode == 1 ? $path : undef, 50).
        "</td> </tr>\n";
 $ft .= "<tr> <td>$text{'backup_login'}</td> <td>".
-       &ui_textbox($name."_user", $mode == 1 ? $user : undef, 15).
+       &ui_textbox($name."_user", $mode == 1 ? $user : undef, 15,
+		   0, undef, $noac).
        "</td> </tr>\n";
 $ft .= "<tr> <td>$text{'backup_pass'}</td> <td>".
-       &ui_password($name."_pass", $mode == 1 ? $pass : undef, 15).
+       &ui_password($name."_pass", $mode == 1 ? $pass : undef, 15,
+		   0, undef, $noac).
        "</td> </tr>\n";
 $ft .= "</table>\n";
 push(@opts, [ 1, $text{'backup_mode1'}, $ft ]);
@@ -1863,10 +1866,12 @@ $st .= "<tr> <td>$text{'backup_path'}</td> <td>".
        &ui_textbox($name."_spath", $mode == 2 ? $path : undef, 50).
        "</td> </tr>\n";
 $st .= "<tr> <td>$text{'backup_login'}</td> <td>".
-       &ui_textbox($name."_suser", $mode == 2 ? $user : undef, 15).
+       &ui_textbox($name."_suser", $mode == 2 ? $user : undef, 15,
+		   0, undef, $noac).
        "</td> </tr>\n";
 $st .= "<tr> <td>$text{'backup_pass'}</td> <td>".
-       &ui_password($name."_spass", $mode == 2 ? $pass : undef, 15).
+       &ui_password($name."_spass", $mode == 2 ? $pass : undef, 15,
+		   0, undef, $noac).
        "</td> </tr>\n";
 $st .= "</table>\n";
 push(@opts, [ 2, $text{'backup_mode2'}, $st ]);
@@ -1878,10 +1883,12 @@ if (&can_use_s3()) {
 	       &ui_textbox($name."_bucket", $mode == 3 ? $server : undef, 20).
 	       "</td> </tr>\n";
 	$st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
-	       &ui_textbox($name."_akey", $mode == 3 ? $user : undef, 40).
+	       &ui_textbox($name."_akey", $mode == 3 ? $user : undef, 40,
+			   0, undef, $noac).
 	       "</td> </tr>\n";
 	$st .= "<tr> <td>$text{'backup_skey'}</td> <td>".
-	       &ui_password($name."_skey", $mode == 3 ? $pass : undef, 40).
+	       &ui_password($name."_skey", $mode == 3 ? $pass : undef, 40,
+			   0, undef, $noac).
 	       "</td> </tr>\n";
 	$st .= "<tr> <td>$text{'backup_s3file'}</td> <td>".
 	       &ui_opt_textbox($name."_s3file", $mode == 3 ? $path : undef,

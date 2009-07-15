@@ -156,7 +156,8 @@ if (!$parentdom) {
 	print &ui_table_row($text{'edit_passwd'},
 		&ui_opt_textbox("passwd", undef, 20,
 				$text{'edit_lv'}." ".&show_password_popup($d),
-				$text{'edit_set'}));
+				$text{'edit_set'}, undef, undef, undef,
+			 	"autocomplete=off"));
 	}
 
 print &ui_hidden_table_end("config");
