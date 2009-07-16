@@ -2996,6 +2996,10 @@ foreach my $l ($log, $elog) {
 		$dir =~ s/\/([^\/]+)$//;
 		if (&is_under_directory($d->{'home'}, $dir)) {
 			# If under home, create as the domain owner
+			if (-l $l) {
+				# Remove old symlink
+				&unlink_file_as_domain_user($d, $l);
+				}
 			if (!-d $dir) {
 				&make_dir_as_domain_user($d, $dir, 0711, 1);
 				}
