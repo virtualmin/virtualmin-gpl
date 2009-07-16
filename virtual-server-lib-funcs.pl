@@ -544,6 +544,9 @@ if ($_[0]) {
 		if ($u->{'user'} eq $_[0]->{'user'} && $u->{'unix'}) {
 			# Virtual server owner
 			$u->{'domainowner'} = 1;
+			if ($config{'mail_system'} == 5) {
+				$u->{'noprimary'} = 1;
+				}
 			}
 		elsif ($u->{'uid'} == $_[0]->{'uid'} && $u->{'unix'}) {
 			# Web management user
