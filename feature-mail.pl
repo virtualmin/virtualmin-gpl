@@ -2552,8 +2552,8 @@ while(<UFILE>) {
 
 		# Create an empty mail file, which may be needed if inbox
 		# location has moved
-		if ($user->{'email'} && !$user->{'nomailfile'}) {
-			&create_mail_file($user);
+		if ($uinfo->{'email'} && !$uinfo->{'nomailfile'}) {
+			&create_mail_file($uinfo);
 			}
 		}
 	}
