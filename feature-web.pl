@@ -201,49 +201,63 @@ else {
 &$second_print($text{'setup_done'});
 &register_post_action(\&restart_apache);
 
-# Add the Apache user to the group for this virtual server, if missing, unless
-# the template says not to.
-local $web_user = &get_apache_user($_[0]);
-if ($tmpl->{'web_user'} ne 'none' && $web_user) {
-	&add_user_to_domain_group($_[0], $web_user, 'setup_webuser');
-	}
+&$first_print($text{'setup_webpost'});
+eval {
+	local $main::error_must_die = 1;
 
-# Make the web directory accessible under SElinux Apache
-if (&has_command("chcon")) {
-	local $hdir = &public_html_dir($_[0]);
-	&execute_command("chcon -R -t httpd_sys_content_t ".quotemeta($hdir));
-	local $cgidir = &cgi_bin_dir($_[0]);
-	&execute_command("chcon -R -t httpd_sys_script_exec_t ".
-			 quotemeta($cgidir));
-	local $logdir = "$_[0]->{'home'}/logs";
-	&execute_command("chcon -R -t httpd_log_t ".quotemeta($logdir));
-	}
-
-# Setup the writelogs wrapper
-&setup_writelogs($_[0]);
-
-# Create a root-owned file in ~/logs to prevent deletion of the directory
-local $logsdir = "$_[0]->{'home'}/logs";
-if (-d $logsdir && !-e "$logsdir/.nodelete") {
-	open(NODELETE, ">$logsdir/.nodelete");
-	close(NODELETE);
-	&set_ownership_permissions(0, 0, 0700, "$logsdir/.nodelete");
-	}
-
-# Setup for script languages
-if (!$_[0]->{'alias'} && $_[0]->{'dir'}) {
-	&add_script_language_directives($_[0], $tmpl, $_[0]->{'web_port'});
-	}
-
-# Re-apply limits, so that Apache directives are updated
-if (defined(&supports_resource_limits)) {
-	local ($ok) = &supports_resource_limits();
-	if ($ok) {
-		local $pd = $_[0]->{'parent'} ? &get_domain($_[0]->{'parent'})
-					      : $_[0];
-		local $rv = &get_domain_resource_limits($pd);
-		&save_domain_resource_limits($_[0], $rv, 1);
+	# Add the Apache user to the group for this virtual server, if missing,
+	# unless the template says not to.
+	local $web_user = &get_apache_user($_[0]);
+	if ($tmpl->{'web_user'} ne 'none' && $web_user) {
+		&add_user_to_domain_group($_[0], $web_user, 'setup_webuser');
 		}
+
+	# Make the web directory accessible under SElinux Apache
+	if (&has_command("chcon")) {
+		local $hdir = &public_html_dir($_[0]);
+		&execute_command("chcon -R -t httpd_sys_content_t ".
+				 quotemeta($hdir));
+		local $cgidir = &cgi_bin_dir($_[0]);
+		&execute_command("chcon -R -t httpd_sys_script_exec_t ".
+				 quotemeta($cgidir));
+		local $logdir = "$_[0]->{'home'}/logs";
+		&execute_command("chcon -R -t httpd_log_t ".
+				 quotemeta($logdir));
+		}
+
+	# Setup the writelogs wrapper
+	&setup_writelogs($_[0]);
+
+	# Create a root-owned file in ~/logs to prevent deletion of directory
+	local $logsdir = "$_[0]->{'home'}/logs";
+	if (-d $logsdir && !-e "$logsdir/.nodelete") {
+		open(NODELETE, ">$logsdir/.nodelete");
+		close(NODELETE);
+		&set_ownership_permissions(0, 0, 0700, "$logsdir/.nodelete");
+		}
+
+	# Setup for script languages
+	if (!$_[0]->{'alias'} && $_[0]->{'dir'}) {
+		&add_script_language_directives($_[0], $tmpl,
+					        $_[0]->{'web_port'});
+		}
+
+	# Re-apply limits, so that Apache directives are updated
+	if (defined(&supports_resource_limits)) {
+		local ($ok) = &supports_resource_limits();
+		if ($ok) {
+			local $pd = $_[0]->{'parent'} ?
+				&get_domain($_[0]->{'parent'}) : $_[0];
+			local $rv = &get_domain_resource_limits($pd);
+			&save_domain_resource_limits($_[0], $rv, 1);
+			}
+		}
+	};
+if ($@) {
+	&$second_print(&text('setup_ewebpost', $@));
+	}
+else {
+	&$second_print($text{'setup_done'});
 	}
 
 # If any alias domains with web already exist, re-set them up
