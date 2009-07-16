@@ -110,7 +110,7 @@ foreach my $ver (@vers) {
 		if (!$tmpl->{'web_php_noedit'}) {
 			($uid, $gid) = ($d->{'uid'}, $d->{'ugid'});
 			}
-		if (&foreign_check("phpini")) {
+		if (&foreign_check("phpini") && -r "$inidir/php.ini") {
 			# Fix up session save path, extension_dir and
 			# gc_probability / gc_divisor
 			&foreign_require("phpini", "phpini-lib.pl");
