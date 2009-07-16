@@ -22,7 +22,7 @@ sub require_s3
 {
 foreach my $m (@s3_perl_modules) {
 	eval "use $m";
-	die $@ if ($@);
+	die "$@" if ($@);
 	}
 }
 

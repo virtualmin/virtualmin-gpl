@@ -254,7 +254,7 @@ eval {
 		}
 	};
 if ($@) {
-	&$second_print(&text('setup_ewebpost', $@));
+	&$second_print(&text('setup_ewebpost', "$@"));
 	}
 else {
 	&$second_print($text{'setup_done'});

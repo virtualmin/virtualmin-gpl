@@ -6306,7 +6306,7 @@ if ($dom->{'alias'}) {
 					    $aliasdom, $dom) };
 			if ($@) {
 				&$second_print(&text('setup_aliasfailure',
-					&plugin_call($f, "feature_name"), $@));
+					&plugin_call($f, "feature_name"),"$@"));
 				}
 			}
 		}
@@ -6439,8 +6439,9 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 						    $aliasdom, $dd) };
 				if ($@) {
 					&$second_print(
-					 &text('delete_aliasfailure',
-					 &plugin_call($f, "feature_name"), $@));
+					  &text('delete_aliasfailure',
+					  &plugin_call($f, "feature_name"),
+					  "$@"));
 					}
 				}
 			}
@@ -6548,7 +6549,7 @@ foreach $a (@main::post_actions) {
 	local $main::error_must_die = 1;
 	eval { &$afunc(@aargs) };
 	if ($@) {
-		&$second_print(&text('setup_postfailure', $@));
+		&$second_print(&text('setup_postfailure', "$@"));
 		}
 	}
 @main::post_actions = ( );
@@ -7519,7 +7520,7 @@ local $main::error_must_die = 1;
 eval { &plugin_call($mod, $func, @args) };
 if ($@) {
         &$second_print(&text('setup_failure',
-			&plugin_call($f, "feature_name")));
+			     &plugin_call($f, "feature_name"), "$@"));
         return 0;
         }
 return 1;
@@ -8329,7 +8330,7 @@ local $main::error_must_die = 1;
 eval { &$func(@args) };
 if ($@) {
 	&$second_print(&text('setup_failure',
-		$text{'feature_'.$f}, $@));
+			     $text{'feature_'.$f}, "$@"));
 	return 0;
 	}
 return 1;
@@ -10280,7 +10281,7 @@ foreach $f (@features) {
 				};
 			if ($@) {
 				&$second_print(&text('setup_failure',
-					$text{'feature_'.$f}, $@));
+					$text{'feature_'.$f}, "$@"));
 				if ($vital{$f}) {
 					# A vital feature failed .. give up
 					return 0;
@@ -10455,7 +10456,7 @@ foreach $f (@features) {
 				};
 			if ($@) {
 				&$second_print(&text('setup_failure',
-					$text{'feature_'.$f}, $@));
+					$text{'feature_'.$f}, "$@"));
 				if ($vital{$f}) {
 					# A vital feature failed .. give up
 					return 0;
@@ -10551,7 +10552,7 @@ foreach my $f (@features) {
 		eval { &$mfunc($d, $oldd); };
 		if ($@) {
 			&$second_print(&text('setup_failure',
-				       $text{'feature_'.$f}, $@));
+				       $text{'feature_'.$f}, "$@"));
 			return 0 if ($vital{$f});
 			}
 		}
@@ -10621,7 +10622,7 @@ if (!$d->{'dir'}) {
 	eval { &setup_dir($d); };
 	if ($@) {
 		&$second_print(&text('setup_failure',
-				     $text{'feature_dir'}, $@));
+				     $text{'feature_dir'}, "$@"));
 		}
 	}
 
@@ -10634,7 +10635,7 @@ foreach my $f (@features) {
 		eval { &$mfunc($d, $oldd); };
 		if ($@) {
 			&$second_print(&text('setup_failure',
-				       $text{'feature_'.$f}, $@));
+				       $text{'feature_'.$f}, "$@"));
 			return 0 if ($vital{$f});
 			}
 		}

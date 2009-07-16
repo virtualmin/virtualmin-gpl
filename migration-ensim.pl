@@ -16,7 +16,7 @@ local $www = "$root/var/www";
 local $manifest;
 eval { $manifest = &parse_enim_xml($root); };
 if ($@) {
-	&error($@);
+	&error("$@");
 	}
 if (!$dom) {
 	# Work out domain name

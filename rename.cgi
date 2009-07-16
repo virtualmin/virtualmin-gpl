@@ -202,7 +202,7 @@ foreach my $f (&unique(@features, 'mail')) {
 				};
 			if ($@) {
 				&$second_print(&text('setup_failure',
-					$text{'feature_'.$f}, $@));
+					$text{'feature_'.$f}, "$@"));
 				}
 			}
 		}

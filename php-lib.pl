@@ -98,8 +98,10 @@ foreach my $ver (@vers) {
 			}
 		else {
 			# Just copy verbatim
-			&copy_source_dest_as_domain_user(
+			local ($ok, $err) = &copy_source_dest_as_domain_user(
 				$d, $srcini, "$inidir/php.ini");
+			$ok || &error("Failed to copy $srcini to ".
+				      "$inidir/php.ini : $err");
 			}
 
 		# Clear any caching on file

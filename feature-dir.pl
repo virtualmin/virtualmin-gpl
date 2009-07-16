@@ -81,7 +81,7 @@ if (!$_[0]->{'parent'}) {
 		&set_usermin_imap_password($uinfo);
 		};
 	if ($@) {
-		&$second_print(&text('setup_eusermail3', $@));
+		&$second_print(&text('setup_eusermail3', "$@"));
 		}
 	else {
 		&$second_print($text{'setup_done'});

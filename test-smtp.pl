@@ -154,7 +154,7 @@ eval {
 	close(MAIL);
 	};
 if ($@) {
-	$err = &entities_to_ascii(&html_tags_to_text($@));
+	$err = &entities_to_ascii(&html_tags_to_text("$@"));
 	$err =~ s/at\s+\S+\s+line\s+\d+.*//;
 	print $err;
 	exit(1);
