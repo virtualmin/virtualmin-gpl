@@ -201,16 +201,16 @@ else {
 &$second_print($text{'setup_done'});
 &register_post_action(\&restart_apache);
 
+# Add the Apache user to the group for this virtual server, if missing,
+# unless the template says not to.
+local $web_user = &get_apache_user($_[0]);
+if ($tmpl->{'web_user'} ne 'none' && $web_user) {
+	&add_user_to_domain_group($_[0], $web_user, 'setup_webuser');
+	}
+
 &$first_print($text{'setup_webpost'});
 eval {
 	local $main::error_must_die = 1;
-
-	# Add the Apache user to the group for this virtual server, if missing,
-	# unless the template says not to.
-	local $web_user = &get_apache_user($_[0]);
-	if ($tmpl->{'web_user'} ne 'none' && $web_user) {
-		&add_user_to_domain_group($_[0], $web_user, 'setup_webuser');
-		}
 
 	# Make the web directory accessible under SElinux Apache
 	if (&has_command("chcon")) {
