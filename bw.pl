@@ -132,7 +132,7 @@ foreach $d (@doms) {
 			$tmpl = $config{'bw_template'} eq 'default' ?
 				"$module_config_directory/bw-template" :
 				$config{'bw_template'};
-			%tkeys = &make_domain_substitions($d);
+			%tkeys = &make_domain_substitions($d, 1);
 			$tkeys{'bw_percent'} = int(100*$usage/$d->{'bw_limit'});
 			foreach $k (keys %usage) {
 				$tkeys{'bw_usage_'.$k} =
@@ -210,7 +210,7 @@ foreach $d (@doms) {
 			$tmpl = $config{'warnbw_template'} eq 'default' ?
 				"$module_config_directory/warnbw-template" :
 				$config{'warnbw_template'};
-			%tkeys = &make_domain_substitions($d);
+			%tkeys = &make_domain_substitions($d, 1);
 			$tkeys{'bw_percent'} = int(100*$usage/$d->{'bw_limit'});
 			foreach $k (keys %usage) {
 				$tkeys{'bw_usage_'.$k} =

@@ -171,7 +171,7 @@ print PAGE "\n";
 print PAGE "<p>The following scripts can be installed by the latest version ";
 print PAGE "of Virtualmin professional :</p>\n\n";
 print PAGE "<table>\n";
-print PAGE "<th> <td>Name</td> <td>Description</td> <td>Versions</td> </th>\n";
+print PAGE "<tr> <th>Name</th> <th>Description</th> <th>Versions</th> </tr>\n";
 foreach $s (sort { lc($a->{'name'}) cmp lc($b->{'name'}) } @scripts) {
 	next if ($s->{'available'} ne 'Yes');
 	next if ($s->{'description'} eq '');
