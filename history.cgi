@@ -157,7 +157,7 @@ foreach $stat (@stats) {
 	$color = $historic_graph_colors[
 			($plotno-1) % scalar(@historic_graph_colors)];
 	$maxopt = "";
-	$axis = $plotno%2 == 0 ? 'left' : 'right';
+	$axis = $plotno%2 == 0 ? 'right' : 'left';
 	if ($maxes->{$stat} && $stat ne 'tx' && $stat ne 'rx') {
 		$maxv = $stat eq "memused" || $stat eq "swapused" ?
 			 $maxes->{$stat}/(1024*1024) :
