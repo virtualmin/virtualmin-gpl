@@ -47,8 +47,7 @@ if ($_[0]->{'alias'} && $tmpl->{'web_alias'} == 1) {
 		return 0;
 		}
 	local @sa = &apache::find_directive("ServerAlias", $pconf);
-	local $d;
-	foreach $d (@dirs) {
+	foreach my $d (@dirs) {
 		if ($d =~ /^\s*Server(Name|Alias)\s+(.*)/) {
 			push(@sa, $2);
 			}
@@ -127,7 +126,7 @@ else {
 		$_[0]->{'cgi_bin_dir'} = $subcgi;
 		foreach my $sd ($subdir, $subcgi) {
 			if (!-d $sd) {
-				&make_dir_as_domain_user($d, $sd, 0755);
+				&make_dir_as_domain_user($_[0], $sd, 0755);
 				}
 			}
 		}
@@ -304,7 +303,7 @@ elsif ($config{'delete_indom'}) {
 	local $conf = &apache::get_config();
 	if (!$_[0]->{'alias_mode'}) {
 		# Remove the custom Listen directive added for the domain
-		&remove_listen($d, $conf, $d->{'web_port'});
+		&remove_listen($_[0], $conf, $_[0]->{'web_port'});
 		}
 	local @virt = reverse(&apache::find_directive_struct("VirtualHost",
 							     $conf));

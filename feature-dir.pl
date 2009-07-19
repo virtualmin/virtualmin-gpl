@@ -571,12 +571,13 @@ foreach my $user (&list_domain_users($d, 1, 1, 1, 1)) {
 # Returns a list of sub-directories that need to be created for virtual servers
 sub virtual_server_directories
 {
-local $tmpl = &get_template($_[0]->{'template'});
+local ($d) = @_;
+local $tmpl = &get_template($d->{'template'});
 local $perms = $tmpl->{'web_html_perms'};
 return ( $d->{'subdom'} || $d->{'alias'} ? ( ) :
-		( [ &public_html_dir($_[0], 1), $perms ] ),
+		( [ &public_html_dir($d, 1), $perms ] ),
          $d->{'subdom'} || $d->{'alias'} ? ( ) :
-		( [ &cgi_bin_dir($_[0], 1), $perms ] ),
+		( [ &cgi_bin_dir($d, 1), $perms ] ),
          [ 'logs', '750' ],
          [ $config{'homes_dir'}, '755' ] );
 }
