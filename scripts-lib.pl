@@ -1876,7 +1876,14 @@ if (defined(&$vfunc)) {
 		$out = &backquote_logged(
 			"gem update --system 2>&1 </dev/null");
 		if ($?) {
+			# Failed
 			&$second_print(&text('scripts_gemverfailed',
+					   "<tt>".&html_escape($out)."</tt>"));
+			return 0;
+			}
+		elsif (&get_gem_version() eq $gotver) {
+			# Appeared to be OK, but really failed
+			&$second_print(&text('scripts_gemverfailed2', $gotver,
 					   "<tt>".&html_escape($out)."</tt>"));
 			return 0;
 			}
