@@ -3213,6 +3213,7 @@ scripts_idbneed=A $1 database is needed
 scripts_idbneedor=$1 or $2
 scripts_gemver=Updating Ruby Gems to latest version from $1 ..
 scripts_gemverfailed=.. Gems update failed : $1
+scripts_gemverfailed2=.. Gems update to version $2 appeared to succeed, but really failed : $1
 scripts_geminstall=Installing Ruby Gem $1 ..
 scripts_geminstall2=Installing Ruby Gem $1 version $2 ..
 scripts_gemfailed=.. Gem install failed : $1

@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Zpush script installer to 1.2.2, Bugzilla to 3.2.4, Wordpress to 2.8.2, Wordpress MU to 2.8.1, Typo3 to 4.2.8, Trac to 0.11.5, MediaWiki to 1.15.1, SMF to 1.1.10, Zikula to 1.1.2, and bbPress to 1.0.1.
+html=Updated the Zpush script installer to 1.2.2, Bugzilla to 3.2.4, Wordpress to 2.8.2, Wordpress MU to 2.8.1, Typo3 to 4.2.8, Trac to 0.11.5, MediaWiki to 1.15.1, SMF to 1.1.10, Zikula to 1.1.2, Rails to 2.3.3, and bbPress to 1.0.1.
 master=1
 reseller=1
 domain=1
