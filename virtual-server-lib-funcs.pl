@@ -3356,14 +3356,14 @@ if (!$to) {
 
 # Set content type and encoding based on whether the email contains HTML
 # and/or non-ascii characters
-local $ctype = $template =~ /<html[^>]>|<body[^>]>/i ? "text/html"
-						     : "text/plain";
+local $ctype = $template =~ /<html[^>]*>|<body[^>]*>/i ? "text/html"
+						       : "text/plain";
 local $cs = &get_charset();
 local $attach = $template =~ /[\177-\377]/ ?
 	{ 'headers' => [ [ 'Content-Type', $ctype.'; charset='.$cs ],
 		         [ 'Content-Transfer-Encoding', 'quoted-printable' ] ],
           'data' => &mailboxes::quoted_encode($template) } :
-	{ 'headers' => [ [ 'Content-type', 'text/plain' ] ],
+	{ 'headers' => [ [ 'Content-type', $ctype ] ],
 	  'data' => &entities_to_ascii($template) };
 
 # Construct and send the email object
