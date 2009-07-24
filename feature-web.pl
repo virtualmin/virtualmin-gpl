@@ -313,11 +313,11 @@ elsif ($config{'delete_indom'}) {
 		local $vp = $v->{'words'}->[0] =~ /:(\d+)$/ ? $1 :
 				$default_web_port;
 		if ($sn =~ /\Q$_[0]->{'dom'}\E$/ &&
-		    $vp != $d->{'web_sslport'}) {
+		    $vp != $_[0]->{'web_sslport'}) {
 			# Check if a real sub-domain corresponds to this
 			# virtualhost
 			local $real = &get_domain_by("dom", $sn);
-			if (!$real || $real->{'id'} == $d->{'id'}) {
+			if (!$real || $real->{'id'} == $_[0]->{'id'}) {
 				&delete_web_virtual_server($v);
 				}
 			}
@@ -333,7 +333,7 @@ else {
 	local $conf = &apache::get_config();
 	if (!$_[0]->{'alias_mode'}) {
 		# Remove the custom Listen directive added for the domain
-		&remove_listen($d, $conf, $d->{'web_port'});
+		&remove_listen($_[0], $conf, $_[0]->{'web_port'});
 		}
 	local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 						    $_[0]->{'web_port'});
