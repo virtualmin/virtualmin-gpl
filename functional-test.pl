@@ -1683,6 +1683,9 @@ $mail_tests = [
 		      [ 'data', $ok_email_file ] ],
 	},
 
+	# Wait for first mail to get delivered
+	{ 'command' => 'sleep 10' },
+
 	# Add empty lines to procmail.log, to prevent later false matches
 	{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
 	},
