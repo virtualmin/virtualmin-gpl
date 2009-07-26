@@ -38,3 +38,6 @@
  - Script to get CGI urls for some help page, for Joe
 
  - Installer for LimeSurvey 1.85+
+
+ - Domain registration create should work if domain already registered
+   with the same account

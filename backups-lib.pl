@@ -1012,6 +1012,7 @@ if ($ok) {
 			$ok = 0;
 			last;
 			}
+		&set_ownership_permissions(undef, undef, 0711, $restoredir);
 
 		if ($homeformat{$f}) {
 			# Move the .backup contents to the restore dir, as
@@ -1553,7 +1554,7 @@ else {
 	# Extract and read domain files
 	if ($wantdoms) {
 		local $vftemp = &transname();
-		&make_dir($vftemp, 0700);
+		&make_dir($vftemp, 0711);
 		local $qvirtfiles = join(" ", map { quotemeta($_) } @virtfiles);
 		if ($cf == 4) {
 			$out = &backquote_command("cd $vftemp && ".
@@ -1671,7 +1672,7 @@ if ($mode == 1) {
 	local $err;
 	if ($isdir) {
 		# Need to download entire directory
-		&make_dir($temp, 0700);
+		&make_dir($temp, 0711);
 		local $list = &ftp_listdir($server, $path, \$err, $user, $pass,
 					   $port);
 		return $err if (!$list);
@@ -1704,7 +1705,7 @@ elsif ($mode == 3) {
 	push(@wantdoms, @$domnames) if (@$domnames);
 	push(@wantdoms, "virtualmin") if (@$vbs);
 	@wantdoms = (keys %$s3b) if (!@wantdoms);
-	&make_dir($temp, 0700);
+	&make_dir($temp, 0711);
 	foreach my $dname (@wantdoms) {
 		local $si = $s3b->{$dname};
 		if (!$si) {
