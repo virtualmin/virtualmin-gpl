@@ -132,9 +132,9 @@ if (!$d->{'parent'} && $virtualmin_pro) {
 		$ufunc = "${f}_user";
 		$un = &$ufunc($d);
 		print &ui_table_row($text{'feature_'.$f},
-		    &ui_radio_table($f."_def", 0,
-			[ [ 0, &text('databases_leave', "<tt>$un</tt>") ],
-			  [ 1, $text{'databases_newuser'},
+		    &ui_radio_table($f."_def", 1,
+			[ [ 1, &text('databases_leave', "<tt>$un</tt>") ],
+			  [ 0, $text{'databases_newuser'},
 			    &ui_textbox($f, undef, 20) ] ]));
 		}
 
