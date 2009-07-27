@@ -109,12 +109,15 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--quota") {
 		$quota = shift(@ARGV);
+		$quota = 0 if ($quota eq "UNLIMITED");
 		}
 	elsif ($a eq "--mail-quota") {
 		$mquota = shift(@ARGV);
+		$mquota = 0 if ($mquota eq "UNLIMITED");
 		}
 	elsif ($a eq "--qmail-quota") {
 		$qquota = shift(@ARGV);
+		$qquota = 0 if ($qquota eq "UNLIMITED");
 		}
 	elsif ($a eq "--mysql") {
 		$db = shift(@ARGV);
@@ -342,13 +345,13 @@ print "                       --pass password-for-new-user |\n";
 print "                       --encpass encrypted-password |\n";
 print "                       --random-pass\n";
 if (&has_home_quotas()) {
-	print "                      [--quota quota-in-blocks]\n";
+	print "                      [--quota quota-in-blocks|\"UNLIMITED\"]\n";
 	}
 if (&has_mail_quotas()) {
-	print "                      [--mail-quota quota-in-blocks]\n";
+	print "                      [--mail-quota quota-in-blocks|\"UNLIMITED\"]\n";
 	}
 if (&has_server_quotas()) {
-	print "                       --qmail-quota quota-in-bytes\n";
+	print "                       --qmail-quota quota-in-bytes|\"UNLIMITED\"\n";
 	}
 if (!$user || $user->{'person'}) {
 	print "                      [--real real-name-for-new-user]\n";
@@ -369,5 +372,6 @@ if ($config{'spam'}) {
 	print "                      [--no-check-spam]\n";
 	}
 print "                      [--no-creation-mail]\n";
+print "                      [--home directory]\n";
 exit(1);
 }
