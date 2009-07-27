@@ -19,15 +19,6 @@
 	- counters (FS 3348)
 	- shortly
 
- - new fcgid mode, as suggested by filip
-	Action php5-fcgi /fcgi-bin/php5-fcgi
-	AddHandler php5-fcgi .php
-	<Directory /home/xxx/fcgi-bin>
-	Options ExecCGI
-	SetHandler fcgid-script
-	</Location>
-	 FS#3421
-
  - option to replicate procmail files to other mail servers
 	- general mail cluster feature?
 	- how can lookup-domain work? Via network?
