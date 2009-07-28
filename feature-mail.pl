@@ -3039,8 +3039,8 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 			    $apache_mmap{lc($1)}, $tm[5]); };
 			if (!$ltime || $ltime > $now+(24*60*60)) {
 				# Must have been last year!
-				$ltime = timelocal($5, $4, $3, $2,
-				     $apache_mmap{lc($1)}, $tm[5]-1);
+				eval { $ltime = timelocal($5, $4, $3, $2,
+				     $apache_mmap{lc($1)}, $tm[5]-1); };
 				}
 			local $user = $11 || $9;
 			local $sz = $sizes{$8};
@@ -3125,8 +3125,8 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 			    $apache_mmap{lc($1)}, $tm[5]); };
 			if (!$ltime || $ltime > $now+(24*60*60)) {
 				# Must have been last year!
-				$ltime = timelocal($5, $4, $3, $2,
-				     $apache_mmap{lc($1)}, $tm[5]-1);
+				eval { $ltime = timelocal($5, $4, $3, $2,
+				     $apache_mmap{lc($1)}, $tm[5]-1); };
 				}
 			local $user = $9;
 			local $sz = $11 || $13 + $14;
