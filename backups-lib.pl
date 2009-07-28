@@ -361,11 +361,18 @@ else {
 	$dest = $path;
 	}
 if ($dirfmt && !-d $dest) {
+	# If backing up to a directory that doesn't exist yet, create it
 	local $derr = &make_backup_dir($dest, 0755, 1, $asd);
 	if ($derr) {
 		&$first_print(&text('backup_emkdir', "<tt>$dest</tt>", $derr));
 		return (0, 0, $doms);
 		}
+	}
+elsif (!$dirfmt && $mode >= 1 && $asd) {
+	# Backing up to a temp file as domain owner .. create first
+	&open_tempfile(DEST, ">$dest");
+	&close_tempfile(DEST);
+	&set_ownership_permissions($asd->{'uid'}, $asd->{'gid'}, undef, $dest);
 	}
 
 # For a home-format backup, the home has to be last
