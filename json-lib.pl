@@ -19,7 +19,26 @@ if ($ex) {
 	}
 elsif ($cmd =~ /^list\-/ && defined($in{'multiline'})) {
 	# Parse multiline output into data structure
-	# XXX 
+	my @lines = split(/\r?\n/, $out);
+	my $obj;
+	my @data;
+	foreach my $l (@lines) {
+		if ($l =~ /^(\S.*)$/) {
+			# Object name
+			$obj = { };
+			push(@data, { 'name' => $1,
+				      'values' => $obj });
+			}
+		elsif ($l =~ /^\s+(\S[^:]+):\s*(.*)$/) {
+			# Key and value within the object
+			my ($k, $v) = ($1, $2);
+			$k = lc($k);
+			$k =~ s/\s/_/g;
+			$obj->{$k} ||= [ ];
+			push(@{$obj->{$k}}, $v);
+			}
+		}
+	$data->{'data'} = \@data;
 	}
 else {
 	# Just attach full output
@@ -29,6 +48,22 @@ else {
 # Call formatting function
 my $ffunc = "create_".$format."_format";
 return &$ffunc($data);
+}
+
+# create_xml_format(&hash)
+# Convert a hash into XML
+sub create_xml_format
+{
+my ($data) = @_;
+eval "use XML::Simple";
+if (!$@) {
+	return XMLout($data, 'KeyAttr' => 1);
+	}
+}
+
+sub create_json_format
+{
+my ($data) = @_;
 }
 
 1;
