@@ -60,8 +60,9 @@ if (!$d->{'alias'} && @rubys && $can == 2) {
 				    @rubys ]));
 	}
 
-# Write logs via program
-if ((!$d->{'alias'} || $d->{'alias_mode'} != 1) && $can == 2) {
+# Write logs via program. Don't show unless enabled.
+if ((!$d->{'alias'} || $d->{'alias_mode'} != 1) && $can == 2 &&
+    &get_writelogs_status($d)) {
 	print &ui_table_row(
 		&hlink($text{'newweb_writelogs'}, "template_writelogs"),
 		&ui_yesno_radio("writelogs", &get_writelogs_status($d)));

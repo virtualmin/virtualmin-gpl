@@ -1138,3 +1138,4 @@ When a virtual server is restored from a backup, the pre and post-change command
 Added the license-info API command for getting the serial number and domain counts for the current Virtualmin install.
 ---- Changes since 3.71 ----
 Added support for JSON, XML and Perl output to the remote API, enabled with the json=1, xml=1 or perl=1 URL parameters.
+Deprecated the feature to write logs via a program, as logging to /var/log/virtualmin is now the default.

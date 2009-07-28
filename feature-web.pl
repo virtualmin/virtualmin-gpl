@@ -2004,7 +2004,8 @@ sub show_template_web
 local ($tmpl) = @_;
 
 # Work out fields to disable
-local @webfields = ( "web", "suexec", "writelogs", "user_def",
+local @webfields = ( "web", "suexec", "user_def",
+		     $tmpl->{'writelogs'} ? ( "writelogs" ) : ( ),
 		     "html_dir", "html_dir_def", "html_perms", "stats_mode",
 		     "stats_dir", "stats_hdir", "statspass", "statsnoedit",
 		     "alias_mode", "web_port", "web_sslport",
@@ -2034,9 +2035,12 @@ print &ui_table_row(&hlink($text{'tmpl_web'}, "template_web"),
 print &ui_table_row(&hlink($text{'newweb_suexec'}, "template_suexec"),
 	&ui_yesno_radio("suexec", $tmpl->{'web_suexec'} ? 1 : 0));
 
-# Input for logging via program
-print &ui_table_row(&hlink($text{'newweb_writelogs'}, "template_writelogs"),
-	&ui_yesno_radio("writelogs", $tmpl->{'web_writelogs'} ? 1 : 0));
+# Input for logging via program. Deprecated, so don't show unless enabled
+if ($tmpl->{'web_writelogs'}) {
+	print &ui_table_row(&hlink($text{'newweb_writelogs'},
+				   "template_writelogs"),
+		&ui_yesno_radio("writelogs", $tmpl->{'web_writelogs'} ? 1 : 0));
+	}
 
 # Input for Apache user to add to domain's group
 print &ui_table_row(&hlink($text{'newweb_user'}, "template_user_def"),
@@ -2269,7 +2273,9 @@ if ($in{"web_mode"} == 2) {
 	$err = &check_apache_directives($in{"web"});
 	&error($err) if ($err);
 	$tmpl->{'web_suexec'} = $in{'suexec'};
-	$tmpl->{'web_writelogs'} = $in{'writelogs'};
+	if (defined($in{'writelogs'})) {
+		$tmpl->{'web_writelogs'} = $in{'writelogs'};
+		}
 	if ($in{'html_dir_def'}) {
 		delete($tmpl->{'web_html_dir'});
 		}
