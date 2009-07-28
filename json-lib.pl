@@ -63,17 +63,18 @@ elsif ($cmd =~ /^list\-/ && defined($in{'multiline'})) {
 		}
 	$data->{'data'} = \@data;
 	}
-elsif ($cmd eq "list-bandwidth" || $cmd eq "list-owner-bandwidth") {
+elsif (($cmd eq "list-bandwidth" ||
+        $cmd eq "list-owner-bandwidth") && $module_name eq "server-manager") {
 	# Parse Cloudmin bandwidth table
 	my @lines = split(/\r?\n/, $out);
         my $obj;
         my @data;
 	foreach my $l (@lines) {
-		if ($l =~ /^(\S.*)$/) {
+		if ($l =~ /^(\S+)$/) {
 			# Start of a system or owner
 			$obj = [ ];
 			push(@data, { 'name' => $1,
-                                      'values' => $obj });
+                                      'bw' => $obj });
 			}
 		elsif ($l =~ /^\s+(\S+)\s+(\d+:\d+)\s+([0-9\.]+\s+\S+)\s+([0-9\.]+\s+\S+)\s+(\d+)\s+(\d+)\s*$/ ||
 		       $l =~ /^\s+(\S+)\s+(\d+:\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s*$/) {
@@ -84,6 +85,55 @@ elsif ($cmd eq "list-bandwidth" || $cmd eq "list-owner-bandwidth") {
 				      'out' => $4,
 				      'inp' => $5,
 				      'outp' => $6 });
+			}
+		}
+	$data->{'data'} = \@data;
+	}
+elsif ($cmd eq "list-bandwidth" && $module_name eq "virtual-server") {
+	# Parse Virtualmin bandwidth table
+	my @lines = split(/\r?\n/, $out);
+        my $obj;
+        my @data;
+	foreach my $l (@lines) {
+		if ($l =~ /^(\S+):$/) {
+			# Start of a domain
+			$obj = [ ];
+			push(@data, { 'name' => $1,
+                                      'bw' => $obj });
+			}
+		elsif ($l =~ /^\s+(\S+):\s+(.*)$/) {
+			# Date and types line
+			my $b = { 'date' => $1 };
+			push(@$obj, $b);
+			foreach my $tc (split(/\s+/, $2)) {
+				my ($t, $c) = split(/:/, $tc);
+				$b->{$t} = $c;
+				}
+			}
+		}
+	$data->{'data'} = \@data;
+	}
+elsif ($cmd eq "validate-domains" && $module_name eq "virtual-server") {
+	# Parse Virtualmin validation output
+        my @lines = split(/\r?\n/, $out);
+        my ($obj, $dom);
+        my @data;
+        foreach my $l (@lines) {
+		if ($l =~ /^(\S+)$/) {
+			# Start of a domain
+			$obj = [ ];
+			$dom = { 'name' => $1,
+                                 'errors' => $obj,
+				 'status' => 'success' };
+                        push(@data, $dom);
+                        }
+                elsif ($l =~ /^\s+((\S[^:]+)\s*:\s*(\S.*))$/ &&
+		       $1 ne $text{'newvalidate_good'} &&
+		       $1 ne "All features OK") {
+			# Error for a domain
+			$dom->{'status'} = 'failed';
+			push(@$obj, { 'feature' => $2,
+				      'error' => $3 });
 			}
 		}
 	$data->{'data'} = \@data;

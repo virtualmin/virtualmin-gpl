@@ -29,6 +29,12 @@ if (!$in{'program'}) {
 	exit;
 	}
 
+# Get output format
+$format = defined($in{'json'}) ? 'json' :
+          defined($in{'xml'}) ? 'xml' :
+          defined($in{'perl'}) ? 'perl' :
+                undef;
+
 # Build the arg list
 $main::virtualmin_remote_api = 1;
 $in{'program'} =~ /^[a-z0-9\.\-]+$/i || &api_error($text{'remote_eprogram'});
@@ -44,7 +50,7 @@ foreach $m ($module_name, @plugins) {
 $cmd || &api_error(&text('remote_eprogram2', $in{'program'}));
 @args = ( );
 foreach $i (keys %in) {
-	next if ($i eq "program");
+	next if ($i eq "program" || $i eq $format);
 	if ($in{$i} eq "") {
 		push(@args, "--".$i);
 		}
@@ -67,7 +73,18 @@ CORE::exit(0);
 
 # Run the script within this same Perl process
 print "Content-type: text/plain\n\n";
-if ($dir eq $module_root_directory) {
+if ($format) {
+	# Convert to selected format
+	$cmd .= " ".join(" ", map { quotemeta($_) } @args);
+        $err = &check_remote_format($format);
+        if ($err) {
+                print "Invalid format $format : $err\n";
+                exit(0);
+                }
+        $out = &backquote_command("$cmd 2>&1");
+        print &convert_remote_format($out, $?, $in{'program'}, \%in, $format);
+	}
+elsif ($dir eq $module_root_directory) {
 	# Can just eval in this module
 	@ARGV = @args;
 	do $cmd;
