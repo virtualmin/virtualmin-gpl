@@ -800,6 +800,22 @@ else {
 				}
 			}
 		}
+
+	# If there are suexec directives, validate them
+	local ($suexec) = &apache::find_directive_struct(
+		"SuexecUserGroup", $vconf);
+	if ($suexec) {
+		if ($suexec->{'words'}->[0] ne $_[0]->{'user'} &&
+		    $suexec->{'words'}->[0] ne '#'.$_[0]->{'uid'}) {
+			return &text('validate_ewebuid',
+			     $suexec->{'words'}->[0], $_[0]->{'uid'});
+			}
+		if ($suexec->{'words'}->[1] ne $_[0]->{'group'} &&
+		    $suexec->{'words'}->[1] ne '#'.$_[0]->{'ugid'}) {
+			return &text('validate_ewebgid',
+			     $suexec->{'words'}->[1], $_[0]->{'ugid'});
+			}
+		}
 	}
 return undef;
 }
