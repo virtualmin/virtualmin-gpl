@@ -32,3 +32,6 @@
 
  - Domain registration create should work if domain already registered
    with the same account
+
+ - Functional test for bandwidth monitoring
+
