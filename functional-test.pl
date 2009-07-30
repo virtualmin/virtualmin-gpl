@@ -1728,6 +1728,13 @@ $mail_tests = [
 	  'grep' => [ 'Hello World', 'X-Spam-Status:' ],
 	},
 
+	# Use IMAP to count mail - should be two or more
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_full_user ],
+		      [ 'pass', 'smeg' ] ],
+	  'grep' => '[23] messages',
+	},
+
 	-r $virus_email_file ? (
 		# Add empty lines to procmail.log
 		{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
