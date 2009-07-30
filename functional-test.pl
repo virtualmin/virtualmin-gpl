@@ -182,6 +182,17 @@ $domains_tests = [
 	  'antigrep' => 'Login incorrect',
 	},
 
+	# Check SMTP to admin mailbox
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'to', $test_domain_user.'@'.$test_domain ] ],
+	},
+
+	# Check IMAP for admin mailbox
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ] ],
+	},
+
 	# Check Webmin login
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
 		       ($webmin_proto eq "https" ? '--no-check-certificate '
@@ -368,9 +379,15 @@ $mailbox_tests = [
 	  'antigrep' => 'Login incorrect',
 	},
 
-	# Check mailbox
+	# Check SMTP to mailbox
 	{ 'command' => 'test-smtp.pl',
 	  'args' => [ [ 'to', $test_user.'@'.$test_domain ] ],
+	},
+
+	# Check IMAP for mailbox
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_full_user ],
+		      [ 'pass', 'smeg' ] ],
 	},
 
 	# Modify the user
