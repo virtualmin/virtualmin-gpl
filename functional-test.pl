@@ -2844,6 +2844,7 @@ $bw_tests = [
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_bw_domain ],
 		      [ 'user', $test_bw_domain_user ],
+		      [ 'prefix', $prefix ],
 		      [ 'desc', 'Test rename domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
@@ -2950,16 +2951,38 @@ $bw_tests = [
 	},
 
 	# Create a mailbox with FTP access
-	# XXX
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_bw_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
 
 	# Send a 1M email to it
-	# XXX
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'from', 'jcameron@webmin.com' ],
+		      [ 'to', $test_user.'@'.$test_bw_domain ],
+		      [ 'data', '/tmp/random.txt' ] ],
+	},
+
+	# Check IMAP for mailbox
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_full_user ],
+		      [ 'pass', 'smeg' ] ],
+	},
 
 	# Re-run bw.pl to pick up that email
-	# XXX
+	{ 'command' => $module_config_directory.'/bw.pl '.$test_bw_domain,
+	},
 
 	# Check that the email was counted
-	# XXX
+	{ 'command' => 'list-bandwidth.pl',
+	  'args' => [ [ 'domain', $test_bw_domain ] ],
+	  'grep' => [ 'mail:2[0-9]{6}', ],
+	},
 
 	# Get rid of the domain
 	{ 'command' => 'delete-domain.pl',

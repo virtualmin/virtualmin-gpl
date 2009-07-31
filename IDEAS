@@ -33,5 +33,5 @@
  - Domain registration create should work if domain already registered
    with the same account
 
- - Functional test for bandwidth monitoring
-	- Add check for mailboxes too
+ - Fix protected directories
+	- http://www.virtualmin.com/node/10774
