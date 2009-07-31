@@ -22,10 +22,12 @@ foreach my $d (@doms) {
 	}
 
 # Work out who has it
+$script = &get_script($sname);
 foreach my $d (@doms) {
 	@got = &list_domain_scripts($d);
 	@dsinfos = grep { $_->{'name'} eq $sname &&
-			  &compare_versions($_->{'version'}, $ver) < 0 } @got;
+			  &compare_versions($_->{'version'}, $ver,
+					    $script) < 0 } @got;
 	foreach $sinfo (@dsinfos) {
 		$sinfo->{'dom'} = $d;
 		}
@@ -34,7 +36,6 @@ foreach my $d (@doms) {
 @sinfos || &error($text{'massscript_enone2'});
 
 &ui_print_unbuffered_header(undef, $text{'massscript_title'}, "");
-$script = &get_script($sname);
 
 if ($in{'confirm'}) {
 	# Doing the upgrade
@@ -54,7 +55,8 @@ if ($in{'confirm'}) {
 		&$first_print(&text('massscript_doing', &show_domain_name($d),
 				    $sinfo->{'version'}, $sinfo->{'desc'}));
 		$opts = $sinfo->{'opts'};
-		if (&compare_versions($sinfo->{'version'}, $ver) >= 0) {
+		if (&compare_versions($sinfo->{'version'}, $ver,
+				      $script) >= 0) {
 			# Already got it
 			&$second_print(&text('massscript_ever',
 					     $sinfo->{'version'}));

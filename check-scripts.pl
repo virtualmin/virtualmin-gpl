@@ -142,15 +142,15 @@ foreach $s (@scripts) {
 				}
 
 			if (@vers) {
-				@vers = sort { &compare_versions($b, $a) }
+				@vers = sort { &compare_versions($b, $a, $script) }
 					     &unique(@vers);
 				$lver = $vers[0];
-				if (&compare_versions($lver, $v) > 0) {
+				if (&compare_versions($lver, $v, $script) > 0) {
 					push(@errs, [ $script, $v, $url,
 						"Version $lver is available" ]);
 					print ".. Found newer version $lver\n";
 					}
-				elsif (&compare_versions($lver, $v) < 0) {
+				elsif (&compare_versions($lver, $v, $script) < 0) {
 					push(@errs, [ $script, $v, $url,
 						"Version $lver is older than $v" ]);
 					print ".. Found older version $lver\n";

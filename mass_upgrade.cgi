@@ -19,7 +19,7 @@ foreach $id (@d) {
 		@vers = grep { &can_script_version($script, $_) }
 			     @{$script->{'versions'}};
 		@better = grep { &compare_versions($_,
-					$sinfo->{'version'}) > 0 } @vers;
+					$sinfo->{'version'}, $script) > 0 } @vers;
 		$ver = @better ? $better[$#better] : undef;
 		$scriptmap{$sinfo->{'id'}} = $script;
 		$vermap{$sinfo->{'id'}} = $ver;
@@ -36,7 +36,8 @@ if ($in{'confirm'}) {
 		$ver = $vermap{$sinfo->{'id'}};
 		$opts = $sinfo->{'opts'};
 		&$first_print(&text('massg_doing', $script->{'desc'}, $ver));
-		if (&compare_versions($sinfo->{'version'}, $ver) >= 0) {
+		if (&compare_versions($sinfo->{'version'}, $ver,
+				      $script) >= 0) {
 			# Already got it
 			&$second_print(&text('massscript_ever',
 					     $sinfo->{'version'}));

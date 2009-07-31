@@ -54,7 +54,7 @@ foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 			         'desc' => $cat } ]);
 		$lastcat = $cat;
 		}
-	@v = sort { &compare_versions($b, $a) } @{$script->{'versions'}};
+	@v = sort { &compare_versions($b, $a, $script) } @{$script->{'versions'}};
 	@v = map { [ $_, $script->{'vdesc'}->{$_} || $_ ] } @v;
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
@@ -118,11 +118,12 @@ print "$text{'newscripts_desc3'}<p>\n";
 foreach $d (&list_domains()) {
 	&detect_real_script_versions($d);
 	foreach my $sinfo (&list_domain_scripts($d)) {
+		$script = &get_script($sname);
 		$n = $sinfo->{'name'};
 		$used{$n}++;
 		if (!$minversion{$n} ||
 		    &compare_versions($sinfo->{'version'},
-				      $minversion{$n}) < 0) {
+				      $minversion{$n}, $script) < 0) {
 			$minversion{$n} = $sinfo->{'version'};
 			}
 		}
@@ -133,7 +134,7 @@ foreach $d (&list_domains()) {
 foreach $sname (grep { $used{$_} } @scripts) {
 	$script = &get_script($sname);
 	foreach $v (@{$script->{'versions'}}) {
-		if (&compare_versions($v, $minversion{$sname}) > 0) {
+		if (&compare_versions($v, $minversion{$sname}, $script) > 0) {
 			push(@opts, [ "$sname $v", "$script->{'desc'} $v" ]);
 			}
 		}

@@ -38,7 +38,8 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 	@vers = grep { &can_script_version($script, $_) }
 		     @{$script->{'versions'}};
 	if (&indexof($sinfo->{'version'}, @vers) < 0) {
-		@better = grep { &compare_versions($_, $sinfo->{'version'}) > 0 } @vers;
+		@better = grep { &compare_versions($_, $sinfo->{'version'},
+				 		   $script) > 0 } @vers;
 		if (@better) {
 			$status = "<font color=#ffaa00>".
 			  &text('scripts_newer', $better[$#better]).

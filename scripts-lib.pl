@@ -94,6 +94,7 @@ $sdir =~ s/\/[^\/]+$//;
 local $dfunc = "script_${name}_desc";
 local $lfunc = "script_${name}_longdesc";
 local $vfunc = "script_${name}_versions";
+local $nvfunc = "script_${name}_numeric_version";
 local $ufunc = "script_${name}_uses";
 local $vdfunc = "script_${name}_version_desc";
 local $catfunc = "script_${name}_category";
@@ -121,6 +122,7 @@ local $rv = { 'name' => $name,
 	      'longdesc' => defined(&$lfunc) ? &$lfunc() : undef,
 	      'versions' => [ &$vfunc(0) ],
 	      'install_versions' => [ &$vfunc(1) ],
+	      'numeric_version' => defined(&$nvfunc) ? &$nvfunc() : 0,
 	      'uses' => defined(&$ufunc) ? [ &$ufunc() ] : [ ],
 	      'category' => defined(&$catfunc) ? &$catfunc() : undef,
 	      'site' => defined(&$sitefunc) ? &$sitefunc() : undef,
@@ -418,12 +420,17 @@ foreach my $f (@files) {
 return undef;
 }
 
-# compare_versions(ver1, ver2)
+# compare_versions(ver1, ver2, [&script])
 # Returns -1 if ver1 is older than ver2, 1 if newer, 0 if same
 sub compare_versions
 {
-local @sp1 = split(/[\.\-]/, $_[0]);
-local @sp2 = split(/[\.\-]/, $_[1]);
+local ($ver1, $ver2, $script) = @_;
+if ($script && $script->{'numeric_version'}) {
+	# Strict numeric compare
+	return $ver1 <=> $ver2;
+	}
+local @sp1 = split(/[\.\-]/, $ver1);
+local @sp2 = split(/[\.\-]/, $ver2);
 for(my $i=0; $i<@sp1 || $i<@sp2; $i++) {
 	local $v1 = $sp1[$i];
 	local $v2 = $sp2[$i];
@@ -1543,14 +1550,14 @@ elsif (!$script->{'minversion'}) {
 	return 1;	# No restrictions
 	}
 elsif ($script->{'minversion'} =~ /^<=(.*)$/) {
-	return &compare_versions($ver, "$1") <= 0;	# At or below
+	return &compare_versions($ver, "$1", $script) <= 0;	# At or below
 	}
 elsif ($script->{'minversion'} =~ /^=(.*)$/) {
 	return $ver eq $1;				# At exact version
 	}
 elsif ($script->{'minversion'} =~ /^>=(.*)$/ ||
        $script->{'minversion'} =~ /^(.*)$/) {
-	return &compare_versions($ver, "$1") >= 0;	# At or above
+	return &compare_versions($ver, "$1", $script) >= 0;	# At or above
 	}
 else {
 	return 1;	# Can never happen!
@@ -2013,9 +2020,9 @@ foreach my $d (@$doms) {
 		$scache{$sinfo->{'name'}} = $script;
 		local @vers = grep { &can_script_version($script, $_) }
 			     @{$script->{'versions'}};
-		@vers = sort { &compare_versions($b, $a) } @vers;
+		@vers = sort { &compare_versions($b, $a, $script) } @vers;
 		local @better = grep { &compare_versions($_,
-					$sinfo->{'version'}) >= 0 } @vers;
+				$sinfo->{'version'}, $script) >= 0 } @vers;
 		local $ver = @better ? $better[$#better] : undef;
 		next if (!$ver);
 
