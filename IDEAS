@@ -34,4 +34,4 @@
    with the same account
 
  - Functional test for bandwidth monitoring
-	- Make sure works with IMAP
+	- Add check for mailboxes too

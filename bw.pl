@@ -20,7 +20,7 @@ $start_day = &bandwidth_period_start();
 if ($ARGV[0]) {
 	$onedom = &get_domain_by("dom", $ARGV[0]);
 	$onedom || die "Server $ARGV[0] not found";
-	@doms = ( $onedom );
+	@doms = ( $onedom, &get_domain_by("parent", $onedom->{'id'}) );
 	}
 else {
 	@doms = &list_domains();

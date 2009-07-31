@@ -2835,6 +2835,139 @@ $rename_tests = [
         },
 	];
 
+# Tests for web, mail and FTP bandwidth accounting.
+# Uses a different domain to prevent re-reading of old mail logs.
+$test_bw_domain = time().$test_domain;
+$test_bw_domain_user = time().$test_domain_user;
+$bw_tests = [
+	# Create a domain for bandwidth loggin
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_bw_domain ],
+		      [ 'user', $test_bw_domain_user ],
+		      [ 'desc', 'Test rename domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test bandwidth page' ],
+		      @create_args, ],
+	},
+
+	# Run bw.pl once to skip to the end of logs
+	{ 'command' => $module_config_directory.'/bw.pl '.$test_bw_domain,
+	},
+
+	# Create a 1M file in the domain's directory
+	{ 'command' => 'dd if=/dev/zero of=/home/'.$test_bw_domain_user.'/public_html/huge bs=1024 count=1024 && chown '.$test_bw_domain_user.': /home/'.$test_bw_domain_user.'/public_html/huge',
+	},
+
+	# Fetch the file 5 times with wget
+	{ 'command' => join(" ; ", map { $wget_command.'http://'.$test_bw_domain.'/huge >/dev/null' } (0..4)),
+	},
+
+	# Fetch 1 time with FTP
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_bw_domain_user.':smeg@localhost/public_html/huge >/dev/null',
+	},
+
+	# Create a 1M test file
+	{ 'command' => '(cat '.$ok_email_file.' ; head -c250000 /dev/urandom | od -c) >/tmp/random.txt',
+	},
+
+	# Send email to the domain's user
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'from', 'jcameron@webmin.com' ],
+		      [ 'to', $test_bw_domain_user.'@'.$test_bw_domain ],
+		      [ 'data', '/tmp/random.txt' ] ],
+	},
+
+	# Check IMAP for admin mailbox
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_bw_domain_user ],
+		      [ 'pass', 'smeg' ] ],
+	},
+
+	# Run bw.pl on this domain
+	{ 'command' => $module_config_directory.'/bw.pl '.$test_bw_domain,
+	},
+
+	# Check separate web, FTP and mail usage
+	{ 'command' => 'list-bandwidth.pl',
+	  'args' => [ [ 'domain', $test_bw_domain ] ],
+	  'grep' => [ 'web:5[0-9]{6}',
+		      'ftp:1[0-9]{6}',
+		      'mail:1[0-9]{6}', ],
+	},
+
+	# Get usage from list-domains
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_bw_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => 'Bandwidth usage: 7(\\.[0-9]+)?\s+MB',
+	},
+
+	# Create a sub-server
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_bw_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ],
+		      @create_args, ],
+	},
+
+	# Create a 1M file in the sub-domain's directory
+	{ 'command' => 'dd if=/dev/zero of=/home/'.$test_bw_domain_user.'/domains/'.$test_subdomain.'/public_html/huge bs=1024 count=1024 && chown '.$test_bw_domain_user.': /home/'.$test_bw_domain_user.'/domains/'.$test_subdomain.'/public_html/huge',
+	},
+
+	# Fetch the file 5 times with wget
+	{ 'command' => join(" ; ", map { $wget_command.'http://'.$test_subdomain.'/huge >/dev/null' } (0..4)),
+	},
+
+	# Run bw.pl on the parent domain
+	{ 'command' => $module_config_directory.'/bw.pl '.$test_bw_domain,
+	},
+
+	# Check web usage in sub-domain
+	{ 'command' => 'list-bandwidth.pl',
+	  'args' => [ [ 'domain', $test_subdomain ] ],
+	  'grep' => [ 'web:5[0-9]{6}' ],
+	},
+
+	# Get usage from list-domains again
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_bw_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => 'Bandwidth usage: 12(\\.[0-9]+)?\s+MB',
+	},
+
+	# Check separate usage in parent domain
+	{ 'command' => 'list-bandwidth.pl',
+	  'args' => [ [ 'domain', $test_bw_domain ],
+		      [ 'include-subservers' ] ],
+	  'grep' => [ 'web:10[0-9]{6}',
+		      'ftp:1[0-9]{6}',
+		      'mail:1[0-9]{6}', ],
+	},
+
+	# Create a mailbox with FTP access
+	# XXX
+
+	# Send a 1M email to it
+	# XXX
+
+	# Re-run bw.pl to pick up that email
+	# XXX
+
+	# Check that the email was counted
+	# XXX
+
+	# Get rid of the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_bw_domain ] ],
+	  'cleanup' => 1
+        },
+	];
+
 $alltests = { 'domains' => $domains_tests,
 	      'web' => $web_tests,
 	      'mailbox' => $mailbox_tests,
@@ -2863,6 +2996,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'plugin' => $plugin_tests,
 	      'ip6' => $ip6_tests,
 	      'rename' => $rename_tests,
+	      'bw' => $bw_tests,
 	    };
 
 # Run selected tests
