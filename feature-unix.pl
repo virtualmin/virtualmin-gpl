@@ -446,11 +446,23 @@ sub check_unix_clash
 {
 return 0 if ($_[0]->{'parent'});	# user already exists!
 if (!$_[1] || $_[1] eq 'user') {
+	# Check for username clash
 	return 1 if (defined(getpwnam($_[0]->{'user'})));
 	}
 if (!$_[1] || $_[1] eq 'group') {
+	# Check for group name clash
 	return 1 if ($_[0]->{'group'} &&
 		     defined(getgrnam($_[0]->{'group'})));
+	}
+if (!$_[1] || $_[1] eq 'uid') {
+	# Check for UID clash
+	return 1 if ($_[0]->{'uid'} &&
+		     defined(getpwuid($_[0]->{'uid'})));
+	}
+if (!$_[1] || $_[1] eq 'gid') {
+	# Check for GID clash
+	return 1 if ($_[0]->{'gid'} &&
+		     defined(getgrgid($_[0]->{'gid'})));
 	}
 return 0;
 }
