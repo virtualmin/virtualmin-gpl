@@ -274,6 +274,7 @@ local @dbs = split(/\s+/, $_[0]->{'db_postgres'});
 
 # Back them all up
 local $db;
+local $ok = 1;
 foreach $db (@dbs) {
 	&$first_print(&text('backup_postgresdump', $db));
 	local $dbfile = $_[1]."_".$db;
@@ -294,7 +295,7 @@ foreach $db (@dbs) {
 	if ($err) {
 		&$second_print(&text('backup_postgresdumpfailed',
 				     "<pre>$err</pre>"));
-		return 0;
+		$ok = 0;
 		}
 	else {
 		if ($destfile ne $dbfile) {
@@ -304,7 +305,7 @@ foreach $db (@dbs) {
 		&$second_print($text{'setup_done'});
 		}
 	}
-return 1;
+return $ok;
 }
 
 # restore_postgres(&domain, file,  &opts, &allopts, homeformat, &oldd, asowner)

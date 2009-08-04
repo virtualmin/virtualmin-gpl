@@ -401,6 +401,7 @@ push(@dbs, split(/\s+/, $_[0]->{'db_mysql'}));
 
 # Back them all up
 local $db;
+local $ok = 1;
 foreach $db (@dbs) {
 	&$first_print(&text('backup_mysqldump', $db));
 	local $dbfile = $_[1]."_".$db;
@@ -412,7 +413,7 @@ foreach $db (@dbs) {
 	if ($err) {
 		&$second_print(&text('backup_mysqldumpfailed',
 				     "<pre>$err</pre>"));
-		return 0;
+		$ok = 0;
 		}
 	else {
 		# Backup worked .. gzip the file
@@ -420,13 +421,14 @@ foreach $db (@dbs) {
 		if ($?) {
 			&$second_print(&text('backup_mysqlgzipfailed',
 					     "<pre>$out</pre>"));
+			$ok = 0;
 			}
 		else {
 			&$second_print($text{'setup_done'});
 			}
 		}
 	}
-return 1;
+return $ok;
 }
 
 # restore_mysql(&domain, file,  &opts, &allopts, homeformat, &oldd, asowner)

@@ -462,7 +462,8 @@ DOMAIN: foreach $d (@$doms) {
 			if (!$fok) {
 				# Didn't work .. remove failed file, so we
 				# don't have partial data
-				if ($ffile && $f ne "dir") {
+				if ($ffile && $f ne "dir" &&
+				    $f ne "mysql" && $f ne "postgres") {
 					foreach my $ff ($ffile,
 						glob("${ffile}_*")) {
 						&unlink_file($ff);

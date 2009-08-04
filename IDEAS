@@ -30,8 +30,8 @@
 
  - Installer for LimeSurvey 1.85+
 
- - Domain registration create should work if domain already registered
-   with the same account
-
  - Fix protected directories
 	- http://www.virtualmin.com/node/10774
+
+ - System stats for postfix NOQUEUE
+	- http://www.virtualmin.com/node/10930
