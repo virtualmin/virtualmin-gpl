@@ -163,6 +163,11 @@ if ($header{'location'} =~ /^(http|https):\/\/$host:$port$page(.*)$/ ||
         &redirect($linkurl.$header{'location'});
 	exit;
 	}
+elsif ($header{'location'} =~ /^(\/\S+)$/) {
+	# Fix a relative redirect
+	&redirect($linkurl.$baseurl.$1);
+	exit;
+	}
 
 # Fix up cookies using the old path
 $headers =~ s/(Set-Cookie:.*path=)(\/\S+)/$1$linkurl$baseurl$2/gi;
