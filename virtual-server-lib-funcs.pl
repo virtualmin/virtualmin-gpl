@@ -6182,6 +6182,13 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			&$first_print(&text('setup_scriptgone', $name));
 			next;
 			}
+
+		# Work out actual version
+		local @allvers = @{$script->{'install_versions'}};
+		if ($ver eq "latest") {
+			$ver = $allvers[0];
+			}
+
 		&$first_print(&text('setup_scriptinstall',
 				    $script->{'name'}, $ver));
 		local $opts = { 'path' => $sinfo->{'path'} };

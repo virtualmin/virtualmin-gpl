@@ -1383,8 +1383,10 @@ local $empty = { 'db' => '${DB}' };
 local @list = $scripts eq "none" ? ( $empty ) : ( @$scripts, $empty );
 
 # Build field list and disablers
-local @sfields = map { ("name_".$_, "path_".$_, "db_def_".$_,
-			"db_".$_, "dbtype_".$_) } (0..scalar(@list)-1);
+local @sfields = map { ("name_".$_, "path_".$_,
+			"version_".$_, "version_".$_."_def",
+			"db_def_".$_, "db_".$_, "dbtype_".$_) }
+		     (0..scalar(@list)-1);
 local $dis1 = &js_disable_inputs(\@sfields, [ ]);
 local $dis2 = &js_disable_inputs([ ], \@sfields);
 
@@ -1402,9 +1404,7 @@ $stable .= &ui_radio("def",
 local @opts = ( );
 foreach $sname (&list_available_scripts()) {
 	$script = &get_script($sname);
-	foreach $v (@{$script->{'versions'}}) {
-		push(@opts, [ "$sname $v", "$script->{'desc'} $v" ]);
-		}
+	push(@opts, [ $sname, $script->{'desc'} ]);
 	}
 @opts = sort { lc($a->[1]) cmp lc($b->[1]) } @opts;
 local @dbopts = ( );
@@ -1417,9 +1417,13 @@ local @table;
 foreach $script (@list) {
 	$db_def = $script->{'db'} eq '${DB}' ? 1 :
                         $script->{'db'} ? 2 : 0;
+	local ($name, $ver) = split(/\s+/, $script->{'name'});
 	push(@table, [
-		&ui_select("name_$i", $script->{'name'},
-		  [ [ undef, "&nbsp;" ], @opts ]),
+		&ui_select("name_$i", $name,
+			   [ [ undef, "&nbsp;" ], @opts ]),
+		&ui_opt_textbox("version_$i", $ver eq "latest" ? undef : $ver,
+				10, $text{'tscripts_latest'}."<br>",
+				$text{'tscripts_exact'}),
 		&ui_textbox("path_$i", $script->{'path'}, 25),
 		&ui_radio("db_def_$i",
 			$db_def,
@@ -1433,8 +1437,9 @@ foreach $script (@list) {
 	$i++;
 	}
 $stable .= &ui_columns_table(
-	[ $text{'tscripts_name'}, $text{'tscripts_path'},
-	  $text{'tscripts_db'}, $text{'tscripts_dbtype'} ],
+	[ $text{'tscripts_name'}, $text{'tscripts_version'},
+	  $text{'tscripts_path'}, $text{'tscripts_db'},
+	  $text{'tscripts_dbtype'} ],
 	undef,
 	\@table,
 	undef,
@@ -1466,8 +1471,11 @@ else {
 	$scripts = [ ];
 	for($i=0; defined($name = $in{"name_$i"}); $i++) {
 		next if (!$name);
+		local $ver = $in{"version_${i}_def"} ? "latest"
+						     : $in{"version_${i}"};
+		$ver =~ /^\S+$/ || &error(&text('tscripts_eversion', $i+1));
 		local $script = { 'id' => $i,
-			    	  'name' => $name };
+			    	  'name' => $name." ".$ver };
 		local $path = $in{"path_$i"};
 		$path =~ /^\/\S*$/ || &error(&text('tscripts_epath', $i+1));
 		$script->{'path'} = $path;
