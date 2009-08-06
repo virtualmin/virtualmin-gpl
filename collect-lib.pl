@@ -466,10 +466,14 @@ sub list_historic_collected_info
 {
 local ($stat, $start, $end) = @_;
 local @rv;
+local $last_time;
+local $now = time();
 open(HISTORY, "$historic_info_dir/$stat");
 while(<HISTORY>) {
 	chop;
 	local ($time, $value) = split(" ", $_);
+	next if ($time < $last_time ||	# No time travel or future data
+		 $time > $now);
 	if ((!defined($start) || $time >= $start) &&
 	    (!defined($end) || $time <= $end)) {
 		push(@rv, [ $time, $value ]);
@@ -477,6 +481,7 @@ while(<HISTORY>) {
 	if (defined($end) && $time > $end) {
 		last;	# Past the end point
 		}
+	$last_time = $time;
 	}
 close(HISTORY);
 return @rv;
