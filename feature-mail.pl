@@ -2975,9 +2975,11 @@ foreach my $d (@$doms) {
 	$maildoms{$d->{'dom'}} = $d;
 	foreach my $md (split(/\s+/, $d->{'bw_maildoms'})) {
 		$maildoms{$md} = $d;
+		if($config{'bw_mail_all'}){ $maildoms{$d->{'uid'}} = $d; }
 		}
 	foreach my $user (&list_domain_users($d, 0, 1, 1, 1)) {
 		$mailusers{$user->{'user'}} = $d;
+		if($config{'bw_mail_all'}){ $maildoms{$user->{'user'}} = $d; }
 		}
 	}
 local $myhostname = &get_system_hostname();
@@ -3006,8 +3008,30 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 
 		# Remove Solaris extra part like [ID 197553 mail.info]
 		s/\[ID\s+\d+\s+\S+\]\s+//;
-
-		if (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(\S+):\s+from=(\S+),\s+size=(\d+)/) {
+        
+		if ($config{'bw_mail_all'} && /^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(\S+):\s+uid=(\S+)\s+from=(\S+)/) {
+			# The initial Sending Uid: line that contains the user id and user for sending from scripts
+			# Will not work if not running php as cgi
+			local ($id, $uid, $fromuser) = ($8, $9, $10);
+			local $md = $maildoms{$uid};
+			if ($md && $config{'bw_mail_all'}) {
+				# Mail is from a local user. If it is to a non-
+				# local domain, we will count it in the next block
+				$fromdoms{$id} = $md;
+				}
+			}
+		elsif ($config{'bw_mail_all'} && /^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(\S+):\s+client=(\S+),\s+sasl_method=(\S+),\s+sasl_username=(\S+)/) {
+			# The initial Authenticated Sending User: line that contains the user logged in sending from sasl_authentication
+			local ($id, $fromuser) = ($8, $11);
+			local $md = $maildoms{$fromuser};
+			if ($md && !$fromdoms{$id} && $config{'bw_mail_all'}) {
+				# Mail is from a local authenticated user. If it is to a non-
+				# local domain, we will count it in the next block
+				$fromdoms{$id} = $md;
+				}
+			}
+		
+		elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(\S+):\s+from=(\S+),\s+size=(\d+)/) {
 			# The initial From: line that contains the size
 			local ($id, $size, $fromuser) = ($8, $10, $9);
 			$sizes{$id} = $size;
@@ -3030,6 +3054,36 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 				$fromdoms{$id} = $md;
 				}
 			}
+		elsif ($config{'bw_mail_all'} && /^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+POP3\((\S+)\): Disconnected: Logged out top=(\S+),\s+retr=(\d+)\/(\d+)/) {
+			# POP3 Downloading Bandwidth Usage
+			local ($uid, $size) = ($8, $11);
+			local $ltime = timelocal($5, $4, $3, $2,
+			    $apache_mmap{lc($1)}, $tm[5]);
+			if ($ltime > $now+(24*60*60)) {
+				# Must have been last year!
+				$ltime = timelocal($5, $4, $3, $2,
+				     $apache_mmap{lc($1)}, $tm[5]-1);
+				}
+			local $user = $8;
+			local $sz = $11;
+			local $md = $maildoms{$user};
+			if ($md && $config{'bw_mail_all'}) {
+				# Downloading of POP mailbox, add to domain bandwidth
+				if ($ltime > $max_ltime{$md->{'id'}}) {
+					# Update most recent seen time for
+					# this domain.
+					$max_ltime{$md->{'id'}} = $ltime;
+					$max_updated{$md->{'id'}} = 1;
+					}
+				if ($ltime > $starts->{$md->{'id'}} && $sz) {
+					# New enough to record
+					local $day =
+					    int($ltime / (24*60*60));
+					$bws->{$md->{'id'}}->
+						{"mail_".$day} += $sz;
+					}
+				}
+			}
 		elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(\S+):\s+to=(\S+),(\s+orig_to=(\S+))?/) {
 			# A To: line that has the local recipient.
 			# The date doesn't have the year, so we need to try
@@ -3043,15 +3097,37 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 				     $apache_mmap{lc($1)}, $tm[5]-1); };
 				}
 			local $user = $11 || $9;
+			if($config{'bw_mail_all'}){
+				local $user = $11;
+				local $id = $8;
+			}
 			local $sz = $sizes{$8};
 			local $fd = $fromdoms{$8};
 			$user =~ s/^<(.*)>/$1/;
 			$user =~ s/,$//;
 			local ($mb, $dom) = split(/\@/, $user);
 			local $md = $maildoms{$dom};
-			if ($md) {
+			if ($md && $fd && !$config{'bw_nomailout'} && $config{'bw_mail_all'}) {
+				# To a local domain - add the size to the 
+				# sending domain's usage once for local deliveries
+				if ($ltime > $max_ltime{$fd->{'id'}}) {
+					# Update most recent seen time for
+					# this domain.
+					$max_ltime{$fd->{'id'}} = $ltime;
+					$max_updated{$fd->{'id'}} = 1;
+					}
+				if ($ltime > $starts->{$fd->{'id'}} && $sz && !$lc{$id}) {
+					# New enough to record
+					local $day =
+					    int($ltime / (24*60*60));
+					$bws->{$fd->{'id'}}->
+						{"mail_".$day} += $sz;
+					$lc{$id} += 1;
+					} 
+				}
+			elsif ($md) {
 				# To a local domain - add the size to that
-				# domain's usage
+				# receiving domain's usage for off-site domain
 				if ($ltime > $max_ltime{$md->{'id'}}) {
 					# Update most recent seen time for
 					# this domain.
@@ -3067,6 +3143,36 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 					}
 				}
 			elsif ($fd && !$config{'bw_nomailout'}) {
+				# From a local domain, but to an off-site domain -
+				# add the size to the sender's usage
+				if ($ltime > $max_ltime{$fd->{'id'}}) {
+					# Update most recent seen time for
+					# this domain.
+					$max_ltime{$fd->{'id'}} = $ltime;
+					$max_updated{$fd->{'id'}} = 1;
+					}
+				if ($ltime > $starts->{$fd->{'id'}} && $sz) {
+					# New enough to record
+					local $day =
+					    int($ltime / (24*60*60));
+					$bws->{$fd->{'id'}}->
+						{"mail_".$day} += $sz;
+					}
+				}
+			}
+		elsif ($config{'bw_mail_all'} && /^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(\S+):\s+to=(\S+),(.+\s?=sent)?/) {
+			# A To: line that has the off-site recipient
+			local $ltime = timelocal($5, $4, $3, $2,
+			    $apache_mmap{lc($1)}, $tm[5]);
+			if ($ltime > $now+(24*60*60)) {
+				# Must have been last year!
+				$ltime = timelocal($5, $4, $3, $2,
+				     $apache_mmap{lc($1)}, $tm[5]-1);
+				}
+			local $id = $8;
+			local $sz = $sizes{$8};
+			local $fd = $fromdoms{$8};
+			if ($fd && !$config{'bw_nomailout'} && $config{'bw_mail_all'}) {
 				# From a local domain, but to an off-site domain -
 				# add the size to the sender's usage
 				if ($ltime > $max_ltime{$fd->{'id'}}) {
