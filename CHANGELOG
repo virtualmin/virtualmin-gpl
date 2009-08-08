@@ -1144,3 +1144,4 @@ Deprecated the feature to write logs via a program, as logging to /var/log/virtu
 Added validation for incorrect SuExec Apache directives.
 If a single database backup for a virtual server fails, others will still be backed up.
 When editing default scripts in a template, an option to always install the latest version is now available.
+Added a bandwidth monitoring option to include relayed email, thanks to Collin from Bisnet.

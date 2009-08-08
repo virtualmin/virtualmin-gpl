@@ -46,6 +46,7 @@ $config{'bw_servers'} = $in{'serversmode'} == 0 ? "" :
 			$in{'serversmode'} == 1 ? join(" ", @servers) :
 						  "!".join(" ", @servers);
 $config{'bw_nomailout'} = $in{'nomailout'};
+$config{'bw_mail_all'} = $in{'mailall'};
 &lock_file($module_config_file);
 $config{'last_check'} = time()+1;	# no need for check.cgi to be run
 &save_module_config();
