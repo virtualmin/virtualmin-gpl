@@ -138,12 +138,12 @@ print &ui_table_row(&hlink($text{'newbw_maillog'}, "bandwidth_maillog_def"),
 
 # Include outgoing email
 print &ui_table_row(&hlink($text{'newbw_mailout'}, "bandwidth_mailout"),
-	&ui_radio("nomailout", $config{'bw_nomailout'},
+	&ui_radio("nomailout", int($config{'bw_nomailout'}),
 		  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
 
 # Include relayed email
 print &ui_table_row(&hlink($text{'newbw_mailall'}, "bandwidth_mailall"),
-	&ui_radio("mailall", $config{'bw_mail_all'},
+	&ui_radio("mailall", int($config{'bw_mail_all'}),
 		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
 print &ui_hidden_table_end("table3");
