@@ -18,7 +18,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-return ( "1.0.2" );
+return ( "1.1" );
 }
 
 sub script_django_category
@@ -136,7 +136,7 @@ sub script_django_files
 local ($d, $ver, $opts, $upgrade) = @_;
 local @files = (
 	 { 'name' => "source",
-	   'file' => "Django-$ver-final.tar.gz",
+	   'file' => "Django-$ver.tar.gz",
 	   'url' => "http://www.djangoproject.com/download/$ver/tarball/" },
 	 { 'name' => "flup",
 	   'file' => "flup-1.0.tar.gz",
@@ -191,7 +191,7 @@ $ENV{'PYTHONPATH'} = "$opts->{'dir'}/lib/python";
 local $temp = &transname();
 local $err = &extract_script_archive($files->{'source'}, $temp, $d);
 $err && return (0, "Failed to extract Django source : $err");
-local $icmd = "(cd ".quotemeta("$temp/Django-$ver-final")." && ".
+local $icmd = "(cd ".quotemeta("$temp/Django-$ver")." && ".
       "python setup.py install --home ".quotemeta($opts->{'dir'}).") 2>&1";
 local $out = &run_as_domain_user($d, $icmd);
 if ($?) {
@@ -438,7 +438,7 @@ sub script_django_latest
 {
 local ($ver) = @_;
 return ( "http://www.djangoproject.com/download/",
-	 "Django-([0-9\\.]+)-final.tar.gz" );
+	 "/download/([0-9\\.]+)/tarball/" );
 }
 
 sub script_django_site
