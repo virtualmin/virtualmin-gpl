@@ -678,7 +678,13 @@ if ($apache::httpd_modules{'mod_php4'} ||
 			# Get from script too
 			foreach my $v (&{$script->{'php_vars_func'}}($d)) {
 				if (!$got{$v->[0]}) {
-					push(@phpv, "$v->[0] $v->[1]");
+					if ($v->[1] =~ /\s/) {
+						push(@phpv,
+						     "$v->[0] \"$v->[1]\"");
+						}
+					else {
+						push(@phpv, "$v->[0] $v->[1]");
+						}
 					$changed++;
 					}
 				}
