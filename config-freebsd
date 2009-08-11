@@ -173,3 +173,4 @@ usermin_switch=1
 plan_auto=1
 collect_notemp=0
 hide_alias=0
+avail_htaccess-htpasswd=1

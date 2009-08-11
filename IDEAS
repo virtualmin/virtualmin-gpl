@@ -30,8 +30,5 @@
 
  - Installer for LimeSurvey 1.85+
 
- - Fix protected directories
-	- http://www.virtualmin.com/node/10774
-
  - System stats for postfix NOQUEUE
 	- http://www.virtualmin.com/node/10930

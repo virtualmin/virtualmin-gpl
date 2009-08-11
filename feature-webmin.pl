@@ -624,6 +624,18 @@ if ($extramods{'change-user'}) {
 	push(@mods, "change-user");
 	}
 
+if ($extramods{'htaccess-htpasswd'} && $_[0]->{'unix'}) {
+	# Can create .htaccess files in home dir, as user
+        local %acl = ( 'noconfig' => 1,
+                       'home' => 0,
+                       'dirs' => $_[0]->{'home'},
+                       'sync' => 0,
+                       'user' => $_[0]->{'user'} );
+        &save_module_acl_logged(\%acl, $_[1]->{'name'}, "htaccess-htpasswd")
+                if (!$hasmods{'htaccess-htpasswd'});
+        push(@mods, "htaccess-htpasswd");
+        }
+
 if ($extramods{'mailboxes'} && $_[0]->{'mail'}) {
 	# Can read mailboxes of users
 	local %acl = ( 'noconfig' => 1,
