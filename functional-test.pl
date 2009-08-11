@@ -190,7 +190,8 @@ $domains_tests = [
 	# Check IMAP for admin mailbox
 	{ 'command' => 'test-imap.pl',
 	  'args' => [ [ 'user', $test_domain_user ],
-		      [ 'pass', 'smeg' ] ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
 	},
 
 	# Check Webmin login
@@ -387,7 +388,8 @@ $mailbox_tests = [
 	# Check IMAP for mailbox
 	{ 'command' => 'test-imap.pl',
 	  'args' => [ [ 'user', $test_full_user ],
-		      [ 'pass', 'smeg' ] ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
 	},
 
 	# Modify the user
@@ -1731,7 +1733,8 @@ $mail_tests = [
 	# Use IMAP to count mail - should be two or more
 	{ 'command' => 'test-imap.pl',
 	  'args' => [ [ 'user', $test_full_user ],
-		      [ 'pass', 'smeg' ] ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
 	  'grep' => '[23] messages',
 	},
 
@@ -2884,7 +2887,8 @@ $bw_tests = [
 	# Check IMAP for admin mailbox
 	{ 'command' => 'test-imap.pl',
 	  'args' => [ [ 'user', $test_bw_domain_user ],
-		      [ 'pass', 'smeg' ] ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
 	},
 
 	# Run bw.pl on this domain
@@ -2971,7 +2975,8 @@ $bw_tests = [
 	# Check IMAP for mailbox
 	{ 'command' => 'test-imap.pl',
 	  'args' => [ [ 'user', $test_full_user ],
-		      [ 'pass', 'smeg' ] ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
 	},
 
 	# Re-run bw.pl to pick up that email
