@@ -2883,7 +2883,7 @@ $bw_tests = [
 	},
 
 	# Create a 1M test file
-	{ 'command' => '(cat '.$ok_email_file.' ; head -c250000 /dev/urandom | od -c) >/tmp/random.txt',
+	{ 'command' => '(cat '.$ok_email_file.' ; head -c250000 /dev/zero | od -c -v) >/tmp/random.txt',
 	},
 
 	# Send email to the domain's user
