@@ -1693,6 +1693,10 @@ $mail_tests = [
 	  'ignorefail' => 1,
 	},
 
+	# Add empty lines to procmail.log, to prevent later false matches
+	{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
+	},
+
 	# Send one email to him, so his mailbox gets created and then procmail
 	# runs as the right user. This is to work around a procmail bug where
 	# it can drop privs too soon!
@@ -1702,8 +1706,13 @@ $mail_tests = [
 		      [ 'data', $ok_email_file ] ],
 	},
 
-	# Wait for first mail to get delivered
-	{ 'command' => 'sleep 10' },
+	# Check procmail log for delivery, for at most 60 seconds
+	{ 'command' => 'while [ "`tail -5 /var/log/procmail.log | grep '.
+		       'To:'.$test_user.'@'.$test_domain.'`" = "" ]; do '.
+		       'sleep 5; done',
+	  'timeout' => 60,
+	  'ignorefail' => 1,
+	},
 
 	# Add empty lines to procmail.log, to prevent later false matches
 	{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',

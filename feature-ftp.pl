@@ -361,6 +361,8 @@ else {
 	local $global = &proftpd::find_directive_struct("Global", $conf);
 	return &proftpd::find_directive("TransferLog", $global->{'members'}) ||
 	       &proftpd::find_directive("ExtendedLog", $global->{'members'}) ||
+	       &proftpd::find_directive("TransferLog", $conf) ||
+	       &proftpd::find_directive("ExtendedLog", $conf) ||
 	       "/var/log/xferlog";
 	}
 return undef;
