@@ -5,7 +5,7 @@
 
  - run functional-test.pl
 	x fudu
-	- lentor
+	x lentor
 	- xencentos
 
  x Generate british english with :
