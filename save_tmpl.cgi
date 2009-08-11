@@ -66,6 +66,21 @@ if ($in{'initsub'}) {
 
 &webmin_log($in{'new'} ? "create" : "modify", "template", $tmpl->{'name'});
 
+# Call post-save function
+$psfunc = "postsave_template_".$in{'editmode'};
+if (defined(&$psfunc)) {
+	&$psfunc($tmpl);
+	}
+
+# Update all Webmin users for domains on this template, if a template
+# section that effects Webmin users was changed
+if (!$in{'new'} &&
+    &indexof($in{'editmode'}, @template_features_effecting_webmin) >= 0) {
+	&set_all_null_print();
+	&modify_all_webmin($tmpl->{'standard'} ? undef : $tmpl->{'id'});
+	&run_post_actions();
+	}
+
 if ($in{'next'}) {
 	# And go to next section
 	@editmodes = &list_template_editmodes($tmpl);
@@ -81,21 +96,6 @@ if ($in{'next'}) {
 else {
 	# Return to template list
 	&redirect("edit_newtmpl.cgi");
-	}
-
-# Call post-save function
-$psfunc = "postsave_template_".$in{'editmode'};
-if (defined(&$psfunc)) {
-	&$psfunc($tmpl);
-	}
-
-# Update all Webmin users for domains on this template, if a template
-# section that effects Webmin users was changed
-if (!$in{'new'} &&
-    &indexof($in{'editmode'}, @template_features_effecting_webmin) >= 0) {
-	&set_all_null_print();
-	&modify_all_webmin($tmpl->{'standard'} ? undef : $tmpl->{'id'});
-	&run_post_actions();
 	}
 
 # parse_none_def(name)
