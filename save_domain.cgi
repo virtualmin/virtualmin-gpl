@@ -372,6 +372,9 @@ else {
 if ($d->{'parent'}) {
 	&refresh_webmin_user(&get_domain($d->{'parent'}));
 	}
+else {
+	&refresh_webmin_user($d);
+	}
 
 # Update custom fields
 &parse_custom_fields($d, \%in);

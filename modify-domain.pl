@@ -489,7 +489,13 @@ if (@add_excludes || @remove_excludes) {
 	&$second_print($text{'setup_done'});
 	}
 
-&refresh_webmin_user($dom);
+# Update the parent user
+if ($dom->{'parent'}) {
+	&refresh_webmin_user(&get_domain($dom->{'parent'}));
+	}
+else {
+	&refresh_webmin_user($dom);
+	}
 
 # Run the after command
 &run_post_actions();
