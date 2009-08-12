@@ -6149,6 +6149,7 @@ if ($aliasname && $aliasname ne $dom->{'dom'}) {
 			 'nocreationmail', 1,
 			 'name', 1,
 			 'ip', $dom->{'ip'},
+			 'dns_ip', $dom->{'dns_ip'},
 			 'virt', 0,
 			 'source', $dom->{'source'},
 			 'parent', $dom->{'id'},

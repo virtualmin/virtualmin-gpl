@@ -26,7 +26,11 @@
  - WebNIC registrar support
 	- See email from Winnie Lee
 
- - Script to get CGI urls for some help page, for Joe
-
  - System stats for postfix NOQUEUE
 	- http://www.virtualmin.com/node/10930
+
+ - Option to update scripts from SVN
+	- Cron job on virtualmin.com
+	- Copy files to somewhere under /etc/webmin ?
+	- Don't re-download if already got
+	- Don't keep those with versions older or equal to in package
