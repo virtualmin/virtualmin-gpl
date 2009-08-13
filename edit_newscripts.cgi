@@ -14,6 +14,7 @@ $prog = "edit_newscripts.cgi?mode=";
 	  [ "enable", $text{'newscripts_tabenable'}, $prog."enable" ],
 	  [ "upgrade", $text{'newscripts_tabupgrade'}, $prog."upgrade" ],
 	  [ "warn", $text{'newscripts_tabwarn'}, $prog."warn" ],
+	  [ "latest", $text{'newscripts_tablatest'}, $prog."latest" ],
 	);
 print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "add", 1);
 
@@ -32,6 +33,8 @@ print &ui_table_row($text{'newscripts_srcinst'},
 print &ui_table_end();
 print &ui_form_end([ [ "install", $text{'newscripts_install'} ] ]);
 print &ui_tabs_end_tab();
+
+############################################################################
 
 # Display a list of those currently available, with checkboxes for enabling
 print &ui_tabs_start_tab("mode", "enable");
@@ -110,6 +113,8 @@ print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
 print &ui_tabs_end_tab();
 
+############################################################################
+
 # Show form to mass upgrade scripts
 print &ui_tabs_start_tab("mode", "upgrade");
 print "$text{'newscripts_desc3'}<p>\n";
@@ -130,8 +135,8 @@ foreach $d (&list_domains()) {
 	}
 
 # Find installed scripts and possible upgrades
-@scripts = &list_available_scripts();
-foreach $sname (grep { $used{$_} } @scripts) {
+@scriptnames = &list_available_scripts();
+foreach $sname (grep { $used{$_} } @scriptnames) {
 	$script = &get_script($sname);
 	foreach $v (@{$script->{'versions'}}) {
 		if (&compare_versions($v, $minversion{$sname}, $script) > 0) {
@@ -167,6 +172,8 @@ else {
 	print "<b>$text{'newscripts_noup'}</b><p>\n";
 	}
 print &ui_tabs_end_tab();
+
+############################################################################
 
 # Show form to setup scheduled email warnings about old scripts
 print &ui_tabs_start_tab("mode", "warn");
@@ -227,6 +234,34 @@ print &ui_table_row($text{'newscripts_wemail'},
 	    &ui_checkbox("wemail", "other", $text{'newscripts_wother'},
 			 $other)." ".
 	    &ui_textbox("wother", $other, 40));
+
+print &ui_table_end();
+print &ui_form_end([ [ undef, $text{'save'} ] ]);
+print &ui_tabs_end_tab();
+
+############################################################################
+
+# Show form for downloading script updates
+print &ui_tabs_start_tab("mode", "latest");
+print "$text{'newscripts_desc5'}<p>\n";
+print &ui_form_start("save_scriptlatest.cgi", "post");
+print &ui_table_start($text{'newscripts_lheader'}, undef, 2);
+
+# Automatically download latest scripts?
+$job = &find_scriptlatest_job();
+print &ui_table_row($text{'newscripts_lenabled'},
+	&ui_yesno_radio("enabled", $job ? 1 : 0));
+
+# Scripts to include
+print &ui_table_row($text{'newscripts_lscripts'},
+	&ui_radio("scripts_def", $config{'scriptlatest'} ? 0 : 1,
+	      [ [ 1, $text{'newscripts_lall'} ],
+		[ 0, $text{'newscripts_lsel'} ] ])."<br>\n".
+	&ui_select("scripts",
+		   [ split(/\s+/, $config{'scriptlatest'}) ],
+		   [ map { [ $_->{'name'}, $_->{'desc'} ] }
+		      sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) } @scripts ],
+		   10, 1));
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);

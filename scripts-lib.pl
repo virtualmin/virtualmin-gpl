@@ -2019,6 +2019,12 @@ local $job = &find_virtualmin_cron_job($scriptwarn_cron_cmd);
 return $job;
 }
 
+sub find_scriptlatest_job
+{
+local $job = &find_virtualmin_cron_job($scriptlatest_cron_cmd);
+return $job;
+}
+
 # list_script_upgrades(&domains)
 # Returns a list of script updates that can be done in the given domains
 sub list_script_upgrades
@@ -2413,6 +2419,36 @@ elsif ($job && $enabled && $when &&
 	&unlock_file(&cron::cron_file($job));
 	}
 &cron::create_wrapper($scriptwarn_cron_cmd, $module_name, "scriptwarn.pl");
+}
+
+# setup_scriptlatest_job(enabled)
+# Create or delete the cron job that downloads script updates
+sub setup_scriptlatest_job
+{
+local ($enabled) = @_;
+&foreign_require("cron", "cron-lib.pl");
+local $job = &find_scriptlatest_job();
+if ($job && !$enabled) {
+	# Delete job
+	&lock_file(&cron::cron_file($job));
+	&cron::delete_cron_job($job);
+	&unlock_file(&cron::cron_file($job));
+	}
+elsif (!$job && $enabled) {
+	# Create daily job
+	$job = { 'user' => 'root',
+		 'command' => $scriptlatest_cron_cmd,
+		 'active' => 1,
+		 'mins' => int(rand()*60),
+		 'hours' => int(rand()*24),
+		 'days' => '*',
+		 'months' => '*',
+		 'weekdays' => '*', };
+	&lock_file(&cron::cron_file($job));
+	&cron::create_cron_job($job);
+	&unlock_file(&cron::cron_file($job));
+	}
+&cron::create_wrapper($scriptlatest_cron_cmd, $module_name, "scriptlatest.pl");
 }
 
 # apply_cron_schedule(&job, 'daily'|'weekly'|'monthly')

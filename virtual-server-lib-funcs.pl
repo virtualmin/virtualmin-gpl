@@ -11604,6 +11604,11 @@ if (defined(&setup_scriptwarn_job) && defined($config{'scriptwarn_enabled'})) {
 	&setup_scriptwarn_job($config{'scriptwarn_enabled'},
 			      $config{'scriptwarn_wsched'});
 	}
+
+# Re-setup script updates job, if it was enabled
+if (defined(&setup_scriptlatest_job) && $config{'scriptlatest_enabled'}) {
+	&setup_scriptlatest_job(1);
+	}
 }
 
 # mount_point(dir)

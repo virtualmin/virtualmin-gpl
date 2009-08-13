@@ -34,3 +34,4 @@
 	- Copy files to somewhere under /etc/webmin ?
 	- Don't re-download if already got
 	- Don't keep those with versions older or equal to in package
+	- CHANGELOG
