@@ -8,6 +8,10 @@ $d = &get_domain($in{'dom'});
 $can = &can_edit_phpmode($d);
 $can || &error($text{'phpmode_ecannot'});
 
+# Make sure an Apache virtualhost exists, or else all the rest is pointless
+($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+$virt || &error(&text('phpmode_evirt', $d->{'dom'}, $d->{'web_port'}));
+
 &ui_print_header(&domain_in($d), $text{'phpmode_title'}, "");
 
 print &ui_form_start("save_phpmode.cgi");

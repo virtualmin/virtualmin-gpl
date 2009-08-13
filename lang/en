@@ -4043,6 +4043,7 @@ phpmode_defweb=Default website for IP address?
 phpmode_defno=No, default is $1
 phpmode_defwebon=Making website the default ..
 phpmode_defweberr=.. failed : $1
+phpmode_evirt=Website options cannot be edited, as no Apache virtual host for $1 port $2 was found!
 
 spf_title=DNS Options
 spf_enable=Enabling SPF ..

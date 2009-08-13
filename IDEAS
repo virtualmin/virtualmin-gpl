@@ -30,8 +30,9 @@
 	- http://www.virtualmin.com/node/10930
 
  - Option to update scripts from SVN
-	- Cron job on virtualmin.com
-	- Copy files to somewhere under /etc/webmin ?
+	- Cron job on virtualmin.com to update from SVN
 	- Don't re-download if already got
 	- Don't keep those with versions older or equal to in package
 	- CHANGELOG
+	- GPG verification?
+	- Need index file with names and versions

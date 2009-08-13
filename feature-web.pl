@@ -2510,6 +2510,7 @@ sub save_domain_suexec
 local ($d, $mode) = @_;
 &require_apache();
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+return if (!$virt);
 local $pdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
 local $conf = &apache::get_config();
 if ($apache::httpd_modules{'core'} >= 2.0) {
@@ -2888,6 +2889,7 @@ my @ports = ( $d->{'web_port'},
 my $withstar = "*.".$d->{'dom'};
 foreach my $p (@ports) {
 	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
+	next if (!$virt);
 	my @sa = &apache::find_directive("ServerAlias", $vconf);
 	my $found;
 	foreach my $sa (@sa) {

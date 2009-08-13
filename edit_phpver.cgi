@@ -9,6 +9,10 @@ $d = &get_domain($in{'dom'});
 @avail = &list_available_php_versions($d);
 @avail > 1 || &error($text{'phpver_eavail'});
 
+# Make sure an Apache virtualhost exists, or else all the rest is pointless
+($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+$virt || &error(&text('phpmode_evirt', $d->{'dom'}, $d->{'web_port'}));
+
 &ui_print_header(&domain_in($d), $text{'phpver_title'}, "", "phpver");
 @hiddens = ( [ "dom", $in{'dom'} ] );
 
