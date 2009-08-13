@@ -355,6 +355,21 @@ if ($config{'mail_system'} == 1) {
 	&flush_file_lines();
 	&unlock_file($sendmail::config{'sendmail_cf'});
 	&unlock_file($cwfile) if ($cwfile);
+
+	# Also delete from generics domain file or list
+	local $cgfile;
+	local @dlist = &sendmail::get_file_or_config($conf, "G", undef,
+                                                     \$cgfile);
+	if (&indexof($_[0]->{'dom'}, @dlist) >= 0) {
+		&lock_file($cgfile) if ($cgfile);
+		&lock_file($sendmail::config{'sendmail_cf'});
+		&sendmail::delete_file_or_config($conf, "G", $_[0]->{'dom'});
+		&flush_file_lines();
+		&unlock_file($sendmail::config{'sendmail_cf'});
+		&unlock_file($cgfile) if ($cgfile);
+		&sendmail::restart_sendmail();
+		}
+
 	if (!$no_restart_mail) {
 		&sendmail::restart_sendmail();
 		}
@@ -4042,11 +4057,29 @@ sub create_generic
 {
 local ($user, $email) = @_;
 if ($config{'mail_system'} == 1) {
+	# Add to Sendmail generics file
 	local $gen = { 'from' => $user, 'to' => $email };
 	&sendmail::create_generic($gen, $sendmail_gfile,
 				  $sendmail_gdbm, $sendmail_gdbmtype);
+
+	# And generics domain list, if missing
+	local $conf = &sendmail::get_sendmailcf();
+	local $cgfile;
+	local @dlist = &sendmail::get_file_or_config($conf, "G", undef,
+                                                     \$cgfile);
+	local ($mb, $dname) = split(/\@/, $email);
+	if (&indexof($dname, @dlist) < 0) {
+		&lock_file($cgfile) if ($cgfile);
+		&lock_file($sendmail::config{'sendmail_cf'});
+		&sendmail::add_file_or_config($conf, "G", $dname);
+		&flush_file_lines();
+		&unlock_file($sendmail::config{'sendmail_cf'});
+		&unlock_file($cgfile) if ($cgfile);
+		&sendmail::restart_sendmail();
+		}
 	}
 elsif ($config{'mail_system'} == 0) {
+	# Add to Postfix generics map
 	local $gen = { 'name' => $user,
 		       'value' => $email };
 	&create_replace_mapping($canonical_type, $gen);
@@ -4060,12 +4093,12 @@ sub delete_generic
 {
 local ($generic) = @_;
 if ($config{'mail_system'} == 1) {
-	# For sendmail
+	# From Sendmail generics file
 	&sendmail::delete_generic($generic, $sendmail_gfile,
 			$sendmail_gdbm, $sendmail_gdbmtype);
 	}
 elsif ($config{'mail_system'} == 0) {
-	# For postfix
+	# From Postfix generics map
 	&postfix::delete_mapping($canonical_type, $generic);
 	&postfix::regenerate_canonical_table();
 	}
@@ -4077,12 +4110,12 @@ sub modify_generic
 {
 local ($generic, $oldgeneric) = @_;
 if ($config{'mail_system'} == 1) {
-	# For sendmail
+	# In Sendmail generics file
 	&sendmail::modify_generic($oldgeneric, $generic, $sendmail_gfile,
 			$sendmail_gdbm, $sendmail_gdbmtype);
 	}
 elsif ($config{'mail_system'} == 0) {
-	# For postfix
+	# In Postfix generics map
 	&postfix::modify_mapping($canonical_type, $oldgeneric, $generic);
 	}
 }
