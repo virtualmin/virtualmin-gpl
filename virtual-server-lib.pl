@@ -214,6 +214,12 @@ $script_download_dir = "/";
 $script_warnings_file = "$module_config_directory/script-warnings-sent";
 $osdn_website_host = "sourceforge.net";
 
+$script_latest_host = "latest-scripts.virtualmin.com";
+$script_latest_port = 80;
+$script_latest_dir = "/";
+$script_latest_file = "scripts.txt";
+$script_latest_key = "latest-scripts@virtualmin.com";
+
 $upgrade_virtualmin_host = "software.virtualmin.com";
 $upgrade_virtualmin_port = 80;
 $upgrade_virtualmin_testpage = "/licence-test.txt";

@@ -59,7 +59,8 @@ foreach $s (@scripts_directories) {
 	if (@st) {
 		push(@sfiles, [ $spath, $st[9],
 			&guess_script_version($spath),
-			$s eq $scripts_directories[0] ? 'custom' : 'core' ]);
+			$s eq $scripts_directories[0] ? 'custom' :
+			 $s eq $scripts_directories[1] ? 'latest' : 'core' ]);
 		}
 	}
 foreach my $p (&list_script_plugins()) {

@@ -23,6 +23,11 @@ $config{'scriptlatest_enabled'} = $in{'enabled'};
 # Create or remove cron job
 &setup_scriptlatest_job($in{'enabled'});
 
+# If enabled, do one run now
+if ($in{'enabled'}) {
+	&system_logged("$scriptlatest_cron_cmd >/dev/null 2>&1 </dev/null");
+	}
+
 # Return
 &webmin_log("latest", "scripts");
 &redirect("edit_newscripts.cgi?mode=latest");

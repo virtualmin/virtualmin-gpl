@@ -1,0 +1,4 @@
+desc=Script installer updater
+html=Script installer versions more recent that those included with the current release of Virtualmin can now be downloaded using the Installer Updates section on the Script Installers page. The new versions will typically be released within hours or days of new script releases.
+master=1
+link=edit_newscripts.cgi?mode=latest

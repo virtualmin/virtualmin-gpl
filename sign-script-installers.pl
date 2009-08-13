@@ -78,6 +78,7 @@ else {
 	}
 
 # Write out version file
+print "Saving versions file ..\n";
 $vfile = "$dir/scripts.txt";
 &open_tempfile(VFILE, ">$vfile");
 foreach $script (@scripts) {
@@ -87,6 +88,15 @@ foreach $script (@scripts) {
 &close_tempfile(VFILE);
 &set_ownership_permissions($user, undef, undef, $vfile);
 
+# GPG sign version file
+$sigvfile = $vfile."-sig.asc";
+system("su $user -c 'rm -f $sigvfile ; gpg --armor --output $sigvfile --default-key $key --detach-sig $vfile'");
+if ($?) {
+	print ".. GPG failed!\n";
+	exit(3);
+	}
+print ".. done\n";
+
 # GPG sign any new script files
 foreach my $sfile (glob("$dir/*.pl")) {
 	$sigfile = $sfile."-sig.asc";
@@ -95,7 +105,7 @@ foreach my $sfile (glob("$dir/*.pl")) {
 	if ($st[9] > $sigst[9]) {
 		# Needs re-signing
 		print "Signing script $sfile ..\n";
-		system("su $user -c 'gpg --armor --output $sigfile --default-key $key --detach-sig $sfile'");
+		system("su $user -c 'rm -f $sigfile ; gpg --armor --output $sigfile --default-key $key --detach-sig $sfile'");
 		if ($?) {
 			print ".. GPG failed!\n";
 			exit(3);
