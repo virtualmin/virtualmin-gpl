@@ -9,6 +9,10 @@ if ($ARGV[0] eq "-debug" || $ARGV[0] eq "--debug") {
 	$debug = 1;
 	}
 
+# Get Virtualmin serial and key for authentication
+&read_env_file($virtualmin_license_file, \%licence);
+($user, $pass) = ($licence{'SerialNumber'}, $licence{'LicenseKey'});
+
 # Check if GPG is available
 &foreign_require("webmin");
 ($gpgbad, $err) = &webmin::gnupg_setup();
@@ -35,7 +39,7 @@ elsif ($debug) {
 # Try to fetch the scripts index
 &http_download($script_latest_host, $script_latest_port,
 	       $script_latest_dir.$script_latest_file,
-	       \$lstr, \$err, undef, 0, undef, undef, 30, 0, 1);
+	       \$lstr, \$err, undef, 0, $user, $pass, 30, 0, 1);
 if ($err) {
 	if ($debug) {
 		print STDERR "Failed to fetch http://$script_latest_host$script_latest_dir$script_latest_file : $err\n";
@@ -48,7 +52,7 @@ if (!$gpgbad) {
 	$script_latest_sig = $script_latest_file."-sig.asc";
 	&http_download($script_latest_host, $script_latest_port,
 		       $script_latest_dir.$script_latest_sig,
-		       \$lsigstr, \$err, undef, 0, undef, undef, 30, 0, 1);
+		       \$lsigstr, \$err, undef, 0, $user, $pass, 30, 0, 1);
 	if ($err) {
 		if ($debug) {
 			print STDERR "Failed to fetch http://$script_latest_host$script_latest_dir$script_latest_sig : $err\n";
@@ -129,7 +133,7 @@ foreach $down (@download) {
 	$err = undef;
 	&http_download($script_latest_host, $script_latest_port,
 		       $script_latest_dir.$down.".pl", \$sdata, \$err,
-		       undef, 0, undef, undef, 30, 0, 1);
+		       undef, 0, $user, $pass, 30, 0, 1);
 	if ($err) {
 		if ($debug) {
 			print STDERR "Failed to download $down : $err\n";
@@ -143,7 +147,7 @@ foreach $down (@download) {
 		&http_download($script_latest_host, $script_latest_port,
 			       $script_latest_dir.$down.".pl-sig.asc",
 			       \$sigdata, \$err,
-			       undef, 0, undef, undef, 30, 0, 1);
+			       undef, 0, $user, $pass, 30, 0, 1);
 		if ($err) {
 			if ($debug) {
 				print STDERR "Failed to download ${down}-sig.asc  : $err\n";
