@@ -8758,7 +8758,8 @@ if (@uinfo) {
 	# Is a Unix user .. find the domains for his GID (which could include
 	# sub-servers), and then check the home for each
 	foreach my $d (&get_domain_by("gid", $uinfo[3])) {
-		if ($uinfo[7] =~ /^\Q$d->{'home'}\E\/homes\//) {
+		if ($uinfo[7] =~ /^\Q$d->{'home'}\E\/homes\// ||
+		    ($d->{'user'} eq $uinfo[0] && !$d->{'parent'})) {
 			return $d;
 			}
 		}
