@@ -308,11 +308,11 @@ sub script_phpmyadmin_latest
 local ($ver) = @_;
 if (&compare_versions($ver, "3.1") > 0) {
 	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
-		 "http://prdownloads.sourceforge.net/phpmyadmin/phpMyAdmin-([0-9\\.]+)-all-languages\\.zip" );
+		 "phpMyAdmin-([0-9\\.]+)-all-languages\\.zip" );
 	}
 elsif (&compare_versions($ver, "2.11") > 0) {
 	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
-		 "http://prdownloads.sourceforge.net/phpmyadmin/phpMyAdmin-(2\\.[0-9\\.]+)-all-languages\\.zip" );
+		 "phpMyAdmin-(2\\.[0-9\\.]+)-all-languages\\.zip" );
 	}
 else {
 	return ( );
