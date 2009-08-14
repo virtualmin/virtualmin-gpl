@@ -41,12 +41,9 @@ foreach $s (@scripts) {
 		foreach $url (map { $_->{'url'} } @files) {
 			# Work out URLs
 			@urls = ( $url );
-			if ($url =~ /^http:\/\/[^\.]+.dl.sourceforge.net\/sourceforge\/([^\/]+)\/(.*)$/ ||
-			    $url =~ /^http:\/\/prdownloads.sourceforge.net\/([^\/]+)\/(.*)$/) {
-				# OSDN url .. get mirrors
-				local ($project, $file) = ($1, $2);
-				local @mirrors = &list_osdn_mirrors($project, $file);
-				push(@urls, map { $_->{'url'} } @mirrors);
+			local $ourl = &convert_osdn_url($url);
+			if ($ourl && $ourl ne $url) {
+				push(@orls, $ourl);
 				}
 
 			# Extract hostnames
