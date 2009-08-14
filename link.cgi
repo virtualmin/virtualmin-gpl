@@ -146,6 +146,13 @@ while(1) {
 	$headers .= $headline."\n";
 	}
 
+# Fix up cookies using the old path
+$headers =~ s/(Set-Cookie:.*path=)(\/\S+)/$1$linkurl$baseurl$2/gi;
+
+# Output the headers, minus location which we mangle
+$headers =~ s/Location:.*\n//gi;
+print $headers;
+
 $defport = $ssl ? 443 : 80;
 if ($header{'location'} =~ /^(http|https):\/\/$host:$port$page(.*)$/ ||
     $header{'location'} =~ /^(http|https):\/\/$host$page(.*)/ &&
@@ -169,11 +176,8 @@ elsif ($header{'location'} =~ /^(\/\S+)$/) {
 	exit;
 	}
 
-# Fix up cookies using the old path
-$headers =~ s/(Set-Cookie:.*path=)(\/\S+)/$1$linkurl$baseurl$2/gi;
-
-# Output the headers
-print $headers,"\n";
+# End of headers
+print "\n";
 
 # read back the rest of the page
 if ($header{'content-type'} =~ /text\/html/ && !$header{'x-no-links'}) {
