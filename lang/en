@@ -2269,6 +2269,7 @@ limits_edit_catchall=Can create catchall aliases
 limits_edit_html=Can use web page editor
 limits_edit_mail=Can edit email settings
 limits_edit_allowedhosts=Can edit database remote hosts
+limits_edit_passwd=Can change password
 limits_shell=Allowed login type
 limits_shell_nologin=No login
 limits_shell_ftp=FTP only

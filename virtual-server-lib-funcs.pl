@@ -277,7 +277,7 @@ else {
 foreach my $ed (@edit_limits) {
 	if (!defined($dom->{'edit_'.$ed})) {
 		$dom->{'edit_'.$ed} = $ed eq "users" || $ed eq "aliases" ||
-				      $ed eq "html" ? 1 :
+				      $ed eq "html" || $ed eq "passwd" ? 1 :
 				      $dom->{'domslimit'} ? 1 : 0;
 		}
 	}
@@ -8451,6 +8451,12 @@ sub can_show_pass
 return &master_admin() || &reseller_admin() || $config{'show_pass'};
 }
 
+# Returns 1 if the user can change his own password
+sub can_passwd
+{
+return &reseller_admin() || $access{'edit_passwd'};
+}
+
 # Returns 1 if the current user can set the chained certificate path to
 # anywhere.
 sub can_chained_cert_path
@@ -9727,7 +9733,7 @@ if (&can_delete_domain($d)) {
 		  });
 	}
 
-if (!&can_config_domain($d)) {
+if (!&can_config_domain($d) && &can_passwd()) {
 	# Change password button
 	push(@rv, { 'page' => 'edit_pass.cgi',
 		    'title' => $text{'edit_changepass'},

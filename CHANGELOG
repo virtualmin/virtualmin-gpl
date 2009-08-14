@@ -1149,3 +1149,4 @@ Added a bandwidth monitoring option to include relayed email, thanks to Collin f
 ---- Changes since 3.72 ----
 On Sendmail systems with outgoing address mapping enabled, the generic domains file is now correctly updated.
 Script installer versions more recent that those included with the current release of Virtualmin can now be downloaded using the Installer Updates section on the Script Installers page. The new versions will typically be released within hours or days of new script releases.
+Added a domain-owner leven restriction to prevent changing of a virtual server's password.

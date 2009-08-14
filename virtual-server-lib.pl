@@ -154,7 +154,7 @@ $initial_users_dir = "$module_config_directory/initial";
 @edit_limits = ('domain', 'users', 'aliases', 'dbs', 'scripts',
 	        'ip', 'ssl', 'forward', 'admins', 'spam', 'phpver', 'phpmode',
 		'mail', 'backup', 'sched', 'restore', 'sharedips', 'catchall',
-		'html', 'allowedhosts', 'disable', 'delete');
+		'html', 'allowedhosts', 'passwd', 'disable', 'delete');
 if (!$virtualmin_pro) {
 	@edit_limits = grep { $_ ne 'scripts' && $_ ne 'html' &&
 			      $_ ne 'phpmode' && $_ ne 'phpver' } @edit_limits;
