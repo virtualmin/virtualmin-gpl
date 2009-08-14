@@ -365,6 +365,7 @@ sub script_squirrelmail_check_latest
 {
 local ($ver) = @_;
 local @vers = &osdn_package_versions("squirrelmail", "squirrelmail-([a-z0-9\\.]+)\\.tar\\.gz");
+@vers = grep { !/RC/ } @vers;
 if (&compare_versions($ver, 1.5) > 0) {
 	@vers = grep { &compare_versions($_, 1.5) > 0 } @vers;
 	}
