@@ -11,6 +11,7 @@ require './virtual-server-lib.pl';
 # Make the table data
 @links = &list_custom_links();
 @cats = &list_custom_link_categories();
+%catmap = map { $_->{'id'}, $_->{'desc'} } @cats;
 print &ui_form_start("save_newlinks.cgi", "post");
 $i = 0;
 @table = ( );
@@ -25,6 +26,8 @@ foreach $l (@links) {
 			$l ne $links[@links-1],
 			);
 		}
+	$catdesc = $l->{'cat'} ? $catmap{$l->{'cat'}}
+			       : "<i>$text{'newlinks_nocat2'}</i>";
 	push(@table, [
 		"<a href='edit_link.cgi?idx=$i'>".
 		  $l->{'desc'}."</a>",
@@ -33,6 +36,7 @@ foreach $l (@links) {
 		join(", ", map { $text{'newlinks_'.$_} }
 			      grep { $l->{'who'}->{$_} }
 				   ('master', 'domain', 'reseller') ),
+		$catdesc,
 		@links > 1 ? ( $updown ) : ( ),
 		]);
 	$i++;	
@@ -47,6 +51,7 @@ print &ui_form_columns_table(
 	undef,
 	[ $text{'newlinks_desc'}, $text{'newlinks_url'},
 	  $text{'newlinks_open'}, $text{'newlinks_who'},
+	  $text{'newlinks_cat'},
 	  @links > 1 ? ( $text{'newlinks_move'} ) : ( ), ],
 	100,
 	\@table,
