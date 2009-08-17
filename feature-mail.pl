@@ -3210,7 +3210,7 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 			}
 
 		# Dovecot byte counts
-		elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(IMAP|POP3)\((\S+)\).*(size=(\d+)|bytes=(\d+)\/(\d+)|retr=(\d+)\/(\d+))/) {
+		elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(IMAP|POP3)\((\S+)\).*(bytes=(\d+)\/(\d+)|retr=(\d+)\/(\d+))/) {
 			local $ltime;
 			eval { $ltime = timelocal($5, $4, $3, $2,
 			    $apache_mmap{lc($1)}, $tm[5]); };
@@ -3220,7 +3220,7 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 				     $apache_mmap{lc($1)}, $tm[5]-1); };
 				}
 			local $user = $9;
-			local $sz = $11 || $13 || $15;
+			local $sz = $11 + $12 || $14;
 			local $md = $mailusers{$user};
 			if ($md) {
 				if ($ltime > $max_ltime{$md->{'id'}}) {
