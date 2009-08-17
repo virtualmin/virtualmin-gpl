@@ -1147,7 +1147,7 @@ If a single database backup for a virtual server fails, others will still be bac
 When editing default scripts in a template, an option to always install the latest version is now available.
 Added a bandwidth monitoring option to include relayed email, thanks to Collin from Bisnet.
 ---- Changes since 3.72 ----
-Updated the Plans script installer to 8.0.2.
+Updated the Plans script installer to 8.0.3.
 On Sendmail systems with outgoing address mapping enabled, the generic domains file is now correctly updated.
 Script installer versions more recent that those included with the current release of Virtualmin can now be downloaded using the Installer Updates section on the Script Installers page. The new versions will typically be released within hours or days of new script releases.
 Added a domain-owner leven restriction to prevent changing of a virtual server's password.
