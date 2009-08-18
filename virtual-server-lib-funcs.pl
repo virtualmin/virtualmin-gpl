@@ -12548,7 +12548,7 @@ if (!$jobs) {
 	}
 $user ||= "root";
 local @rv = grep { $_->{'user'} eq $user &&
-	     $_->{'command'} =~ /(^|[ \|\&;])\Q$cmd\E($|[ \|\&><;])/ } @$jobs;
+	     $_->{'command'} =~ /(^|[ \|\&;\/])\Q$cmd\E($|[ \|\&><;])/ } @$jobs;
 return wantarray ? @rv : $rv[0];
 }
 
