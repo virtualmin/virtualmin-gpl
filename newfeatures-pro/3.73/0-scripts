@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Plans script installer to 8.0.3.
+html=Updated the Plans script installer to 8.0.3, and Movable Type to 4.31.<br>Put back support for installing Joomla 1.0 series versions.
 master=1
 reseller=1
 domain=1
