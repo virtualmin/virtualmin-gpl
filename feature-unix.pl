@@ -134,7 +134,7 @@ eval {
 			&sync_alias_virtuals($_[0]);
 			}
 		if ($config{'generics'}) {
-			&create_generic($_[0]->{'user'}, $email);
+			&create_generic($_[0]->{'user'}, $email, 1);
 			}
 		}
 	};

@@ -4051,11 +4051,11 @@ else {
 	}
 }
 
-# create_generic(user, email)
+# create_generic(user, email, [no-restart])
 # Adds an entry to the systems outgoing addresses file, if active
 sub create_generic
 {
-local ($user, $email) = @_;
+local ($user, $email, $norestart) = @_;
 if ($config{'mail_system'} == 1) {
 	# Add to Sendmail generics file
 	local $gen = { 'from' => $user, 'to' => $email };
@@ -4075,7 +4075,7 @@ if ($config{'mail_system'} == 1) {
 		&flush_file_lines();
 		&unlock_file($sendmail::config{'sendmail_cf'});
 		&unlock_file($cgfile);
-		&sendmail::restart_sendmail();
+		&sendmail::restart_sendmail() if (!$norestart);
 		}
 	}
 elsif ($config{'mail_system'} == 0) {
