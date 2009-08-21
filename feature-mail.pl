@@ -4062,19 +4062,19 @@ if ($config{'mail_system'} == 1) {
 	&sendmail::create_generic($gen, $sendmail_gfile,
 				  $sendmail_gdbm, $sendmail_gdbmtype);
 
-	# And generics domain list, if missing
+	# And generics domain list, if missing and if using a file
 	local $conf = &sendmail::get_sendmailcf();
 	local $cgfile;
 	local @dlist = &sendmail::get_file_or_config($conf, "G", undef,
                                                      \$cgfile);
 	local ($mb, $dname) = split(/\@/, $email);
-	if (&indexof($dname, @dlist) < 0) {
-		&lock_file($cgfile) if ($cgfile);
+	if (&indexof($dname, @dlist) < 0 && $cgfile) {
+		&lock_file($cgfile);
 		&lock_file($sendmail::config{'sendmail_cf'});
 		&sendmail::add_file_or_config($conf, "G", $dname);
 		&flush_file_lines();
 		&unlock_file($sendmail::config{'sendmail_cf'});
-		&unlock_file($cgfile) if ($cgfile);
+		&unlock_file($cgfile);
 		&sendmail::restart_sendmail();
 		}
 	}
