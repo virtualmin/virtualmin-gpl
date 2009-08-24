@@ -1152,3 +1152,5 @@ On Sendmail systems with outgoing address mapping enabled, the generic domains f
 Script installer versions more recent that those included with the current release of Virtualmin can now be downloaded using the Installer Updates section on the Script Installers page. The new versions will typically be released within hours or days of new script releases.
 Added a domain-owner leven restriction to prevent changing of a virtual server's password.
 Put back support for installing Joomla 1.0 series versions.
+---- Changes since 3.73 ----
+Updated the Horde Passwd script installer to h3-3.1.1.
