@@ -28,3 +28,6 @@
 
  - System stats for postfix NOQUEUE
 	- http://www.virtualmin.com/node/10930
+
+ - Command-line domain rename
+	- Add to unit tests

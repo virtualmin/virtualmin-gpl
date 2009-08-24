@@ -395,9 +395,10 @@ if ($wild) {
 push(@dbs, split(/\s+/, $_[0]->{'db_mysql'}));
 @dbs = &unique(@dbs);
 
-# Create empty 'base' backup file
-&open_tempfile(EMPTY, ">$_[1]");
-&close_tempfile(EMPTY);
+# Create base backup file with meta-information
+local @hosts = &get_mysql_allowed_hosts($_[0]);
+local %info = ( 'hosts' => join(' ', @hosts) );
+&write_file($_[1], \%info);
 
 # Back them all up
 local $db;
@@ -436,6 +437,9 @@ return $ok;
 # the mysql user.
 sub restore_mysql
 {
+local %info;
+&read_file($_[1], \%info);
+
 &$first_print($text{'restore_mysqldrop'});
 	{
 	local $first_print = \&null_print;	# supress messages
@@ -447,12 +451,19 @@ sub restore_mysql
 
 	# Now re-set up the login only
 	&setup_mysql($_[0], 1);
+
+	# Re-grant allowed hosts from backup + local
+	if (!$_[0]->{'parent'} && $info{'hosts'}) {
+		local @lhosts = &get_mysql_allowed_hosts($_[0]);
+		push(@lhosts, split(/\s+/, $info{'hosts'}));
+		@lhosts = &unique(@lhosts);
+		&save_mysql_allowed_hosts($_[0], \@lhosts);
+		}
 	}
 &$second_print($text{'setup_done'});
 
 # Work out which databases are in backup
 local ($dbfile, @dbs);
-push(@dbs, [ $_[0]->{'db'}, $_[1] ]) if (-s $_[1]);
 foreach $dbfile (glob("$_[1]_*")) {
 	if (-r $dbfile) {
 		$dbfile =~ /\Q$_[1]\E_(.*)\.gz$/ ||

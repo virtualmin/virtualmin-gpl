@@ -1108,6 +1108,8 @@ $aliasdom_tests = [
 	# Check MySQL login
 	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.' -e "select version()"',
 	},
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.'_extra -e "select version()"',
+	},
 
 	$config{'postgres'} ? (
 		# Check PostgreSQL login
@@ -1139,6 +1141,19 @@ $aliasdom_tests = [
 	{ 'command' => $wget_command.'http://'.$test_subdomain,
 	  'grep' => 'Test home page',
 	},
+
+	# Check that extra database exists
+	{ 'command' => 'list-databases.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'grep' => $test_domain_db.'_extra',
+	},
+
+	# Check for allowed DB host
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => 'Allowed mysql hosts:.*1\\.2\\.3\\.4',
+	},
 	);
 $backup_tests = [
 	# Create a parent domain to be backed up
@@ -1163,6 +1178,20 @@ $backup_tests = [
 		      [ 'desc', 'Test user' ],
 		      [ 'quota', 777*1024 ],
 		      [ 'mail-quota', 777*1024 ] ],
+	},
+
+	# Add an extra database
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'name', $test_domain_db.'_extra' ] ],
+	},
+
+	# Add an allowed database host
+	{ 'command' => 'modify-database-hosts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'add-host', '1.2.3.4' ] ],
 	},
 
 	# Create a sub-server to be included
