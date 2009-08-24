@@ -3526,13 +3526,27 @@ elsif ($config{'mail_system'} == 0) {
 	# Add to Postfix relay domains
 	local @rd = split(/[, ]+/,
 			&postfix::get_current_value("relay_domains"));
+	if ($rd[0] =~ /:/) {
+		# Actually in a map
+		local $rmaps = &postfix::get_maps("relay_domains");
+		@rds = map { $_->{'name'} } @$rmaps;
+		}
 	if (&indexoflc($dom, @rd) >= 0) {
 		return $text{'newmxs_already'};
 		}
-	@rd = &unique(@rd, $dom);
-	&lock_file($postfix::config{'postfix_config_file'});
-	&postfix::set_current_value("relay_domains", join(", ", @rd));
-	&unlock_file($postfix::config{'postfix_config_file'});
+	if ($rd[0] =~ /:/) {
+		# Add to the map
+		&create_replace_mapping("relay_domains",
+					{ 'name' => $dom, 'value' => $dom });
+		&postfix::regenerate_any_table("relay_domains");
+		}
+	else {
+		# Add to main.cf
+		@rd = &unique(@rd, $dom);
+		&lock_file($postfix::config{'postfix_config_file'});
+		&postfix::set_current_value("relay_domains", join(", ", @rd));
+		&unlock_file($postfix::config{'postfix_config_file'});
+		}
 	}
 elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
        $config{'mail_system'} == 5) {
@@ -3578,13 +3592,28 @@ elsif ($config{'mail_system'} == 0) {
 	local @rd = split(/[, ]+/,
 			&postfix::get_current_value("relay_domains"));
 	local $idx = &indexoflc($dom, @rd);
-	if ($idx < 0) {
-		return $text{'newmxs_missing'};
+	if ($rd[0] =~ /:/ && $idx < 0) {
+		# Actually in a map
+		local $rmaps = &postfix::get_maps("relay_domains");
+		local ($m) = grep { $_->{'name'} eq $dom } @$rmaps;
+		if ($m) {
+			&postfix::delete_mapping("relay_domains", $m);
+			&postfix::regenerate_any_table("relay_domains");
+			}
+		else {
+			return $text{'newmxs_missing'};
+			}
 		}
-	splice(@rd, $idx, 1);
-	&lock_file($postfix::config{'postfix_config_file'});
-	&postfix::set_current_value("relay_domains", join(", ", @rd));
-	&unlock_file($postfix::config{'postfix_config_file'});
+	else {
+		# Remove from main.cf
+		if ($idx < 0) {
+			return $text{'newmxs_missing'};
+			}
+		splice(@rd, $idx, 1);
+		&lock_file($postfix::config{'postfix_config_file'});
+		&postfix::set_current_value("relay_domains", join(", ", @rd));
+		&unlock_file($postfix::config{'postfix_config_file'});
+		}
 	}
 elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
        $config{'mail_system'} == 5) {
