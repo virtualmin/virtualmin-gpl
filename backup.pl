@@ -159,7 +159,8 @@ if ($sched->{'after'}) {
 		}
 	}
 &write_backup_log(\@doms, $dest, $backup->{'incremental'}, $start_time,
-		  $size, $ok, "sched", $output, $errdoms);
+		  $size, $ok, "sched", $output, $errdoms,
+		  $asd ? $asd->{'user'} : undef);
 
 PREFAILED:
 

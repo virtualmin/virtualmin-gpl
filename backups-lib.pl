@@ -2420,12 +2420,12 @@ return $virtualmin_pro;
 }
 
 # write_backup_log(&domains, dest, incremental?, start, size, ok?,
-# 		   "cgi"|"sched"|"api", output, &errordoms)
+# 		   "cgi"|"sched"|"api", output, &errordoms, [user])
 # Record that some backup was made and succeeded or failed
 sub write_backup_log
 {
 local ($doms, $dest, $increment, $start, $size, $ok, $mode,
-       $output, $errdoms) = @_;
+       $output, $errdoms, $user) = @_;
 if (!-d $backups_log_dir) {
 	&make_dir($backups_log_dir, 0700);
 	}
@@ -2437,7 +2437,7 @@ local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'end' => time(),
 	       'size' => $size,
 	       'ok' => $ok,
-	       'user' => $remote_user,
+	       'user' => $user || $remote_user,
 	       'mode' => $mode,
 	     );
 $main::backup_log_id_count++;
