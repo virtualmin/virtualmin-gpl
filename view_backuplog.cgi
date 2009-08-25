@@ -11,7 +11,8 @@ $log || &error($text{'viewbackup_egone'});
 &ui_print_header(undef, $text{'viewbackup_title'}, "");
 
 # Basic details
-print &ui_table_start($text{'viewbackup_header'}, "width=100%", 4);
+print &ui_table_start($text{'viewbackup_header'}, "width=100%", 4,
+		      [ "nowrap" ]);
 
 # Destination
 print &ui_table_row($text{'viewbackup_dest'},
