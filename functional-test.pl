@@ -187,8 +187,13 @@ $domains_tests = [
 	  'args' => [ [ 'to', $test_domain_user.'@'.$test_domain ] ],
 	},
 
-	# Check IMAP for admin mailbox
+	# Check IMAP and POP3 for admin mailbox
 	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
+	},
+	{ 'command' => 'test-pop3.pl',
 	  'args' => [ [ 'user', $test_domain_user ],
 		      [ 'pass', 'smeg' ],
 		      [ 'server', &get_system_hostname() ] ],
@@ -385,8 +390,13 @@ $mailbox_tests = [
 	  'args' => [ [ 'to', $test_user.'@'.$test_domain ] ],
 	},
 
-	# Check IMAP for mailbox
+	# Check IMAP and POP3 for mailbox
 	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_full_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
+	},
+	{ 'command' => 'test-pop3.pl',
 	  'args' => [ [ 'user', $test_full_user ],
 		      [ 'pass', 'smeg' ],
 		      [ 'server', &get_system_hostname() ] ],
@@ -1768,8 +1778,14 @@ $mail_tests = [
 	  'grep' => [ 'Hello World', 'X-Spam-Status:' ],
 	},
 
-	# Use IMAP to count mail - should be two or more
+	# Use IMAP and POP3 to count mail - should be two or more
 	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_full_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
+	  'grep' => '[23] messages',
+	},
+	{ 'command' => 'test-pop3.pl',
 	  'args' => [ [ 'user', $test_full_user ],
 		      [ 'pass', 'smeg' ],
 		      [ 'server', &get_system_hostname() ] ],
@@ -2929,6 +2945,13 @@ $bw_tests = [
 		      [ 'server', &get_system_hostname() ] ],
 	},
 
+	# Check POP3 for admin mailbox
+	{ 'command' => 'test-pop3.pl',
+	  'args' => [ [ 'user', $test_bw_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
+	},
+
 	# Run bw.pl on this domain
 	{ 'command' => $module_config_directory.'/bw.pl '.$test_bw_domain,
 	},
@@ -3012,6 +3035,13 @@ $bw_tests = [
 
 	# Check IMAP for mailbox
 	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_full_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
+	},
+
+	# Check POP3 for mailbox
+	{ 'command' => 'test-pop3.pl',
 	  'args' => [ [ 'user', $test_full_user ],
 		      [ 'pass', 'smeg' ],
 		      [ 'server', &get_system_hostname() ] ],
