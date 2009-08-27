@@ -2509,24 +2509,28 @@ sub save_domain_suexec
 {
 local ($d, $mode) = @_;
 &require_apache();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-return if (!$virt);
-local $pdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
-local $conf = &apache::get_config();
-if ($apache::httpd_modules{'core'} >= 2.0) {
-	# Add or remove SuexecUserGroup
-	&apache::save_directive("SuexecUserGroup",
-		$mode ? [ "\"#$pdom->{'uid'}\" \"#$pdom->{'gid'}\"" ] : [ ],
-		$vconf, $conf);
+local @ports;
+push(@ports, $d->{'web_port'}) if ($d->{'web'});
+push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+foreach my $port (@ports) {
+	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
+	next if (!$virt);
+	local $pdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+	if ($apache::httpd_modules{'core'} >= 2.0) {
+		# Add or remove SuexecUserGroup
+		&apache::save_directive("SuexecUserGroup",
+		    $mode ? [ "\"#$pdom->{'uid'}\" \"#$pdom->{'gid'}\"" ] : [],
+		    $vconf, $conf);
+		}
+	else {
+		# Add or remove User and Group directives
+		&apache::save_directive("User",
+		    $mode ? [ "\"#$pdom->{'uid'}\"" ] : [ ], $vconf, $conf);
+		&apache::save_directive("Group",
+		    $mode ? [ "\"#$pdom->{'gid'}\"" ] : [ ], $vconf, $conf);
+		}
+	&flush_file_lines($virt->{'file'});
 	}
-else {
-	# Add or remove User and Group directives
-	&apache::save_directive("User",
-		$mode ? [ "\"#$pdom->{'uid'}\"" ] : [ ], $vconf, $conf);
-	&apache::save_directive("Group",
-		$mode ? [ "\"#$pdom->{'gid'}\"" ] : [ ], $vconf, $conf);
-	}
-&flush_file_lines($virt->{'file'});
 &register_post_action(\&restart_apache);
 }
 
