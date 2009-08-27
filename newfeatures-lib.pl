@@ -179,8 +179,8 @@ return undef if (!@rv);
 
 # If not given, pick a domain or server
 local @servers;
-if (defined(&list_managed_servers)) {
-	@servers = &list_managed_servers();
+if (defined(&list_available_managed_servers_sorted)) {
+	@servers = &list_available_managed_servers_sorted();
 	}
 if (!$d && defined(&list_domains)) {
 	# First Virtualmin domain we can edit
@@ -191,7 +191,7 @@ if (!$d && defined(&list_domains)) {
 			}
 		}
 	}
-elsif (!$d && defined(&list_managed_servers)) {
+elsif (!$d && @servers) {
 	# First Cloudmin server
 	$d = $servers[0];
 	}
