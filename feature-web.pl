@@ -541,8 +541,8 @@ else {
 		&$second_print($text{'setup_done'});
 		}
 	if ($_[0]->{'alias'} && $_[2] && $_[2]->{'dom'} ne $_[3]->{'dom'}) {
-		# This is an alias, and the domain it is aliased to has changed.
-		# update all Proxy* and Redirect directives
+		# This is an alias, and the domain it is aliased to has
+		# changed .. update all Proxy* and Redirect directives
 		&$first_print($text{'save_apache4'});
 		if (!$virt) {
 			&$second_print($text{'delete_noapache'});
@@ -667,6 +667,7 @@ else {
 					$_[0]->{'uid'}, $gid, undef, $ldv);
 				}
 			}
+		&link_apache_logs($_[0]);
 
 		# Add the Apache user to the group for the new domain
 		local $tmpl = &get_template($_[0]->{'template'});
