@@ -2003,6 +2003,7 @@ backup_eskey=Missing or invalid S3 secret key
 backup_esfile=Invalid characters in S3 filename
 backup_done=Backup is complete. Final size was $1.
 backup_partial=Backup is partially complete. Final size was $1.
+backup_partial2=Virtual servers that failed :
 backup_time=Total backup time was $1.
 backup_failed=Backup failed! See the progress output above for the reason why.
 backup_donesubject=Completed backup of Virtualmin on $1

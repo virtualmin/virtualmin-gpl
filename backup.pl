@@ -182,6 +182,13 @@ if ($sched->{'email'} && $has_mailboxes &&
 	$total_time = time() - $start_time;
 	$output .= &text('backup_time', &nice_hour_mins_secs($total_time))."\n";
 	$output .= "\n";
+	if (@$errdoms) {
+		# Include list of failed domains
+		$output .= $text{'backup_partial2'}."\n";
+		foreach $d (@$errdoms) {
+			$output .= "    ".$d->{'dom'}."\n";
+			}
+		}
 	$output .= &text('backup_fromvirt', &get_virtualmin_url())."\n";
 	$mail = { 'headers' => [ [ 'From', &get_global_from_address() ],
 				 [ 'Subject', $subject ],
