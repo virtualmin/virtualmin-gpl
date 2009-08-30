@@ -1612,6 +1612,10 @@ check_title=Checking Configuration
 check_desc=The status of your system is being checked to ensure that all enabled features are available, that the mail server is properly configured, and that quotas are active ..
 check_netok=Webmin's Network Configuration module is installed and supported.
 check_defip=Default IP address for virtual servers is $1.
+check_dnsip1=External IP address for DNS records is set to $1, which matches the detected external address.
+check_dnsip2=Default IP address is set to $1, which matches the detected external address.
+check_ednsip1=External IP address for DNS records is set to $1, but the detected external addresss is actually $2. This may cause DNS records for Virtualmin domains to point to the wrong system.
+check_ednsip2=Default IP address is set to $1, but the detected external addresss is actually $2. This is typically the result of being behind a NAT firewall, and should be corrected on the <a href='$3'>module configuration</a> page.
 check_ewebsuexec=Suexec is enabled in the default template, but the Apache module <tt>mod_suexec</tt> is not installed or not enabled.
 check_ewebsuexecbin=Suexec is enabled in the default template, but the <tt>suexec</tt> command was not found on your system.
 check_ewebsuexechome=The Suexec command on your system is configured to only run scripts under $2, but the Virtualmin base directory is $1. CGI and PHP scripts run as domain owners will not be executed.

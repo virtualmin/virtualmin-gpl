@@ -11290,6 +11290,23 @@ else {
 	&$second_print(&text('check_defip', $defip));
 	}
 
+# Make sure the external IP is set if needed
+if ($config{'dns_ip'} ne '*') {
+	local $dns_ip = $config{'dns_ip'} || $defip;
+	local $ext_ip = &get_external_ip_address();
+	if ($ext_ip && $ext_ip eq $dns_ip) {
+		# Looks OK
+		&$second_print(&text($config{'dns_ip'} ? 'check_dnsip1' :
+				'check_dnsip2', $dns_ip));
+		}
+	elsif ($ext_ip && $ext_ip ne $dns_ip) {
+		# Mis-match .. warn user
+		&$second_print("<b>".&text($config{'dns_ip'} ? 'check_ednsip1' :
+				'check_ednsip2', $dns_ip, $ext_ip,
+				"../config.cgi?mod=$module_name")."</b>");
+		}
+	}
+
 # Make sure local group exists
 if ($config{'localgroup'} && !defined(getgrnam($config{'localgroup'}))) {
 	return &text('index_elocal', "<tt>$config{'localgroup'}</tt>",
