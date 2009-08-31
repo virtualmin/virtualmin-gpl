@@ -58,7 +58,7 @@ foreach $s (@scripts) {
 					&parse_http_url($f->{'url'});
 				&http_download($host, $port, $page, $temp,
 					       \$error, undef, $ssl, undef,
-					       undef, undef, 0,
+					       undef, undef, 1,
 					       $f->{'nocache'});
 				}
 			elsif ($url =~ /^ftp:\/\/([^\/]+)(\/.*)/) {
