@@ -1153,7 +1153,7 @@ Script installer versions more recent that those included with the current relea
 Added a domain-owner leven restriction to prevent changing of a virtual server's password.
 Put back support for installing Joomla 1.0 series versions.
 ---- Changes since 3.73 ----
-Updated the Horde Passwd script installer to h3-3.1.1, PHPCoin to 1.6.4, OpenGoo to 1.5.2, LimeSurvey to 1.85plus-build7548-20090831, TextPattern to 4.2.0, and Plans to 8.0.6.
+Updated the Horde Passwd script installer to h3-3.1.1, PHPCoin to 1.6.4, OpenGoo to 1.5.2, LimeSurvey to 1.85plus-build7548-20090831, TextPattern to 4.2.0, CMS Made Simple to 1.6.4, and Plans to 8.0.6.
 If Postfix relay domains are stored in a hash, update it instead of adding to relay_domains in /etc/postfix/main.cf.
 Additional allowed MySQL client hosts are now included in backups.
 Added a warning to the configuration check for systems behind a NAT gateway with an incorrectly configured DNS IP address.
