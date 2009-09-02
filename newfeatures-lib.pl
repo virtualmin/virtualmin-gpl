@@ -11,8 +11,8 @@
 # The list is returned newest first, assuming that features have numeric prefix
 sub list_new_features
 {
-local ($mod, $ver) = @_;
-local (@rv, @dirs);
+my ($mod, $ver) = @_;
+my (@rv, @dirs);
 if ($mod eq $module_name) {
 	# Core virtualmin features
 	@dirs = map { "$_/$ver" } @newfeatures_dirs;
@@ -24,7 +24,7 @@ else {
 foreach my $dir (@dirs) {
 	opendir(NF, $dir);
 	foreach my $f (grep { !/^\./ } readdir(NF)) {
-		local %nf;
+		my %nf;
 		&read_file_cached("$dir/$f", \%nf);
 		$nf{'id'} = $f;
 		$nf{'mod'} = $mod;
@@ -40,10 +40,10 @@ return sort { $b->{'id'} <=> $a->{'id'} } @rv;
 # Returns a list of module info structures for modules that we are interested in
 sub list_new_features_modules
 {
-local @rv;
+my @rv;
 foreach my $mod ($module_name, @plugins, 'security-updates') {
 	next if (!&foreign_check($mod));
-	local %minfo = $mod eq $module_name ? %module_info : &get_module_info($mod);
+	my %minfo = $mod eq $module_name ? %module_info : &get_module_info($mod);
 	push(@rv, \%minfo);
 	}
 return @rv;
@@ -54,13 +54,13 @@ return @rv;
 # version numbers to show for. The list is in descending version order.
 sub should_show_new_features
 {
-local @nf;
-local %seen;
+my @nf;
+my %seen;
 &read_file_cached("$newfeatures_seen_dir/$remote_user", \%seen);
 foreach my $minfo (&list_new_features_modules()) {
-	local $ver = $minfo->{'version'};
-	local $mod = $minfo->{'dir'};
-	local %mc = &foreign_config($mod);
+	my $ver = $minfo->{'version'};
+	my $mod = $minfo->{'dir'};
+	my %mc = &foreign_config($mod);
 	while($ver > 0 &&
 	      (!$seen{$mod} || $seen{$mod} < $ver) &&
 	      (!$mc{'first_version'} || $mc{'first_version'} <= $ver)) {
@@ -75,8 +75,8 @@ return @nf;
 # Flags that the current user has seen (or not) new features for some version
 sub set_seen_new_features
 {
-local ($mod, $ver, $seen) = @_;
-local %seen;
+my ($mod, $ver, $seen) = @_;
+my %seen;
 if (!-d $newfeatures_seen_dir) {
 	&make_dir($newfeatures_seen_dir, 0700);
 	}
@@ -92,7 +92,7 @@ else {
 
 sub down_one_version
 {
-local ($ver, $mod) = @_;
+my ($ver, $mod) = @_;
 if ($mod eq $module_name && $mod !~ /^server-manager/) {
 	return (int($ver*100) - 1)  / 100.0;
 	}
@@ -105,7 +105,7 @@ else {
 # Returns the Virtualmin version, rounded to 2 decimals
 sub get_base_module_version
 {
-local $ver = $module_info{'version'};
+my $ver = $module_info{'version'};
 return sprintf("%.2f", int($ver*100) / 100.0);
 }
 
@@ -114,14 +114,14 @@ return sprintf("%.2f", int($ver*100) / 100.0);
 # If there are none, returns undef.
 sub get_new_features_html
 {
-local ($d) = @_;
+my ($d) = @_;
 &load_theme_library();
 
 # Find out what's new
-local @nf = &should_show_new_features();
+my @nf = &should_show_new_features();
 return undef if (!@nf);
-local (@rv, @modvers, %modvers);
-local $me;
+my (@rv, @modvers, %modvers);
+my $me;
 if (defined(&master_admin)) {
 	# In Virtualmin
 	$me = &master_admin() ? 'master' :
@@ -131,15 +131,15 @@ else {
 	# In Cloudmin
 	$me = $access{'owner'} ? 'owner' : 'master';
 	}
-local %shownf = map { $_, 1 } split(/,/, $config{'show_nf'});
+my %shownf = map { $_, 1 } split(/,/, $config{'show_nf'});
 return undef if ($me && !$shownf{$me});
-local %donemod;
-local $wver = &get_webmin_version();
+my %donemod;
+my $wver = &get_webmin_version();
 foreach my $nf (@nf) {
 	# Get new features in some version. If there were none, stop looking
 	# for this module.
 	next if ($donemod{$nf->[0]});
-	local @mrv = &list_new_features($nf->[0], $nf->[1]);
+	my @mrv = &list_new_features($nf->[0], $nf->[1]);
 	if (!@mrv) {
 		$donemod{$nf->[0]} = 1;
 		}
@@ -150,7 +150,7 @@ foreach my $nf (@nf) {
 	push(@rv, @mrv);
 	if (@mrv && !$modvers{$mf->[0]}++) {
 		# Create a description for this new version
-		local ($mdesc, $timestr);
+		my ($mdesc, $timestr);
 		if ($nf->[0] eq $module_name) {
 			$mdesc = $text{'nf_vm'};
 			}
@@ -158,14 +158,14 @@ foreach my $nf (@nf) {
 			$mdesc = &plugin_call($nf->[0], "feature_name");
 			}
 		if (!$mdesc) {
-			local %minfo = &get_module_info($nf->[0]);
+			my %minfo = &get_module_info($nf->[0]);
 			$mdesc = $minfo{'desc'};
 			}
 		if ($nf->[0] eq $module_name) {
 			# When was Virtualmin installed?
-			local %itimes;
+			my %itimes;
 			&read_file_cached($install_times_file, \%itimes);
-			local $basever = &get_base_module_version();
+			my $basever = &get_base_module_version();
 			if ($itimes{$basever}) {
 				$timestr = " ".&text('nf_date',
 					&make_date($itimes{$basever}, 1));
@@ -178,7 +178,7 @@ return undef if (!@rv);
 @rv = reverse(@rv);
 
 # If not given, pick a domain or server
-local @servers;
+my @servers;
 if (defined(&list_available_managed_servers_sorted)) {
 	@servers = &list_available_managed_servers_sorted();
 	}
@@ -197,19 +197,19 @@ elsif (!$d && @servers) {
 	}
 
 # Select template function for Virtualmin or Cloudmin
-local $subs = defined(&substitute_domain_template) ?
+my $subs = defined(&substitute_domain_template) ?
 	\&substitute_domain_template :
 	\&substitute_virtualmin_template;
 
 # Make the HTML
-local $rv;
-local $modvers = @modvers <= 1 ? join(", ", @modvers) :
+my $rv;
+my $modvers = @modvers <= 1 ? join(", ", @modvers) :
 		 	&text('nf_and', join(", ", @modvers[0..$#modvers-1]),
 					$modvers[$#modvers]);
 $rv .= &text('nf_header', $modvers)."<br>\n";
 $rv .= "<dl>\n";
 foreach my $nf (@rv) {
-	local $link;
+	my $link;
 	if ($nf->{'link'}) {
 		# Create link, with domain substitution
 		if ($d || $nf->{'link'} !~ /\$\{/) {
@@ -217,7 +217,7 @@ foreach my $nf (@rv) {
 			# some type, limit to them
 			if ($module_name =~ /^server-manager/ &&
 			    $nf->{'managers'}) {
-				local @mans = grep { &match_server_manager($_,
+				my @mans = grep { &match_server_manager($_,
 					        $nf->{'managers'}) } @servers;
 				@mans = sort { &sort_server_manager($a, $b) }
 					     @mans;
@@ -248,7 +248,7 @@ return $rv;
 
 sub match_server_manager
 {
-local ($server, $managers) = @_;
+my ($server, $managers) = @_;
 return 1 if (!$managers);
 foreach my $m (split(/\s+/, $managers)) {
 	return 1 if ($server->{'manager'} eq $m);
@@ -259,15 +259,15 @@ return 0;
 # Sort Cloudmin systems so that those which are up come first
 sub sort_server_manager
 {
-local ($a, $b) = @_;
-local $ao = &order_server_manager_status($a->{'status'});
-local $bo = &order_server_manager_status($b->{'status'});
+my ($a, $b) = @_;
+my $ao = &order_server_manager_status($a->{'status'});
+my $bo = &order_server_manager_status($b->{'status'});
 return $ao - $bo;
 }
 
 sub order_server_manager_status
 {
-local ($s) = @_;
+my ($s) = @_;
 return $s eq 'nohost' ? 0 :
        $s eq 'down' ? 10 :
        $s eq 'paused' ? 15 :

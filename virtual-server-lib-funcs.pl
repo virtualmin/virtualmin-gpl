@@ -5071,7 +5071,7 @@ while(read(PFILE, $buf, 1024) > 0) {
 	if ($ok <= 0) {
 		# Write failed!
 		local $msg = "FTP write failed : $!";
-		if ($_[3]) { ${$_[3]} = $got; return 0; }
+		if ($_[3]) { ${$_[3]} = $msg; return 0; }
 		else { &error($got); }
 		}
 	$got += length($buf);
@@ -5081,8 +5081,8 @@ close(PFILE);
 close(CON);
 if ($got != $st[7]) {
 	local $msg = "Upload incomplete - file size is $st[7], but sent $got";
-	if ($_[3]) { ${$_[3]} = $got; return 0; }
-	else { &error($got); }
+	if ($_[3]) { ${$_[3]} = $msg; return 0; }
+	else { &error($msg); }
 	}
 &$cbfunc(4) if ($cbfunc);
 
