@@ -1258,10 +1258,18 @@ if ($ok) {
 			&$second_print(&text('setup_emaking',"<tt>$merr</tt>"));
 			}
 		else {
-			# Now do the actual restore
+			# Disable quotas for this domain, so that restores work
+			my $qd = $d->{'parent'} ? &get_domain($d->{'parent'})
+						: $d;
+			if (&has_home_quotas()) {
+				&set_server_quotas($qd, 0, 0);
+				}
+
+			# Now do the actual restore, feature by feature
 			&$indent_print();
 			local $f;
 			local %oldd;
+			my $domain_failed = 0;
 			foreach $f (@rfeatures) {
 				# Restore features
 				local $rfunc = "restore_$f";
@@ -1315,10 +1323,16 @@ if ($ok) {
 					# Handle feature failure
 					$ok = 0;
 					&$outdent_print();
-					last DOMAIN;
+					$domain_failed = 1;
+					last;
 					}
 				}
 			&save_domain($d);
+
+			# Re-enable quotas for this domain, or parent
+			if (&has_home_quotas()) {
+				&set_server_quotas($qd);
+				}
 
 			# Run the post-restore command
 			&set_domain_envs($d, "RESTORE_DOMAIN", undef, \%oldd);
@@ -1326,6 +1340,8 @@ if ($ok) {
 			&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
 				if (defined($merr));
 			&reset_domain_envs($d);
+
+			last DOMAIN if ($domain_failed);
 			}
 
 		# Re-setup Webmin user

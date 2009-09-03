@@ -4099,51 +4099,51 @@ else {
 	}
 }
 
-# set_server_quotas(&domain)
+# set_server_quotas(&domain, [user-quota, group-quota])
 # Set the user and possibly group quotas for a domain
 sub set_server_quotas
 {
-local $tmpl = &get_template($_[0]->{'template'});
+my ($d, $uquota, $quota) = @_;
+$uquota = $d->{'uquota'} if (!defined($uquota));
+$quota = $d->{'quota'} if (!defined($quota));
+local $tmpl = &get_template($d->{'template'});
 if (&has_quota_commands()) {
 	# User and group quotas are set externally
-	&run_quota_command("set_user", $_[0]->{'user'},
-		$tmpl->{'quotatype'} eq 'hard' ? ( $_[0]->{'uquota'},
-						   $_[0]->{'uquota'} )
-					       : ( 0, $_[0]->{'uquota'} ));
-	if (&has_group_quotas() && $_[0]->{'group'}) {
-		&run_quota_command("set_group", $_[0]->{'group'},
-			$tmpl->{'quotatype'} eq 'hard' ? ( $_[0]->{'quota'},
-							   $_[0]->{'quota'} )
-						     : ( 0, $_[0]->{'quota'} ));
+	&run_quota_command("set_user", $d->{'user'},
+		$tmpl->{'quotatype'} eq 'hard' ? ( $uquota, $uquota )
+					       : ( 0, $uquota ));
+	if (&has_group_quotas() && $d->{'group'}) {
+		&run_quota_command("set_group", $d->{'group'},
+			$tmpl->{'quotatype'} eq 'hard' ? ( $quota, $quota )
+						       : ( 0, $quota ));
 		}
 	}
 else {
 	if (&has_home_quotas()) {
 		# Set Unix user quota for home
-		&set_quota($_[0]->{'user'}, $config{'home_quotas'},
-			   $_[0]->{'uquota'}, $tmpl->{'quotatype'} eq 'hard');
+		&set_quota($d->{'user'}, $config{'home_quotas'},
+			   $uquota, $tmpl->{'quotatype'} eq 'hard');
 		}
 	if (&has_mail_quotas()) {
 		# Set Unix user quota for mail
-		&set_quota($_[0]->{'user'}, $config{'mail_quotas'},
-			   $_[0]->{'uquota'}, $tmpl->{'quotatype'} eq 'hard');
+		&set_quota($d->{'user'}, $config{'mail_quotas'},
+			   $uquota, $tmpl->{'quotatype'} eq 'hard');
 		}
-	if (&has_group_quotas() && $_[0]->{'group'}) {
+	if (&has_group_quotas() && $d->{'group'}) {
 		# Set group quotas for home and possibly mail
 		&require_useradmin();
 		local @qargs;
 		if ($tmpl->{'quotatype'} eq 'hard') {
-			@qargs = ( int($_[0]->{'quota'}),
-				   int($_[0]->{'quota'}), 0, 0 );
+			@qargs = ( int($quota), int($quota), 0, 0 );
 			}
 		else {
-			@qargs = ( int($_[0]->{'quota'}), 0, 0, 0 );
+			@qargs = ( int($quota), 0, 0, 0 );
 			}
 		&quota::edit_group_quota(
-			$_[0]->{'group'}, $config{'home_quotas'}, @qargs);
+			$d->{'group'}, $config{'home_quotas'}, @qargs);
 		if (&has_mail_quotas()) {
 			&quota::edit_group_quota(
-			    $_[0]->{'group'}, $config{'mail_quotas'}, @qargs);
+			    $d->{'group'}, $config{'mail_quotas'}, @qargs);
 			}
 		}
 	}
