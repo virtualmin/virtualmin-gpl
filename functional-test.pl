@@ -3064,6 +3064,111 @@ $bw_tests = [
         },
 	];
 
+$blocks_per_mb = int(1024*1024 / &quota_bsize("home"));
+$quota_tests = [
+	# Create a domain with a 10M quota
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test quota domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'quota', 10*$blocks_per_mb ],
+		      [ 'uquota', 10*$blocks_per_mb ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test quota page' ],
+		      (grep { $_->[0] ne 'limits-from-plan' } @create_args), ],
+	},
+
+	# Make sure 20M file creation fails
+	{ 'command' => "su $test_domain_user -c 'dd if=/dev/zero of=/home/$test_domain_user/junk bs=1024 count=20480'",
+	  'fail' => 1,
+	},
+	{ 'command' => "rm -f /home/$test_domain_user/junk" },
+
+	# Make sure 5M file creation works
+	{ 'command' => "su $test_domain_user -c 'dd if=/dev/zero of=/home/$test_domain_user/junk bs=1024 count=5120'",
+	},
+	{ 'command' => "rm -f /home/$test_domain_user/junk" },
+
+	# Up quota to 30M
+	{ 'command' => 'modify-domain.pl',
+ 	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'quota', 30*$blocks_per_mb ],
+		      [ 'uquota', 30*$blocks_per_mb ],
+		    ],
+	},
+
+	# Make sure 20M file creation now works
+	{ 'command' => "su $test_domain_user -c 'dd if=/dev/zero of=/home/$test_domain_user/junk bs=1024 count=20480'",
+	},
+	{ 'command' => "rm -f /home/$test_domain_user/junk" },
+
+	# Create a mailbox with 5M quota
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 5*$blocks_per_mb ],
+		      [ 'mail-quota', 5*$blocks_per_mb ] ],
+	},
+
+	# Make sure 20M file creation fails
+	{ 'command' => &command_as_user($test_full_user, 0, "dd if=/dev/zero of=/home/$test_domain_user/homes/$test_user/junk bs=1024 count=20480"),
+	  'fail' => 1,
+	},
+	{ 'command' => "rm -f /home/$test_domain_user/homes/$test_user/junk" },
+
+	# Add empty lines to procmail.log, to prevent later false matches
+	{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
+	},
+
+	# Send one email to him, so his mailbox gets created and then procmail
+	# runs as the right user. This is to work around a procmail bug where
+	# it can drop privs too soon!
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'from', 'jcameron@webmin.com' ],
+		      [ 'to', $test_user.'@'.$test_domain ],
+		      [ 'data', $ok_email_file ] ],
+	},
+
+	# Check procmail log for delivery, for at most 60 seconds
+	{ 'command' => 'while [ "`tail -5 /var/log/procmail.log | grep '.
+		       'To:'.$test_user.'@'.$test_domain.'`" = "" ]; do '.
+		       'sleep 5; done',
+	  'timeout' => 60,
+	  'ignorefail' => 1,
+	},
+
+	# Create a large test email
+	{ 'command' => '(cat '.$ok_email_file.' ; head -c2000000 /dev/zero | od -c -v) >/tmp/random.txt',
+	},
+
+	# Add empty lines to procmail.log, to prevent later false matches
+	{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
+	},
+
+	# Send email to the new mailbox, which won't get delivered
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'from', 'jcameron@webmin.com' ],
+		      [ 'to', $test_user.'@'.$test_domain ],
+		      [ 'data', '/tmp/random.txt' ] ],
+	},
+
+	# Wait for delivery to fail due to lack of quota
+	{ 'command' => 'while [ "`tail -10 /var/log/procmail.log | grep '.
+		       'Quota.exceeded`" = "" ]; do '.
+		       'sleep 5; done',
+	  'timeout' => 60,
+	},
+
+	# Get rid of the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1
+        },
+	];
+
 $alltests = { 'domains' => $domains_tests,
 	      'web' => $web_tests,
 	      'mailbox' => $mailbox_tests,
@@ -3093,6 +3198,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'ip6' => $ip6_tests,
 	      'rename' => $rename_tests,
 	      'bw' => $bw_tests,
+	      'quota' => $quota_tests,
 	    };
 
 # Run selected tests
@@ -3230,7 +3336,12 @@ local $out = &backquote_with_timeout("($cmd) 2>&1 </dev/null",
 if (!$t->{'ignorefail'}) {
 	if ($? && !$t->{'fail'} || !$? && $t->{'fail'}) {
 		print $out;
-		print "    .. failed : $?\n";
+		if ($t->{'fail'}) {
+			print "    .. failed to fail\n";
+			}
+		else {
+			print "    .. failed : $?\n";
+			}
 		return 0;
 		}
 	}
