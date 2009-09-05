@@ -80,6 +80,9 @@ if ($multi) {
 			print "    Virtualmin configs: $s->{'virtualmin'}\n";
 			}
 		print "    Destination: $s->{'dest'}\n";
+		if ($s->{'owner'}) {
+			print "    Owner: $s->{'owner'}\n";
+			}
 		print "    Features: ",
 			$s->{'feature_all'} ? "All" : $s->{'features'},"\n";
 		print "    Incremental: ",$s->{'increment'} ? "Yes" : "No","\n";
