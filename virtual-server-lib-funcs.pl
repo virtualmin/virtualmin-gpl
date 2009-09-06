@@ -10691,8 +10691,6 @@ local $merr = &made_changes();
 return 1;
 }
 
-
-
 # set_parent_attributes(&domain, &parent)
 # Update a domain object with attributes inherited from the parent
 sub set_parent_attributes
@@ -10708,6 +10706,18 @@ $d->{'pass'} = $parent->{'pass'};
 $d->{'mysql_user'} = $parent->{'mysql_user'};
 $d->{'postgres_user'} = $parent->{'postgres_user'};
 $d->{'email'} = $parent->{'email'};
+}
+
+# rename_virtual_server(&domain, new-domain, new-user, new-home)
+# Updates a virtual server and possibly sub-servers with a new domain name,
+# username and home directory. If any of the parameters are undef, they are
+# left un-changed. Prints progress output, and returns undef on success or
+# an error message on failure.
+sub rename_virtual_server
+{
+my ($d, $newdom, $newuser, $newhome) = @_;
+
+# XXX
 }
 
 # check_virtual_server_config()
