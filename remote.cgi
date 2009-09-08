@@ -37,6 +37,7 @@ $format = defined($in{'json'}) ? 'json' :
 
 # Build the arg list
 $main::virtualmin_remote_api = 1;
+$ENV{'VIRTUALMIN_REMOTE_API'} = 1;
 $in{'program'} =~ /^[a-z0-9\.\-]+$/i || &api_error($text{'remote_eprogram'});
 $cmd = $dir = undef;
 foreach $m ($module_name, @plugins) {
