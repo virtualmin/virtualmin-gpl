@@ -16,6 +16,11 @@ local $dump = &read_plesk_xml($xfile);
 ref($dump) || return ($dump);
 local $mig = $dump->{'Data'}->{'migration-dump'};
 $mig || return ("Missing migration-dump section in XML file");
+if (scalar(keys %{$mig->{'domain'}}) == 0 ||
+    $dom && !$mig->{'domain'}->{$dom} && $mig->{'domain'}->{'name'} ne $dom) {
+	# Inside client sub-section
+	$mig = $mig->{'client'}->{'domains'};
+	}
 if (!$dom) {
 	# Work out domain name
 	$dom = $mig->{'domain'}->{'name'};
@@ -72,6 +77,11 @@ local ($xfile) = glob("$root/*.xml");
 local $dump = &read_plesk_xml($xfile);
 ref($dump) || &error($dump);
 local $mig = $dump->{'Data'}->{'migration-dump'};
+if (!$mig->{'domain'}->{$dom} &&
+    $mig->{'domain'}->{'name'} ne $dom) {
+	# Inside client sub-section
+	$mig = $mig->{'client'}->{'domains'};
+	}
 
 # Get the domain object from the XML
 local $domain = $mig->{'domain'}->{$dom};
