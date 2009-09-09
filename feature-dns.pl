@@ -222,8 +222,7 @@ else {
 		# don't want to delete this later
 		$_[0]->{'dns_subalready'} = 1;
 		}
-	local $ipdom = $_[0]->{'virt'} ? $_[0] : $parent;
-	local $ip = $ipdom->{'dns_ip'} || $ipdom->{'ip'};
+	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 	&create_standard_records($fn, $_[0], $ip);
 	&post_records_change($parent, \@recs);
 
