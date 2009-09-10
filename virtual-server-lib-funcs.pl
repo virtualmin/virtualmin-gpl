@@ -1873,7 +1873,6 @@ sub set_usermin_imap_password
 local ($user) = @_;
 return 0 if (!$user->{'unix'} || !$user->{'home'});
 return 0 if (!$user->{'plainpass'});
-return 0 if (!$user->{'email'});
 
 # Make sure Usermin is installed, and the mailbox module is setup for IMAP
 return 0 if (!&foreign_check("usermin"));
