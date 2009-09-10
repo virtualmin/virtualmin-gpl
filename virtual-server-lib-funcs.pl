@@ -736,6 +736,14 @@ if (&has_home_quotas()) {
 			$u->{'spam_quota'} = 1;
 			$u->{'spam_quota_diff'} = $diff < 0 ? 0 : $diff;
 			}
+		if ($u->{'quota'} && $u->{'uquota'} >= $u->{'quota'}) {
+			# At or over quota
+			$u->{'over_quota'} = 1;
+			}
+		elsif ($u->{'quota'} && $u->{'uquota'} >= $u->{'quota'}*0.95) {
+			# Over 95% of quota
+			$u->{'warn_quota'} = 1;
+			}
 		}
 	}
 
@@ -4218,8 +4226,11 @@ foreach $u (@$users) {
 		# Has Unix quotas
 		push(@cols, $quota ? &quota_show($quota, "home")
 				   : $text{'form_unlimit'});
-		if ($u->{'spam_quota'}) {
-			push(@cols, "<font color=#ff0000>".
+		my $color = $u->{'over_quota'} ? "#ff0000" :
+			    $u->{'warn_quota'} ? "#ff8800" :
+			    $u->{'spam_quota'} ? "#aaaaaa" : undef;
+		if ($color) {
+			push(@cols, "<font color=$color>".
 				    &quota_show($uquota, "home")."</font>");
 			}
 		else {

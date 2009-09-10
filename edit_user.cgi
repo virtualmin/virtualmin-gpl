@@ -134,13 +134,13 @@ if ($showquota) {
 			&hlink($qsame ? $text{'user_umquota'}
 				      : $text{'user_uquota'}, "diskquota"),
 			&quota_field("quota", $user->{'quota'},
-				     $user->{'uquota'}, "home"),
+			     $user->{'uquota'}, "home", $user),
 			2, \@tds);
 		}
 	if (&has_mail_quotas()) {
 		print &ui_table_row(&hlink($text{'user_mquota'}, "diskmquota"),
 				    &quota_field("mquota", $user->{'mquota'},
-						 $user->{'umquota'}, "mail"),
+					 $user->{'umquota'}, "mail", $user),
 				    2, \@tds);
 		}
 	}
@@ -457,27 +457,33 @@ else {
 	&ui_print_footer("", $text{'index_return'});
 	}
 
-# quota_field(name, value, used, filesystem)
+# quota_field(name, value, used, filesystem, &user)
 sub quota_field
 {
-local $rv;
+my ($name, $value, $used, $fs, $u) = @_;
+my $rv;
+my $color = $u->{'over_quota'} ? "#ff0000" :
+	    $u->{'warn_quota'} ? "#ff8800" :
+	    $u->{'spam_quota'} ? "#aaaaaa" : undef;
 if (&can_mailbox_quota()) {
 	# Show inputs for editing quotas
 	local $quota = $_[1];
 	$quota = undef if ($quota eq "none");
 	$rv .= &opt_quota_input($_[0], $quota, $_[3]);
 	$rv .= "\n";
-	if (!$in{'new'}) {
-		$rv .= $_[2] ? &text('user_used', &quota_show($_[2], $_[3]))
-			     : &text('user_noneused');
-		$rv .= "\n";
-		}
 	}
 else {
 	# Just show current settings, or default
 	local $q = $in{'new'} ? $defmquota[0] : $_[1];
 	$rv .= ($q ? &quota_show($q, $_[3]) : $text{'form_unlimit'})."\n";
-	$rv .= &text('user_used', &quota_show($_[2], $_[3])) if (!$in{'new'});
+	}
+if (!$in{'new'}) {
+	my $umsg = $used ? &text('user_used', &quota_show($used, $fs))
+		         : &text('user_noneused');
+	if ($color) {
+		$umsg = "<font color=$color>$umsg</font>";
+		}
+	$rv .= $umsg."\n";
 	}
 return $rv;
 }
