@@ -2675,9 +2675,7 @@ sub domains_table
 local ($doms, $checks, $noprint) = @_;
 local $usercounts = &count_domain_users();
 local $aliascounts = &count_domain_aliases(1);
-local @table_features = $config{'show_features'} ?
-    (grep { $_ ne 'webmin' && $_ ne 'mail' &&
-	    $_ ne 'unix' && $_ ne 'dir' } @features) : ( );
+local @table_features = grep { $config{$_} } split(/,/, $config{'index_fcols'});
 local $showchecks = $checks && &can_config_domain($_[0]->[0]);
 
 # Generate headers
@@ -2685,116 +2683,153 @@ local @heads;
 if ($showchecks) {
 	push(@heads, "");
 	}
-push(@heads, $text{'index_domain'}, $text{'index_user'},
-	    $text{'index_owner'} );
-local $f;
-local $qshow = &has_home_quotas() && $config{'show_quotas'};
-foreach $f (@table_features) {
-	push(@heads, $text{'index_'.$f}) if ($config{$f});
+my @colnames = split(/,/, $config{'index_cols'});
+if (!@colnames) {
+	@colnames = ( 'dom', 'user', 'owner', 'users', 'aliases');
 	}
-push(@heads, $text{'index_mail'});
-if ($config{'mail'}) {
-	push(@heads, $text{'index_alias'});
+if (!&has_home_quotas()) {
+	@colnames = grep { $_ ne 'quota' && $_ ne 'uquota' } @colnames;
 	}
-if ($qshow) {
-	push(@heads, $text{'index_quota'}, $text{'index_uquota'});
-	}
+push(@heads, map { $text{'index_'.$_} } @colnames);
+push(@heads, map { $text{'index_'.$_} } @table_features);
 
 # Generate the table contents
 local @table;
 foreach my $d (&sort_indent_domains($doms)) {
 	$done{$d->{'id'}}++;
-	local $dn = &shorten_domain_name($d);
-	$dn = $d->{'disabled'} ? "<i>$dn</i>" : $dn;
 	local $pfx = "&nbsp;" x ($d->{'indent'} * 2);
 	local @cols;
-	local $proxy = $d->{'proxy_pass_mode'} == 2 ?
-		 " <a href='frame_form.cgi?dom=$d->{'id'}'>(F)</a>" :
-		$d->{'proxy_pass_mode'} == 1 ?
-		 " <a href='proxy_form.cgi?dom=$d->{'id'}'>(P)</a>" : "";
-	if (&can_config_domain($d)) {
-		push(@cols, "$pfx<a href='edit_domain.cgi?dom=$d->{'id'}'>$dn</a>$proxy");
-		}
-	else {
-		push(@cols, "$pfx<a href='view_domain.cgi?dom=$d->{'id'}'>$dn</a>$proxy");
-		}
-	push(@cols, $d->{'user'});
-	if ($d->{'alias'}) {
-		local $aliasdom = &get_domain($d->{'alias'});
-		local $of = &text('index_aliasof', $aliasdom->{'dom'});
-		push(@cols, $d->{'owner'} ? "$d->{'owner'} ($of)" : $of);
-		}
-	else {
-		push(@cols, $d->{'owner'});
+
+	# Add configured columns
+	foreach my $c (@colnames) {
+		if ($c eq "dom") {
+			# Domain name, with link
+			my $prog = &can_config_domain($d) ? "edit_domain.cgi"
+							  : "view_domain.cgi";
+			my $dn = &shorten_domain_name($d);
+			$dn = $d->{'disabled'} ? "<i>$dn</i>" : $dn;
+			my $proxy = $d->{'proxy_pass_mode'} == 2 ?
+			 " <a href='frame_form.cgi?dom=$d->{'id'}'>(F)</a>" :
+				    $d->{'proxy_pass_mode'} == 1 ?
+			 " <a href='proxy_form.cgi?dom=$d->{'id'}'>(P)</a>" :"";
+			push(@cols, "$pfx<a href='$prog?".
+				    "dom=$d->{'id'}'>$dn</a>$proxy");
+			}
+		elsif ($c eq "user") {
+			# Username
+			push(@cols, $d->{'user'});
+			}
+		elsif ($c eq "owner") {
+			# Domain description / owner
+			if ($d->{'alias'}) {
+				my $aliasdom = &get_domain($d->{'alias'});
+				my $of = &text('index_aliasof',
+						$aliasdom->{'dom'});
+				push(@cols, $d->{'owner'} ?
+						"$d->{'owner'} ($of)" : $of);
+				}
+			else {
+				push(@cols, $d->{'owner'});
+				}
+			}
+		elsif ($c eq "emailto") {
+			# Email address
+			push(@cols, $d->{'emailto'});
+			}
+		elsif ($c eq "reseller") {
+			# Reseller name
+			push(@cols, $d->{'reseller'});
+			}
+		elsif ($c eq "admins") {
+			# Extra admin names
+			my @admins = map { $_->{'name'} }
+					 &list_extra_admins($d);
+			if (&can_edit_admins($d)) {
+				@admins = map { "<a href='edit_admin.cgi?".
+						"dom=$d->{'id'}&name=".
+						&urlize($_)."'>$_</a>" }
+					      @admins;
+				}
+			push(@cols, join(' ', @admins));
+			}
+		elsif ($c eq "users") {
+			# User count
+			if (&can_domain_have_users($d)) {
+				# Link to users
+				my $uc = int($usercounts->{$d->{'id'}});
+				if (&can_edit_users()) {
+					push(@cols, $uc."&nbsp;".
+					     "(<a href='list_users.cgi?".
+					     "dom=$d->{'id'}'>".
+					     $text{'index_list'}."</a>)");
+					}
+				else {
+					push(@cols, $uc);
+					}
+				}
+			else {
+				push(@cols, "");
+				}
+			}
+		elsif ($c eq "aliases") {
+			# Alias count, with link
+			if ($d->{'mail'}) {
+				my $ac = int($aliascounts->{$d->{'id'}});
+				if (&can_edit_aliases() && !$d->{'aliascopy'}) {
+					push(@cols, $ac."&nbsp;".
+					     "(<a href='list_aliases.cgi?".
+					     "dom=$d->{'id'}'>".
+					     $text{'index_list'}."</a>)");
+					}
+				else {
+					push(@cols, scalar(@aliases));
+					}
+				}
+			else {
+				push(@cols, $text{'index_nomail'});
+				}
+			}
+		elsif ($c eq "quota") {
+			# Quota assigned
+			if ($d->{'parent'}) {
+				# Domains with parent have no quota
+				if ($done{$d->{'parent'}}) {
+					push(@cols, "&nbsp;&nbsp;\"");
+					}
+				else {
+					push(@cols, $text{'index_samequ'});
+					}
+				}
+			else {
+				# Show quota for server
+				push(@cols, $d->{'quota'} ?
+				  &quota_show($d->{'quota'}, "home") :
+				  $text{'form_unlimit'});
+				}
+			}
+		elsif ($c eq "uquota") {
+			# Quota used
+			if ($d->{'alias'}) {
+				# Alias domains have no usage
+				push(@cols, undef);
+				}
+			else {
+				# Show total usage for domain
+				my $qmax = $d->{'quota'} ?
+				    $d->{'quota'}*&quota_bsize("home") : undef;
+				my ($hq, $mq, $dbq) = &get_domain_quota($d, 1);
+				my $ut = $hq*&quota_bsize("home") +
+					 $mq*&quota_bsize("mail") + $dbq;
+				local $txt = &nice_size($ut);
+				if ($qmax && $bytes > $qmax) {
+					$txt ="<font color=#ff0000>$txt</font>";
+					}
+				push(@cols, $txt);
+				}
+			}
 		}
 	foreach $f (@table_features) {
-		push(@cols, $d->{$f} ? $text{'yes'} : $text{'no'})
-			if ($config{$f});
-		}
-	if (&can_domain_have_users($d)) {
-		# Link to users
-		local $uc = int($usercounts->{$d->{'id'}});
-		if (&can_edit_users()) {
-			push(@cols, $uc."&nbsp;(<a href='list_users.cgi?".
-				"dom=$d->{'id'}'>$text{'index_list'}</a>)");
-			}
-		else {
-			push(@cols, $uc);
-			}
-		}
-	else {
-		push(@cols, "");
-		}
-	if ($config{'mail'}) {
-		if ($d->{'mail'}) {
-			# Link to aliases
-			local $ac = $aliascounts->{$d->{'id'}};
-			if (&can_edit_aliases() && !$d->{'aliascopy'}) {
-				push(@cols, sprintf("%d&nbsp;(<a href='list_aliases.cgi?dom=$d->{'id'}'>$text{'index_list'}</a>)\n", $ac));
-				}
-			else {
-				push(@cols, scalar(@aliases));
-				}
-			}
-		else {
-			push(@cols, $text{'index_nomail'});
-			}
-		}
-	if ($qshow) {
-		local $qmax = undef;
-		if ($d->{'parent'}) {
-			# Domains with parent have no quota
-			if ($done{$d->{'parent'}}) {
-				push(@cols, "&nbsp;&nbsp;\"");
-				}
-			else {
-				push(@cols, $text{'index_samequ'});
-				}
-			}
-		else {
-			# Show quota for server
-			push(@cols, $d->{'quota'} ?
-			  &quota_show($d->{'quota'}, "home") :
-			  $text{'form_unlimit'});
-			$qmax = $d->{'quota'} ?
-			    $d->{'quota'}*&quota_bsize("home") : undef;
-			}
-		if ($d->{'alias'}) {
-			# Alias domains have no usage
-			push(@cols, undef);
-			}
-		else {
-			# Show total usage for domain
-			local ($hq, $mq, $dbq) = &get_domain_quota($d, 1);
-			local $ut = $hq*&quota_bsize("home") +
-				    $mq*&quota_bsize("mail") +
-				    $dbq;
-			local $txt = &nice_size($ut);
-			if ($qmax && $bytes > $qmax) {
-				$txt = "<font color=#ff0000>$txt</font>";
-				}
-			push(@cols, $txt);
-			}
+		push(@cols, $d->{$f} ? $text{'yes'} : $text{'no'});
 		}
 	if (&can_config_domain($d) && $showchecks) {
 		unshift(@cols, { 'type' => 'checkbox',

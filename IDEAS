@@ -26,11 +26,7 @@
  - WebNIC registrar support
 	- See email from Winnie Lee
 
- - System stats for postfix NOQUEUE
-	- http://www.virtualmin.com/node/10930
-
  - Command-line domain rename
 	- Add to unit tests
 
  - DAV change for Filip
-
