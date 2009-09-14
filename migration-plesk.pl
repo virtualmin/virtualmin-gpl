@@ -619,6 +619,28 @@ foreach my $mid (keys %$mailusers) {
 	&create_user_home($uinfo, \%dom);
 	$taken{$uinfo->{'uid'}}++;
 	local ($crfile, $crtype) = &create_mail_file($uinfo);
+
+	# Convert windows-style mail files
+	local $mfile = $mailuser->{'dump'}->{'arcname'};
+	local $mpath = "$root/$mfile";
+	if ($mfile && -d $mpath) {
+		# Rename to MH format
+		opendir(MAILDIR, $mpath);
+		my @mfiles = grep { /\.MAI/i } readdir(MAILDIR);
+		closedir(MAILDIR);
+		my $i = 1;
+		foreach my $f (@mfiles) {
+			rename("$mpath/$f", "$mpath/$i");
+			$i++;
+			}
+
+		# Copy MH format
+		local $srcfolder = { 'file' => $mpath, 'type' => 3, };
+		local $dstfolder = { 'file' => $crfile, 'type' => $crtype };
+		&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
+		&set_mailfolder_owner($dstfolder, $uinfo);
+		}
+
 	$mcount++;
 	}
 &$second_print(".. done (migrated $mcount users)");
