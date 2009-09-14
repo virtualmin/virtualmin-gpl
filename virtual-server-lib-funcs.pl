@@ -11613,6 +11613,18 @@ if ($virtualmin_pro && &foreign_check("software")) {
 		}
 	}
 
+# Check for disabled features that are in use
+my @doms = &list_domains();
+foreach my $f (@features) {
+	if (!$config{$f}) {
+		my @lost = grep { $_->{$f} } @doms;
+		if (@lost) {
+			return &text('check_lostfeature', $text{'feature_'.$f},
+				     join(" ", map { $_->{'dom'} } @lost));
+			}
+		}
+	}
+
 # All looks OK .. save the config
 $config{'last_check'} = time()+1;
 $config{'disable'} =~ s/user/unix/g;	# changed since last release
