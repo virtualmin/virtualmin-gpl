@@ -213,6 +213,7 @@ $script_download_port = 80;
 $script_download_dir = "/";
 $script_warnings_file = "$module_config_directory/script-warnings-sent";
 $osdn_website_host = "sourceforge.net";
+$osdn_website_port = 80;
 
 $script_latest_host = "latest-scripts.virtualmin.com";
 $script_latest_port = 80;

@@ -171,7 +171,7 @@ foreach $s (@scripts) {
 	$clfunc = $script->{'check_latest_func'};
 	if (defined(&$clfunc)) {
 		foreach $v (@{$script->{'versions'}}) {
-			print "Check $script->{'name'} versions for $v ..\n";
+			print "Checking $script->{'name'} versions for $v ..\n";
 			$lver = &$clfunc($v);
 			if ($lver) {
 				push(@errs, [ $script, $v, $url,
