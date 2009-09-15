@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Horde Passwd script installer to h3-3.1.1, PHPCoin to 1.6.4, OpenGoo to 1.5.3, LimeSurvey to 1.85plus-build7561-20090902, TextPattern to 4.2.0, CMS Made Simple to 1.6.5, phpMyFAQ to 2.0.17, TWiki to 4.3.2, Rails to 2.3.4, Radiant to 0.8.1, MoinMoin to 1.8.5, SugarCRM to 5.2.0j, Bugzilla to 3.4.2, phpMyAdmin to 3.2.2, Roundcube to 0.3-stable, Redmine to 0.8.5, and Plans to 8.0.8.
+html=Updated the Horde Passwd script installer to h3-3.1.1, PHPCoin to 1.6.4, OpenGoo to 1.5.3, LimeSurvey to 1.85plus-build7561-20090902, TextPattern to 4.2.0, CMS Made Simple to 1.6.5, phpMyFAQ to 2.0.17, TWiki to 4.3.2, Rails to 2.3.4, Radiant to 0.8.1, MoinMoin to 1.8.5, SugarCRM to 5.2.0j, Bugzilla to 3.4.2, phpMyAdmin to 3.2.2, Roundcube to 0.3-stable, Redmine to 0.8.5, and Plans to 8.0.<br>Updated Horde to version 3.3.4, and all sub-applications to their latest versions.
 master=1
 reseller=1
 domain=1
