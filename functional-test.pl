@@ -1286,6 +1286,20 @@ $multibackup_tests = [
 		      [ 'mail-quota', 777*1024 ] ],
 	},
 
+	# Add an extra database
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'name', $test_domain_db.'_extra' ] ],
+	},
+
+	# Add an allowed database host
+	{ 'command' => 'modify-database-hosts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'add-host', '1.2.3.4' ] ],
+	},
+
 	# Create a sub-server to be included
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_subdomain ],
