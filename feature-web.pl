@@ -1606,7 +1606,7 @@ sub check_depends_web
 {
 if (!$_[0]->{'parent'} && !$_[0]->{'unix'}) {
 	# For a non-sub-server, we need a Unix user
-	return $text{'setup_edepunix'};
+	return $text{'setup_edepunix2'};
 	}
 if ($_[0]->{'alias'}) {
 	# If this is an alias domain, then no home is needed
