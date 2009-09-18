@@ -219,7 +219,7 @@ $script_latest_host = "latest-scripts.virtualmin.com";
 $script_latest_port = 80;
 $script_latest_dir = "/";
 $script_latest_file = "scripts.txt";
-$script_latest_key = "latest-scripts@virtualmin.com";
+$script_latest_key = "latest-scripts\@virtualmin.com";
 
 $upgrade_virtualmin_host = "software.virtualmin.com";
 $upgrade_virtualmin_port = 80;
