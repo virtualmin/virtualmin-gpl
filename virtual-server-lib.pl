@@ -3,11 +3,6 @@
 
 BEGIN { push(@INC, ".."); };
 eval "use WebminCore;";
-if ($@) {
-	# Old Webmin version
-	do '../web-lib.pl';
-	do '../ui-lib.pl';
-	}
 
 &init_config();
 if (&indexof($module_root_directory, @INC) < 0) {
