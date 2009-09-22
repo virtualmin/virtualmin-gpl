@@ -187,6 +187,7 @@ if ($bash) {
 #!$bash
 WEBMIN_CONFIG=$config_directory
 WEBMIN_VAR=$var_directory
+PERLLIB=$root_directory
 export WEBMIN_CONFIG WEBMIN_VAR
 cd $module_root_directory
 if [ "\$1" = "" -o "\$1" = "help" -a "\$2" = "" -o "\$1" = "--help" -a "\$2" = "" -o "\$1" = "-help" -a "\$2" = "" ]; then
