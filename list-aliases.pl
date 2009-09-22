@@ -34,10 +34,12 @@ if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
 	$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
-	if ($0 =~ /^(.*\/)[^\/]+$/) {
-		chdir($1);
+	if ($0 =~ /^(.*)\/[^\/]+$/) {
+		chdir($pwd = $1);
 		}
-	chop($pwd = `pwd`);
+	else {
+		chop($pwd = `pwd`);
+		}
 	$0 = "$pwd/list-aliases.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "list-aliases.pl must be run as root";
