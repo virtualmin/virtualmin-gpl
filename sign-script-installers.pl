@@ -54,8 +54,8 @@ $ssh_host || &usage("Missing --ssh-user followed by SSH server hostname");
 $ssh_dir || &usage("Missing --ssh-user followed by SSH server directory");
 
 # Run an SVN update to get checked-in scripts
-print "Updating scripts from SVN ..\n";
-system("cd ".quotemeta($dir)." && su $user -c 'svn update'");
+print "Updating scripts from GIT ..\n";
+system("cd ".quotemeta($dir)." && su $user -c 'git pull'");
 if ($?) {
 	print ".. SVN failed!\n";	
 	exit(1);
