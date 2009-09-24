@@ -2143,6 +2143,7 @@ foreach my $f (@files) {
 	else {
 		# Copy file contents
 		$func = sub { my $data = &read_file_contents($src);
+			      return if (!defined($data));
 			      my @st = stat($src);
 			      &open_tempfile(SKEL, ">$dst", 0, 1);
 			      &print_tempfile(SKEL, $data);
