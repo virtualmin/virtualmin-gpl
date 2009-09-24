@@ -72,6 +72,9 @@ if ($dir eq $module_root_directory) {
 CORE::exit(0);
 }
 
+# Prevent executed programs from doing referer checks
+delete($ENV{'MINISERV_CONFIG'});
+
 # Run the script within this same Perl process
 print "Content-type: text/plain\n\n";
 if ($format) {
