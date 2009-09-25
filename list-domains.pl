@@ -73,6 +73,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--user") {
 		push(@users, shift(@ARGV));
 		}
+	elsif ($a eq "--id") {
+		push(@ids, shift(@ARGV));
+		}
 	elsif ($a eq "--with-feature") {
 		$with = shift(@ARGV);
 		}
@@ -125,7 +128,15 @@ while(@ARGV > 0) {
 		}
 	}
 
-if (@domains || @users || @plans) {
+if (@ids) {
+	# Get domains by IDs
+	foreach $id (@ids) {
+		$d = &get_domain($id);
+		$d || &usage("No virtual server with ID $id exists");
+		push(@doms, $d);
+		}
+	}
+elsif (@domains || @users || @plans) {
 	# Just showing listed domains or domains owned by some user
 	@doms = &get_domains_by_names_users(\@domains, \@users, \&usage,
 					    \@plans);
@@ -501,6 +512,7 @@ print "\n";
 print "virtualmin list-domains [--multiline | --name-only | --id-only]\n";
 print "                        [--domain name]*\n";
 print "                        [--user name]*\n";
+print "                        [--id number]*\n";
 print "                        [--with-feature feature]\n";
 print "                        [--without-feature feature]\n";
 print "                        [--alias | --no-alias | --subserver |\n";
