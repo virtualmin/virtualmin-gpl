@@ -63,6 +63,12 @@ elsif ($cmd =~ /^list\-/ && defined($in{'multiline'})) {
 		}
 	$data->{'data'} = \@data;
 	}
+elsif ($cmd =~ /^list\-/ &&
+       (defined($in{'name-only'}) || defined($in{'id-only'}))) {
+	# Parse list of names into values
+	my @lines = split(/\r?\n/, $out);
+	$data->{'data'} = \@lines;
+	}
 elsif (($cmd eq "list-bandwidth" ||
         $cmd eq "list-owner-bandwidth") && $module_name eq "server-manager") {
 	# Parse Cloudmin bandwidth table
