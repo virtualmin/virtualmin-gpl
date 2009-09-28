@@ -13193,6 +13193,21 @@ local ($msg) = @_;
 &close_tempfile(QUOTAMSG);
 }
 
+# get_domain_http_hostname(&domain)
+# Returns the best hostname for making HTTP requests to some domain, like
+# www.$DOM or just $DOM
+sub get_domain_http_hostname
+{
+my ($d) = @_;
+foreach my $h ("www.$d->{'dom'}", $d->{'dom'}) {
+	my $ip = &to_ipaddress($h);
+	if ($ip && $ip eq $d->{'ip'}) {
+		return $h;
+		}
+	}
+return $d->{'dom'};	# Fallback
+}
+
 # load_plugin_libraries([plugin, ...])
 # Call foreign_require on some or all plugins, just once
 sub load_plugin_libraries

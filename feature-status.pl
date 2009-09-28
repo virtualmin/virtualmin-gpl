@@ -47,13 +47,15 @@ sub make_monitor
 {
 local ($d, $ssl) = @_;
 local $tmpl = &get_template($d->{'template'});
+local $host = $d->{'dns'} ? "www.".$d->{'dom'}
+			  : &get_domain_http_hostname($d);
 local $serv = { 'id' => $d->{'id'}.($ssl ? "_ssl" : "_web"),
 		'type' => 'http',
-		'desc' => $ssl ? "Website www.$d->{'dom'} (SSL)" 
-				: "Website www.$d->{'dom'}",
+		'desc' => $ssl ? "Website $host (SSL)" 
+			       : "Website $host",
 		'fails' => 2,
 		'email' => &monitor_email($d),
-		'host' => "www.$d->{'dom'}",
+		'host' => $host,
 		'port' => $ssl ? $d->{'web_sslport'} : $d->{'web_port'},
 		'nosched' => 0,
 		'ssl' => $ssl,
@@ -89,9 +91,11 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} ||
 	&$first_print($text{'save_status'});
 	&require_status();
 	local $serv = &status::get_service($_[0]->{'id'}."_web");
+	local $host = $_[0]->{'dns'} ? "www.".$_[0]->{'dom'}
+				     : &get_domain_http_hostname($_[0]);
 	if ($serv) {
-		$serv->{'host'} = "www.$_[0]->{'dom'}";
-		$serv->{'desc'} = "Website www.$_[0]->{'dom'}";
+		$serv->{'host'} = $host;
+		$serv->{'desc'} = "Website $host";
 		$serv->{'email'} = &monitor_email($_[0]);
 		&status::save_service($serv);
 		&$second_print($text{'setup_done'});
@@ -106,8 +110,8 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} ||
 		&require_status();
 		local $serv = &status::get_service($_[0]->{'id'}."_ssl");
 		if ($serv) {
-			$serv->{'host'} = "www.$_[0]->{'dom'}";
-			$serv->{'desc'} = "Website www.$_[0]->{'dom'} (SSL)";
+			$serv->{'host'} = $host;
+			$serv->{'desc'} = "Website $host (SSL)";
 			$serv->{'email'} = $_[0]->{'emailto'};
 			&status::save_service($serv);
 			&$second_print($text{'setup_done'});

@@ -1669,21 +1669,6 @@ if (!ref($h)) {
 			$headers);
 }
 
-# get_domain_http_hostname(&domain)
-# Returns the best hostname for making HTTP requests to some domain, like
-# www.$DOM or just $DOM
-sub get_domain_http_hostname
-{
-my ($d) = @_;
-foreach my $h ("www.$d->{'dom'}", $d->{'dom'}) {
-	my $ip = &to_ipaddress($h);
-	if ($ip && $ip eq $d->{'ip'}) {
-		return $h;
-		}
-	}
-return $d->{'dom'};	# Fallback
-}
-
 # make_file_php_writable(&domain, file, [dir-only], [owner-too])
 # Set permissions on a file so that it is writable by PHP
 sub make_file_php_writable
