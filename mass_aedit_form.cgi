@@ -46,7 +46,7 @@ foreach $can (@canaliases) {
 	# Forward, local and bounce destinations
 	$dname = $d->{'dom'};
 	foreach $f (@{$simple->{'forward'}}) {
-		$f =~ s/\@\Q$dname\E$//;	# Remove domain
+		#$f =~ s/\@\Q$dname\E$//;	# Remove domain
 		$aliases .= ":".$f;
 		}
 	if ($simple->{'local'}) {
