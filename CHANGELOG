@@ -1163,3 +1163,4 @@ Added options to the Module Config page for selecting which columns appear on th
 The contents of mailboxes from Windows Plesk backups are now properly migrated.
 Updated the French translation, thanks to Houssin Regis.
 Added the modify-php-ini API command to update PHP variables in one or more virtual servers at once.
+Added validation to prevent SSL from being enabled on a virtual server with an invalid certificate or key.

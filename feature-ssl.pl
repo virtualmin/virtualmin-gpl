@@ -129,6 +129,33 @@ if (!$virt) {
 	}
 local $srclref = &read_file_lines($virt->{'file'});
 
+# Double-check cert and key
+local $certdata = &read_file_contents($_[0]->{'ssl_cert'});
+local $keydata = &read_file_contents($_[0]->{'ssl_key'});
+local $err = &validate_cert_format($certdata, 'cert');
+if ($err) {
+	&$second_print(&text('setup_esslcert', $err));
+	return 0;
+	}
+local $err = &validate_cert_format($keydata, 'key');
+if ($err) {
+	&$second_print(&text('setup_esslkey', $err));
+	return 0;
+	}
+if ($_[0]->{'ssl_ca'}) {
+	local $cadata = &read_file_contents($_[0]->{'ssl_ca'});
+	local $err = &validate_cert_format($cadata, 'ca');
+	if ($err) {
+		&$second_print(&text('setup_esslca', $err));
+		return 0;
+		}
+	}
+local $err = &check_cert_key_match($certdata, $keydata);
+if ($err) {
+	&$second_print(&text('setup_esslmatch', $err));
+	return 0;
+	}
+
 # Add the actual <VirtualHost>
 local $lref = &read_file_lines($f);
 local @ssldirs = &apache_ssl_directives($_[0], $tmpl);
