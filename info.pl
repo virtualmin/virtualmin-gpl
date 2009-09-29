@@ -127,7 +127,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Displays information about this Virtualmin system.\n";
 print "\n";
-print "virtualmin info\n";
+print "virtualmin info [--search 'info'|'ips'|'mem'|'progs'|...]\n";
 exit(1);
 }
 
