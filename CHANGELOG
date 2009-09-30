@@ -1164,3 +1164,4 @@ The contents of mailboxes from Windows Plesk backups are now properly migrated.
 Updated the French translation, thanks to Houssin Regis.
 Added the modify-php-ini API command to update PHP variables in one or more virtual servers at once.
 Added validation to prevent SSL from being enabled on a virtual server with an invalid certificate or key.
+Resellers can be denied access to plans using the Edit Reseller page, or via the modify-reseller API call.

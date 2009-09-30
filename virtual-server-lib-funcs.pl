@@ -8526,7 +8526,8 @@ return &master_admin() || &reseller_admin() || $access{'edit_allowedhosts'};
 # 0 if cannot manage any
 sub can_edit_plans
 {
-return &master_admin() ? 2 : &reseller_admin() ? 1 : 0;
+return &master_admin() ? 2 :
+       &reseller_admin() && !$access{'noplans'} ? 1 : 0;
 }
 
 # has_proxy_balancer(&domain)
@@ -10061,7 +10062,7 @@ if (&reseller_admin() && $config{'bw_active'}) {
 		    'title' => $text{'edit_bwgraph'},
 		    'icon' => 'bw' });
 	}
-if (&reseller_admin()) {
+if (&reseller_admin() && &can_edit_plans()) {
 	# Add plans for resellers
 	push(@rv, { 'url' => $vm."/edit_newplan.cgi",
 		    'title' => $text{'plans_title'},
