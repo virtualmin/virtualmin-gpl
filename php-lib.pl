@@ -385,6 +385,21 @@ foreach my $ini (&list_domain_php_inis($d)) {
 	}
 }
 
+# get_php_max_execution_time(&domain)
+# Returns the max execution time from a php.ini file
+sub get_php_max_execution_time
+{
+local ($d, $max) = @_;
+&foreign_require("phpini", "phpini-lib.pl");
+foreach my $ini (&list_domain_php_inis($d)) {
+	local $f = $ini->[1];
+	local $conf = &phpini::get_config($f);
+	local $max = &phpini::find_value("max_execution_time", $conf);
+	return $max if ($max ne '');
+	}
+return undef;
+}
+
 # create_php_wrappers(&domain, phpmode)
 # Creates all phpN.cgi wrappers for some domain
 sub create_php_wrappers

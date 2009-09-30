@@ -7,6 +7,10 @@ $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
 $can = &can_edit_phpmode($d);
 $can || &error($text{'phpmode_ecannot'});
+if (!$d->{'alias'}) {
+	@modes = &supported_php_modes($d);
+	$mode = &get_domain_php_mode($d);
+	}
 
 # Make sure an Apache virtualhost exists, or else all the rest is pointless
 ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
@@ -27,9 +31,8 @@ if (!$d->{'alias'} && $can == 2) {
 
 if (!$d->{'alias'} && $can == 2) {
 	# PHP execution mode
-	@modes = &supported_php_modes($d);
 	print &ui_table_row(&hlink($text{'phpmode_mode'}, "phpmode"),
-			    &ui_radio("mode", &get_domain_php_mode($d),
+			    &ui_radio("mode", $mode,
 			      [ map { [ $_, $text{'phpmode_'.$_}."<br>" ] }
 				    @modes ]));
 	}
@@ -47,7 +50,8 @@ if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0 && $can == 2) {
 
 # PHP max execution time, for fcgi mode
 if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0) {
-	$max = &get_fcgid_max_execution_time($d);
+	$max = $mode eq "fcgid" ? &get_fcgid_max_execution_time($d)
+				: &get_php_max_execution_time($d);
 	print &ui_table_row(&hlink($text{'phpmode_maxtime'}, "phpmode_maxtime"),
 			    &ui_opt_textbox("maxtime", $max, 5,
 					    $text{'form_unlimit'})." ".
