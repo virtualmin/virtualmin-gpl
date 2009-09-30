@@ -100,6 +100,7 @@ $indent_print = \&indent_save_print;
 $outdent_print = \&outdent_save_print;
 
 # Run any before command
+$start_time = time();
 if ($sched->{'before'}) {
 	&$first_print("Running pre-backup command ..");
 	$out .= &backquote_command("($sched->{'before'}) 2>&1 </dev/null");
@@ -123,7 +124,6 @@ if ($sched->{'strftime'}) {
 else {
 	$dest = $sched->{'dest'};
 	}
-$start_time = time();
 $current_id = undef;
 ($ok, $size, $errdoms) = &backup_domains($dest, \@doms, \@do_features,
 			       $sched->{'fmt'},
