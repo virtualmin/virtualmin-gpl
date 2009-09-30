@@ -563,12 +563,18 @@ if ($waschild) {
 			 undef, \$out, \$out);
 	}
 else {
-	# Migrate home directory contents (except logs)
+	# Migrate home directory contents (except logs and mail)
 	&$first_print("Copying home directory to $dom{'home'} ..");
 	local $qhome = quotemeta($dom{'home'});
-	&execute_command("cd $homesrc && rm -rf logs");
+	local $xtemp = &transname();
+	&open_tempfile(XTEMP, ">$xtemp");
+	&print_tempfile(XTEMP, "logs\n");
+	&print_tempfile(XTEMP, "./logs\n");
+	&print_tempfile(XTEMP, "mail\n");
+	&print_tempfile(XTEMP, "./mail\n");
+	&close_tempfile(XTEMP);
 	&execute_command("cd $homesrc && ".
-			 "(tar cf - . | (cd $qhome && tar xf -))",
+			 "(tar cfX - $xtemp . | (cd $qhome && tar xf -))",
 			 undef, \$out, \$out);
 	}
 if ($?) {
