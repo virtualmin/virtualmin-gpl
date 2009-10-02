@@ -10053,7 +10053,13 @@ push(@rv, { 'url' => $vm.'/index.cgi',
 if (&reseller_admin()) {
 	# Change password for resellers
 	push(@rv, { 'url' => $vm."/edit_pass.cgi",
-		    'title' => $text{'edit_changepass'},
+		    'title' => $text{'edit_changeresellerpass'},
+		    'icon' => 'pass' });
+	}
+elsif (&extra_admin()) {
+	# Change password for admin
+	push(@rv, { 'url' => $vm."/edit_pass.cgi",
+		    'title' => $text{'edit_changeadminpass'},
 		    'icon' => 'pass' });
 	}
 if (&reseller_admin() && $config{'bw_active'}) {

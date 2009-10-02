@@ -8,7 +8,7 @@ if ($in{'dom'}) {
 	$d = &get_domain($in{'dom'});
 	&can_passwd() && &can_edit_domain($d) || &error($text{'pass_ecannot'});
 	}
-elsif (!&reseller_admin()) {
+elsif (!&reseller_admin() && !&extra_admin()) {
 	&error($text{'pass_ecannot2'});
 	}
 

@@ -4,6 +4,7 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 &error_setup($text{'pass_err'});
+&foreign_require("acl");
 
 # Get and validate the domain
 if ($in{'dom'}) {
@@ -11,7 +12,7 @@ if ($in{'dom'}) {
 	$d = &get_domain($in{'dom'});
 	&can_passwd() && &can_edit_domain($d) || &error($text{'pass_ecannot'});
 	}
-elsif (!&reseller_admin()) {
+elsif (!&reseller_admin() && !&extra_admin()) {
 	&error($text{'pass_ecannot2'});
 	}
 
@@ -73,7 +74,7 @@ if ($d) {
 	&reset_domain_envs($d);
 	&webmin_log("pass", "domain", $d->{'dom'}, $d);
 	}
-else {
+elsif (&reseller_admin()) {
 	# Update current reseller
 	&$first_print($text{'pass_changing'});
 	@resels = &list_resellers();
@@ -85,6 +86,20 @@ else {
 	&$second_print($text{'setup_done'});
 	&run_post_actions();
 	&webmin_log("pass", "resel", $resel->{'name'});
+	}
+elsif (&extra_admin()) {
+	# Update current extra admin
+	# XXX also, exits at syscall
+	&$first_print($text{'pass_changing2'});
+	$myd = &get_domain($access{'admin'});
+	@admins = &list_extra_admins($myd);
+	($admin) = grep { $_->{'name'} eq $base_remote_user } @admins;
+	$admin || &error($text{'pass_eadmin'});
+	$oldadmin = { %$admin };
+	$admin->{'pass'} = $in{'new1'};
+	&modify_extra_admin($admin, $oldadmin, $myd);
+	&$second_print($text{'setup_done'});
+        &webmin_log("pass", "admin", $admin->{'name'});
 	}
 
 if ($d) {
