@@ -147,6 +147,7 @@ while(@ARGV > 0) {
 $domain && $sname || &usage();
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
+@scripts = &list_domain_scripts($d);
 $script = &get_script($sname);
 $script || &usage("Script type $sname is not known");
 @vers = defined($id) ? @{$script->{'versions'}}
@@ -167,7 +168,6 @@ else {
 	}
 if (defined($id)) {
 	# Find script being upgraded
-	@scripts = &list_domain_scripts($d);
 	if ($id) {
 		($sinfo) = grep { $_->{'id'} eq $id } @scripts;
 		$sinfo || &usage("No script install to upgrade with ".
@@ -237,7 +237,7 @@ if (defined(&{$script->{'check_func'}}) && !$sinfo && !$logonly) {
 
 # Check for a clash, unless upgrading
 if (!$sinfo) {
-	($clash) = grep { $_->{'opts'}->{'path'} eq $opts->{'path'} } @got;
+	($clash) = grep { $_->{'opts'}->{'path'} eq $opts->{'path'} } @scripts;
 	$clash && &usage(&text('scripts_eclash', $opts->{'dir'}));
 	}
 
