@@ -1070,7 +1070,8 @@ if ($ok) {
 	# Now restore each of the domain/feature files
 	local $d;
 	local @bplugins = &list_backup_plugins();
-	DOMAIN: foreach $d (sort { $a->{'parent'} <=> $b->{'parent'} } @$doms) {
+	DOMAIN: foreach $d (sort { $a->{'parent'} <=> $b->{'parent'} ||
+				   $a->{'alias'} <=> $b->{'alias'} } @$doms) {
 		if ($d->{'missing'}) {
 			# This domain doesn't exist yet - need to re-create it
 			&$first_print(&text('restore_createdomain',
