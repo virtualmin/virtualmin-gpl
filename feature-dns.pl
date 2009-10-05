@@ -818,10 +818,18 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			     grep { $_->{'type'} eq 'A' }
 				  &bind8::read_zone_file($file, $rd->{'dom'});
 
-	# Add standard records we don't have yet
+	# Work out which records to add
 	local $withdot = $d->{'dom'}.".";
+	local @addrecs = split(/\s+/, $tmpl->{'dns_records'});
+	if (!@addrecs || $addrecs[0] eq 'none') {
+		@addrecs = @automatic_dns_records;
+		}
+	local %addrecs = map { $_ eq "@" ? $withdot : $_.".".$withdot, 1 }
+			     @addrecs;
+
+	# Add standard records we don't have yet
 	foreach my $n ($withdot, "www.$withdot", "ftp.$withdot", "m.$withdot") {
-		if (!$already{$n}) {
+		if (!$already{$n} && $addrecs{$n}) {
 			&bind8::create_record($file, $n, undef,
 					      "IN", "A", $ip);
 			}
@@ -829,8 +837,9 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 
 	# Add the localhost record - yes, I know it's lame, but some
 	# registrars require it!
-	if (!$already{"localhost.$withdot"}) {
-		&bind8::create_record($file, "localhost.$withdot", undef,
+	local $n = "localhost.$withdot";
+	if (!$already{$n} && $addrecs{$n}) {
+		&bind8::create_record($file, $n, undef,
 				      "IN", "A", "127.0.0.1");
 		}
 
@@ -1520,6 +1529,17 @@ print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
 		  [ [ 0, $text{'tmpl_replace0'} ],
 		    [ 1, $text{'tmpl_replace1'} ] ]));
 
+# Address records to add
+my @add_records = split(/\s+/, $tmpl->{'dns_records'});
+if (!@add_records || $add_records[0] eq 'none') {
+	@add_records = @automatic_dns_records;
+	}
+my @grid = map { &ui_checkbox("dns_records", $_, $text{'tmpl_dns_record_'.$_},
+			      &indexof($_, @add_records) >= 0) }
+	       @automatic_dns_records;
+print &ui_table_row(&hlink($text{'tmpl_dnsrecords'}, "template_dns_records"),
+	&ui_grid_table(\@grid, scalar(@grid)));
+
 # Default TTL
 local $tmode = $tmpl->{'dns_ttl'} eq 'none' ? 0 :
 	       $tmpl->{'dns_ttl'} eq 'skip' ? 1 : 2;
@@ -1697,6 +1717,9 @@ if ($in{"dns_mode"} == 2) {
 			&error($text{'tmpl_ednsttl'});
 		$tmpl->{'dns_ttl'} = $in{'dns_ttl'};
 		}
+
+	# Save automatic A records
+	$tmpl->{'dns_records'} = join(" ", split(/\0/, $in{'dns_records'}));
 
 	# Save additional nameservers
 	$in{'dnsns'} =~ s/\r//g;

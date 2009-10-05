@@ -1166,3 +1166,4 @@ Added the modify-php-ini API command to update PHP variables in one or more virt
 Added validation to prevent SSL from being enabled on a virtual server with an invalid certificate or key.
 Resellers can be denied access to plans using the Edit Reseller page, or via the modify-reseller API call.
 Extra administrators can now change their own passwords, via a new link on the left menu.
+Added a DNS template option to control which A records are added to new domains.

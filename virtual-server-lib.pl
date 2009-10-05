@@ -268,6 +268,8 @@ $ham_alias_dir = "$trap_base_dir/ham";
 $user_quota_warnings_file = "$module_config_directory/quotas-warnings";
 $user_quota_msg_file = "$module_config_directory/quotas-template";
 
+@automatic_dns_records = ( "@", "www", "ftp", "localhost", "m");
+
 # generate_plugins_list([list])
 # Creates the confplugins, plugins and other arrays based on the module config
 # or given space-separated string.
