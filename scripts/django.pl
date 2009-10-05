@@ -284,7 +284,7 @@ if (!$upgrade) {
 	local ($fh, $fpid) = &proc::pty_process_exec($icmd);
 	chdir($pwd);
 	local $out;
-	$domuser =~ s/[\.\@]/_/g;
+	$domuser =~ s/[\.\@\-]/_/g;
 	foreach my $w ([ "yes.no", "yes" ],
 		       [ "Username", $domuser ],
 		       [ "E-mail address", $d->{'emailto'} ],
