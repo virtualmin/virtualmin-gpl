@@ -8462,16 +8462,16 @@ else {
 	}
 }
 
-# servers_input(name, &ids, &domains)
+# servers_input(name, &ids, &domains, [disabled])
 # Returns HTML for a multi-server selection field
 sub servers_input
 {
-local ($name, $ids, $doms) = @_;
+local ($name, $ids, $doms, $dis) = @_;
 local $sz = scalar(@$doms) > 10 ? 10 : scalar(@$doms) < 5 ? 5 : scalar(@$doms);
 return &ui_select($name, $ids,
 		  [ map { [ $_->{'id'}, &show_domain_name($_) ] }
 			sort { $a->{'dom'} cmp $b->{'dom'} } @$doms ],
-		  $sz, 1);
+		  $sz, 1, 0, $dis);
 }
 
 # can_monitor_bandwidth(&domain)
