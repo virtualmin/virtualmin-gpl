@@ -156,7 +156,12 @@ sub virtualmin_ui_html_editor_bodytags
 {
 return &theme_virtualmin_ui_html_editor_bodytags(@_)
 	if (defined(&theme_virtualmin_ui_html_editor_bodytags));
-return "onload='initEditor()'";
+if (&get_webmin_version() >= 1.491) {
+	return "onload='xinha_init()'";
+	}
+else {
+	return "onload='initEditor()'";
+	}
 }
 
 # virtualmin_ui_show_html_editor(name, html, baseurl)
@@ -169,16 +174,33 @@ return &theme_virtualmin_ui_show_html_editor(@_)
 local ($name, $html, $baseurl) = @_;
 local $rv;
 
-# Javascript for making the editor
-local $mbroot = &module_root_directory("mailboxes");
-local $prog = -d "$mbroot/xinha" ? "xinha" : "htmlarea";
+# Xinha editor config
 $rv .= <<EOF;
 <script type="text/javascript">
-  _editor_url = "$gconfig{'webprefix'}/mailboxes/$prog/";
+  _editor_url = "$gconfig{'webprefix'}/mailboxes/xinha/";
   _editor_lang = "en";
 </script>
-<script type="text/javascript" src="../mailboxes/$prog/htmlarea.js"></script>
+EOF
 
+# Javascript for making the Xinha editor, depending on version
+if (&get_webmin_version() >= 1.491) {
+	$rv .= <<EOF;
+<script type="text/javascript" src="../mailboxes/xinha/XinhaCore.js"></script>
+<script type="text/javascript">
+xinha_init = function()
+{
+xinha_editors = [ "body" ];
+xinha_plugins = [ ];
+xinha_config = new Xinha.Config();
+xinha_editors = Xinha.makeEditors(xinha_editors, xinha_config, xinha_plugins);
+Xinha.startEditors(xinha_editors);
+}
+</script>
+EOF
+	}
+else {
+	$rv .= <<EOF;
+<script type="text/javascript" src="../mailboxes/xinha/htmlarea.js"></script>
 <script type="text/javascript">
 var editor = null;
 function initEditor() {
@@ -191,6 +213,7 @@ function initEditor() {
 }
 </script>
 EOF
+	}
 
 # The actual textbox
 $rv .= "<textarea rows=20 cols=80 style='width:100%;height:70%' name=$name id=$name>";
