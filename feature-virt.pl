@@ -288,7 +288,7 @@ elsif ($in{'virt'} == 3 && &can_edit_sharedips()) {
 elsif ($in{'virt'} == 4 && (&running_in_zone() || &running_in_vserver())) {
 	# On an active IP on a virtual machine that cannot bring up its
 	# own IP.
-	&check_ipadress($in{'zoneip'}) || &error($text{'setup_eip'});
+	&check_ipaddress($in{'zoneip'}) || &error($text{'setup_eip'});
 	local $clash = &check_virt_clash($in{'zoneip'});
 	$clash || &error(&text('setup_evirtclash2'));
 	local $already = &get_domain_by("ip", $in{'ip'});
