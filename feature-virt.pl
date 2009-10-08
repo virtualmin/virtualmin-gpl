@@ -239,7 +239,7 @@ if ($config{'all_namevirtual'}) {
 	# Make sure the IP *is* assigned
 	&check_ipaddress($in{'ip'}) || &error($text{'setup_eip'});
 	if (!&check_virt_clash($in{'ip'})) {
-		&error(&text('setup_evirtclash2'));
+		&error(&text('setup_evirtclash2', $in{'ip'}));
 		}
 	return ($in{'ip'}, 0, 1);
 	}
@@ -268,7 +268,7 @@ elsif ($in{'virt'} == 1) {
 	if ($in{'virtalready'}) {
 		# Fail if the IP isn't yet active, or if claimed by another
 		# virtual server
-		$clash || &error(&text('setup_evirtclash2'));
+		$clash || &error(&text('setup_evirtclash2', $in{'ip'}));
 		local $already = &get_domain_by("ip", $in{'ip'});
 		$already && &error(&text('setup_evirtclash4',
 					 $already->{'dom'}));
@@ -290,7 +290,7 @@ elsif ($in{'virt'} == 4 && (&running_in_zone() || &running_in_vserver())) {
 	# own IP.
 	&check_ipaddress($in{'zoneip'}) || &error($text{'setup_eip'});
 	local $clash = &check_virt_clash($in{'zoneip'});
-	$clash || &error(&text('setup_evirtclash2'));
+	$clash || &error(&text('setup_evirtclash2', $in{'zoneip'}));
 	local $already = &get_domain_by("ip", $in{'ip'});
 	$already && &error(&text('setup_evirtclash4',
 				 $already->{'dom'}));
