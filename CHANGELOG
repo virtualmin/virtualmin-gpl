@@ -1168,3 +1168,4 @@ Resellers can be denied access to plans using the Edit Reseller page, or via the
 Extra administrators can now change their own passwords, via a new link on the left menu.
 Added a DNS template option to control which A records are added to new domains.
 Fixed a bug that prevented paths in php.ini from being updated when a domain is renamed or moved.
+Added a button on the Edit Reseller page to clone his settings for a new reseller.
