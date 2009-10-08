@@ -8,8 +8,8 @@ sub get_domain_php_mode
 {
 local ($d) = @_;
 &require_apache();
-local $conf = &apache::get_config();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+						   $d->{'web_port'});
 if ($virt) {
 	local @actions = &apache::find_directive("Action", $vconf);
 	local $pdir = &public_html_dir($d);

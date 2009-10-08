@@ -840,6 +840,15 @@ else {
 			     $suexec->{'words'}->[1], $_[0]->{'ugid'});
 			}
 		}
+
+	# Make sure a <Directory> exists for the document root
+	local $pdir = &public_html_dir($d);
+	local ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
+			      $_->{'words'}->[0] eq $pdir."/" }
+		    &apache::find_directive_struct("Directory", $vconf);
+	if (!$dir) {
+		return &text('validate_ewebdir', $pdir);
+		}
 	}
 return undef;
 }

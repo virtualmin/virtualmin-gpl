@@ -3761,6 +3761,7 @@ validate_eweb=No Apache virtual host for $1 found
 validate_ewebphp=Missing wrapper script for PHP $1 - $2
 validate_ewebuid=SuExec user is set to $1, but the virtual server's UID is $2
 validate_ewebgid=SuExec group is set to $1, but the virtual server's GID is $2
+validate_ewebdir=Missing Apache &lt;Directory&gt; block for HTML directory $1
 validate_essl=No SSL Apache virtual host for $1 found
 validate_esslcert=No SSL certificate file specified in Apache virtual host
 validate_esslcertfile=SSL certificate file $1 does not exist
