@@ -483,7 +483,7 @@ else {
 			}
 		local $lref = &read_file_lines($virt->{'file'});
 		for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
-			$lref->[$i] =~ s/$_[1]->{'home'}/$_[0]->{'home'}/g;
+			$lref->[$i] =~ s/\Q$_[1]->{'home'}\E/$_[0]->{'home'}/g;
 			}
 		&flush_file_lines($virt->{'file'});
 		undef(@apache::get_config_cache);
@@ -495,6 +495,29 @@ else {
 		# Re-create wrapper scripts, which contain home
 		if (defined(&create_php_wrappers) && !$_[0]->{'alias'}) {
 			&create_php_wrappers($_[0]);
+			}
+
+		# Fix all php.ini files that use old path
+		if (defined(&list_domain_php_inis) && 
+		    &foreign_check("phpini")) {
+			&foreign_require("phpini", "phpini-lib.pl");
+			foreach my $ini (&list_domain_php_inis($_[0])) {
+				&lock_file($ini->[0]);
+				my $conf = &phpini::get_config($ini->[0]);
+				my $fixed = 0;
+				foreach my $c (@$conf) {
+					if ($c->{'value'} =~
+					    s/\Q$_[1]->{'home'}/$_[0]->{'home'}/g) {
+						&phpini::save_directive($conf,
+						   $c->{'name'}, $c->{'value'});
+						$fixed++;
+						}
+					}
+				if ($fixed) {
+					&flush_file_lines($ini->[0]);
+					}
+				&unlock_file($ini->[0]);
+				}
 			}
 		&$second_print($text{'setup_done'});
 		}
