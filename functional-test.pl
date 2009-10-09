@@ -1840,7 +1840,7 @@ $mail_tests = [
 		# Add the spammer's address to this domain's blacklist
 		{ 'command' => 'echo blacklist_from spam@spam.com >'.
 			       $module_config_directory.'/spam/'.
-			       '`./list-domains.pl --domain '.$test_domain.
+			       '`virtualmin list-domains.pl --domain '.$test_domain.
 			       ' --id-only`/virtualmin.cf',
 		},
 
@@ -2030,7 +2030,7 @@ $webmin_tests = [
 
 	# Delete the domain
 	{ 'command' => $webmin_wget_command.
-		       "${webmin_proto}://localhost:${webmin_port}/virtual-server/delete_domain.cgi\\?dom=`./list-domains.pl --domain $test_domain --id-only`\\&confirm=1",
+		       "${webmin_proto}://localhost:${webmin_port}/virtual-server/delete_domain.cgi\\?dom=`virtualmin list-domains.pl --domain $test_domain --id-only`\\&confirm=1",
 	  'grep' => [ 'Deleting virtual website', 'Deleting server details' ],
 	  'cleanup' => 1,
 	},
@@ -2186,7 +2186,7 @@ $shared_tests = [
 	},
 
 	# Get the IP
-	{ 'command' => './list-shared-addresses.pl --name-only | tail -1',
+	{ 'command' => 'list-shared-addresses.pl --name-only | tail -1',
 	  'save' => 'SHARED_IP',
 	},
 
@@ -2244,7 +2244,7 @@ $wildcard_tests = [
 	},
 
 	# Get the IP
-	{ 'command' => './list-shared-addresses.pl --name-only | tail -1',
+	{ 'command' => 'list-shared-addresses.pl --name-only | tail -1',
 	  'save' => 'SHARED_IP',
 	},
 
