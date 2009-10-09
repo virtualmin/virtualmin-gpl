@@ -270,6 +270,8 @@ if ($info->{'poss'} && &foreign_check("security-updates")) {
 	&foreign_require("security-updates", "security-updates-lib.pl");
 	local @poss = &security_updates::list_possible_updates(2);
 	$info->{'poss'} = \@poss;
+	local @allposs = &security_updates::list_possible_updates(2, 1);
+	$info->{'allposs'} = \@allposs;
 	}
 &save_collected_info($info);
 }
