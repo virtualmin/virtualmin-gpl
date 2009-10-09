@@ -1756,7 +1756,7 @@ $mail_tests = [
 	# runs as the right user. This is to work around a procmail bug where
 	# it can drop privs too soon!
 	{ 'command' => 'test-smtp.pl',
-	  'args' => [ [ 'from', 'jcameron@webmin.com' ],
+	  'args' => [ [ 'from', 'nobody@webmin.com' ],
 		      [ 'to', $test_user.'@'.$test_domain ],
 		      [ 'data', $ok_email_file ] ],
 	},
@@ -1775,7 +1775,7 @@ $mail_tests = [
 
         # Send some reasonable mail to him
 	{ 'command' => 'test-smtp.pl',
-	  'args' => [ [ 'from', 'jcameron@webmin.com' ],
+	  'args' => [ [ 'from', 'nobody@webmin.com' ],
 		      [ 'to', $test_user.'@'.$test_domain ],
 		      [ 'data', $ok_email_file ] ],
 	},
@@ -2949,7 +2949,7 @@ $bw_tests = [
 
 	# Send email to the domain's user
 	{ 'command' => 'test-smtp.pl',
-	  'args' => [ [ 'from', 'jcameron@webmin.com' ],
+	  'args' => [ [ 'from', 'nobody@webmin.com' ],
 		      [ 'to', $test_bw_domain_user.'@'.$test_bw_domain ],
 		      [ 'data', '/tmp/random.txt' ] ],
 	},
@@ -3044,7 +3044,7 @@ $bw_tests = [
 
 	# Send a 1M email to it
 	{ 'command' => 'test-smtp.pl',
-	  'args' => [ [ 'from', 'jcameron@webmin.com' ],
+	  'args' => [ [ 'from', 'nobody@webmin.com' ],
 		      [ 'to', $test_user.'@'.$test_bw_domain ],
 		      [ 'data', '/tmp/random.txt' ] ],
 	},
@@ -3143,7 +3143,7 @@ $quota_tests = [
 	# runs as the right user. This is to work around a procmail bug where
 	# it can drop privs too soon!
 	{ 'command' => 'test-smtp.pl',
-	  'args' => [ [ 'from', 'jcameron@webmin.com' ],
+	  'args' => [ [ 'from', 'nobody@webmin.com' ],
 		      [ 'to', $test_user.'@'.$test_domain ],
 		      [ 'data', $ok_email_file ] ],
 	},
@@ -3166,7 +3166,7 @@ $quota_tests = [
 
 	# Send email to the new mailbox, which won't get delivered
 	{ 'command' => 'test-smtp.pl',
-	  'args' => [ [ 'from', 'jcameron@webmin.com' ],
+	  'args' => [ [ 'from', 'nobody@webmin.com' ],
 		      [ 'to', $test_user.'@'.$test_domain ],
 		      [ 'data', '/tmp/random.txt' ] ],
 	},
