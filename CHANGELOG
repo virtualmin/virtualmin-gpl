@@ -1169,3 +1169,4 @@ Extra administrators can now change their own passwords, via a new link on the l
 Added a DNS template option to control which A records are added to new domains.
 Fixed a bug that prevented paths in php.ini from being updated when a domain is renamed or moved.
 Added a button on the Edit Reseller page to clone his settings for a new reseller.
+Removed the 'Bring up virtual interfaces?' module configuration option, as use of an existing interface can now be done on a per-domain basis.

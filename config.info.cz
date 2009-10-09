@@ -116,7 +116,6 @@ avail_shell=Prikazovy radek,1,1-Ano,0-Ne
 avail_syslog=Systemove logy,1,1-Ano,0-Ne
 line6=Rozsirene nastaveni,11
 iface_base=Zakladni cislo pro virtualni rozhranni,3,Automaticky
-iface_manual=Aktivovat virtualni rozhranni?,1,0-Ano,1-Ne
 delete_indom=Behem vymazu virtualniho serveru take virtualni server Apache,1,1-Ano,0-Ne
 ldap_mail=Pridat atribut mail uzivatelum LDAP?,1,1-Ano, pouze atribut <tt>mail</tt>,2-Ano, pouzitim atributu <tt>mail</tt> a <tt>MailAlternateAddress</tt>,0-Ne
 allow_upper=Vzdy uvadet nazvy postovnich uzivatelskych uctu malymi pismeny?,1,0-Ano,1-Ne

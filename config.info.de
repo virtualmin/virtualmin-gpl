@@ -125,7 +125,6 @@ avail_syslog=Systemprotokolle (Apache&#45; und FTP&#45;Logs),1,1-Ja,0-Nein
 avail_phpini=PHP&#45;-Konfiguration (f&#252;r die php.ini der Domain),1,1-Ja,0-Nein
 line6=Erweiterte Optionen,11
 iface_base=Basisnummer f&#252;r Virtuelle Interfaces,3,Automatisch
-iface_manual=Fahre virtuelle Interfaces hoch?,1,0-Ja,1-Nein
 dns_check=Pr&#252;fe auch resolv.conf dieses Systems?,1,1-Ja,0-Nein
 delete_indom=Beim L&#246;schvorgang alle virtuellen Apacheserver in der Domain l&#246;schen?,1,1-Ja,0-Nein
 ldap_mail=F&#252;ge Mailattribute den LDAP&#45;Usern hinzu?,1,1-Nur <tt>mail</tt>,2,Nur <tt>mail</tt> und <tt>mailAlternateAddress</tt>,0-Nein

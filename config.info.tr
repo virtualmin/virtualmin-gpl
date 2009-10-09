@@ -22,7 +22,6 @@ quotas=Alanad&#305; ve eposta kullan&#305;c&#305;lar&#305; için kota kurulsun mu
 iface=Sanal adresler için a&#287; arabirimi,3,Otomatik olarak tespit et
 iface_base=Sanal arabirimler için taban say&#305;s&#305;,3,Otomatik
 defip=Varsay&#305;lan sanal sunucu IP adresi,3,A&#287; arabiriminden
-iface_manual=Sanal arabirimler getirilsin mi?,1,0-Evet,1-Hay&#305;r
 dns_ip=DNS kay&#305;tlar&#305; için varsay&#305;lan IP adresi,3,Sanal sunucuyla ayn&#305;
 disable=Engellenirken etkinli&#287;i kald&#305;r&#305;lacak özellikler,13,unix-Unix kullan&#305;c&#305;s&#305; (hesab&#305; kilitle),mail-eposta (alanad&#305; için eposta kabulünü durdur),web-web sitesi (siteyi hata sayfas&#305;yla yerde&#287;i&#351;tir),dns-DNS (alanad&#305;n&#305; sunmay&#305; durdur),mysql-MySQL (MySQL kullan&#305;c&#305;s&#305;n&#305;n loginini durdur),postgres-PostgreSQL (PostgreSQL kullan&#305;c&#305;s&#305;n&#305;n loginini durdur),ftp-ProFTPD (eri&#351;imi engelle)
 delete_indom=Silerken alanad&#305;ndaki tüm Apache sanal hostlar&#305; silinsin mi?,1,1-Evet,0-Hay&#305;r

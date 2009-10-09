@@ -133,7 +133,6 @@ zip_args=Extra command-line parameters for compression command,3,None
 
 line6=Advanced options,11
 iface_base=Base number for virtual interfaces,3,Automatic
-iface_manual=Bring up virtual interfaces?,1,0-Yes,1-No
 dns_check=Check resolv.conf for this system?,1,1-Yes,0-No
 delete_indom=Delete all Apache virtual hosts in domain when deleting?,1,1-Yes,0-No
 ldap_mail=Add mail attribute to LDAP users?,1,1-Yes using only <tt>mail</tt> attribute,2-Yes using <tt>mail</tt> and <tt>mailAlternateAddress</tt>,0-No

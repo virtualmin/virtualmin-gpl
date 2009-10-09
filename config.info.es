@@ -5,7 +5,6 @@ quotas=Configuraci&#243;n de quota para el dominio y usuarios de correo?,1,1-Si 
 iface=Interface de red para direcciones virtuales,3,Detectar autom&#225;ticamente
 iface_base=Base number for virtual interfaces,3,Automatic
 defip=Direcci&#243;n IP por defecto del servidor virtual,3,La de la placa de red
-iface_manual=Levantar interfaces virtuales?,1,0-Si,1-No
 dns_ip=Direcci&#243;n IP por defecto para los registros de DNS,3,La misma IP que la del servidor virtual
 dns_check=Chequear el archivo  resolv.conf para este sistema?,1,1-Si,0-No
 disable=Opciones a desactivar al deshabilitar,13,Usuario de Administraci&#243;n-unix (bloquear cuenta),mail-Mail (no aceptar mas mails para el dominio),web-Website (reemplazar el sitio con una p&#225;gina de error),dns-DNS (dejar de resolver el dominio),mysql-MySQL (deshabilitar logueo de usuario de MySQL),postgres-PostgreSQL (deshabilitar logueo de usuario de PostgreSQL),ftp-ProFTPD (rechazar acceso)

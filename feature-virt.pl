@@ -7,7 +7,7 @@ sub setup_virt
 &obtain_lock_virt($_[0]);
 &foreign_require("net", "net-lib.pl");
 local @boot = &net::active_interfaces();
-if (!$config{'iface_manual'} && !$_[0]->{'virtalready'}) {
+if (!$_[0]->{'virtalready'}) {
 	# Actually bring up
 	&$first_print(&text('setup_virt', $_[0]->{'ip'}));
 	local ($iface) = grep { $_->{'fullname'} eq $config{'iface'} } @boot;
@@ -61,7 +61,7 @@ return 1;
 # Take down the network interface for a domain
 sub delete_virt
 {
-if (!$config{'iface_manual'} && !$_[0]->{'virtalready'}) {
+if (!$_[0]->{'virtalready'}) {
 	&$first_print($text{'delete_virt'});
 	&obtain_lock_virt($_[0]);
 	&foreign_require("net", "net-lib.pl");
@@ -92,7 +92,7 @@ delete($_[0]->{'iface'});
 sub modify_virt
 {
 if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[0]->{'virt'} &&
-    !$config{'iface_manual'} && !$_[0]->{'virtalready'}) {
+    !$_[0]->{'virtalready'}) {
 	&$first_print($text{'save_virt'});
 	&obtain_lock_virt($_[0]);
 	&foreign_require("net", "net-lib.pl");
@@ -124,7 +124,6 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[0]->{'virt'} &&
 sub validate_virt
 {
 local ($d) = @_;
-return undef if ($config{'iface_manual'});	# manually setup
 if (!$_[0]->{'virtalready'}) {
 	# Only check boot-time interface if added by Virtualmin
 	local @boots = &bootup_ip_addresses();
@@ -143,8 +142,6 @@ return undef;
 # Returns 1 if some IP is already in use, 0 if not
 sub check_virt_clash
 {
-return undef if ($config{'iface_manual'});	# no clash for manual mode
-
 # Check active and boot-time interfaces
 local %allips = &interface_ip_addresses();
 return 1 if ($allips{$_[0]});

@@ -119,7 +119,6 @@ compression=Backup compressie formaat,1,0-gzip,1-bzip2,2-Geen (alleen tar),3-ZIP
 zip_args=Extra opdracht regel parameters voor compressie opdracht,3,Geen
 line6=Geavanceerde opties,11
 iface_base=Basis aantal voor virtuele interfaces,3,Automatisch
-iface_manual=Naar boven halen van virtuele interfaces?,1,0-Ja,1-Nee
 dns_check=Controleer resolv.conf voor dit systeem?,1,1-Ja,0-Nee
 delete_indom=Verwijder alle Apache virtuele hosts in het domein wanneer word verwijdert?,1,1-Ja,0-Nee
 ldap_mail=Toevoegen van attributen aan LDAP gebruikers?,1,1-Ja gebruik alleen <tt>mail</tt> attributen,2-Ja gebruik <tt>mail</tt> en <tt>mailAlternateAddress</tt>,0-Nee
