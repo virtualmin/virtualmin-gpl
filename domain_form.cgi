@@ -577,9 +577,12 @@ if (!$aliasdom && &can_use_feature("virt") && &supports_ip6()) {
 	}
 
 # Show DNS IP address field
-print &ui_table_row(&hlink($text{'edit_dnsip'}, "edit_dnsip"),
-	&ui_opt_textbox("dns_ip", $parentdom ? $parentdom->{'dns_ip'} : undef,
-			20, $text{'spf_default2'}));
+if (&can_dnsip()) {
+	print &ui_table_row(&hlink($text{'edit_dnsip'}, "edit_dnsip"),
+		&ui_opt_textbox("dns_ip",
+				$parentdom ? $parentdom->{'dns_ip'} : undef,
+				20, $text{'spf_default2'}));
+	}
 
 print &ui_hidden_table_end();
 

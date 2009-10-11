@@ -44,8 +44,10 @@ if (!$d->{'parent'} && defined($in{'plan'})) {
 	}
 
 # Check external IP
-$in{'dns_ip_def'} || &check_ipaddress($in{'dns_ip'}) ||
-	&error($text{'save_ednsip'});
+if (&can_dnsip()) {
+	$in{'dns_ip_def'} || &check_ipaddress($in{'dns_ip'}) ||
+		&error($text{'save_ednsip'});
+	}
 
 # Check if the prefix has been changed
 if (defined($in{'prefix'})) {
@@ -334,11 +336,13 @@ if ($plan && $plan->{'id'} ne $d->{'plan'}) {
 	}
 
 # Update DNS IP
-if ($in{'dns_ip_def'}) {
-	delete($d->{'dns_ip'});
-	}
-else {
-	$d->{'dns_ip'} = $in{'dns_ip'};
+if (&can_dnsip()) {
+	if ($in{'dns_ip_def'}) {
+		delete($d->{'dns_ip'});
+		}
+	else {
+		$d->{'dns_ip'} = $in{'dns_ip'};
+		}
 	}
 
 # Update prefix

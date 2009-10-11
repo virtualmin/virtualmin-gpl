@@ -1170,3 +1170,5 @@ Added a DNS template option to control which A records are added to new domains.
 Fixed a bug that prevented paths in php.ini from being updated when a domain is renamed or moved.
 Added a button on the Edit Reseller page to clone his settings for a new reseller.
 Removed the 'Bring up virtual interfaces?' module configuration option, as use of an existing interface can now be done on a per-domain basis.
+---- Changes since 3.74 ----
+Added a domain owner level capability restriction to prevent editing of external IP addresses.

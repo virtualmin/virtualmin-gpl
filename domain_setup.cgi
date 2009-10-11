@@ -253,8 +253,10 @@ elsif (&can_use_feature("virt") && &supports_ip6()) {
 	}
 
 # Validate the DNS IP
-if (!$in{'dns_ip_def'}) {
-	&check_ipaddress($in{'dns_ip'}) || &error($text{'save_ednsip'});
+if (&can_dnsip()) {
+	if (!$in{'dns_ip_def'}) {
+		&check_ipaddress($in{'dns_ip'}) || &error($text{'save_ednsip'});
+		}
 	}
 
 # Make sure domain is under parent, if required
@@ -311,7 +313,7 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'netmask', $netmask,
 	 'ip6', $ip6,
 	 'netmask6', $netmask6,
-	 'dns_ip', !$in{'dns_ip_def'} ? $in{'dns_ip'} :
+	 'dns_ip', !$in{'dns_ip_def'} && &can_dnsip() ? $in{'dns_ip'} :
 		   $virt || $config{'all_namevirtual'} ? undef
 						       : &get_dns_ip(),
 	 'virt', $virt,

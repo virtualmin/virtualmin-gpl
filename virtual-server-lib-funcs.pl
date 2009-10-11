@@ -8505,6 +8505,12 @@ sub can_passwd
 return &reseller_admin() || $access{'edit_passwd'};
 }
 
+# Returns 1 if the user can change a domain's external IP address
+sub can_dnsip
+{
+return &master_admin() || &reseller_admin() || $access{'edit_dnsip'};
+}
+
 # Returns 1 if the current user can set the chained certificate path to
 # anywhere.
 sub can_chained_cert_path
