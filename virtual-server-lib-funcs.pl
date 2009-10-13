@@ -10452,8 +10452,16 @@ push(@olddoms, $oldd);
 
 # The template may no longer be valid if it was for a sub-server
 local $tmpl = &get_template($d->{'template'});
+local $skelchanged;
 if (!$tmpl->{'for_parent'}) {
-	$d->{'template'} = &get_init_template(0);
+	local $deftmpl = &get_init_template(0);
+	if ($d->{'template'} ne $deftmpl) {
+		$d->{'template'} = $deftmpl;
+		local $newtmpl = &get_template($d->{'template'});
+		if ($newtmpl->{'skel'} ne $tmpl->{'skel'}) {
+			$skelchanged = $newtmpl->{'skel'};
+			}
+		}
 	}
 
 # Copy all quotas and limits from the old parent
@@ -10583,6 +10591,14 @@ for(my $i=0; $i<@doms; $i++) {
 if (defined(&supports_resource_limits) && &supports_resource_limits()) {
 	local $rv = &get_domain_resource_limits($d);
 	&save_domain_resource_limits($d, $rv);
+	}
+
+# Copy skeleton files for top-level server
+if ($skelchanged && $skelchanged ne 'none') {
+	local $uinfo = &get_domain_owner($d);
+	&copy_skel_files(&substitute_domain_template($skelchanged, $d),
+			 $uinfo, $d->{'home'},
+			 $d->{'group'} || $d->{'ugroup'}, $d);
 	}
 
 &run_post_actions();
