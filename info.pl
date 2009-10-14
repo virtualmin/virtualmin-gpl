@@ -41,7 +41,8 @@ if (!$module_name) {
 	$< == 0 || die "info.pl must be run as root";
 	}
 
-foreach $a (@ARGV) {
+while(@ARGV > 0) {
+	local $a = shift(@ARGV);
 	if ($a eq "--help") {
 		&usage();
 		}
