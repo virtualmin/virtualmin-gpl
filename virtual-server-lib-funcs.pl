@@ -2129,22 +2129,27 @@ foreach my $f (@files) {
 	local $src = "$uf/$f";		# Needs to be local, for subs
 	local $dst = "$home/$f";
 	my $func;
+
+	# Get file info as root before copying
+	local @st = stat($src);
+	local $data;
+	if (-f $src) {
+		$data = &read_file_contents($src);
+		}
+	local $lnk = readlink($src);
+
 	if (-l $src) {
 		# Re-create symlink
-		$func = sub { my $lnk = readlink($src);
-			      &symlink_file($lnk, $dst) };
+		$func = sub { &symlink_file($lnk, $dst) };
 		}
 	elsif (-d $src) {
 		# Re-create directory
-		$func = sub { my @st = stat($src);
-			      $st[2] ||= 0755;
+		$func = sub { $st[2] ||= 0755;
 			      &make_dir($dst, $st[2] & 07777) };
 		}
 	else {
 		# Copy file contents
-		$func = sub { my $data = &read_file_contents($src);
-			      return if (!defined($data));
-			      my @st = stat($src);
+		$func = sub { return if (!defined($data));
 			      &open_tempfile(SKEL, ">$dst", 0, 1);
 			      &print_tempfile(SKEL, $data);
 			      &close_tempfile(SKEL);
