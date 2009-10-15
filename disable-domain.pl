@@ -87,6 +87,9 @@ foreach $f (&list_feature_plugins()) {
 		}
 	}
 
+# Disable extra admins
+&update_extra_webmin($d, 1);
+
 # Save new domain details
 &$first_print($text{'save_domain'});
 $d->{'disabled'} = join(",", @disabled);

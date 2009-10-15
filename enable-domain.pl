@@ -76,6 +76,9 @@ foreach $f (&list_feature_plugins()) {
 		}
 	}
 
+# Enable extra admins
+&update_extra_webmin($d, 0);
+
 # Save new domain details
 &$first_print($text{'save_domain'});
 delete($d->{'disabled'});

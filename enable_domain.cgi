@@ -66,6 +66,9 @@ else {
 			}
 		}
 
+	# Enable extra admins
+	&update_extra_webmin($d, 0);
+
 	# Save new domain details
 	print $text{'save_domain'},"<br>\n";
 	delete($d->{'disabled'});

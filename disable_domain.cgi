@@ -77,6 +77,9 @@ else {
 			}
 		}
 
+	# Disable extra admins
+	&update_extra_webmin($d, 1);
+
 	# Save new domain details
 	print $text{'save_domain'},"<br>\n";
 	$d->{'disabled'} = join(",", @disabled);

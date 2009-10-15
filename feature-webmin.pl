@@ -889,15 +889,18 @@ local $afile = "$config_directory/$_[2]/$_[1].acl";
 &set_ownership_permissions(undef, undef, 0600, $afile);
 }
 
-# update_extra_webmin(&domain)
+# update_extra_webmin(&domain, [force-disable])
 # Creates, updates or deletes Webmin users to be the extra admins for a
 # virtual server.
 sub update_extra_webmin
 {
-local ($d) = @_;
+local ($d, $forcedis) = @_;
 local @admins = &list_extra_admins($d);
 local %admins = map { $_->{'name'}, $_ } @admins;
 local %webmins;
+local @dis = split(/,/, $d->{'disabled'});
+local $dis = !defined($forcedis) ? &indexof("webmin", @dis) >= 0
+			         : $forcedis;
 
 # Get current users
 &require_acl();
@@ -920,8 +923,7 @@ foreach my $u (&acl::list_users()) {
 # Create or update users
 foreach my $admin (@admins) {
 	local $wuser = $webmins{$admin->{'name'}};
-	local @dis = split(/,/, $d->{'disabled'});
-	local $pass = &indexof("webmin", @dis) >= 0 ? "*LK*" :
+	local $pass = $forcedis ? "*LK*" :
 			&acl::encrypt_password($admin->{'pass'});
 	if ($wuser) {
 		# Update password (if changed)

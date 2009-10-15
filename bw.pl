@@ -187,6 +187,9 @@ foreach $d (@doms) {
 						}
 					}
 
+				# Disable extra admins
+				&update_extra_webmin($dd, 1);
+
 				# Save new domain details
 				$dd->{'disabled'} = join(",", @disabled);
 				$dd->{'disabled_reason'} = 'bw';
@@ -267,6 +270,9 @@ foreach $d (@doms) {
 					&plugin_call($f, "feature_enable", $dd);
 					}
 				}
+
+			# Disable extra admins
+			&update_extra_webmin($dd, 0);
 
 			# Save new domain details
 			delete($dd->{'disabled'});
