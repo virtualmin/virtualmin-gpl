@@ -1817,6 +1817,7 @@ if ($_[0] =~ /^\//) {
 	return $_[0];
 	}
 else {
+	&require_mail();
 	local $pfx = &qmailadmin::get_control_file("ldapmessagestore");
 	return $pfx."/".$_[0];
 	}
