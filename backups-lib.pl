@@ -407,9 +407,11 @@ DOMAIN: foreach $d (@$doms) {
 	local $dok = 1;
 	local @donefeatures;
 
-	if ($homefmt && !$d->{'dir'}) {
+	if ($homefmt && !$d->{'dir'} && !-d $d->{'home'}) {
 		# Create temporary home directory
-		&make_dir_as_domain_user($d, $d->{'home'}, 0755);
+		&make_dir($d->{'home'}, 0755);
+		&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, undef,
+					   $d->{'home'});
 		$d->{'dir'} = 1;
 		push(@cleanuphomes, $d);
 		}
