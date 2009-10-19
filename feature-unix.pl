@@ -51,10 +51,11 @@ if (&mail_system_needs_group() || $_[0]->{'gid'} == $_[0]->{'ugid'}) {
 		&foreign_call($usermodule, "create_group", \%ginfo);
 		&foreign_call($usermodule, "made_changes");
 		};
-	if (@$ || !defined(getgrnam($_[0]->{'group'}))) {
+	my $err = $@;
+	if ($err || !defined(getgrnam($_[0]->{'group'}))) {
 		&delete_partial_group(\%ginfo);
-		&$second_print($@ ? &text('setup_ecrgroup2', "$@")
-				  : $text{'setup_ecrgroup'});
+		&$second_print($err ? &text('setup_ecrgroup2', $err)
+				    : $text{'setup_ecrgroup'});
 		&release_lock_unix($_[0]);
 		return 0;
 		}
@@ -104,11 +105,12 @@ eval {
 			      "useradmin_create_user", \%uinfo);
 		}
 	};
-if ($@ || !defined(getpwnam($_[0]->{'user'}))) {
+my $err = $@;
+if ($err || !defined(getpwnam($_[0]->{'user'}))) {
 	&delete_partial_group(\%ginfo) if (%ginfo);
 	&delete_partial_user(\%uinfo);
-	&$second_print($@ ? &text('setup_ecruser2', "$@")
-			  : $text{'setup_ecruser'});
+	&$second_print($err ? &text('setup_ecruser2', $err)
+			    : $text{'setup_ecruser'});
 	&release_lock_unix($_[0]);
 	return 0;
 	}
