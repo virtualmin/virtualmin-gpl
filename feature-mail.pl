@@ -1868,6 +1868,25 @@ foreach my $f (readdir(TEMP)) {
 		}
 	}
 closedir(TEMP);
+
+# Remove Dovecot index files
+if (&foreign_check("dovecot")) {
+	&foreign_require("dovecot", "dovecot-lib.pl");
+	local $conf = &dovecot::get_config();
+	local $loc = &dovecot::find_value("mail_location", $conf);
+	$loc ||= &dovecot::find_value("default_mail_env", $conf);
+	local @doves;
+	if ($loc =~ /INDEX=([^:]+)\/%u/) {
+		push(@doves, $1);
+		}
+	if ($loc =~ /CONTROL=([^:]+)\/%u/) {
+		push(@doves, $1);
+		}
+	foreach my $dove (@doves) {
+		&unlink_file($dove."/".$_[0]->{'user'});
+		&unlink_file($dove."/".&replace_atsign($_[0]->{'user'}));
+		}
+	}
 }
 
 # rename_mail_file(&user, &olduser)

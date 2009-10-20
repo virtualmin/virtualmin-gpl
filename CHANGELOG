@@ -1175,3 +1175,4 @@ Updated the phpMyAdmin script installer to versions 3.2.2.1 and 2.11.9.6, OpenX 
 Added a domain owner level capability restriction to prevent editing of external IP addresses.
 When a sub-server is converted to a top-level server, files from /etc/skel are copied into its home directory.
 When a virtual server is disabled, all extra admin logins are disabled too.
+When a mailbox user is delete, his Dovecot index and control files are removed too in order to avoid clashes with future users with the same name.
