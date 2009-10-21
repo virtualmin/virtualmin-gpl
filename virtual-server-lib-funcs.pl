@@ -3224,9 +3224,11 @@ if ($nice_sizes) {
 		}
 	if ($config{'bw_period'}) {
 		$hash{'bw_period'} = $config{'bw_period'};
+		$hash{'bw_past'} = '';
 		}
-	if ($config{'bw_past'}) {
+	else {
 		$hash{'bw_past'} = $config{'bw_past'};
+		$hash{'bw_period'} = '';
 		}
 	}
 return %hash;
