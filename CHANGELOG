@@ -1171,7 +1171,7 @@ Fixed a bug that prevented paths in php.ini from being updated when a domain is 
 Added a button on the Edit Reseller page to clone his settings for a new reseller.
 Removed the 'Bring up virtual interfaces?' module configuration option, as use of an existing interface can now be done on a per-domain basis.
 ---- Changes since 3.74 ----
-Updated the phpMyAdmin script installer to versions 3.2.2.1 and 2.11.9.6, OpenX to 2.8.2, and Plans to 8.1.5.
+Updated the phpMyAdmin script installer to versions 3.2.2.1 and 2.11.9.6, OpenX to 2.8.2, PiWik to 0.4.4, and Plans to 8.1.5.
 Added a domain owner level capability restriction to prevent editing of external IP addresses.
 When a sub-server is converted to a top-level server, files from /etc/skel are copied into its home directory.
 When a virtual server is disabled, all extra admin logins are disabled too.
