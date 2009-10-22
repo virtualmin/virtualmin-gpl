@@ -81,8 +81,10 @@ if (&foreign_check("security-updates")) {
 		local @inst = &security_updates::list_possible_installs(2);
 		$info->{'inst'} = \@inst;
 		}
-	local @allposs = &security_updates::list_possible_updates(2, 1);
-	$info->{'allposs'} = \@allposs;
+	if (!$config{'collect_noall'}) {
+		local @allposs = &security_updates::list_possible_updates(2, 1);
+		$info->{'allposs'} = \@allposs;
+		}
 	}
 
 # System status
