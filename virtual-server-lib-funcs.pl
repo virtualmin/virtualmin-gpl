@@ -12937,7 +12937,9 @@ local $days = int($time / (24*60*60));
 local $hours = int($time / (60*60)) % 24;
 local $mins = sprintf("%2.2d", int($time / 60) % 60);
 local $secs = sprintf("%2.2d", int($time) % 60);
-return $days ? $days.":".$mins.":".$secs : $mins.":".$secs;
+return $days ? $days." days, ".$hours.":".$mins.":".$secs :
+       $hours ? $hours.":".$mins.":".$secs :
+	        $mins.":".$secs;
 }
 
 # show_check_migration_features(feature, ...)
