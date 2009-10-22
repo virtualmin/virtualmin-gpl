@@ -4804,6 +4804,7 @@ closedir(BACKUPDIR);
 sub virtualmin_backup_resellers
 {
 local ($file, $vbs) = @_;
+return undef if (!defined(&list_resellers));
 local $temp = &transname();
 mkdir($temp, 0700);
 foreach my $resel (&list_resellers()) {
@@ -4826,6 +4827,7 @@ foreach my $resel (&list_resellers()) {
 sub virtualmin_restore_resellers
 {
 local ($file, $vbs) = @_;
+return undef if (!defined(&list_resellers));
 local $temp = &transname();
 mkdir($temp, 0700);
 &require_acl();
