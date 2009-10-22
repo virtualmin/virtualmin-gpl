@@ -102,6 +102,11 @@ local $catfunc = "script_${name}_category";
 local $disfunc = "script_${name}_disabled";
 local $sitefunc = "script_${name}_site";
 local $authorfunc = "script_${name}_author";
+
+# Check for critical functions
+return undef if (!defined(&$dfunc) || !defined(&$vfunc));
+
+# Work out availability
 local %unavail;
 &read_file_cached($scripts_unavail_file, \%unavail);
 local $disabled;
@@ -118,6 +123,8 @@ if ($access{'allowedscripts'}) {
 	local %allow = map { $_, 1 } split(/\s+/, $access{'allowedscripts'});
 	$avail = 0 if (!$allow{$name});
 	}
+
+# Create script structure
 local $rv = { 'name' => $name,
 	      'desc' => &$dfunc(),
 	      'longdesc' => defined(&$lfunc) ? &$lfunc() : undef,
