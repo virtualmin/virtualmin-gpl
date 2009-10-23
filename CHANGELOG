@@ -1177,3 +1177,4 @@ When a sub-server is converted to a top-level server, files from /etc/skel are c
 When a virtual server is disabled, all extra admin logins are disabled too.
 When a mailbox user is delete, his Dovecot index and control files are removed too in order to avoid clashes with future users with the same name.
 Added a Module Config setting to make collection of all available packages optional.
+Added the list-php-ini API command for fetching PHP settings from one or more domains.

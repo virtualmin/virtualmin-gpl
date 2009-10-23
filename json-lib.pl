@@ -40,7 +40,8 @@ if ($ex) {
 	$data->{'error'} = $err;
 	$data->{'full_error'} = $out;
 	}
-elsif ($cmd =~ /^list\-/ && defined($in{'multiline'})) {
+elsif ($cmd =~ /^list\-/ && defined($in{'multiline'}) ||
+       $cmd =~ /^list\-php\-ini/) {
 	# Parse multiline output into data structure
 	my @lines = split(/\r?\n/, $out);
 	my $obj;
