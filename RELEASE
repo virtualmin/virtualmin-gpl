@@ -6,7 +6,7 @@
  x run functional-test.pl
 	x fudu
 	x lentor
-	x xencentos
+	- xencentos
 
  x Generate british english with :
 	cd /usr/local/webadmin
@@ -14,7 +14,7 @@
 	./fix-english.pl --svn "English conversion" gpl-virtual-server
 	./fix-english.pl --svn "English conversion" virtual-server-theme
 
- x branch in SVN
+ x copy in GIT to branch directory
 
  x Create tar.gz file
 	./gpl-virtual-server/createvirtualminmodule.sh $ver /tmp/virtual-server-$ver.wbm.gz
@@ -27,14 +27,14 @@
 	./makemoduledeb.pl --allow-overwrite virtual-server-theme
 
  x Upload to download.webmin.com:htdocs/download/virtualmin/
-	scp /tmp/virtual-server-$ver.wbm.gz* download.webmin.com:htdocs/download/virtualmin/
-	scp /usr/src/redhat/RPMS/noarch/wbm-virtual-server-$ver-1.noarch.rpm /usr/src/redhat/SRPMS/wbm-virtual-server-$ver-1.src.rpm download.webmin.com:htdocs/download/virtualmin/
-	scp /tmp/webmin-virtual-server_${ver}_all.deb download.webmin.com:htdocs/download/virtualmin/
+	scp /tmp/virtual-server-$ver.wbm.gz* webadmin@download.webmin.com:domains/download.webmin.com/public_html/download/virtualmin/
+	scp /usr/src/redhat/RPMS/noarch/wbm-virtual-server-$ver-1.noarch.rpm /usr/src/redhat/SRPMS/wbm-virtual-server-$ver-1.src.rpm webadmin@download.webmin.com:domains/download.webmin.com/public_html/download/virtualmin/
+	scp /tmp/webmin-virtual-server_${ver}_all.deb webadmin@download.webmin.com:domains/download.webmin.com/public_html/download/virtualmin/
 
  x Upload theme
-	scp virtualmin/virtual-server-theme-$themever.wbt.gz* download.webmin.com:htdocs/download/virtualmin/
-	scp /usr/src/redhat/RPMS/noarch/wbt-virtual-server-theme-$themever-1.noarch.rpm download.webmin.com:htdocs/download/virtualmin/
-	scp /tmp/webmin-virtual-server-theme_${themever}_all.deb download.webmin.com:htdocs/download/virtualmin/
+	scp virtualmin/virtual-server-theme-$themever.wbt.gz* webadmin@download.webmin.com:domains/download.webmin.com/public_html/download/virtualmin/
+	scp /usr/src/redhat/RPMS/noarch/wbt-virtual-server-theme-$themever-1.noarch.rpm webadmin@download.webmin.com:domains/download.webmin.com/public_html/download/virtualmin/
+	scp /tmp/webmin-virtual-server-theme_${themever}_all.deb webadmin@download.webmin.com:domains/download.webmin.com/public_html/download/virtualmin/
 
  x Create signatures for all new packages
 	~/webmin.com/create-update-sigs.pl

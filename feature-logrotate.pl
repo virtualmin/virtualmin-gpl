@@ -19,6 +19,7 @@ sub setup_logrotate
 &require_logrotate();
 &require_apache();
 &obtain_lock_logrotate($_[0]);
+local $tmpl = &get_template($_[0]->{'template'});
 
 # Work out the log files we are rotating
 local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}, 0);
@@ -27,6 +28,13 @@ local @logs = ( $alog, $elog );
 if ($_[0]->{'ftp'}) {
 	push(@logs, &get_proftpd_log($_[0]->{'ip'}));
 	}
+local @tmpllogs;
+foreach my $lt (split(/\t+/, $tmpl->{'logrotate_files'})) {
+	if ($lt && $lt ne "none") {
+		push(@tmpllogs, &substitute_domain_template($lt, $_[0]));
+		}
+	}
+push(@logs, @tmpllogs);
 local @logs = &unique(grep { $_ } @logs);
 local $tmpl = &get_template($_[0]->{'template'});
 if (@logs) {
@@ -78,6 +86,18 @@ if (@logs) {
 		}
 	&logrotate::save_directive($parent, undef, $lconf);
 	&flush_file_lines($lconf->{'file'});
+
+	# Make sure extra log files actually exist
+	foreach my $lt (@tmpllogs) {
+		if (!-e $lt) {
+			&open_tempfile_as_domain_user($_[0], TOUCHLOG,
+						      ">$lt", 1, 1);
+			&close_tempfile_as_domain_user($_[0], TOUCHLOG);
+			&set_permissions_as_domain_user(
+				$_[0], 0777, $lt);
+			}
+		}
+
 	&$second_print($text{'setup_done'});
 	}
 else {
@@ -311,11 +331,24 @@ print &ui_table_row(
 	&hlink($text{'tmpl_logrotate'}, "template_logrotate"),
 	&none_def_input("logrotate", $tmpl->{'logrotate'},
 			$text{'tmpl_ftpbelow'}, 0, 0,
-			$text{'tmpl_logrotatenone'}, [ "logrotate" ])."<br>\n".
+			$text{'tmpl_logrotatenone'},
+			[ "logrotate" ])."<br>\n".
 	&ui_textarea("logrotate",
 		$tmpl->{'logrotate'} eq "none" ? undef :
 		  join("\n", split(/\t/, $tmpl->{'logrotate'})),
 		5, 60));
+
+# Additional files to rotate
+print &ui_table_row(
+        &hlink($text{'tmpl_logrotate_files'}, "template_logrotatefiles"),
+	&none_def_input("logrotate_files", $tmpl->{'logrotate_files'},
+			$text{'tmpl_ftpbelow2'}, 0, 0,
+                        $text{'tmpl_logrotatenone2'},
+			[ "logrotate_files" ])."<br>\n".
+	&ui_textarea("logrotate_files",
+		     $tmpl->{'logrotate_files'} eq 'none' ? '' :
+		       join("\n", split(/\t+/, $tmpl->{'logrotate_files'})),
+		     5, 60));
 }
 
 # parse_template_logrotate(&tmpl)
@@ -330,6 +363,8 @@ if ($in{"logrotate_mode"} == 2) {
 	local $err = &check_logrotate_template($in{'logrotate'});
 	&error($err) if ($err);
 	}
+
+$tmpl->{'logrotate_files'} = &parse_none_def("logrotate_files");
 }
 
 # chained_logrotate(&domain, [&old-domain])
