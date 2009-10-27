@@ -359,6 +359,15 @@ $mailbox_tests = [
 
 	# Add a mailbox to the domain
 	{ 'command' => 'create-user.pl',
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'user', $test_user ],
 		      [ 'pass', 'smeg' ],
@@ -3185,6 +3194,150 @@ $quota_tests = [
         },
 	];
 
+# Test deletion of domains when entries in virtual file overlap
+$overlap_tests = [
+	# Create first domain
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain one' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'mail' ],
+		      @create_args, ],
+	},
+
+	# Create user A in first domain
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', 'a'.$test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user A' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
+	# Create alias A in first domain
+	{ 'command' => 'create-alias.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'from', 'a'.$test_alias ],
+		      [ 'to', 'nobody@webmin.com' ],
+		      [ 'to', 'nobody@virtualmin.com' ] ],
+	},
+
+	# Create second domain
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'desc', 'Test domain two' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'mail' ],
+		      @create_args, ],
+	},
+
+	# Create user A in second domain
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'user', 'a'.$test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user A' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
+	# Create alias A in second domain
+	{ 'command' => 'create-alias.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'from', 'a'.$test_alias ],
+		      [ 'to', 'nobody@webmin.com' ],
+		      [ 'to', 'nobody@virtualmin.com' ] ],
+	},
+
+	# Create user B in first domain
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', 'b'.$test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user B' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
+	# Create alias B in first domain
+	{ 'command' => 'create-alias.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'from', 'b'.$test_alias ],
+		      [ 'to', 'nobody@webmin.com' ],
+		      [ 'to', 'nobody@virtualmin.com' ] ],
+	},
+
+	# Create user B in second domain
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'user', 'b'.$test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user B' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
+	# Create alias B in second domain
+	{ 'command' => 'create-alias.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'from', 'b'.$test_alias ],
+		      [ 'to', 'nobody@webmin.com' ],
+		      [ 'to', 'nobody@virtualmin.com' ] ],
+	},
+
+	# Delete first domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Validate second domain
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_subdomain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Make sure user A in second domain still has email
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'user', 'a'.$test_user ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Email address: a'.$test_user.'@'.$test_subdomain ],
+	},
+
+	# Make sure alias A in second domain still exists
+	{ 'command' => 'list-aliases.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^a'.$test_alias.'@'.$test_subdomain ],
+	},
+
+	# Make sure user B in second domain still has email
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'user', 'b'.$test_user ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Email address: b'.$test_user.'@'.$test_subdomain ],
+	},
+
+	# Make sure alias B in second domain still exists
+	{ 'command' => 'list-aliases.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^b'.$test_alias.'@'.$test_subdomain ],
+	},
+
+	# Delete second domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ] ],
+	  'cleanup' => 1,
+	},
+	];
+
 $alltests = { 'domains' => $domains_tests,
 	      'web' => $web_tests,
 	      'mailbox' => $mailbox_tests,
@@ -3215,6 +3368,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'rename' => $rename_tests,
 	      'bw' => $bw_tests,
 	      'quota' => $quota_tests,
+	      'overlap' => $overlap_tests,
 	    };
 
 # Run selected tests
