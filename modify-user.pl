@@ -45,6 +45,17 @@ The user can also be added to secondary Unix groups with the C<--add-group>
 flag, followed by a group name. To remove him from a group, use the
 C<--del-group> parameter followed by the group to take him out of.
 
+To add a forwarding email address for this user, use the C<--add-forward>
+flag followed by an address or username. Conversely, to remove one use the
+C<--del-forward> flag.
+
+To turn off local email delivery for the user, use the C<--no-local> flag.
+To turn it back on again, use C<--local>.
+
+To setup an autoreply message, use the C<--autoreply> flag followed by
+the message content. To turn off the autoresponder, use the C<--no-autoreply>
+parameter.
+
 =cut
 
 package virtual_server;
@@ -116,11 +127,11 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--add-email") {
 		# Adding an extra email address
-		push(@addemails, shift(@ARGV));
+		push(@addemail, shift(@ARGV));
 		}
 	elsif ($a eq "--remove-email") {
 		# Removing an extra email address
-		push(@delemails, shift(@ARGV));
+		push(@delemail, shift(@ARGV));
 		}
 	elsif ($a eq "--newuser") {
 		# Changing the username
@@ -165,6 +176,25 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--check-spam") {
 		$nospam = 0;
+		}
+	elsif ($a eq "--add-forward") {
+		push(@addemail, shift(@ARGV));
+		}
+	elsif ($a eq "--del-forward") {
+		push(@delemail, shift(@ARGV));
+		}
+	elsif ($a eq "--local") {
+		$localdelivery = 1;
+		}
+	elsif ($a eq "--no-local") {
+		$localdelivery = 0;
+		}
+	elsif ($a eq "--autoreply") {
+		$autotext = shift(@ARGV);
+		$autotext || &usage("Missing parameter for --autoreply");
+		}
+	elsif ($a eq "--no-autoreply") {
+		$autotext = "";
 		}
 	else {
 		&usage();
@@ -330,6 +360,51 @@ if (defined($nospam)) {
 @newsecs = grep { !$delgroups{$_} } @newsecs;
 $user->{'secs'} = \@newsecs;
 
+if (!$user->{'noalias'} && ($user->{'email'} || $user->{'noprimary'})) {
+	# Apply simple alias changes
+	$simple = &get_simple_alias($d, $user);
+
+	# Update forwarding destinations
+	foreach $a (@addemail) {
+		push(@{$simple->{'forward'}}, $a);
+		}
+	foreach $a (@delemail) {
+		@{$simple->{'forward'}} = grep { $_ ne $a }
+					       @{$simple->{'forward'}};
+		}
+	@{$simple->{'forward'}} = &unique(@{$simple->{'forward'}});
+
+	# Enable or disable local delivery
+	if (defined($localdelivery)) {
+		$simple->{'tome'} = $localdelivery;
+		}
+
+	# Update autoresponder
+	if (defined($autotext)) {
+		if ($autotext) {
+			$simple->{'from'} ||= $user->{'email'};
+			$autotext =~ s/\\n/\n/g;
+			$autotext .= "\n" if ($autotext !~ /\n$/);
+			$simple->{'autotext'} = $autotext;
+			$simple->{'auto'} = 1;
+			&set_alias_programs();
+			}
+		else {
+			$simple->{'auto'} = 0;
+			}
+		}
+
+	if (@{$user->{'to'}} == 1 && $simple->{'tome'}) {
+		# If forwarding is just to the user's # mailbox, then that is
+		# like not forwarding at all
+		$user->{'to'} = undef;
+		}
+	&save_simple_alias($d, $user, $simple);
+	if ($autotext) {
+		&write_simple_autoreply($d, $simple);
+		}
+	}
+
 # Validate user
 $err = &validate_user($d, $user, $olduser);
 &usage($err) if ($err);
@@ -411,6 +486,10 @@ print "                      [--send-update-email]\n";
 if ($config{'spam'}) {
 	print "                      [--no-check-spam | --check-spam]\n";
 	}
+print "                      [--add-forward address] ...\n";
+print "                      [--del-forward address] ...\n";
+print "                      [--local | --no-local]\n";
+print "                      [--autoreply \"messsage\" | --no-autoreply]\n";
 exit(1);
 }
 

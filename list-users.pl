@@ -75,6 +75,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mail-size") {
 		$mailsize = 1;
 		}
+	elsif ($a eq "--simple-aliases") {
+		$simplemode = 1;
+		}
 	else {
 		&usage();
 		}
@@ -164,13 +167,41 @@ foreach $d (@doms) {
 			if (@dblist) {
 				print "    Databases: ",join(", ", @dblist),"\n";
 				}
-			if (!$u->{'noalias'}) {
+			if (@{$u->{'secs'}}) {
+				print "    Secondary groups: ",join(" ", @{$u->{'secs'}}),"\n";
+				}
+
+			if ($u->{'noalias'}) {
+				# Nothing to show for forwarding
+				}
+			elsif ($simplemode) {
+				# Show simple forwarding
+				$simple = @{$u->{'to'}} ?
+				   &get_simple_alias($d, $u) : { 'tome' => 1 };
+				print "    Deliver to user: ",
+				      ($simple->{'tome'} ? "Yes" : "No"),"\n";
+				foreach $f (@{$simple->{'forward'}}) {
+					print "    Forward: $f\n";
+					}
+				if ($simple->{'auto'}) {
+					$msg = $simple->{'autotext'};
+					$msg =~ s/\n/\\n/g;
+					print "    Autoreply message: $msg\n";
+					}
+				if ($simple->{'period'}) {
+					print "    Autoreply period: ",
+					      "$simple->{'period'}\n";
+					}
+				if ($simple->{'from'}) {
+					print "    Autoreply from: ",
+					      "$simple->{'from'}\n";
+					}
+				}
+			else {
+				# Show basic forwards
 				foreach $t (@{$u->{'to'}}) {
 					print "    Forward mail to: $t\n";
 					}
-				}
-			if (@{$u->{'secs'}}) {
-				print "    Secondary groups: ",join(" ", @{$u->{'secs'}}),"\n";
 				}
 			}
 		}
@@ -226,6 +257,7 @@ print "virtualmin list-users --all-domains | --domain name | --domain-user usern
 print "                     [--multiline | --name-only | --email-only]\n";
 print "                     [--include-owner]\n";
 print "                     [--user name]\n";
+print "                     [--simple-aliases]\n";
 exit(1);
 }
 
