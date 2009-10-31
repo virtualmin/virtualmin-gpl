@@ -1400,9 +1400,10 @@ if ($virt) {
 	&$second_print($text{'setup_done'});
 
 	# Make sure the PHP execution mode is valid
+	local $mode;
 	if (defined(&get_domain_php_mode)) {
 		&$first_print($text{'restore_checkmode'});
-		local $mode = &get_domain_php_mode($_[0]);
+		$mode = &get_domain_php_mode($_[0]);
 		local @supp = &supported_php_modes($_[0]);
 		if ($mode && &indexof($mode, @supp) < 0 && @supp) {
 			# Need to fix
@@ -1430,6 +1431,31 @@ if ($virt) {
 			push(@fixes, [ "mysql.default_socket", undef, $sock ]);
 			}
 		&fix_php_ini_files($_[0], \@fixes);
+		}
+
+	# Fix broken PHP extension_dir directives
+	if (($mode eq "fcgid" || $mode eq "cgi") && &foreign_check("phpini")) {
+		&foreign_require("phpini", "phpini-lib.pl");
+		foreach my $i (&list_domain_php_inis($d)) {
+			local $pconf = &phpini::get_config($i->[1]);
+			local $ed = &phpini::find_value("extension_dir",$pconf);
+			if ($ed && !-d $ed) {
+				# Doesn't exist .. maybe can fix
+				my $newed = $ed;
+				if ($newed =~ /\/lib\//) {
+					$newed =~ s/\/lib\//\/lib64\//;
+					}
+				elsif ($newed =~ /\/lib64\//) {
+					$newed =~ s/\/lib64\//\/lib\//;
+					}
+				if (!-d $newed) {
+					# Couldn't find it, give up and clear
+					$newed = undef;
+					}
+				&phpini::save_directive($pconf,
+					"extension_dir", $newed);
+				}
+			}
 		}
 
 	# Set new public_html and cgi-bin paths
