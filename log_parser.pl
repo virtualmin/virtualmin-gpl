@@ -130,6 +130,9 @@ elsif ($action eq "notify" || $action eq "mailusers") {
 elsif ($action eq "shells") {
 	return $text{'log_shells'.int($object)};
 	}
+elsif ($action eq "copycert") {
+	return $text{'log_copycert_'.$type};
+	}
 elsif ($action eq "cmd" || $action eq "remote") {
 	# Local or remote API call
 	return &text('log_'.$action.($long ? '_l' : ''),

@@ -20,25 +20,33 @@ else {
 	}
 &$first_print(&text('copycert_webmindir', "<tt>$dir</tt>"));
 $certfile = "$dir/$d->{'dom'}.cert";
+&lock_file($certfile);
 &copy_source_dest($d->{'ssl_cert'}, $certfile);
+&unlock_file($certfile);
 if ($d->{'ssl_key'}) {
 	$keyfile = "$dir/$d->{'dom'}.key";
+	&lock_file($keyfile);
 	&copy_source_dest($d->{'ssl_key'}, $keyfile);
+	&unlock_file($keyfile);
 	}
 if ($d->{'ssl_chain'}) {
 	$chainfile = "$dir/$d->{'dom'}.chain";
+	&lock_file($chainfile);
 	&copy_source_dest($d->{'ssl_chain'}, $chainfile);
+	&unlock_file($chainfile);
 	}
 &$second_print($text{'setup_done'});
 
 if ($in{'usermin'}) {
 	# Configure Usermin to use it
 	&$first_print($text{'copycert_userminconfig'});
+	&lock_file($usermin::usermin_miniserv_config);
 	&usermin::get_usermin_miniserv_config(\%miniserv);
 	$miniserv{'certfile'} = $certfile;
 	$miniserv{'keyfile'} = $keyfile;
 	$miniserv{'extracas'} = $chainfile;
 	&usermin::put_usermin_miniserv_config(\%miniserv);
+	&unlock_file($usermin::usermin_miniserv_config);
 	&usermin::restart_miniserv();
 	&$second_print($text{'setup_done'});
 
@@ -51,11 +59,13 @@ if ($in{'usermin'}) {
 else {
 	# Configure Webmin to use it
 	&$first_print($text{'copycert_webminconfig'});
+	&lock_file($ENV{'MINISERV_CONFIG'});
 	&get_miniserv_config(\%miniserv);
 	$miniserv{'certfile'} = $certfile;
 	$miniserv{'keyfile'} = $keyfile;
 	$miniserv{'extracas'} = $chainfile;
 	&put_miniserv_config(\%miniserv);
+	&unlock_file($ENV{'MINISERV_CONFIG'});
 	&restart_miniserv();
 	&$second_print($text{'setup_done'});
 
@@ -65,6 +75,8 @@ else {
 				     "../webmin/edit_ssl.cgi"));
 		}
 	}
+
+&webmin_log("copycert", $in{'usermin'} ? "usermin" : "webmin");
 
 &ui_print_footer(&domain_footer_link($d),
 		 "", $text{'index_return'});

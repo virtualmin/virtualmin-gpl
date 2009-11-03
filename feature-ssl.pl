@@ -910,6 +910,19 @@ if ($data =~ /(-----BEGIN\s+CERTIFICATE-----\n([A-Za-z0-9\+\/=\n\r]+)-----END\s+
 return undef;
 }
 
+# cert_key_data(&domain)
+# Returns a domain's key in PEM format
+sub cert_key_data
+{
+local ($d) = @_;
+local $data = &read_file_contents_as_domain_user($d, $d->{'ssl_key'} ||
+						     $d->{'ssl_cert'});
+if ($data =~ /(-----BEGIN\s+RSA\s+PRIVATE\s+KEY-----\n([A-Za-z0-9\+\/=\n\r]+)-----END\s+RSA\s+PRIVATE\s+KEY-----)/) {
+	return $1;
+	}
+return undef;
+}
+
 # cert_pkcs12_data(&domain)
 # Returns a domain's cert in PKCS12 format
 sub cert_pkcs12_data

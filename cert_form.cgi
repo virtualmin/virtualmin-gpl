@@ -96,6 +96,24 @@ if (&can_webmin_cert()) {
 			&ui_hidden("usermin", 1));
 		}
 
+	# Copy to Dovecot, if installed
+	if (&foreign_installed("dovecot")) {
+		print &ui_buttons_row(
+			"copy_cert_dovecot.cgi",
+			$text{'cert_dcopy'}, $text{'cert_dcopydesc'},
+			&ui_hidden("dom", $in{'dom'}).
+			&ui_hidden("dovecot", 1));
+		}
+
+	# Copy to Postfix, if in use
+	if ($config{'mail_system'} == 0) {
+		print &ui_buttons_row(
+			"copy_cert_postfix.cgi",
+			$text{'cert_pcopy'}, $text{'cert_pcopydesc'},
+			&ui_hidden("dom", $in{'dom'}).
+			&ui_hidden("postfix", 1));
+		}
+
 	print &ui_buttons_end();
 	}
 

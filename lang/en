@@ -1895,6 +1895,10 @@ log_enable_clamd=Enabled ClamAV server
 log_disable_clamd=Disabled ClamAV server
 log_enable_spamd=Enabled SpamAssassin server
 log_disable_spamd=Disabled SpamAssassin server
+log_copycert_webmin=Copied SSL certificate to Webmin
+log_copycert_usermin=Copied SSL certificate to Usermin
+log_copycert_dovecot=Copied SSL certificate to Dovecot
+log_copycert_postfix=Copied SSL certificate to Postfix
 
 backup_title=Backup Virtual Servers
 backup_title2=Edit Scheduled Backup
@@ -2386,6 +2390,10 @@ cert_copy=Copy to Webmin
 cert_copydesc=Use this certificate in Webmin, so that it is presented to the master admin and domain owners accessing the Virtualmin web user interface on port $1.
 cert_ucopy=Copy to Usermin
 cert_ucopydesc=Use this certificate in Usermin, so that it is presented to mailbox users accessing the webmail interface on port $1.
+cert_dcopy=Copy to Dovecot
+cert_dcopydesc=Use this certificate in Dovecot for SSL-protected IMAP and POP3 connections.
+copy_pcopy=Copy to Postfix
+copy_pcopydesc=Use this certificate in Postfix for SSL-protected SMTP connections by mail clients.
 
 csr_title=Generating CSR
 csr_title2=Generating Certificate
@@ -4969,6 +4977,12 @@ copycert_webminconfig=Configuring Webmin to use them ..
 copycert_webminnot=Warning - SSL is not currently enabled in Webmin. To activate it, go to the <a href='$1'>SSL Encryption</a> page.
 copycert_userminconfig=Configuring Usermin to use them ..
 copycert_userminnot=Warning - SSL is not currently enabled in Usermin. To activate it, go to the <a href='$1'>SSL Encryption</a> page.
+copycert_dtitle=Copy SSL Certificate to Dovecot
+copycert_dsaving=Copying certificate and key to Dovecot files ..
+copycert_dsaved=.. wrote out $1 and $2
+copycert_denabling=Enabling SSL in Dovecot configuration ..
+copycert_ecert=No SSL certificate data found
+copycert_ekey=No SSL key data found
 
 wizard_title=Post-Installation Wizard
 wizard_next=Next
