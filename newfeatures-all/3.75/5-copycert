@@ -1,0 +1,4 @@
+desc=Copy SSL certificate for Dovecot and Postfix
+html=The Manage SSL Certificate page can now be used to copy a domain's cert and key to Dovecot or Postfix, so that connections to those servers can be secured and validated.
+master=1
+link=cert_form.cgi?dom=${ID}

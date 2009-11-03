@@ -28,6 +28,3 @@
 
  - Command-line domain rename
 	- Add to unit tests
-
- - Quick SSL cert setup for Postfix and Dovecot
-	- https://www.virtualmin.com/node/12141

@@ -1181,3 +1181,4 @@ Added the list-php-ini API command for fetching PHP settings from one or more do
 Added a logrotate template-level option for additional files to rotate for new domains.
 When restoring a virtual server with a php.ini file whose extension directory is incorrect, fix it to match this system if possible.
 Added the import-database API command, for associating an existing un-owned database with a domain.
+The Manage SSL Certificate page can now be used to copy a domain's cert and key to Dovecot or Postfix.

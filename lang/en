@@ -2392,8 +2392,8 @@ cert_ucopy=Copy to Usermin
 cert_ucopydesc=Use this certificate in Usermin, so that it is presented to mailbox users accessing the webmail interface on port $1.
 cert_dcopy=Copy to Dovecot
 cert_dcopydesc=Use this certificate in Dovecot for SSL-protected IMAP and POP3 connections.
-copy_pcopy=Copy to Postfix
-copy_pcopydesc=Use this certificate in Postfix for SSL-protected SMTP connections by mail clients.
+cert_pcopy=Copy to Postfix
+cert_pcopydesc=Use this certificate in Postfix for SSL-protected SMTP connections by mail clients.
 
 csr_title=Generating CSR
 csr_title2=Generating Certificate
@@ -4983,6 +4983,8 @@ copycert_dsaved=.. wrote out $1 and $2
 copycert_denabling=Enabling SSL in Dovecot configuration ..
 copycert_ecert=No SSL certificate data found
 copycert_ekey=No SSL key data found
+copycert_psaving=Copying certificate and key to Postfix files ..
+copycert_penabling=Enabling SSL in Postfix configuration ..
 
 wizard_title=Post-Installation Wizard
 wizard_next=Next
