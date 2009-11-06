@@ -91,6 +91,10 @@ print &ui_submit($text{'scripts_uok'}, "uninstall"),"\n";
 	     grep { &compare_versions($_, $sinfo->{'version'}, $script) > 0 &&
 		    &can_script_version($script, $_) }
 		  @{$script->{'versions'}};
+$canupfunc = $script->{'can_upgrade_func'};
+if (defined(&$canupfunc)) {
+	@vers = grep { &$canupfunc($sinfo, $_) } @vers;
+	}
 if (@vers) {
 	# Upgrade button
 	print "&nbsp;&nbsp;\n";

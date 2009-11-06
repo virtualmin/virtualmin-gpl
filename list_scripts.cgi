@@ -37,6 +37,10 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 	$script = $smap{$sinfo->{'name'}};
 	@vers = grep { &can_script_version($script, $_) }
 		     @{$script->{'versions'}};
+	$canupfunc = $script->{'can_upgrade_func'};
+	if (defined(&$canupfunc)) {
+		@vers = grep { &$canupfunc($sinfo, $_) } @vers;
+		}
 	if (&indexof($sinfo->{'version'}, @vers) < 0) {
 		@better = grep { &compare_versions($_, $sinfo->{'version'},
 				 		   $script) > 0 } @vers;

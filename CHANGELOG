@@ -1182,3 +1182,4 @@ Added a logrotate template-level option for additional files to rotate for new d
 When restoring a virtual server with a php.ini file whose extension directory is incorrect, fix it to match this system if possible.
 Added the import-database API command, for associating an existing un-owned database with a domain.
 The Manage SSL Certificate page can now be used to copy a domain's cert and key to Dovecot or Postfix.
+Script version upgrades that are completely un-supported (like Jooma 1.0 to 1.5) are now no longer displayed in Virtualmin.

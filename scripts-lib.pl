@@ -145,6 +145,7 @@ local $rv = { 'name' => $name,
 	      'install_func' => "script_${name}_install",
 	      'uninstall_func' => "script_${name}_uninstall",
 	      'realversion_func' => "script_${name}_realversion",
+	      'can_upgrade_func' => "script_${name}_can_upgrade",
 	      'stop_func' => "script_${name}_stop",
 	      'stop_server_func' => "script_${name}_stop_server",
 	      'start_server_func' => "script_${name}_start_server",
@@ -2028,6 +2029,10 @@ foreach my $d (@$doms) {
 		$scache{$sinfo->{'name'}} = $script;
 		local @vers = grep { &can_script_version($script, $_) }
 			     @{$script->{'versions'}};
+		local $canupfunc = $script->{'can_upgrade_func'};
+		if (defined(&$canupfunc)) {
+			@vers = grep { &$canupfunc($sinfo, $_) } @vers;
+			}
 		@vers = sort { &compare_versions($b, $a, $script) } @vers;
 		local @better = grep { &compare_versions($_,
 				$sinfo->{'version'}, $script) >= 0 } @vers;
