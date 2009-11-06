@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to version 3.2.3, OpenX to 2.8.2, PiWik to 0.4.5, Moodle to 1.9.6, WordPress to 2.8.5, Typo3 to 4.2.10, SugarCRM to 5.2.0k, TikiWiki to 3.3, WordPress MU to 2.8.5.2, Redmine to 0.8.6, Joomla to 1.5.15, and Plans to 8.1.5.
+html=Updated the phpMyAdmin script installer to version 3.2.3, OpenX to 2.8.2, PiWik to 0.4.5, Moodle to 1.9.6, WordPress to 2.8.5, Typo3 to 4.2.10, SugarCRM to 5.2.0k, TikiWiki to 3.3, WordPress MU to 2.8.5.2, Redmine to 0.8.6, Joomla to 1.5.15, Zikula to 1.2.0, and Plans to 8.1.5.
 master=1
 reseller=1
 domain=1
