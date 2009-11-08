@@ -1041,7 +1041,7 @@ elsif ($_[0]->{'vpopmail'}) {
 	local $qdom = $_[1]->{'dom'};
 	local $qreal = quotemeta($_[0]->{'real'}) || '""';
 	local $quota = $_[0]->{'qquota'} ? "-q $_[0]->{'qquota'}" : "-q NOQUOTA";
-	local $qpass = quotemeta($_[0]->{'plainpass'});
+	local $qpass = quotemeta($_[0]->{'plainpass'}) || '""';
 	local $cmd = "$vpopbin/vadduser $quota -c $qreal $quser\@$qdom $qpass";
 	local $out = &backquote_logged("$cmd 2>&1");
 	&error("<tt>$cmd</tt> failed: <pre>$out</pre>") if ($?);
