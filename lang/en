@@ -2088,6 +2088,7 @@ backup_vchroot=FTP directory restrictions
 backup_virtualmin=Virtualmin settings to also backup
 backup_webmin=Backing up Webmin ACL files ..
 backup_webminfailed=.. tar failed : $1
+backup_esamelock=A backup to the same destination is already running with PID $1
 backup_etarcmd=The <tt>tar</tt> command was not found on your system!
 backup_eftptest=Failed to connect to FTP server : $1
 backup_escptest=Failed to connect to SSH server : $1
