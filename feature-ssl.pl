@@ -626,32 +626,37 @@ sub restore_ssl
 # Restore the Apache directives
 local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 					    $_[0]->{'web_sslport'});
-local $srclref = &read_file_lines($_[1], 1);
-local $dstlref = &read_file_lines($virt->{'file'});
-splice(@$dstlref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1,
-       @$srclref[1 .. @$srclref-2]);
+if ($virt) {
+	local $srclref = &read_file_lines($_[1], 1);
+	local $dstlref = &read_file_lines($virt->{'file'});
+	splice(@$dstlref, $virt->{'line'}+1,
+	       $virt->{'eline'}-$virt->{'line'}-1,
+	       @$srclref[1 .. @$srclref-2]);
 
-# Fix ip address in <Virtualhost> section (if needed)
-if ($dstlref->[$virt->{'line'}] =~
-    /^(.*<Virtualhost\s+)([0-9\.]+)(.*)$/i) {
-	$dstlref->[$virt->{'line'}] = $1.$_[0]->{'ip'}.$3;
-	}
-if ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
-	# Fix up any DocumentRoot or other file-related directives
-	local $i;
-	foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
-		$dstlref->[$i] =~ s/\Q$_[5]->{'home'}\E/$_[0]->{'home'}/g;
+	# Fix ip address in <Virtualhost> section (if needed)
+	if ($dstlref->[$virt->{'line'}] =~
+	    /^(.*<Virtualhost\s+)([0-9\.]+)(.*)$/i) {
+		$dstlref->[$virt->{'line'}] = $1.$_[0]->{'ip'}.$3;
 		}
+	if ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
+		# Fix up any DocumentRoot or other file-related directives
+		local $i;
+		foreach $i ($virt->{'line'} ..
+			    $virt->{'line'}+scalar(@$srclref)-1) {
+			$dstlref->[$i] =~
+			    s/\Q$_[5]->{'home'}\E/$_[0]->{'home'}/g;
+			}
+		}
+	&flush_file_lines($virt->{'file'});
+	undef(@apache::get_config_cache);
 	}
-&flush_file_lines($virt->{'file'});
-undef(@apache::get_config_cache);
 
 # Copy suexec-related directives from non-SSL virtual host
 ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 				      $_[0]->{'web_sslport'});
 local ($nvirt, $nvconf) = &get_apache_virtual($_[0]->{'dom'},
 					      $_[0]->{'web_port'});
-if ($nvirt) {
+if ($nvirt && $virt) {
 	local $any;
 	foreach my $dir ("User", "Group", "SuexecUserGroup") {
 		local @vals = &apache::find_directive($dir, $nvconf);
