@@ -1156,7 +1156,8 @@ local $pidfile = "$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid";
 &init::enable_at_boot(
       "lookup-domain",
       "Daemon for quickly looking up Virtualmin servers from procmail",
-      "WEBMIN_CONFIG=$config_directory WEBMIN_VAR=$var_directory $module_root_directory/lookup-domain-daemon.pl",
+      "WEBMIN_CONFIG=$config_directory WEBMIN_VAR=$var_directory ".
+       "PERLLIB=$root_directory $module_root_directory/lookup-domain-daemon.pl",
       "kill `cat $pidfile`",
       undef);
 if (&check_pid_file($pidfile)) {
