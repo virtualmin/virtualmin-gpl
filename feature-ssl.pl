@@ -622,6 +622,7 @@ sub restore_ssl
 {
 &$first_print($text{'restore_sslcp'});
 &obtain_lock_web($_[0]);
+my $rv = 1;
 
 # Restore the Apache directives
 local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
@@ -649,49 +650,55 @@ if ($virt) {
 		}
 	&flush_file_lines($virt->{'file'});
 	undef(@apache::get_config_cache);
-	}
 
-# Copy suexec-related directives from non-SSL virtual host
-($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
-				      $_[0]->{'web_sslport'});
-local ($nvirt, $nvconf) = &get_apache_virtual($_[0]->{'dom'},
-					      $_[0]->{'web_port'});
-if ($nvirt && $virt) {
-	local $any;
-	foreach my $dir ("User", "Group", "SuexecUserGroup") {
-		local @vals = &apache::find_directive($dir, $nvconf);
-		&apache::save_directive($dir, \@vals, $vconf, $conf);
-		$any++ if (@vals);
+	# Copy suexec-related directives from non-SSL virtual host
+	($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
+					      $_[0]->{'web_sslport'});
+	local ($nvirt, $nvconf) = &get_apache_virtual($_[0]->{'dom'},
+						      $_[0]->{'web_port'});
+	if ($nvirt && $virt) {
+		local $any;
+		foreach my $dir ("User", "Group", "SuexecUserGroup") {
+			local @vals = &apache::find_directive($dir, $nvconf);
+			&apache::save_directive($dir, \@vals, $vconf, $conf);
+			$any++ if (@vals);
+			}
+		if ($any) {
+			&flush_file_lines($virt->{'file'});
+			}
 		}
-	if ($any) {
-		&flush_file_lines($virt->{'file'});
+
+	# Restore the cert and key, if any and if saved
+	local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
+	if ($cert && -r "$_[1]_cert") {
+		&lock_file($cert);
+		&set_ownership_permissions(
+			$_[0]->{'uid'}, undef, undef, "$_[1]_cert");
+		&copy_source_dest_as_domain_user($_[0], "$_[1]_cert", $cert);
+		&unlock_file($cert);
 		}
-	}
+	local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf,1);
+	if ($key && -r "$_[1]_key" && $key ne $cert) {
+		&lock_file($key);
+		&set_ownership_permissions(
+			$_[0]->{'uid'}, undef, undef, "$_[1]_key");
+		&copy_source_dest_as_domain_user($_[0], "$_[1]_key", $key);
+		&unlock_file($key);
+		}
 
-# Restore the cert and key, if any and if saved
-local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
-if ($cert && -r "$_[1]_cert") {
-	&lock_file($cert);
-	&set_ownership_permissions($_[0]->{'uid'}, undef, undef, "$_[1]_cert");
-	&copy_source_dest_as_domain_user($_[0], "$_[1]_cert", $cert);
-	&unlock_file($cert);
-	}
-local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf, 1);
-if ($key && -r "$_[1]_key" && $key ne $cert) {
-	&lock_file($key);
-	&set_ownership_permissions($_[0]->{'uid'}, undef, undef, "$_[1]_key");
-	&copy_source_dest_as_domain_user($_[0], "$_[1]_key", $key);
-	&unlock_file($key);
-	}
+	# Re-setup any SSL passphrase
+	&save_domain_passphrase($_[0]);
 
-# Re-setup any SSL passphrase
-&save_domain_passphrase($_[0]);
-
-&$second_print($text{'setup_done'});
+	&$second_print($text{'setup_done'});
+	}
+else {
+	&$second_print($text{'delete_noapache'});
+	$rv = 0;
+	}
 
 &release_lock_web($_[0]);
 &register_post_action(\&restart_apache);
-return 1;
+return $rv;
 }
 
 # cert_info(&domain)
