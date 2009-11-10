@@ -1184,3 +1184,4 @@ Added the import-database API command, for associating an existing un-owned data
 The Manage SSL Certificate page can now be used to copy a domain's cert and key to Dovecot or Postfix.
 Script version upgrades that are completely un-supported (like Jooma 1.0 to 1.5) are now no longer displayed in Virtualmin.
 Concurrent backups to the same destination are now no longer allowed, due to the potential for corruption and odd partial failures.
+Added a Module Config option to always show output from pre and post virtual server creation commands.
