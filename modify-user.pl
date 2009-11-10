@@ -127,11 +127,11 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--add-email") {
 		# Adding an extra email address
-		push(@addemail, shift(@ARGV));
+		push(@addemails, shift(@ARGV));
 		}
 	elsif ($a eq "--remove-email") {
 		# Removing an extra email address
-		push(@delemail, shift(@ARGV));
+		push(@delemails, shift(@ARGV));
 		}
 	elsif ($a eq "--newuser") {
 		# Changing the username
@@ -178,10 +178,10 @@ while(@ARGV > 0) {
 		$nospam = 0;
 		}
 	elsif ($a eq "--add-forward") {
-		push(@addemail, shift(@ARGV));
+		push(@addforward, shift(@ARGV));
 		}
 	elsif ($a eq "--del-forward") {
-		push(@delemail, shift(@ARGV));
+		push(@delforward, shift(@ARGV));
 		}
 	elsif ($a eq "--local") {
 		$localdelivery = 1;
@@ -365,10 +365,10 @@ if (!$user->{'noalias'} && ($user->{'email'} || $user->{'noprimary'})) {
 	$simple = &get_simple_alias($d, $user);
 
 	# Update forwarding destinations
-	foreach $a (@addemail) {
+	foreach $a (@addforward) {
 		push(@{$simple->{'forward'}}, $a);
 		}
-	foreach $a (@delemail) {
+	foreach $a (@delforward) {
 		@{$simple->{'forward'}} = grep { $_ ne $a }
 					       @{$simple->{'forward'}};
 		}

@@ -359,15 +359,6 @@ $mailbox_tests = [
 
 	# Add a mailbox to the domain
 	{ 'command' => 'create-user.pl',
-	{ 'command' => 'create-user.pl',
-	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'user', $test_user ],
-		      [ 'pass', 'smeg' ],
-		      [ 'desc', 'Test user' ],
-		      [ 'quota', 100*1024 ],
-		      [ 'ftp' ],
-		      [ 'mail-quota', 100*1024 ] ],
-	},
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'user', $test_user ],
 		      [ 'pass', 'smeg' ],
