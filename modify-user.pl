@@ -91,6 +91,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--pass") {
 		$pass = shift(@ARGV);
 		}
+	elsif ($a eq "--passfile") {
+		$pass = &read_file_contents(shift(@ARGV));
+		$pass =~ s/\r|\n//g;
+		}
 	elsif ($a eq "--real") {
 		$real = shift(@ARGV);
 		}
@@ -452,7 +456,7 @@ print "Modifies a mail, FTP or database user in a Virtualmin domain.\n";
 print "\n";
 print "virtualmin modify-user --domain domain.name\n";
 print "                       --user username\n";
-print "                      [--pass new-password]\n";
+print "                      [--pass new-password | --passfile password-file]\n";
 print "                      [--disable | --enable]\n";
 print "                      [--real real-name]\n";
 if (&has_home_quotas()) {

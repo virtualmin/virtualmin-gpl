@@ -41,7 +41,7 @@ as C</usr/bin/scponly>. Available shells can be displayed using the
 C<list-available-shells> command.
 
 If you only have a pre-encrypted password that you want the new user
-to use, the C<--encpass> flag can be ysed to set it instead of C<--pass>.
+to use, the C<--encpass> flag can be used to set it instead of C<--pass>.
 However, this will prevent Virtualmin from enabling MySQL access for the user,
 as it needs to know the plaintext password to re-hash it for MySQL.
 
@@ -83,6 +83,10 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--pass") {
 		$pass = shift(@ARGV);
+		}
+	elsif ($a eq "--passfile") {
+		$pass = &read_file_contents(shift(@ARGV));
+		$pass =~ s/\r|\n//g;
 		}
 	elsif ($a eq "--random-pass") {
 		$pass = &random_password();
@@ -345,7 +349,8 @@ print "virtualmin create-user --domain domain.name\n";
 print "                       --user new-username\n";
 print "                       --pass password-for-new-user |\n";
 print "                       --encpass encrypted-password |\n";
-print "                       --random-pass\n";
+print "                       --random-pass |\n";
+print "                       --passfile password-file\n";
 if (&has_home_quotas()) {
 	print "                      [--quota quota-in-blocks|\"UNLIMITED\"]\n";
 	}

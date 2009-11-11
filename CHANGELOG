@@ -1185,3 +1185,5 @@ The Manage SSL Certificate page can now be used to copy a domain's cert and key 
 Script version upgrades that are completely un-supported (like Jooma 1.0 to 1.5) are now no longer displayed in Virtualmin.
 Concurrent backups to the same destination are now no longer allowed, due to the potential for corruption and odd partial failures.
 Added a Module Config option to always show output from pre and post virtual server creation commands.
+---- Changes since 3.75 ----
+Added the --passfile flag to all domain, user, reseller and extra admin creation and modification commands, for reading the password from a file so it doesn't show up in ps output.

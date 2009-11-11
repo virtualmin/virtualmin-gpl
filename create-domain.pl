@@ -100,6 +100,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--pass") {
 		$pass = shift(@ARGV);
 		}
+	elsif ($a eq "--passfile") {
+		$pass = &read_file_contents(shift(@ARGV));
+		$pass =~ s/\r|\n//g;
+		}
 	elsif ($a eq "--mysql-pass") {
 		$mysqlpass = shift(@ARGV);
 		}
@@ -717,7 +721,8 @@ print "Adds a new Virtualmin virtual server, with the settings and features\n";
 print "specified on the command line.\n";
 print "\n";
 print "virtualmin create-domain --domain domain.name\n";
-print "                         --pass password-for-unix-user\n";
+print "                         --pass password-for-unix-user |\n";
+print "                         --passfile password-file\n";
 print "                        [--parent domain.name | --alias domain.name |\n";
 print "                         --superdom domain.name]\n";
 print "                        [--desc description-for-domain]\n";

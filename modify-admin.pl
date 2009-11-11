@@ -67,6 +67,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--pass") {
 		$pass = shift(@ARGV);
 		}
+	elsif ($a eq "--passfile") {
+		$pass = &read_file_contents(shift(@ARGV));
+		$pass =~ s/\r|\n//g;
+		}
 	elsif ($a eq "--desc") {
 		$desc = shift(@ARGV);
 		}
@@ -212,7 +216,7 @@ print "\n";
 print "virtualmin modify-admin --domain domain.name\n";
 print "                        --name login\n";
 print "                       [--newname login]\n";
-print "                       [--pass password]\n";
+print "                       [--pass password | --passfile password-file]\n";
 print "                       [--desc description]\n";
 print "                       [--email user\@domain | --no-email]\n";
 print "                       [--can-create] | [--cannot-create]\n";

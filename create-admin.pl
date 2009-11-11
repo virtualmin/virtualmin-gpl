@@ -69,6 +69,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--pass") {
 		$pass = shift(@ARGV);
 		}
+	elsif ($a eq "--passfile") {
+		$pass = &read_file_contents(shift(@ARGV));
+		$pass =~ s/\r|\n//g;
+		}
 	elsif ($a eq "--edit") {
 		$edit = shift(@ARGV);
 		&indexof($edit, @edit_limits) >= 0 ||
@@ -149,7 +153,7 @@ print "Creates a new extra administrator associated with some virtual server.\n"
 print "\n";
 print "virtualmin create-admin --domain domain.name\n";
 print "                        --name login\n";
-print "                        [--pass password]\n";
+print "                        [--pass password | --passfile password-file]\n";
 print "                        [--desc description]\n";
 print "                        [--email user\@domain]\n";
 print "                        [--create] [--rename]\n";
