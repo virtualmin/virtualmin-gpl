@@ -2547,6 +2547,7 @@ tmpl_logrotatenone2=Just Apache logs
 tmpl_ftpbelow2=Log files below
 tmpl_dns=BIND DNS records for new domains
 tmpl_dnsns=Additional manually configured nameservers
+tmpl_dnsprins=Add nameserver record for this system
 tmpl_dnsrecords=Address records for new domains
 tmpl_dns_record_@=Domain name
 tmpl_dns_record_www=www.<i>domain</i>

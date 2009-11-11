@@ -6941,6 +6941,7 @@ push(@rv, { 'id' => 0,
 	    'dns_sub' => $config{'bind_sub'} || "none",
 	    'dns_master' => $config{'bind_master'} || "none",
 	    'dns_ns' => $config{'dns_ns'},
+	    'dns_prins' => $config{'dns_prins'},
 	    'dns_records' => $config{'dns_records'},
 	    'dns_ttl' => $config{'dns_ttl'},
 	    'dnssec' => $config{'dnssec'} || "none",
@@ -7200,6 +7201,7 @@ if ($tmpl->{'id'} == 0) {
 						   : $tmpl->{'dns_master'};
 	$config{'dns_view'} = $tmpl->{'dns_view'};
 	$config{'dns_ns'} = $tmpl->{'dns_ns'};
+	$config{'dns_prins'} = $tmpl->{'dns_prins'};
 	$config{'dns_records'} = $tmpl->{'dns_records'};
 	$config{'dns_ttl'} = $tmpl->{'dns_ttl'};
 	$config{'namedconf'} = $tmpl->{'namedconf'} eq 'none' ? undef :

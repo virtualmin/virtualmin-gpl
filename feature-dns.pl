@@ -783,8 +783,10 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			}
 		else {
 			# Add NS records for master and auto-configured slaves
-			&bind8::create_record($file, "@", undef, "IN",
-					      "NS", $master);
+			if ($tmpl->{'dns_prins'}) {
+				&bind8::create_record($file, "@", undef, "IN",
+						      "NS", $master);
+				}
 			local $slave;
 			local @slaves = &bind8::list_slave_servers();
 			foreach $slave (@slaves) {
@@ -1519,7 +1521,7 @@ local @views = &bind8::find("view", $conf);
 # DNS records
 local $ndi = &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'}, 1,
      0, undef, [ "dns", "bind_replace", "dnsns", "dns_ttl_def", "dns_ttl",
-		 @views ? ( "newdns_view" ) : ( ) ]);
+		 "dnsprins", @views ? ( "newdns_view" ) : ( ) ]);
 print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
 	$ndi."<br>\n".
 	&ui_textarea("dns", $tmpl->{'dns'} eq "none" ? "" :
@@ -1555,7 +1557,9 @@ print &ui_table_row(&hlink($text{'tmpl_dnsttl'}, "template_dns_ttl"),
 # Manual NS records
 print &ui_table_row(&hlink($text{'tmpl_dnsns'}, "template_dns_ns"),
 	&ui_textarea("dnsns", join("\n", split(/\s+/, $tmpl->{'dns_ns'})),
-		     3, 50));
+		     3, 50)."<br>\n".
+	&ui_checkbox("dnsprins", 1, $text{'tmpl_dnsprins'},
+		     $tmpl->{'dns_prins'}));
 
 # Option for view to add to, for BIND 9
 if (@views) {
@@ -1729,6 +1733,7 @@ if ($in{"dns_mode"} == 2) {
 		gethostbyname($n) || &error(&text('newdns_enshost', $n));
 		}
 	$tmpl->{'dns_ns'} = join(" ", @ns);
+	$tmpl->{'dns_prins'} = $in{'dnsprins'};
 	}
 
 # Save NS hostname

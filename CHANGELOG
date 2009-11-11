@@ -1187,3 +1187,4 @@ Concurrent backups to the same destination are now no longer allowed, due to the
 Added a Module Config option to always show output from pre and post virtual server creation commands.
 ---- Changes since 3.75 ----
 Added the --passfile flag to all domain, user, reseller and extra admin creation and modification commands, for reading the password from a file so it doesn't show up in ps output.
+Added a DNS template option to control if an NS record is added for the Virtualmin system.

@@ -176,3 +176,4 @@ avail_htaccess-htpasswd=1
 index_cols=dom,user,owner,users,aliases
 collect_noall=0
 output_command=0
+dns_prins=1
