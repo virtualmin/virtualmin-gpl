@@ -171,7 +171,7 @@ local $lref = &read_file_lines($virt->{'file'});
 if (!$_[0]->{'name'} && $lref->[$virt->{'line'}] !~ /:\d+/) {
 	$lref->[$virt->{'line'}] =
 		"<VirtualHost $_[0]->{'ip'}:$_[0]->{'web_port'}>";
-	&flush_file_lines();
+	&flush_file_lines($virt->{'file'});
 	}
 undef(@apache::get_config_cache);
 

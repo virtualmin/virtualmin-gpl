@@ -1811,6 +1811,7 @@ else {
 	local $vconf = &apache::get_virtual_config();
 	$rv = $vconf->[0]->{'file'};
 	}
+$rv =~ s/\/+/\//g;	# Fix use of //
 return wantarray ? ($rv, $newfile) : $rv;
 }
 
