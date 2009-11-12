@@ -98,7 +98,8 @@ foreach $d (@doms) {
 			$err = &plugin_call($f, "feature_validate", $d);
 			$name = &plugin_call($f, "feature_name");
 			}
-		push(@errs, "$name : $err") if ($err);
+		push(@errs, "$name : ".
+		     &html_tags_to_text(&entities_to_ascii($err))) if ($err);
 		$count++;
 		}
 
