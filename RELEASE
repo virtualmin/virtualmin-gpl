@@ -1,12 +1,12 @@
  x validate source
 	cd /usr/local/webadmin
-	find virtual-server* -name "*.cgi" -o -name "*.pl" | xargs -l1 perl -c |& grep -v OK
-	find virtualmin-* -name "*.cgi" -o -name "*.pl" | grep -v nuvola | xargs -l1 perl -c |& grep -v OK
+	find virtual-server*/* -name "*.cgi" -o -name "*.pl" | xargs -l1 perl -c |& grep -v OK
+	find virtualmin-*/* -name "*.cgi" -o -name "*.pl" | grep -v nuvola | xargs -l1 perl -c |& grep -v OK
 
  x run functional-test.pl
 	x fudu
 	x lentor
-	- xencentos
+	x xencentos
 
  x Generate british english with :
 	cd /usr/local/webadmin
