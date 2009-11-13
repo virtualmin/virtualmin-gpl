@@ -99,7 +99,7 @@ if ($config{'quota_users'}) {
 	}
 
 # Send email to mailbox users separately
-if ($config{'quota_users'}) {
+if ($config{'quota_mailbox_send'}) {
 	foreach $msg (@umsgs) {
 		&send_single_user_quota_email($msg);
 		}

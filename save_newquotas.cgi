@@ -25,6 +25,7 @@ if ($in{'sched'}) {
 	}
 $config{'quota_email'} = $in{'email'};
 $config{'quota_mailbox'} = $in{'mailbox'};
+$config{'quota_mailbox_send'} = $in{'mailbox_send'};
 $config{'quota_users'} = $in{'users'};
 $config{'quota_warn'} = $in{'warn_def'} ? undef : $in{'warn'};
 if ($in{'interval_def'}) {

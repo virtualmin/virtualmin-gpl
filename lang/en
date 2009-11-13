@@ -3475,6 +3475,7 @@ newquotas_einterval=Missing or invalid number of hours between notifications
 newquotas_emsg=Missing template email message
 newquotas_warnlist=Thresholds
 newquotas_mailbox=Also check mail and FTP user quotas?
+newquotas_mailbox_send=Notify mail and FTP users?
 newquotas_users=Also notify admins who are over quota?
 newquotas_msg=Template for email to mail and FTP users
 

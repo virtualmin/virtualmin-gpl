@@ -1189,3 +1189,4 @@ Added a Module Config option to always show output from pre and post virtual ser
 Added the --passfile flag to all domain, user, reseller and extra admin creation and modification commands, for reading the password from a file so it doesn't show up in ps output.
 Added a DNS template option to control if an NS record is added for the Virtualmin system.
 Updated the Plans script installer to version 8.1.6, Wordpress to 2.8.6, and Nucleus to 3.51.
+Disk quota monitoring now has an option to send email to mailboxes who are over quota.

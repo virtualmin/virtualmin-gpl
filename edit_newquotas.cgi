@@ -29,6 +29,10 @@ print &ui_table_row($text{'newquotas_users'},
 print &ui_table_row($text{'newquotas_mailbox'},
 		    &ui_yesno_radio("mailbox", $config{'quota_mailbox'}));
 
+# Notify mailbox users?
+print &ui_table_row($text{'newquotas_mailbox_send'},
+	    &ui_yesno_radio("mailbox_send", $config{'quota_mailbox_send'}));
+
 # Warning levels
 print &ui_table_row($text{'newquotas_warn'},
 		    &ui_opt_textbox("warn", $config{'quota_warn'}, 20,
