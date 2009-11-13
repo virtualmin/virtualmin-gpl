@@ -42,7 +42,7 @@ foreach $w (@what) {
 		$dest =~ /\S/ || &error($text{'spam_edest'});
 		}
 	@args = ( $d, $mode, $dest );
-	if ($pfx eq "spam" && defined($in{'spamlevel'})) {
+	if ($pfx eq "spam" && defined($in{'spamlevel_def'})) {
 		# Spam deletion level
 		if ($in{'spamlevel_def'}) {
 			push(@args, 0);
