@@ -25,7 +25,7 @@ else {
 my $rv;
 if ($config{'name_max'} && scalar(@chars)+3 > $config{'name_max'}) {
 	# Show first and last max/2 chars, with ... between.
-	my $s = int($config{'name_max'} / 2);
+	my $s = int($config{'name_max'} / 2) - 2;
 	$rv = join("", @chars[0 .. $s-1])."...".
 	      join("", @chars[$#chars-$s .. $#chars]);
 	}
