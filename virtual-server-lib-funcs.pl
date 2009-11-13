@@ -11372,7 +11372,7 @@ if (!$config{'iface'}) {
 		$config{'iface'} = &first_ethernet_iface();
 		if (!$config{'iface'}) {
 			return &text('index_eiface',
-				     "/config.cgi?$module_name");
+				     "../config.cgi?$module_name");
 			}
 		&save_module_config();
 		}
@@ -11412,7 +11412,7 @@ if ($config{'dns_ip'} ne '*') {
 		# Mis-match .. warn user
 		&$second_print("<b>".&text($config{'dns_ip'} ? 'check_ednsip1' :
 				'check_ednsip2', $dns_ip, $ext_ip,
-				"../config.cgi?mod=$module_name")."</b>");
+				"../config.cgi?$module_name")."</b>");
 		}
 	}
 
