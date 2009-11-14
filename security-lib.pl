@@ -64,6 +64,10 @@ if (($uinfo[8] =~ /\/(sh|bash|tcsh|csh)$/ ||
 	}
 else {
 	# Need to run ourselves
+	local %OLDENV = %ENV;
+	$ENV{'HOME'} = $uinfo[7];
+	$ENV{'USER'} = $uinfo[0];
+	$ENV{'LOGNAME'} = $uinfo[0];
 	local $temp = &transname();
 	open(TEMP, ">$temp");
 	&proc::safe_process_exec_logged($cmd, $d->{'uid'}, $d->{'ugid'},\*TEMP);
@@ -77,6 +81,9 @@ else {
 		}
 	close(TEMP);
 	unlink($temp);
+	$ENV{'HOME'} = $OLDENV{'HOME'};
+	$ENV{'USER'} = $OLDENV{'USER'};
+	$ENV{'LOGNAME'} = $OLDENV{'LOGNAME'};
 	return wantarray ? ($out, $ex) : $out;
 	}
 }
