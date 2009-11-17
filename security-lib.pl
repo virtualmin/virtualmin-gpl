@@ -46,8 +46,16 @@ local ($d, $cmd, $bg, $nosu) = @_;
 if ($d->{'parent'}) {
 	$d = &get_domain($d->{'parent'});
 	}
+
+# Set a reasonable environment for the command
+local %OLDENV = %ENV;
+$ENV{'HOME'} = $uinfo[7];
+$ENV{'USER'} = $uinfo[0];
+$ENV{'LOGNAME'} = $uinfo[0];
+
 &foreign_require("proc", "proc-lib.pl");
 local @uinfo = getpwnam($d->{'user'});
+local @rv;
 if (($uinfo[8] =~ /\/(sh|bash|tcsh|csh)$/ ||
      $gconfig{'os_type'} =~ /-linux$/) && !$nosu) {
 	# Usable shell .. use su
@@ -55,19 +63,15 @@ if (($uinfo[8] =~ /\/(sh|bash|tcsh|csh)$/ ||
 	if ($bg) {
 		# No status available
 		&system_logged("$cmd &");
-		return wantarray ? (undef, 0) : undef;
+		@rv = ( undef, 0 );
 		}
 	else {
 		local $out = &backquote_logged($cmd);
-		return wantarray ? ($out, $?) : $out;
+		@rv = ( $out, $? );
 		}
 	}
 else {
 	# Need to run ourselves
-	local %OLDENV = %ENV;
-	$ENV{'HOME'} = $uinfo[7];
-	$ENV{'USER'} = $uinfo[0];
-	$ENV{'LOGNAME'} = $uinfo[0];
 	local $temp = &transname();
 	open(TEMP, ">$temp");
 	&proc::safe_process_exec_logged($cmd, $d->{'uid'}, $d->{'ugid'},\*TEMP);
@@ -81,11 +85,14 @@ else {
 		}
 	close(TEMP);
 	unlink($temp);
-	$ENV{'HOME'} = $OLDENV{'HOME'};
-	$ENV{'USER'} = $OLDENV{'USER'};
-	$ENV{'LOGNAME'} = $OLDENV{'LOGNAME'};
-	return wantarray ? ($out, $ex) : $out;
+	@rv = ( $out, $ex );
 	}
+
+# Clean up the environment
+$ENV{'HOME'} = $OLDENV{'HOME'};
+$ENV{'USER'} = $OLDENV{'USER'};
+$ENV{'LOGNAME'} = $OLDENV{'LOGNAME'};
+return wantarray ? @rv : $rv[0];
 }
 
 # make_dir_as_domain_user(&domain, dir, permissions, recursive?)
