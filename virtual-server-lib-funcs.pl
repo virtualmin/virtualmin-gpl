@@ -10411,6 +10411,26 @@ foreach $f (&list_feature_plugins()) {
 
 $first_print = $old_first_print if ($old_first_print);
 
+# Fix script installer paths in all domains
+if (defined(&list_domain_scripts)) {
+	&$first_print($text{'rename_scripts'});
+	for(my $i=0; $i<@doms; $i++) {
+		local ($olddir, $newdir) =
+		    ($olddoms[$i]->{'home'}, $doms[$i]->{'home'});
+		foreach $sinfo (&list_domain_scripts($doms[$i])) {
+			$changed = 0;
+			if ($olddir ne $newdir) {
+				# Fix directory
+				$changed++
+				   if ($sinfo->{'opts'}->{'dir'} =~
+				       s/^\Q$olddir\E\//$newdir\//);
+				}
+			&save_domain_script($doms[$i], $sinfo) if ($changed);
+			}
+		}
+	&$second_print($text{'setup_done'});
+	}
+
 # Save the domain objects
 &$first_print($text{'save_domain'});
 for(my $i=0; $i<@doms; $i++) {
@@ -10598,6 +10618,26 @@ foreach $f (&list_feature_plugins()) {
 	}
 
 $first_print = $old_first_print if ($old_first_print);
+
+# Fix script installer paths in all domains
+if (defined(&list_domain_scripts)) {
+	&$first_print($text{'rename_scripts'});
+	for(my $i=0; $i<@doms; $i++) {
+		local ($olddir, $newdir) =
+		    ($olddoms[$i]->{'home'}, $doms[$i]->{'home'});
+		foreach $sinfo (&list_domain_scripts($doms[$i])) {
+			$changed = 0;
+			if ($olddir ne $newdir) {
+				# Fix directory
+				$changed++
+				   if ($sinfo->{'opts'}->{'dir'} =~
+				       s/^\Q$olddir\E\//$newdir\//);
+				}
+			&save_domain_script($doms[$i], $sinfo) if ($changed);
+			}
+		}
+	&$second_print($text{'setup_done'});
+	}
 
 # Save the domain objects
 &$first_print($text{'save_domain'});

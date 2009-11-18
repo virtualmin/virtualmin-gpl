@@ -606,6 +606,18 @@ $script_tests = [
 	  'grep' => 'WordPress installation',
 	},
 
+	# Check script list
+	{ 'command' => 'list-scripts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Type: wordpress',
+		      'Directory: /home/'.$test_domain_user.
+			'/public_html/wordpress',
+		      'Database: '.$test_domain_db.' ',
+		      'URL: http://'.$test_domain.'/wordpress',
+		    ],
+	},
+
 	# Un-install
 	{ 'command' => 'delete-script.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -919,6 +931,15 @@ $move_tests = [
 		      [ 'mail-quota', 100*1024 ] ],
 	},
 
+	# Install a script into the domain being moved
+	{ 'command' => 'install-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'wordpress' ],
+		      [ 'path', '/wordpress' ],
+		      [ 'db', 'mysql '.$test_domain_db ],
+		      [ 'version', 'latest' ] ],
+	},
+
 	# Move under the target
 	{ 'command' => 'move-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -956,6 +977,18 @@ $move_tests = [
 	{ 'command' => 'list-users.pl',
 	  'args' => [ [ 'domain' => $test_domain ] ],
 	  'grep' => "^$test_user",
+	},
+
+	# Make sure the script install was updated
+	{ 'command' => 'list-scripts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Type: wordpress',
+		      'Directory: /home/'.$test_target_domain_user.
+			'/domains/'.$test_domain.'/public_html/wordpress',
+		      'Database: '.$test_domain_db.' ',
+		      'URL: http://'.$test_domain.'/wordpress',
+		    ],
 	},
 
 	# Move back to top-level
