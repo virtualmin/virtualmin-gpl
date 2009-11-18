@@ -209,14 +209,17 @@ while(@ARGV > 0) {
 		$anylimits = 1;
 		}
 	elsif ($a eq "--template") {
-		$templatename = shift(@ARGV);
-		foreach $t (&list_templates()) {
-			if ($t->{'name'} eq $templatename ||
-			    $t->{'id'} eq $templatename) {
-				$template = $t->{'id'};
+		# If no template given (as seen by AWBS), use the default
+		if ($ARGV[0] && $ARGV[0] !~ /^\-\-/) {
+			$templatename = shift(@ARGV);
+			foreach $t (&list_templates()) {
+				if ($t->{'name'} eq $templatename ||
+				    $t->{'id'} eq $templatename) {
+					$template = $t->{'id'};
+					}
 				}
+			$template eq "" && &usage("Unknown template name");
 			}
-		$template eq "" && &usage("Unknown template name");
 		}
 	elsif ($a eq "--plan") {
 		$planname = shift(@ARGV);
