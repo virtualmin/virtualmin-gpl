@@ -5049,8 +5049,10 @@ if (!$_[3]->{'fix'}) {
 		&make_dir("$extra_admins_dir/$_[0]->{'id'}", 0755);
 		&execute_command("cd ".quotemeta("$extra_admins_dir/$_[0]->{'id'}")." && tar xf ".quotemeta($_[1]."_admins")." .");
 		}
-	if ($config{'bw_active'} && -r $_[1]."_bw") {
-		# Also restore bandwidth files
+	if ($config{'bw_active'} && -r $_[1]."_bw" &&
+	    !-r "$bandwidth_dir/$_[0]->{'id'}") {
+		# Also restore bandwidth files for the domain, but only
+		# if missing.
 		&make_dir($bandwidth_dir, 0700);
 		&copy_source_dest($_[1]."_bw", "$bandwidth_dir/$_[0]->{'id'}");
 		}

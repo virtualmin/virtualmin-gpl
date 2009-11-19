@@ -958,6 +958,13 @@ sub restore_domains
 local ($file, $doms, $features, $opts, $vbs, $onlyfeats, $ipinfo, $asowner) =@_;
 local $tar = &get_tar_command();
 
+# Find owning domain
+local $asd;
+if ($asowner) {
+	($asd) = grep { !$_->{'parent'} && !$_->{'missing'} } @$doms;
+	$asd ||= $doms->[0];
+	}
+
 # Work out where the backup is located
 local $ok = 1;
 local $backup;
@@ -975,6 +982,7 @@ if ($mode > 0) {
 			}
 		}
 	$backup = &transname();
+	local $tstart = time();
 	local $derr = &download_backup($_[0], $backup,
 		[ map { $_->{'dom'} } @$doms ], $vbs);
 	if ($derr) {
@@ -982,6 +990,11 @@ if ($mode > 0) {
 		$ok = 0;
 		}
 	else {
+		# Done .. account for bandwidth
+		if ($asd) {
+			local $sz = &disk_usage_kb($backup)*1024;
+			&record_backup_bandwidth($asd, $sz, 0, $tstart, time());
+			}
 		&$second_print($text{'setup_done'});
 		}
 	}

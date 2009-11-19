@@ -1589,6 +1589,8 @@ feature_status=Status monitoring
 bandwidth_web=Website traffic
 bandwidth_ftp=FTP transfers
 bandwidth_mail=Mail transferred
+bandwidth_backup=Backups made
+bandwidth_restore=Backups restored
 
 losing_web=All Apache directives in the virtual host will be removed.
 sublosing_web=$losing_web

@@ -71,6 +71,7 @@ $indent_print = \&indent_text_print;
 $outdent_print = \&outdent_text_print;
 
 # Parse command-line args
+$asowner = 0;
 $reuid = 1;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
@@ -128,6 +129,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mailfiles") {
 		# Convenience flag for --option mail mailfiles 1
 		# Deprecated, as this is on by default now
+		}
+	elsif ($a eq "--as-owner") {
+		# Run as domain owner
+		$asowner = 1;
 		}
 	elsif ($a eq "--virtualmin") {
 		$v = shift(@ARGV);
@@ -262,7 +267,7 @@ $opts{'reuid'} = $reuid;
 $opts{'fix'} = $fix;
 &$first_print("Starting restore..");
 $ok = &restore_domains($src, \@doms, \@rfeats, \%opts, \@vbs, $onlyfeats,
-		       $ipinfo);
+		       $ipinfo, $asowner);
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV, $doms[0]);
 if ($ok) {

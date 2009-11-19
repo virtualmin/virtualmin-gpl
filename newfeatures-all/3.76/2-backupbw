@@ -1,0 +1,6 @@
+desc=Backups included in bandwidth monitoring
+html=Network traffic resulting from FTP, SSH and S3 backups created by domain owners is now counted towards their bandwidth limits. This also includes traffic resulting from the restore of backups.
+master=1
+owner=1
+reseller=1
+link=bwgraph.cgi
