@@ -89,6 +89,7 @@ foreach my $fname (@features, "virt", "virt6") {
 @migration_types = ( "cpanel", "ensim", "psa", "plesk", "plesk9", "lxadmin" );
 @startstop_features = ("web", "dns", "mail", "ftp", "unix", "virus", "spam",
 		       "mysql", "postgres");
+@bandwidth_features = ( @features, "backup", "restore" );
 @banned_usernames = ( 'root' );
 
 $backup_cron_cmd = "$module_config_directory/backup.pl";

@@ -518,6 +518,7 @@ DOMAIN: foreach $d (@$doms) {
 		local $err;
 		local $df = "$d->{'dom'}.$hfsuffix";
 		&$cbfunc($d, 1, "$dest/$df") if ($cbfunc);
+		local $tstart = time();
 		if ($mode == 2) {
 			# Via SCP
 			&$first_print($text{'backup_upload2'});
@@ -547,6 +548,10 @@ DOMAIN: foreach $d (@$doms) {
 			&$second_print($text{'setup_done'});
 			local @tst = stat("$dest/$df");
 			$transferred_sz += $tst[7];
+			if ($asd) {
+				&record_backup_bandwidth($d, 0, $tst[7], 
+							 $tstart, time());
+				}
 			}
 
 		# Delete .backup directory
@@ -759,6 +764,8 @@ if ($ok && $mode == 1 && (@destfiles || !$dirfmt)) {
 	if ($dirfmt) {
 		# Need to upload entire directory .. which has to be created
 		foreach my $df (@destfiles) {
+			local $tstart = time();
+			local $d = $destfiles_map{$df};
 			&ftp_upload($server, "$path/$df", "$dest/$df", \$err,
 				    undef, $user, $pass, $port);
 			if ($err) {
@@ -767,15 +774,28 @@ if ($ok && $mode == 1 && (@destfiles || !$dirfmt)) {
 				$ok = 0;
 				last;
 				}
+			elsif ($asd && $d) {
+				# Log bandwidth used by this domain
+				local @tst = stat("$dest/$df");
+				&record_backup_bandwidth($d, 0, $tst[7], 
+							 $tstart, time());
+				}
 			}
 		}
 	else {
 		# Just a single file
+		local $tstart = time();
 		&ftp_upload($server, $path, $dest, \$err, undef, $user, $pass,
 			    $port);
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
 			$ok = 0;
+			}
+		elsif ($asd) {
+			# Log bandwidth used by whole transfer
+			local @tst = stat($dest);
+			&record_backup_bandwidth($asd, 0, $tst[7], 
+						 $tstart, time());
 			}
 		}
 	&$second_print($text{'setup_done'}) if ($ok);
@@ -787,16 +807,35 @@ elsif ($ok && $mode == 2 && (@destfiles || !$dirfmt)) {
 	local $r = ($user ? "$user\@" : "")."$server:$path";
 	if ($dirfmt) {
 		# Need to upload entire directory
+		local $tstart = time();
 		&scp_copy("$dest/*", $r, $pass, \$err, $port);
 		if ($err) {
 			# Target dir didn't exist, so scp just the directory
 			$err = undef;
 			&scp_copy($dest, $r, $pass, \$err, $port);
 			}
+		if (!$err && $asd) {
+			# Log bandwidth used by domain
+			foreach my $df (@destfiles) {
+				local $d = $destfiles_map{$df};
+				if ($d) {
+					local @tst = stat("$dest/$df");
+					&record_backup_bandwidth(
+						$d, 0, $tst[7], $tstart,time());
+					}
+				}
+			}
 		}
 	else {
 		# Just a single file
+		local $tstart = time();
 		&scp_copy($dest, $r, $pass, \$err, $port);
+		if ($asd && !$err) {
+			# Log bandwidth used by whole transfer
+			local @tst = stat($dest);
+			&record_backup_bandwidth($asd, 0, $tst[7], 
+						 $tstart, time());
+			}
 		}
 	if ($err) {
 		&$second_print(&text('backup_uploadfailed', $err));
@@ -811,6 +850,7 @@ elsif ($ok && $mode == 3 && (@destfiles || !$dirfmt)) {
 	if ($dirfmt) {
 		# Upload an entire directory of files
 		foreach my $df (@destfiles) {
+			local $tstart = time();
 			local $d = $destfiles_map{$df};
 			local $n = $d eq "virtualmin" ? "virtualmin"
 						      : $d->{'dom'};
@@ -823,16 +863,29 @@ elsif ($ok && $mode == 3 && (@destfiles || !$dirfmt)) {
 				$ok = 0;
 				last;
 				}
+			elsif ($asd && $d) {
+				# Log bandwidth used by this domain
+				local @tst = stat("$dest/$df");
+				&record_backup_bandwidth($d, 0, $tst[7], 
+							 $tstart, time());
+				}
 			}
 		}
 	else {
 		# Upload one file to the bucket
 		local %donebydname;
+		local $tstart = time();
 		$err = &s3_upload($user, $pass, $server, $dest,
 				  $path, \%donefeatures, $s3_upload_tries);
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
 			$ok = 0;
+			}
+		elsif ($asd) {
+			# Log bandwidth used by whole transfer
+			local @tst = stat($dest);
+			&record_backup_bandwidth($asd, 0, $tst[7], 
+						 $tstart, time());
 			}
 		}
 	&$second_print($text{'setup_done'}) if ($ok);
@@ -2520,6 +2573,21 @@ local %log;
 &read_file("$backups_log_dir/$id", \%log) || return undef;
 $log{'output'} = &read_file_contents("$backups_log_dir/$id.out");
 return \%log;
+}
+
+# record_backup_bandwidth(&domain, bytes-in, bytes-out, start, end)
+# Add to the bandwidth files for some domain data transfer used by a backup
+sub record_backup_bandwidth
+{
+local ($d, $inb, $outb, $start, $end) = @_;
+local $bwinfo = &get_bandwidth($d);
+local $startday = int($start / (24*60*60));
+local $endday = int($end / (24*60*60));
+for(my $day=$startday; $day<=$endday; $day++) {
+	$bwinfo->{"backup_".$day} += $outb / ($endday - $startday + 1);
+	$bwinfo->{"restore_".$day} += $inb / ($endday - $startday + 1);
+	}
+&save_bandwidth($d, $bwinfo);
 }
 
 1;

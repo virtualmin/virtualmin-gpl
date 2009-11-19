@@ -110,7 +110,7 @@ foreach my $d (@doms) {
 	# Show usage within range
 	for($i=$dstart; $i<=$dend; $i++) {
 		print "    ",strftime("%Y-%m-%d:", localtime($i*24*60*60));
-		foreach my $f (@features) {
+		foreach my $f (@bandwidth_features) {
 			if ($allfeatures{$f}) {
 				print " ",$f,":",int($daymap{$i}->{$f});
 				}

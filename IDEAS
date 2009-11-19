@@ -28,3 +28,10 @@
 
  - Command-line domain rename
 	- Add to unit tests
+
+ - Include backup transfers in bandwidth monitoring
+	- Restores too?
+	- FTP, SSH and S3
+	- Only for backups by domain owner
+	- backup_domains should add to bandwidth map directly
+	- https://www.virtualmin.com/node/12389

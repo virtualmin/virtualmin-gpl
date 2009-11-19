@@ -35,7 +35,7 @@ foreach $d (@bwdoms) {
 
 # For each feature that has a function for doing bandwidth for all domains
 # at once, call it
-foreach $f (@features) {
+foreach $f (@bandwidth_features) {
 	local $bwfunc = "bandwidth_all_$f";
 	if (defined(&$bwfunc)) {
 		local %starts = map { $_, $bwinfomap{$_}->{"last_$f"} }
@@ -53,7 +53,7 @@ $maxdays = $config{'bw_maxdays'} || 366;
 foreach $d (@bwdoms) {
 	# Add bandwidth for all features
 	$bwinfo = $bwinfomap{$d->{'id'}};
-	foreach $f (@features) {
+	foreach $f (@bandwidth_features) {
 		local $bwfunc = "bandwidth_$f";
 		if (defined(&$bwfunc)) {
 			$bwinfo->{"last_$f"} =
@@ -106,7 +106,7 @@ foreach $d (@doms) {
 			}
 		$dd->{'bw_usage_only'} = $usage_only;
 		$dd->{'bw_start'} = $start_day;
-		foreach $f (@features) {
+		foreach $f (@bandwidth_features) {
 			delete($dd->{"bw_usage_only_$f"});
 			}
 		foreach $k (keys %usage_only) {
@@ -117,7 +117,7 @@ foreach $d (@doms) {
 			}
 		}
 	$d->{'bw_usage'} = $usage;
-	foreach $f (@features) {
+	foreach $f (@bandwidth_features) {
 		delete($d->{"bw_usage_$f"});
 		}
 	foreach $k (keys %usage) {

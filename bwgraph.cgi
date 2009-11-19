@@ -118,7 +118,7 @@ if ($max) {
 					$pid = $dd->{'parent'} || $dd->{'id'};
 					$usage{$pid} += $dd->{'bw_usage'};
 					$usage_only{$dd->{'id'}} = $dd->{'bw_usage_only'};
-					foreach $f (@features) {
+					foreach $f (@bandwidth_features) {
 						$fusage{$f}->{$pid} +=
 							$dd->{'bw_usage_'.$f};
 						$fusage_only{$f}->{$dd->{'id'}} =
@@ -247,7 +247,7 @@ if ($max) {
 		$max = 0;
 		for($i=$day; $i>=$start_day; $i--) {
 			$usage = 0;
-			foreach $f (@features) {
+			foreach $f (@bandwidth_features) {
 				$usage += &usage_for_days($i, $i, $f, @bands);
 				}
 			$max = $usage if ($usage > $max);
@@ -260,7 +260,7 @@ if ($max) {
 			print "<td>",&make_date($i*24*60*60, 1),"</td>\n";
 			print "<td>";
 			local $usage = 0;
-			foreach $f (@features) {
+			foreach $f (@bandwidth_features) {
 				local $fusage = &usage_for_days($i, $i, $f,
 								@bands);
 				$usage += $fusage;
@@ -313,7 +313,7 @@ if ($max) {
 			if ($endtm[4] == 12) { $endtm[4] = 0; $endtm[5]++ };
 			$iend[$i] = int(timelocal(@endtm)/(24*60*60) - 1);
 			$usage = 0;
-			foreach $f (@features) {
+			foreach $f (@bandwidth_features) {
 				$usage += &usage_for_days(
 					$istart[$i], $iend[$i], $f, @bands);
 				}
@@ -328,7 +328,7 @@ if ($max) {
 			print "<td>",strftime("%m/%Y", @tm),"</td>\n";
 			print "<td>";
 			local $usage = 0;
-			foreach $f (@features) {
+			foreach $f (@bandwidth_features) {
 				local $fusage = &usage_for_days(
 					$istart[$i], $iend[$i], $f, @bands);
 				$usage += $fusage;
@@ -347,20 +347,18 @@ if ($max) {
 	print "</table>\n";
 
 	# Show colour keys
-	if (@features) {
-		print "<br>\n";
-		foreach $f (@features) {
-			if ($donecolour{$f}) {
-				print "<img src=images/usage-$f.gif ",
-				      "width=10 height=10>\n";
-				local $label = $text{'bandwidth_'.$f} ||
-					       $text{'feature_'.$f};
-				print $label," (",
-				      &nice_size($donecolour{$f}),")\n";
-				}
+	print "<br>\n";
+	foreach $f (@bandwidth_features) {
+		if ($donecolour{$f}) {
+			print "<img src=images/usage-$f.gif ",
+			      "width=10 height=10>\n";
+			local $label = $text{'bandwidth_'.$f} ||
+				       $text{'feature_'.$f};
+			print $label," (",
+			      &nice_size($donecolour{$f}),")\n";
 			}
-		print "<br>\n";
 		}
+	print "<br>\n";
 
 	# Show month selector
 	if ($in{'mode'} != 3) {
@@ -404,7 +402,7 @@ sub usage_colours
 {
 local ($d, $usage) = @_;
 local ($f, $total);
-foreach $f (@features) {
+foreach $f (@bandwidth_features) {
 	local $fusage = $usage->{$f}->{$d->{'id'}};
 	if ($fusage) {
 		printf "<img src=images/usage-$f.gif width=%s height=10>",
