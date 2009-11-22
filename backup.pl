@@ -135,7 +135,8 @@ $current_id = undef;
 			       $sched->{'onebyone'},
 			       $cbmode == 2,
 			       \&backup_cbfunc,
-			       $sched->{'increment'});
+			       $sched->{'increment'},
+			       1);
 
 # If purging old backups, do that now
 if ($ok && $sched->{'purge'}) {
@@ -158,6 +159,7 @@ if ($sched->{'after'}) {
 		&$second_print(".. done");
 		}
 	}
+&cleanup_backup_limits(0, 1);
 &write_backup_log(\@doms, $dest, $backup->{'incremental'}, $start_time,
 		  $size, $ok, "sched", $output, $errdoms,
 		  $asd ? $asd->{'user'} : undef);

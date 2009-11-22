@@ -134,6 +134,7 @@ if ($dest eq "download:") {
 				       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
 				       $in{'onebyone'}, $cbmode == 2,
 				       undef, $in{'increment'});
+	&cleanup_backup_limits(0, 1);
 	&run_post_actions();
 	if ($ok) {
 		@st = stat($temp);
@@ -170,6 +171,7 @@ else {
 				       $in{'onebyone'}, $cbmode >= 2,
 				       undef, $in{'increment'});
 	$output = &stop_print_capture();
+	&cleanup_backup_limits(0, 1);
 	&write_backup_log(\@doms, $dest, $in{'increment'}, $start_time,
 			  $size, $ok, "cgi", $output, $errdoms);
 	&run_post_actions();

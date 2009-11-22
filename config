@@ -179,3 +179,6 @@ index_cols=dom,user,owner,users,aliases
 collect_noall=0
 output_command=0
 dns_prins=1
+max_backups=3
+max_all=1
+max_manual=0

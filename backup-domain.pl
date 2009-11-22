@@ -286,6 +286,7 @@ if ($purge && $ok) {
 	}
 
 $output = &stop_print_capture();
+&cleanup_backup_limits(0, 1);
 &write_backup_log(\@doms, $strfdest, $increment, $start_time,
 		  $size, $ok, "api", $output, $errdoms);
 exit($ex);

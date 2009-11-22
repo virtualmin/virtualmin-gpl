@@ -177,21 +177,32 @@ if (@jobs) {
 
 # backup_domains(file, &domains, &features, dir-format, skip-errors, &options,
 #		 home-format, &virtualmin-backups, mkdir, onebyone, as-owner,
-#		 &callback-func, incremental)
+#		 &callback-func, incremental, on-schedule)
 # Perform a backup of one or more domains into a single tar.gz file. Returns
 # an OK flag, the size of the backup file, and a list of domains for which
 # something went wrong.
 sub backup_domains
 {
 local ($desturl, $doms, $features, $dirfmt, $skip, $opts, $homefmt, $vbs,
-       $mkdir, $onebyone, $asowner, $cbfunc, $increment) = @_;
+       $mkdir, $onebyone, $asowner, $cbfunc, $increment, $onsched) = @_;
 local $backupdir;
 local $transferred_sz;
+
+# Check if the limit on running backups has been hit
+local $err = &check_backup_limits($asowner, $onsched, $desturl);
+if ($err) {
+	&$first_print($err);
+	return (0, 0, $doms);
+	}
+
+# Work out who the backup is running as
 local $asd;
 if ($asowner) {
 	($asd) = grep { !$_->{'parent'} } @$doms;
 	$asd ||= $doms->[0];
 	}
+
+# Find the tar command
 local $tar = &get_tar_command();
 if (!$tar) {
 	&$first_print($text{'backup_etarcmd'});
@@ -2601,6 +2612,87 @@ for(my $day=$startday; $day<=$endday; $day++) {
 	$bwinfo->{"restore_".$day} += $inb / ($endday - $startday + 1);
 	}
 &save_bandwidth($d, $bwinfo);
+}
+
+# check_backup_limits(as-owner, on-schedule, dest)
+# Check if the limit on the number of running backups has been exceeded, and
+# if so either waits or returns an error. Returns undef if OK to proceed. May
+# print a message if waiting.
+sub check_backup_limits
+{
+local ($asowner, $sched, $dest) = @_;
+local %maxes;
+local $start = time();
+local $printed;
+
+while(1) {
+	# Lock the file listing current backups, clean it up and read it
+	&lock_file($backup_maxes_file);
+	&cleanup_backup_limits(1);
+	%maxes = ( );
+	&read_file($backup_maxes_file, \%maxes);
+
+	# Check if we are under the limit, or it doesn't apply
+	local @pids = keys %maxes;
+	local $waiting = time() - $start;
+	if (@pids < $config{'max_backups'} ||
+	    !$asowner && $config{'max_all'} == 0 ||
+	    !$sched && $config{'max_manual'} == 0) {
+		# Under the limit, or no limit applies in this case
+		if ($printed) {
+			&$second_print($text{'backup_waited'});
+			}
+		last;
+		}
+	elsif (!$config{'max_timeout'}) {
+		# Too many, and no timeout is set .. give up now
+		&unlock_file($backup_maxes_file);
+		return &text('backup_maxhit', scalar(@pids),
+					      $config{'max_backups'});
+		}
+	elsif ($waiting < $config{'max_timeout'}) {
+		# Too many, but still under timeout .. wait for a while
+		&unlock_file($backup_maxes_file);
+		if (!$printed) {
+			&$first_print(&text('backup_waiting',
+					    $config{'max_backups'}));
+			$printed++;
+			}
+		sleep(10);
+		}
+	else {
+		# Over the timeout .. give up
+		&unlock_file($backup_maxes_file);
+		return &text('backup_waitfailed', $config{'max_timeout'});
+		}
+	}
+
+# Add this job to the file
+$maxes{$$} = $dest;
+&write_file($backup_maxes_file, \%maxes);
+&unlock_file($backup_maxes_file);
+
+return undef;
+}
+
+# cleanup_backup_limits([no-lock], [include-this])
+# Delete from the backup limits file any entries for PIDs that are not running
+sub cleanup_backup_limits
+{
+local ($nolock, $includethis) = @_;
+local (%maxes, $changed);
+&lock_file($backup_maxes_file) if (!$nolock);
+&read_file($backup_maxes_file, \%maxes);
+foreach my $pid (keys %maxes) {
+	if (!kill(0, $pid) || ($includethis && $pid == $$)) {
+		delete($maxes{$pid});
+		$changed++;
+		}
+	}
+if ($changed) {
+	&write_file($backup_maxes_file, \%maxes);
+	}
+&unlock_file($backup_maxes_file) if (!$nolock);
 }
 
 1;
