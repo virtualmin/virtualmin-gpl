@@ -1193,3 +1193,4 @@ Disk quota monitoring now has an option to send email to mailboxes who are over 
 When moving a virtual server, update the paths in the script logs DB to match the new location.
 Backups and restores made by domain owners are now included in their bandwidth usage.
 Added Module Config options to limit the number of concurrent backups, which defaults to 3. This prevents system owners from overloading the machine with their scheduled backups.
+If Apache supports SNI, make the warning about clashing certs less dramatic.

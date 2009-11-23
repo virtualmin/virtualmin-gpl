@@ -14,6 +14,11 @@ local ($d, $oldd) = @_;
 local $tmpl = &get_template($d->{'template'});
 local $defport = $tmpl->{'web_sslport'} || 443;
 local $port = $d->{'web_sslport'} || $defport;
+
+# Check if Apache supports SNI, which makes clashing certs not so bad
+local @dirs = &list_apache_directives();
+local ($sni) = grep { lc($_->[0]) eq lc("SSLStrictSNIVHostCheck") } @dirs;
+
 if ($d->{'virt'}) {
 	# Has a private IP
 	return undef;
@@ -32,7 +37,8 @@ else {
 		# Clash .. but is the cert OK?
 		if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
 			local @certdoms = &list_domain_certificate($sslclash);
-			return &text('setup_edepssl5', $d->{'ip'},
+			return &text($sni ? 'setup_edepssl5sni'
+					  : 'setup_edepssl5', $d->{'ip'},
 				join(", ", map { "<tt>$_</tt>" } @certdoms));
 			}
 		else {

@@ -3287,6 +3287,23 @@ if ($d->{'virt6'}) {
 return join(" ", @vips);
 }
 
+# list_apache_directives()
+# Returns a list of directives and modules (as array refs) supported by Apache
+sub list_apache_directives
+{
+&require_apache();
+local $httpd = &apache::find_httpd();
+local @rv;
+open(DIRS, "$httpd -L 2>/dev/null </dev/null |");
+while(<DIRS>) {
+	if (/^(\S+)\s+\((\S+)\.c\)/) {
+		push(@rv, [ $1, $2 ]);
+		}
+	}
+close(DIRS);
+return @rv;
+}
+
 $done_feature_script{'web'} = 1;
 
 1;

@@ -681,7 +681,7 @@ $cerr = &virtual_server_clashes(\%dom);
 if (@warns) {
 	print "The following possible problems were detected :\n\n";
 	foreach $w (@warns) {
-		print "  $w\n";
+		print "  ",&html_tags_to_text($w),"\n";
 		}
 	if (!$skipwarnings) {
 		print "\n";

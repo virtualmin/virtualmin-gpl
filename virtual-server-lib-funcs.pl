@@ -4315,18 +4315,22 @@ foreach $u (@$users) {
 			}
 		}
 
-	# Work out shell access level
+	# Show shell access level
 	local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} } @ashells;
 	push(@cols, !$u->{'shell'} ? $text{'users_qmail'} :
 		    !$shell ? &text('users_shell', "<tt>$u->{'shell'}</tt>") :
 	            $shell->{'id'} eq 'ftp' && !$u->{'email'} ?
 			$text{'shells_mailboxftp2'} :
 		    	$shell->{'desc'});
+
+	# Show number of DBs
 	if ($d->{'mysql'} || $d->{'postgres'}) {
 		push(@cols, $u->{'domainowner'} ? $text{'users_all'} :
 					   @{$u->{'dbs'}} ? $text{'yes'}
 					   		  : $text{'no'});
 		}
+
+	# Show columns from plugins
 	foreach $f (grep { $plugcol{$_} } &list_mail_plugins()) {
 		push(@cols, &plugin_call($f, "mailbox_column", $u, $d));
 		}
