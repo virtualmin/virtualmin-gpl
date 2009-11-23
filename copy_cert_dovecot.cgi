@@ -13,11 +13,17 @@ $d->{'ssl_pass'} && &error($text{'copycert_epass'});
 # Get the Dovecot config and cert files
 &foreign_require("dovecot");
 &lock_file($dovecot::config{'dovecot_config'});
+$dovedir = $dovecot::config{'dovecot_config'};
+$dovedir =~ s/\/([^\/]+)$//;
 $conf = &dovecot::get_config();
-$cfile = &dovecot::find_value("ssl_cert_file", $conf, 2);
-$kfile = &dovecot::find_value("ssl_key_file", $conf, 2);
-$cfile ||= "/etc/dovecot.cert.pem";
-$kfile ||= "/etc/dovecot.key.pem";
+$cfile = &dovecot::find_value("ssl_cert_file", $conf);
+$kfile = &dovecot::find_value("ssl_key_file", $conf);
+if ($cfile =~ /snakeoil/) {
+	# Hack to not use shared cert file on Ubuntu / Debian
+	$cfile = $kfile = undef;
+	}
+$cfile ||= "$dovedir/dovecot.cert.pem";
+$kfile ||= "$dovedir/dovecot.key.pem";
 
 # Copy cert into those files
 &$first_print($text{'copycert_dsaving'});
@@ -31,8 +37,8 @@ $kdata || &error($text{'copycert_ekey'});
 &open_lock_tempfile(KEY, ">$kfile");
 &print_tempfile(KEY, $kdata,"\n");
 &close_tempfile(KEY);
-&set_ownership_permissions(undef, undef, 0700, $cfile);
-&set_ownership_permissions(undef, undef, 0700, $kfile);
+&set_ownership_permissions(undef, undef, 0750, $cfile);
+&set_ownership_permissions(undef, undef, 0750, $kfile);
 
 # Update config with correct files
 &dovecot::save_directive($conf, "ssl_cert_file", $cfile);

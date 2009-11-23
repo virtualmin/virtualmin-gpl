@@ -15,6 +15,10 @@ $d->{'ssl_pass'} && &error($text{'copycert_epass'});
 $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
 $kfile = &postfix::get_real_value("smtpd_tls_key_file");
 $cdir = &postfix::guess_config_dir();
+if ($cfile =~ /snakeoil/) {
+	# Hack to not use shared cert file on Ubuntu / Debian
+	$cfile = $kfile = undef;
+	}
 $cfile ||= "$cdir/postfix.cert.pem";
 $kfile ||= "$cdir/postfix.key.pem";
 
