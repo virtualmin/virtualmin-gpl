@@ -807,7 +807,14 @@ return undef if ($mysql::config{'host'} &&
 		 $mysql::config{'host'} ne 'localhost' &&
 		 &to_ipaddress($mysql::config{'host'}) ne
 			&to_ipaddress(&get_system_hostname()));
-return "$mysql::config{'mysql_data'}/$db";
+local $escdb = $db;
+$escdb =~ s/-/\@002d/g;
+if (-d "$mysql::config{'mysql_data'}/$escdb") {
+	return "$mysql::config{'mysql_data'}/$escdb";
+	}
+else {
+	return "$mysql::config{'mysql_data'}/$db";
+	}
 }
 
 # get_mysql_hosts(&domain, [always-from-template])
