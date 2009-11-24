@@ -746,14 +746,17 @@ else {
 
 		&flush_file_lines();
 		$rv++;
-		if ($virt->{'file'} =~ /\Q$_[1]->{'dom'}\E/) {
+
+		local $newfile = &get_website_file($_[0]);
+		local $oldfile = &get_website_file($_[1]);
+		if ($virt->{'file'} eq $oldfile &&
+		    $newfile ne $oldfile &&
+		    !-r $newfile) {
 			# Filename contains domain name .. need to re-name
 			# the Apache .conf file
 			&apache::delete_webfile_link($virt->{'file'});
-			local $nfn = $virt->{'file'};
-			$nfn =~ s/$_[1]->{'dom'}/$_[0]->{'dom'}/;
-			&rename_logged($virt->{'file'}, $nfn);
-			&apache::create_webfile_link($nfn);
+			&rename_logged($virt->{'file'}, $newfile);
+			&apache::create_webfile_link($newfile);
 			undef(@apache::get_config_cache);
 			($virt, $vconf, $conf) = &get_apache_virtual(
 				$_[0]->{'dom'}, $_[0]->{'web_port'});
