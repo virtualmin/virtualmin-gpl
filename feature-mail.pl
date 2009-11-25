@@ -1807,6 +1807,33 @@ if (-d $_[0]->{'home'} && $_[0]->{'unix'}) {
 			}
 		}
 	}
+
+# Create spam, virus and trash Maildir sub-directories
+if ($md && $md =~ /\/Maildir$/) {
+	local @folders = ( "$md/.trash" );
+	local ($sdmode, $sdpath) = &get_domain_spam_delivery($d);
+	if ($sdmode == 6) {
+		push(@folders, "$md/.spam");
+		}
+	elsif ($sdmode == 1 && $sdpath =~ /^Maildir\/(\S+)\/$/) {
+		push(@folders, "$md/$1");
+		}
+	local ($vdmode, $vdpath) = &get_domain_virus_delivery($d);
+	if ($vdmode == 6) {
+		push(@folders, "$md/.virus");
+		}
+	elsif ($vdmode == 1 && $vdpath =~ /^Maildir\/(\S+)\/$/) {
+		push(@folders, "$md/$1");
+		}
+	foreach my $f (@folders) {
+		next if (-d $f);
+		foreach $d ($f, "$f/cur", "$f/tmp", "$f/new") {
+			&make_dir($d, 0700, 1);
+			&set_ownership_permissions($uid, $gid, undef, $d);
+			}
+		}
+	}
+
 return @rv;
 }
 
