@@ -11,7 +11,7 @@ print &ui_table_start($text{'newvalidate_header'}, undef, 2);
 
 # Servers to check
 @doms = &list_domains();
-print &ui_table_row(&hlink($text{'newvalidate_servers'}, "newvalidate_servers"),
+print &ui_table_row($text{'newvalidate_servers'},
 		    &ui_radio("servers_def", 1,
 			[ [ 1, $text{'newips_all'} ],
 			  [ 0, $text{'newips_sel'} ] ])."<br>\n".
@@ -26,7 +26,7 @@ foreach $f (&list_feature_plugins()) {
 		push(@fopts, [ $f, &plugin_call($f, "feature_name") ]);
 		}
 	}
-print &ui_table_row(&hlink($text{'newvalidate_feats'}, "newvalidate_feats"),
+print &ui_table_row($text{'newvalidate_feats'},
 		    &ui_radio("features_def", 1,
 			[ [ 1, $text{'newvalidate_all'} ],
 			  [ 0, $text{'newvalidate_sel'} ] ])."<br>\n".
