@@ -10,7 +10,8 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 &can_config_domain($d) || &error($text{'edit_ecannot'});
 $oldd = { %$d };
-$tmpl = &get_template($in{'template'});
+$tmpl = defined($in{'template'}) ? &get_template($in{'template'})
+				 : &get_template($d->{'template'});
 
 # Validate inputs
 &error_setup($text{'save_err'});

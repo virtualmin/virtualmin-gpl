@@ -117,10 +117,12 @@ foreach $t (&list_templates()) {
 	push(@cantmpls, $t);
 	$gottmpl = 1 if ($t->{'id'} == $tmpl->{'id'});
 	}
-push(@cantmpls, $tmpl) if (!$gottmpl);
-print &ui_table_row($text{'edit_tmpl'},
+if (@cantmpls) {
+	push(@cantmpls, $tmpl) if (!$gottmpl);
+	print &ui_table_row($text{'edit_tmpl'},
 		    &ui_select("template", $tmpl->{'id'},
 			[ map { [ $_->{'id'}, $_->{'name'} ] } @cantmpls ]));
+	}
 
 # Show plan, with option to change
 if (!$parentdom) {
