@@ -682,19 +682,14 @@ ins\//);
 			$u->{'plainpass'} = $d->{'pass'};
 			}
 		elsif (!defined($u->{'plainpass'}) &&
-		    defined($plain{$u->{'user'}})) {
+		       defined($plain{$u->{'user'}})) {
 			# Check if the plain password is valid, in case the
 			# crypted password was changed behind our back
-			local $uc;
-			eval {
-				local $main::error_must_die = 1;
-				$uc = &unix_crypt($plain{$u->{'user'}},
-						  $u->{'pass'});
-				};
 			if ($plain{$u->{'user'}." encrypted"} eq $u->{'pass'} ||
 			    &encrypt_user_password($u, $plain{$u->{'user'}}) eq
-			    $u->{'pass'} ||
-			    $uc eq $u->{'pass'}) {
+			      $u->{'pass'} ||
+			    &safe_unix_crypt($plain{$u->{'user'}}, $u->{'pass'})
+			      eq $u->{'pass'}) {
 				# Valid - we can use it
 				$u->{'plainpass'} = $plain{$u->{'user'}};
 				if (!defined($plain{$u->{'user'}." encrypted"})) {
@@ -703,6 +698,13 @@ ins\//);
 						$u->{'pass'};
 					$need_plainpass_save = 1;
 					}
+				}
+			else {
+				# We know it is wrong, so remove from the plain
+				# password cache file
+				delete($plain{$u->{'user'}});
+				delete($plain{$u->{'user'}." encrypted"});
+				$need_plainpass_save = 1;
 				}
 			}
 		}
@@ -888,6 +890,19 @@ if ($_[0]) {
 	}
 
 return @users;
+}
+
+# safe_unix_crypt(pass, salt)
+# Tries to call unix_crypt, returns undef if it fails
+sub safe_unix_crypt
+{
+local ($pass, $salt) = @_;
+local $uc;
+eval {
+	local $main::error_must_die = 1;
+	$uc = &unix_crypt($pass, $salt);
+	};
+return $uc;
 }
 
 # list_all_users_quotas([no-quotas])
