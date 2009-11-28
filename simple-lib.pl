@@ -469,7 +469,7 @@ local ($d, $file) = @_;
 local $dir = &get_autoreply_file_dir();
 return undef if (!$dir);
 local $origdir;
-if ($file =~ /\/(autoreply-(\S+)\.txt)$/) {
+if ($file =~ /\/(autoreply-([^\/]+)\.txt)$/) {
 	# Autoreply file in directory
 	$linkpath = "$dir/$d->{'id'}-$1";
 	$origdir = $file;
