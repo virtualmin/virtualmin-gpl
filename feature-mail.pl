@@ -4180,6 +4180,7 @@ elsif ($config{'mail_system'} == 0) {
 sub delete_generic
 {
 local ($generic) = @_;
+return if ($generic->{'deleted'});
 if ($config{'mail_system'} == 1) {
 	# From Sendmail generics file
 	&sendmail::delete_generic($generic, $sendmail_gfile,
@@ -4190,6 +4191,7 @@ elsif ($config{'mail_system'} == 0) {
 	&postfix::delete_mapping($canonical_type, $generic);
 	&postfix::regenerate_canonical_table();
 	}
+$generic->{'deleted'} = 1;
 }
 
 # modify_generic(&generic, &old-generic)
