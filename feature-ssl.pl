@@ -896,18 +896,18 @@ local ($data, $type) = @_;
 if ($data =~ /^\//) {
 	$data = &read_file_contents($data);
 	}
-local %headers = ( 'key' => 'RSA PRIVATE KEY',
+local %headers = ( 'key' => '(RSA )?PRIVATE KEY',
 		   'cert' => 'CERTIFICATE',
 		   'ca' => 'CERTIFICATE',
 		   'csr' => 'CERTIFICATE REQUEST',
-		   'newkey' => 'RSA PRIVATE KEY' );
+		   'newkey' => '(RSA ?)PRIVATE KEY' );
 local $h = $headers{$type};
 $h || return "Unknown SSL file type $type";
 local @lines = grep { /\S/ } split(/\r?\n/, $data);
-local $begin = "-----BEGIN ".$h."-----";
-local $end = "-----END ".$h."-----";
-$lines[0] eq $begin || return "Data does not start with line $begin";
-$lines[$#lines] eq $end || return "Data does not end with line $begin";
+local $begin = quotemeta("-----BEGIN ").$h.quotemeta("-----");
+local $end = quotemeta("-----END ").$h.quotemeta("-----");
+$lines[0] =~ /^$begin$/ || return "Data does not start with line $begin";
+$lines[$#lines] =~ /^$end$/ || return "Data does not end with line $begin";
 for(my $i=1; $i<$#lines; $i++) {
 	$lines[$i] =~ /^[A-Za-z0-9\+\/=]+$/ ||
 		return "Line ".($i+1)." does not look like PEM format";
@@ -936,6 +936,9 @@ local ($d) = @_;
 local $data = &read_file_contents_as_domain_user($d, $d->{'ssl_key'} ||
 						     $d->{'ssl_cert'});
 if ($data =~ /(-----BEGIN\s+RSA\s+PRIVATE\s+KEY-----\n([A-Za-z0-9\+\/=\n\r]+)-----END\s+RSA\s+PRIVATE\s+KEY-----)/) {
+	return $1;
+	}
+elsif ($data =~ /(-----BEGIN\s+PRIVATE\s+KEY-----\n([A-Za-z0-9\+\/=\n\r]+)-----END\s+PRIVATE\s+KEY-----)/) {
 	return $1;
 	}
 return undef;
