@@ -1175,31 +1175,40 @@ else {
 # Deletes a virtual mail user mapping
 sub delete_virtuser
 {
-return if ($_[0]->{'deleted'});
 &require_mail();
 &execute_before_virtuser($_[0], 'DELETE_ALIAS');
 if ($config{'mail_system'} == 1) {
 	# Delete from sendmail
-	if ($_[0]->{'alias'}) {
+	if ($_[0]->{'alias'} && !$_[0]->{'alias'}->{'deleted'}) {
 		# Delete alias too
 		&sendmail::delete_alias($_[0]->{'alias'});
+		$_[0]->{'alias'}->{'deleted'} = 1;
 		}
-	&sendmail::delete_virtuser($_[0]->{'virt'}, $sendmail_vfile,
-				   $sendmail_vdbm, $sendmail_vdbmtype);
+	if (!$_[0]->{'virt'}->{'deleted'}) {
+		&sendmail::delete_virtuser($_[0]->{'virt'}, $sendmail_vfile,
+					   $sendmail_vdbm, $sendmail_vdbmtype);
+		$_[0]->{'virt'}->{'deleted'} = 1;
+		}
 	}
 elsif ($config{'mail_system'} == 0) {
 	# Delete from postfix file
-	if ($_[0]->{'alias'}) {
+	if ($_[0]->{'alias'} && !$_[0]->{'alias'}->{'deleted'}) {
 		# Delete alias too
 		&$postfix_delete_alias($_[0]->{'alias'});
 		&postfix::regenerate_aliases();
+		$_[0]->{'alias'}->{'deleted'} = 1;
 		}
-	&postfix::delete_mapping($virtual_type, $_[0]->{'virt'});
-	&postfix::regenerate_virtual_table();
+	if (!$_[0]->{'virt'}->{'deleted'}) {
+		&postfix::delete_mapping($virtual_type, $_[0]->{'virt'});
+		&postfix::regenerate_virtual_table();
+		$_[0]->{'virt'}->{'deleted'} = 1;
+		}
 	}
 elsif ($config{'mail_system'} == 2) {
 	# Just delete the qmail alias
+	return if ($_[0]->{'alias'}->{'deleted'});
 	&qmailadmin::delete_alias($_[0]->{'alias'});
+	$_[0]->{'alias'}->{'deleted'} = 1;
 	}
 elsif ($config{'mail_system'} == 4) {
 	# Remove pseudo Qmail user
@@ -1220,14 +1229,17 @@ elsif ($config{'mail_system'} == 5) {
 		}
 	}
 elsif ($config{'mail_system'} == 6) {
-	$_[0]->{'from'} =~ /^(\S*)\@(\S+)$/;
-	local ($box, $dom) = ($1 || "default", $2);
-	local $alias = { 'name' => "$box",
-			 'dom' => $dom };
-	&exim::delete_alias($alias);
+	# Delete Exim alias
+	if (!$_[0]->{'deleted'}) {
+		$_[0]->{'from'} =~ /^(\S*)\@(\S+)$/;
+		local ($box, $dom) = ($1 || "default", $2);
+		local $alias = { 'name' => "$box",
+				 'dom' => $dom };
+		&exim::delete_alias($alias);
+		$_[0]->{'deleted'} = 1;
+		}
 	}
 &execute_after_virtuser($_[0], 'DELETE_ALIAS');
-$_[0]->{'deleted'} = 1;		# Prevent double-deletion
 }
 
 # modify_virtuser(&old, &new)

@@ -1793,16 +1793,22 @@ if (!$_[0]->{'qmail'}) {
 	if ($_[0]->{'alias'}) {
 		if ($config{'mail_system'} == 1) {
 			# Delete Sendmail alias with same name as user
-			&lock_file($_[0]->{'alias'}->{'file'});
-			&sendmail::delete_alias($_[0]->{'alias'});
-			&unlock_file($_[0]->{'alias'}->{'file'});
+			if (!$_[0]->{'alias'}->{'deleted'}) {
+				&lock_file($_[0]->{'alias'}->{'file'});
+				&sendmail::delete_alias($_[0]->{'alias'});
+				&unlock_file($_[0]->{'alias'}->{'file'});
+				$_[0]->{'alias'}->{'deleted'} = 1;
+				}
 			}
 		elsif ($config{'mail_system'} == 0) {
 			# Delete Postfix alias with same name as user
-			&lock_file($_[0]->{'alias'}->{'file'});
-			&$postfix_delete_alias($_[0]->{'alias'});
-			&unlock_file($_[0]->{'alias'}->{'file'});
-			&postfix::regenerate_aliases();
+			if (!$_[0]->{'alias'}->{'deleted'}) {
+				&lock_file($_[0]->{'alias'}->{'file'});
+				&$postfix_delete_alias($_[0]->{'alias'});
+				&unlock_file($_[0]->{'alias'}->{'file'});
+				&postfix::regenerate_aliases();
+				$_[0]->{'alias'}->{'deleted'} = 1;
+				}
 			}
 		elsif ($config{'mail_system'} == 2 ||
 		       $config{'mail_system'} == 5) {
