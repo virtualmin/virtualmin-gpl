@@ -2854,6 +2854,10 @@ foreach my $d (&sort_indent_domains($doms)) {
 				push(@cols, $txt);
 				}
 			}
+		elsif ($c eq "created") {
+			# Creation date
+			push(@cols, &make_date($d->{'created'}, 1));
+			}
 		}
 	foreach $f (@table_features) {
 		push(@cols, $d->{$f} ? $text{'yes'} : $text{'no'});
