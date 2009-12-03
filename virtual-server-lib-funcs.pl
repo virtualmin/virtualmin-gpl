@@ -5615,8 +5615,8 @@ return join(" ", @ranges);
 sub setup_for_subdomain
 {
 local ($d, $subuser, $subd) = @_;
-if (!-d "$_[0]->{'home'}/domains") {
-	&make_dir_as_domain_user($d, "$_[0]->{'home'}/domains", 0755);
+if (!-d "$d->{'home'}/domains") {
+	&make_dir_as_domain_user($d, "$d->{'home'}/domains", 0755);
 	}
 }
 
@@ -10568,6 +10568,11 @@ foreach my $ad (@aliases, @subdoms) {
 			       &server_home_directory($ad, $d));
 	push(@doms, $ad);
 	push(@olddoms, $oldad);
+	}
+
+# Create domains sub-dir
+if (@aliases || @subdoms) {
+	&setup_for_subdomain($d);
 	}
 
 # Setup print function to include domain name
