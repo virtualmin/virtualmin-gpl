@@ -484,10 +484,13 @@ elsif ($got{'web'}) {
 	# Just adjust cgi-bin directory to match cPanel
 	local $conf = &apache::get_config();
 	local ($virt, $vconf) = &get_apache_virtual($dom, undef);
-	&apache::save_directive("ScriptAlias",
-		[ "/cgi-bin $dom{'home'}/public_html/cgi-bin" ], $vconf, $conf);
-	&flush_file_lines($virt->{'file'});
-	&register_post_action(\&restart_apache) if (!$got{'ssl'});
+	if ($virt) {
+		&apache::save_directive("ScriptAlias",
+			[ "/cgi-bin $dom{'home'}/public_html/cgi-bin" ],
+			$vconf, $conf);
+		&flush_file_lines($virt->{'file'});
+		&register_post_action(\&restart_apache) if (!$got{'ssl'});
+		}
 	&save_domain(\%dom);
 	&add_script_language_directives(\%dom, $tmpl, $dom{'web_port'});
 	}
