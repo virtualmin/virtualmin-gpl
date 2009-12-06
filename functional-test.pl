@@ -2347,6 +2347,44 @@ $wildcard_tests = [
 	  'fail' => 1,
         },
 
+	# Create a domain without SSL on the same IP
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', "sslsub2.".$test_domain ],
+		      [ 'desc', 'Test SSL shared clash' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ],
+		      [ 'parent', $test_domain ],
+		      [ 'shared-ip', '$SHARED_IP' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test SSL shared sub-domain 2' ],
+		      @create_args, ],
+        },
+
+	# Enable SSL on that domain, which should work
+	{ 'command' => 'enable-feature.pl',
+	  'args' => [ [ 'domain', "sslsub2.".$test_domain ],
+		      [ 'ssl' ] ],
+	},
+
+	# Try to create a domain on the same IP with a conflicting name,
+	# but without SSL yet
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'desc', 'Test SSL shared clash' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ],
+		      [ 'parent', $test_domain ],
+		      [ 'shared-ip', '$SHARED_IP' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test SSL shared clash' ],
+		      @create_args, ],
+        },
+
+	# Enable SSL on that conflicting domain, which should fail
+	{ 'command' => 'enable-feature.pl',
+	  'args' => [ [ 'domain', "sslsub2.".$test_domain ],
+		      [ 'ssl' ] ],
+	  'fail' => 1,
+	},
+
 	# Remove the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
