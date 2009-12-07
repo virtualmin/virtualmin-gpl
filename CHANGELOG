@@ -1195,3 +1195,4 @@ Backups and restores made by domain owners are now included in their bandwidth u
 Added Module Config options to limit the number of concurrent backups, which defaults to 3. This prevents system owners from overloading the machine with their scheduled backups.
 If Apache supports SNI, make the warning about clashing certs less dramatic.
 When a mailbox user is created, make his spam, virus and trash directories under Maildir so that they show up in the IMAP folder list by default.
+Backups and restores to and from S3 sub-directories are now supported.

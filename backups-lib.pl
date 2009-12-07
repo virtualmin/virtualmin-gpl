@@ -271,11 +271,7 @@ elsif ($mode == 2) {
 	}
 elsif ($mode == 3) {
 	# Connect to S3 service and create bucket
-	if ($path && $dirfmt) {
-		&$first_print($text{'backup_es3path'});
-		return (0, 0, $doms);
-		}
-	elsif (!$path && !$dirfmt) {
+	if (!$path && !$dirfmt) {
 		&$first_print($text{'backup_es3nopath'});
 		return (0, 0, $doms);
 		}
@@ -548,8 +544,9 @@ DOMAIN: foreach $d (@$doms) {
 			local $binfo = { $d->{'dom'} =>
 					 $donefeatures{$d->{'dom'}} };
 			$err = &s3_upload($user, $pass, $server,
-					  "$dest/$df", $df, $binfo,
-					  $s3_upload_tries);
+					  "$dest/$df",
+					  $path ? $path."/".$df : $df,
+					  $binfo, $s3_upload_tries);
 			}
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
@@ -867,7 +864,8 @@ elsif ($ok && $mode == 3 && (@destfiles || !$dirfmt)) {
 						      : $d->{'dom'};
 			local $binfo = { $n => $donefeatures{$n} };
 			$err = &s3_upload($user, $pass, $server, "$dest/$df",
-					  $df, $binfo, $s3_upload_tries);
+					  $path ? $path."/".$df : $df,
+					  $binfo, $s3_upload_tries);
 			if ($err) {
 				&$second_print(
 					&text('backup_uploadfailed', $err));
@@ -1835,8 +1833,10 @@ elsif ($mode == 3) {
 		if (!$si) {
 			return &text('restore_es3info', $dname);
 			}
+		local $tempfile = $si->{'file'};
+		$tempfile =~ s/^(\S+)\///;
 		local $err = &s3_download($user, $pass, $server,
-					  $si->{'file'}, "$temp/$si->{'file'}");
+					  $si->{'file'}, "$temp/$tempfile");
 		return $err if ($err);
 		}
 	}

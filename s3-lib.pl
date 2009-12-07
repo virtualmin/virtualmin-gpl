@@ -241,7 +241,8 @@ if ($response->http_response->code != 200) {
 	}
 local $rv = { };
 foreach my $f (@{$response->entries}) {
-	if ($f->{'Key'} =~ /^(\S+)\.info$/ && (!$path || $path eq $1)) {
+	if ($f->{'Key'} =~ /^(\S+)\.info$/ && (!$path || $path eq $1) ||
+	    $f->{'Key'} =~ /^((\S+)\/([^\/]+))\.info$/ && $path && $path eq $2){
 		# Found a valid info file .. get it
 		local $bfile = $1;
 		local ($bentry) = grep { $_->{'Key'} eq $bfile }
