@@ -907,14 +907,23 @@ foreach my $m (@mods) {
 	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
 	&$first_print(&text($opt ? 'scripts_optmod' : 'scripts_needmod',
 			    "<tt>$m</tt>"));
-	&$indent_print();
 
-	# Configure the domain's php.ini to load it, if needed
+	# Find the php.ini file
 	&foreign_require("phpini", "phpini-lib.pl");
 	local $mode = &get_domain_php_mode($d);
 	local $inifile = $mode eq "mod_php" ?
 			&get_global_php_ini($phpver, $mode) :
 			&get_domain_php_ini($d, $phpver);
+	if (!$inifile) {
+		# Could not find php.ini
+		&$second_print($mode eq "mod_php" ? $text{'scripts_noini'}
+						  : $text{'scripts_noini2'});
+		if ($opt) { next; }
+		else { return 0; }
+		}
+
+	# Configure the domain's php.ini to load it, if needed
+	&$indent_print();
 	local $pconf = &phpini::get_config($inifile);
 	local @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
 	local @exts = grep { $_->{'enabled'} } @allexts;
