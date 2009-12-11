@@ -12715,9 +12715,17 @@ if (!$d) {
 		}
 	}
 if ($d && $d->{'reseller'} && defined(&get_reseller)) {
+	# Domain has a reseller .. check for his logo
 	local $resel = &get_reseller($d->{'reseller'});
 	if ($resel->{'acl'}->{'logo'}) {
-		# Reseller has one - use it
+		$logo = $resel->{'acl'}->{'logo'};
+		$link = $resel->{'acl'}->{'link'};
+		}
+	}
+if (!$d && &reseller_admin()) {
+	# This user is a reseller .. use his logo
+	local $resel = &get_reseller($remote_user);
+	if ($resel->{'acl'}->{'logo'}) {
 		$logo = $resel->{'acl'}->{'logo'};
 		$link = $resel->{'acl'}->{'link'};
 		}
