@@ -34,6 +34,10 @@ else {
 	($clash) = grep { $_->{'user'} eq $in{'newuser'} ||
 		  &remove_userdom($_->{'user'}, $d) eq $in{'newuser'} } @dusers;
 	$clash && &error(&text('move_euserclash', $in{'newuser'}));
+
+	# Check if a user with that name exists anywhere
+	defined(getpwnam($in{'newuser'})) &&
+		&error(&text('move_euserclash2', $in{'newuser'}));
 	}
 
 &ui_print_unbuffered_header(&domain_in($d), $text{'move_title'}, "");

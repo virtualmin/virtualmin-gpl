@@ -3745,6 +3745,7 @@ move_newuser=Username if converting to parent
 move_newpass=Password if converting to parent
 move_failed=.. failed! See the error messages above for the reason why.
 move_euserclash=A user named $1 already exists in the virtual server being converted
+move_euserclash2=A user named $1 already exists
 
 newvalidate_title=Validate Virtual Servers
 newvalidate_ecannot=You are not allowed to validate servers

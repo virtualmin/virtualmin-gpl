@@ -95,6 +95,10 @@ else {
 	($clash) = grep { $_->{'user'} eq $newuser ||
 		  &remove_userdom($_->{'user'}, $d) eq $newuser } @dusers;
 	$clash && &usage("A user named $newuser already exists in $d->{'dom'}");
+
+	# Check if a user with that name exists anywhere
+	defined(getpwnam($newuser)) &&
+		&usage("A user named $newuser already exists");
 	}
 
 # Check if this is a sub-domain
