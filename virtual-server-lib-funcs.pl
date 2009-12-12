@@ -10570,11 +10570,6 @@ foreach my $ad (@aliases, @subdoms) {
 	push(@olddoms, $oldad);
 	}
 
-# Create domains sub-dir
-if (@aliases || @subdoms) {
-	&setup_for_subdomain($d);
-	}
-
 # Setup print function to include domain name
 sub first_html_withdom_reparent
 {
@@ -10593,8 +10588,8 @@ local %vital = map { $_, 1 } @vital_features;
 foreach $f (@features) {
 	local $mfunc = "modify_$f";
 	for(my $i=0; $i<@doms; $i++) {
+		$doing_dom = $doms[$i];
 		if ($doms[$i]->{$f} && ($config{$f} || $f eq "unix")) {
-			$doing_dom = $doms[$i];
 			local $main::error_must_die = 1;
 			eval {
 				if ($doms[$i]->{'alias'}) {
@@ -10626,6 +10621,11 @@ foreach $f (@features) {
 					# A vital feature failed .. give up
 					return 0;
 					}
+				}
+
+			# Setup domains dir for aliases/etc
+			if ($doms[$i] eq $d && $f eq "dir") {
+				&setup_for_subdomain($d);
 				}
 			}
 

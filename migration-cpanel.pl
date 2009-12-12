@@ -1012,10 +1012,12 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 		next if (!$fuser);
 		next if ($fuser eq "ftp" || $fuser eq $user ||
 			 $fuser eq $user."_logs");	# skip cpanel users
+		local $fullfuser = &userdom_name(lc($fuser), \%dom);
 		if ($fhome eq "/dev/null") {
 			$fhome = "$dom{'home'}/$config{'homes_dir'}/$fuser";
 			}
-		local $already = $usermap{$fuser};
+		local $already = $usermap{$fuser} ||
+				 $usermap{$fullfuser};
 		if ($already) {
 			# Turn on FTP for existing user
 			local $olduinfo = { %$already };
@@ -1026,7 +1028,7 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 			# Create new FTP-only user
 			local $fuinfo = &create_initial_user(\%dom, 0,
 							     $fhome eq $ht);
-			$fuinfo->{'user'} = $fuser;
+			$fuinfo->{'user'} = $fullfuser;
 			$fuinfo->{'pass'} = $fpass;
 			if ($fuinfo->{'webowner'}) {
 				$fuinfo->{'uid'} = $dom{'uid'};
