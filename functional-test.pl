@@ -804,6 +804,7 @@ $migrate_tests = [
 		      'migrated\s+4\s+mail\s+users',
 		      'created\s+1\s+list',
 		      'created\s+1\s+database',
+		      'created\s+1\s+aliases',
 		    ],
 	  'migrate' => 'cpanel',
 	  'timeout' => 180,

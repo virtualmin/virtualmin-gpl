@@ -219,7 +219,6 @@ else {
 	# Can't be sure, so guess
 	$waschild = $parent ? 1 : 0;
 	}
-#die "waschild=$waschild wasuser=$wasuser aliasdom=$aliasdom";
 
 # Check for Webalizer and AWstats
 local $webalizer = $waschild ? "$homesrc/tmp/webalizer/$dom"
@@ -845,7 +844,8 @@ if ($got{'mail'}) {
 				}
 			else {
 				# Just create an alias
-				local $virt = { 'from' => $name eq "*" ? "\@$dom" : $name,
+				local $virt = { 'from' => $name eq "*" ?
+						  "\@".$dom : $name."\@".$dom,
 						'to' => \@values };
 				local $clash = $gotvirt{$virt->{'from'}};
 				&delete_virtuser($clash) if ($clash);
@@ -1260,6 +1260,68 @@ foreach my $vf (readdir(VF)) {
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
 	push(@rvdoms, \%alias);
+
+	# Create parked domain aliases
+	&$first_print("Copying email aliases for addon domain $f ..");
+	local $acount = 0;
+	local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
+	open(VA, "$userdir/va/$vf");
+	while(<VA>) {
+		s/\r|\n//g;
+		s/^\s*#.*$//;
+		if (/^(\S+):\s*(.*)$/) {
+			local ($name, $v) = ($1, $2);
+			local @values;
+			if ($v !~ /,/ && $v !~ /"/) {
+				# A single destination, not quoted!
+				@values = ( $v );
+				}
+			else {
+				# Comma-separated alias destinations
+				while($v =~ /^\s*,?\s*"(\|)([^"]+)"(.*)$/ ||
+				      $v =~ /^\s*,?\s*()"([^"]+)"(.*)$/ ||
+				      $v =~ /^\s*,?\s*(\|)"([^"]+)"(.*)$/ ||
+				      $v =~ /^\s*,?\s*()([^,\s]+)(.*)$/) {
+					push(@values, $1.$2);
+					$v = $3;
+					}
+				}
+			local $mailman = 0;
+			foreach my $v (@values) {
+				if ($v =~ /:fail:\s+(.*)/) {
+					# Fix bounce alias
+					$v = "BOUNCE $1";
+					}
+				local ($atype, $aname) = &alias_type($v, $name);
+				if ($atype == 4 && $aname =~ /autorespond\s+(\S+)\@(\S+)\s+(\S+)/) {
+					# Turn into Virtualmin auto-responder
+					$v = "| $module_config_directory/autoreply.pl $3/$name $1";
+					&set_ownership_permissions(
+						undef, undef, 0755,
+						$3, "$3/$name");
+					}
+				elsif ($atype == 4 && $aname =~ /mailman/) {
+					$mailman++;
+					}
+				}
+			# Don't create aliases for mailman lists
+			next if ($mailman || $name =~ /^owner-/);
+
+			# Already done a domain forward
+			next if ($name eq "*");
+
+			# Just create an alias
+			local $virt = { 'from' => $name eq "*" ? "\@".$vf :
+							$name."\@".$vf,
+					'to' => \@values };
+			local $clash = $gotvirt{$virt->{'from'}};
+			&delete_virtuser($clash) if ($clash);
+			&create_virtuser($virt);
+			$acount++;
+			}
+		}
+	close(VA);
+	&$second_print(".. done (migrated $acount aliases)");
 	}
 
 
