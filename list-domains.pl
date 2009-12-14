@@ -32,7 +32,8 @@ can use the C<--any-reseller> option.
 
 To get a list of domain names only, use the C<--name-only> parameter. To get
 just Virtualmin domain IDs, use C<--id-only>. These are useful when iterating
-through domains in a script.
+through domains in a script. You can also use C<--user-only> to output only
+usernames, or C<--home-only> to get just home directories.
 
 =cut
 
@@ -66,6 +67,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--id-only") {
 		$idonly = 1;
+		}
+	elsif ($a eq "--user-only") {
+		$useronly = 1;
+		}
+	elsif ($a eq "--home-only") {
+		$homeonly = 1;
 		}
 	elsif ($a eq "--domain") {
 		push(@domains, shift(@ARGV));
@@ -494,6 +501,18 @@ elsif ($idonly) {
 		print $d->{'id'},"\n";
 		}
 	}
+elsif ($useronly) {
+	# Just usernames
+	foreach $d (@doms) {
+		print $d->{'user'},"\n";
+		}
+	}
+elsif ($homeonly) {
+	# Just home directories
+	foreach $d (@doms) {
+		print $d->{'home'},"\n";
+		}
+	}
 else {
 	# Just show summary table
 	$fmt = "%-30.30s %-15.15s %-30.30s\n";
@@ -509,7 +528,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the virtual servers on this system.\n";
 print "\n";
-print "virtualmin list-domains [--multiline | --name-only | --id-only]\n";
+print "virtualmin list-domains [--multiline | --name-only | --id-only |\n";
+print "                         --user-only | --home-only]\n";
 print "                        [--domain name]*\n";
 print "                        [--user name]*\n";
 print "                        [--id number]*\n";
