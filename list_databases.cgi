@@ -165,7 +165,7 @@ if (!$d->{'parent'}) {
 			push(@opts, [ 2, $text{'databases_enc'} ]);
 			}
 		push(@opts, [ 0, $text{'databases_newpass'},
-			      &ui_textbox($f,
+			      &ui_password($f,
                                  $pw eq $d->{'pass'} &&
 				 !$tmpl->{$f.'_nopass'} ? "" : $pw, 20) ]);
 		if (@opts > 1) {
