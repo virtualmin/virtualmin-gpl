@@ -112,7 +112,7 @@ if ($config{'display_max'} && @doms > $config{'display_max'}) {
 	}
 elsif (@doms) {
 	# Show domains in a table
-	print &ui_form_start("domain_form.cgi");
+	print &ui_form_start("domain_form.cgi", "post");
 	if ($current_theme ne "virtual-server-theme" &&
 	    !$main::nocreate_virtualmin_menu) {
 		&create_links(1);
