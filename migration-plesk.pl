@@ -1182,6 +1182,10 @@ eval {
 	$ref = $xs->XMLin($file);
 	};
 $ref || return "Failed to read XML file : $@";
+if ($ref->{'client'}) {
+	# Expand <client> sub-object
+	$ref = $ref->{'client'};
+	}
 return $ref;
 }
 
