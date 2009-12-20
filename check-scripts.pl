@@ -115,7 +115,7 @@ foreach $s (@scripts) {
 	$url = undef;
 	if (defined(&$lfunc)) {
 		foreach $v (@{$script->{'versions'}}) {
-			($url, $re) = &$lfunc($v);
+			($url, $re, $prefix, $suffix) = &$lfunc($v);
 			next if (!$url);
 			print "Checking $script->{'name'} website for $v ..\n";
 			($host, $port, $page, $ssl) = &parse_http_url($url);
@@ -138,7 +138,7 @@ foreach $s (@scripts) {
 			else {
 				# Using regexp
 				while($data =~ /$re(.*)/is) {
-					push(@vers, $1);
+					push(@vers, $prefix.$1.$suffix);
 					$data = $2;
 					}
 				}
