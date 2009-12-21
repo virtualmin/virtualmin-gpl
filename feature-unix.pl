@@ -383,6 +383,7 @@ sub validate_unix
 local ($d) = @_;
 local $tmpl = &get_template($d->{'template'});
 return undef if ($d->{'parent'});	# sub-servers have no user
+&require_useradmin();
 
 # Make sure user exists and has right UID
 local @users = &list_all_users_quotas(0);
@@ -403,11 +404,13 @@ if (&mail_system_needs_group() || $d->{'gid'} == $d->{'ugid'}) {
 	}
 
 # Make sure encrypted password matches
-local $encmd5 = &encrypt_user_password($user, $d->{'pass'});
-local $encdes = &unix_crypt($d->{'pass'}, $user->{'pass'});
-if ($user->{'pass'} ne $encmd5 && $user->{'pass'} ne $encdes &&
-    !$d->{'disabled'}) {
-	return &text('validate_eenc', $user->{'user'});
+if (!$cannot_rehash_password) {
+	local $encmd5 = &encrypt_user_password($user, $d->{'pass'});
+	local $encdes = &unix_crypt($d->{'pass'}, $user->{'pass'});
+	if ($user->{'pass'} ne $encmd5 && $user->{'pass'} ne $encdes &&
+	    !$d->{'disabled'}) {
+		return &text('validate_eenc', $user->{'user'});
+		}
 	}
 
 # Compare the domain's user and group quotas with reality

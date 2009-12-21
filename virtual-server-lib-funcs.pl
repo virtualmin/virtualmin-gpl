@@ -30,9 +30,14 @@ if (!$require_useradmin++) {
 	&foreign_require("useradmin", "user-lib.pl");
 	%uconfig = &foreign_config("useradmin");
 	$home_base = &resolve_links($config{'home_base'} || $uconfig{'home_base'});
+	$cannot_rehash_password = 0;
 	if ($config{'ldap'}) {
 		&foreign_require("ldap-useradmin", "ldap-useradmin-lib.pl");
 		$usermodule = "ldap-useradmin";
+		if ($ldap_useradmin::config{'md5'} == 3 ||
+		    $ldap_useradmin::config{'md5'} == 4) {
+			$cannot_rehash_password = 1;
+			}
 		}
 	else {
 		$usermodule = "useradmin";
