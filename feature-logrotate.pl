@@ -57,8 +57,12 @@ if (@logs) {
 		# Use automatic configurtation
 		local $apachectl = $apache::config{'apachectl_path'} ||
 				   &has_command("apachectl") ||
-				   &has_command("apache2ctl");
+				   &has_command("apache2ctl") ||
+				   "apachectl";
+		local $apply_cmd = $apache::config{'apply_cmd'};
+		$apply_cmd = undef if ($apply_cmd eq 'restart');
 		local $script = $apache::config{'graceful_cmd'} ||
+				$apply_cmd ||
 				"$apachectl graceful";
 		$lconf->{'members'} = [
 				{ 'name' => 'rotate',
