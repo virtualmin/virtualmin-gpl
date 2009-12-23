@@ -190,6 +190,11 @@ WEBMIN_VAR=$var_directory
 PERLLIB=$root_directory
 export WEBMIN_CONFIG WEBMIN_VAR
 cd $module_root_directory
+id -a | grep uid=0 >/dev/null
+if [ "\$?" != 0 ]; then
+	echo "$api_helper_command must be run as root"
+	exit 2
+fi
 if [ "\$1" = "" -o "\$1" = "help" -a "\$2" = "" -o "\$1" = "--help" -a "\$2" = "" -o "\$1" = "-help" -a "\$2" = "" ]; then
 	echo "usage: $api_helper_command <command> [args..]"
 	echo "   or: $api_helper_command help <command>"
