@@ -2381,7 +2381,7 @@ $wildcard_tests = [
 
 	# Enable SSL on that conflicting domain, which should fail
 	{ 'command' => 'enable-feature.pl',
-	  'args' => [ [ 'domain', "sslsub2.".$test_domain ],
+	  'args' => [ [ 'domain', $test_subdomain ],
 		      [ 'ssl' ] ],
 	  'fail' => 1,
 	},

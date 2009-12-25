@@ -79,6 +79,7 @@ else {
 	}
 
 # Do it for all domains
+$failed = 0;
 DOMAIN: foreach $d (@doms) {
 	&$first_print("Updating server $d->{'dom'} ..");
 	@dom_features = $d->{'alias'} ? @alias_features :
@@ -100,11 +101,13 @@ DOMAIN: foreach $d (@doms) {
 	$derr = &virtual_server_depends(\%newdom, undef, $oldd);
 	if ($derr) {
 		&$second_print($derr);
+		$failed = 1;
 		next;
 		}
 	$cerr = &virtual_server_clashes(\%newdom, \%check);
 	if ($cerr) {
 		&$second_print($cerr);
+		$failed = 1;
 		next;
 		}
 
@@ -116,6 +119,7 @@ DOMAIN: foreach $d (@doms) {
 		if ($check{$f} && !&plugin_call($f, "feature_suitable",
                                         $parentdom, $aliasdom, $subdom)) {
 			&$second_print(".. the feature $f cannot be enabled for this type of virtual server");
+			$failed = 1;
 			next DOMAIN;
 			}
 		}
@@ -128,6 +132,7 @@ DOMAIN: foreach $d (@doms) {
 			}
 		if (!$skipwarnings) {
 			&$second_print(".. this virtual server will not be updated unless the --skip-warnings flag is given");
+			$failed = 1;
 			next;
 			}
 		}
@@ -138,6 +143,7 @@ DOMAIN: foreach $d (@doms) {
 	&reset_domain_envs($d);
 	if (defined($merr)) {
 		&$second_print(&text('save_emaking', "<tt>$merr</tt>"));
+		$failed = 1;
 		next;
 		}
 
@@ -172,6 +178,7 @@ DOMAIN: foreach $d (@doms) {
 
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV);
+exit($failed);
 
 sub usage
 {
