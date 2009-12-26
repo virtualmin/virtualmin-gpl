@@ -10,6 +10,9 @@ while(<STDIN>) {
 	elsif (/^To:\s*(.*)/) {
 		$to = $1;
 		}
+	elsif (/^X-Spam-Status:\s*Yes/) {
+		$spam = 1;
+		}
 	last if ($from && $to);
 	}
 while(read(STDIN, $buf, 1024) > 0) {
@@ -24,7 +27,8 @@ $dest = $ENV{'LASTFOLDER'};
 if ($dest =~ /^\S+\/sendmail.*\s(\S+)$/) {
 	$dest = $1;
 	}
-$mode = $ENV{'VIRUSMODE'} ? "Virus" : $ENV{'SPAMMODE'} ? "Spam" : "None";
+$mode = $ENV{'VIRUSMODE'} ? "Virus" :
+	$ENV{'SPAMMODE'} || $spam ? "Spam" : "None";
 print "Time:$now From:$from To:$to User:$ENV{'LOGNAME'} Size:$size Dest:$dest Mode:$mode\n";
 
 # address_parts(string)
