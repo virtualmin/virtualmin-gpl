@@ -106,6 +106,10 @@ print &ui_hidden_table_start($text{'plan_header3'}, 'width=100%', 2,
 
 # Edit capabilities
 %caps = map { $_, 1 } split(/\s+/, $plan->{'capabilities'});
+if (!$plan->{'capabilities'}) {
+	%caps = map { $_, 1 }
+		    &list_automatic_capabilities($plan->{'domslimit'});
+	}
 $etable = &ui_radio('capabilities_def',
 		    $plan->{'capabilities'} ? 0 : 1,
 		    [ [ 1, $text{'tmpl_capauto'} ],

@@ -279,14 +279,26 @@ else {
 	$dom->{'emailto'} = $dom->{'user'}.'@'.&get_system_hostname();
 	}
 # Set edit limits based on ability to edit domains
+local %acaps = map { $_, 1 } &list_automatic_capabilities($dom->{'domslimit'});
 foreach my $ed (@edit_limits) {
 	if (!defined($dom->{'edit_'.$ed})) {
-		$dom->{'edit_'.$ed} = $ed eq "users" || $ed eq "aliases" ||
-				      $ed eq "html" || $ed eq "passwd" ? 1 :
-				      $dom->{'domslimit'} ? 1 : 0;
+		$dom->{'edit_'.$ed} = $acaps{$ed} || 0;
 		}
 	}
 delete($dom->{'pass_set'});	# Only set by callers for modify_* functions
+}
+
+# list_automatic_capabilities(can-create-domains)
+# Returns a list of default capabilities for a domain owner or plan
+sub list_automatic_capabilities
+{
+local ($cancreate) = @_;
+if ($cancreate) {
+	return @edit_limits;
+	}
+else {
+	return ( 'users', 'aliases', 'html', 'passwd' );
+	}
 }
 
 # get_domain_by(field, value, [field, value, ...])
