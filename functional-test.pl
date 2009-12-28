@@ -1137,6 +1137,14 @@ $aliasdom_tests = [
 	  'grep' => 'Test home page',
 	},
 
+	# Test HTTP get of alias domains
+	{ 'command' => $wget_command.'http://'.$test_parallel_domain1,
+	  'grep' => 'Test home page',
+	},
+	{ 'command' => $wget_command.'http://'.$test_parallel_domain2,
+	  'grep' => 'Test home page',
+	},
+
 	# Check FTP login
 	{ 'command' => $wget_command.
 		       'ftp://'.$test_domain_user.':smeg@localhost/',
@@ -1252,12 +1260,46 @@ $backup_tests = [
 		      @create_args, ],
 	},
 
+	# Create an alias domain to be included, with a dir
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_parallel_domain1 ],
+		      [ 'alias', $test_domain ],
+		      [ 'desc', 'Test alias domain with dir' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      @create_args, ],
+	},
+
+	# Create an alias domain to be included, without a dir
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_parallel_domain2 ],
+		      [ 'alias', $test_domain ],
+		      [ 'desc', 'Test alias domain without dir' ],
+		      [ 'web' ], [ 'dns' ],
+		      @create_args, ],
+	},
+
+	# Test that everything works initially
+	@post_restore_tests,
+
 	# Backup to a temp file
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
+		      [ 'domain', $test_parallel_domain1 ],
+		      [ 'domain', $test_parallel_domain2 ],
 		      [ 'all-features' ],
 		      [ 'dest', $test_backup_file ] ],
+	},
+
+	# Backup to a temp dir
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'domain', $test_parallel_domain1 ],
+		      [ 'domain', $test_parallel_domain2 ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $test_backup_dir ] ],
 	},
 
 	# Delete web page
@@ -1268,11 +1310,13 @@ $backup_tests = [
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
+		      [ 'domain', $test_parallel_domain1 ],
+		      [ 'domain', $test_parallel_domain2 ],
 		      [ 'all-features' ],
 		      [ 'source', $test_backup_file ] ],
 	},
 
-	# Test that everything will works
+	# Test that everything still works
 	@post_restore_tests,
 
 	# Delete the domain, in preparation for re-creation
@@ -1284,11 +1328,31 @@ $backup_tests = [
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
+		      [ 'domain', $test_parallel_domain1 ],
+		      [ 'domain', $test_parallel_domain2 ],
 		      [ 'all-features' ],
 		      [ 'source', $test_backup_file ] ],
 	},
 
 	# Run various tests again
+	@post_restore_tests,
+
+	# Delete the domain, in preparation for re-creation
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Re-create from backup dir
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'domain', $test_parallel_domain1 ],
+		      [ 'domain', $test_parallel_domain2 ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_dir ] ],
+	},
+
+	# Run various tests yet again
 	@post_restore_tests,
 
 	# Cleanup the domain
