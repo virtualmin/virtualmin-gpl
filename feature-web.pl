@@ -1230,7 +1230,32 @@ return @dirs;
 # ServerAlias lines for alias domains
 sub backup_web
 {
-return 1 if ($_[0]->{'alias'} && $_[0]->{'alias_mode'});
+if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
+	# For an alias domain, just save the old ServerAlias entries
+	&$first_print($text{'backup_apachecp2'});
+	local $alias = &get_domain($_[0]->{'alias'});
+	local ($pvirt, $pconf) = &get_apache_virtual($alias->{'dom'},
+						     $alias->{'web_port'});
+	if (!$pvirt) {
+		&$second_print($text{'setup_ewebalias'});
+		return 0;
+		}
+	local @aliasnames;
+	foreach my $sa (&apache::find_directive_struct("ServerAlias", $pconf)) {
+		foreach my $w (@{$sa->{'words'}}) {
+			if ($w eq $_[0]->{'dom'} ||
+			    $w =~ /^([^\.]+)\.(\S+)/ && $2 eq $_[0]->{'dom'}) {
+				push(@aliasnames, $w);
+				}
+			}
+		}
+	&open_tempfile(FILE, ">$_[1]");
+	foreach my $a (@aliasnames) {
+		&print_tempfile(FILE, $a,"\n");
+		}
+	&close_tempfile(FILE);
+	return 1;
+	}
 &$first_print($text{'backup_apachecp'});
 local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 					    $_[0]->{'web_port'});
@@ -1242,6 +1267,7 @@ if ($virt) {
 	&open_tempfile(FILE, ">$_[1]");
 	foreach $l (@$lref[$virt->{'line'} .. $virt->{'eline'}]) {
 		if ($l =~ /^\s*ServerAlias\s+(.*)/i) {
+			# Exclude ServerAlias entries for alias domains
 			local @sa = split(/\s+/, $1);
 			@sa = grep { !($adoms{$_} ||
 				       /^([^\.]+)\.(\S+)/ && $adoms{$2}) } @sa;
@@ -1278,7 +1304,26 @@ else {
 # change the actual <Virtualhost> lines!
 sub restore_web
 {
-return 1 if ($_[0]->{'alias'} && $_[0]->{'alias_mode'});
+if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
+	# Just re-add ServerAlias entries if missing
+	&$first_print($text{'restore_apachecp2'});
+	local $alias = &get_domain($_[0]->{'alias'});
+	local ($pvirt, $pconf) = &get_apache_virtual($alias->{'dom'},
+						     $alias->{'web_port'});
+	if (!$pvirt) {
+		&$second_print($text{'setup_ewebalias'});
+		return 0;
+		}
+	local @sa = &apache::find_directive("ServerAlias", $pconf);
+	local $srclref = &read_file_lines($_[1], 1);
+	push(@sa, @$srclref);
+	&unflush_file_lines($_[1]);
+	@sa = &unique(@sa);
+	&apache::save_directive("ServerAlias", \@sa, $pconf, $conf);
+	&flush_file_lines($pvirt->{'file'});
+	&$second_print($text{'setup_done'});
+	return 1;
+	}
 &$first_print($text{'restore_apachecp'});
 &obtain_lock_web($_[0]);
 local $rv;
