@@ -54,7 +54,7 @@ for($i=0; $i<@stats; $i++) {
 		$units = "GB";
 		}
 	elsif ($stat eq 'load' || $stat eq 'load5' || $stat eq 'load15') {
-		$units = $text{'history_pc'};
+		$units = $text{'history_cores'};
 		}
 	elsif ($stat eq 'tx' || $stat eq 'rx') {
 		$units = $text{'history_kbsec'};
@@ -65,9 +65,10 @@ for($i=0; $i<@stats; $i++) {
 	else {
 		$units = undef;
 		}
+	$sttxt = $text{'history_stat_'.$stat};
 	push(@statnames, "<font color=$color>".
-			 $text{'history_stat_'.$stat}.
-			 ($units ? " ($units)" : "").
+			 ($units ? &text('history_units', $sttxt, $units)
+				 : $sttxt).
 			 "</font>");
 	}
 print "<b>",&text('history_showing', join(", ", @statnames)),"</b><p>\n";

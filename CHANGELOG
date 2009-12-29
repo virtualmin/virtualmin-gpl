@@ -1200,3 +1200,4 @@ When a mailbox user is created, make his spam, virus and trash directories under
 Backups and restores to and from S3 sub-directories are now supported.
 ---- Changes since 3.76 ----
 Fixed the backup and restore for alias websites, which were previously not always restored correctly.
+Changed statistics graphs to show load average in the regular scale, instead of converted to a percentage.

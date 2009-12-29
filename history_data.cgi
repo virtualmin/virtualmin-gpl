@@ -58,9 +58,6 @@ for($i=0; $i<scalar(@$first); $i++) {
 			elsif ($stat eq 'diskused') {
 				$v /= 1024*1024*1024;
 				}
-			elsif ($stat =~ /^load(|5|15)$/) {
-				$v *= 100;
-				}
 			elsif ($stat eq 'tx' || $stat eq 'rx') {
 				$v /= 1024;
 				}
