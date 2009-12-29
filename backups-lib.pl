@@ -344,15 +344,6 @@ else {
 		&$first_print($text{'backup_ehomeformat2'});
 		return (0, 0, $doms);
 		}
-	foreach my $d (@$doms) {
-		if (!$d->{'dir'} && !$skip) {
-			#&$first_print(&text('backup_ehomeformat3',
-			#		    &show_domain_name($d)));
-			#return (0, 0, $doms);
-			}
-		}
-	# Skip any that don't have directories
-	#$doms = [ grep { $_->{'dir'} } @$doms ];
 	}
 
 # Work out where to write the final tar files to
@@ -438,6 +429,12 @@ DOMAIN: foreach $d (@$doms) {
 					   $d->{'home'});
 		$d->{'dir'} = 1;
 		push(@cleanuphomes, $d);
+		}
+	elsif ($homefmt && $d->{'dir'} && !-d $d->{'home'}) {
+		# Missing home dir which we need, so create it
+		&make_dir($d->{'home'}, 0755);
+		&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, undef,
+					   $d->{'home'});
 		}
 
 	if ($homefmt) {
