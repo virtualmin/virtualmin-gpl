@@ -1201,3 +1201,4 @@ Backups and restores to and from S3 sub-directories are now supported.
 ---- Changes since 3.76 ----
 Fixed the backup and restore for alias websites, which were previously not always restored correctly.
 Changed statistics graphs to show load average in the regular scale, instead of converted to a percentage.
+Added --autoreply-start, --autoreply-end and --autoreply-period flags to the modify-user API command, for changing other autoresponder settings.

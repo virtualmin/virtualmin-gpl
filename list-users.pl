@@ -188,6 +188,14 @@ foreach $d (@doms) {
 					$msg =~ s/\n/\\n/g;
 					print "    Autoreply message: $msg\n";
 					}
+				if ($simple->{'autoreply_start'}) {
+					print "    Autoreply start: ",
+					      &time_to_date($simple->{'autoreply_start'})."\n";
+					}
+				if ($simple->{'autoreply_end'}) {
+					print "    Autoreply end: ",
+					      &time_to_date($simple->{'autoreply_end'})."\n";
+					}
 				if ($simple->{'period'}) {
 					print "    Autoreply period: ",
 					      "$simple->{'period'}\n";

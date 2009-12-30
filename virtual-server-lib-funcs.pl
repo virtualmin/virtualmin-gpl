@@ -13364,6 +13364,37 @@ foreach my $h ("www.$d->{'dom'}", $d->{'dom'}) {
 return $d->{'dom'};	# Fallback
 }
 
+# date_to_time(date-string)
+# Convert a date string like YYYY-MM-DD or -5 to a Unix time
+sub date_to_time
+{
+local ($date) = @_;
+local $rv;
+if ($date =~ /^(\d{4})-(\d+)-(\d+)$/) {
+	# Date only
+	$rv = timelocal(0, 0, 0, $3, $2-1, $1-1900);
+	}
+elsif ($date =~ /^\-(\d+)$/) {
+	# Some days ago
+	$rv = time()-($1*24*60*60);
+	}
+elsif ($date =~ /^\+(\d+)$/) {
+	# Some days in the future
+	$rv = time()+($1*24*60*60);
+	}
+$rv || &usage("Date spec must be like 2007-01-20 or -5 (days ago)");
+return $rv;
+}
+
+# time_to_date(unix-time)
+# Convert a Unix time to a date formatted in YYYY-MM-DD
+sub time_to_date
+{
+local ($secs) = @_;
+local @tm = localtime($secs);
+return sprintf "%4.4d-%2.2d-%2.2d", $tm[5]+1900, $tm[4]+1, $tm[3];
+}
+
 # load_plugin_libraries([plugin, ...])
 # Call foreign_require on some or all plugins, just once
 sub load_plugin_libraries

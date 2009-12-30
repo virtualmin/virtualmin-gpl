@@ -200,6 +200,26 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-autoreply") {
 		$autotext = "";
 		}
+	elsif ($a eq "--autoreply-start") {
+		$autostart = &date_to_time(shift(@ARGV));
+		}
+	elsif ($a eq "--no-autoreply-start") {
+		$autostart = '';
+		}
+	elsif ($a eq "--autoreply-end") {
+		$autoend = &date_to_time(shift(@ARGV));
+		}
+	elsif ($a eq "--no-autoreply-end") {
+		$autoend = '';
+		}
+	elsif ($a eq "--autoreply-period") {
+		$autoperiod = shift(@ARGV);
+		$autoperiod > 0 && $autoperiod =~ /^\d+$/ ||
+			&usage("Autoreply period must be a number in minutes");
+		}
+	elsif ($a eq "--no-autoreply-period") {
+		$autoperiod = '';
+		}
 	else {
 		&usage();
 		}
@@ -398,13 +418,23 @@ if (!$user->{'noalias'} && ($user->{'email'} || $user->{'noprimary'})) {
 			}
 		}
 
+	# Update autoreply settings
+	if ($simple->{'auto'}) {
+		$simple->{'autoreply_start'} = $autostart
+			if (defined($autostart));
+		$simple->{'autoreply_end'} = $autoend
+			if (defined($autoend));
+		$simple->{'period'} = $autoperiod
+			if (defined($autoperiod));
+		}
+
 	if (@{$user->{'to'}} == 1 && $simple->{'tome'}) {
 		# If forwarding is just to the user's # mailbox, then that is
 		# like not forwarding at all
 		$user->{'to'} = undef;
 		}
 	&save_simple_alias($d, $user, $simple);
-	if ($autotext) {
+	if ($autotext || $autostart || $autoend || $autoperiod) {
 		&write_simple_autoreply($d, $simple);
 		}
 	}
@@ -494,6 +524,9 @@ print "                      [--add-forward address] ...\n";
 print "                      [--del-forward address] ...\n";
 print "                      [--local | --no-local]\n";
 print "                      [--autoreply \"messsage\" | --no-autoreply]\n";
+print "                      [--autoreply-start time | --no-autoreply-start]\n";
+print "                      [--autoreply-end time | --no-autoreply-end]\n";
+print "                      [--autoreply-period mins | --no-autoreply-period]\n";
 exit(1);
 }
 

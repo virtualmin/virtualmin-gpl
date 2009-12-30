@@ -119,24 +119,6 @@ foreach my $d (@doms) {
 		}
 	}
 
-# date_to_time(date-string)
-# Convert a date string like YYYY-MM-DD or -5 to a Unix time
-sub date_to_time
-{
-local ($date) = @_;
-local $rv;
-if ($date =~ /^(\d{4})-(\d+)-(\d+)$/) {
-	# Date only
-	$rv = timelocal(0, 0, 0, $3, $2-1, $1-1900);
-	}
-elsif ($date =~ /^\-(\d+)$/) {
-	# Some days ago
-	$rv = time()-($1*24*60*60);
-	}
-$rv || &usage("Date spec must be like 2007-01-20 or -5 (days ago)");
-return $rv;
-}
-
 sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
