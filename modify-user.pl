@@ -56,6 +56,12 @@ To setup an autoreply message, use the C<--autoreply> flag followed by
 the message content. To turn off the autoresponder, use the C<--no-autoreply>
 parameter.
 
+To control when the autoreply is sent, use the C<--autoreply-start> flag
+followed by a date in YYYY-MM-DD format, like 2010-04-01. To set the date on
+which is stops being sent, use the C<--autoreply-end> flag. To limit the rate
+of replies to the same address, use the C<--autoreply-period> flag followed by
+a number in minutes. 
+
 =cut
 
 package virtual_server;
