@@ -8443,9 +8443,12 @@ sub random_password
 &require_useradmin();
 local $random_password;
 local $len = $_[0] || $config{'passwd_length'} || 15;
+local @passwd_chars = split(//, $config{'passwd_chars'});
+if (!@passwd_chars) {
+	@passwd_chars = @useradmin::random_password_chars;
+	}
 foreach (1 .. $len) {
-	$random_password .= $useradmin::random_password_chars[
-			rand(scalar(@useradmin::random_password_chars))];
+	$random_password .= $passwd_chars[rand(scalar(@passwd_chars))];
 	}
 return $random_password;
 }
