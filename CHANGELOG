@@ -1199,7 +1199,7 @@ If Apache supports SNI, make the warning about clashing certs less dramatic.
 When a mailbox user is created, make his spam, virus and trash directories under Maildir so that they show up in the IMAP folder list by default.
 Backups and restores to and from S3 sub-directories are now supported.
 ---- Changes since 3.76 ----
-Updated the Plans script installer to version 8.1.9, and ZenPhoto to 1.2.8_RC1.
+Updated the Plans script installer to version 8.1.9, Dolibarr to 2.7.1, and ZenPhoto to 1.2.8_RC1.
 Fixed the backup and restore for alias websites, which were previously not always restored correctly.
 Changed statistics graphs to show load average in the regular scale, instead of converted to a percentage.
 Added --autoreply-start, --autoreply-end and --autoreply-period flags to the modify-user API command, for changing other autoresponder settings.
