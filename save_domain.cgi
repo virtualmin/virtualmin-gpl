@@ -32,8 +32,8 @@ if ($config{'bw_active'} && !$d->{'parent'} && &can_edit_bandwidth()) {
 $d->{'db'} = &database_name($d) if (!$d->{'db'});
 if ($d->{'template'} != $tmpl->{'id'}) {
 	$d->{'template'} = $tmpl->{'id'};
-	if (!&master_admin() && !&reseller_admin() && !$t->{'for_users'} ||
-	    !&can_use_template($t)) {
+	if (!&master_admin() && !&reseller_admin() && !$tmpl->{'for_users'} ||
+	    !&can_use_template($tmpl)) {
 		# Cannot use this template!
 		&error($text{'save_etemplate'});
 		}
