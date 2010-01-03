@@ -3101,6 +3101,8 @@ resel_edefnsnone=No reseller nameservers entered
 resel_edefnsip=Nameserver '$1' is an IP address, not a hostname
 resel_edefns=Nameserver '$1' is not valid
 resel_clone=Clone Reseller
+resel_domsopts=Unowned domains
+resel_domssel=Owned by this reseller
 
 licence_err=A problem was detected with your Virtualmin license :
 licence_soon=Notice - Your Virtualmin license will expire in $1 days.
