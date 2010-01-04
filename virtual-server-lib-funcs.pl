@@ -10533,6 +10533,12 @@ $d->{'parent'} = undef;
 $d->{'user'} = $newuser;
 $d->{'group'} = $newuser;
 $d->{'pass'} = $newpass;
+if (!$d->{'mysql'}) {
+	delete($d->{'mysql_user'});
+	}
+if (!$d->{'postgres'}) {
+	delete($d->{'postgres_user'});
+	}
 local (%gtaken, %taken);
 &build_group_taken(\%gtaken);
 &build_taken(\%taken);
