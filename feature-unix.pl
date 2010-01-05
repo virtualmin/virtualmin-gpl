@@ -452,21 +452,25 @@ sub check_unix_clash
 return 0 if ($_[0]->{'parent'});	# user already exists!
 if (!$_[1] || $_[1] eq 'user') {
 	# Check for username clash
-	return 1 if (defined(getpwnam($_[0]->{'user'})));
+	return &text('setup_eunixclash1', $_[0]->{'user'})
+		if (defined(getpwnam($_[0]->{'user'})));
 	}
 if (!$_[1] || $_[1] eq 'group') {
 	# Check for group name clash
-	return 1 if ($_[0]->{'group'} &&
+	return &text('setup_eunixclash2', $_[0]->{'group'})
+		 if ($_[0]->{'group'} &&
 		     defined(getgrnam($_[0]->{'group'})));
 	}
 if (!$_[1] || $_[1] eq 'uid') {
 	# Check for UID clash
-	return 1 if ($_[0]->{'uid'} &&
+	return &text('setup_eunixclash3', $_[0]->{'uid'})
+		 if ($_[0]->{'uid'} &&
 		     defined(getpwuid($_[0]->{'uid'})));
 	}
 if (!$_[1] || $_[1] eq 'gid') {
 	# Check for GID clash
-	return 1 if ($_[0]->{'gid'} &&
+	return &text('setup_eunixclash4', $_[0]->{'gid'})
+		 if ($_[0]->{'gid'} &&
 		     defined(getgrgid($_[0]->{'gid'})));
 	}
 return 0;
