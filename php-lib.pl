@@ -423,6 +423,7 @@ local $dirvar = $mode eq "fcgid" ? "PWD" : "DOCUMENT_ROOT";
 local $pub = &public_html_dir($d);
 local $children = &get_domain_php_children($d);
 foreach my $v (&list_available_php_versions($d, $mode)) {
+	next if (!$v->[1]);	# No executable available?!
 	&open_tempfile_as_domain_user($d, PHP, ">$dest/php$v->[0].$suffix");
 	local $t = "php".$v->[0].$suffix;
 	if ($tmpl->{$t} && $tmpl->{$t} ne 'none') {
