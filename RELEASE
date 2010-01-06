@@ -40,7 +40,7 @@
 	~/webmin.com/create-update-sigs.pl
 
  x Add to website
-	x Mention plugins too
+	- Mention plugins too
 
  x Add to freshmeat.net
 
