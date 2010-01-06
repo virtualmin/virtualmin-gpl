@@ -28,3 +28,8 @@
 
  - Command-line domain rename
 	- Add to unit tests
+
+ - Replicate virtusers to secondary MX
+	- https://www.virtualmin.com/node/12894
+	- Sendmail
+	- Postfix
