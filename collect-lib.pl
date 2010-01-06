@@ -77,10 +77,6 @@ if (&foreign_check("security-updates")) {
 	&foreign_require("security-updates", "security-updates-lib.pl");
 	local @poss = &security_updates::list_possible_updates(2);
 	$info->{'poss'} = \@poss;
-	if (defined(&security_updates::list_possible_installs)) {
-		local @inst = &security_updates::list_possible_installs(2);
-		$info->{'inst'} = \@inst;
-		}
 	if (!$config{'collect_noall'}) {
 		local @allposs = &security_updates::list_possible_updates(2, 1);
 		$info->{'allposs'} = \@allposs;
