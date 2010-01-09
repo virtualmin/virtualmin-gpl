@@ -1,4 +1,4 @@
 desc=Concurrent backup limits
 html=Added Module Config options to limit the number of concurrent backups, which defaults to 3. This prevents system owners from overloading the machine with their scheduled backups.
 master=1
-link=../config.cgi?mod=virtual-server&section=line8
+link=../config.cgi?module=virtual-server&section=line8
