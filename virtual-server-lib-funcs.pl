@@ -7032,6 +7032,7 @@ push(@rv, { 'id' => 0,
 	    'mysql_nopass' => $config{'mysql_nopass'},
 	    'mysql_chgrp' => $config{'mysql_chgrp'},
 	    'mysql_charset' => $config{'mysql_charset'},
+	    'mysql_collate' => $config{'mysql_collate'},
 	    'postgres_encoding' => $config{'postgres_encoding'},
 	    'skel' => $config{'virtual_skel'} || "none",
 	    'skel_subs' => int($config{'virtual_skel_subs'}),
@@ -7312,6 +7313,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'mysql_nopass'} = $tmpl->{'mysql_nopass'};
 	$config{'mysql_chgrp'} = $tmpl->{'mysql_chgrp'};
 	$config{'mysql_charset'} = $tmpl->{'mysql_charset'};
+	$config{'mysql_collate'} = $tmpl->{'mysql_collate'};
 	$config{'postgres_encoding'} = $tmpl->{'postgres_encoding'};
 	$config{'virtual_skel'} = $tmpl->{'skel'} eq "none" ? "" :
 				  $tmpl->{'skel'};

@@ -1205,3 +1205,4 @@ Changed statistics graphs to show load average in the regular scale, instead of 
 Added --autoreply-start, --autoreply-end and --autoreply-period flags to the modify-user API command, for changing other autoresponder settings.
 Added a Module Config option under Defaults for new domains to set the characters which random passwords are made up of.
 Added buttons to enable or disable multiple resellers at once.
+The MySQL default collation order for new databases can now be set on the database creation form, and in the MySQL section of a server template.

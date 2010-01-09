@@ -66,6 +66,9 @@ if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
 	if ($tmpl->{'mysql_charset'} && $tmpl->{'mysql_charset'} ne 'none') {
 		$opts{'charset'} = $tmpl->{'mysql_charset'};
 		}
+	if ($tmpl->{'mysql_collate'} && $tmpl->{'mysql_collate'} ne 'none') {
+		$opts{'collate'} = $tmpl->{'mysql_collate'};
+		}
 	&create_mysql_database($d, $d->{'db'}, \%opts);
 	}
 else {
@@ -678,7 +681,9 @@ local @dbs = split(/\s+/, $d->{'db_mysql'});
 &mysql::execute_sql_logged($mysql::master_db,
 		   "create database ".&mysql::quotestr($dbname).
 		   ($opts->{'charset'} ?
-		    " character set $_[2]->{'charset'}" : ""));
+		    " character set $_[2]->{'charset'}" : "").
+		   ($opts->{'collate'} ?
+		    " collate $_[2]->{'collate'}" : ""));
 push(@dbs, $dbname);
 $d->{'db_mysql'} = join(" ", @dbs);
 
@@ -1084,8 +1089,8 @@ if (-d $mysql::config{'mysql_data'}) {
 				( [ "", $text{'default'} ] ) )]));
 	}
 
-# Default MySQL character set
 if ($mysql::mysql_version >= 4.1) {
+	# Default MySQL character set
 	print &ui_table_row(&hlink($text{'tmpl_mysql_charset'},
 				   "template_mysql_charset"),
 	    &ui_select("mysql_charset",  $tmpl->{'mysql_charset'},
@@ -1093,6 +1098,17 @@ if ($mysql::mysql_version >= 4.1) {
 		    ( [ "", "&lt;$text{'tmpl_mysql_charsetdef'}&gt;" ] ),
 		  [ "none", "&lt;$text{'tmpl_mysql_charsetnone'}&gt;" ],
 		  &mysql::list_character_sets() ]));
+	}
+
+if ($mysql::mysql_version >= 5) {
+	# Default MySQL collation order
+	print &ui_table_row(&hlink($text{'tmpl_mysql_collate'},
+				   "template_mysql_collate"),
+	    &ui_select("mysql_collate",  $tmpl->{'mysql_collate'},
+		[ $tmpl->{'default'} ? ( ) :
+		    ( [ "", "&lt;$text{'tmpl_mysql_charsetdef'}&gt;" ] ),
+		  [ "none", "&lt;$text{'tmpl_mysql_charsetnone'}&gt;" ],
+		  map { $_->[0] } &list_mysql_collation_orders() ]));
 	}
 }
 
@@ -1148,6 +1164,7 @@ if (-d $mysql::config{'mysql_data'}) {
 	}
 if ($mysql::mysql_version >= 4.1) {
 	$tmpl->{'mysql_charset'} = $in{'mysql_charset'};
+	$tmpl->{'mysql_collate'} = $in{'mysql_collate'};
 	}
 }
 
@@ -1156,15 +1173,33 @@ if ($mysql::mysql_version >= 4.1) {
 sub creation_form_mysql
 {
 &require_mysql();
+local $rv;
 if ($mysql::mysql_version >= 4.1) {
 	local $tmpl = &get_template($_[0]->{'template'});
+
+	# Character set
+	local @charsets = &mysql::list_character_sets();
 	local $cs = $tmpl->{'mysql_charset'};
 	$cs = "" if ($cs eq "none");
-	return &ui_table_row($text{'database_charset'},
+	$rv .= &ui_table_row($text{'database_charset'},
 			     &ui_select("mysql_charset", $cs,
 					[ [ undef, "&lt;$text{'default'}&gt;" ],
-					  &mysql::list_character_sets() ]));
+					  @charsets ]));
+
+	# Collation order
+	local $cl = $tmpl->{'mysql_collate'};
+	$cl = "" if ($cs eq "none");
+	local @colls = &list_mysql_collation_orders();
+	if (@colls) {
+		local %csmap = map { $_->[0], $_->[1] } @charsets;
+		$rv .= &ui_table_row($text{'database_collate'},
+		     &ui_select("mysql_collate", $cl,
+			[ [ undef, "&lt;$text{'default'}&gt;" ],
+			  map { [ $_->[0], $_->[0]." (".$csmap{$_->[1]}.")" ] }
+			      @colls ]));
+		}
 	}
+return $rv;
 }
 
 # creation_parse_mysql(&domain, &in)
@@ -1173,7 +1208,8 @@ if ($mysql::mysql_version >= 4.1) {
 sub creation_parse_mysql
 {
 local ($d, $in) = @_;
-local $opts = { 'charset' => $in->{'mysql_charset'} };
+local $opts = { 'charset' => $in->{'mysql_charset'},
+		'collate' => $in->{'mysql_collate'} };
 return $opts;
 }
 
@@ -1323,6 +1359,20 @@ else {
 		}
 	$mysql::config{'host'} = $thishost;
 	}
+}
+
+# list_mysql_collation_orders()
+# Returns a list of supported collation orders. Each row is an array ref of
+# a code and character set it can work with.
+sub list_mysql_collation_orders
+{
+&require_mysql();
+local @rv;
+if ($mysql::mysql_version >= 5) {
+	local $d = &mysql::execute_sql($mysql::master_db, "show collation");
+	@rv = map { [ $_->[0], $_->[1] ] } @{$d->{'data'}};
+	}
+return sort { lc($a->[0]) cmp lc($b->[0]) } @rv;
 }
 
 $done_feature_script{'mysql'} = 1;
