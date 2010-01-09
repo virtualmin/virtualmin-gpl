@@ -3481,6 +3481,7 @@ sub send_notify_email
 {
 local ($from, $recips, $d, $subject, $body, $attach, $attachfile, $attachtype,
        $admins, $many) = @_;
+&foreign_require("mailboxes", "mailboxes-lib.pl");
 local %done;
 foreach my $r (@$recips) {
 	# Work out recipient type and addresses
