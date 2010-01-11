@@ -6995,6 +6995,7 @@ push(@rv, { 'id' => 0,
 	    'dns_ttl' => $config{'dns_ttl'},
 	    'dnssec' => $config{'dnssec'} || "none",
 	    'dnssec_alg' => $config{'dnssec_alg'},
+	    'dnssec_single' => $config{'dnssec_single'},
 	    'namedconf' => $config{'namedconf'} || "none",
 	    'namedconf_no_allow_transfer' =>
 		$config{'namedconf_no_allow_transfer'},
@@ -7263,6 +7264,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'dnssec'} = $tmpl->{'dnssec'} eq 'none' ? undef
 							: $tmpl->{'dnssec'};
 	$config{'dnssec_alg'} = $tmpl->{'dnssec_alg'};
+	$config{'dnssec_single'} = $tmpl->{'dnssec_single'};
 	delete($config{'mx_server'});
 	$config{'proftpd_config'} = $tmpl->{'ftp'};
 	$config{'ftp_dir'} = $tmpl->{'ftp_dir'};
