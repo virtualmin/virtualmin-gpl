@@ -267,6 +267,7 @@ elsif ($mode == 2) {
 		&make_dir($empty, 0755);
 		local $r = ($user ? "$user\@" : "")."$server:$pathdir";
 		&scp_copy($empty, $r, $pass, \$mkdirerr, $port);
+		&unlink_file($empty);
 		}
 	}
 elsif ($mode == 3) {
@@ -360,7 +361,7 @@ else {
 	}
 if ($dirfmt && !-d $dest) {
 	# If backing up to a directory that doesn't exist yet, create it
-	local $derr = &make_backup_dir($dest, 0755, 1, $asd);
+	local $derr = &make_backup_dir($dest, 0700, 1, $asd);
 	if ($derr) {
 		&$first_print(&text('backup_emkdir', "<tt>$dest</tt>", $derr));
 		return (0, 0, $doms);
