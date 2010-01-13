@@ -34,7 +34,11 @@ ${ENDIF-DNS}
 ${IF-MYSQL}
 MySQL database:          ${DB}
 MySQL login:             ${MYSQL_USER}
+${IF-MYSQL_PASS}
+MySQL password:          ${MYSQL_PASS}
+${ELSE-MYSQL_PASS}
 MySQL password:          ${PASS}
+${ENDIF-MYSQL_PASS}
 
 ${ENDIF-MYSQL}
 ${IF-POSTGRES}
