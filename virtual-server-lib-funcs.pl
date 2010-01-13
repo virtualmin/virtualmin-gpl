@@ -2208,7 +2208,8 @@ if ($d) {
 	local $tmpl = &get_template($d->{'template'});
 	if ($tmpl->{'skel_subs'}) {
 		foreach my $c (@copied) {
-			if (-r $c && !-d $c && !-l $c) {
+			if (-r $c && !-d $c && !-l $c &&
+			    &guess_mime_type($c) !~ /^image\//) {
 				local $data =
 				    &read_file_contents_as_domain_user($d, $c);
 				&open_tempfile_as_domain_user($d, OUT, ">$c");
