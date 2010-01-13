@@ -131,7 +131,7 @@ if ($_[1]->{'alias'} && !$_[0]->{'alias'}) {
 	&$first_print($text{'save_dirunalias'});
 	local $tmpl = &get_template($_[0]->{'template'});
 	if ($tmpl->{'skel'} ne "none") {
-		local $uinfo = &get_domain_owner($_[0]);
+		local $uinfo = &get_domain_owner($_[0], 1);
 		&copy_skel_files(
 			&substitute_domain_template($tmpl->{'skel'}, $_[0]),
 			$uinfo, $_[0]->{'home'},

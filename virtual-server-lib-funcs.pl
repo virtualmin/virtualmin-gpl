@@ -9039,20 +9039,21 @@ else {
 	}
 }
 
-# get_domain_owner(&domain)
-# Returns the Unix user object for a server's owner
+# get_domain_owner(&domain, [skip-virts-quotas-dbs])
+# Returns the Unix user object for a server's owner. Quota, DB and virtuser
+# details will be omitted if the skip flag is set.
 sub get_domain_owner
 {
-local ($d) = @_;
+local ($d, $noinfo) = @_;
 if ($d->{'parent'}) {
 	local $parent = &get_domain($d->{'parent'});
 	if ($parent) {
-		return &get_domain_owner($parent);
+		return &get_domain_owner($parent, $noinfo);
 		}
 	return undef;
 	}
 else {
-	local @users = &list_domain_users($_[0], 0, 0, 0);
+	local @users = &list_domain_users($_[0], 0, $noinfo, $noinfo, $noinfo);
 	local ($user) = grep { $_->{'user'} eq $_[0]->{'user'} } @users;
 	return $user;
 	}
@@ -10725,7 +10726,7 @@ if (defined(&supports_resource_limits) && &supports_resource_limits()) {
 
 # Copy skeleton files for top-level server
 if ($skelchanged && $skelchanged ne 'none') {
-	local $uinfo = &get_domain_owner($d);
+	local $uinfo = &get_domain_owner($d, 1);
 	&copy_skel_files(&substitute_domain_template($skelchanged, $d),
 			 $uinfo, $d->{'home'},
 			 $d->{'group'} || $d->{'ugroup'}, $d);

@@ -743,7 +743,7 @@ if (!$group) {
 local @shells = &list_available_shells();
 foreach my $d (&list_domains(), $newd) {
 	next if ($d->{'parent'} || !$d->{'unix'} || $d eq $deld);
-	local $user = &get_domain_owner($d);
+	local $user = &get_domain_owner($d, 1);
 	local ($sinfo) = grep { $_->{'shell'} eq $user->{'shell'} } @shells;
 	if ($sinfo && $sinfo->{'id'} ne 'ssh') {
 		# On the denied list..
