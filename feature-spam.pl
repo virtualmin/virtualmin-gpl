@@ -1296,8 +1296,8 @@ sub setup_spamtrap_directories
 {
 local ($d) = @_;
 &make_dir($trap_base_dir, 0755) if (!-d $trap_base_dir);
-&make_dir($spam_alias_dir, 0755) if (!-d $spam_alias_dir);
-&make_dir($ham_alias_dir, 0755) if (!-d $ham_alias_dir);
+&make_dir($spam_alias_dir, 01777) if (!-d $spam_alias_dir);
+&make_dir($ham_alias_dir, 01777) if (!-d $ham_alias_dir);
 local $spamfile = &spam_alias_file($d);
 local $hamfile = &ham_alias_file($d);
 foreach my $f ($spamfile, $hamfile) {
