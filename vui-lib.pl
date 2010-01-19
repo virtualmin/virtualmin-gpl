@@ -192,6 +192,7 @@ xinha_init = function()
 xinha_editors = [ "body" ];
 xinha_plugins = [ ];
 xinha_config = new Xinha.Config();
+xinha_config.baseHref = "$baseurl";
 xinha_editors = Xinha.makeEditors(xinha_editors, xinha_config, xinha_plugins);
 Xinha.startEditors(xinha_editors);
 }
