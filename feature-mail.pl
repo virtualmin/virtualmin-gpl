@@ -1822,7 +1822,12 @@ if (-d $_[0]->{'home'} && $_[0]->{'unix'}) {
 
 # Create spam, virus and trash Maildir sub-directories
 if ($md && $md =~ /\/Maildir$/) {
-	local @folders = ( "$md/.trash" );
+	local @folders;
+	local $tname = $config{'trash_folder'};
+	$tname ||= "trash";
+	if ($tname ne "*") {
+		push(@folders, "$md/.$tname");
+		}
 	local ($sdmode, $sdpath) = &get_domain_spam_delivery($d);
 	if ($sdmode == 6) {
 		push(@folders, "$md/.spam");

@@ -86,6 +86,7 @@ other_users=Notify other modules when updating server administrator Unix users?,
 other_doms=Notify other modules when updating mailbox Unix users?,1,1-Yes,0-No
 check_apache=Check Apache configuration before applying?,1,1-Yes,0-No
 nodeniedssh=Add users with no SSH access to <tt>deniedssh</tt> group?,1,0-Yes,1-No
+trash_folder=Trash folder name for new mailboxes,10,*-Don't create any,trash-trash,Trash-Trash,Other name
 
 line4.5=Qmail+LDAP options,11
 ldap_host=LDAP server,0
