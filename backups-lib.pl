@@ -1862,7 +1862,8 @@ return $rv;
 sub parse_backup_url
 {
 local @rv;
-if ($_[0] =~ /^ftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/) {
+if ($_[0] =~ /^ftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
+    $_[0] =~ /^ftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
 	@rv = (1, $1, $2, $3, $5, $4 ? substr($4, 1) : 21);
 	}
 elsif ($_[0] =~ /^ssh:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
@@ -2064,7 +2065,7 @@ elsif ($mode == 1) {
 	local ($server, $port) = split(/:/, $in{$name."_server"});
 	gethostbyname($server) || &error($text{'backup_eserver1'});
 	$port =~ /^\d*$/ || &error($text{'backup_eport'});
-	$in{$name."_path"} =~ /^\/\S/ || &error($text{'backup_epath'});
+	$in{$name."_path"} =~ /\S/ || &error($text{'backup_epath'});
 	$in{$name."_user"} =~ /^[^:\/]*$/ || &error($text{'backup_euser'});
 	$in{$name."_path"} =~ s/\/+$//;
 	return "ftp://".$in{$name."_user"}.":".$in{$name."_pass"}."\@".
