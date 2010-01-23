@@ -219,7 +219,7 @@ if ($mode == 0 && $asd) {
 if ($mode == 1) {
 	# Try FTP login
 	local $ftperr;
-	&ftp_onecommand($server, "CWD /", \$ftperr, $user, $pass, $port);
+	&ftp_onecommand($server, "PWD", \$ftperr, $user, $pass, $port);
 	if ($ftperr) {
 		&$first_print(&text('backup_eftptest', $ftperr));
 		return (0, 0, $doms);
@@ -228,9 +228,14 @@ if ($mode == 1) {
 		# Also create the destination directory and all parents now
 		# (ignoring any error, as it may already exist)
 		local @makepath = split(/\//, $path);
-		shift(@makepath) if ($makepath[0] eq '');
+		local $prefix;
+		if ($makepath[0] eq '') {
+			# Remove leading /
+			$prefix = '/';
+			shift(@makepath);
+			}
 		for(my $i=0; $i<@makepath; $i++) {
-			local $makepath = "/".join("/", @makepath[0..$i]);
+			local $makepath = $prefix.join("/", @makepath[0..$i]);
 			local $mkdirerr;
 			&ftp_onecommand($server, "MKD $makepath", \$mkdirerr,
 					$user, $pass, $port);
@@ -2068,8 +2073,9 @@ elsif ($mode == 1) {
 	$in{$name."_path"} =~ /\S/ || &error($text{'backup_epath'});
 	$in{$name."_user"} =~ /^[^:\/]*$/ || &error($text{'backup_euser'});
 	$in{$name."_path"} =~ s/\/+$//;
+	local $sep = $in{$name."_path"} =~ /^\// ? "" : ":";
 	return "ftp://".$in{$name."_user"}.":".$in{$name."_pass"}."\@".
-	       $in{$name."_server"}.$in{$name."_path"};
+	       $in{$name."_server"}.$sep.$in{$name."_path"};
 	}
 elsif ($mode == 2) {
 	# SSH server
@@ -2322,6 +2328,13 @@ if (($mode == 0 || $mode == 1 || $mode == 2) &&
     $path =~ /^(\S+)\/([^%]*%.*)$/) {
 	# Local, FTP or SSH file like /backup/%d-%m-%Y
 	local ($base, $date) = ($1, $2);
+	$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
+	return ($base, $date);
+	}
+elsif (($mode == 1 || $mode == 2) &&
+       $path =~ /^([^%\/]+%.*)$/) {
+	# FTP or SSH file like backup-%d-%m-%Y
+	local ($base, $date) = ("", $1);
 	$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($base, $date);
 	}
