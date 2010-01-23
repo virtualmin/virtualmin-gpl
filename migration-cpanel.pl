@@ -725,7 +725,6 @@ if ($got{'mail'}) {
 			closedir(DIR);
 			}
 		$mcount++;
-		$useremail{$uinfo->{'email'}} = $uinfo;
 		$usermap{$muser} = $uinfo;
 		}
 	close(PASSWD);
@@ -755,6 +754,14 @@ if ($owner && !$parent) {
 		}
 	else {
 		&$second_print(".. none exists");
+		}
+	}
+
+# Build map from email addresses to users
+local %useremail;
+foreach my $uinfo (&list_domain_users(\%dom)) {
+	if ($uinfo->{'email'}) {
+		$useremail{$uinfo->{'email'}} = $uinfo;
 		}
 	}
 
