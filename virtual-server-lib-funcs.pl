@@ -6752,6 +6752,10 @@ if ($value eq "") {
 	# Default to GB, since bytes are rarely useful
 	$u = "GB";
 	}
+elsif ($value && $value%(1024*1024*1024*1024) == 0) {
+	$val = $value/(1024*1024*1024*1024);
+	$u = "TB";
+	}
 elsif ($value && $value%(1024*1024*1024) == 0) {
 	$val = $value/(1024*1024*1024);
 	$u = "GB";
@@ -6769,7 +6773,7 @@ else {
 	$u = "bytes";
 	}
 local $sel = &ui_select($name."_units", $u,
-		[ ["bytes"], ["kB"], ["MB"], ["GB"] ], 1, 0, 0, $dis);
+		[ ["bytes"], ["kB"], ["MB"], ["GB"], ["TB"] ], 1, 0, 0, $dis);
 $rv .= &text('edit_bwpast_'.$config{'bw_past'},
 	     &ui_textbox($name, $val, 10, $dis)." ".$sel,
 	     $config{'bw_period'});
