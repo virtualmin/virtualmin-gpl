@@ -4458,6 +4458,9 @@ if ($bsize) {
 		# Default to MB, since bytes are rarely useful
 		$units = 1024*1024;
 		}
+	elsif ($sz >= 1024*1024*1024*1024) {
+		$units = 1024*1024*1024*1024;
+		}
 	elsif ($sz >= 1024*1024*1024) {
 		$units = 1024*1024*1024;
 		}
@@ -4474,8 +4477,12 @@ if ($bsize) {
 	$sz =~ s/\.00$//;
 	return &ui_textbox($name, $sz, 8, $dis)." ".
 	       &ui_select($name."_units", $units,
-			 [ [ 1, "bytes" ], [ 1024, "kB" ], [ 1024*1024, "MB" ],
-			   [ 1024*1024*1024, "GB" ] ], 1, 0, 0, $_[3]);
+			 [ [ 1, "bytes" ],
+			   [ 1024, "kB" ],
+			   [ 1024*1024, "MB" ],
+			   [ 1024*1024*1024, "GB" ],
+			   [ 1024*1024*1024*1024, "TB" ] ],
+			 1, 0, 0, $_[3]);
 	}
 else {
 	# Just show blocks input
