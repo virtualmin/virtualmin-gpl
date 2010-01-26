@@ -85,7 +85,9 @@ if ($format) {
                 print "Invalid format $format : $err\n";
                 exit(0);
                 }
+	&clean_environment();
         $out = &backquote_command("$cmd 2>&1");
+	&reset_environment();
         print &convert_remote_format($out, $?, $in{'program'}, \%in, $format);
 	}
 elsif ($dir eq $module_root_directory) {
