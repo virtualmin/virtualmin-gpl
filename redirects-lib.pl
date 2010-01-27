@@ -22,11 +22,12 @@ foreach my $al (&apache::find_directive_struct("Alias", $vconf),
 	my $rd = { 'dest' => $al->{'words'}->[1],
 		   'alias' => $al->{'name'} =~ /^Alias/i ? 1 : 0,
 		   'dir' => $al };
-	if ($al->{'name'} eq 'Alias') {
+	if ($al->{'name'} eq 'Alias' || $al->{'name'} eq 'Redirect') {
 		$rd->{'path'} = $al->{'words'}->[0];
 		push(@rv, $rd);
 		}
-	elsif ($al->{'name'} eq 'AliasMatch' &&
+	elsif (($al->{'name'} eq 'AliasMatch' ||
+		$al->{'name'} eq 'RedirectMatch') &&
 	       $al->{'words'}->[0] =~ /^(.*)\.\*\$$/) {
 		$rd->{'path'} = $1;
 		$rd->{'regexp'} = 1;
@@ -66,8 +67,33 @@ if ($count) {
 return "No Apache virtualhost found";
 }
 
+# delete_redirect(&domain, &redirect)
+# Remove some redirect from a domain
 sub delete_redirect
 {
+my ($d, $redirect) = @_;
+&require_apache();
+my @ports = ( $d->{'web_port'},
+              $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+my $count = 0;
+foreach my $port (@ports) {
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
+	next if (!$virt);
+	my $dir = $redirect->{'alias'} ? "Alias" : "Redirect";
+        $dir .= "Match" if ($redirect->{'regexp'});
+	my @aliases = &apache::find_directive($dir, $vconf);
+	my @newaliases = grep { !/^\Q$redirect->{'path'}\E\s/ } @aliases;
+	if (@aliases != @newaliases) {
+		&apache::save_directive($dir, \@newaliases, $vconf, $conf);
+		&flush_file_lines($virt->{'file'});
+		$count++;
+		}
+	}
+if ($count) {
+	&register_post_action(\&restart_apache);
+	return undef;
+	}
+return "No matching alias or redirect found";
 }
 
 sub modify_redirect
