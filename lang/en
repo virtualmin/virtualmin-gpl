@@ -5115,3 +5115,19 @@ viewbackup_ok=Final status
 viewbackup_success=Succeeded
 viewbackup_failure=Failed
 viewbackup_partial=Partially completed
+
+redirects_title=Website Redirects
+redirects_ecannot=You are not allowed to edit website redirects for this domain
+redirects_eweb=This virtual server does not have a website
+redirects_add=Add a new website redirect.
+redirects_path=URL path
+redirects_delete=Delete Selected Redirects
+redirects_none=No website redirects have been defined yet.
+redirects_return=list of website redirects
+redirects_derr=Failed to delete website redirects
+redirects_denone=None selected
+redirects_type=Type
+redirects_alias=Alias to directory
+redirects_redirect=Redirect to URL
+redirects_dest=Destination
+
