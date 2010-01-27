@@ -16,7 +16,7 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
 		 "php", "ruby", "vui", "dynip", "collect", "maillog",
 		 "balancer", "newfeatures", "resources", "backups",
 		 "domainname", "commands", "connectivity", "plans",
-		 "postgrey", "wizard", "security", "json") {
+		 "postgrey", "wizard", "security", "json", "redirects") {
 	do "$virtual_server_root/$lib-lib.pl";
 	if ($@ && -r "$virtual_server_root/$lib-lib.pl") {
 		print STDERR "failed to load $lib-lib.pl : $@\n";
@@ -9740,6 +9740,15 @@ if (&has_proxy_balancer($d) && &can_edit_forward()) {
 	push(@rv, { 'page' => 'list_balancers.cgi',
 		    'title' => $text{'edit_balancer'},
 		    'desc' => $text{'edit_balancerdesc'},
+		    'cat' => 'server',
+		  });
+	}
+
+# Alias and redirects editor
+if ($d->{'web'}) {
+	push(@rv, { 'page' => 'list_redirects.cgi',
+		    'title' => $text{'edit_redirects'},
+		    'desc' => $text{'edit_redirectsdesc'},
 		    'cat' => 'server',
 		  });
 	}
