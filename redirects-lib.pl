@@ -82,8 +82,10 @@ foreach my $port (@ports) {
 	my $dir = $redirect->{'alias'} ? "Alias" : "Redirect";
         $dir .= "Match" if ($redirect->{'regexp'});
 	my @aliases = &apache::find_directive($dir, $vconf);
-	my @newaliases = grep { !/^\Q$redirect->{'path'}\E\s/ } @aliases;
-	if (@aliases != @newaliases) {
+	my $re = $redirect->{'path'};
+	$re .= '.*$' if ($redirect->{'regexp'});
+	my @newaliases = grep { !/^\Q$re\E\s/ } @aliases;
+	if (scalar(@aliases) != scalar(@newaliases)) {
 		&apache::save_directive($dir, \@newaliases, $vconf, $conf);
 		&flush_file_lines($virt->{'file'});
 		$count++;
@@ -93,7 +95,7 @@ if ($count) {
 	&register_post_action(\&restart_apache);
 	return undef;
 	}
-return "No matching alias or redirect found";
+return "No matching Alias or Redirect found";
 }
 
 sub modify_redirect

@@ -55,7 +55,7 @@ if ($multi) {
 	# Show in multi-line format
 	foreach $r (@redirects) {
 		print "$r->{'path'}\n";
-		print "    Destination: $r->{'path'}\n";
+		print "    Destination: $r->{'dest'}\n";
 		print "    Type: ",$r->{'alias'} ? "Alias" : "Redirect","\n";
 		print "    Match sub-paths: ",
 			$r->{'regexp'} ? "Yes" : "No","\n";
