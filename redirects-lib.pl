@@ -98,8 +98,30 @@ if ($count) {
 return "No matching Alias or Redirect found";
 }
 
+# modify_redirect(&domain, &redirect, &old-redirect)
+# Update some existing website redirect
 sub modify_redirect
 {
+my ($d, $redirect, $oldredirect) = @_;
+&delete_redirect($d, $oldredirect);
+return &create_redirect($d, $redirect);
+}
+
+# get_redirect_root(&domain)
+# Returns the allowed base directory for aliases for the current user
+sub get_redirect_root
+{
+my ($d) = @_;
+if (&master_admin()) {
+	return "/";
+	}
+elsif ($d->{'parent'}) {
+	my $pd = &get_domain($d->{'parent'});
+	return &get_redirect_root($pd);
+	}
+else {
+	return $d->{'home'};
+	}
 }
 
 1;

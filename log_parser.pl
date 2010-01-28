@@ -43,7 +43,16 @@ elsif ($type eq "balancer") {
 		     "<tt>$p->{'dom'}</tt>");
 	}
 elsif ($type eq "balancers") {
-	return &text('log_'.$action.'_balancers', "<tt>$p->{'dom'}</tt>",$object);
+	return &text('log_'.$action.'_balancers', "<tt>$p->{'dom'}</tt>",
+		     $object);
+	}
+elsif ($type eq "redirect") {
+	return &text('log_'.$action.'_redirect', "<tt>$object</tt>",
+		     "<tt>$p->{'dom'}</tt>");
+	}
+elsif ($type eq "redirects") {
+	return &text('log_'.$action.'_redirects', "<tt>$p->{'dom'}</tt>",
+		     $object);
 	}
 elsif ($type eq "resel") {
 	return &text('log_'.$action.'_resel', "<tt>$object</tt>");
