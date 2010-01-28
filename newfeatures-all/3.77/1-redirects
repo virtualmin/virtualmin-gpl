@@ -1,0 +1,6 @@
+desc=Website redirects
+html=Added the Website Redirects page, for easily creating aliases from URL paths to directories, and redirects from URL paths to other websites.
+link=list_redirects.cgi?dom=${ID}
+master=1
+reseller=1
+domain=1

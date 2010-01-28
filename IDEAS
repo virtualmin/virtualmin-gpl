@@ -38,8 +38,3 @@
 
  - Include bounced / greylisted messages in system stats
 	- https://www.virtualmin.com/node/13113
-
- - Separate page for editing aliases / redirects
-	- CHANGELOG
-	- Help page
-	- Web UI
