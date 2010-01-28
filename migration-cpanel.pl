@@ -832,7 +832,7 @@ if ($got{'mail'}) {
 			next if ($mailman || $name =~ /^owner-/);
 
 			# Already done a domain forward
-			next if ($name eq "*" && $domfwd);
+			next if ($name =~ /^\*/ && $domfwd);
 
 			if ($useremail{$name}) {
 				# This is an alias from a user. Preserve
@@ -851,8 +851,11 @@ if ($got{'mail'}) {
 				}
 			else {
 				# Just create an alias
-				local $virt = { 'from' => $name eq "*" ?
-						  "\@".$dom : $name."\@".$dom,
+				if ($name !~ /\@/) {
+					$name .= "\@".$dom;
+					}
+				local $virt = { 'from' => $name =~ /^\*/ ?
+						  "\@".$dom : $name,
 						'to' => \@values };
 				local $clash = $gotvirt{$virt->{'from'}};
 				&delete_virtuser($clash) if ($clash);
@@ -1315,11 +1318,14 @@ foreach my $vf (readdir(VF)) {
 			next if ($mailman || $name =~ /^owner-/);
 
 			# Already done a domain forward
-			next if ($name eq "*");
+			next if ($name =~ /^\*/);
 
 			# Just create an alias
-			local $virt = { 'from' => $name eq "*" ? "\@".$vf :
-							$name."\@".$vf,
+			if ($name !~ /\@/) {
+				$name .= "\@".$dom;
+				}
+			local $virt = { 'from' => $name =~ /^\*/ ? "\@".$vf
+								 : $name,
 					'to' => \@values };
 			local $clash = $gotvirt{$virt->{'from'}};
 			&delete_virtuser($clash) if ($clash);
