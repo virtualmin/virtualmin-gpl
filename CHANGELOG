@@ -1207,3 +1207,4 @@ Added a Module Config option under Defaults for new domains to set the character
 Added buttons to enable or disable multiple resellers at once.
 The MySQL default collation order for new databases can now be set on the database creation form, and in the MySQL section of a server template.
 Added the Website Redirects page, for easily creating aliases from URL paths to directories, and redirects from URL paths to other websites.
+Added a 'status' section to the 'info' API command, to get the collected status of servers like Apache and BIND.

@@ -65,10 +65,20 @@ $info->{'host'} = { 'hostname', &get_system_hostname(),
 		    'root' => $root_directory,
 		    'module root' => $module_root_directory,
 		  };
+$info->{'status'} = $info->{'startstop'};
+foreach $s (@{$info->{'status'}}) {
+	delete($s->{'desc'});
+	delete($s->{'longdesc'});
+	delete($s->{'links'});
+	delete($s->{'restartdesc'});
+	delete($s->{'startdesc'});
+	delete($s->{'stopdesc'});
+	}
 delete($info->{'startstop'});
 delete($info->{'quota'});
 delete($info->{'inst'}) if (!@{$info->{'inst'}});
 delete($info->{'poss'}) if (!@{$info->{'poss'}});
+delete($info->{'allposs'}) if (!@{$info->{'allposs'}});
 delete($info->{'fextra'});
 delete($info->{'fhide'});
 delete($info->{'fmax'});
