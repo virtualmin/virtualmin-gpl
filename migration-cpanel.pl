@@ -411,7 +411,7 @@ if ($cerr) {
 &$second_print(".. all OK");
 
 # Create the initial server
-&$first_print("Creating initial virtual server ..");
+&$first_print("Creating initial virtual server $dom ..");
 &$indent_print();
 local $err = &create_virtual_server(\%dom, $parent,
 				    $parent ? $parent->{'user'} : undef);
@@ -1023,7 +1023,8 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 		next if ($fuser eq "ftp" || $fuser eq $user ||
 			 $fuser eq $user."_logs");	# skip cpanel users
 		local $fullfuser = &userdom_name(lc($fuser), \%dom);
-		if ($fhome eq "/dev/null") {
+		if ($fhome eq "/dev/null" ||
+		    !&is_under_directory($dom{'home'}, $fhome)) {
 			$fhome = "$dom{'home'}/$config{'homes_dir'}/$fuser";
 			}
 		local $already = $usermap{$fuser} ||

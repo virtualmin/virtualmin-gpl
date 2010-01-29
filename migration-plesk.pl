@@ -313,7 +313,7 @@ if ($cerr) {
 &$second_print(".. all OK");
 
 # Create the initial server
-&$first_print("Creating initial virtual server ..");
+&$first_print("Creating initial virtual server $dom ..");
 &$indent_print();
 local $err = &create_virtual_server(\%dom, $parent,
 				    $parent ? $parent->{'user'} : undef);
