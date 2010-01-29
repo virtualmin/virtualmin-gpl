@@ -2770,8 +2770,7 @@ foreach my $d (&sort_indent_domains($doms)) {
 				my $aliasdom = &get_domain($d->{'alias'});
 				my $of = &text('index_aliasof',
 						$aliasdom->{'dom'});
-				push(@cols, $d->{'owner'} ?
-						"$d->{'owner'} ($of)" : $of);
+				push(@cols, $d->{'owner'} || $of);
 				}
 			else {
 				push(@cols, $d->{'owner'});
