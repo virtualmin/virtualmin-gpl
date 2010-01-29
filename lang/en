@@ -1239,6 +1239,8 @@ save_aliascopy1=Switching to alias copy mode ..
 save_aliasip=Changing IP address of alias server $1 to $2 ..
 save_applyplan=Changing plan to <i>$1</i>, and applying new limits ..
 save_plan=Changing plan to <i>$1</i> ..
+save_edomainquota=The server's total disk quota should not be lowered to $2, as the current disk usage is already $1.
+save_euserquota=The server administrator's disk quota should not be lowered to $2, as the current disk usage is already $1.
 
 luser_err=Failed to save local mailbox
 luser_etaken=A user with the same name already exists

@@ -376,6 +376,34 @@ if (!$_[0]->{'parent'}) {
 &update_domain_owners_group(undef, $_[0]);
 }
 
+# check_warnings_unix(&domain, &old-domain)
+# Check if quota is being lowered below what is actually being used
+sub check_warnings_unix
+{
+local ($d, $oldd) = @_;
+return undef if (!$oldd);
+local $bsize = &quota_bsize("home");
+if ($d->{'quota'} && $d->{'quota'} < $oldd->{'quota'}) {
+	# Has a domain quota, which was just lowered .. check if under usage
+	local ($usage) = &get_domain_quota($d);
+	if ($d->{'quota'} < $usage) {
+		return &text('save_edomainquota',
+			     &nice_size($usage*$bsize),
+			     &nice_size($d->{'quota'}*$bsize));
+		}
+	}
+if ($d->{'uquota'} && $d->{'uquota'} < $oldd->{'uquota'}) {
+	# Has a user quota, which was just lowered .. check if under usage
+	local ($uinfo) = &get_domain_owner($d);
+	if ($d->{'uquota'} < $uinfo->{'uquota'}) {
+		return &text('save_euserquota',
+			     &nice_size($uinfo->{'uquota'}*$bsize),
+			     &nice_size($d->{'uquota'}*$bsize));
+		}
+	}
+return undef;
+}
+
 # validate_unix(&domain)
 # Check for the Unix user and group
 sub validate_unix
