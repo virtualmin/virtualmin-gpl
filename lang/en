@@ -2948,6 +2948,7 @@ database_scripts=Used by scripts
 database_err=Failed to create database
 database_emax=You are not allowed to add any more databases
 database_ename=Missing or invalid database name - only letters, numbers and _ are allowed
+database_enamelen=Invalid database name - MySQL only allows names up to 64 characters
 database_eclash=A database with the same name already exists
 database_elimit=This server has reached the limit of allowed databases
 database_title3=Delete Database

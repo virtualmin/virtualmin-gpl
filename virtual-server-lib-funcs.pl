@@ -5890,6 +5890,23 @@ if ($db eq "test" || $db eq "mysql" || $db =~ /^template/) {
 return $db;
 }
 
+# validate_database_name(&domain, type, name)
+# Returns an error message if a name is invalid, undef if OK
+sub validate_database_name
+{
+local ($d, $dbtype, $dbname) = @_;
+local $vfunc = "validate_database_name_".$dbtype;
+if (defined(&$vfunc)) {
+	return &$vfunc($d, $dbname);
+	}
+else {
+	# Default rules
+	$dbname =~ /^[a-z0-9\_]+$/i && $dbname =~ /^[a-z]/i ||
+		return $text{'database_ename'};
+	return undef;
+	}
+}
+
 # unixuser_name(domainname)
 # Returns a Unix username for some domain, or undef if none can be found
 sub unixuser_name

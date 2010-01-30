@@ -22,9 +22,9 @@ if ($in{'new'}) {
 		$prefix =~ s/\./_/g;
 		$in{'name'} = $prefix.$in{'name'};
 		}
-	$in{'name'} = &fix_database_name($in{'name'});
-	$in{'name'} =~ /^[a-z0-9\_]+$/i && $in{'name'} =~ /^[a-z]/i ||
-		&error($text{'database_ename'});
+	$in{'name'} = lc($in{'name'});
+	$err = &validate_database_name($d, $in{'type'}, $in{'name'});
+	&error($err) if ($err);
 
 	# Parse type-specific options
 	if (&indexof($in{'type'}, &list_database_plugins()) < 0) {

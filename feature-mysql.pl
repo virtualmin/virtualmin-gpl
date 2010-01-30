@@ -1375,6 +1375,18 @@ if ($mysql::mysql_version >= 5) {
 return sort { lc($a->[0]) cmp lc($b->[0]) } @rv;
 }
 
+# validate_database_name_mysql(&domain, name)
+# Checks if a MySQL database name is valid
+sub validate_database_name_mysql
+{
+local ($d, $dbname) = @_;
+$dbname =~ /^[a-z0-9\_]+$/i && $dbname =~ /^[a-z]/i ||
+	return $text{'database_ename'};
+length($dbname) <= 64 ||
+	return &text('database_enamelen', 64);
+return undef;
+}
+
 $done_feature_script{'mysql'} = 1;
 
 1;

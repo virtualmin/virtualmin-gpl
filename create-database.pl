@@ -47,8 +47,6 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--name") {
 		$name = shift(@ARGV);
-		$name =~ /^[a-z0-9\_]+$/i && $name =~ /^[a-z]/i ||
-			&usage("Invalid database name");
 		}
 	elsif ($a eq "--type") {
 		$type = shift(@ARGV);
@@ -81,6 +79,11 @@ if ($tmpl->{'mysql_suffix'} ne "none") {
 		$name = $suffix.$name;
 		}
 	}
+
+# Validate the name
+$name = lc($name);
+$err = &validate_database_name($d, $type, $name);
+&usage($err) if ($err);
 
 # Check for clash in the virtual server
 ($clash) = grep { $_->{'name'} eq $name &&
