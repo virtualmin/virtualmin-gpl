@@ -1380,10 +1380,14 @@ return sort { lc($a->[0]) cmp lc($b->[0]) } @rv;
 sub validate_database_name_mysql
 {
 local ($d, $dbname) = @_;
-$dbname =~ /^[a-z0-9\_]+$/i && $dbname =~ /^[a-z]/i ||
+$dbname =~ /^[a-z0-9\_\-]+$/i && $dbname =~ /^[a-z]/i ||
 	return $text{'database_ename'};
-length($dbname) <= 64 ||
-	return &text('database_enamelen', 64);
+&require_mysql();
+local @str = &mysql::table_structure($mysql::master_db, "db");
+local ($dbcol) = grep { lc($_->{'field'}) eq 'db' } @str;
+local $maxlen = $dbcol && $dbcol->{'type'} =~ /\((\d+)\)/ ? $1 : 64;
+length($dbname) <= $maxlen ||
+	return &text('database_enamelen', $maxlen);
 return undef;
 }
 
