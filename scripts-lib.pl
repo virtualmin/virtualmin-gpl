@@ -555,6 +555,13 @@ if (!&can_edit_databases()) {
 $cfunc = "check_".$dbtype."_database_clash";
 &$cfunc($d, $dbname) && return "The database $dbname already exists";
 
+# Work out default creation options
+$ofunc = "default_".$type."_creation_opts";
+local $opts;
+if (defined(&$ofunc)) {
+	$opts = &$ofunc($d);
+	}
+
 # Do the creation
 &push_all_print();
 if (&indexof($dbtype, &list_database_plugins()) >= 0) {
@@ -562,7 +569,7 @@ if (&indexof($dbtype, &list_database_plugins()) >= 0) {
 	}
 else {
 	$crfunc = "create_".$dbtype."_database";
-	&$crfunc($d, $dbname);
+	&$crfunc($d, $dbname, $opts);
 	}
 &save_domain($d);
 &refresh_webmin_user($d);

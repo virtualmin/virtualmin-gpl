@@ -62,14 +62,8 @@ if (!$d->{'parent'}) {
 
 # Create the initial DB (if requested)
 if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
-	my %opts;
-	if ($tmpl->{'mysql_charset'} && $tmpl->{'mysql_charset'} ne 'none') {
-		$opts{'charset'} = $tmpl->{'mysql_charset'};
-		}
-	if ($tmpl->{'mysql_collate'} && $tmpl->{'mysql_collate'} ne 'none') {
-		$opts{'collate'} = $tmpl->{'mysql_collate'};
-		}
-	&create_mysql_database($d, $d->{'db'}, \%opts);
+	local $opts = &default_mysql_creation_opts($d);
+	&create_mysql_database($d, $d->{'db'}, $opts);
 	}
 else {
 	# No DBs can exist
@@ -1389,6 +1383,22 @@ local $maxlen = $dbcol && $dbcol->{'type'} =~ /\((\d+)\)/ ? $1 : 64;
 length($dbname) <= $maxlen ||
 	return &text('database_enamelen', $maxlen);
 return undef;
+}
+
+# default_mysql_creation_opts(&domain)
+# Returns default options for a new MySQL DB in some domain
+sub default_mysql_creation_opts
+{
+local ($d) = @_;
+local $tmpl = &get_template($d->{'template'});
+local %opts;
+if ($tmpl->{'mysql_charset'} && $tmpl->{'mysql_charset'} ne 'none') {
+	$opts{'charset'} = $tmpl->{'mysql_charset'};
+	}
+if ($tmpl->{'mysql_collate'} && $tmpl->{'mysql_collate'} ne 'none') {
+	$opts{'collate'} = $tmpl->{'mysql_collate'};
+	}
+return \%opts;
 }
 
 $done_feature_script{'mysql'} = 1;

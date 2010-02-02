@@ -47,12 +47,8 @@ if (!$_[0]->{'parent'}) {
 	}
 if (!$_[1] && $tmpl->{'mysql_mkdb'}) {
 	# Create the initial DB
-	my %opts;
-	if ($tmpl->{'postgres_encoding'} &&
-	    $tmpl->{'postgres_encoding'} ne 'none') {
-		$opts{'encoding'} = $tmpl->{'postgres_encoding'};
-		}
-	&create_postgres_database($_[0], $_[0]->{'db'}, \%opts);
+	local $opts = &default_postgres_creation_opts($_[0]);
+	&create_postgres_database($_[0], $_[0]->{'db'}, $opts);
 	}
 else {
 	# No DBs can exist
@@ -713,6 +709,20 @@ sub parse_template_postgres
 local ($tmpl) = @_;
 &require_postgres();
 $tmpl->{'postgres_encoding'} = $in{'postgres_encoding'};
+}
+
+# default_postgres_creation_opts(&domain)
+# Returns default options for a new PostgreSQL DB in some domain
+sub default_postgres_creation_opts
+{
+local ($d) = @_;
+local $tmpl = &get_template($d->{'template'});
+local %opts;
+if ($tmpl->{'postgres_encoding'} &&
+    $tmpl->{'postgres_encoding'} ne 'none') {
+	$opts{'encoding'} = $tmpl->{'postgres_encoding'};
+	}
+return \%opts;
 }
 
 $done_feature_script{'postgres'} = 1;

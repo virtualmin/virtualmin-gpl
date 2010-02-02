@@ -100,6 +100,15 @@ else {
 	&$cfunc($d, $name) && &usage("A database called $name already exists");
 	}
 
+# Work out default creation options if needed
+if (!%opts) {
+	$ofunc = "default_".$type."_creation_opts";
+	if (defined(&$ofunc)) {
+		$optsref = &$ofunc($d);
+		%opts = %$optsref;
+		}
+	}
+
 # Do it
 $first_print = \&null_print;
 $second_print = \&null_print;
