@@ -385,6 +385,7 @@ if (&foreign_check("net") && $gconfig{'os_type'} =~ /-linux$/) {
 				}
 			}
 		}
+	@ifaces = &unique(@ifaces);
 	local $ifaces = join(" ", @ifaces);
 	foreach my $iname (@ifaces) {
 		local $out = &backquote_command(
