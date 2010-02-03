@@ -47,6 +47,10 @@ non-incremental backup will be included. This allows you to reduce the size of
 backups for large websites that rarely change, but means that when restoring
 both the full and incremental backups are needed.
 
+To exclude some files from each virtual server's home directory from the
+backup, use the C<--exclude> flag followed by a relative filename, like
+I<public_html/stats> or I<.bashrc>.
+
 To have Virtualmin automatically replace strftime-style date formatting
 characters in the backup destination, you can use the C<--strftime> flag.
 When this is enabled, the C<--purge> flag can also be given, followed by a 
@@ -177,6 +181,10 @@ while(@ARGV > 0) {
 		$purge = shift(@ARGV);
 		$purge =~ /^[0-9\.]+$/ || &usage("--purge must be followed by a number");
 		}
+	elsif ($a eq "--exclude") {
+		$exclude = shift(@ARGV);
+		push(@exclude, $exclude);
+		}
 	else {
 		&usage();
 		}
@@ -250,6 +258,7 @@ if ($test) {
 &$first_print("Starting backup..");
 $start_time = time();
 $strfdest = $strftime ? &backup_strftime($dest) : $dest;
+$opts{'dir'}->{'exclude'} = join("\t", @exclude);
 ($ok, $size, $errdoms) = &backup_domains($strfdest, \@doms, \@bfeats,
 			       $separate,
 			       $ignore_errors,
@@ -316,6 +325,7 @@ if (&has_incremental_tar()) {
 print "                        [--all-virtualmin] | [--virtualmin config]\n";
 print "                        [--option feature name value]\n";
 print "                        [--as-owner]\n";
+print "                        [--exclude file]*\n";
 print "\n";
 print "Multiple domains may be specified with multiple --domain parameters.\n";
 print "Features must be specified using their short names, like web and dns.\n";

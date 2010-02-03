@@ -136,8 +136,8 @@ $ftable .= &ui_links_row(\@links);
 print &ui_table_row(&hlink($text{'backup_features'}, "backup_features"),
 		    $ftable);
 
+# Show virtualmin object backup options
 if (&can_backup_virtualmin()) {
-	# Show virtualmin object backup options
 	$vtable = "";
 	%virts = map { $_, 1 } split(/\s+/, $sched->{'virtualmin'});
 	foreach $vo (@virtualmin_backups) {
@@ -150,6 +150,12 @@ if (&can_backup_virtualmin()) {
 	print &ui_table_row(&hlink($text{'backup_virtualmin'},
 				   "backup_virtualmin"), $vtable);
 	}
+
+# Show files to exclude from each domain
+@exclude = split(/\t+/, $sched->{'exclude'});
+print &ui_table_row(&hlink($text{'backup_exclude'}, 'backup_exclude'),
+	&ui_textarea("exclude", join("\n", @exclude), 5, 80));
+
 print &ui_hidden_table_end("features");
 
 # Show destination fields

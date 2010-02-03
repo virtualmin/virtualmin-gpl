@@ -308,6 +308,10 @@ foreach my $e (&get_backup_excludes($_[0])) {
 	&print_tempfile(XTEMP, "$e\n");
 	&print_tempfile(XTEMP, "./$e\n");
 	}
+foreach my $e (split(/\t+/, $_[2]->{'exclude'})) {
+	&print_tempfile(XTEMP, "$e\n");
+	&print_tempfile(XTEMP, "./$e\n");
+	}
 
 # Exclude all .zfs files, for Solaris
 if ($gconfig{'os_type'} eq 'solaris') {

@@ -110,6 +110,7 @@ foreach $f (@do_features) {
 		$options{$f} = &plugin_call($f, "feature_backup_parse", \%in);
 		}
 	}
+$options{'dir'}->{'exclude'} = join("\t", split(/\r?\n/, $in{'exclude'}));
 
 # Parse Virtualmin feature inputs
 if (&can_backup_virtualmin()) {

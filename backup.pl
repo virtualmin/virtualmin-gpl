@@ -91,6 +91,7 @@ foreach $f (@do_features) {
 	$options{$f} = { map { split(/=/, $_) }
 			  split(/,/, $sched->{'opts_'.$f}) };
 	}
+$options{'dir'}->{'exclude'} = $sched->{'exclude'};
 @vbs = split(/\s+/, $sched->{'virtualmin'});
 
 # Start capturing output
