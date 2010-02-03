@@ -535,13 +535,13 @@ return &ui_select($name, $value,
 		     : ( ) ] );
 }
 
-# create_script_database(&domain, db-spec)
+# create_script_database(&domain, db-spec, [&options])
 # Create a new database for a script. Returns undef on success, or an error
 # message on failure.
 sub create_script_database
 {
-local ($d, $dbspec) = @_;
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+local ($d, $dbspec, $opts) = @_;
+local ($dbtype, $dbname) = split(/_/, $dbspec, 2);
 
 # Check limits (again)
 local ($dleft, $dreason, $dmax) = &count_feature("dbs");
@@ -557,8 +557,7 @@ $cfunc = "check_".$dbtype."_database_clash";
 
 # Work out default creation options
 $ofunc = "default_".$type."_creation_opts";
-local $opts;
-if (defined(&$ofunc)) {
+if (!$opts || defined(&$ofunc)) {
 	$opts = &$ofunc($d);
 	}
 
