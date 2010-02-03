@@ -1452,10 +1452,30 @@ $multibackup_tests = [
 		      @create_args, ],
 	},
 
+	# Create an alias domain to be included, with a dir
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_parallel_domain1 ],
+		      [ 'alias', $test_domain ],
+		      [ 'desc', 'Test alias domain with dir' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      @create_args, ],
+	},
+
+	# Create an alias domain to be included, without a dir
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_parallel_domain2 ],
+		      [ 'alias', $test_domain ],
+		      [ 'desc', 'Test alias domain without dir' ],
+		      [ 'web' ], [ 'dns' ],
+		      @create_args, ],
+	},
+
 	# Back them both up to a directory
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
+		      [ 'domain', $test_parallel_domain1 ],
+		      [ 'domain', $test_parallel_domain2 ],
 		      [ 'all-features' ],
 		      [ 'newformat' ],
 		      [ 'dest', $test_backup_dir ] ],
