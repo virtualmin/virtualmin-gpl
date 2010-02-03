@@ -355,7 +355,8 @@ foreach my $p (@ports) {
 					$vconf, $conf);
 		}
 	else {
-		&apache::save_directive("IPCCommTimeout", [  ], $vconf, $conf);
+		&apache::save_directive("IPCCommTimeout", [ 9999 ],
+					$vconf, $conf);
 		}
 	&flush_file_lines($virt->{'file'});
 	}
@@ -363,12 +364,12 @@ foreach my $p (@ports) {
 }
 
 # get_fcgid_max_execution_time(&domain)
-# Returns the current max FCGId execution time, or undef if not set
+# Returns the current max FCGId execution time, or undef for unlimited
 sub get_fcgid_max_execution_time
 {
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 local $v = &apache::find_directive("IPCCommTimeout", $vconf);
-return $v ? $v-1 : undef;
+return $v == 9999 ? undef : $v ? $v-1 : 40;
 }
 
 # set_php_max_execution_time(&domain, max)
