@@ -556,7 +556,7 @@ $cfunc = "check_".$dbtype."_database_clash";
 &$cfunc($d, $dbname) && return "The database $dbname already exists";
 
 # Work out default creation options
-$ofunc = "default_".$type."_creation_opts";
+$ofunc = "default_".$dbtype."_creation_opts";
 if (!$opts || defined(&$ofunc)) {
 	$opts = &$ofunc($d);
 	}
