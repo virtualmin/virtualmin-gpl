@@ -624,6 +624,46 @@ $script_tests = [
 		      [ 'type', 'wordpress' ] ],
 	},
 
+	# Install with it's own DB
+	{ 'command' => 'install-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'wordpress' ],
+		      [ 'path', '/wordpress' ],
+		      [ 'db', 'mysql '.$test_domain_db.'_wp' ],
+		      [ 'newdb' ],
+		      [ 'version', 'latest' ] ],
+	},
+
+	# Check that it works with it's own DB
+	{ 'command' => $wget_command.'http://'.$test_domain.'/wordpress/',
+	  'grep' => 'WordPress installation',
+	},
+
+	# Check script list
+	{ 'command' => 'list-scripts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Type: wordpress',
+		      'Directory: /home/'.$test_domain_user.
+			'/public_html/wordpress',
+		      'Database: '.$test_domain_db.'_wp ',
+		      'URL: http://'.$test_domain.'/wordpress',
+		    ],
+	},
+
+	# Un-install
+	{ 'command' => 'delete-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'wordpress' ] ],
+	},
+
+	# Make sure the DB is gone
+	{ 'command' => 'list-databases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => '^'.$test_domain_db.'_wp',
+	},
+
 	# Install SugarCRM
 	{ 'command' => 'install-script.pl',
 	  'args' => [ [ 'domain', $test_domain ],
