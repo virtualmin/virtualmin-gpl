@@ -28,6 +28,7 @@ if ($d->{'ssl_same'}) {
 $prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 @tabs = ( [ "current", $text{'cert_tabcurrent'}, $prog."current" ],
 	  [ "csr", $text{'cert_tabcsr'}, $prog."csr" ],
+	  [ "self", $text{'cert_tabself'}, $prog."self" ],
 	  [ "new", $text{'cert_tabnew'}, $prog."new" ],
 	  [ "chain", $text{'cert_tabchain'}, $prog."new" ],
 	);
@@ -124,14 +125,28 @@ print &ui_tabs_start_tab("mode", "csr");
 print "$text{'cert_desc1'}<br>\n";
 print "$text{'cert_desc4'}<p>\n";
 
-# Show warning if there is a CSR outstanding or an existing key
+# Show warning if there is a CSR outstanding
 if ($d->{'ssl_csr'} && -r $d->{'ssl_csr'}) {
 	print "<b>",&text('cert_csrwarn',
 		"<tt>".&home_relative_path($d, $d->{'ssl_csr'})."</tt>",
 		"<tt>".&home_relative_path($d, $d->{'ssl_newkey'})."</tt>"),
 	      "</b><p>\n";
 	}
-elsif ($d->{'ssl_key'} && -r $d->{'ssl_key'}) {
+
+print &ui_form_start("csr.cgi");
+print &ui_hidden("dom", $in{'dom'});
+print &ui_table_start($text{'cert_header1'}, undef, 2);
+&print_cert_fields();
+print &ui_table_end();
+print &ui_form_end([ [ undef, $text{'cert_csrok'} ] ]);
+print &ui_tabs_end_tab();
+
+# Self-signed key generation form
+print &ui_tabs_start_tab("mode", "self");
+print "$text{'cert_desc6'}<p>\n";
+
+# Show warning if there is an existing key
+if ($d->{'ssl_key'} && -r $d->{'ssl_key'}) {
 	print "<b>",&text('cert_keywarn',
 		"<tt>".&home_relative_path($d, $d->{'ssl_cert'})."</tt>",
 		"<tt>".&home_relative_path($d, $d->{'ssl_key'})."</tt>"),
@@ -140,46 +155,11 @@ elsif ($d->{'ssl_key'} && -r $d->{'ssl_key'}) {
 
 print &ui_form_start("csr.cgi");
 print &ui_hidden("dom", $in{'dom'});
-print &ui_table_start($text{'cert_header1'}, undef, 2);
-
-print &ui_table_row($webmin::text{'ssl_cn'},
-		    &ui_textbox("commonName", "www.$d->{'dom'}", 30));
-
-$alts = join("\n", map { "www.".$_->{'dom'} } @others);
-print &ui_table_row($text{'cert_alt'},
-		    &ui_textarea("subjectAltName", $alts, 5, 30));
-
-print &ui_table_row($webmin::text{'ca_email'},
-		    &ui_textbox("emailAddress", $d->{'emailto'}, 30));
-
-print &ui_table_row($webmin::text{'ca_ou'},
-		    &ui_textbox("organizationalUnitName", undef, 30));
-
-print &ui_table_row($webmin::text{'ca_o'},
-		    &ui_textbox("organizationName", $d->{'owner'}, 30));
-
-print &ui_table_row($webmin::text{'ca_city'} || $text{'cert_city'},
-		    &ui_textbox("cityName", undef, 30));
-
-print &ui_table_row($webmin::text{'ca_sp'},
-		    &ui_textbox("stateOrProvinceName", undef, 15));
-
-print &ui_table_row($webmin::text{'ca_c'},
-		    &ui_textbox("countryName", undef, 2));
-
-$key_size = $config{'key_size'};
-$key_size = undef if ($keysize = $webmin::default_key_size);
-print &ui_table_row($webmin::text{'ssl_size'},
-		    &ui_opt_textbox("size", $key_size, 6,
-			    "$text{'default'} ($webmin::default_key_size)").
-			" ".$text{'ssl_bits'});
-
-print &ui_table_row($webmin::text{'ssl_days'},
-		    &ui_textbox("days", 1825, 8));
-
+print &ui_hidden("self", 1);
+print &ui_table_start($text{'cert_header6'}, undef, 2);
+&print_cert_fields();
 print &ui_table_end();
-print &ui_form_end([ [ "ok", $text{'cert_csrok'} ],
-		     [ "self", $text{'cert_self'} ] ]);
+print &ui_form_end([ [ undef, $text{'cert_self'} ] ]);
 print &ui_tabs_end_tab();
 
 # New key and cert form, for using existing key
@@ -260,3 +240,42 @@ if (defined(&theme_select_domain)) {
 &ui_print_footer(&domain_footer_link($d),
 		 "", $text{'index_return'});
 
+sub print_cert_fields
+{
+print &ui_table_row($webmin::text{'ssl_cn'},
+		    &ui_textbox("commonName", "www.$d->{'dom'}", 30));
+
+$alts = join("\n", map { "www.".$_->{'dom'} } @others);
+print &ui_table_row($text{'cert_alt'},
+		    &ui_textarea("subjectAltName", $alts, 5, 30));
+
+print &ui_table_row($webmin::text{'ca_email'},
+		    &ui_textbox("emailAddress", $d->{'emailto'}, 30));
+
+print &ui_table_row($webmin::text{'ca_ou'},
+		    &ui_textbox("organizationalUnitName", undef, 30));
+
+print &ui_table_row($webmin::text{'ca_o'},
+		    &ui_textbox("organizationName", $d->{'owner'}, 30));
+
+print &ui_table_row($webmin::text{'ca_city'} || $text{'cert_city'},
+		    &ui_textbox("cityName", undef, 30));
+
+print &ui_table_row($webmin::text{'ca_sp'},
+		    &ui_textbox("stateOrProvinceName", undef, 15));
+
+print &ui_table_row($webmin::text{'ca_c'},
+		    &ui_textbox("countryName", undef, 2));
+
+$key_size = $config{'key_size'};
+$key_size = undef if ($keysize = $webmin::default_key_size);
+print &ui_table_row($webmin::text{'ssl_size'},
+		    &ui_opt_textbox("size", $key_size, 6,
+			    "$text{'default'} ($webmin::default_key_size)").
+			" ".$text{'ssl_bits'});
+
+print &ui_table_row($webmin::text{'ssl_days'},
+		    &ui_textbox("days", 1825, 8));
+
+
+}
