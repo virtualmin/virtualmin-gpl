@@ -3100,6 +3100,12 @@ $rename_tests = [
 	# Get rid of the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_rename_domain ] ],
+	  'ignorefail' => 1,
+	  'cleanup' => 1
+        },
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'ignorefail' => 1,
 	  'cleanup' => 1
         },
 	];
