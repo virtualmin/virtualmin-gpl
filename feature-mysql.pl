@@ -1091,7 +1091,8 @@ if ($mysql::mysql_version >= 4.1) {
 		[ $tmpl->{'default'} ? ( ) :
 		    ( [ "", "&lt;$text{'tmpl_mysql_charsetdef'}&gt;" ] ),
 		  [ "none", "&lt;$text{'tmpl_mysql_charsetnone'}&gt;" ],
-		  &mysql::list_character_sets() ]));
+		  map { [ $_->[0], $_->[0]." (".$_->[1].")" ] }
+		      &mysql::list_character_sets() ]));
 	}
 
 if ($mysql::mysql_version >= 5) {
@@ -1176,9 +1177,10 @@ if ($mysql::mysql_version >= 4.1) {
 	local $cs = $tmpl->{'mysql_charset'};
 	$cs = "" if ($cs eq "none");
 	$rv .= &ui_table_row($text{'database_charset'},
-			     &ui_select("mysql_charset", $cs,
-					[ [ undef, "&lt;$text{'default'}&gt;" ],
-					  @charsets ]));
+		     &ui_select("mysql_charset", $cs,
+				[ [ undef, "&lt;$text{'default'}&gt;" ],
+				  map { [ $_->[0], $_->[0]." (".$_->[1].")" ] }
+				      @charsets ]));
 
 	# Collation order
 	local $cl = $tmpl->{'mysql_collate'};
