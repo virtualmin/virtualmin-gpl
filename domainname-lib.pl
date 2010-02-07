@@ -23,11 +23,17 @@ else {
 	}
 
 my $rv;
-if ($config{'name_max'} && scalar(@chars)+3 > $config{'name_max'}) {
-	# Show first and last max/2 chars, with ... between.
-	my $s = int($config{'name_max'} / 2) - 2;
-	$rv = join("", @chars[0 .. $s-1])."...".
-	      join("", @chars[$#chars-$s .. $#chars]);
+if ($config{'name_max'} && scalar(@chars) > $config{'name_max'}+3) {
+	if ($config{'name_mode'}) {
+		# Cut off chars at end, replace with ..
+		$rv = join("", @chars[0..$config{'name_max'}])."...";
+		}
+	else {
+		# Show first and last max/2 chars, with ... between.
+		my $s = int($config{'name_max'} / 2);
+		$rv = join("", @chars[0 .. $s-1])."...".
+		      join("", @chars[$#chars-$s .. $#chars]);
+		}
 	}
 else {
 	$rv = $show;
