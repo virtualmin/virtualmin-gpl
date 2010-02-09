@@ -184,3 +184,4 @@ max_backups=3
 max_all=1
 max_manual=0
 trash_folder=trash
+upload_tries=3

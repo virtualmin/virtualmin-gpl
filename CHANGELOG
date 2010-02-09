@@ -1211,3 +1211,5 @@ Added a 'status' section to the 'info' API command, to get the collected status 
 When lowering a virtual server's disk quota below the current usage a warning is displayed asking the user if he really wants to do that.
 Added a field to the backup form as the backup-domain API command to exclude some files from each domain's backup.
 Separated the creation of a CSR from a self-signed certificate on the Manage SSL Certificate page.
+---- Changes since 3.77 ----
+FTP backup transfers are now re-tried up to 3 times, configurable on the Module Config page.

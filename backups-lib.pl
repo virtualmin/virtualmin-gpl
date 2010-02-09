@@ -541,7 +541,8 @@ DOMAIN: foreach $d (@$doms) {
 			# Via FTP
 			&$first_print($text{'backup_upload'});
 			&ftp_upload($server, "$path/$df", "$dest/$df", \$err,
-				    undef, $user, $pass, $port);
+				    undef, $user, $pass, $port,
+				    $ftp_upload_tries);
 			}
 		if ($mode == 3) {
 			# Via S3 upload
@@ -780,7 +781,8 @@ if ($ok && $mode == 1 && (@destfiles || !$dirfmt)) {
 			local $tstart = time();
 			local $d = $destfiles_map{$df};
 			&ftp_upload($server, "$path/$df", "$dest/$df", \$err,
-				    undef, $user, $pass, $port);
+				    undef, $user, $pass, $port,
+				    $ftp_upload_tries);
 			if ($err) {
 				&$second_print(
 					&text('backup_uploadfailed', $err));
@@ -799,7 +801,7 @@ if ($ok && $mode == 1 && (@destfiles || !$dirfmt)) {
 		# Just a single file
 		local $tstart = time();
 		&ftp_upload($server, $path, $dest, \$err, undef, $user, $pass,
-			    $port);
+			    $port, $ftp_upload_tries);
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
 			$ok = 0;

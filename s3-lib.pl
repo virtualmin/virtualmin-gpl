@@ -1,7 +1,6 @@
 # Functions for talking to Amazon's S3 service
 
 @s3_perl_modules = ( "S3::AWSAuthConnection", "S3::QueryStringAuthGenerator" );
-$s3_upload_tries = 3;
 
 # check_s3()
 # Returns an error message if S3 cannot be used
