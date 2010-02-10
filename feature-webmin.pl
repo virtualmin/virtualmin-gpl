@@ -12,13 +12,15 @@ sub setup_webmin
 &$first_print($text{'setup_webmin'});
 &obtain_lock_webmin($_[0]);
 &require_acl();
+local $tmpl = &get_template($_[0]->{'template'});
 local ($wuser) = grep { $_->{'name'} eq $_[0]->{'user'} }
 		      &acl::list_users();
 if ($wuser) {
-	# Update the modules for this Webmin user
+	# Update the modules for existing Webmin user
 	&set_user_modules($_[0], $wuser);
 	}
 else {
+	# Create a new user
 	local @modules;
 	local %wuser = ( 'name' => $_[0]->{'user'},
 			 'pass' => $_[0]->{'unix'} ? 'x' :
@@ -32,6 +34,16 @@ else {
 			 );
 	&acl::create_user(\%wuser);
 	&set_user_modules($_[0], \%wuser);
+
+	# Add to Webmin group
+	if ($tmpl->{'webmin_group'} ne 'none') {
+		local ($group) = grep { $_->{'name'} eq
+				$tmpl->{'webmin_group'} } &acl::list_groups();
+		if ($group) {
+			push(@{$group->{'members'}}, $wuser{'name'});
+			&acl::modify_group($group->{'name'}, $group);
+			}
+		}
 	}
 &update_extra_webmin($_[0]);
 &release_lock_webmin($_[0]);
@@ -54,12 +66,24 @@ sub delete_webmin
 &$first_print($text{'delete_webmin'});
 &obtain_lock_webmin($_[0]);
 &require_acl();
+
+# Delete the user
 &acl::delete_user($_[0]->{'user'});
 local $m;
 foreach $m (&get_all_module_infos()) {
 	&unlink_logged("$config_directory/$m->{'dir'}/$_[0]->{'user'}.acl");
 	}
 &update_extra_webmin($_[0]);
+
+# Delete from any groups
+foreach my $group (&acl::list_groups()) {
+	local $idx = &indexof($_[0]->{'user'}, @{$group->{'members'}});
+	if ($idx >= 0) {
+		splice(@{$group->{'members'}}, $idx, 1);
+		&acl::modify_group($group->{'name'}, $group);
+		}
+	}
+
 &release_lock_webmin($_[0]);
 &register_post_action(\&restart_webmin);
 &$second_print($text{'setup_done'});
@@ -114,6 +138,16 @@ if (!$_[0]->{'parent'}) {
 		$wuser->{'real'} = $_[0]->{'owner'};
 		$wuser->{'name'} = $_[0]->{'user'};
 		&acl::modify_user($_[1]->{'user'}, $wuser);
+
+		# Rename in groups too
+		foreach my $group (&acl::list_groups()) {
+			local $idx = &indexof($_[1]->{'user'},
+					      @{$group->{'members'}});
+			if ($idx >= 0) {
+				$group->{'members'}->[$idx] = $_[0]->{'user'};
+				&acl::modify_group($group->{'name'}, $group);
+				}
+			}
 		}
 	elsif ($_[0]->{'owner'} ne $_[1]->{'owner'}) {
 		# Need to update owner
