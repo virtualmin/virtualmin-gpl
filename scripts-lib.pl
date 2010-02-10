@@ -545,7 +545,7 @@ local ($dbtype, $dbname) = split(/_/, $dbspec, 2);
 
 # Check limits (again)
 local ($dleft, $dreason, $dmax) = &count_feature("dbs");
-if ($dleft == 1) {
+if ($dleft == 0) {
 	return "You are not allowed to create any more databases";
 	}
 if (!&can_edit_databases()) {
