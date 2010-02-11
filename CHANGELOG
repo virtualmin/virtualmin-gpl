@@ -1213,3 +1213,4 @@ Added a field to the backup form as the backup-domain API command to exclude som
 Separated the creation of a CSR from a self-signed certificate on the Manage SSL Certificate page.
 ---- Changes since 3.77 ----
 FTP backup transfers are now re-tried up to 3 times, configurable on the Module Config page.
+Updated the osTicket script installer to version 1.6.0.
