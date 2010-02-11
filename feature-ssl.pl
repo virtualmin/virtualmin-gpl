@@ -1111,7 +1111,7 @@ else {
 	foreach my $a (@{$info->{'alt'}}) {
 		if (lc($a) eq $dname ||
 		    $a =~ /^\*\.(\S+)$/ &&
-		    (lc($dname) eq lc($1) || $dname =~ /\.\Q$a\E$/i)) {
+		    (lc($dname) eq lc($1) || $dname =~ /\.\Q$1\E$/i)) {
 			return 1;
 			}
 		}
