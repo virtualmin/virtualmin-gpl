@@ -42,6 +42,10 @@ else {
 		}
 	}
 
+# Re-check the public html directory
+&find_html_cgi_dirs($d);
+&save_domain($d);
+
 # Check depends again
 $derr = &check_script_depends($script, $d, $ver, $sinfo);
 &error(&text('scripts_edep', $derr)) if ($derr);

@@ -199,6 +199,10 @@ $d->{'web'} && $d->{'dir'} ||
 	&usage("Scripts can only be installed into virtual servers with a ".
 	       "website and home directory");
 
+# Re-check the public html directory
+&find_html_cgi_dirs($d);
+&save_domain($d);
+
 # Validate options
 if ($opts->{'path'}) {
 	# Convert the path into a directory
