@@ -38,3 +38,6 @@
 
  - Include bounced / greylisted messages in system stats
 	- https://www.virtualmin.com/node/13113
+
+ - Allow restore from uploaded file
+
