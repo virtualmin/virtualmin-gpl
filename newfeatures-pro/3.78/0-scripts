@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the osTicket script installer to version 1.6.0, MoinMoin to 1.8.7, Magento to 1.4.0.0, Zikula to 1.2.2, and WordPress to 2.9.2.
+html=Updated the osTicket script installer to version 1.6.0, MoinMoin to 1.8.7, Magento to 1.4.0.0, Zikula to 1.2.2, Redmine to 0.9.2, and WordPress to 2.9.2.
 master=1
 reseller=1
 domain=1
