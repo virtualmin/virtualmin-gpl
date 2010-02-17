@@ -480,6 +480,7 @@ local %acl = ( 'noconfig' => 1,
 	       'nodbname' => $_[0]->{'nodbname'},
 	       'norename' => $_[0]->{'norename'},
 	       'forceunder' => $_[0]->{'forceunder'},
+	       'safeunder' => $_[0]->{'safeunder'},
 	       'domains' => join(" ", map { $_->{'id'} } @doms),
 	       'admin' => $_[2] ? $_[0]->{'id'} : undef,
 	      );

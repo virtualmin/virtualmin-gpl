@@ -1,0 +1,4 @@
+desc=Parent domain restriction
+html=Added a plan and domain-owner level restriction to prevent creation of virtual servers under other user's domains.
+master=1
+link=edit_limits.cgi?dom=${ID}

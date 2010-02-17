@@ -114,6 +114,8 @@ elsif ($multiline) {
 			$plan->{'norename'} ? "No" : "Yes","\n";
 		print "    Can create sub-servers under any domain: ",
 			$plan->{'forceunder'} ? "No" : "Yes","\n";
+		print "    Can create sub-servers under other domains: ",
+			($plan->{'safeunder'} ? "Yes" : "No"),"\n";
 
 		# Allowed features
 		print "    Allowed features: ",

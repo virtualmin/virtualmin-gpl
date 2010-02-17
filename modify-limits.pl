@@ -132,6 +132,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--noforce-under") {
 		$noforceunder = 1;
 		}
+	elsif ($a eq "--safe-under") {
+		$safeunder = 1;
+		}
+	elsif ($a eq "--nosafe-under") {
+		$nosafeunder = 1;
+		}
 	elsif ($a eq "--read-only") {
 		$readonly = 1;
 		}
@@ -226,6 +232,8 @@ $dom->{'norename'} = $canrename ? 0 :
 		     $cannotrename ? 1 : $dom->{'norename'};
 $dom->{'forceunder'} = $forceunder ? 1 :
 		       $noforceunder ? 0 : $dom->{'forceunder'};
+$dom->{'safeunder'} = $safeunder ? 1 :
+		      $nosafeunder ? 0 : $dom->{'safeunder'};
 $dom->{'readonly'} = $readonly ? 1 :
 		     $readwrite ? 0 : $dom->{'readonly'};
 foreach $a (@allow) {

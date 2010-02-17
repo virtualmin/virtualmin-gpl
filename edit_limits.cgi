@@ -76,6 +76,11 @@ print &ui_table_row(&hlink($text{'limits_forceunder'}, "limits_forceunder"),
 	&ui_radio("forceunder", $d->{'forceunder'} ? 1 : 0,
 	       [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
 
+# Disallow domains under other people's domains
+print &ui_table_row(&hlink($text{'limits_safeunder'}, "limits_safeunder"),
+	&ui_radio("safeunder", $d->{'safeunder'} ? 1 : 0,
+	       [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
+
 # Mongrel instances
 if ($virtualmin_pro) {
 	print &ui_table_row(&hlink($text{'limits_mongrels'}, "limits_mongrels"),

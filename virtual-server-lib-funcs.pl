@@ -5079,6 +5079,7 @@ if (!$_[3]->{'fix'}) {
 	$_[0]->{'nodbname'} = $oldd{'nodbname'};
 	$_[0]->{'norename'} = $oldd{'norename'};
 	$_[0]->{'forceunder'} = $oldd{'forceunder'};
+	$_[0]->{'safeunder'} = $oldd{'safeunder'};
 	foreach my $f (@opt_features, &list_feature_plugins(), "virt") {
 		$_[0]->{'limit_'.$f} = $oldd{'limit_'.$f};
 		}
@@ -7112,6 +7113,7 @@ push(@rv, { 'id' => 0,
 	    'nodbname' => $config{'defnodbname'},
 	    'norename' => $config{'defnorename'},
 	    'forceunder' => $config{'defforceunder'},
+	    'safeunder' => $config{'defsafeunder'},
 	    'resources' => $config{'defresources'} || "none",
 	    'ranges' => $config{'ip_ranges'} || "none",
 	    'ranges6' => $config{'ip_ranges6'} || "none",
@@ -7393,6 +7395,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'defnodbname'} = $tmpl->{'nodbname'};
 	$config{'defnorename'} = $tmpl->{'norename'};
 	$config{'defforceunder'} = $tmpl->{'forceunder'};
+	$config{'defsafeunder'} = $tmpl->{'safeunder'};
 	$config{'defresources'} = $tmpl->{'resources'};
 	&uncat_file("framefwd-template", $tmpl->{'frame'});
 	$config{'ip_ranges'} = $tmpl->{'ranges'} eq 'none' ? undef :
@@ -7510,8 +7513,8 @@ if (!$tmpl->{'default'}) {
 		    "disabled_web", "disabled_url",
 		    "php", "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "spamtrap", "namedconf",
-		    "nodbname", "norename", "forceunder", "aliascopy", "bccto",
-		    "resources", "dnssec", "avail",
+		    "nodbname", "norename", "forceunder", "safeunder",
+		    "aliascopy", "bccto", "resources", "dnssec", "avail",
 		    @plugins,
 		    @php_wrapper_templates,
 		    "capabilities",
@@ -8280,20 +8283,39 @@ if (defined($user->{'dbs'})) {
 # Checks domain-owner subdomain and reseller subdomain limits.
 sub allowed_domain_name
 {
-if ($_[0] && $access{'forceunder'}) {
-	local $pd = $_[0]->{'dom'};
-	if ($_[1] !~ /\.\Q$pd\E$/i) {
-		return &text('setup_eforceunder', $parentdom->{'dom'});
+local ($parent, $newdom) = @_;
+
+# Check if forced to be under sub-domain
+if ($parent && $access{'forceunder'}) {
+	local $pd = $parent->{'dom'};
+	if ($newdom !~ /\.\Q$pd\E$/i) {
+		return &text('setup_eforceunder', $pd);
 		}
 	}
+
+# Check if under someone else's domain
+if ($parent && $access{'safeunder'}) {
+	foreach my $d (&list_domains()) {
+		local $od = $d->{'dom'};
+		if ($d->{'id'} ne $parent->{'id'} &&
+		    $d->{'parent'} ne $parent->{'id'} &&
+		    $newdom =~ /\.\Q$od\E$/i) {
+			return &text('setup_esafeunder', $od);
+			}
+		}
+	}
+
+# Check allowed domain regexp
 if ($access{'subdom'}) {
-	if ($_[1] !~ /\.\Q$access{'subdom'}\E$/i) {
+	if ($newdom !~ /\.\Q$access{'subdom'}\E$/i) {
 		return &text('setup_eforceunder', $access{'subdom'});
 		}
 	}
+
+# Check if on denied list
 if (!&master_admin()) {
 	foreach my $re (split(/\s+/, $config{'denied_domains'})) {
-		if ($_[1] =~ /^$re$/i) {
+		if ($newdom =~ /^$re$/i) {
 			return $text{'setup_edenieddomain'};
 			}
 		}

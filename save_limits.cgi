@@ -32,6 +32,7 @@ $d->{'realdomslimit'} = $in{'realdomslimit_def'} == 1 ? undef
 $d->{'nodbname'} = $in{'nodbname'};
 $d->{'norename'} = $in{'norename'};
 $d->{'forceunder'} = $in{'forceunder'};
+$d->{'safeunder'} = $in{'safeunder'};
 if ($virtualmin_pro) {
 	$in{'mongrels_def'} || $in{'mongrels'} =~ /^[1-9][0-9]*$/ ||
 		&error($text{'limits_emongrels'});
