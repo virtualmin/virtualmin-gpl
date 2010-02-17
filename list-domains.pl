@@ -33,7 +33,9 @@ can use the C<--any-reseller> option.
 To get a list of domain names only, use the C<--name-only> parameter. To get
 just Virtualmin domain IDs, use C<--id-only>. These are useful when iterating
 through domains in a script. You can also use C<--user-only> to output only
-usernames, or C<--home-only> to get just home directories.
+usernames, or C<--home-only> to get just home directories, or 
+C<--simple-multiline> to get a faster subset of the information output in
+C<--multiline> mode.
 
 =cut
 
@@ -61,6 +63,9 @@ while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--multiline") {
 		$multi = 1;
+		}
+	elsif ($a eq "--simple-multiline") {
+		$multi = 2;
 		}
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
@@ -190,6 +195,11 @@ if ($multi) {
 	$resok = defined(&supports_resource_limits) &&
 		 &supports_resource_limits();
 	@tmpls = &list_templates();
+	@fplugins = &list_feature_plugins();
+	if ($multi == 1) {
+		$hs = &quota_bsize("home");
+		$ms = &quota_bsize("mail");
+		}
 	foreach $d (@doms) {
 		local @users = &list_domain_users($d, 0, 1, 0, 1);
 		local ($duser) = grep { $_->{'user'} eq $d->{'user'} } @users;
@@ -248,8 +258,14 @@ if ($multi) {
 			print "    Disabled: $dwhy\n";
 			}
 		if ($d->{'virt'}) {
-			local $iface = &get_address_iface($d->{'ip'});
-			print "    IP address: $d->{'ip'} (On $iface)\n";
+			if ($multi == 2) {
+				print "    IP address: $d->{'ip'} (Private)\n";
+				}
+			else {
+				local $iface = &get_address_iface($d->{'ip'});
+				print "    IP address: $d->{'ip'} ",
+				      "(On $iface)\n";
+				}
 			}
 		else {
 			print "    IP address: $d->{'ip'} (Shared)\n";
@@ -257,43 +273,54 @@ if ($multi) {
 		if ($d->{'virt6'}) {
 			print "    IPv6 address: $d->{'ip6'}\n";
 			}
-		print "    Features: ",join(" ", grep { $d->{$_} } @features),"\n";
-		if (&list_feature_plugins()) {
-			print "    Plugins: ",join(" ", grep { $d->{$_} } &list_feature_plugins()),"\n";
-			}
+		print "    Features: ",
+			join(" ", grep { $d->{$_} } @features),"\n";
+		print "    Plugins: ",
+			join(" ", grep { $d->{$_} } @fplugins),"\n";
 		if (&has_home_quotas() && !$d->{'parent'}) {
-			($qhome, $qmail) = &get_domain_quota($d);
-			$hs = &quota_bsize("home");
-			$ms = &quota_bsize("mail");
 			print "    Server quota: ",
 			      &quota_show($d->{'quota'}, "home"),"\n";
 			print "    Server block quota: ",
 			      ($d->{'quota'} || "Unlimited"),"\n";
-			print "    Server quota used: ",
-			      &nice_size($qhome*$hs + $qmail*$ms),"\n";
-			print "    Server block quota used: ",
-			      ($qhome + $qmail),"\n";
+			if ($multi == 1) {
+				($qhome, $qmail) = &get_domain_quota($d);
+				print "    Server quota used: ",
+				      &nice_size($qhome*$hs + $qmail*$ms),"\n";
+				print "    Server block quota used: ",
+				      ($qhome + $qmail),"\n";
+				}
 			print "    User quota: ",
 			      &quota_show($d->{'uquota'}, "home"),"\n";
 			print "    User block quota: ",
 			      ($d->{'uquota'} || "Unlimited"),"\n";
-			print "    User quota used: ",
-			      &nice_size($duser->{'uquota'}*$hs +
-					 $duser->{'umquota'}*$ms),"\n";
-			print "    User block quota used: ",
-			      ($duser->{'uquota'} + $duser->{'umquota'}),"\n";
+			if ($multi == 1) {
+				print "    User quota used: ",
+				      &nice_size($duser->{'uquota'}*$hs +
+						 $duser->{'umquota'}*$ms),"\n";
+				print "    User block quota used: ",
+				      ($duser->{'uquota'} +
+				       $duser->{'umquota'}),"\n";
+				}
 			}
-		@dbs = &domain_databases($d);
-		if (@dbs) {
-			$dbquota = &get_database_usage($d);
-			print "    Databases count: ",scalar(@dbs),"\n";
-			print "    Databases size: ",&nice_size($dbquota),"\n";
+		if ($multi == 1) {
+			@dbs = &domain_databases($d);
+			if (@dbs) {
+				$dbquota = &get_database_usage($d);
+				print "    Databases count: ",
+				      scalar(@dbs),"\n";
+				print "    Databases size: ",
+				      &nice_size($dbquota),"\n";
+				}
 			}
 		if ($config{'bw_active'} && !$d->{'parent'}) {
-			print "    Bandwidth limit: ",($d->{'bw_limit'} ? &nice_size($d->{'bw_limit'}) : "Unlimited"),"\n";
+			print "    Bandwidth limit: ",
+			    ($d->{'bw_limit'} ? &nice_size($d->{'bw_limit'})
+					      : "Unlimited"),"\n";
 			if (defined($d->{'bw_usage'})) {
-				print "    Bandwidth start: ",&make_date($d->{'bw_start'}*(24*60*60), 1),"\n";
-				print "    Bandwidth usage: ",&nice_size($d->{'bw_usage'}),"\n";
+				print "    Bandwidth start: ",
+				    &make_date($d->{'bw_start'}*(24*60*60), 1),"\n";
+				print "    Bandwidth usage: ",
+				    &nice_size($d->{'bw_usage'}),"\n";
 				}
 			if ($config{'bw_disable'}) {
 				print "    Disable if over bandwidth limit: ",
@@ -305,33 +332,36 @@ if ($multi) {
 			}
 
 		# Show spam and virus delivery
-		foreach $w ('spam', 'virus') {
-			next if (!$config{$w} || !$d->{$w});
-			$func = "get_domain_${w}_delivery";
-			($mode, $dest, $slevel) = &$func($d);
-			$msg = $mode == -1 ? "Not configured!" :
-			       $mode == 0 ? "Throw away" :
-			       $mode == 1 ? "Mail file under home $dest" :
-			       $mode == 2 ? "Forward to $dest" :
-			       $mode == 3 ? "Mail file $dest" :
-			       $mode == 4 ? "Default mail file" :
-			       $mode == 5 ? "Deliver normally" :
-			       $mode == 6 ? "Default mail directory" :
-					    "???";
-			print "    ".ucfirst($w)." delivery: $msg\n";
-			if ($w eq 'spam' && $slevel) {
-				print "    Spam deletion level: $slevel\n";
+		if ($multi == 1) {
+			foreach $w ('spam', 'virus') {
+				next if (!$config{$w} || !$d->{$w});
+				$func = "get_domain_${w}_delivery";
+				($mode, $dest, $slevel) = &$func($d);
+				$msg = $mode == -1 ? "Not configured!" :
+				       $mode == 0 ? "Throw away" :
+				       $mode == 1 ? "Mail file under home $dest" :
+				       $mode == 2 ? "Forward to $dest" :
+				       $mode == 3 ? "Mail file $dest" :
+				       $mode == 4 ? "Default mail file" :
+				       $mode == 5 ? "Deliver normally" :
+				       $mode == 6 ? "Default mail directory" :
+						    "???";
+				print "    ".ucfirst($w)." delivery: $msg\n";
+				if ($w eq 'spam' && $slevel) {
+					print "    Spam deletion level: ",
+					      "$slevel\n";
+					}
 				}
 			}
 
 		# Show spam filtering client
-		if ($config{'spam'} && $d->{'spam'}) {
+		if ($config{'spam'} && $d->{'spam'} && $multi == 1) {
 			$c = &get_domain_spam_client($d);
 			print "    SpamAssassin client: $c\n";
 			}
 
 		# Show spam clearing setting
-		if ($config{'spam'} && $d->{'spam'}) {
+		if ($config{'spam'} && $d->{'spam'} && $multi == 1) {
 			$auto = &get_domain_spam_autoclear($d);
 			print "    Spam clearing policy: ",
 			      (!$auto ? "None" :
@@ -341,7 +371,7 @@ if ($multi) {
 
 		# Show PHP and suexec execution mode
 		if ($config{'web'} && $d->{'web'} &&
-		    defined(&get_domain_php_mode)) {
+		    defined(&get_domain_php_mode) && $multi == 1) {
 			$p = &get_domain_php_mode($d);
 			print "    PHP execution mode: $p\n";
 			$s = &get_domain_suexec($d);
@@ -349,41 +379,42 @@ if ($multi) {
 			      ($s ? "enabled" : "disabled"),"\n";
 			}
 		if ($config{'web'} && $d->{'web'} &&
-		    defined(&get_domain_php_children)) {
+		    defined(&get_domain_php_children) && $multi == 1) {
 			$childs = &get_domain_php_children($d);
 			print "    PHP fCGId subprocesses: ",
 				$childs < 0 ? "Not set" :
 				$childs == 0 ? "None" : $childs,"\n";
 			}
 		if ($config{'web'} && $d->{'web'} &&
-		    defined(&list_domain_php_directories)) {
+		    defined(&list_domain_php_directories) && $multi == 1) {
 			($dir) = &list_domain_php_directories($d);
 			if ($dir) {
 				print "    PHP version: $dir->{'version'}\n";
 				}
 			}
 		if ($config{'web'} && $d->{'web'} &&
-		    defined(&get_domain_ruby_mode)) {
+		    defined(&get_domain_ruby_mode) && $multi == 1) {
 			$p = &get_domain_ruby_mode($d) || "none";
 			print "    Ruby execution mode: $p\n";
 			}
 
 		# Show webmail redirects
-		if (&has_webmail_rewrite() && $d->{'web'} && !$d->{'alias'}) {
+		if (&has_webmail_rewrite() && $d->{'web'} && !$d->{'alias'} &&
+		    $multi == 1) {
 			@wm = &get_webmail_redirect_directives($d);
 			print "    Webmail redirects: ",
 				(@wm ? "Yes" : "No"),"\n";
 			}
 
 		# Show star web server alias
-		if ($d->{'web'} && !$d->{'alias'}) {
+		if ($d->{'web'} && !$d->{'alias'} && $multi == 1) {
 			$star = &get_domain_web_star($d);
 			print "    Match all web sub-domains: ",
 			      ($star ? "Yes" : "No"),"\n";
 			}
 
 		# Show default website flag
-		if ($d->{'web'} &&
+		if ($d->{'web'} && $multi == 1 &&
 		    (!$d->{'alias'} || $d->{'alias_mode'} != 1)) {
 			($defvirt, $defd) = &get_default_website($d);
 			print "    Default website for IP: ",
@@ -392,14 +423,15 @@ if ($multi) {
 			}
 
 		# Show DNS SPF mode
-		if ($config{'dns'} && $d->{'dns'} && !$d->{'dns_submode'}) {
+		if ($config{'dns'} && $d->{'dns'} && !$d->{'dns_submode'} &&
+		    $multi == 1) {
 			$spf = &get_domain_spf($d);
 			print "    SPF DNS record: ",
 			      ($spf ? "Enabled" : "Disabled"),"\n";
 			}
 
 		# Show BCC setting
-		if ($config{'mail'} && $supports_bcc) {
+		if ($config{'mail'} && $supports_bcc && $multi == 1) {
 			$bcc = &get_domain_sender_bcc($d);
 			if ($bcc) {
 				print "    BCC email to: $bcc\n";
@@ -453,13 +485,14 @@ if ($multi) {
 					@shells;
 			if ($shell) {
 				print "    Shell type: $shell->{'id'}\n";
-				print "    Login permissions: $shell->{'desc'}\n";
+				print "    Login permissions: ",
+				      "$shell->{'desc'}\n";
 				}
 			print "    Shell command: $duser->{'shell'}\n";
 			}
 
 		# Show resource limits
-		if (!$d->{'parent'} && $resok) {
+		if (!$d->{'parent'} && $resok && $multi == 1) {
 			$rv = &get_domain_resource_limits($d);
 			print "    Maximum processes: ",
 				$rv->{'procs'} || "Unlimited","\n";
@@ -479,7 +512,7 @@ if ($multi) {
 			}
 
 		# Show allowed DB hosts
-		if (!$d->{'parent'}) {
+		if (!$d->{'parent'} && $multi == 1) {
 			foreach $f (@database_features) {
 				$gfunc = "get_".$f."_allowed_hosts";
 				if (defined(&$gfunc)) {
@@ -531,7 +564,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Lists the virtual servers on this system.\n";
 print "\n";
 print "virtualmin list-domains [--multiline | --name-only | --id-only |\n";
-print "                         --user-only | --home-only]\n";
+print "                         --simple-multiline | --user-only | --home-only]\n";
 print "                        [--domain name]*\n";
 print "                        [--user name]*\n";
 print "                        [--id number]*\n";
