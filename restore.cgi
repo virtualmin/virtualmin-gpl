@@ -4,7 +4,7 @@
 require './virtual-server-lib.pl';
 $crmode = &can_restore_domain();
 $crmode || &error($text{'restore_ecannot'});
-&ReadParse();
+&ReadParseMime();
 
 # Work out the current user's main domain, if needed
 if ($crmode == 2) {
@@ -18,6 +18,26 @@ if ($in{'src'}) {
 	}
 else {
 	$src = &parse_backup_destination("src", \%in, $crmode == 2, $d);
+	}
+$origsrc = $in{'origsrc'} || $src;
+$nice = &nice_backup_url($src);
+if ($src eq "upload:") {
+	# Special case - uploaded data, which we need to save locally
+	$fn = $in{'src_upload_filename'};
+	$fn =~ s/^.*[\\\/]//;
+	if ($d) {
+		$temp = "$d->{'home'}/virtualmin-backup/$fn";
+		&open_tempfile_as_domain_user($d, TEMP, ">$temp", 0, 1);
+		&print_tempfile(TEMP, $in{'src_upload'});
+		&close_tempfile_as_domain_user($d, TEMP);
+		}
+	else {
+		$temp = &tempname($fn);
+		&open_tempfile(TEMP, ">$temp", 0, 1);
+		&print_tempfile(TEMP, $in{'src_upload'});
+		&close_tempfile(TEMP);
+		}
+	$src = $temp;
 	}
 ($mode) = &parse_backup_url($src);
 $mode > 0 || -r $src || -d $src || &error($text{'restore_esrc'});
@@ -123,10 +143,10 @@ else {
 	&ui_print_header(undef, $text{'restore_title'}, "");
 	}
 
-$nice = &nice_backup_url($src);
 if (!$in{'confirm'}) {
 	# Tell the user what will be done
-	print &ui_form_start("restore.cgi", "post");
+	print &ui_form_start("restore.cgi", "form-data");
+	print &ui_hidden("origsrc", $origsrc);
 	print &text('restore_from', $nice),"<p>\n";
 
 	# Check for missing features
@@ -232,6 +252,10 @@ else {
 		}
 	else {
 		print &text('restore_failed'),"<p>\n";
+		}
+	if ($origsrc eq "upload:") {
+		# Delete uploaded temp file
+		&unlink_file($src);
 		}
 	&webmin_log("restore", $src, undef,
 		    { 'doms' => [ map { $_->{'dom'} } @doms ] });

@@ -27,17 +27,16 @@ if ($crmode == 2) {
 	}
 
 @tds = ( "width=30%" );
-print &ui_form_start("restore.cgi", "post");
+print &ui_form_start("restore.cgi", "form-data");
 print &ui_hidden_table_start($text{'restore_sourceheader'}, "width=100%", 2,
 			     "source", 1, \@tds);
 
 # Show source file field
 if ($dest eq "download:") {
-	# Not possible for restores
-	$dest = "/";
+	$dest = "upload:";
 	}
 print &ui_table_row($text{'restore_src'},
-	&show_backup_destination("src", $dest, $crmode == 2, $d, 1, 1));
+	&show_backup_destination("src", $dest, $crmode == 2, $d, 1, 0));
 print &ui_hidden_table_end("source");
 
 # Show feature selection boxes
