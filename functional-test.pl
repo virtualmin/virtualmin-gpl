@@ -1159,6 +1159,20 @@ $aliasdom_tests = [
 	  'fail' => 1,
 	},
 
+	# Delete the alias domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Re-create the alias domain
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'alias', $test_target_domain ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      @create_args, ],
+	},
+
 	# Cleanup the target domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_target_domain ] ],
