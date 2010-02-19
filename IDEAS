@@ -40,3 +40,11 @@
 	- https://www.virtualmin.com/node/13113
 
  - SuExec PHP support in GPL version
+
+ - Backup to multiple destinations
+	- https://www.virtualmin.com/node/13450
+	- API too
+	- CHANGELOG
+
+ - Reseller DNS access (and maybe more)
+

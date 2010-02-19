@@ -1217,3 +1217,4 @@ Updated the osTicket script installer to version 1.6.0, MoinMoin to 1.8.7, Magen
 Added a plan and domain-owner level restriction to prevent creation of virtual servers under other user's domains.
 Added the --simple-multiline flag to the list-domains API command, for outputting most of the information about virtual servers significantly faster.
 Backups can now be restored from uploaded file, using a new source option on the restore form.
+Resellers now have access to the DNS records for virtual servers they own.
