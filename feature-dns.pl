@@ -1641,7 +1641,7 @@ if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec()) {
 
 	# Encryption algorithm
 	print &ui_table_row(&hlink($text{'tmpl_dnssec_alg'}, "dnssec_alg"),
-		&ui_select("dnssec_alg", $tmpl->{'dnssec_alg'} || "DSA",
+		&ui_select("dnssec_alg", $tmpl->{'dnssec_alg'} || "RSASHA1",
 			   [ &bind8::list_dnssec_algorithms() ]));
 
 	# One key or two?
