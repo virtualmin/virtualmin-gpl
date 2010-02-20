@@ -59,13 +59,16 @@ if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0) {
 	}
 
 # Ruby execution mode
-@rubys = &supported_ruby_modes($d);
-if (!$d->{'alias'} && @rubys && $can == 2) {
-	print &ui_table_row(&hlink($text{'phpmode_rubymode'}, "rubymode"),
-		    &ui_radio("rubymode", &get_domain_ruby_mode($d),
-			      [ [ "", $text{'phpmode_noruby'}."<br>" ],
-				map { [ $_, $text{'phpmode_'.$_}."<br>" ] }
-				    @rubys ]));
+if (defined(&supported_ruby_modes)) {
+	@rubys = &supported_ruby_modes($d);
+	if (!$d->{'alias'} && @rubys && $can == 2) {
+		print &ui_table_row(
+			&hlink($text{'phpmode_rubymode'}, "rubymode"),
+			&ui_radio("rubymode", &get_domain_ruby_mode($d),
+				  [ [ "", $text{'phpmode_noruby'}."<br>" ],
+				    map { [ $_, $text{'phpmode_'.$_}."<br>" ] }
+					@rubys ]));
+		}
 	}
 
 # Write logs via program. Don't show unless enabled.

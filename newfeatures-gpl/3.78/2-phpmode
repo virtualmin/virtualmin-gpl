@@ -1,0 +1,5 @@
+desc=PHP run as domain owner
+html=PHP scripts can now be run with domain owner permissions, via the new Website Options page. Requires that the CGI version of PHP be installed in addition to mod_php though. This feature was ported from the Pro version of Virtualmin
+master=1
+domain=1
+link=edit_phpmode.cgi?dom=${ID}
