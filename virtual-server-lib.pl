@@ -137,7 +137,7 @@ $styles_unavail_file = "$module_config_directory/stylesunavail";
                $virtualmin_pro ? ( "mongrels" ) : ( ));
 @plan_restrictions = ('nodbname', 'norename', 'forceunder');
 
-@reseller_modules = ("webminlog", "mailboxes", "bind8");
+@reseller_modules = ("webminlog", "mailboxes", "bind8", "syslog");
 
 @all_template_files = ( "domain-template", "subdomain-template",
 			"user-template", "local-template", "bw-template",
