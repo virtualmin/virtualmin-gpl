@@ -2515,13 +2515,12 @@ return &master_admin() || &reseller_admin() || $access{'edit_spam'};
 # settings, 0 if nothing
 sub can_edit_phpmode
 {
-return $virtualmin_pro && &master_admin() ? 2 :
+return &master_admin() ? 2 :
        $access{'edit_phpmode'} ? 1 : 0;
 }
 
 sub can_edit_phpver
 {
-return 0 if (!$virtualmin_pro);
 return &master_admin() || &reseller_admin() || $access{'edit_phpver'};
 }
 
@@ -12120,9 +12119,7 @@ return (
         [ 'shell', 'Command Shell (run commands as admin)' ],
         [ 'webminlog', 'Webmin Actions Log (view own actions)' ],
         [ 'syslog', 'System Logs (view Apache and FTP logs)' ],
-	$virtualmin_pro ? 
-           ( [ 'phpini', 'PHP Configuration (for domain\'s php.ini files)' ] ) :
-	   ( ),
+        [ 'phpini', 'PHP Configuration (for domain\'s php.ini files)' ],
 	);
 }
 

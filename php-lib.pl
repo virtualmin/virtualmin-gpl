@@ -479,7 +479,7 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 	}
 
 # Re-apply resource limits
-if (&supports_resource_limits()) {
+if (defined(&supports_resource_limits) && &supports_resource_limits()) {
 	local $pd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
 	&set_php_wrapper_ulimits($d, &get_domain_resource_limits($pd));
 	}
