@@ -2140,13 +2140,14 @@ if (&has_webmail_rewrite()) {
 	push(@webfields, "webmail", "webmaildom", "webmaildom_def",
 			 "admin", "admindom", "admindom_def");
 	}
-if ($virtualmin_pro) {
-	push(@webfields, "web_php_suexec", "web_phpver", "web_phpchildren",
-			 "web_php_noedit", "web_ruby_suexec" );
-	foreach my $phpver (@all_possible_php_versions) {
-		push(@webfields, "web_php_ini_".$phpver,
-				 "web_php_ini_".$phpver."_def");
-		}
+push(@webfields, "web_php_suexec", "web_phpver", "web_phpchildren",
+		 "web_php_noedit");
+foreach my $phpver (@all_possible_php_versions) {
+	push(@webfields, "web_php_ini_".$phpver,
+			 "web_php_ini_".$phpver."_def");
+	}
+if (defined(&get_domain_ruby_mode)) {
+	push(@webfields, "web_ruby_suexec");
 	}
 
 local $ndi = &none_def_input("web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1,
@@ -2259,45 +2260,45 @@ if (&has_webmail_rewrite()) {
 		}
 	}
 
-if ($virtualmin_pro) {
-	print &ui_table_hr();
+print &ui_table_hr();
 
-	# Run PHP scripts as user
+# Run PHP scripts as user
+print &ui_table_row(
+    &hlink($text{'tmpl_phpmode'}, "template_phpmode"),
+    &ui_radio("web_php_suexec", int($tmpl->{'web_php_suexec'}),
+	      [ [ 0, $text{'phpmode_mod_php'}."<br>" ],
+		[ 1, $text{'phpmode_cgi'}."<br>" ],
+		[ 2, $text{'phpmode_fcgid'}."<br>" ] ]));
+
+# Default PHP version to setup
+print &ui_table_row(
+    &hlink($text{'tmpl_phpver'}, "template_phpver"),
+    &ui_select("web_phpver", $tmpl->{'web_phpver'},
+	       [ [ "", $text{'tmpl_phpverdef'} ],
+		 map { [ $_->[0] ] } &list_available_php_versions() ]));
+
+# Default number of PHP child processes
+print &ui_table_row(
+    &hlink($text{'tmpl_phpchildren'}, "template_phpchildren"),
+    &ui_opt_textbox("web_phpchildren", $tmpl->{'web_phpchildren'},
+	    5, $text{'tmpl_phpchildrennone'}));
+
+# Source php.ini files
+foreach my $phpver (@all_possible_php_versions) {
 	print &ui_table_row(
-	    &hlink($text{'tmpl_phpmode'}, "template_phpmode"),
-	    &ui_radio("web_php_suexec", int($tmpl->{'web_php_suexec'}),
-		      [ [ 0, $text{'phpmode_mod_php'}."<br>" ],
-			[ 1, $text{'phpmode_cgi'}."<br>" ],
-			[ 2, $text{'phpmode_fcgid'}."<br>" ] ]));
+	    &hlink(&text('tmpl_php_iniv', $phpver), "template_php_ini"),
+	    &ui_opt_textbox("web_php_ini_$phpver",
+			    $tmpl->{'web_php_ini_'.$phpver},
+			    40, $text{'default'}));
+	}
 
-	# Default PHP version to setup
-	print &ui_table_row(
-	    &hlink($text{'tmpl_phpver'}, "template_phpver"),
-	    &ui_select("web_phpver", $tmpl->{'web_phpver'},
-		       [ [ "", $text{'tmpl_phpverdef'} ],
-			 map { [ $_->[0] ] } &list_available_php_versions() ]));
+# Allow editing of PHP configs
+print &ui_table_row(
+    &hlink($text{'tmpl_php_noedit'}, "template_php_noedit"),
+    &ui_radio("web_php_noedit", $tmpl->{'web_php_noedit'},
+	      [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
 
-	# Default number of PHP child processes
-	print &ui_table_row(
-	    &hlink($text{'tmpl_phpchildren'}, "template_phpchildren"),
-	    &ui_opt_textbox("web_phpchildren", $tmpl->{'web_phpchildren'},
-		    5, $text{'tmpl_phpchildrennone'}));
-
-	# Source php.ini files
-	foreach my $phpver (@all_possible_php_versions) {
-		print &ui_table_row(
-		    &hlink(&text('tmpl_php_iniv', $phpver), "template_php_ini"),
-		    &ui_opt_textbox("web_php_ini_$phpver",
-				    $tmpl->{'web_php_ini_'.$phpver},
-				    40, $text{'default'}));
-		}
-
-	# Allow editing of PHP configs
-	print &ui_table_row(
-	    &hlink($text{'tmpl_php_noedit'}, "template_php_noedit"),
-	    &ui_radio("web_php_noedit", $tmpl->{'web_php_noedit'},
-		      [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
-
+if (defined(&get_domain_ruby_mode)) {
 	# Run ruby scripts as user
 	print &ui_table_row(
 	    &hlink($text{'tmpl_rubymode'}, "template_rubymode"),
@@ -2321,32 +2322,30 @@ print &ui_table_row(&hlink($text{'tmpl_webalizer'},
 print &ui_table_hr();
 
 # PHP variables for scripts
-if ($virtualmin_pro) {
-	local $i = 0;
-	local @pv = $tmpl->{'php_vars'} eq "none" ? ( ) :
-		split(/\t+/, $tmpl->{'php_vars'});
-	local @pfields;
-	local @table;
-	foreach $pv (@pv, "", "") {
-		local ($n, $v) = split(/=/, $pv, 2);
-		push(@table, [ &ui_textbox("phpname_$i", $n, 25),
-			       &ui_textbox("phpval_$i", $v, 35) ]);
-		push(@pfields, "phpname_$i", "phpval_$i");
-		$i++;
-		}
-	local $ptable = &ui_columns_table(
-		[ $text{'tmpl_phpname'}, $text{'tmpl_phpval'} ],
-		undef,
-		\@table,
-		undef,
-		1);
-	print &ui_table_row(
-		&hlink($text{'tmpl_php_vars'}, "template_php_vars"),
-		&none_def_input("php_vars", $tmpl->{'php_vars'},
-				$text{'tmpl_disabled_websel'}, 0, 0, undef,
-			        \@pfields)."<br>\n".
-		$ptable);
+local $i = 0;
+local @pv = $tmpl->{'php_vars'} eq "none" ? ( ) :
+	split(/\t+/, $tmpl->{'php_vars'});
+local @pfields;
+local @table;
+foreach $pv (@pv, "", "") {
+	local ($n, $v) = split(/=/, $pv, 2);
+	push(@table, [ &ui_textbox("phpname_$i", $n, 25),
+		       &ui_textbox("phpval_$i", $v, 35) ]);
+	push(@pfields, "phpname_$i", "phpval_$i");
+	$i++;
 	}
+local $ptable = &ui_columns_table(
+	[ $text{'tmpl_phpname'}, $text{'tmpl_phpval'} ],
+	undef,
+	\@table,
+	undef,
+	1);
+print &ui_table_row(
+	&hlink($text{'tmpl_php_vars'}, "template_php_vars"),
+	&none_def_input("php_vars", $tmpl->{'php_vars'},
+			$text{'tmpl_disabled_websel'}, 0, 0, undef,
+			\@pfields)."<br>\n".
+	$ptable);
 
 print &ui_table_hr();
 
@@ -2460,40 +2459,44 @@ if ($in{"web_mode"} == 2) {
 				}
 			}
 		}
-	if ($virtualmin_pro) {
-		&require_apache();
-		if ($in{'web_php_suexec'}) {
-			$in{'suexec'} ||
-				&error($text{'tmpl_ephpsuexec'});
-			&has_command("php") ||
-				&error($text{'tmpl_ephpcmd'});
+
+	# Save PHP settings
+	&require_apache();
+	if ($in{'web_php_suexec'}) {
+		$in{'suexec'} ||
+			&error($text{'tmpl_ephpsuexec'});
+		&has_command("php") ||
+			&error($text{'tmpl_ephpcmd'});
+		}
+	if ($in{'web_php_suexec'} == 2 &&
+	    !$apache::httpd_modules{'mod_fcgid'}) {
+		&error($text{'tmpl_ephpmode2'});
+		}
+	$tmpl->{'web_php_suexec'} = $in{'web_php_suexec'};
+	$tmpl->{'web_phpver'} = $in{'web_phpver'};
+	if ($in{'web_phpchildren_def'}) {
+		$tmpl->{'web_phpchildren'} = undef;
+		}
+	else {
+		if ($in{'web_phpchildren'} < 1 ||
+		    $in{'web_phpchildren'} > $max_php_fcgid_children) {
+			&error(&text('phpmode_echildren',
+				     $max_php_fcgid_children));
 			}
-		if ($in{'web_php_suexec'} == 2 &&
-		    !$apache::httpd_modules{'mod_fcgid'}) {
-			&error($text{'tmpl_ephpmode2'});
-			}
-		$tmpl->{'web_php_suexec'} = $in{'web_php_suexec'};
-		$tmpl->{'web_phpver'} = $in{'web_phpver'};
-		if ($in{'web_phpchildren_def'}) {
-			$tmpl->{'web_phpchildren'} = undef;
-			}
-		else {
-			if ($in{'web_phpchildren'} < 1 ||
-			    $in{'web_phpchildren'} > $max_php_fcgid_children) {
-				&error(&text('phpmode_echildren',
-					     $max_php_fcgid_children));
-				}
-			$tmpl->{'web_phpchildren'} = $in{'web_phpchildren'};
-			}
-		foreach my $phpver (@all_possible_php_versions) {
-			$in{'web_php_ini_'.$phpver.'_def'} ||
-			  -r $in{'web_php_ini_'.$phpver} ||
-				&error($text{'tmpl_ephpini'});
-			$tmpl->{'web_php_ini_'.$phpver} =
-				$in{'web_php_ini_'.$phpver.'_def'} ? undef
-					       : $in{'web_php_ini_'.$phpver};
-			}
-		$tmpl->{'web_php_noedit'} = $in{'web_php_noedit'};
+		$tmpl->{'web_phpchildren'} = $in{'web_phpchildren'};
+		}
+	foreach my $phpver (@all_possible_php_versions) {
+		$in{'web_php_ini_'.$phpver.'_def'} ||
+		  -r $in{'web_php_ini_'.$phpver} ||
+			&error($text{'tmpl_ephpini'});
+		$tmpl->{'web_php_ini_'.$phpver} =
+			$in{'web_php_ini_'.$phpver.'_def'} ? undef
+				       : $in{'web_php_ini_'.$phpver};
+		}
+	$tmpl->{'web_php_noedit'} = $in{'web_php_noedit'};
+
+	# Save ruby settings
+	if (defined(&get_domain_ruby_mode)) {
 		if ($in{'web_ruby_suexec'} > 0) {
 			&has_command("ruby") ||
 				&error($text{'tmpl_erubycmd'});
@@ -2513,23 +2516,21 @@ if ($in{'disabled_url_mode'} == 2) {
 $tmpl->{'disabled_url'} = &parse_none_def("disabled_url");
 
 # Save PHP variables
-if ($virtualmin_pro) {
-	if ($in{"php_vars_mode"} == 0) {
-		$tmpl->{'php_vars'} = "none";
+if ($in{"php_vars_mode"} == 0) {
+	$tmpl->{'php_vars'} = "none";
+	}
+elsif ($in{"php_vars_mode"} == 1) {
+	delete($tmpl->{'php_vars'});
+	}
+elsif ($in{"php_vars_mode"} == 2) {
+	for($i=0; defined($n = $in{"phpname_$i"}); $i++) {
+		next if (!$n);
+		$n =~ /^\S+$/ ||
+			&error(&text('tmpl_ephp_var', $n));
+		$v = $in{"phpval_$i"};
+		push(@phpvars, "$n=$v");
 		}
-	elsif ($in{"php_vars_mode"} == 1) {
-		delete($tmpl->{'php_vars'});
-		}
-	elsif ($in{"php_vars_mode"} == 2) {
-		for($i=0; defined($n = $in{"phpname_$i"}); $i++) {
-			next if (!$n);
-			$n =~ /^\S+$/ ||
-				&error(&text('tmpl_ephp_var', $n));
-			$v = $in{"phpval_$i"};
-			push(@phpvars, "$n=$v");
-			}
-		$tmpl->{'php_vars'} = join("\t", @phpvars);
-		}
+	$tmpl->{'php_vars'} = join("\t", @phpvars);
 	}
 
 if ($config{'proxy_pass'} == 2) {

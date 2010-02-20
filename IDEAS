@@ -39,8 +39,9 @@
  - Include bounced / greylisted messages in system stats
 	- https://www.virtualmin.com/node/13113
 
- - SuExec PHP support in GPL version
-
  - Backup to multiple destinations
 	- https://www.virtualmin.com/node/13450
+	- Command line API
 	- CHANGELOG
+
+ - Separate PHP settings page in web template

@@ -1227,7 +1227,7 @@ foreach my $g (@{$_[0]->{'secs'}}) {
 &update_secondary_groups($_[1]) if ($_[1]);
 
 # Update spamassassin whitelist
-if ($virtualmin_pro && $_[1]) {
+if ($_[1]) {
 	&obtain_lock_spam($_[1]);
 	&update_spam_whitelist($_[1]);
 	&release_lock_spam($_[1]);
@@ -1669,7 +1669,7 @@ foreach my $group (@groups) {
 &update_secondary_groups($_[2]) if ($_[2]);
 
 # Update spamassassin whitelist
-if ($virtualmin_pro && $_[2]) {
+if ($_[2]) {
 	&obtain_lock_spam($_[2]);
 	&update_spam_whitelist($_[2]);
 	&release_lock_spam($_[2]);
@@ -1875,7 +1875,7 @@ foreach my $group (@groups) {
 &update_secondary_groups($_[1]) if ($_[1]);
 
 # Update spamassassin whitelist
-if ($virtualmin_pro && $_[1]) {
+if ($_[1]) {
 	&obtain_lock_spam($_[1]);
 	&update_spam_whitelist($_[1]);
 	&release_lock_spam($_[1]);
