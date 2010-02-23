@@ -85,6 +85,20 @@ for($i=0; $i<scalar(@names); $i++) {
 	$tmpl->{$names[$i]} = $values[$i];
 	}
 &save_template($tmpl);
+
+# Run all post-save functions
+foreach my $f (@features) {
+	$psfunc = "postsave_template_".$f;
+	if (defined(&$psfunc)) {
+		&$psfunc($tmpl);
+		}
+	}
+
+# Update all Webmin users
+&set_all_null_print();
+&modify_all_webmin($tmpl->{'standard'} ? undef : $tmpl->{'id'});
+&run_post_actions();
+
 print "Modified ",scalar(@names)," settings in template $tmpl->{'name'}\n";
 &virtualmin_api_log(\@OLDARGV);
 
