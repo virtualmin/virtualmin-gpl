@@ -281,6 +281,9 @@ foreach $l (@$lref) {
 	}
 &flush_file_lines_as_domain_user($d, $cfile);
 
+# Delete the setup directory
+&unlink_file_as_domain_user($d, "$opts->{'dir'}/setup");
+
 # Return a URL for the user
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
