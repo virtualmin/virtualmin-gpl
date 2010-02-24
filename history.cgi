@@ -62,6 +62,12 @@ for($i=0; $i<@stats; $i++) {
 	elsif ($stat eq 'drivetemp' || $stat eq 'cputemp') {
 		$units = $text{'history_cel'};
 		}
+	elsif ($stat =~ /^cpu/) {
+		$units = $text{'history_pc'};
+		}
+	elsif ($stat eq 'bin' || $stat eq 'bout') {
+		$units = $text{'history_bps'};
+		}
 	else {
 		$units = undef;
 		}
