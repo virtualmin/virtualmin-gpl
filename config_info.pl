@@ -22,7 +22,8 @@ sub show_modules
 {
 local ($value, $desc, $type, $func, $name) = @_;
 return &ui_textbox($name, $value, 40)." ".
-       &modules_chooser_button($name, 1);
+       &modules_chooser_button($name, 1,
+		$current_theme eq "virtual-server-theme" ? 1 : 0);
 }
 
 sub parse_modules
