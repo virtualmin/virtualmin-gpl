@@ -513,7 +513,8 @@ if ($multi) {
 
 		# Show allowed DB hosts
 		if (!$d->{'parent'} && $multi == 1) {
-			foreach $f (grep { $d->{$_} } @database_features) {
+			foreach $f (grep { $config{$_} &&
+					   $d->{$_} } @database_features) {
 				$gfunc = "get_".$f."_allowed_hosts";
 				if (defined(&$gfunc)) {
 					@hosts = &$gfunc($d);
