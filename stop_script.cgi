@@ -18,6 +18,10 @@ $sinfo && $script || &error($text{'stopscript_egone'});
 print &text('stopscript_doing', "<i>$script->{'desc'}</i>"),"<br>";
 &{$script->{'stop_server_func'}}($d, $sinfo->{'opts'});
 print &text('stopscript_done'),"<p>\n";
+&webmin_log("stop", "script", $sinfo->{'name'},
+	    { 'ver' => $sinfo->{'version'},
+	      'desc' => $sinfo->{'desc'},
+	      'dom' => $d->{'dom'} });
 
 &ui_print_footer("edit_script.cgi?dom=$in{'dom'}&script=$in{'script'}",
 		  $text{'scripts_ereturn'},

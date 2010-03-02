@@ -27,6 +27,10 @@ if ($err) {
 	}
 else {
 	print $text{'setup_done'},"<p>\n";
+	&webmin_log("restart", "script", $sinfo->{'name'},
+		    { 'ver' => $sinfo->{'version'},
+		      'desc' => $sinfo->{'desc'},
+		      'dom' => $d->{'dom'} });
 	}
 
 &ui_print_footer("edit_script.cgi?dom=$in{'dom'}&script=$in{'script'}",
