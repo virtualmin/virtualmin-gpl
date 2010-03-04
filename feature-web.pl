@@ -3371,10 +3371,8 @@ local ($d, $accesslog) = @_;
 $accesslog =~ /^\/\S+$/ ||
 	return "Access log $accesslog must be an absolute path";
 local $err = &change_apache_log($d, $accesslog, "CustomLog");
-print STDERR "err=$err\n";
 if ($err) {
 	$err = &change_apache_log($d, $accesslog, "TransferLog");
-	print STDERR "err2=$err\n";
 	}
 &link_apache_logs($d);
 &register_post_action(\&restart_apache);
@@ -3401,7 +3399,6 @@ return $err;
 sub change_apache_log
 {
 local ($d, $log, $dir) = @_;
-print STDERR "d=$d->{'dom'} log=$log dir=$dir\n";
 -d $log && return "Log file $log is a directory";
 local $logdir = $log;
 $logdir =~ s/[^\/]+$//;
