@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the osTicket script installer to version 1.6.0, MoinMoin to 1.8.7, Magento to 1.4.0.1, Zikula to 1.2.2, Redmine to 0.9.3, phpScheduleIt to 1.2.12, ZenPhoto to 1.2.9, phpBB to 3.0.7, Typo3 to 4.3.2, Mantis to 1.2.0, CMS Made Simple to 1.6.7, TikiWiki to 3.5, OpenX to 2.8.5, and WordPress to 2.9.2.
+html=Updated the osTicket script installer to version 1.6.0, MoinMoin to 1.8.7, Magento to 1.4.0.1, Zikula to 1.2.2, Redmine to 0.9.3, phpScheduleIt to 1.2.12, ZenPhoto to 1.2.9, phpBB to 3.0.7, Typo3 to 4.3.2, Mantis to 1.2.0, CMS Made Simple to 1.6.7, TikiWiki to 3.5, OpenX to 2.8.5, and WordPress and WordPress MU to 2.9.2.
 master=1
 reseller=1
 domain=1
