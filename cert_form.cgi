@@ -8,8 +8,6 @@ $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_ssl() || &error($text{'edit_ecannot'});
 &foreign_require("webmin", "webmin-lib.pl");
 &ui_print_header(&domain_in($d), $text{'cert_title'}, "");
-@cert_attributes = ('cn', 'o', 'issuer_cn', 'issuer_o', 'notafter',
-		    'type', 'alt');
 
 # If this domain shares a cert file with another, link to it's page
 if ($d->{'ssl_same'}) {

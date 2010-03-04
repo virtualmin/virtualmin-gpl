@@ -145,6 +145,16 @@ elsif ($cmd eq "validate-domains" && $module_name eq "virtual-server") {
 		}
 	$data->{'data'} = \@data;
 	}
+elsif ($cmd eq "get-ssl") {
+	# Parse attributes and values
+	my @lines = split(/\r?\n/, $out);
+	foreach my $l (@lines) {
+		if ($l =~ /^(\S+):\s*(.*)/) {
+			push(@data, { 'name' => $1, 'value' => $2 });
+			}
+		}
+	$data->{'data'} = \@data;
+	}
 else {
 	# Just attach full output
 	$data->{'output'} = $out;

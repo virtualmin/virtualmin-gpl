@@ -267,6 +267,9 @@ $everyone_alias_dir = "$module_config_directory/everyone";
 
 $ssl_passphrase_dir = "$module_config_directory/sslpass";
 
+@cert_attributes = ('cn', 'o', 'issuer_cn', 'issuer_o', 'notafter',
+		    'type', 'alt');
+
 $trap_base_dir = "/var/virtualmin-traps";
 $spam_alias_dir = "$trap_base_dir/spam";
 $ham_alias_dir = "$trap_base_dir/ham";

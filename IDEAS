@@ -44,6 +44,4 @@
 	- Command line API
 	- CHANGELOG
 
- - Separate PHP settings page in web template
-
  - Use drush for drupal installs
