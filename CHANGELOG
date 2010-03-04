@@ -1213,7 +1213,7 @@ Added a field to the backup form as the backup-domain API command to exclude som
 Separated the creation of a CSR from a self-signed certificate on the Manage SSL Certificate page.
 ---- Changes since 3.77 ----
 FTP backup transfers are now re-tried up to 3 times, configurable on the Module Config page.
-Updated the osTicket script installer to version 1.6.0, MoinMoin to 1.8.7, Magento to 1.4.0.1, Zikula to 1.2.2, Redmine to 0.9.3, phpScheduleIt to 1.2.12, ZenPhoto to 1.2.9, phpBB to 3.0.7, Typo3 to 4.3.2, Mantis to 1.2.0, CMS Made Simple to 1.6.7, and WordPress to 2.9.2.
+Updated the osTicket script installer to version 1.6.0, MoinMoin to 1.8.7, Magento to 1.4.0.1, Zikula to 1.2.2, Redmine to 0.9.3, phpScheduleIt to 1.2.12, ZenPhoto to 1.2.9, phpBB to 3.0.7, Typo3 to 4.3.2, Mantis to 1.2.0, CMS Made Simple to 1.6.7, TikiWiki to 3.5, and WordPress to 2.9.2.
 Added a plan and domain-owner level restriction to prevent creation of virtual servers under other user's domains.
 Added the --simple-multiline flag to the list-domains API command, for outputting most of the information about virtual servers significantly faster.
 Backups can now be restored from uploaded file, using a new source option on the restore form.
