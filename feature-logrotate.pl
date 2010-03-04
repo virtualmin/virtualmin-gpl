@@ -140,7 +140,7 @@ if ($alog ne $oldalog || $elog ne $oldelog) {
 			$n = $elog if ($elog && $n eq $oldelog);
 			}
 		&logrotate::save_directive($parent, $lconf, $lconf);
-		&flush_file_lines();
+		&flush_file_lines($lconf->{'file'});
 		&$second_print($text{'setup_done'});
 		}
 	else {

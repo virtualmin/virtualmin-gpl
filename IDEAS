@@ -45,3 +45,9 @@
 	- CHANGELOG
 
  - Separate PHP settings page in web template
+
+ - Use drush for drupal installs
+
+ - Convert from ~/logs to /var/log/virtualmin logging
+	- https://www.virtualmin.com/node/13611
+	- Web UI

@@ -1043,33 +1043,42 @@ if ($virt) {
 		$log = &apache::find_directive("TransferLog", $vconf) ||
 		       &apache::find_directive("CustomLog", $vconf);
 		}
-	if ($log) {
-		# Work-around for a bug that didn't update words in
-		# apache::save_directive. Undo when Webmin 1.450 is out.
-		$log = &apache::wsplit($log)->[0];
-		}
-	if ($log =~ /^\|\Q$writelogs_cmd\E\s+(\S+)\s+(\S+)/) {
-		# Via writelogs .. return real path
-		local $file = $2;
-		if ($file =~ /^\//) {
-			$log = $file;
-			}
-		else {
-			local $d = &get_domain_by("dom", $_[0]);
-			if ($d) {
-				$log = "$d->{'home'}/$file";
-				}
-			}
-		}
-	elsif ($log =~ /^\|/) {
-		# Via some program .. so we don't know where the real log is
-		return undef;
-		}
-	return $log;
+	return &extract_writelogs_path($log);
 	}
 else {
 	return undef;
 	}
+}
+
+# extract_writelogs_path(log-command)
+# Given a log destination, which may be input to a command, return the
+# real log file path.
+sub extract_writelogs_path
+{
+local ($log) = @_;
+if ($log =~ /^\|\Q$writelogs_cmd\E\s+(\S+)\s+(\S+)/) {
+	# Via writelogs .. return real path
+	local $file = $2;
+	if ($file =~ /^\//) {
+		$log = $file;
+		}
+	else {
+		local $d = &get_domain_by("dom", $_[0]);
+		if ($d) {
+			$log = "$d->{'home'}/$file";
+			}
+		}
+	}
+elsif ($log =~ /^\|/) {
+	# Via some program .. so we don't know where the real log is
+	$log = undef;
+	}
+else {
+	# Extract first word, to remove 'combined' at end
+	local $w = &apache::wsplit($log);
+	$log = $w->[0];
+	}
+return $log;
 }
 
 # get_old_apache_log(newlog, &domain, &old-domain)
@@ -3351,6 +3360,90 @@ while(<DIRS>) {
 	}
 close(DIRS);
 return @rv;
+}
+
+# change_access_log(&domain, logfile)
+# Update the Apache config to use a new access log file, move the old one to
+# the new location, and update any links
+sub change_access_log
+{
+local ($d, $accesslog) = @_;
+$accesslog =~ /^\/\S+$/ ||
+	return "Access log $accesslog must be an absolute path";
+local $err = &change_apache_log($d, $accesslog, "CustomLog");
+if ($err) {
+	$err = &change_apache_log($d, $accesslog, "TransferLog");
+	}
+&link_apache_logs($d);
+&register_post_action(\&restart_apache);
+return $err;
+}
+
+# change_error_log(&domain, logfile)
+# Update the Apache config to use a new error log file, move the old one to
+# the new location, and update any links
+sub change_error_log
+{
+local ($d, $errorlog) = @_;
+$errorlog =~ /^\/\S+$/ ||
+	return "Error log $errorlog must be an absolute path";
+local $err = &change_apache_log($d, $errorlog, "ErrorLog");
+&link_apache_logs($d);
+&register_post_action(\&restart_apache);
+return $err;
+}
+
+# change_apache_log(&domain, logfile, directive)
+# Update the Apache config to use a log file of some kind, move the old one to
+# the new location, and update any links
+sub change_apache_log
+{
+local ($d, $log, $dir) = @_;
+-d $log && return "Log file $log is a directory";
+
+# Update the Apache config
+local @ports = ( $d->{'web_port'},
+		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+local $movelog;
+foreach my $p (@ports) {
+	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
+	next if (!$virt);
+	local $oldlog = &apache::find_directive($dir, $vconf);
+	next if (!$oldlog);
+	local $oldlogfile = &extract_writelogs_path($oldlog);
+	$oldlog =~ s/\Q$oldlogfile\E/$log/;
+	$movelog ||= $oldlogfile;
+	&apache::save_directive($dir, [ $oldlog ], $vconf, $conf);
+	&flush_file_lines($virt->{'file'});
+	}
+$movelog || return "No log directives found for $dir";
+
+# Move the file if needed
+if (!&same_file($log, $movelog) || -l $log) {
+	if (-e $log) {
+		&unlink_file($log);
+		}
+	if (-r $movelog) {
+		&rename_logged($movelog, $log);
+		}
+	}
+
+# Fix logrotate config
+if ($d->{'logrotate'}) {
+	local $lconf = &get_logrotate_section($movelog);
+	if ($lconf) {
+		local $parent = &logrotate::get_config_parent();
+		foreach my $n (@{$lconf->{'name'}}) {
+			if ($n eq $movelog) {
+				$n = $log;
+				}
+			}
+		&logrotate::save_directive($parent, $lconf, $lconf);
+		&flush_file_lines($lconf->{'file'});
+		}
+	}
+
+return undef;
 }
 
 $done_feature_script{'web'} = 1;

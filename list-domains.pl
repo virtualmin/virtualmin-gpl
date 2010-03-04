@@ -243,6 +243,10 @@ if ($multi) {
 		if ($d->{'web'}) {
 			print "    HTML directory: ",&public_html_dir($d),"\n";
 			print "    CGI directory: ",&cgi_bin_dir($d),"\n";
+			print "    Access log: ",
+			 &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0),"\n";
+			print "    Error log: ",
+			 &get_apache_log($d->{'dom'}, $d->{'web_port'}, 1),"\n";
 			}
 		print "    Contact email: $d->{'emailto'}\n";
 		print "    Created on: ",&make_date($d->{'created'}),"\n";

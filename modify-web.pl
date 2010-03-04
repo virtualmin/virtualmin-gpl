@@ -153,6 +153,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--default-website") {
 		$defwebsite = 1;
 		}
+	elsif ($a eq "--access-log") {
+		$accesslog = shift(@ARGV);
+		}
+	elsif ($a eq "--error-log") {
+		$errorlog = shift(@ARGV);
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -161,7 +167,7 @@ while(@ARGV > 0) {
 $mode || $rubymode || defined($proxy) || defined($framefwd) ||
   defined($suexec) || $stylename || defined($children) || $version ||
   defined($webmail) || defined($matchall) || defined($timeout) ||
-  $defwebsite || &usage("Nothing to do");
+  $defwebsite || $accesslog || $errorlog || &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -261,6 +267,8 @@ if ($defaultwebsite && @doms > 1) {
 foreach $d (@doms) {
 	&obtain_lock_web($d);
 	&obtain_lock_dns($d) if (defined($webmail) || defined($matchall));
+	&obtain_lock_logrotate($d) if ($d->{'logrotate'} &&
+				       ($accesslog || $errorlog));
 	}
 
 # Do it for all domains
@@ -405,6 +413,21 @@ foreach $d (@doms) {
 			}
 		}
 
+	if ($accesslog) {
+		# Change access log file location
+		$dom_accesslog = &substitute_domain_template($accesslog, $d);
+		&$first_print("Changing access log to $dom_accesslog ..");
+		$err = &change_access_log($d, $dom_accesslog);
+		&$second_print($err ? ".. failed : $err" : ".. done");
+		}
+	if ($errorlog) {
+		# Change error log file location
+		$dom_errorlog = &substitute_domain_template($errorlog, $d);
+		&$first_print("Changing error log to $dom_errorlog ..");
+		$err = &change_error_log($d, $dom_errorlog);
+		&$second_print($err ? ".. failed : $err" : ".. done");
+		}
+
 	if (defined($proxy) || defined($framefwd)) {
 		# Save the domain
 		&modify_web($d, $oldd);
@@ -422,6 +445,8 @@ foreach $d (@doms) {
 	}
 
 foreach $d (@doms) {
+	&release_lock_logrotate($d) if ($d->{'logrotate'} &&
+				        ($accesslog || $errorlog));
 	&release_lock_dns($d) if (defined($webmail) || defined($matchall));
 	&release_lock_web($d);
 	}
