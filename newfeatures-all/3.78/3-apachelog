@@ -1,0 +1,4 @@
+desc=Edit Apache log paths
+html=The files for Apache access and error logs can now be edited on the Website Options page, and via the <tt>modify-web</tt> API command.
+master=1
+link=edit_phpmode.cgi?dom=${ID}

@@ -1218,3 +1218,4 @@ Added a plan and domain-owner level restriction to prevent creation of virtual s
 Added the --simple-multiline flag to the list-domains API command, for outputting most of the information about virtual servers significantly faster.
 Backups can now be restored from uploaded file, using a new source option on the restore form.
 Resellers now have access to the DNS records and Apache logs for virtual servers they own.
+Added fields to the Website Options page for changing the Apache log file locations, and added flags to the modify-web API command to do the same thing.

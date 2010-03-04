@@ -413,14 +413,14 @@ foreach $d (@doms) {
 			}
 		}
 
-	if ($accesslog) {
+	if ($accesslog && !$d->{'alias'}) {
 		# Change access log file location
 		$dom_accesslog = &substitute_domain_template($accesslog, $d);
 		&$first_print("Changing access log to $dom_accesslog ..");
 		$err = &change_access_log($d, $dom_accesslog);
 		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
-	if ($errorlog) {
+	if ($errorlog && !$d->{'alias'}) {
 		# Change error log file location
 		$dom_errorlog = &substitute_domain_template($errorlog, $d);
 		&$first_print("Changing error log to $dom_errorlog ..");

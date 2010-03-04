@@ -45,6 +45,7 @@ if (!$d->{'alias'} && ($in{'mode'} eq 'cgi' || $in{'mode'} eq 'fcgid') &&
 &ui_print_unbuffered_header(&domain_in($d), $text{'phpmode_title'}, "");
 &obtain_lock_web($d);
 &obtain_lock_dns($d);
+&obtain_lock_logrotate($d) if ($d->{'logrotate'});
 
 # Save PHP execution mode
 $oldmode = &get_domain_php_mode($d);
@@ -139,10 +140,34 @@ if (&can_default_website($d) && $in{'defweb'}) {
         $anything++;
 	}
 
+# Change log file locations
+if (!$d->{'alias'} && &can_log_paths()) {
+	# Access log
+	$oldalog = &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0);
+	if ($oldalog && defined($in{'alog'}) && $oldalog ne $in{'alog'}) {
+		&$first_print($text{'phpmode_setalog'});
+		$err = &change_access_log($d, $in{'alog'});
+		&$second_print(!$err ? $text{'setup_done'}
+				     : &text('phpmode_logerr', $err));
+		$anything++;
+		}
+
+	# Error log
+	$oldelog = &get_apache_log($d->{'dom'}, $d->{'web_port'}, 1);
+	if ($oldelog && defined($in{'elog'}) && $oldelog ne $in{'elog'}) {
+		&$first_print($text{'phpmode_setelog'});
+		$err = &change_error_log($d, $in{'elog'});
+		&$second_print(!$err ? $text{'setup_done'}
+				     : &text('phpmode_logerr', $err));
+		$anything++;
+		}
+	}
+
 if (!$anything) {
 	&$first_print($text{'phpmode_nothing'});
 	}
 
+&release_lock_logrotate($d) if ($d->{'logrotate'});
 &release_lock_dns($d);
 &release_lock_web($d);
 &run_post_actions();

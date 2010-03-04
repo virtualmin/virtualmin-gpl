@@ -8673,6 +8673,12 @@ return &master_admin() ? 2 :
        &reseller_admin() && !$access{'noplans'} ? 1 : 0;
 }
 
+# Returns 1 if the current user can edit log file locations
+sub can_log_paths
+{
+return &master_admin();
+}
+
 # has_proxy_balancer(&domain)
 # Returns 2 if some domain supports proxy balancing to multiple URLs, 1 for
 # proxying to a single URL, 0 if neither.
