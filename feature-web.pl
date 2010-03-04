@@ -1056,6 +1056,8 @@ else {
 sub extract_writelogs_path
 {
 local ($log) = @_;
+local $w = &apache::wsplit($log);	# Extract first word
+$log = $w->[0];
 if ($log =~ /^\|\Q$writelogs_cmd\E\s+(\S+)\s+(\S+)/) {
 	# Via writelogs .. return real path
 	local $file = $2;
@@ -1072,11 +1074,6 @@ if ($log =~ /^\|\Q$writelogs_cmd\E\s+(\S+)\s+(\S+)/) {
 elsif ($log =~ /^\|/) {
 	# Via some program .. so we don't know where the real log is
 	$log = undef;
-	}
-else {
-	# Extract first word, to remove 'combined' at end
-	local $w = &apache::wsplit($log);
-	$log = $w->[0];
 	}
 return $log;
 }
