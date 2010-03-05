@@ -3317,6 +3317,9 @@ $quota_tests = [
 	},
 	{ 'command' => "rm -f /home/$test_domain_user/junk" },
 
+	# Give quota system a few seconds to detect the deletion
+	{ 'command' => 'sleep 10' },
+
 	# Make sure 5M file creation works
 	{ 'command' => "su $test_domain_user -c 'dd if=/dev/zero of=/home/$test_domain_user/junk bs=1024 count=5120'",
 	},
