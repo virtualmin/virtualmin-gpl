@@ -5172,5 +5172,3 @@ redirect_epath=Missing or invalid source URL path
 redirect_eurl=Missing or invalid destination URL
 redirect_edir=Missing or non-absolute destination directory
 redirect_edir2=Destination directory must be under $1
-redirects_derr=Failed to delete website redirects
-redirects_denone=None selected
