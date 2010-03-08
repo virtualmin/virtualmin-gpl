@@ -310,16 +310,22 @@ else {
 local $cgidir = &cgi_bin_dir(\%dom);
 local $cgisrc = "$root/var/www/cgi-bin";
 &$first_print("Copying CGI programs to $cgidir ..");
-local $qcgidir = quotemeta($cgidir);
-local $qcgisrc = quotemeta($cgisrc);
-local $out;
-&execute_command("cd $qcgisrc && (tar cvf - . | (cd $qcgidir && tar xf -))",
-		 undef, \$out, \$out);
-if ($?) {
-	&$second_print(".. copy failed : <tt>$out</tt>");
+if (!-d $cgisrc) {
+	&$second_print(".. not found in backup");
 	}
 else {
-	&$second_print(".. done");
+	local $qcgidir = quotemeta($cgidir);
+	local $qcgisrc = quotemeta($cgisrc);
+	local $out;
+	&execute_command(
+		"cd $qcgisrc && (tar cvf - . | (cd $qcgidir && tar xf -))",
+		undef, \$out, \$out);
+	if ($?) {
+		&$second_print(".. copy failed : <tt>$out</tt>");
+		}
+	else {
+		&$second_print(".. done");
+		}
 	}
 
 # Fix up ownership and permissions
