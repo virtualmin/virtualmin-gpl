@@ -784,6 +784,7 @@ return $v1 <=> $v2;
 sub check_pear_module
 {
 local ($mod, $ver, $d) = @_;
+local ($mod, $modver) = split(/\-/, $mod);
 return -1 if (!&foreign_check("php-pear"));
 &foreign_require("php-pear", "php-pear-lib.pl");
 local @cmds = &php_pear::get_pear_commands();
@@ -1104,9 +1105,10 @@ if (!$vercmd) {
 
 foreach my $m (@mods) {
 	next if (&check_pear_module($m, $phpver, $d) == 1);
+	local ($mname, $mver) = split(/\-/, $m);
 
 	# Install if needed
-	&$first_print(&text('scripts_needpear', "<tt>$m</tt>"));
+	&$first_print(&text('scripts_needpear', "<tt>$mname</tt>"));
 	&foreign_require("php-pear", "php-pear-lib.pl");
 	local $err = &php_pear::install_pear_module($m, $phpver);
 	if ($err) {
