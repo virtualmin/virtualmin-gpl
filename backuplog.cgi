@@ -14,7 +14,7 @@ print &ui_submit($text{'backuplog_ok'});
 print &ui_form_end(),"<p>\n";
 
 # Get backups to list
-$days = 7;
+$days = $config{'backuplog_days'} || 7;
 @logs = &list_backup_logs($in{'search'} ? undef : time()-24*60*60*$days);
 if ($in{'search'}) {
 	@logs = grep { $_->{'user'} eq $in{'search'} ||
