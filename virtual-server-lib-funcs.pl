@@ -2555,6 +2555,11 @@ sub can_edit_forward
 return &master_admin() || &reseller_admin() || $access{'edit_forward'};
 }
 
+sub can_edit_redirect
+{
+return &master_admin() || &reseller_admin() || $access{'edit_redirect'};
+}
+
 sub can_edit_ssl
 {
 return &master_admin() || &reseller_admin() || $access{'edit_ssl'};
@@ -9796,7 +9801,7 @@ if (&has_proxy_balancer($d) && &can_edit_forward()) {
 	}
 
 # Alias and redirects editor
-if ($d->{'web'}) {
+if ($d->{'web'} && &can_edit_redirect()) {
 	push(@rv, { 'page' => 'list_redirects.cgi',
 		    'title' => $text{'edit_redirects'},
 		    'desc' => $text{'edit_redirectsdesc'},

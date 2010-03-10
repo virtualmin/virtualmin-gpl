@@ -148,7 +148,8 @@ $styles_unavail_file = "$module_config_directory/stylesunavail";
 $initial_users_dir = "$module_config_directory/initial";
 
 @edit_limits = ('domain', 'users', 'aliases', 'dbs', 'scripts',
-	        'ip', 'dnsip', 'ssl', 'forward', 'admins', 'spam', 'phpver', 'phpmode',
+	        'ip', 'dnsip', 'ssl', 'forward', 'redirect', 'admins',
+		'spam', 'phpver', 'phpmode',
 		'mail', 'backup', 'sched', 'restore', 'sharedips', 'catchall',
 		'html', 'allowedhosts', 'passwd', 'disable', 'delete');
 if (!$virtualmin_pro) {

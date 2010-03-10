@@ -4,7 +4,8 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
-&can_edit_domain($d) || &error($text{'redirects_ecannot'});
+&can_edit_domain($d) && &can_edit_redirect() ||
+	&error($text{'redirects_ecannot'});
 $d->{'web'} || &error($text{'redirects_eweb'});
 if (!$in{'new'}) {
 	($r) = grep { $_->{'path'} eq $in{'path'} } &list_redirects($d);

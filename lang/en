@@ -2310,6 +2310,7 @@ limits_edit_rename=Can rename virtual servers
 limits_edit_ip=Can change IP address
 limits_edit_dnsip=Can change external IP address
 limits_edit_forward=Can edit forwarding frame
+limits_edit_redirect=Can edit website redirects
 limits_edit_backup=Can make backups
 limits_edit_restore=Can restore backups
 limits_edit_sched=Can schedule backups
