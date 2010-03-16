@@ -2926,6 +2926,9 @@ elsif ($tmpl->{'append_style'} == 5) {
 elsif ($tmpl->{'append_style'} == 6) {
 	return $_[0]."\@".$_[1]->{'dom'};
 	}
+elsif ($tmpl->{'append_style'} == 7) {
+	return $_[0]."\%".$_[1]->{'prefix'};
+	}
 else {
 	&error("Unknown append_style $config{'append_style'}!");
 	}
@@ -2940,7 +2943,7 @@ return $_[0] if ($_[0] eq $_[1]->{'user'});	# Domain owner has no prefix
 local $g = $_[1]->{'prefix'};
 local $d = $_[1]->{'dom'};
 local $rv = $_[0];
-($rv =~ s/\@(\Q$d\E)$//) || ($rv =~ s/(\.|\-|_)\Q$g\E$//) || ($rv =~ s/^\Q$g\E(\.|\-|_)//);
+($rv =~ s/\@(\Q$d\E)$//) || ($rv =~ s/(\.|\-|_|\%)\Q$g\E$//) || ($rv =~ s/^\Q$g\E(\.|\-|_|\%)//);
 return $rv;
 }
 

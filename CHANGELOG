@@ -1221,3 +1221,4 @@ Resellers now have access to the DNS records and Apache logs for virtual servers
 Added fields to the Website Options page for changing the Apache log file locations, and added flags to the modify-web API command to do the same thing.
 Added the get-ssl API command to output information about a virtual server's SSL certificate.
 Domain owners can now be prevented from using the Website Redirects page via a new edit capability restriction.
+Added user%domain as an option Unix username format.

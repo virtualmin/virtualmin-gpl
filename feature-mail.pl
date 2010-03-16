@@ -4002,7 +4002,8 @@ print &ui_table_row(&hlink($text{'tmpl_append'}, "template_append"),
 			 [ 3, "domain-username" ],
 			 [ 4, "username_domain" ],
 			 [ 5, "domain_username" ],
-			 [ 6, "username\@domain" ] ]));
+			 [ 6, "username\@domain" ],
+			 [ 7, "username\%domain" ] ]));
 }
 
 # parse_template_mail(&tmpl)
