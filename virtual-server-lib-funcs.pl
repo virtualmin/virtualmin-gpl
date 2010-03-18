@@ -7526,7 +7526,8 @@ if (!$tmpl->{'default'}) {
 		    @php_wrapper_templates,
 		    "capabilities",
 		    "featurelimits",
-		    (map { $_."limit" } @plugins)) {
+		    (map { $_."limit", $_."server", $_."master", $_."view",
+			   $_."passwd" } @plugins)) {
 		if ($tmpl->{$p} eq "") {
 			local $k;
 			foreach $k (keys %$def) {
