@@ -8293,12 +8293,17 @@ sub allowed_domain_name
 {
 local ($parent, $newdom) = @_;
 
-# Check if forced to be under sub-domain
+# Check if forced to be under one of the domains he already owns
 if ($parent && $access{'forceunder'}) {
-	local $pd = $parent->{'dom'};
-	if ($newdom !~ /\.\Q$pd\E$/i) {
-		return &text('setup_eforceunder', $pd);
+	local $ok = 0;
+	foreach my $pdom ($parent, &get_domain_by("parent", $parent->{'id'})) {
+		local $pd = $pdom->{'dom'};
+		if ($newdom =~ /\.\Q$pd\E$/i) {
+			$ok = 1;
+			last;
+			}
 		}
+	$ok || return &text('setup_eforceunder2', $parent->{'dom'});
 	}
 
 # Check if under someone else's domain
