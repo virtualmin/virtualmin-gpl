@@ -114,7 +114,7 @@ foreach $s (@scripts) {
 	$lfunc = $script->{'latest_func'};
 	$url = undef;
 	if (defined(&$lfunc)) {
-		foreach $v (@{$script->{'install_versions'}}) {
+		foreach $v (@{$script->{'versions'}}) {
 			($url, $re, $prefix, $suffix) = &$lfunc($v);
 			next if (!$url);
 			print "Checking $script->{'name'} website for $v ..\n";
