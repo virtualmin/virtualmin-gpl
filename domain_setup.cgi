@@ -344,6 +344,12 @@ if (!$parentuser) {
 		$dom{'quota'} = $quota;
 		$dom{'uquota'} = $uquota;
 		$dom{'norename'} = $plan->{'norename'};	# No input for this
+
+		# No fields for these, so set from plan
+		$d->{'aliasdomslimit'} = $plan->{'aliasdomslimit'} eq '' ? '*' :
+					  $plan->{'aliasdomslimit'};
+		$d->{'realdomslimit'} = $plan->{'realdomslimit'} eq '' ? '*' :
+					 $plan->{'realdomslimit'};
 		}
 	&set_capabilities_from_plan(\%dom, $plan);
 	}
