@@ -47,7 +47,12 @@ $kdata || &error($text{'copycert_ekey'});
 
 # Make sure SSL is enabled
 &$first_print($text{'copycert_denabling'});
-&dovecot::save_directive($conf, "ssl_disable", "no");
+if (&dovecot::find("ssl_disable", $conf, 2)) {
+	&dovecot::save_directive($conf, "ssl_disable", "no");
+	}
+else {
+	&dovecot::save_directive($conf, "ssl", "yes");
+	}
 $protos = &dovecot::find_value("protocols", $conf);
 @protos = split(/\s+/, $protos);
 %protos = map { $_, 1 } @protos;
