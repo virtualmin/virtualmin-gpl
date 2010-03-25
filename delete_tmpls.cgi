@@ -12,9 +12,35 @@ require './virtual-server-lib.pl';
 foreach $tid (@d) {
 	($tmpl) = grep { $_->{'id'} == $tid } @tmpls;
 	if ($tmpl) {
-		&delete_template($tmpl);
+		push(@deltmpls, $tmpl);
+		push(@users, &get_domain_by("template", $tmpl->{'id'}));
 		}
 	}
-&webmin_log("delete", "templates", scalar(@d));
-&redirect("edit_newtmpl.cgi");
+
+if ($in{'confirm'}) {
+	# Do the deletion
+	foreach $tmpl (@deltmpls) {
+		&delete_template($tmpl);
+		}
+	&webmin_log("delete", "templates", scalar(@d));
+	&redirect("edit_newtmpl.cgi");
+	}
+else {
+	# Ask first
+	&ui_print_header(undef, $text{'tdelete_title'}, "");
+
+	print &ui_confirmation_form(
+		"delete_tmpls.cgi",
+		&text('tdelete_warn',
+		      join(", ", map { $_->{'name'} } @deltmpls)),
+		[ map { [ "d", $_ ] } @d ],
+		[ [ "confirm", $text{'tdelete_confirm'} ] ],
+		undef,
+		@users ? &text('tdelete_users', scalar(@users))
+		       : '');
+
+	&ui_print_footer("edit_newtmpl.cgi", $text{'newtmpl_return'},
+			 "", $text{'index_return'});
+	}
+
 

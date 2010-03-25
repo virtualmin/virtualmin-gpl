@@ -2557,6 +2557,7 @@ tmpl_title1=Create Server Template
 tmpl_title2=Edit Server Template
 tmpl_title3=Clone Server Template
 tmpl_title4=Copy Default Server Template
+tmpl_title5=Delete Server Template
 tmpl_default=From default settings
 tmpl_header=Virtual server template details
 tmpl_init=Initially selected template for top-level servers?
@@ -2835,6 +2836,9 @@ tmpl_avail1=From default template
 tmpl_avail0=Selected below ..
 tmpl_availmod=Module and function
 tmpl_availyes=Available?
+tmpl_deletewarn=Are you sure you want to delete this server template? Once removed it cannot be un-deleted.
+tmpl_deleteusers=The template is currently in use by $1 virtual servers.
+tmpl_deleteconfirm=Delete Template
 
 newplugin_title=Plugin Modules
 newplugin_desc=Plugins are Webmin modules which provided additional server and mailbox features for Virtualmin. Unlike the core features, they can be installed separately and written by third-party developers.
@@ -4181,6 +4185,10 @@ s3_elist2=Failed to list S3 bucket : $1
 
 tdelete_err=Failed to delete templates
 tdelete_enone=None selected
+tdelete_title=Delete Server Templates
+tdelete_warn=Are you sure you want to delete the following selected server templates : $1
+tdelete_confirm=Delete Templates
+tdelete_users=They are currently in use by $1 virtual servers.
 
 switch_ecannot=You are not allowed to switch to the admin of this domain
 switch_eadmin=The specified extra administrator does not exist!

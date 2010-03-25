@@ -30,10 +30,30 @@ else {
 	}
 
 if ($in{'delete'}) {
-	# Just delete this template
-	&delete_template($tmpl);
-	&webmin_log("delete", "template", $tmpl->{'name'});
-	&redirect("edit_newtmpl.cgi");
+	if ($in{'confirm'}) {
+		# Just delete this template
+		&delete_template($tmpl);
+		&webmin_log("delete", "template", $tmpl->{'name'});
+		&redirect("edit_newtmpl.cgi");
+		}
+	else {
+		# Ask first, and check for domains using it
+		&ui_print_header($tmpl->{'name'}, $text{'tmpl_title5'}, "");
+
+		@users = &get_domain_by("template", $tmpl->{'id'});
+		print &ui_confirmation_form(
+			"save_tmpl.cgi",
+			$text{'tmpl_deletewarn'},
+			[ [ "id", $in{'id'} ],
+			  [ "delete", 1 ] ],
+			[ [ "confirm", $text{'tmpl_deleteconfirm'} ] ],
+			undef,
+			@users ? &text('tmpl_deleteusers', scalar(@users))
+			       : '');
+
+		&ui_print_footer("edit_newtmpl.cgi", $text{'newtmpl_return'},
+				 "", $text{'index_return'});
+		}
 	exit;
 	}
 elsif ($in{'clone'}) {
