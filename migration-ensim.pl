@@ -349,6 +349,7 @@ if (defined(&set_php_wrappers_writable)) {
 # dir specified in the XML for .mysql.dmp files
 if ($got{'mysql'}) {
 	&$first_print("Re-creating and loading MySQL databases ..");
+	&disable_quotas(\%dom);
 	local ($mc) = grep { $_->{'serviceName'} eq 'mysql' } @$service;
 	local $mydir = "$root/var/lib/mysql/".$mc->{'DbaseAdmin'}->{'TmpPath'};
 	local $prefix = $mc->{'DbaseAdmin'}->{'DbasePrefix'};
@@ -367,6 +368,7 @@ if ($got{'mysql'}) {
 		&$outdent_print();
 		$mycount++;
 		}
+	&enable_quotas(\%dom);
 	&$second_print(".. done (created $mycount)");
 	}
 

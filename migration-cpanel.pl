@@ -910,6 +910,7 @@ if ($got{'mysql'}) {
 	# Re-create all MySQL databases
 	local $mycount = 0;
 	&$first_print("Re-creating and loading MySQL databases ..");
+	&disable_quotas(\%dom);
 	local $mydir = "$userdir/mysql";
 	opendir(MYDIR, $mydir);
 	while($myf = readdir(MYDIR)) {
@@ -928,6 +929,7 @@ if ($got{'mysql'}) {
 			}
 		}
 	closedir(MYDIR);
+	&enable_quotas(\%dom);
 	&$second_print(".. done (created $mycount databases)");
 
 	# Re-create MySQL users

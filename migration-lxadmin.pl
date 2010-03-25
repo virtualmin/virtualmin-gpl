@@ -408,6 +408,7 @@ if ($got{'virtualmin-mailman'}) {
 # Restore MySQL databases
 if ($got{'mysql'}) {
 	&$first_print("Re-creating MySQL databases ..");
+	&disable_quotas(\%dom);
 	&require_mysql();
 	local @gotmysql = &mysql::list_databases();
 	local $dcount = 0;
@@ -444,6 +445,7 @@ if ($got{'mysql'}) {
 		&$outdent_print();
 		$dcount++;
 		}
+	&enable_quotas(\%dom);
 	&$second_print(".. done (migrated $dcount databases)");
 	}
 

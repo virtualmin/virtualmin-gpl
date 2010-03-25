@@ -1222,3 +1222,4 @@ Added fields to the Website Options page for changing the Apache log file locati
 Added the get-ssl API command to output information about a virtual server's SSL certificate.
 Domain owners can now be prevented from using the Website Redirects page via a new edit capability restriction.
 Added user%domain as an option Unix username format.
+Quotas are now disabled before importing a migrated database and re-enabled afterwards, to prevent quota issues from breaking the import process.

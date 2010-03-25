@@ -470,11 +470,7 @@ foreach $dbfile (glob("$_[1]_*")) {
 	}
 
 # Turn off quotas for the domain, to prevent the import failing
-if ($_[0]->{'unix'} && $_[0]->{'quota'}) {
-	local $nqd = { %{$_[0]} };
-	$nqd->{'quota'} = 0;
-	&set_server_quotas($nqd);
-	}
+&disable_quotas($_[0]);
 
 # Finally, import the data
 my $rv = 1;
@@ -522,9 +518,7 @@ foreach my $db (@dbs) {
 	}
 
 # Put quotas back
-if ($_[0]->{'unix'} && $_[0]->{'quota'}) {
-	&set_server_quotas($_[0]);
-	}
+&enable_quotas($_[0]);
 
 return $rv;
 }

@@ -690,6 +690,7 @@ if ($got{'mysql'}) {
 	local $mcount = 0;
 	local $myucount = 0;
 	&$first_print("Migrating MySQL databases ..");
+	&disable_quotas(\%dom);
 	foreach my $name (keys %$databases) {
 		local $database = $databases->{$name};
 		next if ($database->{'type'} ne 'mysql');
@@ -736,6 +737,7 @@ if ($got{'mysql'}) {
 		&$outdent_print();
 		$mcount++;
 		}
+	&enable_quotas(\%dom);
 	&$second_print(".. done (migrated $mcount databases, and created $myucount users)");
 	}
 &release_lock_unix(\%dom);

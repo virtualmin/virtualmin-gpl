@@ -4256,6 +4256,37 @@ else {
 	}
 }
 
+# disable_quotas(&domain)
+# Temporarily disable quotas for some virtual server, so that file or DB
+# operations don't fail
+sub disable_quotas
+{
+local ($d) = @_;
+if ($d->{'parent'}) {
+	local $pd = &get_domain($d->{'parent'});
+	&disable_quotas($pd);
+	}
+elsif ($d->{'unix'} && $d->{'quota'}) {
+	local $nqd = { %$d };
+	$nqd->{'quota'} = 0;
+	&set_server_quotas($nqd);
+	}
+}
+
+# enable_quotas(&domain)
+# Must be called after disable_quotas to re-activate quotas for some domain
+sub enable_quotas
+{
+local ($d) = @_;
+if ($d->{'parent'}) {
+        local $pd = &get_domain($d->{'parent'});
+        &enable_quotas($pd);
+        }
+elsif ($d->{'unix'} && $d->{'quota'}) {
+	&set_server_quotas($d);
+	}
+}
+
 # users_table(&users, &dom, cgi, &buttons, &links, empty-msg)
 # Output a table of mailbox users
 sub users_table
