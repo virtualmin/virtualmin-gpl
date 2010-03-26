@@ -3280,6 +3280,11 @@ if ($nice_sizes) {
 		$hash{'bw_period'} = '';
 		}
 	}
+
+# Set mysql_pass to blank if missing, so that it can be used if $IF
+$hash{'mysql_pass'} ||= '';
+$hash{'postgres_pass'} ||= '';
+
 return %hash;
 }
 
