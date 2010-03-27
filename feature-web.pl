@@ -1577,7 +1577,7 @@ foreach $l (&unique(@logs)) {
 			open(LOG, $f);
 			}
 		while(<LOG>) {
-			if (/^(\S+)\s+(\S+)\s+(\S+)\s+\[(\d+)\/(\S+)\/(\d+):(\d+):(\d+):(\d+)\s+(\S+)\]\s+"([^"]*)"\s+(\S+)\s+(\S+)/) {
+			if (/^(\S+)\s+(\S+)\s+(\S+)\s+\[(\d+)\/(\S+)\/(\d+):(\d+):(\d+):(\d+)\s+(\S+)\]\s+"([^"]*)"\s+(\S+)\s+(\S+)/ && $12 ne "206") {
 				# Valid-looking log line .. work out the time
 				local $ltime = timelocal($9, $8, $7, $4, $apache_mmap{lc($5)}, $6-1900);
 				if ($ltime > $_[1]) {
