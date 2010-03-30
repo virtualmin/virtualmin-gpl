@@ -10109,7 +10109,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    &has_home_quotas() && !&has_quota_commands() ? ( 'quotacheck' ) : ( ),
 #   &can_show_history() ? ( 'history' ) : ( ),
    $virtualmin_pro ? ( 'mxs' ) : ( ),
-   'validate', 'chroot', 'global',
+   'validate', 'chroot', 'global', 'changelog',
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
    );
 if ($config{'mail_system'} == 0) {
@@ -10144,6 +10144,7 @@ local %tmplcat = (
 	'chroot' => 'check',
 	'global' => 'custom',
 	'postgrey' => 'email',
+	'changelog' => 'setting',
 	);
 local %nonew = ( 'history', 1, 'postgrey', 1 );
 local @tlinks = map { $nonew{$_} ? "${_}.cgi"

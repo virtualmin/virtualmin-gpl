@@ -4786,6 +4786,7 @@ nf_date=(installed $1)
 nf_and=$1 and $2
 nf_seen=Hide New Features
 nf_try=Try it ..
+nf_ver=(Version $1)
 
 chroot_title=FTP Directory Restrictions
 newchroot_title=$chroot_title
@@ -5181,3 +5182,7 @@ redirect_epath=Missing or invalid source URL path
 redirect_eurl=Missing or invalid destination URL
 redirect_edir=Missing or non-absolute destination directory
 redirect_edir2=Destination directory must be under $1
+
+newchangelog_title=New Feature Log
+newchangelog_ecannot=You are not allowed to view the new feature log
+newchangelog_desc=This page lists all major changes in all Virtualmin versions installed on your system, up to the current release.

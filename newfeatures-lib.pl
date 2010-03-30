@@ -49,11 +49,12 @@ foreach my $mod ($module_name, @plugins, 'security-updates') {
 return @rv;
 }
 
-# should_show_new_features()
+# should_show_new_features([show-all])
 # If the current user should see new features, returns a list of modules and
 # version numbers to show for. The list is in descending version order.
 sub should_show_new_features
 {
+my ($showall) = @_;
 my @nf;
 my %seen;
 &read_file_cached("$newfeatures_seen_dir/$remote_user", \%seen);
@@ -62,8 +63,9 @@ foreach my $minfo (&list_new_features_modules()) {
 	my $mod = $minfo->{'dir'};
 	my %mc = &foreign_config($mod);
 	while($ver > 0 &&
-	      (!$seen{$mod} || $seen{$mod} < $ver) &&
-	      (!$mc{'first_version'} || $mc{'first_version'} <= $ver)) {
+	      ($showall ||
+	       (!$seen{$mod} || $seen{$mod} < $ver) &&
+	       (!$mc{'first_version'} || $mc{'first_version'} <= $ver))) {
 		push(@nf, [ $mod, $ver ]);
 		$ver = &down_one_version($ver, $mod);
 		}
@@ -109,16 +111,16 @@ my $ver = $module_info{'version'};
 return sprintf("%.2f", int($ver*100) / 100.0);
 }
 
-# get_new_features_html(&domain)
+# get_new_features_html(&domain|&server, show-all)
 # Returns HTML listing new features in this (and older) versions of Virtualmin.
 # If there are none, returns undef.
 sub get_new_features_html
 {
-my ($d) = @_;
+my ($d, $showall) = @_;
 &load_theme_library();
 
 # Find out what's new
-my @nf = &should_show_new_features();
+my @nf = &should_show_new_features($showall);
 return undef if (!@nf);
 my (@rv, @modvers, %modvers);
 my $me;
@@ -175,7 +177,7 @@ foreach my $nf (@nf) {
 		}
 	}
 return undef if (!@rv);
-@rv = reverse(@rv);
+#@rv = reverse(@rv);
 
 # If not given, pick a domain or server
 my @servers;
@@ -203,10 +205,12 @@ my $subs = defined(&substitute_domain_template) ?
 
 # Make the HTML
 my $rv;
-my $modvers = @modvers <= 1 ? join(", ", @modvers) :
-		 	&text('nf_and', join(", ", @modvers[0..$#modvers-1]),
+if (!$showall) {
+	my $modvers = @modvers <= 1 ? join(", ", @modvers) :
+			&text('nf_and', join(", ", @modvers[0..$#modvers-1]),
 					$modvers[$#modvers]);
-$rv .= &text('nf_header', $modvers)."<br>\n";
+	$rv .= &text('nf_header', $modvers)."<br>\n";
+	}
 $rv .= "<dl>\n";
 foreach my $nf (@rv) {
 	my $link;
@@ -233,15 +237,22 @@ foreach my $nf (@rv) {
 				}
 			}
 		}
-	$rv .= "<dt><b>$nf->{'desc'}</b>\n";
+	$rv .= "<dt><b>".$nf->{'desc'}.
+	       ($showall ? " ".&text('nf_ver', $nf->{'ver'}) : "").
+	       "</b>\n";
 	if ($link) {
 		$rv .= " | <a href='$link'>$text{'nf_try'}</a>\n";
 		}
 	$rv .= "<dd>$nf->{'html'}<p>\n";
 	}
 $rv .= "</dl>\n";
-$rv .= &ui_form_start("$gconfig{'webprefix'}/$module_name/seen_newfeatures.cgi");
-$rv .= &ui_form_end([ [ undef, $text{'nf_seen'} ] ]);
+
+# Button to hide new features
+if (!$showall) {
+	$rv .= &ui_form_start(
+		"$gconfig{'webprefix'}/$module_name/seen_newfeatures.cgi");
+	$rv .= &ui_form_end([ [ undef, $text{'nf_seen'} ] ]);
+	}
 
 return $rv;
 }
