@@ -170,6 +170,14 @@ PREFAILED:
 # Send an email to the recipient, if there are any
 if ($sched->{'email'} && $has_mailboxes &&
     (!$ok || @$errdoms || !$sched->{'email_err'} || $force_email)) {
+	if (@$errdoms) {
+		# Put list of failed domains at the top
+		$fails = $text{'backup_partial2'}."\n";
+		foreach $d (@$errdoms) {
+			$fails .= "    ".$d->{'dom'}."\n";
+			}
+		$output = $fails."\n".$output;
+		}
 	if ($ok && !@$errdoms) {
 		$output .= &text('backup_done', &nice_size($size))." ";
 		$subject = &text('backup_donesubject', $host);
@@ -185,13 +193,6 @@ if ($sched->{'email'} && $has_mailboxes &&
 	$total_time = time() - $start_time;
 	$output .= &text('backup_time', &nice_hour_mins_secs($total_time))."\n";
 	$output .= "\n";
-	if (@$errdoms) {
-		# Include list of failed domains
-		$output .= $text{'backup_partial2'}."\n";
-		foreach $d (@$errdoms) {
-			$output .= "    ".$d->{'dom'}."\n";
-			}
-		}
 	$output .= &text('backup_fromvirt', &get_virtualmin_url())."\n";
 	$mail = { 'headers' => [ [ 'From', &get_global_from_address() ],
 				 [ 'Subject', $subject ],
