@@ -45,4 +45,6 @@
 	- CHANGELOG
 
  - API command to add / remove slave DNS zones for a domain
-
+	- CHANGELOG
+	- NS records
+	- Test

@@ -22,6 +22,12 @@ Similarly, deletion is done with the C<--delete-record> flag, followed by a
 single parameter containing the name and type of the record(s) to delete. Both
 of these can be given multiple times.
 
+You can also add or remove slave DNS servers for this domain, assuming that
+they have already been setup in Webmin's BIND DNS Server module. To add a
+specific slave host, use the C<--add-slave> flag followed by a hostname. Or to
+add them all, use the C<--add-all-slaves> flag. To remove a single slave host,
+use the C<--remove-slave> command followed by a hostname.
+
 =cut
 
 package virtual_server;
@@ -100,6 +106,18 @@ while(@ARGV > 0) {
 		$name && $type || &usage("--remove-record must be followed by the record name and type, all in one parameter");
 		push(@delrecs, [ $name, $type ]);
 		}
+	elsif ($a eq "--increment-soa") {
+		$bumpsoa = 1;
+		}
+	elsif ($a eq "--add-slave") {
+		push(@addslaves, shift(@ARGV));
+		}
+	elsif ($a eq "--remove-slave") {
+		push(@delslaves, shift(@ARGV));
+		}
+	elsif ($a eq "--add-all-slaves") {
+		$addallslaves = 1;
+		}
 	else {
 		&usage();
 		}
@@ -121,6 +139,29 @@ else {
 		$d || &usage("Domain $n does not exist");
 		$d->{'dns'} || &usage("Virtual server $n does not have a DNS domain");
 		push(@doms, $d);
+		}
+	}
+
+# Validate slave args
+&require_bind();
+if (@addslaves && $addallslaves) {
+	&usage("Both --add-slave and --add-all-slaves cannot be specified at the same time");
+	}
+@slaveservers = &bind8::list_slave_servers();
+if ($addallslaves) {
+	@addslaves = map { $_->{'host'} } @slaveservers;
+	@addslaves || &usage("No slave DNS servers have been setup in Webmin's BIND module");
+	}
+elsif (@addslaves) {
+	foreach $s (@addslaves) {
+		($ss) = grep { $_->{'host'} eq $s } @slaveservers;
+		$ss || &usage("No slave DNS server with hostname $s exists");
+		}
+	}
+if (@delslaves) {
+	foreach $s (@delslaves) {
+		($ss) = grep { $_->{'host'} eq $s } @slaveservers;
+		$ss || &usage("No slave DNS server with hostname $s exists");
 		}
 	}
 
@@ -224,8 +265,16 @@ foreach $d (@doms) {
 			}
 		}
 
-	if ($changed) {
+	if ($changed || $bumpsoa) {
 		&post_records_change($d, \@recs);
+		}
+
+	# Add to slave DNS servers
+	if (@addslaves) {
+		&create_zone_on_slaves($d, \@addslaves);
+		}
+	if (@delslaves) {
+		&delete_zone_on_slaves($d, \@delslaves);
 		}
 
 	&$outdent_print();
@@ -254,6 +303,8 @@ print "                      --spf-all-neutral | --spf-all-allow |\n";
 print "                      --spf-all-default]\n";
 print "                     [--add-record \"name type value\"]\n";
 print "                     [--remove-record \"name type\"]\n";
+print "                     [--add-slave hostname]* | [--add-all-slaves]\n";
+print "                     [--remove-slave hostname]*\n";
 exit(1);
 }
 

@@ -343,19 +343,20 @@ else {
 $d->{'dns_slave'} = $slaves;
 }
 
-# delete_zone_on_slaves(&domain)
+# delete_zone_on_slaves(&domain, [&slaves])
 # Delete a zone on all slave servers, from the dns_slave key. May print messages
 sub delete_zone_on_slaves
 {
-local ($d) = @_;
-local @slaves = split(/\s+/, $d->{'dns_slave'});
+local ($d, $slaveslist) = @_;
+local @delslaves = $slaveslist ? @$slaveslist
+			       : split(/\s+/, $d->{'dns_slave'});
 &require_bind();
-if (@slaves) {
-	# Delete from slave servers too
-	&$first_print(&text('delete_bindslave', $d->{'dns_slave'}));
+if (@delslaves) {
+	# Delete from slave servers
+	&$first_print(&text('delete_bindslave', join(" ", @delslaves)));
 	local $tmpl = &get_template($d->{'template'});
 	local @slaveerrs = &bind8::delete_on_slaves(
-			$d->{'dom'}, \@slaves,
+			$d->{'dom'}, \@delslaves,
 			$d->{'dns_view'} || $tmpl->{'dns_view'});
 	if (@slaveerrs) {
 		&$second_print($text{'delete_bindeslave'});
@@ -368,7 +369,22 @@ if (@slaves) {
 	else {
 		&$second_print($text{'setup_done'});
 		}
-	delete($d->{'dns_slave'});
+
+	# Update domain data
+	my @newslaves;
+	if ($slaveslist) {
+		foreach my $s (split(/\s+/, $d->{'dns_slave'})) {
+			if (&indexof($s, @delslaves) < 0) {
+				push(@newslaves, $s);
+				}
+			}
+		}
+	if (@newslaves) {
+		$d->{'dns_slave'} = join(" ", @newslaves);
+		}
+	else {
+		delete($d->{'dns_slave'});
+		}
 	}
 }
 
