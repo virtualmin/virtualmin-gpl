@@ -43,3 +43,6 @@
 	- https://www.virtualmin.com/node/13450
 	- Command line API
 	- CHANGELOG
+
+ - API command to add / remove slave DNS zones for a domain
+

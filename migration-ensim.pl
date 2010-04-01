@@ -297,7 +297,8 @@ local $websrc = "$root/var/www/html";
 local $qwebdir = quotemeta($webdir);
 local $qwebsrc = quotemeta($websrc);
 local $out;
-&execute_command("cd $qwebsrc && (tar cvf - . | (cd $qwebdir && tar xf -))",
+local $tar = &get_tar_command();
+&execute_command("cd $qwebsrc && ($tar cvf - . | (cd $qwebdir && $tar xf -))",
 		 undef, \$out, \$out);
 if ($?) {
 	&$second_print(".. copy failed : <tt>$out</tt>");
@@ -318,7 +319,7 @@ else {
 	local $qcgisrc = quotemeta($cgisrc);
 	local $out;
 	&execute_command(
-		"cd $qcgisrc && (tar cvf - . | (cd $qcgidir && tar xf -))",
+		"cd $qcgisrc && ($tar cvf - . | (cd $qcgidir && $tar xf -))",
 		undef, \$out, \$out);
 	if ($?) {
 		&$second_print(".. copy failed : <tt>$out</tt>");
@@ -425,7 +426,7 @@ if ($userident->{$origuser}) {
 		local $qhomesrc = quotemeta($homesrc);
 		local $qhomedest = quotemeta($uinfo->{'home'});
 		&execute_command(
-		  "cd $qhomesrc && (tar cvf - . | (cd $qhomedest && tar xf -))",
+		  "cd $qhomesrc && ($tar cvf - . | (cd $qhomedest && $tar xf -))",
 		  undef, \$out, \$out);
 		&execute_command(
 		  "chown -R $uinfo->{'uid'}:$uinfo->{'gid'} $qhomedest",
@@ -535,7 +536,8 @@ return (1, $done{$_[0]}) if ($done{$_[0]});	# Cache extracted dir
 local $temp = &transname();
 mkdir($temp, 0700);
 local $qf = quotemeta($_[0]);
-local $out = `cd $temp && tar xzf $qf 2>&1`;
+local $tar = &get_tar_command();
+local $out = `cd $temp && $tar xzf $qf 2>&1`;
 if ($? && $out !~ /decompression\s+OK/i) {
 	return (0, $out);
 	}
