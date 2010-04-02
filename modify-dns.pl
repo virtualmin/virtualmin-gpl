@@ -124,7 +124,8 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || usage();
 defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
-  @addrecs || @delrecs || &usage("Nothing to do");
+  @addrecs || @delrecs || @addslaves || @delslaves || $addallslaves ||
+  &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -271,13 +272,14 @@ foreach $d (@doms) {
 
 	# Add to slave DNS servers
 	if (@addslaves) {
-		&create_zone_on_slaves($d, \@addslaves);
+		&create_zone_on_slaves($d, join(" ", @addslaves));
 		}
 	if (@delslaves) {
-		&delete_zone_on_slaves($d, \@delslaves);
+		&delete_zone_on_slaves($d, join(" ", @delslaves));
 		}
 
 	&$outdent_print();
+	&save_domain($d);
 	&release_lock_dns($d);
 	&$second_print(".. done");
 	}

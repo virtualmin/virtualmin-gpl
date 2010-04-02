@@ -316,7 +316,7 @@ else {
 &register_post_action(\&restart_bind);
 }
 
-# create_zone_on_slaves(&domain, slaves)
+# create_zone_on_slaves(&domain, space-separate-slave-list)
 # Create a zone on all specified slaves, and updates the dns_slave key.
 # May print messages.
 sub create_zone_on_slaves
@@ -340,15 +340,27 @@ if (@slaveerrs) {
 else {
 	&$second_print($text{'setup_done'});
 	}
-$d->{'dns_slave'} = $slaves;
+
+# Add to list of slaves where it succeeded
+local @newslaves;
+foreach my $s (split(/\s+/, $slaves)) {
+	local ($err) = grep { $_->[0]->{'host'} eq $s } @slaveerrs;
+	if (!$err) {
+		push(@newslaves, $s);
+		}
+	}
+local @oldslaves = split(/\s+/, $d->{'dns_slave'});
+$d->{'dns_slave'} = join(" ", &unique(@oldslaves, @newslaves));
+
+&register_post_action(\&restart_bind);
 }
 
-# delete_zone_on_slaves(&domain, [&slaves])
+# delete_zone_on_slaves(&domain, [space-separate-slave-list])
 # Delete a zone on all slave servers, from the dns_slave key. May print messages
 sub delete_zone_on_slaves
 {
 local ($d, $slaveslist) = @_;
-local @delslaves = $slaveslist ? @$slaveslist
+local @delslaves = $slaveslist ? split(/\s+/, $slaveslist)
 			       : split(/\s+/, $d->{'dns_slave'});
 &require_bind();
 if (@delslaves) {
@@ -386,6 +398,8 @@ if (@delslaves) {
 		delete($d->{'dns_slave'});
 		}
 	}
+
+&register_post_action(\&restart_bind);
 }
 
 # modify_dns(&domain, &olddomain)

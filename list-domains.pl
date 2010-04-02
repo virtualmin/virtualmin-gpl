@@ -434,6 +434,12 @@ if ($multi) {
 			      ($spf ? "Enabled" : "Disabled"),"\n";
 			}
 
+		# Slave DNS servers
+		if ($config{'dns'} && $d->{'dns'} && $d->{'dns_slave'}) {
+			print "    Slave DNS servers: ",
+			      $d->{'dns_slave'},"\n";
+			}
+
 		# Show BCC setting
 		if ($config{'mail'} && $supports_bcc && $multi == 1) {
 			$bcc = &get_domain_sender_bcc($d);
