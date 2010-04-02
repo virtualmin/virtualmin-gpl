@@ -726,7 +726,9 @@ if (-r $phpini && &foreign_check("phpini")) {
 	# Find PHP variables from template and from script
 	local @todo;
 	foreach my $pv (@tmplphpvars) {
-		push(@todo, [ split(/=/, $pv, 2) ]);
+		local ($n, $v) = split(/=/, $pv, 2);
+		local $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
+		push(@todo, [ $n, $v, $diff ]);
 		}
 	if ($script && defined(&{$script->{'php_vars_func'}})) {
 		push(@todo, &{$script->{'php_vars_func'}}($d));

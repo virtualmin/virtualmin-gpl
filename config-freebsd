@@ -115,7 +115,7 @@ status=1
 show_sysinfo=2
 default_procmail=0
 template_auto=1
-php_vars=memory_limit=32M
+php_vars=memory_limit=+32M
 webalizer_nocron=0
 domains_sort=sub
 name_max=20

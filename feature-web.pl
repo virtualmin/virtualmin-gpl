@@ -2335,13 +2335,18 @@ local @pfields;
 local @table;
 foreach $pv (@pv, "", "") {
 	local ($n, $v) = split(/=/, $pv, 2);
+	local $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
 	push(@table, [ &ui_textbox("phpname_$i", $n, 25),
-		       &ui_textbox("phpval_$i", $v, 35) ]);
-	push(@pfields, "phpname_$i", "phpval_$i");
+		       &ui_select("phpdiff_$i", $diff,
+				  [ [ '', $text{'tmpl_phpexact'} ],
+				    [ '+', $text{'tmpl_phpatleast'} ],
+				    [ '-', $text{'tmpl_phpatmost'} ] ]),
+		       &ui_textbox("phpval_$i", $v, 35), ]);
+	push(@pfields, "phpname_$i", "phpdiff_$i", "phpval_$i");
 	$i++;
 	}
 local $ptable = &ui_columns_table(
-	[ $text{'tmpl_phpname'}, $text{'tmpl_phpval'} ],
+	[ $text{'tmpl_phpname'}, $text{'tmpl_phpdiff'}, $text{'tmpl_phpval'} ],
 	undef,
 	\@table,
 	undef,
@@ -2534,7 +2539,8 @@ elsif ($in{"php_vars_mode"} == 2) {
 		$n =~ /^\S+$/ ||
 			&error(&text('tmpl_ephp_var', $n));
 		$v = $in{"phpval_$i"};
-		push(@phpvars, "$n=$v");
+		$diff = $in{"phpdiff_$i"};
+		push(@phpvars, $diff.$n."=".$v);
 		}
 	$tmpl->{'php_vars'} = join("\t", @phpvars);
 	}
