@@ -2117,18 +2117,23 @@ local $home = $user->{'home'};
 if ($home) {
 	# Create his homedir
 	local @st = $d ? stat($d->{'home'}) : ( undef, undef, 0755 );
-	&lock_file($home);
 	if (!-e $home || $always) {
+		&lock_file($home);
 		&make_dir($home, $st[2] & 0777);
 		&set_ownership_permissions($user->{'uid'}, $user->{'gid'},
 					   $st[2] & 0777, $home);
+		&system_logged("chown -R $user->{'uid'}:$user->{'gid'} ".
+			       quotemeta($home));
 		&unlock_file($home);
 		}
 
-	# Copy files into homedir
-	&copy_skel_files(
-		&substitute_domain_template($config{'mail_skel'}, $d),
-		$user, $home);
+	# Copy files into homedir. Don't die if this fails for quota issues
+	eval {
+		local $main::error_must_die = 1;
+		&copy_skel_files(
+			&substitute_domain_template($config{'mail_skel'}, $d),
+			$user, $home);
+		};
 	}
 }
 
