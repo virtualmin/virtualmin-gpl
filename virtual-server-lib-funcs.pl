@@ -2108,26 +2108,27 @@ else {
 	}
 }
 
-# create_user_home(&uinfo, &domain)
+# create_user_home(&uinfo, &domain, always-chown)
 # Creates the home directory for a new mail user, and copies skel files into it
 sub create_user_home
 {
-local $home = $_[0]->{'home'};
+local ($user, $d, $always) = @_;
+local $home = $user->{'home'};
 if ($home) {
 	# Create his homedir
-	local @st = $_[1] ? stat($_[1]->{'home'}) : ( undef, undef, 0755 );
+	local @st = $d ? stat($d->{'home'}) : ( undef, undef, 0755 );
 	&lock_file($home);
-	if (!-e $home) {
+	if (!-e $home || $always) {
 		&make_dir($home, $st[2] & 0777);
-		&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'gid'},
+		&set_ownership_permissions($user->{'uid'}, $user->{'gid'},
 					   $st[2] & 0777, $home);
 		&unlock_file($home);
 		}
 
 	# Copy files into homedir
 	&copy_skel_files(
-		&substitute_domain_template($config{'mail_skel'}, $_[1]),
-		$_[0], $home);
+		&substitute_domain_template($config{'mail_skel'}, $d),
+		$user, $home);
 	}
 }
 

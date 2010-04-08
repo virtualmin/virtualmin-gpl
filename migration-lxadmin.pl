@@ -315,7 +315,7 @@ foreach my $e (@emails) {
 	$uinfo->{'shell'} = $nologin_shell->{'shell'};
 	$uinfo->{'email'} = lc($e);
 	&create_user($uinfo, \%dom);
-	&create_user_home($uinfo, \%dom);
+	&create_user_home($uinfo, \%dom, 1);
 	$taken{$uinfo->{'uid'}}++;
 	local ($crfile, $crtype) = &create_mail_file($uinfo);
 

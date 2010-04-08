@@ -410,7 +410,7 @@ if ($userident->{$origuser}) {
 			    $qu->{'config'}->{'quota'} / &quota_bsize("home");
 			}
 		&create_user($uinfo, \%dom);
-		&create_user_home($uinfo, \%dom);
+		&create_user_home($uinfo, \%dom, 1);
 		$taken{$uinfo->{'uid'}}++;
 
 		# Move his mail file
