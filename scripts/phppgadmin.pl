@@ -19,7 +19,7 @@ return "A browser-based PostgreSQL database management interface.";
 # script_phppgadmin_versions()
 sub script_phppgadmin_versions
 {
-return ( "4.2.2" );
+return ( "4.2.3" );
 }
 
 sub script_phppgadmin_category
@@ -137,7 +137,7 @@ local ($d, $version, $opts, $files, $upgrade) = @_;
 local ($out, $ex);
 local @dbs = split(/\s+/, $opts->{'db'});
 local $dbuser = &postgres_user($d);
-local $dbpass = &postgres_pass($d);
+local $dbpass = &postgres_pass($d, 1);
 local $dbhost = &get_database_host("postgres");
 
 # Extract tar file to temp dir and copy to target
