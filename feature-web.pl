@@ -367,24 +367,32 @@ undef(@apache::get_config_cache);
 # Delete a single virtual server from the Apache config
 sub delete_web_virtual_server
 {
+local ($vhost) = @_;
 &require_apache();
-local $lref = &read_file_lines($_[0]->{'file'});
-splice(@$lref, $_[0]->{'line'}, $_[0]->{'eline'} - $_[0]->{'line'} + 1);
-&flush_file_lines($_[0]->{'file'});
-if (&is_empty($lref)) {
+local $lref = &read_file_lines($vhost->{'file'});
+splice(@$lref, $vhost->{'line'}, $vhost->{'eline'} - $vhost->{'line'} + 1);
+&flush_file_lines($vhost->{'file'});
+if (&is_empty($vhost->{'file'})) {
 	# Don't keep around empty web files
-	&unlink_file($_[0]->{'file'});
+	&unlink_file($vhost->{'file'});
 
 	# Delete a link from another Apache dir
-	&apache::delete_webfile_link($_[0]->{'file'});
+	&apache::delete_webfile_link($vhost->{'file'});
 	}
 }
 
-# is_empty(&lref)
+# is_empty(&lref|file)
 sub is_empty
 {
-local $l;
-foreach $l (@{$_[0]}) {
+local ($lref_or_file) = @_;
+local $lref;
+if (ref($lref_or_file)) {
+	$lref = $lref_or_file;
+	}
+else {
+	$lref = &read_file_lines($lref_or_file, 1);
+	}
+foreach my $l (@$lref) {
 	if ($l =~ /\S/) {
 		return 0;
 		}
