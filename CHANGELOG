@@ -1225,3 +1225,4 @@ Added user%domain as an option Unix username format.
 Quotas are now disabled before importing a migrated database and re-enabled afterwards, to prevent quota issues from breaking the import process.
 Added the New Feature Log page, for showing all major changes in previous Virtualmin versions.
 The modify-dns API command can now add and remove slave DNS servers for virtual servers.
+---- Changes since 3.78 ----
