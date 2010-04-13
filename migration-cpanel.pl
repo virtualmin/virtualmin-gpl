@@ -1150,18 +1150,29 @@ foreach my $l (@$lref) {
 		}
 	}
 
-# Create sub-domains, from vf directory
+# Create sub-domains as virtualmin sub-domains, from vf directory
 opendir(VF, "$userdir/vf");
 foreach my $vf (readdir(VF)) {
 	local ($clash) = grep { $_->{'dom'} eq $vf } @rvdoms;
 	next if ($vf eq "." || $vf eq ".." || $clash);
 	next if ($addons{$vf});
 	&$first_print("Creating sub-domain $vf ..");
-	if ($vf !~ /^(\S+)\.\Q$dom\E$/) {
-		&$second_print(".. skipping, as not a sub-domain of $dom");
+	local (%subof, $subprefix);
+	foreach my $rv (grep { !$_->{'subdom'} } @rvdoms) {
+		if ($vf =~ /^(\S+)\.\Q$dom\E$/) {
+			$subprefix = $1;
+			%subof = %$rv;
+			last;
+			}
+		}
+	if (!defined(%subof) || !$subof{'dom'}) {
+		&$second_print(".. skipping, as not a sub-domain of $dom or any other migrated domain");
 		next;
 		}
-	local $subprefix = $1;
+	elsif ($subof{'alias'}) {
+		&$second_print(".. skipping, as parent domain $subof{'dom'} is an alias");
+		next;
+		}
 	&$indent_print();
 	local %subd = ( 'id', &domain_id(),
 			'dom', $vf,
@@ -1170,7 +1181,7 @@ foreach my $vf (readdir(VF)) {
 			'prefix', $dom{'prefix'},
 			'ugroup', $dom{'ugroup'},
 			'pass', $dom{'pass'},
-			'subdom', $dom{'id'},
+			'subdom', $subof{'id'},
 		        'subprefix', $subprefix,
 			'uid', $dom{'uid'},
 			'gid', $dom{'gid'},
@@ -1190,14 +1201,14 @@ foreach my $vf (readdir(VF)) {
 			);
 	foreach my $f (@subdom_features) {
 		if ($f eq 'mail') {
-			$subd{$f} = $dom{$f} && -r "$userdir/va/$vf";
+			$subd{$f} = $subof{$f} && -r "$userdir/va/$vf";
 			}
 		elsif ($f eq 'ssl') {
 			# Off for sub-domains, for now
 			$subd{$f} = 0;
 			}
 		else {
-			$subd{$f} = $dom{$f};
+			$subd{$f} = $subof{$f};
 			}
 		}
 	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
@@ -1205,18 +1216,29 @@ foreach my $vf (readdir(VF)) {
 	$subd{'home'} = &server_home_directory(\%subd, $parentdom);
 	&complete_domain(\%subd);
 
+	# Extract correct sub-domain root dir
+	use Data::Dumper;
+	local $userdata = &read_cpanel_userdata_file("$userdir/userdata/$vf");
+	if ($userdata->{'documentroot'} =~
+	    /^\/home\/([^\/]+)\/public_html\/(.*)/) {
+		$subd{'public_html_dir'} =
+			"../../$subof{'public_html_dir'}/$2"; 
+		$subd{'public_html_path'} =
+			"$subof{'public_html_path'}/$2";
+		}
+
 	# Set cgi directories to cpanel standard
 	$subd{'cgi_bin_dir'} =
-		"../../$dom{'public_html_dir'}/$subprefix/cgi-bin";
+		"../../$subof{'public_html_dir'}/$subprefix/cgi-bin";
 	$subd{'cgi_bin_path'} =
-		"$dom{'public_html_path'}/$subprefix/cgi-bin";
+		"$subof{'public_html_path'}/$subprefix/cgi-bin";
 
 	&create_virtual_server(\%subd, $parentdom, $parentdom->{'user'});
 
 	# Cpanel sub-domains always seem to forward mail to the parent
 	if ($subd{'mail'}) {
 		local $virt = { 'from' => "\@$vf",
-				'to' => [ "%1\@$dom" ] };
+				'to' => [ "%1\@".$subof{'dom'} ] };
 		&create_virtuser($virt);
 		}
 
@@ -1226,7 +1248,7 @@ foreach my $vf (readdir(VF)) {
 	}
 closedir(VF);
 
-# Create addon domains
+# Create addon domains as alias domains
 opendir(VF, "$userdir/vf");
 foreach my $vf (readdir(VF)) {
 	local ($clash) = grep { $_->{'dom'} eq $vf } @rvdoms;
@@ -1402,6 +1424,56 @@ local $temp = &transname();
 local $qf = quotemeta($_[0]);
 local $out = `gunzip -c $qf >$temp`;
 return $? ? undef : $temp;
+}
+
+# read_cpanel_userdata_file(file, [offset])
+# Converts a userdata file into a perl hash ref
+sub read_cpanel_userdata_file
+{
+local ($file, $pos) = @_;
+$pos ||= 0;
+local $lref = &read_file_lines($file, 1);
+local $startindent = 0;
+if ($lref->[$pos] =~ /^(\s+)/) {
+	$startindent = length($1);
+	}
+local %rv;
+local $lastname;
+while($pos < scalar(@$lref)) {
+	local $indent = 0;
+	if ($lref->[$pos] =~ /^(\s+)/) {
+		$indent = length($1);
+		}
+	if ($indent < $startindent) {
+		# End of this section
+		last;
+		}
+	elsif ($indent > $startindent) {
+		# Start of a new section
+		if ($lref->[$pos] =~ /^\s*\-/) {
+			# Element in an array
+			$rv{$lastname} ||= [ ];
+			local ($subrv, $subpos) =
+				&read_cpanel_userdata_file($file, $pos+1);
+			push(@{$rv{$lastname}}, $subrv);
+			$pos = $subpos - 1;
+			}
+		else {
+			# Start of a section
+			local ($subrv, $subpos) =
+				&read_cpanel_userdata_file($file, $pos);
+			$rv{$lastname} = $subrv;
+			$pos = $subpos - 1;
+			}
+		}
+	elsif ($lref->[$pos] =~ /^\s*(\S+):\s*(.*)/) {
+		# A value in this section
+		$rv{$1} = $2;
+		$lastname = $1;
+		}
+	$pos++;
+	}
+return wantarray ? ( \%rv, $pos ) : \%rv;
 }
 
 1;
