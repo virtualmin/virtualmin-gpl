@@ -18,30 +18,32 @@ $mailsize = &quota_bsize("mail");
 $now = time();
 &read_file($user_quota_warnings_file, \%userwarnings);
 foreach $d (&list_domains()) {
-	next if ($d->{'parent'} || $d->{'alias'});
-	next if (!$d->{'quota'});
+	next if ($d->{'alias'});
 
-	# Get usage for this server and all sub-servers
-	($homequota, $mailquota, $dbquota) = &get_domain_quota($d, 1);
-	$usage = $homequota*$homesize +
-		 $mailquota*$mailsize +
-		 $dbquota;
+	if ($d->{'quota'} && !$d->{'parent'}) {
+		# Get usage for this server and all sub-servers
+		($homequota, $mailquota, $dbquota) = &get_domain_quota($d, 1);
+		$usage = $homequota*$homesize +
+			 $mailquota*$mailsize +
+			 $dbquota;
 
-	# Compare to server's limit
-	$msg = &check_quota_threshold($d, $usage, $d->{'quota'}*$homesize);
+		# Compare to server's limit
+		$msg = &check_quota_threshold($d, $usage,
+					      $d->{'quota'}*$homesize);
 
-	# Don't send if we have already sent one for this limit within the
-	# configured minimum period
-	if ($msg && !&check_quota_interval($msg,
-			split(/\s+/, $d->{'quota_notify'}))) {
-		$msg = undef;
-		}
+		# Don't send if we have already sent one for this limit within
+		# the configured minimum period
+		if ($msg && !&check_quota_interval($msg,
+				split(/\s+/, $d->{'quota_notify'}))) {
+			$msg = undef;
+			}
 
-	# Record that we have notified this domain
-	if ($msg) {
-		$d->{'quota_notify'} = $now." ".$msg->[4];
-		&save_domain($d);
-		push(@msgs, $msg);
+		# Record that we have notified this domain
+		if ($msg) {
+			$d->{'quota_notify'} = $now." ".$msg->[4];
+			&save_domain($d);
+			push(@msgs, $msg);
+			}
 		}
 	
 	# Check all users in the domain, if enabled
