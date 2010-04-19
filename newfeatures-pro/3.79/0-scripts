@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to version 3.3.2, and BugZilla to 3.6.
+html=Updated the phpMyAdmin script installer to version 3.3.2, and BugZilla to 3.6. Added a script installer for Foswiki, a TWiki fork.
 master=1
 reseller=1
 domain=1

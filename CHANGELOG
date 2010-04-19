@@ -1227,3 +1227,4 @@ Added the New Feature Log page, for showing all major changes in previous Virtua
 The modify-dns API command can now add and remove slave DNS servers for virtual servers.
 ---- Changes since 3.78 ----
 Updated the phpMyAdmin script installer to version 3.3.2, and BugZilla to 3.6.
+Added a script installer for Foswiki, a TWiki fork.
