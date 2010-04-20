@@ -292,32 +292,6 @@ $domains_tests = [
 		       ':newpass@localhost:'.$webmin_port.'/',
 	},
 
-	# Disable the whole domain
-	{ 'command' => 'disable-domain.pl',
-	  'args' => [ [ 'domain' => $test_domain ] ],
-	},
-
-	# Make sure website is gone
-	{ 'command' => $wget_command.'http://'.$test_domain,
-	  'antigrep' => 'Test home page',
-	},
-
-	# Re-enable the domain
-	{ 'command' => 'enable-domain.pl',
-	  'args' => [ [ 'domain' => $test_domain ] ],
-	},
-
-	# Check website again
-	{ 'command' => $wget_command.'http://'.$test_domain,
-	  'grep' => 'Test home page',
-	},
-
-	# Validate all features
-	{ 'command' => 'validate-domains.pl',
-	  'args' => [ [ 'domain' => $test_domain ],
-		      [ 'all-features' ] ],
-	},
-
 	# Create a sub-server
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_subdomain ],
@@ -344,6 +318,130 @@ $domains_tests = [
 	  'args' => [ [ 'domain', $test_domain ] ],
 	  'cleanup' => 1 },
 
+	];
+
+$disable_tests = [
+	# Create a domain that we will disable
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
+		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Add a mailbox to the domain
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
+	# Disable the whole domain
+	{ 'command' => 'disable-domain.pl',
+	  'args' => [ [ 'domain' => $test_domain ] ],
+	},
+
+	# Test that DNS lookup fails
+	{ 'command' => 'host '.$test_domain,
+	  'antigrep' => &get_default_ip(),
+	},
+
+	# Make sure website is gone
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'antigrep' => 'Test home page',
+	},
+
+	# Check FTP login fails
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_domain_user.':smeg@localhost/',
+	  'grep' => 'Login incorrect',
+	  'fail' => 1,
+	},
+
+	# Check IMAP and POP3 for admin mailbox fails
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
+	  'fail' => 1,
+	},
+	{ 'command' => 'test-pop3.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
+	  'fail' => 1,
+	},
+
+	# Check Webmin login fails
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
+		       $webmin_proto.'://'.$test_domain_user.':smeg@localhost:'.
+		       $webmin_port.'/',
+	  'fail' => 1,
+	},
+
+	# Make sure MySQL login is no longer working
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.' -e "select version()"',
+	  'fail' => 1,
+	},
+
+	$config{'postgres'} ? (
+		# Make sure PostgreSQL login doesn't work
+		{ 'command' => 'psql -U '.$test_domain_user.' -h localhost '.$test_domain_db, 'fail' => 1, },
+		) : ( ),
+
+	# Check FTP login as the mailbox fails
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_full_user.':smeg@localhost/',
+	  'grep' => 'Login incorrect',
+	  'fail' => 1,
+	},
+
+	# Check IMAP and POP3 for mailbox fails
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_full_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
+	  'fail' => 1,
+	},
+	{ 'command' => 'test-pop3.pl',
+	  'args' => [ [ 'user', $test_full_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
+	  'fail' => 1,
+	},
+
+	# Re-enable the domain
+	{ 'command' => 'enable-domain.pl',
+	  'args' => [ [ 'domain' => $test_domain ] ],
+	},
+
+	# Check website again
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test home page',
+	},
+
+	# Validate all features
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Cleanup the domains
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
 	];
 
 # Mailbox tests
@@ -3549,6 +3647,7 @@ $overlap_tests = [
 	];
 
 $alltests = { 'domains' => $domains_tests,
+	      'disable' => $disable_tests,
 	      'web' => $web_tests,
 	      'mailbox' => $mailbox_tests,
 	      'alias' => $alias_tests,
