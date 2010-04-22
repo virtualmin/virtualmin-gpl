@@ -741,9 +741,10 @@ else {
 			&apache::save_directive($ld, \@ldv, $vconf, $conf);
 			}
 
-		# Update RewriteCond / RewriteRule directives for
-		# webmail redirects
-		foreach my $ld ("RewriteCond", "RewriteRule") {
+		# Update RewriteCond / RewriteRule / Redirect* directives for
+		# webmail and awstats redirects
+		foreach my $ld ("RewriteCond", "RewriteRule",
+				"Redirect", "RedirectMatch") {
 			local @ldv = &apache::find_directive($ld, $vconf);
 			next if (!@ldv);
 			foreach my $l (@ldv) {
