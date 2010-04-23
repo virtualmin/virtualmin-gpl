@@ -11245,6 +11245,14 @@ if ($config{'mail'}) {
 			return &text('check_ebcc_maps', $err) if ($err);
 			}
 
+		# Make sure virtual_alias_domains is not set, as it overrides
+		# virtual_alias_maps
+		local $vad = &postfix::get_real_value("virtual_alias_domains");
+		local $vam = &postfix::get_real_value($virtual_type);
+		if ($vad && $vad ne $vam) {
+			return &text('check_evad', $vad);
+			}
+
 		&$second_print($text{'check_postfixok'});
 		$expected_mailboxes = 0;
 		}
