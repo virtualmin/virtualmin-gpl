@@ -494,7 +494,7 @@ foreach my $name (keys %$mailusers) {
 	&create_user($uinfo, \%dom);
 	&create_user_home($uinfo, \%dom, 1);
 	$taken{$uinfo->{'uid'}}++;
-	local ($crfile, $crtype) = &create_mail_file($uinfo);
+	local ($crfile, $crtype) = &create_mail_file($uinfo, \%dom);
 
 	# Copy mail into user's inbox
 	local $cids = [ $mailuser->{'preferences'}->{'mailbox'}->{'content'}->{'cid'} ];
@@ -589,7 +589,7 @@ if ($got{'mysql'}) {
 					        'name' => $name } ];
 			&create_user($myuinfo, \%dom);
 			&create_user_home($myuinfo, \%dom, 1);
-			&create_mail_file($myuinfo);
+			&create_mail_file($myuinfo, \%dom);
 			$taken{$myuinfo->{'uid'}}++;
 			$myucount++;
 			}

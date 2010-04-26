@@ -327,7 +327,7 @@ if ($user->{'home'} && !$user->{'nocreatehome'} &&
 
 # Create an empty mail file, if needed
 if ($user->{'email'} && !$user->{'nomailfile'}) {
-	&create_mail_file($user);
+	&create_mail_file($user, $d);
 	}
 
 # Send an email upon creation

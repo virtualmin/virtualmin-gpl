@@ -431,7 +431,7 @@ foreach my $mailuser (@mailusers) {
 	&create_user($muinfo, \%dom);
 	&create_user_home($muinfo, \%dom, 1);
 	$taken{$muinfo->{'uid'}}++;
-	local ($crfile, $crtype) = &create_mail_file($muinfo);
+	local ($crfile, $crtype) = &create_mail_file($muinfo, \%dom);
 
 	# Extract mail user's home directory
 	local $hmsrc = $root."/".&remove_cid_prefix($mailuser->{'src'});
@@ -528,7 +528,7 @@ if ($got{'mysql'}) {
 					        'name' => $name } ];
 			&create_user($myuinfo, \%dom);
 			&create_user_home($myuinfo, \%dom, 1);
-			&create_mail_file($myuinfo);
+			&create_mail_file($myuinfo, \%dom);
 			$taken{$myuinfo->{'uid'}}++;
 			$myucount++;
 			}

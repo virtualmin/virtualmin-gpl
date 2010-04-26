@@ -1682,19 +1682,20 @@ elsif ($err) {
 	}
 }
 
-# create_mail_file(&user)
+# create_mail_file(&user, &domain)
 # Creates a new empty mail file for a user, if necessary. Returns the path
 # and type (0 for mbox, 1 for maildir)
 sub create_mail_file
 {
+local ($user, $d) = @_;
 &require_mail();
 local $mf;
 local $md;
-local ($uid, $gid) = ($_[0]->{'uid'}, $_[0]->{'gid'});
+local ($uid, $gid) = ($user->{'uid'}, $user->{'gid'});
 local @rv;
 if ($config{'mail_system'} == 1) {
 	# Sendmail normally uses a mail file
-	$mf = &sendmail::user_mail_file($_[0]->{'user'});
+	$mf = &sendmail::user_mail_file($user->{'user'});
 	if ($sendmail::config{'mail_type'} == 1) {
 		# But not today
 		$md = $mf;
@@ -1706,40 +1707,40 @@ elsif ($config{'mail_system'} == 0) {
 	local ($s, $d) = &postfix::postfix_mail_system();
 	if ($s == 0 || $s == 1) {
 		# A mail file
-		$mf = &postfix::postfix_mail_file($_[0]->{'user'});
-		if ($s == 0 && $_[0]->{'user'} =~ /\@/) {
+		$mf = &postfix::postfix_mail_file($user->{'user'});
+		if ($s == 0 && $user->{'user'} =~ /\@/) {
 			# For Postfix delivering to /var/mail with @ usernames,
 			# we need to create the file without the @ in it, and
 			# link from the @ so that the mail server and Webmin
 			# agree.
 			$mfreal = &postfix::postfix_mail_file(
-					&replace_atsign($_[0]->{'user'}));
+					&replace_atsign($user->{'user'}));
 			}
 		}
 	elsif ($s == 2) {
 		# A mail directory
-		$md = &postfix::postfix_mail_file($_[0]->{'user'});
+		$md = &postfix::postfix_mail_file($user->{'user'});
 		}
 	}
 elsif ($config{'mail_system'} == 2 ||
-       $config{'mail_system'} == 4 && !$_[0]->{'qmail'}) {
+       $config{'mail_system'} == 4 && !$user->{'qmail'}) {
 	# Normal Qmail user
 	if ($qmailadmin::config{'mail_system'} == 0) {
-		$mf = &qmailadmin::user_mail_file($_[0]->{'user'});
+		$mf = &qmailadmin::user_mail_file($user->{'user'});
 		}
 	elsif ($qmailadmin::config{'mail_system'} == 1) {
-		$md = &qmailadmin::user_mail_dir($_[0]->{'user'});
+		$md = &qmailadmin::user_mail_dir($user->{'user'});
 		}
 	}
 elsif ($config{'mail_system'} == 4) {
 	# Qmail+LDAP mail file comes from DB
-	if ($_[0]->{'mailstore'} =~ /^(.*)\/$/) {
+	if ($user->{'mailstore'} =~ /^(.*)\/$/) {
 		$md = &add_ldapmessagestore("$1");
 		}
 	else {
-		$mf = &add_ldapmessagestore($_[0]->{'mailstore'});
+		$mf = &add_ldapmessagestore($user->{'mailstore'});
 		}
-	if (!$_[0]->{'unix'}) {
+	if (!$user->{'unix'}) {
 		# For non-NSS Qmail+LDAP users, set the ownership based on
 		# LDAP control files
 		local $quid = &qmailadmin::get_control_file("qmailuid");
@@ -1755,14 +1756,14 @@ elsif ($config{'mail_system'} == 4) {
 elsif ($config{'mail_system'} == 5) {
 	# Nothing to do for VPOPMail, because it gets created automatically
 	# by vadduser
-	@rv = ( &user_mail_file($_[0]), 1 );
+	@rv = ( &user_mail_file($user), 1 );
 	}
 elsif ($config{'mail_system'} == 6) {
 	if ($exim::config{'mail_system'} == 0) {
-		$mf = &exim::user_mail_file($_[0]);
+		$mf = &exim::user_mail_file($user);
 		}
 	elsif ($exim::config{'mail_system'} == 1) {
-		$md = &exim::user_mail_file($_[0]);
+		$md = &exim::user_mail_file($user);
 		}
 	}
 
@@ -1800,7 +1801,7 @@ elsif ($md) {
 	@rv = ( $md, 1 );
 	}
 
-if (-d $_[0]->{'home'} && $_[0]->{'unix'}) {
+if (-d $user->{'home'} && $user->{'unix'}) {
 	# Create Usermin ~/mail directory (if installed)
 	if (&foreign_installed("usermin")) {
 		local %uminiserv;
@@ -1812,7 +1813,7 @@ if (-d $_[0]->{'home'} && $_[0]->{'unix'}) {
 		&read_file("$usermin::config{'usermin_dir'}/$mod/uconfig",
 			   \%uconfig);
 		local $umd = $uconfig{'mailbox_dir'} || "mail";
-		local $umail = "$_[0]->{'home'}/$umd";
+		local $umail = "$user->{'home'}/$umd";
 		if (!-e $umail) {
 			&make_dir($umail, 0755);
 			&set_ownership_permissions($uid, $gid, undef, $umail);
@@ -1828,19 +1829,23 @@ if ($md && $md =~ /\/Maildir$/) {
 	if ($tname ne "*") {
 		push(@folders, "$md/.$tname");
 		}
-	local ($sdmode, $sdpath) = &get_domain_spam_delivery($d);
-	if ($sdmode == 6) {
-		push(@folders, "$md/.spam");
+	if ($d->{'spam'}) {
+		local ($sdmode, $sdpath) = &get_domain_spam_delivery($d);
+		if ($sdmode == 6) {
+			push(@folders, "$md/.spam");
+			}
+		elsif ($sdmode == 1 && $sdpath =~ /^Maildir\/(\S+)\/$/) {
+			push(@folders, "$md/$1");
+			}
 		}
-	elsif ($sdmode == 1 && $sdpath =~ /^Maildir\/(\S+)\/$/) {
-		push(@folders, "$md/$1");
-		}
-	local ($vdmode, $vdpath) = &get_domain_virus_delivery($d);
-	if ($vdmode == 6) {
-		push(@folders, "$md/.virus");
-		}
-	elsif ($vdmode == 1 && $vdpath =~ /^Maildir\/(\S+)\/$/) {
-		push(@folders, "$md/$1");
+	if ($d->{'virus'}) {
+		local ($vdmode, $vdpath) = &get_domain_virus_delivery($d);
+		if ($vdmode == 6) {
+			push(@folders, "$md/.virus");
+			}
+		elsif ($vdmode == 1 && $vdpath =~ /^Maildir\/(\S+)\/$/) {
+			push(@folders, "$md/$1");
+			}
 		}
 	foreach my $f (@folders) {
 		next if (-d $f);
@@ -2632,7 +2637,7 @@ while(<UFILE>) {
 		# Create an empty mail file, which may be needed if inbox
 		# location has moved
 		if ($uinfo->{'email'} && !$uinfo->{'nomailfile'}) {
-			&create_mail_file($uinfo);
+			&create_mail_file($uinfo, $_[0]);
 			}
 		}
 	}

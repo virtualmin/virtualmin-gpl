@@ -641,7 +641,7 @@ else {
 	# Create an empty mail file, if needed
 	if ($user->{'email'} && ($in{'new'} || !$old{'email'} ||
 				 $user->{'user'} ne $old{'user'})) {
-		&create_mail_file($user);
+		&create_mail_file($user, $d);
 		}
 
 	# Run plugin save functions

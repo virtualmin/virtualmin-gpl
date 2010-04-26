@@ -459,7 +459,7 @@ if ($remail) {
 
 # Create the mail file, if needed
 if ($user->{'email'} && !$user->{'nomailfile'}) {
-	&create_mail_file($user);
+	&create_mail_file($user, $d);
 	}
 
 # Call plugin save functions

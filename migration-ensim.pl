@@ -414,7 +414,7 @@ if ($userident->{$origuser}) {
 		$taken{$uinfo->{'uid'}}++;
 
 		# Move his mail file
-		local ($crfile, $crtype) = &create_mail_file($uinfo);
+		local ($crfile, $crtype) = &create_mail_file($uinfo, \%dom);
 		local $srcfolder = { 'type' => 0,
 				     'file' => "$root/var/spool/mail/$mu" };
 		local $dstfolder = { 'type' => $crtype,
@@ -469,7 +469,7 @@ if ($userident->{$origuser}) {
 local $owner = &get_domain_owner(\%dom);
 if (!$parent && -r "$root/var/spool/mail/$origuser") {
 	&$first_print("Moving server owner's mailbox ..");
-	local ($mfile, $mtype) = &create_mail_file($owner);
+	local ($mfile, $mtype) = &create_mail_file($owner, \%dom);
 	if ($mfile) {
 		local $srcfolder = { 'type' => 0,
 				     'file' => "$root/var/spool/mail/$origuser" };

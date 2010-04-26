@@ -317,7 +317,7 @@ foreach my $e (@emails) {
 	&create_user($uinfo, \%dom);
 	&create_user_home($uinfo, \%dom, 1);
 	$taken{$uinfo->{'uid'}}++;
-	local ($crfile, $crtype) = &create_mail_file($uinfo);
+	local ($crfile, $crtype) = &create_mail_file($uinfo, \%dom);
 
 	# Find original mail directory
 	local $umdir = "$mdir/$username/Maildir";

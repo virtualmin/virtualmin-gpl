@@ -660,7 +660,7 @@ if ($got{'mail'}) {
 		&create_user($uinfo, \%dom);
 		&create_user_home($uinfo, \%dom, 1);
 		$taken{$uinfo->{'uid'}}++;
-		local ($crfile, $crtype) = &create_mail_file($uinfo);
+		local ($crfile, $crtype) = &create_mail_file($uinfo, \%dom);
 
 		# Move his mail files
 		local $mailsrc = "$homesrc/mail/$dom/$muser";
@@ -984,7 +984,7 @@ if ($got{'mysql'}) {
 				$myuinfo->{'uid'} = &allocate_uid(\%taken);
 				&create_user($myuinfo, \%dom);
 				&create_user_home($myuinfo, \%dom, 1);
-				&create_mail_file($myuinfo);
+				&create_mail_file($myuinfo, \%dom);
 				$taken{$myuinfo->{'uid'}}++;
 				$usermap{$myuinfo->{'user'}} = $myuinfo;
 				}
@@ -1061,7 +1061,7 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 				&create_user_home($fuinfo, \%dom, 1);
 				}
 			if (!$user->{'nomailfile'}) {
-				&create_mail_file($fuinfo);
+				&create_mail_file($fuinfo, \%dom);
 				}
 			$taken{$fuinfo->{'uid'}}++;
 			$fcount++;
