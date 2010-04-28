@@ -12254,7 +12254,7 @@ foreach my $m (&list_domain_owner_modules()) {
 				    $minp ]);
 	}
 $field .= &ui_columns_end();
-print &ui_table_row(&hlink($text{'tmpl_avail'}, "template_avail"), $field);
+print &ui_table_row(undef, $field, 2);
 }
 
 # parse_template_avail(&tmpl)
