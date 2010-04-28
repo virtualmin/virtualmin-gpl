@@ -744,13 +744,20 @@ foreach $u (@users) {
 	$u->{'mquota'} = $u->{$qtype.'mquota'} if (!defined($u->{'mquota'}));
 	}
 
+# Check if spamc is being used
+local $spamc;
+if ($_[0]->{'spam'}) {
+	local $spamclient = &get_domain_spam_client($_[0]);
+	$spamc = 1 if ($spamclient =~ /spamc/);
+	}
+
 # Detect user who are close to their quota
 if (&has_home_quotas()) {
 	local $bsize = &quota_bsize("home");
 	foreach $u (@users) {
 		local $diff = $u->{'quota'}*$bsize - $u->{'uquota'}*$bsize;
 		if ($u->{'quota'} && $diff < $quota_spam_margin &&
-		    $_[0]->{'spam'}) {
+		    $_[0]->{'spam'} && !$spamc) {
 			# Close to quota, which will block spamassassin ..
 			$u->{'spam_quota'} = 1;
 			$u->{'spam_quota_diff'} = $diff < 0 ? 0 : $diff;
