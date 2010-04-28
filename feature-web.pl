@@ -1466,7 +1466,7 @@ if ($virt) {
 
 	# Make sure the PHP execution mode is valid
 	local $mode;
-	if (defined(&get_domain_php_mode)) {
+	if (defined(&get_domain_php_mode) && !$_[0]->{'alias'}) {
 		&$first_print($text{'restore_checkmode'});
 		$mode = &get_domain_php_mode($_[0]);
 		local @supp = &supported_php_modes($_[0]);
@@ -1486,7 +1486,7 @@ if ($virt) {
 		}
 
 	# Correct system-specific entries in PHP config files
-	if (defined(&fix_php_ini_files)) {
+	if (defined(&fix_php_ini_files) && !$_[0]->{'alias'}) {
 		local $sock = &get_php_mysql_socket($_[0]);
 		local @fixes = (
 		  [ "session.save_path", $_[5]->{'home'}, $_[0]->{'home'}, 1 ],
@@ -1499,7 +1499,8 @@ if ($virt) {
 		}
 
 	# Fix broken PHP extension_dir directives
-	if (($mode eq "fcgid" || $mode eq "cgi") && &foreign_check("phpini")) {
+	if (($mode eq "fcgid" || $mode eq "cgi") &&
+	    &foreign_check("phpini") && !$_[0]->{'alias'}) {
 		&foreign_require("phpini", "phpini-lib.pl");
 		foreach my $i (&list_domain_php_inis($d)) {
 			local $pconf = &phpini::get_config($i->[1]);
