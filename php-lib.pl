@@ -90,6 +90,8 @@ foreach my $ver (@vers) {
 		elsif ($subs_ini) {
 			# Perform substitions on config file
 			local $inidata = &read_file_contents($srcini);
+			$inidata || &error("Failed to read $srcini, ".
+					   "or file is empty");
 			$inidata = &substitute_virtualmin_template($inidata,$d);
 			&open_tempfile_as_domain_user(
 				$d, INIDATA, ">$inidir/php.ini");
