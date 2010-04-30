@@ -40,7 +40,7 @@ if (!$d->{'alias'} && $can == 2) {
 # PHP fcgi sub-processes
 if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0 && $can == 2) {
 	$children = &get_domain_php_children($d);
-	if ($children >= 0) {
+	if ($children > 0) {
 		print &ui_table_row(&hlink($text{'phpmode_children'},
 					   "phpmode_children"),
 				    &ui_opt_textbox("children", $children || '',
