@@ -134,7 +134,7 @@ else {
 	$me = $access{'owner'} ? 'owner' : 'master';
 	}
 my %shownf = map { $_, 1 } split(/,/, $config{'show_nf'});
-return undef if ($me && !$shownf{$me});
+return undef if ($me && !$shownf{$me} && !$showall);
 my %donemod;
 my $wver = &get_webmin_version();
 foreach my $nf (@nf) {
