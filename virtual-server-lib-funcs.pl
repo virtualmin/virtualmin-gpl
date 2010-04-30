@@ -3455,9 +3455,22 @@ local %hash = %$subs;
 ($hash{'webmin_port'}, $hash{'webmin_proto'}) = &get_miniserv_port_proto();
 $template = &substitute_virtualmin_template($template, \%hash);
 
-# Work out the From: address - if a domain is given, use it's email address.
+# Work out the From: address - if a domain is given, use it's email address
+# as long as that address is in a local domain with mail
 if (!$from && $remote_user && !&master_admin() && $d) {
-	$from = $d->{'emailto'};
+	local $localdom = 0;
+	local ($emailtouser, $emailtodom) = split(/\@/, $d->{'emailto'});
+	foreach my $ld (grep { $_->{'mail'} } &list_domains()) {
+		if (lc($ld->{'dom'}) eq lc($emailtodom)) {
+			$localdom = 1;
+			}
+		}
+	if ($emailtodom eq &get_system_hostname()) {
+		$localdom = 1;
+		}
+	if ($localdom) {
+		$from = $d->{'emailto'};
+		}
 	}
 
 # Actually send using the mailboxes module
