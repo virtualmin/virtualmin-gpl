@@ -29,11 +29,6 @@
  - Command-line domain rename
 	- Add to unit tests
 
- - Replicate virtusers to secondary MX
-	- https://www.virtualmin.com/node/12894
-	- Sendmail
-	- Postfix
-
  - Move scripts to new directory / DB login / URL
 
  - Include bounced / greylisted messages in system stats
@@ -43,3 +38,11 @@
 	- https://www.virtualmin.com/node/13450
 	- Command line API
 	- CHANGELOG
+
+ - Replicate virtusers to secondary MX
+	- https://www.virtualmin.com/node/12894
+	- Sendmail
+	- Postfix
+	- Per-domain copying
+
+ - Webmin cron
