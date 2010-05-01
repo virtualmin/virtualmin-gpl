@@ -12,6 +12,7 @@
 sub list_new_features
 {
 my ($mod, $ver) = @_;
+$ver =~ s/\.([a-z]+)$//;	# Remove .gpl / etc
 my (@rv, @dirs);
 if ($mod eq $module_name) {
 	# Core virtualmin features
