@@ -170,30 +170,39 @@ PREFAILED:
 # Send an email to the recipient, if there are any
 if ($sched->{'email'} && $has_mailboxes &&
     (!$ok || @$errdoms || !$sched->{'email_err'} || $force_email)) {
-	if (@$errdoms) {
-		# Put list of failed domains at the top
-		$fails = $text{'backup_partial2'}."\n";
-		foreach $d (@$errdoms) {
-			$fails .= "    ".$d->{'dom'}."\n";
-			}
-		$output = $fails."\n".$output;
-		}
+	# Construct header for backup email
+	$output_header = "";
 	if ($ok && !@$errdoms) {
-		$output .= &text('backup_done', &nice_size($size))." ";
+		$output_header .= &text('backup_done',
+					&nice_size($size))." ";
 		$subject = &text('backup_donesubject', $host);
 		}
 	elsif ($ok && @$errdoms) {
-		$output .= &text('backup_partial', &nice_size($size))." ";
+		$output_header .= &text('backup_partial',
+					&nice_size($size))." ";
 		$subject = &text('backup_partialsubject', $host);
 		}
 	else {
-		$output .= $text{'backup_failed'}." ";
+		$output_header .= $text{'backup_failed'}." ";
 		$subject = &text('backup_failedsubject', $host);
 		}
 	$total_time = time() - $start_time;
-	$output .= &text('backup_time', &nice_hour_mins_secs($total_time))."\n";
-	$output .= "\n";
-	$output .= &text('backup_fromvirt', &get_virtualmin_url())."\n";
+	$output_header .= &text('backup_time',
+				&nice_hour_mins_secs($total_time))."\n";
+	$output_header .= "\n";
+
+	if (@$errdoms) {
+		$output_header .= $text{'backup_partial2'}."\n";
+		foreach $d (@$errdoms) {
+			$output_header .= "    ".$d->{'dom'}."\n";
+			}
+		}
+
+	$output_header .= &text('backup_fromvirt',
+				&get_virtualmin_url())."\n";
+	$output_header .= "\n";
+	$output = $output_header.$output;
+
 	$mail = { 'headers' => [ [ 'From', &get_global_from_address() ],
 				 [ 'Subject', $subject ],
 				 [ 'To', $sched->{'email'} ] ],
