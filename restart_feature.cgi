@@ -11,6 +11,11 @@ if (&indexof($in{'feature'}, @plugins) < 0) {
 	$err = &$stopfunc();
 	if (!$err) {
 		$err = &$startfunc();
+		if ($err) {
+			# Delay for Apache to close sockets
+			sleep(5);
+			$err = &$startfunc();
+			}
 		}
 	$name = $text{'feature_'.$in{'feature'}};
 	}
