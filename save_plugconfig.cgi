@@ -2,7 +2,7 @@
 # Save inputs from config.cgi
 
 require './virtual-server-lib.pl';
-require '../config-lib.pl';
+require "$root_directory/config-lib.pl";
 &ReadParse();
 $m = $in{'module'};
 &error_setup($text{'config_err'});

@@ -2,7 +2,7 @@
 # Display a form for editing the configuration of a plugin
 
 require './virtual-server-lib.pl';
-require '../config-lib.pl';
+require "$root_directory/config-lib.pl";
 &can_edit_templates() || &error($text{'newplugin_ecannot'});
 &ReadParse();
 $m = $in{'mod'};
