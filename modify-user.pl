@@ -258,6 +258,7 @@ if (defined($pass)) {
 	$user->{'passmode'} = 3;
 	$user->{'plainpass'} = $pass;
 	$user->{'pass'} = &encrypt_user_password($user, $pass);
+	&set_pass_change($user);
 	}
 if ($disable) {
 	&set_pass_disable($user, 1);
