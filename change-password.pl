@@ -94,6 +94,7 @@ else {
 	$user->{'passmode'} = 3;
 	$user->{'plainpass'} = $newpass;
 	$user->{'pass'} = &encrypt_user_password($user, $newpass);
+	&set_pass_change($user);
 	&modify_user($user, $olduser, $d);
 
 	# Call plugin save functions
