@@ -762,7 +762,7 @@ if ($config{'bw_active'}) {
 	}
 print "                        [--template \"name\"]\n";
 print "                        [--plan \"name\"]\n";
-print "                        [--limits-from-pla]\n";
+print "                        [--limits-from-plan]\n";
 print "                        [--prefix username-prefix]\n";
 print "                        [--db database-name]\n";
 print "                        [--fwdto email-address]\n";
