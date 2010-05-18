@@ -18,7 +18,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-return ( "1.1.1" );
+return ( "1.2" );
 }
 
 sub script_django_category
@@ -227,14 +227,11 @@ if (!$upgrade) {
 	-r $sfile || return (0, "Project settings file $sfile was not found");
 	local $lref = &read_file_lines_as_domain_user($d, $sfile);
 	my $i = 0;
+	my $pdbtype = $dbtype eq "mysql" ? "mysql" : "postgresql";
 	foreach my $l (@$lref) {
+		# Django 1.1 style variables
 		if ($l =~ /DATABASE_ENGINE\s*=/) {
-			if ($dbtype eq "mysql") {
-				$l = "DATABASE_ENGINE = 'mysql'";
-				}
-			else {
-				$l = "DATABASE_ENGINE = 'postgresql'";
-				}
+			$l = "DATABASE_ENGINE = '$pdbtype'";
 			}
 		if ($l =~ /DATABASE_NAME\s*=/) {
 			$l = "DATABASE_NAME = '$dbname'";
@@ -253,6 +250,23 @@ if (!$upgrade) {
 			splice(@$lref, $i+1, 0,
 			       "    'django.contrib.admin',");
 			}
+
+		# Django 1.2 variables
+		if ($l =~ /'ENGINE':/) {
+			$l = "        'ENGINE': 'django.db.backends.$pdbtype',";
+			}
+		if ($l =~ /'NAME':/) {
+			$l = "        'NAME': '$dbname',";
+			}
+		if ($l =~ /'USER':/) {
+			$l = "        'USER': '$dbuser',";
+			}
+		if ($l =~ /'PASSWORD':/) {
+			$l = "        'PASSWORD': '$dbpass',";
+			}
+		if ($l =~ /'HOST':/) {
+			$l = "        'HOST': '$dbhost',";
+			}
 		$i++;
 		}
 	&flush_file_lines_as_domain_user($d, $sfile);
@@ -262,7 +276,8 @@ if (!$upgrade) {
 	local $lref = &read_file_lines_as_domain_user($d, $ufile);
 	foreach my $l (@$lref) {
 		if ($l =~ /^(\s*)#(.*django.contrib.admin.urls.*)/ ||
-		    $l =~ /^(\s*)#(.*admin.site.root.*)/) {
+		    $l =~ /^(\s*)#(.*admin.site.root.*)/ ||
+		    $l =~ /^(\s*)#(.*admin.site.urls.*)/) {
 			# Un-comment /admin/ path
 			$l = $1.$2;
 			}
