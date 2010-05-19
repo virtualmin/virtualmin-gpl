@@ -84,6 +84,8 @@ if ($parentdomain) {
 else {
 	# Validate new username
 	$newd = { %$d };
+	$newd->{'unix'} = 1;
+	$newd->{'webmin'} = 1;
 	$newd->{'user'} = $newuser;
 	$newd->{'group'} = $newuser;
 	$derr = &virtual_server_clashes($newd, undef, 'user') ||

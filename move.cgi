@@ -23,6 +23,8 @@ else {
 	# Turning into a parent domain - check the username for clashes
 	$in{'newuser'} =~ /^[^\t :]+$/ || &error($text{'setup_euser2'});
 	$newd = { %$d };
+	$newd->{'unix'} = 1;
+	$newd->{'webmin'} = 1;
 	$newd->{'user'} = $in{'newuser'};
 	$newd->{'group'} = $in{'newuser'};
 	$derr = &virtual_server_clashes($newd, undef, 'user') ||
