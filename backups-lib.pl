@@ -360,7 +360,7 @@ if ($mode >= 1) {
 	# Write archive to temporary file/dir first, for later upload
 	$path =~ /^(.*)\/([^\/]+)\/?$/;
 	local ($pathdir, $pathfile) = ($1, $2);
-	$dest = &transname($pathfile);
+	$dest = &transname($$."-".$pathfile);
 	}
 else {
 	# Can write direct to destination
