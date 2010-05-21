@@ -1583,7 +1583,9 @@ local $newdbstr = join(" ", map { $_->{'type'}."_".$_->{'name'} }
 local $olddbstr = join(" ", map { $_->{'type'}."_".$_->{'name'} }
 				@{$_[1]->{'dbs'}});
 if ($_[2] && !$_[0]->{'domainowner'} &&
-    ($newdbstr ne $olddbstr || $_[0]->{'pass'} ne $_[1]->{'pass'})) {
+    ($newdbstr ne $olddbstr ||
+     $_[0]->{'pass'} ne $_[1]->{'pass'} ||
+     $_[0]->{'user'} ne $_[1]->{'user'})) {
 	local $dt;
 	foreach $dt (&unique(map { $_->{'type'} } &domain_databases($_[2]))) {
 		local @dbs = map { $_->{'name'} }
