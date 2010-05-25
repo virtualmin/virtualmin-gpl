@@ -238,6 +238,36 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
 					      	     $_[1]->{'web_sslport'});
 	&$second_print($text{'setup_done'});
 	}
+if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[1]->{'ssl_same'}) {
+	# IP has changed - maybe clear ssl_same field
+	local ($sslclash) = grep { $_->{'ip'} eq $_[0]->{'ip'} &&
+				   $_->{'ssl'} &&
+				   $_->{'id'} ne $_[0]->{'id'}} &list_domains();
+	local $oldsslclash = &get_domain($_[1]->{'ssl_same'});
+	if ($sslclash && $_[1]->{'ssl_same'} eq $sslclash->{'id'}) {
+		# No need to change
+		}
+	elsif ($sslclash &&
+	       &check_domain_certificate($_[0]->{'dom'}, $sslclash)) {
+		# New domain with same cert
+		$_[0]->{'ssl_cert'} = $sslclash->{'ssl_cert'};
+		$_[0]->{'ssl_key'} = $sslclash->{'ssl_key'};
+		$_[0]->{'ssl_same'} = $sslclash->{'id'};
+		$chained = &get_chained_certificate_file($sslclash);
+		$_[0]->{'ssl_chain'} = $chained;
+		}
+	else {
+		# No domain has the same cert anymore - copy the one from the
+		# old sslclash domain
+		$_[0]->{'ssl_cert'} = &default_certificate_file($_[0], 'cert');
+		$_[0]->{'ssl_key'} = &default_certificate_file($_[0], 'key');
+		&copy_source_dest_as_domain_user($_[0],
+			$oldsslclash->{'ssl_cert'}, $_[0]->{'ssl_cert'});
+		&copy_source_dest_as_domain_user($_[0],
+			$oldsslclash->{'ssl_key'}, $_[0]->{'ssl_key'});
+		delete($_[0]->{'ssl_same'});
+		}
+	}
 if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 	# Home directory has changed .. update any directives that referred
 	# to the old directory
@@ -429,6 +459,13 @@ foreach my $od (&get_domain_by("ssl_same", $_[0]->{'id'})) {
 		}
 	delete($od->{'ssl_same'});
 	&save_domain($od);
+	}
+
+# If this domain was sharing a cert with another, forget about it now
+if ($_[0]->{'ssl_same'}) {
+	delete($_[0]->{'ssl_cert'});
+	delete($_[0]->{'ssl_key'});
+	delete($_[0]->{'ssl_same'});
 	}
 
 &release_lock_web($_[0]);
