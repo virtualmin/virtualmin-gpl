@@ -69,14 +69,13 @@ $d || usage("Virtual server $domain does not exist");
 @dbs = &domain_databases($d);
 $d->{$type} || &usage("The specified database type is not enabled in this virtual server");
 
-# Prepend suffix (if missing)
+# Append prefix, if any
 $tmpl = &get_template($d->{'template'});
 if ($tmpl->{'mysql_suffix'} ne "none") {
-	$suffix = &substitute_domain_template($tmpl->{'mysql_suffix'}, $d);
-	$suffix =~ s/-/_/g;
-	$suffix =~ s/\./_/g;
-	if ($name !~ /^$suffix/) {
-		$name = $suffix.$name;
+	$prefix = &substitute_domain_template($tmpl->{'mysql_suffix'}, $d);
+	$prefix = &fix_database_name($prefix);
+	if ($name !~ /^\Q$prefix\E/i) {
+		$name = $prefix.$name;
 		}
 	}
 

@@ -14,14 +14,17 @@ if ($in{'new'}) {
 	($dleft, $dreason, $dmax) = &count_feature("dbs");
 	$dleft == 0 && &error($text{'database_emax'});
 
-	# Validate name
+	# Append prefix, if any
 	if ($tmpl->{'mysql_suffix'} ne "none") {
 		$prefix = &substitute_domain_template(
 				$tmpl->{'mysql_suffix'}, $d);
-		$prefix =~ s/-/_/g;
-		$prefix =~ s/\./_/g;
-		$in{'name'} = $prefix.$in{'name'};
+		$prefix = &fix_database_name($prefix);
+		if ($in{'name'} !~ /^\Q$prefix\E/i) {
+			$in{'name'} = $prefix.$in{'name'};
+			}
 		}
+
+	# Validate name
 	$in{'name'} = lc($in{'name'});
 	$err = &validate_database_name($d, $in{'type'}, $in{'name'});
 	&error($err) if ($err);
