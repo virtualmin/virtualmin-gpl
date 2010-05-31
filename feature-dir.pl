@@ -256,20 +256,29 @@ if ($d->{'gid'} && $st[5] != $d->{'gid'} && $st[5] != $d->{'ugid'}) {
 	return &text('validate_edirgroup', "<tt>$d->{'home'}</tt>",
 		     $owner, $d->{'group'})
 	}
-foreach my $sd (&virtual_server_directories($d)) {
-	if (!-d "$d->{'home'}/$sd->[0]") {
-		return &text('validate_esubdir', "<tt>$sd->[0]</tt>")
-		}
-	local @st = stat("$d->{'home'}/$sd->[0]");
-	if ($d->{'uid'} && $st[4] != $d->{'uid'}) {
-		local $owner = getpwuid($st[4]);
-		return &text('validate_esubdiruser', "<tt>$sd->[0]</tt>",
-			     $owner, $d->{'user'})
-		}
-	if ($d->{'gid'} && $st[5] != $d->{'gid'} && $st[5] != $d->{'ugid'}) {
-		local $owner = getgrgid($st[5]);
-		return &text('validate_esubdirgroup', "<tt>$sd->[0]</tt>",
-			     $owner, $d->{'group'})
+if (!$d->{'alias'}) {
+	foreach my $sd (&virtual_server_directories($d)) {
+		if (!-d "$d->{'home'}/$sd->[0]") {
+			# Dir is missing
+			return &text('validate_esubdir',
+				     "<tt>$sd->[0]</tt>")
+			}
+		local @st = stat("$d->{'home'}/$sd->[0]");
+		if ($d->{'uid'} && $st[4] != $d->{'uid'}) {
+			# UID is wrong
+			local $owner = getpwuid($st[4]);
+			return &text('validate_esubdiruser',
+				     "<tt>$sd->[0]</tt>",
+				     $owner, $d->{'user'})
+			}
+		if ($d->{'gid'} && $st[5] != $d->{'gid'} &&
+				   $st[5] != $d->{'ugid'}) {
+			# GID is wrong
+			local $owner = getgrgid($st[5]);
+			return &text('validate_esubdirgroup',
+				     "<tt>$sd->[0]</tt>",
+				     $owner, $d->{'group'})
+			}
 		}
 	}
 return undef;
