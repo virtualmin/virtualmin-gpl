@@ -8503,7 +8503,8 @@ return ( $config{'mysql'} ? ("mysql") : ( ),
 }
 
 # resync_all_databases(&domain, &all-dbs)
-# Updates a domain object to remove databases that no longer really exist
+# Updates a domain object to remove databases that no longer really exist, and
+# perhaps to change the 'db' field to the first actual database
 sub resync_all_databases
 {
 local ($d, $all) = @_;
@@ -8523,6 +8524,14 @@ foreach my $k (keys %$d) {
 		}
 	}
 if ($removed) {
+	&save_domain($d);
+	}
+
+# Fix 'db' field if it is currently set to a missing DB
+local @domdbs = &domain_databases($d);
+local ($defdb) = grep { $_->{'name'} eq $d->{'db'} } @domdbs;
+if (!$defdb && @domdbs) {
+	$d->{'db'} = $domdbs[0]->{'name'};
 	&save_domain($d);
 	}
 }
