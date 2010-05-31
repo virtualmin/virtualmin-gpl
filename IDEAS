@@ -50,8 +50,3 @@
 
  - Webmin SSL cert / CSR generation directly
 	- https://www.virtualmin.com/node/14502
-
- - Option to change a domain's public html directory
-	- Detect existing ones at upgrade time
-	- CHANGELOG
-

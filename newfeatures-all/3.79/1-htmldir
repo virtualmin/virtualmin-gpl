@@ -1,0 +1,6 @@
+desc=Website documents directory editing
+html=The website documents directory for a virtual server can be changed from <tt>public_html</tt> on the Website Options page, and using the modify-web API command.
+master=1
+reseller=1
+domain=1
+link=edit_phpmode.cgi?dom=${ID}

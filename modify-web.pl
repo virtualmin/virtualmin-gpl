@@ -159,6 +159,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--error-log") {
 		$errorlog = shift(@ARGV);
 		}
+	elsif ($a eq "--document-dir") {
+		$htmldir = shift(@ARGV);
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -167,7 +170,7 @@ while(@ARGV > 0) {
 $mode || $rubymode || defined($proxy) || defined($framefwd) ||
   defined($suexec) || $stylename || defined($children) || $version ||
   defined($webmail) || defined($matchall) || defined($timeout) ||
-  $defwebsite || $accesslog || $errorlog || &usage("Nothing to do");
+  $defwebsite || $accesslog || $errorlog || $htmldir || &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -201,6 +204,16 @@ if ($stylename) {
 # Check if webmail is supported
 if (defined($webmail) && !&has_webmail_rewrite()) {
 	&usage("This system does not support mod_rewrite, needed for webmail redirects");
+	}
+
+# Validate HTML dir
+if ($htmldir) {
+	$htmldir =~ /^[a-z0-9\.\-\_\/]+$/ ||
+		&usage("Missing or invalid document directory");
+	$htmldir !~ /^\// && $htmldir !~ /\/$/ ||
+		&usage("Document directory cannot start with or end with /");
+	$htmldir !~ /\.\./ ||
+		&usage("Document directory cannot contain ..");
 	}
 
 # Get domains to update
@@ -428,13 +441,22 @@ foreach $d (@doms) {
 		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
 
+	if ($htmldir && !$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./) {
+		# Change HTML directory
+		&$first_print("Changing documents directory to $htmldir ..");
+		$err = &set_public_html_dir($d, $htmldir);
+		&$second_print($err ? ".. failed : $err" : ".. done");
+		}
+
 	if (defined($proxy) || defined($framefwd)) {
 		# Save the domain
 		&modify_web($d, $oldd);
 		if ($d->{'ssl'}) {
 			&modify_ssl($d, $oldd);
 			}
+		}
 
+	if (defined($proxy) || defined($framefwd) || $htmldir) {
 		&$first_print($text{'save_domain'});
 		&save_domain($d);
 		&$second_print($text{'setup_done'});
@@ -481,6 +503,9 @@ if (&has_webmail_rewrite()) {
 	}
 print "                     [--matchall | --no-matchall]\n";
 print "                     [--default-website]\n";
+print "                     [--access-log log-path]\n";
+print "                     [--error-log log-path]\n";
+print "                     [--document-dir subdirectory]\n";
 exit(1);
 }
 

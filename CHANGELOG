@@ -1230,3 +1230,4 @@ Updated the phpMyAdmin script installer to version 3.3.3, Zikula to 1.2.3, ZenCa
 Added a script installer for Foswiki, a TWiki fork.
 Added options to the Module Config page for defining a link to additional documentation on the System Information page.
 Added an option to the Magento script installer to setup sample data.
+The website documents directory for a virtual server can be changed from public_html on the Website Options page, and using the modify-web API command.

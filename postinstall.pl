@@ -343,6 +343,14 @@ foreach my $d (@doms) {
 # Update IP list cache
 &build_local_ip_list();
 
+# Re-validate all HTML directories
+foreach my $d (@doms) {
+	if ($d->{'web'} && !$d->{'alias'} && !$d->{'subdom'}) {
+		&find_html_cgi_dirs($d);
+		&save_domain($d);
+		}
+	}
+
 # Record the install time for this version
 local %itimes;
 &read_file($install_times_file, \%itimes);
