@@ -41,6 +41,16 @@ if (!$d->{'alias'} && ($in{'mode'} eq 'cgi' || $in{'mode'} eq 'fcgid') &&
 	&error($err) if ($err);
 	}
 
+# Validate HTML directory
+if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./) {
+	$in{'htmldir'} =~ /^[a-z0-9\.\-\_\/]+$/ ||
+		&error($text{'phpmode_ehtmldir'});
+	$in{'htmldir'} !~ /^\// && $in{'htmldir'} !~ /\/$/ ||
+		&error($text{'phpmode_ehtmldir2'});
+	$in{'htmldir'} !~ /\.\./ ||
+		&error($text{'phpmode_ehtmldir3'});
+	}
+
 # Start telling the user what is being done
 &ui_print_unbuffered_header(&domain_in($d), $text{'phpmode_title'}, "");
 &obtain_lock_web($d);
@@ -163,10 +173,21 @@ if (!$d->{'alias'} && &can_log_paths()) {
 		}
 	}
 
+# Change HTML directory
+if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./ &&
+    $d->{'public_html_dir'} ne $in{'htmldir'}) {
+	&$first_print($text{'phpmode_setdir'});
+	$err = &set_public_html_dir($d, $in{'htmldir'});
+	&$second_print(!$err ? $text{'setup_done'}
+                             : &text('phpmode_htmldirerr', $err));
+	$anything++;
+	}
+
 if (!$anything) {
 	&$first_print($text{'phpmode_nothing'});
 	}
 
+&save_domain($d);
 &release_lock_logrotate($d) if ($d->{'logrotate'});
 &release_lock_dns($d);
 &release_lock_web($d);

@@ -1686,6 +1686,37 @@ else {
 	}
 }
 
+# set_public_html_dir(&domain, sub-dir)
+# Sets the HTML directory for a virtual server, by updating the DocumentRoot
+# and <Directory> block. Returns undef on success or an error message on
+# failure.
+sub set_public_html_dir
+{
+local ($d, $subdir) = @_;
+local @ports = ( $d->{'web_port'},
+		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+local $oldpath = $d->{'public_html_path'};
+local $path = $d->{'home'}."/".$subdir;
+foreach my $p (@ports) {
+	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
+	next if (!$virt);
+	&apache::save_directive("DocumentRoot", [ $path ], $vconf, $conf);
+	local @dirs = &apache::find_directive_struct("Directory", $vconf);
+	local ($dir) = grep { $_->{'words'}->[0] eq $oldpath ||
+			      $_->{'words'}->[0] eq $oldpath."/" } @dirs;
+	$dir ||= $dirs[0];
+	$dir || return "No existing Directory block found!";
+	local $olddir = { %$dir };
+	$dir->{'value'} = $path;
+	&apache::save_directive_struct($olddir, $dir, $vconf, $conf, 1);
+	&flush_file_lines($virt->{'file'});
+	}
+$d->{'public_html_dir'} = $subdir;
+$d->{'public_html_path'} = $path;
+&register_post_action(\&restart_apache);
+return undef;
+}
+
 # cgi_bin_dir(&domain, [relative], [no-subdomain])
 # Returns the CGI programs directory for a virtual server
 sub cgi_bin_dir

@@ -113,6 +113,12 @@ if (!$d->{'alias'} && &can_log_paths()) {
 		}
 	}
 
+# HTML directory
+if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./) {
+	print &ui_table_row(&hlink($text{'phpmode_htmldir'}, 'htmldir'),
+		&ui_textbox("htmldir", $d->{'public_html_dir'}, 20));
+	}
+
 print &ui_hidden_table_end();
 
 # Show PHP information

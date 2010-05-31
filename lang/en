@@ -4148,9 +4148,15 @@ phpmode_defweberr=.. failed : $1
 phpmode_evirt=Website options cannot be edited, as no Apache virtual host for $1 port $2 was found!
 phpmode_alog=Webserver access log file
 phpmode_elog=Webserver error log file
+phpmode_htmldir=Website documents sub-directory
 phpmode_setalog=Changing webserver access log ..
 phpmode_logerr=.. failed : $1
 phpmode_setelog=Changing webserver error log ..
+phpmode_setdir=Changing website documents sub-directory ..
+phpmode_htmldirerr=.. failed : $1
+phpmode_ehtmldir=Missing or invalid website documents sub-directory
+phpmode_ehtmldir2=Website documents sub-directory cannot start with or end with /
+phpmode_ehtmldir3=The website documents sub-directory cannot contain ..
 
 spf_title=DNS Options
 spf_enable=Enabling SPF ..
