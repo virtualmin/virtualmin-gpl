@@ -336,7 +336,6 @@ setup_eplan=Selected plan does not exist or is not available
 setup_evital=Critical feature $1 was not properly created - Virtual server creation halted.
 setup_edomain=Missing or invalid domain name - only letters, numbers and the dot, dash and underscore characters are allowed
 setup_edomain2=Domain names cannot start or end with a .
-setup_edomain3=The final component of a domain name cannot contain non-english letters
 setup_esubdomain=Invalid sub-domain name - no dots are allowed
 setup_edomain4=You are already hosting this domain
 setup_eip=Missing or invalid IP address
