@@ -2651,7 +2651,8 @@ while(1) {
 	# Check if we are under the limit, or it doesn't apply
 	local @pids = keys %maxes;
 	local $waiting = time() - $start;
-	if (@pids < $config{'max_backups'} ||
+	if (!$config{'max_backups'} ||
+	    @pids < $config{'max_backups'} ||
 	    !$asowner && $config{'max_all'} == 0 ||
 	    !$sched && $config{'max_manual'} == 0) {
 		# Under the limit, or no limit applies in this case
