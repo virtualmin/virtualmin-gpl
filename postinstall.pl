@@ -351,6 +351,17 @@ foreach my $d (@doms) {
 		}
 	}
 
+# Fix up PID file path on Debian
+if ($gconfig{'os_type'} eq 'debian-linux' && &foreign_check("bind8")) {
+	local %bconfig = &foreign_config("bind8");
+	if ($bconfig{'pid_file'}) {
+		$bconfig{'pid_file'} =
+			join(" ", &unique(split(/\s+/, $bconfig{'pid_file'}),
+				  "/var/run/bind/run/named/named.pid"));
+		&save_module_config(\%bconfig, "bind8");
+		}
+	}
+
 # Record the install time for this version
 local %itimes;
 &read_file($install_times_file, \%itimes);
