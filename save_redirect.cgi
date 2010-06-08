@@ -9,7 +9,7 @@ $d = &get_domain($in{'dom'});
 $d->{'web'} || &error($text{'redirects_eweb'});
 &error_setup($text{'redirect_err'});
 if (!$in{'new'}) {
-	($r) = grep { $_->{'path'} eq $in{'path'} } &list_redirects($d);
+	($r) = grep { $_->{'path'} eq $in{'old'} } &list_redirects($d);
 	$r || &error($text{'redirect_egone'});
 	$oldr = { %$r };
 	}
