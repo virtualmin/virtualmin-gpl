@@ -1536,10 +1536,12 @@ if ($virt) {
 		local $alog = &get_apache_log($_[0]->{'dom'},
 					      $_[0]->{'web_port'});
 		&copy_source_dest($_[1]."_alog", $alog);
+		&set_apache_log_permissions($_[0], $alog);
 		if (-r $_[1]."_elog") {
 			local $elog = &get_apache_log($_[0]->{'dom'},
 						      $_[0]->{'web_port'}, 1);
 			&copy_source_dest($_[1]."_elog", $elog);
+			&set_apache_log_permissions($_[0], $elog);
 			}
 		&$second_print($text{'setup_done'});
 		}
@@ -3212,12 +3214,21 @@ foreach my $l ($log, $elog) {
 			}
 		}
 	# Make non-world-readable
-	if (&is_under_directory($d->{'home'}, $l)) {
-		&set_permissions_as_domain_user($d, 0660, $l);
-		}
-	else {
-		&set_ownership_permissions($d->{'uid'}, $auser, 0660, $l);
-		}
+	&set_apache_log_permissions($d, $l);
+	}
+}
+
+# set_apache_log_permissions(&domain, logfile)
+# Set correct ownership and permissions on an Apache log
+sub set_apache_log_permissions
+{
+local ($d, $l) = @_;
+local $auser = &get_apache_user($d);
+if (&is_under_directory($d->{'home'}, $l)) {
+	&set_permissions_as_domain_user($d, 0660, $l);
+	}
+else {
+	&set_ownership_permissions($d->{'uid'}, $auser, 0660, $l);
 	}
 }
 
