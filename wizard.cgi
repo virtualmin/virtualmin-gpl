@@ -15,7 +15,7 @@ if ($in{'cancel'}) {
 @wizard_steps = &get_wizard_steps();
 $step = $wizard_steps[$in{'step'} || 0];
 
-if ($in{'parse'}) {
+if ($in{'parse'} || $in{'mypass'}) {
 	# Call the parse function for this step, which may return an error.
 	# If so, re-display the page .. otherwise, re-direct
 	$pfunc = "wizard_parse_".$step;
