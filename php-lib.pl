@@ -471,7 +471,8 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 
 	# Also copy the .fcgi wrapper to public_html, which is needed due to
 	# broken-ness on some Debian versions!
-	if ($mode eq "fcgid" && $gconfig{'os_type'} eq 'debian-linux') {
+	if ($mode eq "fcgid" && $gconfig{'os_type'} eq 'debian-linux' &&
+            $gconfig{'os_version'} < 5) {
 		&copy_source_dest_as_domain_user(
 			$d, "$dest/php$v->[0].$suffix",
 			"$pub/php$v->[0].$suffix");
