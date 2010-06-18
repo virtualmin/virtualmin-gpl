@@ -2637,7 +2637,7 @@ foreach my $w (@php_wrapper_templates) {
 	if ($in{$w."_mode"} == 0) {
 		$tmpl->{$w} = 'none';
 		}
-	elsif ($in{$w."_mode"} == 0) {
+	elsif ($in{$w."_mode"} == 1) {
 		delete($tmpl->{$w});
 		}
 	elsif ($in{$w."_mode"} == 2) {
