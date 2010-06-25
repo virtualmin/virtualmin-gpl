@@ -195,6 +195,7 @@ if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin") &&
 	}
 
 # Copy chained CA cert in from domain with same IP, if any
+$_[0]->{'web_sslport'} = $web_sslport;
 if ($chained) {
 	&save_chained_certificate_file($_[0], $chained);
 	}
@@ -202,7 +203,6 @@ if ($chained) {
 &release_lock_web($_[0]);
 &$second_print($text{'setup_done'});
 &register_post_action(\&restart_apache, 1);
-$_[0]->{'web_sslport'} = $web_sslport;
 }
 
 # modify_ssl(&domain, &olddomain)
