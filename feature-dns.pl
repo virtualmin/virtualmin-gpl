@@ -148,7 +148,12 @@ if (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
 	local $rootfile = &bind8::make_chroot($file);
 	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 	if (!-r $rootfile) {
-		&create_standard_records($file, $_[0], $ip);
+		if ($_[0]->{'alias'}) {
+			&create_alias_records($file, $_[0], $ip);
+			}
+		else {
+			&create_standard_records($file, $_[0], $ip);
+			}
 		&bind8::set_ownership($rootfile);
 		}
 	&$second_print($text{'setup_done'});
@@ -223,7 +228,12 @@ else {
 		$_[0]->{'dns_subalready'} = 1;
 		}
 	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
-	&create_standard_records($fn, $_[0], $ip);
+	if ($_[0]->{'alias'}) {
+		&create_standard_records($fn, $_[0], $ip);
+		}
+	else {
+		&create_standard_records($fn, $_[0], $ip);
+		}
 	&post_records_change($parent, \@recs);
 
 	&release_lock_dns($parent);
@@ -912,6 +922,54 @@ if ($tmpl->{'dns'} && (!$d->{'dns_submode'} || !$tmpl->{'dns_replace'})) {
 if ($d->{'virt6'}) {
 	# Create IPv6 records for IPv4
 	&add_ip6_records($d, $file);
+	}
+}
+
+# create_alias_records(file, &domain, ip)
+# For a domain that is an alias, copy records from its target
+sub create_alias_records
+{
+local ($file, $d, $ip) = @_;
+local $tmpl = &get_template($d->{'template'});
+local $aliasd = &get_domain($d->{'alias'});
+local $aliasfile = &get_domain_dns_file($aliasd);
+$file || &error("No zone file for alias target $aliasd->{'dom'} found");
+local @recs = &bind8::read_zone_file($aliasfile, $aliasd->{'dom'});
+@recs || &error("No records for alias target $aliasd->{'dom'} found");
+local $olddom = $alias->{'dom'};
+local $dom = $d->{'dom'};
+local $oldip = $alias->{'ip'};
+print STDERR "adding to $file\n";
+local @sublist = grep { $_->{'id'} ne $aliasd->{'id'} } &list_domains();
+RECORD: foreach my $r (@recs) {
+	if ($d->{'dns_submode'} && ($r->{'type'} eq 'NS' || 
+				    $r->{'type'} eq 'SOA')) {
+		# Skip SOA and NS records for sub-domains in the same file
+		next;
+		}
+	if ($r->{'type'} eq 'NSEC' || $r->{'type'} eq 'NSEC3' ||
+	    $r->{'type'} eq 'RRSIG' || $r->{'type'} eq 'DNSKEY') {
+		# Skip DNSSEC records, as they get re-generated
+		next;
+		}
+	if (!$r->{'type'}) {
+		# Skip special directives, like $ttl
+		next;
+		}
+	foreach my $sd (@sublist) {
+		if ($r->{'name'} eq $sd->{'dom'}."." ||
+		    $r->{'name'} =~ /\.\Q$sd->{'dom'}\E\.$/) {
+			# Skip records in sub-domains of the source
+			next RECORD;
+			}
+		}
+	$r->{'name'} =~ s/\Q$olddom\E\.$/$dom\./i;
+	foreach my $v (@{$r->{'values'}}) {
+		$v =~ s/\Q$olddom\E/$dom/i;
+		$v =~ s/\Q$oldip\E$/$ip/i;
+		}
+	&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
+			      'IN', $r->{'type'}, &join_record_values($r));
 	}
 }
 

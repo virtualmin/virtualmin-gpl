@@ -1,0 +1,5 @@
+desc=Alias domain DNS records
+html=Alias domain DNS records are now copied from the target domain at creation time, rather than being created from the selected template.
+master=1
+domain=1
+reseller=1
