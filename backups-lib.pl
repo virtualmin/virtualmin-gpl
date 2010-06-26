@@ -552,7 +552,7 @@ DOMAIN: foreach $d (@$doms) {
 			$err = &s3_upload($user, $pass, $server,
 					  "$dest/$df",
 					  $path ? $path."/".$df : $df,
-					  $binfo, $s3_upload_tries);
+					  $binfo, $s3_upload_tries, $port);
 			}
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
@@ -872,7 +872,7 @@ elsif ($ok && $mode == 3 && (@destfiles || !$dirfmt)) {
 			local $binfo = { $n => $donefeatures{$n} };
 			$err = &s3_upload($user, $pass, $server, "$dest/$df",
 					  $path ? $path."/".$df : $df,
-					  $binfo, $s3_upload_tries);
+					  $binfo, $s3_upload_tries, $port);
 			if ($err) {
 				&$second_print(
 					&text('backup_uploadfailed', $err));
@@ -892,7 +892,8 @@ elsif ($ok && $mode == 3 && (@destfiles || !$dirfmt)) {
 		local %donebydname;
 		local $tstart = time();
 		$err = &s3_upload($user, $pass, $server, $dest,
-				  $path, \%donefeatures, $s3_upload_tries);
+				  $path, \%donefeatures, $s3_upload_tries,
+				  $port);
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
 			$ok = 0;
@@ -1881,7 +1882,12 @@ elsif ($_[0] =~ /^ssh:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
 	@rv = (2, $1, $2, $3, $5, $4 ? substr($4, 1) : 22);
 	}
 elsif ($_[0] =~ /^s3:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
-	@rv = (3, $1, $2, $3, $5, undef);
+	# S3 with regular redundancy
+	@rv = (3, $1, $2, $3, $5, 0);
+	}
+elsif ($_[0] =~ /^s3rrs:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
+	# S3 with less redundancy
+	@rv = (3, $1, $2, $3, $5, 1);
 	}
 elsif ($_[0] eq "download:") {
 	return (4, undef, undef, undef, undef, undef);
@@ -2027,6 +2033,9 @@ if (&can_use_s3()) {
 	       &ui_opt_textbox($name."_s3file", $mode == 3 ? $path : undef,
 			       30, $text{'backup_nos3file'}).
 	       "</td> </tr>\n";
+	$st .= "<tr> <td></td> <td>".
+	       &ui_checkbox($name."_rrs", 1, $text{'backup_s3rrs'}, $port == 1).
+	       "</td> </tr>\n";
 	$st .= "</table>\n";
 	push(@opts, [ 3, $text{'backup_mode3'}, $st ]);
 	}
@@ -2103,7 +2112,8 @@ elsif ($mode == 3 && &can_use_s3()) {
 	$in{$name."_s3file_def"} ||
 		$in{$name."_s3file"} =~ /^[a-z0-9\-\_\.\%]+$/i ||
 		&error($text{'backup_esfile'});
-	return "s3://".$in{$name.'_akey'}.":".$in{$name.'_skey'}."\@".
+	local $proto = $in{$name.'_rrs'} ? 's3rrs' : 's3';
+	return $proto."://".$in{$name.'_akey'}.":".$in{$name.'_skey'}."\@".
 	       $in{$name.'_bucket'}.
 	       ($in{$name."_s3file_def"} ? "" : "/".$in{$name."_s3file"});
 	}

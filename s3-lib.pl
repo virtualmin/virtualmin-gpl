@@ -87,17 +87,21 @@ return undef;
 }
 
 # s3_upload(access-key, secret-key, bucket, source-file, dest-filename, [&info],
-#           attempts)
+#           attempts, [reduced-redundancy])
 # Upload some file to S3, and return undef on success or an error message on
 # failure. Unfortunately we cannot simply use S3's put method, as it takes
 # a scalar for the content, which could be huge.
 sub s3_upload
 {
-local ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $tries) = @_;
+local ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $tries, $rrs) = @_;
 $tries ||= 1;
 &require_s3();
 local @st = stat($sourcefile);
 my $can_use_write = &get_webmin_version() >= 1.451;
+my $headers = { 'Content-Length' => $st[7] };
+if ($rrs) {
+	$headers->{'x-amz-storage-class'} = 'REDUCED_REDUNDANCY';
+	}
 
 my $err;
 my $endpoint = undef;
@@ -122,8 +126,7 @@ for(my $i=0; $i<$tries; $i++) {
 	# Use the S3 library to create a request object, but use Webmin's HTTP
 	# function to open it.
 	local $req = &s3_make_request($conn, $path, "PUT", "dummy",
-				      { 'Content-Length' => $st[7] },
-				      $authpath);
+				      $headers, $authpath);
 	local ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
 	local $h = &make_http_connection(
 		$host, $port, $ssl, $req->method, $page);
@@ -218,7 +221,7 @@ if (!$err && $info) {
 	&print_tempfile(ITEMP, &serialise_variable($info));
 	&close_tempfile(ITEMP);
 	$err = &s3_upload($akey, $skey, $bucket, $itemp,
-			  $destfile.".info", undef, $tries);
+			  $destfile.".info", undef, $tries, $rrs);
 	}
 
 return $err;

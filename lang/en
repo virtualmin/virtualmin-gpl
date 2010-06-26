@@ -1982,6 +1982,7 @@ backup_akey=Access key ID
 backup_skey=Secret key ID
 backup_s3file=File under bucket
 backup_nos3file=One per domain
+backup_s3rrs=Use reduced redundancy storage?
 backup_ftpserver=FTP server
 backup_sshserver=SSH server
 backup_bucket=S3 bucket
