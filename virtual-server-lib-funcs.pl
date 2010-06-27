@@ -10265,7 +10265,7 @@ if (&can_edit_templates()) {
 # Add module config page
 if (!$access{'noconfig'}) {
 	push(@rv, { 'url' => "$gconfig{'webprefix'}/config.cgi?$module_name",
-		    'title' => $text{'header_config'},
+		    'title' => $text{'index_virtualminconfig'},
 		    'cat' => 'setting',
 		    'icon' => 'config' });
 	}

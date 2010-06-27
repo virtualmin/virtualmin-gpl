@@ -220,6 +220,7 @@ index_restoredesc=Click the button to restore a previous backup. A form for choo
 index_backuplog=Backup Logs
 index_backuplogdesc=Show logs of all backups that you have permissions to create, made via the Virtualmin UI, command line or on schedule.
 index_dmore=$1 more ..
+index_virtualminconfig=Virtualmin Configuration
 
 form_title=Create Virtual Server
 form_title2=Create Virtual Sub-Server
