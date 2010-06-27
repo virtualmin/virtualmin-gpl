@@ -1232,6 +1232,6 @@ Added options to the Module Config page for defining a link to additional docume
 Added an option to the Magento script installer to setup sample data.
 The website documents directory for a virtual server can be changed from public_html on the Website Options page, and using the modify-web API command.
 ---- Changes since 3.79 ----
-Updated the ZenCart script installer to version 1.3.9d, Coppermine to 1.5.6, MoinMoin to 1.8.8, Moodle to 1.9.9, Magento to 1.4.1.0, Trac to 0.12, Z-Push to 1.4, WordPress to 3.0, SugarCRM to 5.5.4, Piwik to 0.6.3, Simple Invoices to 2010.2, Bugzilla to 3.6.1, Radiant to 0.9.1, and TikiWiki to 4.3.
+Updated the ZenCart script installer to version 1.3.9d, Coppermine to 1.5.6, MoinMoin to 1.8.8, Moodle to 1.9.9, Magento to 1.4.1.0, Trac to 0.12, Z-Push to 1.4, WordPress to 3.0, SugarCRM to 5.5.4, Piwik to 0.6.3, Simple Invoices to 2010.2, Bugzilla to 3.6.1, Radiant to 0.9.1, phpMyFAQ to 2.6.6, and TikiWiki to 4.3.
 Alias domain DNS records are now copied from the target domain at creation time, rather than being created from the selected template.
 S3 backups can now be use the new reduced redundancy storage option, which is cheaper but less reliable.
