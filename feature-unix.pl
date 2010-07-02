@@ -630,7 +630,8 @@ return 1;
 # any mail users with FTP access
 sub bandwidth_unix
 {
-local $log = $config{'bw_ftplog'} || &get_proftpd_log();
+local $log = $config{'bw_ftplog'} ? $config{'bw_ftplog'} :
+	     $config{'ftp'} ? &get_proftpd_log() : undef;
 if ($log) {
 	local @users;
 	if (!$_[0]->{'parent'}) {
