@@ -223,5 +223,30 @@ $rv .= "</textarea>\n";
 return $rv;
 }
 
+# vui_opt_bytesbox(name, value, size, option1, [option2], [disabled?],
+# 		   [&extra-fields], [max], [tags], [defaultunits])
+# Returns HTML for a bytes field with a 'default' option
+sub vui_opt_bytesbox
+{
+my ($name, $value, $size, $opt1, $opt2, $dis, $extra, $max, $tags,
+    $defaultunits) = @_;
+$defaultunits ||= 1024*1024*1024;
+my $dis1 = &js_disable_inputs([ $name, $name."_units", @$extra ], [ ]);
+my $dis2 = &js_disable_inputs([ ], [ $name, $name."_units", @$extra ]);
+my $rv;
+$size = &ui_max_text_width($size);
+$rv .= &ui_radio($name."_def", $value eq '' ? 1 : 0,
+		 [ [ 1, $opt1, "onClick='$dis1'" ],
+		   [ 0, $opt2 || " ", "onClick='$dis2'" ] ], $dis)."\n";
+if (&get_webmin_version() < 1.520) {
+	# defaultunits doesn't work yet, so fake it
+	$value = $defaultunits * 10;
+	}
+$rv .= &ui_bytesbox($name, $value, $size, $value eq "" || $dis, $tags,
+		    $defaultunits);
+return $rv;
+
+}
+
 1;
 
