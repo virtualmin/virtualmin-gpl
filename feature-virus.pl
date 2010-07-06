@@ -473,6 +473,9 @@ elsif (&init::action_status("clamd-wrapper")) {
 			$l = "LogFile $1";
 			$logfile = $1;
 			}
+		if ($l =~ /^#+\s*LocalSocket\s+(\S+)/) {
+			$l = "LocalSocket $1";
+			}
 		if ($l =~ /^LocalSocket\s+(\S+)/) {
 			$socketfile = $1;
 			}
