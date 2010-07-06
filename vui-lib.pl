@@ -238,7 +238,7 @@ $size = &ui_max_text_width($size);
 $rv .= &ui_radio($name."_def", $value eq '' ? 1 : 0,
 		 [ [ 1, $opt1, "onClick='$dis1'" ],
 		   [ 0, $opt2 || " ", "onClick='$dis2'" ] ], $dis)."\n";
-if (&get_webmin_version() < 1.520) {
+if (&get_webmin_version() < 1.518) {
 	# defaultunits doesn't work yet, so fake it
 	$value = $defaultunits * 10;
 	}
