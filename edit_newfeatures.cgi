@@ -67,7 +67,8 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 			{ 'type' => 'checkbox', 'name' => 'mods',
 			  'value' => $m->{'dir'},
 			  'checked' => $plugins{$m->{'dir'}} },
-			&plugin_call($m->{'dir'}, "feature_name"),
+			&plugin_call($m->{'dir'}, "feature_name") ||
+			  $m->{'dir'},
 			$text{'features_plugin'},
 			$m->{'version'},
 			{ 'type' => 'checkbox', 'name' => 'active',
