@@ -142,7 +142,11 @@ if (defined(&list_php_modules) && !$d->{'alias'}) {
 		if (defined(&php_pear::list_installed_pear_modules)) {
 			@allmods = &php_pear::list_installed_pear_modules();
 			}
-		foreach $cmd (&php_pear::get_pear_commands()) {
+		@cmds = ( );
+		if (defined(&php_pear::get_pear_commands)) {
+			@cmds = &php_pear::get_pear_commands();
+			}
+		foreach $cmd (@cmds) {
 			@mods = grep { $_->{'pear'} == $cmd->[1] } @allmods;
 			@mods = sort { lc($a->{'name'}) cmp lc($b->{'name'}) }
 				     @mods;
