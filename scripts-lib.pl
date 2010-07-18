@@ -1649,7 +1649,7 @@ if ($returnheaders_array && $post_http_headers_array) {
 sub capture_http_headers
 {
 if ($_[0] == 4) {
-	$post_http_headers = defined(%WebminCore::header) ?
+	$post_http_headers = %WebminCore::header ?
 				\%WebminCore::header : \%header;
 	$post_http_headers_array = defined(@WebminCore::header) ?
 				\@WebminCore::header : \@headers;

@@ -912,7 +912,7 @@ sub list_virtusers
 # Build list of unix users, to exclude aliases with same name as users
 # (which are picked up by list_domain_users instead).
 &require_mail();
-if (!defined(%unix_user)) {
+if (!%unix_user) {
 	&require_useradmin(1);
 	foreach my $u (&list_all_users()) {
 		$unix_user{&escape_alias($u->{'user'})}++;

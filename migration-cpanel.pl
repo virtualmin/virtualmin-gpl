@@ -1165,7 +1165,7 @@ foreach my $vf (readdir(VF)) {
 			last;
 			}
 		}
-	if (!defined(%subof) || !$subof{'dom'}) {
+	if (!%subof || !$subof{'dom'}) {
 		&$second_print(".. skipping, as not a sub-domain of $dom or any other migrated domain");
 		next;
 		}

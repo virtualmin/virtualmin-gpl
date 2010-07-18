@@ -937,7 +937,7 @@ sub list_all_users_quotas
 &require_useradmin($_[0]);
 if (&has_quota_commands()) {
 	# Get from user quota command
-	if (!defined(%main::soft_home_quota) && !$_[0]) {
+	if (!%main::soft_home_quota && !$_[0]) {
 		local $out = &run_quota_command("list_users");
 		foreach my $l (split(/\r?\n/, $out)) {
 			local ($user, $used, $soft, $hard) = split(/\s+/, $l);
@@ -949,7 +949,7 @@ if (&has_quota_commands()) {
 	}
 else {
 	# Get from real quota system
-	if (!defined(%main::soft_home_quota) && &has_home_quotas() && !$_[0]) {
+	if (!%main::soft_home_quota && &has_home_quotas() && !$_[0]) {
 		local $n = &quota::filesystem_users($config{'home_quotas'});
 		local $i;
 		for($i=0; $i<$n; $i++) {
@@ -961,7 +961,7 @@ else {
 				$quota::user{$i,'ublocks'};
 			}
 		}
-	if (!defined(%main::soft_mail_quota) && &has_mail_quotas() && !$_[0]) {
+	if (!%main::soft_mail_quota && &has_mail_quotas() && !$_[0]) {
 		local $n = &quota::filesystem_users($config{'mail_quotas'});
 		local $i;
 		for($i=0; $i<$n; $i++) {
@@ -1000,7 +1000,7 @@ sub list_all_groups_quotas
 &require_useradmin($_[0]);
 if (&has_quota_commands()) {
 	# Get from user quota command
-	if (!defined(%main::gsoft_home_quota) && !$_[0]) {
+	if (!%main::gsoft_home_quota && !$_[0]) {
 		local $out = &run_quota_command("list_groups");
 		foreach my $l (split(/\r?\n/, $out)) {
 			local ($group, $used, $soft, $hard) = split(/\s+/, $l);
@@ -1012,7 +1012,7 @@ if (&has_quota_commands()) {
 	}
 else {
 	# Get from real quota system
-	if (!defined(%main::gsoft_home_quota) && &has_home_quotas() && !$_[0]) {
+	if (!%main::gsoft_home_quota && &has_home_quotas() && !$_[0]) {
 		local $n = &quota::filesystem_groups($config{'home_quotas'});
 		local $i;
 		for($i=0; $i<$n; $i++) {
@@ -1024,7 +1024,7 @@ else {
 				$quota::group{$i,'ublocks'};
 			}
 		}
-	if (!defined(%main::gsoft_mail_quota) && &has_mail_quotas() && !$_[0]) {
+	if (!%main::gsoft_mail_quota && &has_mail_quotas() && !$_[0]) {
 		local $n = &quota::filesystem_groups($config{'mail_quotas'});
 		local $i;
 		for($i=0; $i<$n; $i++) {
