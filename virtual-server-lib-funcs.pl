@@ -2064,7 +2064,8 @@ local $tmpl = &get_template($_[3] ? $_[3]->{'template'} : 0);
 if (&has_quota_commands()) {
 	# Call the external quota program
 	&run_quota_command("set_user", $_[0],
-	    $tmpl->{'quotatype'} eq 'hard' ? ( $_[1], $_[1] ) : ( $_[1], 0 ));
+	    $tmpl->{'quotatype'} eq 'hard' ? ( int($_[1]), int($_[1]) )
+					   : ( int($_[1]), 0 ));
 	}
 else {
 	# Call through to quotas module
@@ -4250,12 +4251,12 @@ local $tmpl = &get_template($d->{'template'});
 if (&has_quota_commands()) {
 	# User and group quotas are set externally
 	&run_quota_command("set_user", $d->{'user'},
-		$tmpl->{'quotatype'} eq 'hard' ? ( $uquota, $uquota )
-					       : ( 0, $uquota ));
+		$tmpl->{'quotatype'} eq 'hard' ? ( int($uquota), int($uquota) )
+					       : ( 0, int($uquota) ));
 	if (&has_group_quotas() && $d->{'group'}) {
 		&run_quota_command("set_group", $d->{'group'},
-			$tmpl->{'quotatype'} eq 'hard' ? ( $quota, $quota )
-						       : ( 0, $quota ));
+			$tmpl->{'quotatype'} eq 'hard' ?
+				( int($quota), int($quota) ) : ( 0, $quota ));
 		}
 	}
 else {
