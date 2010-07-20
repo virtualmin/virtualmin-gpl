@@ -208,7 +208,7 @@ if ($multi) {
 		print "    Type: ",($d->{'alias'} ? "Alias" :
 				    $d->{'parent'} ? "Sub-server" :
 						     "Top-level server"),"\n";
-		$dname = &show_domain_name($d);
+		$dname = &show_domain_name($d, 2);
 		if ($dname ne $d->{'dom'}) {
 			print "    International domain name: $dname\n";
 			}

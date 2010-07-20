@@ -42,17 +42,30 @@ $rv =~ s/ /&nbsp;/g;
 return $rv;
 }
 
-# show_domain_name(&dom|dname)
+# show_domain_name(&dom|dname, [1-never,0-auto,2-always])
 # Converts a domain name to human-readable form for display. Currently this
 # takes IDN encoding into account
 sub show_domain_name
 {
 my $name = ref($_[0]) ? $_[0]->{'dom'} : $_[0];
+my $mode = $_[1];
 my $spacer;
 if ($name =~ s/^(\s+)//) {
 	$spacer = $1;
 	}
-if ($name =~ /^xn--/ || $name =~ /\.xn--/) {
+my $utf8;
+if (!$ENV{'MINISERV_CONFIG'} && $mode == 0) {
+	# Check if STDOUT supports utf-8 output
+	eval "use PerlIO";
+	if (!$@) {
+		foreach my $l (PerlIO::get_layers(STDOUT)) {
+			$utf8++ if ($l =~ /utf8/);
+			}
+		}
+	}
+my $convert = $mode == 2 ||
+	      $mode == 0 && ($ENV{'MINISERV_CONFIG'} || $utf8);
+if (($name =~ /^xn--/ || $name =~ /\.xn--/) && $convert) {
 	# Convert xn-- parts to unicode
 	push(@INC, $module_root_directory)
 		if (&indexof($module_root_directory, @INC) < 0);
