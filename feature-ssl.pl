@@ -71,7 +71,6 @@ local $web_sslport = $_[0]->{'web_sslport'} || $tmpl->{'web_sslport'} || 443;
 &require_apache();
 &obtain_lock_web($_[0]);
 local $conf = &apache::get_config();
-local $f = &get_website_file($_[0]);
 
 # Find out if this domain will share a cert with another
 local $chained;
@@ -163,6 +162,7 @@ if ($err) {
 	}
 
 # Add the actual <VirtualHost>
+local $f = $virt->{'file'};
 local $lref = &read_file_lines($f);
 local @ssldirs = &apache_ssl_directives($_[0], $tmpl);
 push(@$lref, "<VirtualHost ".&get_apache_vhost_ips($_[0], 0, $web_sslport).">");
