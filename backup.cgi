@@ -169,7 +169,7 @@ else {
 	($ok, $size, $errdoms) = &backup_domains($dest, \@doms, \@do_features,
 				       $in{'fmt'}, $in{'errors'}, \%options,
 				       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
-				       $in{'onebyone'}, $cbmode >= 2,
+				       $in{'onebyone'}, $cbmode == 2,
 				       undef, $in{'increment'});
 	$output = &stop_print_capture();
 	&cleanup_backup_limits(0, 1);
