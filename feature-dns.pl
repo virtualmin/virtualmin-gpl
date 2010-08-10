@@ -720,11 +720,20 @@ return $rv;
 sub join_record_values
 {
 local ($r) = @_;
-local @rv;
-foreach my $v (@{$r->{'values'}}) {
-	push(@rv, $v =~ /\s/ ? "\"$v\"" : $v);
+if ($r->{'type'} eq 'SOA') {
+	# Multiliple lines, with brackets
+	local $v = $r->{'values'};
+	return "$v->[0] $v->[1] (\n\t\t\t$v->[2]\n\t\t\t$v->[3]\n".
+	       "\t\t\t$v->[4]\n\t\t\t$v->[5]\n\t\t\t$v->[6] )";
 	}
-return join(" ", @rv);
+else {
+	# All one one line
+	local @rv;
+	foreach my $v (@{$r->{'values'}}) {
+		push(@rv, $v =~ /\s/ ? "\"$v\"" : $v);
+		}
+	return join(" ", @rv);
+	}
 }
 
 # create_mx_records(file, &domain, ip)
@@ -939,7 +948,6 @@ local @recs = &bind8::read_zone_file($aliasfile, $aliasd->{'dom'});
 local $olddom = $alias->{'dom'};
 local $dom = $d->{'dom'};
 local $oldip = $alias->{'ip'};
-print STDERR "adding to $file\n";
 local @sublist = grep { $_->{'id'} ne $aliasd->{'id'} } &list_domains();
 RECORD: foreach my $r (@recs) {
 	if ($d->{'dns_submode'} && ($r->{'type'} eq 'NS' || 
