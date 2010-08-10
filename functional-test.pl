@@ -3377,6 +3377,15 @@ $bw_tests = [
 		      [ 'server', &get_system_hostname() ] ],
 	},
 
+	# Create a 1M file in the user's directory
+	{ 'command' => 'dd if=/dev/zero of=/home/'.$test_bw_domain_user.'/homes/'.$test_user.'/huge bs=1024 count=1024 && chown '.$test_full_user.': /home/'.$test_bw_domain_user.'/homes/'.$test_user.'/huge',
+	},
+
+	# Fetch 1 time with FTP
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_full_user.':smeg@localhost/huge >/dev/null',
+	},
+
 	# Re-run bw.pl to pick up that email
 	{ 'command' => $module_config_directory.'/bw.pl '.$test_bw_domain,
 	},
@@ -3384,7 +3393,8 @@ $bw_tests = [
 	# Check that the email was counted
 	{ 'command' => 'list-bandwidth.pl',
 	  'args' => [ [ 'domain', $test_bw_domain ] ],
-	  'grep' => [ 'mail:2[0-9]{6}', ],
+	  'grep' => [ 'mail:2[0-9]{6}',
+		      'ftp:2[0-9]{6}' ],
 	},
 
 	# Get rid of the domain

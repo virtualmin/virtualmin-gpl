@@ -634,20 +634,27 @@ local $log = $config{'bw_ftplog'} ? $config{'bw_ftplog'} :
 	     $config{'ftp'} ? &get_proftpd_log() : undef;
 if ($log) {
 	local @users;
+	local @ashells = grep { $_->{'mailbox'} } &list_available_shells();
 	if (!$_[0]->{'parent'}) {
 		# Only do the domain owner if this is the parent domain, to
 		# avoid double-counting in subdomains
 		push(@users, $_[0]->{'user'});
 		}
 	foreach $u (&list_domain_users($_[0], 0, 1, 1, 1)) {
-		push(@users, $u->{'user'}) if ($u->{'unix'});
+		# Only add Unix users with FTP access
+		next if (!$u->{'unix'});
+		local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} }
+                                      @ashells;
+		if (!$shell || $shell->{'id'} ne 'nologin') {
+			push(@users, $u->{'user'});
+			}
 		}
-	return &count_ftp_bandwidth($log, $_[1], $_[2], \@users, "ftp",
-				    $config{'bw_ftplog_rotated'});
+	if (@users) {
+		return &count_ftp_bandwidth($log, $_[1], $_[2], \@users, "ftp",
+					    $config{'bw_ftplog_rotated'});
+		}
 	}
-else {
-	return $_[1];
-	}
+return $_[1];
 }
 
 # show_template_unix(&tmpl)
