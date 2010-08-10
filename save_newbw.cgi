@@ -10,6 +10,8 @@ require './virtual-server-lib.pl';
 # Validate inputs
 $in{'bw_past'} || $in{'bw_period'} =~ /^\d+$/ && $in{'bw_period'} > 0 || 
 	&error($text{'newbw_eperiod'});
+$in{'bw_step'} =~ /^\d+$/ && $in{'bw_step'} > 0 && $in{'bw_step'} <= 24 ||
+	&error($text{'newbw_estep'});
 $in{'bw_maxdays_def'} ||
     $in{'bw_maxdays'} =~ /^\d+$/ && $in{'bw_maxdays'} > 0 ||
 	&error($text{'newbw_emaxdays'});
@@ -28,6 +30,7 @@ if ($in{'serversmode'}) {
 
 # Save configuration and create cron job
 $config{'bw_active'} = $in{'bw_active'};
+$config{'bw_step'} = $in{'bw_step'};
 $config{'bw_past'} = $in{'bw_past'};
 $config{'bw_period'} = $in{'bw_period'};
 $config{'bw_maxdays'} = $in{'bw_maxdays_def'} ? undef : $in{'bw_maxdays'};
@@ -71,7 +74,7 @@ $in{'warnbw_template'} =~ s/\r//g;
 &close_tempfile(FILE);
 
 # Setup the cron job
-&setup_bandwidth_job($in{'bw_active'});
+&setup_bandwidth_job($in{'bw_active'}, $in{'bw_step'});
 &unlock_all_files();
 
 &webmin_log("newbw");

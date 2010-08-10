@@ -19,6 +19,10 @@ print &ui_table_row(&hlink($text{'newbw_active'}, "bandwidth_bw_active"),
 		    &ui_radio("bw_active", $job && $config{'bw_active'} ? 1 : 0,
 			      [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
+# Show interval between scans
+print &ui_table_row(&hlink($text{'newbw_step'}, "bandwidth_bw_step"),
+		    &ui_textbox("bw_step", $config{'bw_step'} || 1, 3));
+
 # Show field for monitoring period
 print &ui_table_row(&hlink($text{'newbw_period'}, "bandwidth_bw_past"),
 		    &ui_select("bw_past", $config{'bw_past'},

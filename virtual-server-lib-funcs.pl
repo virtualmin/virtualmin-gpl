@@ -12040,7 +12040,7 @@ if ($config{'spam'} && !$config{'no_lookup_domain_daemon'}) {
 	}
 
 # If bandwidth checking was enabled in the backup, re-enable it now
-&setup_bandwidth_job($config{'bw_active'});
+&setup_bandwidth_job($config{'bw_active'}, $config{'bw_step'} || 1);
 
 # Re-setup script warning job, if it was enabled
 if (defined(&setup_scriptwarn_job) && defined($config{'scriptwarn_enabled'})) {
@@ -13471,11 +13471,12 @@ elsif ($config{'dns_ip'}) {
 return undef;
 }
 
-# setup_bandwidth_job(enabled)
+# setup_bandwidth_job(enabled, [hour-step])
 # Create or delete the bandwidth monitoring cron job
 sub setup_bandwidth_job
 {
-local ($active) = @_;
+local ($active, $step) = @_;
+$step ||= 1;
 &foreign_require("cron", "cron-lib.pl");
 local $job = &find_bandwidth_job();
 if ($job) {
@@ -13483,11 +13484,15 @@ if ($job) {
 	&cron::delete_cron_job($job);
 	}
 if ($active) {
+	my @hours;
+	for(my $h=0; $h<24; $h+=$step) {
+		push(@hours, $h);
+		}
 	$job = { 'user' => 'root',
 		 'command' => $bw_cron_cmd,
 		 'active' => 1,
 		 'mins' => '0',
-		 'hours' => '*',
+		 'hours' => join(',', @hours),
 		 'days' => '*',
 		 'weekdays' => '*',
 		 'months' => '*' };
