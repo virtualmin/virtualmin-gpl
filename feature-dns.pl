@@ -945,9 +945,9 @@ local $aliasfile = &get_domain_dns_file($aliasd);
 $file || &error("No zone file for alias target $aliasd->{'dom'} found");
 local @recs = &bind8::read_zone_file($aliasfile, $aliasd->{'dom'});
 @recs || &error("No records for alias target $aliasd->{'dom'} found");
-local $olddom = $alias->{'dom'};
+local $olddom = $aliasd->{'dom'};
 local $dom = $d->{'dom'};
-local $oldip = $alias->{'ip'};
+local $oldip = $aliasd->{'ip'};
 local @sublist = grep { $_->{'id'} ne $aliasd->{'id'} } &list_domains();
 RECORD: foreach my $r (@recs) {
 	if ($d->{'dns_submode'} && ($r->{'type'} eq 'NS' || 
