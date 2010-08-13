@@ -1238,4 +1238,4 @@ S3 backups can now be use the new reduced redundancy storage option, which is ch
 Internationalized domain names are no longer converted to UTF-8 for output from API commands, to avoid the perl "wide character in print" warning.
 The interval between bandwidth monitoring cron job runs can now be configured.
 ---- Changes since 3.80 ----
-Updated the Drupal script installer to versions 5.23 and 6.19, CMS Made Simple to 1.8.2, and PHProjekt to 6.0.3.
+Updated the Drupal script installer to versions 5.23 and 6.19, CMS Made Simple to 1.8.2, Z-push to 1.4.1, and PHProjekt to 6.0.3.
