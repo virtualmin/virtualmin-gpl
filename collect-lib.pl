@@ -37,7 +37,8 @@ if (&foreign_check("proc")) {
 		local @mounted = &mount::list_mounted();
 		local $total = 0;
 		local $free = 0;
-		local $donezone;
+		local %donezone;
+		local %donevzfs;
 		foreach my $m (@mounted) {
 			if ($m->[2] =~ /^ext/ ||
 			    $m->[2] eq "reiserfs" || $m->[2] eq "ufs" ||
@@ -55,6 +56,11 @@ if (&foreign_check("proc")) {
 					}
 				local ($t, $f) =
 					&mount::disk_space($m->[2], $m->[0]);
+				if (($m->[2] eq "simfs" || $m->[2] eq "vzfs") &&
+				    $donevzfs{$t,$f}++) {
+					# Don't double-count VPS filesystems
+					next;
+					}
 				$total += $t*1024;
 				$free += $f*1024;
 				}
