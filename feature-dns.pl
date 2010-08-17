@@ -1617,7 +1617,8 @@ local @views = &bind8::find("view", $conf);
 # DNS records
 local $ndi = &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'}, 1,
      0, undef, [ "dns", "bind_replace", "dnsns", "dns_ttl_def", "dns_ttl",
-		 "dnsprins", @views ? ( "newdns_view" ) : ( ) ]);
+		 "dnsprins", "dns_records",
+		 @views ? ( "newdns_view" ) : ( ) ]);
 print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
 	$ndi."<br>\n".
 	&ui_textarea("dns", $tmpl->{'dns'} eq "none" ? "" :
