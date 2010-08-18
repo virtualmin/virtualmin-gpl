@@ -2113,7 +2113,7 @@ elsif ($fmt == 2) {
 	$cmd = "(uncompress -c $qfile | $tar xf -)";
 	}
 elsif ($fmt == 3) {
-	$cmd = "(bunzip2 -c $qfile | $tar xf -)";
+	$cmd = "(".&get_bunzip2_command()." -c $qfile | $tar xf -)";
 	}
 elsif ($fmt == 4) {
 	$cmd = "unzip $qfile";

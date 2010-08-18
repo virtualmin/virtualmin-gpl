@@ -9416,7 +9416,7 @@ foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "clamscan_cmd", "iface", "localgroup", "home_quotas",
 	       "mail_quotas", "group_quotas", "quotas", "shell", "ftp_shell",
 	       "all_namevirtual", "dns_ip", "default_procmail",
-	       "compression", "suexec", "domains_group",
+	       "compression", "pbzip2", "suexec", "domains_group",
 	       "quota_commands",
 	       "quota_set_user_command", "quota_set_group_command",
 	       "quota_list_users_command", "quota_list_groups_command",
@@ -9553,10 +9553,11 @@ sub extract_compressed_file
 local ($file, $dir) = @_;
 local $format = &compression_format($file);
 local $tar = &get_tar_command(); 
+local $bunzip2 = &get_bunzip2_command();
 local @needs = ( undef,
 		 [ "gunzip", $tar ],
 		 [ "uncompress", $tar ],
-		 [ "bunzip2", $tar ],
+		 [ $bunzip2, $tar ],
 		 [ "unzip" ],
 		 [ "tar" ],
 		);
@@ -9570,7 +9571,7 @@ if ($dir) {
 	@cmds = ( undef,
 		  "cd $qdir && gunzip -c $qfile | $tar xf -",
 	  	  "cd $qdir && uncompress -c $qfile | $tar xf -",
-		  "cd $qdir && bunzip2 -c $qfile | $tar xf -",
+		  "cd $qdir && $bunzip2 -c $qfile | $tar xf -",
 		  "cd $qdir && unzip $qfile",
 		  "cd $qdir && $tar xf $qfile",
 		  );
@@ -9580,7 +9581,7 @@ else {
 	@cmds = ( undef,
 		  "gunzip -c $qfile | $tar tf -",
 	  	  "uncompress -c $qfile | $tar tf -",
-		  "bunzip2 -c $qfile | $tar tf -",
+		  "$bunzip2 -c $qfile | $tar tf -",
 		  "unzip -l $qfile",
 		  "$tar tf $qfile",
 		  );
@@ -11931,7 +11932,10 @@ if (!&has_command("tar")) {
 	}
 local @bcmds = $config{'compression'} == 0 ? ( "gzip", "gunzip" ) :
 	       $config{'compression'} == 3 ? ( "zip", "unzip" ) :
-					     ( "bzip2", "bunzip2" );
+	       $config{'compression'} == 1 && $config{'pbzip2'} ?
+			( "pbzip2", "pbunzip2" ) :
+	       $config{'compression'} == 1 ? ( "bzip2", "bunzip2" ) :
+					     ( );
 foreach my $bcmd (@bcmds) {
 	if (!&has_command($bcmd)) {
 		return &text('check_ebcmd', "<tt>$bcmd</tt>");
@@ -12741,7 +12745,7 @@ elsif ($f =~ /\.Z$/i) {
 	return open($fh, "uncompress -c ".quotemeta($f)." |");
 	}
 elsif ($f =~ /\.bz2$/i) {
-	return open($fh, "bunzip2 -c ".quotemeta($f)." |");
+	return open($fh, &get_bunzip2_command()." -c ".quotemeta($f)." |");
 	}
 else {
 	return open($fh, $f);

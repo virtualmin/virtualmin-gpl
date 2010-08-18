@@ -1239,3 +1239,4 @@ Internationalized domain names are no longer converted to UTF-8 for output from 
 The interval between bandwidth monitoring cron job runs can now be configured.
 ---- Changes since 3.80 ----
 Updated the Drupal script installer to versions 5.23 and 6.19, CMS Made Simple to 1.8.2, Z-push to 1.4.1, Webcalendar to 1.2.3, ZenCart to 1.3.9f, and PHProjekt to 6.0.3.
+Parallel bzip2 can now be used for backups if the pbzip2 command is installed, via a new option on the Virtualmin Configuration page.

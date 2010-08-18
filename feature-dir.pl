@@ -375,7 +375,8 @@ if ($_[3] && $config{'compression'} == 0) {
 	}
 elsif ($_[3] && $config{'compression'} == 1) {
 	# With bzip
-	$cmd = "$tar cfX - $xtemp $iargs . | bzip2 -c $config{'zip_args'}";
+	$cmd = "$tar cfX - $xtemp $iargs . | ".
+	       &get_bzip2_command()." -c $config{'zip_args'}";
 	}
 elsif ($_[3] && $config{'compression'} == 3) {
 	# ZIP archive
@@ -472,7 +473,7 @@ if ($cf == 4) {
 else {
 	local $comp = $cf == 1 ? "gunzip -c" :
 		      $cf == 2 ? "uncompress -c" :
-		      $cf == 3 ? "bunzip2 -c" : "cat";
+		      $cf == 3 ? &get_bunzip2_command()." -c" : "cat";
 	local $tarcmd = "$tar xfX - $xtemp";
 	#if ($_[6]) {
 	#	# Run as domain owner - disabled, as this prevents some files

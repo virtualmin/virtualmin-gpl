@@ -628,7 +628,8 @@ if ($ok) {
 				}
 			elsif ($config{'compression'} == 1) {
 				$destfile .= ".bz2";
-				$comp = "bzip2 -c $config{'zip_args'}";
+				$comp = &get_bzip2_command().
+					" -c $config{'zip_args'}";
 				}
 			elsif ($config{'compression'} == 3) {
 				$destfile =~ s/\.tar$/\.zip/;
@@ -680,7 +681,8 @@ if ($ok) {
 			$comp = "gzip -c $config{'zip_args'}";
 			}
 		elsif ($dest =~ /\.(bz2|tbz2)$/i) {
-			$comp = "bzip2 -c $config{'zip_args'}";
+			$comp = &get_bzip2_command().
+				" -c $config{'zip_args'}";
 			}
 		local $writer = "cat >$dest";
 		if ($asd) {
@@ -1071,7 +1073,8 @@ if ($ok) {
 			# Other formats use uncompress | tar
 			local $comp = $cf == 1 ? "gunzip -c" :
 				      $cf == 2 ? "uncompress -c" :
-				      $cf == 3 ? "bunzip2 -c" : "cat";
+				      $cf == 3 ? &get_bunzip2_command()." -c" :
+						 "cat";
 			$reader = "$comp $q";
 			if ($asowner && $mode == 0) {
 				$reader = &command_as_user(
@@ -1648,7 +1651,8 @@ else {
 	else {
 		$comp = $cf == 1 ? "gunzip -c" :
 			$cf == 2 ? "uncompress -c" :
-			$cf == 3 ? "bunzip2 -c" : "cat";
+			$cf == 3 ? &get_bunzip2_command()." -c" :
+				   "cat";
 		$out = `($comp $q | $tar tf -) 2>&1`;
 		}
 	if ($?) {
@@ -2206,6 +2210,20 @@ foreach my $c (@cmds) {
 	return $p if ($p);
 	}
 return undef;
+}
+
+# get_bzip2_command()
+# Returns the full path to the bzip2-compatible command
+sub get_bzip2_command
+{
+return &has_command($config{'pbzip2'} ? 'pbzip2' : 'bzip2');
+}
+
+# get_bunzip2_command()
+# Returns the full path to the bunzip2-compatible command
+sub get_bunzip2_command
+{
+return &has_command($config{'pbunzip2'} ? 'pbunzip2' : 'bunzip2');
 }
 
 # get_backup_actions()
