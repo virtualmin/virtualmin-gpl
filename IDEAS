@@ -45,10 +45,12 @@
 	- Postfix
 	- Per-domain copying
 
- - Webmin cron
-	- Need new cron UI (nicer)
-
  - Webmin SSL cert / CSR generation directly
 	- https://www.virtualmin.com/node/14502
 
  - Move demo to srv2
+
+ - IP editing too complex
+	- Move to Change IP Address page
+	- Delete from Edit Virtual Server page
+	- Option to convert a private IP to shared

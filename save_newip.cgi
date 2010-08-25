@@ -4,23 +4,61 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
+$tmpl = &get_template($d->{'template'});
 &can_change_ip($d) && &can_edit_domain($d) || &error($text{'newip_ecannot'});
 
 # Validate inputs
 &error_setup($text{'newip_err'});
-if ($d->{'virt'}) {
-	# Changing virtual IP
-	&check_ipaddress($in{'ip'}) || &error($text{'newip_eip'});
-	$in{'ip'} ne $d->{'ip'} || &error($text{'newip_esame'});
-	foreach $ed (&list_domains()) {
-		if ($ed->{'id'} ne $d->{'id'} &&
-		    $ed->{'virt'} && $e->{'ip'} eq $in{'ip'}) {
-			&error(&text('newip_eclash', $ed->{'dom'}));
+if ($in{'mode'} == 0) {
+	# Switching to shared address
+	# XXX what checking is needed?
+	$ip = $in{'ip'};
+	&check_ipaddress($ip) || &error($text{'setup_eip'});
+	$virt = 0;
+	}
+elsif ($in{'mode'} == 1 && !$d->{'virt'}) {
+	# Switching to private IP
+	%racl = $d->{'reseller'} ?
+		&get_reseller_acl($d->{'reseller'}) : ();
+	if ($racl{'ranges'}) {
+		# Try allocating IP from reseller's range
+		($ip, $netmask) = &free_ip_address(\%racl);
+		$ip || &text('setup_evirtalloc2');
+		}
+	elsif ($tmpl->{'ranges'} ne "none") {
+		# Try allocating IP from template range
+		($ip, $netmask) = &free_ip_address($tmpl);
+		$ip || &text('setup_evirtalloc');
+		}
+	else {
+		# Validate manually entered IP
+		$ip = $in{'virt'};
+		$virtalready = $in{'virtalready'};
+		&check_ipaddress($ip) ||
+			&error($text{'setup_eip'});
+		$clash = &check_virt_clash($ip);
+		if (!$virtalready) {
+			# Make sure the IP isn't assigned yet
+			$clash && &error(&text('setup_evirtclash'));
+			}
+		elsif ($virtalready) {
+			# Make sure the IP is assigned already, but
+			# not to any domain
+			$clash || &error(&text('setup_evirtclash2'));
+			$already = &get_domain_by("ip", $ip);
+			$already && &error(&text('setup_evirtclash4',
+						 $already->{'dom'}));
 			}
 		}
-	$in{'ip'} ne &get_default_ip() || &error($text{'newip_edefault'});
-	&check_virt_clash($in{'ip'}) && &error($text{'newip_eused'});
+	$virt = 1;
 	}
+elsif ($in{'mode'} == 1 && $d->{'virt'}) {
+	# Sticking with private IP
+	$ip = $d->{'ip'};
+	$virtalready = $d->{'virtalready'};
+	$virt = 1;
+	}
+
 if ($d->{'virt6'} && &supports_ip6()) {
 	# Changing IPv6 address
 	&check_ip6address($in{'ip6'}) || &error($text{'newip_eip6'});
@@ -32,6 +70,7 @@ if ($d->{'virt6'} && &supports_ip6()) {
 		}
 	&check_virt6_clash($in{'ip'}) && &error($text{'newip_eused6'});
 	}
+
 if ($d->{'web'}) {
 	# Changing webserver port
 	foreach $p ("port", "sslport") {
@@ -43,45 +82,99 @@ if ($d->{'web'}) {
 &ui_print_unbuffered_header(&domain_in($d), $text{'newip_title'}, "");
 
 # Build new domain object
-$newdom = { %$d };
 $oldd = { %$d };
-if ($newdom->{'virt'}) {
-	$newdom->{'ip'} = $in{'ip'};
-	delete($newdom->{'defip'});
+if ($virt && !$d->{'virt'}) {
+	# Bringing up IP
+	$d->{'ip'} = $ip;
+	$d->{'netmask'} = $netmask;
+	$d->{'virt'} = 1;
+	$d->{'name'} = 0;
+	$d->{'virtalready'} = $virtalready;
+	delete($d->{'dns_ip'});
+	delete($d->{'defip'});
 	}
-elsif ($in{'ip'}) {
-	$newdom->{'ip'} = $in{'ip'};
-	$newdom->{'defip'} = $newdom->{'ip'} eq &get_default_ip();
+elsif (!$virt && $d->{'virt'}) {
+	# Taking down private IP
+	$d->{'ip'} = $ip;
+	$d->{'netmask'} = undef;
+	$d->{'defip'} = $ip eq &get_default_ip();
+	$d->{'virt'} = 0;
+	$d->{'virtalready'} = 0;
+	$d->{'name'} = 1;
+	delete($d->{'dns_ip'});
 	}
+elsif (!$virt && !$d->{'virt'} && $d->{'ip'} ne $ip) {
+	# Changing IP
+	$d->{'ip'} = $ip;
+	}
+
 if ($d->{'virt6'} && &supports_ip6()) {
-	$newdom->{'ip6'} = $in{'ip6'};
+	$d->{'ip6'} = $in{'ip6'};
 	}
-if ($newdom->{'web'}) {
-	$newdom->{'web_port'} = $in{'port'};
-	$newdom->{'web_sslport'} = $in{'sslport'};
+
+if ($d->{'web'}) {
+	$d->{'web_port'} = $in{'port'};
+	$d->{'web_sslport'} = $in{'sslport'};
 	}
 
 # Run the before command
-&set_domain_envs($d, "MODIFY_DOMAIN", $newdom);
+&set_domain_envs($d, "MODIFY_DOMAIN", $d);
 $merr = &making_changes();
 &reset_domain_envs($d);
 &error(&text('save_emaking', "<tt>$merr</tt>")) if (defined($merr));
 
-# Work out which domains we need to update (selected and aliases)
-@doms = ( $d, &get_domain_by("alias", $d->{'id'}) );
-foreach $sd (@doms) {
-	if (@doms > 1) {
-		&$first_print(&text('newip_dom', $sd->{'dom'}));
-		&$indent_print();
-		}
+# Update the primary domain
+&$first_print(&text('newip_dom', $d->{'dom'}));
+&$indent_print();
 
-	# Do it!
-	$oldd = { %$sd };
+if ($d->{'virt'} && !$oldd->{'virt'}) {
+	# Bring up IP
+	&setup_virt($d);
+	}
+elsif (!$d->{'virt'} && $oldd->{'virt'}) {
+	# Take down IP
+	&delete_virt($d);
+	}
+elsif ($d->{'virt'} && $oldd->{'virt'}) {
+	# Change IP, if needed
+	&modify_virt($d, $oldd);
+	}
+
+# Update features and plugins
+foreach $f (@features) {
+	local $mfunc = "modify_$f";
+	if ($config{$f} && $d->{$f}) {
+		&try_function($f, $mfunc, $d, $oldd);
+		}
+	}
+foreach $f (&list_feature_plugins()) {
+	if ($d->{$f}) {
+		&try_plugin_call($f, "feature_modify", $d, $oldd);
+		}
+	}
+if ($d->{'virt6'} && &supports_ip6()) {
+	&try_function("virt6", "modify_virt6", $d, $oldd);
+	}
+
+# Save new domain details
+print $text{'save_domain'},"<br>\n";
+&save_domain($sd);
+print $text{'setup_done'},"<p>\n";
+
+&$outdent_print();
+
+# Get and update alias domains
+@doms = &get_domain_by("alias", $d->{'id'});
+foreach $sd (@doms) {
+	&$first_print(&text('newip_dom2', $sd->{'dom'}));
+	&$indent_print();
+	$oldsd = { %$sd };
+
 	if ($sd->{'virt'}) {
 		# Change virtual IP
 		$sd->{'ip'} = $in{'ip'};
 		delete($sd->{'defip'});
-		&try_function("virt", "modify_virt", $sd, $oldd);
+		&try_function("virt", "modify_virt", $sd, $oldsd);
 		}
 	elsif ($in{'ip'}) {
 		# Changing shared IP
@@ -99,26 +192,22 @@ foreach $sd (@doms) {
 	foreach $f (@features) {
 		local $mfunc = "modify_$f";
 		if ($config{$f} && $sd->{$f}) {
-			&try_function($f, $mfunc, $sd, $oldd);
+			&try_function($f, $mfunc, $sd, $oldsd);
 			}
 		}
 	foreach $f (&list_feature_plugins()) {
-		if ($d->{$f}) {
-			&try_plugin_call($f, "feature_modify", $sd, $oldd);
+		if ($sd->{$f}) {
+			&try_plugin_call($f, "feature_modify", $sd, $oldsd);
 			}
 		}
 	if ($sd->{'virt6'} && &supports_ip6()) {
-		&try_function("virt6", "modify_virt6", $sd, $oldd);
+		&try_function("virt6", "modify_virt6", $sd, $oldsd);
 		}
 
 	# Save new domain details
 	print $text{'save_domain'},"<br>\n";
 	&save_domain($sd);
 	print $text{'setup_done'},"<p>\n";
-
-	if (@doms > 1) {
-		&$outdent_print();
-		}
 	}
 
 # Run the after command

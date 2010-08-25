@@ -162,9 +162,17 @@ if (!$parentdom) {
 			 	"autocomplete=off"));
 	}
 
+# Show the external IP
+if (&can_dnsip()) {
+	print &ui_table_row(&hlink($text{'edit_dnsip'}, "edit_dnsip"),
+		&ui_opt_textbox("dns_ip", $d->{'dns_ip'}, 20,
+				&text('spf_default', $d->{'ip'})));
+	}
+
 print &ui_hidden_table_end("config");
 
 # Start section for IPs
+# XXX delete this
 print &ui_hidden_table_start($text{'form_ipsect'}, "width=100%", 2,
 			     "ipsect", 0, [ "width=30%" ]);
 
@@ -248,13 +256,6 @@ if (&supports_ip6() && !$aliasdom) {
 		# Show existing address
 		print &ui_table_row($text{'edit_ip6'}, "<tt>$d->{'ip6'}</tt>");
 		}
-	}
-
-# Show the external IP
-if (&can_dnsip()) {
-	print &ui_table_row(&hlink($text{'edit_dnsip'}, "edit_dnsip"),
-		&ui_opt_textbox("dns_ip", $d->{'dns_ip'}, 20,
-				&text('spf_default', $d->{'ip'})));
 	}
 
 print &ui_hidden_table_end();

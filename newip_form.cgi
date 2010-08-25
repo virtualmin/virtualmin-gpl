@@ -4,6 +4,7 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
+$tmpl = &get_template($d->{'template'});
 &can_change_ip($d) && &can_edit_domain($d) || &error($text{'newip_ecannot'});
 &ui_print_header(&domain_in($d), $text{'newip_title'}, "");
 
@@ -18,37 +19,58 @@ print &ui_form_start("save_newip.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
 print &ui_table_start($text{'newip_header'}, "width=100%", 2, [ "width=30%" ]);
 
+# Old IP
 print &ui_table_row($text{'newip_old'},
 		    "<tt>$d->{'ip'}</tt>");
 
+# Virtual interface
 if ($d->{'virt'}) {
-	# Changing a domain's private IP address
 	print &ui_table_row($text{'newip_iface'},
 			    "<tt>$d->{'iface'}</tt>");
+	}
 
-	print &ui_table_row($text{'newips_new'},
-			    &ui_textbox("ip", $d->{'ip'}, 20));
+# Build list of possible shared IPs
+@canips = ( );
+push(@canips, [ &get_default_ip(), $text{'newip_shared'} ]);
+$rd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+if ($rd->{'reseller'}) {
+	push(@canips, [ &get_default_ip($rd->{'reseller'}),
+		&text('newip_resel', $rd->{'reseller'}) ]);
+	}
+push(@canips, map { [ $_, $text{'newip_shared2'} ] }
+		  &list_shared_ips());
+push(@canips, [ $d->{'ip'}, $text{'newip_current'} ]);
+@canips = map { [ $_->[0], "$_->[0] ($_->[1])" ] }
+	      grep { !$done{$_->[0]}++ } @canips;
+
+# Build options for new IP field
+# XXX what if need to enter private IP?
+# XXX checkbox for already up?
+# XXX what about "virt" access option?
+# XXX all_namevirtual ?
+@opts = ( [ 0, $text{'newip_sharedaddr'},
+	    &ui_select("ip", $d->{'ip'}, \@canips) ] );
+%racl = $d->{'reseller'} ? &get_reseller_acl($d->{'reseller'}) : ();
+if ($d->{'virt'}) {
+	# Already got a private IP
+	push(@opts, [ 1, $text{'newip_virtaddr'} ] );
+	}
+elsif ($tmpl->{'ranges'} ne "none" || $racl{'ranges'}) {
+	# IP can be alllocated
+	push(@opts, [ 1, $text{'newip_virtaddr2'} ]);
 	}
 else {
-	# Changing to/from a reseller IP
-	local @canips;
-	push(@canips, [ &get_default_ip(), $text{'newip_shared'} ]);
-	$rd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
-	if ($rd->{'reseller'}) {
-		push(@canips, [ &get_default_ip($rd->{'reseller'}),
-			&text('newip_resel', $rd->{'reseller'}) ]);
-		}
-	push(@canips, map { [ $_, $text{'newip_shared2'} ] }
-			  &list_shared_ips());
-	push(@canips, [ $d->{'ip'}, $text{'newip_current'} ]);
-	@canips = map { [ $_->[0], "$_->[0] ($_->[1])" ] }
-		      grep { !$done{$_->[0]}++ } @canips;
-	if (@canips > 1) {
-		print &ui_table_row($text{'newips_new'},
-				    &ui_select("ip", $d->{'ip'}, \@canips));
-		}
+	# User must enter IP, but has option to use one that is already active
+	push(@opts, [ 1, $text{'newip_virtaddr3'},
+		      &ui_textbox("virt", undef, 15)." ".
+		      &ui_checkbox("virtalready", 1,
+				   $text{'form_virtalready'}) ]);
 	}
 
+print &ui_table_row($text{'newips_new'},
+		&ui_radio_table("mode", $d->{'virt'} ? 1 : 0, \@opts, 1));
+
+# XXX change too
 if ($d->{'virt6'} && &supports_ip6()) {
 	# Changing a domain's IPv6 address
 	print &ui_table_row($text{'newip_old6'},
@@ -58,8 +80,8 @@ if ($d->{'virt6'} && &supports_ip6()) {
 			    &ui_textbox("ip6", $d->{'ip6'}, 30));
 	}
 
+# HTTP and HTTPS ports
 if ($d->{'web'}) {
-	$tmpl = &get_template($d->{'template'});
 	$d->{'web_port'} ||= $tmpl->{'web_port'} || 80;
 	$d->{'web_sslport'} ||= $tmpl->{'web_sslport'} || 443;
 
