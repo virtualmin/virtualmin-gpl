@@ -502,7 +502,10 @@ DOMAIN: foreach $d (@$doms) {
 					}
 				$dok = 0;
 				}
-			if (!$fok && !$skip) {
+			if (!$fok && (!$skip || $homefmt && $f eq "dir")) {
+				# If this feature failed and errors aren't being
+				# skipped, stop the backup. Also stop if this
+				# was the directory step of a home-format backup
 				$ok = 0;
 				$errcount++;
 				push(@errdoms, $d);
@@ -666,6 +669,7 @@ if ($ok) {
 			push(@destfiles, $destfile);
 			$destfiles_map{$destfile} = $d;
 			if ($?) {
+				&unlink_file("$dest/$destfile");
 				&$second_print(&text('backup_finalfailed',
 						     "<pre>$out</pre>"));
 				$ok = 0;
