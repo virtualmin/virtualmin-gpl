@@ -52,9 +52,7 @@ elsif (&can_use_feature("virt")) {
 		      grep { !$done{$_->[0]}++ } @canips;
 
 	# Build options for new IP field
-	# XXX what if need to enter private IP?
-	# XXX checkbox for already up?
-	# XXX all_namevirtual ?
+	# XXX show interface name
 	@opts = ( [ 0, $text{'newip_sharedaddr'},
 		    &ui_select("ip", $d->{'ip'}, \@canips) ] );
 	%racl = $d->{'reseller'} ? &get_reseller_acl($d->{'reseller'}) : ();
@@ -67,7 +65,8 @@ elsif (&can_use_feature("virt")) {
 		push(@opts, [ 1, $text{'newip_virtaddr2'} ]);
 		}
 	else {
-		# User must enter IP, but has option to use one that is already active
+		# User must enter IP, but has option to use one that is
+		# already active
 		push(@opts, [ 1, $text{'newip_virtaddr3'},
 			      &ui_textbox("virt", undef, 15)." ".
 			      &ui_checkbox("virtalready", 1,
@@ -79,14 +78,31 @@ elsif (&can_use_feature("virt")) {
 		&ui_radio_table("mode", $d->{'virt'} ? 1 : 0, \@opts, 1));
 	}
 
-# XXX change too
-if ($d->{'virt6'} && &supports_ip6()) {
-	# Changing a domain's IPv6 address
+if (&supports_ip6() && $d->{'virt6'}) {
+	# Current IPv6 addres
 	print &ui_table_row($text{'newip_old6'},
 			    "<tt>$d->{'ip6'}</tt>");
+	}
 
-	print &ui_table_row($text{'newips_new6'},
-			    &ui_textbox("ip6", $d->{'ip6'}, 30));
+if (&supports_ip6() && &can_use_feature("virt6")) {
+	# New IPv6 address
+	@ip6opts = ( [ 0, $text{'newip_virt6off'} ] );
+	if ($d->{'virt6'}) {
+		# Already active, so just show
+		push(@ip6opts, [ 1, $text{'newip_virt6addr'} ]);
+		}
+	elsif ($tmpl->{'ranges6'} ne 'none') {
+		# Can allocate
+		push(@ip6opts, [ 1, $text{'newip_virt6addr2'} ]);
+		}
+	else {
+		# Manually enter, or already active
+		push(@ip6opts, [ 1, $text{'newip_virt6addr3'},
+				 &ui_textbox("ip6", $d->{'ip6'}, 30) ]);
+		}
+	print &ui_table_row($text{'newip_new6'},
+		&ui_radio_table("mode6", $d->{'virt6'} ? 1 : 0,
+				\@ip6opts, 1));
 	}
 
 # HTTP and HTTPS ports

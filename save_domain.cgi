@@ -99,7 +99,7 @@ if (!$d->{'disabled'}) {
 	&set_chained_features(\%newdom, $d);
 	}
 if (!$config{'all_namevirtual'} && !$d->{'alias'} && &can_use_feature("virt")) {
-	$newdom{'virt'} = $in{'virt'};
+	# XXX delete this
 	if (&supports_ip6()) {
 		$newdom{'virt6'} = $in{'virt6'};
 		}
@@ -111,49 +111,6 @@ $cerr = &virtual_server_clashes(\%newdom, \%check);
 $lerr = &virtual_server_limits(\%newdom, $oldd);
 &error($lerr) if ($lerr);
 
-if (!$d->{'alias'} && &can_use_feature("virt")) {
-	# Parse IPv4 address inputs
-	if ($config{'all_namevirtual'}) {
-		# Make sure any new IP *is* assigned
-		&check_ipaddress($in{'ip'}) || &error($text{'setup_eip'});
-		if ($d->{'ip'} ne $in{'ip'} && !&check_virt_clash($in{'ip'})) {
-			&error(&text('setup_evirtclash2'));
-			}
-		}
-	elsif ($in{'virt'} && !$d->{'virt'}) {
-		# An IP is being added
-		local %racl = $d->{'reseller'} ?
-			&get_reseller_acl($d->{'reseller'}) : ();
-		if ($racl{'ranges'}) {
-			# Allocate the IP from the server's reseller's range
-			($in{'ip'}, $netmask) = &free_ip_address(\%racl);
-			$in{'ip'} || &text('setup_evirtalloc2');
-			}
-		elsif ($tmpl->{'ranges'} ne "none") {
-			# Allocate the IP from the template
-			($in{'ip'}, $netmask) = &free_ip_address($tmpl);
-			$in{'ip'} || &text('setup_evirtalloc');
-			}
-		else {
-			# Manually entered
-			&check_ipaddress($in{'ip'}) ||
-				&error($text{'setup_eip'});
-			$clash = &check_virt_clash($in{'ip'});
-			if (!$in{'virtalready'}) {
-				# Make sure the IP isn't assigned yet
-				$clash && &error(&text('setup_evirtclash'));
-				}
-			elsif ($in{'virtalready'}) {
-				# Make sure the IP is assigned already, but
-				# not to any domain
-				$clash || &error(&text('setup_evirtclash2'));
-				$already = &get_domain_by("ip", $in{'ip'});
-				$already && &error(&text('setup_evirtclash4',
-							 $already->{'dom'}));
-				}
-			}
-		}
-	}
 if (!$d->{'alias'} && &can_use_feature("virt") && &supports_ip6()) {
 	# Parse IPv6 address inputs
 	if ($in{'virt6'} && !$d->{'virt6'}) {
@@ -264,42 +221,6 @@ if (&has_home_quotas() && !$d->{'parent'} && &can_edit_quotas($d)) {
 foreach $sd (&get_domain_by("parent", $d->{'id'})) {
 	$sd->{'pass'} = $d->{'pass'};
 	$sd->{'email'} = $d->{'email'};
-	}
-
-if (&can_use_feature("virt")) {
-	if ($config{'all_namevirtual'} && !$d->{'alias'}) {
-		# Possibly changing IP
-		$d->{'ip'} = $in{'ip'};
-		$d->{'defip'} = $d->{'ip'} eq &get_default_ip();
-		delete($d->{'dns_ip'});
-		}
-	elsif ($in{'virt'} && !$d->{'virt'}) {
-		# Need to bring up IP
-		$d->{'ip'} = $in{'ip'};
-		$d->{'netmask'} = $netmask;
-		$d->{'virt'} = 1;
-		$d->{'name'} = 0;
-		$d->{'virtalready'} = $in{'virtalready'};
-		delete($d->{'dns_ip'});
-		delete($d->{'defip'});
-		&setup_virt($d);
-		}
-	elsif (!$in{'virt'} && $d->{'virt'}) {
-		# Need to take down IP, and revert to default
-		$d->{'ip'} = &get_default_ip($d->{'reseller'});
-		$d->{'netmask'} = undef;
-		$d->{'defip'} = $d->{'ip'} eq &get_default_ip();
-		$d->{'virt'} = 0;
-		$d->{'virtalready'} = 0;
-		$d->{'name'} = 1;
-		delete($d->{'dns_ip'});
-		&delete_virt($oldd);
-		}
-	if ($d->{'alias'} && !$d->{'ip'}) {
-		# IP lost bug to bug! Fix it up ..
-		$aliasdom = &get_domain($d->{'alias'});
-		$d->{'ip'} = $aliasdom->{'ip'};
-		}
 	}
 
 if (&can_use_feature("virt") && &supports_ip6()) {

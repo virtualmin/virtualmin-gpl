@@ -176,60 +176,6 @@ print &ui_hidden_table_end("config");
 print &ui_hidden_table_start($text{'form_ipsect'}, "width=100%", 2,
 			     "ipsect", 0, [ "width=30%" ]);
 
-# IP addresses section
-if (!$aliasdom) {
-	# Show IP-related options
-	if ($d->{'reseller'} && defined(&get_reseller)) {
-		$resel = &get_reseller($d->{'reseller'});
-		if ($resel) {
-			$reselip = $resel->{'acl'}->{'defip'};
-			}
-		}
-	print &ui_table_row($text{'edit_ip'},
-		  "<tt>$d->{'ip'}</tt> ".
-		  ($d->{'virt'} ? $text{'edit_private'} :
-		   $d->{'ip'} eq $reselip ? &text('edit_rshared',
-						  "<tt>$resel->{'name'}</tt>") :
-		   $d->{'ip'} eq &get_default_ip() ? $text{'edit_shared'}
-						   : $text{'edit_shared2'}));
-
-	if ($d->{'virt'}) {
-		# Got a virtual IP .. show option to remove
-		local $iface = &get_address_iface($d->{'ip'});
-		$ipfield = &ui_radio_table("virt", 1,
-			[ [ 0, $text{'edit_virtoff'} ],
-			  [ 1, &text('edit_virton', "<tt>$iface</tt>") ] ], 1);
-		}
-	elsif ($config{'all_namevirtual'}) {
-		# Always name-based, but IP can be changed
-		$ipfield = &ui_textbox("ip", $d->{'ip'}, 15);
-		}
-	elsif (!&can_use_feature("virt")) {
-		# Not allowed to add virtual IP
-		$ipfield = $text{'edit_virtnone'};
-		}
-	else {
-		# No IP .. show option to add
-		my @opts = ( [ 0, $text{'edit_virtnone'} ] );
-		if ($tmpl->{'ranges'} ne "none") {
-			# Can do automatic allocation
-			push(@opts, [ 1, $text{'edit_alloc'} ]);
-			}
-		else {
-			# User must enter IP, but has option to use one
-			# that is already active.
-			push(@opts, [ 1, $text{'edit_virtalloc'},
-					&ui_textbox("ip", undef, 15)." ".
-				        &ui_checkbox("virtalready", 1,
-						$text{'form_virtalready'}) ]);
-			}
-		$ipfield = &ui_radio_table("virt", 0, \@opts, 1);
-		}
-	if (&can_use_feature("virt")) {
-		print &ui_table_row($text{'edit_virt'}, $ipfield);
-		}
-	}
-
 if (&supports_ip6() && !$aliasdom) {
 	if (&can_use_feature("virt")) {
 		# Show field to add or remove an IPv6 address

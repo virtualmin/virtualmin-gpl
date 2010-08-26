@@ -46,7 +46,7 @@ elsif ($in{'mode'} == 1 && !$d->{'virt'}) {
 		elsif ($virtalready) {
 			# Make sure the IP is assigned already, but
 			# not to any domain
-			$clash || &error(&text('setup_evirtclash2'));
+			$clash || &error(&text('setup_evirtclash2', $ip));
 			$already = &get_domain_by("ip", $ip);
 			$already && &error(&text('setup_evirtclash4',
 						 $already->{'dom'}));
@@ -61,16 +61,34 @@ elsif ($in{'mode'} == 1 && $d->{'virt'}) {
 	$virt = 1;
 	}
 
-if ($d->{'virt6'} && &supports_ip6()) {
-	# Changing IPv6 address
-	&check_ip6address($in{'ip6'}) || &error($text{'newip_eip6'});
-	foreach $ed (&list_domains()) {
-		if ($ed->{'id'} ne $d->{'id'} &&
-		    $ed->{'virt6'} && $e->{'ip6'} eq $in{'ip6'}) {
-			&error(&text('newip_eclash6', $ed->{'dom'}));
-			}
+if (!&supports_ip6() || !&can_use_feature("virt6")) {
+	# Cannot use or change IPv6, so no validation needed
+	}
+elsif ($in{'mode6'} == 0) {
+	# Turning off IPv6 address
+	$virt6 = 0;
+	}
+elsif ($in{'mode6'} == 1 && !$d->{'virt6'}) {
+	# Turning on IPv6 address
+	if ($tmpl->{'ranges6'} ne 'none') {
+		# Try allocating IPv6 from template range
+		($ip6, $netmask6) = &free_ip6_address($tmpl);
+		$ip6 || &text('setup_evirt6alloc');
 		}
-	&check_virt6_clash($in{'ip'}) && &error($text{'newip_eused6'});
+	else {
+		# Validate manually entered IPv6 address
+		&check_ip6address($in{'ip6'}) ||
+			&error($text{'setup_eip6'});
+		$clash = &check_virt6_clash($in{'ip6'});
+		$clash && &error(&text('setup_evirt6clash'));
+		$ip6 = $in{'ip6'};
+		}
+	$virt6 = 1;
+	}
+elsif ($in{'mode6'} == 1 && $d->{'virt6'}) {
+	# Sticking with IPv6 address
+	$ip6 = $d->{'ip6'};
+	$virt6 = 1;
 	}
 
 if ($d->{'web'}) {
@@ -83,7 +101,7 @@ if ($d->{'web'}) {
 
 &ui_print_unbuffered_header(&domain_in($d), $text{'newip_title'}, "");
 
-# Build new domain object
+# Update domain object for IP change
 $oldd = { %$d };
 if (!&can_use_feature("virt")) {
 	# Cannot change anything, so do nothing
@@ -117,11 +135,24 @@ elsif (!$virt && !$d->{'virt'} && $d->{'ip'} ne $ip) {
 	$d->{'ip'} = $ip;
 	}
 
-# XXX fix
-if ($d->{'virt6'} && &supports_ip6()) {
-	$d->{'ip6'} = $in{'ip6'};
+# Update for IPv6 change
+if (!&supports_ip6() || !&can_use_feature("virt6")) {
+	# Not allowed
+	}
+elsif ($virt6 && !$d->{'virt6'}) {
+	# Bringing up IPv6 interface
+	$d->{'ip6'} = $ip6;
+	$d->{'netmask6'} = $netmask6;
+	$d->{'virt6'} = 1;
+	}
+elsif (!$virt6 && $d->{'virt6'}) {
+	# Taking down IPv6 interface
+	$d->{'ip6'} = undef;
+	$d->{'netmask6'} = undef;
+	$d->{'virt6'} = 0;
 	}
 
+# Update for web ports
 if ($d->{'web'}) {
 	$d->{'web_port'} = $in{'port'};
 	$d->{'web_sslport'} = $in{'sslport'};
@@ -148,6 +179,19 @@ elsif (!$d->{'virt'} && $oldd->{'virt'}) {
 elsif ($d->{'virt'} && $oldd->{'virt'}) {
 	# Change IP, if needed
 	&modify_virt($d, $oldd);
+	}
+
+if ($d->{'virt6'} && !$oldd->{'virt6'}) {
+	# Bring up IPv6
+	&setup_virt6($d);
+	}
+elsif (!$d->{'virt6'} && $oldd->{'virt6'}) {
+	# Take down IPv6
+	&delete_virt6($oldd);
+	}
+elsif ($d->{'virt6'} && $oldd->{'virt6'}) {
+	# Change IPv6, if needed
+	&modify_virt6($d, $oldd);
 	}
 
 # Update features and plugins
