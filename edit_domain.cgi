@@ -171,41 +171,6 @@ if (&can_dnsip()) {
 
 print &ui_hidden_table_end("config");
 
-# Start section for IPs
-# XXX delete this
-print &ui_hidden_table_start($text{'form_ipsect'}, "width=100%", 2,
-			     "ipsect", 0, [ "width=30%" ]);
-
-if (&supports_ip6() && !$aliasdom) {
-	if (&can_use_feature("virt")) {
-		# Show field to add or remove an IPv6 address
-		local @ip6opts = ( [ 0, $text{'edit_virt6off'} ] );
-		if ($d->{'virt6'}) {
-			# Already active, so just show
-			push(@ip6opts, [ 1, $text{'edit_virt6using'},
-					 "<tt>$d->{'ip6'}</tt>" ]);
-			}
-		elsif ($tmpl->{'ranges6'} ne 'none') {
-			# Can allocate
-			push(@ip6opts, [ 1, $text{'edit_alloc'} ]);
-			}
-		else {
-			# Manually enter, or already active
-			push(@ip6opts, [ 1, $text{'edit_virt6on'},
-					 &ui_textbox("ip6", $d->{'ip6'}, 30) ]);
-			}
-		print &ui_table_row($text{'edit_ip6'},
-			&ui_radio_table("virt6", $d->{'virt6'} ? 1 : 0,
-					\@ip6opts, 1));
-		}
-	elsif ($d->{'virt6'}) {
-		# Show existing address
-		print &ui_table_row($text{'edit_ip6'}, "<tt>$d->{'ip6'}</tt>");
-		}
-	}
-
-print &ui_hidden_table_end();
-
 # Related servers section
 @aliasdoms = &get_domain_by("alias", $d->{'id'});
 @subdoms = &get_domain_by("parent", $d->{'id'}, "alias", undef);

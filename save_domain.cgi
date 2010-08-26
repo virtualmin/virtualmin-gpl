@@ -98,37 +98,12 @@ if (!$d->{'disabled'}) {
 		}
 	&set_chained_features(\%newdom, $d);
 	}
-if (!$config{'all_namevirtual'} && !$d->{'alias'} && &can_use_feature("virt")) {
-	# XXX delete this
-	if (&supports_ip6()) {
-		$newdom{'virt6'} = $in{'virt6'};
-		}
-	}
 $derr = &virtual_server_depends(\%newdom, undef, $oldd);
 &error($derr) if ($derr);
 $cerr = &virtual_server_clashes(\%newdom, \%check);
 &error($cerr) if ($cerr);
 $lerr = &virtual_server_limits(\%newdom, $oldd);
 &error($lerr) if ($lerr);
-
-if (!$d->{'alias'} && &can_use_feature("virt") && &supports_ip6()) {
-	# Parse IPv6 address inputs
-	if ($in{'virt6'} && !$d->{'virt6'}) {
-		# An IP is being added
-		if ($tmpl->{'ranges'} ne "none") {
-			# Allocate the IP from the template
-			($in{'ip6'}, $netmask6) = &free_ip6_address($tmpl);
-                        $in{'ip6'} || &text('setup_evirt6alloc');
-			}
-		else {
-			# Manually entered
-			&check_ip6address($in{'ip6'}) ||
-				&error($text{'setup_eip6'});
-			$clash = &check_virt6_clash($in{'ip6'});
-			$clash && &error(&text('setup_evirt6clash'));
-			}
-		}
-	}
 
 # Check if any features are being deleted, and if so ask the user if
 # he is sure
@@ -221,23 +196,6 @@ if (&has_home_quotas() && !$d->{'parent'} && &can_edit_quotas($d)) {
 foreach $sd (&get_domain_by("parent", $d->{'id'})) {
 	$sd->{'pass'} = $d->{'pass'};
 	$sd->{'email'} = $d->{'email'};
-	}
-
-if (&can_use_feature("virt") && &supports_ip6()) {
-	if ($in{'virt6'} && !$d->{'virt6'}) {
-		# Need to bring up IPv6 address
-		$d->{'ip6'} = $in{'ip6'};
-		$d->{'netmask6'} = $netmask6;
-		$d->{'virt6'} = 1;
-		&setup_virt6($d);
-		}
-	elsif (!$in{'virt6'} && $d->{'virt6'}) {
-		# Need to take down IPv6 address
-		$d->{'netmask6'} = undef;
-		$d->{'virt6'} = 0;
-		$d->{'virt6already'} = 0;
-		&delete_virt6($oldd);
-		}
 	}
 
 # Update plan if changed

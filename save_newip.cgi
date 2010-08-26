@@ -206,9 +206,6 @@ foreach $f (&list_feature_plugins()) {
 		&try_plugin_call($f, "feature_modify", $d, $oldd);
 		}
 	}
-if ($d->{'virt6'} && &supports_ip6()) {
-	&try_function("virt6", "modify_virt6", $d, $oldd);
-	}
 
 # Save new domain details
 print $text{'save_domain'},"<br>\n";

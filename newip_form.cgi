@@ -52,7 +52,6 @@ elsif (&can_use_feature("virt")) {
 		      grep { !$done{$_->[0]}++ } @canips;
 
 	# Build options for new IP field
-	# XXX show interface name
 	@opts = ( [ 0, $text{'newip_sharedaddr'},
 		    &ui_select("ip", $d->{'ip'}, \@canips) ] );
 	%racl = $d->{'reseller'} ? &get_reseller_acl($d->{'reseller'}) : ();
