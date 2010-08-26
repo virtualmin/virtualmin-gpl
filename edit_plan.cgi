@@ -78,19 +78,22 @@ print &ui_hidden_table_start($text{'plan_header2'}, 'width=100%', 2,
 			     'features', 0, \@tds);
 
 %flimits = map { $_, 1 } split(/\s+/, $plan->{'featurelimits'});
-$ftable = &ui_radio('featurelimits_def',
-		    $plan->{'featurelimits'} ? 0 : 1,
-		    [ [ 1, $text{'tmpl_featauto'} ],
-		      [ 0, $text{'tmpl_below'} ] ])."<br>\n";
+$dis1 = &js_disable_inputs([ "featurelimits" ], [ ], "onClick");
+$dis2 = &js_disable_inputs([ ], [ "featurelimits" ], "onClick");
+$dis = $plan->{'featurelimits'} ? 0 : 1;
+$ftable = &ui_radio('featurelimits_def', $dis,
+		    [ [ 1, $text{'tmpl_featauto'}, $dis1 ],
+		      [ 0, $text{'tmpl_below'}, $dis2 ] ])."<br>\n";
 @grid = ( );
 foreach my $f (@opt_features, "virt") {
 	push(@grid, &ui_checkbox("featurelimits", $f,
 				 $text{'feature_'.$f} || $f,
-				 $flimits{$f}));
+				 $flimits{$f}, undef, $dis));
 	}
 foreach my $f (&list_feature_plugins()) {
 	push(@grid, &ui_checkbox("featurelimits", $f,
-			 &plugin_call($f, "feature_name"), $flimits{$f}));
+			 &plugin_call($f, "feature_name"), $flimits{$f},
+			 undef, $dis));
 	}
 $ftable .= &ui_grid_table(\@grid, 2).
 	   &ui_links_row([ &select_all_link("featurelimits"),
@@ -106,19 +109,21 @@ print &ui_hidden_table_start($text{'plan_header3'}, 'width=100%', 2,
 
 # Edit capabilities
 %caps = map { $_, 1 } split(/\s+/, $plan->{'capabilities'});
-if (!$plan->{'capabilities'}) {
+$dis1 = &js_disable_inputs([ "capabilities" ], [ ], "onClick");
+$dis2 = &js_disable_inputs([ ], [ "capabilities" ], "onClick");
+$dis = $plan->{'capabilities'} ? 0 : 1;
+if ($dis) {
 	%caps = map { $_, 1 }
 		    &list_automatic_capabilities($plan->{'domslimit'});
 	}
-$etable = &ui_radio('capabilities_def',
-		    $plan->{'capabilities'} ? 0 : 1,
-		    [ [ 1, $text{'tmpl_capauto'} ],
-		      [ 0, $text{'tmpl_below'} ] ])."<br>\n";
+$etable = &ui_radio('capabilities_def', $dis,
+		    [ [ 1, $text{'tmpl_capauto'}, $dis1 ],
+		      [ 0, $text{'tmpl_below'}, $dis2 ] ])."<br>\n";
 @grid = ( );
 foreach my $ed (@edit_limits) {
 	push(@grid, &ui_checkbox("capabilities", $ed,
 				 $text{'limits_edit_'.$ed} || $ed,
-				 $caps{$ed}));
+				 $caps{$ed}, undef, $dis));
 	}
 $etable .= &ui_grid_table(\@grid, 2).
 	   &ui_links_row([ &select_all_link("capabilities"),
@@ -128,10 +133,14 @@ print &ui_table_row(&hlink($text{'tmpl_capabilities'},
 
 # Allowed scripts
 if (defined(&list_scripts)) {
+	@sfields = ( "scripts_opts", "scripts_vals",
+		     "scripts_add", "scripts_remove" );
+	$dis1 = &js_disable_inputs(\@sfields, [ ], "onClick");
+	$dis2 = &js_disable_inputs([ ], \@sfields, "onClick");
 	$stable = &ui_radio('scripts_def',
 			    $plan->{'scripts'} ? 0 : 1,
-			    [ [ 1, $text{'plan_scriptsall'} ],
-			      [ 0, $text{'tmpl_below'} ] ])."<br>\n";
+			    [ [ 1, $text{'plan_scriptsall'}, $dis1 ],
+			      [ 0, $text{'tmpl_below'}, $dis2 ] ])."<br>\n";
 	@scripts = &list_scripts();
 	foreach $s (@scripts) {
 		$script = &get_script($s);
@@ -143,7 +152,8 @@ if (defined(&list_scripts)) {
 		      $plan->{'scripts'} ? split(/\s+/, $plan->{'scripts'})
 					 : @scripts ],
 		[ map { [ $_, $scriptname{$_} ] } @scripts ],
-		10, 1, 0, $text{'plan_scriptsopts'}, $text{'plan_scriptssel'});
+		10, 1, !$plan->{'scripts'},
+		$text{'plan_scriptsopts'}, $text{'plan_scriptssel'});
 	print &ui_table_row(&hlink($text{'plan_scripts'}, "plan_scripts"),
 			    $stable);
 	}
@@ -156,19 +166,23 @@ if ($canplans == 2 && @resels) {
 	print &ui_hidden_table_start($text{'plan_header4'}, 'width=100%', 2,
 				     'resellers', 0, \@tds);
 
+	$dis1 = &js_disable_inputs([ "resellers" ], [ ], "onClick");
+	$dis2 = &js_disable_inputs([ ], [ "resellers" ], "onClick");
+	$mode = $plan->{'resellers'} eq "" ? 1 : 
+		$plan->{'resellers'} eq "none" ? 2 : 0;
 	print &ui_table_row(
 		&hlink($text{'plan_resellers'}, "plan_resellers"),
-		&ui_radio("resellers_def", $plan->{'resellers'} eq "" ? 1 :
-					 $plan->{'resellers'} eq "none" ? 2 : 0,
-			[ [ 1, $text{'tmpl_resellers_all'} ],
-			  [ 2, $text{'tmpl_resellers_none'} ],
-			  [ 0, $text{'tmpl_resellers_sel'} ] ])."<br>\n".
+		&ui_radio("resellers_def", $mode,
+			[ [ 1, $text{'tmpl_resellers_all'}, $dis1 ],
+			  [ 2, $text{'tmpl_resellers_none'}, $dis1 ],
+			  [ 0, $text{'tmpl_resellers_sel'}, $dis2 ] ])."<br>\n".
 		&ui_select("resellers", [ split(/\s+/, $plan->{'resellers'}) ],
 			 [ map { [ $_->{'name'},
 				   $_->{'name'}.
 				    ($_->{'acl'}->{'desc'} ?
 					" ($_->{'acl'}->{'desc'})" : "") ] }
-			       @resels ], 5, 1));
+			       @resels ], 5, 1, 0,
+			 $mode != 0));
 
 	print &ui_hidden_table_end();
 	}
