@@ -3044,7 +3044,7 @@ newip_resel=Shared by customers of reseller $1
 newip_dom=Updating IP address in virtual server $1
 newip_dom2=Updating IP address in alias server $1
 newip_sharedaddr=Shared address
-newip_virtaddr=Private address
+newip_virtaddr=Keep private address
 newip_virtaddr2=Allocate private address
 newip_virtaddr3=Use private address
 

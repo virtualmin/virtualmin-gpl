@@ -29,46 +29,55 @@ if ($d->{'virt'}) {
 			    "<tt>$d->{'iface'}</tt>");
 	}
 
-# Build list of possible shared IPs
-@canips = ( );
-push(@canips, [ &get_default_ip(), $text{'newip_shared'} ]);
-$rd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
-if ($rd->{'reseller'}) {
-	push(@canips, [ &get_default_ip($rd->{'reseller'}),
-		&text('newip_resel', $rd->{'reseller'}) ]);
+if ($config{'all_namevirtual'} && &can_use_feature("virt")) {
+	# Always name-based, but IP can be changed
+	print &ui_table_row($text{'newips_new'},
+		&ui_textbox("ip", $d->{'ip'}, 15));
 	}
-push(@canips, map { [ $_, $text{'newip_shared2'} ] }
-		  &list_shared_ips());
-push(@canips, [ $d->{'ip'}, $text{'newip_current'} ]);
-@canips = map { [ $_->[0], "$_->[0] ($_->[1])" ] }
-	      grep { !$done{$_->[0]}++ } @canips;
+elsif (&can_use_feature("virt")) {
+	# Build list of possible shared IPs
+	@canips = ( );
+	push(@canips, [ &get_default_ip(), $text{'newip_shared'} ]);
+	$rd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+	if ($rd->{'reseller'}) {
+		push(@canips, [ &get_default_ip($rd->{'reseller'}),
+			&text('newip_resel', $rd->{'reseller'}) ]);
+		}
+	push(@canips, map { [ $_, $text{'newip_shared2'} ] }
+			  &list_shared_ips());
+	if (!$d->{'virt'}) {
+		push(@canips, [ $d->{'ip'}, $text{'newip_current'} ]);
+		}
+	@canips = map { [ $_->[0], "$_->[0] ($_->[1])" ] }
+		      grep { !$done{$_->[0]}++ } @canips;
 
-# Build options for new IP field
-# XXX what if need to enter private IP?
-# XXX checkbox for already up?
-# XXX what about "virt" access option?
-# XXX all_namevirtual ?
-@opts = ( [ 0, $text{'newip_sharedaddr'},
-	    &ui_select("ip", $d->{'ip'}, \@canips) ] );
-%racl = $d->{'reseller'} ? &get_reseller_acl($d->{'reseller'}) : ();
-if ($d->{'virt'}) {
-	# Already got a private IP
-	push(@opts, [ 1, $text{'newip_virtaddr'} ] );
-	}
-elsif ($tmpl->{'ranges'} ne "none" || $racl{'ranges'}) {
-	# IP can be alllocated
-	push(@opts, [ 1, $text{'newip_virtaddr2'} ]);
-	}
-else {
-	# User must enter IP, but has option to use one that is already active
-	push(@opts, [ 1, $text{'newip_virtaddr3'},
-		      &ui_textbox("virt", undef, 15)." ".
-		      &ui_checkbox("virtalready", 1,
-				   $text{'form_virtalready'}) ]);
-	}
+	# Build options for new IP field
+	# XXX what if need to enter private IP?
+	# XXX checkbox for already up?
+	# XXX all_namevirtual ?
+	@opts = ( [ 0, $text{'newip_sharedaddr'},
+		    &ui_select("ip", $d->{'ip'}, \@canips) ] );
+	%racl = $d->{'reseller'} ? &get_reseller_acl($d->{'reseller'}) : ();
+	if ($d->{'virt'}) {
+		# Already got a private IP
+		push(@opts, [ 1, $text{'newip_virtaddr'} ] );
+		}
+	elsif ($tmpl->{'ranges'} ne "none" || $racl{'ranges'}) {
+		# IP can be alllocated
+		push(@opts, [ 1, $text{'newip_virtaddr2'} ]);
+		}
+	else {
+		# User must enter IP, but has option to use one that is already active
+		push(@opts, [ 1, $text{'newip_virtaddr3'},
+			      &ui_textbox("virt", undef, 15)." ".
+			      &ui_checkbox("virtalready", 1,
+					   $text{'form_virtalready'}) ]);
+		}
 
-print &ui_table_row($text{'newips_new'},
+	# Show new IP field
+	print &ui_table_row($text{'newips_new'},
 		&ui_radio_table("mode", $d->{'virt'} ? 1 : 0, \@opts, 1));
+	}
 
 # XXX change too
 if ($d->{'virt6'} && &supports_ip6()) {

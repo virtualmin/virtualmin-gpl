@@ -9,9 +9,11 @@ $tmpl = &get_template($d->{'template'});
 
 # Validate inputs
 &error_setup($text{'newip_err'});
-if ($in{'mode'} == 0) {
+if (!&can_use_feature("virt")) {
+	# Cannot change anything, so no validation needed
+	}
+elsif ($in{'mode'} == 0 || $config{'all_namevirtual'}) {
 	# Switching to shared address
-	# XXX what checking is needed?
 	$ip = $in{'ip'};
 	&check_ipaddress($ip) || &error($text{'setup_eip'});
 	$virt = 0;
@@ -83,7 +85,14 @@ if ($d->{'web'}) {
 
 # Build new domain object
 $oldd = { %$d };
-if ($virt && !$d->{'virt'}) {
+if (!&can_use_feature("virt")) {
+	# Cannot change anything, so do nothing
+	}
+elsif ($config{'all_namevirtual'}) {
+	# Can only set IP
+	$d->{'ip'} = $ip;
+	}
+elsif ($virt && !$d->{'virt'}) {
 	# Bringing up IP
 	$d->{'ip'} = $ip;
 	$d->{'netmask'} = $netmask;
@@ -108,6 +117,7 @@ elsif (!$virt && !$d->{'virt'} && $d->{'ip'} ne $ip) {
 	$d->{'ip'} = $ip;
 	}
 
+# XXX fix
 if ($d->{'virt6'} && &supports_ip6()) {
 	$d->{'ip6'} = $in{'ip6'};
 	}
@@ -133,7 +143,7 @@ if ($d->{'virt'} && !$oldd->{'virt'}) {
 	}
 elsif (!$d->{'virt'} && $oldd->{'virt'}) {
 	# Take down IP
-	&delete_virt($d);
+	&delete_virt($oldd);
 	}
 elsif ($d->{'virt'} && $oldd->{'virt'}) {
 	# Change IP, if needed
@@ -158,7 +168,7 @@ if ($d->{'virt6'} && &supports_ip6()) {
 
 # Save new domain details
 print $text{'save_domain'},"<br>\n";
-&save_domain($sd);
+&save_domain($d);
 print $text{'setup_done'},"<p>\n";
 
 &$outdent_print();
