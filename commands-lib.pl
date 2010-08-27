@@ -188,7 +188,7 @@ if ($bash) {
 WEBMIN_CONFIG=$config_directory
 WEBMIN_VAR=$var_directory
 PERLLIB=$root_directory
-export WEBMIN_CONFIG WEBMIN_VAR
+export WEBMIN_CONFIG WEBMIN_VAR PERLLIB
 cd $module_root_directory
 id -a | grep uid=0 >/dev/null
 if [ "\$?" != 0 ]; then
