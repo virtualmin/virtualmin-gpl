@@ -7,6 +7,35 @@ $d = &get_domain($in{'dom'});
 $tmpl = &get_template($d->{'template'});
 &can_change_ip($d) && &can_edit_domain($d) || &error($text{'newip_ecannot'});
 
+if ($in{'convert'}) {
+	# Special mode - adding a new shared IP
+	$d->{'virt'} && &can_edit_templates() ||
+		&error($text{'newip_ecannot'});
+
+	# Turn off virt mode for the domain
+	$d->{'virt'} = 0;
+	$d->{'name'} = 1;
+	&set_domain_envs($d, "MODIFY_DOMAIN", $d);
+	$merr = &making_changes();
+	&error($merr) if ($merr);
+	&reset_domain_envs($d);
+	&save_domain($d);
+	&set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
+	&made_changes();
+	&reset_domain_envs($d);
+
+	# Add to shared IPs list
+	@ips = &list_shared_ips();
+	@ips = &unique(@ips, $d->{'ip'});
+	&lock_file($module_config_file);
+	&save_shared_ips(@ips);
+	&unlock_file($module_config_file);
+
+	&webmin_log("newipshared", "domain", $d->{'dom'}, $d);
+	&redirect("newip_form.cgi?dom=$d->{'id'}");
+	return;
+	}
+
 # Validate inputs
 &error_setup($text{'newip_err'});
 if (!&can_use_feature("virt")) {

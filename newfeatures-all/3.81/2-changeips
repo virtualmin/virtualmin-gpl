@@ -1,0 +1,6 @@
+desc=Moved IP Address Options
+html=Moved all IP-address related options from the Edit Virtual Server page to the Change IP Address page, where they fit in better and are easier to understand.
+master=1
+reseller=1
+domain=1
+link=newip_form.cgi?dom=${ID}

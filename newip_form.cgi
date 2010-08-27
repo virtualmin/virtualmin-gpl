@@ -121,6 +121,9 @@ if ($d->{'web'}) {
 	}
 
 print &ui_table_end();
-print &ui_form_end([ [ "ok", $text{'newips_ok'} ] ]);
+print &ui_form_end([ [ "ok", $text{'newips_ok'} ],
+		     $d->{'virt'} && &can_edit_templates() ?
+			( [ "convert", $text{'newip_convert'} ] ) : ( )
+		   ]);
 
 &ui_print_footer(&domain_footer_link($d));

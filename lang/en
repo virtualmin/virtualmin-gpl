@@ -1796,6 +1796,7 @@ log_limits_domain=Changed owner limits for server $1
 log_res_domain=Changed resource limits for server $1
 log_pass_domain=Changed password for server $1
 log_newip_domain=Changed IP address for server $1
+log_newipshared_domain=Converted IP address for server $1 to shared
 log_style_domain=Applied new website content style to server $1
 log_exclude_domain=Updated excluded backup directories for server $1
 log_check=Re-checked configuration
@@ -3052,6 +3053,7 @@ newip_sharedaddr=Shared address
 newip_virtaddr=Keep private address
 newip_virtaddr2=Allocate private address
 newip_virtaddr3=Use private address
+newip_convert=Convert Private Address to Shared
 
 newip_new=New IP address
 newip_err=Failed to change IP address

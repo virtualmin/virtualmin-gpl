@@ -50,10 +50,6 @@
 
  - Move demo to srv2
 
- - IP editing too complex
-	- Option to convert a private IP to shared
-	- What about alias domains?
-
  - Git repo module
 	- http://www.virtualmin.com/node/11548
 	- http://github.com/sitaramc/gitolite
