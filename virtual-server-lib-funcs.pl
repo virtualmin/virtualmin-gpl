@@ -3301,6 +3301,14 @@ if ($nice_sizes) {
 $hash{'mysql_pass'} ||= '';
 $hash{'postgres_pass'} ||= '';
 
+# Setup MySQL and PostgreSQL usernames if not set yet
+if ($d->{'mysql'} && !$hash{'mysql_user'}) {
+	$hash{'mysql_user'} = &mysql_user($d);
+	}
+if ($d->{'postgres'} && !$hash{'postgres_user'}) {
+	$hash{'postgres_user'} = &postgres_user($d);
+	}
+
 return %hash;
 }
 
