@@ -1,0 +1,4 @@
+desc=Re-send Signup Email Feature
+html=Ported the feature to re-send the signup email for a domain from the Pro version of Virtualmin. This simply re-generates the email that the domain owner gets when a virtual server is initially created.
+master=1
+link=reemail.cgi?dom=${ID}
