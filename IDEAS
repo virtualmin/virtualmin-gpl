@@ -53,3 +53,4 @@
  - Git repo module
 	- http://www.virtualmin.com/node/11548
 	- http://github.com/sitaramc/gitolite
+	- http://www.kernel.org/pub/software/scm/git/docs/howto/setup-git-server-over-http.txt
