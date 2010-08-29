@@ -213,7 +213,7 @@ local ($in) = @_;
 &require_mysql();
 if ($in->{'mysql'}) {
 	# Enable and start MySQL, if possible
-	if (!&foreign_installed("mysql")) {
+	if (!&foreign_installed("mysql", 0)) {
 		return $text{'wizard_emysqlinst'};
 		}
 	$config{'mysql'} ||= 1;
@@ -223,6 +223,11 @@ if ($in->{'mysql'}) {
 		}
 	if (&init::action_status("mysql")) {
 		&init::enable_at_boot("mysql");
+		}
+
+	# Make sure MySQL can be used
+	if (&foreign_installed("mysql", 1) != 2) {
+		return &text('wizard_emysqlconf', '../mysql/');
 		}
 	}
 else {
@@ -235,7 +240,7 @@ else {
 &require_postgres();
 if ($in->{'postgres'}) {
 	# Enable and start PostgreSQL
-	if (!&foreign_installed("postgresql")) {
+	if (!&foreign_installed("postgresql", 0)) {
 		return $text{'wizard_epostgresinst'};
 		}
 	$config{'postgres'} ||= 1;
@@ -245,6 +250,11 @@ if ($in->{'postgres'}) {
 		}
 	if (&init::action_status("postgresql")) {
 		&init::enable_at_boot("postgresql");
+		}
+
+	# Make sure PostgreSQL can be used
+	if (&foreign_installed("postgresql", 1) != 2) {
+		return &text('wizard_epostgresconf', '../postgresql/');
 		}
 	}
 else {
