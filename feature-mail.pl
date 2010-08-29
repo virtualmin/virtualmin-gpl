@@ -498,6 +498,7 @@ if ($_[1]->{'alias'} && !$_[0]->{'alias'}) {
 # as part of the domain's directory.
 # No need to do this for VPOPMail users.
 # Also, any users in the user@domain name format need to be renamed
+local %renamed = ( $_[1]->{'user'} => $_[0]->{'user'} );
 if (($_[0]->{'home'} ne $_[1]->{'home'} ||
      $_[0]->{'dom'} ne $_[1]->{'dom'} ||
      $_[0]->{'gid'} != $_[1]->{'gid'} ||
@@ -569,6 +570,9 @@ if (($_[0]->{'home'} ne $_[1]->{'home'} ||
 		&modify_user($u, \%oldu, $_[0], 1);
 		if (!$u->{'nomailfile'} && $_[0]->{'mail'}) {
 			&rename_mail_file($u, \%oldu);
+			}
+		if ($oldu{'user'} ne $u->{'user'}) {
+			$renamed{$oldu{'user'}} = $u->{'user'};
 			}
 		}
 	&$second_print($text{'setup_done'});
@@ -667,6 +671,12 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 						# For admin user, who has
 						# changed name
 						$u = $_[0]->{'user'};
+						}
+					if ($renamed{$g->{'from'}}) {
+						# Username has been changed by
+						# the rename process
+						$g->{'from'} =
+						  $renamed{$g->{'from'}};
 						}
 					$g->{'to'} = "$u\@$_[0]->{'dom'}";
 					&modify_generic($g, $oldg);
