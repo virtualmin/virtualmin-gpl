@@ -461,6 +461,9 @@ if ($_[0]->{'web'}) {
 	$eloglink = readlink($elog);
 	}
 
+# Turn off quotas for the domain, to prevent the import failing
+&disable_quotas($_[0]);
+
 local $out;
 local $cf = &compression_format($_[1]);
 local $q = quotemeta($_[1]);
@@ -482,7 +485,9 @@ else {
 	#	}
 	&execute_command("cd $qh && $comp $q | $tarcmd", undef, \$out, \$out);
 	}
-if ($?) {
+local $ex = $?;
+&enable_quotas($_[0]);
+if ($ex) {
 	# Errors about utime in the tar extract are ignored when running
 	# as the domain owner
 	&$second_print(&text('backup_dirtarfailed', "<pre>$out</pre>"));
