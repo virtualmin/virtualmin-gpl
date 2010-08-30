@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Drupal script installer to versions 5.23 and 6.19, phpMyAdmin to 2.11.10.1 and 3.3.6, CMS Made Simple to 1.8.2, Z-push to 1.4.1, Webcalendar to 1.2.3, ZenCart to 1.3.9f, SugarCRM to 6.0.1, Zikula to 1.2.4, Redmine to 1.0.1, Piwik to 0.9.9, and PHProjekt to 6.0.3.
+html=Updated the Drupal script installer to versions 5.23 and 6.19, phpMyAdmin to 2.11.10.1 and 3.3.6, CMS Made Simple to 1.8.2, Z-push to 1.4.1, Webcalendar to 1.2.3, ZenCart to 1.3.9f, SugarCRM to 6.0.1, Zikula to 1.2.4, Redmine to 1.0.1, Piwik to 1.0, and PHProjekt to 6.0.3.
 master=1
 reseller=1
 domain=1
