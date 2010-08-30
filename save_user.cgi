@@ -80,6 +80,7 @@ elsif ($in{'delete'}) {
 			}
 
 		$user->{'dom'} = $d->{'dom'};
+		&set_all_null_print();
 		&run_post_actions();
 		&release_lock_unix($d);
 		&release_lock_mail($d);
@@ -681,6 +682,7 @@ else {
 		&write_simple_autoreply($d, $simple);
 		}
 
+	&set_all_null_print();
 	&run_post_actions();
 	$user->{'dom'} = $d->{'dom'};
 	&release_lock_unix($d);
