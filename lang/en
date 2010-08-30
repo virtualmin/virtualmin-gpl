@@ -5207,6 +5207,7 @@ redirect_dir=Directory on this system
 redirect_regexp=Include sub-paths in redirect?
 redirect_err=Failed to save redirect
 redirect_epath=Missing or invalid source URL path
+redirect_epath2=Domain in source URL is not $1
 redirect_eurl=Missing or invalid destination URL
 redirect_edir=Missing or non-absolute destination directory
 redirect_edir2=Destination directory must be under $1

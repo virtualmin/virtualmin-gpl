@@ -22,8 +22,20 @@ if ($in{'delete'}) {
 	}
 else {
 	# Validate inputs
-	$in{'path'} =~ /^\/\S*$/ || &error($text{'redirect_epath'});
-	$r->{'path'} = $in{'path'};
+	if ($in{'path'} =~ /^(http|https):\/\/([^\/]+)(\/\S*)$/) {
+		# URL, check the domain and save the path
+		lc($2) eq $d->{'dom'} ||
+		   lc($2) eq "www.".$d->{'dom'} ||
+		     &error(&text('redirect_epath2', $d->{'dom'}));
+		$r->{'path'} = $3;
+		}
+	elsif ($in{'path'} =~ /^\/\S*$/) {
+		# Just a path
+		$r->{'path'} = $in{'path'};
+		}
+	else {
+		&error($text{'redirect_epath'});
+		}
 	if ($in{'mode'} == 0) {
 		$in{'url'} =~ /^(http|https):\/\/\S+$/ ||
 			&error($text{'redirect_eurl'});
