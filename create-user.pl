@@ -335,6 +335,8 @@ if (!$nocreationmail) {
 	@erv = &send_user_email($d, $user, undef, 0);
 	}
 
+&set_all_null_print();
+&run_post_actions();
 &release_lock_unix($d);
 &release_lock_mail($d);
 &virtualmin_api_log(\@OLDARGV, $d);

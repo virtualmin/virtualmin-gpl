@@ -480,6 +480,7 @@ if ($config{'other_users'}) {
 		}
 	}
 
+&set_all_null_print();
 &run_post_actions();
 &release_lock_mail($d);
 &release_lock_unix($d);
