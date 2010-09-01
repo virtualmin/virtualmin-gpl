@@ -51,9 +51,7 @@
  - Move demo to srv2
 
  - Git repo module
-	- Make /git go to repo browser
-	- Make sure gitweb is password-protected
-	- Link from virtualmin to gitweb
+	- Validate again that instructions work
 	- Release to repos
 	- Documentation
 	- http://www.virtualmin.com/node/11548
