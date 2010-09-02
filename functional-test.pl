@@ -3055,6 +3055,33 @@ $web_tests = [
 	  'grep' => 'Test web page',
 	},
 
+	# Create sub-directory
+	{ 'command' => 'mkdir /home/'.$test_domain_user.'/public_html/subby' },
+	{ 'command' => 'echo foo >>/home/'.$test_domain_user.'/public_html/subby/index.html' },
+	{ 'command' => 'chown -R '.$test_domain_user.' /home/'.$test_domain_user.'/public_html/subby' },
+
+	# Change HTML directory to sub-directory
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'document-dir', 'public_html/subby' ] ],
+	},
+
+	# Test wget for sub-directory
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'foo',
+	},
+
+	# Change HTML directory back
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'document-dir', 'public_html' ] ],
+	},
+
+	# Test wget to make sure sub-directory is gone
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test web page',
+	},
+
 	# Get rid of the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
