@@ -1238,6 +1238,6 @@ S3 backups can now be use the new reduced redundancy storage option, which is ch
 Internationalized domain names are no longer converted to UTF-8 for output from API commands, to avoid the perl "wide character in print" warning.
 The interval between bandwidth monitoring cron job runs can now be configured.
 ---- Changes since 3.80 ----
-Updated the Drupal script installer to versions 5.23 and 6.19, phpMyAdmin to 2.11.10.1 and 3.3.6, CMS Made Simple to 1.8.2, Z-push to 1.4.1, Webcalendar to 1.2.3, ZenCart to 1.3.9f, SugarCRM to 6.0.1, Zikula to 1.2.4, Redmine to 1.0.1, Piwik to 1.0, Zenphoto to 1.3.1.1, phpMyFAQ to 2.6.8, and PHProjekt to 6.0.3.
+Updated the Drupal script installer to versions 5.23 and 6.19, phpMyAdmin to 2.11.10.1 and 3.3.6, CMS Made Simple to 1.8.2, Z-push to 1.4.1, Webcalendar to 1.2.3, ZenCart to 1.3.9f, SugarCRM to 6.0.1, Zikula to 1.2.4, Redmine to 1.0.1, Piwik to 1.0, Zenphoto to 1.3.1.2, phpMyFAQ to 2.6.8, and PHProjekt to 6.0.3.
 Parallel bzip2 can now be used for backups if the pbzip2 command is installed, via a new option on the Virtualmin Configuration page.
 Moved all IP-address related options from the Edit Virtual Server page to the Change IP Address page, where they fit in better and are easier to understand.
