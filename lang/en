@@ -4047,7 +4047,7 @@ amass_title=Batch Create Aliases
 amass_header=Create multiple email aliases from batch file
 amass_help=This page allows you to create multiple email aliases at once from a text file, in the following format (read the help for this page for more):
 amass_help2=If you just want to create a single alias, <a href='$1'>click here</a> instead.
-amass_format=mailbox:comment:destination:[destination...]
+amass_format=mailbox:[comment]:destination[:destination...]
 amass_err=Failed to create aliases
 amass_doing=Creating aliases from $1 ..
 amass_complete=.. done ($1 created, $2 errors).
