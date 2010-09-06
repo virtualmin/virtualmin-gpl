@@ -50,8 +50,7 @@
 
  - Move demo to srv2
 
- - Git repo module
-	- Documentation
-	- Release to repos
-	- http://www.virtualmin.com/node/11548
-	- http://www.kernel.org/pub/software/scm/git/docs/howto/setup-git-server-over-http.txt
+ - DKIM support
+	- https://www.virtualmin.com/node/15457
+
+ - Rails 3.0.0 installer
