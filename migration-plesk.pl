@@ -155,7 +155,8 @@ if ($domain->{'phosting'}->{'webalizer'}) {
 	}
 
 # Check for MySQL databases
-local $databases = $domain->{'phosting'}->{'sapp-installed'}->{'database'};
+local $sapp = $domain->{'phosting'}->{'sapp-installed'};
+local $databases = ref($sapp) eq 'HASH' ? $sapp->{'database'} : undef;
 if (!$databases) {
         $databases = $domain->{'database'};
         }
