@@ -4031,8 +4031,10 @@ local ($tmpl) = @_;
 # Save mail settings
 $tmpl->{'mail_on'} = $in{'mail_mode'} == 0 ? "none" :
 		     $in{'mail_mode'} == 1 ? "" : "yes";
-$in{'mail'} =~ s/\r//g;
-$tmpl->{'mail'} = $in{'mail'};
+if ($tmpl->{'mail_on'} eq 'yes') {
+	$in{'mail'} =~ s/\r//g;
+	$tmpl->{'mail'} = $in{'mail'};
+	}
 $tmpl->{'mail_subject'} = $in{'subject'};
 $tmpl->{'mail_cc'} = $in{'cc'};
 $tmpl->{'mail_bcc'} = $in{'bcc'};
