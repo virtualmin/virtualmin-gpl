@@ -145,7 +145,7 @@ elsif ($cmd eq "validate-domains" && $module_name eq "virtual-server") {
 		}
 	$data->{'data'} = \@data;
 	}
-elsif ($cmd eq "get-ssl") {
+elsif ($cmd eq "get-ssl" || $cmd eq "stat-file") {
 	# Parse attributes and values
 	my @lines = split(/\r?\n/, $out);
 	foreach my $l (@lines) {
