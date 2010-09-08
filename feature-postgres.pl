@@ -141,7 +141,8 @@ elsif ($_[0]->{'parent'} && !$_[1]->{'parent'}) {
 		}
 	&$second_print($text{'setup_done'});
 	}
-elsif ($user ne $olduser && !$_[0]->{'parent'}) {
+elsif ($user ne $olduser && !$_[0]->{'parent'} &&
+       !$tmpl->{'mysql_nouser'}) {
 	# Rename PostgreSQL user ..
 	&$first_print($text{'save_postgresuser'});
 	if (&postgres_user_exists($_[1])) {

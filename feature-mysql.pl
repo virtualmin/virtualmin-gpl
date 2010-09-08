@@ -72,7 +72,7 @@ else {
 
 # Save the initial password
 if ($tmpl->{'mysql_nopass'}) {
-	&set_mysql_pass(&mysql_pass($d, 1));
+	&set_mysql_pass($d, &mysql_pass($d, 1));
 	}
 }
 
@@ -154,7 +154,6 @@ local $rv = 0;
 local $changeduser = $d->{'user'} eq $oldd->{'user'} ? 0 : 1;
 local $olduser = &mysql_user($oldd);
 local $user = &mysql_user($d, $changeduser);
-$d->{'mysql_user'} = $user;
 local $oldencpass = &encrypted_mysql_pass($oldd);
 local $encpass = &encrypted_mysql_pass($d);
 local $tmpl = &get_template($d->{'template'});
@@ -215,11 +214,13 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 	&$second_print($text{'setup_done'});
 	$rv++;
 	}
-elsif ($user ne $olduser && !$d->{'parent'}) {
+elsif ($user ne $olduser && !$d->{'parent'} &&
+       !$tmpl->{'mysql_nouser'}) {
 	# MySQL user in a parent domain has changed, perhaps due to username
 	# change. Need to update user in DB and all db entries
 	&$first_print($text{'save_mysqluser'});
 	if (&mysql_user_exists($oldd)) {
+		$d->{'mysql_user'} = $user;
 		local $pfunc = sub {
 			&mysql::execute_sql_logged($mysql::master_db, "update user set user = '$user' where user = '$olduser'");
 			&mysql::execute_sql_logged($mysql::master_db, "update db set user = '$user' where user = '$olduser'");
@@ -1060,6 +1061,12 @@ print &ui_table_row(&hlink($text{'tmpl_mysql_mkdb'}, "template_mysql_mkdb"),
 		[ [ 1, $text{'yes'} ], [ 0, $text{'no'} ],
 		  ($tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ) )]));
 
+# Update MySQL username to match domain?
+print &ui_table_row(&hlink($text{'tmpl_mysql_nouser'}, "template_mysql_nouser"),
+	&ui_radio("mysql_nouser", $tmpl->{'mysql_nouser'},
+		[ [ 0, $text{'yes'} ], [ 1, $text{'no'} ],
+		  ($tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ) )]));
+
 # Update MySQL password to match domain?
 print &ui_table_row(&hlink($text{'tmpl_mysql_nopass'}, "template_mysql_nopass"),
 	&ui_radio("mysql_nopass", $tmpl->{'mysql_nopass'},
@@ -1148,6 +1155,7 @@ else {
 	}
 $tmpl->{'mysql_mkdb'} = $in{'mysql_mkdb'};
 $tmpl->{'mysql_nopass'} = $in{'mysql_nopass'};
+$tmpl->{'mysql_nouser'} = $in{'mysql_nouser'};
 if (-d $mysql::config{'mysql_data'}) {
 	$tmpl->{'mysql_chgrp'} = $in{'mysql_chgrp'};
 	}

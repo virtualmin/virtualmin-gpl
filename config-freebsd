@@ -104,6 +104,7 @@ vpopmail_auto=/usr/local/bin/autorespond
 bw_ftplog_rotated=1
 mysql_mkdb=1
 mysql_nopass=0
+mysql_nouser=0
 show_quotas=0
 spam=2
 clamscan_cmd=clamscan

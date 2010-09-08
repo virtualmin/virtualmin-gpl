@@ -7169,6 +7169,7 @@ push(@rv, { 'id' => 0,
 	    'mysql_hosts' => $config{'mysql_hosts'} || "none",
 	    'mysql_mkdb' => $config{'mysql_mkdb'},
 	    'mysql_nopass' => $config{'mysql_nopass'},
+	    'mysql_nouser' => $config{'mysql_nouser'},
 	    'mysql_chgrp' => $config{'mysql_chgrp'},
 	    'mysql_charset' => $config{'mysql_charset'},
 	    'mysql_collate' => $config{'mysql_collate'},
@@ -7452,6 +7453,7 @@ if ($tmpl->{'id'} == 0) {
 					"" : $tmpl->{'mysql_suffix'};
 	$config{'mysql_mkdb'} = $tmpl->{'mysql_mkdb'};
 	$config{'mysql_nopass'} = $tmpl->{'mysql_nopass'};
+	$config{'mysql_nouser'} = $tmpl->{'mysql_nouser'};
 	$config{'mysql_chgrp'} = $tmpl->{'mysql_chgrp'};
 	$config{'mysql_charset'} = $tmpl->{'mysql_charset'};
 	$config{'mysql_collate'} = $tmpl->{'mysql_collate'};
@@ -7605,7 +7607,7 @@ if (!$tmpl->{'default'}) {
 		    "dbslimit", "aliaslimit", "bwlimit", "mongrelslimit","skel",
 		    "mysql_hosts", "mysql_mkdb", "mysql_suffix", "mysql_chgrp",
 		    "mysql_nopass", "mysql_wild", "mysql_charset", "mysql",
-		    "postgres_encoding", "webalizer",
+		    "mysql_nouser", "postgres_encoding", "webalizer",
 		    "dom_aliases", "ranges", "ranges6",
 		    "mailgroup", "ftpgroup", "dbgroup",
 		    "othergroups", "defmquota", "quotatype", "append_style",
