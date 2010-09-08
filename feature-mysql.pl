@@ -149,14 +149,15 @@ local $dfunc = sub {
 sub modify_mysql
 {
 local ($d, $oldd) = @_;
+local $tmpl = &get_template($d->{'template'});
 &require_mysql();
 local $rv = 0;
-local $changeduser = $d->{'user'} eq $oldd->{'user'} ? 0 : 1;
+local $changeduser = $d->{'user'} ne $oldd->{'user'} &&
+		     !$tmpl->{'mysql_nouser'} ? 1 : 0;
 local $olduser = &mysql_user($oldd);
 local $user = &mysql_user($d, $changeduser);
 local $oldencpass = &encrypted_mysql_pass($oldd);
 local $encpass = &encrypted_mysql_pass($d);
-local $tmpl = &get_template($d->{'template'});
 if ($encpass ne $oldencpass && !$d->{'parent'} &&
     (!$tmpl->{'mysql_nopass'} || $d->{'mysql_pass'})) {
 	# Change MySQL password
@@ -214,8 +215,7 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 	&$second_print($text{'setup_done'});
 	$rv++;
 	}
-elsif ($user ne $olduser && !$d->{'parent'} &&
-       !$tmpl->{'mysql_nouser'}) {
+elsif ($user ne $olduser && !$d->{'parent'}) {
 	# MySQL user in a parent domain has changed, perhaps due to username
 	# change. Need to update user in DB and all db entries
 	&$first_print($text{'save_mysqluser'});

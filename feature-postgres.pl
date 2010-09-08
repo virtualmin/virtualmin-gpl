@@ -94,10 +94,11 @@ return !$_[1] && &postgresql::get_postgresql_version() >= 7 ? "'$pass'" : $pass;
 sub modify_postgres
 {
 &require_postgres();
-local $changeduser = $_[0]->{'user'} eq $_[1]->{'user'} ? 0 : 1;
+local $tmpl = &get_template($_[0]->{'template'});
+local $changeduser = $_[0]->{'user'} ne $_[1]->{'user'} &&
+		     !$tmpl->{'mysql_nouser'} ? 1 : 0;
 local $user = &postgres_user($_[0], $changeduser);
 local $olduser = &postgres_user($_[1]);
-local $tmpl = &get_template($_[0]->{'template'});
 
 local $pass = &postgres_pass($_[0]);
 local $oldpass = &postgres_pass($_[1]);
@@ -141,8 +142,7 @@ elsif ($_[0]->{'parent'} && !$_[1]->{'parent'}) {
 		}
 	&$second_print($text{'setup_done'});
 	}
-elsif ($user ne $olduser && !$_[0]->{'parent'} &&
-       !$tmpl->{'mysql_nouser'}) {
+elsif ($user ne $olduser && !$_[0]->{'parent'}) {
 	# Rename PostgreSQL user ..
 	&$first_print($text{'save_postgresuser'});
 	if (&postgres_user_exists($_[1])) {
