@@ -19,9 +19,16 @@ foreach my $al (&apache::find_directive_struct("Alias", $vconf),
 		&apache::find_directive_struct("Redirect", $vconf),
                 &apache::find_directive_struct("RedirectMatch", $vconf),
 	       ) {
-	my $rd = { 'dest' => $al->{'words'}->[1],
-		   'alias' => $al->{'name'} =~ /^Alias/i ? 1 : 0,
+	my $rd = { 'alias' => $al->{'name'} =~ /^Alias/i ? 1 : 0,
 		   'dir' => $al };
+	if ($al->{'words'}->[2]) {
+		# Has a code too
+		$rd->{'code'} = $al->{'words'}->[1];
+		$rd->{'dest'} = $al->{'words'}->[2];
+		}
+	else {
+		$rd->{'dest'} = $al->{'words'}->[1];
+		}
 	if ($al->{'name'} eq 'Alias' || $al->{'name'} eq 'Redirect') {
 		$rd->{'path'} = $al->{'words'}->[0];
 		push(@rv, $rd);
@@ -55,6 +62,7 @@ foreach my $port (@ports) {
 	push(@aliases, $redirect->{'path'}.
 			($redirect->{'regexp'} ? "\.\*\$" : "").
 			" ".
+			($redirect->{'code'} ? $redirect->{'code'}." " : "").
 			$redirect->{'dest'});
 	&apache::save_directive($dir, \@aliases, $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
