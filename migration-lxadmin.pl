@@ -96,7 +96,7 @@ $pass ||= $filehash->{'object'}->{'realpass'};
 &$first_print("Checking for LXadmin features ..");
 local @got = ( "dir", $parent ? () : ("unix"), "mail" );
 if ($domhash->{'web_o'}) {
-	push(@got, "web");
+	push(@got, "web", "logrotate");
 	}
 push(@got, "webmin") if ($webmin && !$parent);
 if ($filehash->{'bobject'}->{'used'}->{'mysqldb_num'}) {

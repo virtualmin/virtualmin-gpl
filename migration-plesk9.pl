@@ -98,7 +98,7 @@ local $ugroup = $group;
 
 # First work out what features we have
 &$first_print("Checking for Plesk features ..");
-local @got = ( "dir", $parent ? () : ("unix"), "web" );
+local @got = ( "dir", $parent ? () : ("unix") );
 push(@got, "webmin") if ($webmin && !$parent);
 if (exists($domain->{'mailsystem'}->{'properties'}->{'status'}->{'enabled'}) ||
     $domain->{'mail'}) {

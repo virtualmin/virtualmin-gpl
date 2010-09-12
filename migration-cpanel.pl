@@ -146,7 +146,7 @@ local $ugroup = $group;
 
 # First work out what features we have ..
 &$first_print("Checking for cPanel features ..");
-local @got = ( "dir", $parent ? () : ("unix"), "web" );
+local @got = ( "dir", $parent ? () : ("unix"), "web", "logrotate" );
 push(@got, "webmin") if ($webmin && !$parent);
 local $userdir;
 local $homesrc;
@@ -167,6 +167,8 @@ if (-d $daily) {
 			}
 		}
 	$userdir = &extract_cpanel_dir("$daily/$user.tar.gz")."/$user";
+	-d $userdir || return "No user directory found - ".
+			      "maybe username $user is incorrect";
 	$homesrc = "$userdir/homedir";
 	}
 elsif (-d $datastore) {
@@ -185,6 +187,8 @@ else {
 		# Sub-directory has date-based name
 		($userdir) = glob("$root/*");
 		}
+	-d $userdir || return "No user directory found - ".
+			      "maybe username $user is incorrect";
 	$homesrc = "$userdir/homedir";
 	$datastore = "$homesrc/.cpanel-datastore";
 	if (-d "$homesrc/.cpanel/datastore") {
