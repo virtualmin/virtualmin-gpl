@@ -191,7 +191,9 @@ if ($lconf) {
 	&logrotate::save_directive($parent, $lconf, undef);
 	&flush_file_lines($lconf->{'file'});
 	undef($logrotate::get_config_parent_cache);
-	undef($logrotate::get_config_cache);
+	undef(%logrotate::get_config_cache);
+	undef(%logrotate::get_config_lnum_cache);
+	undef(%logrotate::get_config_files_cache);
 	&$second_print($text{'setup_done'});
 	}
 else {
