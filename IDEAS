@@ -53,4 +53,6 @@
  - DKIM support
 	- https://www.virtualmin.com/node/15457
 
- - Rails 3.0.0 installer
+ - Config check should detect Postfix case where mydestination contains a domain
+   name, like the hostname
+	- When does this fail exactly?
