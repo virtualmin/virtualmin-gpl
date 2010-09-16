@@ -39,21 +39,25 @@ local $nvstar = &add_name_virtual($_[0], $conf, $web_port);
 
 local @dirs = &apache_template($tmpl->{'web'}, $_[0], $tmpl->{'web_suexec'});
 if ($_[0]->{'alias'} && $tmpl->{'web_alias'} == 1) {
-	# Update the parent virtual host
-	local ($pvirt, $pconf) = &get_apache_virtual($alias->{'dom'},
-						     $alias->{'web_port'});
-	if (!$pvirt) {
-		&$second_print($text{'setup_ewebalias'});
-		return 0;
-		}
-	local @sa = &apache::find_directive("ServerAlias", $pconf);
-	foreach my $d (@dirs) {
-		if ($d =~ /^\s*Server(Name|Alias)\s+(.*)/) {
-			push(@sa, $2);
+	# Update the parent virtual host (and the SSL virtual host, if any)
+	local @ports = ( $alias->{'web_port'} );
+	push(@ports, $alias->{'web_sslport'}) if ($alias->{'ssl'});
+	foreach my $p (@ports) {
+		local ($pvirt, $pconf) = &get_apache_virtual(
+						$alias->{'dom'}, $p);
+		if (!$pvirt) {
+			&$second_print($text{'setup_ewebalias'});
+			return 0;
 			}
+		local @sa = &apache::find_directive("ServerAlias", $pconf);
+		foreach my $d (@dirs) {
+			if ($d =~ /^\s*Server(Name|Alias)\s+(.*)/) {
+				push(@sa, $2);
+				}
+			}
+		&apache::save_directive("ServerAlias", \@sa, $pconf, $conf);
+		&flush_file_lines($pvirt->{'file'});
 		}
-	&apache::save_directive("ServerAlias", \@sa, $pconf, $conf);
-	&flush_file_lines($pvirt->{'file'});
 	$_[0]->{'alias_mode'} = 1;
 	}
 else {
@@ -280,18 +284,21 @@ if ($_[0]->{'alias_mode'}) {
 	&$first_print($text{'delete_apachealias'});
 	local $alias = &get_domain($_[0]->{'alias'});
 	&obtain_lock_web($alias);
-	local $conf = &apache::get_config();
-	local ($pvirt, $pconf) = &get_apache_virtual($alias->{'dom'},
-						     $alias->{'web_port'});
-	if (!$pvirt) {
-		&release_lock_web($alias);
-		&$second_print($text{'setup_ewebalias'});
-		return 0;
+	local @ports = ( $alias->{'web_port'} );
+	push(@ports, $alias->{'web_sslport'}) if ($alias->{'ssl'});
+	foreach my $p (@ports) {
+		local ($pvirt, $pconf, $conf) = &get_apache_virtual(
+							$alias->{'dom'}, $p);
+		if (!$pvirt) {
+			&release_lock_web($alias);
+			&$second_print($text{'setup_ewebalias'});
+			return 0;
+			}
+		local @sa = &apache::find_directive("ServerAlias", $pconf);
+		@sa = grep { !/\Q$_[0]->{'dom'}\E$/ } @sa;
+		&apache::save_directive("ServerAlias", \@sa, $pconf, $conf);
+		&flush_file_lines($pvirt->{'file'});
 		}
-	local @sa = &apache::find_directive("ServerAlias", $pconf);
-	@sa = grep { !/\Q$_[0]->{'dom'}\E$/ } @sa;
-	&apache::save_directive("ServerAlias", \@sa, $pconf, $conf);
-	&flush_file_lines($pvirt->{'file'});
 	&release_lock_web($alias);
 	&register_post_action(\&restart_apache);
 	&$second_print($text{'setup_done'});
@@ -425,24 +432,26 @@ if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
 		&$first_print($text{'save_apache5'});
 		local $alias = &get_domain($_[0]->{'alias'});
 		&obtain_lock_web($alias);
-		local ($pvirt, $pconf) = &get_apache_virtual($alias->{'dom'},
-						     $alias->{'web_port'});
-		if (!$pvirt) {
-			&$second_print($text{'setup_ewebalias'});
-			}
-		else {
+		local @ports = ( $alias->{'web_port'} );
+		push(@ports, $alias->{'web_sslport'}) if ($alias->{'ssl'});
+		foreach my $p (@ports) {
+			local ($pvirt, $pconf) = &get_apache_virtual(
+							$alias->{'dom'}, $p);
+			if (!$pvirt) {
+				&$second_print($text{'setup_ewebalias'});
+				next;
+				}
 			local @sa = &apache::find_directive("ServerAlias",
 							    $pconf);
-			local $s;
-			foreach $s (@sa) {
+			foreach my $s (@sa) {
 				$s =~ s/\Q$_[1]->{'dom'}\E($|\s)/$_[0]->{'dom'}$1/g;
 				}
 			&apache::save_directive("ServerAlias", \@sa, $pconf,
 						$conf);
 			&flush_file_lines($pvirt->{'file'});
-			&$second_print($text{'setup_done'});
 			$rv++;
 			}
+		&$second_print($text{'setup_done'});
 		&release_lock_web($alias);
 		}
 	}
