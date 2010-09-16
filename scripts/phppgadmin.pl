@@ -193,7 +193,7 @@ sub script_phppgadmin_latest
 {
 local ($ver) = @_;
 return ( "http://phppgadmin.sourceforge.net/",
-	 "latest\\s+version:\\s+<.*>([0-9\\.]+)" );
+	 "latest\\s+version:\\s+<.*>([0-9\\.]+)<" );
 }
 
 sub script_phppgadmin_site
