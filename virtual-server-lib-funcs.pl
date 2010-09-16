@@ -1645,14 +1645,12 @@ foreach my $group (@groups) {
 	local $changed;
 	if ($idx >= 0) {
 		# User is currently in group
-		if ($secs{$group->{'group'}}) {
+		if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 			# Just rename in group, if needed
-			if ($_[0]->{'user'} ne $_[1]->{'user'}) {
-				$changed = 1;
-				$mems[$idx] = $_[0]->{'user'};
-				}
+			$changed = 1;
+			$mems[$idx] = $_[0]->{'user'};
 			}
-		else {
+		elsif (!$secs{$group->{'group'}}) {
 			# Remove from group, if this is a secondary managed
 			# by Virtualmin
 			if (&indexof($group->{'group'}, @sgroups) >= 0) {
