@@ -54,8 +54,8 @@ print &ui_table_row($text{'viewbackup_time'},
 
 # Incremental?
 print &ui_table_row($text{'viewbackup_inc'},
-	$log->{'incremental'} ? $text{'viewbackup_inc1'}
-			      : $text{'viewbackup_inc0'});
+	$log->{'increment'} ? $text{'viewbackup_inc1'}
+			    : $text{'viewbackup_inc0'});
 
 # Final result
 print &ui_table_row($text{'viewbackup_ok'},
