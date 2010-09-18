@@ -30,7 +30,7 @@ else {
 			 'theme' => $config{'webmin_theme'} eq '*' ? undef :
 				    $config{'webmin_theme'} eq '' ? '' :
 				     $config{'webmin_theme'},
-			 'desc' => $_[0]->{'owner'},
+			 'real' => $_[0]->{'owner'},
 			 );
 	&acl::create_user(\%wuser);
 	&set_user_modules($_[0], \%wuser);
