@@ -11,14 +11,15 @@ require './virtual-server-lib.pl';
 $defip = &get_default_ip();
 @ips = split(/\s+/, $in{'ips'});
 if (defined(&list_resellers)) {
-	@rips = map { $_->{'acl'}->{'defip'} }
+	%rips = map { $_->{'acl'}->{'defip'}, $_ }
 		    grep { $_->{'acl'}->{'defip'} } &list_resellers();
 	}
 @active = &active_ip_addresses();
 foreach $ip (@ips) {
 	&check_ipaddress($ip) || &error(&text('sharedips_eip', $ip));
 	$ip ne $defip || &error(&text('sharedips_edef', $ip));
-	&indexof($ip, @rips) < 0 || &error(&text('sharedips_erip', $ip));
+	$rips{$ip} && &error(&text('sharedips_erip',
+				   $ip, $rips{$ip}->{'name'}));
 	$d = &get_domain_by("ip", $ip, "virt", 1);
 	$d && error(&text('sharedips_edom', $ip, $d->{'dom'}));
 	@users = &get_domain_by("ip", $ip);
