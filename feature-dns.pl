@@ -1050,6 +1050,14 @@ foreach my $r (@recs) {
 		}
 	}
 
+# Find all possible sub-domains, so we don't clone IPs for them
+my @dnames;
+foreach my $od (&list_domains()) {
+	if ($od->{'dns'} && $od->{'id'} ne $d->{'id'}) {
+		push(@dnames, $od->{'dom'});
+		}
+	}
+
 # Clone A records
 my $count = 0;
 my $withdot = $d->{'dom'}.".";
@@ -1057,9 +1065,21 @@ foreach my $r (@recs) {
 	if ($r->{'type'} eq 'A' && $r->{'values'}->[0] eq $d->{'ip'} &&
 	    !$already{$r->{'name'}} &&
 	    ($r->{'name'} eq $withdot || $r->{'name'} =~ /\.\Q$withdot\E$/)) {
-		&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
-				      'IN', 'AAAA', $d->{'ip6'});
-		$count++;
+		# Check if this record is in any other domain
+		my $insub = 0;
+		foreach my $od (@dnames) {
+			my $odwithdot = $od.".";
+			if ($r->{'name'} eq $odwithdot ||
+			    $r->{'name'} =~ /\.\Q$odwithdot\E$/) {
+				$insub = 1;
+				last;
+				}
+			}
+		if (!$insub) {
+			&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
+					      'IN', 'AAAA', $d->{'ip6'});
+			$count++;
+			}
 		}
 	}
 
