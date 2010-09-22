@@ -39,7 +39,8 @@ else {
 			local @certdoms = &list_domain_certificate($sslclash);
 			return &text($sni ? 'setup_edepssl5sni'
 					  : 'setup_edepssl5', $d->{'ip'},
-				join(", ", map { "<tt>$_</tt>" } @certdoms));
+				join(", ", map { "<tt>$_</tt>" } @certdoms),
+				$sslclash->{'dom'});
 			}
 		else {
 			return undef;
