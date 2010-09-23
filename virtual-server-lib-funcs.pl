@@ -6443,7 +6443,8 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 
 		&$first_print(&text('setup_scriptinstall',
 				    $script->{'name'}, $ver));
-		local $opts = { 'path' => $sinfo->{'path'} };
+		local $opts = { 'path' => &substitute_scriptname_template(
+						$sinfo->{'path'}, $d) };
 		local $perr = &validate_script_path($opts, $script, $dom);
 		if ($perr) {
 			&$second_print($perr);
