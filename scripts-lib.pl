@@ -2530,5 +2530,18 @@ $str =~ s/"/\\"/g;
 return $str;
 }
 
+# substitute_scriptname_template(scriptname, &domain)
+# Returns an install script directory name, based on the config
+sub substitute_scriptname_template
+{
+local ($name, $d) = @_;
+if ($config{'scriptdir'}) {
+	local %hash = &make_domain_substitions($d, 0);
+	$hash{'SCRIPTNAME'} = $name;
+	return &substitute_virtualmin_template($config{'scriptdir'}, \%hash);
+	}
+return $name;
+}
+
 1;
 

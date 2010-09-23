@@ -3307,6 +3307,16 @@ if ($d->{'postgres'} && !$hash{'postgres_user'}) {
 	$hash{'postgres_user'} = &postgres_user($d);
 	}
 
+# Add random numbers length 1-10
+&seed_random();
+for(my $i=1; $i<=10; $i++) {
+	my $r;
+	do {
+		$r = int(rand()*(10**$i));
+		} while(length($r) != $i);
+	$hash{'RANDOM$i'} = $r;
+	}
+
 return %hash;
 }
 
