@@ -77,7 +77,8 @@ local $conf = &apache::get_config();
 local $chained;
 local ($sslclash) = grep { $_->{'ip'} eq $_[0]->{'ip'} &&
 			   $_->{'ssl'} &&
-			   $_->{'id'} ne $_[0]->{'id'}} &list_domains();
+			   $_->{'id'} ne $_[0]->{'id'} &&
+			   !$_->{'ssl_same'} } &list_domains();
 if ($sslclash && &check_domain_certificate($_[0]->{'dom'}, $sslclash)) {
 	# Yes - so just use it. In practice this doesn't really matter, as
 	# Apache will pick up the first domain's cert anyway.
