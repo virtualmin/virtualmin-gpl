@@ -1628,6 +1628,39 @@ if ($mode == 3) {
 	return $wantdoms ? (\%rv, undef) : \%rv;
 	}
 elsif ($mode > 0) {
+	# Try to download .info file first
+	local $infotemp = &transname();
+	local $infoerr = &download_backup($_[0], $infotemp, undef, undef, 1);
+	if (!$infoerr) {
+		if (-d $infotemp) {
+			# Got a whole dir of .info files
+			local %rv;
+			opendir(INFODIR, $infotemp);
+			foreach my $f (readdir(INFODIR)) {
+				next if ($f !~ /\.info$/);
+				local $info = &unserialise_variable(
+					&read_file_contents("$infotemp/$f"));
+				foreach my $dname (keys %$info) {
+					$rv{$dname} = $info{$dname};
+					}
+				}
+			closedir(INFODIR);
+			&unlink_file($infotemp);
+			if (%rv) {
+				return $wantdoms ? (\%rv, undef) : \%rv;
+				}
+			}
+		else {
+			# One file
+			local $info = &unserialise_variable(
+					&read_file_contents($infotemp));
+			&unlink_file($infotemp);
+			if (%$info) {
+				return $wantdoms ? ($info, undef) : $info;
+				}
+			}
+		}
+
 	# Need to download to temp file first
 	$backup = &transname();
 	local $derr = &download_backup($_[0], $backup);
@@ -1640,9 +1673,8 @@ else {
 if (-d $backup) {
 	# A directory of backup files, one per domain
 	opendir(DIR, $backup);
-	local $f;
 	local %rv;
-	foreach $f (readdir(DIR)) {
+	foreach my $f (readdir(DIR)) {
 		next if ($f eq "." || $f eq "..");
 		local ($cont, $fdoms);
 		if ($wantdoms) {
@@ -1823,14 +1855,15 @@ if ($doms && !&supports_ip6()) {
 return @rv;
 }
 
-# download_backup(url, tempfile, [&domain-names], [&config-features])
+# download_backup(url, tempfile, [&domain-names], [&config-features],
+#                 [info-files-only])
 # Downloads a backup file or directory to a local temp file or directory.
 # Returns undef on success, or an error message.
 sub download_backup
 {
-local ($url, $temp, $domnames, $vbs) = @_;
+local ($url, $temp, $domnames, $vbs, $infoonly) = @_;
 local $cache = $main::download_backup_cache{$url};
-if ($cache && -r $cache) {
+if ($cache && -r $cache && !$infoonly) {
 	# Already got the file .. no need to re-download
 	link($cache, $temp) || symlink($cache, $temp);
 	return undef;
@@ -1843,7 +1876,8 @@ if ($mode == 1) {
 				       $user, $pass, $port);
 	local $err;
 	if ($isdir) {
-		# Need to download entire directory
+		# Need to download entire directory.
+		# In info-only mode, skip files that don't end with .info
 		&make_dir($temp, 0711);
 		local $list = &ftp_listdir($server, $path, \$err, $user, $pass,
 					   $port);
@@ -1851,26 +1885,46 @@ if ($mode == 1) {
 		foreach $f (@$list) {
 			$f =~ s/^$path[\\\/]//;
 			next if ($f eq "." || $f eq ".." || $f eq "");
+			next if ($infoonly && $f !~ /\.info$/);
 			&ftp_download($server, "$path/$f", "$temp/$f", \$err,
 				      undef, $user, $pass, $port);
 			return $err if ($err);
 			}
 		}
 	else {
-		# Can just download a single file
-		&ftp_download($server, $path, $temp, \$err,
-			      undef, $user, $pass, $port);
+		# Can just download a single file.
+		# In info-only mode, just get the .info file.
+		&ftp_download($server, $path.($infoonly ? ".info" : ""),
+			      $temp, \$err, undef, $user, $pass, $port);
 		return $err if ($err);
 		}
 	}
 elsif ($mode == 2) {
 	# Download from SSH server
-	&scp_copy(($user ? "$user\@" : "")."$server:$path",
-		  $temp, $pass, \$err, $port);
+	if ($infoonly) {
+		# First try file with .info extension
+		&scp_copy(($user ? "$user\@" : "")."$server:$path.info",
+			  $temp, $pass, \$err, $port);
+		if ($err) {
+			# Fall back to .info files in directory
+			&make_dir($temp, 0700);
+			&scp_copy(($user ? "$user\@" : "").
+				  "$server:$path/*.info",
+				  $temp, $pass, \$err, $port);
+			$err = undef;
+			}
+		}
+	else {
+		# Download the whole file or directory
+		&scp_copy(($user ? "$user\@" : "")."$server:$path",
+			  $temp, $pass, \$err, $port);
+		}
 	return $err if ($err);
 	}
 elsif ($mode == 3) {
 	# Download from S3 server
+	$infoonly && return "Info-only mode is not supported by the ".
+			    "download_backup function for S3";
 	local $s3b = &s3_list_backups($user, $pass, $server, $path);
 	return $s3b if (!ref($s3b));
 	local @wantdoms;
@@ -1890,7 +1944,7 @@ elsif ($mode == 3) {
 		return $err if ($err);
 		}
 	}
-$main::download_backup_cache{$url} = $temp;
+$main::download_backup_cache{$url} = $temp if (!$infoonly);
 return undef;
 }
 

@@ -1243,3 +1243,4 @@ Parallel bzip2 can now be used for backups if the pbzip2 command is installed, v
 Moved all IP-address related options from the Edit Virtual Server page to the Change IP Address page, where they fit in better and are easier to understand.
 Added a server template option to not change the MySQL username when a domain's administration username is changed, and fixed bugs with a similar option for the MySQL password.
 The database username and password for a domain can now be changed using the new API commands modify-database-user and modify-database-pass.
+When Virtualmin sends a backup to an SSH or FTP destination, it now also creates a .info file that contains meta-infomation about each backup. When restoring only this file needs to be downloaded to list the contents of a backup, which avoids the need to download the complete backup twice.

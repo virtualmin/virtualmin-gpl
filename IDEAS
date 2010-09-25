@@ -57,10 +57,6 @@
    name, like the hostname
 	- When does this fail exactly?
 
- - Backups to FTP / SSH should create .info file containing domain details
-	- Download when possibly restoring, to avoid re-downloads
-	- What about local backups?
-
  - Make script install dir configurable
 	- https://www.virtualmin.com/node/15663
 	- Can only be completed after 3.82 is out

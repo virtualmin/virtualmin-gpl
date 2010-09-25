@@ -1,0 +1,6 @@
+desc=Backup information files
+html=When Virtualmin sends a backup to an SSH or FTP destination, it now also creates a .info file that contains meta-infomation about each backup. When restoring only this file needs to be downloaded to list the contents of a backup, which avoids the need to download the complete backup twice.
+master=1
+reseller=1
+domain=1
+link=backup_form.cgi
