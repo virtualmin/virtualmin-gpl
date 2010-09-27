@@ -5217,3 +5217,15 @@ redirect_edir2=Destination directory must be under $1
 newchangelog_title=New Feature Log
 newchangelog_ecannot=You are not allowed to view the new feature log
 newchangelog_desc=This page lists all major changes in all Virtualmin versions installed on your system, up to the current release.
+
+dkim_title=DomainKeys Identified Mail
+dkim_econfig=The DKIM configuration file $1 does not exist
+dkim_einit=The DKIM filter server boot script $1 does not exist
+dkim_eos=Management of DKIM is not supported on this operating system
+dkim_failed=DomainKeys indentified mail is not available on this system : $1
+dkim_installdesc=However, Virtualmin can attempt to automatically install the DKIM filter package for you.
+dkim_install=Install Now
+dkim_header=DomainKeys identified mail options
+dkim_enabled=Signing of outgoing mail enabled?
+dkim_domain=DNS domain for DKIM records
+dkim_selector=Selector for record name

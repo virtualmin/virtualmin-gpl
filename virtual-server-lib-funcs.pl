@@ -16,7 +16,8 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
 		 "php", "ruby", "vui", "dynip", "collect", "maillog",
 		 "balancer", "newfeatures", "resources", "backups",
 		 "domainname", "commands", "connectivity", "plans",
-		 "postgrey", "wizard", "security", "json", "redirects", "ftp") {
+		 "postgrey", "wizard", "security", "json", "redirects", "ftp",
+		 "dkim") {
 	do "$virtual_server_root/$lib-lib.pl";
 	if ($@ && -r "$virtual_server_root/$lib-lib.pl") {
 		print STDERR "failed to load $lib-lib.pl : $@\n";
@@ -9881,6 +9882,9 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
 if ($config{'mail_system'} == 0) {
 	push(@tmpls, 'postgrey');
 	}
+if ($virtualmin_pro) {
+	push(@tmpls, "dkim");
+	}
 local %tmplcat = (
 	'features' => 'setting',
 	'user' => 'email',
@@ -9910,9 +9914,10 @@ local %tmplcat = (
 	'chroot' => 'check',
 	'global' => 'custom',
 	'postgrey' => 'email',
+	'dkim' => 'email',
 	'changelog' => 'setting',
 	);
-local %nonew = ( 'history', 1, 'postgrey', 1 );
+local %nonew = ( 'history', 1, 'postgrey', 1, 'dkim', 1 );
 local @tlinks = map { $nonew{$_} ? "${_}.cgi"
 			         : "edit_new${_}.cgi" } @tmpls;
 local @ttitles = map { $nonew{$_} ? $text{"${_}_title"} 

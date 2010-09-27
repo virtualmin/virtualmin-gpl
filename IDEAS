@@ -52,6 +52,8 @@
 
  - DKIM support
 	- https://www.virtualmin.com/node/15457
+	- CHANGELOG
+	- Help page
 
  - Config check should detect Postfix case where mydestination contains a domain
    name, like the hostname
