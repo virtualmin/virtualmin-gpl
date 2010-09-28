@@ -55,6 +55,7 @@
 	- CHANGELOG
 	- Help page
 	- GPL version
+	- Logging
 
  - Config check should detect Postfix case where mydestination contains a domain
    name, like the hostname

@@ -138,5 +138,129 @@ close(DKIM);
 return \%conf;
 }
 
+# obtain_lock_dkim()
+# Locks all DKIM config files
+sub obtain_lock_dkim
+{
+foreach my $f (&get_dkim_config_files()) {
+	&lock_file($f);
+	}
+}
+
+# release_lock_dkim()
+# Remove locks on all DKIM config files
+sub release_lock_dkim
+{
+foreach my $f (reverse(&get_dkim_config_files())) {
+	&unlock_file($f);
+	}
+}
+
+# get_dkim_config_files()
+# Returns a list of all DKIM-related config files
+sub get_dkim_config_files
+{
+if ($gconfig{'os_type'} eq 'debian-linux') {
+	return ( $debian_dkim_config, $debian_dkim_default );
+	}
+elsif ($gconfig{'os_type'} eq 'redhat-linux') {
+	return ( $redhat_dkim_config );
+	}
+else {
+	return ( );
+	}
+}
+
+# enable_dkim()
+# Perform all the steps needed to enable DKIM
+sub enable_dkim
+{
+my ($dkim) = @_;
+&foreign_require("webmin");
+&foreign_require("init");
+
+# Generate private key
+if (!$dkim->{'keyfile'} || !-r $dkim->{'keyfile'}) {
+	my $size = $config{'key_size'} || $webmin::default_key_size;
+	$dkim->{'keyfile'} ||= "/etc/dkim.key";
+	&$first_print(&text('dkim_newkey', "<tt>$dkim->{'keyfile'}</tt>"));
+	my $out = &backquote_logged("openssl genrsa -out ".
+		quotemeta($dkim->{'keyfile'})." $size 2>&1 </dev/null");
+	if ($?) {
+		&$second_print(&text('dkim_enewkey',
+				"<tt>".&html_escape($out)."</tt>"));
+		return 0;
+		}
+	&$second_print($text{'setup_done'});
+	}
+
+# Get the public key
+&$first_print(&text('dkim_pubkey', "<tt>$dkim->{'keyfile'}</tt>"));
+my $pubkey = &backquote_command(
+	"openssl rsa -in ".quotemeta($dkim->{'keyfile'}).
+	" -pubout -outform PEM 2>/dev/null");
+if ($? || $pubkey !~ /BEGIN\s+PUBLIC\s+KEY/) {
+	&$second_print(&text('dkim_epubkey',
+			     "<tt>".&html_escape($pubkey)."</tt>"));
+	return 0;
+	}
+&$second_print($text{'setup_done'});
+
+# Add public key to DNS domain
+&$first_print(&text('dkim_dns', "<tt>$dkim->{'domain'}</tt>"));
+my $z = &get_bind_zone($dkim->{'domain'});
+if (!$z) {
+	&$second_print($text{'dkim_ednszone'});
+	return 0;
+	}
+my $file = &bind8::find("file", $z->{'members'});
+my $fn = $file->{'values'}->[0];
+my @recs = &bind8::read_zone_file($fn, $dkim->{'domain'});
+my $withdot = $dkim->{'domain'}.'.';
+my $dkname = '_domainkey.'.$withdot;
+my ($dkrec) = grep { $_->{'name'} eq $dkname &&
+		     $_->{'type'} eq 'TXT' } @recs;
+my $changed = 0;
+if (!$dkrec) {
+	&bind8::create_record($fn, $dkname, undef, 'IN', 'TXT',
+			      '"t=y; o=-;"');
+	$changed++;
+	}
+my $selname = $dkim->{'selector'}.'.'.$dkname;
+my ($selrec) = grep { $_->{'name'} eq $selname && 
+		      $_->{'type'} eq 'TXT' } @recs;
+if (!$selrec) {
+	# XXX what if changed?
+	&bind8::create_record($fn, $selname, undef, 'IN', 'TXT',
+                              '"k=rsa; t=y; p='.$pubkey.'"');
+        $changed++;
+	}
+if ($changed) {
+	# XXX DNSSEC?
+	&bind8::bump_soa_record($fn, \@recs);
+	&$second_print($text{'dkim_dnsadded'});
+	}
+else {
+	&$second_print($text{'dkim_dnsalready'});
+	}
+
+# Add domain, key and selector to config file
+# XXX
+
+# Enable filter at boot time
+# XXX
+
+# Start filter now
+# XXX
+
+# Configure Postfix to use filter
+# XXX
+
+# Apply Postfix config
+# XXX
+
+return 1;
+}
+
 1;
 

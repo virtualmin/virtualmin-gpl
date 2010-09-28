@@ -30,7 +30,7 @@ print &ui_table_row($text{'dkim_enabled'},
 
 # Domain for DKIM records
 &require_bind();
-@zones = grep { $_->{'type'} ne 'view' &&
+@zones = grep { $_->{'type'} eq 'master' &&
 		$_->{'name'} ne '.' &&
 		$_->{'name'} !~ /in-addr/ } &bind8::list_zone_names();
 @zones = sort { $a->{'name'} cmp $b->{'name'} } @zones;

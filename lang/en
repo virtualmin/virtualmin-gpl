@@ -5242,3 +5242,12 @@ dkim_title4=Install DKIM
 dkim_installing=Installing the DKIM filter package ..
 dkim_installfailed=.. installation failed!
 dkim_installed=.. installation completed successfully
+
+dkim_newkey=Generating private key in file $1 ..
+dkim_enewkey=.. private key failed : $1
+dkim_pubkey=Extracting public key from private key in $1 ..
+dkim_epubkey=.. public key failed : $1
+dkim_dns=Adding DKIM records to DNS domain $1 ..
+dkim_ednszone=.. domain not found!
+dkim_dnsadded=.. added successfully
+dkim_dnsalready=.. records already exist

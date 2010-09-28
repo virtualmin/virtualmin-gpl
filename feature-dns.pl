@@ -2051,7 +2051,8 @@ local $z = &get_bind_zone($d->{'dom'});
 return "Failed to find zone for $d->{'dom'}" if (!$z);
 local $file = &bind8::find("file", $z->{'members'});
 return "Failed to find records file for $d->{'dom'}" if (!$file);
-&bind8::bump_soa_record($file, $recs);
+my $fn = $file->{'values'}->[0];
+&bind8::bump_soa_record($fn, $recs);
 if (defined(&bind8::supports_dnssec) &&
     &bind8::supports_dnssec()) {
 	# Re-sign too
