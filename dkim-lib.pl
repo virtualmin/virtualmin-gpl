@@ -1,6 +1,7 @@
 # Functions for setting up DKIM signing
 
 $debian_dkim_config = "/etc/dkim-filter.conf";
+$debian_dkim_default = "/etc/default/dkim-filter";
 $redhat_dkim_config = "/etc/sysconfig/dkim-milter";
 
 # check_dkim()
@@ -27,6 +28,11 @@ else {
 	# Not supported on this OS
 	return $text{'dkim_eos'};
 	}
+
+# Check mail server
+if ($config{'mail_system'} > 1) {
+	return $text{'dkim_emailsystem'};
+	}
 return undef;
 }
 
@@ -50,6 +56,74 @@ return 0;
 # selector - Record within the domain for the key
 sub get_dkim_config
 {
+&foreign_require("init");
+my %rv;
+
+# Check if filter is running
+if ($gconfig{'os_type'} eq 'debian-linux') {
+	# Read Debian dkim config file
+	my $conf = &get_debian_dkim_config($debian_dkim_config);
+	$rv{'enabled'} = &init::action_status("dkim-filter") == 2;
+	$rv{'domain'} = $conf{'Domain'};
+	$rv{'selector'} = $conf{'Selector'};
+	$rv{'keyfile'} = $conf{'KeyFile'};
+
+	# Read defaults file that specifies port
+	my %def;
+	&read_env_file($debian_dkim_default, \%def);
+	if ($def{'SOCKET'} =~ /^inet:(\d+)/) {
+		$rv{'port'} = $1;
+		}
+	elsif ($def{'SOCKET'} =~ /^local:([^:]+)/) {
+		$rv{'socket'} = $1;
+		}
+	else {
+		$rv{'enabled'} = 0;
+		}
+	}
+elsif ($gconfig{'os_type'} eq 'redhat-linux') {
+	# XXX
+	}
+
+# Check mail server
+&require_mail();
+if ($config{'mail_system'} == 0) {
+	# Postfix config
+	my $milters = &postfix::get_real_value("smtpd_milters");
+	if ($rv{'port'}) {
+		if ($milters !~ /inet:localhost:(\d+)/ || $1 != $rv{'port'}) {
+			$rv{'enabled'} = 0;
+			}
+		}
+	elsif ($rv{'socket'}) {
+		if ($milters !~ /local:([^\s,:]+)/ || $1 ne $rv{'socket'}) {
+			$rv{'enabled'} = 0;
+			}
+		}
+	}
+elsif ($config{'mail_system'} == 1) {
+	# Sendmail config
+	# XXX
+	}
+
+return \%rv;
+}
+
+# get_debian_dkim_config(file)
+# Returns the config file as seen on Debian into as hash ref
+sub get_debian_dkim_config
+{
+my ($file) = @_;
+my %conf;
+open(DKIM, $file) || return undef;
+while(my $l = <DKIM>) {
+	$l =~ s/#.*$//;
+	if ($l =~ /^\s*(\S+)\s+(\S.*)/) {
+		$conf{$1} = $2;
+		}
+	}
+close(DKIM);
+return \%conf;
 }
 
 1;

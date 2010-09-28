@@ -9878,13 +9878,9 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    $virtualmin_pro ? ( 'mxs' ) : ( ),
    'validate', 'chroot', 'global', 'changelog',
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
+   $config{'mail_system'} == 0 ? ( 'postgrey' ) : ( ),
+   'dkim',
    );
-if ($config{'mail_system'} == 0) {
-	push(@tmpls, 'postgrey');
-	}
-if ($virtualmin_pro) {
-	push(@tmpls, "dkim");
-	}
 local %tmplcat = (
 	'features' => 'setting',
 	'user' => 'email',
