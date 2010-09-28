@@ -1245,3 +1245,4 @@ Moved all IP-address related options from the Edit Virtual Server page to the Ch
 Added a server template option to not change the MySQL username when a domain's administration username is changed, and fixed bugs with a similar option for the MySQL password.
 The database username and password for a domain can now be changed using the new API commands modify-database-user and modify-database-pass.
 When Virtualmin sends a backup to an SSH or FTP destination, it now also creates a .info file that contains meta-infomation about each backup. When restoring only this file needs to be downloaded to list the contents of a backup, which avoids the need to download the complete backup twice.
+Added links to the Manage SSL Certificate page to download the key in PEM or PKCS12 format.

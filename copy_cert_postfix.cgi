@@ -25,7 +25,7 @@ $kfile ||= "$cdir/postfix.key.pem";
 # Copy cert into those files
 &$first_print($text{'copycert_psaving'});
 $cdata = &cert_pem_data($d);
-$kdata = &cert_key_data($d);
+$kdata = &key_pem_data($d);
 $cdata || &error($text{'copycert_ecert'});
 $kdata || &error($text{'copycert_ekey'});
 &open_lock_tempfile(CERT, ">$cfile");

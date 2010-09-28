@@ -972,9 +972,9 @@ if ($data =~ /(-----BEGIN\s+CERTIFICATE-----\n([A-Za-z0-9\+\/=\n\r]+)-----END\s+
 return undef;
 }
 
-# cert_key_data(&domain)
+# key_pem_data(&domain)
 # Returns a domain's key in PEM format
-sub cert_key_data
+sub key_pem_data
 {
 local ($d) = @_;
 local $data = &read_file_contents_as_domain_user($d, $d->{'ssl_key'} ||
@@ -996,6 +996,22 @@ local ($d) = @_;
 local $cmd = "openssl pkcs12 -in ".quotemeta($d->{'ssl_cert'}).
              " -inkey ".quotemeta($_[0]->{'ssl_key'}).
 	     " -export -passout pass: -nokeys";
+open(OUT, &command_as_user($d->{'user'}, 0, $cmd)." |");
+while(<OUT>) {
+	$data .= $_;
+	}
+close(OUT);
+return $data;
+}
+
+# key_pkcs12_data(&domain)
+# Returns a domain's key in PKCS12 format
+sub key_pkcs12_data
+{
+local ($d) = @_;
+local $cmd = "openssl pkcs12 -in ".quotemeta($d->{'ssl_cert'}).
+             " -inkey ".quotemeta($_[0]->{'ssl_key'}).
+	     " -export -passout pass: -nocerts";
 open(OUT, &command_as_user($d->{'user'}, 0, $cmd)." |");
 while(<OUT>) {
 	$data .= $_;

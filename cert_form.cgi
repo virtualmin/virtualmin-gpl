@@ -67,6 +67,13 @@ if (@others) {
 	"$text{'cert_pkcs12'}</a>",
 	);
 print &ui_table_row($text{'cert_download'}, &ui_links_row(\@dlinks), 3);
+@dlinks = (
+	"<a href='download_key.cgi/key.pem?dom=$in{'dom'}'>".
+	"$text{'cert_pem'}</a>",
+	"<a href='download_key.cgi/key.p12?dom=$in{'dom'}'>".
+	"$text{'cert_pkcs12'}</a>",
+	);
+print &ui_table_row($text{'cert_kdownload'}, &ui_links_row(\@dlinks), 3);
 print &ui_table_end();
 
 # Buttons to copy cert to Webmin
