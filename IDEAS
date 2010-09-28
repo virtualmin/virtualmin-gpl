@@ -54,6 +54,7 @@
 	- https://www.virtualmin.com/node/15457
 	- CHANGELOG
 	- Help page
+	- GPL version
 
  - Config check should detect Postfix case where mydestination contains a domain
    name, like the hostname

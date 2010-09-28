@@ -48,6 +48,18 @@ if ($gconfig{'os_type'} eq 'debian-linux' ||
 return 0;
 }
 
+# install_dkim_package()
+# Attempt to install DKIM filter, outputting progress messages
+sub install_dkim_package
+{
+&foreign_require("software", "software-lib.pl");
+my $pkg = $gconfig{'os_type'} eq 'debian-linux' ? 'dkim-filter' :
+	  $gconfig{'os_type'} eq 'redhat-linux' ? 'dkim-milter' :
+						  'dkim';
+my @inst = &software::update_system_install($pkg);
+return scalar(@inst) || !&check_dkim();
+}
+
 # get_dkim_config()
 # Returns a hash containing details of the DKIM configuration and status.
 # Keys are :

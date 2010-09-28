@@ -5049,8 +5049,8 @@ postgrey_nonerecipients=No whitelisted recipients have been defined yet.
 postgrey_nofile=No configuration file could be found for this whitelist!
 postgrey_title4=Install Postgrey
 postgrey_installing=Installing the Postgrey package ..
-postgrey_installed=.. installation failed!
-postgrey_installfailed=.. installation completed successfully
+postgrey_installfailed=.. installation failed!
+postgrey_installed=.. installation completed successfully
 
 editgrey_titleclients=Edit Whitelisted Client
 editgrey_titlerecipients=Edit Whitelisted Recipient
@@ -5221,6 +5221,7 @@ newchangelog_ecannot=You are not allowed to view the new feature log
 newchangelog_desc=This page lists all major changes in all Virtualmin versions installed on your system, up to the current release.
 
 dkim_title=DomainKeys Identified Mail
+dkim_ecannot=You are not allowed to configure DKIM
 dkim_econfig=The DKIM configuration file $1 does not exist
 dkim_einit=The DKIM filter server boot script $1 does not exist
 dkim_eos=Management of DKIM is not supported on this operating system
@@ -5232,3 +5233,12 @@ dkim_enabled=Signing of outgoing mail enabled?
 dkim_domain=DNS domain for DKIM records
 dkim_selector=Selector for record name
 dkim_emailsystem=DKIM is only supported with the Postfix and Sendmail mail servers
+dkim_return=DKIM form
+dkim_err=Failed to save DKIM settings
+dkim_edomain=No domain name selected
+dkim_eselector=Missing or invalid selector - must be a valid DNS record name
+
+dkim_title4=Install DKIM
+dkim_installing=Installing the DKIM filter package ..
+dkim_installfailed=.. installation failed!
+dkim_installed=.. installation completed successfully
