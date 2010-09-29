@@ -76,9 +76,9 @@ if ($gconfig{'os_type'} eq 'debian-linux') {
 	# Read Debian dkim config file
 	my $conf = &get_debian_dkim_config($debian_dkim_config);
 	$rv{'enabled'} = &init::action_status("dkim-filter") == 2;
-	$rv{'domain'} = $conf{'Domain'};
-	$rv{'selector'} = $conf{'Selector'};
-	$rv{'keyfile'} = $conf{'KeyFile'};
+	$rv{'domain'} = $conf->{'Domain'};
+	$rv{'selector'} = $conf->{'Selector'};
+	$rv{'keyfile'} = $conf->{'KeyFile'};
 
 	# Read defaults file that specifies port
 	my %def;
@@ -138,6 +138,26 @@ close(DKIM);
 return \%conf;
 }
 
+# save_debian_dkim_config(file, directive, value)
+# Update a value in the Debian-style config file
+sub save_debian_dkim_config
+{
+my ($file, $name, $value) = @_;
+my $lref = &read_file_lines($file);
+my $found = 0;
+foreach my $l (@$lref) {
+	if ($l =~ /^\s*#*\s*(\S+)\s*(\S.*)$/ && $1 eq $name) {
+		$l = "$name $value";
+		$found = 1;
+		last;
+		}
+	}
+if (!$found) {
+	push(@$lref, "$name $value");
+	}
+&flush_file_lines($file);
+}
+
 # obtain_lock_dkim()
 # Locks all DKIM config files
 sub obtain_lock_dkim
@@ -191,6 +211,13 @@ if (!$dkim->{'keyfile'} || !-r $dkim->{'keyfile'}) {
 				"<tt>".&html_escape($out)."</tt>"));
 		return 0;
 		}
+	if ($gconfig{'os_type'} eq 'debian-linux') {
+		&set_ownership_permissions("dkim-filter", undef, 0700,
+					   $dkim->{'keyfile'});
+		}
+	elsif ($gconfig{'os_type'} eq 'redhat-linux') {
+		# XXX
+		}
 	&$second_print($text{'setup_done'});
 	}
 
@@ -204,6 +231,8 @@ if ($? || $pubkey !~ /BEGIN\s+PUBLIC\s+KEY/) {
 			     "<tt>".&html_escape($pubkey)."</tt>"));
 	return 0;
 	}
+$pubkey =~ s/\-+(BEGIN|END)\s+PUBLIC\s+KEY\-+//g;
+$pubkey =~ s/\s+//g;
 &$second_print($text{'setup_done'});
 
 # Add public key to DNS domain
@@ -230,34 +259,110 @@ my $selname = $dkim->{'selector'}.'.'.$dkname;
 my ($selrec) = grep { $_->{'name'} eq $selname && 
 		      $_->{'type'} eq 'TXT' } @recs;
 if (!$selrec) {
-	# XXX what if changed?
+	# Add new record
 	&bind8::create_record($fn, $selname, undef, 'IN', 'TXT',
                               '"k=rsa; t=y; p='.$pubkey.'"');
         $changed++;
 	}
+elsif ($selrec && $selrec->{'values'}->[0] !~ /p=\Q$pubkey\E/) {
+	# Fix existing record
+	my $val = $selrec->{'values'}->[0];
+	if ($val !~ s/p=([^;]+)/p=$pubkey/) {
+		$val = '"k=rsa; t=y; p='.$pubkey.'"';
+		}
+	&bind8::modify_record($selrec->{'file'}, $selrec, $selrec->{'name'},
+			      $selrec->{'ttl'}, $selrec->{'class'},
+			      $selrec->{'type'}, $val);
+        $changed++;
+	}
 if ($changed) {
-	# XXX DNSSEC?
 	&bind8::bump_soa_record($fn, \@recs);
+	if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec()) {
+		eval {
+			local $main::error_must_die = 1;
+			&bind8::sign_dnssec_zone_if_key($z, \@recs, 0);
+			};
+		}
 	&$second_print($text{'dkim_dnsadded'});
+	&restart_bind();
 	}
 else {
 	&$second_print($text{'dkim_dnsalready'});
 	}
 
 # Add domain, key and selector to config file
-# XXX
+&$first_print($text{'dkim_config'});
+if ($gconfig{'os_type'} eq 'debian-linux') {
+	&save_debian_dkim_config($debian_dkim_config, 
+				 "Domain", $dkim->{'domain'});
+	&save_debian_dkim_config($debian_dkim_config, 
+				 "Selector", $dkim->{'selector'});
+	&save_debian_dkim_config($debian_dkim_config, 
+				 "KeyFile", $dkim->{'keyfile'});
+	my %def;
+	&read_env_file($debian_dkim_default, \%def);
+	if (!$def{'SOCKET'}) {
+		$def{'SOCKET'} = "inet:8891\@localhost";
+		&write_env_file($debian_dkim_default, \%def);
+		$dkim->{'port'} = 8891;
+		}
+	}
+elsif ($gconfig{'os_type'} eq 'redhat-linux') {
+	# XXX
+	}
+&$second_print($text{'setup_done'});
 
 # Enable filter at boot time
-# XXX
+&$first_print($text{'dkim_boot'});
+if ($gconfig{'os_type'} eq 'debian-linux') {
+	&init::enable_at_boot("dkim-filter");
+	}
+elsif ($gconfig{'os_type'} eq 'redhat-linux') {
+	&init::enable_at_boot("dkim-milter");
+	}
+&$second_print($text{'setup_done'});
 
-# Start filter now
-# XXX
+# Re-start filter now
+&$first_print($text{'dkim_start'});
+my ($ok, $out);
+if ($gconfig{'os_type'} eq 'debian-linux') {
+	&init::stop_action("dkim-filter");
+	($ok, $out) = &init::start_action("dkim-filter");
+	}
+elsif ($gconfig{'os_type'} eq 'redhat-linux') {
+	&init::stop_action("dkim-milter");
+	($ok, $out) = &init::start_action("dkim-milter");
+	}
+if (!$ok) {
+	&$second_print(&text('dkim_estart',
+			"<tt>".&html_escape($out)."</tt>"));
+	return 0;
+	}
+&$second_print($text{'setup_done'});
 
-# Configure Postfix to use filter
-# XXX
+&$first_print($text{'dkim_mailserver'});
+&require_mail();
+if ($config{'mail_system'} == 0) {
+	# Configure Postfix to use filter
+	&postfix::set_current_value("milter_default_action", "accept");
+	&postfix::set_current_value("milter_protocol", 2);
+	my $milters = &postfix::get_current_value("smtpd_milters");
+	my $newmilter = $dkim->{'port'} ? "inet:localhost:$dkim->{'port'}"
+					: "local:$dkim->{'socket'}";
+	if ($milters !~ /\Q$newmilter\E/) {
+		$milters = $milters ? $milters.",".$newmilter : $newmilter;
+		&postfix::set_current_value("smtpd_milters", $milters);
+		&postfix::set_current_value("non_smtpd_milters", $milters);
+		}
 
-# Apply Postfix config
-# XXX
+	# Apply Postfix config
+	&postfix::reload_postfix();
+	}
+elsif ($config{'mail_system'} == 1) {
+	# Configure Sendmail to use filter
+	# XXX
+	}
+&$second_print($text{'setup_done'});
 
 return 1;
 }

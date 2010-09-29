@@ -21,11 +21,14 @@ $dkim->{'enabled'} = $in{'enabled'};
 &obtain_lock_dkim();
 if ($in{'enabled'}) {
 	# Turn on DKIM, or change domain
-	&enable_dkim($dkim);
+	$ok = &enable_dkim($dkim);
+	if (!$ok) {
+		print "<b>$text{'dkim_somefail'}</b><p>\n";
+		}
 	}
 else {
 	# Turn off DKIM
-	&disable_dkim($dkim);
+	$ok = &disable_dkim($dkim);
 	}
 &release_lock_dkim();
 &webmin_log($in{'enabled'} ? "enable" : "disable", "dkim");
