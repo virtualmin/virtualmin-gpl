@@ -328,15 +328,18 @@ foreach $e (@delemails) {
 	}
 if (defined($newusername)) {
 	# Generate a new username.. first check for a clash in this domain
-	$newusername eq $shortusername && &usage("New username is the same as the old");
+	$newusername eq $shortusername &&
+		&usage("New username is the same as the old");
 	($clash) = grep { &remove_userdom($_->{'user'}, $d) eq $newusername &&
 			  $_->{'unix'} == $user->{'unix'} } @users;
-	$clash && &usage("A user named $newusername already exists in this virtual server");
+	$clash && &usage("A user named $newusername already exists in this ".
+			 "virtual server");
 
 	# Append the suffix if needed
 	if (($utaken{$newusername} || $config{'append'}) &&
 	    !$user->{'noappend'}) {
-		$user->{'user'} = &userdom_name($newusername, $d);
+		$style = &guess_append_style($user->{'user'}, $d);
+		$user->{'user'} = &userdom_name($newusername, $d, $style);
 		}
 	else {
 		$user->{'user'} = $newusername;

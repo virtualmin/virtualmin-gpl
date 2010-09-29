@@ -2915,38 +2915,59 @@ else {
 	}
 }
 
-# userdom_name(name, &domain)
+# userdom_name(name, &domain, [force-append-style])
 # Returns a username with the domain prefix (usually group) appended somehow
 sub userdom_name
 {
-local $tmpl = &get_template($_[1]->{'template'});
-if ($tmpl->{'append_style'} == 0) {
-	return $_[0].".".$_[1]->{'prefix'};
+local ($name, $d, $append_style) = @_;
+if (!defined($append_style)) {
+	local $tmpl = &get_template($d->{'template'});
+	$append_style = $tmpl->{'append_style'};
 	}
-elsif ($tmpl->{'append_style'} == 1) {
-	return $_[0]."-".$_[1]->{'prefix'};
+if ($append_style == 0) {
+	return $name.".".$d->{'prefix'};
 	}
-elsif ($tmpl->{'append_style'} == 2) {
-	return $_[1]->{'prefix'}.".".$_[0];
+elsif ($append_style == 1) {
+	return $name."-".$d->{'prefix'};
 	}
-elsif ($tmpl->{'append_style'} == 3) {
-	return $_[1]->{'prefix'}."-".$_[0];
+elsif ($append_style == 2) {
+	return $d->{'prefix'}.".".$name;
 	}
-elsif ($tmpl->{'append_style'} == 4) {
-	return $_[0]."_".$_[1]->{'prefix'};
+elsif ($append_style == 3) {
+	return $d->{'prefix'}."-".$name;
 	}
-elsif ($tmpl->{'append_style'} == 5) {
-	return $_[1]->{'prefix'}."_".$_[0];
+elsif ($append_style == 4) {
+	return $name."_".$d->{'prefix'};
 	}
-elsif ($tmpl->{'append_style'} == 6) {
-	return $_[0]."\@".$_[1]->{'dom'};
+elsif ($append_style == 5) {
+	return $d->{'prefix'}."_".$name;
 	}
-elsif ($tmpl->{'append_style'} == 7) {
-	return $_[0]."\%".$_[1]->{'prefix'};
+elsif ($append_style == 6) {
+	return $name."\@".$d->{'dom'};
+	}
+elsif ($append_style == 7) {
+	return $name."\%".$d->{'prefix'};
 	}
 else {
-	&error("Unknown append_style $config{'append_style'}!");
+	&error("Unknown append_style $append_style");
 	}
+}
+
+# guess_append_style(username, &domain)
+# Returns the append_style number used for some username, or undef if unknown
+sub guess_append_style
+{
+local ($name, $d) = @_;
+local $p = $d->{'prefix'};
+local $dom = $d->{'dom'};
+return $name =~ /\.\Q$p\E$/ ? 0 :
+       $name =~ /\-\Q$p\E$/ ? 1 :
+       $name =~ /^\Q$p\E\./ ? 2 :
+       $name =~ /^\Q$p\E\-/ ? 3 :
+       $name =~ /_\Q$p\E$/ ? 4 :
+       $name =~ /^\Q$p\E_/ ? 5 :
+       $name =~ /\@\Q$dom\E$/ ? 6 :
+       $name =~ /\%\Q$p\E$/ ? 7 : undef;
 }
 
 # remove_userdom(name, &domain)
