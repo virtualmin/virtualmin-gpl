@@ -533,8 +533,10 @@ else {
 					   $config{'append'}) &&
 				    !$user->{'noappend'}) {
 					# New name has to include group
-					$user->{'user'} =
-						&userdom_name($in{'mailuser'}, $d);
+					$style = &guess_append_style(
+							$user->{'user'}, $d);
+					$user->{'user'} = &userdom_name(
+						$in{'mailuser'}, $d, $style);
 					}
 				else {
 					# Can rename without the dot
