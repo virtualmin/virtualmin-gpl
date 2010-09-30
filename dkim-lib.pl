@@ -76,7 +76,7 @@ if ($gconfig{'os_type'} eq 'debian-linux') {
 	# Read Debian dkim config file
 	my $conf = &get_debian_dkim_config($debian_dkim_config);
 	$rv{'enabled'} = &init::action_status("dkim-filter") == 2;
-	$rv{'domain'} = $conf->{'Domain'};
+	($rv{'domain'}) = split(/,/, $conf->{'Domain'});
 	$rv{'selector'} = $conf->{'Selector'};
 	$rv{'keyfile'} = $conf->{'KeyFile'};
 
@@ -293,12 +293,14 @@ else {
 # Add domain, key and selector to config file
 &$first_print($text{'dkim_config'});
 if ($gconfig{'os_type'} eq 'debian-linux') {
+	my @maildoms = map { $_->{'dom'} }
+			   grep { $_->{'mail'} } &list_domains();
 	&save_debian_dkim_config($debian_dkim_config, 
-				 "Domain", $dkim->{'domain'});
+		"Domain", join(",", &unique($dkim->{'domain'}, @maildoms)));
 	&save_debian_dkim_config($debian_dkim_config, 
-				 "Selector", $dkim->{'selector'});
+		"Selector", $dkim->{'selector'});
 	&save_debian_dkim_config($debian_dkim_config, 
-				 "KeyFile", $dkim->{'keyfile'});
+		"KeyFile", $dkim->{'keyfile'});
 	my %def;
 	&read_env_file($debian_dkim_default, \%def);
 	if (!$def{'SOCKET'}) {
@@ -365,6 +367,38 @@ elsif ($config{'mail_system'} == 1) {
 &$second_print($text{'setup_done'});
 
 return 1;
+}
+
+# update_dkim_domains([&domain, action])
+# Updates the list of domains to sign mail for, if needed
+sub update_dkim_domains
+{
+my ($d, $action) = @_;
+if ($gconfig{'os_type'} eq 'debian-linux' &&
+    -r $debian_dkim_config) {
+	# Update list of domains to sign in Debian config
+	&foreign_require("init");
+	&lock_file($debian_dkim_config);
+	my $conf = &get_debian_dkim_config($debian_dkim_config);
+	my ($maindom) = split(/,/, $conf->{'Domain'});
+	my @maildoms = map { $_->{'dom'} }
+			   grep { $_->{'mail'} } &list_domains();
+	if ($d && ($action eq 'setup' || $action eq 'modify')) {
+		push(@maildoms, $d->{'dom'});
+		}
+	elsif ($d && $action eq 'delete') {
+		@maildoms = grep { $_ ne $d->{'dom'} } @maildoms;
+		}
+	my $newdoms = join(",", &unique($dkim->{'domain'}, @maildoms));
+	if ($newdoms ne $conf->{'Domain'}) {
+		&save_debian_dkim_config($debian_dkim_config, "Domain",
+					 $newdoms);
+		}
+	&unlock_file($debian_dkim_config);
+	if (&init::action_status("dkim-filter")) {
+		&init::restart_action("dkim-filter");
+		}
+	}
 }
 
 1;

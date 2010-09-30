@@ -56,7 +56,6 @@
 	- Help page
 	- GPL version
 	- Logging
-	- Doesn't work on lentor?
 
  - Config check should detect Postfix case where mydestination contains a domain
    name, like the hostname
@@ -65,3 +64,6 @@
  - Make script install dir configurable
 	- https://www.virtualmin.com/node/15663
 	- Can only be completed after 3.82 is out
+
+ - Expired SSL cert monitoring
+

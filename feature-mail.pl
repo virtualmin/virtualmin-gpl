@@ -316,6 +316,10 @@ if (!$_[0]->{'nosecondaries'}) {
 if (!$_[0]->{'alias'}) {
 	&create_everyone_file($_[0]);
 	}
+
+# Add domain to DKIM list
+&update_dkim_domains($_[0], 'setup');
+
 &release_lock_mail($_[0]);
 }
 
@@ -456,6 +460,10 @@ if ($supports_bcc) {
 
 # Delete file containing all users' aliases
 &delete_everyone_file($_[0]);
+
+# Remove domain from DKIM list
+&update_dkim_domains($_[0], 'delete');
+
 &release_lock_mail($_[0]);
 }
 
@@ -701,6 +709,9 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 if (!$_[0]->{'alias'}) {
 	&create_everyone_file($_[0]);
 	}
+
+# Update domain in DKIM list
+&update_dkim_domains($_[0], 'modify');
 
 # Unlock mail and unix DBs the same number of times we locked them
 while($our_mail_locks--) {
