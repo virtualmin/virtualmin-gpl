@@ -130,6 +130,9 @@ elsif ($type eq "postgrey") {
 elsif ($type eq "link") {
 	return &text('log_'.$action.'_link', &html_escape($p->{'desc'}));
 	}
+elsif ($type eq "dkim") {
+	return &text('log_'.$action.'_dkim');
+	}
 elsif ($type eq "scheds") {
 	return &text('log_'.$action.'_scheds', $object);
 	}

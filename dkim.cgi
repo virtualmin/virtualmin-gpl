@@ -28,17 +28,6 @@ $dkim = &get_dkim_config();
 print &ui_table_row($text{'dkim_enabled'},
 	&ui_yesno_radio("enabled", $dkim && $dkim->{'enabled'}));
 
-# Domain for DKIM records
-&require_bind();
-@zones = grep { $_->{'type'} eq 'master' &&
-		$_->{'name'} ne '.' &&
-		$_->{'name'} !~ /in-addr/ } &bind8::list_zone_names();
-@zones = sort { $a->{'name'} cmp $b->{'name'} } @zones;
-print &ui_table_row($text{'dkim_domain'},
-	&ui_select("domain", $dkim && $dkim->{'domain'},
-		   [ map { $_->{'name'} } @zones ],
-		   1, 0, $dkim && $dkim->{'domain'} ? 1 : 0));
-
 # Selector for record
 print &ui_table_row($text{'dkim_selector'},
 	&ui_textbox("selector", $dkim && $dkim->{'selector'} || "default", 20));
