@@ -157,45 +157,6 @@ if (!$found) {
 &flush_file_lines($file);
 }
 
-# obtain_lock_dkim()
-# Locks all DKIM config files
-sub obtain_lock_dkim
-{
-foreach my $f (&get_dkim_config_files()) {
-	&lock_file($f);
-	}
-}
-
-# release_lock_dkim()
-# Remove locks on all DKIM config files
-sub release_lock_dkim
-{
-foreach my $f (reverse(&get_dkim_config_files())) {
-	&unlock_file($f);
-	}
-}
-
-# get_dkim_config_files()
-# Returns a list of all DKIM-related config files
-sub get_dkim_config_files
-{
-my @rv;
-if ($gconfig{'os_type'} eq 'debian-linux') {
-	push(@rv, $debian_dkim_config, $debian_dkim_default);
-	}
-elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-	push(@rv, $redhat_dkim_config);
-	}
-&require_mail();
-if ($config{'mail_system'} == 0) {
-	push(@rv, $postfix::config{'postfix_config_file'});
-	}
-elsif ($config{'mail_system'} == 1) {
-	push(@rv, $sendmail::config{'sendmail_cf'});
-	}
-return @rv;
-}
-
 # enable_dkim()
 # Perform all the steps needed to enable DKIM
 sub enable_dkim
@@ -249,17 +210,21 @@ if (!$pubkey) {
 &$second_print($text{'setup_done'});
 
 # Add public key to DNS domain
-&add_dkim_dns_records(\@doms, $pubkey);
+&add_dkim_dns_records(\@doms, $dkim);
 
 # Add domain, key and selector to config file
 &$first_print($text{'dkim_config'});
 if ($gconfig{'os_type'} eq 'debian-linux') {
+	&lock_file($debian_dkim_config);
 	&save_debian_dkim_config($debian_dkim_config, 
 		"Domain", join(",", map { $_->{'dom'} } @doms));
 	&save_debian_dkim_config($debian_dkim_config, 
 		"Selector", $dkim->{'selector'});
 	&save_debian_dkim_config($debian_dkim_config, 
 		"KeyFile", $dkim->{'keyfile'});
+	&unlock_file($debian_dkim_config);
+
+	&lock_file($debian_dkim_default);
 	my %def;
 	&read_env_file($debian_dkim_default, \%def);
 	if (!$def{'SOCKET'}) {
@@ -267,6 +232,7 @@ if ($gconfig{'os_type'} eq 'debian-linux') {
 		&write_env_file($debian_dkim_default, \%def);
 		$dkim->{'port'} = 8891;
 		}
+	&unlock_file($debian_dkim_default);
 	}
 elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 	# XXX
@@ -305,6 +271,7 @@ if (!$ok) {
 &require_mail();
 if ($config{'mail_system'} == 0) {
 	# Configure Postfix to use filter
+	&lock_file($postfix::config{'postfix_config_file'});
 	&postfix::set_current_value("milter_default_action", "accept");
 	&postfix::set_current_value("milter_protocol", 2);
 	my $milters = &postfix::get_current_value("smtpd_milters");
@@ -315,6 +282,7 @@ if ($config{'mail_system'} == 0) {
 		&postfix::set_current_value("smtpd_milters", $milters);
 		&postfix::set_current_value("non_smtpd_milters", $milters);
 		}
+	&unlock_file($postfix::config{'postfix_config_file'});
 
 	# Apply Postfix config
 	&postfix::reload_postfix();
@@ -343,7 +311,7 @@ $pubkey =~ s/\s+//g;
 return $pubkey;
 }
 
-# disable_dkim()
+# disable_dkim(&dkim)
 # Turn off the DKIM filter and mail server integration
 sub disable_dkim
 {
@@ -352,12 +320,13 @@ my ($dkim) = @_;
 
 # Remove from DNS
 my @doms = grep { $_->{'dns'} && $_->{'mail'} } &list_domains();
-&remove_dkim_dns_records(\@doms);
+&remove_dkim_dns_records(\@doms, $dkim);
 
 &$first_print($text{'dkim_unmailserver'});
 &require_mail();
 if ($config{'mail_system'} == 0) {
 	# Configure Postfix to use filter
+	&lock_file($postfix::config{'postfix_config_file'});
 	&postfix::set_current_value("milter_default_action", "accept");
 	&postfix::set_current_value("milter_protocol", 2);
 	my $milters = &postfix::get_current_value("smtpd_milters");
@@ -369,6 +338,7 @@ if ($config{'mail_system'} == 0) {
 		&postfix::set_current_value("smtpd_milters", $milters);
 		&postfix::set_current_value("non_smtpd_milters", $milters);
 		}
+	&unlock_file($postfix::config{'postfix_config_file'});
 
 	# Apply Postfix config
 	&postfix::reload_postfix();
@@ -428,7 +398,7 @@ if ($d && ($action eq 'setup' || $action eq 'modify')) {
 	&add_dkim_dns_records([ $d ], $dkim);
 	}
 elsif ($d && $action eq 'delete') {
-	&remove_dkim_dns_records([ $d ]);
+	&remove_dkim_dns_records([ $d ], $dkim);
 	}
 else {
 	&add_dkim_dns_records(\@doms, $dkim);
@@ -514,6 +484,7 @@ foreach my $d (@$doms) {
 				};
 			}
 		&$second_print($text{'dkim_dnsadded'});
+		$anychanged++;
 		}
 	else {
 		&$second_print($text{'dkim_dnsalready'});
@@ -523,13 +494,57 @@ foreach my $d (@$doms) {
 &register_post_action(\&restart_bind) if ($anychanged);
 }
 
-# remove_dkim_dns_records(&domains)
+# remove_dkim_dns_records(&domains, &dkim)
 # Delete all DKIM TXT records from the given DNS domains
 sub remove_dkim_dns_records
 {
-my ($doms) = @_;
-# XXX
-# XXX locking
+my ($doms, $dkim) = @_;
+my $anychanged = 0;
+foreach my $d (@$doms) {
+	&$first_print(&text('dkim_undns', "<tt>$d->{'dom'}</tt>"));
+	my $z = &get_bind_zone($d->{'dom'});
+	if (!$z) {
+		&$second_print($text{'dkim_ednszone'});
+		next;
+		}
+	&obtain_lock_dns($d);
+	my $file = &bind8::find("file", $z->{'members'});
+	my $fn = $file->{'values'}->[0];
+	my @recs = &bind8::read_zone_file($fn, $d->{'dom'});
+	my $withdot = $d->{'dom'}.'.';
+	my $dkname = '_domainkey.'.$withdot;
+	my ($dkrec) = grep { $_->{'name'} eq $dkname &&
+			     $_->{'type'} eq 'TXT' } @recs;
+	my $selname = $dkim->{'selector'}.'.'.$dkname;
+	my ($selrec) = grep { $_->{'name'} eq $selname &&
+                              $_->{'type'} eq 'TXT' } @recs;
+	my $changed = 0;
+	if ($selrec) {
+		&bind8::delete_record($fn, $selrec);
+		$changed++;
+		}
+	if ($dkrec) {
+		&bind8::delete_record($fn, $dkrec);
+		$changed++;
+		}
+	if ($changed) {
+		&bind8::bump_soa_record($fn, \@recs);
+		if (defined(&bind8::supports_dnssec) &&
+		    &bind8::supports_dnssec()) {
+			eval {
+				local $main::error_must_die = 1;
+				&bind8::sign_dnssec_zone_if_key($z, \@recs, 0);
+				};
+			}
+		&$second_print($text{'dkim_dnsremoved'});
+		$anychanged++;
+		}
+	else {
+		&$second_print($text{'dkim_dnsalreadygone'});
+		}
+	&release_lock_dns($d);
+	}
+&register_post_action(\&restart_bind) if ($anychanged);
 }
 
 1;

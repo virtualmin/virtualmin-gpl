@@ -58,7 +58,7 @@ $config{'virt'} = 1;
 $config{'virt6'} = 1;
 
 &generate_plugins_list($no_virtualmin_plugins ? '' : $config{'plugins'});
-@opt_features = ( 'unix', 'dir', 'mail', 'dns', 'web', 'webalizer', 'ssl',
+@opt_features = ( 'unix', 'dir', 'dns', 'mail', 'web', 'webalizer', 'ssl',
 		  'logrotate', 'mysql', 'postgres', 'ftp', 'spam', 'virus',
 		  $virtualmin_pro ? ( 'status' ) : ( ),
 		  'webmin' );

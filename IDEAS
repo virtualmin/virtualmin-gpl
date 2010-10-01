@@ -54,10 +54,7 @@
 	- https://www.virtualmin.com/node/15457
 	- Debian support?
 	- CHANGELOG
-	- Help page
 	- Logging
-	- Test verification
-	- Multi-domain support?
 	- Move locking into enable / disable dkim function
 
  - Config check should detect Postfix case where mydestination contains a domain

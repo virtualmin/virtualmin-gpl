@@ -13,7 +13,6 @@ $in{'selector'} =~ /^[a-z0-9\.\-\_]+/i || &error($text{'dkim_eselector'});
 $dkim->{'selector'} = $in{'selector'};
 $dkim->{'enabled'} = $in{'enabled'};
 
-&obtain_lock_dkim();
 if ($in{'enabled'}) {
 	# Turn on DKIM, or change settings
 	&ui_print_unbuffered_header(undef, $text{'dkim_title1'}, "");
@@ -27,7 +26,6 @@ else {
 	&ui_print_unbuffered_header(undef, $text{'dkim_title2'}, "");
 	$ok = &disable_dkim($dkim);
 	}
-&release_lock_dkim();
 &run_post_actions();
 &webmin_log($in{'enabled'} ? "enable" : "disable", "dkim");
 

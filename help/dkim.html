@@ -8,9 +8,9 @@ domain blacklisted. <p>
 
 When DKIM is enabled using Virtualmin your mail server will be configured
 to add a DKIM signature to all outgoing messages, and a public key will be
-added to XXX where??
-
-<p>
+added to each of the DNS domains on your system. Other mail servers can then
+use this key to verify the signature on relayed messages, thus ensuring that
+the sender's address was not forged. <p>
 
 <footer>
 
