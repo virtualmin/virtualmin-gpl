@@ -54,6 +54,7 @@
 	- https://www.virtualmin.com/node/15457
 	- Debian support?
 	- CHANGELOG
+	- CentOS support
 	- Logging
 	- Move locking into enable / disable dkim function
 
