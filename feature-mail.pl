@@ -10,6 +10,7 @@ if ($config{'mail_system'} == 1) {
 	&foreign_require("sendmail", "virtusers-lib.pl");
 	&foreign_require("sendmail", "aliases-lib.pl");
 	&foreign_require("sendmail", "boxes-lib.pl");
+	&foreign_require("sendmail", "features-lib.pl");
 	%sconfig = &foreign_config("sendmail");
 	$sendmail_conf = &sendmail::get_sendmailcf();
 	$sendmail_vfile = &sendmail::virtusers_file($sendmail_conf);

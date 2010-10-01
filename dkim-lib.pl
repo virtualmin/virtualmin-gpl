@@ -2,7 +2,9 @@
 
 $debian_dkim_config = "/etc/dkim-filter.conf";
 $debian_dkim_default = "/etc/default/dkim-filter";
-$redhat_dkim_config = "/etc/sysconfig/dkim-milter";
+
+$redhat_dkim_config = "/etc/mail/dkim-milter/dkim-filter.conf";
+$redhat_dkim_default = "/etc/sysconfig/dkim-milter";
 
 # check_dkim()
 # Returns undef if all the needed commands for DKIM are installed, or an error
@@ -93,28 +95,46 @@ if ($gconfig{'os_type'} eq 'debian-linux') {
 		}
 	}
 elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-	# XXX
+	# Read Fedora dkim config file
+	my $conf = &get_debian_dkim_config($redhat_dkim_config);
+	$rv{'enabled'} = &init::action_status("dkim-milter") == 2;
+	$rv{'selector'} = $conf->{'Selector'};
+	$rv{'keyfile'} = $conf->{'KeyFile'};
+
+	# Read defaults file that specifies port
+	my %def;
+	&read_env_file($redhat_dkim_default, \%def);
+	if ($def{'SOCKET'} =~ /^inet:(\d+)/) {
+		$rv{'port'} = $1;
+		}
+	elsif ($def{'SOCKET'} =~ /^local:([^:]+)/) {
+		$rv{'socket'} = $1;
+		}
+	else {
+		# Assume default socket
+		$rv = "/var/run/dkim-milter/dkim-milter.sock";
+		}
 	}
 
 # Check mail server
 &require_mail();
+my $wantmilter = $rv{'port'} ? "inet:localhost:$rv{'port'}" :
+		 $rv{'socket'} ? "local:$rv{'socket'}" : "";
 if ($config{'mail_system'} == 0) {
 	# Postfix config
 	my $milters = &postfix::get_real_value("smtpd_milters");
-	if ($rv{'port'}) {
-		if ($milters !~ /inet:localhost:(\d+)/ || $1 != $rv{'port'}) {
-			$rv{'enabled'} = 0;
-			}
-		}
-	elsif ($rv{'socket'}) {
-		if ($milters !~ /local:([^\s,:]+)/ || $1 ne $rv{'socket'}) {
-			$rv{'enabled'} = 0;
-			}
+	if ($wantmilter && $milters !~ /\Q$wantmilter\E/) {
+		$rv{'enabled'} = 0;
 		}
 	}
 elsif ($config{'mail_system'} == 1) {
 	# Sendmail config
-	# XXX
+	my @feats = &sendmail::list_features();
+	my ($milter) = grep { $_->{'text'} =~ /INPUT_MAIL_FILTER/ &&
+			      $_->{'text'} =~ /\Q$wantmilter\E/ } @feats;
+	if (!$milter) {
+		$rv{'enabled'} = 0;
+                }
 	}
 
 return \%rv;
@@ -194,7 +214,8 @@ if (!$dkim->{'keyfile'} || !-r $dkim->{'keyfile'}) {
 					   $dkim->{'keyfile'});
 		}
 	elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-		# XXX
+		&set_ownership_permissions("dkim-milter", undef, 0700,
+					   $dkim->{'keyfile'});
 		}
 	&unlock_file($dkim->{'keyfile'});
 	&$second_print($text{'setup_done'});
@@ -215,6 +236,7 @@ if (!$pubkey) {
 # Add domain, key and selector to config file
 &$first_print($text{'dkim_config'});
 if ($gconfig{'os_type'} eq 'debian-linux') {
+	# Save domains and key file in config
 	&lock_file($debian_dkim_config);
 	&save_debian_dkim_config($debian_dkim_config, 
 		"Domain", join(",", map { $_->{'dom'} } @doms));
@@ -224,6 +246,7 @@ if ($gconfig{'os_type'} eq 'debian-linux') {
 		"KeyFile", $dkim->{'keyfile'});
 	&unlock_file($debian_dkim_config);
 
+	# Set socket in defaults file if missing
 	&lock_file($debian_dkim_default);
 	my %def;
 	&read_env_file($debian_dkim_default, \%def);
@@ -235,7 +258,15 @@ if ($gconfig{'os_type'} eq 'debian-linux') {
 	&unlock_file($debian_dkim_default);
 	}
 elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-	# XXX
+	# Save domains and key file in config
+	&lock_file($redhat_dkim_config);
+	&save_debian_dkim_config($redhat_dkim_config, 
+		"Domain", join(",", map { $_->{'dom'} } @doms));
+	&save_debian_dkim_config($redhat_dkim_config, 
+		"Selector", $dkim->{'selector'});
+	&save_debian_dkim_config($redhat_dkim_config, 
+		"KeyFile", $dkim->{'keyfile'});
+	&unlock_file($redhat_dkim_config);
 	}
 &$second_print($text{'setup_done'});
 
@@ -269,14 +300,14 @@ if (!$ok) {
 
 &$first_print($text{'dkim_mailserver'});
 &require_mail();
+my $newmilter = $dkim->{'port'} ? "inet:localhost:$dkim->{'port'}"
+				: "local:$dkim->{'socket'}";
 if ($config{'mail_system'} == 0) {
 	# Configure Postfix to use filter
 	&lock_file($postfix::config{'postfix_config_file'});
 	&postfix::set_current_value("milter_default_action", "accept");
 	&postfix::set_current_value("milter_protocol", 2);
 	my $milters = &postfix::get_current_value("smtpd_milters");
-	my $newmilter = $dkim->{'port'} ? "inet:localhost:$dkim->{'port'}"
-					: "local:$dkim->{'socket'}";
 	if ($milters !~ /\Q$newmilter\E/) {
 		$milters = $milters ? $milters.",".$newmilter : $newmilter;
 		&postfix::set_current_value("smtpd_milters", $milters);
@@ -289,7 +320,28 @@ if ($config{'mail_system'} == 0) {
 	}
 elsif ($config{'mail_system'} == 1) {
 	# Configure Sendmail to use filter
-	# XXX
+	&lock_file($sendmail::config{'sendmail_mc'});
+	my @feats = &sendmail::list_features();
+	my ($milter) = grep { $_->{'text'} =~ /INPUT_MAIL_FILTER/ &&
+			      $_->{'text'} =~ /\Q$wantmilter\E/ } @feats;
+	if (!$milter) {
+		# Add to .mc file
+		&sendmail::create_feature({
+			'type' => 0,
+	    		'text' =>
+			  "INPUT_MAIL_FILTER(`dkim-filter', `S=$newmilter')" });
+
+		# Rebuild .cf file
+		my $cmd = "cd $sendmail::config{'sendmail_features'}/m4 ; ".
+			  "m4 $sendmail::config{'sendmail_features'}/m4/cf.m4 ".
+			  "$sendmail::config{'sendmail_mc'}";
+		&lock_file($sendmail::config{'sendmail_cf'});
+		&system_logged("$cmd 2>/dev/null >$config{'sendmail_cf'} ".
+			       "</dev/null");
+		&unlock_file($sendmail::config{'sendmail_cf'});
+		}
+	&unlock_file($sendmail::config{'sendmail_mc'});
+	&sendmail::restart_sendmail();
 	}
 &$second_print($text{'setup_done'});
 
@@ -421,7 +473,14 @@ if ($gconfig{'os_type'} eq 'debian-linux') {
 		}
 	}
 elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-	# XXX
+	&lock_file($redhat_dkim_config);
+	my $conf = &get_debian_dkim_config($redhat_dkim_config);
+	&save_debian_dkim_config($redhat_dkim_config, "Domain",
+		join(",", map { $_->{'dom'} } @$doms));
+	&unlock_file($redhat_dkim_config);
+	if (&init::action_status("dkim-milter")) {
+		&init::restart_action("dkim-milter");
+		}
 	}
 }
 

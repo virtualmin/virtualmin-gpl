@@ -5234,12 +5234,10 @@ dkim_installdesc=However, Virtualmin can attempt to automatically install the DK
 dkim_install=Install Now
 dkim_header=DomainKeys identified mail options
 dkim_enabled=Signing of outgoing mail enabled?
-dkim_domain=DNS domain for DKIM records
-dkim_selector=Selector for record name
+dkim_selector=Selector for DKIM record name
 dkim_emailsystem=DKIM is only supported with the Postfix and Sendmail mail servers
 dkim_return=DKIM form
 dkim_err=Failed to save DKIM settings
-dkim_edomain=No domain name selected
 dkim_eselector=Missing or invalid selector - must be a valid DNS record name
 
 dkim_title4=Install DKIM
