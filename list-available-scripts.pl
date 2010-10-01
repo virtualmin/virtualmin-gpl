@@ -45,14 +45,17 @@ while(@ARGV > 0) {
 	elsif ($a eq "--type") {
 		push(@types, shift(@ARGV));
 		}
+	elsif ($a eq "--core-only") {
+		$coreonly = 1;
+		}
 	else {
 		&usage();
 		}
 	}
 
 # Get and filter scripts
-@types = &list_scripts() if (!@types);
-@scripts = map { &get_script($_) } @types;
+@types = &list_scripts($coreonly) if (!@types);
+@scripts = map { &get_script($_, $coreonly) } @types;
 if ($source) {
 	@scripts = grep { $_->{'source'} eq $source } @scripts;
 	}

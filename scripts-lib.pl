@@ -1,13 +1,15 @@
 # Functions for scripts
 
-# list_scripts()
+# list_scripts([core-only])
 # Returns a list of installable script names
 sub list_scripts
 {
-local (@rv, $s);
+local ($coreonly) = @_;
+local @rv;
 
 # From core directories
-foreach $s (@scripts_directories) {
+foreach my $s ($coreonly ? "$module_root_directory/scripts"
+		         : @scripts_directories) {
 	opendir(DIR, $s);
 	foreach $f (readdir(DIR)) {
 		push(@rv, $1) if ($f =~ /^(.*)\.pl$/);
@@ -16,8 +18,10 @@ foreach $s (@scripts_directories) {
 	}
 
 # From plugins
-foreach my $p (&list_script_plugins()) {
-	push(@rv, &plugin_call($p, "scripts_list"));
+if (!$coreonly) {
+	foreach my $p (&list_script_plugins()) {
+		push(@rv, &plugin_call($p, "scripts_list"));
+		}
 	}
 
 return &unique(@rv);
@@ -44,16 +48,17 @@ if ($access{'allowedscripts'}) {
 return @rv;
 }
 
-# get_script(name)
+# get_script(name, [core-only])
 # Returns the structure for some script
 sub get_script
 {
-local ($name) = @_;
+local ($name, $coreonly) = @_;
 
 # Find all .pl files for this script, which may come from plugins or
 # the core
 local @sfiles;
-foreach $s (@scripts_directories) {
+foreach my $s ($coreonly ? "$module_root_directory/scripts"
+		         : @scripts_directories) {
 	local $spath = "$s/$name.pl";
 	local @st = stat($spath);
 	if (@st) {
@@ -63,12 +68,14 @@ foreach $s (@scripts_directories) {
 			 $s eq $scripts_directories[1] ? 'latest' : 'core' ]);
 		}
 	}
-foreach my $p (&list_script_plugins()) {
-	local $spath = &module_root_directory($p)."/$name.pl";
-	local @st = stat($spath);
-	if (@st) {
-		push(@sfiles, [ $spath, $st[9],
-			&guess_script_version($spath), 'plugin' ]);
+if (!$coreonly) {
+	foreach my $p (&list_script_plugins()) {
+		local $spath = &module_root_directory($p)."/$name.pl";
+		local @st = stat($spath);
+		if (@st) {
+			push(@sfiles, [ $spath, $st[9],
+				&guess_script_version($spath), 'plugin' ]);
+			}
 		}
 	}
 return undef if (!@sfiles);
