@@ -55,8 +55,6 @@
 	- Debian support?
 	- CHANGELOG
 	- CentOS support
-	- Logging
-	- Move locking into enable / disable dkim function
 
  - Config check should detect Postfix case where mydestination contains a domain
    name, like the hostname

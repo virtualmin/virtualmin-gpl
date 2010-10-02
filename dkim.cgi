@@ -32,6 +32,12 @@ print &ui_table_row($text{'dkim_enabled'},
 print &ui_table_row($text{'dkim_selector'},
 	&ui_textbox("selector", $dkim && $dkim->{'selector'} || "default", 20));
 
+# Force new private key
+if ($dkim && $dkim->{'keyfile'} && -r $dkim->{'keyfile'}) {
+	print &ui_table_row($text{'dkim_makenewkey'},
+		&ui_yesno_radio("newkey", 0));
+	}
+
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 

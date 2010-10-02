@@ -32,8 +32,13 @@ else {
 	}
 
 # Check mail server
+&require_mail();
 if ($config{'mail_system'} > 1) {
 	return $text{'dkim_emailsystem'};
+	}
+elsif ($config{'mail_system'} == 1) {
+	-r $sendmail::config{'sendmail_mc'} ||
+		return $text{'dkim_esendmailmc'};
 	}
 return undef;
 }
@@ -112,7 +117,7 @@ elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 		}
 	else {
 		# Assume default socket
-		$rv = "/var/run/dkim-milter/dkim-milter.sock";
+		$rv{'socket'} = "/var/run/dkim-milter/dkim-milter.sock";
 		}
 	}
 
@@ -163,31 +168,56 @@ sub save_debian_dkim_config
 {
 my ($file, $name, $value) = @_;
 my $lref = &read_file_lines($file);
-my $found = 0;
-foreach my $l (@$lref) {
-	if ($l =~ /^\s*#*\s*(\S+)\s*(\S.*)$/ && $1 eq $name) {
-		$l = "$name $value";
-		$found = 1;
-		last;
+if (defined($value)) {
+	# Change value
+	my $found = 0;
+	foreach my $l (@$lref) {
+		if ($l =~ /^\s*(\S+)\s*/ && $1 eq $name) {
+			$l = $name." ".$value;
+			$found = 1;
+			last;
+			}
+		}
+
+	# Change commented value
+	if (!$found) {
+		foreach my $l (@$lref) {
+			if ($l =~ /^\s*#+\s*(\S+)\s*/ && $1 eq $name) {
+				$l = $name." ".$value;
+				$found = 1;
+				last;
+				}
+			}
+		}
+
+	# Add to end
+	if (!$found) {
+		push(@$lref, "$name $value");
 		}
 	}
-if (!$found) {
-	push(@$lref, "$name $value");
+else {
+	# Comment out if set
+	foreach my $l (@$lref) {
+		if ($l =~ /^\s*(\S+)\s*/ && $1 eq $name) {
+			$l = "# ".$l;
+			}
+		}
 	}
 &flush_file_lines($file);
 }
 
-# enable_dkim()
+# enable_dkim(&dkim, [force-new-key])
 # Perform all the steps needed to enable DKIM
 sub enable_dkim
 {
-my ($dkim) = @_;
+my ($dkim, $newkey) = @_;
 &foreign_require("webmin");
 &foreign_require("init");
 
 # Find domains that we can enable DKIM for (those with mail and DNS)
 &$first_print($text{'dkim_domains'});
-my @doms = grep { $_->{'dns'} && $_->{'mail'} } &list_domains();
+my @doms = grep { $_->{'dns'} && $_->{'mail'} &&
+		  !$_->{'dns_submode'} } &list_domains();
 if (@doms) {
 	&$second_print(&text('dkim_founddomains', scalar(@doms)));
 	}
@@ -197,7 +227,7 @@ else {
 	}
 
 # Generate private key
-if (!$dkim->{'keyfile'} || !-r $dkim->{'keyfile'}) {
+if (!$dkim->{'keyfile'} || !-r $dkim->{'keyfile'} || $newkey) {
 	my $size = $config{'key_size'} || $webmin::default_key_size;
 	$dkim->{'keyfile'} ||= "/etc/dkim.key";
 	&$first_print(&text('dkim_newkey', "<tt>$dkim->{'keyfile'}</tt>"));
@@ -266,6 +296,8 @@ elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 		"Selector", $dkim->{'selector'});
 	&save_debian_dkim_config($redhat_dkim_config, 
 		"KeyFile", $dkim->{'keyfile'});
+	&save_debian_dkim_config($redhat_dkim_config,
+		"KeyList", undef);
 	&unlock_file($redhat_dkim_config);
 	}
 &$second_print($text{'setup_done'});
@@ -330,15 +362,7 @@ elsif ($config{'mail_system'} == 1) {
 			'type' => 0,
 	    		'text' =>
 			  "INPUT_MAIL_FILTER(`dkim-filter', `S=$newmilter')" });
-
-		# Rebuild .cf file
-		my $cmd = "cd $sendmail::config{'sendmail_features'}/m4 ; ".
-			  "m4 $sendmail::config{'sendmail_features'}/m4/cf.m4 ".
-			  "$sendmail::config{'sendmail_mc'}";
-		&lock_file($sendmail::config{'sendmail_cf'});
-		&system_logged("$cmd 2>/dev/null >$config{'sendmail_cf'} ".
-			       "</dev/null");
-		&unlock_file($sendmail::config{'sendmail_cf'});
+		&rebuild_sendmail_cf();
 		}
 	&unlock_file($sendmail::config{'sendmail_mc'});
 	&sendmail::restart_sendmail();
@@ -371,19 +395,20 @@ my ($dkim) = @_;
 &foreign_require("init");
 
 # Remove from DNS
-my @doms = grep { $_->{'dns'} && $_->{'mail'} } &list_domains();
+my @doms = grep { $_->{'dns'} && $_->{'mail'} &&
+	 	  !$_->{'dns_submode'} } &list_domains();
 &remove_dkim_dns_records(\@doms, $dkim);
 
 &$first_print($text{'dkim_unmailserver'});
 &require_mail();
+my $oldmilter = $dkim->{'port'} ? "inet:localhost:$dkim->{'port'}"
+				: "local:$dkim->{'socket'}";
 if ($config{'mail_system'} == 0) {
 	# Configure Postfix to use filter
 	&lock_file($postfix::config{'postfix_config_file'});
 	&postfix::set_current_value("milter_default_action", "accept");
 	&postfix::set_current_value("milter_protocol", 2);
 	my $milters = &postfix::get_current_value("smtpd_milters");
-	my $oldmilter = $dkim->{'port'} ? "inet:localhost:$dkim->{'port'}"
-					: "local:$dkim->{'socket'}";
 	if ($milters =~ /\Q$oldmilter\E/) {
 		$milters = join(",", grep { $_ ne $oldmilter }
 				split(/\s+,\s+/, $milters));
@@ -397,7 +422,16 @@ if ($config{'mail_system'} == 0) {
 	}
 elsif ($config{'mail_system'} == 1) {
 	# Configure Sendmail to not use filter
-	# XXX
+	&lock_file($sendmail::config{'sendmail_mc'});
+	my @feats = &sendmail::list_features();
+	my ($milter) = grep { $_->{'text'} =~ /INPUT_MAIL_FILTER/ &&
+			      $_->{'text'} =~ /\Q$oldmilter\E/ } @feats;
+	if ($milter) {
+		&sendmail::delete_feature($milter);
+		&rebuild_sendmail_cf();
+		}
+	&unlock_file($sendmail::config{'sendmail_mc'});
+	&sendmail::restart_sendmail();
 	}
 &$second_print($text{'setup_done'});
 
@@ -434,7 +468,8 @@ my $dkim = &get_dkim_config();
 return if (!$dkim || !$dkim->{'enabled'});
 
 # Enable DKIM for all domains with mail
-my @doms = grep { $_->{'mail'} && $_->{'dns'} } &list_domains();
+my @doms = grep { $_->{'mail'} && $_->{'dns'} &&
+		  !$_->{'dns_submode'} } &list_domains();
 if ($d && ($action eq 'setup' || $action eq 'modify')) {
 	push(@doms, $d);
 	}
@@ -604,6 +639,19 @@ foreach my $d (@$doms) {
 	&release_lock_dns($d);
 	}
 &register_post_action(\&restart_bind) if ($anychanged);
+}
+
+# rebuild_sendmail_cf()
+# Rebuild sendmail's .cf file from the .mc file
+sub rebuild_sendmail_cf
+{
+my $cmd = "cd $sendmail::config{'sendmail_features'}/m4 ; ".
+	  "m4 $sendmail::config{'sendmail_features'}/m4/cf.m4 ".
+	  "$sendmail::config{'sendmail_mc'}";
+&lock_file($sendmail::config{'sendmail_cf'});
+&system_logged("$cmd 2>/dev/null >$config{'sendmail_cf'} ".
+	       "</dev/null");
+&unlock_file($sendmail::config{'sendmail_cf'});
 }
 
 1;

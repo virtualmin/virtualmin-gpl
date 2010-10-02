@@ -16,7 +16,7 @@ $dkim->{'enabled'} = $in{'enabled'};
 if ($in{'enabled'}) {
 	# Turn on DKIM, or change settings
 	&ui_print_unbuffered_header(undef, $text{'dkim_title1'}, "");
-	$ok = &enable_dkim($dkim);
+	$ok = &enable_dkim($dkim, $in{'newkey'});
 	if (!$ok) {
 		print "<b>$text{'dkim_somefail'}</b><p>\n";
 		}
