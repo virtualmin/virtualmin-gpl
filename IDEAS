@@ -54,11 +54,7 @@
 	- https://www.virtualmin.com/node/15457
 	- Debian support?
 	- CHANGELOG
-	- CentOS support
-
- - Config check should detect Postfix case where mydestination contains a domain
-   name, like the hostname
-	- When does this fail exactly?
+	- Need package on CentOS
 
  - Make script install dir configurable
 	- https://www.virtualmin.com/node/15663

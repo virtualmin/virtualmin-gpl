@@ -299,6 +299,18 @@ elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 	&save_debian_dkim_config($redhat_dkim_config,
 		"KeyList", undef);
 	&unlock_file($redhat_dkim_config);
+
+	# Force use of tcp socket in defaults file for postfix
+	if ($config{'mail_system'} == 0 && $dkim->{'socket'}) {
+		&lock_file($redhat_dkim_default);
+		my %def;
+		&read_env_file($redhat_dkim_default, \%def);
+		$def{'SOCKET'} = "inet:8891\@localhost";
+		&write_env_file($redhat_dkim_default, \%def);
+		$dkim->{'port'} = 8891;
+		delete($dkim->{'socket'});
+		&unlock_file($redhat_dkim_default);
+		}
 	}
 &$second_print($text{'setup_done'});
 
@@ -404,10 +416,8 @@ my @doms = grep { $_->{'dns'} && $_->{'mail'} &&
 my $oldmilter = $dkim->{'port'} ? "inet:localhost:$dkim->{'port'}"
 				: "local:$dkim->{'socket'}";
 if ($config{'mail_system'} == 0) {
-	# Configure Postfix to use filter
+	# Configure Postfix to not use filter
 	&lock_file($postfix::config{'postfix_config_file'});
-	&postfix::set_current_value("milter_default_action", "accept");
-	&postfix::set_current_value("milter_protocol", 2);
 	my $milters = &postfix::get_current_value("smtpd_milters");
 	if ($milters =~ /\Q$oldmilter\E/) {
 		$milters = join(",", grep { $_ ne $oldmilter }
