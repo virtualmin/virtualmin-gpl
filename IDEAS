@@ -52,9 +52,9 @@
 
  - DKIM support
 	- https://www.virtualmin.com/node/15457
-	- Debian support?
-	- CHANGELOG
+	- Documentation
 	- Need package on CentOS
+	- Solaris support?
 
  - Make script install dir configurable
 	- https://www.virtualmin.com/node/15663

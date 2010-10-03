@@ -32,6 +32,10 @@ print &ui_table_row($text{'dkim_enabled'},
 print &ui_table_row($text{'dkim_selector'},
 	&ui_textbox("selector", $dkim && $dkim->{'selector'} || "default", 20));
 
+# Verify incoming email?
+print &ui_table_row($text{'dkim_verify'},
+	&ui_yesno_radio("verify", $dkim->{'verify'}));
+
 # Force new private key
 if ($dkim && $dkim->{'keyfile'} && -r $dkim->{'keyfile'}) {
 	print &ui_table_row($text{'dkim_makenewkey'},

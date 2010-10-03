@@ -1,0 +1,4 @@
+desc=DKIM Email Signing
+html=DKIM signing of outgoing email can now be enabled on the new DomainKeys Identified Mail page. This also configures verification of signatures on incoming email.
+master=1
+link=dkim.cgi

@@ -98,6 +98,17 @@ if ($gconfig{'os_type'} eq 'debian-linux') {
 	else {
 		$rv{'enabled'} = 0;
 		}
+
+	# Parse defaults option to get sign/verify mode
+	if ($def{'DAEMON_OPTS'} =~ /-b\s*(\S+)/) {
+		my $mode = $1;
+		$rv{'sign'} = $mode =~ /s/ ? 1 : 0;
+		$rv{'verify'} = $mode =~ /v/ ? 1 : 0;
+		}
+	else {
+		$rv{'sign'} = 1;
+		$rv{'verify'} = 1;
+		}
 	}
 elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 	# Read Fedora dkim config file
@@ -118,6 +129,17 @@ elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 	else {
 		# Assume default socket
 		$rv{'socket'} = "/var/run/dkim-milter/dkim-milter.sock";
+		}
+
+	# Parse defaults option to get sign/verify mode
+	if ($def{'EXTRA_FLAGS'} =~ /-b\s*(\S+)/) {
+		my $mode = $1;
+		$rv{'sign'} = $mode =~ /s/ ? 1 : 0;
+		$rv{'verify'} = $mode =~ /v/ ? 1 : 0;
+		}
+	else {
+		$rv{'sign'} = 1;
+		$rv{'verify'} = 1;
 		}
 	}
 
@@ -276,15 +298,24 @@ if ($gconfig{'os_type'} eq 'debian-linux') {
 		"KeyFile", $dkim->{'keyfile'});
 	&unlock_file($debian_dkim_config);
 
-	# Set socket in defaults file if missing
 	&lock_file($debian_dkim_default);
 	my %def;
 	&read_env_file($debian_dkim_default, \%def);
 	if (!$def{'SOCKET'}) {
+		# Set socket in defaults file if missing
 		$def{'SOCKET'} = "inet:8891\@localhost";
-		&write_env_file($debian_dkim_default, \%def);
 		$dkim->{'port'} = 8891;
 		}
+
+	# Save sign/verify mode flags
+	my $flags = $def{'DAEMON_OPTS'};
+	my $mode = ($dkim->{'sign'} ? "s" : "").
+		   ($dkim->{'verify'} ? "v" : "");
+	($flags =~ s/-b\s*(\S+)/-b $mode/) ||
+		($flags .= ($flags ? " " : "")."-b $mode");
+	$def{'DAEMON_OPTS'} = $flags;
+
+	&write_env_file($debian_dkim_default, \%def);
 	&unlock_file($debian_dkim_default);
 	}
 elsif ($gconfig{'os_type'} eq 'redhat-linux') {
@@ -300,17 +331,25 @@ elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 		"KeyList", undef);
 	&unlock_file($redhat_dkim_config);
 
-	# Force use of tcp socket in defaults file for postfix
+	&lock_file($redhat_dkim_default);
+	my %def;
 	if ($config{'mail_system'} == 0 && $dkim->{'socket'}) {
-		&lock_file($redhat_dkim_default);
-		my %def;
+		# Force use of tcp socket in defaults file for postfix
 		&read_env_file($redhat_dkim_default, \%def);
 		$def{'SOCKET'} = "inet:8891\@localhost";
-		&write_env_file($redhat_dkim_default, \%def);
 		$dkim->{'port'} = 8891;
 		delete($dkim->{'socket'});
-		&unlock_file($redhat_dkim_default);
 		}
+
+	# Save sign/verify mode flags
+	my $flags = $def{'EXTRA_FLAGS'};
+	my $mode = ($dkim->{'sign'} ? "s" : "").
+		   ($dkim->{'verify'} ? "v" : "");
+	($flags =~ s/-b\s*(\S+)/-b $mode/) ||
+		($flags .= ($flags ? " " : "")."-b $mode");
+	$def{'EXTRA_FLAGS'} = $flags;
+	&write_env_file($redhat_dkim_default, \%def);
+	&unlock_file($redhat_dkim_default);
 	}
 &$second_print($text{'setup_done'});
 

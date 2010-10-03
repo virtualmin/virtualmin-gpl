@@ -5235,6 +5235,7 @@ dkim_install=Install Now
 dkim_header=DomainKeys identified mail options
 dkim_enabled=Signing of outgoing mail enabled?
 dkim_selector=Selector for DKIM record name
+dkim_verify=Verify DKIM signatures on incoming email?
 dkim_makenewkey=Force generation of new private key?
 dkim_emailsystem=DKIM is only supported with the Postfix and Sendmail mail servers
 dkim_esendmailmc=DKIM cannot be enabled for Sendmail unless an M4 configuration file is used

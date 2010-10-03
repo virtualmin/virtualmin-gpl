@@ -12,6 +12,8 @@ $dkim ||= { };
 $in{'selector'} =~ /^[a-z0-9\.\-\_]+/i || &error($text{'dkim_eselector'});
 $dkim->{'selector'} = $in{'selector'};
 $dkim->{'enabled'} = $in{'enabled'};
+$dkim->{'verify'} = $in{'verify'};
+$dkim->{'sign'} = 1;
 
 if ($in{'enabled'}) {
 	# Turn on DKIM, or change settings
