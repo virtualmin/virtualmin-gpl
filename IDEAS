@@ -53,12 +53,14 @@
  - DKIM support
 	- https://www.virtualmin.com/node/15457
 	- Documentation
-	- Need package on CentOS
-	- Solaris support?
+	- Need package on CentOS (just use the one from epel?)
+	- FreeBSD support?
 
  - Make script install dir configurable
 	- https://www.virtualmin.com/node/15663
 	- Can only be completed after 3.82 is out
 
- - Expired SSL cert monitoring
-
+ - SSL cert monitor
+	- template
+	- help page in template
+	- print message when deleting

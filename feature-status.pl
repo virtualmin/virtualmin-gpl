@@ -27,6 +27,7 @@ sub setup_status
 {
 &$first_print($text{'setup_status'});
 &require_status();
+local $tmpl = &get_template($_[0]->{'template'});
 
 # Create website monitor
 local $serv = &make_monitor($_[0], 0);
@@ -39,10 +40,19 @@ if ($_[0]->{'ssl'}) {
 	local $serv = &make_monitor($_[0], 1);
 	&status::save_service($serv);
 	&$second_print($text{'setup_done'});
+
+	# Add SSL cert monitor
+	if ($tmpl->{'statussslcert'}) {
+		&$first_print($text{'setup_statussslcert'});
+		local $certserv = &make_sslcert_monitor($_[0]);
+		&status::save_service($certserv);
+		&$second_print($text{'setup_done'});
+		}
 	}
 }
 
 # make_monitor(&domain, ssl)
+# Returns a hash ref for a status object for monitoring a webserver
 sub make_monitor
 {
 local ($d, $ssl) = @_;
@@ -62,6 +72,29 @@ local $serv = { 'id' => $d->{'id'}.($ssl ? "_ssl" : "_web"),
 		'alarm' => $tmpl->{'statustimeout'},
 		'tmpl' => $tmpl->{'statustmpl'},
 		'page' => '/' };
+return $serv;
+}
+
+# make_sslcert_monitor(&domain)
+# Returns a hash ref for a status object for monitoring an SSL domain's cert
+sub make_sslcert_monitor
+{
+local ($d) = @_;
+local $tmpl = &get_template($d->{'template'});
+local $host = $d->{'dns'} ? "www.".$d->{'dom'}
+			  : &get_domain_http_hostname($d);
+local $serv = { 'id' => $d->{'id'}."_sslcert",
+		'type' => 'sslcert',
+		'desc' => "SSL cert $host",
+		'fails' => 1,
+		'email' => &monitor_email($d),
+		'url' => 'https://'.$host.':'.$d->{'web_sslport'}.'/',
+	        'days' => 7,
+		'mismatch' => 0,
+		'nosched' => 0,
+		'alarm' => $tmpl->{'statustimeout'},
+		'tmpl' => $tmpl->{'statustmpl'},
+	      };
 return $serv;
 }
 
@@ -105,9 +138,18 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} ||
 		}
 
 	if ($_[0]->{'ssl'}) {
-		# Update HTTPS monitor
+		# Update HTTPS monitor and cert monitor
 		&$first_print($text{'save_statusssl'});
 		&require_status();
+		local $certserv =&status::get_service($_[0]->{'id'}."_sslcert");
+		if ($certserv) {
+			$certserv->{'url'} =
+				'https://'.$host.':'.$_[0]->{'web_sslport'}.'/',
+			$certserv->{'desc'} = "SSL cert $host";
+			$certserv->{'email'} = $_[0]->{'emailto'};
+			&status::save_service($certserv);
+			}
+
 		local $serv = &status::get_service($_[0]->{'id'}."_ssl");
 		if ($serv) {
 			$serv->{'host'} = $host;
@@ -127,13 +169,18 @@ if ($_[0]->{'ssl'} && !$_[1]->{'ssl'}) {
 	&$first_print($text{'setup_status'});
 	local $serv = &make_monitor($_[0], 1);
 	&status::save_service($serv);
+	local $certserv = &make_sslcert_monitor($_[0]);
+	&status::save_service($certserv);
 	&$second_print($text{'setup_done'});
 	}
 elsif (!$_[0]->{'ssl'} && $_[1]->{'ssl'}) {
 	# Turned off SSL .. remove monitor
 	&require_status();
 	&$first_print($text{'delete_statusssl'});
-	&require_status();
+	local $certserv = &status::get_service($_[0]->{'id'}."_sslcert");
+	if ($certserv) {
+		&status::delete_service($certserv);
+		}
 	local $serv = &status::get_service($_[0]->{'id'}."_ssl");
 	if ($serv) {
 		&status::delete_service($serv);
@@ -164,6 +211,10 @@ else {
 if ($_[0]->{'ssl'}) {
 	# Remove HTTPS status monitor
 	&$first_print($text{'delete_statusssl'});
+	local $certserv = &status::get_service($_[0]->{'id'}."_sslcert");
+	if ($certserv) {
+		&status::delete_service($certserv);
+		}
 	local $serv = &status::get_service($_[0]->{'id'}."_ssl");
 	if ($serv) {
 		&status::delete_service($serv);
@@ -210,6 +261,11 @@ else {
 # Disable HTTPS status monitor
 if ($_[0]->{'ssl'}) {
 	&$first_print($text{'disable_statusssl'});
+	local $certserv = &status::get_service($_[0]->{'id'}."_sslcert");
+	if ($certserv) {
+		$certserv->{'nosched'} = 1;
+		&status::save_service($certserv);
+		}
 	local $serv = &status::get_service($_[0]->{'id'}."_ssl");
 	if ($serv) {
 		$serv->{'nosched'} = 1;
@@ -242,6 +298,11 @@ else {
 # Disable HTTPS status monitor
 if ($_[0]->{'ssl'}) {
 	&$first_print($text{'enable_statusssl'});
+	local $certserv = &status::get_service($_[0]->{'id'}."_sslcert");
+	if ($certserv) {
+		$certserv->{'nosched'} = 0;
+		&status::save_service($certserv);
+		}
 	local $serv = &status::get_service($_[0]->{'id'}."_ssl");
 	if ($serv) {
 		$serv->{'nosched'} = 0;
@@ -262,8 +323,7 @@ local ($tmpl) = @_;
 &require_status();
 
 local @status_fields = ( "status", "statusonly", "statustimeout",
-			 "statustimeout_def" );
-push(@status_fields, "statustmpl");
+			 "statustimeout_def", "statussslcert", "statustmpl" );
 print &ui_table_row(
 	&hlink($text{'tmpl_status'}, "template_status"),
 	&none_def_input("status", $tmpl->{'status'},
@@ -283,6 +343,14 @@ print &ui_table_row(
 	&hlink($text{'tmpl_statustimeout'}, "template_statustimeout"),
 	&ui_opt_textbox("statustimeout", $tmpl->{'statustimeout'},
 			5, &text('tmpl_statustimeoutdef', 10)));
+
+# Check SSL cert too
+print &ui_table_row(
+        &hlink($text{'tmpl_statussslcert'}, "template_statussslcert"),
+	&ui_radio("statussslcert", $tmpl->{'statussslcert'},
+		  [ [ 0, $text{'no'} ],
+		    [ 1, $text{'tmpl_statussslcert1'} ],
+		    [ 2, $text{'tmpl_statussslcert2'} ] ]));
 
 # Default email template
 local @stmpls = &status::list_templates();
@@ -313,6 +381,7 @@ if ($in{'status_mode'} != 1) {
 	if (defined($in{'statustmpl'})) {
 		$tmpl->{'statustmpl'} = $in{'statustmpl'};
 		}
+	$tmpl->{'statussslcert'} = $in{'statussslcert'};
 	}
 }
 
