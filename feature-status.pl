@@ -90,7 +90,7 @@ local $serv = { 'id' => $d->{'id'}."_sslcert",
 		'email' => &monitor_email($d),
 		'url' => 'https://'.$host.':'.$d->{'web_sslport'}.'/',
 	        'days' => 7,
-		'mismatch' => 0,
+		'mismatch' => $tmpl->{'statussslcert'} == 2 ? 1 : 0,
 		'nosched' => 0,
 		'alarm' => $tmpl->{'statustimeout'},
 		'tmpl' => $tmpl->{'statustmpl'},
@@ -211,10 +211,6 @@ else {
 if ($_[0]->{'ssl'}) {
 	# Remove HTTPS status monitor
 	&$first_print($text{'delete_statusssl'});
-	local $certserv = &status::get_service($_[0]->{'id'}."_sslcert");
-	if ($certserv) {
-		&status::delete_service($certserv);
-		}
 	local $serv = &status::get_service($_[0]->{'id'}."_ssl");
 	if ($serv) {
 		&status::delete_service($serv);
@@ -223,6 +219,13 @@ if ($_[0]->{'ssl'}) {
 	else {
 		&$second_print($text{'delete_nostatus'});
 		}
+
+	&$first_print($text{'delete_statussslcert'});
+	local $certserv = &status::get_service($_[0]->{'id'}."_sslcert");
+	if ($certserv) {
+		&status::delete_service($certserv);
+		}
+	&$second_print($text{'setup_done'});
 	}
 }
 

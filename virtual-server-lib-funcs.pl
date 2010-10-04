@@ -7136,7 +7136,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'statusonly'} = $tmpl->{'statusonly'};
 	$config{'statustimeout'} = $tmpl->{'statustimeout'};
 	$config{'statustmpl'} = $tmpl->{'statustmpl'};
-	$config{'statussslcert'} = $sslcert->{'statussslcert'};
+	$config{'statussslcert'} = $tmpl->{'statussslcert'};
 	if ($tmpl->{'mail_on'} eq 'none') {
 		# Don't send
 		$config{'domain_template'} = 'none';

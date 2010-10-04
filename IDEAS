@@ -59,8 +59,3 @@
  - Make script install dir configurable
 	- https://www.virtualmin.com/node/15663
 	- Can only be completed after 3.82 is out
-
- - SSL cert monitor
-	- template
-	- help page in template
-	- print message when deleting

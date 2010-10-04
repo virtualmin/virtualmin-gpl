@@ -1142,6 +1142,7 @@ delete_virus=Turning off virus filtering ..
 delete_virusnone=.. Procmail entry not found.
 delete_status=Removing status monitor for website ..
 delete_statusssl=Removing status monitor for SSL website ..
+delete_statussslcert=Removing status monitor for SSL certificate ..
 delete_nostatus=.. not found!
 delete_mxs=Removing secondary mail servers $1 ..
 delete_dom=Deleting sub-server $1 ..

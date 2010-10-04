@@ -1,0 +1,4 @@
+desc=SSL certificate expiry monitoring
+html=New virtual servers with an SSL website and status monitoring enabled will now also have the expiry date of their SSL certificate checked, to give advance warning when a cert is about to expire.
+master=1
+owner=1
