@@ -50,12 +50,6 @@
 
  - Move demo to srv2
 
- - DKIM support
-	- https://www.virtualmin.com/node/15457
-	- Documentation
-	- Need package on CentOS (just use the one from epel?)
-	- FreeBSD support?
-
  - Make script install dir configurable
 	- https://www.virtualmin.com/node/15663
 	- Can only be completed after 3.82 is out
