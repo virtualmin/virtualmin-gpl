@@ -1238,7 +1238,7 @@ S3 backups can now be use the new reduced redundancy storage option, which is ch
 Internationalized domain names are no longer converted to UTF-8 for output from API commands, to avoid the perl "wide character in print" warning.
 The interval between bandwidth monitoring cron job runs can now be configured.
 ---- Changes since 3.80 ----
-Updated the Drupal script installer to versions 5.23 and 6.19, phpMyAdmin to 2.11.11 and 3.3.7, CMS Made Simple to 1.8.2, Z-push to 1.4.2, Webcalendar to 1.2.3, ZenCart to 1.3.9f, SugarCRM to 6.0.2, Zikula to 1.2.4, Redmine to 1.0.2, Piwik to 1.0, Zenphoto to 1.3.1.2, phpMyFAQ to 2.6.9, OpenX to 2.8.7, FOSwiki to 1.0.10, Django to 1.2.3, Movable Type to 5.03, Mantis to 1.2.3, eGroupware to 1.8.001.20100929, Roundcube to 0.4.1, Instiki to 0.19, Dolibarr to 2.9.0, and PHProjekt to 6.0.4.
+Updated the Drupal script installer to versions 5.23 and 6.19, phpMyAdmin to 2.11.11 and 3.3.7, CMS Made Simple to 1.8.2, Z-push to 1.4.2, Webcalendar to 1.2.3, ZenCart to 1.3.9f, SugarCRM to 6.0.2, Zikula to 1.2.4, Redmine to 1.0.2, Piwik to 1.0, Zenphoto to 1.3.1.2, phpMyFAQ to 2.6.9, OpenX to 2.8.7, FOSwiki to 1.0.10, Django to 1.2.3, Movable Type to 5.03, Mantis to 1.2.3, eGroupware to 1.8.001.20100929, Roundcube to 0.4.2, Instiki to 0.19, Dolibarr to 2.9.0, and PHProjekt to 6.0.4.
 Renamed the OpenGoo script installer to Feng Office, and updated to version 1.7.2.
 Updated the Horde Webmail installer to version 1.2.7, Horde to 3.3.9, and all its components to their latest versions.
 Parallel bzip2 can now be used for backups if the pbzip2 command is installed, via a new option on the Virtualmin Configuration page.

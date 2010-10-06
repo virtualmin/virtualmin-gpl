@@ -1,6 +1,7 @@
 
 @roundcube_tables = ( 'cache', 'contacts', 'identities', 'session',
-		      'users', 'messages' );
+		      'users', 'messages', 'contactgroupmembers',
+		      'contactgroups', 'contacts' );
 
 # script_roundcube_desc()
 sub script_roundcube_desc
@@ -21,7 +22,7 @@ return "RoundCube Webmail is a browser-based multilingual IMAP client with an ap
 # script_roundcube_versions()
 sub script_roundcube_versions
 {
-return ( "0.4.1" );
+return ( "0.4.2" );
 }
 
 sub script_roundcube_category
