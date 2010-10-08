@@ -244,7 +244,8 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[1]->{'ssl_same'}) {
 	# IP has changed - maybe clear ssl_same field
 	local ($sslclash) = grep { $_->{'ip'} eq $_[0]->{'ip'} &&
 				   $_->{'ssl'} &&
-				   $_->{'id'} ne $_[0]->{'id'}} &list_domains();
+				   $_->{'id'} ne $_[0]->{'id'} &&
+				   !$_->{'ssl_same'} } &list_domains();
 	local $oldsslclash = &get_domain($_[1]->{'ssl_same'});
 	if ($sslclash && $_[1]->{'ssl_same'} eq $sslclash->{'id'}) {
 		# No need to change
