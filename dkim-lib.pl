@@ -529,15 +529,17 @@ my %done;
 @doms = grep { !$done{$_->{'id'}}++ } @doms;
 &set_dkim_domains(\@doms);
 
-# Add DNS records
-if ($d && ($action eq 'setup' || $action eq 'modify')) {
-	&add_dkim_dns_records([ $d ], $dkim);
-	}
-elsif ($d && $action eq 'delete') {
-	&remove_dkim_dns_records([ $d ], $dkim);
-	}
-else {
-	&add_dkim_dns_records(\@doms, $dkim);
+# Add or remove DNS records
+if ($d->{'dns'}) {
+	if ($d && ($action eq 'setup' || $action eq 'modify')) {
+		&add_dkim_dns_records([ $d ], $dkim);
+		}
+	elsif ($d && $action eq 'delete') {
+		&remove_dkim_dns_records([ $d ], $dkim);
+		}
+	else {
+		&add_dkim_dns_records(\@doms, $dkim);
+		}
 	}
 }
 
