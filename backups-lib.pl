@@ -1072,7 +1072,8 @@ if ($ok) {
 		&$first_print($text{'restore_first2'});
 		opendir(DIR, $backup);
 		@files = map { "$backup/$_" }
-			     grep { $_ ne "." && $_ ne ".." } readdir(DIR);
+			     grep { $_ ne "." && $_ ne ".." &&
+				    !/\.info$/ } readdir(DIR);
 		closedir(DIR);
 		}
 	else {
