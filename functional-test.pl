@@ -77,7 +77,7 @@ while(@ARGV > 0) {
 		$test_subdomain = shift(@ARGV);
 		}
 	elsif ($a eq "--test") {
-		push(@tests, shift(@ARGV));
+		push(@tests, split(/\s+/, shift(@ARGV)));
 		}
 	elsif ($a eq "--skip-test") {
 		push(@skips, shift(@ARGV));
@@ -920,7 +920,7 @@ $migrate_tests = [
 	  'args' => [ [ 'domain', $migration_ensim_domain ],
 		      [ 'multiline' ] ],
 	  'grep' => [ 'Username: apservice',
-		      'Features: unix dir mail dns web webalizer',
+		      'Features: unix dir dns mail web webalizer',
 		      'Server quota:\s+30\s+MB' ],
 	  'migrate' => 'ensim',
 	},
@@ -954,7 +954,7 @@ $migrate_tests = [
 	  'args' => [ [ 'domain', $migration_cpanel_domain ],
 		      [ 'multiline' ] ],
 	  'grep' => [ 'Username: adam',
-		      'Features: unix dir mail dns web webalizer mysql',
+		      'Features: unix dir dns mail web webalizer logrotate mysql',
 		    ],
 	  'migrate' => 'cpanel',
 	},
@@ -987,7 +987,7 @@ $migrate_tests = [
 	  'args' => [ [ 'domain', $migration_plesk_domain ],
 		      [ 'multiline' ] ],
 	  'grep' => [ 'Username: rtsadmin',
-		      'Features: unix dir mail dns web webalizer logrotate mysql spam virus',
+		      'Features: unix dir dns mail web webalizer logrotate mysql spam virus',
 		    ],
 	  'migrate' => 'plesk',
 	},
@@ -1020,7 +1020,7 @@ $migrate_tests = [
 	  'args' => [ [ 'domain', $migration_plesk_windows_domain ],
 		      [ 'multiline' ] ],
 	  'grep' => [ 'Username: sbcher',
-		      'Features: unix dir mail dns web logrotate spam',
+		      'Features: unix dir dns mail web logrotate spam',
 		    ],
 	  'migrate' => 'plesk_windows',
 	},
@@ -2728,7 +2728,7 @@ $plans_tests = [
 		      [ 'admin-quota', 8888 ],
 		      [ 'max-doms', 7 ],
 		      [ 'max-bw', 77777777 ],
-		      [ 'features', 'mail dns web' ],
+		      [ 'features', 'dns mail web' ],
 		      [ 'capabilities', 'users aliases scripts' ],
 		      [ 'nodbname' ] ],
 	},
@@ -2741,7 +2741,7 @@ $plans_tests = [
 		      'Administrator block quota: 8888',
 		      'Maximum doms: 7',
 		      'Maximum bw: 77777777',
-		      'Allowed features: mail dns web',
+		      'Allowed features: dns mail web',
 		      'Edit capabilities: users aliases scripts',
 		      'Can choose database names: No' ],
 	},
@@ -2787,7 +2787,7 @@ $plans_tests = [
 		      [ 'admin-quota', 8888 ],
 		      [ 'max-doms', 7 ],
 		      [ 'max-bw', 77777777 ],
-		      [ 'features', 'mail dns web' ],
+		      [ 'features', 'dns mail web' ],
 		      [ 'capabilities', 'users aliases scripts' ],
 		      [ 'nodbname' ] ],
 	},
@@ -2810,7 +2810,7 @@ $plans_tests = [
 		      'User block quota: 8888',
 		      'Maximum sub-servers: 7',
 		      'Bandwidth limit: 74.17',
-		      'Allowed features: mail dns web',
+		      'Allowed features: dns mail web',
 		      'Edit capabilities: users aliases scripts',
 		      'Can choose database names: No' ],
 	},
@@ -2822,7 +2822,7 @@ $plans_tests = [
 		      [ 'no-admin-quota' ],
 		      [ 'max-doms', 8 ],
 		      [ 'max-bw', 88888888 ],
-		      [ 'features', 'mail dns web webalizer' ],
+		      [ 'features', 'dns mail web webalizer' ],
 		      [ 'no-nodbname' ],
 		      [ 'apply' ] ],
 	},
@@ -2835,7 +2835,7 @@ $plans_tests = [
 		      'User block quota: Unlimited',
 		      'Maximum sub-servers: 8',
 		      'Bandwidth limit: 84.77',
-		      'Allowed features: mail dns web webalizer',
+		      'Allowed features: dns mail web webalizer',
 		      'Can choose database names: Yes' ],
 	},
 
