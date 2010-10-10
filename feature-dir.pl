@@ -629,13 +629,17 @@ local ($tmpl) = @_;
 print &ui_table_row(&hlink($text{'tmpl_skel'}, "template_skel"),
 	&none_def_input("skel", $tmpl->{'skel'}, $text{'tmpl_skeldir'}, 0,
 			$tmpl->{'standard'} ? 1 : 0, undef,
-			[ "skel", "skel_subs" ])."\n".
+			[ "skel", "skel_subs", "skel_nosubs" ])."\n".
 	&ui_textbox("skel", $tmpl->{'skel'} eq "none" ? undef
 						      : $tmpl->{'skel'}, 40));
 
 # Perform substitions on skel file contents
 print &ui_table_row(&hlink($text{'tmpl_skel_subs'}, "template_skel_subs"),
 	&ui_yesno_radio("skel_subs", int($tmpl->{'skel_subs'})));
+
+# File patterns to exclude
+print &ui_table_row(&hlink($text{'tmpl_skel_nosubs'}, "template_skel_nosubs"),
+	&ui_textbox("skel_nosubs", $tmpl->{'skel_nosubs'}, 60));
 }
 
 # parse_template_dir(&tmpl)
@@ -649,6 +653,7 @@ $tmpl->{'skel'} = &parse_none_def("skel");
 if ($in{"skel_mode"} == 2) {
 	-d $in{'skel'} || &error($text{'tmpl_eskel'});
 	$tmpl->{'skel_subs'} = $in{'skel_subs'};
+	$tmpl->{'skel_nosubs'} = $in{'skel_nosubs'};
 	}
 }
 

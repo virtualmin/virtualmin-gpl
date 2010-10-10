@@ -2224,6 +2224,7 @@ if ($d) {
 	if ($tmpl->{'skel_subs'}) {
 		foreach my $c (@copied) {
 			if (-r $c && !-d $c && !-l $c &&
+			    !&skip_skel_subs($c, $tmpl->{'skel_nosubs'}) &&
 			    &guess_mime_type($c) !~ /^image\//) {
 				local $data =
 				    &read_file_contents_as_domain_user($d, $c);
@@ -2235,6 +2236,24 @@ if ($d) {
 			}
 		}
 	}
+}
+
+# skip_skel_subs(path, nosubs-list)
+# Returns 1 if some filename is on the list of those to skip for substitution
+sub skip_skel_subs
+{
+my ($path, $nosubs_str) = @_;
+return 0 if ($nosubs_str !~ /\S/);
+my @nosubs = &split_quoted_string($nosubs_str);
+foreach my $ns (@nosubs) {
+	$path =~ /^(\S+)\/([^\/]+)$/ || next;
+	my ($dir, $file) = ($1, $2);
+	my @matches = glob("$dir/$ns");
+	if (&indexof($path, @matches) >= 0) {
+		return 1;
+		}
+	}
+return 0;
 }
 
 # find_skel_files(dir)
@@ -6896,6 +6915,7 @@ push(@rv, { 'id' => 0,
 	    'postgres_encoding' => $config{'postgres_encoding'},
 	    'skel' => $config{'virtual_skel'} || "none",
 	    'skel_subs' => int($config{'virtual_skel_subs'}),
+	    'skel_nosubs' => $config{'virtual_skel_nosubs'},
 	    'frame' => &cat_file("framefwd-template"),
 	    'gacl' => 1,
 	    'gacl_umode' => $config{'gacl_umode'},
@@ -7182,6 +7202,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'virtual_skel'} = $tmpl->{'skel'} eq "none" ? "" :
 				  $tmpl->{'skel'};
 	$config{'virtual_skel_subs'} = $tmpl->{'skel_subs'};
+	$config{'virtual_skel_nosubs'} = $tmpl->{'skel_nosubs'};
 	$config{'gacl_umode'} = $tmpl->{'gacl_umode'};
 	$config{'gacl_ugroups'} = $tmpl->{'gacl_ugroups'};
 	$config{'gacl_users'} = $tmpl->{'gacl_users'};

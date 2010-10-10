@@ -2576,6 +2576,7 @@ tmpl_initsub=Initially selected template for sub-servers?
 tmpl_name=Template name
 tmpl_skel=Skeleton directory for files
 tmpl_skel_subs=Substitute variables in contents?
+tmpl_skel_nosubs=File patterns not to substitute
 tmpl_skeldir=Directory
 tmpl_mail=Email message to send upon server creation
 tmpl_mailbelow=Message below ..

@@ -1250,3 +1250,5 @@ Added links to the Manage SSL Certificate page to download the key in PEM or PKC
 DKIM signing of outgoing email can now be enabled on the new DomainKeys Identified Mail page. This also configures verification of signatures on incoming email.
 New virtual servers with an SSL website and status monitoring enabled will now also have the expiry date of their SSL certificate checked, to give advance warning when a cert is about to expire.
 Added an Italian translation, thanks to Andrea Di Mario.
+---- Changes since 3.81 ----
+Added a template option to specify file types to not perform variable substitution on when copying from the /etc/skel directory.
