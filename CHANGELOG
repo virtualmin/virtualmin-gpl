@@ -1252,4 +1252,4 @@ New virtual servers with an SSL website and status monitoring enabled will now a
 Added an Italian translation, thanks to Andrea Di Mario.
 ---- Changes since 3.81 ----
 Added a template option to specify file types to not perform variable substitution on when copying from the /etc/skel directory.
-Updated the Trac script installer to version 0.12.1.
+Updated the Trac script installer to version 0.12.1, and TWiki to 5.0.1.

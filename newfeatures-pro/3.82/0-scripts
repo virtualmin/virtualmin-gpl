@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Trac script installer to version 0.12.1.
+html=Updated the Trac script installer to version 0.12.1, and TWiki to 5.0.1.
 master=1
 reseller=1
 domain=1
