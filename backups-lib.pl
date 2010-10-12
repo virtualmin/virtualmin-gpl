@@ -185,8 +185,9 @@ if (@jobs) {
 # something went wrong.
 sub backup_domains
 {
-local ($desturl, $doms, $features, $dirfmt, $skip, $opts, $homefmt, $vbs,
+local ($desturls, $doms, $features, $dirfmt, $skip, $opts, $homefmt, $vbs,
        $mkdir, $onebyone, $asowner, $cbfunc, $increment, $onsched) = @_;
+$desturls = [ $desturls ] if (!ref($desturls));
 local $backupdir;
 local $transferred_sz;
 
@@ -212,125 +213,136 @@ if (!$tar) {
 	}
 
 # See if we can actually connect to the remote server
-local ($mode, $user, $pass, $server, $path, $port) =
-	&parse_backup_url($desturl);
-if ($mode == 0 && $asd) {
-	# Always create virtualmin-backup directory
-	$mkdir = 1;
-	}
-if ($mode == 1) {
-	# Try FTP login
-	local $ftperr;
-	&ftp_onecommand($server, "PWD", \$ftperr, $user, $pass, $port);
-	if ($ftperr) {
-		&$first_print(&text('backup_eftptest', $ftperr));
-		return (0, 0, $doms);
+local $anyremote;
+local $anylocal;
+foreach my $desturl (@$desturls) {
+	local ($mode, $user, $pass, $server, $path, $port) =
+		&parse_backup_url($desturl);
+	$anyremote = 1 if ($mode > 0);
+	$anylocal = 1 if ($mode == 0);
+	if ($mode == 0 && $asd) {
+		# Always create virtualmin-backup directory
+		$mkdir = 1;
 		}
-	if ($dirfmt) {
-		# Also create the destination directory and all parents now
-		# (ignoring any error, as it may already exist)
-		local @makepath = split(/\//, $path);
-		local $prefix;
-		if ($makepath[0] eq '') {
-			# Remove leading /
-			$prefix = '/';
-			shift(@makepath);
+	if ($mode == 1) {
+		# Try FTP login
+		local $ftperr;
+		&ftp_onecommand($server, "PWD", \$ftperr, $user, $pass, $port);
+		if ($ftperr) {
+			&$first_print(&text('backup_eftptest', $ftperr));
+			return (0, 0, $doms);
 			}
-		for(my $i=0; $i<@makepath; $i++) {
-			local $makepath = $prefix.join("/", @makepath[0..$i]);
-			local $mkdirerr;
-			&ftp_onecommand($server, "MKD $makepath", \$mkdirerr,
-					$user, $pass, $port);
-			}
-		}
-	}
-elsif ($mode == 2) {
-	# Try a dummy SCP
-	local $scperr;
-	local $r = ($user ? "$user\@" : "").
-		   "$server:/tmp/virtualmin-copy-test.$user";
-	local $temp = &transname();
-	open(TEMP, ">$temp");
-	close(TEMP);
-	&scp_copy($temp, $r, $pass, \$scperr, $port);
-	if ($scperr) {
-		# Copy to /tmp failed .. try current dir instead
-		$scperr = undef;
-		$r = ($user ? "$user\@" : "").
-		     "$server:virtualmin-copy-test.$user";
-		&scp_copy($temp, $r, $pass, \$scperr, $port);
-		}
-	if ($scperr) {
-		&$first_print(&text('backup_escptest', $scperr));
-		return (0, 0, $doms);
-		}
-	if ($dirfmt && $path ne "/") {
-		# Also create the destination directory now, by scping an
-		# empty dir.
-		$path =~ /^(.*)\/([^\/]+)\/?$/;
-		local ($pathdir, $pathfile) = ($1, $2);
-		local $empty = &transname($pathfile);
-		local $mkdirerr;
-		&make_dir($empty, 0755);
-		local $r = ($user ? "$user\@" : "")."$server:$pathdir";
-		&scp_copy($empty, $r, $pass, \$mkdirerr, $port);
-		&unlink_file($empty);
-		}
-	}
-elsif ($mode == 3) {
-	# Connect to S3 service and create bucket
-	if (!$path && !$dirfmt) {
-		&$first_print($text{'backup_es3nopath'});
-		return (0, 0, $doms);
-		}
-	local $cerr = &check_s3();
-	if ($cerr) {
-		&$first_print($cerr);
-		return (0, 0, $doms);
-		}
-	local $err = &init_s3_bucket($user, $pass, $server, $s3_upload_tries);
-	if ($err) {
-		&$first_print($err);
-		return (0, 0, $doms);
-		}
-	}
-elsif ($mode == 0) {
-	# Make sure target is / is not a directory
-	if ($dirfmt && !-d $desturl) {
-		# Looking for a directory
-		if ($mkdir) {
-			local $derr = &make_backup_dir($desturl, 0755, 1, $asd)
-				if (!-d $desturl);
-			if ($derr) {
-				&$first_print(&text('backup_emkdir',
-						   "<tt>$desturl</tt>", $derr));
-				return (0, 0, $doms);
+		if ($dirfmt) {
+			# Also create the destination directory and all parents
+			# (ignoring any error, as it may already exist)
+			local @makepath = split(/\//, $path);
+			local $prefix;
+			if ($makepath[0] eq '') {
+				# Remove leading /
+				$prefix = '/';
+				shift(@makepath);
+				}
+			for(my $i=0; $i<@makepath; $i++) {
+				local $makepath = $prefix.
+						  join("/", @makepath[0..$i]);
+				local $mkdirerr;
+				&ftp_onecommand($server, "MKD $makepath",
+					\$mkdirerr, $user, $pass, $port);
 				}
 			}
-		else {
-			&$first_print(&text('backup_edirtest',
-					    "<tt>$desturl</tt>"));
+		}
+	elsif ($mode == 2) {
+		# Try a dummy SCP
+		local $scperr;
+		local $r = ($user ? "$user\@" : "").
+			   "$server:/tmp/virtualmin-copy-test.$user";
+		local $temp = &transname();
+		open(TEMP, ">$temp");
+		close(TEMP);
+		&scp_copy($temp, $r, $pass, \$scperr, $port);
+		if ($scperr) {
+			# Copy to /tmp failed .. try current dir instead
+			$scperr = undef;
+			$r = ($user ? "$user\@" : "").
+			     "$server:virtualmin-copy-test.$user";
+			&scp_copy($temp, $r, $pass, \$scperr, $port);
+			}
+		if ($scperr) {
+			&$first_print(&text('backup_escptest', $scperr));
+			return (0, 0, $doms);
+			}
+		if ($dirfmt && $path ne "/") {
+			# Also create the destination directory now, by scping
+			# an empty dir.
+			$path =~ /^(.*)\/([^\/]+)\/?$/;
+			local ($pathdir, $pathfile) = ($1, $2);
+			local $empty = &transname($pathfile);
+			local $mkdirerr;
+			&make_dir($empty, 0755);
+			local $r = ($user ? "$user\@" : "")."$server:$pathdir";
+			&scp_copy($empty, $r, $pass, \$mkdirerr, $port);
+			&unlink_file($empty);
+			}
+		}
+	elsif ($mode == 3) {
+		# Connect to S3 service and create bucket
+		if (!$path && !$dirfmt) {
+			&$first_print($text{'backup_es3nopath'});
+			return (0, 0, $doms);
+			}
+		local $cerr = &check_s3();
+		if ($cerr) {
+			&$first_print($cerr);
+			return (0, 0, $doms);
+			}
+		local $err = &init_s3_bucket($user, $pass, $server,
+					     $s3_upload_tries);
+		if ($err) {
+			&$first_print($err);
 			return (0, 0, $doms);
 			}
 		}
-	elsif (!$dirfmt && -d $desturl) {
-		&$first_print(&text('backup_enotdirtest', "<tt>$desturl</tt>"));
-		return (0, 0, $doms);
-		}
-	if (!$dirfmt && $mkdir) {
-		# Create parent directories if requested
-		local $dirdest = $desturl;
-		$dirdest =~ s/\/[^\/]+$//;
-		if ($dirdest && !-d $dirdest) {
-			local $derr = &make_backup_dir($dirdest, 0755, 0, $asd);
-			if ($derr) {
-				&$first_print(&text('backup_emkdir',
-						   "<tt>$dirdest</tt>", $derr));
+	elsif ($mode == 0) {
+		# Make sure target is / is not a directory
+		if ($dirfmt && !-d $desturl) {
+			# Looking for a directory
+			if ($mkdir) {
+				local $derr = &make_backup_dir(
+						$desturl, 0755, 1, $asd)
+					if (!-d $desturl);
+				if ($derr) {
+					&$first_print(&text('backup_emkdir',
+						   "<tt>$desturl</tt>", $derr));
+					return (0, 0, $doms);
+					}
+				}
+			else {
+				&$first_print(&text('backup_edirtest',
+						    "<tt>$desturl</tt>"));
 				return (0, 0, $doms);
 				}
 			}
+		elsif (!$dirfmt && -d $desturl) {
+			&$first_print(&text('backup_enotdirtest',
+					    "<tt>$desturl</tt>"));
+			return (0, 0, $doms);
+			}
+		if (!$dirfmt && $mkdir) {
+			# Create parent directories if requested
+			local $dirdest = $desturl;
+			$dirdest =~ s/\/[^\/]+$//;
+			if ($dirdest && !-d $dirdest) {
+				local $derr = &make_backup_dir(
+						$dirdest, 0755, 0, $asd);
+				if ($derr) {
+					&$first_print(&text('backup_emkdir',
+						   "<tt>$dirdest</tt>", $derr));
+					return (0, 0, $doms);
+					}
+				}
+			}
+		$onebyone = 0;	# Local backups are always written directly
 		}
-	$onebyone = 0;	# Local backups are always written directly
 	}
 
 if (!$homefmt) {
@@ -356,7 +368,7 @@ else {
 
 # Work out where to write the final tar files to
 local ($dest, @destfiles, %destfiles_map);
-if ($mode >= 1) {
+if ($anyremote) {
 	# Write archive to temporary file/dir first, for later upload
 	$path =~ /^(.*)\/([^\/]+)\/?$/;
 	local ($pathdir, $pathfile) = ($1, $2);
@@ -374,7 +386,7 @@ if ($dirfmt && !-d $dest) {
 		return (0, 0, $doms);
 		}
 	}
-elsif (!$dirfmt && $mode >= 1 && $asd) {
+elsif (!$dirfmt && $anyremote && $asd) {
 	# Backing up to a temp file as domain owner .. create first
 	&open_tempfile(DEST, ">$dest");
 	&close_tempfile(DEST);
@@ -528,7 +540,7 @@ DOMAIN: foreach $d (@$doms) {
 		push(@errdoms, $d);
 		}
 
-	if ($onebyone && $homefmt && $dok && $mode != 0) {
+	if ($onebyone && $homefmt && $dok && $anyremote) {
 		# Transfer this domain now
 		local $err;
 		local $df = "$d->{'dom'}.$hfsuffix";
@@ -538,46 +550,54 @@ DOMAIN: foreach $d (@$doms) {
 				 $donefeatures{$d->{'dom'}} };
 		local $infotemp = &transname();
 		&uncat_file($infotemp, &serialise_variable($binfo));
-		if ($mode == 2) {
-			# Via SCP
-			&$first_print($text{'backup_upload2'});
-			local $r = ($user ? "$user\@" : "")."$server:$path";
-			&scp_copy("$dest/$df", $r, $pass, \$err, $port);
-			&scp_copy($infotemp, $r.".info", $pass,
-				  \$err, $port) if (!$err);
-			}
-		elsif ($mode == 1) {
-			# Via FTP
-			&$first_print($text{'backup_upload'});
-			&ftp_upload($server, "$path/$df", "$dest/$df", \$err,
-				    undef, $user, $pass, $port,
-				    $ftp_upload_tries);
-			&ftp_upload($server, "$path/$df.info", $infotemp, \$err,
-				    undef, $user, $pass, $port,
-				    $ftp_upload_tries) if (!$err);
-			}
-		if ($mode == 3) {
-			# Via S3 upload
-			&$first_print($text{'backup_upload3'});
-			$err = &s3_upload($user, $pass, $server,
-					  "$dest/$df",
-					  $path ? $path."/".$df : $df,
-					  $binfo, $s3_upload_tries, $port);
-			}
-		&unlink_file($infotemp);
-		if ($err) {
-			&$second_print(&text('backup_uploadfailed', $err));
-			$ok = 0;
-			}
-		else {
-			&$second_print($text{'setup_done'});
-			local @tst = stat("$dest/$df");
-			$transferred_sz += $tst[7];
-			if ($asd) {
-				&record_backup_bandwidth($d, 0, $tst[7], 
-							 $tstart, time());
+		foreach my $desturl (@$desturls) {
+			local ($mode, $user, $pass, $server, $path, $port) =
+				&parse_backup_url($desturl);
+			if ($mode == 2) {
+				# Via SCP
+				&$first_print($text{'backup_upload2'});
+				local $r = ($user ? "$user\@" : "").
+					   "$server:$path";
+				&scp_copy("$dest/$df", $r, $pass, \$err, $port);
+				&scp_copy($infotemp, $r.".info", $pass,
+					  \$err, $port) if (!$err);
+				}
+			elsif ($mode == 1) {
+				# Via FTP
+				&$first_print($text{'backup_upload'});
+				&ftp_upload($server, "$path/$df", "$dest/$df",
+					    \$err, undef, $user, $pass, $port,
+					    $ftp_upload_tries);
+				&ftp_upload($server, "$path/$df.info",
+					    $infotemp, \$err, undef, $user,
+					    $pass, $port, $ftp_upload_tries)
+						if (!$err);
+				}
+			if ($mode == 3) {
+				# Via S3 upload
+				&$first_print($text{'backup_upload3'});
+				$err = &s3_upload($user, $pass, $server,
+						  "$dest/$df",
+						  $path ? $path."/".$df : $df,
+						  $binfo, $s3_upload_tries,
+						  $port);
+				}
+			if ($err) {
+				&$second_print(&text('backup_uploadfailed',
+						     $err));
+				$ok = 0;
+				}
+			else {
+				&$second_print($text{'setup_done'});
+				local @tst = stat("$dest/$df");
+				$transferred_sz += $tst[7];
+				if ($asd) {
+					&record_backup_bandwidth(
+					    $d, 0, $tst[7], $tstart, time());
+					}
 				}
 			}
+		&unlink_file($infotemp);
 
 		# Delete .backup directory
 		&execute_command("rm -rf ".quotemeta("$d->{'home'}/.backup"));
@@ -785,170 +805,188 @@ else {
 	}
 $sz += $transferred_sz;
 
-if ($ok && $mode == 1 && (@destfiles || !$dirfmt)) {
-	# Upload file(s) to FTP server
-	&$first_print($text{'backup_upload'});
-	local $err;
-	local $infotemp = &transname();
-	if ($dirfmt) {
-		# Need to upload entire directory .. which has to be created
-		foreach my $df (@destfiles) {
+foreach my $desturl (@$desturls) {
+	local ($mode, $user, $pass, $server, $path, $port) =
+		&parse_backup_url($desturl);
+	if ($ok && $mode == 1 && (@destfiles || !$dirfmt)) {
+		# Upload file(s) to FTP server
+		&$first_print($text{'backup_upload'});
+		local $err;
+		local $infotemp = &transname();
+		if ($dirfmt) {
+			# Need to upload entire directory .. which has to be
+			# created first
+			foreach my $df (@destfiles) {
+				local $tstart = time();
+				local $d = $destfiles_map{$df};
+				local $n = $d eq "virtualmin" ? "virtualmin"
+							      : $d->{'dom'};
+				local $binfo = { $n => $donefeatures{$n} };
+				&uncat_file($infotemp,
+					    &serialise_variable($binfo));
+				&ftp_upload($server, "$path/$df", "$dest/$df",
+					    \$err, undef, $user, $pass, $port,
+					    $ftp_upload_tries);
+				&ftp_upload($server, "$path/$df.info",
+					    $infotemp, \$err,
+					    undef, $user, $pass, $port,
+					    $ftp_upload_tries) if (!$err);
+				if ($err) {
+					&$second_print(
+					    &text('backup_uploadfailed', $err));
+					$ok = 0;
+					last;
+					}
+				elsif ($asd && $d) {
+					# Log bandwidth used by this domain
+					local @tst = stat("$dest/$df");
+					&record_backup_bandwidth(
+					    $d, 0, $tst[7], $tstart, time());
+					}
+				}
+			}
+		else {
+			# Just a single file
 			local $tstart = time();
-			local $d = $destfiles_map{$df};
-			local $n = $d eq "virtualmin" ? "virtualmin"
-						      : $d->{'dom'};
-			local $binfo = { $n => $donefeatures{$n} };
-			&uncat_file($infotemp, &serialise_variable($binfo));
-			&ftp_upload($server, "$path/$df", "$dest/$df", \$err,
-				    undef, $user, $pass, $port,
-				    $ftp_upload_tries);
-			&ftp_upload($server, "$path/$df.info", $infotemp, \$err,
+			&uncat_file($infotemp,
+				    &serialise_variable(\%donefeatures));
+			&ftp_upload($server, $path, $dest, \$err, undef, $user,
+				    $pass, $port, $ftp_upload_tries);
+			&ftp_upload($server, $path.".info", $infotemp, \$err,
 				    undef, $user, $pass, $port,
 				    $ftp_upload_tries) if (!$err);
 			if ($err) {
-				&$second_print(
-					&text('backup_uploadfailed', $err));
+				&$second_print(&text('backup_uploadfailed',
+						     $err));
 				$ok = 0;
-				last;
 				}
-			elsif ($asd && $d) {
-				# Log bandwidth used by this domain
-				local @tst = stat("$dest/$df");
-				&record_backup_bandwidth($d, 0, $tst[7], 
+			elsif ($asd) {
+				# Log bandwidth used by whole transfer
+				local @tst = stat($dest);
+				&record_backup_bandwidth($asd, 0, $tst[7], 
 							 $tstart, time());
 				}
 			}
+		&unlink_file($infotemp);
+		&$second_print($text{'setup_done'}) if ($ok);
 		}
-	else {
-		# Just a single file
-		local $tstart = time();
-		&uncat_file($infotemp, &serialise_variable(\%donefeatures));
-		&ftp_upload($server, $path, $dest, \$err, undef, $user, $pass,
-			    $port, $ftp_upload_tries);
-		&ftp_upload($server, $path.".info", $infotemp, \$err, undef,
-			    $user, $pass, $port, $ftp_upload_tries) if (!$err);
+	elsif ($ok && $mode == 2 && (@destfiles || !$dirfmt)) {
+		# Upload to SSH server with scp
+		&$first_print($text{'backup_upload2'});
+		local $err;
+		local $r = ($user ? "$user\@" : "")."$server:$path";
+		local $infotemp = &transname();
+		if ($dirfmt) {
+			# Need to upload entire directory
+			local $tstart = time();
+			&scp_copy("$dest/*", $r, $pass, \$err, $port);
+			if ($err) {
+				# Target dir didn't exist, so scp just the
+				# directory and all files
+				$err = undef;
+				&scp_copy($dest, $r, $pass, \$err, $port);
+				}
+			# Upload each domain's .info file
+			foreach my $df (@destfiles) {
+				local $d = $destfiles_map{$df};
+				local $n = $d eq "virtualmin" ? "virtualmin"
+							      : $d->{'dom'};
+				local $binfo = { $n => $donefeatures{$n} };
+				&uncat_file($infotemp,
+					    &serialise_variable($binfo));
+				&scp_copy($infotemp, $r."/$df.info", $pass,
+					  \$err, $port) if (!$err);
+				}
+			if (!$err && $asd) {
+				# Log bandwidth used by domain
+				foreach my $df (@destfiles) {
+					local $d = $destfiles_map{$df};
+					if ($d) {
+						local @tst = stat("$dest/$df");
+						&record_backup_bandwidth(
+							$d, 0, $tst[7],
+							$tstart, time());
+						}
+					}
+				}
+			}
+		else {
+			# Just a single file
+			local $tstart = time();
+			&uncat_file($infotemp,
+				    &serialise_variable(\%donefeatures));
+			&scp_copy($dest, $r, $pass, \$err, $port);
+			&scp_copy($infotemp, $r.".info", $pass, \$err, $port)
+				if (!$err);
+			if ($asd && !$err) {
+				# Log bandwidth used by whole transfer
+				local @tst = stat($dest);
+				&record_backup_bandwidth($asd, 0, $tst[7], 
+							 $tstart, time());
+				}
+			}
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
 			$ok = 0;
 			}
-		elsif ($asd) {
-			# Log bandwidth used by whole transfer
-			local @tst = stat($dest);
-			&record_backup_bandwidth($asd, 0, $tst[7], 
-						 $tstart, time());
-			}
+		&unlink_file($infotemp);
+		&$second_print($text{'setup_done'}) if ($ok);
 		}
-	&unlink_file($infotemp);
-	&$second_print($text{'setup_done'}) if ($ok);
-	}
-elsif ($ok && $mode == 2 && (@destfiles || !$dirfmt)) {
-	# Upload to SSH server with scp
-	&$first_print($text{'backup_upload2'});
-	local $err;
-	local $r = ($user ? "$user\@" : "")."$server:$path";
-	local $infotemp = &transname();
-	if ($dirfmt) {
-		# Need to upload entire directory
-		local $tstart = time();
-		&scp_copy("$dest/*", $r, $pass, \$err, $port);
-		if ($err) {
-			# Target dir didn't exist, so scp just the directory
-			$err = undef;
-			&scp_copy($dest, $r, $pass, \$err, $port);
-			}
-		# Upload each domain's .info file
-		foreach my $df (@destfiles) {
-			local $d = $destfiles_map{$df};
-                        local $n = $d eq "virtualmin" ? "virtualmin"
-                                                      : $d->{'dom'};
-                        local $binfo = { $n => $donefeatures{$n} };
-			&uncat_file($infotemp, &serialise_variable($binfo));
-			&scp_copy($infotemp, $r."/$df.info", $pass, \$err,
-				  $port) if (!$err);
-			}
-		if (!$err && $asd) {
-			# Log bandwidth used by domain
+	elsif ($ok && $mode == 3 && (@destfiles || !$dirfmt)) {
+		# Upload to S3 server
+		local $err;
+		&$first_print($text{'backup_upload3'});
+		if ($dirfmt) {
+			# Upload an entire directory of files
 			foreach my $df (@destfiles) {
+				local $tstart = time();
 				local $d = $destfiles_map{$df};
-				if ($d) {
+				local $n = $d eq "virtualmin" ? "virtualmin"
+							      : $d->{'dom'};
+				local $binfo = { $n => $donefeatures{$n} };
+				$err = &s3_upload($user, $pass, $server,
+						  "$dest/$df",
+						  $path ? $path."/".$df : $df,
+						  $binfo, $s3_upload_tries,
+						  $port);
+				if ($err) {
+					&$second_print(
+					    &text('backup_uploadfailed', $err));
+					$ok = 0;
+					last;
+					}
+				elsif ($asd && $d) {
+					# Log bandwidth used by this domain
 					local @tst = stat("$dest/$df");
 					&record_backup_bandwidth(
 						$d, 0, $tst[7], $tstart,time());
 					}
 				}
 			}
-		}
-	else {
-		# Just a single file
-		local $tstart = time();
-		&uncat_file($infotemp, &serialise_variable(\%donefeatures));
-		&scp_copy($dest, $r, $pass, \$err, $port);
-		&scp_copy($infotemp, $r.".info", $pass, \$err,$port) if (!$err);
-		if ($asd && !$err) {
-			# Log bandwidth used by whole transfer
-			local @tst = stat($dest);
-			&record_backup_bandwidth($asd, 0, $tst[7], 
-						 $tstart, time());
-			}
-		}
-	if ($err) {
-		&$second_print(&text('backup_uploadfailed', $err));
-		$ok = 0;
-		}
-	&unlink_file($infotemp);
-	&$second_print($text{'setup_done'}) if ($ok);
-	}
-elsif ($ok && $mode == 3 && (@destfiles || !$dirfmt)) {
-	# Upload to S3 server
-	local $err;
-	&$first_print($text{'backup_upload3'});
-	if ($dirfmt) {
-		# Upload an entire directory of files
-		foreach my $df (@destfiles) {
+		else {
+			# Upload one file to the bucket
+			local %donebydname;
 			local $tstart = time();
-			local $d = $destfiles_map{$df};
-			local $n = $d eq "virtualmin" ? "virtualmin"
-						      : $d->{'dom'};
-			local $binfo = { $n => $donefeatures{$n} };
-			$err = &s3_upload($user, $pass, $server, "$dest/$df",
-					  $path ? $path."/".$df : $df,
-					  $binfo, $s3_upload_tries, $port);
+			$err = &s3_upload($user, $pass, $server, $dest,
+					  $path, \%donefeatures,
+					  $s3_upload_tries, $port);
 			if ($err) {
-				&$second_print(
-					&text('backup_uploadfailed', $err));
+				&$second_print(&text('backup_uploadfailed',
+						     $err));
 				$ok = 0;
-				last;
 				}
-			elsif ($asd && $d) {
-				# Log bandwidth used by this domain
-				local @tst = stat("$dest/$df");
-				&record_backup_bandwidth($d, 0, $tst[7], 
+			elsif ($asd) {
+				# Log bandwidth used by whole transfer
+				local @tst = stat($dest);
+				&record_backup_bandwidth($asd, 0, $tst[7], 
 							 $tstart, time());
 				}
 			}
+		&$second_print($text{'setup_done'}) if ($ok);
 		}
-	else {
-		# Upload one file to the bucket
-		local %donebydname;
-		local $tstart = time();
-		$err = &s3_upload($user, $pass, $server, $dest,
-				  $path, \%donefeatures, $s3_upload_tries,
-				  $port);
-		if ($err) {
-			&$second_print(&text('backup_uploadfailed', $err));
-			$ok = 0;
-			}
-		elsif ($asd) {
-			# Log bandwidth used by whole transfer
-			local @tst = stat($dest);
-			&record_backup_bandwidth($asd, 0, $tst[7], 
-						 $tstart, time());
-			}
-		}
-	&$second_print($text{'setup_done'}) if ($ok);
 	}
 
-if ($mode >= 1) {
+if ($anyremote) {
 	# Always delete the temporary destination
 	&execute_command("rm -rf ".quotemeta($dest));
 	}
@@ -2316,7 +2354,16 @@ return &has_command($config{'pbzip2'} ? 'pbzip2' : 'bzip2');
 # Returns the full path to the bunzip2-compatible command
 sub get_bunzip2_command
 {
-return &has_command($config{'pbunzip2'} ? 'pbunzip2' : 'bunzip2');
+if (!$config{'pbzip2'}) {
+	return &has_command('bunzip2');
+	}
+elsif (&has_command('pbunzip2')) {
+	return &has_command('pbunzip2');
+	}
+else {
+	# Fall back to using -d option
+	return &has_command('pbzip2').' -d';
+	}
 }
 
 # get_backup_actions()

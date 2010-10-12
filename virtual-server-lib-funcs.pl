@@ -9314,7 +9314,8 @@ local @needs = ( undef,
 		 [ "tar" ],
 		);
 foreach my $n (@{$needs[$format]}) {
-	&has_command($n) || return &text('addstyle_ecmd', "<tt>$m</tt>");
+	my ($noargs) = split(/\s+/, $n);
+	&has_command($noargs) || return &text('addstyle_ecmd', "<tt>$n</tt>");
 	}
 local ($qfile, $qdir) = ( quotemeta($file), quotemeta($dir) );
 local @cmds;
