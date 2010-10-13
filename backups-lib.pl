@@ -212,6 +212,10 @@ if (!$tar) {
 	return (0, 0, $doms);
 	}
 
+# Order destinations to put local ones first
+@$desturls = sort { ($a =~ /^\// ? 0 : 1) <=> ($b =~ /^\// ? 0 : 1) }
+		  @$desturls;
+
 # See if we can actually connect to the remote server
 local $anyremote;
 local $anylocal;
@@ -368,15 +372,17 @@ else {
 
 # Work out where to write the final tar files to
 local ($dest, @destfiles, %destfiles_map);
-if ($anyremote) {
+local ($mode0, $user0, $pass0, $server0, $path0, $port0) =
+	&parse_backup_url($desturls->[0]);
+if (!$anylocal) {
 	# Write archive to temporary file/dir first, for later upload
-	$path =~ /^(.*)\/([^\/]+)\/?$/;
+	$path0 =~ /^(.*)\/([^\/]+)\/?$/;
 	local ($pathdir, $pathfile) = ($1, $2);
 	$dest = &transname($$."-".$pathfile);
 	}
 else {
-	# Can write direct to destination
-	$dest = $path;
+	# Can write direct to destination (which we might also upload from)
+	$dest = $path0;
 	}
 if ($dirfmt && !-d $dest) {
 	# If backing up to a directory that doesn't exist yet, create it
@@ -553,18 +559,34 @@ DOMAIN: foreach $d (@$doms) {
 		foreach my $desturl (@$desturls) {
 			local ($mode, $user, $pass, $server, $path, $port) =
 				&parse_backup_url($desturl);
-			if ($mode == 2) {
-				# Via SCP
-				&$first_print($text{'backup_upload2'});
-				local $r = ($user ? "$user\@" : "").
-					   "$server:$path";
-				&scp_copy("$dest/$df", $r, $pass, \$err, $port);
-				&scp_copy($infotemp, $r.".info", $pass,
-					  \$err, $port) if (!$err);
+			if ($mode == 0) {
+				# Copy to another local directory
+				next if ($path eq $path0);
+				&$first_print(&text('backup_copy',
+						    "<tt>$path/$df</tt>"));
+				my ($ok, $err);
+				if ($asd) {
+					($ok, $err) = 
+					  &copy_source_dest_as_domain_user(
+					  $asd, "$path0/$df", "$path/$df");
+					}
+				else {
+					($ok, $err) = &copy_source_dest(
+					  "$path0/$df", "$path/$df");
+					}
+				if (!$ok) {
+					&$second_print(
+					  &text('backup_copyfailed', $err));
+					}
+				else {
+					&$second_print($text{'setup_done'});
+					$err = undef;
+					}
 				}
 			elsif ($mode == 1) {
 				# Via FTP
-				&$first_print($text{'backup_upload'});
+				&$first_print(&text('backup_upload',
+						    "<tt>$server</tt>"));
 				&ftp_upload($server, "$path/$df", "$dest/$df",
 					    \$err, undef, $user, $pass, $port,
 					    $ftp_upload_tries);
@@ -573,7 +595,17 @@ DOMAIN: foreach $d (@$doms) {
 					    $pass, $port, $ftp_upload_tries)
 						if (!$err);
 				}
-			if ($mode == 3) {
+			elsif ($mode == 2) {
+				# Via SCP
+				&$first_print(&text('backup_upload2',
+						    "<tt>$server</tt>"));
+				local $r = ($user ? "$user\@" : "").
+					   "$server:$path";
+				&scp_copy("$dest/$df", $r, $pass, \$err, $port);
+				&scp_copy($infotemp, $r.".info", $pass,
+					  \$err, $port) if (!$err);
+				}
+			elsif ($mode == 3) {
 				# Via S3 upload
 				&$first_print($text{'backup_upload3'});
 				$err = &s3_upload($user, $pass, $server,
@@ -591,7 +623,7 @@ DOMAIN: foreach $d (@$doms) {
 				&$second_print($text{'setup_done'});
 				local @tst = stat("$dest/$df");
 				$transferred_sz += $tst[7];
-				if ($asd) {
+				if ($asd && $mode != 0) {
 					&record_backup_bandwidth(
 					    $d, 0, $tst[7], $tstart, time());
 					}
@@ -810,7 +842,7 @@ foreach my $desturl (@$desturls) {
 		&parse_backup_url($desturl);
 	if ($ok && $mode == 1 && (@destfiles || !$dirfmt)) {
 		# Upload file(s) to FTP server
-		&$first_print($text{'backup_upload'});
+		&$first_print(&text('backup_upload', "<tt>$server</tt>"));
 		local $err;
 		local $infotemp = &transname();
 		if ($dirfmt) {
@@ -872,7 +904,7 @@ foreach my $desturl (@$desturls) {
 		}
 	elsif ($ok && $mode == 2 && (@destfiles || !$dirfmt)) {
 		# Upload to SSH server with scp
-		&$first_print($text{'backup_upload2'});
+		&$first_print(&text('backup_upload2', "<tt>$server</tt>"));
 		local $err;
 		local $r = ($user ? "$user\@" : "")."$server:$path";
 		local $infotemp = &transname();
@@ -984,9 +1016,47 @@ foreach my $desturl (@$desturls) {
 			}
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
+	elsif ($ok && $mode == 0 && (@destfiles || !$dirfmt) &&
+	       $path ne $path0) {
+		# Copy to another local directory
+		&$first_print(&text('backup_copy', "<tt>$path</tt>"));
+		my ($ok, $err);
+		if ($asd && $dirfmt) {
+			# Copy separate files as doman owner
+			foreach my $df (@destfiles) {
+				($ok, $err) = &copy_source_dest_as_domain_user(
+					$asd, "$path0/$df", "$path/$df");
+				last if (!$ok);
+				}
+			}
+		elsif ($asd && !$dirfmt) {
+			# Copy one file as domain owner
+			($ok, $err) = &copy_source_dest_as_domain_user(
+				$asd, $path0, $path);
+			}
+		elsif (!$asd && $dirfmt) {
+			# Copy separate files as root
+			foreach my $df (@destfiles) {
+				($ok, $err) = &copy_source_dest(
+					"$path0/$df", "$path/$df");
+				last if (!$ok);
+				}
+			}
+		elsif (!$asd && !$dirfmt) {
+			# Copy one file as root
+			($ok, $err) = &copy_source_dest($path0, $path);
+			}
+		if (!$ok) {
+			&$second_print(&text('backup_copyfailed', $err));
+			$ok = 0;
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
+		}
 	}
 
-if ($anyremote) {
+if (!$anylocal) {
 	# Always delete the temporary destination
 	&execute_command("rm -rf ".quotemeta($dest));
 	}

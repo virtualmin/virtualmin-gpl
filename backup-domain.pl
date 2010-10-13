@@ -86,7 +86,7 @@ $asowner = 0;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--dest") {
-		$dest = shift(@ARGV);
+		push(@dests, shift(@ARGV));
 		}
 	elsif ($a eq "--feature") {
 		local $f = shift(@ARGV);
@@ -189,29 +189,40 @@ while(@ARGV > 0) {
 		&usage();
 		}
 	}
-$dest || usage();
-@bdoms || @users || $all_doms || @plans || @vbs || usage();
+@dests || usage("No destinations specified");
+@bdoms || @users || $all_doms || @plans || @vbs ||
+	&usage("No domains specified");
 if (@bdoms || @users || $all_doms) {
-	@bfeats || usage();
+	@bfeats || usage("No domains specified");
 	}
-($bmode, undef, undef, $host, $path) = &parse_backup_url($dest);
-if ($bmode && $mkdir) {
-	&usage("--mkdir option can only be used for local backups");
+foreach $dest (@dests) {
+	# Validate destination URL
+	($bmode, undef, undef, $host, $path) = &parse_backup_url($dest);
+	if ($bmode && $mkdir) {
+		&usage("--mkdir option can only be used for local backups");
+		}
+	if ($onebyone && !$bmode) {
+		&usage("--onebyone option can only be used with ".
+		       "remote backups");
+		}
+
+	# Validate purging
+	if ($purge) {
+		$strftime || &usage("The --purge flag can only be used in ".
+				    "conjunction with --strftime");
+		$path =~ /%/ || $host =~ /%/ ||
+			&usage("The --purge flag can only be used for backup ".
+			      "destinations containing strftime substitutions");
+		($basepath, $pattern) = &extract_purge_path($dest);
+		$basepath || $pattern ||
+			&usage("The --purge flag can only be used when a ".
+			       "base directory can be extracted from the ".
+			       "backup path, like /backup/virtualmin-%d-%m-%Y");
+		}
 	}
 if ($onebyone && !$newformat) {
-	&usage("--onebyone option can only be used in conjunction with --newformat");
-	}
-if ($onebyone && !$bmode) {
-	&usage("--onebyone option can only be used with remote backups");
-	}
-
-# Validate purging
-if ($purge) {
-	$strftime || &usage("The --purge flag can only be used in conjunction with --strftime");
-	$path =~ /%/ || $host =~ /%/ ||
-		&usage("The --purge flag can only be used for backup destinations containing strftime substitutions");
-	($basepath, $pattern) = &extract_purge_path($dest);
-	$basepath || $pattern || &usage("The --purge flag can only be used when a base directory can be extracted from the backup path, like /backup/virtualmin-%d-%m-%Y");
+	&usage("--onebyone option can only be used in conjunction ".
+	       "with --newformat");
 	}
 
 # Work out what will be backed up
@@ -257,19 +268,27 @@ if ($test) {
 &start_print_capture();
 &$first_print("Starting backup..");
 $start_time = time();
-$strfdest = $strftime ? &backup_strftime($dest) : $dest;
+if ($strftime) {
+	@strfdests = map { &backup_strftime($_) } @dests;
+	}
+else {
+	@strfdests = @dests;
+	}
 $opts{'dir'}->{'exclude'} = join("\t", @exclude);
-($ok, $size, $errdoms) = &backup_domains($strfdest, \@doms, \@bfeats,
-			       $separate,
-			       $ignore_errors,
-			       \%opts,
-			       $newformat,
-			       \@vbs,
-			       $mkdir,
-			       $onebyone,
-			       $asowner,
-			       undef,
-			       $increment);
+($ok, $size, $errdoms) = &backup_domains(
+				\@strfdests,
+				\@doms,
+				\@bfeats,
+				$separate,
+				$ignore_errors,
+				\%opts,
+				$newformat,
+				\@vbs,
+				$mkdir,
+				$onebyone,
+				$asowner,
+				undef,
+				$increment);
 if ($ok && !@$errdoms) {
 	&$second_print("Backup completed successfully. Final size was ".
 		       &nice_size($size));
@@ -288,15 +307,17 @@ else {
 # Purge if requested
 $pok = 1;
 if ($purge && $ok) {
-	$pok = &purge_domain_backups($dest, $purge, $start_time);
-	if (!$pok) {
-		$ex = 3;
+	foreach $dest (@dest) {
+		$pok = &purge_domain_backups($dest, $purge, $start_time);
+		if (!$pok) {
+			$ex = 3;
+			}
 		}
 	}
 
 $output = &stop_print_capture();
 &cleanup_backup_limits(0, 1);
-&write_backup_log(\@doms, $strfdest, $increment, $start_time,
+&write_backup_log(\@doms, $strfdest[0], $increment, $start_time,
 		  $size, $ok, "api", $output, $errdoms);
 exit($ex);
 
@@ -308,24 +329,24 @@ if ($_[0]) {
 print "Creates a Virtualmin backup, for the domains and features specified\n";
 print "on the command line.\n";
 print "\n";
-print "virtualmin backup-domain --dest file\n";
-print "                        [--test]\n";
-print "                        [--domain name] | [--all-domains]\n";
-print "                        [--user name]\n";
-print "                        [--plan name]\n";
-print "                        [--feature name] | [--all-features]\n";
-print "                                           [--except-feature name]\n";
-print "                        [--ignore-errors]\n";
-print "                        [--separate] | [--newformat]\n";
-print "                        [--onebyone]\n";
-print "                        [--strftime [--purge days]]\n";
+print "virtualmin backup-domain [--dest file]+\n";
+print "                         [--test]\n";
+print "                         [--domain name] | [--all-domains]\n";
+print "                         [--user name]\n";
+print "                         [--plan name]\n";
+print "                         [--feature name] | [--all-features]\n";
+print "                                            [--except-feature name]\n";
+print "                         [--ignore-errors]\n";
+print "                         [--separate] | [--newformat]\n";
+print "                         [--onebyone]\n";
+print "                         [--strftime [--purge days]]\n";
 if (&has_incremental_tar()) {
-	print "                        [--incremental]\n";
+	print "                         [--incremental]\n";
 	}
-print "                        [--all-virtualmin] | [--virtualmin config]\n";
-print "                        [--option feature name value]\n";
-print "                        [--as-owner]\n";
-print "                        [--exclude file]*\n";
+print "                         [--all-virtualmin] | [--virtualmin config]\n";
+print "                         [--option feature name value]\n";
+print "                         [--as-owner]\n";
+print "                         [--exclude file]*\n";
 print "\n";
 print "Multiple domains may be specified with multiple --domain parameters.\n";
 print "Features must be specified using their short names, like web and dns.\n";
@@ -337,6 +358,7 @@ print " - An SSH destination, like ssh://login:pass\@server/backup/yourdomain.co
 if ($virtualmin_pro) {
 	print " - An S3 bucket, like s3://accesskey:secretkey\@bucket\n";
 	}
+print "Multiple destinations can be given, if they are all remote.\n";
 exit(1);
 }
 

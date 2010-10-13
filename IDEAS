@@ -36,7 +36,9 @@
 
  - Backup to multiple destinations
 	- https://www.virtualmin.com/node/13450
-	- Command line API
+	- Web UI
+	- scheduled backups
+	- functional tests
 	- CHANGELOG
 
  - Replicate virtusers to secondary MX
@@ -53,3 +55,6 @@
  - Make script install dir configurable
 	- https://www.virtualmin.com/node/15663
 	- Can only be completed after 3.82 is out
+
+ - Max message size for spamassassin, via prodmail rule
+	- https://www.virtualmin.com/node/15834
