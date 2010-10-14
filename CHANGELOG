@@ -1253,3 +1253,4 @@ Added an Italian translation, thanks to Andrea Di Mario.
 ---- Changes since 3.81 ----
 Added a template option to specify file types to not perform variable substitution on when copying from the /etc/skel directory.
 Updated the Trac script installer to version 0.12.1, and TWiki to 5.0.1.
+Virtual server backups can now be to multiple destinations, both local and remote. The time-consuming process of compressing each domain is done only once, and the resulting file then transferred to each destination.

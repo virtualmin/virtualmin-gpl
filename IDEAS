@@ -34,10 +34,6 @@
  - Include bounced / greylisted messages in system stats
 	- https://www.virtualmin.com/node/13113
 
- - Backup to multiple destinations
-	- https://www.virtualmin.com/node/13450
-	- CHANGELOG
-
  - Replicate virtusers to secondary MX
 	- https://www.virtualmin.com/node/12894
 	- Sendmail

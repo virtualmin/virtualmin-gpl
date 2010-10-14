@@ -1,0 +1,6 @@
+desc=Backups to multiple destinations
+html=Virtual server backups can now be to multiple destinations, both local and remote. The time-consuming process of compressing each domain is done only once, and the resulting file then transferred to each destination.
+master=1
+owner=1
+reseller=1
+link=backup_form.cgi
