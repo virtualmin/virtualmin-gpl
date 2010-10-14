@@ -909,9 +909,11 @@ foreach my $desturl (@$desturls) {
 		local $r = ($user ? "$user\@" : "")."$server:$path";
 		local $infotemp = &transname();
 		if ($dirfmt) {
-			# Need to upload entire directory
+			# Need to upload all backup files in the directory
 			local $tstart = time();
-			&scp_copy("$dest/*", $r, $pass, \$err, $port);
+			local $pat = @destfiles == 1 ? $destfiles[0] :
+					"{".join(",", @destfiles)."}";
+			&scp_copy("$dest/$pat", $r, $pass, \$err, $port);
 			if ($err) {
 				# Target dir didn't exist, so scp just the
 				# directory and all files
@@ -2257,6 +2259,7 @@ if (!$noupload) {
 		      &ui_upload($name."_upload", 40) ]);
 	}
 
+return &ui_radio_selector(\@opts, $name."_mode", $mode);
 return &ui_table_start(undef, 2).
        &ui_table_row(undef, 
 	&ui_radio_selector(\@opts, $name."_mode", $mode), 2).
@@ -2953,6 +2956,18 @@ if ($changed) {
 	&write_file($backup_maxes_file, \%maxes);
 	}
 &unlock_file($backup_maxes_file) if (!$nolock);
+}
+
+# get_scheduled_backup_dests(&sched)
+# Returns a list of destination for some scheduled backup
+sub get_scheduled_backup_dests
+{
+local ($sched) = @_;
+local @dests = ( $sched->{'dest0'} || $sched->{'dest'} );
+for(my $i=1; $sched->{'dest'.$i}; $i++) {
+	push(@dests, $sched->{'dest'.$i});
+	}
+return @dests;
 }
 
 1;

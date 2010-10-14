@@ -81,7 +81,9 @@ if ($multi) {
 		if ($s->{'virtualmin'}) {
 			print "    Virtualmin configs: $s->{'virtualmin'}\n";
 			}
-		print "    Destination: $s->{'dest'}\n";
+		foreach $dest (&get_scheduled_backup_dests($s)) {
+			print "    Destination: $dest\n";
+			}
 		if ($s->{'owner'}) {
 			print "    Owner: $s->{'owner'}\n";
 			}

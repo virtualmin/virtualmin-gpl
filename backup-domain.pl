@@ -317,8 +317,10 @@ if ($purge && $ok) {
 
 $output = &stop_print_capture();
 &cleanup_backup_limits(0, 1);
-&write_backup_log(\@doms, $strfdest[0], $increment, $start_time,
-		  $size, $ok, "api", $output, $errdoms);
+foreach $dest (@strfdests) {
+	&write_backup_log(\@doms, $dest, $increment, $start_time,
+			  $size, $ok, "api", $output, $errdoms);
+	}
 exit($ex);
 
 sub usage

@@ -28,8 +28,10 @@ foreach $s (@scheds) {
 	my @row;
 	push(@row, { 'type' => 'checkbox', 'name' => 'd',
 	     'value' => $s->{'id'}, 'disabled' => $s->{'id'}==1 });
+	@dests = &get_scheduled_backup_dests($s);
+	@nices = map { &nice_backup_url($_, 1) } @dests;
 	push(@row, "<a href='backup_form.cgi?sched=$s->{'id'}'>".
-		   &nice_backup_url($s->{'dest'}, 1)."</a>");
+		   join("<br>\n", @nices)."</a>");
 	if ($s->{'all'} == 1) {
 		push(@row, "<i>$text{'sched_all'}</i>");
 		}

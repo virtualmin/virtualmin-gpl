@@ -158,13 +158,31 @@ print &ui_table_row(&hlink($text{'backup_exclude'}, 'backup_exclude'),
 
 print &ui_hidden_table_end("features");
 
+# Build destination field inputs
+@dests = &get_scheduled_backup_dests($sched);
+push(@dests, undef) if (!$in{'new'});
+@dfields = ( );
+$i = 0;
+foreach $dest (@dests) {
+	$dfield = &show_backup_destination("dest".$i, $dest, $cbmode == 3,
+					   $d, $nodownload, 1);
+	if (!$dest && !$in{'new'}) {
+		# Last option is hidden
+		$dfield = &ui_hidden_start($text{'backup_adddest'},
+					   "adddest", 0).$dfield.
+			  &ui_hidden_end("adddest");
+		}
+	push(@dfields, $dfield);
+	$i++;
+	}
+
 # Show destination fields
 print &ui_hidden_table_start($text{'backup_headerdest'}, "width=100%", 2,
 			     "dest", 1, \@tds);
 print &ui_table_row(&hlink($text{'backup_dest'}, "backup_dest"),
-	    &show_backup_destination("dest", $sched->{'dest'},
-				     $cbmode == 3, $d, $nodownload, 1).
-	    "\n".
+	    join("\n", @dfields));
+
+print &ui_table_row($text{'backup_opts'},
 	    &ui_checkbox("strftime", 1,
 			 &hlink($text{'backup_strftime'}, "backup_strftime"),
 			 $sched->{'strftime'})."<br>\n".

@@ -56,7 +56,14 @@ else {
 		@do_features = split(/\0/, $in{'feature'});
 		}
 	@do_features || &error($text{'backup_efeatures'});
-	$dest = &parse_backup_destination("dest", \%in, $cbmode == 3, $d);
+	for($i=0; defined($in{"dest".$i."_mode"}); $i++) {
+		next if ($in{"dest".$i."_mode"} == 0 &&
+			 !$in{"dest".$i."_file"});
+		$dest = &parse_backup_destination("dest".$i, \%in,
+						  $cbmode == 3, $d);
+		push(@dests, $dest);
+		}
+	@dests || &error($text{'backup_edests'});
 	if ($in{'onebyone'}) {
 		$in{'fmt'} == 2 || &error($text{'backup_eonebyone2'});
 		}
@@ -92,7 +99,15 @@ else {
 	$sched->{'feature_all'} = $in{'feature_all'};
 	$sched->{'features'} = join(" ",
 		grep { $sel_features{$_} } (@backup_features, &list_backup_plugins()));
-	$sched->{'dest'} = $dest;
+	foreach my $k (keys %$sched) {
+		if ($k =~ /^dest\d+/) {
+			delete($sched->{$k});
+			}
+		}
+	$sched->{'dest'} = $dests[0];
+	for(my $i=1; $i<@dests; $i++) {
+		$sched->{'dest'.$i} = $dests[$i];
+		}
 	$sched->{'fmt'} = $in{'fmt'};
 	$sched->{'mkdir'} = $in{'mkdir'};
 	$sched->{'email'} = $in{'email'};
@@ -114,13 +129,18 @@ else {
 		}
 	if (!$in{'purge_def'}) {
 		# Make sure purging can be used
-		($mode, undef, undef, $host, $path) = &parse_backup_url($dest);
-		$in{'strftime'} || &error($text{'backup_epurgetime'});
-		$path =~ /%/ || $host =~ /%/ ||
-			&error($text{'backup_epurgetime'});
-		($basepath, $pattern) = &extract_purge_path($dest);
-		$basepath || $pattern || &error($text{'backup_epurgepath'});
-		$in{'purge'} =~ /^[0-9\.]+$/ || &error($text{'backup_epurge'});
+		foreach $dest (@dests) {
+			($mode, undef, undef, $host, $path) =
+				&parse_backup_url($dest);
+			$in{'strftime'} || &error($text{'backup_epurgetime'});
+			$path =~ /%/ || $host =~ /%/ ||
+				&error($text{'backup_epurgetime'});
+			($basepath, $pattern) = &extract_purge_path($dest);
+			$basepath || $pattern ||
+				&error($text{'backup_epurgepath'});
+			$in{'purge'} =~ /^[0-9\.]+$/ ||
+				&error($text{'backup_epurge'});
+			}
 		}
 	$sched->{'purge'} = $in{'purge_def'} ? undef : $in{'purge'};
 	$sched->{'enabled'} = $in{'enabled'};

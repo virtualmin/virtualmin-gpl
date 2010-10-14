@@ -15,7 +15,8 @@ if ($in{'bg'}) {
 
 	&ui_print_unbuffered_header(undef, $text{'backup_title'}, "");
 
-	$nice = &nice_backup_url($sched->{'dest'});
+	@dests = &get_scheduled_backup_dests($sched);
+	$nice = join(", ", map { &nice_backup_url($_) } @dests);
 	&$first_print(&text('backup_starting', $nice));
 	$cmd = "$backup_cron_cmd --id $sched->{'id'} --force-email";
 	&execute_command("$cmd >/dev/null 2>&1 </dev/null &");
@@ -88,6 +89,9 @@ else {
 	@do_features = split(/\0/, $in{'feature'});
 	}
 @do_features || &error($text{'backup_efeatures'});
+
+# Parse destinations
+# XXX
 $dest = &parse_backup_destination("dest", \%in, $cbmode == 3, $d);
 if ($dest eq "download:" && $in{'fmt'}) {
 	&error($text{'backup_edownloadfmt'});

@@ -39,6 +39,7 @@
 	- Web UI
 	- scheduled backups
 	- functional tests
+	- backup logs
 	- CHANGELOG
 
  - Replicate virtusers to secondary MX

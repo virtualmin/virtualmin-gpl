@@ -119,32 +119,34 @@ if ($sched->{'before'}) {
 	}
 
 # Execute the backup
-if ($sched->{'strftime'}) {
-	$dest = &backup_strftime($sched->{'dest'});
-	}
-else {
-	$dest = $sched->{'dest'};
-	}
+@dests = &get_scheduled_backup_dests($sched);
+@strfdests = $sched->{'strftime'} ? map { &backup_strftime($_) } @dests
+				  : @dests;
 $current_id = undef;
-($ok, $size, $errdoms) = &backup_domains($dest, \@doms, \@do_features,
-			       $sched->{'fmt'},
-			       $sched->{'errors'},
-			       \%options,
-			       $sched->{'fmt'} == 2,
-			       \@vbs,
-			       $sched->{'mkdir'},
-			       $sched->{'onebyone'},
-			       $cbmode == 2,
-			       \&backup_cbfunc,
-			       $sched->{'increment'},
-			       1);
+($ok, $size, $errdoms) = &backup_domains(
+				\@strfdests,
+				\@doms,
+				\@do_features,
+			        $sched->{'fmt'},
+			        $sched->{'errors'},
+			        \%options,
+			        $sched->{'fmt'} == 2,
+			        \@vbs,
+			        $sched->{'mkdir'},
+			        $sched->{'onebyone'},
+			        $cbmode == 2,
+			        \&backup_cbfunc,
+			        $sched->{'increment'},
+			        1);
 
 # If purging old backups, do that now
 if ($ok && $sched->{'purge'}) {
-	$current_id = undef;
-	$pok = &purge_domain_backups(
-		$sched->{'dest'}, $sched->{'purge'}, $start_time);
-	$ok = 0 if (!$pok);
+	foreach $dest (@dests) {
+		$current_id = undef;
+		$pok = &purge_domain_backups(
+			$dest, $sched->{'purge'}, $start_time);
+		$ok = 0 if (!$pok);
+		}
 	}
 
 # Run any after command
@@ -161,9 +163,11 @@ if ($sched->{'after'}) {
 		}
 	}
 &cleanup_backup_limits(0, 1);
-&write_backup_log(\@doms, $dest, $backup->{'incremental'}, $start_time,
-		  $size, $ok, "sched", $output, $errdoms,
-		  $asd ? $asd->{'user'} : undef);
+foreach $dest (@strfdests) {
+	&write_backup_log(\@doms, $dest, $backup->{'incremental'}, $start_time,
+			  $size, $ok, "sched", $output, $errdoms,
+			  $asd ? $asd->{'user'} : undef);
+	}
 
 PREFAILED:
 
