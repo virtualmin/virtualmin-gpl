@@ -13330,15 +13330,20 @@ foreach my $h ("www.$d->{'dom'}", $d->{'dom'}) {
 return $d->{'dom'};	# Fallback
 }
 
-# date_to_time(date-string)
+# date_to_time(date-string, [gmt])
 # Convert a date string like YYYY-MM-DD or -5 to a Unix time
 sub date_to_time
 {
-local ($date) = @_;
+local ($date, $gmt) = @_;
 local $rv;
 if ($date =~ /^(\d{4})-(\d+)-(\d+)$/) {
 	# Date only
-	$rv = timelocal(0, 0, 0, $3, $2-1, $1-1900);
+	if ($gmt) {
+		$rv = timegm(0, 0, 0, $3, $2-1, $1-1900);
+		}
+	else {
+		$rv = timelocal(0, 0, 0, $3, $2-1, $1-1900);
+		}
 	}
 elsif ($date =~ /^\-(\d+)$/) {
 	# Some days ago

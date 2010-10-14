@@ -48,10 +48,10 @@ while(@ARGV > 0) {
 		$all_domains = 1;
 		}
 	elsif ($a eq "--start") {
-		$start = int(&date_to_time(shift(@ARGV)) / (24*60*60));
+		$start = int(&date_to_time(shift(@ARGV), 1) / (24*60*60));
 		}
 	elsif ($a eq "--end") {
-		$end = int(&date_to_time(shift(@ARGV)) / (24*60*60));
+		$end = int(&date_to_time(shift(@ARGV), 1) / (24*60*60));
 		}
 	elsif ($a eq "--include-subservers") {
 		$subs = 1;
