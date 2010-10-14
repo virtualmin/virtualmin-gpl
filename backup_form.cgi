@@ -180,7 +180,7 @@ foreach $dest (@dests) {
 print &ui_hidden_table_start($text{'backup_headerdest'}, "width=100%", 2,
 			     "dest", 1, \@tds);
 print &ui_table_row(&hlink($text{'backup_dest'}, "backup_dest"),
-	    join("\n", @dfields));
+	    join("<hr>\n", @dfields));
 
 print &ui_table_row($text{'backup_opts'},
 	    &ui_checkbox("strftime", 1,

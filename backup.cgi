@@ -91,13 +91,19 @@ else {
 @do_features || &error($text{'backup_efeatures'});
 
 # Parse destinations
-# XXX
-$dest = &parse_backup_destination("dest", \%in, $cbmode == 3, $d);
-if ($dest eq "download:" && $in{'fmt'}) {
-	&error($text{'backup_edownloadfmt'});
+for($i=0; defined($in{"dest".$i."_mode"}); $i++) {
+	next if ($in{"dest".$i."_mode"} == 0 &&
+                 !$in{"dest".$i."_file"});
+	$dest = &parse_backup_destination("dest".$i, \%in, $cbmode == 3, $d);
+	push(@dests, $dest);
+	$anydownload++ if ($dest eq "download:");
 	}
-$origdest = $dest;
-$dest = &backup_strftime($dest) if ($in{'strftime'});
+@dests || &error($text{'backup_edests'});
+$anydownload && $in{'fmt'} && &error($text{'backup_edownloadfmt'});
+$anydownload && @dests > 1 && &error($text{'backup_edownloadmany'});
+
+@strfdests = $in{'strftime'} ? map { &backup_strftime($_) } @dests
+			     : @dests;
 if ($in{'onebyone'}) {
 	$in{'fmt'} == 2 || &error($text{'backup_eonebyone2'});
 	}
@@ -125,7 +131,7 @@ else {
 	}
 @doms || @vbs || &error($text{'backup_edoms'});
 
-if ($dest eq "download:") {
+if ($dests[0] eq "download:") {
 	# Special case .. we backup to a temp file and output in the browser
 	$temp = &transname().($config{'compression'} == 0 ? ".tar.gz" :
 			      $config{'compression'} == 1 ? ".tar.bz2" :".tar");
@@ -134,7 +140,7 @@ if ($dest eq "download:") {
 	&set_ownership_permissions($doms[0]->{'uid'}, $doms[0]->{'gid'}, 0700,
 				   $temp);
 	&set_all_null_print();
-	($ok, $size) = &backup_domains($temp, \@doms, \@do_features,
+	($ok, $size) = &backup_domains([ $temp ], \@doms, \@do_features,
 				       $in{'fmt'}, $in{'errors'}, \%options,
 				       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
 				       $in{'onebyone'}, $cbmode == 2,
@@ -161,7 +167,7 @@ else {
 	# Show backup progress
 	&ui_print_unbuffered_header(undef, $text{'backup_title'}, "");
 
-	$nice = &nice_backup_url($dest);
+	$nice = join(", ", map { &nice_backup_url($_) } @dests);
 	if (@doms) {
 		print &text('backup_doing', scalar(@doms), $nice),"<p>\n";
 		}
@@ -170,23 +176,25 @@ else {
 		}
 	$start_time = time();
 	&start_print_capture();
-	($ok, $size, $errdoms) = &backup_domains($dest, \@doms, \@do_features,
+	($ok, $size, $errdoms) = &backup_domains(
+				       \@strfdests, \@doms, \@do_features,
 				       $in{'fmt'}, $in{'errors'}, \%options,
 				       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
 				       $in{'onebyone'}, $cbmode == 2,
 				       undef, $in{'increment'});
 	$output = &stop_print_capture();
 	&cleanup_backup_limits(0, 1);
-	&write_backup_log(\@doms, $dest, $in{'increment'}, $start_time,
-			  $size, $ok, "cgi", $output, $errdoms);
+	foreach $dest (@strfdests) {
+		&write_backup_log(\@doms, $dest, $in{'increment'}, $start_time,
+				  $size, $ok, "cgi", $output, $errdoms);
+		}
 	&run_post_actions();
 	if (!$ok) {
-		#&unlink_file($dest);
 		print "<p>",$text{'backup_failed'},"<p>\n";
 		}
 	else {
 		print "<p>",&text('backup_done', &nice_size($size)),"<p>\n";
-		&webmin_log("backup", $dest, undef,
+		&webmin_log("backup", $dests[0], undef,
 			    { 'doms' => [ map { $_->{'dom'} } @doms ] });
 		}
 
