@@ -36,7 +36,6 @@
 
  - Backup to multiple destinations
 	- https://www.virtualmin.com/node/13450
-	- functional tests
 	- CHANGELOG
 
  - Replicate virtusers to secondary MX

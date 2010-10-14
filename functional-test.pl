@@ -51,6 +51,7 @@ $migration_plesk_windows = "$migration_dir/$migration_plesk_windows_domain.plesk
 $test_backup_file = "/tmp/$test_domain.tar.gz";
 $test_incremental_backup_file = "/tmp/$test_domain.incremental.tar.gz";
 $test_backup_dir = "/tmp/functional-test-backups";
+$test_backup_dir2 = "/tmp/functional-test-backups2";
 $test_email_dir = "/usr/local/webadmin/virtualmin/testmail";
 $spam_email_file = "$test_email_dir/spam.txt";
 $virus_email_file = "$test_email_dir/virus.txt";
@@ -66,6 +67,8 @@ $supports_fcgid = defined(&supported_php_modes) &&
 # Cleanup backup dir
 system("rm -rf $test_backup_dir");
 system("mkdir -p $test_backup_dir");
+system("rm -rf $test_backup_dir2");
+system("mkdir -p $test_backup_dir2");
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -1788,6 +1791,199 @@ $remotebackup_tests = [
 	  'args' => [ [ 'domain', $test_domain ] ],
 	  'cleanup' => 1,
 	},
+	];
+
+$splitbackup_tests = [
+	# Create a domain for the backup target
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'desc', 'Test target domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ],
+		      @create_args, ],
+        },
+
+	# Create a parent domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ], [ 'mail' ],
+		      [ 'mysql' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
+		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Add a user to the domain being backed up
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 777*1024 ],
+		      [ 'mail-quota', 777*1024 ] ],
+	},
+
+	# Add an extra database
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'name', $test_domain_db.'_extra' ] ],
+	},
+
+	# Add an allowed database host
+	{ 'command' => 'modify-database-hosts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'add-host', '1.2.3.4' ] ],
+	},
+
+	# Create a sub-server to be included
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+	},
+
+	# Create an alias domain to be included, with a dir
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_parallel_domain1 ],
+		      [ 'alias', $test_domain ],
+		      [ 'desc', 'Test alias domain with dir' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      @create_args, ],
+	},
+
+	# Create an alias domain to be included, without a dir
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_parallel_domain2 ],
+		      [ 'alias', $test_domain ],
+		      [ 'desc', 'Test alias domain without dir' ],
+		      [ 'web' ], [ 'dns' ],
+		      @create_args, ],
+	},
+
+	# Back them both up to two directories
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'domain', $test_parallel_domain1 ],
+		      [ 'domain', $test_parallel_domain2 ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $test_backup_dir ],
+		      [ 'dest', $test_backup_dir2 ] ],
+	},
+
+	# Delete web page
+	{ 'command' => 'rm -f ~'.$test_domain_user.'/public_html/index.*',
+	},
+
+	# Restore with the domain still in place from the first location
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'all-domains' ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_dir ] ],
+	},
+
+	# Test that everything will works
+	@post_restore_tests,
+
+	# Delete web page again
+	{ 'command' => 'rm -f ~'.$test_domain_user.'/public_html/index.*',
+	},
+
+	# Restore with the domain still in place from the second location
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'all-domains' ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_dir2 ] ],
+	},
+
+	# Test that everything will works again
+	@post_restore_tests,
+
+	# Backup to two remote locations
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $ssh_backup_prefix ],
+		      [ 'dest', $ftp_backup_prefix ] ],
+	},
+
+	# Restore via SSH
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', "$ssh_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+
+	# Restore via FTP
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', "$ftp_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+
+	# Backup to a single file on two remote locations
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'dest', $ssh_backup_prefix."/onefile.tar.gz" ],
+		      [ 'dest', $ftp_backup_prefix."/onefile.tar.gz" ] ],
+	},
+
+	# Restore via SSH from a single file
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', "$ssh_backup_prefix/onefile.tar.gz" ] ],
+	},
+
+	# Restore via FTP from a single file
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', "$ftp_backup_prefix/onefile.tar.gz" ] ],
+	},
+
+	# Backup to a local file and remote file
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_dir.'/onefile.tar.gz' ],
+		      [ 'dest', $ftp_backup_prefix."/onefile.tar.gz" ] ],
+	},
+
+	# Restore from the local file
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_dir.'/onefile.tar.gz' ] ],
+	},
+
+	# Cleanup the target domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ] ],
+	  'cleanup' => 1,
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
 	];
 
 $incremental_tests = [
@@ -3697,6 +3893,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'move' => $move_tests,
 	      'backup' => $backup_tests,
 	      'multibackup' => $multibackup_tests,
+	      'splitbackup' => $splitbackup_tests,
 	      'remotebackup' => $remotebackup_tests,
 	      'purge' => $purge_tests,
 	      'incremental' => $incremental_tests,
