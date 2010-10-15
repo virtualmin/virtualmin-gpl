@@ -196,6 +196,7 @@ if (!$upgrade) {
 	&copy_source_dest_as_domain_user($d, $mcfileorig, $mcfile);
 	local $lref = &read_file_lines_as_domain_user($d, $mcfile);
 	local $vuf = &get_mail_virtusertable();
+	local $added_vuf = 0;
 	foreach my $l (@$lref) {
 		if ($l =~ /^\$rcmail_config\['enable_caching'\]\s+=/) {
 			$l = "\$rcmail_config['enable_caching'] = FALSE;";
@@ -222,8 +223,16 @@ if (!$upgrade) {
 			$l = "\$rcmail_config['mail_domain'] = '$d->{'dom'}';";
 			}
 		if ($l =~ /^\$rcmail_config\['virtuser_file'\]\s+=/ && $vuf) {
+			$added_vuf = 1;
 			$l = "\$rcmail_config['virtuser_file'] = '$vuf';";
 			}
+		if ($l =~ /^\$rcmail_config\['plugins'\]\s+=/) {
+			$l = "\$rcmail_config['plugins'] = array('virtuser_file');";
+			}
+		}
+	if (!$added_vuf && $vuf) {
+		# Need to add virtuser_file directive, as no default exists
+		push(@$lref, "\$rcmail_config['virtuser_file'] = '$vuf';");
 		}
 	&flush_file_lines_as_domain_user($d, $mcfile);
 
