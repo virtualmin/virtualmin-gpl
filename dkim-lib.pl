@@ -427,6 +427,7 @@ return 1;
 # Returns the public key in a format suitable for inclusion in a DNS record
 sub get_dkim_pubkey
 {
+my ($dkim) = @_;
 my $pubkey = &backquote_command(
         "openssl rsa -in ".quotemeta($dkim->{'keyfile'}).
         " -pubout -outform PEM 2>/dev/null");
