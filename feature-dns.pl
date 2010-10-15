@@ -960,8 +960,13 @@ RECORD: foreach my $r (@recs) {
 		# Skip DNSSEC records, as they get re-generated
 		next;
 		}
+	if ($r->{'defttl'}) {
+		# Add default TTL
+		&bind8::create_defttl($file, $r->{'defttl'});
+		next;
+		}
 	if (!$r->{'type'}) {
-		# Skip special directives, like $ttl
+		# Skip special directives, like $generate
 		next;
 		}
 	foreach my $sd (@sublist) {
