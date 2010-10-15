@@ -48,6 +48,3 @@
  - Make script install dir configurable
 	- https://www.virtualmin.com/node/15663
 	- Can only be completed after 3.82 is out
-
- - Max message size for spamassassin, via prodmail rule
-	- https://www.virtualmin.com/node/15834

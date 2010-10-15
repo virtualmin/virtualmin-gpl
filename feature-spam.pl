@@ -145,8 +145,13 @@ local $cmd = &spamassassin_client_command($_[0]);
 local $spamrc = "$procmail_spam_dir/$_[0]->{'id'}";
 local $recipe0 = { 'name' => 'DROPPRIVS',	# Run all commands as user
 		   'value' => 'yes' };
+local @conds;
+if ($cmd =~ /spamassassin/ && $config{'spam_size'}) {
+	# Add condition for max message size
+	push(@conds, [ '<', $config{'spam_size'} ]);
+	}
 local $recipe1 = { 'flags' => [ 'f', 'w' ],	# Call spamassassin
-		   'conds' => [ ],
+		   'conds' => \@conds,
 		   'type' => '|',
 		   'action' => $cmd,
 		 };
@@ -862,6 +867,19 @@ local @recipes = &procmail::parse_procmail_file($spamrc);
 foreach my $r (@recipes) {
 	if ($r->{'action'} =~ /\/\S+\/(spamassassin|spamc)/) {
 		$r->{'action'} = &spamassassin_client_command($d, $client);
+		local ($c) = grep { $_->[0] eq '<' } @{$r->{'conds'}};
+		if ($c && !$config{'spam_size'}) {
+			# Remove size condition
+			@{$r->{'conds'}} = grep { $_ ne $c } @{$r->{'conds'}};
+			}
+		elsif (!$c && $config{'spam_size'}) {
+			# Add size condition
+			push(@{$r->{'conds'}}, [ '<', $config{'spam_size'} ]);
+			}
+		elsif ($c && $config{'spam_size'}) {
+			# Fix size in condition
+			$c->[1] = $config{'spam_size'};
+			}
 		&procmail::modify_recipe($r);
 		}
 	}

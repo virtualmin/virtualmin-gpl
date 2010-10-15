@@ -62,10 +62,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-spamc-host") {
 		$spam_host = "";
 		}
-	elsif ($a eq "--spamc-max") {
+	elsif ($a eq "--spamc-max" || $a eq "--spam-max") {
 		$spam_max = shift(@ARGV);
 		}
-	elsif ($a eq "--no-spamc-max") {
+	elsif ($a eq "--no-spamc-max" || $a eq "--no-spam-max") {
 		$spam_max = 0;
 		}
 	elsif ($a =~ /^--use-(clamscan|clamdscan|clamd-stream-client)$/) {
@@ -99,7 +99,7 @@ while(@ARGV > 0) {
 
 # Validate inputs
 $virus_scanner || $virus_host || $spam_client || $show || defined($clamd) ||
-  defined($spamd) || &usage("Nothing to do");
+  defined($spamd) || defined($spam_max) || &usage("Nothing to do");
 if ($spam_client) {
 	&has_command($spam_client) ||
 	    &usage("SpamAssassin client program $spam_client does not exist");
@@ -139,7 +139,7 @@ if (defined($spamd)) {
 
 &obtain_lock_spam_all();
 
-if ($spam_client || $spam_host || $spam_max) {
+if ($spam_client || $spam_host || defined($spam_max)) {
 	print "Updating all virtual servers with new SpamAssassin client ..\n";
 	$spam_client = $old_spam_client if (!defined($spam_client));
 	$spam_host = $old_spam_host if (!defined($spam_host));
@@ -217,7 +217,7 @@ print "Changes the spam and virus scanning programs for all domains.\n";
 print "\n";
 print "virtualmin set-spam [--use-spamassassin | --use-spamc]\n";
 print "                    [--spamc-host hostname | --no-spamc-host]\n";
-print "                    [--spamc-max bytes | --no-spamc-max]\n";
+print "                    [--spam-max bytes | --no-spam-max]\n";
 print "                    [--use-clamscan | --use-clamdscan |\n";
 print "                     --use-clamd-stream-client | --use-virus command]\n";
 print "                    [--clamd-host hostname]\n";

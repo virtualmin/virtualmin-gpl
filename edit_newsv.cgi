@@ -18,16 +18,16 @@ if ($config{'spam'}) {
 		       [ [ "spamassassin", $text{'tmpl_spamassassin'}."<br>" ],
 			 [ "spamc", $text{'tmpl_spamc'} ] ]));
 
-	# Spamc host
-	print &ui_table_row(
-		&hlink($text{'tmpl_spam_host'}, 'template_spam_host'),
-		&ui_opt_textbox("host", $host, 30, "<tt>localhost</tt>"));
-
 	# Spamc max size
 	print &ui_table_row(
 		&hlink($text{'tmpl_spam_size'}, 'template_spam_size'),
 		&ui_opt_textbox("size", $size, 8,
 				$text{'template_spam_unlimited'}));
+
+	# Spamc host
+	print &ui_table_row(
+		&hlink($text{'tmpl_spam_host'}, 'template_spam_host'),
+		&ui_opt_textbox("host", $host, 30, "<tt>localhost</tt>"));
 
 	# Allow user .procmailrc file?
 	print &ui_table_row(
