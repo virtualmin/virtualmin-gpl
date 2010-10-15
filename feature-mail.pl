@@ -3030,6 +3030,20 @@ else {
 	}
 }
 
+# check_anti_depends_mail(&dom)
+# Ensure that a parent server without email does not have any aliases with it
+sub check_anti_depends_mail
+{
+if (!$_[0]->{'mail'}) {
+	local @aliases = &get_domain_by("alias", $_[0]->{'id'});
+	foreach my $s (@aliases) {
+		return &text('setup_edepmailalias', $s->{'dom'})
+			if ($s->{'mail'});
+		}
+	}
+return undef;
+}
+
 # mail_system_name([num])
 sub mail_system_name
 {

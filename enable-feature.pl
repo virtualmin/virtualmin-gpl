@@ -78,9 +78,11 @@ else {
 	@doms = &get_domains_by_names_users(\@dnames, \@users, \&usage);
 	}
 
-# Do it for all domains
+# Do it for all domains, non-aliases first
 $failed = 0;
-DOMAIN: foreach $d (@doms) {
+DOMAIN:
+foreach $d (sort { ($a->{'alias'} ? 2 : $a->{'parent'} ? 1 : 0) <=>
+		   ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) } @doms) {
 	&$first_print("Updating server $d->{'dom'} ..");
 	@dom_features = $d->{'alias'} ? @alias_features :
 			$d->{'parent'} ? ( grep { $_ ne "webmin" } @features ) :
