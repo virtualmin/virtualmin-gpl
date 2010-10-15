@@ -1119,7 +1119,7 @@ if ($defdir) {
 		local $p = "$spamdir/$f";
 		if ($f ne "." && $f ne "..") {
 			local $lnk = readlink($p);
-			if ($lnk && $lnk =~ /^\Q$defdir\/\E/ && !-e $lnk) {
+			if ($lnk && !-e $lnk) {
 				unlink($p);
 				}
 			}
