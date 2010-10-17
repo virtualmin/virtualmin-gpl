@@ -691,6 +691,7 @@ if ($apache::httpd_modules{'mod_php4'} ||
 		local $changed;
 		foreach my $pv (@tmplphpvars) {
 			local ($n, $v) = split(/=/, $pv, 2);
+			local $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
 			if (!$got{$n}) {
 				push(@phpv, "$n $v");
 				$changed++;
