@@ -1045,6 +1045,7 @@ sub list_php_modules
 local ($d, $ver, $cmd) = @_;
 local $mode = &get_domain_php_mode($d);
 if (!defined($main::php_modules{$ver,$d->{'id'}})) {
+	$cmd ||= &has_command("php".$ver) || &has_command("php");
 	$main::php_modules{$ver} = [ ];
 	if ($mode eq "mod_php") {
 		# Use global PHP config, since with mod_php we can't do
@@ -1061,6 +1062,7 @@ if (!defined($main::php_modules{$ver,$d->{'id'}})) {
 		}
 	&clean_environment();
 	local $_;
+	print STDERR "running PHPRC=$ENV{'PHPRC'} $cmd -m\n";
 	&open_execute_command(PHP, "$cmd -m", 1);
 	while(<PHP>) {
 		s/\r|\n//g;

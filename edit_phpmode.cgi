@@ -130,9 +130,11 @@ if (defined(&list_php_modules) && !$d->{'alias'}) {
 	foreach $phpver (&list_available_php_versions($d)) {
 		@mods = &list_php_modules($d, $phpver->[0], $phpver->[1]);
 		@mods = sort { lc($a) cmp lc($b) } @mods;
-		print &ui_table_row(&text('phpmode_mods', $phpver->[0]),
-			&ui_grid_table([ map { "<tt>$_</tt>" } @mods ],
-				       6, 100));
+		if (@mods) {
+			print &ui_table_row(&text('phpmode_mods', $phpver->[0]),
+				&ui_grid_table([ map { "<tt>$_</tt>" } @mods ],
+					       6, 100));
+			}
 		}
 
 	# Pear modules
