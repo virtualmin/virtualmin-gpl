@@ -56,7 +56,8 @@ if (&foreign_check("proc")) {
 					}
 				local ($t, $f) =
 					&mount::disk_space($m->[2], $m->[0]);
-				if (($m->[2] eq "simfs" || $m->[2] eq "vzfs") &&
+				if (($m->[2] eq "simfs" || $m->[2] eq "vzfs" ||
+				     $m->[0] eq "/dev/vzfs") &&
 				    $donevzfs{$t,$f}++) {
 					# Don't double-count VPS filesystems
 					next;
