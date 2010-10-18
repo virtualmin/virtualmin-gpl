@@ -251,6 +251,7 @@ else {
 # Generate private key
 if (!$dkim->{'keyfile'} || !-r $dkim->{'keyfile'} || $newkey) {
 	my $size = $config{'key_size'} || $webmin::default_key_size;
+	$size = 1024 if ($size > 1024);
 	$dkim->{'keyfile'} ||= "/etc/dkim.key";
 	&$first_print(&text('dkim_newkey', "<tt>$dkim->{'keyfile'}</tt>"));
 	&lock_file($dkim->{'keyfile'});
