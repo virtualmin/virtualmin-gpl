@@ -8039,7 +8039,8 @@ if ($_[0] && !$_[1]) {
 	# Initial aliases and quota come from template
 	local $tmpl = &get_template($_[0]->{'template'});
 	if ($tmpl->{'user_aliases'} ne 'none') {
-		$user->{'to'} = [ split(/\t+/, $tmpl->{'user_aliases'}) ];
+		$user->{'to'} = [ map { &substitute_domain_template($_, $_[0]) }
+				      split(/\t+/, $tmpl->{'user_aliases'}) ];
 		}
 	$user->{'quota'} = $tmpl->{'defmquota'};
 	$user->{'mquota'} = $tmpl->{'defmquota'};
