@@ -10971,11 +10971,11 @@ if ($config{'mail'}) {
 		foreach my $dpo (&sendmail::find_options("DaemonPortOptions",
 							 $conf)) {
 			local $addr = "*";
-			if ($dpo->[1] =~ /(Addr|Address|A)=([^,]+)/i) {
+			if ($dpo->[1] =~ /(Addr|Address|A)=([^ ,]+)/i) {
 				$addr = $2;
 				}
 			local $port = 25;
-			if ($dpo->[1] =~ /(Port|P)=([^,]+)/i) {
+			if ($dpo->[1] =~ /(Port|P)=([^ ,]+)/i) {
 				$port = $2;
 				}
 			push(@addrs, [ $addr, $port ]);
