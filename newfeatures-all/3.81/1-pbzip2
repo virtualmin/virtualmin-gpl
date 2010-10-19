@@ -1,4 +1,4 @@
 desc=Parallel bzip2 backups
 html=Parallel bzip2 can now be used for backups if the pbzip2 command is installed, via a new option on the Virtualmin Configuration page. This runs significantly faster on multi-core systems.
 master=1
-link=../config.cgi?mod=virtual-server&section=line8
+link=../config.cgi?module=virtual-server&section=line8
