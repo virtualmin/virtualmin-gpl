@@ -11,6 +11,7 @@ $crmode || &error($text{'restore_ecannot'});
 if ($in{'sched'}) {
 	($sched) = grep { $_->{'id'} eq $in{'sched'} &&
 			  &can_backup_sched($_) } &list_scheduled_backups();
+	$sched || &error($text{'restore_esched'});
 	}
 else {
 	# Sensible defaults
@@ -20,6 +21,9 @@ else {
 		}
 	}
 $dest = $sched->{'dest'};
+if ($sched->{'strftime'}) {
+	$dest = &backup_strftime($dest);
+	}
 
 # Work out the current user's main domain, if needed
 if ($crmode == 2) {
