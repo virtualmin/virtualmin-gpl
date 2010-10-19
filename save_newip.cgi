@@ -250,25 +250,17 @@ foreach $sd (@doms) {
 	&$indent_print();
 	$oldsd = { %$sd };
 
-	if ($sd->{'virt'}) {
-		# Change virtual IP
-		$sd->{'ip'} = $in{'ip'};
-		delete($sd->{'defip'});
-		&try_function("virt", "modify_virt", $sd, $oldsd);
-		}
-	elsif ($in{'ip'}) {
-		# Changing shared IP
-		$sd->{'ip'} = $in{'ip'};
-		$sd->{'defip'} = $sd->{'ip'} eq &get_default_ip();
-		}
-	if ($sd->{'virt6'} && &supports_ip6()) {
-		# Change IPv6 address
-		$sd->{'ip6'} = $in{'ip6'};
+	# Alias domain IP follows target
+	$sd->{'ip'} = $d->{'ip'};
+	$sd->{'defip'} = $sd->{'ip'} eq &get_default_ip();
+	if ($d->{'virt6'} && &supports_ip6()) {
+		$sd->{'ip6'} = $d->{'ip6'};
 		}
 	if ($sd->{'web'}) {
 		$sd->{'web_port'} = $in{'port'};
 		$sd->{'web_sslport'} = $in{'sslport'};
 		}
+
 	foreach $f (@features) {
 		local $mfunc = "modify_$f";
 		if ($config{$f} && $sd->{$f}) {
@@ -288,6 +280,7 @@ foreach $sd (@doms) {
 	print $text{'save_domain'},"<br>\n";
 	&save_domain($sd);
 	print $text{'setup_done'},"<p>\n";
+	&$outdent_print();
 	}
 
 # Run the after command
