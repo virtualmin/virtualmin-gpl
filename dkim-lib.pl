@@ -250,8 +250,7 @@ else {
 
 # Generate private key
 if (!$dkim->{'keyfile'} || !-r $dkim->{'keyfile'} || $newkey) {
-	my $size = $config{'key_size'} || $webmin::default_key_size;
-	$size = 1024 if ($size > 1024);
+	my $size = 1024;
 	$dkim->{'keyfile'} ||= "/etc/dkim.key";
 	&$first_print(&text('dkim_newkey', "<tt>$dkim->{'keyfile'}</tt>"));
 	&lock_file($dkim->{'keyfile'});
@@ -613,12 +612,12 @@ foreach my $d (@$doms) {
 		# Fix existing record
 		my $val = $selrec->{'values'}->[0];
 		if ($val !~ s/p=([^;]+)/p=$pubkey/) {
-			$val = '"k=rsa; t=y; p='.$pubkey.'"';
+			$val = 'k=rsa; t=y; p='.$pubkey;
 			}
 		&bind8::modify_record($selrec->{'file'}, $selrec,
 				      $selrec->{'name'}, $selrec->{'ttl'},
 				      $selrec->{'class'}, $selrec->{'type'},
-				      $val);
+				      '"'.$val.'"');
 		$changed++;
 		}
 	if ($changed) {
