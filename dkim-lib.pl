@@ -404,7 +404,10 @@ if ($config{'mail_system'} == 0) {
 elsif ($config{'mail_system'} == 1) {
 	# Configure Sendmail to use filter
 	&lock_file($sendmail::config{'sendmail_mc'});
+	my $changed = 0;
 	my @feats = &sendmail::list_features();
+
+	# Check for filter definition
 	my ($milter) = grep { $_->{'text'} =~ /INPUT_MAIL_FILTER/ &&
 			      $_->{'text'} =~ /\Q$newmilter\E/ } @feats;
 	if (!$milter) {
@@ -413,10 +416,38 @@ elsif ($config{'mail_system'} == 1) {
 			'type' => 0,
 	    		'text' =>
 			  "INPUT_MAIL_FILTER(`dkim-filter', `S=$newmilter')" });
+		$changed++;
+		}
+
+	# Check for config for filters to call
+	my ($def) = grep { $_->{'type'} == 2 &&
+			   $_->{'name'} eq 'confINPUT_MAIL_FILTERS' } @feats;
+	if ($def) {
+		my @filters = split(/,/, $def->{'value'});
+		if (&indexof("dkim-filter", @filters) < 0) {
+			# Add to existing define
+			push(@filters, 'dkim-filter');
+			$def->{'value'} = join(',', @filters);
+			&sendmail::modify_feature($def);
+			$changed++;
+			}
+		}
+	else {
+		# Add the define
+		&sendmail::create_feature({
+			'type' => 2,
+			'name' => 'confINPUT_MAIL_FILTERS',
+			'value' => 'dkim-filter' });
+		$changed++;
+		}
+
+	if ($changed) {
 		&rebuild_sendmail_cf();
 		}
 	&unlock_file($sendmail::config{'sendmail_mc'});
-	&sendmail::restart_sendmail();
+	if ($changed) {
+		&sendmail::restart_sendmail();
+		}
 	}
 &$second_print($text{'setup_done'});
 
@@ -474,14 +505,41 @@ elsif ($config{'mail_system'} == 1) {
 	# Configure Sendmail to not use filter
 	&lock_file($sendmail::config{'sendmail_mc'});
 	my @feats = &sendmail::list_features();
+	my $changed = 0;
+
+	# Remove from list of milter to call
+	my ($def) = grep { $_->{'type'} == 2 &&
+			   $_->{'name'} eq 'confINPUT_MAIL_FILTERS' } @feats;
+	if ($def) {
+		my @filters = split(/,/, $def->{'value'});
+		@filters = grep { $_ ne 'dkim-filter' } @filters;
+		if (@filters) {
+			# Some still left, so update
+			$def->{'value'} = join(',', @filters);
+			&sendmail::modify_feature($def);
+			}
+		else {
+			# Delete completely
+			&sendmail::delete_feature($def);
+			}
+		$changed++;
+		}
+
+	# Remove milter definition
 	my ($milter) = grep { $_->{'text'} =~ /INPUT_MAIL_FILTER/ &&
 			      $_->{'text'} =~ /\Q$oldmilter\E/ } @feats;
 	if ($milter) {
 		&sendmail::delete_feature($milter);
+		$changed++;
+		}
+
+	if ($changed) {
 		&rebuild_sendmail_cf();
 		}
 	&unlock_file($sendmail::config{'sendmail_mc'});
-	&sendmail::restart_sendmail();
+	if ($changed) {
+		&sendmail::restart_sendmail();
+		}
 	}
 &$second_print($text{'setup_done'});
 
