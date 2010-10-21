@@ -44,6 +44,14 @@ if ($tmpl->{'web_stats_pass'} && !-r $htaccess_file) {
 	&print_tempfile(HTACCESS, "deny from all\n");
 	&print_tempfile(HTACCESS, "</Files>\n");
 	&close_tempfile_as_domain_user($_[0], HTACCESS);
+
+	# Add to list of protected dirs
+	&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
+	&lock_file($htaccess_htpasswd::directories_file);
+	local @dirs = &htaccess_htpasswd::list_directories();
+	push(@dirs, [ $stats, $passwd_file, 0, 0, undef ]);
+	&htaccess_htpasswd::save_directories(\@dirs);
+	&unlock_file($htaccess_htpasswd::directories_file);
 	}
 if ($tmpl->{'web_stats_pass'}) {
 	&update_create_htpasswd($_[0], $passwd_file, $_[0]->{'user'});
@@ -264,6 +272,7 @@ sub delete_webalizer
 &obtain_lock_webalizer($_[0]);
 &obtain_lock_cron($_[0]);
 &require_webalizer();
+local $stats = &webalizer_stats_dir($_[0]);
 local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
 if (!$alog && -r "$_[0]->{'home'}/logs/access_log") {
 	# Website may have been already deleted, so we don't know the log
@@ -292,6 +301,15 @@ if ($job) {
         }
 &release_lock_webalizer($_[0]);
 &release_lock_cron($_[0]);
+
+# Remove from list of protected dirs
+&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
+&lock_file($htaccess_htpasswd::directories_file);
+local @dirs = &htaccess_htpasswd::list_directories();
+@dirs = grep { $_->[0] ne $stats } @dirs;
+&htaccess_htpasswd::save_directories(\@dirs);
+&unlock_file($htaccess_htpasswd::directories_file);
+
 &$second_print($text{'setup_done'});
 }
 
