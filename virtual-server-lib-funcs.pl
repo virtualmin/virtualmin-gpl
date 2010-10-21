@@ -11686,8 +11686,7 @@ if (!&has_command("tar")) {
 	}
 local @bcmds = $config{'compression'} == 0 ? ( "gzip", "gunzip" ) :
 	       $config{'compression'} == 3 ? ( "zip", "unzip" ) :
-	       $config{'compression'} == 1 && $config{'pbzip2'} ?
-			( "pbzip2", "pbunzip2" ) :
+	       $config{'compression'} == 1 && $config{'pbzip2'} ? ( "pbzip2" ) :
 	       $config{'compression'} == 1 ? ( "bzip2", "bunzip2" ) :
 					     ( );
 foreach my $bcmd (@bcmds) {
@@ -11695,6 +11694,21 @@ foreach my $bcmd (@bcmds) {
 		return &text('check_ebcmd', "<tt>$bcmd</tt>");
 		}
 	}
+
+# If pbzip2 is being used, make sure it is a version that supports
+# compressing to stdout
+if ($config{'compression'} == 1 && $config{'pbzip2'}) {
+	local $out = &backquote_command("pbzip2 -V 2>&1");
+	if ($out !~ /Parallel\s+BZIP2\s+v([0-9\.]+)/i) {
+		return &text('check_epbzip2out',
+			     "<tt>".&html_escape($out)."</tt>");
+		}
+	local $ver = $1;
+	if (&compare_versions($ver, "1.0.4") < 0) {
+		return &text('check_epbzip2ver', "1.0.4", $ver);
+		}
+	}
+
 &$second_print(&text('check_bcmdok'));
 
 # Check if resource limits are supported

@@ -1706,6 +1706,8 @@ check_emysqlplugin=The MySQL users plugin is no longer needed, as its functional
 check_statusok=The System and Server Status module is installed and checking on schedule.
 check_statussched=The System and Server Status module is installed, but is not set up to check servers on a regular schedule. This should be enabled on its <a href='$1'>Scheduled Monitoring</a> page.
 check_ebcmd=The command $1 needed to create or restore backups is not installed.
+check_epbzip2out=You have selected parallel bzip2 compression, but the version number of <tt>pbzip2</tt> could not be determined : $1
+check_epbzip2ver=You have selected parallel bzip2 compression, but this requires <tt>pbzip2</tt> version $1 or later, and your system has version $2
 check_bcmdok=All commands needed to create and restore backups are installed.
 check_eset_user=External quota commands are enabled, but the command to set a user's quota is not defined or does not exist
 check_eset_group=External quota commands are enabled, but the command to set a group's quota is not defined or does not exist
