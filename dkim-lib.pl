@@ -291,7 +291,7 @@ if ($gconfig{'os_type'} eq 'debian-linux') {
 	# Save domains and key file in config
 	&lock_file($debian_dkim_config);
 	&save_debian_dkim_config($debian_dkim_config, 
-		"Domain", join(",", map { $_->{'dom'} } @doms));
+		"Domain", &make_domain_list(\@doms));
 	&save_debian_dkim_config($debian_dkim_config, 
 		"Selector", $dkim->{'selector'});
 	&save_debian_dkim_config($debian_dkim_config, 
@@ -322,7 +322,7 @@ elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 	# Save domains and key file in config
 	&lock_file($redhat_dkim_config);
 	&save_debian_dkim_config($redhat_dkim_config, 
-		"Domain", join(",", map { $_->{'dom'} } @doms));
+		"Domain", &make_domain_list(\@doms));
 	&save_debian_dkim_config($redhat_dkim_config, 
 		"Selector", $dkim->{'selector'});
 	&save_debian_dkim_config($redhat_dkim_config, 
@@ -406,7 +406,7 @@ elsif ($config{'mail_system'} == 1) {
 	&lock_file($sendmail::config{'sendmail_mc'});
 	my @feats = &sendmail::list_features();
 	my ($milter) = grep { $_->{'text'} =~ /INPUT_MAIL_FILTER/ &&
-			      $_->{'text'} =~ /\Q$wantmilter\E/ } @feats;
+			      $_->{'text'} =~ /\Q$newmilter\E/ } @feats;
 	if (!$milter) {
 		# Add to .mc file
 		&sendmail::create_feature({
@@ -552,8 +552,8 @@ my ($doms) = @_;
 if ($gconfig{'os_type'} eq 'debian-linux') {
 	&lock_file($debian_dkim_config);
 	my $conf = &get_debian_dkim_config($debian_dkim_config);
-	&save_debian_dkim_config($debian_dkim_config, "Domain",
-		join(",", map { $_->{'dom'} } @$doms));
+	&save_debian_dkim_config($debian_dkim_config,
+		"Domain", &make_domain_list($doms));
 	&unlock_file($debian_dkim_config);
 	if (&init::action_status("dkim-filter")) {
 		&init::restart_action("dkim-filter");
@@ -562,8 +562,8 @@ if ($gconfig{'os_type'} eq 'debian-linux') {
 elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 	&lock_file($redhat_dkim_config);
 	my $conf = &get_debian_dkim_config($redhat_dkim_config);
-	&save_debian_dkim_config($redhat_dkim_config, "Domain",
-		join(",", map { $_->{'dom'} } @$doms));
+	&save_debian_dkim_config($redhat_dkim_config,
+		"Domain", &make_domain_list($doms));
 	&unlock_file($redhat_dkim_config);
 	if (&init::action_status("dkim-milter")) {
 		&init::restart_action("dkim-milter");
@@ -704,6 +704,20 @@ my $cmd = "cd $sendmail::config{'sendmail_features'}/m4 ; ".
 &system_logged("$cmd 2>/dev/null >$config{'sendmail_cf'} ".
 	       "</dev/null");
 &unlock_file($sendmail::config{'sendmail_cf'});
+}
+
+# make_domain_list(&doms)
+# Given a list of domain objects, return a comma-separated list of domain names
+# for the DKIM config file. Since it has a 1024-character limit on a line
+# length, use * if too long.
+sub make_domain_list
+{
+my ($doms) = @_;
+my $dnames = join(",", map { $_->{'dom'} } @$doms);
+if (length($dnames) > 1000) {
+	return "*";
+	}
+return $dnames;
 }
 
 1;
