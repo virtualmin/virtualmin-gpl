@@ -47,9 +47,13 @@ else {
 # Populate home dir
 if ($tmpl->{'skel'} ne "none" && !$_[0]->{'nocopyskel'} &&
     !$_[0]->{'alias'}) {
-	&copy_skel_files(&substitute_domain_template($tmpl->{'skel'}, $_[0]),
-			 $uinfo, $_[0]->{'home'},
-			 $_[0]->{'group'} || $_[0]->{'ugroup'}, $_[0]);
+	# Don't die if this fails due to quota issues
+	eval {
+	  local $main::error_must_die = 1;
+	  &copy_skel_files(&substitute_domain_template($tmpl->{'skel'}, $_[0]),
+	  		   $uinfo, $_[0]->{'home'},
+	  		   $_[0]->{'group'} || $_[0]->{'ugroup'}, $_[0]);
+	  };
 	}
 
 # If this is a sub-domain, move public_html from any skeleton to it's sub-dir
