@@ -46,21 +46,35 @@ print &ui_hidden_table_start($mailbox ? $text{'user_mheader'} :
 $ulabel = $d->{'mail'} ? &hlink($text{'user_user'}, "username")
 		       : &hlink($text{'user_user2'}, "username2");
 if ($mailbox) {
+	# Domain owner
 	print &ui_table_row($ulabel, "<tt>$user->{'user'}</tt>", 2, \@tds);
 	$pop3 = $user->{'user'};
 	}
 else {
+	# Regular user
 	$pop3 = $d && !$user->{'noappend'} ?
 		&remove_userdom($user->{'user'}, $d) : $user->{'user'};
 	print &ui_table_row($ulabel,
 		&ui_textbox("mailuser", $pop3, 13).
-		($d ? "\@".&show_domain_name($d) : "")."\n".
-		($pop3 ne $user->{'user'} ?
-			" ".&text($d->{'mail'} ? 'user_pop3' : 'user_pop3f',
-				  "<tt>$user->{'user'}</tt>") :
-			""),
+		($d ? "\@".&show_domain_name($d) : ""),
 		2, \@tds);
 	print &ui_hidden("oldpop3", $pop3),"\n";
+
+	# Full username differs
+	if ($pop3 ne $user->{'user'}) {
+		print &ui_table_row(
+			$d->{'mail'} ? &hlink($text{'user_imap'}, 'user_imap')
+				     : &hlink($text{'user_imapf'},'user_imapf'),
+			"<tt>$user->{'user'}</tt>");
+		}
+
+	# MySQL username differs
+	if ($user->{'mysql_user'} &&
+             $user->{'mysql_user'} ne $user->{'user'}) {
+		print &ui_table_row(
+			&hlink($text{'user_mysqluser2'}, 'user_mysqluser2'),
+			"<tt>$user->{'mysql_user'}</tt>");
+		}
 	}
 
 # Real name - only for true Unix users or LDAP persons
@@ -390,15 +404,10 @@ if (@dbs) {
 			   $_->{'name'}." ($_->{'desc'})" ] } @{$user->{'dbs'}};
 	@alldbs = map { [ $_->{'type'}."_".$_->{'name'},
 			  $_->{'name'}." ($_->{'desc'})" ] } @dbs;
-	if ($user->{'mysql_user'} &&
-             $user->{'mysql_user'} ne $user->{'user'}) {
-		$usermsg = "<br>".&text('user_mysqluser',
-                             "<tt>$user->{'mysql_user'}</tt>");
-		}
 	print &ui_table_row(&hlink($text{'user_dbs'},"userdbs"),
 	  &ui_multi_select("dbs", \@userdbs, \@alldbs, 5, 1, 0,
-			   $text{'user_dbsall'}, $text{'user_dbssel'}).
-	  $usermsg, 2, \@tds);
+			   $text{'user_dbsall'}, $text{'user_dbssel'}),
+	  2, \@tds);
 	}
 
 # Show secondary groups
