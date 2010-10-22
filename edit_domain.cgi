@@ -96,10 +96,13 @@ print &ui_hidden_table_start($text{'edit_headerc'}, "width=100%", 2,
 			     "config", 0, \@tds);
 
 # Show username prefix, with option to change
-if (!$aliasdom) {
+if (!$aliasdom && $tmpl->{'append_style'} != 6) {
 	@users = &list_domain_users($d, 1, 1, 1, 1);
-	$msg = $tmpl->{'append_style'} == 0 || $tmpl->{'append_style'} == 1 ||
-	       $tmpl->{'append_style'} == 5 ? 'edit_prefix' : 'edit_suffix';
+	$msg = $tmpl->{'append_style'} == 0 ||
+	       $tmpl->{'append_style'} == 1 ||
+	       $tmpl->{'append_style'} == 4 ||
+	       $tmpl->{'append_style'} == 7 ? 'edit_suffix' :
+					      'edit_prefix';
 	print &ui_table_row($text{$msg},
 		@users ? "<tt>$d->{'prefix'}</tt> (".
 			  &text('edit_noprefix', scalar(@users)).")"
