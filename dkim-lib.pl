@@ -287,17 +287,41 @@ if (!$pubkey) {
 
 # Add domain, key and selector to config file
 &$first_print($text{'dkim_config'});
-if ($gconfig{'os_type'} eq 'debian-linux') {
+my $dkim_config = $gconfig{'os_type'} eq 'debian-linux' ? $debian_dkim_config :
+		  $gconfig{'os_type'} eq 'redhat-linux' ? $redhat_dkim_config :
+							  undef;
+if ($dkim_config) {
 	# Save domains and key file in config
-	&lock_file($debian_dkim_config);
-	&save_debian_dkim_config($debian_dkim_config, 
-		"Domain", &make_domain_list(\@doms));
-	&save_debian_dkim_config($debian_dkim_config, 
+	&lock_file($dkim_config);
+	&save_debian_dkim_config($dkim_config, 
+		"Domain", "*");
+	&save_debian_dkim_config($dkim_config, 
 		"Selector", $dkim->{'selector'});
-	&save_debian_dkim_config($debian_dkim_config, 
+	&save_debian_dkim_config($dkim_config, 
 		"KeyFile", $dkim->{'keyfile'});
-	&unlock_file($debian_dkim_config);
+	&unlock_file($dkim_config);
 
+	# Work out mapping file
+	my $conf = &get_debian_dkim_config($dkim_config);
+	my $keylist = $conf->{'KeyList'};
+	if (!$keylist) {
+		$keylist = $dkim_config;
+		$keylist =~ s/\/([^\/]+)$/\/keylist/;
+		&save_debian_dkim_config($dkim_config,
+			"KeyList", $keylist);
+		}
+
+	# Link key to same directory as mapping file, with selector as filename
+	my $selkeyfile = $keylist;
+	$selkeyfile =~ s/\/([^\/]+)$/$dkim->{'selector'}/;
+	&unlink_file($selkeyfile);
+	&symlink_file($keyfile, $keylist, $selkeyfile);
+
+	# Create key mapping file
+	&create_key_mapping_file(\@doms, $keylist, $selkeyfile);
+	}
+if ($gconfig{'os_type'} eq 'debian-linux') {
+	# Set milter port to listen on
 	&lock_file($debian_dkim_default);
 	my %def;
 	&read_env_file($debian_dkim_default, \%def);
@@ -319,18 +343,7 @@ if ($gconfig{'os_type'} eq 'debian-linux') {
 	&unlock_file($debian_dkim_default);
 	}
 elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-	# Save domains and key file in config
-	&lock_file($redhat_dkim_config);
-	&save_debian_dkim_config($redhat_dkim_config, 
-		"Domain", &make_domain_list(\@doms));
-	&save_debian_dkim_config($redhat_dkim_config, 
-		"Selector", $dkim->{'selector'});
-	&save_debian_dkim_config($redhat_dkim_config, 
-		"KeyFile", $dkim->{'keyfile'});
-	&save_debian_dkim_config($redhat_dkim_config,
-		"KeyList", undef);
-	&unlock_file($redhat_dkim_config);
-
+	# Set milter port to listen on
 	&lock_file($redhat_dkim_default);
 	my %def;
 	if ($config{'mail_system'} == 0 && $dkim->{'socket'}) {
@@ -602,11 +615,57 @@ if ($d->{'dns'}) {
 	}
 }
 
+# create_key_mapping_file(&domains, mapping-file, key-file)
+# Write out a file of all domains to perform DKIM on
+sub create_key_mapping_file
+{
+my ($doms, $keylist, $keyfile) = @_;
+&open_lock_tempfile(KEYLIST, ">$keylist");
+foreach my $d (@$doms) {
+	&print_tempfile(KEYLIST,
+		"*\@".$d->{'dom'}.":".$d->{'dom'}.":".$keyfile."\n");
+	}
+&close_tempfile(KEYLIST);
+&set_ownership_permissions(undef, undef, 0755, $keylist);
+}
+
 # set_dkim_domains(&domains)
 # Configure the DKIM filter to sign mail for the given list of domaisn
 sub set_dkim_domains
 {
 my ($doms) = @_;
+my $dkim_config = $gconfig{'os_type'} eq 'debian-linux' ? $debian_dkim_config :
+		  $gconfig{'os_type'} eq 'redhat-linux' ? $redhat_dkim_config :
+							  undef;
+my $init = $gconfig{'os_type'} eq 'debian-linux' ? 'dkim-filter' :
+	   $gconfig{'os_type'} eq 'redhat-linux' ? 'dkim-milter' :
+						   undef;
+if ($dkim_config) {
+	my $conf = &get_debian_dkim_config($dkim_config);
+	my $keylist = $conf->{'KeyList'};
+	if ($keylist) {
+		# Update key to domain map
+		&save_debian_dkim_config($dkim_config, 
+			"Domain", "*");
+		my $selector = $conf->{'Selector'};
+		my $keylist = $conf->{'KeyList'};
+		my $selkeyfile = $keylist;
+		$selkeyfile =~ s/\/([^\/]+)$/$dkim->{'selector'}/;
+		&create_key_mapping_file($doms, $keylist, $selkeyfile);
+		}
+	else {
+		# Just set list of domains
+		&save_debian_dkim_config($dkim_config,
+			"Domain", join(",", map { $_->{'dom'} } @$doms));
+		}
+
+	# Restart milter
+	&foreign_require("init");
+	if (&init::action_status($init)) {
+		&init::restart_action($init);
+		}
+	}
+
 if ($gconfig{'os_type'} eq 'debian-linux') {
 	&lock_file($debian_dkim_config);
 	my $conf = &get_debian_dkim_config($debian_dkim_config);
@@ -762,20 +821,6 @@ my $cmd = "cd $sendmail::config{'sendmail_features'}/m4 ; ".
 &system_logged("$cmd 2>/dev/null >$config{'sendmail_cf'} ".
 	       "</dev/null");
 &unlock_file($sendmail::config{'sendmail_cf'});
-}
-
-# make_domain_list(&doms)
-# Given a list of domain objects, return a comma-separated list of domain names
-# for the DKIM config file. Since it has a 1024-character limit on a line
-# length, use * if too long.
-sub make_domain_list
-{
-my ($doms) = @_;
-my $dnames = join(",", map { $_->{'dom'} } @$doms);
-if (length($dnames) > 1000) {
-	return "*";
-	}
-return $dnames;
 }
 
 1;
