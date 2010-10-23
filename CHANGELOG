@@ -1256,3 +1256,4 @@ Updated the Trac script installer to version 0.12.1, Instiki to 0.19.1, Rails to
 Virtual server backups can now be to multiple destinations, both local and remote. The time-consuming process of compressing each domain is done only once, and the resulting file then transferred to each destination.
 The maximum message size to check for spam can now be set even when regular spamassassin is used, as well as when using spamc.
 When Webalizer is enabled for a domain, allowed users for the /stats URL path can now be edited on the Protected Web Directories page.
+Fixed DKIM support to handle large numbers of domains.

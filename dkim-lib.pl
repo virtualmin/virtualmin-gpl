@@ -313,9 +313,9 @@ if ($dkim_config) {
 
 	# Link key to same directory as mapping file, with selector as filename
 	my $selkeyfile = $keylist;
-	$selkeyfile =~ s/\/([^\/]+)$/$dkim->{'selector'}/;
+	$selkeyfile =~ s/\/([^\/]+)$/\/$dkim->{'selector'}/;
 	&unlink_file($selkeyfile);
-	&symlink_file($keyfile, $keylist, $selkeyfile);
+	&symlink_file($dkim->{'keyfile'}, $selkeyfile);
 
 	# Create key mapping file
 	&create_key_mapping_file(\@doms, $keylist, $selkeyfile);
@@ -663,27 +663,6 @@ if ($dkim_config) {
 	&foreign_require("init");
 	if (&init::action_status($init)) {
 		&init::restart_action($init);
-		}
-	}
-
-if ($gconfig{'os_type'} eq 'debian-linux') {
-	&lock_file($debian_dkim_config);
-	my $conf = &get_debian_dkim_config($debian_dkim_config);
-	&save_debian_dkim_config($debian_dkim_config,
-		"Domain", &make_domain_list($doms));
-	&unlock_file($debian_dkim_config);
-	if (&init::action_status("dkim-filter")) {
-		&init::restart_action("dkim-filter");
-		}
-	}
-elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-	&lock_file($redhat_dkim_config);
-	my $conf = &get_debian_dkim_config($redhat_dkim_config);
-	&save_debian_dkim_config($redhat_dkim_config,
-		"Domain", &make_domain_list($doms));
-	&unlock_file($redhat_dkim_config);
-	if (&init::action_status("dkim-milter")) {
-		&init::restart_action("dkim-milter");
 		}
 	}
 }
