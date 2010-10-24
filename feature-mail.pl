@@ -2654,6 +2654,23 @@ while(<UFILE>) {
 			$uinfo->{'secs'} = [ split(/;/, $user[12]) ];
 			}
 
+		# Check for possible DB username clashes
+		foreach my $dt (&unique(map { $_->{'type'} }
+					&domain_databases($_[0]))) {
+			local $dfunc = "list_all_".$dt."_users";
+			next if (!defined(&$dfunc));
+			local @dbusers = &$dfunc();
+			local $ufunc = $dt."_username";
+			if (&indexof(&$ufunc($uinfo->{'user'}), @dbusers) >= 0){
+				# Clash found! Don't create this DB type login
+				@{$uinfo->{'dbs'}} =
+					grep { $_->{'type'} ne $dt }
+					@{$uinfo->{'dbs'}};
+				delete($uinfo->{$dt."_pass"});
+				}
+			}
+
+		# Create the user, which will also add any configured DB account
 		&create_user($uinfo, $_[0]);
 
 		# Create an empty mail file, which may be needed if inbox
