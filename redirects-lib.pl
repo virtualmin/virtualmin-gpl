@@ -35,7 +35,8 @@ foreach my $al (&apache::find_directive_struct("Alias", $vconf),
 		}
 	elsif (($al->{'name'} eq 'AliasMatch' ||
 		$al->{'name'} eq 'RedirectMatch') &&
-	       $al->{'words'}->[0] =~ /^(.*)\.\*\$$/) {
+	       ($al->{'words'}->[0] =~ /^(.*)\.\*\$$/ ||
+		$al->{'words'}->[0] =~ /^(.*)\(\.\*\)\$$/)) {
 		$rd->{'path'} = $1;
 		$rd->{'regexp'} = 1;
 		push(@rv, $rd);
@@ -60,7 +61,7 @@ foreach my $port (@ports) {
 	$dir .= "Match" if ($redirect->{'regexp'});
 	my @aliases = &apache::find_directive($dir, $vconf);
 	push(@aliases, $redirect->{'path'}.
-			($redirect->{'regexp'} ? "\.\*\$" : "").
+			($redirect->{'regexp'} ? "(\.\*)\$" : "").
 			" ".
 			($redirect->{'code'} ? $redirect->{'code'}." " : "").
 			($redirect->{'alias'} || $redirect->{'dest'}));

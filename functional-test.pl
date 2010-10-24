@@ -3879,6 +3879,97 @@ $overlap_tests = [
 	},
 	];
 
+$redirect_tests = [
+	# Create a domain for the redirects
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test redirect domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Non-redirected web page' ],
+		      @create_args, ],
+	},
+
+	# Create a redirect for /google
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/google' ],
+		      [ 'redirect', 'http://www.google.com' ] ],
+	},
+
+	# Make sure the redirect appears
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/google', 'Destination: http://www.google.com',
+		      'Type: Redirect', 'Match sub-paths: No' ],
+	},
+
+	# Test wget to redirect to google
+	{ 'command' => $wget_command.'http://'.$test_domain.'/google/',
+	  'grep' => 'Feeling Lucky',
+	},
+
+	# Test wget to a sub-url, which should also work as Redirect includes
+	# sub-paths automatically
+	{ 'command' => $wget_command.'http://'.$test_domain.
+		       '/google/imghp',
+	  'grep' => 'Google Images',
+	},
+
+	# Delete the redirect
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/google' ] ],
+	},
+
+	# Make sure the redirect is gone
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => [ '^/google' ],
+	},
+
+	# Test wget, which should fail
+	{ 'command' => $wget_command.'http://'.$test_domain.'/google/',
+	  'fail' => 1,
+	},
+
+	# Create a redirect for /google again, but with sub-path matching
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/google' ],
+		      [ 'redirect', 'http://www.google.com' ],
+		      [ 'regexp' ] ],
+	},
+
+	# Make sure the redirect appears correctly
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/google', 'Destination: http://www.google.com',
+		      'Type: Redirect', 'Match sub-paths: Yes' ],
+	},
+
+	# Test wget to redirect to google
+	{ 'command' => $wget_command.'http://'.$test_domain.'/google/',
+	  'grep' => 'Feeling Lucky',
+	},
+
+	# Test wget to a sub-url, should go to the same place
+	{ 'command' => $wget_command.'http://'.$test_domain.
+		       '/google/imghp',
+	  'antigrep' => 'Google Images',
+	},
+
+	# Get rid of the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1
+        },
+	];
+
 $alltests = { 'domains' => $domains_tests,
 	      'disable' => $disable_tests,
 	      'web' => $web_tests,
@@ -3912,6 +4003,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'bw' => $bw_tests,
 	      'quota' => $quota_tests,
 	      'overlap' => $overlap_tests,
+	      'redirect' => $redirect_tests,
 	    };
 
 # Run selected tests
@@ -4029,6 +4121,9 @@ foreach my $a (@{$t->{'args'}}) {
 	if (defined($a->[1])) {
 		if ($a->[1] =~ /\s/) {
 			$cmd .= " --".$a->[0]." '".$a->[1]."'";
+			}
+		elsif ($a->[1] =~ /\?|\$|\*/) {
+			$cmd .= " --".$a->[0]." ".quotemeta($a->[1]);
 			}
 		else {
 			$cmd .= " --".$a->[0]." ".$a->[1];
