@@ -7,7 +7,7 @@ Change a virtual server's web configuration
 This script can update the PHP and web forwarding settings for one or more virtual servers. Like other scripts, the servers to change are selecting using the C<--domain> or C<--all-domains> parameters.
 
 To change the method Virtualmin uses to run CGI scripts, use the C<--mode>
-parameter followed by one of C<--mod_php>, C<--cgi> or C<--fcgid>. To enable
+parameter followed by one of C<mod_php>, C<cgi> or C<fcgid>. To enable
 or disable the use of Suexec for running CGI scripts, give either the
 C<--suexec> or C<--no-suexec> parameter.
 
