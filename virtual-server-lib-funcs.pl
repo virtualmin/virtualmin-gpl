@@ -856,17 +856,21 @@ if (!$_[4] && $_[0]) {
 			}
 		local %dbu = map { $_->[0], $_->[1] } @dbu;
 		local $u;
+		local $domufunc = $db->{'type'}.'_user';
+		local $domu = defined(&$domufunc) ? &$domufunc($_[0]) : undef;
 		foreach $u (@users) {
 			# Domain owner always gets all databases
 			next if ($u->{'user'} eq $_[0]->{'user'} &&
 				 $u->{'unix'});
 
 			# For each user, add this DB to his list if there
-			# is a user for it with the same name.
+			# is a user for it with the same name. Unless this
+			# is the same as the domain owner's DB username.
 			local $uname = $ufunc ? &$ufunc($u->{'user'}) :
 				&plugin_call($db->{'type'}, "database_user",
 					     $u->{'user'});
 			if (exists($dbu{$uname}) &&
+			    $uname ne $domu &&
 			    !$dbdone{$db->{'type'},$db->{'name'},$uname}++) {
 				push(@{$u->{'dbs'}}, $db);
 				$u->{$db->{'type'}."_user"} = $uname;
