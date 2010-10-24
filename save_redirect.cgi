@@ -40,6 +40,7 @@ else {
 		$in{'url'} =~ /^(http|https):\/\/\S+$/ ||
 			&error($text{'redirect_eurl'});
 		$r->{'dest'} = $in{'url'};
+		delete($r->{'alias'});
 		}
 	else {
 		$in{'dir'} =~ /^\/\S+$/ && -d $in{'dir'} ||
@@ -49,7 +50,8 @@ else {
 			&is_under_directory($rroot, $in{'dir'}) ||
 				&error(&text('redirect_edir2', $rroot));
 			}
-		$r->{'dest'} = $in{'dir'};
+		$r->{'alias'} = $in{'dir'};
+		delete($r->{'dest'});
 		}
 	$r->{'regexp'} = $in{'regexp'};
 

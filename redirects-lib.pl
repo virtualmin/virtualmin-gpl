@@ -63,7 +63,7 @@ foreach my $port (@ports) {
 			($redirect->{'regexp'} ? "\.\*\$" : "").
 			" ".
 			($redirect->{'code'} ? $redirect->{'code'}." " : "").
-			$redirect->{'dest'});
+			($redirect->{'alias'} || $redirect->{'dest'}));
 	&apache::save_directive($dir, \@aliases, $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	$count++;
