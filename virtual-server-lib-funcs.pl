@@ -5617,7 +5617,7 @@ if ($reseller) {
 	if ($limit ne "") {
 		# Reseller has a limit ..
 		local $got = &count_domain_feature($f, @rdoms);
-		if ($got > $limit) {
+		if ($got > $limit || $got < 0) {
 			# Reseller has reached his limit
 			return (0, $reason, $limit, $hide);
 			}
