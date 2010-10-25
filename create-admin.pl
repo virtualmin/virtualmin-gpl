@@ -95,7 +95,7 @@ while(@ARGV > 0) {
 		push(@allowednames, shift(@ARGV));
 		}
 	else {
-		&usage();
+		&usage("Unknown flag $a");
 		}
 	}
 
@@ -103,6 +103,7 @@ $domain && $name || &usage("Missing domain name or login name");
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 $d->{'parent'} && &usage("Virtual server $domain is not a parent server");
+$d->{'webmin'} || &usage("Virtual server $domain does not have a Webmin login enabled");
 @admins = &list_extra_admins($d);
 
 # Check for a clash
