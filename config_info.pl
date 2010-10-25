@@ -1,5 +1,5 @@
 
-require './virtual-server-lib.pl';
+require 'virtual-server-lib.pl';
 
 sub show_theme
 {
