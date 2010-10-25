@@ -35,6 +35,7 @@ $test_alias = "testing";
 $test_alias_two = "yetanothertesting";
 $test_reseller = "testsel";
 $test_plan = "Test plan";
+$test_admin = "testadmin";
 $timeout = 120;			# Longest time a test should take
 $nowdate = strftime("%Y-%m-%d", localtime(time()));
 $yesterdaydate = strftime("%Y-%m-%d", localtime(time()-24*60*60));
@@ -105,6 +106,7 @@ while(@ARGV > 0) {
 		}
 	}
 $webmin_wget_command = "wget -O - --cache=off --proxy=off --http-user=$webmin_user --http-passwd=$webmin_pass --user-agent=Webmin ";
+$admin_webmin_wget_command = "wget -O - --cache=off --proxy=off --http-user=$test_admin --http-passwd=smeg --user-agent=Webmin ";
 &get_miniserv_config(\%miniserv);
 $webmin_proto = "http";
 if ($miniserv{'ssl'}) {
@@ -117,6 +119,7 @@ $webmin_port = $miniserv{'port'};
 $webmin_url = "$webmin_proto://localhost:$webmin_port";
 if ($webmin_proto eq "https") {
 	$webmin_wget_command .= "--no-check-certificate ";
+	$admin_webmin_wget_command .= "--no-check-certificate ";
 	}
 
 ($test_domain_user) = &unixuser_name($test_domain);
@@ -4012,6 +4015,140 @@ $redirect_tests = [
         },
 	];
 
+$admin_tests = [
+	# Create a domain for the admins
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test admins domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ],
+		      [ 'webmin' ], [ 'mail' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test web page' ],
+		      @create_args, ],
+	},
+
+	# Create an extra admin
+	{ 'command' => 'create-admin.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'name', $test_admin ],
+		      [ 'desc', 'Test extra admin' ],
+		      [ 'email', 'admin@'.$test_domain ],
+		      [ 'pass', 'smeg' ],
+		      [ 'edit', 'users' ],
+		      [ 'edit', 'aliases' ],
+		      [ 'edit', 'dbs' ],
+		      [ 'allowed-domain', $test_domain ] ],
+	},
+
+	# Make sure he was created
+	{ 'command' => 'list-admins.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^'.$test_admin,
+		      'Description: Test extra admin',
+		      'Password: smeg',
+		      'Email: admin@'.$test_domain,
+		      'Create servers: No',
+		      'Rename servers: No',
+		      'Allowed virtual servers: '.$test_domain,
+		      'Edit capabilities: users aliases dbs', ],
+	},
+
+	# Check his login to Virtualmin
+	{ 'command' => $admin_webmin_wget_command.
+		       "${webmin_proto}://localhost:${webmin_port}".
+		       "/virtual-server/",
+	  'grep' => [ 'Virtualmin Virtual Servers', $test_domain ],
+	},
+
+	# Check he can list aliases
+	{ 'command' => $admin_webmin_wget_command.
+		       "${webmin_proto}://localhost:${webmin_port}".
+		       "/virtual-server/list_aliases.cgi\\?dom=".
+		       "`virtualmin list-domains.pl --domain $test_domain --id-only`",
+	  'grep' => [ $test_domain, 'Mail Aliases' ],
+	},
+
+	# Check he can list users
+	{ 'command' => $admin_webmin_wget_command.
+		       "${webmin_proto}://localhost:${webmin_port}".
+		       "/virtual-server/list_users.cgi\\?dom=".
+		       "`virtualmin list-domains.pl --domain $test_domain --id-only`",
+	  'grep' => [ $test_domain, 'Mail and FTP Users' ],
+	},
+
+	# Take away access to aliases and users
+	{ 'command' => 'modify-admin.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'name', $test_admin ],
+		      [ 'cannot-edit', 'aliases' ],
+		      [ 'cannot-edit', 'users' ] ],
+	},
+
+	# Check he can no longer list aliases
+	{ 'command' => $admin_webmin_wget_command.
+		       "${webmin_proto}://localhost:${webmin_port}".
+		       "/virtual-server/list_aliases.cgi\\?dom=".
+		       "`virtualmin list-domains.pl --domain $test_domain --id-only`",
+	  'antigrep' => 'Mail Aliases',
+	  'grep' => 'You are not allowed to edit aliases in this domain',
+	},
+
+	# Check he can no longer list users
+	{ 'command' => $admin_webmin_wget_command.
+		       "${webmin_proto}://localhost:${webmin_port}".
+		       "/virtual-server/list_users.cgi\\?dom=".
+		       "`virtualmin list-domains.pl --domain $test_domain --id-only`",
+	  'antigrep' => 'Mail and FTP Users',
+	  'grep' => 'You are not allowed to edit users in this domain',
+	},
+
+	# Create a sub-server
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      @create_args, ],
+	},
+
+	# Grant the admin access to it
+	{ 'command' => 'modify-admin.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'name', $test_admin ],
+		      [ 'add-domain', $test_subdomain ] ],
+	},
+
+	# Make sure he can see it too
+	{ 'command' => $admin_webmin_wget_command.
+		       "${webmin_proto}://localhost:${webmin_port}".
+		       "/virtual-server/",
+	  'grep' => [ 'Virtualmin Virtual Servers', $test_domain,
+		      $test_subdomain ],
+	},
+
+	# Delete the admin
+	{ 'command' => 'delete-admin.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'name', $test_admin ] ],
+	},
+
+	# Make sure he is gone
+	{ 'command' => 'list-admins.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => '^'.$test_admin,
+	},
+
+	# Get rid of the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1
+        },
+	];
+
 $alltests = { 'domains' => $domains_tests,
 	      'disable' => $disable_tests,
 	      'web' => $web_tests,
@@ -4046,6 +4183,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'quota' => $quota_tests,
 	      'overlap' => $overlap_tests,
 	      'redirect' => $redirect_tests,
+	      'admin' => $admin_tests,
 	    };
 
 # Run selected tests
