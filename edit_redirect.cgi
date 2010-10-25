@@ -22,11 +22,11 @@ print &ui_hidden("old", $in{'path'});
 print &ui_table_start($text{'redirect_header'}, undef, 2);
 
 # URL path
-print &ui_table_row($text{'redirect_path'},
+print &ui_table_row(&hlink($text{'redirect_path'}, 'redirect_path'),
 	&ui_textbox("path", $r->{'path'}, 40));
 
 # Destination
-print &ui_table_row($text{'redirect_dest'},
+print &ui_table_row(&hlink($text{'redirect_dest'}, 'redirect_dest'),
 	&ui_radio_table("mode", $r->{'alias'} ? 1 : 0,
 		[ [ 0, $text{'redirect_url'},
 		    &ui_textbox("url", $r->{'alias'} ? '' : $r->{'dest'}, 40) ],
@@ -35,7 +35,7 @@ print &ui_table_row($text{'redirect_dest'},
 		]));
 
 # Include sub-paths
-print &ui_table_row($text{'redirect_regexp'},
+print &ui_table_row(&hlink($text{'redirect_regexp'}, 'redirect_regexp'),
 	&ui_yesno_radio("regexp", $r->{'regexp'}));
 
 print &ui_table_end();

@@ -131,7 +131,8 @@ $rename_prefix = &compute_prefix($test_rename_domain, $test_rename_domain_user,
 		 'template' => &get_init_template() );
 $test_full_user = &userdom_name($test_user, \%test_domain);
 ($test_target_domain_user) = &unixuser_name($test_target_domain);
-$test_domain{'home'} = &server_home_directory(\%test_domain);
+$test_domain_home = $test_domain{'home'} =
+	&server_home_directory(\%test_domain);
 $test_domain_db = &database_name(\%test_domain);
 $test_domain_cert = &default_certificate_file(\%test_domain, "cert");
 $test_domain_key = &default_certificate_file(\%test_domain, "key");
@@ -3961,6 +3962,47 @@ $redirect_tests = [
 	{ 'command' => $wget_command.'http://'.$test_domain.
 		       '/google/imghp',
 	  'antigrep' => 'Google Images',
+	},
+
+	# Delete the redirect
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/google' ] ],
+	},
+
+	# Create the directory and a file in it
+	{ 'command' => 'mkdir -p '.$test_domain_home.'/somedir' },
+	{ 'command' => 'echo foo >'.$test_domain_home.'/somedir/bar.txt' },
+
+	# Create a directory alias for /tmp
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/somedir' ],
+		      [ 'alias', $test_domain_home.'/somedir' ] ],
+	},
+
+	# Make sure the alias appears
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/somedir', 'Destination: '.$test_domain_home.'/somedir',
+		      'Type: Alias', 'Match sub-paths: No' ],
+	},
+
+	# Validate that the file can be fetched
+	{ 'command' => $wget_command.'http://'.$test_domain.'/somedir/bar.txt',
+	  'grep' => 'foo',
+	},
+
+	# Delete the alias
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/somedir' ] ],
+	},
+
+	# Validate that the file can no longer be fetched
+	{ 'command' => $wget_command.'http://'.$test_domain.'/somedir/bar.txt',
+	  'fail' => 1,
 	},
 
 	# Get rid of the domain

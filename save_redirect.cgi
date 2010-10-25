@@ -37,12 +37,14 @@ else {
 		&error($text{'redirect_epath'});
 		}
 	if ($in{'mode'} == 0) {
+		# Redirect to a URL
 		$in{'url'} =~ /^(http|https):\/\/\S+$/ ||
 			&error($text{'redirect_eurl'});
 		$r->{'dest'} = $in{'url'};
-		delete($r->{'alias'});
+		$r->{'alias'} = 0;
 		}
 	else {
+		# Alias to a directory
 		$in{'dir'} =~ /^\/\S+$/ && -d $in{'dir'} ||
 			&error($text{'redirect_edir'});
 		if ($in{'new'} || $r->{'dest'} ne $in{'dir'}) {
@@ -50,8 +52,8 @@ else {
 			&is_under_directory($rroot, $in{'dir'}) ||
 				&error(&text('redirect_edir2', $rroot));
 			}
-		$r->{'alias'} = $in{'dir'};
-		delete($r->{'dest'});
+		$r->{'dest'} = $in{'dir'};
+		$r->{'alias'} = 1;
 		}
 	$r->{'regexp'} = $in{'regexp'};
 

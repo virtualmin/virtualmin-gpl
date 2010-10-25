@@ -52,3 +52,6 @@
  - Allow changing prefix for a domain with users
 	- Rename form?
 	- https://www.virtualmin.com/node/15971
+
+ - Functional tests for redirects
+	- And extra admins

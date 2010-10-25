@@ -1,0 +1,17 @@
+<header>Include sub-paths in redirect?</header>
+
+When this is set to <b>Yes</b>, and sub-directory or filename under the source
+URL path will <b>not</b> be included in the redirect. For example, if you
+redirected <tt>/google</tt> to <tt>http://www.google.com</tt> and a browser
+accessed <tt>http://example.com/google/something</tt> , the destination URL
+would still be <tt>http://www.google.com</tt>. <p>
+
+If <b>No</b> was selected in this example, the destination would be
+<tt>http://www.google.com/something</tt> instead. <p>
+
+However, if <b>Yes</b> is chosen you can use the special code <tt>$1</tt> in
+the destination URL. This will be replaced by the sub-path or filename that
+comes after the source URL path. <p>
+
+<footer>
+

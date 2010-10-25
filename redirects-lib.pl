@@ -64,7 +64,7 @@ foreach my $port (@ports) {
 			($redirect->{'regexp'} ? "(\.\*)\$" : "").
 			" ".
 			($redirect->{'code'} ? $redirect->{'code'}." " : "").
-			($redirect->{'alias'} || $redirect->{'dest'}));
+			$redirect->{'dest'});
 	&apache::save_directive($dir, \@aliases, $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	$count++;
@@ -92,8 +92,15 @@ foreach my $port (@ports) {
         $dir .= "Match" if ($redirect->{'regexp'});
 	my @aliases = &apache::find_directive($dir, $vconf);
 	my $re = $redirect->{'path'};
-	$re .= '.*$' if ($redirect->{'regexp'});
-	my @newaliases = grep { !/^\Q$re\E\s/ } @aliases;
+	my @newaliases;
+	if ($redirect->{'regexp'}) {
+		# Handle .*$ or (.*)$ at the end
+		@newaliases = grep { !/^\Q$re\E(\.\*|\(\.\*\))\$\s/ } @aliases;
+		}
+	else {
+		# Match on path only
+		@newaliases = grep { !/^\Q$re\E\s/ } @aliases;
+		}
 	if (scalar(@aliases) != scalar(@newaliases)) {
 		&apache::save_directive($dir, \@newaliases, $vconf, $conf);
 		&flush_file_lines($virt->{'file'});
