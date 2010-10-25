@@ -2,9 +2,11 @@
 # list_users.cgi
 # List mailbox users in some domain
 
+$trust_unknown_referers = 1;
 require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
+$d || &error($text{'edit_egone'});
 &can_edit_domain($d) && &can_edit_users() || &error($text{'users_ecannot'});
 @users = &list_domain_users($d, 0, 0, 0, 0);
 &ui_print_header(&domain_in($d), $d->{'mail'} ? $text{'users_title'}

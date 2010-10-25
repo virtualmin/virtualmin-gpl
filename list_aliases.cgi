@@ -2,9 +2,11 @@
 # list_aliases.cgi
 # Display users and aliases in a domain
 
+$trust_unknown_referers = 1;
 require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
+$d || &error($text{'edit_egone'});
 &can_edit_domain($d) && &can_edit_aliases() || &error($text{'aliases_ecannot'});
 @aliases = &list_domain_aliases($d, 1);
 &ui_print_header(&domain_in($d), $text{'aliases_title'}, "");
