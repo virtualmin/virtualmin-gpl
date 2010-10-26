@@ -12088,22 +12088,21 @@ sub show_template_virtualmin
 {
 local ($tmpl) = @_;
 
-if ($virtualmin_pro) {
-	# Automatic alias domain
-	local @afields = ( "domalias", "domalias_type" );
-	print &ui_table_row(&hlink($text{'tmpl_domalias'}, "template_domalias"),
-		&none_def_input("domalias", $tmpl->{'domalias'},
-				$text{'tmpl_aliasset'},
-				undef, undef, $text{'no'}, \@afields)."\n".
-		&ui_textbox("domalias", $tmpl->{'domalias'} eq "none" ? undef :
-					$tmpl->{'domalias'}, 30));
+# Automatic alias domain
+local @afields = ( "domalias", "domalias_type" );
+print &ui_table_row(&hlink($text{'tmpl_domalias'}, "template_domalias"),
+	&none_def_input("domalias", $tmpl->{'domalias'},
+			$text{'tmpl_aliasset'},
+			undef, undef, $text{'no'}, \@afields)."\n".
+	&ui_textbox("domalias", $tmpl->{'domalias'} eq "none" ? undef :
+				$tmpl->{'domalias'}, 30));
 
-	print &ui_table_row(&hlink($text{'tmpl_domalias_type'},
-				   "template_domalias_type"),
-		    &ui_radio("domalias_type", int($tmpl->{'domalias_type'}),
-			      [ [ 0, $text{'tmpl_domalias_type0'} ],
-				[ 1, $text{'tmpl_domalias_type1'} ] ]));
-	}
+# Suffix for alias domain
+print &ui_table_row(&hlink($text{'tmpl_domalias_type'},
+			   "template_domalias_type"),
+	    &ui_radio("domalias_type", int($tmpl->{'domalias_type'}),
+		      [ [ 0, $text{'tmpl_domalias_type0'} ],
+			[ 1, $text{'tmpl_domalias_type1'} ] ]));
 }
 
 # parse_template_virtualmin(&tmpl)

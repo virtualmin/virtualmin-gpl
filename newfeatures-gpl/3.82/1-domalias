@@ -1,0 +1,4 @@
+desc=Automatic alias domain creation
+html=An automatic alias domain for new virtual servers can now be configured in server templates. This feature was ported from the Pro version.
+master=1
+config=edit_tmpl.cgi?id=0&editmode=virtualmin
