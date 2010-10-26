@@ -13385,6 +13385,19 @@ local @tm = localtime($secs);
 return sprintf "%4.4d-%2.2d-%2.2d", $tm[5]+1900, $tm[4]+1, $tm[3];
 }
 
+# get_prefix_msg(&tmpl)
+# Returns either "prefix" or "suffix", depending on the mailbox name mode
+# set in the template.
+sub get_prefix_msg
+{
+local ($tmpl) = @_;
+return $tmpl->{'append_style'} == 0 ||
+       $tmpl->{'append_style'} == 1 ||
+       $tmpl->{'append_style'} == 4 ||
+       $tmpl->{'append_style'} == 7 ? 'suffix' :
+				      'prefix';
+}
+
 # load_plugin_libraries([plugin, ...])
 # Call foreign_require on some or all plugins, just once
 sub load_plugin_libraries

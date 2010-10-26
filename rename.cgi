@@ -29,10 +29,26 @@ if (!$d->{'parent'} && &can_rename_domains() == 2 &&
 		}
 	}
 $parentdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
-if ($in{'group_mode'}) {
-	# New prefix and group comes from domain name
+
+# Work out new group name and prefix
+if ($in{'prefix_mode'}) {
 	$group = $user || $d->{'user'};
+	}
+if ($in{'prefix_mode'} == 0) {
+	# Don't change
+	$prefix = undef;
+	}
+elsif ($in{'prefix_mode'} == 1) {
+	# Automatically compute
 	$prefix = &compute_prefix($in{'new'}, $group, $parentdom);
+	}
+elsif ($in{'prefix_mode'} == 2) {
+	# Entered value
+	$in{'prefix'} =~ /^[a-z0-9\.\-]+$/i || &error($text{'setup_eprefix'});
+	$pclash = &get_domain_by("prefix", $in{'prefix'});
+	$pclash && &error(&text('setup_eprefix3',
+				$in{'prefix'}, $pclash->{'dom'}));
+	$prefix = $in{'prefix'};
 	}
 
 # Make sure new domain is valid

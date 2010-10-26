@@ -69,10 +69,16 @@ else {
 	print &ui_hidden("home_mode", 1),"\n";
 	}
 
-# Rename mailboxes option
+# Prefix field
+$msg = &get_prefix_msg($tmpl);
 @users = &list_domain_users($d, 1, 1, 1, 1);
-print &ui_table_row($text{'rename_group'},
-		    &ui_yesno_radio("group_mode", @users ? 0 : 1));
+print &ui_table_row($text{'rename_'.$msg},
+	&ui_radio("prefix_mode", @users ? 0 : 1,
+		  [ [ 0, &text('rename_prefix0',
+			       "<tt>$d->{'prefix'}</tt>")."<br>" ],
+		    [ 1, $text{'rename_prefix1'}."<br>" ],
+		    [ 2, $text{'rename_prefix2'}." ".
+			 &ui_textbox("prefix", undef, 40) ] ]));
 
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'rename_ok'} ] ]);
