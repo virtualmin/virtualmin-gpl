@@ -97,6 +97,8 @@ foreach $d (@doms) {
 	@users = &list_domain_users($d, $owner, 0, 0, 0);
 	if ($multi) {
 		# Show attributes on separate lines
+		$home_bsize = &has_home_quota() ? &quota_bsize("home") : 0;
+		$mail_bsize = &has_mail_quota() ? &quota_bsize("mail") : 0;
 		foreach $u (@users) {
 			next if (%usernames && !$usernames{$u->{'user'}} &&
 				 !$usernames{&remove_userdom($u->{'user'}, $d)});
@@ -122,27 +124,42 @@ foreach $d (@doms) {
 				      $shell->{'desc'},"\n";
 				}
 			print "    Shell: ",$u->{'shell'},"\n";
-			print "    User type: ",($u->{'domainowner'} ? "Server owner" :
-						 $u->{'webowner'} ? "Website manager" :
-							"Normal user"),"\n";
+			print "    User type: ",
+				($u->{'domainowner'} ? "Server owner" :
+				 $u->{'webowner'} ? "Website manager" :
+						    "Normal user"),"\n";
 			if ($u->{'mailquota'}) {
-				print "    Mail server quota: ",$u->{'qquota'},"\n";
+				print "    Mail server quota: ",
+				      $u->{'qquota'},"\n";
 				}
-			if ($u->{'unix'} && &has_home_quotas() && !$u->{'noquota'}) {
+			if ($u->{'unix'} && &has_home_quotas() &&
+			    !$u->{'noquota'}) {
 				print "    Home quota: ",
 				      &quota_show($u->{'quota'}, "home"),"\n";
 				print "    Home quota used: ",
 				      &quota_show($u->{'uquota'}, "home"),"\n";
+				print "    Home byte quota: ",
+				      ($u->{'quota'} * $home_bsize),"\n";
+				print "    Home byte quota used: ",
+				      ($u->{'uquota'} * $home_bsize),"\n";
 				}
-			if ($u->{'unix'} && &has_mail_quotas() && !$u->{'noquota'}) {
+			if ($u->{'unix'} && &has_mail_quotas() &&
+			    !$u->{'noquota'}) {
 				print "    Mail quota: ",
 				      &quota_show($u->{'mquota'}, "mail"),"\n";
 				print "    Mail quota used: ",
 				      &quota_show($u->{'umquota'}, "mail"),"\n";
+				print "    Mail byte quota: ",
+				      ($u->{'mquota'} * $mail_bsize),"\n";
+				print "    Mail byte quota used: ",
+				      ($u->{'umquota'} * $mail_bsize),"\n";
 				}
 			if ($mailsize) {
 				($msize) = &mail_file_size($u);
-				print "    Mail file size: ",&nice_size($msize),"\n";
+				print "    Mail file size: ",
+				      &nice_size($msize),"\n";
+				print "    Mail file byte size: ",
+				      $msize,"\n";
 				}
 			($mfile, $mtype) = &user_mail_file($u);
 			print "    Mail location: $mfile\n";
@@ -150,10 +167,12 @@ foreach $d (@doms) {
 			      ($mtype == 0 ? "mbox" : $mtype == 1 ? "Maildir" :
 			       "Type $mtype"),"\n";
 			if ($u->{'email'}) {
-				print "    Email address: ",$u->{'email'},"\n";
+				print "    Email address: ",
+				      $u->{'email'},"\n";
 				}
 			if (@{$u->{'extraemail'}} && !$u->{'noextra'}) {
-				print "    Extra addresses: ",join(" ", @{$u->{'extraemail'}}),"\n";
+				print "    Extra addresses: ",
+				      join(" ", @{$u->{'extraemail'}}),"\n";
 				}
 			if ($config{'spam'}) {
 				print "    Check spam and viruses: ",
@@ -165,10 +184,12 @@ foreach $d (@doms) {
 				push(@dblist, $db->{'name'}." ($db->{'type'})");
 				}
 			if (@dblist) {
-				print "    Databases: ",join(", ", @dblist),"\n";
+				print "    Databases: ",
+				      join(", ", @dblist),"\n";
 				}
 			if (@{$u->{'secs'}}) {
-				print "    Secondary groups: ",join(" ", @{$u->{'secs'}}),"\n";
+				print "    Secondary groups: ",
+				      join(" ", @{$u->{'secs'}}),"\n";
 				}
 
 			if ($u->{'noalias'}) {

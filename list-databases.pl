@@ -66,6 +66,7 @@ if ($multi) {
 		($size, $tables) = &get_db_size($db);
 		if ($size) {
 			print "    Size: ",&nice_size($size),"\n";
+			print "    Byte size: ",$size,"\n";
 			}
 		print "    Tables: $tables\n";
 

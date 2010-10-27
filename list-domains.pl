@@ -292,6 +292,8 @@ if ($multi) {
 				      &nice_size($qhome*$hs + $qmail*$ms),"\n";
 				print "    Server block quota used: ",
 				      ($qhome + $qmail),"\n";
+				print "    Server byte quota used: ",
+				      ($qhome*$hs + $qmail*$ms),"\n";
 				}
 			print "    User quota: ",
 			      &quota_show($d->{'uquota'}, "home"),"\n";
@@ -304,6 +306,9 @@ if ($multi) {
 				print "    User block quota used: ",
 				      ($duser->{'uquota'} +
 				       $duser->{'umquota'}),"\n";
+				print "    User byte quota used: ",
+				      ($duser->{'uquota'}*$hs +
+				       $duser->{'umquota'}*$ms),"\n";
 				}
 			}
 		if ($multi == 1) {
@@ -314,17 +319,24 @@ if ($multi) {
 				      scalar(@dbs),"\n";
 				print "    Databases size: ",
 				      &nice_size($dbquota),"\n";
+				print "    Databases byte size: ",
+				      $dbquota,"\n";
 				}
 			}
 		if ($config{'bw_active'} && !$d->{'parent'}) {
 			print "    Bandwidth limit: ",
 			    ($d->{'bw_limit'} ? &nice_size($d->{'bw_limit'})
 					      : "Unlimited"),"\n";
+			print "    Bandwidth byte limit: ",
+			    ($d->{'bw_limit'} || "Unlimited"),"\n";
 			if (defined($d->{'bw_usage'})) {
 				print "    Bandwidth start: ",
-				    &make_date($d->{'bw_start'}*(24*60*60), 1),"\n";
+				    &make_date($d->{'bw_start'}*(24*60*60), 1),
+				    "\n";
 				print "    Bandwidth usage: ",
-				    &nice_size($d->{'bw_usage'}),"\n";
+				      &nice_size($d->{'bw_usage'}),"\n";
+				print "    Bandwidth byte usage: ",
+				      ($d->{'bw_usage'}),"\n";
 				}
 			if ($config{'bw_disable'}) {
 				print "    Disable if over bandwidth limit: ",
