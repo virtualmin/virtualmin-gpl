@@ -711,8 +711,13 @@ if (!$_[0]->{'alias'}) {
 	&create_everyone_file($_[0]);
 	}
 
-# Update domain in DKIM list
-&update_dkim_domains($_[0], 'modify');
+# Update domain in DKIM list, if DNS was enabled or disabled
+if ($_[0]->{'dns'} && !$_[1]->{'dns'}) {
+	&update_dkim_domains($_[0], 'setup');
+	}
+elsif (!$_[0]->{'dns'} && $_[1]->{'dns'}) {
+	&update_dkim_domains($_[0], 'delete');
+	}
 
 # Unlock mail and unix DBs the same number of times we locked them
 while($our_mail_locks--) {
