@@ -28,7 +28,8 @@ sub setup_dns
 &require_bind();
 local $tmpl = &get_template($_[0]->{'template'});
 if (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
-    $tmpl->{'dns_sub'} ne 'yes') {
+    $tmpl->{'dns_sub'} ne 'yes' ||
+    $_[0]->{'alias'}) {
 	# Creating a new real zone
 	&$first_print($text{'setup_bind'});
 	&obtain_lock_dns($_[0], 1);
@@ -207,7 +208,9 @@ if (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
 	&release_lock_dns($_[0], 1);
 	}
 else {
-	# Creating a sub-domain - add to parent's DNS zone
+	# Creating a sub-domain - add to parent's DNS zone.
+	# This only happens if the parent zone has the same owner, and this
+	# feature is enabled in templates, and this zone isn't an alias.
 	local $parent = &get_domain($_[0]->{'subdom'}) ||
 			&get_domain($_[0]->{'parent'});
 	&$first_print(&text('setup_bindsub', $parent->{'dom'}));
