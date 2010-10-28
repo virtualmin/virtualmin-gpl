@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Trac script installer to version 0.12.1, Instiki to 0.19.1, Rails to 3.0.1, phpMyAdmin to 3.3.8, Moodle to 1.9.10, Horde Webmail to 1.2.8, Horde to 3.3.10, IMP to 4.3.8, and TWiki to 5.0.1.
+html=Updated the Trac script installer to version 0.12.1, Instiki to 0.19.1, Rails to 3.0.1, phpMyAdmin to 3.3.8, Moodle to 1.9.10, Horde Webmail to 1.2.8, Horde to 3.3.10, IMP to 4.3.8, ZenCart to 1.3.9h, and TWiki to 5.0.1.
 master=1
 reseller=1
 domain=1
