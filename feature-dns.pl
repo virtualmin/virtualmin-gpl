@@ -777,6 +777,7 @@ local $serial = $bconfig{'soa_style'} ?
 	time();
 local %zd;
 &bind8::get_zone_defaults(\%zd);
+local $created_master;
 if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	# Create records that are appropriate for this domain, as long as the
 	# user hasn't selected a completely custom template, or records are
@@ -838,6 +839,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			if ($tmpl->{'dns_prins'}) {
 				&bind8::create_record($file, "@", undef, "IN",
 						      "NS", $master);
+				$created_master = $master;
 				}
 			local $slave;
 			local @slaves = &bind8::list_slave_servers();
@@ -885,6 +887,17 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	foreach my $n ($withdot, "www.$withdot", "ftp.$withdot", "m.$withdot") {
 		if (!$already{$n} && $addrecs{$n}) {
 			&bind8::create_record($file, $n, undef,
+					      "IN", "A", $ip);
+			}
+		}
+
+	# If the master NS is in this zone and there is no A for it yet, add now
+	if ($created_master && $created_master !~ /\.$/) {
+		$created_master .= ".".$withdot;
+		}
+	if ($created_master =~ /^([^\.]+)\.(\S+\.)$/ && $2 eq $withdot) {
+		if ($already{$created_master}) {
+			&bind8::create_record($file, $created_master, undef,
 					      "IN", "A", $ip);
 			}
 		}
