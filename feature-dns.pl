@@ -777,7 +777,7 @@ local $serial = $bconfig{'soa_style'} ?
 	time();
 local %zd;
 &bind8::get_zone_defaults(\%zd);
-local $created_master;
+local @created_ns;
 if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	# Create records that are appropriate for this domain, as long as the
 	# user hasn't selected a completely custom template, or records are
@@ -832,6 +832,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 				$ns .= "." if ($ns !~ /\.$/);
 				&bind8::create_record($file, "@", undef, "IN",
 						      "NS", $ns);
+				push(@created_ns, $ns);
 				}
 			}
 		else {
@@ -839,7 +840,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			if ($tmpl->{'dns_prins'}) {
 				&bind8::create_record($file, "@", undef, "IN",
 						      "NS", $master);
-				$created_master = $master;
+				push(@created_ns, $master);
 				}
 			local $slave;
 			local @slaves = &bind8::list_slave_servers();
@@ -851,7 +852,8 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 					local $full = "$bn[0].";
 					&bind8::create_record(
 						$file, "@", undef, "IN",
-						"NS", "$bn[0].");
+						"NS", $bn[0].".");
+					push(@created_ns, $bn[0].".");
 					}
 				}
 
@@ -860,6 +862,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 				$ns .= "." if ($ns !~ /\.$/);
 				&bind8::create_record($file, "@", undef, "IN",
 						      "NS", $ns);
+				push(@created_ns, $ns);
 				}
 			}
 		}
@@ -892,12 +895,13 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		}
 
 	# If the master NS is in this zone and there is no A for it yet, add now
-	if ($created_master && $created_master !~ /\.$/) {
-		$created_master .= ".".$withdot;
-		}
-	if ($created_master =~ /^([^\.]+)\.(\S+\.)$/ && $2 eq $withdot) {
-		if ($already{$created_master}) {
-			&bind8::create_record($file, $created_master, undef,
+	foreach my $ns (@created_ns) {
+		if ($ns !~ /\.$/) {
+			$ns .= ".".$withdot;
+			}
+		if ($ns =~ /^([^\.]+)\.(\S+\.)$/ && $2 eq $withdot &&
+		    !$already{$ns}) {
+			&bind8::create_record($file, $ns, undef,
 					      "IN", "A", $ip);
 			}
 		}
