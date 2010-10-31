@@ -7838,8 +7838,11 @@ if ($@) {
 	}
 
 # Connect to server
+local $ipv6 = !&to_ipaddress($config{'ldap_host'}) &&
+	      defined(&to_ip6address) && &to_ip6address($config{'ldap_host'});
 local $port = $config{'ldap_port'} || 389;
-local $ldap = Net::LDAP->new($config{'ldap_host'}, port => $port);
+local $ldap = Net::LDAP->new($config{'ldap_host'},
+			     port => $port, inet6 => $ipv6);
 if (!$ldap) {
 	local $err = &text('ldap_econn',
 			   "<tt>$config{'ldap_host'}</tt>","<tt>$port</tt>");
