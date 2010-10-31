@@ -2289,7 +2289,8 @@ elsif ($mode == 0 && !$nolocal) {
 elsif ($mode == 1) {
 	# FTP server
 	local ($server, $port) = split(/:/, $in{$name."_server"});
-	&to_ipaddress($server) || &to_ip6address($server) ||
+	&to_ipaddress($server) ||
+	    defined(&to_ip6address) && &to_ip6address($server) ||
 		&error($text{'backup_eserver1'});
 	$port =~ /^\d*$/ || &error($text{'backup_eport'});
 	$in{$name."_path"} =~ /\S/ || &error($text{'backup_epath'});
@@ -2302,7 +2303,8 @@ elsif ($mode == 1) {
 elsif ($mode == 2) {
 	# SSH server
 	local ($server, $port) = split(/:/, $in{$name."_sserver"});
-	&to_ipaddress($server) || &to_ip6address($server) ||
+	&to_ipaddress($server) ||
+	    defined(&to_ip6address) && &to_ip6address($server) ||
 		&error($text{'backup_eserver2'});
 	$port =~ /^\d*$/ || &error($text{'backup_eport'});
 	$in{$name."_spath"} =~ /\S/ || &error($text{'backup_epath'});
