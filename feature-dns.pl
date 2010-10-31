@@ -1872,7 +1872,7 @@ if ($in{"dns_mode"} == 2) {
 	local @ns = split(/\n+/, $in{'dnsns'});
 	foreach my $n (@ns) {
 		&check_ipaddress($n) && &error(&text('newdns_ensip', $n));
-		gethostbyname($n) || &error(&text('newdns_enshost', $n));
+		&to_ipaddress($n) || &error(&text('newdns_enshost', $n));
 		}
 	$tmpl->{'dns_ns'} = join(" ", @ns);
 	$tmpl->{'dns_prins'} = $in{'dnsprins'};
