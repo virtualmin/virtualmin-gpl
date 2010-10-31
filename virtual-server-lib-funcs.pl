@@ -11080,7 +11080,9 @@ if ($config{'mail'}) {
 		if ($config{'bccs'}) {
 			return &text('check_eqmailbccs', $mclink);
 			}
-		if (!gethostbyname($config{'ldap_host'})) {
+		if (!&to_ipaddress($config{'ldap_host'}) &&
+	            !(defined(&to_ip6address) &&
+		      &to_ip6address($config{'ldap_host'}))) {
 			return &text('index_eqmailhost', $mclink);
 			}
 		if (!$config{'ldap_base'}) {
