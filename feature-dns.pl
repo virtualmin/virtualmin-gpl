@@ -968,7 +968,9 @@ local @recs = &bind8::read_zone_file($aliasfile, $aliasd->{'dom'});
 local $olddom = $aliasd->{'dom'};
 local $dom = $d->{'dom'};
 local $oldip = $aliasd->{'ip'};
-local @sublist = grep { $_->{'id'} ne $aliasd->{'id'} } &list_domains();
+local @sublist = grep { $_->{'id'} ne $aliasd->{'id'} &&
+			$_->{'dom'} =~ /\.\Q$aliasd->{'dom'}\E$/ }
+		      &list_domains();
 RECORD: foreach my $r (@recs) {
 	if ($d->{'dns_submode'} && ($r->{'type'} eq 'NS' || 
 				    $r->{'type'} eq 'SOA')) {
