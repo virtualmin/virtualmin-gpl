@@ -910,10 +910,13 @@ foreach my $desturl (@$desturls) {
 		local $infotemp = &transname();
 		if ($dirfmt) {
 			# Need to upload all backup files in the directory
+			$err = undef;
 			local $tstart = time();
-			local $pat = @destfiles == 1 ? $destfiles[0] :
-					"{".join(",", @destfiles)."}";
-			&scp_copy("$dest/$pat", $r, $pass, \$err, $port);
+			foreach my $df (@destfiles) {
+				&scp_copy("$dest/$df", "$r/$df",
+					  $pass, \$err, $port);
+				last if ($err);
+				}
 			if ($err) {
 				# Target dir didn't exist, so scp just the
 				# directory and all files
@@ -2027,6 +2030,8 @@ elsif ($mode == 2) {
 		}
 	else {
 		# Download the whole file or directory
+		&unlink_file($temp);	# Must remove that recursive scp doesn't
+					# copy into it
 		&scp_copy(($user ? "$user\@" : "")."$server:$path",
 			  $temp, $pass, \$err, $port);
 		}
