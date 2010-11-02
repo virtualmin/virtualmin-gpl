@@ -14,7 +14,9 @@ if ($config{'spam'}) {
 		$host = undef;
 		}
 	else {
-		gethostbyname($in{'host'}) || &error($text{'tmpl_espam_host'});
+		&to_ipaddress($in{'host'}) ||
+		    defined(&to_ip6address) && &to_ip6address($in{'host'}) ||
+			&error($text{'tmpl_espam_host'});
 		$host = $in{'host'};
 		}
 	if ($in{'size_def'}) {
@@ -50,7 +52,7 @@ if ($config{'virus'}) {
 			&error($text{'sv_estream'});
 		$fullcmd = "clamd-stream-client";
 		}
-	$in{'vhost_def'} || gethostbyname($in{'vhost'}) ||
+	$in{'vhost_def'} || &to_ipaddress($in{'vhost'}) ||
 		&error($text{'sv_evhost'});
 	$err = &test_virus_scanner($fullcmd,
 				   $in{'vhost_def'} ? undef : $in{'vhost'});

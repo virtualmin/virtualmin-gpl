@@ -76,7 +76,7 @@ else {
 		local $port = $aliasdom->{'web_port'} == 80 ? "" :
 				":$aliasdom->{'web_port'}";
 		local $urlhost = "www.".$aliasdom->{'dom'};
-		if (!gethostbyname($urlhost)) {
+		if (!&to_ipaddress($urlhost)) {
 			$urlhost = $aliasdom->{'dom'};
 			}
 		local $url = "http://$urlhost$port/";
