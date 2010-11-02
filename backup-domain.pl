@@ -307,7 +307,7 @@ else {
 # Purge if requested
 $pok = 1;
 if ($purge && $ok) {
-	foreach $dest (@dest) {
+	foreach $dest (@dests) {
 		$pok = &purge_domain_backups($dest, $purge, $start_time);
 		if (!$pok) {
 			$ex = 3;
