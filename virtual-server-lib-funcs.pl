@@ -6997,7 +6997,7 @@ foreach my $m (&list_domain_owner_modules()) {
 	}
 $rv[0]->{'avail'} = join(' ', @avail);
 push(@rv, { 'id' => 1,
-	    'name' => 'Default Settings For Sub-Servers',
+	    'name' => 'Settings For Sub-Servers',
 	    'standard' => 1,
 	    'mail_on' => $config{'subdomain_template'} eq "none" ? "none" :
 			 $config{'subdomain_template'} eq "" ? "" : "yes",
@@ -12136,7 +12136,8 @@ local @rv = grep { $sfunc = "show_template_".$_;
                  @template_features;
 if ($tmpl && $tmpl->{'id'} == 1) {
 	# For sub-servers only
-	@rv = grep { $_ ne 'resources' && $_ ne 'unix' } @rv;
+	@rv = grep { $_ ne 'resources' && $_ ne 'unix' && $_ ne 'webmin' &&
+		     $_ ne 'avail' } @rv;
 	}
 return @rv;
 }
