@@ -1258,3 +1258,5 @@ The maximum message size to check for spam can now be set even when regular spam
 When Webalizer is enabled for a domain, allowed users for the /stats URL path can now be edited on the Protected Web Directories page.
 Fixed DKIM support to handle large numbers of domains.
 Added byte quota sizes to the list-domains, list-users and list-resellers API calls, which are easier for code to parse.
+---- Changes since 3.82 ----
+Updated the Bugzilla script installer to version 3.6.3.
