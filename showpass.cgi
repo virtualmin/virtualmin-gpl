@@ -8,8 +8,10 @@ use POSIX;
 $d = &get_domain($in{'dom'});
 $d || &error($text{'edit_egone'});
 &can_show_pass() || &error($text{'showpass_ecannot'});
+&can_edit_domain($d) || &error($text{'edit_ecannot'});
 if ($in{'user'}) {
 	# Showing for mailbox user
+	&can_edit_users() || &error($text{'users_ecannot'});
 	@users = &list_domain_users($d, 0, 1, 1, 1);
 	($user) = grep { $_->{'user'} eq $in{'user'} } @users;
 	$user || &error($text{'showpass_egone'});
@@ -20,7 +22,6 @@ if ($in{'user'}) {
 	}
 else {
 	# For a domain
-	&can_edit_domain($d) || &error($text{'edit_ecannot'});
 	$username = $d->{'user'};
 	$pass = $d->{'pass'};
 	$msg1 = $text{'showpass_user'};
