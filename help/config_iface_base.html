@@ -1,3 +1,9 @@
 <header>Base number for virtual interfaces</header>
-Virtualmin can automatically calculate new virtual host IP addresses for you, based on incrementing up from the last used address.  By default it starts with the primary address on the interface selected in the previous option.
+
+By default Virtualmin will use <tt>eth0:0</tt> for the first virtual IP
+interface it creates, then <tt>eth0:1</tt> and so on. However, this field can
+be used to change where the interface number after the : starts. This can be
+useful if you want to reserve some of the lower numbers for manual assignment,
+but in most cases it does not need to be changed. <p>
+
 <footer>
