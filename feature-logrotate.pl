@@ -64,6 +64,7 @@ if (@logs) {
 		local $script = $apache::config{'graceful_cmd'} ||
 				$apply_cmd ||
 				"$apachectl graceful";
+		$script .= " ; sleep 5";
 		$lconf->{'members'} = [
 				{ 'name' => 'rotate',
 				  'value' => $config{'logrotate_num'} || 5 },
