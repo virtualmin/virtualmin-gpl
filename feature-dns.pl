@@ -60,16 +60,17 @@ if (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
 				     @{$dir->{'members'}};
 		if (!$also) {
 			$also = { 'name' => 'also-notify',
-				  'type' => 1,
-				  'members' => [ ] };
+				  'type' => 1 };
+			local @also;
 			foreach my $s (@slaves) {
-				push(@{$also->{'members'}},
+				push(@also,
 				     { 'name' => &to_ipaddress($s->{'host'}) });
 				}
 			foreach my $s (@extra_slaves) {
-				push(@{$also->{'members'}},
-                                     { 'name' => &to_ipaddress($s) });
+				push(@also, { 'name' => &to_ipaddress($s) });
 				}
+			@also = grep { $_->{'name'} } @also;
+			$also->{'members'} = \@also;
 			push(@{$dir->{'members'}}, $also);
 			push(@{$dir->{'members'}}, 
 				{ 'name' => 'notify',
@@ -86,6 +87,7 @@ if (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
 	foreach my $s (@extra_slaves) {
 		push(@trans, { 'name' => &to_ipaddress($s) });
 		}
+	@trans = grep { $_->{'name'} } @trans;
 	local ($trans) = grep { $_->{'name'} eq 'allow-transfer' }
 			      @{$dir->{'members'}};
 	if (!$trans && !$tmpl->{'namedconf_no_allow_transfer'}) {
