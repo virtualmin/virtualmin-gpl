@@ -19,10 +19,7 @@
 	- counters (FS 3348)
 	- shortly
 	- ocPortal https://www.virtualmin.com/node/16035
-
- - option to replicate procmail files to other mail servers
-	- general mail cluster feature?
-	- how can lookup-domain work? Via network?
+	- Contao https://www.virtualmin.com/node/16164
 
  - WebNIC registrar support
 	- See email from Winnie Lee
@@ -49,3 +46,20 @@
  - Make script install dir configurable
 	- https://www.virtualmin.com/node/15663
 	- Can only be completed after 3.82 is out
+
+ - Restore option to allocate new ID
+	- Functional test
+	- https://www.virtualmin.com/node/16018
+	- Clone domain?
+
+ - Restore of a local backup does many un-necessary gunzips?
+	- Write .info files locally too
+	- Option to not write info files?
+	- Don't use .info files that are older than the backup
+
+ - Allow admin to edit user's procmail rules
+	- http://www.virtualmin.com/node/12330 
+
+ - Remote DNS and MySQL setup
+	- Needs some module for a central server to allow limited creation
+	- Virtualmin update to use this

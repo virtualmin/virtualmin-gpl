@@ -569,10 +569,17 @@ DOMAIN: foreach $d (@$doms) {
 					($ok, $err) = 
 					  &copy_source_dest_as_domain_user(
 					  $asd, "$path0/$df", "$path/$df");
+					($ok, $err) = 
+					  &copy_source_dest_as_domain_user(
+					  $asd, $infotemp, "$path/$df.info")
+						if (!$err);
 					}
 				else {
 					($ok, $err) = &copy_source_dest(
 					  "$path0/$df", "$path/$df");
+					($ok, $err) = &copy_source_dest(
+					  $infotemp, "$path/$df.info")
+						if (!$err);
 					}
 				if (!$ok) {
 					&$second_print(
@@ -1024,6 +1031,7 @@ foreach my $desturl (@$desturls) {
 	elsif ($ok && $mode == 0 && (@destfiles || !$dirfmt) &&
 	       $path ne $path0) {
 		# Copy to another local directory
+		# XXX .info files
 		&$first_print(&text('backup_copy', "<tt>$path</tt>"));
 		my ($ok, $err);
 		if ($asd && $dirfmt) {
@@ -1057,6 +1065,41 @@ foreach my $desturl (@$desturls) {
 			}
 		else {
 			&$second_print($text{'setup_done'});
+			}
+		}
+	if ($ok && $mode == 0 && (@destfiles || !$dirfmt)) {
+		# Write out .info files, even for initial destination
+		if ($dirfmt) {
+			# One .info file per domain
+			foreach my $df (@destfiles) {
+				local $d = $destfiles_map{$df};
+				local $n = $d eq "virtualmin" ? "virtualmin"
+							      : $d->{'dom'};
+				local $binfo = { $n => $donefeatures{$n} };
+				local $wcode = sub { 
+					&uncat_file("$dest/$df.info",
+					    &serialise_variable($binfo));
+					};
+				if ($asd) {
+					&write_as_domain_user($asd, $wcode);
+					}
+				else {
+					&$wcode();
+					}
+				}
+			}
+		else {
+			# A single file
+			local $wcode = sub {
+				&uncat_file("$dest.info",
+					&serialise_variable(\%donefeatures));
+				};
+			if ($asd) {
+				&write_as_domain_user($asd, $wcode);
+				}
+			else {
+				&$wcode();
+				}
 			}
 		}
 	}
@@ -1780,6 +1823,14 @@ elsif ($mode > 0) {
 	local $derr = &download_backup($_[0], $backup);
 	return $derr if ($derr);
 	}
+elsif (-r $_[0].".info") {
+	# Local .info file exists
+	local $info = &unserialise_variable(
+			&read_file_contents($_[0].".info"));
+	if (%$info) {
+		return $wantdoms ? ($info, undef) : $info;
+		}
+	}
 else {
 	$backup = $_[0];
 	}
@@ -1789,7 +1840,7 @@ if (-d $backup) {
 	opendir(DIR, $backup);
 	local %rv;
 	foreach my $f (readdir(DIR)) {
-		next if ($f eq "." || $f eq "..");
+		next if ($f eq "." || $f eq ".." || $f =~ /\.info$/);
 		local ($cont, $fdoms);
 		if ($wantdoms) {
 			($cont, $fdoms) = &backup_contents("$backup/$f", 1);
