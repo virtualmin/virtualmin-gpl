@@ -314,6 +314,8 @@ if ($dkim_config) {
 	# Link key to same directory as mapping file, with selector as filename
 	my $selkeyfile = $keylist;
 	$selkeyfile =~ s/\/([^\/]+)$/\/$dkim->{'selector'}/;
+	-e $selkeyfile && !-l $selkeyfile &&
+		&error("Selector key file $selkeyfile already exist!");
 	&unlink_file($selkeyfile);
 	&symlink_file($dkim->{'keyfile'}, $selkeyfile);
 
