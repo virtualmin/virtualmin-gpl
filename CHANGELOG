@@ -1259,4 +1259,4 @@ When Webalizer is enabled for a domain, allowed users for the /stats URL path ca
 Fixed DKIM support to handle large numbers of domains.
 Added byte quota sizes to the list-domains, list-users and list-resellers API calls, which are easier for code to parse.
 ---- Changes since 3.82 ----
-Updated the Bugzilla script installer to version 3.6.3, Joomla to 1.5.22, TextPattern to 4.3.0, and phpMyFAQ to 2.6.11.
+Updated the Bugzilla script installer to version 3.6.3, Joomla to 1.5.22, TextPattern to 4.3.0, Dokuwiki to 2010-11-07, and phpMyFAQ to 2.6.11.
