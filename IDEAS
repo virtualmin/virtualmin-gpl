@@ -52,11 +52,6 @@
 	- https://www.virtualmin.com/node/16018
 	- Clone domain?
 
- - Restore of a local backup does many un-necessary gunzips?
-	- Write .info files locally too
-	- Option to not write info files?
-	- Don't use .info files that are older than the backup
-
  - Allow admin to edit user's procmail rules
 	- http://www.virtualmin.com/node/12330 
 

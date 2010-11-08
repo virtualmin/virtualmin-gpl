@@ -1031,7 +1031,6 @@ foreach my $desturl (@$desturls) {
 	elsif ($ok && $mode == 0 && (@destfiles || !$dirfmt) &&
 	       $path ne $path0) {
 		# Copy to another local directory
-		# XXX .info files
 		&$first_print(&text('backup_copy', "<tt>$path</tt>"));
 		my ($ok, $err);
 		if ($asd && $dirfmt) {
@@ -1774,6 +1773,8 @@ local $backup;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($file);
 local $tar = &get_tar_command();
 local $doms;
+local @fst = stat($file);
+local @ist = stat($file.".info");
 if ($mode == 3) {
 	# For S3, just download the backup contents files
 	local $s3b = &s3_list_backups($user, $pass, $server, $path);
@@ -1784,7 +1785,7 @@ if ($mode == 3) {
 		}
 	return $wantdoms ? (\%rv, undef) : \%rv;
 	}
-elsif ($mode > 0) {
+elsif ($mode > 0 && !$wantdoms) {
 	# Try to download .info file first
 	local $infotemp = &transname();
 	local $infoerr = &download_backup($_[0], $infotemp, undef, undef, 1);
@@ -1823,8 +1824,8 @@ elsif ($mode > 0) {
 	local $derr = &download_backup($_[0], $backup);
 	return $derr if ($derr);
 	}
-elsif (-r $_[0].".info") {
-	# Local .info file exists
+elsif (@ist && $ist[9] >= $fst[9] && !$wantdoms) {
+	# Local .info file exists, and is new
 	local $info = &unserialise_variable(
 			&read_file_contents($_[0].".info"));
 	if (%$info) {
