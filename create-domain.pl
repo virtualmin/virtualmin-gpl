@@ -295,6 +295,15 @@ while(@ARGV > 0) {
 			$plugin_values{$1} = shift(@ARGV);
 			}
 		}
+	elsif ($a =~ /^\-\-field\-(\S+)$/) {
+		# Custom field
+		$fn = $1;
+		$fv = shift(@ARGV);
+		@fields = &list_custom_fields();
+		($f) = grep { $_->{'name'} eq $fn } @fields;
+		$f || &usage("Custom field $fn does not exist");
+		$fields{'field_'.$fn} = $fv;
+		}
 	else {
 		&usage("Unknown option $a");
 		}
@@ -629,6 +638,9 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'nosecondaries', $nosecondaries,
 	 'subprefix', $subprefix,
         );
+foreach $f (keys %fields) {
+	$dom{$f} = $fields{$f};
+	}
 if (!$parent) {
 	if ($tlimit) {
 		&set_limits_from_plan(\%dom, $plan);
@@ -789,6 +801,7 @@ foreach $f (&list_feature_plugins()) {
 		}
 	}
 print "                        [--skip-warnings]\n";
+print "                        [--field-name value]*\n";
 exit(1);
 }
 
