@@ -5263,6 +5263,7 @@ dkim_esendmailmc=DKIM cannot be enabled for Sendmail unless an M4 configuration 
 dkim_return=DKIM form
 dkim_err=Failed to save DKIM settings
 dkim_eselector=Missing or invalid selector - must be a valid DNS record name
+dkim_eselfile=.. selector key file $1 already exists!
 
 dkim_title4=Install DKIM
 dkim_installing=Installing the DKIM filter package ..

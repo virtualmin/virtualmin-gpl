@@ -282,9 +282,6 @@ if (!$pubkey) {
 	}
 &$second_print($text{'setup_done'});
 
-# Add public key to DNS domain
-&add_dkim_dns_records(\@doms, $dkim);
-
 # Add domain, key and selector to config file
 &$first_print($text{'dkim_config'});
 my $dkim_config = $gconfig{'os_type'} eq 'debian-linux' ? $debian_dkim_config :
@@ -314,8 +311,11 @@ if ($dkim_config) {
 	# Link key to same directory as mapping file, with selector as filename
 	my $selkeyfile = $keylist;
 	$selkeyfile =~ s/\/([^\/]+)$/\/$dkim->{'selector'}/;
-	-e $selkeyfile && !-l $selkeyfile &&
-		&error("Selector key file $selkeyfile already exist!");
+	if (-e $selkeyfile && !-l $selkeyfile) {
+		&$second_print("<b>".&text('dkim_eselfile',
+					   "<tt>$selkeyfile</tt>")."</b>");
+		return 0;
+		}
 	&unlink_file($selkeyfile);
 	&symlink_file($dkim->{'keyfile'}, $selkeyfile);
 
@@ -367,6 +367,9 @@ elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 	&unlock_file($redhat_dkim_default);
 	}
 &$second_print($text{'setup_done'});
+
+# Add public key to DNS domains
+&add_dkim_dns_records(\@doms, $dkim);
 
 # Enable filter at boot time
 &$first_print($text{'dkim_boot'});
