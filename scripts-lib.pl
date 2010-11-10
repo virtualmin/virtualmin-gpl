@@ -436,64 +436,6 @@ foreach my $f (@files) {
 return undef;
 }
 
-# compare_versions(ver1, ver2, [&script])
-# Returns -1 if ver1 is older than ver2, 1 if newer, 0 if same
-sub compare_versions
-{
-local ($ver1, $ver2, $script) = @_;
-if ($script && $script->{'numeric_version'}) {
-	# Strict numeric compare
-	return $ver1 <=> $ver2;
-	}
-local @sp1 = split(/[\.\-]/, $ver1);
-local @sp2 = split(/[\.\-]/, $ver2);
-for(my $i=0; $i<@sp1 || $i<@sp2; $i++) {
-	local $v1 = $sp1[$i];
-	local $v2 = $sp2[$i];
-	local $comp;
-	if ($v1 =~ /^\d+$/ && $v2 =~ /^\d+$/) {
-		# Full numeric compare
-		$comp = $v1 <=> $v2;
-		}
-	elsif ($v1 =~ /^\d+\S*$/ && $v2 =~ /^\d+\S*$/) {
-		# Numeric followed by string
-		$v1 =~ /^(\d+)(\S*)$/;
-		local ($v1n, $v1s) = ($1, $2);
-		$v2 =~ /^(\d+)(\S*)$/;
-		local ($v2n, $v2s) = ($1, $2);
-		$comp = $v1n <=> $v2n;
-		if (!$comp) {
-			# X.rcN is always older than X
-			if ($v1s =~ /^rc\d+$/i && $v2s =~ /^\d*$/) {
-				$comp = -1;
-				}
-			elsif ($v1s =~ /^\d*$/ && $v2s =~ /^rc\d+$/i) {
-				$comp = 1;
-				}
-			else {
-				$comp = $v1s cmp $v2s;
-				}
-			}
-		}
-	elsif ($v1 =~ /^\d+$/ && $v2 =~ /^rc\d+$/i) {
-		# N is always newer than rcN
-		$comp = 1;
-		}
-	elsif ($v1 =~ /^rc\d+$/i && $v2 =~ /^\d+$/) {
-		# rcN is always older than N
-		$comp = -1;
-		}
-	else {
-		# String compare
-		$v1 = 0 if ($v1 eq '');
-		$v2 = 0 if ($v2 eq '');
-		$comp = $v1 cmp $v2;
-		}
-	return $comp if ($comp);
-	}
-return 0;
-}
-
 # ui_database_select(name, value, &dbs, [&domain, new-db-suffix])
 # Returns a field for selecting a database, from those available for the
 # domain. Can also include an option for a new database
