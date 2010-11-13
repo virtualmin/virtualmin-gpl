@@ -1252,7 +1252,7 @@ New virtual servers with an SSL website and status monitoring enabled will now a
 Added an Italian translation, thanks to Andrea Di Mario.
 ---- Changes since 3.81 ----
 Added a template option to specify file types to not perform variable substitution on when copying from the /etc/skel directory.
-Updated the Trac script installer to version 0.12.1, Instiki to 0.19.1, Rails to 3.0.1, phpMyAdmin to 3.3.8, Moodle to 1.9.10, Horde Webmail to 1.2.8, Horde to 3.3.10, IMP to 4.3.8, ZenCart to 1.3.9h, SugarCRM to 6.0.3, Redmine to 1.0.3, SMF to 1.1.12, and TWiki to 5.0.1.
+Updated the Trac script installer to version 0.12.1, Instiki to 0.19.1, Rails to 3.0.1, phpMyAdmin to 3.3.8, Moodle to 1.9.10, Horde Webmail to 1.2.8, Horde to 3.3.10, IMP to 4.3.8, ZenCart to 1.3.9h, SugarCRM to 6.0.3, Redmine to 1.0.3, SMF to 1.1.12, osCommerce to 2.3, and TWiki to 5.0.1.
 Virtual server backups can now be to multiple destinations, both local and remote. The time-consuming process of compressing each domain is done only once, and the resulting file then transferred to each destination.
 The maximum message size to check for spam can now be set even when regular spamassassin is used, as well as when using spamc.
 When Webalizer is enabled for a domain, allowed users for the /stats URL path can now be edited on the Protected Web Directories page.
