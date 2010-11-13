@@ -27,5 +27,5 @@ foreach $a (@del) {
 &release_lock_mail($d);
 &webmin_log("delete", "aliases", scalar(@del),
 	    { 'dom' => $d->{'dom'} });
-&redirect("list_aliases.cgi?dom=$in{'dom'}");
+&redirect("list_aliases.cgi?dom=$in{'dom'}&show=$in{'show'}");
 

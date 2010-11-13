@@ -8,17 +8,25 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 $d || &error($text{'edit_egone'});
 &can_edit_domain($d) && &can_edit_aliases() || &error($text{'aliases_ecannot'});
-@aliases = &list_domain_aliases($d, 1);
+@aliases = &list_domain_aliases($d, !$in{'show'});
 &ui_print_header(&domain_in($d), $text{'aliases_title'}, "");
 
 # Create add links
 ($mleft, $mreason, $mmax, $mhide) = &count_feature("aliases");
 if ($mleft != 0) {
-	push(@links, [ "edit_alias.cgi?new=1&dom=$in{'dom'}",
+	push(@links, [ "edit_alias.cgi?new=1&dom=$in{'dom'}&show=$in{'show'}",
 		       $text{'aliases_add'} ]);
 	}
 push(@links, [ "mass_aedit_form.cgi?dom=$in{'dom'}",
 	       $text{'aliases_emass'}, 'right' ]);
+if ($in{'show'}) {
+	push(@links, [ "list_aliases.cgi?dom=$in{'dom'}&show=0",
+		       $text{'aliases_hide'}, 'right' ]);
+	}
+else {
+	push(@links, [ "list_aliases.cgi?dom=$in{'dom'}&show=1",
+		       $text{'aliases_show'}, 'right' ]);
+	}
 
 # Show reason why aliases cannot be added
 if ($mleft != 0 && $mleft != -1 && !$mhide) {
@@ -67,7 +75,7 @@ foreach $a (sort { $a->{'from'} cmp $b->{'from'} } @aliases) {
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $a->{'from'} },
 		"<a href='edit_alias.cgi?dom=$in{'dom'}&".
-		"alias=".&urlize($a->{'from'})."'>$name</a>",
+		"alias=".&urlize($a->{'from'})."&show=$in{'show'}'>$name</a>",
 		$alines,
 		$anycmt ? ( $a->{'cmt'} ) : ( ),
 		]);
@@ -79,7 +87,8 @@ print &ui_form_columns_table(
 	[ [ "delete", $text{'aliases_delete'} ] ],
 	1,
 	\@links,
-	[ [ "dom", $in{'dom'} ] ],
+	[ [ "dom", $in{'dom'} ],
+	  [ "show", $in{'show'} ] ],
 	[ "", $text{'aliases_name'},
 	  $text{'aliases_dests'},
           $anycmt ? ( $text{'aliases_cmt'} ) : ( ) ],

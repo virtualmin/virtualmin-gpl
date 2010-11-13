@@ -20,6 +20,7 @@ else {
 print &ui_form_start("save_alias.cgi", "post");
 print &ui_hidden("new", $in{'new'}),"\n";
 print &ui_hidden("dom", $in{'dom'}),"\n";
+print &ui_hidden("show", $in{'show'}),"\n";
 print &ui_hidden("old", $in{'alias'}),"\n";
 
 # Work out if simple mode is supported
@@ -28,7 +29,7 @@ if ($in{'new'} || &get_simple_alias($d, $virt)) {
 	}
 
 # Show tabs, perhaps only one if simple mode isn't supported
-$prog = "edit_alias.cgi?dom=$in{'dom'}&".
+$prog = "edit_alias.cgi?dom=$in{'dom'}&show=$in{'show'}&".
 	($in{'new'} ? "new=1" : "alias=$in{'alias'}");
 if ($can_simple) {
 	@tabs = ( [ "simple", $text{'alias_simplemode'},
@@ -69,12 +70,12 @@ else {
 
 # End of the page, with backlinks
 if ($single_domain_mode) {
-       &ui_print_footer("list_aliases.cgi?dom=$in{'dom'}",
+       &ui_print_footer("list_aliases.cgi?dom=$in{'dom'}&show=$in{'show'}",
                $text{'aliases_return'},
                "", $text{'index_return2'});
        }
 else {
-       &ui_print_footer("list_aliases.cgi?dom=$in{'dom'}",
+       &ui_print_footer("list_aliases.cgi?dom=$in{'dom'}&show=$in{'show'}",
                $text{'aliases_return'},
                &domain_footer_link($d),
                "", $text{'index_return'});

@@ -109,6 +109,6 @@ else {
 		&webmin_log("modify", "alias", $virt->{'from'}, $virt);
 		}
 	}
-&redirect("list_aliases.cgi?dom=$in{'dom'}");
+&redirect("list_aliases.cgi?dom=$in{'dom'}&show=$in{'show'}");
 
 

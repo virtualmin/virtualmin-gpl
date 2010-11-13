@@ -777,6 +777,8 @@ aliases_canadd1=Based on your reseller's limits, $1 additional aliases can be ad
 aliases_canadd2=Based on your reseller limits, $1 additional aliases can be added.
 aliases_reply=Autoreply with message $1
 aliases_emass=Manually edit aliases.
+aliases_hide=Hide special aliases.
+aliases_show=Show special aliases.
 
 alias_create=Create Mail Alias
 alias_edit=Edit Mail Alias
