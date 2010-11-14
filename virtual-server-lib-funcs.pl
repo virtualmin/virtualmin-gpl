@@ -9196,7 +9196,7 @@ foreach my $k (keys %config) {
 return 0;
 }
 
-# update_secondary_groups(&domain, &users)
+# update_secondary_groups(&domain, [&users])
 # After a user is saved, updated or deleted, update the secondary groups
 # specified in it's template with the appropriate users.
 sub update_secondary_groups
