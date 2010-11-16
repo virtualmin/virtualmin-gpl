@@ -271,7 +271,7 @@ foreach $plan (@availplans) {
 		      "].checked = true;\n";
 		}
 
-	# Set features always
+	# Set features if configured
 	if ($config{'plan_auto'}) {
 		local @fl = $plan->{'featurelimits'} ?
 				split(/\s+/, $plan->{'featurelimits'}) :
