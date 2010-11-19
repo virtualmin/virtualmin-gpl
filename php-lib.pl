@@ -1062,7 +1062,6 @@ if (!defined($main::php_modules{$ver,$d->{'id'}})) {
 		}
 	&clean_environment();
 	local $_;
-	print STDERR "running PHPRC=$ENV{'PHPRC'} $cmd -m\n";
 	&open_execute_command(PHP, "$cmd -m", 1);
 	while(<PHP>) {
 		s/\r|\n//g;
