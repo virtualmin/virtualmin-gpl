@@ -258,8 +258,10 @@ foreach my $desturl (@$desturls) {
 	elsif ($mode == 2) {
 		# Try a dummy SCP
 		local $scperr;
+		local $qserver = &check_ip6address($server) ? "[$server]"
+							    : $server;
 		local $r = ($user ? "$user\@" : "").
-			   "$server:/tmp/virtualmin-copy-test.$user";
+			   "$qserver:/tmp/virtualmin-copy-test.$user";
 		local $temp = &transname();
 		open(TEMP, ">$temp");
 		close(TEMP);
@@ -268,7 +270,7 @@ foreach my $desturl (@$desturls) {
 			# Copy to /tmp failed .. try current dir instead
 			$scperr = undef;
 			$r = ($user ? "$user\@" : "").
-			     "$server:virtualmin-copy-test.$user";
+			     "$qserver:virtualmin-copy-test.$user";
 			&scp_copy($temp, $r, $pass, \$scperr, $port);
 			}
 		if ($scperr) {
@@ -606,8 +608,10 @@ DOMAIN: foreach $d (@$doms) {
 				# Via SCP
 				&$first_print(&text('backup_upload2',
 						    "<tt>$server</tt>"));
+				local $qserver = &check_ip6address($server) ?
+							"[$server]" : $server;
 				local $r = ($user ? "$user\@" : "").
-					   "$server:$path";
+					   "$qserver:$path";
 				&scp_copy("$dest/$df", $r, $pass, \$err, $port);
 				&scp_copy($infotemp, $r.".info", $pass,
 					  \$err, $port) if (!$err);
@@ -913,7 +917,9 @@ foreach my $desturl (@$desturls) {
 		# Upload to SSH server with scp
 		&$first_print(&text('backup_upload2', "<tt>$server</tt>"));
 		local $err;
-		local $r = ($user ? "$user\@" : "")."$server:$path";
+		local $qserver = &check_ip6address($server) ?
+					"[$server]" : $server;
+		local $r = ($user ? "$user\@" : "")."$qserver:$path";
 		local $infotemp = &transname();
 		if ($dirfmt) {
 			# Need to upload all backup files in the directory
@@ -1819,7 +1825,13 @@ elsif ($mode > 0 && !$wantdoms) {
 			}
 		}
 
-	# Need to download to temp file first
+	# Could not get info file, need to download whole thing
+	$backup = &transname();
+	local $derr = &download_backup($_[0], $backup);
+	return $derr if ($derr);
+	}
+elsif ($mode > 0 && $wantdoms) {
+	# Need to download the whole file
 	$backup = &transname();
 	local $derr = &download_backup($_[0], $backup);
 	return $derr if ($derr);
@@ -1833,6 +1845,7 @@ elsif (@ist && $ist[9] >= $fst[9] && !$wantdoms) {
 		}
 	}
 else {
+	# Use local backup file
 	$backup = $_[0];
 	}
 
@@ -2067,15 +2080,16 @@ if ($mode == 1) {
 	}
 elsif ($mode == 2) {
 	# Download from SSH server
+	local $qserver = &check_ip6address($server) ? "[$server]" : $server;
 	if ($infoonly) {
 		# First try file with .info extension
-		&scp_copy(($user ? "$user\@" : "")."$server:$path.info",
+		&scp_copy(($user ? "$user\@" : "")."$qserver:$path.info",
 			  $temp, $pass, \$err, $port);
 		if ($err) {
 			# Fall back to .info files in directory
 			&make_dir($temp, 0700);
 			&scp_copy(($user ? "$user\@" : "").
-				  "$server:$path/*.info",
+				  "$qserver:$path/*.info",
 				  $temp, $pass, \$err, $port);
 			$err = undef;
 			}
@@ -2084,7 +2098,7 @@ elsif ($mode == 2) {
 		# Download the whole file or directory
 		&unlink_file($temp);	# Must remove that recursive scp doesn't
 					# copy into it
-		&scp_copy(($user ? "$user\@" : "")."$server:$path",
+		&scp_copy(($user ? "$user\@" : "")."$qserver:$path",
 			  $temp, $pass, \$err, $port);
 		}
 	return $err if ($err);
@@ -2136,11 +2150,16 @@ return $rv;
 sub parse_backup_url
 {
 local @rv;
-if ($_[0] =~ /^ftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
+if ($_[0] =~ /^ftp:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
+    $_[0] =~ /^ftp:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:(.+)$/ ||
+    $_[0] =~ /^ftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
     $_[0] =~ /^ftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
+	# FTP URL
 	@rv = (1, $1, $2, $3, $5, $4 ? substr($4, 1) : 21);
 	}
-elsif ($_[0] =~ /^ssh:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
+elsif ($_[0] =~ /^ssh:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
+       $_[0] =~ /^ssh:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:(.+)$/ ||
+       $_[0] =~ /^ssh:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
        $_[0] =~ /^ssh:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
 	# SSH url with no @ in password
 	@rv = (2, $1, $2, $3, $5, $4 ? substr($4, 1) : 22);
@@ -2169,11 +2188,6 @@ else {
 	local $pwd = &get_current_dir();
 	@rv = (0, undef, undef, undef, $pwd."/".$_[0], undef);
 	$rv[4] =~ s/\/+$//;
-	}
-if ($rv[0] && $rv[3] =~ /^(\S+):(\d+)$/) {
-	# Convert hostname to host:port
-	$rv[3] = $1;
-	$rv[5] = $2;
 	}
 return @rv;
 }
@@ -2222,6 +2236,7 @@ local ($name, $value, $nolocal, $d, $nodownload, $noupload) = @_;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($value);
 $mode = 1 if (!$value && $nolocal);	# Default to FTP
 local $defport = $mode == 1 ? 21 : $mode == 2 ? 22 : undef;
+$server = "[$server]" if (&check_ip6address($server));
 local $serverport = $port && $port != $defport ? "$server:$port" : $server;
 local $rv;
 
@@ -2345,7 +2360,16 @@ elsif ($mode == 0 && !$nolocal) {
 	}
 elsif ($mode == 1) {
 	# FTP server
-	local ($server, $port) = split(/:/, $in{$name."_server"});
+	local ($server, $port);
+	if ($in{$name."_server"} =~ /^\[([^\]]+)\](:(\d+))?$/) {
+		($server, $port) = ($1, $3);
+		}
+	elsif ($in{$name."_server"} =~ /^([A-Za-z0-9\.\-\_]+)(:(\d+))?$/) {
+		($server, $port) = ($1, $3);
+		}
+	else {
+		&error($text{'backup_eserver1'});
+		}
 	&to_ipaddress($server) ||
 	    defined(&to_ip6address) && &to_ip6address($server) ||
 		&error($text{'backup_eserver1'});
@@ -2359,7 +2383,16 @@ elsif ($mode == 1) {
 	}
 elsif ($mode == 2) {
 	# SSH server
-	local ($server, $port) = split(/:/, $in{$name."_sserver"});
+	local ($server, $port);
+	if ($in{$name."_sserver"} =~ /^\[([^\]]+)\](:(\d+))?$/) {
+		($server, $port) = ($1, $3);
+		}
+	elsif ($in{$name."_sserver"} =~ /^([A-Za-z0-9\.\-\_]+)(:(\d+))?$/) {
+		($server, $port) = ($1, $3);
+		}
+	else {
+		&error($text{'backup_eserver2'});
+		}
 	&to_ipaddress($server) ||
 	    defined(&to_ip6address) && &to_ip6address($server) ||
 		&error($text{'backup_eserver2'});
