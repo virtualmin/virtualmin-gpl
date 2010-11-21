@@ -3426,7 +3426,8 @@ return (1, undef) if (!$email && !$cc && !$bcc);
 
 return &send_template_email(&cat_file($tmpl), $email, \%hash,
 			    $subject ||
-			    &entities_to_ascii($text{'mail_usubject'}),
+			    &entities_to_ascii($mode ? $text{'mail_upsubject'}
+						     : $text{'mail_usubject'}),
 			    $cc, $bcc, $d);
 }
 
