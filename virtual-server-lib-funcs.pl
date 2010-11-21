@@ -6114,6 +6114,11 @@ if ($remote_user) {
 		}
 	}
 
+# Update any secondary groups that might contain the domain owner
+if (!$dom->{'parent'}) {
+	&update_secondary_groups($dom);
+	}
+
 # Create an automatic alias domain, if specified in template
 if ($aliasname && $aliasname ne $dom->{'dom'}) {
 	&$first_print(&text('setup_domalias', $aliasname));
@@ -9242,7 +9247,8 @@ foreach my $g ("mailgroup", "ftpgroup", "dbgroup") {
 				@$users;
 		}
 	elsif ($g eq "dbgroup") {
-		@inusers = grep { $_->{'unix'} && @{$_->{'dbs'}} > 0 } @$users;
+		@inusers = grep { $_->{'unix'} && @{$_->{'dbs'}} > 0 ||
+			  $_->{'domainowner'} && $dom->{'mysql'} } @$users;
 		}
 	local @innames = map { $_->{'user'} } @inusers;
 	local %innames = map { $_, 1 } @innames;
