@@ -2198,7 +2198,8 @@ if (&has_webmail_rewrite()) {
 	push(@webfields, "webmail", "webmaildom", "webmaildom_def",
 			 "admin", "admindom", "admindom_def");
 	}
-push(@webfields, "web_php_suexec", "web_phpver", "web_phpchildren",
+push(@webfields, "web_php_suexec", "web_phpver",
+		 $tmpl->{'web_phpchildren'} ? ( "web_phpchildren" ) : ( ),
 		 "web_php_noedit");
 foreach my $phpver (@all_possible_php_versions) {
 	push(@webfields, "web_php_ini_".$phpver,
@@ -2336,10 +2337,12 @@ print &ui_table_row(
 		 map { [ $_->[0] ] } &list_available_php_versions() ]));
 
 # Default number of PHP child processes
-print &ui_table_row(
-    &hlink($text{'tmpl_phpchildren'}, "template_phpchildren"),
-    &ui_opt_textbox("web_phpchildren", $tmpl->{'web_phpchildren'},
-	    5, $text{'tmpl_phpchildrennone'}));
+if ($tmpl->{'web_phpchildren'}) {
+	print &ui_table_row(
+	    &hlink($text{'tmpl_phpchildren'}, "template_phpchildren"),
+	    &ui_opt_textbox("web_phpchildren", $tmpl->{'web_phpchildren'},
+		    5, $text{'tmpl_phpchildrennone'}));
+	}
 
 # Source php.ini files
 foreach my $phpver (@all_possible_php_versions) {
@@ -2537,7 +2540,8 @@ if ($in{"web_mode"} == 2) {
 		}
 	$tmpl->{'web_php_suexec'} = $in{'web_php_suexec'};
 	$tmpl->{'web_phpver'} = $in{'web_phpver'};
-	if ($in{'web_phpchildren_def'}) {
+	if ($in{'web_phpchildren_def'} ||
+	    !defined($in{'web_phpchildren_def'})) {
 		$tmpl->{'web_phpchildren'} = undef;
 		}
 	else {
