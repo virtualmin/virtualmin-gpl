@@ -5355,8 +5355,8 @@ foreach my $rn (@ranges) {
 	my ($r, $n) = split(/\//, $rn);
 	$r =~ /^([0-9a-f:]+):([0-9a-f]+)\-([0-9a-f]+)$/ || next;
 	local ($base, $s, $e) = ($1, $2, $3);
-	for(my $j=$s; $j<=$e; $j++) {
-		local $try = "$base:$j";
+	for(my $j=hex($s); $j<=hex($e); $j++) {
+		local $try = sprintf "%s:%x", $base, $j;
 		if (!$taken{$try} && !&ping_ip_address($try)) {
 			return wantarray ? ( $try, $n ) : $try;
 			}

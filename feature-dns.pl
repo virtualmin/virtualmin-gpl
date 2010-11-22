@@ -1082,7 +1082,8 @@ foreach my $r (@recs) {
 # Find all possible sub-domains, so we don't clone IPs for them
 my @dnames;
 foreach my $od (&list_domains()) {
-	if ($od->{'dns'} && $od->{'id'} ne $d->{'id'}) {
+	if ($od->{'dns'} && $od->{'id'} ne $d->{'id'} &&
+	    $od->{'dom'} =~ /\.\Q$d->{'dom'}\E$/) {
 		push(@dnames, $od->{'dom'});
 		}
 	}
@@ -1094,7 +1095,7 @@ foreach my $r (@recs) {
 	if ($r->{'type'} eq 'A' && $r->{'values'}->[0] eq $d->{'ip'} &&
 	    !$already{$r->{'name'}} &&
 	    ($r->{'name'} eq $withdot || $r->{'name'} =~ /\.\Q$withdot\E$/)) {
-		# Check if this record is in any other domain
+		# Check if this record is in any sub-domain of this one
 		my $insub = 0;
 		foreach my $od (@dnames) {
 			my $odwithdot = $od.".";
