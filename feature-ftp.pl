@@ -346,6 +346,9 @@ return $rv;
 # give, returns the global log file path.
 sub get_proftpd_log
 {
+if (!&foreign_check("proftpd")) {
+	return undef;
+	}
 &require_proftpd();
 if ($_[0]) {
 	# Find by IP
