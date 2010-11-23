@@ -10924,8 +10924,11 @@ if ($config{'dns'}) {
 				      $ns eq "0.0.0.0");
 			}
 		if (!$hasdns) {
-			return &text('check_eresolv', '/net/list_dns.cgi',
-						      $clink);
+			my @dhcp = grep { $_->{'dhcp'} || $_->{'bootp'} }
+					&net::boot_interfaces();
+			return &text('check_eresolv',
+				     '/net/list_dns.cgi', $clink).
+			       (@dhcp ? " ".$text{'check_eresolv2'} : "");
 			}
 		&$second_print($text{'check_dnsok'}." ".$mastermsg);
 		}
