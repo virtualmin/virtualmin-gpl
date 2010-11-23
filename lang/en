@@ -26,6 +26,7 @@ index_webmin=Webmin?
 index_users=Users
 index_aliases=Aliases
 index_reseller=Reseller
+index_emailto=Email address
 index_admins=Admins
 index_created=Created
 index_none=No virtual servers have been created yet.
