@@ -175,6 +175,7 @@ local $rv = { 'name' => $name,
 	      'passmode_func' => "script_${name}_passmode",
 	      'avail' => $avail && !$disabled || $allowmaster,
 	      'enabled' => !$disabled,
+	      'nocheck' => $disabled == 2,
 	      'minversion' => $unavail{$name."_minversion"},
 	    };
 if (defined(&$vdfunc)) {

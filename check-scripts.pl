@@ -41,12 +41,12 @@ while(@ARGV) {
 	}
 
 if (!@scripts) {
-	@scripts = &list_available_scripts();
+	@scripts = &list_scripts();
 	}
 
 foreach $s (@scripts) {
 	$script = &get_script($s);
-	next if (!$script->{'enabled'});
+	next if ($script->{'nocheck'});
 
 	# Make sure all of the versions are available
 	foreach $v (@{$script->{'versions'}}) {
