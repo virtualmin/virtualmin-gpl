@@ -507,7 +507,7 @@ $cfunc = "check_".$dbtype."_database_clash";
 
 # Work out default creation options
 $ofunc = "default_".$dbtype."_creation_opts";
-if (!$opts || defined(&$ofunc)) {
+if (!$opts && defined(&$ofunc)) {
 	$opts = &$ofunc($d);
 	}
 
