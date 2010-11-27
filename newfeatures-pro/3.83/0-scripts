@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Bugzilla script installer to version 3.6.3, Joomla to 1.5.22, TextPattern to 4.3.0, Dokuwiki to 2010-11-07, CMS Made Simple to 1.9.1, osCommerce to 2.3, Z-push to 1.4.3, Dotproject to 2.1.4, phpBB to 3.0.8, Wordpress MU to 3.0.1, Horde Webmail to 1.2.9, Horde to 3.3.11, Moodle to 2.0, and phpMyFAQ to 2.6.11.
+html=Updated the Bugzilla script installer to version 3.6.3, Joomla to 1.5.22, TextPattern to 4.3.0, Dokuwiki to 2010-11-07, CMS Made Simple to 1.9.1, osCommerce to 2.3, Z-push to 1.4.3, Dotproject to 2.1.4, phpBB to 3.0.8, Wordpress MU to 3.0.1, Horde Webmail to 1.2.9, Horde to 3.3.11, Moodle to 2.0, Foswiki to 1.1.2, and phpMyFAQ to 2.6.11.
 master=1
 reseller=1
 domain=1
