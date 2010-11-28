@@ -13,6 +13,14 @@ print &ui_table_start($text{'provision_header'}, undef, 2);
 print &ui_table_row($text{'provision_server'},
 	&ui_textbox("provision_server", $config{'provision_server'}, 40));
 
+# Server port and SSL
+$config{'provision_port'} ||= 10000;
+$config{'provision_ssl'} = 1 if ($config{'provision_ssl'} eq '');
+print &ui_table_row($text{'provision_port'},
+	&ui_textbox("provision_port", $config{'provision_port'}, 6)." ".
+	&ui_checkbox("provision_ssl", 1, $text{'provision_ssl'},
+		     $config{'provision_ssl'}));
+
 # Login name
 print &ui_table_row($text{'provision_user'},
 	&ui_textbox("provision_user", $config{'provision_user'}, 40));

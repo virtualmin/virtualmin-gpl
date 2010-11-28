@@ -5307,3 +5307,5 @@ provision_pass=Password for server
 provision_features=Features to provision
 provision_dns=DNS zones
 provision_mysql=MySQL logins and databases
+provision_port=Port number
+provision_ssl=Make SSL connection
