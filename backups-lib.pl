@@ -413,20 +413,24 @@ if ($homefmt) {
 
 # Take a lock on the backup destination, to avoid concurrent backups to
 # the same dest
-local $lockname = $desturl;
-$lockname =~ s/\//_/g;
-$lockname =~ s/\s/_/g;
-if (!-d $backup_locks_dir) {
-	&make_dir($backup_locks_dir, 0700);
+local @lockfiles;
+foreach my $desturl (@$desturls) {
+	local $lockname = $desturl;
+	$lockname =~ s/\//_/g;
+	$lockname =~ s/\s/_/g;
+	if (!-d $backup_locks_dir) {
+		&make_dir($backup_locks_dir, 0700);
+		}
+	local $lockfile = $backup_locks_dir."/".$lockname;
+	if (&test_lock($lockfile)) {
+		local $lpid = &read_file_contents($lockfile.".lock");
+		chomp($lpid);
+		&$second_print(&text('backup_esamelock', $lpid));
+		return (0, 0, $doms);
+		}
+	&lock_file($lockfile);
+	push(@lockfiles, $lockfile);
 	}
-local $lockfile = $backup_locks_dir."/".$lockname;
-if (&test_lock($lockfile)) {
-	local $lpid = &read_file_contents($lockfile.".lock");
-	chomp($lpid);
-	&$second_print(&text('backup_esamelock', $lpid));
-	return (0, 0, $doms);
-	}
-&lock_file($lockfile);
 
 # Go through all the domains, and for each feature call the backup function
 # to add it to the backup directory
@@ -1127,7 +1131,9 @@ if ($ok) {
 	}
 
 # Release lock on dest file
-&unlock_file($lockfile);
+foreach my $lockfile (@lockfiles) {
+	&unlock_file($lockfile);
+	}
 
 return ($ok, $sz, \@errdoms);
 }
