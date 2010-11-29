@@ -34,11 +34,11 @@ foreach $f (&list_provision_features()) {
 &ui_print_header(undef, $text{'provision_title'}, "");
 
 # Check that provisioning works for the server and login
-&$first_print($text{'provision_checking', "<tt>$in{'provision_server'}</tt>"));
+&$first_print(&text('provision_checking', "<tt>$in{'provision_server'}</tt>"));
 $err = &check_provision_login();
 if ($err) {
 	&$second_print(&text('provision_echeck', $err));
-	goto FAILED:
+	goto FAILED;
 	}
 else {
 	&$second_print($text{'setup_done'});

@@ -15,22 +15,23 @@ if (!$ok) {
 	# Request failed
 	return $msg;
 	}
-if (ref($msg) ne 'HASH') {
+if (ref($msg) ne 'ARRAY') {
 	return "Invalid response from list-provision-features : $msg";
 	}
+my %feats = map { $_->{'name'}, $_->{'values'} } @$msg;
 if ($config{'provision_dns'}) {
 	# Make sure DNS is supported
-	$msg->{'dns'} || return $text{'provision_edns'};
-	$msg->{'dns'}->{'limit'} || return $text{'provision_ednslimit'};
-	$msg->{'dns'}->{'systems'} || return $text{'provision_ednssystems'};
+	$feats{'dns'} || return $text{'provision_edns'};
+	$feats{'dns'}->{'limit'} || return $text{'provision_ednslimit'};
+	$feats{'dns'}->{'systems'} || return $text{'provision_ednssystems'};
 	}
 if ($config{'provision_mysql'}) {
 	# Make sure MySQL logins and DBs are supported
-	$msg->{'mysql'} && $msg->{'mysqldb'} ||
+	$feats{'mysql'} && $feats{'mysqldb'} ||
 		return $text{'provision_emysql'};
-	$msg->{'mysql'}->{'limit'} && $msg->{'mysqldb'}->{'limit'} ||
+	$feats{'mysql'}->{'limit'} && $feats{'mysqldb'}->{'limit'} ||
 		return $text{'provision_emysqllimit'};
-	$msg->{'mysql'}->{'systems'} && $msg->{'mysqldb'}->{'systems'} ||
+	$feats{'mysql'}->{'systems'} && $feats{'mysqldb'}->{'systems'} ||
 		return $text{'provision_emysqlsystems'};
 	}
 return undef;
@@ -62,7 +63,10 @@ if ($multiline) {
 	if ($@) {
 		return (0, "Invalid response format : $@");
 		}
-	return (1, $rv);
+	if ($rv->{'status'} ne 'success') {
+		return (0, $rv->{'error'} || "$cmd failed");
+		}
+	return (1, $rv->{'data'});
 	}
 else {
 	# Plain text format
