@@ -392,12 +392,10 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && &self_signed_cert($_[0]) &&
 if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
     $_[0]->{'home'} ne $_[1]->{'home'}) {
         # IP address has changed .. fix per-IP SSL cert
-	if ($tmpl->{'web_webmin_ssl'}) {
-		&modify_ipkeys($_[0], $_[1], \&get_miniserv_config,
-			       \&put_miniserv_config,
-			       \&restart_webmin);
-		}
-	if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin")) {
+	&modify_ipkeys($_[0], $_[1], \&get_miniserv_config,
+		       \&put_miniserv_config,
+		       \&restart_webmin);
+	if (&foreign_installed("usermin")) {
 		&foreign_require("usermin", "usermin-lib.pl");
 		&modify_ipkeys($_[0], $_[1],
 			       \&usermin::get_usermin_miniserv_config,
@@ -437,12 +435,10 @@ else {
 undef(@apache::get_config_cache);
 
 # Delete per-IP SSL cert
-if ($tmpl->{'web_webmin_ssl'}) {
-	&delete_ipkeys($_[0], \&get_miniserv_config,
-		       \&put_miniserv_config,
-		       \&restart_webmin);
-	}
-if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin")) {
+&delete_ipkeys($_[0], \&get_miniserv_config,
+	       \&put_miniserv_config,
+	       \&restart_webmin);
+if (&foreign_installed("usermin")) {
 	&foreign_require("usermin", "usermin-lib.pl");
 	&delete_ipkeys($_[0], \&usermin::get_usermin_miniserv_config,
 		      \&usermin::put_usermin_miniserv_config,
@@ -1068,7 +1064,10 @@ if (@ipkeys != @newipkeys) {
 return 0;
 }
 
-# modify_ipkeys(&domain, &olddomain, &miniserv-getter, &miniserv-saver, &post-action)
+# modify_ipkeys(&domain, &olddomain, &miniserv-getter, &miniserv-saver,
+# 		&post-action)
+# Remove and then re-add the per-IP SSL key for a domain, to pick up any
+# IP or home directory change
 sub modify_ipkeys
 {
 local ($dom, $olddom, $getfunc, $putfunc, $postfunc) = @_;
