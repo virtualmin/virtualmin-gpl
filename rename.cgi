@@ -275,7 +275,7 @@ print $text{'setup_done'},"<p>\n";
 # Run the after command
 &set_domain_envs($d, "MODIFY_DOMAIN", undef, \%oldd);
 local $merr = &made_changes();
-&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
+&$second_print(&text('rename_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($d);
 &webmin_log("rename", "domain", $oldd{'dom'}, $d);
 
