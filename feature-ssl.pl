@@ -277,13 +277,21 @@ if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 	&$first_print($text{'save_ssl3'});
 	local $lref = &read_file_lines($virt->{'file'});
 	for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
-		$lref->[$i] =~ s/$_[1]->{'home'}/$_[0]->{'home'}/g;
+		$lref->[$i] =~ s/\Q$_[1]->{'home'}\E/$_[0]->{'home'}/g;
 		}
 	&flush_file_lines();
 	$rv++;
 	undef(@apache::get_config_cache);
+
+	# Fix SSL cert file locations
+	foreach my $k ('ssl_cert', 'ssl_key', 'ssl_chain') {
+		$_[0]->{$k} =~ s/\Q$_[1]->{'home'}\E/$_[0]->{'home'}/;
+		}
 	($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
 					      	     $_[1]->{'web_sslport'});
+
+	# If Webmin or Usermin were using the moved cert file, fix up
+	# XXX
 	&$second_print($text{'setup_done'});
 	}
 if ($_[0]->{'proxy_pass_mode'} == 1 &&
@@ -381,7 +389,8 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && &self_signed_cert($_[0]) &&
 	}
 
 # Changes for Webmin and Usermin
-if ($_[0]->{'ip'} ne $_[1]->{'ip'}) {
+if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
+    $_[0]->{'home'} ne $_[1]->{'home'}) {
         # IP address has changed .. fix per-IP SSL cert
 	if ($tmpl->{'web_webmin_ssl'}) {
 		&modify_ipkeys($_[0], $_[1], \&get_miniserv_config,
@@ -390,9 +399,10 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'}) {
 		}
 	if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin")) {
 		&foreign_require("usermin", "usermin-lib.pl");
-		&modify_ipkeys($_[0], $_[1], \&usermin::get_usermin_miniserv_config,
-			      \&usermin::put_usermin_miniserv_config,
-			      \&restart_usermin);
+		&modify_ipkeys($_[0], $_[1],
+			       \&usermin::get_usermin_miniserv_config,
+			       \&usermin::put_usermin_miniserv_config,
+			       \&restart_usermin);
 		}
 	}
 &release_lock_web($_[0]);
@@ -1022,6 +1032,7 @@ return $data;
 }
 
 # setup_ipkeys(&domain, &miniserv-getter, &miniserv-saver, &post-action)
+# Add the per-IP SSL key for some domain, based on its IP address
 sub setup_ipkeys
 {
 local ($dom, $getfunc, $putfunc, $postfunc) = @_;
@@ -1039,6 +1050,7 @@ return 1;
 }
 
 # delete_ipkeys(&domain, &miniserv-getter, &miniserv-saver, &post-action)
+# Remove the per-IP SSL key for some domain, based on its IP address
 sub delete_ipkeys
 {
 local ($dom, $getfunc, $putfunc, $postfunc) = @_;
