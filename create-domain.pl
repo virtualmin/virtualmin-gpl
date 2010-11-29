@@ -660,6 +660,7 @@ foreach $f (&list_feature_plugins()) {
 	}
 &set_featurelimits_from_plan(\%dom, $plan);
 &set_chained_features(\%dom, undef);
+&set_provision_features(\%dom);
 
 # Work out home directory
 $dom{'home'} = &server_home_directory(\%dom, $parent);

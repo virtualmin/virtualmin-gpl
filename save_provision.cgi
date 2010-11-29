@@ -48,7 +48,17 @@ else {
 # XXX
 
 # Get limits from the server and display
-# XXX
+&$first_print(&text('provision_limits'));
+($ok, $feats) = &provision_api_call("list-provision-features", {}, 1);
+use Data::Dumper;
+foreach $f (@$feats) {
+	$v = $f->{'values'};
+	push(@lmsgs, &text('provision_limit',
+			   $v->{'limit'}->[0], $v->{'description'}->[0]).
+		     ($v->{'usage'}->[0] ? " ".&text('provision_used',
+						     $v->{'usage'}->[0]) : ""));
+	}
+&$second_print(&text('provision_limitsgot', join(', ', @lmsgs)));
 
 # Save config and tell the user
 &$first_print($text{'provision_saving'});

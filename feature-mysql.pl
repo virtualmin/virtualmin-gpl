@@ -345,6 +345,7 @@ else {
 
 # mysql_user_exists(&domain)
 # Returns his password if a mysql user exists for the domain's user, or undef
+# XXX provisioning?
 sub mysql_user_exists
 {
 &require_mysql();
@@ -358,18 +359,20 @@ return undef;
 
 # check_mysql_clash(&domain, [field])
 # Returns 1 if some MySQL database already exists
+# XXX provisioning check?
 sub check_mysql_clash
 {
-if (!$_[1] || $_[1] eq 'db') {
+local ($d, $field) = @_;
+if (!$field || $field eq 'db') {
 	&require_mysql();
 	local @dblist = &mysql::list_databases();
-	return &text('setup_emysqldb', $_[0]->{'db'})
-		if (&indexof($_[0]->{'db'}, @dblist) >= 0);
+	return &text('setup_emysqldb', $d->{'db'})
+		if (&indexof($d->{'db'}, @dblist) >= 0);
 	}
-if (!$_[0]->{'parent'} && (!$_[1] || $_[1] eq 'user')) {
+if (!$d->{'parent'} && (!$field || $field eq 'user')) {
 	&require_mysql();
-	return &text('setup_emysqluser', &mysql_user($_[0]))
-		if (&mysql_user_exists($_[0]));
+	return &text('setup_emysqluser', &mysql_user($d))
+		if (&mysql_user_exists($d));
 	}
 return 0;
 }
@@ -966,7 +969,8 @@ sub startstop_mysql
 {
 local ($typestatus) = @_;
 &require_mysql();
-return ( ) if (!&mysql::is_mysql_local());	# cannot stop/start remote
+return ( ) if ($config{'provision_mysql'} ||
+	       !&mysql::is_mysql_local());	# cannot stop/start remote
 local $r = defined($typestatus->{'mysql'}) ?
 		$typestatus->{'mysql'} == 1 :
 		&mysql::is_mysql_running();

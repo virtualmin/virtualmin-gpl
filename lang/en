@@ -41,6 +41,7 @@ index_eproftpd=The ProFTPd server does not appear to be installed on your system
 index_ebind=The BIND DNS server version 8 or 9 does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>BIND DNS Server</a> module. If your system does not use BIND, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page.
 index_email=None of the supported mail servers (Sendmail, Postfix and Qmail) were detected on your system. Maybe they are not installed, or their Webmin modules have not been set up properly.
 index_emysql=MySQL does not appear to be installed and running on your system, or has not yet been set up properly in Webmin's <a href='$1'>MySQL Database</a> module. If your system does not use MySQL, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page.
+index_emysql2=MySQL client programs do not appear to be installed, or have not yet been set up properly in Webmin's <a href='$1'>MySQL Database</a> module. If your system does not use MySQL, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page.
 index_epostgres=PostgreSQL does not appear to be installed and running on your system, or has not yet been set up properly in Webmin's <a href='$1'>PostgreSQL Database</a> module. If your system does not use PostgreSQL, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page.
 index_ewebalizer=Webalizer does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>Webalizer Logfile Analysis</a> module. If your system does not use Webalizer, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page.
 index_ewebalizerfile=The template Webalizer configuration file $1 was not found on your system. It may need to be changed in the <a href='$2'>Webalizer Logfile Analysis</a> module.
@@ -1657,6 +1658,7 @@ check_dnsok=BIND DNS server is installed, and the system is configured to use it
 check_dnsok2=BIND DNS server is installed.
 check_dnsmaster=However, the default master DNS server $1 is not a fully qualified domain name.
 check_mysqlok=MySQL is installed and running.
+check_mysqlok2=MySQL client programs are installed for use with a provisioning server.
 check_mysqlnopass=MySQL is installed and running, but does not have any <tt>root</tt> password set! <b>This should be changed immediately in the <a href='$1'>MySQL Database</a> module</b>.
 check_postgresok=PostgreSQL is installed and running.
 check_postgresnopass=PostgreSQL is installed and running, but does not have any <tt>$2</tt> password set! <b>This should be changed immediately in the <a href='$1'>PostgreSQL Database</a> module</b>.
@@ -5322,3 +5324,7 @@ provision_epass=Password cannot contain a :
 provision_checking=Checking login to provisioning server $1 ..
 provision_echeck=.. check failed : $1
 provision_saving=Saving provisioning settings ..
+provision_limits=Checking provisioning limits ..
+provision_limit=$1 $2
+provision_limitsgot=.. your limits are : $1
+provision_used=($1 used)

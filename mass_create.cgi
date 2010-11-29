@@ -314,6 +314,8 @@ foreach $line (@lines) {
 		}
 	&set_limits_from_plan(\%dom, $plan);
 	&set_featurelimits_from_plan(\%dom, $plan);
+	&set_chained_features(\%dom, undef);
+	&set_provision_features(\%dom);
 	&set_capabilities_from_plan(\%dom, $plan);
 	$dom{'home'} = &server_home_directory(\%dom, $parentdom);
 	&complete_domain(\%dom);

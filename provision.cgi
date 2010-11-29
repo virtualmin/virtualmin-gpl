@@ -23,11 +23,13 @@ print &ui_table_row($text{'provision_port'},
 
 # Login name
 print &ui_table_row($text{'provision_user'},
-	&ui_textbox("provision_user", $config{'provision_user'}, 40));
+	&ui_textbox("provision_user", $config{'provision_user'}, 40,
+		    undef, 0, "autocomplete=off"));
 
 # Password
 print &ui_table_row($text{'provision_pass'},
-	&ui_password("provision_pass", $config{'provision_pass'}, 40));
+	&ui_password("provision_pass", $config{'provision_pass'}, 40,
+		     undef, 0, "autocomplete=off"));
 
 # Features to use
 print &ui_table_row($text{'provision_features'},

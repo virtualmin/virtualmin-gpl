@@ -17,7 +17,7 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
 		 "balancer", "newfeatures", "resources", "backups",
 		 "domainname", "commands", "connectivity", "plans",
 		 "postgrey", "wizard", "security", "json", "redirects", "ftp",
-		 "dkim") {
+		 "dkim", "provision") {
 	do "$virtual_server_root/$lib-lib.pl";
 	if ($@ && -r "$virtual_server_root/$lib-lib.pl") {
 		print STDERR "failed to load $lib-lib.pl : $@\n";
@@ -6154,6 +6154,7 @@ if ($aliasname && $aliasname ne $dom->{'dom'}) {
 		&get_domain($dom->{'parent'}) : $dom;
 	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
 	&complete_domain(\%alias);
+	&set_provision_features(\%alias);
 	&create_virtual_server(\%alias, $parentdom,$parentdom->{'user'});
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
@@ -9939,7 +9940,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    'validate', 'chroot', 'global', 'changelog',
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
    $config{'mail_system'} == 0 ? ( 'postgrey' ) : ( ),
-   'dkim',
+   'dkim', 'provision',
    );
 local %tmplcat = (
 	'features' => 'setting',
@@ -9972,8 +9973,9 @@ local %tmplcat = (
 	'postgrey' => 'email',
 	'dkim' => 'email',
 	'changelog' => 'setting',
+	'provision' => 'setting',
 	);
-local %nonew = ( 'history', 1, 'postgrey', 1, 'dkim', 1 );
+local %nonew = ( 'history', 1, 'postgrey', 1, 'dkim', 1, 'provision', 1, );
 local @tlinks = map { $nonew{$_} ? "${_}.cgi"
 			         : "edit_new${_}.cgi" } @tmpls;
 local @ttitles = map { $nonew{$_} ? $text{"${_}_title"} 
@@ -11236,16 +11238,24 @@ if ($config{'ssl'}) {
 if ($config{'mysql'}) {
 	# Make sure MySQL is installed
 	&require_mysql();
-	&foreign_installed("mysql", 1) == 2 ||
-		return &text('index_emysql', "/mysql/", $clink);
-	if ($mysql::mysql_pass eq '') {
-		local $myd = &module_root_directory("mysql");
-		local $link = -r "$myd/root_form.cgi" ? '/mysql/root_form.cgi'
-						      : '/mysql/';
-		&$second_print(&text('check_mysqlnopass', $link));
+	if ($config{'provision_mysql'}) {
+		# Only MySQL client is needed
+		&foreign_installed("mysql") ||
+			return &text('index_emysql2', "/mysql/", $clink);
+		&$second_print($text{'check_mysqlok2'});
 		}
 	else {
-		&$second_print($text{'check_mysqlok'});
+		# MySQL server is needed
+		&foreign_installed("mysql", 1) == 2 ||
+			return &text('index_emysql', "/mysql/", $clink);
+		if ($mysql::mysql_pass eq '') {
+			local $myd = &module_root_directory("mysql");
+			&$second_print(&text('check_mysqlnopass',
+					     '/mysql/root_form.cgi'));
+			}
+		else {
+			&$second_print($text{'check_mysqlok'});
+			}
 		}
 
 	# If MYSQL_PWD doesn't work, disable it

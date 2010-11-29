@@ -74,5 +74,18 @@ else {
 	}
 }
 
+# set_provision_features(&domain)
+# Set the provision_* fields in a domain based on what provisioning features
+# are currently configured, to indicate that they should be created remotely.
+sub set_provision_features
+{
+my ($d) = @_;
+foreach my $f (&list_provision_features()) {
+	if ($config{'provision_'.$f}) {
+		$d->{'provision_'.$f} = 1;
+		}
+	}
+}
+
 1;
 

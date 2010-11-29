@@ -233,6 +233,7 @@ if ($domain->{'forwarding'} && $domain->{'forwarding'}->{'redirect'}) {
 	$dom{'proxy_pass_mode'} = 2;
 	$dom{'proxy_pass'} = $domain->{'forwarding'}->{'redirect'};
 	}
+&set_provision_features(\%dom);
 &complete_domain(\%dom);
 
 # Check for various clashes
