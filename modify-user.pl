@@ -395,8 +395,10 @@ if (defined($nospam)) {
 $user->{'secs'} = \@newsecs;
 
 if (!$user->{'noalias'} && ($user->{'email'} || $user->{'noprimary'})) {
-	# Apply simple alias changes
-	$simple = &get_simple_alias($d, $user);
+	# Apply simple alias changes. If user has no forwarding set yet, assume
+	# delivery is local.
+	$simple = @{$user->{'to'}} ? &get_simple_alias($d, $user)
+				   : { 'tome' => 1 };
 
 	# Update forwarding destinations
 	foreach $a (@addforward) {
@@ -444,6 +446,11 @@ if (!$user->{'noalias'} && ($user->{'email'} || $user->{'noprimary'})) {
 		$user->{'to'} = undef;
 		}
 	&save_simple_alias($d, $user, $simple);
+	if (@{$user->{'to'}} == 1 && $simple->{'tome'}) {
+		# If forwarding only to local, then that is like no forwarding
+		# at all.
+		$user->{'to'} = undef;
+		}
 	if ($autotext || $autostart || $autoend || $autoperiod) {
 		&write_simple_autoreply($d, $simple);
 		}
