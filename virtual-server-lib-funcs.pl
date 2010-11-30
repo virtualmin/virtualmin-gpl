@@ -3845,8 +3845,9 @@ sub making_changes
 {
 if ($config{'pre_command'} =~ /\S/) {
 	&clean_changes_environment();
-	local $out = &backquote_logged("($config{'pre_command'}) 2>&1 </dev/null");
-	if ($config{'output_command'} && !$?) {
+	local $out = &backquote_logged(
+		"($config{'pre_command'}) 2>&1 </dev/null");
+	if ($config{'output_command'} && !$? && $out =~ /\S/) {
 		&$second_print($out);
 		}
 	&reset_changes_environment();
@@ -3864,7 +3865,7 @@ if ($config{'post_command'} =~ /\S/) {
 	&clean_changes_environment();
 	local $out = &backquote_logged(
 		"($config{'post_command'}) 2>&1 </dev/null");
-	if ($config{'output_command'} && !$?) {
+	if ($config{'output_command'} && !$? && $out =~ /\S/) {
 		&$second_print($out);
 		}
 	&reset_changes_environment();
