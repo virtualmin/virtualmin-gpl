@@ -19,7 +19,7 @@ return "A browser-based PostgreSQL database management interface.";
 # script_phppgadmin_versions()
 sub script_phppgadmin_versions
 {
-return ( "4.2.3" );
+return ( "5.0" );
 }
 
 sub script_phppgadmin_category
@@ -29,7 +29,7 @@ return "Database";
 
 sub script_phppgadmin_php_vers
 {
-return ( 4, 5 );
+return ( 5 );
 }
 
 sub script_phppgadmin_php_modules
@@ -148,23 +148,27 @@ $err && return (0, "Failed to extract source : $err");
 local $cfileorig = "$opts->{'dir'}/conf/config.inc.php-dist";
 local $cfile = "$opts->{'dir'}/conf/config.inc.php";
 
+# Copy and update the config file
 if (!-r $cfile) {
-	# Copy and update the config file
 	&run_as_domain_user($d, "cp ".quotemeta($cfileorig)." ".
 				      quotemeta($cfile));
-	local $lref = &read_file_lines_as_domain_user($d, $cfile);
-	local $l;
-	foreach $l (@$lref) {
-		if ($l =~ /^\s*\$conf\['servers'\]\[0\]\['defaultdb'\]/) {
-			$l = "\$conf['servers'][0]['defaultdb'] = '$opts->{'db'}';";
-			}
-		if ($l =~ /^\s*\$conf\['servers'\]\[0\]\['host'\]/ &&
-		    $dbhost ne 'localhost') {
-			$l = "\$conf['servers'][0]['host'] = '$dbhost';";
-			}
-		}
-	&flush_file_lines_as_domain_user($d, $cfile);
 	}
+local $lref = &read_file_lines_as_domain_user($d, $cfile);
+local $l;
+foreach $l (@$lref) {
+	if ($l =~ /^\s*\$conf\['servers'\]\[0\]\['defaultdb'\]/) {
+		$l = "\$conf['servers'][0]['defaultdb'] = '$opts->{'db'}';";
+		}
+	if ($l =~ /^\s*\$conf\['servers'\]\[0\]\['host'\]/ &&
+	    $dbhost ne 'localhost') {
+		$l = "\$conf['servers'][0]['host'] = '$dbhost';";
+		}
+	if ($l =~ /^\s*\$conf\['owned_only'\]/) {
+		$l = "\$conf['owned_only'] = true;";
+		print STDERR "fixed owned_only\n";
+		}
+	}
+&flush_file_lines_as_domain_user($d, $cfile);
 
 # Return a URL for the user
 local $url = &script_path_url($d, $opts);
