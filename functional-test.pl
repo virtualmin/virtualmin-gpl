@@ -1426,8 +1426,7 @@ $backup_tests = [
 	  'args' => [ [ 'domain', $test_parallel_domain1 ],
 		      [ 'alias', $test_domain ],
 		      [ 'desc', 'Test alias domain with dir' ],
-		      [ 'dir' ], [ 'web' ], [ 'logrotate' ], [ 'dns' ],
-		      [ 'mail' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
 		      @create_args, ],
 	},
 
