@@ -1580,7 +1580,6 @@ $multibackup_tests = [
 		      [ 'alias', $test_domain ],
 		      [ 'desc', 'Test alias domain with dir' ],
 		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
-		      [ 'logrotate' ],
 		      @create_args, ],
 	},
 
