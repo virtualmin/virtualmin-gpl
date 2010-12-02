@@ -518,7 +518,9 @@ else {
 		if (defined(&list_domain_php_inis) && 
 		    &foreign_check("phpini")) {
 			&foreign_require("phpini", "phpini-lib.pl");
-			foreach my $ini (&list_domain_php_inis($_[0])) {
+			my $mode = &get_domain_php_mode($d);
+			$mode = "cgi" if ($mode eq "mod_php");
+			foreach my $ini (&list_domain_php_inis($_[0], $mode)) {
 				&lock_file($ini->[0]);
 				my $conf = &phpini::get_config($ini->[0]);
 				my $fixed = 0;

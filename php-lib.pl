@@ -884,13 +884,13 @@ if (&foreign_check("proc")) {
 return -1;
 }
 
-# list_domain_php_inis(&domain)
+# list_domain_php_inis(&domain, [force-mode])
 # Returns a list of php.ini files used by a domain, and their PHP versions
 sub list_domain_php_inis
 {
-local ($d) = @_;
+local ($d, $mode) = @_;
 local @inis;
-foreach my $v (&list_available_php_versions($d)) {
+foreach my $v (&list_available_php_versions($d, $mode)) {
 	local $ifile = "$d->{'home'}/etc/php$v->[0]/php.ini";
 	if (-r $ifile) {
 		push(@inis, [ $v->[0], $ifile ]);
