@@ -1494,19 +1494,20 @@ local ($alldata, $err);
 	       \$alldata, \$err, undef, 0, undef, undef, undef, 0, 1);
 return ( ) if ($err);
 
-# Search for extra download links. Possibly not needed anymore..
+# Search for sub-directories
 local @data = ( $alldata );
 local $data = $alldata;
-local %donepackage;
-while($data =~ /(\/project\/showfiles.php\?group_id=(\d+)(\&|\&amp;)package_id=(\d+)[^'" ]*)(.*)/is) {
-	$data = $5;
-	local ($spath, $sgroup, $spackage) = ($1, $2, $4);
-	$spath =~ s/\&amp;/\&/g;
-	next if ($donepackage{$sgroup,$spackage}++);
+local %donepath;
+while($data =~ /href="(\/projects\/$project\/files\/[^: ]+)"(.*)/is) {
+	$data = $2;
+	local $spath = $1;
+	next if ($donepath{$spath}++ || $spath =~ /\/stats\/timeline/ ||
+		 $spath =~ /\.\.$/ || $spath =~ /\/download$/);
 	local ($sdata, $err);
 	&http_download($osdn_website_host, $osdn_website_port, $spath,
 		       \$sdata, \$err, undef, 0, undef, undef, undef, 0, 1);
 	push(@data, $sdata) if (!$err);
+	$data .= $sdata;
 	}
 
 # Check them all for files
