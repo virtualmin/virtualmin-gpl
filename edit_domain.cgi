@@ -123,19 +123,34 @@ if (@cantmpls) {
 			[ map { [ $_->{'id'}, $_->{'name'} ] } @cantmpls ]));
 	}
 
+# Generate Javascript for plan change
+@plans = sort { $a->{'name'} cmp $b->{'name'} } &list_available_plans();
+print "<script>\n";
+print "function select_plan(num)\n";
+print "{\n";
+foreach $plan (@plans) {
+	print "if (num == $plan->{'id'}) {\n";
+	print &quota_javascript("quota", $plan->{'quota'}, "home", 1);
+	print &quota_javascript("uquota", $plan->{'uquota'}, "home", 1);
+	print "    }\n";
+	}
+print "}\n";
+print "</script>\n";
+
 # Show plan, with option to change
 if (!$parentdom) {
 	$plan = &get_plan($d->{'plan'});
-	@plans = sort { $a->{'name'} cmp $b->{'name'} } &list_available_plans();
 	if (@plans) {
 		# Can select one
 		($onlist) = grep { $_->{'id'} eq $plan->{'id'} } @plans;
 		push(@plans, $plan) if (!$onlist);
 		print &ui_table_row($text{'edit_plan'},
-			&ui_select("plan", $plan->{'id'},
-			  [ map { [ $_->{'id'}, $_->{'name'} ] } @plans ])." ".
-			&ui_checkbox("applyplan", 1,
-				     $text{'edit_applyplan'}, 1));
+		   &ui_select("plan", $plan->{'id'},
+		     [ map { [ $_->{'id'}, $_->{'name'} ] } @plans ],
+		     1, 0, 0, 0,
+		     "onChange='select_plan(options[selectedIndex].value)'").
+		   " ".
+		   &ui_checkbox("applyplan", 1, $text{'edit_applyplan'}, 1));
 		}
 	else {
 		# Just show current plan

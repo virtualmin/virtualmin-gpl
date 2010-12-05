@@ -1263,3 +1263,4 @@ Updated the Bugzilla script installer to version 3.6.3, Joomla to 1.5.22, TextPa
 When creating a virtual server with the create-domain API command, custom fields can be set with the --field-name flag.
 Added a link to the Mail Aliases page to also show normally hidden internal aliases, such as those for Mailman and spam traps.
 Improved support for backing up to and restoring from IPv6 SSH and FTP servers.
+When a virtual server's plan is changed on the Edit Virtual Server page, quotas are also updated to match those from the plan.
