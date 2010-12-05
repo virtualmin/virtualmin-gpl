@@ -12,7 +12,6 @@ require './virtual-server-lib.pl';
 @links = &list_custom_links();
 @cats = &list_custom_link_categories();
 %catmap = map { $_->{'id'}, $_->{'desc'} } @cats;
-print &ui_form_start("save_newlinks.cgi", "post");
 $i = 0;
 @table = ( );
 foreach $l (@links) {
