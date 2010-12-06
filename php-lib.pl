@@ -905,6 +905,21 @@ if (!@inis) {
 return @inis;
 }
 
+# find_domain_php_ini_files(&domain)
+# Returns the same information as list_domain_php_inis, but looks at files under
+# the home directory only
+sub find_domain_php_ini_files
+{
+local ($d) = @_;
+local @inis;
+foreach my $f (glob("$d->{'home'}/etc/php*/php.ini")) {
+	if ($f =~ /php(\d+)\/php.ini$/) {
+		push(@inis, [ $1, $f ]);
+		}
+	}
+return @inis;
+}
+
 # get_domain_php_ini(&domain, php-version, [dir-only])
 # Returns the php.ini file path for this domain and a PHP version
 sub get_domain_php_ini
