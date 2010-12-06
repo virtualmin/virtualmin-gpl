@@ -408,7 +408,7 @@ foreach $db (@dbs) {
 	&$first_print(&text('backup_mysqldump', $db));
 	local $dbfile = $_[1]."_".$db;
 	local $err = &mysql::backup_database($db, $dbfile, 0, 1, 0,
-					     undef, undef, undef, undef);
+					     undef, undef, undef, undef, 1);
 	if (!$err) {
 		$err = &validate_mysql_backup($dbfile);
 		}
@@ -673,9 +673,9 @@ local @dbs = split(/\s+/, $d->{'db_mysql'});
 &mysql::execute_sql_logged($mysql::master_db,
 		   "create database ".&mysql::quotestr($dbname).
 		   ($opts->{'charset'} ?
-		    " character set $_[2]->{'charset'}" : "").
+		    " character set $info->{'charset'}" : "").
 		   ($opts->{'collate'} ?
-		    " collate $_[2]->{'collate'}" : ""));
+		    " collate $info->{'collate'}" : ""));
 push(@dbs, $dbname);
 $d->{'db_mysql'} = join(" ", @dbs);
 

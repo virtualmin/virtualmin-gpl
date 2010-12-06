@@ -57,6 +57,10 @@ my ($out, $err);
 if ($err) {
 	return (0, $err);
 	}
+if ($out =~ /^ERROR:\s+(.*)/) {
+	# Command failed
+	return (0, $1);
+	}
 if ($multiline) {
 	# Parse perl format
 	my $rv = eval $out;

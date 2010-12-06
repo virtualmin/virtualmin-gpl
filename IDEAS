@@ -41,8 +41,6 @@
  - Webmin SSL cert / CSR generation directly
 	- https://www.virtualmin.com/node/14502
 
- - Move demo to srv2
-
  - Make script install dir configurable
 	- https://www.virtualmin.com/node/15663
 	- Can only be completed after 3.82 is out
@@ -58,7 +56,21 @@
  - Remote DNS and MySQL setup
 	- Needs some module for a central server to allow limited creation
 	- Virtualmin update to use this
+	- Need to set mysql module remote host field after provisioning
+	  first domain
+	- All DB ops need to be done as domain owner
+	- Documentation
 
  - Show usermin folder list in tree
 	- For names like foo.bar.baz and foo/bar/baz
 	- https://www.virtualmin.com/node/16397
+
+ - Automatically add reverse IPv6 addresses for domains
+	- Update / delete too
+	- https://www.virtualmin.com/node/16461
+
+ - Procmail script entry to block mail with useful message if quota is low
+
+ - Make left frame faster
+	- http://www.virtualmin.com/node/16497
+	- Pre-cache all */lang/en files, re-read if stat changes

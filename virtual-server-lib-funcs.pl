@@ -9706,14 +9706,11 @@ if ($d->{'web'} && $config{'web'} && &can_edit_phpmode()) {
 if ($d->{'web'} && &can_edit_phpver() &&
     defined(&list_available_php_versions)) {
 	# PHP directory versions button
-	local @avail = &list_available_php_versions($d);
-	if (@avail > 1) {
-		push(@rv, { 'page' => 'edit_phpver.cgi',
-			    'title' => $text{'edit_phpver'},
-			    'desc' => $text{'edit_phpverdesc'},
-			    'cat' => 'server',
-			  });
-		}
+	push(@rv, { 'page' => 'edit_phpver.cgi',
+		    'title' => $text{'edit_phpver'},
+		    'desc' => $text{'edit_phpverdesc'},
+		    'cat' => 'server',
+		  });
 	}
 
 if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} && &can_edit_spf()) {
