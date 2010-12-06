@@ -37,12 +37,13 @@ if (!$in{'confirm'}) {
 			    "<tt>".&show_domain_name($d)."</tt>"),"<p>\n";
 		}
 
-	$pfx = $d->{'parent'} ? "sublosing_" : "losing_";
 	print "<ul>\n";
 	foreach $f (@features) {
 		if ($d->{$f} && ($config{$f} || $f eq 'unix')) {
-			print "<li>",$text{'feature_'.$f}," - ",
-				     $text{$pfx.$f},"<br>\n";
+			my $msg = $d->{'parent'} ? $text{"sublosing_$f"}
+						 : undef;
+			$msg ||= $text{"losing_$f"};
+			print "<li>",$text{'feature_'.$f}," - ",$msg,"<br>\n";
 			}
 		}
 	foreach $f (&list_feature_plugins()) {

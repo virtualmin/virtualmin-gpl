@@ -124,10 +124,11 @@ if (!$in{'confirm'} && !$d->{'disabled'}) {
 
 		print "<p>",&text('save_rusure',"<tt>$d->{'dom'}</tt>"),"<p>\n";
 		print "<ul>\n";
-		local $pfx = $d->{'parent'} ? "sublosing_" : "losing_";
 		foreach $f (@losing) {
-			print "<li>",$text{'feature_'.$f}," - ",
-				     $text{$pfx.$f},"<br>\n";
+			my $msg = $d->{'parent'} ? $text{"sublosing_$f"}
+						 : undef;
+			$msg ||= $text{"losing_$f"};
+			print "<li>",$text{'feature_'.$f}," - ",$msg,"<br>\n";
 			}
 		foreach $f (@plosing) {
 			print "<li>",&plugin_call($f, "feature_name")," - ",
