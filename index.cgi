@@ -103,7 +103,7 @@ if ($config{'display_max'} && @doms > $config{'display_max'}) {
 	$formno++;
 
 	# Show update/delete all buttons
-	print &ui_form_start("domain_form.cgi");
+	print &ui_form_start("domain_form.cgi", "post");
 	foreach $d (@doms) {
 		print &ui_hidden("d", $d->{'id'});
 		}
@@ -137,7 +137,7 @@ else {
 	else {
 		print "<b>$text{'index_none'}</b><p>\n";
 		}
-	print &ui_form_start("domain_form.cgi");
+	print &ui_form_start("domain_form.cgi", "post");
 	}
 if ($current_theme ne "virtual-server-theme" &&
     !$main::nocreate_virtualmin_menu) {
