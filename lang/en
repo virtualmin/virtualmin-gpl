@@ -4718,8 +4718,8 @@ sv_senabling=Configuring and enabling the SpamAssassin filtering server ..
 sv_swarning=Warning! Virtualmin is configured to use the server filter, but the SpamAssassin server process is no longer running
 
 features_title=Features and Plugins
+newfeatures_title=Features and Plugins
 features_ecannot=You are not allowed to edit enabled features
-newfeatures_title=You are not allowed to edit enabled features
 features_name=Feature or Plugin
 features_type=Source
 features_feature=Core
@@ -5318,6 +5318,4 @@ provision_limit=$1 $2
 provision_limitsgot=.. your limits are : $1
 provision_used=($1 used)
 
-__norefs=1
-__norefs=1
 __norefs=1
