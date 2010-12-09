@@ -2883,6 +2883,7 @@ newplugin_return=plugins list
 newplugin_name=Plugin name
 newplugin_version=Version
 newplugin_def=Default?
+newplugin_count=Domains
 newplugin_acts=Actions
 newplugin_conf=Configure
 newplugin_open=Open
