@@ -9933,7 +9933,6 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    $config{'spam'} || $config{'virus'} ? ( 'sv' ) : ( ),
    &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
    &has_home_quotas() && !&has_quota_commands() ? ( 'quotacheck' ) : ( ),
-#   &can_show_history() ? ( 'history' ) : ( ),
    $virtualmin_pro ? ( 'mxs' ) : ( ),
    'validate', 'chroot', 'global', 'changelog',
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
@@ -10006,29 +10005,47 @@ sub get_all_global_links
 my @rv;
 my $vm = "$gconfig{'webprefix'}/$module_name";
 
+local $v = [ 'plugins' => \@plugins,
+	     'spam' => $config{'spam'},
+	     'virus' => $config{'virus'},
+	     'quotas' => &has_home_quotas(),
+	     'mail_system' => $config{'mail_system'},
+	     'pro' => $virtualmin_pro ];
+
 # Add template pages
 if (&can_edit_templates()) {
-	my ($tlinks, $ttitles, undef, $tcats, $tcodes) = &get_template_pages();
-	$tcats = [ map { "setting" } @$tlinks ] if (!$tcats);
-	for(my $i=0; $i<@$tlinks; $i++) {
-		local $url;
-		if ($tcodes->[$i] eq 'upgrade' && $config{'upgrade_link'}) {
-			# Special link for upgrading GPL to Pro
-			$url = $config{'upgrade_link'};
+	local $crv = &get_links_cache("global", $v);
+	if ($crv) {
+		# Use cache
+		@rv = @$crv;
+		}
+	else {
+		# Need to create
+		my ($tlinks, $ttitles, undef, $tcats, $tcodes) =
+			&get_template_pages();
+		$tcats = [ map { "setting" } @$tlinks ] if (!$tcats);
+		for(my $i=0; $i<@$tlinks; $i++) {
+			local $url;
+			if ($tcodes->[$i] eq 'upgrade' &&
+			    $config{'upgrade_link'}) {
+				# Special link for upgrading GPL to Pro
+				$url = $config{'upgrade_link'};
+				}
+			elsif ($tlinks->[$i] =~ /\//) {
+				# Outside virtualmin module
+				$url = $gconfig{'webprefix'}.$tlinks->[$i];
+				}
+			else {
+				# Inside virtualmin
+				$url = $vm."/".$tlinks->[$i];
+				}
+			push(@rv, { 'url' => $url,
+				    'title' => $ttitles->[$i],
+				    'cat' => $tcats->[$i],
+				    'icon' => $tcodes->[$i],
+				  });
 			}
-		elsif ($tlinks->[$i] =~ /\//) {
-			# Outside virtualmin module
-			$url = $gconfig{'webprefix'}.$tlinks->[$i];
-			}
-		else {
-			# Inside virtualmin
-			$url = $vm."/".$tlinks->[$i];
-			}
-		push(@rv, { 'url' => $url,
-			    'title' => $ttitles->[$i],
-			    'cat' => $tcats->[$i],
-			    'icon' => $tcodes->[$i],
-			  });
+		&save_links_cache("global", $v, \@rv);
 		}
 	}
 
@@ -10127,6 +10144,39 @@ foreach my $l (@rv) {
 	}
 
 return @rv;
+}
+
+# get_links_cache(key, &cache-invalidator)
+# Checks the cache for some key, and if it exists make sure the stored cache
+# validator matches what is given. If so, return the cache contents. If not,
+# return undef.
+sub get_links_cache
+{
+local ($cachekey, $validator) = @_;
+local $cachedata = &read_file_contents("$links_cache_dir/$cachekey");
+return undef if (!$cachedata);
+local $cachestr = &unserialise_variable($cachedata);
+return undef if (!$cachestr);
+use Data::Dumper;
+return undef if (&serialise_variable($cachestr->{'validator'}) ne
+		 &serialise_variable($validator));
+return $cachestr->{'data'};
+}
+
+# save_links_cache(key, &cache-invalidator, &object)
+# Save some cached key based on a key, with an additional validator that can
+# be used to check suitability by get_links_cache.
+sub save_links_cache
+{
+local ($cachekey, $validator, $data) = @_;
+if (!-d $links_cache_dir) {
+	&make_dir($links_cache_dir, 0700);
+	}
+&open_tempfile(CACHEDATA, ">$links_cache_dir/$cachekey", 0, 1);
+&print_tempfile(CACHEDATA, &serialise_variable(
+				{ 'validator' => $validator,
+				  'data' => $data }));
+&close_tempfile(CACHEDATA);
 }
 
 # get_startstop_links([live])
