@@ -48,6 +48,9 @@ if ($webminchanged) {
 # Apply the new config
 &run_post_config_actions(\%lastconfig);
 
+# Clear cache of links
+&clear_links_cache();
+
 &webmin_log("check");
 
 # Call any theme post command

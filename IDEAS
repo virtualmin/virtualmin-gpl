@@ -73,4 +73,3 @@
 
  - Make left frame faster
 	- http://www.virtualmin.com/node/16497
-	- Pre-cache all */lang/en files, re-read if stat changes

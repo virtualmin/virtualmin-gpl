@@ -90,6 +90,7 @@ foreach my $fname (@features, "virt", "virt6") {
 @startstop_features = ("web", "dns", "mail", "ftp", "unix", "virus", "spam",
 		       "mysql", "postgres");
 @bandwidth_features = ( @features, "backup", "restore" );
+@config_features = grep { $config{$_} } @features;
 @banned_usernames = ( 'root' );
 
 $backup_cron_cmd = "$module_config_directory/backup.pl";
@@ -279,6 +280,8 @@ $user_quota_warnings_file = "$module_config_directory/quotas-warnings";
 $user_quota_msg_file = "$module_config_directory/quotas-template";
 
 @automatic_dns_records = ( "@", "www", "ftp", "localhost", "m");
+
+$links_cache_dir = "$module_config_directory/links-cache";
 
 # generate_plugins_list([list])
 # Creates the confplugins, plugins and other arrays based on the module config

@@ -62,13 +62,23 @@ foreach my $m (@migration_types) {
 sub list_domains
 {
 local (@rv, $d);
-opendir(DIR, $domains_dir);
-foreach $d (readdir(DIR)) {
+local @files;
+if (defined(@main::list_domains_cache)) {
+	# Use cache of domain IDs in RAM
+	@files = @main::list_domains_cache;
+	}
+else {
+	# Re-scan the directory
+	opendir(DIR, $domains_dir);
+	@files = readdir(DIR);
+	closedir(DIR);
+	@main::list_domains_cache = @files;
+	}
+foreach $d (@files) {
 	if ($d !~ /^\./ && $d !~ /\.(lock|bak|rpmsave|sav|swp|webmintmp|~)$/i) {
 		push(@rv, &get_domain($d));
 		}
 	}
-closedir(DIR);
 return @rv;
 }
 
@@ -430,7 +440,14 @@ if (!$d->{'created'}) {
 	$d->{'creator'} ||= $remote_user;
 	$d->{'creator'} ||= getpwuid($<);
 	}
-$d->{'id'} ||= &domain_id();
+if (!$d->{'id'}) {
+	# Generate a new ID, add to the in-memory domains cache
+	$d->{'id'} = &domain_id();
+	if (defined(@main::list_domains_cache)) {
+		push(@main::list_domains_cache, $d->{'id'});
+		}
+	}
+$d->{'lastsave'} = time();
 &write_file("$domains_dir/$d->{'id'}", $d);
 &unlock_file("$domains_dir/$d->{'id'}");
 $main::get_domain_cache{$d->{'id'}} = $d;
@@ -484,7 +501,15 @@ if (-r $script_warnings_file) {
 # Delete script install logs
 &unlink_file("$script_log_directory/$id");
 
+# Delete cached links for the domain
+&clear_links_cache($_[0]);
+
+# Remove from caches
 delete($main::get_domain_cache{$_[0]->{'id'}});
+if (defined(@main::list_domains_cache)) {
+	@main::list_domains_cache = grep { $_ ne $_[0]->{'id'} }
+					 @main::list_domains_cache;
+	}
 &build_domain_maps();
 }
 
@@ -9370,6 +9395,17 @@ sub feature_links
 local ($d) = @_;
 local @rv;
 
+# Check cache for feature links
+local $v = [ 'time' => $d->{'lastsave'},
+	     'last_check' => $config{'last_check'},
+	     'plugins' => \@plugins,
+	     'features' => \@config_features ];
+local $ckey = $d->{'id'}."-links-".$base_remote_user;
+local $crv = &get_links_cache($ckey, $v);
+if ($crv) {
+	return @$crv;
+	}
+
 # Links provided by features, like editing DNS records
 foreach my $f (@features) {
 	if ($d->{$f}) {
@@ -9425,6 +9461,8 @@ if (!&master_admin() && !&reseller_admin()) {
 	@ot = sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) } @ot;
 	push(@rv, @ot);
 	}
+
+&save_links_cache($ckey, $v, \@rv);
 return @rv;
 }
 
@@ -9462,6 +9500,17 @@ sub get_domain_actions
 {
 local ($d) = @_;
 local @rv;
+
+# Check cache for domain actions
+local $v = [ 'time' => $d->{'lastsave'},
+	     'last_check' => $config{'last_check'},
+	     'plugins' => \@plugins,
+	     'features' => \@config_features ];
+local $ckey = $d->{'id'}."-actions-".$base_remote_user;
+local $crv = &get_links_cache($ckey, $v);
+if ($crv) {
+	return @$crv;
+	}
 
 if (&can_domain_have_users($d) && &can_edit_users()) {
 	# Users button
@@ -9825,6 +9874,7 @@ if (!&can_config_domain($d) && &can_passwd()) {
 		  });
 	}
 
+&save_links_cache($ckey, $v, \@rv);
 return @rv;
 }
 
@@ -10177,6 +10227,20 @@ if (!-d $links_cache_dir) {
 				{ 'validator' => $validator,
 				  'data' => $data }));
 &close_tempfile(CACHEDATA);
+}
+
+# clear_links_cache([&domain])
+# Delete all cached information for some or all domains
+sub clear_links_cache
+{
+local ($d) = @_;
+opendir(CACHEDIR, $links_cache_dir);
+foreach my $f (readdir(CACHEDIR)) {
+	if ($d && $f =~ /^\Q$d->{'id'}\E\-/ || !$d) {
+		&unlink_file("$links_cache_dir/$f");
+		}
+	}
+closedir(CACHEDIR);
 }
 
 # get_startstop_links([live])
@@ -12452,6 +12516,7 @@ else {
 sub flush_virtualmin_caches
 {
 undef(%main::get_domain_cache);
+undef(@main::list_domains_cache);
 undef(%bsize_cache);
 undef(%get_bandwidth_cache);
 undef(%main::soft_home_quota);
