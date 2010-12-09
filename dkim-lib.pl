@@ -145,10 +145,10 @@ elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 
 # Check mail server
 &require_mail();
-my $wantmilter = $rv{'port'} ? "inet:localhost:$rv{'port'}" :
-		 $rv{'socket'} ? "local:$rv{'socket'}" : "";
 if ($config{'mail_system'} == 0) {
 	# Postfix config
+	my $wantmilter = $rv{'port'} ? "inet:localhost:$rv{'port'}" :
+			 $rv{'socket'} ? "local:$rv{'socket'}" : "";
 	my $milters = &postfix::get_real_value("smtpd_milters");
 	if ($wantmilter && $milters !~ /\Q$wantmilter\E/) {
 		$rv{'enabled'} = 0;
@@ -156,6 +156,8 @@ if ($config{'mail_system'} == 0) {
 	}
 elsif ($config{'mail_system'} == 1) {
 	# Sendmail config
+	my $wantmilter = $rv{'port'} ? "inet:$rv{'port'}\@localhost" :
+			 $rv{'socket'} ? "local:$rv{'socket'}" : "";
 	my @feats = &sendmail::list_features();
 	my ($milter) = grep { $_->{'text'} =~ /INPUT_MAIL_FILTER/ &&
 			      $_->{'text'} =~ /\Q$wantmilter\E/ } @feats;
@@ -348,9 +350,9 @@ elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 	# Set milter port to listen on
 	&lock_file($redhat_dkim_default);
 	my %def;
+	&read_env_file($redhat_dkim_default, \%def);
 	if ($config{'mail_system'} == 0 && $dkim->{'socket'}) {
 		# Force use of tcp socket in defaults file for postfix
-		&read_env_file($redhat_dkim_default, \%def);
 		$def{'SOCKET'} = "inet:8891\@localhost";
 		$dkim->{'port'} = 8891;
 		delete($dkim->{'socket'});
@@ -401,10 +403,10 @@ if (!$ok) {
 
 &$first_print($text{'dkim_mailserver'});
 &require_mail();
-my $newmilter = $dkim->{'port'} ? "inet:localhost:$dkim->{'port'}"
-				: "local:$dkim->{'socket'}";
 if ($config{'mail_system'} == 0) {
 	# Configure Postfix to use filter
+	my $newmilter = $dkim->{'port'} ? "inet:localhost:$dkim->{'port'}"
+					: "local:$dkim->{'socket'}";
 	&lock_file($postfix::config{'postfix_config_file'});
 	&postfix::set_current_value("milter_default_action", "accept");
 	&postfix::set_current_value("milter_protocol", 2);
@@ -421,6 +423,8 @@ if ($config{'mail_system'} == 0) {
 	}
 elsif ($config{'mail_system'} == 1) {
 	# Configure Sendmail to use filter
+	my $newmilter = $dkim->{'port'} ? "inet:$dkim->{'port'}\@localhost"
+					: "local:$dkim->{'socket'}";
 	&lock_file($sendmail::config{'sendmail_mc'});
 	my $changed = 0;
 	my @feats = &sendmail::list_features();
@@ -502,10 +506,10 @@ my @doms = grep { $_->{'dns'} && $_->{'mail'} &&
 
 &$first_print($text{'dkim_unmailserver'});
 &require_mail();
-my $oldmilter = $dkim->{'port'} ? "inet:localhost:$dkim->{'port'}"
-				: "local:$dkim->{'socket'}";
 if ($config{'mail_system'} == 0) {
 	# Configure Postfix to not use filter
+	my $oldmilter = $dkim->{'port'} ? "inet:localhost:$dkim->{'port'}"
+					: "local:$dkim->{'socket'}";
 	&lock_file($postfix::config{'postfix_config_file'});
 	my $milters = &postfix::get_current_value("smtpd_milters");
 	if ($milters =~ /\Q$oldmilter\E/) {
@@ -521,6 +525,8 @@ if ($config{'mail_system'} == 0) {
 	}
 elsif ($config{'mail_system'} == 1) {
 	# Configure Sendmail to not use filter
+	my $oldmilter = $dkim->{'port'} ? "inet:$dkim->{'port'}\@localhost"
+					: "local:$dkim->{'socket'}";
 	&lock_file($sendmail::config{'sendmail_mc'});
 	my @feats = &sendmail::list_features();
 	my $changed = 0;
