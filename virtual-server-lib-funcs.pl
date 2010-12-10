@@ -440,17 +440,15 @@ if (!$d->{'created'}) {
 	$d->{'creator'} ||= $remote_user;
 	$d->{'creator'} ||= getpwuid($<);
 	}
-if (!$d->{'id'}) {
-	# Generate a new ID, add to the in-memory domains cache
-	$d->{'id'} = &domain_id();
-	if (defined(@main::list_domains_cache)) {
-		push(@main::list_domains_cache, $d->{'id'});
-		}
-	}
+$d->{'id'} ||= &domain_id();
 $d->{'lastsave'} = time();
 &write_file("$domains_dir/$d->{'id'}", $d);
 &unlock_file("$domains_dir/$d->{'id'}");
 $main::get_domain_cache{$d->{'id'}} = $d;
+if (defined(@main::list_domains_cache)) {
+	@main::list_domains_cache =
+		&unique(@main::list_domains_cache, $d->{'id'});
+	}
 &build_domain_maps();
 &set_ownership_permissions(undef, undef, 0700, "$domains_dir/$d->{'id'}");
 return 1;
