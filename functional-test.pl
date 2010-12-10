@@ -1369,6 +1369,7 @@ $aliasdom_tests = [
 	  'grep' => 'Allowed mysql hosts:.*1\\.2\\.3\\.4',
 	},
 	);
+
 $backup_tests = [
 	# Create a parent domain to be backed up
 	{ 'command' => 'create-domain.pl',
@@ -2650,6 +2651,35 @@ $ssl_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'cert', $test_domain_cert ],
 		      [ 'key', $test_domain_key ] ],
+	},
+
+	# Backup to a temp file
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_file ] ],
+	},
+
+	# Delete the domain, in preparation for re-creation
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Re-create from backup
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ] ],
+	},
+
+	# Test DNS lookup after the restore
+	{ 'command' => 'host '.$test_domain,
+	  'antigrep' => &get_default_ip(),
+	},
+
+	# Test HTTPS get after the restore
+	{ 'command' => $wget_command.'https://'.$test_domain,
+	  'grep' => 'Test SSL home page',
 	},
 
 	# Cleanup the domain
