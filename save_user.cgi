@@ -256,6 +256,8 @@ else {
 		$edom && $edom->{'mail'} || &error(&text('user_eextra2', $ed));
 		&can_edit_domain($edom) || $oldextra{$e} ||
 			&error(&text('user_eextra3', $ed));
+		!$edom->{'alias'} || !$edom->{'aliascopy'} ||
+			&error(&text('user_eextra7', $ed));
 		$donextra{lc($e)}++ && &error(&text('user_eextra6', $e));
 		}
 	$user->{'extraemail'} = \@extra;

@@ -190,6 +190,8 @@ foreach $e (@extra) {
 	local ($eu, $ed) = ($1, $2);
 	local $edom = &get_domain_by("dom", $ed);
 	$edom && $edom->{'mail'} || usage(&text('user_eextra2', $ed));
+	!$edom->{'alias'} || !$edom->{'aliascopy'} ||
+		&usage(&text('user_eextra7', $ed));
 	}
 
 @alldbs = &domain_databases($d);
