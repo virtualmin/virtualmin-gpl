@@ -498,7 +498,14 @@ setup_ednssecsize=.. could not compute key size : $1
 setup_ednsseckey=.. key generation failed : $1
 setup_ednssecsign=.. records signing failed : $1
 setup_mysqldb=Creating MySQL database $1 ..
+setup_mysqldb_provision=Creating MySQL database $1 on provisioning server ..
+setup_emysqldb_provision=.. provisioning error : $1
 setup_mysqluser=Creating MySQL login ..
+setup_mysqluser_provision=Creating MySQL login on provisioning server ..
+setup_emysqluser_provision=.. provisioning error : $1
+setup_emysqluser_provclash=.. this system is configured to use the remote MySQL server $1, but the MySQL login has been provisioned on $2!
+setup_mysqluser_provisioned=.. created on $1
+setup_mysqldb_provisioned=.. created on $1
 setup_postgresdb=Creating PostgreSQL database $1 ..
 setup_postgresuser=Creating PostgreSQL login ..
 setup_webmin=Creating Webmin user ..
@@ -5319,5 +5326,10 @@ provision_limits=Checking provisioning limits ..
 provision_limit=$1 $2
 provision_limitsgot=.. your limits are : $1
 provision_used=($1 used)
+
+provision_emysqldbcheck=Provisioning error checking MySQL database : $1
+provision_emysqldb=MySQL database $1 already exists on the provisioning server
+provision_emysqlcheck=Provisioning error checking MySQL login : $1
+provision_emysql=MySQl login $1 already exists on the provisioning server
 
 __norefs=1

@@ -45,9 +45,18 @@ sub provision_api_call
 {
 my ($cmd, $args, $multiline) = @_;
 my ($out, $err);
+my @args;
+foreach my $k (keys %$args) {
+	if (ref($args->{$k})) {
+		push(@args, map { [ $k, $_ ] } @{$args->{$k}});
+		}
+	else {
+		push(@args, [ $k, $args->{$k} ]);
+		}
+	}
 &http_download($config{'provision_server'}, $config{'provision_port'},
 	       "/server-manager/remote.cgi?program=".&urlize($cmd).
-	       join("", map { "&".$_."=".&urlize($args->{$_}) } (keys %$args)).
+	       join("", map { "&".$_->[0]."=".&urlize($_->[1]) } @args).
 	       ($multiline ? "&multiline=&perl=" : ""),
 	       \$out, \$err, undef,
 	       $config{'provision_ssl'},

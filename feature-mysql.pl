@@ -37,37 +37,88 @@ sub setup_mysql
 local ($d, $nodb) = @_;
 local $tmpl = &get_template($d->{'template'});
 &require_mysql();
-
-# Create the user
 $d->{'mysql_user'} = &mysql_user($d);
 local $user = $d->{'mysql_user'};
-local @hosts = &get_mysql_hosts($d, 1);
-local $wild = &substitute_domain_template($tmpl->{'mysql_wild'}, $d);
-if (!$d->{'parent'}) {
-	&$first_print($text{'setup_mysqluser'});
-	local $cfunc = sub {
-		local $encpass = &encrypted_mysql_pass($d);
-		foreach my $h (@hosts) {
-			&mysql::execute_sql_logged($mysql::master_db, "insert into user (host, user, password) values ('$h', '$user', $encpass)");
-			if ($wild && $wild ne $d->{'db'}) {
-				&add_db_table($h, $wild, $user);
-				}
-			}
-		&mysql::execute_sql_logged($mysql::master_db,
-					   'flush privileges');
-		};
-	&execute_for_all_mysql_servers($cfunc);
-	&$second_print($text{'setup_done'});
-	}
 
-# Create the initial DB (if requested)
-if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
-	local $opts = &default_mysql_creation_opts($d);
-	&create_mysql_database($d, $d->{'db'}, $opts);
+if ($d->{'provision_mysql'}) {
+	# Create the user on provisioning server
+	if (!$d->{'parent'}) {
+		&$first_print($text{'setup_mysqluser_provision'});
+		my $info = { 'user' => $user };
+		if ($d->{'mysql_enc_pass'}) {
+			$info->{'encpass'} = $d->{'mysql_enc_pass'};
+			}
+		else {
+			$info->{'pass'} = &mysql_pass($d);
+			}
+		local @hosts = &get_mysql_hosts($d, 1);
+		$info->{'remote'} = \@hosts;
+		my ($ok, $msg) = &provision_api_call(
+			"provision-mysql-login", $info, 0);
+		if (!$ok) {
+			&$second_print(
+				&text('setup_emysqluser_provision', $msg));
+			return 0;
+			}
+
+		# Configure MySQL module to use that system from now on
+		my $mysql_host = $msg =~ /host=(\S+)/ ? $1 : undef;
+		my $mysql_user = $msg =~ /owner_user=(\S+)/ ? $1 : undef;
+		my $mysql_pass = $msg =~ /owner_pass=(\S+)/ ? $1 : undef;
+		my @mdoms = grep { $_->{'mysql'} && $_->{'id'} ne $d->{'id'} }
+				 &list_domains();
+		if (!$mysql::config{'host'} || !@mdoms) {
+			# Configure MySQL module
+			$mysql::config{'host'} = $mysql_host;
+			$mysql::config{'login'} = $mysql_user;
+			$mysql::config{'pass'} = $mysql_pass;
+			&mysql::save_module_config(\%mysql::config, 'mysql');
+			}
+		elsif ($mysql::config{'host'} ne $mysql_host) {
+			# Mis-match with current setting!?
+			&$second_print(&text('setup_emysqluser_provclash',
+					     $mysql::config{'host'},
+					     $mysql_host));
+			return 0;
+			}
+
+		&$second_print(&text('setup_mysqluser_provisioned',
+				     $mysql_host));
+		}
+
+	# Create the initial DB on provisioning server
+	# XXX
 	}
 else {
-	# No DBs can exist
-	$d->{'db_mysql'} = "";
+	# Create the user
+	local @hosts = &get_mysql_hosts($d, 1);
+	local $wild = &substitute_domain_template($tmpl->{'mysql_wild'}, $d);
+	if (!$d->{'parent'}) {
+		&$first_print($text{'setup_mysqluser'});
+		local $cfunc = sub {
+			local $encpass = &encrypted_mysql_pass($d);
+			foreach my $h (@hosts) {
+				&mysql::execute_sql_logged($mysql::master_db, "insert into user (host, user, password) values ('$h', '$user', $encpass)");
+				if ($wild && $wild ne $d->{'db'}) {
+					&add_db_table($h, $wild, $user);
+					}
+				}
+			&mysql::execute_sql_logged($mysql::master_db,
+						   'flush privileges');
+			};
+		&execute_for_all_mysql_servers($cfunc);
+		&$second_print($text{'setup_done'});
+		}
+
+	# Create the initial DB (if requested)
+	if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
+		local $opts = &default_mysql_creation_opts($d);
+		&create_mysql_database($d, $d->{'db'}, $opts);
+		}
+	else {
+		# No DBs can exist
+		$d->{'db_mysql'} = "";
+		}
 	}
 
 # Save the initial password
@@ -358,21 +409,43 @@ return undef;
 }
 
 # check_mysql_clash(&domain, [field])
-# Returns 1 if some MySQL database already exists
+# Returns 1 if some MySQL user or database already exists
 # XXX provisioning check?
 sub check_mysql_clash
 {
 local ($d, $field) = @_;
-if (!$field || $field eq 'db') {
-	&require_mysql();
-	local @dblist = &mysql::list_databases();
-	return &text('setup_emysqldb', $d->{'db'})
-		if (&indexof($d->{'db'}, @dblist) >= 0);
+if ($d->{'provision_mysql'}) {
+	# Check on remote DB server
+	if (!$field || $field eq 'db') {
+		my ($ok, $msg) = &provision_api_call(
+			"check-mysql-database", { 'database' => $d->{'db'} });
+		return &text('provision_emysqldbcheck', $msg) if (!$ok);
+		if ($msg =~ /host=/) {
+			return &text('provision_emysqldb', $d->{'db'});
+			}
+		}
+	if (!$d->{'parent'} && (!$field || $field eq 'user')) {
+		my ($ok, $msg) = &provision_api_call(
+			"check-mysql-login", { 'user' => &mysql_user($d) });
+		return &text('provision_emysqlcheck', $msg) if (!$ok);
+		if ($msg =~ /host=/) {
+			return &text('provision_emysql', &mysql_user($d));
+			}
+		}
 	}
-if (!$d->{'parent'} && (!$field || $field eq 'user')) {
-	&require_mysql();
-	return &text('setup_emysqluser', &mysql_user($d))
-		if (&mysql_user_exists($d));
+else {
+	# Check locally
+	if (!$field || $field eq 'db') {
+		&require_mysql();
+		local @dblist = &mysql::list_databases();
+		return &text('setup_emysqldb', $d->{'db'})
+			if (&indexof($d->{'db'}, @dblist) >= 0);
+		}
+	if (!$d->{'parent'} && (!$field || $field eq 'user')) {
+		&require_mysql();
+		return &text('setup_emysqluser', &mysql_user($d))
+			if (&mysql_user_exists($d));
+		}
 	}
 return 0;
 }
@@ -799,6 +872,7 @@ sub get_mysql_database_dir
 {
 local ($db) = @_;
 &require_mysql();
+return undef if ($config{'provision_mysql'});
 return undef if (!-d $mysql::config{'mysql_data'});
 return undef if ($mysql::config{'host'} &&
 		 $mysql::config{'host'} ne 'localhost' &&
@@ -961,6 +1035,7 @@ return $mysql::config{'host'} || 'localhost';
 sub sysinfo_mysql
 {
 &require_mysql();
+return ( ) if ($config{'provision_mysql'});
 local $ver = &mysql::get_mysql_version();
 return ( [ $text{'sysinfo_mysql'}, $ver ] );
 }
