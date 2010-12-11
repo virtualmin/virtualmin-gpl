@@ -275,6 +275,11 @@ if ($d->{'ip'} ne $oldd->{'ip'} ||
 	&update_alias_domain_ips($d, $oldd);
 	}
 
+# If the template has changed, update secondary groups
+if ($d->{'template'} ne $oldd->{'template'}) {
+	&update_secondary_groups($d);
+	}
+
 # Run the after command
 &run_post_actions();
 &set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);

@@ -503,6 +503,11 @@ else {
 	&refresh_webmin_user($dom);
 	}
 
+# If the template has changed, update secondary groups
+if ($dom->{'template'} ne $old->{'template'}) {
+	&update_secondary_groups($dom);
+	}
+
 # Run the after command
 &run_post_actions();
 &set_domain_envs($dom, "MODIFY_DOMAIN", undef, $old);
