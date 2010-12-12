@@ -85,9 +85,6 @@ if ($d->{'provision_mysql'}) {
 		&$second_print(&text('setup_mysqluser_provisioned',
 				     $mysql_host));
 		}
-
-	# Create the initial DB on provisioning server
-	# XXX
 	}
 else {
 	# Create the user
@@ -109,22 +106,26 @@ else {
 		&execute_for_all_mysql_servers($cfunc);
 		&$second_print($text{'setup_done'});
 		}
+	}
 
-	# Create the initial DB (if requested)
-	if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
-		local $opts = &default_mysql_creation_opts($d);
-		&create_mysql_database($d, $d->{'db'}, $opts);
-		}
-	else {
-		# No DBs can exist
-		$d->{'db_mysql'} = "";
-		}
+# Create the initial DB (if requested)
+local $ok;
+if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
+	local $opts = &default_mysql_creation_opts($d);
+	$ok = &create_mysql_database($d, $d->{'db'}, $opts);
+	}
+else {
+	# No DBs can exist
+	$ok = 1;
+	$d->{'db_mysql'} = "";
 	}
 
 # Save the initial password
 if ($tmpl->{'mysql_nopass'}) {
 	&set_mysql_pass($d, &mysql_pass($d, 1));
 	}
+
+return $ok;
 }
 
 # add_db_table(host, db, user)
@@ -739,22 +740,39 @@ sub create_mysql_database
 {
 local ($d, $dbname, $opts) = @_;
 &require_mysql();
-
-# Create the database
-&$first_print(&text('setup_mysqldb', $dbname));
 local @dbs = split(/\s+/, $d->{'db_mysql'});
-&mysql::execute_sql_logged($mysql::master_db,
-		   "create database ".&mysql::quotestr($dbname).
-		   ($opts->{'charset'} ?
-		    " character set $info->{'charset'}" : "").
-		   ($opts->{'collate'} ?
-		    " collate $info->{'collate'}" : ""));
+
+if ($d->{'provision_mysql'}) {
+	# Create the database on the provisioning server
+	&$first_print(&text('setup_mysqldb_provision', $dbname));
+	my $info = { 'user' => &mysql_user($d),
+		     'database' => $dbname };
+	$info->{'charset'} = $opts->{'charset'} if ($opts->{'charset'});
+	$info->{'collate'} = $opts->{'collate'} if ($opts->{'collate'});
+	my ($ok, $msg) = &provision_api_call(
+		"provision-mysql-database", $info, 0);
+	if (!$ok) {
+		&$second_print(&text('setup_emysqldb_provision', $msg));
+		return 0;
+		}
+	}
+else {
+	# Create the database locally
+	&$first_print(&text('setup_mysqldb', $dbname));
+	&mysql::execute_sql_logged($mysql::master_db,
+			   "create database ".&mysql::quotestr($dbname).
+			   ($opts->{'charset'} ?
+			    " character set $info->{'charset'}" : "").
+			   ($opts->{'collate'} ?
+			    " collate $info->{'collate'}" : ""));
+
+	# Make the DB accessible to the domain owner
+	&grant_mysql_database($d, $dbname);
+	&$second_print($text{'setup_done'});
+	}
 push(@dbs, $dbname);
 $d->{'db_mysql'} = join(" ", @dbs);
-
-# Make the DB accessible to the domain owner
-&grant_mysql_database($d, $dbname);
-&$second_print($text{'setup_done'});
+return 1;
 }
 
 # grant_mysql_database(&domain, dbname)
