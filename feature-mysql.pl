@@ -402,16 +402,31 @@ return undef;
 
 # disable_mysql(&domain)
 # Modifies the mysql user for this domain so that he cannot login
-# XXX provisioning support
 sub disable_mysql
 {
 local ($d) = @_;
-&$first_print($text{'disable_mysqluser'});
+&require_mysql();
 if ($d->{'parent'}) {
 	&$second_print($text{'save_nomysqlpar'});
 	}
+elsif ($d->{'provision_mysql'}) {
+	# Lock on provisioning server
+	&$first_print($text{'disable_mysqluser_provision'});
+	my $info = { 'user' => &mysql_user($d),
+		     'host' => $mysql::config{'host'},
+		     'lock' => '' };
+	my ($ok, $msg) = &provision_api_call(
+		"modify-mysql-login", $info, 0);
+	if (!$ok) {
+		&$second_print(&text('disable_emysqluser_provision', $msg));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	}
 else {
-	&require_mysql();
+	# Lock locally
+	&$first_print($text{'disable_mysqluser'});
 	local $user = &mysql_user($d);
 	if ($oldpass = &mysql_user_exists($d)) {
 		local $dfunc = sub {
@@ -430,16 +445,31 @@ else {
 
 # enable_mysql(&domain)
 # Puts back the original password for the mysql user so that he can login again
-# XXX provisioning support
 sub enable_mysql
 {
 local ($d) = @_;
-&$first_print($text{'enable_mysql'});
+&require_mysql();
 if ($d->{'parent'}) {
 	&$second_print($text{'save_nomysqlpar'});
 	}
+elsif ($d->{'provision_mysql'}) {
+	# Unlock on provisioning server
+	&$first_print($text{'enable_mysql_provision'});
+	my $info = { 'user' => &mysql_user($d),
+		     'host' => $mysql::config{'host'},
+		     'unlock' => '' };
+	my ($ok, $msg) = &provision_api_call(
+		"modify-mysql-login", $info, 0);
+	if (!$ok) {
+		&$second_print(&text('enable_emysql_provision', $msg));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	}
 else {
-	&require_mysql();
+	# Un-lock locally
+	&$first_print($text{'enable_mysql'});
 	local $user = &mysql_user($d);
 	if (&mysql_user_exists($d)) {
 		local $efunc = sub {

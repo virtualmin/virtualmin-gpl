@@ -13275,7 +13275,8 @@ local $script = $0;
 $script =~ s/^.*\///;
 local $remote_user = "root";
 local $WebminCore::remote_user = "root";
-local $ENV{'REMOTE_HOST'} ||= "127.0.0.1";
+local $rh = $ENV{'REMOTE_HOST'};
+local $ENV{'REMOTE_HOST'} = $rh || "127.0.0.1";
 &webmin_log($main::virtualmin_remote_api ||
 	    $ENV{'VIRTUALMIN_REMOTE_API'} ? "remote" : "cmd",
 	    $script, $d ? $d->{'dom'} : undef, \%flags);
