@@ -44,14 +44,16 @@ if ($d->{'provision_mysql'}) {
 	# Create the user on provisioning server
 	if (!$d->{'parent'}) {
 		&$first_print($text{'setup_mysqluser_provision'});
-		my $info = { 'user' => $user };
+		my $info = { 'user' => $user,
+			     'domain-owner' => '' };
 		if ($d->{'mysql_enc_pass'}) {
 			$info->{'encpass'} = $d->{'mysql_enc_pass'};
 			}
 		else {
 			$info->{'pass'} = &mysql_pass($d);
 			}
-		local @hosts = &get_mysql_hosts($d, 1);
+		local @hosts = map { &to_ipaddress($_) }
+				   &get_mysql_hosts($d, 1);
 		$info->{'remote'} = \@hosts;
 		my ($ok, $msg) = &provision_api_call(
 			"provision-mysql-login", $info, 0);
@@ -151,53 +153,87 @@ local $qdb = &quote_mysql_database($db);
 sub delete_mysql
 {
 local ($d) = @_;
+&require_mysql();
 
 # Get the domain's users, so we can remove their MySQL logins
-local @users = &list_domain_users($d, 1, 1, 1, 0);
+# XXX needs to support remote servers
+#local @users = &list_domain_users($d, 1, 1, 1, 0);
 
 # First remove the databases
-&require_mysql();
 if ($d->{'db_mysql'}) {
 	&delete_mysql_database($d, &unique(split(/\s+/, $d->{'db_mysql'})));
 	}
 
-# Then remove the main user
-&$first_print($text{'delete_mysqluser'}) if (!$d->{'parent'});
-local $dfunc = sub { 
-	local $user = &mysql_user($d);
-	local $tmpl = &get_template($d->{'template'});
-	local $wild = &substitute_domain_template($tmpl->{'mysql_wild'}, $d);
+if ($d->{'provision_mysql'}) {
+	# Remove the main user on the provisioning server
 	if (!$d->{'parent'}) {
-		# Delete the user and any database permissions
-		&mysql::execute_sql_logged($mysql::master_db, "delete from user where user = '$user'");
-		&mysql::execute_sql_logged($mysql::master_db, "delete from db where user = '$user'");
-		}
-	if ($wild && $wild ne $d->{'db'}) {
-		# Remove any wildcard entry for the user
-		&mysql::execute_sql_logged($mysql::master_db, "delete from db where db = '$wild'");
-		}
-	# Remove any other users. This has to be done here, as when users in
-	# the domain are deleted they won't be able to find their database
-	# privileges anymore.
-	foreach my $u (@users) {
-		foreach my $udb (@{$u->{'dbs'}}) {
-			if ($udb->{'type'} eq 'mysql') {
-				local $myuser = &mysql_username($u->{'user'});
-				&mysql::execute_sql_logged($mysql::master_db,
-				    "delete from user where user = '$myuser'");
-				&mysql::execute_sql_logged($mysql::master_db,
-				    "delete from db where user = '$myuser'");
-				}
+		&$first_print($text{'delete_mysqluser_provision'});
+		my $info = { 'user' => &mysql_user($d),
+			     'host' => $mysql::config{'host'} };
+		my ($ok, $msg) = &provision_api_call(
+			"unprovision-mysql-login", $info, 0);
+		if ($ok) {
+			&$second_print(&text('delete_emysqluser_provision',
+					     $msg));
+			}
+		else {
+			&$second_print($text{'setup_done'});
 			}
 		}
-	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
-	};
-&execute_for_all_mysql_servers($dfunc);
-&$second_print($text{'setup_done'}) if (!$d->{'parent'});
+
+	# Take away access from mailbox users
+	# XXX
+	}
+else {
+	# Remove the main user locally
+	&$first_print($text{'delete_mysqluser'}) if (!$d->{'parent'});
+	local $dfunc = sub { 
+		local $user = &mysql_user($d);
+		local $tmpl = &get_template($d->{'template'});
+		local $wild = &substitute_domain_template(
+				$tmpl->{'mysql_wild'}, $d);
+		if (!$d->{'parent'}) {
+			# Delete the user and any database permissions
+			&mysql::execute_sql_logged($mysql::master_db,
+				"delete from user where user = '$user'");
+			&mysql::execute_sql_logged($mysql::master_db,
+				"delete from db where user = '$user'");
+			}
+		if ($wild && $wild ne $d->{'db'}) {
+			# Remove any wildcard entry for the user
+			&mysql::execute_sql_logged($mysql::master_db,
+				"delete from db where db = '$wild'");
+			}
+		# Remove any other users. This has to be done here, as when
+		# users in the domain are deleted they won't be able to find
+		# their database privileges anymore.
+		foreach my $u (@users) {
+			foreach my $udb (@{$u->{'dbs'}}) {
+				if ($udb->{'type'} eq 'mysql') {
+					local $myuser =
+						&mysql_username($u->{'user'});
+					&mysql::execute_sql_logged(
+					    $mysql::master_db,
+					    "delete from user where user = ?",
+					    $myuser);
+					&mysql::execute_sql_logged(
+					    $mysql::master_db,
+					    "delete from db where user = ?",
+					    $myuser);
+					}
+				}
+			}
+		&mysql::execute_sql_logged(
+			$mysql::master_db, 'flush privileges');
+		};
+	&execute_for_all_mysql_servers($dfunc);
+	&$second_print($text{'setup_done'}) if (!$d->{'parent'});
+	}
 }
 
 # modify_mysql(&domain, &olddomain)
 # Changes the mysql user's password if needed
+# XXX provisioning support
 sub modify_mysql
 {
 local ($d, $oldd) = @_;
@@ -322,18 +358,51 @@ sub validate_mysql
 {
 local ($d) = @_;
 &require_mysql();
-local %got = map { $_, 1 } &mysql::list_databases();
-foreach my $db (&domain_databases($d, [ "mysql" ])) {
-	$got{$db->{'name'}} || return &text('validate_emysql', $db->{'name'});
+if ($d->{'provision_mysql'}) {
+	# Check login on provisioning server
+	my ($ok, $msg) = &provision_api_call(
+		"check-mysql-login", { 'user' => &mysql_user($d) });
+	if (!$ok) {
+		return &text('validate_emysqlcheck', $msg);
+		}
+	elsif ($msg !~ /host=(\S+)/) {
+		return &text('validate_emysqluser', &mysql_user($d));
+		}
+	elsif ($1 ne $mysql::config{'host'}) {
+		return &text('validate_emysqluserhost',
+			     $1, $mysql::config{'host'});
+		}
+
+	# Check DBs on provisioning server
+	foreach my $db (&domain_databases($d, [ "mysql" ])) {
+		my ($ok, $msg) = &provision_api_call(
+		    "check-mysql-database", { 'database' => $db->{'name'} });
+		if (!$ok) {
+			return &text('validate_emysqlcheck',
+				     $db->{'name'}, $msg);
+			}
+		elsif ($msg !~ /host=(\S+)/) {
+			return &text('validate_emysql', $db->{'name'});
+			}
+		}
 	}
-if (!&mysql_user_exists($d)) {
-	return &text('validate_emysqluser', &mysql_user($d));
+else {
+	# Check locally
+	local %got = map { $_, 1 } &mysql::list_databases();
+	foreach my $db (&domain_databases($d, [ "mysql" ])) {
+		$got{$db->{'name'}} ||
+			return &text('validate_emysql', $db->{'name'});
+		}
+	if (!&mysql_user_exists($d)) {
+		return &text('validate_emysqluser', &mysql_user($d));
+		}
 	}
 return undef;
 }
 
 # disable_mysql(&domain)
 # Modifies the mysql user for this domain so that he cannot login
+# XXX provisioning support
 sub disable_mysql
 {
 local ($d) = @_;
@@ -361,6 +430,7 @@ else {
 
 # enable_mysql(&domain)
 # Puts back the original password for the mysql user so that he can login again
+# XXX provisioning support
 sub enable_mysql
 {
 local ($d) = @_;
@@ -411,7 +481,6 @@ return undef;
 
 # check_mysql_clash(&domain, [field])
 # Returns 1 if some MySQL user or database already exists
-# XXX provisioning check?
 sub check_mysql_clash
 {
 local ($d, $field) = @_;
@@ -727,6 +796,7 @@ return ($size, scalar(@tables), $qsize);
 
 # check_mysql_database_clash(&domain, dbname)
 # Check if some MySQL database already exists
+# XXX provisioning support
 sub check_mysql_database_clash
 {
 &require_mysql();
@@ -755,6 +825,7 @@ if ($d->{'provision_mysql'}) {
 		&$second_print(&text('setup_emysqldb_provision', $msg));
 		return 0;
 		}
+	&$second_print($text{'setup_done'});
 	}
 else {
 	# Create the database locally
@@ -809,35 +880,55 @@ if ($tmpl->{'mysql_chgrp'} && $dd) {
 sub delete_mysql_database
 {
 local ($d, @dbnames) = @_;
-
 &require_mysql();
-local @dblist = &mysql::list_databases();
-&$first_print(&text('delete_mysqldb', join(", ", @dbnames)));
 local @dbs = split(/\s+/, $d->{'db_mysql'});
 local @missing;
-foreach my $db (@dbnames) {
-	local $qdb = &quote_mysql_database($db);
-	if (&indexof($db, @dblist) >= 0) {
-		# Drop the DB
-		&mysql::execute_sql_logged($mysql::master_db, "drop database ".
-			&mysql::quotestr($db));
-		}
-	else {
-		push(@missing, $db);
-		}
-	@dbs = grep { $_ ne $db } @dbs;
-	}
-$d->{'db_mysql'} = join(" ", @dbs);
+local $failed = 0;
 
-# Drop permissions
-foreach my $db (@dbnames) {
-	&revoke_mysql_database($d, $db);
-	}
-
-if (@missing) {
-	&$second_print(&text('delete_mysqlmissing', join(", ", @missing)));
+if ($d->{'provision_mysql'}) {
+	# Delete on provisioning server
+	&$first_print(&text('delete_mysqldb_provision', join(", ", @dbnames)));
+	foreach my $db (@dbnames) {
+		my $info = { 'database' => $db,
+			     'host' => $mysql::config{'host'} };
+		my ($ok, $msg) = &provision_api_call(
+			"unprovision-mysql-database", $info, 0);
+		if (!$ok) {
+			&$second_print(
+				&text('delete_emysqldb_provision', $msg));
+			$failed++;
+			}
+		@dbs = grep { $_ ne $db } @dbs;
+		}
 	}
 else {
+	# Delete locally
+	local @dblist = &mysql::list_databases();
+	&$first_print(&text('delete_mysqldb', join(", ", @dbnames)));
+	foreach my $db (@dbnames) {
+		local $qdb = &quote_mysql_database($db);
+		if (&indexof($db, @dblist) >= 0) {
+			# Drop the DB
+			&mysql::execute_sql_logged(
+				$mysql::master_db, "drop database ".
+				&mysql::quotestr($db));
+			}
+		else {
+			push(@missing, $db);
+			&$second_print(&text('delete_mysqlmissing', $db));
+			$failed++;
+			}
+		@dbs = grep { $_ ne $db } @dbs;
+		}
+
+	# Drop permissions
+	foreach my $db (@dbnames) {
+		&revoke_mysql_database($d, $db);
+		}
+	}
+
+$d->{'db_mysql'} = join(" ", @dbs);
+if (!$failed) {
 	&$second_print($text{'setup_done'});
 	}
 }
