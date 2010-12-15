@@ -341,6 +341,7 @@ setup_edomain=Missing or invalid domain name - only letters, numbers and the dot
 setup_edomain2=Domain names cannot start or end with a .
 setup_esubdomain=Invalid sub-domain name - no dots are allowed
 setup_edomain4=You are already hosting this domain
+setup_edomainstar=A domain name cannot start with *. To create a wildcard domain, first create it without the * and then go to Server Configuration -&gt; Website Options.
 setup_eip=Missing or invalid IP address
 setup_eip6=Missing or invalid IPv6 address
 setup_evirtalloc=Could not allocate virtual IP address from range
