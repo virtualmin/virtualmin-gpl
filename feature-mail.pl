@@ -2662,11 +2662,10 @@ while(<UFILE>) {
 		# Check for possible DB username clashes
 		foreach my $dt (&unique(map { $_->{'type'} }
 					&domain_databases($_[0]))) {
-			local $dfunc = "list_all_".$dt."_users";
-			next if (!defined(&$dfunc));
-			local @dbusers = &$dfunc();
+			local $cfunc = "check_".$dt."_user_clash";
+			next if (!defined(&$cfunc));
 			local $ufunc = $dt."_username";
-			if (&indexof(&$ufunc($uinfo->{'user'}), @dbusers) >= 0){
+			if (&$cfunc($_[0], &$ufunc($uinfo->{'user'}))) {
 				# Clash found! Don't create this DB type login
 				@{$uinfo->{'dbs'}} =
 					grep { $_->{'type'} ne $dt }

@@ -156,8 +156,7 @@ local ($d) = @_;
 &require_mysql();
 
 # Get the domain's users, so we can remove their MySQL logins
-# XXX needs to support remote servers
-#local @users = &list_domain_users($d, 1, 1, 1, 0);
+local @users = &list_domain_users($d, 1, 1, 1, 0);
 
 # First remove the databases
 if ($d->{'db_mysql'}) {
@@ -818,6 +817,11 @@ if (!$_[2]) {
 	eval {
 		# Make sure DBI errors don't cause a total failure
 		local $main::error_must_die = 1;
+		if ($d->{'provision_mysql'}) {
+			# Stop supports_views from trying to access the
+			# 'mysql' DB
+			$mysql::supports_views_cache = 0;
+			}
 		@tables = &mysql::list_tables($_[1], 1);
 		};
 	}
@@ -826,12 +830,22 @@ return ($size, scalar(@tables), $qsize);
 
 # check_mysql_database_clash(&domain, dbname)
 # Check if some MySQL database already exists
-# XXX provisioning support
 sub check_mysql_database_clash
 {
+local ($d, $name) = @_;
 &require_mysql();
-local @dblist = &mysql::list_databases();
-return 1 if (&indexof($_[1], @dblist) >= 0);
+if ($d->{'provision_mysql'}) {
+	# Check on provisioning server
+	my ($ok, $msg) = &provision_api_call(
+		"check-mysql-database", { 'database' => $name });
+	&error(&text('provision_emysqldbcheck', $msg)) if (!$ok);
+	return $msg =~ /host=/ ? 1 : 0;
+	}
+else {
+	# Check locally
+	local @dblist = &mysql::list_databases();
+	return &indexof($name, @dblist) >= 0 ? 1 : 0;
+	}
 }
 
 # create_mysql_database(&domain, dbname, &opts)
@@ -1059,22 +1073,50 @@ sub list_mysql_database_users
 {
 local ($d, $db) = @_;
 &require_mysql();
-local $qdb = &quote_mysql_database($db);
-local $d = &mysql::execute_sql($mysql::master_db, "select user.user,user.password from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
-local (@rv, %done);
-foreach my $u (@{$d->{'data'}}) {
-	push(@rv, $u) if (!$done{$u->[0]}++);
+if ($d->{'provision_mysql'}) {
+	# Fetch from provisioning server
+	my $info = { 'host' => $mysql::config{'host'},
+		     'database' => $db };
+	my ($ok, $msg) = &provision_api_call(
+		"list-provision-mysql-users", $info, 1);
+	&error($msg) if (!$ok);
+	my @rv;
+	foreach my $u (@$msg) {
+		push(@rv, [ $u->{'name'}, $u->{'values'}->{'pass'} ]);
+		}
+	return @rv;
 	}
-return @rv;
+else {
+	# Query local MySQL server
+	local $qdb = &quote_mysql_database($db);
+	local $d = &mysql::execute_sql($mysql::master_db, "select user.user,user.password from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
+	local (@rv, %done);
+	foreach my $u (@{$d->{'data'}}) {
+		push(@rv, $u) if (!$done{$u->[0]}++);
+		}
+	return @rv;
+	}
 }
 
-# list_all_mysql_users()
-# Returns a list of all MySQL usernames
-sub list_all_mysql_users
+# check_mysql_user_clash(&domain, username)
+# Returns 1 if some user exists on the MySQL server
+sub check_mysql_user_clash
 {
+local ($d, $user) = @_;
 &require_mysql();
-local $d = &mysql::execute_sql($mysql::master_db, "select user from user");
-return &unique(map { $_->[0] } @{$d->{'data'}});
+if ($d->{'provision_mysql'}) {
+	# Query provisioning server
+	my ($ok, $msg) = &provision_api_call(
+		"check-mysql-login", { 'user' => $user });
+	&error(&text('provision_emysqlcheck', $msg)) if (!$ok);
+	return $msg =~ /host=/ ? 1 : 0;
+	}
+else {
+	# Check locally
+	local $rv = &mysql::execute_sql($mysql::master_db,
+		"select user from user where user = ?", $user);
+	return @{$rv->{'data'}} ? 1 : 0;
+	}
 }
 
 # create_mysql_database_user(&domain, &dbs, username, password, [mysql-pass])
@@ -1083,21 +1125,42 @@ sub create_mysql_database_user
 {
 local ($d, $dbs, $user, $pass, $encpass) = @_;
 &require_mysql();
-local $myuser = &mysql_username($user);
-local @hosts = &get_mysql_hosts($d);
-local $qpass = &mysql_escape($pass);
-local $h;
-local $cfunc = sub {
-	foreach $h (@hosts) {
-		&mysql::execute_sql_logged($mysql::master_db, "insert into user (host, user, password) values ('$h', '$myuser', ".($encpass ? "'$encpass'" : "$password_func('$qpass')").")");
-		local $db;
-		foreach $db (@$dbs) {
-			&add_db_table($h, $db, $myuser);
-			}
+if ($d->{'provision_mysql'}) {
+	# Create on provisioning server
+	my $info = { 'user' => $user };
+	if ($encpass) {
+		$info->{'encpass'} = $encpass;
 		}
-	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
-	};
-&execute_for_all_mysql_servers($cfunc);
+	else {
+		$info->{'pass'} = $pass;
+		}
+	local @hosts = map { &to_ipaddress($_) } &get_mysql_hosts($d, 1);
+	$info->{'remote'} = \@hosts;
+	$info->{'database'} = $dbs;
+	my ($ok, $msg) = &provision_api_call(
+		"provision-mysql-login", $info, 0);
+	if (!$ok) {
+		&error(&text('setup_emysqluser_provision', $msg));
+		}
+	}
+else {
+	# Create locally
+	local $myuser = &mysql_username($user);
+	local @hosts = &get_mysql_hosts($d);
+	local $qpass = &mysql_escape($pass);
+	local $h;
+	local $cfunc = sub {
+		foreach $h (@hosts) {
+			&mysql::execute_sql_logged($mysql::master_db, "insert into user (host, user, password) values ('$h', '$myuser', ".($encpass ? "'$encpass'" : "$password_func('$qpass')").")");
+			local $db;
+			foreach $db (@$dbs) {
+				&add_db_table($h, $db, $myuser);
+				}
+			}
+		&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
+		};
+	&execute_for_all_mysql_servers($cfunc);
+	}
 }
 
 # delete_mysql_database_user(&domain, username)
@@ -1385,6 +1448,7 @@ if ($mysql::mysql_version >= 4.1) {
 
 # creation_form_mysql(&domain)
 # Returns options for a new mysql database
+# XXX provisioning support
 sub creation_form_mysql
 {
 &require_mysql();
@@ -1580,6 +1644,7 @@ else {
 # list_mysql_collation_orders()
 # Returns a list of supported collation orders. Each row is an array ref of
 # a code and character set it can work with.
+# XXX provisioning support
 sub list_mysql_collation_orders
 {
 &require_mysql();
@@ -1598,10 +1663,18 @@ sub validate_database_name_mysql
 local ($d, $dbname) = @_;
 $dbname =~ /^[a-z0-9\_\-]+$/i && $dbname =~ /^[a-z]/i ||
 	return $text{'database_ename'};
-&require_mysql();
-local @str = &mysql::table_structure($mysql::master_db, "db");
-local ($dbcol) = grep { lc($_->{'field'}) eq 'db' } @str;
-local $maxlen = $dbcol && $dbcol->{'type'} =~ /\((\d+)\)/ ? $1 : 64;
+local $maxlen;
+if ($d->{'provision_mysql'}) {
+	# Just assume that the DB name max is 64 chars
+	$maxlen = 64;
+	}
+else {
+	# Get the DB name max from the mysql.db table
+	&require_mysql();
+	local @str = &mysql::table_structure($mysql::master_db, "db");
+	local ($dbcol) = grep { lc($_->{'field'}) eq 'db' } @str;
+	$maxlen = $dbcol && $dbcol->{'type'} =~ /\((\d+)\)/ ? $1 : 64;
+	}
 length($dbname) <= $maxlen ||
 	return &text('database_enamelen', $maxlen);
 return undef;
@@ -1621,6 +1694,29 @@ if ($tmpl->{'mysql_collate'} && $tmpl->{'mysql_collate'} ne 'none') {
 	$opts{'collate'} = $tmpl->{'mysql_collate'};
 	}
 return \%opts;
+}
+
+# list_all_mysql_databases([&domain])
+# Returns the names of all known MySQL databases
+sub list_all_mysql_databases
+{
+local ($d) = @_;
+local $prov = $d ? $d->{'provision_mysql'} : $config{'provision_mysql'};
+&require_mysql();
+if ($prov) {
+	# From provisioning server
+	local $info = { 'feature' => 'mysqldb' };
+	my ($ok, $msg) = &provision_api_call(
+		"list-provision-history", $info, 1);
+	if (!$ok) {
+		&error($msg);
+		}
+	return map { $_->{'values'}->{'mysql_database'}->[0] } @$msg;
+	}
+else {
+	# Local list
+	return &mysql::list_databases();
+	}
 }
 
 $done_feature_script{'mysql'} = 1;

@@ -2069,11 +2069,10 @@ if ($d && @{$user->{'dbs'}} && (!$old || !@{$old->{'dbs'}})) {
 		}
 	# Check for username clash
 	foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
-		local $dfunc = "list_all_".$dt."_users";
-		next if (!defined(&$dfunc));
-		local @dbusers = &$dfunc();
+		local $cfunc = "check_".$dt."_user_clash";
+		next if (!defined(&$cfunc));
 		local $ufunc = $dt."_username";
-		if (&indexof(&$ufunc($user->{'user'}), @dbusers) >= 0) {
+		if (&$cfunc($d, &$ufunc($user->{'user'}))) {
 			# Found a clash!
 			return $text{'user_edbclash'};
 			}
@@ -8220,6 +8219,7 @@ local @dbs;
 if ($_[0]->{'mysql'}) {
 	local %done;
 	local $av = &foreign_available("mysql");
+	&require_mysql();
 	foreach my $db (split(/\s+/, $_[0]->{'db_mysql'})) {
 		next if ($done{$db}++);
 		push(@dbs, { 'name' => $db,
@@ -8227,12 +8227,14 @@ if ($_[0]->{'mysql'}) {
 			     'users' => 1,
 			     'link' => $av ? "../mysql/edit_dbase.cgi?db=$db"
 					   : undef,
-			     'desc' => $text{'databases_mysql'} });
+			     'desc' => $text{'databases_mysql'},
+			     'host' => $mysql::config{'host'}, });
 		}
 	}
 if ($_[0]->{'postgres'}) {
 	local %done;
 	local $av = &foreign_available("postgresql");
+	&require_postgres();
 	foreach my $db (split(/\s+/, $_[0]->{'db_postgres'})) {
 		next if ($done{$db}++);
 		push(@dbs, { 'name' => $db,
@@ -8240,7 +8242,8 @@ if ($_[0]->{'postgres'}) {
 			     'link' => $av ? "../postgresql/".
 					     "edit_dbase.cgi?db=$db"
 					   : undef,
-			     'desc' => $text{'databases_postgres'} });
+			     'desc' => $text{'databases_postgres'},
+			     'host' => $postgresql::config{'host'}, });
 		}
 	}
 foreach my $f (&list_database_plugins()) {
@@ -8257,6 +8260,7 @@ return @dbs;
 # all_databases([&domain])
 # Returns a list of all known databases on the system, possibly limited to
 # those relevant for some domain.
+# XXX provisioning
 sub all_databases
 {
 local ($d) = @_;
@@ -8267,7 +8271,7 @@ if ($config{'mysql'} && (!$d || $d->{'mysql'})) {
 			  'type' => 'mysql',
 			  'desc' => $text{'databases_mysql'},
 			  'special' => $_ eq "mysql" } }
-		      &mysql::list_databases());
+		      &list_all_mysql_databases($d));
 	}
 if ($config{'postgres'} && (!$d || $d->{'postgres'})) {
 	&require_postgres();
@@ -8275,7 +8279,7 @@ if ($config{'postgres'} && (!$d || $d->{'postgres'})) {
 			  'type' => 'postgres',
 			  'desc' => $text{'databases_postgres'},
 			  'special' => ($_ =~ /^template/i) } }
-		      &postgresql::list_databases());
+		      &list_all_postgres_databases($d));
 	}
 foreach my $f (&list_database_plugins()) {
 	if (!$d || $d->{$f}) {
@@ -8300,7 +8304,7 @@ return ( $config{'mysql'} ? ("mysql") : ( ),
 sub resync_all_databases
 {
 local ($d, $all) = @_;
-return ( ) if (!@$all);		# If no DBs were found on the system, do nothing
+return if (!@$all);		# If no DBs were found on the system, do nothing
 				# to avoid mass dis-association
 local %all = map { ("$_->{'type'} $_->{'name'}", $_) } @$all;
 local $removed = 0;

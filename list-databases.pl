@@ -69,6 +69,9 @@ if ($multi) {
 			print "    Byte size: ",$size,"\n";
 			}
 		print "    Tables: $tables\n";
+		if ($db->{'host'}) {
+			print "    Host: $db->{'host'}\n";
+			}
 
 		# Show scripts that use it
 		@slist = ( );

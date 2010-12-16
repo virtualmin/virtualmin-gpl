@@ -726,6 +726,14 @@ if ($tmpl->{'postgres_encoding'} &&
 return \%opts;
 }
 
+# list_all_postgres_databases([&domain])
+# Returns the names of all known databases
+sub list_all_postgres_databases
+{
+&require_postgres();
+return &postgresql::list_databases();
+}
+
 $done_feature_script{'postgres'} = 1;
 
 1;
