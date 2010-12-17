@@ -496,7 +496,6 @@ else {
 
 # mysql_user_exists(&domain)
 # Returns his password if a mysql user exists for the domain's user, or undef
-# XXX provisioning?
 sub mysql_user_exists
 {
 &require_mysql();
@@ -551,6 +550,7 @@ return 0;
 
 # backup_mysql(&domain, file)
 # Dumps this domain's mysql database to a backup file
+# XXX provisioning support
 sub backup_mysql
 {
 &require_mysql();
@@ -608,6 +608,7 @@ return $ok;
 # restore_mysql(&domain, file,  &opts, &allopts, homeformat, &oldd, asowner)
 # Restores this domain's mysql database from a backup file, and re-creates
 # the mysql user.
+# XXX provisioning support
 sub restore_mysql
 {
 local %info;
@@ -1170,50 +1171,90 @@ sub delete_mysql_database_user
 local ($d, $user) = @_;
 &require_mysql();
 local $myuser = &mysql_username($user);
-local $dfunc = sub {
-	&mysql::execute_sql_logged($mysql::master_db, "delete from user where user = '$myuser'");
-	&mysql::execute_sql_logged($mysql::master_db, "delete from db where user = '$myuser'");
-	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
-	};
-&execute_for_all_mysql_servers($dfunc);
+if ($d->{'provision_mysql'}) {
+	# Delete on provisioning server
+	my $info = { 'user' => $myuser,
+		     'host' => $mysql::config{'host'} };
+	my ($ok, $msg) = &provision_api_call(
+		"unprovision-mysql-login", $info, 0);
+	&error($msg) if (!$ok);
+	}
+else {
+	# Delete locally
+	local $dfunc = sub {
+		&mysql::execute_sql_logged($mysql::master_db,
+			"delete from user where user = ?", $myuser);
+		&mysql::execute_sql_logged($mysql::master_db,
+			"delete from db where user = ?", $myuser);
+		&mysql::execute_sql_logged($mysql::master_db,
+			"flush privileges");
+		};
+	&execute_for_all_mysql_servers($dfunc);
+	}
 }
 
 # modify_mysql_database_user(&domain, &olddbs, &dbs, oldusername, username,
 #			     [password])
 # Renames or changes the password for a database user, and his list of allowed
 # mysql databases
+# XXX provisioning support
 sub modify_mysql_database_user
 {
 local ($d, $olddbs, $dbs, $olduser, $user, $pass) = @_;
 &require_mysql();
 local $myuser = &mysql_username($user);
-local $mfunc = sub {
+	local $myolduser = &mysql_username($olduser);
+if ($d->{'provision_mysql'}) {
+	# Update on provisioning server
+	my $info = { 'user' => $myolduser };
 	if ($olduser ne $user) {
-		# Change the username
-		local $myolduser = &mysql_username($olduser);
-		&mysql::execute_sql_logged($mysql::master_db, "update user set user = '$myuser' where user = '$myolduser'");
-		&mysql::execute_sql_logged($mysql::master_db, "update db set user = '$myuser' where user = '$myolduser'");
+		$info->{'new-user'} = $myuser;
 		}
 	if (defined($pass)) {
-		# Change the password
-		local $qpass = &mysql_escape($pass);
-		&mysql::execute_sql_logged($mysql::master_db, "update user set password = $password_func('$qpass') where user = '$myuser'");
+		$info->{'pass'} = $pass;
 		}
-	if (join(" ", @$dbs) ne join(" ", @$olddbs)) {
-		# Update accessible database list
-		local @hosts = &get_mysql_hosts($d);
-		&mysql::execute_sql_logged($mysql::master_db, "delete from db where user = '$myuser'");
-		local $h;
-		foreach $h (@hosts) {
-			local $db;
-			foreach $db (@$dbs) {
-				&add_db_table($h, $db, $myuser);
+	# XXX update DB list
+	if (keys %$info > 1) {
+		my ($ok, $msg) = &provision_api_call(
+			"modify-mysql-login", $info, 0);
+		&error($msg) if (!$ok);
+		}
+	}
+else {
+	# Update locally
+	local $mfunc = sub {
+		if ($olduser ne $user) {
+			# Change the username
+			&mysql::execute_sql_logged($mysql::master_db,
+				"update user set user = ? where user = ?",
+				$myuser, $myolduser);
+			&mysql::execute_sql_logged($mysql::master_db,
+				"update db set user = ? where user = ?",
+				$myuser, $myolduser);
+			}
+		if (defined($pass)) {
+			# Change the password
+			&mysql::execute_sql_logged($mysql::master_db,
+				"update user set password = $password_func(?) ".
+				"where user = ?", $pass, $myuser);
+			}
+		if (join(" ", @$dbs) ne join(" ", @$olddbs)) {
+			# Update accessible database list
+			local @hosts = &get_mysql_hosts($d);
+			&mysql::execute_sql_logged($mysql::master_db,
+				"delete from db where user = ?", $myuser);
+			local $h;
+			foreach $h (@hosts) {
+				local $db;
+				foreach $db (@$dbs) {
+					&add_db_table($h, $db, $myuser);
+					}
 				}
 			}
-		}
-	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
-	};
-&execute_for_all_mysql_servers($mfunc);
+		&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
+		};
+	&execute_for_all_mysql_servers($mfunc);
+	}
 }
 
 # list_mysql_tables(database)
@@ -1374,7 +1415,7 @@ if ($mysql::mysql_version >= 4.1) {
 		    ( [ "", "&lt;$text{'tmpl_mysql_charsetdef'}&gt;" ] ),
 		  [ "none", "&lt;$text{'tmpl_mysql_charsetnone'}&gt;" ],
 		  map { [ $_->[0], $_->[0]." (".$_->[1].")" ] }
-		      &mysql::list_character_sets() ]));
+		      &list_mysql_character_sets() ]));
 	}
 
 if ($mysql::mysql_version >= 5) {
@@ -1448,7 +1489,6 @@ if ($mysql::mysql_version >= 4.1) {
 
 # creation_form_mysql(&domain)
 # Returns options for a new mysql database
-# XXX provisioning support
 sub creation_form_mysql
 {
 &require_mysql();
@@ -1457,7 +1497,7 @@ if ($mysql::mysql_version >= 4.1) {
 	local $tmpl = &get_template($_[0]->{'template'});
 
 	# Character set
-	local @charsets = &mysql::list_character_sets();
+	local @charsets = &list_mysql_character_sets();
 	local $cs = $tmpl->{'mysql_charset'};
 	$cs = "" if ($cs eq "none");
 	$rv .= &ui_table_row($text{'database_charset'},
@@ -1644,16 +1684,53 @@ else {
 # list_mysql_collation_orders()
 # Returns a list of supported collation orders. Each row is an array ref of
 # a code and character set it can work with.
-# XXX provisioning support
 sub list_mysql_collation_orders
 {
 &require_mysql();
 local @rv;
-if ($mysql::mysql_version >= 5) {
-	local $d = &mysql::execute_sql($mysql::master_db, "show collation");
-	@rv = map { [ $_->[0], $_->[1] ] } @{$d->{'data'}};
+if ($config{'provision_mysql'}) {
+	if ($mysql::config{'host'}) {
+		# Query provisioning DB system
+		local $d = &mysql::execute_sql(
+			"information_schema", "show collation");
+		@rv = map { [ $_->[0], $_->[1] ] } @{$d->{'data'}};
+		}
+	else {
+		# No MySQL host yet
+		@rv = ( );
+		}
+	}
+else {
+	# Query local DB
+	if ($mysql::mysql_version >= 5) {
+		local $d = &mysql::execute_sql(
+			$mysql::master_db, "show collation");
+		@rv = map { [ $_->[0], $_->[1] ] } @{$d->{'data'}};
+		}
 	}
 return sort { lc($a->[0]) cmp lc($b->[0]) } @rv;
+}
+
+# list_mysql_character_sets()
+# Returns a list of supported character sets. Each row is an array ref of
+# a code and character set name
+sub list_mysql_character_sets
+{
+&require_mysql();
+if ($config{'provision_mysql'}) {
+	if ($mysql::config{'host'}) {
+		# Query provisioning DB system
+		return &mysql::list_character_sets("information_schema");
+		}
+	else {
+		# No MySQL host yet
+		return ( );
+		}
+	}
+else {
+	# Query local DB
+	return &mysql::list_character_sets();
+	}
 }
 
 # validate_database_name_mysql(&domain, name)
