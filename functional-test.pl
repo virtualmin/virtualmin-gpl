@@ -134,6 +134,7 @@ $rename_prefix = &compute_prefix($test_rename_domain, $test_rename_domain_user,
 		 'template' => &get_init_template() );
 $test_full_user = &userdom_name($test_user, \%test_domain);
 ($test_target_domain_user) = &unixuser_name($test_target_domain);
+$test_target_domain_db = 'targetdb';
 $test_domain_home = $test_domain{'home'} =
 	&server_home_directory(\%test_domain);
 $test_domain_db = &database_name(\%test_domain);
@@ -1064,6 +1065,7 @@ $move_tests = [
 		      [ 'desc', 'Test target domain' ],
 		      [ 'pass', 'spod' ],
 		      [ 'dir' ], [ 'unix' ], [ 'mysql' ],
+		      [ 'db', $test_target_domain_db ],
 		      @create_args, ],
         },
 
@@ -1102,13 +1104,17 @@ $move_tests = [
 	  'grep' => 'Test home page',
 	},
 
-	# Check MySQL login under new owner
+	# Check MySQL login under new owner to the moved DB
 	{ 'command' => 'mysql -u '.$test_target_domain_user.' -pspod '.$test_domain_db.' -e "select version()"',
 	},
 
-	# Make sure MySQL is gone under old owner
+	# Make sure MySQL is gone under old owner to the moved DB
 	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.' -e "select version()"',
 	  'fail' => 1,
+	},
+
+	# Make sure MySQL still works for the new owner's own DB
+	{ 'command' => 'mysql -u '.$test_target_domain_user.' -pspod '.$test_target_domain_db.' -e "select version()"',
 	},
 
 	# Make sure the parent domain and user are correct
@@ -1155,6 +1161,10 @@ $move_tests = [
 
 	# Make sure MySQL is back
 	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.' -e "select version()"',
+	},
+
+	# Make sure MySQL still works for the old owner's own DB
+	{ 'command' => 'mysql -u '.$test_target_domain_user.' -pspod '.$test_target_domain_db.' -e "select version()"',
 	},
 
 	# Make sure the parent domain and user are correct

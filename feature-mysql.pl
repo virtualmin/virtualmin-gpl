@@ -245,9 +245,10 @@ local $olduser = &mysql_user($oldd);
 local $user = &mysql_user($d, $changeduser);
 local $oldencpass = &encrypted_mysql_pass($oldd);
 local $encpass = &encrypted_mysql_pass($d);
-if ($encpass ne $oldencpass && !$d->{'parent'} &&
+if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
     (!$tmpl->{'mysql_nopass'} || $d->{'mysql_pass'})) {
-	# Change MySQL password
+	# Change MySQL password, for a top-level server that isn't being
+	# converted from a sub-server
 	&$first_print($text{'save_mysqlpass'});
 	if (&mysql_user_exists($d)) {
 		local $pfunc = sub {
