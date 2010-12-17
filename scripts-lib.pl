@@ -747,7 +747,7 @@ if ($ver) {
 	local ($vercmd) = grep { $_->[1] == $ver } @cmds;
 	return -1 if (!$vercmd);
 	}
-if (!length(@php_pear_modules)) {
+if (!scalar(@php_pear_modules)) {
 	@php_pear_modules = &php_pear::list_installed_pear_modules();
 	}
 local ($got) = grep { $_->{'name'} eq $mod &&
@@ -1603,7 +1603,7 @@ sub capture_http_headers
 if ($_[0] == 4) {
 	$post_http_headers = %WebminCore::header ?
 				\%WebminCore::header : \%header;
-	$post_http_headers_array = length(@WebminCore::header) ?
+	$post_http_headers_array = scalar(@WebminCore::header) ?
 				\@WebminCore::header : \@headers;
 	}
 }

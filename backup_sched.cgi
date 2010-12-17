@@ -124,7 +124,7 @@ else {
 		    join(",", map { $_."=".$options{$f}->{$_} }
 				  keys %{$options{$f}});
 		}
-	if (length(@vbs) && &can_backup_virtualmin()) {
+	if (scalar(@vbs) && &can_backup_virtualmin()) {
 		$sched->{'virtualmin'} = join(" ", @vbs);
 		}
 	if (!$in{'purge_def'}) {

@@ -1014,7 +1014,7 @@ local $tmpl = &get_template($d->{'template'});
 local $dd = &get_mysql_database_dir($dbname);
 if ($tmpl->{'mysql_chgrp'} && $dd && -d $dd) {
 	local @st = stat("$dd/../mysql");
-	local $group = length(@st) ? $st[5] : "mysql";
+	local $group = scalar(@st) ? $st[5] : "mysql";
 	&system_logged("chgrp -R $group ".quotemeta($dd));
 	}
 }

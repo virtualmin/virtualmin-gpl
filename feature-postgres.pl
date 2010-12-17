@@ -668,7 +668,7 @@ return $opts;
 # is a 2-element hash ref containing a code and description
 sub list_postgres_encodings
 {
-if (!length(@postgres_encodings_cache)) {
+if (!scalar(@postgres_encodings_cache)) {
 	@postgres_encodings_cache = ( );
 	&open_readfile(ENCS, "$module_root_directory/postgres-encodings");
 	while(<ENCS>) {
