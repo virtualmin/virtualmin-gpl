@@ -1071,7 +1071,7 @@ elsif ($config{'mail_system'} == 4) {
 	}
 elsif ($config{'mail_system'} == 5) {
 	# Use the valias program to get aliases for all domains
-	if (!defined(@vpopmail_aliases_cache)) {
+	if (!@vpopmail_aliases_cache) {
 		@vpopmail_aliases_cache = ( );
 
 		# Build up list of all domains

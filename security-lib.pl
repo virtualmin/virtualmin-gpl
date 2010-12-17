@@ -10,7 +10,7 @@ if ($d->{'parent'}) {
         }
 return 0 if (!$d->{'unix'});
 my @uinfo = getpwnam($d->{'user'});
-return defined(@uinfo) ? 1 : 0;
+return length(@uinfo) ? 1 : 0;
 }
 
 # switch_to_domain_user(&domain)

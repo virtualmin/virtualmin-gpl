@@ -63,7 +63,7 @@ sub list_domains
 {
 local (@rv, $d);
 local @files;
-if (defined(@main::list_domains_cache)) {
+if (length(@main::list_domains_cache)) {
 	# Use cache of domain IDs in RAM
 	@files = @main::list_domains_cache;
 	}
@@ -445,7 +445,7 @@ $d->{'lastsave'} = time();
 &write_file("$domains_dir/$d->{'id'}", $d);
 &unlock_file("$domains_dir/$d->{'id'}");
 $main::get_domain_cache{$d->{'id'}} = $d;
-if (defined(@main::list_domains_cache)) {
+if (length(@main::list_domains_cache)) {
 	@main::list_domains_cache =
 		&unique(@main::list_domains_cache, $d->{'id'});
 	}
@@ -504,7 +504,7 @@ if (-r $script_warnings_file) {
 
 # Remove from caches
 delete($main::get_domain_cache{$_[0]->{'id'}});
-if (defined(@main::list_domains_cache)) {
+if (length(@main::list_domains_cache)) {
 	@main::list_domains_cache = grep { $_ ne $_[0]->{'id'} }
 					 @main::list_domains_cache;
 	}
@@ -6851,7 +6851,7 @@ else {
 # top-level and sub-servers
 sub list_templates
 {
-if (defined(@list_templates_cache)) {
+if (length(@list_templates_cache)) {
 	# Use cached copy
 	return @list_templates_cache;
 	}
@@ -13290,7 +13290,7 @@ local $ENV{'REMOTE_HOST'} = $rh || "127.0.0.1";
 # Returns an array of hash refs containing global variable names and values
 sub get_global_template_variables
 {
-if (!defined(@global_template_variables_cache)) {
+if (!length(@global_template_variables_cache)) {
 	local @rv = ( );
 	&open_readfile(GLOBAL, $global_template_variables_file);
 	while(<GLOBAL>) {
