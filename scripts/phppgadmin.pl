@@ -19,7 +19,7 @@ return "A browser-based PostgreSQL database management interface.";
 # script_phppgadmin_versions()
 sub script_phppgadmin_versions
 {
-return ( "5.0" );
+return ( "5.0.1" );
 }
 
 sub script_phppgadmin_category
@@ -118,14 +118,14 @@ if ($ver <= 2.2) {
 	$ver = $ver."-php";
 	}
 local @files = ( { 'name' => "source",
-	   'file' => "phpPgAdmin-$ver.zip",
-	   'url' => "http://osdn.dl.sourceforge.net/sourceforge/phppgadmin/phpPgAdmin-$ver.zip" } );
+	   'file' => "phpPgAdmin-$ver.tar.gz",
+	   'url' => "http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-$ver.tar.gz" } );
 return @files;
 }
 
 sub script_phppgadmin_commands
 {
-return ("unzip");
+return ("tar", "gunzip");
 }
 
 # script_phppgadmin_install(&domain, version, &opts, &files, &upgrade-info)
