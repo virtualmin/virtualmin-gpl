@@ -887,6 +887,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		}
 	local %addrecs = map { $_ eq "@" ? $withdot : $_.".".$withdot, 1 }
 			     @addrecs;
+	delete($addrescs{'noneselected'});
 
 	# Add standard records we don't have yet
 	foreach my $n ($withdot, "www.$withdot", "ftp.$withdot", "m.$withdot") {
@@ -1870,7 +1871,8 @@ if ($in{"dns_mode"} == 2) {
 		}
 
 	# Save automatic A records
-	$tmpl->{'dns_records'} = join(" ", split(/\0/, $in{'dns_records'}));
+	$tmpl->{'dns_records'} = join(" ", split(/\0/, $in{'dns_records'})) ||
+				 'noneselected';
 
 	# Save additional nameservers
 	$in{'dnsns'} =~ s/\r//g;
