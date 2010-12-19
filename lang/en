@@ -751,6 +751,9 @@ user_awl=Manage auto-whitelist
 user_eloop=A user cannot forward email to his own address
 user_switch=Login to Usermin
 user_eswitch=You are not allowed to login to Usermin
+user_emysqlprov=Failed to update user on provisioning server : $1
+user_emysqllist=Failed to fetch users from provisioning server : $1
+user_emysqldelete=Failed to delete user on provisioning server : $1
 
 aliases_ecannot=You are not allowed to edit aliases in this domain
 aliases_title=Mail Aliases

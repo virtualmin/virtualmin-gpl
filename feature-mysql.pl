@@ -1081,7 +1081,7 @@ if ($d->{'provision_mysql'}) {
 		     'database' => $db };
 	my ($ok, $msg) = &provision_api_call(
 		"list-provision-mysql-users", $info, 1);
-	&error($msg) if (!$ok);
+	&error(&text('user_emysqllist', $msg)) if (!$ok);
 	my @rv;
 	foreach my $u (@$msg) {
 		push(@rv, [ $u->{'name'}, $u->{'values'}->{'pass'} ]);
@@ -1178,7 +1178,7 @@ if ($d->{'provision_mysql'}) {
 		     'host' => $mysql::config{'host'} };
 	my ($ok, $msg) = &provision_api_call(
 		"unprovision-mysql-login", $info, 0);
-	&error($msg) if (!$ok);
+	&error(&text('user_emysqldelete', $msg)) if (!$ok);
 	}
 else {
 	# Delete locally
@@ -1198,7 +1198,6 @@ else {
 #			     [password])
 # Renames or changes the password for a database user, and his list of allowed
 # mysql databases
-# XXX provisioning support
 sub modify_mysql_database_user
 {
 local ($d, $olddbs, $dbs, $olduser, $user, $pass) = @_;
@@ -1207,18 +1206,21 @@ local $myuser = &mysql_username($user);
 	local $myolduser = &mysql_username($olduser);
 if ($d->{'provision_mysql'}) {
 	# Update on provisioning server
-	my $info = { 'user' => $myolduser };
+	my $info = { 'user' => $myolduser,
+		     'host' => $mysql::config{'host'} };
 	if ($olduser ne $user) {
 		$info->{'new-user'} = $myuser;
 		}
 	if (defined($pass)) {
 		$info->{'pass'} = $pass;
 		}
-	# XXX update DB list
+	if (join(" ", @$dbs) ne join(" ", @$olddbs)) {
+		$info->{'database'} = join("\0", @$dbs);
+		}
 	if (keys %$info > 1) {
 		my ($ok, $msg) = &provision_api_call(
 			"modify-mysql-login", $info, 0);
-		&error($msg) if (!$ok);
+		&error(&text('user_emysqlprov', $msg)) if (!$ok);
 		}
 	}
 else {
