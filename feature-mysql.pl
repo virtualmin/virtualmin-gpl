@@ -551,7 +551,6 @@ return 0;
 
 # backup_mysql(&domain, file)
 # Dumps this domain's mysql database to a backup file
-# XXX provisioning support
 sub backup_mysql
 {
 &require_mysql();
@@ -559,7 +558,7 @@ sub backup_mysql
 # Find all domain's databases
 local $tmpl = &get_template($_[0]->{'template'});
 local $wild = &substitute_domain_template($tmpl->{'mysql_wild'}, $_[0]);
-local @alldbs = &mysql::list_databases();
+local @alldbs = &list_all_mysql_databases($_[0]);
 local @dbs;
 if ($wild) {
 	$wild =~ s/\%/\.\*/g;
@@ -1543,13 +1542,27 @@ sub get_mysql_allowed_hosts
 {
 local ($d) = @_;
 &require_mysql();
-local $data = &mysql::execute_sql($mysql::master_db, "select distinct host from user where user = ?", &mysql_user($d));
-return map { $_->[0] } @{$data->{'data'}};
+if ($d->{'provision_mysql'}) {
+	# Query provisioning server
+	my $info = { 'host' => $mysql::config{'host'},
+		     'user' => &mysql_user($d) };
+	my ($ok, $msg) = &provision_api_call(
+		"list-provision-mysql-users", $info, 1);
+	&error(&text('user_emysqllist', $msg)) if (!$ok);
+	return split(/\s+/, $msg->[0]->{'values'}->{'hosts'});
+	}
+else {
+	# Get from local DB
+	local $data = &mysql::execute_sql($mysql::master_db,
+	    "select distinct host from user where user = ?", &mysql_user($d));
+	return map { $_->[0] } @{$data->{'data'}};
+	}
 }
 
 # save_mysql_allowed_hosts(&domain, &hosts)
 # Sets the list of hosts from which this domain's MySQL user can connect.
 # Returns undef on success, or an error message on failure.
+# XXX provisioning support
 sub save_mysql_allowed_hosts
 {
 local ($d, $hosts) = @_;

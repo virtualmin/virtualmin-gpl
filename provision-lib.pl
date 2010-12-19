@@ -67,8 +67,12 @@ if ($err) {
 	return (0, $err);
 	}
 if ($out =~ /^ERROR:\s+(.*)/) {
-	# Command failed
+	# Command reported failure
 	return (0, $1);
+	}
+elsif ($out =~ /Exit\s+status:\s+(\d+)/ && $1 != 0) {
+	# Command failed
+	return (0, "$cmd failed : $out");
 	}
 if ($multiline) {
 	# Parse perl format
