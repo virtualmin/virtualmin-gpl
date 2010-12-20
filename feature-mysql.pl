@@ -179,9 +179,13 @@ if ($d->{'provision_mysql'}) {
 			&$second_print($text{'setup_done'});
 			}
 		}
-
 	# Take away access from mailbox users
-	# XXX
+	foreach my $u (@users) {
+		my @mydbs = grep { $_->{'type'} eq 'mysql' } @{$u->{'dbs'}};
+		if (@mydbs) {
+			&delete_mysql_database_user($d, $u->{'user'});
+			}
+		}
 	}
 else {
 	# Remove the main user locally
@@ -1548,7 +1552,7 @@ if ($d->{'provision_mysql'}) {
 	my ($ok, $msg) = &provision_api_call(
 		"list-provision-mysql-users", $info, 1);
 	&error(&text('user_emysqllist', $msg)) if (!$ok);
-	return split(/\s+/, $msg->[0]->{'values'}->{'hosts'});
+	return split(/\s+/, $msg->[0]->{'values'}->{'hosts'}->[0]);
 	}
 else {
 	# Get from local DB
@@ -1561,7 +1565,6 @@ else {
 # save_mysql_allowed_hosts(&domain, &hosts)
 # Sets the list of hosts from which this domain's MySQL user can connect.
 # Returns undef on success, or an error message on failure.
-# XXX provisioning support
 sub save_mysql_allowed_hosts
 {
 local ($d, $hosts) = @_;
