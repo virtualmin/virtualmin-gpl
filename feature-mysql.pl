@@ -249,6 +249,8 @@ local $olduser = &mysql_user($oldd);
 local $user = &mysql_user($d, $changeduser);
 local $oldencpass = &encrypted_mysql_pass($oldd);
 local $encpass = &encrypted_mysql_pass($d);
+local @dbnames = map { $_->{'name'} } &domain_databases($d, [ "mysql" ]);
+
 if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
     (!$tmpl->{'mysql_nopass'} || $d->{'mysql_pass'})) {
 	# Change MySQL password, for a top-level server that isn't being
@@ -307,14 +309,19 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 	local $pfunc = sub {
 		local $h;
 		foreach $h (@hosts) {
-			&mysql::execute_sql_logged($mysql::master_db, "insert into user (host, user, password) values ('$h', '$user', $encpass)");
+			&mysql::execute_sql_logged($mysql::master_db,
+				"insert into user (host, user, password) ".
+				"values (?, ?, ?)", $h, $user, $encpass);
 			if ($wild && $wild ne $d->{'db'}) {
 				&add_db_table($h, $wild, $user);
 				}
 			}
-		foreach my $db (&domain_databases($d, [ "mysql" ])) {
-			local $qdb = &quote_mysql_database($db->{'name'});
-			&mysql::execute_sql_logged($mysql::master_db, "update db set user = '$user' where user = '$olduser' and (db = '$db->{'name'}' or db = '$qdb')");
+		foreach my $db (@dbnames) {
+			local $qdb = &quote_mysql_database($db);
+			&mysql::execute_sql_logged($mysql::master_db,
+				"update db set user = ? where user = ? and ".
+				"(db = ? or db = ?)",
+				$user, $olduser, $db, $qdb);
 			}
 		&mysql::execute_sql_logged($mysql::master_db,
 					   'flush privileges');
@@ -379,20 +386,56 @@ elsif ($user ne $olduser && !$d->{'parent'}) {
 			}
 		}
 	}
-elsif ($user ne $olduser && $d->{'parent'}) {
+elsif ($user ne $olduser && $d->{'parent'} && @dbnames) {
 	# Sub-server has moved to a new user .. change ownership of DBs
-	# XXX
-	&$first_print($text{'save_mysqluser2'});
-	local $pfunc = sub {
-		foreach my $db (&domain_databases($d, [ "mysql" ])) {
-			local $qdb = &quote_mysql_database($db->{'name'});
-			&mysql::execute_sql_logged($mysql::master_db, "update db set user = '$user' where user = '$olduser' and (db = '$db->{'name'}' or db = '$qdb')");
+	if ($d->{'provision_mysql'}) {
+		# Change on provisioning server, by removing DBs from the old
+		# owner's list, and added to new owner's list
+		&$first_print($text{'save_mysqluser2_provision'});
+		my $info = { 'user' => $olduser,
+			     'host' => $mysql::config{'host'},
+			     'remove-database' => \@dbnames };
+		my ($ok, $msg) = &provision_api_call(
+			"modify-mysql-login", $info, 0);
+		if (!$ok) {
+			&$second_print(
+				&text('save_emysqluser2_provision', $msg));
 			}
-		&mysql::execute_sql_logged($master_db, 'flush privileges');
-		};
-	&execute_for_all_mysql_servers($pfunc);
-	$rv++;
-	&$second_print($text{'setup_done'});
+		else {
+			# Add databases back to the new owner
+			my $info = { 'user' => $user,
+				     'host' => $mysql::config{'host'},
+				     'add-database' => \@dbnames };
+			my ($ok, $msg) = &provision_api_call(
+				"modify-mysql-login", $info, 0);
+			if (!$ok) {
+				&$second_print(
+				    &text('save_emysqluser2_provision2', $msg));
+				}
+			else {
+				&$second_print($text{'setup_done'});
+				}
+			}
+		$rv++;
+		}
+	else {
+		# Change locally
+		&$first_print($text{'save_mysqluser2'});
+		local $pfunc = sub {
+			foreach my $db (@dbnames) {
+				local $qdb = &quote_mysql_database($db);
+				&mysql::execute_sql_logged($mysql::master_db,
+				    "update db set user = ? where user = ? ".
+				    "and (db = ? or db = ?)",
+				    $user, $olduser, $db, $qdb);
+				}
+			&mysql::execute_sql_logged($master_db,
+				'flush privileges');
+			};
+		&execute_for_all_mysql_servers($pfunc);
+		$rv++;
+		&$second_print($text{'setup_done'});
+		}
 	}
 
 if ($d->{'group'} ne $oldd->{'group'} && $tmpl->{'mysql_chgrp'}) {
@@ -957,11 +1000,9 @@ local ($d, $dbname) = @_;
 
 if ($d->{'provision_mysql'}) {
 	# Call remote API to grant access
-	local @dbs = map { $_->{'name'} } &domain_databases($d, [ 'mysql' ]);
-	push(@dbs, $dbname);
 	my $info = { 'user' => &mysql_user($d),
 		     'host' => $mysql::config{'host'},
-		     'database' => \@dbs };
+		     'add-database' => $dbname };
 	my ($ok, $msg) = &provision_api_call("modify-mysql-login", $info, 0);
 	&error(&text('user_emysqlprov', $msg)) if (!$ok);
 	}
