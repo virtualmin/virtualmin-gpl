@@ -236,7 +236,6 @@ else {
 
 # modify_mysql(&domain, &olddomain)
 # Changes the mysql user's password if needed
-# XXX provisioning support
 sub modify_mysql
 {
 local ($d, $oldd) = @_;
@@ -299,49 +298,156 @@ if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
 if (!$d->{'parent'} && $oldd->{'parent'}) {
 	# Server has been converted to a parent .. need to create user, and
 	# change access to old DBs
-	# XXX
-	&$first_print($text{'setup_mysqluser'});
 	$d->{'mysql_user'} = &mysql_user($d, 1);
 	local $user = $d->{'mysql_user'};
 	local @hosts = &get_mysql_hosts($d);
-	local $wild = &substitute_domain_template($tmpl->{'mysql_wild'}, $d);
-	local $encpass = &encrypted_mysql_pass($d);
-	local $pfunc = sub {
-		local $h;
-		foreach $h (@hosts) {
-			&mysql::execute_sql_logged($mysql::master_db,
-				"insert into user (host, user, password) ".
-				"values (?, ?, ?)", $h, $user, $encpass);
-			if ($wild && $wild ne $d->{'db'}) {
-				&add_db_table($h, $wild, $user);
+
+	if ($d->{'provision_mysql'}) {
+		# Change on provisioning server .. first create new user
+		&$first_print($text{'setup_mysqluser_provision'});
+		my $info = { 'user' => $user,
+			     'domain-owner' => '' };
+		if ($d->{'mysql_enc_pass'}) {
+			$info->{'encpass'} = $d->{'mysql_enc_pass'};
+			}
+		else {
+			$info->{'pass'} = &mysql_pass($d);
+			}
+		local @hosts = map { &to_ipaddress($_) } @hosts;
+		$info->{'remote'} = \@hosts;
+		my ($ok, $msg) = &provision_api_call(
+			"provision-mysql-login", $info, 0);
+		if (!$ok) {
+			&$second_print(
+				&text('setup_emysqluser_provision', $msg));
+			}
+
+		# Then take away DBs from old user
+		if ($ok && @dbnames) {
+			my $info = { 'user' => $olduser,
+				     'host' => $mysql::config{'host'},
+				     'remove-database' => \@dbnames };
+			($ok, $msg) = &provision_api_call(
+				"modify-mysql-login", $info, 0);
+			if (!$ok) {
+				&$second_print(
+				    &text('save_emysqluser2_provision', $msg));
 				}
 			}
-		foreach my $db (@dbnames) {
-			local $qdb = &quote_mysql_database($db);
-			&mysql::execute_sql_logged($mysql::master_db,
-				"update db set user = ? where user = ? and ".
-				"(db = ? or db = ?)",
-				$user, $olduser, $db, $qdb);
+
+		# Grant to new user
+		if ($ok && @dbnames) {
+			my $info = { 'user' => $user,
+				     'host' => $mysql::config{'host'},
+				     'add-database' => \@dbnames };
+			($ok, $msg) = &provision_api_call(
+				"modify-mysql-login", $info, 0);
+			if (!$ok) {
+				&$second_print(
+				    &text('save_emysqluser2_provision2', $msg));
+				}
 			}
-		&mysql::execute_sql_logged($mysql::master_db,
-					   'flush privileges');
-		};
-	&execute_for_all_mysql_servers($pfunc);
-	&$second_print($text{'setup_done'});
+
+		if ($ok) {
+			&$second_print($text{'setup_done'});
+			}
+		}
+	else {
+		# Change locally
+		&$first_print($text{'setup_mysqluser'});
+		local $wild = &substitute_domain_template(
+				$tmpl->{'mysql_wild'}, $d);
+		local $encpass = &encrypted_mysql_pass($d);
+		local $pfunc = sub {
+			local $h;
+			foreach $h (@hosts) {
+				&mysql::execute_sql_logged($mysql::master_db,
+				  "insert into user (host, user, password) ".
+				  "values (?, ?, ?)", $h, $user, $encpass);
+				if ($wild && $wild ne $d->{'db'}) {
+					&add_db_table($h, $wild, $user);
+					}
+				}
+			foreach my $db (@dbnames) {
+				local $qdb = &quote_mysql_database($db);
+				&mysql::execute_sql_logged($mysql::master_db,
+				  "update db set user = ? where user = ? and ".
+				  "(db = ? or db = ?)",
+				  $user, $olduser, $db, $qdb);
+				}
+			&mysql::execute_sql_logged($mysql::master_db,
+						   'flush privileges');
+			};
+		&execute_for_all_mysql_servers($pfunc);
+		&$second_print($text{'setup_done'});
+		}
+	$rv++;
 	}
 elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 	# Server has changed from parent to sub-server .. need to remove the
 	# old user and update all DB permissions
-	# XXX
-	&$first_print($text{'save_mysqluser'});
-	local $pfunc = sub {
-		&mysql::execute_sql_logged($mysql::master_db, "delete from user where user = '$olduser'");
-		&mysql::execute_sql_logged($mysql::master_db, "update db set user = '$user' where user = '$olduser'");
-		&mysql::execute_sql_logged($master_db, 'flush privileges');
-		};
-	&execute_for_all_mysql_servers($pfunc);
-	&$second_print($text{'setup_done'});
-	$rv++;
+	if ($d->{'provision_mysql'}) {
+		# Update on provisioning server .. first remove ownership
+		# of all DBs
+		&$first_print($text{'save_mysqluser_provision'});
+		my ($ok, $msg) = (1, undef);
+		if (@dbnames) {
+			my $info = { 'user' => $olduser,
+				     'host' => $mysql::config{'host'},
+				     'remove-database' => \@dbnames };
+			($ok, $msg) = &provision_api_call(
+				"modify-mysql-login", $info, 0);
+			if (!$ok) {
+				&$second_print(
+				    &text('save_emysqluser2_provision', $msg));
+				}
+			}
+
+		# Then remove the user
+		if ($ok) {
+			my $info = { 'user' => $olduser,
+				     'host' => $mysql::config{'host'} };
+			($ok, $msg) = &provision_api_call(
+				"unprovision-mysql-login", $info, 0);
+			if (!$ok) {
+				&$second_print(
+				    &text('save_emysqluser_provision',$msg));
+				}
+			}
+
+		# Then grant DBs to new user
+		if ($ok && @dbnames) {
+			my $info = { 'user' => $user,
+				     'host' => $mysql::config{'host'},
+				     'add-database' => \@dbnames };
+			($ok, $msg) = &provision_api_call(
+				"modify-mysql-login", $info, 0);
+			if (!$ok) {
+				&$second_print(
+				    &text('save_emysqluser2_provision2', $msg));
+				}
+			}
+
+		if ($ok) {
+			&$second_print($text{'setup_done'});
+			}
+		}
+	else {
+		# Update locally
+		&$first_print($text{'save_mysqluser'});
+		local $pfunc = sub {
+			&mysql::execute_sql_logged($mysql::master_db,
+				"delete from user where user = ?", $olduser);
+			&mysql::execute_sql_logged($mysql::master_db,
+				"update db set user = ? where user = ?",
+				$user, $olduser);
+			&mysql::execute_sql_logged($master_db,
+				'flush privileges');
+			};
+		&execute_for_all_mysql_servers($pfunc);
+		&$second_print($text{'setup_done'});
+		$rv++;
+		}
 	}
 elsif ($user ne $olduser && !$d->{'parent'}) {
 	# MySQL user in a parent domain has changed, perhaps due to username

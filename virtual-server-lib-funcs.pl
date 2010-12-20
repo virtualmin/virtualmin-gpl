@@ -8260,7 +8260,6 @@ return @dbs;
 # all_databases([&domain])
 # Returns a list of all known databases on the system, possibly limited to
 # those relevant for some domain.
-# XXX provisioning
 sub all_databases
 {
 local ($d) = @_;

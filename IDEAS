@@ -56,10 +56,9 @@
  - Remote DNS and MySQL setup
 	- Needs some module for a central server to allow limited creation
 	- Virtualmin update to use this
-	- Need to set mysql module remote host field after provisioning
-	  first domain
-	- All DB ops need to be done as domain owner
 	- Documentation
+	- Restore should set provisioning flags
+	- CHANGELOG
 
  - Show usermin folder list in tree
 	- For names like foo.bar.baz and foo/bar/baz
