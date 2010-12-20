@@ -415,8 +415,7 @@ elsif ($d->{'provision_mysql'}) {
 	my $info = { 'user' => &mysql_user($d),
 		     'host' => $mysql::config{'host'},
 		     'lock' => '' };
-	my ($ok, $msg) = &provision_api_call(
-		"modify-mysql-login", $info, 0);
+	my ($ok, $msg) = &provision_api_call("modify-mysql-login", $info, 0);
 	if (!$ok) {
 		&$second_print(&text('disable_emysqluser_provision', $msg));
 		}
@@ -1568,58 +1567,76 @@ sub save_mysql_allowed_hosts
 local ($d, $hosts) = @_;
 &require_mysql();
 local $user = &mysql_user($d);
-local @dbs = &domain_databases($d, [ 'mysql' ]);
-foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
-	push(@dbs, &domain_databases($sd, [ 'mysql' ]));
+
+if ($d->{'provision_mysql'}) {
+	# Call the remote API
+	my $info = { 'user' => $user,
+		     'host' => $mysql::config{'host'},
+		     'remote' => $hosts };
+	my ($ok, $msg) = &provision_api_call("modify-mysql-login", $info, 0);
+	return &text('user_emysqlprovips', $msg) if (!$ok);
 	}
-
-local $ufunc = sub {
-	# Update the user table entry for the main user
-	local $encpass = &encrypted_mysql_pass($d);
-	&mysql::execute_sql_logged($mysql::master_db,
-		"delete from user where user = '$user'");
-	&mysql::execute_sql_logged($mysql::master_db,
-		"delete from db where user = '$user'");
-	foreach my $h (@$hosts) {
-		&mysql::execute_sql_logged($mysql::master_db,
-			"insert into user (host, user, password) ".
-			"values ('$h', '$user', $encpass)");
-		foreach my $db (@dbs) {
-			&add_db_table($h, $db->{'name'}, $user);
-			}
+else {
+	# Update MySQL permissions locally
+	local @dbs = &domain_databases($d, [ 'mysql' ]);
+	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
+		push(@dbs, &domain_databases($sd, [ 'mysql' ]));
 		}
-	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
-	};
-&execute_for_all_mysql_servers($ufunc);
 
-# Add db table entries for all users, and user table entries for mailboxes
-local $ufunc = sub {
-	my %allusers;
-	foreach my $db (@dbs) {
-		foreach my $u (&list_mysql_database_users($d, $db->{'name'})) {
-			# Re-populate db table for this db and user
-			next if ($u->[0] eq $user);
-			&mysql::execute_sql_logged($mysql::master_db,
-				"delete from db where user = '$u->[0]' and db = '$db->{'name'}'");
-			foreach my $h (@$hosts) {
-				&add_db_table($h, $db->{'name'}, $u->[0]);
-				}
-			$allusers{$u->[0]} = $u;
-			}
-		}
-	# Re-populate user table
-	foreach my $u (values %allusers) {
+	local $ufunc = sub {
+		# Update the user table entry for the main user
+		local $encpass = &encrypted_mysql_pass($d);
 		&mysql::execute_sql_logged($mysql::master_db,
-			"delete from user where user = '$u->[0]'");
+			"delete from user where user = '$user'");
+		&mysql::execute_sql_logged($mysql::master_db,
+			"delete from db where user = '$user'");
 		foreach my $h (@$hosts) {
 			&mysql::execute_sql_logged($mysql::master_db,
 				"insert into user (host, user, password) ".
-				"values ('$h', '$u->[0]', '$u->[1]')");
+				"values ('$h', '$user', $encpass)");
+			foreach my $db (@dbs) {
+				&add_db_table($h, $db->{'name'}, $user);
+				}
 			}
-		}
-	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
-	};
-&execute_for_all_mysql_servers($ufunc);
+		&mysql::execute_sql_logged($mysql::master_db,
+					   'flush privileges');
+		};
+	&execute_for_all_mysql_servers($ufunc);
+
+	# Add db table entries for all users, and user table entries
+	# for mailboxes
+	local $ufunc = sub {
+		my %allusers;
+		foreach my $db (@dbs) {
+			foreach my $u (&list_mysql_database_users(
+					$d, $db->{'name'})) {
+				# Re-populate db table for this db and user
+				next if ($u->[0] eq $user);
+				&mysql::execute_sql_logged($mysql::master_db,
+					"delete from db where user = ? and ".
+					"db = ?", $u->[0], $db->{'name'});
+				foreach my $h (@$hosts) {
+					&add_db_table($h, $db->{'name'},
+						      $u->[0]);
+					}
+				$allusers{$u->[0]} = $u;
+				}
+			}
+		# Re-populate user table
+		foreach my $u (values %allusers) {
+			&mysql::execute_sql_logged($mysql::master_db,
+				"delete from user where user = ?", $u->[0]);
+			foreach my $h (@$hosts) {
+				&mysql::execute_sql_logged($mysql::master_db,
+				    "insert into user (host, user, password) ".
+				    "values (?, ?, ?)", $h, $u->[0], $u->[1]);
+				}
+			}
+		&mysql::execute_sql_logged($mysql::master_db,
+					   'flush privileges');
+		};
+	&execute_for_all_mysql_servers($ufunc);
+	}
 
 return undef;
 }
