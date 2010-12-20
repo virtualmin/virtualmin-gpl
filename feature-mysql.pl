@@ -253,23 +253,51 @@ if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
     (!$tmpl->{'mysql_nopass'} || $d->{'mysql_pass'})) {
 	# Change MySQL password, for a top-level server that isn't being
 	# converted from a sub-server
-	&$first_print($text{'save_mysqlpass'});
-	if (&mysql_user_exists($d)) {
-		local $pfunc = sub {
-			&mysql::execute_sql_logged($mysql::master_db, "update user set password = $encpass where user = '$olduser'");
-			&mysql::execute_sql_logged($master_db, 'flush privileges');
-			};
-		&execute_for_all_mysql_servers($pfunc);
-		&$second_print($text{'setup_done'});
+	if ($d->{'provision_mysql'}) {
+		# Change on provisioning server
+		&$first_print($text{'save_mysqlpass_provision'});
+		my $info = { 'user' => &mysql_user($d),
+			     'host' => $mysql::config{'host'} };
+		if ($d->{'mysql_enc_pass'}) {
+			$info->{'encpass'} = $d->{'mysql_enc_pass'};
+			}
+		else {
+			$info->{'pass'} = &mysql_pass($d);
+			}
+		my ($ok, $msg) = &provision_api_call("modify-mysql-login",
+						     $info, 0);
+		if (!$ok) {
+			&$second_print(&text('save_emysqlpass_provision',$msg));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
 		$rv++;
 		}
 	else {
-		&$second_print($text{'save_nomysql'});
+		# Change locally
+		&$first_print($text{'save_mysqlpass'});
+		if (&mysql_user_exists($d)) {
+			local $pfunc = sub {
+				&mysql::execute_sql_logged($mysql::master_db,
+					"update user set password = $encpass ".
+					"where user = ?", $olduser);
+				&mysql::execute_sql_logged($master_db,
+					"flush privileges");
+				};
+			&execute_for_all_mysql_servers($pfunc);
+			&$second_print($text{'setup_done'});
+			$rv++;
+			}
+		else {
+			&$second_print($text{'save_nomysql'});
+			}
 		}
 	}
 if (!$d->{'parent'} && $oldd->{'parent'}) {
 	# Server has been converted to a parent .. need to create user, and
 	# change access to old DBs
+	# XXX
 	&$first_print($text{'setup_mysqluser'});
 	$d->{'mysql_user'} = &mysql_user($d, 1);
 	local $user = $d->{'mysql_user'};
@@ -297,6 +325,7 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 	# Server has changed from parent to sub-server .. need to remove the
 	# old user and update all DB permissions
+	# XXX
 	&$first_print($text{'save_mysqluser'});
 	local $pfunc = sub {
 		&mysql::execute_sql_logged($mysql::master_db, "delete from user where user = '$olduser'");
@@ -310,24 +339,49 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 elsif ($user ne $olduser && !$d->{'parent'}) {
 	# MySQL user in a parent domain has changed, perhaps due to username
 	# change. Need to update user in DB and all db entries
-	&$first_print($text{'save_mysqluser'});
-	if (&mysql_user_exists($oldd)) {
-		$d->{'mysql_user'} = $user;
-		local $pfunc = sub {
-			&mysql::execute_sql_logged($mysql::master_db, "update user set user = '$user' where user = '$olduser'");
-			&mysql::execute_sql_logged($mysql::master_db, "update db set user = '$user' where user = '$olduser'");
-			&mysql::execute_sql_logged($master_db, 'flush privileges');
-			};
-		&execute_for_all_mysql_servers($pfunc);
-		&$second_print($text{'setup_done'});
+	if ($d->{'provision_mysql'}) {
+		# Rename on provisioning server
+		&$first_print($text{'save_mysqluser_provision'});
+		my $info = { 'user' => $olduser,
+			     'host' => $mysql::config{'host'},
+			     'new-user' => $user };
+		my ($ok, $msg) = &provision_api_call(
+			"modify-mysql-login", $info, 0);
+		if (!$ok) {
+			&$second_print(&text('save_emysqluser_provision',$msg));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
 		$rv++;
 		}
 	else {
-		&$second_print($text{'save_nomysql'});
+		# Rename locally
+		&$first_print($text{'save_mysqluser'});
+		if (&mysql_user_exists($oldd)) {
+			$d->{'mysql_user'} = $user;
+			local $pfunc = sub {
+				&mysql::execute_sql_logged($mysql::master_db,
+				  "update user set user = ? where user = ?",
+				  $user, $olduser);
+				&mysql::execute_sql_logged($mysql::master_db,
+				  "update db set user = ? where user = ?",
+				  $user, $olduser);
+				&mysql::execute_sql_logged($master_db,
+				  "flush privileges");
+				};
+			&execute_for_all_mysql_servers($pfunc);
+			&$second_print($text{'setup_done'});
+			$rv++;
+			}
+		else {
+			&$second_print($text{'save_nomysql'});
+			}
 		}
 	}
 elsif ($user ne $olduser && $d->{'parent'}) {
-	# Server has moved to a new user .. change ownership of DBs
+	# Sub-server has moved to a new user .. change ownership of DBs
+	# XXX
 	&$first_print($text{'save_mysqluser2'});
 	local $pfunc = sub {
 		foreach my $db (&domain_databases($d, [ "mysql" ])) {
@@ -611,7 +665,6 @@ return $ok;
 # restore_mysql(&domain, file,  &opts, &allopts, homeformat, &oldd, asowner)
 # Restores this domain's mysql database from a backup file, and re-creates
 # the mysql user.
-# XXX provisioning support
 sub restore_mysql
 {
 local %info;
@@ -895,31 +948,44 @@ return 1;
 }
 
 # grant_mysql_database(&domain, dbname)
-# Adds MySQL permission entries for grant the domain owner access to some DB,
+# Adds MySQL permission entries to grant the domain owner access to some DB,
 # and sets file ownership so that quotas work.
 sub grant_mysql_database
 {
 local ($d, $dbname) = @_;
 &require_mysql();
-local $tmpl = &get_template($d->{'template'});
 
-# Add db entries for the user for each host
-local $pfunc = sub {
-	local $h;
-	local @hosts = &get_mysql_hosts($d);
-	local $user = &mysql_user($d);
-	foreach $h (@hosts) {
-		&add_db_table($h, $dbname, $user);
-		}
-	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
-	};
-&execute_for_all_mysql_servers($pfunc);
+if ($d->{'provision_mysql'}) {
+	# Call remote API to grant access
+	local @dbs = map { $_->{'name'} } &domain_databases($d, [ 'mysql' ]);
+	push(@dbs, $dbname);
+	my $info = { 'user' => &mysql_user($d),
+		     'host' => $mysql::config{'host'},
+		     'database' => \@dbs };
+	my ($ok, $msg) = &provision_api_call("modify-mysql-login", $info, 0);
+	&error(&text('user_emysqlprov', $msg)) if (!$ok);
+	}
+else {
+	# Add db entries for the user for each host
+	local $pfunc = sub {
+		local $h;
+		local @hosts = &get_mysql_hosts($d);
+		local $user = &mysql_user($d);
+		foreach $h (@hosts) {
+			&add_db_table($h, $dbname, $user);
+			}
+		&mysql::execute_sql_logged($mysql::master_db,
+					   'flush privileges');
+		};
+	&execute_for_all_mysql_servers($pfunc);
 
-local $dd = &get_mysql_database_dir($dbname);
-if ($tmpl->{'mysql_chgrp'} && $dd) {
 	# Set group ownership of database directory, to enforce quotas
-	&system_logged("chgrp -R $d->{'group'} ".quotemeta($dd));
-	&system_logged("chmod +s ".quotemeta($dd));
+	local $dd = &get_mysql_database_dir($dbname);
+	local $tmpl = &get_template($d->{'template'});
+	if ($tmpl->{'mysql_chgrp'} && $dd) {
+		&system_logged("chgrp -R $d->{'group'} ".quotemeta($dd));
+		&system_logged("chmod +s ".quotemeta($dd));
+		}
 	}
 }
 
