@@ -2966,6 +2966,7 @@ mail_system_4=Qmail+LDAP
 mail_system_5=Qmail+VPOPMail
 
 databases_title=Edit Databases
+databases_hosted=All databases on this system are hosted on the remote MySQL server $1.
 databases_none=This virtual server does not have any databases yet.
 databases_db=Database name
 databases_type=Database type
@@ -3017,6 +3018,7 @@ database_manage=Manage Database
 database_disc=Disassociate With Server
 database_size=Size on disk
 database_tables=Number of tables
+database_host=Hosted on system
 database_scripts=Used by scripts
 database_err=Failed to create database
 database_emax=You are not allowed to add any more databases

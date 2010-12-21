@@ -69,6 +69,12 @@ if (!$in{'new'}) {
 		print &ui_table_row($text{'database_tables'}, $tables);
 		}
 
+	# Show host system
+	if (&master_admin() && $db->{'host'}) {
+		print &ui_table_row($text{'database_host'},
+				    "<tt>$db->{'host'}</tt>");
+		}
+
 	# Show scripts that use it
 	if (defined(&list_domain_scripts)) {
 		@slist = ( );
