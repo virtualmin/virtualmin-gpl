@@ -5688,12 +5688,16 @@ foreach $d (@doms) {
 		$rv += scalar(@aliases);
 		}
 	elsif ($f eq "quota" || $f eq "uquota") {
-		return -1 if ($d->{$f} eq "");
-		$rv += $d->{$f};
+		if (!$d->{'parent'}) {
+			return -1 if ($d->{$f} eq "");
+			$rv += $d->{$f};
+			}
 		}
 	elsif ($f eq "bw") {
-		return -1 if ($d->{'bw_limit'} eq "");
-		$rv += $d->{'bw_limit'};
+		if (!$d->{'parent'}) {
+			return -1 if ($d->{'bw_limit'} eq "");
+			$rv += $d->{'bw_limit'};
+			}
 		}
 	elsif ($f eq "doms") {
 		$rv++ if (!$d->{'alias'} || !$config{'limitnoalias'});
