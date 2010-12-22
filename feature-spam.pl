@@ -1171,11 +1171,11 @@ sub setup_lookup_domain_daemon
 {
 &foreign_require("init", "init-lib.pl");
 local $pidfile = "$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid";
+local $helper = &get_api_helper_command();
 &init::enable_at_boot(
       "lookup-domain",
       "Daemon for quickly looking up Virtualmin servers from procmail",
-      "WEBMIN_CONFIG=$config_directory WEBMIN_VAR=$var_directory ".
-       "PERLLIB=$root_directory $module_root_directory/lookup-domain-daemon.pl",
+      "$helper lookup-domain-daemon",
       "kill `cat $pidfile`",
       undef);
 if (&check_pid_file($pidfile)) {
