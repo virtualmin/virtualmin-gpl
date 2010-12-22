@@ -193,5 +193,43 @@ eval "use Data::Dumper";
 return Dumper($data);
 }
 
+# execute_webmin_script(command, module, &args, output-fh)
+# Run some Virtualmin or Cloudmin API command in a forked sub-process, but with
+# out executing a new perl instance. Returns the exit status.
+sub execute_webmin_script
+{
+my ($cmd, $mod, $args, $fh) = @_;
+my $pid = fork();
+my $remote_addr = $ENV{'REMOTE_ADDR'} || &to_ipaddress($ENV{'REMOTE_HOST'});
+my $remote_host = $ENV{'REMOTE_HOST'};
+if (!$pid) {
+	untie(*STDOUT);
+	close(STDOUT);
+	open(STDOUT, ">&$fh");
+	untie(*STDERR);
+	close(STDERR);
+	open(STDERR, ">&$fh");
+	&clean_environment();
+	$ENV{'WEBMIN_CONFIG'} = $config_directory;
+	$ENV{'WEBMIN_VAR'} = $var_directory;
+	$ENV{'REMOTE_USER'} = $remote_user;
+	$ENV{'REMOTE_ADDR'} = $remote_addr;
+	$ENV{'REMOTE_HOST'} = $remote_host;
+	my $pkg = $cmd;
+	$pkg =~ s/[^A-Za-z0-9]/_/g;
+	@ARGV = @$args;
+	$0 = $cmd;
+	eval "
+		\%pkg::ENV = \%ENV;
+		package $pkg;
+		do \$cmd;
+		die \$@ if (\$@);
+		";
+	exit($@ ? 1 : 0);
+	}
+close($fh);
+return $pid;
+}
+
 1;
 
