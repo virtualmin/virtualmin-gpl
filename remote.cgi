@@ -49,66 +49,53 @@ foreach $m ($module_name, @plugins) {
 		}
 	}
 $cmd || &api_error(&text('remote_eprogram2', $in{'program'}));
+
+# Build list of command-line args
 @args = ( );
 foreach $i (keys %in) {
 	next if ($i eq "program" || $i eq $format);
 	if ($in{$i} eq "") {
-		push(@args, "--".$i);
+		push(@args, "--$i");
 		}
 	else {
 		foreach $v (split(/\0/, $in{$i})) {
-			push(@args, "--".$i, $v);
+			push(@args, "--$i", $v);
 			}
 		}
 	}
 
-# Setup handler if script calls exit. Only needed for this-module calls
-sub exit
-{
-if ($dir eq $module_root_directory) {
-	print "\n";
-	print "Exit status: $_[0]\n";
-	}
-CORE::exit(0);
-}
-
 # Prevent executed programs from doing referer checks
 delete($ENV{'MINISERV_CONFIG'});
 
-# Run the script within this same Perl process
 print "Content-type: text/plain\n\n";
+
+# Execute the command within the same perl interpreter
+pipe(SUBr, SUBw);
+$pid = &execute_webmin_script($cmd, $mod, \@args, SUBw);
 if ($format) {
-	# Convert to selected format
-	$cmd .= " ".join(" ", map { quotemeta($_) } @args);
+	# Capture and convert to selected format
         $err = &check_remote_format($format);
         if ($err) {
                 print "Invalid format $format : $err\n";
                 exit(0);
                 }
-	&clean_environment();
-        $out = &backquote_command("$cmd 2>&1");
-	&reset_environment();
-        print &convert_remote_format($out, $?, $in{'program'}, \%in, $format);
-	}
-elsif ($dir eq $module_root_directory) {
-	# Can just eval in this module
-	@ARGV = @args;
-	do $cmd;
-	print "\n";
-	print "Exit status: 0\n";
+	my $out;
+	while(<SUBr>) {
+		$out .= $_;
+		}
+	waitpid($pid, 0);
+	print &convert_remote_format($out, $?, $in{'program'},
+				     \%in, $format);
 	}
 else {
-	# Need to call in other module
-	$cmd .= " ".join(" ", map { quotemeta($_) } @args);
-	&clean_environment();
-	&open_execute_command(CMD, $cmd, 1);
-	while(<CMD>) {
-		print;
+	# Stream output
+	while(<SUBr>) {
+		print $_;
 		}
-	close(CMD);
+	close(SUBr);
+	waitpid($pid, 0);
 	print "\n";
-	print "Exit status: ",int($?/256),"\n";
-	&reset_environment();
+	print "Exit status: $?\n";
 	}
 
 sub api_error
