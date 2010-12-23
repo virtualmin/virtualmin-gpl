@@ -172,11 +172,11 @@ if ($d->{'provision_mysql'}) {
 		my ($ok, $msg) = &provision_api_call(
 			"unprovision-mysql-login", $info, 0);
 		if ($ok) {
-			&$second_print(&text('delete_emysqluser_provision',
-					     $msg));
+			&$second_print($text{'setup_done'});
 			}
 		else {
-			&$second_print($text{'setup_done'});
+			&$second_print(&text('delete_emysqluser_provision',
+					     $msg));
 			}
 		}
 	# Take away access from mailbox users
