@@ -661,7 +661,7 @@ if ($dkim_config) {
 		my $selector = $conf->{'Selector'};
 		my $keylist = $conf->{'KeyList'};
 		my $selkeyfile = $keylist;
-		$selkeyfile =~ s/\/([^\/]+)$/$dkim->{'selector'}/;
+		$selkeyfile =~ s/\/([^\/]+)$/\/$selector/;
 		&create_key_mapping_file($doms, $keylist, $selkeyfile);
 		}
 	else {
