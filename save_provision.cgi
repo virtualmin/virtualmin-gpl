@@ -50,10 +50,22 @@ if ($in{'provision_mysql'} && !$oldconfig{'provision_mysql'}) {
 	&$first_print($text{'provision_mysqlcheck'});
 	@mydoms = grep { $_->{'mysql'} && !$_->{'provision_mysql'} }
 		       &list_domains();
-	if (@mydoms) {
-		# Some exist .. show error
-		&$second_print($text{'provision_mysqlcheckfail',
-			join(" ", map { $_->{'dom'} } @mydoms));
+	if (@mydoms && $in{'override'}) {
+		# Some exist, but override mode is on
+		&$second_print($text{'provision_mysqlcheckskip'});
+		}
+	elsif (@mydoms) {
+		# Some exist .. show error and override button
+		&$second_print(&text('provision_mysqlcheckfail',
+			join(" ", map { $_->{'dom'} } @mydoms)));
+
+		print &ui_form_start("save_provision.cgi");
+		foreach $i (keys %in) {
+			print &ui_hidden($i, $in{$i});
+			}
+		print "<b>",$text{'provision_mysqlcheckoverride'},"</b><p>\n";
+		print &ui_form_end([ [ "override",
+				       $text{'provision_override'} ] ]);
 		goto FAILED;
 		}
 	else {
