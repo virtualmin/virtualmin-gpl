@@ -5351,6 +5351,9 @@ provision_limits=Checking provisioning limits ..
 provision_limit=$1 $2
 provision_limitsgot=.. your limits are : $1
 provision_used=($1 used)
+provision_mysqlcheck=Checking for existing local MySQL databases ..
+provision_mysqlcheckfail=.. the following virtual servers have MySQL databases or logins already : $1. Provisioning cannot be enabled unless they are deleted.
+provision_mysqlcheckok=.. none found
 
 provision_emysqldbcheck=Provisioning error checking MySQL database : $1
 provision_emysqldb=MySQL database $1 already exists on the provisioning server

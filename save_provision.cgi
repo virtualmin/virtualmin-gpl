@@ -5,6 +5,7 @@ require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'provision_ecannot'});
 &error_setup($text{'provision_err'});
 &ReadParse();
+%oldconfig = %config;
 
 # Validate and store inputs
 foreach $f (&list_provision_features()) {
@@ -45,7 +46,20 @@ else {
 	}
 
 # If any domains exist that were provisioned old-style for mysql, complain
-# XXX
+if ($in{'provision_mysql'} && !$oldconfig{'provision_mysql'}) {
+	&$first_print($text{'provision_mysqlcheck'});
+	@mydoms = grep { $_->{'mysql'} && !$_->{'provision_mysql'} }
+		       &list_domains();
+	if (@mydoms) {
+		# Some exist .. show error
+		&$second_print($text{'provision_mysqlcheckfail',
+			join(" ", map { $_->{'dom'} } @mydoms));
+		goto FAILED;
+		}
+	else {
+		&$second_print($text{'provision_mysqlcheckok'});
+		}
+	}
 
 # Get limits from the server and display
 &$first_print(&text('provision_limits'));
