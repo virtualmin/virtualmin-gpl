@@ -438,6 +438,9 @@ if (!$user->{'noalias'} && ($user->{'email'} || $user->{'noprimary'})) {
 			if (defined($autoend));
 		$simple->{'period'} = $autoperiod
 			if (defined($autoperiod));
+		$simple->{'replies'} ||=
+			&convert_autoreply_file($d, "replies-$user->{'user'}")
+			if ($simple->{'period'});
 		}
 
 	if (@{$user->{'to'}} == 1 && $simple->{'tome'}) {
