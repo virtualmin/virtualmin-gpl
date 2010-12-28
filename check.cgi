@@ -22,7 +22,7 @@ $webminchanged = 0;
 foreach $k (keys %config) {
 	if ($k eq 'leave_acl' || $k eq 'webmin_modules' ||
 	    &indexof($k, @features) >= 0) {
-		$webminchanged++ if ($config{$k} != $lastconfig{$k});
+		$webminchanged++ if ($config{$k} ne $lastconfig{$k});
 		}
 	}
 
