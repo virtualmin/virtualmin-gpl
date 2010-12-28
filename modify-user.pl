@@ -547,7 +547,7 @@ print "                      [--local | --no-local]\n";
 print "                      [--autoreply \"messsage\" | --no-autoreply]\n";
 print "                      [--autoreply-start time | --no-autoreply-start]\n";
 print "                      [--autoreply-end time | --no-autoreply-end]\n";
-print "                      [--autoreply-period mins | --no-autoreply-period]\n";
+print "                      [--autoreply-period secs | --no-autoreply-period]\n";
 exit(1);
 }
 
