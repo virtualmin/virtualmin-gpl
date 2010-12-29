@@ -1265,3 +1265,4 @@ Added a link to the Mail Aliases page to also show normally hidden internal alia
 Improved support for backing up to and restoring from IPv6 SSH and FTP servers.
 When a virtual server's plan is changed on the Edit Virtual Server page, quotas are also updated to match those from the plan.
 German translation updates, thanks to Thomas Suess.
+Added a field to the DKIM form for entering additional domains to sign email for, even if they are not hosted on the system.

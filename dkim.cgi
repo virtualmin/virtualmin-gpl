@@ -44,6 +44,10 @@ if ($dkim && $dkim->{'keyfile'} && -r $dkim->{'keyfile'}) {
 		&ui_yesno_radio("newkey", 0));
 	}
 
+# Additional domains to sign for
+print &ui_table_row($text{'dkim_extra'},
+	&ui_textarea("extra", join("\n", @{$dkim->{'extra'}}), 10, 60));
+
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 

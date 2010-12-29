@@ -166,6 +166,9 @@ elsif ($config{'mail_system'} == 1) {
                 }
 	}
 
+# Add extra domains
+$rv{'extra'} = [ split(/\s+/, $config{'dkim_extra'}) ];
+
 return \%rv;
 }
 
@@ -322,7 +325,12 @@ if ($dkim_config) {
 	&symlink_file($dkim->{'keyfile'}, $selkeyfile);
 
 	# Create key mapping file
-	&create_key_mapping_file(\@doms, $keylist, $selkeyfile);
+	&create_key_mapping_file(\@doms, $keylist, $selkeyfile,
+				 $dkim->{'extra'});
+
+	# Save list of extra domains
+	$config{'dkim_extra'} = join(" ", @{$dkim->{'extra'}});
+	&save_module_config();
 	}
 if ($gconfig{'os_type'} eq 'debian-linux') {
 	# Set milter port to listen on
@@ -626,15 +634,19 @@ if ($d->{'dns'}) {
 	}
 }
 
-# create_key_mapping_file(&domains, mapping-file, key-file)
+# create_key_mapping_file(&domains, mapping-file, key-file, &extra-domains)
 # Write out a file of all domains to perform DKIM on
 sub create_key_mapping_file
 {
-my ($doms, $keylist, $keyfile) = @_;
+my ($doms, $keylist, $keyfile, $extra) = @_;
 &open_lock_tempfile(KEYLIST, ">$keylist");
 foreach my $d (@$doms) {
 	&print_tempfile(KEYLIST,
 		"*\@".$d->{'dom'}.":".$d->{'dom'}.":".$keyfile."\n");
+	}
+foreach my $dname (@$extra) {
+	&print_tempfile(KEYLIST,
+		"*\@".$dname.":".$dname.":".$keyfile."\n");
 	}
 &close_tempfile(KEYLIST);
 &set_ownership_permissions(undef, undef, 0755, $keylist);
@@ -662,12 +674,14 @@ if ($dkim_config) {
 		my $keylist = $conf->{'KeyList'};
 		my $selkeyfile = $keylist;
 		$selkeyfile =~ s/\/([^\/]+)$/\/$selector/;
-		&create_key_mapping_file($doms, $keylist, $selkeyfile);
+		&create_key_mapping_file($doms, $keylist, $selkeyfile,
+					 $conf->{'extra'});
 		}
 	else {
 		# Just set list of domains
 		&save_debian_dkim_config($dkim_config,
-			"Domain", join(",", map { $_->{'dom'} } @$doms));
+			"Domain", join(",", (map { $_->{'dom'} } @$doms),
+					    @{$conf->{'extra'}}));
 		}
 
 	# Restart milter

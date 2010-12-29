@@ -14,6 +14,11 @@ $dkim->{'selector'} = $in{'selector'};
 $dkim->{'enabled'} = $in{'enabled'};
 $dkim->{'verify'} = $in{'verify'};
 $dkim->{'sign'} = 1;
+@extra = split(/\s+/, $in{'extra'});
+foreach $e (@extra) {
+	$e =~ /^[a-z0-9\-\_\.\*]+$/ || &error(&text('dkim_eextra', $e));
+	}
+$dkim->{'extra'} = \@extra;
 
 if ($in{'enabled'}) {
 	# Turn on DKIM, or change settings
