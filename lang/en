@@ -5293,6 +5293,8 @@ dkim_return=DKIM form
 dkim_err=Failed to save DKIM settings
 dkim_eselector=Missing or invalid selector - must be a valid DNS record name
 dkim_eselfile=.. selector key file $1 already exists!
+dkim_extra=Additional domains to sign for
+dkim_eextra=Invalid additional domain $1
 
 dkim_title4=Install DKIM
 dkim_installing=Installing the DKIM filter package ..
