@@ -1083,9 +1083,9 @@ else {
 	&mysql::execute_sql_logged($mysql::master_db,
 			   "create database ".&mysql::quotestr($dbname).
 			   ($opts->{'charset'} ?
-			    " character set $info->{'charset'}" : "").
+			    " character set $opts->{'charset'}" : "").
 			   ($opts->{'collate'} ?
-			    " collate $info->{'collate'}" : ""));
+			    " collate $opts->{'collate'}" : ""));
 
 	# Make the DB accessible to the domain owner
 	&grant_mysql_database($d, $dbname);
