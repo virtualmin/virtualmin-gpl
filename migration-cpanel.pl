@@ -79,6 +79,9 @@ elsif (-d $homedir) {
 	if (!$user && $homedir =~ /\/backup-([^\/]+)_([^\/]+)\//) {
 		$user = $2;
 		}
+	if (!$user && $homedir =~ /\/cpmove-([^\/]+)\//) {
+		$user = $1;
+		}
 	if (!$user) {
 		opendir(ROOT, $root);
 		local @rootfiles = grep { !/^\./ } readdir(ROOT);
