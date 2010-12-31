@@ -39,6 +39,7 @@ index_edefip=Virtualmin could not work out the default IP address for virtual se
 index_eapache=The Apache webserver does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>Apache Webserver</a> module. If your system does not use Apache, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page.
 index_eproftpd=The ProFTPd server does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>ProFTPd Server</a> module. If your system does not use ProFTPd, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page.
 index_ebind=The BIND DNS server version 8 or 9 does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>BIND DNS Server</a> module. If your system does not use BIND, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page.
+index_ebindmod=The BIND DNS server Webmin module is not installed on your system.
 index_email=None of the supported mail servers (Sendmail, Postfix and Qmail) were detected on your system. Maybe they are not installed, or their Webmin modules have not been set up properly.
 index_emysql=MySQL does not appear to be installed and running on your system, or has not yet been set up properly in Webmin's <a href='$1'>MySQL Database</a> module. If your system does not use MySQL, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page.
 index_emysql2=MySQL client programs do not appear to be installed, or have not yet been set up properly in Webmin's <a href='$1'>MySQL Database</a> module. If your system does not use MySQL, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page.
@@ -485,7 +486,10 @@ setup_proftpdpid=Applying FTP server configuration ..
 setup_proftpdfailed=.. failed : $1
 setup_ftpuser=Adding ProFTPd user $1 to server's group ..
 setup_bind=Adding new DNS zone ..
+setup_bind_provision=Adding new DNS zone on provisioning server ..
 setup_bindslave=Adding slave zone on $1 ..
+setup_ebind_provision=.. provisioning failed : $1
+setup_bind_provisioned=.. created on $1
 setup_eslave=.. failed! $1
 setup_eslaves=.. some slave servers failed :
 setup_bindpid=Re-starting DNS server ..
@@ -1672,6 +1676,7 @@ check_webok=Apache is installed.
 check_ftpok=ProFTPd is installed.
 check_dnsok=BIND DNS server is installed, and the system is configured to use it.
 check_dnsok2=BIND DNS server is installed.
+check_dnsok3=BIND DNS domains will be hosted on a provisioning server.
 check_dnsmaster=However, the default master DNS server $1 is not a fully qualified domain name.
 check_mysqlok=MySQL is installed and running.
 check_mysqlok2=MySQL client programs are installed for use with a provisioning server.
@@ -5364,5 +5369,7 @@ provision_emysqldbcheck=Provisioning error checking MySQL database : $1
 provision_emysqldb=MySQL database $1 already exists on the provisioning server
 provision_emysqlcheck=Provisioning error checking MySQL login : $1
 provision_emysql=MySQL login $1 already exists on the provisioning server
+provision_ednscheck=Provisioning error checking DNS zone : $1
+provision_edns=DNS zone $1 already exists on the provisioning server
 
 __norefs=1

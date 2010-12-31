@@ -11016,43 +11016,54 @@ if (!&foreign_check("net")) {
 
 if ($config{'dns'}) {
 	# Make sure BIND is installed
-	&foreign_installed("bind8", 1) == 2 ||
-		return &text('index_ebind', "/bind8/", $clink);
-
-	# Check that primary NS hostname is reasonable
-	&require_bind();
-	local $tmpl = &get_template(0);
-	local $master = $tmpl->{'dns_master'} eq 'none' ? undef :
-                                        $tmpl->{'dns_master'};
-	$master ||= $bind8::config{'default_prins'} ||
-		    &get_system_hostname();
-	local $mastermsg;
-	if ($master !~ /\./) {
-		$mastermsg = &text('check_dnsmaster', "<tt>$master</tt>");
-		}
-
-	# Make sure this server is configured to use the local BIND
-	if (&foreign_check("net") && $config{'dns_check'}) {
-		&foreign_require("net", "net-lib.pl");
-		local %ips = map { $_, 1 } &active_ip_addresses();
-		local $dns = &net::get_dns_config();
-		local $hasdns;
-		foreach my $ns (@{$dns->{'nameserver'}}) {
-			$hasdns++ if ($ips{&to_ipaddress($ns)} ||
-				      $ns eq "127.0.0.1" ||
-				      $ns eq "0.0.0.0");
-			}
-		if (!$hasdns) {
-			my @dhcp = grep { $_->{'dhcp'} || $_->{'bootp'} }
-					&net::boot_interfaces();
-			return &text('check_eresolv',
-				     '/net/list_dns.cgi', $clink).
-			       (@dhcp ? " ".$text{'check_eresolv2'} : "");
-			}
-		&$second_print($text{'check_dnsok'}." ".$mastermsg);
+	if ($config{'provision_dns'}) {
+		# Only BIND module is needed
+		&foreign_check("bind8") ||
+			return $text{'index_ebindmod'};
+		&$second_print($text{'check_dnsok3'});
 		}
 	else {
-		&$second_print($text{'check_dnsok2'}." ".$mastermsg);
+		# BIND server must be installed and usable
+		&foreign_installed("bind8", 1) == 2 ||
+			return &text('index_ebind', "/bind8/", $clink);
+
+		# Check that primary NS hostname is reasonable
+		&require_bind();
+		local $tmpl = &get_template(0);
+		local $master = $tmpl->{'dns_master'} eq 'none' ? undef :
+						$tmpl->{'dns_master'};
+		$master ||= $bind8::config{'default_prins'} ||
+			    &get_system_hostname();
+		local $mastermsg;
+		if ($master !~ /\./) {
+			$mastermsg = &text('check_dnsmaster',
+					   "<tt>$master</tt>");
+			}
+
+		# Make sure this server is configured to use the local BIND
+		if (&foreign_check("net") && $config{'dns_check'}) {
+			&foreign_require("net", "net-lib.pl");
+			local %ips = map { $_, 1 } &active_ip_addresses();
+			local $dns = &net::get_dns_config();
+			local $hasdns;
+			foreach my $ns (@{$dns->{'nameserver'}}) {
+				$hasdns++ if ($ips{&to_ipaddress($ns)} ||
+					      $ns eq "127.0.0.1" ||
+					      $ns eq "0.0.0.0");
+				}
+			if (!$hasdns) {
+				my @dhcp = grep { $_->{'dhcp'} ||
+						  $_->{'bootp'} }
+						&net::boot_interfaces();
+				return &text('check_eresolv',
+					     '/net/list_dns.cgi', $clink).
+				     (@dhcp ? " ".$text{'check_eresolv2'} : "");
+				}
+			&$second_print($text{'check_dnsok'}." ".$mastermsg);
+			}
+		else {
+			&$second_print($text{'check_dnsok2'}." ".$mastermsg);
+			}
 		}
 	}
 

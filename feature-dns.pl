@@ -23,13 +23,29 @@ return undef;
 
 # setup_dns(&domain)
 # Set up a zone for a domain
+# XXX provisioning support
 sub setup_dns
 {
 &require_bind();
 local $tmpl = &get_template($_[0]->{'template'});
-if (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
-    $tmpl->{'dns_sub'} ne 'yes' ||
-    $_[0]->{'alias'}) {
+if ($_[0]->{'provision_dns'}) {
+	# Create on provisioning server
+	&$first_print($text{'setup_bind_provision'});
+	local $info = { 'domain' => $_[0]->{'dom'} };
+	# XXX add records
+	my ($ok, $msg) = &provision_api_call(
+		"provision-dns-zone", $info, 0);
+	if (!$ok || $msg !~ /host=(\S+)/) {
+		&$second_print(&text('setup_ebind_provision', $msg));
+		return 0;
+		}
+	$_[0]->{'provision_dns_host'} = $1;
+	&$second_print(&text('setup_bind_provisioned',
+			     $_[0]->{'provision_dns_host'}));
+	}
+elsif (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
+       $tmpl->{'dns_sub'} ne 'yes' ||
+       $_[0]->{'alias'}) {
 	# Creating a new real zone
 	&$first_print($text{'setup_bind'});
 	&obtain_lock_dns($_[0], 1);
@@ -1350,6 +1366,10 @@ return $z;
 # Signal BIND to re-load its configuration
 sub restart_bind
 {
+if ($d->{'provision_dns'}) {
+	# Hosted on a provisioning server, so nothing to do
+	return 1;
+	}
 &$first_print($text{'setup_bindpid'});
 local $bindlock = "$module_config_directory/bind-restart";
 &lock_file($bindlock);
@@ -1390,9 +1410,24 @@ return $rv;
 # Returns 1 if a domain already exists in BIND
 sub check_dns_clash
 {
-if (!$_[1] || $_[1] eq 'dom') {
-	local ($czone) = &get_bind_zone($_[0]->{'dom'});
-	return $czone ? 1 : 0;
+local ($d, $field) = @_;
+if ($d->{'provision_dns'}) {
+	# Check on remote provisioning server
+	if (!$field || $field eq 'dom') {
+		my ($ok, $msg) = &provision_api_call(
+			"check-dns-zone", { 'domain' => $d->{'dom'} });
+		return &text('provision_ednscheck', $msg) if (!$ok);
+		if ($msg =~ /host=/) {
+			return &text('provision_edns', $d->{'db'});
+			}
+		}
+	}
+else {
+	# Check locally
+	if (!$field || $field eq 'dom') {
+		local ($czone) = &get_bind_zone($d->{'dom'});
+		return $czone ? 1 : 0;
+		}
 	}
 return 0;
 }
@@ -1408,6 +1443,7 @@ return &check_pid_file(&bind8::make_chroot($pidfile, 1));
 
 # backup_dns(&domain, file)
 # Save all the virtual server's DNS records as a separate file
+# XXX provisioning support
 sub backup_dns
 {
 &require_bind();
@@ -1437,6 +1473,7 @@ else {
 
 # restore_dns(&domain, file, &options)
 # Update the virtual server's DNS records from the backup file, except the SOA
+# XXX provisioning support
 sub restore_dns
 {
 &require_bind();
