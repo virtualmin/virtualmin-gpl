@@ -610,7 +610,7 @@ return if (!$dkim || !$dkim->{'enabled'});
 # Enable DKIM for all domains with mail
 my @doms = grep { $_->{'mail'} && $_->{'dns'} &&
 		  !$_->{'dns_submode'} } &list_domains();
-if ($d && !$d->{'dns_submode'} && ($action eq 'setup' || $action eq 'modify')) {
+if ($d && ($action eq 'setup' || $action eq 'modify')) {
 	push(@doms, $d);
 	}
 elsif ($d && $action eq 'delete') {
@@ -621,7 +621,7 @@ my %done;
 &set_dkim_domains(\@doms);
 
 # Add or remove DNS records
-if ($d->{'dns'}) {
+if ($d->{'dns'} && !$d->{'dns_submode'}) {
 	if ($d && ($action eq 'setup' || $action eq 'modify')) {
 		&add_dkim_dns_records([ $d ], $dkim);
 		}
