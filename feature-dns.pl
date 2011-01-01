@@ -28,11 +28,28 @@ sub setup_dns
 {
 &require_bind();
 local $tmpl = &get_template($_[0]->{'template'});
+local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
+
 if ($_[0]->{'provision_dns'}) {
 	# Create on provisioning server
 	&$first_print($text{'setup_bind_provision'});
 	local $info = { 'domain' => $_[0]->{'dom'} };
-	# XXX add records
+	local $temp = &transname();
+	local $bind8::config{'auto_chroot'} = undef;
+	local $bind8::config{'chroot'} = undef;
+	if ($_[0]->{'alias'}) {
+		&create_alias_records($temp, $_[0], $ip);
+		}
+	else {
+		&create_standard_records($temp, $_[0], $ip);
+		}
+	local @recs = &bind8::read_zone_file($temp, $_[0]->{'dom'});
+	@recs = grep { $_->{'name'} } @recs;	# Exclude ttl
+	@recs = grep { $_->{'type'} ne 'NS' ||	# Exclude NS for domain
+		       $_->{'name'} ne $_[0]->{'dom'}."." } @recs;
+	local @rtext = map { join(" ", $_->{'name'}, $_->{'ttl'}, $_->{'class'},
+				       $_->{'type'}, @{$_->{'values'}}) } @recs;
+	$info->{'record'} = \@rtext;
 	my ($ok, $msg) = &provision_api_call(
 		"provision-dns-zone", $info, 0);
 	if (!$ok || $msg !~ /host=(\S+)/) {
@@ -165,7 +182,6 @@ elsif (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
 
 	# Create the records file
 	local $rootfile = &bind8::make_chroot($file);
-	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 	if (!-r $rootfile) {
 		if ($_[0]->{'alias'}) {
 			&create_alias_records($file, $_[0], $ip);
