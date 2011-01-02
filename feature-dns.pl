@@ -1500,25 +1500,23 @@ return &check_pid_file(&bind8::make_chroot($pidfile, 1));
 
 # backup_dns(&domain, file)
 # Save all the virtual server's DNS records as a separate file
-# XXX provisioning support
 sub backup_dns
 {
 &require_bind();
 return 1 if ($_[0]->{'dns_submode'});	# backed up in parent
 &$first_print($text{'backup_dnscp'});
-local $z = &get_bind_zone($_[0]->{'dom'});
-if ($z) {
-	local $file = &bind8::find("file", $z->{'members'});
-	local $filename = &bind8::make_chroot(
-		&bind8::absolute_path($file->{'values'}->[0]));
-	if (-r $filename) {
-		&copy_source_dest($filename, $_[1]);
+local ($recs, $file) = &get_domain_dns_records_and_file($_[0]);
+if ($file) {
+	local $absfile = &bind8::make_chroot(
+			&bind8::absolute_path($file));
+	if (-r $absfile) {
+		&copy_source_dest($absfile, $_[1]);
 		&$second_print($text{'setup_done'});
 		return 1;
 		}
 	else {
 		&$second_print(&text('backup_dnsnozonefile',
-				     "<tt>$filename</tt>"));
+				     "<tt>$file</tt>"));
 		return 0;
 		}
 	}
@@ -1530,41 +1528,38 @@ else {
 
 # restore_dns(&domain, file, &options)
 # Update the virtual server's DNS records from the backup file, except the SOA
-# XXX provisioning support
 sub restore_dns
 {
 &require_bind();
 return 1 if ($_[0]->{'dns_submode'});	# restored in parent
 &$first_print($text{'restore_dnscp'});
 &obtain_lock_dns($_[0], 1);
-local $z = &get_bind_zone($_[0]->{'dom'});
-if ($z) {
-	local $file = &bind8::find("file", $z->{'members'});
-	local $filename = &bind8::make_chroot(
-			&bind8::absolute_path($file->{'values'}->[0]));
-	local $fn = $file->{'values'}->[0];
+local ($recs, $file) = &get_domain_dns_records_and_file($_[0]);
+if ($file) {
+	local $absfile = &bind8::make_chroot(
+			&bind8::absolute_path($file));
 	local @thisrecs;
 
 	if ($_[2]->{'wholefile'}) {
 		# Copy whole file
-		&copy_source_dest($_[1], $filename);
-		&bind8::set_ownership($filename);
+		&copy_source_dest($_[1], $absfile);
+		&bind8::set_ownership($file);
 		}
 	else {
 		# Only copy section after SOA
-		@thisrecs = &bind8::read_zone_file($fn, $_[0]->{'dom'});
+		@thisrecs = &bind8::read_zone_file($file, $_[0]->{'dom'});
 		local $srclref = &read_file_lines($_[1], 1);
-		local $dstlref = &read_file_lines($filename);
+		local $dstlref = &read_file_lines($absfile);
 		local ($srcstart, $srcend) = &except_soa($_[0], $_[1]);
-		local ($dststart, $dstend) = &except_soa($_[0], $filename);
+		local ($dststart, $dstend) = &except_soa($_[0], $absfile);
 		splice(@$dstlref, $dststart, $dstend - $dststart + 1,
 		       @$srclref[$srcstart .. $srcend]);
-		&flush_file_lines($filename);
+		&flush_file_lines($absfile);
 		}
 
 	# Need to bump SOA
-	local @recs = &bind8::read_zone_file($fn, $_[0]->{'dom'});
-	&post_records_change($_[0], \@recs);
+	local @recs = &bind8::read_zone_file($file, $_[0]->{'dom'});
+	&post_records_change($_[0], \@recs, $file);
 
 	# Need to update IP addresses
 	local $r;
@@ -1573,7 +1568,7 @@ if ($z) {
 				   $_->{'name'} eq '@') } @recs;
 	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 	local $baseip = $baserec ? $baserec->{'values'}->[0] : undef;
-	&modify_records_ip_address(\@recs, $fn, $baseip, $ip);
+	&modify_records_ip_address(\@recs, $file, $baseip, $ip);
 
 	# Replace NS records with those from new system
 	if (!$_[2]->{'wholefile'}) {
@@ -1581,14 +1576,14 @@ if ($z) {
 		local @ns = grep { $_->{'type'} eq 'NS' } @recs;
 		foreach my $r (@thisns) {
 			# Create NS records that were in new system's file
-			&bind8::create_record($fn, $r->{'name'}, $r->{'ttl'},
+			&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
 					      $r->{'class'}, $r->{'type'},
 					      &join_record_values($r),
 					      $r->{'comment'});
 			}
 		foreach my $r (reverse(@ns)) {
 			# Remove old NS records that we copied over
-			&bind8::delete_record($fn, $r);
+			&bind8::delete_record($file, $r);
 			}
 		}
 
@@ -1689,6 +1684,10 @@ return { 'wholefile' => $in->{'dns_wholefile'} };
 sub sysinfo_dns
 {
 &require_bind();
+if ($config{'provision_dns'}) {
+	# No local BIND in provisioning mode
+	return ( );
+	}
 if (!$bind8::bind_version) {
 	local $out = `$bind8::config{'named_path'} -v 2>&1`;
 	if ($out =~ /(bind|named)\s+([0-9\.]+)/i) {
@@ -2048,13 +2047,13 @@ return undef;
 sub save_domain_spf
 {
 local ($d, $spf) = @_;
-local @recs = &get_domain_dns_records($d);
-if (!@recs) {
+local ($recs, $file) = &get_domain_dns_records_and_file($d);
+if (!$file) {
 	# Domain not found!
 	return;
 	}
 local ($r) = grep { $_->{'type'} eq 'SPF' &&
-		    $_->{'name'} eq $d->{'dom'}.'.' } @recs;
+		    $_->{'name'} eq $d->{'dom'}.'.' } @$recs;
 local $str = $spf ? &bind8::join_spf($spf) : undef;
 local $bump = 1;
 if ($r && $spf) {
@@ -2069,7 +2068,7 @@ elsif ($r && !$spf) {
 	}
 elsif (!$r && $spf) {
 	# Add record
-	&bind8::create_record($recs[0]->{'file'}, $d->{'dom'}.'.', undef,
+	&bind8::create_record($file, $d->{'dom'}.'.', undef,
 			      "IN", "TXT", "\"$str\"");
 	}
 else {
@@ -2077,7 +2076,7 @@ else {
 	$bump = 0;
 	}
 if ($bump) {
-	&post_records_change($d, \@recs);
+	&post_records_change($d, $recs, $file);
 	&register_post_action(\&restart_bind, $d);
 	}
 }
