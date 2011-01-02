@@ -1683,7 +1683,7 @@ return ( [ $text{'sysinfo_bind'}, $bind8::bind_version ] );
 sub links_dns
 {
 local ($d) = @_;
-if (!$d->{'dns_submode'}) {
+if (!$d->{'dns_submode'} && !$d->{'dns_provision'}) {
 	return ( { 'mod' => 'bind8',
 		   'desc' => $text{'links_dns'},
 		   'page' => "edit_master.cgi?zone=".&urlize($d->{'dom'}),
