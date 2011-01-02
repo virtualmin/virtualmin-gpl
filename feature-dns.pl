@@ -23,7 +23,6 @@ return undef;
 
 # setup_dns(&domain)
 # Set up a zone for a domain
-# XXX provisioning support
 sub setup_dns
 {
 &require_bind();
@@ -968,7 +967,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 
 	# If requested, add webmail and admin records
 	if ($d->{'web'} && &has_webmail_rewrite()) {
-		&add_webmail_dns_records($d, $tmpl, $file, \%already);
+		&add_webmail_dns_records_to_file($d, $tmpl, $file, \%already);
 		}
 
 	# For mail domains, add MX to this server
@@ -1013,17 +1012,16 @@ sub create_alias_records
 local ($file, $d, $ip) = @_;
 local $tmpl = &get_template($d->{'template'});
 local $aliasd = &get_domain($d->{'alias'});
-local $aliasfile = &get_domain_dns_file($aliasd);
-$file || &error("No zone file for alias target $aliasd->{'dom'} found");
-local @recs = &bind8::read_zone_file($aliasfile, $aliasd->{'dom'});
-@recs || &error("No records for alias target $aliasd->{'dom'} found");
+local ($recs, $aliasfile) = &get_domain_dns_records_and_file($aliasd);
+$aliasfile || &error("No zone file for alias target $aliasd->{'dom'} found");
+@$recs || &error("No records for alias target $aliasd->{'dom'} found");
 local $olddom = $aliasd->{'dom'};
 local $dom = $d->{'dom'};
 local $oldip = $aliasd->{'ip'};
 local @sublist = grep { $_->{'id'} ne $aliasd->{'id'} &&
 			$_->{'dom'} =~ /\.\Q$aliasd->{'dom'}\E$/ }
 		      &list_domains();
-RECORD: foreach my $r (@recs) {
+RECORD: foreach my $r (@$recs) {
 	if ($d->{'dns_submode'} && ($r->{'type'} eq 'NS' || 
 				    $r->{'type'} eq 'SOA')) {
 		# Skip SOA and NS records for sub-domains in the same file
@@ -1060,14 +1058,28 @@ RECORD: foreach my $r (@recs) {
 	}
 }
 
-# add_webmail_dns_records(&domain, [&tmpl], [file], [&already-got])
+# add_webmail_dns_records(&domain)
 # Adds the webmail and admin DNS records, if requested in the template
 sub add_webmail_dns_records
 {
-local ($d, $tmpl, $file, $already) = @_;
-$tmpl ||= &get_template($d->{'template'});
-$file ||= &get_domain_dns_file($d);
+local ($d) = @_;
+local $tmpl = &get_template($d->{'template'});
+local ($recs, $file) = &get_domain_dns_records_and_file($d);
 return 0 if (!$file);
+local $count = &add_webmail_dns_records_to_file($d, $tmpl, $file);
+if ($count) {
+	&post_records_change($d, $recs, $file);
+	&register_post_action(\&restart_bind, $d);
+	}
+return $count;
+}
+
+# add_webmail_dns_records_to_file(&domain, &tmpl, file, [&already-got])
+# Adds the webmail and admin DNS records to a specific file, if requested
+# in the template
+sub add_webmail_dns_records_to_file
+{
+local ($d, $tmpl, $file, $already) = @_;
 local $count = 0;
 local $ip = $d->{'dns_ip'} || $d->{'ip'};
 foreach my $r ('webmail', 'admin') {
@@ -1078,11 +1090,6 @@ foreach my $r ('webmail', 'admin') {
 		$count++;
 		}
 	}
-if ($count) {
-	local @recs = &bind8::read_zone_file($file, $d->{'dom'});
-	&post_records_change($_[0], \@recs);
-	&register_post_action(\&restart_bind, $d);
-	}
 return $count;
 }
 
@@ -1091,20 +1098,19 @@ return $count;
 sub remove_webmail_dns_records
 {
 local ($d) = @_;
-local $file = &get_domain_dns_file($d);
+local ($recs, $file) = &get_domain_dns_records_and_file($d);
 return 0 if (!$file);
-local @recs = &bind8::read_zone_file($file, $d->{'dom'});
 local $count = 0;
 foreach my $r (reverse('webmail', 'admin')) {
 	local $n = "$r.$d->{'dom'}.";
-	local ($rec) = grep { $_->{'name'} eq $n } @recs;
+	local ($rec) = grep { $_->{'name'} eq $n } @$recs;
 	if ($rec) {
-		&bind8::delete_record($file, $rec);
+		&bind8::delete_record($rec->{'file'}, $rec);
 		$count++;
 		}
 	}
 if ($count) {
-	&post_records_change($_[0], \@recs);
+	&post_records_change($d, $recs, $file);
 	&register_post_action(\&restart_bind, $d);
 	}
 return $count;
@@ -2323,9 +2329,10 @@ sub obtain_lock_dns
 local ($d, $conftoo) = @_;
 return if (!$config{'dns'});
 &obtain_lock_anything($d);
+local $prov = $d ? $d->{'provision_dns'} : $config{'provision_dns'};
 
 # Lock records file
-if ($d) {
+if ($d && !$prov) {
 	if ($main::got_lock_dns_zone{$d->{'id'}} == 0) {
 		&require_bind();
 		local $conf = &bind8::get_config();
@@ -2349,7 +2356,7 @@ if ($d) {
 
 # Lock named.conf for this domain, if needed. We assume that all domains are
 # in the same .conf file, even though that may not be true.
-if ($conftoo) {
+if ($conftoo && !$prov) {
 	if ($main::got_lock_dns == 0) {
 		&require_bind();
 		undef(@bind8::get_config_cache);
@@ -2367,9 +2374,10 @@ sub release_lock_dns
 {
 local ($d, $conftoo) = @_;
 return if (!$config{'dns'});
+local $prov = $d ? $d->{'provision_dns'} : $config{'provision_dns'};
 
 # Unlock records file
-if ($d) {
+if ($d && !$prov) {
 	if ($main::got_lock_dns_zone{$d->{'id'}} == 1) {
 		local $rootfn = $main::got_lock_dns_file{$d->{'id'}};
 		&unlock_file($rootfn) if ($rootfn);
@@ -2379,7 +2387,7 @@ if ($d) {
 	}
 
 # Unlock named.conf
-if ($conftoo) {
+if ($conftoo && !$prov) {
 	if ($main::got_lock_dns == 1) {
 		&require_bind();
 		&unlock_file(&bind8::make_chroot($bind8::config{'zones_file'} ||
