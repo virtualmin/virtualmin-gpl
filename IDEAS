@@ -56,6 +56,8 @@
  - Remote DNS and MySQL setup
 	- Documentation
 	- DNS support
+	- Suppress template options that aren't valid when provisioning remotely
+	- Hide link to edit DNS records when remote
 	- CHANGELOG
 
  - Automatically add reverse IPv6 addresses for domains
@@ -65,3 +67,5 @@
  - Procmail script entry to block mail with useful message if quota is low
 
  - Better backup for global settings (procmail, etc..)
+	- DKIM
+	- Postgrey

@@ -44,12 +44,7 @@ if ($_[0]->{'provision_dns'}) {
 		&create_standard_records($temp, $_[0], $ip);
 		}
 	local @recs = &bind8::read_zone_file($temp, $_[0]->{'dom'});
-	@recs = grep { $_->{'name'} } @recs;	# Exclude ttl
-	@recs = grep { $_->{'type'} ne 'NS' ||	# Exclude NS for domain
-		       $_->{'name'} ne $_[0]->{'dom'}."." } @recs;
-	local @rtext = map { join(" ", $_->{'name'}, $_->{'ttl'}, $_->{'class'},
-				       $_->{'type'}, @{$_->{'values'}}) } @recs;
-	$info->{'record'} = \@rtext;
+	$info->{'record'} = [ &records_to_text($_[0], \@recs) ];
 	my ($ok, $msg) = &provision_api_call(
 		"provision-dns-zone", $info, 0);
 	if (!$ok || $msg !~ /host=(\S+)/) {
@@ -276,7 +271,7 @@ else {
 	&release_lock_dns($parent);
 	&$second_print($text{'setup_done'});
 	}
-&register_post_action(\&restart_bind);
+&register_post_action(\&restart_bind, $_[0]);
 }
 
 sub slave_error_handler
@@ -289,7 +284,27 @@ $slave_error = $_[0];
 sub delete_dns
 {
 &require_bind();
-if (!$_[0]->{'dns_submode'}) {
+if ($_[0]->{'provision_dns'}) {
+	# Delete from provisioning server
+	&$first_print($text{'delete_bind_provision'});
+	if ($_[0]->{'provision_dns_host'}) {
+		local $info = { 'domain' => $_[0]->{'dom'},
+				'host' => $_[0]->{'provision_dns_host'} };
+		my ($ok, $msg) = &provision_api_call(
+			"unprovision-dns-zone", $info, 0);
+		if (!$ok) {
+			&$second_print(&text('delete_ebind_provision', $msg));
+			return 0;
+			}
+		delete($_[0]->{'provision_dns_host'});
+		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$second_print($text{'delete_bind_provision_none'});
+		}
+	}
+elsif (!$_[0]->{'dns_submode'}) {
+	# Delete real domain
 	&$first_print($text{'delete_bind'});
 	&obtain_lock_dns($_[0], 1);
 	local $z = &get_bind_zone($_[0]->{'dom'});
@@ -360,7 +375,7 @@ else {
 	&$second_print($text{'setup_done'});
 	$_[0]->{'dns_submode'} = 0;
 	}
-&register_post_action(\&restart_bind);
+&register_post_action(\&restart_bind, $_[0]);
 }
 
 # create_zone_on_slaves(&domain, space-separate-slave-list)
@@ -399,7 +414,7 @@ foreach my $s (split(/\s+/, $slaves)) {
 local @oldslaves = split(/\s+/, $d->{'dns_slave'});
 $d->{'dns_slave'} = join(" ", &unique(@oldslaves, @newslaves));
 
-&register_post_action(\&restart_bind);
+&register_post_action(\&restart_bind, $d);
 }
 
 # delete_zone_on_slaves(&domain, [space-separate-slave-list])
@@ -446,12 +461,13 @@ if (@delslaves) {
 		}
 	}
 
-&register_post_action(\&restart_bind);
+&register_post_action(\&restart_bind, $d);
 }
 
 # modify_dns(&domain, &olddomain)
 # If the IP for this server has changed, update all records containing the old
 # IP to the new.
+# XXX provisioning support
 sub modify_dns
 {
 if (!$_[0]->{'subdom'} && $_[1]->{'subdom'} && $_[0]->{'dns_submode'} ||
@@ -747,21 +763,22 @@ elsif ($_[0]->{'virt6'} && $_[1]->{'virt6'} &&
 # Release locks
 &release_lock_dns($lockon, $lockconf);
 
-&register_post_action(\&restart_bind) if ($rv);
+&register_post_action(\&restart_bind, $_[0]) if ($rv);
 return $rv;
 }
 
-# join_record_values(&record)
+# join_record_values(&record, [always-one-line])
 # Given the values for a record, joins them into a space-separated string
 # with quoting if needed
 sub join_record_values
 {
-local ($r) = @_;
-if ($r->{'type'} eq 'SOA') {
+local ($r, $oneline) = @_;
+if ($r->{'type'} eq 'SOA' && !$oneline) {
 	# Multiliple lines, with brackets
 	local $v = $r->{'values'};
-	return "$v->[0] $v->[1] (\n\t\t\t$v->[2]\n\t\t\t$v->[3]\n".
-	       "\t\t\t$v->[4]\n\t\t\t$v->[5]\n\t\t\t$v->[6] )";
+	local $sep = "\n\t\t\t";
+	return "$v->[0] $v->[1] ($sep$v->[2]$sep$v->[3]".
+	       "$sep$v->[4]$sep$v->[5]$sep$v->[6] )";
 	}
 else {
 	# All one one line
@@ -1064,7 +1081,7 @@ foreach my $r ('webmail', 'admin') {
 if ($count) {
 	local @recs = &bind8::read_zone_file($file, $d->{'dom'});
 	&post_records_change($_[0], \@recs);
-	&register_post_action(\&restart_bind);
+	&register_post_action(\&restart_bind, $d);
 	}
 return $count;
 }
@@ -1088,7 +1105,7 @@ foreach my $r (reverse('webmail', 'admin')) {
 	}
 if ($count) {
 	&post_records_change($_[0], \@recs);
-	&register_post_action(\&restart_bind);
+	&register_post_action(\&restart_bind, $d);
 	}
 return $count;
 }
@@ -1172,11 +1189,10 @@ foreach my $r (reverse(@recs)) {
 sub save_domain_matchall_record
 {
 local ($d, $star) = @_;
-local $file = &get_domain_dns_file($d);
+local ($recs, $file) = &get_domain_dns_records_and_file($d);
 return 0 if (!$file);
-local @recs = &bind8::read_zone_file($file, $d->{'dom'});
 local $withstar = "*.".$d->{'dom'}.".";
-local ($r) = grep { $_->{'name'} eq $withstar } @recs;
+local ($r) = grep { $_->{'name'} eq $withstar } @$recs;
 local $any = 0;
 if ($star && !$r) {
 	# Need to add
@@ -1190,14 +1206,16 @@ elsif (!$star && $r) {
 	$any++;
 	}
 if ($any) {
-	&post_records_change($d, \@recs);
-	&register_post_action(\&restart_bind);
+	my $err = &post_records_change($d, $recs, $file);
+	return 0 if ($err);
+	&register_post_action(\&restart_bind, $d);
 	}
 return $any;
 }
 
 # validate_dns(&domain)
 # Check for the DNS domain and records file
+# XXX provisioning support
 sub validate_dns
 {
 local ($d) = @_;
@@ -1256,6 +1274,7 @@ return undef;
 
 # disable_dns(&domain)
 # Re-names this domain in named.conf with the .disabled suffix
+# XXX provisioning support
 sub disable_dns
 {
 &$first_print($text{'disable_bind'});
@@ -1294,7 +1313,7 @@ if ($z) {
 	# Clear zone names caches
 	undef(@bind8::list_zone_names_cache);
 	&$second_print($text{'setup_done'});
-	&register_post_action(\&restart_bind);
+	&register_post_action(\&restart_bind, $_[0]);
 
 	# If on any slaves, delete there too
 	$_[0]->{'old_dns_slave'} = $_[0]->{'dns_slave'};
@@ -1308,6 +1327,7 @@ else {
 
 # enable_dns(&domain)
 # Re-names this domain in named.conf to remove the .disabled suffix
+# XXX provisioning support
 sub enable_dns
 {
 &$first_print($text{'enable_bind'});
@@ -1347,7 +1367,7 @@ if ($z) {
 	# Clear zone names caches
 	undef(@bind8::list_zone_names_cache);
 	&$second_print($text{'setup_done'});
-	&register_post_action(\&restart_bind);
+	&register_post_action(\&restart_bind, $_[0]);
 
 	# If it used to be on any slaves, enable too
 	$_[0]->{'dns_slave'} = $_[0]->{'old_dns_slave'};
@@ -1382,7 +1402,8 @@ return $z;
 # Signal BIND to re-load its configuration
 sub restart_bind
 {
-if ($d->{'provision_dns'}) {
+local $p = $_[0] ? $_[0]->{'provision_dns'} : $config{'provision_dns'};
+if ($p) {
 	# Hosted on a provisioning server, so nothing to do
 	return 1;
 	}
@@ -1553,7 +1574,7 @@ if ($z) {
 
 	&$second_print($text{'setup_done'});
 
-	&register_post_action(\&restart_bind);
+	&register_post_action(\&restart_bind, $_[0]);
 	return 1;
 	}
 else {
@@ -2033,13 +2054,14 @@ else {
 	}
 if ($bump) {
 	&post_records_change($d, \@recs);
-	&register_post_action(\&restart_bind);
+	&register_post_action(\&restart_bind, $d);
 	}
 }
 
 # get_domain_dns_records(&domain)
 # Returns an array of DNS records for a domain, or empty if the file couldn't
 # be found.
+# XXX won't work with provisioning
 sub get_domain_dns_records
 {
 local ($d) = @_;
@@ -2050,6 +2072,7 @@ return &bind8::read_zone_file($fn, $d->{'dom'});
 
 # get_domain_dns_file(&domain)
 # Returns the chroot-relative path to a domain's DNS records
+# XXX won't work with provisioning
 sub get_domain_dns_file
 {
 local ($d) = @_;
@@ -2069,6 +2092,69 @@ return undef if (!$z);
 local $file = &bind8::find("file", $z->{'members'});
 return undef if (!$file);
 return $file->{'values'}->[0];
+}
+
+# get_domain_dns_records_and_file(&domain)
+# Returns an array ref of a domain's DNS records and the file they are in.
+# For a provisioned domain, this may be a local temp file.
+sub get_domain_dns_records_and_file
+{
+local ($d) = @_;
+if ($d->{'provision_dns'}) {
+	# Download to temp file, and read it
+	# XXX deal with chroot mode? Make temp path chroot'd?
+	local $temp = &transname();
+	local $info = { 'domain' => $d->{'dom'},
+			'host' => $d->{'provision_dns_host'} };
+	my ($ok, $msg) = &provision_api_call(
+		"list-dns-records", $info, 1);
+	if (!$ok) {
+		return ("Failed to fetch DNS records from provisioning ".
+			"server : $msg");
+		}
+	local @recs;
+	local $lnum = 0;
+	foreach my $r (@$msg) {
+		local $rec;
+		if ($r->{'name'} eq '$ttl') {
+			$rec = { 'defttl' => $r->{'values'}->{'value'}->[0] };
+			&bind8::create_defttl($temp, $rec->{'defttl'});
+			}
+		elsif ($r->{'name'} eq '$generate') {
+			$rec = { 'generate' => $r->{'values'}->{'value'} };
+			&bind8::create_generator($temp, @{$rec->{'generate'}});
+			}
+		else {
+			$rec = { 'name' => $r->{'name'},
+				 'realname' => $r->{'name'},
+				 'class' => $r->{'values'}->{'class'}->[0],
+				 'type' => $r->{'values'}->{'type'}->[0],
+				 'ttl' => $r->{'values'}->{'ttl'}->[0],
+				 'comment' => $r->{'values'}->{'comment'}->[0],
+				 'values' => $r->{'values'}->{'value'},
+			       };
+			&bind8::create_record($temp, $rec->{'name'},
+				$rec->{'ttl'}, $rec->{'class'}, $rec->{'type'},
+				&join_record_values($rec, 1),
+				$rec->{'comment'});
+			}
+		$rec->{'line'} = $lnum;
+		$rec->{'eline'} = $lnum;
+		$rec->{'num'} = $lnum;
+		$rec->{'file'} = $temp;
+		$rec->{'rootfile'} = $temp;	# XXX
+		push(@recs, $rec);
+		$lnum++;
+		}
+	return (\@recs, $temp);
+	}
+else {
+	# Find local file
+	local $file = &get_domain_dns_file($d);
+	return ("No zone file found for $d->{'dom'}") if (!$file);
+	local @recs = &get_domain_dns_records($d);
+	return (\@recs, $file);
+	}
 }
 
 # default_domain_spf(&domain)
@@ -2125,18 +2211,21 @@ undef($bind8::get_chroot_cache);		# reset cache back
 return @rv;
 }
 
-# post_records_change(&domain, &recs)
+# post_records_change(&domain, &recs, [file])
 # Called after some records in a domain are changed, to bump to SOA
 # and possibly re-sign
 sub post_records_change
 {
-local ($d, $recs) = @_;
+local ($d, $recs, $fn) = @_;
 &require_bind();
-local $z = &get_bind_zone($d->{'dom'});
-return "Failed to find zone for $d->{'dom'}" if (!$z);
-local $file = &bind8::find("file", $z->{'members'});
-return "Failed to find records file for $d->{'dom'}" if (!$file);
-my $fn = $file->{'values'}->[0];
+if (!$fn) {
+	# Use local file by default
+	local $z = &get_bind_zone($d->{'dom'});
+	return "Failed to find zone for $d->{'dom'}" if (!$z);
+	local $file = &bind8::find("file", $z->{'members'});
+	return "Failed to find records file for $d->{'dom'}" if (!$file);
+	$fn = $file->{'values'}->[0];
+	}
 &bind8::bump_soa_record($fn, $recs);
 if (defined(&bind8::supports_dnssec) &&
     &bind8::supports_dnssec()) {
@@ -2149,7 +2238,44 @@ if (defined(&bind8::supports_dnssec) &&
 		return "DNSSEC signing failed : $@";
 		}
 	}
+if ($d->{'provision_dns'}) {
+	# Upload records to provisioning server
+	local $info = { 'domain' => $d->{'dom'},
+			'replace' => '',
+			'host' => $d->{'provision_dns_host'} };
+	local @newrecs = &bind8::read_zone_file($fn, $d->{'dom'});
+	$info->{'record'} = [ &records_to_text($d, \@newrecs) ];
+	my ($ok, $msg) = &provision_api_call("modify-dns-records", $info, 0);
+	if (!ok) {
+		return "Error from provisioning server updating records : $msg";
+		}
+	}
 return undef;
+}
+
+# records_to_text(&domain, &records)
+# Given a list of record hashes, return text-format equivalents for an API call
+sub records_to_text
+{
+local ($d, $recs) = @_;
+local @rv;
+foreach my $r (@$recs) {
+	next if ($r->{'type'} eq 'NS' &&	# Exclude NS for domain
+		 $r->{'name'} eq $d->{'dom'}.".");
+	if ($r->{'defttl'}) {
+		push(@rv, '$ttl '.$r->{'defttl'});
+		}
+	elsif ($r->{'generate'}) {
+		push(@rv, '$generate '.join(' ', @{$r->{'generate'}}));
+		}
+	elsif ($r->{'type'}) {
+		my $t = $r->{'type'};
+		$t = "TXT" if ($t eq "SPF");
+		push(@rv, join(" ", $r->{'name'}, $r->{'ttl'}, $r->{'class'},
+				    $t, &join_record_values($r, 1)));
+		}
+	}
+return @rv;
 }
 
 # under_parent_domain(&domain, [&parent])
