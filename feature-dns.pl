@@ -1215,37 +1215,23 @@ return $any;
 
 # validate_dns(&domain)
 # Check for the DNS domain and records file
-# XXX provisioning support
 sub validate_dns
 {
 local ($d) = @_;
-local $z;
-if ($d->{'dns_submode'}) {
-	# Records are in parent domain's file
-	local $parent = &get_domain($d->{'subdom'}) ||
-			&get_domain($d->{'parent'});
-	$z = &get_bind_zone($parent->{'dom'});
+local ($recs, $file) = &get_domain_dns_records_and_file($d);
+return &text('validate_edns', "<tt>$d->{'dom'}</tt>") if (!$file);
+return &text('validate_ednsfile', "<tt>$d->{'dom'}</tt>") if (!@$recs);
+if (!$d->{'provision_dns'}) {
+	local $zonefile = &bind8::make_chroot(
+				&bind8::absolute_path($file));
+	return &text('validate_ednsfile2', "<tt>$zonefile</tt>") if (!-r $zonefile);
 	}
-else {
-	# Domain has its own records file
-	$z = &get_bind_zone($d->{'dom'});
-	}
-
-# Make sure the zone and file exists
-return &text('validate_edns', "<tt>$d->{'dom'}</tt>") if (!$z);
-local $file = &bind8::find("file", $z->{'members'});
-return &text('validate_ednsfile', "<tt>$d->{'dom'}</tt>") if (!$file);
-local $zonefile = &bind8::make_chroot(
-			&bind8::absolute_path($file->{'values'}->[0]));
-return &text('validate_ednsfile2', "<tt>$zonefile</tt>") if (!-r $zonefile);
 
 # Check for critical records, and that www.$dom and $dom resolve to the
 # expected IP address (if we have a website)
-local $bind8::config{'short_names'} = 0;
-local @recs = &bind8::read_zone_file($file->{'values'}->[0], $d->{'dom'});
 local %got;
 local $ip = $d->{'dns_ip'} || $d->{'ip'};
-foreach my $r (@recs) {
+foreach my $r (@$recs) {
 	$got{uc($r->{'type'})}++;
 	}
 $got{'SOA'} || return &text('validate_ednssoa', "<tt>$zonefile</tt>");
@@ -1253,7 +1239,7 @@ $got{'A'} || return &text('validate_ednsa', "<tt>$zonefile</tt>");
 if ($d->{'web'}) {
 	foreach my $n ($d->{'dom'}.'.', 'www.'.$d->{'dom'}.'.') {
 		my @nips = map { $_->{'values'}->[0] }
-		       grep { $_->{'type'} eq 'A' && $_->{'name'} eq $n } @recs;
+		       grep { $_->{'type'} eq 'A' && $_->{'name'} eq $n } @$recs;
 		if (@nips && &indexof($ip, @nips) < 0) {
 			return &text('validate_ednsip', "<tt>$n</tt>",
 			    "<tt>".join(' or ', @nips)."</tt>", "<tt>$ip</tt>");
@@ -1262,7 +1248,8 @@ if ($d->{'web'}) {
 	}
 
 # If possible, run named-checkzone
-if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone()) {
+if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
+    !$d->{'provision_dns'}) {
 	local @errs = &bind8::check_zone_records($z);
 	if (@errs) {
 		return &text('validate_ednscheck',
@@ -1344,7 +1331,6 @@ else {
 
 # enable_dns(&domain)
 # Re-names this domain in named.conf to remove the .disabled suffix
-# XXX provisioning support
 sub enable_dns
 {
 if ($d->{'provision_dns'}) {
@@ -2099,13 +2085,12 @@ if ($bump) {
 # get_domain_dns_records(&domain)
 # Returns an array of DNS records for a domain, or empty if the file couldn't
 # be found.
-# XXX won't work with provisioning
 sub get_domain_dns_records
 {
 local ($d) = @_;
-local $fn = &get_domain_dns_file($d);
-return ( ) if (!$fn);
-return &bind8::read_zone_file($fn, $d->{'dom'});
+local ($recs, $file) = &get_domain_dns_records_and_file($d);
+return ( ) if (!$file);
+return @$recs;
 }
 
 # get_domain_dns_file(&domain)
@@ -2138,6 +2123,8 @@ return $file->{'values'}->[0];
 sub get_domain_dns_records_and_file
 {
 local ($d) = @_;
+&require_bind();
+local $bind8::config{'short_names'} = 0;
 if ($d->{'provision_dns'}) {
 	# Download to temp file, and read it
 	# XXX deal with chroot mode? Make temp path chroot'd?
