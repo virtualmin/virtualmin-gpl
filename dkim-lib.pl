@@ -707,25 +707,23 @@ foreach my $d (@$doms) {
 		next;
 		}
 	&obtain_lock_dns($d);
-	my $file = &bind8::find("file", $z->{'members'});
-	my $fn = $file->{'values'}->[0];
-	my @recs = &bind8::read_zone_file($fn, $d->{'dom'});
+	my ($recs, $file) = &get_domain_dns_records_and_file($d);
 	my $withdot = $d->{'dom'}.'.';
 	my $dkname = '_domainkey.'.$withdot;
 	my ($dkrec) = grep { $_->{'name'} eq $dkname &&
-			     $_->{'type'} eq 'TXT' } @recs;
+			     $_->{'type'} eq 'TXT' } @$recs;
 	my $changed = 0;
 	if (!$dkrec) {
-		&bind8::create_record($fn, $dkname, undef, 'IN', 'TXT',
+		&bind8::create_record($file, $dkname, undef, 'IN', 'TXT',
 				      '"t=y; o=-;"');
 		$changed++;
 		}
 	my $selname = $dkim->{'selector'}.'.'.$dkname;
 	my ($selrec) = grep { $_->{'name'} eq $selname && 
-			      $_->{'type'} eq 'TXT' } @recs;
+			      $_->{'type'} eq 'TXT' } @$recs;
 	if (!$selrec) {
 		# Add new record
-		&bind8::create_record($fn, $selname, undef, 'IN', 'TXT',
+		&bind8::create_record($file, $selname, undef, 'IN', 'TXT',
 				      '"k=rsa; t=y; p='.$pubkey.'"');
 		$changed++;
 		}
@@ -742,14 +740,7 @@ foreach my $d (@$doms) {
 		$changed++;
 		}
 	if ($changed) {
-		&bind8::bump_soa_record($fn, \@recs);
-		if (defined(&bind8::supports_dnssec) &&
-		    &bind8::supports_dnssec()) {
-			eval {
-				local $main::error_must_die = 1;
-				&bind8::sign_dnssec_zone_if_key($z, \@recs, 0);
-				};
-			}
+		&post_records_change($d, $recs, $file);
 		&$second_print($text{'dkim_dnsadded'});
 		$anychanged++;
 		}
@@ -775,34 +766,25 @@ foreach my $d (@$doms) {
 		next;
 		}
 	&obtain_lock_dns($d);
-	my $file = &bind8::find("file", $z->{'members'});
-	my $fn = $file->{'values'}->[0];
-	my @recs = &bind8::read_zone_file($fn, $d->{'dom'});
+	my ($recs, $file) = &get_domain_dns_records_and_file($d);
 	my $withdot = $d->{'dom'}.'.';
 	my $dkname = '_domainkey.'.$withdot;
 	my ($dkrec) = grep { $_->{'name'} eq $dkname &&
-			     $_->{'type'} eq 'TXT' } @recs;
+			     $_->{'type'} eq 'TXT' } @$recs;
 	my $selname = $dkim->{'selector'}.'.'.$dkname;
 	my ($selrec) = grep { $_->{'name'} eq $selname &&
-                              $_->{'type'} eq 'TXT' } @recs;
+                              $_->{'type'} eq 'TXT' } @$recs;
 	my $changed = 0;
 	if ($selrec) {
-		&bind8::delete_record($fn, $selrec);
+		&bind8::delete_record($selrec->{'file'}, $selrec);
 		$changed++;
 		}
 	if ($dkrec) {
-		&bind8::delete_record($fn, $dkrec);
+		&bind8::delete_record($dkrec->{'file'}, $dkrec);
 		$changed++;
 		}
 	if ($changed) {
-		&bind8::bump_soa_record($fn, \@recs);
-		if (defined(&bind8::supports_dnssec) &&
-		    &bind8::supports_dnssec()) {
-			eval {
-				local $main::error_must_die = 1;
-				&bind8::sign_dnssec_zone_if_key($z, \@recs, 0);
-				};
-			}
+		&post_records_change($d, $recs, $file);
 		&$second_print($text{'dkim_dnsremoved'});
 		$anychanged++;
 		}
