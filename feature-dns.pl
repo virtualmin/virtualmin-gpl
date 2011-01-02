@@ -1696,6 +1696,10 @@ return ( );
 sub startstop_dns
 {
 local ($typestatus) = @_;
+if ($config{'provision_dns'}) {
+	# Cannot start or stop when remote
+	return ();
+	}
 local $bpid = defined($typestatus{'bind8'}) ?
 		$typestatus{'bind8'} == 1 : &get_bind_pid();
 local @links = ( { 'link' => '/bind8/',
