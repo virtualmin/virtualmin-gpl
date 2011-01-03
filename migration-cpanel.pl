@@ -521,13 +521,11 @@ if ($got{'dns'} && -d $daily) {
 	&require_bind();
 	local $named = &extract_cpanel_dir("$daily/dirs/_var_named.tar.gz");
 	local $zsrcfile = &bind8::find_value("file", $zone->{'members'});
-	local $newzone = &get_bind_zone($dom);
-	local $zdstfile = &bind8::find_value("file", $newzone->{'members'});
+	local ($recs, $zdstfile) = &get_domain_dns_records_and_file(\%dom);
 	if (-r "$named/$zsrcfile") {
 		&execute_command("cp ".quotemeta("$named/$zsrcfile")." ".
 			     quotemeta(&bind8::make_chroot($zdstfile)));
-		local @recs = &bind8::read_zone_file($zdstfile, $dom);
-		foreach my $r (@recs) {
+		foreach my $r (@$recs) {
 			my $change = 0;
 			if (($r->{'name'} eq $dom."." ||
 			     $r->{'name'} eq "www.".$dom."." ||
@@ -538,7 +536,8 @@ if ($got{'dns'} && -d $daily) {
 				$r->{'values'} = [ $dom{'ip'} ];
 				$change++;
 				}
-			elsif ($r->{'name'} eq $dom."." && $r->{'type'} eq 'NS') {
+			elsif ($r->{'name'} eq $dom."." &&
+			       $r->{'type'} eq 'NS') {
 				# Set NS record to this server
 				local $master = $bconfig{'default_prins'} ||
 						&get_system_hostname();
@@ -547,13 +546,15 @@ if ($got{'dns'} && -d $daily) {
 				$change++;
 				}
 			if ($change) {
-				&bind8::modify_record($zdstfile, $r, $r->{'name'},
-						      $r->{'ttl'}, $r->{'class'},
-						      $r->{'type'},
-						      join(" ", @{$r->{'values'}}),
-						      $r->{'comment'});
+				&bind8::modify_record(
+					$zdstfile, $r, $r->{'name'},
+					$r->{'ttl'}, $r->{'class'},
+					$r->{'type'},
+					join(" ", @{$r->{'values'}}),
+					$r->{'comment'});
 				}
 			}
+		&post_records_change(\%dom, $zdstfile, $recs);
 		&$second_print(".. done");
 		&register_post_action(\&restart_bind);
 		}

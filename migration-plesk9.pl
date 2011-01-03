@@ -325,8 +325,8 @@ local $oldip = $domain->{'properties'}->{'ip'}->{'ip-address'};
 if ($got{'dns'}) {
 	&$first_print("Copying and fixing DNS records ..");
 	local $zonexml = $domain->{'properties'}->{'dns-zone'};
-	local $newzone = &get_bind_zone($dom);
-	if (!$newzone) {
+	local ($recs, $file) = &get_domain_dns_records_and_file(\%dom);
+	if (!$file) {
 		&$second_print(".. could not find new DNS zone!");
 		}
 	elsif (!$zonexml) {
@@ -334,14 +334,11 @@ if ($got{'dns'}) {
 		}
 	else {
 		local $rcount = 0;
-		local $zdstfile = &bind8::find_value("file",
-						     $newzone->{'members'});
-		local @recs = &bind8::read_zone_file($zdstfile, $dom);
 		foreach my $rec (@{$zonexml->{'dnsrec'}}) {
 			local $recname = $rec->{'src'};
 			$recname .= ".".$dom."." if ($recname !~ /\.$/);
 			local ($oldrec) = grep { $_->{'name'} eq $recname }
-					       @recs;
+					       @$recs;
 			if (!$oldrec) {
 				# Found one we need to add
 				local $recvalue = $rec->{'dst'};
@@ -358,7 +355,7 @@ if ($got{'dns'}) {
 					# Not migratable
 					next;
 					}
-				&bind8::create_record($zdstfile,
+				&bind8::create_record($file,
 						      $recname,
 						      undef,
 						      "IN",
@@ -368,7 +365,7 @@ if ($got{'dns'}) {
 				}
 			}
 		if ($rcount) {
-			&bind8::bump_soa_record($zdstfile, \@recs);
+			&post_records_change(\%dom, $recs, $file);
 			&register_post_action(\&restart_bind);
 			}
 		&$second_print(".. done (added $rcount records)");

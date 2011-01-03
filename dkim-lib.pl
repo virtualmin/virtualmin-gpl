@@ -701,13 +701,12 @@ my $pubkey = &get_dkim_pubkey($dkim);
 my $anychanged = 0;
 foreach my $d (@$doms) {
 	&$first_print(&text('dkim_dns', "<tt>$d->{'dom'}</tt>"));
-	my $z = &get_bind_zone($d->{'dom'});
-	if (!$z) {
+	my ($recs, $file) = &get_domain_dns_records_and_file($d);
+	if (!$file) {
 		&$second_print($text{'dkim_ednszone'});
 		next;
 		}
 	&obtain_lock_dns($d);
-	my ($recs, $file) = &get_domain_dns_records_and_file($d);
 	my $withdot = $d->{'dom'}.'.';
 	my $dkname = '_domainkey.'.$withdot;
 	my ($dkrec) = grep { $_->{'name'} eq $dkname &&
@@ -760,13 +759,12 @@ my ($doms, $dkim) = @_;
 my $anychanged = 0;
 foreach my $d (@$doms) {
 	&$first_print(&text('dkim_undns', "<tt>$d->{'dom'}</tt>"));
-	my $z = &get_bind_zone($d->{'dom'});
-	if (!$z) {
+	my ($recs, $file) = &get_domain_dns_records_and_file($d);
+	if (!$file) {
 		&$second_print($text{'dkim_ednszone'});
 		next;
 		}
 	&obtain_lock_dns($d);
-	my ($recs, $file) = &get_domain_dns_records_and_file($d);
 	my $withdot = $d->{'dom'}.'.';
 	my $dkname = '_domainkey.'.$withdot;
 	my ($dkrec) = grep { $_->{'name'} eq $dkname &&

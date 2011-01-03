@@ -2258,7 +2258,8 @@ if (!$fn) {
 	}
 &bind8::bump_soa_record($fn, $recs);
 if (defined(&bind8::supports_dnssec) &&
-    &bind8::supports_dnssec()) {
+    &bind8::supports_dnssec() &&
+    !$d->{'provision_dns'}) {
 	# Re-sign too
 	eval {
 		local $main::error_must_die = 1;

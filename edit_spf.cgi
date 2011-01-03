@@ -40,7 +40,8 @@ print &ui_table_end();
 
 # DNSSEC key details
 &require_bind();
-if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec()) {
+if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec() &&
+    !$d->{'provision_dns'}) {
 	$key = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
 	if ($key) {
 		print &ui_hidden_table_start($text{'spf_header2'}, "width=100%",

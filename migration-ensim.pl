@@ -267,10 +267,8 @@ if ($got{'dns'} && $si->{'config'}->{'zone'}) {
 	&$first_print("Copying and fixing DNS records ..");
 	&require_bind();
 	local @srcrecs = @{$si->{'config'}->{'zone'}->{'record'}};
-	local $zone = &get_bind_zone($dom{'dom'});
-	local $file = &bind8::find_value("file", $zone->{'members'});
-	local @recs = &bind8::read_zone_file($file, $dom{'dom'});
-	local %got = map { $_->{'name'}, $_ } @recs;
+	local ($recs, $file) = &get_domain_dns_records_and_file(\%dom);
+	local %got = map { $_->{'name'}, $_ } @$recs;
 	local $count = 0;
 	foreach my $rec (@srcrecs) {
 		if (!$got{$rec->{'owner'}}) {
@@ -287,6 +285,7 @@ if ($got{'dns'} && $si->{'config'}->{'zone'}) {
 			$count++;
 			}
 		}
+	&post_records_change(\%dom, $recs, $file);
 	&$second_print(".. added $count records");
 	&register_post_action(\&restart_bind);
 	}
