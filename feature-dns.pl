@@ -1563,7 +1563,7 @@ if ($file) {
 		&flush_file_lines($absfile);
 		}
 
-	# Need to bump SOA
+	# Re-read records, bump SOA and upload records to provisioning server
 	local @recs = &bind8::read_zone_file($file, $_[0]->{'dom'});
 	&post_records_change($_[0], \@recs, $file);
 
@@ -1765,8 +1765,11 @@ sub show_template_dns
 {
 local ($tmpl) = @_;
 &require_bind();
-local $conf = &bind8::get_config();
-local @views = &bind8::find("view", $conf);
+local ($conf, @views);
+if (!$config{'provision_dns'}) {
+	$conf = &bind8::get_config();
+	@views = &bind8::find("view", $conf);
+	}
 
 # DNS records
 local $ndi = &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'}, 1,
@@ -1861,45 +1864,49 @@ print &ui_table_row(&hlink($text{'tmpl_spfall'},
 			   "template_dns_spfall"),
 	&ui_yesno_radio("dns_spfall", $tmpl->{'dns_spfall'} ? 1 : 0));
 
-print &ui_table_hr();
-
-# Extra named.conf directives
-print &ui_table_row(&hlink($text{'tmpl_namedconf'}, "namedconf"),
-    &none_def_input("namedconf", $tmpl->{'namedconf'},
-		    $text{'tmpl_namedconfbelow'}, 0, 0, undef,
-		    [ "namedconf", "namedconf_also_notify",
-		      "namedconf_allow_transfer" ])."<br>".
-    &ui_textarea("namedconf",
-		 $tmpl->{'namedconf'} eq 'none' ? '' :
-			join("\n", split(/\t/, $tmpl->{'namedconf'})),
-		 5, 60));
-
-# Add also-notify and allow-transfer
-print &ui_table_row(&hlink($text{'tmpl_dnsalso'}, "template_dns_also"),
-	&ui_checkbox("namedconf_also_notify", 1, 'also-notify',
-		     !$tmpl->{'namedconf_no_also_notify'})." ".
-	&ui_checkbox("namedconf_allow_transfer", 1, 'allow-transfer',
-		     !$tmpl->{'namedconf_no_allow_transfer'}));
-
-# DNSSEC for new domains
-if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec()) {
+if (!$config{'provision_dns'}) {
 	print &ui_table_hr();
 
-	# Setup for new domains?
-	print &ui_table_row(&hlink($text{'tmpl_dnssec'}, "dnssec"),
-		&none_def_input("dnssec", $tmpl->{'dnssec'}, $text{'yes'}, 0, 0,
-			$text{'no'}, [ "dnssec_alg", "dnssec_single" ]));
+	# Extra named.conf directives
+	print &ui_table_row(&hlink($text{'tmpl_namedconf'}, "namedconf"),
+	    &none_def_input("namedconf", $tmpl->{'namedconf'},
+			    $text{'tmpl_namedconfbelow'}, 0, 0, undef,
+			    [ "namedconf", "namedconf_also_notify",
+			      "namedconf_allow_transfer" ])."<br>".
+	    &ui_textarea("namedconf",
+			 $tmpl->{'namedconf'} eq 'none' ? '' :
+				join("\n", split(/\t/, $tmpl->{'namedconf'})),
+			 5, 60));
 
-	# Encryption algorithm
-	print &ui_table_row(&hlink($text{'tmpl_dnssec_alg'}, "dnssec_alg"),
-		&ui_select("dnssec_alg", $tmpl->{'dnssec_alg'} || "RSASHA1",
-			   [ &bind8::list_dnssec_algorithms() ]));
+	# Add also-notify and allow-transfer
+	print &ui_table_row(&hlink($text{'tmpl_dnsalso'}, "template_dns_also"),
+		&ui_checkbox("namedconf_also_notify", 1, 'also-notify',
+			     !$tmpl->{'namedconf_no_also_notify'})." ".
+		&ui_checkbox("namedconf_allow_transfer", 1, 'allow-transfer',
+			     !$tmpl->{'namedconf_no_allow_transfer'}));
 
-	# One key or two?
-	print &ui_table_row(&hlink($text{'tmpl_dnssec_single'},"dnssec_single"),
-		&ui_radio("dnssec_single", $tmpl->{'dnssec_single'} ? 1 : 0,
-			  [ [ 0, $bind8::text{'zonedef_two'} ],
-			    [ 1, $bind8::text{'zonedef_one'} ] ]));
+	# DNSSEC for new domains
+	if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec()) {
+		print &ui_table_hr();
+
+		# Setup for new domains?
+		print &ui_table_row(&hlink($text{'tmpl_dnssec'}, "dnssec"),
+			&none_def_input("dnssec", $tmpl->{'dnssec'},
+				$text{'yes'}, 0, 0,
+				$text{'no'}, [ "dnssec_alg", "dnssec_single" ]));
+
+		# Encryption algorithm
+		print &ui_table_row(&hlink($text{'tmpl_dnssec_alg'}, "dnssec_alg"),
+			&ui_select("dnssec_alg", $tmpl->{'dnssec_alg'} || "RSASHA1",
+				   [ &bind8::list_dnssec_algorithms() ]));
+
+		# One key or two?
+		print &ui_table_row(&hlink($text{'tmpl_dnssec_single'},
+					   "dnssec_single"),
+			&ui_radio("dnssec_single", $tmpl->{'dnssec_single'} ? 1 : 0,
+				  [ [ 0, $bind8::text{'zonedef_two'} ],
+				    [ 1, $bind8::text{'zonedef_one'} ] ]));
+		}
 	}
 }
 
@@ -2007,29 +2014,31 @@ $tmpl->{'dns_spfall'} = $in{'dns_spfall'};
 $tmpl->{'dns_sub'} = $in{'dns_sub_mode'} == 0 ? "none" :
 		     $in{'dns_sub_mode'} == 1 ? undef : "yes";
 
-# Save named.conf
-$tmpl->{'namedconf'} = &parse_none_def("namedconf");
-if ($in{'namedconf_mode'} == 2) {
-	# Make sure the directives are valid
-	local @recs = &text_to_named_conf($tmpl->{'namedconf'});
-	if ($tmpl->{'namedconf'} =~ /\S/ && !@recs) {
-		&error($text{'newdns_enamedconf'});
+if (!$config{'provision_dns'}) {
+	# Save named.conf
+	$tmpl->{'namedconf'} = &parse_none_def("namedconf");
+	if ($in{'namedconf_mode'} == 2) {
+		# Make sure the directives are valid
+		local @recs = &text_to_named_conf($tmpl->{'namedconf'});
+		if ($tmpl->{'namedconf'} =~ /\S/ && !@recs) {
+			&error($text{'newdns_enamedconf'});
+			}
+		$tmpl->{'namedconf'} ||= " ";	# So it can be empty
+
+		# Save other auto-add directives
+		$tmpl->{'namedconf_no_also_notify'} =
+			!$in{'namedconf_also_notify'};
+		$tmpl->{'namedconf_no_allow_transfer'} =
+			!$in{'namedconf_allow_transfer'};
 		}
-	$tmpl->{'namedconf'} ||= " ";	# So it can be empty
 
-	# Save other auto-add directives
-	$tmpl->{'namedconf_no_also_notify'} =
-		!$in{'namedconf_also_notify'};
-	$tmpl->{'namedconf_no_allow_transfer'} =
-		!$in{'namedconf_allow_transfer'};
-	}
-
-# Save DNSSEC
-if (defined($in{'dnssec_mode'})) {
-	$tmpl->{'dnssec'} = $in{'dnssec_mode'} == 0 ? "none" :
-			    $in{'dnssec_mode'} == 1 ? undef : "yes";
-	$tmpl->{'dnssec_alg'} = $in{'dnssec_alg'};
-	$tmpl->{'dnssec_single'} = $in{'dnssec_single'};
+	# Save DNSSEC
+	if (defined($in{'dnssec_mode'})) {
+		$tmpl->{'dnssec'} = $in{'dnssec_mode'} == 0 ? "none" :
+				    $in{'dnssec_mode'} == 1 ? undef : "yes";
+		$tmpl->{'dnssec_alg'} = $in{'dnssec_alg'};
+		$tmpl->{'dnssec_single'} = $in{'dnssec_single'};
+		}
 	}
 }
 
