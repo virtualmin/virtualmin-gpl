@@ -232,8 +232,7 @@ foreach $d (@doms) {
 		}
 
 	# Remove records from the domain
-	local $file = &get_domain_dns_file($d);
-	local @recs = &get_domain_dns_records($d);
+	local ($recs, $file) = &get_domain_dns_records_and_file($d);
 	local $changed;
 	if (@delrecs) {
 		local @alld;
@@ -243,7 +242,7 @@ foreach $d (@doms) {
 				$name .= ".".$d->{'dom'}.".";
 				}
 			local @d = grep { $_->{'name'} eq $name &&
-					  lc($_->{'type'}) eq lc($type) } @recs;
+					  lc($_->{'type'}) eq lc($type) } @$recs;
 			push(@alld, @d);
 			}
 		@alld = sort { $b->{'line'} cmp $a->{'line'} } @alld;
@@ -267,7 +266,7 @@ foreach $d (@doms) {
 		}
 
 	if ($changed || $bumpsoa) {
-		&post_records_change($d, \@recs);
+		&post_records_change($d, $recs, $file);
 		}
 
 	# Add to slave DNS servers
