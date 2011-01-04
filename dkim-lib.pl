@@ -618,7 +618,7 @@ elsif ($d && $action eq 'delete') {
 	}
 my %done;
 @doms = grep { !$done{$_->{'id'}}++ } @doms;
-&set_dkim_domains(\@doms);
+&set_dkim_domains(\@doms, $dkim);
 
 # Add or remove DNS records
 if ($d->{'dns'} && !$d->{'dns_submode'}) {
@@ -652,11 +652,11 @@ foreach my $dname (@$extra) {
 &set_ownership_permissions(undef, undef, 0755, $keylist);
 }
 
-# set_dkim_domains(&domains)
+# set_dkim_domains(&domains, &dkim)
 # Configure the DKIM filter to sign mail for the given list of domaisn
 sub set_dkim_domains
 {
-my ($doms) = @_;
+my ($doms, $dkim) = @_;
 my $dkim_config = $gconfig{'os_type'} eq 'debian-linux' ? $debian_dkim_config :
 		  $gconfig{'os_type'} eq 'redhat-linux' ? $redhat_dkim_config :
 							  undef;
@@ -675,7 +675,7 @@ if ($dkim_config) {
 		my $selkeyfile = $keylist;
 		$selkeyfile =~ s/\/([^\/]+)$/\/$selector/;
 		&create_key_mapping_file($doms, $keylist, $selkeyfile,
-					 $conf->{'extra'});
+					 $dkim->{'extra'});
 		}
 	else {
 		# Just set list of domains
