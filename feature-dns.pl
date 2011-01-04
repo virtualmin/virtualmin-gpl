@@ -28,11 +28,15 @@ sub setup_dns
 &require_bind();
 local $tmpl = &get_template($_[0]->{'template'});
 local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
+local @extra_slaves = split(/\s+/, $tmpl->{'dns_ns'});
 
 if ($_[0]->{'provision_dns'}) {
 	# Create on provisioning server
 	&$first_print($text{'setup_bind_provision'});
 	local $info = { 'domain' => $_[0]->{'dom'} };
+	if (@extra_slaves) {
+		$info->{'slave'} = \@extra_slaves;
+		}
 	local $temp = &transname();
 	local $bind8::config{'auto_chroot'} = undef;
 	local $bind8::config{'chroot'} = undef;
@@ -81,7 +85,6 @@ elsif (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
 
 	# Also notify slave servers, unless already added
 	local @slaves = &bind8::list_slave_servers();
-	local @extra_slaves = split(/\s+/, $tmpl->{'dns_ns'});
 	if (@slaves && !$tmpl->{'namedconf_no_also_notify'}) {
 		local ($also) = grep { $_->{'name'} eq 'also-notify' }
 				     @{$dir->{'members'}};
@@ -2109,10 +2112,13 @@ return @$recs;
 
 # get_domain_dns_file(&domain)
 # Returns the chroot-relative path to a domain's DNS records
-# XXX won't work with provisioning
 sub get_domain_dns_file
 {
 local ($d) = @_;
+if ($d->{'provision_dns'}) {
+	&error("get_domain_dns_file($d->{'dom'}) cannot be called ".
+	       "for provisioning domains");
+	}
 &require_bind();
 local $z;
 if ($d->{'dns_submode'}) {
@@ -2191,7 +2197,7 @@ else {
 	# Find local file
 	local $file = &get_domain_dns_file($d);
 	return ("No zone file found for $d->{'dom'}") if (!$file);
-	local @recs = &get_domain_dns_records($d);
+	local @recs = &bind8::read_zone_file($file, $d->{'dom'});
 	return (\@recs, $file);
 	}
 }
