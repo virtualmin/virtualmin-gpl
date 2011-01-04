@@ -1230,10 +1230,12 @@ local ($d) = @_;
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 return &text('validate_edns', "<tt>$d->{'dom'}</tt>") if (!$file);
 return &text('validate_ednsfile', "<tt>$d->{'dom'}</tt>") if (!@$recs);
+local $absfile;
 if (!$d->{'provision_dns'}) {
-	local $zonefile = &bind8::make_chroot(
+	$absfile = &bind8::make_chroot(
 				&bind8::absolute_path($file));
-	return &text('validate_ednsfile2', "<tt>$zonefile</tt>") if (!-r $zonefile);
+	return &text('validate_ednsfile2', "<tt>$absfile</tt>")
+		if (!-r $absfile);
 	}
 
 # Check for critical records, and that www.$dom and $dom resolve to the
@@ -1243,12 +1245,13 @@ local $ip = $d->{'dns_ip'} || $d->{'ip'};
 foreach my $r (@$recs) {
 	$got{uc($r->{'type'})}++;
 	}
-$got{'SOA'} || return &text('validate_ednssoa', "<tt>$zonefile</tt>");
-$got{'A'} || return &text('validate_ednsa', "<tt>$zonefile</tt>");
+$got{'SOA'} || return &text('validate_ednssoa', "<tt>$absfile</tt>");
+$got{'A'} || return &text('validate_ednsa', "<tt>$absfile</tt>");
 if ($d->{'web'}) {
 	foreach my $n ($d->{'dom'}.'.', 'www.'.$d->{'dom'}.'.') {
 		my @nips = map { $_->{'values'}->[0] }
-		       grep { $_->{'type'} eq 'A' && $_->{'name'} eq $n } @$recs;
+			       grep { $_->{'type'} eq 'A' &&
+				      $_->{'name'} eq $n } @$recs;
 		if (@nips && &indexof($ip, @nips) < 0) {
 			return &text('validate_ednsip', "<tt>$n</tt>",
 			    "<tt>".join(' or ', @nips)."</tt>", "<tt>$ip</tt>");
@@ -1259,6 +1262,7 @@ if ($d->{'web'}) {
 # If possible, run named-checkzone
 if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
     !$d->{'provision_dns'}) {
+	local $z = &get_bind_zone($d->{'dom'});
 	local @errs = &bind8::check_zone_records($z);
 	if (@errs) {
 		return &text('validate_ednscheck',
