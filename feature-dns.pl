@@ -2170,8 +2170,18 @@ local ($d) = @_;
 local $bind8::config{'short_names'} = 0;
 if ($d->{'provision_dns'}) {
 	# Download to temp file, and read it
-	# XXX deal with chroot mode? Make temp path chroot'd?
 	local $temp = &transname();
+	local $abstemp = $temp;
+	local $chroot = &bind8::get_chroot();
+	if ($chroot && $chroot ne "/") {
+		# Actual temp file needs to be under chroot dir
+		$abstemp = &bind8::make_chroot($temp);
+		local $absdir = $abstemp;
+		$absdir =~ s/\/[^\/]+$//;
+		if (!-d $absdir) {
+			&make_dir($absdir, 0755);
+			}
+		}
 	local $info = { 'domain' => $d->{'dom'},
 			'host' => $d->{'provision_dns_host'} };
 	my ($ok, $msg) = &provision_api_call(
@@ -2210,7 +2220,7 @@ if ($d->{'provision_dns'}) {
 		$rec->{'eline'} = $lnum;
 		$rec->{'num'} = $lnum;
 		$rec->{'file'} = $temp;
-		$rec->{'rootfile'} = $temp;	# XXX
+		$rec->{'rootfile'} = $abstemp;
 		push(@recs, $rec);
 		$lnum++;
 		}
