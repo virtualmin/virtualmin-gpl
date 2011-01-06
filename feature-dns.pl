@@ -483,7 +483,7 @@ if (!$_[0]->{'subdom'} && $_[1]->{'subdom'} && $_[0]->{'dns_submode'} ||
 
 &require_bind();
 local $tmpl = &get_template($_[0]->{'template'});
-local $z;
+local $z;	# XXX do we even need this?
 local ($oldzonename, $newzonename, $lockon, $lockconf);
 if ($_[0]->{'dns_submode'}) {
 	# Get parent domain
@@ -491,7 +491,9 @@ if ($_[0]->{'dns_submode'}) {
 			&get_domain($_[0]->{'parent'});
 	&obtain_lock_dns($parent);
 	$lockon = $parent;
-	$z = &get_bind_zone($parent->{'dom'});
+	if (!$parent->{'provision_dns'}) {
+		$z = &get_bind_zone($parent->{'dom'});
+		}
 	$oldzonename = $newzonename = $parent->{'dom'};
 	}
 else {
@@ -499,11 +501,13 @@ else {
 	&obtain_lock_dns($_[0], 1);
 	$lockon = $_[0];
 	$lockconf = 1;
-	$z = &get_bind_zone($_[1]->{'dom'});
+	if (!$_[1]->{'provision_dns'}) {
+		$z = &get_bind_zone($_[1]->{'dom'});
+		}
 	$newzonename = $_[1]->{'dom'};
 	$oldzonename = $_[1]->{'dom'};
 	}
-if (!$z) {
+if (!$z && !$_[0]->{'provision_dns'}) {
 	# Not found!
 	&release_lock_dns($lockon, $lockconf);
 	return 0;
@@ -513,6 +517,7 @@ local $newip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 local $rv = 0;
 if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 	# Domain name has changed
+	# XXX provisioning
 	local $nfn;
 	local $file = &bind8::find("file", $z->{'members'});
 	if (!$_[0]->{'dns_submode'}) {
@@ -596,37 +601,29 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 		}
 	}
 
+local ($file, $recs);
+
 if ($oldip ne $newip) {
 	# IP address has changed .. need to update any records that use
 	# the old IP
 	&$first_print($text{'save_dns'});
-	local $file = &bind8::find("file", $z->{'members'});
-	local $fn = $file->{'values'}->[0];
-	local $zonefile = &bind8::make_chroot($fn);
-	local @recs = &bind8::read_zone_file($fn, $newzonename);
-	&modify_records_ip_address(\@recs, $fn, $oldip, $newip);
-
-	# Update SOA record
-	&post_records_change($_[0], \@recs);
+	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
+	&modify_records_ip_address($recs, $file, $oldip, $newip);
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}
 
 if ($_[0]->{'mail'} && !$_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 	# Email was enabled .. add MX records
-	local $file = &bind8::find("file", $z->{'members'});
-	local $fn = $file->{'values'}->[0];
-	local $zonefile = &bind8::make_chroot($fn);
-	local @recs = &bind8::read_zone_file($fn, $newzonename);
+	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
 	local ($mx) = grep { $_->{'type'} eq 'MX' &&
 			     $_->{'name'} eq $_[0]->{'dom'}."." ||
 			     $_->{'type'} eq 'A' &&
-			     $_->{'name'} eq "mail.".$_[0]->{'dom'}."." } @recs;
+			     $_->{'name'} eq "mail.".$_[0]->{'dom'}."."} @$recs;
 	if (!$mx) {
 		&$first_print($text{'save_dns4'});
 		local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
-		&create_mx_records($fn, $_[0], $ip);
-		&post_records_change($_[0], \@recs);
+		&create_mx_records($file, $_[0], $ip);
 		&$second_print($text{'setup_done'});
 		$rv++;
 		}
@@ -634,17 +631,14 @@ if ($_[0]->{'mail'} && !$_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 elsif (!$_[0]->{'mail'} && $_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 	# Email was disabled .. remove MX records, but only those that
 	# point to this system or secondaries.
-	local $file = &bind8::find("file", $z->{'members'});
-	local $fn = $file->{'values'}->[0];
-	local $zonefile = &bind8::make_chroot($fn);
-	local @recs = &bind8::read_zone_file($fn, $newzonename);
+	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
 	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 	local %ids = map { $_, 1 }
 		split(/\s+/, $_[0]->{'mx_servers'});
 	local @slaves = grep { $ids{$_->{'id'}} } &list_mx_servers();
 	local @slaveips = map { &to_ipaddress($_->{'mxname'} || $_->{'host'}) }
 			      @slaves;
-	foreach my $r (@recs) {
+	foreach my $r (@$recs) {
 		if ($r->{'type'} eq 'A' &&
 		    $r->{'name'} eq "mail.".$_[0]->{'dom'}."." &&
 		    $r->{'values'}->[0] eq $ip) {
@@ -663,9 +657,8 @@ elsif (!$_[0]->{'mail'} && $_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 	if (@mx) {
 		&$first_print($text{'save_dns5'});
 		foreach my $r (reverse(@mx)) {
-			&bind8::delete_record($fn, $r);
+			&bind8::delete_record($file, $r);
 			}
-		&post_records_change($_[0], \@recs);
 		&$second_print($text{'setup_done'});
 		$rv++;
 		}
@@ -675,12 +668,9 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'} && $_[0]->{'mail'} &&
     !$config{'secmx_nodns'}) {
 	# Secondary MX servers have been changed - add or remove MX records
 	&$first_print($text{'save_dns7'});
+	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
 	local @newmxs = split(/\s+/, $_[0]->{'mx_servers'});
 	local @oldmxs = split(/\s+/, $_[1]->{'mx_servers'});
-	local $file = &bind8::find("file", $z->{'members'});
-	local $fn = $file->{'values'}->[0];
-	local $zonefile = &bind8::make_chroot($fn);
-	local @recs = &bind8::read_zone_file($fn, $newzonename);
 	&foreign_require("servers", "servers-lib.pl");
 	local %servers = map { $_->{'id'}, $_ }
 			     (&servers::list_servers(), &list_mx_servers());
@@ -693,7 +683,7 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'} && $_[0]->{'mail'} &&
 			local $s = $servers{$id};
 			local $mxhost = $s->{'mxname'} || $s->{'host'};
 			local $already = 0;
-			foreach my $r (@recs) {
+			foreach my $r (@$recs) {
 				if ($r->{'type'} eq 'MX' &&
 				    $r->{'name'} eq $withdot &&
 				    $r->{'values'}->[1] eq $mxhost.".") {
@@ -701,7 +691,7 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'} && $_[0]->{'mail'} &&
 					}
 				}
 			if (!$already) {
-				&bind8::create_record($fn, $withdot, undef,
+				&bind8::create_record($file, $withdot, undef,
 					      "IN", "MX", "10 $mxhost.");
 				}
 			}
@@ -714,7 +704,7 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'} && $_[0]->{'mail'} &&
 			# An old MX .. remove it
 			local $s = $servers{$id};
 			local $mxhost = $s->{'mxname'} || $s->{'host'};
-			foreach my $r (@recs) {
+			foreach my $r (@$recs) {
 				if ($r->{'type'} eq 'MX' &&
 				    $r->{'name'} eq $withdot &&
 				    $r->{'values'}->[1] eq $mxhost.".") {
@@ -724,10 +714,9 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'} && $_[0]->{'mail'} &&
 			}
 		}
 	foreach my $r (reverse(@mxs)) {
-		&bind8::delete_record($fn, $r);
+		&bind8::delete_record($file, $r);
 		}
 
-	&post_records_change($_[0], \@recs);
 	&$second_print($text{'setup_done'});
 	$rv++;
 	}
@@ -735,18 +724,16 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'} && $_[0]->{'mail'} &&
 if ($_[0]->{'virt6'} && !$_[1]->{'virt6'}) {
 	# IPv6 enabled
 	&$first_print($text{'save_dnsip6on'});
-	&add_ip6_records($_[0]);
-	local @recs = &get_domain_dns_records($_[0]);
-	&post_records_change($_[0], \@recs);
+	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
+	&add_ip6_records($_[0], $file);
 	&$second_print($text{'setup_done'});
 	$rv++;
 	}
 elsif (!$_[0]->{'virt6'} && $_[1]->{'virt6'}) {
 	# IPv6 disabled
 	&$first_print($text{'save_dnsip6off'});
-	&remove_ip6_records($_[0]);
-	local @recs = &get_domain_dns_records($_[0]);
-	&post_records_change($_[0], \@recs);
+	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
+	&remove_ip6_records($_[0], $file);
 	&$second_print($text{'setup_done'});
 	$rv++;
 	}
@@ -754,12 +741,15 @@ elsif ($_[0]->{'virt6'} && $_[1]->{'virt6'} &&
        $_[0]->{'ip6'} ne $_[1]->{'ip6'}) {
 	# IPv6 address changed
 	&$first_print($text{'save_dnsip6'});
-	local $fn = &get_domain_dns_file($_[0]);
-	local @recs = &get_domain_dns_records($_[0]);
-	&modify_records_ip_address(\@recs, $fn, $_[1]->{'ip6'}, $_[0]->{'ip6'});
-	&post_records_change($_[0], \@recs);
+	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
+	&modify_records_ip_address($recs, $file, $_[1]->{'ip6'},$_[0]->{'ip6'});
 	$rv++;
 	&$second_print($text{'setup_done'});
+	}
+
+# Update SOA and upload records to provisioning server
+if ($file) {
+	&post_records_change($_[0], $recs, $file);
 	}
 
 # Release locks
@@ -1175,13 +1165,14 @@ foreach my $r (@recs) {
 return $count;
 }
 
-# remove_ip6_records(&domain)
+# remove_ip6_records(&domain, [file])
 # Delete all AAAA records whose value is the domain's IP6 address
 sub remove_ip6_records
 {
-local ($d) = @_;
+local ($d, $file) = @_;
 &require_bind();
-local $file = &get_domain_dns_file($d);
+$file ||= &get_domain_dns_file($d);
+return 0 if (!$file);
 local @recs = &bind8::read_zone_file($file, $d->{'dom'});
 my $withdot = $d->{'dom'}.".";
 foreach my $r (reverse(@recs)) {
@@ -1446,7 +1437,8 @@ local $bindlock = "$module_config_directory/bind-restart";
 local $pid = &get_bind_pid();
 if ($pid) {
 	if ($bconfig{'restart_cmd'}) {
-		&system_logged("$bconfig{'restart_cmd'} >/dev/null 2>&1 </dev/null");
+		&system_logged(
+			"$bconfig{'restart_cmd'} >/dev/null 2>&1 </dev/null");
 		}
 	else {
 		&kill_logged('HUP', $pid);
