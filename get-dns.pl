@@ -69,14 +69,8 @@ elsif ($multiline) {
 		if ($r->{'ttl'}) {
 			print "    TTL: $r->{'ttl'}\n";
 			}
-		@v = @{$r->{'values'}};
-		if (@v > 1) {
-			for(my $i=1; @v; $i++) {
-				print "    Value${i}: ",shift(@v),"\n";
-				}
-			}
-		else {
-			print "    Value: $v[0]\n";
+		foreach $v (@{$r->{'values'}}) {
+			print "    Value: $v\n";
 			}
 		}
 	}
