@@ -6575,7 +6575,11 @@ if ($restarting) {
 # Run unique actions
 local %done;
 foreach $a (@main::post_actions) {
-	next if ($done{join(",", @$a)}++);
+	# Don't run multiple times. For BIND, all restarts are considered equal
+	local $key = $a->[0] eq \&restart_bind ? $a->[0] : join(",", @$a);
+	next if ($done{$key}++);
+
+	# Call the restart function
 	local ($afunc, @aargs) = @$a;
 	local $main::error_must_die = 1;
 	eval { &$afunc(@aargs) };

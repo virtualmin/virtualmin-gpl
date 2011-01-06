@@ -469,7 +469,6 @@ if (@delslaves) {
 # modify_dns(&domain, &olddomain)
 # If the IP for this server has changed, update all records containing the old
 # IP to the new.
-# XXX provisioning support
 sub modify_dns
 {
 if (!$_[0]->{'subdom'} && $_[1]->{'subdom'} && $_[0]->{'dns_submode'} ||
@@ -483,17 +482,14 @@ if (!$_[0]->{'subdom'} && $_[1]->{'subdom'} && $_[0]->{'dns_submode'} ||
 
 &require_bind();
 local $tmpl = &get_template($_[0]->{'template'});
-local $z;	# XXX do we even need this?
-local ($oldzonename, $newzonename, $lockon, $lockconf);
+local ($oldzonename, $newzonename, $lockon, $lockconf, $zdom);
 if ($_[0]->{'dns_submode'}) {
 	# Get parent domain
 	local $parent = &get_domain($_[0]->{'subdom'}) ||
 			&get_domain($_[0]->{'parent'});
 	&obtain_lock_dns($parent);
 	$lockon = $parent;
-	if (!$parent->{'provision_dns'}) {
-		$z = &get_bind_zone($parent->{'dom'});
-		}
+	$zdom = $parent;
 	$oldzonename = $newzonename = $parent->{'dom'};
 	}
 else {
@@ -501,23 +497,44 @@ else {
 	&obtain_lock_dns($_[0], 1);
 	$lockon = $_[0];
 	$lockconf = 1;
-	if (!$_[1]->{'provision_dns'}) {
-		$z = &get_bind_zone($_[1]->{'dom'});
-		}
+	$zdom = $_[1];
 	$newzonename = $_[1]->{'dom'};
 	$oldzonename = $_[1]->{'dom'};
-	}
-if (!$z && !$_[0]->{'provision_dns'}) {
-	# Not found!
-	&release_lock_dns($lockon, $lockconf);
-	return 0;
 	}
 local $oldip = $_[1]->{'dns_ip'} || $_[1]->{'ip'};
 local $newip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 local $rv = 0;
-if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
-	# Domain name has changed
-	# XXX provisioning
+
+# Zone file name and records, if we read them
+local ($file, $recs);
+
+if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'provision_dns'}) {
+	# Domain name has changed .. rename via API call
+	&$first_print($text{'save_dns2_provision'});
+	local $info = { 'domain' => $_[1]->{'dom'},
+			'host' => $_[0]->{'provision_dns_host'},
+			'new-domain' => $_[0]->{'dom'} };
+	my ($ok, $msg) = &provision_api_call("modify-dns-zone", $info, 0);
+	if (!$ok) {
+		&$second_print(&text('disable_ebind_provision', $msg));
+		return 0;
+		}
+	&$second_print($text{'setup_done'});
+
+	# Rename records
+	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
+	&modify_records_domain_name($recs, $file,
+				    $_[1]->{'dom'}, $_[0]->{'dom'});
+	}
+elsif ($_[0]->{'dom'} ne $_[1]->{'dom'} && !$_[0]->{'provision_dns'}) {
+	# Domain name has changed .. rename locally
+	local $z = &get_bind_zone($zdom->{'dom'});
+	if (!$z) {
+		# Zone not found!
+		&$second_print($text{'save_dns2_ezone'});
+		&release_lock_dns($lockon, $lockconf);
+		return 0;
+		}
 	local $nfn;
 	local $file = &bind8::find("file", $z->{'members'});
 	if (!$_[0]->{'dns_submode'}) {
@@ -548,26 +565,8 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 	# Modify any records containing the old name
 	&lock_file(&bind8::make_chroot($nfn));
         local @recs = &bind8::read_zone_file($nfn, $oldzonename);
-        foreach my $r (@recs) {
-                if ($r->{'name'} =~ /$_[1]->{'dom'}/i) {
-                        $r->{'name'} =~ s/$_[1]->{'dom'}/$_[0]->{'dom'}/;
-			if ($r->{'type'} eq 'SPF') {
-				# Fix SPF TXT record
-				$r->{'values'}->[0] =~
-					s/$_[1]->{'dom'}/$_[0]->{'dom'}/;
-				}
-			if ($r->{'type'} eq 'MX') {
-				# Fix mail server in MX record
-				$r->{'values'}->[1] =~
-					s/$_[1]->{'dom'}/$_[0]->{'dom'}/;
-				}
-                        &bind8::modify_record($nfn, $r, $r->{'name'},
-                                              $r->{'ttl'}, $r->{'class'},
-                                              $r->{'type'},
-					      &join_record_values($r),
-                                              $r->{'comment'});
-                        }
-                }
+	&modify_records_domain_name(\@recs, $nfn,
+				    $_[1]->{'dom'}, $_[0]->{'dom'});
 
         # Update SOA record
 	&post_records_change($_[0], \@recs);
@@ -600,8 +599,6 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 			}
 		}
 	}
-
-local ($file, $recs);
 
 if ($oldip ne $newip) {
 	# IP address has changed .. need to update any records that use
@@ -1627,12 +1624,42 @@ foreach my $r (@$recs) {
 		&bind8::modify_record($fn, $r, $r->{'name'},
 				      $r->{'ttl'},$r->{'class'},
 				      $r->{'type'},
-				      &join_record_values($r),
+				      &join_record_values($r,
+					$r->{'eline'} == $r->{'line'}),
 				      $r->{'comment'});
 		$count++;
 		}
 	}
 return $count;
+}
+
+# modify_records_domain_name(&records, file, old-domain, new-domain)
+# Change the domain name in DNS record names and values
+sub modify_records_domain_name
+{
+local ($recs, $fn, $olddom, $newdom) = @_;
+foreach my $r (@$recs) {
+	if ($r->{'name'} eq $olddom.".") {
+		$r->{'name'} = $newdom.".";
+		}
+	else {
+		$r->{'name'} =~ s/\.$olddom\.$/\.$newdom\./;
+		}
+	if ($r->{'type'} eq 'SPF') {
+		# Fix SPF TXT record
+		$r->{'values'}->[0] =~ s/$olddom/$newdom/;
+		}
+	if ($r->{'type'} eq 'MX') {
+		# Fix mail server in MX record
+		$r->{'values'}->[1] =~ s/$olddom/$newdom/;
+		}
+	&bind8::modify_record($fn, $r, $r->{'name'},
+			      $r->{'ttl'}, $r->{'class'},
+			      $r->{'type'},
+			      &join_record_values($r,
+				$r->{'eline'} == $r->{'line'}),
+			      $r->{'comment'});
+	}
 }
 
 # except_soa(&domain, file)
