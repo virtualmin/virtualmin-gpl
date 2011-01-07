@@ -1614,7 +1614,8 @@ print &ui_table_row(&hlink($text{'tmpl_mysql_nopass'}, "template_mysql_nopass"),
 		  ($tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ) )]));
 
 # Make MySQL DBs group-owned by domain, for quotas?
-if (-d $mysql::config{'mysql_data'}) {
+if (-d $mysql::config{'mysql_data'} &&
+    !$config{'provision_mysql'}) {
 	print &ui_table_row(&hlink($text{'tmpl_mysql_chgrp'},
 				   "template_mysql_chgrp"),
 		&ui_radio("mysql_chgrp", $tmpl->{'mysql_chgrp'},
@@ -1696,7 +1697,8 @@ else {
 $tmpl->{'mysql_mkdb'} = $in{'mysql_mkdb'};
 $tmpl->{'mysql_nopass'} = $in{'mysql_nopass'};
 $tmpl->{'mysql_nouser'} = $in{'mysql_nouser'};
-if (-d $mysql::config{'mysql_data'}) {
+if (-d $mysql::config{'mysql_data'} &&
+    !$config{'provision_mysql'}) {
 	$tmpl->{'mysql_chgrp'} = $in{'mysql_chgrp'};
 	}
 if ($mysql::mysql_version >= 4.1) {

@@ -55,8 +55,6 @@
 
  - Remote DNS and MySQL setup
 	- Documentation
-	- DNS support
-	- Suppress template options that aren't valid when provisioning remotely
 	- CHANGELOG
 
  - Automatically add reverse IPv6 addresses for domains
