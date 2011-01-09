@@ -215,11 +215,13 @@ foreach $d (@dirs) {
 	$d =~ s/#.*$//;
 	if ($d =~ /^\s*User\s+(\S+)$/i) {
 		defined(getpwnam($1)) ||
+		    $1 eq '$USER' || $1 eq '${USER}' ||
 			return &text('fcheck_euserex', "<tt>$1</tt>");
 		$gotuser++;
 		}
 	elsif ($d =~ /^\s*Group\s+(\S+)$/i) {
 		defined(getgrnam($1)) ||
+		    $1 eq '$GROUP' || $1 eq '${GROUP}' ||
 			return &text('fcheck_egroupex', "<tt>$1</tt>");
 		$gotgroup++;
 		}
