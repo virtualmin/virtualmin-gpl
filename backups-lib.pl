@@ -660,6 +660,7 @@ local $vcount = 0;
 if (@$vbs) {
 	&$first_print(&text('backup_global',
 		      join(", ", map { $text{'backup_v'.$_} } @$vbs)));
+	&$indent_print();
 	if ($homefmt) {
 		# Need to make a backup dir, as we cannot use one of the
 		# previous domains' dirs
@@ -672,6 +673,7 @@ if (@$vbs) {
 		local $ok = &$vfunc($vfile, $vbs);
 		$vcount++;
 		}
+	&$outdent_print();
 	&$second_print($text{'setup_done'});
 	}
 
@@ -1668,6 +1670,7 @@ if ($ok) {
 	if (@$vbs) {
 		&$first_print(&text('restore_global',
 			      join(", ", map { $text{'backup_v'.$_} } @$vbs)));
+		&$indent_print();
 		foreach my $v (@$vbs) {
 			local $vfile = "$restoredir/virtualmin_".$v;
 			if (-r $vfile) {
@@ -1676,6 +1679,7 @@ if ($ok) {
 				$vcount++;
 				}
 			}
+		&$outdent_print();
 		&$second_print($text{'setup_done'});
 		}
 	}

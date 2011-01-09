@@ -71,8 +71,9 @@ return scalar(@inst) || !&check_dkim();
 # Returns a hash containing details of the DKIM configuration and status.
 # Keys are :
 # enabled - Set to 1 if postfix is setup to use DKIM
-# domain - Domain(s) for which DKIM is enabled
 # selector - Record within the domain for the key
+# extra - Additional domains to enable for
+# keyfile - Private key file
 sub get_dkim_config
 {
 &foreign_require("init");

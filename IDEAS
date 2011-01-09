@@ -64,5 +64,5 @@
  - Procmail script entry to block mail with useful message if quota is low
 
  - Better backup for global settings (procmail, etc..)
-	- DKIM
-	- Postgrey
+	- New backup feature, email
+	- Output progress and error messages
