@@ -363,7 +363,7 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 			foreach $h (@hosts) {
 				&mysql::execute_sql_logged($mysql::master_db,
 				  "insert into user (host, user, password) ".
-				  "values (?, ?, ?)", $h, $user, $encpass);
+				  "values (?, ?, $encpass)", $h, $user);
 				if ($wild && $wild ne $d->{'db'}) {
 					&add_db_table($h, $wild, $user);
 					}
