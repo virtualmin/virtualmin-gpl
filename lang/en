@@ -2353,6 +2353,7 @@ restore_vmailserver_wrong=.. backup contains settings for $1, but your system is
 restore_vmailserver_dkim=Restoring DKIM settings ..
 restore_vmailserver_none=.. not supported on source system
 restore_vmailserver_already=.. leaving disabled
+restore_vmailserver_grey=Restoring greylisting settings ..
 
 limits_title=Server Owner Limits
 limits_header=Virtualmin limits for server owner

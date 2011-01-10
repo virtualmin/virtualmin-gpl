@@ -5331,7 +5331,7 @@ if (!&check_postgrey()) {
 		}
 	local $rfile = &get_postgrey_data_file("recipients");
 	if ($rfile) {
-		&copy_source_dest($rfile, $file."_greyclients");
+		&copy_source_dest($rfile, $file."_greyrecipients");
 		}
 	&$second_print($text{'setup_done'});
 	}
@@ -5441,6 +5441,7 @@ else {
 # Restore DKIM config
 &$first_print($text{'restore_vmailserver_dkim'});
 if (!!&check_dkim()) {
+	# DKIM supported .. see what state was in the backup
 	local %dkim;
 	&read_file($file."_dkim", \%dkim);
 	if (!$dkim{'support'}) {
@@ -5489,7 +5490,45 @@ else {
 	}
 
 # Restore Postgrey config
-# XXX print stuff
+&$first_print($text{'restore_vmailserver_grey'});
+if (!&check_postgrey()) {
+	local %grey;
+	&read_file($file."_grey", \%grey);
+	if (!$grey{'support'}) {
+		&$second_print($text{'restore_vmailserver_none'});
+		}
+	else {
+		local $enabled = &is_postgrey_enabled();
+		if ($grey{'enabled'}) {
+			# Enable on this system, and copy client files
+			&enable_postgrey();
+			local $cfile = &get_postgrey_data_file("clients");
+			if ($cfile && -r $file."_greyclients") {
+				&copy_source_dest($file."_greyclients",
+						  $cfile);
+				}
+			local $rfile = &get_postgrey_data_file("recipients");
+			if ($rfile && -r $file."_greyrecipients") {
+				&copy_source_dest($file."_greyrecipients",
+						  $rfile);
+				}
+			&apply_postgrey_data();
+			&$second_print($text{'setup_done'});
+			}
+		elsif ($enabled && !$grey{'enabled'}) {
+			# Disable on this system
+			&disable_postgrey();
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			# Nothing to do
+			&$second_print($text{'restore_vmailserver_already'});
+			}
+		}
+	}
+else {
+	&$second_print($text{'backup_vmailserver_none'});
+	}
 
 return 1;
 }
