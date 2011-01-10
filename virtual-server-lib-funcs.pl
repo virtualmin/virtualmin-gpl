@@ -4839,6 +4839,7 @@ return 1;
 sub virtualmin_restore_config
 {
 local ($file, $vbs) = @_;
+&$first_print($text{'restore_vconfig_doing'});
 local %oldconfig = %config;
 local @tmpls = &list_templates();
 &copy_source_dest($file, $module_config_file);
@@ -4861,12 +4862,10 @@ $config{'last_check'} = $oldconfig{'last_check'};
 &generate_plugins_list($config{'plugins'});
 $config{'plugins'} = join(' ', @plugins);
 &save_module_config();
+&$second_print($text{'setup_done'});
 
 # Apply any new config settings
-&push_all_print();
-&set_all_null_print();
 &run_post_config_actions(\%oldconfig);
-&pop_all_print();
 
 return 1;
 }
@@ -4927,6 +4926,7 @@ foreach my $tmpl (&list_templates()) {
 sub virtualmin_restore_templates
 {
 local ($file, $vbs) = @_;
+&$first_print($text{'restore_vtemplates_doing'});
 
 # Extract backup file
 local $temp = &transname();
@@ -4982,6 +4982,7 @@ if (-r $file."_plans") {
 			 "$tar xf ".quotemeta($file."_plans"));
 	}
 
+&$second_print($text{'setup_done'});
 return 1;
 }
 
@@ -5008,6 +5009,7 @@ return 1;
 sub virtualmin_restore_scheds
 {
 local ($file, $vbs) = @_;
+&$first_print($text{'restore_vscheds_doing'});
 
 # Extract backup file
 local $temp = &transname();
@@ -5033,6 +5035,7 @@ foreach my $t (readdir(BACKUPDIR)) {
 	}
 closedir(BACKUPDIR);
 
+&$second_print($text{'setup_done'});
 return 1;
 }
 
@@ -5070,6 +5073,7 @@ sub virtualmin_restore_resellers
 {
 local ($file, $vbs) = @_;
 return undef if (!defined(&list_resellers));
+&$first_print($text{'restore_vresellers_doing'});
 local $temp = &transname();
 mkdir($temp, 0700);
 &require_acl();
@@ -5101,6 +5105,7 @@ foreach my $f (readdir(DIR)) {
 		}
 	}
 &unlink_file($temp);
+&$second_print($text{'setup_done'});
 return 1;
 }
 
@@ -5115,6 +5120,7 @@ local $tar = &get_tar_command();
 	"cd $module_config_directory && $tar cf ".quotemeta($file)." ".
 	join(" ", @all_template_files));
 &$second_print($text{'setup_done'});
+return 1;
 }
 
 # virtualmin_restore_email(file, &vbs)
@@ -5122,8 +5128,10 @@ local $tar = &get_tar_command();
 sub virtualmin_restore_email
 {
 local ($file, $vbs) = @_;
+&$first_print($text{'restore_vemail_doing'});
 local $tar = &get_tar_command();
 &execute_command("cd $module_config_directory && $tar xf ".quotemeta($file));
+&$second_print($text{'setup_done'});
 return 1;
 }
 
@@ -5145,6 +5153,7 @@ foreach my $fm ([ $custom_fields_file, $file ],
 		}
 	}
 &$second_print($text{'setup_done'});
+return 1;
 }
 
 # virtualmin_restore_custom(file, &vbs)
@@ -5152,6 +5161,7 @@ foreach my $fm ([ $custom_fields_file, $file ],
 sub virtualmin_restore_custom
 {
 local ($file, $vbs) = @_;
+&$first_print($text{'restore_vcustom_doing'});
 foreach my $fm ([ $custom_fields_file, $file ],
 		[ $custom_links_file, $file."_links" ],
 		[ $custom_link_categories_file, $file."_linkcats" ]) {
@@ -5169,6 +5179,7 @@ elsif (-r $file."_shells") {
 	# default shells, so so should we
 	&unlink_file($custom_shells_file);
 	}
+&$second_print($text{'setup_done'});
 return 1;
 }
 
@@ -5192,13 +5203,15 @@ return 1;
 sub virtualmin_restore_scripts
 {
 local ($file, $vbs) = @_;
-mkdir("$module_config_directory/scripts", 0755);
+&$first_print($text{'restore_vscripts_doing'});
+&make_dir("$module_config_directory/scripts", 0755);
 local $tar = &get_tar_command();
 &execute_command("cd $module_config_directory/scripts && ".
 		 "$tar xf ".quotemeta($file));
 if (-r $file."_unavail") {
 	&copy_source_dest($file."_unavail", $scripts_unavail_file);
 	}
+&$second_print($text{'setup_done'});
 return 1;
 }
 
@@ -5221,13 +5234,15 @@ return 1;
 sub virtualmin_restore_styles
 {
 local ($file, $vbs) = @_;
-mkdir("$module_config_directory/styles", 0755);
+&$first_print($text{'restore_vstyles_doing'});
+&make_dir("$module_config_directory/styles", 0755);
 local $tar = &get_tar_command();
 &execute_command("cd $module_config_directory/styles && ".
 		 "$tar xf ".quotemeta($file));
 if (-r $file."_unavail") {
 	&copy_source_dest($file."_unavail", $styles_unavail_file);
 	}
+&$second_print($text{'setup_done'});
 return 1;
 }
 
@@ -5254,6 +5269,7 @@ return 1;
 sub virtualmin_restore_chroot
 {
 local ($file, $vbs) = @_;
+&$first_print($text{'restore_vchroot_doing'});
 &obtain_lock_ftp();
 local @chroots;
 open(CHROOT, $file);
@@ -5267,6 +5283,7 @@ while(<CHROOT>) {
 close(CHROOT);
 &save_ftp_chroots(\@chroots);
 &release_lock_ftp();
+&$second_print($text{'setup_done'});
 return 1;
 }
 
@@ -5372,20 +5389,47 @@ local $bms = &read_file_contents($file);
 $bms =~ s/\n//g;
 
 # Restore mail server type, if matching
+&$first_print($text{'restore_vmailserver_doing'});
 &obtain_lock_mail();
 if ($bms eq $config{'mail_system'}) {
-	# XXX print stuff
 	if ($config{'mail_system'} == 0) {
 		# Restore main.cf and master.cf
-		# XXX lock
+		&lock_file($postfix::config{'postfix_config_file'});
+		&lock_file($postfix::config{'postfix_master'});
+		&copy_source_dest($file."_maincf",
+				  $postfix::config{'postfix_config_file'});
+		&copy_source_dest($file."_mastercf",
+				  $postfix::config{'postfix_master'});
+		&unlock_file($postfix::config{'postfix_master'});
+		&unlock_file($postfix::config{'postfix_config_file'});
+		&$second_print($text{'setup_done'});
 		}
 	elsif ($config{'mail_system'} == 1) {
 		# Restore sendmail.cf and .mc
+		&lock_file($sendmail::config{'sendmail_cf'});
+		&lock_file($sendmail::config{'sendmail_mc'});
+		&copy_source_dest($file."_sendmailcf",
+				  $sendmail::config{'sendmail_cf'});
+		&copy_source_dest($file."_sendmailmc",
+				  $sendmail::config{'sendmail_mc'});
+		&unlock_file($sendmail::config{'sendmail_mc'});
+		&unlock_file($sendmail::config{'sendmail_cf'});
+		&$second_print($text{'setup_done'});
 		}
 	elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
 	       $config{'mail_system'} == 5) {
 		# Un-tar qmail dir
+		# XXX
+		&$second_print($text{'setup_done'});
 		}
+	else {
+		&$second_print($text{'backup_vmailserver_supp'});
+		}
+	}
+else {
+	&$second_print(&text('restore_vmailserver_wrong',
+			     $text{'mail_system_'.$bms},
+			     $text{'mail_system_'.$config{'mail_system'}));
 	}
 &release_lock_mail();
 
