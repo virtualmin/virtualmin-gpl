@@ -55,14 +55,9 @@
 
  - Remote DNS and MySQL setup
 	- Documentation
-	- CHANGELOG
 
  - Automatically add reverse IPv6 addresses for domains
 	- Update / delete too
 	- https://www.virtualmin.com/node/16461
 
  - Procmail script entry to block mail with useful message if quota is low
-
- - Better backup for global settings (procmail, etc..)
-	- New backup feature, email
-	- Output progress and error messages
