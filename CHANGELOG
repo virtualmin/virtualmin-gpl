@@ -1266,3 +1266,4 @@ Improved support for backing up to and restoring from IPv6 SSH and FTP servers.
 When a virtual server's plan is changed on the Edit Virtual Server page, quotas are also updated to match those from the plan.
 German translation updates, thanks to Thomas Suess.
 Added a field to the DKIM form for entering additional domains to sign email for, even if they are not hosted on the system.
+MySQL logins and databases and DNS zones can now be created on a central Cloudmin provisioning server, instead of on the Virtualmin system. This allows Virtualmin to be run on a system with less RAM, disk and CPU, while still providing the same functionality.
