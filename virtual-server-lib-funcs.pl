@@ -5302,10 +5302,11 @@ if (!&check_dkim()) {
 	$dkim{'support'} = 1;
 	local $conf = &get_dkim_config();
 	$dkim{'enabled'} = $conf->{'enabled'};
-	$dkim{'domain'} = $conf->{'domain'};
 	$dkim{'selector'} = $conf->{'selector'};
 	$dkim{'extra'} = join(" ", @{$conf->{'extra'}});
 	$dkim{'keyfile'} = $conf->{'keyfile'};
+	$dkim{'sign'} = $conf->{'sign'};
+	$dkim{'verify'} = $conf->{'verify'};
 	if ($conf->{'keyfile'} && -r $conf->{'keyfile'}) {
 		&copy_source_dest($conf->{'keyfile'}, $file."_dkimkey");
 		}
@@ -5402,6 +5403,7 @@ if ($bms eq $config{'mail_system'}) {
 				  $postfix::config{'postfix_master'});
 		&unlock_file($postfix::config{'postfix_master'});
 		&unlock_file($postfix::config{'postfix_config_file'});
+		undef(@postfix::master_config_cache);
 		&$second_print($text{'setup_done'});
 		}
 	elsif ($config{'mail_system'} == 1) {
@@ -5414,12 +5416,15 @@ if ($bms eq $config{'mail_system'}) {
 				  $sendmail::config{'sendmail_mc'});
 		&unlock_file($sendmail::config{'sendmail_mc'});
 		&unlock_file($sendmail::config{'sendmail_cf'});
+		undef(@sendmail::sendmailcf_cache);
 		&$second_print($text{'setup_done'});
 		}
 	elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
 	       $config{'mail_system'} == 5) {
 		# Un-tar qmail dir
-		# XXX
+		local $tar = &get_tar_command();
+		&execute_command("cd $qmailadmin::config{'qmail_dir'} && ".
+				 "tar xf ".quotemeta($file));
 		&$second_print($text{'setup_done'});
 		}
 	else {
@@ -5429,12 +5434,59 @@ if ($bms eq $config{'mail_system'}) {
 else {
 	&$second_print(&text('restore_vmailserver_wrong',
 			     $text{'mail_system_'.$bms},
-			     $text{'mail_system_'.$config{'mail_system'}));
+			     $text{'mail_system_'.$config{'mail_system'}}));
 	}
 &release_lock_mail();
 
 # Restore DKIM config
-# XXX print stuff
+&$first_print($text{'restore_vmailserver_dkim'});
+if (!!&check_dkim()) {
+	local %dkim;
+	&read_file($file."_dkim", \%dkim);
+	if (!$dkim{'support'}) {
+		&$second_print($text{'restore_vmailserver_none'});
+		}
+	else {
+		local $conf = &get_dkim_config();
+		if ($dkim{'enabled'}) {
+			# Setup on this system, same as source
+			$conf->{'enabled'} = $dkim{'enabled'};
+			$conf->{'selector'} = $dkim{'selector'};
+			$conf->{'extra'} = [ split(/\s+/, $dkim{'extra'}) ];
+			$conf->{'sign'} = $dkim{'sign'};
+			$conf->{'verify'} = $dkim{'verify'};
+			local $copiedkey = 0;
+			if ($conf->{'keyfile'} && -r $file."_dkimkey") {
+				# Can copy key now
+				&copy_source_dest($file."_dkimkey",
+						  $conf->{'keyfile'});
+				$copiedkey = 1;
+				}
+			&enable_dkim($conf);
+			$conf = &get_dkim_config();
+			if ($conf->{'keyfile'} && -r $file."_dkimkey" &&
+			    !$copiedkey) {
+				# Copy key file and re-enable DKIM
+				&copy_source_dest($file."_dkimkey",
+						  $conf->{'keyfile'});
+				&enable_dkim($conf);
+				}
+			&$second_print($text{'setup_done'});
+			}
+		elsif ($conf->{'enabled'} && !$dkim{'enabled'}) {
+			# Disable on this system
+			&disable_dkim($conf);
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			# Nothing to do
+			&$second_print($text{'restore_vmailserver_already'});
+			}
+		}
+	}
+else {
+	&$second_print($text{'backup_vmailserver_none'});
+	}
 
 # Restore Postgrey config
 # XXX print stuff

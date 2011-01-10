@@ -2350,6 +2350,9 @@ restore_vstyles_doing=Restoring custom styles ..
 restore_vchroot_doing=Restoring FTP directory restrictions ..
 restore_vmailserver_doing=Restoring mail server configuration ..
 restore_vmailserver_wrong=.. backup contains settings for $1, but your system is running $2
+restore_vmailserver_dkim=Restoring DKIM settings ..
+restore_vmailserver_none=.. not supported on source system
+restore_vmailserver_already=.. leaving disabled
 
 limits_title=Server Owner Limits
 limits_header=Virtualmin limits for server owner

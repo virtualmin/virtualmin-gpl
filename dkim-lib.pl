@@ -267,16 +267,18 @@ if (!$dkim->{'keyfile'} || !-r $dkim->{'keyfile'} || $newkey) {
 				"<tt>".&html_escape($out)."</tt>"));
 		return 0;
 		}
-	if ($gconfig{'os_type'} eq 'debian-linux') {
-		&set_ownership_permissions("dkim-filter", undef, 0700,
-					   $dkim->{'keyfile'});
-		}
-	elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-		&set_ownership_permissions("dkim-milter", undef, 0700,
-					   $dkim->{'keyfile'});
-		}
 	&unlock_file($dkim->{'keyfile'});
 	&$second_print($text{'setup_done'});
+	}
+
+# Make sure key has the right permissions
+if ($gconfig{'os_type'} eq 'debian-linux') {
+	&set_ownership_permissions("dkim-filter", undef, 0700,
+				   $dkim->{'keyfile'});
+	}
+elsif ($gconfig{'os_type'} eq 'redhat-linux') {
+	&set_ownership_permissions("dkim-milter", undef, 0700,
+				   $dkim->{'keyfile'});
 	}
 
 # Get the public key
