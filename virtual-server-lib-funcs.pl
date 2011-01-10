@@ -63,16 +63,19 @@ sub list_domains
 {
 local (@rv, $d);
 local @files;
-if (scalar(@main::list_domains_cache)) {
+local @st = stat($domains_dir);
+if (scalar(@main::list_domains_cache) &&
+    $st[9] == $main::list_domains_cache_time) {
 	# Use cache of domain IDs in RAM
 	@files = @main::list_domains_cache;
 	}
 else {
-	# Re-scan the directory
+	# Re-scan the directory, if un-changed
 	opendir(DIR, $domains_dir);
 	@files = readdir(DIR);
 	closedir(DIR);
 	@main::list_domains_cache = @files;
+	$main::list_domains_cache_time = $st[9];
 	}
 foreach $d (@files) {
 	if ($d !~ /^\./ && $d !~ /\.(lock|bak|rpmsave|sav|swp|webmintmp|~)$/i) {
