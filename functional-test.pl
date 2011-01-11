@@ -2968,7 +2968,7 @@ $parallel_tests = [
 		      [ 'all-features' ] ],
 	},
 
-	# Remove the domain
+	# Remove the domains
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
 	  'cleanup' => 1 },
@@ -4211,6 +4211,111 @@ $admin_tests = [
         },
 	];
 
+$configbackup_tests = [
+	# Create a test plan
+	{ 'command' => 'create-plan.pl',
+	  'args' => [ [ 'name', $test_plan ],
+		      [ 'quota', 7777 ],
+		      [ 'admin-quota', 8888 ],
+		      [ 'max-doms', 7 ],
+		      [ 'max-bw', 77777777 ],
+		      [ 'features', 'dns mail web' ],
+		      [ 'capabilities', 'users aliases scripts' ],
+		      [ 'nodbname' ] ],
+	},
+
+	# Backup all config settings locally
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'all-virtualmin' ],
+		      [ 'dest', $test_backup_file ] ],
+	},
+
+	# Delete the plan
+	{ 'command' => 'delete-plan.pl',
+	  'args' => [ [ 'name', $test_plan ] ],
+	},
+
+	# Restore plan from local file
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'virtualmin', 'templates' ],
+		      [ 'source', $test_backup_file ] ],
+	},
+
+	# Make sure it worked
+	{ 'command' => 'list-plans.pl',
+	  'args' => [ [ 'name', $test_plan ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Server block quota: 7777',
+		      'Administrator block quota: 8888',
+		      'Maximum doms: 7',
+		      'Maximum bw: 77777777',
+		      'Allowed features: dns mail web',
+		      'Edit capabilities: users aliases scripts',
+		      'Can choose database names: No' ],
+	},
+
+	# Backup all config settings to a local dir
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'all-virtualmin' ],
+		      [ 'separate' ],
+		      [ 'dest', $test_backup_dir ] ],
+	},
+
+	# Restore plan from local dir
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'virtualmin', 'templates' ],
+		      [ 'source', $test_backup_dir ] ],
+	},
+
+	# Create a domain for the backup target
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'desc', 'Test target domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ],
+		      @create_args, ],
+        },
+
+	# Backup all config settings via SSH
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'all-virtualmin' ],
+		      [ 'dest', "$ssh_backup_prefix/virtualmin.tar.gz" ] ],
+	},
+
+	# Restore plans via SSH
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'virtualmin', 'templates' ],
+		      [ 'source', "$ssh_backup_prefix/virtualmin.tar.gz" ] ],
+	},
+
+	# Delete the backups file
+	{ 'command' => "rm -rf /home/$test_target_domain_user/virtualmin.tar.gz" },
+
+	# Backup all config settings via SSH to a dir
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'all-virtualmin' ],
+		      [ 'separate' ],
+		      [ 'dest', "$ssh_backup_prefix/backups" ] ],
+	},
+
+	# Restore plans via SSH from a dir
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'virtualmin', 'templates' ],
+		      [ 'source', "$ssh_backup_prefix/backups" ] ],
+	},
+
+	# Cleanup the target domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ] ],
+	  'cleanup' => 1,
+	},
+
+	# Delete the plan
+	{ 'command' => 'delete-plan.pl',
+	  'args' => [ [ 'name', $test_plan ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { 'domains' => $domains_tests,
 	      'disable' => $disable_tests,
 	      'web' => $web_tests,
@@ -4227,6 +4332,7 @@ $alltests = { 'domains' => $domains_tests,
 	      'multibackup' => $multibackup_tests,
 	      'splitbackup' => $splitbackup_tests,
 	      'remotebackup' => $remotebackup_tests,
+	      'configbackup' => $configbackup_tests,
 	      'purge' => $purge_tests,
 	      'incremental' => $incremental_tests,
               'mail' => $mail_tests,
