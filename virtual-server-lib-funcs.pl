@@ -5388,11 +5388,112 @@ sub virtualmin_restore_mailserver
 local ($file, $vbs) = @_;
 &require_mail();
 
-# Get mail server type
+# Restore DKIM config
+&$first_print($text{'restore_vmailserver_dkim'});
+if (!!&check_dkim()) {
+	# DKIM supported .. see what state was in the backup
+	local %dkim;
+	&read_file($file."_dkim", \%dkim);
+	if (!$dkim{'support'}) {
+		&$second_print($text{'restore_vmailserver_none'});
+		}
+	else {
+		local $conf = &get_dkim_config();
+		if ($dkim{'enabled'}) {
+			# Setup on this system, same as source
+			&$indent_print();
+			$conf->{'enabled'} = $dkim{'enabled'};
+			$conf->{'selector'} = $dkim{'selector'};
+			$conf->{'extra'} = [ split(/\s+/, $dkim{'extra'}) ];
+			$conf->{'sign'} = $dkim{'sign'};
+			$conf->{'verify'} = $dkim{'verify'};
+			local $copiedkey = 0;
+			if ($conf->{'keyfile'} && -r $file."_dkimkey") {
+				# Can copy key now
+				&copy_source_dest($file."_dkimkey",
+						  $conf->{'keyfile'});
+				$copiedkey = 1;
+				}
+			&enable_dkim($conf);
+			$conf = &get_dkim_config();
+			if ($conf->{'keyfile'} && -r $file."_dkimkey" &&
+			    !$copiedkey) {
+				# Copy key file and re-enable DKIM
+				&copy_source_dest($file."_dkimkey",
+						  $conf->{'keyfile'});
+				&enable_dkim($conf);
+				}
+			&$outdent_print();
+			&$second_print($text{'setup_done'});
+			}
+		elsif ($conf->{'enabled'} && !$dkim{'enabled'}) {
+			# Disable on this system
+			&$indent_print();
+			&disable_dkim($conf);
+			&$outdent_print();
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			# Nothing to do
+			&$second_print($text{'restore_vmailserver_already'});
+			}
+		}
+	}
+else {
+	&$second_print($text{'backup_vmailserver_none'});
+	}
+
+# Restore Postgrey config
+&$first_print($text{'restore_vmailserver_grey'});
+if (!&check_postgrey()) {
+	local %grey;
+	&read_file($file."_grey", \%grey);
+	if (!$grey{'support'}) {
+		&$second_print($text{'restore_vmailserver_none'});
+		}
+	else {
+		local $enabled = &is_postgrey_enabled();
+		if ($grey{'enabled'}) {
+			# Enable on this system, and copy client files
+			&$indent_print();
+			&enable_postgrey();
+			local $cfile = &get_postgrey_data_file("clients");
+			if ($cfile && -r $file."_greyclients") {
+				&copy_source_dest($file."_greyclients",
+						  $cfile);
+				}
+			local $rfile = &get_postgrey_data_file("recipients");
+			if ($rfile && -r $file."_greyrecipients") {
+				&copy_source_dest($file."_greyrecipients",
+						  $rfile);
+				}
+			&apply_postgrey_data();
+			&$outdent_print();
+			&$second_print($text{'setup_done'});
+			}
+		elsif ($enabled && !$grey{'enabled'}) {
+			# Disable on this system
+			&$indent_print();
+			&disable_postgrey();
+			&$outdent_print();
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			# Nothing to do
+			&$second_print($text{'restore_vmailserver_already'});
+			}
+		}
+	}
+else {
+	&$second_print($text{'backup_vmailserver_none'});
+	}
+
+# Get mail server type from the backup
 local $bms = &read_file_contents($file);
 $bms =~ s/\n//g;
 
-# Restore mail server type, if matching
+# Restore mail server type, if matching. This is done last because DKIM or
+# greylisting might be detected as disabled if done earlier.
 &$first_print($text{'restore_vmailserver_doing'});
 &obtain_lock_mail();
 if ($bms eq $config{'mail_system'}) {
@@ -5440,98 +5541,6 @@ else {
 			     $text{'mail_system_'.$config{'mail_system'}}));
 	}
 &release_lock_mail();
-
-# Restore DKIM config
-&$first_print($text{'restore_vmailserver_dkim'});
-if (!!&check_dkim()) {
-	# DKIM supported .. see what state was in the backup
-	local %dkim;
-	&read_file($file."_dkim", \%dkim);
-	if (!$dkim{'support'}) {
-		&$second_print($text{'restore_vmailserver_none'});
-		}
-	else {
-		local $conf = &get_dkim_config();
-		if ($dkim{'enabled'}) {
-			# Setup on this system, same as source
-			$conf->{'enabled'} = $dkim{'enabled'};
-			$conf->{'selector'} = $dkim{'selector'};
-			$conf->{'extra'} = [ split(/\s+/, $dkim{'extra'}) ];
-			$conf->{'sign'} = $dkim{'sign'};
-			$conf->{'verify'} = $dkim{'verify'};
-			local $copiedkey = 0;
-			if ($conf->{'keyfile'} && -r $file."_dkimkey") {
-				# Can copy key now
-				&copy_source_dest($file."_dkimkey",
-						  $conf->{'keyfile'});
-				$copiedkey = 1;
-				}
-			&enable_dkim($conf);
-			$conf = &get_dkim_config();
-			if ($conf->{'keyfile'} && -r $file."_dkimkey" &&
-			    !$copiedkey) {
-				# Copy key file and re-enable DKIM
-				&copy_source_dest($file."_dkimkey",
-						  $conf->{'keyfile'});
-				&enable_dkim($conf);
-				}
-			&$second_print($text{'setup_done'});
-			}
-		elsif ($conf->{'enabled'} && !$dkim{'enabled'}) {
-			# Disable on this system
-			&disable_dkim($conf);
-			&$second_print($text{'setup_done'});
-			}
-		else {
-			# Nothing to do
-			&$second_print($text{'restore_vmailserver_already'});
-			}
-		}
-	}
-else {
-	&$second_print($text{'backup_vmailserver_none'});
-	}
-
-# Restore Postgrey config
-&$first_print($text{'restore_vmailserver_grey'});
-if (!&check_postgrey()) {
-	local %grey;
-	&read_file($file."_grey", \%grey);
-	if (!$grey{'support'}) {
-		&$second_print($text{'restore_vmailserver_none'});
-		}
-	else {
-		local $enabled = &is_postgrey_enabled();
-		if ($grey{'enabled'}) {
-			# Enable on this system, and copy client files
-			&enable_postgrey();
-			local $cfile = &get_postgrey_data_file("clients");
-			if ($cfile && -r $file."_greyclients") {
-				&copy_source_dest($file."_greyclients",
-						  $cfile);
-				}
-			local $rfile = &get_postgrey_data_file("recipients");
-			if ($rfile && -r $file."_greyrecipients") {
-				&copy_source_dest($file."_greyrecipients",
-						  $rfile);
-				}
-			&apply_postgrey_data();
-			&$second_print($text{'setup_done'});
-			}
-		elsif ($enabled && !$grey{'enabled'}) {
-			# Disable on this system
-			&disable_postgrey();
-			&$second_print($text{'setup_done'});
-			}
-		else {
-			# Nothing to do
-			&$second_print($text{'restore_vmailserver_already'});
-			}
-		}
-	}
-else {
-	&$second_print($text{'backup_vmailserver_none'});
-	}
 
 return 1;
 }
