@@ -5390,7 +5390,8 @@ local ($file, $vbs) = @_;
 
 # Restore DKIM config
 &$first_print($text{'restore_vmailserver_dkim'});
-if (!!&check_dkim()) {
+&obtain_lock_mail();
+if (!&check_dkim()) {
 	# DKIM supported .. see what state was in the backup
 	local %dkim;
 	&read_file($file."_dkim", \%dkim);
@@ -5487,6 +5488,7 @@ if (!&check_postgrey()) {
 else {
 	&$second_print($text{'backup_vmailserver_none'});
 	}
+&release_lock_mail();
 
 # Get mail server type from the backup
 local $bms = &read_file_contents($file);
