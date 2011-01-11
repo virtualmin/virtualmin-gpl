@@ -7,7 +7,6 @@ $trust_unknown_referers = 1;
 require './virtual-server-lib.pl';
 &ReadParse();
 &can_remote() || &api_error($text{'remote_ecannot'});
-use subs qw(exit);
 
 if (!$in{'program'}) {
 	# Tell the user what needs to be done
