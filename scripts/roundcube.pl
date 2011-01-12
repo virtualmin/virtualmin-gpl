@@ -247,7 +247,35 @@ if (!$upgrade) {
 		}
 	local ($ex, $out) = &mysql::execute_sql_file($dbname, $sqlfile,
 					       	     $dbuser, $dbpass);
-	$ex && return (-1, "Failed to run database setup script : <tt>$out</tt>.");
+	$ex && return (-1, "Failed to run database setup script : ".
+			   "<tt>$out</tt>.");
+	}
+else {
+	# Create script of upgrade SQL to run, by extracting SQL from the old
+	# version onwards from mysql.update.sql
+	&require_mysql();
+	local $sqltemp = &transname();
+	&open_tempfile(SQLTEMP, ">$sqltemp", 0, 1);
+	open(SQLIN, "$opts->{'dir'}/SQL/mysql.update.sql");
+	local $foundver = 0;
+	while(<SQLIN>) {
+		if (/Updates\s+from\s+version\s+(\S+)/ &&
+		    &compare_versions("$1", $upgrade->{'version'}) >= 0) {
+			$foundver = 1;
+			}
+		if ($foundver) {
+			&print_tempfile(SQLTEMP, $_);
+			}
+		}
+	close(SQLIN);
+	&close_tempfile(SQLTEMP);
+	if ($foundver) {
+		local ($ex, $out) = &mysql::execute_sql_file($dbname, $sqltemp,
+							     $dbuser, $dbpass);
+		$ex && return (-1, "Failed to run database date script : ".
+				   "<tt>$out</tt>.");
+		}
+	&unlink_file($sqltemp);
 	}
 
 # Return a URL for the user
