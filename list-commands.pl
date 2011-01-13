@@ -59,6 +59,7 @@ my %done;
 my $fmt = "\%-${maxlen}.${maxlen}s \%s\n";
 foreach my $c (&list_api_categories()) {
 	my ($cname, @cglobs) = @$c;
+	@cglobs = map { my $g = $_; ($g, map { "$root_directory/$_/$g" } @plugins) } @cglobs;
 	my @cmds = map { glob($_) } @cglobs;
 	@cmds = grep { &indexof($_, @skips) < 0 && !$done{$_} } @cmds;
 
@@ -69,6 +70,7 @@ foreach my $c (&list_api_categories()) {
 		next if ($src !~ /=head1\s+(.*)\n\n(.*)\n/);
 		my $desc = $2;
 		my $scmd = $cmd;
+		$scmd =~ s/^.*\///;
 		$scmd =~ s/\.pl$// if ($short);
 		my $wrap;
 		while (length($desc) + $maxlen > 79) {
