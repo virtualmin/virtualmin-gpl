@@ -21,14 +21,14 @@ if (ref($msg) ne 'ARRAY') {
 my %feats = map { $_->{'name'}, $_->{'values'} } @$msg;
 if ($config{'provision_dns'}) {
 	# Make sure DNS is supported
-	$feats{'dns'} || return $text{'provision_edns'};
+	$feats{'dns'} || return $text{'provision_ednssupport'};
 	$feats{'dns'}->{'limit'} || return $text{'provision_ednslimit'};
 	$feats{'dns'}->{'systems'} || return $text{'provision_ednssystems'};
 	}
 if ($config{'provision_mysql'}) {
 	# Make sure MySQL logins and DBs are supported
 	$feats{'mysql'} && $feats{'mysqldb'} ||
-		return $text{'provision_emysql'};
+		return $text{'provision_emysqlsupport'};
 	$feats{'mysql'}->{'limit'} && $feats{'mysqldb'}->{'limit'} ||
 		return $text{'provision_emysqllimit'};
 	$feats{'mysql'}->{'systems'} && $feats{'mysqldb'}->{'systems'} ||
