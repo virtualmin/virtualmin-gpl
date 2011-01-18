@@ -3339,6 +3339,10 @@ if ($config{'dns'}) {
 		$hash{'dns_serial'} = time();
 		}
 	}
+else {
+	# BIND not installed, so default to using unix time for serial
+	$hash{'dns_serial'} = time();
+	}
 $hash{'virtualmin_url'} = &get_virtualmin_url($d);
 
 # Make quotas nicer, if needed
