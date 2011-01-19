@@ -150,7 +150,8 @@ if ($domain->{'phosting'}->{'logrotation'}->{'enabled'} eq 'true' ||
     $windows && &indexof("web", @got) >= 0) {
 	push(@got, "logrotate");
 	}
-if ($domain->{'phosting'}->{'webalizer'}) {
+if ($domain->{'phosting'}->{'webalizer'} &&
+    &indexof("web", @got) >= 0) {
 	push(@got, "webalizer");
 	}
 
