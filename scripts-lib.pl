@@ -940,6 +940,7 @@ foreach my $m (@mods) {
 	# Check if the package is already installed
 	local $iok = 0;
 	local @poss;
+	local $fullphpver = &get_php_version($phpver, $d);
 	if ($software::update_system eq "csw") {
 		@poss = ( "php".$phpver."_".$m );
 		}
@@ -954,6 +955,14 @@ foreach my $m (@mods) {
 		       ($m eq "domxml" || $m eq "dom") && $phpver >= 5) {
 			# On Redhat, the domxml module is in php-domxml
 			push(@poss, "php".$phpver."-xml", "php-xml");
+			}
+		if ($software::update_system eq "yum" &&
+		    $fullphpver =~ /^5\.3/) {
+			# If PHP 5.3 is being used, packages may start with
+			# php53-
+			my @vposs = grep { /^php5-/ } @poss;
+			push(@poss, map { my $p = $_;
+					     $p =~ s/php5/php53/; $p } @vposs);
 			}
 		}
 	foreach my $pkg (@poss) {
