@@ -53,11 +53,11 @@
  - Allow admin to edit user's procmail rules
 	- http://www.virtualmin.com/node/12330 
 
- - Remote DNS and MySQL setup
-	- Documentation
-
  - Automatically add reverse IPv6 addresses for domains
 	- Update / delete too
 	- https://www.virtualmin.com/node/16461
 
  - Procmail script entry to block mail with useful message if quota is low
+
+ - Plugin for APS installation
+
