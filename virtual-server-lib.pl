@@ -71,8 +71,7 @@ $config{'virt6'} = 1;
 @alias_features = ( @opt_alias_features );
 @subdom_features = ( @opt_subdom_features );
 @database_features = ( 'mysql', 'postgres' );
-@template_features = ( 'basic', 'resources', @features, 'virt',
-		       $virtualmin_pro ? ( 'virtualmin' ) : ( ),
+@template_features = ( 'basic', 'resources', @features, 'virt', 'virtualmin',
 		       'plugins',
 		       $virtualmin_pro ? ( 'scripts' ) : ( ),
 		       'phpwrappers', 'avail' );
