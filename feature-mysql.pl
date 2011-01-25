@@ -1202,12 +1202,17 @@ sub revoke_mysql_database
 local ($d, $dbname) = @_;
 &require_mysql();
 local @oldusers = &list_mysql_database_users($d, $dbname);
+local @users = &list_domain_users($d, 1, 1, 1, 0);
+local @unames = ( &mysql_user($d),
+		  map { &mysql_username($_->{'user'}) } @users );
 
-# Take away MySQL permissions
+# Take away MySQL permissions for users in this domain
 local $dfunc = sub {
 	local $qdbname = &quote_mysql_database($dbname);
-	&mysql::execute_sql_logged($mysql::master_db, "delete from db where db = '$dbname' or db = '$qdbname'");
-	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
+	foreach my $uname (@unames) {
+		&mysql::execute_sql_logged($mysql::master_db, "delete from db where (db = ? or db = ?) and user = ?", $dbname, $qdbname, $uname);
+		}
+	&mysql::execute_sql_logged($mysql::master_db, "flush privileges");
 	};
 &execute_for_all_mysql_servers($dfunc);
 
