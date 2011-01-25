@@ -156,6 +156,11 @@ if ($config{'spam'} && !$config{'no_lookup_domain_daemon'}) {
 	&setup_lookup_domain_daemon();
 	}
 
+# Add procmail rule to bounce messages if quota is full
+if ($config{'spam'}) {
+	&setup_quota_full_bounce();
+	}
+
 # Force a restart of Apache, to apply writelogs.pl changes
 if ($config{'web'}) {
 	&require_apache();
