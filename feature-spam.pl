@@ -1509,7 +1509,7 @@ foreach my $r (@recipes) {
 	if ($r->{'type'} eq '=' && $r->{'action'} =~ /^VIRTUALMIN=/) {
 		$virt = $r;
 		}
-	elsif ($r->{'type'} eq '=' && $r->{'action'} =~ /^EXITCODE=/) {
+	elsif ($r->{'name'} eq 'EXITCODE') {
 		$exitcode = $r;
 		}
 	elsif ($virt && !$virtafter && $r->{'index'} == $virt->{'index'}+1) {
@@ -1524,10 +1524,10 @@ local $var1 = { 'name' => 'EXITCODE',
 local $testcmd = &has_command("test") || "test";
 local $cmd;
 if ($gconfig{'os_type'} eq 'solaris') {
-	$cmd = "sh -c \"$testcmd '\$EXITCODE' != '0'\"";
+	$cmd = "sh -c \"$testcmd '\$EXITCODE' = '73'\"";
 	}
 else {
-	$cmd = "$testcmd \"\$EXITCODE\" != \"0\"";
+	$cmd = "$testcmd \"\$EXITCODE\" = \"73\"";
 	}
 local $var2 = { 'flags' => [ ],
 		'conds' => [ [ "?", $cmd ] ],
