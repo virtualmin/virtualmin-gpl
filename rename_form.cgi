@@ -27,7 +27,7 @@ print &ui_table_row($text{'rename_new'},
 if ($d->{'unix'} && &can_rename_domains() == 2) {
 	# Rename user option
 	print &ui_table_row($text{'rename_user'},
-	    &ui_radio("user_mode", 1,
+	    &ui_radio("user_mode", 0,
 		      [ [ 0, &text('rename_user0',
 				   "<tt>$d->{'user'}</tt>")."<br>" ],
 			[ 1, $text{'rename_user1'}."<br>" ],
@@ -50,7 +50,7 @@ elsif ($d->{'dir'}) {
 	if ($rh == 2 || $home_contains_domain) {
 		# Show leave, automatic and perhaps manual option
 		print &ui_table_row($text{'rename_home'},
-		    &ui_radio("home_mode", 1,
+		    &ui_radio("home_mode", 0,
 		      [ [ 0, &text('rename_home0',
 				   "<tt>$d->{'home'}</tt>")."<br>" ],
 			[ 1, $text{'rename_home1'}."<br>" ],
