@@ -53,10 +53,6 @@
  - Allow admin to edit user's procmail rules
 	- http://www.virtualmin.com/node/12330 
 
- - Automatically add reverse IPv6 addresses for domains
-	- Update / delete too
-	- https://www.virtualmin.com/node/16461
-
  - Plugin for APS installation
 
  - Move cron jobs to webmincron

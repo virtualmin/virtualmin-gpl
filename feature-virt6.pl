@@ -36,6 +36,25 @@ if (!$d->{'virtalready'}) {
 	&$second_print(&text('setup_virt6done', $virt->{'name'}));
 	}
 &release_lock_virt($d);
+
+# Add IPv6 reverse entry, if possible
+if ($config{'dns'} && !$d->{'provision_dns'}) {
+	&require_bind();
+	local $ip6 = $d->{'ip6'};
+	local ($revconf, $revfile, $revrec) = &bind8::find_reverse($ip6);
+	if ($revconf && $revfile && !$revrec) {
+		&lock_file(&bind8::make_chroot($revfile));
+		&bind8::create_record($revfile,
+			&bind8::net_to_ip6int($d->{'ip6'}),
+			undef, "IN", "PTR", $d->{'dom'}.".");
+		local @rrecs = &bind8::read_zone_file(
+			$revfile, $revconf->{'name'});
+		&bind8::bump_soa_record($revfile, \@rrecs);
+		&unlock_file(&bind8::make_chroot($revfile));
+		&register_post_action(\&restart_bind);
+		}
+	}
+
 return 1;
 }
 
@@ -75,6 +94,20 @@ if (!$d->{'virtalready'}) {
 		}
 	}
 &release_lock_virt($d);
+
+# Remove IPv6 reverse address, if defined
+if ($config{'dns'} && !$d->{'provision_dns'}) {
+	&require_bind();
+	local $ip6 = $d->{'ip6'};
+	local ($revconf, $revfile, $revrec) = &bind8::find_reverse($ip6);
+	if ($revconf && $revfile && $revrec &&
+	    $revrec->{'values'}->[0] eq $d->{'dom'}.".") {
+		&lock_file(&bind8::make_chroot($revrec->{'file'}));
+		&bind8::delete_record($revfile, $revrec);
+		&unlock_file(&bind8::make_chroot($revrec->{'file'}));
+		&register_post_action(\&restart_bind);
+		}
+	}
 }
 
 # validate_virt6(&domain)
