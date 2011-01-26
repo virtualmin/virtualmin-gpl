@@ -44,9 +44,14 @@ if ($dkim && $dkim->{'keyfile'} && -r $dkim->{'keyfile'}) {
 		&ui_yesno_radio("newkey", 0));
 	}
 
-# Additional domains to sign for
+# Additional domains to sign for, defaulting to local hostname
+@extra = @{$dkim->{'extra'}};
+if (!@extra && (!$dkim || !$dkim->{'enabled'})) {
+	@extra = &unique(&get_system_hostname(),
+			 &get_system_hostname(1));
+	}
 print &ui_table_row($text{'dkim_extra'},
-	&ui_textarea("extra", join("\n", @{$dkim->{'extra'}}), 10, 60));
+	&ui_textarea("extra", join("\n", @extra), 10, 60));
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
