@@ -411,7 +411,7 @@ setup_ecrgroup=.. administration group was created but does not exist!
 setup_ecrgroup2=.. failed to create administration group : $1
 setup_ecruser=.. administration user was created but does not exist!
 setup_ecruser2=.. failed to create administration user : $1
-setup_edirectives=The Apache directives for new websites set on the Module Config page are not valid : $1
+setup_edirectives=The Apache directives for new websites set on the Virtualmin Configuration page are not valid : $1
 setup_eemail=Missing contact email address
 setup_eemail2=A contact email address must be entered for servers that have no administration user
 setup_emaking=Before creation command failed : $1
@@ -1606,7 +1606,7 @@ newlocal_header=New local mailbox email message details
 newdom_title=New Virtual Server Email
 newdom_ecannot=You are not allowed to edit the new server email template
 newdom_desc=Use this form to edit the template file $1 for the email message that will be sent to a new virtual server owner after it is created. The following substitions will be done to the text :
-newdom_descdis=Use this form to edit the template file $1 for the email message that would be sent to a new virtual server owner after it is created, if this feature was enabled on the Module Config page. The following substitions will be done to the text :
+newdom_descdis=Use this form to edit the template file $1 for the email message that would be sent to a new virtual server owner after it is created, if this feature was enabled on the Virtualmin Configuration page. The following substitions will be done to the text :
 newdom_subject=Subject line
 newdom_sending=Send email?
 newdom_cc=Also Cc email to
@@ -1619,7 +1619,7 @@ newdom_reseller=Virtual server reseller
 newsubdom_title=New Virtual Sub-Server Email
 newsubdom_ecannot=You are not allowed to edit the new sub-server email template
 newsubdom_desc=Use this form to edit the template file $1 for the email message that will be sent to the owner of a new virtual sub-server after it is created. The following substitions will be done to the text :
-newsubdom_descdis=Use this form to edit the template file $1 for the email message that would be sent to the owner of a new virtual sub-server after it is created, if this feature was enabled on the Module Config page. The following substitions will be done to the text :
+newsubdom_descdis=Use this form to edit the template file $1 for the email message that would be sent to the owner of a new virtual sub-server after it is created, if this feature was enabled on the Virtualmin Configuration page. The following substitions will be done to the text :
 newreseller_header=New reseller email message details
 
 newreseller_title=New Reseller Email
@@ -1724,7 +1724,7 @@ check_updatenow=Update Webmin Users
 check_current=In Webalizer's global configuration, the <b>Webalizer incremental file</b> is set to an absolute path. Use the <a href='$1'>Webalizer</a> module to change it to a relative path, like just <tt>webalizer.current</tt>.
 check_history=In Webalizer's global configuration, the <b>Webalizer history file</b> is set to an absolute path. Use the <a href='$1'>Webalizer</a> module to change it to a relative path, like just <tt>webalizer.hist</tt>.
 check_proftpd=An error was found in the ProFTPd configuration template : $1. This must be fixed by editing the Default Settings on the Server Templates page.
-check_enamevirt=The <b>All Apache virtual servers are name-based</b> and <b>Default IP address for DNS records</b> options cannot both be enabled on the <a href='$1'>Module Config</a> page.
+check_enamevirt=The <b>All Apache virtual servers are name-based</b> and <b>Default IP address for DNS records</b> options cannot both be enabled on the <a href='$1'>Virtualmin Configuration</a> page.
 check_logrotateok=Logrotate is installed.
 check_plugin=Plugin $1 is installed OK.
 check_eldap=An error occurred contacting the LDAP server : $1. Either LDAP must be disabled in the <a href='$2'>module configuration</a> page, or the <a href='$3'>LDAP Users and Groups</a> module must be set up correctly.
