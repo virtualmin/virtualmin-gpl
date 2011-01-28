@@ -1249,12 +1249,14 @@ if ($d->{'web'}) {
 
 # If possible, run named-checkzone
 if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
-    !$d->{'provision_dns'}) {
+    !$d->{'provision_dns'} && !$d->{'dns_submode'}) {
 	local $z = &get_bind_zone($d->{'dom'});
-	local @errs = &bind8::check_zone_records($z);
-	if (@errs) {
-		return &text('validate_ednscheck',
-			join("<br>", map { &html_escape($_) } @errs));
+	if ($z) {
+		local @errs = &bind8::check_zone_records($z);
+		if (@errs) {
+			return &text('validate_ednscheck',
+				join("<br>", map { &html_escape($_) } @errs));
+			}
 		}
 	}
 return undef;

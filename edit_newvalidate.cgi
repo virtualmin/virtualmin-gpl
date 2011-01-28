@@ -71,7 +71,7 @@ print &ui_table_row($text{'newvalidate_always'},
 # Servers to check
 @ids = split(/\s+/, $config{'validate_servers'});
 print &ui_table_row($text{'newvalidate_servers'},
-		    &ui_radio("servers_def", 1,
+		    &ui_radio("servers_def", @ids ? 0 : 1,
 			[ [ 1, $text{'newips_all'} ],
 			  [ 0, $text{'newips_sel'} ] ])."<br>\n".
 		    &servers_input("servers", \@ids, \@doms));
@@ -79,7 +79,7 @@ print &ui_table_row($text{'newvalidate_servers'},
 # Features to check
 @fids = split(/\s+/, $config{'validate_features'});
 print &ui_table_row($text{'newvalidate_feats'},
-		    &ui_radio("features_def", 1,
+		    &ui_radio("features_def", @fids ? 0 : 1,
 			[ [ 1, $text{'newvalidate_all'} ],
 			  [ 0, $text{'newvalidate_sel'} ] ])."<br>\n".
 		    &ui_select("features", \@fids,
@@ -90,6 +90,6 @@ print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
 print &ui_tabs_end_tab('mode', 'sched');
 
-print &ui_tabs_end();
+print &ui_tabs_end(1);
 
 &ui_print_footer("", $text{'index_return'});

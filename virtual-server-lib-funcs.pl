@@ -3196,6 +3196,18 @@ $rv = &entities_to_ascii($rv);
 return $rv;
 }
 
+# Print functions for caturing output
+sub first_capture_print
+{
+$print_output .= $indent_text.
+    join("", (map { &html_tags_to_text(&entities_to_ascii($_)) } @_))."\n";
+}
+sub second_capture_print
+{
+$print_output .= $indent_text.
+    join("", (map { &html_tags_to_text(&entities_to_ascii($_)) } @_))."\n\n";
+}
+
 sub null_print { }
 
 sub set_all_null_print
@@ -3215,6 +3227,13 @@ $first_print = \&first_html_print;
 $second_print = \&second_html_print;
 $indent_print = \&indent_html_print;
 $outdent_print = \&outdent_html_print;
+}
+sub set_all_capture_print
+{
+$first_print = \&first_capture_print;
+$second_print = \&second_capture_print;
+$indent_print = \&indent_text_print;
+$outdent_print = \&outdent_text_print;
 }
 
 # These functions store and retrieve the current print commands
