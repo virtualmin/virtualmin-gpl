@@ -135,10 +135,12 @@ if ($dests[0] eq "download:") {
 	# Special case .. we backup to a temp file and output in the browser
 	$temp = &transname().($config{'compression'} == 0 ? ".tar.gz" :
 			      $config{'compression'} == 1 ? ".tar.bz2" :".tar");
-	&open_tempfile(TEMP, ">$temp", 0, 1);
-	&close_tempfile(TEMP);
-	&set_ownership_permissions($doms[0]->{'uid'}, $doms[0]->{'gid'}, 0700,
-				   $temp);
+	foreach $t ($temp, $temp.".info") {
+		&open_tempfile(TEMP, ">$t", 0, 1);
+		&close_tempfile(TEMP);
+		&set_ownership_permissions($doms[0]->{'uid'}, $doms[0]->{'gid'},
+					   0700, $t);
+		}
 	&set_all_null_print();
 	($ok, $size) = &backup_domains([ $temp ], \@doms, \@do_features,
 				       $in{'fmt'}, $in{'errors'}, \%options,
@@ -146,6 +148,7 @@ if ($dests[0] eq "download:") {
 				       $in{'onebyone'}, $cbmode == 2,
 				       undef, $in{'increment'});
 	&cleanup_backup_limits(0, 1);
+	unlink($temp.".info");
 	&run_post_actions();
 	if ($ok) {
 		@st = stat($temp);
@@ -160,6 +163,7 @@ if ($dests[0] eq "download:") {
 		close(TEMP);
 		}
 	else {
+		unlink($temp);
 		&error($text{'backup_edownloadfailed'});
 		}
 	}
