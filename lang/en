@@ -5367,6 +5367,7 @@ dkim_nodomains=.. no servers with both DNS and email enabled were found!
 dkim_undns=Removing DKIM records from DNS domain $1 ..
 dkim_dnsremoved=.. removed successfully
 dkim_dnsalreadygone=.. already gone
+dkim_records=DNS records for additional domains
 
 provision_title=Cloudmin Provisioning Client
 provision_ecannot=You are not allowed to setup the Cloudmin provisioning client

@@ -1273,3 +1273,4 @@ Email to users that are with 100 kB of their quota is now bounced back to the se
 Email to users that are with 100 kB of their quota is now bounced back to the sender, to prevent the mailbox from completely filling up and breaking Dovecot's avility to delete messages.
 When adding an IPv6 address to a virtual server, an reverse DNS entry for the IP is also created if the IPv6 reverse zone is hosted on the Virtualmin system.
 The create-domain API command now lets you set a custom group name for a new virtual server with the C<--group> flag. If a custom username is set, the group name defaults to matching it.
+Removed the 'Domain *' directive from the DKIM configuration, which was breaking signing for domains other than those hosted by Virtualmin (such as email from cron).
