@@ -2,6 +2,7 @@
 # Show a form for validating multiple servers
 
 require './virtual-server-lib.pl';
+&ReadParse();
 &can_edit_templates() || &error($text{'newvalidate_ecannot'});
 &ui_print_header(undef, $text{'newvalidate_title'}, "", "newvalidate");
 

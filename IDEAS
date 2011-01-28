@@ -56,9 +56,3 @@
  - Plugin for APS installation
 
  - Move cron jobs to webmincron
-
- - Page to setup daily verification cron job
-	- Also do config check
-	- Re-activate after backup
-	- CHANGELOG
-	- GPL version

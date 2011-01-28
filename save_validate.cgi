@@ -15,6 +15,17 @@ if ($in{'sched'}) {
 	$in{'email'} =~ /^\S+\@\S+$/ || &error($text{'newquotas_eemail'});
 	&virtualmin_ui_parse_cron_time("sched", $job, \%in);
 	}
+if ($in{'sched'} == 0) {
+	delete($config{'validate_sched'});
+	}
+elsif ($in{'sched'} == 1) {
+	$config{'validate_sched'} = '@'.$job->{'special'};
+	}
+else {
+	$config{'validate_sched'} =
+		join(" ", $job->{'mins'}, $job->{'hours'}, $job->{'days'},
+			  $job->{'months'}, $job->{'weekdays'});
+	}
 $config{'validate_email'} = $in{'email'};
 $config{'validate_config'} = $in{'config'};
 $config{'validate_always'} = $in{'always'};

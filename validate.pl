@@ -73,19 +73,21 @@ $out .= "\n";
 
 # Check Virtualmin config
 if ($config{'validate_config'}) {
-	$out .= "Virtualmin configuration check\n";
-	$out .= "------------------------------\n";
 	&set_all_capture_print();
 	$err = &check_virtual_server_config();
-	$out .= $print_output;
-	if ($err) {
-		$out .= $err,"\n";
-		$out .= "Configuration errors found\n";
-		$ecount++;
+	if ($err || $config{'validate_always'}) {
+		$out .= "Virtualmin configuration check\n";
+		$out .= "------------------------------\n";
+		$out .= $print_output;
+		if ($err) {
+			$out .= $err,"\n";
+			$out .= "Configuration errors found\n";
+			}
+		else {
+			$out .= "Configuration OK\n";
+			}
 		}
-	else {
-		$out .= "Configuration OK\n";
-		}
+	$ecount++ if ($err);
 	}
 
 # Send email
@@ -96,7 +98,8 @@ elsif ($ecount || $config{'validate_always'}) {
 	&mailboxes::send_text_mail(&get_global_from_address(),
 				   $config{'validate_email'},
 				   undef,
-				   'Virtualmin Validation',
+				   $ecount ? 'Virtualmin Validation Failed'
+					   : 'Virtualmin Validation Successful',
 				   $out);
 	}
 

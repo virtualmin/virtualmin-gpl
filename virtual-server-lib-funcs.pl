@@ -12337,6 +12337,34 @@ if (defined(&setup_scriptwarn_job) && defined($config{'scriptwarn_enabled'})) {
 if (defined(&setup_scriptlatest_job) && $config{'scriptlatest_enabled'}) {
 	&setup_scriptlatest_job(1);
 	}
+
+# Re-setup the validation cron job based on the saved config
+local ($oldjob, $job);
+$oldjob = $job = &find_validate_job();
+$job ||= { 'user' => 'root',
+	   'active' => 1,
+	   'command' => $validate_cron_cmd };
+if ($oldjob) {
+	&lock_file(&cron::cron_file($oldjob));
+	&cron::delete_cron_job($oldjob);
+	&unlock_file(&cron::cron_file($oldjob));
+	}
+&cron::create_wrapper($validate_cron_cmd, $module_name, "validate.pl");
+if ($config{'validate_sched'}) {
+	# Re-create cron job
+	if ($config{'validate_sched'} =~ /^\@(\S+)/) {
+		$job->{'special'} = $1;
+		}
+	else {
+		($job->{'mins'}, $job->{'hours'}, $job->{'days'},
+		 $job->{'months'}, $job->{'weekdays'}) =
+			split(/\s+/, $config{'validate_sched'});
+		delete($job->{'special'});
+		}
+	&lock_file(&cron::cron_file($job));
+	&cron::create_cron_job($job);
+	&unlock_file(&cron::cron_file($job));
+	}
 }
 
 # mount_point(dir)

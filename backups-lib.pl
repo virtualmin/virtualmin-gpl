@@ -658,8 +658,7 @@ DOMAIN: foreach $d (@$doms) {
 # Add all requested Virtualmin config information
 local $vcount = 0;
 if (@$vbs) {
-	&$first_print(&text('backup_global',
-		      join(", ", map { $text{'backup_v'.$_} } @$vbs)));
+	&$first_print($text{'backup_global'});
 	&$indent_print();
 	if ($homefmt) {
 		# Need to make a backup dir, as we cannot use one of the
@@ -1668,8 +1667,7 @@ if ($ok) {
 
 	# Restore any Virtualmin settings
 	if (@$vbs) {
-		&$first_print(&text('restore_global',
-			      join(", ", map { $text{'backup_v'.$_} } @$vbs)));
+		&$first_print($text{'restore_global2'});
 		&$indent_print();
 		foreach my $v (@$vbs) {
 			local $vfile = "$restoredir/virtualmin_".$v;
