@@ -59,4 +59,6 @@
 
  - Page to setup daily verification cron job
 	- Also do config check
-	- Test for apache config with -t
+	- Re-activate after backup
+	- CHANGELOG
+	- GPL version

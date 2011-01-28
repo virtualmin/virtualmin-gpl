@@ -3192,6 +3192,7 @@ $rv =~ s/<a[^>]*>|<\/a>//g;
 $rv =~ s/<pre>|<\/pre>//g;
 $rv =~ s/<br>/\n/g;
 $rv =~ s/<p>/\n\n/g;
+$rv = &entities_to_ascii($rv);
 return $rv;
 }
 
@@ -9510,10 +9511,15 @@ else {
 # Returns the Cron job used for regularly checking quotas
 sub find_quotas_job
 {
-&foreign_require("cron", "cron-lib.pl");
-local @jobs = &cron::list_cron_jobs();
-local ($job) = grep { $_->{'user'} eq 'root' &&
-		      $_->{'command'} eq $quotas_cron_cmd } @jobs;
+local $job = &find_virtualmin_cron_job($quotas_cron_cmd);
+return $job;
+}
+
+# find_validate_job()
+# Returns the Cron job used for validating virtual servers
+sub find_validate_job
+{
+local $job = &find_virtualmin_cron_job($validate_cron_cmd);
 return $job;
 }
 
@@ -11604,6 +11610,16 @@ if ($config{'web'}) {
 	if ($tmpl->{'web_php_suexec'} == 2 &&
 	    !$apache::httpd_modules{'mod_fcgid'}) {
 		return $text{'tmpl_ephpmode2'};
+		}
+
+	# Run Apache config check
+	local $err = &apache::test_config();
+	if ($err) {
+		local @elines = split(/\r?\n/, $err);
+		@elines = grep { !/\[warn\]/ } @elines;
+		$err = join("\n", @elines) if (@elines);
+		return &text('check_ewebconfig',
+			     "<pre>".&html_escape($err)."</pre>");
 		}
 
 	# Make sure suexec is installed, if enabled. Also check home path.
