@@ -10123,6 +10123,15 @@ if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} && &can_edit_spf()) {
 		  });
 	}
 
+if ($d->{'dns'} && &can_edit_spf()) {
+	# DNS records button
+	push(@rv, { 'page' => 'list_records.cgi',
+		    'title' => $text{'edit_records'},
+		    'desc' => $text{'edit_recordsdesc'},
+		    'cat' => 'server',
+		  });
+	}
+
 &require_mail();
 if ($d->{'mail'} && $config{'mail'} && &can_edit_mail() &&
     ($supports_bcc || $d->{'alias'} && $supports_aliascopy)) {

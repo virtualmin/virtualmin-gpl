@@ -1731,21 +1731,6 @@ if (!$bind8::bind_version) {
 return ( [ $text{'sysinfo_bind'}, $bind8::bind_version ] );
 }
 
-# links_dns(&domain)
-# Returns a link to the BIND module
-sub links_dns
-{
-local ($d) = @_;
-if (!$d->{'dns_submode'} && !$d->{'dns_provision'}) {
-	return ( { 'mod' => 'bind8',
-		   'desc' => $text{'links_dns'},
-		   'page' => "edit_master.cgi?zone=".&urlize($d->{'dom'}),
-		   'cat' => 'services',
-		 } );
-	}
-return ( );
-}
-
 sub startstop_dns
 {
 local ($typestatus) = @_;
@@ -2371,6 +2356,36 @@ if ($parent && $d->{'dom'} =~ /\.\Q$parent->{'dom'}\E$/i && $parent->{'dns'}) {
 	return 1;
 	}
 return 0;
+}
+
+# can_edit_record(&record, &domain)
+# Returns 1 if some DNS record can be edited.
+sub can_edit_record
+{
+local ($r, $d) = @_;
+if ($r->{'type'} eq 'NS' &&
+    $r->{'name'} eq $d->{'dom'}.'.' &&
+    $d->{'provision_dns'}) {
+	# NS record for domain is automatically set in provisioning mode
+	return 0;
+	}
+return 1;
+}
+
+# can_delete_record(&record, &domain)
+# Returns 1 if some DNS record can be removed.
+sub can_delete_record
+{
+local ($r, $d) = @_;
+if (!&can_edit_record($r, $d)) {
+	# If cannot edit, then cannot delete
+	return 0;
+	}
+elsif ($r->{'type'} eq 'SOA') {
+	# Don't allow removal of SOA ever
+	return 0;
+	}
+return 1;
 }
 
 # obtain_lock_dns(&domain, [named-conf-too])

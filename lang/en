@@ -1068,6 +1068,8 @@ edit_phpver=PHP Versions
 edit_phpverdesc=Select the version of PHP to use, and configure different versions for different directories.
 edit_spf=DNS Options
 edit_spfdesc=Configure DNS-related options for this virtual server, such as the (Sender Policy Framework) record.
+edit_records=DNS Records
+edit_recordsdesc=Create, edit and delete DNS records for this virtual server.
 edit_backup=Backup Virtual Server
 edit_backupdesc=Backup just this virtual server to a local or remote file.
 edit_backupdesc2=Backup just this virtual server to a remote FTP or SSH server.
@@ -5422,5 +5424,13 @@ provision_emysqlcheck=Provisioning error checking MySQL login : $1
 provision_emysql=MySQL login $1 already exists on the provisioning server
 provision_ednscheck=Provisioning error checking DNS zone : $1
 provision_edns=DNS zone $1 already exists on the provisioning server
+
+records_title=DNS Records
+records_name=Record name
+records_type=Type
+records_value=Value
+records_delete=Delete Selected Records
+records_add=Create a new DNS record.
+records_evalid=Warning - errors were found in this domain's DNS records : $1
 
 __norefs=1
