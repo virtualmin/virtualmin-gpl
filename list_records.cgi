@@ -27,14 +27,14 @@ if ($err) {
 	}
 
 print &ui_form_start("delete_records.cgi");
-@links = ( &select_all_link("d"), &select_invert_link("d"),
-	   "<a href='edit_record.cgi?new=1'>$text{'records_add'}</a>" );
+@links = ( &select_all_link("d"), &select_invert_link("d") );
 print &ui_hidden("dom", $in{'dom'});
 @tds = ( "width=5" );
 print &ui_links_row(\@links);
 print &ui_columns_start([ "", $text{'records_name'}, $text{'records_type'},
 			      $text{'records_value'} ], 100, 0, \@tds);
 
+%tmap = map { $_->{'type'}, $_ } &list_dns_record_types($d);
 RECORD: foreach $r (@$recs) {
 	next if (!$r->{'name'});		# $ttl or other
 	next if ($r->{'type'} eq 'DNSKEY' ||	# auto-generated DNSSEC
@@ -52,18 +52,23 @@ RECORD: foreach $r (@$recs) {
 		$values = substr($values, 0, 75)." ...";
 		}
 	$id = join("/", $r->{'name'}, $r->{'type'}, @{$r->{'values'}});
+	$t = $tmap{$r->{'type'}};
 	print &ui_checked_columns_row([
-		&can_edit_record($r, $d) ?
+		$t && &can_edit_record($r, $d) ?
 		    "<a href='edit_record.cgi?id=".&urlize($id)."'>$name</a>" :
 		    $name,
-		$r->{'type'},
+		$t ? $t->{'type'}." - ".$t->{'desc'} : $r->{'type'},
 		$values,
 		], \@tds, "d", $id, 0, !&can_delete_record($r, $d));
 	}
 
 print &ui_columns_end();
 print &ui_links_row(\@links);
-print &ui_form_end([ [ 'delete', $text{'records_delete'} ] ]);
+@types = map { [ $_->{'type'}, $_->{'type'}." - ".$_->{'desc'} ] }
+	     &list_dns_record_types($d);
+print &ui_form_end([ [ 'delete', $text{'records_delete'} ],
+		     [ 'new', $text{'records_add'},
+		       &ui_select("type", "A", \@types) ] ]);
 
 &ui_print_footer(&domain_footer_link($d),
 		 "", $text{'index_return'});

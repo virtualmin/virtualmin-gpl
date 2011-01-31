@@ -5430,7 +5430,8 @@ records_name=Record name
 records_type=Type
 records_value=Value
 records_delete=Delete Selected Records
-records_add=Create a new DNS record.
+records_add=Create Record of Type:
 records_evalid=Warning - errors were found in this domain's DNS records : $1
+records_evaluea=Value must be an IPv4 address
 
 __norefs=1

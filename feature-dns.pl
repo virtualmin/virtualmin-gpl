@@ -2369,6 +2369,11 @@ if ($r->{'type'} eq 'NS' &&
 	# NS record for domain is automatically set in provisioning mode
 	return 0;
 	}
+elsif ($r->{'type'} eq 'SPF' &&
+       $r->{'name'} eq $d->{'dom'}.'.') {
+	# SPF is edited separately
+	return 0;
+	}
 return 1;
 }
 
@@ -2386,6 +2391,29 @@ elsif ($r->{'type'} eq 'SOA') {
 	return 0;
 	}
 return 1;
+}
+
+# list_dns_record_types(&domain)
+# Returns a list of hash refs, one per supported record type. Each contains the
+# following keys :
+# type - A, NS, etc..
+# desc - Human-readable description
+# values - Array ref of hash refs, with keys :
+#   desc - Human-readable description of this value
+#   regexp - Validation regexp for value
+#   func - Validation function ref for value
+sub list_dns_record_types
+{
+local ($d) = @_;
+return ( { 'type' => 'A',
+	   'desc' => 'Address',
+	   'values' => [ { 'desc' => 'IPv4 address',
+			   'func' => sub { &check_ipaddress($_[0]) ? undef :
+						$text{'records_evaluea'} }
+			 },
+		       ],
+	 },
+       );
 }
 
 # obtain_lock_dns(&domain, [named-conf-too])
