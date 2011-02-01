@@ -63,6 +63,7 @@
 	- Help page
 	- Safe editing of sub-domain records
 	- Cache get_domain_dns_records_and_file result (maybe across calls?)
+	- Locking and logging
 
  - Ubuntu 10.10 init support
 	- https://sourceforge.net/tracker/?func=detail&atid=117457&aid=3166670&group_id=17457

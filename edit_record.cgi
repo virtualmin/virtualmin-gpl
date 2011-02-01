@@ -10,7 +10,8 @@ $d || &error($text{'edit_egone'});
 
 if ($in{'type'}) {
 	# Adding a new record
-	$rec = { 'type' => $in{'type'} };
+	$r = { 'type' => $in{'type'},
+	       'name' => ".".$d->{'dom'}."." };
 	&ui_print_header(&domain_in($d), $text{'record_title1'}, "");
 	}
 else {
@@ -48,7 +49,7 @@ if ($r->{'name'} eq $d->{'dom'}) {
 	}
 else {
 	# Within the domain
-	$r->{'name'} =~ /^(\S+)\.\Q$d->{'dom'}\E\.$/ ||
+	$r->{'name'} =~ /^(\S*)\.\Q$d->{'dom'}\E\.$/ ||
 		&error($text{'record_eparse'});
 	$name = $1;
 	print &ui_table_row($text{'record_name'},
@@ -100,7 +101,7 @@ else {
 	print &ui_form_end([ [ undef, $text{'save'} ] ]);
 	}
 
-&ui_print_footer("list_records.cgi?id=$in{'id'}", $text{'records_return'},
+&ui_print_footer("list_records.cgi?dom=$in{'dom'}", $text{'records_return'},
 	         &domain_footer_link($d),
 		 "", $text{'index_return'});
 
