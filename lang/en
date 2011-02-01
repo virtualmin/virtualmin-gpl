@@ -5435,4 +5435,15 @@ records_add=Create Record of Type:
 records_evalid=Warning - errors were found in this domain's DNS records : $1
 records_evaluea=Value must be an IPv4 address
 
+record_title1=Create DNS Record
+record_title2=Edit DNS Record
+record_egone=Record no longer exists!
+record_eedit=This DNS record cannot be edited
+record_header=DNS record details
+record_name=Record name
+record_type=Record type
+record_ttl=Cache time
+record_ttl1=Domain default
+record_ttl0=Custom time
+
 __norefs=1

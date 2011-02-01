@@ -55,7 +55,8 @@ RECORD: foreach $r (@$recs) {
 	$t = $tmap{$r->{'type'}};
 	print &ui_checked_columns_row([
 		$t && &can_edit_record($r, $d) ?
-		    "<a href='edit_record.cgi?id=".&urlize($id)."'>$name</a>" :
+		    "<a href='edit_record.cgi?dom=$in{'dom'}&id=".
+		      &urlize($id)."'>$name</a>" :
 		    $name,
 		$t ? $t->{'type'}." - ".$t->{'desc'} : $r->{'type'},
 		$values,
