@@ -5603,6 +5603,14 @@ if (!$_[3]->{'fix'}) {
 	foreach my $f (&list_custom_fields()) {
 		$_[0]->{$f->{'name'}} = $oldd{$f->{'name'}};
 		}
+	# Disable any features that are not on this system, as they can't
+	# be restored from the backup anyway.
+	foreach my $f (@features) {
+		next if ($f eq 'dir' || $f eq 'unix');	# Always on
+		if ($d->{$f} && !$config{$f}) {
+			$d->{$f} = 0;
+			}
+		}
 	&save_domain($_[0]);
 	if (-r $_[1]."_initial") {
 		# Also restore user defaults file
