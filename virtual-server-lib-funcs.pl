@@ -11551,6 +11551,21 @@ if ($config{'mail'}) {
 			return &text('check_evad', $vad);
 			}
 
+		# Make sure mydestination contains hostname or origin
+		local $myhost = &postfix::get_real_value("myorigin") ||
+			        &postfix::get_real_value("myhostname") ||
+				&get_system_hostname();
+		if ($myhost =~ /^\//) {
+			$myhost = &read_file_contents($myhost);
+			$myhost =~ s/\s//g;
+			}
+		local @mydest = split(/\s*,\s*/,
+				   &postfix::get_real_value("mydestination"));
+		if (&indexoflc($myhost, @mydest) < 0 &&
+		    &indexoflc('$myhostname', @mydest) < 0) {
+			return &text('check_emydest', $myhost);
+			}
+
 		&$second_print($text{'check_postfixok'});
 		$expected_mailboxes = 0;
 		}
