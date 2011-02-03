@@ -6,7 +6,8 @@ Lists API scripts available
 
 This command lists all API commands available, categorized by type and
 with a brief summary of each. It is used to produce the output from the
-virtualmin --help command.
+virtualmin --help command. By default the output is in a human-readable format,
+but you can switch to a more parsable format with the C<--multiline> flag.
 
 =cut
 
@@ -35,6 +36,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--long") {
 		$short = 0;
+		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
 		}
 	else {
 		&usage();
@@ -72,24 +76,34 @@ foreach my $c (&list_api_categories()) {
 		my $scmd = $cmd;
 		$scmd =~ s/^.*\///;
 		$scmd =~ s/\.pl$// if ($short);
-		my $wrap;
-		while (length($desc) + $maxlen > 79) {
-			# Line is too long - wrap it by taking off a word
-			$desc =~ s/\s(\S+)$//;
-			$wrap = $1." ".$wrap;
+		if ($multiline) {
+			# Show a block for the command
+			print $scmd,"\n";
+			print "    Description: $desc\n";
+			print "    Category: $cname\n";
 			}
-		if (!$donehead) {
-			# Category header
-			print $cname,"\n";
-			print ("-" x length($cname));
-			print "\n";
-			$donehead = 1;
+		else {
+			# Just one line, maybe wrapped
+			my $wrap;
+			while (length($desc) + $maxlen > 79) {
+				# Line is too long - wrap it by taking off
+				# a word
+				$desc =~ s/\s(\S+)$//;
+				$wrap = $1." ".$wrap;
+				}
+			if (!$donehead) {
+				# Category header
+				print $cname,"\n";
+				print ("-" x length($cname));
+				print "\n";
+				$donehead = 1;
+				}
+			printf $fmt, $scmd, $desc;
+			printf $fmt, "", $wrap if ($wrap);
 			}
-		printf $fmt, $scmd, $desc;
-		printf $fmt, "", $wrap if ($wrap);
 		$done{$cmd}++;
 		}
-	if ($donehead) {
+	if ($donehead && !$multiline) {
 		print "\n";
 		}
 	}
@@ -100,6 +114,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Lists available command-line API scripts.\n";
 print "\n";
 print "virtualmin list-commands [--short]\n";
+print "                         [--multiline]\n";
 exit(1);
 }
 
