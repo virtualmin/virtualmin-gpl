@@ -54,6 +54,17 @@ elsif ($type eq "redirects") {
 	return &text('log_'.$action.'_redirects', "<tt>$p->{'dom'}</tt>",
 		     $object);
 	}
+elsif ($type eq "record") {
+	local $n = $p->{'name'};
+	$n =~ s/\.$//;
+	$n =~ s/\.\Q$object\E$//;
+	return &text('log_'.$action.'_record', "<tt>$object</tt>",
+		     "<tt>".&html_escape($n)."</tt>");
+	}
+elsif ($type eq "records") {
+	return &text('log_'.$action.'_records', "<tt>$object</tt>",
+		     $p->{'count'});
+	}
 elsif ($type eq "resel") {
 	return &text('log_'.$action.'_resel', "<tt>$object</tt>");
 	}

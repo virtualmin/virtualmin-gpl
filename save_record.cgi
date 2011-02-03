@@ -97,7 +97,7 @@ else {
 &release_lock_dns($d);
 &set_all_null_print();
 &restart_bind($d);
-&webmin_log($in{'delete'} ? 'delete' : $in{'type'} ? 'create' : 'update',
+&webmin_log($in{'delete'} ? 'delete' : $in{'type'} ? 'create' : 'modify',
 	    'record', $d->{'dom'}, $r);
 &redirect("list_records.cgi?dom=$in{'dom'}");
 
