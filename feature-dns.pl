@@ -1467,6 +1467,27 @@ if (&bind8::list_slave_servers()) {
 return $rv;
 }
 
+# reload_bind_records(&domain)
+# Tell BIND to reload the DNS records in some zone, using rndc / ndc if possible
+sub reload_bind_records
+{
+local ($d) = @_;
+if ($d->{'provision_dns'}) {
+	# Done remotely when records are uploaded
+	return undef;
+	}
+&require_bind();
+if (defined(&bind8::restart_zone)) {
+	local $err = &bind8::restart_zone($d->{'dom'}, $d->{'dns_view'});
+	return undef if (!$err);
+	}
+&push_all_print();
+&set_all_null_print();
+local $rv = &restart_bind($d);
+&pop_all_print();
+return $rv;
+}
+
 # check_dns_clash(&domain, [changing])
 # Returns 1 if a domain already exists in BIND
 sub check_dns_clash

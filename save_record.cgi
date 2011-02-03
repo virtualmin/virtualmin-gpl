@@ -95,8 +95,7 @@ else {
 	}
 &post_records_change($d, $recs, $file);
 &release_lock_dns($d);
-&set_all_null_print();
-&restart_bind($d);
+&reload_bind_records($d);
 &webmin_log($in{'delete'} ? 'delete' : $in{'type'} ? 'create' : 'modify',
 	    'record', $d->{'dom'}, $r);
 &redirect("list_records.cgi?dom=$in{'dom'}");

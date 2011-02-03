@@ -63,7 +63,6 @@
 	- Help page
 	- Safe editing of sub-domain records
 	- Cache get_domain_dns_records_and_file result (maybe across calls?)
-	- Per-domain post-records change function that uses rndc
 	- Other record types
 
  - Ubuntu 10.10 init support
