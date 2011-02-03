@@ -26,6 +26,7 @@ if ($in{'delete'}) {
 		}
 	&post_records_change($d, $recs, $file);
 	&release_lock_dns($d);
+	&restart_bind($d);
 	&webmin_log("delete", "records", $d->{'dom'},
 		    { 'count' => scalar(@d) });
 	&redirect("list_records.cgi?dom=$in{'dom'}");

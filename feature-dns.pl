@@ -2407,7 +2407,8 @@ sub list_dns_record_types
 local ($d) = @_;
 return ( { 'type' => 'A',
 	   'desc' => 'Address',
-	   'values' => [ { 'desc' => 'IPv4 address',
+	   'values' => [ { 'desc' => $text{'records_valuea'},
+			   'size' => 20,
 			   'func' => sub { &check_ipaddress($_[0]) ? undef :
 						$text{'records_evaluea'} }
 			 },

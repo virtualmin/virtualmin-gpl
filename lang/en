@@ -5449,5 +5449,16 @@ record_ttl=Cache time
 record_ttl1=Domain default
 record_ttl0=Custom time
 record_eparse=Record is not within the domain
+record_same=Same as domain
+record_err=Failed to save DNS record
+record_edelete=This DNS record cannot be deleted
+record_eedit=This DNS record cannot be edited
+record_ename=Record name contains invalid characters
+record_enamedot=Record name cannot start or end with a dot
+record_ettl=Cache time must be a number greater than zero
+record_ettlunits=Invalid units for cache time
+record_evalue=Invalid value for $1
+records_valuea=IPv4 address
+records_evaluea=Invalid IPv4 address
 
 __norefs=1

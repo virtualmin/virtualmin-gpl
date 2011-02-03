@@ -35,12 +35,19 @@ else {
 
 print &ui_form_start("save_record.cgi", "post");
 print &ui_hidden("dom", $in{'dom'});
-print &ui_hidden("type", $r->{'type'});
+print &ui_hidden("type", $in{'type'});
 print &ui_hidden("id", $in{'id'});
 print &ui_table_start($text{'record_header'}, undef, 2);
 
 # Record name
-if ($r->{'name'} eq $d->{'dom'}) {
+if ($in{'type'}) {
+	# New record, might be same as domain, or within it
+	print &ui_table_row($text{'record_name'},
+			    &ui_opt_textbox("name", undef, 20,
+					    $text{'record_same'}).
+			    "<tt>.$d->{'dom'}</tt>");
+	}
+elsif ($r->{'name'} eq $d->{'dom'}.".") {
 	# Same as domain - disallow changes
 	$name = $r->{'name'};
 	$name =~ s/\.$//;
