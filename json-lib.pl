@@ -41,13 +41,18 @@ if ($ex) {
 	$data->{'full_error'} = $out;
 	}
 elsif ($cmd =~ /^(list\-|get-dns)/ && defined($in{'multiline'}) ||
-       $cmd =~ /^list\-php\-ini/) {
+       $cmd =~ /^(list\-php\-ini|get\-command)/) {
 	# Parse multiline output into data structure
 	my @lines = split(/\r?\n/, $out);
 	my $obj;
 	my @data;
 	foreach my $l (@lines) {
-		if ($l =~ /^(\S.*)$/) {
+		if ($l =~ /^(\S[^:]+):\s*(.*)$/ && !$obj) {
+			# Top-level key and value
+			push(@data, { 'name' => $1,
+				      'value' => $2 });
+			}
+		elsif ($l =~ /^(\S.*)$/) {
 			# Object name
 			$obj = { };
 			push(@data, { 'name' => $1,
