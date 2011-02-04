@@ -40,7 +40,7 @@ print &ui_hidden("id", $in{'id'});
 print &ui_table_start($text{'record_header'}, undef, 2);
 
 # Record name
-if ($in{'type'}) {
+if ($in{'type'} && $t->{'domain'}) {
 	# New record, might be same as domain, or within it
 	print &ui_table_row($text{'record_name'},
 			    &ui_opt_textbox("name", undef, 20,
@@ -93,7 +93,8 @@ print &ui_table_row($text{'record_ttl'},
 for(my $i=0; $i<@vals; $i++) {
 	print &ui_table_row($vals[$i]->{'desc'},
 		&ui_textbox("value_$i", $r->{'values'}->[$i],
-			    $vals[$i]->{'size'}));
+			    $vals[$i]->{'size'})." ".
+		$vals[$i]->{'suffix'});
 	}
 
 print &ui_table_end();

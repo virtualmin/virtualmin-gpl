@@ -76,11 +76,25 @@ else {
 			&error(&text('record_evalue', $vals[$i]->{'desc'}));
 		$err = $fn && &$fn($v);
 		$err && &error($err);
+		if ($vals[$i]->{'dot'} && $v =~ /\./ && $v !~ /\.$/) {
+			# Append dot to value, in case user forgot it
+			$v .= ".";
+			}
 		push(@{$r->{'values'}}, $v);
 		}
 
-	# Re-validate the record list for overall consistency
-	# XXX
+	# Check for CNAME collision
+	$newrecs = [ @$recs ];
+	push(@$newrecs, $r) if ($in{'type'});
+	if ($r->{'type'} eq 'CNAME') {
+		%clash = map { $_->{'name'}, $_ }
+			     grep { $_ ne $r } @$newrecs;
+		foreach $e (@$newrecs) {
+			if ($e->{'type'} eq 'CNAME' && $clash{$r->{'name'}}) {
+				&error(&text('record_ecname', $r->{'name'}));
+				}
+			}
+		}
 
 	@params = ( $r->{'name'}, $r->{'ttl'}, $r->{'class'}, $r->{'type'},
 		    &bind8::join_record_values($r), $r->{'comment'} );

@@ -5442,6 +5442,18 @@ records_evaluea=Value must be an IPv4 address
 records_derr=Failed to delete records
 records_enone=None selected
 records_return=DNS records
+records_typea=IPv4 Address
+records_valuea=IPv4 address
+records_evaluea=Invalid IPv4 address
+records_typecname=Name Alias
+records_valuecname=Target DNS name
+records_evaluecname=Invalid target DNS name
+records_typemx=Mail Server
+records_valuemx1=Mail server priority
+records_valuemx1a=(Lower numbers are tried first)
+records_valuemx2=Mail server hostname
+records_evaluemx1=Mail server priority must be a number
+records_evaluemx2=Invalid DNS name for mail server hostname
 
 record_title1=Create DNS Record
 record_title2=Edit DNS Record
@@ -5463,7 +5475,6 @@ record_enamedot=Record name cannot start or end with a dot
 record_ettl=Cache time must be a number greater than zero
 record_ettlunits=Invalid units for cache time
 record_evalue=Invalid value for $1
-records_valuea=IPv4 address
-records_evaluea=Invalid IPv4 address
+record_ecname=The Name Alias record $1 has the same name an existing record
 
 __norefs=1

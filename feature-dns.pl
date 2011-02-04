@@ -2419,6 +2419,7 @@ return 1;
 # following keys :
 # type - A, NS, etc..
 # desc - Human-readable description
+# domain - Can be same as domain name
 # values - Array ref of hash refs, with keys :
 #   desc - Human-readable description of this value
 #   regexp - Validation regexp for value
@@ -2427,13 +2428,42 @@ sub list_dns_record_types
 {
 local ($d) = @_;
 return ( { 'type' => 'A',
-	   'desc' => 'Address',
+	   'desc' => $text{'records_typea'},
+	   'domain' => 1,
 	   'values' => [ { 'desc' => $text{'records_valuea'},
 			   'size' => 20,
 			   'func' => sub { &check_ipaddress($_[0]) ? undef :
 						$text{'records_evaluea'} }
 			 },
 		       ],
+	 },
+	 { 'type' => 'CNAME',
+	   'desc' => $text{'records_typecname'},
+	   'domain' => 0,
+	   'values' => [ { 'desc' => $text{'records_valuecname'},
+                           'size' => 40,
+                           'func' => sub { $_[0] =~ /^[a-z0-9\.\_\-]+$/i ?
+					undef : $text{'records_evaluecname'} },
+			   'dot' => 1,
+                         },
+                       ],
+         },
+	 { 'type' => 'MX',
+	   'desc' => $text{'records_typemx'},
+	   'domain' => 1,
+	   'values' => [ { 'desc' => $text{'records_valuemx1'},
+                           'size' => 5,
+                           'func' => sub { $_[0] =~ /^\d+$/ ?
+					undef : $text{'records_evaluemx1'} },
+			   'suffix' => $text{'records_valuemx1a'},
+                         },
+		         { 'desc' => $text{'records_valuemx2'},
+                           'size' => 40,
+                           'func' => sub { $_[0] =~ /^[a-z0-9\.\_\-]+$/i ?
+                                        undef : $text{'records_evaluemx2'} },
+			   'dot' => 1,
+                         },
+                       ],
 	 },
        );
 }
