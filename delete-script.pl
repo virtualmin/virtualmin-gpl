@@ -8,7 +8,8 @@ This program completely removes a third-party script from a server. It
 takes the usual C<--domain> parameter to identifiy the server, and either
 C<--id> followed by the install ID, or C<--type> followed by the script's short
 name. The latter option is more convenient, but only works if there is only
-one instance of the script in the virtual server.
+one instance of the script in the virtual server. If multiple different versions
+are installed, you can also use C<--version> to select a specific one to remove.
 
 Be careful using this program, as it removes all data files, web pages and
 database tables for the script, without asking for confirmation.
@@ -45,6 +46,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--type") {
 		$sname = shift(@ARGV);
 		}
+	elsif ($a eq "--version") {
+		$ver = shift(@ARGV);
+		}
 	elsif ($a eq "--id") {
 		$id = shift(@ARGV);
 		}
@@ -67,8 +71,11 @@ if ($id) {
 	}
 else {
 	@matches = grep { $_->{'name'} eq $sname } @scripts;
+	if ($ver) {
+		@matches = grep { $_->{'version'} eq $ver } @matches;
+		}
 	@matches || &usage("No script install for $sname was found for this virtual server");
-	@matches == 1 || &usage("More than one script install for $sname was found for this virtual server. Use the --id option to specify the exact install");
+	@matches == 1 || &usage("More than one script install for $sname was found for this virtual server. Use the --id option to specify the exact install, or --version to select a version");
 	$sinfo = $matches[0];
 	}
 
@@ -110,7 +117,8 @@ print "$_[0]\n\n" if ($_[0]);
 print "Un-installs a third-party script from some virtual server.\n";
 print "\n";
 print "virtualmin delete-script --domain domain.name\n";
-print "                        [--type name] | [--id number]\n";
+print "                        [--type name --version number] |\n";
+print "                        [--id number]\n";
 exit(1);
 }
 
