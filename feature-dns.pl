@@ -1210,16 +1210,19 @@ if ($any) {
 return $any;
 }
 
-# validate_dns(&domain)
+# validate_dns(&domain, [&records])
 # Check for the DNS domain and records file
 sub validate_dns
 {
-local ($d) = @_;
-local ($recs, $file) = &get_domain_dns_records_and_file($d);
-return &text('validate_edns', "<tt>$d->{'dom'}</tt>") if (!$file);
+local ($d, $recs) = @_;
+local $file;
+if (!$recs) {
+	($recs, $file) = &get_domain_dns_records_and_file($d);
+	return &text('validate_edns', "<tt>$d->{'dom'}</tt>") if (!$file);
+	}
 return &text('validate_ednsfile', "<tt>$d->{'dom'}</tt>") if (!@$recs);
 local $absfile;
-if (!$d->{'provision_dns'}) {
+if (!$d->{'provision_dns'} && $file) {
 	$absfile = &bind8::make_chroot(
 				&bind8::absolute_path($file));
 	return &text('validate_ednsfile2', "<tt>$absfile</tt>")
@@ -1233,8 +1236,8 @@ local $ip = $d->{'dns_ip'} || $d->{'ip'};
 foreach my $r (@$recs) {
 	$got{uc($r->{'type'})}++;
 	}
-$got{'SOA'} || return &text('validate_ednssoa', "<tt>$absfile</tt>");
-$got{'A'} || return &text('validate_ednsa', "<tt>$absfile</tt>");
+$got{'SOA'} || return $text{'validate_ednssoa2'};
+$got{'A'} || return $text{'validate_ednsa2'};
 if ($d->{'web'}) {
 	foreach my $n ($d->{'dom'}.'.', 'www.'.$d->{'dom'}.'.') {
 		my @nips = map { $_->{'values'}->[0] }

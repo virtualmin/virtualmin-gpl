@@ -62,7 +62,6 @@
 	- DNS registration provisioning
 	- Help page
 	- Safe editing of sub-domain records
-	- Cache get_domain_dns_records_and_file result (maybe across calls?)
 	- Test on provisioning server
 
  - Ubuntu 10.10 init support
