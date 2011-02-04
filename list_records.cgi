@@ -66,7 +66,7 @@ RECORD: foreach $r (@$recs) {
 print &ui_columns_end();
 print &ui_links_row(\@links);
 @types = map { [ $_->{'type'}, $_->{'type'}." - ".$_->{'desc'} ] }
-	     &list_dns_record_types($d);
+	     grep { $_->{'create'} } &list_dns_record_types($d);
 print &ui_form_end([ [ 'delete', $text{'records_delete'} ],
 		     [ 'new', $text{'records_add'},
 		       &ui_select("type", "A", \@types) ] ]);

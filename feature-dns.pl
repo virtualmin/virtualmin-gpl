@@ -2395,6 +2395,15 @@ elsif ($r->{'type'} eq 'SPF' &&
 	# SPF is edited separately
 	return 0;
 	}
+elsif ($r->{'type'} eq 'TXT' &&
+       $r->{'values'}->[0] =~ /^(t=|k=)/) {
+	# DKIM, managed by Virtualmin
+	return 0;
+	}
+elsif ($r->{'type'} eq 'SOA') {
+	# Always auto-generate
+	return 0;
+	}
 return 1;
 }
 
@@ -2403,8 +2412,10 @@ return 1;
 sub can_delete_record
 {
 local ($r, $d) = @_;
-if (!&can_edit_record($r, $d)) {
-	# If cannot edit, then cannot delete
+if ($r->{'type'} eq 'NS' &&
+    $r->{'name'} eq $d->{'dom'}.'.' &&
+    $d->{'provision_dns'}) {
+	# NS record for domain is automatically set in provisioning mode
 	return 0;
 	}
 elsif ($r->{'type'} eq 'SOA') {
@@ -2430,6 +2441,7 @@ local ($d) = @_;
 return ( { 'type' => 'A',
 	   'desc' => $text{'records_typea'},
 	   'domain' => 1,
+	   'create' => 1,
 	   'values' => [ { 'desc' => $text{'records_valuea'},
 			   'size' => 20,
 			   'func' => sub { &check_ipaddress($_[0]) ? undef :
@@ -2437,9 +2449,21 @@ return ( { 'type' => 'A',
 			 },
 		       ],
 	 },
+	 { 'type' => 'AAAA',
+	   'desc' => $text{'records_typeaaaa'},
+	   'domain' => 1,
+	   'create' => 1,
+	   'values' => [ { 'desc' => $text{'records_valueaaaa'},
+			   'size' => 20,
+			   'func' => sub { &check_ip6address($_[0]) ? undef :
+						$text{'records_evalueaaaa'} }
+			 },
+		       ],
+	 },
 	 { 'type' => 'CNAME',
 	   'desc' => $text{'records_typecname'},
 	   'domain' => 0,
+	   'create' => 1,
 	   'values' => [ { 'desc' => $text{'records_valuecname'},
                            'size' => 40,
                            'func' => sub { $_[0] =~ /^[a-z0-9\.\_\-]+$/i ?
@@ -2448,9 +2472,22 @@ return ( { 'type' => 'A',
                          },
                        ],
          },
+	 { 'type' => 'NS',
+	   'desc' => $text{'records_typens'},
+	   'domain' => 1,
+	   'create' => 1,
+	   'values' => [ { 'desc' => $text{'records_valuens'},
+                           'size' => 40,
+                           'func' => sub { $_[0] =~ /^[a-z0-9\.\_\-]+$/i ?
+					undef : $text{'records_evaluens'} },
+			   'dot' => 1,
+                         },
+                       ],
+         },
 	 { 'type' => 'MX',
 	   'desc' => $text{'records_typemx'},
 	   'domain' => 1,
+	   'create' => 1,
 	   'values' => [ { 'desc' => $text{'records_valuemx1'},
                            'size' => 5,
                            'func' => sub { $_[0] =~ /^\d+$/ ?
@@ -2464,6 +2501,27 @@ return ( { 'type' => 'A',
 			   'dot' => 1,
                          },
                        ],
+	 },
+	 { 'type' => 'TXT',
+	   'desc' => $text{'records_typetxt'},
+	   'domain' => 1,
+	   'create' => 1,
+	   'values' => [ { 'desc' => $text{'records_valuetxt'},
+                           'size' => 40,
+			   'regexp' => '\S',
+			   'dot' => 0,
+                         },
+                       ],
+         },
+	 { 'type' => 'SOA',
+	   'desc' => $text{'records_typesoa'},
+	   'domain' => 1,
+	   'create' => 0,
+	 },
+	 { 'type' => 'SPF',
+	   'desc' => $text{'records_typespf'},
+	   'domain' => 1,
+	   'create' => 0,
 	 },
        );
 }
