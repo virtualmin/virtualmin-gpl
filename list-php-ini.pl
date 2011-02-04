@@ -115,8 +115,8 @@ print "$_[0]\n\n" if ($_[0]);
 print "Shows PHP variables for some or all domains.\n";
 print "\n";
 print "virtualmin list-php-ini --domain name | --user name | --all-domains\n";
-print "                       [--php-version N]\n";
-print "                       [--ini-name name --ini-value value]+\n";
+print "                       [--php-version number]\n";
+print "                       <--ini-name name>+ <--ini-value value>+\n";
 print "                       [--name-only]\n";
 exit(1);
 }

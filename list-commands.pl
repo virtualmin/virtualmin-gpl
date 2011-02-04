@@ -40,6 +40,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--name-only") {
+		$nameonly = 1;
+		}
 	else {
 		&usage();
 		}
@@ -82,6 +85,10 @@ foreach my $c (&list_api_categories()) {
 			print "    Description: $desc\n";
 			print "    Category: $cname\n";
 			}
+		elsif ($nameonly) {
+			# Just command name
+			print $scmd,"\n";
+			}
 		else {
 			# Just one line, maybe wrapped
 			my $wrap;
@@ -103,7 +110,7 @@ foreach my $c (&list_api_categories()) {
 			}
 		$done{$cmd}++;
 		}
-	if ($donehead && !$multiline) {
+	if ($donehead && !$multiline && !$nameonly) {
 		print "\n";
 		}
 	}
@@ -114,7 +121,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Lists available command-line API scripts.\n";
 print "\n";
 print "virtualmin list-commands [--short]\n";
-print "                         [--multiline]\n";
+print "                         [--multiline | --nameonly]\n";
 exit(1);
 }
 

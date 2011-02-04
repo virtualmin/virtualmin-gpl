@@ -99,7 +99,7 @@ print "Adds a mail alias to a virtual server.\n";
 print "\n";
 print "virtualmin create-alias --domain domain.name\n";
 print "                        --from mailbox|\"*\"\n";
-print "                        --to address [--to address ...]\n";
+print "                       <--to address>+\n";
 if ($can_alias_comments) {
 	print "                        [--desc \"Comment text\"]\n";
 	}

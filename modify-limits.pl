@@ -287,11 +287,11 @@ print "                        [--can-dbname] | [--cannot-dbname]\n";
 print "                        [--can-rename] | [--cannot-rename]\n";
 print "                        [--force-under] | [--noforce-under]\n";
 print "                        [--read-only] | [--read-write]\n";
-print "                        [--allow feature] ...\n";
-print "                        [--disallow feature] ...\n";
-print "                        [--can-edit capability] ...\n";
-print "                        [--cannot-edit capability] ...\n";
-print "                        [--shell \"nologin\" | \"ftp\" | \"ssh\"]\n";
+print "                        [--allow feature]*\n";
+print "                        [--disallow feature]*\n";
+print "                        [--can-edit capability]*\n";
+print "                        [--cannot-edit capability]*\n";
+print "                        [--shell nologin|ftp|ssh]\n";
 exit(1);
 }
 

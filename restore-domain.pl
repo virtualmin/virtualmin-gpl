@@ -291,7 +291,7 @@ print "                         [--feature name] | [--all-features]\n";
 print "                         [--except-feature name]\n";
 print "                         [--reuid | --no-reuid]\n";
 print "                         [--fix]\n";
-print "                         [--option feature name value]\n";
+print "                         [--option \"feature name value\"]\n";
 print "                         [--all-virtualmin] | [--virtualmin config]\n";
 print "                         [--only-features]\n";
 print "                         [--shared-ip address | --ip address | --allocate-ip]\n";

@@ -341,12 +341,12 @@ print "                                            [--except-feature name]\n";
 print "                         [--ignore-errors]\n";
 print "                         [--separate] | [--newformat]\n";
 print "                         [--onebyone]\n";
-print "                         [--strftime [--purge days]]\n";
+print "                         [--strftime] [--purge days]\n";
 if (&has_incremental_tar()) {
 	print "                         [--incremental]\n";
 	}
 print "                         [--all-virtualmin] | [--virtualmin config]\n";
-print "                         [--option feature name value]\n";
+print "                         [--option \"feature name value\"]\n";
 print "                         [--as-owner]\n";
 print "                         [--exclude file]*\n";
 print "\n";

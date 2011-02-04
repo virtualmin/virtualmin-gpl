@@ -84,7 +84,7 @@ print "Removes a database from the control of a virtual server.\n";
 print "\n";
 print "virtualmin disconnect-database --domain domain.name\n";
 print "                               --name database-name\n";
-print "                               --type [mysql|postgres]\n";
+print "                               --type mysql|postgres\n";
 exit(1);
 }
 

@@ -64,6 +64,7 @@ $out = &backquote_command("$cmdpath --help 2>&1 </dev/null");
 &reset_environment();
 foreach my $l (split(/\r?\n/, $out)) {
 	$l =~ s/^(virtualmin|cloudmin)\s+(\S+)//;	# strip command
+	last if (@args && $l !~ /\S/);			# end of help
 	next if ($l !~ /--/ || $l =~ /--help/);
 	push(@args, $l);
 	}
@@ -79,7 +80,7 @@ while($args =~ /\S/) {
 		$repeat = $2;
 		$args = $3;
 		}
-	elsif ($args =~ /^\s*\<([^\]]+)\>(\*|\+|)(.*)$/) {
+	elsif ($args =~ /^\s*\<([^\>]+)\>(\*|\+|)(.*)$/) {
 		# One or more required args
 		$opt = 0;
 		$flags = $1;
@@ -93,7 +94,7 @@ while($args =~ /\S/) {
 		$repeat = "";
 		$args = $2;
 		}
-	elsif ($args =~ /^\s*(\-\-\S+\s+[^\-]\S+)(.*)$/) {
+	elsif ($args =~ /^\s*(\-\-\S+\s+[^\[\<\-\s]\S+)(.*)$/) {
 		# One arg with non-quoted parameter
 		$opt = 0;
 		$flags = $1;
@@ -115,7 +116,7 @@ while($args =~ /\S/) {
 	while($flags =~ /\S/) {
 		$flags =~ s/^\s*\|\s*//;
 		if ($flags =~ /^\s*\-\-(\S+)\s+"([^"]+)"(.*)$/ ||
-		    $flags =~ /^\s*\-\-(\S+)\s+([^\-]\S+)(.*)$/) {
+		    $flags =~ /^\s*\-\-(\S+)\s+([^\[\<\-\s]\S+)(.*)$/) {
 			push(@rv, { 'name' => $1,
 				    'binary' => 0,
 				    'value' => $2,

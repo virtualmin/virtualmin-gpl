@@ -53,7 +53,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--opt") {
 		local $oname = shift(@ARGV);
-		local $ovalue = shift(@ARGV);
+		local $ovalue;
+		($oname, $ovalue) = split(/\s+/, $oname);
+		$ovalue ||= shift(@ARGV);
 		$oname && $ovalue ne '' ||
 		  &usage("--opt must be followed by an option name and value");
 		$opts{$oname} = $ovalue;
@@ -131,8 +133,8 @@ print "Creates a new database associated with some virtual server.\n";
 print "\n";
 print "virtualmin create-database --domain domain.name\n";
 print "                           --name database-name\n";
-print "                           --type [mysql|postgres]\n";
-print "                           [--opt name value]*\n";
+print "                           --type mysql|postgres\n";
+print "                           [--opt \"name value\"]*\n";
 exit(1);
 }
 
