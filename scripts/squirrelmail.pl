@@ -192,10 +192,10 @@ if (!$upgrade) {
 	kill('KILL', $fpid);
 	if (&foreign_check("proc")) {
 		&foreign_require("proc", "proc-lib.pl");
-		local ($cproc) = grep { $_->{'user'} eq $d->{'user'} &&
-				        $_->{'args'} =~ /conf\.pl/ }
-				      &proc::list_processes();
-		if ($cproc) {
+		local @cprocs = grep { $_->{'user'} eq $d->{'user'} &&
+				       $_->{'args'} =~ /conf\.pl/ }
+				     &proc::list_processes();
+		foreach my $cproc (@cprocs) {
 			kill('KILL', $cproc->{'pid'});
 			}
 		}
