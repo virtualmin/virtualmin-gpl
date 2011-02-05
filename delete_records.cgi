@@ -17,8 +17,7 @@ if ($in{'delete'}) {
 	($recs, $file) = &get_domain_dns_records_and_file($d);
 	$file || &error($recs);
 	foreach $r (reverse(@$recs)) {
-		$id = join("/", $r->{'name'}, $r->{'type'}, @{$r->{'values'}});
-		if (&indexof($id, @d) >= 0) {
+		if (&indexof($r->{'id'}, @d) >= 0) {
 			&can_delete_record($d, $r) ||
 				&error(&text('records_edelete', $r->{'name'}));
 			&bind8::delete_record($file, $r);

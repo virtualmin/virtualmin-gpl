@@ -13,13 +13,7 @@ $file || &error($recs);
 
 if (!$in{'type'}) {
 	# Get the record
-	foreach $e (@$recs) {
-		$id = join("/", $e->{'name'}, $e->{'type'}, @{$e->{'values'}});
-		if ($id eq $in{'id'}) {
-			$r = $e;
-			last;
-			}
-		}
+	($r) = grep { $_->{'id'} eq $in{'id'} } @$recs;
 	$r || &error($text{'record_egone'});
 	}
 else {

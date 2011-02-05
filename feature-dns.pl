@@ -2235,6 +2235,7 @@ if ($d->{'provision_dns'}) {
 		push(@recs, $rec);
 		$lnum++;
 		}
+	&set_record_ids(\@recs);
 	return (\@recs, $temp);
 	}
 else {
@@ -2244,7 +2245,27 @@ else {
 	local $rd = $d->{'dns_submode'} ? &get_domain($d->{'subdom'} ||
 						      $d->{'parent'}) : $d;
 	local @recs = &bind8::read_zone_file($file, $rd->{'dom'});
+	&set_record_ids(\@recs);
 	return (\@recs, $file);
+	}
+}
+
+# set_record_ids(&records)
+# Sets the ID field on a bunch of DNS records
+sub set_record_ids
+{
+local ($recs) = @_;
+foreach my $r (@$recs) {
+	if ($r->{'name'} eq '$ttl') {
+		$r->{'id'} = join("/", $r->{'name'}, $r->{'defttl'});
+		}
+	elsif ($r->{'name'} eq '$generate') {
+		$r->{'id'} = join("/", $r->{'name'}, @{$r->{'generate'}});
+		}
+	else {
+		$r->{'id'} = join("/", $r->{'name'}, $r->{'type'},
+				       @{$r->{'values'}});
+		}
 	}
 }
 

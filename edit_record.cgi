@@ -18,19 +18,23 @@ else {
 	# Editing existing one
 	($recs, $file) = &get_domain_dns_records_and_file($d);
 	$file || &error($recs);
-	foreach $e (@$recs) {
-		$id = join("/", $e->{'name'}, $e->{'type'}, @{$e->{'values'}});
-		if ($id eq $in{'id'}) {
-			$r = $e;
-			last;
-			}
-		}
+	($r) = grep { $_->{'id'} eq $in{'id'} } @$recs;
 	$r || &error($text{'record_egone'});
+	$r->{'defttl'} ||
+	    $r->{'name'} eq $d->{'dom'}."." ||
+	    $r->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/ ||
+		&error(&text('record_eunder', $r->{'name'}, $d->{'dom'}));
 	&ui_print_header(&domain_in($d), $text{'record_title2'}, "");
 	}
 
 # Get type, verify editability
-($t) = grep { $_->{'type'} eq $r->{'type'} } &list_dns_record_types($d);
+if ($r->{'defttl'}) {
+	$t = { 'type' => '$ttl',
+	       'desc' => $text{'records_typedefttl'} };
+	}
+else {
+	($t) = grep { $_->{'type'} eq $r->{'type'} } &list_dns_record_types($d);
+	}
 &can_edit_record($d, $r) && $t || &error($text{'record_eedit'});
 
 print &ui_form_start("save_record.cgi", "post");
@@ -40,7 +44,10 @@ print &ui_hidden("id", $in{'id'});
 print &ui_table_start($text{'record_header'}, undef, 2);
 
 # Record name
-if ($in{'type'} && $t->{'domain'}) {
+if ($r->{'defttl'}) {
+	# Default TTL has no name!
+	}
+elsif ($in{'type'} && $t->{'domain'}) {
 	# New record, might be same as domain, or within it
 	print &ui_table_row($text{'record_name'},
 			    &ui_opt_textbox("name", undef, 20,
@@ -67,34 +74,40 @@ else {
 # Record type
 print &ui_table_row($text{'record_type'}, $t->{'type'}." - ".$t->{'desc'});
 
-# TTL
-if ($r->{'ttl'} =~ /^(\d+)([a-z])$/i) {
-	$ttl = $1;
-	$ttl_units = lc($2);
+if ($r->{'defttl'}) {
+	# Default TTL for domain
+	# XXX
 	}
 else {
-	$ttl = $r->{'ttl'};
-	$ttl_units = "s";
-	}
-print &ui_table_row($text{'record_ttl'},
-	&ui_radio("ttl_def", $r->{'ttl'} ? 0 : 1,
-		  [ [ 1, $text{'record_ttl1'} ],
-		    [ 0, $text{'record_ttl0'} ] ])." ".
-	&ui_textbox("ttl", $ttl, 5)." ".
-	&ui_select("ttl_units", $ttl_units || "s",
-		   [ [ "s", $bind8::text{'seconds'} ],
-		     [ "m", $bind8::text{'minutes'} ],
-		     [ "h", $bind8::text{'hours'} ],
-		     [ "d", $bind8::text{'days'} ],
-		     [ "w", $bind8::text{'weeks'} ] ], 1, 0, 1));
+	# TTL
+	if ($r->{'ttl'} =~ /^(\d+)([a-z])$/i) {
+		$ttl = $1;
+		$ttl_units = lc($2);
+		}
+	else {
+		$ttl = $r->{'ttl'};
+		$ttl_units = "s";
+		}
+	print &ui_table_row($text{'record_ttl'},
+		&ui_radio("ttl_def", $r->{'ttl'} ? 0 : 1,
+			  [ [ 1, $text{'record_ttl1'} ],
+			    [ 0, $text{'record_ttl0'} ] ])." ".
+		&ui_textbox("ttl", $ttl, 5)." ".
+		&ui_select("ttl_units", $ttl_units || "s",
+			   [ [ "s", $bind8::text{'seconds'} ],
+			     [ "m", $bind8::text{'minutes'} ],
+			     [ "h", $bind8::text{'hours'} ],
+			     [ "d", $bind8::text{'days'} ],
+			     [ "w", $bind8::text{'weeks'} ] ], 1, 0, 1));
 
-# Values (type specific)
-@vals = @{$t->{'values'}};
-for(my $i=0; $i<@vals; $i++) {
-	print &ui_table_row($vals[$i]->{'desc'},
-		&ui_textbox("value_$i", $r->{'values'}->[$i],
-			    $vals[$i]->{'size'})." ".
-		$vals[$i]->{'suffix'});
+	# Values (type specific)
+	@vals = @{$t->{'values'}};
+	for(my $i=0; $i<@vals; $i++) {
+		print &ui_table_row($vals[$i]->{'desc'},
+			&ui_textbox("value_$i", $r->{'values'}->[$i],
+				    $vals[$i]->{'size'})." ".
+			$vals[$i]->{'suffix'});
+		}
 	}
 
 print &ui_table_end();

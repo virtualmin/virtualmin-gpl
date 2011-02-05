@@ -5464,6 +5464,8 @@ records_typetxt=Text
 records_valuetxt=Text record
 records_typesoa=Start Of Domain
 records_typespf=Sender Permitted From
+records_typedefttl=Default Cache Time
+records_typegenerate=Record Generator
 
 record_title1=Create DNS Record
 record_title2=Edit DNS Record
@@ -5486,5 +5488,6 @@ record_ettl=Cache time must be a number greater than zero
 record_ettlunits=Invalid units for cache time
 record_evalue=Invalid value for $1
 record_ecname=The Name Alias record $1 has the same name an existing record
+record_eunder=DNS record $1 cannot be edited, as it is not under $2
 
 __norefs=1

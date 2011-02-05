@@ -36,34 +36,53 @@ print &ui_columns_start([ "", $text{'records_name'}, $text{'records_type'},
 
 %tmap = map { $_->{'type'}, $_ } &list_dns_record_types($d);
 RECORD: foreach $r (@$recs) {
-	next if (!$r->{'name'});		# $ttl or other
-	next if ($r->{'type'} eq 'DNSKEY' ||	# auto-generated DNSSEC
-		 $r->{'type'} eq 'NSEC' ||
-		 $r->{'type'} eq 'NSEC3');
-	# Skip sub-domain records
-	foreach $sname (@subdoms) {
-		next RECORD if ($r->{'name'} eq $sname."." ||
-				$r->{'name'} =~ /\.\Q$sname\E\.$/);
+	if ($r->{'defttl'}) {
+		# Default TTL .. skip if in sub-domain
+		next if ($d->{'dns_submode'});
+		$name = '$ttl';
+		$values = $r->{'defttl'};
+		$tdesc = $text{'records_typedefttl'};
+		$etype = 1;
 		}
-	# Skip records not in this domain, such as if we are in a sub-domain
-	next if ($r->{'name'} ne $d->{'dom'}."." &&
-		 $r->{'name'} !~ /\.$d->{'dom'}\.$/);
+	elsif ($r->{'generate'}) {
+		# Record generator .. cannot edit yet
+		$name = '$generate';
+		$values = join(" ", @{$r->{'generate'}});
+		$tdesc = $text{'records_typegenerate'};
+		$etype = 0;
+		}
+	else {
+		# Regular DNS record
+		next if ($r->{'type'} eq 'DNSKEY' ||	# auto-generated DNSSEC
+			 $r->{'type'} eq 'NSEC' ||
+			 $r->{'type'} eq 'NSEC3');
+		# Skip sub-domain records
+		foreach $sname (@subdoms) {
+			next RECORD if ($r->{'name'} eq $sname."." ||
+					$r->{'name'} =~ /\.\Q$sname\E\.$/);
+			}
+		# Skip records not in this domain, such as if we are in
+		# a sub-domain
+		next if ($r->{'name'} ne $d->{'dom'}."." &&
+			 $r->{'name'} !~ /\.$d->{'dom'}\.$/);
 
-	$name = $r->{'name'};
-	$name =~ s/\.$//;
-	$name =~ s/\.\Q$d->{'dom'}\E//;
-	$values = join(" ", @{$r->{'values'}});
-	if (length($values) > 80) {
-		$values = substr($values, 0, 75)." ...";
+		$name = $r->{'name'};
+		$name =~ s/\.$//;
+		$name =~ s/\.\Q$d->{'dom'}\E//;
+		$values = join(" ", @{$r->{'values'}});
+		if (length($values) > 80) {
+			$values = substr($values, 0, 75)." ...";
+			}
+		$t = $tmap{$r->{'type'}};
+		$etype = $t;
+		$tdesc = $t ? $t->{'type'}." - ".$t->{'desc'} : $r->{'type'};
 		}
-	$id = join("/", $r->{'name'}, $r->{'type'}, @{$r->{'values'}});
-	$t = $tmap{$r->{'type'}};
 	print &ui_checked_columns_row([
-		$t && &can_edit_record($r, $d) ?
+		$etype && &can_edit_record($r, $d) ?
 		    "<a href='edit_record.cgi?dom=$in{'dom'}&id=".
-		      &urlize($id)."'>$name</a>" :
+		      &urlize($r->{'id'})."'>$name</a>" :
 		    $name,
-		$t ? $t->{'type'}." - ".$t->{'desc'} : $r->{'type'},
+		$tdesc,
 		$values,
 		], \@tds, "d", $id, 0, !&can_delete_record($r, $d));
 	}
