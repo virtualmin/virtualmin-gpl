@@ -1737,6 +1737,7 @@ check_detected=Detected mail server $1.
 check_spamok=SpamAssassin and Procmail are installed and configured for use.
 check_noprocmail=SpamAssassin and Procmail are installed. However, your mail server does not appear to be configured to deliver using Procmail.
 check_spamglobal=SpamAssassin is configured to be run from the global Procmail configuration $1, which is not needed as Virtualmin will set it up on a per-domain basis.
+check_spamwhite=Whitelisting of all mailboxes in each domain is enabled on the <a href='$1'>Virtualmin Configuration</a> page, but this is incompatible with the use of the <a href='$2'>spamc</a> SpamAssassin client program.
 check_virusok=ClamAV is installed and running.
 check_virusok2=ClamAV is installed and assumed to be running.
 check_emysqlplugin=The MySQL users plugin is no longer needed, as its functionality has been incorporated into the Virtualmin core.

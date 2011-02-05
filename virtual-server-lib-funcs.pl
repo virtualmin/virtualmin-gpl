@@ -9575,7 +9575,7 @@ foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "quota_list_users_command", "quota_list_groups_command",
 	       "quota_get_user_command", "quota_get_group_command",
 	       "preload_mode", "collect_interval", "api_helper",
-	       "spam_lock") {
+	       "spam_lock", "spam_white") {
 	# Some important config option was changed
 	return 1 if ($config{$c} ne $lastconfig{$c});
 	}
@@ -11859,6 +11859,15 @@ if ($config{'spam'}) {
 		if ($r->{'action'} =~ /spamassassin|spamc/) {
 			return &text('check_spamglobal',
 				     "<tt>$procmail::procmailrc</tt>");
+			}
+		}
+
+	# Check for spam_white conflict with spamc
+	if ($config{'spam_white'}) {
+		local ($client, $host, $size) = &get_global_spam_client();
+		if ($client eq "spamc") {
+			return &text('check_spamwhite', $mclink,
+				     "edit_newsv.cgi");
 			}
 		}
 
