@@ -6,14 +6,21 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
 &can_edit_phpver($d) || &error($text{'phpver_ecannot'});
-@avail = &list_available_php_versions($d);
-@avail > 1 || &error($text{'phpver_eavail'});
 
 # Make sure an Apache virtualhost exists, or else all the rest is pointless
 ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 $virt || &error(&text('phpmode_evirt', $d->{'dom'}, $d->{'web_port'}));
 
 &ui_print_header(&domain_in($d), $text{'phpver_title'}, "", "phpver");
+
+@avail = &list_available_php_versions($d);
+if (@avail <= 1) {
+	print &text('phpver_eavail2', $avail[0]->[0]),"<p>\n";
+	&ui_print_footer(&domain_footer_link($d),
+			 "", $text{'index_return'});
+	return;
+	}
+
 @hiddens = ( [ "dom", $in{'dom'} ] );
 
 # Build data for existing directories
