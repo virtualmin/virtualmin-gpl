@@ -97,7 +97,7 @@ else {
 		}
 
 	@params = ( $r->{'name'}, $r->{'ttl'}, $r->{'class'}, $r->{'type'},
-		    &bind8::join_record_values($r), $r->{'comment'} );
+		    &join_record_values($r), $r->{'comment'} );
 	if ($in{'type'}) {
 		# Create the record
 		&bind8::create_record($file, @params);
