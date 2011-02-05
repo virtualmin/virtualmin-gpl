@@ -2241,7 +2241,9 @@ else {
 	# Find local file
 	local $file = &get_domain_dns_file($d);
 	return ("No zone file found for $d->{'dom'}") if (!$file);
-	local @recs = &bind8::read_zone_file($file, $d->{'dom'});
+	local $rd = $d->{'dns_submode'} ? &get_domain($d->{'subdom'} ||
+						      $d->{'parent'}) : $d;
+	local @recs = &bind8::read_zone_file($file, $rd->{'dom'});
 	return (\@recs, $file);
 	}
 }

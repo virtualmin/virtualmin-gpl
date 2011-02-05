@@ -60,7 +60,6 @@
  - Allow editing of DNS records (including provisioned) via UI
 	- Provisioning checkbox to use provisioning.virtualmin.com
 	- DNS registration provisioning
-	- Safe editing of sub-domain records
 	- Test on provisioning server
 
  - Ubuntu 10.10 init support

@@ -40,10 +40,15 @@ RECORD: foreach $r (@$recs) {
 	next if ($r->{'type'} eq 'DNSKEY' ||	# auto-generated DNSSEC
 		 $r->{'type'} eq 'NSEC' ||
 		 $r->{'type'} eq 'NSEC3');
+	# Skip sub-domain records
 	foreach $sname (@subdoms) {
 		next RECORD if ($r->{'name'} eq $sname."." ||
 				$r->{'name'} =~ /\.\Q$sname\E\.$/);
 		}
+	# Skip records not in this domain, such as if we are in a sub-domain
+	next if ($r->{'name'} ne $d->{'dom'}."." &&
+		 $r->{'name'} !~ /\.$d->{'dom'}\.$/);
+
 	$name = $r->{'name'};
 	$name =~ s/\.$//;
 	$name =~ s/\.\Q$d->{'dom'}\E//;
