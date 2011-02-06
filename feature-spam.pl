@@ -655,13 +655,17 @@ return ( [ $text{'sysinfo_spam'}, $vers ] );
 sub links_spam
 {
 local ($d) = @_;
-return ( { 'mod' => 'spam',
-	   'desc' => $text{'links_spam'},
-	   'page' => 'index.cgi?file='.&urlize(
-		"$spam_config_dir/$d->{'id'}/virtualmin.cf").
-		'&title='.&urlize(&show_domain_name($d)),
-	   'cat' => 'services',
-	 });
+local $client = &get_domain_spam_client($d);
+if ($client ne "spamc") {
+	return ( { 'mod' => 'spam',
+		   'desc' => $text{'links_spam'},
+		   'page' => 'index.cgi?file='.&urlize(
+			"$spam_config_dir/$d->{'id'}/virtualmin.cf").
+			'&title='.&urlize(&show_domain_name($d)),
+		   'cat' => 'services',
+		 });
+	}
+return ( );
 }
 
 # find_spam_recipe(&recipes)

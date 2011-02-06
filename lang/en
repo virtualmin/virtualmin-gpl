@@ -3719,7 +3719,7 @@ links_website=Preview Website
 links_ssl=Configure Website for SSL
 links_webalizer=Webalizer Report
 links_webalizer2=View Webalizer Report
-links_spam=SpamAssassin
+links_spam=SpamAssassin Configuration
 links_webminlog=Logged Webmin Actions
 links_alog=Apache Access Log
 links_elog=Apache Error Log
@@ -5490,5 +5490,6 @@ record_ettlunits=Invalid units for cache time
 record_evalue=Invalid value for $1
 record_ecname=The Name Alias record $1 has the same name an existing record
 record_eunder=DNS record $1 cannot be edited, as it is not under $2
+record_defttl=Default cache time
 
 __norefs=1
