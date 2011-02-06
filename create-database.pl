@@ -75,7 +75,7 @@ $d->{$type} || &usage("The specified database type is not enabled in this virtua
 $tmpl = &get_template($d->{'template'});
 if ($tmpl->{'mysql_suffix'} ne "none") {
 	$prefix = &substitute_domain_template($tmpl->{'mysql_suffix'}, $d);
-	$prefix = &fix_database_name($prefix);
+	$prefix = &fix_database_name($prefix, $type);
 	if ($name !~ /^\Q$prefix\E/i) {
 		$name = $prefix.$name;
 		}

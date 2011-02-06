@@ -460,6 +460,7 @@ if ($newsuffix) {
 	if ($dleft != 0 && &can_edit_databases()) {
 		# Choose a name ether based on the allowed prefix, or the
 		# default DB name
+		$newdbtype = $d->{'mysql'} ? "mysql" : "postgres";
 		if ($tmpl->{'mysql_suffix'} ne "none") {
 			local $prefix = &substitute_domain_template(
 						$tmpl->{'mysql_suffix'}, $d);
@@ -469,12 +470,12 @@ if ($newsuffix) {
 				# Always use _ as separator
 				$prefix .= "_";
 				}
-			$newdbname = &fix_database_name($prefix.$newsuffix);
+			$newdbname = &fix_database_name($prefix.$newsuffix,
+							$newdbtype);
 			}
 		else {
 			$newdbname = $d->{'db'}."_".$newsuffix;
 			}
-		$newdbtype = $d->{'mysql'} ? "mysql" : "postgres";
 		$newdbdesc = $text{'databases_'.$newdbtype};
 		local ($already) = grep { $_->{'type'} eq $newdbtype &&
 					  $_->{'name'} eq $newdbname } @$dbs;

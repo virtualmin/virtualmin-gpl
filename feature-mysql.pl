@@ -1994,7 +1994,7 @@ else {
 sub validate_database_name_mysql
 {
 local ($d, $dbname) = @_;
-$dbname =~ /^[a-z0-9\_\-]+$/i && $dbname =~ /^[a-z]/i ||
+$dbname =~ /^[a-z0-9\_\-]+$/i ||
 	return $text{'database_ename'};
 local $maxlen;
 if ($d->{'provision_mysql'}) {

@@ -6082,34 +6082,39 @@ if (!$hash{'gid'}) {
 	}
 local $db = &substitute_domain_template($tmpl->{'mysql'}, \%hash);
 $db = lc($db);
-$db ||= $_[0]->{'prefix'};
-$db = &fix_database_name($db);
+$db ||= $d->{'prefix'};
+$db = &fix_database_name($db, $d->{'mysql'} && $d->{'postgres'} ? undef :
+			      $d->{'mysql'} ? 'mysql' : 'postgres');
 return $db;
 }
 
-# fix_database_name(dbname)
+# fix_database_name(dbname, [dbtype])
 # If a database name starts with a number, convert it to a word to support
 # PostgreSQL, which doesn't like numeric names. Also converts . and - to _,
 # and handles reserved DB names.
 sub fix_database_name
 {
-local ($db) = @_;
+local ($db, $dbtype) = @_;
+print STDERR "old=$db\n";
 $db = lc($db);
 $db =~ s/[\.\-]/_/g;	# mysql doesn't like . or _
-$db =~ s/^0/zero/g;	# postgresql doesn't like leading numbers
-$db =~ s/^1/one/g;
-$db =~ s/^2/two/g;
-$db =~ s/^3/three/g;
-$db =~ s/^4/four/g;
-$db =~ s/^5/five/g;
-$db =~ s/^6/six/g;
-$db =~ s/^7/seven/g;
-$db =~ s/^8/eight/g;
-$db =~ s/^9/nine/g;
+if (!$dbtype || $dbtype eq "postgres") {
+	$db =~ s/^0/zero/g;	# postgresql doesn't like leading numbers
+	$db =~ s/^1/one/g;
+	$db =~ s/^2/two/g;
+	$db =~ s/^3/three/g;
+	$db =~ s/^4/four/g;
+	$db =~ s/^5/five/g;
+	$db =~ s/^6/six/g;
+	$db =~ s/^7/seven/g;
+	$db =~ s/^8/eight/g;
+	$db =~ s/^9/nine/g;
+	}
 if ($db eq "test" || $db eq "mysql" || $db =~ /^template/) {
 	# These names are reserved by MySQL and PostgreSQL
 	$db = "db".$db;
 	}
+print STDERR "db=$db dbtype=$dbtype\n";
 return $db;
 }
 

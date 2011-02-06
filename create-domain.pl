@@ -655,7 +655,6 @@ if (!$parent) {
 		}
 	&set_capabilities_from_plan(\%dom, $plan);
 	}
-$dom{'db'} = $db || &database_name(\%dom);
 $dom{'emailto'} = $parent ? $parent->{'emailto'} :
 		  $dom{'email'} ? $dom{'email'} :
 		  $dom{'mail'} ? $dom{'user'}.'@'.$dom{'dom'} :
@@ -666,6 +665,7 @@ foreach $f (@features) {
 foreach $f (&list_feature_plugins()) {
 	$dom{$f} = $plugin{$f} ? 1 : 0;
 	}
+$dom{'db'} = $db || &database_name(\%dom);
 &set_featurelimits_from_plan(\%dom, $plan);
 &set_chained_features(\%dom, undef);
 &set_provision_features(\%dom);

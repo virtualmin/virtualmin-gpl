@@ -1276,3 +1276,4 @@ The create-domain API command now lets you set a custom group name for a new vir
 Removed the 'Domain *' directive from the DKIM configuration, which was breaking signing for domains other than those hosted by Virtualmin (such as email from cron).
 Added the scheduled validation tab to the Validate Virtual Servers page, for setting up automatic email notification when Virtualmin detects problems with the configuration of any server, or the global configuration.
 Added the get-command API operation to fetch the parameters of another API command, for use by authors of higher-level APIs. Also updated the list-commands operation to make its output more parsable.
+Removed the restriction on database names that start with a number, for MySQL.
