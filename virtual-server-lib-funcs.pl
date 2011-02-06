@@ -3363,7 +3363,20 @@ else {
 	# BIND not installed, so default to using unix time for serial
 	$hash{'dns_serial'} = time();
 	}
+
+# Add webmin and usermin ports
 $hash{'virtualmin_url'} = &get_virtualmin_url($d);
+local %miniserv;
+&get_miniserv_config(\%miniserv);
+$hash{'webmin_port'} = $miniserv{'port'};
+$hash{'webmin_proto'} = $miniserv{'ssl'} ? 'https' : 'http';
+if (&foreign_installed('usermin')) {
+	&foreign_require('usermin');
+	local %uminiserv;
+	&usermin::get_usermin_miniserv_config(\%uminiserv);
+	$hash{'usermin_port'} = $uminiserv{'port'};
+	$hash{'usermin_proto'} = $uminiserv{'ssl'} ? 'https' : 'http';
+	}
 
 # Make quotas nicer, if needed
 if ($nice_sizes) {
