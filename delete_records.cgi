@@ -20,7 +20,12 @@ if ($in{'delete'}) {
 		if (&indexof($r->{'id'}, @d) >= 0) {
 			&can_delete_record($d, $r) ||
 				&error(&text('records_edelete', $r->{'name'}));
-			&bind8::delete_record($file, $r);
+			if ($r->{'defttl'}) {
+				&bind8::delete_defttl($file, $r);
+				}
+			else {
+				&bind8::delete_record($file, $r);
+				}
 			}
 		}
 	&post_records_change($d, $recs, $file);

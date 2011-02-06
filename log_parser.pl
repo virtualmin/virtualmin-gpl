@@ -54,6 +54,9 @@ elsif ($type eq "redirects") {
 	return &text('log_'.$action.'_redirects', "<tt>$p->{'dom'}</tt>",
 		     $object);
 	}
+elsif ($type eq "record" && $p->{'defttl'}) {
+	return &text('log_'.$action.'_defttl', "<tt>$object</tt>");
+	}
 elsif ($type eq "record") {
 	local $n = $p->{'name'};
 	$n =~ s/\.$//;

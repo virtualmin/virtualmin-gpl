@@ -18,18 +18,47 @@ if (!$in{'type'}) {
 	}
 else {
 	# Creating a new one
-	$r = { 'type' => $in{'type'},
-	       'class' => 'IN' };
+	if ($in{'type'} eq '$ttl') {
+		$r = { 'defttl' => '1h' };	# defttl gets set later
+		}
+	else {
+		$r = { 'type' => $in{'type'},
+		       'class' => 'IN' };
+		}
 	}
 
 &obtain_lock_dns($d);
 if ($in{'delete'}) {
 	# Just delete it
 	&can_delete_record($d, $r) || &error($text{'record_edelete'});
-	&bind8::delete_record($file, $r);
+	if ($r->{'defttl'}) {
+		&bind8::delete_defttl($file, $r);
+		}
+	else {
+		&bind8::delete_record($file, $r);
+		}
+	}
+elsif ($r->{'defttl'}) {
+	# Validate and save default TTL
+	$in{'defttl'} =~ /^\d+$/ && $in{'defttl'} > 0 ||
+		&error($text{'record_ettl'});
+	$in{'defttl_units'} =~ /^[a-z]$/i ||
+		&error($text{'record_ettlunits'});
+	$r->{'defttl'} = $in{'defttl'}.$in{'defttl_units'};
+
+	# Create or update record
+	if ($in{'type'}) {
+		# Create the record
+		&bind8::create_defttl($file, $r->{'defttl'});
+		}
+	else {
+		# Just update it
+		&bind8::modify_defttl($file, $r, $r->{'defttl'});
+		}
+
 	}
 else {
-	# Validate and store inputs
+	# Validate and save record
 	($t) = grep { $_->{'type'} eq $r->{'type'} } &list_dns_record_types($d);
 	&can_edit_record($d, $r) && $t || &error($text{'record_eedit'});
 	if ($in{'type'} || $r->{'name'} ne $d->{'dom'}.".") {

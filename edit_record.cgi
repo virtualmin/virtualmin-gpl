@@ -10,8 +10,13 @@ $d || &error($text{'edit_egone'});
 
 if ($in{'type'}) {
 	# Adding a new record
-	$r = { 'type' => $in{'type'},
-	       'name' => ".".$d->{'dom'}."." };
+	if ($in{'type'} eq '$ttl') {
+		$r = { 'defttl' => '1h' };
+		}
+	else {
+		$r = { 'type' => $in{'type'},
+		       'name' => ".".$d->{'dom'}."." };
+		}
 	&ui_print_header(&domain_in($d), $text{'record_title1'}, "");
 	}
 else {
@@ -76,29 +81,16 @@ print &ui_table_row($text{'record_type'}, $t->{'type'}." - ".$t->{'desc'});
 
 if ($r->{'defttl'}) {
 	# Default TTL for domain
-	# XXX
+	print &ui_table_row($text{'record_defttl'},
+		&ttl_field("defttl", $r->{'defttl'}));
 	}
 else {
-	# TTL
-	if ($r->{'ttl'} =~ /^(\d+)([a-z])$/i) {
-		$ttl = $1;
-		$ttl_units = lc($2);
-		}
-	else {
-		$ttl = $r->{'ttl'};
-		$ttl_units = "s";
-		}
+	# TTL for record
 	print &ui_table_row($text{'record_ttl'},
 		&ui_radio("ttl_def", $r->{'ttl'} ? 0 : 1,
 			  [ [ 1, $text{'record_ttl1'} ],
 			    [ 0, $text{'record_ttl0'} ] ])." ".
-		&ui_textbox("ttl", $ttl, 5)." ".
-		&ui_select("ttl_units", $ttl_units || "s",
-			   [ [ "s", $bind8::text{'seconds'} ],
-			     [ "m", $bind8::text{'minutes'} ],
-			     [ "h", $bind8::text{'hours'} ],
-			     [ "d", $bind8::text{'days'} ],
-			     [ "w", $bind8::text{'weeks'} ] ], 1, 0, 1));
+		&ttl_field("ttl", $r->{'ttl'}));
 
 	# Values (type specific)
 	@vals = @{$t->{'values'}};
@@ -126,3 +118,26 @@ else {
 	         &domain_footer_link($d),
 		 "", $text{'index_return'});
 
+# ttl_field(name, value)
+# Returns a field for entering a TTL
+sub ttl_field
+{
+local ($name, $ttl) = @_;
+local $ttl_units;
+if ($ttl =~ /^(\d+)([a-z])$/i) {
+	$ttl = $1;
+	$ttl_units = lc($2);
+	}
+else {
+	$ttl_units = "s";
+	}
+return &ui_textbox($name, $ttl, 5)." ".
+	&ui_select($name."_units", $ttl_units || "s",
+		   [ [ "s", $bind8::text{'seconds'} ],
+		     [ "m", $bind8::text{'minutes'} ],
+		     [ "h", $bind8::text{'hours'} ],
+		     [ "d", $bind8::text{'days'} ],
+		     [ "w", $bind8::text{'weeks'} ] ], 1, 0, 1);
+
+
+}
