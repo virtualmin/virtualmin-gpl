@@ -59,7 +59,6 @@
 
  - Allow editing of DNS records (including provisioned) via UI
 	- Provisioning checkbox to use provisioning.virtualmin.com
-	- GPL version
 
  - Ubuntu 10.10 init support
 	- https://sourceforge.net/tracker/?func=detail&atid=117457&aid=3166670&group_id=17457
