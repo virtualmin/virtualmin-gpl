@@ -21,9 +21,19 @@ if ($in{'delete'}) {
 			&can_delete_record($d, $r) ||
 				&error(&text('records_edelete', $r->{'name'}));
 			if ($r->{'defttl'}) {
+				# Delete the TTL, renumber others down so that
+				# bumping the SOA modifies the correct line
 				&bind8::delete_defttl($file, $r);
+				foreach my $e (@$recs) {
+					$e->{'line'}--
+					  if ($e->{'line'} > $r->{'line'});
+					$e->{'eline'}--
+					  if (defined($e->{'eline'}) &&
+					      $e->{'eline'} > $r->{'line'});
+					}
 				}
 			else {
+				# Delete the record
 				&bind8::delete_record($file, $r);
 				}
 			}

@@ -2256,11 +2256,11 @@ sub set_record_ids
 {
 local ($recs) = @_;
 foreach my $r (@$recs) {
-	if ($r->{'name'} eq '$ttl') {
-		$r->{'id'} = join("/", $r->{'name'}, $r->{'defttl'});
+	if ($r->{'defttl'}) {
+		$r->{'id'} = join("/", '$ttl', $r->{'defttl'});
 		}
-	elsif ($r->{'name'} eq '$generate') {
-		$r->{'id'} = join("/", $r->{'name'}, @{$r->{'generate'}});
+	elsif ($r->{'generate'}) {
+		$r->{'id'} = join("/", '$generate', @{$r->{'generate'}});
 		}
 	else {
 		$r->{'id'} = join("/", $r->{'name'}, $r->{'type'},

@@ -43,6 +43,7 @@ RECORD: foreach $r (@$recs) {
 		$values = $r->{'defttl'};
 		$tdesc = $text{'records_typedefttl'};
 		$etype = 1;
+		$gotttl++;
 		}
 	elsif ($r->{'generate'}) {
 		# Record generator .. cannot edit yet
@@ -84,13 +85,16 @@ RECORD: foreach $r (@$recs) {
 		    $name,
 		$tdesc,
 		$values,
-		], \@tds, "d", $id, 0, !&can_delete_record($r, $d));
+		], \@tds, "d", $r->{'id'}, 0, !&can_delete_record($r, $d));
 	}
 
 print &ui_columns_end();
 print &ui_links_row(\@links);
 @types = map { [ $_->{'type'}, $_->{'type'}." - ".$_->{'desc'} ] }
 	     grep { $_->{'create'} } &list_dns_record_types($d);
+if (!$gotttl) {
+	push(@types, [ '$ttl', '$ttl - '.$text{'records_typedefttl'} ]);
+	}
 print &ui_form_end([ [ 'delete', $text{'records_delete'} ],
 		     [ 'new', $text{'records_add'},
 		       &ui_select("type", "A", \@types) ] ]);
