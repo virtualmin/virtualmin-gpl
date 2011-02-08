@@ -145,17 +145,25 @@ else {
 
 if (!$in{'confirm'}) {
 	# Tell the user what will be done
-	print &ui_form_start("restore.cgi", "form-data");
-	print &ui_hidden("origsrc", $origsrc);
 	print &text('restore_from', $nice),"<p>\n";
 
 	# Check for missing features
 	@missing = &missing_restore_features($cont, $contdoms);
-	if (@missing) {
+	@critical = grep { $_->{'critical'} } @missing;
+	if (@critical) {
+		print "<b>",&text('restore_fmissing', 
+			join(", ", map { $_->{'desc'} } @critical)),"</b><p>\n";
+		print "<b>",$text{'restore_fmissing3'},"</b><p>\n";
+		goto FAILED;
+		}
+	elsif (@missing) {
 		print "<b>",&text('restore_fmissing', 
 			join(", ", map { $_->{'desc'} } @missing)),"</b><p>\n";
 		print "<b>",$text{'restore_fmissing2'},"</b><p>\n";
 		}
+
+	print &ui_form_start("restore.cgi", "form-data");
+	print &ui_hidden("origsrc", $origsrc);
 
 	# Show domains with features below them
 	@links = ( &select_all_link("dom", 0), &select_invert_link("dom", 0) );
@@ -269,6 +277,7 @@ else {
 		}
 	}
 
+FAILED:
 if (defined($in{'onedom'})) {
 	# Link is back to view/edit form
 	&ui_print_footer(&domain_footer_link(&get_domain($in{'onedom'})));

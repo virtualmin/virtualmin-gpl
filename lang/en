@@ -2268,6 +2268,7 @@ restore_edup=Server $1 appears twice in backup directory
 restore_from=Are you sure you want to restore the selected domains and features from $1? Any existing data for the features in these domains will be over-written!
 restore_fmissing=Warning - the following features were enabled in one or more of the domains in the backup, but are not enabled on this system : <i>$1</i>
 restore_fmissing2=Without them, some functions of the restored virtual servers may not work.
+restore_fmissing3=This backup cannot be restored without breaking the configuration of this system.
 restore_create=Server does not exist, will be re-created
 restore_nocreate=Server does not exist, but you are not allowed to re-create it
 restore_norestore=You do not have permissions to restore this server

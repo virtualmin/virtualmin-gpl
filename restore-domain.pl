@@ -222,7 +222,16 @@ elsif ($onlyexisting) {
 # Check for missing features
 &$first_print("Checking for missing features ..");
 @missing = &missing_restore_features($cont, $contdoms);
-if (@missing) {
+@critical = grep { $_->{'critical'} } @missing;
+if (@critical) {
+	&$second_print(
+	  ".. WARNING - The following features were enabled for one or more\n".
+	  "domains in the backup, but do not exist on this system. Restoring\n".
+	  "this backup would break the configuration of the system : ".
+	  join(", ", map { $_->{'desc'} } @critical));
+	exit(2);
+	}
+elsif (@missing) {
 	&$second_print(
 	  ".. WARNING - The following features were enabled for one or more\n".
 	  "domains in the backup, but do not exist on this system. Some\n".
