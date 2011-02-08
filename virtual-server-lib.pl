@@ -285,6 +285,10 @@ $user_quota_msg_file = "$module_config_directory/quotas-template";
 
 $links_cache_dir = "$module_config_directory/links-cache";
 
+$cloudmin_provisioning_server = "provisioning.virtualmin.com";
+$cloudmin_provisioning_port = 10000;
+$cloudmin_provisioning_ssl = 1;
+
 # generate_plugins_list([list])
 # Creates the confplugins, plugins and other arrays based on the module config
 # or given space-separated string.
