@@ -19,7 +19,7 @@ return "A browser-based MySQL database management interface.";
 # script_phpmyadmin_versions()
 sub script_phpmyadmin_versions
 {
-return ( "3.3.9.1", "2.11.11.2" );
+return ( "3.3.9.2", "2.11.11.3" );
 }
 
 sub script_phpmyadmin_version_desc
