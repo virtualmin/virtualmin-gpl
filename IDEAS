@@ -56,7 +56,3 @@
  - Plugin for APS installation
 
  - Move cron jobs to webmincron
-
- - Ubuntu 10.10 init support
-	- https://sourceforge.net/tracker/?func=detail&atid=117457&aid=3166670&group_id=17457
-	- https://sourceforge.net/tracker/?func=detail&atid=117457&aid=3175284&group_id=17457
