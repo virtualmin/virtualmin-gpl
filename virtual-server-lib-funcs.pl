@@ -13193,8 +13193,8 @@ foreach my $u (&list_all_users_quotas(1)) {
 		# belong to it.
 		$did = $homemap{$1};
 		}
-	elsif ($h =~ /^(.*)\/public_html$/) {
-		# Home is public_html, so he is a web user
+	elsif ($h =~ /^(.*)\/public_html(\/\S+)?$/) {
+		# Home is in or under public_html, so he is a web user
 		$did = $homemap{$1};
 		}
 	else {
