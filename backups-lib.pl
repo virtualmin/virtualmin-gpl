@@ -2485,6 +2485,12 @@ sub can_backup_commands
 return &master_admin();
 }
 
+# Returns 1 if the configured backup format supports incremental backups
+sub has_incremental_format
+{
+return $config{'compression'} != 3;
+}
+
 # Returns 1 if tar supports incremental backups
 sub has_incremental_tar
 {

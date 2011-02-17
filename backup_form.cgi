@@ -212,7 +212,7 @@ if ($d) {
 	}
 
 # Show incremental option
-if (&has_incremental_tar()) {
+if (&has_incremental_tar() && &has_incremental_format()) {
 	print &ui_table_row(
 		&hlink($text{'backup_increment'}, "backup_increment"),
 			    &ui_radio("increment", int($sched->{'increment'}),

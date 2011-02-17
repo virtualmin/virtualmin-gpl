@@ -11,7 +11,7 @@ require './virtual-server-lib.pl';
 @scheds = grep { &can_backup_sched($_) } @scheds;
 
 # Work out what to show
-$hasinc = &has_incremental_tar();
+$hasinc = &has_incremental_tar() && &has_incremental_format();
 @table = ( );
 $hasowner = 0;
 if (&can_backup_domain() == 1) {
@@ -55,8 +55,8 @@ foreach $s (@scheds) {
 	push(@row, $s->{'enabled'} ?
 		&text('sched_yes', &cron::when_text($s)) :
 		"<font color=#ff0000>$text{'no'}</font>");
-	# Incremental level
 	if ($hasinc) {
+		# Incremental level
 		push(@row, $s->{'increment'} ? $text{'sched_inc'}
 					     : $text{'sched_full'});
 		}
