@@ -55,7 +55,7 @@ foreach $d (@doms) {
 
 	# Print message, if anything done
 	if ($count) {
-		print "<dt>$d->{'dom'}\n";
+		print "<dt>",&show_domain_name($d),"\n";
 		if (@errs) {
 			print "<dd><font color=#ff0000>",
 			      join("<br>\n", @errs),"</font>\n";
