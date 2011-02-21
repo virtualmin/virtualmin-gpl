@@ -3192,7 +3192,20 @@ $rv =~ s/<a[^>]*>|<\/a>//g;
 $rv =~ s/<pre>|<\/pre>//g;
 $rv =~ s/<br>/\n/g;
 $rv =~ s/<p>/\n\n/g;
+$rv = &entities_to_ascii($rv);
 return $rv;
+}
+
+# Print functions for caturing output
+sub first_capture_print
+{
+$print_output .= $indent_text.
+    join("", (map { &html_tags_to_text(&entities_to_ascii($_)) } @_))."\n";
+}
+sub second_capture_print
+{
+$print_output .= $indent_text.
+    join("", (map { &html_tags_to_text(&entities_to_ascii($_)) } @_))."\n\n";
 }
 
 sub null_print { }
@@ -3214,6 +3227,13 @@ $first_print = \&first_html_print;
 $second_print = \&second_html_print;
 $indent_print = \&indent_html_print;
 $outdent_print = \&outdent_html_print;
+}
+sub set_all_capture_print
+{
+$first_print = \&first_capture_print;
+$second_print = \&second_capture_print;
+$indent_print = \&indent_text_print;
+$outdent_print = \&outdent_text_print;
 }
 
 # These functions store and retrieve the current print commands
@@ -3339,7 +3359,24 @@ if ($config{'dns'}) {
 		$hash{'dns_serial'} = time();
 		}
 	}
+else {
+	# BIND not installed, so default to using unix time for serial
+	$hash{'dns_serial'} = time();
+	}
+
+# Add webmin and usermin ports
 $hash{'virtualmin_url'} = &get_virtualmin_url($d);
+local %miniserv;
+&get_miniserv_config(\%miniserv);
+$hash{'webmin_port'} = $miniserv{'port'};
+$hash{'webmin_proto'} = $miniserv{'ssl'} ? 'https' : 'http';
+if (&foreign_installed('usermin')) {
+	&foreign_require('usermin');
+	local %uminiserv;
+	&usermin::get_usermin_miniserv_config(\%uminiserv);
+	$hash{'usermin_port'} = $uminiserv{'port'};
+	$hash{'usermin_proto'} = $uminiserv{'ssl'} ? 'https' : 'http';
+	}
 
 # Make quotas nicer, if needed
 if ($nice_sizes) {
@@ -5579,6 +5616,14 @@ if (!$_[3]->{'fix'}) {
 	foreach my $f (&list_custom_fields()) {
 		$_[0]->{$f->{'name'}} = $oldd{$f->{'name'}};
 		}
+	# Disable any features that are not on this system, as they can't
+	# be restored from the backup anyway.
+	foreach my $f (@features) {
+		next if ($f eq 'dir' || $f eq 'unix');	# Always on
+		if ($d->{$f} && !$config{$f}) {
+			$d->{$f} = 0;
+			}
+		}
 	&save_domain($_[0]);
 	if (-r $_[1]."_initial") {
 		# Also restore user defaults file
@@ -6050,34 +6095,39 @@ if (!$hash{'gid'}) {
 	}
 local $db = &substitute_domain_template($tmpl->{'mysql'}, \%hash);
 $db = lc($db);
-$db ||= $_[0]->{'prefix'};
-$db = &fix_database_name($db);
+$db ||= $d->{'prefix'};
+$db = &fix_database_name($db, $d->{'mysql'} && $d->{'postgres'} ? undef :
+			      $d->{'mysql'} ? 'mysql' : 'postgres');
 return $db;
 }
 
-# fix_database_name(dbname)
+# fix_database_name(dbname, [dbtype])
 # If a database name starts with a number, convert it to a word to support
 # PostgreSQL, which doesn't like numeric names. Also converts . and - to _,
 # and handles reserved DB names.
 sub fix_database_name
 {
-local ($db) = @_;
+local ($db, $dbtype) = @_;
+print STDERR "old=$db\n";
 $db = lc($db);
 $db =~ s/[\.\-]/_/g;	# mysql doesn't like . or _
-$db =~ s/^0/zero/g;	# postgresql doesn't like leading numbers
-$db =~ s/^1/one/g;
-$db =~ s/^2/two/g;
-$db =~ s/^3/three/g;
-$db =~ s/^4/four/g;
-$db =~ s/^5/five/g;
-$db =~ s/^6/six/g;
-$db =~ s/^7/seven/g;
-$db =~ s/^8/eight/g;
-$db =~ s/^9/nine/g;
+if (!$dbtype || $dbtype eq "postgres") {
+	$db =~ s/^0/zero/g;	# postgresql doesn't like leading numbers
+	$db =~ s/^1/one/g;
+	$db =~ s/^2/two/g;
+	$db =~ s/^3/three/g;
+	$db =~ s/^4/four/g;
+	$db =~ s/^5/five/g;
+	$db =~ s/^6/six/g;
+	$db =~ s/^7/seven/g;
+	$db =~ s/^8/eight/g;
+	$db =~ s/^9/nine/g;
+	}
 if ($db eq "test" || $db eq "mysql" || $db =~ /^template/) {
 	# These names are reserved by MySQL and PostgreSQL
 	$db = "db".$db;
 	}
+print STDERR "db=$db dbtype=$dbtype\n";
 return $db;
 }
 
@@ -9506,10 +9556,15 @@ else {
 # Returns the Cron job used for regularly checking quotas
 sub find_quotas_job
 {
-&foreign_require("cron", "cron-lib.pl");
-local @jobs = &cron::list_cron_jobs();
-local ($job) = grep { $_->{'user'} eq 'root' &&
-		      $_->{'command'} eq $quotas_cron_cmd } @jobs;
+local $job = &find_virtualmin_cron_job($quotas_cron_cmd);
+return $job;
+}
+
+# find_validate_job()
+# Returns the Cron job used for validating virtual servers
+sub find_validate_job
+{
+local $job = &find_virtualmin_cron_job($validate_cron_cmd);
 return $job;
 }
 
@@ -9538,7 +9593,7 @@ foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "quota_list_users_command", "quota_list_groups_command",
 	       "quota_get_user_command", "quota_get_group_command",
 	       "preload_mode", "collect_interval", "api_helper",
-	       "spam_lock") {
+	       "spam_lock", "spam_white") {
 	# Some important config option was changed
 	return 1 if ($config{$c} ne $lastconfig{$c});
 	}
@@ -10090,6 +10145,15 @@ if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} && &can_edit_spf()) {
 	push(@rv, { 'page' => 'edit_spf.cgi',
 		    'title' => $text{'edit_spf'},
 		    'desc' => $text{'edit_spfdesc'},
+		    'cat' => 'server',
+		  });
+	}
+
+if ($d->{'dns'} && &can_edit_spf()) {
+	# DNS records button
+	push(@rv, { 'page' => 'list_records.cgi',
+		    'title' => $text{'edit_records'},
+		    'desc' => $text{'edit_recordsdesc'},
 		    'cat' => 'server',
 		  });
 	}
@@ -11505,6 +11569,21 @@ if ($config{'mail'}) {
 			return &text('check_evad', $vad);
 			}
 
+		# Make sure mydestination contains hostname or origin
+		local $myhost = &postfix::get_real_value("myorigin") ||
+			        &postfix::get_real_value("myhostname") ||
+				&get_system_hostname();
+		if ($myhost =~ /^\//) {
+			$myhost = &read_file_contents($myhost);
+			$myhost =~ s/\s//g;
+			}
+		local @mydest = split(/\s*,\s*/,
+				   &postfix::get_real_value("mydestination"));
+		if (&indexoflc($myhost, @mydest) < 0 &&
+		    &indexoflc('$myhostname', @mydest) < 0) {
+			return &text('check_emydest', $myhost);
+			}
+
 		&$second_print($text{'check_postfixok'});
 		$expected_mailboxes = 0;
 		}
@@ -11600,6 +11679,16 @@ if ($config{'web'}) {
 	if ($tmpl->{'web_php_suexec'} == 2 &&
 	    !$apache::httpd_modules{'mod_fcgid'}) {
 		return $text{'tmpl_ephpmode2'};
+		}
+
+	# Run Apache config check
+	local $err = &apache::test_config();
+	if ($err) {
+		local @elines = split(/\r?\n/, $err);
+		@elines = grep { !/\[warn\]/ } @elines;
+		$err = join("\n", @elines) if (@elines);
+		return &text('check_ewebconfig',
+			     "<pre>".&html_escape($err)."</pre>");
 		}
 
 	# Make sure suexec is installed, if enabled. Also check home path.
@@ -11788,6 +11877,15 @@ if ($config{'spam'}) {
 		if ($r->{'action'} =~ /spamassassin|spamc/) {
 			return &text('check_spamglobal',
 				     "<tt>$procmail::procmailrc</tt>");
+			}
+		}
+
+	# Check for spam_white conflict with spamc
+	if ($config{'spam_white'}) {
+		local ($client, $host, $size) = &get_global_spam_client();
+		if ($client eq "spamc") {
+			return &text('check_spamwhite', $mclink,
+				     "edit_newsv.cgi");
 			}
 		}
 
@@ -12297,6 +12395,34 @@ if (defined(&setup_scriptwarn_job) && defined($config{'scriptwarn_enabled'})) {
 # Re-setup script updates job, if it was enabled
 if (defined(&setup_scriptlatest_job) && $config{'scriptlatest_enabled'}) {
 	&setup_scriptlatest_job(1);
+	}
+
+# Re-setup the validation cron job based on the saved config
+local ($oldjob, $job);
+$oldjob = $job = &find_validate_job();
+$job ||= { 'user' => 'root',
+	   'active' => 1,
+	   'command' => $validate_cron_cmd };
+if ($oldjob) {
+	&lock_file(&cron::cron_file($oldjob));
+	&cron::delete_cron_job($oldjob);
+	&unlock_file(&cron::cron_file($oldjob));
+	}
+&cron::create_wrapper($validate_cron_cmd, $module_name, "validate.pl");
+if ($config{'validate_sched'}) {
+	# Re-create cron job
+	if ($config{'validate_sched'} =~ /^\@(\S+)/) {
+		$job->{'special'} = $1;
+		}
+	else {
+		($job->{'mins'}, $job->{'hours'}, $job->{'days'},
+		 $job->{'months'}, $job->{'weekdays'}) =
+			split(/\s+/, $config{'validate_sched'});
+		delete($job->{'special'});
+		}
+	&lock_file(&cron::cron_file($job));
+	&cron::create_cron_job($job);
+	&unlock_file(&cron::cron_file($job));
 	}
 }
 
@@ -13067,8 +13193,8 @@ foreach my $u (&list_all_users_quotas(1)) {
 		# belong to it.
 		$did = $homemap{$1};
 		}
-	elsif ($h =~ /^(.*)\/public_html$/) {
-		# Home is public_html, so he is a web user
+	elsif ($h =~ /^(.*)\/public_html(\/\S+)?$/) {
+		# Home is in or under public_html, so he is a web user
 		$did = $homemap{$1};
 		}
 	else {

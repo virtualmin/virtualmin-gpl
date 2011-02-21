@@ -54,6 +54,7 @@ foreach $s (@scripts) {
 		@files = &{$script->{'files_func'}}(undef, $v, undef, undef);
 		foreach $f (@files) {
 			# Try a download
+			next if ($f->{'nocheck'});
 			($url, $def) = &convert_osdn_url($f->{'url'});
 			if ($def == 1) {
 				# Couldn't find OSDN file

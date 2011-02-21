@@ -12,6 +12,12 @@ foreach $f (&list_provision_features()) {
 	push(@oldpfeatures, $f) if ($config{'provision_'.$f});
 	push(@pfeatures, $f) if ($in{'provision_'.$f});
 	}
+if ($in{'provision_cloudmin'}) {
+	# Use Virtualmin's provisioning service
+	$in{'provision_server'} = $cloudmin_provisioning_server;
+	$in{'provision_port'} = $cloudmin_provisioning_port;
+	$in{'provision_ssl'} = $cloudmin_provisioning_ssl;
+	}
 if (@pfeatures) {
 	&to_ipaddress($in{'provision_server'}) ||
 	  defined(&to_ip6address) && &to_ip6address($in{'provision_server'}) ||

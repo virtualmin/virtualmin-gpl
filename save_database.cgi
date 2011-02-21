@@ -18,7 +18,7 @@ if ($in{'new'}) {
 	if ($tmpl->{'mysql_suffix'} ne "none") {
 		$prefix = &substitute_domain_template(
 				$tmpl->{'mysql_suffix'}, $d);
-		$prefix = &fix_database_name($prefix);
+		$prefix = &fix_database_name($prefix, $in{'type'});
 		if ($in{'name'} !~ /^\Q$prefix\E/i) {
 			$in{'name'} = $prefix.$in{'name'};
 			}

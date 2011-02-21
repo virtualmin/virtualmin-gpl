@@ -376,8 +376,8 @@ if (!$user || $user->{'unix'}) {
 	}
 print "                      [--noemail]\n";
 print "                      [--extra email.address\@some.domain]\n";
-print "                      [--mysql db] ...\n";
-print "                      [--group name] ...\n";
+print "                      [--mysql db]*\n";
+print "                      [--group name]*\n";
 print "                      [--web]\n";
 if ($config{'spam'}) {
 	print "                      [--no-check-spam]\n";

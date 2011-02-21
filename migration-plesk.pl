@@ -140,7 +140,8 @@ if (exists($domain->{'mailsystem'}->{'status'}->{'enabled'}) ||
 if ($domain->{'dns-zone'} || $domain->{'dns_zone'}) {
 	push(@got, "dns");
 	}
-if ($domain->{'www'} eq 'true' || -d "$root/$dom/httpdocs") {
+if ($domain->{'www'} eq 'true' || -d "$root/$dom/httpdocs" ||
+    $domain->{'www'} && (-r "$root/$dom.httpdocs" || -r "$root/$dom.htdocs")) {
 	push(@got, "web");
 	}
 if ($domain->{'ip'}->{'ip-type'} eq 'exclusive' && $virt) {
@@ -150,7 +151,8 @@ if ($domain->{'phosting'}->{'logrotation'}->{'enabled'} eq 'true' ||
     $windows && &indexof("web", @got) >= 0) {
 	push(@got, "logrotate");
 	}
-if ($domain->{'phosting'}->{'webalizer'}) {
+if ($domain->{'phosting'}->{'webalizer'} &&
+    &indexof("web", @got) >= 0) {
 	push(@got, "webalizer");
 	}
 

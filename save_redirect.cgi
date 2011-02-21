@@ -45,8 +45,15 @@ else {
 		}
 	else {
 		# Alias to a directory
-		$in{'dir'} =~ /^\/\S+$/ && -d $in{'dir'} ||
+		$in{'dir'} =~ /^\/\S+$/ ||
 			&error($text{'redirect_edir'});
+		$actualdir = $in{'dir'};
+		if ($actualdir =~ s/\$.*$//) {
+			# If path contains $1, reduce to parent dir
+			$actualdir =~ s/\/[^\/]*$//;
+			}
+		!$actualdir || -d $actualdir ||
+			&error(&text('redirect_edir3', $actualdir));
 		if ($in{'new'} || $r->{'dest'} ne $in{'dir'}) {
 			$rroot = &get_redirect_root($d);
 			&is_under_directory($rroot, $in{'dir'}) ||

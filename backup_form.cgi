@@ -160,13 +160,13 @@ print &ui_hidden_table_end("features");
 
 # Build destination field inputs
 @dests = &get_scheduled_backup_dests($sched);
-push(@dests, undef) if (!$in{'new'});
+push(@dests, undef) if ($in{'sched'});
 @dfields = ( );
 $i = 0;
 foreach $dest (@dests) {
 	$dfield = &show_backup_destination("dest".$i, $dest, $cbmode == 3,
 					   $d, $nodownload, 1);
-	if (!$dest && !$in{'new'}) {
+	if (!$dest && $in{'sched'}) {
 		# Last option is hidden
 		$dfield = &ui_hidden_start($text{'backup_adddest'},
 					   "adddest", 0).$dfield.
@@ -212,7 +212,7 @@ if ($d) {
 	}
 
 # Show incremental option
-if (&has_incremental_tar()) {
+if (&has_incremental_tar() && &has_incremental_format()) {
 	print &ui_table_row(
 		&hlink($text{'backup_increment'}, "backup_increment"),
 			    &ui_radio("increment", int($sched->{'increment'}),

@@ -11,6 +11,7 @@ while($got = read(STDIN, $buf, 1024)) {
 	$size += $got;
 	}
 $margin = $size*2+5*1024*1024;
+$quota_margin = 100*1024;    # Bounce if message would get this close to quota
 
 # First, try connecting to the lookup-domain-daemon.pl process. Only wait for
 # 30 seconds, in case it has hung.
@@ -33,7 +34,13 @@ if ($connect_timed_out) {
 if ($fromdaemon && !$connect_timed_out) {
 	# We have an answer from the server process
 	($did, $dname, $spam, $spamc, $quotaleft) = split(/\t/, $fromdaemon);
-	if (!$did || !$spam) {
+	if ($did && $quotaleft ne "UNLIMITED" &&
+	    $quotaleft-$size-$quota_margin <= 0) {
+		# Quota has been reached, bounce mail
+		print STDERR "Disk quota for $ARGV[0] has been reached.\n";
+		exit(73);
+		}
+	elsif (!$did || !$spam) {
 		# No such user, or user's domain doesn't have spam enabled -
 		# don't do spam check
 		}
@@ -43,7 +50,8 @@ if ($fromdaemon && !$connect_timed_out) {
 		print $did,"\n";
 		}
 	elsif ($quotaleft < $margin) {
-		# Too close to quota - don't check
+		# Too close to quota - don't check for spam, so return
+		# no domain ID
 		}
 	else {
 		# Do spam check
@@ -70,7 +78,12 @@ if (defined($usercache{$ARGV[0]})) {
 		split(/ /, $usercache{$ARGV[0]});
 	$cacheclient ||= "spamassassin";
 	if ($now - $cachetime < 60*60) {
-		if (!$cachespam) {
+		if ($cachequota &&
+		    $cacheuquota+$size+$quota_margin >= $cachequota) {
+			# At or over quota. Actually re-check for real though,
+			# to avoid bouncing mail un-necessarily
+			}
+		elsif (!$cachespam) {
 			# Domain doesn't have spam enabled, so don't do check
 			$cacheuquota += $size;
 			&update_cache();
@@ -149,7 +162,12 @@ else {
 $bsize = &quota_bsize($qmode);
 $quota *= $bsize;
 $uquota *= $bsize;
-if ($user->{'nospam'}) {
+if ($quota && $uquota+$size+$quota_margin >= $quota) {
+	# Over quota - intentionally fail
+	print STDERR "Disk quota for $user->{'user'} of $quota blocks has been reached.\n";
+	exit(73);
+	}
+elsif ($user->{'nospam'}) {
 	# Spam filtering disabled for this user
 	$cachespam = 0;
 	}
@@ -159,7 +177,7 @@ elsif ($cacheclient eq "spamc") {
 	print "$d->{'id'}\n";
 	}
 elsif ($quota && $uquota+$margin >= $quota) {
-	# Over quota, or too close to it
+	# Close to quota - don't return domain ID, to disable spam checking
 	}
 else {
 	# Under quota ... do the spam check
@@ -170,6 +188,7 @@ $cachequota = $quota;
 $cacheuquota = $uquota;
 $cachetime = $now;
 &update_cache();
+exit(0);
 
 sub update_cache
 {

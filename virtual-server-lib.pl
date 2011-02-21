@@ -71,8 +71,7 @@ $config{'virt6'} = 1;
 @alias_features = ( @opt_alias_features );
 @subdom_features = ( @opt_subdom_features );
 @database_features = ( 'mysql', 'postgres' );
-@template_features = ( 'basic', 'resources', @features, 'virt',
-		       $virtualmin_pro ? ( 'virtualmin' ) : ( ),
+@template_features = ( 'basic', 'resources', @features, 'virt', 'virtualmin',
 		       'plugins',
 		       $virtualmin_pro ? ( 'scripts' ) : ( ),
 		       'phpwrappers', 'avail' );
@@ -108,13 +107,15 @@ $spamconfig_cron_cmd = "$module_config_directory/spamconfig.pl";
 $scriptwarn_cron_cmd = "$module_config_directory/scriptwarn.pl";
 $scriptlatest_cron_cmd = "$module_config_directory/scriptlatest.pl";
 $spamtrap_cron_cmd = "$module_config_directory/spamtrap.pl";
+$validate_cron_cmd = "$module_config_directory/validate.pl";
 
 @all_cron_commands = ( $backup_cron_cmd, $bw_cron_cmd, $licence_cmd,
 		       $licence_status, $quotas_cron_cmd, $spamclear_cmd,
 		       $dynip_cron_cmd, $ratings_cron_cmd, $collect_cron_cmd,
 		       $fcgiclear_cron_cmd, $maillog_cron_cmd,
 		       $spamconfig_cron_cmd, $scriptwarn_cron_cmd,
-		       $scriptlatest_cron_cmd, $spamtrap_cron_cmd );
+		       $scriptlatest_cron_cmd, $spamtrap_cron_cmd,
+		       $validate_cron_cmd, );
 
 $custom_fields_file = "$module_config_directory/custom-fields";
 $custom_links_file = "$module_config_directory/custom-links";
@@ -283,6 +284,10 @@ $user_quota_msg_file = "$module_config_directory/quotas-template";
 @automatic_dns_records = ( "@", "www", "ftp", "localhost", "m");
 
 $links_cache_dir = "$module_config_directory/links-cache";
+
+$cloudmin_provisioning_server = "provisioning.virtualmin.com";
+$cloudmin_provisioning_port = 10000;
+$cloudmin_provisioning_ssl = 1;
 
 # generate_plugins_list([list])
 # Creates the confplugins, plugins and other arrays based on the module config

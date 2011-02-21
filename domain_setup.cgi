@@ -357,6 +357,16 @@ $dom{'emailto'} = $parentdom ? $parentdom->{'emailto'} :
 		  $dom{'email'} ? $dom{'email'} :
 		  $dom{'mail'} ? $dom{'user'}.'@'.$dom{'dom'} :
 		  		 $dom{'user'}.'@'.&get_system_hostname();
+
+# Set selected features in domain object
+# Special magic - if the dir feature is enabled by default and this is an alias
+# domain, don't set it
+foreach my $f (@features, &list_feature_plugins()) {
+	next if ($f eq 'dir' && $config{$f} == 3 && $aliasdom &&
+                 $tmpl->{'aliascopy'});
+	$dom{$f} = &can_use_feature($f) && int($in{$f});
+	}
+
 if ($in{'db_def'} || !&database_feature() || !&can_edit_databases() ||
     $aliasdom || $subdom) {
 	# Database name is automatic (or not even used, in the case of alias
@@ -376,14 +386,6 @@ else {
 	$dom{'db'} = $in{'db'};
 	}
 
-# Set selected features in domain object
-# Special magic - if the dir feature is enabled by default and this is an alias
-# domain, don't set it
-foreach my $f (@features, &list_feature_plugins()) {
-	next if ($f eq 'dir' && $config{$f} == 3 && $aliasdom &&
-                 $tmpl->{'aliascopy'});
-	$dom{$f} = &can_use_feature($f) && int($in{$f});
-	}
 if (!$parentdom) {
 	&set_featurelimits_from_plan(\%dom, $plan);
 	}

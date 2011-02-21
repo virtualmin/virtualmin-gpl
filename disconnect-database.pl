@@ -1,13 +1,14 @@
 #!/usr/local/bin/perl
 
-=head1 delete-database.pl
+=head1 disconnect-database.pl
 
-Deletes one database
+Removes a database from the control of a virtual server.
 
-To remove a single database from a virtual server and delete all of its
-contents, you can use this command. It takes the exact same parameters as the
-C<create-database> command : C<--domain>, C<--name> and C<--type>. Be careful using
-it, as the complete contents of the specified database will be removed without any prompting for confirmation.
+This command removes access to a database from the virtual server that
+owns it, but does not actually delete the database itself. You must provide
+the C<--domain> flag followed by a virtual server name, C<--type> followed by
+the DB type (like mysql or postgres), and C<--name> followed by the database
+name.
 
 =cut
 
@@ -22,7 +23,7 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/delete-database.pl";
+	$0 = "$pwd/disconnect-database.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "delete-database.pl must be run as root";
 	}
@@ -59,26 +60,31 @@ $db || &usage("The specified database is not associated with this server");
 $first_print = \&null_print;
 $second_print = \&null_print;
 if (&indexof($type, &list_database_plugins()) >= 0) {
-	&plugin_call($type, "database_delete", $d, $name);
+	&plugin_call($type, "database_revoke", $d, $name);
 	}
 else {
-	$dfunc = "delete_".$type."_database";
+	$dfunc = "revoke_".$type."_database";
 	&$dfunc($d, $name);
 	}
+
+# Save domain object
+@dbs = split(/\s+/, $d->{'db_'.$type});
+@dbs = grep { $_ ne $name } @dbs;
+$d->{'db_'.$type} = join(" ", @dbs);
 &save_domain($d);
 &refresh_webmin_user($d);
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV, $d);
-print "Database $name deleted successfully\n";
+print "Database $name disconnected successfully\n";
 
 sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
-print "Deletes a database associated with some virtual server.\n";
+print "Removes a database from the control of a virtual server.\n";
 print "\n";
-print "virtualmin delete-database --domain domain.name\n";
-print "                           --name database-name\n";
-print "                           --type mysql|postgres\n";
+print "virtualmin disconnect-database --domain domain.name\n";
+print "                               --name database-name\n";
+print "                               --type mysql|postgres\n";
 exit(1);
 }
 

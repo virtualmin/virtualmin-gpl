@@ -155,7 +155,11 @@ close(PGPASS);
 $ENV{'PGPASSFILE'} = $pg_pass_file;
 chmod(0600, $pg_pass_file);
 
-# Build list of test types
+$_config_tests = [
+	# Just validate global config
+	{ 'command' => 'check-config.pl' },
+	];
+
 $domains_tests = [
 	# Make sure domain creation works
 	{ 'command' => 'create-domain.pl',
@@ -4316,7 +4320,8 @@ $configbackup_tests = [
 	  'cleanup' => 1 },
 	];
 
-$alltests = { 'domains' => $domains_tests,
+$alltests = { '_config' => $_config_tests,
+	      'domains' => $domains_tests,
 	      'disable' => $disable_tests,
 	      'web' => $web_tests,
 	      'mailbox' => $mailbox_tests,

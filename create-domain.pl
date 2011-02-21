@@ -97,6 +97,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--user") {
 		$user = lc(shift(@ARGV));
 		}
+	elsif ($a eq "--group") {
+		$group = lc(shift(@ARGV));
+		}
 	elsif ($a eq "--pass") {
 		$pass = shift(@ARGV);
 		}
@@ -399,18 +402,23 @@ if ($parentdomain) {
 # Allow user and group names
 if (!$parent) {
 	if (!$user) {
+		# Select user automatically
 		($user, $try1, $try2) = &unixuser_name($domain);
 		$user || &usage(&text('setup_eauto', $try1, $try2));
 		}
 	else {
+		# Use specified username, and also group
 		$user =~ /^[^\t :]+$/ || &usage($text{'setup_euser2'});
 		defined(getpwnam($user)) && &usage($text{'setup_euser'});
+		$group ||= $user;
 		}
 	if (!$group) {
+		# Select group automatically
 		($group, $gtry1, $gtry2) = &unixgroup_name($domain, $user);
 		$group || &usage(&text('setup_eauto2', $try1, $try2));
 		}
 	else {
+		# Use specified group name
 		$group =~ /^[^\t :]+$/ || &usage($text{'setup_egroup2'});
 		defined(getgrnam($group)) &&
 			&usage(&text('setup_egroup', $group));
@@ -647,7 +655,6 @@ if (!$parent) {
 		}
 	&set_capabilities_from_plan(\%dom, $plan);
 	}
-$dom{'db'} = $db || &database_name(\%dom);
 $dom{'emailto'} = $parent ? $parent->{'emailto'} :
 		  $dom{'email'} ? $dom{'email'} :
 		  $dom{'mail'} ? $dom{'user'}.'@'.$dom{'dom'} :
@@ -658,6 +665,7 @@ foreach $f (@features) {
 foreach $f (&list_feature_plugins()) {
 	$dom{$f} = $plugin{$f} ? 1 : 0;
 	}
+$dom{'db'} = $db || &database_name(\%dom);
 &set_featurelimits_from_plan(\%dom, $plan);
 &set_chained_features(\%dom, undef);
 &set_provision_features(\%dom);
@@ -744,6 +752,7 @@ print "                         --superdom domain.name]\n";
 print "                        [--desc description-for-domain]\n";
 print "                        [--email contact-email]\n";
 print "                        [--user new-unix-user]\n";
+print "                        [--group new-unix-group]\n";
 foreach $f (@features) {
 	print "                        [--$f]\n" if ($config{$f});
 	}

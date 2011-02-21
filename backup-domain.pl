@@ -174,6 +174,7 @@ while(@ARGV > 0) {
 		@vbs = @virtualmin_backups;
 		}
 	elsif ($a eq "--incremental") {
+		&has_incremental_format() || &error("The configured backup format does not support incremental backups");
 		&has_incremental_tar() || &error("The tar command on this system does not support incremental backups");
 		$increment = 1;
 		}
@@ -341,12 +342,12 @@ print "                                            [--except-feature name]\n";
 print "                         [--ignore-errors]\n";
 print "                         [--separate] | [--newformat]\n";
 print "                         [--onebyone]\n";
-print "                         [--strftime [--purge days]]\n";
+print "                         [--strftime] [--purge days]\n";
 if (&has_incremental_tar()) {
 	print "                         [--incremental]\n";
 	}
 print "                         [--all-virtualmin] | [--virtualmin config]\n";
-print "                         [--option feature name value]\n";
+print "                         [--option \"feature name value\"]\n";
 print "                         [--as-owner]\n";
 print "                         [--exclude file]*\n";
 print "\n";

@@ -125,6 +125,9 @@ if (!$gotvirt) {
 	&flush_file_lines($procmail::procmailrc);
 	}
 
+# Add procmail rule to bounce mail if quota is full
+&setup_quota_full_bounce();
+
 # Create the lookup-domain.pl wrapper script, and hack it to turn off setuid
 &cron::create_wrapper($domain_lookup_cmd, $module_name,
 		      "lookup-domain.pl");
@@ -652,13 +655,17 @@ return ( [ $text{'sysinfo_spam'}, $vers ] );
 sub links_spam
 {
 local ($d) = @_;
-return ( { 'mod' => 'spam',
-	   'desc' => $text{'links_spam'},
-	   'page' => 'index.cgi?file='.&urlize(
-		"$spam_config_dir/$d->{'id'}/virtualmin.cf").
-		'&title='.&urlize(&show_domain_name($d)),
-	   'cat' => 'services',
-	 });
+local $client = &get_domain_spam_client($d);
+if ($client ne "spamc") {
+	return ( { 'mod' => 'spam',
+		   'desc' => $text{'links_spam'},
+		   'page' => 'index.cgi?file='.&urlize(
+			"$spam_config_dir/$d->{'id'}/virtualmin.cf").
+			'&title='.&urlize(&show_domain_name($d)),
+		   'cat' => 'services',
+		 });
+	}
+return ( );
 }
 
 # find_spam_recipe(&recipes)
@@ -1491,6 +1498,48 @@ if (!$ok) {
 &$second_print($text{'setup_done'});
 
 return 1;
+}
+
+# setup_quota_full_bounce()
+# Update /etc/procmailrc with rules after the VIRTUALMIN line to bounce mail
+# if quota if full.
+sub setup_quota_full_bounce
+{
+local @recipes = &procmail::get_procmailrc();
+
+# Find existing VIRTUALMIN= and EXITCODE= recipes
+my ($virt, $exitcode, $virtafter);
+foreach my $r (@recipes) {
+	if ($r->{'type'} eq '=' && $r->{'action'} =~ /^VIRTUALMIN=/) {
+		$virt = $r;
+		}
+	elsif ($r->{'name'} eq 'EXITCODE') {
+		$exitcode = $r;
+		}
+	elsif ($virt && !$virtafter && $r->{'index'} == $virt->{'index'}+1) {
+		$virtafter = $r;
+		}
+	}
+return 0 if (!$virt || $exitcode);
+
+# Create new recipe objects
+local $var1 = { 'name' => 'EXITCODE',
+		'value' => '$?' };
+local $testcmd = &has_command("test") || "test";
+local $cmd;
+if ($gconfig{'os_type'} eq 'solaris') {
+	$cmd = "sh -c \"$testcmd '\$EXITCODE' = '73'\"";
+	}
+else {
+	$cmd = "$testcmd \"\$EXITCODE\" = \"73\"";
+	}
+local $var2 = { 'flags' => [ ],
+		'conds' => [ [ "?", $cmd ] ],
+	        'action' => '/dev/null' };
+
+# Add after the VIRTUALMIN= line
+&procmail::create_recipe_before($var1, $virtafter);
+&procmail::create_recipe_before($var2, $virtafter);
 }
 
 # startstop_spam([&typestatus])

@@ -66,7 +66,7 @@ limitnoalias=Include alias servers in limits?,1,0-Yes,1-No
 denied_domains=Regular expressions for disallowed domain names,0
 
 line2.1=SSL settings,11
-key_size=Default SSL key size,3,Webmin default (512 bits),6,,bits
+key_size=Default SSL key size,3,Webmin default (2048 bits),6,,bits
 key_tmpl=Template for private key path,3,Default (<tt>~/ssl.key</tt>)
 cert_tmpl=Template for certificate path,3,Default (<tt>~/ssl.cert</tt>)
 ca_tmpl=Template for CA certificate path,3,Default (<tt>~/ssl.ca</tt>)

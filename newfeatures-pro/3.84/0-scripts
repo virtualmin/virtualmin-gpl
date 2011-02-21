@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Redmine script installer to version 1.1.0, and SugarCRM to 6.1.1.
+html=Updated the Redmine script installer to version 1.1.1, Z-push to 1.5.1, DokuWiki to 2010-11-07a, ZenPhoto to 1.4.0.2, Zikula to 1.2.5, Bugzilla to 3.6.4, phpMyFAQ to 2.6.14, Trac to 0.12.2, MediaWiki to 1.16.2, PHPList to 2.11.6, Joomla to 1.6.0, CMS Made Simple to 1.9.3, Wordpress to 3.0.5, Drupal to 7.0, phpMyAdmin to 2.11.11.3 and 3.3.9.2, Django to 1.2.5, Roundcube to 0.5.1, PHPList to 2.10.13, Magento to 1.5.0.1, SMF to 1.1.13, eGroupware to 1.8.001.20110216, and SugarCRM to 6.1.2.
 master=1
 reseller=1
 domain=1

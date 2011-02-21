@@ -1210,16 +1210,19 @@ if ($any) {
 return $any;
 }
 
-# validate_dns(&domain)
+# validate_dns(&domain, [&records])
 # Check for the DNS domain and records file
 sub validate_dns
 {
-local ($d) = @_;
-local ($recs, $file) = &get_domain_dns_records_and_file($d);
-return &text('validate_edns', "<tt>$d->{'dom'}</tt>") if (!$file);
+local ($d, $recs) = @_;
+local $file;
+if (!$recs) {
+	($recs, $file) = &get_domain_dns_records_and_file($d);
+	return &text('validate_edns', "<tt>$d->{'dom'}</tt>") if (!$file);
+	}
 return &text('validate_ednsfile', "<tt>$d->{'dom'}</tt>") if (!@$recs);
 local $absfile;
-if (!$d->{'provision_dns'}) {
+if (!$d->{'provision_dns'} && $file) {
 	$absfile = &bind8::make_chroot(
 				&bind8::absolute_path($file));
 	return &text('validate_ednsfile2', "<tt>$absfile</tt>")
@@ -1233,8 +1236,8 @@ local $ip = $d->{'dns_ip'} || $d->{'ip'};
 foreach my $r (@$recs) {
 	$got{uc($r->{'type'})}++;
 	}
-$got{'SOA'} || return &text('validate_ednssoa', "<tt>$absfile</tt>");
-$got{'A'} || return &text('validate_ednsa', "<tt>$absfile</tt>");
+$got{'SOA'} || return $text{'validate_ednssoa2'};
+$got{'A'} || return $text{'validate_ednsa2'};
 if ($d->{'web'}) {
 	foreach my $n ($d->{'dom'}.'.', 'www.'.$d->{'dom'}.'.') {
 		my @nips = map { $_->{'values'}->[0] }
@@ -1249,12 +1252,14 @@ if ($d->{'web'}) {
 
 # If possible, run named-checkzone
 if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
-    !$d->{'provision_dns'}) {
+    !$d->{'provision_dns'} && !$d->{'dns_submode'}) {
 	local $z = &get_bind_zone($d->{'dom'});
-	local @errs = &bind8::check_zone_records($z);
-	if (@errs) {
-		return &text('validate_ednscheck',
-			join("<br>", map { &html_escape($_) } @errs));
+	if ($z) {
+		local @errs = &bind8::check_zone_records($z);
+		if (@errs) {
+			return &text('validate_ednscheck',
+				join("<br>", map { &html_escape($_) } @errs));
+			}
 		}
 	}
 return undef;
@@ -1462,6 +1467,27 @@ if (&bind8::list_slave_servers()) {
 		}
 	}
 &unlock_file($bindlock);
+return $rv;
+}
+
+# reload_bind_records(&domain)
+# Tell BIND to reload the DNS records in some zone, using rndc / ndc if possible
+sub reload_bind_records
+{
+local ($d) = @_;
+if ($d->{'provision_dns'}) {
+	# Done remotely when records are uploaded
+	return undef;
+	}
+&require_bind();
+if (defined(&bind8::restart_zone)) {
+	local $err = &bind8::restart_zone($d->{'dom'}, $d->{'dns_view'});
+	return undef if (!$err);
+	}
+&push_all_print();
+&set_all_null_print();
+local $rv = &restart_bind($d);
+&pop_all_print();
 return $rv;
 }
 
@@ -1727,21 +1753,6 @@ if (!$bind8::bind_version) {
 		}
 	}
 return ( [ $text{'sysinfo_bind'}, $bind8::bind_version ] );
-}
-
-# links_dns(&domain)
-# Returns a link to the BIND module
-sub links_dns
-{
-local ($d) = @_;
-if (!$d->{'dns_submode'} && !$d->{'dns_provision'}) {
-	return ( { 'mod' => 'bind8',
-		   'desc' => $text{'links_dns'},
-		   'page' => "edit_master.cgi?zone=".&urlize($d->{'dom'}),
-		   'cat' => 'services',
-		 } );
-	}
-return ( );
 }
 
 sub startstop_dns
@@ -2224,14 +2235,37 @@ if ($d->{'provision_dns'}) {
 		push(@recs, $rec);
 		$lnum++;
 		}
+	&set_record_ids(\@recs);
 	return (\@recs, $temp);
 	}
 else {
 	# Find local file
 	local $file = &get_domain_dns_file($d);
 	return ("No zone file found for $d->{'dom'}") if (!$file);
-	local @recs = &bind8::read_zone_file($file, $d->{'dom'});
+	local $rd = $d->{'dns_submode'} ? &get_domain($d->{'subdom'} ||
+						      $d->{'parent'}) : $d;
+	local @recs = &bind8::read_zone_file($file, $rd->{'dom'});
+	&set_record_ids(\@recs);
 	return (\@recs, $file);
+	}
+}
+
+# set_record_ids(&records)
+# Sets the ID field on a bunch of DNS records
+sub set_record_ids
+{
+local ($recs) = @_;
+foreach my $r (@$recs) {
+	if ($r->{'defttl'}) {
+		$r->{'id'} = join("/", '$ttl', $r->{'defttl'});
+		}
+	elsif ($r->{'generate'}) {
+		$r->{'id'} = join("/", '$generate', @{$r->{'generate'}});
+		}
+	else {
+		$r->{'id'} = join("/", $r->{'name'}, $r->{'type'},
+				       @{$r->{'values'}});
+		}
 	}
 }
 
@@ -2369,6 +2403,153 @@ if ($parent && $d->{'dom'} =~ /\.\Q$parent->{'dom'}\E$/i && $parent->{'dns'}) {
 	return 1;
 	}
 return 0;
+}
+
+# can_edit_record(&record, &domain)
+# Returns 1 if some DNS record can be edited.
+sub can_edit_record
+{
+local ($r, $d) = @_;
+if ($r->{'type'} eq 'NS' &&
+    $r->{'name'} eq $d->{'dom'}.'.' &&
+    $d->{'provision_dns'}) {
+	# NS record for domain is automatically set in provisioning mode
+	return 0;
+	}
+elsif ($r->{'type'} eq 'SPF' &&
+       $r->{'name'} eq $d->{'dom'}.'.') {
+	# SPF is edited separately
+	return 0;
+	}
+elsif ($r->{'type'} eq 'TXT' &&
+       $r->{'values'}->[0] =~ /^(t=|k=)/) {
+	# DKIM, managed by Virtualmin
+	return 0;
+	}
+elsif ($r->{'type'} eq 'SOA') {
+	# Always auto-generate
+	return 0;
+	}
+return 1;
+}
+
+# can_delete_record(&record, &domain)
+# Returns 1 if some DNS record can be removed.
+sub can_delete_record
+{
+local ($r, $d) = @_;
+if ($r->{'type'} eq 'NS' &&
+    $r->{'name'} eq $d->{'dom'}.'.' &&
+    $d->{'provision_dns'}) {
+	# NS record for domain is automatically set in provisioning mode
+	return 0;
+	}
+elsif ($r->{'type'} eq 'SOA') {
+	# Don't allow removal of SOA ever
+	return 0;
+	}
+return 1;
+}
+
+# list_dns_record_types(&domain)
+# Returns a list of hash refs, one per supported record type. Each contains the
+# following keys :
+# type - A, NS, etc..
+# desc - Human-readable description
+# domain - Can be same as domain name
+# values - Array ref of hash refs, with keys :
+#   desc - Human-readable description of this value
+#   regexp - Validation regexp for value
+#   func - Validation function ref for value
+sub list_dns_record_types
+{
+local ($d) = @_;
+return ( { 'type' => 'A',
+	   'desc' => $text{'records_typea'},
+	   'domain' => 1,
+	   'create' => 1,
+	   'values' => [ { 'desc' => $text{'records_valuea'},
+			   'size' => 20,
+			   'func' => sub { &check_ipaddress($_[0]) ? undef :
+						$text{'records_evaluea'} }
+			 },
+		       ],
+	 },
+	 { 'type' => 'AAAA',
+	   'desc' => $text{'records_typeaaaa'},
+	   'domain' => 1,
+	   'create' => 1,
+	   'values' => [ { 'desc' => $text{'records_valueaaaa'},
+			   'size' => 20,
+			   'func' => sub { &check_ip6address($_[0]) ? undef :
+						$text{'records_evalueaaaa'} }
+			 },
+		       ],
+	 },
+	 { 'type' => 'CNAME',
+	   'desc' => $text{'records_typecname'},
+	   'domain' => 0,
+	   'create' => 1,
+	   'values' => [ { 'desc' => $text{'records_valuecname'},
+                           'size' => 40,
+                           'func' => sub { $_[0] =~ /^[a-z0-9\.\_\-]+$/i ?
+					undef : $text{'records_evaluecname'} },
+			   'dot' => 1,
+                         },
+                       ],
+         },
+	 { 'type' => 'NS',
+	   'desc' => $text{'records_typens'},
+	   'domain' => 1,
+	   'create' => 1,
+	   'values' => [ { 'desc' => $text{'records_valuens'},
+                           'size' => 40,
+                           'func' => sub { $_[0] =~ /^[a-z0-9\.\_\-]+$/i ?
+					undef : $text{'records_evaluens'} },
+			   'dot' => 1,
+                         },
+                       ],
+         },
+	 { 'type' => 'MX',
+	   'desc' => $text{'records_typemx'},
+	   'domain' => 1,
+	   'create' => 1,
+	   'values' => [ { 'desc' => $text{'records_valuemx1'},
+                           'size' => 5,
+                           'func' => sub { $_[0] =~ /^\d+$/ ?
+					undef : $text{'records_evaluemx1'} },
+			   'suffix' => $text{'records_valuemx1a'},
+                         },
+		         { 'desc' => $text{'records_valuemx2'},
+                           'size' => 40,
+                           'func' => sub { $_[0] =~ /^[a-z0-9\.\_\-]+$/i ?
+                                        undef : $text{'records_evaluemx2'} },
+			   'dot' => 1,
+                         },
+                       ],
+	 },
+	 { 'type' => 'TXT',
+	   'desc' => $text{'records_typetxt'},
+	   'domain' => 1,
+	   'create' => 1,
+	   'values' => [ { 'desc' => $text{'records_valuetxt'},
+                           'size' => 40,
+			   'regexp' => '\S',
+			   'dot' => 0,
+                         },
+                       ],
+         },
+	 { 'type' => 'SOA',
+	   'desc' => $text{'records_typesoa'},
+	   'domain' => 1,
+	   'create' => 0,
+	 },
+	 { 'type' => 'SPF',
+	   'desc' => $text{'records_typespf'},
+	   'domain' => 1,
+	   'create' => 0,
+	 },
+       );
 }
 
 # obtain_lock_dns(&domain, [named-conf-too])

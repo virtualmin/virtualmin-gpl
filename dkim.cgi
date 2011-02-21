@@ -44,11 +44,28 @@ if ($dkim && $dkim->{'keyfile'} && -r $dkim->{'keyfile'}) {
 		&ui_yesno_radio("newkey", 0));
 	}
 
-# Additional domains to sign for
+# Additional domains to sign for, defaulting to local hostname
+@extra = @{$dkim->{'extra'}};
+if (!@extra && (!$dkim || !$dkim->{'enabled'})) {
+	@extra = &unique(&get_system_hostname(),
+			 &get_system_hostname(1));
+	}
 print &ui_table_row($text{'dkim_extra'},
-	&ui_textarea("extra", join("\n", @{$dkim->{'extra'}}), 10, 60));
+	&ui_textarea("extra", join("\n", @extra), 10, 60));
+
+# Public key and DNS record, for offsite DNS domains
+if ($dkim && $dkim->{'enabled'}) {
+	$records = "_domainkey IN TXT \"t=y; o=-;\"\n";
+	$pubkey = &get_dkim_pubkey($dkim);
+	$records .= $dkim->{'selector'}."._domainkey IN TXT ".
+		    "\"k=rsa; t=y; p=$pubkey\"";
+	print &ui_table_row($text{'dkim_records'},
+		&ui_textarea("records", $records, 4, 60, "off",
+			     undef, "readonly=true"));
+	}
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
+
 
 &ui_print_footer("", $text{'index_return'});

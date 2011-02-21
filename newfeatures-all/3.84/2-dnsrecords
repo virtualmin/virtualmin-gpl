@@ -1,0 +1,6 @@
+desc=DNS records page
+html=A new, simpler page for editing DNS records has been added. This also works when the DNS domain is provisioned remotely.
+master=1
+reseller=1
+owner=1
+link=list_records.cgi?dom=${ID}

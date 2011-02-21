@@ -1,0 +1,4 @@
+desc=Scheduled validation
+html=Added a tab to the Validate Virtual Servers page, for setting up automatic email notification when Virtualmin detects problems with the configuration of any server, or the global configuration.
+master=1
+link=edit_newvalidate.cgi?mode=sched

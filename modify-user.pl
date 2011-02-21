@@ -535,14 +535,14 @@ print "                      [--disable-ftp]\n";
 if ($config{'jail_shell'}) {
 	print "                      [--jail-ftp]\n";
 	}
-print "                      [--add-group group] ...\n";
-print "                      [--del-group group] ...\n";
+print "                      [--add-group group]*\n";
+print "                      [--del-group group]*\n";
 print "                      [--send-update-email]\n";
 if ($config{'spam'}) {
 	print "                      [--no-check-spam | --check-spam]\n";
 	}
-print "                      [--add-forward address] ...\n";
-print "                      [--del-forward address] ...\n";
+print "                      [--add-forward address]*\n";
+print "                      [--del-forward address]*\n";
 print "                      [--local | --no-local]\n";
 print "                      [--autoreply \"messsage\" | --no-autoreply]\n";
 print "                      [--autoreply-start time | --no-autoreply-start]\n";

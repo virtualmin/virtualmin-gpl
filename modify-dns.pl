@@ -267,6 +267,7 @@ foreach $d (@doms) {
 
 	if ($changed || $bumpsoa) {
 		&post_records_change($d, $recs, $file);
+		&reload_bind_records($d);
 		}
 
 	# Add to slave DNS servers

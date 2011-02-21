@@ -96,7 +96,7 @@ print "Associates an existing database with some virtual server.\n";
 print "\n";
 print "virtualmin import-database --domain domain.name\n";
 print "                           --name database-name\n";
-print "                           --type [mysql|postgres]\n";
+print "                           --type mysql|postgres\n";
 exit(1);
 }
 

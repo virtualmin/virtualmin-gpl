@@ -37,13 +37,28 @@ else {
 	}
 $in{'msg'} =~ s/\r//g;
 $in{'msg'} =~ /\S/ || &error($text{'newquotas_emsg'});
-&cron::delete_cron_job($oldjob) if ($oldjob);
+
+# Setup the cron job
+if ($oldjob) {
+	&lock_file(&cron::cron_file($oldjob));
+	&cron::delete_cron_job($oldjob);
+	&unlock_file(&cron::cron_file($oldjob));
+	}
 &cron::create_wrapper($quotas_cron_cmd, $module_name, "quotas.pl");
 if ($in{'sched'}) {
+	&lock_file(&cron::cron_file($job));
 	&cron::create_cron_job($job);
+	&unlock_file(&cron::cron_file($job));
 	}
+
+# Save configuration
+&lock_file($module_config_file);
 $config{'last_check'} = time()+1;	# no need for check.cgi to be run
 &save_module_config();
+&unlock_file($module_config_file);
+&lock_file($user_quota_msg_file);
 &save_quotas_message($in{'msg'});
+&unlock_file($user_quota_msg_file);
+&webmin_log("quotas");
 &redirect("");
 

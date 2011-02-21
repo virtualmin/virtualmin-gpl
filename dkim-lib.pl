@@ -299,11 +299,13 @@ if ($dkim_config) {
 	# Save domains and key file in config
 	&lock_file($dkim_config);
 	&save_debian_dkim_config($dkim_config, 
-		"Domain", "*");
+		"Domain", undef);
 	&save_debian_dkim_config($dkim_config, 
 		"Selector", $dkim->{'selector'});
 	&save_debian_dkim_config($dkim_config, 
 		"KeyFile", $dkim->{'keyfile'});
+	&save_debian_dkim_config($dkim_config,
+                "Syslog", "yes");
 	&unlock_file($dkim_config);
 
 	# Work out mapping file
@@ -672,7 +674,7 @@ if ($dkim_config) {
 	if ($keylist) {
 		# Update key to domain map
 		&save_debian_dkim_config($dkim_config, 
-			"Domain", "*");
+			"Domain", undef);
 		my $selector = $conf->{'Selector'};
 		my $keylist = $conf->{'KeyList'};
 		my $selkeyfile = $keylist;

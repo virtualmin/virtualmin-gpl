@@ -229,7 +229,7 @@ print "                      [--spam-delete | --spam-deliver |\n";
 print "                       --spam-normal | --spam-file file-under-home |\n";
 print "                       --spam-email address | --spam-dest file |\n";
 print "                       --spam-maildir ]\n";
-print "                      [--spam-delete-level N | --spam-no-delete-level]\n";
+print "                      [--spam-delete-level score | --spam-no-delete-level]\n";
 print "                      [--virus-delete |\n";
 print "                       --virus-normal | --virus-file file-under-home |\n";
 print "                       --virus-email address | --virus-dest file\n";

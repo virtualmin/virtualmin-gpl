@@ -320,6 +320,8 @@ foreach my $script (@$scripts) {
 sub fetch_script_files
 {
 local ($d, $ver, $opts, $sinfo, $gotfiles, $nocallback) = @_;
+local %serial;
+&read_env_file($virtualmin_license_file, \%serial);
 
 local $cb = $nocallback ? undef : \&progress_callback;
 local @files = &{$script->{'files_func'}}($d, $ver, $opts, $sinfo);
@@ -338,15 +340,20 @@ foreach my $f (@files) {
 		local @urls;
 		my $temp = &transname($f->{'file'});
 		local $newurl = &convert_osdn_url($f->{'url'});
-		push(@urls, [ $newurl || $f->{'url'}, $f->{'nocache'} ]);
+		push(@urls, [ $newurl || $f->{'url'}, $f->{'nocache'},
+			      $f->{'user'}, $f->{'pass'} ]);
 		local $vurl = "http://$script_download_host:$script_download_port$script_download_dir$f->{'file'}";
 		if ($f->{'virtualmin'}) {
 			# Use Virtualmin site first, for scripts that don't
 			# have a version-specific name
-			unshift(@urls, [ $vurl, $f->{'nocache'} ]);
+			unshift(@urls, [ $vurl, $f->{'nocache'},
+					 $serial{'SerialNumber'},
+					 $serial{'LicenseKey'} ]);
 			}
 		else {
-			push(@urls, [ $vurl, $f->{'nocache'} ]);
+			push(@urls, [ $vurl, $f->{'nocache'},
+				      $serial{'SerialNumber'},
+				      $serial{'LicenseKey'} ]);
 			}
 
 		# Add to URL list attempts with no cache, for cached URLs
@@ -359,14 +366,15 @@ foreach my $f (@files) {
 					$host.":".$port.$page;
 			if (&check_in_http_cache($canonical) &&
 			    !$urlcache->[1]) {
-				push(@urls, [ $urlcache->[0], 1 ]);
+				push(@urls, [ $urlcache->[0], 1,
+					      $urlcache->[2], $urlcache->[3] ]);
 				}
 			}
 
 		# Try each URL
 		local $firsterror;
 		foreach my $urlcache (@urls) {
-			my ($url, $nocache) = @$urlcache;
+			my ($url, $nocache, $user, $pass) = @$urlcache;
 			local $error;
 			$progress_callback_url = $url;
 			local %headers;
@@ -378,14 +386,15 @@ foreach my $f (@files) {
 				my ($host, $port, $page, $ssl) =
 					&parse_http_url($url);
 				&http_download($host, $port, $page, $temp,
-					       \$error, $cb, $ssl, undef, undef,
+					       \$error, $cb, $ssl, $user, $pass,
 					       undef, 0, $nocache,
 					       \%headers);
 				}
 			elsif ($url =~ /^ftp:\/\/([^\/]+)(\/.*)/) {
 				# Via FTP
 				my ($host, $page) = ($1, $2);
-				&ftp_download($host, $page, $temp, \$error,$cb);
+				&ftp_download($host, $page, $temp, \$error,
+					      $cb, $user, $pass);
 				}
 			else {
 				$firsterror ||= &text('scripts_eurl', $url);
@@ -451,6 +460,7 @@ if ($newsuffix) {
 	if ($dleft != 0 && &can_edit_databases()) {
 		# Choose a name ether based on the allowed prefix, or the
 		# default DB name
+		$newdbtype = $d->{'mysql'} ? "mysql" : "postgres";
 		if ($tmpl->{'mysql_suffix'} ne "none") {
 			local $prefix = &substitute_domain_template(
 						$tmpl->{'mysql_suffix'}, $d);
@@ -460,12 +470,12 @@ if ($newsuffix) {
 				# Always use _ as separator
 				$prefix .= "_";
 				}
-			$newdbname = &fix_database_name($prefix.$newsuffix);
+			$newdbname = &fix_database_name($prefix.$newsuffix,
+							$newdbtype);
 			}
 		else {
 			$newdbname = $d->{'db'}."_".$newsuffix;
 			}
-		$newdbtype = $d->{'mysql'} ? "mysql" : "postgres";
 		$newdbdesc = $text{'databases_'.$newdbtype};
 		local ($already) = grep { $_->{'type'} eq $newdbtype &&
 					  $_->{'name'} eq $newdbname } @$dbs;
@@ -940,6 +950,7 @@ foreach my $m (@mods) {
 	# Check if the package is already installed
 	local $iok = 0;
 	local @poss;
+	local $fullphpver = &get_php_version($phpver, $d);
 	if ($software::update_system eq "csw") {
 		@poss = ( "php".$phpver."_".$m );
 		}
@@ -954,6 +965,14 @@ foreach my $m (@mods) {
 		       ($m eq "domxml" || $m eq "dom") && $phpver >= 5) {
 			# On Redhat, the domxml module is in php-domxml
 			push(@poss, "php".$phpver."-xml", "php-xml");
+			}
+		if ($software::update_system eq "yum" &&
+		    $fullphpver =~ /^5\.3/) {
+			# If PHP 5.3 is being used, packages may start with
+			# php53-
+			my @vposs = grep { /^php5-/ } @poss;
+			push(@poss, map { my $p = $_;
+					     $p =~ s/php5/php53/; $p } @vposs);
 			}
 		}
 	foreach my $pkg (@poss) {

@@ -658,8 +658,7 @@ DOMAIN: foreach $d (@$doms) {
 # Add all requested Virtualmin config information
 local $vcount = 0;
 if (@$vbs) {
-	&$first_print(&text('backup_global',
-		      join(", ", map { $text{'backup_v'.$_} } @$vbs)));
+	&$first_print($text{'backup_global'});
 	&$indent_print();
 	if ($homefmt) {
 		# Need to make a backup dir, as we cannot use one of the
@@ -1668,8 +1667,7 @@ if ($ok) {
 
 	# Restore any Virtualmin settings
 	if (@$vbs) {
-		&$first_print(&text('restore_global',
-			      join(", ", map { $text{'backup_v'.$_} } @$vbs)));
+		&$first_print($text{'restore_global2'});
 		&$indent_print();
 		foreach my $v (@$vbs) {
 			local $vfile = "$restoredir/virtualmin_".$v;
@@ -2023,8 +2021,10 @@ foreach my $f (@allfeatures) {
 				$desc = &plugin_call($f, "feature_name");
 				};
 			}
+		local $critical = $f eq "virtualmin-google-analytics" ? 1 : 0;
 		push(@rv, { 'feature' => $f,
 			    'plugin' => 1,
+			    'critical' => $critical,
 			    'desc' => $desc });
 		}
 	}
@@ -2483,6 +2483,12 @@ else {
 sub can_backup_commands
 {
 return &master_admin();
+}
+
+# Returns 1 if the configured backup format supports incremental backups
+sub has_incremental_format
+{
+return $config{'compression'} != 3;
 }
 
 # Returns 1 if tar supports incremental backups
