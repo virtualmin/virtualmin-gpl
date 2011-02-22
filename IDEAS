@@ -45,14 +45,29 @@
 	- https://www.virtualmin.com/node/15663
 	- Can only be completed after 3.82 is out
 
- - Restore option to allocate new ID
-	- Functional test
+ - Clone domain feature
+	- copy and modify
+		- files
+		- users
+		- aliases
+		- DNS records
+		- apache directives
+	- API command
+	- Web UI
+		- Check limits, don't allow cloning of a top-level domain
+		  by domain owner
 	- https://www.virtualmin.com/node/16018
-	- Clone domain?
+	- functional tests
+	- what if it has sub-servers?
+	- GPL version
+	- CHANGELOG
 
  - Allow admin to edit user's procmail rules
 	- http://www.virtualmin.com/node/12330 
 
- - Plugin for APS installation
+ - Plugin for APS (package system) installation
 
  - Move cron jobs to webmincron
+
+ - Allow arbitrary analytics javascript
+	- https://www.virtualmin.com/node/17265

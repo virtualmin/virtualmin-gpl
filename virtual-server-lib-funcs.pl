@@ -14062,6 +14062,103 @@ for(my $i=0; $i<@sp1 || $i<@sp2; $i++) {
 return 0;
 }
 
+# clone_virtual_server(&domain, new-domain, [new-user, [new-password]])
+# Creates a copy of a virtual server, with a new domain name and perhaps
+# username (if top-level). Prints stuff as it progresses. Returns 0 on failure
+# or 1 on success.
+sub clone_virtual_server
+{
+local ($oldd, $newdom, $newuser, $newpass) = @_;
+
+# Create the new domain object, with changes
+&$first_print($text{'clone_object'});
+local $d = { %$oldd };
+local $parent;
+$d->{'id'} = &domain_id();
+$d->{'dom'} = $newdom;
+$d->{'owner'} = "Clone of ".$d->{'owner'};
+if (!$d->{'parent'}) {
+	# Allocate new UID, GID, prefix, username and group name
+	delete($d->{'uid'});
+	delete($d->{'gid'});
+	$d->{'user'} = $newuser;
+	$d->{'group'} = $newuser;
+	if ($newpass) {
+		# XXX mysql encrypted pass?
+		$d->{'pass'} = $newpass;
+		}
+
+	# Re-compute email address
+	$d->{'emailto'} = $d->{'mail'} ? $d->{'user'}.'@'.$d->{'dom'}
+				      : $d->{'user'}.'@'.&get_system_hostname();
+	}
+else {
+	$parent = &get_domain($d->{'parent'});
+	}
+
+# Pick a new home directory and prefix
+$d->{'home'} = &server_home_directory($d, $parent);
+$d->{'prefix'} = &compute_prefix($d->{'dom'}, $d->{'group'}, $parent, 1);
+local $pclash = &get_domain_by("prefix", $d->{'prefix'});
+if ($pclash) {
+	&$second_print(&text('clone_prefixclash',
+			     $d->{'prefix'}, $pclash->{'dom'}));
+	return 0;
+	}
+&$second_print($text{'setup_done'});
+
+# Allocate a new IP if needed
+# XXX
+
+# Allocate a new IPv6 address if needed
+# XXX
+
+# Disable and features that don't support cloning
+&$first_print($text{'clone_clash'});
+foreach my $f (@features) {
+	local $cfunc = "clone_".$f;
+	if ($d->{$f} && !defined(&$cfunc)) {
+		$d->{$f} = 0;
+		}
+	}
+foreach my $f (@plugins) {
+	if ($d->{$f} && !&plugin_defined($f, "feature_clone")) {
+		$d->{$f} = 0;
+		}
+	}
+
+# Check for clashes / depends
+local $derr = &virtual_server_depends($d);
+if ($derr) {
+	&$second_print(&text('clone_dependfound', $derr));
+	return 0;
+	}
+local $cerr = &virtual_server_clashes($d);
+if ($cerr) {
+	&$second_print(&text('clone_clashfound', $cerr));
+	return 0;
+	}
+&$second_print($text{'setup_done'});
+
+# Create it
+&$first_print($text{'clone_create'});
+&$indent_print();
+local $err = &create_virtual_server($d, $parent,
+				    $parent ? $parent->{'user'} : undef);
+&$outdent_print();
+if ($err) {
+	&$second_print(&text('clone_createfailed', $err));
+	return 0;
+	}
+&$second_print($text{'setup_done'});
+
+# Copy across features
+# XXX
+
+&run_post_actions();
+return 1;
+}
+
 # load_plugin_libraries([plugin, ...])
 # Call foreign_require on some or all plugins, just once
 sub load_plugin_libraries
