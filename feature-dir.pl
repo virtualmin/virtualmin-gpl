@@ -260,11 +260,12 @@ if (defined(&set_php_wrappers_writable)) {
 	}
 if ($err) {
 	&$second_print(&text('clone_edir', &html_escape($err)));
+	return 0;
 	}
 else {
 	&$second_print($text{'setup_done'});
+	return 1;
 	}
-return 1;
 }
 
 # validate_dir(&domain)
