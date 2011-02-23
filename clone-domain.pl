@@ -52,8 +52,11 @@ $newdomain || usage("Missing --newdomain flag");
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist.");
 if (!$d->{'parent'}) {
-	$newuser || &usage("The --newuser flag is required when cloning ".
-			   "a top-level virtual server");
+	if (!$newuser) {
+		($newuser, $try1, $try2) = &unixuser_name($newdomain);
+		$newuser || &usage("No free new username could be found - use ".
+				   "the --newuser flag to specify one");
+		}
 	}
 else {
 	$newuser && &usage("The --newuser flag makes no sense when cloning ".

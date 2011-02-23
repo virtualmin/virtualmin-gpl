@@ -380,6 +380,50 @@ else {
 &register_post_action(\&restart_bind, $_[0]);
 }
 
+# clone_dns(&domain, &old-domain)
+# Copy all DNS records to a new domain
+sub clone_dns
+{
+local ($d, $oldd) = @_;
+&$first_print($text{'clone_dns'});
+if ($d->{'dns_submode'}) {
+	&$second_print($text{'clone_dnssub'});
+	return 0;
+	}
+local ($orecs, $ofile) = &get_domain_dns_records_and_file($oldd);
+local ($recs, $file) = &get_domain_dns_records_and_file($d);
+if (!$orecs) {
+	&$second_print($text{'clone_dnsold'});
+	return 0;
+	}
+if (!$recs) {
+	&$second_print($text{'clone_dnsnew'});
+	return 0;
+	}
+&obtain_lock_dns($d);
+
+# Copy over the records file
+local $absfile = &bind8::make_chroot($file);
+local $absofile = &bind8::make_chroot($ofile);
+&copy_source_dest($absofile, $absfile);
+$recs = [ &bind8::read_zone_file($file, $d->{'dom'}) ];
+&modify_records_domain_name($recs, $file, $oldd->{'dom'}, $d->{'dom'});
+local $oldip = $oldd->{'dns_ip'} || $oldd->{'ip'};
+local $newip = $d->{'dns_ip'} || $d->{'ip'};
+if ($oldip ne $newip) {
+	&modify_records_ip_address($recs, $file, $oldip, $newip);
+	}
+if ($d->{'virt6'} && $d->{'ip6'} ne $oldd->{'ip6'}) {
+	&modify_records_ip_address($recs, $file, $oldd->{'ip6'}, $d->{'ip6'});
+	}
+
+&post_records_change($d, $recs, $file);
+&release_lock_dns($d);
+&register_post_action(\&restart_bind, $_[0]);
+&$second_print($text{'setup_done'});
+return 1;
+}
+
 # create_zone_on_slaves(&domain, space-separate-slave-list)
 # Create a zone on all specified slaves, and updates the dns_slave key.
 # May print messages.
@@ -1665,6 +1709,7 @@ sub modify_records_domain_name
 {
 local ($recs, $fn, $olddom, $newdom) = @_;
 foreach my $r (@$recs) {
+	next if (!$r->{'name'});	# TTL or generator
 	if ($r->{'name'} eq $olddom.".") {
 		$r->{'name'} = $newdom.".";
 		}

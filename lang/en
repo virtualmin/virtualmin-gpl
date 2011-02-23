@@ -5514,5 +5514,9 @@ clone_failed=.. cloning failed!
 clone_unix=Copying cron jobs and resource limits ..
 clone_dir=Copying home directory contents ..
 clone_edir=.. copy failed : $1
+clone_dns=Copying DNS records ..
+clone_dnsold=.. source DNS zone not found!
+clone_dnsnew=.. destination DNS zone not found!
+clone_dnssub=.. not required for sub-domains
 
 __norefs=1
