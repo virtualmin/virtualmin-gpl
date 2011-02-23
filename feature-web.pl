@@ -388,6 +388,41 @@ if (&is_empty($vhost->{'file'})) {
 	}
 }
 
+# clone_dns(&domain, &old-domain)
+# Copy all Apache directives to a new domain
+sub clone_web
+{
+local ($d, $oldd) = @_;
+&$first_print($text{'clone_web'});
+if ($d->{'alias_mode'}) {
+	# No copying needed for web alias domains
+	&$second_print($text{'clone_webalias'});
+	return 1;
+	}
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+local ($ovirt, $ovconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+if (!$ovirt) {
+	&$second_print($text{'clone_webold'});
+	return 0;
+	}
+if (!$virt) {
+	&$second_print($text{'clone_webnew'});
+	return 0;
+	}
+&obtain_lock_web($d);
+
+# Splice across directives
+# XXX
+
+# Modify home directory, domain name and IP address
+# XXX
+
+&release_lock_web($d);
+&register_post_action(\&restart_apache);
+&$second_print($text{'setup_done'});
+return 1;
+}
+
 # is_empty(&lref|file)
 sub is_empty
 {

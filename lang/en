@@ -5518,5 +5518,9 @@ clone_dns=Copying DNS records ..
 clone_dnsold=.. source DNS zone not found!
 clone_dnsnew=.. destination DNS zone not found!
 clone_dnssub=.. not required for sub-domains
+clone_web=Copying Apache directives ..
+clone_webalias=.. not required for alias servers
+clone_webold=.. source Apache configuration not found!
+clone_webnew=.. destination Apache configuration not found!
 
 __norefs=1
