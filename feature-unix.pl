@@ -376,6 +376,29 @@ if (!$_[0]->{'parent'}) {
 &update_domain_owners_group(undef, $_[0]);
 }
 
+# clone_unix(&domain, &src-domain)
+# Copy crontab for a Unix user to a new cloned domain
+sub clone_unix
+{
+local ($d, $oldd) = @_;
+&$first_print($text{'clone_unix'});
+&obtain_lock_unix($d);
+&obtain_lock_cron($d);
+
+# Copy cron jobs, adjust paths
+&copy_unix_cron_jobs($d->{'user'}, $oldd->{'user'});
+
+# Copy resource limits
+if (defined(&supports_resource_limits) && &supports_resource_limits()) {
+	local $olimits = &get_domain_resource_limits($oldd);
+	&save_domain_resource_limits($d, $olimits);
+	}
+
+&release_lock_cron($d);
+&release_lock_unix($d);
+&$second_print($text{'setup_done'});
+}
+
 # check_warnings_unix(&domain, &old-domain)
 # Check if quota is being lowered below what is actually being used
 sub check_warnings_unix

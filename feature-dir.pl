@@ -240,6 +240,33 @@ if (-d $_[0]->{'home'} && $_[0]->{'home'} ne "/") {
 	}
 }
 
+# clone_dir(&domain, &src-domain)
+# Copy home directory contents to a new cloned domain
+sub clone_dir
+{
+local ($d, $oldd) = @_;
+&$first_print($text{'clone_dir'});
+if (defined(&set_php_wrappers_writable)) {
+	&set_php_wrappers_writable($d, 1);
+	}
+local $err = &backquote_logged(
+	       "cd ".quotemeta($oldd->{'home'})." && ".
+	       "tar cf - . | ".
+	       "(cd ".quotemeta($d->{'home'})." && ".
+	       " tar xpf -) 2>&1");
+&set_home_ownership($d);
+if (defined(&set_php_wrappers_writable)) {
+	&set_php_wrappers_writable($d, 0);
+	}
+if ($err) {
+	&$second_print(&text('clone_edir', &html_escape($err)));
+	}
+else {
+	&$second_print($text{'setup_done'});
+	}
+return 1;
+}
+
 # validate_dir(&domain)
 # Returns an error message if the directory is missing, or has the wrong
 # ownership

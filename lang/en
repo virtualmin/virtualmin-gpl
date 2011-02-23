@@ -5511,5 +5511,8 @@ clone_prefixclash=.. prefix $1 is already in use by virtual server $2
 clone_doing=Cloning virtual server $1 to $2 ..
 clone_doing2=Cloning virtual server $1 to $2 with username $3 ..
 clone_failed=.. cloning failed!
+clone_unix=Copying cron jobs and resource limits ..
+clone_dir=Copying home directory contents ..
+clone_edir=.. copy failed : $1
 
 __norefs=1

@@ -2053,10 +2053,27 @@ foreach my $j (@jobs) {
 		$cronfile ||= &cron::cron_file($j);
 		&lock_file($cronfile);
 		$j->{'user'} = $username;
-		&change_cron_job($j);
+		&cron::change_cron_job($j);
 		}
 	}
 &unlock_file($cronfile) if ($cronfile);
+}
+
+# copy_unix_cron_jobs(username, oldusername)
+# Duplicate all cron jobs for some domain user
+sub copy_unix_cron_jobs
+{
+local ($username, $oldusername) = @_;
+return if ($username eq $oldusername);
+&foreign_require("cron", "cron-lib.pl");
+local @jobs = &cron::list_cron_jobs();
+foreach my $j (@jobs) {
+	if ($j->{'user'} eq $oldusername) {
+		local $newj = { %$j };
+		$newj->{'user'} = $username;
+		&cron::create_cron_job($newj);
+		}
+	}
 }
 
 # validate_user(&domain, &user, [&olduser])
@@ -6127,7 +6144,6 @@ if ($db eq "test" || $db eq "mysql" || $db =~ /^template/) {
 	# These names are reserved by MySQL and PostgreSQL
 	$db = "db".$db;
 	}
-print STDERR "db=$db dbtype=$dbtype\n";
 return $db;
 }
 
@@ -14153,7 +14169,17 @@ if ($err) {
 &$second_print($text{'setup_done'});
 
 # Copy across features
-# XXX
+foreach my $f (@features) {
+	if ($d->{$f}) {
+		local $cfunc = "clone_".$f;
+		&try_function($f, $cfunc, $d, $oldd);
+		}
+	}
+foreach my $f (@plugins) {
+	if ($d->{$f}) {
+		&try_plugin_call($f, "feature_clone", $d, $oldd);
+		}
+	}
 
 &run_post_actions();
 return 1;

@@ -2,7 +2,7 @@
 
 =head1 clone-domain.pl
 
-Duplicate an existing virtual server with a new name.
+Duplicates an existing virtual server with a new name.
 
 XXX
 
@@ -24,9 +24,7 @@ if (!$module_name) {
 	$< == 0 || die "clone-domain.pl must be run as root";
 	}
 @OLDARGV = @ARGV;
-
-$first_print = \&first_text_print;
-$second_print = \&second_text_print;
+&set_all_text_print();
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -56,6 +54,10 @@ $d || usage("Virtual server $domain does not exist.");
 if (!$d->{'parent'}) {
 	$newuser || &usage("The --newuser flag is required when cloning ".
 			   "a top-level virtual server");
+	}
+else {
+	$newuser && &usage("The --newuser flag makes no sense when cloning ".
+			   "a sub-server");
 	}
 
 # Check for clash with new name
@@ -89,13 +91,12 @@ else {
 sub usage
 {
 print $_[0],"\n\n" if ($_[0]);
-print "Moves a virtual server under a new parent server, or converts it.\n";
-print "into a parent server of its own.\n";
+print "Duplicates an existing virtual server with a new name.\n";
 print "\n";
-print "virtualmin move-domain --domain domain.name\n";
-print "                      [--parent domain.name]\n";
-print "                      [--newuser username]\n";
-print "                      [--newpass password]\n";
+print "virtualmin clone-domain --domain domain.name\n";
+print "                        --newdomain new.name\n";
+print "                       [--newuser name]\n";
+print "                       [--newpass password]\n";
 exit(1);
 }
 
