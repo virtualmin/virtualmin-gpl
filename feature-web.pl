@@ -411,11 +411,38 @@ if (!$virt) {
 	}
 &obtain_lock_web($d);
 
-# Splice across directives
-# XXX
+# Splice across directives, fixing ServerName so that get_apache_virtual works
+local $olref = &read_file_lines($ovirt->{'file'});
+local $lref = &read_file_lines($virt->{'file'});
+local @lines = @$olref[$ovirt->{'line'}+1 .. $ovirt->{'eline'}-1];
+foreach my $l (@lines) {
+	if ($l =~ /^ServerName/) {
+		$l = "ServerName ".$d->{'dom'};
+		}
+	}
+splice(@$lref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1, @lines);
+&flush_file_lines($virt->{'file'});
+undef(@apache::get_config_cache);
+($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 
-# Modify home directory, domain name and IP address
-# XXX
+# Fix home dir
+&modify_web_home_directory($d, $oldd, $virt);
+($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+
+# Fix username in suexec, if needed
+if ($d->{'user'} ne $oldd->{'user'}) {
+	# XXX re-factor
+	}
+
+# Fix domain name in apache config
+&modify_web_domain($d, $oldd, $virt, $vconf, $conf, 0);
+&link_apache_logs($d);
+
+# Update cached public_html and CGI dirs, re-create PHP wrappers with new home
+&find_html_cgi_dirs($d);
+if (defined(&create_php_wrappers)) {
+	&create_php_wrappers($d);
+	}
 
 &release_lock_web($d);
 &register_post_action(\&restart_apache);
@@ -429,16 +456,16 @@ sub is_empty
 local ($lref_or_file) = @_;
 local $lref;
 if (ref($lref_or_file)) {
-	$lref = $lref_or_file;
-	}
+$lref = $lref_or_file;
+}
 else {
-	$lref = &read_file_lines($lref_or_file, 1);
-	}
+$lref = &read_file_lines($lref_or_file, 1);
+}
 foreach my $l (@$lref) {
-	if ($l =~ /\S/) {
-		return 0;
-		}
+if ($l =~ /\S/) {
+	return 0;
 	}
+}
 return 1;
 }
 
@@ -533,12 +560,7 @@ else {
 			&$second_print($text{'delete_noapache'});
 			goto VIRTFAILED;
 			}
-		local $lref = &read_file_lines($virt->{'file'});
-		for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
-			$lref->[$i] =~ s/\Q$_[1]->{'home'}\E/$_[0]->{'home'}/g;
-			}
-		&flush_file_lines($virt->{'file'});
-		undef(@apache::get_config_cache);
+		&modify_web_home_directory($_[0], $_[1], $virt, $vconf, $conf);
 		($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
 						      $_[1]->{'web_port'});
 		$rv++;
@@ -547,31 +569,6 @@ else {
 		# Re-create wrapper scripts, which contain home
 		if (defined(&create_php_wrappers) && !$_[0]->{'alias'}) {
 			&create_php_wrappers($_[0]);
-			}
-
-		# Fix all php.ini files that use old path
-		if (defined(&list_domain_php_inis) && 
-		    &foreign_check("phpini")) {
-			&foreign_require("phpini", "phpini-lib.pl");
-			my $mode = &get_domain_php_mode($d);
-			$mode = "cgi" if ($mode eq "mod_php");
-			foreach my $ini (&list_domain_php_inis($_[0], $mode)) {
-				&lock_file($ini->[0]);
-				my $conf = &phpini::get_config($ini->[0]);
-				my $fixed = 0;
-				foreach my $c (@$conf) {
-					if ($c->{'value'} =~
-					    s/\Q$_[1]->{'home'}/$_[0]->{'home'}/g) {
-						&phpini::save_directive($conf,
-						   $c->{'name'}, $c->{'value'});
-						$fixed++;
-						}
-					}
-				if ($fixed) {
-					&flush_file_lines($ini->[0]);
-					}
-				&unlock_file($ini->[0]);
-				}
 			}
 		&$second_print($text{'setup_done'});
 		}
@@ -761,54 +758,15 @@ else {
 			&$second_print($text{'delete_noapache'});
 			goto VIRTFAILED;
 			}
-		&apache::save_directive("ServerName", [ $_[0]->{'dom'} ],
-					$vconf, $conf);
-		local @sa = map { s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g; $_ }
-				&apache::find_directive("ServerAlias", $vconf);
-		&apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
-
-		# Update log paths
-		foreach my $ld ("ErrorLog", "TransferLog", "CustomLog") {
-			local @ldv = &apache::find_directive($ld, $vconf);
-			next if (!@ldv);
-			foreach my $l (@ldv) {
-				my $oldl = $l;
-				if ($l =~ /\/[^\/]*\Q$_[1]->{'dom'}\E[^\/]*$/ &&
-				    !$_[0]->{'subdom'}) {
-					$l =~ s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g;
-					}
-				if ($l ne $oldl) {
-					# Rename log file too
-					local $wl = &apache::wsplit($l);
-					local $woldl = &apache::wsplit($oldl);
-					&rename_file($woldl->[0], $wl->[0]);
-					}
-				}
-			&apache::save_directive($ld, \@ldv, $vconf, $conf);
-			}
-
-		# Update RewriteCond / RewriteRule / Redirect* directives for
-		# webmail and awstats redirects
-		foreach my $ld ("RewriteCond", "RewriteRule",
-				"Redirect", "RedirectMatch") {
-			local @ldv = &apache::find_directive($ld, $vconf);
-			next if (!@ldv);
-			foreach my $l (@ldv) {
-				$l =~ s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g;
-				}
-			&apache::save_directive($ld, \@ldv, $vconf, $conf);
-			}
-
-		&flush_file_lines();
+		&modify_web_domain($_[0], $_[1], $virt, $vconf, $conf, 1);
 		$rv++;
 
+		# If filename contains domain name, rename the Apache .conf file
 		local $newfile = &get_website_file($_[0]);
 		local $oldfile = &get_website_file($_[1]);
 		if ($virt->{'file'} eq $oldfile &&
 		    $newfile ne $oldfile &&
 		    !-r $newfile) {
-			# Filename contains domain name .. need to re-name
-			# the Apache .conf file
 			&apache::delete_webfile_link($virt->{'file'});
 			&rename_logged($virt->{'file'}, $newfile);
 			&apache::create_webfile_link($newfile);
@@ -3549,6 +3507,92 @@ if ($d->{'logrotate'}) {
 	}
 
 return undef;
+}
+
+# modify_web_home_directory(&domain, &old-domain, &virt, &vconf, &apache-config)
+# Updates all directives that refer to the old home directory, by modifying
+# the Apache config files directly. Also updates PHP config files. Invalidates
+# the Apache config cache.
+sub modify_web_home_directory
+{
+local ($d, $oldd, $virt, $vconf, $conf) = @_;
+local $lref = &read_file_lines($virt->{'file'});
+for(my $i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
+	$lref->[$i] =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
+	}
+&flush_file_lines($virt->{'file'});
+undef(@apache::get_config_cache);
+
+# Fix all php.ini files that use old path
+if (defined(&list_domain_php_inis) && &foreign_check("phpini")) {
+	&foreign_require("phpini", "phpini-lib.pl");
+	my $mode = &get_domain_php_mode($d);
+	$mode = "cgi" if ($mode eq "mod_php");
+	foreach my $ini (&list_domain_php_inis($d, $mode)) {
+		&lock_file($ini->[0]);
+		my $conf = &phpini::get_config($ini->[0]);
+		my $fixed = 0;
+		foreach my $c (@$conf) {
+			if ($c->{'value'} =~
+			    s/\Q$oldd->{'home'}/$d->{'home'}/g) {
+				&phpini::save_directive($conf,
+				   $c->{'name'}, $c->{'value'});
+				$fixed++;
+				}
+			}
+		if ($fixed) {
+			&flush_file_lines($ini->[0]);
+			}
+		&unlock_file($ini->[0]);
+		}
+	}
+}
+
+# modify_web_domain(&domain, &old-domain, &virt, &vconf, &apache-config,
+# 		    [rename-log-files])
+# Update the Apache config for a virtual host to fix the domain name. May also
+# rename actual log files if changed.
+sub modify_web_domain
+{
+local ($d, $oldd, $virt, $vconf, $conf, $rlogs) = @_;
+&apache::save_directive("ServerName", [ $d->{'dom'} ],
+			$vconf, $conf);
+local @sa = map { s/\Q$oldd->{'dom'}\E/$d->{'dom'}/g; $_ }
+		&apache::find_directive("ServerAlias", $vconf);
+&apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
+
+# Update log paths
+foreach my $ld ("ErrorLog", "TransferLog", "CustomLog") {
+	local @ldv = &apache::find_directive($ld, $vconf);
+	next if (!@ldv);
+	foreach my $l (@ldv) {
+		my $oldl = $l;
+		if ($l =~ /\/[^\/]*\Q$oldd->{'dom'}\E[^\/]*$/ &&
+		    !$_[0]->{'subdom'}) {
+			$l =~ s/\Q$oldd->{'dom'}\E/$d->{'dom'}/g;
+			}
+		if ($l ne $oldl && $rlogs) {
+			# Rename log file too
+			local $wl = &apache::wsplit($l);
+			local $woldl = &apache::wsplit($oldl);
+			&rename_file($woldl->[0], $wl->[0]);
+			}
+		}
+	&apache::save_directive($ld, \@ldv, $vconf, $conf);
+	}
+
+# Update RewriteCond / RewriteRule / Redirect* directives for
+# webmail and awstats redirects
+foreach my $ld ("RewriteCond", "RewriteRule",
+		"Redirect", "RedirectMatch") {
+	local @ldv = &apache::find_directive($ld, $vconf);
+	next if (!@ldv);
+	foreach my $l (@ldv) {
+		$l =~ s/\Q$oldd->{'dom'}\E/$d->{'dom'}/g;
+		}
+	&apache::save_directive($ld, \@ldv, $vconf, $conf);
+	}
+&flush_file_lines();
 }
 
 $done_feature_script{'web'} = 1;
