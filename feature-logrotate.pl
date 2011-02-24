@@ -155,21 +155,8 @@ if ($_[0]->{'user'} ne $_[1]->{'user'} ||
 	&$first_print($text{'save_logrotateuser'});
 	local $lconf = &get_logrotate_section($alog);
 	if ($lconf) {
-		local $create = &logrotate::find_value(
-			"create", $lconf->{'members'});
-		if ($create =~ /^(\d+)\s+(\S+)\s+(\S+)$/) {
-			local ($p, $u, $g) = ($1, $2, $3);
-			$u = $_[0]->{'user'} if ($u eq $_[1]->{'user'});
-			$g = $_[0]->{'group'} if ($g eq $_[1]->{'group'});
-			&logrotate::save_directive($lconf, "create",
-				{ 'name' => 'create',
-				  'value' => join(" ", $p, $u, $g) }, "\t");
-			&flush_file_lines($lconf->{'file'});
-			&$second_print($text{'setup_done'});
-			}
-		else {
-			&$second_print($text{'save_nologrotatecreate'});
-			}
+		&modify_user_logrotate($_[0], $_[1], $lconf);
+		&$second_print($text{'setup_done'});
 		}
 	else {
 		&$second_print($text{'setup_nologrotate'});
@@ -201,6 +188,48 @@ else {
 	&$second_print($text{'setup_nologrotate'});
 	}
 &release_lock_logrotate($_[0]);
+}
+
+# clone_logrotate(&domain, &old-domain)
+# Copy logrotate directives to a new domain
+sub clone_logrotate
+{
+local ($d, $oldd) = @_;
+&obtain_lock_logrotate($d);
+&$first_print($text{'clone_logrotate'});
+local $lconf = &get_logrotate_section($d);
+local $olconf = &get_logrotate_section($oldd);
+if (!$olconf) {
+	&$second_print($text{'clone_logrotateold'});
+	return 0;
+	}
+if (!$lconf) {
+	&$second_print($text{'clone_logrotatenew'});
+	return 0;
+	}
+&require_logrotate();
+
+# Splice across the lines
+local $lref = &read_file_lines($lconf->{'file'});
+local $olref = &read_file_lines($olconf->{'file'});
+local @lines = @$olref[$olconf->{'line'}+1 .. $olconf->{'eline'}-1];
+splice(@$lref, $lconf->{'line'}+1,
+       $lconf->{'eline'}-$lconf->{'line'}-1, @lines);
+&flush_file_lines($lconf->{'file'});
+undef($logrotate::get_config_parent_cache);
+undef(%logrotate::get_config_cache);
+undef(%logrotate::get_config_lnum_cache);
+undef(%logrotate::get_config_files_cache);
+
+# Fix username if changed
+if ($d->{'user'} ne $oldd->{'user'}) {
+	local $lconf = &get_logrotate_section($d);
+	&modify_user_logrotate($d, $oldd, $lconf);
+	}
+
+&release_lock_logrotate($d);
+&$second_print($text{'setup_done'});
+return 1;
 }
 
 # validate_logrotate(&domain)
@@ -406,6 +435,23 @@ else {
 return $d->{'web'} && (!$oldd || !$oldd->{'web'}) &&
        !$d->{'alias'} && !$d->{'subdom'} &&
        $config{'logrotate'} == 3;
+}
+
+# modify_user_logrotate(&domain, &old-domain, &logrotate-config)
+# Change the user and group names in a logrotate config
+sub modify_user_logrotate
+{
+local ($d, $oldd, $lconf) = @_;
+local $create = &logrotate::find_value("create", $lconf->{'members'});
+if ($create =~ /^(\d+)\s+(\S+)\s+(\S+)$/) {
+	local ($p, $u, $g) = ($1, $2, $3);
+	$u = $d->{'user'} if ($u eq $oldd->{'user'});
+	$g = $d->{'group'} if ($g eq $oldd->{'group'});
+	&logrotate::save_directive($lconf, "create",
+		{ 'name' => 'create',
+		  'value' => join(" ", $p, $u, $g) }, "\t");
+	&flush_file_lines($lconf->{'file'});
+	}
 }
 
 # Lock the logrotate config files

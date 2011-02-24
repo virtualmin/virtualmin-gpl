@@ -5530,5 +5530,8 @@ clone_mysqlcopy=Copying contents of MySQL databases ..
 clone_mysqlbackup=.. backup of $1 failed : $2
 clone_mysqlbackup=.. restore into $1 failed : $2
 clone_mysqlclash=.. a database named $1 already exists
+clone_logrotate=Copying logrotate options ..
+clone_logrotateold=.. source configuration not found!
+clone_logrotatenew=.. destination configuration not found!
 
 __norefs=1
