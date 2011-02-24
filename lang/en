@@ -5522,5 +5522,13 @@ clone_web=Copying Apache directives ..
 clone_webalias=.. not required for alias servers
 clone_webold=.. source Apache configuration not found!
 clone_webnew=.. destination Apache configuration not found!
+clone_mysql=Re-creating MySQL databases ..
+clone_mysqlprefix=.. could not work out a new name for database $1, as it does not contain the prefix $1
+clone_mysqlcreate=.. creation of database $1 failed
+clone_mysqldone=.. created $1 databases
+clone_mysqlcopy=Copying contents of MySQL databases ..
+clone_mysqlbackup=.. backup of $1 failed : $2
+clone_mysqlbackup=.. restore into $1 failed : $2
+clone_mysqlclash=.. a database named $1 already exists
 
 __norefs=1

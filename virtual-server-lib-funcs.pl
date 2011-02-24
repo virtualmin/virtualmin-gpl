@@ -6125,7 +6125,6 @@ return $db;
 sub fix_database_name
 {
 local ($db, $dbtype) = @_;
-print STDERR "old=$db\n";
 $db = lc($db);
 $db =~ s/[\.\-]/_/g;	# mysql doesn't like . or _
 if (!$dbtype || $dbtype eq "postgres") {
@@ -14099,6 +14098,8 @@ if (!$d->{'parent'}) {
 	delete($d->{'gid'});
 	$d->{'user'} = $newuser;
 	$d->{'group'} = $newuser;
+	delete($d->{'mysql_user'});	# Force re-creation of DB name
+	delete($d->{'postgres_user'});
 	if ($newpass) {
 		# XXX mysql encrypted pass?
 		$d->{'pass'} = $newpass;
@@ -14121,6 +14122,8 @@ if ($pclash) {
 			     $d->{'prefix'}, $pclash->{'dom'}));
 	return 0;
 	}
+$d->{'db'} = &database_name($d);
+$d->{'no_mysql_db'} = 1;
 &$second_print($text{'setup_done'});
 
 # Allocate a new IP if needed
@@ -14180,6 +14183,7 @@ foreach my $f (@plugins) {
 		&try_plugin_call($f, "feature_clone", $d, $oldd);
 		}
 	}
+&save_domain($d);
 
 &run_post_actions();
 return 1;

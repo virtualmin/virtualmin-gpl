@@ -75,11 +75,11 @@ if (!$d->{'parent'}) {
 # Call the clone function
 if ($d->{'parent'}) {
 	&$first_print(&text('clone_doing',
-			    $oldd->{'dom'}, $newdomain));
+			    $d->{'dom'}, $newdomain));
 	}
 else {
 	&$first_print(&text('clone_doing2',
-			    $oldd->{'dom'}, $newdomain, $newuser));
+			    $d->{'dom'}, $newdomain, $newuser));
 	}
 $ok = &clone_virtual_server($d, $newdomain, $newuser, $newpass);
 if ($ok) {

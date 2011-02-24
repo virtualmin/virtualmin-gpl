@@ -387,8 +387,9 @@ sub clone_dns
 local ($d, $oldd) = @_;
 &$first_print($text{'clone_dns'});
 if ($d->{'dns_submode'}) {
+	# Record cloning not supported for DNS sub-domains
 	&$second_print($text{'clone_dnssub'});
-	return 0;
+	return 1;
 	}
 local ($orecs, $ofile) = &get_domain_dns_records_and_file($oldd);
 local ($recs, $file) = &get_domain_dns_records_and_file($d);

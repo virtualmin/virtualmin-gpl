@@ -3428,6 +3428,8 @@ $rename_tests = [
 		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
 		      [ 'mysql' ], [ 'status' ], [ 'spam' ], [ 'virus' ],
 		      [ 'logrotate' ],
+		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
+			( [ 'virtualmin-awstats' ] ) : ( ),
 		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test rename page' ],
 		      @create_args, ],
@@ -3456,6 +3458,12 @@ $rename_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'id-only' ] ],
 	  'save' => 'DOMID',
+	},
+
+	# Validate the domain before
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'all-features' ] ],
 	},
 
 	# Call the rename CGI
