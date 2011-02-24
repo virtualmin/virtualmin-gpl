@@ -431,7 +431,7 @@ undef(@apache::get_config_cache);
 
 # Fix username in suexec, if needed
 if ($d->{'user'} ne $oldd->{'user'}) {
-	# XXX re-factor
+	&modify_web_user_group($d, $oldd, $virt, $vconf, $conf);
 	}
 
 # Fix domain name in apache config
@@ -702,30 +702,10 @@ else {
 		}
 	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 		# Username has changed .. update SuexecUserGroup and User
-		local $suexec = &apache::find_directive_struct(
-			"SuexecUserGroup", $vconf);
-		if ($suexec && ($suexec->{'words'}->[0] eq $_[1]->{'user'} ||
-				$suexec->{'words'}->[0] eq '#'.$_[1]->{'uid'})){
-			&$first_print($text{'save_apache7'});
-			&apache::save_directive("SuexecUserGroup",
-					[ "#$_[0]->{'uid'} #$_[0]->{'ugid'}" ],
-					$vconf, $conf);
-			&flush_file_lines();
-			$rv++;
-			&$second_print($text{'setup_done'});
-			}
-		local $user = &apache::find_directive_struct(
-			"User", $vconf);
-		if ($user && ($user->{'words'}->[0] eq $_[1]->{'user'} ||
-			      $user->{'words'}->[0] eq '#'.$_[1]->{'uid'})) {
-			&$first_print($text{'save_apache7'});
-			&apache::save_directive("User",
-					[ '#'.$_[0]->{'uid'} ],
-					$vconf, $conf);
-			&flush_file_lines();
-			$rv++;
-			&$second_print($text{'setup_done'});
-			}
+		&$first_print($text{'save_apache7'});
+		&modify_web_user_group($_[0], $_[1], $virt, $vconf, $conf);
+		$rv++;
+		&$second_print($text{'setup_done'});
 
 		# Set owner on log files
 		local $web_user = &get_apache_user($_[0]);
@@ -3593,6 +3573,28 @@ foreach my $ld ("RewriteCond", "RewriteRule",
 	&apache::save_directive($ld, \@ldv, $vconf, $conf);
 	}
 &flush_file_lines();
+}
+
+# modify_web_user_group(&domain, &old-domain, &virt, &vconf, &apache-config)
+# Update the Apache config for a virtual host to fix the user and group names
+sub modify_web_user_group
+{
+local ($d, $oldd, $virt, $vconf, $conf) = @_;
+local $suexec = &apache::find_directive_struct("SuexecUserGroup", $vconf);
+if ($suexec && ($suexec->{'words'}->[0] eq $oldd->{'user'} ||
+		$suexec->{'words'}->[0] eq '#'.$oldd->{'uid'})){
+	&apache::save_directive("SuexecUserGroup",
+			[ "#$d->{'uid'} #$d->{'ugid'}" ],
+			$vconf, $conf);
+	&flush_file_lines($virt->{'file'});
+	}
+local $user = &apache::find_directive_struct("User", $vconf);
+if ($user && ($user->{'words'}->[0] eq $oldd->{'user'} ||
+	      $user->{'words'}->[0] eq '#'.$oldd->{'uid'})) {
+	&apache::save_directive("User", [ '#'.$d->{'uid'} ],
+				$vconf, $conf);
+	&flush_file_lines($virt->{'file'});
+	}
 }
 
 $done_feature_script{'web'} = 1;
