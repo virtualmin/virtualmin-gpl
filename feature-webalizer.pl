@@ -324,7 +324,9 @@ if (!$oalog) {
 &obtain_lock_webalizer($d);
 
 # Copy .conf file, change log file path, home directory and domain name
-&copy_source_dest($oalog, $alog);
+local $cfile = &webalizer::config_file_name($alog);
+local $ocfile = &webalizer::config_file_name($oalog);
+&copy_source_dest($ocfile, $cfile);
 local $conf = &webalizer::get_config($alog);
 foreach my $c (@$conf) {
 	if ($c->{'value'} =~ /\Q$oalog\E/) {
@@ -340,11 +342,16 @@ foreach my $c (@$conf) {
 	}
 &webalizer::save_directive($conf, "HostName", $d->{'dom'});
 &webalizer::save_directive($conf, "HideReferrer", "*.$d->{'dom'}");
-&flush_file_lines($alog);
+&flush_file_lines($cfile);
 
 # Re-generate password file
-# XXX only if already exists
-# XXX and .htaccess file
+local $stats = &webalizer_stats_dir($d);
+local $htaccess_file = "$stats/.htaccess";
+local $passwd_file = "$d->{'home'}/.stats-htpasswd";
+if (-r $htaccess_file) {
+	&create_webalizer_htaccess($d, $htaccess_file, $passwd_file);
+	&update_create_htpasswd($d, $passwd_file, $oldd->{'user'});
+	}
 
 &release_lock_webalizer($d);
 &$second_print($text{'setup_done'});
