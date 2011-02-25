@@ -5536,5 +5536,8 @@ clone_logrotatenew=.. destination configuration not found!
 clone_spam=Copying SpamAssassin configuration ..
 clone_mail=Copying email aliases and mailboxes ..
 clone_mailalias=.. not required for alias domains
+clone_webalizer=Copying Webalizer configuration ..
+clone_webalizernewlog=.. source Apache log file not found!
+clone_webalizeroldlog=.. destination Apache log file not found!
 
 __norefs=1
