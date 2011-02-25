@@ -5533,5 +5533,8 @@ clone_mysqlclash=.. a database named $1 already exists
 clone_logrotate=Copying logrotate options ..
 clone_logrotateold=.. source configuration not found!
 clone_logrotatenew=.. destination configuration not found!
+clone_spam=Copying SpamAssassin configuration ..
+clone_mail=Copying email aliases and mailboxes ..
+clone_mailalias=.. not required for alias domains
 
 __norefs=1

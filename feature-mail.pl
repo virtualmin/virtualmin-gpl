@@ -468,6 +468,29 @@ if ($supports_bcc) {
 &release_lock_mail($_[0]);
 }
 
+# clone_mail(&domain, &old-domain)
+# Copy all mail aliases and mailboxes from the old domain to the new one
+sub clone_mail
+{
+local ($d, $oldd) = @_;
+&$first_print($text{'clone_mail'});
+if ($d->{'alias'}) {
+	&$second_print($text{'clone_mailalias'});
+	return 1;
+	}
+&obtain_lock_mail($d);
+
+# Clone all aliases
+# XXX
+
+# Clone all users
+# XXX
+
+&$second_print($text{'setup_done'});
+&release_lock_mail($d);
+return 1;
+}
+
 # modify_mail(&domain, &olddomain)
 # Deal with a change in domain name, UID or home.
 # Note - this may be called even for domains without mail enabled, in order to

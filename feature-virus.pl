@@ -97,6 +97,13 @@ else {
 &release_lock_virus($_[0]);
 }
 
+# clone_virus(&domain, &old-domain)
+# Does nothing, as cloning the spamassassin config clones virus settings too
+sub clone_virus
+{
+return 1;
+}
+
 # copy_clam_wrapper()
 # Copies the clamav wrapper script into place
 sub copy_clam_wrapper
