@@ -612,6 +612,7 @@ if (%dbmap) {
 			}
 		local ($ex, $out) = &mysql::execute_sql_file($db->{'name'},
 							     $temp);
+		&unlink_file($temp);
 		if ($ex) {
 			&$second_print(&text('clone_mysqlbackup',
 					     $db->{'name'}, $out));

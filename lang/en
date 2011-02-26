@@ -5539,5 +5539,13 @@ clone_mailalias=.. not required for alias domains
 clone_webalizer=Copying Webalizer configuration ..
 clone_webalizernewlog=.. source Apache log file not found!
 clone_webalizeroldlog=.. destination Apache log file not found!
+clone_postgres=Re-creating PostgreSQL databases ..
+clone_postgresprefix=.. could not work out a new name for database $1, as it does not contain the prefix $1
+clone_postgrescreate=.. creation of database $1 failed
+clone_postgresdone=.. created $1 databases
+clone_postgrescopy=Copying contents of PostgreSQL databases ..
+clone_postgresbackup=.. backup of $1 failed : $2
+clone_postgresbackup=.. restore into $1 failed : $2
+clone_postgresclash=.. a database named $1 already exists
 
 __norefs=1
