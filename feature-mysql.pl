@@ -570,12 +570,14 @@ local ($d, $oldd) = @_;
 local %dbmap;
 foreach my $db (&domain_databases($oldd, [ 'mysql' ])) {
 	local $newname = $db->{'name'};
+	local $newprefix = &fix_database_name($d->{'prefix'}, 'mysql');
+	local $oldprefix = &fix_database_name($oldd->{'prefix'}, 'mysql');
 	if ($newname eq $oldd->{'db'}) {
 		$newname = $d->{'db'};
 		}
-	elsif ($newname !~ s/\Q$oldd->{'prefix'}\E/$d->{'prefix'}/) {
+	elsif ($newname !~ s/\Q$oldprefix\E/$newprefix/) {
 		&$second_print(&text('clone_mysqlprefix', $newname,
-				     $oldd->{'prefix'}, $d->{'prefix'}));
+				     $oldprefix, $newprefix));
 		next;
 		}
 	if (&check_mysql_database_clash($d, $newname)) {
