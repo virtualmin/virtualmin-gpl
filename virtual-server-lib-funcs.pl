@@ -14100,6 +14100,7 @@ local ($oldd, $newdom, $newuser, $newpass) = @_;
 &$first_print($text{'clone_object'});
 local $d = { %$oldd };
 local $parent;
+local $tmpl = &get_template($d->{'template'});
 $d->{'id'} = &domain_id();
 $d->{'dom'} = $newdom;
 $d->{'owner'} = "Clone of ".$d->{'owner'};
@@ -14141,7 +14142,22 @@ $d->{'no_mysql_db'} = 1;
 # XXX
 
 # Allocate a new IPv6 address if needed
-# XXX
+if ($oldd->{'virt6'}) {
+	&$first_print($text{'clone_virt6'});
+	if ($tmpl->{'ranges6'} eq 'none') {
+		&$second_print($text{'clone_virt6range'});
+		return 0;
+		}
+	local ($ip6, $netmask6) = &free_ip6_address($tmpl);
+	if (!$ip6) {
+		&$second_print($text{'clone_virt6alloc'});
+		return 0;
+		}
+	$d->{'ip6'} = $ip6;
+	$d->{'netmask6'} = $netmask6;
+	$d->{'virt6already'} = 0;
+	&$second_print(&text('clone_virt6done', $ip6));
+	}
 
 # Disable and features that don't support cloning
 &$first_print($text{'clone_clash'});

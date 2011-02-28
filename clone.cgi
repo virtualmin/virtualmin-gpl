@@ -57,6 +57,6 @@ if (defined(&theme_post_save_domain) && $clone) {
 	}
 
 &ui_print_footer(&domain_footer_link($d),
-        "", $text{'index_return'});
+        	 "", $text{'index_return'});
 
 

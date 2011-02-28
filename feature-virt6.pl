@@ -110,6 +110,14 @@ if ($config{'dns'} && !$d->{'provision_dns'}) {
 	}
 }
 
+# clone_virt6(&domain, &old-domain)
+# No need to do anything here, as an IP address doesn't have any settings that
+# need copying
+sub clone_virt6
+{
+return 1;
+}
+
 # validate_virt6(&domain)
 # Check for boot-time and active IP6 network interfaces
 sub validate_virt6
