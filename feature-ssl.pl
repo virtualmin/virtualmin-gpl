@@ -490,6 +490,18 @@ local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
 					    $d->{'web_sslport'});
 return &text('validate_essl', "<tt>$d->{'dom'}</tt>") if (!$virt);
 
+# Check IP addresses
+if ($d->{'virt'}) {
+	local $ipp = $d->{'ip'}.":".$d->{'web_port'};
+	&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
+		return &text('validate_ewebip', $ipp);
+	}
+if ($d->{'virt6'}) {
+	local $ipp = "[".$d->{'ip6'}."]:".$d->{'web_port'};
+	&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
+		return &text('validate_ewebip6', $ipp);
+	}
+
 # Make sure cert file exists
 local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
 if (!$cert) {

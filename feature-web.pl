@@ -802,6 +802,18 @@ else {
 						    $d->{'web_port'});
 	return &text('validate_eweb', "<tt>$d->{'dom'}</tt>") if (!$virt);
 
+	# Check IP addresses
+	if ($d->{'virt'}) {
+		local $ipp = $d->{'ip'}.":".$d->{'web_port'};
+		&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
+			return &text('validate_ewebip', $ipp);
+		}
+	if ($d->{'virt6'}) {
+		local $ipp = "[".$d->{'ip6'}."]:".$d->{'web_port'};
+		&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
+			return &text('validate_ewebip6', $ipp);
+		}
+
 	# If using php via CGI or fcgi, check for wrappers
 	if (defined(&get_domain_php_mode)) {
 		local $mode = &get_domain_php_mode($d);
