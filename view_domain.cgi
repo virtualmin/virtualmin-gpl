@@ -201,11 +201,11 @@ else {
 				     "feature", 0);
 	@grid = ( );
 	$i = 0;
-	foreach $f (@features, &list_feature_plugins()) {
-		if ($d->{$f}) {
-			local $txt = $text{'feature_'.$f};
-			push(@grid, $txt);
-			}
+	foreach $f (@features) {
+		push(@grid, $text{'feature_'.$f}) if ($d->{$f});
+		}
+	foreach $f (&list_feature_plugins()) {
+		push(@grid, &plugin_call($f, "feature_label", 1)) if ($d->{$f});
 		}
 	$featmsg .= &ui_grid_table(\@grid, 2, 100,
 				   [ "width=30%", "width=70%" ]);
