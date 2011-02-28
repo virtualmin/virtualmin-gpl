@@ -49,7 +49,6 @@
 	- copy and modify
 		- users
 		- aliases
-		- proftpd directives
 	- https://www.virtualmin.com/node/16018
 	- functional tests
 	- what if it has sub-servers?
