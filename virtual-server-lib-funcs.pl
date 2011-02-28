@@ -9980,6 +9980,17 @@ if (&can_move_domain($d) && !$d->{'alias'} && !$d->{'subdom'}) {
 		  });
 	}
 
+if ($d->{'parent'} && &can_create_sub_servers() ||
+    !$d->{'parent'} && &can_create_master_servers()) {
+	# Clone server
+	push(@rv, { 'page' => 'clone_form.cgi',
+		    'title' => $text{'edit_clone'},
+		    'desc' => $text{'edit_clonedesc'},
+		    'cat' => 'server',
+		    'icon' => 'arrow_right',
+		  });
+	}
+
 if (&can_config_domain($d) && $d->{'subdom'}) {
 	# Turn sub-domain into sub-server
 	push(@rv, { 'page' => 'unsub.cgi',
