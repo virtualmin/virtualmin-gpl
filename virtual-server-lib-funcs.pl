@@ -14138,11 +14138,26 @@ $d->{'db'} = &database_name($d);
 $d->{'no_mysql_db'} = 1;
 &$second_print($text{'setup_done'});
 
-# Allocate a new IP if needed
-# XXX
+# Allocate a new IPv4 address if needed
+if ($d->{'virt'}) {
+	&$first_print($text{'clone_virt'});
+	if ($tmpl->{'ranges'} eq 'none') {
+		&$second_print($text{'clone_virtrange'});
+		return 0;
+		}
+	local ($ip, $netmask) = &free_ip_address($tmpl);
+	if (!$ip) {
+		&$second_print($text{'clone_virtalloc'});
+		return 0;
+		}
+	$d->{'ip'} = $ip;
+	$d->{'netmask'} = $netmask;
+	$d->{'virtalready'} = 0;
+	&$second_print(&text('clone_virtdone', $ip6));
+	}
 
 # Allocate a new IPv6 address if needed
-if ($oldd->{'virt6'}) {
+if ($d->{'virt6'}) {
 	&$first_print($text{'clone_virt6'});
 	if ($tmpl->{'ranges6'} eq 'none') {
 		&$second_print($text{'clone_virt6range'});
