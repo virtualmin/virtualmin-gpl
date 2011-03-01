@@ -480,6 +480,41 @@ if ($_[0]->{'ssl_same'}) {
 &release_lock_web($_[0]);
 }
 
+# clone_ssl(&domain, &old-domain)
+# Since the non-SSL website has already been cloned and modified, just copy
+# its directives and add SSL-specific options.
+sub clone_ssl
+{
+local ($d, $oldd) = @_;
+local $tmpl = &get_template($d->{'template'});
+&$first_print($text{'clone_ssl'});
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+local ($svirt, $svconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_sslport'});
+if (!$virt) {
+	&$second_print($text{'setup_esslcopy'});
+	return 0;
+	}
+if (!$svirt) {
+	&$second_print($text{'clone_webnew'});
+	return 0;
+	}
+
+# Copy across directives, adding the ones for SSL
+&obtain_lock_web($d);
+local $lref = &read_file_lines($virt->{'file'});
+local @ssldirs = &apache_ssl_directives($d, $tmpl);
+local $slref = &read_file_lines($svirt->{'file'});
+splice(@$slref, $svirt->{'line'}+1, $svirt->{'eline'}-$svirt->{'line'}-1,
+       @ssldirs, @$lref[$virt->{'line'}+1 .. $virt->{'eline'}-1]);
+&flush_file_lines($svirt->{'file'});
+undef(@apache::get_config_cache);
+&release_lock_web($d);
+
+&$second_print($text{'setup_done'});
+&register_post_action(\&restart_apache, 1);
+return 1;
+}
+
 # validate_ssl(&domain)
 # Returns an error message if no SSL Apache virtual host exists, or if the
 # cert files are missing.
@@ -492,12 +527,12 @@ return &text('validate_essl', "<tt>$d->{'dom'}</tt>") if (!$virt);
 
 # Check IP addresses
 if ($d->{'virt'}) {
-	local $ipp = $d->{'ip'}.":".$d->{'web_port'};
+	local $ipp = $d->{'ip'}.":".$d->{'web_sslport'};
 	&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
 		return &text('validate_ewebip', $ipp);
 	}
 if ($d->{'virt6'}) {
-	local $ipp = "[".$d->{'ip6'}."]:".$d->{'web_port'};
+	local $ipp = "[".$d->{'ip6'}."]:".$d->{'web_sslport'};
 	&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
 		return &text('validate_ewebip6', $ipp);
 	}

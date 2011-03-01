@@ -51,7 +51,6 @@
 		- aliases
 	- https://www.virtualmin.com/node/16018
 	- functional tests
-	- what if it has sub-servers?
 	- CHANGELOG
 
  - Allow admin to edit user's procmail rules

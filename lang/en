@@ -5569,5 +5569,6 @@ clone_virt6done=.. allocated address $1
 clone_ftp=Copying ProFTPd directives ..
 clone_ftpold=.. source ProFTPd configuration not found!
 clone_ftpnew=.. destination ProFTPd configuration not found!
+clone_ssl=Copying Apache SSL directives ..
 
 __norefs=1

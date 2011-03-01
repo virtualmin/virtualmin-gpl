@@ -438,6 +438,18 @@ if ($d->{'user'} ne $oldd->{'user'}) {
 &modify_web_domain($d, $oldd, $virt, $vconf, $conf, 0);
 &link_apache_logs($d);
 
+# Remove ServerAlias directives not for this domain, such as for an alias of
+# the cloned source
+local @sa = &apache::find_directive("ServerAlias", $vconf);
+local @newsa;
+foreach my $sa (@sa) {
+	push(@newsa, $sa) if ($sa eq $d->{'dom'} || $sa =~ /\.\Q$d->{'dom'}\E/);
+	}
+if (@newsa) {
+	&apache::save_directive("ServerAlias", \@newsa, $vconf, $conf);
+	&flush_file_lines($virt->{'file'});
+	}
+
 # Update cached public_html and CGI dirs, re-create PHP wrappers with new home
 &find_html_cgi_dirs($d);
 if (defined(&create_php_wrappers)) {
