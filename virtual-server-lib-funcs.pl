@@ -14108,8 +14108,10 @@ if (!$d->{'parent'}) {
 	# Allocate new UID, GID, prefix, username and group name
 	delete($d->{'uid'});
 	delete($d->{'gid'});
+	delete($d->{'ugid'});
 	$d->{'user'} = $newuser;
 	$d->{'group'} = $newuser;
+	$d->{'ugroup'} = $newuser;
 	delete($d->{'mysql_user'});	# Force re-creation of DB name
 	delete($d->{'postgres_user'});
 	if ($newpass) {
@@ -14136,6 +14138,11 @@ if ($pclash) {
 	}
 $d->{'db'} = &database_name($d);
 $d->{'no_mysql_db'} = 1;
+
+# Fix any paths that refer to old home, like SSL certs
+foreach my $k (keys %$d) {
+	$d->{$k} =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
+	}
 &$second_print($text{'setup_done'});
 
 # Allocate a new IPv4 address if needed

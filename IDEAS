@@ -49,6 +49,7 @@
 	- copy and modify
 		- users
 		- aliases
+		- fix paths in php.ini?
 	- https://www.virtualmin.com/node/16018
 	- functional tests
 	- CHANGELOG
