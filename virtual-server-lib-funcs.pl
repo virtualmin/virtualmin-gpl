@@ -14137,7 +14137,8 @@ if ($pclash) {
 	return 0;
 	}
 $d->{'db'} = &database_name($d);
-$d->{'no_mysql_db'} = 1;
+$d->{'no_mysql_db'} = 1;	# Don't create DB automatically
+$d->{'no_tmpl_aliases'} = 1;	# Don't create any aliases
 
 # Fix any paths that refer to old home, like SSL certs
 foreach my $k (keys %$d) {

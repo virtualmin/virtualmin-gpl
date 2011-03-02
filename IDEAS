@@ -49,6 +49,7 @@
 	- copy and modify
 		- users
 		- aliases
+			- autoreply files need to be renamed / re-linked
 	- https://www.virtualmin.com/node/16018
 	- functional tests
 	- CHANGELOG

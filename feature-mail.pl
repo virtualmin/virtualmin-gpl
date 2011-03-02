@@ -473,7 +473,7 @@ if ($supports_bcc) {
 sub clone_mail
 {
 local ($d, $oldd) = @_;
-&$first_print($text{'clone_mail'});
+&$first_print($text{'clone_mail1'});
 if ($d->{'alias'}) {
 	&$second_print($text{'clone_mailalias'});
 	return 1;
@@ -481,12 +481,48 @@ if ($d->{'alias'}) {
 &obtain_lock_mail($d);
 
 # Clone all aliases
-# XXX
+local %already = map { $_->{'from'}, $_ } &list_domain_aliases($d, 0);
+local $acount = 0;
+foreach my $a (&list_domain_aliases($oldd, 1)) {
+	local ($mailbox, $dom) = split(/\@/, $a->{'from'});
+	local @to;
+	foreach my $t (@{$a->{'to'}}) {
+		local ($atype, $adest) = &alias_type($t, $a->{'from'});
+		print STDERR "type=$atype dest=$adest t=$t\n";
+		if ($atype == 1) {
+			$t =~ s/\@\Q$oldd->{'dom'}\E$/\@$d->{'dom'}/;
+			}
+		elsif ($atype == 2 || $atype == 3 || $atype == 4 ||
+		       $atype == 5 || $atype == 6) {
+			$t =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
+			if ($atype == 5) {
+				$t =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/g;
+				$t =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/g;
+				}
+			}
+		elsif ($atype == 13) {
+			$t =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/;
+			}
+		print STDERR "newt=$t\n";
+		push(@to, $t);
+		}
+	local $newa = { 'from' => $mailbox."\@".$d->{'dom'},
+			'cmt' => $a->{'cmt'},
+			'to' => \@to };
+	if (!$already{$newa->{'from'}}) {
+		&create_virtuser($newa);
+		$acount++;
+		}
+	}
+&sync_alias_virtuals($d);
+&$second_print(&text('clone_maildone', $acount));
 
 # Clone all users
 # XXX
+&$first_print($text{'clone_mail1'});
+local $ucount = 0;
 
-&$second_print($text{'setup_done'});
+&$second_print(&text('clone_maildone', $ucount));
 &release_lock_mail($d);
 return 1;
 }
