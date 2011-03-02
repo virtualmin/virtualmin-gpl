@@ -48,7 +48,6 @@
  - Clone domain feature
 	- copy and modify
 		- users
-		- don't clone DNS sub-domain records
 	- https://www.virtualmin.com/node/16018
 	- functional tests
 	- CHANGELOG

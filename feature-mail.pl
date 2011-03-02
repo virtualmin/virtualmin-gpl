@@ -488,7 +488,6 @@ foreach my $a (&list_domain_aliases($oldd, 1)) {
 	local @to;
 	foreach my $t (@{$a->{'to'}}) {
 		local ($atype, $adest) = &alias_type($t, $a->{'from'});
-		print STDERR "type=$atype dest=$adest t=$t\n";
 		if ($atype == 1) {
 			$t =~ s/\@\Q$oldd->{'dom'}\E$/\@$d->{'dom'}/;
 			}
@@ -509,7 +508,6 @@ foreach my $a (&list_domain_aliases($oldd, 1)) {
 		elsif ($atype == 13) {
 			$t =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/;
 			}
-		print STDERR "newt=$t\n";
 		push(@to, $t);
 		}
 	local $newa = { 'from' => $mailbox."\@".$d->{'dom'},

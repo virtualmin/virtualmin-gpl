@@ -418,6 +418,19 @@ if ($d->{'virt6'} && $d->{'ip6'} ne $oldd->{'ip6'}) {
 	&modify_records_ip_address($recs, $file, $oldd->{'ip6'}, $d->{'ip6'});
 	}
 
+# Find and delete sub-domain records
+local @sublist = grep { $_->{'id'} ne $oldd->{'id'} &&
+			$_->{'dom'} =~ /\.\Q$oldd->{'dom'}\E$/ }
+		      &list_domains();
+foreach my $r (reverse(@$recs)) {
+	foreach my $sd (@sublist) {
+		if ($r->{'name'} eq $sd->{'dom'}."." ||
+		    $r->{'name'} =~ /\.\Q$sd->{'dom'}\E\.$/) {
+			&bind8::delete_record($file, $r);
+			}
+		}
+	}
+
 &post_records_change($d, $recs, $file);
 &release_lock_dns($d);
 &register_post_action(\&restart_bind, $_[0]);
