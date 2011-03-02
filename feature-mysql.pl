@@ -616,7 +616,7 @@ if (%dbmap) {
 							     $temp);
 		&unlink_file($temp);
 		if ($ex) {
-			&$second_print(&text('clone_mysqlbackup',
+			&$second_print(&text('clone_mysqlrestore',
 					     $db->{'name'}, $out));
 			next;
 			}

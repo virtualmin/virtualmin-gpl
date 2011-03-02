@@ -270,7 +270,7 @@ if (%dbmap) {
 						     0, 0);
 		&unlink_file($temp);
 		if ($err) {
-			&$second_print(&text('clone_postgresbackup',
+			&$second_print(&text('clone_postgresrestore',
 					     $db->{'name'}, $err));
 			next;
 			}
