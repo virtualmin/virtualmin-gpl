@@ -494,6 +494,12 @@ foreach my $a (&list_domain_aliases($oldd, 1)) {
 			}
 		elsif ($atype == 2 || $atype == 3 || $atype == 4 ||
 		       $atype == 5 || $atype == 6) {
+			if ($adest =~ /^\Q$oldd->{'home'}\E\/(\S+)$/) {
+				# Rename the autoreply file too
+				local $newadest = "$d->{'home'}/$1";
+				$newadest =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/g;
+				&rename_logged($adest, $newadest);
+				}
 			$t =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
 			if ($atype == 5) {
 				$t =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/g;
@@ -514,6 +520,7 @@ foreach my $a (&list_domain_aliases($oldd, 1)) {
 		$acount++;
 		}
 	}
+&create_autoreply_alias_links($d);
 &sync_alias_virtuals($d);
 &$second_print(&text('clone_maildone', $acount));
 

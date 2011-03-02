@@ -48,8 +48,7 @@
  - Clone domain feature
 	- copy and modify
 		- users
-		- aliases
-			- autoreply files need to be renamed / re-linked
+		- don't clone DNS sub-domain records
 	- https://www.virtualmin.com/node/16018
 	- functional tests
 	- CHANGELOG
