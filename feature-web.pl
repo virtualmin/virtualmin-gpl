@@ -3533,21 +3533,22 @@ if (defined(&list_domain_php_inis) && &foreign_check("phpini")) {
 	my $mode = &get_domain_php_mode($d);
 	$mode = "cgi" if ($mode eq "mod_php");
 	foreach my $ini (&list_domain_php_inis($d, $mode)) {
-		&lock_file($ini->[0]);
-		my $conf = &phpini::get_config($ini->[0]);
+		&lock_file($ini->[1]);
+		my $conf = &phpini::get_config($ini->[1]);
 		my $fixed = 0;
 		foreach my $c (@$conf) {
-			if ($c->{'value'} =~
-			    s/\Q$oldd->{'home'}/$d->{'home'}/g) {
+			if ($c->{'value'} =~ /\Q$oldd->{'home'}\E/) {
+				$c->{'value'} =~
+				    s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
 				&phpini::save_directive($conf,
 				   $c->{'name'}, $c->{'value'});
 				$fixed++;
 				}
 			}
 		if ($fixed) {
-			&flush_file_lines($ini->[0]);
+			&flush_file_lines($ini->[1]);
 			}
-		&unlock_file($ini->[0]);
+		&unlock_file($ini->[1]);
 		}
 	}
 }

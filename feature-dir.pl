@@ -249,9 +249,47 @@ local ($d, $oldd) = @_;
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable($d, 1);
 	}
+
+# Exclude sub-server directories, logs, SSL certs and .zfs files
+local $xtemp = &transname();
+&open_tempfile(XTEMP, ">$xtemp");
+&print_tempfile(XTEMP, "domains\n");
+&print_tempfile(XTEMP, "./domains\n");
+&print_tempfile(XTEMP, "logs\n");
+&print_tempfile(XTEMP, "./logs\n");
+if ($gconfig{'os_type'} eq 'solaris') {
+	open(FIND, "find ".quotemeta($d->{'home'})." -name .zfs |");
+	while(<FIND>) {
+		s/\r|\n//g;
+		s/^\Q$d->{'home'}\E\///;
+		&print_tempfile(XTEMP, "$_\n");
+		&print_tempfile(XTEMP, "./$_\n");
+		}
+	close(FIND);
+	}
+foreach my $s ('ssl_cert', 'ssl_key', 'ssl_chain', 'ssl_csr', 'ssl_newkey') {
+	my $p = $d->{$s};
+	if ($p) {
+		$p =~ s/^\Q$d->{'home'}\E\///;
+		&print_tempfile(XTEMP, "$p\n");
+		&print_tempfile(XTEMP, "./$p\n");
+		}
+	}
+&close_tempfile(XTEMP);
+
+# Clear any in-memory caches of files under home dir
+if (defined(&list_domain_php_inis) && &foreign_check("phpini")) {
+	my $mode = &get_domain_php_mode($d);
+        $mode = "cgi" if ($mode eq "mod_php");
+	foreach my $ini (&list_domain_php_inis($d, $mode)) {
+		delete($phpini::get_config_cache{$ini->[1]});
+		}
+	}
+
+# Do the copy
 local $err = &backquote_logged(
 	       "cd ".quotemeta($oldd->{'home'})." && ".
-	       "tar cf - . | ".
+	       "tar cfX - $xtemp . | ".
 	       "(cd ".quotemeta($d->{'home'})." && ".
 	       " tar xpf -) 2>&1");
 &set_home_ownership($d);
