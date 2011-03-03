@@ -480,6 +480,76 @@ if ($d->{'alias'}) {
 	}
 &obtain_lock_mail($d);
 
+# Clone all users
+&$first_print($text{'clone_mail2'});
+local $ucount = 0;
+local $hb = "$d->{'home'}/$config{'homes_dir'}";
+foreach my $u (&list_domain_users($oldd, 1, 0, 0, 0)) {
+	local $newu = { %$u };
+	local $as = &guess_append_style($u->{'user'}, $oldd);
+	local $ushort = &remove_userdom($u->{'user'}, $oldd);
+	$newu->{'user'} = &userdom_name($ushort, $d, $as);
+	if ($u->{'uid'} == $d->{'uid'}) {
+		# Web management user, so same UID as new domain
+		$newu->{'uid'} = $d->{'uid'};
+		}
+	else {
+		# Allocate UID
+		local %taken;
+		&build_taken(\%taken);
+		$newu->{'uid'} = &allocate_uid(\%taken);
+		}
+	$newu->{'gid'} = $d->{'gid'};
+	$newu->{'home'} =~ s/^\Q$oldd->{'home'}\E/$d->{'home'}/;
+
+	# Fix email addresses
+	$newu->{'email'} =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/;
+	foreach my $extra (@{$newu->{'extraemail'}}) {
+		$extra =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/;
+		}
+
+	# Fix database access list
+	local @newdbs;
+	foreach my $db (@{$newu->{'dbs'}}) {
+		local $newprefix = &fix_database_name($d->{'prefix'},
+						      $db->{'type'});
+		local $oldprefix = &fix_database_name($oldd->{'prefix'},
+						      $db->{'type'});
+		if ($db->{'name'} eq $oldd->{'db'}) {
+			# Use new main DB
+			$db->{'name'} = $d->{'db'};
+			}
+		elsif ($db->{'name'} !~ s/\Q$oldprefix\E/$newprefix/) {
+			# Cannot fix prefix, so skip
+			next;
+			}
+		push(@newdbs, $db);
+		}
+	$newu->{'dbs'} = \@newdbs;
+
+	# Fix email forwarding destinations
+	# XXX
+
+	# Create the user
+	&create_user($newu, $d);
+
+	# Clone mail files under /var/mail , if needed
+	# XXX
+
+	# Fix home directory permissions
+	if (-d $newu->{'home'} && &is_under_directory($hb, $newu->{'home'})) {
+		&execute_command("chown -R $newu->{'uid'}:$newu->{'gid'} ".
+                       quotemeta($newu->{'home'}));
+		}
+
+	# Copy user cron jobs
+	# XXX
+	}
+
+# XXX copy no-spam flags file
+
+# XXX copy plaintext passwords file
+
 # Clone all aliases
 local %already = map { $_->{'from'}, $_ } &list_domain_aliases($d, 0);
 local $acount = 0;
@@ -521,11 +591,6 @@ foreach my $a (&list_domain_aliases($oldd, 1)) {
 &create_autoreply_alias_links($d);
 &sync_alias_virtuals($d);
 &$second_print(&text('clone_maildone', $acount));
-
-# Clone all users
-# XXX
-&$first_print($text{'clone_mail1'});
-local $ucount = 0;
 
 &$second_print(&text('clone_maildone', $ucount));
 &release_lock_mail($d);

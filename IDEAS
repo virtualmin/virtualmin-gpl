@@ -47,9 +47,10 @@
 
  - Clone domain feature
 	- copy and modify
-		- users
+		- users (more to do)
 	- https://www.virtualmin.com/node/16018
 	- functional tests
+		- test all user details
 	- CHANGELOG
 
  - Allow admin to edit user's procmail rules

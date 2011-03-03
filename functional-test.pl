@@ -4356,7 +4356,7 @@ $clone_tests = [
 	{ 'command' => 'create-database.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'type', 'mysql' ],
-		      [ 'name', $test_domain_user.'_extra' ] ],
+		      [ 'name', $test_domain_db.'_extra' ] ],
 	},
 
 	# Add some aliases
@@ -4372,7 +4372,19 @@ $clone_tests = [
 	},
 
 	# Add a mailbox
-	# XXX
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'extra', 'bob@'.$test_domain ],
+		      [ 'extra', 'fred@'.$test_domain ],
+		      [ 'mysql', $test_domain_db ],
+		      [ 'mysql', $test_domain_db.'_extra' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
 
 	# Switch PHP mode to CGI
 	{ 'command' => 'modify-web.pl',
