@@ -26,6 +26,7 @@ $ENV{'ftp_proxy'} = undef;
 $test_domain = "example.com";	# Never really exists
 $test_rename_domain = "examplerename.com";
 $test_target_domain = "exampletarget.com";
+$test_clone_domain = "exampleclone.com";
 $test_subdomain = "example.net";
 $test_parallel_domain1 = "example1.net";
 $test_parallel_domain2 = "example2.net";
@@ -124,8 +125,11 @@ if ($webmin_proto eq "https") {
 
 ($test_domain_user) = &unixuser_name($test_domain);
 ($test_rename_domain_user) = &unixuser_name($test_rename_domain);
+($test_clone_domain_user) = &unixuser_name($test_clone_domain);
 $prefix = &compute_prefix($test_domain, $test_domain_user, undef, 1);
 $rename_prefix = &compute_prefix($test_rename_domain, $test_rename_domain_user,
+				 undef, 1);
+$clone_prefix = &compute_prefix($test_clone_domain, $test_clone_domain_user,
 				 undef, 1);
 %test_domain = ( 'dom' => $test_domain,
 		 'prefix' => $prefix,
@@ -146,6 +150,12 @@ $test_domain_key = &default_certificate_file(\%test_domain, "key");
 		        'group' => $test_rename_domain_user,
 		        'template' => &get_init_template() );
 $test_rename_full_user = &userdom_name($test_user, \%test_drename_omain);
+%test_clone_domain = ( 'dom' => $test_clone_domain,
+		       'prefix' => $clone_prefix,
+       		       'user' => $test_clone_domain_user,
+		       'group' => $test_clone_domain_user,
+		       'template' => &get_init_template() );
+$test_clone_domain_db = &database_name(\%test_clone_domain);
 
 # Create PostgreSQL password file
 $pg_pass_file = "/tmp/pgpass.txt";
@@ -4328,6 +4338,138 @@ $configbackup_tests = [
 	  'cleanup' => 1 },
 	];
 
+$clone_tests = [
+	# Create a parent domain to be moved
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ], [ 'mail' ],
+		      [ 'mysql' ], [ 'logrotate' ], [ 'webmin' ], [ 'spam' ],
+		      [ 'virus' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test clone page' ],
+		      @create_args, ],
+        },
+
+	# Add an extra database
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'name', $test_domain_user.'_extra' ] ],
+	},
+
+	# Add some aliases
+	{ 'command' => 'create-alias.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'from', $test_alias ],
+		      [ 'to', 'nobody@virtualmin.com' ] ],
+	},
+	{ 'command' => 'create-simple-alias.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'from', $test_alias.'2' ],
+		      [ 'autoreply', 'Test autoreply' ] ],
+	},
+
+	# Add a mailbox
+	# XXX
+
+	# Switch PHP mode to CGI
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'mode', 'cgi' ] ],
+	},
+
+	# Clone it
+	{ 'command' => 'clone-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'newdomain', $test_clone_domain ],
+		      [ 'newuser', $test_clone_domain_user ],
+		      [ 'newpass', 'foo' ] ],
+	},
+
+	# Make sure the domain was created
+	{ 'command' => 'list-domains.pl',
+	  'grep' => "^$test_clone_domain",
+	},
+
+	# Validate everything
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'domain' => $test_clone_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Check mail aliases
+	{ 'command' => 'list-aliases.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^'.$test_alias.'@'.$test_clone_domain,
+		      '^ *nobody@virtualmin.com' ],
+	},
+	{ 'command' => 'list-simple-aliases.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Autoreply message: Test autoreply' ],
+	},
+
+	# Check mailboxes
+	# XXX
+
+	# Test DNS lookup
+	{ 'command' => 'host '.$test_clone_domain,
+	  'grep' => &get_default_ip(),
+	},
+
+	# Test HTTP get
+	{ 'command' => $wget_command.'http://'.$test_clone_domain,
+	  'grep' => 'Test clone page',
+	},
+
+	# Check FTP login
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_clone_domain_user.':foo@localhost/',
+	  'antigrep' => 'Login incorrect',
+	},
+
+	# Check SMTP to admin mailbox
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'to', $test_clone_domain_user.'@'.$test_clone_domain ]],
+	},
+
+	# Check Webmin login
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
+		       $webmin_proto.'://'.$test_clone_domain_user.':foo@localhost:'.
+		       $webmin_port.'/',
+	},
+
+	# Check MySQL login
+	{ 'command' => 'mysql -u '.$test_clone_domain_user.' -pfoo '.$test_clone_domain_db.' -e "select version()"',
+	},
+	{ 'command' => 'mysql -u '.$test_clone_domain_user.' -pfoo '.$test_clone_domain_db.'_extra -e "select version()"',
+	},
+
+	# Check PHP running via CGI
+	{ 'command' => 'echo "<?php system(\'id -a\'); ?>" >~'.
+		       $test_clone_domain_user.'/public_html/test.php',
+	},
+	{ 'command' => $wget_command.'http://'.$test_clone_domain.'/test.php',
+	  'grep' => 'uid=[0-9]+\\('.$test_clone_domain_user.'\\)',
+	},
+
+	# Cleanup the domain being cloned
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+
+	# Cleanup the clone
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'disable' => $disable_tests,
@@ -4365,6 +4507,7 @@ $alltests = { '_config' => $_config_tests,
 	      'overlap' => $overlap_tests,
 	      'redirect' => $redirect_tests,
 	      'admin' => $admin_tests,
+	      'clone' => $clone_tests,
 	    };
 
 # Run selected tests
