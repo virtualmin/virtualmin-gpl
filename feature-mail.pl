@@ -544,11 +544,15 @@ foreach my $u (&list_domain_users($oldd, 1, 0, 0, 0)) {
 
 	# Copy user cron jobs
 	# XXX
+
+	$ucount++;
 	}
 
 # XXX copy no-spam flags file
 
 # XXX copy plaintext passwords file
+
+&$second_print(&text('clone_maildone', $ucount));
 
 # Clone all aliases
 local %already = map { $_->{'from'}, $_ } &list_domain_aliases($d, 0);
@@ -592,7 +596,6 @@ foreach my $a (&list_domain_aliases($oldd, 1)) {
 &sync_alias_virtuals($d);
 &$second_print(&text('clone_maildone', $acount));
 
-&$second_print(&text('clone_maildone', $ucount));
 &release_lock_mail($d);
 return 1;
 }

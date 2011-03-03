@@ -4372,10 +4372,11 @@ $clone_tests = [
 	},
 
 	# Add a mailbox
+	# XXX to address
 	{ 'command' => 'create-user.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'user', $test_user ],
-		      [ 'pass', 'smeg' ],
+		      [ 'pass', 'spod' ],
 		      [ 'desc', 'Test user' ],
 		      [ 'quota', 100*1024 ],
 		      [ 'ftp' ],
@@ -4426,7 +4427,20 @@ $clone_tests = [
 	},
 
 	# Check mailboxes
-	# XXX
+	# XXX to address
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_clone_domain ],
+		      [ 'user' => $test_user ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Password: spod',
+		      'Home quota: 100',
+		      'Databases: '.$test_clone_domain_db.' (mysql), '.
+				    $test_clone_domain_db.'_extra (mysql)',
+		      'Email address: '.$test_user.'@'.$test_clone_domain,
+		      'Extra addresses: bob@'.$test_clone_domain,
+		      'Extra addresses: fred@'.$test_clone_domain,
+	            ],
+	},
 
 	# Test DNS lookup
 	{ 'command' => 'host '.$test_clone_domain,
