@@ -4760,6 +4760,12 @@ if (!@tests) {
 @tests = grep { &indexof($_, @skips) < 0 } @tests;
 @failed_tests = ( );
 foreach $tt (@tests) {
+	# Cleanup backups first
+	&unlink_file($test_backup_file);
+	&unlink_file($test_incremental_backup_file);
+	&unlink_file($test_backup_dir);
+	&unlink_file($test_backup_dir2);
+
 	print "Running $tt tests ..\n";
 	@tts = @{$alltests->{$tt}};
 	$allok = 1;
