@@ -3809,8 +3809,8 @@ $quota_tests = [
 	},
 
 	# Wait for delivery to fail due to lack of quota
-	{ 'command' => 'while [ "`tail -10 /var/log/mail*log | grep '.
-		       'Can.t.create.output`" = "" ]; do '.
+	{ 'command' => 'while [ "`tail -10 /var/log/mail*log | grep -i '.
+		       'can.t.create`" = "" ]; do '.
 		       'sleep 5; done',
 	  'timeout' => 60,
 	},
