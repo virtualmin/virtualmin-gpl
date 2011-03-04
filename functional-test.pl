@@ -66,12 +66,6 @@ $supports_fcgid = defined(&supported_php_modes) &&
 		 [ 'no-slaves' ],
 	  	 [ 'no-secondaries' ] );
 
-# Cleanup backup dir
-system("rm -rf $test_backup_dir");
-system("mkdir -p $test_backup_dir");
-system("rm -rf $test_backup_dir2");
-system("mkdir -p $test_backup_dir2");
-
 # Parse command-line args
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
@@ -4764,7 +4758,9 @@ foreach $tt (@tests) {
 	&unlink_file($test_backup_file);
 	&unlink_file($test_incremental_backup_file);
 	&unlink_file($test_backup_dir);
+	system("mkdir -p $test_backup_dir");
 	&unlink_file($test_backup_dir2);
+	system("mkdir -p $test_backup_dir2");
 
 	print "Running $tt tests ..\n";
 	@tts = @{$alltests->{$tt}};
