@@ -1,0 +1,6 @@
+desc=Virtual server cloning
+html=An existing virtual server can now be duplicated with a new domain name. All web content, DNS records, mailboxes, email aliases and other settings will be duplicated.
+master=1
+reseller=1
+domain=1
+link=clone_form.cgi?dom=${ID}

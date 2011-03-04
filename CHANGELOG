@@ -1278,3 +1278,4 @@ Added the scheduled validation tab to the Validate Virtual Servers page, for set
 Added the get-command API operation to fetch the parameters of another API command, for use by authors of higher-level APIs. Also updated the list-commands operation to make its output more parsable.
 Removed the restriction on database names that start with a number, for MySQL.
 Added $WEBMIN_PORT, $WEBMIN_PROTO, $USERMIN_PORT and $USERMIN_PROTO template variables.
+Added the Clone Virtual Server page to duplicate an existing domain, and the clone-domain API command.

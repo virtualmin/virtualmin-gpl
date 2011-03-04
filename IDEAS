@@ -45,10 +45,6 @@
 	- https://www.virtualmin.com/node/15663
 	- Can only be completed after 3.82 is out
 
- - Clone domain feature
-	- https://www.virtualmin.com/node/16018
-	- CHANGELOG
-
  - Allow admin to edit user's procmail rules
 	- http://www.virtualmin.com/node/12330 
 

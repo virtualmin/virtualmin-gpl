@@ -4340,7 +4340,7 @@ $configbackup_tests = [
 	];
 
 $clone_tests = [
-	# Create a parent domain to be moved
+	# Create a parent domain to be cloned
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'desc', 'Test domain' ],
@@ -4535,6 +4535,182 @@ $clone_tests = [
 	  'cleanup' => 1 },
 	];
 
+$clonesub_tests = [
+	# Create a parent domain to hold the clone
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'mysql' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a sub-server to clone
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'db', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
+		      [ 'spam' ], [ 'virus' ], [ 'ssl' ],
+		      [ 'allocate-ip' ], [ 'allocate-ip6' ],
+                      [ 'style' => 'construction' ],
+                      [ 'content' => 'Test source page' ],
+		      @create_args, ],
+	},
+
+	# Add an extra database
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'type', 'mysql' ],
+		      [ 'name', 'example2_extra' ] ],
+	},
+
+	# Add some aliases
+	{ 'command' => 'create-alias.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'from', $test_alias ],
+		      [ 'to', 'nobody@virtualmin.com' ] ],
+	},
+	{ 'command' => 'create-simple-alias.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'from', $test_alias.'2' ],
+		      [ 'autoreply', 'Test autoreply' ] ],
+	},
+
+	# Add a mailbox
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'spod' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'extra', 'bob@'.$test_subdomain ],
+		      [ 'extra', 'fred@'.$test_subdomain ],
+		      [ 'mysql', 'example2' ],
+		      [ 'mysql', 'example2_extra' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+	{ 'command' => 'modify-user.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'user', $test_user ],
+		      [ 'add-forward', 'jack@'.$test_subdomain ],
+		      [ 'add-forward', 'jill@'.$test_subdomain ],
+		      [ 'autoreply', 'User autoreply' ] ],
+	},
+
+	# Switch PHP mode to CGI
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_subdomain ],
+		      [ 'mode', 'cgi' ] ],
+	},
+
+	# Clone it
+	{ 'command' => 'clone-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'newdomain', $test_clone_domain ] ],
+	},
+
+	# Make sure the domain was created
+	{ 'command' => 'list-domains.pl',
+	  'grep' => "^$test_clone_domain",
+	},
+
+	# Force change web content
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test clone page' ] ],
+	},
+
+	# Validate everything
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'domain' => $test_subdomain ],
+		      [ 'domain' => $test_clone_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Check mail aliases
+	{ 'command' => 'list-aliases.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^'.$test_alias.'@'.$test_clone_domain,
+		      '^ *nobody@virtualmin.com' ],
+	},
+	{ 'command' => 'list-simple-aliases.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Autoreply message: Test autoreply' ],
+	},
+
+	# Check mailboxes
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_clone_domain ],
+		      [ 'user' => $test_user ],
+		      [ 'multiline' ],
+		      [ 'simple-aliases' ] ],
+	  'grep' => [ 'Password: spod',
+		      'Home quota: 100',
+		      'Databases: exampleclone \\(mysql\\), '.
+				 'exampleclone_extra \\(mysql\\)',
+		      'Email address: '.$test_user.'@'.$test_clone_domain,
+		      'Extra addresses: bob@'.$test_clone_domain.
+		      		     ' fred@'.$test_clone_domain,
+		      'Forward: jack@'.$test_clone_domain,
+		      'Forward: jill@'.$test_clone_domain,
+		      'Autoreply message: User autoreply',
+	            ],
+	},
+
+	# Test DNS lookup
+	{ 'command' => 'host '.$test_clone_domain,
+	  'antigrep' => &get_default_ip(),
+	},
+
+	# Test HTTP get
+	{ 'command' => $wget_command.'http://'.$test_clone_domain,
+	  'grep' => 'Test clone page',
+	},
+
+	# Test HTTPS get
+	{ 'command' => $wget_command.'https://'.$test_clone_domain,
+	  'grep' => 'Test clone page',
+	},
+
+	# Test HTTP get to v6 address
+	{ 'command' => $wget_command.' --inet6 http://'.$test_clone_domain,
+	  'grep' => 'Test clone page',
+	},
+
+	# Test HTTP get of old page
+	{ 'command' => $wget_command.'http://'.$test_subdomain,
+	  'grep' => 'Test source page',
+	},
+
+	# Check MySQL login
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg exampleclone -e "select version()"',
+	},
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg exampleclone_extra -e "select version()"',
+	},
+
+	# Check MySQL login by user
+	{ 'command' => 'mysql -u '.$test_full_clone_user.' -pspod exampleclone -e "select version()"',
+	},
+	{ 'command' => 'mysql -u '.$test_full_clone_user.' -pspod exampleclone_extra -e "select version()"',
+	},
+
+	# Cleanup all the domains
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'disable' => $disable_tests,
@@ -4573,6 +4749,7 @@ $alltests = { '_config' => $_config_tests,
 	      'redirect' => $redirect_tests,
 	      'admin' => $admin_tests,
 	      'clone' => $clone_tests,
+	      'clonesub' => $clonesub_tests,
 	    };
 
 # Run selected tests
