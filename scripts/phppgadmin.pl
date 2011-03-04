@@ -205,5 +205,10 @@ sub script_phppgadmin_site
 return 'http://phppgadmin.sourceforge.net/';
 }
 
+sub script_phppgadmin_gpl
+{
+return 1;
+}
+
 1;
 

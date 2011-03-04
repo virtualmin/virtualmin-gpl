@@ -327,5 +327,10 @@ sub script_phpmyadmin_site
 return "http://www.phpmyadmin.net/";
 }
 
+sub script_phpmyadmin_gpl
+{
+return 1;
+}
+
 1;
 

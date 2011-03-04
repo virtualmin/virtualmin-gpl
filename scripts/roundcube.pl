@@ -326,5 +326,10 @@ sub script_roundcube_site
 return 'http://www.roundcube.net/';
 }
 
+sub script_roundcube_gpl
+{
+return 1;
+}
+
 1;
 
