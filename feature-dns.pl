@@ -788,7 +788,7 @@ elsif (!$_[0]->{'virt6'} && $_[1]->{'virt6'}) {
 	# IPv6 disabled
 	&$first_print($text{'save_dnsip6off'});
 	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
-	&remove_ip6_records($_[0], $file);
+	&remove_ip6_records($_[1], $file);
 	&$second_print($text{'setup_done'});
 	$rv++;
 	}
