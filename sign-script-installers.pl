@@ -127,7 +127,7 @@ foreach my $sfile (glob("$dir/*.pl")) {
 # Upload via SSH
 print "Uploading via SCP to $ssh_host ..\n";
 $snames = "{".join(",", @upload)."}.pl*";
-system("su $user -c 'scp $dir/$snames $dir/scripts.txt ${ssh_user}\@${ssh_host}:${ssh_dir}/'");
+system("su $user -c 'scp $dir/$snames $dir/scripts.txt* ${ssh_user}\@${ssh_host}:${ssh_dir}/'");
 if ($?) {
 	print ".. SCP failed!\n";
 	exit(4);
