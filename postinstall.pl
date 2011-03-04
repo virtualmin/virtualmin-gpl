@@ -348,6 +348,9 @@ foreach my $d (@doms) {
 # Update IP list cache
 &build_local_ip_list();
 
+# Clear left-side links caches, in case new features are available
+&clear_links_cache();
+
 # Re-validate all HTML directories
 foreach my $d (@doms) {
 	if ($d->{'web'} && !$d->{'alias'} && !$d->{'subdom'}) {

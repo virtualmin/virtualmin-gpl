@@ -118,6 +118,7 @@ sub script_roundcube_check
 {
 local ($d, $ver, $opts, $upgrade) = @_;
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
+$opts->{'db'} || return "Missing database";
 if (-r "$opts->{'dir'}/config/db.inc.php") {
 	return "RoundCube appears to be already installed in the selected directory";
 	}

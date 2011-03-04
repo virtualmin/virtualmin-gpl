@@ -561,7 +561,7 @@ foreach my $u (&list_domain_users($oldd, 1, 0, 0, 0)) {
 		local $oldmf = &user_mail_file($u);
 		local $newmf = &user_mail_file($newu);
 		local @st = stat($newmf);
-		if (@st) {
+		if (@st && -r $oldmf) {
 			&copy_source_dest($oldmf, $newmf);
 			&set_ownership_permissions(
 				$st[5], $st[5], $st[2]&0777, $newmf);
