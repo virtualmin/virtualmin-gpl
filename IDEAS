@@ -62,7 +62,4 @@
 	- Verify that they can be resolved
 
  - GPL support for limited script installers
-	- phpmyadmin
-	- django
-	- roundcube
 	- CHANGELOG

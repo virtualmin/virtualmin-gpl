@@ -217,7 +217,12 @@ $osdn_website_port = 80;
 
 $script_latest_host = "latest-scripts.virtualmin.com";
 $script_latest_port = 80;
-$script_latest_dir = "/";
+if ($virtualmin_pro) {
+	$script_latest_dir = "/";
+	}
+else {
+	$script_latest_dir = "/gpl/";
+	}
 $script_latest_file = "scripts.txt";
 $script_latest_key = "latest-scripts\@virtualmin.com";
 
