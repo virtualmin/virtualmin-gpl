@@ -4,7 +4,16 @@
 
 Duplicates an existing virtual server with a new name.
 
-XXX
+This command will duplicate an existing virtual server with a new
+domain name. Any web content, DNS records, mailboxes, mail aliases, databases
+and other settings associated with the original domain will be duplicated,
+where possible.
+
+The virtual server to clone is selected with the C<--domain> flag, and the
+new name is set with the C<--newdomain> parameter. When cloning a top-level
+server the C<--newuser> and C<--newpass> flags can be used to set the login
+and password of the new user that will be created as part of the cloning
+process.
 
 =cut
 
