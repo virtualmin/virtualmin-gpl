@@ -2621,13 +2621,12 @@ return &master_admin() || &reseller_admin() || $access{'edit_html'};
 
 sub can_edit_scripts
 {
-return 0 if (!$virtualmin_pro);
 return &master_admin() || &reseller_admin() || $access{'edit_scripts'};
 }
 
 sub can_unsupported_scripts
 {
-return $virtualmin_pro && &master_admin();
+return &master_admin();
 }
 
 sub can_edit_forward
@@ -4851,16 +4850,14 @@ if ($config{'bw_active'}) {
 		&close_tempfile(EMPTY);
 		}
 	}
-if ($virtualmin_pro) {
-	# Script logs
-	if (-d "$script_log_directory/$_[0]->{'id'}") {
-		&execute_command("cd ".quotemeta("$script_log_directory/$_[0]->{'id'}")." && $tar cf ".quotemeta($_[1]."_scripts")." .");
-		}
-	else {
-		# Create an empty file to indicate that we have no scripts
-		&open_tempfile(EMPTY, ">".$_[1]."_scripts");
-		&close_tempfile(EMPTY);
-		}
+# Script logs
+if (-d "$script_log_directory/$_[0]->{'id'}") {
+	&execute_command("cd ".quotemeta("$script_log_directory/$_[0]->{'id'}")." && $tar cf ".quotemeta($_[1]."_scripts")." .");
+	}
+else {
+	# Create an empty file to indicate that we have no scripts
+	&open_tempfile(EMPTY, ">".$_[1]."_scripts");
+	&close_tempfile(EMPTY);
 	}
 
 # Include template, in case the restore target doesn't have it
@@ -5663,7 +5660,7 @@ if (!$_[3]->{'fix'}) {
 		&make_dir($bandwidth_dir, 0700);
 		&copy_source_dest($_[1]."_bw", "$bandwidth_dir/$_[0]->{'id'}");
 		}
-	if ($virtualmin_pro && -r $_[1]."_scripts") {
+	if (-r $_[1]."_scripts") {
 		# Also restore script logs
 		&execute_command("rm -rf ".quotemeta("$script_log_directory/$_[0]->{'id'}"));
 		if (-s $_[1]."_scripts") {
@@ -10391,7 +10388,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    'bw',
    $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'dynip', 'resels',
 		       'reseller', 'notify', 'scripts', 'styles' )
-		   : ( 'fields', 'ips', 'sharedips', 'dynip' ),
+		   : ( 'fields', 'ips', 'sharedips', 'scripts', 'dynip' ),
    'shells',
    $config{'spam'} || $config{'virus'} ? ( 'sv' ) : ( ),
    &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
@@ -12317,8 +12314,8 @@ if (defined(&supports_resource_limits)) {
 			       $text{'check_resok'});
 	}
 
-# Check if software packages work, for pro
-if ($virtualmin_pro && &foreign_check("software")) {
+# Check if software packages work, for script installs
+if (&foreign_check("software")) {
 	&foreign_require("software", "software-lib.pl");
 	if (defined(&software::check_package_system)) {
 		local $err = &software::check_package_system();

@@ -72,8 +72,7 @@ $config{'virt6'} = 1;
 @subdom_features = ( @opt_subdom_features );
 @database_features = ( 'mysql', 'postgres' );
 @template_features = ( 'basic', 'resources', @features, 'virt', 'virtualmin',
-		       'plugins',
-		       $virtualmin_pro ? ( 'scripts' ) : ( ),
+		       'plugins', 'scripts',
 		       'phpwrappers', 'avail' );
 @template_features_effecting_webmin = ( 'web', 'webmin', 'avail' );
 @can_always_features = ( 'dir', 'unix', 'logrotate' );
@@ -155,13 +154,13 @@ $initial_users_dir = "$module_config_directory/initial";
 		'mail', 'backup', 'sched', 'restore', 'sharedips', 'catchall',
 		'html', 'allowedhosts', 'passwd', 'disable', 'delete');
 if (!$virtualmin_pro) {
-	@edit_limits = grep { $_ ne 'scripts' && $_ ne 'html' } @edit_limits;
+	@edit_limits = grep { $_ ne 'html' } @edit_limits;
 	}
 
 @virtualmin_backups = ( 'config', 'templates',
 			$virtualmin_pro ? ( 'resellers' ) : ( ),
-			'email', 'custom',
-			$virtualmin_pro ? ( 'scripts', 'styles' ) : ( ),
+			'email', 'custom', 'scripts',
+			$virtualmin_pro ? ( 'styles' ) : ( ),
 		        'scheds',
 			&has_ftp_chroot() ? ( 'chroot' ) : ( ),
 			'mailserver' );
