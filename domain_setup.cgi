@@ -98,7 +98,7 @@ if (!$parentuser) {
 		defined(getpwnam($user)) && &error($text{'setup_euser'});
 		}
 	&indexof($user, @banned_usernames) < 0 ||
-		&error(&text('setup_eroot', 'root'));
+		&error(&text('setup_eroot', join(" ", @banned_usernames)));
 
 	# Parse mail group name
 	if ($in{'mgroup_def'}) {
