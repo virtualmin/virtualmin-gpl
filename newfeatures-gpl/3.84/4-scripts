@@ -1,0 +1,6 @@
+desc=Script Installers
+html=Virtualmin GPL now supports the script installers feature that used to be part of the Pro version only, but for installing only phpMyAdmin, phpPgAdmin, Roundcube, Squirrelmail and Django.
+master=1
+domain=1
+reseller=1
+link=list_scripts.cgi?dom=${ID}

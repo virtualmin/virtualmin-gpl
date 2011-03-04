@@ -60,6 +60,3 @@
  - Ask for DNS nameservers for new zones in wizard
 	- https://www.virtualmin.com/node/17335
 	- Verify that they can be resolved
-
- - GPL support for limited script installers
-	- CHANGELOG
