@@ -394,6 +394,24 @@ if (defined(&supports_resource_limits) && &supports_resource_limits()) {
 	&save_domain_resource_limits($d, $olimits);
 	}
 
+# Copy mail file
+if (&mail_under_home()) {
+	local $oldmf = &user_mail_file($oldd->{'user'});
+	local $newmf = &user_mail_file($d->{'user'});
+	if (-r $oldmf) {
+		local @st = stat($newmf);
+		&copy_source_dest($oldmf, $newmf);
+		if (@st) {
+			&set_ownership_permissions(
+				$st[5], $st[5], $st[2]&0777, $newmf);
+			}
+		else {
+			&set_ownership_permissions(
+				$d->{'uid'}, $d->{'gid'}, undef, $newmf);
+			}
+		}
+	}
+
 &release_lock_cron($d);
 &release_lock_unix($d);
 &$second_print($text{'setup_done'});
