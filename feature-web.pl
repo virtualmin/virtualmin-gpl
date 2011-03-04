@@ -388,7 +388,7 @@ if (&is_empty($vhost->{'file'})) {
 	}
 }
 
-# clone_dns(&domain, &old-domain)
+# clone_web(&domain, &old-domain)
 # Copy all Apache directives to a new domain
 sub clone_web
 {
@@ -400,7 +400,8 @@ if ($d->{'alias_mode'}) {
 	return 1;
 	}
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-local ($ovirt, $ovconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+local ($ovirt, $ovconf) = &get_apache_virtual($oldd->{'dom'},
+					      $oldd->{'web_port'});
 if (!$ovirt) {
 	&$second_print($text{'clone_webold'});
 	return 0;

@@ -156,6 +156,7 @@ $test_rename_full_user = &userdom_name($test_user, \%test_drename_omain);
 		       'group' => $test_clone_domain_user,
 		       'template' => &get_init_template() );
 $test_clone_domain_db = &database_name(\%test_clone_domain);
+$test_full_clone_user = &userdom_name($test_user, \%test_clone_domain);
 
 # Create PostgreSQL password file
 $pg_pass_file = "/tmp/pgpass.txt";
@@ -4346,9 +4347,10 @@ $clone_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ], [ 'mail' ],
 		      [ 'mysql' ], [ 'logrotate' ], [ 'webmin' ], [ 'spam' ],
-		      [ 'virus' ],
+		      [ 'virus' ], [ 'ssl' ],
+		      [ 'allocate-ip' ], [ 'allocate-ip6' ],
 		      [ 'style' => 'construction' ],
-		      [ 'content' => 'Test clone page' ],
+		      [ 'content' => 'Test source page' ],
 		      @create_args, ],
         },
 
@@ -4372,7 +4374,6 @@ $clone_tests = [
 	},
 
 	# Add a mailbox
-	# XXX to address
 	{ 'command' => 'create-user.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'user', $test_user ],
@@ -4385,6 +4386,13 @@ $clone_tests = [
 		      [ 'mysql', $test_domain_db ],
 		      [ 'mysql', $test_domain_db.'_extra' ],
 		      [ 'mail-quota', 100*1024 ] ],
+	},
+	{ 'command' => 'modify-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'add-forward', 'jack@'.$test_domain ],
+		      [ 'add-forward', 'jill@'.$test_domain ],
+		      [ 'autoreply', 'User autoreply' ] ],
 	},
 
 	# Switch PHP mode to CGI
@@ -4404,6 +4412,13 @@ $clone_tests = [
 	# Make sure the domain was created
 	{ 'command' => 'list-domains.pl',
 	  'grep' => "^$test_clone_domain",
+	},
+
+	# Force change web content
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test clone page' ] ],
 	},
 
 	# Validate everything
@@ -4427,29 +4442,47 @@ $clone_tests = [
 	},
 
 	# Check mailboxes
-	# XXX to address
 	{ 'command' => 'list-users.pl',
 	  'args' => [ [ 'domain' => $test_clone_domain ],
 		      [ 'user' => $test_user ],
-		      [ 'multiline' ] ],
+		      [ 'multiline' ],
+		      [ 'simple-aliases' ] ],
 	  'grep' => [ 'Password: spod',
 		      'Home quota: 100',
-		      'Databases: '.$test_clone_domain_db.' (mysql), '.
-				    $test_clone_domain_db.'_extra (mysql)',
+		      'Databases: '.$test_clone_domain_db.' \\(mysql\\), '.
+				    $test_clone_domain_db.'_extra \\(mysql\\)',
 		      'Email address: '.$test_user.'@'.$test_clone_domain,
-		      'Extra addresses: bob@'.$test_clone_domain,
-		      'Extra addresses: fred@'.$test_clone_domain,
+		      'Extra addresses: bob@'.$test_clone_domain.
+		      		     ' fred@'.$test_clone_domain,
+		      'Forward: jack@'.$test_clone_domain,
+		      'Forward: jill@'.$test_clone_domain,
+		      'Autoreply message: User autoreply',
 	            ],
 	},
 
 	# Test DNS lookup
 	{ 'command' => 'host '.$test_clone_domain,
-	  'grep' => &get_default_ip(),
+	  'antigrep' => &get_default_ip(),
 	},
 
 	# Test HTTP get
 	{ 'command' => $wget_command.'http://'.$test_clone_domain,
 	  'grep' => 'Test clone page',
+	},
+
+	# Test HTTPS get
+	{ 'command' => $wget_command.'https://'.$test_clone_domain,
+	  'grep' => 'Test clone page',
+	},
+
+	# Test HTTP get to v6 address
+	{ 'command' => $wget_command.' --inet6 http://'.$test_clone_domain,
+	  'grep' => 'Test clone page',
+	},
+
+	# Test HTTP get of old page
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test source page',
 	},
 
 	# Check FTP login
@@ -4475,6 +4508,12 @@ $clone_tests = [
 	{ 'command' => 'mysql -u '.$test_clone_domain_user.' -pfoo '.$test_clone_domain_db.' -e "select version()"',
 	},
 	{ 'command' => 'mysql -u '.$test_clone_domain_user.' -pfoo '.$test_clone_domain_db.'_extra -e "select version()"',
+	},
+
+	# Check MySQL login by user
+	{ 'command' => 'mysql -u '.$test_full_clone_user.' -pspod '.$test_clone_domain_db.' -e "select version()"',
+	},
+	{ 'command' => 'mysql -u '.$test_full_clone_user.' -pspod '.$test_clone_domain_db.'_extra -e "select version()"',
 	},
 
 	# Check PHP running via CGI

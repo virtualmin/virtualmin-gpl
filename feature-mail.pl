@@ -473,17 +473,18 @@ if ($supports_bcc) {
 sub clone_mail
 {
 local ($d, $oldd) = @_;
-&$first_print($text{'clone_mail1'});
+&$first_print($text{'clone_mail2'});
 if ($d->{'alias'}) {
 	&$second_print($text{'clone_mailalias'});
 	return 1;
 	}
 &obtain_lock_mail($d);
+&obtain_lock_cron($d);
 
 # Clone all users
-&$first_print($text{'clone_mail2'});
 local $ucount = 0;
 local $hb = "$d->{'home'}/$config{'homes_dir'}";
+local $mail_under_home = &mail_under_home();
 foreach my $u (&list_domain_users($oldd, 1, 0, 0, 0)) {
 	local $newu = { %$u };
 	local $as = &guess_append_style($u->{'user'}, $oldd);
@@ -528,13 +529,44 @@ foreach my $u (&list_domain_users($oldd, 1, 0, 0, 0)) {
 	$newu->{'dbs'} = \@newdbs;
 
 	# Fix email forwarding destinations
-	# XXX
+	foreach my $t (@{$newu->{'to'}}) {
+		local ($atype, $adest) = &alias_type($t, $u->{'user'});
+		if ($atype == 1) {
+			# Change destination to new domain
+			$t =~ s/\@\Q$oldd->{'dom'}\E$/\@$d->{'dom'}/;
+			}
+		elsif ($atype == 2 || $atype == 3 || $atype == 4 ||
+		       $atype == 5 || $atype == 6) {
+			if ($adest =~ /^\Q$oldd->{'home'}\E\/(\S+)$/) {
+				# Rename the autoreply file too
+				local $newadest = "$d->{'home'}/$1";
+				$newadest =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/g;
+				&rename_logged($adest, $newadest);
+				}
+			$t =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
+			if ($atype == 5) {
+				# Change domain name and ID in autoreply files
+				$t =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/g;
+				$t =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/g;
+				}
+			}
+		}
 
 	# Create the user
 	&create_user($newu, $d);
+	&create_mail_file($newu, $d);
 
 	# Clone mail files under /var/mail , if needed
-	# XXX
+	if ($mail_under_home) {
+		local $oldmf = &user_mail_file($u);
+		local $newmf = &user_mail_file($newu);
+		local @st = stat($newmf);
+		if (@st) {
+			&copy_source_dest($oldmf, $newmf);
+			&set_ownership_permissions(
+				$st[5], $st[5], $st[2]&0777, $newmf);
+			}
+		}
 
 	# Fix home directory permissions
 	if (-d $newu->{'home'} && &is_under_directory($hb, $newu->{'home'})) {
@@ -543,18 +575,14 @@ foreach my $u (&list_domain_users($oldd, 1, 0, 0, 0)) {
 		}
 
 	# Copy user cron jobs
-	# XXX
+	&copy_unix_cron_jobs($newu->{'user'}, $u->{'user'});
 
 	$ucount++;
 	}
-
-# XXX copy no-spam flags file
-
-# XXX copy plaintext passwords file
-
 &$second_print(&text('clone_maildone', $ucount));
 
 # Clone all aliases
+&$first_print($text{'clone_mail1'});
 local %already = map { $_->{'from'}, $_ } &list_domain_aliases($d, 0);
 local $acount = 0;
 foreach my $a (&list_domain_aliases($oldd, 1)) {
@@ -575,6 +603,7 @@ foreach my $a (&list_domain_aliases($oldd, 1)) {
 				}
 			$t =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
 			if ($atype == 5) {
+				# Change domain name and ID in autoreply files
 				$t =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/g;
 				$t =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/g;
 				}
@@ -596,6 +625,7 @@ foreach my $a (&list_domain_aliases($oldd, 1)) {
 &sync_alias_virtuals($d);
 &$second_print(&text('clone_maildone', $acount));
 
+&release_lock_cron($d);
 &release_lock_mail($d);
 return 1;
 }

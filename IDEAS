@@ -46,11 +46,7 @@
 	- Can only be completed after 3.82 is out
 
  - Clone domain feature
-	- copy and modify
-		- users (more to do)
 	- https://www.virtualmin.com/node/16018
-	- functional tests
-		- test all user details
 	- CHANGELOG
 
  - Allow admin to edit user's procmail rules
@@ -68,3 +64,8 @@
  - Ask for DNS nameservers for new zones in wizard
 	- https://www.virtualmin.com/node/17335
 	- Verify that they can be resolved
+
+ - GPL support for limited script installers
+	- phpmyadmin
+	- django
+	- roundcube

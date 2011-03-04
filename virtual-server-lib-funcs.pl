@@ -14142,7 +14142,8 @@ $d->{'no_tmpl_aliases'} = 1;	# Don't create any aliases
 
 # Fix any paths that refer to old home, like SSL certs
 foreach my $k (keys %$d) {
-	$d->{$k} =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
+	next if ($k eq "home");	# already fixed
+	$d->{$k} =~ s/\Q$oldd->{'home'}\E\//$d->{'home'}\//g;
 	}
 &$second_print($text{'setup_done'});
 
@@ -14221,8 +14222,12 @@ if ($err) {
 	}
 &$second_print($text{'setup_done'});
 
-# Copy across features
-foreach my $f (@features) {
+# Copy across features, mail last so that user DB association works
+my @clonefeatures = @features;
+if (&indexof("mail", @clonefeatures) >= 0) {
+	@clonefeatures = ( ( grep { $_ ne "mail" } @clonefeatures ), "mail" );
+	}
+foreach my $f (@clonefeatures) {
 	if ($d->{$f}) {
 		local $cfunc = "clone_".$f;
 		&try_function($f, $cfunc, $d, $oldd);
