@@ -135,7 +135,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--style" && $supports_styles) {
 		$stylename = shift(@ARGV);
 		}
-	elsif ($a eq "--content" && $supports_styles) {
+	elsif ($a eq "--content") {
 		$content = shift(@ARGV);
 		}
 	elsif ($a eq "--webmail") {
@@ -168,8 +168,8 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || usage("No domains to modify specified");
 $mode || $rubymode || defined($proxy) || defined($framefwd) ||
-  defined($suexec) || $stylename || defined($children) || $version ||
-  defined($webmail) || defined($matchall) || defined($timeout) ||
+  defined($suexec) || $stylename || $content || defined($children) ||
+  $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
@@ -361,6 +361,12 @@ foreach $d (@doms) {
 		# Apply content style
 		&$first_print(&text('setup_styleing', $style->{'desc'}));
 		&apply_content_style($d, $style, $content);
+		&$second_print($text{'setup_done'});
+		}
+	elsif ($content && !$d->{'alias'}) {
+		# Just create index.html page with content
+		&$first_print($text{'setup_contenting'});
+		&create_index_content($d, $content);
 		&$second_print($text{'setup_done'});
 		}
 

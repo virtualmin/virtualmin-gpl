@@ -564,7 +564,7 @@ else {
 	}
 
 # Validate style
-if ($stylename) {
+if ($stylename && defined(&list_content_styles)) {
 	($style) = grep { $_->{'name'} eq $stylename } &list_content_styles();
 	$style || &usage("Style $stylename does not exist");
 	$content || $style->{'nocontent'} || &usage("--content followed by some initial text for the website must be specified when using --style");
@@ -732,6 +732,12 @@ if ($fwdto) {
 if ($style && $dom{'web'}) {
 	&$first_print(&text('setup_styleing', $style->{'desc'}));
 	&apply_content_style(\%dom, $style, $content);
+	&$second_print($text{'setup_done'});
+	}
+elsif ($content) {
+	# Just create index.html page with content
+	&$first_print($text{'setup_contenting'});
+	&create_index_content(\%dom, $content);
 	&$second_print($text{'setup_done'});
 	}
 

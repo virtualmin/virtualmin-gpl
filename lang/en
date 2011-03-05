@@ -551,6 +551,7 @@ setup_edomainprefix=The domain name does not need to have $1 at the start
 setup_evadddomain=.. vadddomain failed : $1
 setup_fwding=Adding alias to forward all email to $1 ..
 setup_styleing=Applying initial website style '$1' ..
+setup_contenting=Creating initial website index page ..
 setup_domaliases=Adding default mail aliases ..
 setup_noquotainf0=Unlimited server quota cannot be selected, as you have a quota limit of $1 in force.
 setup_noquotainf1=Unlimited server quota cannot be selected, as your reseller has a quota limit of $1 in force.

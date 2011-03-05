@@ -727,6 +727,21 @@ if ($in{"skel_mode"} == 2) {
 	}
 }
 
+# create_index_content(&domain, content)
+# Create an index.html file containing the given text
+sub create_index_content
+{
+local ($d, $content) = @_;
+local $dest = &public_html_dir($d);
+local @indexes = grep { -f $_ } glob("$dest/index.*");
+if (@indexes) {
+	&unlink_file(@indexes);
+	}
+&open_tempfile_as_domain_user($d, DESTOUT, ">$dest/index.html");
+&print_tempfile(DESTOUT, $content);
+&close_tempfile_as_domain_user($d, DESTOUT);
+}
+
 $done_feature_script{'dir'} = 1;
 
 1;
