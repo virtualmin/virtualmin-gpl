@@ -806,6 +806,102 @@ $script_tests = [
 	  'cleanup' => 1 },
 	];
 
+# GPL Script tests
+$gplscript_tests = [
+	# Create a domain for the scripts
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'mysql' ], [ 'dns' ],
+		      @create_args, ],
+        },
+
+	# List all scripts
+	{ 'command' => 'list-available-scripts.pl',
+	  'grep' => 'RoundCube',
+	},
+
+	# Install Wordpress
+	{ 'command' => 'install-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'roundcube' ],
+		      [ 'path', '/roundcube' ],
+		      [ 'db', 'mysql '.$test_domain_db ],
+		      [ 'version', 'latest' ] ],
+	},
+
+	# Check that it works
+	{ 'command' => $wget_command.'http://'.$test_domain.'/roundcube/',
+	  'grep' => 'Welcome to Roundcube Webmail',
+	},
+
+	# Check script list
+	{ 'command' => 'list-scripts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Type: roundcube',
+		      'Directory: /home/'.$test_domain_user.
+			'/public_html/roundcube',
+		      'Database: '.$test_domain_db.' ',
+		      'URL: http://'.$test_domain.'/roundcube',
+		    ],
+	},
+
+	# Un-install
+	{ 'command' => 'delete-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'roundcube' ] ],
+	},
+
+	# Install with it's own DB
+	{ 'command' => 'install-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'roundcube' ],
+		      [ 'path', '/roundcube' ],
+		      [ 'db', 'mysql '.$test_domain_db.'_roundcube' ],
+		      [ 'newdb' ],
+		      [ 'version', 'latest' ] ],
+	},
+
+	# Check that it works with it's own DB
+	{ 'command' => $wget_command.'http://'.$test_domain.'/roundcube/',
+	  'grep' => 'Welcome to Roundcube Webmail',
+	},
+
+	# Check script list
+	{ 'command' => 'list-scripts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Type: roundcube',
+		      'Directory: /home/'.$test_domain_user.
+			'/public_html/roundcube',
+		      'Database: '.$test_domain_db.'_roundcube ',
+		      'URL: http://'.$test_domain.'/roundcube',
+		    ],
+	},
+
+	# Un-install
+	{ 'command' => 'delete-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'roundcube' ] ],
+	},
+
+	# Make sure the DB is gone
+	{ 'command' => 'list-databases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => '^'.$test_domain_db.'_roundcube',
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
+
+
 # Database tests
 $database_tests = [
 	# Create a domain for the databases
@@ -2422,20 +2518,24 @@ $prepost_tests = [
 	},
 	{ 'command' => 'rm -f /tmp/prepost-test.out' },
 
-	# Create a reseller for the new domain
-	{ 'command' => 'create-reseller.pl',
-	  'args' => [ [ 'name', $test_reseller ],
-		      [ 'pass', 'smeg' ],
-		      [ 'desc', 'Test reseller' ],
-		      [ 'email', $test_reseller.'@'.$test_domain ] ],
-	},
+	$virtualmin_pro ? 
+		(
+		# Create a reseller for the new domain
+		{ 'command' => 'create-reseller.pl',
+		  'args' => [ [ 'name', $test_reseller ],
+			      [ 'pass', 'smeg' ],
+			      [ 'desc', 'Test reseller' ],
+			      [ 'email', $test_reseller.'@'.$test_domain ] ],
+		},
+		) : ( ),
 
 	# Re-create the domain, capturing all variables
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
-		      [ 'reseller', $test_reseller ],
+		      $virtualmin_pro ? ( [ 'reseller', $test_reseller ] )
+				      : ( ),
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ],
 		      [ 'logrotate' ],
 		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
@@ -2454,9 +2554,11 @@ $prepost_tests = [
 		      'VIRTUALSERVER_GID=\d+',
 		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
 			( 'VIRTUALSERVER_VIRTUALMIN_AWSTATS=1' ) : ( ),
-		      'RESELLER_NAME='.$test_reseller,
-		      'RESELLER_DESC=Test reseller',
-		      'RESELLER_EMAIL='.$test_reseller.'@'.$test_domain,
+		      $virtualmin_pro ? (
+			      'RESELLER_NAME='.$test_reseller,
+			      'RESELLER_DESC=Test reseller',
+			      'RESELLER_EMAIL='.$test_reseller.'@'.$test_domain,
+			      ) : ( ),
 		    ]
 	},
 
@@ -4715,6 +4817,7 @@ $alltests = { '_config' => $_config_tests,
 	      'aliasdom' => $aliasdom_tests,
 	      'reseller' => $reseller_tests,
 	      'script' => $script_tests,
+	      'gplscript' => $gplscript_tests,
 	      'database' => $database_tests,
 	      'proxy' => $proxy_tests,
 	      'migrate' => $migrate_tests,
@@ -4751,6 +4854,7 @@ if (!$virtualmin_pro) {
 	delete($alltests->{'admin'});
 	delete($alltests->{'reseller'});
 	delete($alltests->{'proxy'});
+	delete($alltests->{'script'});
 	}
 
 # Run selected tests
