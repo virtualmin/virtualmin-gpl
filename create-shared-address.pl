@@ -60,8 +60,10 @@ if ($ip eq "allocate" && !$activate) {
 	}
 
 # Get all existing shared IPs
-@ips = ( &get_default_ip(), &list_shared_ips(),
-	 map { $r->{'acl'}->{'defip'} } &list_resellers() );
+@ips = ( &get_default_ip(), &list_shared_ips() );
+if (defined(&list_resellers)) {
+	push(@ips, map { $r->{'acl'}->{'defip'} } &list_resellers());
+	}
 if ($ip ne "allocate") {
 	&indexof($ip, @ips) < 0 ||
 		&usage("IP address $ip is already a shared address");

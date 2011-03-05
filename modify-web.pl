@@ -132,7 +132,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-suexec") {
 		$suexec = 0;
 		}
-	elsif ($a eq "--style" && $supports_styles) {
+	elsif ($a eq "--style") {
 		$stylename = shift(@ARGV);
 		}
 	elsif ($a eq "--content") {
@@ -189,7 +189,7 @@ if (defined($children)) {
 	}
 
 # Validate style
-if ($stylename) {
+if ($stylename && defined(&list_content_styles)) {
 	($style) = grep { $_->{'name'} eq $stylename } &list_content_styles();
 	$style || &usage("Style $stylename does not exist");
 	$content || &usage("--content followed by some initial text for the website must be specified when using --style");

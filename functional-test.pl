@@ -3431,8 +3431,9 @@ $rename_tests = [
 		      [ 'desc', 'Test rename domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
-		      [ 'mysql' ], [ 'status' ], [ 'spam' ], [ 'virus' ],
+		      [ 'mysql' ], [ 'spam' ], [ 'virus' ],
 		      [ 'logrotate' ],
+		      $virtualmin_pro ? ( [ 'status' ] ) : ( ),
 		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
 			( [ 'virtualmin-awstats' ] ) : ( ),
 		      [ 'style' => 'construction' ],
@@ -4745,6 +4746,12 @@ $alltests = { '_config' => $_config_tests,
 	      'clone' => $clone_tests,
 	      'clonesub' => $clonesub_tests,
 	    };
+if (!$virtualmin_pro) {
+	# Some tests don't work on GPL
+	delete($alltests->{'admin'});
+	delete($alltests->{'reseller'});
+	delete($alltests->{'proxy'});
+	}
 
 # Run selected tests
 $total_failed = 0;
