@@ -57,6 +57,23 @@ if ($postfix::postfix_version >= 2.3) {
 else {
 	&postfix::set_current_value("smtpd_use_tls", "yes");
 	}
+&lock_file($postfix::config{'postfix_master'});
+$master = &postfix::get_master_config();
+($smtps) = grep { $_->{'name'} eq 'smtps' } @$master;
+($smtp) = grep { $_->{'name'} eq 'smtp' } @$master;
+if ($smtps && !$smtps->{'enabled'}) {
+	# Enable existing entry
+	$smtps->{'enabled'} = 1;
+	&postfix::modify_master($smtps);
+	}
+elsif (!$smtps && $smtp) {
+	# Add new smtps entry, cloned from smtp
+	$smtps = { %$smtp };
+	$smtps->{'name'} = 'smtps';
+	$smtps->{'command'} .= " -o smtpd_tls_wrappermode=yes";
+	&postfix::create_master($smtps);
+	}
+&unlock_file($postfix::config{'postfix_master'});
 &$second_print($text{'setup_done'});
 
 # Apply Postfix config

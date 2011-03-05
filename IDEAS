@@ -55,8 +55,6 @@
  - Allow arbitrary analytics javascript
 	- https://www.virtualmin.com/node/17265
 
- - Virtualmin button that copies cert to postfix should enable smtps too
-
  - Ask for DNS nameservers for new zones in wizard
 	- https://www.virtualmin.com/node/17335
 	- Verify that they can be resolved
