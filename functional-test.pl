@@ -1187,8 +1187,8 @@ $move_tests = [
 	# Install a script into the domain being moved
 	{ 'command' => 'install-script.pl',
 	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'type', 'wordpress' ],
-		      [ 'path', '/wordpress' ],
+		      [ 'type', 'roundcube' ],
+		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
 		      [ 'version', 'latest' ] ],
 	},
@@ -1240,11 +1240,11 @@ $move_tests = [
 	{ 'command' => 'list-scripts.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
-	  'grep' => [ 'Type: wordpress',
+	  'grep' => [ 'Type: roundcube',
 		      'Directory: /home/'.$test_target_domain_user.
-			'/domains/'.$test_domain.'/public_html/wordpress',
+			'/domains/'.$test_domain.'/public_html/roundcube',
 		      'Database: '.$test_domain_db.' ',
-		      'URL: http://'.$test_domain.'/wordpress',
+		      'URL: http://'.$test_domain.'/roundcube',
 		    ],
 	},
 
@@ -2125,11 +2125,11 @@ $incremental_tests = [
 		      @create_args, ],
         },
 
-	# Install Wordpress to use up some disk
+	# Install Roundcube to use up some disk
 	{ 'command' => 'install-script.pl',
 	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'type', 'wordpress' ],
-		      [ 'path', '/wordpress' ],
+		      [ 'type', 'roundcube' ],
+		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
 		      [ 'version', 'latest' ] ],
 	},
@@ -2186,8 +2186,8 @@ $incremental_tests = [
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'New website content',
 	},
-	{ 'command' => $wget_command.'http://'.$test_domain.'/wordpress/',
-	  'grep' => 'WordPress installation',
+	{ 'command' => $wget_command.'http://'.$test_domain.'/roundcube/',
+	  'grep' => 'Welcome to Roundcube Webmail',
 	},
 
 	# Finally delete to clean up
@@ -2592,9 +2592,11 @@ $prepost_tests = [
 		      'PARENT_VIRTUALSERVER_FIELD_MYFIELD=foo',
 		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
 			( 'PARENT_VIRTUALSERVER_VIRTUALMIN_AWSTATS=1' ) : ( ),
-		      'RESELLER_NAME='.$test_reseller,
-		      'RESELLER_DESC=Test reseller',
-		      'RESELLER_EMAIL='.$test_reseller.'@'.$test_domain,
+		      $virtualmin_pro ? (
+			      'RESELLER_NAME='.$test_reseller,
+			      'RESELLER_DESC=Test reseller',
+			      'RESELLER_EMAIL='.$test_reseller.'@'.$test_domain,
+			      ) : ( ),
 		    ]
 	},
 
@@ -2604,10 +2606,12 @@ $prepost_tests = [
 	  'cleanup' => 1,
         },
 
-	# Cleanup the reseller
-	{ 'command' => 'delete-reseller.pl',
-	  'args' => [ [ 'name', $test_reseller ] ],
-	  'cleanup' => 1 },
+	$virtualmin_pro ? (
+		# Cleanup the reseller
+		{ 'command' => 'delete-reseller.pl',
+		  'args' => [ [ 'name', $test_reseller ] ],
+		  'cleanup' => 1 },
+		) : ( ),
 	];
 
 $webmin_tests = [
