@@ -48,11 +48,13 @@ while(@ARGV > 0) {
 
 # Get the IPs
 push(@ips, { 'ip' => &get_default_ip(), 'type' => 'default' });
-foreach $r (&list_resellers()) {
-	if ($r->{'acl'}->{'defip'}) {
-		push(@ips, { 'ip' => $r->{'acl'}->{'defip'},
-		 	     'type' => 'reseller',
-			     'reseller' => $r->{'name'} });
+if (defined(&list_resellers)) {
+	foreach $r (&list_resellers()) {
+		if ($r->{'acl'}->{'defip'}) {
+			push(@ips, { 'ip' => $r->{'acl'}->{'defip'},
+				     'type' => 'reseller',
+				     'reseller' => $r->{'name'} });
+			}
 		}
 	}
 foreach $ip (&list_shared_ips()) {
