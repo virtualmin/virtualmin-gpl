@@ -1279,3 +1279,5 @@ Added the get-command API operation to fetch the parameters of another API comma
 Removed the restriction on database names that start with a number, for MySQL.
 Added $WEBMIN_PORT, $WEBMIN_PROTO, $USERMIN_PORT and $USERMIN_PROTO template variables.
 Added the Clone Virtual Server page to duplicate an existing domain, and the clone-domain API command.
+---- Changes since 3.84 ----
+Updated the bbPress script installer to version 1.0.3.
