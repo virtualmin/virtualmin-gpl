@@ -3474,6 +3474,15 @@ $ip6_tests = [
 		      @create_args, ],
 	},
 
+	# Create an alias for it
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'desc', 'Test alias domain' ],
+		      [ 'alias', $test_domain ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ],
+		      @create_args, ],
+	},
+
 	# Delay needed for v6 address to become routable
 	{ 'command' => 'sleep 10' },
 
@@ -3481,9 +3490,15 @@ $ip6_tests = [
 	{ 'command' => 'host '.$test_domain,
 	  'grep' => 'IPv6 address',
 	},
+	{ 'command' => 'host '.$test_target_domain,
+	  'grep' => 'IPv6 address',
+	},
 
 	# Test HTTP get to v6 address
 	{ 'command' => $wget_command.' --inet6 http://'.$test_domain,
+	  'grep' => 'Test IPv6 home page',
+	},
+	{ 'command' => $wget_command.' --inet6 http://'.$test_target_domain,
 	  'grep' => 'Test IPv6 home page',
 	},
 
@@ -3500,6 +3515,9 @@ $ip6_tests = [
 
 	# Make sure HTTP get to v6 address no longer works
 	{ 'command' => $wget_command.' --inet6 http://'.$test_domain,
+	  'fail' => 1,
+	},
+	{ 'command' => $wget_command.' --inet6 http://'.$test_target_domain,
 	  'fail' => 1,
 	},
 
