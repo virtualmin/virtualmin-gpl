@@ -3957,7 +3957,7 @@ $secondary_error = join("", @_);
 # Add this domain to all secondary MX servers
 sub setup_on_secondaries
 {
-local ($dom) = @_;
+local ($d) = @_;
 local @servers = &list_mx_servers();
 return if (!@servers);
 local @okservers;
@@ -3966,7 +3966,7 @@ local @okservers;
 		       @servers)));
 local @errs;
 foreach my $s (@servers) {
-	local $err = &setup_one_secondary($dom, $s);
+	local $err = &setup_one_secondary($d, $s);
 	if ($err) {
 		push(@errs, "$s->{'host'} : $err");
 		}
@@ -3974,7 +3974,26 @@ foreach my $s (@servers) {
 		push(@okservers, $s);
 		}
 	}
-$dom->{'mx_servers'} = join(" ", map { $_->{'id'} } @okservers);
+$d->{'mx_servers'} = join(" ", map { $_->{'id'} } @okservers);
+if ($d->{'dns'}) {
+	# Add DNS MX records. This is needed because sometimes the mail setup
+	# happens after DNS, and so mx_servers hasn't been populated.
+	my ($recs, $file) = &get_domain_dns_records_and_file($d);
+	my $withdot = $_[0]->{'dom'}.".";
+	my $added = 0;
+	foreach my $s (@okservers) {
+		my $mxhost = $s->{'mxname'} || $s->{'host'};
+		my ($r) = grep { $_->{'type'} eq 'MX' &&
+				 $r->{'name'} eq $withdot &&
+				 $r->{'values'}->[1] eq $mxhost."." } @$recs;
+		if (!$r) {
+			&bind8::create_record($file, $withdot, undef,
+				      "IN", "MX", "10 $mxhost.");
+			$added++;
+			}
+		}
+	&register_post_action(\&restart_bind, $d) if ($added);
+	}
 if (@errs) {
 	&$second_print($text{'setup_mxserrs'}."<br>\n".
 			join("<br>\n", @errs));
