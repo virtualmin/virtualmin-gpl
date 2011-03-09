@@ -66,7 +66,7 @@ if (-r "$d->{'home'}/$phd") {
 foreach $dir (@dirs) {
 	local $path = "$d->{'home'}/$dir";
 	local $levels = $dir eq "domains" || $dir eq "homes" ||
-			$dir eq "." ? 0 : undef;
+			$dir eq "." || $dir eq $phd ? 0 : undef;
 	($dirusage) = &recursive_disk_usage_mtime($path, undef, $levels);
 	($dirgid) = &recursive_disk_usage_mtime($path, $d->{'gid'}, $levels);
 	if (-d $path && $dir ne ".") {
