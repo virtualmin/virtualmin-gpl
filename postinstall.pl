@@ -229,24 +229,22 @@ if (&foreign_installed("sshd") && !$config{'nodeniedssh'}) {
 	}
 &build_denied_ssh_group();
 
-if ($virtualmin_pro) {
-	# Create the cron job for sending in script ratings
-	local $job = &find_virtualmin_cron_job($ratings_cron_cmd);
-	if (!$job) {
-		# Create, and run for the first time
-		$job = { 'mins' => int(rand()*60),
-			 'hours' => int(rand()*24),
-			 'days' => '*',
-			 'months' => '*',
-			 'weekdays' => '*',
-			 'user' => 'root',
-			 'active' => 1,
-			 'command' => $ratings_cron_cmd };
-		&cron::create_cron_job($job);
-		&cron::create_wrapper($ratings_cron_cmd, $module_name,
-				      "sendratings.pl");
-		&execute_command($ratings_cron_cmd);
-		}
+# Create the cron job for sending in script ratings
+local $job = &find_virtualmin_cron_job($ratings_cron_cmd);
+if (!$job) {
+	# Create, and run for the first time
+	$job = { 'mins' => int(rand()*60),
+		 'hours' => int(rand()*24),
+		 'days' => '*',
+		 'months' => '*',
+		 'weekdays' => '*',
+		 'user' => 'root',
+		 'active' => 1,
+		 'command' => $ratings_cron_cmd };
+	&cron::create_cron_job($job);
+	&cron::create_wrapper($ratings_cron_cmd, $module_name,
+			      "sendratings.pl");
+	&execute_command($ratings_cron_cmd);
 	}
 
 # Create the cron job for collecting system info
