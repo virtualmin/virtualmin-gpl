@@ -10211,7 +10211,7 @@ if ($d->{'dir'} && !$d->{'parent'} && $virtualmin_pro) {
 	}
 
 # Button to re-send signup email
-if (!$d->{'alias'} && &can_edit_domain($d)) {
+if (!$d->{'alias'} && &can_config_domain($d)) {
 	push(@rv, { 'page' => 'reemail.cgi',
 		    'title' => $text{'edit_reemail'},
 		    'desc' => &text('edit_reemaildesc',
