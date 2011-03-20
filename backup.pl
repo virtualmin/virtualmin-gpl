@@ -82,7 +82,8 @@ else {
 
 # Work out features and options
 if ($sched->{'feature_all'}) {
-	@do_features = ( &get_available_backup_features(), &list_backup_plugins() );
+	@do_features = ( &get_available_backup_features(),
+			 &list_backup_plugins() );
 	}
 else {
 	@do_features = split(/\s+/, $sched->{'features'});

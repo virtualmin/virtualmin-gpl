@@ -13105,7 +13105,8 @@ local @rv;
 foreach my $f ($safe ? @safe_backup_features : @backup_features) {
 	local $bfunc = "backup_$f";
 	if (defined(&$bfunc) &&
-	    ($config{$f} || $f eq "unix" || $f eq "virtualmin")) {
+	    ($config{$f} ||
+	     $f eq "unix" || $f eq "virtualmin" || $f eq "mail")) {
 		push(@rv, $f);
 		}
 	}
