@@ -5047,6 +5047,7 @@ unsub_doing=Converting $1 to sub-server ..
 unsub_failed=.. conversion failed!
 
 unalias_title=Convert Alias Server
+unalias_err=Failed to convert alias server
 unalias_rusure=Are you sure you want to convert this alias virtual server into a sub-server? It will no longer serve the web pages of the old target virtual server, but can have its own web content, mailboxes and mail aliases.
 unalias_ok=Convert to Sub-Server
 unalias_doing=Converting $1 to sub-server ..
