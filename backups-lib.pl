@@ -1407,8 +1407,11 @@ if ($ok) {
 				# Does the parent exist?
 				$parentdom = &get_domain($d->{'parent'});
 				if (!$parentdom && $d->{'backup_parent_dom'}) {
+					# Domain with same name exists, but ID
+					# has changed.
 					$parentdom = &get_domain_by(
 					    "dom", $d->{'backup_parent_dom'});
+					$d->{'parent'} = $parentdom->{'id'};
 					}
 				if (!$parentdom) {
 					&$second_print(
