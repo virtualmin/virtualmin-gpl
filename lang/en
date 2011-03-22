@@ -5479,6 +5479,7 @@ records_typesoa=Start Of Domain
 records_typespf=Sender Permitted From
 records_typedefttl=Default Cache Time
 records_typegenerate=Record Generator
+records_comment=Comment
 
 record_title1=Create DNS Record
 record_title2=Edit DNS Record
@@ -5487,6 +5488,7 @@ record_eedit=This DNS record cannot be edited
 record_header=DNS record details
 record_name=Record name
 record_type=Record type
+record_comment=Record comment
 record_ttl=Cache time
 record_ttl1=Domain default
 record_ttl0=Custom time

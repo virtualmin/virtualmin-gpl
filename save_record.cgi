@@ -53,6 +53,7 @@ elsif ($r->{'defttl'}) {
 	$in{'defttl_units'} =~ /^[a-z]$/i ||
 		&error($text{'record_ettlunits'});
 	$r->{'defttl'} = $in{'defttl'}.$in{'defttl_units'};
+	$r->{'comment'} = $in{'comment'};
 
 	# Create or update record
 	if ($in{'type'}) {
@@ -100,6 +101,9 @@ else {
 			&error($text{'record_ettlunits'});
 		$r->{'ttl'} = $in{'ttl'}.$in{'ttl_units'};
 		}
+
+	# Save comment
+	$r->{'comment'} = $in{'comment'};
 
 	# Validate values
 	@vals = @{$t->{'values'}};
