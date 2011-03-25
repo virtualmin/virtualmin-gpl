@@ -32,7 +32,7 @@ if ($config{'spam'}) {
 		&find_byname("spamd") || &error($text{'tmpl_espamd'});
 		}
 	}
-if ($config{'virus'}) {
+if ($config{'virus'} && !$config{'provision_virus_host'}) {
 	if ($in{'scanner'} == 2) {
 		local ($cmd, @args) = &split_quoted_string($in{'scanprog'});
 		&has_command($cmd) || &error($text{'spam_escanner'});
@@ -85,7 +85,7 @@ if ($config{'spam'}) {
 	}
 
 # Update virus scanner
-if ($config{'virus'}) {
+if ($config{'virus'} && !$config{'provision_virus_host'}) {
 	&save_global_virus_scanner($fullcmd,
 				   $in{'vhost_def'} ? undef : $in{'vhost'});
 	}

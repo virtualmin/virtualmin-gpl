@@ -2,7 +2,7 @@
 
 sub list_provision_features
 {
-return ('dns', 'mysql');
+return ('dns', 'mysql', 'virus');
 }
 
 # check_provision_login()
@@ -33,6 +33,11 @@ if ($config{'provision_mysql'}) {
 		return $text{'provision_emysqllimit'};
 	$feats{'mysql'}->{'systems'} && $feats{'mysqldb'}->{'systems'} ||
 		return $text{'provision_emysqlsystems'};
+	}
+if ($config{'provision_virus'}) {
+	# Make sure remote scanning is possible
+	&has_command("clamd-stream-client") ||
+		return &text('provision_evirusclient', 'clamd-stream-client');
 	}
 return undef;
 }

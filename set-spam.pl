@@ -104,6 +104,12 @@ if ($spam_client) {
 	&has_command($spam_client) ||
 	    &usage("SpamAssassin client program $spam_client does not exist");
 	}
+defined($clamd) && $config{'provision_virus_host'} &&
+	&usage("Clamd cannot be enabled or disabled when a Cloudmin Services ".
+	       "virus scanning system is in use");
+$virus_host && $config{'provision_virus_host'} &&
+	&usage("The ClamAV server host cannot be changed when a Cloudmin ".
+	       "Services virus scanning system is in use");
 
 # Work out new commands
 $new_virus_scanner = defined($virus_scanner) ? $virus_scanner

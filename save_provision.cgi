@@ -79,10 +79,61 @@ if ($in{'provision_mysql'} && !$oldconfig{'provision_mysql'}) {
 		}
 	}
 
+# If virus provisioning is enabled, force use of clamd-stream-client for
+# all domains
+if ($in{'provision_virus'} && !$config{'provision_virus_host'}) {
+	&$first_print($text{'provision_virussetup'});
+	($ok, $msg) = &provision_api_call("provision-virus", { }, 0);
+	if (!$ok || $msg !~ /ip=\S+/ || $msg !~ /port=\d+/ ||
+	    $msg !~ /host=\S+/) {
+		&$second_print(&text('provision_evirussetup', $msg));
+		}
+	else {
+		$msg =~ /ip=(\S+)/;
+		$clamhost = $1;
+		$msg =~ /port=(\S+)/;
+		$clamhost .= ":$1" if ($1 != 3310);
+		$err = &test_virus_scanner("clamd-stream-client", $clamhost);
+		if ($err) {
+			&$second_print(&text('provision_evirustest',
+					     $clamhost, $err));
+			}
+		else {
+			&save_global_virus_scanner("clamd-stream-client",
+						   $clamhost);
+			$msg =~ /host=(\S+)/;
+			$config{'provision_virus_host'} = $1;
+			&save_module_config();
+			&$second_print(&text('provision_virusgot', $clamhost));
+			if (&check_clamd_status() == 1) {
+				# Can now disable clamd
+				&disable_clamd();
+				}
+			}
+		}
+	}
+elsif (!$in{'provision_virus'} && $config{'provision_virus_host'}) {
+	# Un-provision virus access
+	&$first_print($text{'provision_virusunsetup'});
+	$clamhost = $config{'provision_virus_host'};
+	$clamhost =~ s/:\d+$//;
+	($ok, $msg) = &provision_api_call("unprovision-virus",
+					  { 'host' => $clamhost }, 0);
+	if (!$ok) {
+		&$second_print(&text('provision_evirusunsetup', $msg));
+		}
+	else {
+		# Done .. switch back to clamscan
+		delete($config{'provision_virus_host'});
+		&save_global_virus_scanner("clamscan");
+		&save_module_config();
+		&$second_print($text{'setup_done'});
+		}
+	}
+
 # Get limits from the server and display
 &$first_print(&text('provision_limits'));
 ($ok, $feats) = &provision_api_call("list-provision-features", {}, 1);
-use Data::Dumper;
 foreach $f (@$feats) {
 	$v = $f->{'values'};
 	push(@lmsgs, &text('provision_limit',
