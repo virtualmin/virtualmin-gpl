@@ -227,7 +227,10 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
     $_[0]->{'web_sslport'} != $_[1]->{'web_sslport'}) {
 	# IP address or port has changed .. update VirtualHost
 	&$first_print($text{'save_ssl'});
-	local $conf = &apache::get_config();
+	if (!$virt) {
+		&$second_print($text{'delete_noapache'});
+		goto VIRTFAILED;
+		}
 	&add_listen($_[0], $conf, $_[0]->{'web_sslport'});
 	local $lref = &read_file_lines($virt->{'file'});
 	$lref->[$virt->{'line'}] =
@@ -240,6 +243,106 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
 					      	     $_[1]->{'web_sslport'});
 	&$second_print($text{'setup_done'});
 	}
+if ($_[0]->{'home'} ne $_[1]->{'home'}) {
+	# Home directory has changed .. update any directives that referred
+	# to the old directory
+	&$first_print($text{'save_ssl3'});
+	if (!$virt) {
+		&$second_print($text{'delete_noapache'});
+		goto VIRTFAILED;
+		}
+	local $lref = &read_file_lines($virt->{'file'});
+	for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
+		$lref->[$i] =~ s/\Q$_[1]->{'home'}\E/$_[0]->{'home'}/g;
+		}
+	&flush_file_lines();
+	$rv++;
+	undef(@apache::get_config_cache);
+	($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
+					      	     $_[1]->{'web_sslport'});
+	&$second_print($text{'setup_done'});
+	}
+if ($_[0]->{'proxy_pass_mode'} == 1 &&
+    $_[1]->{'proxy_pass_mode'} == 1 &&
+    $_[0]->{'proxy_pass'} ne $_[1]->{'proxy_pass'}) {
+	# This is a proxying forwarding website and the URL has
+	# changed - update all Proxy* directives
+	&$first_print($text{'save_ssl6'});
+	if (!$virt) {
+		&$second_print($text{'delete_noapache'});
+		goto VIRTFAILED;
+		}
+	local $lref = &read_file_lines($virt->{'file'});
+	for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
+		if ($lref->[$i] =~ /^\s*ProxyPass(Reverse)?\s/) {
+			$lref->[$i] =~ s/$_[1]->{'proxy_pass'}/$_[0]->{'proxy_pass'}/g;
+			}
+		}
+	&flush_file_lines();
+	$rv++;
+	&$second_print($text{'setup_done'});
+	}
+if ($_[0]->{'proxy_pass_mode'} != $_[1]->{'proxy_pass_mode'}) {
+	# Proxy mode has been enabled or disabled .. copy all directives from
+	# non-SSL site
+	local $mode = $_[0]->{'proxy_pass_mode'} ||
+		      $_[1]->{'proxy_pass_mode'};
+	&$first_print($mode == 2 ? $text{'save_ssl8'}
+				 : $text{'save_ssl9'});
+	if (!$virt) {
+		&$second_print($text{'delete_noapache'});
+		goto VIRTFAILED;
+		}
+	local $lref = &read_file_lines($virt->{'file'});
+	local $nonlref = &read_file_lines($nonvirt->{'file'});
+	local $tmpl = &get_template($_[0]->{'tmpl'});
+	local @dirs = @$nonlref[$nonvirt->{'line'}+1 .. $nonvirt->{'eline'}-1];
+	push(@dirs, &apache_ssl_directives($_[0], $tmpl));
+	splice(@$lref, $virt->{'line'} + 1,
+	       $virt->{'eline'} - $virt->{'line'} - 1, @dirs);
+	&flush_file_lines($virt->{'file'});
+	$rv++;
+	undef(@apache::get_config_cache);
+	($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
+					      	     $_[1]->{'web_sslport'});
+	&$second_print($text{'setup_done'});
+	}
+if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+	# Username has changed .. copy suexec directives from parent
+	&$first_print($text{'save_ssl10'});
+	if (!$virt || !$nonvirt) {
+		&$second_print($text{'delete_noapache'});
+		goto VIRTFAILED;
+		}
+	foreach my $dir ("User", "Group", "SuexecUserGroup") {
+		local @vals = &apache::find_directive($dir, $nonvconf);
+		&apache::save_directive($dir, \@vals, $vconf, $conf);
+		}
+	&flush_file_lines($virt->{'file'});
+	$rv++;
+	&$second_print($text{'setup_done'});
+	}
+if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
+        # Domain name has changed .. fix up Apache config by copying relevant
+        # directives from the real domain
+        &$first_print($text{'save_ssl2'});
+	if (!$virt || !$nonvirt) {
+		&$second_print($text{'delete_noapache'});
+		goto VIRTFAILED;
+		}
+	foreach my $dir ("ServerName", "ServerAlias",
+			 "ErrorLog", "TransferLog", "CustomLog",
+			 "RewriteCond", "RewriteRule") {
+		local @vals = &apache::find_directive($dir, $nonvconf);
+		&apache::save_directive($dir, \@vals, $vconf, $conf);
+		}
+        &flush_file_lines($virt->{'file'});
+        $rv++;
+        &$second_print($text{'setup_done'});
+        }
+
+# Code after here still works even if SSL virtualhost is missing
+VIRTFAILED:
 if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[1]->{'ssl_same'}) {
 	# IP has changed - maybe clear ssl_same field
 	local ($sslclash) = grep { $_->{'ip'} eq $_[0]->{'ip'} &&
@@ -272,90 +375,11 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[1]->{'ssl_same'}) {
 		}
 	}
 if ($_[0]->{'home'} ne $_[1]->{'home'}) {
-	# Home directory has changed .. update any directives that referred
-	# to the old directory
-	&$first_print($text{'save_ssl3'});
-	local $lref = &read_file_lines($virt->{'file'});
-	for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
-		$lref->[$i] =~ s/\Q$_[1]->{'home'}\E/$_[0]->{'home'}/g;
-		}
-	&flush_file_lines();
-	$rv++;
-	undef(@apache::get_config_cache);
-
 	# Fix SSL cert file locations
 	foreach my $k ('ssl_cert', 'ssl_key', 'ssl_chain') {
 		$_[0]->{$k} =~ s/\Q$_[1]->{'home'}\E/$_[0]->{'home'}/;
 		}
-	($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
-					      	     $_[1]->{'web_sslport'});
-
-	# If Webmin or Usermin were using the moved cert file, fix up
-	# XXX
-	&$second_print($text{'setup_done'});
 	}
-if ($_[0]->{'proxy_pass_mode'} == 1 &&
-    $_[1]->{'proxy_pass_mode'} == 1 &&
-    $_[0]->{'proxy_pass'} ne $_[1]->{'proxy_pass'}) {
-	# This is a proxying forwarding website and the URL has
-	# changed - update all Proxy* directives
-	&$first_print($text{'save_ssl6'});
-	local $lref = &read_file_lines($virt->{'file'});
-	for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
-		if ($lref->[$i] =~ /^\s*ProxyPass(Reverse)?\s/) {
-			$lref->[$i] =~ s/$_[1]->{'proxy_pass'}/$_[0]->{'proxy_pass'}/g;
-			}
-		}
-	&flush_file_lines();
-	$rv++;
-	&$second_print($text{'setup_done'});
-	}
-if ($_[0]->{'proxy_pass_mode'} != $_[1]->{'proxy_pass_mode'}) {
-	# Proxy mode has been enabled or disabled .. copy all directives from
-	# non-SSL site
-	local $mode = $_[0]->{'proxy_pass_mode'} ||
-		      $_[1]->{'proxy_pass_mode'};
-	&$first_print($mode == 2 ? $text{'save_ssl8'}
-				 : $text{'save_ssl9'});
-	local $lref = &read_file_lines($virt->{'file'});
-	local $nonlref = &read_file_lines($nonvirt->{'file'});
-	local $tmpl = &get_template($_[0]->{'tmpl'});
-	local @dirs = @$nonlref[$nonvirt->{'line'}+1 .. $nonvirt->{'eline'}-1];
-	push(@dirs, &apache_ssl_directives($_[0], $tmpl));
-	splice(@$lref, $virt->{'line'} + 1,
-	       $virt->{'eline'} - $virt->{'line'} - 1, @dirs);
-	&flush_file_lines($virt->{'file'});
-	$rv++;
-	undef(@apache::get_config_cache);
-	($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
-					      	     $_[1]->{'web_sslport'});
-	&$second_print($text{'setup_done'});
-	}
-if ($_[0]->{'user'} ne $_[1]->{'user'}) {
-	# Username has changed .. copy suexec directives from parent
-	&$first_print($text{'save_ssl10'});
-	foreach my $dir ("User", "Group", "SuexecUserGroup") {
-		local @vals = &apache::find_directive($dir, $nonvconf);
-		&apache::save_directive($dir, \@vals, $vconf, $conf);
-		}
-	&flush_file_lines($virt->{'file'});
-	$rv++;
-	&$second_print($text{'setup_done'});
-	}
-if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
-        # Domain name has changed .. fix up Apache config by copying relevant
-        # directives from the real domain
-        &$first_print($text{'save_ssl2'});
-	foreach my $dir ("ServerName", "ServerAlias",
-			 "ErrorLog", "TransferLog", "CustomLog",
-			 "RewriteCond", "RewriteRule") {
-		local @vals = &apache::find_directive($dir, $nonvconf);
-		&apache::save_directive($dir, \@vals, $vconf, $conf);
-		}
-        &flush_file_lines($virt->{'file'});
-        $rv++;
-        &$second_print($text{'setup_done'});
-        }
 if ($_[0]->{'dom'} ne $_[1]->{'dom'} && &self_signed_cert($_[0]) &&
     !&check_domain_certificate($_[0]->{'dom'}, $_[0])) {
 	# Domain name has changed .. re-generate self-signed cert
