@@ -11,23 +11,33 @@ print &ui_table_start($text{'sv_header'}, "width=100%", 2, [ "width=30%" ]);
 @doms = &list_domains();
 
 if ($config{'spam'}) {
-	# Spam scanning program
 	($client, $host, $size) = &get_global_spam_client();
-	print &ui_table_row(&hlink($text{'spam_client'}, 'spam_client'),
-		    &ui_radio("client", $client,
-		       [ [ "spamassassin", $text{'tmpl_spamassassin'}."<br>" ],
-			 [ "spamc", $text{'tmpl_spamc'} ] ]));
+	if ($config{'provision_spam_host'}) {
+		print &ui_table_row($text{'spam_client'},
+				    $text{'tmpl_spamc'});
+		print &ui_table_row($text{'tmpl_spam_host'},
+		    &text('spam_prov', $config{'provision_spam_host'}));
+		}
+	else {
+		# Spam scanning program
+		print &ui_table_row(&hlink($text{'spam_client'}, 'spam_client'),
+			    &ui_radio("client", $client,
+			       [ [ "spamassassin", $text{'tmpl_spamassassin'}."<br>" ],
+				 [ "spamc", $text{'tmpl_spamc'} ] ]));
+
+		# Spamc host
+		print &ui_table_row(
+			&hlink($text{'tmpl_spam_host'}, 'template_spam_host'),
+			&ui_opt_textbox("host", $host, 30, "<tt>localhost</tt>"));
+		}
 
 	# Spamc max size
 	print &ui_table_row(
 		&hlink($text{'tmpl_spam_size'}, 'template_spam_size'),
-		&ui_opt_textbox("size", $size, 8,
-				$text{'template_spam_unlimited'}));
-
-	# Spamc host
-	print &ui_table_row(
-		&hlink($text{'tmpl_spam_host'}, 'template_spam_host'),
-		&ui_opt_textbox("host", $host, 30, "<tt>localhost</tt>"));
+		&ui_radio("size_def", $size ? 0 : 1,
+			  [ [ 1, $text{'template_spam_unlimited'} ],
+			    [ 0, $text{'template_spam_atmost'} ] ])." ".
+		&ui_bytesbox("size", $size));
 
 	# Allow user .procmailrc file?
 	print &ui_table_row(

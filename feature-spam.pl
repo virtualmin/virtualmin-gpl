@@ -233,8 +233,16 @@ local $spamid = $d->{'parent'} || $d->{'id'};
 $client ||= $config{'spam_client'};
 local $cmd = &has_command($client);
 if ($client eq 'spamc') {
-	$cmd .= " -d $config{'spam_host'}" if ($config{'spam_host'});
-	$cmd .= " -s $config{'spam_size'}" if ($config{'spam_size'});
+	local ($host, $port) = split(/:/, $config{'spam_host'});
+	if ($host) {
+		$cmd .= " -d $host";
+		if ($port) {
+			$cmd .= " -p $port";
+			}
+		}
+	if ($config{'spam_size'}) {
+		$cmd .= " -s $config{'spam_size'}";
+		}
 	}
 else {
 	$cmd .= " --siteconfigpath $spam_config_dir/$spamid";
