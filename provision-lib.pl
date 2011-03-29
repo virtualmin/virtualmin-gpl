@@ -2,7 +2,7 @@
 
 sub list_provision_features
 {
-return ('dns', 'mysql', 'virus');
+return ('dns', 'mysql', 'spam', 'virus');
 }
 
 # check_provision_login()
@@ -38,6 +38,11 @@ if ($config{'provision_virus'}) {
 	# Make sure remote scanning is possible
 	&has_command("clamd-stream-client") ||
 		return &text('provision_evirusclient', 'clamd-stream-client');
+	}
+if ($config{'provision_spam'}) {
+	# Make sure remote filtering is possible
+	&has_command("spamc") ||
+		return &text('provision_espamclient', 'spamc');
 	}
 return undef;
 }

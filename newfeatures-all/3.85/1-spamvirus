@@ -1,0 +1,4 @@
+desc=Spam and Virus Filtering with Cloudmin Services
+html=Both spam and virus scanning can now be offloading to a system provided by Cloudmin Services, which removes the need to run the CPU and memory intensive spamd and clamd servers on each Virtualmin system.
+master=1
+link=edit_newsv.cgi
