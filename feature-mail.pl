@@ -122,34 +122,35 @@ elsif ($config{'mail_system'} == 6) {
 # Returns just virtusers for some domain
 sub list_domain_aliases
 {
+local ($d, $ignore_plugins) = @_;
 &require_mail();
 local ($u, %foruser);
 if ($config{'mail_system'} != 4) {
 	# Filter out aliases that point to users
-	foreach $u (&list_domain_users($_[0], 0, 1, 1, 1)) {
-		local $pop3 = &remove_userdom($u->{'user'}, $_[0]);
-		$foruser{$pop3."\@".$_[0]->{'dom'}} = $u->{'user'};
+	foreach $u (&list_domain_users($d, 0, 1, 1, 1)) {
+		local $pop3 = &remove_userdom($u->{'user'}, $d);
+		$foruser{$pop3."\@".$d->{'dom'}} = $u->{'user'};
 		if ($config{'mail_system'} == 0 && $u->{'user'} =~ /\@/) {
 			# Special case for Postfix @ users
-			$foruser{$pop3."\@".$_[0]->{'dom'}} =
+			$foruser{$pop3."\@".$d->{'dom'}} =
 				&replace_atsign($u->{'user'});
 			}
 		}
-	if ($d->{'mailbox'}) {
-		$foruser{$d->{'user'}."\@".$_[0]->{'dom'}} = $d->{'user'};
+	if ($d->{'mail'}) {
+		$foruser{$d->{'user'}."\@".$d->{'dom'}} = $d->{'user'};
 		}
 	}
 local @virts = &list_virtusers();
 local %ignore;
-if ($_[1]) {
+if ($ignore_plugins) {
 	# Get a list to ignore from each plugin
 	foreach my $f (&list_feature_plugins()) {
-		foreach my $i (&plugin_call($f, "virtusers_ignore", $_[0])) {
+		foreach my $i (&plugin_call($f, "virtusers_ignore", $d)) {
 			$ignore{lc($i)} = 1;
 			}
 		}
 	}
-if ($_[1] && $_[0]->{'spam'}) {
+if ($ignore_plugins && $d->{'spam'}) {
 	# Skip spamtrap and hamtrap aliases
 	foreach my $v (@virts) {
 		if ($v->{'from'} =~ /^(spamtrap|hamtrap)\@/ &&
@@ -163,9 +164,9 @@ if ($_[1] && $_[0]->{'spam'}) {
 # Return only virtusers that match this domain,
 # which are not for forwarding email for users in the domain,
 # and which are not on the plugin ignore list.
-return grep { $_->{'from'} =~ /\@(\S+)$/ && $1 eq $_[0]->{'dom'} &&
-	      ($foruser{$_->{'from'}} ne $_->{'to'}->[0] ||
-	       @{$_->{'to'}} != 1) &&
+return grep { $_->{'from'} =~ /\@(\S+)$/ && $1 eq $d->{'dom'} &&
+	      !($foruser{$_->{'from'}} eq $_->{'to'}->[0] &&
+		@{$_->{'to'}} == 1) &&
 	      !$ignore{lc($_->{'from'})} } @virts;
 }
 

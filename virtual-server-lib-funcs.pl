@@ -1757,8 +1757,10 @@ if (defined(&clear_lookup_domain_cache) && $_[2]) {
 &set_usermin_imap_password($_[0]);
 
 # Update cache of existing usernames
-$unix_user{&escape_alias($_[0]->{'user'})}++;
-$unix_user{&escape_alias($_[1]->{'user'})} = 0;
+if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+	$unix_user{&escape_alias($_[0]->{'user'})}++;
+	$unix_user{&escape_alias($_[1]->{'user'})} = 0;
+	}
 
 if ($_[0]->{'shell'} ne $_[1]->{'shell'}) {
 	# Rebuild denied user list, by shell
