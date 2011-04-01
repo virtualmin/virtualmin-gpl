@@ -922,6 +922,7 @@ edit_headers=Related virtual servers
 edit_domain=Domain name
 edit_xndomain=Real DNS domain name
 edit_user=Administration username
+edit_dbuser=For $2 : $1
 edit_group=Administration group
 edit_nogroup=None created
 edit_prefix=Mailbox name prefix
