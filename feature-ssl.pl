@@ -498,6 +498,7 @@ foreach my $od (&get_domain_by("ssl_same", $_[0]->{'id'})) {
 if ($_[0]->{'ssl_same'}) {
 	delete($_[0]->{'ssl_cert'});
 	delete($_[0]->{'ssl_key'});
+	delete($_[0]->{'ssl_chain'});
 	delete($_[0]->{'ssl_same'});
 	}
 
