@@ -40,6 +40,7 @@ chop($newpass = <STDIN>);
 if (!$username) {
 	&error_exit("No username given");
 	}
+$username = lc($username);
 sleep(5);		# To prevent brute force attacks
 
 # Find the user
