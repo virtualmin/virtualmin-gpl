@@ -52,11 +52,11 @@
 
  - Move cron jobs to webmincron
 
- - Allow arbitrary analytics javascript
-	- https://www.virtualmin.com/node/17265
-
  - Ask for DNS nameservers for new zones in wizard
 	- https://www.virtualmin.com/node/17335
 	- Verify that they can be resolved
 
  - Include ajaxterm in Webmin
+
+ - WHMCS installer
+	- See email from eric "WHMCS Install Script"
