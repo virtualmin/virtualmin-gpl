@@ -58,5 +58,5 @@
 
  - Include ajaxterm in Webmin
 
- - WHMCS installer
-	- See email from eric "WHMCS Install Script"
+ - Allow manual editing of DNS records
+
