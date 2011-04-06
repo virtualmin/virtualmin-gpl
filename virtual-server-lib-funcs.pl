@@ -11597,7 +11597,7 @@ if ($config{'mail'}) {
 		# Make sure mydestination contains hostname or origin
 		local $myhost = &postfix::get_real_value("myorigin") ||
 			        &postfix::get_real_value("myhostname") ||
-				&get_system_hostname();
+				&get_system_hostname(0, 1);
 		if ($myhost =~ /^\//) {
 			$myhost = &read_file_contents($myhost);
 			$myhost =~ s/\s//g;
