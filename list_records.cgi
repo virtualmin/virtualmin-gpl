@@ -106,7 +106,9 @@ if (!$gotttl) {
 	}
 print &ui_form_end([ [ 'delete', $text{'records_delete'} ],
 		     [ 'new', $text{'records_add'},
-		       &ui_select("type", "A", \@types) ] ]);
+		       &ui_select("type", "A", \@types) ],
+		     &can_manual_dns() ?
+			( [ 'manual', $text{'records_manual'} ] ) : ( ), ]);
 
 &ui_print_footer(&domain_footer_link($d),
 		 "", $text{'index_return'});

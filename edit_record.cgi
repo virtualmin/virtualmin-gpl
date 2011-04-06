@@ -142,6 +142,4 @@ return &ui_textbox($name, $ttl, 5)." ".
 		     [ "h", $bind8::text{'hours'} ],
 		     [ "d", $bind8::text{'days'} ],
 		     [ "w", $bind8::text{'weeks'} ] ], 1, 0, 1);
-
-
 }

@@ -45,6 +45,10 @@ if ($in{'delete'}) {
 		    { 'count' => scalar(@d) });
 	&redirect("list_records.cgi?dom=$in{'dom'}");
 	}
+elsif ($in{'manual'}) {
+	# Redirect to manual DNS form
+	&redirect("manual_records.cgi?dom=$in{'dom'}&type=$in{'type'}");
+	}
 else {
 	# Redirect to add form for selected type
 	&redirect("edit_record.cgi?dom=$in{'dom'}&type=$in{'type'}");

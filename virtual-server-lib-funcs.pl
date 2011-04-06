@@ -8967,6 +8967,12 @@ sub can_log_paths
 return &master_admin();
 }
 
+# Returns 1 if DNS records can be manually edited
+sub can_manual_dns
+{
+return &master_admin();
+}
+
 # has_proxy_balancer(&domain)
 # Returns 2 if some domain supports proxy balancing to multiple URLs, 1 for
 # proxying to a single URL, 0 if neither.

@@ -1941,6 +1941,7 @@ log_create_record=Created DNS record in $1 named $2
 log_delete_record=Deleted DNS record in $1 named $2
 log_modify_record=Modified DNS record in $1 named $2
 log_delete_records=Deleted $2 DNS records in $1
+log_manual_records=Manually updated $2 DNS records in $1
 log_create_defttl=Created DNS default cache time in $1
 log_delete_defttl=Deleted DNS default cache time in $1
 log_modify_defttl=Modified DNS default cache time in $1
@@ -5499,6 +5500,7 @@ records_typespf=Sender Permitted From
 records_typedefttl=Default Cache Time
 records_typegenerate=Record Generator
 records_comment=Comment
+records_manual=Manually Edit Records
 
 record_title1=Create DNS Record
 record_title2=Edit DNS Record
@@ -5594,5 +5596,9 @@ clone_ftp=Copying ProFTPd directives ..
 clone_ftpold=.. source ProFTPd configuration not found!
 clone_ftpnew=.. destination ProFTPd configuration not found!
 clone_ssl=Copying Apache SSL directives ..
+
+mrecords_title=Edit DNS Records
+mrecords_ecannot=You are not allowed to manually edit DNS records
+mrecords_desc=This page allows you to manually modify all DNS records in the domain, in the BIND configuration format.
 
 __norefs=1
