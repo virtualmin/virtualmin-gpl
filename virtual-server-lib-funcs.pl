@@ -11604,7 +11604,8 @@ if ($config{'mail'}) {
 			}
 		local @mydest = split(/\s*,\s*/,
 				   &postfix::get_real_value("mydestination"));
-		if (&indexoflc($myhost, @mydest) < 0 &&
+		if ($myhost &&
+		    &indexoflc($myhost, @mydest) < 0 &&
 		    &indexoflc('$myhostname', @mydest) < 0) {
 			return &text('check_emydest', $myhost);
 			}
