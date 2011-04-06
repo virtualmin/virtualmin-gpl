@@ -425,7 +425,7 @@ elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4) {
 elsif ($config{'mail_system'} == 5) {
 	# Call vpopmail domain deletion program
 	local $qdom = quotemeta($_[0]->{'dom'});
-	local $out = `$vpopbin/vdeldomain $qdom 2>&1`;
+	local $out = &backquote_logged("$vpopbin/vdeldomain $qdom 2>&1");
 	if ($?) {
 		&$second_print(&text('delete_evdeldomain', "<tt>$out</tt>"));
 		return;
@@ -991,7 +991,15 @@ sub disable_mail
 {
 &obtain_lock_mail($_[0]);
 &obtain_lock_unix($_[0]);
-&delete_mail($_[0], 1);
+if ($config{'mail_system'} == 5) {
+	# Just call vpopmail's disable function
+	local $qdom = quotemeta($_[0]->{'dom'});
+	&system_logged("$vpopbin/vmoduser -p $qdom 2>&1");
+	}
+else {
+	# Delete mail access for the domain
+	&delete_mail($_[0], 1);
+	}
 
 &$first_print($text{'disable_users'});
 foreach my $user (&list_domain_users($_[0], 1)) {
@@ -1011,7 +1019,14 @@ sub enable_mail
 {
 &obtain_lock_mail($_[0]);
 &obtain_lock_unix($_[0]);
-&setup_mail($_[0], 1);
+if ($config{'mail_system'} == 5) {
+	# Just call vpopmail's enable function
+	local $qdom = quotemeta($_[0]->{'dom'});
+	&system_logged("$vpopbin/vmoduser -x $qdom 2>&1");
+	}
+else {
+	&setup_mail($_[0], 1);
+	}
 
 &$first_print($text{'enable_users'});
 foreach my $user (&list_domain_users($_[0], 1)) {
