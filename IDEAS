@@ -57,6 +57,3 @@
 	- Verify that they can be resolved
 
  - Include ajaxterm in Webmin
-
- - Allow manual editing of DNS records
-	- CHANGELOG

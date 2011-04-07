@@ -25,7 +25,7 @@ $temp = &transname();
 &close_tempfile(FILE);
 
 # Re-read the file and re-validate
-$recs = &bind8::read_zone_file($file, $d->{'dom'});
+$recs = [ &bind8::read_zone_file($file, $d->{'dom'}) ];
 &set_record_ids($recs);
 $err = &validate_dns($d, $recs);
 if ($err && !$olderr) {

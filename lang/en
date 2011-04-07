@@ -5600,5 +5600,8 @@ clone_ssl=Copying Apache SSL directives ..
 mrecords_title=Edit DNS Records
 mrecords_ecannot=You are not allowed to manually edit DNS records
 mrecords_desc=This page allows you to manually modify all DNS records in the domain, in the BIND configuration format.
+mrecords_err=Failed to save DNS records
+mrecords_enone=Nothing entered!
+mrecords_evalidate=Validation failed : $1
 
 __norefs=1

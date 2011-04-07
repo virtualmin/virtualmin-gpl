@@ -1284,3 +1284,4 @@ Updated the bbPress script installer to version 1.0.3, ZenPhoto to 1.4.0.3, Joom
 Added a script installer for WHMCS 4.4.2. This is a commerical product, so you will need to purchase a licence for it before using the installer though.
 Comments are now shown and can be edited on the DNS Records page.
 Added support for spam and virus filtering offloading to the Cloudmin Services page.
+Records can now be manually edited by the master admin on the DNS Records page, in BIND record format.
