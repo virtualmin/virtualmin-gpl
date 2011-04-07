@@ -71,8 +71,10 @@ else {
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
 			     &ui_opt_textbox("dir", "whmcs", 30,
 					     "At top level"));
-	$rv .= &ui_table_row("WHCS licence key",
+	$rv .= &ui_table_row("WHCS license key",
 			     &ui_textbox("licensekey", undef, 30));
+	$rv .= &ui_table_row(" ",
+		"You must purchase an <a href='http://www.whmcs.com/members/aff.php?aff=4115' target=_new>WHMCS license</a> before installing this script");
 	}
 return $rv;
 }
@@ -108,7 +110,7 @@ else {
 sub script_whmcs_check
 {
 local ($d, $ver, $opts, $upgrade) = @_;
-$opts->{'licensekey'} || return "Missing licensekey option";
+$opts->{'licensekey'} || return "Missing licensekey option - licenses can be purchased at http://www.whmcs.com/members/aff.php?aff=4115";
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
 $opts->{'db'} || return "Missing database";
 if (-r "$opts->{'dir'}/configuration.php") {
