@@ -1673,6 +1673,22 @@ if ($file) {
 			}
 		}
 
+	# Make sure any SPF record contains this system's default IP
+	local ($r) = grep { $_->{'type'} eq 'SPF' &&
+			    $r->{'name'} eq $d->{'dom'}.'.' } @recs;
+	if ($r) {
+		local $spf = &bind8::parse_spf(@{$r->{'values'}});
+		local $defip = &get_default_ip();
+		if (&indexof($defip, @{$spf->{'ip4'}}) < 0) {
+			push(@{$spf->{'ip4'}}, $defip);
+			local $str = &bind8::join_spf($spf);
+			&bind8::modify_record($r->{'file'}, $r, $r->{'name'},
+					      $r->{'ttl'}, $r->{'class'},
+					      $r->{'type'}, "\"$str\"",
+					      $r->{'comment'});
+			}
+		}
+
 	&$second_print($text{'setup_done'});
 
 	&register_post_action(\&restart_bind, $_[0]);
