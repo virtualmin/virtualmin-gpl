@@ -1508,7 +1508,7 @@ ffile_ewrite=Failed to write to filter file $1 as user $2 : $3
 
 newweb_title=Apache Website Template
 newweb_ecannot=You are not allowed to edit the website template
-newweb_desc=Use this form to edit the template Apache directives that will be used for websites created by Virtualmin. The following substitions will be done when the site is created from the template :
+newweb_desc=Use this form to edit the template Apache directives that will be used for websites created by Virtualmin. The following substitutions will be done when the site is created from the template :
 newweb_undo=Undo
 newweb_err=Failed to save website template
 newweb_suexec=Automatically add appropriate SuExec directive?
