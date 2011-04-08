@@ -3019,6 +3019,8 @@ newfields_type7=Yes/No
 newfields_type8=Password
 newfields_type9=Menu..
 newfields_type10=Text box
+newfields_show=In server list?
+newfields_show2=Show
 
 ldap_emod=Missing Perl module $1 needed for connecting to LDAP
 ldap_econn=Failed to connect to LDAP server $1 port $2

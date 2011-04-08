@@ -1285,3 +1285,4 @@ Added a script installer for WHMCS 4.4.2. This is a commerical product, so you w
 Comments are now shown and can be edited on the DNS Records page.
 Added support for spam and virus filtering offloading to the Cloudmin Services page.
 Records can now be manually edited by the master admin on the DNS Records page, in BIND record format.
+Added a checkbox to the Custom Fields page to control if each field appears on the List Virtual Servers page.

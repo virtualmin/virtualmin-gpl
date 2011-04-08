@@ -12,7 +12,9 @@ for($i=0; defined($in{"name_$i"}); $i++) {
 	push(@rv, { 'name' => $in{"name_$i"},
 		    'desc' => $in{"desc_$i"},
 		    'type' => $in{"type_$i"},
-		    'opts' => $in{"opts_$i"} });
+		    'opts' => $in{"opts_$i"},
+		    'show' => $in{"show_$i"},
+		  });
 	}
 &save_custom_fields(\@rv);
 &webmin_log("save", "fields");

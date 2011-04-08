@@ -2821,6 +2821,12 @@ if (!&has_home_quotas()) {
 	@colnames = grep { $_ ne 'quota' && $_ ne 'uquota' } @colnames;
 	}
 push(@heads, map { $text{'index_'.$_} } @colnames);
+foreach my $f (&list_custom_fields()) {
+	if ($f->{'show'}) {
+		push(@colnames, 'field_'.$f->{'name'});
+		push(@heads, $f->{'desc'});
+		}
+	}
 push(@heads, map { $text{'index_'.$_} } @table_features);
 
 # Generate the table contents
@@ -2959,6 +2965,10 @@ foreach my $d (&sort_indent_domains($doms)) {
 		elsif ($c eq "created") {
 			# Creation date
 			push(@cols, &make_date($d->{'created'}, 1));
+			}
+		elsif ($c =~ /^field_/) {
+			# Some custom field
+			push(@cols, $d->{$c});
 			}
 		}
 	foreach $f (@table_features) {
@@ -7996,11 +8006,12 @@ local $_;
 open(FIELDS, $custom_fields_file);
 while(<FIELDS>) {
 	s/\r|\n//g;
-	local @a = split(/:/, $_, 4);
+	local @a = split(/:/, $_, 5);
 	push(@rv, { 'name' => $a[0],
 		    'type' => $a[1],
 		    'opts' => $a[2],
-		    'desc' => $a[3] });
+		    'desc' => $a[3],
+		    'show' => $a[4], });
 
 	}
 close(FIELDS);
@@ -8013,7 +8024,7 @@ sub save_custom_fields
 &open_lock_tempfile(FIELDS, ">$custom_fields_file");
 foreach my $a (@{$_[0]}) {
 	&print_tempfile(FIELDS, $a->{'name'},":",$a->{'type'},":",
-		     $a->{'opts'},":",$a->{'desc'},"\n");
+		     $a->{'opts'},":",$a->{'desc'},":",$a->{'show'},"\n");
 	}
 &close_tempfile(FIELDS);
 }
