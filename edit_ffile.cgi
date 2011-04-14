@@ -67,6 +67,6 @@ print &text('ffile_other',
 print "<input type=submit value=\"$text{'save'}\">\n";
 print "</form>\n";
 
-&ui_print_footer("edit_$what.cgi?dom=$in{'dom'}&$what=$in{$what}",
-	$text{$what.'_return'});
+&ui_print_footer("edit_$what.cgi?dom=$in{'dom'}&$what=$in{$what}&unix=1",
+		 $text{$what.'_return'});
 

@@ -30,6 +30,6 @@ print &ui_table_row(undef,
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
-&ui_print_footer("edit_$what.cgi?dom=$in{'dom'}&$what=$in{$what}",
-	$text{$what.'_return'});
+&ui_print_footer("edit_$what.cgi?dom=$in{'dom'}&$what=$in{$what}&unix=1",
+		 $text{$what.'_return'});
 
