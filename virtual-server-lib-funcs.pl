@@ -502,6 +502,9 @@ if (-r $script_warnings_file) {
 # Delete script install logs
 &unlink_file("$script_log_directory/$id");
 
+# Delete incremental backup file
+&unlink_file("$incremental_backups_dir/$id");
+
 # Delete cached links for the domain
 &clear_links_cache($_[0]);
 
