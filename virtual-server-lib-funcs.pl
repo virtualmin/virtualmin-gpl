@@ -1822,8 +1822,11 @@ else {
 	# Delete the user
 	&foreign_call($usermodule, "set_user_envs", $_[0], 'DELETE_USER')
 	&foreign_call($usermodule, "making_changes");
-	&foreign_call($usermodule, "delete_user",$_[0]);
+	&foreign_call($usermodule, "delete_user", $_[0]);
 	&foreign_call($usermodule, "made_changes");
+
+	# Record the old UID to prevent re-use
+	&record_old_uid($_[0]->{'uid'});
 	}
 
 if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
@@ -4303,6 +4306,14 @@ foreach $d (&list_domains()) {
 	$_[0]->{$d->{'uid'}} = 1;
 	$_[1]->{$d->{'user'}} = 1;
 	}
+
+# Add UIDs used in the past
+my %uids;
+&read_file_cached($old_uids_file, \%uids);
+foreach my $uid (keys %uids) {
+	$_[0]->{$uid} = 1;
+	}
+
 &release_lock_unix();
 }
 
@@ -4335,10 +4346,19 @@ foreach $d (&list_domains()) {
 	$_[0]->{$d->{'gid'}} = 1;
 	$_[1]->{$d->{'group'}} = 1;
 	}
+
+# Add GIDs used in the past
+my %gids;
+&read_file_cached($old_gids_file, \%gids);
+foreach my $gid (keys %gids) {
+	$_[0]->{$gid} = 1;
+	}
+
 &release_lock_unix();
 }
 
 # allocate_uid(&uid-taken)
+# Given a hash of used UIDs, return one that is free
 sub allocate_uid
 {
 local $uid = $uconfig{'base_uid'};
@@ -4349,6 +4369,7 @@ return $uid;
 }
 
 # allocate_gid(&gid-taken)
+# Given a hash of used GIDs, return one that is free
 sub allocate_gid
 {
 local $gid = $uconfig{'base_gid'};
@@ -14263,6 +14284,27 @@ foreach my $f (@plugins) {
 
 &run_post_actions();
 return 1;
+}
+
+# record_old_uid(uid, [gid])
+# Record usage of some UID and perhaps GID to prevent re-use
+sub record_old_uid
+{
+my ($uid, $gid) = @_;
+&lock_file($old_uids_file);
+my %uids;
+&read_file_cached($old_uids_file, \%uids);
+$uids{$uid} = 1;
+&write_file($old_uids_file, \%uids);
+&unlock_file($old_uids_file);
+if ($gid) {
+	&lock_file($old_gids_file);
+	my %gids;
+	&read_file_cached($old_gids_file, \%gids);
+	$gids{$gid} = 1;
+	&write_file($old_gids_file, \%gids);
+	&unlock_file($old_gids_file);
+	}
 }
 
 # load_plugin_libraries([plugin, ...])

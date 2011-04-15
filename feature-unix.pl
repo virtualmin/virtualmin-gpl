@@ -367,6 +367,7 @@ if (!$_[0]->{'parent'}) {
 		&foreign_call($usermodule, "made_changes");
 		&$second_print($text{'setup_done'});
 		}
+	&record_old_uid($uinfo->{'uid'}, $uinfo->{'gid'});
 	&release_lock_unix($_[0]);
 	&release_lock_cron($_[0]);
 	}

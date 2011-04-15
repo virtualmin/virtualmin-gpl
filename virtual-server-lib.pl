@@ -293,6 +293,9 @@ $cloudmin_provisioning_server = "provisioning.virtualmin.com";
 $cloudmin_provisioning_port = 10000;
 $cloudmin_provisioning_ssl = 1;
 
+$old_uids_file = "$module_config_directory/old-uids";
+$old_gids_file = "$module_config_directory/old-gids";
+
 # generate_plugins_list([list])
 # Creates the confplugins, plugins and other arrays based on the module config
 # or given space-separated string.
