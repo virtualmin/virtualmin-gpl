@@ -57,3 +57,14 @@
 	- Verify that they can be resolved
 
  - Include ajaxterm in Webmin
+
+ - Allow web and SSL ports to be changed via API
+	- https://www.virtualmin.com/node/17811
+
+ - Fix upstart support
+	- http://www.virtualmin.com/node/17831
+	- Fix init module
+	- Fix CGIs in init module
+	- Fix other modules that check init_mode
+	- Make sure enable_at_boot can create new actions
+	- CHANGELOG
