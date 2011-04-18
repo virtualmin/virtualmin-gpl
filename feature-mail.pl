@@ -228,7 +228,8 @@ elsif ($config{'mail_system'} == 5) {
 	# Call vpopmail domain creation program
 	local $qdom = quotemeta($_[0]->{'dom'});
 	local $qpass = quotemeta($_[0]->{'pass'});
-	local $out = `$vpopbin/vadddomain $qdom $qpass 2>&1`;
+	local $out = &backquote_command(
+			"$vpopbin/vadddomain $qdom $qpass 2>&1");
 	if ($?) {
 		&$second_print(&text('setup_evadddomain', "<tt>$out</tt>"));
 		return;
@@ -1099,8 +1100,13 @@ elsif ($config{'mail_system'} == 4) {
 	@$rlist = map { lc($_) } @$rlist;
 	$found++ if (&indexof($_[0], @$rlist) >= 0);
 	}
+elsif ($config{'mail_system'} == 5) {
+	# Check active vpopmail domains
+	$found = -e "$config{'vpopmail_dir'}/domains/$_[0]";
+	}
 elsif ($config{'mail_system'} == 6) {
-    local @dlist = &exim::list_domains();
+	# Look in Exim domains list
+	local @dlist = &exim::list_domains();
 	foreach my $d (@dlist) {
 		$found++ if (lc($d) eq lc($_[0]));
 		}
