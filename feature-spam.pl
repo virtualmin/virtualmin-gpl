@@ -1238,7 +1238,8 @@ local $helper = &get_api_helper_command();
       "Daemon for quickly looking up Virtualmin servers from procmail",
       "$helper lookup-domain-daemon",
       "kill `cat $pidfile`",
-      undef);
+      undef,
+      { 'fork' => 1 });
 if (&check_pid_file($pidfile)) {
 	&init::stop_action("lookup-domain");
 	sleep(5);	# Let port free up
