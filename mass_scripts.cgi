@@ -114,6 +114,9 @@ if ($in{'confirm'}) {
 				&$second_print($text{'scripts_failed'});
 				last if ($in{'fail'});
 				}
+
+			# Clean up any temp files from this script
+			&cleanup_tempnames();
 			}
 		}
 	&webmin_log("upgrade", "scripts", scalar(@sinfos));
