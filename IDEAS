@@ -62,7 +62,5 @@
 	- https://www.virtualmin.com/node/17811
 
  - Fix upstart support
-	- don't set "expect fork" if process doesn't fork, or else hangs
-	- fix commenting in / out of start line
-	- test start / stop buttons
+	- http://www.virtualmin.com/node/17831
 	- webmin.com / facebook
