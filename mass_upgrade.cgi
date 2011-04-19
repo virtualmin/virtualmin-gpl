@@ -16,10 +16,12 @@ foreach $id (@d) {
 	if ($sinfo) {
 		push(@sinfos, $sinfo);
 		$script = &get_script($sinfo->{'name'});
+		$sinfo->{'deleted'} &&
+			&text('massg_edeleted', $script->{'desc'}));
 		@vers = grep { &can_script_version($script, $_) }
 			     @{$script->{'versions'}};
 		@better = grep { &compare_versions($_,
-					$sinfo->{'version'}, $script) > 0 } @vers;
+				    $sinfo->{'version'}, $script) > 0 } @vers;
 		$ver = @better ? $better[$#better] : undef;
 		$scriptmap{$sinfo->{'id'}} = $script;
 		$vermap{$sinfo->{'id'}} = $ver;

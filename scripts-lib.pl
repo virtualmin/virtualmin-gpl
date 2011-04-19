@@ -210,6 +210,9 @@ while($f = readdir(DIR)) {
 				}
 			}
 		$info{'time'} = $st[9];
+		if ($info{'opts'}->{'dir'} && !-d $info{'opts'}->{'dir'}) {
+			$info{'deleted'} = 1;
+			}
 		push(@rv, \%info);
 		}
 	}
@@ -2032,6 +2035,9 @@ foreach my $d (@$doms) {
 
 		# Don't upgrade if we are already running this version
 		next if ($ver eq $sinfo->{'version'});
+
+		# Don't upgrade if deleted
+		next if ($sinfo->{'deleted'});
 
 		# We have one - add to the results
 		push(@rv, { 'sinfo' => $sinfo,

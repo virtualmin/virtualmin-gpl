@@ -41,7 +41,11 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 	if (defined(&$canupfunc)) {
 		@vers = grep { &$canupfunc($sinfo, $_) } @vers;
 		}
-	if (&indexof($sinfo->{'version'}, @vers) < 0) {
+	if ($sinfo->{'deleted'}) {
+		$status = "<font color=#ff0000>".
+			  $text{'scripts_deleted'}."</font>";
+		}
+	elsif (&indexof($sinfo->{'version'}, @vers) < 0) {
 		@better = grep { &compare_versions($_, $sinfo->{'version'},
 				 		   $script) > 0 } @vers;
 		if (@better) {
@@ -85,7 +89,7 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 		 "script=$sinfo->{'id'}'>$desc</a>",
 		$script->{'vdesc'}->{$sinfo->{'version'}} ||
 		  $sinfo->{'version'},
-		$sinfo->{'url'} ? 
+		$sinfo->{'url'} && !$sinfo->{'deleted'} ? 
 		  "<a href='$sinfo->{'url'}' target=_new>$path</a>" :
 		  $path,
 		$dbdesc,

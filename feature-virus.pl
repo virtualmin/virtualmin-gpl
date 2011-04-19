@@ -641,7 +641,7 @@ elsif (-r "/opt/csw/etc/clamd.conf.CSW") {
 	local $clamd = &has_command("clamd") ||
 		       &has_command("/opt/csw/sbin/clamd");
 	&init::enable_at_boot($init, "Start ClamAV server",
-			      "$clamd",
+			      $clamd,
 			      "ps -ef | grep clamd | grep -v grep | grep -v \$\$ | awk '{ print \$2 }' | xargs kill");
 	local $ifile = &init::action_filename($init);
 	local $out = &backquote_logged("$ifile start 2>&1");

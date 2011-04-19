@@ -29,6 +29,10 @@ if ($sinfo->{'partial'}) {
 	print &ui_table_row($text{'scripts_ipartial'},
 		"<font color=#ff0000>$sinfo->{'partial'}</font>");
 	}
+if ($sinfo->{'deleted'}) {
+	print &ui_table_row($text{'scripts_idstatus'},
+		"<font color=#ff0000>$text{'scripts_ideleted'}</font>");
+	}
 
 # Show install URL
 if ($sinfo->{'url'}) {
@@ -92,30 +96,35 @@ print &ui_submit($text{'scripts_uok'}, "uninstall"),"\n";
 		    &can_script_version($script, $_) }
 		  @{$script->{'versions'}};
 $canupfunc = $script->{'can_upgrade_func'};
-if (defined(&$canupfunc)) {
-	@vers = grep { &$canupfunc($sinfo, $_) } @vers;
-	}
-if (@vers) {
-	# Upgrade button
-	print "&nbsp;&nbsp;\n";
-	print &ui_submit($text{'scripts_upok'}, "upgrade"),"\n";
-	print &ui_select("version", $vers[$#vers],
-			 [ map { [ $_ ] } @vers ]),"\n";
-	}
-elsif (&can_unsupported_scripts()) {
-	# Upgrade to un-supported version
-	print "&nbsp;&nbsp;\n";
-        print &ui_submit($text{'scripts_upok2'}, "upgrade"),"\n";
-	print &ui_textbox("version", undef, 15),"\n";
-	}
-if ($gotstatus) {
-	print "&nbsp;&nbsp;\n";
-	if (@pids) {
-		print &ui_submit($text{'scripts_ustop'}, "stop"),"\n";
-		print &ui_submit($text{'scripts_urestart'}, "restart"),"\n";
+if (!$sinfo->{'deleted'}) {
+	if (defined(&$canupfunc)) {
+		@vers = grep { &$canupfunc($sinfo, $_) } @vers;
 		}
-	else {
-		print &ui_submit($text{'scripts_ustart'}, "start"),"\n";
+	if (@vers) {
+		# Upgrade button
+		print "&nbsp;&nbsp;\n";
+		print &ui_submit($text{'scripts_upok'}, "upgrade"),"\n";
+		print &ui_select("version", $vers[$#vers],
+				 [ map { [ $_ ] } @vers ]),"\n";
+		}
+	elsif (&can_unsupported_scripts()) {
+		# Upgrade to un-supported version
+		print "&nbsp;&nbsp;\n";
+		print &ui_submit($text{'scripts_upok2'}, "upgrade"),"\n";
+		print &ui_textbox("version", undef, 15),"\n";
+		}
+	if ($gotstatus) {
+		print "&nbsp;&nbsp;\n";
+		if (@pids) {
+			print &ui_submit($text{'scripts_ustop'},
+					 "stop"),"\n";
+			print &ui_submit($text{'scripts_urestart'},
+					 "restart"),"\n";
+			}
+		else {
+			print &ui_submit($text{'scripts_ustart'},
+					 "start"),"\n";
+			}
 		}
 	}
 print &ui_form_end();

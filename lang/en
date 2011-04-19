@@ -3313,6 +3313,8 @@ scripts_nomatch=No scripts matched your search.
 scripts_iheader=Script install options
 scripts_iname=Script to install
 scripts_ipartial=Partial installation error
+scripts_idstatus=Installation status
+scripts_ideleted=Directory has been manually deleted
 scripts_idesc=Script description
 scripts_iuses=Programming language
 scripts_isite=Original website
@@ -3452,6 +3454,7 @@ scripts_geminstall=Installing Ruby Gem $1 ..
 scripts_geminstall2=Installing Ruby Gem $1 version $2 ..
 scripts_gemfailed=.. Gem install failed : $1
 scripts_gemlink=Linking Gem command $1 to new version $2 ..
+scripts_deleted=Manually deleted
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:
@@ -4676,6 +4679,7 @@ massg_enone=None selected
 massg_fromto=Upgrading from $1 to $2
 massg_stay=Staying with $1
 massg_doing=Upgrading $1 to version $2 ..
+massg_edeleted=Script $1 has been manually deleted and so cannot be upgraded!
 
 aedit_title=Manually Edit Aliases
 aedit_header=Create multiple email aliases from batch file

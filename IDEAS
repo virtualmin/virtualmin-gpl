@@ -62,9 +62,7 @@
 	- https://www.virtualmin.com/node/17811
 
  - Fix upstart support
-	- http://www.virtualmin.com/node/17831
-	- Fix init module
-	- Fix CGIs in init module
-	- Fix other modules that check init_mode
-	- Make sure enable_at_boot can create new actions
-	- CHANGELOG
+	- don't set "expect fork" if process doesn't fork, or else hangs
+	- fix commenting in / out of start line
+	- test start / stop buttons
+	- webmin.com / facebook
