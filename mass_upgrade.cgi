@@ -17,7 +17,7 @@ foreach $id (@d) {
 		push(@sinfos, $sinfo);
 		$script = &get_script($sinfo->{'name'});
 		$sinfo->{'deleted'} &&
-			&text('massg_edeleted', $script->{'desc'}));
+			&text('massg_edeleted', $script->{'desc'});
 		@vers = grep { &can_script_version($script, $_) }
 			     @{$script->{'versions'}};
 		@better = grep { &compare_versions($_,
