@@ -400,7 +400,7 @@ foreach my $w (@w) {
 		$w = "0".$w;
 		}
 	}
-return join(":", @w);
+return lc(join(":", @w));
 }
 
 1;
