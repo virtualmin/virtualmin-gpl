@@ -1591,10 +1591,13 @@ else {
 local $var2 = { 'flags' => [ ],
 		'conds' => [ [ "?", $cmd ] ],
 	        'action' => '/dev/null' };
+local $var3 = { 'name' => 'EXITCODE',
+                'value' => '0' };
 
 # Add after the VIRTUALMIN= line
 &procmail::create_recipe_before($var1, $virtafter);
 &procmail::create_recipe_before($var2, $virtafter);
+&procmail::create_recipe_before($var3, $virtafter);
 }
 
 # startstop_spam([&typestatus])
