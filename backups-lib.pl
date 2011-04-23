@@ -278,16 +278,28 @@ foreach my $desturl (@$desturls) {
 			return (0, 0, $doms);
 			}
 		if ($dirfmt && $path ne "/") {
-			# Also create the destination directory now, by scping
-			# an empty dir.
+			# Also create the destination directory now, by running
+			# mkdir via ssh or scping an empty dir
 			$path =~ /^(.*)\/([^\/]+)\/?$/;
 			local ($pathdir, $pathfile) = ($1, $2);
-			local $empty = &transname($pathfile);
-			local $mkdirerr;
-			&make_dir($empty, 0755);
-			local $r = ($user ? "$user\@" : "")."$server:$pathdir";
-			&scp_copy($empty, $r, $pass, \$mkdirerr, $port);
-			&unlink_file($empty);
+
+			# ssh mkdir first
+			local $sshcmd = "ssh".($port ? " -p $port" : "")." ".
+					($user ? "$user\@" : "").$server;
+			local $mkcmd = $sshcmd." mkdir -p ".quotemeta($pathdir);
+			local $err;
+			local $lsout = &run_ssh_command($mkcmd, $pass, \$err);
+
+			if ($err) {
+				# Try scping an empty dir
+				local $empty = &transname($pathfile);
+				local $mkdirerr;
+				&make_dir($empty, 0755);
+				local $r = ($user ? "$user\@" : "").
+					   "$server:$pathdir";
+				&scp_copy($empty, $r, $pass, \$mkdirerr, $port);
+				&unlink_file($empty);
+				}
 			}
 		}
 	elsif ($mode == 3) {
