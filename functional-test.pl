@@ -3453,6 +3453,33 @@ $web_tests = [
 	  'grep' => 'Test web page',
 	},
 
+	# Change listen port to 8888
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'port', 8888 ] ],
+	},
+
+	# Test wget on new port
+	{ 'command' => $wget_command.'http://'.$test_domain.':8888',
+	  'grep' => 'Test web page',
+	},
+
+	# Test wget to make sure port 80 now fails
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'antigrep' => 'Test web page',
+	},
+
+	# Change listen port back to 80
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'port', 80 ] ],
+	},
+
+	# Test wget to make sure port 80 works
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test web page',
+	},
+
 	# Get rid of the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],

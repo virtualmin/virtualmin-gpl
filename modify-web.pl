@@ -49,6 +49,10 @@ use the C<--default-website> flag. This lets you control which domain's
 contents appear if someone accesses your system via a URL with only an IP
 address, rather than a domain name.
 
+To change the HTTP port the selected virtual servers listen on, use the 
+C<--port> flag followed by a port number. For SSL websites, you can also use
+the C<--ssl-port> flag.
+
 =cut
 
 package virtual_server;
@@ -162,6 +166,16 @@ while(@ARGV > 0) {
 	elsif ($a eq "--document-dir") {
 		$htmldir = shift(@ARGV);
 		}
+	elsif ($a eq "--port") {
+		$port = shift(@ARGV);
+		$port =~ /^\d+$/ && $port > 0 && $port < 65536 ||
+			&usage("--port must be followed by a number");
+		}
+	elsif ($a eq "--ssl-port") {
+		$sslport = shift(@ARGV);
+		$sslport =~ /^\d+$/ && $sslport > 0 && $sslport < 65536 ||
+			&usage("--ssl-port must be followed by a number");
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -170,7 +184,8 @@ while(@ARGV > 0) {
 $mode || $rubymode || defined($proxy) || defined($framefwd) ||
   defined($suexec) || $stylename || $content || defined($children) ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
-  $defwebsite || $accesslog || $errorlog || $htmldir || &usage("Nothing to do");
+  $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
+  &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -454,7 +469,15 @@ foreach $d (@doms) {
 		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
 
-	if (defined($proxy) || defined($framefwd)) {
+	# Change web ports
+	if ($port) {
+		$d->{'web_port'} = $port;
+		}
+	if ($sslport) {
+		$d->{'web_sslport'} = $sslport;
+		}
+
+	if (defined($proxy) || defined($framefwd) || $port || $sslport) {
 		# Save the domain
 		&modify_web($d, $oldd);
 		if ($d->{'ssl'}) {
@@ -462,7 +485,8 @@ foreach $d (@doms) {
 			}
 		}
 
-	if (defined($proxy) || defined($framefwd) || $htmldir) {
+	if (defined($proxy) || defined($framefwd) || $htmldir ||
+	    $port || $sslport) {
 		&$first_print($text{'save_domain'});
 		&save_domain($d);
 		&$second_print($text{'setup_done'});
@@ -512,6 +536,7 @@ print "                     [--default-website]\n";
 print "                     [--access-log log-path]\n";
 print "                     [--error-log log-path]\n";
 print "                     [--document-dir subdirectory]\n";
+print "                     [--port number] [--ssl-port number]\n";
 exit(1);
 }
 

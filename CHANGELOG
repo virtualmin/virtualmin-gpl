@@ -1287,3 +1287,4 @@ Added support for spam and virus filtering offloading to the Cloudmin Services p
 Records can now be manually edited by the master admin on the DNS Records page, in BIND record format.
 Added a checkbox to the Custom Fields page to control if each field appears on the List Virtual Servers page.
 Unix UIDs and GIDs for domain owners and mailboxes are now tracked when deleted to prevent re-use.
+The HTTP and HTTPS ports for a virtual server can now be changed using the --port and --ssh-port flags to the modify-web API command.
