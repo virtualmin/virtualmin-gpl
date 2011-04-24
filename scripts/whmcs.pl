@@ -309,7 +309,7 @@ if (!-r $cfile) {
 # Run install script
 if (!$upgrade) {
 	# Fetch config check page
-	local $ipath = $opts->{'path'}."install/install.php";
+	local $ipath = $opts->{'path'}."/install/install.php";
 	local ($out, $err);
 	&get_http_connection($d, $ipath."?step=2", \$out, \$err);
 	if ($err) {
