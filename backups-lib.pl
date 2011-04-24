@@ -566,7 +566,6 @@ DOMAIN: foreach $d (@$doms) {
 
 	if ($onebyone && $homefmt && $dok && $anyremote) {
 		# Transfer this domain now
-		local $err;
 		local $df = "$d->{'dom'}.$hfsuffix";
 		&$cbfunc($d, 1, "$dest/$df") if ($cbfunc);
 		local $tstart = time();
@@ -577,12 +576,13 @@ DOMAIN: foreach $d (@$doms) {
 		foreach my $desturl (@$desturls) {
 			local ($mode, $user, $pass, $server, $path, $port) =
 				&parse_backup_url($desturl);
+			local $err;
 			if ($mode == 0) {
 				# Copy to another local directory
 				next if ($path eq $path0);
 				&$first_print(&text('backup_copy',
 						    "<tt>$path/$df</tt>"));
-				my ($ok, $err);
+				local $ok;
 				if ($asd) {
 					($ok, $err) = 
 					  &copy_source_dest_as_domain_user(
