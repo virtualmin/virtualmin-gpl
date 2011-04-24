@@ -61,7 +61,7 @@ if ($upgrade) {
 	local $dir = $upgrade->{'opts'}->{'dir'};
 	$dir =~ s/^$d->{'home'}\///;
 	$rv .= &ui_table_row("Install directory", $dir);
-	$rv .= &ui_table_row("WHCS licence key", $opts->{'licensekey'});
+	$rv .= &ui_table_row("WHMCS licence key", $opts->{'licensekey'});
 	}
 else {
 	# Show editable install options
@@ -71,7 +71,7 @@ else {
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
 			     &ui_opt_textbox("dir", "whmcs", 30,
 					     "At top level"));
-	$rv .= &ui_table_row("WHCS license key",
+	$rv .= &ui_table_row("WHMCS license key",
 			     &ui_textbox("licensekey", undef, 30));
 	$rv .= &ui_table_row(" ",
 		"You must purchase an <a href='http://www.whmcs.com/members/aff.php?aff=4115' target=_new>WHMCS license</a> before installing this script");
@@ -411,7 +411,7 @@ return ( "http://forum.whmcs.com/forumdisplay.php?s=f0986c5381d494b7b6b6a0923fef
 
 sub script_whmcs_site
 {
-return 'http://www.whmcs.com/';
+return 'http://www.whmcs.com/members/aff.php?aff=4115';
 }
 
 sub script_whmcs_passmode
