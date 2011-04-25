@@ -235,6 +235,10 @@ $connectivity_check_host = "software.virtualmin.com";
 $connectivity_check_port = 80;
 $connectivity_check_page = "/cgi-bin/connectivity.cgi";
 
+$resolve_check_host = "software.virtualmin.com";
+$resolve_check_port = 80;
+$resolve_check_page = "/cgi-bin/resolve.cgi";
+
 $virtualmin_license_file = "/etc/virtualmin-license";
 $virtualmin_yum_repo = "/etc/yum.repos.d/virtualmin.repo";
 

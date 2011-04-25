@@ -52,9 +52,5 @@
 
  - Move cron jobs to webmincron
 
- - Ask for DNS nameservers for new zones in wizard
-	- https://www.virtualmin.com/node/17335
-	- Verify that they can be resolved
-
  - Include ajaxterm in Webmin
 

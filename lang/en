@@ -5276,6 +5276,16 @@ wizard_mysql_pass0=Set to
 wizard_mysql_empty=Set MySQL password
 wizard_title_done=All done
 wizard_done=Virtualmin post-installation configuration is now complete!<p>You can adjust the settings you just made on the <a href='$1'>Features and Plugins</a> and <a href='$2'>Spam and Virus Scanning</a> pages.
+wizard_dns=For DNS zones created by Virtualmin to be resolvable, the primary nameserver record for each zone must be set to something that can itself be resolved by other systems on the Internet.
+wizard_dns_prins=Primary nameserver
+wizard_dns_secns=Secondary nameservers (optional)
+wizard_dns_eprins=Primary nameserver is not a valid DNS name
+wizard_dns_eprins2=Primary nameserver cannot be resolved on this system
+wizard_dns_eprins3=Primary nameserver cannot be resolved from the rest of the Internet : $1
+wizard_dns_esecns=Secondary nameserver $1 is not a valid DNS name
+wizard_dns_esecns2=Secondary nameserver $1 cannot be resolved on this system
+wizard_dns_esecns3=Secondary nameserver $1 cannot be resolved from the rest of the Internet : $2
+wizard_dns_skip=Skip check for resolvability
 
 backuplog_title=Backup Logs
 backuplg_ecannot=You are not allowed to view Virtualmin backup logs

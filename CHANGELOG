@@ -1288,3 +1288,4 @@ Records can now be manually edited by the master admin on the DNS Records page, 
 Added a checkbox to the Custom Fields page to control if each field appears on the List Virtual Servers page.
 Unix UIDs and GIDs for domain owners and mailboxes are now tracked when deleted to prevent re-use.
 The HTTP and HTTPS ports for a virtual server can now be changed using the --port and --ssh-port flags to the modify-web API command.
+As part of the post-install wizard process, the primary DNS server hostname is now prompted for and validated. This ensures that DNS zones created by Virtualmin have usable NS records.

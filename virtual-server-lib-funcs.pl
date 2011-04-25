@@ -14308,6 +14308,30 @@ if ($gid) {
 	}
 }
 
+# check_resolvability(name)
+# Returns 1 and the IP if a name can be resolved, or 0 and an error message
+sub check_resolvability
+{
+my ($name) = @_;
+local $page = $resolve_check_page."?host=".&urlize($name);
+local ($out, $error);
+&http_download($resolve_check_host,
+	       $resolve_check_port,
+	       $page, \$out, \$error, undef, 0, undef, undef, 60, 0, 1);
+if ($error) {
+	return (0, $error);
+	}
+elsif ($out =~ /^ok\s+([0-9\.]+)/) {
+	return (1, $1);
+	}
+elsif ($out =~ /^(error|param)\s+(.*)/) {
+	return (0, $2);
+	}
+else {
+	return (0, "Unknown response : $out");
+	}
+}
+
 # load_plugin_libraries([plugin, ...])
 # Call foreign_require on some or all plugins, just once
 sub load_plugin_libraries
