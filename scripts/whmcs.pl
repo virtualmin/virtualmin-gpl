@@ -39,7 +39,7 @@ return ( 5 );
 
 sub script_whmcs_php_modules
 {
-return ("mysql");
+return ("mysql", "curl");
 }
 
 sub script_whmcs_dbs
