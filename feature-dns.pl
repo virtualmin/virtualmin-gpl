@@ -2624,6 +2624,17 @@ return ( { 'type' => 'A',
 	   'domain' => 1,
 	   'create' => 0,
 	 },
+	 { 'type' => 'PTR',
+	   'desc' => $text{'records_typeptr'},
+	   'domain' => 0,
+	   'create' => 1,
+	   'values' => [ { 'desc' => $text{'records_valueptr'},
+			   'size' => 40,
+			   'func' => sub { $_[0] =~ /^[a-z0-9\.\_\-]+\.$/i ?
+					    undef : $text{'records_evalueptr'} }
+			 },
+		       ],
+	 },
        );
 }
 
