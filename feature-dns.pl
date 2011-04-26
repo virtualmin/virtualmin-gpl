@@ -2405,9 +2405,10 @@ sub post_records_change
 {
 local ($d, $recs, $fn) = @_;
 &require_bind();
+local $z;
 if (!$fn) {
 	# Use local file by default
-	local $z = &get_bind_zone($d->{'dom'});
+	$z = &get_bind_zone($d->{'dom'});
 	return "Failed to find zone for $d->{'dom'}" if (!$z);
 	local $file = &bind8::find("file", $z->{'members'});
 	return "Failed to find records file for $d->{'dom'}" if (!$file);
@@ -2418,6 +2419,7 @@ if (defined(&bind8::supports_dnssec) &&
     &bind8::supports_dnssec() &&
     !$d->{'provision_dns'}) {
 	# Re-sign too
+	$z ||= &get_bind_zone($d->{'dom'});
 	eval {
 		local $main::error_must_die = 1;
 		&bind8::sign_dnssec_zone_if_key($z, $recs, 0);
