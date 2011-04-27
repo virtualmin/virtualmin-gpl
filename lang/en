@@ -5520,6 +5520,7 @@ records_valueptr=Reverse address
 records_evalueptr=Value must be an DNS name and end with a dot
 records_comment=Comment
 records_manual=Manually Edit Records
+records_epost=Records were not fully deleted : $1
 
 record_title1=Create DNS Record
 record_title2=Edit DNS Record
@@ -5544,6 +5545,7 @@ record_evalue=Invalid value for $1
 record_ecname=The Name Alias record $1 has the same name an existing record
 record_eunder=DNS record $1 cannot be edited, as it is not under $2
 record_defttl=Default cache time
+record_epost=Record was not fully saved : $1
 
 clone_object=Creating new virtual server settings ..
 clone_clash=Checking for clashes and dependency problems ..

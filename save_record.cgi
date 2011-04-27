@@ -147,10 +147,11 @@ else {
 		&bind8::modify_record($file, $r, @params);
 		}
 	}
-&post_records_change($d, $recs, $file);
+$err = &post_records_change($d, $recs, $file);
 &release_lock_dns($d);
 &reload_bind_records($d);
 &webmin_log($in{'delete'} ? 'delete' : $in{'type'} ? 'create' : 'modify',
 	    'record', $d->{'dom'}, $r);
+&error(&text('record_epost', $err)) if ($err);
 &redirect("list_records.cgi?dom=$in{'dom'}");
 
