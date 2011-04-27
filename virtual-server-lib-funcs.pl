@@ -2859,7 +2859,7 @@ foreach my $d (&sort_indent_domains($doms)) {
 			}
 		elsif ($c eq "user") {
 			# Username
-			push(@cols, $d->{'user'});
+			push(@cols, &html_escape($d->{'user'}));
 			}
 		elsif ($c eq "owner") {
 			# Domain description / owner
@@ -2867,19 +2867,19 @@ foreach my $d (&sort_indent_domains($doms)) {
 				my $aliasdom = &get_domain($d->{'alias'});
 				my $of = &text('index_aliasof',
 						$aliasdom->{'dom'});
-				push(@cols, $d->{'owner'} || $of);
+				push(@cols, &html_escape($d->{'owner'} || $of));
 				}
 			else {
-				push(@cols, $d->{'owner'});
+				push(@cols, &html_escape($d->{'owner'}));
 				}
 			}
 		elsif ($c eq "emailto") {
 			# Email address
-			push(@cols, $d->{'emailto'});
+			push(@cols, &html_escape($d->{'emailto'}));
 			}
 		elsif ($c eq "reseller") {
 			# Reseller name
-			push(@cols, $d->{'reseller'});
+			push(@cols, &html_escape($d->{'reseller'}));
 			}
 		elsif ($c eq "admins") {
 			# Extra admin names
@@ -2891,7 +2891,7 @@ foreach my $d (&sort_indent_domains($doms)) {
 						&urlize($_)."'>$_</a>" }
 					      @admins;
 				}
-			push(@cols, join(' ', @admins));
+			push(@cols, &html_escape(join(' ', @admins)));
 			}
 		elsif ($c eq "users") {
 			# User count
@@ -2974,7 +2974,7 @@ foreach my $d (&sort_indent_domains($doms)) {
 			}
 		elsif ($c =~ /^field_/) {
 			# Some custom field
-			push(@cols, $d->{$c});
+			push(@cols, &html_escape($d->{$c}));
 			}
 		}
 	foreach $f (@table_features) {
@@ -4542,6 +4542,7 @@ local $did = $d ? $d->{'id'} : 0;
 local @table;
 foreach $u (@$users) {
 	local $pop3 = $d ? &remove_userdom($u->{'user'}, $d) : $u->{'user'};
+	$pop3 = &html_escape($pop3);
 	local @cols;
 	push(@cols, "<a href='edit_user.cgi?dom=$did&".
 	      "user=".&urlize($u->{'user'})."&unix=$u->{'unix'}'>".
@@ -4550,8 +4551,8 @@ foreach $u (@$users) {
 	        $u->{'pass'} =~ /^\!/ ? "<u><i>$pop3</i></u>" :
 	       $u->{'webowner'} ? "<u>$pop3</u>" :
 	       $u->{'pass'} =~ /^\!/ ? "<i>$pop3</i>" : $pop3)."</a>\n");
-	push(@cols, $u->{'user'});
-	push(@cols, $u->{'real'});
+	push(@cols, &html_escape($u->{'user'}));
+	push(@cols, &html_escape($u->{'real'}));
 
 	# Add columns for quotas
 	local $quota;
