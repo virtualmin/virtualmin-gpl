@@ -12503,18 +12503,28 @@ local $dir = &resolve_links($_[0]);
 &foreign_require("mount", "mount-lib.pl");
 local @mounts = &mount::list_mounts();
 local @mounted = &mount::list_mounted();
-local @realmounts = grep { $_->[0] ne 'none' && $_->[0] !~ /^swap/ &&
+# Exclude swap mounts
+local @realmounts = grep { $_->[0] ne 'none' &&
+			   $_->[0] !~ /^swap/ &&
 			   $_->[1] ne 'none' } @mounts;
 if (!@realmounts) {
 	# If /etc/fstab contains no real mounts (such as in a VPS environment),
 	# then fake it to be the same as /etc/mtab
 	@mounts = @mounted;
 	}
-foreach $m (sort { length($b->[0]) <=> length($a->[0]) } @mounted) {
+foreach my $m (sort { length($b->[0]) <=> length($a->[0]) } @mounted) {
 	if ($dir eq $m->[0] || $m->[0] eq "/" ||
 	    substr($dir, 0, length($m->[0])+1) eq "$m->[0]/") {
+		# Found currently mounted parent directory
 		local ($m2) = grep { $_->[0] eq $m->[0] } @mounts;
 		if ($m2) {
+			if ($m2->[2] eq "bind" && $m2->[0] eq $m2->[1]) {
+				# Skip loopback mount onto same directory,
+				# as any quotas will be defined in the real
+				# mount.
+				next;
+				}
+			# Found boot-time mount as well
 			return ($m, $m2);
 			}
 		}
