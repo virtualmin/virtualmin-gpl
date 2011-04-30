@@ -165,7 +165,7 @@ if ($sched->{'after'}) {
 	}
 &cleanup_backup_limits(0, 1);
 foreach $dest (@strfdests) {
-	&write_backup_log(\@doms, $dest, $backup->{'incremental'}, $start_time,
+	&write_backup_log(\@doms, $dest, $sched->{'incremental'}, $start_time,
 			  $size, $ok, "sched", $output, $errdoms,
 			  $asd ? $asd->{'user'} : undef);
 	}
