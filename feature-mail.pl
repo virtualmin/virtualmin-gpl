@@ -2111,6 +2111,11 @@ if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 		}
 	}
 
+# Delete old-style mail file under /var/mail or /var/spool/mail , which
+# procmail sometimes creates
+&unlink_file("/var/mail/$_[0]->{'user'}",
+	     "/var/spool/mail/$_[0]->{'user'}");
+
 # Remove mailboxes moduile indexes
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 &mailboxes::delete_user_index_files($_[0]->{'user'});
