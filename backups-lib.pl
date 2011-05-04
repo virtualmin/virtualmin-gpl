@@ -2091,7 +2091,7 @@ if ($mode == 1) {
 			next if ($f eq "." || $f eq ".." || $f eq "");
 			next if ($infoonly && $f !~ /\.info$/);
 			&ftp_download($server, "$path/$f", "$temp/$f", \$err,
-				      undef, $user, $pass, $port);
+				      undef, $user, $pass, $port, 1);
 			return $err if ($err);
 			}
 		}
@@ -2099,7 +2099,7 @@ if ($mode == 1) {
 		# Can just download a single file.
 		# In info-only mode, just get the .info file.
 		&ftp_download($server, $path.($infoonly ? ".info" : ""),
-			      $temp, \$err, undef, $user, $pass, $port);
+			      $temp, \$err, undef, $user, $pass, $port, 1);
 		return $err if ($err);
 		}
 	}

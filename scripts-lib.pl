@@ -398,7 +398,7 @@ foreach my $f (@files) {
 				# Via FTP
 				my ($host, $page) = ($1, $2);
 				&ftp_download($host, $page, $temp, \$error,
-					      $cb, $user, $pass);
+					    $cb, $user, $pass, undef, $nocache);
 				}
 			else {
 				$firsterror ||= &text('scripts_eurl', $url);
