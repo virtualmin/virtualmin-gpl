@@ -19,7 +19,7 @@ if ($in{'upgrade'}) {
 	}
 else {
 	# Installing new
-	$sname = $in{'script'};
+	$sname = $in{'fast'} || $in{'script'};
 	$sname || &error($text{'scripts_enosel'});
 	$ver = $in{'ver_'.$sname} || $in{'ver'};
 	$script = &get_script($sname);

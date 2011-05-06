@@ -190,7 +190,10 @@ foreach $script (sort { $a->{'sortcategory'} cmp
 	      'checked' => $in{'search'} && @scripts == 1 },
 	    $script->{'site'} ? "<a href='$script->{'site'}' target=_new>".
 				"$script->{'desc'}</a>" : $script->{'desc'},
-	    $vsel,
+	    $vsel." ".
+	    "<input type=image name=fast ".
+	      "value=\"".&quote_escape($script->{'name'})."\" ".
+	      "src=images/ok.gif>",
 	    $script->{'longdesc'},
 	    { 'type' => 'string',
 	      'nowrap' => 1,
