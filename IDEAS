@@ -52,5 +52,10 @@
 
  - Move cron jobs to webmincron
 
- - Include ajaxterm in Webmin
+ - Per-directory SVN access control
+	- http://www.virtualmin.com/node/18073
 
+ - Webmin code cleanup
+	- Can avoid need to use "our" for globals?
+
+ - Disable users whose licences have expired by > 60 days
