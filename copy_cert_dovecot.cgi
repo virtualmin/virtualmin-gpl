@@ -71,6 +71,11 @@ $protos = &dovecot::find_value("protocols", $conf);
 push(@protos, "imaps") if (!$protos{'imaps'} && $protos{'imap'});
 push(@protos, "pop3s") if (!$protos{'pop3s'} && $protos{'pop3'});
 &dovecot::save_directive($conf, "protocols", join(" ", @protos));
+
+# Enable PCI-compliant ciphers
+&dovecot::save_directive($conf, "ssl_cipher_list",
+			 "HIGH:MEDIUM:+TLSv1:!SSLv2:+SSLv3");
+
 &flush_file_lines();
 &unlock_file($dovecot::config{'dovecot_config'});
 &$second_print($text{'setup_done'});
