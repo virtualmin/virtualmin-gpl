@@ -1290,3 +1290,5 @@ Unix UIDs and GIDs for domain owners and mailboxes are now tracked when deleted 
 The HTTP and HTTPS ports for a virtual server can now be changed using the --port and --ssh-port flags to the modify-web API command.
 As part of the post-install wizard process, the primary DNS server hostname is now prompted for and validated. This ensures that DNS zones created by Virtualmin have usable NS records.
 Reverse (PTR) records can now be created on the DNS Records page.
+---- Changes since 3.85 ----
+Updated the Moodle script installer to version 2.0.3.
