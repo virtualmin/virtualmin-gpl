@@ -2766,10 +2766,12 @@ while(<UFILE>) {
 		# Domain owner, just update alias list
 		local @users = &list_domain_users($_[0]);
 		local ($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'}} @users;
-		local %old = %$uinfo;
-		$uinfo->{'email'} = $user[7];
-		$uinfo->{'to'} = \@to;
-		&modify_user($uinfo, \%old, $_[0]);
+		if ($uinfo) {
+			local %old = %$uinfo;
+			$uinfo->{'email'} = $user[7];
+			$uinfo->{'to'} = \@to;
+			&modify_user($uinfo, \%old, $_[0]);
+			}
 		}
 	else {
 		# Need to create user
