@@ -58,4 +58,5 @@
  - Webmin code cleanup
 	- Can avoid need to use "our" for globals?
 
- - Disable users whose licences have expired by > 60 days
+ - Postfix page for outgoing SMTP authentication
+	- Email "Feature Request: Relay host authentication" from Eric
