@@ -2488,7 +2488,7 @@ foreach my $sinfo (&list_domain_scripts($d)) {
 	my $rfunc = $script->{'realversion_func'};
 	if (defined(&$rfunc)) {
 		local $realver = &$rfunc($d, $sinfo->{'opts'}, $sinfo);
-		if ($realver ne $sinfo->{'version'}) {
+		if ($realver && $realver ne $sinfo->{'version'}) {
 			# Version has changed .. fix
 			$sinfo->{'version'} = $realver;
 			&save_domain_script($d, $sinfo);
