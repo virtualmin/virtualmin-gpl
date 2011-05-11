@@ -4498,10 +4498,18 @@ local ($d, $fwdto) = @_;
 local $virt = { 'from' => "\@$d->{'dom'}",
 		'to' => [ $fwdto ] };
 local ($clash) = grep { $_->{'from'} eq $virt->{'from'} } &list_virtusers();
-if ($clash) {
-	&delete_virtuser($clash);
-	}
+&delete_virtuser($clash) if ($clash);
 &create_virtuser($virt);
+if ($d->{'unix'}) {
+	# Also forward domain owner's mail
+	local @users = &list_domain_users($d);
+	local ($uinfo) = grep { $_->{'user'} eq $d->{'user'}} @users;
+	if ($uinfo) {
+		local %old = %$uinfo;
+		$uinfo->{'to'} = [ $fwdto ];
+		&modify_user($uinfo, \%old, $d);
+		}
+	}
 &sync_alias_virtuals($d);
 }
 
