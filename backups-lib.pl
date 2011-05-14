@@ -286,7 +286,7 @@ foreach my $desturl (@$desturls) {
 			# ssh mkdir first
 			local $sshcmd = "ssh".($port ? " -p $port" : "")." ".
 					($user ? "$user\@" : "").$server;
-			local $mkcmd = $sshcmd." mkdir -p ".quotemeta($pathdir);
+			local $mkcmd = $sshcmd." mkdir -p ".quotemeta($path);
 			local $err;
 			local $lsout = &run_ssh_command($mkcmd, $pass, \$err);
 
