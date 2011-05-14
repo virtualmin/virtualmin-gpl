@@ -1291,4 +1291,4 @@ The HTTP and HTTPS ports for a virtual server can now be changed using the --por
 As part of the post-install wizard process, the primary DNS server hostname is now prompted for and validated. This ensures that DNS zones created by Virtualmin have usable NS records.
 Reverse (PTR) records can now be created on the DNS Records page.
 ---- Changes since 3.85 ----
-Updated the Moodle script installer to version 2.0.3, Zikula to 1.2.7, phpMyAdmin to 3.4.0, PHPList to 2.10.14, and SugarCRM to 6.2.0RC1.
+Updated the Moodle script installer to version 2.0.3, Zikula to 1.2.7, phpMyAdmin to 3.4.0, PHPList to 2.10.14, and SugarCRM to 6.2.0RC2.
