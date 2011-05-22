@@ -60,3 +60,7 @@
 
  - Postfix page for outgoing SMTP authentication
 	- Email "Feature Request: Relay host authentication" from Eric
+
+ - Release plugins
+	- svn
+	- analytics
