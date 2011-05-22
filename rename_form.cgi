@@ -71,6 +71,7 @@ else {
 
 # Prefix field
 $msg = &get_prefix_msg($tmpl);
+$msg .= '_group' if (!$d->{'parent'});
 @users = &list_domain_users($d, 1, 1, 1, 1);
 print &ui_table_row($text{'rename_'.$msg},
 	&ui_radio("prefix_mode", @users ? 0 : 1,
