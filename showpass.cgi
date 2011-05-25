@@ -32,9 +32,9 @@ else {
 
 print "<center><table>\n";
 print "<tr> <td><b>$msg1</b></td> ",
-      "<td><tt>$username</tt></td> </tr>\n";
+      "<td><tt>",&html_escape($username),"</tt></td> </tr>\n";
 print "<tr> <td><b>$msg2</b></td> ",
-      "<td><tt>$pass</tt></td> </tr>\n";
+      "<td><tt>",&html_escape($pass),"</tt></td> </tr>\n";
 print "</table></center>\n";
 
 &popup_footer();
