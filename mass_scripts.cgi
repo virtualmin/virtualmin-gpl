@@ -42,18 +42,24 @@ if ($in{'confirm'}) {
 	print &text('massstart_start', $script->{'desc'},
 				       $ver, scalar(@sinfos)),"<p>\n";
 
-	# Fetch needed files
-	$ferr = &fetch_script_files($sinfos[0]->{'dom'}, $ver,
-				    $sinfos[0]->{'opts'},
-				    $sinfos[0], \%gotfiles);
-	&error($ferr) if ($ferr);
-	print "<p>\n";
-
 	# Do each server that has it
 	foreach $sinfo (@sinfos) {
 		$d = $sinfo->{'dom'};
 		&$first_print(&text('massscript_doing', &show_domain_name($d),
 				    $sinfo->{'version'}, $sinfo->{'desc'}));
+		&$indent_print();
+
+		# Fetch needed files
+		my %gotfiles;
+		$ferr = &fetch_script_files($sinfos[0]->{'dom'}, $ver,
+					    $sinfos[0]->{'opts'},
+					    $sinfos[0], \%gotfiles, 1);
+		if ($ferr) {
+			&$outdent_print();
+			&$second_print(&text('massscript_efetch', $ferr));
+			next;
+			}
+
 		$opts = $sinfo->{'opts'};
 		if (&compare_versions($sinfo->{'version'}, $ver,
 				      $script) >= 0) {
@@ -96,7 +102,6 @@ if ($in{'confirm'}) {
 			($ok, $msg, $desc, $url) = &{$script->{'install_func'}}(
 				$d, $ver, $sinfo->{'opts'}, \%gotfiles, $sinfo,
 				$domuser, $dompass);
-			&$indent_print();
 			print $msg,"<br>\n";
 			&$outdent_print();
 			&release_lock_web($d);

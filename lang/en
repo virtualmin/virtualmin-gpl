@@ -3752,6 +3752,7 @@ massscript_enone2=None of the selected servers have the script installed
 massscript_title=Upgrade Scripts
 massstart_start=Now upgrading $1 to version $2 in $3 locations ..
 massscript_ever=.. version $1 is already installed.
+massscript_efetch=.. failed to download files : $1
 massscript_edep=.. failed dependencies : $1
 massscript_ecommands=.. required commands are missing : $1
 massscript_doing=Installing in domain $1  ..
