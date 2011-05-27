@@ -238,12 +238,14 @@ elsif ($config{'mail_system'} == 5) {
 	local $errorlabel;
 	if ($_[0]->{'alias'}) {
 		local $aliasdom = &get_domain($_[0]->{'alias'});
-		$out = `$vpopbin/vaddaliasdomain $qdom $aliasdom->{'dom'} 2>&1`;
-		$errorlabel = 'setup_evaddaliasdomain'
+		$out = &backquote_command(
+		    "$vpopbin/vaddaliasdomain $qdom $aliasdom->{'dom'} 2>&1");
+		$errorlabel = 'setup_evaddaliasdomain';
 		}
 	else {
-		$errorlabel = 'setup_evadddomain'
-		$out = `$vpopbin/vadddomain $qowner $qdom $qpass 2>&1`;
+		$errorlabel = 'setup_evadddomain';
+		$out = &backquote_command(
+		    "$vpopbin/vadddomain $qowner $qdom $qpass 2>&1");
 		}
 	if ($?) {
 		&$second_print(&text($label, "<tt>$out</tt>"));
