@@ -228,10 +228,25 @@ elsif ($config{'mail_system'} == 5) {
 	# Call vpopmail domain creation program
 	local $qdom = quotemeta($_[0]->{'dom'});
 	local $qpass = quotemeta($_[0]->{'pass'});
-	local $out = &backquote_command(
-			"$vpopbin/vadddomain $qdom $qpass 2>&1");
+	local $qowner = '';
+	if ($config{'vpopmail_owner'}) {
+		local $quid = quotemeta($_[0]->{'uid'});
+		local $qgid = quotemeta($_[0]->{'gid'});
+		$qowner = "-d ~$_[0]->{'user'} -i $quid -g $qgid"
+	}
+	local $out;
+	local $errorlabel;
+	if ($_[0]->{'alias'}) {
+		local $aliasdom = &get_domain($_[0]->{'alias'});
+		$out = `$vpopbin/vaddaliasdomain $qdom $aliasdom->{'dom'} 2>&1`;
+		$errorlabel = 'setup_evaddaliasdomain'
+		}
+	else {
+		$errorlabel = 'setup_evadddomain'
+		$out = `$vpopbin/vadddomain $qowner $qdom $qpass 2>&1`;
+		}
 	if ($?) {
-		&$second_print(&text('setup_evadddomain', "<tt>$out</tt>"));
+		&$second_print(&text($label, "<tt>$out</tt>"));
 		return;
 		}
 	}
