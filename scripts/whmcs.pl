@@ -24,7 +24,7 @@ return "WHMCS is an all-in-one client management, billing & support solution for
 # script_whmcs_versions()
 sub script_whmcs_versions
 {
-return ( "4.4.2" );
+return ( "4.5.1" );
 }
 
 sub script_whmcs_category
@@ -307,9 +307,9 @@ if (!-r $cfile) {
 	}
 
 # Run install script
+local $ipath = $opts->{'path'}."/install/install.php";
 if (!$upgrade) {
 	# Fetch config check page
-	local $ipath = $opts->{'path'}."/install/install.php";
 	local ($out, $err);
 	&get_http_connection($d, $ipath."?step=2", \$out, \$err);
 	if ($err) {
@@ -353,6 +353,35 @@ if (!$upgrade) {
 		}
 	elsif ($out !~ /Installation\s+Complete/i) {
 		return (-1, "Account creation did not succeed");
+		}
+	}
+else {
+	# Fetch config check page
+	local ($out, $err);
+	&get_http_connection($d, $ipath."?step=2", \$out, \$err);
+	if ($err) {
+		return (-1, "Failed to fetch upgrade check page : $err");
+		}
+	elsif ($out !~ /Perform\s+Upgrade/) {
+		return (-1, "Upgrade check failed");
+		}
+
+	# Post to DB upgrade page
+	local $oldver = $upgrade->{'version'};
+	$oldver =~ s/\.//g;
+	local @params = (
+		[ "step", "upgrade" ],
+		[ "version", $oldver ],
+		[ "confirmbackup", 1 ],
+		);
+	local $params = join("&", map { $_->[0]."=".&urlize($_->[1]) } @params);
+	local ($out, $err);
+	&post_http_connection($d, $ipath, $params, \$out, \$err);
+	if ($err) {
+		return (-1, "Database upgrade page failed : $err");
+		}
+	elsif ($out !~ /Upgrade\s+Complete/i) {
+		return (-1, "Database upgrade did not succeed");
 		}
 	}
 
