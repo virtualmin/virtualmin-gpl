@@ -435,7 +435,7 @@ sub script_whmcs_latest
 {
 local ($ver) = @_;
 return ( "http://forum.whmcs.com/forumdisplay.php?s=f0986c5381d494b7b6b6a0923fef97e0&f=9",
-	 "WHMCS\\s+V([0-9\\.]+)\\s+(Incremental|Stable)" );
+	 "WHMCS\\s+V([0-9\\.]+)\\s" );
 }
 
 sub script_whmcs_site
