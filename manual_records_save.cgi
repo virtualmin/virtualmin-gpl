@@ -2,6 +2,7 @@
 # Save manually edited records
 
 require './virtual-server-lib.pl';
+&require_bind();
 &ReadParse();
 &error_setup($text{'mrecords_err'});
 $d = &get_domain($in{'dom'});
@@ -15,6 +16,7 @@ $in{'data'} =~ /\S/ || &error($text{'mrecords_enone'});
 &obtain_lock_dns($d);
 ($recs, $file) = &get_domain_dns_records_and_file($d);
 $file || &error($recs);
+$file = &bind8::make_chroot($file);
 $olderr = &validate_dns($d, $recs);
 
 # Update the file with entered records

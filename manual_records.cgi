@@ -2,6 +2,7 @@
 # Show a form for manually editing DNS records
 
 require './virtual-server-lib.pl';
+&require_bind();
 &ReadParse();
 &error_setup($text{'mrecords_err'});
 $d = &get_domain($in{'dom'});
@@ -12,6 +13,7 @@ $d || &error($text{'edit_egone'});
 # Get the zone and records
 ($recs, $file) = &get_domain_dns_records_and_file($d);
 $file || &error($recs);
+$file = &bind8::make_chroot($file);
 $data = &read_file_contents($file);
 
 &ui_print_header(&domain_in($d), $text{'mrecords_title'}, "");
