@@ -239,6 +239,13 @@ if ($multi) {
 		print "    Group ID: $d->{'gid'}\n";
 		print "    Mailbox username prefix: $d->{'prefix'}\n";
 		print "    Password: $d->{'pass'}\n";
+		foreach my $f (grep { $d->{$_} } @database_features) {
+			my $ufunc = "${f}_pass";
+			if (defined(&$ufunc)) {
+				my $p = &$ufunc($d, 1);
+				print "    Password for ${f}: $p\n";
+				}
+			}
 		print "    Home directory: $d->{'home'}\n";
 		if ($d->{'web'}) {
 			$wd = $d->{'alias'} ? &get_domain($d->{'alias'}) : $d;
