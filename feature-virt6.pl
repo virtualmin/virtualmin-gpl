@@ -128,12 +128,12 @@ local ($d) = @_;
 if (!$_[0]->{'virtalready'}) {
 	# Only check boot-time interface if added by Virtualmin
 	local @boots = map { &canonicalize_ip6($_) } &bootup_ip_addresses();
-	if (&indexof(&canonicalize_ip6($d->{'ip6'}), @boots) < 0) {
+	if (&indexoflc(&canonicalize_ip6($d->{'ip6'}), @boots) < 0) {
 		return &text('validate_evirt6b', $d->{'ip6'});
 		}
 	}
 local @acts = map { &canonicalize_ip6($_) } &active_ip_addresses();
-if (&indexof(&canonicalize_ip6($d->{'ip6'}), @acts) < 0) {
+if (&indexoflc(&canonicalize_ip6($d->{'ip6'}), @acts) < 0) {
 	return &text('validate_evirt6a', $d->{'ip6'});
 	}
 return undef;
@@ -387,7 +387,7 @@ my @w = split(/:/, $addr);
 my $idx = &indexof("", @w);
 if ($idx >= 0) {
 	# Expand ::
-	my $mis = 8 - scalar(@w) + 1;
+	my $mis = 8 - scalar(@w);
 	my @nw = @w[0..$idx];
 	for(my $i=0; $i<$mis; $i++) {
 		push(@nw, 0);
