@@ -423,6 +423,9 @@ elsif (&init::action_status("clamd-wrapper") ||
        &init::action_status("clamd-virtualmin")) {
 	return 0;	# Redhat, not setup yet
 	}
+elsif (&init::action_status("clamd")) {
+	return 0;	# RHEL 6, not setup yet
+	}
 elsif (&init::action_status("clamav-clamd")) {
 	return 0;	# FreeBSD
 	}
@@ -443,7 +446,7 @@ return 1 if ($st == 1 || $st == -1);
 # Check for simple init scripts
 local $init;
 &foreign_require("init", "init-lib.pl");
-foreach my $i ("clamav-daemon", "clamdscan-clamd", "clamav-clamd") {
+foreach my $i ("clamav-daemon", "clamdscan-clamd", "clamav-clamd", "clamd") {
 	if (&init::action_status($i)) {
 		$init = $i;
 		last;
@@ -663,7 +666,7 @@ sub disable_clamd
 {
 &foreign_require("init", "init-lib.pl");
 foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-virtualmin",
-		  "clamd-wrapper", "clamd-csw", "clamav-clamd") {
+		  "clamd-wrapper", "clamd-csw", "clamav-clamd", "clamd") {
 	if (&init::action_status($init)) {
 		&$first_print(&text('clamd_stop'));
 		&init::disable_at_boot($init);
@@ -726,7 +729,7 @@ sub stop_service_virus
 {
 &foreign_require("init", "init-lib.pl");
 foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-virtualmin",
-		  "clamd-wrapper", "clamd-csw", "clamav-clamd") {
+		  "clamd-wrapper", "clamd-csw", "clamav-clamd", "clamd") {
 	if (&init::action_status($init)) {
 		local ($ok, $out) = &init::stop_action($init);
 		return $ok ? undef : "<tt>".&html_escape($out)."</tt>";
