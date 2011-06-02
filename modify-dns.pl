@@ -22,6 +22,10 @@ Similarly, deletion is done with the C<--delete-record> flag, followed by a
 single parameter containing the name and type of the record(s) to delete. Both
 of these can be given multiple times.
 
+Similarly, the default TTL for records can be set with the C<--ttl> flag
+followed by a number in seconds. Suffixes like h, m and d are also allowed
+to specific a TTL in hours, minutes or days.
+
 You can also add or remove slave DNS servers for this domain, assuming that
 they have already been setup in Webmin's BIND DNS Server module. To add a
 specific slave host, use the C<--add-slave> flag followed by a hostname. Or to
@@ -106,6 +110,10 @@ while(@ARGV > 0) {
 		$name && $type || &usage("--remove-record must be followed by the record name and type, all in one parameter");
 		push(@delrecs, [ $name, $type ]);
 		}
+	elsif ($a eq "--ttl") {
+		$ttl = shift(@ARGV);
+		$ttl =~ /^\d+(s|m|h|d)?$/ || &usage("--ttl must be followed by a number with a valid suffix");
+		}
 	elsif ($a eq "--increment-soa") {
 		$bumpsoa = 1;
 		}
@@ -124,7 +132,7 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || usage();
 defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
-  @addrecs || @delrecs || @addslaves || @delslaves || $addallslaves ||
+  @addrecs || @delrecs || @addslaves || @delslaves || $addallslaves || $ttl ||
   &usage("Nothing to do");
 
 # Get domains to update
@@ -265,6 +273,23 @@ foreach $d (@doms) {
 			}
 		}
 
+	# Set or modify default TTL
+	if ($ttl) {
+		($oldttl) = grep { $_->{'defttl'} } @$recs;
+		if ($oldttl) {
+			$oldttl->{'defttl'} = $ttl;
+			&bind8::modify_defttl($file, $oldttl, $ttl);
+			}
+		else {
+			&bind8::create_defttl($file, $ttl);
+			foreach my $e (@$recs) {
+				$e->{'line'}++;
+				$e->{'eline'}++ if (defined($e->{'eline'}));
+				}
+			}
+		$changed++;
+		}
+
 	if ($changed || $bumpsoa) {
 		&post_records_change($d, $recs, $file);
 		&reload_bind_records($d);
@@ -305,6 +330,7 @@ print "                      --spf-all-neutral | --spf-all-allow |\n";
 print "                      --spf-all-default]\n";
 print "                     [--add-record \"name type value\"]\n";
 print "                     [--remove-record \"name type\"]\n";
+print "                     [--ttl seconds]\n";
 print "                     [--add-slave hostname]* | [--add-all-slaves]\n";
 print "                     [--remove-slave hostname]*\n";
 exit(1);
