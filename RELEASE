@@ -7,6 +7,7 @@
 	x fudu
 	x lentor
 	x xencentos
+	x xengpl
 
  x Generate british english with :
 	cd /usr/local/webadmin
@@ -39,7 +40,7 @@
  x Create signatures for all new packages
 	~/webmin.com/create-update-sigs.pl
 
- - Add to website
+ x Add to website
 	x Mention plugins too
 
  - Add to freshmeat.net

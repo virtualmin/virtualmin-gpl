@@ -8,23 +8,33 @@ require './virtual-server-lib.pl';
 
 # Validate inputs
 if ($config{'spam'}) {
-	$client = $in{'client'};
-	&has_command($client) || &error(&text('tmpl_espam',"<tt>$client</tt>"));
-	if ($in{'host_def'}) {
-		$host = undef;
+	if ($config{'provision_spam_host'}) {
+		# Client and host don't change
+		($client, $host, $size) = &get_global_spam_client();
 		}
 	else {
-		&to_ipaddress($in{'host'}) ||
-		    defined(&to_ip6address) && &to_ip6address($in{'host'}) ||
-			&error($text{'tmpl_espam_host'});
-		$host = $in{'host'};
+		# Validate spamassassin program and host system
+		$client = $in{'client'};
+		&has_command($client) ||
+			&error(&text('tmpl_espam',"<tt>$client</tt>"));
+		if ($in{'host_def'}) {
+			$host = undef;
+			}
+		else {
+			&to_ipaddress($in{'host'}) ||
+			    defined(&to_ip6address) &&
+			    &to_ip6address($in{'host'}) ||
+				&error($text{'tmpl_espam_host'});
+			$host = $in{'host'};
+			}
 		}
+	# Validate max size
 	if ($in{'size_def'}) {
 		$size = undef;
 		}
 	else {
 		$in{'size'} =~ /^\d+$/ || &error($text{'tmpl_espam_size'});
-		$size = $in{'size'};
+		$size = $in{'size'}*$in{'size_units'};
 		}
 	if ($client eq "spamc" &&
 	    (!$host || $host eq "localhost" ||
@@ -32,7 +42,7 @@ if ($config{'spam'}) {
 		&find_byname("spamd") || &error($text{'tmpl_espamd'});
 		}
 	}
-if ($config{'virus'}) {
+if ($config{'virus'} && !$config{'provision_virus_host'}) {
 	if ($in{'scanner'} == 2) {
 		local ($cmd, @args) = &split_quoted_string($in{'scanprog'});
 		&has_command($cmd) || &error($text{'spam_escanner'});
@@ -85,7 +95,7 @@ if ($config{'spam'}) {
 	}
 
 # Update virus scanner
-if ($config{'virus'}) {
+if ($config{'virus'} && !$config{'provision_virus_host'}) {
 	&save_global_virus_scanner($fullcmd,
 				   $in{'vhost_def'} ? undef : $in{'vhost'});
 	}

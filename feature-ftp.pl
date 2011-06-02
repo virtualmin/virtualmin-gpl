@@ -77,6 +77,50 @@ else {
 &release_lock_ftp($_[0]);
 }
 
+# clone_ftp(&domain, &old-domain)
+# Copy proftpd directives to a new cloned domain
+sub clone_ftp
+{
+local ($d, $oldd) = @_;
+&$first_print($text{'clone_ftp'});
+&require_proftpd();
+local $conf = &proftpd::get_config();
+local ($virt, $vconf, $anon, $aconf) = &get_proftpd_virtual($d->{'ip'});
+local ($ovirt, $ovconf) = &get_proftpd_virtual($oldd->{'ip'});
+if (!$ovirt) {
+	&$second_print($text{'clone_ftpold'});
+	return 0;
+	}
+if (!$virt) {
+	&$second_print($text{'clone_ftpnew'});
+	return 0;
+	}
+&obtain_lock_ftp($d);
+
+# Splice across directives, fixing home
+local $olref = &read_file_lines($ovirt->{'file'});
+local $lref = &read_file_lines($virt->{'file'});
+local @lines = @$olref[$ovirt->{'line'}+1 .. $ovirt->{'eline'}-1];
+foreach my $l (@lines) {
+	$l =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/;
+	}
+splice(@$lref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1, @lines);
+&flush_file_lines($virt->{'file'});
+($virt, $vconf, $anon, $aconf) = &get_proftpd_virtual($d->{'ip'});
+
+# Fix server name
+local $sname = &proftpd::find_directive_struct("ServerName", $vconf);
+if ($sname) {
+	&proftpd::save_directive("ServerName", [ $d->{'dom'} ], $vconf, $conf);
+	&flush_file_lines($virt->{'file'});
+	}
+
+&release_lock_ftp($d);
+&register_post_action(\&restart_proftpd);
+&$second_print($text{'setup_done'});
+return 1;
+}
+
 # modify_ftp(&domain, &olddomain)
 # If the server has changed IP address, update the ProFTPd virtual server
 sub modify_ftp
@@ -114,7 +158,7 @@ if ($_[0]->{'home'} ne $_[1]->{'home'} && $anon) {
 	&$first_print($text{'save_proftpd3'});
 	local $lref = &read_file_lines($anon->{'file'});
 	$lref->[$anon->{'line'}] =~ s/$_[1]->{'home'}/$_[0]->{'home'}/;
-	&flush_file_lines();
+	&flush_file_lines($anon->{'file'});
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}

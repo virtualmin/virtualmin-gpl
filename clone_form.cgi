@@ -1,0 +1,45 @@
+#!/usr/local/bin/perl
+# Display system cloning form
+
+require './virtual-server-lib.pl';
+&ReadParse();
+$d = &get_domain($in{'dom'});
+
+# Check limits
+if ($d->{'parent'} && !&can_create_sub_servers() ||
+    !$d->{'parent'} && !&can_create_master_servers()) {
+	&error($text{'clone_ecannot'});
+	}
+($dleft, $dreason, $dmax) = &count_domains($d->{'alias'} ? "aliasdoms"
+							 : "realdoms");
+&error(&text('setup_emax', $dmax)) if ($dleft == 0);
+
+&ui_print_header(&domain_in($d), $text{'clone_title'}, "", "clone");
+
+print $text{'clone_warn'},"<p>\n";
+print &ui_form_start("clone.cgi");
+print &ui_hidden("dom", $d->{'id'}),"\n";
+print &ui_table_start($text{'clone_header'}, undef, 2);
+
+# Domain being cloned
+print &ui_table_row($text{'clone_dom'},
+	"<tt>".&show_domain_name($d)."</tt>");
+
+# New domain name
+print &ui_table_row($text{'clone_newdom'},
+	&ui_textbox("newdomain", undef, 40));
+
+# New username and password
+if (!$d->{'parent'}) {
+	print &ui_table_row($text{'clone_newuser'},
+		&ui_textbox("newuser", undef, 20));
+
+	print &ui_table_row($text{'clone_newpass'},
+		&ui_opt_textbox("newpass", undef, 20, $text{'clone_samepass'}));
+	}
+
+print &ui_table_end();
+print &ui_form_end([ [ undef, $text{'clone_ok'} ] ]);
+
+&ui_print_footer(&domain_footer_link($d),
+		 "", $text{'index_return'});

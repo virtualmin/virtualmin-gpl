@@ -381,5 +381,10 @@ sub script_squirrelmail_site
 return 'http://www.squirrelmail.org/';
 }
 
+sub script_squirrelmail_gpl
+{
+return 1;
+}
+
 1;
 

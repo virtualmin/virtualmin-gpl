@@ -18,7 +18,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-return ( "1.2.5" );
+return ( "1.3" );
 }
 
 sub script_django_category
@@ -371,19 +371,24 @@ foreach my $port (@ports) {
 	&flush_file_lines($virt->{'file'});
 	}
 
-# All /media alias to Apache config
-local $mpath = $opts->{'path'} eq '/' ? "/media/"
-				      : "$opts->{'path'}/media/";
+# Add /media and /static/admin aliass to Apache config
+local @paths;
+push(@paths, $opts->{'path'} eq '/' ? "/media/"
+                                    : "$opts->{'path'}/media/");
+push(@paths, $opts->{'path'} eq '/' ? "/static/admin/"
+                                    : "$opts->{'path'}/static/admin/");
 local $mdir = "$opts->{'dir'}/lib/python/django/contrib/admin/media/";
-foreach my $port (@ports) {
-	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
-	next if (!$virt);
-	local @al = &apache::find_directive("Alias", $vconf);
-	local ($media) = grep { $_ =~ /^\Q$mpath\E\s/ } @al;
-	next if ($media);
-	push(@al, "$mpath $mdir");
-	&apache::save_directive("Alias", \@al, $vconf, $conf);
-	&flush_file_lines($virt->{'file'});
+foreach my $path (@paths) {
+	foreach my $port (@ports) {
+		local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+		next if (!$virt);
+		local @al = &apache::find_directive("Alias", $vconf);
+		local ($media) = grep { $_ =~ /^\Q$path\E\s/ } @al;
+		next if ($media);
+		push(@al, "$path $mdir");
+		&apache::save_directive("Alias", \@al, $vconf, $conf);
+		&flush_file_lines($virt->{'file'});
+		}
 	}
 
 &register_post_action(\&restart_apache);
@@ -424,18 +429,23 @@ foreach my $port (@ports) {
 	&flush_file_lines($virt->{'file'});
 	}
 
-# Media /media lias
-local $mpath = $opts->{'path'} eq '/' ? "/media/"
-				      : "$opts->{'path'}/media/";
-foreach my $port (@ports) {
-	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
-	next if (!$virt);
-	local @al = &apache::find_directive("Alias", $vconf);
-	local ($media) = grep { $_ =~ /^\Q$mpath\E\s/ } @al;
-	next if (!$media);
-	@al = grep { $_ ne $media } @al;
-	&apache::save_directive("Alias", \@al, $vconf, $conf);
-	&flush_file_lines($virt->{'file'});
+# Remove /media and /static/admin aliases
+local @paths;
+push(@paths, $opts->{'path'} eq '/' ? "/media/"
+                                    : "$opts->{'path'}/media/");
+push(@paths, $opts->{'path'} eq '/' ? "/static/admin/"
+                                    : "$opts->{'path'}/static/admin/");
+foreach my $path (@paths) {
+	foreach my $port (@ports) {
+		local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+		next if (!$virt);
+		local @al = &apache::find_directive("Alias", $vconf);
+		local ($media) = grep { $_ =~ /^\Q$path\E\s/ } @al;
+		next if (!$media);
+		@al = grep { $_ ne $media } @al;
+		&apache::save_directive("Alias", \@al, $vconf, $conf);
+		&flush_file_lines($virt->{'file'});
+		}
 	}
 
 &register_post_action(\&restart_apache);

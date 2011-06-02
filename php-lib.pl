@@ -327,6 +327,16 @@ foreach my $p (@ports) {
 					$vconf, $conf);
 		}
 
+	# For fcgid mode, set max request size to 1GB, which is the default
+	# in older versions of mod_fcgid but is smaller in versions 2.3.6 and
+	# later.
+	local $setmax = $mode eq "fcgid" &&
+		        $gconfig{'os_type'} eq 'debian-linux' &&
+		        $gconfig{'os_version'} >= 6;
+	&apache::save_directive("FcgidMaxRequestLen",
+				$setmax ? [ 1024*1024*1024 ] : [ ],
+				$vconf, $conf);
+
 	&flush_file_lines();
 	}
 

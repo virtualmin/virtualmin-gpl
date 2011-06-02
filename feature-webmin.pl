@@ -173,6 +173,13 @@ elsif ($_[0]->{'parent'} && !$_[1]->{'parent'}) {
 return 0;
 }
 
+# clone_webmin(&old-domain, &domain)
+# Does nothing, as the webmin user is re-created as part of the clone process
+sub clone_webmin
+{
+return 1;
+}
+
 # validate_webmin(&domain)
 # Make sure all Webmin users exist
 sub validate_webmin

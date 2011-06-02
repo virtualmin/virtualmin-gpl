@@ -559,6 +559,76 @@ if ($d->{'group'} ne $oldd->{'group'} && $tmpl->{'mysql_chgrp'}) {
 return $rv;
 }
 
+# clone_mysql(&domain, &old-domain)
+# Copy all databases and their contents to a new domain
+sub clone_mysql
+{
+local ($d, $oldd) = @_;
+&$first_print($text{'clone_mysql'});
+
+# Re-create each DB with a new name
+local %dbmap;
+foreach my $db (&domain_databases($oldd, [ 'mysql' ])) {
+	local $newname = $db->{'name'};
+	local $newprefix = &fix_database_name($d->{'prefix'}, 'mysql');
+	local $oldprefix = &fix_database_name($oldd->{'prefix'}, 'mysql');
+	if ($newname eq $oldd->{'db'}) {
+		$newname = $d->{'db'};
+		}
+	elsif ($newname !~ s/\Q$oldprefix\E/$newprefix/) {
+		&$second_print(&text('clone_mysqlprefix', $newname,
+				     $oldprefix, $newprefix));
+		next;
+		}
+	if (&check_mysql_database_clash($d, $newname)) {
+		&$second_print(&text('clone_mysqlclash', $newname));
+		next;
+		}
+	&push_all_print();
+	&set_all_null_print();
+	local $opts = &get_mysql_creation_opts($oldd, $db->{'name'});
+	local $ok = &create_mysql_database($d, $newname, $opts);
+	&pop_all_print();
+	if (!$ok) {
+		&$second_print(&text('clone_mysqlcreate', $newname));
+		}
+	else {
+		$dbmap{$newname} = $db->{'name'};
+		}
+	}
+&$second_print(&text('clone_mysqldone', scalar(keys %dbmap)));
+
+# Copy across contents
+if (%dbmap) {
+	&require_mysql();
+	&$first_print($text{'clone_mysqlcopy'});
+	foreach my $db (&domain_databases($d, [ 'mysql' ])) {
+		local $oldname = $dbmap{$db->{'name'}};
+		local $temp = &transname();
+		local $err = &mysql::backup_database($oldname, $temp, 0, 1, 0,
+					undef, undef, undef, undef, 1);
+		if ($err) {
+			&$second_print(&text('clone_mysqlbackup',
+					     $oldname, $err));
+			next;
+			}
+		local ($ex, $out) = &mysql::execute_sql_file($db->{'name'},
+							     $temp);
+		&unlink_file($temp);
+		if ($ex) {
+			&$second_print(&text('clone_mysqlrestore',
+					     $db->{'name'}, $out));
+			next;
+			}
+		}
+	&$second_print($text{'setup_done'});
+	}
+
+# Duplicate allowed hosts
+local @allowed = &get_mysql_allowed_hosts($oldd);
+&save_mysql_allowed_hosts($d, \@allowed);
+}
+
 # validate_mysql(&domain)
 # Make sure all MySQL databases exist, and that the admin user exists
 sub validate_mysql
@@ -2027,6 +2097,25 @@ if ($tmpl->{'mysql_collate'} && $tmpl->{'mysql_collate'} ne 'none') {
 	$opts{'collate'} = $tmpl->{'mysql_collate'};
 	}
 return \%opts;
+}
+
+# get_mysql_creation_opts(&domain, db)
+# Returns a hash ref of database creation options for an existing DB
+sub get_mysql_creation_opts
+{
+local ($d, $dbname) = @_;
+&require_mysql();
+local $data = &mysql::execute_sql($dbname, "show create database ".
+					   &mysql::quotestr($dbname));
+local $sql = $data->{'data'}->[0]->[1];
+local $opts = { };
+if ($sql =~ /CHARACTER\s+SET\s+(\S+)/i) {
+	$opts->{'charset'} = $1;
+	}
+if ($sql =~ /COLLATE\s+(\S+)/i) {
+	$opts->{'collate'} = $1;
+	}
+return $opts;
 }
 
 # list_all_mysql_databases([&domain])

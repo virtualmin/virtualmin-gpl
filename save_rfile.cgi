@@ -29,5 +29,5 @@ if (!$in{'period_def'}) {
 &webmin_log("save", "rfile", $in{'file'});
 
 $what = $in{'alias'} ? 'alias' : 'user';
-&redirect("edit_$what.cgi?$what=$in{$what}&dom=$in{'dom'}&unix=$in{'unix'}");
+&redirect("edit_$what.cgi?$what=$in{$what}&dom=$in{'dom'}&unix=1");
 

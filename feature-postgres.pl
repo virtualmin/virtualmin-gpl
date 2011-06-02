@@ -36,23 +36,25 @@ return $s->{'data'}->[0] ? 1 : 0;
 # Create a new PostgreSQL database and user
 sub setup_postgres
 {
+local ($d, $nodb) = @_;
 &require_postgres();
-local $tmpl = &get_template($_[0]->{'template'});
-local $user = $_[0]->{'postgres_user'} = &postgres_user($_[0]);
-if (!$_[0]->{'parent'}) {
+local $tmpl = &get_template($d->{'template'});
+local $user = $d->{'postgres_user'} = &postgres_user($d);
+if (!$d->{'parent'}) {
 	&$first_print($text{'setup_postgresuser'});
-	local $pass = &postgres_pass($_[0]);
-	&postgresql::execute_sql_logged($qconfig{'basedb'}, "create user \"$user\" with password $pass nocreatedb nocreateuser");
+	local $pass = &postgres_pass($d);
+	&postgresql::execute_sql_logged($qconfig{'basedb'},
+	  "create user \"$user\" with password $pass nocreatedb nocreateuser");
 	&$second_print($text{'setup_done'});
 	}
-if (!$_[1] && $tmpl->{'mysql_mkdb'}) {
+if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
 	# Create the initial DB
-	local $opts = &default_postgres_creation_opts($_[0]);
-	&create_postgres_database($_[0], $_[0]->{'db'}, $opts);
+	local $opts = &default_postgres_creation_opts($d);
+	&create_postgres_database($d, $d->{'db'}, $opts);
 	}
 else {
 	# No DBs can exist
-	$_[0]->{'db_postgres'} = "";
+	$d->{'db_postgres'} = "";
 	}
 
 # Save the initial password
@@ -201,6 +203,82 @@ if (!$_[0]->{'parent'}) {
 	}
 }
 
+# clone_postgres(&domain, &old-domain)
+# Copy all databases and their contents to a new domain
+sub clone_postgres
+{
+local ($d, $oldd) = @_;
+&$first_print($text{'clone_postgres'});
+
+# Re-create each DB with a new name
+local %dbmap;
+foreach my $db (&domain_databases($oldd, [ 'postgres' ])) {
+	local $newname = $db->{'name'};
+	local $newprefix = &fix_database_name($d->{'prefix'}, 'postgres');
+	local $oldprefix = &fix_database_name($oldd->{'prefix'}, 'postgres');
+	if ($newname eq $oldd->{'db'}) {
+		$newname = $d->{'db'};
+		}
+	elsif ($newname !~ s/\Q$oldprefix\E/$newprefix/) {
+		&$second_print(&text('clone_postgresprefix', $newname,
+				     $oldprefix, $newprefix));
+		next;
+		}
+	if (&check_postgres_database_clash($d, $newname)) {
+		&$second_print(&text('clone_postgresclash', $newname));
+		next;
+		}
+	&push_all_print();
+	&set_all_null_print();
+	local $opts = &get_postgres_creation_opts($oldd, $db->{'name'});
+	local $ok = &create_postgres_database($d, $newname, $opts);
+	&pop_all_print();
+	if (!$ok) {
+		&$second_print(&text('clone_postgrescreate', $newname));
+		}
+	else {
+		$dbmap{$newname} = $db->{'name'};
+		}
+	}
+&$second_print(&text('clone_postgresdone', scalar(keys %dbmap)));
+
+# Copy across contents
+if (%dbmap) {
+	&require_postgres();
+	&$first_print($text{'clone_postgrescopy'});
+	foreach my $db (&domain_databases($d, [ 'postgres' ])) {
+		local $oldname = $dbmap{$db->{'name'}};
+		local $temp = &transname();
+		if ($postgresql::postgres_sameunix) {
+			# Create empty file postgres user can write to
+			local @uinfo = getpwnam($postgresql::postgres_login);
+			if (@uinfo) {
+				&open_tempfile(EMPTY, ">$temp", 0, 1);
+				&close_tempfile(EMPTY);
+				&set_ownership_permissions($uinfo[2], $uinfo[3],
+							   undef, $temp);
+				}
+			}
+		local $err = &postgresql::backup_database($oldname, $temp,
+							  'c', undef);
+		if ($err) {
+			&$second_print(&text('clone_postgresbackup',
+					     $oldname, $err));
+			next;
+			}
+		$err = &postgresql::restore_database($db->{'name'}, $temp,
+						     0, 0);
+		&unlink_file($temp);
+		if ($err) {
+			&$second_print(&text('clone_postgresrestore',
+					     $db->{'name'}, $err));
+			next;
+			}
+		}
+	&$second_print($text{'setup_done'});
+	}
+}
+
 # validate_postgres(&domain)
 # Make sure all PostgreSQL databases exist
 sub validate_postgres
@@ -212,7 +290,7 @@ foreach my $db (&domain_databases($d, [ "postgres" ])) {
 	$got{$db->{'name'}} || return &text('validate_epostgres',$db->{'name'});
 	}
 if (!&postgres_user_exists($d)) {
-	return &text('validate_epostgresuser', &mysql_user($d));
+	return &text('validate_epostgresuser', &postgres_user($d));
 	}
 return undef;
 }
@@ -465,6 +543,7 @@ local @dbs = split(/\s+/, $_[0]->{'db_postgres'});
 push(@dbs, $_[1]);
 $_[0]->{'db_postgres'} = join(" ", @dbs);
 &$second_print($text{'setup_done'});
+return 1;
 }
 
 # grant_postgres_database(&domain, dbname)
@@ -724,6 +803,25 @@ if ($tmpl->{'postgres_encoding'} &&
 	$opts{'encoding'} = $tmpl->{'postgres_encoding'};
 	}
 return \%opts;
+}
+
+# get_postgres_creation_opts(&domain, db)
+# Returns a hash ref of database creation options for an existing DB
+sub get_postgres_creation_opts
+{
+local ($d, $dbname) = @_;
+&require_postgres();
+local $opts = { };
+eval {
+	local $main::error_must_die = 1;
+	local $rv = &postgresql::execute_sql($qconfig{'basedb'}, "\\l");
+	foreach my $r (@{$rv->{'data'}}) {
+		if ($r->[0] eq $dbname) {
+			$opts->{'encoding'} = $r->[2];
+			}
+		}
+	};
+return $opts;
 }
 
 # list_all_postgres_databases([&domain])

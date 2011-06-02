@@ -11,7 +11,7 @@ $d = &get_domain($in{'dom'});
 &ui_print_header(undef, $text{'rfile_title'}, "");
 
 if (-e $in{'file'}) {
-	&open_tempfile_as_domain_user($d, FILE, $in{'file'}) ||
+	&open_readfile_as_domain_user($d, FILE, $in{'file'}) ||
 		&error(&text('rfile_eread', $in{'file'}, $d->{'user'}, $!));
 	while(<FILE>) {
 		if (/^Reply-Tracking:\s*(.*)/) {
@@ -59,5 +59,5 @@ print "<input type=submit value=\"$text{'save'}\"> ",
       "<input type=reset value=\"$text{'rfile_undo'}\">\n";
 print "</form>\n";
 
-&ui_print_footer("edit_$what.cgi?dom=$in{'dom'}&$what=$in{$what}",
-	$text{$what.'_return'});
+&ui_print_footer("edit_$what.cgi?dom=$in{'dom'}&$what=$in{$what}&unix=1",
+		 $text{$what.'_return'});

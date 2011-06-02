@@ -380,6 +380,64 @@ else {
 &register_post_action(\&restart_bind, $_[0]);
 }
 
+# clone_dns(&domain, &old-domain)
+# Copy all DNS records to a new domain
+sub clone_dns
+{
+local ($d, $oldd) = @_;
+&$first_print($text{'clone_dns'});
+if ($d->{'dns_submode'}) {
+	# Record cloning not supported for DNS sub-domains
+	&$second_print($text{'clone_dnssub'});
+	return 1;
+	}
+local ($orecs, $ofile) = &get_domain_dns_records_and_file($oldd);
+local ($recs, $file) = &get_domain_dns_records_and_file($d);
+if (!$orecs) {
+	&$second_print($text{'clone_dnsold'});
+	return 0;
+	}
+if (!$recs) {
+	&$second_print($text{'clone_dnsnew'});
+	return 0;
+	}
+&obtain_lock_dns($d);
+
+# Copy over the records file
+local $absfile = &bind8::make_chroot($file);
+local $absofile = &bind8::make_chroot($ofile);
+&copy_source_dest($absofile, $absfile);
+$recs = [ &bind8::read_zone_file($file, $d->{'dom'}) ];
+&modify_records_domain_name($recs, $file, $oldd->{'dom'}, $d->{'dom'});
+local $oldip = $oldd->{'dns_ip'} || $oldd->{'ip'};
+local $newip = $d->{'dns_ip'} || $d->{'ip'};
+if ($oldip ne $newip) {
+	&modify_records_ip_address($recs, $file, $oldip, $newip);
+	}
+if ($d->{'virt6'} && $d->{'ip6'} ne $oldd->{'ip6'}) {
+	&modify_records_ip_address($recs, $file, $oldd->{'ip6'}, $d->{'ip6'});
+	}
+
+# Find and delete sub-domain records
+local @sublist = grep { $_->{'id'} ne $oldd->{'id'} &&
+			$_->{'dom'} =~ /\.\Q$oldd->{'dom'}\E$/ }
+		      &list_domains();
+foreach my $r (reverse(@$recs)) {
+	foreach my $sd (@sublist) {
+		if ($r->{'name'} eq $sd->{'dom'}."." ||
+		    $r->{'name'} =~ /\.\Q$sd->{'dom'}\E\.$/) {
+			&bind8::delete_record($file, $r);
+			}
+		}
+	}
+
+&post_records_change($d, $recs, $file);
+&release_lock_dns($d);
+&register_post_action(\&restart_bind, $_[0]);
+&$second_print($text{'setup_done'});
+return 1;
+}
+
 # create_zone_on_slaves(&domain, space-separate-slave-list)
 # Create a zone on all specified slaves, and updates the dns_slave key.
 # May print messages.
@@ -730,7 +788,7 @@ elsif (!$_[0]->{'virt6'} && $_[1]->{'virt6'}) {
 	# IPv6 disabled
 	&$first_print($text{'save_dnsip6off'});
 	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
-	&remove_ip6_records($_[0], $file);
+	&remove_ip6_records($_[1], $file);
 	&$second_print($text{'setup_done'});
 	$rv++;
 	}
@@ -1615,6 +1673,22 @@ if ($file) {
 			}
 		}
 
+	# Make sure any SPF record contains this system's default IP
+	local ($r) = grep { $_->{'type'} eq 'SPF' &&
+			    $r->{'name'} eq $d->{'dom'}.'.' } @recs;
+	if ($r) {
+		local $spf = &bind8::parse_spf(@{$r->{'values'}});
+		local $defip = &get_default_ip();
+		if (&indexof($defip, @{$spf->{'ip4'}}) < 0) {
+			push(@{$spf->{'ip4'}}, $defip);
+			local $str = &bind8::join_spf($spf);
+			&bind8::modify_record($r->{'file'}, $r, $r->{'name'},
+					      $r->{'ttl'}, $r->{'class'},
+					      $r->{'type'}, "\"$str\"",
+					      $r->{'comment'});
+			}
+		}
+
 	&$second_print($text{'setup_done'});
 
 	&register_post_action(\&restart_bind, $_[0]);
@@ -1665,6 +1739,7 @@ sub modify_records_domain_name
 {
 local ($recs, $fn, $olddom, $newdom) = @_;
 foreach my $r (@$recs) {
+	next if (!$r->{'name'});	# TTL or generator
 	if ($r->{'name'} eq $olddom.".") {
 		$r->{'name'} = $newdom.".";
 		}
@@ -2330,9 +2405,10 @@ sub post_records_change
 {
 local ($d, $recs, $fn) = @_;
 &require_bind();
+local $z;
 if (!$fn) {
 	# Use local file by default
-	local $z = &get_bind_zone($d->{'dom'});
+	$z = &get_bind_zone($d->{'dom'});
 	return "Failed to find zone for $d->{'dom'}" if (!$z);
 	local $file = &bind8::find("file", $z->{'members'});
 	return "Failed to find records file for $d->{'dom'}" if (!$file);
@@ -2343,6 +2419,7 @@ if (defined(&bind8::supports_dnssec) &&
     &bind8::supports_dnssec() &&
     !$d->{'provision_dns'}) {
 	# Re-sign too
+	$z ||= &get_bind_zone($d->{'dom'});
 	eval {
 		local $main::error_must_die = 1;
 		&bind8::sign_dnssec_zone_if_key($z, $recs, 0);
@@ -2548,6 +2625,17 @@ return ( { 'type' => 'A',
 	   'desc' => $text{'records_typespf'},
 	   'domain' => 1,
 	   'create' => 0,
+	 },
+	 { 'type' => 'PTR',
+	   'desc' => $text{'records_typeptr'},
+	   'domain' => 0,
+	   'create' => 1,
+	   'values' => [ { 'desc' => $text{'records_valueptr'},
+			   'size' => 40,
+			   'func' => sub { $_[0] =~ /^[a-z0-9\.\_\-]+\.$/i ?
+					    undef : $text{'records_evalueptr'} }
+			 },
+		       ],
 	 },
        );
 }

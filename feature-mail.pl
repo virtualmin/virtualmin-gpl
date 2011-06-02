@@ -122,34 +122,35 @@ elsif ($config{'mail_system'} == 6) {
 # Returns just virtusers for some domain
 sub list_domain_aliases
 {
+local ($d, $ignore_plugins) = @_;
 &require_mail();
 local ($u, %foruser);
 if ($config{'mail_system'} != 4) {
 	# Filter out aliases that point to users
-	foreach $u (&list_domain_users($_[0], 0, 1, 1, 1)) {
-		local $pop3 = &remove_userdom($u->{'user'}, $_[0]);
-		$foruser{$pop3."\@".$_[0]->{'dom'}} = $u->{'user'};
+	foreach $u (&list_domain_users($d, 0, 1, 1, 1)) {
+		local $pop3 = &remove_userdom($u->{'user'}, $d);
+		$foruser{$pop3."\@".$d->{'dom'}} = $u->{'user'};
 		if ($config{'mail_system'} == 0 && $u->{'user'} =~ /\@/) {
 			# Special case for Postfix @ users
-			$foruser{$pop3."\@".$_[0]->{'dom'}} =
+			$foruser{$pop3."\@".$d->{'dom'}} =
 				&replace_atsign($u->{'user'});
 			}
 		}
-	if ($d->{'mailbox'}) {
-		$foruser{$d->{'user'}."\@".$_[0]->{'dom'}} = $d->{'user'};
+	if ($d->{'mail'}) {
+		$foruser{$d->{'user'}."\@".$d->{'dom'}} = $d->{'user'};
 		}
 	}
 local @virts = &list_virtusers();
 local %ignore;
-if ($_[1]) {
+if ($ignore_plugins) {
 	# Get a list to ignore from each plugin
 	foreach my $f (&list_feature_plugins()) {
-		foreach my $i (&plugin_call($f, "virtusers_ignore", $_[0])) {
+		foreach my $i (&plugin_call($f, "virtusers_ignore", $d)) {
 			$ignore{lc($i)} = 1;
 			}
 		}
 	}
-if ($_[1] && $_[0]->{'spam'}) {
+if ($ignore_plugins && $d->{'spam'}) {
 	# Skip spamtrap and hamtrap aliases
 	foreach my $v (@virts) {
 		if ($v->{'from'} =~ /^(spamtrap|hamtrap)\@/ &&
@@ -163,9 +164,9 @@ if ($_[1] && $_[0]->{'spam'}) {
 # Return only virtusers that match this domain,
 # which are not for forwarding email for users in the domain,
 # and which are not on the plugin ignore list.
-return grep { $_->{'from'} =~ /\@(\S+)$/ && $1 eq $_[0]->{'dom'} &&
-	      ($foruser{$_->{'from'}} ne $_->{'to'}->[0] ||
-	       @{$_->{'to'}} != 1) &&
+return grep { $_->{'from'} =~ /\@(\S+)$/ && $1 eq $d->{'dom'} &&
+	      !($foruser{$_->{'from'}} eq $_->{'to'}->[0] &&
+		@{$_->{'to'}} == 1) &&
 	      !$ignore{lc($_->{'from'})} } @virts;
 }
 
@@ -227,9 +228,27 @@ elsif ($config{'mail_system'} == 5) {
 	# Call vpopmail domain creation program
 	local $qdom = quotemeta($_[0]->{'dom'});
 	local $qpass = quotemeta($_[0]->{'pass'});
-	local $out = `$vpopbin/vadddomain $qdom $qpass 2>&1`;
+	local $qowner = '';
+	if ($config{'vpopmail_owner'}) {
+		local $quid = quotemeta($_[0]->{'uid'});
+		local $qgid = quotemeta($_[0]->{'gid'});
+		$qowner = "-d ~$_[0]->{'user'} -i $quid -g $qgid"
+	}
+	local $out;
+	local $errorlabel;
+	if ($_[0]->{'alias'}) {
+		local $aliasdom = &get_domain($_[0]->{'alias'});
+		$out = &backquote_command(
+		    "$vpopbin/vaddaliasdomain $qdom $aliasdom->{'dom'} 2>&1");
+		$errorlabel = 'setup_evaddaliasdomain';
+		}
+	else {
+		$errorlabel = 'setup_evadddomain';
+		$out = &backquote_command(
+		    "$vpopbin/vadddomain $qowner $qdom $qpass 2>&1");
+		}
 	if ($?) {
-		&$second_print(&text('setup_evadddomain', "<tt>$out</tt>"));
+		&$second_print(&text($label, "<tt>$out</tt>"));
 		return;
 		}
 	}
@@ -424,7 +443,7 @@ elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4) {
 elsif ($config{'mail_system'} == 5) {
 	# Call vpopmail domain deletion program
 	local $qdom = quotemeta($_[0]->{'dom'});
-	local $out = `$vpopbin/vdeldomain $qdom 2>&1`;
+	local $out = &backquote_logged("$vpopbin/vdeldomain $qdom 2>&1");
 	if ($?) {
 		&$second_print(&text('delete_evdeldomain', "<tt>$out</tt>"));
 		return;
@@ -466,6 +485,168 @@ if ($supports_bcc) {
 &update_dkim_domains($_[0], 'delete');
 
 &release_lock_mail($_[0]);
+}
+
+# clone_mail(&domain, &old-domain)
+# Copy all mail aliases and mailboxes from the old domain to the new one
+sub clone_mail
+{
+local ($d, $oldd) = @_;
+&$first_print($text{'clone_mail2'});
+if ($d->{'alias'}) {
+	&$second_print($text{'clone_mailalias'});
+	return 1;
+	}
+&obtain_lock_mail($d);
+&obtain_lock_cron($d);
+
+# Clone all users
+local $ucount = 0;
+local $hb = "$d->{'home'}/$config{'homes_dir'}";
+local $mail_under_home = &mail_under_home();
+foreach my $u (&list_domain_users($oldd, 1, 0, 0, 0)) {
+	local $newu = { %$u };
+	local $as = &guess_append_style($u->{'user'}, $oldd);
+	local $ushort = &remove_userdom($u->{'user'}, $oldd);
+	$newu->{'user'} = &userdom_name($ushort, $d, $as);
+	if ($u->{'uid'} == $d->{'uid'}) {
+		# Web management user, so same UID as new domain
+		$newu->{'uid'} = $d->{'uid'};
+		}
+	else {
+		# Allocate UID
+		local %taken;
+		&build_taken(\%taken);
+		$newu->{'uid'} = &allocate_uid(\%taken);
+		}
+	$newu->{'gid'} = $d->{'gid'};
+	$newu->{'home'} =~ s/^\Q$oldd->{'home'}\E/$d->{'home'}/;
+
+	# Fix email addresses
+	$newu->{'email'} =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/;
+	foreach my $extra (@{$newu->{'extraemail'}}) {
+		$extra =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/;
+		}
+
+	# Fix database access list
+	local @newdbs;
+	foreach my $db (@{$newu->{'dbs'}}) {
+		local $newprefix = &fix_database_name($d->{'prefix'},
+						      $db->{'type'});
+		local $oldprefix = &fix_database_name($oldd->{'prefix'},
+						      $db->{'type'});
+		if ($db->{'name'} eq $oldd->{'db'}) {
+			# Use new main DB
+			$db->{'name'} = $d->{'db'};
+			}
+		elsif ($db->{'name'} !~ s/\Q$oldprefix\E/$newprefix/) {
+			# Cannot fix prefix, so skip
+			next;
+			}
+		push(@newdbs, $db);
+		}
+	$newu->{'dbs'} = \@newdbs;
+
+	# Fix email forwarding destinations
+	foreach my $t (@{$newu->{'to'}}) {
+		local ($atype, $adest) = &alias_type($t, $u->{'user'});
+		if ($atype == 1) {
+			# Change destination to new domain
+			$t =~ s/\@\Q$oldd->{'dom'}\E$/\@$d->{'dom'}/;
+			}
+		elsif ($atype == 2 || $atype == 3 || $atype == 4 ||
+		       $atype == 5 || $atype == 6) {
+			if ($adest =~ /^\Q$oldd->{'home'}\E\/(\S+)$/) {
+				# Rename the autoreply file too
+				local $newadest = "$d->{'home'}/$1";
+				$newadest =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/g;
+				&rename_logged($adest, $newadest);
+				}
+			$t =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
+			if ($atype == 5) {
+				# Change domain name and ID in autoreply files
+				$t =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/g;
+				$t =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/g;
+				}
+			}
+		}
+
+	# Create the user
+	&create_user($newu, $d);
+	&create_mail_file($newu, $d);
+
+	# Clone mail files under /var/mail , if needed
+	if ($mail_under_home) {
+		local $oldmf = &user_mail_file($u);
+		local $newmf = &user_mail_file($newu);
+		local @st = stat($newmf);
+		if (@st && -r $oldmf) {
+			&copy_source_dest($oldmf, $newmf);
+			&set_ownership_permissions(
+				$st[5], $st[5], $st[2]&0777, $newmf);
+			}
+		}
+
+	# Fix home directory permissions
+	if (-d $newu->{'home'} && &is_under_directory($hb, $newu->{'home'})) {
+		&execute_command("chown -R $newu->{'uid'}:$newu->{'gid'} ".
+                       quotemeta($newu->{'home'}));
+		}
+
+	# Copy user cron jobs
+	&copy_unix_cron_jobs($newu->{'user'}, $u->{'user'});
+
+	$ucount++;
+	}
+&$second_print(&text('clone_maildone', $ucount));
+
+# Clone all aliases
+&$first_print($text{'clone_mail1'});
+local %already = map { $_->{'from'}, $_ } &list_domain_aliases($d, 0);
+local $acount = 0;
+foreach my $a (&list_domain_aliases($oldd, 1)) {
+	local ($mailbox, $dom) = split(/\@/, $a->{'from'});
+	local @to;
+	foreach my $t (@{$a->{'to'}}) {
+		local ($atype, $adest) = &alias_type($t, $a->{'from'});
+		if ($atype == 1) {
+			$t =~ s/\@\Q$oldd->{'dom'}\E$/\@$d->{'dom'}/;
+			}
+		elsif ($atype == 2 || $atype == 3 || $atype == 4 ||
+		       $atype == 5 || $atype == 6) {
+			if ($adest =~ /^\Q$oldd->{'home'}\E\/(\S+)$/) {
+				# Rename the autoreply file too
+				local $newadest = "$d->{'home'}/$1";
+				$newadest =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/g;
+				&rename_logged($adest, $newadest);
+				}
+			$t =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
+			if ($atype == 5) {
+				# Change domain name and ID in autoreply files
+				$t =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/g;
+				$t =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/g;
+				}
+			}
+		elsif ($atype == 13) {
+			$t =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/;
+			}
+		push(@to, $t);
+		}
+	local $newa = { 'from' => $mailbox."\@".$d->{'dom'},
+			'cmt' => $a->{'cmt'},
+			'to' => \@to };
+	if (!$already{$newa->{'from'}}) {
+		&create_virtuser($newa);
+		$acount++;
+		}
+	}
+&create_autoreply_alias_links($d);
+&sync_alias_virtuals($d);
+&$second_print(&text('clone_maildone', $acount));
+
+&release_lock_cron($d);
+&release_lock_mail($d);
+return 1;
 }
 
 # modify_mail(&domain, &olddomain)
@@ -828,7 +1009,15 @@ sub disable_mail
 {
 &obtain_lock_mail($_[0]);
 &obtain_lock_unix($_[0]);
-&delete_mail($_[0], 1);
+if ($config{'mail_system'} == 5) {
+	# Just call vpopmail's disable function
+	local $qdom = quotemeta($_[0]->{'dom'});
+	&system_logged("$vpopbin/vmoduser -p $qdom 2>&1");
+	}
+else {
+	# Delete mail access for the domain
+	&delete_mail($_[0], 1);
+	}
 
 &$first_print($text{'disable_users'});
 foreach my $user (&list_domain_users($_[0], 1)) {
@@ -848,7 +1037,14 @@ sub enable_mail
 {
 &obtain_lock_mail($_[0]);
 &obtain_lock_unix($_[0]);
-&setup_mail($_[0], 1);
+if ($config{'mail_system'} == 5) {
+	# Just call vpopmail's enable function
+	local $qdom = quotemeta($_[0]->{'dom'});
+	&system_logged("$vpopbin/vmoduser -x $qdom 2>&1");
+	}
+else {
+	&setup_mail($_[0], 1);
+	}
 
 &$first_print($text{'enable_users'});
 foreach my $user (&list_domain_users($_[0], 1)) {
@@ -921,8 +1117,13 @@ elsif ($config{'mail_system'} == 4) {
 	@$rlist = map { lc($_) } @$rlist;
 	$found++ if (&indexof($_[0], @$rlist) >= 0);
 	}
+elsif ($config{'mail_system'} == 5) {
+	# Check active vpopmail domains
+	$found = -e "$config{'vpopmail_dir'}/domains/$_[0]";
+	}
 elsif ($config{'mail_system'} == 6) {
-    local @dlist = &exim::list_domains();
+	# Look in Exim domains list
+	local @dlist = &exim::list_domains();
 	foreach my $d (@dlist) {
 		$found++ if (lc($d) eq lc($_[0]));
 		}
@@ -1927,6 +2128,11 @@ if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 		}
 	}
 
+# Delete old-style mail file under /var/mail or /var/spool/mail , which
+# procmail sometimes creates
+&unlink_file("/var/mail/$_[0]->{'user'}",
+	     "/var/spool/mail/$_[0]->{'user'}");
+
 # Remove mailboxes moduile indexes
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 &mailboxes::delete_user_index_files($_[0]->{'user'});
@@ -2577,10 +2783,12 @@ while(<UFILE>) {
 		# Domain owner, just update alias list
 		local @users = &list_domain_users($_[0]);
 		local ($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'}} @users;
-		local %old = %$uinfo;
-		$uinfo->{'email'} = $user[7];
-		$uinfo->{'to'} = \@to;
-		&modify_user($uinfo, \%old, $_[0]);
+		if ($uinfo) {
+			local %old = %$uinfo;
+			$uinfo->{'email'} = $user[7];
+			$uinfo->{'to'} = \@to;
+			&modify_user($uinfo, \%old, $_[0]);
+			}
 		}
 	else {
 		# Need to create user
@@ -3795,7 +4003,7 @@ $secondary_error = join("", @_);
 # Add this domain to all secondary MX servers
 sub setup_on_secondaries
 {
-local ($dom) = @_;
+local ($d) = @_;
 local @servers = &list_mx_servers();
 return if (!@servers);
 local @okservers;
@@ -3804,7 +4012,7 @@ local @okservers;
 		       @servers)));
 local @errs;
 foreach my $s (@servers) {
-	local $err = &setup_one_secondary($dom, $s);
+	local $err = &setup_one_secondary($d, $s);
 	if ($err) {
 		push(@errs, "$s->{'host'} : $err");
 		}
@@ -3812,7 +4020,26 @@ foreach my $s (@servers) {
 		push(@okservers, $s);
 		}
 	}
-$dom->{'mx_servers'} = join(" ", map { $_->{'id'} } @okservers);
+$d->{'mx_servers'} = join(" ", map { $_->{'id'} } @okservers);
+if ($d->{'dns'}) {
+	# Add DNS MX records. This is needed because sometimes the mail setup
+	# happens after DNS, and so mx_servers hasn't been populated.
+	my ($recs, $file) = &get_domain_dns_records_and_file($d);
+	my $withdot = $_[0]->{'dom'}.".";
+	my $added = 0;
+	foreach my $s (@okservers) {
+		my $mxhost = $s->{'mxname'} || $s->{'host'};
+		my ($r) = grep { $_->{'type'} eq 'MX' &&
+				 $r->{'name'} eq $withdot &&
+				 $r->{'values'}->[1] eq $mxhost."." } @$recs;
+		if (!$r) {
+			&bind8::create_record($file, $withdot, undef,
+				      "IN", "MX", "10 $mxhost.");
+			$added++;
+			}
+		}
+	&register_post_action(\&restart_bind, $d) if ($added);
+	}
 if (@errs) {
 	&$second_print($text{'setup_mxserrs'}."<br>\n".
 			join("<br>\n", @errs));
@@ -4288,10 +4515,18 @@ local ($d, $fwdto) = @_;
 local $virt = { 'from' => "\@$d->{'dom'}",
 		'to' => [ $fwdto ] };
 local ($clash) = grep { $_->{'from'} eq $virt->{'from'} } &list_virtusers();
-if ($clash) {
-	&delete_virtuser($clash);
-	}
+&delete_virtuser($clash) if ($clash);
 &create_virtuser($virt);
+if ($d->{'unix'}) {
+	# Also forward domain owner's mail
+	local @users = &list_domain_users($d);
+	local ($uinfo) = grep { $_->{'user'} eq $d->{'user'}} @users;
+	if ($uinfo) {
+		local %old = %$uinfo;
+		$uinfo->{'to'} = [ $fwdto ];
+		&modify_user($uinfo, \%old, $d);
+		}
+	}
 &sync_alias_virtuals($d);
 }
 

@@ -342,7 +342,7 @@ elsif ($virt) {
 if ($ip6 eq "allocate") {
 	# Allocate an IPv6 address now
 	$virt6already && &usage("The --ip6-already and --allocate-ip6 options are incompatible");
-	$tmpl->{'ranges'} ne "none" || &usage("The --allocate-ip6 option cannot be used unless automatic IPv6 allocation is enabled - use --ip6 instead");
+	$tmpl->{'ranges6'} ne "none" || &usage("The --allocate-ip6 option cannot be used unless automatic IPv6 allocation is enabled - use --ip6 instead");
 	($ip6, $netmask6) = &free_ip6_address($tmpl);
 	$ip6 || &usage("Failed to allocate IPv6 address from ranges!");
 	}
@@ -564,7 +564,7 @@ else {
 	}
 
 # Validate style
-if ($stylename) {
+if ($stylename && defined(&list_content_styles)) {
 	($style) = grep { $_->{'name'} eq $stylename } &list_content_styles();
 	$style || &usage("Style $stylename does not exist");
 	$content || $style->{'nocontent'} || &usage("--content followed by some initial text for the website must be specified when using --style");
@@ -732,6 +732,12 @@ if ($fwdto) {
 if ($style && $dom{'web'}) {
 	&$first_print(&text('setup_styleing', $style->{'desc'}));
 	&apply_content_style(\%dom, $style, $content);
+	&$second_print($text{'setup_done'});
+	}
+elsif ($content) {
+	# Just create index.html page with content
+	&$first_print($text{'setup_contenting'});
+	&create_index_content(\%dom, $content);
 	&$second_print($text{'setup_done'});
 	}
 

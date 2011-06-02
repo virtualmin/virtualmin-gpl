@@ -165,6 +165,9 @@ foreach $d (@doms) {
 				@disable = &get_disable_features($dd);
 				%disable = map { $_, 1 } @disable;
 				@disabled = ( );
+				$dd->{'disabled_reason'} = 'bw';
+				$dd->{'disabled_why'} =
+					"Exceeded bandwidth limit";
 
 				# Run the before command
 				&set_domain_envs($dd, "DISABLE_DOMAIN");
@@ -192,9 +195,6 @@ foreach $d (@doms) {
 
 				# Save new domain details
 				$dd->{'disabled'} = join(",", @disabled);
-				$dd->{'disabled_reason'} = 'bw';
-				$dd->{'disabled_why'} =
-					"Exceeded bandwidth limit";
 				&save_domain($dd);
 
 				# Run the after command

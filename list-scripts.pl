@@ -88,6 +88,8 @@ foreach my $d (@doms) {
 			print "$sinfo->{'id'}\n";
 			print "    Domain: $d->{'dom'}\n";
 			print "    Type: $script->{'name'}\n";
+			print "    Manually deleted: ",
+			      ($script->{'deleted'} ? "Yes" : "No"),"\n";
 			print "    Description: $script->{'desc'}\n";
 			print "    Version: $sinfo->{'version'}\n";
 			print "    Installed: ",&make_date($sinfo->{'time'}),"\n";

@@ -26,6 +26,7 @@ $ENV{'ftp_proxy'} = undef;
 $test_domain = "example.com";	# Never really exists
 $test_rename_domain = "examplerename.com";
 $test_target_domain = "exampletarget.com";
+$test_clone_domain = "exampleclone.com";
 $test_subdomain = "example.net";
 $test_parallel_domain1 = "example1.net";
 $test_parallel_domain2 = "example2.net";
@@ -64,12 +65,6 @@ $supports_fcgid = defined(&supported_php_modes) &&
 		 [ 'no-email' ],
 		 [ 'no-slaves' ],
 	  	 [ 'no-secondaries' ] );
-
-# Cleanup backup dir
-system("rm -rf $test_backup_dir");
-system("mkdir -p $test_backup_dir");
-system("rm -rf $test_backup_dir2");
-system("mkdir -p $test_backup_dir2");
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -124,8 +119,11 @@ if ($webmin_proto eq "https") {
 
 ($test_domain_user) = &unixuser_name($test_domain);
 ($test_rename_domain_user) = &unixuser_name($test_rename_domain);
+($test_clone_domain_user) = &unixuser_name($test_clone_domain);
 $prefix = &compute_prefix($test_domain, $test_domain_user, undef, 1);
 $rename_prefix = &compute_prefix($test_rename_domain, $test_rename_domain_user,
+				 undef, 1);
+$clone_prefix = &compute_prefix($test_clone_domain, $test_clone_domain_user,
 				 undef, 1);
 %test_domain = ( 'dom' => $test_domain,
 		 'prefix' => $prefix,
@@ -146,6 +144,13 @@ $test_domain_key = &default_certificate_file(\%test_domain, "key");
 		        'group' => $test_rename_domain_user,
 		        'template' => &get_init_template() );
 $test_rename_full_user = &userdom_name($test_user, \%test_drename_omain);
+%test_clone_domain = ( 'dom' => $test_clone_domain,
+		       'prefix' => $clone_prefix,
+       		       'user' => $test_clone_domain_user,
+		       'group' => $test_clone_domain_user,
+		       'template' => &get_init_template() );
+$test_clone_domain_db = &database_name(\%test_clone_domain);
+$test_full_clone_user = &userdom_name($test_user, \%test_clone_domain);
 
 # Create PostgreSQL password file
 $pg_pass_file = "/tmp/pgpass.txt";
@@ -801,6 +806,102 @@ $script_tests = [
 	  'cleanup' => 1 },
 	];
 
+# GPL Script tests
+$gplscript_tests = [
+	# Create a domain for the scripts
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'mysql' ], [ 'dns' ],
+		      @create_args, ],
+        },
+
+	# List all scripts
+	{ 'command' => 'list-available-scripts.pl',
+	  'grep' => 'RoundCube',
+	},
+
+	# Install Wordpress
+	{ 'command' => 'install-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'roundcube' ],
+		      [ 'path', '/roundcube' ],
+		      [ 'db', 'mysql '.$test_domain_db ],
+		      [ 'version', 'latest' ] ],
+	},
+
+	# Check that it works
+	{ 'command' => $wget_command.'http://'.$test_domain.'/roundcube/',
+	  'grep' => 'Welcome to Roundcube Webmail',
+	},
+
+	# Check script list
+	{ 'command' => 'list-scripts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Type: roundcube',
+		      'Directory: /home/'.$test_domain_user.
+			'/public_html/roundcube',
+		      'Database: '.$test_domain_db.' ',
+		      'URL: http://'.$test_domain.'/roundcube',
+		    ],
+	},
+
+	# Un-install
+	{ 'command' => 'delete-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'roundcube' ] ],
+	},
+
+	# Install with it's own DB
+	{ 'command' => 'install-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'roundcube' ],
+		      [ 'path', '/roundcube' ],
+		      [ 'db', 'mysql '.$test_domain_db.'_roundcube' ],
+		      [ 'newdb' ],
+		      [ 'version', 'latest' ] ],
+	},
+
+	# Check that it works with it's own DB
+	{ 'command' => $wget_command.'http://'.$test_domain.'/roundcube/',
+	  'grep' => 'Welcome to Roundcube Webmail',
+	},
+
+	# Check script list
+	{ 'command' => 'list-scripts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Type: roundcube',
+		      'Directory: /home/'.$test_domain_user.
+			'/public_html/roundcube',
+		      'Database: '.$test_domain_db.'_roundcube ',
+		      'URL: http://'.$test_domain.'/roundcube',
+		    ],
+	},
+
+	# Un-install
+	{ 'command' => 'delete-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'roundcube' ] ],
+	},
+
+	# Make sure the DB is gone
+	{ 'command' => 'list-databases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => '^'.$test_domain_db.'_roundcube',
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
+
+
 # Database tests
 $database_tests = [
 	# Create a domain for the databases
@@ -1086,8 +1187,8 @@ $move_tests = [
 	# Install a script into the domain being moved
 	{ 'command' => 'install-script.pl',
 	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'type', 'wordpress' ],
-		      [ 'path', '/wordpress' ],
+		      [ 'type', 'roundcube' ],
+		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
 		      [ 'version', 'latest' ] ],
 	},
@@ -1139,11 +1240,11 @@ $move_tests = [
 	{ 'command' => 'list-scripts.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
-	  'grep' => [ 'Type: wordpress',
+	  'grep' => [ 'Type: roundcube',
 		      'Directory: /home/'.$test_target_domain_user.
-			'/domains/'.$test_domain.'/public_html/wordpress',
+			'/domains/'.$test_domain.'/public_html/roundcube',
 		      'Database: '.$test_domain_db.' ',
-		      'URL: http://'.$test_domain.'/wordpress',
+		      'URL: http://'.$test_domain.'/roundcube',
 		    ],
 	},
 
@@ -2024,11 +2125,11 @@ $incremental_tests = [
 		      @create_args, ],
         },
 
-	# Install Wordpress to use up some disk
+	# Install Roundcube to use up some disk
 	{ 'command' => 'install-script.pl',
 	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'type', 'wordpress' ],
-		      [ 'path', '/wordpress' ],
+		      [ 'type', 'roundcube' ],
+		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
 		      [ 'version', 'latest' ] ],
 	},
@@ -2085,8 +2186,8 @@ $incremental_tests = [
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'New website content',
 	},
-	{ 'command' => $wget_command.'http://'.$test_domain.'/wordpress/',
-	  'grep' => 'WordPress installation',
+	{ 'command' => $wget_command.'http://'.$test_domain.'/roundcube/',
+	  'grep' => 'Welcome to Roundcube Webmail',
 	},
 
 	# Finally delete to clean up
@@ -2417,20 +2518,24 @@ $prepost_tests = [
 	},
 	{ 'command' => 'rm -f /tmp/prepost-test.out' },
 
-	# Create a reseller for the new domain
-	{ 'command' => 'create-reseller.pl',
-	  'args' => [ [ 'name', $test_reseller ],
-		      [ 'pass', 'smeg' ],
-		      [ 'desc', 'Test reseller' ],
-		      [ 'email', $test_reseller.'@'.$test_domain ] ],
-	},
+	$virtualmin_pro ? 
+		(
+		# Create a reseller for the new domain
+		{ 'command' => 'create-reseller.pl',
+		  'args' => [ [ 'name', $test_reseller ],
+			      [ 'pass', 'smeg' ],
+			      [ 'desc', 'Test reseller' ],
+			      [ 'email', $test_reseller.'@'.$test_domain ] ],
+		},
+		) : ( ),
 
 	# Re-create the domain, capturing all variables
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
-		      [ 'reseller', $test_reseller ],
+		      $virtualmin_pro ? ( [ 'reseller', $test_reseller ] )
+				      : ( ),
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ],
 		      [ 'logrotate' ],
 		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
@@ -2449,9 +2554,11 @@ $prepost_tests = [
 		      'VIRTUALSERVER_GID=\d+',
 		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
 			( 'VIRTUALSERVER_VIRTUALMIN_AWSTATS=1' ) : ( ),
-		      'RESELLER_NAME='.$test_reseller,
-		      'RESELLER_DESC=Test reseller',
-		      'RESELLER_EMAIL='.$test_reseller.'@'.$test_domain,
+		      $virtualmin_pro ? (
+			      'RESELLER_NAME='.$test_reseller,
+			      'RESELLER_DESC=Test reseller',
+			      'RESELLER_EMAIL='.$test_reseller.'@'.$test_domain,
+			      ) : ( ),
 		    ]
 	},
 
@@ -2485,9 +2592,11 @@ $prepost_tests = [
 		      'PARENT_VIRTUALSERVER_FIELD_MYFIELD=foo',
 		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
 			( 'PARENT_VIRTUALSERVER_VIRTUALMIN_AWSTATS=1' ) : ( ),
-		      'RESELLER_NAME='.$test_reseller,
-		      'RESELLER_DESC=Test reseller',
-		      'RESELLER_EMAIL='.$test_reseller.'@'.$test_domain,
+		      $virtualmin_pro ? (
+			      'RESELLER_NAME='.$test_reseller,
+			      'RESELLER_DESC=Test reseller',
+			      'RESELLER_EMAIL='.$test_reseller.'@'.$test_domain,
+			      ) : ( ),
 		    ]
 	},
 
@@ -2497,10 +2606,12 @@ $prepost_tests = [
 	  'cleanup' => 1,
         },
 
-	# Cleanup the reseller
-	{ 'command' => 'delete-reseller.pl',
-	  'args' => [ [ 'name', $test_reseller ] ],
-	  'cleanup' => 1 },
+	$virtualmin_pro ? (
+		# Cleanup the reseller
+		{ 'command' => 'delete-reseller.pl',
+		  'args' => [ [ 'name', $test_reseller ] ],
+		  'cleanup' => 1 },
+		) : ( ),
 	];
 
 $webmin_tests = [
@@ -2508,7 +2619,8 @@ $webmin_tests = [
 	{ 'command' => $webmin_wget_command.
 		       "${webmin_proto}://localhost:${webmin_port}".
 		       "/virtual-server/",
-	  'grep' => [ 'Virtualmin Virtual Servers', 'Delete Selected' ],
+	  'grep' => [ 'Virtualmin Virtual Servers',
+		      $virtualmin_pro ? ( ) : ( 'Delete Selected' ) ],
 	},
 
 	# Create a test domain
@@ -3342,6 +3454,33 @@ $web_tests = [
 	  'grep' => 'Test web page',
 	},
 
+	# Change listen port to 8888
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'port', 8888 ] ],
+	},
+
+	# Test wget on new port
+	{ 'command' => $wget_command.'http://'.$test_domain.':8888',
+	  'grep' => 'Test web page',
+	},
+
+	# Test wget to make sure port 80 now fails
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'antigrep' => 'Test web page',
+	},
+
+	# Change listen port back to 80
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'port', 80 ] ],
+	},
+
+	# Test wget to make sure port 80 works
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test web page',
+	},
+
 	# Get rid of the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
@@ -3363,6 +3502,15 @@ $ip6_tests = [
 		      @create_args, ],
 	},
 
+	# Create an alias for it
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'desc', 'Test alias domain' ],
+		      [ 'alias', $test_domain ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ],
+		      @create_args, ],
+	},
+
 	# Delay needed for v6 address to become routable
 	{ 'command' => 'sleep 10' },
 
@@ -3370,9 +3518,15 @@ $ip6_tests = [
 	{ 'command' => 'host '.$test_domain,
 	  'grep' => 'IPv6 address',
 	},
+	{ 'command' => 'host '.$test_target_domain,
+	  'grep' => 'IPv6 address',
+	},
 
 	# Test HTTP get to v6 address
 	{ 'command' => $wget_command.' --inet6 http://'.$test_domain,
+	  'grep' => 'Test IPv6 home page',
+	},
+	{ 'command' => $wget_command.' --inet6 http://'.$test_target_domain,
 	  'grep' => 'Test IPv6 home page',
 	},
 
@@ -3389,6 +3543,9 @@ $ip6_tests = [
 
 	# Make sure HTTP get to v6 address no longer works
 	{ 'command' => $wget_command.' --inet6 http://'.$test_domain,
+	  'fail' => 1,
+	},
+	{ 'command' => $wget_command.' --inet6 http://'.$test_target_domain,
 	  'fail' => 1,
 	},
 
@@ -3426,8 +3583,11 @@ $rename_tests = [
 		      [ 'desc', 'Test rename domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
-		      [ 'mysql' ], [ 'status' ], [ 'spam' ], [ 'virus' ],
+		      [ 'mysql' ], [ 'spam' ], [ 'virus' ],
 		      [ 'logrotate' ],
+		      $virtualmin_pro ? ( [ 'status' ] ) : ( ),
+		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
+			( [ 'virtualmin-awstats' ] ) : ( ),
 		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test rename page' ],
 		      @create_args, ],
@@ -3456,6 +3616,12 @@ $rename_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'id-only' ] ],
 	  'save' => 'DOMID',
+	},
+
+	# Validate the domain before
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'all-features' ] ],
 	},
 
 	# Call the rename CGI
@@ -3790,8 +3956,8 @@ $quota_tests = [
 	},
 
 	# Wait for delivery to fail due to lack of quota
-	{ 'command' => 'while [ "`tail -10 /var/log/procmail.log | grep '.
-		       'Quota.exceeded`" = "" ]; do '.
+	{ 'command' => 'while [ "`tail -10 /var/log/mail*log | grep -i '.
+		       'can.t.create`" = "" ]; do '.
 		       'sleep 5; done',
 	  'timeout' => 60,
 	},
@@ -4320,6 +4486,378 @@ $configbackup_tests = [
 	  'cleanup' => 1 },
 	];
 
+$clone_tests = [
+	# Create a parent domain to be cloned
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'web' ], [ 'mail' ],
+		      [ 'mysql' ], [ 'logrotate' ], [ 'webmin' ], [ 'spam' ],
+		      [ 'virus' ], [ 'ssl' ],
+		      [ 'allocate-ip' ], [ 'allocate-ip6' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test source page' ],
+		      @create_args, ],
+        },
+
+	# Add an extra database
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'name', $test_domain_db.'_extra' ] ],
+	},
+
+	# Add some aliases
+	{ 'command' => 'create-alias.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'from', $test_alias ],
+		      [ 'to', 'nobody@virtualmin.com' ] ],
+	},
+	{ 'command' => 'create-simple-alias.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'from', $test_alias.'2' ],
+		      [ 'autoreply', 'Test autoreply' ] ],
+	},
+
+	# Add a mailbox
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'spod' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'extra', 'bob@'.$test_domain ],
+		      [ 'extra', 'fred@'.$test_domain ],
+		      [ 'mysql', $test_domain_db ],
+		      [ 'mysql', $test_domain_db.'_extra' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+	{ 'command' => 'modify-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'add-forward', 'jack@'.$test_domain ],
+		      [ 'add-forward', 'jill@'.$test_domain ],
+		      [ 'autoreply', 'User autoreply' ] ],
+	},
+
+	# Switch PHP mode to CGI
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'mode', 'cgi' ] ],
+	},
+
+	# Clone it
+	{ 'command' => 'clone-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'newdomain', $test_clone_domain ],
+		      [ 'newuser', $test_clone_domain_user ],
+		      [ 'newpass', 'foo' ] ],
+	},
+
+	# Make sure the domain was created
+	{ 'command' => 'list-domains.pl',
+	  'grep' => "^$test_clone_domain",
+	},
+
+	# Force change web content
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test clone page' ] ],
+	},
+
+	# Validate everything
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'domain' => $test_clone_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Check mail aliases
+	{ 'command' => 'list-aliases.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^'.$test_alias.'@'.$test_clone_domain,
+		      '^ *nobody@virtualmin.com' ],
+	},
+	{ 'command' => 'list-simple-aliases.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Autoreply message: Test autoreply' ],
+	},
+
+	# Check mailboxes
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_clone_domain ],
+		      [ 'user' => $test_user ],
+		      [ 'multiline' ],
+		      [ 'simple-aliases' ] ],
+	  'grep' => [ 'Password: spod',
+		      'Home quota: 100',
+		      'Databases: '.$test_clone_domain_db.' \\(mysql\\), '.
+				    $test_clone_domain_db.'_extra \\(mysql\\)',
+		      'Email address: '.$test_user.'@'.$test_clone_domain,
+		      'Extra addresses: bob@'.$test_clone_domain.
+		      		     ' fred@'.$test_clone_domain,
+		      'Forward: jack@'.$test_clone_domain,
+		      'Forward: jill@'.$test_clone_domain,
+		      'Autoreply message: User autoreply',
+	            ],
+	},
+
+	# Test DNS lookup
+	{ 'command' => 'host '.$test_clone_domain,
+	  'antigrep' => &get_default_ip(),
+	},
+
+	# Test HTTP get
+	{ 'command' => $wget_command.'http://'.$test_clone_domain,
+	  'grep' => 'Test clone page',
+	},
+
+	# Test HTTPS get
+	{ 'command' => $wget_command.'https://'.$test_clone_domain,
+	  'grep' => 'Test clone page',
+	},
+
+	# Test HTTP get to v6 address
+	{ 'command' => $wget_command.' --inet6 http://'.$test_clone_domain,
+	  'grep' => 'Test clone page',
+	},
+
+	# Test HTTP get of old page
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test source page',
+	},
+
+	# Check FTP login
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_clone_domain_user.':foo@localhost/',
+	  'antigrep' => 'Login incorrect',
+	},
+
+	# Check SMTP to admin mailbox
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'to', $test_clone_domain_user.'@'.$test_clone_domain ]],
+	},
+
+	# Check Webmin login
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
+		       $webmin_proto.'://'.$test_clone_domain_user.':foo@localhost:'.
+		       $webmin_port.'/',
+	},
+
+	# Check MySQL login
+	{ 'command' => 'mysql -u '.$test_clone_domain_user.' -pfoo '.$test_clone_domain_db.' -e "select version()"',
+	},
+	{ 'command' => 'mysql -u '.$test_clone_domain_user.' -pfoo '.$test_clone_domain_db.'_extra -e "select version()"',
+	},
+
+	# Check MySQL login by user
+	{ 'command' => 'mysql -u '.$test_full_clone_user.' -pspod '.$test_clone_domain_db.' -e "select version()"',
+	},
+	{ 'command' => 'mysql -u '.$test_full_clone_user.' -pspod '.$test_clone_domain_db.'_extra -e "select version()"',
+	},
+
+	# Check PHP running via CGI
+	{ 'command' => 'echo "<?php system(\'id -a\'); ?>" >~'.
+		       $test_clone_domain_user.'/public_html/test.php',
+	},
+	{ 'command' => $wget_command.'http://'.$test_clone_domain.'/test.php',
+	  'grep' => 'uid=[0-9]+\\('.$test_clone_domain_user.'\\)',
+	},
+
+	# Cleanup the domain being cloned
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+
+	# Cleanup the clone
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ] ],
+	  'cleanup' => 1 },
+	];
+
+$clonesub_tests = [
+	# Create a parent domain to hold the clone
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'mysql' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a sub-server to clone
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'db', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
+		      [ 'spam' ], [ 'virus' ], [ 'ssl' ],
+		      [ 'allocate-ip' ], [ 'allocate-ip6' ],
+                      [ 'style' => 'construction' ],
+                      [ 'content' => 'Test source page' ],
+		      @create_args, ],
+	},
+
+	# Add an extra database
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'type', 'mysql' ],
+		      [ 'name', 'example2_extra' ] ],
+	},
+
+	# Add some aliases
+	{ 'command' => 'create-alias.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'from', $test_alias ],
+		      [ 'to', 'nobody@virtualmin.com' ] ],
+	},
+	{ 'command' => 'create-simple-alias.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'from', $test_alias.'2' ],
+		      [ 'autoreply', 'Test autoreply' ] ],
+	},
+
+	# Add a mailbox
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'spod' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'extra', 'bob@'.$test_subdomain ],
+		      [ 'extra', 'fred@'.$test_subdomain ],
+		      [ 'mysql', 'example2' ],
+		      [ 'mysql', 'example2_extra' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+	{ 'command' => 'modify-user.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'user', $test_user ],
+		      [ 'add-forward', 'jack@'.$test_subdomain ],
+		      [ 'add-forward', 'jill@'.$test_subdomain ],
+		      [ 'autoreply', 'User autoreply' ] ],
+	},
+
+	# Switch PHP mode to CGI
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_subdomain ],
+		      [ 'mode', 'cgi' ] ],
+	},
+
+	# Clone it
+	{ 'command' => 'clone-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'newdomain', $test_clone_domain ] ],
+	},
+
+	# Make sure the domain was created
+	{ 'command' => 'list-domains.pl',
+	  'grep' => "^$test_clone_domain",
+	},
+
+	# Force change web content
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test clone page' ] ],
+	},
+
+	# Validate everything
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'domain' => $test_subdomain ],
+		      [ 'domain' => $test_clone_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Check mail aliases
+	{ 'command' => 'list-aliases.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^'.$test_alias.'@'.$test_clone_domain,
+		      '^ *nobody@virtualmin.com' ],
+	},
+	{ 'command' => 'list-simple-aliases.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Autoreply message: Test autoreply' ],
+	},
+
+	# Check mailboxes
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_clone_domain ],
+		      [ 'user' => $test_user ],
+		      [ 'multiline' ],
+		      [ 'simple-aliases' ] ],
+	  'grep' => [ 'Password: spod',
+		      'Home quota: 100',
+		      'Databases: exampleclone \\(mysql\\), '.
+				 'exampleclone_extra \\(mysql\\)',
+		      'Email address: '.$test_user.'@'.$test_clone_domain,
+		      'Extra addresses: bob@'.$test_clone_domain.
+		      		     ' fred@'.$test_clone_domain,
+		      'Forward: jack@'.$test_clone_domain,
+		      'Forward: jill@'.$test_clone_domain,
+		      'Autoreply message: User autoreply',
+	            ],
+	},
+
+	# Test DNS lookup
+	{ 'command' => 'host '.$test_clone_domain,
+	  'antigrep' => &get_default_ip(),
+	},
+
+	# Test HTTP get
+	{ 'command' => $wget_command.'http://'.$test_clone_domain,
+	  'grep' => 'Test clone page',
+	},
+
+	# Test HTTPS get
+	{ 'command' => $wget_command.'https://'.$test_clone_domain,
+	  'grep' => 'Test clone page',
+	},
+
+	# Test HTTP get to v6 address
+	{ 'command' => $wget_command.' --inet6 http://'.$test_clone_domain,
+	  'grep' => 'Test clone page',
+	},
+
+	# Test HTTP get of old page
+	{ 'command' => $wget_command.'http://'.$test_subdomain,
+	  'grep' => 'Test source page',
+	},
+
+	# Check MySQL login
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg exampleclone -e "select version()"',
+	},
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg exampleclone_extra -e "select version()"',
+	},
+
+	# Check MySQL login by user
+	{ 'command' => 'mysql -u '.$test_full_clone_user.' -pspod exampleclone -e "select version()"',
+	},
+	{ 'command' => 'mysql -u '.$test_full_clone_user.' -pspod exampleclone_extra -e "select version()"',
+	},
+
+	# Cleanup all the domains
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'disable' => $disable_tests,
@@ -4329,6 +4867,7 @@ $alltests = { '_config' => $_config_tests,
 	      'aliasdom' => $aliasdom_tests,
 	      'reseller' => $reseller_tests,
 	      'script' => $script_tests,
+	      'gplscript' => $gplscript_tests,
 	      'database' => $database_tests,
 	      'proxy' => $proxy_tests,
 	      'migrate' => $migrate_tests,
@@ -4357,7 +4896,16 @@ $alltests = { '_config' => $_config_tests,
 	      'overlap' => $overlap_tests,
 	      'redirect' => $redirect_tests,
 	      'admin' => $admin_tests,
+	      'clone' => $clone_tests,
+	      'clonesub' => $clonesub_tests,
 	    };
+if (!$virtualmin_pro) {
+	# Some tests don't work on GPL
+	delete($alltests->{'admin'});
+	delete($alltests->{'reseller'});
+	delete($alltests->{'proxy'});
+	delete($alltests->{'script'});
+	}
 
 # Run selected tests
 $total_failed = 0;
@@ -4367,6 +4915,14 @@ if (!@tests) {
 @tests = grep { &indexof($_, @skips) < 0 } @tests;
 @failed_tests = ( );
 foreach $tt (@tests) {
+	# Cleanup backups first
+	&unlink_file($test_backup_file);
+	&unlink_file($test_incremental_backup_file);
+	&unlink_file($test_backup_dir);
+	system("mkdir -p $test_backup_dir");
+	&unlink_file($test_backup_dir2);
+	system("mkdir -p $test_backup_dir2");
+
 	print "Running $tt tests ..\n";
 	@tts = @{$alltests->{$tt}};
 	$allok = 1;

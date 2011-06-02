@@ -233,8 +233,16 @@ local $spamid = $d->{'parent'} || $d->{'id'};
 $client ||= $config{'spam_client'};
 local $cmd = &has_command($client);
 if ($client eq 'spamc') {
-	$cmd .= " -d $config{'spam_host'}" if ($config{'spam_host'});
-	$cmd .= " -s $config{'spam_size'}" if ($config{'spam_size'});
+	local ($host, $port) = split(/:/, $config{'spam_host'});
+	if ($host) {
+		$cmd .= " -d $host";
+		if ($port) {
+			$cmd .= " -p $port";
+			}
+		}
+	if ($config{'spam_size'}) {
+		$cmd .= " -s $config{'spam_size'}";
+		}
 	}
 else {
 	$cmd .= " --siteconfigpath $spam_config_dir/$spamid";
@@ -547,6 +555,52 @@ local $spamdir = "$spam_config_dir/$_[0]->{'id'}";
 &save_domain_spam_autoclear($_[0], undef);
 &release_lock_spam($_[0]);
 &$second_print($text{'setup_done'});
+}
+
+# clone_spam(&domain, &old-domain)
+# Copy per-domain procmail rules and spamassassin config files to new domain,
+# correcting the domain ID
+sub clone_spam
+{
+local ($d, $oldd) = @_;
+&$first_print($text{'clone_spam'});
+&obtain_lock_spam($d);
+local $pm = "$procmail_spam_dir/$d->{'id'}";
+local $opm = "$procmail_spam_dir/$oldd->{'id'}";
+&copy_source_dest($opm, $pm);
+local $lref = &read_file_lines($pm);
+foreach my $l (@$lref) {
+	$l =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/;
+	}
+&flush_file_lines($pm);
+local $spamdir = "$spam_config_dir/$d->{'id'}";
+local $ospamdir = "$spam_config_dir/$oldd->{'id'}";
+&system_logged("rm -rf ".quotemeta($spamdir)."/*");
+&system_logged("cd ".quotemeta($ospamdir)." && tar cf - . | ".
+	       "(cd $spamdir && tar xpf -)");
+
+# Fix email addresses in per-domain spamassassin config file
+local $spamfile = "$spamdir/virtualmin.cf";
+&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, undef, $spamfile);
+local $lref = &read_file_lines($spamfile);
+foreach my $l (@$lref) {
+	if ($l =~ /^whitelist_from\s+\Q$oldd->{'emailto'}\E/) {
+		$l = "whitelist_from $d->{'emailto'}";
+		}
+	}
+&flush_file_lines($spamfile);
+
+# Re-update whitelist
+if ($d->{'spam_white'}) {
+	&update_spam_whitelist($d);
+	}
+
+# Copy automatic spam clearing
+&save_domain_spam_autoclear($d, &get_domain_spam_autoclear($oldd));
+
+&release_lock_spam($d);
+&$second_print($text{'setup_done'});
+return 1;
 }
 
 # check_spam_clash()
@@ -1184,7 +1238,8 @@ local $helper = &get_api_helper_command();
       "Daemon for quickly looking up Virtualmin servers from procmail",
       "$helper lookup-domain-daemon",
       "kill `cat $pidfile`",
-      undef);
+      undef,
+      { 'fork' => 1 });
 if (&check_pid_file($pidfile)) {
 	&init::stop_action("lookup-domain");
 	sleep(5);	# Let port free up
@@ -1536,10 +1591,13 @@ else {
 local $var2 = { 'flags' => [ ],
 		'conds' => [ [ "?", $cmd ] ],
 	        'action' => '/dev/null' };
+local $var3 = { 'name' => 'EXITCODE',
+                'value' => '0' };
 
 # Add after the VIRTUALMIN= line
 &procmail::create_recipe_before($var1, $virtafter);
 &procmail::create_recipe_before($var2, $virtafter);
+&procmail::create_recipe_before($var3, $virtafter);
 }
 
 # startstop_spam([&typestatus])

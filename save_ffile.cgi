@@ -27,5 +27,5 @@ push(@filter, "2 ".$in{'other'}."\n") if ($in{'other'});
 &webmin_log("save", "ffile", $in{'file'});
 
 $what = $in{'alias'} ? 'alias' : 'user';
-&redirect("edit_$what.cgi?$what=$in{$what}&dom=$in{'dom'}");
+&redirect("edit_$what.cgi?$what=$in{$what}&dom=$in{'dom'}&unix=1");
 

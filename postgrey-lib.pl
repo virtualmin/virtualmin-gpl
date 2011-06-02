@@ -131,7 +131,7 @@ if (!$port) {
 &require_mail();
 local $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
 if ($rr =~ /check_policy_service\s+inet:\S+:(\d+)/ && $1 == $port ||
-    $rr =~ /check_policy_service\s+unix:(\S+)/ && $1 eq $port) {
+    $rr =~ /check_policy_service\s+unix:([^ ,]+)/ && $1 eq $port) {
 	return 1;
 	}
 return 0;
@@ -187,14 +187,14 @@ else {
 &require_mail();
 local $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
 if ($rr =~ /check_policy_service\s+inet:\S+:(\d+)/ && $1 == $port ||
-    $rr =~ /check_policy_service\s+unix:(\S+)/ && $1 eq $port) {
+    $rr =~ /check_policy_service\s+unix:([^, ]+)/ && $1 eq $port) {
 	# Already OK
 	&$second_print($text{'postgrey_postfixalready'});
 	}
 else {
 	local $wantport = $port =~ /^\// ? "unix:$port"
 					 : "inet:127.0.0.1:$port";
-	if ($rr =~ /(.*)check_policy_service\s+(inet|unix):\S+(.*)/) {
+	if ($rr =~ /(.*)check_policy_service\s+(inet|unix):[^, ]+(.*)/) {
 		# Wrong port?!
 		$rr = $1."check_policy_service ".$wantport.$3;
 		}
@@ -222,7 +222,7 @@ local $init = &get_postgrey_init();
 &require_mail();
 local $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
 if ($rr =~ /^(.*)\s*check_policy_service\s+inet:\S+:(\d+)(.*)/ && $2 == $port ||
-    $rr =~ /^(.*)\s*check_policy_service\s+unix:(\S+)(.*)/ && $2 eq $port) {
+    $rr =~ /^(.*)\s*check_policy_service\s+unix:([^, ]+)(.*)/ && $2 eq $port) {
 	$rr = $1.$3;
 	&postfix::set_current_value("smtpd_recipient_restrictions", $rr);
 	&postfix::reload_postfix();

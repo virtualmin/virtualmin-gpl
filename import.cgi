@@ -25,6 +25,10 @@ if (!$parent) {
 		&error_exit($text{'setup_euser2'});
 	$in{'group_def'} || $in{'group'} =~ /^[^\t :]+$/ ||
 		&error_exit($text{'import_egroup'});
+	$in{'user_def'} || &indexof($in{'user'}, @banned_usernames) < 0 ||
+		&error(&text('setup_eroot', join(" ", @banned_usernames)));
+	$in{'group_def'} || &indexof($in{'group'}, @banned_usernames) < 0 ||
+		&error(&text('setup_eroot2', join(" ", @banned_usernames)));
 	}
 
 # Make sure IP is valid

@@ -51,13 +51,22 @@ if (&has_home_quotas()) {
 	print &ui_tabs_end_tab();
 	}
 
-# Show usage by each sub-directory under home
+# Show usage by each sub-directory under home, and sub-dirs under public_html
 opendir(DIR, $d->{'home'});
-foreach $dir (readdir(DIR)) {
-	next if ($dir eq "..");
+@dirs = grep { $_ ne ".." } readdir(DIR);
+closedir(DIR);
+$phd = &public_html_dir($d, 1);
+if (-r "$d->{'home'}/$phd") {
+	opendir(DIR, "$d->{'home'}/$phd");
+	push(@dirs, map { "$phd/$_" }
+			grep { $_ ne ".." && $_ ne "." } readdir(DIR));
+	closedir(DIR);
+	}
+@dirs = sort { $a cmp $b } @dirs;
+foreach $dir (@dirs) {
 	local $path = "$d->{'home'}/$dir";
 	local $levels = $dir eq "domains" || $dir eq "homes" ||
-			$dir eq "." ? 0 : undef;
+			$dir eq "." || $dir eq $phd ? 0 : undef;
 	($dirusage) = &recursive_disk_usage_mtime($path, undef, $levels);
 	($dirgid) = &recursive_disk_usage_mtime($path, $d->{'gid'}, $levels);
 	if (-d $path && $dir ne ".") {

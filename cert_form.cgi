@@ -49,7 +49,7 @@ foreach $i (@cert_attributes) {
 	}
 
 # Other domains using same cert, such as via wildcards or UCC
-@others = &get_domain_by("ssl_same", $d->{'id'});
+@others = grep { $_->{'ssl'} } &get_domain_by("ssl_same", $d->{'id'});
 if (@others) {
 	print &ui_table_row($text{'cert_also'},
 		&ui_links_row([
@@ -218,7 +218,9 @@ print &ui_table_row($text{'cert_chain'},
 	    $chain ? ( [ 1, &text('cert_chain1', "<tt>$chain</tt>")."<br>" ] ) :
 		     ( ),
 	    [ 2, &text('cert_chain2',
-		       &ui_upload("upload", 50)) ] ]));
+		       &ui_upload("upload", 50))."<br>" ],
+	    [ 3, $text{'cert_chain3'}."<br>\n".
+		 &ui_textarea("paste", undef, 8, 70) ] ]));
 
 # Current details
 if ($chain) {

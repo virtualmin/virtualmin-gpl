@@ -22,7 +22,7 @@ return "RoundCube Webmail is a browser-based multilingual IMAP client with an ap
 # script_roundcube_versions()
 sub script_roundcube_versions
 {
-return ( "0.5.1" );
+return ( "0.5.2" );
 }
 
 sub script_roundcube_category
@@ -118,6 +118,7 @@ sub script_roundcube_check
 {
 local ($d, $ver, $opts, $upgrade) = @_;
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
+$opts->{'db'} || return "Missing database";
 if (-r "$opts->{'dir'}/config/db.inc.php") {
 	return "RoundCube appears to be already installed in the selected directory";
 	}
@@ -323,6 +324,11 @@ return $ver eq $vers[0] ? undef : $vers[0];
 sub script_roundcube_site
 {
 return 'http://www.roundcube.net/';
+}
+
+sub script_roundcube_gpl
+{
+return 1;
 }
 
 1;

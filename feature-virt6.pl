@@ -79,9 +79,11 @@ local ($d) = @_;
 if (!$d->{'virtalready'}) {
 	# Bring down and delete the IPv6 interface
 	&$first_print(&text('delete_virt6', $d->{'ip6'}));
-	local ($active) = grep { $_->{'address'} eq $d->{'ip6'} }
+	local ($active) = grep { &canonicalize_ip6($_->{'address'}) eq
+				 &canonicalize_ip6($d->{'ip6'}) }
 			       &active_ip6_interfaces();
-	local ($boot) = grep { $_->{'address'} eq $d->{'ip6'} }
+	local ($boot) = grep { &canonicalize_ip6($_->{'address'}) eq
+			       &canonicalize_ip6($d->{'ip6'}) }
 			     &boot_ip6_interfaces();
 	&deactivate_ip6_interface($active) if ($active);
 	&delete_ip6_interface($boot) if ($boot);
@@ -110,6 +112,14 @@ if ($config{'dns'} && !$d->{'provision_dns'}) {
 	}
 }
 
+# clone_virt6(&domain, &old-domain)
+# No need to do anything here, as an IP address doesn't have any settings that
+# need copying
+sub clone_virt6
+{
+return 1;
+}
+
 # validate_virt6(&domain)
 # Check for boot-time and active IP6 network interfaces
 sub validate_virt6
@@ -117,13 +127,13 @@ sub validate_virt6
 local ($d) = @_;
 if (!$_[0]->{'virtalready'}) {
 	# Only check boot-time interface if added by Virtualmin
-	local @boots = &bootup_ip_addresses();
-	if (&indexof($d->{'ip6'}, @boots) < 0) {
+	local @boots = map { &canonicalize_ip6($_) } &bootup_ip_addresses();
+	if (&indexoflc(&canonicalize_ip6($d->{'ip6'}), @boots) < 0) {
 		return &text('validate_evirt6b', $d->{'ip6'});
 		}
 	}
-local @acts = &active_ip_addresses();
-if (&indexof($d->{'ip6'}, @acts) < 0) {
+local @acts = map { &canonicalize_ip6($_) } &active_ip_addresses();
+if (&indexoflc(&canonicalize_ip6($d->{'ip6'}), @acts) < 0) {
 	return &text('validate_evirt6a', $d->{'ip6'});
 	}
 return undef;
@@ -137,7 +147,8 @@ local ($ip6) = @_;
 
 # Check interfaces
 foreach my $i (&active_ip6_interfaces(), &boot_ip6_interfaces()) {
-	return 1 if ($i->{'address'} eq $ip6);
+	return 1 if (&canonicalize_ip6($i->{'address'}) eq
+		     &canonicalize_ip6($ip6));
 	}
 
 # Do a quick ping test
@@ -319,7 +330,9 @@ if ($gconfig{'os_type'} eq 'debian-linux') {
 		if ($o->[0] ne 'up' || $o->[1] !~ /ifconfig\s+(\S+)\s+inet6\s+add\s+([a-f0-9:]+)\/(\d+)/ || $2 ne $iface->{'address'}) {
 			push(@opts, $o);
 			}
-		if ($o->[0] eq 'address' && $o->[1] eq $iface->{'address'}) {
+		if ($o->[0] eq 'address' &&
+		    &canonicalize_ip6($o->[1]) eq
+		     &canonicalize_ip6($iface->{'address'})) {
 			&error("Not removing primary IPv6 interface");
 			}
 		}
@@ -334,11 +347,12 @@ elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 	local %conf;
 	&read_env_file($boot->{'file'}, \%conf);
 	local $full = $iface->{'address'}."/".$iface->{'netmask'};
-	if ($conf{'IPV6ADDR'} eq $full) {
+	if (&canonicalize_ip6($conf{'IPV6ADDR'}) eq &canonicalize_ip6($full)) {
 		&error("Not removing primary IPv6 interface");
 		}
 	local @secs = split(/\s+/, $conf{'IPV6ADDR_SECONDARIES'});
-	@secs = grep { $_ ne $full } @secs;
+	@secs = grep { &canonicalize_ip6($_) ne &canonicalize_ip6($full) }
+		     @secs;
 	$conf{'IPV6ADDR_SECONDARIES'} = join(" ", @secs);
 	&write_env_file($boot->{'file'}, \%conf);
 	}
@@ -360,6 +374,33 @@ if ($gconfig{'os_type'} eq 'redhat-linux') {
 	return $boot->{'file'} if ($boot);
 	}
 return undef;
+}
+
+# canonicalize_ip6(address)
+# Converts an address to its full long form. Ie. 2001:db8:0:f101::20 to
+# 2001:0db8:0000:f101:0000:0000:0000:0020
+sub canonicalize_ip6
+{
+my ($addr) = @_;
+return $addr if (!&check_ip6address($addr));
+my @w = split(/:/, $addr);
+my $idx = &indexof("", @w);
+if ($idx >= 0) {
+	# Expand ::
+	my $mis = 8 - scalar(@w);
+	my @nw = @w[0..$idx];
+	for(my $i=0; $i<$mis; $i++) {
+		push(@nw, 0);
+		}
+	push(@nw, @w[$idx+1 .. $#w]);
+	@w = @nw;
+	}
+foreach my $w (@w) {
+	while(length($w) < 4) {
+		$w = "0".$w;
+		}
+	}
+return lc(join(":", @w));
 }
 
 1;

@@ -502,6 +502,9 @@ if (-r $script_warnings_file) {
 # Delete script install logs
 &unlink_file("$script_log_directory/$id");
 
+# Delete incremental backup file
+&unlink_file("$incremental_backups_dir/$id");
+
 # Delete cached links for the domain
 &clear_links_cache($_[0]);
 
@@ -1757,8 +1760,10 @@ if (defined(&clear_lookup_domain_cache) && $_[2]) {
 &set_usermin_imap_password($_[0]);
 
 # Update cache of existing usernames
-$unix_user{&escape_alias($_[0]->{'user'})}++;
-$unix_user{&escape_alias($_[1]->{'user'})} = 0;
+if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+	$unix_user{&escape_alias($_[0]->{'user'})}++;
+	$unix_user{&escape_alias($_[1]->{'user'})} = 0;
+	}
 
 if ($_[0]->{'shell'} ne $_[1]->{'shell'}) {
 	# Rebuild denied user list, by shell
@@ -1817,8 +1822,11 @@ else {
 	# Delete the user
 	&foreign_call($usermodule, "set_user_envs", $_[0], 'DELETE_USER')
 	&foreign_call($usermodule, "making_changes");
-	&foreign_call($usermodule, "delete_user",$_[0]);
+	&foreign_call($usermodule, "delete_user", $_[0]);
 	&foreign_call($usermodule, "made_changes");
+
+	# Record the old UID to prevent re-use
+	&record_old_uid($_[0]->{'uid'});
 	}
 
 if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
@@ -2053,10 +2061,27 @@ foreach my $j (@jobs) {
 		$cronfile ||= &cron::cron_file($j);
 		&lock_file($cronfile);
 		$j->{'user'} = $username;
-		&change_cron_job($j);
+		&cron::change_cron_job($j);
 		}
 	}
 &unlock_file($cronfile) if ($cronfile);
+}
+
+# copy_unix_cron_jobs(username, oldusername)
+# Duplicate all cron jobs for some domain user
+sub copy_unix_cron_jobs
+{
+local ($username, $oldusername) = @_;
+return if ($username eq $oldusername);
+&foreign_require("cron", "cron-lib.pl");
+local @jobs = &cron::list_cron_jobs();
+foreach my $j (@jobs) {
+	if ($j->{'user'} eq $oldusername) {
+		local $newj = { %$j };
+		$newj->{'user'} = $username;
+		&cron::create_cron_job($newj);
+		}
+	}
 }
 
 # validate_user(&domain, &user, [&olduser])
@@ -2604,13 +2629,12 @@ return &master_admin() || &reseller_admin() || $access{'edit_html'};
 
 sub can_edit_scripts
 {
-return 0 if (!$virtualmin_pro);
 return &master_admin() || &reseller_admin() || $access{'edit_scripts'};
 }
 
 sub can_unsupported_scripts
 {
-return $virtualmin_pro && &master_admin();
+return &master_admin();
 }
 
 sub can_edit_forward
@@ -2803,6 +2827,12 @@ if (!&has_home_quotas()) {
 	@colnames = grep { $_ ne 'quota' && $_ ne 'uquota' } @colnames;
 	}
 push(@heads, map { $text{'index_'.$_} } @colnames);
+foreach my $f (&list_custom_fields()) {
+	if ($f->{'show'}) {
+		push(@colnames, 'field_'.$f->{'name'});
+		push(@heads, $f->{'desc'});
+		}
+	}
 push(@heads, map { $text{'index_'.$_} } @table_features);
 
 # Generate the table contents
@@ -2829,7 +2859,7 @@ foreach my $d (&sort_indent_domains($doms)) {
 			}
 		elsif ($c eq "user") {
 			# Username
-			push(@cols, $d->{'user'});
+			push(@cols, &html_escape($d->{'user'}));
 			}
 		elsif ($c eq "owner") {
 			# Domain description / owner
@@ -2837,19 +2867,19 @@ foreach my $d (&sort_indent_domains($doms)) {
 				my $aliasdom = &get_domain($d->{'alias'});
 				my $of = &text('index_aliasof',
 						$aliasdom->{'dom'});
-				push(@cols, $d->{'owner'} || $of);
+				push(@cols, &html_escape($d->{'owner'} || $of));
 				}
 			else {
-				push(@cols, $d->{'owner'});
+				push(@cols, &html_escape($d->{'owner'}));
 				}
 			}
 		elsif ($c eq "emailto") {
 			# Email address
-			push(@cols, $d->{'emailto'});
+			push(@cols, &html_escape($d->{'emailto'}));
 			}
 		elsif ($c eq "reseller") {
 			# Reseller name
-			push(@cols, $d->{'reseller'});
+			push(@cols, &html_escape($d->{'reseller'}));
 			}
 		elsif ($c eq "admins") {
 			# Extra admin names
@@ -2861,7 +2891,7 @@ foreach my $d (&sort_indent_domains($doms)) {
 						&urlize($_)."'>$_</a>" }
 					      @admins;
 				}
-			push(@cols, join(' ', @admins));
+			push(@cols, &html_escape(join(' ', @admins)));
 			}
 		elsif ($c eq "users") {
 			# User count
@@ -2941,6 +2971,10 @@ foreach my $d (&sort_indent_domains($doms)) {
 		elsif ($c eq "created") {
 			# Creation date
 			push(@cols, &make_date($d->{'created'}, 1));
+			}
+		elsif ($c =~ /^field_/) {
+			# Some custom field
+			push(@cols, &html_escape($d->{$c}));
 			}
 		}
 	foreach $f (@table_features) {
@@ -4272,6 +4306,14 @@ foreach $d (&list_domains()) {
 	$_[0]->{$d->{'uid'}} = 1;
 	$_[1]->{$d->{'user'}} = 1;
 	}
+
+# Add UIDs used in the past
+my %uids;
+&read_file_cached($old_uids_file, \%uids);
+foreach my $uid (keys %uids) {
+	$_[0]->{$uid} = 1;
+	}
+
 &release_lock_unix();
 }
 
@@ -4304,10 +4346,19 @@ foreach $d (&list_domains()) {
 	$_[0]->{$d->{'gid'}} = 1;
 	$_[1]->{$d->{'group'}} = 1;
 	}
+
+# Add GIDs used in the past
+my %gids;
+&read_file_cached($old_gids_file, \%gids);
+foreach my $gid (keys %gids) {
+	$_[0]->{$gid} = 1;
+	}
+
 &release_lock_unix();
 }
 
 # allocate_uid(&uid-taken)
+# Given a hash of used UIDs, return one that is free
 sub allocate_uid
 {
 local $uid = $uconfig{'base_uid'};
@@ -4318,6 +4369,7 @@ return $uid;
 }
 
 # allocate_gid(&gid-taken)
+# Given a hash of used GIDs, return one that is free
 sub allocate_gid
 {
 local $gid = $uconfig{'base_gid'};
@@ -4490,6 +4542,7 @@ local $did = $d ? $d->{'id'} : 0;
 local @table;
 foreach $u (@$users) {
 	local $pop3 = $d ? &remove_userdom($u->{'user'}, $d) : $u->{'user'};
+	$pop3 = &html_escape($pop3);
 	local @cols;
 	push(@cols, "<a href='edit_user.cgi?dom=$did&".
 	      "user=".&urlize($u->{'user'})."&unix=$u->{'unix'}'>".
@@ -4498,8 +4551,8 @@ foreach $u (@$users) {
 	        $u->{'pass'} =~ /^\!/ ? "<u><i>$pop3</i></u>" :
 	       $u->{'webowner'} ? "<u>$pop3</u>" :
 	       $u->{'pass'} =~ /^\!/ ? "<i>$pop3</i>" : $pop3)."</a>\n");
-	push(@cols, $u->{'user'});
-	push(@cols, $u->{'real'});
+	push(@cols, &html_escape($u->{'user'}));
+	push(@cols, &html_escape($u->{'real'}));
 
 	# Add columns for quotas
 	local $quota;
@@ -4834,16 +4887,14 @@ if ($config{'bw_active'}) {
 		&close_tempfile(EMPTY);
 		}
 	}
-if ($virtualmin_pro) {
-	# Script logs
-	if (-d "$script_log_directory/$_[0]->{'id'}") {
-		&execute_command("cd ".quotemeta("$script_log_directory/$_[0]->{'id'}")." && $tar cf ".quotemeta($_[1]."_scripts")." .");
-		}
-	else {
-		# Create an empty file to indicate that we have no scripts
-		&open_tempfile(EMPTY, ">".$_[1]."_scripts");
-		&close_tempfile(EMPTY);
-		}
+# Script logs
+if (-d "$script_log_directory/$_[0]->{'id'}") {
+	&execute_command("cd ".quotemeta("$script_log_directory/$_[0]->{'id'}")." && $tar cf ".quotemeta($_[1]."_scripts")." .");
+	}
+else {
+	# Create an empty file to indicate that we have no scripts
+	&open_tempfile(EMPTY, ">".$_[1]."_scripts");
+	&close_tempfile(EMPTY);
 	}
 
 # Include template, in case the restore target doesn't have it
@@ -5646,7 +5697,7 @@ if (!$_[3]->{'fix'}) {
 		&make_dir($bandwidth_dir, 0700);
 		&copy_source_dest($_[1]."_bw", "$bandwidth_dir/$_[0]->{'id'}");
 		}
-	if ($virtualmin_pro && -r $_[1]."_scripts") {
+	if (-r $_[1]."_scripts") {
 		# Also restore script logs
 		&execute_command("rm -rf ".quotemeta("$script_log_directory/$_[0]->{'id'}"));
 		if (-s $_[1]."_scripts") {
@@ -6108,7 +6159,6 @@ return $db;
 sub fix_database_name
 {
 local ($db, $dbtype) = @_;
-print STDERR "old=$db\n";
 $db = lc($db);
 $db =~ s/[\.\-]/_/g;	# mysql doesn't like . or _
 if (!$dbtype || $dbtype eq "postgres") {
@@ -6127,7 +6177,6 @@ if ($db eq "test" || $db eq "mysql" || $db =~ /^template/) {
 	# These names are reserved by MySQL and PostgreSQL
 	$db = "db".$db;
 	}
-print STDERR "db=$db dbtype=$dbtype\n";
 return $db;
 }
 
@@ -7982,11 +8031,12 @@ local $_;
 open(FIELDS, $custom_fields_file);
 while(<FIELDS>) {
 	s/\r|\n//g;
-	local @a = split(/:/, $_, 4);
+	local @a = split(/:/, $_, 5);
 	push(@rv, { 'name' => $a[0],
 		    'type' => $a[1],
 		    'opts' => $a[2],
-		    'desc' => $a[3] });
+		    'desc' => $a[3],
+		    'show' => $a[4], });
 
 	}
 close(FIELDS);
@@ -7999,7 +8049,7 @@ sub save_custom_fields
 &open_lock_tempfile(FIELDS, ">$custom_fields_file");
 foreach my $a (@{$_[0]}) {
 	&print_tempfile(FIELDS, $a->{'name'},":",$a->{'type'},":",
-		     $a->{'opts'},":",$a->{'desc'},"\n");
+		     $a->{'opts'},":",$a->{'desc'},":",$a->{'show'},"\n");
 	}
 &close_tempfile(FIELDS);
 }
@@ -8949,6 +8999,12 @@ return &master_admin() ? 2 :
 
 # Returns 1 if the current user can edit log file locations
 sub can_log_paths
+{
+return &master_admin();
+}
+
+# Returns 1 if DNS records can be manually edited
+sub can_manual_dns
 {
 return &master_admin();
 }
@@ -9965,6 +10021,17 @@ if (&can_move_domain($d) && !$d->{'alias'} && !$d->{'subdom'}) {
 		  });
 	}
 
+if ($d->{'parent'} && &can_create_sub_servers() ||
+    !$d->{'parent'} && &can_create_master_servers()) {
+	# Clone server
+	push(@rv, { 'page' => 'clone_form.cgi',
+		    'title' => $text{'edit_clone'},
+		    'desc' => $text{'edit_clonedesc'},
+		    'cat' => 'server',
+		    'icon' => 'arrow_right',
+		  });
+	}
+
 if (&can_config_domain($d) && $d->{'subdom'}) {
 	# Turn sub-domain into sub-server
 	push(@rv, { 'page' => 'unsub.cgi',
@@ -10188,7 +10255,7 @@ if ($d->{'dir'} && !$d->{'parent'} && $virtualmin_pro) {
 	}
 
 # Button to re-send signup email
-if (!$d->{'alias'} && &can_edit_domain($d)) {
+if (!$d->{'alias'} && &can_config_domain($d)) {
 	push(@rv, { 'page' => 'reemail.cgi',
 		    'title' => $text{'edit_reemail'},
 		    'desc' => &text('edit_reemaildesc',
@@ -10365,7 +10432,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    'bw',
    $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'dynip', 'resels',
 		       'reseller', 'notify', 'scripts', 'styles' )
-		   : ( 'fields', 'ips', 'sharedips', 'dynip' ),
+		   : ( 'fields', 'ips', 'sharedips', 'scripts', 'dynip' ),
    'shells',
    $config{'spam'} || $config{'virus'} ? ( 'sv' ) : ( ),
    &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
@@ -11572,14 +11639,15 @@ if ($config{'mail'}) {
 		# Make sure mydestination contains hostname or origin
 		local $myhost = &postfix::get_real_value("myorigin") ||
 			        &postfix::get_real_value("myhostname") ||
-				&get_system_hostname();
+				&get_system_hostname(0, 1);
 		if ($myhost =~ /^\//) {
 			$myhost = &read_file_contents($myhost);
 			$myhost =~ s/\s//g;
 			}
 		local @mydest = split(/\s*,\s*/,
 				   &postfix::get_real_value("mydestination"));
-		if (&indexoflc($myhost, @mydest) < 0 &&
+		if ($myhost &&
+		    &indexoflc($myhost, @mydest) < 0 &&
 		    &indexoflc('$myhostname', @mydest) < 0) {
 			return &text('check_emydest', $myhost);
 			}
@@ -12214,7 +12282,8 @@ if ($config{'unix'}) {
 		local $msg;
 		if (&foreign_available("init")) {
 			&foreign_require("init", "init-lib.pl");
-			if ($init::init_mode eq 'init' &&
+			if (($init::init_mode eq 'init' ||
+			     $init::init_mode eq 'upstart') &&
 			    &init::action_status("nscd") == 2) {
 				$msg = &text('check_enscd2',
 					'../init/edit_action.cgi?0+nscd');
@@ -12291,8 +12360,8 @@ if (defined(&supports_resource_limits)) {
 			       $text{'check_resok'});
 	}
 
-# Check if software packages work, for pro
-if ($virtualmin_pro && &foreign_check("software")) {
+# Check if software packages work, for script installs
+if (&foreign_check("software")) {
 	&foreign_require("software", "software-lib.pl");
 	if (defined(&software::check_package_system)) {
 		local $err = &software::check_package_system();
@@ -12434,18 +12503,28 @@ local $dir = &resolve_links($_[0]);
 &foreign_require("mount", "mount-lib.pl");
 local @mounts = &mount::list_mounts();
 local @mounted = &mount::list_mounted();
-local @realmounts = grep { $_->[0] ne 'none' && $_->[0] !~ /^swap/ &&
+# Exclude swap mounts
+local @realmounts = grep { $_->[0] ne 'none' &&
+			   $_->[0] !~ /^swap/ &&
 			   $_->[1] ne 'none' } @mounts;
 if (!@realmounts) {
 	# If /etc/fstab contains no real mounts (such as in a VPS environment),
 	# then fake it to be the same as /etc/mtab
 	@mounts = @mounted;
 	}
-foreach $m (sort { length($b->[0]) <=> length($a->[0]) } @mounted) {
+foreach my $m (sort { length($b->[0]) <=> length($a->[0]) } @mounted) {
 	if ($dir eq $m->[0] || $m->[0] eq "/" ||
 	    substr($dir, 0, length($m->[0])+1) eq "$m->[0]/") {
+		# Found currently mounted parent directory
 		local ($m2) = grep { $_->[0] eq $m->[0] } @mounts;
 		if ($m2) {
+			if ($m2->[2] eq "bind" && $m2->[0] eq $m2->[1]) {
+				# Skip loopback mount onto same directory,
+				# as any quotas will be defined in the real
+				# mount.
+				next;
+				}
+			# Found boot-time mount as well
 			return ($m, $m2);
 			}
 		}
@@ -13082,7 +13161,8 @@ local @rv;
 foreach my $f ($safe ? @safe_backup_features : @backup_features) {
 	local $bfunc = "backup_$f";
 	if (defined(&$bfunc) &&
-	    ($config{$f} || $f eq "unix" || $f eq "virtualmin")) {
+	    ($config{$f} ||
+	     $f eq "unix" || $f eq "virtualmin" || $f eq "mail")) {
 		push(@rv, $f);
 		}
 	}
@@ -14060,6 +14140,207 @@ for(my $i=0; $i<@sp1 || $i<@sp2; $i++) {
 	return $comp if ($comp);
 	}
 return 0;
+}
+
+# clone_virtual_server(&domain, new-domain, [new-user, [new-password]])
+# Creates a copy of a virtual server, with a new domain name and perhaps
+# username (if top-level). Prints stuff as it progresses. Returns 0 on failure
+# or 1 on success.
+sub clone_virtual_server
+{
+local ($oldd, $newdom, $newuser, $newpass) = @_;
+
+# Create the new domain object, with changes
+&$first_print($text{'clone_object'});
+local $d = { %$oldd };
+local $parent;
+local $tmpl = &get_template($d->{'template'});
+$d->{'id'} = &domain_id();
+$d->{'dom'} = $newdom;
+$d->{'owner'} = "Clone of ".$d->{'owner'};
+if (!$d->{'parent'}) {
+	# Allocate new UID, GID, prefix, username and group name
+	delete($d->{'uid'});
+	delete($d->{'gid'});
+	delete($d->{'ugid'});
+	$d->{'user'} = $newuser;
+	$d->{'group'} = $newuser;
+	$d->{'ugroup'} = $newuser;
+	delete($d->{'mysql_user'});	# Force re-creation of DB name
+	delete($d->{'postgres_user'});
+	if ($newpass) {
+		# XXX mysql encrypted pass?
+		$d->{'pass'} = $newpass;
+		}
+
+	# Re-compute email address
+	$d->{'emailto'} = $d->{'mail'} ? $d->{'user'}.'@'.$d->{'dom'}
+				      : $d->{'user'}.'@'.&get_system_hostname();
+	}
+else {
+	$parent = &get_domain($d->{'parent'});
+	}
+
+# Pick a new home directory and prefix
+$d->{'home'} = &server_home_directory($d, $parent);
+$d->{'prefix'} = &compute_prefix($d->{'dom'}, $d->{'group'}, $parent, 1);
+local $pclash = &get_domain_by("prefix", $d->{'prefix'});
+if ($pclash) {
+	&$second_print(&text('clone_prefixclash',
+			     $d->{'prefix'}, $pclash->{'dom'}));
+	return 0;
+	}
+$d->{'db'} = &database_name($d);
+$d->{'no_mysql_db'} = 1;	# Don't create DB automatically
+$d->{'no_tmpl_aliases'} = 1;	# Don't create any aliases
+
+# Fix any paths that refer to old home, like SSL certs
+foreach my $k (keys %$d) {
+	next if ($k eq "home");	# already fixed
+	$d->{$k} =~ s/\Q$oldd->{'home'}\E\//$d->{'home'}\//g;
+	}
+&$second_print($text{'setup_done'});
+
+# Allocate a new IPv4 address if needed
+if ($d->{'virt'}) {
+	&$first_print($text{'clone_virt'});
+	if ($tmpl->{'ranges'} eq 'none') {
+		&$second_print($text{'clone_virtrange'});
+		return 0;
+		}
+	local ($ip, $netmask) = &free_ip_address($tmpl);
+	if (!$ip) {
+		&$second_print($text{'clone_virtalloc'});
+		return 0;
+		}
+	$d->{'ip'} = $ip;
+	$d->{'netmask'} = $netmask;
+	$d->{'virtalready'} = 0;
+	&$second_print(&text('clone_virtdone', $ip6));
+	}
+
+# Allocate a new IPv6 address if needed
+if ($d->{'virt6'}) {
+	&$first_print($text{'clone_virt6'});
+	if ($tmpl->{'ranges6'} eq 'none') {
+		&$second_print($text{'clone_virt6range'});
+		return 0;
+		}
+	local ($ip6, $netmask6) = &free_ip6_address($tmpl);
+	if (!$ip6) {
+		&$second_print($text{'clone_virt6alloc'});
+		return 0;
+		}
+	$d->{'ip6'} = $ip6;
+	$d->{'netmask6'} = $netmask6;
+	$d->{'virt6already'} = 0;
+	&$second_print(&text('clone_virt6done', $ip6));
+	}
+
+# Disable and features that don't support cloning
+&$first_print($text{'clone_clash'});
+foreach my $f (@features) {
+	local $cfunc = "clone_".$f;
+	if ($d->{$f} && !defined(&$cfunc)) {
+		$d->{$f} = 0;
+		}
+	}
+foreach my $f (@plugins) {
+	if ($d->{$f} && !&plugin_defined($f, "feature_clone")) {
+		$d->{$f} = 0;
+		}
+	}
+
+# Check for clashes / depends
+local $derr = &virtual_server_depends($d);
+if ($derr) {
+	&$second_print(&text('clone_dependfound', $derr));
+	return 0;
+	}
+local $cerr = &virtual_server_clashes($d);
+if ($cerr) {
+	&$second_print(&text('clone_clashfound', $cerr));
+	return 0;
+	}
+&$second_print($text{'setup_done'});
+
+# Create it
+&$first_print($text{'clone_create'});
+&$indent_print();
+local $err = &create_virtual_server($d, $parent,
+				    $parent ? $parent->{'user'} : undef);
+&$outdent_print();
+if ($err) {
+	&$second_print(&text('clone_createfailed', $err));
+	return 0;
+	}
+&$second_print($text{'setup_done'});
+
+# Copy across features, mail last so that user DB association works
+my @clonefeatures = @features;
+if (&indexof("mail", @clonefeatures) >= 0) {
+	@clonefeatures = ( ( grep { $_ ne "mail" } @clonefeatures ), "mail" );
+	}
+foreach my $f (@clonefeatures) {
+	if ($d->{$f}) {
+		local $cfunc = "clone_".$f;
+		&try_function($f, $cfunc, $d, $oldd);
+		}
+	}
+foreach my $f (@plugins) {
+	if ($d->{$f}) {
+		&try_plugin_call($f, "feature_clone", $d, $oldd);
+		}
+	}
+&save_domain($d);
+
+&run_post_actions();
+return 1;
+}
+
+# record_old_uid(uid, [gid])
+# Record usage of some UID and perhaps GID to prevent re-use
+sub record_old_uid
+{
+my ($uid, $gid) = @_;
+&lock_file($old_uids_file);
+my %uids;
+&read_file_cached($old_uids_file, \%uids);
+$uids{$uid} = 1;
+&write_file($old_uids_file, \%uids);
+&unlock_file($old_uids_file);
+if ($gid) {
+	&lock_file($old_gids_file);
+	my %gids;
+	&read_file_cached($old_gids_file, \%gids);
+	$gids{$gid} = 1;
+	&write_file($old_gids_file, \%gids);
+	&unlock_file($old_gids_file);
+	}
+}
+
+# check_resolvability(name)
+# Returns 1 and the IP if a name can be resolved, or 0 and an error message
+sub check_resolvability
+{
+my ($name) = @_;
+local $page = $resolve_check_page."?host=".&urlize($name);
+local ($out, $error);
+&http_download($resolve_check_host,
+	       $resolve_check_port,
+	       $page, \$out, \$error, undef, 0, undef, undef, 60, 0, 1);
+if ($error) {
+	return (0, $error);
+	}
+elsif ($out =~ /^ok\s+([0-9\.]+)/) {
+	return (1, $1);
+	}
+elsif ($out =~ /^(error|param)\s+(.*)/) {
+	return (0, $2);
+	}
+else {
+	return (0, "Unknown response : $out");
+	}
 }
 
 # load_plugin_libraries([plugin, ...])

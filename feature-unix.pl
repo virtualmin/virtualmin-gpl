@@ -367,6 +367,7 @@ if (!$_[0]->{'parent'}) {
 		&foreign_call($usermodule, "made_changes");
 		&$second_print($text{'setup_done'});
 		}
+	&record_old_uid($uinfo->{'uid'}, $uinfo->{'gid'});
 	&release_lock_unix($_[0]);
 	&release_lock_cron($_[0]);
 	}
@@ -374,6 +375,47 @@ if (!$_[0]->{'parent'}) {
 # Update any groups
 &build_denied_ssh_group(undef, $_[0]);
 &update_domain_owners_group(undef, $_[0]);
+}
+
+# clone_unix(&domain, &src-domain)
+# Copy crontab for a Unix user to a new cloned domain
+sub clone_unix
+{
+local ($d, $oldd) = @_;
+&$first_print($text{'clone_unix'});
+&obtain_lock_unix($d);
+&obtain_lock_cron($d);
+
+# Copy cron jobs, adjust paths
+&copy_unix_cron_jobs($d->{'user'}, $oldd->{'user'});
+
+# Copy resource limits
+if (defined(&supports_resource_limits) && &supports_resource_limits()) {
+	local $olimits = &get_domain_resource_limits($oldd);
+	&save_domain_resource_limits($d, $olimits);
+	}
+
+# Copy mail file
+if (&mail_under_home()) {
+	local $oldmf = &user_mail_file($oldd->{'user'});
+	local $newmf = &user_mail_file($d->{'user'});
+	if (-r $oldmf) {
+		local @st = stat($newmf);
+		&copy_source_dest($oldmf, $newmf);
+		if (@st) {
+			&set_ownership_permissions(
+				$st[5], $st[5], $st[2]&0777, $newmf);
+			}
+		else {
+			&set_ownership_permissions(
+				$d->{'uid'}, $d->{'gid'}, undef, $newmf);
+			}
+		}
+	}
+
+&release_lock_cron($d);
+&release_lock_unix($d);
+&$second_print($text{'setup_done'});
 }
 
 # check_warnings_unix(&domain, &old-domain)

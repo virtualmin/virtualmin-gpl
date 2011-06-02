@@ -16,8 +16,12 @@ $d->{'ssl_pass'} && &error($text{'copycert_epass'});
 $dovedir = $dovecot::config{'dovecot_config'};
 $dovedir =~ s/\/([^\/]+)$//;
 $conf = &dovecot::get_config();
-$cfile = &dovecot::find_value("ssl_cert_file", $conf);
-$kfile = &dovecot::find_value("ssl_key_file", $conf);
+$cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
+	 &dovecot::find_value("ssl_cert", $conf);
+$kfile = &dovecot::find_value("ssl_key_file", $conf) ||
+	 &dovecot::find_value("ssl_key", $conf);
+$cfile =~ s/^<//;
+$kfile =~ s/^<//;
 if ($cfile =~ /snakeoil/) {
 	# Hack to not use shared cert file on Ubuntu / Debian
 	$cfile = $kfile = undef;
@@ -41,8 +45,16 @@ $kdata || &error($text{'copycert_ekey'});
 &set_ownership_permissions(undef, undef, 0750, $kfile);
 
 # Update config with correct files
-&dovecot::save_directive($conf, "ssl_cert_file", $cfile);
-&dovecot::save_directive($conf, "ssl_key_file", $kfile);
+if (&dovecot::find_value($conf, "ssl_cert", 2)) {
+	# 2.0 and later format
+	&dovecot::save_directive($conf, "ssl_cert", "<".$cfile);
+	&dovecot::save_directive($conf, "ssl_key", "<".$kfile);
+	}
+else {
+	# Pre-2.0 format
+	&dovecot::save_directive($conf, "ssl_cert_file", $cfile);
+	&dovecot::save_directive($conf, "ssl_key_file", $kfile);
+	}
 &$second_print(&text('copycert_dsaved', "<tt>$cfile</tt>", "<tt>$kfile</tt>"));
 
 # Make sure SSL is enabled
@@ -59,6 +71,11 @@ $protos = &dovecot::find_value("protocols", $conf);
 push(@protos, "imaps") if (!$protos{'imaps'} && $protos{'imap'});
 push(@protos, "pop3s") if (!$protos{'pop3s'} && $protos{'pop3'});
 &dovecot::save_directive($conf, "protocols", join(" ", @protos));
+
+# Enable PCI-compliant ciphers
+&dovecot::save_directive($conf, "ssl_cipher_list",
+			 "HIGH:MEDIUM:+TLSv1:!SSLv2:+SSLv3");
+
 &flush_file_lines();
 &unlock_file($dovecot::config{'dovecot_config'});
 &$second_print($text{'setup_done'});

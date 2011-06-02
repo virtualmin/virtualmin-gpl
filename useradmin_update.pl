@@ -18,6 +18,20 @@ sub useradmin_delete_user
 # file as well
 sub useradmin_modify_user
 {
+if ($_[0]->{'olduser'} && $_[0]->{'olduser'} ne $_[0]->{'user'}) {
+	# User was renamed .. update mailbox plainpass
+	local $d = &get_user_domain($_[0]->{'user'});
+	if ($d) {
+		local %plain;
+		&read_file_cached("$plainpass_dir/$d->{'id'}", \%plain);
+		if ($plain{$_[0]->{'olduser'}}) {
+			$plain{$_[0]->{'user'}} = $plain{$_[0]->{'olduser'}};
+			delete($plain{$_[0]->{'olduser'}});
+			&write_file("$plainpass_dir/$d->{'id'}", \%plain);
+			}
+		}
+	}
+
 if ($_[0]->{'passmode'} == 3) {
 	&set_all_null_print();
 

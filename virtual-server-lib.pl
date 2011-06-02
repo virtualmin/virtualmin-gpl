@@ -72,8 +72,7 @@ $config{'virt6'} = 1;
 @subdom_features = ( @opt_subdom_features );
 @database_features = ( 'mysql', 'postgres' );
 @template_features = ( 'basic', 'resources', @features, 'virt', 'virtualmin',
-		       'plugins',
-		       $virtualmin_pro ? ( 'scripts' ) : ( ),
+		       'plugins', 'scripts',
 		       'phpwrappers', 'avail' );
 @template_features_effecting_webmin = ( 'web', 'webmin', 'avail' );
 @can_always_features = ( 'dir', 'unix', 'logrotate' );
@@ -155,13 +154,13 @@ $initial_users_dir = "$module_config_directory/initial";
 		'mail', 'backup', 'sched', 'restore', 'sharedips', 'catchall',
 		'html', 'allowedhosts', 'passwd', 'disable', 'delete');
 if (!$virtualmin_pro) {
-	@edit_limits = grep { $_ ne 'scripts' && $_ ne 'html' } @edit_limits;
+	@edit_limits = grep { $_ ne 'html' } @edit_limits;
 	}
 
 @virtualmin_backups = ( 'config', 'templates',
 			$virtualmin_pro ? ( 'resellers' ) : ( ),
-			'email', 'custom',
-			$virtualmin_pro ? ( 'scripts', 'styles' ) : ( ),
+			'email', 'custom', 'scripts',
+			$virtualmin_pro ? ( 'styles' ) : ( ),
 		        'scheds',
 			&has_ftp_chroot() ? ( 'chroot' ) : ( ),
 			'mailserver' );
@@ -218,7 +217,12 @@ $osdn_website_port = 80;
 
 $script_latest_host = "latest-scripts.virtualmin.com";
 $script_latest_port = 80;
-$script_latest_dir = "/";
+if ($virtualmin_pro) {
+	$script_latest_dir = "/";
+	}
+else {
+	$script_latest_dir = "/gpl/";
+	}
 $script_latest_file = "scripts.txt";
 $script_latest_key = "latest-scripts\@virtualmin.com";
 
@@ -230,6 +234,10 @@ $upgrade_virtualmin_updates = "/wbm/updates.txt";
 $connectivity_check_host = "software.virtualmin.com";
 $connectivity_check_port = 80;
 $connectivity_check_page = "/cgi-bin/connectivity.cgi";
+
+$resolve_check_host = "software.virtualmin.com";
+$resolve_check_port = 80;
+$resolve_check_page = "/cgi-bin/resolve.cgi";
 
 $virtualmin_license_file = "/etc/virtualmin-license";
 $virtualmin_yum_repo = "/etc/yum.repos.d/virtualmin.repo";
@@ -288,6 +296,9 @@ $links_cache_dir = "$module_config_directory/links-cache";
 $cloudmin_provisioning_server = "provisioning.virtualmin.com";
 $cloudmin_provisioning_port = 10000;
 $cloudmin_provisioning_ssl = 1;
+
+$old_uids_file = "$module_config_directory/old-uids";
+$old_gids_file = "$module_config_directory/old-gids";
 
 # generate_plugins_list([list])
 # Creates the confplugins, plugins and other arrays based on the module config

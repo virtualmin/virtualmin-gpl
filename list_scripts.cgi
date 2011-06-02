@@ -41,7 +41,11 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 	if (defined(&$canupfunc)) {
 		@vers = grep { &$canupfunc($sinfo, $_) } @vers;
 		}
-	if (&indexof($sinfo->{'version'}, @vers) < 0) {
+	if ($sinfo->{'deleted'}) {
+		$status = "<font color=#ff0000>".
+			  $text{'scripts_deleted'}."</font>";
+		}
+	elsif (&indexof($sinfo->{'version'}, @vers) < 0) {
 		@better = grep { &compare_versions($_, $sinfo->{'version'},
 				 		   $script) > 0 } @vers;
 		if (@better) {
@@ -85,7 +89,7 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 		 "script=$sinfo->{'id'}'>$desc</a>",
 		$script->{'vdesc'}->{$sinfo->{'version'}} ||
 		  $sinfo->{'version'},
-		$sinfo->{'url'} ? 
+		$sinfo->{'url'} && !$sinfo->{'deleted'} ? 
 		  "<a href='$sinfo->{'url'}' target=_new>$path</a>" :
 		  $path,
 		$dbdesc,
@@ -186,7 +190,10 @@ foreach $script (sort { $a->{'sortcategory'} cmp
 	      'checked' => $in{'search'} && @scripts == 1 },
 	    $script->{'site'} ? "<a href='$script->{'site'}' target=_new>".
 				"$script->{'desc'}</a>" : $script->{'desc'},
-	    $vsel,
+	    $vsel." ".
+	    "<input type=image name=fast ".
+	      "value=\"".&quote_escape($script->{'name'})."\" ".
+	      "src=images/ok.gif>",
 	    $script->{'longdesc'},
 	    { 'type' => 'string',
 	      'nowrap' => 1,

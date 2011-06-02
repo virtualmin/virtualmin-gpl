@@ -88,10 +88,12 @@ foreach $d (@doms) {
 	if ($multi) {
 		# Show each destination on a separate line
 		foreach $a (@aliases) {
-			print $a->{'from'},
-			      ($a->{'cmt'} ? " # $a->{'cmt'}" : ""),"\n";
+			print $a->{'from'},"\n";
+			if ($a->{'cmt'}) {
+				print "    Comment: $a->{'cmt'}\n";
+				}
 			foreach $t (@{$a->{'to'}}) {
-				print "    $t\n";
+				print "    To: $t\n";
 				}
 			}
 		}

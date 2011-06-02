@@ -38,12 +38,17 @@ if ($in{'delete'}) {
 				}
 			}
 		}
-	&post_records_change($d, $recs, $file);
+	$err = &post_records_change($d, $recs, $file);
 	&release_lock_dns($d);
 	&reload_bind_records($d);
 	&webmin_log("delete", "records", $d->{'dom'},
 		    { 'count' => scalar(@d) });
+	&error(&text('records_epost', $err)) if ($err);
 	&redirect("list_records.cgi?dom=$in{'dom'}");
+	}
+elsif ($in{'manual'}) {
+	# Redirect to manual DNS form
+	&redirect("manual_records.cgi?dom=$in{'dom'}&type=$in{'type'}");
 	}
 else {
 	# Redirect to add form for selected type

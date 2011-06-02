@@ -41,8 +41,19 @@ if ($dname ne $d->{'dom'}) {
 	}
 
 # Username
+foreach $f (@database_features) {
+	$ufunc = "${f}_user";
+	if (!$d->{'parent'} && $d->{$f} && defined(&$ufunc)) {
+		$duser = &$ufunc($d);
+		if ($duser ne $d->{'user'}) {
+			push(@dbusers, &text('edit_dbuser', $duser,
+					     $text{'feature_'.$f}));
+			}
+		}
+	}
 print &ui_table_row($text{'edit_user'},
-		    "<tt>$d->{'user'}</tt>");
+		    "<tt>$d->{'user'}</tt> ".
+		    (@dbusers ? " (".join(", ", @dbusers).")" : ""));
 
 # Group name
 if (($d->{'unix'} || $d->{'parent'}) && $d->{'group'}) {

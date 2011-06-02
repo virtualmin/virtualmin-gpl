@@ -105,6 +105,20 @@ if ($spam_client) {
 	    &usage("SpamAssassin client program $spam_client does not exist");
 	}
 
+# Don't allow changing virus settings when provisioning is in use
+defined($clamd) && $config{'provision_virus_host'} &&
+	&usage("Clamd cannot be enabled or disabled when a Cloudmin Services ".
+	       "virus scanning system is in use");
+$virus_host && $config{'provision_virus_host'} &&
+	&usage("The ClamAV server host cannot be changed when a Cloudmin ".
+	       "Services virus scanning system is in use");
+defined($spamd) && $config{'provision_spam_host'} &&
+	&usage("Spamd cannot be enabled or disabled when a Cloudmin Services ".
+	       "spam filtering system is in use");
+defined($spam_host) && $config{'provision_spam_host'} &&
+	&usage("The spam server host cannot be changed when a Cloudmin ".
+	       "Services spam filtering system is in use");
+
 # Work out new commands
 $new_virus_scanner = defined($virus_scanner) ? $virus_scanner
 					     : $old_virus_scanner;

@@ -53,6 +53,7 @@ elsif ($r->{'defttl'}) {
 	$in{'defttl_units'} =~ /^[a-z]$/i ||
 		&error($text{'record_ettlunits'});
 	$r->{'defttl'} = $in{'defttl'}.$in{'defttl_units'};
+	$r->{'comment'} = $in{'comment'};
 
 	# Create or update record
 	if ($in{'type'}) {
@@ -101,6 +102,9 @@ else {
 		$r->{'ttl'} = $in{'ttl'}.$in{'ttl_units'};
 		}
 
+	# Save comment
+	$r->{'comment'} = $in{'comment'};
+
 	# Validate values
 	@vals = @{$t->{'values'}};
 	$r->{'values'} = [ ];
@@ -143,10 +147,11 @@ else {
 		&bind8::modify_record($file, $r, @params);
 		}
 	}
-&post_records_change($d, $recs, $file);
+$err = &post_records_change($d, $recs, $file);
 &release_lock_dns($d);
 &reload_bind_records($d);
 &webmin_log($in{'delete'} ? 'delete' : $in{'type'} ? 'create' : 'modify',
 	    'record', $d->{'dom'}, $r);
+&error(&text('record_epost', $err)) if ($err);
 &redirect("list_records.cgi?dom=$in{'dom'}");
 

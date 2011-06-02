@@ -35,15 +35,7 @@ local $htaccess_file = "$stats/.htaccess";
 local $passwd_file = "$_[0]->{'home'}/.stats-htpasswd";
 if ($tmpl->{'web_stats_pass'} && !-r $htaccess_file) {
 	# Setup .htaccess file for directory
-	&open_tempfile_as_domain_user($_[0], HTACCESS, ">$htaccess_file");
-	&print_tempfile(HTACCESS, "AuthName \"$_[0]->{'dom'} statistics\"\n");
-	&print_tempfile(HTACCESS, "AuthType Basic\n");
-	&print_tempfile(HTACCESS, "AuthUserFile $passwd_file\n");
-	&print_tempfile(HTACCESS, "require valid-user\n");
-	&print_tempfile(HTACCESS, "<Files .stats-htpasswd>\n");
-	&print_tempfile(HTACCESS, "deny from all\n");
-	&print_tempfile(HTACCESS, "</Files>\n");
-	&close_tempfile_as_domain_user($_[0], HTACCESS);
+	&create_webalizer_htaccess($d, $htaccess_file, $passwd_file);
 
 	# Add to list of protected dirs
 	&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
@@ -313,6 +305,59 @@ local @dirs = &htaccess_htpasswd::list_directories();
 &$second_print($text{'setup_done'});
 }
 
+# clone_webalizer(&domain, &old-domain)
+# Copy Weblizer config files for some domain
+sub clone_webalizer
+{
+local ($d, $oldd) = @_;
+&$first_print($text{'clone_webalizer'});
+local $alog = &get_apache_log($d->{'dom'}, $d->{'web_port'});
+local $oalog = &get_apache_log($oldd->{'dom'}, $oldd->{'web_port'});
+if (!$alog) {
+	&$second_print($text{'clone_webalizernewlog'});
+	return 0;
+	}
+if (!$oalog) {
+	&$second_print($text{'clone_webalizeroldlog'});
+	return 0;
+	}
+&obtain_lock_webalizer($d);
+
+# Copy .conf file, change log file path, home directory and domain name
+local $cfile = &webalizer::config_file_name($alog);
+local $ocfile = &webalizer::config_file_name($oalog);
+&copy_source_dest($ocfile, $cfile);
+local $conf = &webalizer::get_config($alog);
+foreach my $c (@$conf) {
+	if ($c->{'value'} =~ /\Q$oalog\E/) {
+		$c->{'value'} =~ s/\Q$oalog\E/$alog/g;
+		&webalizer::save_directive($conf, $c->{'name'},
+					   $c->{'value'});
+		}
+	if ($c->{'value'} =~ /\Q$oldd->{'home'}\E/) {
+		$c->{'value'} =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
+		&webalizer::save_directive($conf, $c->{'name'},
+					   $c->{'value'});
+		}
+	}
+&webalizer::save_directive($conf, "HostName", $d->{'dom'});
+&webalizer::save_directive($conf, "HideReferrer", "*.$d->{'dom'}");
+&flush_file_lines($cfile);
+
+# Re-generate password file
+local $stats = &webalizer_stats_dir($d);
+local $htaccess_file = "$stats/.htaccess";
+local $passwd_file = "$d->{'home'}/.stats-htpasswd";
+if (-r $htaccess_file) {
+	&create_webalizer_htaccess($d, $htaccess_file, $passwd_file);
+	&update_create_htpasswd($d, $passwd_file, $oldd->{'user'});
+	}
+
+&release_lock_webalizer($d);
+&$second_print($text{'setup_done'});
+return 1;
+}
+
 # validate_webalizer(&domain)
 # Returns an error message if Webalizer is not configured properly
 sub validate_webalizer
@@ -529,6 +574,22 @@ else {
 	$stats = "$hdir/stats";
 	}
 return $stats;
+}
+
+# create_webalizer_htaccess(&domain, htaccess-file, htpasswd-file)
+# Create a new .htaccess file for a domain
+sub create_webalizer_htaccess
+{
+local ($d, $htaccess_file, $passwd_file) = @_;
+&open_tempfile_as_domain_user($d, HTACCESS, ">$htaccess_file");
+&print_tempfile(HTACCESS, "AuthName \"$d->{'dom'} statistics\"\n");
+&print_tempfile(HTACCESS, "AuthType Basic\n");
+&print_tempfile(HTACCESS, "AuthUserFile $passwd_file\n");
+&print_tempfile(HTACCESS, "require valid-user\n");
+&print_tempfile(HTACCESS, "<Files .stats-htpasswd>\n");
+&print_tempfile(HTACCESS, "deny from all\n");
+&print_tempfile(HTACCESS, "</Files>\n");
+&close_tempfile_as_domain_user($d, HTACCESS);
 }
 
 # obtain_lock_webalizer(&domain)

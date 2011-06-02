@@ -79,10 +79,107 @@ if ($in{'provision_mysql'} && !$oldconfig{'provision_mysql'}) {
 		}
 	}
 
+# If virus provisioning is enabled, force use of clamd-stream-client for
+# all domains
+if ($in{'provision_virus'} && !$config{'provision_virus_host'}) {
+	&$first_print($text{'provision_virussetup'});
+	($ok, $msg) = &provision_api_call("provision-virus", { }, 0);
+	if (!$ok || $msg !~ /ip=\S+/ || $msg !~ /port=\d+/ ||
+	    $msg !~ /host=\S+/) {
+		&$second_print(&text('provision_evirussetup', $msg));
+		}
+	else {
+		$msg =~ /ip=(\S+)/;
+		$clamhost = $1;
+		$msg =~ /port=(\S+)/;
+		$clamhost .= ":$1" if ($1 != 3310);
+		$err = &test_virus_scanner("clamd-stream-client", $clamhost);
+		if ($err) {
+			&$second_print(&text('provision_evirustest',
+					     $clamhost, $err));
+			}
+		else {
+			&save_global_virus_scanner("clamd-stream-client",
+						   $clamhost);
+			$msg =~ /host=(\S+)/;
+			$config{'provision_virus_host'} = $1;
+			&save_module_config();
+			&$second_print(&text('provision_virusgot', $clamhost));
+			if (&check_clamd_status() == 1) {
+				# Can now disable clamd
+				&disable_clamd();
+				}
+			}
+		}
+	}
+elsif (!$in{'provision_virus'} && $config{'provision_virus_host'}) {
+	# Un-provision virus access
+	&$first_print($text{'provision_virusunsetup'});
+	$clamhost = $config{'provision_virus_host'};
+	$clamhost =~ s/:\d+$//;
+	($ok, $msg) = &provision_api_call("unprovision-virus",
+					  { 'host' => $clamhost }, 0);
+	if (!$ok) {
+		&$second_print(&text('provision_evirusunsetup', $msg));
+		}
+	else {
+		# Done .. switch back to clamscan
+		&save_global_virus_scanner("clamscan");
+		&$second_print($text{'setup_done'});
+		}
+	delete($config{'provision_virus_host'});
+	&save_module_config();
+	}
+
+# If spam provisioning is enabled, force use of spamc for
+# all domains
+if ($in{'provision_spam'} && !$config{'provision_spam_host'}) {
+	&$first_print($text{'provision_spamsetup'});
+	($ok, $msg) = &provision_api_call("provision-spam", { }, 0);
+	if (!$ok || $msg !~ /ip=\S+/ || $msg !~ /port=\d+/ ||
+	    $msg !~ /host=\S+/) {
+		&$second_print(&text('provision_espamsetup', $msg));
+		}
+	else {
+		$msg =~ /ip=(\S+)/;
+		$spamhost = $1;
+		$msg =~ /port=(\S+)/;
+		$spamhost .= ":$1" if ($1 != 783);
+		&save_global_spam_client("spamc", $spamhost);
+		$msg =~ /host=(\S+)/;
+		$config{'provision_spam_host'} = $1;
+		&save_module_config();
+		&$second_print(&text('provision_spamgot', $spamhost));
+		if (&check_spamd_status() == 1) {
+			# Can now disable spamd
+			&disable_spamd();
+			}
+		}
+	}
+elsif (!$in{'provision_spam'} && $config{'provision_spam_host'}) {
+	# Un-provision spam filtering
+	&$first_print($text{'provision_spamunsetup'});
+	$spamhost = $config{'provision_spam_host'};
+	$spamhost =~ s/:\d+$//;
+	($ok, $msg) = &provision_api_call("unprovision-spam",
+					  { 'host' => $spamhost }, 0);
+	if (!$ok) {
+		&$second_print(&text('provision_espamunsetup', $msg));
+		}
+	else {
+		# Done .. switch back to spamassassin
+		&save_global_spam_client("spamassassin");
+		&$second_print($text{'setup_done'});
+		}
+	delete($config{'provision_spam_host'});
+	&save_module_config();
+	}
+
+
+
 # Get limits from the server and display
 &$first_print(&text('provision_limits'));
 ($ok, $feats) = &provision_api_call("list-provision-features", {}, 1);
-use Data::Dumper;
 foreach $f (@$feats) {
 	$v = $f->{'values'};
 	push(@lmsgs, &text('provision_limit',

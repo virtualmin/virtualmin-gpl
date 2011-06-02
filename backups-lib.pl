@@ -278,16 +278,28 @@ foreach my $desturl (@$desturls) {
 			return (0, 0, $doms);
 			}
 		if ($dirfmt && $path ne "/") {
-			# Also create the destination directory now, by scping
-			# an empty dir.
+			# Also create the destination directory now, by running
+			# mkdir via ssh or scping an empty dir
 			$path =~ /^(.*)\/([^\/]+)\/?$/;
 			local ($pathdir, $pathfile) = ($1, $2);
-			local $empty = &transname($pathfile);
-			local $mkdirerr;
-			&make_dir($empty, 0755);
-			local $r = ($user ? "$user\@" : "")."$server:$pathdir";
-			&scp_copy($empty, $r, $pass, \$mkdirerr, $port);
-			&unlink_file($empty);
+
+			# ssh mkdir first
+			local $sshcmd = "ssh".($port ? " -p $port" : "")." ".
+					($user ? "$user\@" : "").$server;
+			local $mkcmd = $sshcmd." mkdir -p ".quotemeta($path);
+			local $err;
+			local $lsout = &run_ssh_command($mkcmd, $pass, \$err);
+
+			if ($err) {
+				# Try scping an empty dir
+				local $empty = &transname($pathfile);
+				local $mkdirerr;
+				&make_dir($empty, 0755);
+				local $r = ($user ? "$user\@" : "").
+					   "$server:$pathdir";
+				&scp_copy($empty, $r, $pass, \$mkdirerr, $port);
+				&unlink_file($empty);
+				}
 			}
 		}
 	elsif ($mode == 3) {
@@ -554,7 +566,6 @@ DOMAIN: foreach $d (@$doms) {
 
 	if ($onebyone && $homefmt && $dok && $anyremote) {
 		# Transfer this domain now
-		local $err;
 		local $df = "$d->{'dom'}.$hfsuffix";
 		&$cbfunc($d, 1, "$dest/$df") if ($cbfunc);
 		local $tstart = time();
@@ -565,12 +576,13 @@ DOMAIN: foreach $d (@$doms) {
 		foreach my $desturl (@$desturls) {
 			local ($mode, $user, $pass, $server, $path, $port) =
 				&parse_backup_url($desturl);
+			local $err;
 			if ($mode == 0) {
 				# Copy to another local directory
 				next if ($path eq $path0);
 				&$first_print(&text('backup_copy',
 						    "<tt>$path/$df</tt>"));
-				my ($ok, $err);
+				local $ok;
 				if ($asd) {
 					($ok, $err) = 
 					  &copy_source_dest_as_domain_user(
@@ -1407,8 +1419,11 @@ if ($ok) {
 				# Does the parent exist?
 				$parentdom = &get_domain($d->{'parent'});
 				if (!$parentdom && $d->{'backup_parent_dom'}) {
+					# Domain with same name exists, but ID
+					# has changed.
 					$parentdom = &get_domain_by(
 					    "dom", $d->{'backup_parent_dom'});
+					$d->{'parent'} = $parentdom->{'id'};
 					}
 				if (!$parentdom) {
 					&$second_print(
@@ -2076,7 +2091,7 @@ if ($mode == 1) {
 			next if ($f eq "." || $f eq ".." || $f eq "");
 			next if ($infoonly && $f !~ /\.info$/);
 			&ftp_download($server, "$path/$f", "$temp/$f", \$err,
-				      undef, $user, $pass, $port);
+				      undef, $user, $pass, $port, 1);
 			return $err if ($err);
 			}
 		}
@@ -2084,7 +2099,7 @@ if ($mode == 1) {
 		# Can just download a single file.
 		# In info-only mode, just get the .info file.
 		&ftp_download($server, $path.($infoonly ? ".info" : ""),
-			      $temp, \$err, undef, $user, $pass, $port);
+			      $temp, \$err, undef, $user, $pass, $port, 1);
 		return $err if ($err);
 		}
 	}

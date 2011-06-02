@@ -1,0 +1,4 @@
+desc=Manual DNS Record Editing
+html=The master administrator can now manually edit the DNS records for a domain in BIND record format on the DNS Records page.
+link=list_records.cgi?dom=${ID}
+master=1

@@ -1,0 +1,6 @@
+desc=Script installer for WHMCS
+html=Added a script installer for WHMCS 4.4.2, a billing system for Virtualmin and other control panels. This is a commerical product, so you will need to purchase a licence for it before using the installer though.
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}

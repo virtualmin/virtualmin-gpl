@@ -43,6 +43,21 @@ elsif ($in{'mode'} == 2) {
 	&set_permissions_as_domain_user($d, 0755, $chain);
 	&unlock_file($chain);
 	}
+elsif ($in{'mode'} == 3) {
+	# New pasted text
+	$in{'paste'} =~ s/\r//g;
+	$in{'paste'} || &error($text{'chain_epaste'});
+	$err = &check_certificate_data($in{'paste'});
+	$err && &error(&text('chain_ecert', $err));
+	$chain = &default_certificate_file($d, 'ca');
+	&lock_file($chain);
+	&unlink_file_as_domain_user($d, $chain);
+	&open_tempfile_as_domain_user($d, CERT, ">$chain");
+	&print_tempfile(CERT, $in{'paste'});
+	&close_tempfile_as_domain_user($d, CERT);
+	&set_permissions_as_domain_user($d, 0755, $chain);
+	&unlock_file($chain);
+	}
 
 # Apply it, including domains that share a cert
 &set_all_null_print();

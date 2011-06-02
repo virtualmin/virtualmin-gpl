@@ -26,13 +26,21 @@ if ($err) {
 	      "</b></font><p>\n";
 	}
 
+# Check if we need a comment column
+foreach $r (@$recs) {
+	$anycomment++ if ($r->{'comment'});
+	}
+
 print &ui_form_start("delete_records.cgi");
 @links = ( &select_all_link("d"), &select_invert_link("d") );
 print &ui_hidden("dom", $in{'dom'});
 @tds = ( "width=5" );
 print &ui_links_row(\@links);
-print &ui_columns_start([ "", $text{'records_name'}, $text{'records_type'},
-			      $text{'records_value'} ], 100, 0, \@tds);
+print &ui_columns_start([ "", $text{'records_name'},
+			      $text{'records_type'},
+			      $text{'records_value'},
+			      $anycomment ? ( $text{'records_comment'} ) : ( ),
+		        ], 100, 0, \@tds);
 
 %tmap = map { $_->{'type'}, $_ } &list_dns_record_types($d);
 RECORD: foreach $r (@$recs) {
@@ -85,6 +93,7 @@ RECORD: foreach $r (@$recs) {
 		    $name,
 		$tdesc,
 		$values,
+		$anycomment ? ( $r->{'comment'} ): ( ),
 		], \@tds, "d", $r->{'id'}, 0, !&can_delete_record($r, $d));
 	}
 
@@ -97,7 +106,9 @@ if (!$gotttl) {
 	}
 print &ui_form_end([ [ 'delete', $text{'records_delete'} ],
 		     [ 'new', $text{'records_add'},
-		       &ui_select("type", "A", \@types) ] ]);
+		       &ui_select("type", "A", \@types) ],
+		     &can_manual_dns() ?
+			( [ 'manual', $text{'records_manual'} ] ) : ( ), ]);
 
 &ui_print_footer(&domain_footer_link($d),
 		 "", $text{'index_return'});

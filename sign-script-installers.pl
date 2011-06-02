@@ -41,6 +41,9 @@ while(@ARGV) {
 	elsif ($a eq "--ssh-dir") {
 		$ssh_dir = shift(@ARGV);
 		}
+	elsif ($a eq "--gpl-only") {
+		$gplonly = 1;
+		}
         else {
                 &usage();
                 }
@@ -69,7 +72,12 @@ print "Building list of scripts and versions ..\n";
 @snames = &list_scripts();
 foreach $sname (@snames) {
 	$script = &get_script($sname);
-	push(@scripts, $script) if ($script);
+	next if (!$script);
+	$gfunc = $script->{'gpl_func'};
+	$gpl = $gfunc && defined(&$gfunc) && &$gfunc();
+	next if (!$gpl && $gplonly);
+	push(@scripts, $script);
+	push(@upload, $sname);
 	}
 if (@scripts) {
 	print ".. found ",scalar(@scripts),"\n";
@@ -118,7 +126,8 @@ foreach my $sfile (glob("$dir/*.pl")) {
 
 # Upload via SSH
 print "Uploading via SCP to $ssh_host ..\n";
-system("su $user -c 'scp $dir/* ${ssh_user}\@${ssh_host}:${ssh_dir}/'");
+$snames = "{".join(",", @upload)."}.pl*";
+system("su $user -c 'scp $dir/$snames $dir/scripts.txt* ${ssh_user}\@${ssh_host}:${ssh_dir}/'");
 if ($?) {
 	print ".. SCP failed!\n";
 	exit(4);

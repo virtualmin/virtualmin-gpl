@@ -115,8 +115,8 @@ local $lowmem;
 &foreign_require("proc", "proc-lib.pl");
 if (defined(&proc::get_memory_info)) {
 	local ($real) = &proc::get_memory_info();
-	if ($real*1024 <= 256*1024*1024) {
-		# Less that 256 M .. don't preload
+	if ($real*1024 <= 384*1024*1024) {
+		# Less that 384 M .. don't preload
 		$lowmem = 1;
 		}
 	}
@@ -229,24 +229,22 @@ if (&foreign_installed("sshd") && !$config{'nodeniedssh'}) {
 	}
 &build_denied_ssh_group();
 
-if ($virtualmin_pro) {
-	# Create the cron job for sending in script ratings
-	local $job = &find_virtualmin_cron_job($ratings_cron_cmd);
-	if (!$job) {
-		# Create, and run for the first time
-		$job = { 'mins' => int(rand()*60),
-			 'hours' => int(rand()*24),
-			 'days' => '*',
-			 'months' => '*',
-			 'weekdays' => '*',
-			 'user' => 'root',
-			 'active' => 1,
-			 'command' => $ratings_cron_cmd };
-		&cron::create_cron_job($job);
-		&cron::create_wrapper($ratings_cron_cmd, $module_name,
-				      "sendratings.pl");
-		&execute_command($ratings_cron_cmd);
-		}
+# Create the cron job for sending in script ratings
+local $job = &find_virtualmin_cron_job($ratings_cron_cmd);
+if (!$job) {
+	# Create, and run for the first time
+	$job = { 'mins' => int(rand()*60),
+		 'hours' => int(rand()*24),
+		 'days' => '*',
+		 'months' => '*',
+		 'weekdays' => '*',
+		 'user' => 'root',
+		 'active' => 1,
+		 'command' => $ratings_cron_cmd };
+	&cron::create_cron_job($job);
+	&cron::create_wrapper($ratings_cron_cmd, $module_name,
+			      "sendratings.pl");
+	&execute_command($ratings_cron_cmd);
 	}
 
 # Create the cron job for collecting system info
@@ -347,6 +345,9 @@ foreach my $d (@doms) {
 
 # Update IP list cache
 &build_local_ip_list();
+
+# Clear left-side links caches, in case new features are available
+&clear_links_cache();
 
 # Re-validate all HTML directories
 foreach my $d (@doms) {

@@ -196,13 +196,18 @@ return (1, "phpPgAdmin directory deleted.");
 sub script_phppgadmin_latest
 {
 local ($ver) = @_;
-return ( "http://phppgadmin.sourceforge.net/",
-	 "latest\\s+version:\\s+<.*>([0-9\\.]+)<" );
+return ( "http://phppgadmin.sourceforge.net/doku.php",
+	 "latest\\s+version:\\s+<[^>]+>([0-9\\.]+)" );
 }
 
 sub script_phppgadmin_site
 {
 return 'http://phppgadmin.sourceforge.net/';
+}
+
+sub script_phppgadmin_gpl
+{
+return 1;
 }
 
 1;

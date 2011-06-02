@@ -97,6 +97,13 @@ else {
 &release_lock_virus($_[0]);
 }
 
+# clone_virus(&domain, &old-domain)
+# Does nothing, as cloning the spamassassin config clones virus settings too
+sub clone_virus
+{
+return 1;
+}
+
 # copy_clam_wrapper()
 # Copies the clamav wrapper script into place
 sub copy_clam_wrapper
@@ -235,11 +242,31 @@ return 1;
 # Returns the clamav scan command, using the full path plus any args
 sub full_clamscan_path
 {
-local ($cmd, @args) = &split_quoted_string($config{'clamscan_cmd'});
+local $prog = $config{'clamscan_cmd'};
+if ($prog eq "clamd-stream-client") {
+	$prog .= &make_stream_client_args($config{'clamscan_host'});
+	}
+local ($cmd, @args) = &split_quoted_string($prog);
 local $fullcmd = &has_command($cmd);
 return undef if (!$fullcmd);
 local @rv = ( $fullcmd, @args );
 return join(" ", map { /\s/ ? "\"$_\"" : $_ } @rv);
+}
+
+# make_stream_client_args([host[:port]])
+# Convert a hostname with possible port into an arg string
+sub make_stream_client_args
+{
+my ($hostport) = @_;
+my ($host, $port) = split(/:/, $hostport);
+my $rv;
+if ($host) {
+	$rv .= " -d ".$host;
+	if ($port) {
+		$rv .= " -p ".$port;
+		}
+	}
+return $rv;
 }
 
 # get_domain_virus_scanner(&domain)
@@ -290,9 +317,7 @@ if (@clamrec) {
 		}
 	elsif ($prog eq "clamd-stream-client") {
 		$prog = &has_command("clamd-stream-client");
-		if ($config{'clamscan_host'}) {
-			$prog .= " -d ".$config{'clamscan_host'};
-			}
+		$prog .= &make_stream_client_args($config{'clamscan_host'});
 		}
 	$clamrec[0]->{'action'} = "$clam_wrapper_cmd $prog";
 	&procmail::modify_recipe($clamrec[0]);
@@ -349,9 +374,7 @@ local ($cmd, $host) = @_;
 local $fullcmd = $cmd;
 if ($cmd eq "clamd-stream-client") {
 	# Set remote host
-	if ($host) {
-		$fullcmd .= " -d ".$host;
-		}
+	$fullcmd .= &make_stream_client_args($host);
 	}
 else {
 	# Tell command to use stdin
@@ -618,7 +641,7 @@ elsif (-r "/opt/csw/etc/clamd.conf.CSW") {
 	local $clamd = &has_command("clamd") ||
 		       &has_command("/opt/csw/sbin/clamd");
 	&init::enable_at_boot($init, "Start ClamAV server",
-			      "$clamd",
+			      $clamd,
 			      "ps -ef | grep clamd | grep -v grep | grep -v \$\$ | awk '{ print \$2 }' | xargs kill");
 	local $ifile = &init::action_filename($init);
 	local $out = &backquote_logged("$ifile start 2>&1");

@@ -173,6 +173,7 @@ local $rv = { 'name' => $name,
 	      'check_latest_func' => "script_${name}_check_latest",
 	      'commands_func' => "script_${name}_commands",
 	      'passmode_func' => "script_${name}_passmode",
+	      'gpl_func' => "script_${name}_gpl",
 	      'avail' => $avail && !$disabled || $allowmaster,
 	      'enabled' => !$disabled,
 	      'nocheck' => $disabled == 2,
@@ -209,6 +210,9 @@ while($f = readdir(DIR)) {
 				}
 			}
 		$info{'time'} = $st[9];
+		if ($info{'opts'}->{'dir'} && !-d $info{'opts'}->{'dir'}) {
+			$info{'deleted'} = 1;
+			}
 		push(@rv, \%info);
 		}
 	}
@@ -394,7 +398,7 @@ foreach my $f (@files) {
 				# Via FTP
 				my ($host, $page) = ($1, $2);
 				&ftp_download($host, $page, $temp, \$error,
-					      $cb, $user, $pass);
+					    $cb, $user, $pass, undef, $nocache);
 				}
 			else {
 				$firsterror ||= &text('scripts_eurl', $url);
@@ -2032,6 +2036,9 @@ foreach my $d (@$doms) {
 		# Don't upgrade if we are already running this version
 		next if ($ver eq $sinfo->{'version'});
 
+		# Don't upgrade if deleted
+		next if ($sinfo->{'deleted'});
+
 		# We have one - add to the results
 		push(@rv, { 'sinfo' => $sinfo,
 			    'script' => $script,
@@ -2481,7 +2488,7 @@ foreach my $sinfo (&list_domain_scripts($d)) {
 	my $rfunc = $script->{'realversion_func'};
 	if (defined(&$rfunc)) {
 		local $realver = &$rfunc($d, $sinfo->{'opts'}, $sinfo);
-		if ($realver ne $sinfo->{'version'}) {
+		if ($realver && $realver ne $sinfo->{'version'}) {
 			# Version has changed .. fix
 			$sinfo->{'version'} = $realver;
 			&save_domain_script($d, $sinfo);

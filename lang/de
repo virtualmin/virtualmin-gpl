@@ -1429,6 +1429,7 @@ setup_euser2=Fehlender oder ung&#252;ltiger Unix-Benutzername.
 setup_eusername=Der Benutzername $1 ist nicht g&#252;ltig : $2
 setup_eusername2=Der Benutzername $1 beginnt nicht mit einem Buchstaben
 setup_evadddomain=.. VAddDomain gescheitert : $1
+setup_evadddomain=.. VAddAliasDomain gescheitert : $1
 setup_evirtalloc=Konnte keine virtuelle IP-Adresse aus diesem Bereich alloziieren.
 setup_evirtclash=Die virtuelle Interface-IP-Adresse wird bereits benutzt.
 setup_evirtclash2=Es existiert f&#252;r diese IP-Adresse kein Interface

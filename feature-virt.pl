@@ -119,6 +119,14 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[0]->{'virt'} &&
 	}
 }
 
+# clone_virt(&domain, &old-domain)
+# No need to do anything here, as an IP address doesn't have any settings that
+# need copying
+sub clone_virt
+{
+return 1;
+}
+
 # validate_virt(&domain)
 # Check for boot-time and active network interfaces
 sub validate_virt

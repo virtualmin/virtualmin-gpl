@@ -79,6 +79,10 @@ else {
 # Record type
 print &ui_table_row($text{'record_type'}, $t->{'type'}." - ".$t->{'desc'});
 
+# Record comment
+print &ui_table_row($text{'record_comment'},
+		    &ui_textbox("comment", $r->{'comment'}, 60));
+
 if ($r->{'defttl'}) {
 	# Default TTL for domain
 	print &ui_table_row($text{'record_defttl'},
@@ -138,6 +142,4 @@ return &ui_textbox($name, $ttl, 5)." ".
 		     [ "h", $bind8::text{'hours'} ],
 		     [ "d", $bind8::text{'days'} ],
 		     [ "w", $bind8::text{'weeks'} ] ], 1, 0, 1);
-
-
 }

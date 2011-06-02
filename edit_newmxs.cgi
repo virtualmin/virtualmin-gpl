@@ -9,12 +9,13 @@ require './virtual-server-lib.pl';
 # Make the table data
 @servers = grep { $_->{'user'} } &servers::list_servers();
 %mxs = map { $_->{'id'}, $_ } &list_mx_servers();
-foreach $s (@servers) {
+foreach $s (sort { $a->{'host'} cmp $b->{'host'} } @servers) {
 	$mx = $mxs{$s->{'id'}};
 	push(@table, [
 	  { 'type' => 'checkbox', 'name' => 'servers',
 	    'value' => $s->{'id'}, 'checked' => $mx },
-	  $s->{'desc'} || $s->{'host'},
+	  $s->{'desc'} ? $s->{'host'}." (".$s->{'desc'}.")"
+		       : $s->{'host'},
 	  &ui_opt_textbox("mxname_".$s->{'id'},
 			  $mx ? $mx->{'mxname'} : undef, 30,
 			  $text{'newmxs_same'}),

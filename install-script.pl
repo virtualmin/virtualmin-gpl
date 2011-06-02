@@ -185,6 +185,8 @@ if (defined($id)) {
 				       "type $sname was found");
 		$sinfo = $sinfos[0];
 		}
+	$sinfo->{'deleted'} &&
+		&usage("Manually deleted scripts cannot be upgraded");
 	$opts = $sinfo->{'opts'};
 	$domuser = $sinfo->{'user'} || $d->{'user'};
 	$dompass = $sinfo->{'pass'} || $d->{'pass'};

@@ -19,5 +19,5 @@ print FILE $in{'text'};
 &webmin_log("save", "afile", $in{'file'});
 
 $what = $in{'alias'} ? 'alias' : 'user';
-&redirect("edit_$what.cgi?$what=$in{$what}&dom=$in{'dom'}");
+&redirect("edit_$what.cgi?$what=$in{$what}&dom=$in{'dom'}&unix=1");
 

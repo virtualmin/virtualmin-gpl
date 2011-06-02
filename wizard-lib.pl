@@ -19,6 +19,7 @@ return ( "intro",
 	 $config{'spam'} ? ( "spam" ) : ( ),
 	 "db",
 	 $config{'mysql'} ? ( "mysql" ) : ( ),
+	 $config{'dns'} ? ( "dns" ) : ( ),
 	 "done" );
 }
 
@@ -306,6 +307,66 @@ if (!$in{'mypass_def'}) {
 	&mysql::save_module_config(\%mysql::config, "mysql");
 	}
 return undef;
+}
+
+# Show a form to set the primary nameservers
+sub wizard_show_dns
+{
+&require_bind();
+print &ui_table_row(undef, $text{'wizard_dns'}, 2);
+
+# Primary nameserver
+local $tmpl = &get_template(0);
+local $tmaster = $tmpl->{'dns_master'} eq 'none' ? undef
+						 : $tmpl->{'dns_master'};
+local $master = $tmaster ||
+		$bconfig{'default_prins'} ||
+		&get_system_hostname();
+print &ui_table_row($text{'wizard_dns_prins'},
+		    &ui_textbox("prins", $master, 40)." ".
+		    &ui_checkbox("prins_skip", 1, $text{'wizard_dns_skip'}, 0));
+
+# Secondaries (optional)
+local @secns = split(/\s+/, $tmpl->{'dns_ns'});
+print &ui_table_row($text{'wizard_dns_secns'},
+		    &ui_textarea("secns", join("", map { "$_\n" } @secns),
+				 4, 40));
+}
+
+sub wizard_parse_dns
+{
+local ($in) = @_;
+&require_bind();
+local @tmpls = &list_templates();
+local ($tmpl) = grep { $_->{'id'} eq '0' } @tmpls;
+
+# Validate primary NS
+$in->{'prins'} =~ /^[a-z0-9\.\_\-]+$/i || return $text{'wizard_dns_eprins'};
+if (!$in->{'prins_skip'}) {
+	&to_ipaddress($in->{'prins'}) || return $text{'wizard_dns_eprins2'};
+	local ($ok, $msg) = &check_resolvability($in->{'prins'});
+	if (!$ok) {
+		return &text('wizard_dns_eprins3', $msg);
+		}
+	}
+$tmpl->{'dns_master'} = $in->{'prins'};
+&save_template($tmpl);
+
+# Validate any secondary NSs
+local @secns;
+foreach my $ns (split(/\s+/, $in->{'secns'})) {
+	$ns =~ /^[a-z0-9\.\_\-]+$/i || return &text('wizard_dns_esecns', $ns);
+	if (!$in->{'prins_skip'}) {
+		&to_ipaddress($ns) || return &text('wizard_dns_esecns2', $ns);
+		local ($ok, $msg) = &check_resolvability($ns);
+		if (!$ok) {
+			return &text('wizard_dns_esecns3', $ns, $msg);
+			}
+		}
+	push(@secns, $ns);
+	}
+$tmpl->{'dns_ns'} = join(" ", @secns);
+&save_template($tmpl);
 }
 
 sub wizard_show_done

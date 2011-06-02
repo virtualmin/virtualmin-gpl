@@ -54,6 +54,9 @@ foreach my $d (&list_domains()) {
 		if (-r "$initial_users_dir/$d->{'id'}");
 	}
 
+# IDs files
+push(@rv, $old_uids_file, $old_gids_file);
+
 return @rv;
 }
 
