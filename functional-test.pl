@@ -580,8 +580,8 @@ $alias_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
 	  'grep' => [ '^'.$test_alias.'@'.$test_domain,
-		      '^ *nobody@webmin.com',
-		      '^ *nobody@virtualmin.com' ],
+		      'To: nobody@webmin.com',
+		      'To: nobody@virtualmin.com' ],
 	},
 
 	# Create another alias
@@ -4580,7 +4580,7 @@ $clone_tests = [
 	  'args' => [ [ 'domain', $test_clone_domain ],
 		      [ 'multiline' ] ],
 	  'grep' => [ '^'.$test_alias.'@'.$test_clone_domain,
-		      '^ *nobody@virtualmin.com' ],
+		      'To: nobody@virtualmin.com' ],
 	},
 	{ 'command' => 'list-simple-aliases.pl',
 	  'args' => [ [ 'domain', $test_clone_domain ],
@@ -4788,7 +4788,7 @@ $clonesub_tests = [
 	  'args' => [ [ 'domain', $test_clone_domain ],
 		      [ 'multiline' ] ],
 	  'grep' => [ '^'.$test_alias.'@'.$test_clone_domain,
-		      '^ *nobody@virtualmin.com' ],
+		      'To: nobody@virtualmin.com' ],
 	},
 	{ 'command' => 'list-simple-aliases.pl',
 	  'args' => [ [ 'domain', $test_clone_domain ],
