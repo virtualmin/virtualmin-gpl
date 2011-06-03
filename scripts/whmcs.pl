@@ -338,8 +338,11 @@ if (!$upgrade) {
 		}
 
 	# Post to user creation page
+	local $firstname = $d->{'owner'};
+	$firstname =~ s/\s.*$//;
+	$firstname =~ s/['"]//g;
 	local @params = (
-		[ "firstname", $d->{'owner'} ],
+		[ "firstname", $firstname ],
 		[ "lastname", "" ],
 		[ "email", $d->{'emailto'} ],
 		[ "username", $domuser ],
