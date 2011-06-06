@@ -2457,6 +2457,7 @@ rename_suffix_group=Change mailbox name suffix and group?
 rename_prefix0=Leave as $1
 rename_prefix1=Automatically chosen
 rename_prefix2=Change to
+rename_group=Change group name?
 rename_ok=Rename Now
 rename_err=Failed to change domain name
 rename_emaking=Before rename command failed : $1
@@ -4596,6 +4597,7 @@ upgrade_eyumfile=No Virtualmin GPL repository was found in $1
 upgrade_update=Updating available packages from APT ..
 upgrade_debs=Upgrading Virtualmin Debian packages : $1
 upgrade_yumclear=Clearing YUM caches ..
+upgrade_etypematch=Upgrading is not possible as Virtualmin's install type is <tt>$1</tt> but Webmin's is <tt>$2</tt>
 
 maillog_title=Search Mail Log
 maillog_desc=This form can be used to search the mail logs for messages matching some conditions, to find out what happened to them. All fields are optional, and will be skipped for comparison purposes if left empty.

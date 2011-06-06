@@ -69,10 +69,20 @@ else {
 	print &ui_hidden("home_mode", 1),"\n";
 	}
 
-# Prefix field
-$msg = &get_prefix_msg($tmpl);
-$msg .= '_group' if (!$d->{'parent'});
-@users = &list_domain_users($d, 1, 1, 1, 1);
+# Prefix / group rename field
+if ($tmpl->{'append_style'} == 6) {
+	# Prefix isn't really used
+	$txt = $text{'rename_'.$msg};
+	$mode = 1;
+	}
+else {
+	# Actual prefix is in use
+	$msg = &get_prefix_msg($tmpl);
+	$msg .= '_group' if (!$d->{'parent'});
+	@users = &list_domain_users($d, 1, 1, 1, 1);
+	$txt = $text{'rename_'.$msg};
+	$mode = @users ? 0 : 1;
+	}
 print &ui_table_row($text{'rename_'.$msg},
 	&ui_radio("prefix_mode", @users ? 0 : 1,
 		  [ [ 0, &text('rename_prefix0',
