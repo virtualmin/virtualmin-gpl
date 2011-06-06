@@ -28,9 +28,14 @@ if (&webmin::shared_root_directory()) {
 
 # Verify that the install is one we can upgrade
 chop($itype = &read_file_contents("$module_root_directory/install-type"));
+$witype = &webmin::get_install_type() || "tar.gz";
 if ($itype eq "rpm") {
 	# Check for repo file
 	-r $virtualmin_yum_repo || &error($text{'upgrade_eyumrepo'});
+
+	# Make sure Webmin was also from an RPM
+	$witype eq "rpm" ||
+		&error(&text('upgrade_etypematch', $itype, $witype));
 
 	# Make sure YUM works
 	&foreign_require("software", "software-lib.pl");
@@ -42,6 +47,7 @@ if ($itype eq "rpm") {
 		}
 	}
 elsif ($itype eq "deb") {
+	# Check for Virtualmin repo in sources.list
 	$sources_list = "/etc/apt/sources.list";
 	$lref = &read_file_lines($sources_list);
 	$found = 0;
@@ -51,6 +57,10 @@ elsif ($itype eq "deb") {
 			}
 		}
 	$found || $text{'upgrade_edebrepo'};
+
+	# Make sure Webmin was also from a Debian package
+	$witype eq "deb" ||
+		&error(&text('upgrade_etypematch', $itype, $witype));
 	}
 
 &ui_print_unbuffered_header(undef, $text{'upgrade_title'}, "");
