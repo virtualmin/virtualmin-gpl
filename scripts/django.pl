@@ -464,7 +464,7 @@ sub script_django_latest
 {
 local ($ver) = @_;
 return ( "http://www.djangoproject.com/download/",
-	 "/download/([0-9\\.]+)/tarball/" );
+	 "Django-([0-9\\.]+)\\.tar\\.gz" );
 }
 
 sub script_django_site
