@@ -213,6 +213,9 @@ while($f = readdir(DIR)) {
 		if ($info{'opts'}->{'dir'} && !-d $info{'opts'}->{'dir'}) {
 			$info{'deleted'} = 1;
 			}
+		else {
+			$info{'deleted'} = 0;
+			}
 		push(@rv, \%info);
 		}
 	}
