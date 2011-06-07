@@ -481,7 +481,7 @@ if ($newsuffix) {
 							$newdbtype);
 			}
 		else {
-			$newdbname = $d->{'db'}."_".$newsuffix;
+			$newdbname = &database_name($d)."_".$newsuffix;
 			}
 		$newdbdesc = $text{'databases_'.$newdbtype};
 		local ($already) = grep { $_->{'type'} eq $newdbtype &&
