@@ -246,15 +246,20 @@ if (defined(&list_domain_scripts)) {
 			$changed = 0;
 			if ($olddir ne $newdir) {
 				# Fix directory
-				$changed++
-				   if ($sinfo->{'opts'}->{'dir'} =~
-				       s/^\Q$olddir\E\//$newdir\//);
+				$changed++ if ($sinfo->{'opts'}->{'dir'} =~
+				       	       s/^\Q$olddir\E\//$newdir\//);
 				}
 			if ($olddname ne $newdname) {
 				# Fix domain in URL
-				$changed++
-				    if ($sinfo->{'url'} =~
-					s/\Q$olddname\E/$newdname/);
+				$changed++ if ($sinfo->{'url'} =~
+					       s/\Q$olddname\E/$newdname/);
+				}
+			if (!$info{'opts'}->{'dir'} ||
+			    -d $info{'opts'}->{'dir'}) {
+				# list_domain_scripts will set deleted flag
+				# due to home directory move, so fix it now that
+				# script dir has been corrected
+				$sinfo->{'deleted'} = 0;
 				}
 			&save_domain_script($doms[$i], $sinfo) if ($changed);
 			}
