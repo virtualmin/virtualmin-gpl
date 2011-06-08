@@ -94,6 +94,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--email") {
 		if ($ARGV[0] !~ /^-/) {
 			$email = shift(@ARGV);
+			$email =~ /^\S+\@\S+$/ ||
+				&usage("--email must be followed by a ".
+				       "valid email address");
 			}
 		}
 	elsif ($a eq "--user") {
