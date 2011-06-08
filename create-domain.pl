@@ -92,7 +92,9 @@ while(@ARGV > 0) {
 		$owner =~ /:/ && &usage($text{'setup_eowner'});
 		}
 	elsif ($a eq "--email") {
-		$email = shift(@ARGV);
+		if ($ARGV[0] !~ /^-/) {
+			$email = shift(@ARGV);
+			}
 		}
 	elsif ($a eq "--user") {
 		$user = lc(shift(@ARGV));
