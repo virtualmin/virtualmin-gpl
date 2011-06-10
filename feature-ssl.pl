@@ -377,7 +377,7 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[1]->{'ssl_same'}) {
 if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 	# Fix SSL cert file locations
 	foreach my $k ('ssl_cert', 'ssl_key', 'ssl_chain') {
-		$_[0]->{$k} =~ s/\Q$_[1]->{'home'}\E/$_[0]->{'home'}/;
+		$_[0]->{$k} =~ s/\Q$_[1]->{'home'}\E\//$_[0]->{'home'}\//;
 		}
 	}
 if ($_[0]->{'dom'} ne $_[1]->{'dom'} && &self_signed_cert($_[0]) &&
