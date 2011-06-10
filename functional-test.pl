@@ -2656,6 +2656,24 @@ $remote_tests = [
 	  'grep' => [ "^$test_domain", 'Exit status: 0' ],
 	},
 
+	# Get the domain in JSON format
+	{ 'command' => $webmin_wget_command.
+		       "'${webmin_proto}://localhost:${webmin_port}/virtual-server/remote.cgi?program=list-domains&domain=$test_domain&multiline=&json=1'",
+	  'grep' => [ "\"name\" : \"$test_domain\"" ],
+	},
+
+	# Get the domain in XML format
+	{ 'command' => $webmin_wget_command.
+		       "'${webmin_proto}://localhost:${webmin_port}/virtual-server/remote.cgi?program=list-domains&domain=$test_domain&multiline=&xml=1'",
+	  'grep' => [ "name=\"$test_domain\"" ],
+	},
+
+	# Get the domain in Perl format
+	{ 'command' => $webmin_wget_command.
+		       "'${webmin_proto}://localhost:${webmin_port}/virtual-server/remote.cgi?program=list-domains&domain=$test_domain&multiline=&perl=1'",
+	  'grep' => [ "'name' => '$test_domain'" ],
+	},
+
 	# Delete the domain
 	{ 'command' => $webmin_wget_command.
 		       "'${webmin_proto}://localhost:${webmin_port}/virtual-server/remote.cgi?program=delete-domain&domain=$test_domain'",

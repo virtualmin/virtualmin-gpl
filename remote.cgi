@@ -3,6 +3,8 @@
 # simply passes on parameters to a specified command-line program
 
 package virtual_server;
+use Socket;
+use POSIX;
 $trust_unknown_referers = 1;
 require './virtual-server-lib.pl';
 &ReadParse();
@@ -69,7 +71,7 @@ delete($ENV{'MINISERV_CONFIG'});
 print "Content-type: text/plain\n\n";
 
 # Execute the command within the same perl interpreter
-pipe(SUBr, SUBw);
+socketpair(SUBr, SUBw, AF_UNIX, SOCK_STREAM, PF_UNSPEC);
 $pid = &execute_webmin_script($cmd, $mod, \@args, SUBw);
 if ($format) {
 	# Capture and convert to selected format
