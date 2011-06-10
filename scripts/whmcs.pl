@@ -392,7 +392,7 @@ else {
 local $url = &script_path_url($d, $opts);
 if (!$upgrade) {
 	&create_script_wget_job($d, $url."admin/cron.php",
-			        int(rand()*60), '*', 1);
+			        '0', int(rand()*24), 1);
 	}
 
 # Delete install folder
