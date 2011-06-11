@@ -193,7 +193,8 @@ foreach $script (sort { $a->{'sortcategory'} cmp
 	    $vsel." ".
 	    "<input type=image name=fast ".
 	      "value=\"".&quote_escape($script->{'name'})."\" ".
-	      "src=images/ok.gif>",
+	      "src=images/ok.gif ".
+	      "onClick='form.fhidden.value=\"$script->{'name'}\"'>",
 	    $script->{'longdesc'},
 	    { 'type' => 'string',
 	      'nowrap' => 1,
@@ -208,7 +209,8 @@ print &ui_form_columns_table(
 	[ [ undef, $text{'scripts_ok'} ] ],
 	0,
 	undef,
-	[ [ "dom", $in{'dom'} ] ],
+	[ [ "dom", $in{'dom'} ],
+	  [ "fhidden", "" ] ],
 	[ "", $text{'scripts_name'}, $text{'scripts_ver'},
 	  $text{'scripts_longdesc'}, $text{'scripts_overall'} ],
 	100,
