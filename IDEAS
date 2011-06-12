@@ -58,9 +58,10 @@
  - Webmin code cleanup
 	- Can avoid need to use "our" for globals?
 
- - Postfix page for outgoing SMTP authentication
-	- Email "Feature Request: Relay host authentication" from Eric
+ - Move email messages into templates
+	- https://www.virtualmin.com/node/18405
+	- CHANGELOG
+	- backup/restore
 
- - Release plugins
-	- svn
-	- analytics
+ - Track last-login time for mailbox users (IMAP or FTP)
+	- http://www.virtualmin.com/node/18417
