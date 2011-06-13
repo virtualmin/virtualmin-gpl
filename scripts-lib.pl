@@ -2524,5 +2524,41 @@ if ($config{'scriptdir'}) {
 return $name;
 }
 
+# describe_script_status(&sinfo, &script)
+# Returns an HTML string describing the upgradability of a script
+sub describe_script_status
+{
+my ($sinfo, $script) = @_;
+my @vers = grep { &can_script_version($script, $_) }
+		@{$script->{'versions'}};
+my $canupfunc = $script->{'can_upgrade_func'};
+if (defined(&$canupfunc)) {
+	@vers = grep { &$canupfunc($sinfo, $_) } @vers;
+	}
+my ($status, $canup);
+if ($sinfo->{'deleted'}) {
+	$status = "<font color=#ff0000>".
+		  $text{'scripts_deleted'}."</font>";
+	}
+elsif (&indexof($sinfo->{'version'}, @vers) < 0) {
+	my @better = grep { &compare_versions($_, $sinfo->{'version'},
+					      $script) > 0 } @vers;
+	if (@better) {
+		$status = "<font color=#ffaa00>".
+		  &text('scripts_newer', $better[$#better]).
+		  "</font>";
+		$canup = 1;
+		}
+	else {
+		$status = $text{'scripts_nonewer'};
+		}
+	}
+else {
+	$status = "<font color=#00aa00>".
+		  $text{'scripts_newest'}."</font>";
+	}
+return wantarray ? ($status, $canup) : $status;
+}
+
 1;
 

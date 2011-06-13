@@ -15,6 +15,7 @@ $prog = "edit_newscripts.cgi?mode=";
 	  [ "upgrade", $text{'newscripts_tabupgrade'}, $prog."upgrade" ],
 	  [ "warn", $text{'newscripts_tabwarn'}, $prog."warn" ],
 	  [ "latest", $text{'newscripts_tablatest'}, $prog."latest" ],
+	  [ "summary", $text{'newscripts_tabsummary'}, $prog."summary" ],
 	);
 print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "add", 1);
 
@@ -120,11 +121,13 @@ print &ui_tabs_start_tab("mode", "upgrade");
 print "$text{'newscripts_desc3'}<p>\n";
 
 # Find those we actually use, and the minimum version of each installed
+@all_scripts = ( );
 foreach $d (&list_domains()) {
 	&detect_real_script_versions($d);
 	foreach my $sinfo (&list_domain_scripts($d)) {
-		$script = &get_script($sname);
 		$n = $sinfo->{'name'};
+		$script = &get_script($n);
+		push(@all_scripts, [ $d, $sinfo, $script ]);
 		$used{$n}++;
 		if (!$minversion{$n} ||
 		    &compare_versions($sinfo->{'version'},
@@ -266,6 +269,47 @@ print &ui_table_row($text{'newscripts_lscripts'},
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 print &ui_tabs_end_tab();
+
+############################################################################
+
+# Show summary of all installed scripts
+print &ui_tabs_start_tab("mode", "summary");
+print "$text{'newscripts_desc6'}<p>\n";
+
+foreach $as (sort { $a->[0]->{'dom'} cmp $b->[0]->{'dom'} } @all_scripts) {
+	($d, $sinfo, $script) = @$as;
+	$desc = $script->{'desc'};
+	if ($sinfo->{'partial'}) {
+		$desc = "<i>$desc</i>";
+		}
+	$path = $sinfo->{'opts'}->{'path'};
+	$status = &describe_script_status($sinfo, $script);
+	push(@all_table,
+	     [ &show_domain_name($d),
+	       "<a href='edit_script.cgi?dom=$d->{'id'}&".
+                 "script=$sinfo->{'id'}'>$desc</a>",
+	       $script->{'vdesc'}->{$sinfo->{'version'}} ||
+		  $sinfo->{'version'},
+	       $sinfo->{'url'} && !$sinfo->{'deleted'} ? 
+		  "<a href='$sinfo->{'url'}' target=_new>$path</a>" :
+		  $path,
+	       $status,
+	     ]);
+	}
+print &ui_columns_table(
+	[ $text{'newscripts_dom'}, $text{'scripts_name'},
+	  $text{'scripts_ver'}, $text{'scripts_path'}, 
+	  $text{'scripts_status'} ],
+	100,
+	\@all_table,
+	undef,
+	0,
+	undef,
+	$text{'newscripts_noneyet'},
+	);
+
+print &ui_tabs_end_tab();
+
 
 print &ui_tabs_end(1);
 

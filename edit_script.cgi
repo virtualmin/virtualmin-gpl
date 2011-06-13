@@ -129,6 +129,11 @@ if (!$sinfo->{'deleted'}) {
 	}
 print &ui_form_end();
 
+# Make sure the left menu is showing this domain
+if (defined(&theme_select_domain)) {
+	&theme_select_domain($d);
+	}
+
 &ui_print_footer("list_scripts.cgi?dom=$in{'dom'}", $text{'scripts_return'},
 		 &domain_footer_link($d));
 

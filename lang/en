@@ -3581,6 +3581,7 @@ newscripts_tabenable=Disable Scripts
 newscripts_tabupgrade=Upgrade Scripts
 newscripts_tabwarn=Upgrade Notification
 newscripts_tablatest=Installer Updates
+newscripts_tabsummary=Script Summary
 newscripts_desc1=This form can be used to add script installers that were created by third-party vendors, so that they can be used like those built into Virtualmin.
 newscripts_desc2=This table can be used to de-select scripts that you do not want made available to virtual server owners.
 newscripts_desc2b=You can also limit available scripts to those of at least some version or at most some version, to prevent installation of buggy or unstable releases.
@@ -3617,6 +3618,8 @@ newscripts_lall=All available
 newscripts_lsel=Only selected ..
 newscripts_lerr=Failed to save script installer updates
 newscripts_elnone=No scripts selected
+newscripts_desc6=This tab lists all scripts installed across all virtual servers on this system. To upgrade or un-install a single script, click on its name in the list.
+newscripts_dom=Domain name
 
 addscripts_err=Failed to add script installer
 addscripts_elocal=Local file does not exist

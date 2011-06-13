@@ -35,33 +35,8 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 		       lc($smap{$b->{'name'}}->{'desc'}) } @got) {
 	# Check if a newer version exists
 	$script = $smap{$sinfo->{'name'}};
-	@vers = grep { &can_script_version($script, $_) }
-		     @{$script->{'versions'}};
-	$canupfunc = $script->{'can_upgrade_func'};
-	if (defined(&$canupfunc)) {
-		@vers = grep { &$canupfunc($sinfo, $_) } @vers;
-		}
-	if ($sinfo->{'deleted'}) {
-		$status = "<font color=#ff0000>".
-			  $text{'scripts_deleted'}."</font>";
-		}
-	elsif (&indexof($sinfo->{'version'}, @vers) < 0) {
-		@better = grep { &compare_versions($_, $sinfo->{'version'},
-				 		   $script) > 0 } @vers;
-		if (@better) {
-			$status = "<font color=#ffaa00>".
-			  &text('scripts_newer', $better[$#better]).
-			  "</font>";
-			$upcount++;
-			}
-		else {
-			$status = $text{'scripts_nonewer'};
-			}
-		}
-	else {
-		$status = "<font color=#00aa00>".
-			  $text{'scripts_newest'}."</font>";
-		}
+	($status, $canup) = &describe_script_status($sinfo, $script);
+	$upcount += $canup;
 	$path = $sinfo->{'opts'}->{'path'};
 	($dbtype, $dbname) = split(/_/, $sinfo->{'opts'}->{'db'}, 2);
 	if ($dbtype && $dbname && $script->{'name'} !~ /^php(\S+)admin$/i) {
