@@ -295,6 +295,20 @@ if ($hasspam) {
 		2, \@tds);
 	}
 
+# Show most recent logins
+if ($hasemail && !$in{'new'}) {
+	# XXX help page
+	$ll = &get_last_login_time($user->{'user'});
+	@grid = ( );
+	foreach $k (keys %$ll) {
+		push(@grid, $text{'user_lastlogin_'.$k},
+			    &make_date($ll->{$k}));
+		}
+	print &ui_table_row(&hlink($text{'user_lastlogin'}, "lastlogin"),
+		@grid ? &ui_grid_table(\@grid, 2, 50)
+		      : $text{'user_lastlogin_never'});
+	}
+
 if ($hasemail) {
 	print &ui_hidden_table_end("table2a");
 	}

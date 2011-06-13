@@ -1751,6 +1751,19 @@ if ($_[2]) {
 		}
 	}
 
+# Update the last logins file
+if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+	&lock_file($mail_login_file);
+	my %logins;
+	&read_file_cached($mail_login_file, \%logins);
+	if ($logins{$_[1]->{'user'}}) {
+		$logins{$_[1]->{'user'}} = $logins{$_[1]->{'user'}};
+		delete($logins{$_[1]->{'user'}});
+		&write_file($mail_login_file, \%logins);
+		}
+	&unlock_file($mail_login_file);
+	}
+
 # Clear quota cache for this user
 if (defined(&clear_lookup_domain_cache) && $_[2]) {
 	&clear_lookup_domain_cache($_[2], $_[0]);
@@ -1948,6 +1961,16 @@ delete($spam{$_[0]->{'user'}});
 
 # Update cache of existing usernames
 $unix_user{&escape_alias($_[0]->{'user'})} = 0;
+
+# Delete from last logins file
+&lock_file($mail_login_file);
+my %logins;
+&read_file_cached($mail_login_file, \%logins);
+if ($logins{$_[0]->{'user'}}) {
+	delete($logins{$_[0]->{'user'}});
+	&write_file($mail_login_file, \%logins);
+	}
+&unlock_file($mail_login_file);
 
 # Create everyone file for domain, minus the user
 if ($_[1] && $_[1]->{'mail'}) {

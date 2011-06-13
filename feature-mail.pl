@@ -4907,6 +4907,95 @@ local $dn1 = join(",", split(/,\s*/, $_[1]));
 return lc($dn0) eq lc($dn1);
 }
 
+# update_last_login_times()
+# Scans the mail log and updates the last time a user logs in via IMAP, POP3
+# or SMTP.
+sub update_last_login_times
+{
+# Find the mail log
+my $maillog = $config{'bw_maillog'};
+$maillog = &get_mail_log() if ($maillog eq "auto");
+return 0 if (!$maillog);
+
+# Seek to the last position
+&lock_file($mail_login_file);
+my @st = stat($maillog);
+my $lastpost;
+my %logins;
+&read_file($mail_login_file, \%logins);
+$lastpos = $logins{'lastpos'} || $st[7];
+if ($lastpos > $st[7]) {
+	# Off end .. file has probably been rotated
+	$lastpos = 0;
+	}
+open(MAILLOG, $maillog);
+seek(MAILLOG, $lastpos, 0);
+my $now = time();
+my @tm = localtime($now);
+while(<MAILLOG>) {
+	s/\r|\n//g;
+
+	# Remove Solaris extra part like [ID 197553 mail.info]
+	s/\[ID\s+\d+\s+\S+\]\s+//;
+
+	if (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+dovecot:\s+(pop3|imap)-login:\s+Login:\s+user=<([^>]+)>/) {
+		# POP3 or IMAP login with dovecot
+		my $ltime;
+		eval { $ltime = timelocal($5, $4, $3, $2,
+				          $apache_mmap{lc($1)}, $tm[5]); };
+		if (!$ltime || $ltime > $now+(24*60*60)) {
+			# Must have been last year!
+			eval { $ltime = timelocal($5, $4, $3, $2,
+					  $apache_mmap{lc($1)}, $tm[5]-1); };
+			}
+		&add_last_login_time(\%logins, $ltime, $7, $8);
+		}
+	elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+.*sasl_username=([^ ,]+)/) {
+		# Postfix SMTP
+		my $ltime;
+		eval { $ltime = timelocal($5, $4, $3, $2,
+				          $apache_mmap{lc($1)}, $tm[5]); };
+		if (!$ltime || $ltime > $now+(24*60*60)) {
+			# Must have been last year!
+			eval { $ltime = timelocal($5, $4, $3, $2,
+					  $apache_mmap{lc($1)}, $tm[5]-1); };
+			}
+		&add_last_login_time(\%logins, $ltime, 'smtp', $7);
+		}
+	}
+close(MAILLOG);
+@st = stat($maillog);
+$logins{'lastpos'} = $st[7];
+&write_file($mail_login_file, \%logins);
+&unlock_file($mail_login_file);
+return 1;
+}
+
+# add_last_login_time(&logins, time, type, username)
+# Add to the hash of login types for some user
+sub add_last_login_time
+{
+my ($logins, $ltime, $ltype, $user) = @_;
+my %curr = map { split(/=/, $_) } split(/\s+/, $logins->{$user});
+$curr{$ltype} = $ltime;
+$logins->{$user} = join(" ", map { $_."=".$curr{$_} } keys %curr);
+}
+
+# get_last_login_time(username)
+# Returns a hash ref of last login types to times for a user
+sub get_last_login_time
+{
+my ($user) = @_;
+my %logins;
+&read_file_cached($mail_login_file, \%logins);
+if ($logins{$user}) {
+	return { map { split(/=/, $_) } split(/\s+/, $logins{$user}) };
+	}
+else {
+	return undef;
+	}
+}
+
 $done_feature_script{'mail'} = 1;
 
 1;

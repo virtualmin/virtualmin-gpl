@@ -179,6 +179,13 @@ foreach $d (@doms) {
 					!$d->{'spam'} ? "Disabled for domain" :
 					$u->{'nospam'} ? "No" : "Yes","\n";
 				}
+			$ll = &get_last_login_time($u->{'user'});
+			if ($ll) {
+				print "    Last logins: ",
+				    join(", ",
+				       map { $_." ".&make_date($ll->{$_}) }
+					   keys %$ll),"\n";
+				}
 			@dblist = ( );
 			foreach $db (@{$u->{'dbs'}}) {
 				push(@dblist, $db->{'name'}." ($db->{'type'})");

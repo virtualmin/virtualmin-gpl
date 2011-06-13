@@ -35,3 +35,5 @@ if ($info) {
 # Update IP list cache
 &build_local_ip_list();
 
+# Update DB of per-user last login times
+&update_last_login_times();

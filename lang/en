@@ -762,6 +762,11 @@ user_emysqlprov=Failed to update user on services host : $1
 user_emysqllist=Failed to fetch users from services host : $1
 user_emysqldelete=Failed to delete user on services host : $1
 user_emysqlprovips=Failed to update IP addresses on services host : $1
+user_lastlogin=Last email login
+user_lastlogin_pop3=POP3 (fetching email)
+user_lastlogin_imap=IMAP (fetching email)
+user_lastlogin_smtp=SMTP (sending email)
+user_lastlogin_never=No logins recorded yet
 
 aliases_ecannot=You are not allowed to edit aliases in this domain
 aliases_title=Mail Aliases

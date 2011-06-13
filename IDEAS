@@ -62,6 +62,3 @@
 	- https://www.virtualmin.com/node/18405
 	- CHANGELOG
 	- backup/restore
-
- - Track last-login time for mailbox users (IMAP or FTP)
-	- http://www.virtualmin.com/node/18417
