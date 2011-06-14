@@ -96,6 +96,7 @@ ldap=0
 ldap_unix=1
 ldap_mailstore=$HOME/Maildir/
 vpopmail_dir=/home/vpopmail
+vpopmail_maildir=mail
 mysql_db=${PREFIX}
 other_users=0
 other_doms=0

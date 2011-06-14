@@ -229,10 +229,19 @@ elsif ($config{'mail_system'} == 5) {
 	local $qdom = quotemeta($_[0]->{'dom'});
 	local $qpass = quotemeta($_[0]->{'pass'});
 	local $qowner = '';
+	local $qdir = '';
 	if ($config{'vpopmail_owner'}) {
 		local $quid = quotemeta($_[0]->{'uid'});
 		local $qgid = quotemeta($_[0]->{'gid'});
-		$qowner = "-d ~$_[0]->{'user'} -i $quid -g $qgid"
+		$qowner = "-i $quid -g $qgid"
+	}
+	if ($config{'vpopmail_maildir'}) {
+		local $qmdir = quotemeta($_[0]->{'home'}.'/'.$config{'vpopmail_maildir'});
+		$qdir = "-d $qmdir";
+		if (!-e $qmdir) {
+			mkdir($_[0]->{'home'}.'/'.$config{'vpopmail_maildir'});
+			chown($_[0]->{'uid'},$_[0]->{'gid'},$_[0]->{'home'}.'/'.$config{'vpopmail_maildir'})
+		}
 	}
 	local $out;
 	local $errorlabel;
@@ -245,7 +254,7 @@ elsif ($config{'mail_system'} == 5) {
 	else {
 		$errorlabel = 'setup_evadddomain';
 		$out = &backquote_command(
-		    "$vpopbin/vadddomain $qowner $qdom $qpass 2>&1");
+		    "$vpopbin/vadddomain $qdir $qowner $qdom $qpass 2>&1");
 		}
 	if ($?) {
 		&$second_print(&text($label, "<tt>$out</tt>"));

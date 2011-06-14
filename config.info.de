@@ -92,6 +92,8 @@ vpopmail_dir=Basisverzeichnis f&#252;r VPOPMail,0
 vpopmail_user=VPOPMail&#45;Benutzer,5
 vpopmail_group=VPOPMail&#45;Gruppe,6
 vpopmail_auto=Pfad zum Autoresponder&#45;Programm,3,Nicht installiert
+vpopmail_owner=Erstelle VPOPMail-Domains mit dem Serveradmin als Besitzer?,1,1-Yes,0-No
+vpopmail_maildir=VPOPMails "domains"-Verzeichnis liegt unter (Pfad relativ zum Home=Verzeichnis),3,VPOPMails Home-Verzeichnis
 line4.7=Spamfilter&#45;Optionen,11
 spam_delivery=Standardausliefeung f&#252;r Spam,10,-Normal ausliefern,/dev/null-L&#246;schen,$HOME/mail/spam-Spam&#45;Mboxdatei,$HOME/Maildir/.spam/-Spam&#45;Maildir&#45;Ordner,Andere Datei oder Mailadresse
 clam_delivery=Standardauslieferung f&#252;r Viren,10,/dev/null-L&#246;schen,$HOME/mail/virus-MBox&#45;Datei f&#252;r Viren,$HOME/Maildir/.virus/-Maildir&#45;Ordner f&#252;r Viren, Andere Datei oder Mailadresse

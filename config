@@ -98,6 +98,7 @@ ldap_mailstore=$HOME/Maildir/
 vpopmail_dir=/home/vpopmail
 vpopmail_user=vpopmail
 vpopmail_group=vchkpw
+vpopmail_maildir=mail
 mysql_db=${PREFIX}
 other_users=0
 other_doms=0
