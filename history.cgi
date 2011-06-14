@@ -128,6 +128,27 @@ print "</tr></table>\n";
 print "<div id='history' style='height: 300px;'></div>\n";
 print "<a href='history_data.cgi?$statsparams&start=$start&end=$end&nice=1'>$text{'history_rawdata'}</a><br>\n";
 
+# For email, show total over time period
+my @tstats;
+foreach $stat (@stats) {
+	if ($stat eq "mailcount" || $stat eq "spamcount" ||
+	    $stat eq "viruscount") {
+		my @info = &list_historic_collected_info($stat, $start, $end);
+		my $lasttime;
+		my $count = 0;
+		foreach $i (@info) {
+			if ($lasttime) {
+				$count += $i->[1] * (($i->[0] - $lasttime) / 60);
+				}
+			$lasttime = $i->[0];
+			}
+		push(@tstats, &text('history_total_'.$stat, int($count)));
+		}
+	}
+if (@tstats) {
+	print &ui_links_row(\@tstats);
+	}
+
 # Checkboxes for statistics to show
 print &ui_hr();
 print "<b>$text{'history_showsel'}</b><br>\n";
