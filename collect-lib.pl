@@ -39,12 +39,23 @@ if (&foreign_check("proc")) {
 		local $free = 0;
 		local %donezone;
 		local %donevzfs;
+		local @cfs = split(/\s+/, $config{'collect_fs'});
 		foreach my $m (@mounted) {
-			if ($m->[2] =~ /^ext/ ||
-			    $m->[2] eq "reiserfs" || $m->[2] eq "ufs" ||
-			    $m->[2] eq "zfs" || $m->[2] eq "simfs" ||
-			    $m->[2] eq "xfs" || $m->[2] eq "jfs" ||
-			    $m->[1] =~ /^\/dev\// || $m->[1] eq $home_base) {
+			if (@cfs) {
+				# If a list of filesystesm to monitor is given,
+				# only include those
+				if (&indexof($m->[0], @cfs) >= 0) {
+					local ($t, $f) =
+					  &mount::disk_space($m->[2], $m->[0]);
+					$total += $t*1024;
+					$free += $f*1024;
+					}
+				}
+			elsif ($m->[2] =~ /^ext/ ||
+			       $m->[2] eq "reiserfs" || $m->[2] eq "ufs" ||
+			       $m->[2] eq "zfs" || $m->[2] eq "simfs" ||
+			       $m->[2] eq "xfs" || $m->[2] eq "jfs" ||
+			       $m->[1] =~ /^\/dev\// || $m->[1] eq $home_base) {
 				if ($m->[1] =~ /^(zones|zonas)\/([^\/]+)/ &&
 				    $m->[2] eq "zfs" &&
 				    $donezone{$2}++) {

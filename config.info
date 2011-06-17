@@ -135,6 +135,7 @@ collect_restart=Restart services that are detected as down?,1,1-Yes,0-No
 collect_ifaces=Network interfaces for traffic graph,3,All Ethernet
 collect_notemp=Collect drive and CPU temperatures?,1,0-Yes,1-No
 collect_noall=Collect all available package updates?,1,0-Yes,1-No
+collect_fs=Filesystems to include in local disk space,3,All local filesystems,40,,,Listed filesystems (space separated)
 
 line8=Backup and restore,11
 compression=Backup compression format,1,0-gzip,1-bzip2,2-None (tar only),3-ZIP
