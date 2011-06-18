@@ -1110,7 +1110,8 @@ local %miniserv;
 local @ipkeys = &webmin::get_ipkeys(\%miniserv);
 push(@ipkeys, { 'ips' => [ $_[0]->{'ip'} ],
 		'key' => $_[0]->{'ssl_key'},
-		'cert' => $_[0]->{'ssl_cert'} });
+		'cert' => $_[0]->{'ssl_cert'},
+		'extracas' => $_[0]->{'ssl_ca'}, });
 &webmin::save_ipkeys(\%miniserv, \@ipkeys);
 &$putfunc(\%miniserv);
 &register_post_action($postfunc);
