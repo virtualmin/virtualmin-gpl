@@ -7,7 +7,7 @@ sub migration_cpanel_validate
 local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
 local ($ok, $root) = &extract_cpanel_dir($file);
 $ok || return ("Not a cPanel tar.gz file : $root");
-local $daily = "$root/backup/cpbackup/daily";
+local $daily = glob("$root/backup*/cpbackup/daily");
 local ($homedir) = glob("$root/*/homedir");
 local $datastore = "$root/.cpanel-datastore";
 -d $daily || -d $homedir || -d $datastore ||
@@ -52,7 +52,7 @@ if (!$dom) {
 		return ("More than one domain name was found in the cPanel backup : ".join(" ", @doms));
 		}
 	else {
-		return ("Could not work on domain name from cPanel backup");
+		return ("Could not work out domain name from cPanel backup");
 		}
 	}
 
@@ -114,7 +114,7 @@ local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
        $prefix, $virtalready, $email, $netmask) = @_;
 local ($ok, $root) = &extract_cpanel_dir($file);
 $ok || &error("Failed to extract backup : $root");
-local $daily = "$root/backup/cpbackup/daily";
+local $daily = glob("$root/backup*/cpbackup/daily");
 local $datastore = "$root/.cpanel-datastore";
 local $tmpl = &get_template($template);
 local $tar = &get_tar_command();
