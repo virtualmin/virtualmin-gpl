@@ -1,3 +1,7 @@
+ - bump versions on
+	virtual-server/module.info
+	gpl-virtual-server/module.info
+
  x validate source
 	cd /usr/local/webadmin
 	find virtual-server*/* -name "*.cgi" -o -name "*.pl" | xargs -l1 perl -c |& grep -v OK
@@ -21,7 +25,7 @@
 	./gpl-virtual-server/createvirtualminmodule.sh $ver /tmp/virtual-server-$ver.wbm.gz
 	./create-module.pl --sign virtualmin/virtual-server-theme-$themever.wbt.gz virtual-server-theme
 
- x build RPM and .deb
+ - build RPM and .deb
 	./makemodulerpm.pl --sign --dir virtual-server --allow-overwrite gpl-virtual-server
 	./makemodulerpm.pl --sign --allow-overwrite --epoch 2 virtual-server-theme
 	./makemoduledeb.pl --dir virtual-server --allow-overwrite gpl-virtual-server
