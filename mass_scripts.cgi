@@ -23,17 +23,24 @@ foreach my $d (@doms) {
 
 # Work out who has it
 $script = &get_script($sname);
+$canupfunc = $script->{'can_upgrade_func'};
 foreach my $d (@doms) {
 	@got = &list_domain_scripts($d);
 	@dsinfos = grep { $_->{'name'} eq $sname &&
 			  &compare_versions($_->{'version'}, $ver,
 					    $script) < 0 } @got;
+	push(@sinfos_anyver, grep { $_->{'name'} eq $sname } @got);
+	if (defined(&$canupfunc)) {
+		# Limit to allowable upgrades
+		@dsinfos = grep { &$canupfunc($_, $ver) } @dsinfos;
+		}
 	foreach $sinfo (@dsinfos) {
 		$sinfo->{'dom'} = $d;
 		}
 	push(@sinfos, @dsinfos);
 	}
-@sinfos || &error($text{'massscript_enone2'});
+@sinfos || @sinfos_anyver || &error($text{'massscript_enone2'});
+@sinfos || &error($text{'massscript_enone3'});
 
 &ui_print_unbuffered_header(undef, $text{'massscript_title'}, "");
 

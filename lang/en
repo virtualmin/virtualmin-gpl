@@ -3759,6 +3759,7 @@ links_phpini2=PHP $1 Configuration
 massscript_err=Failed to upgrade scripts
 massscript_enone=No virtual servers selected
 massscript_enone2=None of the selected servers have the script installed
+massscript_enone3=None of the selected servers have scripts installed that can be upgraded to the selected version
 massscript_title=Upgrade Scripts
 massstart_start=Now upgrading $1 to version $2 in $3 locations ..
 massscript_ever=.. version $1 is already installed.
