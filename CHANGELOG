@@ -1295,6 +1295,6 @@ Updated the Moodle script installer to version 2.0.3, Zikula to 1.2.7, phpMyAdmi
 Added a field for pasting in the text of a domain's CA certificate.
 The default DNS TTL for one or more domains can now be changed via the --ttl flag to the modify-dns API command.
 ---- Changes since 3.86 ----
-Updated the Roundcube script installer to version 0.5.3, PHPprojekt to 6.0.6, phpMyAdmin to 3.4.2, phpMyFAQ to 2.6.17, Movable Type to 5.11, Instiki to 0.19.2, FengOffice to 1.7.5, DokuWiki to 2011-05-25a, TextPattern to 4.4.1, and SugarCRM to 6.2.0.
+Updated the Roundcube script installer to version 0.5.3, PHPprojekt to 6.0.6, phpMyAdmin to 3.4.2, phpMyFAQ to 2.6.17, Movable Type to 5.11, Instiki to 0.19.2, FengOffice to 1.7.5, DokuWiki to 2011-05-25a, TextPattern to 4.4.1, WHMCS to 4.5.2, and SugarCRM to 6.2.0.
 Added the new API command set-global-feature to turn features and plugins on and off from the command line.
 The last IMAP, POP3 and SMTP logins for mailbox users are now tracked by Virtualmin, and can be viewed on the Edit Mailbox page and in the output from the list-users API command.
