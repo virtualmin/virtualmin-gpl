@@ -807,7 +807,10 @@ sub validate_web
 {
 local ($d) = @_;
 if ($d->{'alias_mode'}) {
-	# Find alias target
+	# Find alias target, unless disabled
+	if ($d->{'disabled'}) {
+		return undef;
+		}
 	local ($pvirt, $pconf) = &get_apache_virtual($d->{'dom'},
 						     $d->{'web_port'});
 	return &text('validate_eweb', "<tt>$d->{'dom'}</tt>") if (!$pvirt);
@@ -884,8 +887,15 @@ return undef;
 sub disable_web
 {
 if ($_[0]->{'alias'} && $_[0]->{'alias_mode'} == 1) {
-	# Just a ServerAlias in a real domain, so don't disable
-	return 1;
+	# Just a ServerAlias in a real domain, so disabling is the same as
+	# deletion. Unless the parent has already been disabled, in which case
+	# nothing needs to be done.
+	local $alias = &get_domain($_[0]->{'alias'});
+	if ($alias->{'disabled'}) {
+		return 1;
+		}
+	$_[0]->{'disable_alias_web_delete'} = 1;
+	return &delete_web($_[0]);
 	}
 &$first_print($text{'disable_apache'});
 &require_apache();
@@ -951,7 +961,12 @@ return "$disabled_website_dir/$_[0]->{'id'}.html";
 sub enable_web
 {
 if ($_[0]->{'alias'} && $_[0]->{'alias_mode'} == 1) {
-	# Just a ServerAlias in a real domain, so no need to do anything
+	# Just a ServerAlias in a real domain, so enabling is the same as
+	# creating.
+	if ($_[0]->{'disable_alias_web_delete'}) {
+		delete($_[0]->{'disable_alias_web_delete'});
+		return &setup_web($_[0]);
+		}
 	return 1;
 	}
 &$first_print($text{'enable_apache'});
