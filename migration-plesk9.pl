@@ -96,6 +96,19 @@ if (!$user) {
 local $group = $user;
 local $ugroup = $group;
 
+# Extract the tar.gz file containing additional content
+&$first_print("Finding contents files ..");
+local $cids = $domain->{'phosting'}->{'content'}->{'cid'};
+if (!$cids) {
+	&$second_print(".. no contents data found!");
+	return ( \%dom );
+	}
+elsif (ref($cids) eq 'HASH') {
+	# Just one file (unlikely)
+	$cids = [ $cids ];
+	}
+&$second_print(".. done");
+
 # First work out what features we have
 &$first_print("Checking for Plesk features ..");
 local @got = ( "dir", $parent ? () : ("unix") );
@@ -107,14 +120,14 @@ if (exists($domain->{'mailsystem'}->{'properties'}->{'status'}->{'enabled'}) ||
 if ($domain->{'properties'}->{'dns-zone'}) {
 	push(@got, "dns");
 	}
-if ($domain->{'www'} eq 'true') {
+local ($wwwcid) = grep { $_->{'type'} eq 'docroot' } @$cids;
+if ($domain->{'www'} eq 'true' || $wwwcid) {
 	push(@got, "web");
 	}
 if ($domain->{'properties'}->{'ip'}->{'ip-type'} eq 'exclusive' && $virt) {
 	push(@got, "ssl");
 	}
-if ($domain->{'phosting'}->{'preferences'}->{'logrotation'}->{'enabled'} eq 'true' ||
-    $windows && &indexof("web", @got) >= 0) {
+if (($domain->{'phosting'}->{'preferences'}->{'logrotation'}->{'enabled'} eq 'true' || $windows) && &indexof("web", @got) >= 0) {
 	push(@got, "logrotate");
 	}
 if ($domain->{'phosting'}->{'preferences'}->{'webalizer'} &&
@@ -275,19 +288,6 @@ if ($err) {
 else {
 	&$second_print(".. done");
 	}
-
-# Extract the tar.gz file containing additional content
-&$first_print("Finding contents files ..");
-local $cids = $domain->{'phosting'}->{'content'}->{'cid'};
-if (!$cids) {
-	&$second_print(".. no contents data found!");
-	return ( \%dom );
-	}
-elsif (ref($cids) eq 'HASH') {
-	# Just one file (unlikely)
-	$cids = [ $cids ];
-	}
-&$second_print(".. done");
 
 # Copy home directory files
 &$first_print("Copying web pages ..");
