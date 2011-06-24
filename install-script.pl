@@ -25,6 +25,11 @@ fail with an error message. By default the database must already exist
 under the virtual server, but if the C<--newdb> parameter is given it will
 be created as part of the script installation process.
 
+By default the exact database name you enter will be used, but when creating
+a new database for the script you can use the C<--prefix-db> flag to request
+that the DB name be prefixed in the same way that it would be when installing
+a script from the Virtualmin UI.
+
 If upgrading an existing script in this virtual server, you must supply the
 C<--upgrade> parameter, followed by the install ID. This can be found from the
 C<list-scripts> command, documented below.
@@ -104,6 +109,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--newdb") {
 		$opts->{'newdb'} = 1;
+		}
+	elsif ($a eq "--prefix-db") {
+		$dbprefix = 1;
 		}
 	elsif ($a eq "--opt") {
 		$oname = shift(@ARGV);
@@ -200,6 +208,28 @@ else {
 $d->{'web'} && $d->{'dir'} ||
 	&usage("Scripts can only be installed into virtual servers with a ".
 	       "website and home directory");
+
+# Fix DB name with prefix if requested
+$tmpl = &get_template($d->{'template'});
+if ($dbprefix && $dbname) {
+	if ($tmpl->{'mysql_suffix'} ne "none") {
+		# Prefix comes from template
+		$prefix = &substitute_domain_template(
+				$tmpl->{'mysql_suffix'}, $d);
+		$prefix =~ s/-/_/g;
+		$prefix =~ s/\./_/g;
+		if ($prefix && $prefix !~ /_$/) {
+			# Always use _ as separator
+			$prefix .= "_";
+			}
+		}
+	else {
+		# Prefix is domain's default DB
+		$prefix = &database_name($d)."_";
+		}
+	$dbname = &fix_database_name($prefix.$dbname, $dbtype);
+	$opts->{'db'} = $dbtype."_".$dbname;
+	}
 
 # Re-check the public html directory
 &find_html_cgi_dirs($d);
@@ -370,6 +400,7 @@ print "                          --type name\n";
 print "                          --version number|\"latest\" [--unsupported]\n";
 print "                         [--path url-path]\n";
 print "                         [--db \"type name\"]\n";
+print "                         [--prefix-db]\n";
 print "                         [--opt \"name value\"]\n";
 print "                         [--upgrade id]\n";
 print "                         [--force-dir directory]\n";
