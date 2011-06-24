@@ -1029,8 +1029,10 @@ $h || return "Unknown SSL file type $type";
 local @lines = grep { /\S/ } split(/\r?\n/, $data);
 local $begin = quotemeta("-----BEGIN ").$h.quotemeta("-----");
 local $end = quotemeta("-----END ").$h.quotemeta("-----");
-$lines[0] =~ /^$begin$/ || return "Data does not start with line $begin";
-$lines[$#lines] =~ /^$end$/ || return "Data does not end with line $begin";
+$lines[0] =~ /^$begin$/ || return "Data does not start with line ".
+				  "-----BEGIN $h-----";
+$lines[$#lines] =~ /^$end$/ || return "Data does not end with line ".
+				      "-----END $h-----";
 for(my $i=1; $i<$#lines; $i++) {
 	$lines[$i] =~ /^[A-Za-z0-9\+\/=]+$/ ||
 		return "Line ".($i+1)." does not look like PEM format";
