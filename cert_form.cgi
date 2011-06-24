@@ -275,7 +275,7 @@ print &ui_table_row($webmin::text{'ca_c'},
 		    &ui_textbox("countryName", undef, 2));
 
 $key_size = $config{'key_size'};
-$key_size = undef if ($keysize = $webmin::default_key_size);
+$key_size = undef if ($key_size == $webmin::default_key_size);
 print &ui_table_row($webmin::text{'ssl_size'},
 		    &ui_opt_textbox("size", $key_size, 6,
 			    "$text{'default'} ($webmin::default_key_size)").
