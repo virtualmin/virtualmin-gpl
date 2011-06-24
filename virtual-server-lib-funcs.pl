@@ -6182,6 +6182,13 @@ return $db;
 sub fix_database_name
 {
 local ($db, $dbtype) = @_;
+if (!$dbtype) {
+	# Guess DB type
+	my @dbtypes = grep { $config{$_} } @database_features;
+	if (scalar(@dbtypes) == 1) {
+		$dbtype = $dbtypes[0];
+		}
+	}
 $db = lc($db);
 $db =~ s/[\.\-]/_/g;	# mysql doesn't like . or _
 if (!$dbtype || $dbtype eq "postgres") {
