@@ -166,7 +166,7 @@ if ($ok) {
 	if ($sinfo) {
 		&remove_domain_script($d, $sinfo);
 		}
-	&add_domain_script($d, $sname, $ver, $opts, $desc, $url,
+	$sinfo = &add_domain_script($d, $sname, $ver, $opts, $desc, $url,
 			   $sinfo ? ( $sinfo->{'user'}, $sinfo->{'pass'} )
 				  : ( $suser, $spass ),
 			   $ok < 0 ? $msg : undef);
@@ -184,6 +184,9 @@ else {
 &release_lock_web($d);
 &release_lock_cron($d);
 
-&ui_print_footer("list_scripts.cgi?dom=$in{'dom'}", $text{'scripts_return'},
-		 &domain_footer_link($d));
+&ui_print_footer(
+	$sinfo ? ( "edit_script.cgi?dom=$in{'dom'}&script=$sinfo->{'id'}",
+		   $text{'scripts_ereturn'} ) : ( ),
+	"list_scripts.cgi?dom=$in{'dom'}", $text{'scripts_return'},
+	&domain_footer_link($d));
 
