@@ -260,8 +260,9 @@ foreach my $desturl (@$desturls) {
 		local $scperr;
 		local $qserver = &check_ip6address($server) ? "[$server]"
 							    : $server;
+		local $testuser = $user || "root";
 		local $r = ($user ? "$user\@" : "").
-			   "$qserver:/tmp/virtualmin-copy-test.$user";
+			   "$qserver:/tmp/virtualmin-copy-test.$testuser";
 		local $temp = &transname();
 		open(TEMP, ">$temp");
 		close(TEMP);
@@ -270,7 +271,7 @@ foreach my $desturl (@$desturls) {
 			# Copy to /tmp failed .. try current dir instead
 			$scperr = undef;
 			$r = ($user ? "$user\@" : "").
-			     "$qserver:virtualmin-copy-test.$user";
+			     "$qserver:virtualmin-copy-test.$testuser";
 			&scp_copy($temp, $r, $pass, \$scperr, $port);
 			}
 		if ($scperr) {
