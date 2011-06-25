@@ -261,8 +261,8 @@ foreach my $desturl (@$desturls) {
 		local $qserver = &check_ip6address($server) ? "[$server]"
 							    : $server;
 		local $testuser = $user || "root";
-		local $r = ($user ? "$user\@" : "").
-			   "$qserver:/tmp/virtualmin-copy-test.$testuser";
+		local $testfile = "/tmp/virtualmin-copy-test.$testuser";
+		local $r = ($user ? "$user\@" : "").$qserver.":".$testfile;
 		local $temp = &transname();
 		open(TEMP, ">$temp");
 		close(TEMP);
@@ -270,14 +270,22 @@ foreach my $desturl (@$desturls) {
 		if ($scperr) {
 			# Copy to /tmp failed .. try current dir instead
 			$scperr = undef;
-			$r = ($user ? "$user\@" : "").
-			     "$qserver:virtualmin-copy-test.$testuser";
+			$testfile = "virtualmin-copy-test.$testuser";
+			$r = ($user ? "$user\@" : "").$qserver.":".$testfile;
 			&scp_copy($temp, $r, $pass, \$scperr, $port);
 			}
 		if ($scperr) {
 			&$first_print(&text('backup_escptest', $scperr));
 			return (0, 0, $doms);
 			}
+
+		# Clean up dummy file if possible
+		local $sshcmd = "ssh".($port ? " -p $port" : "")." ".
+				($user ? "$user\@" : "").$server;
+		local $rmcmd = $sshcmd." rm -f ".$testfile;
+		local $rmerr;
+		&run_ssh_command($rmcmd, $pass, \$rmerr);
+
 		if ($dirfmt && $path ne "/") {
 			# Also create the destination directory now, by running
 			# mkdir via ssh or scping an empty dir
@@ -285,8 +293,6 @@ foreach my $desturl (@$desturls) {
 			local ($pathdir, $pathfile) = ($1, $2);
 
 			# ssh mkdir first
-			local $sshcmd = "ssh".($port ? " -p $port" : "")." ".
-					($user ? "$user\@" : "").$server;
 			local $mkcmd = $sshcmd." mkdir -p ".quotemeta($path);
 			local $err;
 			local $lsout = &run_ssh_command($mkcmd, $pass, \$err);
