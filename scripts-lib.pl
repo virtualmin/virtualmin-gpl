@@ -245,6 +245,7 @@ foreach $o (keys %$opts) {
 &make_dir($script_log_directory, 0700);
 &make_dir("$script_log_directory/$d->{'id'}", 0700);
 &write_file("$script_log_directory/$d->{'id'}/$info{'id'}.script", \%info);
+return \%info;
 }
 
 # save_domain_script(&domain, &sinfo)
