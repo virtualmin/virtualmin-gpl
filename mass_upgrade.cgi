@@ -137,6 +137,10 @@ else {
 	print "</center>\n";
 	}
 
-&ui_print_footer("list_scripts.cgi?dom=$in{'dom'}", $text{'scripts_return'},
+&ui_print_footer(@sinfos == 1 ?
+		   ( "edit_script.cgi?dom=$in{'dom'}&script=$sinfos[0]->{'id'}",
+		     $text{'scripts_ereturn'} ) :
+		   ( ),
+		 "list_scripts.cgi?dom=$in{'dom'}", $text{'scripts_return'},
 		 &domain_footer_link($d));
 
