@@ -66,10 +66,10 @@ while(@ARGV > 0) {
 		$dest = shift(@ARGV);
 		}
 	elsif ($a eq "--start") {
-		$start = int(&date_to_time(shift(@ARGV), 1) / (24*60*60));
+		$start = &date_to_time(shift(@ARGV));
 		}
 	elsif ($a eq "--end") {
-		$end = int(&date_to_time(shift(@ARGV), 1) / (24*60*60));
+		$end = &date_to_time(shift(@ARGV));
 		}
 	elsif ($a eq "--multiline") {
 		$multi = 1;
@@ -136,7 +136,9 @@ if ($multi) {
 			      &nice_size($l->{'size'}),"\n";
 			}
 		print "    Final status: ",($l->{'ok'} ? "OK" : "Failed"),"\n";
-		print "    Run by user: $l->{'user'}\n";
+		if ($l->{'user'}) {
+			print "    Run by user: $l->{'user'}\n";
+			}
 		print "    Run from: $l->{'mode'}\n";
 		}
 	}
@@ -148,7 +150,7 @@ else {
 	foreach my $l (@logs) {
 		printf $fmt, $l->{'doms'},
 			     &html_tags_to_text(
-				&nice_backup_url($s->{'dest'}, 1)),
+				&nice_backup_url($l->{'dest'}, 1)),
 			     $l->{'ok'} ? 'OK' : 'Failed',
 			     &nice_size($l->{'size'});
 		}
