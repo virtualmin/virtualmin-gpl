@@ -32,12 +32,6 @@
  - Include bounced / greylisted messages in system stats
 	- https://www.virtualmin.com/node/13113
 
- - Replicate virtusers to secondary MX
-	- https://www.virtualmin.com/node/12894
-	- Sendmail
-	- Postfix
-	- Per-domain copying
-
  - Webmin SSL cert / CSR generation directly
 	- https://www.virtualmin.com/node/14502
 
@@ -62,3 +56,9 @@
 	- https://www.virtualmin.com/node/18405
 	- CHANGELOG
 	- backup/restore
+
+ - Replicate virtusers to secondary MX
+	- https://www.virtualmin.com/node/12894
+	- Sendmail
+	- Postfix
+	- Per-domain copying
