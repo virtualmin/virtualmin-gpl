@@ -1415,7 +1415,7 @@ foreach my $vf (readdir(VF)) {
 	next if ($addons{$vf});
 	local (%subof, $subprefix);
 	foreach my $rv (grep { !$_->{'subdom'} } @rvdoms) {
-		if ($vf =~ /^(\S+)\.\Q$dom\E$/) {
+		if ($vf =~ /^(\S+)\.\Q$rv->{'dom'}\E$/) {
 			$subprefix = $1;
 			%subof = %$rv;
 			last;
