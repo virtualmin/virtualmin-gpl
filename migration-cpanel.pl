@@ -1426,53 +1426,59 @@ foreach my $vf (readdir(VF)) {
 		# Skip silently
 		next;
 		}
-	&$first_print("Creating sub-domain $vf ..");
 	if (!%subof || !$subof{'dom'}) {
+		&$first_print("Creating sub-domain $vf ..");
 		&$second_print(".. skipping, as not a sub-domain of $dom or any other migrated domain");
 		next;
 		}
 	elsif ($subof{'alias'}) {
-		# Sub-domain of an alias ... create as an alias too
+		# Sub-domain of an alias ... need to create as a sub-server
+		# of the main domain
+		&$first_print("Creating sub-server sub-domain $vf ..");
 		&$indent_print();
-		local $target = &get_domain($subof{'alias'});
-		local %alias = ( 'id', &domain_id(),
-				 'dom', $vf,
-				 'user', $dom{'user'},
-				 'group', $dom{'group'},
-				 'prefix', $dom{'prefix'},
-				 'ugroup', $dom{'ugroup'},
-				 'pass', $dom{'pass'},
-				 'alias', $target->{'id'},
-				 'uid', $dom{'uid'},
-				 'gid', $dom{'gid'},
-				 'ugid', $dom{'ugid'},
-				 'owner', "Migrated cPanel alias sub-domain for $target->{'dom'}",
-				 'email', $dom{'email'},
-				 'name', 1,
-				 'ip', $target->{'ip'},
-				 'virt', 0,
-				 'source', $dom{'source'},
-				 'parent', $dom{'id'},
-				 'template', $target->{'template'},
-				 'reseller', $target->{'reseller'},
-				 'nocreationmail', 1,
-				 'nocopyskel', 1,
+		local %subs = ( 'id', &domain_id(),
+				'dom', $vf,
+				'user', $dom{'user'},
+				'group', $dom{'group'},
+				'prefix', $dom{'prefix'},
+				'ugroup', $dom{'ugroup'},
+				'pass', $dom{'pass'},
+				'uid', $dom{'uid'},
+				'gid', $dom{'gid'},
+				'ugid', $dom{'ugid'},
+				'owner', "Migrated cPanel sub-server",
+				'email', $dom{'email'},
+				'name', 1,
+				'ip', $dom{'ip'},
+				'virt', 0,
+				'source', $dom{'source'},
+				'parent', $dom{'id'},
+				'template', $dom{'template'},
+				'reseller', $dom{'reseller'},
+				'nocreationmail', 1,
+				'nocopyskel', 1,
 				);
-		foreach my $f (@alias_features) {
-			$alias{$f} = $target->{$f};
+		foreach my $f (@opt_features) {
+			if ($f ne "unix" && $f ne "webmin") {
+				$subs{$f} = $dom{$f};
+				}
 			}
 		local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
 						  : \%dom;
-		$alias{'home'} = &server_home_directory(\%alias, $parentdom);
-		&complete_domain(\%alias);
-		&create_virtual_server(\%alias, $parentdom,
+		$subs{'home'} = &server_home_directory(\%subs, $parentdom);
+		&complete_domain(\%subs);
+		&create_virtual_server(\%subs, $parentdom,
 				       $parentdom->{'user'});
+
+		# XXX copy in files
+
 		&$outdent_print();
 		&$second_print($text{'setup_done'});
-		push(@rvdoms, \%alias);
+		push(@rvdoms, \%subs);
 		}
 	else {
 		# Sub-domain of a regular domain
+		&$first_print("Creating sub-domain $vf ..");
 		&$indent_print();
 		local %subd = ( 'id', &domain_id(),
 				'dom', $vf,
