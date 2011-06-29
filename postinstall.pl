@@ -295,6 +295,12 @@ if (defined(&set_php_wrappers_writable) && &has_command("chattr")) {
 		}
 	}
 
+# Fix old PHP memory limit default
+if ($config{'php_vars'} =~ /^memory_limit=32M/) {
+	$config{'php_vars'} = "+".$config{'php_vars'};
+	&save_module_config();
+	}
+
 # Prevent an un-needed module config check
 if (!$cerr) {
 	$config{'last_check'} = time()+1;
