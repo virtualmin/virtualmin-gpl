@@ -521,10 +521,11 @@ if ($got{'dns'} && -d $daily) {
 	&require_bind();
 	local $named = &extract_cpanel_dir("$daily/dirs/_var_named.tar.gz");
 	local $zsrcfile = &bind8::find_value("file", $zone->{'members'});
-	local ($recs, $zdstfile) = &get_domain_dns_records_and_file(\%dom);
 	if (-r "$named/$zsrcfile") {
 		&execute_command("cp ".quotemeta("$named/$zsrcfile")." ".
 			     quotemeta(&bind8::make_chroot($zdstfile)));
+		local ($recs, $zdstfile) =
+			&get_domain_dns_records_and_file(\%dom);
 		foreach my $r (@$recs) {
 			my $change = 0;
 			if (($r->{'name'} eq $dom."." ||
@@ -1441,7 +1442,7 @@ foreach my $vf (readdir(VF)) {
 				 'prefix', $dom{'prefix'},
 				 'ugroup', $dom{'ugroup'},
 				 'pass', $dom{'pass'},
-				 'alias', $subof{'alias'},
+				 'alias', $target->{'id'},
 				 'uid', $dom{'uid'},
 				 'gid', $dom{'gid'},
 				 'ugid', $dom{'ugid'},

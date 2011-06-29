@@ -177,10 +177,20 @@ elsif (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
 	undef(@bind8::list_zone_names_cache);
 	undef(@bind8::get_config_cache);
 
+	# Work out if can copy from alias target - not possible if target
+	# is a sub-domain, as they don't have their own domain.
+	local $copyfromalias = 0;
+	if ($_[0]->{'alias'}) {
+		local $target = &get_domain($_[0]->{'alias'});
+		if ($target && !$target->{'subdom'}) {
+			$copyfromalias = 1;
+			}
+		}
+
 	# Create the records file
 	local $rootfile = &bind8::make_chroot($file);
 	if (!-r $rootfile) {
-		if ($_[0]->{'alias'}) {
+		if ($copyfromalias) {
 			&create_alias_records($file, $_[0], $ip);
 			}
 		else {
