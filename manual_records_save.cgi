@@ -16,6 +16,7 @@ $in{'data'} =~ /\S/ || &error($text{'mrecords_enone'});
 &obtain_lock_dns($d);
 ($recs, $file) = &get_domain_dns_records_and_file($d);
 $file || &error($recs);
+$chroot_relative_file = $file;
 $file = &bind8::make_chroot($file);
 $olderr = &validate_dns($d, $recs);
 
@@ -27,7 +28,7 @@ $temp = &transname();
 &close_tempfile(FILE);
 
 # Re-read the file and re-validate
-$recs = [ &bind8::read_zone_file($file, $d->{'dom'}) ];
+$recs = [ &bind8::read_zone_file($chroot_relative_file, $d->{'dom'}) ];
 &set_record_ids($recs);
 $err = &validate_dns($d, $recs);
 if ($err && !$olderr) {
