@@ -1299,3 +1299,4 @@ Updated the Roundcube script installer to version 0.5.3, PHPprojekt to 6.0.6, ph
 Added the new API command set-global-feature to turn features and plugins on and off from the command line.
 The last IMAP, POP3 and SMTP logins for mailbox users are now tracked by Virtualmin, and can be viewed on the Edit Mailbox page and in the output from the list-users API command.
 When an alias domain with a website is disabled, it is now removed from the parent domain's Apache virtualhost.
+Added the list-backup-logs API command to report on previous backups run from the web UI, API or on schedule.
