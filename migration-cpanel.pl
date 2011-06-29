@@ -1159,149 +1159,15 @@ foreach my $l (@$lref) {
 		}
 	}
 
-# Create addon domains, skipping those that have no target yet
-&create_addon_domains(1);
+# Create sub-domains, silently skipping those for which no parent exists yet
+&create_sub_domains(1);
 
-# Create sub-domains as virtualmin sub-domains, from vf directory
-opendir(VF, "$userdir/vf");
-foreach my $vf (readdir(VF)) {
-	local ($clash) = grep { $_->{'dom'} eq $vf } @rvdoms;
-	next if ($vf eq "." || $vf eq ".." || $clash);
-	next if ($addons{$vf});
-	&$first_print("Creating sub-domain $vf ..");
-	local (%subof, $subprefix);
-	foreach my $rv (grep { !$_->{'subdom'} } @rvdoms) {
-		if ($vf =~ /^(\S+)\.\Q$dom\E$/) {
-			$subprefix = $1;
-			%subof = %$rv;
-			last;
-			}
-		}
-	if (!%subof || !$subof{'dom'}) {
-		&$second_print(".. skipping, as not a sub-domain of $dom or any other migrated domain");
-		next;
-		}
-	elsif ($subof{'alias'}) {
-		# Sub-domain of an alias ... create as an alias too
-		&$indent_print();
-		local $target = &get_domain($subof{'alias'});
-		local %alias = ( 'id', &domain_id(),
-				 'dom', $vf,
-				 'user', $dom{'user'},
-				 'group', $dom{'group'},
-				 'prefix', $dom{'prefix'},
-				 'ugroup', $dom{'ugroup'},
-				 'pass', $dom{'pass'},
-				 'alias', $subof{'alias'},
-				 'uid', $dom{'uid'},
-				 'gid', $dom{'gid'},
-				 'ugid', $dom{'ugid'},
-				 'owner', "Migrated cPanel alias sub-domain for $target->{'dom'}",
-				 'email', $dom{'email'},
-				 'name', 1,
-				 'ip', $target->{'ip'},
-				 'virt', 0,
-				 'source', $dom{'source'},
-				 'parent', $dom{'id'},
-				 'template', $target->{'template'},
-				 'reseller', $target->{'reseller'},
-				 'nocreationmail', 1,
-				 'nocopyskel', 1,
-				);
-		foreach my $f (@alias_features) {
-			$alias{$f} = $target->{$f};
-			}
-		local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
-						  : \%dom;
-		$alias{'home'} = &server_home_directory(\%alias, $parentdom);
-		&complete_domain(\%alias);
-		&create_virtual_server(\%alias, $parentdom,
-				       $parentdom->{'user'});
-		&$outdent_print();
-		&$second_print($text{'setup_done'});
-		push(@rvdoms, \%alias);
-		}
-	else {
-		# Sub-domain of a regular domain
-		&$indent_print();
-		local %subd = ( 'id', &domain_id(),
-				'dom', $vf,
-				'user', $dom{'user'},
-				'group', $dom{'group'},
-				'prefix', $dom{'prefix'},
-				'ugroup', $dom{'ugroup'},
-				'pass', $dom{'pass'},
-				'subdom', $subof{'id'},
-				'subprefix', $subprefix,
-				'uid', $dom{'uid'},
-				'gid', $dom{'gid'},
-				'ugid', $dom{'ugid'},
-				'owner', "Migrated cPanel sub-domain",
-				'email', $dom{'email'},
-				'name', 1,
-				'ip', $dom{'ip'},
-				'virt', 0,
-				'source', $dom{'source'},
-				'parent', $dom{'id'},
-				'template', $dom{'template'},
-				'reseller', $dom{'reseller'},
-				'nocreationmail', 1,
-				'nocopyskel', 1,
-				'no_tmpl_aliases', 1,
-				);
-		foreach my $f (@subdom_features) {
-			if ($f eq 'mail') {
-				$subd{$f} = $subof{$f} && -r "$userdir/va/$vf";
-				}
-			elsif ($f eq 'ssl') {
-				# Off for sub-domains, for now
-				$subd{$f} = 0;
-				}
-			else {
-				$subd{$f} = $subof{$f};
-				}
-			}
-		local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
-						  : \%dom;
-		$subd{'home'} = &server_home_directory(\%subd, $parentdom);
-		&complete_domain(\%subd);
+# Create addon domains
+&create_addon_domains();
 
-		# Extract correct sub-domain root dir
-		local $userdata = &read_cpanel_userdata_file(
-					"$userdir/userdata/$vf");
-		if ($userdata->{'documentroot'} =~
-		    /^\/home\/([^\/]+)\/public_html\/(.*)/) {
-			$subd{'public_html_dir'} =
-				"../../$subof{'public_html_dir'}/$2"; 
-			$subd{'public_html_path'} =
-				"$subof{'public_html_path'}/$2";
-			}
+# Create sub-domains again, to catch those for which an addon target exists now
+&create_sub_domains(0);
 
-		# Set cgi directories to cpanel standard
-		$subd{'cgi_bin_dir'} =
-			"../../$subof{'public_html_dir'}/$subprefix/cgi-bin";
-		$subd{'cgi_bin_path'} =
-			"$subof{'public_html_path'}/$subprefix/cgi-bin";
-
-		&create_virtual_server(\%subd, $parentdom,
-				       $parentdom->{'user'});
-
-		# Cpanel sub-domains always seem to forward mail to the parent
-		if ($subd{'mail'}) {
-			local $virt = { 'from' => "\@$vf",
-					'to' => [ "%1\@".$subof{'dom'} ] };
-			&create_virtuser($virt);
-			}
-
-		&$outdent_print();
-		&$second_print($text{'setup_done'});
-		push(@rvdoms, \%subd);
-		}
-	}
-closedir(VF);
-
-# Create addon domains again, as some may be for sub-domains just created
-&create_addon_domains(0);
 
 if ($got{'webalizer'}) {
 	# Copy existing Weblizer stats to ~/public_html/stats
@@ -1471,7 +1337,7 @@ foreach my $vf (readdir(VF)) {
 	push(@rvdoms, \%alias);
 
 	# Create parked domain aliases
-	&$first_print("Copying email aliases for addon domain $f ..");
+	&$first_print("Copying email aliases for addon domain $vf ..");
 	local $acount = 0;
 	local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
 	open(VA, "$userdir/va/$vf");
@@ -1535,6 +1401,155 @@ foreach my $vf (readdir(VF)) {
 	close(VA);
 	&$second_print(".. done (migrated $acount aliases)");
 	}
+}
+
+sub create_sub_domains
+{
+local ($skip_missing_target) = @_;
+
+# Create sub-domains as virtualmin sub-domains, from vf directory
+opendir(VF, "$userdir/vf");
+foreach my $vf (readdir(VF)) {
+	local ($clash) = grep { $_->{'dom'} eq $vf } @rvdoms;
+	next if ($vf eq "." || $vf eq ".." || $clash);
+	next if ($addons{$vf});
+	local (%subof, $subprefix);
+	foreach my $rv (grep { !$_->{'subdom'} } @rvdoms) {
+		if ($vf =~ /^(\S+)\.\Q$dom\E$/) {
+			$subprefix = $1;
+			%subof = %$rv;
+			last;
+			}
+		}
+	if ((!%subof || !$subof{'dom'}) && $skip_missing_target) {
+		# Skip silently
+		next;
+		}
+	&$first_print("Creating sub-domain $vf ..");
+	if (!%subof || !$subof{'dom'}) {
+		&$second_print(".. skipping, as not a sub-domain of $dom or any other migrated domain");
+		next;
+		}
+	elsif ($subof{'alias'}) {
+		# Sub-domain of an alias ... create as an alias too
+		&$indent_print();
+		local $target = &get_domain($subof{'alias'});
+		local %alias = ( 'id', &domain_id(),
+				 'dom', $vf,
+				 'user', $dom{'user'},
+				 'group', $dom{'group'},
+				 'prefix', $dom{'prefix'},
+				 'ugroup', $dom{'ugroup'},
+				 'pass', $dom{'pass'},
+				 'alias', $subof{'alias'},
+				 'uid', $dom{'uid'},
+				 'gid', $dom{'gid'},
+				 'ugid', $dom{'ugid'},
+				 'owner', "Migrated cPanel alias sub-domain for $target->{'dom'}",
+				 'email', $dom{'email'},
+				 'name', 1,
+				 'ip', $target->{'ip'},
+				 'virt', 0,
+				 'source', $dom{'source'},
+				 'parent', $dom{'id'},
+				 'template', $target->{'template'},
+				 'reseller', $target->{'reseller'},
+				 'nocreationmail', 1,
+				 'nocopyskel', 1,
+				);
+		foreach my $f (@alias_features) {
+			$alias{$f} = $target->{$f};
+			}
+		local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+						  : \%dom;
+		$alias{'home'} = &server_home_directory(\%alias, $parentdom);
+		&complete_domain(\%alias);
+		&create_virtual_server(\%alias, $parentdom,
+				       $parentdom->{'user'});
+		&$outdent_print();
+		&$second_print($text{'setup_done'});
+		push(@rvdoms, \%alias);
+		}
+	else {
+		# Sub-domain of a regular domain
+		&$indent_print();
+		local %subd = ( 'id', &domain_id(),
+				'dom', $vf,
+				'user', $dom{'user'},
+				'group', $dom{'group'},
+				'prefix', $dom{'prefix'},
+				'ugroup', $dom{'ugroup'},
+				'pass', $dom{'pass'},
+				'subdom', $subof{'id'},
+				'subprefix', $subprefix,
+				'uid', $dom{'uid'},
+				'gid', $dom{'gid'},
+				'ugid', $dom{'ugid'},
+				'owner', "Migrated cPanel sub-domain",
+				'email', $dom{'email'},
+				'name', 1,
+				'ip', $dom{'ip'},
+				'virt', 0,
+				'source', $dom{'source'},
+				'parent', $dom{'id'},
+				'template', $dom{'template'},
+				'reseller', $dom{'reseller'},
+				'nocreationmail', 1,
+				'nocopyskel', 1,
+				'no_tmpl_aliases', 1,
+				);
+		foreach my $f (@subdom_features) {
+			if ($f eq 'mail') {
+				$subd{$f} = $subof{$f} && -r "$userdir/va/$vf";
+				}
+			elsif ($f eq 'ssl') {
+				# Off for sub-domains, for now
+				$subd{$f} = 0;
+				}
+			else {
+				$subd{$f} = $subof{$f};
+				}
+			}
+		local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+						  : \%dom;
+		$subd{'home'} = &server_home_directory(\%subd, $parentdom);
+		&complete_domain(\%subd);
+
+		# Extract correct sub-domain root dir
+		local $userdata = &read_cpanel_userdata_file(
+					"$userdir/userdata/$vf");
+		if ($userdata->{'documentroot'} =~
+		    /^\/home\/([^\/]+)\/public_html\/(.*)/) {
+			$subd{'public_html_dir'} =
+				"../../$subof{'public_html_dir'}/$2"; 
+			$subd{'public_html_path'} =
+				"$subof{'public_html_path'}/$2";
+			}
+
+		# Set cgi directories to cpanel standard
+		$subd{'cgi_bin_dir'} =
+			"../../$subof{'public_html_dir'}/$subprefix/cgi-bin";
+		$subd{'cgi_bin_path'} =
+			"$subof{'public_html_path'}/$subprefix/cgi-bin";
+
+		&create_virtual_server(\%subd, $parentdom,
+				       $parentdom->{'user'});
+
+		# Cpanel sub-domains always seem to forward mail to the parent
+		if ($subd{'mail'}) {
+			local $virt = { 'from' => "\@$vf",
+					'to' => [ "%1\@".$subof{'dom'} ] };
+			&create_virtuser($virt);
+			}
+
+		&$outdent_print();
+		&$second_print($text{'setup_done'});
+		push(@rvdoms, \%subd);
+		}
+	}
+closedir(VF);
+
+
 }
 
 1;
