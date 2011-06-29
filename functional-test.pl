@@ -1568,6 +1568,19 @@ $backup_tests = [
 		      [ 'dest', $test_backup_file ] ],
 	},
 
+	# Make sure it was logged
+	{ 'command' => 'list-backup-logs.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'start', -1 ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Domains: '.$test_domain.' '.$test_subdomain.' '.
+		        $test_parallel_domain1.' '.$test_parallel_domain2,
+		      'Final status: OK',
+		      'Destination: '.$test_backup_file,
+		      'Run from: api',
+		      'Incremental: No' ],
+	},
+
 	# Backup to a temp dir
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
