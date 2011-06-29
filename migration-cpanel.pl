@@ -1159,120 +1159,8 @@ foreach my $l (@$lref) {
 		}
 	}
 
-# Create addon domains as alias domains
-opendir(VF, "$userdir/vf");
-foreach my $vf (readdir(VF)) {
-	local ($clash) = grep { $_->{'dom'} eq $vf } @rvdoms;
-	next if ($vf eq "." || $vf eq ".." || $clash);
-	next if (!$addons{$vf});
-	&$first_print("Creating addon domain $vf ..");
-	local $target = &get_domain_by("dom", $addons{$vf});
-	if (!$target) {
-		&$second_print(".. skipping, as target $addons{$vf} does not exist");
-		next;
-		}
-	&$indent_print();
-	local %alias = ( 'id', &domain_id(),
-			 'dom', $vf,
-			 'user', $dom{'user'},
-			 'group', $dom{'group'},
-			 'prefix', $dom{'prefix'},
-			 'ugroup', $dom{'ugroup'},
-			 'pass', $dom{'pass'},
-			 'alias', $target->{'id'},
-			 'uid', $dom{'uid'},
-			 'gid', $dom{'gid'},
-			 'ugid', $dom{'ugid'},
-			 'owner', "Migrated cPanel alias for $target->{'dom'}",
-			 'email', $dom{'email'},
-			 'name', 1,
-			 'ip', $target->{'ip'},
-			 'virt', 0,
-			 'source', $dom{'source'},
-			 'parent', $dom{'id'},
-			 'template', $target->{'template'},
-			 'reseller', $target->{'reseller'},
-			 'nocreationmail', 1,
-			 'nocopyskel', 1,
-			);
-	foreach my $f (@alias_features) {
-		$alias{$f} = $target->{$f};
-		}
-	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
-					  : \%dom;
-	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
-	&complete_domain(\%alias);
-	&create_virtual_server(\%alias, $parentdom,
-			       $parentdom->{'user'});
-	&$outdent_print();
-	&$second_print($text{'setup_done'});
-	push(@rvdoms, \%alias);
-
-	# Create parked domain aliases
-	&$first_print("Copying email aliases for addon domain $f ..");
-	local $acount = 0;
-	local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
-	open(VA, "$userdir/va/$vf");
-	while(<VA>) {
-		s/\r|\n//g;
-		s/^\s*#.*$//;
-		if (/^(\S+):\s*(.*)$/) {
-			local ($name, $v) = ($1, $2);
-			local @values;
-			if ($v !~ /,/ && $v !~ /"/) {
-				# A single destination, not quoted!
-				@values = ( $v );
-				}
-			else {
-				# Comma-separated alias destinations
-				while($v =~ /^\s*,?\s*"(\|)([^"]+)"(.*)$/ ||
-				      $v =~ /^\s*,?\s*()"([^"]+)"(.*)$/ ||
-				      $v =~ /^\s*,?\s*(\|)"([^"]+)"(.*)$/ ||
-				      $v =~ /^\s*,?\s*()([^,\s]+)(.*)$/) {
-					push(@values, $1.$2);
-					$v = $3;
-					}
-				}
-			local $mailman = 0;
-			foreach my $v (@values) {
-				if ($v =~ /:fail:\s+(.*)/) {
-					# Fix bounce alias
-					$v = "BOUNCE $1";
-					}
-				local ($atype, $aname) = &alias_type($v, $name);
-				if ($atype == 4 && $aname =~ /autorespond\s+(\S+)\@(\S+)\s+(\S+)/) {
-					# Turn into Virtualmin auto-responder
-					$v = "| $module_config_directory/autoreply.pl $3/$name $1";
-					&set_ownership_permissions(
-						undef, undef, 0755,
-						$3, "$3/$name");
-					}
-				elsif ($atype == 4 && $aname =~ /mailman/) {
-					$mailman++;
-					}
-				}
-			# Don't create aliases for mailman lists
-			next if ($mailman || $name =~ /^owner-/);
-
-			# Already done a domain forward
-			next if ($name =~ /^\*/);
-
-			# Just create an alias
-			if ($name !~ /\@/) {
-				$name .= "\@".$dom;
-				}
-			local $virt = { 'from' => $name =~ /^\*/ ? "\@".$vf
-								 : $name,
-					'to' => \@values };
-			local $clash = $gotvirt{$virt->{'from'}};
-			&delete_virtuser($clash) if ($clash);
-			&create_virtuser($virt);
-			$acount++;
-			}
-		}
-	close(VA);
-	&$second_print(".. done (migrated $acount aliases)");
-	}
+# Create addon domains, skipping those that have no target yet
+&create_addon_domains(1);
 
 # Create sub-domains as virtualmin sub-domains, from vf directory
 opendir(VF, "$userdir/vf");
@@ -1412,6 +1300,9 @@ foreach my $vf (readdir(VF)) {
 	}
 closedir(VF);
 
+# Create addon domains again, as some may be for sub-domains just created
+&create_addon_domains(0);
+
 if ($got{'webalizer'}) {
 	# Copy existing Weblizer stats to ~/public_html/stats
 	&$first_print("Copying Weblizer data files ..");
@@ -1522,6 +1413,128 @@ while($pos < scalar(@$lref)) {
 	$pos++;
 	}
 return wantarray ? ( \%rv, $pos ) : \%rv;
+}
+
+sub create_addon_domains
+{
+local ($skip_missing_target) = @_;
+
+# Create addon domains as alias domains
+opendir(VF, "$userdir/vf");
+foreach my $vf (readdir(VF)) {
+	local ($clash) = grep { $_->{'dom'} eq $vf } @rvdoms;
+	next if ($clash);
+	next if ($vf eq "." || $vf eq ".." || $clash);
+	next if (!$addons{$vf});
+	local $target = &get_domain_by("dom", $addons{$vf});
+	next if (!$target && $skip_missing_target);
+	&$first_print("Creating addon domain $vf ..");
+	if (!$target) {
+		&$second_print(".. skipping, as target $addons{$vf} does not exist");
+		next;
+		}
+	&$indent_print();
+	local %alias = ( 'id', &domain_id(),
+			 'dom', $vf,
+			 'user', $dom{'user'},
+			 'group', $dom{'group'},
+			 'prefix', $dom{'prefix'},
+			 'ugroup', $dom{'ugroup'},
+			 'pass', $dom{'pass'},
+			 'alias', $target->{'id'},
+			 'uid', $dom{'uid'},
+			 'gid', $dom{'gid'},
+			 'ugid', $dom{'ugid'},
+			 'owner', "Migrated cPanel alias for $target->{'dom'}",
+			 'email', $dom{'email'},
+			 'name', 1,
+			 'ip', $target->{'ip'},
+			 'virt', 0,
+			 'source', $dom{'source'},
+			 'parent', $dom{'id'},
+			 'template', $target->{'template'},
+			 'reseller', $target->{'reseller'},
+			 'nocreationmail', 1,
+			 'nocopyskel', 1,
+			);
+	foreach my $f (@alias_features) {
+		$alias{$f} = $target->{$f};
+		}
+	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+					  : \%dom;
+	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
+	&complete_domain(\%alias);
+	&create_virtual_server(\%alias, $parentdom,
+			       $parentdom->{'user'});
+	&$outdent_print();
+	&$second_print($text{'setup_done'});
+	push(@rvdoms, \%alias);
+
+	# Create parked domain aliases
+	&$first_print("Copying email aliases for addon domain $f ..");
+	local $acount = 0;
+	local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
+	open(VA, "$userdir/va/$vf");
+	while(<VA>) {
+		s/\r|\n//g;
+		s/^\s*#.*$//;
+		if (/^(\S+):\s*(.*)$/) {
+			local ($name, $v) = ($1, $2);
+			local @values;
+			if ($v !~ /,/ && $v !~ /"/) {
+				# A single destination, not quoted!
+				@values = ( $v );
+				}
+			else {
+				# Comma-separated alias destinations
+				while($v =~ /^\s*,?\s*"(\|)([^"]+)"(.*)$/ ||
+				      $v =~ /^\s*,?\s*()"([^"]+)"(.*)$/ ||
+				      $v =~ /^\s*,?\s*(\|)"([^"]+)"(.*)$/ ||
+				      $v =~ /^\s*,?\s*()([^,\s]+)(.*)$/) {
+					push(@values, $1.$2);
+					$v = $3;
+					}
+				}
+			local $mailman = 0;
+			foreach my $v (@values) {
+				if ($v =~ /:fail:\s+(.*)/) {
+					# Fix bounce alias
+					$v = "BOUNCE $1";
+					}
+				local ($atype, $aname) = &alias_type($v, $name);
+				if ($atype == 4 && $aname =~ /autorespond\s+(\S+)\@(\S+)\s+(\S+)/) {
+					# Turn into Virtualmin auto-responder
+					$v = "| $module_config_directory/autoreply.pl $3/$name $1";
+					&set_ownership_permissions(
+						undef, undef, 0755,
+						$3, "$3/$name");
+					}
+				elsif ($atype == 4 && $aname =~ /mailman/) {
+					$mailman++;
+					}
+				}
+			# Don't create aliases for mailman lists
+			next if ($mailman || $name =~ /^owner-/);
+
+			# Already done a domain forward
+			next if ($name =~ /^\*/);
+
+			# Just create an alias
+			if ($name !~ /\@/) {
+				$name .= "\@".$dom;
+				}
+			local $virt = { 'from' => $name =~ /^\*/ ? "\@".$vf
+								 : $name,
+					'to' => \@values };
+			local $clash = $gotvirt{$virt->{'from'}};
+			&delete_virtuser($clash) if ($clash);
+			&create_virtuser($virt);
+			$acount++;
+			}
+		}
+	close(VA);
+	&$second_print(".. done (migrated $acount aliases)");
+	}
 }
 
 1;
