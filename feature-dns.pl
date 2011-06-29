@@ -1065,6 +1065,7 @@ $aliasfile || &error("No zone file for alias target $aliasd->{'dom'} found");
 @$recs || &error("No records for alias target $aliasd->{'dom'} found");
 local $olddom = $aliasd->{'dom'};
 local $dom = $d->{'dom'};
+print STDERR "file=$file olddom=$olddom dom=$dom\n";
 local $oldip = $aliasd->{'ip'};
 local @sublist = grep { $_->{'id'} ne $aliasd->{'id'} &&
 			$_->{'dom'} =~ /\.\Q$aliasd->{'dom'}\E$/ }
@@ -1103,6 +1104,7 @@ RECORD: foreach my $r (@$recs) {
 		}
 	&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
 			      'IN', $r->{'type'}, &join_record_values($r));
+	print STDERR "wrote $r->{'name'} ",&join_record_values($r),"\n";
 	}
 }
 
