@@ -566,9 +566,9 @@ if ($got{'dns'} && -d $daily) {
 
 local $out;
 local $ht = &public_html_dir(\%dom);
+local $qht = quotemeta($ht);
 if ($waschild) {
 	# Migrate web directory
-	local $qht = quotemeta($ht);
 	local $qhtsrc = "$homesrc/public_html/$wasuser";
 	&$first_print("Copying web pages to $ht ..");
 	&execute_command("cd $qhtsrc && ".
@@ -1470,7 +1470,22 @@ foreach my $vf (readdir(VF)) {
 		&create_virtual_server(\%subs, $parentdom,
 				       $parentdom->{'user'});
 
-		# XXX copy in files
+		# Copy files from parent
+		local $sdsrc = "$ht/$subprefix";
+		local $qsdsrc = quotemeta($sdsrc);
+		local $sddst = &public_html_dir(\%subs);
+		local $qsddst = quotemeta($sddst);
+		local $out;
+		&$first_print("Copying web pages from $sdsrc to $sddst ..");
+		&execute_command("cd $qsdsrc && ".
+				 "($tar cf - . | (cd $qsddst && $tar xf -))",
+				 undef, \$out, \$out);
+		if ($?) {
+			&$second_print(".. copy failed : <tt>$out</tt>");
+			}
+		else {
+			&$second_print(".. done");
+			}
 
 		&$outdent_print();
 		&$second_print($text{'setup_done'});
