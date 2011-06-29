@@ -144,9 +144,9 @@ if ($multi) {
 	}
 else {
 	# Just show one per line
-	$fmt = "%-20.20s %-40.40s %-8.8s %-8.8s\n";
+	$fmt = "%-20.20s %-40.40s %-6.6s %-10.10s\n";
 	printf $fmt, "Domains", "Destination", "Status", "Size";
-	printf $fmt, ("-" x 20), ("-" x 40), ("-" x 8), ("-"  x 8);
+	printf $fmt, ("-" x 20), ("-" x 40), ("-" x 6), ("-"  x 10);
 	foreach my $l (@logs) {
 		printf $fmt, $l->{'doms'},
 			     &html_tags_to_text(
