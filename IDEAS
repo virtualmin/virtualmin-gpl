@@ -62,3 +62,7 @@
 	- Sendmail
 	- Postfix
 	- Per-domain copying
+		- Call sync_secondary_mx_virtusers at end of all scripts that
+		  modify aliases or users?
+	- CHANGELOG
+	- Add to documentation
