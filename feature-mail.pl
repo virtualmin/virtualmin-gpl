@@ -1140,12 +1140,14 @@ elsif ($config{'mail_system'} == 6) {
 return $found;
 }
 
-# list_virtusers()
+# list_virtusers([include-everything])
 # Returns a list of a virtual mail address mappings. Each may actually have
 # an alias as its destination, and is automatically expanded to the
 # destinations for that alias.
 sub list_virtusers
 {
+local ($incall) = @_;
+
 # Build list of unix users, to exclude aliases with same name as users
 # (which are picked up by list_domain_users instead).
 &require_mail();
@@ -1159,7 +1161,7 @@ if (!%unix_user) {
 # Build a list of copy-mode alias domains, as their Sendmail and Postfix
 # virtusers shouldn't be included
 local %alias_copy;
-if ($supports_aliascopy) {
+if ($supports_aliascopy && !$incall) {
 	foreach my $d (&get_domain_by("alias", "_ANY_")) {
 		if ($d->{'aliascopy'}) {
 			$alias_copy{$d->{'dom'}}++;
@@ -1171,7 +1173,8 @@ if ($config{'mail_system'} == 1) {
 	# Get from sendmail
 	local @svirts = &sendmail::list_virtusers($sendmail_vfile);
 	local %aliases = map { lc($_->{'name'}), $_ }
-			 grep { $_->{'enabled'} && !$unix_user{$_->{'name'}} }
+			 grep { $_->{'enabled'} &&
+				(!$unix_user{$_->{'name'}} || $incall) }
 				&sendmail::list_aliases($sendmail_afiles);
 	local ($v, $a, @virts);
 	foreach $v (@svirts) {
@@ -1209,8 +1212,9 @@ elsif ($config{'mail_system'} == 0) {
 	# Get from postfix
 	local $svirts = &postfix::get_maps($virtual_type);
 	local %aliases = map { lc($_->{'name'}), $_ }
-			 grep { $_->{'enabled'} && !$unix_user{$_->{'name'}} }
-			     &$postfix_list_aliases($postfix_afiles);
+			 grep { $_->{'enabled'} &&
+				(!$unix_user{$_->{'name'}} || $incall) }
+			      &$postfix_list_aliases($postfix_afiles);
 	local ($v, $a, @virts);
 	foreach $v (@$svirts) {
 		local %rv = ( 'from' => lc($v->{'name'}),
@@ -1811,6 +1815,47 @@ elsif ($config{'mail_system'} == 6) {
 	$_[0]->{'alias'} = $alias;
 	}
 &execute_after_virtuser($_[0], 'CREATE_ALIAS');
+}
+
+# sync_secondary_virtusers(&domain)
+# Find all virtusers in the given domain, and make sure all secondary MX
+# servers running Postfix or Sendmail have only those users on their list to
+# allow relaying for.
+# This function is called on the master Virtualmin.
+sub sync_secondary_virtusers
+{
+local ($d) = @_;
+local @servers = &list_mx_servers();
+return if (!@servers);
+
+# Build list of mailboxes in the domain
+local @mailboxes;
+foreach my $v (&list_virtusers(1)) {
+	my ($mb, $dom) = split(/\@/, $v->{'from'});
+	if ($dom eq $d->{'dom'}) {
+		push(@mailboxes, $mb);
+		}
+	}
+
+# Sync to each secondary
+&remote_error_setup(\&secondary_error_handler);
+foreach my $s (@servers) {
+	$secondary_error = undef;
+	&remote_foreign_require($s, "virtual-server", "virtual-server-lib.pl");
+	next if ($secondary_error);
+	&remote_foreign_call($s, "virtual-server",
+		  "update_secondary_mx_virtusers", $dom->{'dom'}, \@mailboxes);
+	}
+&remote_error_setup(undef);
+}
+
+# update_secondary_mx_virtusers(domain, &mailbox-names)
+# Update the list of mailboxes allowed to relay for some domain.
+# This is called on the secondary MX Virtualmins.
+sub update_secondary_mx_virtusers
+{
+local ($dom, $mailboxes) = @_;
+# XXX mailserver-specific
 }
 
 # needs_alias(list..)

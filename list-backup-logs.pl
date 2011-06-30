@@ -124,7 +124,9 @@ if ($multi) {
 	foreach my $l (@logs) {
 		print "$l->{'id'}:\n";
 		print "    Domains: $l->{'doms'}\n";
-		print "    Failed domains: $l->{'errdoms'}\n";
+		if ($l->{'errdoms'}) {
+			print "    Failed domains: $l->{'errdoms'}\n";
+			}
 		print "    Destination: $l->{'dest'}\n";
 		print "    Incremental: ",
 		      ($l->{'increment'} ? "Yes" : "No"),"\n";

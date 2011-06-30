@@ -1476,15 +1476,18 @@ foreach my $vf (readdir(VF)) {
 		local $sddst = &public_html_dir(\%subs);
 		local $qsddst = quotemeta($sddst);
 		local $out;
-		&$first_print("Copying web pages from $sdsrc to $sddst ..");
-		&execute_command("cd $qsdsrc && ".
+		if (-d $sdsrc) {
+			&$first_print(
+				"Copying web pages from $sdsrc to $sddst ..");
+			&execute_command("cd $qsdsrc && ".
 				 "($tar cf - . | (cd $qsddst && $tar xf -))",
 				 undef, \$out, \$out);
-		if ($?) {
-			&$second_print(".. copy failed : <tt>$out</tt>");
-			}
-		else {
-			&$second_print(".. done");
+			if ($?) {
+				&$second_print(".. copy failed :<tt>$out</tt>");
+				}
+			else {
+				&$second_print(".. done");
+				}
 			}
 
 		&$outdent_print();
