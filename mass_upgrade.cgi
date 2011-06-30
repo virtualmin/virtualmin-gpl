@@ -87,9 +87,11 @@ if ($in{'confirm'}) {
 				# Worked .. record it
 				&$second_print($text{'setup_done'});
 				&remove_domain_script($d, $sinfo);
-				&add_domain_script($d, $sinfo->{'name'}, $ver,
+				$newsinfo = &add_domain_script(
+					$d, $sinfo->{'name'}, $ver,
 					$opts, $desc, $url,
 					$sinfo->{'user'}, $sinfo->{'pass'});
+				$sinfo->{'id'} = $newsinfo->{'id'};
 				}
 			else {
 				&$second_print($text{'scripts_failed'});
