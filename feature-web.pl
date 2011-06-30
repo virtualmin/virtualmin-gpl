@@ -834,6 +834,7 @@ else {
 		}
 
 	# If using php via CGI or fcgi, check for wrappers
+	local $need_suexec = 0;
 	if (defined(&get_domain_php_mode)) {
 		local $mode = &get_domain_php_mode($d);
 		if ($mode ne "mod_php") {
@@ -849,13 +850,19 @@ else {
 						     "<tt>$path</tt>");
 					}
 				}
+			$need_suexec = 1;
 			}
 		}
 
 	# If there are suexec directives, validate them
 	local ($suexec) = &apache::find_directive_struct(
 		"SuexecUserGroup", $vconf);
+	local ($suuser) = &apache::find_directive_struct(
+		"User", $vconf);
+	local ($sugroup) = &apache::find_directive_struct(
+		"Group", $vconf);
 	if ($suexec) {
+		# Has new-style suexec
 		if ($suexec->{'words'}->[0] ne $_[0]->{'user'} &&
 		    $suexec->{'words'}->[0] ne '#'.$_[0]->{'uid'}) {
 			return &text('validate_ewebuid',
@@ -866,6 +873,23 @@ else {
 			return &text('validate_ewebgid',
 			     $suexec->{'words'}->[1], $_[0]->{'ugid'});
 			}
+		}
+	elsif ($suuser && $sugroup) {
+		# Has old style user and group
+		if ($suuser->{'words'}->[0] ne $_[0]->{'user'} &&
+		    $suuser->{'words'}->[0] ne '#'.$_[0]->{'uid'}) {
+			return &text('validate_ewebuid',
+			     $suexec->{'words'}->[0], $_[0]->{'uid'});
+			}
+		if ($sugroup->{'words'}->[1] ne $_[0]->{'group'} &&
+		    $sugroup->{'words'}->[1] ne '#'.$_[0]->{'ugid'}) {
+			return &text('validate_ewebgid',
+			     $suexec->{'words'}->[1], $_[0]->{'ugid'});
+			}
+		}
+	elsif ($need_suexec) {
+		# Has neither, but needs them!
+		return $text{'validate_ewebphpsuexec'};
 		}
 
 	# Make sure a <Directory> exists for the document root
