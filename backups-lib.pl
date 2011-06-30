@@ -488,9 +488,11 @@ DOMAIN: foreach $d (@$doms) {
 					   $d->{'home'});
 		}
 
+	local $lockdir;
 	if ($homefmt) {
 		# Backup goes to a sub-dir of the home
-		$backupdir = "$d->{'home'}/.backup";
+		$lockdir = $backupdir = "$d->{'home'}/.backup";
+		&lock_file($lockdir);
 		system("rm -rf ".quotemeta($backupdir));
 		local $derr = &make_backup_dir($backupdir, 0777, 0, $asd);
 		if ($derr) {
@@ -562,6 +564,9 @@ DOMAIN: foreach $d (@$doms) {
 		}
 
 	DOMAINFAILED:
+	if ($lockdir) {
+		&unlock_file($lockdir);
+		}
 	$donefeatures{$d->{'dom'}} = \@donefeatures;
 	if ($dok) {
 		$okcount++;
