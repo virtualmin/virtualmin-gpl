@@ -4700,12 +4700,12 @@ if (defined(&quota::block_size)) {
 return undef;
 }
 
-# quota_show(number, filesystem|"home"|"mail")
+# quota_show(number, filesystem|"home"|"mail", [zero-means-none])
 # Returns text for the quota on some filesystem, in a human-readable format
 sub quota_show
 {
 if (!$_[0]) {
-	return "Unlimited";
+	return $_[2] ? $text{'resel_none'} : $text{'resel_unlimit'};
 	}
 else {
 	local $bsize = &quota_bsize($_[1]);
@@ -6378,7 +6378,8 @@ if (!$d->{'parent'} && $d->{'quota'} eq "" && $left != -1) {
 local $newquota = $d->{'quota'} - ($oldd ? $oldd->{'quota'} : 0);
 if ($left != -1 && $left-$newquota < 0) {
 	return &text('setup_noquotaadd'.$reason,
-		     &quota_show($left+($oldd ? $oldd->{'quota'} : 0), "home"));
+		     &quota_show($left+($oldd ? $oldd->{'quota'} : 0),
+				 "home", 1));
 	}
 
 # Check bandwidth limits

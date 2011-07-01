@@ -3236,6 +3236,7 @@ resel_max_doms=Maximum virtual servers
 resel_max_aliasdoms=Maximum alias servers
 resel_max_realdoms=Maximum non-alias servers
 resel_unlimit=Unlimited
+resel_none=None
 resel_max_quota=Maximum quota for all servers
 resel_max_mailboxes=Maximum mail/FTP users for all servers
 resel_max_aliases=Maximum aliases for all servers
