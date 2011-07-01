@@ -193,7 +193,7 @@ sub script_phpmyadmin_install
 {
 local ($d, $ver, $opts, $files, $upgrade) = @_;
 local ($out, $ex);
-local @dbs = split(/\s+/, $opts->{'db'});
+local @dbs = map { s/^mysql_//; $_ } split(/\s+/, $opts->{'db'});
 local $dbuser = &mysql_user($d);
 local $dbpass = &mysql_pass($d);
 local $dbhost = &get_database_host("mysql");
