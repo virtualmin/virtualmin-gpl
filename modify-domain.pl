@@ -33,6 +33,10 @@ new plan, use the C<--apply-plan> parameter followed by the plan name or ID.
 Alternately, you can switch the plan without applying any of it's limits
 with the C<--plan> flag.
 
+You can also have the domain's enabled features updated to match the current
+or new plan with the C<--plan-features> flag. This will disable or enable
+features to match those that are allowed on the plan by default.
+
 If your system is on an internal network and made available to the Internet
 via a router doing NAT, the IP address of a domain in DNS may be different
 from it's IP on the actual system. To set this, the C<--dns-ip> flag can
@@ -58,9 +62,7 @@ if (!$module_name) {
 	$< == 0 || die "modify-domain.pl must be run as root";
 	}
 @OLDARGV = @ARGV;
-
-$first_print = \&first_text_print;
-$second_print = \&second_text_print;
+&set_all_text_print();
 
 # Parse command-line args
 $name = 1;
@@ -191,6 +193,9 @@ while(@ARGV > 0) {
 			}
 		$planapply = 1 if ($a eq "--apply-plan");
 		}
+	elsif ($a eq "--plan-features") {
+		$planfeatures = 1;
+		}
 	elsif ($a eq "--add-exclude") {
 		push(@add_excludes, shift(@ARGV));
 		}
@@ -299,6 +304,21 @@ if (defined($template)) {
 		&usage("The selected template cannot be used for alias servers");
 		}
 	$dom->{'template'} = $template;
+	}
+
+# Plans can only be used with top-level servers
+if ($plan) {
+	$d->{'parent'} && &usage("--plan can only be used with top ".
+				 "level virtual servers");
+	}
+
+# Make sure plan specifies features
+if ($planfeatures) {
+	$d->{'parent'} && &usage("--plan-features can only be used with top ".
+				 "level virtual servers");
+	$plan ||= &get_plan($d->{'plan'});
+	$plan->{'featurelimits'} || &usage("--plan-features cannot be used ".
+				   "unless the plan has default features");
 	}
 
 # Find all other domains to be changed
@@ -460,7 +480,69 @@ elsif (!$dom->{'virt6'} && $old->{'virt6'}) {
 	&delete_virt6($old);
 	}
 
-# Actually update the domains
+# If the plan is being applied, update features
+if ($planfeatures) {
+	%flimits = map { $_, 1 } split(/\s+/, $plan->{'featurelimits'});
+	%newdom = %$dom;
+	$oldd = { %$dom };
+
+	# Update the newdom object
+	print "Applying features from plan ..\n";
+	@fchanged = ( );
+	foreach my $feat (&list_available_features(undef, undef, undef)) {
+		$f = $feat->{'feature'};
+		next if ($f eq "dir" || $f eq "unix" ||
+			 $f eq "virt" || $f eq "virt6");
+		if (!$dom->{$f} && $flimits{$f}) {
+			# Need to enable feature
+			$newdom{$f} = 1;
+			push(@fchanged, $f);
+			}
+		elsif ($dom->{$f} && !$flimits{$f}) {
+			# Need to disable feature
+			$newdom{$f} = 0;
+			push(@fchanged, $f);
+			}
+		}
+	if (!@fchanged) {
+		print ".. nothing to do\n\n";
+		goto PLANFAILED;
+		}
+
+	# Check for dependencies and clashes
+	$derr = &virtual_server_depends(\%newdom, undef, $oldd);
+        if ($derr) {
+		print ".. $derr\n\n";
+		goto PLANFAILED;
+                }
+        $cerr = &virtual_server_clashes(\%newdom, \%check);
+        if ($cerr) {
+		print ".. $cerr\n\n";
+		goto PLANFAILED;
+                }
+
+	# Check warnings
+	@warns = &virtual_server_warnings(\%newdom, $oldd);
+        if (@warns) {
+		print ".. warnings detected : ",join(", ", @warns),"\n\n";
+		goto PLANFAILED;
+		}
+
+	# Make the changes
+	&$indent_print();
+        foreach $f (@fchanged) {
+		$dom->{$f} = $newdom{$f};
+                }
+        foreach $f (@fchanged) {
+                &call_feature_func($f, $dom, $oldd);
+                }
+	&$outdent_print();
+
+	print ".. done\n\n";
+	PLANFAILED:
+	}
+
+# Call the modify function for enabled features on the domain and sub-servers
 for(my $i=0; $i<@doms; $i++) {
 	$d = $doms[$i];
 	$od = $olddoms[$i];
@@ -545,6 +627,7 @@ if (&supports_ip6()) {
 print "                        [--prefix name]\n";
 print "                        [--template name|id]\n";
 print "                        [--plan name|id | --apply-plan name|id]\n";
+print "                        [--plan-features]\n";
 print "                        [--add-exclude directory]*\n";
 print "                        [--remove-exclude directory]*\n";
 print "                        [--dns-ip address | --no-dns-ip]\n";
