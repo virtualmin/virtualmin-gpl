@@ -9680,7 +9680,7 @@ foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "quota_list_users_command", "quota_list_groups_command",
 	       "quota_get_user_command", "quota_get_group_command",
 	       "preload_mode", "collect_interval", "api_helper",
-	       "spam_lock", "spam_white") {
+	       "spam_lock", "spam_white", "mem_low") {
 	# Some important config option was changed
 	return 1 if ($config{$c} ne $lastconfig{$c});
 	}
@@ -11494,6 +11494,44 @@ if (!&foreign_check("net")) {
 	&$second_print($text{'check_netok'});
 	}
 
+# Check for sensible memory limits
+if (&foreign_check("proc")) {
+	&foreign_require("proc");
+	local $rmem = ($config{'mem_low'} || 256)*1024*1024;
+	if (defined(&proc::get_memory_info)) {
+		local @mem = &proc::get_memory_info();
+		local $beans = &get_beancounters();
+		if ($mem[0]*1024 < $rmem) {
+			# Memory is less than 256 M
+			&$second_print("<b>".&text('check_lowmemory',
+				&nice_size($mem[0]*1024),
+				&nice_size($rmem))."</b>");
+			}
+		elsif ($beans->{'vmguarpages'} &&
+		       $beans->{'vmguarpages'}*4096 < $rmem &&
+		       $beans->{'vmguarpages'} != $beans->{'privvmpages'}) {
+			# OpenVZ guaranteed memory is less than 256 M
+			&$second_print("<b>".&text('check_lowgmemory',
+				&nice_size($mem[0]*1024),
+				&nice_size($beans->{'vmguarpages'}*4096),
+				&nice_size($rmem))."</b>");
+			}
+		elsif ($beans->{'vmguarpages'} &&
+		       $beans->{'vmguarpages'} != $beans->{'privvmpages'}) {
+			# OpenVZ guaranteed memory is above 256 M
+			&$second_print(&text('check_okgmemory',
+				&nice_size($mem[0]*1024),
+				&nice_size($beans->{'vmguarpages'}*4096),
+				&nice_size($rmem)));
+			}
+		else {
+			# Memory is OK
+			&$second_print(&text('check_okmemory',
+				&nice_size($mem[0]*1024), &nice_size($rmem)));
+			}
+		}
+	}
+
 if ($config{'dns'}) {
 	# Make sure BIND is installed
 	if ($config{'provision_dns'}) {
@@ -12430,6 +12468,30 @@ $config{'disable'} =~ s/user/unix/g;	# changed since last release
 &write_file("$module_config_directory/last-config", \%config);
 
 return undef;
+}
+
+# get_beancounters()
+# Returns the contents of /proc/user_beancounters for this VM
+sub get_beancounters
+{
+local %beans;
+local $inctx = 0;
+open(BEANS, "/proc/user_beancounters") || return undef;
+while(<BEANS>) {
+	if (/^\s*(\d+):/) {
+		if ($1 != 0) {
+			$inctx = 1;
+			}
+		else {
+			$inctx = 0;
+			}
+		}
+	if (/\s+(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/ && $inctx) {
+		$beans{$1} = $5;
+		}
+	}
+close(BEANS);
+return \%beans;
 }
 
 # run_post_config_actions(&lastconfig)

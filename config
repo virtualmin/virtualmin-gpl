@@ -192,3 +192,4 @@ pbzip2=0
 statussslcert=1
 vpopmail_owner=0
 aliascopy=1
+mem_low=256
