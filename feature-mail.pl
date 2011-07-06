@@ -349,6 +349,10 @@ if (!$_[0]->{'alias'}) {
 # Add domain to DKIM list
 &update_dkim_domains($_[0], 'setup');
 
+# Request a call to sync to secondary MX servers after creation.
+# create_virtuser cannot do this, as the domain doesn't exist yet
+&register_post_action(\&sync_secondary_virtusers, $_[0]);
+
 &release_lock_mail($_[0]);
 }
 
@@ -1882,8 +1886,9 @@ elsif ($config{'mail_system'} == 0) {
 	foreach my $f (@mapfiles) {
 		&lock_file($f);
 		}
-	foreach my $m (@$maps) {
-		my ($mbox, $mdom) = @_;
+	local @maps_copy = @$maps;	# delete_virtuser modifies map cache
+	foreach my $m (@maps_copy) {
+		my ($mbox, $mdom) = split(/\@/, $m->{'name'});
 		next if ($mdom ne $dom);
 		if ($mailboxes_map{$mbox}) {
 			# Already got, so leave alone
