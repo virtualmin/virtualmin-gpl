@@ -1481,6 +1481,7 @@ elsif ($config{'mail_system'} == 6) {
 		}
 	}
 &execute_after_virtuser($_[0], 'DELETE_ALIAS');
+&register_sync_secondary_virtuser($_[0]);
 }
 
 # modify_virtuser(&old, &new)
@@ -1661,6 +1662,8 @@ elsif ($config{'mail_system'} == 6) {
 	$_[1]->{'alias'} = $alias;
 	}
 &execute_after_virtuser($_[1], 'MODIFY_ALIAS');
+&register_sync_secondary_virtuser($_[0]);
+&register_sync_secondary_virtuser($_[1]);
 }
 
 # create_virtuser(&virtuser)
@@ -1815,6 +1818,7 @@ elsif ($config{'mail_system'} == 6) {
 	$_[0]->{'alias'} = $alias;
 	}
 &execute_after_virtuser($_[0], 'CREATE_ALIAS');
+&register_sync_secondary_virtuser($_[0]);
 }
 
 # sync_secondary_virtusers(&domain, [&only-servers])
@@ -1903,6 +1907,20 @@ elsif ($config{'mail_system'} == 0) {
 	}
 else {
 	return $text{'mxv_unsupported'};
+	}
+}
+
+# register_sync_secondary_virtuser(&virtuser)
+# Register a call to sync_secondary_virtusers after everything is done for the
+# domain is one alias
+sub register_sync_secondary_virtuser
+{
+local ($virt) = @_;
+if ($virt->{'from'} =~ /\@(\S+)$/) {
+	local $d = &get_domain_by("dom", $1);
+	if ($d) {
+		&register_post_action(\&sync_secondary_virtusers, $d);
+		}
 	}
 }
 

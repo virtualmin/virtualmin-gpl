@@ -86,6 +86,7 @@ foreach $f (@set) {
 &made_changes();
 &reset_domain_envs($dom);
 
+&run_post_actions_silently();
 &virtualmin_api_log(\@OLDARGV, $dom);
 print "Custom field values in $domain successfully updated\n";
 

@@ -90,6 +90,7 @@ $virt = { 'from' => $email,
 &sync_alias_virtuals($d);
 &release_lock_mail($d);
 &virtualmin_api_log(\@OLDARGV, $d);
+&run_post_actions_silently();
 print "Alias for $email created successfully\n";
 
 sub usage

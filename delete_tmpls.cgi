@@ -22,6 +22,7 @@ if ($in{'confirm'}) {
 	foreach $tmpl (@deltmpls) {
 		&delete_template($tmpl);
 		}
+	&run_post_actions_silently();
 	&webmin_log("delete", "templates", scalar(@d));
 	&redirect("edit_newtmpl.cgi");
 	}

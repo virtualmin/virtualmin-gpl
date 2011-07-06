@@ -21,6 +21,8 @@ if ($in{'confirm'}) {
 		&$second_print($text{'unalias_failed'});
 		}
 
+	&run_post_actions();
+
 	&webmin_log("unalias", "domain", $d->{'dom'}, $d);
 
 	# Call any theme post command

@@ -53,6 +53,7 @@ if ($in{'alloc'}) {
 &save_shared_ips(@ips);
 &unlock_file($module_config_file);
 
+&run_post_actions_silently();
 &webmin_log("sharedips");
 &redirect("");
 

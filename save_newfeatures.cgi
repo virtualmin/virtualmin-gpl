@@ -101,6 +101,7 @@ if ($oldplugins ne $config{'plugins'}) {
 	&restart_miniserv();
 	}
 
+&run_post_actions_silently();
 &webmin_log("features");
 &redirect("");
 

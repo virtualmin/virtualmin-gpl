@@ -173,6 +173,7 @@ foreach $simple (@created) {
 &sync_alias_virtuals($d);
 print "<p>\n";
 print &text('aedit_complete', $count, $ecount, $mcount, $dcount),"<br>\n";
+&run_post_actions();
 &webmin_log("manual", "aliases", $count);
 
 &ui_print_footer("list_aliases.cgi?dom=$in{'dom'}", $text{'aliases_return'},

@@ -18,5 +18,6 @@ foreach $e (@exclude) {
 &save_backup_excludes($d, \@exclude);
 
 # All done
+&run_post_actions_silently();
 &webmin_log("exclude", "domain", $d->{'dom'});
 &domain_redirect($d);

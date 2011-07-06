@@ -316,6 +316,7 @@ if (&foreign_installed("security-updates")) {
 	}
 
 PAGEEND:
+&run_post_actions();
 if ($errors) {
 	print "<b>$text{'upgrade_problems'}</b><p>\n";
 	}

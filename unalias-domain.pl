@@ -54,6 +54,7 @@ $d->{'alias'} || &usage("The given virtual server is not an alias");
 # Call the move function
 &$first_print(&text('unalias_doing', "<tt>$d->{'dom'}</tt>"));
 $ok = &unalias_virtual_server($d);
+&run_post_actions_silently();
 if ($ok) {
 	&$second_print($text{'setup_done'});
 	&virtualmin_api_log(\@OLDARGV, $d);

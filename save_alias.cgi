@@ -24,6 +24,7 @@ if ($in{'delete'}) {
 	&delete_virtuser($virt);
 	&sync_alias_virtuals($d);
 	&release_lock_mail($d);
+	&run_post_actions_silently();
 	&webmin_log("delete", "alias", $virt->{'from'}, $virt);
 	}
 else {
@@ -102,6 +103,7 @@ else {
 		&write_simple_autoreply($d, $simple);
 		}
 	&release_lock_mail($d);
+	&run_post_actions_silently();
 	if ($in{'new'}) {
 		&webmin_log("create", "alias", $virt->{'from'}, $virt);
 		}

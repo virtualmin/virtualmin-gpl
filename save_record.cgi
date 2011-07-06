@@ -150,6 +150,7 @@ else {
 $err = &post_records_change($d, $recs, $file);
 &release_lock_dns($d);
 &reload_bind_records($d);
+&run_post_actions_silently();
 &webmin_log($in{'delete'} ? 'delete' : $in{'type'} ? 'create' : 'modify',
 	    'record', $d->{'dom'}, $r);
 &error(&text('record_epost', $err)) if ($err);

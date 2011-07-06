@@ -103,6 +103,7 @@ if ($in{'confirm'}) {
 			}
 		}
 
+	&run_post_actions();
 	&webmin_log("upgrade", "scripts", scalar(@d));
 	}
 else {

@@ -31,6 +31,7 @@ foreach $fs (@quotafs) {
 		}
 	}
 
+&run_post_actions();
 &webmin_log("quotacheck");
 &ui_print_footer("", $text{'index_return'});
 

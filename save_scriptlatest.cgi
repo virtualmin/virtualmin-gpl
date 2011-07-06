@@ -29,6 +29,7 @@ if ($in{'enabled'}) {
 	}
 
 # Return
+&run_post_actions_silently();
 &webmin_log("latest", "scripts");
 &redirect("edit_newscripts.cgi?mode=latest");
 

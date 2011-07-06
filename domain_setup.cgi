@@ -443,6 +443,7 @@ if (defined($in{'content'}) && !$in{'content_def'} && $dom{'web'}) {
 		}
 	}
 
+&run_post_actions();
 &webmin_log("create", "domain", $dom{'dom'}, \%dom);
 
 # Call any theme post command

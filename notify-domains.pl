@@ -142,6 +142,7 @@ foreach $t (@to) {
 	print "  $t\n";
 	}
 
+&run_post_actions_silently();
 &virtualmin_api_log(\@OLDARGV);
 
 sub usage

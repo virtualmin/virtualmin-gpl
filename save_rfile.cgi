@@ -26,6 +26,7 @@ if (!$in{'period_def'}) {
 &print_tempfile(FILE, $in{'text'});
 &close_tempfile_as_domain_user($d, FILE);
 &unlock_file($in{'file'});
+&run_post_actions_silently();
 &webmin_log("save", "rfile", $in{'file'});
 
 $what = $in{'alias'} ? 'alias' : 'user';

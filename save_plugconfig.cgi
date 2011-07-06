@@ -28,6 +28,7 @@ if (!$func) {
 	}
 &write_file("$config_directory/$m/config", \%pconfig);
 &unlock_file("$config_directory/$m/config");
+&run_post_actions_silently();
 &webmin_log("_config_", undef, undef, \%in, $m);
 &redirect("edit_newfeatures.cgi");
 

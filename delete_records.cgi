@@ -41,6 +41,7 @@ if ($in{'delete'}) {
 	$err = &post_records_change($d, $recs, $file);
 	&release_lock_dns($d);
 	&reload_bind_records($d);
+	&run_post_actions_silently();
 	&webmin_log("delete", "records", $d->{'dom'},
 		    { 'count' => scalar(@d) });
 	&error(&text('records_epost', $err)) if ($err);

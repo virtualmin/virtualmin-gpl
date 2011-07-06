@@ -89,5 +89,6 @@ foreach $f (&list_mail_plugins()) {
 	}
 
 &save_initial_user($user, $d);
+&run_post_actions_silently();
 &webmin_log("initial", "domain", $d->{'dom'});
 &redirect("list_users.cgi?dom=$in{'dom'}");

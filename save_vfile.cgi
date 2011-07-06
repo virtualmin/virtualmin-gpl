@@ -61,6 +61,7 @@ $in{'text'} =~ s/\r//g;
 	&error(&text('rfile_ewrite', $in{'file'}, $dom->{'user'}, $!));
 &print_tempfile(FILE, $in{'text'});
 &close_tempfile(FILE);
+&run_post_actions_silently();
 &webmin_log("save", "vfile", $in{'file'});
 
 &redirect("edit_$what.cgi?$what=$in{$what}&dom=$in{'dom'}&unix=1");

@@ -60,6 +60,7 @@ $tmpl->{'standard'} && &usage("Default settings templates cannot be deleted");
 # Delete it
 &delete_template($tmpl);
 print "Deleted template $tmpl->{'name'} with ID $tmpl->{'id'}\n";
+&run_post_actions_silently();
 &virtualmin_api_log(\@OLDARGV);
 
 sub usage

@@ -14,6 +14,7 @@ for($i=0; defined($in{"desc_$i"}); $i++) {
 		   });
 	}
 &save_custom_link_categories(\@rv);
+&run_post_actions_silently();
 &webmin_log("save", "linkcats");
 &redirect("edit_newlinks.cgi?refresh=1");
 

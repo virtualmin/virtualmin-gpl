@@ -131,6 +131,7 @@ if ($in{'confirm'}) {
 			&cleanup_tempnames();
 			}
 		}
+	&run_post_actions();
 	&webmin_log("upgrade", "scripts", scalar(@sinfos));
 	}
 else {

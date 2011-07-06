@@ -297,6 +297,7 @@ print "<p>\n";
 &release_lock_unix();
 &release_lock_mail();
 print &text('umass_complete', $count, $ecount),"<br>\n";
+&run_post_actions();
 &webmin_log("create", "users", $count);
 
 &ui_print_footer("list_users.cgi?dom=$in{'dom'}", $text{'users_return'},

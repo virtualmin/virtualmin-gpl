@@ -68,6 +68,7 @@ foreach $d (grep { $_->{'mail'} } @doms) {
 		}
 	}
 
+&run_post_actions_silently();
 &virtualmin_api_log(\@OLDARGV);
 
 sub usage

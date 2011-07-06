@@ -16,6 +16,7 @@ foreach $s (&list_scripts()) {
 
 # Save it
 &save_scripts_available(\@scripts);
+&run_post_actions_silently();
 &webmin_log("enable", "scripts");
 &redirect("edit_newscripts.cgi?mode=enable");
 

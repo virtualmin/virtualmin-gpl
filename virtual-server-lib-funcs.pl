@@ -7019,7 +7019,9 @@ if ($restarting) {
 local %done;
 foreach $a (@main::post_actions) {
 	# Don't run multiple times. For BIND, all restarts are considered equal
-	local $key = $a->[0] eq \&restart_bind ? $a->[0] : join(",", @$a);
+	local $key = $a->[0] eq \&restart_bind ? $a->[0] :
+	     $a->[0] eq \&update_secondary_mx_virtusers ? $a->[1]->{'dom'} :
+	     join(",", @$a);
 	next if ($done{$key}++);
 
 	# Call the restart function
@@ -7031,6 +7033,16 @@ foreach $a (@main::post_actions) {
 		}
 	}
 @main::post_actions = ( );
+}
+
+# run_post_actions_silently()
+# Just calls run_post_actions while supressing output
+sub run_post_actions_silently
+{
+&push_all_print();
+&set_all_null_print();
+&run_post_actions();
+&pop_all_print();
 }
 
 # find_bandwidth_job()

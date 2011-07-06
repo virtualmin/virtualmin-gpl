@@ -26,12 +26,16 @@ if ($in{'show'}) {
 
 	print &text('start_done', $name),"<p>\n";
 
+	&run_post_actions();
+
 	&ui_print_footer("", $text{'index_return'});
 	}
 elsif ($in{'redirect'}) {
+	&run_post_actions_silently();
 	&redirect($in{'redirect'});
 	}
 else {
+	&run_post_actions_silently();
 	&redirect($ENV{'HTTP_REFERER'});
 	}
 

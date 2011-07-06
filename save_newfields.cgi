@@ -17,6 +17,7 @@ for($i=0; defined($in{"name_$i"}); $i++) {
 		  });
 	}
 &save_custom_fields(\@rv);
+&run_post_actions_silently();
 &webmin_log("save", "fields");
 &redirect("");
 

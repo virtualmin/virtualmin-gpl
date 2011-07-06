@@ -18,6 +18,7 @@ foreach $name (@del) {
 	&delete_extra_admin($admin, $d);
 	}
 &release_lock_webmin();
+&run_post_actions_silently();
 &webmin_log("delete", "admins", scalar(@del));
 &redirect("list_admins.cgi?dom=$d->{'id'}");
 

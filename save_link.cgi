@@ -38,6 +38,7 @@ else {
 
 # Save custom links
 &save_custom_links(\@links);
+&run_post_actions_silently();
 &webmin_log($in{'new'} ? 'create' : $in{'delete'} ? 'delete' : 'modify',
 	    'link', undef, $link);
 &redirect("edit_newlinks.cgi?refresh=1");

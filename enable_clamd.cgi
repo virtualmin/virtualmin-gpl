@@ -16,6 +16,7 @@ if ($ok) {
 else {
 	print "<b>",$text{'sv_notenabled'},"</b><p>\n";
 	}
+&run_post_actions();
 
 &ui_print_footer("edit_newsv.cgi", $text{'sv_return'});
 

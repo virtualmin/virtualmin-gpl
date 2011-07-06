@@ -68,6 +68,7 @@ if ($in{'new'}) {
 		}
 	&save_domain($d);
 	&refresh_webmin_user($d);
+	&run_post_actions();
 	&webmin_log("create", "database", $in{'name'},
 		    { 'type' => $in{'type'}, 'dom' => $d->{'dom'} });
 	}
@@ -98,6 +99,7 @@ elsif ($in{'delete'}) {
 		}
 	&save_domain_print($d);
 	&refresh_webmin_user($d);
+	&run_post_actions();
 	&webmin_log("delete", "database", $in{'name'},
 		    { 'type' => $in{'type'}, 'dom' => $d->{'dom'} });
 	}
@@ -116,6 +118,7 @@ elsif ($in{'disc'}) {
 
 	&save_domain_print($d);
 	&refresh_webmin_user($d);
+	&run_post_actions();
 	&webmin_log("export", "database", $in{'name'},
 		    { 'type' => $in{'type'}, 'dom' => $d->{'dom'} });
 	}

@@ -164,6 +164,7 @@ else {
 	}
 &unlock_file($module_config_file);
 &release_lock_cron();
+&run_post_actions_silently();
 
 # Log it
 $what = $sched->{'all'} ? 'all' :

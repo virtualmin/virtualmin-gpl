@@ -91,6 +91,7 @@ else {
 			    $d->{'dom'}, $newdomain, $newuser));
 	}
 $ok = &clone_virtual_server($d, $newdomain, $newuser, $newpass);
+&run_post_actions_silently();
 if ($ok) {
 	&$second_print($text{'setup_done'});
 	&virtualmin_api_log(\@OLDARGV, $d);

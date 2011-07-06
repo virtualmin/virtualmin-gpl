@@ -60,14 +60,12 @@
  - Replicate virtusers to secondary MX
 	- https://www.virtualmin.com/node/12894
 	- Sendmail
-	- Postfix
-		- relay_recipient_maps
-		- relay_domains
 	- Per-domain copying
 		- Call sync_secondary_mx_virtusers at end of all scripts that
 		  modify aliases or users?
 	- script to re-sync all domains, and show errors
 		- re-sync when adding a secondary MX
+	- sync after domain deletion
 	- wildcard support
 	- CHANGELOG
 	- Add to documentation

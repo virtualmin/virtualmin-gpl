@@ -16,6 +16,7 @@ $in{'text'} =~ s/\n*$/\n/;
 print FILE $in{'text'};
 &close_tempfile_as_domain_user($d, FILE);
 &unlock_file($in{'file'});
+&run_post_actions_silently();
 &webmin_log("save", "afile", $in{'file'});
 
 $what = $in{'alias'} ? 'alias' : 'user';

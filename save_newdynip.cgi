@@ -60,5 +60,7 @@ else {
 	print $text{'newdynip_off'},"<p>\n";
 	}
 
+&run_post_actions();
+
 &ui_print_footer("", $text{'index_return'});
 

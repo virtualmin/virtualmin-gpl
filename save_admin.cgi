@@ -102,6 +102,7 @@ else {
 	}
 &release_lock_webmin();
 
+&run_post_actions_silently();
 &webmin_log($in{'new'} ? "create" : $in{'delete'} ? "delete" : "modify",
 	    "admin", $oldadmin ? $oldadmin->{'name'} : $admin->{'name'});
 &redirect("list_admins.cgi?dom=$d->{'id'}");

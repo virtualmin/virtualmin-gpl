@@ -22,6 +22,9 @@ if ($err) {
 	}
 else {
 	print $text{'setup_done'},"<p>\n";
+	}
+&run_post_actions();
+if (!$err) {
 	&webmin_log("start", "script", $sinfo->{'name'},
 		    { 'ver' => $sinfo->{'version'},
 		      'desc' => $sinfo->{'desc'},

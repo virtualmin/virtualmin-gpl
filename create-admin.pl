@@ -144,6 +144,7 @@ if (@allowed) {
 # Create the admin
 &create_extra_admin($admin, $d);
 &release_lock_webmin();
+&run_post_actions_silently();
 &virtualmin_api_log(\@OLDARGV, $d);
 print "Extra administrator $name created successfully\n";
 

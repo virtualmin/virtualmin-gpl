@@ -77,6 +77,7 @@ $in{'warnbw_template'} =~ s/\r//g;
 &setup_bandwidth_job($in{'bw_active'}, $in{'bw_step'});
 &unlock_all_files();
 
+&run_post_actions_silently();
 &webmin_log("newbw");
 &redirect("");
 

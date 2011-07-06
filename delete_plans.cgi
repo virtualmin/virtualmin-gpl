@@ -22,6 +22,7 @@ foreach $d (@d) {
 	}
 
 # Log and return
+&run_post_actions_silently();
 &webmin_log("delete", "plans", scalar(@d));
 &redirect("edit_newplan.cgi");
 

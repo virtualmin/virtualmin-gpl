@@ -7,6 +7,7 @@ require './virtual-server-lib.pl';
 
 &save_script_master_permissions($in{'allowmaster'}, $in{'allowvers'},
 				$in{'denydefault'});
+&run_post_actions_silently();
 &webmin_log("allow", "scripts");
 &redirect("edit_newscripts.cgi?mode=enable");
 

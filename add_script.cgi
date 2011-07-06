@@ -85,6 +85,7 @@ if (@files == 1) {
 else {
 	print &text('addscripts_done', scalar(@files)),"<p>\n";
 	}
+&run_post_actions();
 &ui_print_footer("edit_newscripts.cgi", $text{'newscripts_return'});
 
 &webmin_log("add", "scripts", scalar(@files),

@@ -41,6 +41,7 @@ if ($err && !$olderr) {
 &post_records_change($d, $recs, $file);
 &release_lock_dns($d);
 &reload_bind_records($d);
+&run_post_actions_silently();
 &webmin_log("manual", "records", $d->{'dom'},
 	    { 'count' => scalar(@$recs) });
 &redirect("list_records.cgi?dom=$in{'dom'}");

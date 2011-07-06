@@ -40,6 +40,7 @@ $config{'scriptwarn_wsched'} = $in{'wsched'};
 &setup_scriptwarn_job($in{'enabled'}, $in{'wsched'});
 
 # Return
+&run_post_actions_silently();
 &webmin_log("warn", "scripts");
 &redirect("edit_newscripts.cgi?mode=warn");
 

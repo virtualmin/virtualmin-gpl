@@ -17,6 +17,7 @@ if ($ok) {
 	}
 &$outdent_print();
 
+&run_post_actions();
 &ui_print_footer("edit_newsv.cgi", $text{'sv_return'});
 
 

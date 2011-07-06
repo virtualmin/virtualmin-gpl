@@ -65,6 +65,7 @@ else {
 	print "<b>$text{'move_failed'}</b><p>\n";
 	}
 
+&run_post_actions();
 &webmin_log("move", "domain", $d->{'dom'}, $d);
 
 # Call any theme post command

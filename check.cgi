@@ -51,6 +51,8 @@ if ($webminchanged) {
 # Clear cache of links
 &clear_links_cache();
 
+&run_post_actions();
+
 &webmin_log("check");
 
 # Call any theme post command

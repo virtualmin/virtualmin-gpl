@@ -69,6 +69,7 @@ if ($deactivate) {
 &save_shared_ips(@oldips);
 &unlock_file($module_config_file);
 print "Removed shared IP address $ip\n";
+&run_post_actions_silently();
 &virtualmin_api_log(\@OLDARGV);
 
 sub usage

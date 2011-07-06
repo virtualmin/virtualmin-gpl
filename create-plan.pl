@@ -136,6 +136,7 @@ $clash && &usage("A plan name $plan->{'name'} already exists");
 # Create it
 &save_plan($plan);
 print "Created plan $plan->{'name'} with ID $plan->{'id'}\n";
+&run_post_actions_silently();
 &virtualmin_api_log(\@OLDARGV);
 
 sub usage

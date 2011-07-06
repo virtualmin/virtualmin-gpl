@@ -115,6 +115,7 @@ else {
 	&$first_print(&text('move_doing2', $d->{'dom'}));
 	$ok = &reparent_virtual_server($d, $newuser, $newpass);
 	}
+&run_post_actions_silently();
 if ($ok) {
 	&$second_print($text{'setup_done'});
 	&virtualmin_api_log(\@OLDARGV, $d);

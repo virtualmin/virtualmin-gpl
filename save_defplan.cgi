@@ -17,5 +17,6 @@ else {
 	&set_default_plan($plan);
 	&webmin_log("default", "plan", $plan->{'id'}, $plan);
 	}
+&run_post_actions_silently();
 &redirect("edit_newplan.cgi");
 

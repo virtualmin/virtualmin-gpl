@@ -131,6 +131,7 @@ if ($webmin::config{'upsource'} =~ /\Q$upgrade_virtualmin_host\E/) {
 &write_env_file($virtualmin_license_file, \%lfile);
 &unlock_file($virtualmin_license_file);
 &$second_print(".. done");
+&run_post_actions_silently();
 &virtualmin_api_log(\@OLDARGV);
 
 sub usage

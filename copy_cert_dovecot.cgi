@@ -83,6 +83,7 @@ push(@protos, "pop3s") if (!$protos{'pop3s'} && $protos{'pop3'});
 # Apply Dovecot config
 &dovecot::apply_configuration();
 
+&run_post_actions();
 &webmin_log("copycert", "dovecot");
 
 &ui_print_footer(&domain_footer_link($d),

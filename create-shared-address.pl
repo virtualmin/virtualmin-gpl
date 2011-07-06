@@ -100,6 +100,7 @@ else {
 &save_shared_ips(@oldips, $ip);
 &unlock_file($module_config_file);
 print "Created shared IP address $ip\n";
+&run_post_actions_silently();
 &virtualmin_api_log(\@OLDARGV);
 
 sub usage

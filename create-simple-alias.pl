@@ -133,6 +133,7 @@ $virt = { 'from' => $email,
 &sync_alias_virtuals($d);
 &release_lock_mail($d);
 &write_simple_autoreply($d, $simple);
+&run_post_actions_silently();
 &virtualmin_api_log(\@OLDARGV, $d);
 print "Alias for $email created successfully\n";
 

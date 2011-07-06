@@ -18,6 +18,7 @@ $sinfo && $script || &error($text{'stopscript_egone'});
 print &text('stopscript_doing', "<i>$script->{'desc'}</i>"),"<br>";
 &{$script->{'stop_server_func'}}($d, $sinfo->{'opts'});
 print &text('stopscript_done'),"<p>\n";
+&run_post_actions();
 &webmin_log("stop", "script", $sinfo->{'name'},
 	    { 'ver' => $sinfo->{'version'},
 	      'desc' => $sinfo->{'desc'},

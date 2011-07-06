@@ -81,6 +81,7 @@ elsif (!$smtps && $smtp) {
 # Apply Postfix config
 &postfix::reload_postfix();
 
+&run_post_actions();
 &webmin_log("copycert", "postfix");
 
 &ui_print_footer(&domain_footer_link($d),

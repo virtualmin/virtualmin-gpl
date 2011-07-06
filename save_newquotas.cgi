@@ -59,6 +59,7 @@ $config{'last_check'} = time()+1;	# no need for check.cgi to be run
 &lock_file($user_quota_msg_file);
 &save_quotas_message($in{'msg'});
 &unlock_file($user_quota_msg_file);
+&run_post_actions_silently();
 &webmin_log("quotas");
 &redirect("");
 

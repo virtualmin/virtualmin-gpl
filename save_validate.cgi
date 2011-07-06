@@ -62,6 +62,7 @@ $config{'last_check'} = time()+1;	# no need for check.cgi to be run
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
+&run_post_actions_silently();
 &webmin_log("validate");
 &redirect("");
 

@@ -10,6 +10,7 @@ $err = &check_postgrey();
 &obtain_lock_postgrey();
 &enable_postgrey();
 &release_lock_postgrey();
+&run_post_actions();
 &webmin_log("enable", "postgrey");
 
 &ui_print_footer("postgrey.cgi", $text{'postgrey_return'});

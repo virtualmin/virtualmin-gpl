@@ -41,6 +41,7 @@ else {
 	&save_available_shells(\@shells);
 	}
 
+&run_post_actions_silently();
 &webmin_log("shells", undef, $in{'defs'});
 &redirect("");
 

@@ -13,6 +13,7 @@ $file = "$module_config_directory/update-template"
 		      "newupdate_to_mailbox", "newupdate_to_owner",
 		      "newupdate_to_reseller", "update_template");
 
+&run_post_actions_silently();
 &webmin_log("newupdate");
 &redirect("");
 

@@ -24,5 +24,6 @@ foreach $tn (split(/\0/, $in{'import'})) {
 	}
 &save_domain($d);
 &refresh_webmin_user($d);
+&run_post_actions_silently();
 &redirect("list_databases.cgi?dom=$in{'dom'}");
 

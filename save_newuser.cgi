@@ -14,6 +14,7 @@ $file = "$module_config_directory/user-template"
 	      	      "newuser_to_mailbox", "newuser_to_owner",
 		      "newuser_to_reseller", "user_template");
 
+&run_post_actions_silently();
 &webmin_log("newuser");
 &redirect("");
 

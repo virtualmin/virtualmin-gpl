@@ -68,6 +68,7 @@ if (defined(&get_simple_alias)) {
 &sync_alias_virtuals($d);
 &release_lock_mail($d);
 &virtualmin_api_log(\@OLDARGV, $d);
+&run_post_actions_silently();
 print "Alias for $email deleted successfully\n";
 
 sub usage

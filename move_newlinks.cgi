@@ -10,6 +10,7 @@ $idx = $in{'idx'};
 $idx2 = $idx + ($in{'up'} ? -1 : 1);
 ($links[$idx], $links[$idx2]) = ($links[$idx2], $links[$idx]);
 &save_custom_links(\@links);
+&run_post_actions_silently();
 &webmin_log("move", "links");
 &redirect("edit_newlinks.cgi");
 

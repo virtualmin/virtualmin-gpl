@@ -54,6 +54,7 @@ $d->{'subdom'} || &usage("Only sub-domains can be converted to sub-servers");
 # Call the move function
 &$first_print(&text('unsub_doing', "<tt>$d->{'dom'}</tt>"));
 $ok = &unsub_virtual_server($d);
+&run_post_actions_silently();
 if ($ok) {
 	&$second_print($text{'setup_done'});
 	&virtualmin_api_log(\@OLDARGV, $d);

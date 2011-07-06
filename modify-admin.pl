@@ -205,6 +205,7 @@ else {
 # Save him
 &modify_extra_admin($admin, $old, $d);
 &release_lock_webmin();
+&run_post_actions_silently();
 &virtualmin_api_log(\@OLDARGV, $d);
 print "Extra administrator $name modified successfully\n";
 

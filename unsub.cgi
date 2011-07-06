@@ -19,6 +19,8 @@ if ($in{'confirm'}) {
 		&$second_print($text{'unsub_failed'});
 		}
 
+	&run_post_actions();
+
 	&webmin_log("unsub", "domain", $d->{'dom'}, $d);
 
 	# Call any theme post command

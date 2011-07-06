@@ -37,6 +37,7 @@ print $text{'newnotify_done'},"<p>\n";
 foreach $t (@to) {
 	print "<tt>$t</tt><br>\n";
 	}
+&run_post_actions();
 &webmin_log("mailusers", undef, undef, { 'to' => join("\0", @to) });
 
 &ui_print_footer("list_users.cgi?dom=$in{'dom'}", $text{'users_return'},

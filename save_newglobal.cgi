@@ -19,6 +19,7 @@ for(my $i=0; defined($in{"name_$i"}); $i++) {
 &save_global_template_variables(\@vars);
 &unlock_file($global_template_variables_file);
 
+&run_post_actions_silently();
 &webmin_log("global");
 &redirect("");
 

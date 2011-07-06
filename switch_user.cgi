@@ -30,6 +30,7 @@ $olduser || &error($acl::text{'switch_eold'});
 $acl::sessiondb{$skey} = "$user $oldtime $ENV{'REMOTE_ADDR'}";
 dbmclose(%acl::sessiondb);
 &reload_miniserv();
+&run_post_actions_silently();
 if ($in{'admin'}) {
 	&webmin_log("switch", "admin", $user);
 	}

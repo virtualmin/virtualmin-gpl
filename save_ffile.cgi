@@ -24,6 +24,7 @@ push(@filter, "2 ".$in{'other'}."\n") if ($in{'other'});
 &print_tempfile(FILE, @filter);
 &close_tempfile_as_domain_user($d, FILE);
 &unlock_file($in{'file'});
+&run_post_actions_silently();
 &webmin_log("save", "ffile", $in{'file'});
 
 $what = $in{'alias'} ? 'alias' : 'user';

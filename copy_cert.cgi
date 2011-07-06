@@ -76,6 +76,7 @@ else {
 		}
 	}
 
+&run_post_actions();
 &webmin_log("copycert", $in{'usermin'} ? "usermin" : "webmin");
 
 &ui_print_footer(&domain_footer_link($d),

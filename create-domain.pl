@@ -747,6 +747,7 @@ elsif ($content) {
 	}
 
 &virtualmin_api_log(\@OLDARGV, \%dom);
+&run_post_actions_silently();
 print "All done!\n";
 
 sub usage

@@ -103,6 +103,7 @@ else {
 		&theme_post_save_domain(\%dom, 'delete');
 		}
 
+	&run_post_actions();
 	&webmin_log("delete", "domain", $d->{'dom'}, $d);
 	&ui_print_footer("", $text{'index_return'});
 	}

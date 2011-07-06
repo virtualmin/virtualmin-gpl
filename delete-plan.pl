@@ -60,6 +60,7 @@ else {
 # Delete it
 &delete_plan($plan);
 print "Deleted plan $plan->{'name'} with ID $plan->{'id'}\n";
+&run_post_actions_silently();
 &virtualmin_api_log(\@OLDARGV);
 
 sub usage

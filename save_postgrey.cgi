@@ -36,6 +36,7 @@ else {
 
 &release_lock_postgrey();
 &apply_postgrey_data();
+&run_post_actions_silently();
 &webmin_log($in{'delete'} ? 'delete' : $in{'new'} ? 'create' : 'modify',
 	    'postgrey', $d->{'value'}, { 'type' => $in{'type'} });
 &redirect("postgrey.cgi?type=$in{'type'}");

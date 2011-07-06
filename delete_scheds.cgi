@@ -16,6 +16,7 @@ foreach $sid (@d) {
 	&delete_scheduled_backup($sched);
 	}
 
+&run_post_actions_silently();
 &webmin_log("delete", "scheds", scalar(@d));
 &redirect("list_sched.cgi");
 

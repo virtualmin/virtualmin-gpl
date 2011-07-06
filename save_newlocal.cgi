@@ -12,6 +12,7 @@ $file = "$module_config_directory/local-template"
 &parse_email_template($file, "newlocal_subject", "newlocal_cc", "newlocal_bcc",
 		      undef, undef, undef, "local_template");
 
+&run_post_actions_silently();
 &webmin_log("newlocal");
 &redirect("");
 

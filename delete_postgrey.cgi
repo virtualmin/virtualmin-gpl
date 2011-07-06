@@ -18,6 +18,7 @@ foreach $i (sort { $b <=> $a } @d) {
 	}
 &release_lock_postgrey();
 &apply_postgrey_data();
+&run_post_actions_silently();
 
 &webmin_log('deletes', 'postgrey', scalar(@d), { 'type' => $in{'type'} });
 

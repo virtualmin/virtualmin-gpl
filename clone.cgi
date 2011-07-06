@@ -48,6 +48,7 @@ else {
 	&$second_print($text{'clone_failed'});
 	}
 
+&run_post_actions();
 &webmin_log("clone", "domain", $d->{'dom'}, $d);
 
 # Call any theme post command

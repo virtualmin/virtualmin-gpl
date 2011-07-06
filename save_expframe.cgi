@@ -16,5 +16,6 @@ $in{'text'} =~ s/\n*$/\n/;
 &close_tempfile_as_domain_user($d, FILE);
 &unlock_file($ff);
 
+&run_post_actions_silently();
 &webmin_log("frame", "domain", $d->{'dom'}, $d);
 &domain_redirect($d);

@@ -45,6 +45,7 @@ $dom || usage("Virtual server $domain does not exist");
 
 if (&will_send_domain_email($dom)) {
 	&send_domain_email($dom);
+	&run_post_actions_silently();
 	&virtualmin_api_log(\@OLDARGV, $dom);
 	}
 else {
