@@ -117,7 +117,7 @@ foreach $s (@scripts) {
 	if (defined(&$lfunc)) {
 		foreach $v (@{$script->{'versions'}}) {
 			($url, $re, $prefix, $suffix) = &$lfunc($v);
-			next if (!$url);
+			next if (!$url || !$re);
 			print "Checking $script->{'name'} website for $v ..\n";
 			($host, $port, $page, $ssl) = &parse_http_url($url);
 			$data = $err = undef;
