@@ -1817,15 +1817,16 @@ elsif ($config{'mail_system'} == 6) {
 &execute_after_virtuser($_[0], 'CREATE_ALIAS');
 }
 
-# sync_secondary_virtusers(&domain)
+# sync_secondary_virtusers(&domain, [&only-servers])
 # Find all virtusers in the given domain, and make sure all secondary MX
 # servers running Postfix or Sendmail have only those users on their list to
 # allow relaying for.
 # This function is called on the master Virtualmin.
+# Returns a list of tuples containing the server object and error message.
 sub sync_secondary_virtusers
 {
-local ($d) = @_;
-local @servers = &list_mx_servers();
+local ($d, $onlyservers) = @_;
+local @servers = $onlyservers ? @$onlyservers : &list_mx_servers();
 return if (!@servers);
 
 # Build list of mailboxes in the domain
@@ -1838,15 +1839,20 @@ foreach my $v (&list_virtusers(1)) {
 	}
 
 # Sync to each secondary
+local @rv;
 &remote_error_setup(\&secondary_error_handler);
 foreach my $s (@servers) {
 	$secondary_error = undef;
 	&remote_foreign_require($s, "virtual-server", "virtual-server-lib.pl");
-	next if ($secondary_error);
-	&remote_foreign_call($s, "virtual-server",
-		  "update_secondary_mx_virtusers", $dom->{'dom'}, \@mailboxes);
+	if ($secondary_error) {
+		push(@rv, [ $s, $secondary_error ]);
+		}
+	local $err = &remote_foreign_call($s, "virtual-server",
+		  "update_secondary_mx_virtusers", $d->{'dom'}, \@mailboxes);
+	push(@rv, [ $s, $err ]);
 	}
 &remote_error_setup(undef);
+return @rv;
 }
 
 # update_secondary_mx_virtusers(domain, &mailbox-names)
@@ -1855,7 +1861,49 @@ foreach my $s (@servers) {
 sub update_secondary_mx_virtusers
 {
 local ($dom, $mailboxes) = @_;
-# XXX mailserver-specific
+local %mailboxes_map = map { $_, 1 } @$mailboxes;
+&obtain_lock_mail($_[0]);
+&require_mail();
+if ($config{'mail_system'} == 1) {
+	# XXX sendmail
+	}
+elsif ($config{'mail_system'} == 0) {
+	# Update Postfix relay_recipient_maps
+	local $rrm = &postfix::get_current_value("relay_recipient_maps");
+	if (!$rrm) {
+		return &text('mxv_rrm', 'relay_recipient_maps');
+		}
+	local $maps = &postfix::get_maps('relay_recipient_maps');
+	local @mapfiles = &postfix::get_maps_files();
+	foreach my $f (@mapfiles) {
+		&lock_file($f);
+		}
+	foreach my $m (@$maps) {
+		my ($mbox, $mdom) = @_;
+		next if ($mdom ne $dom);
+		if ($mailboxes_map{$mbox}) {
+			# Already got, so leave alone
+			delete($mailboxes_map{$mbox});
+			}
+		else {
+			# Need to remove
+			&postfix::delete_mapping('relay_recipient_maps', $m);
+			}
+		}
+	foreach my $mbox (keys %mailboxes_map) {
+		&postfix::create_mapping('relay_recipient_maps',
+					 { 'name' => $mbox.'@'.$dom,
+					   'value' => 'OK' });
+		}
+	&postfix::regenerate_any_table('relay_recipient_maps');
+	foreach my $f (@mapfiles) {
+		&unlock_file($f);
+		}
+	return undef;
+	}
+else {
+	return $text{'mxv_unsupported'};
+	}
 }
 
 # needs_alias(list..)

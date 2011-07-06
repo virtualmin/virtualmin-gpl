@@ -75,6 +75,7 @@ foreach my $d (&list_domains()) {
 	&$indent_print();
 
 	local @ids = split(/\s+/, $d->{'mx_servers'});
+	local @added;
 	if ($in{'addexisting'}) {
 		# Add to new secondaries
 		foreach $server (@mxs) {
@@ -90,6 +91,7 @@ foreach my $d (&list_domains()) {
 					&$second_print(&text('newmxs_failed',
 							     $err));
 					}
+				push(@added, $server);
 				}
 			}
 		}
@@ -115,6 +117,22 @@ foreach my $d (&list_domains()) {
 	if ($d->{'dns'}) {
 		# Add or remove DNS MX records
 		&modify_dns($d, $oldd);
+		}
+
+	# Re-sync virtusers for domain to secondaries, if any were added
+	if (@added) {
+		&$first_print($text{'newmxs_syncing'});
+		@rv = &sync_secondary_virtusers($d, \@added);
+		@errs = grep { $_->[1] } @rv;
+		if (@errs) {
+			&$second_print(&text('newmxs_esynced',
+				join(", ", map { $_->[0]->{'host'}." - ".
+						 ($_->[1] || "OK") } @rv)));
+			}
+		else {
+			&$second_print(&text('newmxs_synced',
+				join(", ", map { $_->[0]->{'host'} } @rv)));
+			}
 		}
 
 	&save_domain($d);
