@@ -231,6 +231,8 @@ if (&foreign_installed("sshd") && !$config{'nodeniedssh'}) {
 
 # Create the cron job for sending in script ratings
 local $job = &find_virtualmin_cron_job($ratings_cron_cmd);
+&cron::create_wrapper($ratings_cron_cmd, $module_name,
+		      "sendratings.pl");
 if (!$job) {
 	# Create, and run for the first time
 	$job = { 'mins' => int(rand()*60),
@@ -242,8 +244,6 @@ if (!$job) {
 		 'active' => 1,
 		 'command' => $ratings_cron_cmd };
 	&cron::create_cron_job($job);
-	&cron::create_wrapper($ratings_cron_cmd, $module_name,
-			      "sendratings.pl");
 	&execute_command($ratings_cron_cmd);
 	}
 
