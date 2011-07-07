@@ -1716,6 +1716,7 @@ if ($config{'mail_system'} == 1) {
 elsif ($config{'mail_system'} == 0) {
 	# Create in postfix file
 	local @psto = map { $_ =~ /^BOUNCE\s+(.*)$/ ? "BOUNCE" : $_ } @to;
+	local $virt;
 	if (&needs_alias(@psto)) {
 		# Need to create an alias, named address-domain
 		$_[0]->{'from'} =~ /^(\S*)\@(\S+)$/;
@@ -1873,7 +1874,80 @@ local %mailboxes_map = map { $_, 1 } @$mailboxes;
 &obtain_lock_mail($_[0]);
 &require_mail();
 if ($config{'mail_system'} == 1) {
-	# XXX sendmail
+	# Update Sendmail access list
+	&foreign_require("sendmail", "access-lib.pl");
+	local $conf = &sendmail::get_sendmailcf();
+	local $afile = &sendmail::access_file($conf);
+	local ($adbm, $adbmtype) = &sendmail::access_dbm($conf);
+	if (!$adbm) {
+		return $text{'mxv_eaccess'};
+		}
+	if (!-r $afile) {
+		return &text('mxv_eaccessfile', "<tt>$afile</tt>");
+		}
+	&lock_file($afile);
+	local @accs = &sendmail::list_access($afile);
+	local $gotdoma;
+	foreach my $a (@accs) {
+		next if ($a->{'tag'} ne 'To');
+		if ($a->{'from'} eq $dom) {
+			$gotdoma = $a;
+			next;
+			}
+		my ($mbox, $mdom) = split(/\@/, $a->{'from'});
+		next if ($mdom ne $dom);
+		if ($mailboxes_map{$mbox}) {
+			# Already got, so leave alone
+			delete($mailboxes_map{$mbox});
+			}
+		else {
+			# Need to remove
+			&sendmail::delete_access($a, $afile, $adbm, $adbmtype);
+			}
+		}
+	foreach my $mbox (keys %mailboxes_map) {
+		next if ($mbox eq "");	# Wildcard is handled below
+		&sendmail::create_access({ 'tag' => 'To',
+					   'from' => $mbox.'@'.$dom,
+					   'action' => 'RELAY' },
+					 $afile, $adbm, $adbmtype);
+		}
+
+	# Check if relaying for this domain - will be false after deletion
+	local $cwfile;
+	local @dlist = &sendmail::get_file_or_config($conf, "R", undef,
+                                                     \$cwfile);
+	local $relaying = &indexof(lc($dom), (map { lc($_) } @dlist)) >= 0;
+
+	# Add, update or remove domain-level rule
+	if (!$relaying && scalar(keys %mailboxes_map) == 0) {
+		# No longer relaying, so delete domain-level rule
+		if ($gotdoma) {
+			&sendmail::delete_access($gotdoma, $afile, $adbm,
+						 $adbmtype);
+			}
+		}
+	elsif (!$gotdoma && !$mailboxes_map{""}) {
+		# Add special rule to reject the whole domain
+		&sendmail::create_access({ 'tag' => 'To',
+					   'from' => $dom,
+					   'action' => 'REJECT' },
+					 $afile, $adbm, $adbmtype);
+		}
+	elsif (!$gotdoma && $mailboxes_map{""}) {
+		# Add special rule to access the whole domain
+		&sendmail::create_access({ 'tag' => 'To',
+					   'from' => $dom,
+					   'action' => 'RELAY' },
+					 $afile, $adbm, $adbmtype);
+		}
+	elsif ($gotdoma) {
+		# Update domain rule
+		$gotdoma->{'action'} = $mailboxes_map{""} ? 'RELAY' : 'REJECT';
+		&sendmail::modify_access($gotdoma, $gotdoma,
+					 $afile, $adbm, $adbmtype);
+		}
+	&unlock_file($afile);
 	}
 elsif ($config{'mail_system'} == 0) {
 	# Update Postfix relay_recipient_maps
@@ -1881,11 +1955,11 @@ elsif ($config{'mail_system'} == 0) {
 	if (!$rrm) {
 		return &text('mxv_rrm', 'relay_recipient_maps');
 		}
-	local $maps = &postfix::get_maps('relay_recipient_maps');
 	local @mapfiles = &postfix::get_maps_files();
 	foreach my $f (@mapfiles) {
 		&lock_file($f);
 		}
+	local $maps = &postfix::get_maps('relay_recipient_maps');
 	local @maps_copy = @$maps;	# delete_virtuser modifies map cache
 	foreach my $m (@maps_copy) {
 		my ($mbox, $mdom) = split(/\@/, $m->{'name'});
@@ -1922,7 +1996,7 @@ sub register_sync_secondary_virtuser
 {
 local ($virt) = @_;
 if ($virt->{'from'} =~ /\@(\S+)$/) {
-	local $d = &get_domain_by("dom", $1);
+	local $d = &get_domain_by("dom", "$1");
 	if ($d) {
 		&register_post_action(\&sync_secondary_virtusers, $d);
 		}

@@ -59,6 +59,5 @@
 
  - Replicate virtusers to secondary MX
 	- https://www.virtualmin.com/node/12894
-	- Sendmail
 	- CHANGELOG
 	- Add to documentation
