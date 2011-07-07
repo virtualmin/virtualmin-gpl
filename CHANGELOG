@@ -1302,3 +1302,4 @@ When an alias domain with a website is disabled, it is now removed from the pare
 Added the list-backup-logs API command to report on previous backups run from the web UI, API or on schedule.
 Added the --plan-features flag to the modify-domain command, to enable features based those selected for the plan.
 The virtualmin configuration check now ensures that the system has at least 256 MB of real (non-burstable) memory, and displays a warning if total memory is too low.
+Updated the modify-php-ini API command to set variables in the Apache configuration as well.

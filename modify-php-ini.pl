@@ -5,9 +5,10 @@
 Changes PHP variables for some or all domains.
 
 This command can be used to change the value of a PHP configuration variable
-(set in the php.ini file) for one or many virtual servers at once. The
-servers to update can be selected with the C<--domain> or C<--user> flags,
-or you can choose to modify them all with the C<--all-domains> option.
+(set in the php.ini file and Apache configuration) for one or many virtual
+servers at once. The servers to update can be selected with the C<--domain> or
+C<--user> flags, or you can choose to modify them all with the C<--all-domains>
+option.
 
 If your system supports multiple PHP versions, you can limit the changes
 to the config for a specific version with the C<--php-version> flag folowed
@@ -90,37 +91,78 @@ foreach my $d (@doms) {
 		&$second_print(".. no website enabled");
 		next;
 		}
+
+	# Update php.ini files
 	$mode = &get_domain_php_mode($d);
-	if ($mode eq "mod_php") {
-		&$second_print(".. virtual servers using mod_php mode ".
-			       "cannot be updated");
-		next;
-		}
+	if ($mode ne "mod_php") {
+		# Get the ini files
+		@inis = &list_domain_php_inis($d);
+		if ($php_ver) {
+			@inis = grep { $_->[0] == $php_ver } @inis;
+			if (!@inis) {
+				&$second_print(".. no PHP configuration for ".
+					       "version $php_ver found");
+				next;
+				}
+			}
 
-	# Get the ini files
-	@inis = &list_domain_php_inis($d);
-	if ($php_ver) {
-		@inis = grep { $_->[0] == $php_ver } @inis;
-		if (!@inis) {
-			&$second_print(".. no PHP configuration for version ".
-				       "$php_ver found");
-			next;
+		# Update settings in each one
+		foreach $ini (@inis) {
+			&lock_file($ini->[1]);
+			$conf = &phpini::get_config($ini->[1]);
+			for(my $i=0; $i<@ini_names; $i++) {
+				&phpini::save_directive($conf, $ini_names[$i],
+							       $ini_values[$i]);
+				}
+			&flush_file_lines($ini->[1]);
+			&unlock_file($ini->[1]);
 			}
 		}
 
-	# Update settings in each one
-	foreach $ini (@inis) {
-		&lock_file($ini->[1]);
-		$conf = &phpini::get_config($ini->[1]);
-		for(my $i=0; $i<@ini_names; $i++) {
-			&phpini::save_directive($conf, $ini_names[$i],
-						       $ini_values[$i]);
+	# Update Apache PHP directives
+	$mod_php = 0;
+	if ($apache::httpd_modules{'mod_php4'} ||
+	    $apache::httpd_modules{'mod_php5'}) {
+		&obtain_lock_web($d);
+		local @ports;
+		push(@ports, $d->{'web_port'}) if ($d->{'web'});
+		push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+		foreach my $port (@ports) {
+			local ($virt, $vconf, $conf) = &get_apache_virtual(
+							$d->{'dom'}, $port);
+			next if (!$virt);
+
+			# Find currently set PHP variables
+			local @phpv = &apache::find_directive(
+					"php_value", $vconf);
+			for(my $i=0; $i<@ini_names; $i++) {
+				my $found = 0;
+				for(my $j=0; $j<@phpv; $i++) {
+					if ($phpv[$j] =~ /^(\S+)\s/ &&
+					    $1 eq $ini_names[$i]) {
+						$phpv[$j] = $ini_names[$i]." ".
+							    $ini_values[$i];
+						$found = 1;
+						last;
+						}
+					}
+				if (!$found) {
+					push(@phpv, $ini_names[$i]." ".
+						    $ini_values[$i]);
+					}
+				}
+			&apache::save_directive("php_value",
+						\@phpv, $vconf, $conf);
+			&flush_file_lines($virt->{'file'});
+			&release_lock_web($d);
+			&register_post_action(\&restart_apache);
+			$mod_php = 1;
 			}
-		&flush_file_lines($ini->[1]);
-		&unlock_file($ini->[1]);
 		}
+
 	&$second_print(".. updated ",scalar(@ini_names)," variables in ",
-		       scalar(@inis)," files");
+		       scalar(@inis)," files",
+		       ($mod_php ? " and Apache configuration" : ""));
 	}
 
 &run_post_actions();
