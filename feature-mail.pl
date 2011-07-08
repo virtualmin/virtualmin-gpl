@@ -1851,14 +1851,27 @@ foreach my $v (&list_virtusers(1)) {
 local @rv;
 &remote_error_setup(\&secondary_error_handler);
 foreach my $s (@servers) {
-	$secondary_error = undef;
-	&remote_foreign_require($s, "virtual-server", "virtual-server-lib.pl");
-	if ($secondary_error) {
-		push(@rv, [ $s, $secondary_error ]);
+	alarm(20);
+	$SIG{'ALRM'} = sub { die "timeout" };
+	eval {
+		$secondary_error = undef;
+		&remote_foreign_require($s, "virtual-server",
+					    "virtual-server-lib.pl");
+		if ($secondary_error) {
+			push(@rv, [ $s, $secondary_error ]);
+			}
+		else {
+			local $err = &remote_foreign_call($s, "virtual-server",
+				  "update_secondary_mx_virtusers", $d->{'dom'},
+				  \@mailboxes);
+			push(@rv, [ $s, $err ]);
+			}
+		};
+	alarm(0);
+	if ($@) {
+		push(@rv, [ $s, $@ =~ /timeout/ ?
+				  "Timeout connecting to Webmin" : $@ ]);
 		}
-	local $err = &remote_foreign_call($s, "virtual-server",
-		  "update_secondary_mx_virtusers", $d->{'dom'}, \@mailboxes);
-	push(@rv, [ $s, $err ]);
 	}
 &remote_error_setup(undef);
 return @rv;
