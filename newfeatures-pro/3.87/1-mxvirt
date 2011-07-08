@@ -1,0 +1,4 @@
+desc=Allowed addresses on secondary mail servers
+html=Secondary mail servers running Sendmail and Postfix will now receive the list of allowed addresses for all domains from the master Virtualmin system, to prevent backscatter spam. Existing domains' addresses can be synced to all secondary mailservers with the new <tt>syncmx-domain</tt> API command.
+master=1
+link=edit_newmxs.cgi
