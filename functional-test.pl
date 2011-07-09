@@ -2633,7 +2633,7 @@ $webmin_tests = [
 		       "${webmin_proto}://localhost:${webmin_port}".
 		       "/virtual-server/",
 	  'grep' => [ 'Virtualmin Virtual Servers',
-		      $virtualmin_pro ? ( ) : ( 'Delete Selected' ) ],
+		      $virtualmin_pro ? ( 'Delete Selected' ) : ( ) ],
 	},
 
 	# Create a test domain
