@@ -441,6 +441,9 @@ foreach $d (@doms) {
 			else {
 				&$second_print(".. done");
 				}
+			# Clear all left-frame links caches, as links to
+			# Apache may no longer be valid
+			&clear_links_cache();
 			}
 		else {
 			&$second_print(".. not possible for alias domains");

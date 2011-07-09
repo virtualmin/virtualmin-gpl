@@ -147,6 +147,9 @@ if (&can_default_website($d) && $in{'defweb'}) {
 	else {
 		&$second_print($text{'setup_done'});
 		}
+	# Clear all left-frame links caches, as links to Apache may no
+	# longer be valid
+	&clear_links_cache();
         $anything++;
 	}
 

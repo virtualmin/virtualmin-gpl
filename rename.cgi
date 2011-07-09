@@ -282,6 +282,10 @@ print $text{'setup_done'},"<p>\n";
 local $merr = &made_changes();
 &$second_print(&text('rename_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($d);
+
+# Clear all left-frame links caches, as links to Apache may no longer be valid
+&clear_links_cache();
+
 &webmin_log("rename", "domain", $oldd{'dom'}, $d);
 
 # Call any theme post command
