@@ -5910,7 +5910,7 @@ foreach my $rn (@ranges) {
 		# IPv4 range
 		push(@rv, [ "$1.$2", "$1.$3", $n ]);
 		}
-	elsif ($r =~ /^([0-9a-f:]+):([0-9a-f]+)-([0-9a-f]+)$/) {
+	elsif ($r =~ /^([0-9a-f:]+):([0-9a-f]+)-([0-9a-f]+)$/i) {
 		# IPv6 range
 		push(@rv, [ "$1:$2", "$1:$3", $n ]);
 		}
