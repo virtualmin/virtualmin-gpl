@@ -1304,3 +1304,5 @@ Added the --plan-features flag to the modify-domain command, to enable features 
 The virtualmin configuration check now ensures that the system has at least 256 MB of real (non-burstable) memory, and displays a warning if total memory is too low.
 Updated the modify-php-ini API command to set variables in the Apache configuration as well.
 Secondary mail servers running Sendmail and Postfix will now receive the list of allowed addresses for all domains from the master Virtualmin system, to prevent backscatter spam.
+---- Changes since 3.87 ----
+Updated the PiWik script installer to version 1.5.1.
