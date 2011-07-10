@@ -56,7 +56,3 @@
 	- https://www.virtualmin.com/node/18405
 	- CHANGELOG
 	- backup/restore
-
- - Replicate virtusers to secondary MX
-	- https://www.virtualmin.com/node/12894
-	- Add to documentation
