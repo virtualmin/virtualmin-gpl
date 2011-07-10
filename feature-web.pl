@@ -2068,6 +2068,9 @@ foreach my $dip ($d->{'ip'}, $d->{'virt6'} ? ( $d->{'ip6'} ) : ( )) {
 			      ($l =~ /^(\S+):(\d+)$/ &&
 			       &to_ipaddress("$1") eq $dip &&
 			       $2 == $web_port) ||
+			      ($l =~ /^\[(\S+)\]:(\d+)$/ &&
+			       &to_ip6address("$1") eq $dip &&
+			       $2 == $web_port) ||
 			      ($l !~ /:/ && &to_ipaddress($l) eq $dip));
 		}
 	if (!$lfound && @listen > 0) {
@@ -2092,6 +2095,9 @@ local ($d, $conf, $web_port) = @_;
 if ($d->{'virt'} && !$d->{'name'}) {
 	local @listen = &apache::find_directive("Listen", $conf);
 	local @newlisten = grep { $_ ne "$d->{'ip'}:$web_port" } @listen;
+	if ($d->{'virt6'}) {
+		@newlisten = grep { $_ ne "[$d->{'ip6'}]:$web_port" } @listen;
+		}
 	if (scalar(@listen) != scalar(@newlisten)) {
 		&apache::save_directive("Listen", \@newlisten,
 					$conf, $conf);
