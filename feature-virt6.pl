@@ -272,7 +272,8 @@ if ($gconfig{'os_type'} eq 'debian-linux') {
 		# Need to add a new interface
 		&net::new_interface_def($iface->{'name'}, "inet6", "static",
 					[ [ "address", $iface->{'address'} ],
-					  [ "netmask", $iface->{'netmask'} ] ]);
+					  [ "netmask", $iface->{'netmask'} ],
+					  [ "post-up", "sleep 3" ] ]);
 		}
 	}
 elsif ($gconfig{'os_type'} eq 'redhat-linux') {
