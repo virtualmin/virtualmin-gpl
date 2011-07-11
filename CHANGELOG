@@ -1305,4 +1305,4 @@ The virtualmin configuration check now ensures that the system has at least 256 
 Updated the modify-php-ini API command to set variables in the Apache configuration as well.
 Secondary mail servers running Sendmail and Postfix will now receive the list of allowed addresses for all domains from the master Virtualmin system, to prevent backscatter spam.
 ---- Changes since 3.87 ----
-Updated the PiWik script installer to version 1.5.1, and Dolibarr to 3.0.1.
+Updated the PiWik script installer to version 1.5.1, phpBB to 3.0.9, and Dolibarr to 3.0.1.
