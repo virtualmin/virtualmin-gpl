@@ -3305,6 +3305,7 @@ if ($newdir && $olddir && $newdir ne $olddir && @users) {
 						      $oldf->{'file'}));
 			local $newf = { };
 			local $oldname = $oldf->{'file'};
+			next if ($oldname eq $oldbase);	  # Skip inbox
 			$oldname =~ s/^\Q$oldbase\E\///;  # Get folder name,
 			local $oldnameorig = $oldname;
 			$oldname =~ s/^\.//;		  # with no dots before
@@ -3333,7 +3334,14 @@ if ($newdir && $olddir && $newdir ne $olddir && @users) {
 					$u->{'uid'}, $u->{'gid'}, 0755,
 					$newf->{'file'});
 				}
-			&mailboxes::mailbox_move_folder($oldf, $newf);
+			eval {
+				local $main::error_must_die = 1;
+				&mailboxes::mailbox_move_folder($oldf, $newf);
+				};
+			if ($@) {
+				&$second_print(&text('restore_emailmove2',
+					$oldf->{'file'}, $newf->{'file'}, $@));
+				}
 			}
 		}
 	&$second_print($text{'setup_done'});
