@@ -32,7 +32,7 @@ else {
 	if ($in{'passmode'} && !$in{'passmode_def'}) {
 		if ($in{'passmode'} == 1 || $in{'passmode'} == 3) {
 			# Check username
-			$in{'passmodeuser'} =~ /^[a-z0-9\.\-\_]+$/ ||
+			$in{'passmodeuser'} =~ /^[a-z0-9\.\-\_]+$/i ||
 				&error($text{'scripts_epassmodeuser'});
 			$domuser = $in{'passmodeuser'};
 			}

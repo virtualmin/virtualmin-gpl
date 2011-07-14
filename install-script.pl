@@ -137,7 +137,7 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--user") {
 		$domuser = shift(@ARGV);
-		$domuser =~ /^[a-z0-9\.\-\_]+$/ ||
+		$domuser =~ /^[a-z0-9\.\-\_]+$/i ||
 			&usage("Invalid default script username");
 		}
 	elsif ($a eq "--pass") {
