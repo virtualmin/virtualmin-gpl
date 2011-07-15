@@ -1162,7 +1162,7 @@ else {
 	&$second_print($text{'setup_done'});
 	}
 push(@dbs, $dbname);
-$d->{'db_mysql'} = join(" ", @dbs);
+$d->{'db_mysql'} = &unique(join(" ", @dbs));
 return 1;
 }
 
@@ -1258,7 +1258,7 @@ else {
 		}
 	}
 
-$d->{'db_mysql'} = join(" ", @dbs);
+$d->{'db_mysql'} = &unique(join(" ", @dbs));
 if (!$failed) {
 	&$second_print($text{'setup_done'});
 	}
