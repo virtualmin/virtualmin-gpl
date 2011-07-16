@@ -314,8 +314,8 @@ if (&compare_versions($ver, "3.1") > 0) {
 		 "phpMyAdmin-([0-9\\.]+)-all-languages\\.zip" );
 	}
 elsif (&compare_versions($ver, "2.11") > 0) {
-	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
-		 "phpMyAdmin-(2\\.[0-9\\.]+)-all-languages\\.zip" );
+	return ( "https://sourceforge.net/projects/phpmyadmin/files/phpMyAdmin/",
+		 "(2\\.11\\.[0-9\\.]+)" );
 	}
 else {
 	return ( );
