@@ -6618,7 +6618,11 @@ if ($aliasname && $aliasname ne $dom->{'dom'}) {
 			 'plan', $dom->{'plan'},
 			 'reseller', $dom->{'reseller'},
 			);
+	# Alias gets all features of domain, except for directory if it isn't
+	# needed
 	foreach my $f (@alias_features) {
+		next if ($f eq 'dir' && $config{$f} == 3 &&
+			 $tmpl->{'aliascopy'});
 		$alias{$f} = $dom->{$f};
 		}
 	local $parentdom = $dom->{'parent'} ?
