@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the PiWik script installer to version 1.5.1, phpBB to 3.0.9, WordPress to 3.2.1, Joomla to 1.6.5, and Dolibarr to 3.0.1.
+html=Updated the PiWik script installer to version 1.5.1, phpBB to 3.0.9, WordPress to 3.2.1, Joomla to 1.6.5, SugarCRM to 6.2.1, and Dolibarr to 3.0.1.
 master=1
 reseller=1
 domain=1
