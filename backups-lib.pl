@@ -1558,6 +1558,12 @@ if ($ok) {
 			$d->{'dns_ip'} = $virt || $config{'all_namevirtual'} ?
 				undef : &get_dns_ip();
 
+			# Change provisioning settings to match this system
+			foreach my $f (&list_provision_features()) {
+				$d->{$f} = 0;
+				}
+			&set_provision_features($d);
+
 			# Check for clashes
 			local $cerr = &virtual_server_clashes($d);
 			if ($cerr) {
