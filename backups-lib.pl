@@ -222,6 +222,7 @@ local $anylocal;
 foreach my $desturl (@$desturls) {
 	local ($mode, $user, $pass, $server, $path, $port) =
 		&parse_backup_url($desturl);
+	local $starpass = "*" x length($pass);
 	$anyremote = 1 if ($mode > 0);
 	$anylocal = 1 if ($mode == 0);
 	if ($mode == 0 && $asd) {
@@ -233,6 +234,7 @@ foreach my $desturl (@$desturls) {
 		local $ftperr;
 		&ftp_onecommand($server, "PWD", \$ftperr, $user, $pass, $port);
 		if ($ftperr) {
+			$ftperr =~ s/\Q$pass\E/$starpass/g;
 			&$first_print(&text('backup_eftptest', $ftperr));
 			return (0, 0, $doms);
 			}
@@ -252,6 +254,7 @@ foreach my $desturl (@$desturls) {
 				local $mkdirerr;
 				&ftp_onecommand($server, "MKD $makepath",
 					\$mkdirerr, $user, $pass, $port);
+				$mkdirerr =~ s/\Q$pass\E/$starpass/g;
 				}
 			}
 		}
@@ -275,6 +278,7 @@ foreach my $desturl (@$desturls) {
 			&scp_copy($temp, $r, $pass, \$scperr, $port);
 			}
 		if ($scperr) {
+			$scperr =~ s/\Q$pass\E/$starpass/g;
 			&$first_print(&text('backup_escptest', $scperr));
 			return (0, 0, $doms);
 			}
@@ -631,6 +635,7 @@ DOMAIN: foreach $d (@$doms) {
 					    $infotemp, \$err, undef, $user,
 					    $pass, $port, $ftp_upload_tries)
 						if (!$err);
+				$err =~ s/\Q$pass\E/$starpass/g;
 				}
 			elsif ($mode == 2) {
 				# Via SCP
@@ -643,6 +648,7 @@ DOMAIN: foreach $d (@$doms) {
 				&scp_copy("$dest/$df", $r, $pass, \$err, $port);
 				&scp_copy($infotemp, $r.".info", $pass,
 					  \$err, $port) if (!$err);
+				$err =~ s/\Q$pass\E/$starpass/g;
 				}
 			elsif ($mode == 3) {
 				# Via S3 upload
@@ -904,6 +910,7 @@ foreach my $desturl (@$desturls) {
 					    undef, $user, $pass, $port,
 					    $ftp_upload_tries) if (!$err);
 				if ($err) {
+					$err =~ s/\Q$pass\E/$starpass/g;
 					&$second_print(
 					    &text('backup_uploadfailed', $err));
 					$ok = 0;
@@ -928,6 +935,7 @@ foreach my $desturl (@$desturls) {
 				    undef, $user, $pass, $port,
 				    $ftp_upload_tries) if (!$err);
 			if ($err) {
+				$err =~ s/\Q$pass\E/$starpass/g;
 				&$second_print(&text('backup_uploadfailed',
 						     $err));
 				$ok = 0;
@@ -976,6 +984,7 @@ foreach my $desturl (@$desturls) {
 				&scp_copy($infotemp, $r."/$df.info", $pass,
 					  \$err, $port) if (!$err);
 				}
+			$err =~ s/\Q$pass\E/$starpass/g;
 			if (!$err && $asd) {
 				# Log bandwidth used by domain
 				foreach my $df (@destfiles) {
@@ -997,6 +1006,7 @@ foreach my $desturl (@$desturls) {
 			&scp_copy($dest, $r, $pass, \$err, $port);
 			&scp_copy($infotemp, $r.".info", $pass, \$err, $port)
 				if (!$err);
+			$err =~ s/\Q$pass\E/$starpass/g;
 			if ($asd && !$err) {
 				# Log bandwidth used by whole transfer
 				local @tst = stat($dest);
