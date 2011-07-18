@@ -592,6 +592,7 @@ DOMAIN: foreach $d (@$doms) {
 		foreach my $desturl (@$desturls) {
 			local ($mode, $user, $pass, $server, $path, $port) =
 				&parse_backup_url($desturl);
+			local $starpass = "*" x length($pass);
 			local $err;
 			if ($mode == 0) {
 				# Copy to another local directory
@@ -1228,6 +1229,7 @@ if ($asowner) {
 local $ok = 1;
 local $backup;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($file);
+local $starpass = "*" x length($pass);
 if ($mode > 0) {
 	# Need to download to temp file/directory first
 	&$first_print($mode == 1 ? $text{'restore_download'} :
@@ -1245,6 +1247,7 @@ if ($mode > 0) {
 	local $derr = &download_backup($_[0], $backup,
 		[ map { $_->{'dom'} } @$doms ], $vbs);
 	if ($derr) {
+		$derr =~ s/\Q$pass\E/$starpass/g;
 		&$second_print(&text('restore_downloadfailed', $derr));
 		$ok = 0;
 		}
