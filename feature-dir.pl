@@ -699,7 +699,8 @@ local ($tmpl) = @_;
 print &ui_table_row(&hlink($text{'tmpl_skel'}, "template_skel"),
 	&none_def_input("skel", $tmpl->{'skel'}, $text{'tmpl_skeldir'}, 0,
 			$tmpl->{'standard'} ? 1 : 0, undef,
-			[ "skel", "skel_subs", "skel_nosubs" ])."\n".
+			[ "skel", "skel_subs", "skel_nosubs",
+			  "skel_onlysubs" ])."\n".
 	&ui_textbox("skel", $tmpl->{'skel'} eq "none" ? undef
 						      : $tmpl->{'skel'}, 40));
 
@@ -710,6 +711,11 @@ print &ui_table_row(&hlink($text{'tmpl_skel_subs'}, "template_skel_subs"),
 # File patterns to exclude
 print &ui_table_row(&hlink($text{'tmpl_skel_nosubs'}, "template_skel_nosubs"),
 	&ui_textbox("skel_nosubs", $tmpl->{'skel_nosubs'}, 60));
+
+# File patterns to include
+print &ui_table_row(&hlink($text{'tmpl_skel_onlysubs'},
+			   "template_skel_onlysubs"),
+	&ui_textbox("skel_onlysubs", $tmpl->{'skel_onlysubs'}, 60));
 }
 
 # parse_template_dir(&tmpl)
@@ -724,6 +730,7 @@ if ($in{"skel_mode"} == 2) {
 	-d $in{'skel'} || &error($text{'tmpl_eskel'});
 	$tmpl->{'skel_subs'} = $in{'skel_subs'};
 	$tmpl->{'skel_nosubs'} = $in{'skel_nosubs'};
+	$tmpl->{'skel_onlysubs'} = $in{'skel_onlysubs'};
 	}
 }
 
