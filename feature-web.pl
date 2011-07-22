@@ -3395,7 +3395,7 @@ foreach my $port ($d->{'web_port'},
 		  $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( )) {
 	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	$virt || return "No Apache virtualhost found for $d->{'dom'}:$port";
-	local ($oldvirt, $oldd) = &get_default_website($d);
+	local ($oldvirt, $oldd) = &get_default_website($d, $port);
 	if ($virt && $oldvirt && $virt ne $oldvirt) {
 		if ($virt->{'file'} eq $oldvirt->{'file'}) {
 			# Need to move up in file
