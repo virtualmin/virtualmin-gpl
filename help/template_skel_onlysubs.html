@@ -1,4 +1,4 @@
-<header>File patterns not to substitute</header>
+<header>File patterns to only substitute</header>
 
 If the <b>Substitute variables in contents?</b> option is set to <b>Yes</b>,
 Virtualmin will replace variables in all files except for images when copying
@@ -6,9 +6,9 @@ them from the skeleton directory. However, this may break PHP or perl scripts
 which use the same format for variables as Virtualmin's template language. <p>
 
 To avoid this problem, you can enter a list of file patterns in this field,
-like <tt>*.php *.pl</tt>. Files matching those patterns will not have their
-contents modified, even if they match the list in <b>File patterns to only
-substitute</b>. <p>
+like <tt>*.conf</tt>. Only files matching those patterns and not the patterns
+in <b>File patterns not to substitute</b> will not have their contents modified.
+<p>
 
 <footer>
 

@@ -2301,7 +2301,9 @@ if ($d) {
 	if ($tmpl->{'skel_subs'}) {
 		foreach my $c (@copied) {
 			if (-r $c && !-d $c && !-l $c &&
-			    !&skip_skel_subs($c, $tmpl->{'skel_nosubs'}) &&
+			    (!$tmpl->{'skel_onlysubs'} ||
+			     &match_skel_subs($c, $tmpl->{'skel_onlysubs'})) &&
+			    !&match_skel_subs($c, $tmpl->{'skel_nosubs'}) &&
 			    &guess_mime_type($c) !~ /^image\//) {
 				local $data =
 				    &read_file_contents_as_domain_user($d, $c);
@@ -2315,9 +2317,9 @@ if ($d) {
 	}
 }
 
-# skip_skel_subs(path, nosubs-list)
-# Returns 1 if some filename is on the list of those to skip for substitution
-sub skip_skel_subs
+# match_skel_subs(path, nosubs-list)
+# Returns 1 if some filename matches the space-separated list of patterns given
+sub match_skel_subs
 {
 my ($path, $nosubs_str) = @_;
 return 0 if ($nosubs_str !~ /\S/);
