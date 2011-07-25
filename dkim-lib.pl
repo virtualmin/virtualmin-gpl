@@ -249,6 +249,10 @@ my @doms = grep { $_->{'dns'} && $_->{'mail'} &&
 if (@doms) {
 	&$second_print(&text('dkim_founddomains', scalar(@doms)));
 	}
+elsif (@{$dkim->{'extra'}}) {
+	&$second_print(&text('dkim_founddomains2',
+			     scalar(@{$dkim->{'extra'}})));
+	}
 else {
 	&$second_print($text{'dkim_nodomains'});
 	return 0;

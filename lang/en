@@ -5446,6 +5446,7 @@ dkim_stop=Stopping DKIM filter ..
 dkim_unboot=Disabling DKIM filter at boot time ..
 dkim_domains=Finding virtual servers to enable DKIM for ..
 dkim_founddomains=.. found $1 servers
+dkim_founddomains2=.. no virtual servers with DNS and email enabled were found, but enabling for $1 extra domains
 dkim_nodomains=.. no servers with both DNS and email enabled were found!
 dkim_undns=Removing DKIM records from DNS domain $1 ..
 dkim_dnsremoved=.. removed successfully
