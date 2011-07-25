@@ -1497,6 +1497,17 @@ if ($ok) {
 					}
 				}
 
+			# Does the reseller exists
+			if ($d->{'reseller'} && defined(&get_reseller)) {
+				my $resel = &get_reseller($d->{'reseller'});
+				if (!$resel) {
+					&$second_print(&text('restore_eresel',
+							$d->{'reseller'}));
+					$ok = 0;
+					last DOMAIN;
+					}
+				}
+
 			if ($parentdom) {
 				# UID and GID always come from parent
 				$d->{'uid'} = $parentdom->{'uid'};
