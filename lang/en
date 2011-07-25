@@ -639,6 +639,7 @@ users_batch2=Batch create users.
 users_derr=Failed to delete users
 users_ednone=None selected
 users_drusure=Are you sure you want to delete the $1 selected users? $2 of home directory and mail files will be deleted.
+users_dlist=Users to delete : $1
 users_drusure2=Are you sure you want to delete the $1 selected users? No files will be deleted.
 users_dtitle=Delete Users
 users_dconfirm=Yes, Delete Them
