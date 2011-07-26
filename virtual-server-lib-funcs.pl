@@ -11527,16 +11527,18 @@ if (&foreign_check("proc")) {
 			}
 		elsif ($beans->{'vmguarpages'} &&
 		       $beans->{'vmguarpages'}*4096 < $rmem &&
-		       $beans->{'vmguarpages'} != $beans->{'privvmpages'}) {
-			# OpenVZ guaranteed memory is less than 256 M
+		       $beans->{'vmguarpages'} < $beans->{'privvmpages'}) {
+			# OpenVZ guaranteed memory is lower than max memory,
+			# and is less than 256 M
 			&$second_print("<b>".&text('check_lowgmemory',
 				&nice_size($mem[0]*1024),
 				&nice_size($beans->{'vmguarpages'}*4096),
 				&nice_size($rmem))."</b>");
 			}
 		elsif ($beans->{'vmguarpages'} &&
-		       $beans->{'vmguarpages'} != $beans->{'privvmpages'}) {
-			# OpenVZ guaranteed memory is above 256 M
+		       $beans->{'vmguarpages'} < $beans->{'privvmpages'}) {
+			# OpenVZ guaranteed memory is lower than max memory,
+			# but is above 256 M
 			&$second_print(&text('check_okgmemory',
 				&nice_size($mem[0]*1024),
 				&nice_size($beans->{'vmguarpages'}*4096),
