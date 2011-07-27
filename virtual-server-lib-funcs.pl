@@ -2107,6 +2107,49 @@ foreach my $j (@jobs) {
 	}
 }
 
+# disable_unix_cron_jobs(username)
+# Disable all Cron jobs belonging to some Unix user
+sub disable_unix_cron_jobs
+{
+local ($username) = @_;
+&foreign_require("cron", "cron-lib.pl");
+local @jobs = &cron::list_cron_jobs();
+local $cronfile;
+foreach my $j (@jobs) {
+	if ($j->{'user'} eq $username && $j->{'active'} && !$j->{'name'}) {
+		$cronfile ||= &cron::cron_file($j);
+		&lock_file($cronfile);
+		$j->{'active'} = 0;
+		if ($j->{'command'} !~ /#\s+VIRTUALMIN\s+DISABLE/) {
+			$j->{'command'} .= " # VIRTUALMIN DISABLE";
+			}
+		&cron::change_cron_job($j);
+		}
+	}
+&unlock_file($cronfile) if ($cronfile);
+}
+
+# enable_unix_cron_jobs(username)
+# Enable all Cron jobs belonging to some Unix user
+sub enable_unix_cron_jobs
+{
+local ($username) = @_;
+&foreign_require("cron", "cron-lib.pl");
+local @jobs = &cron::list_cron_jobs();
+local $cronfile;
+foreach my $j (@jobs) {
+	if ($j->{'user'} eq $username && !$j->{'active'} && !$j->{'name'} &&
+	    $j->{'command'} =~ /#\s+VIRTUALMIN\s+DISABLE/) {
+		$cronfile ||= &cron::cron_file($j);
+		&lock_file($cronfile);
+		$j->{'active'} = 1;
+		$j->{'command'} =~ s/\s+#\s+VIRTUALMIN\s+DISABLE//g;
+		&cron::change_cron_job($j);
+		}
+	}
+&unlock_file($cronfile) if ($cronfile);
+}
+
 # validate_user(&domain, &user, [&olduser])
 # Called before a user is saved, to validate it. Must return undef on success,
 # or an error message on failure
