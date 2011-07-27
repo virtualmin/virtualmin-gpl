@@ -1306,3 +1306,4 @@ Updated the modify-php-ini API command to set variables in the Apache configurat
 Secondary mail servers running Sendmail and Postfix will now receive the list of allowed addresses for all domains from the master Virtualmin system, to prevent backscatter spam.
 ---- Changes since 3.87 ----
 Updated the PiWik script installer to version 1.5.1, phpBB to 3.0.9, WordPress to 3.2.1, Joomla to 1.6.5, SugarCRM to 6.2.1, and Dolibarr to 3.0.1.
+When a virtual server is disabled, any cron jobs run by its owner or mailbox users are also disabled.
