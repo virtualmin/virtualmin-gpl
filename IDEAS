@@ -26,6 +26,7 @@
 
  - Command-line domain rename
 	- Add to unit tests
+	- http://www.virtualmin.com/node/18938
 
  - Move scripts to new directory / DB login / URL
 

@@ -1,4 +1,4 @@
- - bump versions on
+ x bump versions on
 	virtual-server/module.info
 	gpl-virtual-server/module.info
 
@@ -11,7 +11,7 @@
 	x fudu
 	x lentor
 	x xencentos
-	x xengpl
+	- xengpl
 
  x Generate british english with :
 	cd /usr/local/webadmin
@@ -22,19 +22,19 @@
  x copy in GIT to branch directory
 
  x Create tar.gz file
-	./gpl-virtual-server/createvirtualminmodule.sh $ver /tmp/virtual-server-$ver.wbm.gz
-	./create-module.pl --sign virtualmin/virtual-server-theme-$themever.wbt.gz virtual-server-theme
+	cd /usr/local/webadmin && ./gpl-virtual-server/createvirtualminmodule.sh $ver /tmp/virtual-server-$ver.wbm.gz
+	cd /usr/local/webadmin && ./create-module.pl --sign virtualmin/virtual-server-theme-$themever.wbt.gz virtual-server-theme
 
- - build RPM and .deb
-	./makemodulerpm.pl --sign --dir virtual-server --allow-overwrite gpl-virtual-server
-	./makemodulerpm.pl --sign --allow-overwrite --epoch 2 virtual-server-theme
-	./makemoduledeb.pl --dir virtual-server --allow-overwrite gpl-virtual-server
-	./makemoduledeb.pl --allow-overwrite virtual-server-theme
+ x build RPM and .deb
+	ssh root@fudu "cd /usr/local/webadmin && ./makemodulerpm.pl --sign --dir virtual-server --allow-overwrite gpl-virtual-server"
+	ssh root@fudu "cd /usr/local/webadmin && ./makemodulerpm.pl --sign --allow-overwrite --epoch 2 virtual-server-theme"
+	ssh lentor "cd /usr/local/webadmin && ./makemoduledeb.pl --dir virtual-server --allow-overwrite gpl-virtual-server"
+	ssh lentor "cd /usr/local/webadmin && ./makemoduledeb.pl --allow-overwrite virtual-server-theme"
 
  x Upload to download.webmin.com:htdocs/download/virtualmin/
 	scp /tmp/virtual-server-$ver.wbm.gz* webadmin@download.webmin.com:domains/download.webmin.com/public_html/download/virtualmin/
 	scp /usr/src/redhat/RPMS/noarch/wbm-virtual-server-$ver-1.noarch.rpm /usr/src/redhat/SRPMS/wbm-virtual-server-$ver-1.src.rpm webadmin@download.webmin.com:domains/download.webmin.com/public_html/download/virtualmin/
-	scp /tmp/webmin-virtual-server_${ver}_all.deb webadmin@download.webmin.com:domains/download.webmin.com/public_html/download/virtualmin/
+	ssh lentor "scp /tmp/webmin-virtual-server_${ver}_all.deb webadmin@download.webmin.com:domains/download.webmin.com/public_html/download/virtualmin/"
 
  x Upload theme
 	scp virtualmin/virtual-server-theme-$themever.wbt.gz* webadmin@download.webmin.com:domains/download.webmin.com/public_html/download/virtualmin/
@@ -47,9 +47,9 @@
  x Add to website
 	x Mention plugins too
 
- - Add to freshmeat.net
+ x Add to freshmeat.net
 
- - Announce on mailing list
+ x Announce on mailing list
 
  x Add to updates.txt
 
