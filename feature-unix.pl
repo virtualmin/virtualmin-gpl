@@ -564,6 +564,7 @@ if (!$_[0]->{'parent'}) {
 		$uinfo->{'pass'} = $uconfig{'lock_string'};
 		&foreign_call($usermodule, "modify_user", $uinfo, $uinfo);
 		&foreign_call($usermodule, "made_changes");
+		&disable_unix_cron_jobs($uinfo->{'user'});
 		&$second_print($text{'setup_done'});
 		}
 	&release_lock_unix($_[0]);
@@ -588,6 +589,7 @@ if (!$_[0]->{'parent'}) {
 		delete($_[0]->{'disabled_oldpass'});
 		&foreign_call($usermodule, "modify_user", $uinfo, $uinfo);
 		&foreign_call($usermodule, "made_changes");
+		&enable_unix_cron_jobs($uinfo->{'user'});
 		&$second_print($text{'setup_done'});
 		}
 	&release_lock_unix($_[0]);

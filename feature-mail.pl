@@ -1038,6 +1038,9 @@ foreach my $user (&list_domain_users($_[0], 1)) {
 		&set_pass_disable($user, 1);
 		&modify_user($user, $user, $_[0]);
 		}
+	if ($user->{'unix'}) {
+		&disable_unix_cron_jobs($user->{'user'});
+		}
 	}
 &$second_print($text{'setup_done'});
 &release_lock_mail($_[0]);
@@ -1064,6 +1067,9 @@ foreach my $user (&list_domain_users($_[0], 1)) {
 	if (!$user->{'alwaysplain'}) {
 		&set_pass_disable($user, 0);
 		&modify_user($user, $user, $_[0]);
+		}
+	if ($user->{'unix'}) {
+		&enable_unix_cron_jobs($user->{'user'});
 		}
 	}
 &$second_print($text{'setup_done'});
