@@ -948,7 +948,7 @@ if ($tmpl->{'disabled_url'} eq 'none') {
 	local @am = &apache::find_directive("AliasMatch", $vconf);
 	local $dis = &disabled_website_html($d);
 	&apache::save_directive("AliasMatch",
-				[ @am, "^/.*\$ $dis" ], $vconf, $conf);
+				[ "^/.*\$ $dis", @am ], $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	local $msg = $tmpl->{'disabled_web'} eq 'none' ?
 		"<h1>Website Disabled</h1>\n" :
@@ -964,7 +964,7 @@ else {
 	local @rm = &apache::find_directive("RedirectMatch", $vconf);
 	local $url = &substitute_domain_template($tmpl->{'disabled_url'}, $d);
 	&apache::save_directive("RedirectMatch",
-			[ @rm, "^/.*\$ $url" ], $vconf, $conf);
+			[ "^/.*\$ $url", @rm ], $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	}
 }
