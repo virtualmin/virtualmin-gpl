@@ -5076,14 +5076,18 @@ if ($gconfig{'os_type'} !~ /-linux$/ && &has_command("bash")) {
 	# Force use of bash
 	$cmd = "bash -c ".quotemeta($cmd);
 	}
-local $out = &backquote_with_timeout("($cmd) 2>&1 </dev/null",
-				     $t->{'timeout'} || $timeout);
+local $to = $t->{'timeout'} || $timeout;
+local ($out, $timed_out) = &backquote_with_timeout(
+				"($cmd) 2>&1 </dev/null", $to);
 if (!$t->{'ignorefail'}) {
 	if ($? && !$t->{'fail'} || !$? && $t->{'fail'}) {
 		print $out;
 		if ($t->{'fail'}) {
 			print "    .. failed to fail\n";
 			}
+                elsif ($timed_out) {
+                        print "    .. timeout after $to seconds\n";
+                        }
 		else {
 			print "    .. failed : $?\n";
 			}
