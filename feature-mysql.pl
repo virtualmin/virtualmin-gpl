@@ -1131,6 +1131,7 @@ sub create_mysql_database
 local ($d, $dbname, $opts) = @_;
 &require_mysql();
 local @dbs = split(/\s+/, $d->{'db_mysql'});
+print STDERR "dbname=$dbname db_mysql=$d->{'db_mysql'}\n";
 
 if ($d->{'provision_mysql'}) {
 	# Create the database on the provisioning server
@@ -1162,7 +1163,8 @@ else {
 	&$second_print($text{'setup_done'});
 	}
 push(@dbs, $dbname);
-$d->{'db_mysql'} = &unique(join(" ", @dbs));
+$d->{'db_mysql'} = join(" ", &unique(@dbs));
+print STDERR "db_mysql=$d->{'db_mysql'}\n";
 return 1;
 }
 
@@ -1258,7 +1260,7 @@ else {
 		}
 	}
 
-$d->{'db_mysql'} = &unique(join(" ", @dbs));
+$d->{'db_mysql'} = join(" ", &unique(@dbs));
 if (!$failed) {
 	&$second_print($text{'setup_done'});
 	}
