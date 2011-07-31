@@ -23,7 +23,7 @@ sub setup_virt6
 {
 local ($d) = @_;
 &obtain_lock_virt($d);
-if (!$d->{'virtalready'}) {
+if (!$d->{'virt6already'}) {
 	# Save and bring up the IPv6 interface
 	&$first_print(&text('setup_virt6', $d->{'ip6'}));
 	local $virt = { 'name' => $config{'iface6'} || $config{'iface'},
@@ -63,7 +63,7 @@ return 1;
 sub modify_virt6
 {
 local ($d, $oldd) = @_;
-if ($d->{'ip6'} ne $oldd->{'ip6'} && !$d->{'virtalready'}) {
+if ($d->{'ip6'} ne $oldd->{'ip6'} && !$d->{'virt6already'}) {
 	# Remove and re-add the IPv6 interface
 	&delete_virt6($oldd);
 	&setup_virt6($d);
@@ -76,7 +76,7 @@ sub delete_virt6
 {
 local ($d) = @_;
 &obtain_lock_virt($d);
-if (!$d->{'virtalready'}) {
+if (!$d->{'virt6already'}) {
 	# Bring down and delete the IPv6 interface
 	&$first_print(&text('delete_virt6', $d->{'ip6'}));
 	local ($active) = grep { &canonicalize_ip6($_->{'address'}) eq
@@ -125,7 +125,7 @@ return 1;
 sub validate_virt6
 {
 local ($d) = @_;
-if (!$_[0]->{'virtalready'}) {
+if (!$_[0]->{'virt6already'}) {
 	# Only check boot-time interface if added by Virtualmin
 	local @boots = map { &canonicalize_ip6($_) } &bootup_ip_addresses();
 	if (&indexoflc(&canonicalize_ip6($d->{'ip6'}), @boots) < 0) {

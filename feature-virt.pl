@@ -211,9 +211,9 @@ else {
 	if ($anychoose) {
 		# Can enter arbitrary IP
 		push(@opts, [ 1, $text{'form_vip'},
-			 &ui_textbox("ip", undef, 20)." (".
+			 &ui_textbox("ip", undef, 20)." ".
 			 &ui_checkbox("virtalready", 1,
-				      $text{'form_virtalready'}).")" ]);
+				      $text{'form_virtalready'}) ]);
 		}
 	if ($anyzone) {
 		# Can select an existing active IP

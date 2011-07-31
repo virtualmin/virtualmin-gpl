@@ -570,7 +570,9 @@ if (!$aliasdom && &can_use_feature("virt") && &supports_ip6()) {
 	if (@noalloctmpls) {
 		# Can enter
 		push(@ip6opts, [ 1, $text{'edit_virt6on'},
-				 &ui_textbox("ip6", undef, 30) ]);
+				 &ui_textbox("ip6", undef, 30)." ".
+				 &ui_checkbox("virt6already", 1,
+                                      $text{'form_virtalready'}) ]);
 		}
 	print &ui_table_row(&hlink($text{'form_iface6'}, "iface6"),
 		&ui_radio_table("virt6", 0, \@ip6opts, 1));

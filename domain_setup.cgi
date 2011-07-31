@@ -238,7 +238,18 @@ elsif (&can_use_feature("virt") && &supports_ip6()) {
 			&error(&text('setup_evirt6tmpl2'));
 		&check_ip6address($in{'ip6'}) || &error($text{'setup_eip6'});
 		$clash = &check_virt6_clash($in{'ip6'});
-		$clash && &error(&text('setup_evirt6clash'));
+		if ($in{'virt6already'}) {
+			# Fail if the IPv6 address isn't yet active, or if
+			# claimed by another virtual server
+			local $already = &get_domain_by("ip", $in{'ip'});
+			$already && &error(&text('setup_evirt6clash4',
+						 $already->{'dom'}));
+			}
+		else {
+			# Fail if the IPv6 address *is* already active
+			$clash && &error(&text('setup_evirt6clash'));
+			}
+		$virt6already = $in{'virt6already'};
 		$ip6 = $in{'ip6'};
 		$virt6 = 1;
 		}
@@ -319,6 +330,7 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'virt', $virt,
 	 'virt6', $virt6,
 	 'virtalready', $virtalready,
+	 'virt6already', $virt6already,
 	 'source', 'domain_setup.cgi',
 	 'proxy_pass', $proxy,
 	 'proxy_pass_mode', $proxy ? $config{'proxy_pass'} : 0,
