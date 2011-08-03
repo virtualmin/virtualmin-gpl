@@ -1131,7 +1131,6 @@ sub create_mysql_database
 local ($d, $dbname, $opts) = @_;
 &require_mysql();
 local @dbs = split(/\s+/, $d->{'db_mysql'});
-print STDERR "dbname=$dbname db_mysql=$d->{'db_mysql'}\n";
 
 if ($d->{'provision_mysql'}) {
 	# Create the database on the provisioning server
@@ -1164,7 +1163,6 @@ else {
 	}
 push(@dbs, $dbname);
 $d->{'db_mysql'} = join(" ", &unique(@dbs));
-print STDERR "db_mysql=$d->{'db_mysql'}\n";
 return 1;
 }
 
