@@ -1497,7 +1497,7 @@ if ($ok) {
 					}
 				}
 
-			# Does the reseller exists
+			# Does the reseller exist? If not, fail
 			if ($d->{'reseller'} && defined(&get_reseller)) {
 				my $resel = &get_reseller($d->{'reseller'});
 				if (!$resel) {
@@ -1584,7 +1584,7 @@ if ($ok) {
 
 			# Change provisioning settings to match this system
 			foreach my $f (&list_provision_features()) {
-				$d->{$f} = 0;
+				$d->{'provision_'.$f} = 0;
 				}
 			&set_provision_features($d);
 
