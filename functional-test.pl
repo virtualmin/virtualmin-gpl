@@ -2691,6 +2691,7 @@ $remote_tests = [
 	{ 'command' => $webmin_wget_command.
 		       "'${webmin_proto}://localhost:${webmin_port}/virtual-server/remote.cgi?program=delete-domain&domain=$test_domain'",
 	  'grep' => [ 'Exit status: 0' ],
+	  'cleanup' => 1,
 	},
 	];
 
