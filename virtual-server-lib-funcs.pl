@@ -11891,6 +11891,18 @@ if ($config{'web'}) {
 			     "<pre>".&html_escape($err)."</pre>");
 		}
 
+	# Check for Ubuntu PHP setting that breaks fcgi
+	my $php5conf = "/etc/apache2/mods-available/php5.conf";
+	if (-r $php5conf) {
+		my $lref = &read_file_lines($php5conf, 1);
+                foreach my $l (@$lref) {
+                        if ($l =~ /^\s*SetHandler/) {
+				return &text('check_ewebphp',
+				   "<tt>$php5conf</tt>", "<tt>SetHandler</tt>");
+                                }
+                        }
+		}
+
 	# Make sure suexec is installed, if enabled. Also check home path.
 	local $err = &check_suexec_install($tmpl);
 	if ($err) {
