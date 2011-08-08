@@ -2439,7 +2439,7 @@ elsif ($mode == 1) {
 		}
 	&to_ipaddress($server) ||
 	    defined(&to_ip6address) && &to_ip6address($server) ||
-		&error($text{'backup_eserver1'});
+		&error($text{'backup_eserver1a'});
 	$port =~ /^\d*$/ || &error($text{'backup_eport'});
 	$in{$name."_path"} =~ /\S/ || &error($text{'backup_epath'});
 	$in{$name."_user"} =~ /^[^:\/]*$/ || &error($text{'backup_euser'});
@@ -2462,7 +2462,7 @@ elsif ($mode == 2) {
 		}
 	&to_ipaddress($server) ||
 	    defined(&to_ip6address) && &to_ip6address($server) ||
-		&error($text{'backup_eserver2'});
+		&error($text{'backup_eserver2a'});
 	$port =~ /^\d*$/ || &error($text{'backup_eport'});
 	$in{$name."_spath"} =~ /\S/ || &error($text{'backup_epath'});
 	$in{$name."_suser"} =~ /^[^:\/]*$/ || &error($text{'backup_euser2'});
