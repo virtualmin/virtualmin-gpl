@@ -47,6 +47,7 @@ local $conf = &apache::get_config();
 # Work out source php.ini files
 local (%srcini, %subs_ini);
 local @vers = &list_available_php_versions($d, $mode);
+@vers || &error("No PHP versions found for mode $mode");
 foreach my $ver (@vers) {
 	$subs_ini{$ver->[0]} = 0;
 	local $srcini = $tmpl->{'web_php_ini_'.$ver->[0]};
