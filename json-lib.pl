@@ -207,6 +207,8 @@ my ($cmd, $mod, $args, $fh) = @_;
 my $pid = fork();
 my $remote_addr = $ENV{'REMOTE_ADDR'} || &to_ipaddress($ENV{'REMOTE_HOST'});
 my $remote_host = $ENV{'REMOTE_HOST'};
+my $miniserv_pid = $ENV{'MINISERV_PID'};
+my $miniserv_config = $ENV{'MINISERV_CONFIG'};
 if (!$pid) {
 	untie(*STDOUT);
 	close(STDOUT);
@@ -220,6 +222,8 @@ if (!$pid) {
 	$ENV{'REMOTE_USER'} = $remote_user;
 	$ENV{'REMOTE_ADDR'} = $remote_addr;
 	$ENV{'REMOTE_HOST'} = $remote_host;
+	$ENV{'MINISERV_PID'} = $miniserv_pid;
+	$ENV{'MINISERV_CONFIG'} = $miniserv_config;
 	my $pkg = $cmd;
 	$pkg =~ s/[^A-Za-z0-9]/_/g;
 	@ARGV = @$args;
