@@ -2647,6 +2647,14 @@ $webmin_tests = [
 	  'grep' => "^$test_domain",
 	},
 
+	# Check Webmin login as domain owner
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
+		       $webmin_proto.'://'.$test_domain_user.':smeg@localhost:'.
+		       $webmin_port.'/',
+	},
+
 	# Delete the domain
 	{ 'command' => $webmin_wget_command.
 		       "${webmin_proto}://localhost:${webmin_port}/virtual-server/delete_domain.cgi\\?dom=`virtualmin list-domains.pl --domain $test_domain --id-only`\\&confirm=1",
@@ -2659,7 +2667,7 @@ $webmin_tests = [
 $remote_tests = [
 	# Test domain creation via remote API
 	{ 'command' => $webmin_wget_command.
-		       "'${webmin_proto}://localhost:${webmin_port}/virtual-server/remote.cgi?program=create-domain&domain=$test_domain&pass=smeg&dir=&unix=&web=&dns=&mail=&webalizer=&mysql=&logrotate=&".join("&", map { $_->[0]."=" } @create_args)."'",
+		       "'${webmin_proto}://localhost:${webmin_port}/virtual-server/remote.cgi?program=create-domain&domain=$test_domain&pass=smeg&dir=&unix=&web=&dns=&mail=&webalizer=&mysql=&logrotate=&webmin=&".join("&", map { $_->[0]."=" } @create_args)."'",
 	  'grep' => 'Exit status: 0',
 	},
 
@@ -2667,6 +2675,14 @@ $remote_tests = [
 	{ 'command' => $webmin_wget_command.
 		       "'${webmin_proto}://localhost:${webmin_port}/virtual-server/remote.cgi?program=list-domains'",
 	  'grep' => [ "^$test_domain", 'Exit status: 0' ],
+	},
+
+	# Check Webmin login as domain owner
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
+		       $webmin_proto.'://'.$test_domain_user.':smeg@localhost:'.
+		       $webmin_port.'/',
 	},
 
 	# Get the domain in JSON format
