@@ -297,7 +297,6 @@ if ($hasspam) {
 
 # Show most recent logins
 if ($hasemail && !$in{'new'}) {
-	# XXX help page
 	$ll = &get_last_login_time($user->{'user'});
 	@grid = ( );
 	foreach $k (keys %$ll) {

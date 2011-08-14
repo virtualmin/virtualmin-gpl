@@ -4591,6 +4591,9 @@ if ($can_qquotas) {
 if ($config{'show_mailsize'} && $d->{'mail'}) {
 	push(@headers, $text{'users_size'});
 	}
+if ($config{'show_lastlogin'} && $d->{'mail'}) {
+	push(@headers, $text{'users_ll'});
+	}
 push(@headers, $text{'users_ushell'});
 if ($d->{'mysql'} || $d->{'postgres'}) {
 	push(@headers, $text{'users_db'});
@@ -4674,6 +4677,17 @@ foreach $u (@$users) {
 		else {
 			push(@cols, $text{'users_noemail'});
 			}
+		}
+
+	if ($config{'show_lastlogin'} && $d->{'mail'}) {
+		# Last mail login
+		my $ll = &get_last_login_time($u->{'user'});
+		my $llbest;
+		foreach $k (keys %$ll) {
+			$llbest = $ll->{$k} if ($ll->{$k} > $llbest);
+			}
+		push(@cols, $llbest ? &make_date($llbest)
+				    : $text{'users_ll_never'});
 		}
 
 	# Show shell access level

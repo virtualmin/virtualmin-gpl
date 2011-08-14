@@ -123,6 +123,7 @@ domains_sort=sub
 name_max=20
 name_mode=0
 show_mailsize=0
+show_lastlogin=0
 check_apache=0
 show_ugroup=0
 php_suexec=0

@@ -23,6 +23,7 @@ name_mode=Shorten long domain names at,1,1-End,0-Middle
 index_cols=Columns to show,2,dom-Domain name,user-Username,owner-Description,emailto-Email address<br>,reseller-Reseller,admins-Extra admins,users-User count,aliases-Alias count<br>,quota-Disk quota,uquota-Quota used,created-Creation date
 index_fcols=Feature columns to show,2,web-Website,ssl-SSL website,dns-DNS domain,mail-Email<br>,mysql-MySQL,postgres-PostgreSQL,spam-Spam filtering,virus-Virus filtering<br>,webalizer-Webalizer,webmin-Webmin login
 show_mailsize=Show mailbox size in users list?,1,1-Yes,0-No
+show_lastlogin=Show last login in users list?,1,1-Yes,0-No
 show_sysinfo=Show system information on main page?,1,1-Yes,0-No,2-Only for master admin,3-Only for master and resellers
 template_auto=Allow editing of limits when creating server?,1,0-Yes,1-No
 plan_auto=Set default features from plan when creating server?,1,1-Yes,0-No
