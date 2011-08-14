@@ -331,9 +331,24 @@ foreach my $p (@ports) {
 	# For fcgid mode, set max request size to 1GB, which is the default
 	# in older versions of mod_fcgid but is smaller in versions 2.3.6 and
 	# later.
-	local $setmax = $mode eq "fcgid" &&
-		        $gconfig{'os_type'} eq 'debian-linux' &&
-		        $gconfig{'os_version'} >= 6;
+	local $setmax;
+	if ($mode eq "fcgid") {
+		if ($gconfig{'os_type'} eq 'debian-linux' &&
+                    $gconfig{'os_version'} >= 6) {
+			# Debian 6 and Ubuntu 10 definately use mod_fcgid 2.3.6+
+			$setmax = 1;
+			}
+		elsif ($gconfig{'os_type'} eq 'redhat-linux' &&
+                       $gconfig{'os_version'} >= 14 &&
+		       &foreign_check("software")) {
+			# CentOS 6 and Fedora 14+ may have it..
+			&foreign_require("software", "software-lib.pl");
+			local @pinfo = &software::package_info("mod_fcgid");
+			if (&compare_versions($pinfo[4], "2.3.6") >= 0) {
+				$setmax = 1;
+				}
+			}
+		}
 	&apache::save_directive("FcgidMaxRequestLen",
 				$setmax ? [ 1024*1024*1024 ] : [ ],
 				$vconf, $conf);
