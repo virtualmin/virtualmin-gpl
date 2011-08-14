@@ -164,7 +164,7 @@ if ($ignore_plugins && $d->{'spam'}) {
 # Return only virtusers that match this domain,
 # which are not for forwarding email for users in the domain,
 # and which are not on the plugin ignore list.
-return grep { $_->{'from'} =~ /\@(\S+)$/ && $1 eq $d->{'dom'} &&
+return grep { $_->{'from'} =~ /\@(\S+)$/ && lc($1) eq lc($d->{'dom'}) &&
 	      !($foruser{$_->{'from'}} eq $_->{'to'}->[0] &&
 		@{$_->{'to'}} == 1) &&
 	      !$ignore{lc($_->{'from'})} } @virts;
