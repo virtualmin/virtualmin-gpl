@@ -1837,7 +1837,7 @@ else {
 	&require_mail();
 
 	# Delete the user
-	&foreign_call($usermodule, "set_user_envs", $_[0], 'DELETE_USER')
+	&foreign_call($usermodule, "set_user_envs", $_[0], 'DELETE_USER');
 	$ENV{'USERADMIN_DOM'} = $_[1]->{'dom'} if ($_[1]);
 	&foreign_call($usermodule, "making_changes");
 	&foreign_call($usermodule, "delete_user", $_[0]);
@@ -1853,7 +1853,7 @@ if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 	local @allusers = &list_all_users_quotas(1);
 	local ($extrauser) = grep { $_->{'user'} eq $esc } @allusers;
 	if ($extrauser) {
-		&foreign_call($usermodule, "set_user_envs", $extrauser, 'DELETE_USER')
+		&foreign_call($usermodule, "set_user_envs", $extrauser, 'DELETE_USER');
 		$ENV{'USERADMIN_DOM'} = $_[1]->{'dom'} if ($_[1]);
 		&foreign_call($usermodule, "making_changes");
 		&foreign_call($usermodule, "delete_user", $extrauser);
