@@ -1133,6 +1133,7 @@ else {
 		     map { ( $ea, $_ ) } @{$_[0]->{'extraemail'}});
 		}
 	&foreign_call($usermodule, "set_user_envs", $_[0], 'CREATE_USER', $_[0]->{'plainpass'}, [ ]);
+	$ENV{'USERADMIN_DOM'} = $_[1]->{'dom'} if ($_[1]);
 	&foreign_call($usermodule, "making_changes");
 	&userdom_substitutions($_[0], $_[1]);
 	&foreign_call($usermodule, "create_user", $_[0]);
@@ -1147,6 +1148,7 @@ if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/ &&
 	$extrauser = { %{$_[0]} };
 	$extrauser->{'user'} = &replace_atsign($extrauser->{'user'});
 	&foreign_call($usermodule, "set_user_envs", $extrauser, 'CREATE_USER', $extrauser->{'plainpass'}, [ ]);
+	$ENV{'USERADMIN_DOM'} = $_[1]->{'dom'} if ($_[1]);
 	&foreign_call($usermodule, "making_changes");
 	&userdom_substitutions($extrauser, $_[1]);
 	&foreign_call($usermodule, "create_user", $extrauser);
@@ -1402,6 +1404,7 @@ else {
 		}
 	&foreign_call($usermodule, "set_user_envs", $_[0], 'MODIFY_USER',
 		      $_[0]->{'plainpass'}, undef, $_[1], $_[1]->{'plainpass'});
+	$ENV{'USERADMIN_DOM'} = $_[2]->{'dom'} if ($_[2]);
 	&foreign_call($usermodule, "making_changes");
 	&userdom_substitutions($_[0], $_[2]);
 	&foreign_call($usermodule, "modify_user", $_[1], $_[0]);
@@ -1420,6 +1423,7 @@ else {
 					'MODIFY_USER', $_[0]->{'plainpass'},
 					undef, $oldextrauser,
 					$_[1]->{'plainpass'});
+			$ENV{'USERADMIN_DOM'} = $_[2]->{'dom'} if ($_[2]);
 			&foreign_call($usermodule, "making_changes");
 			&userdom_substitutions($extrauser, $_[2]);
 			&foreign_call($usermodule, "modify_user",
@@ -1794,7 +1798,7 @@ if ($_[2] && $_[2]->{'mail'}) {
 	}
 }
 
-# delete_user(&user, domain)
+# delete_user(&user, &domain)
 # Delete a mailbox user and all associated virtusers and aliases
 sub delete_user
 {
@@ -1834,6 +1838,7 @@ else {
 
 	# Delete the user
 	&foreign_call($usermodule, "set_user_envs", $_[0], 'DELETE_USER')
+	$ENV{'USERADMIN_DOM'} = $_[1]->{'dom'} if ($_[1]);
 	&foreign_call($usermodule, "making_changes");
 	&foreign_call($usermodule, "delete_user", $_[0]);
 	&foreign_call($usermodule, "made_changes");
@@ -1849,6 +1854,7 @@ if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 	local ($extrauser) = grep { $_->{'user'} eq $esc } @allusers;
 	if ($extrauser) {
 		&foreign_call($usermodule, "set_user_envs", $extrauser, 'DELETE_USER')
+		$ENV{'USERADMIN_DOM'} = $_[1]->{'dom'} if ($_[1]);
 		&foreign_call($usermodule, "making_changes");
 		&foreign_call($usermodule, "delete_user", $extrauser);
 		&foreign_call($usermodule, "made_changes");
