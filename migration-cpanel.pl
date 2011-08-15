@@ -667,8 +667,8 @@ if ($got{'mail'}) {
 		$uinfo->{'qquota'} = $quota{$muser};
 		$uinfo->{'quota'} = $quota{$muser};
 		$uinfo->{'mquota'} = $quota{$muser};
-		&create_user($uinfo, \%dom);
 		&create_user_home($uinfo, \%dom, 1);
+		&create_user($uinfo, \%dom);
 		$taken{$uinfo->{'uid'}}++;
 		local ($crfile, $crtype) = &create_mail_file($uinfo, \%dom);
 
@@ -992,8 +992,8 @@ if ($got{'mysql'}) {
 				}
 			else {
 				$myuinfo->{'uid'} = &allocate_uid(\%taken);
-				&create_user($myuinfo, \%dom);
 				&create_user_home($myuinfo, \%dom, 1);
+				&create_user($myuinfo, \%dom);
 				&create_mail_file($myuinfo, \%dom);
 				$taken{$myuinfo->{'uid'}}++;
 				$usermap{$myuinfo->{'user'}} = $myuinfo;
@@ -1066,10 +1066,10 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 			$fuinfo->{'shell'} = $ftp_shell->{'shell'};
 			delete($fuinfo->{'email'});
 			$usermap{$fuser} = $fuinfo;
-			&create_user($fuinfo, \%dom);
 			if (!$user->{'nocreatehome'}) {
 				&create_user_home($fuinfo, \%dom, 1);
 				}
+			&create_user($fuinfo, \%dom);
 			if (!$user->{'nomailfile'}) {
 				&create_mail_file($fuinfo, \%dom);
 				}

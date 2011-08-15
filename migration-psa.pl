@@ -429,8 +429,8 @@ foreach my $mailuser (@mailusers) {
 		# would be his own mailbox or offsite
 		$muinfo->{'email'} = lc($name)."\@".$dom;
 		}
-	&create_user($muinfo, \%dom);
 	&create_user_home($muinfo, \%dom, 1);
+	&create_user($muinfo, \%dom);
 	$taken{$muinfo->{'uid'}}++;
 	local ($crfile, $crtype) = &create_mail_file($muinfo, \%dom);
 
@@ -527,8 +527,8 @@ if ($got{'mysql'}) {
 			delete($myuinfo->{'email'});
 			$myuinfo->{'dbs'} = [ { 'type' => 'mysql',
 					        'name' => $name } ];
-			&create_user($myuinfo, \%dom);
 			&create_user_home($myuinfo, \%dom, 1);
+			&create_user($myuinfo, \%dom);
 			&create_mail_file($myuinfo, \%dom);
 			$taken{$myuinfo->{'uid'}}++;
 			$myucount++;

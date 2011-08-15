@@ -490,8 +490,8 @@ foreach my $name (keys %$mailusers) {
 	else {
 		delete($uinfo->{'email'});
 		}
-	&create_user($uinfo, \%dom);
 	&create_user_home($uinfo, \%dom, 1);
+	&create_user($uinfo, \%dom);
 	$taken{$uinfo->{'uid'}}++;
 	local ($crfile, $crtype) = &create_mail_file($uinfo, \%dom);
 
@@ -586,8 +586,8 @@ if ($got{'mysql'}) {
 			delete($myuinfo->{'email'});
 			$myuinfo->{'dbs'} = [ { 'type' => 'mysql',
 					        'name' => $name } ];
-			&create_user($myuinfo, \%dom);
 			&create_user_home($myuinfo, \%dom, 1);
+			&create_user($myuinfo, \%dom);
 			&create_mail_file($myuinfo, \%dom);
 			$taken{$myuinfo->{'uid'}}++;
 			$myucount++;

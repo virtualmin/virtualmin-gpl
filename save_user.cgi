@@ -487,15 +487,15 @@ else {
 		$err = &validate_user($d, $user);
 		&error($err) if ($err);
 
-		# Create the user and virtusers and alias
-		&create_user($user, $d);
-
 		if ($home && !$user->{'nocreatehome'} &&
 		    (!$user->{'maybecreatehome'} || !-d $home)) {
 			# Create his homedir, unless either this is a user
 			# who has none, or it already exists
 			&create_user_home($user, $d);
 			}
+
+		# Create the user and virtusers and alias
+		&create_user($user, $d);
 
 		# Send an email upon creation
 		if ($user->{'email'} || $newmailto) {

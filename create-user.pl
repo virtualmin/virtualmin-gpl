@@ -318,14 +318,14 @@ if ($lerr = &too_long($user->{'user'})) {
 $err = &validate_user($d, $user);
 &usage($err) if ($err);
 
-# Create the user and virtusers and alias
-&create_user($user, $d);
-
 if ($user->{'home'} && !$user->{'nocreatehome'} &&
     (!$user->{'maybecreatehome'} || !-d $user->{'home'})) {
 	# Create his homedir
 	&create_user_home($user, $d);
 	}
+
+# Create the user and virtusers and alias
+&create_user($user, $d);
 
 # Create an empty mail file, if needed
 if ($user->{'email'} && !$user->{'nomailfile'}) {

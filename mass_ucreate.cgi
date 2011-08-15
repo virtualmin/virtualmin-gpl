@@ -272,13 +272,13 @@ USER: foreach $line (@lines) {
 		next USER;
 		}
 
-	# Create the user and virtusers and alias
-	&create_user($user, $d);
-
 	if ($user->{'home'} && !$user->{'nocreatehome'}) {
 		# Create his homedir
 		&create_user_home($user, $d);
 		}
+
+	# Create the user and virtusers and alias
+	&create_user($user, $d);
 
 	# Create an empty mail file, if needed
 	if ($user->{'email'} && !$user->{'nomailfile'}) {
