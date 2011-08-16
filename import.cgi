@@ -275,6 +275,20 @@ if ($in{'confirm'}) {
 		print $text{'setup_done'},"<p>\n";
 		}
 
+	# Find any slave DNS servers with the domain
+	if ($dom{'dns'}) {
+		@slavehosts = ( );
+		foreach my $s (&bind8::list_slave_servers()) {
+			if (&exists_on_slave($dom{'dom'}, $s)) {
+				push(@slavehosts, $s->{'nsname'} ||
+						  $s->{'host'});
+				}
+			}
+		if (@slavehosts) {
+			$dom{'dns_slave'} = join(" ", @slavehosts);
+			}
+		}
+
 	# Create the domain details
 	&complete_domain(\%dom);
 	&find_html_cgi_dirs(\%dom);
