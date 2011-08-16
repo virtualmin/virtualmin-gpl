@@ -120,7 +120,7 @@ print &ui_hidden_table_end();
 
 $showmailquota = !$mailbox && $user->{'mailquota'};
 $showquota = !$mailbox && $user->{'unix'} && !$user->{'noquota'};
-$showhome = &can_mailbox_home() && $d && $d->{'home'} &&
+$showhome = &can_mailbox_home($user) && $d && $d->{'home'} &&
 	    !$mailbox && !$user->{'fixedhome'};
 
 if ($showmailquota || $showquota || $showhome) {

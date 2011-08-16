@@ -2787,10 +2787,15 @@ return &master_admin() ||
        $tmpl->{'ranges'} ne "none";
 }
 
-# Returns 1 if the current user can choose the home directory of mailboxes
+# can_mailbox_home(&user)
+# Returns 1 if the current Webmin user can choose the home directory of some
+# mailbox user
 sub can_mailbox_home
 {
-return &master_admin() || $config{'edit_homes'};
+local ($user) = @_;
+return &master_admin() ||
+       $config{'edit_homes'} == 1 ||
+       $config{'edit_homes'} == 2 && $user->{'webowner'};
 }
 
 # Returns 1 if the current user can create FTP mailboxes

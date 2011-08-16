@@ -288,7 +288,7 @@ else {
 
 	if (!$mailbox && !$user->{'fixedhome'} && !$user->{'brokenhome'}) {
 		# Find home
-		if (&can_mailbox_home() &&
+		if (&can_mailbox_home($user) &&
 		    $d && $d->{'home'} && !$in{'home_def'}) {
 			$in{'home'} =~ /^\S+$/ && $in{'home'} !~ /\.\./ ||
 				&error($text{'user_ehome'});
