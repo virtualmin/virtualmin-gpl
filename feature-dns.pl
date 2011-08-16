@@ -534,6 +534,19 @@ if (@delslaves) {
 &register_post_action(\&restart_bind, $d);
 }
 
+# exists_on_slave(zone-name, &slave)
+# Returns "OK" if some zone exists on the given DNS slave, undef if not, or
+# an error message otherwise.
+sub exists_on_slave
+{
+my ($name, $slave) = @_;
+&remote_error_setup(\&bind8::slave_error_handler);
+&remote_foreign_require($slave, "bind8", "bind8-lib.pl");
+return $bind8::slave_error if ($bind8::slave_error);
+my $z = &remote_foreign_call($slave, "bind8", "get_zone_name", $name, "any");
+return $z ? "OK" : undef;
+}
+
 # modify_dns(&domain, &olddomain)
 # If the IP for this server has changed, update all records containing the old
 # IP to the new.
@@ -1330,6 +1343,24 @@ if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
 			}
 		}
 	}
+
+# Check slave servers
+my @slaves = &bind8::list_slave_servers();
+foreach my $sn (split(/\s+/, $d->{'dns_slave'})) {
+	my ($slave) = grep { $_->{'nsname'} eq $sn ||
+			     $_->{'host'} eq $sn } @slaves;
+	if ($slave) {
+		my $ok = &exists_on_slave($d->{'dom'}, $slave);
+		if (!$ok) {
+			return &text('validate_ednsslave', $slave->{'host'});
+			}
+		elsif ($ok ne "OK") {
+			return &text('validate_ednsslave2',
+				     $slave->{'host'}, $ok);
+			}
+		}
+	}
+
 return undef;
 }
 
