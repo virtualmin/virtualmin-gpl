@@ -1345,18 +1345,21 @@ if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
 	}
 
 # Check slave servers
-my @slaves = &bind8::list_slave_servers();
-foreach my $sn (split(/\s+/, $d->{'dns_slave'})) {
-	my ($slave) = grep { $_->{'nsname'} eq $sn ||
-			     $_->{'host'} eq $sn } @slaves;
-	if ($slave) {
-		my $ok = &exists_on_slave($d->{'dom'}, $slave);
-		if (!$ok) {
-			return &text('validate_ednsslave', $slave->{'host'});
-			}
-		elsif ($ok ne "OK") {
-			return &text('validate_ednsslave2',
-				     $slave->{'host'}, $ok);
+if (!$d->{'dns_submode'}) {
+	my @slaves = &bind8::list_slave_servers();
+	foreach my $sn (split(/\s+/, $d->{'dns_slave'})) {
+		my ($slave) = grep { $_->{'nsname'} eq $sn ||
+				     $_->{'host'} eq $sn } @slaves;
+		if ($slave) {
+			my $ok = &exists_on_slave($d->{'dom'}, $slave);
+			if (!$ok) {
+				return &text('validate_ednsslave',
+					     $slave->{'host'});
+				}
+			elsif ($ok ne "OK") {
+				return &text('validate_ednsslave2',
+					     $slave->{'host'}, $ok);
+				}
 			}
 		}
 	}
