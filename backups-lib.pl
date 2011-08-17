@@ -1404,6 +1404,22 @@ if ($_[3]->{'reuid'}) {
 
 local $vcount = 0;
 if ($ok) {
+	# Restore any Virtualmin settings
+	if (@$vbs) {
+		&$first_print($text{'restore_global2'});
+		&$indent_print();
+		foreach my $v (@$vbs) {
+			local $vfile = "$restoredir/virtualmin_".$v;
+			if (-r $vfile) {
+				local $vfunc = "virtualmin_restore_".$v;
+				local $ok = &$vfunc($vfile, $vbs);
+				$vcount++;
+				}
+			}
+		&$outdent_print();
+		&$second_print($text{'setup_done'});
+		}
+
 	# Fill in missing domain details
 	foreach $d (grep { $_->{'missing'} } @$doms) {
 		$d = &get_domain(undef,
@@ -1720,22 +1736,6 @@ if ($ok) {
 		# Re-setup Webmin user
 		&refresh_webmin_user($d);
 		&$outdent_print();
-		}
-
-	# Restore any Virtualmin settings
-	if (@$vbs) {
-		&$first_print($text{'restore_global2'});
-		&$indent_print();
-		foreach my $v (@$vbs) {
-			local $vfile = "$restoredir/virtualmin_".$v;
-			if (-r $vfile) {
-				local $vfunc = "virtualmin_restore_".$v;
-				local $ok = &$vfunc($vfile, $vbs);
-				$vcount++;
-				}
-			}
-		&$outdent_print();
-		&$second_print($text{'setup_done'});
 		}
 	}
 
