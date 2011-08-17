@@ -20,6 +20,7 @@
 	- shortly
 	- ocPortal https://www.virtualmin.com/node/16035
 	- Contao https://www.virtualmin.com/node/16164
+	- net2ftp https://www.virtualmin.com/node/19024
 
  - WebNIC registrar support
 	- See email from Winnie Lee
@@ -57,3 +58,7 @@
 	- https://www.virtualmin.com/node/18405
 	- CHANGELOG
 	- backup/restore
+
+ - Plesk upper-case domain support
+	- Email from Regan Wallace
+	- /backup/plesk/backup_SyntaxNode.net_info_1108110206.xml.tgz
