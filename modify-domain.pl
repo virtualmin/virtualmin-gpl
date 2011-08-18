@@ -317,8 +317,9 @@ if ($planfeatures) {
 	$d->{'parent'} && &usage("--plan-features can only be used with top ".
 				 "level virtual servers");
 	$plan ||= &get_plan($d->{'plan'});
-	$plan->{'featurelimits'} || &usage("--plan-features cannot be used ".
-				   "unless the plan has default features");
+	$plan->{'featurelimits'} && $plan->{'featurelimits'} ne 'none' ||
+		&usage("--plan-features cannot be used unless the plan ".
+		       "has default features");
 	}
 
 # Find all other domains to be changed

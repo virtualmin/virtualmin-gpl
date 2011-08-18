@@ -437,6 +437,7 @@ $owner ||= $domain;
 $tfl = $plan->{'featurelimits'};
 if ($planfeatures && $tfl) {
 	# From limits on selected plan
+	$tfl eq 'none' && &usage("Selected plan has no features enabled");
 	%flimits = map { $_, 1 } split(/\s+/, $tfl);
 	%feature = ( 'virt' => $feature{'virt'} );
 	%plugin = ( );

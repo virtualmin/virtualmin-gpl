@@ -85,9 +85,9 @@ else {
 		}
 	else {
 		# Explicitly selected
-		$in{'featurelimits'} || &error($text{'tmpl_efeaturelimits'});
+		#$in{'featurelimits'} || &error($text{'tmpl_efeaturelimits'});
 		$plan->{'featurelimits'} =
-			join(" ", split(/\0/, $in{'featurelimits'}));
+			join(" ", split(/\0/, $in{'featurelimits'})) || "none";
 		}
 
 	# Save capability limits

@@ -94,6 +94,9 @@ while(@ARGV > 0) {
 			}
 		$plan->{'featurelimits'} = join(" ", @fl);
 		}
+	elsif ($a eq "--no-features") {
+		$plan->{'featurelimits'} = 'none';
+		}
 	elsif ($a eq "--capabilities") {
 		# Edit capabilities
 		@cl = split(/\s+/, shift(@ARGV));
@@ -154,7 +157,7 @@ foreach $l (@plan_maxes) {
 foreach $r (@plan_restrictions) {
 	print "                      [--$r]\n";
 	}
-print "                      [--features \"web dns mail ...\"]\n";
+print "                      [--features \"web dns mail ...\" | --no-features]\n";
 print "                      [--capabilities \"domain users aliases ...\"]\n";
 if (defined(&list_scripts)) {
 	print "                      [--scripts \"name name ...\"]\n";

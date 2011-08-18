@@ -107,6 +107,10 @@ while(@ARGV > 0) {
 		# Allow all features
 		$newplan->{'featurelimits'} = '';
 		}
+	elsif ($a eq "--no-features") {
+		# Remove all features
+		$newplan->{'featurelimits'} = 'none';
+		}
 
 	elsif ($a eq "--capabilities") {
 		# Edit capabilities
@@ -230,7 +234,7 @@ foreach $r (@plan_restrictions) {
 	print "                      [--$r | --no-$r]\n";
 	}
 print "                      [--features \"web dns mail ...\" |\n";
-print "                       --auto-features]\n";
+print "                       --auto-features | --no-features]\n";
 print "                      [--capabilities \"domain users aliases ...\" |\n";
 print "                       --auto-capabilities]\n";
 if (defined(&list_resellers)) {
