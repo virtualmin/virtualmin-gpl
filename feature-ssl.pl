@@ -11,6 +11,7 @@ $default_web_sslport = $config{'web_sslport'} || 443;
 sub check_warnings_ssl
 {
 local ($d, $oldd) = @_;
+&require_web();
 local $tmpl = &get_template($d->{'template'});
 local $defport = $tmpl->{'web_sslport'} || 443;
 local $port = $d->{'web_sslport'} || $defport;
@@ -18,6 +19,10 @@ local $port = $d->{'web_sslport'} || $defport;
 # Check if Apache supports SNI, which makes clashing certs not so bad
 local @dirs = &list_apache_directives();
 local ($sni) = grep { lc($_->[0]) eq lc("SSLStrictSNIVHostCheck") } @dirs;
+if (!$sni && $apache::httpd_modules{'mod_ssl'} >= 2.22) {
+	# Assume SNI works for Apache 2.2.2 or later
+	$sni = 1;
+	}
 
 if ($d->{'virt'}) {
 	# Has a private IP
