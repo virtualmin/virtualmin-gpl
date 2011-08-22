@@ -2586,6 +2586,7 @@ newbw_desc=This page can be used to enable bandwidth accounting for virtual serv
 newbw_active=Bandwidth monitoring active?
 newbw_step=Hours between collection
 newbw_owner=Send email to server owners when over limit?
+newbw_backup=Include backup transfers in usage?
 newbw_email=Also send email to
 newbw_period=Accounting period
 newbw_past_week=Weekly

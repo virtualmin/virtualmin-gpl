@@ -41,8 +41,7 @@ print &ui_table_row(&hlink($text{'newbw_maxdays'}, "bandwidth_maxdays"),
 
 # Show email to owner field
 print &ui_table_row(&hlink($text{'newbw_owner'}, "bandwidth_bw_owner"),
-		    &ui_radio("bw_owner", $config{'bw_owner'} ? 1 : 0,
-			      [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+		    &ui_yesno_radio("bw_owner", $config{'bw_owner'}));
 
 # Show email to other address
 print &ui_table_row(&hlink($text{'newbw_email'}, "bandwidth_bw_email"),
@@ -60,8 +59,11 @@ print &ui_table_row(&hlink($text{'newbw_disable'}, "bandwidth_bw_disable"),
 
 # Show field for re-enable option
 print &ui_table_row(&hlink($text{'newbw_enable'}, "bandwidth_bw_enable"),
-		    &ui_radio("bw_enable", $config{'bw_enable'} ? 1 : 0,
-			      [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+		    &ui_yesno_radio("bw_enable", $config{'bw_enable'}));
+
+# Include FTP and SSH transfers for backups?
+print &ui_table_row(&hlink($text{'newbw_backup'}, "bandwidth_bw_backup"),
+		    &ui_yesno_radio("bw_backup", $config{'bw_backup'}));
 
 print &ui_hidden_table_end("table1");
 

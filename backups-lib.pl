@@ -3033,14 +3033,16 @@ return \%log;
 sub record_backup_bandwidth
 {
 local ($d, $inb, $outb, $start, $end) = @_;
-local $bwinfo = &get_bandwidth($d);
-local $startday = int($start / (24*60*60));
-local $endday = int($end / (24*60*60));
-for(my $day=$startday; $day<=$endday; $day++) {
-	$bwinfo->{"backup_".$day} += $outb / ($endday - $startday + 1);
-	$bwinfo->{"restore_".$day} += $inb / ($endday - $startday + 1);
+if ($config{'bw_backup'}) {
+	local $bwinfo = &get_bandwidth($d);
+	local $startday = int($start / (24*60*60));
+	local $endday = int($end / (24*60*60));
+	for(my $day=$startday; $day<=$endday; $day++) {
+		$bwinfo->{"backup_".$day} += $outb / ($endday - $startday + 1);
+		$bwinfo->{"restore_".$day} += $inb / ($endday - $startday + 1);
+		}
+	&save_bandwidth($d, $bwinfo);
 	}
-&save_bandwidth($d, $bwinfo);
 }
 
 # check_backup_limits(as-owner, on-schedule, dest)

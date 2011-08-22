@@ -36,6 +36,7 @@ $config{'bw_period'} = $in{'bw_period'};
 $config{'bw_maxdays'} = $in{'bw_maxdays_def'} ? undef : $in{'bw_maxdays'};
 $config{'bw_notify'} = $in{'bw_notify'};
 $config{'bw_owner'} = $in{'bw_owner'};
+$config{'bw_backup'} = $in{'bw_backup'};
 $config{'bw_email'} = $in{'bw_email'};
 $config{'bw_disable'} = $in{'bw_disable'};
 $config{'bw_enable'} = $in{'bw_enable'};
