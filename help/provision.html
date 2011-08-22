@@ -1,0 +1,25 @@
+<header>Cloudmin Services Client</header>
+
+This page allows you to configure Virtualmin to connect to a Cloudmin Services
+server, so that MySQL databases, DNS zones and other services can be offloaded
+to remote systems. Ideally it should be used before any virtual servers have
+been created, as mixing locally served and remote databases and zones is
+inefficient. <p>
+
+The fields that need to be completed are :
+<dl>
+<dt><b>Cloudmin services master</b>
+<dd>This hostname of a Cloudmin machine with the Cloudmin Services plugin installed. This might be run by you, your hosting company or VPS provider.<p>
+
+<dt><b>Port number</b>
+<dd>This should almost always be set to 10000, which is the default Webmin / Cloudmin port.<p>
+
+<dt><b>Username for server</b>
+<dd>This field must contain the username of a system owner account on the Cloudmin Services master that has permission to create databases, DNS zones or other services.
+
+<dt><b>Features to host</b>
+<dd>This section allows you to select which Virtualmin features will be offloaded to remote systems. Only those that your account on the master system is allowed to provision can be selected.
+
+</dl>
+
+<footer>
