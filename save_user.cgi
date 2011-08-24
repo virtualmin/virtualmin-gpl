@@ -562,7 +562,7 @@ else {
 			# Save aliases
 			if ($in{'simplemode'} eq 'simple') {
 				# From simple form
-				$simple = &get_simple_alias($d, $user);
+				$simple = &get_simple_alias($d, \%old);
 				&parse_simple_form($simple, \%in, $d, 1, 1, 1,
 						   $user->{'user'});
 				$simple->{'from'} = $fullemail;
