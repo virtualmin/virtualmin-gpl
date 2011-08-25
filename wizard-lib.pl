@@ -121,7 +121,14 @@ if (defined($in->{'clamd'})) {
 			for(my $try=0; $try<10; $try++) {
 				$last_err = &test_virus_scanner("clamdscan");
 				last if (!$last_err);
-				sleep($try);
+				if ($try == 0 && &has_command("freshclam")) {
+					# First time around, try running
+					# freshclam
+					&backquote_with_timeout("freshclam",60);
+					}
+				else {
+					sleep($try);
+					}
 				}
 			return &text('wizard_eclamdtest', $last_err)
 				if ($last_err);
