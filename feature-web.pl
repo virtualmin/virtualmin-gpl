@@ -1074,6 +1074,10 @@ if ($_[0]) {
 	# Totally stop and start
 	&apache::stop_apache();
 	sleep(5);
+	my $try = 0;
+	while($try < 10 && &get_apache_pid()) {
+		$try++;		# Wait up till 10 seconds for final exit
+		}
 	&apache::start_apache();
 	}
 else {
