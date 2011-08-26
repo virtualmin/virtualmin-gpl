@@ -919,12 +919,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 				}
 			}
 		&close_tempfile(RECS);
-		local $tmaster = $tmpl->{'dns_master'} eq 'none' ? undef :
-					$tmpl->{'dns_master'};
-		local $master = $tmaster ||
-				$bconfig{'default_prins'} ||
-				&get_system_hostname();
-		$master .= "." if ($master !~ /\.$/);
+		local $master = &get_master_nameserver($tmpl);
 		local $email = $bconfig{'tmpl_email'} ||
 			       "root\@$master";
 		$email = &bind8::email_to_dotted($email);
@@ -979,8 +974,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 				}
 
 			# Add NS records from template
-			foreach my $ns (split(/\s+/, $tmpl->{'dns_ns'})) {
-				$ns .= "." if ($ns !~ /\.$/);
+			foreach my $ns (&get_slave_nameservers($tmpl)) {
 				&bind8::create_record($file, "@", undef, "IN",
 						      "NS", $ns);
 				push(@created_ns, $ns);
@@ -1120,13 +1114,52 @@ RECORD: foreach my $r (@$recs) {
 			}
 		}
 	$r->{'name'} =~ s/\Q$olddom\E\.$/$dom\./i;
-	foreach my $v (@{$r->{'values'}}) {
-		$v =~ s/\Q$olddom\E/$dom/i;
-		$v =~ s/\Q$oldip\E$/$ip/i;
+
+	# Change domain name to alias in record values, unless it is an NS
+	# that is set in the template
+	my %tmplns;
+	my $master = &get_master_nameserver($tmpl);
+	$tmplns{$master} = 1;
+	foreach my $ns (&get_slave_nameservers($tmpl)) {
+		$tmplns{$ns} = 1;
+		}
+	if ($r->{'type'} ne 'NS' || !$tmplns{$r->{'values'}->[0]}) {
+		foreach my $v (@{$r->{'values'}}) {
+			$v =~ s/\Q$olddom\E/$dom/i;
+			$v =~ s/\Q$oldip\E$/$ip/i;
+			}
 		}
 	&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
 			      'IN', $r->{'type'}, &join_record_values($r));
 	}
+}
+
+# get_master_nameserver(&template)
+# Returns default primary NS name
+sub get_master_nameserver
+{
+local ($tmpl) = @_;
+&require_bind();
+local $tmaster = $tmpl->{'dns_master'} eq 'none' ? undef :
+			$tmpl->{'dns_master'};
+local $master = $tmaster ||
+		$bconfig{'default_prins'} ||
+		&get_system_hostname();
+$master .= "." if ($master !~ /\.$/);
+return $master;
+}
+
+# get_slave_nameserver(&template)
+# Returns default additional slave NS names
+sub get_slave_nameservers
+{
+local ($tmpl) = @_;
+local @rv;
+foreach my $ns (split(/\s+/, $tmpl->{'dns_ns'})) {
+	$ns .= "." if ($ns !~ /\.$/);
+	push(@rv, $ns);
+	}
+return @rv;
 }
 
 # add_webmail_dns_records(&domain)
