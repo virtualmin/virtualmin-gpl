@@ -1053,8 +1053,13 @@ return 0;
 # Tell Apache to re-read its config file
 sub restart_apache
 {
-&$first_print($_[0] ? $text{'setup_webpid2'} : $text{'setup_webpid'});
+local ($restart) = @_;
 &require_apache();
+if ($restart && $apache::httpd_modules{'core'} >= 2.2) {
+	# Apache 2.2 doesn't need a full restart to open ports on new IPs
+	$restart = 0;
+	}
+&$first_print($restart ? $text{'setup_webpid2'} : $text{'setup_webpid'});
 if ($config{'check_apache'}) {
 	# Do a config check first
 	local $err = &apache::test_config();
@@ -1070,7 +1075,7 @@ if (!$pid || !kill(0, $pid)) {
 	&$second_print($text{'setup_notrun'});
 	return 0;
 	}
-if ($_[0]) {
+if ($restart) {
 	# Totally stop and start
 	&apache::stop_apache();
 	sleep(5);
