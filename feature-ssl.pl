@@ -209,7 +209,7 @@ if ($chained) {
 
 &release_lock_web($_[0]);
 &$second_print($text{'setup_done'});
-&register_post_action(\&restart_apache, 1);
+&register_post_action(\&restart_apache, $d->{'virt'} ? 1 : 0);
 }
 
 # modify_ssl(&domain, &olddomain)
