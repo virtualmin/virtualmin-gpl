@@ -401,7 +401,9 @@ else {
 # 1 if yes, or -1 if we can't tell (due to a non-supported OS).
 sub check_clamd_status
 {
-local @pids = grep { $_ != $$ } &find_byname("clamd");
+local %avahi_pids = map { $_, 1 }
+			grep { $_ != $$ } &find_byname("avahi-daemon");
+local @pids = grep { $_ != $$ && !$avahi_pids{$_} } &find_byname("clamd");
 if (@pids) {
 	# Running already, so we assume everything is cool
 	return 1;
