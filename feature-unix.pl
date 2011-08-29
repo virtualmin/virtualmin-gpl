@@ -715,12 +715,15 @@ print &ui_table_row(&hlink($text{'tmpl_quotatype'}, "template_quotatype"),
 		[ "soft", $text{'tmpl_soft'} ] ]));
 
 # Domain owner primary group
-print &ui_table_row(&hlink($text{'tmpl_ugroup'}, "template_ugroup_mode"),
-    &none_def_input("ugroup", $tmpl->{'ugroup'}, $text{'tmpl_ugroupsel'},
-		    0, 0, undef, [ "ugroup" ])."\n".
-    &ui_textbox("ugroup", $tmpl->{'ugroup'} eq "none" ?
-				"" : $tmpl->{'ugroup'}, 13)."\n".
-    &group_chooser_button("ugroup", 0, 1));
+if ($config{'show_ugroup'}) {
+	print &ui_table_row(&hlink($text{'tmpl_ugroup'},
+				   "template_ugroup_mode"),
+	    &none_def_input("ugroup", $tmpl->{'ugroup'},$text{'tmpl_ugroupsel'},
+			    0, 0, undef, [ "ugroup" ])."\n".
+	    &ui_textbox("ugroup", $tmpl->{'ugroup'} eq "none" ?
+					"" : $tmpl->{'ugroup'}, 13)."\n".
+	    &group_chooser_button("ugroup", 0, 1));
+	}
 
 # Domain owner secondary group
 print &ui_table_row(&hlink($text{'tmpl_sgroup'}, "template_sgroup"),
@@ -749,9 +752,11 @@ local ($tmpl) = @_;
 $tmpl->{'quotatype'} = $in{'quotatype'};
 
 # Save domain owner primary group option
-$tmpl->{'ugroup'} = &parse_none_def("ugroup");
-if ($in{"ugroup_mode"} == 2) {
-	getgrnam($in{'ugroup'}) || &error($text{'tmpl_eugroup'});
+if ($config{'show_ugroup'}) {
+	$tmpl->{'ugroup'} = &parse_none_def("ugroup");
+	if ($in{"ugroup_mode"} == 2) {
+		getgrnam($in{'ugroup'}) || &error($text{'tmpl_eugroup'});
+		}
 	}
 
 # Save domain owner secondary group
