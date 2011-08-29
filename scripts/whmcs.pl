@@ -154,7 +154,7 @@ elsif ($out =~ /suspended/) {
 	return "WHMCS licence key has been suspended";
 	}
 elsif ($out =~ /invalid/) {
-	return "WHMCS licence key is not allowed in this location";
+	return "WHMCS license key is registered to another IP address or directory. For more information, or to reissue your WHMCS  license, please see "My Licenses and Services" in the Client Area at whmcs.com.";
 	}
 elsif ($out !~ /valid/) {
 	return "Unknown WHMCS licence check code : $out";
