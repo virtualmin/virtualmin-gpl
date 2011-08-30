@@ -533,7 +533,12 @@ return ( [ $text{'sysinfo_webalizer'}, $vers ] );
 sub links_webalizer
 {
 local ($d) = @_;
-local $log = &resolve_links(&get_apache_log($d->{'dom'}, $d->{'web_port'}));
+&require_webalizer();
+local $log = &get_apache_log($d->{'dom'}, $d->{'web_port'});
+local $cfg = &webalizer::config_file_name($log);
+if (!-r $cfg) {
+	$log = &resolve_links($log);
+	}
 local %waccess = &get_module_acl(undef, "webalizer");
 if ($waccess{'view'}) {
 	# Can view report only
