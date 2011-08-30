@@ -1566,7 +1566,7 @@ elsif ($config{'mail_system'} == 0) {
 	local $alias = $_[0]->{'alias'};
 	local $oldalias = $alias ? { %$alias } : undef;
 	local @psto = map { $_ =~ /^BOUNCE\s+(.*)$/ ? "BOUNCE" : $_ } @to;
-	$_[0]->{'from'} =~ /^(\S*)\@(\S+)$/;
+	$_[1]->{'from'} =~ /^(\S*)\@(\S+)$/;
 	local $an = ($1 || "default")."-".$2;
 	if (&needs_alias(@psto) && !$alias) {
 		# Alias needs to be created and virtuser updated
