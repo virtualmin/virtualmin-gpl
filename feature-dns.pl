@@ -2342,7 +2342,7 @@ if ($d->{'provision_dns'}) {
 		local $absdir = $abstemp;
 		$absdir =~ s/\/[^\/]+$//;
 		if (!-d $absdir) {
-			&make_dir($absdir, 0755);
+			&make_dir($absdir, 0755, 1);
 			}
 		}
 	local $info = { 'domain' => $d->{'dom'},
