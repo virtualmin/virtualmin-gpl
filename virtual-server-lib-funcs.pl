@@ -3570,7 +3570,8 @@ local $subject = $config{'new'.$tmode.'_subject'};
 local @ccs;
 push(@ccs, $config{'new'.$tmode.'_cc'}) if ($config{'new'.$tmode.'_cc'});
 push(@ccs, $d->{'emailto'}) if ($config{'new'.$tmode.'_to_owner'});
-if ($config{'new'.$tmode.'_to_reseller'} && $d->{'reseller'}) {
+if ($config{'new'.$tmode.'_to_reseller'} && $d->{'reseller'} &&
+    defined(&get_reseller)) {
 	local $resel = &get_reseller($d->{'reseller'});
 	if ($resel && $resel->{'acl'}->{'email'}) {
 		push(@ccs, $resel->{'acl'}->{'email'});
@@ -3818,7 +3819,7 @@ sub get_global_from_address
 local ($d) = @_;
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 local $rv = $config{'from_addr'} || &mailboxes::get_from_address();
-if ($d && $d->{'reseller'}) {
+if ($d && $d->{'reseller'} && defined(&get_reseller)) {
 	local $resel = &get_reseller($d->{'reseller'});
 	if ($resel && $resel->{'acl'}->{'email'}) {
 		$rv = $resel->{'acl'}->{'email'};
