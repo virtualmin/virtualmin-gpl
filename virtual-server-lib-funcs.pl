@@ -2743,12 +2743,15 @@ sub can_edit_exclude
 return !$access{'admin'};	# Any except extra admins
 }
 
-sub can_edit_spf
-{
+# can_edit_spf(&domain)
 # Allow master admin, resellers, domain owners with BIND record access.
 # Don't allow extra admins.
+sub can_edit_spf
+{
+local ($d) = @_;
 return &master_admin() || &reseller_admin() ||
-       !$access{'admin'} && &foreign_available("bind8");
+       !$access{'admin'} && ($d->{'provision_dns'} ||
+			     &foreign_available("bind8"));
 }
 
 sub can_edit_mail
@@ -10325,7 +10328,8 @@ if ($d->{'web'} && &can_edit_phpver() &&
 		  });
 	}
 
-if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} && &can_edit_spf()) {
+if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} &&
+    &can_edit_spf($d)) {
 	# SPF settings button
 	push(@rv, { 'page' => 'edit_spf.cgi',
 		    'title' => $text{'edit_spf'},
@@ -10334,7 +10338,7 @@ if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} && &can_edit_spf()) {
 		  });
 	}
 
-if ($d->{'dns'} && &can_edit_spf()) {
+if ($d->{'dns'} && &can_edit_spf($d)) {
 	# DNS records button
 	push(@rv, { 'page' => 'list_records.cgi',
 		    'title' => $text{'edit_records'},
