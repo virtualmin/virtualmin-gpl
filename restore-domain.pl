@@ -137,7 +137,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--virtualmin") {
 		$v = shift(@ARGV);
 		&indexof($v, @virtualmin_backups) >= 0 ||
-			&usage("Unknown --virtualmin option. Available options are : ".join(" ", @virtualmin_backups));
+			&usage("Unknown --virtualmin option $v. Available options are : ".join(" ", @virtualmin_backups));
 		push(@vbs, $v);
 		}
 	elsif ($a eq "--all-virtualmin") {
