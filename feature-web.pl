@@ -1539,7 +1539,9 @@ if ($virt) {
 					$text{'phpmode_short_'.$fix}));
 			}
 		else {
-			# Looks good
+			# Looks good .. but re-save anyway, to update
+			# compatible directives
+			save_domain_php_mode($_[0], $mode);
 			&$second_print(&text('restore_okmode',
 					$text{'phpmode_short_'.$mode}));
 			}
