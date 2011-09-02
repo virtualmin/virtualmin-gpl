@@ -301,6 +301,13 @@ if ($config{'php_vars'} =~ /^memory_limit=32M/) {
 	&save_module_config();
 	}
 
+# Enable checking for latest scripts
+if ($config{'scriptlatest_enabled'} eq '') {
+	$config{'scriptlatest_enabled'} = 1;
+	&save_module_config();
+	&setup_scriptlatest_job(1);
+	}
+
 # Prevent an un-needed module config check
 if (!$cerr) {
 	$config{'last_check'} = time()+1;

@@ -63,5 +63,7 @@
 	- Email from Regan Wallace
 	- /backup/plesk/backup_SyntaxNode.net_info_1108110206.xml.tgz
 
- - Enable latest script checking by default
-	- Unless already disabled
+ - Button to fix permissions
+	- http://www.virtualmin.com/node/19369
+	- API too
+	- CHANGELOG
