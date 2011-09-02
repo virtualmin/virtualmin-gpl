@@ -2430,7 +2430,10 @@ local $tmpl = &get_template($d->{'template'});
 local $defip = &get_default_ip();
 local $spf = { 'a' => 1, 'mx' => 1,
 	       'a:' => [ $d->{'dom'} ],
-	       'ip4:' => [ $defip ] };
+	       'ip4:' => [ ] };
+if ($defip ne "127.0.0.1") {
+	push(@{$spf->{'ip4:'}}, $defip);
+	}
 local $hosts = &substitute_domain_template($tmpl->{'dns_spfhosts'}, $d);
 foreach my $h (split(/\s+/, $hosts)) {
 	if (&check_ipaddress($h) ||
