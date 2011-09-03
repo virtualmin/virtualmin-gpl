@@ -2793,6 +2793,7 @@ tmpl_ugroupsel=Selected group
 tmpl_eugroup=Missing or invalid default Unix group
 tmpl_esgroup=Missing or invalid secondary Unix group
 tmpl_ushell=Initial Unix shell
+tmpl_uplainpass=Store clear text passwords?
 tmpl_ushelldef=Default from Custom Shells page
 tmpl_quota=Quota for entire server
 tmpl_uquota=Quota for server administrator user
@@ -3982,11 +3983,16 @@ newvalidate_doing=Beginning validation of selected virtual servers. Any problems
 newvalidate_return=validation form
 newvalidate_tabval=Validate Now
 newvalidate_tabsched=Scheduled Validation
+newvalidate_tabsfix=Fix Permissions
 newvalidate_sched=Validate on schedule
 newvalidate_email=Send email report to
 newvalidate_config=Also check Virtualmin configuration?
 newvalidate_always=Send email even if no problems are found?
 newvalidate_err2=Failed to save validation settings
+newvalidate_desc3=This page allows you to fix file ownerships on some or all virtual servers. It can be useful if files have been edited or created by <tt>root</tt>, and are now owned by the wrong user.
+newvalidate_fixservers=Virtual servers to fix
+newvalidate_fix=Fix Permissions Now
+newvalidate_header3=Permissions fix options
 
 validate_edir=Home directory $1 does not exist
 validate_ediruser=Home directory $1 is owned by $2 instead of $3
@@ -5673,5 +5679,10 @@ mxv_unsupported=Only Sendmail and Postfix are supported for restricting relaying
 mxv_rrm=The $1 directive is not set in the Postfix configuration
 mxv_eaccess=The spam control (access_db) feature is not enabled in the Sendmail configuration
 mxv_eaccessfile=The spam control (access_db) file $1 does not exist yet
+
+fixperms_err=Failed to fix permissions
+fixperms_edoms=No virutal servers selected
+fixperms_title=Fixing Permissions
+fixperms_dom=Fixing file ownership and permissions for $1 ..
 
 __norefs=1

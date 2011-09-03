@@ -7539,6 +7539,8 @@ push(@rv, { 'id' => 0,
 	    'dbgroup' => $config{'dbgroup'} || "none",
 	    'othergroups' => $config{'othergroups'} || "none",
 	    'quotatype' => $config{'hard_quotas'} ? "hard" : "soft",
+	    'plainpass' => $config{'plainpass'} eq '' ? 1 :
+				$config{'plainpass'},
 	    'append_style' => $config{'append_style'},
 	    'domalias' => $config{'domalias'} || "none",
 	    'domalias_type' => $config{'domalias_type'} || 0,
@@ -7831,6 +7833,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'othergroups'} = $tmpl->{'othergroups'} eq 'none' ? undef :
 			     	 $tmpl->{'othergroups'};
 	$config{'hard_quotas'} = $tmpl->{'quotatype'} eq "hard" ? 1 : 0;
+	$config{'plainpass'} = $tmpl->{'plainpass'};
 	$config{'append_style'} = $tmpl->{'append_style'};
 	$config{'domalias'} = $tmpl->{'domalias'} eq 'none' ? undef :
 			      $tmpl->{'domalias'};
