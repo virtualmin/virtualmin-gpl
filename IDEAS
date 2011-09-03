@@ -62,3 +62,15 @@
  - Plesk upper-case domain support
 	- Email from Regan Wallace
 	- /backup/plesk/backup_SyntaxNode.net_info_1108110206.xml.tgz
+
+ - Hashed password feature
+	- Template level
+	- Domain level, inherit from template
+	- Mailbox users too
+	- Changable with modify-domain
+	- All calls to create_virtual_server need to call
+		generate_domain_password_hashes
+	- What about MySQL - Virtualmin needs it to login
+		- Force generation of separate random password
+	- Dirk Ertner <dec@multiply.de>
+	- CHANGELOG

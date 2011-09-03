@@ -2243,6 +2243,63 @@ else {
 	}
 }
 
+# generate_password_hashes(&user, text)
+# Given a password, returns a hash ref of it hashed into different formats.
+# Keys returned are :
+# md5 - MD5 hash
+# crypt - Unix crypt
+# unix - Appropriate hash for Unix user
+# mysql - MySQL password hash
+sub generate_password_hashes
+{
+local ($user, $pass) = @_;
+&require_useradmin();
+local %rv;
+local $salt = $user->{'pass'} || substr(time(), -2);
+$salt =~ s/^\!//;
+$rv{'crypt'} = &unix_crypt($pass, $salt);
+if (!&useradmin::check_md5()) {
+	$rv{'md5'} = &useradmin::encrypt_md5($pass);
+	}
+$rv{'unix'} = &encrypt_user_password($user, $pass);
+if ($config{'mysql'}) {
+	&require_mysql();
+	local $qpass = &mysql_escape($pass);
+	local $d = &mysql::execute_sql_safe("select $password_func('$qpass')");
+	$rv{'myql'} = $d->{'data'}->[0]->[0];
+	}
+return \%rv;
+}
+
+# generate_domain_password_hashes(&domain)
+# Updates a domain object with the appropriate password hash fields. For use
+# when creating a new domain.
+sub generate_domain_password_hashes
+{
+local ($d) = @_;
+local $tmpl = &get_template($d->{'template'});
+return if (!$tmpl->{'hashpass'});	# Hashing disabled
+if ($d->{'parent'}) {
+	# Just copy from parent
+	local $parent = &get_domain($d->{'parent'});
+	foreach my $k ('enc_pass', 'mysql_enc_pass', 'crypt_enc_pass',
+		       'md5_enc_pass') {
+		$d->{$k} = $parent->{$k};
+		}
+	}
+else {
+	# Hash and store
+	# XXX random mysql pass??
+	local $fakeuinfo = { 'user' => $d->{'user'} };
+	local $hashes = &generate_password_hashes($fakeuinfo, $d->{'pass'});
+	$d->{'enc_pass'} = $hashes->{'unix'};
+	$d->{'mysql_enc_pass'} = $hashes->{'mysql'};
+	$d->{'crypt_enc_pass'} = $hashes->{'crypt'};
+	$d->{'md5_enc_pass'} = $hashes->{'md5'};
+	}
+delete($d->{'pass'});
+}
+
 # create_user_home(&uinfo, &domain, always-chown)
 # Creates the home directory for a new mail user, and copies skel files into it
 sub create_user_home
@@ -7539,8 +7596,7 @@ push(@rv, { 'id' => 0,
 	    'dbgroup' => $config{'dbgroup'} || "none",
 	    'othergroups' => $config{'othergroups'} || "none",
 	    'quotatype' => $config{'hard_quotas'} ? "hard" : "soft",
-	    'plainpass' => $config{'plainpass'} eq '' ? 1 :
-				$config{'plainpass'},
+	    'hashpass' => $config{'hashpass'} || 0,
 	    'append_style' => $config{'append_style'},
 	    'domalias' => $config{'domalias'} || "none",
 	    'domalias_type' => $config{'domalias_type'} || 0,
@@ -7833,7 +7889,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'othergroups'} = $tmpl->{'othergroups'} eq 'none' ? undef :
 			     	 $tmpl->{'othergroups'};
 	$config{'hard_quotas'} = $tmpl->{'quotatype'} eq "hard" ? 1 : 0;
-	$config{'plainpass'} = $tmpl->{'plainpass'};
+	$config{'hashpass'} = $tmpl->{'hashpass'};
 	$config{'append_style'} = $tmpl->{'append_style'};
 	$config{'domalias'} = $tmpl->{'domalias'} eq 'none' ? undef :
 			      $tmpl->{'domalias'};
@@ -13239,7 +13295,8 @@ else {
 sub show_password_popup
 {
 local ($d, $user) = @_;
-if (&can_show_pass()) {
+local $pass = $user ? $user->{'plainpass'} : $d->{'pass'};
+if (&can_show_pass() && $pass) {
 	local $link = "showpass.cgi?dom=$d->{'id'}";
 	if ($user) {
 		$link .= "&user=".&urlize($user->{'user'});

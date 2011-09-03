@@ -743,9 +743,9 @@ print &ui_table_row(&hlink($text{'tmpl_ushell'}, "template_ushell"),
 
 # Store plaintext passwords?
 print &ui_table_row(&hlink($text{'tmpl_uplainpass'}, "template_uplainpass"),
-    &ui_radio("plainpass", $tmpl->{'plainpass'},
+    &ui_radio("hashpass", $tmpl->{'hashpass'},
 	      [ $tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ),
-		[ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+		[ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
 }
 
 # parse_template_unix(&tmpl)
@@ -775,7 +775,7 @@ if ($in{"sgroup_mode"} == 2) {
 $tmpl->{'ushell'} = &parse_none_def("ushell");
 
 # Save password type
-$tmpl->{'plainpass'} = $in{'plainpass'};
+$tmpl->{'hashpass'} = $in{'hashpass'};
 }
 
 # get_unix_shells()
