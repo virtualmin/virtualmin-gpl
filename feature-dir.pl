@@ -26,23 +26,7 @@ if ($_[0]->{'unix'} && !$uinfo) {
 	}
 
 # Create and populate home directory
-local $perms = oct($uconfig{'homedir_perms'});
-if (&has_domain_user($_[0]) && $_[0]->{'parent'}) {
-	# Run as domain owner, as this is a sub-server
-	&make_dir_as_domain_user($_[0], $_[0]->{'home'}, $perms);
-	&set_permissions_as_domain_user($_[0], $perms, $_[0]->{'home'});
-	}
-else {
-	# Run commands as root, as user is missing
-	if (!-d $_[0]->{'home'}) {
-		&make_dir($_[0]->{'home'}, $perms);
-		}
-	&set_ownership_permissions(undef, undef, $perms, $_[0]->{'home'});
-	if ($uinfo) {
-		&set_ownership_permissions($uinfo->{'uid'}, $uinfo->{'gid'},
-					   undef, $_[0]->{'home'});
-		}
-	}
+&create_domain_home_directory($_[0], $uinfo);
 
 # Populate home dir
 if ($tmpl->{'skel'} ne "none" && !$_[0]->{'nocopyskel'} &&
@@ -93,6 +77,30 @@ if (!$_[0]->{'parent'}) {
 	}
 
 return 1;
+}
+
+# create_domain_home_directory(&domain, &unix-user)
+# Create the home directory for a server or sub-server
+sub create_domain_home_directory
+{
+local ($d, $uinfo) = @_;
+local $perms = oct($uconfig{'homedir_perms'});
+if (&has_domain_user($d) && $d->{'parent'}) {
+	# Run as domain owner, as this is a sub-server
+	&make_dir_as_domain_user($d, $d->{'home'}, $perms);
+	&set_permissions_as_domain_user($d, $perms, $d->{'home'});
+	}
+else {
+	# Run commands as root, as user is missing
+	if (!-d $d->{'home'}) {
+		&make_dir($d->{'home'}, $perms);
+		}
+	&set_ownership_permissions(undef, undef, $perms, $d->{'home'});
+	if ($uinfo) {
+		&set_ownership_permissions($uinfo->{'uid'}, $uinfo->{'gid'},
+					   undef, $d->{'home'});
+		}
+	}
 }
 
 # create_standard_directories(&domain)
@@ -531,6 +539,16 @@ if ($_[0]->{'web'}) {
 	$eloglink = readlink($elog);
 	}
 
+# If home dir is missing (perhaps due to deletion of /home), re-create it
+if (!-e $_[0]->{'home'}) {
+	local $uinfo;
+	if ($_[0]->{'unix'} || $_[0]->{'parent'}) {
+		local @users = &list_all_users();
+		($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'} } @users;
+		}
+	&create_domain_home_directory($_[0], $uinfo);
+	}
+
 # Turn off quotas for the domain, to prevent the import failing
 &disable_quotas($_[0]);
 
@@ -636,6 +654,7 @@ if (defined(&set_php_wrappers_writable)) {
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable($d, 0);
 	}
+return undef;
 }
 
 # set_mailbox_homes_ownership(&domain)
