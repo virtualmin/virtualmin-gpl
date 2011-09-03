@@ -1,0 +1,31 @@
+#!/usr/local/bin/perl
+# Fix permissions on selected domains
+
+require './virtual-server-lib.pl';
+&ReadParse();
+&error_setup($text{'fixperms_err'});
+&can_edit_templates() || &error($text{'fixperms_ecannot'});
+
+# Check and parse inputs
+if ($in{'servers_def'}) {
+	@doms = &list_domains();
+	}
+else {
+	foreach $id (split(/\0/, $in{'servers'})) {
+		$d = &get_domain($id);
+		push(@doms, $d) if ($d);
+		}
+	}
+@doms = grep { !$_->{'parent'} } @doms;
+@doms || &error($text{'fixperms_edoms'});
+
+&ui_print_header(undef, $text{'fixperms_title'}, "");
+
+foreach $d (@doms) {
+	&$first_print(&text('fixperms_dom', &show_domain_name($d)));
+	$err = &set_home_ownership($d);
+	&$second_print($text{'setup_done'});
+	}
+
+&ui_print_footer("", $text{'index_return'},
+		 "edit_newvalidate.cgi?mode=fix", $text{'newvalidate_return'});

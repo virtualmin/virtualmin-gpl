@@ -1309,3 +1309,4 @@ Updated the PiWik script installer to version 1.5.1, phpBB to 3.0.9, WordPress t
 When a virtual server is disabled, any cron jobs run by its owner or mailbox users are also disabled.
 An IPv6 address that is already active can now be used when creating a virtual server.
 Checking for new script updates is now enabled by default on new installs and upgrades, unless explicitly disabled by root.
+Added a tab to the Validate Virtual Servers page for fixing file ownership and permissions problems.
