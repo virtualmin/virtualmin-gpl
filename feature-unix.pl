@@ -725,7 +725,7 @@ if ($config{'show_ugroup'}) {
 	    &group_chooser_button("ugroup", 0, 1));
 	}
 
-# Domain owner secondary group
+# Domain owner secondary groups
 print &ui_table_row(&hlink($text{'tmpl_sgroup'}, "template_sgroup"),
     &none_def_input("sgroup", $tmpl->{'sgroup'}, $text{'tmpl_ugroupsel'},
 		    0, 0, undef, [ "sgroup" ])."\n".
@@ -740,6 +740,12 @@ print &ui_table_row(&hlink($text{'tmpl_ushell'}, "template_ushell"),
 		$tmpl->{'ushell'} eq "none" ? undef : $tmpl->{'ushell'},
 		"owner", 1),
 	0, 0, $text{'tmpl_ushelldef'}, [ "ushell" ]));
+
+# Store plaintext passwords?
+print &ui_table_row(&hlink($text{'tmpl_uplainpass'}, "template_uplainpass"),
+    &ui_radio("plainpass", $tmpl->{'plainpass'},
+	      [ $tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ),
+		[ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 }
 
 # parse_template_unix(&tmpl)
@@ -767,6 +773,9 @@ if ($in{"sgroup_mode"} == 2) {
 
 # Save initial shell
 $tmpl->{'ushell'} = &parse_none_def("ushell");
+
+# Save password type
+$tmpl->{'plainpass'} = $in{'plainpass'};
 }
 
 # get_unix_shells()
