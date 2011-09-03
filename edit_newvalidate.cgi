@@ -8,7 +8,8 @@ require './virtual-server-lib.pl';
 
 # Start of tabs
 print &ui_tabs_start([ [ 'val', $text{'newvalidate_tabval'} ],
-		       [ 'sched', $text{'newvalidate_tabsched'} ] ],
+		       [ 'sched', $text{'newvalidate_tabsched'} ],
+		       [ 'fix', $text{'newvalidate_tabsfix'} ] ],
 		     'mode', $in{'mode'} || 'val', 1);
 
 # Start of validation form
@@ -90,6 +91,25 @@ print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
 print &ui_tabs_end_tab('mode', 'sched');
+
+# Start of permissions fix form
+print &ui_tabs_start_tab('mode', 'fix');
+print "$text{'newvalidate_desc3'}<p>\n";
+print &ui_form_start("fixperms.cgi", "post");
+print &ui_table_start($text{'newvalidate_header3'}, undef, 2);
+
+# Servers to check
+print &ui_table_row($text{'newvalidate_fixservers'},
+		    &ui_radio("servers_def", 1,
+			[ [ 1, $text{'newips_all'} ],
+			  [ 0, $text{'newips_sel'} ] ])."<br>\n".
+		    &servers_input("servers", [ ],
+			[ grep { !$_->{'parent'} } @doms ]));
+
+print &ui_table_end();
+print &ui_form_end([ [ undef, $text{'newvalidate_fix'} ] ]);
+
+print &ui_tabs_end_tab('mode', 'fix');
 
 print &ui_tabs_end(1);
 
