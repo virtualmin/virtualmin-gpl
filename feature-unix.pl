@@ -210,8 +210,16 @@ if (!$_[0]->{'parent'}) {
 		$uinfo->{'real'} = $_[0]->{'owner'};
 		if ($_[0]->{'pass_set'}) {
 			# Update the Unix user's password
-			local $enc = &foreign_call($usermodule,
-				"encrypt_password", $_[0]->{'pass'});
+			local $enc;
+			if ($_[0]->{'pass'}) {
+				$enc = &foreign_call($usermodule,
+					"encrypt_password", $_[0]->{'pass'});
+				delete($d->{'enc_pass'});# Any stored encrypted
+							 # password is not valid
+				}
+			else {
+				$enc = $d->{'enc_pass'};
+				}
 			if ($d->{'disabled'}) {
 				# Just keep for later use when enabling
 				$d->{'disabled_oldpass'} = $enc;
@@ -220,8 +228,6 @@ if (!$_[0]->{'parent'}) {
 				# Set password now
 				$uinfo->{'pass'} = $enc;
 				}
-			delete($d->{'enc_pass'});	# Any stored encrypted
-							# password is not valid
 			$uinfo->{'plainpass'} = $_[0]->{'pass'};
 			&set_pass_change($uinfo);
 			&set_usermin_imap_password($uinfo);
@@ -474,12 +480,17 @@ if (&mail_system_needs_group() || $d->{'gid'} == $d->{'ugid'}) {
 	}
 
 # Make sure encrypted password matches
-if (!$cannot_rehash_password) {
+if (!$cannot_rehash_password && $d->{'pass'}) {
 	local $encmd5 = &encrypt_user_password($user, $d->{'pass'});
 	local $encdes = &unix_crypt($d->{'pass'}, $user->{'pass'});
 	if ($user->{'pass'} ne $encmd5 && $user->{'pass'} ne $encdes &&
 	    !$d->{'disabled'}) {
 		return &text('validate_eenc', $user->{'user'});
+		}
+	}
+elsif ($d->{'enc_pass'}) {
+	if ($user->{'pass'} ne $d->{'enc_pass'} && !$d->{'disabled'}) {
+		return &text('validate_eenc2', $user->{'user'});
 		}
 	}
 
@@ -633,8 +644,14 @@ local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
 if ($uinfo && !$d->{'parent'}) {
 	local $olduinfo = { %$uinfo };
 	$uinfo->{'real'} = $d->{'owner'};
-	local $enc = &foreign_call($usermodule, "encrypt_password",
-			$d->{'pass'});
+	local $enc;
+	if ($d->{'pass'}) {
+		 $enc = &foreign_call($usermodule, "encrypt_password",
+				      $d->{'pass'});
+		}
+	else {
+		$enc = $d->{'enc_pass'};
+		}
 	if ($d->{'backup_encpass'} &&
 	    ($enc =~ /^\$1\$/ || $d->{'backup_encpass'} !~ /^\$1\$/ ||
 	     $uinfo->{'pass'} =~ /^\$1\$/)) {

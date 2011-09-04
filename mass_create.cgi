@@ -318,6 +318,7 @@ foreach $line (@lines) {
 	&set_provision_features(\%dom);
 	&set_capabilities_from_plan(\%dom, $plan);
 	$dom{'home'} = &server_home_directory(\%dom, $parentdom);
+	&generate_domain_password_hashes(\%dom);
 	&complete_domain(\%dom);
 
 	# Check for various clashes

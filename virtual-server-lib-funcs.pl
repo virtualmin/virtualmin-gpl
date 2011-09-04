@@ -2265,7 +2265,8 @@ $rv{'unix'} = &encrypt_user_password($user, $pass);
 if ($config{'mysql'}) {
 	&require_mysql();
 	local $qpass = &mysql_escape($pass);
-	local $d = &mysql::execute_sql_safe("select $password_func('$qpass')");
+	local $d = &mysql::execute_sql_safe($mysql::master_db,
+					    "select $password_func('$qpass')");
 	$rv{'myql'} = $d->{'data'}->[0]->[0];
 	}
 return \%rv;
@@ -2277,11 +2278,12 @@ return \%rv;
 sub generate_domain_password_hashes
 {
 local ($d) = @_;
-local $tmpl = &get_template($d->{'template'});
+local $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
+local $tmpl = &get_template($parent ? $parent->{'template'} : $d->{'template'});
 return if (!$tmpl->{'hashpass'});	# Hashing disabled
 if ($d->{'parent'}) {
 	# Just copy from parent
-	local $parent = &get_domain($d->{'parent'});
+	$parent = &get_domain($d->{'parent'});
 	foreach my $k ('enc_pass', 'mysql_enc_pass', 'crypt_enc_pass',
 		       'md5_enc_pass') {
 		$d->{$k} = $parent->{$k};
@@ -2289,7 +2291,7 @@ if ($d->{'parent'}) {
 	}
 else {
 	# Hash and store
-	# XXX random mysql pass??
+	return if (!$d->{'pass'});	# Plaintext password unknown
 	local $fakeuinfo = { 'user' => $d->{'user'} };
 	local $hashes = &generate_password_hashes($fakeuinfo, $d->{'pass'});
 	$d->{'enc_pass'} = $hashes->{'unix'};
@@ -2297,6 +2299,7 @@ else {
 	$d->{'crypt_enc_pass'} = $hashes->{'crypt'};
 	$d->{'md5_enc_pass'} = $hashes->{'md5'};
 	}
+$d->{'hashpass'} = 1;
 delete($d->{'pass'});
 }
 
@@ -6759,8 +6762,9 @@ if ($aliasname && $aliasname ne $dom->{'dom'}) {
 	local $parentdom = $dom->{'parent'} ?
 		&get_domain($dom->{'parent'}) : $dom;
 	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
-	&complete_domain(\%alias);
+	&generate_domain_password_hashes(\%dom);
 	&set_provision_features(\%alias);
+	&complete_domain(\%alias);
 	&create_virtual_server(\%alias, $parentdom,$parentdom->{'user'});
 	&$outdent_print();
 	&$second_print($text{'setup_done'});

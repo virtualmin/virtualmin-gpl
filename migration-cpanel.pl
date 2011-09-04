@@ -403,6 +403,7 @@ $dom{'cgi_bin_path'} = "$dom{'home'}/$dom{'cgi_bin_dir'}";
 $dom{'cgi_bin_correct'} = 1;	# So that setup_web doesn't fix it
 
 &set_provision_features(\%dom);
+&generate_domain_password_hashes(\%dom);
 &complete_domain(\%dom);
 
 # Check for various clashes
@@ -1141,6 +1142,7 @@ foreach my $pdom (&unique(@parked)) {
 	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
 					  : \%dom;
 	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
+	&generate_domain_password_hashes(\%alias);
 	&complete_domain(\%alias);
 	&create_virtual_server(\%alias, $parentdom,
 			       $parentdom->{'user'});
@@ -1330,6 +1332,7 @@ foreach my $vf (readdir(VF)) {
 	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
 					  : \%dom;
 	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
+	&generate_domain_password_hashes(\%alias);
 	&complete_domain(\%alias);
 	&create_virtual_server(\%alias, $parentdom,
 			       $parentdom->{'user'});
@@ -1466,6 +1469,7 @@ foreach my $vf (readdir(VF)) {
 		local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
 						  : \%dom;
 		$subs{'home'} = &server_home_directory(\%subs, $parentdom);
+		&generate_domain_password_hashes(\%subs);
 		&complete_domain(\%subs);
 		&create_virtual_server(\%subs, $parentdom,
 				       $parentdom->{'user'});
@@ -1538,6 +1542,7 @@ foreach my $vf (readdir(VF)) {
 		local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
 						  : \%dom;
 		$subd{'home'} = &server_home_directory(\%subd, $parentdom);
+		&generate_domain_password_hashes(\%subd);
 		&complete_domain(\%subd);
 
 		# Extract correct sub-domain root dir

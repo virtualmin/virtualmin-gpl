@@ -61,6 +61,7 @@ if ($user->{'domainowner'}) {
 		$oldd = { %$d };
 		$d->{'pass'} = $newpass;
 		$d->{'pass_set'} = 1;
+		&generate_domain_password_hashes($d);
 		if ($d->{'disabled'}) {
 			# Clear any saved passwords, as they should
 			# be reset at this point

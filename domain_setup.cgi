@@ -404,6 +404,7 @@ if (!$parentdom) {
 &set_chained_features(\%dom, undef);
 &set_provision_features(\%dom);
 $dom{'home'} = &server_home_directory(\%dom, $parentdom);
+&generate_domain_password_hashes(\%dom);
 &complete_domain(\%dom);
 
 # Parse extra feature inputs

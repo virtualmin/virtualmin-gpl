@@ -196,6 +196,7 @@ $dom{'cgi_bin_path'} = "$dom{'home'}/$dom{'cgi_bin_dir'}";
 $dom{'cgi_bin_correct'} = 1;	# So that setup_web doesn't fix it
 
 &set_provision_features(\%dom);
+&generate_domain_password_hashes(\%dom);
 &complete_domain(\%dom);
 
 # Check for various clashes

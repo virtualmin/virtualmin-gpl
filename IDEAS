@@ -66,10 +66,10 @@
  - Hashed password feature
 	- Template level
 	- Domain level, inherit from template
+	- Password changing
+	- Audit all use of 'pass'
+		- Plugins too
 	- Mailbox users too
-	- Changable with modify-domain
-	- All calls to create_virtual_server need to call
-		generate_domain_password_hashes
 	- What about MySQL - Virtualmin needs it to login
 		- Force generation of separate random password
 	- Dirk Ertner <dec@multiply.de>

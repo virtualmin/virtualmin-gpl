@@ -238,7 +238,14 @@ if ($multi) {
 		print "    Group name: $d->{'group'}\n";
 		print "    Group ID: $d->{'gid'}\n";
 		print "    Mailbox username prefix: $d->{'prefix'}\n";
-		print "    Password: $d->{'pass'}\n";
+		print "    Password storage: ",
+		      ($d->{'hashpass'} ? "Hashed" : "Plain text"),"\n";
+		if ($d->{'pass'}) {
+			print "    Password: $d->{'pass'}\n";
+			}
+		elsif ($d->{'enc_pass'}) {
+			print "    Hashed password: $d->{'enc_pass'}\n";
+			}
 		foreach my $f (grep { $d->{$_} } @database_features) {
 			my $ufunc = "${f}_pass";
 			if (defined(&$ufunc)) {
