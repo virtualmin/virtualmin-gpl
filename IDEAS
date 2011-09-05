@@ -67,7 +67,6 @@
 	- Domain level, inherit from template
 	- Audit all use of 'pass'
 		- Plugins too
-	- Forgotten password plugin
 	- Mailbox users too
 	- Virtual server move to new owner
 	- Dirk Ertner <dec@multiply.de>
