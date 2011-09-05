@@ -173,6 +173,7 @@ if ($virtualmin_pro) {
 
 $bandwidth_dir = "$module_config_directory/bandwidth";
 $plainpass_dir = "$module_config_directory/plainpass";
+$hashpass_dir = "$module_config_directory/hashpass";
 $nospam_dir = "$module_config_directory/nospam";
 
 $template_scripts_dir = "$module_config_directory/template-scripts";

@@ -157,6 +157,7 @@ if ($in{'confirm'}) {
 		&set_capabilities_from_plan(\%dom, $plan);
 		&set_featurelimits_from_plan(\%dom, $plan);
 		}
+	&generate_domain_password_hashes(\%dom);
 	$dom{'emailto'} = $dom{'email'} ||
 			  $dom{'user'}.'@'.&get_system_hostname();
 
@@ -188,7 +189,8 @@ if ($in{'confirm'}) {
 			%uinfo = ( 'user', $cruser,
 				   'uid', $uid,
 				   'gid', $gid,
-				   'pass', &foreign_call($usermodule,
+				   'pass', $dom->{'enc_pass'} ||
+					&foreign_call($usermodule,
 						"encrypt_password", $in{'pass'}),
 				   'real', $owner,
 				   'home', $dom{'home'},

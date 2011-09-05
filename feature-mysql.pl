@@ -40,6 +40,16 @@ local $tmpl = &get_template($d->{'template'});
 $d->{'mysql_user'} = &mysql_user($d);
 local $user = $d->{'mysql_user'};
 
+# Check if only hashed passwords are stored, and if so generate a random
+# MySQL password now
+if (!$d->{'parent'} && !$d->{'mysql_pass'}) {
+	local $tmpl = &get_template($d->{'template'});
+	if ($tmpl->{'hashpass'}) {
+		$d->{'mysql_pass'} = &random_password(8);
+		delete($d->{'mysql_enc_pass'});
+		}
+	}
+
 if ($d->{'provision_mysql'}) {
 	# Create the user on provisioning server
 	if (!$d->{'parent'}) {
@@ -301,6 +311,13 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 	$d->{'mysql_user'} = &mysql_user($d, 1);
 	local $user = $d->{'mysql_user'};
 	local @hosts = &get_mysql_hosts($d);
+
+	# If hashed passwords are in use, generate a random MySQL password
+	# for the new MySQL user
+	if ($tmpl->{'hashpass'}) {
+		$d->{'mysql_pass'} = &random_password(8);
+		delete($d->{'mysql_enc_pass'});
+		}
 
 	if ($d->{'provision_mysql'}) {
 		# Change on provisioning server .. first create new user

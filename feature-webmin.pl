@@ -56,7 +56,8 @@ else {
 sub webmin_password
 {
 &require_acl();
-return &acl::encrypt_password($_[0]->{'pass'});
+return $_[0]->{'pass'} ? &acl::encrypt_password($_[0]->{'pass'})
+		       : $_[0]->{'crypt_enc_pass'};
 }
 
 # delete_webmin(&domain)
@@ -129,7 +130,8 @@ if (!$_[0]->{'parent'}) {
 			      &acl::list_users();
 	if ($_[0]->{'unix'} ne $_[1]->{'unix'}) {
 		# Turn on or off password synchronization
-		$wuser->{'pass'} = $_[0]->{'unix'} ? 'x' : &webmin_password($_[0]);
+		$wuser->{'pass'} = $_[0]->{'unix'} ? 'x' :
+					&webmin_password($_[0]);
 		&acl::modify_user($_[1]->{'user'}, $wuser);
 		}
 	if ($_[0]->{'user'} ne $_[1]->{'user'}) {

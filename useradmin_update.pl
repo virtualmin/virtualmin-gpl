@@ -39,6 +39,8 @@ if ($_[0]->{'passmode'} == 3) {
 	foreach my $d (&get_domain_by("user", $_[0]->{'user'})) {
 		$oldd = { %$d };
 		$d->{'pass'} = $_[0]->{'plainpass'};
+		$d->{'pass_set'} = 1;
+		&generate_domain_password_hashes($d);
 		if ($d->{'disabled'}) {
 			# Clear any saved passwords, as they should
 			# be reset at this point

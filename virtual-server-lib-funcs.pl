@@ -720,43 +720,62 @@ ins\//);
 			}
 		}
 
-	# Merge in plain text passwords
-	local (%plain, $need_plainpass_save);
-	&read_file_cached("$plainpass_dir/$d->{'id'}", \%plain);
-	foreach my $u (@users) {
-		if ($u->{'domainowner'}) {
-			# The domain owner's password is always known
-			$u->{'plainpass'} = $d->{'pass'};
+	if ($d->{'hashpass'}) {
+		# Merge in encrypted passwords
+		&read_file_cached("$hashpass_dir/$d->{'id'}", \%hash);
+		foreach my $u (@users) {
+			$u->{'pass_md5'} = $hash{$u->{'user'}." md5"};
+			$u->{'pass_crypt'} = $hash{$u->{'user'}." crypt"};
+			$u->{'pass_mysql'} = $hash{$u->{'user'}." mysql"};
+			$u->{'pass_digest'} = $hash{$u->{'user'}." digest"};
 			}
-		elsif (!defined($u->{'plainpass'}) &&
-		       defined($plain{$u->{'user'}})) {
-			# Check if the plain password is valid, in case the
-			# crypted password was changed behind our back
-			if ($plain{$u->{'user'}." encrypted"} eq $u->{'pass'} ||
-			    &encrypt_user_password($u, $plain{$u->{'user'}}) eq
-			      $u->{'pass'} ||
-			    &safe_unix_crypt($plain{$u->{'user'}}, $u->{'pass'})
-			      eq $u->{'pass'}) {
-				# Valid - we can use it
-				$u->{'plainpass'} = $plain{$u->{'user'}};
-				if (!defined($plain{$u->{'user'}." encrypted"})) {
-					# Save the correct crypted version now
-					$plain{$u->{'user'}." encrypted"} =
-						$u->{'pass'};
+		}
+	else {
+		# Merge in plain text passwords
+		local (%plain, $need_plainpass_save);
+		&read_file_cached("$plainpass_dir/$d->{'id'}", \%plain);
+		foreach my $u (@users) {
+			if ($u->{'domainowner'}) {
+				# The domain owner's password is always known
+				$u->{'plainpass'} = $d->{'pass'};
+				}
+			elsif (!defined($u->{'plainpass'}) &&
+			       defined($plain{$u->{'user'}})) {
+				# Check if the plain password is valid, in case
+				# the crypted password was changed behind
+				# our back
+				if ($plain{$u->{'user'}." encrypted"} eq
+				     $u->{'pass'} ||
+				    &encrypt_user_password(
+				      $u, $plain{$u->{'user'}}) eq
+				      $u->{'pass'} ||
+				    &safe_unix_crypt($plain{$u->{'user'}},
+						     $u->{'pass'})
+				      eq $u->{'pass'}) {
+					# Valid - we can use it
+					$u->{'plainpass'} =$plain{$u->{'user'}};
+					if (!defined($plain{$u->{'user'}.
+						            " encrypted"})) {
+						# Save the correct crypted
+						# version now
+						$plain{$u->{'user'}.
+						       " encrypted"} =
+							$u->{'pass'};
+						$need_plainpass_save = 1;
+						}
+					}
+				else {
+					# We know it is wrong, so remove from
+					# the plain password cache file
+					delete($plain{$u->{'user'}});
+					delete($plain{$u->{'user'}." encrypted"});
 					$need_plainpass_save = 1;
 					}
 				}
-			else {
-				# We know it is wrong, so remove from the plain
-				# password cache file
-				delete($plain{$u->{'user'}});
-				delete($plain{$u->{'user'}." encrypted"});
-				$need_plainpass_save = 1;
-				}
 			}
-		}
-	if ($need_plainpass_save) {
-		&write_file("$plainpass_dir/$d->{'id'}", \%plain);
+		if ($need_plainpass_save) {
+			&write_file("$plainpass_dir/$d->{'id'}", \%plain);
+			}
 		}
 	}
 else {
@@ -1132,7 +1151,8 @@ else {
 		push(@{$_[0]->{'ldap_attrs'}},
 		     map { ( $ea, $_ ) } @{$_[0]->{'extraemail'}});
 		}
-	&foreign_call($usermodule, "set_user_envs", $_[0], 'CREATE_USER', $_[0]->{'plainpass'}, [ ]);
+	&foreign_call($usermodule, "set_user_envs", $_[0], 'CREATE_USER',
+		      $_[0]->{'plainpass'}, [ ]);
 	$ENV{'USERADMIN_DOM'} = $_[1]->{'dom'} if ($_[1]);
 	&foreign_call($usermodule, "making_changes");
 	&userdom_substitutions($_[0], $_[1]);
@@ -1276,16 +1296,35 @@ if ($_[1]) {
 	&release_lock_spam($_[1]);
 	}
 
-# Save the plain-text password, if known
-if (!-d $plainpass_dir) {
-	mkdir($plainpass_dir, 0700);
+if ($_[1]->{'hashpass'}) {
+	# Save hashed passwords, if plain is known
+	if (!-d $hashpass_dir) {
+		mkdir($hashpass_dir, 0700);
+		}
+	if (defined($_[0]->{'plainpass'})) {
+		local %hash;
+		&read_file_cached("$hashpass_dir/$_[1]->{'id'}", \%hash);
+		local $g = &generate_password_hashes(
+				$_[0], $_[0]->{'plainpass'}, $_[1]->{'dom'});
+		$hash{$_[0]->{'user'}." crypt"} = $g->{'crypt'};
+		$hash{$_[0]->{'user'}." md5"} = $g->{'md5'};
+		$hash{$_[0]->{'user'}." mysql"} = $g->{'mysql'};
+		$hash{$_[0]->{'user'}." digest"} = $g->{'digest'};
+		&write_file("$hashpass_dir/$_[1]->{'id'}", \%hash);
+		}
 	}
-if (defined($_[0]->{'plainpass'})) {
-	local %plain;
-	&read_file_cached("$plainpass_dir/$_[1]->{'id'}", \%plain);
-	$plain{$_[0]->{'user'}} = $_[0]->{'plainpass'};
-	$plain{$_[0]->{'user'}." encrypted"} = $_[0]->{'pass'};
-	&write_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
+else {
+	# Save the plain-text password, if known
+	if (!-d $plainpass_dir) {
+		mkdir($plainpass_dir, 0700);
+		}
+	if (defined($_[0]->{'plainpass'})) {
+		local %plain;
+		&read_file_cached("$plainpass_dir/$_[1]->{'id'}", \%plain);
+		$plain{$_[0]->{'user'}} = $_[0]->{'plainpass'};
+		$plain{$_[0]->{'user'}." encrypted"} = $_[0]->{'pass'};
+		&write_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
+		}
 	}
 
 # Save the no-spam-check flag
@@ -1956,6 +1995,18 @@ delete($plain{$_[0]->{'user'}});
 delete($plain{$_[0]->{'user'}." encrypted"});
 &write_file("$plainpass_dir/$_[1]->{'id'}", \%plain);
 
+# Remove the hashed password
+local %hash;
+if (!-d $hashpass_dir) {
+	mkdir($hashpass_dir, 0700);
+	}
+&read_file_cached("$hashpass_dir/$_[1]->{'id'}", \%hash);
+delete($hash{$_[0]->{'user'}." md5"});
+delete($hash{$_[0]->{'user'}." crypt"});
+delete($hash{$_[0]->{'user'}." mysql"});
+delete($hash{$_[0]->{'user'}." digest"});
+&write_file("$hashpass_dir/$_[1]->{'id'}", \%hash);
+
 # Clear the no-spam flag
 local %spam;
 if (!-d $nospam_dir) {
@@ -2232,7 +2283,7 @@ sub encrypt_user_password
 local ($user, $pass) = @_;
 if ($user->{'qmail'}) {
 	# Force crypt mode for Qmail+LDAP
-	local $salt = $user->{'pass'} || substr(time(), -2);
+	local $salt = $user->{'pass'} || &random_salt();
 	$salt =~ s/^\!//;
 	return &unix_crypt($pass, $salt);
 	}
@@ -2243,7 +2294,7 @@ else {
 	}
 }
 
-# generate_password_hashes(&user, text)
+# generate_password_hashes(&user, text, domain-name)
 # Given a password, returns a hash ref of it hashed into different formats.
 # Keys returned are :
 # md5 - MD5 hash
@@ -2252,10 +2303,11 @@ else {
 # mysql - MySQL password hash
 sub generate_password_hashes
 {
-local ($user, $pass) = @_;
+local ($user, $pass, $dom) = @_;
 &require_useradmin();
 local %rv;
-local $salt = $user->{'pass'} || substr(time(), -2);
+local $salt = $user->{'pass'} && $user->{'pass'} !~ /\$/ ? $user->{'pass'}
+							 : &random_salt();
 $salt =~ s/^\!//;
 $rv{'crypt'} = &unix_crypt($pass, $salt);
 if (!&useradmin::check_md5()) {
@@ -2267,7 +2319,12 @@ if ($config{'mysql'}) {
 	local $qpass = &mysql_escape($pass);
 	local $d = &mysql::execute_sql_safe($mysql::master_db,
 					    "select $password_func('$qpass')");
-	$rv{'myql'} = $d->{'data'}->[0]->[0];
+	$rv{'mysql'} = $d->{'data'}->[0]->[0];
+	}
+if (&foreign_check("htaccess-htpasswd")) {
+	&foreign_require("htaccess-htpasswd");
+	$rv{'digest'} = &htaccess_htpasswd::digest_password(
+				$user->{'user'}, $dom, $pass);
 	}
 return \%rv;
 }
@@ -2293,13 +2350,15 @@ else {
 	# Hash and store
 	return if (!$d->{'pass'});	# Plaintext password unknown
 	local $fakeuinfo = { 'user' => $d->{'user'} };
-	local $hashes = &generate_password_hashes($fakeuinfo, $d->{'pass'});
+	local $hashes = &generate_password_hashes(
+				$fakeuinfo, $d->{'pass'}, $d->{'dom'});
 	$d->{'enc_pass'} = $hashes->{'unix'};
 	if (!$d->{'mysql_pass'}) {
 		$d->{'mysql_enc_pass'} = $hashes->{'mysql'};
 		}
 	$d->{'crypt_enc_pass'} = $hashes->{'crypt'};
 	$d->{'md5_enc_pass'} = $hashes->{'md5'};
+	$d->{'digest_enc_pass'} = $hashes->{'digest'};
 	}
 $d->{'hashpass'} = 1;
 delete($d->{'pass'});
@@ -9024,6 +9083,20 @@ foreach (1 .. $len) {
 	$random_password .= $passwd_chars[rand(scalar(@passwd_chars))];
 	}
 return $random_password;
+}
+
+# random_salt([len])
+# Returns a crypt-format salt of the given length (default 2 chars)
+sub random_salt
+{
+local $len = $_[0] || 2;
+&seed_random();
+local $rv;
+local @saltchars = ( 'a' .. 'z', 'A' .. 'Z', 0 .. 9, '.', '/' );
+for(my $i=0; $i<$len; $i++) {
+	$rv .= $saltchars[int(rand()*scalar(@saltchars))];
+	}
+return $rv;
 }
 
 # try_function(feature, function, arg, ...)

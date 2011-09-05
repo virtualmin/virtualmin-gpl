@@ -68,6 +68,10 @@
 	- Audit all use of 'pass'
 		- Plugins too
 	- Mailbox users too
+		- Audit all use of 'plainpass'
+		- Include in backups
+		- All plugins / etc
+		- All use of plainpass_dir
 	- Virtual server move to new owner
 	- Dirk Ertner <dec@multiply.de>
 	- CHANGELOG
