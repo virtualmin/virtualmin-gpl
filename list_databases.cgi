@@ -164,7 +164,7 @@ if (!$d->{'parent'}) {
 		$pw = &$ufunc($d, 1);
 		$encpw = defined(&$efunc) ? &$efunc($d) : undef;
 		@opts = ( );
-		if (!$tmpl->{$f.'_nopass'}) {
+		if (!$tmpl->{$f.'_nopass'} && $d->{'pass'}) {
 			push(@opts, [ 1, $text{'databases_samepass'} ]);
 			}
 		if ($encpw) {
