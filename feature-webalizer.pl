@@ -496,26 +496,31 @@ else {
 sub update_create_htpasswd
 {
 my ($d, $file, $olduser) = @_;
-local $pass;
+local ($pass, $encpass);
 if ($d->{'parent'}) {
-	$pass = &get_domain($d->{'parent'})->{'pass'};
+	my $parent = &get_domain($d->{'parent'});
+	$pass = $parent->{'pass'};
+	$encpass = $pass ? &htaccess_htpasswd::encrypt_password($pass)
+			 : $parent->{'crypt_enc_pass'};
 	}
 else {
 	$pass = $d->{'pass'};
+	$encpass = $pass ? &htaccess_htpasswd::encrypt_password($pass)
+			 : $d->{'crypt_enc_pass'};
 	}
 &foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
 local $users = &htaccess_htpasswd::list_users($file);
 local ($user) = grep { $_->{'user'} eq $olduser } @$users;
 if ($user) {
 	$user->{'user'} = $d->{'user'};
-	$user->{'pass'} = &htaccess_htpasswd::encrypt_password($pass);
+	$user->{'pass'} = $encpass;
 	&write_as_domain_user($d,
 		sub { &htaccess_htpasswd::modify_user($user) });
 	}
 else {
 	$user = { 'enabled' => 1,
 		  'user' => $d->{'user'},
-		  'pass' => &htaccess_htpasswd::encrypt_password($pass) };
+		  'pass' => $encpass };
 	&write_as_domain_user($d,
 		sub { &htaccess_htpasswd::create_user($user, $file); });
 	}
