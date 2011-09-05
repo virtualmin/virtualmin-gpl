@@ -2295,7 +2295,9 @@ else {
 	local $fakeuinfo = { 'user' => $d->{'user'} };
 	local $hashes = &generate_password_hashes($fakeuinfo, $d->{'pass'});
 	$d->{'enc_pass'} = $hashes->{'unix'};
-	$d->{'mysql_enc_pass'} = $hashes->{'mysql'};
+	if (!$d->{'mysql_pass'}) {
+		$d->{'mysql_enc_pass'} = $hashes->{'mysql'};
+		}
 	$d->{'crypt_enc_pass'} = $hashes->{'crypt'};
 	$d->{'md5_enc_pass'} = $hashes->{'md5'};
 	}
@@ -6877,10 +6879,11 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			}
 
 		# Call the install function
+		local $dompass = $dom->{'pass'} || &random_password(8);
 		local ($ok, $msg, $desc, $url, $suser, $spass) =
 			&{$script->{'install_func'}}(
 				$dom, $ver, $opts, \%gotfiles, undef,
-				$dom->{'user'}, $dom->{'pass'});
+				$dom->{'user'}, $dompass);
 
 		if ($ok) {
 			&$second_print(&text($ok < 0 ? 'setup_scriptpartial' :
@@ -11243,6 +11246,7 @@ $d->{'parent'} = undef;
 $d->{'user'} = $newuser;
 $d->{'group'} = $newuser;
 $d->{'pass'} = $newpass;
+&generate_domain_password_hashes($d);
 if (!$d->{'mysql'}) {
 	delete($d->{'mysql_user'});
 	}

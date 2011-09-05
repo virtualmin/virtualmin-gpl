@@ -64,13 +64,11 @@
 	- /backup/plesk/backup_SyntaxNode.net_info_1108110206.xml.tgz
 
  - Hashed password feature
-	- Template level
 	- Domain level, inherit from template
-	- Password changing
 	- Audit all use of 'pass'
 		- Plugins too
+	- Forgotten password plugin
 	- Mailbox users too
-	- What about MySQL - Virtualmin needs it to login
-		- Force generation of separate random password
+	- Virtual server move to new owner
 	- Dirk Ertner <dec@multiply.de>
 	- CHANGELOG

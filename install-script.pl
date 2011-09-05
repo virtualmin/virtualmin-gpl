@@ -201,7 +201,7 @@ if (defined($id)) {
 	}
 else {
 	$domuser ||= $d->{'user'};
-	$dompass ||= $d->{'pass'};
+	$dompass = $dompass || $d->{'pass'} || &random_password(8);
 	}
 
 # Check domain features

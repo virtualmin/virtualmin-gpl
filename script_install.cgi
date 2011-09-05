@@ -28,7 +28,7 @@ if ($in{'upgrade'}) {
 	}
 else {
 	$domuser = $d->{'user'};
-	$dompass = $d->{'pass'};
+	$dompass = $d->{'pass'} || &random_password(8);
 	if ($in{'passmode'} && !$in{'passmode_def'}) {
 		if ($in{'passmode'} == 1 || $in{'passmode'} == 3) {
 			# Check username
