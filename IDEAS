@@ -64,15 +64,11 @@
 	- /backup/plesk/backup_SyntaxNode.net_info_1108110206.xml.tgz
 
  - Hashed password feature
-	- Domain level, inherit from template
-	- Audit all use of 'pass'
-		- Plugins too
-	- Mailbox users too
-		- Audit all use of 'plainpass'
-		- Include in backups
-		- All plugins / etc
-		- All use of plainpass_dir
-		- MySQL user creation
-	- Virtual server move to new owner
+	- Migration scripts don't need to require a password if we have
+	  one hashed
 	- Dirk Ertner <dec@multiply.de>
 	- CHANGELOG
+	- Documentation
+	- Wizard?
+
+ - Disable PHP timeouts during script installs
