@@ -595,6 +595,12 @@ if ($_[0]) {
 			if ($config{'mail_system'} == 5) {
 				$u->{'noprimary'} = 1;
 				}
+			if ($d->{'hashpass'}) {
+				$u->{'pass_crypt'} = $d->{'crypt_enc_pass'};
+				$u->{'pass_md5'} = $d->{'md5_enc_pass'};
+				$u->{'pass_mysql'} = $d->{'mysql_enc_pass'};
+				$u->{'pass_digest'} = $d->{'digest_enc_pass'};
+				}
 			}
 		elsif ($u->{'uid'} == $_[0]->{'uid'} && $u->{'unix'}) {
 			# Web management user
@@ -2334,9 +2340,12 @@ local ($user, $pass, $dom) = @_;
 local %rv;
 local $salt = $user->{'pass'} && $user->{'pass'} !~ /\$/ ? $user->{'pass'}
 							 : &random_salt();
-$salt =~ s/^\!//;
+$salt =~ s/^\!// if ($salt);
 $rv{'crypt'} = &unix_crypt($pass, $salt);
 if (!&useradmin::check_md5()) {
+	local $salt = $user->{'pass'} &&
+		      $user->{'pass'} =~ /\$1\$/ ? $user->{'pass'} : undef;
+	$salt =~ s/^\!// if ($salt);
 	$rv{'md5'} = &useradmin::encrypt_md5($pass);
 	}
 $rv{'unix'} = &encrypt_user_password($user, $pass);
@@ -2368,7 +2377,7 @@ if ($d->{'parent'}) {
 	# Just copy from parent
 	$parent = &get_domain($d->{'parent'});
 	foreach my $k ('enc_pass', 'mysql_enc_pass', 'crypt_enc_pass',
-		       'md5_enc_pass') {
+		       'md5_enc_pass', 'digest_enc_pass') {
 		$d->{$k} = $parent->{$k};
 		}
 	}
