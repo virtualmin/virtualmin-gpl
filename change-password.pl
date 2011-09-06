@@ -93,6 +93,11 @@ else {
 		$user->{'plainpass'} eq $oldpass ||
 			&error_exit("Wrong password");
 		}
+	elsif ($user->{'pass'}) {
+		&require_useradmin();
+		&useradmin::validate_password($oldpass, $user->{'pass'}) ||
+			&error_exit("Wrong password");
+		}
 	$user->{'passmode'} = 3;
 	$user->{'plainpass'} = $newpass;
 	$user->{'pass'} = &encrypt_user_password($user, $newpass);
