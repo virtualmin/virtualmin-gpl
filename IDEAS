@@ -72,6 +72,7 @@
 		- Include in backups
 		- All plugins / etc
 		- All use of plainpass_dir
+		- MySQL user creation
 	- Virtual server move to new owner
 	- Dirk Ertner <dec@multiply.de>
 	- CHANGELOG

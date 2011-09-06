@@ -467,6 +467,7 @@ local $id = $_[0]->{'id'};
 # And the bandwidth and plain-text password files
 &unlink_file("$bandwidth_dir/$id");
 &unlink_file("$plainpass_dir/$id");
+&unlink_file("$hashpass_dir/$id");
 &unlink_file("$nospam_dir/$id");
 
 if (defined(&get_autoreply_file_dir)) {
@@ -724,10 +725,9 @@ ins\//);
 		# Merge in encrypted passwords
 		&read_file_cached("$hashpass_dir/$d->{'id'}", \%hash);
 		foreach my $u (@users) {
-			$u->{'pass_md5'} = $hash{$u->{'user'}." md5"};
-			$u->{'pass_crypt'} = $hash{$u->{'user'}." crypt"};
-			$u->{'pass_mysql'} = $hash{$u->{'user'}." mysql"};
-			$u->{'pass_digest'} = $hash{$u->{'user'}." digest"};
+			foreach my $s (@hashpass_types) {
+				$u->{'pass_'.$s} = $hash{$u->{'user'}.' '.$s};
+				}
 			}
 		}
 	else {
@@ -1306,10 +1306,9 @@ if ($_[1]->{'hashpass'}) {
 		&read_file_cached("$hashpass_dir/$_[1]->{'id'}", \%hash);
 		local $g = &generate_password_hashes(
 				$_[0], $_[0]->{'plainpass'}, $_[1]->{'dom'});
-		$hash{$_[0]->{'user'}." crypt"} = $g->{'crypt'};
-		$hash{$_[0]->{'user'}." md5"} = $g->{'md5'};
-		$hash{$_[0]->{'user'}." mysql"} = $g->{'mysql'};
-		$hash{$_[0]->{'user'}." digest"} = $g->{'digest'};
+		foreach my $s (@hashpass_types) {
+			$hash{$_[0]->{'user'}.' '.$s} = $g->{$s};
+			}
 		&write_file("$hashpass_dir/$_[1]->{'id'}", \%hash);
 		}
 	}
@@ -1653,6 +1652,49 @@ if ($_[0]->{'unix'} && $_[2] && $_[0]->{'user'} ne $_[2]->{'user'} &&
 			 $_[2]);
 	}
 
+# Update the plain-text password file, except for a domain owner
+if (!$_[0]->{'domainowner'} && $_[2] && !$_[2]->{'hashpass'}) {
+	local %plain;
+	mkdir($plainpass_dir, 0700);
+	&read_file_cached("$plainpass_dir/$_[2]->{'id'}", \%plain);
+	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+		$plain{$_[0]->{'user'}} = $plain{$_[1]->{'user'}};
+		delete($plain{$_[1]->{'user'}});
+		$plain{$_[0]->{'user'}." encrypted"} =
+			$plain{$_[1]->{'user'}." encrypted"};
+		delete($plain{$_[1]->{'user'}." encrypted"});
+		}
+	if (defined($_[0]->{'plainpass'})) {
+		$plain{$_[0]->{'user'}} = $_[0]->{'plainpass'};
+		$plain{$_[0]->{'user'}." encrypted"} = $_[0]->{'pass'};
+		}
+	&write_file("$plainpass_dir/$_[2]->{'id'}", \%plain);
+	}
+
+# Update hashed passwords file, except for domain owner
+if (!$_[0]->{'domainowner'} && $_[2] && $_[2]->{'hashpass'}) {
+	local %hash;
+	mkdir($hashpass_dir, 0700);
+	&read_file_cached("$hashpass_dir/$_[2]->{'id'}", \%hash);
+	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+		foreach my $s (@hashpass_types) {
+			$hash{$_[0]->{'user'}.' '.$s} =
+				$hash{$_[1]->{'user'}.' '.$s};
+			delete($hash{$_[1]->{'user'}.' '.$s});
+			}
+		}
+	if (defined($_[0]->{'plainpass'})) {
+		# Re-hash new password
+		local $g = &generate_password_hashes(
+				$_[0], $_[0]->{'plainpass'}, $_[2]->{'dom'});
+		foreach my $s (@hashpass_types) {
+			$hash{$_[0]->{'user'}.' '.$s} = $g->{$s};
+			$_[0]->{'pass_'.$s} = $g->{$s};
+			}
+		}
+	&write_file("$hashpass_dir/$_[2]->{'id'}", \%hash);
+	}
+
 # Update his allowed databases (unless this is the domain owner), if any
 # have been added or removed.
 local $newdbstr = join(" ", map { $_->{'type'}."_".$_->{'name'} }
@@ -1675,12 +1717,14 @@ if ($_[2] && !$_[0]->{'domainowner'} &&
 			if (!$plugin) {
 				local $crfunc = "create_${dt}_database_user";
 				&$crfunc($_[2], \@dbs, $_[0]->{'user'},
-					 $_[0]->{'plainpass'});
+					 $_[0]->{'plainpass'},
+					 $_[0]->{'pass_'.$dt});
 				}
 			else {
 				&plugin_call($dt, "database_create_user",
 					     $_[2], \@dbs, $_[0]->{'user'},
-					     $_[0]->{'plainpass'});
+					     $_[0]->{'plainpass'},
+					     $_[0]->{'pass_'.$dt});
 				}
 			}
 		elsif (@dbs && @olddbs) {
@@ -1689,13 +1733,15 @@ if ($_[2] && !$_[0]->{'domainowner'} &&
 				local $mdfunc = "modify_${dt}_database_user";
 				&$mdfunc($_[2], \@olddbs, \@dbs,
 					 $_[1]->{'user'}, $_[0]->{'user'},
-					 $_[0]->{'plainpass'});
+					 $_[0]->{'plainpass'},
+					 $_[0]->{'pass_'.$dt});
 				}
 			else {
 				&plugin_call($dt, "database_modify_user",
 					     $_[2], \@olddbs, \@dbs,
 					     $_[1]->{'user'}, $_[0]->{'user'},
-					     $_[0]->{'plainpass'});
+					     $_[0]->{'plainpass'},
+					     $_[0]->{'pass_'.$dt});
 				}
 			}
 		elsif (!@dbs && @olddbs) {
@@ -1757,25 +1803,6 @@ if ($_[2]) {
 	&obtain_lock_spam($_[2]);
 	&update_spam_whitelist($_[2]);
 	&release_lock_spam($_[2]);
-	}
-
-# Update the plain-text password, except for a domain owner
-if (!$_[0]->{'domainowner'} && $_[2]) {
-	local %plain;
-	mkdir($plainpass_dir, 0700);
-	&read_file_cached("$plainpass_dir/$_[2]->{'id'}", \%plain);
-	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
-		$plain{$_[0]->{'user'}} = $plain{$_[1]->{'user'}};
-		delete($plain{$_[1]->{'user'}});
-		$plain{$_[0]->{'user'}." encrypted"} =
-			$plain{$_[1]->{'user'}." encrypted"};
-		delete($plain{$_[1]->{'user'}." encrypted"});
-		}
-	if (defined($_[0]->{'plainpass'})) {
-		$plain{$_[0]->{'user'}} = $_[0]->{'plainpass'};
-		$plain{$_[0]->{'user'}." encrypted"} = $_[0]->{'pass'};
-		}
-	&write_file("$plainpass_dir/$_[2]->{'id'}", \%plain);
 	}
 
 # Update the no-spam-check flag
@@ -2001,10 +2028,9 @@ if (!-d $hashpass_dir) {
 	mkdir($hashpass_dir, 0700);
 	}
 &read_file_cached("$hashpass_dir/$_[1]->{'id'}", \%hash);
-delete($hash{$_[0]->{'user'}." md5"});
-delete($hash{$_[0]->{'user'}." crypt"});
-delete($hash{$_[0]->{'user'}." mysql"});
-delete($hash{$_[0]->{'user'}." digest"});
+foreach my $s (@hashpass_types) {
+	delete($hash{$_[0]->{'user'}.' '.$s});
+	}
 &write_file("$hashpass_dir/$_[1]->{'id'}", \%hash);
 
 # Clear the no-spam flag
@@ -2215,7 +2241,7 @@ sub validate_user
 local ($d, $user, $old) = @_;
 if ($d && @{$user->{'dbs'}} && (!$old || !@{$old->{'dbs'}})) {
 	# Enabling database access .. make sure a password was given
-	if (!$user->{'plainpass'}) {
+	if (!$user->{'plainpass'} && !$user->{'pass_mysql'}) {
 		return $text{'user_edbpass'};
 		}
 	# Check for username clash

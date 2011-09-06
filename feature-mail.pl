@@ -2875,9 +2875,12 @@ foreach $u (&list_domain_users($_[0])) {
 	}
 &close_tempfile(UFILE);
 
-# Copy plain text passwords file too
+# Copy plain text and hashed passwords file too
 if (-r "$plainpass_dir/$_[0]->{'id'}") {
 	&copy_source_dest("$plainpass_dir/$_[0]->{'id'}", "$_[1]_plainpass");
+	}
+if (-r "$hashpass_dir/$_[0]->{'id'}") {
+	&copy_source_dest("$hashpass_dir/$_[0]->{'id'}", "$_[1]_hashpass");
 	}
 
 # Copy no-spam flags file too
@@ -3128,6 +3131,26 @@ if (-r "$_[1]_plainpass") {
 		# Copy the whole file
 		&copy_source_dest("$_[1]_plainpass",
 				  "$plainpass_dir/$_[0]->{'id'}");
+		}
+	}
+
+# Restore hashed password file too
+if (-r "$_[1]_hashpass") {
+	if ($_[2]->{'mailuser'}) {
+		# Just copy one hash password
+		local (%oldhash, %newhash);
+		&read_file("$_[1]_hashpass", \%oldhash);
+		&read_file("$hashpass_dir/$_[0]->{'id'}", \%newhash);
+		foreach my $s (@hashpass_types) {
+			$newhash{$_[2]->{'mailuser'}.' '.$s} =
+				$oldhash{$_[2]->{'mailuser'}.' '.$s};
+			}
+		&write_file("$hashpass_dir/$_[0]->{'id'}", \%newhash);
+		}
+	else {
+		# Copy the whole file
+		&copy_source_dest("$_[1]_hashpass",
+				  "$hashpass_dir/$_[0]->{'id'}");
 		}
 	}
 

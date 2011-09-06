@@ -1502,12 +1502,12 @@ else {
 }
 
 # modify_mysql_database_user(&domain, &olddbs, &dbs, oldusername, username,
-#			     [password])
+#			     [password], [encrypted-password])
 # Renames or changes the password for a database user, and his list of allowed
 # mysql databases
 sub modify_mysql_database_user
 {
-local ($d, $olddbs, $dbs, $olduser, $user, $pass) = @_;
+local ($d, $olddbs, $dbs, $olduser, $user, $pass, $encpass) = @_;
 &require_mysql();
 local $myuser = &mysql_username($user);
 	local $myolduser = &mysql_username($olduser);
@@ -1518,7 +1518,10 @@ if ($d->{'provision_mysql'}) {
 	if ($olduser ne $user) {
 		$info->{'new-user'} = $myuser;
 		}
-	if (defined($pass)) {
+	if ($encpass) {
+		$info->{'encpass'} = $encpass;
+		}
+	elsif (defined($pass)) {
 		$info->{'pass'} = $pass;
 		}
 	if (join(" ", @$dbs) ne join(" ", @$olddbs)) {
@@ -1544,9 +1547,18 @@ else {
 			}
 		if (defined($pass)) {
 			# Change the password
-			&mysql::execute_sql_logged($mysql::master_db,
-				"update user set password = $password_func(?) ".
-				"where user = ?", $pass, $myuser);
+			if ($encpass) {
+				&mysql::execute_sql_logged($mysql::master_db,
+					"update user ".
+					"set password = ? ".
+					"where user = ?", $encpass, $myuser);
+				}
+			else {
+				&mysql::execute_sql_logged($mysql::master_db,
+					"update user ".
+					"set password = $password_func(?) ".
+					"where user = ?", $pass, $myuser);
+				}
 			}
 		if (join(" ", @$dbs) ne join(" ", @$olddbs)) {
 			# Update accessible database list
