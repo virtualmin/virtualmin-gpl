@@ -203,7 +203,7 @@ local $tmpl = &get_quotas_message();
 local %hash = %{$msg->[5]};
 $hash{'quota_limit'} = &nice_size($msg->[2]);
 $hash{'quota_used'} = &nice_size($msg->[1]);
-$hash{'quota_percent'} = $msg->[3] if ($msg->[3]);
+$hash{'quota_percent'} = $msg->[3] || '';
 local $body = &substitute_domain_template($tmpl, $msg->[0], \%hash);
 
 # Send the email
