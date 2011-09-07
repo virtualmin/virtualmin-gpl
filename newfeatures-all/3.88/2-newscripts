@@ -1,0 +1,4 @@
+desc=Automatic script installer updates
+html=Checking for new script updates is now enabled by default on new installs and upgrades, unless explicitly disabled by root. This means that your system will have access to new versions of scripts sooner.
+master=1
+link=edit_newscripts.cgi?mode=latest
