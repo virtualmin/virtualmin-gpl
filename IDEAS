@@ -64,8 +64,8 @@
 	- /backup/plesk/backup_SyntaxNode.net_info_1108110206.xml.tgz
 
  - Hashed password feature
+	- Exclude from webmin logs
 	- Dirk Ertner <dec@multiply.de>
-	- CHANGELOG
 	- Documentation
 	- Wizard?
 

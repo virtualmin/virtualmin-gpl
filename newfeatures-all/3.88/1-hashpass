@@ -1,0 +1,4 @@
+desc=Hashed password storage
+html=Storage of plaintext passwords for virtual servers and mailboxes can now be disabled on a per-template basis. Virtualmin will instead store only hashed passwords in multiple formats, which prevents passwords from being compromised if the system is hacked. This feature should ideally be enabled before any virtual servers have been created.
+master=1
+link=edit_tmpl.cgi?id=0&editmode=unix
