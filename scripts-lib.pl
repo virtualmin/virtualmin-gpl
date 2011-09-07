@@ -126,6 +126,7 @@ if (&master_admin()) {
 	}
 local $avail = $unavail{$name} eq '0' ||
 	       $unavail{$name} eq '' && !$unavail{'denydefault'};
+local $avail_only = !$unavail{$name};
 if ($access{'allowedscripts'}) {
 	local %allow = map { $_, 1 } split(/\s+/, $access{'allowedscripts'});
 	$avail = 0 if (!$allow{$name});
@@ -175,6 +176,7 @@ local $rv = { 'name' => $name,
 	      'passmode_func' => "script_${name}_passmode",
 	      'gpl_func' => "script_${name}_gpl",
 	      'avail' => $avail && !$disabled || $allowmaster,
+	      'avail_only' => $avail_only,
 	      'enabled' => !$disabled,
 	      'nocheck' => $disabled == 2,
 	      'minversion' => $unavail{$name."_minversion"},
@@ -308,7 +310,7 @@ local ($scripts) = @_;
 foreach my $script (@$scripts) {
 	local $n = $script->{'name'};
 	delete($unavail{$n."_minversion"});
-	if (!$script->{'avail'}) {
+	if (!$script->{'avail_only'}) {
 		$unavail{$n} = 1;
 		}
 	else {

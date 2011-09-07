@@ -63,7 +63,7 @@ foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $script->{'name'},
-		  'checked' => $script->{'avail'} },
+		  'checked' => $script->{'avail_only'} },
 		$script->{'site'} ? 
 			"<a href='$script->{'site'}' target=_new>".
 			"$script->{'desc'}</a>" : $script->{'desc'},

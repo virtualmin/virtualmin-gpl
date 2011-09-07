@@ -9,7 +9,7 @@ require './virtual-server-lib.pl';
 # Get the script objects, and update available and min version flags
 foreach $s (&list_scripts()) {
 	$script = &get_script($s);
-	$script->{'avail'} = $d{$script->{'name'}};
+	$script->{'avail_only'} = $d{$script->{'name'}};
 	$script->{'minversion'} = $in{$script->{'name'}."_minversion"};
 	push(@scripts, $script);
 	}
