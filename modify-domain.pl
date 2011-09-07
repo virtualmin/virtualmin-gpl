@@ -598,7 +598,7 @@ if ($dom->{'template'} ne $old->{'template'}) {
 local $merr = &made_changes();
 &$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($dom);
-&virtualmin_api_log(\@OLDARGV, $dom);
+&virtualmin_api_log(\@OLDARGV, $dom, $dom->{'hashpass'} ? [ "pass" ] : [ ]);
 print "All done\n";
 
 sub usage

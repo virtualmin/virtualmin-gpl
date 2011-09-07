@@ -341,7 +341,7 @@ if (!$nocreationmail) {
 &run_post_actions();
 &release_lock_unix($d);
 &release_lock_mail($d);
-&virtualmin_api_log(\@OLDARGV, $d);
+&virtualmin_api_log(\@OLDARGV, $d, $d->{'hashpass'} ? [ "pass" ] : [ ]
 print "User $user->{'user'} created successfully\n";
 
 sub usage

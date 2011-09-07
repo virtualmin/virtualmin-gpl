@@ -748,7 +748,7 @@ elsif ($content) {
 	&$second_print($text{'setup_done'});
 	}
 
-&virtualmin_api_log(\@OLDARGV, \%dom);
+&virtualmin_api_log(\@OLDARGV, \%dom, $dom{'hashpass'} ? [ "pass" ] : [ ]);
 &run_post_actions_silently();
 print "All done!\n";
 

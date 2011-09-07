@@ -80,6 +80,7 @@ elsif ($in{'delete'}) {
 			}
 
 		$user->{'dom'} = $d->{'dom'};
+		delete($user->{'plainpass'}) if ($d->{'hashpass'});
 		&set_all_null_print();
 		&run_post_actions();
 		&release_lock_unix($d);
@@ -689,6 +690,7 @@ else {
 	&set_all_null_print();
 	&run_post_actions();
 	$user->{'dom'} = $d->{'dom'};
+	delete($user->{'plainpass'}) if ($d->{'hashpass'});
 	&release_lock_unix($d);
 	&release_lock_mail($d);
 	&webmin_log($in{'new'} ? "create" : "modify", "user",

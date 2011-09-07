@@ -14153,11 +14153,11 @@ sub release_lock_anything
 local ($d) = @_;
 }
 
-# virtualmin_api_log(&argv, [&domain])
+# virtualmin_api_log(&argv, [&domain], [&suppress-flags])
 # Log an action taken by a Virtualmin command-line API call
 sub virtualmin_api_log
 {
-local ($argv, $d) = @_;
+local ($argv, $d, $hide) = @_;
 
 # Parse into flags hash
 local (%flags, $lastflag);
@@ -14187,6 +14187,18 @@ while(@argv) {
 		}
 	else {
 		push(@qargv, quotameta($a));
+		}
+	}
+if ($hide) {
+	# Hide sensitive fields, like the password
+	foreach my $h (@$hide) {
+		if ($flags{$h}) {
+			$flags{$h} = ("X" x length($flags{$h}));
+			}
+		my $idx = &indexoflc("--".$h, @qargv);
+		if ($idx >= 0) {
+			$qargv[$idx+1] = $flags{$h};
+			}
 		}
 	}
 $flags{'argv'} = &urlize(join(" ", @qargv));

@@ -497,7 +497,7 @@ if ($config{'other_users'}) {
 &run_post_actions();
 &release_lock_mail($d);
 &release_lock_unix($d);
-&virtualmin_api_log(\@OLDARGV, $d);
+&virtualmin_api_log(\@OLDARGV, $d, $d->{'hashpass'} ? [ "pass" ] : [ ]);
 print "User $user->{'user'} updated successfully\n";
 
 sub usage
