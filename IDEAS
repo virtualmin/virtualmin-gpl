@@ -63,10 +63,4 @@
 	- Email from Regan Wallace
 	- /backup/plesk/backup_SyntaxNode.net_info_1108110206.xml.tgz
 
- - Hashed password feature
-	- Exclude from webmin logs
-	- Dirk Ertner <dec@multiply.de>
-	- Documentation
-	- Wizard?
-
  - Disable PHP timeouts during script installs

@@ -20,6 +20,7 @@ return ( "intro",
 	 "db",
 	 $config{'mysql'} ? ( "mysql" ) : ( ),
 	 $config{'dns'} ? ( "dns" ) : ( ),
+	 "hashpass",
 	 "done" );
 }
 
@@ -385,6 +386,27 @@ print &ui_table_row(undef,
 sub wizard_parse_done
 {
 return undef;	# Always works
+}
+
+sub wizard_show_hashpass
+{
+print &ui_table_row(undef, $text{'wizard_hashpass'}, 2);
+
+local $tmpl = &get_template(0);
+print &ui_table_row($text{'wizard_hashpass_mode'},
+	&ui_radio("hashpass", $tmpl->{'hashpass'} ? 1 : 0,
+		  [ [ 0, $text{'wizard_hashpass_mode0'}."<br>" ],
+		    [ 1, $text{'wizard_hashpass_mode1'} ] ]));
+}
+
+sub wizard_parse_hashpass
+{
+local ($in) = @_;
+
+local @tmpls = &list_templates();
+local ($tmpl) = grep { $_->{'id'} eq '0' } @tmpls;
+$tmpl->{'hashpass'} = $in->{'hashpass'};
+&save_template($tmpl);
 }
 
 1;

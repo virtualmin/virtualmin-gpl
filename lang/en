@@ -5336,6 +5336,10 @@ wizard_dns_esecns=Secondary nameserver $1 is not a valid DNS name
 wizard_dns_esecns2=Secondary nameserver $1 cannot be resolved on this system
 wizard_dns_esecns3=Secondary nameserver $1 cannot be resolved from the rest of the Internet : $2
 wizard_dns_skip=Skip check for resolvability
+wizard_hashpass=Virtualmin gives you the option of storing plain-text passwords for virtual servers and mailboxes, or storing only one-way encrypted (hashed) passwords. Plain text passwords are more convenient, but less secure if your system is compromised.
+wizard_hashpass_mode=Password storage mode
+wizard_hashpass_mode1=Only store hashed passwords
+wizard_hashpass_mode0=Store plain-text passwords
 
 backuplog_title=Backup Logs
 backuplg_ecannot=You are not allowed to view Virtualmin backup logs
