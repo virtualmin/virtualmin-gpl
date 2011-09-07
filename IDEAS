@@ -64,8 +64,6 @@
 	- /backup/plesk/backup_SyntaxNode.net_info_1108110206.xml.tgz
 
  - Hashed password feature
-	- Migration scripts don't need to require a password if we have
-	  one hashed
 	- Dirk Ertner <dec@multiply.de>
 	- CHANGELOG
 	- Documentation

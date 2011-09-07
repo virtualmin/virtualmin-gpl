@@ -36,10 +36,6 @@ if (!$parent && !$user) {
 	$user || return ("Could not work out original username from backup");
 	}
 
-if (!$parent && !$pass) {
-	return ("A password must be supplied for Ensim migrations");
-	}
-
 return (undef, $dom, $user, $pass);
 }
 
@@ -164,6 +160,9 @@ local $encpass;
 if ($uu) {
 	$encpass = $uu->{'config'}->{'password'};
 	}
+$parent || $encpass || $pass ||
+	&error("No encrypted password was found in the Ensim backup, ".
+	       "and no password was provided");
 
 # Find original IP address
 local ($ii) = grep { $_->{'serviceName'} eq 'ipinfo' } @$service;
@@ -192,7 +191,8 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
          'virtalready', $virtalready,
 	 $parent ? ( 'pass', $parent->{'pass'} )
 		 : ( 'pass', $pass,
-		     'enc_pass', $encpass ),
+		     'enc_pass', $encpass,
+		     'hashpass', $pass ? 0 : 1 ),
 	 'source', 'migrate.cgi',
 	 'template', $template,
 	 'plan', $plan->{'id'},
