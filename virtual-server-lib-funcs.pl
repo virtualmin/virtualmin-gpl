@@ -1515,9 +1515,8 @@ local @oldto = @{$_[1]->{'to'}};
 if (!$_[0]->{'qmail'} && $echanged) {
 	# Take away all virtusers and add new ones, for non Qmail+LDAP users
 	&delete_virtuser($_[1]->{'virt'}) if ($_[1]->{'virt'});
-	local $e;
 	local %oldcmt;
-	foreach $e (@{$_[1]->{'extravirt'}}) {
+	foreach my $e (@{$_[1]->{'extravirt'}}) {
 		$oldcmt{$e->{'from'}} = $e->{'cmt'};
 		&delete_virtuser($e);
 		}
@@ -1542,7 +1541,7 @@ if (!$_[0]->{'qmail'} && $echanged) {
 		$_[0]->{'virt'} = $virt;
 		}
 	local @extravirt;
-	foreach $e (&unique(@{$_[0]->{'extraemail'}})) {
+	foreach my $e (&unique(@{$_[0]->{'extraemail'}})) {
 		local $virt = { 'from' => $e,
 				'to' => [ $vto ],
 				'cmt' => $oldcmt{$e} };
@@ -1551,6 +1550,15 @@ if (!$_[0]->{'qmail'} && $echanged) {
 		$firstemail ||= $e;
 		}
 	$_[0]->{'extravirt'} = \@extravirt;
+	}
+else {
+	# Just work out primary email address, for use by generics
+	if ($_[0]->{'email'}) {
+		$firstemail ||= $_[0]->{'email'};
+		}
+	foreach my $e (@{$_[0]->{'extraemail'}}) {
+		$firstemail ||= $e;
+		}
 	}
 
 if (!$_[0]->{'qmail'}) {
