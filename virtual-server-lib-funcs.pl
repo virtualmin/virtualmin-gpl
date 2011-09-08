@@ -6972,6 +6972,9 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			next;
 			}
 
+		# Disable PHP timeouts
+		local $t = &disable_script_php_timeout($dom);
+
 		# Call the install function
 		local $dompass = $dom->{'pass'} || &random_password(8);
 		local ($ok, $msg, $desc, $url, $suser, $spass) =
@@ -6991,6 +6994,9 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 		else {
 			&$second_print(&text('setup_scriptfailed', $msg));
 			}
+
+		# Re-enable script PHP timeout
+		&enable_script_php_timeout($dom, $t);
 		}
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
