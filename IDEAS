@@ -64,3 +64,4 @@
 	- /backup/plesk/backup_SyntaxNode.net_info_1108110206.xml.tgz
 
  - Disable PHP timeouts during script installs
+	- Call in virtual-server-lib-funcs.pl and other places 

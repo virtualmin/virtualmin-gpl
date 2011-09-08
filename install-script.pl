@@ -323,6 +323,9 @@ else {
 # Install needed PHP and Perl modules
 &setup_script_requirements($d, $script, $ver, $phpver, $opts) || exit(1);
 
+# Disable PHP timeouts
+$t = &disable_script_php_timeout($d);
+
 # Apply Apache config if needed, for new PHP version or modules or settings
 &run_post_actions();
 
@@ -352,6 +355,9 @@ else {
 		}
 	print "$msg\n";
 	}
+
+# Re-enable script PHP timeout
+&enable_script_php_timeout($d, $t);
 
 if ($ok) {
 	&$second_print($ok < 0 ? $text{'scripts_epartial'}
@@ -384,11 +390,13 @@ if ($ok) {
 	}
 else {
 	&$second_print($text{'scripts_failed'});
-	exit(1);
+	&run_post_actions();
 	}
 
 &release_lock_web($d);
 &release_lock_cron($d);
+
+exit($ok ? 0 : 1);
 
 sub usage
 {

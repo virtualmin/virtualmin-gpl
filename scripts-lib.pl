@@ -2563,5 +2563,53 @@ else {
 return wantarray ? ($status, $canup) : $status;
 }
 
+# disable_script_php_timeout(&domain)
+# Temporarily disable any PHP execution timeout for a domain, to allow long
+# running install scripts to complete
+sub disable_script_php_timeout
+{
+local ($d) = @_;
+local $mode = &get_domain_php_mode($d);
+if ($mode eq "mod_php") {
+	return undef;
+	}
+elsif ($mode eq "fcgid") {
+	local $max = &get_fcgid_max_execution_time($d);
+	return undef if (!$max);
+	&set_fcgid_max_execution_time($d, 9999);
+	&set_php_max_execution_time($d, 9999);
+	return $max;
+	}
+elsif ($mode eq "cgi") {
+	local $max = &get_php_max_execution_time($d);
+	return undef if (!$max);
+	&set_php_max_execution_time($d, 9999);
+	return $max;
+	}
+else {
+	return undef;
+	}
+}
+
+# enable_script_php_timeout(&domain, old-timeout)
+# Undoes the changes made by disable_script_php_timeout
+sub enable_script_php_timeout
+{
+local ($d, $max) = @_;
+if (defined($max)) {
+	local $mode = &get_domain_php_mode($d);
+	if ($mode eq "fcgid") {
+		&set_fcgid_max_execution_time($d, $max);
+		&set_php_max_execution_time($d, $max);
+		return 1;
+		}
+	elsif ($mode eq "cgi") {
+		&set_php_max_execution_time($d, $max);
+		return 1;
+		}
+	}
+return 0;
+}
+
 1;
 

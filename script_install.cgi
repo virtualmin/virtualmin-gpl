@@ -131,6 +131,9 @@ if (!&setup_script_requirements($d, $script, $ver, $phpver, $opts)) {
 	exit;
 	}
 
+# Disable PHP timeouts
+$t = &disable_script_php_timeout($d);
+
 # Restart Apache now if needed
 &run_post_actions();
 
@@ -158,6 +161,10 @@ if ($ok > 0 && !$sinfo) {
 		}
 	}
 &$outdent_print();
+
+# Re-enable script PHP timeout
+&enable_script_php_timeout($d, $t);
+
 if ($ok) {
 	&$second_print($ok < 0 ? $text{'scripts_epartial'}
 			       : $text{'setup_done'});
@@ -179,6 +186,7 @@ if ($ok) {
 	}
 else {
 	&$second_print($text{'scripts_failed'});
+	&run_post_actions();
 	}
 
 &release_lock_web($d);
