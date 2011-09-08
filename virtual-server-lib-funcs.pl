@@ -2372,15 +2372,25 @@ if (&foreign_check("htaccess-htpasswd")) {
 return \%rv;
 }
 
-# generate_domain_password_hashes(&domain)
+# generate_domain_password_hashes(&domain, new-domain?)
 # Updates a domain object with the appropriate password hash fields. For use
 # when creating a new domain.
 sub generate_domain_password_hashes
 {
-local ($d) = @_;
+local ($d, $newdom) = @_;
 local $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
-local $tmpl = &get_template($parent ? $parent->{'template'} : $d->{'template'});
-return if (!$tmpl->{'hashpass'});	# Hashing disabled
+if ($newdom) {
+	if ($parent) {
+		# Inherit from parent
+		$d->{'hashpass'} = $parent->{'hashpass'};
+		}
+	else {
+		# Inherit from template
+		local $tmpl = &get_template($d->{'template'});
+		$d->{'hashpass'} = $tmpl->{'hashpass'};
+		}
+	}
+return if (!$d->{'hashpass'});	# Hashing disabled
 if ($d->{'parent'}) {
 	# Just copy from parent
 	$parent = &get_domain($d->{'parent'});
@@ -6866,7 +6876,7 @@ if ($aliasname && $aliasname ne $dom->{'dom'}) {
 	local $parentdom = $dom->{'parent'} ?
 		&get_domain($dom->{'parent'}) : $dom;
 	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
-	&generate_domain_password_hashes(\%dom);
+	&generate_domain_password_hashes(\%dom, 1);
 	&set_provision_features(\%alias);
 	&complete_domain(\%alias);
 	&create_virtual_server(\%alias, $parentdom,$parentdom->{'user'});
@@ -11368,7 +11378,7 @@ $d->{'parent'} = undef;
 $d->{'user'} = $newuser;
 $d->{'group'} = $newuser;
 $d->{'pass'} = $newpass;
-&generate_domain_password_hashes($d);
+&generate_domain_password_hashes($d, 1);
 if (!$d->{'mysql'}) {
 	delete($d->{'mysql_user'});
 	}

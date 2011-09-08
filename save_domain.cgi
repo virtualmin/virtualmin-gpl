@@ -181,7 +181,7 @@ if (!$in{'passwd_def'}) {
 		}
 	$d->{'pass'} = $in{'passwd'};
 	$d->{'pass_set'} = 1;	# indicates that the password has been changed
-	&generate_domain_password_hashes($d);
+	&generate_domain_password_hashes($d, 0);
 	}
 else {
 	$d->{'pass_set'} = 0;

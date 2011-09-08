@@ -300,7 +300,7 @@ foreach my $f (@features, &list_feature_plugins()) {
 &set_featurelimits_from_plan(\%dom, $plan);
 $dom{'home'} = &server_home_directory(\%dom, $parent);
 &set_provision_features(\%dom);
-&generate_domain_password_hashes(\%dom);
+&generate_domain_password_hashes(\%dom, 1);
 &complete_domain(\%dom);
 
 # Check for various clashes
@@ -859,7 +859,7 @@ foreach my $adom (keys %$aliasdoms) {
 	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
 					  : \%dom;
 	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
-	&generate_domain_password_hashes(\%alias);
+	&generate_domain_password_hashes(\%alias, 1);
 	&complete_domain(\%alias);
 	&create_virtual_server(\%alias, $parentdom,
 			       $parentdom->{'user'});
@@ -911,7 +911,7 @@ foreach my $sdom (keys %$subdoms) {
 	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
 					  : \%dom;
 	$subd{'home'} = &server_home_directory(\%subd, $parentdom);
-	&generate_domain_password_hashes(\%subd);
+	&generate_domain_password_hashes(\%subd, 1);
 	&complete_domain(\%subd);
 	&create_virtual_server(\%subd, $parentdom,
 			       $parentdom->{'user'});

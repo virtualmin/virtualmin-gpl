@@ -348,7 +348,7 @@ if (defined($pass)) {
 			}
 		$d->{'pass'} = $pass;
 		$d->{'pass_set'} = 1;
-		&generate_domain_password_hashes($d);
+		&generate_domain_password_hashes($d, 0);
 		}
 	}
 if (defined($email)) {

@@ -157,7 +157,7 @@ if ($in{'confirm'}) {
 		&set_capabilities_from_plan(\%dom, $plan);
 		&set_featurelimits_from_plan(\%dom, $plan);
 		}
-	&generate_domain_password_hashes(\%dom);
+	&generate_domain_password_hashes(\%dom, 1);
 	$dom{'emailto'} = $dom{'email'} ||
 			  $dom{'user'}.'@'.&get_system_hostname();
 

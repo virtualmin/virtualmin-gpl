@@ -234,7 +234,7 @@ if ($domain->{'forwarding'} && $domain->{'forwarding'}->{'redirect'}) {
 	$dom{'proxy_pass'} = $domain->{'forwarding'}->{'redirect'};
 	}
 &set_provision_features(\%dom);
-&generate_domain_password_hashes(\%dom);
+&generate_domain_password_hashes(\%dom, 1);
 &complete_domain(\%dom);
 
 # Check for various clashes
@@ -662,7 +662,7 @@ foreach my $sdom (keys %$subdoms) {
 	$subd{'public_html_path'} = $subd{'home'}.'/httpdocs';
 	$subd{'cgi_bin_dir'} = 'cgi-bin';
 	$subd{'cgi_bin_path'} = $subd{'home'}.'/cgi-bin';
-	&generate_domain_password_hashes(\%subd);
+	&generate_domain_password_hashes(\%subd, 1);
 	&complete_domain(\%subd);
 	&create_virtual_server(\%subd, $parentdom,
 			       $parentdom->{'user'});

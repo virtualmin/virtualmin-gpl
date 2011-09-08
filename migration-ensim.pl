@@ -224,7 +224,7 @@ foreach my $f (@features, &list_feature_plugins()) {
 &set_featurelimits_from_plan(\%dom, $plan);
 $dom{'home'} = &server_home_directory(\%dom, $parent);
 &set_provision_features(\%dom);
-&generate_domain_password_hashes(\%dom);
+&generate_domain_password_hashes(\%dom, 1);
 &complete_domain(\%dom);
 
 # Set MySQL login and password

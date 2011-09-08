@@ -675,7 +675,7 @@ $dom{'db'} = $db || &database_name(\%dom);
 &set_featurelimits_from_plan(\%dom, $plan);
 &set_chained_features(\%dom, undef);
 &set_provision_features(\%dom);
-&generate_domain_password_hashes(\%dom);
+&generate_domain_password_hashes(\%dom, 1);
 
 # Work out home directory
 $dom{'home'} = &server_home_directory(\%dom, $parent);
