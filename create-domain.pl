@@ -118,6 +118,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--postgres-pass") {
 		$postgrespass = shift(@ARGV);
 		}
+	elsif ($a eq "--hashpass") {
+		$hashpass = 1;
+		}
 	elsif ($a eq "--quota") {
 		$quota = shift(@ARGV);
 		$quota = 0 if ($quota eq "UNLIMITED");
@@ -651,6 +654,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'noslaves', $noslaves,
 	 'nosecondaries', $nosecondaries,
 	 'subprefix', $subprefix,
+	 'hashpass', $hashpass,
         );
 foreach $f (keys %fields) {
 	$dom{$f} = $fields{$f};
@@ -761,6 +765,7 @@ print "\n";
 print "virtualmin create-domain --domain domain.name\n";
 print "                         --pass password-for-unix-user |\n";
 print "                         --passfile password-file\n";
+print "                        [--hashpass]\n";
 print "                        [--parent domain.name | --alias domain.name |\n";
 print "                         --superdom domain.name]\n";
 print "                        [--desc description-for-domain]\n";
