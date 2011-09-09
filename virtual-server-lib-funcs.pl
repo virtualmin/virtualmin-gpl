@@ -2382,12 +2382,12 @@ local $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
 if ($newdom) {
 	if ($parent) {
 		# Inherit from parent
-		$d->{'hashpass'} = $parent->{'hashpass'};
+		$d->{'hashpass'} ||= $parent->{'hashpass'};
 		}
 	else {
 		# Inherit from template
 		local $tmpl = &get_template($d->{'template'});
-		$d->{'hashpass'} = $tmpl->{'hashpass'};
+		$d->{'hashpass'} ||= $tmpl->{'hashpass'};
 		}
 	}
 return if (!$d->{'hashpass'});	# Hashing disabled
