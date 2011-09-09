@@ -64,9 +64,6 @@ else {
 		push(@dests, $dest);
 		}
 	@dests || &error($text{'backup_edests'});
-	if ($in{'onebyone'}) {
-		$in{'fmt'} == 2 || &error($text{'backup_eonebyone2'});
-		}
 
 	# Parse option inputs
 	foreach $f (@do_features) {

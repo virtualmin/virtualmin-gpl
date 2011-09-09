@@ -104,9 +104,6 @@ $anydownload && @dests > 1 && &error($text{'backup_edownloadmany'});
 
 @strfdests = $in{'strftime'} ? map { &backup_strftime($_) } @dests
 			     : @dests;
-if ($in{'onebyone'}) {
-	$in{'fmt'} == 2 || &error($text{'backup_eonebyone2'});
-	}
 
 # Parse option inputs
 foreach $f (@do_features) {
