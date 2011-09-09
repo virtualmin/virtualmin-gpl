@@ -3608,6 +3608,9 @@ $ip6_tests = [
 		      [ 'allocate-ip6' ] ],
 	},
 
+	# Delay needed for v6 address to become routable
+	{ 'command' => 'sleep 10' },
+
 	# Re-check HTTP get
 	{ 'command' => $wget_command.' --inet6 http://'.$test_domain,
 	  'grep' => 'Test IPv6 home page',
@@ -4906,8 +4909,211 @@ $clonesub_tests = [
 	  'cleanup' => 1 },
 	];
 
+$hashpass_tests = [
+	# Make sure domain creation works
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'hashpass' ],
+		      [ 'mysql-pass', 'spod' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
+		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Make sure the domain was created
+	{ 'command' => 'list-domains.pl',
+	  'grep' => "^$test_domain",
+	},
+
+	# Check for hashed password
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Hashed password:', 'Password for mysql:',
+		      'Password storage: Hashed' ],
+	  'antigrep' => [ 'Password:' ],
+	},
+
+	# Check FTP login
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_domain_user.':smeg@localhost/',
+	  'antigrep' => 'Login incorrect',
+	},
+
+	# Check SMTP to admin mailbox
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'to', $test_domain_user.'@'.$test_domain ] ],
+	},
+
+	# Check IMAP and POP3 for admin mailbox
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
+	},
+	{ 'command' => 'test-pop3.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
+	},
+
+	# Check Webmin login
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
+		       $webmin_proto.'://'.$test_domain_user.':smeg@localhost:'.
+		       $webmin_port.'/',
+	},
+
+	# Check MySQL login
+	{ 'command' => 'mysql -u '.$test_domain_user.' -pspod '.$test_domain_db.' -e "select version()"',
+	},
+
+	# Change password
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'pass' => 'newpass' ] ],
+	},
+
+	# Check new Webmin password
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
+		       $webmin_proto.'://'.$test_domain_user.
+		       ':newpass@localhost:'.$webmin_port.'/',
+	},
+
+	# Check FTP login with new password
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_domain_user.':newpass@localhost/',
+	  'antigrep' => 'Login incorrect',
+	},
+
+	# Check IMAP and POP3 for admin mailbox with new password
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'newpass' ],
+		      [ 'server', &get_system_hostname() ] ],
+	},
+
+	# Check MySQL login again
+	{ 'command' => 'mysql -u '.$test_domain_user.' -pspod '.$test_domain_db.' -e "select version()"',
+	},
+
+	# Add a mailbox to the domain
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'mail-quota', 100*1024 ],
+		      [ 'mysql', $test_domain_user ] ],
+	},
+
+	# Make sure the mailbox exists
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'user' => $test_user ],
+		      [ 'multiline' ] ],
+	  'antigrep' => 'Password:',
+	},
+
+	# Check FTP login
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_full_user.':smeg@localhost/',
+	  'antigrep' => 'Login incorrect',
+	},
+
+	# Check IMAP and POP3 for mailbox
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_full_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
+	},
+
+	# Check MySQL login
+	{ 'command' => 'mysql -u '.$test_full_user.' -psmeg '.$test_domain_db.' -e "select version()"',
+	},
+
+	# Change password
+	{ 'command' => 'modify-user.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'user' => $test_user ],
+		      [ 'pass' => 'newpass' ] ],
+	},
+
+	# Check FTP login with new password
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_full_user.':newpass@localhost/',
+	  'antigrep' => 'Login incorrect',
+	},
+
+	# Check IMAP and POP3 for mailbox with new password
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_full_user ],
+		      [ 'pass', 'newpass' ],
+		      [ 'server', &get_system_hostname() ] ],
+	},
+
+	# Check MySQL login with new password
+	{ 'command' => 'mysql -u '.$test_full_user.' -pnewpass '.$test_domain_db.' -e "select version()"',
+	},
+
+	# Create a sub-server
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ 'mail' ],
+		      @create_args, ],
+	},
+
+	# Check for hashed password
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Hashed password:',
+		      'Password storage: Hashed' ],
+	  'antigrep' => [ 'Password:' ],
+	},
+
+	# Create a mailbox in it
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
+	# Make sure the mailbox exists
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_subdomain ],
+		      [ 'user' => $test_user ],
+		      [ 'multiline' ] ],
+	  'antigrep' => 'Password:',
+	},
+
+	# Cleanup the domains
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+
+	];
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
+	      'hashpass' => $hashpass_tests,
 	      'disable' => $disable_tests,
 	      'web' => $web_tests,
 	      'mailbox' => $mailbox_tests,
