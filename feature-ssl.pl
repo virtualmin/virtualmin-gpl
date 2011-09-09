@@ -11,7 +11,7 @@ $default_web_sslport = $config{'web_sslport'} || 443;
 sub check_warnings_ssl
 {
 local ($d, $oldd) = @_;
-&require_web();
+&require_apache();
 local $tmpl = &get_template($d->{'template'});
 local $defport = $tmpl->{'web_sslport'} || 443;
 local $port = $d->{'web_sslport'} || $defport;
