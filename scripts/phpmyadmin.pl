@@ -283,6 +283,7 @@ foreach $l (@$lref) {
 
 # Delete the setup directory
 &unlink_file_as_domain_user($d, "$opts->{'dir'}/setup");
+&unlink_file_as_domain_user($d, "$opts->{'dir'}/scripts/setup.php");
 
 # Return a URL for the user
 local $rp = $opts->{'dir'};
