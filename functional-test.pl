@@ -149,6 +149,8 @@ $test_rename_full_user = &userdom_name($test_user, \%test_drename_omain);
        		       'user' => $test_clone_domain_user,
 		       'group' => $test_clone_domain_user,
 		       'template' => &get_init_template() );
+$test_clone_domain_home = $test_clone_domain{'home'} =
+	&server_home_directory(\%test_clone_domain);
 $test_clone_domain_db = &database_name(\%test_clone_domain);
 $test_full_clone_user = &userdom_name($test_user, \%test_clone_domain);
 
@@ -231,8 +233,22 @@ $domains_tests = [
 	},
 
 	$config{'postgres'} ? (
+		# Create a .pgpass file for the user
+		{ 'command' => 'echo "*:*:*:'.$test_domain_user.':smeg" > '.
+			       $test_domain_home.'/.pgpass',
+		},
+		{ 'command' => 'chown '.$test_domain_user.' '.
+			       $test_domain_home.'/.pgpass',
+		},
+		{ 'command' => 'chmod 600 '.$test_domain_home.'/.pgpass',
+		},
+
 		# Check PostgreSQL login
-		{ 'command' => 'psql -U '.$test_domain_user.' -h localhost '.$test_domain_db },
+		{ 'command' => 'su - '.$test_domain_user.' -c '.
+			quotemeta('psql -U '.$test_domain_user.' -h localhost '.
+				  '-c "select 666" '.$test_domain_db),
+		  'grep' => 666,
+		},
 		) : ( ),
 
 	# Check PHP execution
@@ -415,6 +431,7 @@ $disable_tests = [
 
 	$config{'postgres'} ? (
 		# Make sure PostgreSQL login doesn't work
+		# XXX
 		{ 'command' => 'psql -U '.$test_domain_user.' -h localhost '.$test_domain_db, 'fail' => 1, },
 		) : ( ),
 
@@ -956,6 +973,7 @@ $database_tests = [
 		},
 
 		# Check that we can login
+		# XXX
 		{ 'command' => 'psql -U '.$test_domain_user.' -h localhost '.$test_domain_user.'_extra2' },
 
 		# Drop the PostgreSQL database
@@ -1442,6 +1460,7 @@ $aliasdom_tests = [
 
 	$config{'postgres'} ? (
 		# Check PostgreSQL login
+		# XXX
 		{ 'command' => 'psql -U '.$test_domain_user.' -h localhost '.$test_domain_db },
 		) : ( ),
 
@@ -4917,8 +4936,10 @@ $hashpass_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'hashpass' ],
 		      [ 'mysql-pass', 'spod' ],
+		      [ 'postgres-pass', 'spam' ],
 		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
 		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
 		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
 		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
@@ -4974,6 +4995,25 @@ $hashpass_tests = [
 	{ 'command' => 'mysql -u '.$test_domain_user.' -pspod '.$test_domain_db.' -e "select version()"',
 	},
 
+	$config{'postgres'} ? (
+		# Create a .pgpass file for the user
+		{ 'command' => 'echo "*:*:*:'.$test_domain_user.':spam" > '.
+			       $test_domain_home.'/.pgpass',
+		},
+		{ 'command' => 'chown '.$test_domain_user.' '.
+			       $test_domain_home.'/.pgpass',
+		},
+		{ 'command' => 'chmod 600 '.$test_domain_home.'/.pgpass',
+		},
+
+		# Check PostgreSQL login
+		{ 'command' => 'su - '.$test_domain_user.' -c '.
+			quotemeta('psql -U '.$test_domain_user.' -h localhost '.
+				  '-c "select 666" '.$test_domain_db),
+		  'grep' => 666,
+		},
+		) : ( ),
+
 	# Change password
 	{ 'command' => 'modify-domain.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
@@ -5001,9 +5041,18 @@ $hashpass_tests = [
 		      [ 'server', &get_system_hostname() ] ],
 	},
 
-	# Check MySQL login again
+	# Check MySQL login again (password should be un-changed)
 	{ 'command' => 'mysql -u '.$test_domain_user.' -pspod '.$test_domain_db.' -e "select version()"',
 	},
+
+	$config{'postgres'} ? (
+		# Check PostgreSQL login (password should be un-changed)
+		{ 'command' => 'su - '.$test_domain_user.' -c '.
+			quotemeta('psql -U '.$test_domain_user.' -h localhost '.
+				  '-c "select 666" '.$test_domain_db),
+		  'grep' => 666,
+		},
+		) : ( ),
 
 	# Add a mailbox to the domain
 	{ 'command' => 'create-user.pl',
@@ -5038,7 +5087,7 @@ $hashpass_tests = [
 		      [ 'server', &get_system_hostname() ] ],
 	},
 
-	# Check MySQL login
+	# Check MySQL login for the mailbox
 	{ 'command' => 'mysql -u '.$test_full_user.' -psmeg '.$test_domain_db.' -e "select version()"',
 	},
 
@@ -5062,7 +5111,7 @@ $hashpass_tests = [
 		      [ 'server', &get_system_hostname() ] ],
 	},
 
-	# Check MySQL login with new password
+	# Check MySQL login for the mailbox with new password
 	{ 'command' => 'mysql -u '.$test_full_user.' -pnewpass '.$test_domain_db.' -e "select version()"',
 	},
 
@@ -5104,11 +5153,69 @@ $hashpass_tests = [
 	  'antigrep' => 'Password:',
 	},
 
+	# Create another domain with a random MySQL pass
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ],
+		      [ 'desc', 'Test domain two' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'hashpass' ],
+		      [ 'dir' ], [ 'unix' ], [ 'mysql' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Get the MySQL password
+	{ 'command' => 'list-domains.pl --multiline '.
+		       '--domain '.$test_clone_domain.
+		       ' | grep "Password for mysql" | awk \'{ print $4 }\'',
+	  'save' => 'MYSQL_PASS',
+	  'antigrep' => 'smeg',
+	},
+
+	# Check MySQL login with random pass
+	{ 'command' => 'mysql -u '.$test_clone_domain_user.' -p$MYSQL_PASS '.$test_clone_domain_db.' -e "select version()"',
+	},
+
+	$config{'postgres'} ? (
+		# Get the PostgreSQL password
+		{ 'command' => 'list-domains.pl --multiline '.
+			       '--domain '.$test_clone_domain.
+			       ' | grep "Password for postgres" | awk \'{ print $4 }\'',
+		  'save' => 'POSTGRES_PASS',
+		  'antigrep' => 'smeg',
+		},
+
+		# Create a .pgpass file for the user with the random pass
+		{ 'command' => 'echo "*:*:*:'.$test_clone_domain_user.
+			       ':$POSTGRES_PASS" > '.
+			       $test_clone_domain_home.'/.pgpass',
+		},
+		{ 'command' => 'chown '.$test_clone_domain_user.' '.
+			       $test_clone_domain_home.'/.pgpass',
+		},
+		{ 'command' => 'chmod 600 '.$test_clone_domain_home.'/.pgpass',
+		},
+
+		# Check PostgreSQL login with random pass
+		{ 'command' => 'su - '.$test_clone_domain_user.' -c '.
+			quotemeta('psql -U '.$test_clone_domain_user.
+				  ' -h localhost '.
+				  '-c "select 666" '.$test_clone_domain_db),
+		  'grep' => 666,
+		},
+		) : ( ),
+
 	# Cleanup the domains
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
-	  'cleanup' => 1 },
-
+	  'cleanup' => 1
+	},
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ] ],
+	  'cleanup' => 1
+	},
 	];
 
 $alltests = { '_config' => $_config_tests,

@@ -43,12 +43,9 @@ local $user = $d->{'postgres_user'} = &postgres_user($d);
 
 # Check if only hashed passwords are stored, and if so generate a random
 # PostgreSQL password now
-if (!$d->{'parent'} && !$d->{'postgres_pass'}) {
-	local $tmpl = &get_template($d->{'template'});
-	if ($tmpl->{'hashpass'}) {
-		$d->{'postgres_pass'} = &random_password(8);
-		delete($d->{'postgres_enc_pass'});
-		}
+if ($d->{'hashpass'} && !$d->{'parent'} && !$d->{'postgres_pass'}) {
+	$d->{'postgres_pass'} = &random_password(16);
+	delete($d->{'postgres_enc_pass'});
 	}
 
 if (!$d->{'parent'}) {

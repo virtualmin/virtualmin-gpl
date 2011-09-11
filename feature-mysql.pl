@@ -43,7 +43,7 @@ local $user = $d->{'mysql_user'};
 # Check if only hashed passwords are stored, and if so generate a random
 # MySQL password now
 if ($d->{'hashpass'} && !$d->{'parent'} && !$d->{'mysql_pass'}) {
-	$d->{'mysql_pass'} = &random_password(8);
+	$d->{'mysql_pass'} = &random_password(16);
 	delete($d->{'mysql_enc_pass'});
 	}
 
