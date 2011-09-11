@@ -13435,14 +13435,15 @@ else {
 
 }
 
-# show_password_popup(&domain, [&user])
+# show_password_popup(&domain, [&user], [mode])
 # Returns HTML for a link that pops up a password display window
 sub show_password_popup
 {
-local ($d, $user) = @_;
-local $pass = $user ? $user->{'plainpass'} : $d->{'pass'};
+local ($d, $user, $mode) = @_;
+local $pass = $mode ? $d->{$mode."_pass"} :
+	      $user ? $user->{'plainpass'} : $d->{'pass'};
 if (&can_show_pass() && $pass) {
-	local $link = "showpass.cgi?dom=$d->{'id'}";
+	local $link = "showpass.cgi?dom=$d->{'id'}&mode=".&urlize($mode);
 	if ($user) {
 		$link .= "&user=".&urlize($user->{'user'});
 		}

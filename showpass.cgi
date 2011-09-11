@@ -20,6 +20,15 @@ if ($in{'user'}) {
 	$msg1 = $text{'showpass_useru'};
 	$msg2 = $text{'showpass_passu'};
 	}
+elsif (&indexof($in{'mode'}, @database_features) >= 0) {
+	# For a DB
+	$ufunc = $in{'mode'}."_user";
+	$username = &$ufunc($d);
+	$pfunc = $in{'mode'}."_pass";
+	$pass = &$pfunc($d);
+	$msg1 = &text('showpass_dbuser', $text{'feature_'.$in{'mode'}});
+	$msg2 = &text('showpass_dbpass', $text{'feature_'.$in{'mode'}});
+	}
 else {
 	# For a domain
 	$username = $d->{'user'};

@@ -173,7 +173,9 @@ if (!$d->{'parent'}) {
 		push(@opts, [ 0, $text{'databases_newpass'},
 			      &ui_password($f,
                                  $pw eq $d->{'pass'} &&
-				 !$tmpl->{$f.'_nopass'} ? "" : $pw, 20) ]);
+				 !$tmpl->{$f.'_nopass'} ? "" : $pw, 20)." ".
+			      ($pw ? &show_password_popup($d, undef, $f) : "")
+			    ]);
 		if (@opts > 1) {
 			print &ui_table_row($text{'feature_'.$f},
 				&ui_radio_table($f."_def",

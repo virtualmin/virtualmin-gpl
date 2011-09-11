@@ -4460,6 +4460,8 @@ showpass_useru=IMAP / POP3 / FTP login
 showpass_passu=Password
 showpass_ecannot=You are not allowed to view virtual server passwords
 showpass_egone=User does not exist!
+showpass_dbuser=Username for $1
+showpass_dbpass=Password for $1
 
 phpver_title=PHP Versions
 phpver_dir=Website subdirectory
