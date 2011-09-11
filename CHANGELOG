@@ -1310,4 +1310,4 @@ When a virtual server is disabled, any cron jobs run by its owner or mailbox use
 An IPv6 address that is already active can now be used when creating a virtual server.
 Checking for new script updates is now enabled by default on new installs and upgrades, unless explicitly disabled by root.
 Added a tab to the Validate Virtual Servers page for fixing file ownership and permissions problems.
-Storage of plaintext passwords for virtual servers and mailboxes can now be disabled on a per-template basis. Virtualmin will instead store only hashed passwords in multiple formats, which prevents passwords from being compromised if the system is hacked.
+Storage of plaintext passwords for virtual servers and mailboxes can now be disabled on a per-template basis. Virtualmin will instead store only hashed passwords in multiple formats, which prevents passwords from being compromised if the system is hacked. Thanks to Dirk Ertner for supporting this feature.
