@@ -65,9 +65,6 @@ foreach $i (keys %in) {
 		}
 	}
 
-# Prevent executed programs from doing referer checks
-delete($ENV{'MINISERV_CONFIG'});
-
 print "Content-type: text/plain\n\n";
 
 # Execute the command within the same perl interpreter
