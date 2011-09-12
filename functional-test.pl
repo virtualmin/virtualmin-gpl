@@ -232,24 +232,10 @@ $domains_tests = [
 	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.' -e "select version()"',
 	},
 
-	$config{'postgres'} ? (
-		# Create a .pgpass file for the user
-		{ 'command' => 'echo "*:*:*:'.$test_domain_user.':smeg" > '.
-			       $test_domain_home.'/.pgpass',
-		},
-		{ 'command' => 'chown '.$test_domain_user.' '.
-			       $test_domain_home.'/.pgpass',
-		},
-		{ 'command' => 'chmod 600 '.$test_domain_home.'/.pgpass',
-		},
-
-		# Check PostgreSQL login
-		{ 'command' => 'su - '.$test_domain_user.' -c '.
-			quotemeta('psql -U '.$test_domain_user.' -h localhost '.
-				  '-c "select 666" '.$test_domain_db),
-		  'grep' => 666,
-		},
-		) : ( ),
+	$config{'postgres'} ?
+		&postgresql_login_commands($test_domain_user, 'smeg',
+					   $test_domain_db, $test_domain_home)
+		: ( ),
 
 	# Check PHP execution
 	{ 'command' => 'echo "<?php phpinfo(); ?>" >~'.
@@ -429,11 +415,12 @@ $disable_tests = [
 	  'fail' => 1,
 	},
 
-	$config{'postgres'} ? (
+	$config{'postgres'} ?
 		# Make sure PostgreSQL login doesn't work
-		# XXX
-		{ 'command' => 'psql -U '.$test_domain_user.' -h localhost '.$test_domain_db, 'fail' => 1, },
-		) : ( ),
+		&postgresql_login_commands($test_domain_user, 'smeg',
+                                           $test_domain_db, $test_domain_home,
+					   1)
+		: ( ),
 
 	# Check FTP login as the mailbox fails
 	{ 'command' => $wget_command.
@@ -973,8 +960,9 @@ $database_tests = [
 		},
 
 		# Check that we can login
-		# XXX
-		{ 'command' => 'psql -U '.$test_domain_user.' -h localhost '.$test_domain_user.'_extra2' },
+		&postgresql_login_commands($test_domain_user, 'smeg',
+					   $test_domain_user.'_extra2',
+					   $test_domain_home),
 
 		# Drop the PostgreSQL database
 		{ 'command' => 'delete-database.pl',
@@ -1458,11 +1446,12 @@ $aliasdom_tests = [
 	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.'_extra -e "select version()"',
 	},
 
-	$config{'postgres'} ? (
+	$config{'postgres'} ?
 		# Check PostgreSQL login
-		# XXX
-		{ 'command' => 'psql -U '.$test_domain_user.' -h localhost '.$test_domain_db },
-		) : ( ),
+		&postgresql_login_commands($test_domain_user, 'smeg',
+					   $test_domain_db,
+					   $test_domain_home)
+		: ( ),
 
 	# Make sure the mailbox still exists
 	{ 'command' => 'list-users.pl',
@@ -4995,24 +4984,10 @@ $hashpass_tests = [
 	{ 'command' => 'mysql -u '.$test_domain_user.' -pspod '.$test_domain_db.' -e "select version()"',
 	},
 
-	$config{'postgres'} ? (
-		# Create a .pgpass file for the user
-		{ 'command' => 'echo "*:*:*:'.$test_domain_user.':spam" > '.
-			       $test_domain_home.'/.pgpass',
-		},
-		{ 'command' => 'chown '.$test_domain_user.' '.
-			       $test_domain_home.'/.pgpass',
-		},
-		{ 'command' => 'chmod 600 '.$test_domain_home.'/.pgpass',
-		},
-
-		# Check PostgreSQL login
-		{ 'command' => 'su - '.$test_domain_user.' -c '.
-			quotemeta('psql -U '.$test_domain_user.' -h localhost '.
-				  '-c "select 666" '.$test_domain_db),
-		  'grep' => 666,
-		},
-		) : ( ),
+	$config{'postgres'} ?
+		&postgresql_login_commands($test_domain_user, 'spam',
+                                           $test_domain_db, $test_domain_home)
+		: ( ),
 
 	# Change password
 	{ 'command' => 'modify-domain.pl',
@@ -5045,14 +5020,10 @@ $hashpass_tests = [
 	{ 'command' => 'mysql -u '.$test_domain_user.' -pspod '.$test_domain_db.' -e "select version()"',
 	},
 
-	$config{'postgres'} ? (
-		# Check PostgreSQL login (password should be un-changed)
-		{ 'command' => 'su - '.$test_domain_user.' -c '.
-			quotemeta('psql -U '.$test_domain_user.' -h localhost '.
-				  '-c "select 666" '.$test_domain_db),
-		  'grep' => 666,
-		},
-		) : ( ),
+	$config{'postgres'} ?
+		&postgresql_login_commands($test_domain_user, 'spod',
+					   $test_domain_db, $test_domain_home)
+		: ( ),
 
 	# Add a mailbox to the domain
 	{ 'command' => 'create-user.pl',
@@ -5187,24 +5158,11 @@ $hashpass_tests = [
 		  'antigrep' => 'smeg',
 		},
 
-		# Create a .pgpass file for the user with the random pass
-		{ 'command' => 'echo "*:*:*:'.$test_clone_domain_user.
-			       ':$POSTGRES_PASS" > '.
-			       $test_clone_domain_home.'/.pgpass',
-		},
-		{ 'command' => 'chown '.$test_clone_domain_user.' '.
-			       $test_clone_domain_home.'/.pgpass',
-		},
-		{ 'command' => 'chmod 600 '.$test_clone_domain_home.'/.pgpass',
-		},
-
-		# Check PostgreSQL login with random pass
-		{ 'command' => 'su - '.$test_clone_domain_user.' -c '.
-			quotemeta('psql -U '.$test_clone_domain_user.
-				  ' -h localhost '.
-				  '-c "select 666" '.$test_clone_domain_db),
-		  'grep' => 666,
-		},
+		# Test login
+		&postgresql_login_commands($test_clone_domain_user,
+					   '$POSTGRES_PASS',
+					    $test_clone_domain_db,
+					    $test_clone_domain_home),
 		) : ( ),
 
 	# Cleanup the domains
@@ -5491,4 +5449,28 @@ print "                           [--user webmin-login --pass password]\n";
 exit(1);
 }
 
+# postgresql_login_commands(user, pass, db, home, failmode)
+# Returns test commands to test a login to PostgreSQL
+sub postgresql_login_commands
+{
+my ($user, $pass, $db, $home, $failmode) = @_;
+return (
+	# Create a .pgpass file for the user
+	{ 'command' => 'echo "*:*:*:'.$user.':'.$pass.'" > '.
+		       $home.'/.pgpass',
+	},
+	{ 'command' => 'chown '.$user.' '.$home.'/.pgpass',
+	},
+	{ 'command' => 'chmod 600 '.$home.'/.pgpass',
+	},
 
+	# Check PostgreSQL login
+	{ 'command' => 'su - '.$user.' -c '.
+		quotemeta('psql -U '.$user.' -h localhost '.
+			  '-c "select 666" '.$db),
+	  $failmode ? ( 'antigrep' => 666 ) : ( 'grep' => 666 ),
+	  'ignorefail' => $failmode,
+	},
+	);
+
+}
