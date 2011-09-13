@@ -113,7 +113,7 @@ local $olduser = &postgres_user($_[1]);
 local $pass = &postgres_pass($_[0]);
 local $oldpass = &postgres_pass($_[1]);
 if ($pass ne $oldpass && !$_[0]->{'parent'} &&
-    (!$tmpl->{'mysql_nopass'} || $_[0]->{'mysql_pass'})) {
+    (!$tmpl->{'mysql_nopass'} || $_[0]->{'postgres_pass'})) {
 	# Change PostgreSQL password ..
 	&$first_print($text{'save_postgrespass'});
 	if (&postgres_user_exists($_[1])) {
