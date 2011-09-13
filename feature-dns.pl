@@ -246,6 +246,11 @@ elsif (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
 		&create_zone_on_slaves($_[0], $slaves);
 		}
 
+	# If website has a *.domain.com ServerAlias, add * DNS record now
+	if ($_[0]->{'web'} && &get_domain_web_star($_[0])) {
+		&save_domain_matchall_record($_[0], 1);
+		}
+
 	&release_lock_dns($_[0], 1);
 	}
 else {
