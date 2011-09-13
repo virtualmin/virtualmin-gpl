@@ -158,6 +158,11 @@ if ($defini && !-l "$etc/php.ini") {
 	&symlink_file_as_domain_user($d, $defini, "$etc/php.ini");
 	}
 
+# Create wrapper scripts
+if ($mode ne "mod_php") {
+	&create_php_wrappers($d, $mode);
+	}
+
 # Add the appropriate directives to the Apache config
 local @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
@@ -354,11 +359,6 @@ foreach my $p (@ports) {
 				$vconf, $conf);
 
 	&flush_file_lines();
-	}
-
-# Create wrapper scripts
-if ($mode ne "mod_php") {
-	&create_php_wrappers($d, $mode);
 	}
 
 &register_post_action(\&restart_apache);
