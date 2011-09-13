@@ -5020,8 +5020,9 @@ $hashpass_tests = [
 	{ 'command' => 'mysql -u '.$test_domain_user.' -pspod '.$test_domain_db.' -e "select version()"',
 	},
 
+	# Check PostgreSQL login again (password should be un-changed)
 	$config{'postgres'} ?
-		&postgresql_login_commands($test_domain_user, 'spod',
+		&postgresql_login_commands($test_domain_user, 'spam',
 					   $test_domain_db, $test_domain_home)
 		: ( ),
 
