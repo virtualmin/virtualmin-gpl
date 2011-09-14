@@ -35,7 +35,8 @@ if ($_[0]->{'provision_dns'}) {
 	&$first_print($text{'setup_bind_provision'});
 	local $info = { 'domain' => $_[0]->{'dom'} };
 	if (@extra_slaves) {
-		$info->{'slave'} = \@extra_slaves;
+		$info->{'slave'} = [ grep { $_ } map { &to_ipaddress($_) }
+						     @extra_slaves ];
 		}
 	local $temp = &transname();
 	local $bind8::config{'auto_chroot'} = undef;
