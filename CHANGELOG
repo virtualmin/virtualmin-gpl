@@ -1311,3 +1311,5 @@ An IPv6 address that is already active can now be used when creating a virtual s
 Checking for new script updates is now enabled by default on new installs and upgrades, unless explicitly disabled by root.
 Added a tab to the Validate Virtual Servers page for fixing file ownership and permissions problems.
 Storage of plaintext passwords for virtual servers and mailboxes can now be disabled on a per-template basis. Virtualmin will instead store only hashed passwords in multiple formats, which prevents passwords from being compromised if the system is hacked. Thanks to Dirk Ertner for supporting this feature.
+---- Changes since 3.88 ----
+Updated the phpMyAdmin script installer to version 3.4.5.
