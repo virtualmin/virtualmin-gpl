@@ -2345,6 +2345,7 @@ restore_mysqlloadfailed=.. load failed! $1
 restore_mysqlgunzipfailed=.. gunzip failed! $1
 restore_mysqlnosuch=.. database does not exist.
 restore_mysqlclash=.. a database with the same name already exists!
+restore_mysqlimport=.. database already exists
 restore_apachecp=Restoring Apache virtual host configuration ..
 restore_apachecp2=Restoring Apache aliases ..
 restore_apachelog=Restoring Apache log files ..

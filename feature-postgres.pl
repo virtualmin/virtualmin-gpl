@@ -408,19 +408,24 @@ sub restore_postgres
 {
 &require_postgres();
 &foreign_require("proc", "proc-lib.pl");
-&$first_print($text{'restore_postgresdrop'});
-	{
-	local $first_print = \&null_print;	# supress messages
-	local $second_print = \&null_print;
-	&require_mysql();
 
-	# First clear out the databases
-	&delete_postgres($_[0]);
+if (!$_[0]->{'wasmissing'}) {
+	# Only delete and re-create databases if this domain was not created
+	# as part of the restore process.
+	&$first_print($text{'restore_postgresdrop'});
+		{
+		local $first_print = \&null_print;	# supress messages
+		local $second_print = \&null_print;
+		&require_mysql();
 
-	# Now re-set up the user only
-	&setup_postgres($_[0], 1);
+		# First clear out the databases
+		&delete_postgres($_[0]);
+
+		# Now re-set up the user only
+		&setup_postgres($_[0], 1);
+		}
+	&$second_print($text{'setup_done'});
 	}
-&$second_print($text{'setup_done'});
 
 # Work out which databases are in backup
 local ($dbfile, @dbs);
@@ -435,13 +440,26 @@ foreach $dbfile (glob("$_[1]_*")) {
 # Finally, import the data
 local $db;
 foreach $db (@dbs) {
+	my $clash = &check_postgres_database_clash($_[0], $db->[0]);
+	if ($clash && $_[0]->{'wasmissing'}) {
+		# DB already exists, silently ignore it if not empty.
+		# This can happen during a restore when PostgreSQL is on a
+		# remote system.
+		my @tables = &postgresql::list_tables($db->[0], 1);
+		if (@tables) {
+			next;
+			}
+		}
 	&$first_print(&text('restore_postgresload', $db->[0]));
-	if (&check_postgres_database_clash($_[0], $db->[0])) {
+	if ($clash && !$_[0]->{'wasmissing'}) {
+                # DB already exists, and this isn't a newly created domain
 		&$second_print(&text('restore_postgresclash'));
 		return 0;
 		}
 	&$indent_print();
-	&create_postgres_database($_[0], $db->[0]);
+	if (!$clash) {
+		&create_postgres_database($_[0], $db->[0]);
+		}
 	&$outdent_print();
 	if ($postgresql::postgres_sameunix) {
 		# Restore is running as the postgres user - make the backup

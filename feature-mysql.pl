@@ -918,27 +918,31 @@ sub restore_mysql
 local %info;
 &read_file($_[1], \%info);
 
-&$first_print($text{'restore_mysqldrop'});
-	{
-	local $first_print = \&null_print;	# supress messages
-	local $second_print = \&null_print;
-	&require_mysql();
+if (!$_[0]->{'wasmissing'}) {
+	# Only delete and re-create databases if this domain was not created
+	# as part of the restore process.
+	&$first_print($text{'restore_mysqldrop'});
+		{
+		local $first_print = \&null_print;	# supress messages
+		local $second_print = \&null_print;
+		&require_mysql();
 
-	# First clear out all current databases and the MySQL login
-	&delete_mysql($_[0]);
+		# First clear out all current databases and the MySQL login
+		&delete_mysql($_[0]);
 
-	# Now re-set up the login only
-	&setup_mysql($_[0], 1);
+		# Now re-set up the login only
+		&setup_mysql($_[0], 1);
 
-	# Re-grant allowed hosts from backup + local
-	if (!$_[0]->{'parent'} && $info{'hosts'}) {
-		local @lhosts = &get_mysql_allowed_hosts($_[0]);
-		push(@lhosts, split(/\s+/, $info{'hosts'}));
-		@lhosts = &unique(@lhosts);
-		&save_mysql_allowed_hosts($_[0], \@lhosts);
+		# Re-grant allowed hosts from backup + local
+		if (!$_[0]->{'parent'} && $info{'hosts'}) {
+			local @lhosts = &get_mysql_allowed_hosts($_[0]);
+			push(@lhosts, split(/\s+/, $info{'hosts'}));
+			@lhosts = &unique(@lhosts);
+			&save_mysql_allowed_hosts($_[0], \@lhosts);
+			}
 		}
+	&$second_print($text{'setup_done'});
 	}
-&$second_print($text{'setup_done'});
 
 # Work out which databases are in backup
 local ($dbfile, @dbs);
@@ -956,14 +960,27 @@ foreach $dbfile (glob("$_[1]_*")) {
 # Finally, import the data
 my $rv = 1;
 foreach my $db (@dbs) {
+	my $clash = &check_mysql_database_clash($_[0], $db->[0]);
+	if ($clash && $_[0]->{'wasmissing'}) {
+		# DB already exists, silently ignore it if not empty.
+		# This can happen during a restore when MySQL is on a remote
+		# system.
+		my @tables = &mysql::list_tables($db->[0], 1);
+		if (@tables) {
+			next;
+			}
+		}
 	&$first_print(&text('restore_mysqlload', $db->[0]));
-	if (&check_mysql_database_clash($_[0], $db->[0])) {
-		&$second_print(&text('restore_mysqlclash'));
+	if ($clash && !$_[0]->{'wasmissing'}) {
+		# DB already exists, and this isn't a newly created domain
+		&$second_print($text{'restore_mysqlclash'});
 		$rv = 0;
 		last;
 		}
 	&$indent_print();
-	&create_mysql_database($_[0], $db->[0]);
+	if (!$clash) {
+		&create_mysql_database($_[0], $db->[0]);
+		}
 	&$outdent_print();
 	if ($db->[1] =~ /\.gz$/) {
 		# Need to uncompress first

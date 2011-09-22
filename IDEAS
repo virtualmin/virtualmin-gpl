@@ -66,6 +66,3 @@
 	- https://www.virtualmin.com/node/19495
 	- Provisioning mode support
 		- Only if owned by same owner
-	- when restoring, DB contents should be preserved if it already exists
-		- ie. replicated setup
-	- CHANGELOG
