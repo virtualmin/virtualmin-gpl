@@ -1561,6 +1561,7 @@ if ($ok) {
 				}
 
 			# Fix up the IP address if needed
+			$d->{'old_ip'} = $d->{'ip'};
 			if ($d->{'alias'}) {
 				# Alias domains always have same IP as parent
 				local $alias = &get_domain($d->{'alias'});
@@ -1597,6 +1598,7 @@ if ($ok) {
 
 			# DNS external IP is always reset to match this system,
 			# as the old setting is unlikely to be correct.
+			$d->{'old_dns_ip'} = $d->{'dns_ip'};
 			$d->{'dns_ip'} = $virt || $config{'all_namevirtual'} ?
 				undef : &get_dns_ip();
 
@@ -1835,6 +1837,8 @@ if (defined(&list_domain_scripts) && $ok && scalar(@wasmissing)) {
 foreach my $d (@$doms) {
 	if ($d->{'wasmissing'}) {
 		delete($d->{'wasmissing'});
+		delete($d->{'old_ip'});
+		delete($d->{'old_dns_ip'});
 		&save_domain($d);
 		}
 	}

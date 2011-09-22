@@ -1736,8 +1736,12 @@ if ($file) {
 				  ($_->{'name'} eq $_[0]->{'dom'}."." ||
 				   $_->{'name'} eq '@') } @recs;
 	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
-	local $baseip = $baserec ? $baserec->{'values'}->[0] : undef;
-	&modify_records_ip_address(\@recs, $file, $baseip, $ip);
+	local $baseip = $_[0]->{'old_dns_ip'} ? $_[0]->{'old_dns_ip'} :
+		        $_[0]->{'old_ip'} ? $_[0]->{'old_ip'} :
+				$baserec ? $baserec->{'values'}->[0] : undef;
+	if ($baseip) {
+		&modify_records_ip_address(\@recs, $file, $baseip, $ip);
+		}
 
 	# Replace NS records with those from new system
 	if (!$_[2]->{'wholefile'}) {
