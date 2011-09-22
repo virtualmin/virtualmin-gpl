@@ -62,4 +62,10 @@
  - Directadmin migration support
 	- https://www.virtualmin.com/node/19460
 
- - Fix postgresql login checks in functional tests
+ - Allow restore when MySQL already exists
+	- https://www.virtualmin.com/node/19495
+	- Provisioning mode support
+		- Only if owned by same owner
+	- when restoring, DB contents should be preserved if it already exists
+		- ie. replicated setup
+	- CHANGELOG

@@ -176,6 +176,9 @@ while(@ARGV > 0) {
 			    'virtalready' => 0, 'netmask' => $netmask,
 			    'mode' => 2 };
 		}
+	elsif ($a eq "--skip-warnings") {
+		$skipwarnings = 1;
+		}
 	else {
 		&usage();
 		}
@@ -276,7 +279,7 @@ $opts{'reuid'} = $reuid;
 $opts{'fix'} = $fix;
 &$first_print("Starting restore..");
 $ok = &restore_domains($src, \@doms, \@rfeats, \%opts, \@vbs, $onlyfeats,
-		       $ipinfo, $asowner);
+		       $ipinfo, $asowner, $skipwarnings);
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV, $doms[0]);
 if ($ok) {
@@ -305,6 +308,7 @@ print "                         [--all-virtualmin] | [--virtualmin config]\n";
 print "                         [--only-features]\n";
 print "                         [--shared-ip address | --ip address | --allocate-ip]\n";
 print "                         [--only-missing | --only-existing]\n";
+print "                         [--skip-warnings]\n";
 print "\n";
 print "Multiple domains may be specified with multiple --domain parameters.\n";
 print "Features must be specified using their short names, like web and dns.\n";

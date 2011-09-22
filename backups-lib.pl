@@ -1211,11 +1211,13 @@ return $? ? $out : undef;
 }
 
 # restore_domains(file, &domains, &features, &options, &vbs,
-#		  [only-backup-features], [&ip-address-info], [as-owner])
+#		  [only-backup-features], [&ip-address-info], [as-owner],
+#		  [skip-warnings])
 # Restore multiple domains from the given file
 sub restore_domains
 {
-local ($file, $doms, $features, $opts, $vbs, $onlyfeats, $ipinfo, $asowner) =@_;
+local ($file, $doms, $features, $opts, $vbs, $onlyfeats, $ipinfo, $asowner,
+       $skipwarnings) = @_;
 local $tar = &get_tar_command();
 
 # Find owning domain
@@ -1610,6 +1612,22 @@ if ($ok) {
 				&$second_print(&text('restore_eclash', $cerr));
 				$ok = 0;
 				last DOMAIN;
+				}
+
+			# Check for warnings
+			if (!$skipwarnings) {
+				local @warns = &virtual_server_warnings($d);
+				if (@warns) {
+					&$second_print(
+						$text{'restore_ewarnings'});
+					&$indent_print();
+					foreach my $w (@warns) {
+						&$second_print($w);
+						}
+					&$outdent_print();
+					$ok = 0;
+					last DOMAIN;
+					}
 				}
 
 			# Finally, create it

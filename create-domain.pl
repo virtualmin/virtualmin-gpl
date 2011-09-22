@@ -717,9 +717,12 @@ if (@warns) {
 		}
 	if (!$skipwarnings) {
 		print "\n";
-		print "The virtual server will not be created unless the --skip-warnings\n";
-		print "flag is given.\n";
+		print "The virtual server will not be created unless the --skip-warnings flag is given.\n";
 		exit(5);
+		}
+	else {
+		print "\n";
+		print "Warnings have been bypassed with the --skip-warnings flag\n";
 		}
 	}
 

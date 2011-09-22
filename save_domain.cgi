@@ -71,8 +71,10 @@ if (!$d->{'parent'} && !$in{'passwd_def'}) {
 # Work out which features are relevant
 @dom_features = &domain_features($d);
 
-# Work around possible bad 'db' name
-if (!$d->{'mysql'} && $in{'mysql'} && &check_mysql_clash($d, 'db')) {
+# Work around possible clashing 'db' name, if domain was renamed after
+# creation and then a DB was enabled
+if (!$d->{'mysql'} && $in{'mysql'} &&
+    &check_mysql_database_clash($d, $d->{'db'})) {
 	$d->{'db'} = &database_name($d);
 	}
 

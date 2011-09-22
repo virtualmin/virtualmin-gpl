@@ -6,20 +6,26 @@ $postgresql::use_global_login = 1;
 %qconfig = &foreign_config("postgresql");
 }
 
-# check_postgres_clash(&domain, [field])
-# Returns 1 if some PostgreSQL database already exists
-sub check_postgres_clash
+# check_warnings_postgres(&dom, &old-domain)
+# Return warning if a PosgreSQL database or user with a clashing name exists.
+# This can be overridden to allow a takeover of the DB.
+sub check_warnings_postgres
 {
-if (!$_[1] || $_[1] eq 'db') {
+local ($d, $oldd) = @_;
+if (!$d->{'provision_postgres'}) {
+	# DB clash
 	&require_postgres();
-	local @dblist = &postgresql::list_databases();
-	return 1 if (&indexof($_[0]->{'db'}, @dblist) >= 0);
+	local @dblist = &postgres::list_databases();
+	return &text('setup_epostgresdb', $d->{'db'})
+		if (&indexof($d->{'db'}, @dblist) >= 0);
+
+	# User clash
+	if (!$d->{'parent'}) {
+		return &text('setup_epostgresuser', &postgres_user($d))
+			if (&postgres_user_exists($d));
+		}
 	}
-if (!$_[0]->{'parent'} && (!$_[1] || $_[1] eq 'user')) {
-	# Check for user clash, or special user
-	return 1 if (&postgres_user_exists($_[0]) ? 1 : 0);
-	}
-return 0;
+return undef;
 }
 
 # postgres_user_exists(&domain)
@@ -51,6 +57,10 @@ if ($d->{'hashpass'} && !$d->{'parent'} && !$d->{'postgres_pass'}) {
 if (!$d->{'parent'}) {
 	&$first_print($text{'setup_postgresuser'});
 	local $pass = &postgres_pass($d);
+	if (&postgres_user_exists($user)) {
+		&postgresql::execute_sql_logged($qconfig{'basedb'},
+		  "drop user \"$user\"");
+		}
 	&postgresql::execute_sql_logged($qconfig{'basedb'},
 	  "create user \"$user\" with password $pass nocreatedb nocreateuser");
 	&$second_print($text{'setup_done'});
@@ -426,7 +436,7 @@ foreach $dbfile (glob("$_[1]_*")) {
 local $db;
 foreach $db (@dbs) {
 	&$first_print(&text('restore_postgresload', $db->[0]));
-	if (&check_postgres_clash($_[0], $db->[0])) {
+	if (&check_postgres_database_clash($_[0], $db->[0])) {
 		&$second_print(&text('restore_postgresclash'));
 		return 0;
 		}
@@ -522,23 +532,28 @@ return 1 if (&indexof($_[1], @dblist) >= 0);
 # Create one PostgreSQL database
 sub create_postgres_database
 {
-&$first_print(&text('setup_postgresdb', $_[1]));
 &require_postgres();
 
-# Build and run creation command
-local $user = &postgres_user($_[0]);
-local $sql = "create database ".&postgresql::quote_table($_[1]);
-local $withs;
-if (&postgresql::get_postgresql_version() >= 7) {
-	$withs .= " owner=\"$user\"";
+if (!&check_postgres_database_clash($_[0], $_[1])) {
+	# Build and run creation command
+	&$first_print(&text('setup_postgresdb', $_[1]));
+	local $user = &postgres_user($_[0]);
+	local $sql = "create database ".&postgresql::quote_table($_[1]);
+	local $withs;
+	if (&postgresql::get_postgresql_version() >= 7) {
+		$withs .= " owner=\"$user\"";
+		}
+	if ($_[2]->{'encoding'}) {
+		$withs .= " encoding '$_[2]->{'encoding'}'";
+		}
+	if ($withs) {
+		$sql .= " with".$withs;
+		}
+	&postgresql::execute_sql_logged($qconfig{'basedb'}, $sql);
 	}
-if ($_[2]->{'encoding'}) {
-	$withs .= " encoding '$_[2]->{'encoding'}'";
+else {
+	&$first_print(&text('setup_postgresdbimport', $_[1]));
 	}
-if ($withs) {
-	$sql .= " with".$withs;
-	}
-&postgresql::execute_sql_logged($qconfig{'basedb'}, $sql);
 
 # Make sure nobody else can access it
 eval {

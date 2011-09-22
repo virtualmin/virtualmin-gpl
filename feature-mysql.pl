@@ -104,7 +104,12 @@ else {
 		local $cfunc = sub {
 			local $encpass = &encrypted_mysql_pass($d);
 			foreach my $h (@hosts) {
-				&mysql::execute_sql_logged($mysql::master_db, "insert into user (host, user, password) values ('$h', '$user', $encpass)");
+				&mysql::execute_sql_logged($mysql::master_db,
+				    "delete from user where host = '$h' ".
+				    "and user = '$user'");
+				&mysql::execute_sql_logged($mysql::master_db,
+				    "insert into user (host, user, password) ".
+				    "values ('$h', '$user', $encpass)");
 				if ($wild && $wild ne $d->{'db'}) {
 					&add_db_table($h, $wild, $user);
 					}
@@ -799,7 +804,9 @@ return undef;
 }
 
 # check_mysql_clash(&domain, [field])
-# Returns 1 if some MySQL user or database already exists
+# Returns 1 if some MySQL user or database already exists. Only done when
+# provisioning, as for local DBs the existing user will be over-ridden or
+# DB imported.
 sub check_mysql_clash
 {
 local ($d, $field) = @_;
@@ -822,21 +829,29 @@ if ($d->{'provision_mysql'}) {
 			}
 		}
 	}
-else {
-	# Check locally
-	if (!$field || $field eq 'db') {
-		&require_mysql();
-		local @dblist = &mysql::list_databases();
-		return &text('setup_emysqldb', $d->{'db'})
-			if (&indexof($d->{'db'}, @dblist) >= 0);
-		}
-	if (!$d->{'parent'} && (!$field || $field eq 'user')) {
-		&require_mysql();
+return 0;
+}
+
+# check_warnings_mysql(&dom, &old-domain)
+# Return warning if a MySQL database or user with a clashing name exists.
+# This can be overridden to allow a takeover of the DB.
+sub check_warnings_mysql
+{
+local ($d, $oldd) = @_;
+if (!$d->{'provision_mysql'}) {
+	# DB clash
+	&require_mysql();
+	local @dblist = &mysql::list_databases();
+	return &text('setup_emysqldb', $d->{'db'})
+		if (&indexof($d->{'db'}, @dblist) >= 0);
+
+	# User clash
+	if (!$d->{'parent'}) {
 		return &text('setup_emysqluser', &mysql_user($d))
 			if (&mysql_user_exists($d));
 		}
 	}
-return 0;
+return undef;
 }
 
 # backup_mysql(&domain, file)
@@ -1162,14 +1177,19 @@ if ($d->{'provision_mysql'}) {
 	&$second_print($text{'setup_done'});
 	}
 else {
-	# Create the database locally
-	&$first_print(&text('setup_mysqldb', $dbname));
-	&mysql::execute_sql_logged($mysql::master_db,
-			   "create database ".&mysql::quotestr($dbname).
-			   ($opts->{'charset'} ?
-			    " character set $opts->{'charset'}" : "").
-			   ($opts->{'collate'} ?
-			    " collate $opts->{'collate'}" : ""));
+	# Create the database locally, unless it already exists
+	if (&indexof($dbname, &mysql::list_databases()) < 0) {
+		&$first_print(&text('setup_mysqldb', $dbname));
+		&mysql::execute_sql_logged($mysql::master_db,
+				   "create database ".&mysql::quotestr($dbname).
+				   ($opts->{'charset'} ?
+				    " character set $opts->{'charset'}" : "").
+				   ($opts->{'collate'} ?
+				    " collate $opts->{'collate'}" : ""));
+		}
+	else {
+		&$first_print(&text('setup_mysqldbimport', $dbname));
+		}
 
 	# Make the DB accessible to the domain owner
 	&grant_mysql_database($d, $dbname);

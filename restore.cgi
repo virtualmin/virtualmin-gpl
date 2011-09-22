@@ -170,6 +170,7 @@ if (!$in{'confirm'}) {
 	print &ui_links_row(\@links);
 	%plugins = map { $_, 1 } &list_backup_plugins();
 	print "<dl>\n";
+	$anymissing = 0;
 	foreach $d (sort { $a cmp $b } keys %$cont) {
 		next if ($d eq "virtualmin");
 		local $dinfo = &get_domain_by("dom", $d);
@@ -186,6 +187,7 @@ if (!$in{'confirm'}) {
 			else {
 				print "($text{'restore_nocreate'})\n";
 				}
+			$anymissing++;
 			}
 		elsif (!&can_edit_domain($dinfo)) {
 			# Warn if cannot restore
@@ -237,6 +239,10 @@ if (!$in{'confirm'}) {
 				}
 			}
 		print "<center>",&ui_submit($text{'restore_now2'}, "confirm"),
+		      ($anymissing ? 
+			      "<br>".&ui_checkbox("skipwarnings", 1,
+						  $text{'restore_wskip'}, 0) :
+			      ""),
 		      "</center>\n";
 		}
 	else {
@@ -253,7 +259,8 @@ else {
 		print &text('restore_doing2', scalar(@vbs), $nice),"<p>\n";
 		}
 	$ok = &restore_domains($src, \@doms, \@do_features, \%options, \@vbs,
-			       $in{'only'}, $ipinfo, $crmode == 2);
+			       $in{'only'}, $ipinfo, $crmode == 2,
+			       $in{'skipwarnings'});
 	&run_post_actions();
 	if ($ok) {
 		print &text('restore_done'),"<p>\n";
