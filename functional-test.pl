@@ -18,6 +18,7 @@ if (!$module_name) {
 	$< == 0 || die "functional-test.pl must be run as root";
 	}
 $ENV{'PATH'} = "$module_root_directory:$ENV{'PATH'}";
+&require_mysql();
 
 # Make sure wget doesn't use a cache
 $ENV{'http_proxy'} = undef;
@@ -1657,6 +1658,94 @@ $backup_tests = [
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
 	  'cleanup' => 1 },
+	];
+
+$dbbackup_tests = [
+	# Create a domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'mysql' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Add an extra database
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'name', $test_domain_db.'_extra' ] ],
+	},
+
+	# Backup to a temp file
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_file ] ],
+	},
+
+	# Disconnect the databases
+	{ 'command' => 'disconnect-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'type', 'mysql' ],
+		      [ 'name', $test_domain_db ] ],
+	},
+	{ 'command' => 'disconnect-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'type', 'mysql' ],
+		      [ 'name', $test_domain_db.'_extra' ] ],
+	},
+
+	# Create some tables
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' '.$test_domain_db.' -e "create table foo (id int(4))"',
+	},
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' '.$test_domain_db.'_extra -e "create table bar (id int(4))"',
+	},
+
+	# Delete the domain, in preparation for re-creation
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Attempt a restore, which should fail
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ] ],
+	  'fail' => 1,
+	},
+
+	# Try the restore again with warnings disabled
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ],
+		      [ 'skip-warnings' ] ],
+	},
+
+	# Verify database association
+	{ 'command' => 'list-databases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^'.$test_domain_db.'_extra$',
+		      '^'.$test_domain_db.'$' ],
+	},
+
+	# Verify that DB contents still exist
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' '.$test_domain_db.' -e "desc foo"',
+	  'grep' => 'int\(4\)',
+	},
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' '.$test_domain_db.'_extra -e "desc bar"',
+	  'grep' => 'int\(4\)',
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
 	];
 
 $multibackup_tests = [
@@ -5193,6 +5282,7 @@ $alltests = { '_config' => $_config_tests,
 	      'migrate' => $migrate_tests,
 	      'move' => $move_tests,
 	      'backup' => $backup_tests,
+	      'dbbackup' => $dbbackup_tests,
 	      'multibackup' => $multibackup_tests,
 	      'splitbackup' => $splitbackup_tests,
 	      'remotebackup' => $remotebackup_tests,
