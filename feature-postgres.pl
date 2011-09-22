@@ -12,6 +12,7 @@ $postgresql::use_global_login = 1;
 sub check_warnings_postgres
 {
 local ($d, $oldd) = @_;
+$d->{'postgres'} && (!$oldd || !$oldd->{'postgres'}) || return undef;
 if (!$d->{'provision_postgres'}) {
 	# DB clash
 	&require_postgres();

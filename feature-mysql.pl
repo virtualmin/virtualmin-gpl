@@ -838,6 +838,7 @@ return 0;
 sub check_warnings_mysql
 {
 local ($d, $oldd) = @_;
+$d->{'mysql'} && (!$oldd || !$oldd->{'mysql'}) || return undef;
 if (!$d->{'provision_mysql'}) {
 	# DB clash
 	&require_mysql();
