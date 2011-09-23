@@ -1741,6 +1741,54 @@ $dbbackup_tests = [
 	  'grep' => 'int\(4\)',
 	},
 
+	# Disconnect the main database
+	{ 'command' => 'disconnect-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'type', 'mysql' ],
+		      [ 'name', $test_domain_db ] ],
+	},
+
+	# Delete the domain, in preparation for re-creation
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Re-create, which should fail
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'mysql' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+	  'fail' => 1,
+        },
+
+	# Re-create with warnings skipped, which should pass
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'mysql' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      [ 'skip-warnings' ],
+		      @create_args, ],
+        },
+
+	# Verify database association
+	{ 'command' => 'list-databases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^'.$test_domain_db.'$' ],
+	},
+
+	# Verify that DB contents still exist
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' '.$test_domain_db.' -e "desc foo"',
+	  'grep' => 'int\(4\)',
+	},
+
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
