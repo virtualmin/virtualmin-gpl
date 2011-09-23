@@ -64,5 +64,5 @@
 
  - Allow restore when MySQL already exists
 	- https://www.virtualmin.com/node/19495
-	- Provisioning mode support
-		- Only if owned by same owner
+	- mailbox logins - handle case where user already exists or is already
+	  granted access

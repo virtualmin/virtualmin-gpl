@@ -6529,7 +6529,7 @@ foreach $f (@features) {
 	next if ($dom->{'parent'} && $f eq "unix");
 	if ($dom->{$f} && (!$check || $check->{$f})) {
 		local $cfunc = "check_${f}_clash";
-		local $err = &$cfunc($dom, $field);
+		local $err = defined(&$cfunc) ? &$cfunc($dom, $field) : undef;
 		if ($err) {
 			if ($err eq '1') {
 				# Use a built-in error
