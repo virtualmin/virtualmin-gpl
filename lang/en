@@ -375,8 +375,13 @@ setup_eftp=A ProFTPd virtual server with the same IP address already exists
 setup_emysql=A MySQL database called $2 or user called $3 already exists
 setup_emysqldb=A MySQL database named $1 already exists
 setup_emysqluser=A MySQL user named $1 already exists - try selecting a different administration username
+setup_emysqldbdom=A MySQL database named $1 is already owned by virtual server $2
+setup_emysqluserdom=A MySQL login named $1 is already owned by virtual server $
+2
 setup_epostgresdb=A PostgreSQL database called $1 already exists
 setup_epostgresuser=A PostgreSQL user called $1 already exists
+setup_epostgresdbdom=A PostgreSQL database named $1 is already owned by virtual server $2
+setup_epostgresuserdom=A PostgreSQL login named $1 is already owned by virtual server $
 setup_ehomebase=Home directory base is not set in the configuration of the Users and Groups module or this module
 setup_equota=Missing or invalid total quota
 setup_euquota=Missing or invalid administration user's quota

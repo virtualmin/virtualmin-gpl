@@ -39,6 +39,40 @@ local $s = &postgresql::execute_sql($qconfig{'basedb'}, "select * from pg_shadow
 return $s->{'data'}->[0] ? 1 : 0;
 }
 
+# check_postgres_clash(&domain, [field])
+# Returns 1 if some PostgreSQL user or database is used by another domain
+sub check_postgres_clash
+{
+local ($d, $field) = @_;
+local @doms = grep { $_->{'postgres'} && $_->{'id'} ne $d->{'id'} }
+		   &list_domains();
+
+# Check for DB clash
+if (!$field || $field eq 'db') {
+	foreach my $od (@doms) {
+		foreach my $db (split(/\s+/, $od->{'db_postgres'})) {
+			if ($db eq $d->{'db'}) {
+				return &text('setup_epostgresdbdom',
+					$d->{'db'}, &show_domain_name($od));
+				}
+			}
+		}
+	}
+
+# Check for user clash
+if (!$d->{'parent'} && (!$field || $field eq 'user')) {
+	foreach my $od (@doms) {
+		if (&postgres_user($d) eq &postgres_user($od)) {
+			return &text('setup_epostgresuserdom',
+				     &postgres_user($d),
+				     &show_domain_name($od));
+			}
+		}
+	}
+
+return undef;
+}
+
 # setup_postgres(&domain, [no-dbs])
 # Create a new PostgreSQL database and user
 sub setup_postgres

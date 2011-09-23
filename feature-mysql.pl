@@ -30,6 +30,39 @@ if (!$_[0]->{'mysql'}) {
 return undef;
 }
 
+# check_mysql_clash(&domain, [field])
+# Returns 1 if some MySQL user or database is used by another domain
+sub check_mysql_clash
+{
+local ($d, $field) = @_;
+local @doms = grep { $_->{'mysql'} && $_->{'id'} ne $d->{'id'} }
+		   &list_domains();
+
+# Check for DB clash
+if (!$field || $field eq 'db') {
+	foreach my $od (@doms) {
+		foreach my $db (split(/\s+/, $od->{'db_mysql'})) {
+			if ($db eq $d->{'db'}) {
+				return &text('setup_emysqldbdom', $d->{'db'},
+						&show_domain_name($od));
+				}
+			}
+		}
+	}
+
+# Check for user clash
+if (!$d->{'parent'} && (!$field || $field eq 'user')) {
+	foreach my $od (@doms) {
+		if (&mysql_user($d) eq &mysql_user($od)) {
+			return &text('setup_emysqluserdom', &mysql_user($d),
+					&show_domain_name($od));
+			}
+		}
+	}
+
+return undef;
+}
+
 # setup_mysql(&domain, [no-db])
 # Create a new MySQL database, user and permissions
 sub setup_mysql
@@ -803,24 +836,24 @@ foreach my $r (@{$u->{'data'}}) {
 return undef;
 }
 
-# check_mysql_clash(&domain, [field])
-# Returns 1 if some MySQL user or database already exists. Only done when
-# provisioning, as for local DBs the existing user will be over-ridden or
-# DB imported.
-sub check_mysql_clash
+# check_warnings_mysql(&dom, &old-domain)
+# Return warning if a MySQL database or user with a clashing name exists.
+# This can be overridden to allow a takeover of the DB.
+sub check_warnings_mysql
 {
-local ($d, $field) = @_;
+local ($d, $oldd) = @_;
+$d->{'mysql'} && (!$oldd || !$oldd->{'mysql'}) || return undef;
 if ($d->{'provision_mysql'}) {
-	# Check on remote DB server
-	if (!$field || $field eq 'db') {
-		my ($ok, $msg) = &provision_api_call(
-			"check-mysql-database", { 'database' => $d->{'db'} });
-		return &text('provision_emysqldbcheck', $msg) if (!$ok);
-		if ($msg =~ /host=/) {
-			return &text('provision_emysqldb', $d->{'db'});
-			}
+	# DB clash on provisioning server
+	my ($ok, $msg) = &provision_api_call(
+		"check-mysql-database", { 'database' => $d->{'db'} });
+	return &text('provision_emysqldbcheck', $msg) if (!$ok);
+	if ($msg =~ /host=/) {
+		return &text('provision_emysqldb', $d->{'db'});
 		}
-	if (!$d->{'parent'} && (!$field || $field eq 'user')) {
+
+	# User clash on provisioning server
+	if (!$d->{'parent'}) {
 		my ($ok, $msg) = &provision_api_call(
 			"check-mysql-login", { 'user' => &mysql_user($d) });
 		return &text('provision_emysqlcheck', $msg) if (!$ok);
@@ -829,24 +862,14 @@ if ($d->{'provision_mysql'}) {
 			}
 		}
 	}
-return 0;
-}
-
-# check_warnings_mysql(&dom, &old-domain)
-# Return warning if a MySQL database or user with a clashing name exists.
-# This can be overridden to allow a takeover of the DB.
-sub check_warnings_mysql
-{
-local ($d, $oldd) = @_;
-$d->{'mysql'} && (!$oldd || !$oldd->{'mysql'}) || return undef;
-if (!$d->{'provision_mysql'}) {
-	# DB clash
+else {
+	# DB clash on local
 	&require_mysql();
 	local @dblist = &mysql::list_databases();
 	return &text('setup_emysqldb', $d->{'db'})
 		if (&indexof($d->{'db'}, @dblist) >= 0);
 
-	# User clash
+	# User clash on local
 	if (!$d->{'parent'}) {
 		return &text('setup_emysqluser', &mysql_user($d))
 			if (&mysql_user_exists($d));
