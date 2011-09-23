@@ -483,7 +483,9 @@ if (&mail_system_needs_group() || $d->{'gid'} == $d->{'ugid'}) {
 if (!$cannot_rehash_password && $d->{'pass'}) {
 	local $encmd5 = &encrypt_user_password($user, $d->{'pass'});
 	local $encdes = &unix_crypt($d->{'pass'}, $user->{'pass'});
-	if ($user->{'pass'} ne $encmd5 && $user->{'pass'} ne $encdes &&
+	if (!&useradmin::validate_password($d->{'pass'}, $user->{'pass'}) &&
+	    $user->{'pass'} ne $encmd5 &&
+	    $user->{'pass'} ne $encdes &&
 	    !$d->{'disabled'}) {
 		return &text('validate_eenc', $user->{'user'});
 		}
