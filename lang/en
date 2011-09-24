@@ -4366,6 +4366,7 @@ phpmode_htmldirerr=.. failed : $1
 phpmode_ehtmldir=Missing or invalid website documents sub-directory
 phpmode_ehtmldir2=Website documents sub-directory cannot start with or end with /
 phpmode_ehtmldir3=The website documents sub-directory cannot contain ..
+phpmode_ehtmldir4=The website documents sub-directory cannot be under <tt>domains</tt>, as that directory is reserved for sub-servers
 
 spf_title=DNS Options
 spf_enable=Enabling SPF ..

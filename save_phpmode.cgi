@@ -49,6 +49,8 @@ if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./) {
 		&error($text{'phpmode_ehtmldir2'});
 	$in{'htmldir'} !~ /\.\./ ||
 		&error($text{'phpmode_ehtmldir3'});
+	$in{'htmldir'} !~ /^domains(\/\S*)$/i ||
+		&error($text{'phpmode_ehtmldir4'});
 	}
 
 # Start telling the user what is being done
