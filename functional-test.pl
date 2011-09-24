@@ -1679,6 +1679,18 @@ $dbbackup_tests = [
 		      [ 'name', $test_domain_db.'_extra' ] ],
 	},
 
+	# Create a mailbox user with access to the DBs
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'mysql', $test_domain_db ],
+		      [ 'mysql', $test_domain_db.'_extra' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
 	# Backup to a temp file
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -1740,6 +1752,23 @@ $dbbackup_tests = [
 	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' '.$test_domain_db.'_extra -e "desc bar"',
 	  'grep' => 'int\(4\)',
 	},
+
+	# Verify that mailbox user exists
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'user' => $test_user ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Databases: '.$test_domain_db.' \(mysql\), '.
+				    $test_domain_db.'_extra \(mysql\)' ],
+	},
+
+	# Verify that mailbox user can access DBs
+	{ 'command' => 'mysql -u '.$test_full_user.' -psmeg '.$test_domain_db.' -e "desc foo"',
+	 'grep' => 'int\(4\)',
+        },
+	{ 'command' => 'mysql -u '.$test_full_user.' -psmeg '.$test_domain_db.'_extra -e "desc bar"',
+	 'grep' => 'int\(4\)',
+        },
 
 	# Disconnect the main database
 	{ 'command' => 'disconnect-database.pl',

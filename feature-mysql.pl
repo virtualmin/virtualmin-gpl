@@ -1518,7 +1518,14 @@ else {
 	local $h;
 	local $cfunc = sub {
 		foreach $h (@hosts) {
-			&mysql::execute_sql_logged($mysql::master_db, "insert into user (host, user, password) values ('$h', '$myuser', ".($encpass ? "'$encpass'" : "$password_func('$qpass')").")");
+			&mysql::execute_sql_logged($mysql::master_db,
+			    "delete from user where host = '$h' ".
+			    "and user = '$user'");
+			&mysql::execute_sql_logged($mysql::master_db,
+			    "insert into user (host, user, password) ".
+			    "values ('$h', '$myuser', ".
+			    ($encpass ? "'$encpass'"
+				      : "$password_func('$qpass')").")");
 			local $db;
 			foreach $db (@$dbs) {
 				&add_db_table($h, $db, $myuser);
