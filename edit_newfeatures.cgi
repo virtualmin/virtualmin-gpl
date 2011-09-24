@@ -16,6 +16,7 @@ print &ui_form_start("save_newfeatures.cgi", "post");
 print "$text{'features_desc'}<p>\n";
 
 # Add rows for core features
+$n = 0;
 foreach $f (@features) {
 	local @acts;
 	push(@acts, "<a href='search.cgi?field=$f&what=1'>".
@@ -40,21 +41,26 @@ foreach $f (@features) {
 		# Other features can be disabled
 		push(@table, [
 			{ 'type' => 'checkbox', 'name' => 'fmods',
-			  'value' => $f, 'checked' => $config{$f} != 0 },
+			  'value' => $f, 'checked' => $config{$f} != 0,
+			  'tags' => "onClick='form.factive[$n].disabled = !this.checked;'",
+			},
 			$text{'feature_'.$f},
 			$text{'features_feature'},
 			$module_info{'version'},
 			$fcount{$f} || 0,
 			{ 'type' => 'checkbox', 'name' => 'factive',
-			  'value' => $f, 'checked' => $config{$f} != 2 },
+			  'value' => $f, 'checked' => $config{$f} != 2,
+			  'disabled' => $config{$f} == 0 },
 			&ui_links_row(\@acts)
 			]);
 		}
+	$n++;
 	}
 
 # Add rows for all plugins
 %plugins = map { $_, 1 } @plugins;
 %inactive = map { $_, 1 } split(/\s+/, $config{'plugins_inactive'});
+$n = 0;
 foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 	$mdir = &module_root_directory($m->{'dir'});
 	if (-r "$mdir/virtual_feature.pl") {
@@ -75,7 +81,8 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 		push(@table, [
 			{ 'type' => 'checkbox', 'name' => 'mods',
 			  'value' => $m->{'dir'},
-			  'checked' => $plugins{$m->{'dir'}} },
+			  'checked' => $plugins{$m->{'dir'}},
+			},
 			&plugin_call($m->{'dir'}, "feature_name") ||
 			  $m->{'dir'},
 			$text{'features_plugin'},
@@ -85,10 +92,12 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 									: "-",
 			{ 'type' => 'checkbox', 'name' => 'active',
 			  'value' => $m->{'dir'},
-			  'checked' => !$inactive{$m->{'dir'}} },
+			  'checked' => !$inactive{$m->{'dir'}},
+			},
 			&ui_links_row(\@acts)
 			]);
 		push(@hiddens, [ "allplugins", $m->{'dir'} ]);
+		$n++;
 		}
 	}
 
