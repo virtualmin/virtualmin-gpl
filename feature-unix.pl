@@ -923,11 +923,6 @@ if ($group->{'members'} ne $oldgroup->{'members'}) {
 sub startstop_unix
 {
 local @rv;
-if (!$config{'ftp'} && &foreign_installed("proftpd")) {
-	# Even if the FTP feature is not enabled, show the proftpd start/stop
-	# buttons.
-	push(@rv, &startstop_ftp());
-	}
 if (&foreign_installed("sshd")) {
 	# Add SSH server status
 	local @links = ( { 'link' => '/sshd/',
