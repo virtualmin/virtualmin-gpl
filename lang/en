@@ -3447,6 +3447,7 @@ scripts_eclash=Another script is already installed in $1.
 scripts_status=Status
 scripts_newest=Latest
 scripts_newer=Version $1 is available
+scripts_newer2=Version $1 exists but cannot be upgraded to
 scripts_nonewer=Newer than latest
 scripts_rating=Your rating
 scripts_find=Find scripts matching:

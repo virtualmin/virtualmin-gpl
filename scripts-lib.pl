@@ -2534,6 +2534,7 @@ sub describe_script_status
 my ($sinfo, $script) = @_;
 my @vers = grep { &can_script_version($script, $_) }
 		@{$script->{'versions'}};
+my @allvers = @vers;
 my $canupfunc = $script->{'can_upgrade_func'};
 if (defined(&$canupfunc)) {
 	@vers = grep { &$canupfunc($sinfo, $_) } @vers;
@@ -2544,13 +2545,23 @@ if ($sinfo->{'deleted'}) {
 		  $text{'scripts_deleted'}."</font>";
 	}
 elsif (&indexof($sinfo->{'version'}, @vers) < 0) {
+	# Not on list of possible versions
 	my @better = grep { &compare_versions($_, $sinfo->{'version'},
 					      $script) > 0 } @vers;
+	my @allbetter = grep { &compare_versions($_, $sinfo->{'version'},
+					         $script) > 0 } @allvers;
 	if (@better) {
+		# Some newer version exists
 		$status = "<font color=#ffaa00>".
 		  &text('scripts_newer', $better[$#better]).
 		  "</font>";
 		$canup = 1;
+		}
+	elsif (@allbetter) {
+		# Some newer version exists, but cannot upgrade to it
+		$status = "<font color=#ffaa00>".
+		  &text('scripts_newer2', $allbetter[$#allbetter]).
+		  "</font>";
 		}
 	else {
 		$status = $text{'scripts_nonewer'};
