@@ -212,7 +212,7 @@ while($f = readdir(DIR)) {
 				}
 			}
 		$info{'time'} = $st[9];
-		if ($info{'opts'}->{'dir'} && !-d $info{'opts'}->{'dir'}) {
+		if ($info{'opts'}->{'dir'} && !-e $info{'opts'}->{'dir'}) {
 			$info{'deleted'} = 1;
 			}
 		else {
