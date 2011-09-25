@@ -14585,7 +14585,6 @@ if (!$d->{'parent'}) {
 	delete($d->{'mysql_user'});	# Force re-creation of DB name
 	delete($d->{'postgres_user'});
 	if ($newpass) {
-		# XXX mysql encrypted pass?
 		$d->{'pass'} = $newpass;
 		}
 

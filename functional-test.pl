@@ -1716,6 +1716,17 @@ $dbbackup_tests = [
 	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' '.$test_domain_db.'_extra -e "create table bar (id int(4))"',
 	},
 
+	# Create a MySQL user who would clash on restore
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' mysql -e "create user \''.$test_full_user.'\'@localhost identified by \'blah\';"',
+	},
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' mysql -e "grant all on '.$test_domain_db.'.* to \''.$test_full_user.'\'@localhost;"',
+	},
+
+	# Verify that the manually created user works
+	{ 'command' => 'mysql -u '.$test_full_user.' -pblah '.$test_domain_db.' -e "desc foo"',
+	 'grep' => 'int\(4\)',
+        },
+
 	# Delete the domain, in preparation for re-creation
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
@@ -1753,7 +1764,7 @@ $dbbackup_tests = [
 	  'grep' => 'int\(4\)',
 	},
 
-	# Verify that mailbox user exists
+	# Verify that mailbox user exists and has DB access
 	{ 'command' => 'list-users.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
 		      [ 'user' => $test_user ],
@@ -1822,6 +1833,20 @@ $dbbackup_tests = [
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
 	  'cleanup' => 1,
+	},
+
+	# Clean up DBs
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' mysql -e "drop database if exists '.$test_domain_db.';"',
+	  'cleanup' => 1,
+	  'ignorefail' => 1,
+	},
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' mysql -e "drop database if exists '.$test_domain_db.'_extra;"',
+	  'cleanup' => 1,
+	  'ignorefail' => 1,
+	},
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' mysql -e "drop user if exists \''.$test_full_user.'\'@localhost;"',
+	  'cleanup' => 1,
+	  'ignorefail' => 1,
 	},
 	];
 

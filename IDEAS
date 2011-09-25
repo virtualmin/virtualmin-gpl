@@ -61,9 +61,3 @@
 
  - Directadmin migration support
 	- https://www.virtualmin.com/node/19460
-
- - Allow restore when MySQL already exists
-	- https://www.virtualmin.com/node/19495
-	- mailbox logins - handle case where user already exists or is already
-	  granted access
-		- postgresql too

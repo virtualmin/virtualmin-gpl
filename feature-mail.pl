@@ -3089,19 +3089,19 @@ while(<UFILE>) {
 			}
 
 		# Check for possible DB username clashes
-		foreach my $dt (&unique(map { $_->{'type'} }
-					&domain_databases($_[0]))) {
-			local $cfunc = "check_".$dt."_user_clash";
-			next if (!defined(&$cfunc));
-			local $ufunc = $dt."_username";
-			if (&$cfunc($_[0], &$ufunc($uinfo->{'user'}))) {
-				# Clash found! Don't create this DB type login
-				@{$uinfo->{'dbs'}} =
-					grep { $_->{'type'} ne $dt }
-					@{$uinfo->{'dbs'}};
-				delete($uinfo->{$dt."_pass"});
-				}
-			}
+		#foreach my $dt (&unique(map { $_->{'type'} }
+		#			&domain_databases($_[0]))) {
+		#	local $cfunc = "check_".$dt."_user_clash";
+		#	next if (!defined(&$cfunc));
+		#	local $ufunc = $dt."_username";
+		#	if (&$cfunc($_[0], &$ufunc($uinfo->{'user'}))) {
+		#		# Clash found! Don't create this DB type login
+		#		@{$uinfo->{'dbs'}} =
+		#			grep { $_->{'type'} ne $dt }
+		#			@{$uinfo->{'dbs'}};
+		#		delete($uinfo->{$dt."_pass"});
+		#		}
+		#	}
 
 		# Create the user, which will also add any configured DB account
 		&create_user($uinfo, $_[0]);
