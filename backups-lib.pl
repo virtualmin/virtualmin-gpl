@@ -2465,7 +2465,10 @@ elsif ($mode == 1) {
 	$port =~ /^\d*$/ || &error($text{'backup_eport'});
 	$in{$name."_path"} =~ /\S/ || &error($text{'backup_epath'});
 	$in{$name."_user"} =~ /^[^:\/]*$/ || &error($text{'backup_euser'});
-	$in{$name."_path"} =~ s/\/+$//;
+	if ($in{$name."_path"} ne "/") {
+		# Strip trailing /
+		$in{$name."_path"} =~ s/\/+$//;
+		}
 	local $sep = $in{$name."_path"} =~ /^\// ? "" : ":";
 	return "ftp://".$in{$name."_user"}.":".$in{$name."_pass"}."\@".
 	       $in{$name."_server"}.$sep.$in{$name."_path"};
@@ -2488,7 +2491,10 @@ elsif ($mode == 2) {
 	$port =~ /^\d*$/ || &error($text{'backup_eport'});
 	$in{$name."_spath"} =~ /\S/ || &error($text{'backup_epath'});
 	$in{$name."_suser"} =~ /^[^:\/]*$/ || &error($text{'backup_euser2'});
-	$in{$name."_spath"} =~ s/\/+$//;
+	if ($in{$name."_spath"} ne "/") {
+		# Strip trailing /
+		$in{$name."_spath"} =~ s/\/+$//;
+		}
 	return "ssh://".$in{$name."_suser"}.":".$in{$name."_spass"}."\@".
 	       $in{$name."_sserver"}.":".$in{$name."_spath"};
 	}
