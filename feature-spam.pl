@@ -1489,8 +1489,9 @@ if (-r $dfile) {
 	local %defs;
 	&lock_file($dfile);
 	&read_env_file($dfile, \%defs);
-	if (!$defs{'ENABLED'}) {
+	if (!$defs{'ENABLED'} || !$defs{'CRON'}) {
 		$defs{'ENABLED'} = 1;
+		$defs{'CRON'} = 1;
 		&write_env_file($dfile, \%defs);
 		}
 	&unlock_file($dfile);
