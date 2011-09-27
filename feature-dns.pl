@@ -610,6 +610,11 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'provision_dns'}) {
 
 	# Rename records
 	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
+	if (!$file) {
+		&$second_print($text{'save_nobind'});
+		&release_lock_dns($lockon, $lockconf);
+		return 0;
+		}
 	&modify_records_domain_name($recs, $file,
 				    $_[1]->{'dom'}, $_[0]->{'dom'});
 	}
@@ -692,6 +697,11 @@ if ($oldip ne $newip) {
 	# the old IP
 	&$first_print($text{'save_dns'});
 	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
+	if (!$file) {
+		&$second_print($text{'save_nobind'});
+		&release_lock_dns($lockon, $lockconf);
+		return 0;
+		}
 	&modify_records_ip_address($recs, $file, $oldip, $newip);
 	$rv++;
 	&$second_print($text{'setup_done'});
@@ -700,6 +710,11 @@ if ($oldip ne $newip) {
 if ($_[0]->{'mail'} && !$_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 	# Email was enabled .. add MX records
 	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
+	if (!$file) {
+		&$second_print($text{'save_nobind'});
+		&release_lock_dns($lockon, $lockconf);
+		return 0;
+		}
 	local ($mx) = grep { $_->{'type'} eq 'MX' &&
 			     $_->{'name'} eq $_[0]->{'dom'}."." ||
 			     $_->{'type'} eq 'A' &&
@@ -716,6 +731,11 @@ elsif (!$_[0]->{'mail'} && $_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 	# Email was disabled .. remove MX records, but only those that
 	# point to this system or secondaries.
 	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
+	if (!$file) {
+		&$second_print($text{'save_nobind'});
+		&release_lock_dns($lockon, $lockconf);
+		return 0;
+		}
 	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 	local %ids = map { $_, 1 }
 		split(/\s+/, $_[0]->{'mx_servers'});
@@ -753,6 +773,11 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'} && $_[0]->{'mail'} &&
 	# Secondary MX servers have been changed - add or remove MX records
 	&$first_print($text{'save_dns7'});
 	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
+	if (!$file) {
+		&$second_print($text{'save_nobind'});
+		&release_lock_dns($lockon, $lockconf);
+		return 0;
+		}
 	local @newmxs = split(/\s+/, $_[0]->{'mx_servers'});
 	local @oldmxs = split(/\s+/, $_[1]->{'mx_servers'});
 	&foreign_require("servers", "servers-lib.pl");
@@ -809,6 +834,11 @@ if ($_[0]->{'virt6'} && !$_[1]->{'virt6'}) {
 	# IPv6 enabled
 	&$first_print($text{'save_dnsip6on'});
 	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
+	if (!$file) {
+		&$second_print($text{'save_nobind'});
+		&release_lock_dns($lockon, $lockconf);
+		return 0;
+		}
 	&add_ip6_records($_[0], $file);
 	&$second_print($text{'setup_done'});
 	$rv++;
@@ -817,6 +847,11 @@ elsif (!$_[0]->{'virt6'} && $_[1]->{'virt6'}) {
 	# IPv6 disabled
 	&$first_print($text{'save_dnsip6off'});
 	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
+	if (!$file) {
+		&$second_print($text{'save_nobind'});
+		&release_lock_dns($lockon, $lockconf);
+		return 0;
+		}
 	&remove_ip6_records($_[1], $file);
 	&$second_print($text{'setup_done'});
 	$rv++;
@@ -826,6 +861,11 @@ elsif ($_[0]->{'virt6'} && $_[1]->{'virt6'} &&
 	# IPv6 address changed
 	&$first_print($text{'save_dnsip6'});
 	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
+	if (!$file) {
+		&$second_print($text{'save_nobind'});
+		&release_lock_dns($lockon, $lockconf);
+		return 0;
+		}
 	&modify_records_ip_address($recs, $file, $_[1]->{'ip6'},$_[0]->{'ip6'});
 	$rv++;
 	&$second_print($text{'setup_done'});
