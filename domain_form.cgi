@@ -208,67 +208,72 @@ if (!$parentuser) {
 $deftmplid = &get_init_template($parentdom);
 ($deftmpl) = grep { $_->{'id'} == $deftmplid } @availtmpls;
 $deftmpl ||= $availtmpls[0];
-print "<script>\n";
-print "function select_template(num)\n";
-print "{\n";
+$js = "<script>\n";
+$js .= "function select_template(num)\n";
+$js .= "{\n";
 foreach $t (@availtmpls) {
 	local $tmpl = &get_template($t->{'id'});
-	print "if (num == $tmpl->{'id'}) {\n";
 	if (!$parentdom && &can_choose_ugroup()) {
 		# Set group for unix user
+		$js .= "if (num == $tmpl->{'id'}) {\n";
 		$num = $tmpl->{'ugroup'} eq "none" ? 0 : 1;
 		$val = $tmpl->{'ugroup'} eq "none" ? "" : $tmpl->{'ugroup'};
-		print "    document.forms[0].group_def[$num].checked = true;\n";
-		print "    document.forms[0].group.value = \"$val\";\n";
+		$js .= "    document.forms[0].group_def[$num].checked = true;\n";
+		$js .= "    document.forms[0].group.value = \"$val\";\n";
+		$js .= "    }\n";
 		}
-	print "    }\n";
 	}
-print "}\n";
-print "</script>\n";
+$js .= "}\n";
+$js .= "</script>\n";
+print $js;
 
 # Work out which features are enabled by default
 @dom_features = $aliasdom ? @opt_alias_features :
 		$subdom ? @opt_subdom_features : @opt_features;
 %plugins_inactive = map { $_, 1 } split(/\s+/, $config{'plugins_inactive'});
-@def_features = grep { $config{$_} == 1 || $config{$_} == 3 } @dom_features;
-push(@def_features, grep { !$plugins_inactive{$_} } &list_feature_plugins());
+if ($config{'plan_auto'}) {
+	@def_features = grep { $config{$_} == 1 || $config{$_} == 3 }
+			     @dom_features;
+	@fplugins = &list_feature_plugins();
+	push(@def_features, grep { !$plugins_inactive{$_} } @fplugins);
+	}
 
 # Generate Javascript for plan change
 @availplans = sort { $a->{'name'} cmp $b->{'name'} } &list_available_plans();
 $defplan = &get_default_plan();
-print "<script>\n";
-print "function select_plan(num)\n";
-print "{\n";
+$js = "<script>\n";
+$js .= "function select_plan(num)\n";
+$js .= "{\n";
 foreach $plan (@availplans) {
-	print "if (num == $plan->{'id'}) {\n";
+	$js .= "if (num == $plan->{'id'}) {\n";
 	if (!$config{'template_auto'}) {
 		# Limits are only set if the fields exists
 
 		# Set quotas
-		print &quota_javascript("quota", $plan->{'quota'}, "home", 1);
-		print &quota_javascript("uquota", $plan->{'uquota'}, "home", 1);
+		$js .= &quota_javascript("quota", $plan->{'quota'}, "home", 1);
+		$js .= &quota_javascript("uquota", $plan->{'uquota'}, "home",1);
 
 		# Set limits
-		print &quota_javascript("mailboxlimit", $plan->{'mailboxlimit'},
-					"none", 1);
-		print &quota_javascript("aliaslimit", $plan->{'aliaslimit'},
-					"none", 1);
-		print &quota_javascript("dbslimit", $plan->{'dbslimit'},
-					"none", 1);
+		$js .= &quota_javascript("mailboxlimit",$plan->{'mailboxlimit'},
+					 "none", 1);
+		$js .= &quota_javascript("aliaslimit", $plan->{'aliaslimit'},
+					 "none", 1);
+		$js .= &quota_javascript("dbslimit", $plan->{'dbslimit'},
+					 "none", 1);
 		if ($config{'bw_active'}) {
-			print &quota_javascript("bwlimit", $plan->{'bwlimit'},
-						"bw", 1);
+			$js .= &quota_javascript("bwlimit", $plan->{'bwlimit'},
+						 "bw", 1);
 			}
 		$num = $plan->{'domslimit'} eq "" ? 1 :
 		       $plan->{'domslimit'} eq "0" ? 0 : 2;
 		$val = $num == 2 ? $plan->{'domslimit'} : "";
-		print "    var f = document.forms[0];\n";
-		print "    f.domslimit_def[$num].checked = true;\n";
-		print "    f.domslimit.value = \"$val\";\n";
+		$js .= "    var f = document.forms[0];\n";
+		$js .= "    f.domslimit_def[$num].checked = true;\n";
+		$js .= "    f.domslimit.value = \"$val\";\n";
 
 		# Set no database name
-		print "    f.nodbname[".int($plan->{'nodbname'}).
-		      "].checked = true;\n";
+		$js .= "    f.nodbname[".int($plan->{'nodbname'}).
+		       "].checked = true;\n";
 		}
 
 	# Set features if configured
@@ -276,17 +281,18 @@ foreach $plan (@availplans) {
 		local @fl = $plan->{'featurelimits'} ?
 				split(/\s+/, $plan->{'featurelimits'}) :
 				@def_features;
-		foreach $f (@dom_features, &list_feature_plugins()) {
-			print "    if (document.forms[0]['$f']) {\n";
-			print "        document.forms[0]['$f'].checked = ",
-				(&indexof($f, @fl) >= 0 ? 1 : 0),";\n";
-			print "    }\n";
+		foreach $f (@dom_features, @fplugins) {
+			$js .= "    if (document.forms[0]['$f']) {\n";
+			$js .= "        document.forms[0]['$f'].checked = ".
+			       (&indexof($f, @fl) >= 0 ? 1 : 0).";\n";
+			$js .= "    }\n";
 			}
 		}
-	print "    }\n";
+	$js .= "    }\n";
 	}
-print "}\n";
-print "</script>\n";
+$js .= "}\n";
+$js .= "</script>\n";
+print $js;
 
 # Show template selection field
 foreach $t (&list_available_templates($parentdom, $aliasdom)) {
@@ -503,7 +509,8 @@ foreach $f (@dom_features) {
 
 # Show checkboxes for plugins
 @input_plugins = ( );
-foreach $f (&list_feature_plugins()) {
+@fplugins = &list_feature_plugins() if (!$config{'plan_auto'});
+foreach $f (@fplugins) {
 	next if (!&plugin_call($f, "feature_suitable",
 				$parentdom, $aliasdom, $subdom));
 	next if (!&can_use_feature($f));
