@@ -8319,12 +8319,14 @@ return defined(&$func);
 # Returns 1 if any feature that uses a database is enabled (perhaps in a domain)
 sub database_feature
 {
-local $ok = 0;
-foreach my $f ('mysql', 'postgres', &list_database_plugins()) {
-	$ok = 1 if ($config{$f} &&
-		    (!$_[0] || $_[0]->{$f}));
+local ($d) = @_;
+foreach my $f ('mysql', 'postgres') {
+	return 1 if ($config{$f} && (!$d || $d->{$f}));
 	}
-return $ok;
+foreach my $f (&list_database_plugins()) {
+	return 1 if ($config{$f} && (!$d || $d->{$f}));
+	}
+return 0;
 }
 
 # list_custom_fields()
