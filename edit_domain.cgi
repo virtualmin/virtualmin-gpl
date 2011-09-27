@@ -136,17 +136,18 @@ if (@cantmpls) {
 
 # Generate Javascript for plan change
 @plans = sort { $a->{'name'} cmp $b->{'name'} } &list_available_plans();
-print "<script>\n";
-print "function select_plan(num)\n";
-print "{\n";
+$js = "<script>\n";
+$js .= "function select_plan(num)\n";
+$js .= "{\n";
 foreach $plan (@plans) {
-	print "if (num == $plan->{'id'}) {\n";
-	print &quota_javascript("quota", $plan->{'quota'}, "home", 1);
-	print &quota_javascript("uquota", $plan->{'uquota'}, "home", 1);
-	print "    }\n";
+	$js .= "if (num == $plan->{'id'}) {\n";
+	$js .= &quota_javascript("quota", $plan->{'quota'}, "home", 1);
+	$js .= &quota_javascript("uquota", $plan->{'uquota'}, "home", 1);
+	$js .= "    }\n";
 	}
-print "}\n";
-print "</script>\n";
+$js .= "}\n";
+$js .= "</script>\n";
+print $js;
 
 # Show plan, with option to change
 if (!$parentdom) {
@@ -196,30 +197,6 @@ if (&can_dnsip()) {
 
 print &ui_hidden_table_end("config");
 
-# Related servers section
-@aliasdoms = &get_domain_by("alias", $d->{'id'});
-@subdoms = &get_domain_by("parent", $d->{'id'}, "alias", undef);
-if (@aliasdoms || @subdoms) {
-	print &ui_hidden_table_start($text{'edit_headers'}, "width=100%", 2,
-				     "subs", 0, \@tds);
-	}
-
-# Show any sub-servers
-if (@subdoms) {
-	print &ui_table_row($text{'edit_subdoms'},
-		&domains_list_links(\@subdoms, "parent", $d->{'dom'}));
-	}
-
-# Show any alias domains
-if (@aliasdoms) {
-	print &ui_table_row($text{'edit_aliasdoms'},
-		&domains_list_links(\@aliasdoms, "alias", $d->{'dom'}));
-	}
-
-if (@aliasdoms || @subdoms) {
-	print &ui_hidden_table_end("subs");
-	}
-
 # Start of collapsible section for limits
 $limits_section = !$parentdom &&
 		  (&has_home_quotas() && (&can_edit_quotas() || $d->{'unix'}) ||
@@ -230,14 +207,14 @@ if ($limits_section) {
 	if ($d->{'bw_limit'} && $d->{'bw_usage'} > $d->{'bw_limit'}) {
 		$overlimits++;
 		}
-	if ($d->{'quota'}) {
+	if ($d->{'quota'} && 0) {
 		($totalhomequota, $totalmailquota) = &get_domain_quota($d);
 		if ($totalhomequota > $d->{'quota'}) {
 			$overlimits++;
 			}
 		}
-	if ($d->{'uquota'}) {
-		$duser = &get_domain_owner($d);
+	if ($d->{'uquota'} && 0) {
+		$duser = &get_domain_owner($d, 1, 0, 1);
 		if ($duser && $duser->{'uquota'} > $d->{'uquota'}) {
 			$overlimits++;
 			}
@@ -256,7 +233,7 @@ if (&has_home_quotas() && !$parentdom && &can_edit_quotas()) {
 	}
 
 if ($config{'bw_active'} && !$parentdom) {
-	# Show bandwidth limit and usage
+	# Show bandwidth limit and period
 	if (&can_edit_bandwidth()) {
 		print &ui_table_row($text{'edit_bw'},
 			    &bandwidth_input("bw", $d->{'bw_limit'}));

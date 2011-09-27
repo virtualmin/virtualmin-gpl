@@ -9752,12 +9752,14 @@ else {
 	}
 }
 
-# get_domain_owner(&domain, [skip-virts-quotas-dbs])
+# get_domain_owner(&domain, [skip-virts, [skip-quotas, skip-dbs]])
 # Returns the Unix user object for a server's owner. Quota, DB and virtuser
 # details will be omitted if the skip flag is set.
 sub get_domain_owner
 {
-local ($d, $noinfo) = @_;
+local ($d, $novirts, $noquotas, $nodbs) = @_;
+$noquotas = $novirts if (!defined($noquotas));
+$nodbs = $novirts if (!defined($nodbs));
 if ($d->{'parent'}) {
 	local $parent = &get_domain($d->{'parent'});
 	if ($parent) {
@@ -9766,7 +9768,7 @@ if ($d->{'parent'}) {
 	return undef;
 	}
 else {
-	local @users = &list_domain_users($_[0], 0, $noinfo, $noinfo, $noinfo);
+	local @users = &list_domain_users($d, 0, $novirts, $noquotas, $nodbs);
 	local ($user) = grep { $_->{'user'} eq $_[0]->{'user'} } @users;
 	return $user;
 	}
@@ -13357,7 +13359,7 @@ if ($d->{'uquota'} && $duser->{'uquota'} > $d->{'uquota'}) {
 	}
 local $mmsg = &nice_size(($homequota+$subhomequota)*$bsize);
 print &ui_table_row($text{'edit_allquotah'},
-   &text('edit_quotaby', $tmsg, $umsg, $mmsg), 3);
+		    &text('edit_quotaby', $tmsg, $umsg, $mmsg), 3);
 $tcount++;
 $total += $totalhomequota*$bsize;
 

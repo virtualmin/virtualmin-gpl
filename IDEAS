@@ -63,3 +63,5 @@
 	- https://www.virtualmin.com/node/19460
 
  - Why is Edit Server page so slow?
+	- Move 'alias' servers and 'sub-servers' into separate left-side link
+	- get_domain_user_quotas is slow
