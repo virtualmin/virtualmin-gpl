@@ -113,8 +113,17 @@ elsif (ref($cids) eq 'HASH') {
 &$first_print("Checking for Plesk features ..");
 local @got = ( "dir", $parent ? () : ("unix") );
 push(@got, "webmin") if ($webmin && !$parent);
-if (exists($domain->{'mailsystem'}->{'properties'}->{'status'}->{'enabled'}) ||
+local $mss = $domain->{'mailsystem'}->{'properties'}->{'status'};
+if (exists($mss->{'enabled'}) ||
     $domain->{'mail'}) {
+	push(@got, "mail");
+	}
+elsif (!$mss->{'disabled-by'}->{'admin'} &&
+       $mss->{'disabled-by'}->{'name'} ne 'admin') {
+	# Handle case where mail is enabled, but XML contains :
+	# <disabled-by name="parent"/>
+	# but not
+	# <disabled-by name="admin"/>
 	push(@got, "mail");
 	}
 if ($domain->{'properties'}->{'dns-zone'}) {
