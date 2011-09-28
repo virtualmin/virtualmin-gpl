@@ -1133,6 +1133,7 @@ edit_mailopts=Email Settings
 edit_mailoptsdesc=Configure settings related to email for this virtual server.
 edit_connect=Check Connectivity
 edit_connectdesc=Validate that this virtual server's website, DNS domain and mail server can be accessed from the rest of the Internet.
+edit_psearch=List Sub-Servers
 
 delete_title=Delete Server
 delete_rusure2=Are you sure you want to delete the virtual server $1, which has $2 of files? The following features will be deleted :

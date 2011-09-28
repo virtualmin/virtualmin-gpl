@@ -64,7 +64,9 @@ else {
 			     &select_invert_link("d") );
 		}
 	print &ui_links_row(\@links);
-	&domains_table(\@doms, $virtualmin_pro);
+	&domains_table(\@doms, $virtualmin_pro, 0,
+           $in{'field'} eq 'parent' ? [ 'user', 'quota', 'squota', 'uquota' ]
+				    : [ ]);
 	print &ui_links_row(\@links);
 	if ($virtualmin_pro) {
 		print &ui_submit($text{'index_delete'}, "delete"),"\n";

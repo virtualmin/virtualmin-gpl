@@ -3060,11 +3060,13 @@ else {
 	}
 }
 
-# domains_table(&domains, [checkboxes], [return-html])
+# domains_table(&domains, [checkboxes], [return-html], [exclude-cols])
 # Display a list of domains in a table, with links for editing
 sub domains_table
 {
-local ($doms, $checks, $noprint) = @_;
+local ($doms, $checks, $noprint, $exclude) = @_;
+$exclude ||= [ ];
+local %emap = map { $_, 1 } @$exclude;
 local $usercounts = &count_domain_users();
 local $aliascounts = &count_domain_aliases(1);
 local @table_features = grep { $config{$_} } split(/,/, $config{'index_fcols'});
@@ -3082,6 +3084,7 @@ if (!@colnames) {
 if (!&has_home_quotas()) {
 	@colnames = grep { $_ ne 'quota' && $_ ne 'uquota' } @colnames;
 	}
+@colnames = grep { !$emap{$_} } @colnames;
 push(@heads, map { $text{'index_'.$_} } @colnames);
 foreach my $f (&list_custom_fields()) {
 	if ($f->{'show'}) {
@@ -10679,6 +10682,15 @@ push(@rv, { 'url' => $canconfig ? "$vm/edit_domain.cgi?dom=$d->{'id'}"
 	    'title' => $canconfig ? $text{'edit_title'} : $text{'view_title'},
 	    'cat' => 'objects',
 	    'icon' => $canconfig ? 'edit' : 'view' });
+
+# Add link to list sub-servers
+if (!$d->{'parent'}) {
+	push(@rv, { 'url' => $vm.'/search.cgi?field=parent&what='.
+			     &urlize($d->{'dom'}),
+		    'title' => $text{'edit_psearch'},
+		    'cat' => 'admin',
+		    'catname' => $text{'cat_admin'} });
+	}
 
 # Add actions and links
 foreach my $l (&get_domain_actions($d), &feature_links($d)) {
