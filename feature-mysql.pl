@@ -676,9 +676,11 @@ if (%dbmap) {
 	&$second_print($text{'setup_done'});
 	}
 
-# Duplicate allowed hosts
-local @allowed = &get_mysql_allowed_hosts($oldd);
-&save_mysql_allowed_hosts($d, \@allowed);
+if (!$d->{'parent'}) {
+	# Duplicate allowed hosts
+	local @allowed = &get_mysql_allowed_hosts($oldd);
+	&save_mysql_allowed_hosts($d, \@allowed);
+	}
 }
 
 # validate_mysql(&domain)
