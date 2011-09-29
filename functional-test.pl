@@ -4907,7 +4907,13 @@ $clone_tests = [
 	{ 'command' => 'mysql -u '.$test_clone_domain_user.' -pfoo '.$test_clone_domain_db.'_extra -e "select version()"',
 	},
 
-	# Check MySQL login by user
+	# Check MySQL login to old DB as old user
+	{ 'command' => 'mysql -u '.$test_domain_user.' -pfoo '.$test_domain_db.' -e "select version()"',
+	},
+	{ 'command' => 'mysql -u '.$test_domain_user.' -pfoo '.$test_domain_db.'_extra -e "select version()"',
+	},
+
+	# Check MySQL login by mailbox user
 	{ 'command' => 'mysql -u '.$test_full_clone_user.' -pspod '.$test_clone_domain_db.' -e "select version()"',
 	},
 	{ 'command' => 'mysql -u '.$test_full_clone_user.' -pspod '.$test_clone_domain_db.'_extra -e "select version()"',
@@ -4965,6 +4971,12 @@ $clonesub_tests = [
 	  'args' => [ [ 'domain', $test_subdomain ],
 		      [ 'type', 'mysql' ],
 		      [ 'name', 'example2_extra' ] ],
+	},
+
+	# Check MySQL login to DBs before cloning
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg example2 -e "select version()"',
+	},
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg example2_extra -e "select version()"',
 	},
 
 	# Add some aliases
@@ -5096,7 +5108,13 @@ $clonesub_tests = [
 	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg exampleclone_extra -e "select version()"',
 	},
 
-	# Check MySQL login by user
+	# Check MySQL login to old DB
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg example2 -e "select version()"',
+	},
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg example2_extra -e "select version()"',
+	},
+
+	# Check MySQL login by mailbox user
 	{ 'command' => 'mysql -u '.$test_full_clone_user.' -pspod exampleclone -e "select version()"',
 	},
 	{ 'command' => 'mysql -u '.$test_full_clone_user.' -pspod exampleclone_extra -e "select version()"',
