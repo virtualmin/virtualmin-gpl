@@ -376,6 +376,11 @@ $disable_tests = [
 	  'antigrep' => &get_default_ip(),
 	},
 
+	# Test that DNS lookup works for the disabled domain
+	{ 'command' => 'host '.$test_domain.'.disabled',
+	  'grep' => &get_default_ip(),
+	},
+
 	# Make sure website is gone
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'antigrep' => 'Test home page',

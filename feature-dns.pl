@@ -1467,17 +1467,17 @@ if ($d->{'provision_dns'}) {
 else {
 	# Lock locally
 	&$first_print($text{'disable_bind'});
-	if ($_[0]->{'dns_submode'}) {
+	if ($d->{'dns_submode'}) {
 		# Disable is not done for sub-domains
 		&$second_print($text{'disable_bindnosub'});
 		return;
 		}
-	&obtain_lock_dns($_[0], 1);
+	&obtain_lock_dns($d, 1);
 	&require_bind();
-	local $z = &get_bind_zone($_[0]->{'dom'});
+	local $z = &get_bind_zone($d->{'dom'});
 	if ($z) {
 		local $rootfile = &bind8::make_chroot($z->{'file'});
-		$z->{'values'}->[0] = $_[0]->{'dom'}.".disabled";
+		$z->{'values'}->[0] = $d->{'dom'}.".disabled";
 		&bind8::save_directive(&bind8::get_config_parent(),
 					[ $z ], [ $z ], 0);
 		&flush_file_lines();
@@ -1485,11 +1485,11 @@ else {
 		# Rename all records in the domain with the new .disabled name
 		local $file = &bind8::find("file", $z->{'members'});
 		local $fn = $file->{'values'}->[0];
-		local $bind8::config{'short_names'} = 1;
-		local @recs = &bind8::read_zone_file($fn, $_[0]->{'dom'});
+		local @recs = &bind8::read_zone_file(
+				$fn, $d->{'dom'}.".disabled");
 		foreach my $r (@recs) {
-			if ($r->{'name'} =~ /\.\Q$_[0]->{'dom'}\E\.$/ ||
-			    $r->{'name'} eq "$_[0]->{'dom'}.") {
+			if ($r->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/ ||
+			    $r->{'name'} eq $d->{'dom'}.".") {
 				# Need to rename
 				&bind8::modify_record($fn, $r,
 					      $r->{'name'}."disabled.",
@@ -1503,16 +1503,16 @@ else {
 		# Clear zone names caches
 		undef(@bind8::list_zone_names_cache);
 		&$second_print($text{'setup_done'});
-		&register_post_action(\&restart_bind, $_[0]);
+		&register_post_action(\&restart_bind, $d);
 
 		# If on any slaves, delete there too
-		$_[0]->{'old_dns_slave'} = $_[0]->{'dns_slave'};
-		&delete_zone_on_slaves($_[0]);
+		$d->{'old_dns_slave'} = $d->{'dns_slave'};
+		&delete_zone_on_slaves($d);
 		}
 	else {
 		&$second_print($text{'save_nobind'});
 		}
-	&release_lock_dns($_[0], 1);
+	&release_lock_dns($d, 1);
 	}
 }
 
@@ -1535,17 +1535,17 @@ if ($d->{'provision_dns'}) {
 	}
 else {
 	&$first_print($text{'enable_bind'});
-	if ($_[0]->{'dns_submode'}) {
+	if ($d->{'dns_submode'}) {
 		# Disable is not done for sub-domains
 		&$second_print($text{'enable_bindnosub'});
 		return;
 		}
-	&obtain_lock_dns($_[0], 1);
+	&obtain_lock_dns($d, 1);
 	&require_bind();
-	local $z = &get_bind_zone($_[0]->{'dom'});
+	local $z = &get_bind_zone($d->{'dom'});
 	if ($z) {
 		local $rootfile = &bind8::make_chroot($z->{'file'});
-		$z->{'values'}->[0] = $_[0]->{'dom'};
+		$z->{'values'}->[0] = $d->{'dom'};
 		&bind8::save_directive(
 			&bind8::get_config_parent(), [ $z ], [ $z ], 0);
 		&flush_file_lines();
@@ -1553,12 +1553,11 @@ else {
 		# Fix all records in the domain with the .disabled name
 		local $file = &bind8::find("file", $z->{'members'});
 		local $fn = $file->{'values'}->[0];
-		local $bind8::config{'short_names'} = 1;
-		local @recs = &bind8::read_zone_file($fn, $_[0]->{'dom'});
+		local @recs = &bind8::read_zone_file($fn, $d->{'dom'});
 		foreach my $r (@recs) {
-			if ($r->{'name'} =~ /\.\Q$_[0]->{'dom'}\E\.disabled\.$/
+			if ($r->{'name'} =~ /\.\Q$d->{'dom'}\E\.disabled\.$/
 			    ||
-			    $r->{'name'} eq "$_[0]->{'dom'}.disabled.") {
+			    $r->{'name'} eq $d->{'dom'}.".disabled.") {
 				# Need to rename
 				$r->{'name'} =~ s/\.disabled\.$/\./;
 				&bind8::modify_record($fn, $r,
@@ -1573,17 +1572,17 @@ else {
 		# Clear zone names caches
 		undef(@bind8::list_zone_names_cache);
 		&$second_print($text{'setup_done'});
-		&register_post_action(\&restart_bind, $_[0]);
+		&register_post_action(\&restart_bind, $d);
 
 		# If it used to be on any slaves, enable too
-		$_[0]->{'dns_slave'} = $_[0]->{'old_dns_slave'};
-		&create_zone_on_slaves($_[0], $_[0]->{'dns_slave'});
-		delete($_[0]->{'old_dns_slave'});
+		$d->{'dns_slave'} = $d->{'old_dns_slave'};
+		&create_zone_on_slaves($d, $d->{'dns_slave'});
+		delete($d->{'old_dns_slave'});
 		}
 	else {
 		&$second_print($text{'save_nobind'});
 		}
-	&release_lock_dns($_[0], 1);
+	&release_lock_dns($d, 1);
 	}
 }
 
