@@ -44,6 +44,10 @@ be given, followed by the external IP address to use. To revert to using the
 real IP in DNS, use C<--no-dns-ip> instead. In both cases, the actual
 DNS records managed by Virtualmin will be updated.
 
+By default, virtual server plan changes that modify features will be blocked
+if any warnings are detected, such as an existing database or SSL certificate
+conflict. These can be overridden with the C<--skip-warnings> flag.
+
 =cut
 
 package virtual_server;
@@ -215,6 +219,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--no-dns-ip") {
 		$dns_ip = "";
+		}
+	elsif ($a eq "--skip-warnings") {
+		$skipwarnings = 1;
 		}
 	else {
 		usage();
@@ -526,8 +533,15 @@ if ($planfeatures) {
 	# Check warnings
 	@warns = &virtual_server_warnings(\%newdom, $oldd);
         if (@warns) {
-		print ".. warnings detected : ",join(", ", @warns),"\n\n";
-		goto PLANFAILED;
+		if (!$skipwarnings) {
+			print ".. warnings detected : ",
+			      join(", ", @warns),"\n\n";
+			goto PLANFAILED;
+			}
+		else {
+			print ".. warnings bypassed : ",
+			      join(", ", @warns),"\n\n";
+			}
 		}
 
 	# Make the changes
@@ -633,6 +647,7 @@ print "                        [--plan-features]\n";
 print "                        [--add-exclude directory]*\n";
 print "                        [--remove-exclude directory]*\n";
 print "                        [--dns-ip address | --no-dns-ip]\n";
+print "                        [--skip-warnings]\n";
 exit(1);
 }
 

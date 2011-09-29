@@ -1315,3 +1315,4 @@ Storage of plaintext passwords for virtual servers and mailboxes can now be disa
 Updated the phpMyAdmin script installer to version 3.4.5, SMF to 2.0.1, bbPress to 1.1, SugarCRM to 6.2.3, Joomla to 1.7.1, and PHPList to 2.10.17.
 When creating or restoring a virtual server with a database that already exists, you now have the option to simply associate that database with the server rather than causing the server creation to fail.
 The list of sub-servers under a top-level server has been moved from the Edit Virtual Server page to the List Sub-Servers link on the left menu.
+Added the --skip-warnings flag to the modify-domain API command, to ignore warnings related to new features from a plan change.

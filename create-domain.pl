@@ -47,6 +47,10 @@ login. However, you can specify a different password with the --mysql-pass or
 that database type. These options are only available for top-level virtual
 servers though.
 
+By default, virtual server creation will be blocked if any warnings are 
+detected, such as an existing database or SSL certificate conflict. These can
+be overridden with the C<--skip-warnings> flag.
+
 =cut
 
 package virtual_server;
