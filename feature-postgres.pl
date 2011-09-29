@@ -16,7 +16,7 @@ $d->{'postgres'} && (!$oldd || !$oldd->{'postgres'}) || return undef;
 if (!$d->{'provision_postgres'}) {
 	# DB clash
 	&require_postgres();
-	local @dblist = &postgres::list_databases();
+	local @dblist = &postgresql::list_databases();
 	return &text('setup_epostgresdb', $d->{'db'})
 		if (&indexof($d->{'db'}, @dblist) >= 0);
 
