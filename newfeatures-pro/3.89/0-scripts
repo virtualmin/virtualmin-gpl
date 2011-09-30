@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to version 3.4.5, SMF to 2.0.1, bbPress to 1.1, SugarCRM to 6.2.3, Joomla to 1.7.1, and PHPList to 2.10.17.
+html=Updated the phpMyAdmin script installer to version 3.4.5, SMF to 2.0.1, bbPress to 1.1, SugarCRM to 6.2.3, Joomla to 1.7.1, phpMyFAQ to 2.7.0, and PHPList to 2.10.17.
 master=1
 reseller=1
 domain=1
