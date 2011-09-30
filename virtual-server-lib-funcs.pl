@@ -9924,16 +9924,16 @@ return wantarray ? ($rv, $qrv) : $rv;
 sub get_one_database_usage
 {
 local ($d, $db) = @_;
-if (&indexof($db->{'type'}, &list_database_plugins()) >= 0) {
-	# Get size from plugin
-	local ($size, $tables, $qsize) = &plugin_call($db->{'type'}, 
-		      "database_size", $d, $db->{'name'}, 1);
-	return ($size, $qsize);
-	}
-else {
+if ($db->{'type'} eq 'mysql' || $db->{'type'} eq 'postgres') {
 	# Get size from core database
 	local $szfunc = $db->{'type'}."_size";
 	local ($size, $tables, $qsize) = &$szfunc($d, $db->{'name'}, 1);
+	return ($size, $qsize);
+	}
+else {
+	# Get size from plugin
+	local ($size, $tables, $qsize) = &plugin_call($db->{'type'}, 
+		      "database_size", $d, $db->{'name'}, 1);
 	return ($size, $qsize);
 	}
 }

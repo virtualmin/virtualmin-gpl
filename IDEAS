@@ -62,5 +62,4 @@
  - Directadmin migration support
 	- https://www.virtualmin.com/node/19460
 
- - Why is Edit Server page so slow?
-	- get_domain_user_quotas is slow
+ - Check for MySQL user clash when creating a mailbox
