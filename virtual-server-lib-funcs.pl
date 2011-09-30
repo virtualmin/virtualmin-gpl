@@ -8947,12 +8947,13 @@ return undef;
 # Returns a list of structures for databases in a domain
 sub domain_databases
 {
+local ($d, $types) = @_;
 local @dbs;
-if ($_[0]->{'mysql'}) {
+if ($d->{'mysql'} && (!$types || &indexof("mysql", @$types) >= 0)) {
 	local %done;
 	local $av = &foreign_available("mysql");
 	&require_mysql();
-	foreach my $db (split(/\s+/, $_[0]->{'db_mysql'})) {
+	foreach my $db (split(/\s+/, $d->{'db_mysql'})) {
 		next if ($done{$db}++);
 		push(@dbs, { 'name' => $db,
 			     'type' => 'mysql',
@@ -8963,11 +8964,11 @@ if ($_[0]->{'mysql'}) {
 			     'host' => $mysql::config{'host'}, });
 		}
 	}
-if ($_[0]->{'postgres'}) {
+if ($d->{'postgres'} && (!$types || &indexof("postgres", @$types) >= 0)) {
 	local %done;
 	local $av = &foreign_available("postgresql");
 	&require_postgres();
-	foreach my $db (split(/\s+/, $_[0]->{'db_postgres'})) {
+	foreach my $db (split(/\s+/, $d->{'db_postgres'})) {
 		next if ($done{$db}++);
 		push(@dbs, { 'name' => $db,
 			     'type' => 'postgres',
@@ -8978,13 +8979,16 @@ if ($_[0]->{'postgres'}) {
 			     'host' => $postgresql::config{'host'}, });
 		}
 	}
-foreach my $f (&list_database_plugins()) {
-	push(@dbs, &plugin_call($f, "database_list", $_[0]));
-	}
-if ($_[1]) {
-	# Limit to specified types
-	local %types = map { $_, 1 } @{$_[1]};
-	@dbs = grep { $types{$_->{'type'}} } @dbs;
+
+# Only check plugins if some non-core DB types were requested
+local @nctypes = $types ? grep { $_ ne "mysql" && $_ ne "postgres" } @$types
+			: ( );
+if (!$types || @nctypes) {
+	foreach my $f (&list_database_plugins()) {
+		if (!$types || &indexof($f, @$types) >= 0) {
+			push(@dbs, &plugin_call($f, "database_list", $d));
+			}
+		}
 	}
 return @dbs;
 }
@@ -9906,7 +9910,7 @@ sub get_database_usage
 local ($d) = @_;
 local $rv = 0;
 local $qrv = 0;
-foreach my $db (&domain_databases($d)) {
+foreach my $db (&domain_databases($d, [ 'mysql', 'postgres' ])) {
 	local ($size, $qsize) = &get_one_database_usage($d, $db);
 	$rv += $size;
 	$qrv += $qsize;
