@@ -2502,7 +2502,6 @@ rename_subdoing=Updating sub-servers
 rename_subdoinguser=, and changing administration user to $1
 rename_dd=For $1
 rename_ecannot=You are not allowed to rename domains
-rename_group=Rename mail / FTP users too?
 rename_ehome=You are not allowed to change the home directory
 rename_ehome2=No new home directory entered
 rename_ehome3=New home directory already exists

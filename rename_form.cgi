@@ -72,7 +72,7 @@ else {
 # Prefix / group rename field
 if ($tmpl->{'append_style'} == 6) {
 	# Prefix isn't really used
-	$txt = $text{'rename_'.$msg};
+	$msg = 'group';
 	$mode = 1;
 	}
 else {
@@ -80,7 +80,6 @@ else {
 	$msg = &get_prefix_msg($tmpl);
 	$msg .= '_group' if (!$d->{'parent'});
 	@users = &list_domain_users($d, 1, 1, 1, 1);
-	$txt = $text{'rename_'.$msg};
 	$mode = @users ? 0 : 1;
 	}
 print &ui_table_row($text{'rename_'.$msg},
