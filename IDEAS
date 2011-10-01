@@ -61,5 +61,3 @@
 
  - Directadmin migration support
 	- https://www.virtualmin.com/node/19460
-
- - Check for MySQL user clash when creating a mailbox
