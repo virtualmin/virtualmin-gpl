@@ -924,11 +924,18 @@ $database_tests = [
 		      @create_args, ],
         },
 
-	# Add a MySQL database
+	# Add a extra MySQL database
 	{ 'command' => 'create-database.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'type', 'mysql' ],
 		      [ 'name', $test_domain_user.'_extra' ] ],
+	},
+
+	# Add an allowed database host
+	{ 'command' => 'modify-database-hosts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'add-host', '1.2.3.4' ] ],
 	},
 
 	# Check that we can login to MySQL
@@ -942,11 +949,25 @@ $database_tests = [
 	  'grep' => '^'.$test_domain_user.'_extra',
 	},
 
-	# Drop the MySQL database
+	# Check for allowed DB hosts
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => 'Allowed mysql hosts:.*1\\.2\\.3\\.4',
+	},
+
+	# Drop the extra MySQL database
 	{ 'command' => 'delete-database.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'type', 'mysql' ],
 		      [ 'name', $test_domain_user.'_extra' ] ],
+	},
+
+	# Check for allowed DB hosts after the drop
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => 'Allowed mysql hosts:.*1\\.2\\.3\\.4',
 	},
 
 	$config{'postgres'} ?

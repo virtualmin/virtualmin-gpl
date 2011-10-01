@@ -958,15 +958,17 @@ if (!$_[0]->{'wasmissing'}) {
 
 		# Now re-set up the login only
 		&setup_mysql($_[0], 1);
-
-		# Re-grant allowed hosts from backup + local
-		if (!$_[0]->{'parent'} && $info{'hosts'}) {
-			local @lhosts = &get_mysql_allowed_hosts($_[0]);
-			push(@lhosts, split(/\s+/, $info{'hosts'}));
-			@lhosts = &unique(@lhosts);
-			&save_mysql_allowed_hosts($_[0], \@lhosts);
-			}
 		}
+	&$second_print($text{'setup_done'});
+	}
+
+# Re-grant allowed hosts from backup + local
+if (!$_[0]->{'parent'} && $info{'hosts'}) {
+	&$first_print($text{'restore_mysqlgrant'});
+	local @lhosts = &get_mysql_allowed_hosts($_[0]);
+	push(@lhosts, split(/\s+/, $info{'hosts'}));
+	@lhosts = &unique(@lhosts);
+	&save_mysql_allowed_hosts($_[0], \@lhosts);
 	&$second_print($text{'setup_done'});
 	}
 
