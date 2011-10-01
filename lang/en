@@ -3373,7 +3373,6 @@ scripts_ecommands=This script cannot be installed, as it requires the following 
 scripts_eweb=Scripts can only be installed into virtual servers with a home directory and website
 scripts_ephpvers=This script cannot be installed, as it requires PHP version $1.
 scripts_return=list of scripts
-scripts_ereturn=script details
 scripts_edownload=Download of $2 failed : $1
 scripts_edownload2=Download of $1 is not an archive file - perhaps an error page
 scripts_edownload3=Download of $1 is an incomplete archive file : $2
