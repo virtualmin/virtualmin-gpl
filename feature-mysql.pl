@@ -1820,6 +1820,26 @@ if ($mysql::mysql_version >= 5) {
 		  [ "none", "&lt;$text{'tmpl_mysql_charsetnone'}&gt;" ],
 		  map { $_->[0] } &list_mysql_collation_orders() ]));
 	}
+
+# Max DB connections for domain owner
+my $c = $tmpl->{'mysql_conns'};
+$c = "" if ($c eq "none");
+print &ui_table_row(&hlink($text{'tmpl_mysql_conns'},
+			   "template_mysql_conns"),
+		    &none_def_input("mysql_conns", $tmpl->{'mysql_conns'},
+				    $text{'tmpl_mysql_maxconns'}, 0, 0,
+				    $text{'tmpl_mysql_unlimited'}).
+		    &ui_textbox("mysql_conns", $c, 5));
+
+# Max DB connections for mailbox users
+my $uc = $tmpl->{'mysql_uconns'};
+$uc = "" if ($uc eq "none");
+print &ui_table_row(&hlink($text{'tmpl_mysql_uconns'},
+			   "template_mysql_uconns"),
+		    &none_def_input("mysql_uconns", $tmpl->{'mysql_uconns'},
+				    $text{'tmpl_mysql_maxconns'}, 0, 0,
+				    $text{'tmpl_mysql_unlimited'}).
+		    &ui_textbox("mysql_uconns", $uc, 5));
 }
 
 # parse_template_mysql(&tmpl)
@@ -1878,6 +1898,14 @@ if ($mysql::mysql_version >= 4.1) {
 	$tmpl->{'mysql_charset'} = $in{'mysql_charset'};
 	$tmpl->{'mysql_collate'} = $in{'mysql_collate'};
 	}
+
+$in{'mysql_conns_mode'} < 2 || $in{'mysql_conns'} =~ /^[1-9]\d*$/ ||
+	&error($text{'tmpl_emysql_conns'});
+$tmpl->{'mysql_conns'} = &parse_none_def("mysql_conns");
+
+$in{'mysql_uconns_mode'} < 2 || $in{'mysql_uconns'} =~ /^[1-9]\d*$/ ||
+	&error($text{'tmpl_emysql_conns'});
+$tmpl->{'mysql_uconns'} = &parse_none_def("mysql_uconns");
 }
 
 # creation_form_mysql(&domain)

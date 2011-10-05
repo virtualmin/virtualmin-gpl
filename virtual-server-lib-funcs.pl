@@ -7673,6 +7673,8 @@ push(@rv, { 'id' => 0,
 	    'mysql_chgrp' => $config{'mysql_chgrp'},
 	    'mysql_charset' => $config{'mysql_charset'},
 	    'mysql_collate' => $config{'mysql_collate'},
+	    'mysql_conns' => $config{'mysql_conns'} || "none",
+	    'mysql_uconns' => $config{'mysql_uconns'} || "none",
 	    'postgres_encoding' => $config{'postgres_encoding'},
 	    'skel' => $config{'virtual_skel'} || "none",
 	    'skel_subs' => int($config{'virtual_skel_subs'}),
@@ -7960,6 +7962,8 @@ if ($tmpl->{'id'} == 0) {
 	$config{'mysql_chgrp'} = $tmpl->{'mysql_chgrp'};
 	$config{'mysql_charset'} = $tmpl->{'mysql_charset'};
 	$config{'mysql_collate'} = $tmpl->{'mysql_collate'};
+	$config{'mysql_conns'} = $tmpl->{'mysql_conns'};
+	$config{'mysql_uconns'} = $tmpl->{'mysql_uconns'};
 	$config{'postgres_encoding'} = $tmpl->{'postgres_encoding'};
 	$config{'virtual_skel'} = $tmpl->{'skel'} eq "none" ? "" :
 				  $tmpl->{'skel'};

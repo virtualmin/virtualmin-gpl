@@ -1,0 +1,13 @@
+<header>Maximum connections for mailbox users</header>
+
+This field controls the number of concurrent connections to MySQL that a
+mailbox with database access can make. The default
+is to allow an unlimited number of connections, but because each consumes
+memory within the MySQL server process you may want to limit total connections
+on a busy system. <p>
+
+The limit set here will only be applied when a new mailbox is created,
+or when a MySQL login is enabled for an existing mailbox. <p>
+
+<footer>
+

@@ -61,3 +61,8 @@
 
  - Directadmin migration support
 	- https://www.virtualmin.com/node/19460
+
+ - sub END in web-lib-funcs.pl detection for script doesn't work (on lentor)
+
+ - MySQL connection limits
+	- https://www.virtualmin.com/node/19683
