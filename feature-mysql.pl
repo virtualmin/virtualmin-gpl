@@ -95,6 +95,7 @@ if ($d->{'provision_mysql'}) {
 		local @hosts = map { &to_ipaddress($_) }
 				   &get_mysql_hosts($d, 1);
 		$info->{'remote'} = \@hosts;
+		$info->{'conns'} = &get_mysql_user_connections($d, 0);
 		my ($ok, $msg) = &provision_api_call(
 			"provision-mysql-login", $info, 0);
 		if (!$ok) {
@@ -146,6 +147,7 @@ else {
 				if ($wild && $wild ne $d->{'db'}) {
 					&add_db_table($h, $wild, $user);
 					}
+				&set_mysql_user_connections($d, $h, $user, 0);
 				}
 			&mysql::execute_sql_logged($mysql::master_db,
 						   'flush privileges');
@@ -367,6 +369,7 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 			}
 		local @hosts = map { &to_ipaddress($_) } @hosts;
 		$info->{'remote'} = \@hosts;
+		$info->{'conns'} = &get_mysql_user_connections($d, 0);
 		my ($ok, $msg) = &provision_api_call(
 			"provision-mysql-login", $info, 0);
 		if (!$ok) {
@@ -419,6 +422,7 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 				if ($wild && $wild ne $d->{'db'}) {
 					&add_db_table($h, $wild, $user);
 					}
+				&set_mysql_user_connections($d, $h, $user, 0);
 				}
 			foreach my $db (@dbnames) {
 				local $qdb = &quote_mysql_database($db);
@@ -1508,6 +1512,7 @@ if ($d->{'provision_mysql'}) {
 	local @hosts = map { &to_ipaddress($_) } &get_mysql_hosts($d, 1);
 	$info->{'remote'} = \@hosts;
 	$info->{'database'} = $dbs;
+	$info->{'conns'} = &get_mysql_user_connections($d, 1);
 	my ($ok, $msg) = &provision_api_call(
 		"provision-mysql-login", $info, 0);
 	if (!$ok) {
@@ -1534,6 +1539,7 @@ else {
 			foreach $db (@$dbs) {
 				&add_db_table($h, $db, $myuser);
 				}
+			&set_mysql_user_connections($d, $h, $myuser, 1);
 			}
 		&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
 		};
@@ -2016,6 +2022,7 @@ else {
 			foreach my $db (@dbs) {
 				&add_db_table($h, $db->{'name'}, $user);
 				}
+			&set_mysql_user_connections($d, $h, $user, 0);
 			}
 		&mysql::execute_sql_logged($mysql::master_db,
 					   'flush privileges');
@@ -2049,6 +2056,7 @@ else {
 				&mysql::execute_sql_logged($mysql::master_db,
 				    "insert into user (host, user, password) ".
 				    "values (?, ?, ?)", $h, $u->[0], $u->[1]);
+				&set_mysql_user_connections($d, $h, $u->[0], 1);
 				}
 			}
 		&mysql::execute_sql_logged($mysql::master_db,
@@ -2265,6 +2273,30 @@ else {
 	# Local list
 	return &mysql::list_databases();
 	}
+}
+
+# set_mysql_user_connections(&domain, hostname, username, is-mailbox)
+# Sets the max connections for a user if defined in the template
+sub set_mysql_user_connections
+{
+local ($d, $host, $user, $mailbox) = @_;
+local $conns = &get_mysql_user_connections($d, $mailbox);
+if ($conns) {
+	&mysql::execute_sql_logged($mysql::master_db,
+		"update user set max_user_connections = ? ".
+		"where user = ? and host = ?", $conns, $user, $host);
+	}
+}
+
+# get_mysql_user_connections(&domain, is-mailbox)
+# Returns the max connections to MySQL from a template
+sub get_mysql_user_connections
+{
+local ($d, $mailbox) = @_;
+local $tmpl = &get_template($d->{'template'});
+local $conns = $tmpl->{$mailbox ? 'mysql_uconns' : 'mysql_conns'};
+$conns = undef if ($conns eq "none");
+return $conns;
 }
 
 $done_feature_script{'mysql'} = 1;
