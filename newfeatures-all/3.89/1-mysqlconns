@@ -1,0 +1,4 @@
+desc=MySQL connection limits
+html=MySQL concurrent connection limits for domain owners and mailboxes can now be set at the template level, and will be applied to new virtual servers and mail users with database access.
+master=1
+link=edit_tmpl.cgi?id=0&new=&editmode=mysql
