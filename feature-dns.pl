@@ -179,11 +179,14 @@ elsif (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
 	undef(@bind8::get_config_cache);
 
 	# Work out if can copy from alias target - not possible if target
-	# is a sub-domain, as they don't have their own domain.
+	# is a sub-domain, as they don't have their own domain. Also not
+	# possible if target uses another domain's zone file to store its
+	# records.
 	local $copyfromalias = 0;
 	if ($_[0]->{'alias'}) {
 		local $target = &get_domain($_[0]->{'alias'});
-		if ($target && !$target->{'subdom'}) {
+		if ($target && !$target->{'subdom'} &&
+		    !$target->{'dns_submode'}) {
 			$copyfromalias = 1;
 			}
 		}
