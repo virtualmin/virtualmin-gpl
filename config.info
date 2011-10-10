@@ -153,6 +153,7 @@ line6=Advanced options,11
 iface_base=Base number for virtual interfaces,3,Automatic
 dns_check=Check resolv.conf for this system?,1,1-Yes,0-No
 ldap_mail=Add mail attribute to LDAP users?,1,1-Yes using only <tt>mail</tt> attribute,2-Yes using <tt>mail</tt> and <tt>mailAlternateAddress</tt>,0-No
+maillog_hide=Allow searching of mail logs,1,0-Yes,1-For master admin only,2-No
 maillog_period=Number of days to keep processed mail logs,3,Forever
 allow_upper=Force mailbox usernames to lower case?,1,0-Yes,1-No
 delete_virts=Delete all email aliases when disabling mail?,1,1-Yes,0-No

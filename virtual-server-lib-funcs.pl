@@ -3051,6 +3051,8 @@ return &can_edit_domain($d) &&
 sub can_view_maillog
 {
 local ($d) = @_;
+return 0 if ($config{'maillog_hide'} == 2 ||
+	     $config{'maillog_hide'} == 1 && !&master_admin());
 return 0 if (!&procmail_logging_enabled());
 if ($d) {
 	return &can_edit_domain($d);
