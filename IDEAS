@@ -66,3 +66,8 @@
 	- plugin
 	- scripts
 	- generic web API for plugins?
+	- take nginx modules into account
+		- scrape list of modules, directives and defaults
+
+ - Handle service lookup-domain XXX hang
+	- timeout?
