@@ -497,6 +497,7 @@ sub update_create_htpasswd
 {
 my ($d, $file, $olduser) = @_;
 local ($pass, $encpass);
+&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
 if ($d->{'parent'}) {
 	my $parent = &get_domain($d->{'parent'});
 	$pass = $parent->{'pass'};
@@ -508,7 +509,6 @@ else {
 	$encpass = $pass ? &htaccess_htpasswd::encrypt_password($pass)
 			 : $d->{'crypt_enc_pass'};
 	}
-&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
 local $users = &htaccess_htpasswd::list_users($file);
 local ($user) = grep { $_->{'user'} eq $olduser } @$users;
 if ($user) {
