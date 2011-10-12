@@ -68,6 +68,7 @@
 	- generic web API for plugins?
 	- take nginx modules into account
 		- scrape list of modules, directives and defaults
+		- why is gzip directive missing?
 
  - Handle service lookup-domain XXX hang
 	- timeout?
