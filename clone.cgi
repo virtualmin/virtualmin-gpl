@@ -29,6 +29,11 @@ if (!$d->{'parent'}) {
 	$clash && &error($text{'clone_eclash2'});
 	}
 
+# Check for allowed domain name
+$parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
+$derr = &allowed_domain_name($parent, $in{'newdomain'});
+&error($derr) if ($derr);
+
 &ui_print_unbuffered_header(&domain_in($d), $text{'clone_title'}, "");
 
 if ($d->{'parent'}) {
