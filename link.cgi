@@ -17,6 +17,7 @@ if ($ENV{'PATH_INFO'} =~ /^\/([0-9\.]+)\/(http|https):\/+([^:\/]+)(:(\d+))?(.*)$
 	$host = $3;
 	$port = $5 || ($ssl ? 443 : 80);
 	$path = $6;
+	$path =~ s/ /%20/g;
 	$openurl = "$2://$3$4$6";
 	$baseurl = "$2://$3$4";
 	}
@@ -27,6 +28,7 @@ elsif ($ENV{'PATH_INFO'} =~ /^\/(http|https):\/+([^:\/]+)(:(\d+))?(.*)$/) {
 	$host = $2;
 	$port = $4 || ($ssl ? 443 : 80);
 	$path = $5;
+	$path =~ s/ /%20/g;
 	$openurl = "$1://$2$3$5";
 	$baseurl = "$1://$2$3";
 	$ip = &to_ipaddress($host);
