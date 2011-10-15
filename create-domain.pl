@@ -420,7 +420,7 @@ if (!$parent) {
 		}
 	else {
 		# Use specified username, and also group
-		$user =~ /^[^\t :]+$/ || &usage($text{'setup_euser2'});
+		&valid_mailbox_name($user) && &usage($text{'setup_euser2'});
 		defined(getpwnam($user)) && &usage($text{'setup_euser'});
 		$group ||= $user;
 		}
@@ -431,7 +431,7 @@ if (!$parent) {
 		}
 	else {
 		# Use specified group name
-		$group =~ /^[^\t :]+$/ || &usage($text{'setup_egroup2'});
+		&valid_mailbox_name($group) && &usage($text{'setup_egroup2'});
 		defined(getgrnam($group)) &&
 			&usage(&text('setup_egroup', $group));
 		}

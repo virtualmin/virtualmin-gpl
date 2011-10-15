@@ -3344,7 +3344,7 @@ else {
 sub valid_mailbox_name
 {
 local ($name) = @_;
-return $name =~ /^[^ \t:\&\(\)\|\;\<\>\*\?]+$/ ? undef : $text{'user_euser'};
+return $name =~ /^[^ \t:\&\(\)\|\;\<\>\*\?\!]+$/ ? undef : $text{'user_euser'};
 }
 
 sub max_username_length

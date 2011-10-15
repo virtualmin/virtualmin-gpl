@@ -26,6 +26,7 @@ if (!$d->{'parent'} && &can_rename_domains() == 2 &&
 		# Use the entered username
 		$in{'user'} || &error($text{'rename_euser'});
 		$user = $in{'user'};
+		&valid_mailbox_name($user) && &error($text{'setup_euser2'});
 		}
 	}
 $parentdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;

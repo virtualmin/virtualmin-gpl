@@ -94,7 +94,7 @@ if (!$parentuser) {
 		# Selected by user
 		$in{'vuser'} = lc($in{'vuser'});
 		$user = $in{'vuser'};
-		$user =~ /^[^\t :]+$/ || &error($text{'setup_euser2'});
+		&valid_mailbox_name($user) && &error($text{'setup_euser2'});
 		defined(getpwnam($user)) && &error($text{'setup_euser'});
 		}
 	&indexof($user, @banned_usernames) < 0 ||
@@ -119,7 +119,7 @@ if (!$parentuser) {
 		# Selected by user
 		$in{'mgroup'} = lc($in{'mgroup'});
 		$group = $in{'mgroup'};
-		$group =~ /^[^\t :]+$/ || &error($text{'setup_egroup2'});
+		&valid_mailbox_name($group) && &error($text{'setup_egroup2'});
 		}
 
 	# Parse special group for Unix user
