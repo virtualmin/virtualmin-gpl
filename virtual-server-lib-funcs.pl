@@ -3087,6 +3087,9 @@ if (!&has_home_quotas()) {
 	@colnames = grep { $_ ne 'quota' && $_ ne 'uquota' } @colnames;
 	}
 @colnames = grep { !$emap{$_} } @colnames;
+if (!defined(&list_resellers)) {
+	@colnames = grep { $_ ne 'reseller' } @colnames;
+	}
 push(@heads, map { $text{'index_'.$_} } @colnames);
 foreach my $f (&list_custom_fields()) {
 	if ($f->{'show'}) {
