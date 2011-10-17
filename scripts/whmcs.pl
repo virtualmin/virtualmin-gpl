@@ -179,6 +179,12 @@ push(@files, { 'name' => "ioncube",
 	       'file' => "ioncube_loaders.zip",
 	       'url' => "http://downloads2.ioncube.com/".
 			"loader_downloads/ioncube_loaders_$io.zip" });
+if (&compare_versions($ver, "4.5.2") <= 0) {
+	# Also need security path
+	push(@files, { 'name' => 'patch',
+		       'file' => 'patch.zip',
+		       'url' => 'http://www.whmcs.com/go/21/download' });
+	}
 return @files;
 }
 
@@ -260,6 +266,14 @@ local $cfile = "$opts->{'dir'}/configuration.php";
 local $err = &extract_script_archive($files->{'source'}, $temp, $d,
 				     $opts->{'dir'}, "whmcs");
 $err && return (0, "Failed to extract source : $err");
+
+# Apply security patch, if needed
+if ($files->{'patch'}) {
+	local $ptemp = &transname();
+	local $err = &extract_script_archive($files->{'patch'}, $ptemp, $d,
+					     $opts->{'dir'});
+	$err && return (0, "Failed to extract patch source : $err");
+	}
 
 # Copy loader to ~/etc , adjust php.ini
 local $inifile = &get_domain_php_ini($d, 5);
