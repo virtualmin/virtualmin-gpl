@@ -3116,7 +3116,8 @@ databases_noimport=However, there are no un-owned databases on the system.
 databases_tabhosts=Remote hosts
 databases_desc5=This form lists remote hosts that are allowed to connect to databases owned by this virtual server, and any sub-servers. These apply to the domain owner and any other mailbox users with MySQL access.
 databases_ahosts=Allowed hosts for $1
-databases_hosts_mysql=You may enter hostnames, IP addresses, or network patterns like <tt>192.168.1.%</tt>
+databases_hosts_mysql=You may enter hostnames, IP addresses, or network patterns like <tt>192.168.1.%</tt> .
+databases_hosts_fmt=Each hostname or IP must be entered on a separate line.
 
 database_title1=Create Database
 database_title2=Edit Database
