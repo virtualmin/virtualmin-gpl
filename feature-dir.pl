@@ -645,8 +645,15 @@ local $gid = $d->{'gid'} || $d->{'ugid'};
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable($d, 1);
 	}
+my @subhomes;
+if (!$d->{'parent'}) {
+	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
+		push(@subhomes, " | grep -v ".quotemeta("$sd->{'home'}/$hd/"));
+		}
+	}
 &system_logged("find ".quotemeta($d->{'home'})." ! -type l ".
 	       " | grep -v ".quotemeta("$d->{'home'}/$hd/").
+	       join("", @subhomes).
 	       " | sed -e 's/^/\"/' | sed -e 's/\$/\"/' ".
 	       " | xargs chown $d->{'uid'}:$gid");
 &system_logged("chown $d->{'uid'}:$gid ".
