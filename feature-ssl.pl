@@ -1321,7 +1321,7 @@ sub generate_self_signed_cert
 local ($certfile, $keyfile, $size, $days, $country, $state, $city, $org,
        $orgunit, $common, $email, $altnames, $d) = @_;
 &foreign_require("webmin", "webmin-lib.pl");
-$size ||= $config{'key_size'} || $webmin::default_key_size;
+$size ||= $webmin::default_key_size;
 $days ||= 1825;
 
 # Prepare for SSL alt names
@@ -1372,7 +1372,7 @@ sub generate_certificate_request
 local ($csrfile, $keyfile, $size, $days, $country, $state, $city, $org,
        $orgunit, $common, $email, $altnames, $d) = @_;
 &foreign_require("webmin", "webmin-lib.pl");
-$size ||= $config{'key_size'} || $webmin::default_key_size;
+$size ||= $webmin::default_key_size;
 $days ||= 1825;
 
 # Prepare for SSL alt names
