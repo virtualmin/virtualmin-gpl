@@ -476,6 +476,8 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 				$common .= "PHP_FCGI_CHILDREN=$defchildren\n";
 				}
 			$common .= "export PHP_FCGI_CHILDREN\n";
+			$common .= "PHP_FCGI_MAX_REQUESTS=99999\n";
+			$common .= "export PHP_FCGI_MAX_REQUESTS\n";
 			}
 		&print_tempfile(PHP, $common);
 		if ($v->[1] =~ /-cgi$/) {
