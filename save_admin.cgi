@@ -80,7 +80,9 @@ else {
 	$admin->{'modules'} = $in{'modules'};
 	%sel_edits = map { $_, 1 } split(/\0/, $in{'edit'});
 	foreach $ed (@edit_limits) {
-		$admin->{"edit_".$ed} = $sel_edits{$ed};
+		if ($d->{'edit_'.$ed}) {
+			$admin->{"edit_".$ed} = $sel_edits{$ed};
+			}
 		}
 
 	# Save allowed domains

@@ -90,7 +90,9 @@ print &ui_table_row(&hlink($text{'admin_modules'}, "admin_modules"),
 # Capabilities when editing a server
 @grid = ( );
 foreach $ed (@edit_limits) {
-	push(@grid, &ui_checkbox("edit", $ed, $text{'limits_edit_'.$ed} || $ed, $admin->{"edit_$ed"}));
+	push(@grid, &ui_checkbox("edit", $ed, $text{'limits_edit_'.$ed} || $ed,
+				 $admin->{"edit_$ed"}, undef,
+				 !$d->{'edit_'.$ed}));
 	}
 $etable .= &ui_grid_table(\@grid, 2);
 print &ui_table_row(&hlink($text{'limits_edit'}, "admin_edit"), $etable);
