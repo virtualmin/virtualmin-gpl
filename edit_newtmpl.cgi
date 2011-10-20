@@ -33,7 +33,9 @@ foreach $t (@tmpls) {
 		$t->{'skel'} eq "none" ? $text{'newtmpl_none'} :
 		$t->{'skel'} eq "" ? $text{'default'} :
 				     "<tt>$t->{'skel'}</tt>",
-		@fcs ]);
+		@fcs,
+	        $t->{'created'} ? &make_date($t->{'created'}, 1)
+				: "<i>$text{'newtmpl_init'}</i>" ]);
 	$deletable++ if (!$t->{'standard'});
 	}
 
@@ -49,7 +51,8 @@ print &ui_form_columns_table(
 	  $text{'newtmpl_web'}, $text{'newtmpl_dns'},
 	  $text{'newtmpl_ftp'}, $text{'newtmpl_logrotate'},
 	  $text{'newtmpl_mail'},
-	  $virtualmin_pro ? ( $text{'newtmpl_scripts'} ) : ( ), ],
+	  $virtualmin_pro ? ( $text{'newtmpl_scripts'} ) : ( ),
+	  $text{'newtmpl_created'} ],
 	100,
 	\@table);
 

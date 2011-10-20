@@ -2702,6 +2702,8 @@ newtmpl_cust=Custom
 newtmpl_return=templates list
 newtmpl_scripts=Scripts
 newtmpl_delete=Delete Selected Templates
+newtmpl_created=Created on
+newtmpl_init=Virtualmin install
 
 tmpl_title1=Create Server Template
 tmpl_title2=Edit Server Template
