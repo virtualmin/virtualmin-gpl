@@ -66,6 +66,13 @@
 	- plugin
 	- scripts
 	- generic web API for plugins?
+	- locking and logging
+	- add new servers to separate file
+	- config files for all distros
 
  - Handle service lookup-domain XXX hang
 	- timeout?
+
+ - Include dovecot control files in backups, if located in a separate dir
+	- http://wiki.dovecot.org/MailLocation/Maildir
+	- https://www.virtualmin.com/node/19773
