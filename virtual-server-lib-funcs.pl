@@ -12155,7 +12155,7 @@ if ($config{'web'}) {
 		}
 
 	# Check for Ubuntu PHP setting that breaks fcgi
-	my $php5conf = "/etc/apache2/mods-available/php5.conf";
+	my $php5conf = "/etc/apache2/mods-enabled/php5.conf";
 	if (-r $php5conf) {
 		my $lref = &read_file_lines($php5conf, 1);
                 foreach my $l (@$lref) {
