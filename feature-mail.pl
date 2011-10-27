@@ -1059,7 +1059,12 @@ if ($config{'mail_system'} == 5) {
 	&system_logged("$vpopbin/vmoduser -x $qdom 2>&1");
 	}
 else {
+	# Re-enable mail, and re-copy aliases from target domain (if any)
 	&setup_mail($_[0], 1);
+	if ($_[0]->{'alias'} && $_[0]->{'aliascopy'}) {
+		my $target = &get_domain($_[0]->{'alias'});
+		&copy_alias_virtuals($_[0], $target);
+		}
 	}
 
 &$first_print($text{'enable_users'});
