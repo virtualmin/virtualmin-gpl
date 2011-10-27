@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to version 3.4.7, SMF to 2.0.1, bbPress to 1.1, SugarCRM to 6.2.4, Joomla to 1.7.2 and 1.5.24, phpMyFAQ to 2.7.1, phpPgAdmin to 5.0.3, ZenPhoto to 1.4.1.4, Moodle to 2.1.2, PiWik to 1.6, Magento to 1.6.1.0, CMS Made Simple to 1.10, and PHPList to 2.10.17.
+html=Updated the phpMyAdmin script installer to version 3.4.7, SMF to 2.0.1, bbPress to 1.1, SugarCRM to 6.2.4, Joomla to 1.7.2 and 1.5.24, phpMyFAQ to 2.7.1, phpPgAdmin to 5.0.3, ZenPhoto to 1.4.1.4, Moodle to 2.1.2, PiWik to 1.6, Magento to 1.6.1.0, CMS Made Simple to 1.10, Drupal to 7.9, and PHPList to 2.10.17.
 master=1
 reseller=1
 domain=1
