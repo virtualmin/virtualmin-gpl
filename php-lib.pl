@@ -168,9 +168,11 @@ local @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 @ports = ( $port ) if ($port);	# Overridden to just do SSL or non-SSL
 local $fdest = "$d->{'home'}/fcgi-bin";
+local $pfound = 0;
 foreach my $p (@ports) {
 	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
 	next if (!$vconf);
+	$pfound++;
 
 	# Find <directory> sections containing PHP directives.
 	# If none exist, add them in either the directory for
@@ -362,6 +364,7 @@ foreach my $p (@ports) {
 	}
 
 &register_post_action(\&restart_apache);
+$pfound || &error("Apache virtual host was not found");
 }
 
 # set_fcgid_max_execution_time(&domain, value, [mode], [port])
@@ -375,9 +378,11 @@ local @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 @ports = ( $port ) if ($port);	# Overridden to just do SSL or non-SSL
 local $conf = &apache::get_config();
+local $pfound = 0;
 foreach my $p (@ports) {
         local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
         next if (!$vconf);
+	$pfound++;
 	if ($max) {
 		&apache::save_directive("IPCCommTimeout", [ $max+1 ],
 					$vconf, $conf);
@@ -389,6 +394,7 @@ foreach my $p (@ports) {
 	&flush_file_lines($virt->{'file'});
 	}
 &register_post_action(\&restart_apache);
+$pfound || &error("Apache virtual host was not found");
 }
 
 # get_fcgid_max_execution_time(&domain)
@@ -770,10 +776,12 @@ local @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 local $any = 0;
 local %allvers = map { $_, 1 } @all_possible_php_versions;
+local $pfound = 0;
 foreach my $p (@ports) {
 	local $conf = &apache::get_config();
 	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
 	next if (!$virt);
+	$pfound++;
 
 	# Check for an existing <Directory> block
 	local @dirs = &apache::find_directive_struct("Directory", $vconf);
@@ -863,6 +871,7 @@ return 0 if (!$any);
 &create_php_wrappers($d, $mode);
 
 &register_post_action(\&restart_apache);
+$pfound || &error("Apache virtual host was not found");
 return 1;
 }
 
