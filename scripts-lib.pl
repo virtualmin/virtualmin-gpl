@@ -1980,8 +1980,19 @@ local $job = { 'user' => $d->{'user'},
 	       'weekdays' => '*' };
 &cron::create_cron_job($job);
 if ($callnow) {
-	# Run wget now
-	&system_logged("$wget -q -O /dev/null $url >/dev/null 2>&1 </dev/null");
+	# Fetch the URL now
+	local ($host, $port, $page, $ssl) = &parse_http_url($url);
+	if ($host eq $d->{'dom'} && $port == $d->{'web_port'}) {
+		# On this domain .. can use internal function which handles
+		# use of internal IP
+		local ($out, $err);
+		&get_http_connection($d, $page, \$out, \$err);
+		}
+	else {
+		# Need to call wget
+		&system_logged(
+		    "$wget -q -O /dev/null $url >/dev/null 2>&1 </dev/null");
+		}
 	}
 return 1;
 }
