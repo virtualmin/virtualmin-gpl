@@ -1233,18 +1233,33 @@ sub setup_lookup_domain_daemon
 &foreign_require("init", "init-lib.pl");
 local $pidfile = "$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid";
 local $helper = &get_api_helper_command();
-&init::enable_at_boot(
-      "lookup-domain",
-      "Daemon for quickly looking up Virtualmin servers from procmail",
-      "$helper lookup-domain-daemon",
-      "kill `cat $pidfile`",
-      undef,
-      { 'fork' => 1 });
-if (&check_pid_file($pidfile)) {
-	&init::stop_action("lookup-domain");
-	sleep(5);	# Let port free up
+local $old_init_mode = $init::init_mode;
+if (!&init::action_status("lookup-domain")) {
+	if ($init::init_mode eq 'upstart') {
+		# Force use of regular init, to avoid restarting problems
+		$init::init_mode = 'init';
+		}
+	if (!&init::action_status("lookup-domain")) {
+		&init::enable_at_boot(
+		      "lookup-domain",
+		      "Daemon for quickly looking up Virtualmin servers ".
+		        "from procmail",
+		      "$helper lookup-domain-daemon",
+		      "kill `cat $pidfile`",
+		      undef,
+		      { 'fork' => 1 });
+		}
+	$init::init_mode = $old_init_mode;
 	}
-&init::start_action("lookup-domain");
+
+# Stop and re-start the daemon
+my $pid = &check_pid_file($pidfile);
+if ($pid) {
+	kill('KILL', $pid);
+	sleep(5);	# Wait for port to free up
+	&system_logged(
+		"$helper lookup-domain-daemon >/dev/null 2>&1 </dev/null &");
+	}
 }
 
 # delete_lookup_domain_daemon()
