@@ -67,8 +67,10 @@
 	- scripts
 	- generic web API for plugins?
 	- locking and logging
-	- add new servers to separate file
+		- locations
 	- config files for all distros
+	- access directive
+	- password protection
 
  - Handle service lookup-domain XXX hang
 	- timeout?
