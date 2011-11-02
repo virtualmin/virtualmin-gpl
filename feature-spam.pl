@@ -1257,9 +1257,8 @@ my $pid = &check_pid_file($pidfile);
 if ($pid) {
 	kill('KILL', $pid);
 	sleep(5);	# Wait for port to free up
-	&system_logged(
-		"$helper lookup-domain-daemon >/dev/null 2>&1 </dev/null &");
 	}
+&system_logged("$helper lookup-domain-daemon >/dev/null 2>&1 </dev/null &");
 }
 
 # delete_lookup_domain_daemon()
