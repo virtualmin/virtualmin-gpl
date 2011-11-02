@@ -904,18 +904,28 @@ if (-r "$userdir/cron/$user" && !$waschild) {
 	&foreign_require("cron", "cron-lib.pl");
 	&$first_print("Copying Cron jobs ..");
 	$cron::cron_temp_file = &transname();
-	if ($parent) {
-		# Append migrated cron to parent user's
-		&cron::copy_cron_temp({ 'user' => $parent->{'user'} });
-		&execute_command("cat $userdir/cron/$user >>$cron::cron_temp_file");
-		&cron::copy_crontab($parent->{'user'});
+	eval {
+		local $main::error_must_die = 1;
+		if ($parent) {
+			# Append migrated cron to parent user's
+			&cron::copy_cron_temp({ 'user' => $parent->{'user'} });
+			&execute_command(
+			  "cat $userdir/cron/$user >>$cron::cron_temp_file");
+			&cron::copy_crontab($parent->{'user'});
+			}
+		else {
+			# Just over-write cron
+			&execute_command(
+			  "cp $userdir/cron/$user $cron::cron_temp_file");
+			&cron::copy_crontab($user);
+			}
+		};
+	if ($@) {
+		&$second_print(".. failed : $@");
 		}
 	else {
-		# Just over-write cron
-		&execute_command("cp $userdir/cron/$user $cron::cron_temp_file");
-		&cron::copy_crontab($user);
+		&$second_print(".. done");
 		}
-	&$second_print(".. done");
 	}
 
 if ($got{'mysql'}) {

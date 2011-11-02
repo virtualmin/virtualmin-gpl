@@ -348,11 +348,21 @@ if (!$parent) {
 			&remove_cid_prefix($uinfo->{'crontab'}->{'src'});
 		if ($uinfo->{'crontab'}->{'src'} && -r $crsrc) {
 			&$first_print("Copying domain owner's cron jobs ..");
-			$cron::cron_temp_file = &transname();
-			&cron::copy_cron_temp({ 'user' => $duser->{'user'} });
-			&execute_command("cat $crsrc >>$cron::cron_temp_file");
-			&cron::copy_crontab($duser->{'user'});
-			&$second_print(".. done");
+			eval {
+				local $main::error_must_die = 1;
+				$cron::cron_temp_file = &transname();
+				&cron::copy_cron_temp(
+					{ 'user' => $duser->{'user'} });
+				&execute_command(
+					"cat $crsrc >>$cron::cron_temp_file");
+				&cron::copy_crontab($duser->{'user'});
+				};
+			if ($@) {
+				&$second_print(".. failed : $@");
+				}
+			else {
+				&$second_print(".. done");
+				}
 			}
 		}
 	}
