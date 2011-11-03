@@ -278,6 +278,11 @@ foreach $l (@$lref) {
 		local $rand = &random_password(32);
 		$l = "\$cfg['blowfish_secret'] = '$rand';";
 		}
+
+	# Turn off warning message about config DB
+	if ($l =~ /^\$cfg\['PmaNoRelation_DisableWarning'\]/) {
+		$l = "\$cfg['PmaNoRelation_DisableWarning'] = true;";
+		}
 	}
 &flush_file_lines_as_domain_user($d, $cfile);
 
