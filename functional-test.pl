@@ -639,6 +639,30 @@ $alias_tests = [
 	  'grep' => [ 'Autoreply message: Test autoreply' ],
 	},
 
+	# Turn off mail
+	{ 'command' => 'disable-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'mail' ] ],
+	},
+
+	# Turn mail back on again
+	{ 'command' => 'enable-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'mail' ] ],
+	},
+
+	# Make sure aliases still exist
+	{ 'command' => 'list-aliases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => '^'.$test_alias_two.'@'.$test_domain,
+	},
+	{ 'command' => 'list-simple-aliases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Autoreply message: Test autoreply' ],
+	},
+
 	# Cleanup the aliases and domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
