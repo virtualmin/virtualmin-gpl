@@ -1317,3 +1317,4 @@ When creating or restoring a virtual server with a database that already exists,
 The list of sub-servers under a top-level server has been moved from the Edit Virtual Server page to the List Sub-Servers link on the left menu.
 Added the --skip-warnings flag to the modify-domain API command, to ignore warnings related to new features from a plan change.
 MySQL connection limits for domain owners and mailboxes can now be set at the template level, and will be applied to new virtual servers and mail users with database access.
+When the email feature is disabled for a domain, all mail aliases are now removed and saved by Virtualmin. If email is later re-enabled, aliases will be restored.

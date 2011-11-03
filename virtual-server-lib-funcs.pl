@@ -509,6 +509,9 @@ if (-r $script_warnings_file) {
 # Delete cached links for the domain
 &clear_links_cache($_[0]);
 
+# Delete any saved aliases
+&unlink_file("$saved_aliases_dir/$id");
+
 # Remove from caches
 delete($main::get_domain_cache{$_[0]->{'id'}});
 if (scalar(@main::list_domains_cache)) {
@@ -5188,6 +5191,10 @@ if ($plan) {
 	&copy_source_dest($plan->{'file'}, $_[1]."_plan");
 	}
 
+# Save deleted aliases file
+&copy_source_dest("$saved_aliases_dir/$_[0]->{'id'}",
+		  $_[1]."_saved_aliases");
+
 &$second_print($text{'setup_done'});
 return 1;
 }
@@ -5986,6 +5993,12 @@ if (!$_[3]->{'fix'}) {
 			&make_dir("$script_log_directory/$_[0]->{'id'}", 0755);
 			&execute_command("cd ".quotemeta("$script_log_directory/$_[0]->{'id'}")." && $tar xf ".quotemeta($_[1]."_scripts")." .");
 			}
+		}
+	if (-r $_[1]."_saved_aliases") {
+		# Restore saved aliases
+		&make_dir($saved_aliases_dir, 0700);
+		&copy_source_dest($_[1]."_saved_aliases",
+				  "$saved_aliases_dir/$_[0]->{'id'}");
 		}
 	&$second_print($text{'setup_done'});
 	}

@@ -289,6 +289,14 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 				   'to' => [ '%1@'.$aliasdom->{'dom'} ] })
 			}
 		}
+	elsif (&has_deleted_aliases($_[0])) {
+		# Restore aliases from before mail was deleted
+		my @deleted = &get_deleted_aliases($_[0]);
+		foreach my $a (@deleted) {
+			&create_virtuser($a) if (!$gotvirt{$a->{'from'}}++);
+			}
+		&clear_deleted_aliases($_[0]);
+		}
 	elsif ($tmpl->{'dom_aliases'} && $tmpl->{'dom_aliases'} ne "none") {
 		# Setup aliases from this domain based on the template
 		&$first_print($text{'setup_domaliases'});
@@ -313,7 +321,7 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 				}
 			}
 		foreach $a (values %acreate) {
-			&create_virtuser($a) if (!$gotvirt{$a->{'from'}});
+			&create_virtuser($a) if (!$gotvirt{$a->{'from'}}++);
 			}
 		if ($tmpl->{'dom_aliases_bounce'} &&
 		    !$acreate{"\@$_[0]->{'dom'}"} &&
@@ -324,6 +332,7 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 			local $v = { 'from' => "\@$_[0]->{'dom'}",
 				     'to' => [ 'BOUNCE' ] };
 			&create_virtuser($v);
+			$gotvirt{'@'.$_[0]->{'dom'}}++;
 			}
 		&$second_print($text{'setup_done'});
 		}
@@ -360,24 +369,26 @@ if (!$_[0]->{'alias'}) {
 # Removes a domain from the list of those accepted by the mail system
 sub delete_mail
 {
+local ($d, $leave_aliases) = @_;
+
 &$first_print($text{'delete_doms'});
-&obtain_lock_mail($_[0]);
+&obtain_lock_mail($d);
 &require_mail();
 
-if ($_[0]->{'alias'} && !$_[0]->{'aliascopy'} ||
-    !$_[0]->{'alias'} && $config{'mail_system'} == 0) {
+if ($d->{'alias'} && !$d->{'aliascopy'} ||
+    !$d->{'alias'} && $config{'mail_system'} == 0) {
         # Remove whole-domain alias, for alias domains or regular domains using
 	# Postfix
         local @virts = &list_virtusers();
-        local ($catchall) = grep { lc($_->{'from'}) eq '@'.$_[0]->{'dom'} }
+        local ($catchall) = grep { lc($_->{'from'}) eq '@'.$d->{'dom'} }
 				 @virts;
         if ($catchall) {
                 &delete_virtuser($catchall);
                 }
         }
-elsif ($_[0]->{'alias'} && $_[0]->{'aliascopy'}) {
+elsif ($d->{'alias'} && $d->{'aliascopy'}) {
 	# Remove alias copy virtuals
-	&delete_alias_virtuals($_[0]);
+	&delete_alias_virtuals($d);
 	}
 
 if ($config{'mail_system'} == 1) {
@@ -388,7 +399,7 @@ if ($config{'mail_system'} == 1) {
 						     \$cwfile);
 	&lock_file($cwfile) if ($cwfile);
 	&lock_file($sendmail::config{'sendmail_cf'});
-	&sendmail::delete_file_or_config($conf, "w", $_[0]->{'dom'});
+	&sendmail::delete_file_or_config($conf, "w", $d->{'dom'});
 	&flush_file_lines();
 	&unlock_file($sendmail::config{'sendmail_cf'});
 	&unlock_file($cwfile) if ($cwfile);
@@ -397,10 +408,10 @@ if ($config{'mail_system'} == 1) {
 	local $cgfile;
 	local @dlist = &sendmail::get_file_or_config($conf, "G", undef,
                                                      \$cgfile);
-	if (&indexof($_[0]->{'dom'}, @dlist) >= 0) {
+	if (&indexof($d->{'dom'}, @dlist) >= 0) {
 		&lock_file($cgfile) if ($cgfile);
 		&lock_file($sendmail::config{'sendmail_cf'});
-		&sendmail::delete_file_or_config($conf, "G", $_[0]->{'dom'});
+		&sendmail::delete_file_or_config($conf, "G", $d->{'dom'});
 		&flush_file_lines();
 		&unlock_file($sendmail::config{'sendmail_cf'});
 		&unlock_file($cgfile) if ($cgfile);
@@ -414,13 +425,13 @@ if ($config{'mail_system'} == 1) {
 elsif ($config{'mail_system'} == 0) {
 	# Delete the special postfix virtuser
 	local @virts = &list_virtusers();
-	local ($lv) = grep { lc($_->{'from'}) eq $_[0]->{'dom'} } @virts;
+	local ($lv) = grep { lc($_->{'from'}) eq $d->{'dom'} } @virts;
 	if ($lv) {
 		&delete_virtuser($lv);
 		}
 	local @md = split(/[, ]+/,
 			  lc(&postfix::get_current_value("mydestination")));
-	local $idx = &indexof($_[0]->{'dom'}, @md);
+	local $idx = &indexof($d->{'dom'}, @md);
 	if ($idx >= 0) {
 		# Delete old-style entry too
 		&lock_file($postfix::config{'postfix_config_file'});
@@ -436,14 +447,14 @@ elsif ($config{'mail_system'} == 0) {
 elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4) {
 	# Delete domain from qmail locals file, rcpthosts file and virtuals
 	local $dlist = &qmailadmin::list_control_file("locals");
-	$dlist = [ grep { lc($_) ne $_[0]->{'dom'} } @$dlist ];
+	$dlist = [ grep { lc($_) ne $d->{'dom'} } @$dlist ];
 	&qmailadmin::save_control_file("locals", $dlist);
 
 	local $rlist = &qmailadmin::list_control_file("rcpthosts");
-	$rlist = [ grep { lc($_) ne $_[0]->{'dom'} } @$rlist ];
+	$rlist = [ grep { lc($_) ne $d->{'dom'} } @$rlist ];
 	&qmailadmin::save_control_file("rcpthosts", $rlist);
 
-	local ($virtmap) = grep { lc($_->{'domain'}) eq $_[0]->{'dom'} &&
+	local ($virtmap) = grep { lc($_->{'domain'}) eq $d->{'dom'} &&
 				  !$_->{'user'} } &qmailadmin::list_virts();
 	&qmailadmin::delete_virt($virtmap) if ($virtmap);
         if ($config{'mail_system'} == 4) {
@@ -455,7 +466,7 @@ elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4) {
 	}
 elsif ($config{'mail_system'} == 5) {
 	# Call vpopmail domain deletion program
-	local $qdom = quotemeta($_[0]->{'dom'});
+	local $qdom = quotemeta($d->{'dom'});
 	local $out = &backquote_logged("$vpopbin/vdeldomain $qdom 2>&1");
 	if ($?) {
 		&$second_print(&text('delete_evdeldomain', "<tt>$out</tt>"));
@@ -463,41 +474,50 @@ elsif ($config{'mail_system'} == 5) {
 		}
 	}
 elsif ($config{'mail_system'} == 6) {
-	&exim::remove_domain( $_[0]->{'dom'} );
+	&exim::remove_domain( $d->{'dom'} );
 	}
 
 &$second_print($text{'setup_done'});
 
-if ($config{'delete_virts'} && !$_[1]) {
-	# Delete all email aliases
+if (!$leave_aliases) {
+	# Delete all email aliases, saving them to a per-domain file
+	# so they can be restored if email is later enabled.
+	# The leave_aliases flag is only set to true when the whole virtual
+	# server is being deleted, as aliases will be already removed in the
+	# function delete_virtual_server.
 	&$first_print($text{'delete_aliases'});
+	local @deleted;
 	foreach my $v (&list_virtusers()) {
 		if ($v->{'from'} =~ /\@(\S+)$/ &&
-		    $1 eq $_[0]->{'dom'}) {
+		    $1 eq $d->{'dom'}) {
 			&delete_virtuser($v);
+			push(@deleted, $v);
 			}
+		}
+	if (!$d->{'aliascopy'}) {
+		&save_deleted_aliases($d, \@deleted);
 		}
 	&$second_print($text{'setup_done'});
 	}
 
 # Remove BCC address
 if ($supports_bcc) {
-	local $bcc = &get_domain_sender_bcc($_[0]);
+	local $bcc = &get_domain_sender_bcc($d);
 	if ($bcc) {
-		&save_domain_sender_bcc($_[0], undef);
+		&save_domain_sender_bcc($d, undef);
 		}
 	}
 
 # Remove any secondary MX servers
-&delete_on_secondaries($_[0]);
+&delete_on_secondaries($d);
 
 # Delete file containing all users' aliases
-&delete_everyone_file($_[0]);
+&delete_everyone_file($d);
 
 # Remove domain from DKIM list
-&update_dkim_domains($_[0], 'delete');
+&update_dkim_domains($d, 'delete');
 
-&release_lock_mail($_[0]);
+&release_lock_mail($d);
 }
 
 # clone_mail(&domain, &old-domain)
@@ -5248,6 +5268,58 @@ if ($logins{$user}) {
 else {
 	return undef;
 	}
+}
+
+# save_deleted_aliases(&domain, &aliases)
+# Record aliases that belonged to a deleted domain, to restore if mail is
+# later re-enabled
+sub save_deleted_aliases
+{
+my ($d, $aliases) = @_;
+if (!-d $saved_aliases_dir) {
+	&make_dir($saved_aliases_dir, 0700);
+	}
+&open_lock_tempfile(DELETED, ">$saved_aliases_dir/$d->{'id'}");
+foreach my $a (@$aliases) {
+	&print_tempfile(DELETED,
+		join("\t", $a->{'from'}, @{$a->{'to'}}),"\n");
+	}
+&close_tempfile(DELETED);
+}
+
+# get_deleted_aliases(&domain)
+# Returns a list of aliases saved for a domain by save_deleted_aliases
+sub get_deleted_aliases
+{
+my ($d) = @_;
+my @rv;
+open(DELETED, "$saved_aliases_dir/$d->{'id'}");
+while(my $l = <DELETED>) {
+	$l =~ s/\r|\n//g;
+	my ($from, @to) = split(/\t+/, $l);
+	$from =~ s/\@.*$/\@$d->{'dom'}/;
+	push(@rv, { 'from' => $from,
+		    'to' => \@to });
+	}
+close(DELETED);
+return @rv;
+}
+
+# has_deleted_aliases(&domain)
+# Returns 1 if deleted aliases were saved for a domain
+sub has_deleted_aliases
+{
+my ($d) = @_;
+return -r "$saved_aliases_dir/$d->{'id'}" ? 1 : 0;
+}
+
+# clear_deleted_aliases(&domain)
+# Remove the file storing deleted aliases. Typically called after they have
+# been re-created.
+sub clear_deleted_aliases
+{
+my ($d) = @_;    
+&unlink_logged("$saved_aliases_dir/$d->{'id'}");
 }
 
 $done_feature_script{'mail'} = 1;

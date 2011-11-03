@@ -148,6 +148,8 @@ $styles_unavail_file = "$module_config_directory/stylesunavail";
 
 $initial_users_dir = "$module_config_directory/initial";
 
+$saved_aliases_dir = "$module_config_directory/saved-aliases";
+
 @edit_limits = ('domain', 'users', 'aliases', 'dbs', 'scripts',
 	        'ip', 'dnsip', 'ssl', 'forward', 'redirect', 'admins',
 		'spam', 'phpver', 'phpmode',
