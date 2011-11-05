@@ -66,14 +66,7 @@
 	- plugin
 	- scripts
 	- generic web API for plugins?
-	- locking and logging
-		- locations
 	- config files for all distros
-	- access directive
-	- password protection
-
- - Handle service lookup-domain XXX hang
-	- timeout?
 
  - Include dovecot control files in backups, if located in a separate dir
 	- http://wiki.dovecot.org/MailLocation/Maildir
