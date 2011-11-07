@@ -12,8 +12,9 @@ $d->{'ssl_pass'} && &error($text{'copycert_epass'});
 
 # Get the Dovecot config and cert files
 &foreign_require("dovecot");
-&lock_file($dovecot::config{'dovecot_config'});
-$dovedir = $dovecot::config{'dovecot_config'};
+$cfile = &dovecot::get_config_file();
+&lock_file($cfile);
+$dovedir = $cfile;
 $dovedir =~ s/\/([^\/]+)$//;
 $conf = &dovecot::get_config();
 $cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
@@ -65,19 +66,24 @@ if (&dovecot::find("ssl_disable", $conf, 2)) {
 else {
 	&dovecot::save_directive($conf, "ssl", "yes");
 	}
-$protos = &dovecot::find_value("protocols", $conf);
-@protos = split(/\s+/, $protos);
-%protos = map { $_, 1 } @protos;
-push(@protos, "imaps") if (!$protos{'imaps'} && $protos{'imap'});
-push(@protos, "pop3s") if (!$protos{'pop3s'} && $protos{'pop3'});
-&dovecot::save_directive($conf, "protocols", join(" ", @protos));
+if (&dovecot::get_dovecot_version() < 2) {
+	$protos = &dovecot::find_value("protocols", $conf);
+	@protos = split(/\s+/, $protos);
+	%protos = map { $_, 1 } @protos;
+	push(@protos, "imaps") if (!$protos{'imaps'} && $protos{'imap'});
+	push(@protos, "pop3s") if (!$protos{'pop3s'} && $protos{'pop3'});
+	&dovecot::save_directive($conf, "protocols", join(" ", @protos));
+	}
+else {
+	# XXX what needs to be done for 2.0 ?
+	}
 
 # Enable PCI-compliant ciphers
 &dovecot::save_directive($conf, "ssl_cipher_list",
 			 "HIGH:MEDIUM:+TLSv1:!SSLv2:+SSLv3");
 
 &flush_file_lines();
-&unlock_file($dovecot::config{'dovecot_config'});
+&unlock_file($cfile);
 &$second_print($text{'setup_done'});
 
 # Apply Dovecot config
