@@ -266,6 +266,12 @@ sub feature_modify_alias
 {
 }
 
+# feature_provides_web()
+# Returns 1 if this plugin provides a website feature
+sub feature_provides_web
+{
+}
+
 # mailbox_inputs(&user, new, &domain)
 # Returns HTML for additional inputs on the mailbox form. These should be
 # formatted to appear inside a table.

@@ -14799,6 +14799,20 @@ else {
 	}
 }
 
+# domain_has_website(&domain)
+# Returns 1 if a domain has a website, either via apache or a plugin
+sub domain_has_website
+{
+my ($d) = @_;
+return 1 if ($d->{'web'});
+foreach my $p (&list_feature_plugins()) {
+	if ($d->{$p} && &plugin_call($p, "feature_provides_web")) {
+		return 1;
+		}
+	}
+return 0;
+}
+
 # load_plugin_libraries([plugin, ...])
 # Call foreign_require on some or all plugins, just once
 sub load_plugin_libraries

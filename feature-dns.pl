@@ -1401,7 +1401,7 @@ foreach my $r (@$recs) {
 	}
 $got{'SOA'} || return $text{'validate_ednssoa2'};
 $got{'A'} || return $text{'validate_ednsa2'};
-if ($d->{'web'}) {
+if (&domain_has_website($d)) {
 	foreach my $n ($d->{'dom'}.'.', 'www.'.$d->{'dom'}.'.') {
 		my @nips = map { $_->{'values'}->[0] }
 			       grep { $_->{'type'} eq 'A' &&
