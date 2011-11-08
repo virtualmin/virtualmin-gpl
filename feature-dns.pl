@@ -665,6 +665,7 @@ elsif ($_[0]->{'dom'} ne $_[1]->{'dom'} && !$_[0]->{'provision_dns'}) {
 
         # Update SOA record
 	&post_records_change($_[0], \@recs);
+	$recs = \@recs;
 	&unlock_file(&bind8::make_chroot($nfn));
 	$rv++;
 
@@ -1874,6 +1875,12 @@ foreach my $r (@$recs) {
 		}
 	else {
 		$r->{'name'} =~ s/\.$olddom\.$/\.$newdom\./;
+		}
+	if ($r->{'realname'} eq $olddom.".") {
+		$r->{'realname'} = $newdom.".";
+		}
+	else {
+		$r->{'realname'} =~ s/\.$olddom\.$/\.$newdom\./;
 		}
 	if ($r->{'type'} eq 'SPF') {
 		# Fix SPF TXT record
