@@ -72,7 +72,6 @@
 	- backup and restore
 	- all virtualmin code that checks for 'web' feature should call
 	  feature_provides_web instead (or cache)
-	- IPv6 listen (and modify)
 
  - Include dovecot control files in backups, if located in a separate dir
 	- http://wiki.dovecot.org/MailLocation/Maildir
