@@ -67,12 +67,16 @@
 	- scripts
 	- generic web API for plugins?
 	- config files for all distros
-	- validation
 	- functional test?
 	- backup and restore
 	- all virtualmin code that checks for 'web' feature should call
 	  feature_provides_web instead (or cache)
+	- php server is crashing?
 
  - Include dovecot control files in backups, if located in a separate dir
 	- http://wiki.dovecot.org/MailLocation/Maildir
 	- https://www.virtualmin.com/node/19773
+
+ - Wizard option for MySQL DB size
+	- Update my.cnf directly
+	- Choose based on free memory
