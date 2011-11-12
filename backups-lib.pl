@@ -2605,8 +2605,9 @@ else {
 		}
 	}
 foreach my $c (@cmds) {
-	my $p = &has_command($c);
-	return $p if ($p);
+	my ($bin, @args) = split(/\s+/, $c);
+	my $p = &has_command($bin);
+	return join(" ", $p, @args) if ($p);
 	}
 return undef;
 }
