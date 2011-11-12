@@ -11106,7 +11106,8 @@ return 1;
 sub can_domain_have_scripts
 {
 local ($d) = @_;
-return $d->{'web'} && $config{'web'} && !$d->{'subdom'} && !$d->{'alias'};
+return ($d->{'web'} && $config{'web'} ||
+	&domain_has_website($d)) && !$d->{'subdom'} && !$d->{'alias'};
 }
 
 # call_feature_func(feature, &domain, &olddomain)
@@ -14804,13 +14805,13 @@ else {
 sub domain_has_website
 {
 my ($d) = @_;
-return 1 if ($d->{'web'});
+return 'web' if ($d->{'web'});
 foreach my $p (&list_feature_plugins()) {
 	if ($d->{$p} && &plugin_call($p, "feature_provides_web")) {
-		return 1;
+		return $p;
 		}
 	}
-return 0;
+return undef;
 }
 
 # load_plugin_libraries([plugin, ...])

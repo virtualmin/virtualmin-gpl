@@ -205,7 +205,7 @@ else {
 	}
 
 # Check domain features
-$d->{'web'} && $d->{'dir'} ||
+&domain_has_website($d) && $d->{'dir'} ||
 	&usage("Scripts can only be installed into virtual servers with a ".
 	       "website and home directory");
 

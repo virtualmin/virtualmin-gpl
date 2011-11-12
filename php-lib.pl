@@ -7,6 +7,13 @@
 sub get_domain_php_mode
 {
 local ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	return &plugin_call($p, "feature_get_web_php_mode", $d);
+	}
+elsif (!$p) {
+	return "Virtual server does not have a website";
+	}
 &require_apache();
 local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
 						   $d->{'web_port'});
@@ -40,6 +47,14 @@ return 'mod_php';
 sub save_domain_php_mode
 {
 local ($d, $mode, $port, $newdom) = @_;
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	return &plugin_call($p, "feature_save_web_php_mode",
+			    $d, $mode, $port, $newdom);
+	}
+elsif (!$p) {
+	return "Virtual server does not have a website";
+	}
 &require_apache();
 local $tmpl = &get_template($d->{'template'});
 local $conf = &apache::get_config();
@@ -374,6 +389,14 @@ sub set_fcgid_max_execution_time
 local ($d, $max, $mode, $port) = @_;
 $mode ||= &get_domain_php_mode($d);
 return 0 if ($mode ne "fcgid");
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	return &plugin_call($p, "feature_set_fcgid_max_execution_time",
+			    $d, $max, $mode, $port);
+	}
+elsif (!$p) {
+	return "Virtual server does not have a website";
+	}
 local @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 @ports = ( $port ) if ($port);	# Overridden to just do SSL or non-SSL
@@ -401,6 +424,13 @@ $pfound || &error("Apache virtual host was not found");
 # Returns the current max FCGId execution time, or undef for unlimited
 sub get_fcgid_max_execution_time
 {
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	return &plugin_call($p, "feature_get_fcgid_max_execution_time", $d);
+	}
+elsif (!$p) {
+	return "Virtual server does not have a website";
+	}
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 local $v = &apache::find_directive("IPCCommTimeout", $vconf);
 return $v == 9999 ? undef : $v ? $v-1 : 40;
@@ -719,6 +749,13 @@ return undef;
 sub list_domain_php_directories
 {
 local ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	return &plugin_call($p, "feature_list_web_php_directories", $d);
+	}
+elsif (!$p) {
+	return "Virtual server does not have a website";
+	}
 &require_apache();
 local $conf = &apache::get_config();
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
@@ -769,6 +806,14 @@ return @rv;
 sub save_domain_php_directory
 {
 local ($d, $dir, $ver) = @_;
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	return &plugin_call($p, "feature_save_web_php_directory",
+			    $d, $dir, $ver);
+	}
+elsif (!$p) {
+	return "Virtual server does not have a website";
+	}
 &require_apache();
 local $mode = &get_domain_php_mode($d);
 return 0 if ($mode eq "mod_php");
@@ -880,7 +925,13 @@ return 1;
 sub delete_domain_php_directory
 {
 local ($d, $dir) = @_;
-
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	return &plugin_call($p, "feature_delete_web_php_directory", $d, $dir);
+	}
+elsif (!$p) {
+	return "Virtual server does not have a website";
+	}
 &require_apache();
 local $conf = &apache::get_config();
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
@@ -908,7 +959,7 @@ return 0;
 # is restarted.
 sub cleanup_php_cgi_processes
 {
-if (&foreign_check("proc")) {
+if (&foreign_check("proc") && $config{'web'}) {
 	&foreign_require("proc", "proc-lib.pl");
 	local @procs = &proc::list_processes();
 	local @cgis = grep { $_->{'args'} =~ /^\S+php(4|5|)\-cgi/ &&

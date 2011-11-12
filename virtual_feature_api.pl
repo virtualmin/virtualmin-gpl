@@ -272,6 +272,51 @@ sub feature_provides_web
 {
 }
 
+# feature_get_web_php_mode(&domain)
+# If a feature provides a website, this function must return the PHP execution
+# mode (one of mod_php, cgi or fcgid)
+sub feature_get_web_php_mode
+{
+}
+
+# feature_get_web_php_mode(&domain)
+# If a feature provides a website, this function must change the PHP execution
+# mode to one of mod_php, cgi or fcgid. Can call error if mode isn't valid.
+sub feature_save_web_php_mode
+{
+}
+
+# feature_list_web_php_directories(&domain)
+# If a feature provides a website, this function must return a list of hash
+# refs, one per directory with 'dir', 'version' and 'mode' keys.
+sub feature_list_web_php_directories
+{
+}
+
+# feature_save_web_php_directory(&domain, dir, version)
+# Sets the PHP version to use for a directory.
+sub feature_save_web_php_directory
+{
+}
+
+# feature_delete_web_php_directory(&domain, dir)
+# Removes the custom PHP version to use for a directory.
+sub feature_delete_web_php_directory
+{
+}
+
+# feature_get_fcgid_max_execution_time(&domain)
+# Returns the max execution time for FastCGI scripts in this domain
+sub feature_get_fcgid_max_execution_time
+{
+}
+
+# feature_set_fcgid_max_execution_time(&domain, max)
+# Sets the max execution time for FastCGI scripts in this domain
+sub feature_set_fcgid_max_execution_time
+{
+}
+
 # mailbox_inputs(&user, new, &domain)
 # Returns HTML for additional inputs on the mailbox form. These should be
 # formatted to appear inside a table.
