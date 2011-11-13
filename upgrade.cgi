@@ -150,7 +150,8 @@ elsif ($itype eq "deb") {
 				# replaced.
 				local ($ver) = grep { !/\.gpl/ }
 					&apt_package_versions($p->{'name'});
-                                push(@packages, $p->{'name'}."=".$ver);
+                                push(@packages, $ver ? $p->{'name'}."=".$ver
+						     : $p->{'name'});
 				}
 			else {
 				push(@packages, $p->{'name'});
