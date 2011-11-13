@@ -317,6 +317,20 @@ sub feature_set_fcgid_max_execution_time
 {
 }
 
+# feature_restart_web_php(&domain)
+# Will be called by Virtualmin when some PHP config change is made, like
+# installing a new module
+sub feature_restart_web_php
+{
+}
+
+# feature_setup_web_for_php(&domain, &script, php-version)
+# Called to set any PHP variables needed by a script that are set in the 
+# webserver config.
+sub feature_setup_web_for_php
+{
+}
+
 # mailbox_inputs(&user, new, &domain)
 # Returns HTML for additional inputs on the mailbox form. These should be
 # formatted to appear inside a table.

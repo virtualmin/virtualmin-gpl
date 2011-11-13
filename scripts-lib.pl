@@ -627,9 +627,10 @@ local $tmpl = &get_template($d->{'template'});
 local $any = 0;
 local $varstr = &substitute_domain_template($tmpl->{'php_vars'}, $d);
 local @tmplphpvars = $varstr eq 'none' ? ( ) : split(/\t+/, $varstr);
+local $p = &domain_has_website($d);
 
-if ($apache::httpd_modules{'mod_php4'} ||
-    $apache::httpd_modules{'mod_php5'}) {
+if ($p eq "web" && ($apache::httpd_modules{'mod_php4'} ||
+		    $apache::httpd_modules{'mod_php5'})) {
 	# Add the PHP variables to the domain's <Virtualhost> in Apache config
 	&require_apache();
 	local $conf = &apache::get_config();
@@ -731,6 +732,11 @@ if (-r $phpini && &foreign_check("phpini")) {
 	if ($anyini) {
 		&write_as_domain_user($d, sub { &flush_file_lines($phpini) });
 		}
+	}
+
+# Call web plugin specific variable function
+if ($p && $p ne "web") {
+	&plugin_call($p, "feature_setup_web_for_php", $d, $script, $phpver);
 	}
 
 return $any;
@@ -1049,7 +1055,13 @@ foreach my $m (@mods) {
 
 	# If we are running via mod_php or fcgid, an Apache reload is needed
 	if ($mode eq "mod_php" || $mode eq "fcgid") {
-		&register_post_action(\&restart_apache);
+		local $p = &domain_has_website($d);
+		if ($p eq "web") {
+			&register_post_action(\&restart_apache);
+			}
+		elsif ($p) {
+			&plugin_call($p, "feature_restart_web_php", $d);
+			}
 		}
 	}
 return 1;
@@ -2333,7 +2345,7 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 	&$first_print($text{'scripts_apache'});
 	if (&setup_web_for_php($d, $script, $phpver)) {
 		&$second_print($text{'setup_done'});
-		&register_post_action(\&restart_apache);
+		&register_post_action(\&restart_apache) if ($d->{'web'});
 		}
 	else {
 		&$second_print($text{'scripts_aalready'});

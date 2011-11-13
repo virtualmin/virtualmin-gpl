@@ -48,16 +48,8 @@ sub save_domain_php_mode
 {
 local ($d, $mode, $port, $newdom) = @_;
 local $p = &domain_has_website($d);
-if ($p && $p ne 'web') {
-	return &plugin_call($p, "feature_save_web_php_mode",
-			    $d, $mode, $port, $newdom);
-	}
-elsif (!$p) {
-	return "Virtual server does not have a website";
-	}
-&require_apache();
+$p || return "Virtual server does not have a website";
 local $tmpl = &get_template($d->{'template'});
-local $conf = &apache::get_config();
 
 # Work out source php.ini files
 local (%srcini, %subs_ini);
@@ -173,12 +165,20 @@ if ($defini && !-l "$etc/php.ini") {
 	&symlink_file_as_domain_user($d, $defini, "$etc/php.ini");
 	}
 
+# Call plugin-specific function to perform webserver setup
+if ($p ne 'web') {
+	return &plugin_call($p, "feature_save_web_php_mode",
+			    $d, $mode, $port, $newdom);
+	}
+&require_apache();
+
 # Create wrapper scripts
 if ($mode ne "mod_php") {
 	&create_php_wrappers($d, $mode);
 	}
 
 # Add the appropriate directives to the Apache config
+local $conf = &apache::get_config();
 local @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 @ports = ( $port ) if ($port);	# Overridden to just do SSL or non-SSL
