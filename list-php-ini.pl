@@ -78,7 +78,7 @@ else {
 # Get from domain
 foreach my $d (@doms) {
 	# Check if this domain even makes sense
-	next if (!$d->{'web'} || $d->{'alias'});
+	next if (!&domain_has_website($d) || $d->{'alias'});
 	$mode = &get_domain_php_mode($d);
 	next if ($mode eq "mod_php");
 

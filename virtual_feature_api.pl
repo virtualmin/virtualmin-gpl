@@ -345,6 +345,25 @@ sub feature_setup_web_for_php
 {
 }
 
+# feature_startstop()
+# If this feature has a server process, this function should return a hash
+# with 'status', 'desc' and 'links' keys.
+sub feature_startstop
+{
+}
+
+# feature_stop_service()
+# Stops the server process associated with this plugin
+sub feature_stop_service
+{
+}
+
+# feature_start_service()
+# Starts the server process associated with this plugin
+sub feature_start_service
+{
+}
+
 # mailbox_inputs(&user, new, &domain)
 # Returns HTML for additional inputs on the mailbox form. These should be
 # formatted to appear inside a table.

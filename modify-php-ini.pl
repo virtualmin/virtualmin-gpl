@@ -87,7 +87,7 @@ else {
 foreach my $d (@doms) {
 	# Check if we can manage this domain
 	&$first_print("Updating $d->{'dom'} ..");
-	if (!$d->{'web'} || $d->{'alias'}) {
+	if (!&domain_has_website($d) || $d->{'alias'}) {
 		&$second_print(".. no website enabled");
 		next;
 		}
@@ -121,8 +121,8 @@ foreach my $d (@doms) {
 
 	# Update Apache PHP directives
 	$mod_php = 0;
-	if ($apache::httpd_modules{'mod_php4'} ||
-	    $apache::httpd_modules{'mod_php5'}) {
+	if ($d->{'web'} && ($apache::httpd_modules{'mod_php4'} ||
+			    $apache::httpd_modules{'mod_php5'})) {
 		&obtain_lock_web($d);
 		local @ports;
 		push(@ports, $d->{'web_port'}) if ($d->{'web'});
