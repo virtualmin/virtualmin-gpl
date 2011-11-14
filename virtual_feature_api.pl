@@ -279,10 +279,24 @@ sub feature_get_web_php_mode
 {
 }
 
-# feature_get_web_php_mode(&domain)
+# feature_save_web_php_mode(&domain)
 # If a feature provides a website, this function must change the PHP execution
 # mode to one of mod_php, cgi or fcgid. Can call error if mode isn't valid.
 sub feature_save_web_php_mode
+{
+}
+
+# feature_get_web_php_children(&domain)
+# If a feature provides a website, this function must return the number of
+# FastCGI PHP child processes
+sub feature_get_web_php_children
+{
+}
+
+# feature_save_web_php_children(&domain, children)
+# If a feature provides a website, this function must change the number of 
+# FastCGI PHP child processes
+sub feature_save_web_php_children
 {
 }
 

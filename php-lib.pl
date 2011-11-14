@@ -1075,6 +1075,13 @@ return $sock;
 sub get_domain_php_children
 {
 local ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	return &plugin_call($p, "feature_get_web_php_children", $d);
+	}
+elsif (!$p) {
+	return "Virtual server does not have a website";
+	}
 local ($ver) = &list_available_php_versions($d, "fcgid");
 return -2 if (!$ver);
 local $childs = 0;
@@ -1094,6 +1101,14 @@ return $childs;
 sub save_domain_php_children
 {
 local ($d, $children, $nowritable) = @_;
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	return &plugin_call($p, "feature_save_web_php_children", $d,
+			    $children, $nowritable);
+	}
+elsif (!$p) {
+	return "Virtual server does not have a website";
+	}
 local $count = 0;
 &set_php_wrappers_writable($d, 1) if (!$nowritable);
 foreach my $ver (&list_available_php_versions($d, "fcgi")) {

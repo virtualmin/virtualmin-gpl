@@ -72,7 +72,7 @@
 	- all virtualmin code that checks for 'web' feature should call
 	  feature_provides_web instead (or cache)
 	- php server is crashing?
-	- setup_web_for_php needs nginx support
+	- edit_phpmode and modify-web need to work with nginx
 
  - Include dovecot control files in backups, if located in a separate dir
 	- http://wiki.dovecot.org/MailLocation/Maildir
