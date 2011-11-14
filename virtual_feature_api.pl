@@ -272,6 +272,13 @@ sub feature_provides_web
 {
 }
 
+# feature_web_supported_php_modes([&domain])
+# If a feature provides a website, this function must return the list of 
+# possible PHP execution modes
+sub feature_web_supported_php_modes
+{
+}
+
 # feature_get_web_php_mode(&domain)
 # If a feature provides a website, this function must return the PHP execution
 # mode (one of mod_php, cgi or fcgid)
@@ -342,6 +349,30 @@ sub feature_restart_web_php
 # Called to set any PHP variables needed by a script that are set in the 
 # webserver config.
 sub feature_setup_web_for_php
+{
+}
+
+# feature_get_web_suexec(&domain)
+# Returns 1 if this domain's website runs scripts as the domain owner
+sub feature_get_web_suexec
+{
+}
+
+# feature_save_web_suexec(&domain, enabled)
+# Enables or disables running of scripts as the domain owner
+sub feature_save_web_suexec
+{
+}
+
+# feature_get_web_default_website(&domain)
+# Returns 1 if this website is the default for its IP
+sub feature_get_web_default_website
+{
+}
+
+# feature_save_web_default_website(&domain)
+# Makes a website the default for it's IP
+sub feature_save_web_default_website
 {
 }
 

@@ -10539,8 +10539,8 @@ if (($d->{'spam'} && $config{'spam'} ||
 		  });
 	}
 
-if ($d->{'web'} && $config{'web'} && &can_edit_phpmode()) {
-	# PHP execution mode button
+if (&domain_has_website($d) && &can_edit_phpmode()) {
+	# Website / PHP options button
 	push(@rv, { 'page' => 'edit_phpmode.cgi',
 		    'title' => $text{'edit_phpmode'},
 		    'desc' => $text{'edit_phpmodedesc'},
@@ -14805,7 +14805,7 @@ else {
 sub domain_has_website
 {
 my ($d) = @_;
-return 'web' if ($d->{'web'});
+return 'web' if ($d->{'web'} && $config{'web'});
 foreach my $p (&list_feature_plugins()) {
 	if ($d->{$p} && &plugin_call($p, "feature_provides_web")) {
 		return $p;

@@ -644,6 +644,10 @@ foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
 sub supported_php_modes
 {
 local ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p ne 'web') {
+	return &plugin_call($p, "feature_web_supported_php_modes", $d);
+	}
 &require_apache();
 local @rv;
 if ($apache::httpd_modules{'mod_php4'} || $apache::httpd_modules{'mod_php5'}) {

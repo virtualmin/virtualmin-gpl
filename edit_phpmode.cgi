@@ -12,9 +12,13 @@ if (!$d->{'alias'}) {
 	$mode = &get_domain_php_mode($d);
 	}
 
-# Make sure an Apache virtualhost exists, or else all the rest is pointless
-($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-$virt || &error(&text('phpmode_evirt', $d->{'dom'}, $d->{'web_port'}));
+$p = &domain_has_website($d);
+if ($p eq 'web') {
+	# Make sure an Apache virtualhost exists, or else all the rest
+	# is pointless
+	($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+	$virt || &error(&text('phpmode_evirt', $d->{'dom'}, $d->{'web_port'}));
+	}
 
 &ui_print_header(&domain_in($d), $text{'phpmode_title'}, "");
 
@@ -23,13 +27,15 @@ print &ui_hidden("dom", $d->{'id'}),"\n";
 print &ui_hidden_table_start($text{'phpmode_header'}, "width=100%", 2,
 			     "phpmode", 1, [ "width=30%" ]);
 
-if (!$d->{'alias'} && $can == 2) {
+if (!$d->{'alias'} && $can == 2 &&
+    ($p eq 'web' || &plugin_defined($p, "feature_get_web_suexec"))) {
 	# Use suexec
 	print &ui_table_row(&hlink($text{'phpmode_suexec'}, "phpmode_suexec"),
 			    &ui_yesno_radio("suexec", &get_domain_suexec($d)));
 	}
 
-if (!$d->{'alias'} && $can == 2) {
+if (!$d->{'alias'} && $can == 2 &&
+    ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_mode"))) {
 	# PHP execution mode
 	print &ui_table_row(&hlink($text{'phpmode_mode'}, "phpmode"),
 			    &ui_radio("mode", $mode,
@@ -38,7 +44,8 @@ if (!$d->{'alias'} && $can == 2) {
 	}
 
 # PHP fcgi sub-processes
-if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0 && $can == 2) {
+if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0 && $can == 2 &&
+    ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_children"))) {
 	$children = &get_domain_php_children($d);
 	if ($children > 0) {
 		print &ui_table_row(&hlink($text{'phpmode_children'},
@@ -49,7 +56,9 @@ if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0 && $can == 2) {
 	}
 
 # PHP max execution time, for fcgi mode
-if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0) {
+if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0 &&
+    ($p eq 'web' ||
+     &plugin_defined($p, "feature_get_fcgid_max_execution_time"))) {
 	$max = $mode eq "fcgid" ? &get_fcgid_max_execution_time($d)
 				: &get_php_max_execution_time($d);
 	print &ui_table_row(&hlink($text{'phpmode_maxtime'}, "phpmode_maxtime"),
@@ -61,7 +70,8 @@ if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0) {
 # Ruby execution mode
 if (defined(&supported_ruby_modes)) {
 	@rubys = &supported_ruby_modes($d);
-	if (!$d->{'alias'} && @rubys && $can == 2) {
+	if (!$d->{'alias'} && @rubys && $can == 2 &&
+	    ($p eq 'web' || &plugin_defined($p, "feature_get_web_ruby_mode"))) {
 		print &ui_table_row(
 			&hlink($text{'phpmode_rubymode'}, "rubymode"),
 			&ui_radio("rubymode", &get_domain_ruby_mode($d),
@@ -73,18 +83,21 @@ if (defined(&supported_ruby_modes)) {
 
 # Write logs via program. Don't show unless enabled.
 if ((!$d->{'alias'} || $d->{'alias_mode'} != 1) && $can == 2 &&
-    &get_writelogs_status($d)) {
+    &get_writelogs_status($d) && $p eq 'web') {
 	print &ui_table_row(
 		&hlink($text{'newweb_writelogs'}, "template_writelogs"),
 		&ui_yesno_radio("writelogs", &get_writelogs_status($d)));
 	}
 
 # Match all sub-domains
-print &ui_table_row(&hlink($text{'phpmode_matchall'}, "matchall"),
+if ($p eq 'web' || &plugin_defined($p, "feature_get_web_domain_star")) {
+	print &ui_table_row(&hlink($text{'phpmode_matchall'}, "matchall"),
 		    &ui_yesno_radio("matchall", &get_domain_web_star($d)));
+	}
 
 # Default website for its IP
-if (!$d->{'alias'} || $d->{'alias_mode'} != 1) {
+if (!$d->{'alias'} || $d->{'alias_mode'} != 1 &&
+    ($p eq 'web' || &plugin_defined($p, "feature_get_web_default_website"))) {
 	($defvirt, $defd) = &get_default_website($d);
 	$defweb = $defd && $defd->{'id'} eq $d->{'id'} ? 1 : 0;
 	$defno = $defd ? &text('phpmode_defno', $defd->{'dom'}) : $text{'no'};
@@ -100,7 +113,7 @@ if (!$d->{'alias'} || $d->{'alias_mode'} != 1) {
 	}
 
 # Log file locations
-if (!$d->{'alias'} && &can_log_paths()) {
+if (!$d->{'alias'} && &can_log_paths() && $d->{'web'}) {
 	$alog = &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0);
 	if ($alog) {
 		print &ui_table_row(&hlink($text{'phpmode_alog'}, 'accesslog'),
@@ -114,7 +127,7 @@ if (!$d->{'alias'} && &can_log_paths()) {
 	}
 
 # HTML directory
-if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./) {
+if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./ && $p eq 'web') {
 	print &ui_table_row(&hlink($text{'phpmode_htmldir'}, 'htmldir'),
 		&ui_textbox("htmldir", $d->{'public_html_dir'}, 20));
 	}
