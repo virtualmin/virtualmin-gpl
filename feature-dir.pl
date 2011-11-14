@@ -528,6 +528,8 @@ local $xtemp = &transname();
 &print_tempfile(XTEMP, "./public_html/icon\n");
 &print_tempfile(XTEMP, "public_html/awstats-icon\n");
 &print_tempfile(XTEMP, "./public_html/awstats-icon\n");
+&print_tempfile(XTEMP, ".backup\n");
+&print_tempfile(XTEMP, "./.backup\n");
 &close_tempfile(XTEMP);
 
 # Check if Apache logs were links before the restore
