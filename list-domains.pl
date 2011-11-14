@@ -254,7 +254,7 @@ if ($multi) {
 				}
 			}
 		print "    Home directory: $d->{'home'}\n";
-		if ($d->{'web'}) {
+		if (&domain_has_website($d)) {
 			$wd = $d->{'alias'} ? &get_domain($d->{'alias'}) : $d;
 			print "    HTML directory: ",&public_html_dir($wd),"\n";
 			print "    CGI directory: ",&cgi_bin_dir($wd),"\n";
@@ -401,7 +401,7 @@ if ($multi) {
 			}
 
 		# Show PHP and suexec execution mode
-		if ($config{'web'} && $d->{'web'} &&
+		if (&domain_has_website($d) &&
 		    defined(&get_domain_php_mode) && $multi == 1) {
 			$p = &get_domain_php_mode($d);
 			print "    PHP execution mode: $p\n";
@@ -409,43 +409,43 @@ if ($multi) {
 			print "    SuExec for CGIs: ",
 			      ($s ? "enabled" : "disabled"),"\n";
 			}
-		if ($config{'web'} && $d->{'web'} &&
+		if (&domain_has_website($d) &&
 		    defined(&get_domain_php_children) && $multi == 1) {
 			$childs = &get_domain_php_children($d);
 			print "    PHP fCGId subprocesses: ",
 				$childs < 0 ? "Not set" :
 				$childs == 0 ? "None" : $childs,"\n";
 			}
-		if ($config{'web'} && $d->{'web'} &&
+		if (&domain_has_website($d) &&
 		    defined(&list_domain_php_directories) && $multi == 1) {
 			($dir) = &list_domain_php_directories($d);
 			if ($dir) {
 				print "    PHP version: $dir->{'version'}\n";
 				}
 			}
-		if ($config{'web'} && $d->{'web'} &&
+		if (&domain_has_website($d) &&
 		    defined(&get_domain_ruby_mode) && $multi == 1) {
 			$p = &get_domain_ruby_mode($d) || "none";
 			print "    Ruby execution mode: $p\n";
 			}
 
 		# Show webmail redirects
-		if (&has_webmail_rewrite() && $d->{'web'} && !$d->{'alias'} &&
-		    $multi == 1) {
+		if (&has_webmail_rewrite() && &domain_has_website($d) &&
+		    !$d->{'alias'} && $multi == 1) {
 			@wm = &get_webmail_redirect_directives($d);
 			print "    Webmail redirects: ",
 				(@wm ? "Yes" : "No"),"\n";
 			}
 
 		# Show star web server alias
-		if ($d->{'web'} && !$d->{'alias'} && $multi == 1) {
+		if (&domain_has_website($d) && !$d->{'alias'} && $multi == 1) {
 			$star = &get_domain_web_star($d);
 			print "    Match all web sub-domains: ",
 			      ($star ? "Yes" : "No"),"\n";
 			}
 
 		# Show default website flag
-		if ($d->{'web'} && $multi == 1 &&
+		if (&domain_has_website($d) && $multi == 1 &&
 		    (!$d->{'alias'} || $d->{'alias_mode'} != 1)) {
 			($defvirt, $defd) = &get_default_website($d);
 			print "    Default website for IP: ",

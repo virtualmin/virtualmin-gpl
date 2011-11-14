@@ -71,7 +71,6 @@ if (!$module_name) {
 	$< == 0 || die "modify-web.pl must be run as root";
 	}
 @OLDARGV = @ARGV;
-$config{'web'} || &usage("Web serving is not enabled for Virtualmin");
 &set_all_text_print();
 
 # Parse command-line args
@@ -233,13 +232,14 @@ if ($htmldir) {
 
 # Get domains to update
 if ($all_doms) {
-	@doms = grep { $_->{'web'} } &list_domains();
+	@doms = grep { &domain_has_website($_) } &list_domains();
 	}
 else {
 	foreach $n (@dnames) {
 		$d = &get_domain_by("dom", $n);
 		$d || &usage("Domain $n does not exist");
-		$d->{'web'} || &usage("Virtual server $n does not have a web site enabled");
+		&domain_has_website($d) ||
+		  &usage("Virtual server $n does not have a web site enabled");
 		push(@doms, $d);
 		}
 	}
@@ -385,7 +385,7 @@ foreach $d (@doms) {
 		&$second_print($text{'setup_done'});
 		}
 
-	if (defined($webmail) && $d->{'web'} && !$d->{'alias'}) {
+	if (defined($webmail) && &domain_has_website($d) && !$d->{'alias'}) {
 		# Enable or disable webmail redirects
 		local @oldwm = &get_webmail_redirect_directives($d);
 		if ($webmail && !@oldwm) {
@@ -407,7 +407,7 @@ foreach $d (@doms) {
 			}
 		}
 
-	if (defined($matchall) && $d->{'web'}) {
+	if (defined($matchall) && &domain_has_website($d)) {
 		# Enable or disable *.domain.com serveralias
 		local $oldmatchall = &get_domain_web_star($d);
 		if ($matchall && !$oldmatchall) {

@@ -1099,11 +1099,20 @@ return 1;
 # Given a domain name, returns the path to its log file
 sub get_apache_log
 {
+local ($dname, $port, $errorlog) = @_;
+local $d = &get_domain_by("dom", $dname);
+if ($d) {
+	local $p = &domain_has_website($d);
+	if ($p ne 'web') {
+		return &plugin_call($p, "feature_get_web_log",
+				    $d, $port, $errorlog);
+		}
+	}
 &require_apache();
-local ($virt, $vconf) = &get_apache_virtual($_[0], $_[1]);
+local ($virt, $vconf) = &get_apache_virtual($dname, $port);
 if ($virt) {
 	local $log;
-	if ($_[2]) {
+	if ($errorlog) {
 		# Looking for error log
 		$log = &apache::find_directive("ErrorLog", $vconf);
 		}
@@ -3105,6 +3114,13 @@ if ($conf) {
 sub get_domain_web_star
 {
 local ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	return &plugin_call($p, "feature_get_web_domain_star", $d);
+	}
+elsif (!$p) {
+	return "Virtual server does not have a website";
+	}
 &require_apache();
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 local @sa = &apache::find_directive("ServerAlias", $vconf);
@@ -3121,6 +3137,13 @@ return 0;
 sub save_domain_web_star
 {
 local ($d, $star) = @_;
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	return &plugin_call($p, "feature_save_web_domain_star", $d, $star);
+	}
+elsif (!$p) {
+	return "Virtual server does not have a website";
+	}
 &require_apache();
 my $conf = &apache::get_config();
 my @ports = ( $d->{'web_port'},
