@@ -11,7 +11,7 @@
 	x fudu
 	x lentor
 	x xencentos
-	- xengpl
+	x xengpl
 
  x Generate british english with :
 	cd /usr/local/webadmin

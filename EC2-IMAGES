@@ -1,0 +1,37 @@
+ - Install CentOS / Debian rightscale image
+
+ - Fix /etc/motd
+
+ - Update EC2 tools
+   wget http://s3.amazonaws.com/ec2-downloads/ec2-ami-tools.noarch.rpm && rpm -Uvh ec2-ami-tools.noarch.rpm
+
+ - Install Virtualmin GPL
+
+ - Update all packages / versions to 5.6
+
+ - Add /etc/webmin/start to /etc/rc.local , if needed
+
+ - Make sure quotas come back after reboot
+
+ - Disable rightscale bootup actions?
+
+ - Enable external IP detection via dns_ip=* in /etc/webmin/virtual-server/config
+
+ - Disable resolv.conf check via dns_check=0 in /etc/webmin/virtual-server/config
+
+ - Set root password to *
+
+ - Config check
+
+ - Updated detected OS in Webmin Configuration
+
+ - Hide new features
+
+ - Manually enable pre-loading
+
+ - Test with new system
+
+ - Copy to other regions
+	- Create bucket in new region
+	- Copy all files to new bucket
+	- Set bucket permissions to za-team listable

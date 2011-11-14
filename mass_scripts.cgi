@@ -152,7 +152,7 @@ else {
 			&show_domain_name($sinfo->{'dom'}),
 			$sinfo->{'version'},
 			$sinfo->{'url'} ?
-			    "<a href='$sinfo->{'url'}' target=_new>$path</a>" :
+			    "<a href='$sinfo->{'url'}' target=_blank/g>$path</a>" :
 			    $path,
 			$utype,
 			]);

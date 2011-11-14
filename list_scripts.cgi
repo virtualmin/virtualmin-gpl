@@ -65,7 +65,7 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 		$script->{'vdesc'}->{$sinfo->{'version'}} ||
 		  $sinfo->{'version'},
 		$sinfo->{'url'} && !$sinfo->{'deleted'} ? 
-		  "<a href='$sinfo->{'url'}' target=_new>$path</a>" :
+		  "<a href='$sinfo->{'url'}' target=_blank/g>$path</a>" :
 		  $path,
 		$dbdesc,
 		$status,
@@ -163,7 +163,7 @@ foreach $script (sort { $a->{'sortcategory'} cmp
 	    { 'type' => 'radio', 'name' => 'script',
 	      'value' => $script->{'name'},
 	      'checked' => $in{'search'} && @scripts == 1 },
-	    $script->{'site'} ? "<a href='$script->{'site'}' target=_new>".
+	    $script->{'site'} ? "<a href='$script->{'site'}' target=_blank/g>".
 				"$script->{'desc'}</a>" : $script->{'desc'},
 	    $vsel." ".
 	    "<input type=image name=fast ".

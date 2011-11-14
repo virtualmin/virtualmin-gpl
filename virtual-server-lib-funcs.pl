@@ -13856,7 +13856,7 @@ if (!$logo) {
 	}
 if ($logo && $logo ne "none") {
 	local $html;
-	$html .= "<a href='$link' target=_new>" if ($link);
+	$html .= "<a href='$link' target=_blank/g>" if ($link);
 	$html .= "<img src='$image' border=0>";
 	$html .= "</a>" if ($link);
 	return wantarray ? ( $html, $logo, $link ) : $html;

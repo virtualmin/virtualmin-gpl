@@ -32,7 +32,7 @@ print &ui_hidden_table_start($text{'edit_header'}, "width=100%", 2,
 # Domain name, with link
 $dname = &show_domain_name($d);
 print &ui_table_row($text{'edit_domain'},
-	$d->{'web'} ? "<tt><a target=_new href=http://$d->{'dom'}/>$dname</a></tt>"
+	$d->{'web'} ? "<tt><a target=_blank/g href=http://$d->{'dom'}/>$dname</a></tt>"
 		    : "<tt>$dname</tt>");
 
 if ($dname ne $d->{'dom'}) {

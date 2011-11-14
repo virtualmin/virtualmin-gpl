@@ -283,7 +283,7 @@ else {
 local $url = &script_path_url($d, $opts);
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
-return (1, "RoundCube installation complete. It can be accessed at <a target=_new href='$url'>$url</a>.", "Under $rp using $dbphptype database $dbname", $url);
+return (1, "RoundCube installation complete. It can be accessed at <a target=_blank/g href='$url'>$url</a>.", "Under $rp using $dbphptype database $dbname", $url);
 }
 
 # script_roundcube_uninstall(&domain, version, &opts)

@@ -87,7 +87,7 @@ if ($ok) {
 	# Show original website
 	if ($script->{'site'}) {
 		print &ui_table_row($text{'scripts_isite'},
-			"<a href='$script->{'site'}' target=_new>".
+			"<a href='$script->{'site'}' target=_blank/g>".
 			"$script->{'site'}</a>");
 		}
 

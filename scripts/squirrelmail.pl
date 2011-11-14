@@ -336,7 +336,7 @@ if (!$upgrade) {
 local $url = &script_path_url($d, $opts);
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
-return (1, "SquirrelMail installation complete. It can be accessed at <a target=_new href='$url'>$url</a>.", $dbname ? "Under $rp using $dbphptype database $dbname" : "Under $rp", $url);
+return (1, "SquirrelMail installation complete. It can be accessed at <a target=_blank/g href='$url'>$url</a>.", $dbname ? "Under $rp using $dbphptype database $dbname" : "Under $rp", $url);
 }
 
 # script_squirrelmail_uninstall(&domain, version, &opts)
