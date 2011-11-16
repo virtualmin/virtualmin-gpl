@@ -158,7 +158,7 @@ if (&can_default_website($d) && $in{'defweb'}) {
 # Change log file locations
 if (!$d->{'alias'} && &can_log_paths()) {
 	# Access log
-	$oldalog = &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0);
+	$oldalog = &get_website_log($d, 0);
 	if ($oldalog && defined($in{'alog'}) && $oldalog ne $in{'alog'}) {
 		&$first_print($text{'phpmode_setalog'});
 		$err = &change_access_log($d, $in{'alog'});
@@ -168,7 +168,7 @@ if (!$d->{'alias'} && &can_log_paths()) {
 		}
 
 	# Error log
-	$oldelog = &get_apache_log($d->{'dom'}, $d->{'web_port'}, 1);
+	$oldelog = &get_website_log($d, 1);
 	if ($oldelog && defined($in{'elog'}) && $oldelog ne $in{'elog'}) {
 		&$first_print($text{'phpmode_setelog'});
 		$err = &change_error_log($d, $in{'elog'});

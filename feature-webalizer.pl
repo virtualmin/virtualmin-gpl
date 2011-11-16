@@ -31,7 +31,7 @@ if (!-d $stats) {
 
 &obtain_lock_webalizer($_[0]);
 &obtain_lock_cron($_[0]);
-local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
+local $alog = &get_website_log($_[0]);
 if (!$alog) {
 	&release_lock_webalizer($_[0]);
 	&$second_print($text{'setup_nolog'});
@@ -166,8 +166,8 @@ sub modify_webalizer
 &obtain_lock_cron($_[0]);
 
 # Work out the old and new Webalizer log files
-local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
-local $oldalog = &get_old_apache_log($alog, $_[0], $_[1]);
+local $alog = &get_website_log($_[0]);
+local $oldalog = &get_old_website_log($alog, $_[0], $_[1]);
 
 if ($alog ne $oldalog) {
 	# Log file has been renamed - fix up Webmin Webalizer config files
@@ -291,7 +291,7 @@ sub delete_webalizer
 &obtain_lock_cron($_[0]);
 &require_webalizer();
 local $stats = &webalizer_stats_dir($_[0]);
-local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
+local $alog = &get_website_log($_[0]);
 if (!$alog && -r "$_[0]->{'home'}/logs/access_log") {
 	# Website may have been already deleted, so we don't know the log
 	# file path! Try the template default.
@@ -342,8 +342,8 @@ sub clone_webalizer
 {
 local ($d, $oldd) = @_;
 &$first_print($text{'clone_webalizer'});
-local $alog = &get_apache_log($d->{'dom'}, $d->{'web_port'});
-local $oalog = &get_apache_log($oldd->{'dom'}, $oldd->{'web_port'});
+local $alog = &get_website_log($d);
+local $oalog = &get_website_log($oldd);
 if (!$alog) {
 	&$second_print($text{'clone_webalizernewlog'});
 	return 0;

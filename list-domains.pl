@@ -258,10 +258,8 @@ if ($multi) {
 			$wd = $d->{'alias'} ? &get_domain($d->{'alias'}) : $d;
 			print "    HTML directory: ",&public_html_dir($wd),"\n";
 			print "    CGI directory: ",&cgi_bin_dir($wd),"\n";
-			print "    Access log: ",&get_apache_log($wd->{'dom'},
-						   $wd->{'web_port'}, 0),"\n";
-			print "    Error log: ",&get_apache_log($wd->{'dom'},
-						   $wd->{'web_port'}, 1),"\n";
+			print "    Access log: ",&get_website_log($wd, 0),"\n";
+			print "    Error log: ",&get_website_log($wd, 1),"\n";
 			}
 		print "    Contact email: $d->{'emailto'}\n";
 		print "    Created on: ",&make_date($d->{'created'}),"\n";

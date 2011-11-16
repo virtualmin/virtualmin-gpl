@@ -617,10 +617,8 @@ else {
 	local $new_aloglink = readlink($alog);
 	local $new_eloglink = readlink($elog);
 	if ($_[0]->{'web'} && !$_[0]->{'subdom'} && !$_[0]->{'alias'}) {
-		local $new_alog = &get_apache_log(
-			$_[0]->{'dom'}, $_[0]->{'web_port'}, 0);
-		local $new_elog = &get_apache_log(
-			$_[0]->{'dom'}, $_[0]->{'web_port'}, 1);
+		local $new_alog = &get_website_log($_[0], 0);
+		local $new_elog = &get_website_log($_[0], 1);
 		if ($aloglink && !$new_aloglink) {
 			&system_logged("mv ".quotemeta($alog)." ".
 					     quotemeta($new_alog));

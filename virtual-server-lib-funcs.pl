@@ -6769,39 +6769,25 @@ if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$dom->{'alias'}) {
 
 # Set up all the selected features (except Webmin login)
 my $f;
-local %vital = map { $_, 1 } @vital_features;
 local @dof = grep { $_ ne "webmin" } @features;
+local $p = &domain_has_website($dom);
 foreach $f (@dof) {
-	if ($dom->{$f}) {
-		local $sfunc = "setup_$f";
-		if ($vital{$f}) {
-			# Failure of this feature should halt the entire setup
-			if (!&$sfunc($dom)) {
-				return &text('setup_evital',
-					     $text{'feature_'.$f});
-				}
-			}
-		else {
-			# Failure can be ignored
-			if (!&try_function($f, $sfunc, $dom)) {
-				$dom->{$f} = 0;
-				}
-			}
+	my $err;
+	if ($f eq 'web' && $p && $p ne 'web') {
+		# Web feature is provided by a plugin .. call it now
+		$err = &call_feature_setup($p, $dom);
 		}
+	elsif ($dom->{$f}) {
+		$err = &call_feature_setup($f, $dom);
+		}
+	return $err if ($err);
 	}
 
 # Set up all the selected plugins
 foreach $f (&list_feature_plugins()) {
-	if ($dom->{$f}) {
-		# Failure can be ignored
-		local $main::error_must_die = 1;
-		eval { &plugin_call($f, "feature_setup", $dom) };
-		if ($@) {
-			local $err = $@;
-			&$second_print(&text('setup_failure',
-				&plugin_call($f, "feature_name"), $err));
-			$dom->{$f} = 0;
-			}
+	if ($dom->{$f} && $f ne $p) {
+		my $err = &call_feature_setup($f, $dom);
+		return $err if ($err);
 		}
 	}
 
@@ -7076,6 +7062,45 @@ local $merr = &made_changes();
 &$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($dom);
 
+return undef;
+}
+
+# call_feature_setup(feature, &domain, [args])
+# Calls the setup function for some feature or plugin. May print stuff.
+# Returns an error message on a vital feature failure, sets flag to 0 for
+# a non-vital failure.
+sub call_feature_setup
+{
+local ($f, $dom, @args) = @_;
+local %vital = map { $_, 1 } @vital_features;
+if (&indexof($f, @features) >= 0) {
+	# Core feature
+	local $sfunc = "setup_$f";
+	if ($vital{$f}) {
+		# Failure of this feature should halt the entire setup
+		if (!&$sfunc($dom, @args)) {
+			return &text('setup_evital',
+				     $text{'feature_'.$f});
+			}
+		}
+	else {
+		# Failure can be ignored
+		if (!&try_function($f, $sfunc, $dom)) {
+			$dom->{$f} = 0;
+			}
+		}
+	}
+else {
+	# Plugin feature
+	local $main::error_must_die = 1;
+	eval { &plugin_call($f, "feature_setup", $dom, @args) };
+	if ($@) {
+		local $err = $@;
+		&$second_print(&text('setup_failure',
+			&plugin_call($f, "feature_name"), $err));
+		$dom->{$f} = 0;
+		}
+	}
 return undef;
 }
 
@@ -14820,6 +14845,36 @@ foreach my $p (&list_feature_plugins()) {
 		}
 	}
 return undef;
+}
+
+# get_website_log(&domain, [error-log])
+# Returns the access or error log for a domain's website. May come from a plugin
+sub get_website_log
+{
+local ($d, $errorlog) = @_;
+local $p = &domain_has_website($d);
+if ($p eq 'web') {
+	return &get_apache_log($d->{'dom'}, $d->{'web_port'}, $errorlog);
+	}
+elsif ($p) {
+	return &plugin_call($p, "feature_get_web_log", $d, $errorlog);
+	}
+return undef;
+}
+
+# get_old_website_log(log, &domain, &old-domain)
+# Returns the log path that would have been used in the old domain
+sub get_old_website_log
+{
+local ($alog, $d, $oldd) = @_;
+if ($d->{'home'} ne $oldd->{'home'}) {
+        $alog =~ s/\Q$d->{'home'}\E/$oldd->{'home'}/;
+        }
+if ($d->{'dom'} ne $oldd->{'dom'} &&
+    !&is_under_directory($d->{'home'}, $alog)) {
+        $alog =~ s/\Q$d->{'dom'}\E/$oldd->{'dom'}/;
+        }
+return $alog;
 }
 
 # load_plugin_libraries([plugin, ...])

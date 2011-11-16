@@ -114,12 +114,12 @@ if (!$d->{'alias'} || $d->{'alias_mode'} != 1 &&
 
 # Log file locations
 if (!$d->{'alias'} && &can_log_paths() && $d->{'web'}) {
-	$alog = &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0);
+	$alog = &get_website_log($d, 0);
 	if ($alog) {
 		print &ui_table_row(&hlink($text{'phpmode_alog'}, 'accesslog'),
 			&ui_textbox("alog", $alog, 60));
 		}
-	$elog = &get_apache_log($d->{'dom'}, $d->{'web_port'}, 1);
+	$elog = &get_website_log($d, 1);
 	if ($elog) {
 		print &ui_table_row(&hlink($text{'phpmode_elog'}, 'errorlog'),
 			&ui_textbox("elog", $elog, 60));

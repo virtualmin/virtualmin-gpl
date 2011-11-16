@@ -432,8 +432,7 @@ if ($features{'webalizer'} && $avail{'webalizer'}) {
 	local @logs;
 	local $d;
 	foreach $d (grep { $_->{'webalizer'} } @doms) {
-		push(@logs, &resolve_links(&get_apache_log(
-				$d->{'dom'}, $d->{'web_port'})));
+		push(@logs, &resolve_links(&get_website_log($d)));
 		}
 	@logs = &unique(@logs);
 	local %acl = ( 'noconfig' => 1,
@@ -733,10 +732,8 @@ if ($extramods{'syslog'} && $_[0]->{'webmin'}) {
 	foreach my $sd (@doms) {
 		# Add Apache logs, for domains with websites and separate logs
 		if ($sd->{'web'} && !$sd->{'alias_mode'}) {
-			local $alog = &get_apache_log($sd->{'dom'},
-						      $sd->{'web_port'}, 0);
-			local $elog = &get_apache_log($sd->{'dom'},
-						      $sd->{'web_port'}, 1);
+			local $alog = &get_website_log($sd, 0);
+			local $elog = &get_website_log($sd, 1);
 			push(@extras, $alog." ".&text('webmin_alog',
 						      $sd->{'dom'}))
 				if ($alog && !$done{$alog}++);

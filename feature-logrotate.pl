@@ -26,8 +26,8 @@ sub setup_logrotate
 local $tmpl = &get_template($_[0]->{'template'});
 
 # Work out the log files we are rotating
-local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}, 0);
-local $elog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}, 1);
+local $alog = &get_website_log($_[0], 0);
+local $elog = &get_website_log($_[0], 1);
 local @logs = ( $alog, $elog );
 if ($_[0]->{'ftp'}) {
 	push(@logs, &get_proftpd_log($_[0]->{'ip'}));
@@ -130,10 +130,10 @@ else {
 sub modify_logrotate
 {
 # Work out old and new Apache logs
-local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
-local $oldalog = &get_old_apache_log($alog, $_[0], $_[1]);
-local $elog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}, 1);
-local $oldelog = &get_old_apache_log($elog, $_[0], $_[1]);
+local $alog = &get_website_log($_[0], 0);
+local $oldalog = &get_old_website_log($alog, $_[0], $_[1]);
+local $elog = &get_website_log($_[0], 1);
+local $oldelog = &get_old_website_log($elog, $_[0], $_[1]);
 
 # Stop here if nothing to do
 return if ($alog eq $oldalog && $elog eq $oldelog &&
@@ -251,7 +251,7 @@ return 1;
 sub validate_logrotate
 {
 local ($d) = @_;
-local $log = &get_apache_log($d->{'dom'}, $d->{'web_port'});
+local $log = &get_website_log($d);
 return &text('validate_elogfile', "<tt>$d->{'dom'}</tt>") if (!$log);
 local $lconf = &get_logrotate_section($d);
 return &text('validate_elogrotate', "<tt>$logfile</tt>") if (!$lconf);
@@ -264,8 +264,7 @@ sub get_logrotate_section
 {
 &require_logrotate();
 &require_apache();
-local $alog = ref($_[0]) ? &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'})
-			 : $_[0];
+local $alog = ref($_[0]) ? &get_website_log($_[0]) : $_[0];
 if (!$alog && ref($_[0])) {
 	# Website may have been already deleted, so we don't know the log
 	# file path! Try the template default.

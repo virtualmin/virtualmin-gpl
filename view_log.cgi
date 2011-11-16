@@ -10,7 +10,7 @@ $ENV{'PATH_INFO'} =~ /^\/([^\/]+)(\/.*)$/ ||
 $did = $1;
 $file = $2;
 $d = &get_domain($did);
-$log = &get_apache_log($d->{'dom'}, $d->{'web_port'});
+$log = &get_website_log($d);
 $file =~ /\.\./ || $file =~ /\<|\>|\||\0/ &&
 	&error($webalizer::text{'view_efile'});
 

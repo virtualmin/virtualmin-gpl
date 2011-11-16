@@ -37,7 +37,7 @@ if (@ARGV) {
 		      "webalizer", "webalizer.pl");
 foreach $d (&list_domains()) {
 	next if (!$d->{'webalizer'});
-	$alog = &get_apache_log($d->{'dom'}, $d->{'web_port'});
+	$alog = &get_website_log($d);
 	next if (!$alog);
 	print "Running Webalizer for $d->{'dom'} ($alog)\n";
 	system("$webalizer::cron_cmd ".quotemeta($alog));

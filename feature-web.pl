@@ -1102,6 +1102,7 @@ sub get_apache_log
 local ($dname, $port, $errorlog) = @_;
 local $d = &get_domain_by("dom", $dname);
 if ($d) {
+	# XXX remove this case
 	local $p = &domain_has_website($d);
 	if ($p ne 'web') {
 		return &plugin_call($p, "feature_get_web_log",
@@ -1154,21 +1155,6 @@ elsif ($log =~ /^\|/) {
 	$log = undef;
 	}
 return $log;
-}
-
-# get_old_apache_log(newlog, &domain, &old-domain)
-# Returns the Apache log path that would have been used in the old domain
-sub get_old_apache_log
-{
-local ($alog, $d, $oldd) = @_;
-if ($d->{'home'} ne $oldd->{'home'}) {
-	$alog =~ s/\Q$d->{'home'}\E/$oldd->{'home'}/;
-	}
-if ($d->{'dom'} ne $oldd->{'dom'} && 
-    !&is_under_directory($d->{'home'}, $alog)) {
-	$alog =~ s/\Q$d->{'dom'}\E/$oldd->{'dom'}/;
-	}
-return $alog;
 }
 
 # get_apache_template_log(&domain, [errorlog])
@@ -3320,7 +3306,9 @@ if (&is_under_directory($d->{'home'}, $l)) {
 	&set_permissions_as_domain_user($d, 0660, $l);
 	}
 else {
-	&set_ownership_permissions($d->{'uid'}, $auser, 0660, $l);
+	my @uinfo = getpwnam($auser);
+	my $agroup = getgrgid($uinfo[3]) || $uinfo[3];
+	&set_ownership_permissions($d->{'uid'}, $agroup, 0660, $l);
 	}
 }
 
