@@ -1,14 +1,18 @@
 # Functions for managing logrotate
 
-sub init_logrotate
-{
-$feature_depends{'logrotate'} = [ 'web' ];
-}
-
 sub require_logrotate
 {
 return if ($require_logrotate++);
 &foreign_require("logrotate", "logrotate-lib.pl");
+}
+
+sub check_depends_logrotate
+{
+local ($d) = @_;
+if (!&domain_has_website($d)) {
+	return $text{'setup_edeplogrotate'};
+	}
+return undef;
 }
 
 # setup_logrotate(&domain)
@@ -55,16 +59,26 @@ if (@logs) {
 			 'name' => \@logs };
 	if ($tmpl->{'logrotate'} eq 'none') {
 		# Use automatic configurtation
-		local $apachectl = $apache::config{'apachectl_path'} ||
-				   &has_command("apachectl") ||
-				   &has_command("apache2ctl") ||
-				   "apachectl";
-		local $apply_cmd = $apache::config{'apply_cmd'};
-		$apply_cmd = undef if ($apply_cmd eq 'restart');
-		local $script = $apache::config{'graceful_cmd'} ||
-				$apply_cmd ||
-				"$apachectl graceful";
-		$script .= " ; sleep 5";
+		local $p = &domain_has_website($_[0]);
+		local $script;
+		if ($p eq 'web') {
+			# Get restart command from Apache
+			local $apachectl = $apache::config{'apachectl_path'} ||
+					   &has_command("apachectl") ||
+					   &has_command("apache2ctl") ||
+					   "apachectl";
+			local $apply_cmd = $apache::config{'apply_cmd'};
+			$apply_cmd = undef if ($apply_cmd eq 'restart');
+			$script = $apache::config{'graceful_cmd'} ||
+				  $apply_cmd ||
+				  "$apachectl graceful";
+			$script .= " ; sleep 5";
+			}
+		else {
+			# Ask plugin
+			$script = &plugin_call($p,
+				"feature_restart_web_command", $_[0]);
+			}
 		$lconf->{'members'} = [
 				{ 'name' => 'rotate',
 				  'value' => $config{'logrotate_num'} || 5 },

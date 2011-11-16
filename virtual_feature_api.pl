@@ -345,6 +345,13 @@ sub feature_restart_web_php
 {
 }
 
+# feature_restart_web_command([&domain])
+# Returns a command to restart the webserver, typically used after log file
+# rotation
+sub feature_restart_web_command
+{
+}
+
 # feature_setup_web_for_php(&domain, &script, php-version)
 # Called to set any PHP variables needed by a script that are set in the 
 # webserver config.
