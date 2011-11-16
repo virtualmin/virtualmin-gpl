@@ -83,6 +83,7 @@
 	- set_public_html_dir
 	- logrotate integration
 	- webalizer
+		- needs to be run after website when creating new domain
 	- awstats
 
  - Include dovecot control files in backups, if located in a separate dir

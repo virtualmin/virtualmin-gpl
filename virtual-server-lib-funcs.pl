@@ -12196,9 +12196,17 @@ if ($config{'web'}) {
 		}
 	}
 
+# Check for any website plugin
+local $has_website = $config{'web'} ? 'web' : undef;
+if (!$has_website) {
+	foreach my $p (@plugins) {
+		$has_website = $p if (&plugin_call($p, "feature_provides_web"));
+		}
+	}
+
 if ($config{'webalizer'}) {
 	# Make sure Webalizer is installed, and that global directives are OK
-	$config{'web'} || return &text('check_edepwebalizer', $clink);
+	$has_website || return &text('check_edepwebalizer', $clink);
 	&foreign_installed("webalizer", 1) == 2 ||
 		return &text('index_ewebalizer', "/webalizer/", $clink);
 	&foreign_require("webalizer", "webalizer-lib.pl");

@@ -1,11 +1,18 @@
 
-$feature_depends{'webalizer'} = [ 'web' ];
-
 sub require_webalizer
 {
 return if ($require_webalizer++);
 &foreign_require("webalizer", "webalizer-lib.pl");
 %wconfig = &foreign_config("webalizer");
+}
+
+sub check_depends_webalizer
+{
+local ($d) = @_;
+if (!&domain_has_website($d)) {
+	return $text{'setup_edepwebalizer'};
+	}
+return undef;
 }
 
 # setup_webalizer(&domain)
@@ -108,6 +115,15 @@ else {
 	&flush_file_lines();
 	}
 
+# If webserver for domain isn't apache, add log to Webalizer module's log list
+local $p = &domain_has_website($d);
+if ($p ne 'web') {
+	local @custom = &webalizer::read_custom_logs();
+	push(@custom, { 'file' => $alog,
+			'type' => 'combined' });
+	&webalizer::write_custom_logs(@custom);
+	}
+
 local $job = &find_virtualmin_cron_job("$webalizer::cron_cmd $alog");
 if (!$job) {
 	# Create a Cron job to process the log
@@ -189,6 +205,16 @@ if ($alog ne $oldalog) {
 		$job->{'command'} = "$webalizer::cron_cmd $alog";
 		&cron::change_cron_job($job);
 		}
+
+	# Rename in custom logs list
+	local @custom = &webalizer::read_custom_logs();
+	foreach my $c (@custom) {
+		if ($c->{'file'} eq $oldalog) {
+			$c->{'file'} = $alog;
+			}
+		}
+	&webalizer::write_custom_logs(@custom);
+
 	&$second_print($text{'setup_done'});
 	}
 
@@ -301,6 +327,11 @@ local @dirs = &htaccess_htpasswd::list_directories();
 @dirs = grep { $_->[0] ne $stats } @dirs;
 &htaccess_htpasswd::save_directories(\@dirs);
 &unlock_file($htaccess_htpasswd::directories_file);
+
+# Remove from custom logs list
+local @custom = &webalizer::read_custom_logs();
+@custom = grep { $_->{'file'} ne $alog } @custom;
+&webalizer::write_custom_logs(@custom);
 
 &$second_print($text{'setup_done'});
 }
