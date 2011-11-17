@@ -272,6 +272,20 @@ sub feature_provides_web
 {
 }
 
+# feature_web_supports_suexec([&domain])
+# If a feature provides a website, this function must return 1 if scripts can
+# be run as the domain owner, 0 if not, or -1 if they always are.
+sub feature_web_supports_suexec
+{
+}
+
+# feature_web_supports_cgi([&domain])
+# If a feature provides a website, this function must return 1 if CGI scripts
+# are supported, 0 if not
+sub feature_web_supports_cgi
+{
+}
+
 # feature_web_supported_php_modes([&domain])
 # If a feature provides a website, this function must return the list of 
 # possible PHP execution modes

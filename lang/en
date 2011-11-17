@@ -3504,6 +3504,9 @@ scripts_geminstall2=Installing Ruby Gem $1 version $2 ..
 scripts_gemfailed=.. Gem install failed : $1
 scripts_gemlink=Linking Gem command $1 to new version $2 ..
 scripts_deleted=Manually deleted
+scripts_inophp=Webserver support for PHP is needed
+scripts_inocgi=Webserver support for CGI scripts is needed
+scripts_inoapache=Only the Apache webserver is supported
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:

@@ -72,7 +72,6 @@
 	- all virtualmin code that checks for 'web' feature should call
 	  feature_provides_web instead (or cache)
 	- edit_phpmode and modify-web need to work with nginx
-	- some scripts need CGI support
 	- aliases / redirects editing
 	- proxy editing
 	- proxy pass / frame forwarding
@@ -81,6 +80,8 @@
 	- default website for IP address
 	- change_access_log / change_error_log
 	- set_public_html_dir
+	- bandwidth
+	- ruby installers
 
  - Include dovecot control files in backups, if located in a separate dir
 	- http://wiki.dovecot.org/MailLocation/Maildir

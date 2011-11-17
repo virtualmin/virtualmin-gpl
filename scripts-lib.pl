@@ -2362,9 +2362,13 @@ sub check_script_depends
 {
 local ($script, $d, $ver, $sinfo) = @_;
 local @rv;
+
+# Call script's depends function
 if (defined(&{$script->{'depends_func'}})) {
 	push(@rv, grep { $_ } &{$script->{'depends_func'}}($d, $ver, $sinfo));
 	}
+
+# Check for DB type
 if (defined(&{$script->{'dbs_func'}})) {
 	local @dbs = &{$script->{'dbs_func'}}($d, $ver);
 	if (!&has_domain_databases($d, \@dbs)) {
@@ -2376,8 +2380,27 @@ if (defined(&{$script->{'dbs_func'}})) {
 		push(@rv, &text('scripts_idbneed', $dbneed));
 		}
 	}
+
+# Check for required commands
 push(@rv, map { &text('scripts_icommand', $_) }
       &check_script_required_commands($d, $script, $ver, $sinfo->{'opts'}));
+
+# Check for webserver CGI or PHP support
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	local $cancgi = &plugin_call($p, "feature_web_supports_cgi", $d);
+	local @canphp = &plugin_call($p, "feature_web_supported_php_modes", $d);
+	if (&indexof("php", @{$script->{'uses'}}) >= 0 && !@canphp) {
+		return $text{'scripts_inophp'};
+		}
+	if (&indexof("cgi", @{$script->{'uses'}}) >= 0 && !$cancgi) {
+		return $text{'scripts_inocgi'};
+		}
+	if (&indexof("apache", @{$script->{'uses'}}) >= 0) {
+		return $text{'scripts_inoapache'};
+		}
+	}
+
 return wantarray ? @rv : join(", ", @rv);
 }
 

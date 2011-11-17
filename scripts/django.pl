@@ -7,7 +7,7 @@ return "Django";
 
 sub script_django_uses
 {
-return ( "python" );
+return ( "python", "apache" );
 }
 
 sub script_django_longdesc
