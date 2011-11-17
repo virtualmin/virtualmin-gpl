@@ -609,6 +609,7 @@ print "                        [--without-feature feature]\n";
 print "                        [--alias | --no-alias | --subserver |\n";
 print "                         --toplevel | --subdomain]\n";
 print "                        [--plan ID|name]\n";
+print "                        [--template ID|name]\n";
 if ($virtualmin_pro) {
 	print "                        [--reseller name | --no-reseller |\n";
 	print "                         --any-reseller]\n";

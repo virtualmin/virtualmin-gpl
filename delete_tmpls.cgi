@@ -37,7 +37,8 @@ else {
 		[ map { [ "d", $_ ] } @d ],
 		[ [ "confirm", $text{'tdelete_confirm'} ] ],
 		undef,
-		@users ? &text('tdelete_users', scalar(@users))
+		@users ? &text('tdelete_users',
+			   join(" ", map { &show_domain_name($_) } @users)),
 		       : '');
 
 	&ui_print_footer("edit_newtmpl.cgi", $text{'newtmpl_return'},
