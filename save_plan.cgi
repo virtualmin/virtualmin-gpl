@@ -144,7 +144,7 @@ else {
 			&set_limits_from_plan($d, $plan);
 			&set_featurelimits_from_plan($d, $plan);
 			&set_capabilities_from_plan($d, $plan);
-			foreach $f (&domain_features($d), &list_feature_plugins()) {
+			foreach $f (&list_ordered_features($d)) {
 				&call_feature_func($f, $d, $oldd);
 				}
 			&save_domain($d);

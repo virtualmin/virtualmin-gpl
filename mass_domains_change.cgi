@@ -203,7 +203,7 @@ foreach $d (@doms) {
 		foreach $f (&list_feature_plugins()) {
 			$d->{$f} = $newdom->{$f};
 			}
-		foreach $f (&domain_features($d), &list_feature_plugins()) {
+		foreach $f (&list_ordered_features($d)) {
 			&call_feature_func($f, $d, $oldd);
 			}
 		}

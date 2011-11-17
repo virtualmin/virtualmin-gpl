@@ -73,15 +73,12 @@ else {
 foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 		   ($a->{'alias'} ? 2 : $a->{'parent'} ? 1 : 0) } @doms) {
 	&$first_print("Updating server $d->{'dom'} ..");
-	@dom_features = $d->{'alias'} ? @alias_features :
-			$d->{'parent'} ? ( grep { $_ ne "webmin" } @features ) :
-					 @features;
 
 	# Check for various clashes
 	%newdom = %$d;
 	$oldd = { %$d };
 	my $f;
-	foreach $f (@dom_features, &list_feature_plugins()) {
+	foreach $f (reverse(&list_ordered_features(\%newdom))) {
 		if ($feature{$f} || $plugin{$f}) {
 			$newdom{$f} = 0;
 			if (!$d->{$f}) {
@@ -111,12 +108,12 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 
 	# Do it!
 	&$indent_print();
-	foreach $f (@dom_features, &list_feature_plugins()) {
+	foreach $f (reverse(&list_ordered_features($oldd))) {
 		if ($feature{$f} || $plugin{$f}) {
 			$d->{$f} = 0;
 			}
 		}
-	foreach $f (@dom_features, &list_feature_plugins()) {
+	foreach $f (reverse(&list_ordered_features($oldd))) {
 		&call_feature_func($f, $d, $oldd);
 		}
 

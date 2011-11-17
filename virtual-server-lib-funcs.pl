@@ -7231,35 +7231,30 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 	# failures are ignored!
 	my $f;
 	$dd->{'deleting'} = 1;		# so that features know about delete
+	local $p = &domain_has_website($dd);
 	if (!$only) {
 		# Delete all plugins, with error handling
 		foreach $f (&list_feature_plugins()) {
-			if ($dd->{$f}) {
-				local $main::error_must_die = 1;
-				eval { &plugin_call($f,
-					"feature_delete",$dd) };
-				if ($@) {
-					local $err = $@;
-					&$second_print(
-					    &text('delete_failure',
-					    &plugin_call($f,
-						"feature_name"), $err));
-					}
+			if ($dd->{$f} && $f ne $p) {
+				&call_feature_delete($f, $dd);
 				}
 			}
 		}
 	foreach $f ($only ? ( "webmin" ) : reverse(@features)) {
-		if ($config{$f} && $dd->{$f} || $f eq 'unix') {
-			local $dfunc = "delete_$f";
+		if ($f eq "web" && $p && $p ne "web") {
+			# Delete web plugin later, after dependencies have
+			# been removed
+			&call_feature_delete($p, $dd);
+			}
+		elsif ($config{$f} && $dd->{$f} || $f eq 'unix') {
+			# Delete core feature
 			local @args;
 			if ($f eq "mail") {
 				# Don't delete mail aliases, because we have
 				# already done so above
 				push(@args, 1);
 				}
-			if (!&try_function($f, $dfunc, $dd, @args)) {
-				$dd->{$f} = 1;
-				}
+			&call_feature_delete($f, $dd, @args);
 			}
 		}
 
@@ -7295,6 +7290,31 @@ if (!$nopost) {
 	}
 
 return undef;
+}
+
+# call_feature_delete(feature, &domain, args)
+# Calls the core or plugin-specific function to delete a feature. May print
+# stuff.
+sub call_feature_delete
+{
+local ($f, $dom, @args) = @_;
+if (&indexof($f, @features) >= 0) {
+	# Call core delete function
+	local $dfunc = "delete_$f";
+	if (!&try_function($f, $dfunc, $dom, @args)) {
+		$dom->{$f} = 1;
+		}
+	}
+else {
+	# Call plugin delete function
+	local $main::error_must_die = 1;
+	eval { &plugin_call($f, "feature_delete", $dom) };
+	if ($@) {
+		local $err = $@;
+		&$second_print(&text('delete_failure',
+			    &plugin_call($f, "feature_name"), $err));
+		}
+	}
 }
 
 # register_post_action(&function, args)
@@ -14875,6 +14895,32 @@ if ($d->{'dom'} ne $oldd->{'dom'} &&
         $alog =~ s/\Q$d->{'dom'}\E/$oldd->{'dom'}/;
         }
 return $alog;
+}
+
+# list_ordered_features(&domain)
+# Returns a list of features or plugins possibly relevant to some domain,
+# in dependency order
+sub list_ordered_features
+{
+local ($d) = @_;
+local @dom_features = &domain_features($d);
+local $p = &domain_has_website($d);
+local @rv;
+foreach my $f (@dom_features, &list_feature_plugins()) {
+	if ($f eq "web" && $p && $p ne "web") {
+		# Replace 'web' feature in ordering with plugin that provides
+		# a website.
+		push(@rv, $p, "web");
+		}
+	elsif ($f eq $p) {
+		# Skip website plugin feature, as it was inserted above
+		}
+	else {
+		# Some other feature
+		push(@rv, $f);
+		}
+	}
+return @rv;
 }
 
 # load_plugin_libraries([plugin, ...])
