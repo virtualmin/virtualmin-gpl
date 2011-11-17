@@ -6077,7 +6077,7 @@ local ($tmpl) = @_;
 local %taken = &interface_ip_addresses(); 
 local @ranges = split(/\s+/, $tmpl->{'ranges6'});
 foreach my $rn (@ranges) {
-	my ($r, $n) = split(/\//, $rn);
+	my ($r, $n) = split(/\//, lc($rn));
 	$r =~ /^([0-9a-f:]+):([0-9a-f]+)\-([0-9a-f]+)$/ || next;
 	local ($base, $s, $e) = ($1, $2, $3);
 	for(my $j=hex($s); $j<=hex($e); $j++) {

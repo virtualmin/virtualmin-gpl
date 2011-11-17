@@ -54,12 +54,12 @@ elsif ($in{'mode'} == 1 && !$d->{'virt'}) {
 	if ($racl{'ranges'}) {
 		# Try allocating IP from reseller's range
 		($ip, $netmask) = &free_ip_address(\%racl);
-		$ip || &text('setup_evirtalloc2');
+		$ip || &error(&text('setup_evirtalloc2'));
 		}
 	elsif ($tmpl->{'ranges'} ne "none") {
 		# Try allocating IP from template range
 		($ip, $netmask) = &free_ip_address($tmpl);
-		$ip || &text('setup_evirtalloc');
+		$ip || &error(&text('setup_evirtalloc'));
 		}
 	else {
 		# Validate manually entered IP
@@ -102,7 +102,7 @@ elsif ($in{'mode6'} == 1 && !$d->{'virt6'}) {
 	if ($tmpl->{'ranges6'} ne 'none') {
 		# Try allocating IPv6 from template range
 		($ip6, $netmask6) = &free_ip6_address($tmpl);
-		$ip6 || &text('setup_evirt6alloc');
+		$ip6 || &error(&text('setup_evirt6alloc'));
 		}
 	else {
 		# Validate manually entered IPv6 address
