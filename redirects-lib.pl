@@ -1,5 +1,16 @@
 # Functions for finding and editing aliases and redirects for a website
 
+# supports_redirects(&domain)
+# Returns 1 if redirect editing is supported for this domain's webserver
+sub supports_redirects
+{
+my ($d) = @_;
+return 1 if ($d->{'web'});
+my $p = &domain_has_website($d);
+return 0 if (!$p);
+return &plugin_defined($p, "feature_list_web_redirects");
+}
+
 # list_redirects(&domain)
 # Returns a list of URL paths and destinations for redirects and aliases. Each
 # is a hash ref with keys :
@@ -10,6 +21,10 @@
 sub list_redirects
 {
 my ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+        return &plugin_call($p, "feature_list_web_redirects", $d);
+        }
 &require_apache();
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return ( ) if (!$virt);
@@ -50,6 +65,10 @@ return @rv;
 sub create_redirect
 {
 my ($d, $redirect) = @_;
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+        return &plugin_call($p, "feature_create_web_redirect", $d, $redirect);
+        }
 &require_apache();
 my @ports = ( $d->{'web_port'},
 	      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
@@ -81,6 +100,10 @@ return "No Apache virtualhost found";
 sub delete_redirect
 {
 my ($d, $redirect) = @_;
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+        return &plugin_call($p, "feature_delete_web_redirect", $d, $redirect);
+        }
 &require_apache();
 my @ports = ( $d->{'web_port'},
               $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );

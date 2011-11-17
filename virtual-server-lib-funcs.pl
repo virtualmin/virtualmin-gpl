@@ -10566,7 +10566,7 @@ if (&has_proxy_balancer($d) && &can_edit_forward()) {
 	}
 
 # Alias and redirects editor
-if ($d->{'web'} && &can_edit_redirect() && !$d->{'alias'}) {
+if (&supports_redirects($d) && &can_edit_redirect() && !$d->{'alias'}) {
 	push(@rv, { 'page' => 'list_redirects.cgi',
 		    'title' => $text{'edit_redirects'},
 		    'desc' => $text{'edit_redirectsdesc'},

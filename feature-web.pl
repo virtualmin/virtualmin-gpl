@@ -1100,15 +1100,6 @@ return 1;
 sub get_apache_log
 {
 local ($dname, $port, $errorlog) = @_;
-local $d = &get_domain_by("dom", $dname);
-if ($d) {
-	# XXX remove this case
-	local $p = &domain_has_website($d);
-	if ($p ne 'web') {
-		return &plugin_call($p, "feature_get_web_log",
-				    $d, $port, $errorlog);
-		}
-	}
 &require_apache();
 local ($virt, $vconf) = &get_apache_virtual($dname, $port);
 if ($virt) {

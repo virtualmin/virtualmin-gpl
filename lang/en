@@ -5414,7 +5414,7 @@ viewbackup_partial=Partially completed
 
 redirects_title=Website Redirects
 redirects_ecannot=You are not allowed to edit website redirects for this domain
-redirects_eweb=This virtual server does not have a website
+redirects_eweb=This virtual server does not support redirects
 redirects_add=Add a new website redirect.
 redirects_path=URL path
 redirects_delete=Delete Selected Redirects

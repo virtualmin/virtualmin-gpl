@@ -75,7 +75,8 @@ else {
 
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
-$d->{'web'} || &usage("Virtual server $domain does not have a website");
+&supports_redirects($d) ||
+	&usage("Virtual server $domain does not support redirects");
 
 # Check for clash
 &obtain_lock_web($d);

@@ -397,6 +397,30 @@ sub feature_save_web_default_website
 {
 }
 
+# feature_list_web_redirects(&domain)
+# If defined, must return a list of redirect hash refs with keys :
+#   path - A URL path like /foo
+#   dest - Either a URL or a directory
+#   alias - Set to 1 for an alias, 0 for a redirect
+#   regexp - If set to 1, any sub-path is redirected to the same destination
+sub feature_list_web_redirects
+{
+}
+
+# feature_create_web_redirect(&domain, &redirect)
+# If feature_list_web_redirects is defined, this function must be as well,
+# and accept a redirect hash ref in the same format to add.
+sub feature_create_web_redirect
+{
+}
+
+# feature_delete_web_redirect(&domain, &redirect)
+# If feature_list_web_redirects is defined, this function must be as well,
+# and accept a redirect hash ref in the same format to remove.
+sub feature_delete_web_redirect
+{
+}
+
 # feature_startstop()
 # If this feature has a server process, this function should return a hash
 # with 'status', 'desc' and 'links' keys.

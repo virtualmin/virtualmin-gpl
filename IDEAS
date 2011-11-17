@@ -74,13 +74,10 @@
 	- edit_phpmode and modify-web need to work with nginx
 	- aliases / redirects editing
 	- proxy editing
-	- proxy pass / frame forwarding
 	- webmail redirects
-	- catchall support (get_domain_web_star)
 	- default website for IP address
 	- change_access_log / change_error_log
 	- set_public_html_dir
-	- bandwidth
 	- ruby installers
 
  - Include dovecot control files in backups, if located in a separate dir

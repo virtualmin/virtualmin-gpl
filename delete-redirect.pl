@@ -44,7 +44,8 @@ while(@ARGV > 0) {
 $domain && $path || &usage();
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
-$d->{'web'} || &usage("Virtual server $domain does not have a website");
+&supports_redirects($d) ||
+	&usage("Virtual server $domain does not support redirects");
 
 # Get the redirect
 &obtain_lock_web($d);

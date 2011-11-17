@@ -6,7 +6,7 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_redirect() ||
 	&error($text{'redirects_ecannot'});
-$d->{'web'} || &error($text{'redirects_eweb'});
+&supports_redirects($d) || &error($text{'redirects_eweb'});
 &ui_print_header(&domain_in($d), $text{'redirects_title'}, "", "redirects");
 
 # Build table data
