@@ -8400,7 +8400,17 @@ return 0;
 }
 
 # list_custom_fields()
-# Returns a list of structures containing custom field details
+# Returns a list of structures containing custom field details. Each has keys :
+#   name - Unique name for this field
+#   type - 0=textbox, 1=unix user, 2=unix UID, 3=unix group, 4=unix GID,
+#          5=file chooser, 6=directory chooser, 7=yes/no, 8=password,
+#          9=options file, 10=text area
+#   opts - Name of options file
+#   desc - Human-readable description
+#   show - 1=show in list of domains, 0=hide
+#   visible - 0=anyone can edit
+#   	      1=root can edit, others can view
+#   	      2=only root can see
 sub list_custom_fields
 {
 local @rv;
@@ -8413,7 +8423,8 @@ while(<FIELDS>) {
 		    'type' => $a[1],
 		    'opts' => $a[2],
 		    'desc' => $a[3],
-		    'show' => $a[4], });
+		    'show' => $a[4],
+		    'visible' => $a[5], });
 
 	}
 close(FIELDS);
@@ -8426,7 +8437,8 @@ sub save_custom_fields
 &open_lock_tempfile(FIELDS, ">$custom_fields_file");
 foreach my $a (@{$_[0]}) {
 	&print_tempfile(FIELDS, $a->{'name'},":",$a->{'type'},":",
-		     $a->{'opts'},":",$a->{'desc'},":",$a->{'show'},"\n");
+		     $a->{'opts'},":",$a->{'desc'},":",$a->{'show'},":",
+		     $a->{'visible'},"\n");
 	}
 &close_tempfile(FIELDS);
 }
@@ -8540,48 +8552,55 @@ sub show_custom_fields
 {
 local ($d, $tds) = @_;
 local $rv;
-local $f;
 local $col = 0;
-foreach $f (&list_custom_fields()) {
-	local $n = "field_".$f->{'name'};
-	local $v = $d ? $d->{"field_".$f->{'name'}} : undef;
-	local $fv;
-	if ($f->{'type'} == 0) {
-		local $sz = $f->{'opts'} || 30;
-		$fv = &ui_textbox($n, $v, $sz);
+foreach my $f (&list_custom_fields()) {
+	if ($f->{'visible'} == 0 || &master_admin()) {
+		# Can edit
+		local $n = "field_".$f->{'name'};
+		local $v = $d ? $d->{"field_".$f->{'name'}} : undef;
+		local $fv;
+		if ($f->{'type'} == 0) {
+			local $sz = $f->{'opts'} || 30;
+			$fv = &ui_textbox($n, $v, $sz);
+			}
+		elsif ($f->{'type'} == 1 || $f->{'type'} == 2) {
+			$fv = &ui_user_textbox($n, $v);
+			}
+		elsif ($f->{'type'} == 3 || $f->{'type'} == 4) {
+			$fv = &ui_group_textbox($n, $v);
+			}
+		elsif ($f->{'type'} == 5 || $f->{'type'} == 6) {
+			$fv = &ui_textbox($n, $v, 30)." ".
+				&file_chooser_button($n, $f->{'type'}-5);
+			}
+		elsif ($f->{'type'} == 7) {
+			$fv = &ui_radio($n, $v ? 1 : 0, [ [ 1, $text{'yes'} ],
+							   [ 0, $text{'no'} ] ]);
+			}
+		elsif ($f->{'type'} == 8) {
+			local $sz = $f->{'opts'} || 30;
+			$fv = &ui_password($n, $v, $sz);
+			}
+		elsif ($f->{'type'} == 9) {
+			local @opts = &read_opts_file($f->{'opts'});
+			local ($found) = grep { $_->[0] eq $v } @opts;
+			push(@opts, [ $v, $v ]) if (!$found);
+			$fv = &ui_select($n, $v, \@opts);
+			}
+		elsif ($f->{'type'} == 10) {
+			local ($w, $h) = split(/\s+/, $f->{'opts'});
+			$h ||= 4;
+			$w ||= 30;
+			$v =~ s/\t/\n/g;
+			$fv = &ui_textarea($n, $v, $h, $w);
+			}
+		$rv .= &ui_table_row($f->{'desc'}, $fv, 1, $tds);
 		}
-	elsif ($f->{'type'} == 1 || $f->{'type'} == 2) {
-		$fv = &ui_user_textbox($n, $v);
+	elsif ($f->{'visible'} == 1 && $d) {
+		# Can only see
+		local $fv = $d->{"field_".$f->{'name'}};
+		$rv .= &ui_table_row($f->{'desc'}, $fv, 1, $tds);
 		}
-	elsif ($f->{'type'} == 3 || $f->{'type'} == 4) {
-		$fv = &ui_group_textbox($n, $v);
-		}
-	elsif ($f->{'type'} == 5 || $f->{'type'} == 6) {
-		$fv = &ui_textbox($n, $v, 30)." ".
-			&file_chooser_button($n, $f->{'type'}-5);
-		}
-	elsif ($f->{'type'} == 7) {
-		$fv = &ui_radio($n, $v ? 1 : 0, [ [ 1, $text{'yes'} ],
-						   [ 0, $text{'no'} ] ]);
-		}
-	elsif ($f->{'type'} == 8) {
-		local $sz = $f->{'opts'} || 30;
-		$fv = &ui_password($n, $v, $sz);
-		}
-	elsif ($f->{'type'} == 9) {
-		local @opts = &read_opts_file($f->{'opts'});
-		local ($found) = grep { $_->[0] eq $v } @opts;
-		push(@opts, [ $v, $v ]) if (!$found);
-		$fv = &ui_select($n, $v, \@opts);
-		}
-	elsif ($f->{'type'} == 10) {
-		local ($w, $h) = split(/\s+/, $f->{'opts'});
-		$h ||= 4;
-		$w ||= 30;
-		$v =~ s/\t/\n/g;
-		$fv = &ui_textarea($n, $v, $h, $w);
-		}
-	$rv .= &ui_table_row($f->{'desc'}, $fv, 1, $tds);
 	}
 return $rv;
 }
@@ -8590,9 +8609,9 @@ return $rv;
 # Updates a domain with custom fields
 sub parse_custom_fields
 {
-local $f;
 local %in = %{$_[1]};
-foreach $f (&list_custom_fields()) {
+foreach my $f (&list_custom_fields()) {
+	next if ($f->{'visible'} != 0 && !&master_admin());
 	local $n = "field_".$f->{'name'};
 	local $rv;
 	if ($f->{'type'} == 0 || $f->{'type'} == 5 ||

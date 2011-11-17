@@ -3067,6 +3067,10 @@ newfields_type9=Menu..
 newfields_type10=Text box
 newfields_show=In server list?
 newfields_show2=Show
+newfields_visible=Visible to
+newfields_visible0=All users
+newfields_visible1=Only editable by master admin
+newfields_visible2=Only master admin
 
 ldap_emod=Missing Perl module $1 needed for connecting to LDAP
 ldap_econn=Failed to connect to LDAP server $1 port $2

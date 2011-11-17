@@ -14,6 +14,7 @@ for($i=0; defined($in{"name_$i"}); $i++) {
 		    'type' => $in{"type_$i"},
 		    'opts' => $in{"opts_$i"},
 		    'show' => $in{"show_$i"},
+		    'visible' => $in{"visible_$i"},
 		  });
 	}
 &save_custom_fields(\@rv);

@@ -20,6 +20,10 @@ foreach $f (@fields, { }, { }) {
 		&ui_textbox("opts_$i", $f->{'opts'}, 25),
 		&ui_checkbox("show_$i", 1, $text{'newfields_show2'},
 			     $f->{'show'}),
+	        &ui_select("visible_$i", int($f->{'visible'}),
+			    [ [ 0, $text{'newfields_visible0'} ],
+			      [ 1, $text{'newfields_visible1'} ],
+			      [ 2, $text{'newfields_visible2'} ] ]),
 		]);
 	$i++;	
 	}
@@ -32,7 +36,8 @@ print &ui_form_columns_table(
 	undef,
 	undef,
 	[ $text{'newfields_name'}, $text{'newfields_desc'},
-	  $text{'newfields_type'}, $text{'newfields_show'} ],
+	  $text{'newfields_type'}, $text{'newfields_show'},
+	  $text{'newfields_visible'}, ],
 	100,
 	\@table,
 	undef,
