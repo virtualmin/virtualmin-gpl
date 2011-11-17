@@ -430,8 +430,8 @@ elsif ($d->{'alias'} || $d->{'subdom'}) {
 	# These types never have logs
 	return 0;
 	}
-elsif ($d->{'web'}) {
-	if (!$oldd || !$oldd->{'web'}) {
+elsif (&domain_has_website($d)) {
+	if (!$oldd || !&domain_has_website($oldd)) {
 		# Turning on web, so turn on logrotate
 		return 1;
 		}
@@ -445,7 +445,8 @@ else {
 	return 0;
 	}
 
-return $d->{'web'} && (!$oldd || !$oldd->{'web'}) &&
+return &domain_has_website($d) &&
+       (!$oldd || !&domain_has_website($oldd)) &&
        !$d->{'alias'} && !$d->{'subdom'} &&
        $config{'logrotate'} == 3;
 }
