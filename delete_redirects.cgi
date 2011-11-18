@@ -6,7 +6,7 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_redirect() ||
 	&error($text{'redirects_ecannot'});
-&supports_redirects($d) || &error($text{'redirects_eweb'});
+&has_web_redirects($d) || &error($text{'redirects_eweb'});
 &error_setup($text{'redirects_derr'});
 
 # Find them and delete them

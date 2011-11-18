@@ -1,8 +1,8 @@
 # Functions for finding and editing aliases and redirects for a website
 
-# supports_redirects(&domain)
+# has_web_redirects(&domain)
 # Returns 1 if redirect editing is supported for this domain's webserver
-sub supports_redirects
+sub has_web_redirects
 {
 my ($d) = @_;
 return 1 if ($d->{'web'});

@@ -48,7 +48,7 @@ while(@ARGV > 0) {
 $domain || &usage();
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
-&supports_redirects($d) ||
+&has_web_redirects($d) ||
 	&usage("Virtual server $domain does not support redirects");
 
 @redirects = &list_redirects($d);

@@ -6,7 +6,7 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_redirect() ||
 	&error($text{'redirects_ecannot'});
-&supports_redirects($d) || &error($text{'redirects_eweb'});
+&has_web_redirects($d) || &error($text{'redirects_eweb'});
 if (!$in{'new'}) {
 	($r) = grep { $_->{'path'} eq $in{'path'} } &list_redirects($d);
 	$r || &error($text{'redirect_egone'});
