@@ -9429,8 +9429,9 @@ return &master_admin();
 sub has_proxy_balancer
 {
 local ($d) = @_;
-if ($d->{'web'} && $config{'web'} && !$d->{'alias'} && $virtualmin_pro &&
+if ($config{'web'} && !$d->{'alias'} && $virtualmin_pro &&
     !$d->{'proxy_pass_mode'}) {
+	# From Apache
 	&require_apache();
 	if ($apache::httpd_modules{'mod_proxy'} &&
 	    $apache::httpd_modules{'mod_proxy_balancer'}) {
@@ -9440,7 +9441,12 @@ if ($d->{'web'} && $config{'web'} && !$d->{'alias'} && $virtualmin_pro &&
 		return 1;
 		}
 	}
-return 0;
+else {
+	# From plugin, maybe
+	local $p = &domain_has_website($d);
+	return &plugin_defined($p, "feature_supports_web_balancers") ?
+		&plugin_call($p, "feature_supports_web_balancers", $d) : 0;
+	}
 }
 
 # has_proxy_none()

@@ -397,6 +397,12 @@ sub feature_save_web_default_website
 {
 }
 
+# feature_supports_web_redirects(&domain)
+# Returns 1 if redirects are supported for some domain, 0 if not
+sub feature_supports_web_redirects
+{
+}
+
 # feature_list_web_redirects(&domain)
 # If defined, must return a list of redirect hash refs with keys :
 #   path - A URL path like /foo
@@ -418,6 +424,45 @@ sub feature_create_web_redirect
 # If feature_list_web_redirects is defined, this function must be as well,
 # and accept a redirect hash ref in the same format to remove.
 sub feature_delete_web_redirect
+{
+}
+
+# feature_supports_web_balancers(&domain)
+# Returns 2 if the webserver supports balancing to multiple URLs, 1 if
+# balancing to only 1, 0 if neither
+sub feature_supports_web_balancers
+{
+}
+
+# feature_list_web_balancers(&domain)
+# Returns a list of balancers active for a domain, as hash refs. Each must
+# have the keys :
+#   path - A URL path like /foo
+#   balancer - Name of the balancer, if any
+#   urls - Array ref of destination URLs
+#   none - Set to 1 if proxying is disabled for this path
+sub feature_list_web_balancers
+{
+}
+
+# feature_create_web_balancer(&domain, &balancer)
+# Creates a new proxy balancer for some domain. Returns an error message
+# on failure, undef on success.
+sub feature_create_web_balancer
+{
+}
+
+# feature_delete_web_balancer(&domain, &balancer)
+# Deletes an existing proxy balancer for some domain. Returns an error message
+# on failure, undef on success.
+sub feature_delete_web_balancer
+{
+}
+
+# feature_modify_web_balancer(&domain, &balancer, &oldbalancer)
+# Updates an existing proxy balancer for some domain. Returns an error message
+# on failure, undef on success.
+sub feature_modify_web_balancer
 {
 }
 

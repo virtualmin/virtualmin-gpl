@@ -8,7 +8,8 @@ my ($d) = @_;
 return 1 if ($d->{'web'});
 my $p = &domain_has_website($d);
 return 0 if (!$p);
-return &plugin_defined($p, "feature_list_web_redirects");
+return &plugin_defined($p, "feature_supports_web_redirects") &&
+	&plugin_call($p, "feature_supports_web_redirects", $d);
 }
 
 # list_redirects(&domain)
