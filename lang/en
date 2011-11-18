@@ -4426,7 +4426,7 @@ tdelete_enone=None selected
 tdelete_title=Delete Server Templates
 tdelete_warn=Are you sure you want to delete the following selected server templates : $1
 tdelete_confirm=Delete Templates
-tdelete_users=They are currently in use by $1 virtual servers.
+tdelete_users2=They are currently in use by virtual servers : $1
 
 switch_ecannot=You are not allowed to switch to the admin of this domain
 switch_eadmin=The specified extra administrator does not exist!
