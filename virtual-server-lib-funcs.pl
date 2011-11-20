@@ -9429,8 +9429,8 @@ return &master_admin();
 sub has_proxy_balancer
 {
 local ($d) = @_;
-if ($config{'web'} && !$d->{'alias'} && $virtualmin_pro &&
-    !$d->{'proxy_pass_mode'}) {
+return 0 if (!$virtualmin_pro);
+if ($config{'web'} && !$d->{'alias'} && !$d->{'proxy_pass_mode'}) {
 	# From Apache
 	&require_apache();
 	if ($apache::httpd_modules{'mod_proxy'} &&
@@ -9449,21 +9449,38 @@ else {
 	}
 }
 
-# has_proxy_none()
+# has_proxy_none([&domain])
 # Returns 1 if the system supports disabling proxying for some URL
 sub has_proxy_none
 {
-&require_apache();
-return $apache::httpd_modules{'mod_proxy'} >= 2.0;
+local ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p eq 'web') {
+	&require_apache();
+	return $apache::httpd_modules{'mod_proxy'} >= 2.0;
+	}
+else {
+	return 1;	# Assume OK for plugins
+	}
 }
 
-# has_webmail_rewrite()
+# has_webmail_rewrite(&domain)
 # Returns 1 if this system has mod_rewrite, needed for redirecting webmail.$DOM
 # to port 20000
 sub has_webmail_rewrite
 {
-&require_apache();
-return $apache::httpd_modules{'mod_rewrite'};
+local ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p eq 'web') {
+	# Check Apache modules
+	&require_apache();
+	return $apache::httpd_modules{'mod_rewrite'};
+	}
+else {
+	# Call plugin
+	return &plugin_defined($p, "feature_supports_webmail_redirect") ?
+		&plugin_call($p, "feature_supports_webmail_redirect", $d) : 0;
+	}
 }
 
 # require_licence()

@@ -2256,7 +2256,7 @@ local ($d, $script, $ver, $opts, $forceadd) = @_;
 
 # Check if the script doesn't use proxying, and if Apache supports negatives
 return 1 if (&indexof("proxy", @{$script->{'uses'}}) >= 0);
-return 1 if (!&has_proxy_balancer($d) || !&has_proxy_none());
+return 1 if (!&has_proxy_balancer($d) || !&has_proxy_none($d));
 
 # Check if a proxy exists for a parent path
 local @proxies = &list_proxy_balancers($d);
@@ -2313,7 +2313,7 @@ local ($d, $script, $ver, $opts) = @_;
 
 # Check if the script doesn't use proxying, and if Apache supports negatives
 return 0 if (&indexof("proxy", @{$script->{'uses'}}) >= 0);
-return 0 if (!&has_proxy_balancer($d) || !&has_proxy_none());
+return 0 if (!&has_proxy_balancer($d) || !&has_proxy_none($d));
 
 # Find and remove the negator
 local @proxies = &list_proxy_balancers($d);

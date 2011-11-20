@@ -428,7 +428,7 @@ if ($multi) {
 			}
 
 		# Show webmail redirects
-		if (&has_webmail_rewrite() && &domain_has_website($d) &&
+		if (&has_webmail_rewrite($d) && &domain_has_website($d) &&
 		    !$d->{'alias'} && $multi == 1) {
 			@wm = &get_webmail_redirect_directives($d);
 			print "    Webmail redirects: ",

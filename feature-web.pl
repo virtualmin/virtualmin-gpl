@@ -188,7 +188,7 @@ else {
 		}
 
 	# Redirect webmail and admin to Usermin and Webmin
-	if (&has_webmail_rewrite()) {
+	if (&has_webmail_rewrite($_[0])) {
 		&add_webmail_redirect_directives($_[0], $tmpl);
 		}
 
@@ -2236,10 +2236,8 @@ local @webfields = ( "web", "suexec", "user_def",
 		     "stats_dir", "stats_hdir", "statspass", "statsnoedit",
 		     "alias_mode", "web_port", "web_sslport",
 		     "web_webmin_ssl", "web_usermin_ssl" );
-if (&has_webmail_rewrite()) {
-	push(@webfields, "webmail", "webmaildom", "webmaildom_def",
-			 "admin", "admindom", "admindom_def");
-	}
+push(@webfields, "webmail", "webmaildom", "webmaildom_def",
+		 "admin", "admindom", "admindom_def");
 push(@webfields, "web_php_suexec", "web_phpver",
 		 $tmpl->{'web_phpchildren'} ? ( "web_phpchildren" ) : ( ),
 		 "web_php_noedit");
@@ -2345,20 +2343,18 @@ print &ui_table_row(&hlink($text{'newweb_usermin'},
 		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
 # Add rewrites for webmail and admin
-if (&has_webmail_rewrite()) {
-	print &ui_table_hr();
-	foreach my $r ('webmail', 'admin') {
-		print &ui_table_row(&hlink($text{'newweb_'.$r},
-					   "template_".$r),
-			&ui_yesno_radio($r, $tmpl->{'web_'.$r} ? 1 : 0));
+print &ui_table_hr();
+foreach my $r ('webmail', 'admin') {
+	print &ui_table_row(&hlink($text{'newweb_'.$r},
+				   "template_".$r),
+		&ui_yesno_radio($r, $tmpl->{'web_'.$r} ? 1 : 0));
 
-		# Domain name to use in webmail redirect
-		print &ui_table_row(&hlink($text{'newweb_'.$r.'dom'},
-					   "template_".$r."dom"),
-			&ui_opt_textbox($r."dom",
-					$tmpl->{'web_'.$r.'dom'}, 40,
-					$text{'newweb_webmailsame'}));
-		}
+	# Domain name to use in webmail redirect
+	print &ui_table_row(&hlink($text{'newweb_'.$r.'dom'},
+				   "template_".$r."dom"),
+		&ui_opt_textbox($r."dom",
+				$tmpl->{'web_'.$r.'dom'}, 40,
+				$text{'newweb_webmailsame'}));
 	}
 
 print &ui_table_hr();
@@ -2553,18 +2549,17 @@ if ($in{"web_mode"} == 2) {
 	$tmpl->{'web_sslport'} = $in{'web_sslport'};
 	$tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};
 	$tmpl->{'web_usermin_ssl'} = $in{'web_usermin_ssl'};
-	if (&has_webmail_rewrite()) {
-		# Parse webmail redirect
-		foreach my $r ('webmail', 'admin') {
-			$tmpl->{'web_'.$r} = $in{$r};
-			if ($in{$r.'dom_def'}) {
-				delete($tmpl->{'web_'.$r.'dom'});
-				}
-			else {
-				$in{$r.'dom'} =~ /^(http|https):\/\/\S+$/ ||
-					&error($text{'newweb_e'.$r.'dom'});
-				$tmpl->{'web_'.$r.'dom'} = $in{$r.'dom'};
-				}
+
+	# Parse webmail redirect
+	foreach my $r ('webmail', 'admin') {
+		$tmpl->{'web_'.$r} = $in{$r};
+		if ($in{$r.'dom_def'}) {
+			delete($tmpl->{'web_'.$r.'dom'});
+			}
+		else {
+			$in{$r.'dom'} =~ /^(http|https):\/\/\S+$/ ||
+				&error($text{'newweb_e'.$r.'dom'});
+			$tmpl->{'web_'.$r.'dom'} = $in{$r.'dom'};
 			}
 		}
 
@@ -2825,6 +2820,10 @@ sub add_webmail_redirect_directives
 {
 local ($d, $tmpl) = @_;
 $tmpl ||= &get_template($d->{'template'});
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	return &plugin_call($p, "feature_add_web_webmail_redirect", $d, $tmpl);
+	}
 &require_apache();
 
 foreach my $r ('webmail', 'admin') {
@@ -2921,6 +2920,10 @@ foreach my $r ('webmail', 'admin') {
 sub remove_webmail_redirect_directives
 {
 local ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	return &plugin_call($p, "feature_remove_web_webmail_redirect", $d);
+	}
 
 # Get directives we will be changing
 &require_apache();
@@ -2959,6 +2962,11 @@ return 1;
 sub get_webmail_redirect_directives
 {
 local ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	return &plugin_call($p, "feature_get_web_webmail_redirect", $d);
+	}
+
 &require_apache();
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return ( ) if (!$virt);

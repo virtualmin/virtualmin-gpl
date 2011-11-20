@@ -216,7 +216,7 @@ if ($stylename && defined(&list_content_styles)) {
 	}
 
 # Check if webmail is supported
-if (defined($webmail) && !&has_webmail_rewrite()) {
+if (defined($webmail) && !&has_webmail_rewrite($d)) {
 	&usage("This system does not support mod_rewrite, needed for webmail redirects");
 	}
 
@@ -531,7 +531,7 @@ if ($supports_styles) {
 	print "                     [--style name]\n";
 	print "                     [--content text|filename]\n";
 	}
-if (&has_webmail_rewrite()) {
+if (&has_webmail_rewrite($d)) {
 	print "                     [--webmail | --no-webmail]\n";
 	}
 print "                     [--matchall | --no-matchall]\n";

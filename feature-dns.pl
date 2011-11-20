@@ -1081,7 +1081,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		}
 
 	# If requested, add webmail and admin records
-	if ($d->{'web'} && &has_webmail_rewrite()) {
+	if ($d->{'web'} && &has_webmail_rewrite($d)) {
 		&add_webmail_dns_records_to_file($d, $tmpl, $file, \%already);
 		}
 
