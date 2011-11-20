@@ -1391,7 +1391,8 @@ return undef;
 sub script_path_url
 {
 local ($d, $opts) = @_;
-local $pt = $d->{'web_port'} == 80 ? "" : ":$d->{'web_port'}";
+local $pt = $d->{'web_port'} == 80 || !$d->{'web_port'} ?
+		"" : ":$d->{'web_port'}";
 local $pp = $opts->{'path'} eq '/' ? '' : $opts->{'path'};
 if ($pp !~ /\.(cgi|pl|php)$/i) {
 	$pp .= "/";
@@ -1603,7 +1604,7 @@ local ($d, $page, $params, $out, $err, $headers,
        $returnheaders, $returnheaders_array) = @_;
 local $ip = $d->{'ip'};
 local $host = &get_domain_http_hostname($d);
-local $port = $d->{'web_port'};
+local $port = $d->{'web_port'} || 80;
 
 local $oldproxy = $gconfig{'http_proxy'};	# Proxies mess up connection
 $gconfig{'http_proxy'} = '';			# to the IP explicitly
@@ -1659,7 +1660,7 @@ local ($d, $page, $dest, $error, $cbfunc, $ssl, $user, $pass,
        $timeout, $osdn, $nocache, $headers) = @_;
 local $ip = $d->{'ip'};
 local $host = &get_domain_http_hostname($d);
-local $port = $d->{'web_port'};
+local $port = $d->{'web_port'} || 80;
 
 # Build headers
 local @headers;
@@ -1994,7 +1995,7 @@ local $job = { 'user' => $d->{'user'},
 if ($callnow) {
 	# Fetch the URL now
 	local ($host, $port, $page, $ssl) = &parse_http_url($url);
-	if ($host eq $d->{'dom'} && $port == $d->{'web_port'}) {
+	if ($host eq $d->{'dom'} && $port == ($d->{'web_port'} || 80)) {
 		# On this domain .. can use internal function which handles
 		# use of internal IP
 		local ($out, $err);
