@@ -78,8 +78,9 @@
 	- change_access_log / change_error_log
 	- set_public_html_dir
 	- ruby installers
-		- proxy shouldn't include original path
 		- need to verify working, ruby integration
+		- verify redirects
+		- duplicate location block
 
  - Include dovecot control files in backups, if located in a separate dir
 	- http://wiki.dovecot.org/MailLocation/Maildir

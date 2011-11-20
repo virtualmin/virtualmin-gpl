@@ -5,7 +5,7 @@ require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_scripts() || &error($text{'edit_ecannot'});
-$d->{'web'} && $d->{'dir'} || &error($text{'scripts_eweb'});
+&domain_has_website($d) && $d->{'dir'} || &error($text{'scripts_eweb'});
 &detect_real_script_versions($d);
 @got = &list_domain_scripts($d);
 

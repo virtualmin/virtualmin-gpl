@@ -6,7 +6,7 @@ require './virtual-server-lib.pl';
 &error_setup($text{'scripts_ierr'});
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_scripts() || &error($text{'edit_ecannot'});
-$d->{'web'} && $d->{'dir'} || &error($text{'scripts_eweb'});
+&domain_has_website($d) && $d->{'dir'} || &error($text{'scripts_eweb'});
 
 if ($in{'upgrade'}) {
 	# Upgrading

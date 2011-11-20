@@ -10409,7 +10409,7 @@ if (&can_domain_have_scripts($d) && &can_edit_scripts()) {
 		  });
 	}
 
-if ($d->{'web'} && $config{'web'} && $d->{'dir'} && !$d->{'alias'} &&
+if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
     !$d->{'proxy_pass_mode'} &&
     $virtualmin_pro && &can_edit_html()) {
 	# Edit web pages button
