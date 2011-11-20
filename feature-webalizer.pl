@@ -395,7 +395,7 @@ sub validate_webalizer
 {
 local ($d) = @_;
 &require_webalizer();
-local $alog = &get_apache_log($d->{'dom'}, $d->{'web_port'});
+local $alog = &get_website_log($d);
 return &text('validate_elogfile', "<tt>$d->{'dom'}</tt>") if (!$alog);
 local $cfile = &webalizer::config_file_name($alog);
 return &text('validate_ewebalizer', "<tt>$cfile</tt>") if (!-r $cfile);
@@ -431,7 +431,7 @@ sub backup_webalizer
 {
 &$first_print($text{'backup_webalizercp'});
 &require_webalizer();
-local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
+local $alog = &get_website_log($_[0]);
 if (!$alog) {
 	&$second_print($text{'setup_nolog'});
 	return 0;
@@ -454,7 +454,7 @@ sub restore_webalizer
 &$first_print($text{'restore_webalizercp'});
 &require_webalizer();
 &obtain_lock_webalizer($_[0]);
-local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
+local $alog = &get_website_log($_[0]);
 if (!$alog) {
 	&release_lock_webalizer($_[0]);
 	&$second_print($text{'setup_nolog'});
@@ -570,7 +570,7 @@ sub links_webalizer
 {
 local ($d) = @_;
 &require_webalizer();
-local $log = &get_apache_log($d->{'dom'}, $d->{'web_port'});
+local $log = &get_website_log($d);
 local $cfg = &webalizer::config_file_name($log);
 if (!-r $cfg) {
 	$log = &resolve_links($log);
@@ -643,7 +643,7 @@ return if (!$config{'webalizer'});
 
 if ($main::got_lock_webalizer_dom{$d->{'id'}} == 0) {
 	&require_webalizer();
-	local $alog = &get_apache_log($d->{'dom'}, $d->{'web_port'});
+	local $alog = &get_website_log($d);
 	local $stats = &webalizer_stats_dir($d);
 	if ($alog) {
 		&lock_file(&webalizer::log_config_name($alog));
