@@ -9,11 +9,12 @@ $d = &get_domain($in{'dom'});
 $can = &can_edit_phpmode($d);
 $can || &error($text{'phpmode_ecannot'});
 &require_apache();
+$p = &domain_has_website($d);
 
 # Check for option clashes
 if (!$d->{'alias'} && $can == 2) {
 	if (($in{'mode'} eq 'cgi' || $in{'mode'} eq 'fcgid') &&
-	    !$in{'suexec'}) {
+	    defined($in{'suexec'}) && !$in{'suexec'}) {
 		&error($text{'phpmode_esuexec'});
 		}
 	if ($in{'suexec'} && $apache::httpd_modules{'core'} >= 2.0 &&
@@ -33,16 +34,17 @@ if (!$d->{'alias'}) {
 		}
 	}
 
-# Check for working suexec for PHP
+# Check for working Apache suexec for PHP
 if (!$d->{'alias'} && ($in{'mode'} eq 'cgi' || $in{'mode'} eq 'fcgid') &&
-    $can == 2) {
+    $can == 2 && $p eq 'web') {
 	$tmpl = &get_template($d->{'template'});
 	$err = &check_suexec_install($tmpl);
 	&error($err) if ($err);
 	}
 
 # Validate HTML directory
-if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./) {
+if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./ &&
+    defined($in{'htmldir'})) {
 	$in{'htmldir'} =~ /^[a-z0-9\.\-\_\/]+$/ ||
 		&error($text{'phpmode_ehtmldir'});
 	$in{'htmldir'} !~ /^\// && $in{'htmldir'} !~ /\/$/ ||
@@ -156,7 +158,7 @@ if (&can_default_website($d) && $in{'defweb'}) {
 	}
 
 # Change log file locations
-if (!$d->{'alias'} && &can_log_paths()) {
+if (defined($in{'alog'}) && !$d->{'alias'} && &can_log_paths()) {
 	# Access log
 	$oldalog = &get_website_log($d, 0);
 	if ($oldalog && defined($in{'alog'}) && $oldalog ne $in{'alog'}) {
@@ -179,7 +181,8 @@ if (!$d->{'alias'} && &can_log_paths()) {
 	}
 
 # Change HTML directory
-if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./ &&
+if (defined($in{'htmldir'}) &&
+    !$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./ &&
     $d->{'public_html_dir'} ne $in{'htmldir'}) {
 	&$first_print($text{'phpmode_setdir'});
 	$err = &set_public_html_dir($d, $in{'htmldir'});

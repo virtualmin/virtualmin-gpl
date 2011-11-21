@@ -64,17 +64,12 @@
 
  - NGINX support
 	- plugin
-	- scripts
-	- generic web API for plugins?
 	- config files for all distros
 	- functional test?
 	- backup and restore
-	- all virtualmin code that checks for 'web' feature should call
-	  feature_provides_web instead (or cache)
-	- edit_phpmode and modify-web need to work with nginx
-	- default website for IP address
 	- change_access_log / change_error_log
 	- set_public_html_dir
+	- function to set port?
 
  - Include dovecot control files in backups, if located in a separate dir
 	- http://wiki.dovecot.org/MailLocation/Maildir
