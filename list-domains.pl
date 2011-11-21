@@ -445,10 +445,8 @@ if ($multi) {
 		# Show default website flag
 		if (&domain_has_website($d) && $multi == 1 &&
 		    (!$d->{'alias'} || $d->{'alias_mode'} != 1)) {
-			($defvirt, $defd) = &get_default_website($d);
 			print "    Default website for IP: ",
-				($defd && $defd->{'id'} eq $d->{'id'} ?
-					"Yes" : "No"),"\n";
+				(&is_default_website($d) ? "Yes" : "No"),"\n";
 			}
 
 		# Show DNS SPF mode

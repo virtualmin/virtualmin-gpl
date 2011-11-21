@@ -98,8 +98,8 @@ if ($p eq 'web' || &plugin_defined($p, "feature_get_web_domain_star")) {
 # Default website for its IP
 if (!$d->{'alias'} || $d->{'alias_mode'} != 1 &&
     ($p eq 'web' || &plugin_defined($p, "feature_get_web_default_website"))) {
-	($defvirt, $defd) = &get_default_website($d);
-	$defweb = $defd && $defd->{'id'} eq $d->{'id'} ? 1 : 0;
+	$defweb = &is_default_website($d);
+	$defd = &find_default_website($d);
 	$defno = $defd ? &text('phpmode_defno', $defd->{'dom'}) : $text{'no'};
 	if (&can_default_website($d) && !$defweb) {
 		print &ui_table_row(&hlink($text{'phpmode_defweb'}, "defweb"),

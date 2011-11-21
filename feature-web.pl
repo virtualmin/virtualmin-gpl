@@ -3344,21 +3344,38 @@ if ($elog && (!-e $eloglink || -l $eloglink) &&
 sub can_default_website
 {
 local ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p ne 'web') {
+	# Does this website type support it?
+	return 0 if (!&plugin_defined($p, "feature_supports_web_default") ||
+		     !&plugin_call($p, "feature_supports_web_default", $d));
+	}
 return 1 if (&master_admin());
-foreach my $o (&list_domains_on_ip($d)) {
-	if ($o->[1] && !&can_edit_domain($o->[1])) {
-		return 0;
+if ($p eq 'web') {
+	# Find all Apache vhosts on the IP and their domains, and make sure
+	# the user can edit all of them
+	foreach my $o (&list_apache_domains_on_ip($d)) {
+		if ($o->[1] && !&can_edit_domain($o->[1])) {
+			return 0;
+			}
+		}
+	}
+else {
+	# Just find all domains on the IP, and make sure the user can edit
+	# all of them
+	foreach my $o (&get_domain_by("ip", $d->{'ip'})) {
+		return 0 if (!&can_edit_domain($o));
 		}
 	}
 return 1;
 }
 
-# list_domains_on_ip(&domain, [port])
+# list_apache_domains_on_ip(&domain, [port])
 # Returns a list of Apache virtualhost hash refs and virtual servers that are
 # using the same IP in the Apache config as this one. If it is name-based
 # (* in the virtualhost), then all similar servers will be matched.
 # XXX will a request to some IP match both domains on that IP, and * ?
-sub list_domains_on_ip
+sub list_apache_domains_on_ip
 {
 local ($d, $port) = @_;
 $port ||= $d->{'web_port'};
@@ -3395,13 +3412,13 @@ if ($apache::config{'virt_file'} && -d $apache::config{'virt_file'} &&
 return @rv;
 }
 
-# get_default_website(&domain, [port])
+# get_default_apache_website(&domain, [port])
 # Returns the Apache virtualhost and possibly virtual server hash for the
 # default website on some domain's IP
-sub get_default_website
+sub get_default_apache_website
 {
 local ($d, $port) = @_;
-local @onip = &list_domains_on_ip($d, $port);
+local @onip = &list_apache_domains_on_ip($d, $port);
 return @onip ? @{$onip[0]} : ( );
 }
 
@@ -3411,12 +3428,16 @@ return @onip ? @{$onip[0]} : ( );
 sub set_default_website
 {
 local ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p ne 'web') {
+	return &plugin_call($p, "feature_set_web_default", $d);
+	}
 &require_apache();
 foreach my $port ($d->{'web_port'},
 		  $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( )) {
 	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	$virt || return "No Apache virtualhost found for $d->{'dom'}:$port";
-	local ($oldvirt, $oldd) = &get_default_website($d, $port);
+	local ($oldvirt, $oldd) = &get_default_apache_website($d, $port);
 	if ($virt && $oldvirt && $virt ne $oldvirt) {
 		if ($virt->{'file'} eq $oldvirt->{'file'}) {
 			# Need to move up in file
@@ -3459,6 +3480,42 @@ foreach my $port ($d->{'web_port'},
 		}
 	}
 return undef;
+}
+
+# is_default_website(&domain)
+# Returns 1 if some domain is the default website for it's IP, 0 otherwise
+sub is_default_website
+{
+local ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p ne 'web') {
+	return &plugin_call($p, "feature_is_web_default", $d);
+	}
+else {
+	local ($defvirt, $defd) = &get_default_apache_website($d);
+	return $defd && $defd->{'id'} eq $d->{'id'} ? 1 : 0;
+	}
+}
+
+# find_default_website(&domain)
+# Finds the domain that has the default website for the IP the given domain
+# is on
+sub find_default_website
+{
+my ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p eq 'web') {
+	# Can just use the default apache site function
+	local (undef, $defd) = &get_default_apache_website($d);
+	return $defd;
+	}
+else {
+	# Iterate through domains
+	foreach my $defd (&get_domain_by("ip", $d->{'ip'})) {
+		return $defd if (&is_default_website($defd));
+		}
+	return undef;
+	}
 }
 
 # get_apache_vhost_ips(&domain, star-namevirtualhost, [port])
