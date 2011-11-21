@@ -72,14 +72,13 @@
 	- all virtualmin code that checks for 'web' feature should call
 	  feature_provides_web instead (or cache)
 	- edit_phpmode and modify-web need to work with nginx
-	- webmail redirects
 	- default website for IP address
 	- change_access_log / change_error_log
 	- set_public_html_dir
 	- ruby installers
 		- need to verify working, ruby integration
 		- verify redirects
-	- fix has_proxy_none
+		- typo command is installed into odd place on Debian 6
 
  - Include dovecot control files in backups, if located in a separate dir
 	- http://wiki.dovecot.org/MailLocation/Maildir

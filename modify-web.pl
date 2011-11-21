@@ -215,11 +215,6 @@ if ($stylename && defined(&list_content_styles)) {
 	$content =~ s/\\n/\n/g;
 	}
 
-# Check if webmail is supported
-if (defined($webmail) && !&has_webmail_rewrite($d)) {
-	&usage("This system does not support mod_rewrite, needed for webmail redirects");
-	}
-
 # Validate HTML dir
 if ($htmldir) {
 	$htmldir =~ /^[a-z0-9\.\-\_\/]+$/ ||
@@ -241,6 +236,13 @@ else {
 		&domain_has_website($d) ||
 		  &usage("Virtual server $n does not have a web site enabled");
 		push(@doms, $d);
+		}
+	}
+
+# Check if webmail is supported
+foreach $d (@doms) {
+	if (defined($webmail) && !&has_webmail_rewrite($d)) {
+		&usage("The domain $d->{'dom'} does not support URL rewriting, needed for webmail redirects");
 		}
 	}
 

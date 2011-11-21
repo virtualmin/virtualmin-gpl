@@ -466,6 +466,34 @@ sub feature_modify_web_balancer
 {
 }
 
+# feature_supports_webmail_redirect(&domain)
+# Must return 1 if redirects from webmail.domain and admin.domain can be 
+# enabled
+sub feature_supports_webmail_redirect
+{
+}
+
+# feature_add_web_webmail_redirect(&domain, &template)
+# When called, this function must setup the domain's webserver to accept
+# requests for webmail.domain and admin.domain, and redirect them to Usermin
+# and Virtualmin.
+sub feature_add_web_webmail_redirect
+{
+}
+
+# feature_remove_web_webmail_redirect(&domain)
+# When called, this function must remove the redirects setup by the function
+# feature_add_web_webmail_redirect
+sub feature_remove_web_webmail_redirect
+{
+}
+
+# feature_get_web_webmail_redirect(&domain)
+# The function must return 1 if webmail redirects are enabled, or 0 if not
+sub feature_get_web_webmail_redirect
+{
+}
+
 # feature_startstop()
 # If this feature has a server process, this function should return a hash
 # with 'status', 'desc' and 'links' keys.

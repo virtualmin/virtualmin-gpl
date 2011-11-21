@@ -9478,8 +9478,8 @@ if ($p eq 'web') {
 	}
 else {
 	# Call plugin
-	return &plugin_defined($p, "feature_supports_webmail_redirect") ?
-		&plugin_call($p, "feature_supports_webmail_redirect", $d) : 0;
+	return &plugin_defined($p, "feature_supports_webmail_redirect") &&
+	       &plugin_call($p, "feature_supports_webmail_redirect", $d);
 	}
 }
 
