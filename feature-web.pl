@@ -779,7 +779,7 @@ else {
 	# If any other rename step fails becuase no <virtualhost> was found,
 	# the code will jump to here.
 	VIRTFAILED:
-	if ($_[0]->{'home'} ne $_[1]->{'home'} && defined(&fix_php_ini_files)) {
+	if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 		# Update session dir and upload path in php.ini files
 		local @fixes = (
 		  [ "session.save_path", $_[1]->{'home'}, $_[0]->{'home'}, 1 ],
@@ -1534,7 +1534,7 @@ if ($virt) {
 		}
 
 	# Correct system-specific entries in PHP config files
-	if (defined(&fix_php_ini_files) && !$_[0]->{'alias'}) {
+	if (!$_[0]->{'alias'}) {
 		local $sock = &get_php_mysql_socket($_[0]);
 		local @fixes = (
 		  [ "session.save_path", $_[5]->{'home'}, $_[0]->{'home'}, 1 ],
@@ -1547,29 +1547,8 @@ if ($virt) {
 		}
 
 	# Fix broken PHP extension_dir directives
-	if (($mode eq "fcgid" || $mode eq "cgi") &&
-	    &foreign_check("phpini") && !$_[0]->{'alias'}) {
-		&foreign_require("phpini", "phpini-lib.pl");
-		foreach my $i (&list_domain_php_inis($d)) {
-			local $pconf = &phpini::get_config($i->[1]);
-			local $ed = &phpini::find_value("extension_dir",$pconf);
-			if ($ed && !-d $ed) {
-				# Doesn't exist .. maybe can fix
-				my $newed = $ed;
-				if ($newed =~ /\/lib\//) {
-					$newed =~ s/\/lib\//\/lib64\//;
-					}
-				elsif ($newed =~ /\/lib64\//) {
-					$newed =~ s/\/lib64\//\/lib\//;
-					}
-				if (!-d $newed) {
-					# Couldn't find it, give up and clear
-					$newed = undef;
-					}
-				&phpini::save_directive($pconf,
-					"extension_dir", $newed);
-				}
-			}
+	if (($mode eq "fcgid" || $mode eq "cgi") && !$_[0]->{'alias'}) {
+		&fix_php_extension_dir($_[0]);
 		}
 
 	# Set new public_html and cgi-bin paths

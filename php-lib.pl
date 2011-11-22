@@ -1244,5 +1244,33 @@ if (defined(&get_domain_php_mode) &&
 return $rv;
 }
 
+# fix_php_extension_dir(&domain)
+# If the extension_dir in a domain's php.ini file is invalid, try to fix it
+sub fix_php_extension_dir
+{
+local ($d) = @_;
+return if (!&foreign_check("phpini"));
+&foreign_require("phpini", "phpini-lib.pl");
+foreach my $i (&list_domain_php_inis($d)) {
+	local $pconf = &phpini::get_config($i->[1]);
+	local $ed = &phpini::find_value("extension_dir", $pconf);
+	if ($ed && !-d $ed) {
+		# Doesn't exist .. maybe can fix
+		my $newed = $ed;
+		if ($newed =~ /\/lib\//) {
+			$newed =~ s/\/lib\//\/lib64\//;
+			}
+		elsif ($newed =~ /\/lib64\//) {
+			$newed =~ s/\/lib64\//\/lib\//;
+			}
+		if (!-d $newed) {
+			# Couldn't find it, give up and clear
+			$newed = undef;
+			}
+		&phpini::save_directive($pconf, "extension_dir", $newed);
+		}
+	}
+}
+
 1;
 
