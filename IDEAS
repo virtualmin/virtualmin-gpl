@@ -64,11 +64,12 @@
 
  - NGINX support
 	- plugin
-	- config files for all distros
 	- functional test?
 	- change_access_log / change_error_log
 	- set_public_html_dir
 	- function to set port?
+	- config files for bsd / generic?
+		- module.info update
 
  - Include dovecot control files in backups, if located in a separate dir
 	- http://wiki.dovecot.org/MailLocation/Maildir
