@@ -19,7 +19,9 @@ if ($in{'bg'}) {
 	$nice = join(", ", map { &nice_backup_url($_) } @dests);
 	&$first_print(&text('backup_starting', $nice));
 	$cmd = "$backup_cron_cmd --id $sched->{'id'} --force-email";
+	&clean_environment();
 	&execute_command("$cmd >/dev/null 2>&1 </dev/null &");
+	&reset_environment();
 	if ($sched->{'email'}) {
 		&$second_print(&text('backup_started', $sched->{'email'}));
 		}
