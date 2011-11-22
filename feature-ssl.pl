@@ -79,50 +79,11 @@ local $web_sslport = $_[0]->{'web_sslport'} || $tmpl->{'web_sslport'} || 443;
 local $conf = &apache::get_config();
 
 # Find out if this domain will share a cert with another
-local $chained;
-local ($sslclash) = grep { $_->{'ip'} eq $_[0]->{'ip'} &&
-			   $_->{'ssl'} &&
-			   $_->{'id'} ne $_[0]->{'id'} &&
-			   !$_->{'ssl_same'} } &list_domains();
-if ($sslclash && &check_domain_certificate($_[0]->{'dom'}, $sslclash)) {
-	# Yes - so just use it. In practice this doesn't really matter, as
-	# Apache will pick up the first domain's cert anyway.
-	$_[0]->{'ssl_cert'} = $sslclash->{'ssl_cert'};
-	$_[0]->{'ssl_key'} = $sslclash->{'ssl_key'};
-	$_[0]->{'ssl_same'} = $sslclash->{'id'};
-	$chained = &get_chained_certificate_file($sslclash);
-	$_[0]->{'ssl_chain'} = $chained;
-	}
+&find_chained_certificate($_[0]);
+local $chained = $_[0]->{'ssl_chain'};
 
 # Create a self-signed cert and key, if needed
-$_[0]->{'ssl_cert'} ||= &default_certificate_file($_[0], 'cert');
-$_[0]->{'ssl_key'} ||= &default_certificate_file($_[0], 'key');
-if (!-r $_[0]->{'ssl_cert'} && !-r $_[0]->{'ssl_key'}) {
-	# Need to do it
-	local $temp = &transname();
-	&$first_print($text{'setup_openssl'});
-	&lock_file($_[0]->{'ssl_cert'});
-	&lock_file($_[0]->{'ssl_key'});
-	local $err = &generate_self_signed_cert(
-		$_[0]->{'ssl_cert'}, $_[0]->{'ssl_key'}, undef, 1825,
-		undef, undef, undef, $_[0]->{'owner'}, undef,
-		"*.$_[0]->{'dom'}", $_[0]->{'emailto'}, undef, $_[0]);
-	if ($err) {
-		&$second_print(&text('setup_eopenssl', $err));
-		return 0;
-		}
-	else {
-		&set_certificate_permissions($_[0], $_[0]->{'ssl_cert'});
-		&set_certificate_permissions($_[0], $_[0]->{'ssl_key'});
-		if (&has_command("chcon")) {
-			&execute_command("chcon -R -t httpd_config_t ".quotemeta($_[0]->{'ssl_cert'}).">/dev/null 2>&1");
-			&execute_command("chcon -R -t httpd_config_t ".quotemeta($_[0]->{'ssl_key'}).">/dev/null 2>&1");
-			}
-		&$second_print($text{'setup_done'});
-		}
-	&unlock_file($_[0]->{'ssl_cert'});
-	&unlock_file($_[0]->{'ssl_key'});
-	}
+&generate_default_certificate($_[0]);
 
 # Add NameVirtualHost if needed, and if there is more than one SSL site on
 # this IP address
@@ -1525,6 +1486,62 @@ if ($main::got_lock_ssl == 1) {
 	}
 $main::got_lock_ssl-- if ($main::got_lock_ssl);
 &release_lock_anything($d);
+}
+
+# find_chained_certificate(&domain)
+# For a domain with SSL being enabled, check if another domain on the same IP
+# already has a matching cert. If so, update the domain hash's cert file
+sub find_chained_certificate
+{
+local ($d) = @_;
+local ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
+			   $_->{'ssl'} &&
+			   $_->{'id'} ne $d->{'id'} &&
+			   !$_->{'ssl_same'} } &list_domains();
+if ($sslclash && &check_domain_certificate($d->{'dom'}, $sslclash)) {
+	# Yes - so just use it. In practice this doesn't really matter, as
+	# Apache will pick up the first domain's cert anyway.
+	$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
+	$d->{'ssl_key'} = $sslclash->{'ssl_key'};
+	$d->{'ssl_same'} = $sslclash->{'id'};
+	$d->{'ssl_chain'} = &get_chained_certificate_file($sslclash);
+	}
+}
+
+# generate_default_certificate(&domain)
+# If a domain doesn't have a cert file set, pick one and generate a self-signed
+# cert if needed. May print stuff.
+sub generate_default_certificate
+{
+local ($d) = @_;
+$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
+$d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
+if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
+	# Need to do it
+	local $temp = &transname();
+	&$first_print($text{'setup_openssl'});
+	&lock_file($d->{'ssl_cert'});
+	&lock_file($d->{'ssl_key'});
+	local $err = &generate_self_signed_cert(
+		$d->{'ssl_cert'}, $d->{'ssl_key'}, undef, 1825,
+		undef, undef, undef, $d->{'owner'}, undef,
+		"*.$d->{'dom'}", $d->{'emailto'}, undef, $d);
+	if ($err) {
+		&$second_print(&text('setup_eopenssl', $err));
+		return 0;
+		}
+	else {
+		&set_certificate_permissions($d, $d->{'ssl_cert'});
+		&set_certificate_permissions($d, $d->{'ssl_key'});
+		if (&has_command("chcon")) {
+			&execute_command("chcon -R -t httpd_config_t ".quotemeta($d->{'ssl_cert'}).">/dev/null 2>&1");
+			&execute_command("chcon -R -t httpd_config_t ".quotemeta($d->{'ssl_key'}).">/dev/null 2>&1");
+			}
+		&$second_print($text{'setup_done'});
+		}
+	&unlock_file($d->{'ssl_cert'});
+	&unlock_file($d->{'ssl_key'});
+	}
 }
 
 $done_feature_script{'ssl'} = 1;
