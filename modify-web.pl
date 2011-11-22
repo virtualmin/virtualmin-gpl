@@ -483,15 +483,24 @@ foreach $d (@doms) {
 		}
 
 	if (defined($proxy) || defined($framefwd) || $port || $sslport) {
-		# Save the domain
-		&modify_web($d, $oldd);
-		if ($d->{'ssl'}) {
-			&modify_ssl($d, $oldd);
+		# Update website feature
+		$p = &domain_has_website($d);
+		if ($p eq 'web') {
+			# Core website feature
+			&modify_web($d, $oldd);
+			if ($d->{'ssl'}) {
+				&modify_ssl($d, $oldd);
+				}
+			}
+		else {
+			# Via plugin call
+			&plugin_call($p, "feature_modify", $d, $oldd);
 			}
 		}
 
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport) {
+		# Save the domain
 		&$first_print($text{'save_domain'});
 		&save_domain($d);
 		&$second_print($text{'setup_done'});

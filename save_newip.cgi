@@ -120,7 +120,7 @@ elsif ($in{'mode6'} == 1 && $d->{'virt6'}) {
 	$virt6 = 1;
 	}
 
-if ($d->{'web'}) {
+if (&domain_has_website($d)) {
 	# Changing webserver port
 	foreach $p ("port", "sslport") {
 		$in{$p} =~ /^\d+$/ && $in{$p} > 0 && $in{$p} < 65536 ||
@@ -182,7 +182,7 @@ elsif (!$virt6 && $d->{'virt6'}) {
 	}
 
 # Update for web ports
-if ($d->{'web'}) {
+if (&domain_has_website($d)) {
 	$d->{'web_port'} = $in{'port'};
 	$d->{'web_sslport'} = $in{'sslport'};
 	}
@@ -256,7 +256,7 @@ foreach $sd (@doms) {
 	if ($d->{'virt6'} && &supports_ip6()) {
 		$sd->{'ip6'} = $d->{'ip6'};
 		}
-	if ($sd->{'web'}) {
+	if (&domain_has_website($sd)) {
 		$sd->{'web_port'} = $in{'port'};
 		$sd->{'web_sslport'} = $in{'sslport'};
 		}

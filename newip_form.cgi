@@ -105,7 +105,8 @@ if (&supports_ip6() && &can_use_feature("virt6")) {
 	}
 
 # HTTP and HTTPS ports
-if ($d->{'web'}) {
+$p = &domain_has_website($d);
+if ($p) {
 	$d->{'web_port'} ||= $tmpl->{'web_port'} || 80;
 	$d->{'web_sslport'} ||= $tmpl->{'web_sslport'} || 443;
 
