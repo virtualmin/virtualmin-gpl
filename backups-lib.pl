@@ -527,7 +527,7 @@ DOMAIN: foreach $d (@$doms) {
 				$ffile = "$backupdir/$d->{'dom'}_$f";
 				}
 			$fok = &$bfunc($d, $ffile, $opts->{$f}, $homefmt,
-				       $increment, $asd);
+				       $increment, $asd, $opts);
 			}
 		elsif (&indexof($f, &list_backup_plugins()) >= 0 &&
 		       $d->{$f}) {
@@ -535,7 +535,7 @@ DOMAIN: foreach $d (@$doms) {
 			$ffile = "$backupdir/$d->{'dom'}_$f";
 			$fok = &plugin_call($f, "feature_backup",
 					  $d, $ffile, $opts->{$f}, $homefmt,
-					  $increment, $asd);
+					  $increment, $asd, $opts);
 			}
 		if (defined($fok)) {
 			# See if it worked or not

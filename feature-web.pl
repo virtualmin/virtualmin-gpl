@@ -1286,15 +1286,17 @@ elsif ($d->{'proxy_pass_mode'} == 2) {
 return @dirs;
 }
 
-# backup_web(&domain, file)
+# backup_web(&domain, file, &opts, home-format?, incremental?, as-owner,
+# 	     &all-opts)
 # Save the virtual server's Apache config as a separate file, except for 
 # ServerAlias lines for alias domains
 sub backup_web
 {
-if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
+local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts) = @_;
+if ($d->{'alias'} && $d->{'alias_mode'}) {
 	# For an alias domain, just save the old ServerAlias entries
 	&$first_print($text{'backup_apachecp2'});
-	local $alias = &get_domain($_[0]->{'alias'});
+	local $alias = &get_domain($d->{'alias'});
 	local ($pvirt, $pconf) = &get_apache_virtual($alias->{'dom'},
 						     $alias->{'web_port'});
 	if (!$pvirt) {
@@ -1304,13 +1306,13 @@ if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
 	local @aliasnames;
 	foreach my $sa (&apache::find_directive_struct("ServerAlias", $pconf)) {
 		foreach my $w (@{$sa->{'words'}}) {
-			if ($w eq $_[0]->{'dom'} ||
-			    $w =~ /^([^\.]+)\.(\S+)/ && $2 eq $_[0]->{'dom'}) {
+			if ($w eq $d->{'dom'} ||
+			    $w =~ /^([^\.]+)\.(\S+)/ && $2 eq $d->{'dom'}) {
 				push(@aliasnames, $w);
 				}
 			}
 		}
-	&open_tempfile(FILE, ">$_[1]");
+	&open_tempfile(FILE, ">$file");
 	foreach my $a (@aliasnames) {
 		&print_tempfile(FILE, $a,"\n");
 		}
@@ -1318,14 +1320,14 @@ if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
 	return 1;
 	}
 &$first_print($text{'backup_apachecp'});
-local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
-					    $_[0]->{'web_port'});
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+					    $d->{'web_port'});
 if ($virt) {
 	local $lref = &read_file_lines($virt->{'file'});
 	local $l;
-	local @adoms = &get_domain_by("alias", $_[0]->{'id'});
+	local @adoms = &get_domain_by("alias", $d->{'id'});
 	local %adoms = map { $_->{'dom'}, 1 } @adoms;
-	&open_tempfile(FILE, ">$_[1]");
+	&open_tempfile(FILE, ">$file");
 	foreach $l (@$lref[$virt->{'line'} .. $virt->{'eline'}]) {
 		if ($l =~ /^\s*ServerAlias\s+(.*)/i) {
 			# Exclude ServerAlias entries for alias domains
@@ -1341,14 +1343,15 @@ if ($virt) {
 	&$second_print($text{'setup_done'});
 
 	# If the Apache log is outside the home, back it up too
-	local $alog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'});
-	if (!&is_under_directory($_[0]->{'home'}, $alog)) {
+	local $alog = &get_apache_log($d->{'dom'}, $d->{'web_port'});
+	if (!&is_under_directory($d->{'home'}, $alog) &&
+	    !$allopts->{'dir'}->{'dirnologs'}) {
 		&$first_print($text{'backup_apachelog'});
-		&copy_source_dest($alog, $_[1]."_alog");
-		local $elog = &get_apache_log($_[0]->{'dom'},
-					      $_[0]->{'web_port'}, 1);
-		if (!&is_under_directory($_[0]->{'home'}, $elog)) {
-			&copy_source_dest($elog, $_[1]."_elog");
+		&copy_source_dest($alog, $file."_alog");
+		local $elog = &get_apache_log($d->{'dom'},
+					      $d->{'web_port'}, 1);
+		if (!&is_under_directory($d->{'home'}, $elog)) {
+			&copy_source_dest($elog, $file."_elog");
 			}
 		&$second_print($text{'setup_done'});
 		}
