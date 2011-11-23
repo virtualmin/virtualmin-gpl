@@ -2223,11 +2223,20 @@ return undef;
 # Replaces stftime-style % codes in a path with the current time
 sub backup_strftime
 {
+local ($dest) = @_;
 eval "use POSIX";
 eval "use posix" if ($@);
 local @tm = localtime(time());
 &clear_time_locale() if (defined(&clear_time_locale));
-local $rv = strftime($_[0], @tm);
+local $rv;
+if ($dest =~ /^(.*)\@([^\@]+)$/) {
+	# Only modify hostname and path part
+	$rv = $1."\@".strftime($2, @tm);
+	}
+else {
+	# Fix up whole dest
+	$rv = strftime($dest, @tm);
+	}
 &reset_time_locale() if (defined(&reset_time_locale));
 return $rv;
 }
