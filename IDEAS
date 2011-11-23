@@ -67,8 +67,12 @@
 	- functional test?
 	- change_access_log / change_error_log
 	- set_public_html_dir
-	- newip_form.cgi
 	- ssl
+		- how to enable?
+		- API to enable
+		- enable SSL by default for domains on private ip
+		- limit to control access by domain owner
+		- cert_form.cgi
 
  - Include dovecot control files in backups, if located in a separate dir
 	- http://wiki.dovecot.org/MailLocation/Maildir

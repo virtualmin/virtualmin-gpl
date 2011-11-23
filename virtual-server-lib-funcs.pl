@@ -10542,6 +10542,7 @@ if (&can_create_sub_servers() && !$d->{'alias'} && $unixer->{'unix'}) {
 
 if ($d->{'ssl'} && $config{'ssl'} && $d->{'dir'} && &can_edit_ssl()) {
 	# SSL options page button
+	# XXX
 	push(@rv, { 'page' => 'cert_form.cgi',
 		    'title' => $text{'edit_cert'},
 		    'desc' => $text{'edit_certdesc'},
