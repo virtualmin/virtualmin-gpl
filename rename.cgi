@@ -189,8 +189,15 @@ foreach my $f (&unique(@features, 'mail')) {
 	local $mfunc = "modify_$f";
 	my $i;
 	for($i=0; $i<@doms; $i++) {
-		if ($doms[$i]->{$f} && $config{$f} ||
-	            $f eq "unix" || $f eq "mail") {
+		local $p = &domain_has_website($doms[$i]);
+		if ($f eq "web" && $p && $p ne "web") {
+			# Web feature is provided by a plugin .. call it now
+			$doing_dom = $doms[$i];
+			&try_plugin_call($f, "feature_modify",
+					 $doms[$i], $olddoms[$i]);
+			}
+		elsif ($doms[$i]->{$f} && $config{$f} ||
+	               $f eq "unix" || $f eq "mail") {
 			$doing_dom = $doms[$i];
 			local $main::error_must_die = 1;
 			eval {
@@ -228,9 +235,11 @@ foreach my $f (&unique(@features, 'mail')) {
 # Update plugins in all domains
 foreach $f (&list_feature_plugins()) {
 	for($i=0; $i<@doms; $i++) {
-		if ($doms[$i]->{$f}) {
+		local $p = &domain_has_website($doms[$i]);
+		if ($doms[$i]->{$f} && $f ne $p) {
 			$doing_dom = $doms[$i];
-			&try_plugin_call($f, "feature_modify", $doms[$i], $olddoms[$i]);
+			&try_plugin_call($f, "feature_modify",
+					 $doms[$i], $olddoms[$i]);
 			}
 		}
 	}
