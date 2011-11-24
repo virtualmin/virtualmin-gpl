@@ -2553,10 +2553,6 @@ if ($in{"web_mode"} == 2) {
 		&has_command("php") ||
 			&error($text{'tmpl_ephpcmd'});
 		}
-	if ($in{'web_php_suexec'} == 2 &&
-	    !$apache::httpd_modules{'mod_fcgid'}) {
-		&error($text{'tmpl_ephpmode2'});
-		}
 	$tmpl->{'web_php_suexec'} = $in{'web_php_suexec'};
 	$tmpl->{'web_phpver'} = $in{'web_phpver'};
 	if ($in{'web_phpchildren_def'} ||

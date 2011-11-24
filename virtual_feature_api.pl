@@ -360,6 +360,12 @@ sub feature_restart_web_php
 {
 }
 
+# feature_restart_web()
+# Restarts the webserver - typically called after the SSL cert is changed
+sub feature_restart_web
+{
+}
+
 # feature_restart_web_command([&domain])
 # Returns a command to restart the webserver, typically used after log file
 # rotation
@@ -492,6 +498,13 @@ sub feature_remove_web_webmail_redirect
 # feature_get_web_webmail_redirect(&domain)
 # The function must return 1 if webmail redirects are enabled, or 0 if not
 sub feature_get_web_webmail_redirect
+{
+}
+
+# feature_save_web_passphrase(&domain)
+# For a domain with SSL enabled, configure the webserver to use the passphrase
+# from ssl_pass in the domain object to decrypt the key
+sub feature_save_web_passphrase
 {
 }
 

@@ -69,6 +69,8 @@
 	- set_public_html_dir
 	- ssl
 		- cert_form.cgi
+		- ssl API functions
+		- save_domain_passphrase and similar funcs
 
  - Include dovecot control files in backups, if located in a separate dir
 	- http://wiki.dovecot.org/MailLocation/Maildir

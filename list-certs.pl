@@ -74,7 +74,7 @@ else {
 	}
 @doms || &usage("No virtual servers matching the domain names and usernames ".
 		"given were found");
-@doms = grep { $_->{'ssl'} } @doms;
+@doms = grep { $_->{'ssl_cert'} } @doms;
 @doms || &usage("None of the specified virtual servers have SSL enabled");
 if (!@types) {
 	@types = @alltypes;

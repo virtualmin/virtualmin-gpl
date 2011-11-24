@@ -911,6 +911,10 @@ return 0;
 sub save_domain_passphrase
 {
 local ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p ne "web") {
+	return &plugin_call($p, "feature_save_web_passphrase", $d);
+	}
 local $pass_script = "$ssl_passphrase_dir/$d->{'id'}";
 &lock_file($pass_script);
 local @pps = &apache::find_directive("SSLPassPhraseDialog", $conf);
@@ -1457,13 +1461,17 @@ sub obtain_lock_ssl
 local ($d) = @_;
 return if (!$config{'ssl'});
 &obtain_lock_anything($d);
-&obtain_lock_web($d);
+&obtain_lock_web($d) if ($d->{'web'});
 if ($main::got_lock_ssl == 0) {
 	local @sfiles = ($ENV{'MINISERV_CONFIG'} ||
 		         "$config_directory/miniserv.conf",
 		        $config_directory =~ /^(.*)\/webmin$/ ?
 		         "$1/usermin/miniserv.conf" :
 			 "/etc/usermin/miniserv.conf");
+	foreach my $k ('ssl_cert', 'ssl_key', 'ssl_chain') {
+		push(@sfiles, $d->{$k}) if ($d->{$k});
+		}
+	@sfiles = &unique(@sfiles);
 	foreach my $f (@sfiles) {
 		&lock_file($f);
 		}
@@ -1478,7 +1486,7 @@ sub release_lock_ssl
 {
 local ($d) = @_;
 return if (!$config{'ssl'});
-&release_lock_web($d);
+&release_lock_web($d) if ($d->{'web'});
 if ($main::got_lock_ssl == 1) {
 	foreach my $f (@main::got_lock_ssl_files) {
 		&unlock_file($f);

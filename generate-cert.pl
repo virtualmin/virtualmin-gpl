@@ -98,7 +98,7 @@ $dname || &usage("Missing --domain parameter");
 $self || $csr || &usage("One of the --self or --csr parameters must be given");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("No virtual server named $dname found");
-$d->{'ssl'} || &usage("Virtual server $dname does not have SSL enabled");
+$d->{'ssl_cert'} || &usage("Virtual server $dname does not have SSL enabled");
 
 if ($self) {
 	# Generate the self-signed cert, over-writing the existing file
@@ -129,7 +129,7 @@ if ($self) {
 	&$second_print(".. done");
 
 	# Remove any SSL passphrase on this domain
-	&$first_print("Configuring Apache to use it ..");
+	&$first_print("Configuring webserver to use it ..");
 	$d->{'ssl_pass'} = undef;
 	&save_domain_passphrase($d);
 	&save_domain($d);
@@ -148,7 +148,7 @@ if ($self) {
 	&$second_print(".. done");
 
 	# Re-start Apache
-	&register_post_action(\&restart_apache, 1);
+	&register_post_action(\&restart_website_server, $d, 1);
 	&run_post_actions();
 	}
 else {

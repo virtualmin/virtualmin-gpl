@@ -78,7 +78,7 @@ $dname || &usage("Missing --domain parameter");
 @got || &usage("No new certificates or keys given");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("No virtual server named $dname found");
-$d->{'ssl'} || &usage("Virtual server $dname does not have SSL enabled");
+$d->{'ssl_cert'} || &usage("Virtual server $dname does not have SSL enabled");
 if ($usenewkey) {
 	($clash) = grep { $_->[0] eq 'key' } @got;
 	$clash && &usage("--use-newkey and --key cannot both be given");
@@ -111,6 +111,7 @@ $passok || &usage("Private key is password-protected, but either none was entere
 $err = &check_cert_key_match($checkcert, $checkkey);
 $err && &usage("Certificate problems found : $err");
 
+# XXX nginx support
 &$first_print("Installing new SSL files ..");
 &obtain_lock_ssl($d);
 ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $d->{'web_sslport'});

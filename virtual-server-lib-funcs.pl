@@ -10540,9 +10540,8 @@ if (&can_create_sub_servers() && !$d->{'alias'} && $unixer->{'unix'}) {
 		}
 	}
 
-if ($d->{'ssl'} && $config{'ssl'} && $d->{'dir'} && &can_edit_ssl()) {
+if ($d->{'ssl_cert'} && $d->{'dir'} && &can_edit_ssl()) {
 	# SSL options page button
-	# XXX
 	push(@rv, { 'page' => 'cert_form.cgi',
 		    'title' => $text{'edit_cert'},
 		    'desc' => $text{'edit_certdesc'},
@@ -14938,6 +14937,20 @@ if ($d->{'dom'} ne $oldd->{'dom'} &&
         $alog =~ s/\Q$d->{'dom'}\E/$oldd->{'dom'}/;
         }
 return $alog;
+}
+
+# restart_website_server(&domain, [args])
+# Calls the restart function for the webserver for a domain
+sub restart_website_server
+{
+local ($d, @args) = @_;
+local $p = &domain_has_website($d);
+if ($p eq "web") {
+	&restart_apache(@args);
+	}
+else {
+	&plugin_call($p, "feature_restart_web", @args);
+	}
 }
 
 # list_ordered_features(&domain)
