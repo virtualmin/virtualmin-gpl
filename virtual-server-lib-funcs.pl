@@ -14953,6 +14953,32 @@ else {
 	}
 }
 
+# save_website_ssl_file(&domain, "cert"|"key"|"ca", file)
+# Configure the webserver for some domain to use a file as the SSL cert or key
+sub save_website_ssl_file
+{
+local ($d, $type, $file) = @_;
+local $p = &domain_has_website($d);
+if ($p ne "web") {
+	return &plugin_call($p, "feature_save_web_ssl_file", $d, $type, $file);
+	}
+&obtain_lock_ssl($d);
+local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+						   $d->{'web_sslport'});
+local $dir = $type eq 'cert' ? "SSLCertificateFile" :
+	     $type eq 'key' ? "SSLCertificateKeyFile" :
+	     $type eq 'ca' ? "SSLCACertificateFile" : undef;
+if ($dir) {
+	&apache::save_directive($dir, [ $file ], $vconf, $conf);
+	}
+&release_lock_ssl($d);
+if ($dir) {
+	&flush_file_lines($virt->{'file'});
+	&register_post_action(\&restart_apache, 1);
+	}
+return undef;
+}
+
 # list_ordered_features(&domain)
 # Returns a list of features or plugins possibly relevant to some domain,
 # in dependency order

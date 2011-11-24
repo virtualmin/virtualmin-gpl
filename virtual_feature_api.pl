@@ -508,6 +508,12 @@ sub feature_save_web_passphrase
 {
 }
 
+# feature_save_web_ssl_file(&domain, "cert"|"key"|"ca", file)
+# Sets the file used by a domain's webserver as an SSH cert or key
+sub feature_save_web_ssl_file
+{
+}
+
 # feature_startstop()
 # If this feature has a server process, this function should return a hash
 # with 'status', 'desc' and 'links' keys.

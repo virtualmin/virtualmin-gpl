@@ -111,10 +111,7 @@ $passok || &usage("Private key is password-protected, but either none was entere
 $err = &check_cert_key_match($checkcert, $checkkey);
 $err && &usage("Certificate problems found : $err");
 
-# XXX nginx support
 &$first_print("Installing new SSL files ..");
-&obtain_lock_ssl($d);
-($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $d->{'web_sslport'});
 $changed = 0;
 foreach $g (@got) {
 	$d->{'ssl_'.$g->[0]} ||= &default_certificate_file($d, $g->[0]);
@@ -124,27 +121,10 @@ foreach $g (@got) {
 	&close_tempfile_as_domain_user($d, SSL);
 	&set_certificate_permissions($d, $d->{'ssl_'.$g->[0]});
 	&unlock_file($d->{'ssl_'.$g->[0]});
-	if ($g->[0] eq 'cert') {
-		&apache::save_directive("SSLCertificateFile",
-			[ $d->{'ssl_cert'} ], $vconf, $conf);
-		$changed++;
-		}
-	elsif ($g->[0] eq 'key') {
-		&apache::save_directive("SSLCertificateKeyFile",
-			[ $d->{'ssl_key'} ], $vconf, $conf);
-		$changed++;
-		}
-	elsif ($g->[0] eq 'ca') {
-		&apache::save_directive("SSLCACertificateFile",
-			[ $d->{'ssl_ca'} ], $vconf, $conf);
-		$changed++;
+	if ($g->[0] ne 'csr') {
+		&save_website_ssl_file($d, $g->[0], $d->{'ssl_'.$g->[0]});
 		}
 	}
-if ($changed) {
-	&flush_file_lines($virt->{'file'});
-	&register_post_action(\&restart_apache, 1);
-	}
-&release_lock_ssl($d);
 &$second_print(".. done");
 
 # Remove old private key and CSR, as they are now installed
