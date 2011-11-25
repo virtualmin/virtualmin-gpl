@@ -49,7 +49,7 @@ foreach $i (@cert_attributes) {
 	}
 
 # Other domains using same cert, such as via wildcards or UCC
-@others = grep { $_->{'ssl_cert'} } &get_domain_by("ssl_same", $d->{'id'});
+@others = grep { &domain_has_ssl($_) } &get_domain_by("ssl_same", $d->{'id'});
 if (@others) {
 	print &ui_table_row($text{'cert_also'},
 		&ui_links_row([

@@ -10540,7 +10540,7 @@ if (&can_create_sub_servers() && !$d->{'alias'} && $unixer->{'unix'}) {
 		}
 	}
 
-if ($d->{'ssl_cert'} && $d->{'dir'} && &can_edit_ssl()) {
+if (&domain_has_ssl($d) && $d->{'dir'} && &can_edit_ssl()) {
 	# SSL options page button
 	push(@rv, { 'page' => 'cert_form.cgi',
 		    'title' => $text{'edit_cert'},
@@ -14903,6 +14903,20 @@ my ($d) = @_;
 return 'web' if ($d->{'web'} && $config{'web'});
 foreach my $p (&list_feature_plugins()) {
 	if ($d->{$p} && &plugin_call($p, "feature_provides_web")) {
+		return $p;
+		}
+	}
+return undef;
+}
+
+# domain_has_ssl(&domain)
+# Returns 1 if a domain has a website with SSL, either via apache or a plugin
+sub domain_has_ssl
+{
+my ($d) = @_;
+return 'ssl' if ($d->{'ssl'} && $config{'ssl'});
+foreach my $p (&list_feature_plugins()) {
+	if ($d->{$p} && &plugin_call($p, "feature_provides_ssl")) {
 		return $p;
 		}
 	}

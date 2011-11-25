@@ -78,7 +78,8 @@ $dname || &usage("Missing --domain parameter");
 @got || &usage("No new certificates or keys given");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("No virtual server named $dname found");
-$d->{'ssl_cert'} || &usage("Virtual server $dname does not have SSL enabled");
+&domain_has_ssl($d) ||
+	&usage("Virtual server $dname does not have SSL enabled");
 if ($usenewkey) {
 	($clash) = grep { $_->[0] eq 'key' } @got;
 	$clash && &usage("--use-newkey and --key cannot both be given");

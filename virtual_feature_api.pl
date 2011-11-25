@@ -273,6 +273,12 @@ sub feature_provides_web
 {
 }
 
+# feature_provides_ssl()
+# Returns 1 if this plugin provides an SSL website feature
+sub feature_provides_ssl
+{
+}
+
 # feature_web_supports_suexec([&domain])
 # If a feature provides a website, this function must return 1 if scripts can
 # be run as the domain owner, 0 if not, or -1 if they always are.

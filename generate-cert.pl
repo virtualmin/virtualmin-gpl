@@ -98,7 +98,8 @@ $dname || &usage("Missing --domain parameter");
 $self || $csr || &usage("One of the --self or --csr parameters must be given");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("No virtual server named $dname found");
-$d->{'ssl_cert'} || &usage("Virtual server $dname does not have SSL enabled");
+&domain_has_ssl($d) ||
+	&usage("Virtual server $dname does not have SSL enabled");
 
 if ($self) {
 	# Generate the self-signed cert, over-writing the existing file
