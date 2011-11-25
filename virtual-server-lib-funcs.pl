@@ -14979,6 +14979,26 @@ if ($dir) {
 return undef;
 }
 
+# get_website_ssl_file(&domain, "cert"|"key"|"ca")
+# Looks up the SSL cert, key or chained CA file for some domain
+sub get_website_ssl_file
+{
+local ($d, $type) = @_;
+local $p = &domain_has_website($d);
+if ($p ne "web") {
+        return &plugin_call($p, "feature_get_web_ssl_file", $d, $type);
+        }
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+					    $d->{'web_sslport'});
+return undef if (!$virt);
+local $dir = $type eq 'cert' ? "SSLCertificateFile" :
+	     $type eq 'key' ? "SSLCertificateKeyFile" :
+	     $type eq 'ca' ? "SSLCACertificateFile" : undef;
+return undef if (!$dir);
+local ($file) = &apache::find_directive($dir, $vconf);
+return $file;
+}
+
 # list_ordered_features(&domain)
 # Returns a list of features or plugins possibly relevant to some domain,
 # in dependency order

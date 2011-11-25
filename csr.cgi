@@ -29,6 +29,10 @@ if ($in{'subjectAltName'}) {
 
 if (!$in{'self'}) {
 	# Generate the private key and CSR
+	&ui_print_header(&domain_in($d), $text{'csr_title'}, "");
+
+	&$first_print($text{'csr_selfing'});
+	&obtain_lock_ssl($d);
 	$d->{'ssl_csr'} ||= &default_certificate_file($d, "csr");
 	$d->{'ssl_newkey'} ||= &default_certificate_file($d, "newkey");
 	&lock_file($d->{'ssl_csr'});
@@ -49,14 +53,13 @@ if (!$in{'self'}) {
 	&set_certificate_permissions($d, $d->{'ssl_csr'});
 	&unlock_file($d->{'ssl_newkey'});
 	&unlock_file($d->{'ssl_csr'});
+	&release_lock_ssl($d);
+	&$second_print($text{'setup_done'});
 
 	# Save the domain
 	&save_domain($d);
 	&run_post_actions();
 	&webmin_log("newcsr", "domain", $d->{'dom'}, $d);
-
-	# Show the output
-	&ui_print_header(&domain_in($d), $text{'csr_title'}, "");
 
 	print "$text{'csr_done'}<p>\n";
 
@@ -70,6 +73,10 @@ if (!$in{'self'}) {
 	}
 else {
 	# Create key and cert files
+	&ui_print_header(&domain_in($d), $text{'csr_title2'}, "");
+
+	&$first_print($text{'csr_selfing'});
+	&obtain_lock_ssl($d);
 	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 	$d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
 	$err = &generate_self_signed_cert(
@@ -85,21 +92,11 @@ else {
 				   \@alts,
 				   $d);
 	&error($err) if ($err);
-
-	&ui_print_header(&domain_in($d), $text{'csr_title2'}, "");
+	&$second_print($text{'setup_done'});
 	
 	# Make sure Apache is setup to use the right key files
-	&obtain_lock_ssl($d);
-	&require_apache();
-	$conf = &apache::get_config();
-	($virt, $vconf) = &get_apache_virtual($d->{'dom'},
-					      $d->{'web_sslport'});
-	&apache::save_directive("SSLCertificateFile", [ $d->{'ssl_cert'} ],
-				$vconf, $conf);
-	&apache::save_directive("SSLCertificateKeyFile", [ $d->{'ssl_key'} ],
-				$vconf, $conf);
-	&flush_file_lines();
-	&release_lock_ssl($d);
+	&save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
+	&save_website_ssl_file($d, "key", $d->{'ssl_key'});
 
 	# Remove any SSL passphrase
 	$d->{'ssl_pass'} = undef;
@@ -108,6 +105,7 @@ else {
 	# Set permissions
 	&set_certificate_permissions($d, $d->{'ssl_cert'});
 	&set_certificate_permissions($d, $d->{'ssl_key'});
+	&release_lock_ssl($d);
 
 	# Copy to other domains using same cert. Only the password needs to be
 	# copied though, as the cert file isn't changing
@@ -119,8 +117,6 @@ else {
 		&release_lock_ssl($od);
 		}
 
-	# Re-start Apache
-	&register_post_action(\&restart_apache, 1);
 	&save_domain($d);
 	&run_post_actions();
 	&webmin_log("newself", "domain", $d->{'dom'}, $d);

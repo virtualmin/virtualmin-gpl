@@ -2585,6 +2585,8 @@ csr_ecsr=OpenSSL error : $1
 csr_done=The certificate signing request has been successfully generated, and can now be submitted to a CA for signing.
 csr_csr=The CSR for this virtual server, saved in $1, is :
 csr_key=The new private key for this virtual server, saved in $1, is :
+csr_selfing=Generating self-signed certificate and private key ..
+csr_csring=Generating signing request and and private key ..
 
 newkey_title=Installing Certificate
 newkey_err=Failed to install certificate

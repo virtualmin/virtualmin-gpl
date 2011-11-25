@@ -30,20 +30,10 @@ $certerr && &error(&text('newkey_ematch', $certerr));
 
 # Make sure Apache is setup to use the right key files
 &obtain_lock_ssl($d);
-&require_apache();
-$conf = &apache::get_config();
-($virt, $vconf) = &get_apache_virtual($d->{'dom'},
-                                      $d->{'web_sslport'});
-
 $d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 $d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
-&apache::save_directive("SSLCertificateFile", [ $d->{'ssl_cert'} ],
-			$vconf, $conf);
-&apache::save_directive("SSLCertificateKeyFile", [ $d->{'ssl_key'} ],
-			$vconf, $conf);
-&flush_file_lines($virt->{'file'});
-&release_lock_ssl($d);
-&register_post_action(\&restart_apache, 1);
+&save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
+&save_website_ssl_file($d, "key", $d->{'ssl_key'});
 
 # If a passphrase is needed, add it to the top-level Apache config. This is
 # done by creating a small script that outputs the passphrase
@@ -70,6 +60,7 @@ $d->{'ssl_pass'} = $passok == 2 ? $in{'pass'} : undef;
 &$second_print($text{'setup_done'});
 
 # Remove the new private key we just installed
+&release_lock_ssl($d);
 if ($d->{'ssl_newkey'}) {
 	$newkeyfile = &read_file_contents_as_domain_user(
 		$d, $d->{'ssl_newkey'});
@@ -91,7 +82,6 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	&save_domain_passphrase($od);
 	}
 
-# Re-start Apache
 &run_post_actions();
 &webmin_log("newkey", "domain", $d->{'dom'}, $d);
 

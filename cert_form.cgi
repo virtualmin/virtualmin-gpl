@@ -49,7 +49,7 @@ foreach $i (@cert_attributes) {
 	}
 
 # Other domains using same cert, such as via wildcards or UCC
-@others = grep { $_->{'ssl'} } &get_domain_by("ssl_same", $d->{'id'});
+@others = grep { $_->{'ssl_cert'} } &get_domain_by("ssl_same", $d->{'id'});
 if (@others) {
 	print &ui_table_row($text{'cert_also'},
 		&ui_links_row([
@@ -199,7 +199,7 @@ print &ui_form_end([ [ "ok", $text{'cert_newok'} ] ]);
 print &ui_tabs_end_tab();
 
 # CA certificate form
-$chain = &get_chained_certificate_file($d);
+$chain = &get_website_ssl_file($d, 'ca');
 print &ui_tabs_start_tab("mode", "chain");
 print "$text{'cert_desc5'}<p>\n";
 

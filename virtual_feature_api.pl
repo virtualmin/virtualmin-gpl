@@ -508,8 +508,14 @@ sub feature_save_web_passphrase
 {
 }
 
+# feature_get_web_ssl_file(&domain, "cert"|"key"|"ca")
+# Returns the file used by a domain's webserver as an SSL cert or key
+sub feature_get_web_ssl_file
+{
+}
+
 # feature_save_web_ssl_file(&domain, "cert"|"key"|"ca", file)
-# Sets the file used by a domain's webserver as an SSH cert or key
+# Sets the file used by a domain's webserver as an SSL cert or key
 sub feature_save_web_ssl_file
 {
 }

@@ -165,7 +165,7 @@ if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin") &&
 # Copy chained CA cert in from domain with same IP, if any
 $_[0]->{'web_sslport'} = $web_sslport;
 if ($chained) {
-	&save_chained_certificate_file($_[0], $chained);
+	&save_website_ssl_file($_[0], 'ca', $chained);
 	}
 
 &release_lock_web($_[0]);
@@ -325,7 +325,7 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[1]->{'ssl_same'}) {
 		$_[0]->{'ssl_cert'} = $sslclash->{'ssl_cert'};
 		$_[0]->{'ssl_key'} = $sslclash->{'ssl_key'};
 		$_[0]->{'ssl_same'} = $sslclash->{'id'};
-		$chained = &get_chained_certificate_file($sslclash);
+		$chained = &get_website_ssl_file($sslclash, 'ca');
 		$_[0]->{'ssl_chain'} = $chained;
 		}
 	else {
@@ -1136,34 +1136,6 @@ if ($d->{'ssl_chain'}) {
 return @dirs;
 }
 
-# get_chained_certificate_file(&domain)
-# Returns the file used for the chained cert, or undef if not set
-sub get_chained_certificate_file
-{
-local ($d) = @_;
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
-					    $d->{'web_sslport'});
-return undef if (!$virt);
-local ($cert) = &apache::find_directive("SSLCACertificateFile", $vconf);
-return $cert;
-}
-
-# save_chained_certificate_file(&domain, [file])
-# Updates the chained cert file, or removed it if file is undef
-sub save_chained_certificate_file
-{
-local ($d, $file) = @_;
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
-					    $d->{'web_sslport'});
-return undef if (!$virt);
-&lock_file($virt->{'file'});
-&apache::save_directive("SSLCACertificateFile", $file ? [ $file ] : [ ],
-			$vconf,$conf);
-&flush_file_lines($virt->{'file'});
-&unlock_file($virt->{'file'});
-&register_post_action(\&restart_apache);
-}
-
 # check_certificate_data(data)
 # Checks if some data looks like a valid cert. Returns undef if OK, or an error
 # message if not
@@ -1512,7 +1484,7 @@ if ($sslclash && &check_domain_certificate($d->{'dom'}, $sslclash)) {
 	$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
 	$d->{'ssl_key'} = $sslclash->{'ssl_key'};
 	$d->{'ssl_same'} = $sslclash->{'id'};
-	$d->{'ssl_chain'} = &get_chained_certificate_file($sslclash);
+	$d->{'ssl_chain'} = &get_website_ssl_file($sslclash, 'ca');
 	}
 }
 

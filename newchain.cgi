@@ -8,7 +8,7 @@ $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_ssl() || &error($text{'edit_ecannot'});
 
 # Validate and store inputs
-$oldchain = &get_chained_certificate_file($d);
+$oldchain = &get_website_ssl_file($d, 'ca');
 if ($in{'mode'} == 0) {
 	# No file
 	$chain = undef;
@@ -61,12 +61,15 @@ elsif ($in{'mode'} == 3) {
 
 # Apply it, including domains that share a cert
 &set_all_null_print();
-&save_chained_certificate_file($d, $chain);
+&obtain_lock_ssl($d);
+$err = &save_website_ssl_file($d, 'ca', $chain);
+&error($err) if ($err);
 $d->{'ssl_chain'} = $chain;
+&release_lock_ssl($d);
 &save_domain($d);
 foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	$od->{'ssl_chain'} = $chain;
-	&save_chained_certificate_file($od, $chain);
+	&save_website_ssl_file($od, 'ca', $chain);
 	&save_domain($od);
 	}
 
