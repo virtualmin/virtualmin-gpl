@@ -147,6 +147,7 @@ $clone_prefix = &compute_prefix($test_clone_domain, $test_clone_domain_user,
 		 'group' => $test_domain_user,
 		 'template' => &get_init_template() );
 $test_full_user = &userdom_name($test_user, \%test_domain);
+$test_full_user_mysql = &mysql_username($test_full_user);
 ($test_target_domain_user) = &unixuser_name($test_target_domain);
 $test_target_domain_db = 'targetdb';
 $test_domain_home = $test_domain{'home'} =
@@ -169,6 +170,7 @@ $test_clone_domain_home = $test_clone_domain{'home'} =
 	&server_home_directory(\%test_clone_domain);
 $test_clone_domain_db = &database_name(\%test_clone_domain);
 $test_full_clone_user = &userdom_name($test_user, \%test_clone_domain);
+$test_full_clone_user_mysql = &mysql_username($test_full_clone_user);
 
 # Create PostgreSQL password file
 $pg_pass_file = "/tmp/pgpass.txt";
@@ -568,7 +570,7 @@ $mailbox_tests = [
 	},
 
 	# Check user's MySQL login
-	{ 'command' => 'mysql -u '.$test_full_user.' -pnewpass '.$test_domain_db.' -e "select version()"',
+	{ 'command' => 'mysql -u '.$test_full_user_mysql.' -pnewpass '.$test_domain_db.' -e "select version()"',
 	},
 
 	# Delete the user
@@ -1784,13 +1786,13 @@ $dbbackup_tests = [
 	},
 
 	# Create a MySQL user who would clash on restore
-	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' mysql -e "create user \''.$test_full_user.'\'@localhost identified by \'blah\';"',
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' mysql -e "create user \''.$test_full_user_mysql.'\'@localhost identified by \'blah\';"',
 	},
-	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' mysql -e "grant all on '.$test_domain_db.'.* to \''.$test_full_user.'\'@localhost;"',
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' mysql -e "grant all on '.$test_domain_db.'.* to \''.$test_full_user_mysql.'\'@localhost;"',
 	},
 
 	# Verify that the manually created user works
-	{ 'command' => 'mysql -u '.$test_full_user.' -pblah '.$test_domain_db.' -e "desc foo"',
+	{ 'command' => 'mysql -u '.$test_full_user_mysql.' -pblah '.$test_domain_db.' -e "desc foo"',
 	 'grep' => 'int\(4\)',
         },
 
@@ -1842,10 +1844,10 @@ $dbbackup_tests = [
 	},
 
 	# Verify that mailbox user can access DBs
-	{ 'command' => 'mysql -u '.$test_full_user.' -psmeg '.$test_domain_db.' -e "desc foo"',
+	{ 'command' => 'mysql -u '.$test_full_user_mysql.' -psmeg '.$test_domain_db.' -e "desc foo"',
 	 'grep' => 'int\(4\)',
         },
-	{ 'command' => 'mysql -u '.$test_full_user.' -psmeg '.$test_domain_db.'_extra -e "desc bar"',
+	{ 'command' => 'mysql -u '.$test_full_user_mysql.' -psmeg '.$test_domain_db.'_extra -e "desc bar"',
 	 'grep' => 'int\(4\)',
         },
 
@@ -1912,7 +1914,7 @@ $dbbackup_tests = [
 	  'cleanup' => 1,
 	  'ignorefail' => 1,
 	},
-	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' mysql -e "drop user if exists \''.$test_full_user.'\'@localhost;"',
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' mysql -e "drop user if exists \''.$test_full_user_mysql.'\'@localhost;"',
 	  'cleanup' => 1,
 	  'ignorefail' => 1,
 	},
@@ -2934,7 +2936,7 @@ $webmin_tests = [
 $remote_tests = [
 	# Test domain creation via remote API
 	{ 'command' => $webmin_wget_command.
-		       "'${webmin_proto}://localhost:${webmin_port}/virtual-server/remote.cgi?program=create-domain&domain=$test_domain&pass=smeg&dir=&unix=&web=&dns=&mail=&webalizer=&mysql=&logrotate=&webmin=&".join("&", map { $_->[0]."=" } @create_args)."'",
+		       "'${webmin_proto}://localhost:${webmin_port}/virtual-server/remote.cgi?program=create-domain&domain=$test_domain&pass=smeg&dir=&unix=&$web=&dns=&mail=&webalizer=&mysql=&logrotate=&webmin=&".join("&", map { $_->[0]."=" } @create_args)."'",
 	  'grep' => 'Exit status: 0',
 	},
 
@@ -3026,19 +3028,22 @@ $ssl_tests = [
 	  'grep' => 'PHP Version',
 	},
 
-	# Switch PHP mode to CGI
-	{ 'command' => 'modify-web.pl',
-	  'args' => [ [ 'domain' => $test_domain ],
-		      [ 'mode', 'cgi' ] ],
-	},
+	$supports_cgi ? (
+		# Switch PHP mode to CGI
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain' => $test_domain ],
+			      [ 'mode', 'cgi' ] ],
+		},
 
-	# Check PHP running via CGI via HTTPS
-	{ 'command' => 'echo "<?php system(\'id -a\'); ?>" >~'.
-		       $test_domain_user.'/public_html/test.php',
-	},
-	{ 'command' => $wget_command.'https://'.$test_domain.'/test.php',
-	  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
-	},
+		# Check PHP running via CGI via HTTPS
+		{ 'command' => 'echo "<?php system(\'id -a\'); ?>" >~'.
+			       $test_domain_user.'/public_html/test.php',
+		},
+		{ 'command' => $wget_command.
+			       'https://'.$test_domain.'/test.php',
+		  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+		},
+		) : ( ),
 
 	# Test generation of a new self-signed cert
 	{ 'command' => 'generate-cert.pl',
@@ -4860,11 +4865,13 @@ $clone_tests = [
 		      [ 'autoreply', 'User autoreply' ] ],
 	},
 
-	# Switch PHP mode to CGI
-	{ 'command' => 'modify-web.pl',
-	  'args' => [ [ 'domain' => $test_domain ],
-		      [ 'mode', 'cgi' ] ],
-	},
+	$supports_cgi ? (
+		# Switch PHP mode to CGI
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain' => $test_domain ],
+			      [ 'mode', 'cgi' ] ],
+		},
+		) : ( ),
 
 	# Clone it
 	{ 'command' => 'clone-domain.pl',
@@ -4982,9 +4989,9 @@ $clone_tests = [
 	},
 
 	# Check MySQL login by mailbox user
-	{ 'command' => 'mysql -u '.$test_full_clone_user.' -pspod '.$test_clone_domain_db.' -e "select version()"',
+	{ 'command' => 'mysql -u '.$test_full_clone_user_mysql.' -pspod '.$test_clone_domain_db.' -e "select version()"',
 	},
-	{ 'command' => 'mysql -u '.$test_full_clone_user.' -pspod '.$test_clone_domain_db.'_extra -e "select version()"',
+	{ 'command' => 'mysql -u '.$test_full_clone_user_mysql.' -pspod '.$test_clone_domain_db.'_extra -e "select version()"',
 	},
 
 	# Check PHP running via CGI
@@ -5081,11 +5088,13 @@ $clonesub_tests = [
 		      [ 'autoreply', 'User autoreply' ] ],
 	},
 
-	# Switch PHP mode to CGI
-	{ 'command' => 'modify-web.pl',
-	  'args' => [ [ 'domain' => $test_subdomain ],
-		      [ 'mode', 'cgi' ] ],
-	},
+	$supports_cgi ? (
+		# Switch PHP mode to CGI
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain' => $test_subdomain ],
+			      [ 'mode', 'cgi' ] ],
+		},
+		) : ( ),
 
 	# Clone it
 	{ 'command' => 'clone-domain.pl',
@@ -5183,9 +5192,9 @@ $clonesub_tests = [
 	},
 
 	# Check MySQL login by mailbox user
-	{ 'command' => 'mysql -u '.$test_full_clone_user.' -pspod exampleclone -e "select version()"',
+	{ 'command' => 'mysql -u '.$test_full_clone_user_mysql.' -pspod exampleclone -e "select version()"',
 	},
-	{ 'command' => 'mysql -u '.$test_full_clone_user.' -pspod exampleclone_extra -e "select version()"',
+	{ 'command' => 'mysql -u '.$test_full_clone_user_mysql.' -pspod exampleclone_extra -e "select version()"',
 	},
 
 	# Cleanup all the domains
@@ -5337,7 +5346,7 @@ $hashpass_tests = [
 	},
 
 	# Check MySQL login for the mailbox
-	{ 'command' => 'mysql -u '.$test_full_user.' -psmeg '.$test_domain_db.' -e "select version()"',
+	{ 'command' => 'mysql -u '.$test_full_user_mysql.' -psmeg '.$test_domain_db.' -e "select version()"',
 	},
 
 	# Change password
@@ -5361,7 +5370,7 @@ $hashpass_tests = [
 	},
 
 	# Check MySQL login for the mailbox with new password
-	{ 'command' => 'mysql -u '.$test_full_user.' -pnewpass '.$test_domain_db.' -e "select version()"',
+	{ 'command' => 'mysql -u '.$test_full_user_mysql.' -pnewpass '.$test_domain_db.' -e "select version()"',
 	},
 
 	# Create a sub-server
