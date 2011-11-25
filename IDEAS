@@ -63,10 +63,7 @@
 	- https://www.virtualmin.com/node/19460
 
  - NGINX support
-	- plugin
-	- functional test?
-	- change_access_log / change_error_log
-	- set_public_html_dir
+	- functional test
 
  - Include dovecot control files in backups, if located in a separate dir
 	- http://wiki.dovecot.org/MailLocation/Maildir
