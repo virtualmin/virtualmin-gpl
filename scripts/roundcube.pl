@@ -45,6 +45,13 @@ sub script_roundcube_php_vers
 return ( 5 );
 }
 
+# script_roundcube_php_vars(&domain)
+# Returns an array of extra PHP variables needed for this script
+sub script_roundcube_php_vars
+{
+return ( [ 'suhosin.session.encrypt', 'Off' ] );
+}
+
 # script_roundcube_depends(&domain, version)
 sub script_roundcube_depends
 {
