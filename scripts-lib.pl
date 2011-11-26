@@ -731,6 +731,10 @@ if (-r $phpini && &foreign_check("phpini")) {
 
 	if ($anyini) {
 		&write_as_domain_user($d, sub { &flush_file_lines($phpini) });
+		local $p = &domain_has_website($d);
+		if ($p ne "web") {
+			&plugin_call($p, "feature_restart_web_php", $d);
+			}
 		}
 	}
 
