@@ -485,6 +485,7 @@ print &ui_hidden_table_start($text{'edit_featuresect'}, "width=100%", 2,
 			     "feature", 0);
 @grid = ( );
 $i = 0;
+$can_website = 0;
 foreach $f (@dom_features) {
 	# Don't allow access to features that this user hasn't been
 	# granted for his subdomains.
@@ -494,6 +495,7 @@ foreach $f (@dom_features) {
 	next if ($aliasdom && !$aliasdom->{$f});
 	next if (!$config{$f} && defined($config{$f}));		# Not enabled
 	$can_feature{$f}++;
+	$can_website = 1 if ($f eq 'web');
 
 	if ($config{$f} == 3) {
 		# This feature is always on, so don't show it
@@ -514,6 +516,7 @@ foreach $f (@fplugins) {
 	next if (!&plugin_call($f, "feature_suitable",
 				$parentdom, $aliasdom, $subdom));
 	next if (!&can_use_feature($f));
+	$can_website = 1 if (&plugin_call($f, "feature_provides_web"));
 
 	$label = &plugin_call($f, "feature_label", 0);
 	$label = "<b>$label</b>";
@@ -545,7 +548,7 @@ print &ui_hidden_table_start($text{'form_proxysect'}, "width=100%", 2,
 			     "proxy", 0, [ "width=30%" ]);
 
 # Show inputs for setting up a proxy-only virtual server
-if ($can_feature{'web'} && $config{'proxy_pass'} && !$aliasdom) {
+if ($can_website && $config{'proxy_pass'} && !$aliasdom) {
 	print &frame_fwd_input();
 	}
 
@@ -595,7 +598,7 @@ if (&can_dnsip()) {
 
 print &ui_hidden_table_end();
 
-if ($can_feature{'web'} && !$aliasdom && $config{'web'} && $virtualmin_pro) {
+if ($can_website && !$aliasdom && $virtualmin_pro) {
 	# Show field for initial content
 	print &ui_hidden_table_start($text{'form_park'}, "width=100%", 2,
 				     "park", 0);

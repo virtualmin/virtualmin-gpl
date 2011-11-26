@@ -80,7 +80,7 @@ if (!$aliasdom && $d->{'dir'}) {
 			    "<tt>$d->{'home'}</tt>");
 	}
 
-if ($d->{'proxy_pass_mode'} && $d->{'proxy_pass'} && $d->{'web'}) {
+if ($d->{'proxy_pass_mode'} && $d->{'proxy_pass'} && &domain_has_website($d)) {
 	# Show forwarding / proxy destination
 	print &ui_table_row($text{'edit_proxy'.$d->{'proxy_pass_mode'}},
 			    "<tt>$d->{'proxy_pass'}</tt>");

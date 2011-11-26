@@ -175,7 +175,7 @@ if (!$parentuser) {
 	}
 if (!$aliasdom) {
 	# Validate non-alias domain inputs
-	if ($config{'proxy_pass'} && $in{'web'} && !$in{'proxy_def'} &&
+	if ($config{'proxy_pass'} && !$in{'proxy_def'} &&
 	    defined($in{'proxy'})) {
 		($proxy = $in{'proxy'}) =~ /^(http|https):\/\/\S+$/ ||
 			&error($text{'setup_eproxy'});
@@ -447,7 +447,8 @@ if ($add_fwdto) {
 	}
 
 # Copy initial website style
-if (defined($in{'content'}) && !$in{'content_def'} && $dom{'web'}) {
+if (defined($in{'content'}) && !$in{'content_def'} &&
+    &domain_has_website(\%dom)) {
 	if ($style) {
 		&$first_print(&text('setup_styleing', $style->{'desc'}));
 		$in{'content'} =~ s/\r//g;

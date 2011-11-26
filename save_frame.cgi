@@ -33,10 +33,9 @@ $merr = &making_changes();
 
 &ui_print_unbuffered_header(&domain_in($d), $text{'frame_title'}, "");
 
-&obtain_lock_web($d);
-&modify_web($d, $oldd);
-if ($d->{'ssl'}) {
-	&modify_ssl($d, $oldd);
+# Call all modify funcs
+foreach $f (&list_ordered_features($d)) {
+	&call_feature_func($f, $d, $oldd);
 	}
 
 if ($in{'enabled'}) {
@@ -52,7 +51,6 @@ print $text{'save_domain'},"<br>\n";
 print $text{'setup_done'},"<p>\n";
 
 # Run the after command
-&release_lock_web($d);
 &run_post_actions();
 &set_domain_envs($d, "MODIFY_DOMAIN", undef, \%oldd);
 local $merr = &made_changes();
