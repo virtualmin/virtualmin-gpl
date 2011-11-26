@@ -65,6 +65,8 @@
  - NGINX support
 	- cannot enable IPv6 address when default listen exists?
 	- functional test
+		- mail move quota redirect remote rename reseller web webmin wildcard
+	- test on centos 6
 	- docs
 	- beta test
 
