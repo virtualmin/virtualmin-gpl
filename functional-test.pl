@@ -19,6 +19,7 @@ if (!$module_name) {
 	}
 $ENV{'PATH'} = "$module_root_directory:$ENV{'PATH'}";
 &require_mysql();
+$mysql::mysql_login ||= 'root';
 
 # Make sure wget doesn't use a cache
 $ENV{'http_proxy'} = undef;
