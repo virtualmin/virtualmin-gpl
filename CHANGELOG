@@ -1318,3 +1318,4 @@ The list of sub-servers under a top-level server has been moved from the Edit Vi
 Added the --skip-warnings flag to the modify-domain API command, to ignore warnings related to new features from a plan change.
 MySQL connection limits for domain owners and mailboxes can now be set at the template level, and will be applied to new virtual servers and mail users with database access.
 When the email feature is disabled for a domain, all mail aliases are now removed and saved by Virtualmin. If email is later re-enabled, aliases will be restored.
+Expanded the Virtualmin plugin API to allow a plugin to replace the core Apache website feature, for example with Nginx.

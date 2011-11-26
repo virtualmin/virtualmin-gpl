@@ -1,0 +1,4 @@
+desc=Alternate webserver support
+html=Expanded the Virtualmin plugin API to allow a plugin to replace the core Apache website feature, for example with Nginx.
+master=1
+link=edit_newfeatures.cgi

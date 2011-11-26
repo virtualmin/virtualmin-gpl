@@ -63,11 +63,9 @@
 	- https://www.virtualmin.com/node/19460
 
  - NGINX support
+	- cannot enable IPv6 address when default listen exists?
 	- functional test
-	- cannot use 'ssl_cert' to check if a domain has SSL, need new
-	  function instead 
 	- docs
-	- CHANGELOG
 	- beta test
 
  - Include dovecot control files in backups, if located in a separate dir
