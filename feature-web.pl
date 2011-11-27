@@ -1725,10 +1725,19 @@ else {
 sub set_public_html_dir
 {
 local ($d, $subdir) = @_;
+local $p = &domain_has_website($d);
+local $path = $d->{'home'}."/".$subdir;
+local $oldpath = $d->{'public_html_path'};
+if ($p ne "web") {
+	my $err = &plugin_call($p, "feature_set_web_public_html_dir",
+			       $d, $subdir);
+	return $err if ($err);
+	$d->{'public_html_dir'} = $subdir;
+	$d->{'public_html_path'} = $path;
+	return undef;
+	}
 local @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
-local $oldpath = $d->{'public_html_path'};
-local $path = $d->{'home'}."/".$subdir;
 foreach my $p (@ports) {
 	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
 	next if (!$virt);
@@ -2964,6 +2973,10 @@ return @rv;
 sub find_html_cgi_dirs
 {
 local ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p ne "web") {
+	return &plugin_call($p, "feature_find_web_html_cgi_dirs", $d);
+	}
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 if ($virt) {
 	# Set public_html directory from document root

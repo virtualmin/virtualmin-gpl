@@ -526,6 +526,20 @@ sub feature_save_web_ssl_file
 {
 }
 
+# feature_set_web_public_html_dir(&domain, subdir)
+# Configures the webserver for this domain to use the given sub-directory of 
+# the home as the web root, instead of public_html
+sub feature_set_web_public_html_dir
+{
+}
+
+# feature_find_web_html_cgi_dirs(&domain)
+# Updates the public_html_dir and public_html_path fields of the domain object
+# to match the actual web root home-relative dir and full path
+sub feature_find_web_html_cgi_dirs
+{
+}
+
 # feature_startstop()
 # If this feature has a server process, this function should return a hash
 # with 'status', 'desc' and 'links' keys.
