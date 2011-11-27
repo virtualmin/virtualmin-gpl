@@ -8,7 +8,8 @@ return if ($require_status++);
 
 sub check_depends_status
 {
-if (!$_[0]->{'web'}) {
+local ($d) = @_;
+if (!&domain_has_website($d)) {
 	return $text{'setup_edepstatus'};
 	}
 return undef;
@@ -34,7 +35,7 @@ local $serv = &make_monitor($_[0], 0);
 &status::save_service($serv);
 &$second_print($text{'setup_done'});
 
-if ($_[0]->{'ssl'}) {
+if (&domain_has_ssl($_[0])) {
 	# Add SSL website monitor too
 	&$first_print($text{'setup_statusssl'});
 	local $serv = &make_monitor($_[0], 1);
@@ -137,7 +138,7 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} ||
 		&$second_print($text{'delete_nostatus'});
 		}
 
-	if ($_[0]->{'ssl'}) {
+	if (&domain_has_ssl($_[0])) {
 		# Update HTTPS monitor and cert monitor
 		&$first_print($text{'save_statusssl'});
 		&require_status();
@@ -163,7 +164,7 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} ||
 			}
 		}
 	}
-if ($_[0]->{'ssl'} && !$_[1]->{'ssl'}) {
+if (&domain_has_ssl($_[0]) && !&domain_has_ssl($_[1])) {
 	# Turned on SSL .. add monitor
 	&require_status();
 	&$first_print($text{'setup_status'});
@@ -173,7 +174,7 @@ if ($_[0]->{'ssl'} && !$_[1]->{'ssl'}) {
 	&status::save_service($certserv);
 	&$second_print($text{'setup_done'});
 	}
-elsif (!$_[0]->{'ssl'} && $_[1]->{'ssl'}) {
+elsif (!&domain_has_ssl($_[0]) && &domain_has_ssl($_[1])) {
 	# Turned off SSL .. remove monitor
 	&require_status();
 	&$first_print($text{'delete_statusssl'});
@@ -208,7 +209,7 @@ else {
 	&$second_print($text{'delete_nostatus'});
 	}
 
-if ($_[0]->{'ssl'}) {
+if (&domain_has_ssl($_[0])) {
 	# Remove HTTPS status monitor
 	&$first_print($text{'delete_statusssl'});
 	local $serv = &status::get_service($_[0]->{'id'}."_ssl");
@@ -237,7 +238,7 @@ local ($d) = @_;
 &require_status();
 local $serv = &status::get_service($_[0]->{'id'}."_web");
 return &text('validate_estatusweb') if (!$serv);
-if ($d->{'ssl'}) {
+if (&domain_has_ssl($d)) {
 	local $serv = &status::get_service($_[0]->{'id'}."_ssl");
 	return &text('validate_estatusssl') if (!$serv);
 	}
@@ -262,7 +263,7 @@ else {
 	}
 
 # Disable HTTPS status monitor
-if ($_[0]->{'ssl'}) {
+if (domain_has_ssl($_[0])) {
 	&$first_print($text{'disable_statusssl'});
 	local $certserv = &status::get_service($_[0]->{'id'}."_sslcert");
 	if ($certserv) {
@@ -299,7 +300,7 @@ else {
 	}
 
 # Disable HTTPS status monitor
-if ($_[0]->{'ssl'}) {
+if (&domain_has_ssl($_[0])) {
 	&$first_print($text{'enable_statusssl'});
 	local $certserv = &status::get_service($_[0]->{'id'}."_sslcert");
 	if ($certserv) {
