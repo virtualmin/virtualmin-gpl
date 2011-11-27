@@ -193,7 +193,7 @@ foreach my $f (&unique(@features, 'mail')) {
 		if ($f eq "web" && $p && $p ne "web") {
 			# Web feature is provided by a plugin .. call it now
 			$doing_dom = $doms[$i];
-			&try_plugin_call($f, "feature_modify",
+			&try_plugin_call($p, "feature_modify",
 					 $doms[$i], $olddoms[$i]);
 			}
 		elsif ($doms[$i]->{$f} && $config{$f} ||
