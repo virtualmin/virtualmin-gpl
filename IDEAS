@@ -63,10 +63,9 @@
 	- https://www.virtualmin.com/node/19460
 
  - NGINX support
-	- changing public_html dir with --document-dir
 	- cannot enable IPv6 address when default listen exists?
 	- functional test
-		- mail move quota redirect remote rename reseller web webmin wildcard
+		- mail move quota rename wildcard
 	- test on centos 6
 	- docs
 	- beta test

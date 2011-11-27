@@ -733,7 +733,7 @@ $reseller_tests = [
 	  'grep' => [ 'Description: New description',
 		      'Email: newmail@'.$test_domain,
 		      'Maximum domains: 66',
-		      'Allowed features:.*web',
+		      'Allowed features:.*'.$web,
 		      'Logo URL: http://'.$test_domain.'/logo.gif',
 		      'Logo link: http://'.$test_domain,
 		    ],
@@ -2417,6 +2417,11 @@ $incremental_tests = [
 		      [ 'version', 'latest' ] ],
 	},
 
+	# Test that roundcube works before the backup
+	{ 'command' => $wget_command.'http://'.$test_domain.'/roundcube/',
+	  'grep' => 'Welcome to Roundcube Webmail',
+	},
+
 	# Backup to a temp file
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -2443,7 +2448,7 @@ $incremental_tests = [
 	{ 'command' =>
 		"full=`du -k $test_backup_file | cut -f 1` ; ".
 		"incr=`du -k $test_incremental_backup_file | cut -f 1` ; ".
-		"test $incr -lt $full"
+		"test \$incr -lt \$full"
 	},
 
 	# Delete the domain
@@ -2909,7 +2914,8 @@ $webmin_tests = [
 	# Create a test domain
 	{ 'command' => $webmin_wget_command.
 		       "'${webmin_proto}://localhost:${webmin_port}/virtual-server/domain_setup.cgi?dom=$test_domain&vpass=smeg&template=0&plan=0&dns_ip_def=1&vuser_def=1&email_def=1&mgroup_def=1&group_def=1&prefix_def=1&db_def=1&quota=100&quota_units=1048576&uquota=120&uquota_units=1048576&bwlimit_def=0&bwlimit=100&bwlimit_units=MB&mailboxlimit_def=1&aliaslimit_def=0&aliaslimit=34&dbslimit_def=0&dbslimit=10&domslimit_def=0&domslimit=3&nodbname=0&field_purpose=&field_amicool=&unix=1&dir=1&logrotate=1&mail=1&dns=1&$web=1&webalizer=1&mysql=1&webmin=1&proxy_def=1&fwdto_def=1&virt=0&ip=&content_def=1'",
-	  'grep' => [ 'Adding new virtual website', 'Saving server details' ],
+	  'grep' => [ 'Adding new virtual website|Creating Nginx virtual host',
+		      'Saving server details' ],
 	},
 
 	# Make sure the domain was created
@@ -2928,7 +2934,8 @@ $webmin_tests = [
 	# Delete the domain
 	{ 'command' => $webmin_wget_command.
 		       "${webmin_proto}://localhost:${webmin_port}/virtual-server/delete_domain.cgi\\?dom=`virtualmin list-domains.pl --domain $test_domain --id-only`\\&confirm=1",
-	  'grep' => [ 'Deleting virtual website', 'Deleting server details' ],
+	  'grep' => [ 'Deleting virtual website|Removing Nginx virtual host',
+		      'Deleting server details' ],
 	  'cleanup' => 1,
 	},
 
@@ -3788,6 +3795,7 @@ $web_tests = [
 
 	# Test wget to make sure port 80 now fails
 	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'ignorefail' => 1,
 	  'antigrep' => 'Test web page',
 	},
 
@@ -4529,21 +4537,22 @@ $redirect_tests = [
 	},
 
 	# Create the directory and a file in it
-	{ 'command' => 'mkdir -p '.$test_domain_home.'/somedir' },
-	{ 'command' => 'echo foo >'.$test_domain_home.'/somedir/bar.txt' },
+	{ 'command' => 'mkdir -p '.$test_domain_home.'/public_html/blah' },
+	{ 'command' => 'echo foo >'.$test_domain_home.'/public_html/blah/bar.txt' },
 
 	# Create a directory alias for /tmp
 	{ 'command' => 'create-redirect.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'path', '/somedir' ],
-		      [ 'alias', $test_domain_home.'/somedir' ] ],
+		      [ 'alias', $test_domain_home.'/public_html/blah' ] ],
 	},
 
 	# Make sure the alias appears
 	{ 'command' => 'list-redirects.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
-	  'grep' => [ '^/somedir', 'Destination: '.$test_domain_home.'/somedir',
+	  'grep' => [ '^/somedir',
+		      'Destination: '.$test_domain_home.'/public_html/blah',
 		      'Type: Alias', 'Match sub-paths: No' ],
 	},
 
