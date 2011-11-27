@@ -65,7 +65,7 @@
  - NGINX support
 	- cannot enable IPv6 address when default listen exists?
 	- functional test
-		- mail move quota rename wildcard
+		- rename wildcard
 	- test on centos 6
 	- docs
 	- beta test
