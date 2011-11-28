@@ -540,6 +540,20 @@ sub feature_find_web_html_cgi_dirs
 {
 }
 
+# feature_change_web_access_log(&domain, logfile)
+# For a feature that provides a website, this function must update the
+# location that it's access log is written to
+sub feature_change_web_access_log
+{
+}
+
+# feature_change_web_error_log(&domain, logfile)
+# For a feature that provides a website, this function must update the
+# location that it's error log is written to
+sub feature_change_web_error_log
+{
+}
+
 # feature_startstop()
 # If this feature has a server process, this function should return a hash
 # with 'status', 'desc' and 'links' keys.

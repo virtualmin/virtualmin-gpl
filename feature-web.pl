@@ -3552,6 +3552,11 @@ sub change_access_log
 local ($d, $accesslog) = @_;
 $accesslog =~ /^\/\S+$/ ||
 	return "Access log $accesslog must be an absolute path";
+local $p = &domain_has_website($d);
+if ($p ne "web") {
+	return &plugin_call($p, "feature_change_web_access_log",
+			    $d, $accesslog);
+	}
 local $err = &change_apache_log($d, $accesslog, "CustomLog");
 if ($err) {
 	$err = &change_apache_log($d, $accesslog, "TransferLog");
@@ -3569,6 +3574,11 @@ sub change_error_log
 local ($d, $errorlog) = @_;
 $errorlog =~ /^\/\S+$/ ||
 	return "Error log $errorlog must be an absolute path";
+local $p = &domain_has_website($d);
+if ($p ne "web") {
+	return &plugin_call($p, "feature_change_web_error_log",
+			    $d, $errorlog);
+	}
 local $err = &change_apache_log($d, $errorlog, "ErrorLog");
 &link_apache_logs($d);
 &register_post_action(\&restart_apache);

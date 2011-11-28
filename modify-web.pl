@@ -295,8 +295,9 @@ if ($defaultwebsite && @doms > 1) {
 
 # Lock them all
 foreach $d (@doms) {
-	&obtain_lock_web($d);
-	&obtain_lock_dns($d) if (defined($webmail) || defined($matchall));
+	&obtain_lock_web($d) if ($d->{'web'});
+	&obtain_lock_dns($d) if ($d->{'dns'} &&
+				 (defined($webmail) || defined($matchall)));
 	&obtain_lock_logrotate($d) if ($d->{'logrotate'} &&
 				       ($accesslog || $errorlog));
 	}
@@ -513,8 +514,9 @@ foreach $d (@doms) {
 foreach $d (@doms) {
 	&release_lock_logrotate($d) if ($d->{'logrotate'} &&
 				        ($accesslog || $errorlog));
-	&release_lock_dns($d) if (defined($webmail) || defined($matchall));
-	&release_lock_web($d);
+	&release_lock_dns($d) if ($d->{'dns'} && 
+				  (defined($webmail) || defined($matchall)));
+	&release_lock_web($d) if ($d->{'web'});
 	}
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV);

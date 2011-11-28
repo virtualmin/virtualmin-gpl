@@ -3825,6 +3825,26 @@ $web_tests = [
 	  'grep' => 'Test web page',
 	},
 
+	# Change access and error logs to a new location
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'access-log' => '/tmp/'.$test_domain.'_access_log' ],
+		      [ 'error-log' => '/tmp/'.$test_domain.'_error_log' ] ],
+	},
+
+	# Verify the move
+	{ 'command' => 'ls -l /tmp/'.$test_domain.'_access_log' },
+	{ 'command' => 'ls -l /tmp/'.$test_domain.'_error_log' },
+
+	# Make another request
+	{ 'command' => $wget_command.'http://'.$test_domain.'/smeg',
+	  'ignorefail' => 1,
+	},
+
+	# Verify that it was logged
+	{ 'command' => 'grep smeg /tmp/'.$test_domain.'_access_log' },
+	{ 'command' => 'grep smeg /tmp/'.$test_domain.'_error_log' },
+
 	# Get rid of the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],

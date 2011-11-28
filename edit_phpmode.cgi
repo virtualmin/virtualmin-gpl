@@ -113,7 +113,8 @@ if (!$d->{'alias'} || $d->{'alias_mode'} != 1 &&
 	}
 
 # Log file locations
-if (!$d->{'alias'} && &can_log_paths() && $d->{'web'}) {
+if (!$d->{'alias'} && &can_log_paths() &&
+    ($p eq 'web' || &plugin_defined($p, "feature_change_web_access_log"))) {
 	$alog = &get_website_log($d, 0);
 	if ($alog) {
 		print &ui_table_row(&hlink($text{'phpmode_alog'}, 'accesslog'),
