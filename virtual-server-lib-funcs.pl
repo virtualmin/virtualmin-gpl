@@ -10587,7 +10587,7 @@ if (!$d->{'parent'} && $d->{'webmin'} && &can_switch_user($d)) {
 		  });
 	}
 
-if ($d->{'web'} && $config{'web'} && !$d->{'alias'} && &can_edit_forward()) {
+if (&domain_has_website($d) && !$d->{'alias'} && &can_edit_forward()) {
 	# Proxying / frame forwward configuration button
 	local $mode = $d->{'proxy_pass_mode'} || $config{'proxy_pass'};
 	local $psuffix = $mode == 2 ? "frame" : "proxy";
@@ -10635,7 +10635,7 @@ if (&domain_has_website($d) && &can_edit_phpmode()) {
 		  });
 	}
 
-if ($d->{'web'} && &can_edit_phpver() &&
+if (&domain_has_website($d) && &can_edit_phpver() &&
     defined(&list_available_php_versions)) {
 	# PHP directory versions button
 	push(@rv, { 'page' => 'edit_phpver.cgi',
