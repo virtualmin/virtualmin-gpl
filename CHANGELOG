@@ -1312,7 +1312,7 @@ Checking for new script updates is now enabled by default on new installs and up
 Added a tab to the Validate Virtual Servers page for fixing file ownership and permissions problems.
 Storage of plaintext passwords for virtual servers and mailboxes can now be disabled on a per-template basis. Virtualmin will instead store only hashed passwords in multiple formats, which prevents passwords from being compromised if the system is hacked. Thanks to Dirk Ertner for supporting this feature.
 ---- Changes since 3.88 ----
-Updated the phpMyAdmin script installer to version 3.4.7.1, SMF to 2.0.1, bbPress to 1.1, SugarCRM to 6.3.0, Joomla to 1.7.3 and 1.5.25, phpMyFAQ to 2.7.1, phpPgAdmin to 5.0.3, ZenPhoto to 1.4.1.6, Moodle to 2.1.2, PiWik to 1.6, Magento to 1.6.1.0, CMS Made Simple to 1.10.2, Drupal to 7.9, OpenX to 2.8.8, eGroupWare to 1.8.002.20111111, vTigerCRM to 5.3.0, and PHPList to 2.10.17.
+Updated the phpMyAdmin script installer to version 3.4.7.1, SMF to 2.0.1, bbPress to 1.1, SugarCRM to 6.3.0, Joomla to 1.7.3 and 1.5.25, phpMyFAQ to 2.7.1, phpPgAdmin to 5.0.3, ZenPhoto to 1.4.1.6, Moodle to 2.1.3, PiWik to 1.6, Magento to 1.6.1.0, CMS Made Simple to 1.10.2, Drupal to 7.9, OpenX to 2.8.8, eGroupWare to 1.8.002.20111111, vTigerCRM to 5.3.0, and PHPList to 2.10.17.
 When creating or restoring a virtual server with a database that already exists, you now have the option to simply associate that database with the server rather than causing the server creation to fail.
 The list of sub-servers under a top-level server has been moved from the Edit Virtual Server page to the List Sub-Servers link on the left menu.
 Added the --skip-warnings flag to the modify-domain API command, to ignore warnings related to new features from a plan change.
