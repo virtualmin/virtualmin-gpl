@@ -63,12 +63,11 @@
 	- https://www.virtualmin.com/node/19460
 
  - NGINX support
-	- cannot enable IPv6 address when default listen exists?
-	- functional test
-		- wildcard
+	- tests leave php5-cgi processes hanging
 	- test on centos 6
 	- docs
 	- beta test
+	- Cloudmin images with Nginx
 
  - Include dovecot control files in backups, if located in a separate dir
 	- http://wiki.dovecot.org/MailLocation/Maildir
