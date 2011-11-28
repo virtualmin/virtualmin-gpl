@@ -184,6 +184,12 @@ chmod(0600, $pg_pass_file);
 $_config_tests = [
 	# Just validate global config
 	{ 'command' => 'check-config.pl' },
+
+	# Is lookup-domain running?
+	{ 'command' => 'ps auxwww | grep -v grep | grep lookup-domain-daemon' },
+	
+	# Bandwidth monitoring enabled?
+	{ 'command' => 'grep bw_active=1 '.$module_config_directory.'/config' },
 	];
 
 $domains_tests = [
@@ -3332,6 +3338,12 @@ $wildcard_tests = [
 	  'cleanup' => 1,
 	},
 	];
+if (&domain_has_website() ne 'web') {
+	# Assume only Apache supports
+	$wildcard_tests = [
+		{ 'command' => 'echo Skipping SSL wildcard tests for non-Apache webserver' },
+		];
+	}
 
 # Tests for concurrent domain creation
 $parallel_tests = [
