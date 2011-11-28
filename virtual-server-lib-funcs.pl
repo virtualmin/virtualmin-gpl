@@ -12283,17 +12283,9 @@ if ($config{'web'}) {
 		}
 	}
 
-# Check for any website plugin
-local $has_website = $config{'web'} ? 'web' : undef;
-if (!$has_website) {
-	foreach my $p (@plugins) {
-		$has_website = $p if (&plugin_call($p, "feature_provides_web"));
-		}
-	}
-
 if ($config{'webalizer'}) {
 	# Make sure Webalizer is installed, and that global directives are OK
-	$has_website || return &text('check_edepwebalizer', $clink);
+	&domain_has_website() || return &text('check_edepwebalizer', $clink);
 	&foreign_installed("webalizer", 1) == 2 ||
 		return &text('index_ewebalizer', "/webalizer/", $clink);
 	&foreign_require("webalizer", "webalizer-lib.pl");
@@ -14895,28 +14887,32 @@ else {
 	}
 }
 
-# domain_has_website(&domain)
-# Returns 1 if a domain has a website, either via apache or a plugin
+# domain_has_website([&domain])
+# Returns 1 if a domain has a website, either via apache or a plugin.
+# If called without a domain parameter, just return the plugin or feature
+# that provides a website.
 sub domain_has_website
 {
 my ($d) = @_;
-return 'web' if ($d->{'web'} && $config{'web'});
+return 'web' if ((!$d || $d->{'web'}) && $config{'web'});
 foreach my $p (&list_feature_plugins()) {
-	if ($d->{$p} && &plugin_call($p, "feature_provides_web")) {
+	if ((!$d || $d->{$p}) && &plugin_call($p, "feature_provides_web")) {
 		return $p;
 		}
 	}
 return undef;
 }
 
-# domain_has_ssl(&domain)
+# domain_has_ssl([&domain])
 # Returns 1 if a domain has a website with SSL, either via apache or a plugin
+# If called without a domain parameter, just return the plugin or feature
+# that provides an SSL website.
 sub domain_has_ssl
 {
 my ($d) = @_;
-return 'ssl' if ($d->{'ssl'} && $config{'ssl'});
+return 'ssl' if ((!$d || $d->{'ssl'}) && $config{'ssl'});
 foreach my $p (&list_feature_plugins()) {
-	if ($d->{$p} && &plugin_call($p, "feature_provides_ssl")) {
+	if ((!$d || $d->{$p}) && &plugin_call($p, "feature_provides_ssl")) {
 		return $p;
 		}
 	}
