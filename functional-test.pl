@@ -294,6 +294,9 @@ $domains_tests = [
 		},
 
 		# Check PHP running via fCGId
+		{ 'command' => 'echo "<?php system(\'id -a\'); ?>" >~'.
+			       $test_domain_user.'/public_html/test.php',
+		},
 		{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
 		  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
 		},
