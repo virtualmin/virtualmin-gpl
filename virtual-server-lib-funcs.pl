@@ -9688,6 +9688,7 @@ if ($status != 0) {
 	$rv = "<table width=100%><tr bgcolor=#ff8888><td align=center>";
 	$rv .= "<b>".$text{'licence_err'}."</b><br>\n";
 	$rv .= $err."\n";
+	$rv .= &text('licence_renew', $virtualmin_renewal_url),"\n";
 	if (&can_recheck_licence()) {
 		$rv .= &ui_form_start("/$module_name/licence.cgi");
 		$rv .= &ui_submit($text{'licence_recheck'});
