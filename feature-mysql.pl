@@ -2299,6 +2299,69 @@ $conns = undef if ($conns eq "none");
 return $conns;
 }
 
+# list_mysql_size_settings("small"|"medium"|"large"|"huge")
+# Returns an array of tupes for MySQL my.cnf settings for some size
+sub list_mysql_size_settings
+{
+local ($size) = @_;
+if ($size eq "small") {
+	return ([ "key_buffer", "16K" ],
+		[ "table_cache", "4" ],
+		[ "sort_buffer_size", "64K" ],
+		[ "read_rnd_buffer_size", "256K" ],
+		[ "net_buffer_length", "2K" ],
+		[ "thread_stack", "128K" ],
+		[ "key_buffer", "8M" ],
+		[ "sort_buffer_size", "8M" ],
+		[ "key_buffer", "8M" ],
+		[ "sort_buffer_size", "8M" ]);
+	}
+elsif ($size eq "medium") {
+	return ([ "key_buffer", "16M" ],
+		[ "table_cache", "64" ],
+		[ "sort_buffer_size", "512K" ],
+		[ "net_buffer_length", "8K" ],
+		[ "read_rnd_buffer_size", "512K" ],
+		[ "myisam_sort_buffer_size", "8M" ],
+		[ "key_buffer", "20M" ],
+		[ "sort_buffer_size", "20M" ],
+		[ "read_buffer", "2M" ],
+		[ "write_buffer", "2M" ],
+		[ "key_buffer", "20M" ],
+		[ "sort_buffer_size", "20M" ],
+		[ "read_buffer", "2M" ],
+		[ "write_buffer", "2M" ]);
+	}
+elsif ($size eq "large") {
+	return ([ "key_buffer", "256M" ],
+		[ "table_cache", "256" ],
+		[ "sort_buffer_size", "1M" ],
+		[ "read_buffer_size", "1M" ],
+		[ "read_rnd_buffer_size", "4M" ],
+		[ "myisam_sort_buffer_size", "64M" ],
+		[ "thread_cache_size", "8" ],
+		[ "query_cache_size", "16M" ],
+		[ "thread_concurrency", "8" ],
+		[ "key_buffer", "128M" ],
+		[ "sort_buffer_size", "128M" ],
+		[ "key_buffer", "128M" ],
+		[ "sort_buffer_size", "128M" ]);
+	}
+elsif ($size eq "huge") {
+	return ([ "key_buffer", "384M" ],
+		[ "table_cache", "512" ],
+		[ "sort_buffer_size", "2M" ],
+		[ "read_buffer_size", "2M" ],
+		[ "read_rnd_buffer_size", "8M" ],
+		[ "query_cache_size", "32M" ],
+		[ "key_buffer", "256M" ],
+		[ "sort_buffer_size", "256M" ],
+		[ "key_buffer", "256M" ],
+		[ "sort_buffer_size", "256M" ]);
+	}
+return ( );
+}
+
 $done_feature_script{'mysql'} = 1;
 
 1;

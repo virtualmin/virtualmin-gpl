@@ -18,7 +18,7 @@ return ( "intro",
 	 $config{'virus'} ? ( "virus" ) : ( ),
 	 $config{'spam'} ? ( "spam" ) : ( ),
 	 "db",
-	 $config{'mysql'} ? ( "mysql" ) : ( ),
+	 $config{'mysql'} ? ( "mysql", "mysize" ) : ( ),
 	 $config{'dns'} ? ( "dns" ) : ( ),
 	 "hashpass",
 	 "done" );
@@ -317,6 +317,48 @@ if (!$in{'mypass_def'}) {
 return undef;
 }
 
+# Show a form to select the MySQL size configuration
+sub wizard_show_mysize
+{
+print &ui_table_row(undef, $text{'wizard_mysize'}, 2);
+
+local $mem = &get_real_memory_size();
+local $mysize;
+if ($mem) {
+	$mysize = $mem <= 256*1024*1024 ? "small" :
+		  $mem <= 512*1024*1024 ? "medium" :
+		  $mem <= 1024*1024*1024 ? "large" : "huge";
+	}
+print &ui_table_row(undef, $text{'wizard_mysize_type'},
+		    &ui_radio("mysize", $mysize,
+			      [ [ "", $text{'wizard_mysize_def'} ],
+				[ "small", $text{'wizard_mysize_small'} ],
+				[ "medium", $text{'wizard_mysize_medium'} ],
+				[ "large", $text{'wizard_mysize_large'} ],
+				[ "huge", $text{'wizard_mysize_huge'} ] ]));
+}
+
+sub wizard_parse_mysize
+{
+local ($in) = @_;
+&require_mysql();
+if ($in{'mysize'}) {
+	# Stop MySQL
+	local $running = &mysql::is_mysql_running();
+	if ($running) {
+		&mysql::stop_mysql();
+		}
+
+	# Adjust my.cnf
+	# XXX
+
+	# Start it up again
+	if ($running) {
+		&mysql::start_mysql();
+		}
+	}
+}
+
 # Show a form to set the primary nameservers
 sub wizard_show_dns
 {
@@ -407,6 +449,17 @@ local @tmpls = &list_templates();
 local ($tmpl) = grep { $_->{'id'} eq '0' } @tmpls;
 $tmpl->{'hashpass'} = $in->{'hashpass'};
 &save_template($tmpl);
+}
+
+# get_real_memory_size()
+# Returns the amount of RAM in bytes, or undef if we can't get it
+sub get_real_memory_size
+{
+return undef if (!&foreign_check("proc"));
+&foreign_require("proc");
+return undef if (!defined(&proc::get_memory_info));
+local ($real) = &proc::get_memory_info();
+return $real * 1024;
 }
 
 1;

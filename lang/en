@@ -5362,6 +5362,14 @@ wizard_mysql_pass=Change MySQL password
 wizard_mysql_pass1=Leave un-changed
 wizard_mysql_pass0=Set to
 wizard_mysql_empty=Set MySQL password
+wizard_title_mysize=MySQL database size
+wizard_mysize=MySQL can be configured to trade off memory use for performance, depending on how much RAM your system has and how heavily you expect the database to be used.
+wizard_mysize_type=MySQL configuration size
+wizard_mysize_def=Leave default settings
+wizard_mysize_small=Small system (256M) with infrequent MySQL use
+wizard_mysize_medium=Medium system (512M) with regular MySQL use
+wizard_mysize_large=Large system (1G) on which MySQL is heavily used
+wizard_mysize_huge=Huge system (2G or more) on which MySQL is heavily used
 wizard_title_done=All done
 wizard_done=Virtualmin post-installation configuration is now complete!<p>You can adjust the settings you just made on the <a href='$1'>Features and Plugins</a> and <a href='$2'>Spam and Virus Scanning</a> pages.
 wizard_dns=For DNS zones created by Virtualmin to be resolvable, the primary nameserver record for each zone must be set to something that can itself be resolved by other systems on the Internet.
