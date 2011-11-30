@@ -12623,6 +12623,26 @@ if ($config{'localgroup'} && !defined(getgrnam($config{'localgroup'}))) {
 			   "../config.cgi?$module_name");
 	}
 
+# Validate home directory format
+if ($config{'home_base'} && $config{'home_base'} !~ /^\/\S+/) {
+	return &text('check_ehomebase', "<tt>$config{'home_base'}</tt>",
+		     "../config.cgi?$module_name");
+	}
+&require_useradmin();
+if (!$config{'home_base'} && $uconfig{'home_base'} !~ /^\/\S+/) {
+	return &text('check_ehomebase2', "<tt>$uconfig{'home_base'}</tt>",
+		     "../config.cgi?useradmin");
+	}
+if ($config{'home_format'} &&
+    $config{'home_format'} !~ /\$\{(USER|UID|DOM|PREFIX)\}/ &&
+    $config{'home_format'} !~ /\$(USER|UID|DOM|PREFIX)/) {
+	return &text('check_ehomeformat', "<tt>$config{'home_format'}</tt>",
+		     "../config.cgi?$module_name");
+	}
+elsif (!$config{'home_format'} && $uconfig{'home_style'} == 4) {
+	return &text('check_ehomestyle', "../config.cgi?useradmin");
+	}
+
 $config{'home_quotas'} = '';
 $config{'mail_quotas'} = '';
 $config{'group_quotas'} = '';

@@ -1820,6 +1820,10 @@ check_spamwrappergroup=The procmail command <tt>$1</tt> is owned by group $2, wh
 check_spamwrapperperms=The procmail command <tt>$1</tt> has $2 permissions, when it should be setuid and setgid to root. Email may not be properly delivered or checked for spam.
 check_lostfeature=The feature <i>$1</i> cannot be disabled, as it is used by the following virtual servers : $2
 check_lostplugin=The plugin <i>$1</i> cannot be disabled, as it is used by the following virtual servers : $2
+check_ehomebase=The home base directory $1 is not an absolute path. This can be corrected on the <a href='$2'>Virtualmin configuration</a> page.
+check_ehomebase=The home base directory $1 is not an absolute path. This can be corrected on the <a href='$2'>Users and Groups module configuration</a> page.
+check_ehomeformat=The home directory format $1 does not contain the username or domain name. This can be corrected on the <a href='$2'>Virtualmin configuration</a> page.
+check_ehomestyle=The home directory style is set to "Just base directory", which is unusable with Virtualmin. This can be corrected on the <a href='$2'>Users and Groups module configuration</a> page.
 
 checkmap_enone=No map sources were found in the <a href='$1'>Postfix configuration</a>
 checkmap_esupport=The map source <tt>$1</tt> is not supported by Postfix - you may need to install Postfix libraries for it, or re-compile
