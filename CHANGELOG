@@ -1319,3 +1319,4 @@ Added the --skip-warnings flag to the modify-domain API command, to ignore warni
 MySQL connection limits for domain owners and mailboxes can now be set at the template level, and will be applied to new virtual servers and mail users with database access.
 When the email feature is disabled for a domain, all mail aliases are now removed and saved by Virtualmin. If email is later re-enabled, aliases will be restored.
 Expanded the Virtualmin plugin API to allow a plugin to replace the core Apache website feature, for example with Nginx.
+Backups now include the Dovecot control files of users when they are stored outside the home directory, so that message UIDs are preserved when the domain is restored on another system.

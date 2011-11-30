@@ -2974,6 +2974,44 @@ else {
 	&$second_print($text{'backup_mailfilesnone'});
 	}
 
+# Backup Dovecot control files, if in custom location
+if (&foreign_check("dovecot") && &foreign_installed("dovecot")) {
+	&foreign_require("dovecot");
+	local $conf = &dovecot::get_config();
+	local $env = &dovecot::find("mail_location", $conf, 2) ?
+			&dovecot::find_value("mail_location", $conf) :
+			&dovecot::find_value("default_mail_env", $conf);
+	if ($env =~ /:CONTROL=([^:]+)\/%u/) {
+		local $control = $1;
+		&$first_print($text{'backup_mailcontrol'});
+		local @names;
+		foreach $u (&list_domain_users($_[0], 0, 1, 1, 1)) {
+			if (-e "$control/$u->{'user'}") {
+				push(@names, $u->{'user'});
+				push(@names, &replace_atsign($u->{'user'}));
+				}
+			}
+		@names = &unique(@names);
+		if (@names) {
+			local $out;
+			&execute_command("cd ".quotemeta($control)." && ".
+					 "tar cf ".quotemeta($_[1]."_control").
+					 " ".join(" ", @names),
+					 undef, \$out, \$out);
+			if ($?) {
+				&$second_print(&text('backup_emailcontrol',
+						     $out));
+				}
+			else {
+				&$second_print($text{'setup_done'});
+				}
+			}
+		else {
+			&$second_print($text{'backup_nomailcontrol'});
+			}
+		}
+	}
+
 return 1;
 }
 
@@ -3413,6 +3451,39 @@ if (-r "$_[1]_cron") {
 		&cron::copy_crontab($u->{'user'});
 		}
 	&$second_print($text{'setup_done'});
+	}
+
+# Restore Dovecot control files
+if (-r "$_[1]_control" && &foreign_check("dovecot") &&
+			  &foreign_installed("dovecot")) {
+	&foreign_require("dovecot");
+        local $conf = &dovecot::get_config();
+	local $env = &dovecot::find("mail_location", $conf, 2) ?
+                        &dovecot::find_value("mail_location", $conf) :
+                        &dovecot::find_value("default_mail_env", $conf);
+	if ($env =~ /:CONTROL=([^:]+)\/%u/) {
+		# Local dovecot specifies a control file location
+		local $control = $1;
+		&$first_print($text{'restore_mailcontrol'});
+		local $cmd = "cd ".quotemeta($control)." && ".
+                             "tar xf ".quotemeta($_[1]."_control");
+		if ($_[2]->{'mailuser'}) {
+			# Limit extract to one user
+			$cmd .= " ".quotemeta($_[2]->{'mailuser'});
+			local $at = &replace_atsign($_[2]->{'mailuser'});
+			if ($at ne $_[2]->{'mailuser'}) {
+				$cmd .= " ".quotemeta($at);
+				}
+			}
+		local $out;
+		&execute_command($cmd, undef, \$out, \$out);
+		if ($?) {
+			&$second_print(&text('restore_emailcontrol', $out));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
+		}
 	}
 
 # Set mailbox user home directory permissions

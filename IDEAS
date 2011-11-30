@@ -62,16 +62,6 @@
  - Directadmin migration support
 	- https://www.virtualmin.com/node/19460
 
- - NGINX support
-	- test on centos 6
-	- docs
-	- beta test
-	- Cloudmin images with Nginx
-
- - Include dovecot control files in backups, if located in a separate dir
-	- http://wiki.dovecot.org/MailLocation/Maildir
-	- https://www.virtualmin.com/node/19773
-
  - Wizard option for MySQL DB size
 	- Update my.cnf directly
 	- Choose based on free memory
