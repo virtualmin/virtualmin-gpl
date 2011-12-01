@@ -61,7 +61,3 @@
 
  - Directadmin migration support
 	- https://www.virtualmin.com/node/19460
-
- - Wizard option for MySQL DB size
-	- Update my.cnf directly
-	- Choose based on free memory

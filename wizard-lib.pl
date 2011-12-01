@@ -323,26 +323,26 @@ sub wizard_show_mysize
 print &ui_table_row(undef, $text{'wizard_mysize'}, 2);
 
 local $mem = &get_real_memory_size();
-local $mysize;
-if ($mem) {
+local $mysize = $config{'mysql_size'};
+if ($mem && !$mysize) {
 	$mysize = $mem <= 256*1024*1024 ? "small" :
 		  $mem <= 512*1024*1024 ? "medium" :
 		  $mem <= 1024*1024*1024 ? "large" : "huge";
 	}
-print &ui_table_row(undef, $text{'wizard_mysize_type'},
-		    &ui_radio("mysize", $mysize,
-			      [ [ "", $text{'wizard_mysize_def'} ],
-				[ "small", $text{'wizard_mysize_small'} ],
-				[ "medium", $text{'wizard_mysize_medium'} ],
-				[ "large", $text{'wizard_mysize_large'} ],
-				[ "huge", $text{'wizard_mysize_huge'} ] ]));
+print &ui_table_row($text{'wizard_mysize_type'},
+	    &ui_radio("mysize", $mysize,
+		      [ [ "", $text{'wizard_mysize_def'}."<br>" ],
+			[ "small", $text{'wizard_mysize_small'}."<br>" ],
+			[ "medium", $text{'wizard_mysize_medium'}."<br>" ],
+			[ "large", $text{'wizard_mysize_large'}."<br>" ],
+			[ "huge", $text{'wizard_mysize_huge'}."<br>" ] ]));
 }
 
 sub wizard_parse_mysize
 {
 local ($in) = @_;
 &require_mysql();
-if ($in{'mysize'}) {
+if ($in->{'mysize'}) {
 	# Stop MySQL
 	local $running = &mysql::is_mysql_running();
 	if ($running) {
@@ -350,13 +350,40 @@ if ($in{'mysize'}) {
 		}
 
 	# Adjust my.cnf
-	# XXX
+	my $temp = &transname();
+	&copy_source_dest($mysql::config{'my_cnf'}, $temp);
+	&lock_file($mysql::config{'my_cnf'});
+	my $conf = &mysql::get_mysql_config();
+	foreach my $s (&list_mysql_size_settings($in->{'mysize'})) {
+		my $sname = $s->[2] || "mysqld";
+		my ($sect) = grep { $_->{'name'} eq $sname &&
+				    $_->{'members'} } @$conf;
+		if ($sect) {
+			&mysql::save_directive($conf, $sect, $s->[0],
+					       $s->[1] ? [ $s->[1] ] : [ ]);
+			}
+		}
+	&flush_file_lines($mysql::config{'my_cnf'});
+	&unlock_file($mysql::config{'my_cnf'});
+	$config{'mysql_size'} = $in->{'mysize'};
 
 	# Start it up again
 	if ($running) {
-		&mysql::start_mysql();
+		&mysql::stop_mysql();
+		my $err = &mysql::start_mysql();
+		if ($err) {
+			# Panic! MySQL couldn't start with the new config ..
+			# try to roll it back
+			&copy_source_dest($temp, $mysql::config{'my_cnf'});
+			&mysql::start_mysql();
+			return &text('wizard_emysizestart', $err);
+			}
 		}
 	}
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
+return undef;
 }
 
 # Show a form to set the primary nameservers

@@ -2301,63 +2301,105 @@ return $conns;
 
 # list_mysql_size_settings("small"|"medium"|"large"|"huge")
 # Returns an array of tupes for MySQL my.cnf settings for some size
+# diff my-large.cnf my-huge.cnf  | grep ">" | grep -v "#" | grep = | perl -ne 'print "[ \"$1\", \"$2\" ],\n" if (/(\S+)\s*=\s*(\S+)/)'
 sub list_mysql_size_settings
 {
 local ($size) = @_;
 if ($size eq "small") {
 	return ([ "key_buffer", "16K" ],
+		[ "max_allowed_packet", "1M" ],
 		[ "table_cache", "4" ],
 		[ "sort_buffer_size", "64K" ],
+		[ "read_buffer_size", "256K" ],
 		[ "read_rnd_buffer_size", "256K" ],
 		[ "net_buffer_length", "2K" ],
+		[ "myisam_sort_buffer_size", undef ],
 		[ "thread_stack", "128K" ],
-		[ "key_buffer", "8M" ],
-		[ "sort_buffer_size", "8M" ],
-		[ "key_buffer", "8M" ],
-		[ "sort_buffer_size", "8M" ]);
+		[ "thread_cache_size", undef ],
+		[ "query_cache_size", undef ],
+		[ "thread_concurrency", undef ],
+
+		[ "key_buffer", "8M", "isamchk" ],
+		[ "sort_buffer_size", "8M", "isamchk" ],
+		[ "read_buffer", undef, "isamchk" ],
+		[ "write_buffer", undef, "isamchk" ],
+
+		[ "key_buffer", "8M", "myisamchk" ],
+		[ "sort_buffer_size", "8M", "myisamchk" ],
+		[ "read_buffer", undef, "myisamchk" ],
+		[ "write_buffer", undef, "myisamchk" ]);
 	}
 elsif ($size eq "medium") {
 	return ([ "key_buffer", "16M" ],
+		[ "max_allowed_packet", "1M" ],
 		[ "table_cache", "64" ],
 		[ "sort_buffer_size", "512K" ],
+		[ "read_buffer_size", "256K" ],
 		[ "net_buffer_length", "8K" ],
 		[ "read_rnd_buffer_size", "512K" ],
 		[ "myisam_sort_buffer_size", "8M" ],
-		[ "key_buffer", "20M" ],
-		[ "sort_buffer_size", "20M" ],
-		[ "read_buffer", "2M" ],
-		[ "write_buffer", "2M" ],
-		[ "key_buffer", "20M" ],
-		[ "sort_buffer_size", "20M" ],
-		[ "read_buffer", "2M" ],
-		[ "write_buffer", "2M" ]);
+		[ "thread_stack", undef ],
+		[ "thread_cache_size", undef ],
+		[ "query_cache_size", undef ],
+		[ "thread_concurrency", undef ],
+
+		[ "key_buffer", "20M", "isamchk" ],
+		[ "sort_buffer_size", "20M", "isamchk" ],
+		[ "read_buffer", "2M", "isamchk" ],
+		[ "write_buffer", "2M", "isamchk" ],
+
+		[ "key_buffer", "20M", "myisamchk" ],
+		[ "sort_buffer_size", "20M", "myisamchk" ],
+		[ "read_buffer", "2M", "myisamchk" ],
+		[ "write_buffer", "2M", "myisamchk" ]);
 	}
 elsif ($size eq "large") {
 	return ([ "key_buffer", "256M" ],
+		[ "max_allowed_packet", "1M" ],
 		[ "table_cache", "256" ],
 		[ "sort_buffer_size", "1M" ],
 		[ "read_buffer_size", "1M" ],
+		[ "net_buffer_length", undef ],
 		[ "read_rnd_buffer_size", "4M" ],
 		[ "myisam_sort_buffer_size", "64M" ],
+		[ "thread_stack", undef ],
 		[ "thread_cache_size", "8" ],
 		[ "query_cache_size", "16M" ],
 		[ "thread_concurrency", "8" ],
-		[ "key_buffer", "128M" ],
-		[ "sort_buffer_size", "128M" ],
-		[ "key_buffer", "128M" ],
-		[ "sort_buffer_size", "128M" ]);
+
+		[ "key_buffer", "128M", "isamchk" ],
+		[ "sort_buffer_size", "128M", "isamchk" ],
+		[ "read_buffer", "2M", "isamchk" ],
+		[ "write_buffer", "2M", "isamchk" ],
+
+		[ "key_buffer", "128M", "myisamchk" ],
+		[ "sort_buffer_size", "128M", "myisamchk" ],
+		[ "read_buffer", "2M", "myisamchk" ],
+		[ "write_buffer", "2M", "myisamchk" ]);
 	}
 elsif ($size eq "huge") {
 	return ([ "key_buffer", "384M" ],
+		[ "max_allowed_packet", "1M" ],
 		[ "table_cache", "512" ],
 		[ "sort_buffer_size", "2M" ],
 		[ "read_buffer_size", "2M" ],
+		[ "net_buffer_length", undef ],
 		[ "read_rnd_buffer_size", "8M" ],
+		[ "myisam_sort_buffer_size", "64M" ],
+		[ "thread_stack", undef ],
+		[ "thread_cache_size", "8" ],
 		[ "query_cache_size", "32M" ],
-		[ "key_buffer", "256M" ],
-		[ "sort_buffer_size", "256M" ],
-		[ "key_buffer", "256M" ],
-		[ "sort_buffer_size", "256M" ]);
+		[ "thread_concurrency", "8" ],
+
+		[ "key_buffer", "256M", "isamchk" ],
+		[ "sort_buffer_size", "256M", "isamchk" ],
+		[ "read_buffer", "2M", "isamchk" ],
+		[ "write_buffer", "2M", "isamchk" ],
+
+		[ "key_buffer", "256M", "myisamchk" ],
+		[ "sort_buffer_size", "256M", "myisamchk" ],
+		[ "read_buffer", "2M", "myisamchk" ],
+		[ "write_buffer", "2M", "myisamchk" ]);
 	}
 return ( );
 }
