@@ -13354,7 +13354,8 @@ sub list_template_editmodes
 local ($tmpl) = @_;
 local @rv = grep { $sfunc = "show_template_".$_;
                    defined(&$sfunc) &&
-                    ($config{$_} || !$isfeature{$_} || $_ eq 'mail') }
+                    ($config{$_} || !$isfeature{$_} || $_ eq 'mail' ||
+		     $_ eq 'web' && &domain_has_website()) }
                  @template_features;
 if ($tmpl && $tmpl->{'id'} == 1) {
 	# For sub-servers only
