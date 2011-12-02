@@ -185,6 +185,12 @@ if (&compare_versions($ver, "4.5.2") <= 0) {
 		       'file' => 'patch.zip',
 		       'url' => 'http://www.whmcs.com/go/21/download' });
 	}
+if (&compare_versions($ver, "4.5.2") <= 0) {
+	# New security path
+	push(@files, { 'name' => 'patch2',
+		       'file' => 'patch2.zip',
+		       'url' => 'http://www.whmcs.com/members/dl.php?type=d&id=112' });
+	}
 return @files;
 }
 
@@ -267,12 +273,14 @@ local $err = &extract_script_archive($files->{'source'}, $temp, $d,
 				     $opts->{'dir'}, "whmcs");
 $err && return (0, "Failed to extract source : $err");
 
-# Apply security patch, if needed
-if ($files->{'patch'}) {
-	local $ptemp = &transname();
-	local $err = &extract_script_archive($files->{'patch'}, $ptemp, $d,
-					     $opts->{'dir'});
-	$err && return (0, "Failed to extract patch source : $err");
+# Apply security patches, if needed
+foreach my $k (keys %$files) {
+	if ($k =~ /^patch/) {
+		local $ptemp = &transname();
+		local $err = &extract_script_archive($files->{$k}, $ptemp, $d,
+						     $opts->{'dir'});
+		$err && return (0, "Failed to extract patch source : $err");
+		}
 	}
 
 # Copy loader to ~/etc , adjust php.ini
