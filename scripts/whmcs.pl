@@ -27,6 +27,11 @@ sub script_whmcs_versions
 return ( "4.5.2" );
 }
 
+sub script_whmcs_release
+{
+return 1;	# New patch doesn't update version
+}
+
 sub script_whmcs_category
 {
 return "Commerce";
