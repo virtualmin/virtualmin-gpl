@@ -3677,6 +3677,7 @@ newscripts_lerr=Failed to save script installer updates
 newscripts_elnone=No scripts selected
 newscripts_desc6=This tab lists all scripts installed across all virtual servers on this system. To upgrade or un-install a single script, click on its name in the list.
 newscripts_dom=Domain name
+newscripts_noneyet=No scripts have been installed into any virtual servers yet.
 
 addscripts_err=Failed to add script installer
 addscripts_elocal=Local file does not exist
