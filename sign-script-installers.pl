@@ -93,7 +93,8 @@ $vfile = "$dir/scripts.txt";
 &open_tempfile(VFILE, ">$vfile");
 foreach $script (@scripts) {
 	&print_tempfile(VFILE, $script->{'name'}."\t".
-			       join(" ", @{$script->{'versions'}})."\n");
+			       join(" ", @{$script->{'versions'}})."\t".
+			       $script->{'release'}."\n");
 	}
 &close_tempfile(VFILE);
 &set_ownership_permissions($user, undef, undef, $vfile);

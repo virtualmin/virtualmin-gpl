@@ -70,8 +70,9 @@ if (!$gpgbad) {
 
 # Parse the scripts index
 foreach $l (split(/\r?\n/, $lstr)) {
-	($lname, $lvers) = split(/\t/, $l);
+	($lname, $lvers, $lrelease) = split(/\t/, $l);
 	$latest{$lname} = [ split(/\s+/, $lvers) ];
+	$release{$lname} = $lrelease;
 	}
 if ($debug) {
 	print STDERR "Found ",scalar(keys %latest)," available scripts\n";
@@ -94,24 +95,40 @@ foreach $sname (&list_scripts()) {
 	@lvers = sort { &compare_versions($a, $b, $script) } @lvers;
 	@svers = sort { &compare_versions($a, $b, $script) }
 		      @{$script->{'versions'}};
+	$want_download = 0;	# Need to download installer?
+	$any_local_newer = 0;	# Are local versions newer?
 	if (scalar(@lvers) != scalar(@svers)) {
 		# More versions exist, so this update must be better
 		if ($debug) {
 			print STDERR "$sname has ",scalar(@lvers)," latest versions ",scalar(@svers)," installed versions\n";
 			}
-		push(@download, $sname);
+		$want_download++;
 		}
 	else {
 		# See if any latest version is better
 		for(my $i=0; $i<scalar(@lvers); $i++) {
-			if (&compare_versions($lvers[$i], $svers[$i], $script) > 0) {
+			$vdiff = &compare_versions($lvers[$i], $svers[$i],
+						   $script);
+			if ($vdiff > 0) {
 				if ($debug) {
 					print STDERR "$sname has latest $lvers[$i] installed $svers[$i]\n";
 					}
-				push(@download, $sname);
-				last;
+				$want_download++;
+				}
+			elsif ($vdiff < 0) {
+				$any_local_newer++;
 				}
 			}
+		}
+	if (!$want_download && $release{$sname} > $script->{'release'} &&
+	    !$any_local_newer) {
+		# New version of installer itself
+		print STDERR "$sname has new release $release{$sname} ",
+			     "compared to $script->{'release'}\n";
+		$want_download++;
+		}
+	if ($want_download) {
+		push(@download, $sname);
 		}
 	}
 

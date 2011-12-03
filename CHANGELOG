@@ -1323,3 +1323,4 @@ Backups now include the Dovecot control files of users when they are stored outs
 The post-installation wizard now prompts for you to select a MySQL configuration size appropriate for the available memory on your system, and applies it to /etc/my.cnf.
 ---- Changes since 3.89 ----
 Updated the phpMyAdmin script installer to version 3.4.8, and MoinMoin to 1.8.9.
+The script installer update process can now detect new installer releases that don't change the application version.
