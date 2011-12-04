@@ -449,12 +449,13 @@ if ($_[5] && $_[3]) {
 # Do the backup
 if ($_[3] && $config{'compression'} == 0) {
 	# With gzip
-	$cmd = "$tar cfX - $xtemp $iargs . | gzip -c $config{'zip_args'}";
+	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, ".").
+	       " | gzip -c $config{'zip_args'}";
 	}
 elsif ($_[3] && $config{'compression'} == 1) {
 	# With bzip
-	$cmd = "$tar cfX - $xtemp $iargs . | ".
-	       &get_bzip2_command()." -c $config{'zip_args'}";
+	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, ".").
+	       " | ".&get_bzip2_command()." -c $config{'zip_args'}";
 	}
 elsif ($_[3] && $config{'compression'} == 3) {
 	# ZIP archive
@@ -462,7 +463,7 @@ elsif ($_[3] && $config{'compression'} == 3) {
 	}
 else {
 	# Plain tar
-	$cmd = "$tar cfX - $xtemp $iargs .";
+	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, ".");
 	}
 $cmd .= " | $writer";
 local $ex = &execute_command("cd ".quotemeta($_[0]->{'home'})." && $cmd",
@@ -567,7 +568,7 @@ else {
 	local $comp = $cf == 1 ? "gunzip -c" :
 		      $cf == 2 ? "uncompress -c" :
 		      $cf == 3 ? &get_bunzip2_command()." -c" : "cat";
-	local $tarcmd = "$tar xfX - $xtemp";
+	local $tarcmd = &make_tar_command("xfX", "-", $xtemp);
 	#if ($_[6]) {
 	#	# Run as domain owner - disabled, as this prevents some files
 	#	# from being written to by tar

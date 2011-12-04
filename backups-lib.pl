@@ -768,10 +768,12 @@ if ($ok) {
 					 undef, \$out);
 				}
 			else {
-				&execute_command("cd $backupdir && ".
-						 "($tar cf - $d->{'dom'}_* | ".
-						 "$comp) 2>&1 | $writer",
-						 undef, \$out);
+				&execute_command(
+					"cd $backupdir && ".
+					"(".&make_tar_command(
+					    "cf", "-", "$d->{'dom'}_*")." | ".
+					"$comp) 2>&1 | $writer",
+					undef, \$out);
 				}
 			push(@destfiles, $destfile);
 			$destfiles_map{$destfile} = $d;
@@ -819,7 +821,8 @@ if ($ok) {
 			}
 		else {
 			&execute_command("cd $backupdir && ".
-					 "($tar cf - . | $comp) 2>&1 | $writer",
+					 "(".&make_tar_command("cf", "-", ".").
+					 " | $comp) 2>&1 | $writer",
 					 undef, \$out);
 			}
 		if ($?) {
@@ -836,11 +839,20 @@ if ($ok) {
 	# config backups
 	if (@$vbs && ($homefmt || $dirfmt)) {
 		if (&has_command("gzip")) {
-			&execute_command("cd $backupdir && ($tar cf - virtualmin_* | gzip -c $config{'zip_args'}) 2>&1 >$dest/virtualmin.tar.gz", undef, \$out, \$out);
+			&execute_command(
+			    "cd $backupdir && ".
+			    "(".&make_tar_command("cf", "-", "virtualmin_*").
+			    " | gzip -c $config{'zip_args'}) ".
+			    "2>&1 >$dest/virtualmin.tar.gz",
+			    undef, \$out, \$out);
 			push(@destfiles, "virtualmin.tar.gz");
 			}
 		else {
-			&execute_command("cd $backupdir && $tar cf $dest/virtualmin.tar virtualmin_* 2>&1", undef, \$out, \$out);
+			&execute_command(
+			    "cd $backupdir && ".
+			    &make_tar_command("cf", "$dest/virtualmin.tar",
+					      "virtualmin_*").
+			    " 2>&1", undef, \$out, \$out);
 			push(@destfiles, "virtualmin.tar");
 			}
 		&set_ownership_permissions(undef, undef, 0600,
@@ -1326,7 +1338,8 @@ if ($ok) {
 				$reader = &command_as_user(
 					$doms[0]->{'user'}, 0, $reader);
 				}
-			&execute_command("$reader | $tar tf -", undef,
+			&execute_command("$reader | ".
+					 &make_tar_command("tf", "-"), undef,
 					 \$lout, \$lout);
 			@lines = split(/\n/, $lout);
 			}
@@ -1364,9 +1377,11 @@ if ($ok) {
 			}
 		else {
 			# Using tar pipeline
-			&execute_command("cd ".quotemeta($restoredir)." && ".
-				"($reader | $tar xf - $extract)", undef,
-				\$out, \$out);
+			&execute_command(
+			    "cd ".quotemeta($restoredir)." && ".
+			    "($reader | ".
+			    &make_tar_command("xf", "-", $extract).")", undef,
+			    \$out, \$out);
 			}
 		if ($?) {
 			&$second_print(&text('restore_firstfailed',
@@ -1982,14 +1997,15 @@ else {
 	local $comp;
 	if ($cf == 4) {
 		# Special handling for zip
-		$out = `unzip -l $q 2>&1`;
+		$out = &backquote_command("unzip -l $q 2>&1");
 		}
 	else {
 		$comp = $cf == 1 ? "gunzip -c" :
 			$cf == 2 ? "uncompress -c" :
 			$cf == 3 ? &get_bunzip2_command()." -c" :
 				   "cat";
-		$out = `($comp $q | $tar tf -) 2>&1`;
+		$out = &backquote_command(
+			"($comp $q | ".&make_tar_command("tf", "-").") 2>&1");
 		}
 	if ($?) {
 		return $text{'restore_etar'};
@@ -2031,8 +2047,11 @@ else {
 				"unzip $q $qvirtfiles 2>&1");
 			}
 		else {
-			$out = &backquote_command("cd $vftemp && ".
-				"($comp $q | $tar xvf - $qvirtfiles) 2>&1");
+			$out = &backquote_command(
+			    "cd $vftemp && ".
+			    "($comp $q | ".
+			    &make_tar_command("xvf", "-", $qvirtfiles).
+			    ") 2>&1");
 			}
 		if (!$?) {
 			$doms = [ ];
@@ -2619,6 +2638,18 @@ foreach my $c (@cmds) {
 	return join(" ", $p, @args) if ($p);
 	}
 return undef;
+}
+
+# make_tar_command(flags, output, file, ...)
+# Returns a tar command using the given flags writing to the given output
+sub make_tar_command
+{
+my ($flags, $output, @files) = @_;
+my $cmd = &get_tar_command();
+$cmd .= " ".$flags;
+$cmd .= " ".$output;
+$cmd .= " ".join(" ", @files) if (@files);
+return $cmd;
 }
 
 # get_bzip2_command()

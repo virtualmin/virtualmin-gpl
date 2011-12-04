@@ -575,10 +575,11 @@ if (-d $src) {
 	my @st = stat($src);
 	&unlink_file_as_domain_user($d, $dst);
 	&make_dir_as_domain_user($d, $dst, $st[2]);
-	local $tar = &get_tar_command();
 	my ($out, $ex) = &run_as_domain_user($d,
-		"(cd ".quotemeta($src)." && $tar cf - . | (cd ".
-		quotemeta($dst)." && $tar xf -)) 2>&1");
+		"(cd ".quotemeta($src)." && ".
+		&make_tar_command("cf", "-", ".").
+		" | (cd ".quotemeta($dst)." && ".
+		&make_tar_command("xf", "-").")) 2>&1");
 	if ($ex) {
 		$ok = 0;
 		$err = $out;

@@ -2121,19 +2121,20 @@ if ($fmt == 0) {
 	return "Not a compressed file";
 	}
 elsif ($fmt == 1) {
-	$cmd = "(gunzip -c $qfile | $tar xf -)";
+	$cmd = "(gunzip -c $qfile | ".&make_tar_command("xf", "-").")";
 	}
 elsif ($fmt == 2) {
-	$cmd = "(uncompress -c $qfile | $tar xf -)";
+	$cmd = "(uncompress -c $qfile | ".&make_tar_command("xf", "-").")";
 	}
 elsif ($fmt == 3) {
-	$cmd = "(".&get_bunzip2_command()." -c $qfile | $tar xf -)";
+	$cmd = "(".&get_bunzip2_command()." -c $qfile | ".
+	       &make_tar_command("xf", "-").")";
 	}
 elsif ($fmt == 4) {
 	$cmd = "unzip $qfile";
 	}
 elsif ($fmt == 5) {
-	$cmd = "$tar xf $qfile";
+	$cmd = &make_tar_command("xf", $qfile);
 	}
 else {
 	return "Unknown compression format";
