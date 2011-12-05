@@ -509,8 +509,7 @@ return undef if (!-r $_[0]);
 local $temp = &transname();
 &make_dir($temp, 0700);
 local $qf = quotemeta($_[0]);
-local $tar = &get_tar_command();
-&execute_command("cd $temp && $tar xf $qf");
+&execute_command("cd $temp && ".&make_tar_command("xf", $qf));
 return $? ? undef : $temp;
 }
 

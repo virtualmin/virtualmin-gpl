@@ -117,7 +117,6 @@ $ok || &error("Failed to extract backup : $root");
 local $daily = glob("$root/backup*/cpbackup/daily");
 local $datastore = "$root/.cpanel-datastore";
 local $tmpl = &get_template($template);
-local $tar = &get_tar_command();
 
 # Check for prefix clash
 $prefix ||= &compute_prefix($dom, undef, $parent, 1);
@@ -444,7 +443,8 @@ if (-r $hometar) {
 		&make_dir($homesrc, 0755);
 		}
 	&execute_command("cd ".quotemeta($homesrc)." && ".
-			 "$tar xf ".quotemeta($hometar), undef, \$out, \$out);
+			 &make_tar_command("xf", quotemeta($hometar)),
+			 undef, \$out, \$out);
 	if ($?) {
 		&$second_print(".. TAR failed : <tt>$out</tt>");
 		}
@@ -573,7 +573,9 @@ if ($waschild) {
 	local $qhtsrc = "$homesrc/public_html/$wasuser";
 	&$first_print("Copying web pages to $ht ..");
 	&execute_command("cd $qhtsrc && ".
-			 "($tar cf - . | (cd $qht && $tar xf -))",
+			 "(".&make_tar_command("cf", "-", ".").
+			 " | (cd $qht && ".
+			 &make_tar_command("xf", "-")."))",
 			 undef, \$out, \$out);
 	}
 else {
@@ -588,7 +590,9 @@ else {
 	&print_tempfile(XTEMP, "./mail\n");
 	&close_tempfile(XTEMP);
 	&execute_command("cd $homesrc && ".
-			 "($tar cfX - $xtemp . | (cd $qhome && $tar xf -))",
+			 "(".&make_tar_command("cfX", "-", $xtemp, ".").
+			 " | (cd $qhome && ".
+			 &make_tar_command("xf", "-")."))",
 			 undef, \$out, \$out);
 	}
 if ($?) {
@@ -1494,7 +1498,9 @@ foreach my $vf (readdir(VF)) {
 			&$first_print(
 				"Copying web pages from $sdsrc to $sddst ..");
 			&execute_command("cd $qsdsrc && ".
-				 "($tar cf - . | (cd $qsddst && $tar xf -))",
+				 "(".&make_tar_command("cf", "-", ".").
+				 " | (cd $qsddst && ".
+				 &make_tar_command("xf", "-")."))",
 				 undef, \$out, \$out);
 			if ($?) {
 				&$second_print(".. copy failed :<tt>$out</tt>");

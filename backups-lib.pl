@@ -206,8 +206,7 @@ if ($asowner) {
 	}
 
 # Find the tar command
-local $tar = &get_tar_command();
-if (!$tar) {
+if (!&get_tar_command()) {
 	&$first_print($text{'backup_etarcmd'});
 	return (0, 0, $doms);
 	}
@@ -1230,7 +1229,6 @@ sub restore_domains
 {
 local ($file, $doms, $features, $opts, $vbs, $onlyfeats, $ipinfo, $asowner,
        $skipwarnings) = @_;
-local $tar = &get_tar_command();
 
 # Find owning domain
 local $asd;
@@ -1879,7 +1877,6 @@ sub backup_contents
 local ($file, $wantdoms) = @_;
 local $backup;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($file);
-local $tar = &get_tar_command();
 local $doms;
 local @fst = stat($file);
 local @ist = stat($file.".info");

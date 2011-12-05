@@ -5617,9 +5617,8 @@ sub virtualmin_restore_styles
 local ($file, $vbs) = @_;
 &$first_print($text{'restore_vstyles_doing'});
 &make_dir("$module_config_directory/styles", 0755);
-local $tar = &get_tar_command();
 &execute_command("cd $module_config_directory/styles && ".
-		 "$tar xf ".quotemeta($file));
+		 &make_tar_command("xf", quotemeta($file)));
 if (-r $file."_unavail") {
 	&copy_source_dest($file."_unavail", $styles_unavail_file);
 	}
@@ -5748,9 +5747,8 @@ elsif ($config{'mail_system'} == 1) {
 elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
        $config{'mail_system'} == 5) {
 	# Save Qmail dir
-	local $tar = &get_tar_command();
 	&execute_command("cd $qmailadmin::config{'qmail_dir'} && ".
-			 "tar cf ".quotemeta($file)." .");
+			 &make_tar_command("cf", quotemeta($file), "."));
 	&$second_print($text{'setup_done'});
 	}
 else {
@@ -5906,9 +5904,8 @@ if ($bms eq $config{'mail_system'}) {
 	elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
 	       $config{'mail_system'} == 5) {
 		# Un-tar qmail dir
-		local $tar = &get_tar_command();
 		&execute_command("cd $qmailadmin::config{'qmail_dir'} && ".
-				 "tar xf ".quotemeta($file));
+				 &make_tar_command("xf", quotemeta($file)));
 		&$second_print($text{'setup_done'});
 		}
 	else {
@@ -5933,7 +5930,6 @@ sub restore_virtualmin
 if (!$_[3]->{'fix'}) {
 	# Merge current and backup configs
 	&$first_print($text{'restore_virtualmincp'});
-	local $tar = &get_tar_command();
 	local %oldd;
 	&read_file($_[1], \%oldd);
 	$_[0]->{'quota'} = $oldd{'quota'};
@@ -5978,7 +5974,9 @@ if (!$_[3]->{'fix'}) {
 			&make_dir($extra_admins_dir, 755);
 			}
 		&make_dir("$extra_admins_dir/$_[0]->{'id'}", 0755);
-		&execute_command("cd ".quotemeta("$extra_admins_dir/$_[0]->{'id'}")." && $tar xf ".quotemeta($_[1]."_admins")." .");
+		&execute_command(
+		    "cd ".quotemeta("$extra_admins_dir/$_[0]->{'id'}")." && ".
+		    &make_tar_command("xf", quotemeta($_[1]."_admins"), "."));
 		}
 	if ($config{'bw_active'} && -r $_[1]."_bw" &&
 	    !-r "$bandwidth_dir/$_[0]->{'id'}") {
@@ -5995,7 +5993,11 @@ if (!$_[3]->{'fix'}) {
 				&make_dir($script_log_directory, 0755);
 				}
 			&make_dir("$script_log_directory/$_[0]->{'id'}", 0755);
-			&execute_command("cd ".quotemeta("$script_log_directory/$_[0]->{'id'}")." && $tar xf ".quotemeta($_[1]."_scripts")." .");
+			&execute_command(
+			 "cd ".quotemeta("$script_log_directory/$_[0]->{'id'}").
+			 " && ".
+			 &make_tar_command("xf",
+				quotemeta($_[1]."_scripts"), "."));
 			}
 		}
 	if (-r $_[1]."_saved_aliases") {
@@ -10242,21 +10244,28 @@ local @cmds;
 if ($dir) {
 	# Actually extract
 	@cmds = ( undef,
-		  "cd $qdir && gunzip -c $qfile | $tar xf -",
-	  	  "cd $qdir && uncompress -c $qfile | $tar xf -",
-		  "cd $qdir && $bunzip2 -c $qfile | $tar xf -",
+		  "cd $qdir && gunzip -c $qfile | ".
+		    &make_tar_command("xf", "-"),
+	  	  "cd $qdir && uncompress -c $qfile | ".
+		    &make_tar_command("xf", "-"),
+		  "cd $qdir && $bunzip2 -c $qfile | ".
+		    &make_tar_command("xf", "-"),
 		  "cd $qdir && unzip $qfile",
-		  "cd $qdir && $tar xf $qfile",
+		  "cd $qdir && ".
+		    &make_tar_command("xf", $qfile),
 		  );
 	}
 else {
 	# Just do a test listing
 	@cmds = ( undef,
-		  "gunzip -c $qfile | $tar tf -",
-	  	  "uncompress -c $qfile | $tar tf -",
-		  "$bunzip2 -c $qfile | $tar tf -",
+		  "gunzip -c $qfile | ".
+		    &make_tar_command("tf", "-"),
+	  	  "uncompress -c $qfile | ".
+		    &make_tar_command("tf", "-"),
+		  "$bunzip2 -c $qfile | ".
+		    &make_tar_command("tf", "-"),
 		  "unzip -l $qfile",
-		  "$tar tf $qfile",
+		  &make_tar_command("tf", $qfile),
 		  );
 	}
 $cmds[$format] || return "Unknown compression format";

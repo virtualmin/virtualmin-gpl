@@ -2116,7 +2116,6 @@ if (!-d $dir) {
 local $fmt = &compression_format($file);
 local $qfile = quotemeta($file);
 local $cmd;
-local $tar = &get_tar_command();
 if ($fmt == 0) {
 	return "Not a compressed file";
 	}

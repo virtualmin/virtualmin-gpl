@@ -378,7 +378,6 @@ sub backup_dir
 local $out;
 local $cmd;
 local $gzip = $_[3] && &has_command("gzip");
-local $tar = &get_tar_command(); 
 
 # Create exclude file
 $xtemp = &transname();
@@ -509,7 +508,6 @@ return { 'dirnologs' => !$in{'dir_logs'} };
 sub restore_dir
 {
 &$first_print($text{'restore_dirtar'});
-local $tar = &get_tar_command(); 
 local $iflag = "$_[0]->{'home'}/.incremental";
 &unlink_file($iflag);
 if (defined(&set_php_wrappers_writable)) {
