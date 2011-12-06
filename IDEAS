@@ -64,4 +64,5 @@
 
  - Make tar args configurable
 	- http://www.virtualmin.com/node/20142
-	- generic move dir function?
+	- doesn't work with X flag
+	- test run in debug mode to check commands

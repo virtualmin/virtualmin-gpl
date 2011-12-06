@@ -2643,6 +2643,15 @@ sub make_tar_command
 {
 my ($flags, $output, @files) = @_;
 my $cmd = &get_tar_command();
+if ($config{'tar_args'}) {
+	$cmd .= " ".$config{'tar_args'};
+	$flags = "-".$flags;
+	if ($flags =~ s/X//) {
+		# In -flag mode, need to move -X after the output name and
+		# before the exclude filename.
+		unshift(@files, "-X");
+		}
+	}
 $cmd .= " ".$flags;
 $cmd .= " ".$output;
 $cmd .= " ".join(" ", @files) if (@files);

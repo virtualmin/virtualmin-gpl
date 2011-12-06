@@ -148,6 +148,8 @@ max_all=Apply limit to,1,1-Backups by anyone,0-Only those by domain owners
 max_manual=Backup types to limit,1,1-Scheduled and manual,0-Scheduled only
 upload_tries=Number of times to re-try FTP or S3 uploads,0,5
 backuplog_days=Number of days to show backup logs for,0,5
+tar_cmd=Full path to tar command,3,Detect automatically
+tar_args=Additonal parameters to tar command,0
 
 line6=Advanced options,11
 iface_base=Base number for virtual interfaces,3,Automatic
@@ -163,6 +165,5 @@ mem_cmd=Command to get memory usage,3,Query operating system
 mem_low=Minimum recommended real memory,0,5,,MB
 api_helper=Path to create API helper command,3,Determine automatically
 fcgid_max=Maximum fcgid execution time,10,-From PHP configuration,*-Don't set,Time in seconds
-tar_cmd=Full path to tar command,3,Detect automatically
 secmx_nodns=Add DNS MX records for secondary mail servers?,1,0-Yes,1-No
 scriptdir=Template for default script directory,3,Script code
