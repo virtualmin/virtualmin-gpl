@@ -290,6 +290,9 @@ if ($multi) {
 		if ($d->{'virt6'}) {
 			print "    IPv6 address: $d->{'ip6'}\n";
 			}
+		if ($d->{'dns_ip'}) {
+			print "    External IP address: $d->{'dns_ip'}\n";
+			}
 		print "    Features: ",
 			join(" ", grep { $d->{$_} } @features),"\n";
 		print "    Plugins: ",
