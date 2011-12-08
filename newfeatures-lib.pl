@@ -143,7 +143,7 @@ foreach my $nf (@nf) {
 	# for this module.
 	next if ($donemod{$nf->[0]});
 	my @mrv = &list_new_features($nf->[0], $nf->[1]);
-	if (!@mrv) {
+	if (!@mrv && !$showall) {
 		$donemod{$nf->[0]} = 1;
 		}
 	if ($me) {
