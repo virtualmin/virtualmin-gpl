@@ -2604,6 +2604,7 @@ return $config{'compression'} != 3;
 # Returns 1 if tar supports incremental backups
 sub has_incremental_tar
 {
+return 0 if ($config{'tar_args'} =~ /--acls/);
 my $tar = &get_tar_command();
 my $out = &backquote_command("$tar --help 2>&1 </dev/null");
 return $out =~ /--listed-incremental/;
