@@ -1324,3 +1324,4 @@ The post-installation wizard now prompts for you to select a MySQL configuration
 ---- Changes since 3.89 ----
 Updated the phpMyAdmin script installer to version 3.4.8, Drupal to 7.10, Moodle to 2.2, and MoinMoin to 1.8.9.
 The script installer update process can now detect new installer releases that don't change the application version.
+Added the modify-proxy API command, to update an existing proxy balancer.
