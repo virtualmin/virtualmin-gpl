@@ -67,3 +67,6 @@
 	- other modules that call init.d scripts (firewall, mysql?)
 	- https://www.virtualmin.com/node/20348
 	- https://sourceforge.net/tracker/index.php?func=detail&aid=3451866&group_id=17457&atid=117457#
+
+ - Allow domain owner to restore backups made by root
+	- Select from logs
