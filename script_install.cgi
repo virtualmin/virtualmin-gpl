@@ -4,6 +4,7 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
+$ENV{'HTTP_REFERER'} = "list_scripts.cgi?dom=$in{'dom'}";
 &can_edit_domain($d) && &can_edit_scripts() || &error($text{'edit_ecannot'});
 &domain_has_website($d) && $d->{'dir'} || &error($text{'scripts_eweb'});
 
