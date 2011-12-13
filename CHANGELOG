@@ -1322,6 +1322,6 @@ Expanded the Virtualmin plugin API to allow a plugin to replace the core Apache 
 Backups now include the Dovecot control files of users when they are stored outside the home directory, so that message UIDs are preserved when the domain is restored on another system.
 The post-installation wizard now prompts for you to select a MySQL configuration size appropriate for the available memory on your system, and applies it to /etc/my.cnf.
 ---- Changes since 3.89 ----
-Updated the phpMyAdmin script installer to version 3.4.8, Drupal to 7.10, Moodle to 2.2, and MoinMoin to 1.8.9.
+Updated the phpMyAdmin script installer to version 3.4.8, Drupal to 7.10, Moodle to 2.2, WordPress to 3.3, and MoinMoin to 1.8.9.
 The script installer update process can now detect new installer releases that don't change the application version.
 Added the modify-proxy API command, to update an existing proxy balancer.
