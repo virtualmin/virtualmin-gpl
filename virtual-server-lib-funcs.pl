@@ -15059,7 +15059,7 @@ foreach my $f (@dom_features, &list_feature_plugins()) {
 		# a website.
 		push(@rv, $p, "web");
 		}
-	elsif ($f eq $p) {
+	elsif ($f eq $p && $p ne "web") {
 		# Skip website plugin feature, as it was inserted above
 		}
 	else {
