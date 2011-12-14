@@ -3715,6 +3715,30 @@ $web_tests = [
 	  'fail' => 1,
 	},
 
+	# Disable web feature
+	{ 'command' => 'disable-feature.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ $web ],
+		      [ 'logrotate' ] ],
+	},
+
+	# Test wget, which should fail
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'antigrep' => 'Test web page',
+	},
+
+	# Re-enable web feature
+	{ 'command' => 'enable-feature.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ $web ],
+		      [ 'logrotate' ] ],
+	},
+
+	# Test wget, which should work again
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test web page',
+	},
+
 	# Enable proxying
 	{ 'command' => 'modify-web.pl',
 	  'args' => [ [ 'domain' => $test_domain ],

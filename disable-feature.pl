@@ -70,6 +70,7 @@ else {
 	}
 
 # Do it for all domains, aliases first
+$failed = 0;
 foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 		   ($a->{'alias'} ? 2 : $a->{'parent'} ? 1 : 0) } @doms) {
 	&$first_print("Updating server $d->{'dom'} ..");
@@ -89,11 +90,13 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 	$derr = &virtual_server_depends(\%newdom, undef, $oldd);
 	if ($derr) {
 		&$second_print($derr);
+		$failed++;
 		next;
 		}
 	$cerr = &virtual_server_clashes(\%newdom, \%check);
 	if ($cerr) {
 		&$second_print($cerr);
+		$failed++;
 		next;
 		}
 
@@ -103,6 +106,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 	&reset_domain_envs($d);
 	if (defined($merr)) {
 		&$second_print(&text('save_emaking', "<tt>$merr</tt>"));
+		$failed++;
 		next;
 		}
 
@@ -136,6 +140,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV);
+exit($failed);
 
 sub usage
 {
