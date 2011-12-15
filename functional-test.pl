@@ -2030,7 +2030,43 @@ $multibackup_tests = [
 	  'args' => [ [ 'domain', $test_domain ] ],
 	},
 
-	# Restore with the domain still in place
+	# Restore with domain creation
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'all-domains' ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_dir ] ],
+	},
+
+	# Run various tests again
+	@post_restore_tests,
+
+	# Clean out the backup dir
+	{ 'command' => 'rm -rf '.$test_backup_dir },
+
+	# Back all domains with domain owner permissions
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'domain', $test_parallel_domain1 ],
+		      [ 'domain', $test_parallel_domain2 ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'as-owner' ],
+		      [ 'dest', $test_backup_dir ] ],
+	},
+
+	# Make sure the backup files are owned by the domain owner
+	{ 'command' => 'ls -l '.$test_backup_dir.' | awk \'{ print $3 }\'',
+	  'grep' => $test_domain_user,
+	  'antigrep' => 'root',
+	},
+
+	# Delete the domains, in preparation for re-creation
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Restore with domain creation
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'all-domains' ],
 		      [ 'all-features' ],
