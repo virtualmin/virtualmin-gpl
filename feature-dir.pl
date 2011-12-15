@@ -438,9 +438,18 @@ if (&has_incremental_tar()) {
 	$iargs = "--listed-incremental=$ifile";
 	}
 
+# Create the dest file with strict permissions
+local $qf = quotemeta($_[1]);
+local $toucher = "touch $qf && chmod 600 $qf";
+if ($_[5] && $_[3]) {
+	$toucher = &command_as_user(
+		$_[5]->{'user'}, 0, $toucher);
+	}
+&execute_command($toucher);
+
 # Create the writer command. This will be run as the domain owner if this
 # is the final step of the backup process, and if the owner is doing the backup.
-local $writer = "cat >".quotemeta($_[1]);
+local $writer = "cat >$qf";
 if ($_[5] && $_[3]) {
 	$writer = &command_as_user($_[5]->{'user'}, 0, $writer);
 	}
