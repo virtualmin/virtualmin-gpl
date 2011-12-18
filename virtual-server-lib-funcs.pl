@@ -12824,7 +12824,8 @@ if ($config{'unix'}) {
 		if (&foreign_available("init")) {
 			&foreign_require("init", "init-lib.pl");
 			if (($init::init_mode eq 'init' ||
-			     $init::init_mode eq 'upstart') &&
+			     $init::init_mode eq 'upstart' ||
+			     $init::init_mode eq 'systemd') &&
 			    &init::action_status("nscd") == 2) {
 				$msg = &text('check_enscd2',
 					'../init/edit_action.cgi?0+nscd');

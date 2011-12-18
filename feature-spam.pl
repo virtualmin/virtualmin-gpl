@@ -1235,7 +1235,7 @@ local $pidfile = "$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid";
 local $helper = &get_api_helper_command();
 local $old_init_mode = $init::init_mode;
 if (!&init::action_status("lookup-domain")) {
-	if ($init::init_mode eq 'upstart') {
+	if ($init::init_mode eq 'upstart' || $init::init_mode eq 'systemd') {
 		# Force use of regular init, to avoid restarting problems
 		$init::init_mode = 'init';
 		}
