@@ -1347,7 +1347,9 @@ if ($_[0]->{'nospam'}) {
 	}
 
 # Set the user's Usermin IMAP password
-&set_usermin_imap_password($_[0]);
+if ($_[0]->{'email'} || @{$_[0]->{'extraemail'}}) {
+	&set_usermin_imap_password($_[0]);
+	}
 
 # Update cache of existing usernames
 $unix_user{&escape_alias($_[0]->{'user'})}++;
@@ -1857,7 +1859,9 @@ if (defined(&clear_lookup_domain_cache) && $_[2]) {
 	}
 
 # Set the user's Usermin IMAP password
-&set_usermin_imap_password($_[0]);
+if ($_[0]->{'email'} || @{$_[0]->{'extraemail'}}) {
+	&set_usermin_imap_password($_[0]);
+	}
 
 # Update cache of existing usernames
 if ($_[0]->{'user'} ne $_[1]->{'user'}) {
