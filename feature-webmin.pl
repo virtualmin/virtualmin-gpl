@@ -658,8 +658,8 @@ if ($extramods{'updown'} && $_[0]->{'unix'}) {
 	local $udfile = "$config_directory/updown/config";
 	&lock_file($udfile);
 	&read_file($udfile, \%udconfig);
-	$udfile{'dir_'.$_[1]->{'name'}} ||= &resolve_links($_[0]->{'home'});
-	$udfile{'ddir_'.$_[1]->{'name'}} ||= &resolve_links($_[0]->{'home'});
+	$udconfig{'dir_'.$_[1]->{'name'}} ||= &resolve_links($_[0]->{'home'});
+	$udconfig{'ddir_'.$_[1]->{'name'}} ||= &resolve_links($_[0]->{'home'});
 	&write_file($udfile, \%udconfig);
 	&unlock_file($udfile);
 	}
