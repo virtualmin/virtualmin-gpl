@@ -2110,7 +2110,10 @@ print &ui_table_row(&hlink($text{'tmpl_spfincludes'},
 # SPF ~all mode
 print &ui_table_row(&hlink($text{'tmpl_spfall'},
 			   "template_dns_spfall"),
-	&ui_yesno_radio("dns_spfall", $tmpl->{'dns_spfall'} ? 1 : 0));
+	&ui_radio("dns_spfall", $tmpl->{'dns_spfall'},
+		  [ [ 0, $text{'tmpl_spfall0'} ],
+		    [ 1, $text{'tmpl_spfall1'} ],
+		    [ 2, $text{'tmpl_spfall2'} ] ]));
 
 if (!$config{'provision_dns'}) {
 	print &ui_table_hr();
@@ -2513,7 +2516,7 @@ if ($d->{'dns_ip'}) {
 if ($d->{'ip'} ne $defip) {
 	push(@{$spf->{'ip4:'}}, $d->{'ip'});
 	}
-$spf->{'all'} = $tmpl->{'dns_spfall'} ? 2 : 1;
+$spf->{'all'} = $tmpl->{'dns_spfall'} + 1;
 return $spf;
 }
 
