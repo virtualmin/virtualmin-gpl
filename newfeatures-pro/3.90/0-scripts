@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to version 3.4.9, Drupal to 7.10, Moodle to 2.2, WordPress to 3.3, RoundCube to 0.7, SugarCRM to 6.3.1, and MoinMoin to 1.8.9.
+html=Updated the phpMyAdmin script installer to version 3.4.9, Drupal to 7.10, Moodle to 2.2, WordPress to 3.3, RoundCube to 0.7, SugarCRM to 6.3.1, SMF to 2.0.2, and MoinMoin to 1.8.9.
 master=1
 reseller=1
 domain=1
