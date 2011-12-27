@@ -17,12 +17,7 @@ local $defport = $tmpl->{'web_sslport'} || 443;
 local $port = $d->{'web_sslport'} || $defport;
 
 # Check if Apache supports SNI, which makes clashing certs not so bad
-local @dirs = &list_apache_directives();
-local ($sni) = grep { lc($_->[0]) eq lc("SSLStrictSNIVHostCheck") } @dirs;
-if (!$sni && $apache::httpd_modules{'mod_ssl'} >= 2.22) {
-	# Assume SNI works for Apache 2.2.2 or later
-	$sni = 1;
-	}
+local $sni = &has_sni_support($d);
 
 if ($d->{'virt'}) {
 	# Has a private IP
@@ -30,6 +25,11 @@ if ($d->{'virt'}) {
 	}
 elsif ($port != $defport) {
 	# Has a private port
+	return undef;
+	}
+elsif ($config{'sni_support'}) {
+	# Assume web server and clients can handle multiple SSL certs on
+	# the same IP address
 	return undef;
 	}
 else {
@@ -553,7 +553,8 @@ if (!&check_domain_certificate($d->{'dom'}, $d) &&
 			            &list_domain_certificate($d)));
 	}
 
-# Make sure the first virtualhost on this IP serves the same cert
+# Make sure the first virtualhost on this IP serves the same cert, unless
+# SNI is enabled
 &require_apache();
 local $conf = &apache::get_config();
 local $firstcert;
@@ -567,7 +568,7 @@ foreach my $v (&apache::find_directive_struct("VirtualHost",
 		last;
 		}
 	}
-if ($firstcert) {
+if ($firstcert && !$config{'sni_support'}) {
 	local $info = &cert_file_info($firstcert, $d);
 	if (!&check_domain_certificate($d->{'dom'}, $info) &&
 	    !&check_domain_certificate("www.".$d->{'dom'}, $info)) {

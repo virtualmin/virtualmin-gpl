@@ -1,0 +1,21 @@
+<header>Allow multiple SSL websites on the same IP?</header>
+
+By default (when this option is set to <b>No</b>) Virtualmin will display
+a warning if you try to create two SSL-enabled websites on the same IP
+address without a certificate that can be used for both domain names. This is
+necessary because the HTTTP protocol did not originally provide any way for
+the web server to select the correct certificate in this situation. <p>
+
+However, an improvement to the SSL protocol called SNI (server name
+identification) solves this problem, by allowing the web browser to send a
+hostname before SSL certification selection is done. All modern browsers
+support this extension, but IE 6 and below and all IE versions on Windows XP
+do not. <p>
+
+Selecting <b>Yes</b> for this option will remove the warning when two SSL
+sites are on the same IP address, based on the assumption that all web browsers
+connection to your sites support SNI. If a browser without SNI support connects,
+the user will see a warning about a mismatched certificate. <p>
+
+<footer>
+

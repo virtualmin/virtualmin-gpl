@@ -9493,6 +9493,33 @@ else {
 	}
 }
 
+# has_sni_support([&domain])
+# Returns 1 if the webserver supports SNI for SSL cert selection
+sub has_sni_support
+{
+local ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p eq 'web') {
+	# Check Apache modules
+	&require_apache();
+	local @dirs = &list_apache_directives();
+	local ($sni) = grep { lc($_->[0]) eq lc("SSLStrictSNIVHostCheck") }
+			    @dirs;
+	return 1 if ($sni);
+	if ($apache::httpd_modules{'mod_ssl'} >= 2.3 ||
+	    $apache::httpd_modules{'mod_ssl'} =~ /^2\.2(\d+)/ && $1 >= 12) {
+		# Assume SNI works for Apache 2.2.12 or later
+		return 1;
+		}
+	return 0;
+	}
+else {
+	# Call plugin
+	return &plugin_defined($p, "feature_supports_sni") &&
+	       &plugin_call($p, "feature_supports_sni", $d);
+	}
+}
+
 # require_licence()
 # Reads in the file containing the licence_scheduled function.
 # Returns 1 if OK, 0 if not
@@ -10099,7 +10126,7 @@ foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "quota_list_users_command", "quota_list_groups_command",
 	       "quota_get_user_command", "quota_get_group_command",
 	       "preload_mode", "collect_interval", "api_helper",
-	       "spam_lock", "spam_white", "mem_low") {
+	       "spam_lock", "spam_white", "mem_low", "sni_support") {
 	# Some important config option was changed
 	return 1 if ($config{$c} ne $lastconfig{$c});
 	}
@@ -12299,6 +12326,11 @@ if ($config{'web'}) {
 	else {
 		&$second_print($text{'check_webok'});
 		}
+	}
+
+# Make sure SNI is supported by webserver, if enabled
+if ($config{'sni_support'} && !&has_sni_support()) {
+	return &text('check_esni', $mclink);
 	}
 
 if ($config{'webalizer'}) {
