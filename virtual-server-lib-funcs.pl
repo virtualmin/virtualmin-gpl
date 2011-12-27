@@ -12329,7 +12329,7 @@ if ($config{'web'}) {
 	}
 
 # Make sure SNI is supported by webserver, if enabled
-if ($config{'sni_support'} && !&has_sni_support()) {
+if (&domain_has_website() && $config{'sni_support'} && !&has_sni_support()) {
 	return &text('check_esni', $mclink);
 	}
 

@@ -526,6 +526,12 @@ sub feature_save_web_ssl_file
 {
 }
 
+# feature_supports_sni(&domain)
+# Should return 1 if the webserver for this feature supports TLS SNI
+sub feature_supports_sni
+{
+}
+
 # feature_set_web_public_html_dir(&domain, subdir)
 # Configures the webserver for this domain to use the given sub-directory of 
 # the home as the web root, instead of public_html
