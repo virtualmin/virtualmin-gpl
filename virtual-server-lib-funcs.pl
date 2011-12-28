@@ -3631,6 +3631,7 @@ sub make_domain_substitions
 {
 local ($d, $nice_sizes) = @_;
 local %hash = %$d;
+local $tmpl = &get_template($d->{'template'});
 
 delete($hash{''});
 $hash{'idndom'} = &show_domain_name($d->{'dom'});	# With unicode
@@ -3740,6 +3741,19 @@ for(my $i=1; $i<=10; $i++) {
 		} while(length($r) != $i);
 	$hash{'RANDOM$i'} = $r;
 	}
+
+# Add secondary mail servers
+local %ids = map { $_, 1 } split(/\s+/, $d->{'mx_servers'});
+local @servers = grep { $ids{$_->{'id'}} } &list_mx_servers();
+$hash{'mx_slaves'} = join(" ", map { $_->{'host'} } @servers);
+
+# Add secondary nameservers
+local %on = map { $_, 1 } split(/\s+/, $d->{'dns_slaves'});
+local @servers = grep { $on{$_->{'host'}} || $on{$_->{'nsname'}} }
+		      &bind8::list_slave_servers();
+$hash{'dns_server'} = &get_master_nameserver($tmpl);
+$hash{'dns_slaves'} = join(" ", map { $_->{'nsname'} || $_->{'host'} }
+				    @servers);
 
 return %hash;
 }

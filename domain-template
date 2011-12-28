@@ -24,11 +24,17 @@ ${IF-MAIL}
 Email domain:            ${DOM}
 SMTP server:             mail.${DOM}
 POP3 server:             mail.${DOM}
+${IF-MX_SLAVES}
+Backup SMTP servers:     ${MX_SLAVES}
+${ENDIF-MX_SLAVES}
 
 ${ENDIF-MAIL}
 ${IF-DNS}
 DNS domain:              ${DOM}
-Nameserver:              ${HOSTNAME}
+Nameserver:              ${DNS_SERVER}
+${IF-DNS_SLAVES}
+Slave nameservers:       ${DNS_SLAVES}
+${ENDIF-DNS_SLAVES}
 
 ${ENDIF-DNS}
 ${IF-MYSQL}
