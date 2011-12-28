@@ -64,6 +64,10 @@
 
  - Allow domain owner to restore backups made by root
 	- Select from logs
+	- CHANGELOG
+	- Documentation?
+	- Make sure restores by root and restores by owners of their own
+	  domains still work
 	- Also per-destination purge policy
 		- https://www.virtualmin.com/node/20445
 

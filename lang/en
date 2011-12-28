@@ -5398,7 +5398,7 @@ wizard_hashpass_mode1=Only store hashed passwords
 wizard_hashpass_mode0=Store plain-text passwords
 
 backuplog_title=Backup Logs
-backuplg_ecannot=You are not allowed to view Virtualmin backup logs
+backuplog_ecannot=You are not allowed to view Virtualmin backup logs
 backuplog_search=Find logs matching
 backuplog_ok=Search
 backuplog_match=Showing logs matching $1 ..
@@ -5441,6 +5441,8 @@ viewbackup_ok=Final status
 viewbackup_success=Succeeded
 viewbackup_failure=Failed
 viewbackup_partial=Partially completed
+viewbackup_restore=Restore This Backup
+viewbackup_ecannot=You are not allowed to view this backup log
 
 redirects_title=Website Redirects
 redirects_ecannot=You are not allowed to edit website redirects for this domain

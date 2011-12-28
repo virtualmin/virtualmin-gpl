@@ -6,11 +6,13 @@ require './virtual-server-lib.pl';
 $in{'id'} =~ /^[0-9\.\-]+$/ || &error($text{'viewbackup_eid'});
 $log = &get_backup_log($in{'id'});
 $log || &error($text{'viewbackup_egone'});
-&can_backup_log($log) || &error($text{'backuplog_ecannot'});
+&can_backup_log($log) || &error($text{'viewbackup_ecannot'});
 
 &ui_print_header(undef, $text{'viewbackup_title'}, "");
 
 # Basic details
+print &ui_form_start("restore_form.cgi");
+print &ui_hidden("log", $in{'id'});
 print &ui_table_start($text{'viewbackup_header'}, "width=100%", 4,
 		      [ "nowrap" ]);
 
@@ -79,8 +81,7 @@ if (@dnames == @alldnames) {
 	print &ui_hidden_table_end();
 	}
 
-# Button to restore
-# XXX
+print &ui_form_end([ [ undef, $text{'viewbackup_restore'} ] ]);
 
 &ui_print_footer("backuplog.cgi?search=".&urlize($in{'search'}),
 		 $text{'backuplog_return'});

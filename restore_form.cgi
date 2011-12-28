@@ -4,14 +4,24 @@
 require './virtual-server-lib.pl';
 $crmode = &can_restore_domain();
 $crmode || &error($text{'restore_ecannot'});
+$safe_backup = $crmode == 1 ? 1 : 0;
 &ui_print_header(undef, $text{'restore_title'}, "");
 &ReadParse();
 
-# Get the schedule being restored from
 if ($in{'sched'}) {
+	# Get the schedule being restored from
 	($sched) = grep { $_->{'id'} eq $in{'sched'} &&
 			  &can_backup_sched($_) } &list_scheduled_backups();
 	$sched || &error($text{'restore_esched'});
+	}
+elsif ($in{'log'}) {
+	# Restoring from a logged backup
+	$log = &get_backup_log($in{'log'});
+	$log || &error($text{'viewbackup_egone'});
+	&can_backup_log($log) || &error($text{'viewbackup_ecannot'});
+	$sched = { 'feature_all' => 1,
+		   'dest' => $log->{'dest'} };
+	$safe_backup = $log->{'owner'} eq $remote_user ? 0 : 1;
 	}
 else {
 	# Sensible defaults
@@ -32,6 +42,7 @@ if ($crmode == 2) {
 
 @tds = ( "width=30%" );
 print &ui_form_start("restore.cgi", "form-data");
+print &ui_hidden("log", $in{'log'});
 print &ui_hidden_table_start($text{'restore_sourceheader'}, "width=100%", 2,
 			     "source", 1, \@tds);
 
@@ -39,8 +50,16 @@ print &ui_hidden_table_start($text{'restore_sourceheader'}, "width=100%", 2,
 if ($dest eq "download:") {
 	$dest = "upload:";
 	}
-print &ui_table_row($text{'restore_src'},
-	&show_backup_destination("src", $dest, $crmode == 2, $d, 1, 0));
+if ($in{'log'}) {
+	# Source is fixed
+	print &ui_table_row($text{'restore_src'},
+		&nice_backup_url($dest, 1));
+	}
+else {
+	# Can select restore source
+	print &ui_table_row($text{'restore_src'},
+		&show_backup_destination("src", $dest, $crmode == 2, $d, 1, 0));
+	}
 print &ui_hidden_table_end("source");
 
 # Show feature selection boxes
@@ -52,7 +71,7 @@ $ftable .= &ui_radio("feature_all", int($sched->{'feature_all'}),
 		  [ 0, $text{'backup_selfeatures'} ] ])."<br>\n";
 @links = ( &select_all_link("feature"), &select_invert_link("feature") );
 $ftable .= &ui_links_row(\@links);
-foreach $f (&get_available_backup_features($crmode == 2)) {
+foreach $f (&get_available_backup_features(!$safe_backup)) {
 	$ftable .= &ui_checkbox("feature", $f,
 		$text{'backup_feature_'.$f} || $text{'feature_'.$f},
 		$sched->{'feature_'.$f});
@@ -75,7 +94,7 @@ foreach $f (&get_available_backup_features($crmode == 2)) {
 
 # Add boxes for plugins which are known to be safe
 foreach $f (&list_backup_plugins()) {
-	if ($crmode == 1 || &plugin_call($f, "feature_backup_safe")) {
+	if ($safe_backup || &plugin_call($f, "feature_backup_safe")) {
 		$ftable .= &ui_checkbox("feature", $f,
 			&plugin_call($f, "feature_backup_name") ||
 			    &plugin_call($f, "feature_name"),
