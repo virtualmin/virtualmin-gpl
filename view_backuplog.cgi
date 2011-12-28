@@ -19,15 +19,18 @@ print &ui_table_row($text{'viewbackup_dest'},
 	&nice_backup_url($log->{'dest'}, 1), 3);
 
 # Domains included
-@dnames = split(/\s+/, $log->{'doms'});
+@alldnames = split(/\s+/, $log->{'doms'});
+@dnames = &backup_log_own_domains($log);
+$msg = @alldnames > @dnames ? " , <b>".&text('viewbackup_extra',
+					   @alldnames - @dnames)."</b>" : "";
 print &ui_table_row($text{'viewbackup_doms'},
-	join(" , ", @dnames) || $text{'backuplog_nodoms'}, 3);
+	join(" , ", @dnames).$msg || $text{'backuplog_nodoms'}, 3);
 
 # Domains that failed, if any
-@dnames = split(/\s+/, $log->{'errdoms'});
-if (@dnames) {
+@errdnames = &backup_log_own_domains($log, 1);
+if (@errdnames) {
 	print &ui_table_row($text{'viewbackup_errdoms'},
-		    "<font color=#ff0000>".join(" , ", @dnames)."</font>", 3);
+		   "<font color=#ff0000>".join(" , ", @errdnames)."</font>", 3);
 	}
 
 # Execution type
@@ -66,14 +69,18 @@ print &ui_table_row($text{'viewbackup_ok'},
 
 print &ui_table_end();
 
-# Full output
-print &ui_hidden_table_start($text{'viewbackup_output'}, "width=100%", 2,
-			     "output", $log->{'ok'} ? 0 : 1);
-print &ui_table_row(undef,
-	$log->{'mode'} eq 'cgi' ? $log->{'output'}
-			: "<pre>".&html_escape($log->{'output'})."</pre>", 2);
-print &ui_hidden_table_end();
+if (@dnames == @alldnames) {
+	# Full output
+	print &ui_hidden_table_start($text{'viewbackup_output'}, "width=100%",
+				     2, "output", $log->{'ok'} ? 0 : 1);
+	print &ui_table_row(undef,
+		$log->{'mode'} eq 'cgi' ? $log->{'output'} :
+			"<pre>".&html_escape($log->{'output'})."</pre>", 2);
+	print &ui_hidden_table_end();
+	}
 
+# Button to restore
+# XXX
 
 &ui_print_footer("backuplog.cgi?search=".&urlize($in{'search'}),
 		 $text{'backuplog_return'});

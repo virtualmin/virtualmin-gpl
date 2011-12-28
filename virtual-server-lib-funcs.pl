@@ -417,6 +417,18 @@ else {
 	}
 }
 
+# get_domains_by_names(name, ...)
+# Given a list of domain names, returns the domain objects (where they exist)
+sub get_domains_by_names
+{
+local @rv;
+foreach my $dname (@_) {
+	my $d = &get_domain_by("dom", $dname);
+	push(@rv, $d) if ($d);
+	}
+return @rv;
+}
+
 # domain_id()
 # Returns a new unique domain ID
 sub domain_id

@@ -2794,14 +2794,32 @@ else {
 sub can_backup_log
 {
 local ($log) = @_;
+return 1 if (&master_admin());
 return 0 if (!&can_backup_domain());
 if ($log) {
 	# Only allow non-admins to view their own logs
-	if (!&master_admin() && $log->{'user'} ne $remote_user) {
-		return 0;
-		}
+	local @dnames = &backup_log_own_domains($log);
+	return @dnames ? 1 : 0;
 	}
 return 1;
+}
+
+# backup_log_own_domains(&log, [error-domains-only])
+# Given a backup log object, return the domain names that the current user
+# can restore
+sub backup_log_own_domains
+{
+local ($log, $errormode) = @_;
+local @dnames = split(/\s+/, $errormode ? $log->{'errdoms'} : $log->{'doms'});
+return @dnames if (&master_admin() || $log->{'user'} eq $remote_user);
+if ($config{'own_restore'}) {
+	local @rv;
+	foreach my $d (&get_domains_by_names(@dnames)) {
+		push(@rv, $d->{'dom'}) if (&can_edit_domain($d));
+		}
+	return @rv;
+	}
+return ( );
 }
 
 # extract_purge_path(dest)

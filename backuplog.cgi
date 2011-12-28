@@ -37,7 +37,8 @@ if (@logs) {
 	# Show in a table
 	@table = ( );
 	foreach $log (sort { $b->{'start'} <=> $a->{'start'} } @logs) {
-		@dnames = split(/\s+/, $log->{'doms'});
+		@dnames = &backup_log_own_domains($log);
+		next if (!@dnames);
 		$ddesc = scalar(@dnames) == 0 ?
 				$text{'backuplog_nodoms'} :
 			 scalar(@dnames) <= 2 ?

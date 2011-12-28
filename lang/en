@@ -5421,6 +5421,7 @@ viewbackup_egone=Logged backup does not exist!
 viewbackup_header=Backup details
 viewbackup_dest=Backup destination
 viewbackup_doms=Virtual servers included
+viewbackup_extra=and $1 more owned by other users
 viewbackup_errdoms=Virtual servers that failed
 viewbackup_mode=Executed via
 viewbackup_mode_api=Command line
