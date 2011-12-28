@@ -24,7 +24,7 @@ return "WHMCS is an all-in-one client management, billing & support solution for
 # script_whmcs_versions()
 sub script_whmcs_versions
 {
-return ( "4.5.2" );
+return ( "5.0.3" );
 }
 
 sub script_whmcs_release
@@ -66,7 +66,8 @@ if ($upgrade) {
 	local $dir = $upgrade->{'opts'}->{'dir'};
 	$dir =~ s/^$d->{'home'}\///;
 	$rv .= &ui_table_row("Install directory", $dir);
-	$rv .= &ui_table_row("WHMCS licence key", $opts->{'licensekey'});
+	$rv .= &ui_table_row("WHMCS licence key",
+			     $upgrade->{'opts'}->{'licensekey'});
 	}
 else {
 	# Show editable install options
