@@ -463,6 +463,7 @@ local ($okcount, $errcount) = (0, 0);
 local @errdoms;
 local %donefeatures;				# Map from domain name->features
 local @cleanuphomes;				# Temporary homes
+local %donedoms;				# Map from domain name->hash
 DOMAIN: foreach $d (@$doms) {
 	# Make sure there are no databases that don't really exist, as these
 	# can cause database feature backups to fail.
@@ -571,6 +572,7 @@ DOMAIN: foreach $d (@$doms) {
 		&unlock_file($lockdir);
 		}
 	$donefeatures{$d->{'dom'}} = \@donefeatures;
+	$donedoms{$d->{'dom'}} = $d;
 	if ($dok) {
 		$okcount++;
 		}
@@ -586,8 +588,11 @@ DOMAIN: foreach $d (@$doms) {
 		local $tstart = time();
 		local $binfo = { $d->{'dom'} =>
 				 $donefeatures{$d->{'dom'}} };
+		local $bdom = { $d->{'dom'} => $d };
 		local $infotemp = &transname();
 		&uncat_file($infotemp, &serialise_variable($binfo));
+		local $domtemp = &transname();
+		&uncat_file($domtemp, &serialise_variable($bdom));
 		foreach my $desturl (@$desturls) {
 			local ($mode, $user, $pass, $server, $path, $port) =
 				&parse_backup_url($desturl);
@@ -607,12 +612,19 @@ DOMAIN: foreach $d (@$doms) {
 					  &copy_source_dest_as_domain_user(
 					  $asd, $infotemp, "$path/$df.info")
 						if (!$err);
+					($ok, $err) = 
+					  &copy_source_dest_as_domain_user(
+					  $asd, $domtemp, "$path/$df.dom")
+						if (!$err);
 					}
 				else {
 					($ok, $err) = &copy_source_dest(
 					  "$path0/$df", "$path/$df");
 					($ok, $err) = &copy_source_dest(
 					  $infotemp, "$path/$df.info")
+						if (!$err);
+					($ok, $err) = &copy_source_dest(
+					  $domtemp, "$path/$df.dom")
 						if (!$err);
 					}
 				if (!$ok) {
@@ -635,6 +647,10 @@ DOMAIN: foreach $d (@$doms) {
 					    $infotemp, \$err, undef, $user,
 					    $pass, $port, $ftp_upload_tries)
 						if (!$err);
+				&ftp_upload($server, "$path/$df.dom",
+					    $domtemp, \$err, undef, $user,
+					    $pass, $port, $ftp_upload_tries)
+						if (!$err);
 				$err =~ s/\Q$pass\E/$starpass/g;
 				}
 			elsif ($mode == 2) {
@@ -648,6 +664,8 @@ DOMAIN: foreach $d (@$doms) {
 				&scp_copy("$dest/$df", $r, $pass, \$err, $port);
 				&scp_copy($infotemp, $r.".info", $pass,
 					  \$err, $port) if (!$err);
+				&scp_copy($domtemp, $r.".dom", $pass,
+					  \$err, $port) if (!$err);
 				$err =~ s/\Q$pass\E/$starpass/g;
 				}
 			elsif ($mode == 3) {
@@ -656,8 +674,8 @@ DOMAIN: foreach $d (@$doms) {
 				$err = &s3_upload($user, $pass, $server,
 						  "$dest/$df",
 						  $path ? $path."/".$df : $df,
-						  $binfo, $s3_upload_tries,
-						  $port);
+						  $binfo, $bdom,
+						  $s3_upload_tries, $port);
 				}
 			if ($err) {
 				&$second_print(&text('backup_uploadfailed',
@@ -675,6 +693,7 @@ DOMAIN: foreach $d (@$doms) {
 				}
 			}
 		&unlink_file($infotemp);
+		&unlink_file($domtemp);
 
 		# Delete .backup directory
 		&execute_command("rm -rf ".quotemeta("$d->{'home'}/.backup"));
@@ -903,6 +922,7 @@ foreach my $desturl (@$desturls) {
 		&$first_print(&text('backup_upload', "<tt>$server</tt>"));
 		local $err;
 		local $infotemp = &transname();
+		local $domtemp = &transname();
 		if ($dirfmt) {
 			# Need to upload entire directory .. which has to be
 			# created first
@@ -912,13 +932,20 @@ foreach my $desturl (@$desturls) {
 				local $n = $d eq "virtualmin" ? "virtualmin"
 							      : $d->{'dom'};
 				local $binfo = { $n => $donefeatures{$n} };
+				local $bdom = { $n => $d };
 				&uncat_file($infotemp,
 					    &serialise_variable($binfo));
+				&uncat_file($domtemp,
+					    &serialise_variable($bdom));
 				&ftp_upload($server, "$path/$df", "$dest/$df",
 					    \$err, undef, $user, $pass, $port,
 					    $ftp_upload_tries);
 				&ftp_upload($server, "$path/$df.info",
 					    $infotemp, \$err,
+					    undef, $user, $pass, $port,
+					    $ftp_upload_tries) if (!$err);
+				&ftp_upload($server, "$path/$df.dom",
+					    $domtemp, \$err,
 					    undef, $user, $pass, $port,
 					    $ftp_upload_tries) if (!$err);
 				if ($err) {
@@ -941,9 +968,14 @@ foreach my $desturl (@$desturls) {
 			local $tstart = time();
 			&uncat_file($infotemp,
 				    &serialise_variable(\%donefeatures));
+			&uncat_file($domtemp,
+				    &serialise_variable(\%donedoms));
 			&ftp_upload($server, $path, $dest, \$err, undef, $user,
 				    $pass, $port, $ftp_upload_tries);
 			&ftp_upload($server, $path.".info", $infotemp, \$err,
+				    undef, $user, $pass, $port,
+				    $ftp_upload_tries) if (!$err);
+			&ftp_upload($server, $path.".dom", $domtemp, \$err,
 				    undef, $user, $pass, $port,
 				    $ftp_upload_tries) if (!$err);
 			if ($err) {
@@ -960,6 +992,7 @@ foreach my $desturl (@$desturls) {
 				}
 			}
 		&unlink_file($infotemp);
+		&unlink_file($domtemp);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
 	elsif ($ok && $mode == 2 && (@destfiles || !$dirfmt)) {
@@ -970,6 +1003,7 @@ foreach my $desturl (@$desturls) {
 					"[$server]" : $server;
 		local $r = ($user ? "$user\@" : "")."$qserver:$path";
 		local $infotemp = &transname();
+		local $domtemp = &transname();
 		if ($dirfmt) {
 			# Need to upload all backup files in the directory
 			$err = undef;
@@ -985,15 +1019,20 @@ foreach my $desturl (@$desturls) {
 				$err = undef;
 				&scp_copy($dest, $r, $pass, \$err, $port);
 				}
-			# Upload each domain's .info file
+			# Upload each domain's .info and .dom files
 			foreach my $df (@destfiles) {
 				local $d = $destfiles_map{$df};
 				local $n = $d eq "virtualmin" ? "virtualmin"
 							      : $d->{'dom'};
 				local $binfo = { $n => $donefeatures{$n} };
+				local $bdom = { $n => $d };
 				&uncat_file($infotemp,
 					    &serialise_variable($binfo));
+				&uncat_file($domtemp,
+					    &serialise_variable($bdom));
 				&scp_copy($infotemp, $r."/$df.info", $pass,
+					  \$err, $port) if (!$err);
+				&scp_copy($domtemp, $r."/$df.dom", $pass,
 					  \$err, $port) if (!$err);
 				}
 			$err =~ s/\Q$pass\E/$starpass/g;
@@ -1015,8 +1054,12 @@ foreach my $desturl (@$desturls) {
 			local $tstart = time();
 			&uncat_file($infotemp,
 				    &serialise_variable(\%donefeatures));
+			&uncat_file($domtemp,
+				    &serialise_variable(\%donedoms));
 			&scp_copy($dest, $r, $pass, \$err, $port);
 			&scp_copy($infotemp, $r.".info", $pass, \$err, $port)
+				if (!$err);
+			&scp_copy($domtemp, $r.".dom", $pass, \$err, $port)
 				if (!$err);
 			$err =~ s/\Q$pass\E/$starpass/g;
 			if ($asd && !$err) {
@@ -1031,6 +1074,7 @@ foreach my $desturl (@$desturls) {
 			$ok = 0;
 			}
 		&unlink_file($infotemp);
+		&unlink_file($domtemp);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
 	elsif ($ok && $mode == 3 && (@destfiles || !$dirfmt)) {
@@ -1048,8 +1092,8 @@ foreach my $desturl (@$desturls) {
 				$err = &s3_upload($user, $pass, $server,
 						  "$dest/$df",
 						  $path ? $path."/".$df : $df,
-						  $binfo, $s3_upload_tries,
-						  $port);
+						  $binfo, $bdom,
+						  $s3_upload_tries, $port);
 				if ($err) {
 					&$second_print(
 					    &text('backup_uploadfailed', $err));
@@ -1069,7 +1113,7 @@ foreach my $desturl (@$desturls) {
 			local %donebydname;
 			local $tstart = time();
 			$err = &s3_upload($user, $pass, $server, $dest,
-					  $path, \%donefeatures,
+					  $path, \%donefeatures, \%donedoms,
 					  $s3_upload_tries, $port);
 			if ($err) {
 				&$second_print(&text('backup_uploadfailed',
@@ -1124,17 +1168,22 @@ foreach my $desturl (@$desturls) {
 			}
 		}
 	if ($ok && $mode == 0 && (@destfiles || !$dirfmt)) {
-		# Write out .info files, even for initial destination
+		# Write out .info and .dom files, even for initial destination
 		if ($dirfmt) {
-			# One .info file per domain
+			# One .info and .dom file per domain
 			foreach my $df (@destfiles) {
 				local $d = $destfiles_map{$df};
 				local $n = $d eq "virtualmin" ? "virtualmin"
 							      : $d->{'dom'};
 				local $binfo = { $n => $donefeatures{$n} };
+				local $bdom = { $n => $d };
 				local $wcode = sub { 
 					&uncat_file("$dest/$df.info",
 					    &serialise_variable($binfo));
+					if ($d ne "virtualmin") {
+						&uncat_file("$dest/$df.dom",
+						    &serialise_variable($bdom));
+						}
 					};
 				if ($asd) {
 					&write_as_domain_user($asd, $wcode);
@@ -1149,6 +1198,8 @@ foreach my $desturl (@$desturls) {
 			local $wcode = sub {
 				&uncat_file("$dest.info",
 					&serialise_variable(\%donefeatures));
+				&uncat_file("$dest.dom",
+					&serialise_variable(\%donedoms));
 				};
 			if ($asd) {
 				&write_as_domain_user($asd, $wcode);
@@ -1290,7 +1341,7 @@ if ($ok) {
 		opendir(DIR, $backup);
 		@files = map { "$backup/$_" }
 			     grep { $_ ne "." && $_ ne ".." &&
-				    !/\.info$/ } readdir(DIR);
+				    !/\.(info|dom)$/ } readdir(DIR);
 		closedir(DIR);
 		}
 	else {
@@ -1304,6 +1355,17 @@ if ($ok) {
 	foreach $f (@files) {
 		local $out;
 		local $q = quotemeta($f);
+
+		# Make sure file is for a domain we want to restore
+		if (-r $f.".info") {
+			local $info = &unserialise_variable(
+					&read_file_contents($f.".info"));
+			if ($info) {
+				local @wantdoms = grep { $info->{$_->{'dom'}} }
+						       @$doms;
+				next if (!@wantdoms);
+				}
+			}
 
 		# See if this is a home-format backup, by looking for a .backup
 		# sub-directory
@@ -1880,68 +1942,114 @@ local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($file);
 local $doms;
 local @fst = stat($file);
 local @ist = stat($file.".info");
+local @dst = stat($file.".dom");
+
+# First download the .info file(s) always
+local %info;
 if ($mode == 3) {
-	# For S3, just download the backup contents files
+	# For S3, just download the .info backup contents files
 	local $s3b = &s3_list_backups($user, $pass, $server, $path);
 	return $s3b if (!ref($s3b));
-	local %rv;
 	foreach my $b (keys %$s3b) {
-		$rv{$b} = $s3b->{$b}->{'features'};
+		$info{$b} = $s3b->{$b}->{'features'};
 		}
-	return $wantdoms ? (\%rv, undef) : \%rv;
 	}
-elsif ($mode > 0 && !$wantdoms) {
-	# Try to download .info file first
+elsif ($mode > 0) {
+	# Download info files via SSH or FTP
 	local $infotemp = &transname();
 	local $infoerr = &download_backup($_[0], $infotemp, undef, undef, 1);
 	if (!$infoerr) {
 		if (-d $infotemp) {
 			# Got a whole dir of .info files
-			local %rv;
 			opendir(INFODIR, $infotemp);
 			foreach my $f (readdir(INFODIR)) {
-				next if ($f !~ /\.info$/);
-				local $info = &unserialise_variable(
+				next if ($f !~ /\.(info|dom)$/);
+				local $oneinfo = &unserialise_variable(
 					&read_file_contents("$infotemp/$f"));
-				foreach my $dname (keys %$info) {
-					$rv{$dname} = $info{$dname};
+				foreach my $dname (keys %$oneinfo) {
+					$info{$dname} = $oneinfo->{$dname};
 					}
 				}
 			closedir(INFODIR);
 			&unlink_file($infotemp);
-			if (%rv) {
-				return $wantdoms ? (\%rv, undef) : \%rv;
-				}
 			}
 		else {
 			# One file
-			local $info = &unserialise_variable(
+			local $oneinfo = &unserialise_variable(
 					&read_file_contents($infotemp));
 			&unlink_file($infotemp);
-			if (%$info) {
-				return $wantdoms ? ($info, undef) : $info;
-				}
+			%info = %$oneinfo if (%$oneinfo);
 			}
 		}
-
-	# Could not get info file, need to download whole thing
-	$backup = &transname();
-	local $derr = &download_backup($_[0], $backup);
-	return $derr if ($derr);
 	}
-elsif ($mode > 0 && $wantdoms) {
+elsif (@ist && $ist[9] >= $fst[9]) {
+	# Local .info file exists, and is new
+	local $oneinfo = &unserialise_variable(
+			&read_file_contents($_[0].".info"));
+	%info = %$oneinfo if (%$oneinfo);
+	}
+
+# If all we want is the .info data and we have it, can return now
+if (!$wantdoms && %info) {
+	return \%info;
+	}
+
+# Try to download .dom files, which contain full domain hashes
+local %dom;
+if ($mode == 3) {
+	# For S3, just download the .dom files
+	local $s3b = &s3_list_domains($user, $pass, $server, $path);
+	if (ref($s3b)) {
+		foreach my $b (keys %$s3b) {
+			$info{$b} = $s3b->{$b};
+			}
+		}
+	}
+elsif ($mode > 0) {
+	# Download .dom files via SSH or FTP
+	local $domtemp = &transname();
+	local $domerr = &download_backup($_[0], $domtemp, undef, undef, 2);
+	if (!$domerr) {
+		if (-d $domtemp) {
+			# Got a whole dir of .dom files
+			opendir(INFODIR, $domtemp);
+			foreach my $f (readdir(INFODIR)) {
+				next if ($f !~ /\.dom$/);
+				local $onedom = &unserialise_variable(
+					&read_file_contents("$domtemp/$f"));
+				foreach my $dname (keys %$onedom) {
+					$dom{$dname} = $onedom->{$dname};
+					}
+				}
+			closedir(INFODIR);
+			&unlink_file($domtemp);
+			}
+		else {
+			# One file
+			local $onedom = &unserialise_variable(
+					&read_file_contents($domtemp));
+			&unlink_file($domtemp);
+			%dom = %$onedom if (%$onedom);
+			}
+		}
+	}
+elsif (@dst && $dst[9] >= $fst[9]) {
+	# Local .dom file exists, and is new
+	local $onedom = &unserialise_variable(
+			&read_file_contents($_[0].".dom"));
+	%dom = %$onedom if (%$onedom);
+	}
+
+# If we got the .dom files, can return now
+if (%dom && %info && keys(%dom) >= keys(%info)) {
+	return $wantdoms ? (\%info, [ values %dom ]) : \%info;
+	}
+
+if ($mode > 0) {
 	# Need to download the whole file
 	$backup = &transname();
 	local $derr = &download_backup($_[0], $backup);
 	return $derr if ($derr);
-	}
-elsif (@ist && $ist[9] >= $fst[9] && !$wantdoms) {
-	# Local .info file exists, and is new
-	local $info = &unserialise_variable(
-			&read_file_contents($_[0].".info"));
-	if (%$info) {
-		return $wantdoms ? ($info, undef) : $info;
-		}
 	}
 else {
 	# Use local backup file
@@ -1953,7 +2061,7 @@ if (-d $backup) {
 	opendir(DIR, $backup);
 	local %rv;
 	foreach my $f (readdir(DIR)) {
-		next if ($f eq "." || $f eq ".." || $f =~ /\.info$/);
+		next if ($f eq "." || $f eq ".." || $f =~ /\.(info|dom)$/);
 		local ($cont, $fdoms);
 		if ($wantdoms) {
 			($cont, $fdoms) = &backup_contents("$backup/$f", 1);
@@ -2153,6 +2261,7 @@ if ($cache && -r $cache && !$infoonly) {
 	return undef;
 	}
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($url);
+local $sfx = $infoonly == 1 ? ".info" : $infoonly == 2 ? ".dom" : "";
 if ($mode == 1) {
 	# Download from FTP server
 	local $cwderr;
@@ -2161,7 +2270,7 @@ if ($mode == 1) {
 	local $err;
 	if ($isdir) {
 		# Need to download entire directory.
-		# In info-only mode, skip files that don't end with .info
+		# In info-only mode, skip files that don't end with .info / .dom
 		&make_dir($temp, 0711);
 		local $list = &ftp_listdir($server, $path, \$err, $user, $pass,
 					   $port);
@@ -2169,7 +2278,11 @@ if ($mode == 1) {
 		foreach $f (@$list) {
 			$f =~ s/^$path[\\\/]//;
 			next if ($f eq "." || $f eq ".." || $f eq "");
-			next if ($infoonly && $f !~ /\.info$/);
+			next if ($infoonly && $f !~ /\Q$sfx\E$/);
+			if (@$domnames && $f =~ /^(\S+)\.(tar.*|zip)$/i) {
+				# Make sure file is for a domain we want
+				next if (&indexof($1, @$domnames) < 0);
+				}
 			&ftp_download($server, "$path/$f", "$temp/$f", \$err,
 				      undef, $user, $pass, $port, 1);
 			return $err if ($err);
@@ -2177,8 +2290,8 @@ if ($mode == 1) {
 		}
 	else {
 		# Can just download a single file.
-		# In info-only mode, just get the .info file.
-		&ftp_download($server, $path.($infoonly ? ".info" : ""),
+		# In info-only mode, just get the .info and .dom files.
+		&ftp_download($server, $path.$sfx,
 			      $temp, \$err, undef, $user, $pass, $port, 1);
 		return $err if ($err);
 		}
@@ -2187,24 +2300,40 @@ elsif ($mode == 2) {
 	# Download from SSH server
 	local $qserver = &check_ip6address($server) ? "[$server]" : $server;
 	if ($infoonly) {
-		# First try file with .info extension
-		&scp_copy(($user ? "$user\@" : "")."$qserver:$path.info",
+		# First try file with .info or .dom extension
+		&scp_copy(($user ? "$user\@" : "")."$qserver:$path".$sfx,
 			  $temp, $pass, \$err, $port);
 		if ($err) {
-			# Fall back to .info files in directory
+			# Fall back to .info or .dom files in directory
 			&make_dir($temp, 0700);
 			&scp_copy(($user ? "$user\@" : "").
-				  "$qserver:$path/*.info",
+				  $qserver.":".$path."/*".$sfx,
 				  $temp, $pass, \$err, $port);
 			$err = undef;
 			}
 		}
 	else {
-		# Download the whole file or directory
-		&unlink_file($temp);	# Must remove that recursive scp doesn't
-					# copy into it
-		&scp_copy(($user ? "$user\@" : "")."$qserver:$path",
-			  $temp, $pass, \$err, $port);
+		# If a list of domain names was given, first try to scp down
+		# only the files for those domains in the directory
+		local $gotfiles = 0;
+		if (@$domnames) {
+			&unlink_file($temp);
+			&make_dir($temp, 0711);
+			local $domfiles = "{".join(",", @$domnames)."}";
+			&scp_copy(($user ? "$user\@" : "").
+				  "$qserver:$path/$domfiles.*",
+				  $temp, $pass, \$err, $port);
+			$gotfiles = 1 if (!$err);
+			$err = undef;
+			}
+
+		if (!$gotfiles) {
+			# Download the whole file or directory
+			&unlink_file($temp);	# Must remove so that recursive
+						# scp doesn't copy into it
+			&scp_copy(($user ? "$user\@" : "")."$qserver:$path",
+				  $temp, $pass, \$err, $port);
+			}
 		}
 	return $err if ($err);
 	}
@@ -2892,6 +3021,7 @@ if ($mode == 0) {
 				            "<tt>$path</tt>", $old));
 			local $sz = &nice_size(&disk_usage_kb($path)*1024);
 			&unlink_file($path.".info") if (!-d $path);
+			&unlink_file($path.".dom") if (!-d $path);
 			&unlink_file($path);
 			&$second_print(&text('backup_deleted', $sz));
 			$pcount++;
@@ -2926,6 +3056,9 @@ elsif ($mode == 1) {
 			local $infoerr;
 			&ftp_deletefile($host, "$base/$f->[13].info",
 					\$infoerr, $user, $pass, $port);
+			local $domerr;
+			&ftp_deletefile($host, "$base/$f->[13].dom",
+					\$domerr, $user, $pass, $port);
 			if ($err) {
 				&$second_print(&text('backup_edelftp', $err));
 				$ok = 0;
@@ -2957,9 +3090,10 @@ elsif ($mode == 2) {
 			local $old = int((time() - $st[9]) / (24*60*60));
 			&$first_print(&text('backup_deletingssh',
 					    "<tt>$base/$st[13]</tt>", $old));
-			local $rmcmd = $sshcmd.
-				       " rm -rf ".quotemeta("$base/$st[13]").
-				       " ".quotemeta("$base/$st[13].info");
+			local $rmcmd = $sshcmd." rm -rf".
+				       " ".quotemeta("$base/$st[13]").
+				       " ".quotemeta("$base/$st[13].info").
+				       " ".quotemeta("$base/$st[13].dom");
 			local $rmerr;
 			&run_ssh_command($rmcmd, $pass, \$rmerr);
 			if ($rmerr) {
@@ -3037,6 +3171,8 @@ elsif ($mode == 3 && $path =~ /\%/) {
 			else {
 				&s3_delete_file($user, $pass, $host,
 						$f->{'Key'}.".info");
+				&s3_delete_file($user, $pass, $host,
+						$f->{'Key'}.".dom");
 				&$second_print(&text('backup_deleted',
 						     &nice_size($f->{'Size'})));
 				$pcount++;

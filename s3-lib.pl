@@ -87,13 +87,13 @@ return undef;
 }
 
 # s3_upload(access-key, secret-key, bucket, source-file, dest-filename, [&info],
-#           attempts, [reduced-redundancy])
+#           [&domains], attempts, [reduced-redundancy])
 # Upload some file to S3, and return undef on success or an error message on
 # failure. Unfortunately we cannot simply use S3's put method, as it takes
 # a scalar for the content, which could be huge.
 sub s3_upload
 {
-local ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $tries, $rrs) = @_;
+local ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries, $rrs) = @_;
 $tries ||= 1;
 &require_s3();
 local @st = stat($sourcefile);
@@ -117,10 +117,11 @@ for(my $i=0; $i<$tries; $i++) {
 	my $path = $endpoint ? $destfile : "$bucket/$destfile";
 	my $authpath = "$bucket/$destfile";
 
-	# Delete any .info file first, as it will no longer be valid. Only needs
-	# to be done the first time.
+	# Delete any .info or .dom file first, as it will no longer be valid.
+	# Only needs to be done the first time.
 	if (!$endpoint) {
 		$conn->delete($bucket, $destfile.".info");
+		$conn->delete($bucket, $destfile.".dom");
 		}
 
 	# Use the S3 library to create a request object, but use Webmin's HTTP
@@ -204,6 +205,16 @@ for(my $i=0; $i<$tries; $i++) {
                                      &extract_s3_message($response));
 			}
 		}
+	if (!$err && $dom) {
+		# Write out the .dom file, if given
+		local $iconn = S3::AWSAuthConnection->new($akey, $skey);
+		local $response = $iconn->put($bucket, $destfile.".dom",
+					     &serialise_variable($dom));
+		if ($response->http_response->code != 200) {
+			$err = &text('s3_edom',
+                                     &extract_s3_message($response));
+			}
+		}
 	if ($err) {
 		# Wait a little before re-trying
 		sleep(10) if (!$newendpoint);
@@ -259,6 +270,42 @@ foreach my $f (@{$response->entries}) {
 					'file' => $bfile,
 					'features' => $info->{$dname},
 					};
+				}
+			}
+		}
+	}
+return $rv;
+}
+
+# s3_list_domains(access-key, secret-key, bucket, [file])
+# Returns a hash reference from domain names to domain hashes, or an error
+# message string on failure.
+sub s3_list_domains
+{
+local ($akey, $skey, $bucket, $path) = @_;
+&require_s3();
+local $conn = S3::AWSAuthConnection->new($akey, $skey);
+return $text{'s3_econn'} if (!$conn);
+
+local $response = $conn->list_bucket($bucket);
+if ($response->http_response->code != 200) {
+	return &text('s3_elist2', &extract_s3_message($response));
+	}
+local $rv = { };
+foreach my $f (@{$response->entries}) {
+	if ($f->{'Key'} =~ /^(\S+)\.dom$/ && (!$path || $path eq $1) ||
+	    $f->{'Key'} =~ /^((\S+)\/([^\/]+))\.dom$/ && $path && $path eq $2){
+		# Found a valid .dom file .. get it
+		local $bfile = $1;
+		local ($bentry) = grep { $_->{'Key'} eq $bfile }
+				  @{$response->entries};
+		next if (!$bentry);	# No actual backup file found!
+		local $gresponse = $conn->get($bucket, $f->{'Key'});
+		if ($gresponse->http_response->code == 200) {
+			local $dom = &unserialise_variable(
+				$gresponse->object->data);
+			foreach my $dname (keys %$dom) {
+				$rv->{$dname} = $dom->{$dname};
 				}
 			}
 		}

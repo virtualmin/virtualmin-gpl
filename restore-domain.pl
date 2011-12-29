@@ -255,6 +255,13 @@ if ($test) {
 		print "\n";
 		print "The following features will be restored :\n";
 		foreach $f (@rfeats) {
+			# Do any domains being restored have this feature?
+			@fdoms = grep { $cont->{$_} &&
+					&indexof($f, @{$cont->{$_}}) >= 0 }
+				      @rdoms;
+			next if (!@fdoms);
+
+			# Get and show restore featurer name
 			if (&indexof($f, &list_backup_plugins()) >= 0) {
 				$fn = &plugin_call($f, "feature_backup_name") ||
 				      &plugin_call($f, "feature_name");

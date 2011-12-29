@@ -4,6 +4,7 @@
 require './virtual-server-lib.pl';
 $crmode = &can_restore_domain();
 $crmode || &error($text{'restore_ecannot'});
+$safe_backup = $crmode == 1 ? 1 : 0;
 &ReadParseMime();
 
 # Work out the current user's main domain, if needed
@@ -13,10 +14,19 @@ if ($crmode == 2) {
 
 # Validate inputs, starting with source
 &error_setup($text{'restore_err'});
-if ($in{'src'}) {
+if ($in{'log'}) {
+	# Restoring a logged backup
+	$log = &get_backup_log($in{'log'});
+	$log || &error($text{'viewbackup_egone'});
+	&can_backup_log($log) || &error($text{'viewbackup_ecannot'});
+	$src = $log->{'dest'};
+	$safe_backup = $log->{'owner'} eq $remote_user ? 0 : 1;
+	}
+elsif ($in{'src'}) {
 	$src = $in{'src'};
 	}
 else {
+	# Restoring from user-entered source
 	$src = &parse_backup_destination("src", \%in, $crmode == 2, $d);
 	}
 $origsrc = $in{'origsrc'} || $src;
@@ -45,11 +55,11 @@ $mode > 0 || -r $src || -d $src || &error($text{'restore_esrc'});
 # Parse features
 if ($in{'feature_all'}) {
 	# All features usable by current user
-	@do_features = &get_available_backup_features($crmode == 2);
+	@do_features = &get_available_backup_features(!$safe_backup);
 	foreach my $f (&list_backup_plugins()) {
 		push(@do_features, $f);
 		}
-	if ($crmode == 2) {
+	if (!$safe_backup) {
 		@do_features = grep {
 			&indexof($_, @safe_backup_features) >= 0 ||
 			&plugin_call($_, "feature_backup_safe") } @do_features;
@@ -59,7 +69,7 @@ else {
 	# Selected features
 	@do_features = split(/\0/, $in{'feature'});
 	@do_features || &error($text{'restore_efeatures'});
-	if ($crmode == 2) {
+	if (!$safe_backup) {
 		# Make sure they are all safe
 		foreach my $f (@do_features) {
 			&indexof($f, @safe_backup_features) >= 0 ||

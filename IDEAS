@@ -68,6 +68,7 @@
 	- Documentation?
 	- Make sure restores by root and restores by owners of their own
 	  domains still work
+	- Test restore of missing domain
 	- Also per-destination purge policy
 		- https://www.virtualmin.com/node/20445
 
