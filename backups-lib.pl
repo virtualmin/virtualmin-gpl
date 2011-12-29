@@ -1356,8 +1356,10 @@ if ($ok) {
 		local $out;
 		local $q = quotemeta($f);
 
-		# Make sure file is for a domain we want to restore
-		if (-r $f.".info") {
+		# Make sure file is for a domain we want to restore, unless
+		# we are restoring templates or from a single file, in which
+		# case all files need to be extracted.
+		if (-r $f.".info" && !@$vbs && -d $backup) {
 			local $info = &unserialise_variable(
 					&read_file_contents($f.".info"));
 			if ($info) {
@@ -1485,7 +1487,9 @@ if ($ok) {
 	if (@$vbs) {
 		&$first_print($text{'restore_global2'});
 		&$indent_print();
+		print STDERR `ls -la $restoredir`;
 		foreach my $v (@$vbs) {
+			print STDERR "v=$v\n";
 			local $vfile = "$restoredir/virtualmin_".$v;
 			if (-r $vfile) {
 				local $vfunc = "virtualmin_restore_".$v;
@@ -2279,7 +2283,8 @@ if ($mode == 1) {
 			$f =~ s/^$path[\\\/]//;
 			next if ($f eq "." || $f eq ".." || $f eq "");
 			next if ($infoonly && $f !~ /\Q$sfx\E$/);
-			if (@$domnames && $f =~ /^(\S+)\.(tar.*|zip)$/i) {
+			if (@$domnames && $f =~ /^(\S+)\.(tar.*|zip)$/i &&
+			    $f !~ /^virtualmin\.(tar.*|zip)$/i) {
 				# Make sure file is for a domain we want
 				next if (&indexof($1, @$domnames) < 0);
 				}
@@ -2319,7 +2324,8 @@ elsif ($mode == 2) {
 		if (@$domnames) {
 			&unlink_file($temp);
 			&make_dir($temp, 0711);
-			local $domfiles = "{".join(",", @$domnames)."}";
+			local $domfiles = "{".join(",", @$domnames,
+							"virtualmin")."}";
 			&scp_copy(($user ? "$user\@" : "").
 				  "$qserver:$path/$domfiles.*",
 				  $temp, $pass, \$err, $port);
