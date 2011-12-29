@@ -1656,6 +1656,11 @@ $backup_tests = [
 		      [ 'dest', $test_backup_file ] ],
 	},
 
+	# Make sure the file and meta-files exist
+	{ 'command' => 'ls -l '.$test_backup_file },
+	{ 'command' => 'ls -l '.$test_backup_file.'.info' },
+	{ 'command' => 'ls -l '.$test_backup_file.'.dom' },
+
 	# Make sure it was logged
 	{ 'command' => 'list-backup-logs.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -1679,6 +1684,11 @@ $backup_tests = [
 		      [ 'newformat' ],
 		      [ 'dest', $test_backup_dir ] ],
 	},
+
+	# Make sure the file and meta-files exist
+	{ 'command' => 'ls -l '.$test_backup_dir.'/'.$test_domain.'.tar.gz' },
+	{ 'command' => 'ls -l '.$test_backup_dir.'/'.$test_domain.'.tar.gz.info' },
+	{ 'command' => 'ls -l '.$test_backup_dir.'/'.$test_domain.'.tar.gz.dom' },
 
 	# Delete web page
 	{ 'command' => 'rm -f ~'.$test_domain_user.'/public_html/index.*',
@@ -2010,6 +2020,14 @@ $multibackup_tests = [
 		      [ 'newformat' ],
 		      [ 'dest', $test_backup_dir ] ],
 	},
+
+	# Make sure backup and all meta files exist
+	{ 'command' => 'ls -l '.$test_backup_dir.'/'.$test_domain.'.tar.gz' },
+	{ 'command' => 'ls -l '.$test_backup_dir.'/'.$test_domain.'.tar.gz.info' },
+	{ 'command' => 'ls -l '.$test_backup_dir.'/'.$test_domain.'.tar.gz.dom' },
+	{ 'command' => 'ls -l '.$test_backup_dir.'/'.$test_subdomain.'.tar.gz' },
+	{ 'command' => 'ls -l '.$test_backup_dir.'/'.$test_subdomain.'.tar.gz.info' },
+	{ 'command' => 'ls -l '.$test_backup_dir.'/'.$test_subdomain.'.tar.gz.dom' },
 
 	# Delete web page
 	{ 'command' => 'rm -f ~'.$test_domain_user.'/public_html/index.*',
