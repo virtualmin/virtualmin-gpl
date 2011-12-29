@@ -1326,3 +1326,5 @@ Updated the phpMyAdmin script installer to version 3.4.9, Drupal to 7.10, Moodle
 The script installer update process can now detect new installer releases that don't change the application version.
 Added the modify-proxy API command, to update an existing proxy balancer.
 The warning when multiple SSL sites share the same IP can now be disabled if your webserver supports SNI, via a new option on the Virtualmin Configuration page.
+Backups now create a .dom file in the same directory as the tar.gz file, which contains information about the domains included and is used to speed up the restore process.
+A new option on the Virtualmin Configuration page allows domain owners to restore backups made by root for their own domains. Because root backups are considered secure, the domain owner can restore all settings, including the Apache and DNS configuration.

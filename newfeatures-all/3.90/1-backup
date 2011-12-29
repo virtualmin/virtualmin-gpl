@@ -1,0 +1,4 @@
+desc=Domain owners can restore root backups
+html=A new option on the Virtualmin Configuration page allows domain owners to restore backups made by root for their own domains. Because root backups are considered secure, the domain owner can restore all settings, including the Apache and DNS configuration.
+master=1
+link=../config.cgi?mod=virtual-server&sect=line1.5
