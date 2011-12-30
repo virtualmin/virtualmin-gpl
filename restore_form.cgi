@@ -54,6 +54,9 @@ if ($in{'log'}) {
 	# Source is fixed
 	print &ui_table_row($text{'restore_src'},
 		&nice_backup_url($dest, 1));
+
+	print &ui_table_row($text{'restore_madeat'},
+		&make_date($log->{'start'}));
 	}
 else {
 	# Can select restore source

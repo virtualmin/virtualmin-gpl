@@ -62,9 +62,5 @@
  - Directadmin migration support
 	- https://www.virtualmin.com/node/19460
 
- - Allow domain owner to restore backups made by root
-	- Also per-destination purge policy
-		- https://www.virtualmin.com/node/20445
-
  - New gandi API
 	- https://www.virtualmin.com/node/20543

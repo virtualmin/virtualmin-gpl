@@ -49,6 +49,7 @@ if (@logs) {
 			 "&search=".&urlize($in{'search'})."'>".
 			 &nice_backup_url($log->{'dest'}, 1)."</a>",
 			$ddesc,
+		        $log->{'user'} || "<i>root</i>",
 			&make_date($log->{'start'}),
 			&short_nice_hour_mins_secs(
 				$log->{'end'} - $log->{'start'}),
@@ -60,6 +61,7 @@ if (@logs) {
 			]);
 		}
 	print &ui_columns_table([ $text{'sched_dest'}, $text{'sched_doms'},
+				  $text{'backuplog_who'},
 				  $text{'backuplog_when'},
 				  $text{'backuplog_len'},
 				  $text{'backuplog_size'},

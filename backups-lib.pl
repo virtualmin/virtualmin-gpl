@@ -2998,7 +2998,7 @@ return ( );
 sub purge_domain_backups
 {
 local ($dest, $days, $start) = @_;
-&$first_print(&text('backup_purging', $days));
+&$first_print(&text('backup_purging2', $days, &nice_backup_url($dest)));
 local ($mode, $user, $pass, $host, $path, $port) = &parse_backup_url($dest);
 local ($base, $re) = &extract_purge_path($dest);
 if (!$base && !$re) {
@@ -3364,7 +3364,7 @@ if ($changed) {
 }
 
 # get_scheduled_backup_dests(&sched)
-# Returns a list of destination for some scheduled backup
+# Returns a list of destinations for some scheduled backup
 sub get_scheduled_backup_dests
 {
 local ($sched) = @_;
@@ -3373,6 +3373,18 @@ for(my $i=1; $sched->{'dest'.$i}; $i++) {
 	push(@dests, $sched->{'dest'.$i});
 	}
 return @dests;
+}
+
+# get_scheduled_backup_purges(&sched)
+# Returns a list of purge times for some scheduled backup
+sub get_scheduled_backup_purges
+{
+local ($sched) = @_;
+local @purges = ( $sched->{'purge0'} || $sched->{'purge'} );
+for(my $i=1; exists($sched->{'purge'.$i}); $i++) {
+	push(@purges, $sched->{'purge'.$i});
+	}
+return @purges;
 }
 
 1;

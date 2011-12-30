@@ -1,0 +1,4 @@
+desc=Separate backup purge times
+html=Scheduled backups now have a separate deletion policy for each destination, instead of the same policy being applied to all destinations. For example, you could delete local backups after 5 days and remote backups after 10.
+master=1
+link=list_sched.cgi

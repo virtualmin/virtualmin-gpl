@@ -57,11 +57,27 @@ else {
 		}
 	@do_features || &error($text{'backup_efeatures'});
 	for($i=0; defined($in{"dest".$i."_mode"}); $i++) {
+		# Parse destination
 		next if ($in{"dest".$i."_mode"} == 0 &&
 			 !$in{"dest".$i."_file"});
 		$dest = &parse_backup_destination("dest".$i, \%in,
 						  $cbmode == 3, $d);
 		push(@dests, $dest);
+
+		# Parse purge policy for the destination
+		if (!$in{'purge'.$i.'_def'}) {
+			($mode, undef, undef, $host, $path) =
+				&parse_backup_url($dest);
+			$in{'strftime'} || &error($text{'backup_epurgetime'});
+			$path =~ /%/ || $host =~ /%/ ||
+				&error($text{'backup_epurgetime'});
+			($basepath, $pattern) = &extract_purge_path($dest);
+			$basepath || $pattern ||
+				&error($text{'backup_epurgepath'});
+			$in{'purge'.$i} =~ /^[0-9\.]+$/ ||
+				&error($text{'backup_epurge'});
+			}
+		push(@purges, $in{'purge_'.$i.'def'} ? undef : $in{'purge'.$i});
 		}
 	@dests || &error($text{'backup_edests'});
 
@@ -94,10 +110,12 @@ else {
 	$sched->{'parent'} = $in{'parent'};
 	%sel_features = map { $_, 1 } split(/\0/, $in{'feature'});
 	$sched->{'feature_all'} = $in{'feature_all'};
-	$sched->{'features'} = join(" ",
-		grep { $sel_features{$_} } (@backup_features, &list_backup_plugins()));
+	$sched->{'features'} = join(" ", grep { $sel_features{$_} }
+				    (@backup_features, &list_backup_plugins()));
+
+	# Save destinations
 	foreach my $k (keys %$sched) {
-		if ($k =~ /^dest\d+/) {
+		if ($k =~ /^(dest|purge)\d+/) {
 			delete($sched->{$k});
 			}
 		}
@@ -105,6 +123,13 @@ else {
 	for(my $i=1; $i<@dests; $i++) {
 		$sched->{'dest'.$i} = $dests[$i];
 		}
+
+	# Save purge policies
+	$sched->{'purge'} = $purges[0];
+	for(my $i=1; $i<@purges; $i++) {
+		$sched->{'purge'.$i} = $purges[$i];
+		}
+
 	$sched->{'fmt'} = $in{'fmt'};
 	$sched->{'mkdir'} = $in{'mkdir'};
 	$sched->{'email'} = $in{'email'};
@@ -124,22 +149,6 @@ else {
 	if (scalar(@vbs) && &can_backup_virtualmin()) {
 		$sched->{'virtualmin'} = join(" ", @vbs);
 		}
-	if (!$in{'purge_def'}) {
-		# Make sure purging can be used
-		foreach $dest (@dests) {
-			($mode, undef, undef, $host, $path) =
-				&parse_backup_url($dest);
-			$in{'strftime'} || &error($text{'backup_epurgetime'});
-			$path =~ /%/ || $host =~ /%/ ||
-				&error($text{'backup_epurgetime'});
-			($basepath, $pattern) = &extract_purge_path($dest);
-			$basepath || $pattern ||
-				&error($text{'backup_epurgepath'});
-			$in{'purge'} =~ /^[0-9\.]+$/ ||
-				&error($text{'backup_epurge'});
-			}
-		}
-	$sched->{'purge'} = $in{'purge_def'} ? undef : $in{'purge'};
 	$sched->{'enabled'} = $in{'enabled'};
 	if (&can_backup_commands()) {
 		$sched->{'before'} = $in{'before_def'} ? undef : $in{'before'};

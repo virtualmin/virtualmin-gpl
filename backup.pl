@@ -141,12 +141,17 @@ $current_id = undef;
 			        1);
 
 # If purging old backups, do that now
-if ($ok && $sched->{'purge'}) {
+@purges = &get_scheduled_backup_purges($sched);
+if ($ok) {
+	$i = 0;
 	foreach $dest (@dests) {
-		$current_id = undef;
-		$pok = &purge_domain_backups(
-			$dest, $sched->{'purge'}, $start_time);
-		$ok = 0 if (!$pok);
+		if ($purges[$i]) {
+			$current_id = undef;
+			$pok = &purge_domain_backups(
+				$dest, $purges[$i], $start_time);
+			$ok = 0 if (!$pok);
+			}
+		$i++;
 		}
 	}
 

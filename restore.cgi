@@ -186,6 +186,11 @@ if (!$in{'confirm'}) {
 		local $dinfo = &get_domain_by("dom", $d);
 		local $can = $crmode == 1 ||
 			     $dinfo && &can_edit_domain($dinfo);
+		if ($in{'log'} && !$can) {
+			# When restoring from a logged backup, don't even show
+			# domains that this user can't restore
+			next;
+			}
 		print "<dt>",&ui_checkbox("dom", $d,
 				"<b>".&show_domain_name($d)."</b>",
 				$can, undef, !$can),"\n";
@@ -269,7 +274,7 @@ else {
 		print &text('restore_doing2', scalar(@vbs), $nice),"<p>\n";
 		}
 	$ok = &restore_domains($src, \@doms, \@do_features, \%options, \@vbs,
-			       $in{'only'}, $ipinfo, $crmode == 2,
+			       $in{'only'}, $ipinfo, !$safe_backup,
 			       $in{'skipwarnings'});
 	&run_post_actions();
 	if ($ok) {

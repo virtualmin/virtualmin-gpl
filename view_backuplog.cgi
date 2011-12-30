@@ -81,7 +81,12 @@ if (@dnames == @alldnames) {
 	print &ui_hidden_table_end();
 	}
 
-print &ui_form_end([ [ undef, $text{'viewbackup_restore'} ] ]);
+if ($log->{'ok'} || $log->{'errdoms'}) {
+	print &ui_form_end([ [ undef, $text{'viewbackup_restore'} ] ]);
+	}
+else {
+	print &ui_form_end();
+	}
 
 &ui_print_footer("backuplog.cgi?search=".&urlize($in{'search'}),
 		 $text{'backuplog_return'});
