@@ -8,6 +8,7 @@ require './virtual-server-lib.pl';
 if (!$in{'new'}) {
 	# Fetch existing template object
 	($tmpl) = grep { $_->{'id'} == $in{'id'} } @tmpls;
+	$tmpl || &error($text{'tmpl_egone'});
 	}
 elsif ($in{'cloneof'}) {
 	# Fetch source for clone
@@ -63,9 +64,17 @@ elsif ($in{'clone'}) {
 	}
 
 # Validate and store all inputs
+$oldname = $tmpl->{'name'};
 &error_setup($text{'tmpl_err'});
 $pfunc = "parse_template_".$in{'editmode'};
 &$pfunc($tmpl);
+
+# Check for name clash
+if ($in{'new'} || lc($tmpl->{'name'}) ne lc($oldname)) {
+	($clash) = grep { lc($_->{'name'}) eq lc($tmpl->{'name'}) &&
+			 $_->{'id'} ne $tmpl->{'id'} } @tmpls;
+	$clash && &error($text{'tmpl_eclash'});
+	}
 
 # Create or update the template
 &save_template($tmpl);
