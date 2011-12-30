@@ -137,7 +137,7 @@ foreach my $d (@doms) {
 					"php_value", $vconf);
 			for(my $i=0; $i<@ini_names; $i++) {
 				my $found = 0;
-				for(my $j=0; $j<@phpv; $i++) {
+				for(my $j=0; $j<@phpv; $j++) {
 					if ($phpv[$j] =~ /^(\S+)\s/ &&
 					    $1 eq $ini_names[$i]) {
 						$phpv[$j] = $ini_names[$i]." ".
