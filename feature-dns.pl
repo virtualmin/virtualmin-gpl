@@ -1395,12 +1395,17 @@ if (!$d->{'provision_dns'} && $file) {
 
 # Check for critical records, and that www.$dom and $dom resolve to the
 # expected IP address (if we have a website)
+if ($d->{'dns_submode'}) {
+	# Only care about records within this domain
+	$recs = [ grep { $_->{'name'} eq $d->{'dom'}.'.' ||
+			 $_->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/ } @$recs ];
+	}
 local %got;
 local $ip = $d->{'dns_ip'} || $d->{'ip'};
 foreach my $r (@$recs) {
 	$got{uc($r->{'type'})}++;
 	}
-$got{'SOA'} || return $text{'validate_ednssoa2'};
+$d->{'dns_submode'} || $got{'SOA'} || return $text{'validate_ednssoa2'};
 $got{'A'} || return $text{'validate_ednsa2'};
 if (&domain_has_website($d)) {
 	foreach my $n ($d->{'dom'}.'.', 'www.'.$d->{'dom'}.'.') {
