@@ -1322,7 +1322,7 @@ Expanded the Virtualmin plugin API to allow a plugin to replace the core Apache 
 Backups now include the Dovecot control files of users when they are stored outside the home directory, so that message UIDs are preserved when the domain is restored on another system.
 The post-installation wizard now prompts for you to select a MySQL configuration size appropriate for the available memory on your system, and applies it to /etc/my.cnf.
 ---- Changes since 3.89 ----
-Updated the phpMyAdmin script installer to version 3.4.9, Drupal to 7.10, Moodle to 2.2, WordPress to 3.3, RoundCube to 0.7, SugarCRM to 6.3.1, SMF to 2.0.2, FosWiki to 1.1.4, WHMCS to 5.0.3, Dolibarr to 3.1.0, phpBB to 3.0.10, Bugzilla to 3.6.7, phpMyFAQ to 2.7.2, and MoinMoin to 1.8.9.
+Updated the phpMyAdmin script installer to version 3.4.9, Drupal to 7.10, Moodle to 2.2, WordPress to 3.3, RoundCube to 0.7, SugarCRM to 6.3.1, SMF to 2.0.2, FosWiki to 1.1.4, WHMCS to 5.0.3, Dolibarr to 3.1.0, phpBB to 3.0.10, Bugzilla to 3.6.7, phpMyFAQ to 2.7.2, MediaWiki to 1.18.0, and MoinMoin to 1.8.9.
 The script installer update process can now detect new installer releases that don't change the application version.
 Added the modify-proxy API command, to update an existing proxy balancer.
 The warning when multiple SSL sites share the same IP can now be disabled if your webserver supports SNI, via a new option on the Virtualmin Configuration page.
