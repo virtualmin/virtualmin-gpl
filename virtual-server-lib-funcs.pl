@@ -738,6 +738,11 @@ ins\//);
 		if ($u->{'home'} &&
 		    $u->{'home'} !~ /^$d->{'home'}\/$config{'homes_dir'}\// &&
 		    !&is_under_directory($homebase, $u->{'home'})) {
+			# Home dir is outside domain's home base somehow
+			$u->{'brokenhome'} = 1;
+			}
+		elsif ($u->{'home'} eq $d->{'home'}) {
+			# Home dir is equal to domain's dir, which is invalid
 			$u->{'brokenhome'} = 1;
 			}
 		}
