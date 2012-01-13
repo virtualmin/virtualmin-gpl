@@ -49,20 +49,20 @@ if ($in{'subdom'}) {
 &error(&text('setup_emax', $dmax)) if ($dleft == 0);
 
 # Validate inputs (check domain name to see if in use)
-$in{'dom'} = lc(&parse_domain_name($in{'dom'}));
-$err = &valid_domain_name($in{'dom'});
+$dname = lc(&parse_domain_name($in{'dom'}));
+$err = &valid_domain_name($dname);
 &error($err) if ($err);
-&lock_domain_name($in{'dom'});
+&lock_domain_name($dname);
 if ($subdom) {
 	# Append super-domain
-	$in{'dom'} =~ /^[A-Za-z0-9\-]+$/ || &error($text{'setup_esubdomain'});
-	$subprefix = $in{'dom'};
-	$in{'dom'} .= ".$subdom->{'dom'}";
+	$dname =~ /^[A-Za-z0-9\-]+$/ || &error($text{'setup_esubdomain'});
+	$subprefix = $dname;
+	$dname .= ".$subdom->{'dom'}";
 	}
 $in{'owner'} =~ s/\r|\n//g;
 $in{'owner'} =~ /:/ && &error($text{'setup_eowner'});
 foreach $d (&list_domains()) {
-	&error($text{'setup_edomain4'}) if (lc($d->{'dom'}) eq lc($in{'dom'}));
+	&error($text{'setup_edomain4'}) if (lc($d->{'dom'}) eq lc($dname));
 	}
 $tmpl = &get_template($in{'template'});
 if (!$parentdom) {
@@ -87,7 +87,7 @@ if (!$parentuser) {
 	# Parse admin/unix username
 	if ($in{'vuser_def'}) {
 		# Automatic
-		($user, $try1, $try2) = &unixuser_name($in{'dom'});
+		($user, $try1, $try2) = &unixuser_name($dname);
 		$user || &error(&text('setup_eauto', $try1, $try2));
 		}
 	else {
@@ -105,7 +105,7 @@ if (!$parentuser) {
 		if ($in{'vuser_def'}) {
 			# Automatic
 			($group, $gtry1, $gtry2) =
-				&unixgroup_name($in{'dom'}, $user);
+				&unixgroup_name($dname, $user);
 			$group || &error(&text('setup_eauto2', $try1, $try2));
 			}
 		else {
@@ -271,7 +271,7 @@ if (&can_dnsip()) {
 	}
 
 # Make sure domain is under parent, if required
-local $derr = &allowed_domain_name($parentdom, $in{'dom'});
+local $derr = &allowed_domain_name($parentdom, $dname);
 &error($derr) if ($derr);
 
 if ($parentuser) {
@@ -295,14 +295,14 @@ else {
 		$ugroup = $in{'group'};
 		}
 	}
-$prefix = $in{'prefix_def'} ? &compute_prefix($in{'dom'}, $group, $parentdom, 1)
+$prefix = $in{'prefix_def'} ? &compute_prefix($dname, $group, $parentdom, 1)
 			    : $in{'prefix'};
 $pclash = &get_domain_by("prefix", $prefix);
 $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 
 # Build up domain object
 %dom = ( 'id', &domain_id(),
-	 'dom', $in{'dom'},
+	 'dom', $dname,
 	 'user', $user,
 	 'group', $group,
 	 'prefix', $prefix,
