@@ -343,7 +343,8 @@ foreach $line (@lines) {
 	# Actually do it!
 	&set_all_null_print();
 	local $err = &create_virtual_server(\%dom, $parentdom,
-			      $parentdom ? $parentdom->{'user'} : undef, 0, 1);
+			      $parentdom ? $parentdom->{'user'} : undef, 0, 1,
+			      $parentdom ? undef : $pass);
 	if ($err) {
 		&line_error($err);
 		next;

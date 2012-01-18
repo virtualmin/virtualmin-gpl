@@ -735,7 +735,8 @@ print "Beginning server creation ..\n\n";
 $config{'pre_command'} = $precommand if ($precommand);
 $config{'post_command'} = $postcommand if ($postcommand);
 $err = &create_virtual_server(\%dom, $parent,
-			      $parent ? $parent->{'user'} : undef);
+			      $parent ? $parent->{'user'} : undef,
+			      0, 0, $parent ? undef : $pass);
 if ($err) {
 	print "$err\n";
 	exit 1;

@@ -3601,13 +3601,13 @@ local $tmpl = &get_template($_[0]->{'template'});
 return $tmpl->{'mail_on'} ne 'none';
 }
 
-# send_domain_email(&domain, [force-to])
+# send_domain_email(&domain, [force-to], [password])
 # Sends the signup email to a new domain owner. Returns a pair containing a
 # number (0=failed, 1=success) and an optional message. Also outputs status
 # messages.
 sub send_domain_email
 {
-local ($d, $forceto) = @_;
+local ($d, $forceto, $pass) = @_;
 local $tmpl = &get_template($d->{'template'});
 local $mail = $tmpl->{'mail'};
 local $subject = $tmpl->{'mail_subject'};
@@ -3619,6 +3619,7 @@ if ($tmpl->{'mail_on'} eq 'none') {
 &$first_print($text{'setup_email'});
 
 local %hash = &make_domain_substitions($d, 1);
+$hash{'pass'} = $pass if ($pass);
 local @erv = &send_template_email($mail, $forceto || $d->{'emailto'},
 			    	  \%hash, $subject, $cc, $bcc, undef,
 				  &get_global_from_address($d));
@@ -6770,11 +6771,11 @@ return 1;
 }
 
 # create_virtual_server(&domain, [&parent-domain], [parent-user], [no-scripts],
-#			[no-post-actions])
+#			[no-post-actions], [password])
 # Given a complete domain object, setup all it's features
 sub create_virtual_server
 {
-local ($dom, $parentdom, $parentuser, $noscripts, $nopost) = @_;
+local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass) = @_;
 
 # Sanity checks
 $dom->{'ip'} || return $text{'setup_edefip'};
@@ -6863,7 +6864,7 @@ if (!$nopost) {
 
 if (!$dom->{'nocreationmail'}) {
 	# Notify the owner via email
-	&send_domain_email($dom);
+	&send_domain_email($dom, undef, $pass);
 	}
 
 # Update the parent domain Webmin user

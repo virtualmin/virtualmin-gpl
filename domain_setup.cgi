@@ -436,7 +436,8 @@ if (&show_virtual_server_warnings(\%dom, undef, \%in)) {
 	return;
 	}
 
-$err = &create_virtual_server(\%dom, $parentdom, $parentuser);
+$err = &create_virtual_server(\%dom, $parentdom, $parentuser,
+			      0, 0, $parentdom ? undef : $pass);
 &error($err) if ($err);
 
 # Create default mail forward
