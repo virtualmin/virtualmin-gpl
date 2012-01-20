@@ -8460,7 +8460,7 @@ local $_;
 open(FIELDS, $custom_fields_file);
 while(<FIELDS>) {
 	s/\r|\n//g;
-	local @a = split(/:/, $_, 5);
+	local @a = split(/:/, $_, 6);
 	push(@rv, { 'name' => $a[0],
 		    'type' => $a[1],
 		    'opts' => $a[2],
