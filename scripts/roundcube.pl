@@ -1,7 +1,9 @@
 
 @roundcube_tables = ( 'cache', 'contacts', 'identities', 'session',
 		      'users', 'messages', 'contactgroupmembers',
-		      'contactgroups', 'contacts' );
+		      'contactgroups', 'contacts',
+		      'cache_index', 'cache_messages', 'cache_thread',
+		      'dictionary', 'searches', 'users' );
 
 # script_roundcube_desc()
 sub script_roundcube_desc
