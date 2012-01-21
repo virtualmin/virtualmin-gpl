@@ -1821,7 +1821,7 @@ check_spamwrapperperms=The procmail command <tt>$1</tt> has $2 permissions, when
 check_lostfeature=The feature <i>$1</i> cannot be disabled, as it is used by the following virtual servers : $2
 check_lostplugin=The plugin <i>$1</i> cannot be disabled, as it is used by the following virtual servers : $2
 check_ehomebase=The home base directory $1 is not an absolute path. This can be corrected on the <a href='$2'>Virtualmin configuration</a> page.
-check_ehomebase=The home base directory $1 is not an absolute path. This can be corrected on the <a href='$2'>Users and Groups module configuration</a> page.
+check_ehomebase2=The home base directory $1 is not an absolute path. This can be corrected on the <a href='$2'>Users and Groups module configuration</a> page.
 check_ehomeformat=The home directory format $1 does not contain the username or domain name. This can be corrected on the <a href='$2'>Virtualmin configuration</a> page.
 check_ehomestyle=The home directory style is set to "Just base directory", which is unusable with Virtualmin. This can be corrected on the <a href='$2'>Users and Groups module configuration</a> page.
 check_esni=Multiple SSL websites on the same IP address have been enabled on the <a href='$1'>Virtualmin Configuration</a> page, but your web server does not support this feature.
