@@ -35,7 +35,8 @@ sub postgres_user_exists
 {
 &require_postgres();
 local $user = &postgres_user($_[0]);
-local $s = &postgresql::execute_sql($qconfig{'basedb'}, "select * from pg_shadow where usename = '$user'");
+local $s = &postgresql::execute_sql($qconfig{'basedb'},
+		"select * from pg_shadow where usename = ?", $user);
 return $s->{'data'}->[0] ? 1 : 0;
 }
 
@@ -94,10 +95,11 @@ if (!$d->{'parent'}) {
 	local $pass = &postgres_pass($d);
 	if (&postgres_user_exists($user)) {
 		&postgresql::execute_sql_logged($qconfig{'basedb'},
-		  "drop user \"$user\"");
+		  "drop user ".&postgres_uquote($user));
 		}
 	&postgresql::execute_sql_logged($qconfig{'basedb'},
-	  "create user \"$user\" with password $pass nocreatedb nocreateuser");
+		"create user ".&postgres_uquote($user).
+		" with password $pass nocreatedb nocreateuser");
 	&$second_print($text{'setup_done'});
 	}
 if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
@@ -141,7 +143,25 @@ if ($_[0]->{'parent'}) {
 &require_postgres();
 local $pass = defined($_[0]->{'postgres_pass'}) ? $_[0]->{'postgres_pass'}
 						: $_[0]->{'pass'};
-return !$_[1] && &postgresql::get_postgresql_version() >= 7 ? "'$pass'" : $pass;
+return !$_[1] && &postgresql::get_postgresql_version() >= 7 ?
+	&postgres_quote($pass) : $pass;
+}
+
+# postgres_quote(string)
+# Returns a string in '' quotes, with escaping if needed
+sub postgres_quote
+{
+local ($str) = @_;
+$str =~ s/'/''/g;
+return "'$str'";
+}
+
+# postgres_uquote(string)
+# Returns a string in "" quotes, with escaping if needed
+sub postgres_uquote
+{
+local ($str) = @_;
+return "\"".quotemeta($str)."\"";
 }
 
 # modify_postgres(&domain, &olddomain)
@@ -162,7 +182,9 @@ if ($pass ne $oldpass && !$_[0]->{'parent'} &&
 	# Change PostgreSQL password ..
 	&$first_print($text{'save_postgrespass'});
 	if (&postgres_user_exists($_[1])) {
-		&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter user \"$olduser\" with password $pass");
+		&postgresql::execute_sql_logged($qconfig{'basedb'},
+			"alter user ".&postgres_uquote($olduser).
+			" with password $pass");
 		&$second_print($text{'setup_done'});
 		}
 	else {
@@ -175,10 +197,14 @@ if (!$_[0]->{'parent'} && $_[1]->{'parent'}) {
 	local $user = $_[0]->{'postgres_user'} = &postgres_user($_[0]);
 	&$first_print($text{'setup_postgresuser'});
 	local $pass = &postgres_pass($_[0]);
-	&postgresql::execute_sql_logged($qconfig{'basedb'}, "create user \"$user\" with password $pass nocreatedb nocreateuser");
+	&postgresql::execute_sql_logged($qconfig{'basedb'},
+		"create user ".&postgres_uquote($user).
+		" with password $pass nocreatedb nocreateuser");
 	if (&postgresql::get_postgresql_version() >= 8.0) {
 		foreach my $db (&domain_databases($_[0], [ "postgres" ])) {
-			&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter database \"$db->{'name'}\" owner to \"$user\"");
+			&postgresql::execute_sql_logged($qconfig{'basedb'},
+				"alter database ".&postgres_uquote($db->{'name'}).
+				" owner to ".&postgres_uquote($user));
 			}
 		}
 	&$second_print($text{'setup_done'});
@@ -189,11 +215,14 @@ elsif ($_[0]->{'parent'} && !$_[1]->{'parent'}) {
 	&$first_print($text{'save_postgresuser'});
 	if (&postgresql::get_postgresql_version() >= 8.0) {
 		foreach my $db (&domain_databases($_[0], [ "postgres" ])) {
-			&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter database \"$db->{'name'}\" owner to \"$user\"");
+			&postgresql::execute_sql_logged($qconfig{'basedb'},
+				"alter database ".&postgres_uquote($db->{'name'}).
+				" owner to ".&postgres_uquote($user));
 			}
 		}
 	if (&postgres_user_exists($_[1])) {
-		&postgresql::execute_sql_logged($qconfig{'basedb'}, "drop user \"$olduser\"");
+		&postgresql::execute_sql_logged($qconfig{'basedb'},
+			"drop user ".&postgres_uquote($olduser));
 		}
 	&$second_print($text{'setup_done'});
 	}
@@ -203,8 +232,12 @@ elsif ($user ne $olduser && !$_[0]->{'parent'}) {
 	if (&postgres_user_exists($_[1])) {
 		if (&postgresql::get_postgresql_version() >= 7.4) {
 			# Can use proper rename command
-			&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter user \"$olduser\" rename to \"$user\"");
-			&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter user \"$user\" with password $pass");
+			&postgresql::execute_sql_logged($qconfig{'basedb'},
+				"alter user ".&postgres_uquote($olduser).
+				" rename to ".&postgres_uquote($user));
+			&postgresql::execute_sql_logged($qconfig{'basedb'},
+				"alter user ".&postgres_uquote($user).
+				" with password $pass");
 			$_[0]->{'postgres_user'} = $user;
 			&$second_print($text{'setup_done'});
 			}
@@ -223,7 +256,9 @@ elsif ($user ne $olduser && $_[0]->{'parent'}) {
 	local $user = &postgres_user($_[0]);
 	if (&postgresql::get_postgresql_version() >= 8.0) {
 		foreach my $db (&domain_databases($_[0], [ "mysql" ])) {
-			&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter database \"$db->{'name'}\" owner to \"$user\"");
+			&postgresql::execute_sql_logged($qconfig{'basedb'},
+				"alter database ".&postgres_uquote($db->{'name'}).
+				" owner to ".&postgres_uquote($user));
 			}
 		&$second_print($text{'setup_done'});
 		}
@@ -247,7 +282,8 @@ if (!$_[0]->{'parent'}) {
 	# Delete the user
 	&$first_print($text{'delete_postgresuser'});
 	if (&postgres_user_exists($_[0])) {
-		&postgresql::execute_sql_logged($qconfig{'basedb'}, "drop user \"$user\"");
+		&postgresql::execute_sql_logged($qconfig{'basedb'},
+			"drop user ".&postgres_uquote($user));
 		&$second_print($text{'setup_done'});
 		}
 	else {
@@ -360,7 +396,9 @@ if ($_[0]->{'parent'}) {
 elsif (&postgres_user_exists($_[0])) {
 	&require_postgres();
 	local $date = localtime(0);
-	&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter user \"$user\" valid until '$date'");
+	&postgresql::execute_sql_logged($qconfig{'basedb'},
+		"alter user ".&postgres_uquote($user).
+		" valid until ".&postgres_quote($date));
 	&$second_print($text{'setup_done'});
 	}
 else {
@@ -379,7 +417,9 @@ if ($_[0]->{'parent'}) {
 	}
 elsif (&postgres_user_exists($_[0])) {
 	&require_postgres();
-	&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter user \"$user\" valid until 'Jan 1 2038'");
+	&postgresql::execute_sql_logged($qconfig{'basedb'},
+		"alter user ".&postgres_uquote($user).
+		" valid until ".&postgres_quote("Jan 1 2038"));
 	&$second_print($text{'setup_done'});
 	}
 else {
@@ -594,10 +634,10 @@ if (!&check_postgres_database_clash($_[0], $_[1])) {
 	local $sql = "create database ".&postgresql::quote_table($_[1]);
 	local $withs;
 	if (&postgresql::get_postgresql_version() >= 7) {
-		$withs .= " owner=\"$user\"";
+		$withs .= " owner=".&postgres_uquote($user);
 		}
 	if ($_[2]->{'encoding'}) {
-		$withs .= " encoding '$_[2]->{'encoding'}'";
+		$withs .= " encoding ".&postgres_quote($_[2]->{'encoding'});
 		}
 	if ($withs) {
 		$sql .= " with".$withs;
@@ -612,7 +652,7 @@ else {
 eval {
 	local $main::error_must_die = 1;
 	&postgresql::execute_sql_logged($qconfig{'basedb'},
-		"revoke all on database ".&postgresql::quote_table($_[1]).
+		"revoke all on database ".&postgres_uquote($_[1]).
 		" from public");
 	};
 local @dbs = split(/\s+/, $_[0]->{'db_postgres'});
@@ -630,7 +670,9 @@ local ($d, $dbname) = @_;
 &require_postgres();
 if (&postgresql::get_postgresql_version() >= 8.0) {
 	local $user = &postgres_user($d);
-	&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter database \"$dbname\" owner to \"$user\"");
+	&postgresql::execute_sql_logged($qconfig{'basedb'},
+		"alter database ".&postgres_uquote($dbname).
+		" owner to ".&postgres_uquote($user));
 	}
 }
 
@@ -671,7 +713,9 @@ local ($d, $dbname) = @_;
 &require_postgres();
 if (&postgresql::get_postgresql_version() >= 8.0 &&
     &postgres_user_exists("postgres")) {
-	&postgresql::execute_sql_logged($qconfig{'basedb'}, "alter database \"$dbname\" owner to \"postgres\"");
+	&postgresql::execute_sql_logged($qconfig{'basedb'},
+		"alter database ".&postgres_uquote($dbname).
+		" owner to ".&postgres_uquote(postgres));
 	}
 }
 
