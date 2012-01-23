@@ -5586,6 +5586,101 @@ $hashpass_tests = [
 	},
 	];
 
+$ipbackup_tests = [
+	# Create a parent domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
+		      [ 'mysql' ], [ 'spam' ], [ 'virus' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
+		      [ 'webmin' ], [ 'logrotate' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a sub-server to be included, with a private IP
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ $web ], [ 'logrotate' ], [ 'dns' ],
+		      [ 'mail' ], [ $ssl ],
+		      [ 'allocate-ip' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test sub-home page' ],
+		      @create_args, ],
+	},
+
+	# Backup to a temp file
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_file ] ],
+	},
+
+	# Delete the domain, in preparation for re-creation
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Restore from backup, with IP re-allocation
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'original-ip' ],
+		      [ 'source', $test_backup_file ] ],
+	},
+
+	# Make sure the main domain is on the shared IP
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => 'IP address: '.&get_default_ip(),
+	},
+
+	# Check that the main domain IP resolves OK
+	{ 'command' => 'host '.$test_domain,
+	  'grep' => &get_default_ip(),
+	},
+
+	# Check main domain website
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test home page',
+	},
+
+	# Make sure the sub-server is on a private IP
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => 'IP address: '.&get_default_ip(),
+	  'grep' => 'IP address:.*On',
+	},
+
+	# Check that the sub-server IP resolves OK
+	{ 'command' => 'host '.$test_subdomain,
+	  'antigrep' => &get_default_ip(),
+	},
+
+	# Check sub-server website
+	{ 'command' => $wget_command.'http://'.$test_subdomain,
+	  'grep' => 'Test sub-home page',
+	},
+	{ 'command' => $wget_command.'https://'.$test_subdomain,
+	  'grep' => 'Test sub-domain',
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'hashpass' => $hashpass_tests,
@@ -5607,6 +5702,7 @@ $alltests = { '_config' => $_config_tests,
 	      'splitbackup' => $splitbackup_tests,
 	      'remotebackup' => $remotebackup_tests,
 	      'configbackup' => $configbackup_tests,
+	      'ipbackup' => $ipbackup_tests,
 	      'purge' => $purge_tests,
 	      'incremental' => $incremental_tests,
               'mail' => $mail_tests,

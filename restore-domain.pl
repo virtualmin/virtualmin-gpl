@@ -41,6 +41,12 @@ followed by an address. Or you can use the C<--allocate-ip> flag to have
 Virtualmin select one automatically, assuming that an allocation range is
 defined in the template used.
 
+If restoring multiple domains, some of which were on shared IP addresses and
+some of which had private IPs, the C<--original-ip> flag can be used to
+force IP allocation for domains that had a private address originally. Domains
+which were on the old system's shared IP will be assigned this system's default
+address.
+
 When the restored server was on a shared address, it will by default be
 given the system's default shared IP. However, if you have defined additional
 shared addresses, a different one can be selected with the C<--shared-ip>
@@ -175,6 +181,13 @@ while(@ARGV > 0) {
 		$ipinfo = { 'virt' => 1, 'ip' => $ip,
 			    'virtalready' => 0, 'netmask' => $netmask,
 			    'mode' => 2 };
+		}
+	elsif ($a eq "--original-ip") {
+		$tmpl = &get_template(0);
+		($ip, $netmask) = &free_ip_address($tmpl);
+		$ipinfo = { 'virt' => 1, 'ip' => $ip,
+			    'virtalready' => 0, 'netmask' => $netmask,
+			    'mode' => 3 };
 		}
 	elsif ($a eq "--skip-warnings") {
 		$skipwarnings = 1;
@@ -313,7 +326,8 @@ print "                         [--fix]\n";
 print "                         [--option \"feature name value\"]\n";
 print "                         [--all-virtualmin] | [--virtualmin config]\n";
 print "                         [--only-features]\n";
-print "                         [--shared-ip address | --ip address | --allocate-ip]\n";
+print "                         [--shared-ip address | --ip address |\n";
+print "                          --allocate-ip | --original-ip]\n";
 print "                         [--only-missing | --only-existing]\n";
 print "                         [--skip-warnings]\n";
 print "\n";

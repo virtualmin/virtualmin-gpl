@@ -1646,6 +1646,31 @@ if ($ok) {
 				local $alias = &get_domain($d->{'alias'});
 				$d->{'ip'} = $alias->{'ip'};
 				}
+			elsif ($ipinfo && $ipinfo->{'mode'} == 3) {
+				# Allocate IP if the domain had one before,
+				# use shared IP otherwise
+				if ($d->{'virt'}) {
+					$d->{'virtalready'} = 0;
+					($d->{'ip'}, $d->{'netmask'}) =
+						&free_ip_address($tmpl);
+					if (!$d->{'ip'}) {
+						&$second_print(
+						    &text('setup_evirtalloc'));
+						$ok = 0;
+						last DOMAIN;
+						}
+					}
+				else {
+					$d->{'ip'} = &get_default_ip(
+							$d->{'reseller'});
+					if (!$d->{'ip'}) {
+						&$second_print(
+						    $text{'restore_edefip'});
+						$ok = 0;
+						last DOMAIN;
+						}
+					}
+				}
 			elsif ($ipinfo) {
 				# Use IP specified on backup form
 				$d->{'ip'} = $ipinfo->{'ip'};

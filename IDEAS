@@ -64,3 +64,10 @@
 
  - New gandi API
 	- https://www.virtualmin.com/node/20543
+
+ - Mass restore should support allocating an IP if one was used before
+-	- https://www.virtualmin.com/node/18268#
+	- UI
+	- API
+	- functional test
+
