@@ -706,7 +706,8 @@ if ($oldip ne $newip) {
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
-	&modify_records_ip_address($recs, $file, $oldip, $newip);
+	&modify_records_ip_address($recs, $file, $oldip, $newip,
+				   $_[0]->{'dom'});
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}
@@ -870,7 +871,8 @@ elsif ($_[0]->{'virt6'} && $_[1]->{'virt6'} &&
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
-	&modify_records_ip_address($recs, $file, $_[1]->{'ip6'},$_[0]->{'ip6'});
+	&modify_records_ip_address($recs, $file, $_[1]->{'ip6'}, $_[0]->{'ip6'},
+				   $_[0]->{'dom'});
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}
@@ -1836,14 +1838,19 @@ else {
 &release_lock_dns($_[0], 1);
 }
 
-# modify_records_ip_address(&records, filename, oldip, newip)
+# modify_records_ip_address(&records, filename, oldip, newip, domain)
 # Update the IP address in all DNS records
 sub modify_records_ip_address
 {
-local ($recs, $fn, $oldip, $newip) = @_;
+local ($recs, $fn, $oldip, $newip, $dname) = @_;
 local $count = 0;
 foreach my $r (@$recs) {
 	my $changed = 0;
+	if ($dname && $r->{'fullname'} !~ /\.\Q$dname\E\.$/i &&
+		      $r->{'fullname'} !~ /^\Q$dname\E\.$/i) {
+		# Out of zone record .. skip it
+		next;
+		}
 	if (($r->{'type'} eq "A" || $r->{'type'} eq "AAAA") &&
 	    $r->{'values'}->[0] eq $oldip) {
 		# Address record - just replace IP
