@@ -472,10 +472,42 @@ sub wizard_parse_hashpass
 {
 local ($in) = @_;
 
+# Update default template
 local @tmpls = &list_templates();
 local ($tmpl) = grep { $_->{'id'} eq '0' } @tmpls;
 $tmpl->{'hashpass'} = $in->{'hashpass'};
 &save_template($tmpl);
+
+# If not storing hashed passwords, need to have Usermin read mail files directly
+if ($in->{'hashpass'} && &foreign_check("usermin")) {
+	# Make sure read mail module is installed, and setup to use IMAP
+	&foreign_require("usermin", "usermin-lib.pl");
+	return undef if (!&usermin::get_usermin_module_info("mailbox"));
+	my %mconfig;
+	my $cfile = "$usermin::config{'usermin_dir'}/mailbox/config";
+	&lock_file($cfile);
+	&read_file($cfile, \%mconfig);
+	return undef if ($mconfig{'mail_system'} != 4);
+
+	# Force use of local mail files instead
+	my ($mail_base, $mail_style, $mail_file, $mail_dir) = &get_mail_style();
+	if ($mail_dir) {
+		$mconfig{'mail_system'} = 1;
+		$mconfig{'mail_qmail'} = $mail_base;
+		$mconfig{'mail_style'} = $mail_style;
+		$mconfig{'mail_dir_qmail'} = $mail_dir;
+		}
+	else {
+		$mconfig{'mail_system'} = 0;
+		$mconfig{'mail_dir'} = $mail_base;
+		$mconfig{'mail_style'} = $mail_style;
+		$mconfig{'mail_file'} = $mail_file;
+		}
+	&write_file($cfile, \%mconfig);
+	&unlock_file($cfile);
+	}
+
+return undef;
 }
 
 # get_real_memory_size()
