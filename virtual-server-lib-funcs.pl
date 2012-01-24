@@ -13091,9 +13091,7 @@ if ($config{'spam_lock'} != $lastconfig{'spam_lock'}) {
 	}
 
 # Fix default procmail delivery
-if ($config{'default_procmail'} != $lastconfig{'default_procmail'}) {
-	&setup_default_delivery();
-	}
+&setup_default_delivery();
 
 # Re-create API helper command
 if ($config{'api_helper'} ne $lastconfig{'api_helper'}) {
