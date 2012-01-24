@@ -1679,6 +1679,10 @@ if ($ok) {
 							}
 						}
 					}
+				elsif (&indexof($d->{'ip'},
+						&list_shared_ips()) >= 0) {
+					# IP is on shared list, so keep it
+					}
 				else {
 					# Use shared IP
 					$d->{'ip'} = &get_default_ip(
