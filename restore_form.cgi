@@ -142,7 +142,7 @@ if ($crmode == 1) {
 		@cantmpls = ( &get_template(0) );
 		print &ui_table_row(&hlink($text{'restore_newip'},
 					   "restore_newip"),
-				&virtual_ip_input(\@cantmpls, undef, 1));
+				&virtual_ip_input(\@cantmpls, undef, 1, 5));
 		}
 
 	print &ui_hidden_table_end("opts");

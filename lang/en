@@ -319,6 +319,7 @@ form_activeip=Virtual on existing IP
 form_eparent=No parent Virtualmin server for the user $1 was found!
 form_esubdom=The parent domain Virtualmin server $1 was not found!
 form_alloc=Virtual with allocated IP
+form_allocmaybe=Allocate IP if server had one originally, shared otherwise
 form_noalloc=(No free IPs are left in the allocation range!)
 form_ealiasdom=Alias destination domain was not found!
 form_fwdto=Default mail forwarding address

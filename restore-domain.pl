@@ -187,7 +187,7 @@ while(@ARGV > 0) {
 		($ip, $netmask) = &free_ip_address($tmpl);
 		$ipinfo = { 'virt' => 1, 'ip' => $ip,
 			    'virtalready' => 0, 'netmask' => $netmask,
-			    'mode' => 3 };
+			    'mode' => 5 };
 		}
 	elsif ($a eq "--skip-warnings") {
 		$skipwarnings = 1;

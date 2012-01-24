@@ -164,11 +164,12 @@ return 1 if (!$timed_out && !$?);
 return 0;
 }
 
-# virtual_ip_input(&templates, [reseller], [show-original])
+# virtual_ip_input(&templates, [reseller], [show-original], [default-mode])
 # Returns HTML for selecting a virtual IP mode for a new server, or not
 sub virtual_ip_input
 {
-local ($tmpls, $resel, $orig) = @_;
+local ($tmpls, $resel, $orig, $mode) = @_;
+$mode ||= 0;
 local $defip = &get_default_ip($resel);
 if ($config{'all_namevirtual'}) {
 	# Always name-based, but on varying IP
@@ -230,7 +231,15 @@ else {
 					 &ui_textbox("zoneip", undef, 20) ]);
 			}
 		}
-	return &ui_radio_table("virt", 0, \@opts, 1);
+	if ($mode == 5 && $anyalloc) {
+		# Use shared or allocated (for restores only)
+		push(@opts, [ 5, &text('form_allocmaybe') ]);
+		}
+	if (&indexof($mode, map { $_->[0] } @opts) < 0) {
+		# Mode is not on the list .. use shared mode
+		$mode = 0;
+		}
+	return &ui_radio_table("virt", $mode, \@opts, 1);
 	}
 }
 
@@ -300,6 +309,11 @@ elsif ($in{'virt'} == 4 && (&running_in_zone() || &running_in_vserver())) {
 	$already && &error(&text('setup_evirtclash4',
 				 $already->{'dom'}));
 	return ($in{'zoneip'}, 1, 1);
+	}
+elsif ($in{'virt'} == 5) {
+	# Allocate if needed, shared otherwise
+	local ($ip, $netmask) = &free_ip_address($tmpl);
+	return ($ip, 1, 0, $netmask);
 	}
 else {
 	# Global shared IP

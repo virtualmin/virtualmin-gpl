@@ -67,7 +67,7 @@
 
  - Mass restore should support allocating an IP if one was used before
 -	- https://www.virtualmin.com/node/18268#
-	- UI
-	- API
-	- functional test
 
+ - Dovecot 2 support
+	- https://www.virtualmin.com/node/19776
+	- CentOS 6

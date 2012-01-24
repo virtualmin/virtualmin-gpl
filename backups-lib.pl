@@ -1646,21 +1646,41 @@ if ($ok) {
 				local $alias = &get_domain($d->{'alias'});
 				$d->{'ip'} = $alias->{'ip'};
 				}
-			elsif ($ipinfo && $ipinfo->{'mode'} == 3) {
+			elsif ($ipinfo && $ipinfo->{'mode'} == 5) {
 				# Allocate IP if the domain had one before,
 				# use shared IP otherwise
 				if ($d->{'virt'}) {
-					$d->{'virtalready'} = 0;
-					($d->{'ip'}, $d->{'netmask'}) =
-						&free_ip_address($tmpl);
-					if (!$d->{'ip'}) {
+					# Try to allocate, assuming template
+					# defines an IP range
+					local %taken =&interface_ip_addresses();
+					if ($tmpl->{'ranges'} eq "none") {
 						&$second_print(
-						    &text('setup_evirtalloc'));
+						    &text('setup_evirttmpl'));
 						$ok = 0;
 						last DOMAIN;
 						}
+					$d->{'virtalready'} = 0;
+					if (&ip_within_ranges(
+					      $d->{'ip'}, $tmpl->{'ranges'}) &&
+					    !$taken{$d->{'ip'}} &&
+					    !&ping_ip_address($d->{'ip'})) {
+						# Old IP is within local range,
+						# so keep it
+						print STDERR "within range\n";
+						}
+					else {
+						# Actually allocate from range
+						($d->{'ip'}, $d->{'netmask'}) =
+							&free_ip_address($tmpl);
+						if (!$d->{'ip'}) {
+							&$second_print(&text('setup_evirtalloc'));
+							$ok = 0;
+							last DOMAIN;
+							}
+						}
 					}
 				else {
+					# Use shared IP
 					$d->{'ip'} = &get_default_ip(
 							$d->{'reseller'});
 					if (!$d->{'ip'}) {

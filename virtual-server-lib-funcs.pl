@@ -6252,6 +6252,23 @@ foreach my $r (@{$_[0]}) {
 return join(" ", @ranges);
 }
 
+# ip_within_ranges(ip, ranges-string)
+# Returns 1 if some IP falls within a space-separated list of ranges
+sub ip_within_ranges
+{
+my ($ip, $ranges) = @_;
+&foreign_require("net", "net-lib.pl");
+my $n = &net::ip_to_integer($ip);
+foreach my $r (&parse_ip_ranges($ranges)) {
+	next if (!&check_ipaddress($r->[0]));
+	if ($n >= &net::ip_to_integer($r->[0]) &&
+	    $n <= &net::ip_to_integer($r->[1])) {
+		return 1;
+		}
+	}
+return 0;
+}
+
 # setup_for_subdomain(&parent-domain, subdomain-user, &sub-domain)
 # Ensures that this virtual server can host sub-servers
 sub setup_for_subdomain
