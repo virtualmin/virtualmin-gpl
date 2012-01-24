@@ -6,7 +6,8 @@ Checks if IMAP login to some server works.
 
 This is a tool for testing IMAP servers. It takes C<--server>, C<--user>
 and C<--pass> flags, followed by the IMAP hostname, login and password
-respectively.
+respectively. The optional C<--folder> flag can be used to select an IMAP
+folder other than the inbox.
 
 =cut
 
@@ -48,6 +49,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--pass") {
 		$pass = shift(@ARGV);
 		}
+	elsif ($a eq "--folder") {
+		$mailbox = shift(@ARGV);
+		}
 	else {
 		&usage();
 		}
@@ -58,7 +62,8 @@ $user || &usage();
 $folder = { 'server' => $server,
 	    'port' => $port,
 	    'user' => $user,
-	    'pass' => $pass };
+	    'pass' => $pass,
+	    'mailbox' => $mailbox };
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 $main::error_must_die = 1;
 ($st, $h, $count) = &mailboxes::imap_login($folder);
@@ -94,6 +99,7 @@ print "virtualmin test-imap --user login\n";
 print "                    [--pass password]\n";
 print "                    [--server hostname]\n";
 print "                    [--port number|name]\n";
+print "                    [--folder name]\n";
 exit(1);
 }
 
