@@ -71,6 +71,9 @@ if ($multi) {
 			}
 		print "    Available: ",$script->{'avail'} ? "Yes" : "No","\n";
 		print "    Versions: ",join(" ", @{$script->{'versions'}}),"\n";
+		if ($script->{'release'}) {
+			print "    Release: ",$script->{'release'},"\n";
+			}
 		print "    Available versions: ",
 			join(" ", grep { &can_script_version($script, $_) }
 				       @{$script->{'versions'}}),"\n";
