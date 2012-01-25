@@ -83,9 +83,6 @@ if (!$in{'confirm'}) {
 	print "<center>\n";
 	print &ui_form_start("delete_domain.cgi");
 	print &ui_hidden("dom", $in{'dom'});
-	if (&can_import_servers() && !$virtualmin_pro) {
-		print &ui_checkbox("only", 1, $text{'delete_only'}, 0),"<br>\n";
-		}
 	print &ui_form_end([ [ "confirm", $text{'delete_ok'} ] ]);
 	print "</center>\n";
 
