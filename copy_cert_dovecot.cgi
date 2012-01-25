@@ -46,7 +46,7 @@ $kdata || &error($text{'copycert_ekey'});
 &set_ownership_permissions(undef, undef, 0750, $kfile);
 
 # Update config with correct files
-if (&dovecot::find_value($conf, "ssl_cert", 2)) {
+if (&dovecot::find_value("ssl_cert", $conf, 2)) {
 	# 2.0 and later format
 	&dovecot::save_directive($conf, "ssl_cert", "<".$cfile);
 	&dovecot::save_directive($conf, "ssl_key", "<".$kfile);
@@ -67,6 +67,7 @@ else {
 	&dovecot::save_directive($conf, "ssl", "yes");
 	}
 if (&dovecot::get_dovecot_version() < 2) {
+	# Add imaps and pop3s protocols ..
 	$protos = &dovecot::find_value("protocols", $conf);
 	@protos = split(/\s+/, $protos);
 	%protos = map { $_, 1 } @protos;
@@ -74,13 +75,12 @@ if (&dovecot::get_dovecot_version() < 2) {
 	push(@protos, "pop3s") if (!$protos{'pop3s'} && $protos{'pop3'});
 	&dovecot::save_directive($conf, "protocols", join(" ", @protos));
 	}
-else {
-	# XXX what needs to be done for 2.0 ?
-	}
 
 # Enable PCI-compliant ciphers
+&foreign_require("webmin");
 &dovecot::save_directive($conf, "ssl_cipher_list",
-			 "HIGH:MEDIUM:+TLSv1:!SSLv2:+SSLv3");
+			 $webmin::strong_ssl_ciphers ||
+			   "HIGH:MEDIUM:+TLSv1:!SSLv2:+SSLv3");
 
 &flush_file_lines();
 &unlock_file($cfile);
