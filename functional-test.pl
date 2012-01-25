@@ -4109,6 +4109,14 @@ $rename_tests = [
 	  'grep' => [ '^'.$test_alias.'@'.$test_rename_domain ],
 	},
 
+	# Check that log file was renamed
+	{ 'command' => 'ls /var/log/virtualmin/'.$test_rename_domain.'_access_log' },
+	{ 'command' => 'ls /var/log/virtualmin/'.$test_rename_domain.'_error_log' },
+	{ 'command' => 'ls /var/log/virtualmin/'.$test_domain.'_access_log',
+	  'fail' => 1 },
+	{ 'command' => 'ls /var/log/virtualmin/'.$test_domain.'_error_log',
+	  'fail' => 1 },
+
 	# Get rid of the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_rename_domain ] ],
