@@ -78,7 +78,9 @@ while(@ARGV > 0) {
 &procmail_logging_enabled() || &usage("Logging is not enabled in global Procmail configuration file");
 
 # Get the matching logs
-@logs = &parse_procmail_log($start, $end, $source, $dest);
+$ok = &procmail_log_status();
+$ok == 0 && &usage("Procmail logging is not enabled");
+@logs = &parse_procmail_log($start, $end, $source, $dest, undef, $ok == 1);
 @logs = grep { (!$_->{'spam'} || !$nospam) &&
 	       (!$_->{'virus'} || !$novirus) } @logs;
 

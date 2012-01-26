@@ -74,7 +74,8 @@ if ($in{'search'}) {
 	$dest .= "\@".$d->{'dom'} if ($in{'dom'});
 
 	# Get matching results
-	@logs = &parse_procmail_log($start, $end, $source, $dest);
+	@logs = &parse_procmail_log($start, $end, $source, $dest,
+				    undef, $ok == 1);
 	@logs = grep { ($in{'spam'} || !$_->{'spam'}) &&
 		       ($in{'virus'} || !$_->{'virus'}) } @logs;
 
