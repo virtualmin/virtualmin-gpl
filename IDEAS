@@ -59,12 +59,5 @@
 
  - CSR script for eric holtzman
 
- - Directadmin migration support
-	- https://www.virtualmin.com/node/19460
-
  - New gandi API
 	- https://www.virtualmin.com/node/20543
-
- - Dovecot 2 support
-	- https://www.virtualmin.com/node/19776
-	- CentOS 6
