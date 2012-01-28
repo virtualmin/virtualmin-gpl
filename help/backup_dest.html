@@ -18,5 +18,10 @@ If backing up to an SSH or FTP server on a non-standard port, you can enter
 it in the server field separated from the hostname with a colon, like 
 <tt>backupserver.yourdomain.com:2222</tt> . <p>
 
+If backing up to an SSH server that only supports certifcate-based
+authentication, the password field is optional. However, the <tt>root</tt>
+use on the system must have his SSH public key in the destination user's
+<tt>authorized_keys</tt> file. <p>
+
 <footer>
 

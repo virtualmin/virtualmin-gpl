@@ -284,6 +284,7 @@ foreach my $desturl (@$desturls) {
 
 		# Clean up dummy file if possible
 		local $sshcmd = "ssh".($port ? " -p $port" : "")." ".
+				$config{'ssh_args'}." ".
 				($user ? "$user\@" : "").$server;
 		local $rmcmd = $sshcmd." rm -f ".$testfile;
 		local $rmerr;
@@ -3129,8 +3130,9 @@ elsif ($mode == 1) {
 
 elsif ($mode == 2) {
 	# Use ls -l via SSH to list the directory
-	local $sshcmd = "ssh".($port ? " -p $port" : "").
-			" ".$user."\@".$host;
+	local $sshcmd = "ssh".($port ? " -p $port" : "")." ".
+			$config{'ssh_args'}." ".
+			$user."\@".$host;
 	local $lscmd = $sshcmd." ls -l ".quotemeta($base);
 	local $err;
 	local $lsout = &run_ssh_command($lscmd, $pass, \$err);

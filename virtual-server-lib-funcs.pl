@@ -6053,7 +6053,7 @@ return 1;
 sub scp_copy
 {
 local ($src, $dest, $pass, $err, $port) = @_;
-local $cmd = "scp -r ".($port ? "-P $port " : "").
+local $cmd = "scp -r ".($port ? "-P $port " : "").$config{'ssh_args'}." ".
 	     $src." ".quotemeta($dest);
 &run_ssh_command($cmd, $pass, $err);
 }
