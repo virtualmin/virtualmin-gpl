@@ -1838,7 +1838,7 @@ else {
 &release_lock_dns($_[0], 1);
 }
 
-# modify_records_ip_address(&records, filename, oldip, newip, domain)
+# modify_records_ip_address(&records, filename, oldip, newip, [domain])
 # Update the IP address in all DNS records
 sub modify_records_ip_address
 {
@@ -1846,8 +1846,8 @@ local ($recs, $fn, $oldip, $newip, $dname) = @_;
 local $count = 0;
 foreach my $r (@$recs) {
 	my $changed = 0;
-	if ($dname && $r->{'fullname'} !~ /\.\Q$dname\E\.$/i &&
-		      $r->{'fullname'} !~ /^\Q$dname\E\.$/i) {
+	if ($dname && $r->{'name'} !~ /\.\Q$dname\E\.$/i &&
+		      $r->{'name'} !~ /^\Q$dname\E\.$/i) {
 		# Out of zone record .. skip it
 		next;
 		}
@@ -2182,7 +2182,7 @@ local ($tmpl) = @_;
 # Save DNS settings
 $tmpl->{'dns'} = &parse_none_def("dns");
 if ($in{"dns_mode"} == 2) {
-	$tmpl->{'default'} || $tmpl->{'dns'} ||
+	$tmpl->{'default'} || $tmpl->{'dns'} || $in{'bind_replace'} == 0 ||
 		&error($text{'tmpl_edns'});
 	$tmpl->{'dns_replace'} = $in{'bind_replace'};
 	$tmpl->{'dns_view'} = $in{'view'};
