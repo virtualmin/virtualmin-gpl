@@ -1401,11 +1401,19 @@ sub get_mysql_database_dir
 local ($db) = @_;
 &require_mysql();
 return undef if ($config{'provision_mysql'});
-return undef if (!-d $mysql::config{'mysql_data'});
 return undef if ($mysql::config{'host'} &&
 		 $mysql::config{'host'} ne 'localhost' &&
 		 &to_ipaddress($mysql::config{'host'}) ne
 			&to_ipaddress(&get_system_hostname()));
+my $mysql_dir;
+my $conf = &mysql::get_mysql_config();
+my ($mysqld) = grep { $_->{'name'} eq 'mysqld' } @$conf;
+my $dir;
+if ($mysqld) {
+	$dir = &mysql::find_value("datadir", $mysqld->{'members'});
+	}
+$dir ||= $mysql::config{'mysql_data'};
+return undef if (!-d $dir);
 local $escdb = $db;
 $escdb =~ s/-/\@002d/g;
 if (-d "$mysql::config{'mysql_data'}/$escdb") {
