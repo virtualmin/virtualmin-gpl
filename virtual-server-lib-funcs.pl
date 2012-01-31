@@ -3754,12 +3754,14 @@ local @servers = grep { $ids{$_->{'id'}} } &list_mx_servers();
 $hash{'mx_slaves'} = join(" ", map { $_->{'host'} } @servers);
 
 # Add secondary nameservers
-local %on = map { $_, 1 } split(/\s+/, $d->{'dns_slaves'});
-local @servers = grep { $on{$_->{'host'}} || $on{$_->{'nsname'}} }
-		      &bind8::list_slave_servers();
-$hash{'dns_server'} = &get_master_nameserver($tmpl);
-$hash{'dns_slaves'} = join(" ", map { $_->{'nsname'} || $_->{'host'} }
-				    @servers);
+if ($config{'dns'}) {
+	local %on = map { $_, 1 } split(/\s+/, $d->{'dns_slaves'});
+	local @servers = grep { $on{$_->{'host'}} || $on{$_->{'nsname'}} }
+			      &bind8::list_slave_servers();
+	$hash{'dns_server'} = &get_master_nameserver($tmpl);
+	$hash{'dns_slaves'} = join(" ", map { $_->{'nsname'} || $_->{'host'} }
+					    @servers);
+	}
 
 return %hash;
 }
