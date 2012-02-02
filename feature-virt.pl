@@ -54,6 +54,7 @@ else {
 	}
 &build_local_ip_list();
 &release_lock_virt($_[0]);
+&register_post_action(\&restart_bind) if ($config{'dns'});
 return 1;
 }
 
@@ -116,6 +117,7 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[0]->{'virt'} &&
 		}
 	&build_local_ip_list();
 	&release_lock_virt($_[0]);
+	&register_post_action(\&restart_bind) if ($config{'dns'});
 	}
 }
 
