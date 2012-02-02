@@ -660,56 +660,6 @@ closedir(HISTDIR);
 return @rv;
 }
 
-# historic_stat_info(name, &maxes)
-# Returns a hash ref with info about the units and class of some stat
-sub historic_stat_info
-{
-local ($name, $maxes) = @_;
-if ($name =~ /count$/) {
-	return { 'type' => 'email', 'units' => $text{'history_messages'} };
-	}
-elsif ($name =~ /^load/) {
-	return { 'type' => 'cpu', 'units' => $text{'history_cores'} };
-	}
-elsif ($name =~ /^cpu(idle|io|kernel|user)$/) {
-	return { 'type' => 'cpu', 'units' => $text{'history_pc'} };
-	}
-elsif ($name eq "cputemp") {
-	return { 'type' => 'cpu', 'units' => $text{'history_degrees'} };
-	}
-elsif ($name =~ /^b(in|out)$/) {
-	return { 'type' => 'system', 'units' => $text{'history_bps'} };
-	}
-elsif ($name eq "drivetemp") {
-	return { 'type' => 'system', 'units' => $text{'history_degrees'} };
-	}
-elsif ($name eq "tx" || $name eq "rx") {
-	return { 'type' => 'system', 'units' => $text{'history_kbsec'},
-		 'scale' => 1024 };
-	}
-elsif ($name eq "aliases" || $name eq "doms" || $name eq "users") {
-	return { 'type' => 'virt' };
-	}
-elsif ($name =~ /^(mem|swap)used$/) {
-	return { 'type' => 'system', 'units' => 'MB',
-		 'scale' => 1024*1024 };
-	}
-elsif ($name eq "diskused") {
-	return { 'type' => 'system', 'units' => 'GB',
-		 'scale' => 1024*1024*1024 };
-	}
-elsif ($name =~ /^quota/) {
-	return { 'type' => 'virt',
-		 'units' => $maxes->{$name} < 10*1024*1024*1024 ? "MB" : "GB",
-		 'scale' => $maxes->{$name} < 10*1024*1024*1024 ? 1024*1024 :
-							1024*1024*1024 };
-	}
-elsif ($name eq "procs") {
-	return { 'type' => 'system' };
-	}
-return undef;
-}
-
 # setup_collectinfo_job()
 # Creates or updates the collectinfo.pl cron job, based on the schedule
 # set in the module config.

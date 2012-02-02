@@ -31,11 +31,6 @@
 
  - Move scripts to new directory / DB login / URL
 
- - Include bounced / greylisted messages in system stats
-	- https://www.virtualmin.com/node/13113
-	- cloudmin too?
-	- CHANGELOG
-
  - Webmin SSL cert / CSR generation directly
 	- https://www.virtualmin.com/node/14502
 

@@ -1,0 +1,4 @@
+desc=System statistics improvements
+html=System statistics graphs now include the number of email messages received, bounced and greylisted. Statistic are also categorized by type, and when multiple stats are plotted at once the same axis is used for stats of the same type.
+master=1
+link=history.cgi

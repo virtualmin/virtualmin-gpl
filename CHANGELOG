@@ -1330,3 +1330,5 @@ The warning when multiple SSL sites share the same IP can now be disabled if you
 Backups now create a .dom file in the same directory as the tar.gz file, which contains information about the domains included and is used to speed up the restore process.
 A new option on the Virtualmin Configuration page allows domain owners to restore backups made by root for their own domains. Because root backups are considered secure, the domain owner can restore all settings, including the Apache and DNS configuration.
 Scheduled backups now have a separate deletion policy for each destination, instead of the same policy being applied to all destinations. For example, you could delete local backups after 5 days and remote backups after 10.
+---- Changes since 3.90 ----
+System statistics graphs now include the number of email messages received, bounced and greylisted. Statistic are also categorized by type, and when multiple stats are plotted at once the same axis is used for stats of the same type.

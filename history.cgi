@@ -5,14 +5,6 @@ require './virtual-server-lib.pl';
 &can_show_history() || &error($text{'history_ecannot'});
 &ReadParse();
 
-@history_periods = (
-	[ 'year', 365*24*60*60 ],
-	[ 'month', 31*24*60*60 ],
-	[ 'week', 7*24*60*60 ],
-	[ 'day', 24*60*60 ],
-	[ 'hour', 60*60 ],
-	);
-
 &ui_print_header(undef, $text{'history_title'}, "", undef, 0, 0, 0, undef,
 		 "<script src='timeplot/timeplot-api.js?local'></script>",
 		 "onload='onLoad();' onresize='onResize();'");
@@ -66,7 +58,8 @@ print "</td>\n";
 # Time period links
 @plinks = ( );
 print "<td align=middle width=33%>";
-foreach $p (map { [ $text{'history_'.$_->[0]}, $_->[1] ] } @history_periods) {
+foreach $p (map { [ $text{'history_'.$_->[0]}, $_->[1] ] }
+		&get_history_periods()) {
 	if ($period == $p->[1]) {
 		push(@plinks, "<b>$p->[0]</b>");
 		}
@@ -250,7 +243,7 @@ EOF
 sub period_to_name
 {
 local ($p) = @_;
-foreach my $hp (@history_periods) {
+foreach my $hp (&get_history_periods()) {
 	return $hp->[0] if ($p == $hp->[1]);
 	}
 return undef;
