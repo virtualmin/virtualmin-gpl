@@ -39,38 +39,8 @@ $maxes = &get_historic_maxes();
 for($i=0; $i<@stats; $i++) {
 	$color = $historic_graph_colors[$i % scalar(@historic_graph_colors)];
 	$stat = $stats[$i];
-	if ($stat eq 'memused' || $stat eq 'swapused') {
-		$units = "MB";
-		}
-	elsif ($stat eq 'quotalimit' || $stat eq 'quotaused') {
-		if ($maxes->{$stat} < 10*1024*1024*1024) {
-			$units = "MB";
-			}
-		else {
-			$units = "GB";
-			}
-		}
-	elsif ($stat eq 'diskused') {
-		$units = "GB";
-		}
-	elsif ($stat eq 'load' || $stat eq 'load5' || $stat eq 'load15') {
-		$units = $text{'history_cores'};
-		}
-	elsif ($stat eq 'tx' || $stat eq 'rx') {
-		$units = $text{'history_kbsec'};
-		}
-	elsif ($stat eq 'drivetemp' || $stat eq 'cputemp') {
-		$units = $text{'history_cel'};
-		}
-	elsif ($stat =~ /^cpu/) {
-		$units = $text{'history_pc'};
-		}
-	elsif ($stat eq 'bin' || $stat eq 'bout') {
-		$units = $text{'history_bps'};
-		}
-	else {
-		$units = undef;
-		}
+	$fmt = &historic_stat_info($stat, $maxes);
+	$units = $fmt ? $fmt->{'units'} : undef;
 	$sttxt = $text{'history_stat_'.$stat};
 	push(@statnames, "<font color=$color>".
 			 ($units ? &text('history_units', $sttxt, $units)
@@ -131,8 +101,8 @@ print "<a href='history_data.cgi?$statsparams&start=$start&end=$end&nice=1'>$tex
 # For email, show total over time period
 my @tstats;
 foreach $stat (@stats) {
-	if ($stat eq "mailcount" || $stat eq "spamcount" ||
-	    $stat eq "viruscount") {
+	$fmt = &historic_stat_info($stat, $maxes);
+	if ($fmt && $fmt->{'type'} eq 'email') {
 		my @info = &list_historic_collected_info($stat, $start, $end);
 		my $lasttime;
 		my $count = 0;
@@ -155,17 +125,29 @@ print "<b>$text{'history_showsel'}</b><br>\n";
 print &ui_form_start("history.cgi");
 print &ui_hidden("start", $start);
 print &ui_hidden("period", $period);
-@grid = ( );
-foreach $s (sort { $text{'history_stat_'.$a} cmp
-		   $text{'history_stat_'.$b} } &list_historic_stats()) {
-	$link = "history.cgi?start=".&urlize($start).
-		"&period=".&urlize($period)."&logscale=".$in{'logscale'}.
-		"&stat=$s";
-	push(@grid, &ui_checkbox("stat", $s,
-		"<a href='$link'>".($text{'history_stat_'.$s} || $s)."</a>",
-		&indexof($s, @stats) >= 0));
+foreach $s (&list_historic_stats()) {
+	$fmt = &historic_stat_info($s, $maxes);
+	if ($fmt) {
+		push(@{$type_to_stat{$fmt->{'type'}}}, $s);
+		}
 	}
-print &ui_grid_table(\@grid, 4);
+foreach $t (sort { $text{'history_type_'.$a} cmp
+		   $text{'history_type_'.$b} } keys %type_to_stat) {
+	@grid = ( );
+	foreach $s (sort { $text{'history_stat_'.$a} cmp
+			   $text{'history_stat_'.$b} } @{$type_to_stat{$t}}) {
+		$link = "history.cgi?start=".&urlize($start).
+			"&period=".&urlize($period).
+			"&logscale=".$in{'logscale'}."&stat=$s";
+		push(@grid, &ui_checkbox("stat", $s,
+			"<a href='$link'>".
+			  ($text{'history_stat_'.$s} || $s)."</a>",
+			&indexof($s, @stats) >= 0));
+		}
+	print &ui_grid_table(\@grid, 4, 100,
+		[ "width=25%", "width=25%", "width=25%", "width=25%" ], undef,
+		$text{'history_type_'.$t});
+	}
 print "<b>$text{'history_logscale'}</b>\n";
 print &ui_radio("logscale", int($in{'logscale'}),
 		[ [ 0, $text{'history_logscale0'} ],
@@ -177,32 +159,55 @@ print "<script>\n";
 print "var timeplot;\n";
 print "function onLoad() {\n";
 print "  var eventSource = new Timeplot.DefaultEventSource();\n";
-print "  var plotInfo = [\n";
-$plotno = 1;
+
+# Work out how many different axes we have
+@axes = ( );
 $geom = $in{'logscale'} ? 'LogarithmicValueGeometry'
 		        : 'DefaultValueGeometry';
 foreach $stat (@stats) {
-	$color = $historic_graph_colors[
-			($plotno-1) % scalar(@historic_graph_colors)];
 	$maxopt = "";
-	$axis = $plotno%2 == 0 ? 'right' : 'left';
-	if ($maxes->{$stat} && $stat ne 'tx' && $stat ne 'rx') {
-		$maxv = $stat eq "memused" || $stat eq "swapused" ?
-			 $maxes->{$stat}/(1024*1024) :
-			$stat eq "diskused" ?
-			 $maxes->{$stat}/(1024*1024*1024) :
-			 $maxes->{$stat};
+	$fmt = &historic_stat_info($stat, $maxes);
+	if ($maxes->{$stat}) {
+		$maxv = $maxes->{$stat};
+		$maxv /= $fmt->{'scale'} if ($fmt && $fmt->{'scale'});
 		$maxopt = "max: $maxv,";
 		}
+	$units = $fmt ? $fmt->{'units'} : "count";
+	$axis = &indexof($units, @axes);
+	if ($axis < 0) {
+		# New axis
+		$axis = scalar(@axes);
+		push(@axes, $units);
+		if ($axis == 0) {
+			$place = "left";
+			}
+		elsif ($axis == 1) {
+			$place = "right";
+			}
+		else {
+			next;
+			}
+		print "var value$axis = new Timeplot.$geom({\n";
+		print "        gridColor: '#B3B6B0',\n";
+		print "        axisLabelsPlacement: '$place',\n";
+		print "        $maxopt\n";
+		print "        min: 0\n";
+		print "      });\n";
+		}
+	$stat_to_axis{$stat} = "value".$axis;
+	}
+
+# Generate JS for each stat
+print "  var plotInfo = [\n";
+$plotno = 1;
+foreach $stat (@stats) {
+	next if (!$stat_to_axis{$stat});	# Not enough axes!
+	$color = $historic_graph_colors[
+			($plotno-1) % scalar(@historic_graph_colors)];
 	print "    Timeplot.createPlotInfo({\n";
 	print "      id: 'plot$plotno',\n";
 	print "      dataSource: new Timeplot.ColumnSource(eventSource, $plotno),\n";
-	print "      valueGeometry: new Timeplot.$geom({\n";
-	print "        gridColor: '#B3B6B0',\n";
-	print "        axisLabelsPlacement: '$axis',\n";
-	print "        $maxopt\n";
-	print "        min: 0\n";
-	print "      }),\n";
+	print "      valueGeometry: $stat_to_axis{$stat},\n";
 	print "      timeGeometry: new Timeplot.DefaultTimeGeometry({\n";
 	print "        gridColor: '#B3B6B0',\n";
 	print "        axisLabelsPlacement: 'top'\n";

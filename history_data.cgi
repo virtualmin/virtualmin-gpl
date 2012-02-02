@@ -44,23 +44,8 @@ for($i=0; $i<scalar(@$first); $i++) {
 	foreach $stat (@stats) {
 		$v = $infomap{$stat}->[$i]->[1];
 		if ($in{'nice'}) {
-			if ($stat eq 'memused' || $stat eq 'swapused') {
-				$v /= 1024*1024;
-				}
-			elsif ($stat eq 'quotalimit' || $stat eq 'quotaused') {
-				if ($maxes->{$stat} < 10*1024*1024*1024) {
-					$v /= 1024*1024;
-					}
-				else {
-					$v /= 1024*1024*1024;
-					}
-				}
-			elsif ($stat eq 'diskused') {
-				$v /= 1024*1024*1024;
-				}
-			elsif ($stat eq 'tx' || $stat eq 'rx') {
-				$v /= 1024;
-				}
+			$fmt = &historic_stat_info($stat, $maxes);
+			$v /= $fmt->{'scale'} if ($fmt && $fmt->{'scale'});
 			}
 		if ($v ne int($v)) {
 			# Two decimal places only

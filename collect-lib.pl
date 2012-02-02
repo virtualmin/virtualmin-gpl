@@ -350,7 +350,7 @@ foreach my $q (@{$info->{'quota'}}) {
 push(@stats, [ "quotalimit", $qlimit ]);
 push(@stats, [ "quotaused", $qused ]);
 
-# Get mail since the last collection time
+# Get messages processed by procmail since the last collection time
 local $now = time();
 if (-r $procmail_log_file) {
 	# Get last seek position
@@ -399,6 +399,69 @@ if (-r $procmail_log_file) {
 	&open_tempfile(PROCMAILPOS, ">$historic_info_dir/procmailpos");
 	&print_tempfile(PROCMAILPOS, $lastpos," ",$st[1]," ",$now."\n");
 	&close_tempfile(PROCMAILPOS);
+	}
+
+# Read mail server log to count messages since the last run
+local $mail_log_file = $config{'bw_maillog'};
+$mail_log_file = &get_mail_log() if ($mail_log_file eq "auto");
+if ($mail_log_file) {
+	# Get last seek position
+	local $lastinfo = &read_file_contents("$historic_info_dir/maillogpos");
+	local @st = stat($mail_log_file);
+	local ($lastpos, $lastinode, $lasttime);
+	if (defined($lastinfo)) {
+		($lastpos, $lastinode, $lasttime) = split(/\s+/, $lastinfo);
+		}
+	else {
+		# For the first run, start at the end of the file
+		$lastpos = $st[7];
+		$lastinode = $st[1];
+		$lasttime = time();
+		}
+
+	# Read the log, finding number of messages recived, bounced and
+	# greylisted
+	local ($recvcount, $bouncecount, $greycount) = (0, 0, 0);
+	open(MAILLOG, $mail_log_file);
+	if ($st[1] == $lastinode && $lastpos) {
+		seek(MAILLOG, $lastpos, 0);
+		}
+	else {
+		$lastpos = 0;
+		}
+	while(<MAILLOG>) {
+		if (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(\S+):\s+from=(\S+),\s+size=(\d+)/) {
+			# Sendmail or postfix from= line for a new message
+			$recvcount++;
+			}
+		elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(\S+):\s+<(\S+)>\.*\s*(.*)/i) {
+			# Sendmail bounce message
+			$recvcount++;
+			$bouncecount++;
+			}
+		elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(NOQUEUE):\s+(\S+):.*from=(\S+)\s+to=(\S+)/) {
+			# Postfix bounce message
+			$recvcount++;
+			if (/Greylisted/) {
+				$greycount++;
+				}
+			else {
+				$bouncecount++;
+				}
+			}
+		}
+	close(MAILLOG);
+	local $mins = ($now - $lasttime) / 60.0;
+	push(@stats, [ "recvcount", $mins ? $recvcount / $mins : 0 ]);
+	push(@stats, [ "bouncecount", $mins ? $bouncecount / $mins : 0 ]);
+	if ($greycount || !&check_postgrey()) {
+		push(@stats, [ "greycount", $mins ? $greycount / $mins : 0 ]);
+		}
+
+	# Save last seek
+	&open_tempfile(MAILPOS, ">$historic_info_dir/maillogpos");
+	&print_tempfile(MAILPOS, $lastpos," ",$st[1]," ",$now."\n");
+	&close_tempfile(MAILPOS);
 	}
 
 # Get network traffic counts since last run
@@ -589,12 +652,62 @@ local @rv;
 opendir(HISTDIR, $historic_info_dir);
 foreach my $f (readdir(HISTDIR)) {
 	if ($f =~ /^[a-z]+[0-9]*$/ && $f ne "maxes" && $f ne "procmailpos" &&
-	    $f ne "netcounts") {
+	    $f ne "netcounts" && $f ne "maillogpos") {
 		push(@rv, $f);
 		}
 	}
 closedir(HISTDIR);
 return @rv;
+}
+
+# historic_stat_info(name, &maxes)
+# Returns a hash ref with info about the units and class of some stat
+sub historic_stat_info
+{
+local ($name, $maxes) = @_;
+if ($name =~ /count$/) {
+	return { 'type' => 'email', 'units' => $text{'history_messages'} };
+	}
+elsif ($name =~ /^load/) {
+	return { 'type' => 'cpu', 'units' => $text{'history_cores'} };
+	}
+elsif ($name =~ /^cpu(idle|io|kernel|user)$/) {
+	return { 'type' => 'cpu', 'units' => $text{'history_pc'} };
+	}
+elsif ($name eq "cputemp") {
+	return { 'type' => 'cpu', 'units' => $text{'history_degrees'} };
+	}
+elsif ($name =~ /^b(in|out)$/) {
+	return { 'type' => 'system', 'units' => $text{'history_bps'} };
+	}
+elsif ($name eq "drivetemp") {
+	return { 'type' => 'system', 'units' => $text{'history_degrees'} };
+	}
+elsif ($name eq "tx" || $name eq "rx") {
+	return { 'type' => 'system', 'units' => $text{'history_kbsec'},
+		 'scale' => 1024 };
+	}
+elsif ($name eq "aliases" || $name eq "doms" || $name eq "users") {
+	return { 'type' => 'virt' };
+	}
+elsif ($name =~ /^(mem|swap)used$/) {
+	return { 'type' => 'system', 'units' => 'MB',
+		 'scale' => 1024*1024 };
+	}
+elsif ($name eq "diskused") {
+	return { 'type' => 'system', 'units' => 'GB',
+		 'scale' => 1024*1024*1024 };
+	}
+elsif ($name =~ /^quota/) {
+	return { 'type' => 'virt',
+		 'units' => $maxes->{$name} < 10*1024*1024*1024 ? "MB" : "GB",
+		 'scale' => $maxes->{$name} < 10*1024*1024*1024 ? 1024*1024 :
+							1024*1024*1024 };
+	}
+elsif ($name eq "procs") {
+	return { 'type' => 'system' };
+	}
+return undef;
 }
 
 # setup_collectinfo_job()
