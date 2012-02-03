@@ -1332,3 +1332,4 @@ A new option on the Virtualmin Configuration page allows domain owners to restor
 Scheduled backups now have a separate deletion policy for each destination, instead of the same policy being applied to all destinations. For example, you could delete local backups after 5 days and remote backups after 10.
 ---- Changes since 3.90 ----
 System statistics graphs now include the number of email messages received, bounced and greylisted. Statistic are also categorized by type, and when multiple stats are plotted at once the same axis is used for stats of the same type.
+Updated the Drupal script installer to versions 6.24 and 7.12, and Joomla to 2.5.1.
