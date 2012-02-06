@@ -39,6 +39,7 @@ if (&foreign_check("proc")) {
 		local $free = 0;
 		local %donezone;
 		local %donevzfs;
+		local %donedevice;
 		local @cfs = split(/\s+/, $config{'collect_fs'});
 		foreach my $m (@mounted) {
 			if (@cfs) {
@@ -63,6 +64,11 @@ if (&foreign_check("proc")) {
 					# may be mounts from zones/foo/bar
 					# and zones/foo/smeg that really refer
 					# to the zone source.
+					next;
+					}
+				if ($donedevice{$m->[0]}++) {
+					# Don't double-count mounts from
+					# the same device
 					next;
 					}
 				local ($t, $f) =
