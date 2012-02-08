@@ -1106,13 +1106,13 @@ if (!$waschild) {
 	while(<PARKED>) {
 		s/\r|\n//g;
 		local ($pdom) = split(/\s+/, $_);
-		push(@parked, $pdom) if ($pdom);
+		push(@parked, $pdom) if ($pdom && $pdom !~ /^\*/);
 		}
 	close(PARKED);
 	}
 
 # Create alias domain for sub-domain
-if ($aliasdom) {
+if ($aliasdom && $aliasdom !~ /^\*/) {
 	push(@parked, $aliasdom);
 	}
 
