@@ -1,0 +1,6 @@
+desc=S3 backup support
+html=The S3 backup support has been ported from Virtualmin Pro, allowing GPL users to backup domains to Amazon's paid storage service.
+master=1
+reseller=1
+owner=1
+link=backup_form.cgi

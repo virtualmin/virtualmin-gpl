@@ -31,9 +31,6 @@
 
  - Move scripts to new directory / DB login / URL
 
- - Webmin SSL cert / CSR generation directly
-	- https://www.virtualmin.com/node/14502
-
  - Allow admin to edit user's procmail rules
 	- http://www.virtualmin.com/node/12330 
 
@@ -58,3 +55,8 @@
 
  - New gandi API
 	- https://www.virtualmin.com/node/20543
+	- Also namecheap support
+		- virtualmin/pdXxeckg9R
+
+ - Clear right frame after changing domain / VM
+	- https://www.virtualmin.com/node/21133

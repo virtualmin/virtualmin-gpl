@@ -3248,7 +3248,7 @@ return $ok;
 # Returns 1 if the current user can backup to Amazon's S3 service
 sub can_use_s3
 {
-return $virtualmin_pro;
+return 1;	# Now supported for GPL too
 }
 
 # write_backup_log(&domains, dest, incremental?, start, size, ok?,
