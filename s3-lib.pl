@@ -36,7 +36,7 @@ $tries ||= 1;
 my $err;
 for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
-	local $conn = S3::AWSAuthConnection->new($akey, $skey);
+	local $conn = &make_s3_connection($akey, $skey);
 	if (!$conn) {
 		$err = $text{'s3_econn'};
 		sleep(10);
@@ -58,7 +58,7 @@ for(my $i=0; $i<$tries; $i++) {
 		}
 
 	# Re-open the connection, as sometimes it times out
-	$conn = S3::AWSAuthConnection->new($akey, $skey);
+	$conn = &make_s3_connection($akey, $skey);
 
 	# Check if given bucket is in the list
 	local ($got) = grep { $_->{'Name'} eq $bucket } @{$response->entries};
@@ -108,8 +108,7 @@ my $endpoint = undef;
 for(my $i=0; $i<$tries; $i++) {
 	local $newendpoint;
 	$err = undef;
-	local $conn = S3::AWSAuthConnection->new($akey, $skey, undef,
-						 $endpoint);
+	local $conn = &make_s3_connection($akey, $skey, $endpoint);
 	if (!$conn) {
 		$err = $text{'s3_econn'};
 		next;
@@ -197,7 +196,7 @@ for(my $i=0; $i<$tries; $i++) {
 
 	if (!$err && $info) {
 		# Write out the info file, if given
-		local $iconn = S3::AWSAuthConnection->new($akey, $skey);
+		local $iconn = &make_s3_connection($akey, $skey);
 		local $response = $iconn->put($bucket, $destfile.".info",
 					     &serialise_variable($info));
 		if ($response->http_response->code != 200) {
@@ -207,7 +206,7 @@ for(my $i=0; $i<$tries; $i++) {
 		}
 	if (!$err && $dom) {
 		# Write out the .dom file, if given
-		local $iconn = S3::AWSAuthConnection->new($akey, $skey);
+		local $iconn = &make_s3_connection($akey, $skey);
 		local $response = $iconn->put($bucket, $destfile.".dom",
 					     &serialise_variable($dom));
 		if ($response->http_response->code != 200) {
@@ -245,7 +244,7 @@ sub s3_list_backups
 {
 local ($akey, $skey, $bucket, $path) = @_;
 &require_s3();
-local $conn = S3::AWSAuthConnection->new($akey, $skey);
+local $conn = &make_s3_connection($akey, $skey);
 return $text{'s3_econn'} if (!$conn);
 
 local $response = $conn->list_bucket($bucket);
@@ -284,7 +283,7 @@ sub s3_list_domains
 {
 local ($akey, $skey, $bucket, $path) = @_;
 &require_s3();
-local $conn = S3::AWSAuthConnection->new($akey, $skey);
+local $conn = &make_s3_connection($akey, $skey);
 return $text{'s3_econn'} if (!$conn);
 
 local $response = $conn->list_bucket($bucket);
@@ -320,7 +319,7 @@ sub s3_list_buckets
 {
 &require_s3();
 local ($akey, $skey, $bucket) = @_;
-local $conn = S3::AWSAuthConnection->new($akey, $skey);
+local $conn = &make_s3_connection($akey, $skey);
 return $text{'s3_econn'} if (!$conn);
 local $response = $conn->list_all_my_buckets();
 if ($response->http_response->code != 200) {
@@ -337,7 +336,7 @@ sub s3_list_files
 {
 local ($akey, $skey, $bucket) = @_;
 &require_s3();
-local $conn = S3::AWSAuthConnection->new($akey, $skey);
+local $conn = &make_s3_connection($akey, $skey);
 return $text{'s3_econn'} if (!$conn);
 local $response = $conn->list_bucket($bucket);
 if ($response->http_response->code != 200) {
@@ -352,7 +351,7 @@ sub s3_delete_file
 {
 local ($akey, $skey, $bucket, $file) = @_;
 &require_s3();
-local $conn = S3::AWSAuthConnection->new($akey, $skey);
+local $conn = &make_s3_connection($akey, $skey);
 return $text{'s3_econn'} if (!$conn);
 local $response = $conn->delete($bucket, $file);
 if ($response->http_response->code < 200 ||
@@ -384,7 +383,7 @@ sub s3_delete_bucket
 {
 local ($akey, $skey, $bucket) = @_;
 &require_s3();
-local $conn = S3::AWSAuthConnection->new($akey, $skey);
+local $conn = &make_s3_connection($akey, $skey);
 return $text{'s3_econn'} if (!$conn);
 
 # Get and delete files first
@@ -419,8 +418,7 @@ for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
 
 	# Connect to S3
-	local $conn = S3::AWSAuthConnection->new($akey, $skey, undef,
-						 $endpoint);
+	local $conn = &make_s3_connection($akey, $skey, $endpoint);
 	if (!$conn) {
 		$err = $text{'s3_econn'};
 		next;
@@ -524,6 +522,16 @@ foreach my $h ($merged->header_field_names()) {
 local $req = HTTP::Request->new($method, $url, \@http_headers);
 $req->content($object->data);
 return $req;
+}
+
+# make_s3_connection(access-key, secret-key, [endpoint])
+# Returns an S3::AWSAuthConnection connection object
+sub make_s3_connection
+{
+local ($akey, $skey, $endpoint) = @_;
+$endpoint ||= $config{'s3_endpoint'};
+&require_s3();
+return S3::AWSAuthConnection->new($akey, $skey, undef, $endpoint);
 }
 
 1;

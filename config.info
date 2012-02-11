@@ -153,6 +153,7 @@ backuplog_days=Number of days to show backup logs for,0,5
 tar_cmd=Full path to tar command,3,Detect automatically
 tar_args=Additonal parameters to tar command,0
 ssh_args=Additonal parameters to ssh and scp commands,0
+s3_endpoint=S3-compatible server hostname,3,Use Amazon S3
 
 line6=Advanced options,11
 iface_base=Base number for virtual interfaces,3,Automatic
