@@ -1527,6 +1527,15 @@ if ($ok) {
 			&$first_print(&text('restore_createdomain',
 				      &show_domain_name($d)));
 
+			# Check if licence limits are exceeded
+			local ($dleft, $dreason, $dmax) = &count_domains(
+				$d->{'alias'} ? "aliasdoms" :"realdoms");
+			if ($dleft == 0) {
+				&$second_print(&text('restore_elimit', $dmax));
+				$ok = 0;
+				last DOMAIN;
+				}
+
 			# Only features in the backup are enabled
 			if ($onlyfeats) {
 				foreach my $f (@backup_features, @bplugins) {

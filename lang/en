@@ -2331,6 +2331,7 @@ restore_firstfailed=.. extraction of $1 failed! $2
 restore_missinginfo=Backup does not contain virtual server information for missing domain $1.
 restore_createdomain=Re-creating virtual server $1 ..
 restore_epar=.. the original parent virtual server does not exist
+restore_elimit=.. creation would exceed your virtual server limit of $1
 restore_epardom=.. the original parent virtual server <tt>$1</tt> does not exist
 restore_etemplate=.. the server template specified in the backup does not exist
 restore_eresel=.. the reseller $1 specified in the backup does not exist
