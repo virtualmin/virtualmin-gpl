@@ -176,9 +176,21 @@ return 0;
 }
 
 # clone_webmin(&old-domain, &domain)
-# Does nothing, as the webmin user is re-created as part of the clone process
+# Copy Webmin user settings to the new domain
 sub clone_webmin
 {
+local ($oldd, $d) = @_;
+&obtain_lock_webmin($d);
+&require_acl();
+local ($olduser) = grep { $_->{'name'} eq $oldd->{'user'} } &acl::list_users();
+local ($user) = grep { $_->{'name'} eq $d->{'user'} } &acl::list_users();
+if ($olduser && $user) {
+	$user->{'theme'} = $olduser->{'theme'};
+	$user->{'lang'} = $olduser->{'lang'};
+	&acl::modify_user($d->{'user'}, $user);
+	}
+&release_lock_webmin($d);
+&register_post_action(\&restart_webmin);
 return 1;
 }
 
