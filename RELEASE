@@ -11,7 +11,7 @@
 	x fudu
 	x lentor
 	x xencentos
-	x xengpl
+	- xengpl
 
  x Generate british english with :
 	cd /usr/local/webadmin
@@ -39,7 +39,7 @@
  x Upload theme
 	scp virtualmin/virtual-server-theme-$themever.wbt.gz* webadmin@download.webmin.com:domains/download.webmin.com/public_html/download/virtualmin/
 	scp /usr/src/redhat/RPMS/noarch/wbt-virtual-server-theme-$themever-1.noarch.rpm webadmin@download.webmin.com:domains/download.webmin.com/public_html/download/virtualmin/
-	scp /tmp/webmin-virtual-server-theme_${themever}_all.deb webadmin@download.webmin.com:domains/download.webmin.com/public_html/download/virtualmin/
+	ssh lentor "scp /tmp/webmin-virtual-server-theme_${themever}_all.deb webadmin@download.webmin.com:domains/download.webmin.com/public_html/download/virtualmin/"
 
  x Create signatures for all new packages
 	~/webmin.com/create-update-sigs.pl
@@ -47,9 +47,9 @@
  x Add to website
 	x Mention plugins too
 
- - Add to freshmeat.net
+ x Add to freshmeat.net
 
- - Announce on mailing list
+ x Announce on mailing list
 
  x Add to updates.txt
 

@@ -5743,6 +5743,7 @@ clone_virt6=Allocating new IPv6 address ..
 clone_virt6range=.. no IPv6 allocation ranges have been configured
 clone_virt6alloc=.. no free IPv6 address was found
 clone_virt6done=.. allocated address $1
+clone_virt2=Changing IPv4 address to $1 ..
 clone_ftp=Copying ProFTPd directives ..
 clone_ftpold=.. source ProFTPd configuration not found!
 clone_ftpnew=.. destination ProFTPd configuration not found!

@@ -14813,13 +14813,14 @@ for(my $i=0; $i<@sp1 || $i<@sp2; $i++) {
 return 0;
 }
 
-# clone_virtual_server(&domain, new-domain, [new-user, [new-password]])
+# clone_virtual_server(&domain, new-domain, [new-user, [new-password]],
+# 		       [ip], [ip-already])
 # Creates a copy of a virtual server, with a new domain name and perhaps
 # username (if top-level). Prints stuff as it progresses. Returns 0 on failure
 # or 1 on success.
 sub clone_virtual_server
 {
-local ($oldd, $newdom, $newuser, $newpass) = @_;
+local ($oldd, $newdom, $newuser, $newpass, $ip, $virtalready) = @_;
 
 # Create the new domain object, with changes
 &$first_print($text{'clone_object'});
@@ -14871,8 +14872,17 @@ foreach my $k (keys %$d) {
 	}
 &$second_print($text{'setup_done'});
 
-# Allocate a new IPv4 address if needed
-if ($d->{'virt'}) {
+# Pick a new IPv4 address if needed
+if ($d->{'virt'} && $ip) {
+	# IP specific by caller
+	&$first_print(&text('clone_virt2', $ip));
+	$d->{'ip'} = $ip;
+	$d->{'virtalready'} = $virtalready;
+	delete($d->{'dns_ip'});
+	&$second_print($text{'setup_done'});
+	}
+elsif ($d->{'virt'}) {
+	# Allocating IP
 	&$first_print($text{'clone_virt'});
 	if ($tmpl->{'ranges'} eq 'none') {
 		&$second_print($text{'clone_virtrange'});
@@ -14886,6 +14896,7 @@ if ($d->{'virt'}) {
 	$d->{'ip'} = $ip;
 	$d->{'netmask'} = $netmask;
 	$d->{'virtalready'} = 0;
+	delete($d->{'dns_ip'});
 	&$second_print(&text('clone_virtdone', $ip6));
 	}
 
