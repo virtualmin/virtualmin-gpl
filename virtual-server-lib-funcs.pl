@@ -14897,7 +14897,7 @@ elsif ($d->{'virt'}) {
 	$d->{'netmask'} = $netmask;
 	$d->{'virtalready'} = 0;
 	delete($d->{'dns_ip'});
-	&$second_print(&text('clone_virtdone', $ip6));
+	&$second_print(&text('clone_virtdone', $ip));
 	}
 
 # Allocate a new IPv6 address if needed

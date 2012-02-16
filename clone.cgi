@@ -34,6 +34,26 @@ $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
 $derr = &allowed_domain_name($parent, $in{'newdomain'});
 &error($derr) if ($derr);
 
+# Validate IP address
+if ($d->{'virt'} && &can_select_ip() && !$in{'ip_def'}) {
+	$ip = $in{'ip'};
+	$virtalready = $in{'virtalready'};
+	&check_ipaddress($ip) || &error($text{'setup_eip'});
+	$clash = &check_virt_clash($ip);
+	if ($virtalready) {
+		# Fail if the IP isn't yet active, or if claimed by another
+		# virtual server
+                $clash || &error(&text('setup_evirtclash2', $ip));
+		$already = &get_domain_by("ip", $ip);
+		$already && &error(&text('setup_evirtclash4',
+                                         $already->{'dom'}));
+		}
+	else {
+		# Fail if the IP *is* already activ
+		$clash && &error(&text('setup_evirtclash'));
+		}
+	}
+
 &ui_print_unbuffered_header(&domain_in($d), $text{'clone_title'}, "");
 
 if ($d->{'parent'}) {
@@ -45,7 +65,8 @@ else {
 			    $d->{'dom'}, $in{'newdomain'}, $in{'newuser'}));
 	}
 $ok = &clone_virtual_server($d, $in{'newdomain'}, $in{'newuser'},
-			    $in{'newpass_def'} ? undef : $in{'newpass'});
+			    $in{'newpass_def'} ? undef : $in{'newpass'},
+			    $ip, $virtalready);
 if ($ok) {
 	&$second_print($text{'setup_done'});
 	}

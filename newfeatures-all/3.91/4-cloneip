@@ -1,0 +1,6 @@
+desc=Specify IP address when cloning
+html=When cloning a virtual server with a private IP, a new address for the clone can be entered instead of relying on automatic IP allocation. The <tt>clone-domain</tt> API command now also has an <tt>--ip</tt> flag to select an address to use.
+master=1
+reseller=1
+owner=1
+link=clone_form.cgi?dom=${ID}

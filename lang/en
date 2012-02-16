@@ -5677,6 +5677,7 @@ record_eunder=DNS record $1 cannot be edited, as it is not under $2
 record_defttl=Default cache time
 record_epost=Record was not fully saved : $1
 
+clone_err=Failed to clone virtual server
 clone_object=Creating new virtual server settings ..
 clone_clash=Checking for clashes and dependency problems ..
 clone_clashfound=.. clash found : $1
@@ -5748,6 +5749,9 @@ clone_ftp=Copying ProFTPd directives ..
 clone_ftpold=.. source ProFTPd configuration not found!
 clone_ftpnew=.. destination ProFTPd configuration not found!
 clone_ssl=Copying Apache SSL directives ..
+clone_newip=IP address for clone
+clone_alloc=Allocate new IP
+clone_vip=Use address
 
 mrecords_title=Edit DNS Records
 mrecords_ecannot=You are not allowed to manually edit DNS records

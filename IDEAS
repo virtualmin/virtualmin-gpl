@@ -60,10 +60,3 @@
 
  - Clear right frame after changing domain / VM
 	- https://www.virtualmin.com/node/21133
-
- - Allow selection of IP when cloning
-	- https://virtualmin.com/node/20381
-	- May be already active
-	- UI
-	- API
-	- functional tests

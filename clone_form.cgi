@@ -38,6 +38,25 @@ if (!$d->{'parent'}) {
 		&ui_opt_textbox("newpass", undef, 20, $text{'clone_samepass'}));
 	}
 
+# IP address
+if ($d->{'virt'} && &can_select_ip()) {
+	$tmpl = &get_template($d->{'template'});
+	$ipfield = &ui_textbox("ip", undef, 20)." ".
+		   &ui_checkbox("virtalready", 1, $text{'form_virtalready'});
+	if ($tmpl->{'ranges'} eq 'none') {
+		# Must enter an IP
+		print &ui_table_row($text{'clone_newip'}, $ipfield);
+		}
+	else {
+		# Can select an IP, or allocate
+		print &ui_table_row($text{'clone_newip'},
+			&ui_radio("ip_def", 1,
+				  [ [ 1, $text{'clone_alloc'}."<br>" ],
+				    [ 0, $text{'clone_vip'} ] ]).
+			" ".$ipfield);
+		}
+	}
+
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'clone_ok'} ] ]);
 
