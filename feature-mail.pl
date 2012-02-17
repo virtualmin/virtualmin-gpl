@@ -2988,7 +2988,10 @@ if (&foreign_check("dovecot") && &foreign_installed("dovecot")) {
 		foreach $u (&list_domain_users($_[0], 0, 1, 1, 1)) {
 			if (-e "$control/$u->{'user'}") {
 				push(@names, $u->{'user'});
-				push(@names, &replace_atsign($u->{'user'}));
+				}
+			local $repl = &replace_atsign($u->{'user'});
+			if ($repl ne $u->{'user'} && -e "$control/$repl") {
+				push(@names, $repl);
 				}
 			}
 		@names = &unique(@names);
