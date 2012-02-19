@@ -60,3 +60,5 @@
 
  - Clear right frame after changing domain / VM
 	- https://www.virtualmin.com/node/21133
+
+ - lookup-domain-daemon should fork for each request

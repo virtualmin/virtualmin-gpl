@@ -61,6 +61,7 @@ while(@ARGV > 0) {
 		}
 	}
 @enable || @disable || @defaulton || @defaultoff || &usage("Nothing to do");
+%lastconfig = %config;
 
 # Verify inputs
 foreach $f (@enable, @disable, @defaulton, @defaultoff) {
@@ -139,7 +140,7 @@ $config{'plugins'} = join(" ", @plugins);
 
 # Validate new settings with a config check
 &set_all_null_print();
-$cerr = &check_virtual_server_config();
+$cerr = &check_virtual_server_config(\%lastconfig);
 &usage(&html_tags_to_text($cerr)) if ($cerr);
 
 # Update the procmail setting for default delivery, turn on logging, and 

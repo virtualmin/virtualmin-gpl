@@ -5,6 +5,7 @@ require './virtual-server-lib.pl';
 &error_setup($text{'features_err'});
 &can_edit_templates() || &error($text{'features_ecannot'});
 &ReadParse();
+%lastconfig = %config;
 
 # Validate plugins
 @newplugins = split(/\0/, $in{'mods'});
@@ -63,7 +64,7 @@ $config{'plugins_inactive'} = join(" ", @inactive);
 # Validate new settings with a config check
 @plugins = @newplugins;
 &set_all_null_print();
-$cerr = &check_virtual_server_config();
+$cerr = &check_virtual_server_config(\%lastconfig);
 &error($cerr) if ($cerr);
 
 # Update the procmail setting for default delivery, turn on logging, and 

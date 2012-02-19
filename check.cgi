@@ -11,7 +11,7 @@ require './virtual-server-lib.pl';
 print "<b>$text{'check_desc'}</b><br>\n";
 
 &$indent_print();
-$cerr = &check_virtual_server_config();
+$cerr = &check_virtual_server_config(\%lastconfig);
 &check_error($cerr) if ($cerr);
 &$outdent_print();
 

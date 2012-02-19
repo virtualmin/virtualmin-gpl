@@ -11997,11 +11997,12 @@ my ($d, $newdom, $newuser, $newhome) = @_;
 # XXX
 }
 
-# check_virtual_server_config()
+# check_virtual_server_config([&lastconfig])
 # Validates the Virtualmin configuration, printing out messages as it goes.
 # Returns undef on success, or an error message on failure.
 sub check_virtual_server_config
 {
+local ($lastconfig) = @_;
 local $clink = "edit_newfeatures.cgi";
 local $mclink = "../config.cgi?$module_name";
 
@@ -13010,7 +13011,7 @@ if (&foreign_check("software")) {
 # Check for disabled features that are in use
 my @doms = &list_domains();
 foreach my $f (@features) {
-	if (!$config{$f}) {
+	if (!$config{$f} && (!$lastconfig || $lastconfig->{$f})) {
 		my @lost = grep { $_->{$f} } @doms;
 		if (@lost) {
 			return &text('check_lostfeature', $text{'feature_'.$f},

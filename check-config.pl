@@ -35,7 +35,8 @@ if (@ARGV) {
 	}
 
 &set_all_text_print();
-$cerr = &html_tags_to_text(&check_virtual_server_config());
+&read_file("$module_config_directory/last-config", \%lastconfig);
+$cerr = &html_tags_to_text(&check_virtual_server_config(\%lastconfig));
 if ($cerr) {
 	print "ERROR: $cerr\n";
 	exit(1);
