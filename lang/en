@@ -3567,6 +3567,11 @@ view_title4=Virtual Sub-Domain Details
 view_features=Enabled features
 view_return=server details
 
+summary_title=Virtual Server Summary
+summary_title2=Virtual Sub-Server Summary
+summary_title3=Alias Server Summary
+summary_title4=Virtual Sub-Domain Summary
+
 migrate_title=Migrate Virtual Server
 migrate_desc=This page allows you to create a new virtual server by migrating a backup file created by a competitor's product. The configuration for all supported features will be extracted from the backup, and converted for use by Virtualmin. All contents of the domain's directory will copied into the home directory of the new user.
 migrate_file=Source backup file
