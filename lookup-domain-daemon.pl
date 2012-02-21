@@ -63,6 +63,8 @@ open(PIDFILE, ">$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid");
 printf PIDFILE "%d\n", getpid();
 close(PIDFILE);
 
+$SIG{'CHLD'} = sub { wait(); };
+
 # Loop forever, accepting requests from clients
 while(1) {
 	# Get a connection
@@ -71,31 +73,69 @@ while(1) {
 	binmode(SOCK);
 	($peerp, $peera) = unpack_sockaddr_in($acptaddr);
 
-	# Read the username
-	select(SOCK); $| = 1;
-	$username = <SOCK>;
-	$username =~ s/\r|\n//g;
-
-	# Find the user
-	&flush_virtualmin_caches();
-	&flush_webmin_caches();
-	$d = &get_user_domain($username);
-	if (!$d) {
-		# No such user!
-		&send_response(undef, undef);
-		next;
+	# Truncate the log if too big (10MB)
+	local @st = stat($daemon_logfile);
+	if ($st[7] > 10*1024*1024) {
+		close(STDERR);
+		open(STDERR, ">$daemon_logfile");
 		}
-	@users = &list_domain_users($d, 0, 1, 0, 1);
-	($user) = grep { $_->{'user'} eq $username ||
-			 &replace_atsign($_->{'user'}) eq $username } @users;
-	if (!$user) {
-		# Failed to find user again!
-		&send_response(undef, undef);
+
+	# Give up now if too many child processes already,
+	# to prevent DDOS
+	if (@childpids > 50) {
+		print STDERR "Too many child processes are running already\n";
+		close(SOCK);
 		next;
 		}
 
-	# Send back status
-	&send_response($d, $user);
+	# Fork a sub-process to handle this request
+	$pid = fork();
+	if ($pid < 0) {
+		print STDERR "Fork failed : $!\n";
+		close(SOCK);
+		next;
+		}
+	elsif (!$pid) {
+		# Close the main socket
+		close(MAIN);
+
+		# Return child cleanup policy to default, so
+		# that sub-command exit statuses can be collected
+		$SIG{'CHLD'} = 'DEFAULT';
+
+		# Read the username
+		select(SOCK); $| = 1;
+		$username = <SOCK>;
+		$username =~ s/\r|\n//g;
+
+		# Find the user
+		&flush_virtualmin_caches();
+		&flush_webmin_caches();
+		$d = &get_user_domain($username);
+		if (!$d) {
+			# No such user!
+			&send_response(undef, undef);
+			next;
+			}
+		@users = &list_domain_users($d, 0, 1, 0, 1);
+		($user) = grep { $_->{'user'} eq $username ||
+				 &replace_atsign($_->{'user'}) eq $username }
+			       @users;
+		if (!$user) {
+			# Failed to find user again!
+			&send_response(undef, undef);
+			next;
+			}
+
+		# Send back status
+		&send_response($d, $user);
+
+		exit(0);
+		}
+	
+	# Maintain list of child processes
+	push(@childpids, $pid);
+	@childpids = grep { kill(0, $_) } @childpids;
 	}
 
 # send_response(&domain, &user)
@@ -121,20 +161,16 @@ if ($d && $user) {
 			 ($quota ? ($quota - $uquota)*&quota_bsize($qmode)
 				 : "UNLIMITED"),
 		  ),"\n";
+	seek(STDERR, 0, 2);
 	print STDERR "[$now] user=$username dom=$d->{'dom'} spam=$d->{'spam'} client=$client quota=$quota uquota=$uquota\n";
 	}
 else {
 	print "\t\t\t\t\t\n";
+	seek(STDERR, 0, 2);
 	print STDERR "[$now] user=$username NOUSER\n";
 	}
 close(SOCK);
 
-# Truncate the log if too big (10MB)
-local @st = stat($daemon_logfile);
-if ($st[7] > 10*1024*1024) {
-	close(STDERR);
-	open(STDERR, ">$daemon_logfile");
-	}
 }
 
 sub usage

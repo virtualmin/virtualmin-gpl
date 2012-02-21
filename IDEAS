@@ -57,5 +57,3 @@
 	- https://www.virtualmin.com/node/20543
 	- Also namecheap support
 		- virtualmin/pdXxeckg9R
-
- - lookup-domain-daemon should fork for each request
