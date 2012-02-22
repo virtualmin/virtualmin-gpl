@@ -103,6 +103,10 @@ while(1) {
 		# that sub-command exit statuses can be collected
 		$SIG{'CHLD'} = 'DEFAULT';
 
+		# If lookup takes more than 60 seconds, give up .. since the
+		# client only waits 30
+		alarm(60);
+
 		# Read the username
 		select(SOCK); $| = 1;
 		$username = <SOCK>;
@@ -135,7 +139,10 @@ while(1) {
 	
 	# Maintain list of child processes
 	push(@childpids, $pid);
-	@childpids = grep { kill(0, $_) } @childpids;
+	local $expid;
+	do {	$expid = waitpid(-1, WNOHANG);
+		@childpids = grep { $_ != $expid } @childpids;
+		} while($expid != 0 && $expid != -1);
 	}
 
 # send_response(&domain, &user)

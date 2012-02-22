@@ -58,3 +58,5 @@
 	- Also namecheap support
 		- virtualmin/pdXxeckg9R
 	- remove or deprecate DiT
+
+ - lookup-domain-daemon leaves hanging processes?
