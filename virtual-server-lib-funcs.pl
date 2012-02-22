@@ -3371,7 +3371,15 @@ else {
 sub valid_mailbox_name
 {
 local ($name) = @_;
-return $name =~ /^[^ \t:\&\(\)\|\;\<\>\*\?\!]+$/ ? undef : $text{'user_euser'};
+&require_useradmin();
+if ($name !~ /^[^ \t:\&\(\)\|\;\<\>\*\?\!]+$/) {
+	return $text{'user_euser'};
+	}
+local $err = &useradmin::check_username_restrictions($name);
+if ($err) {
+	return $err;
+	}
+return undef;
 }
 
 sub max_username_length
