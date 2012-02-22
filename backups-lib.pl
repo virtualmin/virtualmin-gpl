@@ -470,6 +470,7 @@ DOMAIN: foreach $d (@$doms) {
 	# can cause database feature backups to fail.
 	my @alldbs = &all_databases($d);
         &resync_all_databases($d, \@alldbs);
+	my $dstart = time();
 
 	# Begin doing this domain
 	&$cbfunc($d, 0, $backupdir) if ($cbfunc);
@@ -508,7 +509,6 @@ DOMAIN: foreach $d (@$doms) {
 			}
 		}
 
-	&$second_print();
 	&$indent_print();
 	foreach $f (@backupfeatures) {
 		local $bfunc = "backup_$f";
@@ -702,6 +702,9 @@ DOMAIN: foreach $d (@$doms) {
 		}
 
 	&$outdent_print();
+	my $dtime = time() - $dstart;
+	&$second_print(&text('backup_donedomain',
+			     &nice_hour_mins_secs($dtime, 1, 1)));
 	&$cbfunc($d, 2, "$dest/$df") if ($cbfunc);
 	}
 
