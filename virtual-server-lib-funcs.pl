@@ -11904,6 +11904,7 @@ local $merr = &making_changes();
 
 # Update the domain object to set the web directory
 delete($d->{'alias'});
+delete($d->{'aliascopy'});
 delete($d->{'public_html_dir'});
 delete($d->{'public_html_path'});
 $d->{'public_html_dir'} = &public_html_dir($d, 1);
