@@ -86,6 +86,8 @@ else {
 				&error($text{'record_ename'});
 			($in{'name'} =~ /^\./ || $in{'name'} =~ /\.$/) &&
 				&error($text{'record_enamedot'});
+			$in{'name'} =~ /(^|\.)$d->{'dom'}$/i &&
+				&error($text{'record_enamedom'});
 			$r->{'name'} = $in{'name'}.".".$d->{'dom'}.".";
 			}
 		}

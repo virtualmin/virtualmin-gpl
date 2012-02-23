@@ -55,8 +55,10 @@ if ($r->{'defttl'}) {
 elsif ($in{'type'} && $t->{'domain'}) {
 	# New record, might be same as domain, or within it
 	print &ui_table_row($text{'record_name'},
-			    &ui_opt_textbox("name", undef, 20,
-					    $text{'record_same'}).
+			    &ui_radio("name_def", 0,
+				      [ [ 1, $text{'record_same'} ],
+					[ 0, " " ] ]).
+			    &ui_textbox("name", undef, 20).
 			    "<tt>.$d->{'dom'}</tt>");
 	}
 elsif ($r->{'name'} eq $d->{'dom'}.".") {
@@ -78,10 +80,6 @@ else {
 
 # Record type
 print &ui_table_row($text{'record_type'}, $t->{'type'}." - ".$t->{'desc'});
-
-# Record comment
-print &ui_table_row($text{'record_comment'},
-		    &ui_textbox("comment", $r->{'comment'}, 60));
 
 if ($r->{'defttl'}) {
 	# Default TTL for domain
@@ -105,6 +103,10 @@ else {
 			$vals[$i]->{'suffix'});
 		}
 	}
+
+# Record comment
+print &ui_table_row($text{'record_comment'},
+		    &ui_textbox("comment", $r->{'comment'}, 60));
 
 print &ui_table_end();
 if ($in{'type'}) {

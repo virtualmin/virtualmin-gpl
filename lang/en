@@ -5676,6 +5676,7 @@ record_err=Failed to save DNS record
 record_edelete=This DNS record cannot be deleted
 record_ename=Record name contains invalid characters
 record_enamedot=Record name cannot start or end with a dot
+record_enamedom=Record name does not need to include the domain name
 record_ettl=Cache time must be a number greater than zero
 record_ettlunits=Invalid units for cache time
 record_evalue=Invalid value for $1

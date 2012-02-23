@@ -105,8 +105,10 @@ if (!$gotttl) {
 	push(@types, [ '$ttl', '$ttl - '.$text{'records_typedefttl'} ]);
 	}
 print &ui_form_end([ [ 'delete', $text{'records_delete'} ],
+		     undef,
 		     [ 'new', $text{'records_add'},
 		       &ui_select("type", "A", \@types) ],
+		     undef,
 		     &can_manual_dns() ?
 			( [ 'manual', $text{'records_manual'} ] ) : ( ), ]);
 
