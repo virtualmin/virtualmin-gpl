@@ -10862,7 +10862,7 @@ if (&can_delete_domain($d)) {
 		  });
 	}
 
-if (!&can_config_domain($d) && &can_passwd()) {
+if (!&master_admin() && &can_passwd()) {
 	# Change password button
 	push(@rv, { 'page' => 'edit_pass.cgi',
 		    'title' => $text{'edit_changepass'},
