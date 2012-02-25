@@ -60,9 +60,10 @@ if ($_[0]->{'passmode'} == 3) {
 			$d->{'disabled_mysqlpass'} = undef;
 			$d->{'disabled_postgrespass'} = undef;
 			}
-		# Update all features
+		# Update all features, except Unix which has already been
+		# updated by caller
 		foreach my $f (@features) {
-			if ($config{$f} && $d->{$f}) {
+			if ($f ne "unix" && $config{$f} && $d->{$f}) {
 				local $mfunc = "modify_".$f;
 				&$mfunc($d, $oldd);
 				}
