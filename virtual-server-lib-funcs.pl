@@ -11213,7 +11213,6 @@ local $cachedata = &read_file_contents("$links_cache_dir/$cachekey");
 return undef if (!$cachedata);
 local $cachestr = &unserialise_variable($cachedata);
 return undef if (!$cachestr);
-use Data::Dumper;
 return undef if (&serialise_variable($cachestr->{'validator'}) ne
 		 &serialise_variable($validator));
 return $cachestr->{'data'};
