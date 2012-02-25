@@ -2098,31 +2098,35 @@ sub links_web
 {
 local ($d) = @_;
 local @rv;
-&require_apache();
-local $conf = &apache::get_config();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
-					    $d->{'web_port'});
-if ($virt) {
-	# Link to configure virtual host
-	push(@rv, { 'mod' => 'apache',
-		    'desc' => $text{'links_web'},
-		    'page' => "virt_index.cgi?virt=".
-				&indexof($virt, @$conf),
-		    'cat' => 'services',
-		  });
+local ($link, $slink);
+if (&get_webmin_version() < 1.582) {
+	&require_apache();
+	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+						     $d->{'web_port'});
+	$link = &indexof($virt, @$conf);
+	if ($d->{'ssl'}) {
+		local ($svirt, $svconf) = &get_apache_virtual($d->{'dom'},
+							$d->{'web_sslport'});
+		$slink = &indexof($svirt, @$conf);
+		}
 	}
+else {
+	$link = $d->{'dom'}.":".$d->{'web_port'};
+	$slink = $d->{'dom'}.":".$d->{'web_sslport'};
+	}
+# Link to configure virtual host
+push(@rv, { 'mod' => 'apache',
+	    'desc' => $text{'links_web'},
+	    'page' => "virt_index.cgi?virt=".$link,
+	    'cat' => 'services',
+	  });
 if ($d->{'ssl'}) {
 	# Link to configure SSL virtual host
-	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
-						   $d->{'web_sslport'});
-	if ($virt) {
-		push(@rv, { 'mod' => 'apache',
-			    'desc' => $text{'links_ssl'},
-			    'page' => "virt_index.cgi?virt=".
-					&indexof($virt, @$conf),
-			    'cat' => 'services',
-			  });
-		}
+	push(@rv, { 'mod' => 'apache',
+		    'desc' => $text{'links_ssl'},
+		    'page' => "virt_index.cgi?virt=".$slink,
+		    'cat' => 'services',
+		  });
 	}
 
 # Link to website, proxied via Webmin
