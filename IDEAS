@@ -59,5 +59,9 @@
 		- virtualmin/pdXxeckg9R
 	- renew jewellery-zone.com
 	- https://rpc.ote.gandi.net/doc/2.0/overview.html#introduction
+	- contact management outside of domains
+		- register.com too
+	- update list of top-level domains
+	- domains page should show all registered
 
  - lookup-domain-daemon leaves hanging processes?
