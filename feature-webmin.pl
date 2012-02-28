@@ -1025,9 +1025,15 @@ sub backup_webmin
 {
 local ($d, $file, $opts) = @_;
 &$first_print($text{'backup_webmin'});
-local @files;
+&require_acl();
+local ($wuser) = grep { $_->{'name'} eq $d->{'user'} } &acl::list_users();
+if ($wuser->{'proto'}) {
+	&$second_print($text{'backup_webminproto'});
+	return 1;
+	}
 
 # Add .acl files for domain owner
+local @files;
 if (-r "$config_directory/$d->{'user'}.acl") {
 	push(@files, "$d->{'user'}.acl");
 	}
@@ -1065,6 +1071,13 @@ sub restore_webmin
 {
 local ($d, $file, $opts) = @_;
 &$first_print($text{'restore_webmin'});
+&require_acl();
+local ($wuser) = grep { $_->{'name'} eq $d->{'user'} } &acl::list_users();
+if ($wuser->{'proto'}) {
+	&$second_print($text{'backup_webminproto'});
+	return 1;
+	}
+
 &obtain_lock_webmin($_[0]);
 local $out = &backquote_logged(
 	"cd $config_directory && tar xf ".quotemeta($file)." 2>&1");
