@@ -63,5 +63,5 @@
 		- register.com too
 	- update list of top-level domains
 	- domains page should show all registered
-
- - lookup-domain-daemon leaves hanging processes?
+	- need way to transfer domains to new registrar type
+		- ie. old gandi to new gandi
