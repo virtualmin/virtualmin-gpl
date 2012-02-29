@@ -1485,6 +1485,9 @@ if ($_[3]->{'reuid'}) {
 	&obtain_lock_unix($d);
 	}
 
+# Clear left-frame links cache, as the restore may change them
+&clear_links_cache();
+
 local $vcount = 0;
 if ($ok) {
 	# Restore any Virtualmin settings
