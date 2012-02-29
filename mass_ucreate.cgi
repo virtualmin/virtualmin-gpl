@@ -156,7 +156,7 @@ USER: foreach $line (@lines) {
 		}
 
 	# Populate the user object
-	local $user = &create_initial_user($d, 0, 0);
+	local $user = &create_initial_user($d, 0, $ftp == 3);
 	if ($user->{'unix'} && !$user->{'webowner'}) {
 		$user->{'uid'} = &allocate_uid(\%taken);
 		}
@@ -180,6 +180,7 @@ USER: foreach $line (@lines) {
 		else {
 			# Old-style number
 			$shell = $ftp == 1 ? $ftp_shell :
+			         $ftp == 3 ? $ftp_shell :
 				 $ftp == 2 ? $jailed_shell : $nologin_shell;
 			if (!$shell) {
 				&line_error(&text('umass_eshell'));
@@ -213,7 +214,15 @@ USER: foreach $line (@lines) {
 		$user->{'to'} = \@forward;
 		}
 	if (!$user->{'fixedhome'}) {
-		$user->{'home'} = "$d->{'home'}/$config{'homes_dir'}/$username";
+		if ($user->{'webowner'}) {
+			# Automatic public_html home
+			$user->{'home'} = &public_html_dir($d);
+			}
+		else {
+			# Automatic home under homes
+			$user->{'home'} =
+				"$d->{'home'}/$config{'homes_dir'}/$username";
+			}
 		}
 	if (($utaken{$username} || $config{'append'}) && !$user->{'noappend'}) {
 		$user->{'user'} = &userdom_name($username, $d);

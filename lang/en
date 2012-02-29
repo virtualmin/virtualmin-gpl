@@ -4277,6 +4277,8 @@ umass_eto='$1' is not a valid forwarding address - only full email addresses can
 umass_help=This page allows you to create multiple mail / FTP users at once from a text file, in the following format (read the help for this page for more):
 umass_help2=If you just want to create a single user, <a href='$1'>click here</a> instead.
 umass_format=username:realname:password:ftp-flag:email-flag:quota:[extras]:[forwards]:[databases]
+umass_formatftp=Possible options for <tt>ftp-flag</tt> are :<br>0 - No FTP login allowed<br>1 - Regular FTP login<br>2 - Jailed FTP login<br>3 - Website FTP user
+umass_formatemail=Possible options for <tt>email-flag</tt> are :<br>0 - No email address<br>1 - Email enabled
 umass_eshell=No suitable shell found for specified FTP mode
 umass_eshell2=Shell $1 is not available for mail / FTP users
 umass_encpass=Passwords are already encrypted?
