@@ -2219,6 +2219,7 @@ backup_virtualmin=Virtualmin settings to also backup
 backup_exclude=Files to exclude from each domain
 backup_webmin=Backing up Webmin ACL files ..
 backup_webminfailed=.. tar failed : $1
+backup_webminproto=.. not required, as the Webmin user is in a remote data store
 backup_esamelock=A backup to the same destination is already running with PID $1
 backup_etarcmd=The <tt>tar</tt> command was not found on your system!
 backup_eftptest=Failed to connect to FTP server : $1
