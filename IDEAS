@@ -65,3 +65,5 @@
 	- domains page should show all registered
 	- need way to transfer domains to new registrar type
 		- ie. old gandi to new gandi
+	- make sure company contact creation works
+		- when editing domain, use correct schema for class
