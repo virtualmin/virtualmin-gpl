@@ -339,7 +339,7 @@ while(<OUT>) {
 		}
 	}
 close(OUT);
-return @rv;
+return sort { $b cmp $a } @rv;
 }
 
 # round_hundred(version)
