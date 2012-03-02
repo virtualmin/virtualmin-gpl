@@ -11903,7 +11903,6 @@ local $merr = &making_changes();
 
 # Update the domain object to set the web directory
 delete($d->{'alias'});
-delete($d->{'aliascopy'});
 delete($d->{'public_html_dir'});
 delete($d->{'public_html_path'});
 $d->{'public_html_dir'} = &public_html_dir($d, 1);
@@ -11961,6 +11960,10 @@ foreach my $f (&list_feature_plugins()) {
 &modify_webmin($parent, $parent);
 
 &run_post_actions();
+
+# Turn off aliascopy for future
+delete($d->{'aliascopy'});
+&save_domain($d);
 
 # Run the after command
 &set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
