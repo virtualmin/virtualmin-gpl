@@ -141,8 +141,8 @@ while(1) {
 	push(@childpids, $pid);
 	local $expid;
 	do {	$expid = waitpid(-1, WNOHANG);
-		@childpids = grep { $_ != $expid } @childpids;
 		} while($expid != 0 && $expid != -1);
+	@childpids = grep { kill(0, $_) } @childpids;
 	}
 
 # send_response(&domain, &user)
