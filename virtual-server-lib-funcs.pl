@@ -5868,9 +5868,14 @@ else {
 
 # Restore Postgrey config
 &$first_print($text{'restore_vmailserver_grey'});
-if (!&check_postgrey()) {
-	local %grey;
-	&read_file($file."_grey", \%grey);
+local %grey;
+&read_file($file."_grey", \%grey);
+if (&check_postgrey() ne '' && &can_install_postgrey() && $grey{'enabled'}) {
+	# Postgrey is not installed on this system yet, but it was enabled
+	# on the old machine - try to install it now
+	&install_postgrey_package();
+	}
+if (&check_postgrey() eq '') {
 	if (!$grey{'support'}) {
 		&$second_print($text{'restore_vmailserver_none'});
 		}
