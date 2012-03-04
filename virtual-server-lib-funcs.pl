@@ -1014,7 +1014,8 @@ sub list_all_users_quotas
 {
 # Get quotas for all users
 &require_useradmin($_[0]);
-if (&has_quota_commands()) {
+local $hascmds = &has_quota_commands();
+if ($hascmds) {
 	# Get from user quota command
 	if (!%main::soft_home_quota && !$_[0]) {
 		local $out = &run_quota_command("list_users");
@@ -1056,17 +1057,32 @@ else {
 
 # Get user list and add in quota info
 local @users = &foreign_call($usermodule, "list_users");
-local $u;
-foreach $u (@users) {
+local %uidmap;
+foreach my $u (@users) {
 	$u->{'module'} = $usermodule;
-	$u->{'softquota'} = $main::soft_home_quota{$u->{'user'}};
-	$u->{'hardquota'} = $main::hard_home_quota{$u->{'user'}};
-	$u->{'uquota'} = $main::used_home_quota{$u->{'user'}};
-	$u->{'softmquota'} = $main::soft_mail_quota{$u->{'user'}};
-	$u->{'hardmquota'} = $main::hard_mail_quota{$u->{'user'}};
-	$u->{'umquota'} = $main::used_mail_quota{$u->{'user'}};
+	local $sameu = $uidmap{$u->{'uid'}};
+	if ($sameu && !$hascmds) {
+		# Quotas are set on a per-uid basis, so copy from previously
+		# seem user with same ID
+		$u->{'softquota'} = $sameu->{'softquota'};
+		$u->{'hardquota'} = $sameu->{'hardquota'};
+		$u->{'uquota'} = $sameu->{'uquota'};
+		$u->{'softmquota'} = $sameu->{'softmquota'};
+		$u->{'hardmquota'} = $sameu->{'hardmquota'};
+		$u->{'umquota'} = $sameu->{'umquota'};
+		}
+	else {
+		# Set quotas based on quota commands
+		$u->{'softquota'} = $main::soft_home_quota{$u->{'user'}};
+		$u->{'hardquota'} = $main::hard_home_quota{$u->{'user'}};
+		$u->{'uquota'} = $main::used_home_quota{$u->{'user'}};
+		$u->{'softmquota'} = $main::soft_mail_quota{$u->{'user'}};
+		$u->{'hardmquota'} = $main::hard_mail_quota{$u->{'user'}};
+		$u->{'umquota'} = $main::used_mail_quota{$u->{'user'}};
+		}
 	$u->{'unix'} = 1;
 	$u->{'person'} = 1;
+	$uidmap{$u->{'uid'}} ||= $u;
 	}
 return @users;
 }
