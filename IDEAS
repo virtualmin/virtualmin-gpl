@@ -61,9 +61,9 @@
 	- https://rpc.ote.gandi.net/doc/2.0/overview.html#introduction
 	- contact management outside of domains
 		- register.com too
-	- update list of top-level domains
 	- domains page should show all registered
 	- need way to transfer domains to new registrar type
 		- ie. old gandi to new gandi
-	- make sure company contact creation works
-		- when editing domain, use correct schema for class
+	- option to change contact for a domain to a selected contact
+
+ - Amazon linux GPL AMI
