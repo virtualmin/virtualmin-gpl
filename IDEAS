@@ -57,6 +57,7 @@
 	- https://www.virtualmin.com/node/20543
 	- Also namecheap support
 		- virtualmin/pdXxeckg9R
+		- ensure NS host records are created via API
 	- renew jewellery-zone.com
 	- https://rpc.ote.gandi.net/doc/2.0/overview.html#introduction
 	- contact management outside of domains
