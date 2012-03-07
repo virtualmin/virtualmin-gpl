@@ -122,12 +122,16 @@ sub send_domain_quota_email
 local ($msgs, $email) = @_;
 
 local $fmt = "%-20.20s %-15.15s %-15.15s %-20.20s\n";
-local $body = "The following Virtualmin servers have reached or are approaching\ntheir disk quota limits:\n\n";
-local $body .= sprintf($fmt, "Server", "Quota", "Usage", "Status");
+local $body = "$text{'quotawarn_body'}\n\n";
+local $body .= sprintf($fmt, $text{'quotawarn_server'},
+			     $text{'quotawarn_quota'},
+			     $text{'quotawarn_usage'},
+			     $text{'quotawarn_status'});
 $body .= sprintf($fmt, "-" x 20, "-" x 15, "-" x 15, "-" x 20);
 local $emaild = undef;
 foreach my $m (@$msgs) {
-	local $msg = $m->[3] ? "Reached $m->[3] %" : "Over quota";
+	local $msg = $m->[3] ? &text('quotawarn_reached', $m->[3])
+			     : $text{'quotawarn_over'};
 	$emaild ||= $m->[0];
 	$body .= sprintf($fmt, $m->[0]->{'dom'},
 			       &nice_size($m->[2]),
@@ -160,12 +164,16 @@ sub send_user_quota_email
 local ($msgs, $email) = @_;
 
 local $fmt = "%-30.30s %-15.15s %-15.15s %-15.15s\n";
-local $body = "The following Virtualmin users have reached or are approaching\ntheir disk quota limits:\n\n";
-local $body .= sprintf($fmt, "Email", "Quota", "Usage", "Status");
+local $body = "$text{'quotawarn_body2'}\n\n";
+local $body .= sprintf($fmt, $text{'quotawarn_email'},
+                             $text{'quotawarn_quota'},
+                             $text{'quotawarn_usage'},
+                             $text{'quotawarn_status'});
 $body .= sprintf($fmt, "-" x 35, "-" x 15, "-" x 15, "-" x 15);
 local $emaild = undef;
 foreach my $m (@$msgs) {
-	local $msg = $m->[3] ? "Reached $m->[3] %" : "Over quota";
+	local $msg = $m->[3] ? &text('quotawarn_reached', $m->[3])
+                             : $text{'quotawarn_over'};
 	$emaild ||= $m->[0];
 	$body .= sprintf($fmt, $m->[5]->{'email'} ||
 				$m->[5]->{'user'},
@@ -187,7 +195,7 @@ else {
 	&mailboxes::send_text_mail(&get_global_from_address($emailid),
 				   $email,
 				   undef,
-				   'Virtualmin User Disk Quota Monitoring',
+				   $text{'quotawarn_subject'},
 				   $body);
 	}
 }
@@ -217,7 +225,7 @@ else {
 	&mailboxes::send_text_mail($msg->[0]->{'emailto'},
 				   $email,
 				   undef,
-				   'Virtualmin User Disk Quota Monitoring',
+				   $text{'quotawarn_subject'},
 				   $body);
 	}
 }

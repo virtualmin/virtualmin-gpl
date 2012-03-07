@@ -4853,6 +4853,17 @@ scriptwarn_where3=Upgrades can be done in Virtualmin, on each domain's Install S
 scriptwarn_where2=Upgrades can be done in Virtualmin, on the page :\n$1
 scriptwarn_subject=Virtualmin script upgrades available
 
+quotawarn_subject=Virtualmin User Disk Quota Monitoring
+quotawarn_body=The following Virtualmin servers have reached or are approaching\ntheir disk quota limits:
+quotawarn_body2=The following Virtualmin users have reached or are approaching\ntheir disk quota limits:
+quotawarn_server=Server
+quotawarn_email=Email
+quotawarn_quota=Quota
+quotawarn_usage=Usage
+quotawarn_status=Status
+quotawarn_reached=Reached $1 %
+quotawarn_over=Over quota
+
 history_title=System Statistics
 history_ecannot=You are not allowed to view historic system statistics
 history_year=1 year
