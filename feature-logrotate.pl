@@ -254,7 +254,7 @@ local ($d) = @_;
 local $log = &get_website_log($d);
 return &text('validate_elogfile', "<tt>$d->{'dom'}</tt>") if (!$log);
 local $lconf = &get_logrotate_section($d);
-return &text('validate_elogrotate', "<tt>$logfile</tt>") if (!$lconf);
+return &text('validate_elogrotate', "<tt>$log</tt>") if (!$lconf);
 return undef;
 }
 
