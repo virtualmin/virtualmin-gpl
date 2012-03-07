@@ -60,8 +60,6 @@
 		- ensure NS host records are created via API
 	- renew jewellery-zone.com
 	- https://rpc.ote.gandi.net/doc/2.0/overview.html#introduction
-	- contact management outside of domains
-		- register.com too
 	- domains page should show all registered
 	- need way to transfer domains to new registrar type
 		- ie. old gandi to new gandi
