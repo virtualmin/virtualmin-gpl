@@ -57,10 +57,9 @@
 	- https://www.virtualmin.com/node/20543
 	- Also namecheap support
 		- virtualmin/pdXxeckg9R
-		- ensure NS host records are created via API
 	- renew jewellery-zone.com
 	- https://rpc.ote.gandi.net/doc/2.0/overview.html#introduction
-	- remove all STDERR
-	- test gandi and namecheap for real
+	- test namecheap for real
+	- blank contact for gandi on srv2?
 
  - Amazon linux GPL AMI
