@@ -161,7 +161,12 @@ return "'$str'";
 sub postgres_uquote
 {
 local ($str) = @_;
-return "\"".quotemeta($str)."\"";
+if ($str =~ /^[A-Za-z0-9\.\_\-]+$/) {
+	return "\"".$str."\"";
+	}
+else {
+	return "\"".quotemeta($str)."\"";
+	}
 }
 
 # modify_postgres(&domain, &olddomain)
