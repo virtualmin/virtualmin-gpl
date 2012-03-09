@@ -57,9 +57,12 @@
 	- https://www.virtualmin.com/node/20543
 	- Also namecheap support
 		- virtualmin/pdXxeckg9R
-	- renew jewellery-zone.com
 	- https://rpc.ote.gandi.net/doc/2.0/overview.html#introduction
 	- test namecheap for real
-	- blank contact for gandi on srv2?
+		- error on domain creation on srv2
+	- remove STDERR
 
  - Amazon linux GPL AMI
+
+ - Change domain creation form to wizard
+	- Same for CLoudmin
