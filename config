@@ -30,6 +30,7 @@ avail_spam=1
 avail_shell=0
 avail_webminlog=0
 avail_syslog=1
+avail_bind8=1
 display_max=
 postgres=0
 avail_change-user=1
