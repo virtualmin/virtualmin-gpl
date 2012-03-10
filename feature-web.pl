@@ -811,6 +811,10 @@ if ($d->{'alias_mode'}) {
 	if ($d->{'disabled'}) {
 		return undef;
 		}
+	local $target = &get_domain($d->{'alias'});
+	if ($target->{'disabled'}) {
+		return undef;
+		}
 	local ($pvirt, $pconf) = &get_apache_virtual($d->{'dom'},
 						     $d->{'web_port'});
 	return &text('validate_eweb', "<tt>$d->{'dom'}</tt>") if (!$pvirt);
