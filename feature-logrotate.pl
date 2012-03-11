@@ -163,6 +163,24 @@ if ($alog ne $oldalog || $elog ne $oldelog) {
 		}
 	}
 
+# Change references to home dir
+if ($_[0]->{'home'} ne $_[1]->{'home'}) {
+	&$first_print($text{'save_logrotatehome'});
+	local $lconf = &get_logrotate_section($alog);
+	if ($lconf) {
+                local $parent = &logrotate::get_config_parent();
+		foreach my $n (@{$lconf->{'name'}}) {
+			$n =~ s/\Q$_[1]->{'home'}\E\//$_[0]->{'home'}\//;
+			}
+		&logrotate::save_directive($parent, $lconf, $lconf);
+		&flush_file_lines($lconf->{'file'});
+		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$second_print($text{'setup_nologrotate'});
+		}
+	}
+
 # Change references to user or group
 if ($_[0]->{'user'} ne $_[1]->{'user'} ||
     $_[0]->{'group'} ne $_[1]->{'group'}) {

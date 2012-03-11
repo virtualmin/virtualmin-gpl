@@ -1292,6 +1292,7 @@ save_webalizerhome=Updating home directory in Webalizer configuration ..
 save_webalizeruser=Updating username in Webalizer configuration ..
 save_webalizerlog=Updating log file path in Webalizer configuration ..
 save_logrotate=Updating log file path in Logrotate configuration ..
+save_logrotatehome=Updating home directory in Logrotate configuration ..
 save_logrotateuser=Updating user and group in Logrotate configuration ..
 save_nologrotatecreate=.. not needed
 save_virt=Changing virtual interface address ..
