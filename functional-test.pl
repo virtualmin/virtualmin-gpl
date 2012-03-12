@@ -1437,6 +1437,13 @@ $aliasdom_tests = [
 	  'fail' => 1,
 	},
 
+	# Try disabling a feature in the main domain used by the alias
+	{ 'command' => 'disable-feature.pl',
+	  'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'web' ], [ 'logrotate' ] ],
+	  'fail' => 1,
+	},
+
 	# Convert to sub-server
 	{ 'command' => 'unalias-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],

@@ -110,7 +110,8 @@ $lerr = &virtual_server_limits(\%newdom, $oldd);
 # Check if any features are being deleted, and if so ask the user if
 # he is sure
 if (!$in{'confirm'} && !$d->{'disabled'}) {
-	local @losing;
+	# Collect features and plugins being disabled
+	local (@losing, @plosing);
 	foreach $f (@dom_features) {
 		if ($config{$f} && $d->{$f} && !$newdom{$f}) {
 			push(@losing, $f);
@@ -121,6 +122,22 @@ if (!$in{'confirm'} && !$d->{'disabled'}) {
 			push(@plosing, $f);
 			}
 		}
+
+	# Check if any alias domains use a feature being disabled
+	local @ausers;
+	foreach my $ad (&get_domain_by("alias", $d->{'id'})) {
+		foreach $f (@losing) {
+			if ($ad->{$f}) {
+				push(@ausers, $ad);
+				}
+			}
+		}
+	if (@ausers) {
+		&error(&text('save_aliasusers',
+			join(" ", map { &show_domain_name($_) } @ausers)));
+		}
+
+	# Ask for confirmation
 	if (@losing || @plosing) {
 		&ui_print_header(&domain_in($d), $text{'save_title'}, "");
 

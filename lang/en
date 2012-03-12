@@ -1311,6 +1311,7 @@ save_applyplan=Changing plan to <i>$1</i>, and applying new limits ..
 save_plan=Changing plan to <i>$1</i> ..
 save_edomainquota=The server's total disk quota should not be lowered to $2, as the current disk usage is already $1.
 save_euserquota=The server administrator's disk quota should not be lowered to $2, as the current disk usage is already $1.
+save_aliasusers=The feature being disabled is in use by the following alias servers : $1
 
 luser_err=Failed to save local mailbox
 luser_etaken=A user with the same name already exists

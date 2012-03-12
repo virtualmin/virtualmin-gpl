@@ -100,6 +100,23 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 		next;
 		}
 
+	# Make sure no alias domains for this target have the feature
+	my @ausers;
+	foreach my $ad (&get_domain_by("alias", $d->{'id'})) {
+		foreach my $f (reverse(&list_ordered_features($oldd))) {
+			if ($ad->{$f} && $feature{$f}) {
+				push(@ausers, $ad);
+				}
+			}
+		}
+	if (@ausers) {
+		&$second_print(".. feature being disabled is in use by ".
+		       "alias servers : ".
+			join(" ", map { &show_domain_name($_) } @ausers));
+		$failed++;
+		next;
+		}
+
 	# Run the before command
 	&set_domain_envs($d, "MODIFY_DOMAIN", \%newdom);
 	$merr = &making_changes();
