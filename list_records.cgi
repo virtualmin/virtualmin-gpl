@@ -20,7 +20,7 @@ foreach $sd (&list_domains()) {
 &ui_print_header(&domain_in($d), $text{'records_title'}, "", "records");
 
 # Warn if DNS records are not valid
-$err = &validate_dns($d, $recs);
+$err = &validate_dns($d, $recs, 1);
 if ($err) {
 	print "<font color=red><b>",&text('records_evalid', $err),
 	      "</b></font><p>\n";

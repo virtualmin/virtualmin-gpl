@@ -1376,11 +1376,11 @@ if ($any) {
 return $any;
 }
 
-# validate_dns(&domain, [&records])
+# validate_dns(&domain, [&records], [records-only])
 # Check for the DNS domain and records file
 sub validate_dns
 {
-local ($d, $recs) = @_;
+local ($d, $recs, $recsonly) = @_;
 local $file;
 if (!$recs) {
 	($recs, $file) = &get_domain_dns_records_and_file($d);
@@ -1423,7 +1423,7 @@ if (&domain_has_website($d)) {
 
 # If possible, run named-checkzone
 if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
-    !$d->{'provision_dns'} && !$d->{'dns_submode'}) {
+    !$d->{'provision_dns'} && !$d->{'dns_submode'} && !$recsonly) {
 	local $z = &get_bind_zone($d->{'dom'});
 	if ($z) {
 		local @errs = &bind8::check_zone_records($z);
@@ -1435,7 +1435,7 @@ if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
 	}
 
 # Check slave servers
-if (!$d->{'dns_submode'}) {
+if (!$d->{'dns_submode'} && !$recsonly) {
 	my @slaves = &bind8::list_slave_servers();
 	foreach my $sn (split(/\s+/, $d->{'dns_slave'})) {
 		my ($slave) = grep { $_->{'nsname'} eq $sn ||
