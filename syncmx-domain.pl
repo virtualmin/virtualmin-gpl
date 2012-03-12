@@ -4,7 +4,13 @@
 
 Updates allowed relay addresses in one or more domains.
 
-XXX
+This command can be used to bring the lists of allowed addresses on secondary
+MX servers into sync with the master Virtualmin system for some or all domains.
+In general it should never need to be run, unless email addresses have been
+modified outside of Virtualmin's control.
+
+The only flags it takes are C<--domain> followed by domain name to sync, 
+C<--user> followed by the name of a user who owns domains, or C<--all-domains>.
 
 =cut
 
