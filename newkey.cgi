@@ -10,7 +10,12 @@ $d = &get_domain($in{'dom'});
 # Validate inputs
 &error_setup($text{'newkey_err'});
 $cert = $in{'cert'} || $in{'certupload'};
-$newkey = $in{'newkey'} || $in{'newkeyupload'};
+if ($in{'newkey_def'}) {
+	$newkey = &read_file_contents($d->{'ssl_key'});
+	}
+else {
+	$newkey = $in{'newkey'} || $in{'newkeyupload'};
+	}
 $cert =~ s/\r//g;
 $newkey =~ s/\r//g;
 $err = &validate_cert_format($cert, "cert");

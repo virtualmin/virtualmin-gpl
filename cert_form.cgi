@@ -186,6 +186,11 @@ if (-r $d->{'ssl_newkey'}) {
 	$newkey = &read_file_contents_as_domain_user($d, $d->{'ssl_newkey'});
 	}
 print &ui_table_row($text{'cert_newkey'},
+		    (-r $d->{'ssl_key'} ?
+			&ui_radio("newkey_def", 0,
+				  [ [ 1, $text{'cert_newkey1'} ],
+				    [ 0, $text{'cert_newkey0'} ] ])."<br>\n" :
+			"").
 		    &ui_textarea("newkey", $newkey, 8, 70)."<br>\n".
 		    "<b>$text{'cert_upload'}</b>\n".
 		    &ui_upload("newkeyupload"));
