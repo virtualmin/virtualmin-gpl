@@ -161,12 +161,14 @@ if (&can_default_website($d) && $in{'defweb'}) {
 if (defined($in{'alog'}) && !$d->{'alias'} && &can_log_paths()) {
 	# Access log
 	$oldalog = &get_website_log($d, 0);
+	$logchanged = 0;
 	if ($oldalog && defined($in{'alog'}) && $oldalog ne $in{'alog'}) {
 		&$first_print($text{'phpmode_setalog'});
 		$err = &change_access_log($d, $in{'alog'});
 		&$second_print(!$err ? $text{'setup_done'}
 				     : &text('phpmode_logerr', $err));
 		$anything++;
+		$logchanged++;
 		}
 
 	# Error log
@@ -177,6 +179,12 @@ if (defined($in{'alog'}) && !$d->{'alias'} && &can_log_paths()) {
 		&$second_print(!$err ? $text{'setup_done'}
 				     : &text('phpmode_logerr', $err));
 		$anything++;
+		$logchanged++;
+		}
+
+	# Update Webmin permissions
+	if ($logchanged) {
+		&refresh_webmin_user($d);
 		}
 	}
 

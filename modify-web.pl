@@ -468,12 +468,18 @@ foreach $d (@doms) {
 		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
 
+	# Update Webmin permissions to cover new log location
+	if (($errorlog || $accesslog) && !$d->{'alias'} && !$d->{'parent'}) {
+		&refresh_webmin_user($d);
+		}
+
 	if ($htmldir && !$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./) {
 		# Change HTML directory
 		&$first_print("Changing documents directory to $htmldir ..");
 		$err = &set_public_html_dir($d, $htmldir);
 		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
+
 
 	# Change web ports
 	if ($port) {
