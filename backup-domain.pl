@@ -194,7 +194,7 @@ while(@ARGV > 0) {
 @bdoms || @users || $all_doms || @plans || @vbs ||
 	&usage("No domains specified");
 if (@bdoms || @users || $all_doms) {
-	@bfeats || usage("No domains specified");
+	@bfeats || usage("No features specified");
 	}
 foreach $dest (@dests) {
 	# Validate destination URL
