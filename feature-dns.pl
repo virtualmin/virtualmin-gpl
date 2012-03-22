@@ -1625,18 +1625,18 @@ if ($p) {
 	return 1;
 	}
 &$first_print($text{'setup_bindpid'});
+&require_bind();
 local $bindlock = "$module_config_directory/bind-restart";
 &lock_file($bindlock);
 local $pid = &get_bind_pid();
 if ($pid) {
-	if ($bconfig{'restart_cmd'}) {
-		&system_logged(
-			"$bconfig{'restart_cmd'} >/dev/null 2>&1 </dev/null");
+	my $err = &bind8::restart_bind();
+	if ($err) {
+		&$second_print(&text('setup_ebindpid', $err));
 		}
 	else {
-		&kill_logged('HUP', $pid);
+		&$second_print($text{'setup_done'});
 		}
-	&$second_print($text{'setup_done'});
 	$rv = 1;
 	}
 else {
