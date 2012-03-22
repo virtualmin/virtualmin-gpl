@@ -502,6 +502,7 @@ setup_bind_provisioned=.. created on $1
 setup_eslave=.. failed! $1
 setup_eslaves=.. some slave servers failed :
 setup_bindpid=Re-starting DNS server ..
+setup_ebindpid=.. failed : $1
 setup_bindslavepids=Re-starting slave DNS servers ..
 setup_bindeslave=.. some slave servers failed
 setup_bindsub=Adding records to DNS zone $1 ..
