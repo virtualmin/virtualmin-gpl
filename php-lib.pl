@@ -151,6 +151,7 @@ foreach my $ver (@vers) {
 
 			&flush_file_lines("$inidir/php.ini");
 			}
+		&set_ownership_permissions($uid, $gid, 0755, "$inidir/php.ini");
 		}
 
 	# Is this the default of PHP, remember the path for later linking
