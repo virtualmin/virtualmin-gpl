@@ -52,8 +52,17 @@
 	- /backup/plesk/backup_SyntaxNode.net_info_1108110206.xml.tgz
 
  - CSR script for eric holtzman
+	- SSL cert support
+	- Namecheap too
+	- Pro only
 
  - Amazon linux GPL AMI
 
  - Change domain creation form to wizard
 	- Same for CLoudmin
+
+ - Backup encryption / signing
+	- GPG
+	- Cloudmin too
+	- Allow resellers to restore
+		- https://www.virtualmin.com/node/21544
