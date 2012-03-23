@@ -2481,6 +2481,8 @@ limits_edit_html=Can use web page editor
 limits_edit_mail=Can edit email settings
 limits_edit_allowedhosts=Can edit database remote hosts
 limits_edit_passwd=Can change domain's password
+limits_edit_spf=Can change DNS options
+limits_edit_records=Can edit DNS records
 limits_shell=Allowed login type
 limits_shell_nologin=No login
 limits_shell_ftp=FTP only
@@ -4421,6 +4423,7 @@ phpmode_ehtmldir3=The website documents sub-directory cannot contain ..
 phpmode_ehtmldir4=The website documents sub-directory cannot be under <tt>domains</tt>, as that directory is reserved for sub-servers
 
 spf_title=DNS Options
+spf_ecannot=You are not allowed to edit DNS options
 spf_enable=Enabling SPF ..
 spf_disable=Disabling SPF ..
 spf_change=Updating SPF record ..
@@ -5638,6 +5641,7 @@ provision_ednscheck=Services error checking DNS zone : $1
 provision_edns=DNS zone $1 already exists on the services host
 
 records_title=DNS Records
+records_ecannot=You are not allowed to edit DNS records
 records_name=Record name
 records_type=Type
 records_value=Value
