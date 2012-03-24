@@ -18,7 +18,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-return ( "1.3.1" );
+return ( "1.4" );
 }
 
 sub script_django_category
@@ -217,14 +217,18 @@ if (!$upgrade) {
 		      quotemeta($opts->{'project'})." 2>&1";
 	local $out = &run_as_domain_user($d, $icmd);
 	if ($?) {
-		return (0, "Project initialization install failed : ".
+		return (-1, "Project initialization install failed : ".
 			   "<pre>".&html_escape($out)."</pre>");
 		}
 
 	# Fixup settings.py to use the MySQL DB
 	local $pdir = "$opts->{'dir'}/$opts->{'project'}";
 	local $sfile = "$pdir/settings.py";
-	-r $sfile || return (0, "Project settings file $sfile was not found");
+	if (!-r $sfile) {
+		# New django moves this into a sub-directory
+		$sfile = "$pdir/$opts->{'project'}/settings.py";
+		}
+	-r $sfile || return (-1, "Project settings file $sfile was not found");
 	local $lref = &read_file_lines_as_domain_user($d, $sfile);
 	my $i = 0;
 	my $pdbtype = $dbtype eq "mysql" ? "mysql" : "postgresql";
@@ -273,6 +277,9 @@ if (!$upgrade) {
 
 	# Activate the admin site
 	local $ufile = "$pdir/urls.py";
+	if (!-r $ufile) {
+		$ufile = "$pdir/$opts->{'project'}/urls.py";
+		}
 	local $lref = &read_file_lines_as_domain_user($d, $ufile);
 	foreach my $l (@$lref) {
 		if ($l =~ /^(\s*)#(.*django.contrib.admin.urls.*)/ ||
@@ -296,6 +303,8 @@ if (!$upgrade) {
 	local $pwd = &get_current_dir();
 	&foreign_require("proc", "proc-lib.pl");
 	chdir($pdir);
+	$ENV{'LANG'} = 'en_US';	# Needed because manage.py chokes with the
+				# default locale
 	local ($fh, $fpid) = &proc::pty_process_exec($icmd);
 	chdir($pwd);
 	local $out;
@@ -332,6 +341,7 @@ if (!-r $wrapper) {
 	&print_tempfile(WRAPPER, "import sys, os\n");
 	&print_tempfile(WRAPPER, "sys.path.insert(0, \"$opts->{'dir'}/lib/python\")\n");
 	&print_tempfile(WRAPPER, "sys.path.insert(0, \"$opts->{'dir'}\")\n");
+	&print_tempfile(WRAPPER, "sys.path.insert(0, \"$opts->{'dir'}/$opts->{'project'}\")\n");
 	&print_tempfile(WRAPPER, "os.chdir(\"$opts->{'dir'}\")\n");
 	&print_tempfile(WRAPPER, "os.environ['DJANGO_SETTINGS_MODULE'] = \"$opts->{'project'}.settings\"\n");
 	&print_tempfile(WRAPPER, "from django.core.servers.fastcgi import runfastcgi\n");
@@ -362,7 +372,7 @@ foreach my $port (@ports) {
 			  'value' => 'On' },
 			{ 'name' => 'RewriteCond',
 			  'value' =>
-				'%{REQUEST_FILENAME} !django.fcgi|/media/' },
+				'%{REQUEST_FILENAME} !django.fcgi|/media/|/static/' },
 			{ 'name' => 'RewriteRule',
 			  'value' => "$reldir(.*) django.fcgi/\$1 [L]" },
 			]
@@ -371,13 +381,13 @@ foreach my $port (@ports) {
 	&flush_file_lines($virt->{'file'});
 	}
 
-# Add /media and /static/admin aliass to Apache config
+# Add /media and /static/admin aliases to Apache config
 local @paths;
 push(@paths, $opts->{'path'} eq '/' ? "/media/"
                                     : "$opts->{'path'}/media/");
 push(@paths, $opts->{'path'} eq '/' ? "/static/admin/"
                                     : "$opts->{'path'}/static/admin/");
-local $mdir = "$opts->{'dir'}/lib/python/django/contrib/admin/media/";
+local $mdir = "$opts->{'dir'}/lib/python/django/contrib/admin/static/admin/";
 foreach my $path (@paths) {
 	foreach my $port (@ports) {
 		local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
@@ -397,7 +407,7 @@ local $url = &script_path_url($d, $opts);
 local $adminurl = $url."admin/";
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
-return (1, "Initial Django installation complete. Go to <a target=_blank/g href='$adminurl'>$adminurl</a> to manage it. Django is a development environment, so it doesn't do anything by itself!", "Under $rp", $url, $domuser, $dompass);
+return (1, "Initial Django installation complete. Go to <a target=_blank href='$adminurl'>$adminurl</a> to manage it. Django is a development environment, so it doesn't do anything by itself!", "Under $rp", $url, $domuser, $dompass);
 }
 
 # script_django_uninstall(&domain, version, &opts)
