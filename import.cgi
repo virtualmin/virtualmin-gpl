@@ -279,6 +279,7 @@ if ($in{'confirm'}) {
 
 	# Find any slave DNS servers with the domain
 	if ($dom{'dns'}) {
+		&require_bind();
 		@slavehosts = ( );
 		foreach my $s (&bind8::list_slave_servers()) {
 			if (&exists_on_slave($dom{'dom'}, $s)) {
