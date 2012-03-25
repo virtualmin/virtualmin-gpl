@@ -5,6 +5,7 @@ require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
+&can_edit_spf($d) || &error($text{'spf_ecannot'});
 
 &ui_print_header(&domain_in($d), $text{'spf_title'}, "", "spf");
 

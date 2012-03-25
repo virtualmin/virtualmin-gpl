@@ -6,6 +6,7 @@ require './virtual-server-lib.pl';
 &error_setup($text{'spf_err'});
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
+&can_edit_spf($d) || &error($text{'spf_ecannot'});
 &set_all_null_print();
 $oldd = { %$d };
 

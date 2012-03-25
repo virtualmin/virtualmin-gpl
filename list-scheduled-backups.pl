@@ -74,7 +74,7 @@ elsif ($reseller) {
 if ($multi) {
 	# Show all details
 	foreach my $s (@scheds) {
-		print "$s->{'id'}:\n";
+		print "$s->{'id'}\n";
 		print "    Domains: ",&make_nice_dnames($s),"\n";
 		print "    Include sub-servers: ",
 			$s->{'parent'} ? "Yes" : "No","\n";

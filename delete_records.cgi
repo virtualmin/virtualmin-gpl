@@ -7,6 +7,7 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 $d || &error($text{'edit_egone'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
+&can_edit_records($d) || &error($text{'records_ecannot'});
 &require_bind();
 
 if ($in{'delete'}) {

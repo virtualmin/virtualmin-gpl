@@ -154,7 +154,8 @@ $saved_aliases_dir = "$module_config_directory/saved-aliases";
 	        'ip', 'dnsip', 'ssl', 'forward', 'redirect', 'admins',
 		'spam', 'phpver', 'phpmode',
 		'mail', 'backup', 'sched', 'restore', 'sharedips', 'catchall',
-		'html', 'allowedhosts', 'passwd', 'disable', 'delete');
+		'html', 'allowedhosts', 'passwd', 'spf', 'records',
+		'disable', 'delete');
 if (!$virtualmin_pro) {
 	@edit_limits = grep { $_ ne 'html' } @edit_limits;
 	}

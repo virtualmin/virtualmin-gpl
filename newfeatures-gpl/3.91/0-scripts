@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to 3.4.10.1.
+html=Updated the phpMyAdmin script installer to 3.4.10.1, and phpPgAdmin to 5.0.4.
 master=1
 reseller=1
 domain=1
