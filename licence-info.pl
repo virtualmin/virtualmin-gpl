@@ -26,8 +26,14 @@ if (!$module_name) {
 	$< == 0 || die "license-info.pl must be run as root";
 	}
 
-foreach $a (@ARGV) {
-	&usage();
+while(@ARGV > 0) {
+	local $a = shift(@ARGV);
+	if ($a eq "--multiline") {
+		$multiline = 1;
+		}
+	else {
+		&usage("Unknown parameter $a");
+		}
 	}
 
 # Show serial and key

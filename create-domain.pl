@@ -301,6 +301,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--skip-warnings") {
 		$skipwarnings = 1;
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	elsif ($a =~ /^\-\-(.*)$/ && $plugin_args{$1}) {
 		# Plugin-specific arg
 		if ($plugin_args{$1}->{'novalue'}) {

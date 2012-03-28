@@ -126,6 +126,9 @@ while(@ARGV > 0) {
 			}
 		$plan->{'resellers'} = join(" ", @rl);
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

@@ -94,6 +94,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--allowed-domain") {
 		push(@allowednames, shift(@ARGV));
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage("Unknown flag $a");
 		}

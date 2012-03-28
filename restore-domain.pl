@@ -192,6 +192,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--skip-warnings") {
 		$skipwarnings = 1;
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage();
 		}

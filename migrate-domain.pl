@@ -128,6 +128,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--delete-existing") {
 		$delete_existing = 1;
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage();
 		}

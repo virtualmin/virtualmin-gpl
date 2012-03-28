@@ -57,6 +57,9 @@ while(@ARGV > 0) {
 		defined($v) || &usage("Failed to read file $f : $!");
 		push(@values, $v);
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage();
 		}

@@ -54,6 +54,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--post-command") {
 		$postcommand = shift(@ARGV);
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage("Unknown option $a");
 		}

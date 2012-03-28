@@ -182,6 +182,9 @@ while(@ARGV > 0) {
 				  $_->{'id'} eq $shellmode } @shells;
 		$shell || &usage("Unknown or un-supported shell $shellmode");
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		usage();
 		}

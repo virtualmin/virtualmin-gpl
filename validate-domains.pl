@@ -70,6 +70,9 @@ while(@ARGV > 0) {
 		# Only report problem domains
 		$problems = 1;
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage();
 		}

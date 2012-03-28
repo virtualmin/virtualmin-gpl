@@ -64,6 +64,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--php-version") {
 		$php_ver = shift(@ARGV);
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

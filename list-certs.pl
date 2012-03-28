@@ -59,6 +59,9 @@ while(@ARGV > 0) {
 	       $a eq "--csr" || $a eq "--newkey") {
 		push(@types, substr($a, 2));
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

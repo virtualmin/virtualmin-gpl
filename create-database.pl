@@ -60,6 +60,9 @@ while(@ARGV > 0) {
 		  &usage("--opt must be followed by an option name and value");
 		$opts{$oname} = $ovalue;
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage();
 		}

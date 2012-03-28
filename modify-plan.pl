@@ -161,6 +161,9 @@ while(@ARGV > 0) {
 		# Apply to domains
 		$applyplan = 1;
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

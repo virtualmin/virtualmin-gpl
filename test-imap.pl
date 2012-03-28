@@ -52,6 +52,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--folder") {
 		$mailbox = shift(@ARGV);
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage();
 		}

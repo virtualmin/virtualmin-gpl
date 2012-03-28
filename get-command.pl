@@ -33,6 +33,9 @@ while(@ARGV > 0) {
 	if ($a eq "--command") {
 		$cmd = shift(@ARGV);
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage();
 		}

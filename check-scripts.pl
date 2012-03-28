@@ -32,6 +32,9 @@ while(@ARGV) {
 	if ($a eq "--debug") {
 		$debug = 1;
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	elsif ($a !~ /^\-/) {
 		push(@scripts, $a);
 		}

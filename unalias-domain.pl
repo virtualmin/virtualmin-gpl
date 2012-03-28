@@ -40,6 +40,9 @@ while(@ARGV > 0) {
 	if ($a eq "--domain") {
 		$domain = lc(shift(@ARGV));
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage();
 		}

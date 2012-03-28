@@ -186,6 +186,9 @@ while(@ARGV > 0) {
 		$exclude = shift(@ARGV);
 		push(@exclude, $exclude);
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage();
 		}

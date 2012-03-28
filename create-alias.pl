@@ -62,6 +62,9 @@ while(@ARGV > 0) {
 		  usage("Your mail server does not support alias descriptions");
 		$cmt = shift(@ARGV);
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage();
 		}

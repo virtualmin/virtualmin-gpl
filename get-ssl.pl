@@ -31,6 +31,9 @@ while(@ARGV > 0) {
 	if ($a eq "--domain") {
 		$dname = shift(@ARGV);
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

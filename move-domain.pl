@@ -59,6 +59,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--newpass") {
 		$newpass = shift(@ARGV);
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage();
 		}
