@@ -90,6 +90,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--days") {
 		$days = shift(@ARGV);
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

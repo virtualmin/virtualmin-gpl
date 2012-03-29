@@ -51,6 +51,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--all-domains") {
 		$all_doms = 1;
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
+	else {
+		&usage("Unknown option $a");
+		}
 	}
 @dnames || $all_doms || usage();
 

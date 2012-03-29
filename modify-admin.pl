@@ -120,6 +120,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--remove-domain") {
 		push(@deniednames, shift(@ARGV));
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage();
 		}

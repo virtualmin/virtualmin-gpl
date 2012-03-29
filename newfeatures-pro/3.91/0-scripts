@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Drupal script installer to versions 6.25 and 7.12, ZenPhoto to 1.4.2.2, Autoload to 4.7.8, Horde to 3.3.13, IMP to 4.3.11, Horde Webmail to 1.2.11, SugarCRM to 6.4.2, phpMyAdmin to 3.4.10.1, PiWik to 1.7.1, Movable Type to 5.13, phpMyFAQ to 2.7.4, Radiant to 1.0.0, Dolibarr to 3.1.1, WebCalendar to 1.2.5, Mantis to 1.2.9, LimeSurvey to 1.92, Radiant to 1.0.1, RoundCube to 0.7.2, Moodle to 2.2.2, PHPList to 2.10.18, ZenCart to 1.5.0, MediaWiki to 1.18.2, phpPgAdmin to 5.0.4, Django to 1.4, and Joomla to 2.5.3 and 1.7.5.
+html=Updated the Drupal script installer to versions 6.25 and 7.12, ZenPhoto to 1.4.2.2, Autoload to 4.7.8, Horde to 3.3.13, IMP to 4.3.11, Horde Webmail to 1.2.11, SugarCRM to 6.4.2, phpMyAdmin to 3.4.10.1, PiWik to 1.7.1, Movable Type to 5.13, phpMyFAQ to 2.7.4, Radiant to 1.0.0, Dolibarr to 3.1.1, WebCalendar to 1.2.5, Mantis to 1.2.9, LimeSurvey to 1.92, Radiant to 1.0.1, RoundCube to 0.7.2, Moodle to 2.2.2, PHPList to 2.10.18, ZenCart to 1.5.0, MediaWiki to 1.18.2, phpPgAdmin to 5.0.4, Django to 1.4, Coppermine to 1.5.18, and Joomla to 2.5.3, 1.5.26 and 1.7.5.
 master=1
 reseller=1
 domain=1

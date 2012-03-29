@@ -66,3 +66,7 @@
 	- Cloudmin too
 	- Allow resellers to restore
 		- https://www.virtualmin.com/node/21544
+
+ - Accept multiline parameter for all scripts
+	- Set automatically in json, xml and perl modes
+	- https://www.virtualmin.com/node/21662

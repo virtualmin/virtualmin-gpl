@@ -30,6 +30,9 @@ while(@ARGV > 0) {
 	if ($a eq "--name-only") {
 		$nameonly = 1;
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage();
 		}

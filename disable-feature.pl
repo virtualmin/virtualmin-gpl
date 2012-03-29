@@ -45,6 +45,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--user") {
 		push(@users, shift(@ARGV));
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	elsif ($a =~ /^--(\S+)$/ &&
 	       &indexof($1, @features) >= 0) {
 		$config{$1} || &usage("The $a option cannot be used unless the feature is enabled in the module configuration");

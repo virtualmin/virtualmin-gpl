@@ -56,6 +56,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--include-subservers") {
 		$subs = 1;
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage();
 		}

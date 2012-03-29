@@ -49,6 +49,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--search") {
 		push(@searches, shift(@ARGV));
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		push(@searches, $a);
 		}

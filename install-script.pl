@@ -198,6 +198,13 @@ if (defined($id)) {
 	$opts = $sinfo->{'opts'};
 	$domuser = $sinfo->{'user'} || $d->{'user'};
 	$dompass = $sinfo->{'pass'} || $d->{'pass'};
+
+	# Check if upgrade is allowed
+	$canupfunc = $script->{'can_upgrade_func'};
+	if (defined(&$canupfunc) && !&$canupfunc($sinfo, $ver)) {
+		&usage("Upgrading from version $sinfo->{'version'} to $ver ".
+		       "is not supported");
+		}
 	}
 else {
 	$domuser ||= $d->{'user'};

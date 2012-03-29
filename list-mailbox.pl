@@ -42,6 +42,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--filesonly") {
 		$filesonly = 1;
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage();
 		}

@@ -30,8 +30,14 @@ if (!$module_name) {
 	$< == 0 || die "check-scripts.pl must be run as root";
 	}
 
-if (@ARGV) {
-	&usage();
+while(@ARGV > 0) {
+        local $a = shift(@ARGV);
+	if ($a eq "--multiline") {
+		$multiline = 1;
+		}
+	else {
+		&usage();
+		}
 	}
 
 &set_all_text_print();

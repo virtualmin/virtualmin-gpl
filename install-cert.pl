@@ -70,6 +70,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--pass") {
 		$newpass = shift(@ARGV);
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

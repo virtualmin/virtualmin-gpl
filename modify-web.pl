@@ -175,6 +175,9 @@ while(@ARGV > 0) {
 		$sslport =~ /^\d+$/ && $sslport > 0 && $sslport < 65536 ||
 			&usage("--ssl-port must be followed by a number");
 		}
+	elsif ($a eq "--multiline") {
+		$multiline = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
