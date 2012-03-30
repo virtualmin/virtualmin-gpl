@@ -51,10 +51,12 @@ print &text('umass_doing', $src),"<p>\n";
 @lines = split(/\n+/, $source);
 $lnum = 0;
 $count = $ecount = 0;
+$sep = $in{'separator'};
+$sep = "\t" if ($sep eq "tab");
 USER: foreach $line (@lines) {
 	$lnum++;
 	next if ($line !~ /\S/);
-	local ($username, $real, $pass, $ftp, $email, $quota, $extras, $forwards, $dbs) = split(/:/, $line, -1);
+	local ($username, $real, $pass, $ftp, $email, $quota, $extras, $forwards, $dbs) = split($sep, $line, -1);
 	if (!$config{'allow_upper'}) {
 		$username = lc($username);
 		}

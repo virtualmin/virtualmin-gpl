@@ -29,6 +29,13 @@ push(@sopts, [ 2, &text('cmass_text', &ui_textarea("text", "", 5, 60))."<br>"]);
 print &ui_table_row($text{'cmass_file'},
 		    &ui_radio("file_def", 0, \@sopts));
 
+# Separator character
+print &ui_table_row($text{'umass_separator'},
+		    &ui_radio("separator", ":",
+			      [ [ ":", $text{'umass_separatorcolon'} ],
+				[ ",", $text{'umass_separatorcomma'} ],
+				[ "tab", $text{'umass_separatortab'} ] ]));
+
 # Password format (encrypted or not)
 print &ui_table_row($text{'umass_encpass'},
 		    &ui_yesno_radio("encpass", 0));

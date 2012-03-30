@@ -4290,6 +4290,10 @@ umass_eshell=No suitable shell found for specified FTP mode
 umass_eshell2=Shell $1 is not available for mail / FTP users
 umass_encpass=Passwords are already encrypted?
 umass_randpass=Generate random passwords when empty?
+umass_separator=Batch field separator
+umass_separatorcolon=Colon :
+umass_separatorcomma=Comma ,
+umass_separatortab=Tab
 
 amass_title=Batch Create Aliases
 amass_header=Create multiple email aliases from batch file

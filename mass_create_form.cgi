@@ -28,6 +28,13 @@ push(@sopts, [ 2, &text('cmass_text', &ui_textarea("text", "", 5, 60))."<br>"]);
 print &ui_table_row($text{'cmass_file'},
 		    &ui_radio("file_def", 0, \@sopts), 1, \@tds);
 
+# Separator character
+print &ui_table_row($text{'umass_separator'},
+		    &ui_radio("separator", ":",
+			      [ [ ":", $text{'umass_separatorcolon'} ],
+				[ ",", $text{'umass_separatorcomma'} ],
+				[ "tab", $text{'umass_separatortab'} ] ]));
+
 # Templates for parent and sub domains
 @ptmpls = &list_available_templates(undef, undef);
 if (&can_create_master_servers()) {

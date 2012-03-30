@@ -54,10 +54,12 @@ print &text('cmass_doing', $src),"<p>\n";
 @lines = split(/\n+/, $source);
 $lnum = 0;
 $count = $ecount = 0;
+$sep = $in{'separator'};
+$sep = "\t" if ($sep eq "tab");
 foreach $line (@lines) {
 	$lnum++;
 	next if ($line !~ /\S/);
-	local ($dname, $owner, $pass, $user, $pname, $ip, $aname) = split(/:/, $line, -1);
+	local ($dname, $owner, $pass, $user, $pname, $ip, $aname) = split($sep, $line, -1);
 	$dname = lc(&parse_domain_name($dname));
 	$user = lc($user);
 
