@@ -134,7 +134,7 @@ if ($dests[0] eq "download:") {
 	# Special case .. we backup to a temp file and output in the browser
 	$temp = &transname().($config{'compression'} == 0 ? ".tar.gz" :
 			      $config{'compression'} == 1 ? ".tar.bz2" :".tar");
-	foreach $t ($temp, $temp.".info") {
+	foreach $t ($temp, $temp.".info", $temp.".dom") {
 		&open_tempfile(TEMP, ">$t", 0, 1);
 		&close_tempfile(TEMP);
 		&set_ownership_permissions($doms[0]->{'uid'}, $doms[0]->{'gid'},
@@ -148,6 +148,7 @@ if ($dests[0] eq "download:") {
 				       undef, $in{'increment'});
 	&cleanup_backup_limits(0, 1);
 	unlink($temp.".info");
+	unlink($temp.".dom");
 	&run_post_actions();
 	if ($ok) {
 		@st = stat($temp);
