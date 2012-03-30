@@ -13593,7 +13593,7 @@ sub check_password_restrictions
 local ($user, $webmin) = @_;
 &require_useradmin();
 local $err = &useradmin::check_password_restrictions(
-	$user->{'plainpass'}, $user->{'user'});
+	$user->{'plainpass'}, $user->{'user'}, $user);
 return $err if ($err);
 if ($webmin) {
 	# Check ACL module too
