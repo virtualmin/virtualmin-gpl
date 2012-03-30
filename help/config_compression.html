@@ -1,9 +1,9 @@
 <header>Backup compression format</header>
 
 By default, Virtualmin uses gzip compression on its backup files. However, this
-option can be used to select the more efficient (but CPU-intensive) bzip2 
-format instead. Alternately, you can select to create un-compressed tar format
-backups, which may be useful if writing to tape. <p>
+option can be used to select the space efficient (but CPU-intensive) bzip2
+format instead. You can also use un-compressed tar format backups, which may be useful
+if you want a speedy backup, or if you are writing to tape. <p>
 
 This option is only used when backing up virtual servers to a directory, with
 one file per domain. When backing up to a single file, the filename determines

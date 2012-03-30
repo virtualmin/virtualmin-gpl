@@ -1,6 +1,9 @@
 <header>Default IP address for DNS records</header>
 
-DNS records are automatically generated for new virtual hosts, and in normal circumstances you will want them to match the virtual server IP provided above.  However, if you operate a proxy server, a load balancing server, or some other type of device that leads to your server operating on a different address than the world sees when talking to your virtual domains, you may wish to alter the value here.  Another instance where you may wish to change this is if you are adding domains to a development server that will have different addresses when it goes into production.  You can fill in the production or public IP address here rather than having Virtualmin use the local IP address. <p>
+DNS records are automatically generated for new virtual hosts, and in normal circumstances you will want
+them to match the virtual server IP provided above.  However, if your server is behind a NAT router, you
+operate a proxy server, a load balancing server, or some other type of device that leads to your server
+operating on a different IP address than the world sees when talking to your domains, you may need to alter the value here.  Another instance where you may wish to change this is if you are adding domains to a development server that will have different addresses when it goes into production.  You can fill in the production or public IP address here rather than having Virtualmin use the local IP address. <p>
 
 If the <b>Automatically detect external address</b> option is selected, Virtualmin will attempt to work out the IP at virtual server creation time. This is done by making an HTTP request to <tt>www.virtualmin.com</tt>, which will respond with the address it sees the connection coming from. <p>
 
