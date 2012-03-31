@@ -230,12 +230,12 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 
 # Make sure all needed args are set
-$domain && $username || &usage();
+$domain && $username || &usage("No domain name or username specified");
 $d = &get_domain_by("dom", $domain);
 $d || &usage("Virtual server $domain does not exist");
 &obtain_lock_mail($d);

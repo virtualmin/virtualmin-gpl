@@ -49,12 +49,12 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage("Unknown option $a");
+		&usage("Unknown parameter $a");
 		}
 	}
 
 # Find the domains
-@domains || @users || $all_doms || usage();
+@domains || @users || $all_doms || usage("No domains or users specified");
 if ($all_doms) {
         # All domains
         @doms = &list_domains();

@@ -46,12 +46,13 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 
 # Parse args and get domain
-$dname && $uname || &usage();
+$dname || &usage("No domain specified");
+$uname || &usage("No username specified");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("No domain name $dname found");
 @users = &list_domain_users($d, 0, 1, 1, 1);

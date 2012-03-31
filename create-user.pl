@@ -152,10 +152,12 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
-$domain && $username && ($pass || $encpass) || &usage();
+$domain || &usage("No domain specified");
+$username || &usage("No username specified");
+$pass || $encpass || &usage("No password specified");
 
 # Get the initial user
 $d = &get_domain_by("dom", $domain);
@@ -167,14 +169,14 @@ $user = &create_initial_user($d, 0, $web);
 # Make sure all needed args are set
 if ($user->{'unix'} && !$user->{'noquota'}) {
 	if (&has_home_quotas() && defined($quota)) {
-		$quota =~ /^\d+$/ || &usage();
+		$quota =~ /^\d+$/ || &usage("Quota must be a number");
 		}
 	if (&has_mail_quotas() && defined($mquota)) {
-		$mquota =~ /^\d+$/ || &usage();
+		$mquota =~ /^\d+$/ || &usage("Quota must be a number");
 		}
 	}
 if ($user->{'mailquota'}) {
-	!$qquota || $qquota =~ /^\d+$/ || usage();
+	!$qquota || $qquota =~ /^\d+$/ || usage("Mail quota must be a number");
 	}
 $err = &valid_mailbox_name($username);
 &usage($err) if ($err);

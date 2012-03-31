@@ -80,10 +80,10 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
-@dnames || $all_doms || @users || usage();
+@dnames || $all_doms || @users || usage("No domains or users specified");
 defined($bcc) || defined($aliascopy) || &usage("Nothing to do");
 
 # Get domains to update

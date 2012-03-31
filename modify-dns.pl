@@ -130,10 +130,10 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
-@dnames || $all_doms || usage();
+@dnames || $all_doms || usage("No domains specified");
 defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
   @addrecs || @delrecs || @addslaves || @delslaves || $addallslaves || $ttl ||
   &usage("Nothing to do");

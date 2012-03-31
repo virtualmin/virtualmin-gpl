@@ -58,10 +58,10 @@ while(@ARGV > 0) {
 		$plugin{$1}++;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
-@dnames || $all_doms || @users || usage();
+@dnames || $all_doms || @users || usage("No domains or users specified");
 
 # Get domains to update
 if ($all_doms) {

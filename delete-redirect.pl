@@ -41,10 +41,11 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
-$domain && $path || &usage();
+$domain || &usage("No domain specified");
+$path || &usage("No redirect path specified");
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 &has_web_redirects($d) ||

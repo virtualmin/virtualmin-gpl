@@ -66,8 +66,11 @@ while(@ARGV > 0) {
 	       &indexof($1, @edit_limits) >= 0) {
 		$edit{$1}++;
 		}
+	else {
+		&usage("Unknown parameter $a");
+		}
 	}
-@dnames || $all_doms || usage();
+@dnames || $all_doms || usage("No domains specified");
 
 # Get domains to update
 if ($all_doms) {

@@ -124,11 +124,11 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 
-$domain && $name || &usage();
+$domain && $name || &usage("No domain or username specified");
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 

@@ -147,12 +147,13 @@ while(@ARGV > 0) {
 		$logonly = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 
 # Validate args
-$domain && $sname || &usage();
+$domain || &usage("No domain specified");
+$sname || &usage("No script name specified");
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 @scripts = &list_domain_scripts($d);

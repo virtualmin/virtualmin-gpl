@@ -37,7 +37,7 @@ use POSIX;
 use Socket;
 
 if (@ARGV) {
-	&usage();
+	&usage("No parameters needed");
 	}
 
 # Attempt to open the socket

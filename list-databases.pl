@@ -44,11 +44,11 @@ while(@ARGV > 0) {
 		$type = shift(@ARGV);
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 
-$domain || &usage();
+$domain || &usage("No domain specified");
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 @dbs = &domain_databases($d);

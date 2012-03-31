@@ -47,7 +47,8 @@ while(@ARGV > 0) {
 		else {
 			$value = shift(@ARGV);
 			}
-		$field && defined($value) || &usage();
+		$field && defined($value) ||
+		     &usage("--set must be followed by a field name and value");
 		push(@set, [ $field, $value ]);
 		}
 	elsif ($a eq "--allow-missing") {
@@ -57,10 +58,10 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
-$domain && @set || &usage();
+$domain && @set || &usage("No domain or fields to set specified");
 
 # Get the domain
 $dom = &get_domain_by("dom", $domain);

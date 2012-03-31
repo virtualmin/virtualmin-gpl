@@ -46,10 +46,11 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
-$serial && $key || &usage();
+$serial || &usage("No serial number specified");
+$key || &usage("No licence key specified");
 
 # Make sure it is valid
 &require_licence();

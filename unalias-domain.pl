@@ -44,12 +44,12 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 
 # Find the domain
-$domain || usage();
+$domain || usage("No domain specified");
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist.");
 $d->{'alias'} || &usage("The given virtual server is not an alias");

@@ -49,7 +49,7 @@ while(@ARGV > 0) {
 		$coreonly = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 

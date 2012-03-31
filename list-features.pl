@@ -58,7 +58,7 @@ while(@ARGV > 0) {
 		$nameonly = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 

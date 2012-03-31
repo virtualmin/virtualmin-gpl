@@ -40,12 +40,12 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage("Unknown option $a");
+		&usage("Unknown parameter $a");
 		}
 	}
 
 # Find the domain
-$domain || usage();
+$domain || usage("No domain specified");
 $d = &get_domain_by("dom", $domain);
 $d || &usage("Virtual server $domain does not exist");
 !$d->{'disabled'} && &usage("Virtual server $domain is not disabled");

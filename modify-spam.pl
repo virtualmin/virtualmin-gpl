@@ -143,10 +143,10 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
-@dnames || $all_doms || usage();
+@dnames || $all_doms || usage("No domains specified");
 defined($mode{'spam'}) || defined($mode{'virus'}) || $spam_client ||
     $virus_scanner || defined($auto) || defined($spamlevel) ||
     defined($spamtrap) || &usage("Nothing to do");

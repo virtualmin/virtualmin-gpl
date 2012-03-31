@@ -91,10 +91,11 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
-$bounce || $local || @forward || $autotext || $everyone || &usage();
+$bounce || $local || @forward || $autotext || $everyone ||
+	&usage("No destination specified");
 
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");

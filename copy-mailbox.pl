@@ -46,7 +46,7 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 $src && $dest || &usage("Missing --source or --dest parameter");

@@ -136,7 +136,7 @@ while(@ARGV > 0) {
 		$any_resel = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 

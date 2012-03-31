@@ -68,7 +68,7 @@ while(@ARGV > 0) {
 	}
 
 # Get the domains
-@dnames || @users || $all || &usage();
+@dnames || @users || $all || &usage("No domains or users specified");
 if ($all) {
 	@doms = &list_domains();
 	}

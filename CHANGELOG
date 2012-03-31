@@ -1336,3 +1336,4 @@ Updated the Drupal script installer to versions 6.25 and 7.12, ZenPhoto to 1.4.2
 Added a Virtualmin Configuration option to use an alternate S3-compatible backup service instead of Amazon's.
 When cloning a virtual server with a private IP, a new address for the clone can be entered instead of relying on automatic IP allocation.
 Extra administrators can now be granted permissions to edit DNS records and options.
+When calling the remote API with the json, perl or xml format flags, multiline mode is automatically enabled so that the output from commands can be correctly parsed. API errors are also returned using the selected format.

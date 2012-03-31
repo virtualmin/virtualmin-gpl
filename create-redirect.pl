@@ -60,10 +60,11 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
-$domain && $path || &usage();
+$domain || &usage("No domain specified");
+$path || &usage("No redirect path specified");
 if ($url) {
 	$url =~ /^*(http|https):\/\/\S+$/ ||
 		&usage("The --redirect flag must be followed by a URL");

@@ -28,7 +28,7 @@ while(@ARGV) {
 		push(@scripts, $a);
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 

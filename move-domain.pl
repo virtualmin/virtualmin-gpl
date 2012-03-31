@@ -63,12 +63,14 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 
 # Find the domains
-$domain && ($parentdomain || $newuser) || usage();
+$domain || &usage("No domain to move specified");
+$parentdomain || $newuser ||
+	&usage("No destination domain or new username specified");
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist.");
 if ($parentdomain) {

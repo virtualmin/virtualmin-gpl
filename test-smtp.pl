@@ -76,10 +76,10 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
-$to || &usage();
+$to || &usage("No destination address specified");
 
 # Open SMTP connection
 &foreign_require("mailboxes", "mailboxes-lib.pl");

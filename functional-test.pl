@@ -114,7 +114,7 @@ while(@ARGV > 0) {
 		&indexof($ssl, @plugins) >= 0 || &usage("$ssl is not a plugin");
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 $webmin_wget_command = "wget -O - --cache=off --proxy=off --http-user=$webmin_user --http-passwd=$webmin_pass --user-agent=Webmin ";

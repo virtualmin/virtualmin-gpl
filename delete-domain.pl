@@ -58,12 +58,12 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage("Unknown option $a");
+		&usage("Unknown parameter $a");
 		}
 	}
 
 # Find the domains, minus any sub-domains of already selected parents
-@domains || @users || usage();
+@domains || @users || usage("No users or domains specified");
 @doms = &get_domains_by_names_users(\@domains, \@users, \&usage);
 foreach $d (@doms) {
 	$idmap{$d->{'id'}} = $d;

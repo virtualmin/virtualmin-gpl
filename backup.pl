@@ -26,7 +26,7 @@ while(@ARGV > 0) {
 		$force_email = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 ($sched) = grep { $_->{'id'} == $id } &list_scheduled_backups();

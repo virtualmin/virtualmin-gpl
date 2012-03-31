@@ -186,12 +186,12 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 
 # Find the domain
-$domain || $user || usage();
+$domain || $user || usage("No domain or user specified");
 if ($domain) {
 	$dom = &get_domain_by("dom", $domain);
 	$dom || usage("Virtual server $domain does not exist.");

@@ -40,11 +40,12 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 
-$domain && $name || &usage();
+$domain || &usage("No domain specified");
+$name || &usage("No username specified");
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 

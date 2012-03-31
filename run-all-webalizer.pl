@@ -27,7 +27,7 @@ require './virtual-server-lib.pl';
 $< == 0 || die "run-all-webalizer.pl must be run as root";
 
 if (@ARGV) {
-	&usage();
+	&usage("No parameters required");
 	}
 
 &require_webalizer();

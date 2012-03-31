@@ -58,12 +58,12 @@ while(@ARGV > 0) {
 		$nameonly = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 
 # Validate args and get domains
-@dnames || @users || $all || &usage();
+@dnames || @users || $all || &usage("No domains or users specified");
 if ($all) {
 	@doms = &list_domains();
 	}

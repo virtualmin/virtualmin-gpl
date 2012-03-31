@@ -71,3 +71,5 @@
 	- https://www.virtualmin.com/node/21662
 	- All API commands should call usage with a useful message if
 	  param is unknown
+	- CHANGELOG
+	- Cloudmin too

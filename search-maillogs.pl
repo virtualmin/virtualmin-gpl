@@ -71,7 +71,7 @@ while(@ARGV > 0) {
 		$novirus = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 

@@ -42,11 +42,11 @@ while(@ARGV > 0) {
 		$nameonly = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 
-$domain || &usage();
+$domain || &usage("No domain specified");
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 @dirs = &list_domain_php_directories($d);

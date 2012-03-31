@@ -45,7 +45,7 @@ while(@ARGV) {
 		$gplonly = 1;
 		}
         else {
-                &usage();
+		&usage("Unknown parameter $a");
                 }
         }
 

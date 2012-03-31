@@ -46,10 +46,10 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
-@dnames || $all_doms || usage();
+@dnames || $all_doms || usage("No domains specified");
 
 # Get domains to update
 if ($all_doms) {

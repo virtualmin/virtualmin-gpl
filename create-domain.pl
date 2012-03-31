@@ -323,7 +323,7 @@ while(@ARGV > 0) {
 		$fields{'field_'.$fn} = $fv;
 		}
 	else {
-		&usage("Unknown option $a");
+		&usage("Unknown parameter $a");
 		}
 	}
 if ($template eq "") {

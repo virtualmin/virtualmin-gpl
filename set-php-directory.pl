@@ -51,12 +51,14 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
 
 # Validate inputs
-$domain && $dir && $version || &usage();
+$domain || &usage("No domain specified");
+$dir || &usage("No directory specified");
+$version || &usage("No PHP version specified");
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 $mode = &get_domain_php_mode($d);

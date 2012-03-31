@@ -132,10 +132,10 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
-$src && $type || usage();
+$src && $type || usage("Missing source or backup type");
 if ($template eq "") {
 	$template = &get_init_template($parentdomain);
 	}

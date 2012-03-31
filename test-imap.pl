@@ -56,10 +56,10 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	else {
-		&usage();
+		&usage("Unknown parameter $a");
 		}
 	}
-$user || &usage();
+$user || &usage("No IMAP username specified");
 
 # Open IMAP connection
 $folder = { 'server' => $server,
