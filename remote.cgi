@@ -50,6 +50,11 @@ foreach $m ($module_name, @plugins) {
 		}
 	}
 $cmd || &api_error(&text('remote_eprogram2', $in{'program'}));
+if ($format) {
+	# Always force multiline format, as JSON output makes no sense
+	# without it
+	$in{'multiline'} = '';
+	}
 
 # Build list of command-line args
 @args = ( );
@@ -99,7 +104,15 @@ else {
 sub api_error
 {
 print "Content-type: text/plain\n\n";
-print "ERROR: ",@_,"\n";
+if ($format) {
+	$data = { 'status' => 'error',
+		  'error' => join("", @_) };
+	$ffunc = "create_".$format."_format";
+	print &$ffunc($data);
+	}
+else {
+	print "ERROR: ",@_,"\n";
+	}
 CORE::exit(0);
 }
 

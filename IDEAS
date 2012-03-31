@@ -68,5 +68,6 @@
 		- https://www.virtualmin.com/node/21544
 
  - Accept multiline parameter for all scripts
-	- Set automatically in json, xml and perl modes
 	- https://www.virtualmin.com/node/21662
+	- All API commands should call usage with a useful message if
+	  param is unknown
