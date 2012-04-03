@@ -112,14 +112,18 @@ if ($backup->{'id'} == 1) {
 		$config{'backup_feature_'.$f} = &indexof($f, @bf) >= 0 ? 1 : 0;
 		$config{'backup_opts_'.$f} = $backup->{'opts_'.$f};
 		}
+	&lock_file($module_config_file);
 	&save_module_config();
+	&unlock_file($module_config_file);
 	}
 else {
 	# Update or create separate file
 	&make_dir($scheduled_backups_dir, 0700) if (!-d $scheduled_backups_dir);
 	$backup->{'id'} ||= &domain_id();
 	$backup->{'file'} = "$scheduled_backups_dir/$backup->{'id'}";
+	&lock_file($backup->{'file'});
 	&write_file($backup->{'file'}, $backup);
+	&unlock_file($backup->{'file'});
 	}
 
 # Update or delete cron job
@@ -2911,10 +2915,18 @@ if (&can_backup_log()) {
 	push(@codes, 'backuplog');
 	}
 if (&can_restore_domain()) {
+	# Show restore form
 	push(@links, "restore_form.cgi");
 	push(@titles, $text{'index_restore'});
 	push(@descs, $text{'index_restoredesc'});
 	push(@codes, 'restore');
+	}
+if (&can_backup_keys()) {
+	# Show list of backup keys
+	push(@links, "list_bkeys.cgi");
+	push(@titles, $text{'index_bkeys'});
+	push(@descs, $text{'index_bkeysdesc'});
+	push(@codes, 'bkeys');
 	}
 return (\@links, \@titles, \@descs, \@codes);
 }
@@ -3002,6 +3014,17 @@ if ($log) {
 	return @dnames ? 1 : 0;
 	}
 return 1;
+}
+
+# can_backup_keys()
+# Returns 1 if the current user can access all backup keys, 2 if only his own,
+# 0 if neither
+sub can_backup_keys
+{
+return 0 if (!$virtualmin_pro);		# Pro only feature
+return 0 if ($access{'admin'});		# Not for extra admins
+return 1 if (&master_admin());		# Master admin can access all keys
+return 2;			# Domain owner / reseller can access his own
 }
 
 # backup_log_own_domains(&log, [error-domains-only])

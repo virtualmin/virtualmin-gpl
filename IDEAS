@@ -66,3 +66,4 @@
 	- Cloudmin too
 	- Allow resellers to restore
 		- https://www.virtualmin.com/node/21544
+	- Include keys in global backups

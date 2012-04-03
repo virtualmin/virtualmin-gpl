@@ -222,6 +222,8 @@ index_restore=Restore Backup
 index_restoredesc=Click the button to restore a previous backup. A form for choosing the backup file, servers to extract and features to restore will be displayed.
 index_backuplog=Backup Logs
 index_backuplogdesc=Show logs of all backups that you have permissions to create, made via the Virtualmin UI, command line or on schedule.
+index_bkeys=Backup Encryption Keys
+index_bkeysdesc=List GPG keys used for signing and encrypting Virtualmin backups.
 index_dmore=$1 more ..
 index_virtualminconfig=Virtualmin Configuration
 

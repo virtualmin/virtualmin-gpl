@@ -276,6 +276,8 @@ $backup_locks_dir = "$module_config_directory/backuplocks";
 
 $backup_maxes_file = "$module_config_directory/backupsrunning";
 
+$backup_keys_dir = "$module_config_directory/bkeys";
+
 $incremental_backups_dir = "$module_config_directory/incremental";
 
 $backups_log_dir = "$module_config_directory/backuplogs";
