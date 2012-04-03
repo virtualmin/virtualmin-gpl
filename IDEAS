@@ -67,3 +67,5 @@
 	- Allow resellers to restore
 		- https://www.virtualmin.com/node/21544
 	- Include keys in global backups
+	- Don't allow deletion if in any backup logs
+		- Include key ID in backup log

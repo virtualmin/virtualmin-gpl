@@ -5807,4 +5807,16 @@ fixperms_edoms=No virutal servers selected
 fixperms_title=Fixing Permissions
 fixperms_dom=Fixing file ownership and permissions for $1 ..
 
+bkeys_title=Backup Encryption Keys
+bkeys_delete=Delete Selected Keys
+bkeys_add=Add a new encryption key
+bkeys_desc=Description
+bkeys_owner=Owned by
+bkeys_count=Schedules
+bkeys_lcount=Backups
+bkeys_ecannot=You are not allowed to manage backup keys
+bkeys_esupport=Backup keys cannot be used on this system : $1
+bkeys_egpg=GPG was not found at $1
+bkeys_none=No backup encryption keys have been created yet.
+
 __norefs=1
