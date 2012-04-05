@@ -6486,13 +6486,14 @@ foreach $d (@doms) {
 		}
 	elsif ($f eq "quota" || $f eq "uquota") {
 		if (!$d->{'parent'}) {
-			return -1 if ($d->{$f} eq "");
+			return -1 if ($d->{$f} eq "" || $d->{$f} eq "0");
 			$rv += $d->{$f};
 			}
 		}
 	elsif ($f eq "bw") {
 		if (!$d->{'parent'}) {
-			return -1 if ($d->{'bw_limit'} eq "");
+			return -1 if ($d->{'bw_limit'} eq "" ||
+				      $d->{'bw_limit'} eq "0");
 			$rv += $d->{'bw_limit'};
 			}
 		}

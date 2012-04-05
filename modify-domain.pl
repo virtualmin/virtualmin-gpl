@@ -245,6 +245,25 @@ if ($dom->{'parent'}) {
 	(defined($quota) || defined($uquota)) && &usage("Quotas cannot be changed for a sub-domain");
 	}
 
+# Check for unlimited quota clash with reseller
+if ($dom->{'reseller'} && defined(&get_reseller)) {
+	$r = &get_reseller($dom->{'reseller'});
+	if (defined($quota) && $quota eq "0" &&
+	    $r && $r->{'acl'}->{'max_quota'}) {
+		&usage("The disk quota for this domain cannot be set to ".
+		       "unlimited, as it is owned by reseller ".
+		       "$dom->{'reseller'} who has a quota limit");
+		       
+		}
+	if ($bw eq "NONE" &&
+	    $r && $r->{'acl'}->{'max_bw'}) {
+		&usage("The bandwidth for this domain cannot be set to ".
+		       "unlimited, as it is owned by reseller ".
+		       "$dom->{'reseller'} who has a bandwidth limit");
+		       
+		}
+	}
+
 # Validate IP change options
 if ($ip && $dom->{'alias'}) {
 	&usage("An IP address cannot be added to an alias domain");
@@ -389,7 +408,7 @@ if (defined($newdomain)) {
 	$dom->{'dom'} = $newdomain;
 	}
 if (defined($bw)) {
-	$dom->{'bw_limit'} = $bw eq "none" ? undef : $bw;
+	$dom->{'bw_limit'} = $bw eq "NONE" ? undef : $bw;
 	}
 if (defined($bw_no_disable)) {
 	$dom->{'bw_no_disable'} = $bw_no_disable;
@@ -431,6 +450,23 @@ elsif ($noip6) {
 	$dom->{'virt6'} = 0;
 	}
 if (defined($resel)) {
+	defined(&get_reseller) || &usage("Resellers are not supported");
+	if ($resel ne "NONE") {
+		$r = &get_reseller($resel);
+		$r || &usage("Reseller $resel does not exist");
+		if (($dom->{'quota'} eq '' || $dom->{'quota'} eq '0') &&
+		    $r->{'acl'}->{'max_quota'}) {
+			&usage("This domain has unlimited disk quota, and so ".
+			       "cannot be assigned to reseller $resel who has ".
+			       "a quota limit");
+			}
+		if (($dom->{'bw_limit'} eq '' || $dom->{'bw_limit'} eq '0') &&
+		    $r->{'acl'}->{'max_bw'}) {
+			&usage("This domain has unlimited bandwidth, and so ".
+			       "cannot be assigned to reseller $resel who has ".
+			       "a bandwidth limit");
+			}
+		}
 	$dom->{'reseller'} = $resel eq "NONE" ? undef : $resel;
 	}
 if (defined($dns_ip)) {

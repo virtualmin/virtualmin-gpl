@@ -107,6 +107,22 @@ $cerr = &virtual_server_clashes(\%newdom, \%check);
 $lerr = &virtual_server_limits(\%newdom, $oldd);
 &error($lerr) if ($lerr);
 
+# Check if quota makes sense for reseller
+if ($d->{'reseller'} && defined(&get_reseller)) {
+	$r = &get_reseller($d->{'reseller'});
+	if (!$d->{'parent'} &&
+	    ($newdom{'quota'} eq '' || $newdom{'quota'} eq '0') &&
+	    $r && $r->{'acl'}->{'max_quota'}) {
+		&error(&text('save_erquota', $d->{'reseller'}));
+		}
+	if (!$d->{'parent'} &&
+	    ($newdom{'bw_limit'} eq '' || $newdom{'bw_limit'} eq '0') &&
+	    $r && $r->{'acl'}->{'max_bw'}) {
+		&error(&text('save_erbw', $d->{'reseller'}));
+		}
+	}
+
+
 # Check if any features are being deleted, and if so ask the user if
 # he is sure
 if (!$in{'confirm'} && !$d->{'disabled'}) {

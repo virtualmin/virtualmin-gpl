@@ -1315,6 +1315,8 @@ save_plan=Changing plan to <i>$1</i> ..
 save_edomainquota=The server's total disk quota should not be lowered to $2, as the current disk usage is already $1.
 save_euserquota=The server administrator's disk quota should not be lowered to $2, as the current disk usage is already $1.
 save_aliasusers=The feature being disabled is in use by the following alias servers : $1
+save_erquota=The disk quota for this virtual server cannot be set to unlimited, as it is owned by the reseller $1 who has a quota limit
+save_erbw=The bandwidth limit for this virtual server cannot be set to unlimited, as it is owned by the reseller $1 who has a bandwidth limit
 
 luser_err=Failed to save local mailbox
 luser_etaken=A user with the same name already exists
@@ -3316,6 +3318,7 @@ resel_max_doms=Maximum virtual servers
 resel_max_aliasdoms=Maximum alias servers
 resel_max_realdoms=Maximum non-alias servers
 resel_unlimit=Unlimited
+resel_unlimit2=Unlimited for some domains
 resel_none=None
 resel_max_quota=Maximum quota for all servers
 resel_max_mailboxes=Maximum mail/FTP users for all servers
@@ -3368,6 +3371,8 @@ resel_edefns=Nameserver '$1' is not valid
 resel_clone=Clone Reseller
 resel_domsopts=Unowned domains
 resel_domssel=Owned by this reseller
+resel_equnlimit=The virtual server $1 cannot be assigned to this reseller, as it has unlimited disk quota, but the reseller has a limit
+resel_ebwunlimit=The virtual server $1 cannot be assigned to this reseller, as it has unlimited bandwidth quota, but the reseller has a limit
 
 licence_err=A problem was detected with your Virtualmin license :
 licence_soon=Notice - Your Virtualmin license will expire in $1 days.
