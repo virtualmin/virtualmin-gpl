@@ -3,7 +3,7 @@
 sub list_api_categories
 {
 return ([ "Backup and restore", "backup-domain.pl", "list-scheduled-backups.pl",
-				"restore-domain.pl" ],
+				"restore-domain.pl", "list-backup-keys.pl" ],
 	[ "Virtual servers", "*-domain.pl", "*-domains.pl",
 			     "enable-feature.pl", "disable-feature.pl",
 			     "modify-dns.pl", "modify-spam.pl", "modify-web.pl",

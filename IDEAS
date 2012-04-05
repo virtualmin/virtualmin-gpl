@@ -69,3 +69,7 @@
 	- Include keys in global backups
 	- Don't allow deletion if in any backup logs
 		- Include key ID in backup log
+	- Help pages
+	- API too
+	- Option to create a new key
+	- Check keys used by all destinations when deleting a key

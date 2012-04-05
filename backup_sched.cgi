@@ -78,6 +78,20 @@ else {
 				&error($text{'backup_epurge'});
 			}
 		push(@purges, $in{'purge_'.$i.'def'} ? undef : $in{'purge'.$i});
+
+		# Parse key for the destination
+		if (defined($in{'key'.$i})) {
+			if ($in{'key'.$i}) {
+				$key = &get_backup_key($in{'key'.$i});
+				$key || &error($text{'backup_ekey'});
+				&can_use_backup_key($key) ||
+					&error($text{'backup_ekey2'});
+				push(@keys, $key->{'id'});
+				}
+			else {
+				push(@keys, undef);
+				}
+			}
 		}
 	@dests || &error($text{'backup_edests'});
 
@@ -128,6 +142,12 @@ else {
 	$sched->{'purge'} = $purges[0];
 	for(my $i=1; $i<@purges; $i++) {
 		$sched->{'purge'.$i} = $purges[$i];
+		}
+
+	# Save backup keys
+	$sched->{'key'} = $keys[0];
+	for(my $i=1; $i<@keys; $i++) {
+		$sched->{'key'.$i} = $keys[$i];
 		}
 
 	$sched->{'fmt'} = $in{'fmt'};

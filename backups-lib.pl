@@ -3476,5 +3476,17 @@ for(my $i=1; exists($sched->{'purge'.$i}); $i++) {
 return @purges;
 }
 
+# get_scheduled_backup_keys(&sched)
+# Returns a list of encryption keys for some scheduled backup
+sub get_scheduled_backup_keys
+{
+local ($sched) = @_;
+local @keys = ( $sched->{'key0'} || $sched->{'key'} );
+for(my $i=1; exists($sched->{'key'.$i}); $i++) {
+	push(@keys, $sched->{'key'.$i});
+	}
+return @keys;
+}
+
 1;
 

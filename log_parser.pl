@@ -80,6 +80,13 @@ elsif ($type eq "template") {
 elsif ($type eq "templates") {
 	return &text('log_'.$action.'_template', $object);
 	}
+elsif ($type eq "bkey") {
+	return &text('log_'.$action.'_bkey',
+		     "<i>".&html_escape($p->{'desc'})."</i>");
+	}
+elsif ($type eq "bkeys") {
+	return &text('log_'.$action.'_bkey', $object);
+	}
 elsif ($type eq "script") {
 	return &text('log_'.$action.'_script', $object, $p->{'ver'},
 		     "<tt>$p->{'dom'}</tt>");

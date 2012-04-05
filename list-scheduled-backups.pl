@@ -81,8 +81,20 @@ if ($multi) {
 		if ($s->{'virtualmin'}) {
 			print "    Virtualmin configs: $s->{'virtualmin'}\n";
 			}
-		foreach $dest (&get_scheduled_backup_dests($s)) {
-			print "    Destination: $dest\n";
+		@dests = get_scheduled_backup_dests($s);
+		@purges = &get_scheduled_backup_purges($s);
+		@keys = &get_scheduled_backup_keys($s);
+		for(my $i=0; $i<@dests; $i++) {
+			print "    Destination: $dests[$i]\n";
+			print "    Delete old backups after: ",
+			    ($purges[$i] ? "$purges[$i] days" : "Never"),"\n";
+			if ($keys[$i] && defined(&get_backup_key)) {
+				$key = &get_backup_key($keys[$i]);
+				print "    Encryption key: ",
+					$key->{'desc'},"\n";
+				print "    Encryption key ID: ",
+					$key->{'id'},"\n";
+				}
 			}
 		if ($s->{'owner'}) {
 			print "    Owner: $s->{'owner'}\n";
@@ -111,10 +123,6 @@ if ($multi) {
 			$s->{'email_err'} ? "Only on failure" : "Always","\n";
 		print "    Notify domain owners: ",
 			$s->{'email_doms'} ? "Yes" : "No","\n";
-		foreach $purge (&get_scheduled_backup_purges($s)) {
-			print "    Delete old backups after: ",
-				($purge ? "$purge days" : "Never"),"\n";
-			}
 		}
 	}
 else {

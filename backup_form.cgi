@@ -162,15 +162,32 @@ print &ui_hidden_table_end("features");
 @dests = &get_scheduled_backup_dests($sched);
 push(@dests, undef) if ($in{'sched'});
 @purges = &get_scheduled_backup_purges($sched);
+@keys = &get_scheduled_backup_keys($sched);
 @dfields = ( );
 $i = 0;
+@allkeys = defined(&list_backup_keys) ? &list_available_backup_keys() : ( );
 foreach $dest (@dests) {
+	# Show destination fields
 	$dfield = &show_backup_destination("dest".$i, $dest, $cbmode == 3,
 					   $d, $nodownload, 1);
-	$dfield .= &hlink($text{'backup_purge'}, "backup_purge")." ".
-		   &ui_opt_textbox("purge".$i, $purges[$i], 5,
+
+	# Add purging option
+	@grid = ( );
+	push(@grid, &hlink($text{'backup_purge'}, "backup_purge"));
+	push(@grid, &ui_opt_textbox("purge".$i, $purges[$i], 5,
                         $text{'backup_purgeno'}, $text{'backup_purgeyes'})." ".
-		   $text{'newbw_days'};
+		    $text{'newbw_days'});
+
+	if (@allkeys) {
+		# Add backup key field
+		push(@grid, &hlink($text{'backup_key'}, "backup_key"));
+		push(@grid, &ui_select("key".$i, $keys[$i],
+			      [ [ "", "&lt;$text{'backup_nokey'}&gt;" ],
+				map { [ $_->{'id'}, $_->{'desc'} ] } @allkeys ],
+			      1, 0, 1));
+		}
+	$dfield .= &ui_grid_table(\@grid, 2, 30, [ "nowrap", "nowrap" ]);
+
 	if (!$dest && $in{'sched'}) {
 		# Last option is hidden
 		$dfield = &ui_hidden_start($text{'backup_adddest'},
