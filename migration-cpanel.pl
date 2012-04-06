@@ -584,9 +584,7 @@ else {
 	local $qhome = quotemeta($dom{'home'});
 	local $xtemp = &transname();
 	&open_tempfile(XTEMP, ">$xtemp");
-	&print_tempfile(XTEMP, "logs\n");
 	&print_tempfile(XTEMP, "./logs\n");
-	&print_tempfile(XTEMP, "mail\n");
 	&print_tempfile(XTEMP, "./mail\n");
 	&close_tempfile(XTEMP);
 	&execute_command("cd $homesrc && ".
