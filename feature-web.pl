@@ -2238,8 +2238,7 @@ local @webfields = ( "web", "suexec", "user_def",
 push(@webfields, "webmail", "webmaildom", "webmaildom_def",
 		 "admin", "admindom", "admindom_def");
 push(@webfields, "web_php_suexec", "web_phpver",
-		 $tmpl->{'web_phpchildren'} ? ( "web_phpchildren" ) : ( ),
-		 "web_php_noedit");
+		 "web_phpchildren", "web_php_noedit");
 foreach my $phpver (@all_possible_php_versions) {
 	push(@webfields, "web_php_ini_".$phpver,
 			 "web_php_ini_".$phpver."_def");
@@ -2374,12 +2373,10 @@ print &ui_table_row(
 		 map { [ $_->[0] ] } &list_available_php_versions() ]));
 
 # Default number of PHP child processes
-if ($tmpl->{'web_phpchildren'}) {
-	print &ui_table_row(
-	    &hlink($text{'tmpl_phpchildren'}, "template_phpchildren"),
-	    &ui_opt_textbox("web_phpchildren", $tmpl->{'web_phpchildren'},
-		    5, $text{'tmpl_phpchildrennone'}));
-	}
+print &ui_table_row(
+    &hlink($text{'tmpl_phpchildren'}, "template_phpchildren"),
+    &ui_opt_textbox("web_phpchildren", $tmpl->{'web_phpchildren'},
+	    5, $text{'tmpl_phpchildrennone'}));
 
 # Source php.ini files
 foreach my $phpver (@all_possible_php_versions) {
