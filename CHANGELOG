@@ -1338,4 +1338,4 @@ When cloning a virtual server with a private IP, a new address for the clone can
 Extra administrators can now be granted permissions to edit DNS records and options.
 When calling the remote API with the json, perl or xml format flags, multiline mode is automatically enabled so that the output from commands can be correctly parsed. API errors are also returned using the selected format.
 ---- Changes since 3.91 ----
-Updated the Mantis script installer to version 1.2.10, ZenPhoto to 1.4.2.3, and Joomla to 2.5.4.
+Updated the Mantis script installer to version 1.2.10, ZenPhoto to 1.4.2.3, phpMyAdmin to 3.5.0, and Joomla to 2.5.4.
