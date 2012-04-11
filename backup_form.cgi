@@ -27,6 +27,7 @@ if ($in{'sched'}) {
 	print &ui_form_start("backup_sched.cgi", "post");
 	print &ui_hidden("sched", $in{'sched'});
 	$nodownload = 1;
+	$nopurge = 0;
 	}
 elsif ($in{'new'}) {
 	# Creating new scheduled backup
@@ -34,6 +35,7 @@ elsif ($in{'new'}) {
 	print &ui_form_start("backup_sched.cgi", "post");
 	print &ui_hidden("new", 1);
 	$nodownload = 1;
+	$nopurge = 0;
 	}
 else {
 	# Doing a one-off backup
@@ -48,6 +50,7 @@ else {
 		$sched = $scheds[0];
 		}
 	$nodownload = 0;
+	$nopurge = 1;
 	}
 
 if ($cbmode == 3 && ($in{'sched'} || $in{'oneoff'})) {
@@ -173,10 +176,12 @@ foreach $dest (@dests) {
 
 	# Add purging option
 	@grid = ( );
-	push(@grid, &hlink($text{'backup_purge'}, "backup_purge"));
-	push(@grid, &ui_opt_textbox("purge".$i, $purges[$i], 5,
-                        $text{'backup_purgeno'}, $text{'backup_purgeyes'})." ".
-		    $text{'newbw_days'});
+	if (!$nopurge) {
+		push(@grid, &hlink($text{'backup_purge'}, "backup_purge"));
+		push(@grid, &ui_opt_textbox("purge".$i, $purges[$i], 5,
+			$text{'backup_purgeno'}, $text{'backup_purgeyes'})." ".
+			$text{'newbw_days'});
+		}
 
 	if (@allkeys) {
 		# Add backup key field
@@ -186,7 +191,10 @@ foreach $dest (@dests) {
 				map { [ $_->{'id'}, $_->{'desc'} ] } @allkeys ],
 			      1, 0, 1));
 		}
-	$dfield .= &ui_grid_table(\@grid, 2, 30, [ "nowrap", "nowrap" ]);
+	if (@grid) {
+		$dfield .= &ui_grid_table(\@grid, 2, 30,
+					  [ "nowrap", "nowrap" ]);
+		}
 
 	if (!$dest && $in{'sched'}) {
 		# Last option is hidden

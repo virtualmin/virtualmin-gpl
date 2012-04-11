@@ -3477,7 +3477,7 @@ return @purges;
 }
 
 # get_scheduled_backup_keys(&sched)
-# Returns a list of encryption keys for some scheduled backup
+# Returns a list of encryption key IDs for some scheduled backup
 sub get_scheduled_backup_keys
 {
 local ($sched) = @_;

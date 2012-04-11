@@ -67,9 +67,13 @@
 	- Allow resellers to restore
 		- https://www.virtualmin.com/node/21544
 	- Include keys in global backups
+		- Re-import to gpg when restoring
 	- Don't allow deletion if in any backup logs
 		- Include key ID in backup log
 	- Help pages
 	- API too
-	- Option to create a new key
-	- Check keys used by all destinations when deleting a key
+	- Delete key from root's keyring when removing, if generated
+	- Functional tests
+
+ - Update Typo3 installer
+	- Or remove
