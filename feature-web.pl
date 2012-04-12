@@ -2133,15 +2133,6 @@ if ($d->{'ssl'}) {
 		  });
 	}
 
-# Link to website, proxied via Webmin
-local $pt = $d->{'web_port'} == 80 ? "" : ":$d->{'web_port'}";
-push(@rv, { 'mod' => $module_name,
-	    'desc' => $text{'links_website'},
-	    'page' => "link.cgi/$d->{'ip'}/http://www.$d->{'dom'}$pt/",
-	    'cat' => 'services',
-	    'target' => '_new',
-	  });
-
 # Links to logs
 foreach my $log ([ 0, $text{'links_alog'} ],
 		 [ 1, $text{'links_elog'} ]) {

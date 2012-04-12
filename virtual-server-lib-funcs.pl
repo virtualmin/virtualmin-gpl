@@ -10951,6 +10951,18 @@ foreach my $l (&get_domain_actions($d), &feature_links($d)) {
 	}
 my %catmap = map { $_->{'catname'}, $_->{'cat'} } @rv;
 
+# Add preview website link, proxied via Webmin
+if (&domain_has_website($d)) {
+	local $pt = $d->{'web_port'} == 80 ? "" : ":$d->{'web_port'}";
+	push(@rv, { 'url' => "$gconfig{'webprefix'}/$module_name/".
+		    	     "link.cgi/$d->{'ip'}/http://www.$d->{'dom'}$pt/",
+		    'title' => $text{'links_website'},
+		    'cat' => 'services',
+		    'catname' => $text{'cat_services'},
+		    'target' => '_new',
+		  });
+	}
+
 # Add custom links
 if (defined(&list_visible_custom_links)) {
 	foreach my $l (&list_visible_custom_links($d)) {
