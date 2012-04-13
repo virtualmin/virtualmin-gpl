@@ -50,6 +50,7 @@ if ($multi) {
 		if ($key->{'owner'}) {
 			print "    Owner: ",$key->{'owner'},"\n";
 			}
+		print "    GPG key ID: ",$key->{'key'},"\n";
 		print "    Created: ",&make_date($key->{'created'}),"\n";
 		}
 	}

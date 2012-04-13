@@ -72,8 +72,13 @@
 		- Include key ID in backup log
 	- Help pages
 	- API too
-	- Delete key from root's keyring when removing, if generated
 	- Functional tests
+	- Backup via UI
+	- Backup on schedule
 
  - Update Typo3 installer
 	- Or remove
+
+ - Hashed password fixes
+	- Show warning about MySQL password mismatch
+	- Allow it to be turned off for an existing domain

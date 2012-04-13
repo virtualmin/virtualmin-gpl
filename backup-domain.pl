@@ -182,6 +182,9 @@ while(@ARGV > 0) {
 		$purge = shift(@ARGV);
 		$purge =~ /^[0-9\.]+$/ || &usage("--purge must be followed by a number");
 		}
+	elsif ($a eq "--key") {
+		$keyid = shift(@ARGV);
+		}
 	elsif ($a eq "--exclude") {
 		$exclude = shift(@ARGV);
 		push(@exclude, $exclude);
@@ -223,6 +226,15 @@ foreach $dest (@dests) {
 			       "base directory can be extracted from the ".
 			       "backup path, like /backup/virtualmin-%d-%m-%Y");
 		}
+	}
+if ($keyid) {
+	# Validate encryption key
+	defined(&list_backup_keys) ||
+		&usage("Backup encryption is not supported on this system");
+	($key) = grep { $_->{'id'} eq $keyid ||
+		  	$_->{'key'} eq $keyid ||
+		  	$_->{'desc'} eq $keyid } &list_backup_keys();
+	$key || &usage("No backup key with ID or description $keyid exists");
 	}
 if ($onebyone && !$newformat) {
 	&usage("--onebyone option can only be used in conjunction ".
@@ -292,7 +304,9 @@ $opts{'dir'}->{'exclude'} = join("\t", @exclude);
 				$onebyone,
 				$asowner,
 				undef,
-				$increment);
+				$increment,
+				0,
+				$key);
 if ($ok && !@$errdoms) {
 	&$second_print("Backup completed successfully. Final size was ".
 		       &nice_size($size));
@@ -353,6 +367,10 @@ print "                         [--all-virtualmin] | [--virtualmin config]\n";
 print "                         [--option \"feature name value\"]\n";
 print "                         [--as-owner]\n";
 print "                         [--exclude file]*\n";
+print "                         [--purge days]\n";
+if (defined(&list_backup_keys)) {
+	print "                         [--key id]\n";
+	}
 print "\n";
 print "Multiple domains may be specified with multiple --domain parameters.\n";
 print "Features must be specified using their short names, like web and dns.\n";

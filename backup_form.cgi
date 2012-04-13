@@ -165,10 +165,8 @@ print &ui_hidden_table_end("features");
 @dests = &get_scheduled_backup_dests($sched);
 push(@dests, undef) if ($in{'sched'});
 @purges = &get_scheduled_backup_purges($sched);
-@keys = &get_scheduled_backup_keys($sched);
 @dfields = ( );
 $i = 0;
-@allkeys = defined(&list_backup_keys) ? &list_available_backup_keys() : ( );
 foreach $dest (@dests) {
 	# Show destination fields
 	$dfield = &show_backup_destination("dest".$i, $dest, $cbmode == 3,
@@ -183,14 +181,6 @@ foreach $dest (@dests) {
 			$text{'newbw_days'});
 		}
 
-	if (@allkeys) {
-		# Add backup key field
-		push(@grid, &hlink($text{'backup_key'}, "backup_key"));
-		push(@grid, &ui_select("key".$i, $keys[$i],
-			      [ [ "", "&lt;$text{'backup_nokey'}&gt;" ],
-				map { [ $_->{'id'}, $_->{'desc'} ] } @allkeys ],
-			      1, 0, 1));
-		}
 	if (@grid) {
 		$dfield .= &ui_grid_table(\@grid, 2, 30,
 					  [ "nowrap", "nowrap" ]);
@@ -219,6 +209,16 @@ print &ui_table_row($text{'backup_opts'},
 	    &ui_checkbox("onebyone", 1,
 			 &hlink($text{'backup_onebyone'}, "backup_onebyone"),
 			 $sched->{'onebyone'}));
+
+# Encrypt with key
+@allkeys = defined(&list_backup_keys) ? &list_available_backup_keys() : ( );
+if (@allkeys) {
+	print &ui_table_row(&hlink($text{'backup_key'}, "backup_key"),
+		&ui_select("key", $sched->{'key'},
+			   [ [ "", "&lt;$text{'backup_nokey'}&gt;" ],
+		 	     map { [ $_->{'id'}, $_->{'desc'} ] } @allkeys ],
+			   1, 0, 1));
+	}
 
 # Single/multiple file mode
 print &ui_table_row(&hlink($text{'backup_fmt'}, "backup_fmt"),

@@ -183,14 +183,14 @@ if (@jobs) {
 
 # backup_domains(file, &domains, &features, dir-format, skip-errors, &options,
 #		 home-format, &virtualmin-backups, mkdir, onebyone, as-owner,
-#		 &callback-func, incremental, on-schedule)
+#		 &callback-func, incremental, on-schedule, &key)
 # Perform a backup of one or more domains into a single tar.gz file. Returns
 # an OK flag, the size of the backup file, and a list of domains for which
 # something went wrong.
 sub backup_domains
 {
 local ($desturls, $doms, $features, $dirfmt, $skip, $opts, $homefmt, $vbs,
-       $mkdir, $onebyone, $asowner, $cbfunc, $increment, $onsched) = @_;
+       $mkdir, $onebyone, $asowner, $cbfunc, $increment, $onsched, $key) = @_;
 $desturls = [ $desturls ] if (!ref($desturls));
 local $backupdir;
 local $transferred_sz;
@@ -532,7 +532,7 @@ DOMAIN: foreach $d (@$doms) {
 				$ffile = "$backupdir/$d->{'dom'}_$f";
 				}
 			$fok = &$bfunc($d, $ffile, $opts->{$f}, $homefmt,
-				       $increment, $asd, $opts);
+				       $increment, $asd, $opts, $key);
 			}
 		elsif (&indexof($f, &list_backup_plugins()) >= 0 &&
 		       $d->{$f}) {
@@ -565,7 +565,7 @@ DOMAIN: foreach $d (@$doms) {
 				push(@errdoms, $d);
 				last DOMAIN;
 				}
-			push(@donedoms, $d);
+			push(@donedoms, &clean_domain_passwords($d));
 			}
 		if ($fok) {
 			push(@donefeatures, $f);
@@ -593,7 +593,7 @@ DOMAIN: foreach $d (@$doms) {
 		local $tstart = time();
 		local $binfo = { $d->{'dom'} =>
 				 $donefeatures{$d->{'dom'}} };
-		local $bdom = { $d->{'dom'} => $d };
+		local $bdom = { $d->{'dom'} => &clean_domain_passwords($d) };
 		local $infotemp = &transname();
 		&uncat_file($infotemp, &serialise_variable($binfo));
 		local $domtemp = &transname();
@@ -770,11 +770,19 @@ if ($ok) {
 			elsif ($config{'compression'} == 3) {
 				$destfile =~ s/\.tar$/\.zip/;
 				}
+
+			# Create command that writes to the final file
 			local $qf = quotemeta("$dest/$destfile");
 			local $writer = "cat >$qf";
 			if ($asd) {
 				$writer = &command_as_user(
 					$asd->{'user'}, 0, $writer);
+				}
+
+			# If encrypting, add gpg to the pipeline
+			if ($key) {
+				$writer = &backup_encryption_command($key).
+					  " | ".$writer;
 				}
 
 			# Create the dest file with strict permissions
@@ -823,6 +831,8 @@ if ($ok) {
 			$comp = &get_bzip2_command().
 				" -c $config{'zip_args'}";
 			}
+
+		# Create writer command, which may run as the domain user
 		local $writer = "cat >$dest";
 		if ($asd) {
 			&open_tempfile_as_domain_user(
@@ -835,6 +845,12 @@ if ($ok) {
 		else {
 			&open_tempfile(DEST, ">$dest", 0, 1);
 			&close_tempfile(DEST);
+			}
+
+		# If encrypting, add gpg to the pipeline
+		if ($key) {
+			$writer = &backup_encryption_command($key).
+				  " | ".$writer;
 			}
 
 		# Start the tar command
@@ -861,29 +877,38 @@ if ($ok) {
 			}
 		}
 
+	# If encrypting, add gpg to the pipeline
+	if ($key) {
+		$writer = &backup_encryption_command($key).
+			  " | $writer";
+		}
+
 	# Create a separate file in the destination directory for Virtualmin
 	# config backups
 	if (@$vbs && ($homefmt || $dirfmt)) {
+		local $comp;
+		local $vdestfile;
 		if (&has_command("gzip")) {
-			&execute_command(
-			    "cd $backupdir && ".
-			    "(".&make_tar_command("cf", "-", "virtualmin_*").
-			    " | gzip -c $config{'zip_args'}) ".
-			    "2>&1 >$dest/virtualmin.tar.gz",
-			    undef, \$out, \$out);
-			push(@destfiles, "virtualmin.tar.gz");
+			$comp = "gzip -c $config{'zip_args'}";
+			$vdestfile = "virtualmin.tar.gz";
 			}
 		else {
-			&execute_command(
-			    "cd $backupdir && ".
-			    &make_tar_command("cf", "$dest/virtualmin.tar",
-					      "virtualmin_*").
-			    " 2>&1", undef, \$out, \$out);
-			push(@destfiles, "virtualmin.tar");
+			$comp = "cat";
+			$vdestfile = "virtualmin.tar";
 			}
+		# If encrypting, add gpg to the pipeline
+		if ($key) {
+			$comp = $comp." | ".&backup_encryption_command($key);
+			}
+		&execute_command(
+		    "cd $backupdir && ".
+		    "(".&make_tar_command("cf", "-", "virtualmin_*").
+		    " | $comp > $dest/$vdestfile) 2>&1",
+		    undef, \$out, \$out);
 		&set_ownership_permissions(undef, undef, 0600,
-					   $dest."/".$destfiles[$#destfiles]);
-		$destfiles_map{$destfiles[$#destfiles]} = "virtualmin";
+					   $dest."/".$vdestfile);
+		push(@destfiles, $vdestfile);
+		$destfiles_map{$vdestfile} = "virtualmin";
 		}
 	$donefeatures{"virtualmin"} = $vbs;
 	}
@@ -940,7 +965,8 @@ foreach my $desturl (@$desturls) {
 				local $n = $d eq "virtualmin" ? "virtualmin"
 							      : $d->{'dom'};
 				local $binfo = { $n => $donefeatures{$n} };
-				local $bdom = { $n => $d };
+				local $bdom =
+					{ $n => &clean_domain_passwords($d) };
 				&uncat_file($infotemp,
 					    &serialise_variable($binfo));
 				&uncat_file($domtemp,
@@ -3486,6 +3512,18 @@ for(my $i=1; exists($sched->{'key'.$i}); $i++) {
 	push(@keys, $sched->{'key'.$i});
 	}
 return @keys;
+}
+
+# clean_domain_passwords(&domain)
+# Removes any passwords or other secure information from a domain hash
+sub clean_domain_passwords
+{
+local ($d) = @_;
+local $rv = { %$d };
+foreach my $f ("pass", "enc_pass", "mysql_pass", "postgres_pass") {
+	delete($rv->{$f});
+	}
+return $rv;
 }
 
 1;

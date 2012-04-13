@@ -208,7 +208,7 @@ for(my $i=0; $i<$tries; $i++) {
 		# Write out the .dom file, if given
 		local $iconn = &make_s3_connection($akey, $skey);
 		local $response = $iconn->put($bucket, $destfile.".dom",
-					     &serialise_variable($dom));
+		     &serialise_variable(&clean_domain_passwords($dom)));
 		if ($response->http_response->code != 200) {
 			$err = &text('s3_edom',
                                      &extract_s3_message($response));

@@ -369,15 +369,17 @@ sub check_dir_clash
 return 0;
 }
 
-# backup_dir(&domain, file, &options, home-format, incremental, [&as-domain])
+# backup_dir(&domain, file, &options, home-format, incremental, [&as-domain],
+# 	     &all-options, &key)
 # Backs up the server's home directory in tar format to the given file
 sub backup_dir
 {
-&$first_print($_[3] && $config{'compression'} == 3 ? $text{'backup_dirzip'} :
-	      $_[4] ?  $text{'backup_dirtarinc'} : $text{'backup_dirtar'});
+local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
+&$first_print($homefmt && $config{'compression'} == 3 ? $text{'backup_dirzip'} :
+	      $increment ? $text{'backup_dirtarinc'} : $text{'backup_dirtar'});
 local $out;
 local $cmd;
-local $gzip = $_[3] && &has_command("gzip");
+local $gzip = $homefmt && &has_command("gzip");
 
 # Create exclude file
 $xtemp = &transname();
@@ -390,21 +392,21 @@ if ($_[2]->{'dirnologs'}) {
 	}
 &print_tempfile(XTEMP, "virtualmin-backup\n");
 &print_tempfile(XTEMP, "./virtualmin-backup\n");
-foreach my $e (&get_backup_excludes($_[0])) {
+foreach my $e (&get_backup_excludes($d)) {
 	&print_tempfile(XTEMP, "$e\n");
 	&print_tempfile(XTEMP, "./$e\n");
 	}
-foreach my $e (split(/\t+/, $_[2]->{'exclude'})) {
+foreach my $e (split(/\t+/, $opts->{'exclude'})) {
 	&print_tempfile(XTEMP, "$e\n");
 	&print_tempfile(XTEMP, "./$e\n");
 	}
 
 # Exclude all .zfs files, for Solaris
 if ($gconfig{'os_type'} eq 'solaris') {
-	open(FIND, "find ".quotemeta($_[0]->{'home'})." -name .zfs |");
+	open(FIND, "find ".quotemeta($d->{'home'})." -name .zfs |");
 	while(<FIND>) {
 		s/\r|\n//g;
-		s/^\Q$_[0]->{'home'}\E\///;
+		s/^\Q$d->{'home'}\E\///;
 		&print_tempfile(XTEMP, "$_\n");
 		&print_tempfile(XTEMP, "./$_\n");
 		}
@@ -418,7 +420,7 @@ if (&has_incremental_tar()) {
 	if (!-d $incremental_backups_dir) {
 		&make_dir($incremental_backups_dir, 0700);
 		}
-	$ifile = "$incremental_backups_dir/$_[0]->{'id'}";
+	$ifile = "$incremental_backups_dir/$d->{'id'}";
 	if (!$_[4]) {
 		# Force full backup
 		&unlink_file($ifile);
@@ -428,7 +430,7 @@ if (&has_incremental_tar()) {
 		# and take a copy of the file so we can put it back as before
 		# the backup (as tar modifies it)
 		if (-r $ifile) {
-			$iflag = "$_[0]->{'home'}/.incremental";
+			$iflag = "$d->{'home'}/.incremental";
 			&open_tempfile(IFLAG, ">$iflag", 0, 1);
 			&close_tempfile(IFLAG);
 			$ifilecopy = &transname();
@@ -439,33 +441,37 @@ if (&has_incremental_tar()) {
 	}
 
 # Create the dest file with strict permissions
-local $qf = quotemeta($_[1]);
+local $qf = quotemeta($file);
 local $toucher = "touch $qf && chmod 600 $qf";
-if ($_[5] && $_[3]) {
-	$toucher = &command_as_user(
-		$_[5]->{'user'}, 0, $toucher);
+if ($asd && $homefmt) {
+	$toucher = &command_as_user($asd->{'user'}, 0, $toucher);
 	}
 &execute_command($toucher);
 
 # Create the writer command. This will be run as the domain owner if this
 # is the final step of the backup process, and if the owner is doing the backup.
 local $writer = "cat >$qf";
-if ($_[5] && $_[3]) {
-	$writer = &command_as_user($_[5]->{'user'}, 0, $writer);
+if ($asd && $homefmt) {
+	$writer = &command_as_user($asd->{'user'}, 0, $writer);
+	}
+
+# If encrypting, add gpg to the pipeline
+if ($key) {
+	$writer = &backup_encryption_command($key)." | ".$writer;
 	}
 
 # Do the backup
-if ($_[3] && $config{'compression'} == 0) {
+if ($homefmt && $config{'compression'} == 0) {
 	# With gzip
 	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, ".").
 	       " | gzip -c $config{'zip_args'}";
 	}
-elsif ($_[3] && $config{'compression'} == 1) {
+elsif ($homefmt && $config{'compression'} == 1) {
 	# With bzip
 	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, ".").
 	       " | ".&get_bzip2_command()." -c $config{'zip_args'}";
 	}
-elsif ($_[3] && $config{'compression'} == 3) {
+elsif ($homefmt && $config{'compression'} == 3) {
 	# ZIP archive
 	$cmd = "zip -r -x\@$xtemp - .";
 	}
@@ -474,13 +480,13 @@ else {
 	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, ".");
 	}
 $cmd .= " | $writer";
-local $ex = &execute_command("cd ".quotemeta($_[0]->{'home'})." && $cmd",
+local $ex = &execute_command("cd ".quotemeta($d->{'home'})." && $cmd",
 			     undef, \$out, \$out);
 &unlink_file($iflag) if ($iflag);
 &copy_source_dest($ifilecopy, $ifile) if ($ifilecopy);
 if (-r $ifile) {
 	# Make owned by domain owner, so tar can read in future
-	&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'gid'},
+	&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
 				   0700, $ifile);
 	}
 if ($ex) {

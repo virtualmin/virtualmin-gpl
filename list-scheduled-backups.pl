@@ -83,18 +83,17 @@ if ($multi) {
 			}
 		@dests = get_scheduled_backup_dests($s);
 		@purges = &get_scheduled_backup_purges($s);
-		@keys = &get_scheduled_backup_keys($s);
 		for(my $i=0; $i<@dests; $i++) {
 			print "    Destination: $dests[$i]\n";
 			print "    Delete old backups after: ",
 			    ($purges[$i] ? "$purges[$i] days" : "Never"),"\n";
-			if ($keys[$i] && defined(&get_backup_key)) {
-				$key = &get_backup_key($keys[$i]);
-				print "    Encryption key: ",
-					$key->{'desc'},"\n";
-				print "    Encryption key ID: ",
-					$key->{'id'},"\n";
-				}
+			}
+		if ($s->{'key'} && defined(&get_backup_key)) {
+			$key = &get_backup_key($s->{'key'});
+			print "    Encryption key: ",
+				$key->{'desc'},"\n";
+			print "    Encryption key ID: ",
+				$key->{'id'},"\n";
 			}
 		if ($s->{'owner'}) {
 			print "    Owner: $s->{'owner'}\n";
