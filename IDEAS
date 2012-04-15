@@ -70,7 +70,10 @@
 		- Re-import to gpg when restoring
 	- Restoring of backups
 		- Check signature too
-	- API too
+		- UI
+		- API
+		- ZIP support
+	- For a non-home-format backup, no need to encrypt in feature_dir again
 	- Functional tests
 	- CHANGELOG
 	- Documentation

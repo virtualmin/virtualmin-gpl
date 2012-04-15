@@ -518,15 +518,18 @@ local %in = %{$_[0]};
 return { 'dirnologs' => !$in{'dir_logs'} };
 }
 
-# restore_dir(&domain, file, &options, homeformat?, &oldd, asowner)
+# restore_dir(&domain, file, &options, &all-options, homeformat?, &oldd,
+# 	      asowner, &key)
 # Extracts the given tar file into server's home directory
 sub restore_dir
 {
+local ($d, $file, $opts, $allopts, $homefmt, $oldd, $asd, $key) = @_;
+
 &$first_print($text{'restore_dirtar'});
-local $iflag = "$_[0]->{'home'}/.incremental";
+local $iflag = "$d->{'home'}/.incremental";
 &unlink_file($iflag);
 if (defined(&set_php_wrappers_writable)) {
-	&set_php_wrappers_writable($_[0], 1, 1);
+	&set_php_wrappers_writable($d, 1, 1);
 	}
 
 # Create exclude file, to skip local system-specific files
@@ -547,34 +550,42 @@ local $xtemp = &transname();
 &close_tempfile(XTEMP);
 
 # Check if Apache logs were links before the restore
-local $alog = "$_[0]->{'home'}/logs/access_log";
-local $elog = "$_[0]->{'home'}/logs/error_log";
+local $alog = "$d->{'home'}/logs/access_log";
+local $elog = "$d->{'home'}/logs/error_log";
 local ($aloglink, $eloglink);
-if ($_[0]->{'web'}) {
+if ($d->{'web'}) {
 	$aloglink = readlink($alog);
 	$eloglink = readlink($elog);
 	}
 
 # If home dir is missing (perhaps due to deletion of /home), re-create it
-if (!-e $_[0]->{'home'}) {
+if (!-e $d->{'home'}) {
 	local $uinfo;
-	if ($_[0]->{'unix'} || $_[0]->{'parent'}) {
+	if ($d->{'unix'} || $d->{'parent'}) {
 		local @users = &list_all_users();
-		($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'} } @users;
+		($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @users;
 		}
-	&create_domain_home_directory($_[0], $uinfo);
+	&create_domain_home_directory($d, $uinfo);
 	}
 
 # Turn off quotas for the domain, to prevent the import failing
-&disable_quotas($_[0]);
+&disable_quotas($d);
 
 local $out;
-local $cf = &compression_format($_[1]);
-local $q = quotemeta($_[1]);
-local $qh = quotemeta($_[0]->{'home'});
+local $cf = &compression_format($file, $key);
+local $q = quotemeta($file);
+local $qh = quotemeta($d->{'home'});
+local $catter;
+if ($key) {
+	$catter = &backup_decryption_command($key)." ".$q;
+	}
+else {
+	$catter = "cat $q";
+	}
 if ($cf == 4) {
 	# Unzip command does un-compression and un-archiving
 	# XXX ZIP doesn't support excludes of paths :-(
+	# XXX GPG
 	&execute_command("cd $qh && unzip -o $q", undef, \$out, \$out);
 	}
 else {
@@ -582,15 +593,16 @@ else {
 		      $cf == 2 ? "uncompress -c" :
 		      $cf == 3 ? &get_bunzip2_command()." -c" : "cat";
 	local $tarcmd = &make_tar_command("xfX", "-", $xtemp);
-	#if ($_[6]) {
+	local $reader = $catter." | ".$comp;
+	#if ($asd) {
 	#	# Run as domain owner - disabled, as this prevents some files
 	#	# from being written to by tar
-	#	$tarcmd = &command_as_user($_[0]->{'user'}, 0, $tarcmd);
+	#	$tarcmd = &command_as_user($d->{'user'}, 0, $tarcmd);
 	#	}
-	&execute_command("cd $qh && $comp $q | $tarcmd", undef, \$out, \$out);
+	&execute_command("cd $qh && $reader | $tarcmd", undef, \$out, \$out);
 	}
 local $ex = $?;
-&enable_quotas($_[0]);
+&enable_quotas($d);
 if ($ex) {
 	# Errors about utime in the tar extract are ignored when running
 	# as the domain owner
@@ -600,7 +612,7 @@ if ($ex) {
 else {
 	# Check for incremental restore of new-created domain, which indicates
 	# that is is not complete
-	if ($_[0]->{'wasmissing'} && -r $iflag) {
+	if ($d->{'wasmissing'} && -r $iflag) {
 		&$second_print($text{'restore_wasmissing'});
 		}
 	else {
@@ -608,31 +620,31 @@ else {
 		}
 	&unlink_file($iflag);
 
-	if ($_[0]->{'unix'}) {
+	if ($d->{'unix'}) {
 		# Set ownership on extracted home directory, apart from
 		# content of ~/homes - unless running as the domain owner,
 		# in which case ~/homes is set too
 		&$first_print($text{'restore_dirchowning'});
-		&set_home_ownership($_[0]);
-		if ($_[6]) {
-			&set_mailbox_homes_ownership($_[0]);
+		&set_home_ownership($d);
+		if ($asd) {
+			&set_mailbox_homes_ownership($d);
 			}
 		&$second_print($text{'setup_done'});
 		}
 	if (defined(&set_php_wrappers_writable)) {
-		&set_php_wrappers_writable($_[0], 0, 1);
+		&set_php_wrappers_writable($d, 0, 1);
 		}
 	
 	# Incremental file is no longer valid, so clear it
-	local $ifile = "$incremental_backups_dir/$_[0]->{'id'}";
+	local $ifile = "$incremental_backups_dir/$d->{'id'}";
 	&unlink_file($ifile);
 
 	# Check if logs are links now .. if not, we need to move the files
 	local $new_aloglink = readlink($alog);
 	local $new_eloglink = readlink($elog);
-	if ($_[0]->{'web'} && !$_[0]->{'subdom'} && !$_[0]->{'alias'}) {
-		local $new_alog = &get_website_log($_[0], 0);
-		local $new_elog = &get_website_log($_[0], 1);
+	if ($d->{'web'} && !$d->{'subdom'} && !$d->{'alias'}) {
+		local $new_alog = &get_website_log($d, 0);
+		local $new_elog = &get_website_log($d, 1);
 		if ($aloglink && !$new_aloglink) {
 			&system_logged("mv ".quotemeta($alog)." ".
 					     quotemeta($new_alog));

@@ -1308,12 +1308,12 @@ return $? ? $out : undef;
 
 # restore_domains(file, &domains, &features, &options, &vbs,
 #		  [only-backup-features], [&ip-address-info], [as-owner],
-#		  [skip-warnings])
+#		  [skip-warnings], [&key])
 # Restore multiple domains from the given file
 sub restore_domains
 {
 local ($file, $doms, $features, $opts, $vbs, $onlyfeats, $ipinfo, $asowner,
-       $skipwarnings) = @_;
+       $skipwarnings, $key) = @_;
 
 # Find owning domain
 local $asd;
@@ -1405,10 +1405,24 @@ if ($ok) {
 
 		# See if this is a home-format backup, by looking for a .backup
 		# sub-directory
-		local ($lout, @lines, $reader);
-		local $cf = &compression_format($f);
+		local ($lout, $lerr, @lines, $reader);
+		local $cf = &compression_format($f, $key);
+
+		# Create command to read the file, as the correct user and
+		# possibly with decryption
+		local $catter = "cat $q";
+		if ($asowner && $mode == 0) {
+			$reader = &command_as_user(
+				$doms[0]->{'user'}, 0, $reader);
+			}
+		if ($key) {
+			$catter = $catter." | ".
+				  &backup_decryption_command($key);
+			}
+
 		if ($cf == 4) {
 			# ZIP files are extracted with a single command
+			# XXX decrypt too
 			$reader = "unzip -l $q";
 			if ($asowner && $mode == 0) {
 				# Read as domain owner, to prevent access to
@@ -1416,7 +1430,7 @@ if ($ok) {
 				$reader = &command_as_user(
 					$doms[0]->{'user'}, 0, $reader);
 				}
-			&execute_command($reader, undef, \$lout, \$lout);
+			&execute_command($reader, undef, \$lout, \$lerr);
 			foreach my $l (split(/\r?\n/, $lout)) {
 				if ($l =~ /^\s*(\d+)\s*\d+\-\d+\-\d+\s+\d+:\d+\s+(.*)/) {
 					push(@lines, $2);
@@ -1429,14 +1443,10 @@ if ($ok) {
 				      $cf == 2 ? "uncompress -c" :
 				      $cf == 3 ? &get_bunzip2_command()." -c" :
 						 "cat";
-			$reader = "$comp $q";
-			if ($asowner && $mode == 0) {
-				$reader = &command_as_user(
-					$doms[0]->{'user'}, 0, $reader);
-				}
+			$reader = $catter." | ".$comp;
 			&execute_command("$reader | ".
 					 &make_tar_command("tf", "-"), undef,
-					 \$lout, \$lout);
+					 \$lout, \$lerr);
 			@lines = split(/\n/, $lout);
 			}
 		local $extract;
@@ -1459,9 +1469,23 @@ if ($ok) {
 			$extract = ".backup/*";
 			}
 
+		# If encrypted, check signature too
+		if ($key) {
+			if ($lerr !~ /Good\s+signature\s+from/ ||
+			    $lerr !~ /Signature\s+made.*key\s+ID\s+(\S+)/ ||
+			    $1 ne $key->{'key'}) {
+				&$second_print(&text('restore_badkey',
+					$key->{'key'},
+					"<pre>".&html_escape($lerr)."</pre>"));
+				$ok = 0;
+				last;
+				}
+			}
+
 		# Do the actual extraction
 		if ($cf == 4) {
 			# Using unzip command
+			# XXX gpg decrypt
 			$reader = "unzip $q $extract";
 			if ($asowner && $mode == 0) {
 				$reader = &command_as_user(
@@ -1887,7 +1911,7 @@ if ($ok) {
 						# Call the restore function
 						$fok = &$rfunc($d, $ffile,
 						     $_[3]->{$f}, $_[3], $hft,
-						     \%oldd, $asowner);
+						     \%oldd, $asowner, $key);
 						}
 					}
 				elsif (&indexof($f, @bplugins) >= 0 &&
@@ -2197,7 +2221,7 @@ else {
 	local $err;
 	local $out;
 	local $q = quotemeta($backup);
-	local $cf = &compression_format($backup);
+	local $cf = &compression_format($backup, $key);
 	local $comp;
 	if ($cf == 4) {
 		# Special handling for zip

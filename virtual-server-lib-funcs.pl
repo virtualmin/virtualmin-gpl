@@ -10312,12 +10312,19 @@ if ($_[0] && ($tmpl = &get_template($_[0]->{'template'})) &&
 return ( );
 }
 
-# compression_format(file)
+# compression_format(file, [&key])
 # Returns 0 if uncompressed, 1 for gzip, 2 for compress, 3 for bzip2 or
 # 4 for zip, 5 for tar
 sub compression_format
 {
-open(BACKUP, $_[0]);
+local ($file, $key) = @_;
+if ($key) {
+	open(BACKUP, &backup_decryption_command($key)." ".
+		     quotemeta($file)." 2>/dev/null |");
+	}
+else {
+	open(BACKUP, $file);
+	}
 local $two;
 read(BACKUP, $two, 2);
 close(BACKUP);

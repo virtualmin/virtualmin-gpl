@@ -57,6 +57,10 @@ When this is enabled, the C<--purge> flag can also be given, followed by a
 number of days. The command will then delete backups in the same desination
 directory older than the specified number of days.
 
+On a Virtualmin Pro system, you can use the C<--key> flag followed by
+a backup key ID or description to select the key to encrypt this backup with.
+Keys can be found using the C<list-backup-keys> API call.
+
 =cut
 
 package virtual_server;
@@ -379,9 +383,7 @@ print "The destination can be one of :\n";
 print " - A local file, like /backup/yourdomain.com.tgz\n";
 print " - An FTP destination, like ftp://login:pass\@server/backup/yourdomain.com.tgz\n";
 print " - An SSH destination, like ssh://login:pass\@server/backup/yourdomain.com.tgz\n";
-if ($virtualmin_pro) {
-	print " - An S3 bucket, like s3://accesskey:secretkey\@bucket\n";
-	}
+print " - An S3 bucket, like s3://accesskey:secretkey\@bucket\n";
 print "Multiple destinations can be given, if they are all remote.\n";
 exit(1);
 }

@@ -52,6 +52,10 @@ given the system's default shared IP. However, if you have defined additional
 shared addresses, a different one can be selected with the C<--shared-ip>
 flag followed by an address.
 
+On a Virtualmin Pro system, you can use the C<--key> flag followed by
+a backup key ID or description to select the key to decrypt this backup with.
+This must be the same key that the backup was originally encrypted with.
+
 =cut
 
 package virtual_server;
@@ -192,6 +196,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--skip-warnings") {
 		$skipwarnings = 1;
 		}
+	elsif ($a eq "--key") {
+		$keyid = shift(@ARGV);
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -207,6 +214,16 @@ if (@rdoms || $all_doms) {
 ($mode) = &parse_backup_url($src);
 $mode > 0 || -r $src || -d $src || &usage("Missing or invalid restore file");
 $onlymissing && $onlyexisting && &usage("The --only-missing and --only-existing flags are mutually exclusive");
+
+if ($keyid) {
+	# Validate encryption key
+	defined(&list_backup_keys) ||
+		&usage("Backup encryption is not supported on this system");
+	($key) = grep { $_->{'id'} eq $keyid ||
+		  	$_->{'key'} eq $keyid ||
+		  	$_->{'desc'} eq $keyid } &list_backup_keys();
+	$key || &usage("No backup key with ID or description $keyid exists");
+	}
 
 # Find the selected domains
 ($cont, $contdoms) = &backup_contents($src, 1);
@@ -302,7 +319,7 @@ $opts{'reuid'} = $reuid;
 $opts{'fix'} = $fix;
 &$first_print("Starting restore..");
 $ok = &restore_domains($src, \@doms, \@rfeats, \%opts, \@vbs, $onlyfeats,
-		       $ipinfo, $asowner, $skipwarnings);
+		       $ipinfo, $asowner, $skipwarnings, $key);
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV, $doms[0]);
 if ($ok) {
@@ -333,6 +350,9 @@ print "                         [--shared-ip address | --ip address |\n";
 print "                          --allocate-ip | --original-ip]\n";
 print "                         [--only-missing | --only-existing]\n";
 print "                         [--skip-warnings]\n";
+if (defined(&list_backup_keys)) {
+	print "                         [--key id]\n";
+	}
 print "\n";
 print "Multiple domains may be specified with multiple --domain parameters.\n";
 print "Features must be specified using their short names, like web and dns.\n";
@@ -341,9 +361,7 @@ print "The source can be one of :\n";
 print " - A local file, like /backup/yourdomain.com.tgz\n";
 print " - An FTP destination, like ftp://login:pass\@server/backup/yourdomain.com.tgz\n";
 print " - An SSH destination, like ssh://login:pass\@server/backup/yourdomain.com.tgz\n";
-if ($virtualmin_pro) {
-	print " - An S3 bucket, like s3://accesskey:secretkey\@bucket\n";
-	}
+print " - An S3 bucket, like s3://accesskey:secretkey\@bucket\n";
 exit(1);
 }
 
