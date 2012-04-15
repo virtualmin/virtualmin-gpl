@@ -68,11 +68,12 @@
 		- https://www.virtualmin.com/node/21544
 	- Include keys in global backups
 		- Re-import to gpg when restoring
-	- Don't allow deletion if in any backup logs
-		- Include key ID in backup log
-	- Help pages
+	- Restoring of backups
+		- Check signature too
 	- API too
 	- Functional tests
+	- CHANGELOG
+	- Documentation
 
  - Update Typo3 installer
 	- Or remove
