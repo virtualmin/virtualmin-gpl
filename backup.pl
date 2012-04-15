@@ -80,6 +80,11 @@ else {
 	$cbmode = 1;
 	}
 
+# Get the backup key
+if ($sched->{'key'} && defined(&get_backup_key)) {
+	$key = &get_backup_key($sched->{'key'});
+	}
+
 # Work out features and options
 if ($sched->{'feature_all'}) {
 	@do_features = ( &get_available_backup_features(),
@@ -138,7 +143,8 @@ $current_id = undef;
 			        $cbmode == 2,
 			        \&backup_cbfunc,
 			        $sched->{'increment'},
-			        1);
+			        1,
+				$key);
 
 # If purging old backups, do that now
 @purges = &get_scheduled_backup_purges($sched);
@@ -172,7 +178,7 @@ if ($sched->{'after'}) {
 foreach $dest (@strfdests) {
 	&write_backup_log(\@doms, $dest, $sched->{'increment'}, $start_time,
 			  $size, $ok, "sched", $output, $errdoms,
-			  $asd ? $asd->{'user'} : undef);
+			  $asd ? $asd->{'user'} : undef, $key);
 	}
 
 PREFAILED:

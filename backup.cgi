@@ -107,6 +107,13 @@ $anydownload && @dests > 1 && &error($text{'backup_edownloadmany'});
 @strfdests = $in{'strftime'} ? map { &backup_strftime($_) } @dests
 			     : @dests;
 
+# Get the backup key
+$key = undef;
+if (defined(&get_backup_key) && $in{'key'}) {
+	$key = &get_backup_key($in{'key'});
+	$key || &error($text{'backup_ekey'});
+	}
+
 # Parse option inputs
 foreach $f (@do_features) {
 	local $ofunc = "parse_backup_$f";
@@ -145,7 +152,7 @@ if ($dests[0] eq "download:") {
 				       $in{'fmt'}, $in{'errors'}, \%options,
 				       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
 				       $in{'onebyone'}, $cbmode == 2,
-				       undef, $in{'increment'});
+				       undef, $in{'increment'}, 0, $key);
 	&cleanup_backup_limits(0, 1);
 	unlink($temp.".info");
 	unlink($temp.".dom");
@@ -185,12 +192,13 @@ else {
 				       $in{'fmt'}, $in{'errors'}, \%options,
 				       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
 				       $in{'onebyone'}, $cbmode == 2,
-				       undef, $in{'increment'});
+				       undef, $in{'increment'}, undef, $key);
 	$output = &stop_print_capture();
 	&cleanup_backup_limits(0, 1);
 	foreach $dest (@strfdests) {
 		&write_backup_log(\@doms, $dest, $in{'increment'}, $start_time,
-				  $size, $ok, "cgi", $output, $errdoms);
+				  $size, $ok, "cgi", $output, $errdoms,
+				  undef, $key);
 		}
 	&run_post_actions();
 	if (!$ok) {

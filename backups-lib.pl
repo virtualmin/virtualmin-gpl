@@ -3316,12 +3316,12 @@ return 1;	# Now supported for GPL too
 }
 
 # write_backup_log(&domains, dest, incremental?, start, size, ok?,
-# 		   "cgi"|"sched"|"api", output, &errordoms, [user])
+# 		   "cgi"|"sched"|"api", output, &errordoms, [user], [&key])
 # Record that some backup was made and succeeded or failed
 sub write_backup_log
 {
 local ($doms, $dest, $increment, $start, $size, $ok, $mode,
-       $output, $errdoms, $user) = @_;
+       $output, $errdoms, $user, $key) = @_;
 if (!-d $backups_log_dir) {
 	&make_dir($backups_log_dir, 0700);
 	}
@@ -3335,6 +3335,7 @@ local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'ok' => $ok,
 	       'user' => $user || $remote_user,
 	       'mode' => $mode,
+	       'key' => $key->{'id'},
 	     );
 $main::backup_log_id_count++;
 $log{'id'} = $log{'end'}."-".$$."-".$main::backup_log_id_count;

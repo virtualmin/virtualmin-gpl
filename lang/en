@@ -2179,6 +2179,7 @@ backup_es3nopath=You must specify a filename when backing up to a single file on
 backup_es3path=You cannot specify a filename when backing up to multiple files on S3
 backup_copy=Copying to additional destination $1 ..
 backup_copyfailed=.. copy failed : $1
+backup_ekey=You are not allowed to use the selected backup key
 
 backup_dirtar=Creating TAR file of home directory ..
 backup_dirtarinc=Creating incremental TAR file of home directory ..
@@ -5507,6 +5508,10 @@ viewbackup_failure=Failed
 viewbackup_partial=Partially completed
 viewbackup_restore=Restore This Backup
 viewbackup_ecannot=You are not allowed to view this backup log
+viewbackup_enc=Encrypted backup?
+viewbackup_nopro=Yes, but encryption is not supported
+viewbackup_nokey=Yes, but with missing key $1
+viewbackup_key=Yes, with key $1
 
 redirects_title=Website Redirects
 redirects_ecannot=You are not allowed to edit website redirects for this domain

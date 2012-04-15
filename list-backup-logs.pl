@@ -142,6 +142,27 @@ if ($multi) {
 			print "    Run by user: $l->{'user'}\n";
 			}
 		print "    Run from: $l->{'mode'}\n";
+		if ($l->{'key'}) {
+			print "    Encrypted: Yes\n";
+			print "    Encryption key ID: $l->{'key'}\n";
+			if (!defined(&get_backup_key)) {
+				$key = undef;
+				print "    Encryption key state: ",
+				      "Not supported","\n";
+				}
+			else {
+				$key = &get_backup_key($l->{'key'});
+				print "    Encryption key state: ",
+				      ($key ? "Available" : "Missing"),"\n";
+				}
+			if ($key) {
+				print "    Encryption key description: ",
+				      $key->{'desc'},"\n";
+				}
+			}
+		else {
+			print "    Encrypted: No\n";
+			}
 		}
 	}
 else {

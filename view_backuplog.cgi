@@ -69,6 +69,16 @@ print &ui_table_row($text{'viewbackup_ok'},
 		"<font color=#ffaa00>$text{'viewbackup_partial'}</font>" :
 		"<font color=#ff0000>$text{'viewbackup_failure'}</font>");
 
+# Encryption key
+print &ui_table_row($text{'viewbackup_enc'},
+	!$log->{'key'} ? $text{'no'} :
+	!defined(&get_backup_key) ?
+		"<font color=#ff0000>$text{'viewbackup_nopro'}</font>" :
+	!($key = &get_backup_key($log->{'key'})) ?
+		"<font color=#ffaa00>".
+		  &text('viewbackup_nokey', $log->{'key'})."</font>" :
+		&text('viewbackup_key', "<i>$key->{'desc'}</i>"));
+
 print &ui_table_end();
 
 if (@dnames == @alldnames) {
