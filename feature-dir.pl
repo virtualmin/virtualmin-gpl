@@ -455,8 +455,9 @@ if ($asd && $homefmt) {
 	$writer = &command_as_user($asd->{'user'}, 0, $writer);
 	}
 
-# If encrypting, add gpg to the pipeline
-if ($key) {
+# If encrypting, add gpg to the pipeline - unless encryption is being done
+# at a higher level
+if ($key && $homefmt) {
 	$writer = &backup_encryption_command($key)." | ".$writer;
 	}
 
@@ -576,7 +577,7 @@ local $cf = &compression_format($file, $key);
 local $q = quotemeta($file);
 local $qh = quotemeta($d->{'home'});
 local $catter;
-if ($key) {
+if ($key && $homefmt) {
 	$catter = &backup_decryption_command($key)." ".$q;
 	}
 else {
