@@ -2237,6 +2237,7 @@ backup_webminfailed=.. tar failed : $1
 backup_webminproto=.. not required, as the Webmin user is in a remote data store
 backup_esamelock=A backup to the same destination is already running with PID $1
 backup_etarcmd=The <tt>tar</tt> command was not found on your system!
+backup_ezipkey=Encryption cannot be used with ZIP format backups
 backup_eftptest=Failed to connect to FTP server : $1
 backup_escptest=Failed to connect to SSH server : $1
 backup_edirtest=Cannot backup multiple domains to $1, as it is not a directory

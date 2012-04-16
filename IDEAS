@@ -68,10 +68,9 @@
 		- https://www.virtualmin.com/node/21544
 	- Include keys in global backups
 		- Re-import to gpg when restoring
-	- Restoring of backups
-		- ZIP support
 	- Test with owners
 	- Functional tests
+		- Test all formats, plus local and remote
 	- CHANGELOG
 	- Documentation
 

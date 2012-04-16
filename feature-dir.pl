@@ -586,7 +586,6 @@ else {
 if ($cf == 4) {
 	# Unzip command does un-compression and un-archiving
 	# XXX ZIP doesn't support excludes of paths :-(
-	# XXX GPG
 	&execute_command("cd $qh && unzip -o $q", undef, \$out, \$out);
 	}
 else {

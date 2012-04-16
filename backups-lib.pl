@@ -215,6 +215,12 @@ if (!&get_tar_command()) {
 	return (0, 0, $doms);
 	}
 
+# Check for clash between encryption and backup format
+if ($key && $config{'compression'} == 3) {
+	&$first_print($text{'backup_ezipkey'});
+	return (0, 0, $doms);
+	}
+
 # Order destinations to put local ones first
 @$desturls = sort { ($a =~ /^\// ? 0 : 1) <=> ($b =~ /^\// ? 0 : 1) }
 		  @$desturls;
@@ -1422,7 +1428,6 @@ if ($ok) {
 
 		if ($cf == 4) {
 			# ZIP files are extracted with a single command
-			# XXX decrypt too
 			$reader = "unzip -l $q";
 			if ($asowner && $mode == 0) {
 				# Read as domain owner, to prevent access to
@@ -1485,7 +1490,6 @@ if ($ok) {
 		# Do the actual extraction
 		if ($cf == 4) {
 			# Using unzip command
-			# XXX gpg decrypt
 			$reader = "unzip $q $extract";
 			if ($asowner && $mode == 0) {
 				$reader = &command_as_user(
