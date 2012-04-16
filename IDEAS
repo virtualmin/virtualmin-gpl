@@ -66,8 +66,6 @@
 	- Cloudmin too
 	- Allow resellers to restore
 		- https://www.virtualmin.com/node/21544
-	- Include keys in global backups
-		- Re-import to gpg when restoring
 	- Test with owners
 	- Functional tests
 		- Test all formats, plus local and remote

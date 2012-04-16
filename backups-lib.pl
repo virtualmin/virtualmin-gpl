@@ -1552,9 +1552,7 @@ if ($ok) {
 	if (@$vbs) {
 		&$first_print($text{'restore_global2'});
 		&$indent_print();
-		print STDERR `ls -la $restoredir`;
 		foreach my $v (@$vbs) {
-			print STDERR "v=$v\n";
 			local $vfile = "$restoredir/virtualmin_".$v;
 			if (-r $vfile) {
 				local $vfunc = "virtualmin_restore_".$v;

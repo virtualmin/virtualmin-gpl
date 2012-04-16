@@ -5439,11 +5439,15 @@ return 1;
 }
 
 # virtualmin_backup_scheds(file, &vbs)
-# Create a tar file of all scheduled backups
+# Create a tar file of all scheduled backups and keys
 sub virtualmin_backup_scheds
 {
 local ($file, $vbs) = @_;
-&$first_print($text{'backup_vscheds_doing'});
+local $dokeys = defined(&list_backup_keys) && scalar(&list_backup_keys());
+&$first_print($dokeys ? $text{'backup_vscheds_doing2'}
+		      : $text{'backup_vscheds_doing'});
+
+# Tar up scheduled backups dir
 local $temp = &transname();
 mkdir($temp, 0700);
 foreach my $sched (&list_scheduled_backups()) {
@@ -5452,6 +5456,13 @@ foreach my $sched (&list_scheduled_backups()) {
 &execute_command("cd ".quotemeta($temp)." && ".
 		 &make_tar_command("cf", quotemeta($file), "."));
 &unlink_file($temp);
+
+# Also tar up keys dir
+if ($dokeys) {
+	&execute_command("cd ".quotemeta($backup_keys_dir)." && ".
+			 &make_tar_command("cf", quotemeta($file."_keys"),"."));
+	}
+
 &$second_print($text{'setup_done'});
 return 1;
 }
@@ -5461,7 +5472,9 @@ return 1;
 sub virtualmin_restore_scheds
 {
 local ($file, $vbs) = @_;
-&$first_print($text{'restore_vscheds_doing'});
+local $dokeys = -r $file."_keys" && defined(&list_backup_keys);
+&$first_print($dokeys ? $text{'restore_vscheds_doing'}
+		      : $text{'restore_vscheds_doing2'});
 
 # Extract backup file
 local $temp = &transname();
@@ -5486,6 +5499,22 @@ foreach my $t (readdir(BACKUPDIR)) {
 	&save_scheduled_backup(\%sched);
 	}
 closedir(BACKUPDIR);
+
+# Extract dir of backup keys, then re-save each to re-import to root
+if ($dokeys) {
+	local %oldkeys = map { $_->{'id'}, 1 } &list_backup_keys();
+	&make_dir($backup_keys_dir, 0700) if (!-d $backup_keys_dir);
+	&execute_command("cd ".quotemeta($backup_keys_dir)." && ".
+			 &make_tar_command("xf", quotemeta($file."_keys")));
+	foreach my $key (&list_backup_keys()) {
+		if (!$oldkey{$key->{'id'}}) {
+			eval {
+				$main::error_must_die = 1;
+				&save_backup_key($key, 1);
+				};
+			}
+		}
+	}
 
 &$second_print($text{'setup_done'});
 return 1;
