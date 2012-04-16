@@ -52,6 +52,14 @@ if ($src eq "upload:") {
 ($mode) = &parse_backup_url($src);
 $mode > 0 || -r $src || -d $src || &error($text{'restore_esrc'});
 
+# Get the backup key
+$key = undef;
+if (defined(&get_backup_key) && $in{'key'}) {
+	$key = &get_backup_key($in{'key'});
+	$key || &error($text{'backup_ekey'});
+	&can_backup_key($key) || &error($text{'backup_ekeycannot'});
+	}
+
 # Parse features
 if ($in{'feature_all'}) {
 	# All features usable by current user
@@ -114,7 +122,7 @@ if ($crmode == 1) {
 		}
 	}
 
-($cont, $contdoms) = &backup_contents($src, 1);
+($cont, $contdoms) = &backup_contents($src, 1, $key);
 if (!$in{'confirm'}) {
 	# See what is in the tar file or directory, to show the user
 	ref($cont) || &error(&text('restore_efile', $cont));
@@ -275,7 +283,7 @@ else {
 		}
 	$ok = &restore_domains($src, \@doms, \@do_features, \%options, \@vbs,
 			       $in{'only'}, $ipinfo, !$safe_backup,
-			       $in{'skipwarnings'});
+			       $in{'skipwarnings'}, $key);
 	&run_post_actions();
 	if ($ok) {
 		print &text('restore_done'),"<p>\n";

@@ -1412,8 +1412,8 @@ if ($ok) {
 		# possibly with decryption
 		local $catter = "cat $q";
 		if ($asowner && $mode == 0) {
-			$reader = &command_as_user(
-				$doms[0]->{'user'}, 0, $reader);
+			$catter = &command_as_user(
+				$doms[0]->{'user'}, 0, $catter);
 			}
 		if ($key) {
 			$catter = $catter." | ".
@@ -2053,13 +2053,13 @@ if ($mode > 0) {
 return $ok;
 }
 
-# backup_contents(file, [want-domains])
+# backup_contents(file, [want-domains], [&key])
 # Returns a hash ref of domains and features in a backup file, or an error
 # string if it is invalid. If the want-domains flag is given, the domain
 # structures are also returned as a list of hash refs (except for S3).
 sub backup_contents
 {
-local ($file, $wantdoms) = @_;
+local ($file, $wantdoms, $key) = @_;
 local $backup;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($file);
 local $doms;
@@ -2187,10 +2187,11 @@ if (-d $backup) {
 		next if ($f eq "." || $f eq ".." || $f =~ /\.(info|dom)$/);
 		local ($cont, $fdoms);
 		if ($wantdoms) {
-			($cont, $fdoms) = &backup_contents("$backup/$f", 1);
+			($cont, $fdoms) = &backup_contents(
+						"$backup/$f", 1, $key);
 			}
 		else {
-			$cont = &backup_contents("$backup/$f", 0);
+			$cont = &backup_contents("$backup/$f", 0, $key);
 			}
 		if (ref($cont)) {
 			# Merge in contents of file
@@ -2228,12 +2229,20 @@ else {
 		$out = &backquote_command("unzip -l $q 2>&1");
 		}
 	else {
+		local $catter;
+		if ($key) {
+			$catter = &backup_decryption_command($key)." ".$q;
+			}
+		else {
+			$catter = "cat $q";
+			}
 		$comp = $cf == 1 ? "gunzip -c" :
 			$cf == 2 ? "uncompress -c" :
 			$cf == 3 ? &get_bunzip2_command()." -c" :
 				   "cat";
 		$out = &backquote_command(
-			"($comp $q | ".&make_tar_command("tf", "-").") 2>&1");
+			"($catter | $comp | ".
+			&make_tar_command("tf", "-").") 2>&1");
 		}
 	if ($?) {
 		return $text{'restore_etar'};

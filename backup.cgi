@@ -112,6 +112,7 @@ $key = undef;
 if (defined(&get_backup_key) && $in{'key'}) {
 	$key = &get_backup_key($in{'key'});
 	$key || &error($text{'backup_ekey'});
+	&can_backup_key($key) || &error($text{'backup_ekeycannot'});
 	}
 
 # Parse option inputs

@@ -20,6 +20,7 @@ elsif ($in{'log'}) {
 	$log || &error($text{'viewbackup_egone'});
 	&can_backup_log($log) || &error($text{'viewbackup_ecannot'});
 	$sched = { 'feature_all' => 1,
+		   'key' => $log->{'key'},
 		   'dest' => $log->{'dest'} };
 	$safe_backup = $log->{'owner'} eq $remote_user ? 0 : 1;
 	}
@@ -63,6 +64,17 @@ else {
 	print &ui_table_row($text{'restore_src'},
 		&show_backup_destination("src", $dest, $crmode == 2, $d, 1, 0));
 	}
+
+# Show decryption key field
+@allkeys = defined(&list_backup_keys) ? &list_available_backup_keys() : ( );
+if (@allkeys) {
+	print &ui_table_row($text{'restore_key'},
+		&ui_select("key", $sched->{'key'},
+			   [ [ "", "&lt;$text{'restore_nokey'}&gt;" ],
+		 	     map { [ $_->{'id'}, $_->{'desc'} ] } @allkeys ],
+			   1, 0, 1));
+	}
+
 print &ui_hidden_table_end("source");
 
 # Show feature selection boxes

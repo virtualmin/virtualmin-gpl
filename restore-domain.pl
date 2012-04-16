@@ -226,7 +226,7 @@ if ($keyid) {
 	}
 
 # Find the selected domains
-($cont, $contdoms) = &backup_contents($src, 1);
+($cont, $contdoms) = &backup_contents($src, 1, $key);
 ref($cont) || &usage("Failed to read backup file : $cont");
 (keys %$cont) || &usage("Nothing in backup file!");
 if ($all_doms) {

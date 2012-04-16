@@ -69,8 +69,8 @@
 	- Include keys in global backups
 		- Re-import to gpg when restoring
 	- Restoring of backups
-		- UI
 		- ZIP support
+	- Test with owners
 	- Functional tests
 	- CHANGELOG
 	- Documentation
