@@ -2412,6 +2412,7 @@ $splitbackup_tests = [
 		      [ 'newformat' ],
 		      [ 'dest', $ssh_backup_prefix ],
 		      [ 'dest', $ftp_backup_prefix ] ],
+	  'timeout' => 300,
 	},
 
 	# Restore via SSH
@@ -2435,6 +2436,7 @@ $splitbackup_tests = [
 		      [ 'all-features' ],
 		      [ 'dest', $ssh_backup_prefix."/onefile.tar.gz" ],
 		      [ 'dest', $ftp_backup_prefix."/onefile.tar.gz" ] ],
+	  'timeout' => 300,
 	},
 
 	# Restore via SSH from a single file
