@@ -130,6 +130,11 @@ for(my $i=0; $i<$tries; $i++) {
 	local ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
 	local $h = &make_http_connection(
 		$host, $port, $ssl, $req->method, $page);
+	if (!ref($h)) {
+		$err = "HTTP connection to ${host}:${port} ".
+		       "for $page failed : $h";
+		next;
+		}
 	foreach my $hfn ($req->header_field_names) {
 		&write_http_connection($h, $hfn.": ".$req->header($hfn)."\r\n");
 		}
