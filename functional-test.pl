@@ -190,6 +190,12 @@ $_config_tests = [
 	
 	# Bandwidth monitoring enabled?
 	{ 'command' => 'grep bw_active=1 '.$module_config_directory.'/config' },
+
+	defined(&list_backup_keys) ?
+		( { 'command' => 'list-backup-keys',
+		    'args' => [ [ 'multiline' ] ],
+		    'grep' => 'Description' } ) :
+		( ),
 	];
 
 $domains_tests = [
@@ -1755,6 +1761,8 @@ $backup_tests = [
 	  'args' => [ [ 'domain', $test_domain ] ],
 	  'cleanup' => 1 },
 	];
+
+$enc_backup_tests = &convert_to_encrypted($backup_tests);
 
 $dbbackup_tests = [
 	# Create a domain to be backed up
@@ -5720,6 +5728,7 @@ $alltests = { '_config' => $_config_tests,
 	      'remotebackup' => $remotebackup_tests,
 	      'configbackup' => $configbackup_tests,
 	      'ipbackup' => $ipbackup_tests,
+	      'enc_backup' => $enc_backup_tests,
 	      'purge' => $purge_tests,
 	      'incremental' => $incremental_tests,
               'mail' => $mail_tests,
@@ -6001,4 +6010,27 @@ return (
 	},
 	);
 
+}
+
+# convert_to_encrypted(&tests)
+# Returns a list of tests with backup and restore commands modified to use
+# a key
+sub convert_to_encrypted
+{
+local ($tests) = @_;
+if (!defined(&list_backup_keys)) {
+	return [ ];
+	}
+local ($key) = &list_backup_keys();
+local $rv = [ ];
+foreach my $t (@$tests) {
+	my $nt = { %$t };
+	if ($nt->{'command'} eq 'backup-domain.pl' ||
+	    $nt->{'command'} eq 'restore-domain.pl') {
+		$nt->{'args'} = [ @{$nt->{'args'}},
+				  [ 'key' => $key->{'id'} ] ];
+		}
+	push(@$rv, $nt);
+	}
+return $rv;
 }

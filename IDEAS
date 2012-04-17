@@ -62,7 +62,6 @@
 	- Same for CLoudmin
 
  - Backup encryption / signing
-	- GPG
 	- Cloudmin too
 	- Allow resellers to restore
 		- https://www.virtualmin.com/node/21544

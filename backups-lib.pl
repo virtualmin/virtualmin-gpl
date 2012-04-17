@@ -742,7 +742,7 @@ if (@$vbs) {
 if ($ok) {
 	# Work out command for writing to backup destination (which may use
 	# su, so that permissions are correct)
-	local $out;
+	local ($out, $err);
 	if ($homefmt) {
 		# No final step is needed for home-format backups, because
 		# we have already reached it!
@@ -805,7 +805,7 @@ if ($ok) {
 				&execute_command("cd $backupdir && ".
 					 "zip -r - $d->{'dom'}_* | ".
 					 $writer,
-					 undef, \$out);
+					 undef, \$out, \$err);
 				}
 			else {
 				&execute_command(
@@ -813,11 +813,12 @@ if ($ok) {
 					"(".&make_tar_command(
 					    "cf", "-", "$d->{'dom'}_*")." | ".
 					"$comp) 2>&1 | $writer",
-					undef, \$out);
+					undef, \$out, \$err);
 				}
 			push(@destfiles, $destfile);
 			$destfiles_map{$destfile} = $d;
-			if ($?) {
+			if ($? || !-s "$dest/$destfile") {
+				$out ||= $err;
 				&unlink_file("$dest/$destfile");
 				&$second_print(&text('backup_finalfailed',
 						     "<pre>$out</pre>"));
@@ -865,15 +866,16 @@ if ($ok) {
 			# Use zip command to archive and compress
 			&execute_command("cd $backupdir && ".
 					 "zip -r - . | $writer",
-					 undef, \$out);
+					 undef, \$out, \$err);
 			}
 		else {
 			&execute_command("cd $backupdir && ".
 					 "(".&make_tar_command("cf", "-", ".").
 					 " | $comp) 2>&1 | $writer",
-					 undef, \$out);
+					 undef, \$out, \$err);
 			}
-		if ($?) {
+		if ($? || !-s $dest) {
+			$out ||= $err;
 			&$second_print(&text('backup_finalfailed',
 					     "<pre>$out</pre>"));
 			$ok = 0;

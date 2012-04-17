@@ -490,7 +490,7 @@ if (-r $ifile) {
 	&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
 				   0700, $ifile);
 	}
-if ($ex) {
+if ($ex || !-s $file) {
 	&$second_print(&text($cmd =~ /^\S*zip/ ? 'backup_dirzipfailed'
 					       : 'backup_dirtarfailed',
 			     "<pre>".&html_escape($out)."</pre>"));
