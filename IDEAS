@@ -71,7 +71,3 @@
 
  - Update Typo3 installer
 	- Or remove
-
- - Hashed password fixes
-	- Show warning about MySQL password mismatch
-	- Allow it to be turned off for an existing domain

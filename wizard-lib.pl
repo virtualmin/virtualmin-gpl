@@ -466,6 +466,7 @@ print &ui_table_row($text{'wizard_hashpass_mode'},
 	&ui_radio("hashpass", $tmpl->{'hashpass'} ? 1 : 0,
 		  [ [ 0, $text{'wizard_hashpass_mode0'}."<br>" ],
 		    [ 1, $text{'wizard_hashpass_mode1'} ] ]));
+print &ui_table_row(undef, "<b>$text{'wizard_hashpass_warn'}</b>", 2);
 }
 
 sub wizard_parse_hashpass

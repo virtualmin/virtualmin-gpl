@@ -4247,6 +4247,7 @@ pass_eresel=Could not find reseller!
 pass_eadmin=Could not find administrator!
 pass_changing=Changing reseller password ..
 pass_changing2=Changing administrator password ..
+pass_hashpass=Only store hashed password for this domain?
 
 dbname_err=Failed to change database usernames
 dbname_euser=Missing or invalid username
@@ -5467,6 +5468,7 @@ wizard_hashpass=Virtualmin gives you the option of storing plain-text passwords 
 wizard_hashpass_mode=Password storage mode
 wizard_hashpass_mode1=Only store hashed passwords
 wizard_hashpass_mode0=Store plain-text passwords
+wizard_hashpass_warn=Warning - when hashed passwords are used, password recovery for virtual servers will no longer be possible. In addition, the MySQL password for new servers will different from the administration password, and will be randomly generated.
 
 backuplog_title=Backup Logs
 backuplog_ecannot=You are not allowed to view Virtualmin backup logs
