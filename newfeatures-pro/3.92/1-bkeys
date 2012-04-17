@@ -1,0 +1,6 @@
+desc=Encrypted backups
+html=Virtualmin backups can now be signed and encrypted, using GPG keys created within Virtualmin or imported from an existing file. This protects backups from snooping or modification when stored on an untrusted remote system.
+link=list_bkeys.cgi
+master=1
+reseller=1
+domain=1
