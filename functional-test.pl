@@ -1955,6 +1955,8 @@ $dbbackup_tests = [
 	},
 	];
 
+$enc_dbbackup_tests = &convert_to_encrypted($dbbackup_tests);
+
 $multibackup_tests = [
 	# Create a parent domain to be backed up
 	{ 'command' => 'create-domain.pl',
@@ -2115,6 +2117,8 @@ $multibackup_tests = [
 	  'cleanup' => 1 },
 
 	];
+
+$enc_multibackup_tests = &convert_to_encrypted($multibackup_tests);
 
 $remote_backup_dir = "/home/$test_target_domain_user";
 $ssh_backup_prefix = "ssh://$test_target_domain_user:smeg\@localhost".
@@ -2278,6 +2282,8 @@ $remotebackup_tests = [
 	  'cleanup' => 1,
 	},
 	];
+
+$enc_remotebackup_tests = &convert_to_encrypted($remotebackup_tests);
 
 $splitbackup_tests = [
 	# Create a domain for the backup target
@@ -2473,6 +2479,8 @@ $splitbackup_tests = [
 	  'cleanup' => 1 },
 	];
 
+$enc_splitbackup_tests = &convert_to_encrypted($splitbackup_tests);
+
 $incremental_tests = [
 	# Create a test domain
 	{ 'command' => 'create-domain.pl',
@@ -2562,6 +2570,8 @@ $incremental_tests = [
 	  'cleanup' => 1,
 	},
 	];
+
+$enc_incremental_tests = &convert_to_encrypted($incremental_tests);
 
 $purge_tests = [
 	# Create a test domain to backup
@@ -4957,6 +4967,8 @@ $configbackup_tests = [
 	  'cleanup' => 1 },
 	];
 
+$enc_configbackup_tests = &convert_to_encrypted($configbackup_tests);
+
 $clone_tests = [
 	# Create a parent domain to be cloned
 	{ 'command' => 'create-domain.pl',
@@ -5723,14 +5735,19 @@ $alltests = { '_config' => $_config_tests,
 	      'move' => $move_tests,
 	      'backup' => $backup_tests,
 	      'dbbackup' => $dbbackup_tests,
-	      'multibackup' => $multibackup_tests,
-	      'splitbackup' => $splitbackup_tests,
-	      'remotebackup' => $remotebackup_tests,
-	      'configbackup' => $configbackup_tests,
-	      'ipbackup' => $ipbackup_tests,
 	      'enc_backup' => $enc_backup_tests,
+	      'multibackup' => $multibackup_tests,
+	      'enc_multibackup' => $enc_multibackup_tests,
+	      'splitbackup' => $splitbackup_tests,
+	      'enc_splitbackup' => $enc_splitbackup_tests,
+	      'remotebackup' => $remotebackup_tests,
+	      'enc_remotebackup' => $enc_remotebackup_tests,
+	      'configbackup' => $configbackup_tests,
+	      'enc_configbackup' => $enc_configbackup_tests,
+	      'ipbackup' => $ipbackup_tests,
 	      'purge' => $purge_tests,
 	      'incremental' => $incremental_tests,
+	      'enc_incremental' => $enc_incremental_tests,
               'mail' => $mail_tests,
 	      'prepost' => $prepost_tests,
 	      'webmin' => $webmin_tests,
@@ -5759,12 +5776,21 @@ if (!$virtualmin_pro) {
 	delete($alltests->{'script'});
 	}
 
-# Run selected tests
-$total_failed = 0;
+# Find tests to run
 if (!@tests) {
 	@tests = sort { $a cmp $b } (keys %$alltests);
 	}
+else {
+	for($i=0; $i<@tests; $i++) {
+		@match = grep { /^$tests[$i]$/ } (keys %$alltests);
+		@match || die "No test named or matching $tests[$i]";
+		splice(@tests, $i, 1, @match);
+		}
+	}
 @tests = grep { &indexof($_, @skips) < 0 } @tests;
+
+# Run selected tests
+$total_failed = 0;
 @failed_tests = ( );
 foreach $tt (@tests) {
 	# Cleanup backups first

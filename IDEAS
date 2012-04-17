@@ -66,8 +66,6 @@
 	- Allow resellers to restore
 		- https://www.virtualmin.com/node/21544
 	- Test with owners
-	- Functional tests
-		- Test all formats, plus local and remote
 	- CHANGELOG
 	- Documentation
 
