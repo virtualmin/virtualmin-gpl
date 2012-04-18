@@ -4878,7 +4878,8 @@ foreach $f (&list_mail_plugins()) {
 local $u;
 local $did = $d ? $d->{'id'} : 0;
 local @table;
-foreach $u (@$users) {
+foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
+		   $a->{'user'} cmp $b->{'user'} } @$users) {
 	local $pop3 = $d ? &remove_userdom($u->{'user'}, $d) : $u->{'user'};
 	$pop3 = &html_escape($pop3);
 	local @cols;
