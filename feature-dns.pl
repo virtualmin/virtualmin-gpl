@@ -1421,6 +1421,33 @@ if (&domain_has_website($d)) {
 		}
 	}
 
+# If domain has email, make sure MX record points to this system
+if ($d->{'mail'} && $config{'mx_validate'}) {
+	local @mxs = grep { $_->{'name'} eq $d->{'dom'}.'.' &&
+			    $_->{'type'} eq 'MX' } @$recs;
+	local $defip = &get_default_ip();
+	if (@mxs) {
+		local $found;
+		local @mxips;
+		foreach my $mx (@mxs) {
+			local $mxh = $mx->{'values'}->[1];
+			$mxh .= ".".$d->{'dom'} if ($mxh !~ /\.$/);
+			$mxh =~ s/\.$//;
+			local $ip = &to_ipaddress($mxh);
+			if ($ip eq $d->{'ip'} ||
+			    $ip eq $d->{'dns_ip'} ||
+			    $ip eq $defip) {
+				$found = $ip;
+				last;
+				}
+			push(@mxips, $mxh);
+			}
+		if (!$found) {
+			return &text('validate_ednsmx', join(" ", @mxips));
+			}
+		}
+	}
+
 # If possible, run named-checkzone
 if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
     !$d->{'provision_dns'} && !$d->{'dns_submode'} && !$recsonly) {

@@ -200,3 +200,4 @@ hashpass=0
 maillog_hide=0
 own_restore=0
 sni_support=0
+mx_validate=1

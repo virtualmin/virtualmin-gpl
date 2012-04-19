@@ -4103,6 +4103,7 @@ validate_ednscheck=The following errors were found in the DNS records : $1
 validate_ednsslave=DNS zone does not exist on slave server $1
 validate_ednsslave2=Failed to check for DNS zone on slave server $1 : $2
 validate_ednsip=The DNS record $1 resolves to the IP address $2 instead of the virtual server's IP $3
+validate_ednsmx=This domain has email enabled, but none of the MX records $1 point to it. Either the MX records should be corrected, or the email feature disabled if mail is hosted externally.
 validate_eweb=No Apache virtual host for $1 found
 validate_ewebphp=Missing wrapper script for PHP $1 - $2
 validate_ewebphpsuexec=PHP is configured to run as the domain owner, but SuExec is not enabled!
