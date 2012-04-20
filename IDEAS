@@ -63,10 +63,9 @@
 	- Same for CLoudmin
 
  - Backup encryption / signing
-	- Cloudmin too
 	- Allow resellers to restore
 		- https://www.virtualmin.com/node/21544
-	- Test with owners
+	- If owner is renamed, update all keys (and scheduled backups)
 
  - Update Typo3 installer
 	- Or remove

@@ -5855,6 +5855,7 @@ bkeys_eused=The key $2 is in use by $1 scheduled backups
 bkeys_eused2=The key $2 is in use by a scheduled backup to $1
 bkeys_rusure=Are you sure you want to delete the $1 selected backup encryption keys?
 bkeys_rusuerlogs=These keys have been used to encrypt $1 previous backups, which will be un-restorable without them.
+bkeys_all=Allow domain owners to use key?
 
 bkey_create=Create Encryption Key
 bkey_edit=Edit Encryption Key
