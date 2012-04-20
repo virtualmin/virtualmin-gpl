@@ -56,18 +56,12 @@
 	- Namecheap too
 	- Pro only
 
- - Amazon linux GPL AMI
-	- vm2 create-ec2-image --host ec2-107-22-145-102.compute-1.amazonaws.com --account 541491349868 --bucket amazon-virtualmin-gpl-391 --size 10000 --public --no-serial
-
  - Change domain creation form to wizard
 	- Same for CLoudmin
 
  - Backup encryption / signing
 	- Allow resellers to restore
 		- https://www.virtualmin.com/node/21544
-	- If owner is renamed, update all keys (and scheduled backups)
 
  - Update Typo3 installer
 	- Or remove
-
- - Allow renaming of cloned modules

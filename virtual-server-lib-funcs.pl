@@ -11635,6 +11635,11 @@ if (defined(&list_domain_scripts)) {
 	&$second_print($text{'setup_done'});
 	}
 
+# Fix backup schedule and key owners
+if (!$oldd->{'parent'}) {
+	&rename_backup_owner($d, $oldd);
+	}
+
 # Save the domain objects
 &$first_print($text{'save_domain'});
 for(my $i=0; $i<@doms; $i++) {

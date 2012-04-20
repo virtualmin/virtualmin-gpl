@@ -277,6 +277,11 @@ if (defined(&list_domain_scripts)) {
 	&$second_print($text{'setup_done'});
 	}
 
+# Fix backup schedule and key owners
+if (!$oldd{'parent'}) {
+	&rename_backup_owner($d, \%oldd);
+	}
+
 &refresh_webmin_user($d);
 &run_post_actions();
 
