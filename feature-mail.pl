@@ -2740,17 +2740,19 @@ if (&foreign_available("mailboxes")) {
 		# Read a Unix user's mail
 		if ($config{'mail_system'} == 5) {
 			return "../mailboxes/list_mail.cgi?user=".
-			       $_[0]->{'user'}."\@".$_[1]->{'dom'};
+			       $_[0]->{'user'}."\@".$_[1]->{'dom'}.
+			       "&dom=".$_[1]->{'id'};
 			}
 		else {
 			return "../mailboxes/list_mail.cgi?user=".
-			       $_[0]->{'user'};
+			       $_[0]->{'user'}."&dom=".$_[1]->{'id'};
 			}
 		}
 	else {
 		# Access mail file directly
 		return "../mailboxes/list_mail.cgi?user=".
-			&urlize(user_mail_file($_[0]));
+			&urlize(user_mail_file($_[0])).
+			"&dom=".$_[1]->{'id'};
 		}
 	}
 else {
