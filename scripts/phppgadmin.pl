@@ -174,7 +174,7 @@ foreach $l (@$lref) {
 local $url = &script_path_url($d, $opts);
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
-return (1, "phpPgAdmin installation complete. It can be accessed at <a target=_blank/g href='$url'>$url</a>.", "Under $rp", $url, $dbuser, $dbpass);
+return (1, "phpPgAdmin installation complete. It can be accessed at <a target=_blank href='$url'>$url</a>.", "Under $rp", $url, $dbuser, $dbpass);
 }
 
 # script_phppgadmin_uninstall(&domain, version, &opts)

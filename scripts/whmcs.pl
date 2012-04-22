@@ -80,7 +80,7 @@ else {
 	$rv .= &ui_table_row("WHMCS license key",
 			     &ui_textbox("licensekey", undef, 30));
 	$rv .= &ui_table_row(" ",
-		"You must purchase an <a href='http://www.whmcs.com/members/aff.php?aff=4115' target=_blank/g>WHMCS license</a> before installing this script");
+		"You must purchase an <a href='http://www.whmcs.com/members/aff.php?aff=4115' target=_blank>WHMCS license</a> before installing this script");
 	}
 return $rv;
 }
@@ -430,7 +430,7 @@ if (!$upgrade) {
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
 local $adminurl = $url."admin/";
-return (1, "WHMCS installation complete. It can be accessed at <a href=$url target=_blank/g>$url</a> and managed at <a href=$adminurl target=_blank/g>$adminurl</a>. For more information, see <a href=http://wiki.whmcs.com/Installing_WHMCS target=_blank/g>http://wiki.whmcs.com/Installing_WHMCS</a> and <a href=http://wiki.whmcs.com/Virtualmin_Pro target=_blank/g>http://wiki.whmcs.com/Virtualmin_Pro</a>.",
+return (1, "WHMCS installation complete. It can be accessed at <a href=$url target=_blank>$url</a> and managed at <a href=$adminurl target=_blank>$adminurl</a>. For more information, see <a href=http://wiki.whmcs.com/Installing_WHMCS target=_blank>http://wiki.whmcs.com/Installing_WHMCS</a> and <a href=http://wiki.whmcs.com/Virtualmin_Pro target=_blank>http://wiki.whmcs.com/Virtualmin_Pro</a>.",
 	"Under $rp using $dbphptype database $dbname", $url,
 	$domuser, $dompass);
 }
