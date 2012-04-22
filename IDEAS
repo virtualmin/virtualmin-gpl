@@ -59,9 +59,5 @@
  - Change domain creation form to wizard
 	- Same for CLoudmin
 
- - Backup encryption / signing
-	- Allow resellers to restore
-		- https://www.virtualmin.com/node/21544
-
  - Update Typo3 installer
 	- Or remove

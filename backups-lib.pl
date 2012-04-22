@@ -3049,8 +3049,8 @@ if (&master_admin()) {
 	}
 else {
 	if (&reseller_admin()) {
-		# Resellers cannot restore for now
-		return 0;
+		# Resellers can do limited restores
+		return 2;
 		}
 	else {
 		# Domain owners can only restore if allowed
