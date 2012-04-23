@@ -47,6 +47,15 @@ if ($in{'switch'}) {
 	&redirect($url);
 	return;
 	}
+elsif ($in{'remail'}) {
+	# Re-send signup email
+	&error_setup($text{'user_err2'});
+	@erv = &send_user_email($d, $user, $user->{'email'}, 0);
+	if (!$erv[0]) {
+		&error($erv[1]);
+		}
+	&redirect($d ? "list_users.cgi?dom=$in{'dom'}" : "index.cgi");
+	}
 elsif ($in{'delete'}) {
 	# Just deleting a user
 	if ($in{'confirm'}) {
