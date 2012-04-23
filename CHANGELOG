@@ -1338,5 +1338,5 @@ When cloning a virtual server with a private IP, a new address for the clone can
 Extra administrators can now be granted permissions to edit DNS records and options.
 When calling the remote API with the json, perl or xml format flags, multiline mode is automatically enabled so that the output from commands can be correctly parsed. API errors are also returned using the selected format.
 ---- Changes since 3.91 ----
-Updated the Mantis script installer to version 1.2.10, ZenPhoto to 1.4.2.3, phpMyAdmin to 3.5.0, Gallery to 2.3.2, phpMyFAQ to 2.7.5, SugarCRM to 6.4.3, WordPress to 3.3.2, DokuWiki to 2012-01-25a, vTigerCRM to 5.4.0, and Joomla to 2.5.4.
+Updated the Mantis script installer to version 1.2.10, ZenPhoto to 1.4.2.3, phpMyAdmin to 3.5.0, Gallery to 2.3.2, phpMyFAQ to 2.7.5, SugarCRM to 6.4.3, WordPress to 3.3.2, DokuWiki to 2012-01-25a, vTigerCRM to 5.4.0, Typo3 to 4.6.8, and Joomla to 2.5.4.
 Virtualmin backups can now be signed and encrypted, using GPG keys created within Virtualmin or imported from an existing file. This protects backups from snooping or modification when stored on an untrusted remote system.

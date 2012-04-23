@@ -59,5 +59,4 @@
  - Change domain creation form to wizard
 	- Same for CLoudmin
 
- - Update Typo3 installer
-	- Or remove
+ - Re-send signup email for mailbox
