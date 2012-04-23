@@ -398,9 +398,7 @@ $domain = lc(&parse_domain_name($domain));
 $err = &valid_domain_name($domain);
 &usage($err) if ($err);
 &lock_domain_name($domain);
-foreach $d (&list_domains()) {
-        usage($text{'setup_edomain4'}) if (lc($d->{'dom'}) eq lc($domain));
-        }
+&domain_name_clash($domain) && &usage($text{'setup_edomain4'});
 if ($parentdomain) {
 	$parent = &get_domain_by("dom", $parentdomain);
 	$parent || &usage("Parent domain does not exist");

@@ -77,8 +77,7 @@ foreach $line (@lines) {
 		&line_error($text{'setup_eowner'});
 		next;
 		}
-	local $clash = &get_domain_by("dom", $dname);
-	if ($clash) {
+	if (&domain_name_clash($dname)) {
 		&line_error($text{'setup_edomain4'});
 		next;
 		}

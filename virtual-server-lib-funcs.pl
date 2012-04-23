@@ -6854,6 +6854,17 @@ print &ui_confirmation_form(
 return 1;
 }
 
+# domain_name_clash(name)
+# Returns 1 if some domain name is already in use
+sub domain_name_clash
+{
+local ($domain) = @_;
+foreach my $d (&list_domains()) {
+        return 1 if (lc($d->{'dom'}) eq lc($domain));
+        }
+return 0;
+}
+
 # create_virtual_server(&domain, [&parent-domain], [parent-user], [no-scripts],
 #			[no-post-actions], [password])
 # Given a complete domain object, setup all it's features

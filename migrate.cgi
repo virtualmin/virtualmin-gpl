@@ -87,7 +87,7 @@ if ($err) {
 	&$second_print(&text('migrate_evalidate', $err));
 	goto DONE;
 	}
-elsif (&get_domain_by("dom", $domain)) {
+elsif (&domain_name_clash($domain)) {
 	&$second_print($text{'migrate_eclash'});
 	goto DONE;
 	}

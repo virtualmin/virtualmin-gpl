@@ -1122,6 +1122,10 @@ foreach my $pdom (&unique(@parked)) {
 	else {
 		&$first_print("Creating parked domain $pdom ..");
 		}
+	if (&domain_name_clash($pdom)) {
+		&$second_print(".. the domain $pdom already exists");
+		next;
+		}
 	&$indent_print();
 	local %alias = ( 'id', &domain_id(),
 			 'dom', $pdom,
@@ -1314,6 +1318,10 @@ foreach my $vf (readdir(VF)) {
 		&$second_print(".. skipping, as target $addons{$vf} does not exist");
 		next;
 		}
+	if (&domain_name_clash($vf)) {
+		&$second_print(".. the domain $vf already exists");
+		next;
+		}
 	&$indent_print();
 	local %alias = ( 'id', &domain_id(),
 			 'dom', $vf,
@@ -1444,6 +1452,11 @@ foreach my $vf (readdir(VF)) {
 	if (!%subof || !$subof{'dom'}) {
 		&$first_print("Creating sub-domain $vf ..");
 		&$second_print(".. skipping, as not a sub-domain of $dom or any other migrated domain");
+		next;
+		}
+	if (&domain_name_clash($vf)) {
+		&$first_print("Creating sub-domain $vf ..");
+		&$second_print(".. the domain $vf already exists");
 		next;
 		}
 	elsif ($subof{'alias'}) {

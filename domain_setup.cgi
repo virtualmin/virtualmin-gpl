@@ -61,9 +61,7 @@ if ($subdom) {
 	}
 $in{'owner'} =~ s/\r|\n//g;
 $in{'owner'} =~ /:/ && &error($text{'setup_eowner'});
-foreach $d (&list_domains()) {
-	&error($text{'setup_edomain4'}) if (lc($d->{'dom'}) eq lc($dname));
-	}
+&domain_name_clash($dname) && &error($text{'setup_edomain4'});
 $tmpl = &get_template($in{'template'});
 if (!$parentdom) {
 	$plan = &get_plan($in{'plan'});

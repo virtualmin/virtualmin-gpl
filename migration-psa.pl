@@ -636,10 +636,15 @@ elsif ($subdoms->{'name'}) {
 	}
 foreach my $sdom (keys %$subdoms) {
 	local $subdom = $subdoms->{$sdom};
-	&$first_print("Creating sub-domain $sdom.$dom{'dom'} ..");
+	local $sname = $sdom.".".$dom{'dom'};
+	&$first_print("Creating sub-domain $sname ..");
+	if (&domain_name_clash($sname)) {
+		&$second_print(".. the domain $sname already exists");
+		next;
+		}
 	&$indent_print();
 	local %subd = ( 'id', &domain_id(),
-			'dom', $sdom.".".$dom{'dom'},
+			'dom', $sname,
 			'user', $dom{'user'},
 			'group', $dom{'group'},
 			'prefix', $dom{'prefix'},
