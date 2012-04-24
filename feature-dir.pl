@@ -620,7 +620,8 @@ else {
 		}
 	&unlink_file($iflag);
 
-	if ($d->{'unix'}) {
+	if ($d->{'unix'} ||
+	    $d->{'parent'} && &get_domain($d->{'parent'})->{'unix'}) {
 		# Set ownership on extracted home directory, apart from
 		# content of ~/homes - unless running as the domain owner,
 		# in which case ~/homes is set too
