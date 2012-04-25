@@ -10253,7 +10253,8 @@ foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "quota_list_users_command", "quota_list_groups_command",
 	       "quota_get_user_command", "quota_get_group_command",
 	       "preload_mode", "collect_interval", "api_helper",
-	       "spam_lock", "spam_white", "mem_low", "sni_support") {
+	       "spam_lock", "spam_white", "mem_low", "sni_support",
+	       "lookup_domain_serial") {
 	# Some important config option was changed
 	return 1 if ($config{$c} ne $lastconfig{$c});
 	}

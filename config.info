@@ -122,6 +122,7 @@ spam_level=Default score to delete spam,3,Don't delete,4
 spam_lock=Only run one spamassassin process at a time?,1,1-Yes,0-No
 spam_trap_black=Add senders of spam sent to <tt>spamtrap</tt> to blacklist?,1,2-Global,1-Domain level,0-No
 ham_trap_white=Add senders of non-spam sent to <tt>hamtrap</tt> to whitelist?,1,2-Global,1-Domain level,0-No
+lookup_domain_serial=Lookup domain for incoming email,1,0-In parallel,1-One at a time
 
 line4.8=Quota commands,11
 quota_commands=Use external commands to get and set quotas?,1,1-Yes,0-No

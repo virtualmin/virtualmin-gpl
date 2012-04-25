@@ -63,7 +63,9 @@ open(PIDFILE, ">$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid");
 printf PIDFILE "%d\n", getpid();
 close(PIDFILE);
 
-$SIG{'CHLD'} = sub { wait(); };
+if (!$config{'lookup_domain_serial'}) {
+	$SIG{'CHLD'} = sub { wait(); };
+	}
 
 # Loop forever, accepting requests from clients
 while(1) {
@@ -80,70 +82,81 @@ while(1) {
 		open(STDERR, ">$daemon_logfile");
 		}
 
-	# Give up now if too many child processes already,
-	# to prevent DDOS
-	if (@childpids > 50) {
-		print STDERR "Too many child processes are running already\n";
-		close(SOCK);
-		next;
+	if ($config{'lookup_domain_serial'}) {
+		# Single-threaded mode
+		&handle_one_request();
 		}
-
-	# Fork a sub-process to handle this request
-	$pid = fork();
-	if ($pid < 0) {
-		print STDERR "Fork failed : $!\n";
-		close(SOCK);
-		next;
-		}
-	elsif (!$pid) {
-		# Close the main socket
-		close(MAIN);
-
-		# Return child cleanup policy to default, so
-		# that sub-command exit statuses can be collected
-		$SIG{'CHLD'} = 'DEFAULT';
-
-		# If lookup takes more than 60 seconds, give up .. since the
-		# client only waits 30
-		alarm(60);
-
-		# Read the username
-		select(SOCK); $| = 1;
-		$username = <SOCK>;
-		$username =~ s/\r|\n//g;
-
-		# Find the user
-		&flush_virtualmin_caches();
-		&flush_webmin_caches();
-		$d = &get_user_domain($username);
-		if (!$d) {
-			# No such user!
-			&send_response(undef, undef);
-			next;
-			}
-		@users = &list_domain_users($d, 0, 1, 0, 1);
-		($user) = grep { $_->{'user'} eq $username ||
-				 &replace_atsign($_->{'user'}) eq $username }
-			       @users;
-		if (!$user) {
-			# Failed to find user again!
-			&send_response(undef, undef);
+	else {
+		# Give up now if too many child processes already,
+		# to prevent DDOS
+		if (@childpids > 50) {
+			print STDERR "Too many child processes are ",
+				     "running already\n";
+			close(SOCK);
 			next;
 			}
 
-		# Send back status
-		&send_response($d, $user);
+		# Fork a sub-process to handle this request
+		$pid = fork();
+		if ($pid < 0) {
+			print STDERR "Fork failed : $!\n";
+			close(SOCK);
+			next;
+			}
+		elsif (!$pid) {
+			# Close the main socket
+			close(MAIN);
 
-		exit(0);
+			# Return child cleanup policy to default, so
+			# that sub-command exit statuses can be collected
+			$SIG{'CHLD'} = 'DEFAULT';
+
+			# If lookup takes more than 60 seconds, give up .. since
+			# the client only waits 30
+			alarm(60);
+
+			&handle_one_request();
+			exit(0);
+			}
+		
+		# Maintain list of child processes
+		push(@childpids, $pid);
+		local $expid;
+		do {	$expid = waitpid(-1, WNOHANG);
+			} while($expid != 0 && $expid != -1);
+		@childpids = grep { kill(0, $_) } @childpids;
 		}
-	
-	# Maintain list of child processes
-	push(@childpids, $pid);
-	local $expid;
-	do {	$expid = waitpid(-1, WNOHANG);
-		} while($expid != 0 && $expid != -1);
-	@childpids = grep { kill(0, $_) } @childpids;
 	}
+
+sub handle_one_request
+{
+# Read the username
+select(SOCK); $| = 1;
+$username = <SOCK>;
+$username =~ s/\r|\n//g;
+
+# Find the user
+&flush_virtualmin_caches();
+&flush_webmin_caches();
+$d = &get_user_domain($username);
+if (!$d) {
+	# No such user!
+	&send_response(undef, undef);
+	return;
+	}
+@users = &list_domain_users($d, 0, 1, 0, 1);
+($user) = grep { $_->{'user'} eq $username ||
+		 &replace_atsign($_->{'user'}) eq $username }
+	       @users;
+if (!$user) {
+	# Failed to find user again!
+	&send_response(undef, undef);
+	return;
+	}
+
+# Send back status
+&send_response($d, $user);
+}
 
 # send_response(&domain, &user)
 sub send_response

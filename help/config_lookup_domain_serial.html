@@ -1,0 +1,13 @@
+<header>Lookup domain for incoming email</header>
+
+By default, Virtualmin's <tt>lookup-domain-daemon</tt> process will launch a
+separate subprocess to find the domain and spam settings for each incoming
+message on your system. However, this can consume large amounts of CPU time
+and memory if multiple messages arrive at the same time. <p>
+
+To have email processed one by one instead, select the <b>One at a time</b>
+option for this field. Mail delivery will be slightly slower, but CPU and
+memory use will be limited. <p>
+
+<footer>
+
