@@ -456,7 +456,11 @@ if ($mail_log_file) {
 				}
 			}
 		}
+	$lastpos = tell(MAILLOG);
 	close(MAILLOG);
+	if ($lastpos <= 0) {
+		$lastpos = $st[7];
+		}
 	local $mins = ($now - $lasttime) / 60.0;
 	push(@stats, [ "recvcount", $mins ? $recvcount / $mins : 0 ]);
 	push(@stats, [ "bouncecount", $mins ? $bouncecount / $mins : 0 ]);
