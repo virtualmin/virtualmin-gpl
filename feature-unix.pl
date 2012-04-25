@@ -348,7 +348,7 @@ if (!$_[0]->{'parent'}) {
 
 	# Clear any resource limits
 	if (defined(&supports_resource_limits) && &supports_resource_limits()) {
-		&save_domain_resource_limits($_[0], { });
+		&save_domain_resource_limits($_[0], { }, 1);
 		}
 
 	# Delete unix user
