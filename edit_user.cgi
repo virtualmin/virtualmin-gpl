@@ -459,7 +459,7 @@ else {
 	     $usermin ? ( [ "switch", $text{'user_switch'}, undef, undef,
 			    "onClick='form.target = \"_new\"'" ] ) : ( ),
 	     &will_send_user_email($d) && $user->{'email'} ?
-	     	( [ "remail", $text{'user_remail'} ] ) : ( ),
+	     	( [ "remail", $text{'user_remailbut'} ] ) : ( ),
 	     $mailbox ? ( ) : ( [ "delete", $text{'delete'} ] ) ]);
 	}
 
