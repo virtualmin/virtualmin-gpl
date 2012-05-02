@@ -192,7 +192,7 @@ $_config_tests = [
 	{ 'command' => 'grep bw_active=1 '.$module_config_directory.'/config' },
 
 	defined(&list_backup_keys) ?
-		( { 'command' => 'list-backup-keys',
+		( { 'command' => 'list-backup-keys.pl',
 		    'args' => [ [ 'multiline' ] ],
 		    'grep' => 'Description' } ) :
 		( ),
