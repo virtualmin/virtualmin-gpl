@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to version 3.5.1.
+html=Updated the phpMyAdmin script installer to version 3.5.1, and MediaWiki to 1.19.0.
 master=1
 reseller=1
 domain=1
