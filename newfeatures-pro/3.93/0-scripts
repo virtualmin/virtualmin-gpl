@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to version 3.5.1, and MediaWiki to 1.19.0.
+html=Updated the phpMyAdmin script installer to version 3.5.1, Drupal to 7.14 and 6.26, SugarCRM to 6.4.4, and MediaWiki to 1.19.0.
 master=1
 reseller=1
 domain=1
