@@ -1342,4 +1342,4 @@ Updated the Mantis script installer to version 1.2.10, ZenPhoto to 1.4.2.3, phpM
 Virtualmin backups can now be signed and encrypted, using GPG keys created within Virtualmin or imported from an existing file. This protects backups from snooping or modification when stored on an untrusted remote system.
 Added a button to the Edit User page to re-send the signup email.
 ---- Changes since 3.92 ----
-Updated the phpMyAdmin script installer to version 3.5.1, Drupal to 7.14 and 6.26, SugarCRM to 6.4.4, and MediaWiki to 1.19.0.
+Updated the phpMyAdmin script installer to version 3.5.1, Drupal to 7.14 and 6.26, SugarCRM to 6.4.4, FengOffice to 2.0.0, and MediaWiki to 1.19.0.
