@@ -2677,17 +2677,21 @@ push(@opts, [ 2, $text{'backup_mode2'}, $st ]);
 
 if (&can_use_s3()) {
 	# S3 backup fields (bucket, access key ID, secret key and file)
+	local $s3user = $mode == 3 ? $user : undef;
+	local $s3pass = $mode == 3 ? $pass : undef;
+	if (&master_admin()) {
+		$s3user ||= $config{'a3_akey'};
+		$s3pass ||= $config{'s3_akey'};
+		}
 	local $st = "<table>\n";
 	$st .= "<tr> <td>$text{'backup_bucket'}</td> <td>".
 	       &ui_textbox($name."_bucket", $mode == 3 ? $server : undef, 20).
 	       "</td> </tr>\n";
 	$st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
-	       &ui_textbox($name."_akey", $mode == 3 ? $user : undef, 40,
-			   0, undef, $noac).
+	       &ui_textbox($name."_akey", $s3user, 40, 0, undef, $noac).
 	       "</td> </tr>\n";
 	$st .= "<tr> <td>$text{'backup_skey'}</td> <td>".
-	       &ui_password($name."_skey", $mode == 3 ? $pass : undef, 40,
-			   0, undef, $noac).
+	       &ui_password($name."_skey", $s3pass, 40, 0, undef, $noac).
 	       "</td> </tr>\n";
 	$st .= "<tr> <td>$text{'backup_s3file'}</td> <td>".
 	       &ui_opt_textbox($name."_s3file", $mode == 3 ? $path : undef,
