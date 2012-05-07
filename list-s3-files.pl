@@ -67,8 +67,6 @@ if (!ref($files)) {
 	print "ERROR: $files\n";
 	exit(1);
 	}
-use Data::Dumper;
-print Dumper($files);
 
 if ($multi) {
 	# Full details
