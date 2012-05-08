@@ -34,8 +34,14 @@ sub init_s3_bucket
 local ($akey, $skey, $bucket, $tries, $location) = @_;
 $tries ||= 1;
 my $err;
-local %headers;
-$headers{'Location'} = $location if ($location);
+local $data;
+if ($location) {
+	$data = "<CreateBucketConfiguration>".
+		"<LocationConstraint>".
+		$location.
+		"</LocationConstraint>".
+		"</CreateBucketConfiguration>";
+	}
 for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
 	local $conn = &make_s3_connection($akey, $skey);
@@ -66,7 +72,7 @@ for(my $i=0; $i<$tries; $i++) {
 	local ($got) = grep { $_->{'Name'} eq $bucket } @{$response->entries};
 	if (!$got) {
 		# Create the bucket
-		$response = $conn->create_bucket($bucket, \%headers);
+		$response = $conn->create_bucket($bucket, undef, $data);
 		if ($response->http_response->code != 200) {
 			$err = &text('s3_ecreate',
 				     &extract_s3_message($response));

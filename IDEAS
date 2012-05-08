@@ -69,5 +69,4 @@
 	- S3 API commands (list, delete, upload, download)
 		- GPL version links
 		- commands-lib.pl ?
-		- bucket creation in location
 		- CHANGELOG

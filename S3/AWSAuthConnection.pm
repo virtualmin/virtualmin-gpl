@@ -41,11 +41,12 @@ sub new {
 }
 
 sub create_bucket {
-    my ($self, $bucket, $headers) = @_;
+    my ($self, $bucket, $headers, $data) = @_;
     croak 'must specify bucket' unless $bucket;
     $headers ||= {};
 
-    return S3::Response->new($self->_make_request('PUT', $bucket, $headers));
+    return S3::Response->new(
+	$self->_make_request('PUT', $bucket, $headers, $data));
 }
 
 sub list_bucket {
