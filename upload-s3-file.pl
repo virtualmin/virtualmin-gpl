@@ -80,7 +80,7 @@ if ($err) {
 	}
 else {
 	@st = stat($source);
-	print "OK: $st[7] bytes\n";
+	print "OK: Uploaded $bucket/$file size $st[7] bytes\n";
 	}
 
 sub usage

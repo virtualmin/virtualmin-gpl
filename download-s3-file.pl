@@ -73,7 +73,7 @@ if ($err) {
 	}
 else {
 	@st = stat($dest);
-	print "OK: $st[7] bytes\n";
+	print "OK: Downloaded $bucket/$file size $st[7] bytes\n";
 	}
 
 sub usage

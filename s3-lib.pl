@@ -382,21 +382,24 @@ elsif ($str =~ /^(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)/) {
 return undef;
 }
 
-# s3_delete_bucket(access-key, secret-key, bucket)
+# s3_delete_bucket(access-key, secret-key, bucket, [bucket-only])
 # Deletes an S3 bucket and all contents
 sub s3_delete_bucket
 {
-local ($akey, $skey, $bucket) = @_;
+local ($akey, $skey, $bucket, $norecursive) = @_;
 &require_s3();
 local $conn = &make_s3_connection($akey, $skey);
 return $text{'s3_econn'} if (!$conn);
 
-# Get and delete files first
-local $files = &s3_list_files($akey, $skey, $bucket);
-return $files if (!ref($files));
-foreach my $f (@$files) {
-	local $err = &s3_delete_file($akey, $skey, $bucket, $f->{'Key'});
-	return $err if ($err);
+if (!$norecursive) {
+	# Get and delete files first
+	local $files = &s3_list_files($akey, $skey, $bucket);
+	return $files if (!ref($files));
+	foreach my $f (@$files) {
+		local $err = &s3_delete_file($akey, $skey,
+					     $bucket, $f->{'Key'});
+		return $err if ($err);
+		}
 	}
 
 local $response = $conn->delete_bucket($bucket);
