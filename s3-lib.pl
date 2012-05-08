@@ -348,6 +348,14 @@ local $response = $conn->get_bucket_location($bucket);
 if ($response->http_response->code == 200) {
 	$rv{'location'} = $response->{'LocationConstraint'};
 	}
+$response = $conn->get_bucket_logging($bucket);
+if ($response->http_response->code == 200) {
+	$rv{'logging'} = $response->{'BucketLoggingStatus'};
+	}
+$response = $conn->get_bucket_acl($bucket);
+if ($response->http_response->code == 200) {
+	$rv{'acl'} = $response->{'AccessControlPolicy'};
+	}
 return \%rv;
 }
 

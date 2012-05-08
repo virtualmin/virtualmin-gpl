@@ -73,6 +73,18 @@ if ($multi) {
 		if ($info && $info->{'location'}) {
 			print "    Location: $info->{'location'}\n";
 			}
+		if ($info && $info->{'acl'}) {
+			print "    Owner: ",
+			      $info->{'acl'}->{'Owner'}->{'DisplayName'},"\n";
+			$acl = $info->{'acl'}->{'AccessControlList'};
+			@grant = ref($acl->{'Grant'}) eq 'HASH' ?
+					( $acl->{'Grant'} ) :
+				 $acl->{'Grant'} ? @{$acl->{'Grant'}} : ( );
+			foreach my $g (@grant) {
+				print "    Grant: $g->{'Permission'} to ",
+				      $g->{'Grantee'}->{'DisplayName'},"\n";
+				}
+			}
 		}
 	}
 elsif ($nameonly) {

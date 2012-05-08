@@ -110,7 +110,12 @@ sub delete {
 sub get_bucket_logging {
     my ($self, $bucket, $headers) = @_;
     croak 'must specify bucket' unless $bucket;
-    return S3::GetResponse->new($self->_make_request('GET', "$bucket?logging", $headers));
+    my $rv = S3::GetResponse->new($self->_make_request('GET', "$bucket?logging", $headers));
+    if ($rv->http_response->code == 200) {
+      my $doc = XMLin($rv->{BODY});
+      $rv->{'LoggingPolicy'} = $doc;
+    }
+    return $rv;
 }
 
 sub put_bucket_logging {
@@ -133,7 +138,12 @@ sub get_acl {
 
     $key = urlencode($key);
 
-    return S3::GetResponse->new($self->_make_request('GET', "$bucket/$key?acl", $headers));
+    my $rv = S3::GetResponse->new($self->_make_request('GET', "$bucket/$key?acl", $headers));
+    if ($rv->http_response->code == 200) {
+      my $doc = XMLin($rv->{BODY});
+      $rv->{'AccessControlPolicy'} = $doc;
+    }
+    return $rv;
 }
 
 sub put_bucket_acl {
