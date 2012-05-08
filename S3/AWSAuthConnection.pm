@@ -17,6 +17,7 @@ use warnings;
 use HTTP::Date;
 use URI::Escape;
 use Carp;
+use XML::Simple;
 
 use S3 qw($DEFAULT_HOST $PORTS_BY_SECURITY merge_meta urlencode);
 use S3::GetResponse;
@@ -158,6 +159,19 @@ sub list_all_my_buckets {
     $headers ||= {};
 
     return S3::ListAllMyBucketsResponse->new($self->_make_request('GET', '', $headers));
+}
+
+sub get_bucket_location {
+    my ($self, $bucket, $headers) = @_;
+    croak 'must specify bucket' unless $bucket;
+    $headers ||= {};
+
+    my $rv = S3::GetResponse->new($self->_make_request('GET', "$bucket?location", $headers));
+    if ($rv->http_response->code == 200) {
+      my $doc = XMLin($rv->{BODY});
+      $rv->{'LocationConstraint'} = $doc->{'content'};
+    }
+    return $rv;
 }
 
 sub _make_request {

@@ -73,8 +73,7 @@ if (!$file) {
 	}
 
 # Try the upload
-$err = &s3_upload($akey, $skey, $bucket, $source, $file, undef, undef,
-		  $s3_upload_tries, $rrs);
+$err = &s3_upload($akey, $skey, $bucket, $source, $file, undef, undef, 1, $rrs);
 if ($err) {
 	print "ERROR: $err\n";
 	}

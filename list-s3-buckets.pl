@@ -69,6 +69,10 @@ if ($multi) {
 	foreach $f (@$files) {
 		print $f->{'Name'},"\n";
 		print "    Created: $f->{'CreationDate'}\n";
+		$info = &s3_get_bucket($akey, $skey, $f->{'Name'});
+		if ($info && $info->{'location'}) {
+			print "    Location: $info->{'location'}\n";
+			}
 		}
 	}
 elsif ($nameonly) {

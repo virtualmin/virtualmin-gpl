@@ -25,15 +25,17 @@ foreach my $m (@s3_perl_modules) {
 	}
 }
 
-# init_s3_bucket(access-key, secret-key, bucket, attempts)
+# init_s3_bucket(access-key, secret-key, bucket, attempts, [location])
 # Connect to S3 and create a bucket (if needed). Returns undef on success or
 # an error message on failure.
 sub init_s3_bucket
 {
 &require_s3();
-local ($akey, $skey, $bucket, $tries) = @_;
+local ($akey, $skey, $bucket, $tries, $location) = @_;
 $tries ||= 1;
 my $err;
+local %headers;
+$headers{'Location'} = $location if ($location);
 for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
 	local $conn = &make_s3_connection($akey, $skey);
@@ -64,7 +66,7 @@ for(my $i=0; $i<$tries; $i++) {
 	local ($got) = grep { $_->{'Name'} eq $bucket } @{$response->entries};
 	if (!$got) {
 		# Create the bucket
-		$response = $conn->create_bucket($bucket);
+		$response = $conn->create_bucket($bucket, \%headers);
 		if ($response->http_response->code != 200) {
 			$err = &text('s3_ecreate',
 				     &extract_s3_message($response));
@@ -331,6 +333,22 @@ if ($response->http_response->code != 200) {
 	return &text('s3_elist', &extract_s3_message($response));
 	}
 return $response->entries;
+}
+
+# s3_get_bucket(access-key, secret-key, bucket)
+# Returns a hash ref with details of a bucket. Keys are :
+# location - A location like us-west-1, if any is set
+sub s3_get_bucket
+{
+&require_s3();
+local ($akey, $skey, $bucket) = @_;
+local %rv;
+local $conn = &make_s3_connection($akey, $skey);
+local $response = $conn->get_bucket_location($bucket);
+if ($response->http_response->code == 200) {
+	$rv{'location'} = $response->{'LocationConstraint'};
+	}
+return \%rv;
 }
 
 # s3_list_files(access-key, secret-key, bucket)

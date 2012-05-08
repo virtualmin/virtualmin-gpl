@@ -86,6 +86,8 @@ sub canonical_string {
         $buf .= '?torrent';
     } elsif ($path =~ /[&?]logging($|=|&)/) {
         $buf .= '?logging';
+    } elsif ($path =~ /[&?]location($|=|&)/) {
+        $buf .= '?location';
     }
 
     return $buf;
