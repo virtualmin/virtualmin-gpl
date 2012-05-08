@@ -1,0 +1,3 @@
+desc=API commands for Amazon S3
+html=Added new API commands list list-s3-buckets and upload-s3-file for manipulating files on Amazon's S3 service.
+master=1

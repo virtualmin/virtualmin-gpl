@@ -48,6 +48,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--secret-key") {
 		$skey = shift(@ARGV);
 		}
+	elsif ($a eq "--bucket") {
+		$bucket = shift(@ARGV);
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -64,6 +67,9 @@ if (!ref($files)) {
 	exit(1);
 	}
 
+if ($bucket) {
+	@$files = grep { $_->{'Name'} eq $bucket } @$files;
+	}
 if ($multi) {
 	# Full details
 	foreach $f (@$files) {

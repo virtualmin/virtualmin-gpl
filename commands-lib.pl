@@ -27,6 +27,7 @@ return ([ "Backup and restore", "backup-domain.pl", "list-scheduled-backups.pl",
 	[ "Virtual server templates", "*-template.pl", "*-templates.pl" ],
 	[ "Account plans", "*-plan.pl", "*-plans.pl" ],
 	[ "SVN repositories", "*-svn-repositor*.pl" ],
+	[ "Amazon S3", "*-s3-*.pl" ],
 	[ "Other scripts", "*.pl" ],
 	);
 }
@@ -118,6 +119,10 @@ limits, create new plans, and delete them.",
 "SVN repositories",
 "For virtual serves with the SVN plugin enabled, these commands can be used
 to list, create and delete SVN repositories.",
+
+"Amazon S3",
+"These commands can be used to upload files to, download files from and
+manage files on Amazon's S3 cloud storage service.",
 
 "Other scripts",
 "Programs in this section don't fall into any of the other categories.",
