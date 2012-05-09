@@ -2892,6 +2892,7 @@ return &master_admin() || &reseller_admin() || $access{'edit_spam'};
 sub can_edit_phpmode
 {
 return &master_admin() ? 2 :
+       &reseller_admin() ? 1 :
        $access{'edit_phpmode'} ? 1 : 0;
 }
 
