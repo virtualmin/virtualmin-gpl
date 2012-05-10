@@ -15,6 +15,11 @@ flag to set the destination filename. The optional C<--rrs> flag can be used
 to tell S3 that the file should be stored with reduced redundancy, which
 is cheaper but has a lower reliability SLA.
 
+By default, this command will perform a multi-part S3 upload only for files
+above 2GB in size. However, you can force multi-part mode with the
+C<--multipart> flag. Amazon requires that files above 5GB in size be multi-part
+uploaded.
+
 =cut
 
 package virtual_server;
