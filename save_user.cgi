@@ -47,7 +47,7 @@ if ($in{'switch'}) {
 	&redirect($url);
 	return;
 	}
-elsif ($in{'remail'}) {
+elsif ($in{'remailbut'}) {
 	# Re-send signup email
 	&error_setup($text{'user_err2'});
 	@erv = &send_user_email($d, $user, $user->{'email'}, 0);
