@@ -165,6 +165,43 @@ sub put_acl {
         $self->_make_request('PUT', "$bucket/$key?acl", $headers, $acl_xml_doc));
 }
 
+sub abort_upload {
+    my ($self, $bucket, $key, $uploadid, $headers) = @_;
+    croak 'must specify bucket' unless $bucket;
+    croak 'must specify key' unless $key;
+    croak 'must specify uploadid' unless $uploadid;
+    $headers ||= {};
+
+    return S3::Response->new(
+        $self->_make_request('DELETE', "$bucket/$key?uploadId=$uploadid",
+			     $headers));
+}
+
+sub complete_upload {
+    my ($self, $bucket, $key, $uploadid, $tags, $headers) = @_;
+    croak 'must specify bucket' unless $bucket;
+    croak 'must specify key' unless $key;
+    croak 'must specify uploadid' unless $uploadid;
+    $headers ||= {};
+
+    my $tags_xml;
+    $tags_xml = "<CompleteMultipartUpload>\n";
+    for(my $i=1; $i<=@$tags; $i++) {
+ 	$tags_xml .= "<Part>\n".
+		     "<PartNumber>".$i."</PartNumber>\n".
+		     "<ETag>".$tags->[$i-1]."</ETag>\n".
+		     "</Part>\n";
+    }
+    $tags_xml .= "</CompleteMultipartUpload>\n";
+
+    $headers->{'Content-Length'} = length($tags_xml);
+    return S3::Response->new(
+        $self->_make_request('POST', "$bucket/$key?uploadId=$uploadid",
+			     $headers, $tags_xml));
+}
+
+
+
 sub list_all_my_buckets {
     my ($self, $headers) = @_;
     $headers ||= {};

@@ -95,20 +95,28 @@ return undef;
 }
 
 # s3_upload(access-key, secret-key, bucket, source-file, dest-filename, [&info],
-#           [&domains], attempts, [reduced-redundancy])
+#           [&domains], attempts, [reduced-redundancy], [multipart])
 # Upload some file to S3, and return undef on success or an error message on
 # failure. Unfortunately we cannot simply use S3's put method, as it takes
 # a scalar for the content, which could be huge.
 sub s3_upload
 {
-local ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries, $rrs) = @_;
+local ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries,
+       $rrs, $multipart) = @_;
 $tries ||= 1;
 &require_s3();
 local @st = stat($sourcefile);
 my $can_use_write = &get_webmin_version() >= 1.451;
-my $headers = { 'Content-Length' => $st[7] };
+my $headers = { };
+if (!$multipart) {
+	$header->{'Content-Length'} = $st[7];
+	}
 if ($rrs) {
 	$headers->{'x-amz-storage-class'} = 'REDUCED_REDUNDANCY';
+	}
+if ($st[7] >= 2**31) {
+	# 2GB or more forces multipart mode
+	$multipart = 1;
 	}
 
 my $err;
@@ -133,8 +141,15 @@ for(my $i=0; $i<$tries; $i++) {
 
 	# Use the S3 library to create a request object, but use Webmin's HTTP
 	# function to open it.
-	local $req = &s3_make_request($conn, $path, "PUT", "dummy",
-				      $headers, $authpath);
+	local $req;
+	if ($multipart) {
+		$req = &s3_make_request($conn, $path."?uploads", "POST",
+				"dummy", $headers, $authpath."?uploads");
+		}
+	else {
+		$req = &s3_make_request($conn, $path, "PUT", "dummy",
+				$headers, $authpath);
+		}
 	local ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
 	local $h = &make_http_connection(
 		$host, $port, $ssl, $req->method, $page);
@@ -149,17 +164,20 @@ for(my $i=0; $i<$tries; $i++) {
 	&write_http_connection($h, "\r\n");
 
 	# Send the backup file contents
-	local $SIG{'PIPE'} = 'IGNORE';
-	local $buf;
 	local $writefailed;
-	open(BACKUP, $sourcefile);
-	while(read(BACKUP, $buf, 1024) > 0) {
-		if (!&write_http_connection($h, $buf) && $can_use_write) {
-			$writefailed = $!;
-			last;
+	if (!$multipart) {
+		local $SIG{'PIPE'} = 'IGNORE';
+		local $buf;
+		open(BACKUP, $sourcefile);
+		while(read(BACKUP, $buf, 1024) > 0) {
+			if (!&write_http_connection($h, $buf) &&
+			    $can_use_write) {
+				$writefailed = $!;
+				last;
+				}
 			}
+		close(BACKUP);
 		}
-	close(BACKUP);
 
 	# Read back response .. this needs to be our own code, as S3 does
 	# some wierd redirects
@@ -205,6 +223,58 @@ for(my $i=0; $i<$tries; $i++) {
 		}
 	elsif ($writefailed) {
 		$err = "HTTP transfer failed : $writefailed";
+		}
+
+	if ($multipart) {
+		# Response should contain upload ID
+		if ($out !~ /<UploadId>([^<]+)<\/UploadId>/i) {
+			$err = $out;
+			}
+		else {
+			# Multi-part upload started .. send the bits
+			my $uploadid = $1;
+			my $sent = 0;
+			my $part = 1;
+			my $j = 0;
+			my @tags;
+			while($sent < $st[7]) {
+				my $chunk = $st[7] - $sent;
+				$chunk = 5*1024*1024 if ($chunk > 5*1024*1024);
+				my ($pok, $ptag) = &s3_part_upload(
+				    $conn, $bucket, $endpoint, $sourcefile,
+				    $destfile, $part, $sent, $chunk, $uploadid);
+				if (!$pok) {
+					if ($j++ > $tries) {
+						$err = "Part $part failed at ".
+						       "$sent : $ptag";
+						last;
+						}
+					}
+				else {
+					$part++;
+					$sent += $chunk;
+					push(@tags, $ptag);
+					}
+				}
+			if (!$err) {
+				# Complete the upload
+				my $response = $conn->complete_upload(
+					$bucket, $destfile, $uploadid, \@tags);
+				if ($response->http_response->code != 200) {
+					$err = &extract_s3_message($response);
+					}
+				}
+			else {
+				# Abort the upload
+				my $response = $conn->abort_upload(
+					$bucket, $destfile, $uploadid);
+				if ($response->http_response->code < 200 ||
+				    $response->http_response->code >= 300) {
+					$err .= " Also, abort failed : ".
+						&extract_s3_message($response);
+					}
+				}
+			}
 		}
 
 	if (!$err && $info) {
@@ -572,6 +642,83 @@ local ($akey, $skey, $endpoint) = @_;
 $endpoint ||= $config{'s3_endpoint'};
 &require_s3();
 return S3::AWSAuthConnection->new($akey, $skey, undef, $endpoint);
+}
+
+# s3_part_upload(&s3-connection, bucket, endpoint, sourcefile, destfile,
+# 		 part-number, sent-offset, chunk-size, upload-id)
+# Uploads a chunk of a file to S3. On success returns 1 and an etag for the
+# part. On failure returns 0 and an error message.
+sub s3_part_upload
+{
+local ($conn, $bucket, $endpoint, $sourcefile, $destfile, $part, $sent,
+       $chunk, $uploadid) = @_;
+my $headers = { 'Content-Length' => $chunk };
+my $path = $endpoint ? $destfile : "$bucket/$destfile";
+my $authpath = "$bucket/$destfile";
+my $params = "?partNumber=".$part."&uploadId=".$uploadid;
+$path .= $params;
+$authpath .= $params;
+my $req = &s3_make_request($conn, $path, "PUT", "dummy",
+		$headers, $authpath);
+my ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
+
+# Make the HTTP request and send headers
+my $h = &make_http_connection($host, $port, $ssl, $req->method, $page);
+if (!ref($h)) {
+	return (0, "HTTP connection to ${host}:${port} for $page failed : $h");
+	}
+foreach my $hfn ($req->header_field_names) {
+	&write_http_connection($h, $hfn.": ".$req->header($hfn)."\r\n");
+	}
+&write_http_connection($h, "\r\n");
+
+# Send the chunk
+local $SIG{'PIPE'} = 'IGNORE';
+local $buf;
+open(BACKUP, $sourcefile);
+seek(BACKUP, $sent, 0);
+my $got = 0;
+while(1) {
+	my $want = $chunk - $got;
+	last if (!$want);
+	my $read = read(BACKUP, $buf, $want);
+	if ($read <= 0) {
+		return (0, "Read failed for $want : $!");
+		}
+	$got += $read;
+	&write_http_connection($h, $buf);
+	}
+close(BACKUP);
+
+# Start reading back the response
+local $line = &read_http_connection($h);
+$line =~ s/\r|\n//g;
+
+# Read the headers
+local %rheader;
+while(1) {
+	local $hline = &read_http_connection($h);
+	$hline =~ s/\r\n//g;
+	$hline =~ /^(\S+):\s+(.*)$/ || last;
+	$rheader{lc($1)} = $2;
+	}
+
+# Read the body
+local $out;
+while(defined($buf = &read_http_connection($h, 1024))) {
+	$out .= $buf;
+	}
+&close_http_connection($out);
+
+if ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
+	return (0, "Upload failed : $line");
+	}
+elsif (!$rheader{'etag'}) {
+	return (0, "Response missing etag header : $out");
+	}
+
+$rheader{'etag'} =~ s/^"(.*)"$/$1/;
+return (1, $rheader{'etag'});
 }
 
 1;

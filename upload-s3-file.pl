@@ -56,6 +56,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--rrs") {
 		$rrs = 1;
 		}
+	elsif ($a eq "--multipart") {
+		$multipart = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -73,7 +76,8 @@ if (!$file) {
 	}
 
 # Try the upload
-$err = &s3_upload($akey, $skey, $bucket, $source, $file, undef, undef, 1, $rrs);
+$err = &s3_upload($akey, $skey, $bucket, $source, $file, undef, undef, 1, $rrs,
+		  $multipart);
 if ($err) {
 	print "ERROR: $err\n";
 	}
@@ -93,5 +97,6 @@ print "                           --source local-file\n";
 print "                           --bucket name\n";
 print "                          [--file remote-file]\n";
 print "                          [--rrs]\n";
+print "                          [--multipart]\n";
 exit(1);
 }

@@ -88,6 +88,12 @@ sub canonical_string {
         $buf .= '?logging';
     } elsif ($path =~ /[&?]location($|=|&)/) {
         $buf .= '?location';
+    } elsif ($path =~ /[&?]uploads($|=|&)/) {
+        $buf .= '?uploads';
+    } elsif ($path =~ /[&?]partNumber=([0-9]+)&uploadId=([^&]+)/) {
+        $buf .= '?partNumber='.$1.'&uploadId='.$2;
+    } elsif ($path =~ /[&?]uploadId=([^&]+)/) {
+        $buf .= '?uploadId='.$1;
     }
 
     return $buf;
