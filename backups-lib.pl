@@ -566,11 +566,12 @@ DOMAIN: foreach $d (@$doms) {
 				# If this feature failed and errors aren't being
 				# skipped, stop the backup. Also stop if this
 				# was the directory step of a home-format backup
-				$dok = 0;
+				$ok = 0;
 				$errcount++;
 				push(@errdoms, $d);
 				last DOMAIN;
 				}
+			push(@donedoms, &clean_domain_passwords($d));
 			}
 		if ($fok) {
 			push(@donefeatures, $f);
@@ -584,7 +585,6 @@ DOMAIN: foreach $d (@$doms) {
 	$donefeatures{$d->{'dom'}} = \@donefeatures;
 	$donedoms{$d->{'dom'}} = $d;
 	if ($dok) {
-		push(@donedoms, &clean_domain_passwords($d));
 		$okcount++;
 		}
 	else {
@@ -720,6 +720,10 @@ DOMAIN: foreach $d (@$doms) {
 	&$cbfunc($d, 2, "$dest/$df") if ($cbfunc);
 	}
 
+# Remove duplicate done domains
+local %doneseen;
+@donedoms = grep { !$doneseen{$_->{'id'}}++ } @donedoms;
+
 # Add all requested Virtualmin config information
 local $vcount = 0;
 if (@$vbs) {
@@ -749,7 +753,7 @@ if ($ok) {
 		# No final step is needed for home-format backups, because
 		# we have already reached it!
 		if (!$onebyone) {
-			foreach $d (&unique(@donedoms)) {
+			foreach $d (@donedoms) {
 				push(@destfiles, "$d->{'dom'}.$hfsuffix");
 				$destfiles_map{$destfiles[$#destfiles]} = $d;
 				}
@@ -762,7 +766,7 @@ if ($ok) {
 			&make_backup_dir($dest, 0755, 0, $asd);
 			}
 
-		foreach $d (&unique(@donedoms)) {
+		foreach $d (@donedoms) {
 			# Work out dest file and compression command
 			local $destfile = "$d->{'dom'}.tar";
 			local $comp = "cat";
