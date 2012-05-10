@@ -566,12 +566,11 @@ DOMAIN: foreach $d (@$doms) {
 				# If this feature failed and errors aren't being
 				# skipped, stop the backup. Also stop if this
 				# was the directory step of a home-format backup
-				$ok = 0;
+				$dok = 0;
 				$errcount++;
 				push(@errdoms, $d);
 				last DOMAIN;
 				}
-			push(@donedoms, &clean_domain_passwords($d));
 			}
 		if ($fok) {
 			push(@donefeatures, $f);
@@ -585,6 +584,7 @@ DOMAIN: foreach $d (@$doms) {
 	$donefeatures{$d->{'dom'}} = \@donefeatures;
 	$donedoms{$d->{'dom'}} = $d;
 	if ($dok) {
+		push(@donedoms, &clean_domain_passwords($d));
 		$okcount++;
 		}
 	else {
@@ -696,7 +696,9 @@ DOMAIN: foreach $d (@$doms) {
 			else {
 				&$second_print($text{'setup_done'});
 				local @tst = stat("$dest/$df");
-				$transferred_sz += $tst[7];
+				if ($mode != 0) {
+					$transferred_sz += $tst[7];
+					}
 				if ($asd && $mode != 0) {
 					&record_backup_bandwidth(
 					    $d, 0, $tst[7], $tstart, time());
