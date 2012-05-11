@@ -130,19 +130,19 @@ $nologin_shell ||= $def_shell;
 $ftp_shell ||= $def_shell;
 
 # Work out the username again if it wasn't supplied
-if (!$user) {
-	local ($homedir) = glob("$root/*/homedir");
-	if (-d $daily) {
-		local ($tgz) = glob("$daily/*.tar.gz");
-		$tgz =~ /\/([^\/]+)\.tar\.gz$/;
-		$user = $1;
-		}
-	elsif (-d $homedir) {
-		$homedir =~ /\/backup-([^\/]+)_([^\/]+)\//;
-		$user = $2;
-		}
-	$user || &error("Could not work out username automatically");
+local $origuser;
+local ($homedir) = glob("$root/*/homedir");
+if (-d $daily) {
+	local ($tgz) = glob("$daily/*.tar.gz");
+	$tgz =~ /\/([^\/]+)\.tar\.gz$/;
+	$origuser = $1;
 	}
+elsif (-d $homedir) {
+	$homedir =~ /\/backup-([^\/]+)_([^\/]+)\//;
+	$origuser = $2;
+	}
+$user ||= $origuser;
+$user || &error("Could not work out username automatically");
 local $group = $user;
 local $ugroup = $group;
 
@@ -239,12 +239,13 @@ if (-r "$homesrc/tmp/awstats/awstats.$dom.conf") {
 
 if (-s "$userdir/mysql.sql" && !$waschild) {
 	# Check for mysql
+	local $dbuser = $origuser || $user;
 	local $mycount = 0;
 	local $mydir = "$userdir/mysql";
 	opendir(MYDIR, $mydir);
 	while($myf = readdir(MYDIR)) {
-		if ($myf =~ /^(\Q$user\E_\S*).sql$/ ||
-		    $myf eq "$user.sql") {
+		if ($myf =~ /^(\Q$dbuser\E_\S*).sql$/ ||
+		    $myf eq "$dbuser.sql") {
 			$mycount++;
 			}
 		}
