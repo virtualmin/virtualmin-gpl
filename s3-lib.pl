@@ -108,9 +108,6 @@ $tries ||= 1;
 local @st = stat($sourcefile);
 my $can_use_write = &get_webmin_version() >= 1.451;
 my $headers = { };
-if (!$multipart) {
-	$header->{'Content-Length'} = $st[7];
-	}
 if ($rrs) {
 	$headers->{'x-amz-storage-class'} = 'REDUCED_REDUNDANCY';
 	}
@@ -118,9 +115,13 @@ if ($st[7] >= 2**31) {
 	# 2GB or more forces multipart mode
 	$multipart = 1;
 	}
+if (!$multipart) {
+	$headers->{'Content-Length'} = $st[7];
+	}
 
 my $err;
 my $endpoint = undef;
+my $noep_conn = &make_s3_connection($akey, $skey);
 for(my $i=0; $i<$tries; $i++) {
 	local $newendpoint;
 	$err = undef;
@@ -135,8 +136,8 @@ for(my $i=0; $i<$tries; $i++) {
 	# Delete any .info or .dom file first, as it will no longer be valid.
 	# Only needs to be done the first time.
 	if (!$endpoint) {
-		$conn->delete($bucket, $destfile.".info");
-		$conn->delete($bucket, $destfile.".dom");
+		$noep_conn->delete($bucket, $destfile.".info");
+		$noep_conn->delete($bucket, $destfile.".dom");
 		}
 
 	# Use the S3 library to create a request object, but use Webmin's HTTP
@@ -225,7 +226,7 @@ for(my $i=0; $i<$tries; $i++) {
 		$err = "HTTP transfer failed : $writefailed";
 		}
 
-	if ($multipart) {
+	if (!$err && $multipart) {
 		# Response should contain upload ID
 		if ($out !~ /<UploadId>([^<]+)<\/UploadId>/i) {
 			$err = $out;
@@ -258,20 +259,22 @@ for(my $i=0; $i<$tries; $i++) {
 				}
 			if (!$err) {
 				# Complete the upload
-				my $response = $conn->complete_upload(
+				my $response = $noep_conn->complete_upload(
 					$bucket, $destfile, $uploadid, \@tags);
 				if ($response->http_response->code != 200) {
-					$err = &extract_s3_message($response);
+					$err = "Completion failed : ".
+					       &extract_s3_message($response);
 					}
 				}
 			else {
 				# Abort the upload
-				my $response = $conn->abort_upload(
+				my $response = $noep_conn->abort_upload(
 					$bucket, $destfile, $uploadid);
 				if ($response->http_response->code < 200 ||
 				    $response->http_response->code >= 300) {
-					$err .= " Also, abort failed : ".
-						&extract_s3_message($response);
+					$err = "Abort failed : ".
+					       &extract_s3_message($response).
+					       "Original error : $err";
 					}
 				}
 			}
