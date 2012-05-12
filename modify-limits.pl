@@ -30,24 +30,57 @@ aliases or users, the C<--can-edit> flag should be used, followed by a
 capability code. Supported codes and their meanings are :
 
 C<domain> - Edit Virtual server details such as the description and password
+
 C<users> - Manage mail / FTP users
+
 C<aliases> - Manage email aliases
+
 C<dbs> - Manage databases
+
 C<scripts> - List and install scripts
+
 C<ip> - Change the IP address of virtual servers
+
+C<dnsip> - Change the externally visible (DNS) IP address of virtual servers
+
 C<ssl> - Generate and upload SSL certificates
+
 C<forward> - Setup proxying and frame forwarding
+
+C<redirect> - Create and edit website aliases and redirects
+
 C<admins> - Manage extra administrators
+
 C<spam> - Edit spam filtering, delivery and clearing settings
+
 C<phpver> - Change PHP versions
+
+C<phpmode> - Change website options and PHP execution mode
+
 C<mail> - Edit email-related settings
+
 C<backup> - Backup virtual servers
+
 C<sched> - Schedule automatic backups
+
 C<restore> - Restore virtual servers (databases and home directories only)
+
 C<sharedips> - Move to different shared IP addresses
+
 C<catchall> - Create catchall email aliases
+
 C<html> - Use the HTML editor
+
+C<allowedhosts> - Can edit the remote IPs allowed access to MySQL
+
+C<passwd> - Can change a virtual server's password
+
+C<spf> - Can edit the DNS sender permitted from record
+
+C<records> - Can edit other DNS records
+
 C<disable> - Disable virtual servers
+
 C<delete> - Delete virtual servers
 
 Access to capabilities can also be taken away with the C<--cannot-edit> flag.
