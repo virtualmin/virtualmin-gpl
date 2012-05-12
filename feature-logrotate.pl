@@ -86,6 +86,7 @@ if (@logs) {
 				{ 'name' => 'compress' },
 				{ 'name' => 'postrotate',
 				  'script' => $script }
+				{ 'name' => 'sharedscripts' },
 				];
 		}
 	else {
