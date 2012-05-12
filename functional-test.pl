@@ -2285,6 +2285,113 @@ $remotebackup_tests = [
 
 $enc_remotebackup_tests = &convert_to_encrypted($remotebackup_tests);
 
+$s3_backup_prefix = "s3://$config{'s3_akey'}:$config{'s3_skey'}\@virtualmin-test-backup-bucket";
+$s3backup_tests = [
+	# Create target bucket
+	{ 'command' => 'create-s3-bucket.pl',
+	  'args' => [ [ 'bucket', 'virtualmin-test-backup-bucket' ] ],
+	},
+
+	# Create a simple domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
+		      [ 'logrotate' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a sub-server
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      [ 'logrotate' ],
+		      @create_args, ],
+	},
+
+	# Backup to S3
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$s3_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$s3_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Restore from S3
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', "$s3_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+
+	# Restore sub-domain from S3
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', "$s3_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Backup to S3 in home format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $s3_backup_prefix ] ],
+	},
+
+	# Restore from S3 in home format
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', $s3_backup_prefix ] ],
+	},
+
+	# Backup from S3 one-by-one
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'onebyone' ],
+		      [ 'newformat' ],
+		      [ 'dest', $s3_backup_prefix ] ],
+	},
+
+	# Restore from S3, all domains
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'all-domains' ],
+		      [ 'all-features' ],
+		      [ 'source', $s3_backup_prefix ] ],
+	},
+
+	# Cleanup the backup domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
+
+	# Delete the S3 bucket
+	{ 'command' => 'delete-s3-bucket.pl',
+	  'args' => [ [ 'bucket', 'virtualmin-test-backup-bucket' ],
+		      [ 'recursive' ] ],
+	  'cleanup' => 1,
+	},
+	];
+
+$enc_s3backup_tests = &convert_to_encrypted($s3backup_tests);
+
+
 $splitbackup_tests = [
 	# Create a domain for the backup target
 	{ 'command' => 'create-domain.pl',
@@ -5815,6 +5922,8 @@ $alltests = { '_config' => $_config_tests,
 	      'enc_splitbackup' => $enc_splitbackup_tests,
 	      'remotebackup' => $remotebackup_tests,
 	      'enc_remotebackup' => $enc_remotebackup_tests,
+	      's3backup' => $s3backup_tests,
+	      'enc_s3backup' => $enc_s3backup_tests,
 	      'configbackup' => $configbackup_tests,
 	      'enc_configbackup' => $enc_configbackup_tests,
 	      'ipbackup' => $ipbackup_tests,
