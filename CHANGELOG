@@ -1344,3 +1344,4 @@ Added a button to the Edit User page to re-send the signup email.
 ---- Changes since 3.92 ----
 Updated the phpMyAdmin script installer to version 3.5.1, Drupal to 7.14 and 6.26, SugarCRM to 6.4.4, FengOffice to 2.0.0, Zikula to 1.2.9, OpenX to 2.8.9, and MediaWiki to 1.19.0.
 Added new API commands list list-s3-buckets and upload-s3-file for manipulating files on Amazon's S3 service.
+Backups of more than 2GB to Amazon's S3 service now use the mulitpart protocol, which is needed to support large backups.

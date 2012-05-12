@@ -1,0 +1,6 @@
+desc=S3 multipart backups
+html=Backups of more than 2GB to Amazon's S3 service now use the mulitpart protocol, which is needed to support large backups.
+master=1
+reseller=1
+owner=1
+link=backup_form.cgi

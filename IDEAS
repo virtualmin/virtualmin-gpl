@@ -62,8 +62,3 @@
  - Single logrotate block for all domains
 	- sharedscripts
 	- https://www.virtualmin.com/node/22024
-
- - Multi-part S3 backups
-	- https://virtualmin.com/node/21944
-	- http://aws.amazon.com/about-aws/whats-new/2010/11/10/Amazon-S3-Introducing-Multipart-Upload/
-	- CHANGELOG
