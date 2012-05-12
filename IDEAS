@@ -67,4 +67,6 @@
 	- https://virtualmin.com/node/21944
 	- http://aws.amazon.com/about-aws/whats-new/2010/11/10/Amazon-S3-Introducing-Multipart-Upload/
 	- functional test for backup to S3
+		- virtualmin backups too
+		- deletion in a bucket doesn't work?
 	- CHANGELOG

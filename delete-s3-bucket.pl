@@ -60,6 +60,7 @@ $bucket || &usage("Missing --bucket parameter");
 $err = &s3_delete_bucket($akey, $skey, $bucket, !$recursive);
 if ($err) {
 	print "ERROR: $err\n";
+	exit(1);
 	}
 else {
 	print "OK: Deleted $bucket\n";

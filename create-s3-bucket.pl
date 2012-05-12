@@ -58,6 +58,7 @@ $bucket || &usage("Missing --bucket parameter");
 $err = &init_s3_bucket($akey, $skey, $bucket, 1, $location);
 if ($err) {
 	print "ERROR: $err\n";
+	exit(1);
 	}
 else {
 	print "OK: Created $bucket\n";

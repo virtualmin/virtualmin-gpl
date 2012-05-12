@@ -85,6 +85,7 @@ $err = &s3_upload($akey, $skey, $bucket, $source, $file, undef, undef, 1, $rrs,
 		  $multipart);
 if ($err) {
 	print "ERROR: $err\n";
+	exit(1);
 	}
 else {
 	@st = stat($source);

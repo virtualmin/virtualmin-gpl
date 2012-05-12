@@ -61,6 +61,7 @@ $file || &usage("Missing --file parameter");
 $err = &s3_delete_file($akey, $skey, $bucket, $file);
 if ($err) {
 	print "ERROR: $err\n";
+	exit(1);
 	}
 else {
 	print "OK: Deleted $bucket/$file\n";

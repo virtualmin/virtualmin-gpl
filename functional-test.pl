@@ -5720,6 +5720,77 @@ $ipbackup_tests = [
 	  'cleanup' => 1 },
 	];
 
+$s3_tests = [
+	# Create a random file
+	{ 'command' => 'dd if=/dev/random of=/tmp/s3.dat count=10 bs=1024',
+	},
+
+	# Create a bucket
+	{ 'command' => 'create-s3-bucket.pl',
+	  'args' => [ [ 'bucket', 'virtualmin-s3-test-bucket' ] ],
+	},
+
+	# Upload the file
+	{ 'command' => 'upload-s3-file.pl',
+	  'args' => [ [ 'bucket', 'virtualmin-s3-test-bucket' ],
+		      [ 'source', '/tmp/s3.dat' ] ],
+	},
+
+	# Download the file
+	{ 'command' => 'download-s3-file.pl',
+	  'args' => [ [ 'bucket', 'virtualmin-s3-test-bucket' ],
+		      [ 'file', 's3.dat' ],
+		      [ 'dest', '/tmp/s3.dat.2' ] ],
+	},
+
+	# Make sure they are the same
+	{ 'command' => 'diff /tmp/s3.dat /tmp/s3.dat.2 >/dev/null' },
+
+	# Delete the file on S3
+	{ 'command' => 'delete-s3-file.pl',
+	  'args' => [ [ 'bucket', 'virtualmin-s3-test-bucket' ],
+		      [ 'file', 's3.dat' ] ],
+	},
+
+	# Try a download, which should fail
+	{ 'command' => 'download-s3-file.pl',
+	  'args' => [ [ 'bucket', 'virtualmin-s3-test-bucket' ],
+		      [ 'file', 's3.dat' ],
+		      [ 'dest', '/tmp/s3.dat.2' ] ],
+	  'fail' => 1,
+	},
+
+	# Re-upload multipart
+	{ 'command' => 'upload-s3-file.pl',
+	  'args' => [ [ 'bucket', 'virtualmin-s3-test-bucket' ],
+		      [ 'source', '/tmp/s3.dat' ],
+		      [ 'multipart' ] ],
+	},
+
+	# Download the file again
+	{ 'command' => 'download-s3-file.pl',
+	  'args' => [ [ 'bucket', 'virtualmin-s3-test-bucket' ],
+		      [ 'file', 's3.dat' ],
+		      [ 'dest', '/tmp/s3.dat.2' ] ],
+	},
+
+	# Make sure they are the same again
+	{ 'command' => 'diff /tmp/s3.dat /tmp/s3.dat.2 >/dev/null' },
+
+	# Delete the bucket
+	{ 'command' => 'delete-s3-bucket.pl',
+	  'args' => [ [ 'bucket', 'virtualmin-s3-test-bucket' ],
+		      [ 'recursive' ] ],
+	  'cleanup' => 1,
+	},
+	];
+if (!$config{'s3_akey'} || !$config{'s3_skey'}) {
+	$s3_tests = [ { 'command' => 'echo No default S3 access or secret key defined on this system' } ];
+	}
+else {
+	$s3_eu_tests = &convert_to_location($s3_tests, "EU");
+	}
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'hashpass' => $hashpass_tests,
@@ -5769,6 +5840,8 @@ $alltests = { '_config' => $_config_tests,
 	      'admin' => $admin_tests,
 	      'clone' => $clone_tests,
 	      'clonesub' => $clonesub_tests,
+	      's3' => $s3_tests,
+	      's3_eu' => $s3_eu_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
@@ -6057,6 +6130,33 @@ foreach my $t (@$tests) {
 	    $nt->{'command'} eq 'restore-domain.pl') {
 		$nt->{'args'} = [ @{$nt->{'args'}},
 				  [ 'key' => $key->{'id'} ] ];
+		}
+	push(@$rv, $nt);
+	}
+return $rv;
+}
+
+# convert_to_location(&tests, location)
+# Returns a list of tests with bucket creation commands modified to use the
+# EU S3 location
+sub convert_to_location
+{
+local ($tests, $location) = @_;
+local $rv = [ ];
+foreach my $t (@$tests) {
+	my $nt = { %$t };
+	my @na;
+	foreach my $a (@{$t->{'args'}}) {
+		push(@na, [ $a->[0], $a->[1] ]);
+		}
+	$nt->{'args'} = \@na;
+	if ($nt->{'command'} eq 'create-s3-bucket.pl') {
+		push(@{$nt->{'args'}}, [ 'location' => $location ]);
+		}
+	foreach my $a (@{$nt->{'args'}}) {
+		if ($a->[0] eq 'bucket') {
+			$a->[1] .= "-".lc($location);
+			}
 		}
 	push(@$rv, $nt);
 	}

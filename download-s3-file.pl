@@ -70,6 +70,7 @@ $bucket || &usage("Missing --bucket parameter");
 $err = &s3_download($akey, $skey, $bucket, $file, $dest);
 if ($err) {
 	print "ERROR: $err\n";
+	exit(1);
 	}
 else {
 	@st = stat($dest);
