@@ -74,7 +74,6 @@ if (!-d $etc) {
 	&make_dir_as_domain_user($d, $etc, 0755);
 	}
 local $defver = $vers[0]->[0];
-local $defini;
 foreach my $ver (@vers) {
 	# Create separate .ini file for each PHP version, if missing
 	local $subs_ini = $subs_ini{$ver->[0]};
@@ -153,18 +152,10 @@ foreach my $ver (@vers) {
 			}
 		&set_ownership_permissions($uid, $gid, 0755, "$inidir/php.ini");
 		}
-
-	# Is this the default of PHP, remember the path for later linking
-	if ($ver->[0] eq $defver) {
-		$defini = "php$ver->[0]/php.ini";
-		}
 	}
 
 # Link ~/etc/php.ini to the per-version ini file
-if ($defini && !-l "$etc/php.ini") {
-	&unlink_file_as_domain_user($d, "$etc/php.ini");
-	&symlink_file_as_domain_user($d, $defini, "$etc/php.ini");
-	}
+&create_php_ini_link($d, $mode);
 
 # Call plugin-specific function to perform webserver setup
 if ($p ne 'web') {
@@ -920,6 +911,9 @@ return 0 if (!$any);
 # Make sure we have all the wrapper scripts
 &create_php_wrappers($d, $mode);
 
+# Re-create php.ini link
+&create_php_ini_link($d, $mode);
+
 &register_post_action(\&restart_apache);
 $pfound || &error("Apache virtual host was not found");
 return 1;
@@ -1269,6 +1263,27 @@ foreach my $i (&list_domain_php_inis($d)) {
 			$newed = undef;
 			}
 		&phpini::save_directive($pconf, "extension_dir", $newed);
+		}
+	}
+}
+
+# create_php_ini_link(&domain, [php-mode])
+# Create a link from etc/php.ini to the PHP version used by the domain's
+# public_html directory
+sub create_php_ini_link
+{
+local ($d, $mode) = @_;
+$mode ||= &get_domain_php_mode($d);
+if ($mode ne "mod_php") {
+	local @dirs = &list_domain_php_directories($d);
+	local $phd = &public_html_dir($d);
+	local ($hdir) = grep { $_->{'dir'} eq $phd } @dirs;
+	$hdir ||= $dirs[0];
+	local $etc = "$d->{'home'}/etc";
+	if ($hdir) {
+		&unlink_file_as_domain_user($d, "$etc/php.ini");
+		&symlink_file_as_domain_user($d,
+			"php".$hdir->{'version'}."/php.ini", "$etc/php.ini");
 		}
 	}
 }
