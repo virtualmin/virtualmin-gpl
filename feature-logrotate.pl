@@ -85,7 +85,7 @@ if (@logs) {
 				{ 'name' => 'weekly' },
 				{ 'name' => 'compress' },
 				{ 'name' => 'postrotate',
-				  'script' => $script }
+				  'script' => $script },
 				{ 'name' => 'sharedscripts' },
 				];
 		}
