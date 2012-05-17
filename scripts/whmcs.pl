@@ -372,7 +372,7 @@ if (!$upgrade) {
 	local @params = (
 		[ "firstname", $firstname ],
 		[ "lastname", "" ],
-		[ "email", $d->{'emailto'} ],
+		[ "email", $d->{'emailto_addr'} ],
 		[ "username", $domuser ],
 		[ "password", $dompass ],
 		);

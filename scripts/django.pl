@@ -311,7 +311,7 @@ if (!$upgrade) {
 	$domuser =~ s/[\.\@\-]/_/g;
 	foreach my $w ([ "yes.no", "yes" ],
 		       [ "Username", $domuser ],
-		       [ "E-mail address", $d->{'emailto'} ],
+		       [ "E-mail address", $d->{'emailto_addr'} ],
 		       [ "Password", $dompass ],
 		       [ "Password", $dompass ]) {
 		local $rv = &wait_for($fh, $w->[0]);
