@@ -890,7 +890,7 @@ if ($got{'virtualmin-mailman'}) {
 	foreach $ml (@lists) {
 		local $err = &plugin_call("virtualmin-mailman", "create_list",
 			     $ml, $dom, "Migrated cPanel mailing list",
-			     undef, $dom{'emailto'}, $dom{'pass'});
+			     undef, $dom{'emailto_addr'}, $dom{'pass'});
 		if ($err) {
 			&$second_print("Failed to create $ml : $err");
 			}

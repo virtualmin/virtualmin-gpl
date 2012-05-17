@@ -38,7 +38,7 @@ print &ui_table_row($text{'newnotify_subject'},
 
 # Message sender
 print &ui_table_row($text{'newnotify_from'},
-		    &ui_textbox("from", $d->{'emailto'}, 50));
+		    &ui_textbox("from", $d->{'emailto_addr'}, 50));
 
 # Message body
 print &ui_table_row($text{'newnotify_body'},

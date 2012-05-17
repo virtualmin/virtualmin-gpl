@@ -363,7 +363,7 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && &self_signed_cert($_[0]) &&
 		$info->{'o'},
 		$info->{'ou'},
 		"*.$_[0]->{'dom'}",
-		$_[0]->{'emailto'},
+		$_[0]->{'emailto_addr'},
 		$info->{'alt'},
 		$_[0],
 		);
@@ -1506,7 +1506,7 @@ if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
 	local $err = &generate_self_signed_cert(
 		$d->{'ssl_cert'}, $d->{'ssl_key'}, undef, 1825,
 		undef, undef, undef, $d->{'owner'}, undef,
-		"*.$d->{'dom'}", $d->{'emailto'}, undef, $d);
+		"*.$d->{'dom'}", $d->{'emailto_addr'}, undef, $d);
 	if ($err) {
 		&$second_print(&text('setup_eopenssl', $err));
 		return 0;

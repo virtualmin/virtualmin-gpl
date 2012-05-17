@@ -120,7 +120,7 @@ if ($self) {
 		$subject{'o'},
 		$subject{'ou'},
 		$subject{'cn'} || "*.$d->{'dom'}",
-		$subject{'email'} || $d->{'emailto'},
+		$subject{'email'} || $d->{'emailto_addr'},
 		\@alts,
 		$d,
 		);
@@ -170,7 +170,7 @@ else {
 		$subject{'o'},
 		$subject{'ou'},
 		$subject{'cn'} || "*.$d->{'dom'}",
-		$subject{'email'} || $d->{'emailto'},
+		$subject{'email'} || $d->{'emailto_addr'},
 		\@alts,
 		$d,
 		);

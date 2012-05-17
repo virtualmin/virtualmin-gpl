@@ -3971,7 +3971,7 @@ $template = &substitute_virtualmin_template($template, \%hash);
 # as long as that address is in a local domain with mail
 if (!$from && $remote_user && !&master_admin() && $d) {
 	local $localdom = 0;
-	local ($emailtouser, $emailtodom) = split(/\@/, $d->{'emailto'});
+	local ($emailtouser, $emailtodom) = split(/\@/, $d->{'emailto_addr'});
 	foreach my $ld (grep { $_->{'mail'} } &list_domains()) {
 		if (lc($ld->{'dom'}) eq lc($emailtodom)) {
 			$localdom = 1;
@@ -10894,7 +10894,7 @@ if (!$d->{'alias'} && &can_config_domain($d)) {
 	push(@rv, { 'page' => 'reemail.cgi',
 		    'title' => $text{'edit_reemail'},
 		    'desc' => &text('edit_reemaildesc',
-                                    "<tt>$d->{'emailto'}</tt>"),
+                                    "<tt>$d->{'emailto_addr'}</tt>"),
 		    'cat' => 'admin',
 		  });
 	}

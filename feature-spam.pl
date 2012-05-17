@@ -195,7 +195,7 @@ if ($recipe2 || $recipe3) {
 
 # Create the config file for this server
 &open_tempfile(TOUCH, ">$spamdir/virtualmin.cf", 0, 1);
-&print_tempfile(TOUCH, "whitelist_from $d->{'emailto'}\n");
+&print_tempfile(TOUCH, "whitelist_from $d->{'emailto_addr'}\n");
 &close_tempfile(TOUCH);
 &set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'gid'}, 0755,
 			  "$spamdir/virtualmin.cf");
@@ -584,8 +584,8 @@ local $spamfile = "$spamdir/virtualmin.cf";
 &set_ownership_permissions($d->{'uid'}, $d->{'gid'}, undef, $spamfile);
 local $lref = &read_file_lines($spamfile);
 foreach my $l (@$lref) {
-	if ($l =~ /^whitelist_from\s+\Q$oldd->{'emailto'}\E/) {
-		$l = "whitelist_from $d->{'emailto'}";
+	if ($l =~ /^whitelist_from\s+\Q$oldd->{'emailto_addr'}\E/) {
+		$l = "whitelist_from $d->{'emailto_addr'}";
 		}
 	}
 &flush_file_lines($spamfile);

@@ -262,7 +262,7 @@ print &ui_table_row($text{'cert_alt'},
 		    &ui_textarea("subjectAltName", $alts, 5, 30));
 
 print &ui_table_row($webmin::text{'ca_email'},
-		    &ui_textbox("emailAddress", $d->{'emailto'}, 30));
+		    &ui_textbox("emailAddress", $d->{'emailto_addr'}, 30));
 
 print &ui_table_row($webmin::text{'ca_ou'},
 		    &ui_textbox("organizationalUnitName", undef, 30));

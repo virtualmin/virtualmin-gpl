@@ -62,3 +62,8 @@
  - Single logrotate block for all domains
 	- sharedscripts
 	- https://www.virtualmin.com/node/22024
+	- backup and restore?
+	- CGI and API to switch modes
+
+ - Validate emailto field - allow multiple addresses, but they must be valid
+	- Set emailto_addr field to first address only, use in scripts / etc
