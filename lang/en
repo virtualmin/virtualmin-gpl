@@ -379,12 +379,11 @@ setup_emysql=A MySQL database called $2 or user called $3 already exists
 setup_emysqldb=A MySQL database named $1 already exists
 setup_emysqluser=A MySQL user named $1 already exists - try selecting a different administration username
 setup_emysqldbdom=A MySQL database named $1 is already owned by virtual server $2
-setup_emysqluserdom=A MySQL login named $1 is already owned by virtual server $
-2
+setup_emysqluserdom=A MySQL login named $1 is already owned by virtual server $2
 setup_epostgresdb=A PostgreSQL database called $1 already exists
 setup_epostgresuser=A PostgreSQL user called $1 already exists
 setup_epostgresdbdom=A PostgreSQL database named $1 is already owned by virtual server $2
-setup_epostgresuserdom=A PostgreSQL login named $1 is already owned by virtual server $
+setup_epostgresuserdom=A PostgreSQL login named $1 is already owned by virtual server $2
 setup_ehomebase=Home directory base is not set in the configuration of the Users and Groups module or this module
 setup_equota=Missing or invalid total quota
 setup_euquota=Missing or invalid administration user's quota
@@ -2629,7 +2628,7 @@ csr_done=The certificate signing request has been successfully generated, and ca
 csr_csr=The CSR for this virtual server, saved in $1, is :
 csr_key=The new private key for this virtual server, saved in $1, is :
 csr_selfing=Generating self-signed certificate and private key ..
-csr_csring=Generating signing request and and private key ..
+csr_csring=Generating signing request and private key ..
 
 newkey_title=Installing Certificate
 newkey_err=Failed to install certificate
