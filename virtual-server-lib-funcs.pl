@@ -278,7 +278,8 @@ if (!defined($dom->{'db_postgres'}) && $dom->{'postgres'}) {
 	$dom->{'db_postgres'} = $dom->{'db'};
 	}
 $dom->{'db_postgres'} = join(" ", &unique(split(/\s+/, $dom->{'db_postgres'})));
-# This is a computed field
+
+# Emailto is a computed field
 local $parent;
 if ($dom->{'email'}) {
 	$dom->{'emailto'} = $dom->{'email'};
@@ -292,6 +293,20 @@ elsif ($dom->{'mail'}) {
 else {
 	$dom->{'emailto'} = $dom->{'user'}.'@'.&get_system_hostname();
 	}
+
+# Also compute first actual email address
+if (!$dom->{'emailto_addr'} ||
+    $dom->{'emailto_src'} ne $dom->{'emailto'}) {
+	if ($dom->{'emailto'} =~ /^[a-z0-9\.\_\-\+]+\@[a-z0-9\.\_\-]+$/i) {
+		$dom->{'emailto_addr'} = $dom->{'emailto'};
+		}
+	else {
+		($dom->{'emailto_addr'}) =
+			&extract_address_parts($dom->{'emailto'});
+		}
+	$dom->{'emailto_src'} = $dom->{'emailto'};
+	}
+
 # Set edit limits based on ability to edit domains
 local %acaps = map { $_, 1 } &list_automatic_capabilities($dom->{'domslimit'});
 foreach my $ed (@edit_limits) {
@@ -15293,6 +15308,17 @@ $ENV{'USERADMIN_EMAIL'} = $d->{'email'};
 if ($u->{'extraemail'}) {
 	$ENV{'USERADMIN_EXTRAEMAIL'} = join(" ", @{$u->{'extraemail'}});
 	}
+}
+
+# extract_address_parts(string)
+# Given a string that may contain multiple email addresses with real names,
+# return a list of just the address parts. Excludes un-qualified addresses
+sub extract_address_parts
+{
+local ($str) = @_;
+&foreign_require("mailboxes", "mailboxes-lib.pl");
+return grep { /^[^@ ]+\@[^@ ]+$/ }
+	    map { $_->[0] } &mailboxes::split_addresses($str);
 }
 
 # load_plugin_libraries([plugin, ...])

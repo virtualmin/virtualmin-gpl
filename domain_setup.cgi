@@ -72,8 +72,11 @@ else {
 	}
 if (!$parentuser) {
 	# Validate user and password-related inputs for top-level domain
-	$in{'email_def'} || $in{'email'} =~ /\S/ ||
-		&error($text{'setup_eemail'});
+	if (!$in{'email_def'}) {
+		$in{'email'} =~ /\S/ || &error($text{'setup_eemail'});
+		&extract_address_parts($in{'email'}) ||
+			&usage($text{'setup_eemail3'});
+		}
 	if (!$in{'unix'}) {
 		$tmpl->{'mail_on'} eq "none" || !$in{'email_def'} ||
 			&error($text{'setup_eemail2'});

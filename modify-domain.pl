@@ -381,6 +381,8 @@ if (defined($pass)) {
 		}
 	}
 if (defined($email)) {
+	&extract_address_parts($email) ||
+		&usage("Invalid email address $email");
 	foreach $d (@doms) {
 		$d->{'email'} = $email;
 		}

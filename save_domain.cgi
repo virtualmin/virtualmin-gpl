@@ -68,6 +68,11 @@ if (!$d->{'parent'} && !$in{'passwd_def'}) {
 	&error($err) if ($err);
 	}
 
+# Check email format
+if (!$in{'email_def'}) {
+	&extract_address_parts($in{'email'}) || &usage($text{'setup_eemail3'});
+	}
+
 # Work out which features are relevant
 @dom_features = &domain_features($d);
 

@@ -262,6 +262,7 @@ if ($multi) {
 			print "    Error log: ",&get_website_log($wd, 1),"\n";
 			}
 		print "    Contact email: $d->{'emailto'}\n";
+		print "    Contact address: $d->{'emailto_addr'}\n";
 		print "    Created on: ",&make_date($d->{'created'}),"\n";
 		if ($d->{'creator'}) {
 			print "    Created by: $d->{'creator'}\n";
