@@ -2952,6 +2952,94 @@ $mail_tests = [
         },
 	];
 
+$exclude_tests = [
+	# Create a domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a sub-directory and file to exclude
+	{ 'command' => 'su -s /bin/sh '.$test_domain_user.' -c "mkdir ~/xxx"',
+	},
+	{ 'command' => 'su -s /bin/sh '.$test_domain_user.' -c "touch ~/xxx/yyy.txt"',
+	},
+
+	# Create a sub-directory and file to keep
+	{ 'command' => 'su -s /bin/sh '.$test_domain_user.' -c "mkdir ~/aaa"',
+	},
+	{ 'command' => 'su -s /bin/sh '.$test_domain_user.' -c "touch ~/aaa/yyy.txt"',
+	},
+
+	# Set exclude path
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-exclude', 'zzz' ],
+		      [ 'add-exclude', 'xxx' ],
+		      [ 'add-exclude', 'vvv' ] ],
+	},
+
+	# Check exclude list
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Backup exclusion: xxx', 'Backup exclusion: vvv',
+		      'Backup exclusion: zzz' ],
+	},
+
+	# Backup to a temp file
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_file ] ],
+	},
+
+	# Delete the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Restore to re-create
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ] ],
+	},
+
+	# Make sure the dir is gone
+	{ 'command' => 'ls -ld '.$test_domain_home.'/xxx',
+	  'fail' => 1,
+	},
+
+	# Make sure the other dir still exists
+	{ 'command' => 'ls -ld '.$test_domain_home.'/aaa',
+	},
+
+	# Remove an exclude
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'remove-exclude', 'zzz' ] ],
+	},
+
+	# Re-check exclude list
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Backup exclusion: xxx', 'Backup exclusion: vvv' ],
+	  'antigrep' => [ 'Backup exclusion: zzz' ],
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $prepost_tests = [
 	# Create a domain just to see if scripts run
 	{ 'command' => 'create-domain.pl',
@@ -5951,6 +6039,7 @@ $alltests = { '_config' => $_config_tests,
 	      'clonesub' => $clonesub_tests,
 	      's3' => $s3_tests,
 	      's3_eu' => $s3_eu_tests,
+	      'exclude' => $exclude_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
