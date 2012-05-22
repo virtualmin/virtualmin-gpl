@@ -56,11 +56,11 @@
 	- Namecheap too
 	- Pro only
 
- - Change domain creation form to wizard
-	- Same for CLoudmin
+ - Sub-directories under S3 buckets
+	- https://www.virtualmin.com/node/22224
 
- - Single logrotate block for all domains
-	- sharedscripts
-	- https://www.virtualmin.com/node/22024
-	- backup and restore?
-	- CGI and API to switch modes
+ - DKIM on Ubuntu 12.04
+	- http://www.virtualmin.com/node/22160
+
+ - Keep history in status module
+	- Result values too
