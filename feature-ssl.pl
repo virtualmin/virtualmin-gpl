@@ -780,6 +780,9 @@ if ($virt) {
 	# Re-setup any SSL passphrase
 	&save_domain_passphrase($_[0]);
 
+	# Re-save PHP mode, in case it changed
+	&save_domain_php_mode($_[0], &get_domain_php_mode($_[0]));
+
 	&$second_print($text{'setup_done'});
 	}
 else {
