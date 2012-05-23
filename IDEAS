@@ -58,9 +58,3 @@
 
  - Sub-directories under S3 buckets
 	- https://www.virtualmin.com/node/22224
-
- - DKIM on Ubuntu 12.04
-	- http://www.virtualmin.com/node/22160
-
- - Keep history in status module
-	- Result values too

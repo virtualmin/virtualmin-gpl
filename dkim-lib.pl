@@ -342,39 +342,49 @@ if ($dkim_config) {
 	# Save domains and key file in config
 	&lock_file($dkim_config);
 	&save_debian_dkim_config($dkim_config, 
-		"Domain", undef);
-	&save_debian_dkim_config($dkim_config, 
 		"Selector", $dkim->{'selector'});
 	&save_debian_dkim_config($dkim_config, 
 		"KeyFile", $dkim->{'keyfile'});
 	&save_debian_dkim_config($dkim_config,
                 "Syslog", "yes");
-	&unlock_file($dkim_config);
 
-	# Work out mapping file
-	my $conf = &get_debian_dkim_config($dkim_config);
-	my $keylist = $conf->{'KeyList'};
-	if (!$keylist) {
-		$keylist = $dkim_config;
-		$keylist =~ s/\/([^\/]+)$/\/keylist/;
+	if (&get_dkim_type() eq 'ubuntu') {
+		# OpenDKIM version supplied with Ubuntu doesn't support the
+		# KeyList parameter
 		&save_debian_dkim_config($dkim_config,
-			"KeyList", $keylist);
+			"Domain", join(",", &unique((map { $_->{'dom'} } @doms),
+						    @{$dkim->{'extra'}})));
 		}
+	else {
+		# Work out mapping file
+		&save_debian_dkim_config($dkim_config, 
+			"Domain", undef);
+		my $conf = &get_debian_dkim_config($dkim_config);
+		my $keylist = $conf->{'KeyList'};
+		if (!$keylist) {
+			$keylist = $dkim_config;
+			$keylist =~ s/\/([^\/]+)$/\/keylist/;
+			&save_debian_dkim_config($dkim_config,
+				"KeyList", $keylist);
+			}
 
-	# Link key to same directory as mapping file, with selector as filename
-	my $selkeyfile = $keylist;
-	$selkeyfile =~ s/\/([^\/]+)$/\/$dkim->{'selector'}/;
-	if (-e $selkeyfile && !-l $selkeyfile) {
-		&$second_print("<b>".&text('dkim_eselfile',
+		# Link key to same directory as mapping file, with selector
+		# as filename
+		my $selkeyfile = $keylist;
+		$selkeyfile =~ s/\/([^\/]+)$/\/$dkim->{'selector'}/;
+		if (-e $selkeyfile && !-l $selkeyfile) {
+			&$second_print("<b>".&text('dkim_eselfile',
 					   "<tt>$selkeyfile</tt>")."</b>");
-		return 0;
-		}
-	&unlink_file($selkeyfile);
-	&symlink_file($dkim->{'keyfile'}, $selkeyfile);
+			return 0;
+			}
+		&unlink_file($selkeyfile);
+		&symlink_file($dkim->{'keyfile'}, $selkeyfile);
 
-	# Create key mapping file
-	&create_key_mapping_file(\@doms, $keylist, $selkeyfile,
-				 $dkim->{'extra'});
+		# Create key mapping file
+		&create_key_mapping_file(\@doms, $keylist, $selkeyfile,
+					 $dkim->{'extra'});
+		}
+	&unlock_file($dkim_config);
 
 	# Save list of extra domains
 	$config{'dkim_extra'} = join(" ", @{$dkim->{'extra'}});
@@ -689,6 +699,7 @@ sub set_dkim_domains
 my ($doms, $dkim) = @_;
 my $dkim_config = &get_dkim_config_file();
 my $init = &get_dkim_init_name();
+my $dkim = &get_dkim_config();
 if ($dkim_config) {
 	my $conf = &get_debian_dkim_config($dkim_config);
 	my $keylist = $conf->{'KeyList'};
@@ -706,8 +717,9 @@ if ($dkim_config) {
 	else {
 		# Just set list of domains
 		&save_debian_dkim_config($dkim_config,
-			"Domain", join(",", (map { $_->{'dom'} } @$doms),
-					    @{$conf->{'extra'}}));
+			"Domain",
+			join(",", &unique((map { $_->{'dom'} } @$doms),
+					  @{$dkim->{'extra'}})));
 		}
 
 	# Restart milter
