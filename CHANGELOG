@@ -1347,3 +1347,4 @@ Added new API commands list list-s3-buckets and upload-s3-file for manipulating 
 Backups of more than 2GB to Amazon's S3 service now use the mulitpart protocol, which is needed to support large backups.
 The contact email address for a domain can now contain multiple addresses with real names.
 The DKIM feature in Virtualmin now supports OpenDKIM, as seen in Ubuntu 12.04.
+Backups to Amazon S3 can now be to a sub-directory under a bucket, rather than being at the top level.

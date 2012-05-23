@@ -310,16 +310,6 @@ for(my $i=0; $i<$tries; $i++) {
 		}
 	}
 
-# If it worked, save the info file too
-if (!$err && $info) {
-	local $itemp = &transname();
-	&open_tempfile(ITEMP, ">$itemp", 0, 1);
-	&print_tempfile(ITEMP, &serialise_variable($info));
-	&close_tempfile(ITEMP);
-	$err = &s3_upload($akey, $skey, $bucket, $itemp,
-			  $destfile.".info", undef, $tries, $rrs);
-	}
-
 return $err;
 }
 
@@ -339,7 +329,8 @@ if ($response->http_response->code != 200) {
 	}
 local $rv = { };
 foreach my $f (@{$response->entries}) {
-	if ($f->{'Key'} =~ /^(\S+)\.info$/ && (!$path || $path eq $1) ||
+	if ($f->{'Key'} =~ /^(\S+)\.info$/ && $path eq $1 ||
+	    $f->{'Key'} =~ /^([^\/\s]+)\.info$/ && !$path ||
 	    $f->{'Key'} =~ /^((\S+)\/([^\/]+))\.info$/ && $path && $path eq $2){
 		# Found a valid info file .. get it
 		local $bfile = $1;
@@ -378,7 +369,8 @@ if ($response->http_response->code != 200) {
 	}
 local $rv = { };
 foreach my $f (@{$response->entries}) {
-	if ($f->{'Key'} =~ /^(\S+)\.dom$/ && (!$path || $path eq $1) ||
+	if ($f->{'Key'} =~ /^(\S+)\.dom$/ && $path eq $1 ||
+	    $f->{'Key'} =~ /^([^\/\s]+)\.dom$/ && !$path ||
 	    $f->{'Key'} =~ /^((\S+)\/([^\/]+))\.dom$/ && $path && $path eq $2){
 		# Found a valid .dom file .. get it
 		local $bfile = $1;

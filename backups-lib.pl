@@ -1137,6 +1137,8 @@ foreach my $desturl (@$desturls) {
 				local $n = $d eq "virtualmin" ? "virtualmin"
 							      : $d->{'dom'};
 				local $binfo = { $n => $donefeatures{$n} };
+				local $bdom = $d eq "virtualmin" ? undef :
+					{ $n => &clean_domain_passwords($d) };
 				$err = &s3_upload($user, $pass, $server,
 						  "$dest/$df",
 						  $path ? $path."/".$df : $df,
@@ -2134,7 +2136,7 @@ if ($mode == 3) {
 	local $s3b = &s3_list_domains($user, $pass, $server, $path);
 	if (ref($s3b)) {
 		foreach my $b (keys %$s3b) {
-			$info{$b} = $s3b->{$b};
+			$dom{$b} = $s3b->{$b};
 			}
 		}
 	}
@@ -2593,7 +2595,9 @@ elsif ($proto == 2) {
 	$rv = &text('backup_nicescp', "<tt>$path</tt>", "<tt>$host</tt>");
 	}
 elsif ($proto == 3) {
-	$rv = &text('backup_nices3', "<tt>$host</tt>");
+	$rv = $path ?
+		&text('backup_nices3p', "<tt>$host</tt>", "<tt>$path</tt>") :
+		&text('backup_nices3', "<tt>$host</tt>");
 	}
 elsif ($proto == 0) {
 	$rv = &text('backup_nicefile', "<tt>$path</tt>");
@@ -2699,9 +2703,9 @@ if (&can_use_s3()) {
 	$st .= "<tr> <td>$text{'backup_skey'}</td> <td>".
 	       &ui_password($name."_skey", $s3pass, 40, 0, undef, $noac).
 	       "</td> </tr>\n";
-	$st .= "<tr> <td>$text{'backup_s3file'}</td> <td>".
+	$st .= "<tr> <td>$text{'backup_s3path'}</td> <td>".
 	       &ui_opt_textbox($name."_s3file", $mode == 3 ? $path : undef,
-			       30, $text{'backup_nos3file'}).
+			       30, $text{'backup_nos3path'}).
 	       "</td> </tr>\n";
 	$st .= "<tr> <td></td> <td>".
 	       &ui_checkbox($name."_rrs", 1, $text{'backup_s3rrs'}, $port == 1).
