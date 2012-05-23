@@ -1346,3 +1346,4 @@ Updated the phpMyAdmin script installer to version 3.5.1, Drupal to 7.14 and 6.2
 Added new API commands list list-s3-buckets and upload-s3-file for manipulating files on Amazon's S3 service.
 Backups of more than 2GB to Amazon's S3 service now use the mulitpart protocol, which is needed to support large backups.
 The contact email address for a domain can now contain multiple addresses with real names.
+The DKIM feature in Virtualmin now supports OpenDKIM, as seen in Ubuntu 12.04.
