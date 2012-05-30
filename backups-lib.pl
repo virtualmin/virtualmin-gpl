@@ -1687,7 +1687,12 @@ if ($ok) {
 			# Does the reseller exist? If not, fail
 			if ($d->{'reseller'} && defined(&get_reseller)) {
 				my $resel = &get_reseller($d->{'reseller'});
-				if (!$resel) {
+				if (!$resel && $skipwarnings) {
+					&$second_print(&text('restore_eresel2',
+							$d->{'reseller'}));
+					delete($d->{'reseller'});
+					}
+				elsif (!$resel) {
 					&$second_print(&text('restore_eresel',
 							$d->{'reseller'}));
 					$ok = 0;

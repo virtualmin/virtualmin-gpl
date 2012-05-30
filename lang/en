@@ -2361,6 +2361,7 @@ restore_elimit=.. creation would exceed your virtual server limit of $1
 restore_epardom=.. the original parent virtual server <tt>$1</tt> does not exist
 restore_etemplate=.. the server template specified in the backup does not exist
 restore_eresel=.. the reseller $1 specified in the backup does not exist
+restore_eresel2=.. the reseller $1 specified in the backup does not exist - removing it from the domain
 restore_edefip=.. could not work out the default IP address
 restore_eclash=.. a clash was detected : $1
 restore_ewarnings=.. the following warnings were detected :
