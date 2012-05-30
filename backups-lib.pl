@@ -482,6 +482,14 @@ DOMAIN: foreach $d (@$doms) {
         &resync_all_databases($d, \@alldbs);
 	my $dstart = time();
 
+	# If domain has a reseller set whole doesn't exist, clear it now
+	# to prevent errors on restore
+	if ($d->{'reseller'} && defined(&get_reseller) &&
+	    !&get_reseller($d->{'reseller'})) {
+		delete($d->{'reseller'});
+		&save_domain($d);
+		}
+
 	# Begin doing this domain
 	&$cbfunc($d, 0, $backupdir) if ($cbfunc);
 	&$first_print(&text('backup_fordomain', &show_domain_name($d)));
