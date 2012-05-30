@@ -21,6 +21,11 @@ sub script_django_versions
 return ( "1.4" );
 }
 
+sub script_django_gpl
+{
+return 1;
+}
+
 sub script_django_category
 {
 return "Development";

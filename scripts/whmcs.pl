@@ -27,6 +27,11 @@ sub script_whmcs_versions
 return ( "5.0.3" );
 }
 
+sub script_whmcs_gpl
+{
+return 1;
+}
+
 sub script_whmcs_release
 {
 return 2;
