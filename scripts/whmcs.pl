@@ -29,7 +29,7 @@ return ( "5.0.3" );
 
 sub script_whmcs_release
 {
-return 1;	# New patch doesn't update version
+return 2;
 }
 
 sub script_whmcs_category
@@ -186,16 +186,22 @@ push(@files, { 'name' => "ioncube",
 	       'url' => "http://downloads2.ioncube.com/".
 			"loader_downloads/ioncube_loaders_$io.zip" });
 if (&compare_versions($ver, "4.5.2") <= 0) {
-	# Also need security path
+	# Also need security patch
 	push(@files, { 'name' => 'patch',
 		       'file' => 'patch.zip',
 		       'url' => 'http://www.whmcs.com/go/21/download' });
 	}
 if (&compare_versions($ver, "4.5.2") <= 0) {
-	# New security path
+	# New security patch
 	push(@files, { 'name' => 'patch2',
 		       'file' => 'patch2.zip',
 		       'url' => 'http://www.whmcs.com/members/dl.php?type=d&id=112' });
+	}
+if (&compare_versions($ver, "5.0.3") <= 0) {
+	# SQL injection path
+	push(@files, { 'name' => 'patch3',
+		       'file' => 'patch3.zip',
+		       'url' => 'http://www.whmcs.com/members/dl.php?type=d&id=126' });
 	}
 return @files;
 }
