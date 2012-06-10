@@ -4903,6 +4903,8 @@ quotawarn_usage=Usage
 quotawarn_status=Status
 quotawarn_reached=Reached $1 %
 quotawarn_over=Over quota
+quotawarn_suffixdom=Sent by Virtualmin at: $1
+quotawarn_suffixuser=Sent by Virtualmin at: $1
 
 history_title=System Statistics
 history_ecannot=You are not allowed to view historic system statistics

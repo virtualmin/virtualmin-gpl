@@ -139,7 +139,7 @@ foreach my $m (@$msgs) {
 			       $msg);
 	}
 $body .= "\n";
-$body .= "Sent by Virtualmin at: ".&get_virtualmin_url($emaild)."\n";
+$body .= &text('quotawarn_suffixdom', &get_virtualmin_url($emaild))."\n";
 
 # Send the email
 if ($debug_mode) {
@@ -182,7 +182,7 @@ foreach my $m (@$msgs) {
 			       $msg);
 	}
 $body .= "\n";
-$body .= "Sent by Virtualmin at: ".&get_virtualmin_url($emaild)."\n";
+$body .= &text('quotawarn_suffixuser', &get_virtualmin_url($emaild))."\n";
 
 # Send the email
 if ($debug_mode) {
