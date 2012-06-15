@@ -681,9 +681,9 @@ DOMAIN: foreach $d (@$doms) {
 				local $r = ($user ? "$user\@" : "").
 					   "$qserver:$path";
 				&scp_copy("$dest/$df", $r, $pass, \$err, $port);
-				&scp_copy($infotemp, $r.".info", $pass,
+				&scp_copy($infotemp, "$r/$df.info", $pass,
 					  \$err, $port) if (!$err);
-				&scp_copy($domtemp, $r.".dom", $pass,
+				&scp_copy($domtemp, "$r/$df.dom", $pass,
 					  \$err, $port) if (!$err);
 				$err =~ s/\Q$pass\E/$starpass/g;
 				}
