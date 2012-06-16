@@ -2609,6 +2609,7 @@ cert_chain1=In file on server $1
 cert_chain2=Uploaded file $1
 cert_chain3=Pasted certificate text
 cert_desc5=If your virtual server's SSL certificate is from a certificate authority that is not directly known to major browsers, you may need to upload the CA's certificate using this form.
+cert_desc5a=The selected file can contain multiple CA certificates in PEM format, one after the other.
 cert_chainok=Save Certificate
 cert_esubject=Certficate does not appear to have a common name
 cert_same=This virtual server shares its SSL certificate with <tt>$1</tt>, so it cannot be edited on this page.

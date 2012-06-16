@@ -207,6 +207,7 @@ print &ui_tabs_end_tab();
 $chain = &get_website_ssl_file($d, 'ca');
 print &ui_tabs_start_tab("mode", "chain");
 print "$text{'cert_desc5'}<p>\n";
+print "$text{'cert_desc5a'}<p>\n";
 
 print &ui_form_start("newchain.cgi", "form-data");
 print &ui_hidden("dom", $in{'dom'});
