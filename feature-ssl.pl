@@ -79,7 +79,7 @@ local $web_sslport = $_[0]->{'web_sslport'} || $tmpl->{'web_sslport'} || 443;
 local $conf = &apache::get_config();
 
 # Find out if this domain will share a cert with another
-&find_chained_certificate($_[0]);
+&find_matching_certificate($_[0]);
 local $chained = $_[0]->{'ssl_chain'};
 
 # Create a self-signed cert and key, if needed
@@ -1472,10 +1472,10 @@ $main::got_lock_ssl-- if ($main::got_lock_ssl);
 &release_lock_anything($d);
 }
 
-# find_chained_certificate(&domain)
+# find_matching_certificate(&domain)
 # For a domain with SSL being enabled, check if another domain on the same IP
 # already has a matching cert. If so, update the domain hash's cert file
-sub find_chained_certificate
+sub find_matching_certificate
 {
 local ($d) = @_;
 local ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
