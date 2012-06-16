@@ -1736,6 +1736,7 @@ check_postgresok=PostgreSQL is installed and running.
 check_postgresnopass=PostgreSQL is installed and running, but does not have any <tt>$2</tt> password set! <b>This should be changed immediately in the <a href='$1'>PostgreSQL Database</a> module</b>.
 check_webalizerok=Webalizer is installed.
 check_ifaceok=Using network interface $1 for virtual IPs.
+check_enetmask6=IPv6 netmask $1 is not valid - it should be a number, like 64
 check_iface6=IPv6 addresses are available, using interface $1.
 check_ifacezone=Network interface will be detected automatically at virtual server creation time.
 check_sendmailok=Mail server Sendmail is installed and configured.

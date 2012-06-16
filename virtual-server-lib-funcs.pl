@@ -10260,7 +10260,7 @@ foreach my $f (@features) {
 foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "ldap_base", "ldap_login", "ldap_pass", "ldap_port", "ldap",
 	       "vpopmail_dir", "vpopmail_user", "vpopmail_group",
-	       "clamscan_cmd", "iface", "localgroup", "home_quotas",
+	       "clamscan_cmd", "iface", "netmask6", "localgroup", "home_quotas",
 	       "mail_quotas", "group_quotas", "quotas", "shell", "ftp_shell",
 	       "all_namevirtual", "dns_ip", "default_procmail",
 	       "compression", "pbzip2", "suexec", "domains_group",
@@ -12809,6 +12809,8 @@ if (!&running_in_zone()) {
 
 # Tell the user that IPv6 is available
 if (&supports_ip6()) {
+	!$config{'netmask6'} || $config{'netmask6'} =~ /^\d+$/ ||
+		return &text('check_enetmask6', $config{'netmask6'});
 	&$second_print(&text('check_iface6',
 		"<tt>".($config{'iface6'} || $config{'iface'})."</tt>"));
 	}
