@@ -27,7 +27,7 @@ if (!$d->{'virt6already'}) {
 	# Save and bring up the IPv6 interface
 	&$first_print(&text('setup_virt6', $d->{'ip6'}));
 	local $virt = { 'name' => $config{'iface6'} || $config{'iface'},
-		        'netmask' => $d->{'netmask'} ||
+		        'netmask' => $d->{'netmask6'} ||
 				     $config{'netmask6'} || 64,
 			'address' => $d->{'ip6'} };
 	&save_ip6_interface($virt);
