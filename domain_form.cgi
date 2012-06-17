@@ -562,7 +562,15 @@ if ($can_feature{'mail'} && !$aliasdom && !$subdom && &can_edit_catchall()) {
 # Show IP address allocation section
 $resel = $parentdom ? $parentdom->{'reseller'} :
 	 &reseller_admin() ? $base_remote_user : undef;
-if (!$aliasdom && &can_select_ip()) {
+if ($aliasdom) {
+	print &ui_table_row($text{'edit_ip'}, $aliasdom->{'ip'});
+	}
+elsif (!&can_select_ip()){
+	print &ui_table_row($text{'edit_ip'},
+		$access{'ipfollow'} && $parentdom ? $parentdom->{'ip'}
+						  : &get_default_ip());
+	}
+else {
 	print &ui_table_row(&hlink($text{'form_iface'}, "iface"),
 		&virtual_ip_input(\@cantmpls, $resel),
 		undef, \@tds);
