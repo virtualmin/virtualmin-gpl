@@ -2474,6 +2474,7 @@ limits_nodbname=Can choose database names?
 limits_norename=Can rename domains?
 limits_forceunder=Allow sub-servers not under this domain?
 limits_safeunder=Allow sub-servers under other users' domains?
+limits_ipfollow=Sub-servers inherit IP address from parent?
 limits_mongrels=Maximum Mongrel server processes for Rails
 limits_emongrels=Missing or invalid number of Mongrel server processes - must be at least 1
 limits_demo=Limit to read-only demo mode?

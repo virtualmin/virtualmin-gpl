@@ -171,6 +171,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--nosafe-under") {
 		$nosafeunder = 1;
 		}
+	elsif ($a eq "--ipfollow") {
+		$ipfollow = 1;
+		}
+	elsif ($a eq "--noipfollow") {
+		$noipfollow = 1;
+		}
 	elsif ($a eq "--read-only") {
 		$readonly = 1;
 		}
@@ -270,6 +276,8 @@ $dom->{'forceunder'} = $forceunder ? 1 :
 		       $noforceunder ? 0 : $dom->{'forceunder'};
 $dom->{'safeunder'} = $safeunder ? 1 :
 		      $nosafeunder ? 0 : $dom->{'safeunder'};
+$dom->{'ipfollow'} = $ipfollow ? 1 :
+		      $noipfollow ? 0 : $dom->{'ipfollow'};
 $dom->{'readonly'} = $readonly ? 1 :
 		     $readwrite ? 0 : $dom->{'readonly'};
 foreach $a (@allow) {
@@ -322,6 +330,8 @@ print "                        [--max-aliases max|UNLIMITED]\n";
 print "                        [--can-dbname] | [--cannot-dbname]\n";
 print "                        [--can-rename] | [--cannot-rename]\n";
 print "                        [--force-under] | [--noforce-under]\n";
+print "                        [--safe-under] | [--nosafe-under]\n";
+print "                        [--ipfollow] | [--noipfollow]\n";
 print "                        [--read-only] | [--read-write]\n";
 print "                        [--allow feature]*\n";
 print "                        [--disallow feature]*\n";

@@ -215,14 +215,25 @@ $resel = $parentdom ? $parentdom->{'reseller'} :
 	 &reseller_admin() ? $base_remote_user : $in{'reseller'};
 $defip = &get_default_ip($resel);
 if ($aliasdom) {
+	# Alias domain gets IP from target
 	$ip = $aliasdom->{'ip'};
 	$virt = 0;
 	}
 elsif (!&can_select_ip()) {
-	$ip = $defip;
-	$virt = 0;
+	# Not allowed to select IP
+	if ($access{'ipfollow'} && $parentdom) {
+		# Inherit from parent
+		$ip = $parentdom->{'ip'};
+		$virt = 0;
+		}
+	else {
+		# Use global default
+		$ip = $defip;
+		$virt = 0;
+		}
 	}
 else {
+	# User can select
 	($ip, $virt, $virtalready, $netmask) =
 		&parse_virtual_ip($tmpl, $resel);
 	}

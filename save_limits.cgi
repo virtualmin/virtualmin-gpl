@@ -33,6 +33,7 @@ $d->{'nodbname'} = $in{'nodbname'};
 $d->{'norename'} = $in{'norename'};
 $d->{'forceunder'} = $in{'forceunder'};
 $d->{'safeunder'} = $in{'safeunder'};
+$d->{'ipfollow'} = $in{'ipfollow'};
 if ($virtualmin_pro) {
 	$in{'mongrels_def'} || $in{'mongrels'} =~ /^[1-9][0-9]*$/ ||
 		&error($text{'limits_emongrels'});

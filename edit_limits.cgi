@@ -81,6 +81,11 @@ print &ui_table_row(&hlink($text{'limits_safeunder'}, "limits_safeunder"),
 	&ui_radio("safeunder", $d->{'safeunder'} ? 1 : 0,
 	       [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
 
+# IP of sub-servers follows parent
+print &ui_table_row(&hlink($text{'limits_ipfollow'}, "limits_ipfollow"),
+	&ui_radio("ipfollow", $d->{'ipfollow'} ? 1 : 0,
+	       [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+
 # Mongrel instances
 if ($virtualmin_pro) {
 	print &ui_table_row(&hlink($text{'limits_mongrels'}, "limits_mongrels"),

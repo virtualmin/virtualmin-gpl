@@ -512,6 +512,8 @@ if ($multi) {
 				($d->{'forceunder'} ? "Yes" : "No"),"\n";
 			print "    Sub-servers cannot be under other domains: ",
 				($d->{'safeunder'} ? "Yes" : "No"),"\n";
+			print "    Sub-servers inherit IP address: ",
+				($d->{'ipfollow'} ? "Yes" : "No"),"\n";
 			print "    Read-only mode: ",
 				($d->{'readonly'} ? "Yes" : "No"),"\n";
 			print "    Allowed features: ",

@@ -6062,6 +6062,7 @@ if (!$_[3]->{'fix'}) {
 	$_[0]->{'norename'} = $oldd{'norename'};
 	$_[0]->{'forceunder'} = $oldd{'forceunder'};
 	$_[0]->{'safeunder'} = $oldd{'safeunder'};
+	$_[0]->{'ipfollow'} = $oldd{'ipfollow'};
 	foreach my $f (@opt_features, &list_feature_plugins(), "virt") {
 		$_[0]->{'limit_'.$f} = $oldd{'limit_'.$f};
 		}
@@ -7934,6 +7935,7 @@ push(@rv, { 'id' => 0,
 	    'norename' => $config{'defnorename'},
 	    'forceunder' => $config{'defforceunder'},
 	    'safeunder' => $config{'defsafeunder'},
+	    'ipfollow' => $config{'defipfollow'},
 	    'resources' => $config{'defresources'} || "none",
 	    'ranges' => $config{'ip_ranges'} || "none",
 	    'ranges6' => $config{'ip_ranges6'} || "none",
@@ -8222,6 +8224,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'defnorename'} = $tmpl->{'norename'};
 	$config{'defforceunder'} = $tmpl->{'forceunder'};
 	$config{'defsafeunder'} = $tmpl->{'safeunder'};
+	$config{'defipfollow'} = $tmpl->{'ipfollow'};
 	$config{'defresources'} = $tmpl->{'resources'};
 	&uncat_file("framefwd-template", $tmpl->{'frame'});
 	$config{'ip_ranges'} = $tmpl->{'ranges'} eq 'none' ? undef :
@@ -8341,6 +8344,7 @@ if (!$tmpl->{'default'}) {
 		    "php", "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "spamtrap", "namedconf",
 		    "nodbname", "norename", "forceunder", "safeunder",
+		    "ipfollow",
 		    "aliascopy", "bccto", "resources", "dnssec", "avail",
 		    @plugins,
 		    @php_wrapper_templates,
