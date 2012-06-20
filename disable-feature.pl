@@ -9,6 +9,12 @@ line parameters, but disables the specified features instead. Be careful when
 using it, as it will not prompt for confirmation before disabling features
 that may result in the loss of configuration files and other data.
 
+If the C<--disassociate> flag is given, this command will simply remove the
+association between the domain and the underlying system configuration or
+database. For example, if disabling the MySQL with the C<--disassociate>
+flag set, the underlying databases beloning to the domain would not be
+removed.
+
 =cut
 
 package virtual_server;
@@ -47,6 +53,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
+		}
+	elsif ($a eq "--disassociate") {
+		$disassociate = 1;
 		}
 	elsif ($a =~ /^--(\S+)$/ &&
 	       &indexof($1, @features) >= 0) {
@@ -137,8 +146,12 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 			$d->{$f} = 0;
 			}
 		}
-	foreach $f (reverse(&list_ordered_features($oldd))) {
-		&call_feature_func($f, $d, $oldd);
+	if (!$disassociate) {
+		# Only actually turn off feature if not just
+		# dis-associating
+		foreach $f (reverse(&list_ordered_features($oldd))) {
+			&call_feature_func($f, $d, $oldd);
+			}
 		}
 
 	# Save new domain details
@@ -168,6 +181,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Enables features for one or more domains specified on the command line.\n";
 print "\n";
 print "virtualmin disable-feature --domain name | --user name | --all-domains\n";
+print "                          [--disassociate]\n";
 foreach $f (@features) {
 	print "                          [--$f]\n" if ($config{$f});
 	}
