@@ -56,8 +56,6 @@
 	- Namecheap too
 	- Pro only
 
- - Allow custom directives for Nginx
-
  - Allow anonymous access to git repos
 	- http://www.virtualmin.com/node/22470
 
