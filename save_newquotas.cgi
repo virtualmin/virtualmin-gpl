@@ -12,7 +12,8 @@ $job ||= { 'user' => 'root',
 	   'active' => 1,
 	   'command' => $quotas_cron_cmd };
 if ($in{'sched'}) {
-	$in{'email'} =~ /^\S+\@\S+$/ || &error($text{'newquotas_eemail'});
+	$in{'email_def'} || $in{'email'} =~ /^\S+\@\S+$/ ||
+		&error($text{'newquotas_eemail'});
 	if (!$in{'warn_def'}) {
 		$in{'warn'} || &error($text{'newquotas_ewarn2'});
 		$in{'warn'} =~ s/,/ /g;		# Allow commas
@@ -23,7 +24,7 @@ if ($in{'sched'}) {
 		}
 	&virtualmin_ui_parse_cron_time("sched", $job, \%in);
 	}
-$config{'quota_email'} = $in{'email'};
+$config{'quota_email'} = $in{'email_def'} ? undef : $in{'email'};
 $config{'quota_mailbox'} = $in{'mailbox'};
 $config{'quota_mailbox_send'} = $in{'mailbox_send'};
 $config{'quota_users'} = $in{'users'};

@@ -108,11 +108,13 @@ if ($config{'quota_mailbox_send'}) {
 	}
 
 # Send email to master admin for both domains and users over quota
-if (@msgs) {
-	&send_domain_quota_email(\@msgs, $config{'quota_email'});
-	}
-if (@umsgs) {
-	&send_user_quota_email(\@umsgs, $config{'quota_email'});
+if ($config{'quota_email'}) {
+	if (@msgs) {
+		&send_domain_quota_email(\@msgs, $config{'quota_email'});
+		}
+	if (@umsgs) {
+		&send_user_quota_email(\@umsgs, $config{'quota_email'});
+		}
 	}
 
 # send_domain_quota_email(&message, address)
