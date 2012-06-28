@@ -5228,6 +5228,14 @@ if ($_[0]->{'unix'} && !$_[0]->{'parent'} && !$_[0]->{'disabled'}) {
 		}
 	}
 
+# Record if default for the IP
+if ($_[0]->{'web'}) {
+	$_[0]->{'backup_web_default'} = &is_default_website($_[0]);
+	}
+else {
+	delete($_[0]->{'backup_web_default'});
+	}
+
 &save_domain($_[0]);
 
 # Save the domain's data file

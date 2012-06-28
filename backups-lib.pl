@@ -1966,6 +1966,11 @@ if ($ok) {
 				&set_server_quotas($qd);
 				}
 
+			# Make site the default if it was before
+			if ($d->{'web'} && $d->{'backup_web_default'}) {
+				&set_default_website($d);
+				}
+
 			# Run the post-restore command
 			&set_domain_envs($d, "RESTORE_DOMAIN", undef, \%oldd);
 			local $merr = &made_changes();
