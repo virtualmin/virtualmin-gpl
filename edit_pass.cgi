@@ -24,7 +24,7 @@ print &ui_table_row($text{'pass_new1'},
 print &ui_table_row($text{'pass_new2'},
 		    &ui_password("new2", undef, 20));
 
-if ($d && $d->{'hashpass'}) {
+if ($d && $d->{'hashpass'} && &master_admin()) {
 	print &ui_table_row($text{'pass_hashpass'},
 			    &ui_yesno_radio("hashpass", 1));
 	}

@@ -38,7 +38,9 @@ if ($d) {
 		$d->{'disabled_mysqlpass'} = undef;
 		$d->{'disabled_postgrespass'} = undef;
 		}
-	$d->{'hashpass'} = $in{'hashpass'};
+	if (&master_admin()) {
+		$d->{'hashpass'} = $in{'hashpass'};
+		}
 	$d->{'pass'} = $in{'new1'};
 	$d->{'pass_set'} = 1;
 	&generate_domain_password_hashes($d, 0);
