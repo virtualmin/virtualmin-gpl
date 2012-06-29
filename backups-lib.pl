@@ -1761,7 +1761,6 @@ if ($ok) {
 					    !&ping_ip_address($d->{'ip'})) {
 						# Old IP is within local range,
 						# so keep it
-						print STDERR "within range\n";
 						}
 					else {
 						# Actually allocate from range
