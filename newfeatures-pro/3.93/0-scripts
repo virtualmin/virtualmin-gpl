@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to version 3.5.1, Drupal to 7.14 and 6.26, SugarCRM to 6.4.4, FengOffice to 2.0.0, Zikula to 1.2.9, OpenX to 2.8.9, ZenPhoto to 1.4.2.4, phpMyFAQ to 2.7.6, Movable Type to 5.14, Typo3 to 4.6.9, Flyspray to 0.9.9.7, PiWik to 1.8.2, WordPress to 3.4.1, Mantis to 1.2.11, Coppermime to 1.5.20, Joomla to 2.5.6, Magento to 1.7.0.1, Instiki to 0.19.4, Moodle to 2.3, and MediaWiki to 1.19.1.
+html=Updated the phpMyAdmin script installer to version 3.5.1, Drupal to 7.14 and 6.26, SugarCRM to 6.5, FengOffice to 2.0.0, Zikula to 1.2.9, OpenX to 2.8.9, ZenPhoto to 1.4.2.4, phpMyFAQ to 2.7.6, Movable Type to 5.14, Typo3 to 4.6.9, Flyspray to 0.9.9.7, PiWik to 1.8.2, WordPress to 3.4.1, Mantis to 1.2.11, Coppermime to 1.5.20, Joomla to 2.5.6, Magento to 1.7.0.1, Instiki to 0.19.4, Moodle to 2.3, and MediaWiki to 1.19.1.
 master=1
 reseller=1
 domain=1
