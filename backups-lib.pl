@@ -2008,7 +2008,7 @@ if ($ok) {
 if ($continue) {
 	$doms = [ grep { $restoreok{$_->{'id'}} } @$doms ];
 	}
-else if (!$ok) {
+elsif (!$ok) {
 	$doms = [ ];
 	}
 
