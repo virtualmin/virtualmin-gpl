@@ -56,9 +56,6 @@
 	- Namecheap too
 	- Pro only
 
- - Allow anonymous access to git repos
-	- http://www.virtualmin.com/node/22470
-
  - Sub-domain SSL cert linkage should be broken if new cert doesn't match
 	- https://www.virtualmin.com/node/22495
 
