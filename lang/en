@@ -2343,6 +2343,7 @@ restore_nocreate=Server does not exist, but you are not allowed to re-create it
 restore_norestore=You do not have permissions to restore this server
 restore_now2=Restore Now
 restore_wskip=Ignore virtual server creation warnings?
+restore_wcontinue=Ignore individual virtual server errors?
 restore_nofeat=No selected features in backup
 restore_novirt=No selected Virtualmin settings in backup
 restore_dovirtualmin=Virtualmin configuration settings

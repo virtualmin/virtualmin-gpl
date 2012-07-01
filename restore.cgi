@@ -266,6 +266,9 @@ if (!$in{'confirm'}) {
 			      "<br>".&ui_checkbox("skipwarnings", 1,
 						  $text{'restore_wskip'}, 0) :
 			      ""),
+		      (keys %$cont > 1 ?
+			      "<br>".&ui_checkbox("continue", 1,
+					  $text{'restore_wcontinue'}, 0) : ""),
 		      "</center>\n";
 		}
 	else {
@@ -283,7 +286,7 @@ else {
 		}
 	$ok = &restore_domains($src, \@doms, \@do_features, \%options, \@vbs,
 			       $in{'only'}, $ipinfo, !$safe_backup,
-			       $in{'skipwarnings'}, $key);
+			       $in{'skipwarnings'}, $key, $in{'continue'});
 	&run_post_actions();
 	if ($ok) {
 		print &text('restore_done'),"<p>\n";

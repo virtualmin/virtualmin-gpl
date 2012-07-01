@@ -52,6 +52,11 @@ given the system's default shared IP. However, if you have defined additional
 shared addresses, a different one can be selected with the C<--shared-ip>
 flag followed by an address.
 
+By default, if any non-fatal warnings encountered during the restore process
+will cause the restore to fail. However, you can force it to continue with the
+C<--skip-warnings> flag. Similarly, the failure of any one domain will abort
+the entire restore unless the C<--continue-on-error> flag is given.
+
 On a Virtualmin Pro system, you can use the C<--key> flag followed by
 a backup key ID or description to select the key to decrypt this backup with.
 This must be the same key that the backup was originally encrypted with.
@@ -196,6 +201,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--skip-warnings") {
 		$skipwarnings = 1;
 		}
+	elsif ($a eq "--continue-on-error") {
+		$continue = 1;
+		}
 	elsif ($a eq "--key") {
 		$keyid = shift(@ARGV);
 		}
@@ -319,7 +327,7 @@ $opts{'reuid'} = $reuid;
 $opts{'fix'} = $fix;
 &$first_print("Starting restore..");
 $ok = &restore_domains($src, \@doms, \@rfeats, \%opts, \@vbs, $onlyfeats,
-		       $ipinfo, $asowner, $skipwarnings, $key);
+		       $ipinfo, $asowner, $skipwarnings, $key, $continue);
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV, $doms[0]);
 if ($ok) {
@@ -350,6 +358,7 @@ print "                         [--shared-ip address | --ip address |\n";
 print "                          --allocate-ip | --original-ip]\n";
 print "                         [--only-missing | --only-existing]\n";
 print "                         [--skip-warnings]\n";
+print "                         [--continue-on-error]\n";
 if (defined(&list_backup_keys)) {
 	print "                         [--key id]\n";
 	}

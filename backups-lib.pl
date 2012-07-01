@@ -1332,12 +1332,12 @@ return $? ? $out : undef;
 
 # restore_domains(file, &domains, &features, &options, &vbs,
 #		  [only-backup-features], [&ip-address-info], [as-owner],
-#		  [skip-warnings], [&key])
+#		  [skip-warnings], [&key], [continue-on-errors])
 # Restore multiple domains from the given file
 sub restore_domains
 {
 local ($file, $doms, $features, $opts, $vbs, $onlyfeats, $ipinfo, $asowner,
-       $skipwarnings, $key) = @_;
+       $skipwarnings, $key, $continue) = @_;
 
 # Find owning domain
 local $asd;
@@ -1565,6 +1565,7 @@ if ($_[3]->{'reuid'}) {
 &clear_links_cache();
 
 local $vcount = 0;
+local %restoreok;	# Which domain IDs were restored OK?
 if ($ok) {
 	# Restore any Virtualmin settings
 	if (@$vbs) {
@@ -1613,7 +1614,8 @@ if ($ok) {
 			if ($dleft == 0) {
 				&$second_print(&text('restore_elimit', $dmax));
 				$ok = 0;
-				last DOMAIN;
+				if ($continue) { next DOMAIN; }
+				else { last DOMAIN; }
 				}
 
 			# Only features in the backup are enabled
@@ -1644,7 +1646,8 @@ if ($ok) {
 						    $d->{'backup_parent_dom'}) :
 						$text{'restore_epar'});
 					$ok = 0;
-					last DOMAIN;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
 					}
 				$parentuser = $parentdom->{'user'};
 				}
@@ -1668,7 +1671,8 @@ if ($ok) {
 			if (!$tmpl) {
 				&$second_print($text{'restore_etemplate'});
 				$ok = 0;
-				last DOMAIN;
+				if ($continue) { next DOMAIN; }
+				else { last DOMAIN; }
 				}
 
 			# Does the plan exist? If not, get it from the backup
@@ -1696,7 +1700,8 @@ if ($ok) {
 					&$second_print(&text('restore_eresel',
 							$d->{'reseller'}));
 					$ok = 0;
-					last DOMAIN;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
 					}
 				}
 
@@ -1752,7 +1757,8 @@ if ($ok) {
 						&$second_print(
 						    &text('setup_evirttmpl'));
 						$ok = 0;
-						last DOMAIN;
+						if ($continue) { next DOMAIN; }
+						else { last DOMAIN; }
 						}
 					$d->{'virtalready'} = 0;
 					if (&ip_within_ranges(
@@ -1769,7 +1775,8 @@ if ($ok) {
 						if (!$d->{'ip'}) {
 							&$second_print(&text('setup_evirtalloc'));
 							$ok = 0;
-							last DOMAIN;
+							if ($continue) { next DOMAIN; }
+							else { last DOMAIN; }
 							}
 						}
 					}
@@ -1785,7 +1792,8 @@ if ($ok) {
 						&$second_print(
 						    $text{'restore_edefip'});
 						$ok = 0;
-						last DOMAIN;
+						if ($continue) { next DOMAIN; }
+						else { last DOMAIN; }
 						}
 					}
 				}
@@ -1805,7 +1813,8 @@ if ($ok) {
 					&$second_print(
 						&text('setup_evirtalloc'));
 					$ok = 0;
-					last DOMAIN;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
 					}
 				}
 			elsif (!$d->{'virt'} && !$config{'all_namevirtual'}) {
@@ -1814,7 +1823,8 @@ if ($ok) {
 				if (!$d->{'ip'}) {
 					&$second_print($text{'restore_edefip'});
 					$ok = 0;
-					last DOMAIN;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
 					}
 				}
 
@@ -1835,7 +1845,8 @@ if ($ok) {
 			if ($cerr) {
 				&$second_print(&text('restore_eclash', $cerr));
 				$ok = 0;
-				last DOMAIN;
+				if ($continue) { next DOMAIN; }
+				else { last DOMAIN; }
 				}
 
 			# Check for warnings
@@ -1850,7 +1861,8 @@ if ($ok) {
 						}
 					&$outdent_print();
 					$ok = 0;
-					last DOMAIN;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
 					}
 				}
 
@@ -1977,7 +1989,13 @@ if ($ok) {
 				if (defined($merr));
 			&reset_domain_envs($d);
 
-			last DOMAIN if ($domain_failed);
+			if ($domain_failed) {
+				if ($continue) { next DOMAIN; }
+				else { last DOMAIN; }
+				}
+			else {
+				$restoreok{$d->{'id'}} = 1;
+				}
 			}
 
 		# Re-setup Webmin user
@@ -1986,9 +2004,17 @@ if ($ok) {
 		}
 	}
 
+# Find domains that were restored OK
+if ($continue) {
+	$doms = [ grep { $restoreok{$_->{'id'}} } @$doms ];
+	}
+else if (!$ok) {
+	$doms = [ ];
+	}
+
 # If any created restored domains had scripts, re-verify their dependencies
 local @wasmissing = grep { $_->{'wasmissing'} } @$doms;
-if (defined(&list_domain_scripts) && $ok && scalar(@wasmissing)) {
+if (defined(&list_domain_scripts) && scalar(@wasmissing)) {
 	&$first_print($text{'restore_phpmods'});
 	local %scache;
 	local (@phpinstalled, $phpanyfailed, @phpbad);
@@ -2031,11 +2057,11 @@ if (defined(&list_domain_scripts) && $ok && scalar(@wasmissing)) {
 
 			# Re-activate it's PHP modules
 			&push_all_print();
-			local $ok = &setup_php_modules($d, $script,
+			local $pok = &setup_php_modules($d, $script,
 			   $sinfo->{'version'}, $phpver, $sinfo->{'opts'},
 			   \@phpinstalled);
 			&pop_all_print();
-			$phpanyfailed++ if (!$ok);
+			$phpanyfailed++ if (!$pok);
 			}
 		}
 	if ($anyfailed) {

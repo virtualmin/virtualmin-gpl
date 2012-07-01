@@ -61,3 +61,6 @@
 
  - Sub-domain SSL cert linkage should be broken if new cert doesn't match
 	- https://www.virtualmin.com/node/22495
+
+ - Option to turn off storage of some or all hashes
+	- https://virtualmin.com/node/22625
