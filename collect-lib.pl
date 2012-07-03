@@ -56,7 +56,9 @@ if (&foreign_check("proc")) {
 			       $m->[2] eq "reiserfs" || $m->[2] eq "ufs" ||
 			       $m->[2] eq "zfs" || $m->[2] eq "simfs" ||
 			       $m->[2] eq "xfs" || $m->[2] eq "jfs" ||
-			       $m->[1] =~ /^\/dev\// || $m->[1] eq $home_base) {
+			       $m->[1] =~ /^\/dev\// ||
+			       ($m->[1] eq $home_base &&
+				$m->[0] ne $home_base)) {
 				if ($m->[1] =~ /^(zones|zonas)\/([^\/]+)/ &&
 				    $m->[2] eq "zfs" &&
 				    $donezone{$2}++) {
