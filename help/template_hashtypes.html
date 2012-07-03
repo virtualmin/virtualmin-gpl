@@ -1,0 +1,16 @@
+<header>Hashed password types to store</header>
+
+By default, Virtualmin will store domain and mailbox passwords in various
+hash formats so that the password is available when adding new features to
+the domain. However, not all hash formats are equally secure, so this field
+can be used to disable storage of some formats. Regardless of what you
+select here, the password will always be stored hashed using the system's
+default format in <tt>/etc/shadow</tt> or LDAP though. <p>
+
+Be aware that disabling the <b>MySQL</b> hash format may prevent Virtualmin
+from creating a MySQL login for mailbox users with the same password that
+the mailbox was originally assigned. Disabling the <b>Web digest</b> format
+may prevent access to a protected web directory by mailbox users. <p>
+
+<footer>
+
