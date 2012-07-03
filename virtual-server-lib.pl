@@ -178,7 +178,7 @@ $bandwidth_dir = "$module_config_directory/bandwidth";
 $plainpass_dir = "$module_config_directory/plainpass";
 $hashpass_dir = "$module_config_directory/hashpass";
 $nospam_dir = "$module_config_directory/nospam";
-@hashpass_types = ( 'md5', 'crypt', 'mysql', 'digest' );
+@hashpass_types = ( 'md5', 'crypt', 'unix', 'mysql', 'digest' );
 
 $template_scripts_dir = "$module_config_directory/template-scripts";
 

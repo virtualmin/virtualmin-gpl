@@ -197,6 +197,7 @@ aliascopy=1
 mem_low=256
 bw_backup=1
 hashpass=0
+hashtypes=*
 maillog_hide=0
 own_restore=0
 sni_support=0

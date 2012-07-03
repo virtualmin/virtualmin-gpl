@@ -1362,7 +1362,7 @@ if ($_[1]->{'hashpass'}) {
 		local %hash;
 		&read_file_cached("$hashpass_dir/$_[1]->{'id'}", \%hash);
 		local $g = &generate_password_hashes(
-				$_[0], $_[0]->{'plainpass'}, $_[1]->{'dom'});
+				$_[0], $_[0]->{'plainpass'}, $_[1]);
 		foreach my $s (@hashpass_types) {
 			$hash{$_[0]->{'user'}.' '.$s} = $g->{$s};
 			}
@@ -1753,7 +1753,7 @@ if (!$_[0]->{'domainowner'} && $_[2] && $_[2]->{'hashpass'}) {
 	if (defined($_[0]->{'plainpass'})) {
 		# Re-hash new password
 		local $g = &generate_password_hashes(
-				$_[0], $_[0]->{'plainpass'}, $_[2]->{'dom'});
+				$_[0], $_[0]->{'plainpass'}, $_[2]);
 		foreach my $s (@hashpass_types) {
 			$hash{$_[0]->{'user'}.' '.$s} = $g->{$s};
 			$_[0]->{'pass_'.$s} = $g->{$s};
@@ -2389,16 +2389,22 @@ else {
 	}
 }
 
-# generate_password_hashes(&user, text, domain-name)
+# generate_password_hashes(&user, text, &domain)
 # Given a password, returns a hash ref of it hashed into different formats.
 # Keys returned are :
 # md5 - MD5 hash
 # crypt - Unix crypt
 # unix - Appropriate hash for Unix user
 # mysql - MySQL password hash
+# digest - Web digest authentication hash
 sub generate_password_hashes
 {
-local ($user, $pass, $dom) = @_;
+local ($user, $pass, $d) = @_;
+local $tmpl = &get_template($d->{'template'});
+if ($tmpl->{'hashtypes'} eq 'none') {
+	# Don't return any hash types
+	return { };
+	}
 &require_useradmin();
 local %rv;
 local $salt = $user->{'pass'} && $user->{'pass'} !~ /\$/ ? $user->{'pass'}
@@ -2422,9 +2428,27 @@ if ($config{'mysql'}) {
 if (&foreign_check("htaccess-htpasswd")) {
 	&foreign_require("htaccess-htpasswd");
 	$rv{'digest'} = &htaccess_htpasswd::digest_password(
-				$user->{'user'}, $dom, $pass);
+				$user->{'user'}, $d->{'dom'}, $pass);
 	}
-return \%rv;
+if ($tmpl->{'hashtypes'} ne '' && $tmpl->{'hashtypes'} ne '*') {
+	# Remove disabled types
+	local %newrv;
+	foreach my $t (split(/\s+/, $tmpl->{'hashtypes'})) {
+		$newrv{$t} = $rv{$t} if (defined($rv{$t}));
+		}
+	return \%newrv;
+	}
+else {
+	# Just return all types
+	return \%rv;
+	}
+}
+
+# list_password_hash_types()
+# Returns a list of all supported hashing types and their descriptions
+sub list_password_hash_types
+{
+return ( map { [ $_, $text{'hashtype_'.$_} ] } @hashpass_types );
 }
 
 # generate_domain_password_hashes(&domain, new-domain?)
@@ -2459,7 +2483,7 @@ else {
 	return if (!$d->{'pass'});	# Plaintext password unknown
 	local $fakeuinfo = { 'user' => $d->{'user'} };
 	local $hashes = &generate_password_hashes(
-				$fakeuinfo, $d->{'pass'}, $d->{'dom'});
+				$fakeuinfo, $d->{'pass'}, $d);
 	$d->{'enc_pass'} = $hashes->{'unix'};
 	if (!$d->{'mysql_pass'}) {
 		$d->{'mysql_enc_pass'} = $hashes->{'mysql'};
@@ -7953,6 +7977,7 @@ push(@rv, { 'id' => 0,
 	    'othergroups' => $config{'othergroups'} || "none",
 	    'quotatype' => $config{'hard_quotas'} ? "hard" : "soft",
 	    'hashpass' => $config{'hashpass'} || 0,
+	    'hashtypes' => $config{'hashtypes'},
 	    'append_style' => $config{'append_style'},
 	    'domalias' => $config{'domalias'} || "none",
 	    'domalias_type' => $config{'domalias_type'} || 0,
@@ -8249,6 +8274,7 @@ if ($tmpl->{'id'} == 0) {
 			     	 $tmpl->{'othergroups'};
 	$config{'hard_quotas'} = $tmpl->{'quotatype'} eq "hard" ? 1 : 0;
 	$config{'hashpass'} = $tmpl->{'hashpass'};
+	$config{'hashtypes'} = $tmpl->{'hashtypes'};
 	$config{'append_style'} = $tmpl->{'append_style'};
 	$config{'domalias'} = $tmpl->{'domalias'} eq 'none' ? undef :
 			      $tmpl->{'domalias'};
@@ -8358,6 +8384,7 @@ if (!$tmpl->{'default'}) {
 		    @php_wrapper_templates,
 		    "capabilities",
 		    "featurelimits",
+		    "hashpass", "hashtypes",
 		    (map { $_."limit", $_."server", $_."master", $_."view",
 			   $_."passwd" } @plugins)) {
 		if ($tmpl->{$p} eq "") {

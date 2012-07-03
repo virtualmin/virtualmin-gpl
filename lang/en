@@ -2865,8 +2865,14 @@ tmpl_sgroup=Add domain owners to secondary group
 tmpl_ugroupsel=Selected group
 tmpl_eugroup=Missing or invalid default Unix group
 tmpl_esgroup=Missing or invalid secondary Unix group
+tmpl_ehashtypes=No password hash types selected
 tmpl_ushell=Initial Unix shell
 tmpl_uplainpass=Store clear text passwords?
+tmpl_uplainpassno=No, only stored hashed passwords
+tmpl_hashtypes=Hashed password types to store
+tmpl_hashtypes1=All types
+tmpl_hashtypes3=No types
+tmpl_hashtypes0=Only selected ..
 tmpl_ushelldef=Default from Custom Shells page
 tmpl_quota=Quota for entire server
 tmpl_uquota=Quota for server administrator user
@@ -5902,5 +5908,11 @@ bkey_ok=Delete Now
 bkey_rusuerlogs=This key has been used to encrypt $1 previous backups, which will be un-restorable without it.
 bkey_edescclash=A GPG key with the same description already exists
 bkey_eemailclash=A GPG key with the same email address already exists
+
+hashtype_crypt=Unix DES crypt
+hashtype_md5=MD5 hash
+hashtype_unix=System default hash type
+hashtype_mysql=MySQL password hash
+hashtype_digest=Web digest authentication hash
 
 __norefs=1
