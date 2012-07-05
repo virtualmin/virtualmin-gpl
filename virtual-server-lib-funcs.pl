@@ -14314,6 +14314,14 @@ if (!@rv) {
 			    'id' => 'ftp' });
 		}
 	local (%done, %classes, $defclass);
+	local $best_unix_shell;
+	foreach my $s (split(/\s+/, $config{'unix_shell'})) {
+		if (&has_command($s)) {
+			$best_unix_shell = &has_command($s);
+			last;
+			}
+		}
+	$best_unix_shell ||= "/bin/sh";
 	foreach my $us (&get_unix_shells()) {
 		next if (!-r $us->[1]);
 		next if ($done{$us->[1]}++);
@@ -14322,7 +14330,7 @@ if (!@rv) {
 						: $text{'shells_'.$us->[0].'2'},
 				 'id' => $us->[0],
 				 'owner' => 1 );
-		if ($us->[1] eq $config{'unix_shell'}) {
+		if ($us->[1] eq $best_unix_shell) {
 			$shell{'default'} = 1;
 			$shell{'avail'} = 1;
 			$defclass = $us->[0];
@@ -14332,7 +14340,7 @@ if (!@rv) {
 		}
 	if (!$defclass) {
 		# Default for owners was not found .. use config
-		local %shell = ( 'shell' => $config{'unix_shell'},
+		local %shell = ( 'shell' => $best_unix_shell,
 				 'desc' => $text{'shells_ssh'},
 			         'id' => 'ssh',
 				 'owner' => 1,
