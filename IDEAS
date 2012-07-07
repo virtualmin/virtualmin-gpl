@@ -56,5 +56,4 @@
 	- Namecheap too
 	- Pro only
 
- - Sub-domain SSL cert linkage should be broken if new cert doesn't match
-	- https://www.virtualmin.com/node/22495
+ - Cpanel migration of alias domains with mailboxes

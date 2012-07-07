@@ -180,6 +180,9 @@ while(@ARGV > 0) {
 		&indexof($sharedip, &list_shared_ips()) >= 0 ||
 		    &usage("$sharedip is not in the shared IP addresses list");
 		}
+	elsif ($a eq "--parent-ip") {
+		$parentip = 1;
+		}
 	elsif ($a eq "--ip6" && &supports_ip6()) {
 		$ip6 = shift(@ARGV);
 		$virt6 = 1;
@@ -557,6 +560,11 @@ if (!$alias) {
 			$clash && &usage(&text('setup_evirtclash'));
 			}
 		}
+	elsif ($parentip) {
+		# IP comes from parent domain
+		$parent || &usage("The --parent-ip flag cannot be used for ".
+				  "top-level servers");
+		}
 
 	if ($virt6) {
 		# Validate virtual IPv6 address
@@ -624,6 +632,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
          'ip', $config{'all_namevirtual'} ? $ip :
 	       $virt ? $ip :
 	       $alias ? $ip :
+	       $parentip ? $parent->{'ip'} :
 	       $sharedip ? $sharedip : $defip,
 	 'netmask', $netmask,
 	 'dns_ip', defined($dns_ip) ? $dns_ip :

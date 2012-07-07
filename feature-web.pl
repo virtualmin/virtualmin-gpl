@@ -31,8 +31,13 @@ else {
 local $conf = &apache::get_config();
 local ($f, $newfile) = &get_website_file($_[0]);
 
+# We use a * for the address for name-based servers under Apache 2,
+# if NameVirtualHost * exists.
+local $vips = &get_apache_vhost_ips($_[0], $nvstar, $web_port);
+
 # add NameVirtualHost if needed
-local $nvstar = &add_name_virtual($_[0], $conf, $web_port);
+local $nvstar = &add_name_virtual($_[0], $conf, $web_port,
+				  $vips =~ /^\*/ ? 0 : 1);
 
 # Add Listen if needed
 &add_listen($_[0], $conf, $web_port);
@@ -62,9 +67,6 @@ if ($_[0]->{'alias'} && $tmpl->{'web_alias'} == 1) {
 	}
 else {
 	# Add the actual <VirtualHost>
-	# We use a * for the address for name-based servers under Apache 2,
-	# if NameVirtualHost * exists.
-	local $vips = &get_apache_vhost_ips($_[0], $nvstar, $web_port);
 
 	# First build up the directives in the <VirtualHost>
 	local $proxying;
@@ -2001,14 +2003,14 @@ if (defined(&list_available_php_versions)) {
 return @rv;
 }
 
-# add_name_virtual(&domain, $conf, port)
+# add_name_virtual(&domain, $conf, port, star-doesnt-match)
 # Adds a NameVirtualHost entry for some domain, if needed. Returns 1 there is
 # an existing NameVirtualHost entry for * or *:80 .
 # For Apache 2.2 and above, NameVirtualHost * will no longer match
 # virtualhosts like *:80, so we need to add *:80 even if * is already there.
 sub add_name_virtual
 {
-local ($d, $conf, $web_port) = @_;
+local ($d, $conf, $web_port, $no_star_match) = @_;
 &require_apache();
 local $nvstar;
 if ($d->{'name'}) {
@@ -2024,7 +2026,8 @@ if ($d->{'name'}) {
 			     $nv eq '*' && $canstar &&	# Like *
 			      $defport == $web_port ||
 			     $nv =~ /^\*:(\d+)$/	# Like *:80
-			      && $1 == $web_port);
+			      && $1 == $web_port
+			      && !$no_star_match);
 		$found_no_port++ if ($nv eq $d->{'ip'});
 		$nvstar++ if ($nv eq '*' && $canstar && # Like *
 			       $defport == $web_port ||
@@ -3506,10 +3509,13 @@ else {
 }
 
 # get_apache_vhost_ips(&domain, star-namevirtualhost, [port])
-# Returns a string listing the IPs for a domain's <virtualhost> block
+# Returns a string listing the IPs for a domain's <virtualhost> block.
+# A star is used for the IP if the virtual host is name based, and the IP
+# is shared with other domains.
 sub get_apache_vhost_ips
 {
 local ($d, $nvstar, $port) = @_;
+local $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
 $port ||= $d->{'web_port'};
 &require_apache();
 local $vip = $d->{'name'} &&

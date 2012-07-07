@@ -26,6 +26,7 @@ $ENV{'http_proxy'} = undef;
 $ENV{'ftp_proxy'} = undef;
 
 $test_domain = "example.com";	# Never really exists
+$test_ssl_subdomain = "ssl.".$test_domain;
 $test_rename_domain = "examplerename.com";
 $test_target_domain = "exampletarget.com";
 $test_clone_domain = "exampleclone.com";
@@ -3292,6 +3293,18 @@ $ssl_tests = [
 		      @create_args, ],
         },
 
+	# Create a sub-domain with SSL on the same IP
+	{ 'command' => 'create-domain.pl',
+          'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'desc', 'Test SSL subdomain' ],
+		      [ 'parent', $test_domain ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
+		      [ 'parent-ip' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test SSL subdomain home page' ],
+		      @create_args, ],
+	},
+
 	# Test DNS lookup
 	{ 'command' => 'host '.$test_domain,
 	  'antigrep' => &get_default_ip(),
@@ -3309,6 +3322,33 @@ $ssl_tests = [
 
 	# Test SSL cert
 	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Test HTTP get to subdomain
+	{ 'command' => $wget_command.'http://'.$test_ssl_subdomain,
+	  'grep' => 'Test SSL subdomain home page',
+	},
+
+	# Check for SSL linkage
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'SSL shared with: '.$test_domain ],
+	  'antigrep' => [ 'SSL key file: '.$test_domain_home.
+		          '/domains/'.$test_ssl_subdomain.'/',
+		          'SSL cert file: '.$test_domain_home.
+                          '/domains/'.$test_ssl_subdomain.'/' ],
+	},
+
+	# Test HTTPS get to subdomain
+	{ 'command' => $wget_command.'https://'.$test_ssl_subdomain,
+	  'grep' => 'Test SSL subdomain home page',
+	},
+
+	# Test SSL cert to subdomain (should be the same)
+	{ 'command' => 'openssl s_client -host '.$test_ssl_subdomain.
 		       ' -port 443 </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -3359,6 +3399,23 @@ $ssl_tests = [
 		       ' -port 443 </dev/null',
 	  'grep' => [ 'C=US', 'ST=California', 'L=Santa Clara',
 		      'O=Virtualmin', 'OU=Testing', 'CN='.$test_domain ],
+	},
+
+	# Test new SSL cert via HTTP
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Virtualmin', 'CN='.$test_domain ],
+	},
+
+	# Make sure SSL linkage is broken
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => 'SSL shared with:',
+	  'grep' => [ 'SSL key file: '.$test_domain_home.
+		      '/domains/'.$test_ssl_subdomain.'/',
+		      'SSL cert file: '.$test_domain_home.
+                      '/domains/'.$test_ssl_subdomain.'/' ],
 	},
 
 	# Test generation of a CSR

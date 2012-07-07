@@ -115,6 +115,18 @@ $passok || &usage("Private key is password-protected, but either none was entere
 $err = &check_cert_key_match($checkcert, $checkkey);
 $err && &usage("Certificate problems found : $err");
 
+# Break SSL linkages that no longer work with this cert
+($gotcert) = grep { $_->[0] eq 'cert' } @got;
+if ($gotcert) {
+	$temp = &transname();
+	&open_tempfile(TEMP, ">$temp", 0, 1);
+	&print_tempfile(TEMP, $gotcert->[1]);
+	&close_tempfile(TEMP);
+	$newcertinfo = &cert_file_info($temp);
+	&break_invalid_ssl_linkages($d, $newcertinfo);
+	&unlink_file($temp);
+	}
+
 &$first_print("Installing new SSL files ..");
 $changed = 0;
 foreach $g (@got) {

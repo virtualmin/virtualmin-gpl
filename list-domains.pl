@@ -458,6 +458,24 @@ if ($multi) {
 				(&is_default_website($d) ? "Yes" : "No"),"\n";
 			}
 
+		# Show SSL cert
+		if ($d->{'ssl'}) {
+			if ($d->{'ssl_key'}) {
+				print "    SSL key file: $d->{'ssl_key'}\n";
+				}
+			if ($d->{'ssl_cert'}) {
+				print "    SSL cert file: $d->{'ssl_cert'}\n";
+				}
+			if ($d->{'ssl_ca'}) {
+				print "    SSL CA file: $d->{'ssl_ca'}\n";
+				}
+			$same = $d->{'ssl_same'} ? &get_domain($d->{'ssl_same'})
+						 : undef;
+			if ($same) {
+				print "    SSL shared with: $same->{'dom'}\n";
+				}
+			}
+
 		# Show DNS SPF mode
 		if ($config{'dns'} && $d->{'dns'} && !$d->{'dns_submode'} &&
 		    $multi == 1) {

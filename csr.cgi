@@ -31,6 +31,11 @@ if (!$in{'self'}) {
 	# Generate the private key and CSR
 	&ui_print_header(&domain_in($d), $text{'csr_title'}, "");
 
+	# Break SSL linkages that no longer work with this cert
+	$newcert = { 'cn' => $in{'commonName'},
+		     'alt' => \@alts };
+	&break_invalid_ssl_linkages($d, $newcert);
+
 	&$first_print($text{'csr_selfing'});
 	&obtain_lock_ssl($d);
 	$d->{'ssl_csr'} ||= &default_certificate_file($d, "csr");

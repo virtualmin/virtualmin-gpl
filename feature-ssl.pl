@@ -331,13 +331,7 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[1]->{'ssl_same'}) {
 	else {
 		# No domain has the same cert anymore - copy the one from the
 		# old sslclash domain
-		$_[0]->{'ssl_cert'} = &default_certificate_file($_[0], 'cert');
-		$_[0]->{'ssl_key'} = &default_certificate_file($_[0], 'key');
-		&copy_source_dest_as_domain_user($_[0],
-			$oldsslclash->{'ssl_cert'}, $_[0]->{'ssl_cert'});
-		&copy_source_dest_as_domain_user($_[0],
-			$oldsslclash->{'ssl_key'}, $_[0]->{'ssl_key'});
-		delete($_[0]->{'ssl_same'});
+		&break_ssl_linkage($_[0], $oldsslclash);
 		}
 	}
 if ($_[0]->{'home'} ne $_[1]->{'home'}) {
@@ -437,26 +431,7 @@ if (&foreign_installed("usermin")) {
 
 # If any other domains were using this one's SSL cert or key, break the linkage
 foreach my $od (&get_domain_by("ssl_same", $_[0]->{'id'})) {
-	foreach my $k ('cert', 'key', 'ca') {
-		if ($od->{'ssl_'.$k}) {
-			$od->{'ssl_'.$k} = &default_certificate_file($od, $k);
-			&copy_source_dest($d->{'ssl_'.$k}, $od->{'ssl_'.$k});
-			}
-		}
-	local ($ovirt, $ovconf, $conf) = &get_apache_virtual(
-		$od->{'dom'}, $od->{'web_sslport'});
-	if ($ovirt) {
-		&apache::save_directive("SSLCertificateFile",
-			[ $od->{'ssl_cert'} ], $ovconf, $conf);
-		&apache::save_directive("SSLCertificateKeyFile",
-			$od->{'ssl_key'} ? [ $od->{'ssl_key'} ] : [ ],
-			$ovconf, $conf);
-		&apache::save_directive("SSLCACertificateFile",
-			$od->{'ssl_chain'} ? [ $od->{'ssl_chain'} ] : [ ],
-			$ovconf, $conf);
-		&flush_file_lines($ovirt->{'file'});
-		}
-	delete($od->{'ssl_same'});
+	&break_ssl_linkage($od, $d);
 	&save_domain($od);
 	}
 
@@ -1525,6 +1500,57 @@ if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
 		}
 	&unlock_file($d->{'ssl_cert'});
 	&unlock_file($d->{'ssl_key'});
+	}
+}
+
+# break_ssl_linkage(&domain, &old-same-domain)
+# If domain was using the SSL cert from old-same-domain before, break the link
+# by copying the cert into the default location for domain and updating the
+# domain and Apache config to match
+sub break_ssl_linkage
+{
+local ($d, $samed) = @_;
+foreach my $k ('cert', 'key', 'ca') {
+	if ($d->{'ssl_'.$k}) {
+		$d->{'ssl_'.$k} = &default_certificate_file($d, $k);
+		if ($d->{'user'} eq $samed->{'user'}) {
+			&copy_source_dest_as_domain_user(
+				$d, $samed->{'ssl_'.$k}, $d->{'ssl_'.$k});
+			}
+		else {
+			&copy_source_dest($samed->{'ssl_'.$k}, $d->{'ssl_'.$k});
+			}
+		}
+	}
+delete($d->{'ssl_same'});
+if ($d->{'web'}) {
+	local ($ovirt, $ovconf, $conf) = &get_apache_virtual(
+		$d->{'dom'}, $d->{'web_sslport'});
+	if ($ovirt) {
+		&apache::save_directive("SSLCertificateFile",
+			[ $d->{'ssl_cert'} ], $ovconf, $conf);
+		&apache::save_directive("SSLCertificateKeyFile",
+			$d->{'ssl_key'} ? [ $d->{'ssl_key'} ] : [ ],
+			$ovconf, $conf);
+		&apache::save_directive("SSLCACertificateFile",
+			$d->{'ssl_chain'} ? [ $d->{'ssl_chain'} ] : [ ],
+			$ovconf, $conf);
+		&flush_file_lines($ovirt->{'file'});
+		}
+	}
+}
+
+# break_invalid_ssl_linkages(&domain, [&new-cert])
+# Find all domains that link to this domain's SSL cert, and if their domain
+# names are no longer legit for the cert, break the link.
+sub break_invalid_ssl_linkages
+{
+local ($d, $newcert) = @_;
+foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
+	if (!&check_domain_certificate($od->{'dom'}, $newcert || $d)) {
+		&break_ssl_linkage($od, $d);
+		&save_domain($od);
+		}
 	}
 }
 
