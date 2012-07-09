@@ -76,7 +76,7 @@ print "</table>\n";
 # Tell the user if something was saved
 $port = $d->{'web_port'} == 80 ? "" : ":".$d->{'web_port'};
 if ($in{'saved'}) {
-	print "<p><b>",&text('html_saved', "<a href='http://$d->{'dom'}$port/$in{'edit'}' target=_blank/g><tt>$in{'edit'}</tt></a>"),"</b><p>\n";
+	print "<p><b>",&text('html_saved', "<a href='http://$d->{'dom'}$port/$in{'edit'}' target=_blank><tt>$in{'edit'}</tt></a>"),"</b><p>\n";
 	}
 
 if ($editing) {
@@ -99,7 +99,7 @@ if ($editing) {
 	print &ui_hr();
 	print "<b>";
 	if ($editing == 1) {
-		print &text('html_editing', "<a href='http://$d->{'dom'}$port/$in{'edit'}' target=_blank/g><tt>$in{'edit'}</tt></a>");
+		print &text('html_editing', "<a href='http://$d->{'dom'}$port/$in{'edit'}' target=_blank><tt>$in{'edit'}</tt></a>");
 		}
 	else {
 		print &text('html_creating', "<tt>$in{'create'}</tt>");
