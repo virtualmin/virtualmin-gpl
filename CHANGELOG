@@ -1342,7 +1342,7 @@ Updated the Mantis script installer to version 1.2.10, ZenPhoto to 1.4.2.3, phpM
 Virtualmin backups can now be signed and encrypted, using GPG keys created within Virtualmin or imported from an existing file. This protects backups from snooping or modification when stored on an untrusted remote system.
 Added a button to the Edit User page to re-send the signup email.
 ---- Changes since 3.92 ----
-Updated the phpMyAdmin script installer to version 3.5.2, Drupal to 7.14 and 6.26, SugarCRM to 6.5, FengOffice to 2.0.0, Zikula to 1.2.9, OpenX to 2.8.9, ZenPhoto to 1.4.3, phpMyFAQ to 2.7.7, Movable Type to 5.14, Typo3 to 4.6.10, Flyspray to 0.9.9.7, PiWik to 1.8.2, WordPress to 3.4.1, Mantis to 1.2.11, Coppermime to 1.5.20, Joomla to 2.5.6, Magento to 1.7.0.2, Instiki to 0.19.4, Moodle to 2.3.1, Dolibarr to 3.2, and MediaWiki to 1.19.1.
+Updated the phpMyAdmin script installer to version 3.5.2, Drupal to 7.14 and 6.26, SugarCRM to 6.5, FengOffice to 2.0.0, Zikula to 1.2.9, OpenX to 2.8.9, ZenPhoto to 1.4.3, phpMyFAQ to 2.7.7, Movable Type to 5.14, Typo3 to 4.6.10, Flyspray to 0.9.9.7, PiWik to 1.8.2, WordPress to 3.4.1, Mantis to 1.2.11, Coppermime to 1.5.20, Joomla to 2.5.6, Magento to 1.7.0.2, Instiki to 0.19.4, Moodle to 2.3.1, Dolibarr to 3.2, Z-Push to 2.0-1346, and MediaWiki to 1.19.1.
 Added new API commands list list-s3-buckets and upload-s3-file for manipulating files on Amazon's S3 service.
 Backups of more than 2GB to Amazon's S3 service now use the mulitpart protocol, which is needed to support large backups.
 The contact email address for a domain can now contain multiple addresses with real names.
