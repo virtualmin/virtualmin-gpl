@@ -245,7 +245,7 @@ elsif ($config{'mail_system'} == 5) {
 	}
 	local $out;
 	local $errorlabel;
-	if ($_[0]->{'alias'}) {
+	if ($_[0]->{'alias'} && !$_[0]->{'aliasmail'}) {
 		local $aliasdom = &get_domain($_[0]->{'alias'});
 		$out = &backquote_command(
 		    "$vpopbin/vaddaliasdomain $qdom $aliasdom->{'dom'} 2>&1");
@@ -273,7 +273,7 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 	foreach my $v (&list_virtusers()) {
 		$gotvirt{$v->{'from'}} = $v;
 		}
-	if ($_[0]->{'alias'}) {
+	if ($_[0]->{'alias'} && !$_[0]->{'aliasmail'}) {
 		# Alias all mail to this domain to a different domain
 		local $aliasdom = &get_domain($_[0]->{'alias'});
 		if ($supports_aliascopy) {
@@ -351,7 +351,7 @@ if (!$_[0]->{'nosecondaries'}) {
 	}
 
 # Create file containing all users' email addresses
-if (!$_[0]->{'alias'}) {
+if (!$_[0]->{'alias'} && !$_[0]->{'aliasmail'}) {
 	&create_everyone_file($_[0]);
 	}
 
@@ -375,8 +375,9 @@ local ($d, $leave_aliases) = @_;
 &obtain_lock_mail($d);
 &require_mail();
 
-if ($d->{'alias'} && !$d->{'aliascopy'} ||
-    !$d->{'alias'} && $config{'mail_system'} == 0) {
+local $isalias = $d->{'alias'} && !$d->{'aliasmail'};
+if ($isalias && !$d->{'aliascopy'} ||
+    !$isalias && $config{'mail_system'} == 0) {
         # Remove whole-domain alias, for alias domains or regular domains using
 	# Postfix
         local @virts = &list_virtusers();
@@ -386,7 +387,7 @@ if ($d->{'alias'} && !$d->{'aliascopy'} ||
                 &delete_virtuser($catchall);
                 }
         }
-elsif ($d->{'alias'} && $d->{'aliascopy'}) {
+elsif ($isalias && $d->{'aliascopy'}) {
 	# Remove alias copy virtuals
 	&delete_alias_virtuals($d);
 	}
@@ -526,7 +527,7 @@ sub clone_mail
 {
 local ($d, $oldd) = @_;
 &$first_print($text{'clone_mail2'});
-if ($d->{'alias'}) {
+if ($d->{'alias'} && !$d->{'aliasmail'}) {
 	&$second_print($text{'clone_mailalias'});
 	return 1;
 	}
@@ -694,7 +695,9 @@ local $our_mail_locks = 0;
 local $our_unix_locks = 0;
 
 # Special case - conversion of an alias domain to non-alias
-if ($_[1]->{'alias'} && !$_[0]->{'alias'}) {
+local $isalias = $_[0]->{'alias'} && !$_[0]->{'aliasmail'};
+local $wasalias = $_[1]->{'alias'} && !$_[1]->{'aliasmail'};
+if ($wasalias && !$isalias) {
 	&obtain_lock_mail($_[0]);
 	if ($_[0]->{'aliascopy'}) {
 		# Stop copying mail aliases
@@ -725,7 +728,7 @@ local %renamed = ( $_[1]->{'user'} => $_[0]->{'user'} );
 if (($_[0]->{'home'} ne $_[1]->{'home'} ||
      $_[0]->{'dom'} ne $_[1]->{'dom'} ||
      $_[0]->{'gid'} != $_[1]->{'gid'} ||
-     $_[0]->{'prefix'} ne $_[1]->{'prefix'}) && !$_[0]->{'alias'}) {
+     $_[0]->{'prefix'} ne $_[1]->{'prefix'}) && !$isalias) {
 	&obtain_lock_mail($_[0]); $our_mail_locks++;
 	&obtain_lock_unix($_[0]); $our_unix_locks++;
 	&$first_print($text{'save_mailrename'});
@@ -801,7 +804,7 @@ if (($_[0]->{'home'} ne $_[1]->{'home'} ||
 	&$second_print($text{'setup_done'});
 	}
 	
-if ($_[0]->{'alias'} && $_[2] && $_[2]->{'dom'} ne $_[3]->{'dom'}) {
+if ($isalias && $_[2] && $_[2]->{'dom'} ne $_[3]->{'dom'}) {
 	# This is an alias, and the domain it is aliased to has changed ..
 	# update the catchall alias or virtuser copies
 	&obtain_lock_mail($_[0]); $our_mail_locks++;
@@ -822,7 +825,7 @@ if ($_[0]->{'alias'} && $_[2] && $_[2]->{'dom'} ne $_[3]->{'dom'}) {
 		&copy_alias_virtuals($_[0], $_[2]);
 		}
 	}
-elsif ($_[0]->{'alias'} && $_[0]->{'dom'} ne $_[1]->{'dom'} &&
+elsif ($isalias && $_[0]->{'dom'} ne $_[1]->{'dom'} &&
        $_[0]->{'aliascopy'}) {
 	# This is an alias and the domain name has changed - fix all virtuals
 	&obtain_lock_mail($_[0]); $our_mail_locks++;
@@ -881,7 +884,7 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 			}
 		}
 
-	if (!$_[0]->{'alias'}) {
+	if (!$isalias) {
 		# Update any generics/sender canonical entries in the old domain
 		if ($config{'generics'}) {
 			local %ghash = &get_generics_hash();
@@ -921,7 +924,7 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 	}
 
 # Re-write the file containing all users' addresses, in case the domain changed 
-if (!$_[0]->{'alias'}) {
+if (!$isalias) {
 	&create_everyone_file($_[0]);
 	}
 
@@ -1081,7 +1084,7 @@ if ($config{'mail_system'} == 5) {
 else {
 	# Re-enable mail, and re-copy aliases from target domain (if any)
 	&setup_mail($_[0], 1);
-	if ($_[0]->{'alias'} && $_[0]->{'aliascopy'}) {
+	if ($_[0]->{'alias'} && !$_[0]->{'aliasmail'} && $_[0]->{'aliascopy'}) {
 		my $target = &get_domain($_[0]->{'alias'});
 		&copy_alias_virtuals($_[0], $target);
 		}
@@ -3590,7 +3593,7 @@ elsif ($config{'mail_system'} == 0) {
 	!$config{'generics'} || $canonical_maps ||
 		return $text{'setup_epostfixgfile'};
 	}
-if ($_[0]->{'alias'}) {
+if ($_[0]->{'alias'} && !$_[0]->{'aliasmail'}) {
 	# If this is an alias domain, then no home is needed
 	return undef;
 	}
@@ -5208,7 +5211,8 @@ if ($main::got_lock_mail == 0) {
 		     "$qmailadmin::qmail_control_dir/rcpthosts",
 		     "$qmailadmin::qmail_control_dir/locals");
 		}
-	if (-d $everyone_alias_dir && $_[0] && !$_[0]->{'alias'}) {
+	if (-d $everyone_alias_dir && $_[0] &&
+	    !($_[0]->{'alias'} && !$_[0]->{'aliasmail'})) {
 		push(@main::got_lock_mail_files,
 		     "$everyone_alias_dir/$_[0]->{'id'}");
 		}

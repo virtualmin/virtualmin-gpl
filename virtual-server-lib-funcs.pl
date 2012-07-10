@@ -11423,7 +11423,8 @@ return @rv;
 sub can_domain_have_users
 {
 local ($d) = @_;
-return 0 if ($d->{'alias'} || $d->{'subdom'});	# never allowed for aliases
+return 0 if ($d->{'alias'} && !$d->{'aliasmail'} ||
+	     $d->{'subdom'});		# never allowed for aliases
 if (!$d->{'mail'}) {
 	# Qmail+LDAP and VPOPMail require mail to be enabled
 	return 0 if ($config{'mail_system'}==4 || $config{'mail_system'}==5);

@@ -57,3 +57,6 @@
 	- Pro only
 
  - Cpanel migration of alias domains with mailboxes
+
+ - Rackspace cloud files backup destination
+	- http://www.virtualmin.com/node/11659

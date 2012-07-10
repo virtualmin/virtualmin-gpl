@@ -33,6 +33,8 @@ followed by the name of the virtual server to create under. In this case, the --
 To create an alias of an existing virtual server, use the --alias option,
 followed by the domain name of the target server. For alias servers, the
 --pass , --unix , --webmin , --dir and --quota options are not needed.
+A variation is the --alias-with-mail option, which creates an alias virtual
+server that can still have mailboxes and email aliases. 
 
 You can specify limits on the number of aliases, sub-servers, mailboxes and
 databases for the new domain owner using the --max-aliases, --max-doms,
@@ -271,8 +273,11 @@ while(@ARGV > 0) {
 	elsif ($a eq "--parent") {
 		$parentdomain = lc(shift(@ARGV));
 		}
-	elsif ($a eq "--alias") {
+	elsif ($a eq "--alias" || $a eq "--alias-with-mail") {
 		$aliasdomain = $parentdomain = lc(shift(@ARGV));
+		if ($a eq "--alias-with-mail") {
+			$aliasmail = 1;
+			}
 		}
 	elsif ($a eq "--subdom" || $a eq "--superdom") {
 		$subdomain = $parentdomain = lc(shift(@ARGV));
@@ -649,6 +654,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
          	     'quota', $quota,
 		     'uquota', $uquota ),
 	 'alias', $alias ? $alias->{'id'} : undef,
+	 'aliasmail', $aliasmail,
 	 'subdom', $subdom ? $subdom->{'id'} : undef,
 	 'source', 'create-domain.pl',
 	 'template', $template,
@@ -785,6 +791,7 @@ print "                         --pass password-for-unix-user |\n";
 print "                         --passfile password-file\n";
 print "                        [--hashpass]\n";
 print "                        [--parent domain.name | --alias domain.name |\n";
+print "                         --alias-with-mail domain.name |\n";
 print "                         --superdom domain.name]\n";
 print "                        [--desc description-for-domain]\n";
 print "                        [--email contact-email]\n";
