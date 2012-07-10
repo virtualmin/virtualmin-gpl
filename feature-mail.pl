@@ -273,10 +273,10 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 	foreach my $v (&list_virtusers()) {
 		$gotvirt{$v->{'from'}} = $v;
 		}
-	if ($_[0]->{'alias'} && !$_[0]->{'aliasmail'}) {
+	if ($_[0]->{'alias'}) {
 		# Alias all mail to this domain to a different domain
 		local $aliasdom = &get_domain($_[0]->{'alias'});
-		if ($supports_aliascopy) {
+		if ($supports_aliascopy && !$_[0]->{'aliasmail'}) {
 			$_[0]->{'aliascopy'} = $tmpl->{'aliascopy'};
 			}
 		if ($_[0]->{'aliascopy'}) {

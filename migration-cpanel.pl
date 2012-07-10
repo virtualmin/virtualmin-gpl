@@ -1021,6 +1021,7 @@ foreach my $pdom (&unique(@parked)) {
 			 'ugroup', $dom{'ugroup'},
 			 'pass', $dom{'pass'},
 			 'alias', $dom{'id'},
+			 'aliasmail', 1,
 			 'uid', $dom{'uid'},
 			 'gid', $dom{'gid'},
 			 'ugid', $dom{'ugid'},
@@ -1048,6 +1049,9 @@ foreach my $pdom (&unique(@parked)) {
 	&complete_domain(\%alias);
 	&create_virtual_server(\%alias, $parentdom,
 			       $parentdom->{'user'});
+	if ($alias{'mail'}) {
+		&cpanel_migrate_mailboxes($alias{'dom'}, \%alias, undef);
+		}
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
 	push(@rvdoms, \%alias);
@@ -1217,6 +1221,7 @@ foreach my $vf (readdir(VF)) {
 			 'ugroup', $dom{'ugroup'},
 			 'pass', $dom{'pass'},
 			 'alias', $target->{'id'},
+			 'aliasmail', 1,
 			 'uid', $dom{'uid'},
 			 'gid', $dom{'gid'},
 			 'ugid', $dom{'ugid'},
@@ -1242,6 +1247,9 @@ foreach my $vf (readdir(VF)) {
 	&complete_domain(\%alias);
 	&create_virtual_server(\%alias, $parentdom,
 			       $parentdom->{'user'});
+	if ($alias{'mail'}) {
+		&cpanel_migrate_mailboxes($alias{'dom'}, \%alias, undef);
+		}
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
 	push(@rvdoms, \%alias);
@@ -1611,7 +1619,9 @@ while(<PASSWD>) {
 		closedir(DIR);
 		}
 	$mcount++;
-	$usermap->{$muser} = $uinfo;
+	if ($usermap) {
+		$usermap->{$muser} = $uinfo;
+		}
 	}
 close(PASSWD);
 &$second_print(".. done (migrated $mcount mail users)");
