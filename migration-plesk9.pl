@@ -101,7 +101,7 @@ local $ugroup = $group;
 local $cids = $domain->{'phosting'}->{'content'}->{'cid'};
 if (!$cids) {
 	&$second_print(".. no contents data found!");
-	return ( \%dom );
+#	return ( \%dom );
 	}
 elsif (ref($cids) eq 'HASH') {
 	# Just one file (unlikely)
@@ -305,6 +305,7 @@ if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable(\%dom, 1);
 	}
 local $hdir = &public_html_dir(\%dom);
+if ($cids) {
 local $docroot_files = &extract_plesk9_cid($root, $cids, "docroot");
 if ($docroot_files) {
 	&copy_source_dest($docroot_files, $hdir);
@@ -330,6 +331,7 @@ else {
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable(\%dom, 0);
 	}
+}
 
 # Re-create DNS records
 local $oldip = $domain->{'properties'}->{'ip'}->{'ip-address'};
