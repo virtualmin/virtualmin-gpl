@@ -72,6 +72,12 @@ if ($in{'generic'}) {
 			push(@generics, [ &text('form_generic_alias',
 						&show_domain_name($gparent)),
 					  'to='.$gparent->{'id'} ]);
+
+			# Alias domain with mail
+			push(@generics, [ &text('form_generic_aliasmail',
+						&show_domain_name($gparent)),
+					  'to='.$gparent->{'id'}.
+					  '&aliasmail=1' ]);
 			}
 		if (!$gparent->{'alias'} && !$gparent->{'subdom'} &&
 		    &can_create_sub_domains() && $rdleft) {
@@ -157,6 +163,7 @@ if ($in{'generic'} && @generics > 1) {
 print &ui_form_start("domain_setup.cgi", "post");
 print &ui_hidden("parentuser", $parentuser),"\n";
 print &ui_hidden("to", $in{'to'}),"\n";
+print &ui_hidden("aliasmail", $in{'aliasmail'}),"\n";
 print &ui_hidden("subdom", $in{'subdom'}),"\n";
 print &ui_hidden_table_start($text{'form_header'}, "width=100%", 2,
 			     "basic", 1);

@@ -11490,8 +11490,9 @@ elsif (&indexof($f, &list_feature_plugins()) >= 0) {
 sub domain_features
 {
 local ($d) = @_;
-return $d->{'alias'} ? @alias_features :
-	$d->{'parent'} ? ( grep { $_ ne "webmin" && $_ ne "unix" } @features ) :
+return $d->{'alias'} && $d->{'aliasmail'} ? @aliasmail_features :
+       $d->{'alias'} ? @alias_features :
+       $d->{'parent'} ? ( grep { $_ ne "webmin" && $_ ne "unix" } @features ) :
 		         @features;
 }
 

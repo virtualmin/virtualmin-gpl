@@ -69,6 +69,7 @@ $config{'virt6'} = 1;
 @opt_alias_features = ( 'dir', 'mail', 'dns', 'web' );
 @opt_subdom_features = ( 'dir', 'dns', 'web', 'ssl' );
 @alias_features = ( @opt_alias_features );
+@aliasmail_features = ( @opt_alias_features, 'spam', 'virus' );
 @subdom_features = ( @opt_subdom_features );
 @database_features = ( 'mysql', 'postgres' );
 @template_features = ( 'basic', 'resources', @features, 'virt', 'virtualmin',

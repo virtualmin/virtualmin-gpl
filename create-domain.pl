@@ -389,8 +389,9 @@ if ($parentdomain) {
 	$feature{'unix'} && &usage("--unix option makes no sense for sub-servers");
 	}
 if ($aliasdomain) {
+	@af = $aliasmail ? @aliasmail_features : @alias_features;
 	foreach $f (keys %feature) {
-		&indexof($f, @opt_alias_features) >= 0 ||
+		&indexof($f, @af) >= 0 ||
 			&usage("--$f option makes no sense for alias servers");
 		}
 	}

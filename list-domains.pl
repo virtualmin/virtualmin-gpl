@@ -205,7 +205,9 @@ if ($multi) {
 		local ($duser) = grep { $_->{'user'} eq $d->{'user'} } @users;
 		print "$d->{'dom'}\n";
 		print "    ID: $d->{'id'}\n";
-		print "    Type: ",($d->{'alias'} ? "Alias" :
+		print "    Type: ",($d->{'alias'} && $d->{'aliasmail'} ?
+					"Alias with own email" :
+				    $d->{'alias'} ? "Alias" :
 				    $d->{'parent'} ? "Sub-server" :
 						     "Top-level server"),"\n";
 		$dname = &show_domain_name($d, 2);

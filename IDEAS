@@ -58,3 +58,8 @@
 
  - Rackspace cloud files backup destination
 	- http://www.virtualmin.com/node/11659
+
+ - Install dependencies for redmine / other ruby scripts
+	- gcc
+	- libfcgi-devel
+	- make?
