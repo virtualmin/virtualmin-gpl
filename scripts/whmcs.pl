@@ -471,14 +471,11 @@ if ($opts->{'newdb'}) {
 return (1, "WHMCS directory and tables deleted.");
 }
 
-# script_whmcs_latest(version)
-# Returns a URL and regular expression or callback func to get the version
-#sub script_whmcs_latest
-#{
-#local ($ver) = @_;
-#return ( "http://forum.whmcs.com/forumdisplay.php?s=f0986c5381d494b7b6b6a0923fef97e0&f=9",
-#	 "WHMCS\\s+V([0-9\\.]+)\\s[^>]*Release" );
-#}
+sub script_whmcs_latest
+{
+return ( "http://www.whmcs.com/whats-new/#download",
+	 "WHMCS\\s+V(\\S+)\\s+Stable" );
+}
 
 sub script_whmcs_site
 {
