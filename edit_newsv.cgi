@@ -35,7 +35,7 @@ if ($config{'spam'}) {
 	print &ui_table_row(
 		&hlink($text{'tmpl_spam_size'}, 'template_spam_size'),
 		&ui_radio("size_def", $size ? 0 : 1,
-			  [ [ 1, $text{'template_spam_unlimited'} ],
+			  [ [ 1, $text{'template_spam_defsize'} ],
 			    [ 0, $text{'template_spam_atmost'} ] ])." ".
 		&ui_bytesbox("size", $size));
 
