@@ -61,5 +61,10 @@
 
  - Install dependencies for redmine / other ruby scripts
 	- gcc
-	- libfcgi-devel
-	- make?
+	- fcgi-devel
+	- make
+	- what else?
+	- get_ruby_rails_packages function
+
+ - Deal with change of internal IP
+	- do on config check, if eth0 IP has changed

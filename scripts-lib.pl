@@ -175,6 +175,7 @@ local $rv = { 'name' => $name,
 	      'latest_func' => "script_${name}_latest",
 	      'check_latest_func' => "script_${name}_check_latest",
 	      'commands_func' => "script_${name}_commands",
+	      'packages_func' => "script_${name}_packages",
 	      'passmode_func' => "script_${name}_passmode",
 	      'gpl_func' => "script_${name}_gpl",
 	      'avail' => $avail && !$disabled || $allowmaster,
@@ -2360,6 +2361,66 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 	}
 
 return 1;
+}
+
+# setup_script_packages(&script, &domain)
+# Install any software packages requested by the script
+sub setup_script_packages
+{
+local ($script, $d) = @_;
+local $pkgfunc = $script->{'packages_func'};
+return 1 if (!defined(&$pkgfunc));
+local @pkgs = &$pkgfunc($d);
+return 1 if (!@pkgs);
+&$first_print(&text('scripts_needpackages', join(" ", @pkgs)));
+local $canpkgs = 0;
+if (&foreign_installed("software")) {
+	&foreign_require("software", "software-lib.pl");
+	if (defined(&software::update_system_install)) {
+		$canpkgs = 1;
+		}
+	}
+if (!$canpkgs) {
+	&$second_print($text{'scripts_epackages'});
+	return 0;
+	}
+&$indent_print();
+foreach my $p (@pkgs) {
+	&$first_print(&text('scripts_installpackage', $p));
+	local @pinfo = &software::package_info($p);
+	if (@pinfo && $pinfo[0] eq $p) {
+		# Looks like we already have it!
+		&$second_print($text{'scripts_gotpackage'});
+		next;
+		}
+
+	# Install it
+	if ($first_print eq \&null_print) {
+		# Suppress output
+		&capture_function_output(
+		    \&software::update_system_install, $p);
+		}
+	elsif ($first_print eq \&first_text_print) {
+		# Make output text
+		local $out = &capture_function_output(
+		    \&software::update_system_install, $p);
+		print &html_tags_to_text($out);
+		}
+	else {
+		# Show HTML output
+		&software::update_system_install($p);
+		}
+
+	# Did it work?
+	local @pinfo = &software::package_info($p);
+	if (@pinfo && $pinfo[0] eq $p) {
+		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$second_print($text{'scripts_failedpackage'});
+		}
+	}
+&$outdent_print();
 }
 
 # check_script_depends(&script, &domain, &ver, [&upgrade-info])
