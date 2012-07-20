@@ -561,11 +561,14 @@ if ($got{'mysql'}) {
 		&save_domain(\%dom, 1);
 		local $cids = [ $database->{'content'}->{'cid'} ];
 		local $sqldir = &extract_plesk9_cid($root, $cids, "sqldump");
-		local ($sqlfile) = glob("$sqldir/backup_*");
+		local ($sqlfile) = glob("$sqldir/*$name*");
+		if (!$sqlfile && !-f $sqlfile) {
+			($sqlfile) = glob("$sqldir/backup_*");
+			}
 		if (!$sqldir) {
 			&$first_print("No database content found");
 			}
-		elsif (!$sqlfile || !-r $sqlfile) {
+		elsif (!$sqlfile || !-f $sqlfile) {
 			&$first_print("Database content missing SQL file");
 			}
 		else {
