@@ -3579,11 +3579,13 @@ scripts_deleted=Manually deleted
 scripts_inophp=Webserver support for PHP is needed
 scripts_inocgi=Webserver support for CGI scripts is needed
 scripts_inoapache=Only the Apache webserver is supported
-scripts_needpackages=Installing required packages $1 ..
+scripts_needpackages=Checking for $1 required packages ..
 scripts_epackages=.. package installation is not supported on this system!
 scripts_installpackage=Installing $1 ..
-scripts_failedpackage=.. failed
+scripts_failedpackage=.. failed. Later steps in the installation of this script may fail.
 scripts_gotpackage=.. already installed
+scripts_packagecount=.. installed $1 new packages
+scripts_packageall=.. all packages are already installed
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:

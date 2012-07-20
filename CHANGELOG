@@ -1355,3 +1355,4 @@ The default shell for new virtual servers on Linux systems is now bash, if insta
 When the SSL certificate for a domain is changed, any domains which shared the old cert but cannot use the new one will be switched to a copy of the old cert file.
 ---- Changes since 3.93 ----
 Alias virtual servers that have their own mailboxes and aliases can now be created, rather than always forwarding mail to the destination domain.
+When installing Ruby scripts, dependencies like gcc and libfcgi-devel are now installed automatically if possible.

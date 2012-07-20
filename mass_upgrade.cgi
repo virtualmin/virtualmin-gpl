@@ -37,70 +37,75 @@ if ($in{'confirm'}) {
 		$script = $scriptmap{$sinfo->{'id'}};
 		$ver = $vermap{$sinfo->{'id'}};
 		$opts = $sinfo->{'opts'};
+
+		# Install needed packages
+		&setup_script_packages($script, $d);
+
 		&$first_print(&text('massg_doing', $script->{'desc'}, $ver));
 		if (&compare_versions($sinfo->{'version'}, $ver,
 				      $script) >= 0) {
 			# Already got it
 			&$second_print(&text('massscript_ever',
 					     $sinfo->{'version'}));
+			next;
 			}
-		elsif ($derr = &check_script_depends($script,
-						     $d, $ver, $sinfo)) {
+
+		if ($derr = &check_script_depends($script, $d, $ver, $sinfo)) {
 			# Failed depends
 			&$second_print(&text('massscript_edep', $derr));
+			next;
+			}
+
+		# Setup PHP version
+		&$indent_print();
+		$phpvfunc = $script->{'php_vers_func'};
+		local $phpver;
+		if (defined(&$phpvfunc)) {
+			@vers = &$phpvfunc($d, $ver);
+			$phpver = &setup_php_version($d, \@vers,
+						     $opts->{'path'});
+			if (!$phpver) {
+				&error(&text('scripts_ephpvers',
+					     join(" ", @vers)));
+				}
+			}
+
+		# Install needed PHP modules
+		&setup_script_requirements($d, $script, $ver, $phpver,
+					   $opts) || next;
+
+		# Fetch needed files
+		$ferr = &fetch_script_files($sinfo->{'dom'}, $ver,$opts,
+					    $sinfo, \%gotfiles);
+		&error($ferr) if ($ferr);
+
+		# Work out username and password
+		$domuser = $sinfo->{'user'} || $d->{'user'};
+		$dompass = $sinfo->{'pass'} || $d->{'pass'};
+
+		# Go ahead and do it
+		($ok, $msg, $desc, $url) = &{$script->{'install_func'}}(
+			$d, $ver, $opts, \%gotfiles, $sinfo,
+			$domuser, $dompass);
+		print $msg,"<br>\n";
+		&$outdent_print();
+		if ($ok) {
+			# Worked .. record it
+			&$second_print($text{'setup_done'});
+			&remove_domain_script($d, $sinfo);
+			$newsinfo = &add_domain_script(
+				$d, $sinfo->{'name'}, $ver,
+				$opts, $desc, $url,
+				$sinfo->{'user'}, $sinfo->{'pass'});
+			$sinfo->{'id'} = $newsinfo->{'id'};
 			}
 		else {
-			# Setup PHP version
-			&$indent_print();
-			$phpvfunc = $script->{'php_vers_func'};
-			local $phpver;
-			if (defined(&$phpvfunc)) {
-				@vers = &$phpvfunc($d, $ver);
-				$phpver = &setup_php_version($d, \@vers,
-							     $opts->{'path'});
-				if (!$phpver) {
-					&error(&text('scripts_ephpvers',
-						     join(" ", @vers)));
-					}
-				}
-
-			# Install needed PHP modules
-			&setup_script_requirements($d, $script, $ver, $phpver,
-						   $opts) || next;
-
-			# Fetch needed files
-			$ferr = &fetch_script_files($sinfo->{'dom'}, $ver,$opts,
-						    $sinfo, \%gotfiles);
-			&error($ferr) if ($ferr);
-
-			# Work out username and password
-			$domuser = $sinfo->{'user'} || $d->{'user'};
-			$dompass = $sinfo->{'pass'} || $d->{'pass'};
-
-			# Go ahead and do it
-			($ok, $msg, $desc, $url) = &{$script->{'install_func'}}(
-				$d, $ver, $opts, \%gotfiles, $sinfo,
-				$domuser, $dompass);
-			print $msg,"<br>\n";
-			&$outdent_print();
-			if ($ok) {
-				# Worked .. record it
-				&$second_print($text{'setup_done'});
-				&remove_domain_script($d, $sinfo);
-				$newsinfo = &add_domain_script(
-					$d, $sinfo->{'name'}, $ver,
-					$opts, $desc, $url,
-					$sinfo->{'user'}, $sinfo->{'pass'});
-				$sinfo->{'id'} = $newsinfo->{'id'};
-				}
-			else {
-				&$second_print($text{'scripts_failed'});
-				last if ($in{'fail'});
-				}
-
-			# Clean up any temp files from this script
-			&cleanup_tempnames();
+			&$second_print($text{'scripts_failed'});
+			last if ($in{'fail'});
 			}
+
+		# Clean up any temp files from this script
+		&cleanup_tempnames();
 		}
 
 	&run_post_actions();

@@ -7108,6 +7108,9 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			next;
 			}
 
+		# Install needed packages
+		&setup_script_packages($script, $d);
+
 		# Check dependencies
 		local $derr = &check_script_depends($script, $dom, $ver,$sinfo);
 		if ($derr) {

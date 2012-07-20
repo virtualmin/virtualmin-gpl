@@ -2372,7 +2372,7 @@ local $pkgfunc = $script->{'packages_func'};
 return 1 if (!defined(&$pkgfunc));
 local @pkgs = &$pkgfunc($d);
 return 1 if (!@pkgs);
-&$first_print(&text('scripts_needpackages', join(" ", @pkgs)));
+&$first_print(&text('scripts_needpackages', scalar(@pkgs)));
 local $canpkgs = 0;
 if (&foreign_installed("software")) {
 	&foreign_require("software", "software-lib.pl");
@@ -2385,6 +2385,7 @@ if (!$canpkgs) {
 	return 0;
 	}
 &$indent_print();
+local $count = 0;
 foreach my $p (@pkgs) {
 	&$first_print(&text('scripts_installpackage', $p));
 	local @pinfo = &software::package_info($p);
@@ -2415,12 +2416,16 @@ foreach my $p (@pkgs) {
 	local @pinfo = &software::package_info($p);
 	if (@pinfo && $pinfo[0] eq $p) {
 		&$second_print($text{'setup_done'});
+		$count++;
 		}
 	else {
 		&$second_print($text{'scripts_failedpackage'});
 		}
 	}
 &$outdent_print();
+&$second_print($count == 0 ? $text{'scripts_packageall'}
+			   : &text('scripts_packagecount', $count));
+return 1;
 }
 
 # check_script_depends(&script, &domain, &ver, [&upgrade-info])

@@ -59,12 +59,5 @@
  - Rackspace cloud files backup destination
 	- http://www.virtualmin.com/node/11659
 
- - Install dependencies for redmine / other ruby scripts
-	- gcc
-	- fcgi-devel
-	- make
-	- what else?
-	- get_ruby_rails_packages function
-
  - Deal with change of internal IP
 	- do on config check, if eth0 IP has changed
