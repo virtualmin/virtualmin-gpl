@@ -245,16 +245,24 @@ for(my $i=0; $i<$tries; $i++) {
 				    $conn, $bucket, $endpoint, $sourcefile,
 				    $destfile, $part, $sent, $chunk, $uploadid);
 				if (!$pok) {
+					# This part failed
 					if ($j++ > $tries) {
+						# Too many failures
 						$err = "Part $part failed at ".
 						       "$sent : $ptag";
 						last;
 						}
+					else {
+						# Can re-try
+						sleep($j+1);
+						}
 					}
 				else {
+					# Part worked, move on to the next one
 					$part++;
 					$sent += $chunk;
 					push(@tags, $ptag);
+					$j = 0;
 					}
 				}
 			if (!$err) {
