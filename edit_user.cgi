@@ -397,7 +397,7 @@ if ($anyother) {
 				     "table4", 0, \@tds);
 	}
 
-if (&can_mailbox_ftp() && !$mailbox && $user->{'unix'}) {
+if (&can_mailbox_ftp() && !$mailbox && $user->{'unix'} && !$user->{'webowner'}) {
 	# Show FTP shell field
 	print &ui_table_row(&hlink($text{'user_ushell'}, "ushell"),
 		&available_shells_menu("shell", $user->{'shell'}, "mailbox",

@@ -380,7 +380,7 @@ else {
 		$clash && &error($text{'user_eclash2'});
 
 		if ($user->{'unix'}) {
-			if (&can_mailbox_ftp()) {
+			if (&can_mailbox_ftp() && !$user->{'webowner'}) {
 				# Shell can be set based on FTP flag
 				&check_available_shell($in{'shell'}, 'mailbox',
 						       undef) ||
