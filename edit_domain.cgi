@@ -33,7 +33,7 @@ print &ui_hidden_table_start($text{'edit_header'}, "width=100%", 2,
 $dname = &show_domain_name($d);
 print &ui_table_row($text{'edit_domain'},
 	&domain_has_website($d) ?
-	  "<tt><a target=_blank/g href=http://$d->{'dom'}/>$dname</a></tt>" :
+	  "<tt><a target=_blank href=http://$d->{'dom'}/>$dname</a></tt>" :
 	  "<tt>$dname</tt>");
 
 if ($dname ne $d->{'dom'}) {
@@ -91,7 +91,9 @@ if ($aliasdom) {
 	# Show link to aliased domain
 	print &ui_table_row($text{'edit_aliasto'},
 			    "<a href='edit_domain.cgi?dom=$d->{'alias'}'>".
-			    &show_domain_name($aliasdom)."</a>");
+			    &show_domain_name($aliasdom)."</a>".
+			    ($d->{'aliasmail'} ?
+				" (".$text{'edit_aliasmail'}.")" : ""));
 	}
 elsif ($parentdom) {
 	# Show link to parent domain
@@ -297,7 +299,8 @@ else {
 				     "feature", 0);
 	@grid = ( );
 	$i = 0;
-	@dom_features = $aliasdom ? @opt_alias_features :
+	@dom_features = $aliasdom && $d->{'aliasmail'} ? @aliasmail_features :
+			$aliasdom ? @opt_alias_features :
 			$subdom ? @opt_subdom_features : @opt_features;
 	foreach $f (@dom_features) {
 		# Webmin feature is not needed for sub-servers

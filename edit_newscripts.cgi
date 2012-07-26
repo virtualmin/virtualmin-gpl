@@ -65,7 +65,7 @@ foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 		  'value' => $script->{'name'},
 		  'checked' => $script->{'avail_only'} },
 		$script->{'site'} ? 
-			"<a href='$script->{'site'}' target=_blank/g>".
+			"<a href='$script->{'site'}' target=_blank>".
 			"$script->{'desc'}</a>" : $script->{'desc'},
 		$script->{'longdesc'},
 		$text{'newscripts_'.$script->{'source'}},
@@ -291,7 +291,7 @@ foreach $as (sort { $a->[0]->{'dom'} cmp $b->[0]->{'dom'} } @all_scripts) {
 	       $script->{'vdesc'}->{$sinfo->{'version'}} ||
 		  $sinfo->{'version'},
 	       $sinfo->{'url'} && !$sinfo->{'deleted'} ? 
-		  "<a href='$sinfo->{'url'}' target=_blank/g>$path</a>" :
+		  "<a href='$sinfo->{'url'}' target=_blank>$path</a>" :
 		  $path,
 	       $status,
 	     ]);

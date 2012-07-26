@@ -1,0 +1,6 @@
+desc=S3 backups to directories
+html=Backups to Amazon S3 can now be to a sub-directory under a bucket, rather than being at the top level.
+master=1
+reseller=1
+owner=1
+link=backup_form.cgi

@@ -71,10 +71,16 @@ if ($in{'confirm'}) {
 		if (&compare_versions($sinfo->{'version'}, $ver,
 				      $script) >= 0) {
 			# Already got it
+			&$outdent_print();
 			&$second_print(&text('massscript_ever',
 					     $sinfo->{'version'}));
+			next;
 			}
-		elsif ($derr = &check_script_depends($script,
+
+		# Install needed packages
+		&setup_script_packages($script, $d);
+
+		if ($derr = &check_script_depends($script,
 						     $d, $ver, $sinfo)) {
 			# Failed depends
 			&$second_print(&text('massscript_edep', $derr));
@@ -152,7 +158,7 @@ else {
 			&show_domain_name($sinfo->{'dom'}),
 			$sinfo->{'version'},
 			$sinfo->{'url'} ?
-			    "<a href='$sinfo->{'url'}' target=_blank/g>$path</a>" :
+			    "<a href='$sinfo->{'url'}' target=_blank>$path</a>" :
 			    $path,
 			$utype,
 			]);

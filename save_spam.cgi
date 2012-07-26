@@ -60,7 +60,7 @@ foreach $w (@what) {
 &obtain_lock_cron($d);
 &obtain_lock_mail($d);
 
-if ($d->{'spam'}) {
+if ($d->{'spam'} && &get_domain_spam_client($d) ne "spamc") {
 	$d->{'spam_white'} = $in{'spam_white'};
 	&update_spam_whitelist($d);
 	&save_domain($d);

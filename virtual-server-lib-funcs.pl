@@ -278,7 +278,8 @@ if (!defined($dom->{'db_postgres'}) && $dom->{'postgres'}) {
 	$dom->{'db_postgres'} = $dom->{'db'};
 	}
 $dom->{'db_postgres'} = join(" ", &unique(split(/\s+/, $dom->{'db_postgres'})));
-# This is a computed field
+
+# Emailto is a computed field
 local $parent;
 if ($dom->{'email'}) {
 	$dom->{'emailto'} = $dom->{'email'};
@@ -292,6 +293,20 @@ elsif ($dom->{'mail'}) {
 else {
 	$dom->{'emailto'} = $dom->{'user'}.'@'.&get_system_hostname();
 	}
+
+# Also compute first actual email address
+if (!$dom->{'emailto_addr'} ||
+    $dom->{'emailto_src'} ne $dom->{'emailto'}) {
+	if ($dom->{'emailto'} =~ /^[a-z0-9\.\_\-\+]+\@[a-z0-9\.\_\-]+$/i) {
+		$dom->{'emailto_addr'} = $dom->{'emailto'};
+		}
+	else {
+		($dom->{'emailto_addr'}) =
+			&extract_address_parts($dom->{'emailto'});
+		}
+	$dom->{'emailto_src'} = $dom->{'emailto'};
+	}
+
 # Set edit limits based on ability to edit domains
 local %acaps = map { $_, 1 } &list_automatic_capabilities($dom->{'domslimit'});
 foreach my $ed (@edit_limits) {
@@ -1347,7 +1362,7 @@ if ($_[1]->{'hashpass'}) {
 		local %hash;
 		&read_file_cached("$hashpass_dir/$_[1]->{'id'}", \%hash);
 		local $g = &generate_password_hashes(
-				$_[0], $_[0]->{'plainpass'}, $_[1]->{'dom'});
+				$_[0], $_[0]->{'plainpass'}, $_[1]);
 		foreach my $s (@hashpass_types) {
 			$hash{$_[0]->{'user'}.' '.$s} = $g->{$s};
 			}
@@ -1738,7 +1753,7 @@ if (!$_[0]->{'domainowner'} && $_[2] && $_[2]->{'hashpass'}) {
 	if (defined($_[0]->{'plainpass'})) {
 		# Re-hash new password
 		local $g = &generate_password_hashes(
-				$_[0], $_[0]->{'plainpass'}, $_[2]->{'dom'});
+				$_[0], $_[0]->{'plainpass'}, $_[2]);
 		foreach my $s (@hashpass_types) {
 			$hash{$_[0]->{'user'}.' '.$s} = $g->{$s};
 			$_[0]->{'pass_'.$s} = $g->{$s};
@@ -2374,16 +2389,22 @@ else {
 	}
 }
 
-# generate_password_hashes(&user, text, domain-name)
+# generate_password_hashes(&user, text, &domain)
 # Given a password, returns a hash ref of it hashed into different formats.
 # Keys returned are :
 # md5 - MD5 hash
 # crypt - Unix crypt
 # unix - Appropriate hash for Unix user
 # mysql - MySQL password hash
+# digest - Web digest authentication hash
 sub generate_password_hashes
 {
-local ($user, $pass, $dom) = @_;
+local ($user, $pass, $d) = @_;
+local $tmpl = &get_template($d->{'template'});
+if ($tmpl->{'hashtypes'} eq 'none') {
+	# Don't return any hash types
+	return { };
+	}
 &require_useradmin();
 local %rv;
 local $salt = $user->{'pass'} && $user->{'pass'} !~ /\$/ ? $user->{'pass'}
@@ -2407,9 +2428,27 @@ if ($config{'mysql'}) {
 if (&foreign_check("htaccess-htpasswd")) {
 	&foreign_require("htaccess-htpasswd");
 	$rv{'digest'} = &htaccess_htpasswd::digest_password(
-				$user->{'user'}, $dom, $pass);
+				$user->{'user'}, $d->{'dom'}, $pass);
 	}
-return \%rv;
+if ($tmpl->{'hashtypes'} ne '' && $tmpl->{'hashtypes'} ne '*') {
+	# Remove disabled types
+	local %newrv;
+	foreach my $t (split(/\s+/, $tmpl->{'hashtypes'})) {
+		$newrv{$t} = $rv{$t} if (defined($rv{$t}));
+		}
+	return \%newrv;
+	}
+else {
+	# Just return all types
+	return \%rv;
+	}
+}
+
+# list_password_hash_types()
+# Returns a list of all supported hashing types and their descriptions
+sub list_password_hash_types
+{
+return ( map { [ $_, $text{'hashtype_'.$_} ] } @hashpass_types );
 }
 
 # generate_domain_password_hashes(&domain, new-domain?)
@@ -2444,7 +2483,7 @@ else {
 	return if (!$d->{'pass'});	# Plaintext password unknown
 	local $fakeuinfo = { 'user' => $d->{'user'} };
 	local $hashes = &generate_password_hashes(
-				$fakeuinfo, $d->{'pass'}, $d->{'dom'});
+				$fakeuinfo, $d->{'pass'}, $d);
 	$d->{'enc_pass'} = $hashes->{'unix'};
 	if (!$d->{'mysql_pass'}) {
 		$d->{'mysql_enc_pass'} = $hashes->{'mysql'};
@@ -3956,7 +3995,7 @@ $template = &substitute_virtualmin_template($template, \%hash);
 # as long as that address is in a local domain with mail
 if (!$from && $remote_user && !&master_admin() && $d) {
 	local $localdom = 0;
-	local ($emailtouser, $emailtodom) = split(/\@/, $d->{'emailto'});
+	local ($emailtouser, $emailtodom) = split(/\@/, $d->{'emailto_addr'});
 	foreach my $ld (grep { $_->{'mail'} } &list_domains()) {
 		if (lc($ld->{'dom'}) eq lc($emailtodom)) {
 			$localdom = 1;
@@ -5213,6 +5252,14 @@ if ($_[0]->{'unix'} && !$_[0]->{'parent'} && !$_[0]->{'disabled'}) {
 		}
 	}
 
+# Record if default for the IP
+if ($_[0]->{'web'}) {
+	$_[0]->{'backup_web_default'} = &is_default_website($_[0]);
+	}
+else {
+	delete($_[0]->{'backup_web_default'});
+	}
+
 &save_domain($_[0]);
 
 # Save the domain's data file
@@ -6047,6 +6094,7 @@ if (!$_[3]->{'fix'}) {
 	$_[0]->{'norename'} = $oldd{'norename'};
 	$_[0]->{'forceunder'} = $oldd{'forceunder'};
 	$_[0]->{'safeunder'} = $oldd{'safeunder'};
+	$_[0]->{'ipfollow'} = $oldd{'ipfollow'};
 	foreach my $f (@opt_features, &list_feature_plugins(), "virt") {
 		$_[0]->{'limit_'.$f} = $oldd{'limit_'.$f};
 		}
@@ -7060,6 +7108,9 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			next;
 			}
 
+		# Install needed packages
+		&setup_script_packages($script, $d);
+
 		# Check dependencies
 		local $derr = &check_script_depends($script, $dom, $ver,$sinfo);
 		if ($derr) {
@@ -7919,6 +7970,7 @@ push(@rv, { 'id' => 0,
 	    'norename' => $config{'defnorename'},
 	    'forceunder' => $config{'defforceunder'},
 	    'safeunder' => $config{'defsafeunder'},
+	    'ipfollow' => $config{'defipfollow'},
 	    'resources' => $config{'defresources'} || "none",
 	    'ranges' => $config{'ip_ranges'} || "none",
 	    'ranges6' => $config{'ip_ranges6'} || "none",
@@ -7928,6 +7980,7 @@ push(@rv, { 'id' => 0,
 	    'othergroups' => $config{'othergroups'} || "none",
 	    'quotatype' => $config{'hard_quotas'} ? "hard" : "soft",
 	    'hashpass' => $config{'hashpass'} || 0,
+	    'hashtypes' => $config{'hashtypes'},
 	    'append_style' => $config{'append_style'},
 	    'domalias' => $config{'domalias'} || "none",
 	    'domalias_type' => $config{'domalias_type'} || 0,
@@ -8207,6 +8260,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'defnorename'} = $tmpl->{'norename'};
 	$config{'defforceunder'} = $tmpl->{'forceunder'};
 	$config{'defsafeunder'} = $tmpl->{'safeunder'};
+	$config{'defipfollow'} = $tmpl->{'ipfollow'};
 	$config{'defresources'} = $tmpl->{'resources'};
 	&uncat_file("framefwd-template", $tmpl->{'frame'});
 	$config{'ip_ranges'} = $tmpl->{'ranges'} eq 'none' ? undef :
@@ -8223,6 +8277,7 @@ if ($tmpl->{'id'} == 0) {
 			     	 $tmpl->{'othergroups'};
 	$config{'hard_quotas'} = $tmpl->{'quotatype'} eq "hard" ? 1 : 0;
 	$config{'hashpass'} = $tmpl->{'hashpass'};
+	$config{'hashtypes'} = $tmpl->{'hashtypes'};
 	$config{'append_style'} = $tmpl->{'append_style'};
 	$config{'domalias'} = $tmpl->{'domalias'} eq 'none' ? undef :
 			      $tmpl->{'domalias'};
@@ -8326,11 +8381,13 @@ if (!$tmpl->{'default'}) {
 		    "php", "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "spamtrap", "namedconf",
 		    "nodbname", "norename", "forceunder", "safeunder",
+		    "ipfollow",
 		    "aliascopy", "bccto", "resources", "dnssec", "avail",
 		    @plugins,
 		    @php_wrapper_templates,
 		    "capabilities",
 		    "featurelimits",
+		    "hashpass", "hashtypes",
 		    (map { $_."limit", $_."server", $_."master", $_."view",
 			   $_."passwd" } @plugins)) {
 		if ($tmpl->{$p} eq "") {
@@ -10245,7 +10302,7 @@ foreach my $f (@features) {
 foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "ldap_base", "ldap_login", "ldap_pass", "ldap_port", "ldap",
 	       "vpopmail_dir", "vpopmail_user", "vpopmail_group",
-	       "clamscan_cmd", "iface", "localgroup", "home_quotas",
+	       "clamscan_cmd", "iface", "netmask6", "localgroup", "home_quotas",
 	       "mail_quotas", "group_quotas", "quotas", "shell", "ftp_shell",
 	       "all_namevirtual", "dns_ip", "default_procmail",
 	       "compression", "pbzip2", "suexec", "domains_group",
@@ -10879,7 +10936,7 @@ if (!$d->{'alias'} && &can_config_domain($d)) {
 	push(@rv, { 'page' => 'reemail.cgi',
 		    'title' => $text{'edit_reemail'},
 		    'desc' => &text('edit_reemaildesc',
-                                    "<tt>$d->{'emailto'}</tt>"),
+                                    "<tt>$d->{'emailto_addr'}</tt>"),
 		    'cat' => 'admin',
 		  });
 	}
@@ -11369,7 +11426,8 @@ return @rv;
 sub can_domain_have_users
 {
 local ($d) = @_;
-return 0 if ($d->{'alias'} || $d->{'subdom'});	# never allowed for aliases
+return 0 if ($d->{'alias'} && !$d->{'aliasmail'} ||
+	     $d->{'subdom'});		# never allowed for aliases
 if (!$d->{'mail'}) {
 	# Qmail+LDAP and VPOPMail require mail to be enabled
 	return 0 if ($config{'mail_system'}==4 || $config{'mail_system'}==5);
@@ -11435,8 +11493,9 @@ elsif (&indexof($f, &list_feature_plugins()) >= 0) {
 sub domain_features
 {
 local ($d) = @_;
-return $d->{'alias'} ? @alias_features :
-	$d->{'parent'} ? ( grep { $_ ne "webmin" && $_ ne "unix" } @features ) :
+return $d->{'alias'} && $d->{'aliasmail'} ? @aliasmail_features :
+       $d->{'alias'} ? @alias_features :
+       $d->{'parent'} ? ( grep { $_ ne "webmin" && $_ ne "unix" } @features ) :
 		         @features;
 }
 
@@ -12794,6 +12853,8 @@ if (!&running_in_zone()) {
 
 # Tell the user that IPv6 is available
 if (&supports_ip6()) {
+	!$config{'netmask6'} || $config{'netmask6'} =~ /^\d+$/ ||
+		return &text('check_enetmask6', $config{'netmask6'});
 	&$second_print(&text('check_iface6',
 		"<tt>".($config{'iface6'} || $config{'iface'})."</tt>"));
 	}
@@ -14175,7 +14236,7 @@ if (!$logo) {
 	}
 if ($logo && $logo ne "none") {
 	local $html;
-	$html .= "<a href='$link' target=_blank/g>" if ($link);
+	$html .= "<a href='$link' target=_blank>" if ($link);
 	$html .= "<img src='$image' border=0>";
 	$html .= "</a>" if ($link);
 	return wantarray ? ( $html, $logo, $link ) : $html;
@@ -14258,6 +14319,14 @@ if (!@rv) {
 			    'id' => 'ftp' });
 		}
 	local (%done, %classes, $defclass);
+	local $best_unix_shell;
+	foreach my $s (split(/\s+/, $config{'unix_shell'})) {
+		if (&has_command($s)) {
+			$best_unix_shell = &has_command($s);
+			last;
+			}
+		}
+	$best_unix_shell ||= "/bin/sh";
 	foreach my $us (&get_unix_shells()) {
 		next if (!-r $us->[1]);
 		next if ($done{$us->[1]}++);
@@ -14266,7 +14335,7 @@ if (!@rv) {
 						: $text{'shells_'.$us->[0].'2'},
 				 'id' => $us->[0],
 				 'owner' => 1 );
-		if ($us->[1] eq $config{'unix_shell'}) {
+		if ($us->[1] eq $best_unix_shell) {
 			$shell{'default'} = 1;
 			$shell{'avail'} = 1;
 			$defclass = $us->[0];
@@ -14276,7 +14345,7 @@ if (!@rv) {
 		}
 	if (!$defclass) {
 		# Default for owners was not found .. use config
-		local %shell = ( 'shell' => $config{'unix_shell'},
+		local %shell = ( 'shell' => $best_unix_shell,
 				 'desc' => $text{'shells_ssh'},
 			         'id' => 'ssh',
 				 'owner' => 1,
@@ -15293,6 +15362,17 @@ $ENV{'USERADMIN_EMAIL'} = $d->{'email'};
 if ($u->{'extraemail'}) {
 	$ENV{'USERADMIN_EXTRAEMAIL'} = join(" ", @{$u->{'extraemail'}});
 	}
+}
+
+# extract_address_parts(string)
+# Given a string that may contain multiple email addresses with real names,
+# return a list of just the address parts. Excludes un-qualified addresses
+sub extract_address_parts
+{
+local ($str) = @_;
+&foreign_require("mailboxes", "mailboxes-lib.pl");
+return grep { /^[^@ ]+\@[^@ ]+$/ }
+	    map { $_->[0] } &mailboxes::split_addresses($str);
 }
 
 # load_plugin_libraries([plugin, ...])

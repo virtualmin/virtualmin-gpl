@@ -27,9 +27,14 @@ sub script_whmcs_versions
 return ( "5.0.3" );
 }
 
+sub script_whmcs_gpl
+{
+return 1;
+}
+
 sub script_whmcs_release
 {
-return 1;	# New patch doesn't update version
+return 2;
 }
 
 sub script_whmcs_category
@@ -186,16 +191,22 @@ push(@files, { 'name' => "ioncube",
 	       'url' => "http://downloads2.ioncube.com/".
 			"loader_downloads/ioncube_loaders_$io.zip" });
 if (&compare_versions($ver, "4.5.2") <= 0) {
-	# Also need security path
+	# Also need security patch
 	push(@files, { 'name' => 'patch',
 		       'file' => 'patch.zip',
 		       'url' => 'http://www.whmcs.com/go/21/download' });
 	}
 if (&compare_versions($ver, "4.5.2") <= 0) {
-	# New security path
+	# New security patch
 	push(@files, { 'name' => 'patch2',
 		       'file' => 'patch2.zip',
 		       'url' => 'http://www.whmcs.com/members/dl.php?type=d&id=112' });
+	}
+if (&compare_versions($ver, "5.0.3") <= 0) {
+	# SQL injection path
+	push(@files, { 'name' => 'patch3',
+		       'file' => 'patch3.zip',
+		       'url' => 'http://www.whmcs.com/members/dl.php?type=d&id=126' });
 	}
 return @files;
 }
@@ -372,7 +383,7 @@ if (!$upgrade) {
 	local @params = (
 		[ "firstname", $firstname ],
 		[ "lastname", "" ],
-		[ "email", $d->{'emailto'} ],
+		[ "email", $d->{'emailto_addr'} ],
 		[ "username", $domuser ],
 		[ "password", $dompass ],
 		);
@@ -460,14 +471,11 @@ if ($opts->{'newdb'}) {
 return (1, "WHMCS directory and tables deleted.");
 }
 
-# script_whmcs_latest(version)
-# Returns a URL and regular expression or callback func to get the version
-#sub script_whmcs_latest
-#{
-#local ($ver) = @_;
-#return ( "http://forum.whmcs.com/forumdisplay.php?s=f0986c5381d494b7b6b6a0923fef97e0&f=9",
-#	 "WHMCS\\s+V([0-9\\.]+)\\s[^>]*Release" );
-#}
+sub script_whmcs_latest
+{
+return ( "http://www.whmcs.com/whats-new/#download",
+	 "WHMCS\\s+V(\\S+)\\s+Stable" );
+}
 
 sub script_whmcs_site
 {

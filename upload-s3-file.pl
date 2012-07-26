@@ -20,6 +20,10 @@ above 2GB in size. However, you can force multi-part mode with the
 C<--multipart> flag. Amazon requires that files above 5GB in size be multi-part
 uploaded.
 
+By default each S3 operation will only be tried once. However, you can use
+the C<--tries> flag to have Virtualmin re-try failed operations some number
+of times.
+
 =cut
 
 package virtual_server;
@@ -40,7 +44,7 @@ if (!$module_name) {
 &require_mail();
 
 # Parse command-line args
-$owner = 1;
+$tries = 1;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--source") {
@@ -64,6 +68,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multipart") {
 		$multipart = 1;
 		}
+	elsif ($a eq "--tries") {
+		$tries = shift(@ARGV);
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -81,8 +88,8 @@ if (!$file) {
 	}
 
 # Try the upload
-$err = &s3_upload($akey, $skey, $bucket, $source, $file, undef, undef, 1, $rrs,
-		  $multipart);
+$err = &s3_upload($akey, $skey, $bucket, $source, $file, undef, undef,
+		  $tries, $rrs, $multipart);
 if ($err) {
 	print "ERROR: $err\n";
 	exit(1);
@@ -104,5 +111,6 @@ print "                           --bucket name\n";
 print "                          [--file remote-file]\n";
 print "                          [--rrs]\n";
 print "                          [--multipart]\n";
+print "                          [--tries count]\n";
 exit(1);
 }

@@ -764,7 +764,20 @@ print &ui_table_row(&hlink($text{'tmpl_ushell'}, "template_ushell"),
 print &ui_table_row(&hlink($text{'tmpl_uplainpass'}, "template_uplainpass"),
     &ui_radio("hashpass", $tmpl->{'hashpass'},
 	      [ $tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ),
-		[ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
+		[ 0, $text{'yes'} ], [ 1, $text{'tmpl_uplainpassno'} ] ]));
+
+# Hash types to store
+local @hashtypes = &list_password_hash_types();
+print &ui_table_row(&hlink($text{'tmpl_hashtypes'}, "template_hashtypes"),
+    &ui_radio("hashtypes_def", $tmpl->{'hashtypes'} eq "*" ? 1 :
+			       $tmpl->{'hashtypes'} eq "none" ? 3 :
+			       $tmpl->{'hashtypes'} eq "" ? 2 : 0,
+	      [ $tmpl->{'default'} ? ( ) : ( [ 2, $text{'default'} ] ),
+		[ 1, $text{'tmpl_hashtypes1'} ],
+		[ 3, $text{'tmpl_hashtypes3'} ],
+		[ 0, $text{'tmpl_hashtypes0'} ] ])."<br>\n".
+    &ui_select("hashtypes", [ split(/\s+/, $tmpl->{'hashtypes'}) ],
+	       \@hashtypes, scalar(@hashtypes), 1));
 }
 
 # parse_template_unix(&tmpl)
@@ -795,6 +808,19 @@ $tmpl->{'ushell'} = &parse_none_def("ushell");
 
 # Save password type
 $tmpl->{'hashpass'} = $in{'hashpass'};
+if ($in{'hashtypes_def'} == 2) {
+	$tmpl->{'hashtypes'} = '';
+	}
+elsif ($in{'hashtypes_def'} == 1) {
+	$tmpl->{'hashtypes'} = '*';
+	}
+elsif ($in{'hashtypes_def'} == 3) {
+	$tmpl->{'hashtypes'} = 'none';
+	}
+else {
+	$tmpl->{'hashtypes'} = join(" ", split(/\0/, $in{'hashtypes'}));
+	$tmpl->{'hashtypes'} || &error($text{'tmpl_ehashtypes'});
+	}
 }
 
 # get_unix_shells()

@@ -33,6 +33,8 @@ followed by the name of the virtual server to create under. In this case, the --
 To create an alias of an existing virtual server, use the --alias option,
 followed by the domain name of the target server. For alias servers, the
 --pass , --unix , --webmin , --dir and --quota options are not needed.
+A variation is the --alias-with-mail option, which creates an alias virtual
+server that can still have mailboxes and email aliases. 
 
 You can specify limits on the number of aliases, sub-servers, mailboxes and
 databases for the new domain owner using the --max-aliases, --max-doms,
@@ -98,7 +100,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--email") {
 		if ($ARGV[0] !~ /^-/) {
 			$email = shift(@ARGV);
-			$email =~ /^\S+\@\S+$/ ||
+			&extract_address_parts($email) ||
 				&usage("--email must be followed by a ".
 				       "valid email address");
 			}
@@ -179,6 +181,9 @@ while(@ARGV > 0) {
 		$name = 1;
 		&indexof($sharedip, &list_shared_ips()) >= 0 ||
 		    &usage("$sharedip is not in the shared IP addresses list");
+		}
+	elsif ($a eq "--parent-ip") {
+		$parentip = 1;
 		}
 	elsif ($a eq "--ip6" && &supports_ip6()) {
 		$ip6 = shift(@ARGV);
@@ -268,8 +273,11 @@ while(@ARGV > 0) {
 	elsif ($a eq "--parent") {
 		$parentdomain = lc(shift(@ARGV));
 		}
-	elsif ($a eq "--alias") {
+	elsif ($a eq "--alias" || $a eq "--alias-with-mail") {
 		$aliasdomain = $parentdomain = lc(shift(@ARGV));
+		if ($a eq "--alias-with-mail") {
+			$aliasmail = 1;
+			}
 		}
 	elsif ($a eq "--subdom" || $a eq "--superdom") {
 		$subdomain = $parentdomain = lc(shift(@ARGV));
@@ -381,8 +389,9 @@ if ($parentdomain) {
 	$feature{'unix'} && &usage("--unix option makes no sense for sub-servers");
 	}
 if ($aliasdomain) {
+	@af = $aliasmail ? @aliasmail_features : @alias_features;
 	foreach $f (keys %feature) {
-		&indexof($f, @opt_alias_features) >= 0 ||
+		&indexof($f, @af) >= 0 ||
 			&usage("--$f option makes no sense for alias servers");
 		}
 	}
@@ -557,6 +566,11 @@ if (!$alias) {
 			$clash && &usage(&text('setup_evirtclash'));
 			}
 		}
+	elsif ($parentip) {
+		# IP comes from parent domain
+		$parent || &usage("The --parent-ip flag cannot be used for ".
+				  "top-level servers");
+		}
 
 	if ($virt6) {
 		# Validate virtual IPv6 address
@@ -624,6 +638,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
          'ip', $config{'all_namevirtual'} ? $ip :
 	       $virt ? $ip :
 	       $alias ? $ip :
+	       $parentip ? $parent->{'ip'} :
 	       $sharedip ? $sharedip : $defip,
 	 'netmask', $netmask,
 	 'dns_ip', defined($dns_ip) ? $dns_ip :
@@ -640,6 +655,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
          	     'quota', $quota,
 		     'uquota', $uquota ),
 	 'alias', $alias ? $alias->{'id'} : undef,
+	 'aliasmail', $aliasmail,
 	 'subdom', $subdom ? $subdom->{'id'} : undef,
 	 'source', 'create-domain.pl',
 	 'template', $template,
@@ -776,6 +792,7 @@ print "                         --pass password-for-unix-user |\n";
 print "                         --passfile password-file\n";
 print "                        [--hashpass]\n";
 print "                        [--parent domain.name | --alias domain.name |\n";
+print "                         --alias-with-mail domain.name |\n";
 print "                         --superdom domain.name]\n";
 print "                        [--desc description-for-domain]\n";
 print "                        [--email contact-email]\n";

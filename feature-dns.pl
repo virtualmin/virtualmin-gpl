@@ -1108,7 +1108,7 @@ if ($tmpl->{'dns'} && (!$d->{'dns_submode'} || !$tmpl->{'dns_replace'})) {
 	&open_tempfile(RECS, ">>$rootfile");
 	local %subs = %$d;
 	$subs{'serial'} = $serial;
-	$subs{'dnsemail'} = $d->{'emailto'};
+	$subs{'dnsemail'} = $d->{'emailto_addr'};
 	$subs{'dnsemail'} =~ s/\@/./g;
 	local $recs = &substitute_domain_template(
 		join("\n", split(/\t+/, $tmpl->{'dns'}))."\n", \%subs);

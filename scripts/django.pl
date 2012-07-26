@@ -21,6 +21,11 @@ sub script_django_versions
 return ( "1.4" );
 }
 
+sub script_django_gpl
+{
+return 1;
+}
+
 sub script_django_category
 {
 return "Development";
@@ -311,7 +316,7 @@ if (!$upgrade) {
 	$domuser =~ s/[\.\@\-]/_/g;
 	foreach my $w ([ "yes.no", "yes" ],
 		       [ "Username", $domuser ],
-		       [ "E-mail address", $d->{'emailto'} ],
+		       [ "E-mail address", $d->{'emailto_addr'} ],
 		       [ "Password", $dompass ],
 		       [ "Password", $dompass ]) {
 		local $rv = &wait_for($fh, $w->[0]);

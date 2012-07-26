@@ -110,7 +110,7 @@ if ($tmpl->{'status'} ne 'none') {
 	push(@rv, $tmpl->{'status'});
 	}
 if (!$tmpl->{'statusonly'}) {
-	push(@rv, $d->{'emailto'});
+	push(@rv, &extract_address_parts($d->{'emailto'}));
 	}
 return join(",", @rv);
 }

@@ -69,6 +69,7 @@ $config{'virt6'} = 1;
 @opt_alias_features = ( 'dir', 'mail', 'dns', 'web' );
 @opt_subdom_features = ( 'dir', 'dns', 'web', 'ssl' );
 @alias_features = ( @opt_alias_features );
+@aliasmail_features = ( @opt_alias_features, 'spam', 'virus' );
 @subdom_features = ( @opt_subdom_features );
 @database_features = ( 'mysql', 'postgres' );
 @template_features = ( 'basic', 'resources', @features, 'virt', 'virtualmin',
@@ -178,7 +179,7 @@ $bandwidth_dir = "$module_config_directory/bandwidth";
 $plainpass_dir = "$module_config_directory/plainpass";
 $hashpass_dir = "$module_config_directory/hashpass";
 $nospam_dir = "$module_config_directory/nospam";
-@hashpass_types = ( 'md5', 'crypt', 'mysql', 'digest' );
+@hashpass_types = ( 'md5', 'crypt', 'unix', 'mysql', 'digest' );
 
 $template_scripts_dir = "$module_config_directory/template-scripts";
 

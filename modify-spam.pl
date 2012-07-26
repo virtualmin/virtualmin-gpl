@@ -185,9 +185,15 @@ foreach $d (@doms) {
 		&modify_webmin($d, $d);
 		}
 	if (defined($spam_white)) {
-		$d->{'spam_white'} = 1;
-		&update_spam_whitelist($d);
-		&save_domain($d);
+		if (&get_domain_spam_client($d) eq "spamc") {
+			&$second_print(".. whitelist cannot be configured ".
+				       "spamc is in use");
+			}
+		else {
+			$d->{'spam_white'} = $spam_white;
+			&update_spam_whitelist($d);
+			&save_domain($d);
+			}
 		}
 	if (defined($auto)) {
 		&save_domain_spam_autoclear($d, $auto);

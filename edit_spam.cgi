@@ -52,7 +52,7 @@ if ($d->{'spam'}) {
 	}
 
 # Show input for option to whitelist all mailboxes
-if ($d->{'spam'}) {
+if ($d->{'spam'} && &get_domain_spam_client($d) ne "spamc") {
 	print &ui_table_row(&hlink($text{'spam_white'}, 'spam_white'),
 		    &ui_yesno_radio("spam_white", int($d->{'spam_white'})));
 	}

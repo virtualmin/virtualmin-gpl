@@ -482,6 +482,14 @@ DOMAIN: foreach $d (@$doms) {
         &resync_all_databases($d, \@alldbs);
 	my $dstart = time();
 
+	# If domain has a reseller set whole doesn't exist, clear it now
+	# to prevent errors on restore
+	if ($d->{'reseller'} && defined(&get_reseller) &&
+	    !&get_reseller($d->{'reseller'})) {
+		delete($d->{'reseller'});
+		&save_domain($d);
+		}
+
 	# Begin doing this domain
 	&$cbfunc($d, 0, $backupdir) if ($cbfunc);
 	&$first_print(&text('backup_fordomain', &show_domain_name($d)));
@@ -673,9 +681,9 @@ DOMAIN: foreach $d (@$doms) {
 				local $r = ($user ? "$user\@" : "").
 					   "$qserver:$path";
 				&scp_copy("$dest/$df", $r, $pass, \$err, $port);
-				&scp_copy($infotemp, $r.".info", $pass,
+				&scp_copy($infotemp, "$r/$df.info", $pass,
 					  \$err, $port) if (!$err);
-				&scp_copy($domtemp, $r.".dom", $pass,
+				&scp_copy($domtemp, "$r/$df.dom", $pass,
 					  \$err, $port) if (!$err);
 				$err =~ s/\Q$pass\E/$starpass/g;
 				}
@@ -1137,6 +1145,8 @@ foreach my $desturl (@$desturls) {
 				local $n = $d eq "virtualmin" ? "virtualmin"
 							      : $d->{'dom'};
 				local $binfo = { $n => $donefeatures{$n} };
+				local $bdom = $d eq "virtualmin" ? undef :
+					{ $n => &clean_domain_passwords($d) };
 				$err = &s3_upload($user, $pass, $server,
 						  "$dest/$df",
 						  $path ? $path."/".$df : $df,
@@ -1322,12 +1332,12 @@ return $? ? $out : undef;
 
 # restore_domains(file, &domains, &features, &options, &vbs,
 #		  [only-backup-features], [&ip-address-info], [as-owner],
-#		  [skip-warnings], [&key])
+#		  [skip-warnings], [&key], [continue-on-errors])
 # Restore multiple domains from the given file
 sub restore_domains
 {
 local ($file, $doms, $features, $opts, $vbs, $onlyfeats, $ipinfo, $asowner,
-       $skipwarnings, $key) = @_;
+       $skipwarnings, $key, $continue) = @_;
 
 # Find owning domain
 local $asd;
@@ -1555,6 +1565,7 @@ if ($_[3]->{'reuid'}) {
 &clear_links_cache();
 
 local $vcount = 0;
+local %restoreok;	# Which domain IDs were restored OK?
 if ($ok) {
 	# Restore any Virtualmin settings
 	if (@$vbs) {
@@ -1603,7 +1614,8 @@ if ($ok) {
 			if ($dleft == 0) {
 				&$second_print(&text('restore_elimit', $dmax));
 				$ok = 0;
-				last DOMAIN;
+				if ($continue) { next DOMAIN; }
+				else { last DOMAIN; }
 				}
 
 			# Only features in the backup are enabled
@@ -1634,7 +1646,8 @@ if ($ok) {
 						    $d->{'backup_parent_dom'}) :
 						$text{'restore_epar'});
 					$ok = 0;
-					last DOMAIN;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
 					}
 				$parentuser = $parentdom->{'user'};
 				}
@@ -1658,7 +1671,8 @@ if ($ok) {
 			if (!$tmpl) {
 				&$second_print($text{'restore_etemplate'});
 				$ok = 0;
-				last DOMAIN;
+				if ($continue) { next DOMAIN; }
+				else { last DOMAIN; }
 				}
 
 			# Does the plan exist? If not, get it from the backup
@@ -1677,11 +1691,17 @@ if ($ok) {
 			# Does the reseller exist? If not, fail
 			if ($d->{'reseller'} && defined(&get_reseller)) {
 				my $resel = &get_reseller($d->{'reseller'});
-				if (!$resel) {
+				if (!$resel && $skipwarnings) {
+					&$second_print(&text('restore_eresel2',
+							$d->{'reseller'}));
+					delete($d->{'reseller'});
+					}
+				elsif (!$resel) {
 					&$second_print(&text('restore_eresel',
 							$d->{'reseller'}));
 					$ok = 0;
-					last DOMAIN;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
 					}
 				}
 
@@ -1737,7 +1757,8 @@ if ($ok) {
 						&$second_print(
 						    &text('setup_evirttmpl'));
 						$ok = 0;
-						last DOMAIN;
+						if ($continue) { next DOMAIN; }
+						else { last DOMAIN; }
 						}
 					$d->{'virtalready'} = 0;
 					if (&ip_within_ranges(
@@ -1746,7 +1767,6 @@ if ($ok) {
 					    !&ping_ip_address($d->{'ip'})) {
 						# Old IP is within local range,
 						# so keep it
-						print STDERR "within range\n";
 						}
 					else {
 						# Actually allocate from range
@@ -1755,7 +1775,8 @@ if ($ok) {
 						if (!$d->{'ip'}) {
 							&$second_print(&text('setup_evirtalloc'));
 							$ok = 0;
-							last DOMAIN;
+							if ($continue) { next DOMAIN; }
+							else { last DOMAIN; }
 							}
 						}
 					}
@@ -1771,7 +1792,8 @@ if ($ok) {
 						&$second_print(
 						    $text{'restore_edefip'});
 						$ok = 0;
-						last DOMAIN;
+						if ($continue) { next DOMAIN; }
+						else { last DOMAIN; }
 						}
 					}
 				}
@@ -1791,7 +1813,8 @@ if ($ok) {
 					&$second_print(
 						&text('setup_evirtalloc'));
 					$ok = 0;
-					last DOMAIN;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
 					}
 				}
 			elsif (!$d->{'virt'} && !$config{'all_namevirtual'}) {
@@ -1800,7 +1823,8 @@ if ($ok) {
 				if (!$d->{'ip'}) {
 					&$second_print($text{'restore_edefip'});
 					$ok = 0;
-					last DOMAIN;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
 					}
 				}
 
@@ -1821,7 +1845,8 @@ if ($ok) {
 			if ($cerr) {
 				&$second_print(&text('restore_eclash', $cerr));
 				$ok = 0;
-				last DOMAIN;
+				if ($continue) { next DOMAIN; }
+				else { last DOMAIN; }
 				}
 
 			# Check for warnings
@@ -1836,7 +1861,8 @@ if ($ok) {
 						}
 					&$outdent_print();
 					$ok = 0;
-					last DOMAIN;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
 					}
 				}
 
@@ -1951,6 +1977,11 @@ if ($ok) {
 				&set_server_quotas($qd);
 				}
 
+			# Make site the default if it was before
+			if ($d->{'web'} && $d->{'backup_web_default'}) {
+				&set_default_website($d);
+				}
+
 			# Run the post-restore command
 			&set_domain_envs($d, "RESTORE_DOMAIN", undef, \%oldd);
 			local $merr = &made_changes();
@@ -1958,7 +1989,13 @@ if ($ok) {
 				if (defined($merr));
 			&reset_domain_envs($d);
 
-			last DOMAIN if ($domain_failed);
+			if ($domain_failed) {
+				if ($continue) { next DOMAIN; }
+				else { last DOMAIN; }
+				}
+			else {
+				$restoreok{$d->{'id'}} = 1;
+				}
 			}
 
 		# Re-setup Webmin user
@@ -1967,9 +2004,17 @@ if ($ok) {
 		}
 	}
 
+# Find domains that were restored OK
+if ($continue) {
+	$doms = [ grep { $restoreok{$_->{'id'}} } @$doms ];
+	}
+elsif (!$ok) {
+	$doms = [ ];
+	}
+
 # If any created restored domains had scripts, re-verify their dependencies
 local @wasmissing = grep { $_->{'wasmissing'} } @$doms;
-if (defined(&list_domain_scripts) && $ok && scalar(@wasmissing)) {
+if (defined(&list_domain_scripts) && scalar(@wasmissing)) {
 	&$first_print($text{'restore_phpmods'});
 	local %scache;
 	local (@phpinstalled, $phpanyfailed, @phpbad);
@@ -2012,11 +2057,11 @@ if (defined(&list_domain_scripts) && $ok && scalar(@wasmissing)) {
 
 			# Re-activate it's PHP modules
 			&push_all_print();
-			local $ok = &setup_php_modules($d, $script,
+			local $pok = &setup_php_modules($d, $script,
 			   $sinfo->{'version'}, $phpver, $sinfo->{'opts'},
 			   \@phpinstalled);
 			&pop_all_print();
-			$phpanyfailed++ if (!$ok);
+			$phpanyfailed++ if (!$pok);
 			}
 		}
 	if ($anyfailed) {
@@ -2134,7 +2179,7 @@ if ($mode == 3) {
 	local $s3b = &s3_list_domains($user, $pass, $server, $path);
 	if (ref($s3b)) {
 		foreach my $b (keys %$s3b) {
-			$info{$b} = $s3b->{$b};
+			$dom{$b} = $s3b->{$b};
 			}
 		}
 	}
@@ -2593,7 +2638,9 @@ elsif ($proto == 2) {
 	$rv = &text('backup_nicescp', "<tt>$path</tt>", "<tt>$host</tt>");
 	}
 elsif ($proto == 3) {
-	$rv = &text('backup_nices3', "<tt>$host</tt>");
+	$rv = $path ?
+		&text('backup_nices3p', "<tt>$host</tt>", "<tt>$path</tt>") :
+		&text('backup_nices3', "<tt>$host</tt>");
 	}
 elsif ($proto == 0) {
 	$rv = &text('backup_nicefile', "<tt>$path</tt>");
@@ -2699,9 +2746,9 @@ if (&can_use_s3()) {
 	$st .= "<tr> <td>$text{'backup_skey'}</td> <td>".
 	       &ui_password($name."_skey", $s3pass, 40, 0, undef, $noac).
 	       "</td> </tr>\n";
-	$st .= "<tr> <td>$text{'backup_s3file'}</td> <td>".
+	$st .= "<tr> <td>$text{'backup_s3path'}</td> <td>".
 	       &ui_opt_textbox($name."_s3file", $mode == 3 ? $path : undef,
-			       30, $text{'backup_nos3file'}).
+			       30, $text{'backup_nos3path'}).
 	       "</td> </tr>\n";
 	$st .= "<tr> <td></td> <td>".
 	       &ui_checkbox($name."_rrs", 1, $text{'backup_s3rrs'}, $port == 1).

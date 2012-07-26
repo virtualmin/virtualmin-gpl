@@ -47,10 +47,6 @@ else {
 &find_html_cgi_dirs($d);
 &save_domain($d);
 
-# Check depends again
-$derr = &check_script_depends($script, $d, $ver, $sinfo);
-&error(&text('scripts_edep', $derr)) if ($derr);
-
 # Parse inputs
 %incopy = %in;
 $opts = &{$script->{'parse_func'}}($d, $ver, \%incopy, $sinfo);
@@ -72,7 +68,8 @@ if (defined(&{$script->{'check_func'}}) && !$sinfo) {
 		}
 	}
 
-# Check for install into non-empty directory, unless upgrading
+# Check for files in the script's directory
+$found = 0;
 if (-d $opts->{'dir'} && !$sinfo && !$in{'confirm'}) {
 	opendir(DESTDIR, $opts->{'dir'});
 	foreach $f (readdir(DESTDIR)) {
@@ -81,25 +78,39 @@ if (-d $opts->{'dir'} && !$sinfo && !$in{'confirm'}) {
 			}
 		}
 	closedir(DESTDIR);
-	if ($fcount > 0) {
-		# Has some files already .. ask the user if he is sure
-		&ui_print_header(&domain_in($d), $text{'scripts_intitle'}, "");
-		print "<center>\n";
-		print &ui_form_start("script_install.cgi", "post");
-		foreach my $i (keys %in) {
-			print &ui_hidden($i, $in{$i}),"\n";
-			}
-		print &text('scripts_rusurei', $script->{'desc'},
-			    "<tt>$opts->{'dir'}</tt>", $fcount,
-			    &nice_size(&disk_usage_kb($opts->{'dir'})*1024)),
-		      "<p>\n";
-		print &ui_form_end([ [ "confirm", $text{'scripts_iok'} ] ]);
-		print "</center>\n";
-		&ui_print_footer("list_scripts.cgi?dom=$in{'dom'}",
-				 $text{'scripts_return'},
-				 &domain_footer_link($d));
-		exit;
+	}
+
+&ui_print_unbuffered_header(&domain_in($d),
+	$sinfo ? $text{'scripts_uptitle'} : $text{'scripts_intitle'}, "");
+
+if (!$fcount) {
+	# Install needed packages (unless we are going to prompt for
+	# overwrite confirmation)
+	&setup_script_packages($script, $d);
+	}
+
+# Check depends again
+$derr = &check_script_depends($script, $d, $ver, $sinfo);
+&error(&text('scripts_edep', $derr)) if ($derr);
+
+# Check for install into non-empty directory, unless upgrading
+if ($fcount > 0) {
+	# Has some files already .. ask the user if he is sure
+	print "<center>\n";
+	print &ui_form_start("script_install.cgi", "post");
+	foreach my $i (keys %in) {
+		print &ui_hidden($i, $in{$i}),"\n";
 		}
+	print &text('scripts_rusurei', $script->{'desc'},
+		    "<tt>$opts->{'dir'}</tt>", $fcount,
+		    &nice_size(&disk_usage_kb($opts->{'dir'})*1024)),
+	      "<p>\n";
+	print &ui_form_end([ [ "confirm", $text{'scripts_iok'} ] ]);
+	print "</center>\n";
+	&ui_print_footer("list_scripts.cgi?dom=$in{'dom'}",
+			 $text{'scripts_return'},
+			 &domain_footer_link($d));
+	exit;
 	}
 
 # Get locks
@@ -116,9 +127,6 @@ if (defined(&$phpvfunc)) {
 		}
 	$opts->{'phpver'} = $phpver;
 	}
-
-&ui_print_unbuffered_header(&domain_in($d),
-	$sinfo ? $text{'scripts_uptitle'} : $text{'scripts_intitle'}, "");
 
 # First fetch needed files
 $ferr = &fetch_script_files($d, $ver, $opts, $sinfo, \%gotfiles);

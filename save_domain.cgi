@@ -68,6 +68,11 @@ if (!$d->{'parent'} && !$in{'passwd_def'}) {
 	&error($err) if ($err);
 	}
 
+# Check email format
+if (!$in{'email_def'} && !$d->{'parent'}) {
+	&extract_address_parts($in{'email'}) || &error($text{'setup_eemail3'});
+	}
+
 # Work out which features are relevant
 @dom_features = &domain_features($d);
 
@@ -221,7 +226,9 @@ if (!$in{'passwd_def'}) {
 else {
 	$d->{'pass_set'} = 0;
 	}
-$d->{'email'} = $in{'email_def'} ? undef : $in{'email'};
+if (!$d->{'parent'}) {
+	$d->{'email'} = $in{'email_def'} ? undef : $in{'email'};
+	}
 
 # Update quotas in domain object
 if (&has_home_quotas() && !$d->{'parent'} && &can_edit_quotas($d)) {

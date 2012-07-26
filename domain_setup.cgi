@@ -72,8 +72,11 @@ else {
 	}
 if (!$parentuser) {
 	# Validate user and password-related inputs for top-level domain
-	$in{'email_def'} || $in{'email'} =~ /\S/ ||
-		&error($text{'setup_eemail'});
+	if (!$in{'email_def'}) {
+		$in{'email'} =~ /\S/ || &error($text{'setup_eemail'});
+		&extract_address_parts($in{'email'}) ||
+			&usage($text{'setup_eemail3'});
+		}
 	if (!$in{'unix'}) {
 		$tmpl->{'mail_on'} eq "none" || !$in{'email_def'} ||
 			&error($text{'setup_eemail2'});
@@ -212,14 +215,25 @@ $resel = $parentdom ? $parentdom->{'reseller'} :
 	 &reseller_admin() ? $base_remote_user : $in{'reseller'};
 $defip = &get_default_ip($resel);
 if ($aliasdom) {
+	# Alias domain gets IP from target
 	$ip = $aliasdom->{'ip'};
 	$virt = 0;
 	}
 elsif (!&can_select_ip()) {
-	$ip = $defip;
-	$virt = 0;
+	# Not allowed to select IP
+	if ($access{'ipfollow'} && $parentdom) {
+		# Inherit from parent
+		$ip = $parentdom->{'ip'};
+		$virt = 0;
+		}
+	else {
+		# Use global default
+		$ip = $defip;
+		$virt = 0;
+		}
 	}
 else {
+	# User can select
 	($ip, $virt, $virtalready, $netmask) =
 		&parse_virtual_ip($tmpl, $resel);
 	}
@@ -309,6 +323,7 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 		( 'pass', $parentdom->{'pass'} ) :
 		( 'pass', $pass ),
 	 'alias', $aliasdom ? $aliasdom->{'id'} : undef,
+	 'aliasmail', $in{'aliasmail'},
 	 'subdom', $subdom ? $subdom->{'id'} : undef,
 	 'subprefix', $subprefix,
 	 'uid', $uid,

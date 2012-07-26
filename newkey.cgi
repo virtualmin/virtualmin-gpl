@@ -33,6 +33,15 @@ $certerr && &error(&text('newkey_ematch', $certerr));
 
 &ui_print_header(&domain_in($d), $text{'newkey_title'}, "");
 
+# Break SSL linkages that no longer work with this cert
+$temp = &transname();
+&open_tempfile(TEMP, ">$temp", 0, 1);
+&print_tempfile(TEMP, $cert);
+&close_tempfile(TEMP);
+$newcertinfo = &cert_file_info($temp);
+&break_invalid_ssl_linkages($d, $newcertinfo);
+&unlink_file($temp);
+
 # Make sure Apache is setup to use the right key files
 &obtain_lock_ssl($d);
 $d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
@@ -77,6 +86,10 @@ if ($d->{'ssl_newkey'}) {
 		}
 	}
 
+# For domains that were using the SSL cert on this domain originally but
+# can no longer due to the cert hostname changing, break the linkage
+&break_invalid_ssl_linkages($d);
+
 # Copy SSL directives to domains using same cert
 foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	$od->{'ssl_cert'} = $d->{'ssl_cert'};
@@ -85,6 +98,7 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	$od->{'ssl_csr'} = $d->{'ssl_csr'};
 	$od->{'ssl_pass'} = $d->{'ssl_pass'};
 	&save_domain_passphrase($od);
+	&save_domain($od);
 	}
 
 &run_post_actions();

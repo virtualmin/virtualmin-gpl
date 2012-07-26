@@ -105,6 +105,11 @@ $d || &usage("No virtual server named $dname found");
 	&usage("Virtual server $dname does not have SSL enabled");
 
 if ($self) {
+	# Break SSL linkages that no longer work with this cert
+	local $newcert = { 'cn' => $subject{'cn'} || "*.$d->{'dom'}",
+			   'alt' => \@alts };
+	&break_invalid_ssl_linkages($d, $newcert);
+
 	# Generate the self-signed cert, over-writing the existing file
 	&$first_print("Generating new self-signed certificate ..");
 	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
@@ -120,7 +125,7 @@ if ($self) {
 		$subject{'o'},
 		$subject{'ou'},
 		$subject{'cn'} || "*.$d->{'dom'}",
-		$subject{'email'} || $d->{'emailto'},
+		$subject{'email'} || $d->{'emailto_addr'},
 		\@alts,
 		$d,
 		);
@@ -170,7 +175,7 @@ else {
 		$subject{'o'},
 		$subject{'ou'},
 		$subject{'cn'} || "*.$d->{'dom'}",
-		$subject{'email'} || $d->{'emailto'},
+		$subject{'email'} || $d->{'emailto_addr'},
 		\@alts,
 		$d,
 		);

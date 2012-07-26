@@ -285,6 +285,9 @@ if (!$sinfo) {
 	$clash && &usage(&text('scripts_eclash', $opts->{'dir'}));
 	}
 
+# Install needed packages
+&setup_script_packages($script, $d);
+
 # Check dependencies
 &$first_print("Checking dependencies ..");
 $derr = &check_script_depends($script, $d, $ver, $sinfo);

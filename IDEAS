@@ -56,9 +56,8 @@
 	- Namecheap too
 	- Pro only
 
- - Change domain creation form to wizard
-	- Same for CLoudmin
+ - Rackspace cloud files backup destination
+	- http://www.virtualmin.com/node/11659
 
- - Single logrotate block for all domains
-	- sharedscripts
-	- https://www.virtualmin.com/node/22024
+ - Deal with change of internal IP
+	- do on config check, if eth0 IP has changed

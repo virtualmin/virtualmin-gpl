@@ -248,14 +248,16 @@ if ($dom->{'parent'}) {
 # Check for unlimited quota clash with reseller
 if ($dom->{'reseller'} && defined(&get_reseller)) {
 	$r = &get_reseller($dom->{'reseller'});
-	if (defined($quota) && $quota eq "0" &&
+	if (!$dom->{'parent'} &&
+	    defined($quota) && $quota eq "0" &&
 	    $r && $r->{'acl'}->{'max_quota'}) {
 		&usage("The disk quota for this domain cannot be set to ".
 		       "unlimited, as it is owned by reseller ".
 		       "$dom->{'reseller'} who has a quota limit");
 		       
 		}
-	if ($bw eq "NONE" &&
+	if (!$dom->{'parent'} &&
+	    $bw eq "NONE" &&
 	    $r && $r->{'acl'}->{'max_bw'}) {
 		&usage("The bandwidth for this domain cannot be set to ".
 		       "unlimited, as it is owned by reseller ".
@@ -381,6 +383,8 @@ if (defined($pass)) {
 		}
 	}
 if (defined($email)) {
+	&extract_address_parts($email) ||
+		&usage("Invalid email address $email");
 	foreach $d (@doms) {
 		$d->{'email'} = $email;
 		}

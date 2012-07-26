@@ -108,11 +108,13 @@ if ($config{'quota_mailbox_send'}) {
 	}
 
 # Send email to master admin for both domains and users over quota
-if (@msgs) {
-	&send_domain_quota_email(\@msgs, $config{'quota_email'});
-	}
-if (@umsgs) {
-	&send_user_quota_email(\@umsgs, $config{'quota_email'});
+if ($config{'quota_email'}) {
+	if (@msgs) {
+		&send_domain_quota_email(\@msgs, $config{'quota_email'});
+		}
+	if (@umsgs) {
+		&send_user_quota_email(\@umsgs, $config{'quota_email'});
+		}
 	}
 
 # send_domain_quota_email(&message, address)
@@ -139,7 +141,7 @@ foreach my $m (@$msgs) {
 			       $msg);
 	}
 $body .= "\n";
-$body .= "Sent by Virtualmin at: ".&get_virtualmin_url($emaild)."\n";
+$body .= &text('quotawarn_suffixdom', &get_virtualmin_url($emaild))."\n";
 
 # Send the email
 if ($debug_mode) {
@@ -182,7 +184,7 @@ foreach my $m (@$msgs) {
 			       $msg);
 	}
 $body .= "\n";
-$body .= "Sent by Virtualmin at: ".&get_virtualmin_url($emaild)."\n";
+$body .= &text('quotawarn_suffixuser', &get_virtualmin_url($emaild))."\n";
 
 # Send the email
 if ($debug_mode) {

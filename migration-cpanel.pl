@@ -628,122 +628,7 @@ local (%taken, %utaken);
 local %usermap;
 if ($got{'mail'}) {
 	# Migrate mail users
-	&$first_print("Re-creating mail users ..");
-	local $mcount = 0;
-	local (%pass, %quota);
-	local $_;
-	open(SHADOW, "$homesrc/etc/$dom/shadow");
-	while(<SHADOW>) {
-		s/\r|\n//g;
-		local ($suser, $spass) = split(/:/, $_);
-		$pass{$suser} = $spass;
-		}
-	close(SHADOW);
-	local $_;
-	local $bsize = &quota_bsize("home");
-	open(QUOTA, "$homesrc/etc/$dom/quota");
-	while(<QUOTA>) {
-		s/\r|\n//g;
-		local ($quser, $qquota) = split(/:/, $_);
-		$quota{$quser} = $bsize ? int($qquota/$bsize) : 0;
-		}
-	close(QUOTA);
-	local $_;
-	open(PASSWD, "$homesrc/etc/$dom/passwd");
-	while(<PASSWD>) {
-		# Create the user
-		s/\r|\n//g;
-		local ($muser, $mdummy, $muid, $mgid, $mreal, $mdir, $mshell) =
-			split(/:/, $_);
-		next if (!$muser);
-		next if ($muser =~ /_logs$/);		# Special logs user
-		next if ($muser eq $user && !$parent);	# Domain owner
-		local $uinfo = &create_initial_user(\%dom);
-		$uinfo->{'user'} = &userdom_name(lc($muser), \%dom);
-		$uinfo->{'pass'} = $pass{$muser};
-		$uinfo->{'uid'} = &allocate_uid(\%taken);
-		$uinfo->{'gid'} = $dom{'gid'};
-		$uinfo->{'real'} = $mreal;
-		$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/".
-				   lc($muser);
-		$uinfo->{'shell'} = $nologin_shell->{'shell'};
-		$uinfo->{'email'} = lc($muser)."\@$dom";
-		$uinfo->{'qquota'} = $quota{$muser};
-		$uinfo->{'quota'} = $quota{$muser};
-		$uinfo->{'mquota'} = $quota{$muser};
-		&create_user_home($uinfo, \%dom, 1);
-		&create_user($uinfo, \%dom);
-		$taken{$uinfo->{'uid'}}++;
-		local ($crfile, $crtype) = &create_mail_file($uinfo, \%dom);
-
-		# Move his mail files
-		local $mailsrc = "$homesrc/mail/$dom/$muser";
-		local $sfdir = $mailboxes::config{'mail_usermin'};
-		local $sftype = $sfdir eq 'Maildir' ? 1 : 0;
-		local $sfpath = "$uinfo->{'home'}/$sfdir";
-		if (!-d $sfpath && !$sftype) {
-			# Create ~/mail if needed
-			&make_dir($sfpath, 0755);
-			&set_ownership_permissions(
-			     $uinfo->{'uid'}, $uinfo->{'gid'}, undef, $sfpath);
-			}
-		if (-d "$mailsrc/cur") {
-			# Mail directory is in Maildir format, and sub-folders
-			# are in Maildir++
-			local $srcfolder = { 'type' => 1,
-					     'file' => $mailsrc };
-			local $dstfolder = { 'file' => $crfile,
-					     'type' => $crtype };
-			&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
-			&set_mailfolder_owner($dstfolder, $uinfo);
-			opendir(DIR, $mailsrc);
-			while(my $mf = readdir(DIR)) {
-				next if ($mf eq "." || $mf eq ".." ||
-					 $mf !~ /^\./);
-				local $srcfolder = { 'type' => 1,
-					'file' => "$mailsrc/$mf" };
-				# Remove . if destination is not Maildir++
-				$mf =~ s/^\.// if (!$sftype);
-				local $dstfolder = { 'type' => $sftype,
-						     'file' => "$sfpath/$mf" };
-				&mailboxes::mailbox_move_folder($srcfolder,
-								$dstfolder);
-				&set_mailfolder_owner($dstfolder, $uinfo);
-				}
-			closedir(DIR);
-			}
-		else {
-			# Assume that mail files are mbox formatted
-			opendir(DIR, $mailsrc);
-			local $mf;
-			while($mf = readdir(DIR)) {
-				next if ($mf =~ /^\./);
-				local $srcfolder = { 'type' => 0,
-						     'file' => "$mailsrc/$mf" };
-				local $dstfolder;
-				if ($mf eq "inbox") {
-					$dstfolder = { 'file' => $crfile,
-						       'type' => $crtype };
-					}
-				else {
-					# Copying an extra folder - use
-					# Maildir++ name if dest folders are
-					# under ~/Maildir
-					$mf = ".$mf" if ($sftype);
-					$dstfolder = { 'type' => $sftype,
-						'file' => "$sfpath/$mf" };
-					}
-				&mailboxes::mailbox_move_folder($srcfolder,
-								$dstfolder);
-				&set_mailfolder_owner($dstfolder, $uinfo);
-				}
-			closedir(DIR);
-			}
-		$mcount++;
-		$usermap{$muser} = $uinfo;
-		}
-	close(PASSWD);
-	&$second_print(".. done (migrated $mcount mail users)");
+	&cpanel_migrate_mailboxes($dom, \%dom, \%usermap);
 	}
 
 # Move server owner's inbox file
@@ -890,7 +775,7 @@ if ($got{'virtualmin-mailman'}) {
 	foreach $ml (@lists) {
 		local $err = &plugin_call("virtualmin-mailman", "create_list",
 			     $ml, $dom, "Migrated cPanel mailing list",
-			     undef, $dom{'emailto'}, $dom{'pass'});
+			     undef, $dom{'emailto_addr'}, $dom{'pass'});
 		if ($err) {
 			&$second_print("Failed to create $ml : $err");
 			}
@@ -1136,6 +1021,7 @@ foreach my $pdom (&unique(@parked)) {
 			 'ugroup', $dom{'ugroup'},
 			 'pass', $dom{'pass'},
 			 'alias', $dom{'id'},
+			 'aliasmail', 1,
 			 'uid', $dom{'uid'},
 			 'gid', $dom{'gid'},
 			 'ugid', $dom{'ugid'},
@@ -1163,6 +1049,9 @@ foreach my $pdom (&unique(@parked)) {
 	&complete_domain(\%alias);
 	&create_virtual_server(\%alias, $parentdom,
 			       $parentdom->{'user'});
+	if ($alias{'mail'}) {
+		&cpanel_migrate_mailboxes($alias{'dom'}, \%alias, undef);
+		}
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
 	push(@rvdoms, \%alias);
@@ -1332,6 +1221,7 @@ foreach my $vf (readdir(VF)) {
 			 'ugroup', $dom{'ugroup'},
 			 'pass', $dom{'pass'},
 			 'alias', $target->{'id'},
+			 'aliasmail', 1,
 			 'uid', $dom{'uid'},
 			 'gid', $dom{'gid'},
 			 'ugid', $dom{'ugid'},
@@ -1357,6 +1247,9 @@ foreach my $vf (readdir(VF)) {
 	&complete_domain(\%alias);
 	&create_virtual_server(\%alias, $parentdom,
 			       $parentdom->{'user'});
+	if ($alias{'mail'}) {
+		&cpanel_migrate_mailboxes($alias{'dom'}, \%alias, undef);
+		}
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
 	push(@rvdoms, \%alias);
@@ -1606,8 +1499,132 @@ foreach my $vf (readdir(VF)) {
 		}
 	}
 closedir(VF);
+}
 
+# cpanel_migrate_mailboxes(domain-name, &domain, &user-map)
+# Re-create mailbox users from a cPanel backup
+sub cpanel_migrate_mailboxes
+{
+local ($dom, $d, $usermap) = @_;
+&foreign_require("mailboxes", "mailboxes-lib.pl");
+&$first_print("Re-creating mail users for $dom ..");
+local $mcount = 0;
+local (%pass, %quota);
+local $_;
+open(SHADOW, "$homesrc/etc/$dom/shadow");
+while(<SHADOW>) {
+	s/\r|\n//g;
+	local ($suser, $spass) = split(/:/, $_);
+	$pass{$suser} = $spass;
+	}
+close(SHADOW);
+local $_;
+local $bsize = &quota_bsize("home");
+open(QUOTA, "$homesrc/etc/$dom/quota");
+while(<QUOTA>) {
+	s/\r|\n//g;
+	local ($quser, $qquota) = split(/:/, $_);
+	$quota{$quser} = $bsize ? int($qquota/$bsize) : 0;
+	}
+close(QUOTA);
+local $_;
+open(PASSWD, "$homesrc/etc/$dom/passwd");
+while(<PASSWD>) {
+	# Create the user
+	s/\r|\n//g;
+	local ($muser, $mdummy, $muid, $mgid, $mreal, $mdir, $mshell) =
+		split(/:/, $_);
+	next if (!$muser);
+	next if ($muser =~ /_logs$/);		# Special logs user
+	next if ($muser eq $user && !$parent);	# Domain owner
+	local $uinfo = &create_initial_user($d);
+	$uinfo->{'user'} = &userdom_name(lc($muser), $d);
+	$uinfo->{'pass'} = $pass{$muser};
+	$uinfo->{'uid'} = &allocate_uid(\%taken);
+	$uinfo->{'gid'} = $d->{'gid'};
+	$uinfo->{'real'} = $mreal;
+	$uinfo->{'home'} = "$d->{'home'}/$config{'homes_dir'}/".
+			   lc($muser);
+	$uinfo->{'shell'} = $nologin_shell->{'shell'};
+	$uinfo->{'email'} = lc($muser)."\@$dom";
+	$uinfo->{'qquota'} = $quota{$muser};
+	$uinfo->{'quota'} = $quota{$muser};
+	$uinfo->{'mquota'} = $quota{$muser};
+	&create_user_home($uinfo, $d, 1);
+	&create_user($uinfo, $d);
+	$taken{$uinfo->{'uid'}}++;
+	local ($crfile, $crtype) = &create_mail_file($uinfo, $d);
 
+	# Move his mail files
+	local $mailsrc = "$homesrc/mail/$dom/$muser";
+	local $sfdir = $mailboxes::config{'mail_usermin'};
+	local $sftype = $sfdir eq 'Maildir' ? 1 : 0;
+	local $sfpath = "$uinfo->{'home'}/$sfdir";
+	if (!-d $sfpath && !$sftype) {
+		# Create ~/mail if needed
+		&make_dir($sfpath, 0755);
+		&set_ownership_permissions(
+		     $uinfo->{'uid'}, $uinfo->{'gid'}, undef, $sfpath);
+		}
+	if (-d "$mailsrc/cur") {
+		# Mail directory is in Maildir format, and sub-folders
+		# are in Maildir++
+		local $srcfolder = { 'type' => 1,
+				     'file' => $mailsrc };
+		local $dstfolder = { 'file' => $crfile,
+				     'type' => $crtype };
+		&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
+		&set_mailfolder_owner($dstfolder, $uinfo);
+		opendir(DIR, $mailsrc);
+		while(my $mf = readdir(DIR)) {
+			next if ($mf eq "." || $mf eq ".." ||
+				 $mf !~ /^\./);
+			local $srcfolder = { 'type' => 1,
+				'file' => "$mailsrc/$mf" };
+			# Remove . if destination is not Maildir++
+			$mf =~ s/^\.// if (!$sftype);
+			local $dstfolder = { 'type' => $sftype,
+					     'file' => "$sfpath/$mf" };
+			&mailboxes::mailbox_move_folder($srcfolder,
+							$dstfolder);
+			&set_mailfolder_owner($dstfolder, $uinfo);
+			}
+		closedir(DIR);
+		}
+	else {
+		# Assume that mail files are mbox formatted
+		opendir(DIR, $mailsrc);
+		local $mf;
+		while($mf = readdir(DIR)) {
+			next if ($mf =~ /^\./);
+			local $srcfolder = { 'type' => 0,
+					     'file' => "$mailsrc/$mf" };
+			local $dstfolder;
+			if ($mf eq "inbox") {
+				$dstfolder = { 'file' => $crfile,
+					       'type' => $crtype };
+				}
+			else {
+				# Copying an extra folder - use
+				# Maildir++ name if dest folders are
+				# under ~/Maildir
+				$mf = ".$mf" if ($sftype);
+				$dstfolder = { 'type' => $sftype,
+					'file' => "$sfpath/$mf" };
+				}
+			&mailboxes::mailbox_move_folder($srcfolder,
+							$dstfolder);
+			&set_mailfolder_owner($dstfolder, $uinfo);
+			}
+		closedir(DIR);
+		}
+	$mcount++;
+	if ($usermap) {
+		$usermap->{$muser} = $uinfo;
+		}
+	}
+close(PASSWD);
+&$second_print(".. done (migrated $mcount mail users)");
 }
 
 1;

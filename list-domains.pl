@@ -205,7 +205,9 @@ if ($multi) {
 		local ($duser) = grep { $_->{'user'} eq $d->{'user'} } @users;
 		print "$d->{'dom'}\n";
 		print "    ID: $d->{'id'}\n";
-		print "    Type: ",($d->{'alias'} ? "Alias" :
+		print "    Type: ",($d->{'alias'} && $d->{'aliasmail'} ?
+					"Alias with own email" :
+				    $d->{'alias'} ? "Alias" :
 				    $d->{'parent'} ? "Sub-server" :
 						     "Top-level server"),"\n";
 		$dname = &show_domain_name($d, 2);
@@ -262,6 +264,7 @@ if ($multi) {
 			print "    Error log: ",&get_website_log($wd, 1),"\n";
 			}
 		print "    Contact email: $d->{'emailto'}\n";
+		print "    Contact address: $d->{'emailto_addr'}\n";
 		print "    Created on: ",&make_date($d->{'created'}),"\n";
 		if ($d->{'creator'}) {
 			print "    Created by: $d->{'creator'}\n";
@@ -457,6 +460,24 @@ if ($multi) {
 				(&is_default_website($d) ? "Yes" : "No"),"\n";
 			}
 
+		# Show SSL cert
+		if ($d->{'ssl'}) {
+			if ($d->{'ssl_key'}) {
+				print "    SSL key file: $d->{'ssl_key'}\n";
+				}
+			if ($d->{'ssl_cert'}) {
+				print "    SSL cert file: $d->{'ssl_cert'}\n";
+				}
+			if ($d->{'ssl_ca'}) {
+				print "    SSL CA file: $d->{'ssl_ca'}\n";
+				}
+			$same = $d->{'ssl_same'} ? &get_domain($d->{'ssl_same'})
+						 : undef;
+			if ($same) {
+				print "    SSL shared with: $same->{'dom'}\n";
+				}
+			}
+
 		# Show DNS SPF mode
 		if ($config{'dns'} && $d->{'dns'} && !$d->{'dns_submode'} &&
 		    $multi == 1) {
@@ -511,6 +532,8 @@ if ($multi) {
 				($d->{'forceunder'} ? "Yes" : "No"),"\n";
 			print "    Sub-servers cannot be under other domains: ",
 				($d->{'safeunder'} ? "Yes" : "No"),"\n";
+			print "    Sub-servers inherit IP address: ",
+				($d->{'ipfollow'} ? "Yes" : "No"),"\n";
 			print "    Read-only mode: ",
 				($d->{'readonly'} ? "Yes" : "No"),"\n";
 			print "    Allowed features: ",

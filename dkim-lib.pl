@@ -6,30 +6,64 @@ $debian_dkim_default = "/etc/default/dkim-filter";
 $redhat_dkim_config = "/etc/mail/dkim-milter/dkim-filter.conf";
 $redhat_dkim_default = "/etc/sysconfig/dkim-milter";
 
+$ubuntu_dkim_config = "/etc/opendkim.conf";
+$ubuntu_dkim_default = "/etc/default/opendkim";
+
+# get_dkim_type()
+# Returns either 'ubuntu', 'debian', 'redhat' or undef
+sub get_dkim_type
+{
+return $gconfig{'os_type'} eq 'debian-linux' && $gconfig{'os_version'} >= 7 ?
+	 'ubuntu' :
+       $gconfig{'os_type'} eq 'debian-linux' ? 'debian' :
+       $gconfig{'os_type'} eq 'redhat-linux' ? 'redhat' : undef;
+}
+
+# get_dkim_config_file()
+# Returns the path to the DKIM config file
+sub get_dkim_config_file
+{
+return &get_dkim_type() eq 'ubuntu' ? $ubuntu_dkim_config :
+       &get_dkim_type() eq 'debian' ? $debian_dkim_config :
+       &get_dkim_type() eq 'redhat' ? $redhat_dkim_config :
+				      undef;
+}
+
+# get_dkim_defaults_file()
+# Returns the path to the DKIM defaults file
+sub get_dkim_defaults_file
+{
+return &get_dkim_type() eq 'ubuntu' ? $ubuntu_dkim_default :
+       &get_dkim_type() eq 'debian' ? $debian_dkim_default :
+       &get_dkim_type() eq 'redhat' ? $redhat_dkim_default :
+				      undef;
+}
+
+# get_dkim_init_name()
+# Returns the name of the DKIM init script
+sub get_dkim_init_name
+{
+return &get_dkim_type() eq 'ubuntu' ? 'opendkim' :
+       &get_dkim_type() eq 'debian' ? 'dkim-filter' :
+       &get_dkim_type() eq 'redhat' ? 'dkim-milter' : undef;
+}
+
 # check_dkim()
 # Returns undef if all the needed commands for DKIM are installed, or an error
 # message if not.
 sub check_dkim
 {
 &foreign_require("init");
-if ($gconfig{'os_type'} eq 'debian-linux') {
-	# Look for milter config file
-	return &text('dkim_econfig', "<tt>$debian_dkim_config</tt>")
-		if (!-r $debian_dkim_config);
-	return &text('dkim_einit', "<tt>dkim-filter</tt>")
-		if (!&init::action_status("dkim-filter"));
-	}
-elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-	# Look for mfilter sysconfig file and init script
-	return &text('dkim_econfig', "<tt>$redhat_dkim_config</tt>")
-		if (!-r $redhat_dkim_config);
-	return &text('dkim_einit', "<tt>dkim-milter</tt>")
-		if (!&init::action_status("dkim-milter"));
-	}
-else {
+if (!&get_dkim_type()) {
 	# Not supported on this OS
 	return $text{'dkim_eos'};
 	}
+my $config_file = &get_dkim_config_file();
+return &text('dkim_econfig', "<tt>$config_file</tt>")
+	if (!-r $config_file);
+my $init = &get_dkim_init_name();
+return &text('dkim_einit', "<tt>$init</tt>")
+	if (!&init::action_status($init));
 
 # Check mail server
 &require_mail();
@@ -60,9 +94,9 @@ return 0;
 sub install_dkim_package
 {
 &foreign_require("software", "software-lib.pl");
-my $pkg = $gconfig{'os_type'} eq 'debian-linux' ? 'dkim-filter' :
-	  $gconfig{'os_type'} eq 'redhat-linux' ? 'dkim-milter' :
-						  'dkim';
+my $pkg = &get_dkim_type() eq 'ubuntu' ? 'opendkim' :
+	  &get_dkim_type() eq 'debian' ? 'dkim-filter' :
+	  &get_dkim_type() eq 'redhat' ? 'dkim-milter' : 'dkim';
 my @inst = &software::update_system_install($pkg);
 return scalar(@inst) || !&check_dkim();
 }
@@ -80,16 +114,19 @@ sub get_dkim_config
 my %rv;
 
 # Check if filter is running
-if ($gconfig{'os_type'} eq 'debian-linux') {
+my $dkim_config = &get_dkim_config_file();
+my $dkim_defaults = &get_dkim_defaults_file();
+my $init = &get_dkim_init_name();
+if (&get_dkim_type() eq 'debian' || &get_dkim_type() eq 'ubuntu') {
 	# Read Debian dkim config file
-	my $conf = &get_debian_dkim_config($debian_dkim_config);
-	$rv{'enabled'} = &init::action_status("dkim-filter") == 2;
+	my $conf = &get_debian_dkim_config($dkim_config);
+	$rv{'enabled'} = &init::action_status($init) == 2;
 	$rv{'selector'} = $conf->{'Selector'};
 	$rv{'keyfile'} = $conf->{'KeyFile'};
 
 	# Read defaults file that specifies port
 	my %def;
-	&read_env_file($debian_dkim_default, \%def);
+	&read_env_file($dkim_defaults, \%def);
 	if ($def{'SOCKET'} =~ /^inet:(\d+)/) {
 		$rv{'port'} = $1;
 		}
@@ -111,16 +148,16 @@ if ($gconfig{'os_type'} eq 'debian-linux') {
 		$rv{'verify'} = 1;
 		}
 	}
-elsif ($gconfig{'os_type'} eq 'redhat-linux') {
+elsif (&get_dkim_type() eq 'redhat') {
 	# Read Fedora dkim config file
-	my $conf = &get_debian_dkim_config($redhat_dkim_config);
-	$rv{'enabled'} = &init::action_status("dkim-milter") == 2;
+	my $conf = &get_debian_dkim_config($dkim_config);
+	$rv{'enabled'} = &init::action_status($init) == 2;
 	$rv{'selector'} = $conf->{'Selector'};
 	$rv{'keyfile'} = $conf->{'KeyFile'};
 
 	# Read defaults file that specifies port
 	my %def;
-	&read_env_file($redhat_dkim_default, \%def);
+	&read_env_file($dkim_defaults, \%def);
 	if ($def{'SOCKET'} =~ /^inet:(\d+)/) {
 		$rv{'port'} = $1;
 		}
@@ -276,11 +313,15 @@ if (!$dkim->{'keyfile'} || !-r $dkim->{'keyfile'} || $newkey) {
 	}
 
 # Make sure key has the right permissions
-if ($gconfig{'os_type'} eq 'debian-linux') {
+if (&get_dkim_type() eq 'ubuntu') {
+	&set_ownership_permissions("opendkim", undef, 0700,
+				   $dkim->{'keyfile'});
+	}
+elsif (&get_dkim_type() eq 'debian') {
 	&set_ownership_permissions("dkim-filter", undef, 0700,
 				   $dkim->{'keyfile'});
 	}
-elsif ($gconfig{'os_type'} eq 'redhat-linux') {
+elsif (&get_dkim_type() eq 'redhat') {
 	&set_ownership_permissions("dkim-milter", undef, 0700,
 				   $dkim->{'keyfile'});
 	}
@@ -296,56 +337,66 @@ if (!$pubkey) {
 
 # Add domain, key and selector to config file
 &$first_print($text{'dkim_config'});
-my $dkim_config = $gconfig{'os_type'} eq 'debian-linux' ? $debian_dkim_config :
-		  $gconfig{'os_type'} eq 'redhat-linux' ? $redhat_dkim_config :
-							  undef;
+my $dkim_config = &get_dkim_config_file();
 if ($dkim_config) {
 	# Save domains and key file in config
 	&lock_file($dkim_config);
-	&save_debian_dkim_config($dkim_config, 
-		"Domain", undef);
 	&save_debian_dkim_config($dkim_config, 
 		"Selector", $dkim->{'selector'});
 	&save_debian_dkim_config($dkim_config, 
 		"KeyFile", $dkim->{'keyfile'});
 	&save_debian_dkim_config($dkim_config,
                 "Syslog", "yes");
-	&unlock_file($dkim_config);
 
-	# Work out mapping file
-	my $conf = &get_debian_dkim_config($dkim_config);
-	my $keylist = $conf->{'KeyList'};
-	if (!$keylist) {
-		$keylist = $dkim_config;
-		$keylist =~ s/\/([^\/]+)$/\/keylist/;
+	if (&get_dkim_type() eq 'ubuntu') {
+		# OpenDKIM version supplied with Ubuntu doesn't support the
+		# KeyList parameter
 		&save_debian_dkim_config($dkim_config,
-			"KeyList", $keylist);
+			"Domain", join(",", &unique((map { $_->{'dom'} } @doms),
+						    @{$dkim->{'extra'}})));
 		}
+	else {
+		# Work out mapping file
+		&save_debian_dkim_config($dkim_config, 
+			"Domain", undef);
+		my $conf = &get_debian_dkim_config($dkim_config);
+		my $keylist = $conf->{'KeyList'};
+		if (!$keylist) {
+			$keylist = $dkim_config;
+			$keylist =~ s/\/([^\/]+)$/\/keylist/;
+			&save_debian_dkim_config($dkim_config,
+				"KeyList", $keylist);
+			}
 
-	# Link key to same directory as mapping file, with selector as filename
-	my $selkeyfile = $keylist;
-	$selkeyfile =~ s/\/([^\/]+)$/\/$dkim->{'selector'}/;
-	if (-e $selkeyfile && !-l $selkeyfile) {
-		&$second_print("<b>".&text('dkim_eselfile',
+		# Link key to same directory as mapping file, with selector
+		# as filename
+		my $selkeyfile = $keylist;
+		$selkeyfile =~ s/\/([^\/]+)$/\/$dkim->{'selector'}/;
+		if (-e $selkeyfile && !-l $selkeyfile) {
+			&$second_print("<b>".&text('dkim_eselfile',
 					   "<tt>$selkeyfile</tt>")."</b>");
-		return 0;
-		}
-	&unlink_file($selkeyfile);
-	&symlink_file($dkim->{'keyfile'}, $selkeyfile);
+			return 0;
+			}
+		&unlink_file($selkeyfile);
+		&symlink_file($dkim->{'keyfile'}, $selkeyfile);
 
-	# Create key mapping file
-	&create_key_mapping_file(\@doms, $keylist, $selkeyfile,
-				 $dkim->{'extra'});
+		# Create key mapping file
+		&create_key_mapping_file(\@doms, $keylist, $selkeyfile,
+					 $dkim->{'extra'});
+		}
+	&unlock_file($dkim_config);
 
 	# Save list of extra domains
 	$config{'dkim_extra'} = join(" ", @{$dkim->{'extra'}});
 	&save_module_config();
 	}
-if ($gconfig{'os_type'} eq 'debian-linux') {
+
+my $dkim_defaults = &get_dkim_defaults_file();
+if (&get_dkim_type() eq 'debian' || &get_dkim_type() eq 'ubuntu') {
 	# Set milter port to listen on
-	&lock_file($debian_dkim_default);
+	&lock_file($dkim_defaults);
 	my %def;
-	&read_env_file($debian_dkim_default, \%def);
+	&read_env_file($dkim_defaults, \%def);
 	if (!$def{'SOCKET'}) {
 		# Set socket in defaults file if missing
 		$def{'SOCKET'} = "inet:8891\@localhost";
@@ -360,14 +411,14 @@ if ($gconfig{'os_type'} eq 'debian-linux') {
 		($flags .= ($flags ? " " : "")."-b $mode");
 	$def{'DAEMON_OPTS'} = $flags;
 
-	&write_env_file($debian_dkim_default, \%def);
-	&unlock_file($debian_dkim_default);
+	&write_env_file($dkim_defaults, \%def);
+	&unlock_file($dkim_defaults);
 	}
-elsif ($gconfig{'os_type'} eq 'redhat-linux') {
+elsif (&get_dkim_type() eq 'redhat') {
 	# Set milter port to listen on
-	&lock_file($redhat_dkim_default);
+	&lock_file($dkim_defaults);
 	my %def;
-	&read_env_file($redhat_dkim_default, \%def);
+	&read_env_file($dkim_defaults, \%def);
 	if ($config{'mail_system'} == 0 && $dkim->{'socket'}) {
 		# Force use of tcp socket in defaults file for postfix
 		$def{'SOCKET'} = "inet:8891\@localhost";
@@ -382,8 +433,8 @@ elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 	($flags =~ s/-b\s*(\S+)/-b $mode/) ||
 		($flags .= ($flags ? " " : "")."-b $mode");
 	$def{'EXTRA_FLAGS'} = $flags;
-	&write_env_file($redhat_dkim_default, \%def);
-	&unlock_file($redhat_dkim_default);
+	&write_env_file($dkim_defaults, \%def);
+	&unlock_file($dkim_defaults);
 	}
 &$second_print($text{'setup_done'});
 
@@ -392,25 +443,14 @@ elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 
 # Enable filter at boot time
 &$first_print($text{'dkim_boot'});
-if ($gconfig{'os_type'} eq 'debian-linux') {
-	&init::enable_at_boot("dkim-filter");
-	}
-elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-	&init::enable_at_boot("dkim-milter");
-	}
+my $init = &get_dkim_init_name();
+&init::enable_at_boot($init);
 &$second_print($text{'setup_done'});
 
 # Re-start filter now
 &$first_print($text{'dkim_start'});
-my ($ok, $out);
-if ($gconfig{'os_type'} eq 'debian-linux') {
-	&init::stop_action("dkim-filter");
-	($ok, $out) = &init::start_action("dkim-filter");
-	}
-elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-	&init::stop_action("dkim-milter");
-	($ok, $out) = &init::start_action("dkim-milter");
-	}
+&init::stop_action($init);
+my ($ok, $out) = &init::start_action($init);
 if (!$ok) {
 	&$second_print(&text('dkim_estart',
 			"<tt>".&html_escape($out)."</tt>"));
@@ -586,22 +626,13 @@ elsif ($config{'mail_system'} == 1) {
 
 # Stop filter now
 &$first_print($text{'dkim_stop'});
-if ($gconfig{'os_type'} eq 'debian-linux') {
-	&init::stop_action("dkim-filter");
-	}
-elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-	&init::stop_action("dkim-milter");
-	}
+my $init = &get_dkim_init_name();
+&init::stop_action($init);
 &$second_print($text{'setup_done'});
 
 # Disable filter at boot time
 &$first_print($text{'dkim_unboot'});
-if ($gconfig{'os_type'} eq 'debian-linux') {
-	&init::disable_at_boot("dkim-filter");
-	}
-elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-	&init::disable_at_boot("dkim-milter");
-	}
+&init::disable_at_boot($init);
 &$second_print($text{'setup_done'});
 
 return 1;
@@ -666,12 +697,9 @@ foreach my $dname (@$extra) {
 sub set_dkim_domains
 {
 my ($doms, $dkim) = @_;
-my $dkim_config = $gconfig{'os_type'} eq 'debian-linux' ? $debian_dkim_config :
-		  $gconfig{'os_type'} eq 'redhat-linux' ? $redhat_dkim_config :
-							  undef;
-my $init = $gconfig{'os_type'} eq 'debian-linux' ? 'dkim-filter' :
-	   $gconfig{'os_type'} eq 'redhat-linux' ? 'dkim-milter' :
-						   undef;
+my $dkim_config = &get_dkim_config_file();
+my $init = &get_dkim_init_name();
+my $dkim = &get_dkim_config();
 if ($dkim_config) {
 	my $conf = &get_debian_dkim_config($dkim_config);
 	my $keylist = $conf->{'KeyList'};
@@ -689,8 +717,9 @@ if ($dkim_config) {
 	else {
 		# Just set list of domains
 		&save_debian_dkim_config($dkim_config,
-			"Domain", join(",", (map { $_->{'dom'} } @$doms),
-					    @{$conf->{'extra'}}));
+			"Domain",
+			join(",", &unique((map { $_->{'dom'} } @$doms),
+					  @{$dkim->{'extra'}})));
 		}
 
 	# Restart milter

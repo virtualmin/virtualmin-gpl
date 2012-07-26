@@ -244,21 +244,31 @@ sub _make_request {
       if ($response->content =~ /<Endpoint>([^<]*)<\/Endpoint>/i) {
 	my $oldserver = $self->{SERVER};
 	$self->{SERVER} = $1;
+	$self->{SERVER_REDIRECTS} ||= 0;
+	$self->{SERVER_REDIRECTS}++;
 	my $newpath = $path;
-	$newpath =~ s/^([^\/]+)//;
-	if ($newpath eq "") {
-	  # When requesting a bucket like /foo originally, we have to
-	  # request ? from foo.s3.amazonaws.com instead. HOWEVER, the path
-	  # to sign is still like /foo/
-	  $newpath = "?";
-	  $path .= "/";
-	}
-	# If the new path ends up like /bar.com.tar.gz, it must be converted
-	# to bar.com.tar.gz for the HTTP request
-        $newpath =~ s/^\///;
+	if ($self->{'SERVER_REDIRECTS'} == 1) {
+		# Redirecting from default to new endpoint
+		$newpath =~ s/^([^\/]+)//;
+		if ($newpath eq "") {
+		  # When requesting a bucket like /foo originally, we have to
+		  # request ? from foo.s3.amazonaws.com instead. HOWEVER, the
+		  # path to sign is still like /foo/
+		  $newpath = "?";
+		  $path .= "/";
+		}
+		# If the new path ends up like /bar.com.tar.gz, it must be
+		# converted to bar.com.tar.gz for the HTTP request
+		$newpath =~ s/^\///;
+		}
+	else {
+		# Already redirected once, so only need to change server
+		$path = $authpath;
+		}
         $response = $self->_make_request($method, $newpath, $headers,
 					 $data, $metadata, $path);
 	$self->{SERVER} = $oldserver;
+	$self->{SERVER_REDIRECTS}--;
       }
     }
     return $response;

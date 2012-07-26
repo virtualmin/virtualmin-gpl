@@ -26,6 +26,7 @@ $ENV{'http_proxy'} = undef;
 $ENV{'ftp_proxy'} = undef;
 
 $test_domain = "example.com";	# Never really exists
+$test_ssl_subdomain = "ssl.".$test_domain;
 $test_rename_domain = "examplerename.com";
 $test_target_domain = "exampletarget.com";
 $test_clone_domain = "exampleclone.com";
@@ -2952,6 +2953,213 @@ $mail_tests = [
         },
 	];
 
+$aliasmail_tests = [
+	# Create a domain to be the alias target
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'desc', 'Test target domain' ],
+		      [ 'pass', 'spod' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'mail' ],
+		      [ 'spam' ], [ 'virus' ],
+		      @create_args, ],
+        },
+
+	# Create an alias domain to get mail
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'alias-with-mail', $test_target_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'dns' ], [ 'mail' ],
+		      [ 'spam' ], [ 'virus' ],
+		      @create_args, ],
+	},
+
+	# Setup spam and virus delivery
+	{ 'command' => 'modify-spam.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'virus-delete' ],
+		      [ 'spam-file', 'spam' ],
+		      [ 'spam-no-delete-level' ] ],
+	},
+
+	# Add a mailbox to the domain
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'mail-quota', 100*1024 ],
+		      [ 'no-creation-mail' ] ],
+	},
+
+	# If spamd is running, make it restart so that it picks up the new user
+	{ 'command' => $gconfig{'os_type'} eq 'solaris' ?
+			'pkill -HUP spamd' : 'killall -HUP spamd',
+	  'ignorefail' => 1,
+	},
+
+	# Add empty lines to procmail.log, to prevent later false matches
+	{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
+	},
+
+	# Send one email to him, so his mailbox gets created and then procmail
+	# runs as the right user. This is to work around a procmail bug where
+	# it can drop privs too soon!
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'from', 'nobody@webmin.com' ],
+		      [ 'to', $test_user.'@'.$test_domain ],
+		      [ 'data', $ok_email_file ] ],
+	},
+
+	# Check procmail log for delivery, for at most 60 seconds
+	{ 'command' => 'while [ "`tail -5 /var/log/procmail.log | grep '.
+		       'To:'.$test_user.'@'.$test_domain.'`" = "" ]; do '.
+		       'sleep 5; done',
+	  'timeout' => 60,
+	  'ignorefail' => 1,
+	},
+
+	# Add empty lines to procmail.log, to prevent later false matches
+	{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
+	},
+
+        # Send some reasonable mail to him
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'from', 'nobody@webmin.com' ],
+		      [ 'to', $test_user.'@'.$test_domain ],
+		      [ 'data', $ok_email_file ] ],
+	},
+
+	# Check procmail log for delivery, for at most 60 seconds
+	{ 'command' => 'while [ "`tail -5 /var/log/procmail.log | grep '.
+		       'To:'.$test_user.'@'.$test_domain.'`" = "" ]; do '.
+		       'sleep 5; done',
+	  'timeout' => 60,
+	},
+
+	# Check if the mail arrived
+	{ 'command' => 'list-mailbox.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'user', $test_user ] ],
+	  'grep' => [ 'Hello World', 'X-Spam-Status:' ],
+	},
+
+	# Use IMAP and POP3 to count mail - should be two or more
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_full_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
+	  'grep' => '[23] messages',
+	},
+	{ 'command' => 'test-pop3.pl',
+	  'args' => [ [ 'user', $test_full_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
+	  'grep' => '[23] messages',
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+        },
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ] ],
+	  'cleanup' => 1,
+        },
+	];
+
+$exclude_tests = [
+	# Create a domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a sub-directory and file to exclude
+	{ 'command' => 'su -s /bin/sh '.$test_domain_user.' -c "mkdir ~/xxx"',
+	},
+	{ 'command' => 'su -s /bin/sh '.$test_domain_user.' -c "touch ~/xxx/yyy.txt"',
+	},
+
+	# Create a sub-directory and file to keep
+	{ 'command' => 'su -s /bin/sh '.$test_domain_user.' -c "mkdir ~/aaa"',
+	},
+	{ 'command' => 'su -s /bin/sh '.$test_domain_user.' -c "touch ~/aaa/yyy.txt"',
+	},
+
+	# Set exclude path
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-exclude', 'zzz' ],
+		      [ 'add-exclude', 'xxx' ],
+		      [ 'add-exclude', 'vvv' ] ],
+	},
+
+	# Check exclude list
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Backup exclusion: xxx', 'Backup exclusion: vvv',
+		      'Backup exclusion: zzz' ],
+	},
+
+	# Backup to a temp file
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_file ] ],
+	},
+
+	# Delete the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Restore to re-create
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ] ],
+	},
+
+	# Make sure the dir is gone
+	{ 'command' => 'ls -ld '.$test_domain_home.'/xxx',
+	  'fail' => 1,
+	},
+
+	# Make sure the other dir still exists
+	{ 'command' => 'ls -ld '.$test_domain_home.'/aaa',
+	},
+
+	# Remove an exclude
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'remove-exclude', 'zzz' ] ],
+	},
+
+	# Re-check exclude list
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Backup exclusion: xxx', 'Backup exclusion: vvv' ],
+	  'antigrep' => [ 'Backup exclusion: zzz' ],
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $prepost_tests = [
 	# Create a domain just to see if scripts run
 	{ 'command' => 'create-domain.pl',
@@ -3204,6 +3412,18 @@ $ssl_tests = [
 		      @create_args, ],
         },
 
+	# Create a sub-domain with SSL on the same IP
+	{ 'command' => 'create-domain.pl',
+          'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'desc', 'Test SSL subdomain' ],
+		      [ 'parent', $test_domain ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
+		      [ 'parent-ip' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test SSL subdomain home page' ],
+		      @create_args, ],
+	},
+
 	# Test DNS lookup
 	{ 'command' => 'host '.$test_domain,
 	  'antigrep' => &get_default_ip(),
@@ -3221,6 +3441,33 @@ $ssl_tests = [
 
 	# Test SSL cert
 	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Test HTTP get to subdomain
+	{ 'command' => $wget_command.'http://'.$test_ssl_subdomain,
+	  'grep' => 'Test SSL subdomain home page',
+	},
+
+	# Check for SSL linkage
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'SSL shared with: '.$test_domain ],
+	  'antigrep' => [ 'SSL key file: '.$test_domain_home.
+		          '/domains/'.$test_ssl_subdomain.'/',
+		          'SSL cert file: '.$test_domain_home.
+                          '/domains/'.$test_ssl_subdomain.'/' ],
+	},
+
+	# Test HTTPS get to subdomain
+	{ 'command' => $wget_command.'https://'.$test_ssl_subdomain,
+	  'grep' => 'Test SSL subdomain home page',
+	},
+
+	# Test SSL cert to subdomain (should be the same)
+	{ 'command' => 'openssl s_client -host '.$test_ssl_subdomain.
 		       ' -port 443 </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -3271,6 +3518,23 @@ $ssl_tests = [
 		       ' -port 443 </dev/null',
 	  'grep' => [ 'C=US', 'ST=California', 'L=Santa Clara',
 		      'O=Virtualmin', 'OU=Testing', 'CN='.$test_domain ],
+	},
+
+	# Test new SSL cert via HTTP
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Virtualmin', 'CN='.$test_domain ],
+	},
+
+	# Make sure SSL linkage is broken
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => 'SSL shared with:',
+	  'grep' => [ 'SSL key file: '.$test_domain_home.
+		      '/domains/'.$test_ssl_subdomain.'/',
+		      'SSL cert file: '.$test_domain_home.
+                      '/domains/'.$test_ssl_subdomain.'/' ],
 	},
 
 	# Test generation of a CSR
@@ -5931,6 +6195,7 @@ $alltests = { '_config' => $_config_tests,
 	      'incremental' => $incremental_tests,
 	      'enc_incremental' => $enc_incremental_tests,
               'mail' => $mail_tests,
+              'aliasmail' => $aliasmail_tests,
 	      'prepost' => $prepost_tests,
 	      'webmin' => $webmin_tests,
 	      'remote' => $remote_tests,
@@ -5951,6 +6216,7 @@ $alltests = { '_config' => $_config_tests,
 	      'clonesub' => $clonesub_tests,
 	      's3' => $s3_tests,
 	      's3_eu' => $s3_eu_tests,
+	      'exclude' => $exclude_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL

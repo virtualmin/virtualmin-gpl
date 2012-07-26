@@ -1,0 +1,6 @@
+desc=Alias domains with email
+html=Alias virtual servers that have their own mailboxes and aliases can now be created, rather than always forwarding mail to the destination domain.
+master=1
+reseller=1
+owner=1
+link=domain_form.cgi?generic=1&genericmode=3&gparent=${ID}&to=${ID}&aliasmail=1

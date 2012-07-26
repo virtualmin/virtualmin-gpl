@@ -503,6 +503,7 @@ local %acl = ( 'noconfig' => 1,
 	       'norename' => $_[0]->{'norename'},
 	       'forceunder' => $_[0]->{'forceunder'},
 	       'safeunder' => $_[0]->{'safeunder'},
+	       'ipfollow' => $_[0]->{'ipfollow'},
 	       'domains' => join(" ", map { $_->{'id'} } @doms),
 	       'admin' => $_[2] ? $_[0]->{'id'} : undef,
 	      );

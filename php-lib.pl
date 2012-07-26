@@ -507,6 +507,12 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 			$common .= "PHP_FCGI_MAX_REQUESTS=99999\n";
 			$common .= "export PHP_FCGI_MAX_REQUESTS\n";
 			}
+		elsif ($mode eq "cgi") {
+			$common .= "if [ \"\$REDIRECT_URL\" ne \"\" ]; then\n";
+			$common .= "  SCRIPT_NAME=\$REDIRECT_URL\n";
+			$common .= "  export SCRIPT_NAME\n";
+			$common .= "fi\n";
+			}
 		&print_tempfile(PHP, $common);
 		if ($v->[1] =~ /-cgi$/) {
 			# php-cgi requires the SCRIPT_FILENAME variable

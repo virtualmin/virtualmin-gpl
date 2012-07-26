@@ -15,6 +15,11 @@ When updating multiple servers, this program may take some time to run due to
 the amount of work it needs to do. However, the progress of each server and
 step will be shown as it runs.
 
+If the C<--associate> flag is given, this command will simply make Virtualmin
+assume that the underlying configuration changes or databases have been
+already created. This reverses the effect of the C<--disassociate> flag to
+the C<disable-feature> API command.
+
 =cut
 
 package virtual_server;
@@ -50,6 +55,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--user") {
 		push(@users, shift(@ARGV));
+		}
+	elsif ($a eq "--associate") {
+		$associate = 1;
 		}
 	elsif ($a =~ /^--(\S+)$/ &&
 	       &indexof($1, @features) >= 0) {
@@ -106,11 +114,13 @@ foreach $d (sort { ($a->{'alias'} ? 2 : $a->{'parent'} ? 1 : 0) <=>
 		$failed = 1;
 		next;
 		}
-	$cerr = &virtual_server_clashes(\%newdom, \%check);
-	if ($cerr) {
-		&$second_print($cerr);
-		$failed = 1;
-		next;
+	if (!$associate) {
+		$cerr = &virtual_server_clashes(\%newdom, \%check);
+		if ($cerr) {
+			&$second_print($cerr);
+			$failed = 1;
+			next;
+			}
 		}
 
 	# Make sure plugins are suitable
@@ -156,8 +166,10 @@ foreach $d (sort { ($a->{'alias'} ? 2 : $a->{'parent'} ? 1 : 0) <=>
 			$d->{$f} = 1;
 			}
 		}
-	foreach $f (&list_ordered_features($d)) {
-		&call_feature_func($f, $d, $oldd);
+	if (!$associate) {
+		foreach $f (&list_ordered_features($d)) {
+			&call_feature_func($f, $d, $oldd);
+			}
 		}
 
 	# Save new domain details
@@ -188,6 +200,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Enables features for one or more domains specified on the command line.\n";
 print "\n";
 print "virtualmin enable-feature --domain name | --user name | --all-domains\n";
+print "                         [--associate]\n";
 foreach $f (@features) {
 	print "                          [--$f]\n" if ($config{$f});
 	}

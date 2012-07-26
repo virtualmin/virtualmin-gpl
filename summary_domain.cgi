@@ -101,7 +101,8 @@ if ($aliasdom) {
 	}
 elsif (!$parentdom) {
 	# Contact email address
-	print &ui_table_row($text{'edit_email'}, $d->{'emailto'}, 3, \@tds);
+	print &ui_table_row($text{'edit_email'},
+			    &html_escape($d->{'emailto'}), 3, \@tds);
 	}
 else {
 	# Show link to parent domain

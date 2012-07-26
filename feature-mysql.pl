@@ -1487,6 +1487,7 @@ sub check_mysql_user_clash
 {
 local ($d, $user) = @_;
 &require_mysql();
+return 1 if ($user eq 'root');	# Never available
 if ($d->{'provision_mysql'}) {
 	# Query provisioning server
 	my ($ok, $msg) = &provision_api_call(

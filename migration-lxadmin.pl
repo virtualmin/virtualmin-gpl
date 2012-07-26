@@ -396,7 +396,8 @@ if ($got{'virtualmin-mailman'}) {
 				       $l->{'listname'}, $dom,
 				       "Migrated LXadmin mailing list",
 				       undef, $l->{'adminemail'} ||
-						$dom{'emailto'}, $dom{'pass'});
+						$dom{'emailto_addr'},
+				       $dom{'pass'});
 		if ($err) {
 			&$second_print("Failed to create $ml : $err");
 			}

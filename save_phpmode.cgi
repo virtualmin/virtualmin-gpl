@@ -45,7 +45,7 @@ if (!$d->{'alias'} && ($in{'mode'} eq 'cgi' || $in{'mode'} eq 'fcgid') &&
 # Validate HTML directory
 if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./ &&
     defined($in{'htmldir'})) {
-	$in{'htmldir'} =~ /^[a-z0-9\.\-\_\/]+$/ ||
+	$in{'htmldir'} =~ /^[a-z0-9\.\-\_\/]+$/i ||
 		&error($text{'phpmode_ehtmldir'});
 	$in{'htmldir'} !~ /^\// && $in{'htmldir'} !~ /\/$/ ||
 		&error($text{'phpmode_ehtmldir2'});
