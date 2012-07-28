@@ -1,0 +1,14 @@
+<header>1 Spamassasin proces tegelijkertijd laten werken?</header>
+
+Wanneer dit veld op <b>Nee</b> staat zoals het standaard is ingesteld, zal
+Virtualmin meerdere samenlopende <tt>spamassassin</tt> processen laten werken
+indien er meerdere email berichten tegelijkertijd binnenkomen. Dit gebruikt
+echter heel veel CPU en RAM op een klein systeem. Indien u <b>Ja</b> selecteert
+zal iedere virtuele server waar spam filteren aanstaat hun Procmail configuratie
+updaten zodat er maar 1 kopie van <tt>spamassassin</tt> tegelijkertijd werkt. <p>
+
+Deze beperking word aan alle virtuele servers toegevoegd, dus zelfs als er twee
+berichten tegelijkertijd aan verschillende domeinen binnenkomen zal er maar 
+1 <tt>spamassassin</tt> proces gaan werken. <p>
+
+<footer>

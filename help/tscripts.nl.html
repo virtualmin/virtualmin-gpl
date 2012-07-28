@@ -1,0 +1,26 @@
+<header>Template Script Installers</header>
+
+Deze pagina geeft u de mogelijkheid om 3e partij scripts te specificeren die
+mogen worden geinstalleerd wanneer er een nieuwe virtuele server word aangemaakt
+met deze template. 
+Voor ieder script moet de volgende informatie worden ingevuld :<p>
+<dl>
+<dt><b>Script</b>
+<dd>De naam en versie van het te installeren script
+<dt><b>URL pad</b>
+<dd>Een pad onder de virtuele server website om het script te installeren, zoals <tt>/phpmyadmin</tt>. Dit bepaald tevens de directory onder de <tt>~/public_html</tt> waar de script files zijn opgeslagen.
+<dt><b>DB naam</b>
+<dd>De naam van de database die het script gaat gebruiken om data in op te slaan. De opties zijn :
+	<dl>
+	<dt><b>Geen</b>
+	<dd>Dit moet geselecteerd worden voor scripts die geen database nodig hebben, zoals <b>Gallery</b>.
+	<dt><b>Hoofd database</b>
+	<dd>De script's database zal de virtuele server primaire database zijn van het gekozen type.
+	<dt><b>Anders</b>
+	<dd>Als u wilt dat het script zijn eigen prive database gebruikt, kan deze optie geselecteerd worden en het patroon voor de database kan worden ingevuld in het naastgelegen tekst veld. Bijvoorbeeld, u kunt invullen <i>${DB}_phpnuke</i>. Als de database niet bestaat zal het worden aangemaakt als onderdeel van het script installatie proces.
+	</dl>
+<dt><b>DB type</b>
+<dd>Het type database wat word gebruikt voor de script data, indien dit is geselecteerd.
+</dl>
+
+<footer>

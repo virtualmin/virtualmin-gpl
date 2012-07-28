@@ -1,0 +1,20 @@
+<header>Backup Niveau</header>
+
+Standaard zal Virtualmin een backup maken inclusief alle files van de geselecteerde
+home directory's in de domeinen. Echter indien u regelmatig een backup maakt van grote
+virtuele server word er veel tijd gebruikt om files te kopieren die recent niet zijn
+gewijzigd. <p>
+
+Indien de <b>Incrementele</b> optie hier is geselecteerd worden alleen de files die
+zijn gewijzigd of zijn aangemaakt sinds de laatste volledige backup worden toegevoegd.
+Dit is erg handig indien u twee soorten geplande backup's heeft, zoals wekelijks een
+volledige backup en dagelijks een incrementele backup. Ervan uitgaande dat de meeste
+files in een domein niet dagelijks wijzigen, dit bespaard erg veel tijd en de grote
+van de files van de dagelijkse backup's. <p>
+
+Let er wel op dat u bij het herstellen eerst de volledige backup hersteld en daarna
+de incrementele backup om echt alle files te herstellen. Ook andere data zoals de
+Apache configuratie en de databases worden niet meegenomen in een incrementele
+backup. <p>
+
+<footer>

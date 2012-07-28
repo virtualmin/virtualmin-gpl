@@ -1,0 +1,25 @@
+<header>Virtualmin bibliotheken vooraf laden bij opstarten?</header>
+
+Om de snelheid van de CGI scripts verhogen die gebruikt worden door Virtualmin
+kan Webmin zo worden geconfigureerd om sommige Perl Bibliotheken te laden in
+het geheugen tijdens het booten zodat ze niet gelezen hoeven te worden van de
+harddisk bij iedere aanvraag. Dit gebruikt echter wel meer RAM - ongeveer 100MB
+op een typisch Linux systeem. <p>
+
+Deze instelling geeft u meer controle over hoeveel er vooraf geladen word.
+De opties zijn :
+<dl>
+<dt><b>Alle bibliotheken</b>
+<dd>Bibliotheken voor alle Webmin modules en plug-ins die gebruikt worden door Virtualmin
+    worden geladen. Het Webmin server proces verbruikt ongeveer 100MB RAM.
+
+<dt><b>Alleen de core</b>
+<dd>Alleen die bibliotheken die van Virtualmin zelf zijn worden geladen.
+    Het Webmin server proces verbruikt ongeveer 50MB RAM.
+
+<dt><b>Nee</b>
+<dd>Niets word vooraf geladen - alle bibliotheken worden geladen zodra ze opgevraagd worden.
+    Het Webmin server proces verbruikt ongeveer 15MB RAM.
+</dl>
+
+<footer>

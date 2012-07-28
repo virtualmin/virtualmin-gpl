@@ -1,0 +1,13 @@
+<header>Uit te voeren opdracht om een domein home directory te verplaatsen</header>
+
+Standaard zal Virtualmin alleen de <tt>mv</tt> opdracht gebruiken om een domein
+home directory te verplaatsen als dit nodig is, bijvoorbeeld als een domein
+hernoemd word. Echter dit kan niet geschikt zijn in gevallen waar iedere virtuele
+server op zijn eigen filesysteem staat zoals bij een ZFS mount. <p>
+
+In dit soort gevallen kunt u in dit veld een opdracht of script gebruiken waarbij
+de oude en de nieuwe home directory's worden gebruikt als parameter. Dit heeft
+dan ook toegang tot alle omgeving's variabelen die normaal gepasseerd worden
+naar vooraf- en achteraf- modificatie opdrachten. <p>
+
+<footer>

@@ -1,0 +1,20 @@
+<header>DomainKeys Identified Mail (Domein Sleutels Identificeer Mail)</header>
+
+DomainKeys Identified Mail (DKIM) is een protocol om uitgaande email berichten te
+ondertekenen met een handtekening waardoor bewezen word dat het echt van de
+afzender domein komt. Dit kan worden gebruikt door ontvangende email servers of
+spam filters om afzender vervalsing te detecteren, wat over het algemeen word gedaan
+door spammers om te voorkomen dat hun domein op de zwarte lijst komt. <p>
+
+Wanneer DKIM is aangezet met gebruik van Virtualmin zal uw email server zo worden
+geconfigureerd dat de DKIM handtekening word toegevoegd aan al uw uitgaande berichten,
+en er word een publieke sleutel toegevoegd aan iedere DNS domein op uw systeem. Andere
+email servers kunnen deze sleutel gebruiken om de handtekening te virifieeren op
+doorgestuurde berichten om zo te garanderen dat de afzender niet vervalst is. <p>
+
+Indien u virtuele servers heeft waarvan de DNS ergens anders word gehost maar de email
+word gehost op dit systeem kunt u de domein namen invullen in de <b>Extra domeinen om
+te ondertekenen</b> box. De records in de <b>DNS records voor extra domeinen</b> box
+kan dan handmatig worden toegevoegd aan deze zones. <p>
+
+<footer>

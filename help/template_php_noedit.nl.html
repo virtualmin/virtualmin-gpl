@@ -1,0 +1,16 @@
+<header>Bewerken van de PHP configuratie toestaan?</header>
+
+Wanneer deze optie is ingesteld op <b>Ja</b> (zoals het standaard is) kunnen
+virtuele server eigenaars hun PHP configuratie bewerken. U kunt dit ook op
+<b>Nee</b> zetten voor veiligheid's risico's of om te voorkomen dat onervaren
+administrators verkeerde wijzigingen maken. <p>
+
+Dit word gedaan door de domein <tt>~/etc/php.ini</tt> file <tt>root</tt> alleen
+voor de Unix gebruiker bewerkbaar te maken. Wees ervan bewust dat dit niet een
+honderd procent veilige methoden is om wijzigingen aan de PHP configuratie te
+voorkomen - de domein eigenaar kan nog altijd een andere configuratie file
+specificeren door de PHP wrapper scripts in de <tt>cgi-bin</tt> te bewerken,
+om vervolgens hun eigen kopie van PHP te laten werken of PHP scripts te laten
+werken als CGI programma's. <p>
+
+<footer>

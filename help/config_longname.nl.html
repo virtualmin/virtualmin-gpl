@@ -1,0 +1,27 @@
+<header>Domein naam stijl in gebruikersnamen</header>
+
+Deze optie bepaald of de domein naam die gebruikt word in gebruikersnamen binnen het domein de volledige domein naam is,
+Bijv. "virtualmin.com", of alleen het eerste gedeelte, Bijv. "virtualmin", of de gebruikers/groep naam van het domein.
+Standaard word de groep naam gebruikt voor nieuwe top-niveau servers, en het eerste gedeelte van het domein word
+gebruikt voor sub-servers. <p>
+
+In sommige omgevingen is het makkelijker voor gebruikers om een gebruikersnaam te begrijpen zoals "joeuser@virtualmin.com" voor hun POP/IMAP of FTP login naam dan "joeuser.virtualmin". <p>
+
+Dit veld bepaald ook hoe een nieuwe virtuele server voorvoegsel word gemaakt.
+De opties zijn :
+
+<dl>
+<dt><b>Volledige domein naam</b>
+<dd>Het voorvoegsel is altijd hetzelfde als de domein naam.<p>
+
+<dt><b>Gebruikersnaam of eerste gedeelte van het domein</b>
+<dd>Het voorvoegsel is hetzelfde als de virtuele server Unix groep naam, indien het een top-niveau virtuele server is. Anders, worden de volgende opties toegevoegd. <p>
+
+<dt><b>Eerste gedeelte van het domein</b>
+<dd>Het voorvoegsel is het eerste gedeelte van het domein, of een andere virtuele server moet reeds dit voorvoegsel gebruiken. Dus voor het domein <tt>foo.com.au</tt>, het voorvoegsel word dan (in volgorde van uw voorkeur) <tt>foo</tt>, <tt>foo.com</tt> of <tt>foo.com.au</tt>. <p>
+</dl>
+
+Het bepaald ook de automatische gegenereerde gebruikersnaam voor een top-niveau domein, wat hetzelfde zal zijn
+als het voorvoegsel. <p>
+
+<footer>

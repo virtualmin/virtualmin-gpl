@@ -1,0 +1,30 @@
+<header>Batch Aanmaken Aliassen</header>
+
+Met deze pagina kunt u meerdere  email aliassen aanmaken in 1 keer met een tekst file.
+In deze file moet er een lijst zijn met 1 alias per regel, en iedere regel
+moet het volgende formaat hebben :<p>
+
+<tt><i>naam</i>:[<i>commentaar</i>]:<i>bestemming1</i>:[<i>bestemming2</i>:...]</tt><p>
+
+De betekenis van de velden zijn :<br>
+<dl>
+<dt>naam
+<dd>De mailbox naam van de alias, zoals <i>verkoop</i>. Om een alias aan te maken die overeenkomt met alle email
+van het domein vult u hier een <i>*</i> in.
+<dt>commentaar
+<dd>Dit optionele veld kan worden gebruikt voor een omschrijving voor de alias zoals <i>Bedrijfs verkoop</i>.
+<dt>Bestemming
+<dd>1 of meerdere bestemmingen kunnen worden ingevuld, normaal gesproken in de vorm van een email adres om de
+email naar door te sturen, zoals <i>joe@uwdomein.com</i>. 
+De volgende speciale bestemmingen worden ook ondersteund :
+	<ul>
+	<li><tt>bounce</tt><br>
+	    Een alias aanmaken wat word teruggekaatst naar de afzender.
+	<li><tt>auto-antwoord <i>Uw auto-antwoord bericht</i></tt><br>
+	    Dit verstuurd een auto-antwoord terug naar de afzenden, en het bevat de tekst achter het woord <tt>auto-antwoord</tt>.
+	<li><tt>lokaal <i>gebruikersnaam</i></tt><br>
+	    Dit levert de email direct af aan de mailbox van de gespecificeerde gebruiker.
+	</ul>
+</dl><p>
+
+<footer>

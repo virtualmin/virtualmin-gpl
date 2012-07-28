@@ -1,0 +1,37 @@
+<header>Eigen Shells</header>
+
+Met deze pagina kunt u de Unix shells bewerken die beschikbaar zijn voor mailbox
+gebruikers en virtuele server administrators. De shell word gebruikt door servers
+zoals ProFTPd en SSHd om het soort inlog te controleren voor iedere gebruiker,
+zoals email, FTP en remote shell toegang. <p>
+
+Wanneer de <b>Virtualmin ingebouwde standaarden</b> word geselecteerd zal de
+beschikbare shell automatisch bepaald worden door Virtualmin, wat normaal
+gesproken bruikbaar is voor de meeste systemen. Indien u ze wilt modificeren
+selecteert u <b>Eigen shells hieronder</b> en maakt u wijzigingen aan de tabel. <p>
+
+Van iedere shell kunnen de volgende velden worden bewerkt :
+<dl>
+<dt><b>Aangezet?</b>
+<dd>Dit selectievakje bepaald of de shell zichtbaar is wanneer gebruikers worden aangemaakt of word bewerkt.
+
+<dt><b>Pad naar shell</b>
+<dd>Dit moet het volledige pad zijn naar de shell opdracht, zoals <tt>/bin/sh</tt> of <tt>/bin/false</tt>.
+
+<dt><b>Omschrijving</b>
+<dd>Dit is de titel die verschijnt in het menu wanneer de shell word geselecteerd.
+
+<dt><b>Admin?</b>
+<dd>Klik op dit vakje als u wilt dat de shell beschikbaar word gemaakt voor de virtuele server administrator Unix gebruiker.
+
+<dt><b>Mailbox?</b>
+<dd>Klik op dit vakje als u wilt dat de shell beschikbaar word gemaakt voor email / FTP gebruikers.
+
+<dt><b>Standaard?</b>
+<dd>Precies 1 shell voor administrators en 1 voor mailboxen moeten dit aangevinkt hebben, waarmee de indicatie word gegeven dat dit de standaard is voor de Unix gebruikers van dit soort.
+
+<dt><b>Toegang</b>
+<dd>Dit menu geeft de indicatie aan Virtualmin welk type toegang word toegekend door deze shell. Wanneer u uw eigen toevoegt moet u dit selecteren of het FTP en/of SSH toestaat of niet.
+</dl>
+
+<footer>

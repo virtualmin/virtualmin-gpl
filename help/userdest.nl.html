@@ -1,0 +1,46 @@
+<header>Email doorstuur bestemmingen</header>
+
+Deze tabel met velden bepaald wat er gebeurt met de email die word verstuurd
+naar deze gebruiker. Normaal word het gewoon direct afgeleverd aan de
+gebruikers mailbox, maar als er hier bestemmingen zijn gedefinieerd worden
+deze gebruikt. Dit kan gebruikt worden om een auto-antwoord op te zetten voor
+als de gebruiker op vakantie is, of om zijn email door te sturen naar een
+andere server. <p>
+
+Iedere bestemming heeft een type (gekozen van het menu), wat 1 van de
+volgende kan zijn :
+
+<ul>
+<li><b>Email adres</b><br>
+    Email word doorgestuurd naar het adres wat in het aangrenzende veld staat.<p>
+<li><b>Adressen in file</b><br>
+    Email word doorgestuurd naar alle adressen die in de lijst van een tekst file
+    staan waarvan het pad in het aangrenzende veld staat.<p>
+<li><b>Schrijf naar file</b><br>
+    Email naar de alias word toegevoegd aan de gespecificeerde file. Alle headers en
+    de raw niet-gecodeerde body word toegevoegd.<p>
+<li><b>Geef aan programma</b><br>
+    Het programma wat ingevuld is in het aangrenzende veld word uitgevoerd en email
+    naar de alias passeert dit programma. <p>
+<li><b>Auto-antwoord van file</b><br>
+    Wanneer email word ontvangen door de gebruiker, word er automatisch antwoord terug
+    gestuurd naar de afzender. De tekst van dit automatische antwoord word gepakt van
+    de file die is ingevuld in het aangrenzende tekst veld. <p>
+<li><b>Filter file toevoegen</b><br>
+    Email die verstuurd word naar de gebruiker word verwerkt volgens de regels die
+    in de gespecificeerde filter file staan, wat ervoor kan zorgen dat het word
+    doorgestuurd naar andere adressen of files afhankelijk van de inhoud van het
+    bericht. <p>
+<li><b>Mailbox van gebruiker</b><br>
+    Email word direct afgeleverd aan de mailbox van de gebruiker die ingevuld
+    is in het aangrenzende tekst veld. Normaal gesproken vult u hier de naam van
+    de gebruiker zelf in zodat hij een kopie ontvangt van de email die word
+    doorgestuurd naar andere bestemmingen. U moet echter de volledige POP3
+    login gebruikersnaam invullen, zoals <i>joe.foo</i> inplaats van alleen <i>joe</i>.<p>
+</ul>
+Indien u kiest voor de <b>Adressen in file</b>, <b>Auto-antwoord van file</b> of
+<b>Filter file toevoegen</b> bestemming soorten, en u opnieuw de gebruikers link's
+wilt bewerken zal er een label met de tekst <b>Bewerk..</b> verschijnen naar al die
+bestemmingen voor het bewerken van de inhoud van de gespecificeerde file . <p>
+
+<hr>

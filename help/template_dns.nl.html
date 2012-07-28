@@ -1,0 +1,9 @@
+<header>BIND DNS records voor nieuwe domeinen</header>
+
+Wanneer er een nieuw domein word aangemaakt word er ook een zone aangemaakt. U kunt de records die hier zijn aangemaakt wijzigen. U mag in dit veld alleen geldige named.conf ingangen gebruiken, hoewel de Virtualmin variabelen zullen worden vertaald naar de juiste waarden voor het domein. U kunt records toevoegen aan de door Virtualmin standaard gegenereerde records, u mag ook de Virtualmin records volledig vervangen door uw eigen records. Voor verdere informatie van BIND moet u de het BIND hoofdstuk lezen in het Webmin boek.<p>
+
+<include subs>
+
+Als u uw eigen SOA record wilt aanmaken, kunnen de toevoegingen <tt><b>${CURRENT_YEAR}</b></tt>, <tt><b>${CURRENT_MONTH}</b></tt> en <tt><b>${CURRENT_DAY}</b></tt> erg handig zijn. <p>
+
+<footer>

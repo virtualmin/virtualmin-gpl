@@ -1,0 +1,13 @@
+<header>Webalizer Cron taak instellen voor iedere virtuele server?</header>
+
+Wanneer deze optie is ingesteld op <b>Ja</b> (wat het standaard is), zal Virtualmin aparte Cron taken aanmaken
+voor iedere virtuele server waarvoor Webalizer is aangezet, zodat er op een dagelijkse basis een rapport gemaakt
+kan worden van zijn log files. <p>
+
+Echter op een server met een groot aantal domeinen wilt u dit liever op <b>Nee</b>
+zetten, en handmatig deze <tt>/usr/libexec/webmin/virtual-server/run-all-webalizer.pl</tt>
+opdracht plannen met gebruik van Cron. Hierdoor bent u er zeker van dat Webalizer
+om de beurt werkt op ieder domein in plaats van op meerdere domeinen tegelijkertijd
+en geeft u meer controle over wanneer het proces word uitgevoerd. <p>
+
+<footer>

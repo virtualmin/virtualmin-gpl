@@ -1,0 +1,35 @@
+<header>Veel servers tegelijk aanmaken</header>
+
+Met deze pagina kunt u in 1 keer meerdere virtuele servers aanmaken via
+een tekst file. Deze file moet een lijst zijn met 1 server per regel en
+iedere regel moet in het volgende formaat zijn :<p>
+
+<tt><i>domein</i>:<i>omschrijving</i>:<i>wachtwoord</i>:[<i>gebruikersnaam</i>]:[<i>hoofd-domein</i>]:[<i>ip-adres</i>]:[<i>alias-domein</i>]</tt><p>
+
+De betekenis van de velden zijn :<br>
+<dl>
+<dt>Domein
+<dd>De domein naam voor de aan te maken virtuele server, zoals <i>foo.com</i>.
+<dt>Omschrijving
+<dd>Een menselijk leesbare omschrijving, zoals <i>Joe's Website</i>.
+<dt>Wachtwoord
+<dd>Het wachtwoord voor de server's administratie login. Dit is alleen nodig voor hoofd servers.
+<dt>Gebruikersnaam
+<dd>De administratie gebruikersnaam voor de server. Indien dit niet word ingevuld, word er automatisch een gebruikersnaam geselecteerd.
+<dt>Hoofd-domein
+<dd>De domein naam van de hoofd server waaronder deze server word aangemaakt. Indien dit niet word ingevuld, zal de nieuwe server zelf worden aangemaakt als een hoofdserver.
+<dt>ip-adres
+<dd>Voor virtuele servers die geen eigen prive IP nodig hebben, Dit veld kan leeg gelaten worden. Anders moet u een geldig ongebruikt IP adres invullen, of het woord <tt>allocate</tt> om Virtualmin er 1 te laten selecteren voor u (indien dit geconfigureerd is).
+<dt>alias-domein
+<dd>De domein naam van de virtuele server waar dit een alias voor moet worden. Indien u dit niet invult word de nieuwe server een top-niveau of een sub-server.
+</dl><p>
+
+Quota, bandbreedte, en andere limieten voor de aangemaakte servers worden ingesteld gebaseerd
+op de template die u heeft geselecteerd in dit formulier. De opties van de aangemaakte servers
+worden bepaald door de selectievakjes, net zoals op de normale enkele-server aanmaak pagina. <p>
+
+Indien uw systeem wederverkoop accounts gebruikt kunt u selecteren dat alle virtuele servers
+worden aangemaakt onder de eigenaarschap van een wederverkoper. Deze optie is alleen beschikbaar
+voor de hoofd administrator. <p>
+
+<footer>

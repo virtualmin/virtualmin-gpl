@@ -1,0 +1,18 @@
+<header>Proxy Paden</header>
+
+Met proxy kunt u een URL pad doorsturen in een virtuele server website naar
+1 of meerdere URL bestemmingen. Dit word typisch gebruikt om Ruby on Rails
+applicaties die worden aangeleverd door meerdere Mongrel instanties beschikbaar
+te maken onder een URL pad in de server website. Het kan ook gebruikt worden
+om andere webservers zoals Tomcat beschikbaar te maken via een URL pad op uw
+website. <p>
+
+Bijvoorbeeld, U wilt het pad <tt>/radiant</tt> door sturen naar de URL's <tt>http://localhost:3001</tt>
+en <tt>http://localhost:3002</tt>, wat de poorten zijn voor twee Mongrel instanties
+die dezelfde applicatie serveren die uitgevoerd worden op uw Virtualmin systeem. <p>
+
+Alleen systemen die de <tt>mod_proxy_balancer</tt> Apache module geinstalleerd hebben
+kunnen een pad doorsturen naar meerdere URL's. Alle andere die alleen de reguliere
+Apache proxy module ondersteunen kunnen alleen doorsturen naar een enkele URL. <p>
+
+<footer>

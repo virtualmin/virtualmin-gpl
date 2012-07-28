@@ -1,0 +1,43 @@
+<header>Verplaats Virtuele Server</header>
+
+Een virtuele server verplaatsen wijzigt de domein administratie die er
+controle over heeft. De functies van de server blijven onaangetast, maar
+het kan nu beheerd worden door een andere administrator, en word opgeteld
+bij alle limieten zoals aantal domeinen, aliassen en databases voor die
+nieuwe administrator. <p>
+
+Deze pagina kan worden gebruikt om drie verschillende soorten handelingen te
+verrichten, afhankelijk wat voor soort server u gaat bewerken en wat u ermee
+wilt doen.
+De volgende handelingen zijn mogelijk :<p>
+<dl>
+<dt><b>Verplaats een sub-server onder een andere hoofd server</b>
+<dd>Wanneer u een sub-server bewerkt kunt u een ander hoofd domein selecteren
+    in het menu en zo de eigenaar wijzigen. De server website, DNS domein,
+    mailboxen enzovoort blijven ongewijzigd, het valt echter nu onder de
+    controle van de eigenaar van de geselecteerd hoofd server. De home 
+    directory word verplaatst onder de home van de nieuwe hoofd server en van
+    alle files word de eigenaarschap gewijzigd naar de nieuwe hoofd gebruikers
+    en groep. <p>
+
+<dt><b>Verplaats een hoofd server onder een andere hoofd server</b>
+<dd>Wanneer u een hoofd server bewerkt, kunt u deze converteren naar een
+    sub-server met gebruik van deze pagina. Dit moet u voorzichtig doen omdat
+    sommige bestaande instellingen (zoals het wachtwoord, quota's en limieten)
+    verloren zullen gaan omdat die nu vallen onder de nieuwe hoofd server.
+    Daar komt bij dat de Unix gebruiker, Unix groep of Webmin gebruiker die bij
+    dit domein horen zullen worden verwijdert. <p>
+
+<dt><b>Converteer een sub-server naar een hoofd server</b>
+<dd>Wanneer u een sub-server bewerkt heeft u de optie om het te converteren naar
+    hoofd server voor een nieuwe server administrator. Er moet dan een
+    gebruikersnaam en wachtwoord worden ingevuld voor de nieuwe administrator.
+    Nadat de verplaatsing compleet is zullen alle files in de nieuwe home 
+    directory van de server behoren aan de nieuwe gebruiker. Harddisk quota's,
+    bandbreedte limieten en server eigenaar limieten van de verplaatste server
+    zullen worden gekopieerd van de oude hoofd server, maar kunnen achteraf
+    altijd weer apart bewerkt worden.<p>
+
+</dl>
+
+<footer>

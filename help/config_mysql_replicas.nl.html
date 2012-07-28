@@ -1,0 +1,15 @@
+<header>Extra MySQL servers om gebruikers op aan te maken</header>
+
+Standaard zal Virtualmin alle MySQL account en permissies aanmaken op een enkele
+MySQL server, normaal gesproken in de MySQL die werkt op dezelfde machine als
+waarop Virtualmin aan het werk is. Echter indien u meerdere servers aan het werk
+heeft met een replicatie van het NDBCluster systeem, is het nodig dat Virtualmin
+de permissies op al die servers instelt. Dit geeft de domein eigenaars de mogelijkheid
+om in te loggen bij deze servers. <p>
+
+Om dit in te stellen moet u een spatie-gescheiden lijst maken in dit veld met extra
+servers. Virtuele servers die vanaf dat moment worden aangemaakt worden dan
+toegevoegd aan het hoofd systeem en die in de lijst staan. Bestaande virtuele
+server worden niet toegevoegd. <p>
+
+<footer>

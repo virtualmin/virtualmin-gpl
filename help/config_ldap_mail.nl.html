@@ -1,0 +1,27 @@
+<header>Email attributen toevoegen aan LDAP gebruikers?</header>
+
+Wanneer u Virtualmin gebruikers in LDAP opslaat, kunt u met deze instelling
+ook hun email adressen toevoegen aan de LDAP database. Dit is handig als uw
+email server of spam filter dezelfde database gebruikt om email af te leveren. <p>
+
+De beschikbare opties zijn :
+<ul>
+<li><b>Ja alleen <tt>email</tt> attributen gebruiken</b><br>
+    Iedere gebruiker zijn primaire en extra email adressen zullen worden
+    opgeslagen in deze attribuut als gescheiden waardes.<p>
+
+<li><b>Ja gebruik <tt>email</tt> en <tt>mailAlternateAddress</tt></b><br>
+    Gebruikers primaire adressen zullen worden opgeslagen in de <tt>email</tt>
+    attribuut, en extra adressen in de <tt>mailAlternateAddress</tt>.<p>
+
+<li><b>Nee</b><br>
+    Email adressen worden nooit opgeslagen in de LDAP.<p>
+</ul>
+
+Wanneer dit is ingesteld op <b>Ja</b> zal Webmin LDAP <tt>email</tt> attributen
+toevoegen aan iedere gebruiker die hij aanmaakt of modificeert voor hun primaire
+en extra email adressen. Dit is handig indien u dezelfde LDAP database gebruikt
+met een email server die de attributen gebruikt om uit te zoeken waar de email
+afgeleverd moet worden. <p>
+
+<footer>

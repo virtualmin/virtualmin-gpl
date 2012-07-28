@@ -1,0 +1,19 @@
+<header>Extra named.conf richtlijnen voor nieuwe zones</header>
+
+Wanneer er een nieuwe BIND DNS zone word aangemaakt zullen de richtlijnen
+die ingevuld worden in dit tekstvak worden toegevoegd aan de zone sectie
+in de <tt>named.conf</tt> configuratie file. Bijvoorbeeld, u kunt het volgende
+invullen om de zone overdrachten te limiteren naar een geselecteerd IP adres :
+
+<pre>
+allow-transfer { 
+  1.2.3.4;
+  1.2.3.10;
+};
+</pre>
+
+Deze optie moet u alleen gebruiken als u ervaring heeft met het BIND
+configuratie formaat, omdat een fout ervoor kan zorgen dat uw gehele
+DNS server stopt met werken. <p>
+
+<footer>
