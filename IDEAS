@@ -61,3 +61,9 @@
 
  - Deal with change of internal IP
 	- do on config check, if eth0 IP has changed
+
+ - Per-domain postfix outgoing IP
+	- sender_dependent_default_transport_maps
+	- Mail option to enable it for domains with a private IP
+	- Update if IP changes
+	- https://www.virtualmin.com/node/22875
