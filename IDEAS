@@ -67,3 +67,7 @@
 	- Mail option to enable it for domains with a private IP
 	- Update if IP changes
 	- https://www.virtualmin.com/node/22875
+
+ - Allow selection of any file for cert and key
+	- Under domain's home
+	- http://www.virtualmin.com/node/22883

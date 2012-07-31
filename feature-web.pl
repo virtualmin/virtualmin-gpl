@@ -31,13 +31,12 @@ else {
 local $conf = &apache::get_config();
 local ($f, $newfile) = &get_website_file($_[0]);
 
+# Add NameVirtualHost if needed
+local $nvstar = &add_name_virtual($_[0], $conf, $web_port, 1);
+
 # We use a * for the address for name-based servers under Apache 2,
 # if NameVirtualHost * exists.
 local $vips = &get_apache_vhost_ips($_[0], $nvstar, $web_port);
-
-# add NameVirtualHost if needed
-local $nvstar = &add_name_virtual($_[0], $conf, $web_port,
-				  $vips =~ /^\*/ ? 0 : 1);
 
 # Add Listen if needed
 &add_listen($_[0], $conf, $web_port);
@@ -1416,10 +1415,12 @@ if ($virt) {
 
 	splice(@$dstlref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1,
 	       @$srclref[1 .. @$srclref-2]);
-	# Fix IP address in <Virtualhost> section (if needed)
+
+	# Fix IP address in <Virtualhost> section (if an IP was used before)
 	if ($dstlref->[$virt->{'line'}] =~
 	    /^(.*<Virtualhost\s+)([0-9\.]+)(.*)$/i) {
 		$dstlref->[$virt->{'line'}] = $1.$_[0]->{'ip'}.$3;
+
 		}
 	if ($_[3]->{'reuid'}) {
 		# Fix up any UID or GID in suexec lines
