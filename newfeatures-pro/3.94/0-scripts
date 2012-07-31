@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the SugarCRM script installer to version 6.5.2, WHCMS to 5.1.2, and CMS made simple to 1.11.
+html=Updated the SugarCRM script installer to version 6.5.2, WHCMS to 5.1.2, Django to 1.4.1, and CMS made simple to 1.11.
 master=1
 reseller=1
 domain=1
