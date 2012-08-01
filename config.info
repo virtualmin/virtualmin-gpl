@@ -93,6 +93,8 @@ other_doms=Notify other modules when updating mailbox Unix users?,1,1-Yes,0-No
 check_apache=Check Apache configuration before applying?,1,1-Yes,0-No
 nodeniedssh=Add users with no SSH access to <tt>deniedssh</tt> group?,1,0-Yes,1-No
 trash_folder=Trash folder name for new mailboxes,10,*-Don't create any,trash-trash,Trash-Trash,Other name
+drafts_folder=Drafts folder name for new mailboxes,10,*-Don't create any,drafts-drafts,Drafts-Drafts,Other name
+sent_folder=Sent mail folder name for new mailboxes,10,*-Don't create any,sent-sent,Sent-Sent,Other name
 
 line4.5=Qmail+LDAP options,11
 ldap_host=LDAP server,0

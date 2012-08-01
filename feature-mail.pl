@@ -2295,13 +2295,15 @@ if (-d $user->{'home'} && $user->{'unix'}) {
 		}
 	}
 
-# Create spam, virus and trash Maildir sub-directories
+# Create spam, virus, drafts, sent and trash Maildir sub-directories
 if ($md && $md =~ /\/Maildir$/) {
 	local @folders;
-	local $tname = $config{'trash_folder'};
-	$tname ||= "trash";
-	if ($tname ne "*") {
-		push(@folders, "$md/.$tname");
+	foreach my $n ("trash", "drafts", "sent") {
+		local $tname = $config{$n.'_folder'};
+		$tname ||= $n;
+		if ($tname ne "*") {
+			push(@folders, "$md/.$tname");
+			}
 		}
 	if ($d->{'spam'}) {
 		local ($sdmode, $sdpath) = &get_domain_spam_delivery($d);
