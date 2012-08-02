@@ -295,12 +295,20 @@ if (defined(&list_domain_php_inis) && &foreign_check("phpini")) {
 	}
 
 # Do the copy
+if (!$d->{'parent'}) {
+	&disable_quotas($d);
+	&disable_quotas($oldd);
+	}
 local $err = &backquote_logged(
 	       "cd ".quotemeta($oldd->{'home'})." && ".
 	       "tar cfX - $xtemp . | ".
 	       "(cd ".quotemeta($d->{'home'})." && ".
 	       " tar xpf -) 2>&1");
 &set_home_ownership($d);
+if (!$d->{'parent'}) {
+	&enable_quotas($oldd);
+	&enable_quotas($d);
+	}
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable($d, 0);
 	}
