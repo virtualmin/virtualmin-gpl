@@ -97,7 +97,9 @@ if (&supports_ip6() && &can_use_feature("virt6")) {
 	else {
 		# Manually enter, or already active
 		push(@ip6opts, [ 1, $text{'newip_virt6addr3'},
-				 &ui_textbox("ip6", $d->{'ip6'}, 30) ]);
+				 &ui_textbox("ip6", $d->{'ip6'}, 30)." ".
+				 &ui_checkbox("virt6already", 1,
+                                           $text{'form_virtalready'}) ]);
 		}
 	print &ui_table_row($text{'newip_new6'},
 		&ui_radio_table("mode6", $d->{'virt6'} ? 1 : 0,
