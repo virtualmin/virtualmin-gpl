@@ -71,8 +71,22 @@ elsif ($config{'mail_system'} == 0) {
 		$sender_bcc_maps = &postfix::get_real_value("sender_bcc_maps");
 		@sender_bcc_map_files = &postfix::get_maps_files(
 						$sender_bcc_maps);
-		$supports_bcc = 1;
+		if (@sender_bcc_map_files) {
+			$supports_bcc = 1;
+			}
 		}
+
+	# Work out if per-domain outgoing IP support is available
+	if ($postfix::postfix_version >= 2.7) {
+		$dependent_maps = &postfix::get_real_value(
+			"sender_dependent_default_transport_maps");
+		@dependent_map_files = &postfix::get_maps_files(
+						$dependent_maps);
+		if (@dependent_map_files) {
+			$supports_dependent = 1;
+			}
+		}
+
 	$supports_aliascopy = 1;
 	}
 elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
@@ -2512,7 +2526,8 @@ elsif ($config{'mail_system'} == 4) {
 	}
 elsif ($config{'mail_system'} == 5) {
 	# Mail dir is under VPOPMail home
-	@rv = ( "$_[0]->{'home'}/Maildir", 1 );
+	local $md = $config{'vpopmail_md'} || "Maildir";
+	@rv = ( "$_[0]->{'home'}/$md", 1 );
 	}
 elsif ($config{'mail_system'} == 6) { 
 	if (-d "$_[0]->{'home'}/Maildir") {

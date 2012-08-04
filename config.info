@@ -115,6 +115,7 @@ vpopmail_group=VPOPMail group,6
 vpopmail_auto=Path to autorespond program,3,Not installed
 vpopmail_owner=Create VPOPMail domains owned by administration user?,1,1-Yes,0-No
 vpopmail_maildir=VPOPMail domains directory resides in (path relative to home directory),3,VPOPMail's home directory
+vpopmail_md=VPOPMail sub-directory for email,3,Default (<tt>Maildir</tt>)
 
 line4.7=Spam filtering options,11
 spam_delivery=Default delivery for spam,10,-Deliver normally,/dev/null-Delete,$HOME/mail/spam-Spam mbox folder,$HOME/Maildir/.spam/-Spam Maildir folder,Other file or email address
