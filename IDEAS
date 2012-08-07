@@ -66,7 +66,11 @@
 	- sender_dependent_default_transport_maps
 	- Mail option to enable it for domains with a private IP
 	- Update if IP changes
+	- what does the RHS of this map actually mean?
 	- https://www.virtualmin.com/node/22875
+	- Setup at install time, for Postfix 2.7+
+	- CHANGELOG
+	- http://tech.groups.yahoo.com/group/postfix-users/message/283594
 
  - Allow selection of any file for cert and key
 	- Under domain's home

@@ -27,6 +27,12 @@ To prevent this, the C<--alias-copy> flag can be used to duplicate Postfix
 C<virtual> table entries into the alias domain. To revert to the default
 mode, use the C<--alias-catchall> flag.
 
+If supported by your mail server and if the domain has a non-default IP address,
+the C<--outgoing-ip> flag can be used to have email sent by addresses in the
+domain use its own IP address for outgoing SMTP connections. This can be useful
+for separating virtual servers from each other from the point of view of 
+other mail servers. To disable this mode, use the C<--no-outgoing-ip> flag.
+
 =cut
 
 package virtual_server;
@@ -65,6 +71,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-bcc") {
 		$bcc = "";
 		}
+	elsif ($a eq "--outgoing-ip") {
+		$dependent = 1;
+		}
+	elsif ($a eq "--no-outgoing-ip") {
+		$dependent = 0;
+		}
 	elsif ($a eq "--user") {
 		push(@users, shift(@ARGV));
 		}
@@ -96,6 +108,14 @@ else {
 	}
 @doms = grep { $_->{'mail'} } @doms;
 @doms || &usage("None of the selected domains have email enabled");
+
+# Check supported features
+if (defined($bcc) && !$supports_bcc) {
+	&usage("BCCing of email is not supported on this system");
+	}
+if (defined($dependent) && !$supports_dependent) {
+	&usage("Outgoing IP addresses are not supported on this system");
+	}
 
 # Do it for all domains
 foreach $d (@doms) {
@@ -144,6 +164,23 @@ foreach $d (@doms) {
 		$d->{'aliascopy'} = $aliascopy;
 		}
 
+	# Change outgoing IP mode
+	if (defined($dependent)) {
+		$old_dependent = &get_domain_dependent($d);
+		if ($dependent && !$old_dependent) {
+			# Turn on sender-dependent IP
+			&$first_print("Enabling outgoing IP address for $d->{'dom'} ..");
+			&save_domain_dependent($d, 1);
+			&$second_print(".. done");
+			}
+		elsif (!$dependent && $old_dependent) {
+			# Turn off sender-dependent IP
+			&$first_print("Disabling outgoing IP address for $d->{'dom'} ..");
+			&save_domain_dependent($d, 0);
+			&$second_print(".. done");
+			}
+		}
+
 	&save_domain($d);
 
 	&$outdent_print();
@@ -161,6 +198,7 @@ print "\n";
 print "virtualmin modify-mail --domain name | --user name | --all-domains\n";
 print "                      [--bcc user\@domain] | [--no-bcc]\n";
 print "                      [--alias-copy] | [--alias-catchall]\n";
+print "                      [--outgoing-ip | --no-outgoing-ip]\n";
 exit(1);
 }
 

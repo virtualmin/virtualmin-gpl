@@ -5162,6 +5162,80 @@ else {
 	}
 }
 
+# get_domain_dependent(&domain)
+# If a sender-dependent outgoing IP is enabled for the given domain, returns it.
+# Otherwise returns undef.
+sub get_domain_dependent
+{
+local ($d) = @_;
+return undef if (!$supports_dependent);
+&require_mail();
+
+# Read the map file to find an entry for the domain
+local $map = &postfix::get_maps("sender_dependent_default_transport_maps");
+local ($rv) = grep { $_->{'name'} eq '@'.$d->{'dom'} } @$map;
+return undef if (!$rv);
+
+# Check for a Postfix service
+local $master = &postfix::get_master_config();
+foreach my $m (@$master) {
+	if ($m->{'name'} eq $rv->{'value'} && $m->{'enabled'}) {
+		# Found match on the name .. extract the IP
+		if ($m->{'command'} =~ /smtp_bind_address=([0-9\.]+)/) {
+			return $1;
+			}
+		}
+	}
+
+return undef;
+}
+
+# save_domain_dependent(&domain, enabled-flag)
+# Enables or disables sender-dependent outgoing IP for the domain
+sub save_domain_dependent
+{
+local ($d, $dependent) = @_;
+return undef if (!$supports_dependent);
+&require_mail();
+
+# Read the map file to find an entry for the domain
+local $map = &postfix::get_maps("sender_dependent_default_transport_maps");
+local ($rv) = grep { $_->{'name'} eq '@'.$d->{'dom'} } @$map;
+if ($rv && !$dependent) {
+	# Need to remove
+	&postfix::delete_mapping(
+		"sender_dependent_default_transport_maps", $rv);
+	&postfix::regenerate_any_table(
+		"sender_dependent_default_transport_maps");
+	}
+elsif (!$rv && $dependent) {
+	# Need to add
+	$rv = { 'name' => '@'.$d->{'dom'},
+		'value' => 'smtp:'.$d->{'id'} };
+	&postfix::create_mapping(
+		"sender_dependent_default_transport_maps", $rv);
+	&postfix::regenerate_any_table(
+		"sender_dependent_default_transport_maps");
+	}
+
+# Find the master file entry
+local $master = &postfix::get_master_config();
+local ($m) = grep { $_->{'name'} eq 'smtp:'.$d->{'id'} && $_->{'enabled'} }
+		  @$master;
+if ($m && !$dependent) {
+	# Need to remove
+	# XXX
+	}
+elsif (!$m && $dependent) {
+	# Need to add
+	# XXX
+	}
+elsif ($m && $dependent) {
+	# Need to fix IP, maybe
+	# XXX
+	}
+}
+
 # check_postfix_map(mapname)
 # Checks that all data sources in a map are usable. Returns undef if OK, or
 # an error message if not.
