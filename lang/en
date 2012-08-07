@@ -690,6 +690,7 @@ user_err2=Failed to re-send signup email
 user_eclash=A mailbox or mail alias with the same name and domain already exists
 user_eclash2=A user with the same name already exists
 user_euser=Missing or invalid username
+user_ereserved=The username $1 is reserved for use by Virtualmin
 user_euser2=Invalid username : $1
 user_ereal=Invalid real name
 user_uquota=Home directory quota

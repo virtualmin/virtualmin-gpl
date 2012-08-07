@@ -3436,6 +3436,9 @@ local ($name) = @_;
 if ($name !~ /^[^ \t:\&\(\)\|\;\<\>\*\?\!]+$/) {
 	return $text{'user_euser'};
 	}
+if ($name eq "domains" || $name eq "logs" || $name eq "virtualmin-backup") {
+	return &text('user_ereserved', $name);
+	}
 local $err = &useradmin::check_username_restrictions($name);
 if ($err) {
 	return $err;
