@@ -4168,6 +4168,9 @@ elsif ($_[0] =~ /^\|\s*(.*)$/) {
 elsif ($_[0] eq "./Maildir/") {
 	return (10);
 	}
+elsif ($config{'vpopmail_md'} && $_[0] eq "./$config{'vpopmail_md'}/") {
+	return (10);
+	}
 elsif ($_[0] eq "/dev/null") {
 	return (11);
 	}
@@ -7812,7 +7815,12 @@ if (@{$_[0]->{'values'}}) {
 	foreach $v (@{$_[0]->{'values'}}) {
 		if ($v eq "\\$_[2]" || $v eq "\\NEWUSER") {
 			# Delivery to this user means to his maildir
-			&print_tempfile(AFILE, "./Maildir/\n");
+			if ($config{'vpopmail_md'}) {
+				&print_tempfile(AFILE, "./$config{'vpopmail_md'}/\n");
+				}
+			else {
+				&print_tempfile(AFILE, "./Maildir/\n");
+				}
 			}
 		else {
 			&print_tempfile(AFILE, $v,"\n");
@@ -12410,6 +12418,17 @@ if ($config{'mail'}) {
 
 		&$second_print($text{'check_postfixok'});
 		$expected_mailboxes = 0;
+
+		# Report on outgoing IP option
+		if ($supports_dependent) {
+			&$second_print($text{'check_dependentok'});
+			}
+		elsif ($postfix::postfix_version < 2.7) {
+			&$second_print($text{'check_dependentever'});
+			}
+		else {
+			&$second_print($text{'check_dependentesupport'});
+			}
 		}
 	elsif ($config{'mail_system'} == 2) {
 		# Make sure qmail is installed
