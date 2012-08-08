@@ -96,7 +96,8 @@ while(@ARGV > 0) {
 		}
 	}
 @dnames || $all_doms || @users || usage("No domains or users specified");
-defined($bcc) || defined($aliascopy) || &usage("Nothing to do");
+defined($bcc) || defined($aliascopy) || defined($dependent) ||
+	&usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {

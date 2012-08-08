@@ -523,6 +523,11 @@ if ($supports_bcc) {
 		}
 	}
 
+# Remove sender-dependent outgoing IP
+if ($supports_dependent) {
+	&save_domain_dependent($d, 0);
+	}
+
 # Remove any secondary MX servers
 &delete_on_secondaries($d);
 
@@ -948,6 +953,16 @@ if ($_[0]->{'dns'} && !$_[1]->{'dns'}) {
 	}
 elsif (!$_[0]->{'dns'} && $_[1]->{'dns'}) {
 	&update_dkim_domains($_[0], 'delete');
+	}
+
+# Update any outgoing IP mapping
+if (($_[0]->{'dom'} ne $_[1]->{'dom'} ||
+     $_[0]->{'ip'} ne $_[1]->{'ip'}) && $supports_dependent) {
+	local $old_dependent = &get_domain_dependent($_[1]);
+	if ($old_dependent) {
+		&save_domain_dependent($_[1], 0);
+		&save_domain_dependent($_[0], 1);
+		}
 	}
 
 # Unlock mail and unix DBs the same number of times we locked them
@@ -2943,6 +2958,14 @@ if ($supports_bcc) {
 	&close_tempfile(BCC);
 	}
 
+# Create sender dependent file
+if ($supports_dependent) {
+	local $dependent = &get_domain_dependent($_[0]);
+	&open_tempfile(DEPENDENT, ">$_[1]_dependent");
+	&print_tempfile(DEPENDENT, $dependent,"\n");
+	&close_tempfile(DEPENDENT);
+	}
+
 &$second_print($text{'setup_done'});
 
 if (!&mail_under_home()) {
@@ -3264,6 +3287,13 @@ if ($supports_bcc && -r "$_[1]_bcc") {
 	local $bcc = &read_file_contents("$_[1]_bcc");
 	chop($bcc);
 	&save_domain_sender_bcc($_[0], $bcc);
+	}
+
+# Restore sender-dependent IP
+if ($supports_dependent && -r "$_[1]_dependent") {
+	local $dependent = &read_file_contents("$_[1]_dependent");
+	chop($dependent);
+	&save_domain_dependent($_[0], $dependent ? 1 : 0);
 	}
 
 if (@errs) {
