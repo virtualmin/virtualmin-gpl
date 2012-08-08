@@ -12430,7 +12430,8 @@ if ($config{'mail'}) {
 			&$second_print($text{'check_dependentever'});
 			}
 		else {
-			&$second_print($text{'check_dependentesupport'});
+			&$second_print(&text('check_dependentesupport',
+					     '../postfix/'));
 			}
 		}
 	elsif ($config{'mail_system'} == 2) {

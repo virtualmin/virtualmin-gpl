@@ -1746,7 +1746,7 @@ check_sendmailok=Mail server Sendmail is installed and configured.
 check_postfixok=Mail server Postfix is installed and configured.
 check_dependentok=Postfix is configured to support per-domain outgoing IP addresses.
 check_dependentever=Your Postfix version does not support per-domain outgoing IP addresses.
-check_dependentesupport=Postfix can support per-domain outgoing IP addresses, but is not currently configured to do so.
+check_dependentesupport=Postfix can support per-domain outgoing IP addresses, but is not currently configured to do so. This can be setup in the <a href='$1'>Postfix Mailserver</a> module.
 check_qmailok=Mail server Qmail is installed and configured.
 check_qmailmode6=Mail server Qmail is installed and configured. However, the username format on the server templates page is set to <b>username@domain</b>, which may not work.
 check_postfixmode6=Mail server Postfix is installed and configured. However, the username format on the server templates page is set to <b>username@domain</b>, is not supported by Postfix.

@@ -5220,7 +5220,10 @@ elsif (!$rv && $dependent) {
 
 # Find the master file entry for smtp
 local $master = &postfix::get_master_config();
-local ($smtp) = grep { $_->{'name'} eq 'smtp' && $_->{'enabled'} } @$master;
+local ($smtp) = grep { $_->{'name'} eq 'smtp' &&
+		       $_->{'type'} eq 'unix' &&
+		       $_->{'enabled'} } @$master;
+return "No master service named smtp found!" if (!$smtp);
 
 # Find the master file entry for this domain
 local ($m) = grep { $_->{'name'} eq 'smtp-'.$d->{'id'} && $_->{'enabled'} }
@@ -5235,7 +5238,7 @@ elsif (!$m && $dependent) {
 	$m = { %$smtp };
 	delete($m->{'line'});
 	delete($m->{'uline'});
-	$m->{'command'} .= " -o smtp_bind_address=$d->{'id'}";
+	$m->{'command'} .= " -o smtp_bind_address=$d->{'ip'}";
 	$m->{'name'} = "smtp-".$d->{'id'};
 	&postfix::create_master($m);
 	&postfix::reload_postfix();
@@ -5249,6 +5252,7 @@ elsif ($m && $dependent) {
 		&postfix::reload_postfix();
 		}
 	}
+return undef;
 }
 
 # check_postfix_map(mapname)
