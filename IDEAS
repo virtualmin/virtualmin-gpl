@@ -70,6 +70,9 @@
 	- https://www.virtualmin.com/node/22875
 	- Setup at install time, for Postfix 2.7+
 	- CHANGELOG
+	- Backup and restore
+	- Domain rename
+	- IP change
 	- http://tech.groups.yahoo.com/group/postfix-users/message/283594
 
  - Allow selection of any file for cert and key

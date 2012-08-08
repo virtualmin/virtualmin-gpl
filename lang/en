@@ -5143,6 +5143,11 @@ mail_ebcc=Missing or invalid BCC address
 mail_bccing=BCCing all sent email to $1 ..
 mail_nobcc=Disabling the BCC of sent email
 mail_bccoff=Leaving BCCing of sent email disabled.
+mail_dependent=Send outgoing email for domain from IP
+mail_dependent0=System's default address
+mail_dependent1=Virtual server's address $1
+mail_dependenting1=Configuring outgoing SMTP connections on IP address $1 ..
+mail_dependenting0=Reverting outgoing SMTP connections to system's default address ..
 
 nf_header=The following new features are available in $1 ..
 nf_desc=Feature

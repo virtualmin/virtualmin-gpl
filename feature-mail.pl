@@ -5211,28 +5211,43 @@ if ($rv && !$dependent) {
 elsif (!$rv && $dependent) {
 	# Need to add
 	$rv = { 'name' => '@'.$d->{'dom'},
-		'value' => 'smtp:'.$d->{'id'} };
+		'value' => 'smtp-'.$d->{'id'} };
 	&postfix::create_mapping(
 		"sender_dependent_default_transport_maps", $rv);
 	&postfix::regenerate_any_table(
 		"sender_dependent_default_transport_maps");
 	}
 
-# Find the master file entry
+# Find the master file entry for smtp
 local $master = &postfix::get_master_config();
-local ($m) = grep { $_->{'name'} eq 'smtp:'.$d->{'id'} && $_->{'enabled'} }
+local ($smtp) = grep { $_->{'name'} eq 'smtp' && $_->{'enabled'} } @$master;
+
+# Find the master file entry for this domain
+local ($m) = grep { $_->{'name'} eq 'smtp-'.$d->{'id'} && $_->{'enabled'} }
 		  @$master;
 if ($m && !$dependent) {
 	# Need to remove
-	# XXX
+	&postfix::delete_master($m);
+	&postfix::reload_postfix();
 	}
 elsif (!$m && $dependent) {
 	# Need to add
-	# XXX
+	$m = { %$smtp };
+	delete($m->{'line'});
+	delete($m->{'uline'});
+	$m->{'command'} .= " -o smtp_bind_address=$d->{'id'}";
+	$m->{'name'} = "smtp-".$d->{'id'};
+	&postfix::create_master($m);
+	&postfix::reload_postfix();
 	}
 elsif ($m && $dependent) {
 	# Need to fix IP, maybe
-	# XXX
+	if ($m->{'command'} =~ /smtp_bind_address=([0-9\.]+)/ &&
+	    $1 ne $d->{'ip'}) {
+		$m->{'command'} =~ s/smtp_bind_address=([0-9\.]+)/smtp_bind_address=$d->{'ip'}/;
+		&postfix::modify_master($m);
+		&postfix::reload_postfix();
+		}
 	}
 }
 
