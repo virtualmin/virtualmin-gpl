@@ -3250,7 +3250,7 @@ reemail_ok=Send Now
 
 newips_title=Change IP Addresses
 newips_ecannot=You are not allowed to change IP addresses
-newips_desc=This page allows you to change the IP address of all non private IP virtual servers that are using a specified address. This should be done if you have just updated the primary IP address on the system.
+newips_desc=This page allows you to change the IP address of all non-private IP virtual servers that are using a specified address. This should be done if you have just updated the primary IP address on the system.
 newips_header=IP address change options
 newips_old=Address of servers to update
 newips_new=New IP address
@@ -3417,6 +3417,8 @@ licence_goterr=.. a problem was detected : $1
 licence_ecannot=You are not allowed to re-check the Virtualmin license
 licence_maxdoms=Your system is licensed for only $1 servers, but you have $2.
 licence_maxservers=Your serial number is licensed for only $1 servers, but is being used on $2.
+licence_ipchanged=Your system's primary IP address appears to have changed from $1 to $2. Virtual servers using the old address may be unreachable or serve the wrong web content.
+licence_changeip=Update Incorrect IP Addresses
 
 config_deftheme=Global Webmin default
 config_oldtheme=Old Webmin theme

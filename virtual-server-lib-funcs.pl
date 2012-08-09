@@ -9901,12 +9901,15 @@ return defined(&running_in_zone) && &running_in_zone() ? 'zones' :
        defined(&running_in_xen) && &running_in_xen() ? 'xen' : undef;
 }
 
-# licence_warning_message()
+# warning_messages()
 # Returns HTML for an error message about the licence being expired, if it
 # is and if the current user is the master admin.
-sub licence_warning_message
+sub warning_messages
 {
 return undef if (!&master_admin());
+local $rv;
+
+# Get licence expiry date
 local ($status, $expiry, $err, undef, undef, $autorenew) =
 	&check_licence_expired();
 local $expirytime;
@@ -9915,10 +9918,9 @@ if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
 	require 'timelocal.pl';
 	$expirytime = timelocal(59, 59, 23, $3, $2-1, $1-1900);
 	}
-local $rv;
 if ($status != 0) {
 	# Not valid .. show message
-	$rv = "<table width=100%><tr bgcolor=#ff8888><td align=center>";
+	$rv .= "<table width=100%><tr bgcolor=#ff8888><td align=center><p>";
 	$rv .= "<b>".$text{'licence_err'}."</b><br>\n";
 	$rv .= $err."\n";
 	$rv .= &text('licence_renew', $virtualmin_renewal_url),"\n";
@@ -9927,13 +9929,13 @@ if ($status != 0) {
 		$rv .= &ui_submit($text{'licence_recheck'});
 		$rv .= &ui_form_end();
 		}
-	$rv .= "</td></tr></table>\n";
+	$rv .= "<p></td></tr></table>\n";
 	}
 elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 	# One week to expiry .. tell the user
 	local $days = int(($expirytime - time()) / (24*60*60));
 	local $hours = int(($expirytime - time()) / (60*60));
-	$rv = "<table width=100%><tr bgcolor=#ffff88><td align=center>";
+	$rv .= "<table width=100%><tr bgcolor=#ffff88><td align=center><p>";
 	if ($days) {
 		$rv .= "<b>".&text('licence_soon', $days)."</b><br>\n";
 		}
@@ -9946,8 +9948,25 @@ elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 		$rv .= &ui_submit($text{'licence_recheck'});
 		$rv .= &ui_form_end();
 		}
-	$rv .= "</td></tr></table>\n";
+	$rv .= "<p></td></tr></table>\n";
 	}
+
+# Check if default IP has changed
+local $defip = &get_default_ip();
+if ($config{'old_defip'} && $defip && $config{'old_defip'} ne $defip) {
+	$rv .= "<table width=100%><tr bgcolor=#ffff88><td align=center><p>";
+	$rv .= "<b>".&text('licence_ipchanged',
+			   "<tt>$config{'old_defip'}</tt>",
+			   "<tt>$defip</tt>")."</b><p>\n";
+	$rv .= &ui_form_start("/$module_name/edit_newips.cgi");
+	$rv .= &ui_hidden("old", $config{'old_defip'});
+	$rv .= &ui_hidden("new", $defip);
+	$rv .= &ui_hidden("setold", 1);
+	$rv .= &ui_submit($text{'licence_changeip'});
+	$rv .= &ui_form_end();
+	$rv .= "<p></td></tr></table>\n";
+	}
+
 return $rv;
 }
 
@@ -12890,6 +12909,7 @@ if (!$defip) {
 else {
 	&$second_print(&text('check_defip', $defip));
 	}
+$config{'old_defip'} ||= $defip;
 
 # Make sure the external IP is set if needed
 if ($config{'dns_ip'} ne '*') {

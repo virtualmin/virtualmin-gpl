@@ -60,8 +60,8 @@ if (&need_config_check() && &can_check_config()) {
 	exit;
 	}
 
-# Setup the licence cron job
-$lerr = &licence_warning_message();
+# Show any warnings
+$lerr = &warning_messages();
 print $lerr;
 $formno++ if ($lerr =~ /<\s*form/i);
 

@@ -59,13 +59,6 @@
  - Rackspace cloud files backup destination
 	- http://www.virtualmin.com/node/11659
 
- - Deal with change of internal IP
-	- do on config check, if eth0 IP has changed
-
- - Per-domain postfix outgoing IP
-	- https://www.virtualmin.com/node/22875
-	- Documentation
-
  - Allow selection of any file for cert and key
 	- Under domain's home
 	- http://www.virtualmin.com/node/22883

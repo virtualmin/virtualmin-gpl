@@ -66,6 +66,15 @@ foreach $d (@doms) {
 	&$outdent_print();
 	}
 &run_post_actions();
+
+# Update old default IP
+if ($in{'setold'}) {
+	$config{'old_defip'} = &get_default_ip();
+	&lock_file($module_config_file);
+	&save_module_config();
+	&unlock_file($module_config_file);
+	}
+
 &webmin_log("newips", "domains", scalar(@doms), { 'old' => $in{'old'},
 					          'new' => $in{'new'} });
 

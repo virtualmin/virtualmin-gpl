@@ -7,6 +7,9 @@ require './virtual-server-lib.pl';
 
 &ui_print_unbuffered_header(undef, $text{'check_title'}, "");
 
+# First show any warnings
+print virtual_server::warning_messages();
+
 &read_file("$module_config_directory/last-config", \%lastconfig);
 print "<b>$text{'check_desc'}</b><br>\n";
 
