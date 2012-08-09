@@ -12430,8 +12430,9 @@ if ($config{'mail'}) {
 			&$second_print($text{'check_dependentever'});
 			}
 		else {
-			&$second_print(&text('check_dependentesupport',
-					     '../postfix/'));
+			local $l = &get_webmin_version() >= 1.593 ?
+				'../postfix/dependent.cgi' : '../postfix/';
+			&$second_print(&text('check_dependentesupport', $l));
 			}
 		}
 	elsif ($config{'mail_system'} == 2) {
