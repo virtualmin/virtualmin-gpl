@@ -256,7 +256,7 @@ print $text{'setup_done'},"<p>\n";
 
 &$outdent_print();
 
-# Get and update alias domains
+# Get and update all alias domains
 @doms = &get_domain_by("alias", $d->{'id'});
 foreach $sd (@doms) {
 	&$first_print(&text('newip_dom2', $sd->{'dom'}));
