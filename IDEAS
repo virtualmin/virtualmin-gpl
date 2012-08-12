@@ -58,7 +58,3 @@
 
  - Rackspace cloud files backup destination
 	- http://www.virtualmin.com/node/11659
-
- - Allow selection of any file for cert and key
-	- Under domain's home
-	- http://www.virtualmin.com/node/22883

@@ -9,12 +9,33 @@ $d = &get_domain($in{'dom'});
 
 # Validate inputs
 &error_setup($text{'newkey_err'});
-$cert = $in{'cert'} || $in{'certupload'};
-if ($in{'newkey_def'}) {
-	$newkey = &read_file_contents($d->{'ssl_key'});
+$homed = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+if ($in{'cert_mode'} == 0) {
+	$cert = $in{'cert'};
+	}
+elsif ($in{'cert_mode'} == 1) {
+	$cert = $in{'certupload'};
 	}
 else {
-	$newkey = $in{'newkey'} || $in{'newkeyupload'};
+	&is_under_directory($homed->{'home'}, $in{'certfile'}) ||
+		&error(&text('newkey_ecertfilehome', $in{'certfile'}));
+	$cert = &read_file_contents_as_domain_user($d, $in{'certfile'});
+	$cert || &error(&text('newkey_ecertfile', $in{'certfile'}));
+	}
+if ($in{'newkey_mode'} == 0) {
+	$newkey = $in{'newkey'};
+	}
+elsif ($in{'newkey_mode'} == 1) {
+	$newkey = $in{'newkeyupload'};
+	}
+elsif ($in{'newkey_mode'} == 2) {
+	&is_under_directory($homed->{'home'}, $in{'newkeyfile'}) ||
+		&error(&text('newkey_enewkeyfilehome', $in{'newkeyfile'}));
+	$newkey = &read_file_contents_as_domain_user($d, $in{'newkeyfile'});
+	$newkey || &error(&text('newkey_enewkeyfile', $in{'newkeyfile'}));
+	}
+else {
+	$newkey = &read_file_contents($d->{'ssl_key'});
 	}
 $cert =~ s/\r//g;
 $newkey =~ s/\r//g;
@@ -44,10 +65,23 @@ $newcertinfo = &cert_file_info($temp);
 
 # Make sure Apache is setup to use the right key files
 &obtain_lock_ssl($d);
-$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
-$d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
+&$first_print($text{'newkey_apache'});
+if ($in{'cert_mode'} == 2) {
+	$d->{'ssl_cert'} = $in{'certfile'};
+	}
+else {
+	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
+	}
+if ($in{'newkey_mode'} == 2) {
+	$d->{'ssl_key'} = $in{'newkeyfile'};
+	}
+else {
+	$d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
+	}
 &save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
 &save_website_ssl_file($d, "key", $d->{'ssl_key'});
+&save_domain($d);
+&$second_print($text{'setup_done'});
 
 # If a passphrase is needed, add it to the top-level Apache config. This is
 # done by creating a small script that outputs the passphrase
@@ -55,23 +89,29 @@ $d->{'ssl_pass'} = $passok == 2 ? $in{'pass'} : undef;
 &save_domain_passphrase($d);
 
 # Save the cert and private keys
-&$first_print($text{'newkey_saving'});
-&lock_file($d->{'ssl_cert'});
-&unlink_file($d->{'ssl_cert'});
-&open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_cert'}");
-&print_tempfile(CERT, $cert);
-&close_tempfile_as_domain_user($d, CERT);
-&set_certificate_permissions($d, $d->{'ssl_cert'});
-&unlock_file($d->{'ssl_cert'});
+if ($in{'cert_mode'} != 2) {
+	&$first_print($text{'newkey_savingcert'});
+	&lock_file($d->{'ssl_cert'});
+	&unlink_file($d->{'ssl_cert'});
+	&open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_cert'}");
+	&print_tempfile(CERT, $cert);
+	&close_tempfile_as_domain_user($d, CERT);
+	&set_certificate_permissions($d, $d->{'ssl_cert'});
+	&unlock_file($d->{'ssl_cert'});
+	&$second_print($text{'setup_done'});
+	}
 
-&lock_file($d->{'ssl_key'});
-&unlink_file($d->{'ssl_key'});
-&open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_key'}");
-&print_tempfile(CERT, $newkey);
-&close_tempfile_as_domain_user($d, CERT);
-&set_certificate_permissions($d, $d->{'ssl_key'});
-&unlock_file($d->{'ssl_key'});
-&$second_print($text{'setup_done'});
+if ($in{'newkey_mode'} != 2) {
+	&$first_print($text{'newkey_savingkey'});
+	&lock_file($d->{'ssl_key'});
+	&unlink_file($d->{'ssl_key'});
+	&open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_key'}");
+	&print_tempfile(CERT, $newkey);
+	&close_tempfile_as_domain_user($d, CERT);
+	&set_certificate_permissions($d, $d->{'ssl_key'});
+	&unlock_file($d->{'ssl_key'});
+	&$second_print($text{'setup_done'});
+	}
 
 # Remove the new private key we just installed
 &release_lock_ssl($d);
