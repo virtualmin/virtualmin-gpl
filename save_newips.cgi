@@ -14,10 +14,16 @@ require './virtual-server-lib.pl';
 
 # Work out which domains to update
 if ($in{'servers_def'}) {
-	@doms = grep { !$_->{'virt'} && $_->{'ip'} eq $in{'old'} }
+	# Update all virtual servers on the old IP, including their aliases
+	# (even if the alias wasn't on the old IP)
+	@doms = grep { !$_->{'virt'} &&
+			($_->{'ip'} eq $in{'old'} ||
+			 $_->{'alias'} &&
+			 &get_domain($_->{'alias'})->{'ip'} eq $in{'old'}) }
 		     &list_domains();
 	}
 else {
+	# Update selected virtual servers, regardless of their IP
 	%servers = map { $_, 1 } split(/\0/, $in{'servers'});
 	@doms = grep { $servers{$_->{'id'}} } &list_domains();
 	}
