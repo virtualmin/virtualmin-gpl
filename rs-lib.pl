@@ -6,6 +6,35 @@
 sub rs_connect
 {
 my ($url, $user, $key) = @_;
+my ($host, $port, $page, $ssl) = &parse_http_url($url);
+$host || return "Invalid URL : $url";
+my $apiver;
+if ($url =~ /(v[0-9\.]+)$/) {
+	$apiver = $1;
+	}
+else {
+	return "URL does not end with an API version : $url";
+	}
+my ($out, $err);
+my $headers = { 'X-Auth-User' => $user,
+		'X-Auth-Key' => $key };
+$rs_headers = undef;
+&http_download($host, $port, $page, \$out, \$error,
+	       \&rs_capture_headers_callback, $ssl, undef, undef, 30, 0, 1,
+	       $headers);
+return "Authentication at $url failed : $error" if ($error);
+if (!$rs_headers->{'x-auth-token'}) {
+	return "No authentication token received : $out";
+	}
+my $h = { 'url' => $url,
+	  'storage-url' => $rs_headers->{'x-storage-url'},
+	  'cdn-url' => $rs_headers->{'x-cdn-management-url'},
+	  'token' => $rs_headers->{'x-auth-token'},
+	  'user' => $user,
+	  'key' => $key,
+	  'api' => $apiver,
+	};
+return $h;
 }
 
 # rs_list_containers(&handle)
@@ -14,6 +43,9 @@ my ($url, $user, $key) = @_;
 sub rs_list_containers
 {
 my ($h) = @_;
+my ($ok, $out, $headers) = &rs_api_call($h, "", "GET");
+return $out if (!$ok);
+return [ split(/\r?\n/, $out) ];
 }
 
 # rs_create_container(&handle, container)
@@ -86,6 +118,63 @@ my ($h, $container, $file) = @_;
 sub rs_delete_object
 {
 my ($h, $container, $file) = @_;
+}
+
+# rs_capture_headers_callback(mode)
+# For passing to http_download to get back headers
+sub rs_capture_headers_callback
+{
+my ($mode) = @_;
+if ($mode == 2) {
+	$rs_headers = $WebminCore::header;
+	}
+}
+
+# rs_api_call(&handle, path, method, &headers)
+# Calls the rackspace API, and returns an OK flag, response body or error
+# message, and HTTP headers.
+sub rs_api_call
+{
+my ($h, $path, $method, $headers) = @_;
+my ($host, $port, $page, $ssl) = &parse_http_url($h->{'storage-url'});
+my $sendheaders = $headers ? { %$headers } : { };
+$sendheaders->{'X-Auth-Token'} = $h->{'token'};
+return &rs_http_call($h->{'storage-url'}.$path, $method, $sendheaders);
+}
+
+# rs_http_call(url, method, &headers)
+# Makes an HTTP call and returns an OK flag, response body or error
+# message, and HTTP headers.
+sub rs_http_call
+{
+my ($url, $method, $headers) = @_;
+my ($host, $port, $page, $ssl) = &parse_http_url($url);
+
+# Build headers
+my @headers;
+push(@headers, [ "Host", $host ]);
+push(@headers, [ "User-agent", "Webmin" ]);
+push(@headers, [ "Accept-language", "en" ]);
+foreach my $hname (keys %$headers) {
+	push(@headers, [ $hname, $headers->{$hname} ]);
+	}
+
+# Actually download it
+$main::download_timed_out = undef;
+local $SIG{ALRM} = \&download_timeout;
+alarm(60);
+my $h = &make_http_connection($host, $port, $ssl, $method, $page, \@headers);
+alarm(0);
+$h = $main::download_timed_out if ($main::download_timed_out);
+if (!ref($h)) {
+	return (0, $error);
+	}
+
+# XXX doesn't handle 204 status
+my ($out, $error);
+&complete_http_download($h, \$out, \$error, \&rs_capture_headers_callback,
+			0, $host, $port, $headers, $ssl, 1);
+return (1, $out, $rs_headers);
 }
 
 1;
