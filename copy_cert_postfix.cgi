@@ -14,18 +14,22 @@ $d->{'ssl_pass'} && &error($text{'copycert_epass'});
 &foreign_require("postfix");
 $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
 $kfile = &postfix::get_real_value("smtpd_tls_key_file");
+$cafile = &postfix::get_real_value("smtpd_tls_CAfile");
 $cdir = &postfix::guess_config_dir();
 if ($cfile =~ /snakeoil/) {
 	# Hack to not use shared cert file on Ubuntu / Debian
-	$cfile = $kfile = undef;
+	$cfile = $kfile = $cafile = undef;
 	}
 $cfile ||= "$cdir/postfix.cert.pem";
 $kfile ||= "$cdir/postfix.key.pem";
+$cafile ||= "$cdir/postfix.ca.pem";
 
 # Copy cert into those files
 &$first_print($text{'copycert_psaving'});
 $cdata = &cert_pem_data($d);
 $kdata = &key_pem_data($d);
+$casrcfile = &get_website_ssl_file($d, "ca");
+$cadata = $casrcfile ? &read_file_contents($casrcfile) : undef;
 $cdata || &error($text{'copycert_ecert'});
 $kdata || &error($text{'copycert_ekey'});
 &open_lock_tempfile(CERT, ">$cfile");
@@ -43,10 +47,17 @@ else {
 	&close_tempfile(KEY);
 	&set_ownership_permissions(undef, undef, 0700, $kfile);
 	}
+if ($cadata) {
+	&open_lock_tempfile(CA, ">$cafile");
+	&print_tempfile(CA, $cadata,"\n");
+	&close_tempfile(CA);
+	&set_ownership_permissions(undef, undef, 0750, $cafile);
+	}
 
 # Update config with correct files
 &postfix::set_current_value("smtpd_tls_cert_file", $cfile);
 &postfix::set_current_value("smtpd_tls_key_file", $kfile);
+&postfix::set_current_value("smtpd_tls_CAfile", $cadata ? $cafile : undef);
 &$second_print(&text('copycert_dsaved', "<tt>$cfile</tt>", "<tt>$kfile</tt>"));
 
 # Make sure SSL is enabled

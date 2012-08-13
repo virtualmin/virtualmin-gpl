@@ -5433,7 +5433,8 @@ copycert_userminconfig=Configuring Usermin to use them ..
 copycert_userminnot=Warning - SSL is not currently enabled in Usermin. To activate it, go to the <a href='$1'>SSL Encryption</a> page.
 copycert_dtitle=Copy SSL Certificate to Dovecot
 copycert_dsaving=Copying certificate and key to Dovecot files ..
-copycert_dsaved=.. wrote out $1 and $2
+copycert_dsaved=.. wrote out certificate in $1 and key in $2
+copycert_dsaved2=.. wrote out certificate in $1, key in $2 and CA cert in $3
 copycert_denabling=Enabling SSL in Dovecot configuration ..
 copycert_ecert=No SSL certificate data found
 copycert_ekey=No SSL key data found
