@@ -206,3 +206,4 @@ sni_support=0
 mx_validate=1
 lookup_domain_serial=0
 ipfollow=0
+rs_endpoint=https://auth.api.rackspacecloud.com/v1.0
