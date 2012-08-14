@@ -77,42 +77,37 @@ if ($container) {
 	}
 if ($multi) {
 	# Full details
-	# XXX
 	foreach $f (@$files) {
-		print $f->{'Name'},"\n";
-		print "    Created: $f->{'CreationDate'}\n";
-		$info = &s3_get_bucket($akey, $skey, $f->{'Name'});
-		if ($info && $info->{'location'}) {
-			print "    Location: $info->{'location'}\n";
+		print $f,"\n";
+		$st = &rs_stat_container($h, $f);
+		if (ref($st)) {
+			print "    Created: ",
+			      &make_date($st->{'X-Timestamp'}),"\n";
+			print "    Bytes used: ",
+			      $st->{'X-Container-Bytes-Used'},"\n";
+			print "    Object count: ",
+			      $st->{'X-Container-Object-Count'},"\n";
 			}
-		if ($info && $info->{'acl'}) {
-			print "    Owner: ",
-			      $info->{'acl'}->{'Owner'}->{'DisplayName'},"\n";
-			$acl = $info->{'acl'}->{'AccessControlList'};
-			@grant = ref($acl->{'Grant'}) eq 'HASH' ?
-					( $acl->{'Grant'} ) :
-				 $acl->{'Grant'} ? @{$acl->{'Grant'}} : ( );
-			foreach my $g (@grant) {
-				print "    Grant: $g->{'Permission'} to ",
-				      $g->{'Grantee'}->{'DisplayName'},"\n";
-				}
+		else {
+			print "    ERROR: $st\n";
 			}
 		}
 	}
 elsif ($nameonly) {
 	# Container names only
-	foreach $f (@$containers) {
+	foreach $f (@$files) {
                 print $f,"\n";
 		}
 	}
 else {
 	# Summary
-	# XXX
-	$fmt = "%-45.45s %-30.30s\n";
-	printf $fmt, "Bucket name", "Created";
-	printf $fmt, ("-" x 45), ("-" x 30);
+	$fmt = "%-30.30s %-30.30s %-15.15s\n";
+	printf $fmt, "Container name", "Created", "Size";
+	printf $fmt, ("-" x 30), ("-" x 30), ("-" x 15);
 	foreach $f (@$files) {
-		printf $fmt, $f->{'Name'}, $f->{'CreationDate'};
+		$st = &rs_stat_container($h, $f);
+		printf $fmt, $f, &make_date($st->{'X-Timestamp'}),
+			     &nice_size($st->{'X-Container-Bytes-Used'});
 		}
 	}
 
