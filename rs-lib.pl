@@ -62,7 +62,7 @@ my ($h, $container) = @_;
 sub rs_stat_container
 {
 my ($h, $container) = @_;
-my ($ok, $out, $headers) = &rs_api_call($h, "/$container", "GET");
+my ($ok, $out, $headers) = &rs_api_call($h, "/$container", "HEAD");
 return $out if (!$ok);
 return $headers;
 }
@@ -81,6 +81,9 @@ my ($h, $container) = @_;
 sub rs_list_objects
 {
 my ($h, $container) = @_;
+my ($ok, $out, $headers) = &rs_api_call($h, "/$container", "GET");
+return $out if (!$ok);
+return [ split(/\r?\n/, $out) ];
 }
 
 # rs_upload_object(&handle, container, file, source-file)
@@ -110,6 +113,9 @@ my ($h, $container, $file, $dst) = @_;
 sub rs_stat_object
 {
 my ($h, $container, $file) = @_;
+my ($ok, $out, $headers) = &rs_api_call($h, "/$container/$file", "HEAD");
+return $out if (!$ok);
+return $headers;
 }
 
 # rs_delete_object(&handle, container, file)
