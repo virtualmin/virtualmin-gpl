@@ -1354,7 +1354,7 @@ Added an option to the restore form and a flag to restore-domain to ignore virtu
 The default shell for new virtual servers on Linux systems is now bash, if installed.
 When the SSL certificate for a domain is changed, any domains which shared the old cert but cannot use the new one will be switched to a copy of the old cert file.
 ---- Changes since 3.93 ----
-Updated the SugarCRM script installer to version 6.5.2, WHCMS to 5.1.2, Django to 1.4.1, phpMyAdmin to 3.5.2.2, ZenPhoto to 1.4.3.1, PHPList to 2.10.19, Drupal to 7.15, RoundCube to 0.8.0, Typo3 to 4.6.12, dotProject to 2.1.6, and CMS made simple to 1.11.
+Updated the SugarCRM script installer to version 6.5.2, WHCMS to 5.1.2, Django to 1.4.1, phpMyAdmin to 3.5.2.2, ZenPhoto to 1.4.3.1, PHPList to 2.10.19, Drupal to 7.15, RoundCube to 0.8.0, Typo3 to 4.6.12, dotProject to 2.1.6, and CMS made simple to 1.11.1.
 Alias virtual servers that have their own mailboxes and aliases can now be created, rather than always forwarding mail to the destination domain.
 When installing Ruby scripts, dependencies like gcc and libfcgi-devel are now installed automatically if possible.
 The outgoing IP address for email sent from a domain can now be configured to match the domain's IP, when using Postfix 2.7 or above.
