@@ -105,7 +105,9 @@ else {
 		return "Missing or invalid installation directory";
 	local $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
 	local ($newdb) = ($in->{'db'} =~ s/^\*//);
-	$in{'licensekey'} =~ /^\S+\-\S+$/ ||
+	$in{'licensekey'} =~ s/^\s*//;
+	$in{'licensekey'} =~ s/\s*$//;
+	$in{'licensekey'} =~ /^\S+$/ ||
 		return "Missing or invalid-looking licence key - should be ".
 		       "like Owned-a8f06f0510547d80704b";
 	return { 'db' => $in->{'db'},
