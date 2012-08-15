@@ -92,6 +92,10 @@ return [ split(/\r?\n/, $out) ];
 sub rs_upload_object
 {
 my ($h, $container, $file, $src) = @_;
+# XXX large files
+my ($ok, $out) = &rs_api_call($h, "/$container/$file", "PUT",
+			      undef, undef, $src);
+return $ok ? undef : $out;
 }
 
 # rs_download_object(&handle, container, file, dest-file)
@@ -126,25 +130,27 @@ sub rs_delete_object
 my ($h, $container, $file) = @_;
 }
 
-# rs_api_call(&handle, path, method, &headers)
+# rs_api_call(&handle, path, method, &headers, [save-to-file], [read-from-file])
 # Calls the rackspace API, and returns an OK flag, response body or error
 # message, and HTTP headers.
 sub rs_api_call
 {
-my ($h, $path, $method, $headers) = @_;
+my ($h, $path, $method, $headers, $dstfile, $srcfile) = @_;
 my ($host, $port, $page, $ssl) = &parse_http_url($h->{'storage-url'});
 my $sendheaders = $headers ? { %$headers } : { };
 $sendheaders->{'X-Auth-Token'} = $h->{'token'};
-return &rs_http_call($h->{'storage-url'}.$path, $method, $sendheaders);
+return &rs_http_call($h->{'storage-url'}.$path, $method, $sendheaders,
+		     $dstfile, $srcfile);
 }
 
-# rs_http_call(url, method, &headers, [save-to-file])
+# rs_http_call(url, method, &headers, [save-to-file], [read-from-file])
 # Makes an HTTP call and returns an OK flag, response body or error
 # message, and HTTP headers.
 sub rs_http_call
 {
-my ($url, $method, $headers, $file) = @_;
+my ($url, $method, $headers, $dstfile, $srcfile) = @_;
 my ($host, $port, $page, $ssl) = &parse_http_url($url);
+!$srcfile || -r $srcfile || return (0, "Source file $srcfile does not exist");
 
 # Build headers
 my @headers;
@@ -153,6 +159,10 @@ push(@headers, [ "User-agent", "Webmin" ]);
 push(@headers, [ "Accept-language", "en" ]);
 foreach my $hname (keys %$headers) {
 	push(@headers, [ $hname, $headers->{$hname} ]);
+	}
+if ($srcfile) {
+	my @st = stat($srcfile);
+	push(@headers, [ "Content-Length", $st[7] ]);
 	}
 
 # Make the HTTP connection
@@ -166,6 +176,16 @@ if (!ref($h)) {
 	return (0, $error);
 	}
 
+if ($srcfile) {
+	# Send body contents
+	my $buf;
+	open(SRCFILE, $srcfile);
+	while(read(SRCFILE, $buf, 1024) > 0) {
+		&write_http_connection($h, $buf);
+		}
+	close(SRCFILE);
+	}
+
 my ($out, $error);
 
 # Read headers
@@ -174,7 +194,7 @@ my $line;
 ($line = &read_http_connection($h)) =~ tr/\r\n//d;
 if ($line !~ /^HTTP\/1\..\s+(20[0-9])(\s+|$)/) {
 	alarm(0);
-	return (0, "Invalid HTTP response : $file");
+	return (0, "Invalid HTTP response : $line");
 	}
 my $rcode = $1;
 my %header;
@@ -191,7 +211,7 @@ if ($main::download_timed_out) {
 
 # Read data
 my $out;
-if (!$file) {
+if (!$dstfile) {
 	# Append to a variable
 	while(defined($buf = &read_http_connection($h, 1024))) {
 		$out .= $buf;
@@ -200,8 +220,8 @@ if (!$file) {
 else {
 	# Write to a file
 	my $got = 0;
-	if (!&open_tempfile(PFILE, ">$file", 1)) {
-		return (0, "Failed to write to $file : $!");
+	if (!&open_tempfile(PFILE, ">$dstfile", 1)) {
+		return (0, "Failed to write to $dstfile : $!");
 		}
 	binmode(PFILE);		# For windows
 	while(defined($buf = &read_http_connection($h, 1024))) {
