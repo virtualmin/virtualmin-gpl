@@ -104,6 +104,9 @@ return $ok ? undef : $out;
 sub rs_download_object
 {
 my ($h, $container, $file, $dst) = @_;
+my ($ok, $out) = &rs_api_call($h, "/$container/$file", "GET",
+			      undef, $dst);
+return $ok ? undef : $out;
 }
 
 # rs_stat_object(&handle, container, file)
