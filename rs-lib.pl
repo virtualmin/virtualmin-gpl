@@ -50,7 +50,8 @@ return [ split(/\r?\n/, $out) ];
 sub rs_create_container
 {
 my ($h, $container) = @_;
-# XXX
+my ($ok, $out, $headers) = &rs_api_call($h, "/$container", "PUT");
+return $ok ? undef : $out;
 }
 
 # rs_stat_container(&handle, container)
@@ -67,12 +68,22 @@ return $out if (!$ok);
 return $headers;
 }
 
-# rs_delete_container(&handle, container)
+# rs_delete_container(&handle, container, [recursive])
 # Deletes some container from rackspace. Returns an error message on failure, or
 # undef on success
 sub rs_delete_container
 {
-my ($h, $container) = @_;
+my ($h, $container, $recursive) = @_;
+if ($recursive) {
+	my $files = &rs_list_objects($h, $container);
+	return $files if (!ref($files));
+	foreach my $f (@$files) {
+		my $err = &rs_delete_object($h, $container, $f);
+		return "$f : $err" if ($err);
+		}
+	}
+my ($ok, $out, $headers) = &rs_api_call($h, "/$container", "DELETE");
+return $ok ? undef : $out;
 }
 
 # rs_list_objects(&handle, container)
