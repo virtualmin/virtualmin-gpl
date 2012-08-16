@@ -131,6 +131,8 @@ return $headers;
 sub rs_delete_object
 {
 my ($h, $container, $file) = @_;
+my ($ok, $out) = &rs_api_call($h, "/$container/$file", "DELETE");
+return $ok ? undef : $out;
 }
 
 # rs_api_call(&handle, path, method, &headers, [save-to-file], [read-from-file])
