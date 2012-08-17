@@ -228,6 +228,7 @@ if ($key && $config{'compression'} == 3) {
 # See if we can actually connect to the remote server
 local $anyremote;
 local $anylocal;
+local $rsh;	# Rackspace cloud files handle
 foreach my $desturl (@$desturls) {
 	local ($mode, $user, $pass, $server, $path, $port) =
 		&parse_backup_url($desturl);
@@ -340,6 +341,24 @@ foreach my $desturl (@$desturls) {
 			&$first_print($err);
 			return (0, 0, $doms);
 			}
+		}
+	elsif ($mode == 6) {
+		# Connect to Rackspace cloud files and create container
+		if (!$path && !$dirfmt) {
+			&$first_print($text{'backup_ersnopath'});
+			return (0, 0, $doms);
+			}
+		$rsh = &rs_connect($config{'rs_endpoint'}, $user, $pass);
+		if (!ref($rsh)) {
+			&$first_print($rsh);
+			return (0, 0, $doms);
+			}
+		local $err = &rs_create_container($rsh, $server);
+		if ($err) {
+			&$first_print($err);
+			return (0, 0, $doms);
+			}
+
 		}
 	elsif ($mode == 0) {
 		# Make sure target is / is not a directory
@@ -695,6 +714,13 @@ DOMAIN: foreach $d (@$doms) {
 						  $path ? $path."/".$df : $df,
 						  $binfo, $bdom,
 						  $s3_upload_tries, $port);
+				}
+			elsif ($mode == 6) {
+				# Via rackspace upload
+				&$first_print($text{'backup_upload6'});
+				$err = &rs_upload_object($rsh,
+					$server, $df, "$dest/$df");
+				# XXX
 				}
 			if ($err) {
 				&$second_print(&text('backup_uploadfailed',
@@ -1186,6 +1212,10 @@ foreach my $desturl (@$desturls) {
 				}
 			}
 		&$second_print($text{'setup_done'}) if ($ok);
+		}
+	elsif ($ok && $mode == 6 && (@destfiles || !$dirfmt)) {
+		# Upload to Rackspace cloud files
+		# XXX
 		}
 	elsif ($ok && $mode == 0 && (@destfiles || !$dirfmt) &&
 	       $path ne $path0) {
@@ -2577,8 +2607,8 @@ return $rv;
 
 # parse_backup_url(string)
 # Converts a URL like ftp:// or a filename into its components. These will be
-# protocol (1 for FTP, 2 for SSH, 0 for local, 3 for S3, 4 for download), login,
-# password, host, path and port
+# protocol (1 for FTP, 2 for SSH, 0 for local, 3 for S3, 4 for download,
+# 5 for upload, 6 for rackspace), login, password, host, path and port
 sub parse_backup_url
 {
 local @rv;
@@ -2603,6 +2633,10 @@ elsif ($_[0] =~ /^s3:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
 elsif ($_[0] =~ /^s3rrs:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
 	# S3 with less redundancy
 	@rv = (3, $1, $2, $3, $5, 1);
+	}
+elsif ($_[0] =~ /^rs:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
+	# Rackspace cloud files
+	@rv = (6, $1, $2, $3, $5, 0);
 	}
 elsif ($_[0] eq "download:") {
 	return (4, undef, undef, undef, undef, undef);
@@ -2650,6 +2684,11 @@ elsif ($proto == 4) {
 	}
 elsif ($proto == 5) {
 	$rv = $text{'backup_niceupload'};
+	}
+elsif ($proto == 6) {
+	$rv = $path ?
+		&text('backup_nicersp', "<tt>$host</tt>", "<tt>$path</tt>") :
+		&text('backup_nicers', "<tt>$host</tt>");
 	}
 else {
 	$rv = $url;
@@ -2728,34 +2767,32 @@ $st .= "<tr> <td>$text{'backup_pass'}</td> <td>".
 $st .= "</table>\n";
 push(@opts, [ 2, $text{'backup_mode2'}, $st ]);
 
-if (&can_use_s3()) {
-	# S3 backup fields (bucket, access key ID, secret key and file)
-	local $s3user = $mode == 3 ? $user : undef;
-	local $s3pass = $mode == 3 ? $pass : undef;
-	if (&master_admin()) {
-		$s3user ||= $config{'a3_akey'};
-		$s3pass ||= $config{'s3_akey'};
-		}
-	local $st = "<table>\n";
-	$st .= "<tr> <td>$text{'backup_bucket'}</td> <td>".
-	       &ui_textbox($name."_bucket", $mode == 3 ? $server : undef, 20).
-	       "</td> </tr>\n";
-	$st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
-	       &ui_textbox($name."_akey", $s3user, 40, 0, undef, $noac).
-	       "</td> </tr>\n";
-	$st .= "<tr> <td>$text{'backup_skey'}</td> <td>".
-	       &ui_password($name."_skey", $s3pass, 40, 0, undef, $noac).
-	       "</td> </tr>\n";
-	$st .= "<tr> <td>$text{'backup_s3path'}</td> <td>".
-	       &ui_opt_textbox($name."_s3file", $mode == 3 ? $path : undef,
-			       30, $text{'backup_nos3path'}).
-	       "</td> </tr>\n";
-	$st .= "<tr> <td></td> <td>".
-	       &ui_checkbox($name."_rrs", 1, $text{'backup_s3rrs'}, $port == 1).
-	       "</td> </tr>\n";
-	$st .= "</table>\n";
-	push(@opts, [ 3, $text{'backup_mode3'}, $st ]);
+# S3 backup fields (bucket, access key ID, secret key and file)
+local $s3user = $mode == 3 ? $user : undef;
+local $s3pass = $mode == 3 ? $pass : undef;
+if (&master_admin()) {
+	$s3user ||= $config{'a3_akey'};
+	$s3pass ||= $config{'s3_akey'};
 	}
+local $st = "<table>\n";
+$st .= "<tr> <td>$text{'backup_bucket'}</td> <td>".
+       &ui_textbox($name."_bucket", $mode == 3 ? $server : undef, 20).
+       "</td> </tr>\n";
+$st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
+       &ui_textbox($name."_akey", $s3user, 40, 0, undef, $noac).
+       "</td> </tr>\n";
+$st .= "<tr> <td>$text{'backup_skey'}</td> <td>".
+       &ui_password($name."_skey", $s3pass, 40, 0, undef, $noac).
+       "</td> </tr>\n";
+$st .= "<tr> <td>$text{'backup_s3path'}</td> <td>".
+       &ui_opt_textbox($name."_s3file", $mode == 3 ? $path : undef,
+		       30, $text{'backup_nos3path'}).
+       "</td> </tr>\n";
+$st .= "<tr> <td></td> <td>".
+       &ui_checkbox($name."_rrs", 1, $text{'backup_s3rrs'}, $port == 1).
+       "</td> </tr>\n";
+$st .= "</table>\n";
+push(@opts, [ 3, $text{'backup_mode3'}, $st ]);
 
 if (!$nodownload) {
 	# Show mode to download in browser
@@ -2847,7 +2884,7 @@ elsif ($mode == 2) {
 	return "ssh://".$in{$name."_suser"}.":".$in{$name."_spass"}."\@".
 	       $in{$name."_sserver"}.":".$in{$name."_spath"};
 	}
-elsif ($mode == 3 && &can_use_s3()) {
+elsif ($mode == 3) {
 	# Amazon S3 service
 	local $cerr = &check_s3();
 	$cerr && &error($cerr);
@@ -3401,12 +3438,6 @@ elsif ($mode == 3 && $path =~ /\%/) {
 &$second_print($pcount ? &text('backup_purged', $pcount)
 		       : $text{'backup_purgednone'});
 return $ok;
-}
-
-# Returns 1 if the current user can backup to Amazon's S3 service
-sub can_use_s3
-{
-return 1;	# Now supported for GPL too
 }
 
 # write_backup_log(&domains, dest, incremental?, start, size, ok?,

@@ -58,3 +58,12 @@
 
  - Rackspace cloud files backup destination
 	- http://www.virtualmin.com/node/11659
+	- http://docs.rackspace.com/files/api/v1/cf-devguide/content/index.html
+	- web UI for backup
+	- API for backup
+	- API for rs
+	- Documentation
+	- CHANGELOG
+	- Functional tests
+	- GPL version links
+	- Purging

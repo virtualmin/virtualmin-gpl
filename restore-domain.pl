@@ -371,6 +371,7 @@ print " - A local file, like /backup/yourdomain.com.tgz\n";
 print " - An FTP destination, like ftp://login:pass\@server/backup/yourdomain.com.tgz\n";
 print " - An SSH destination, like ssh://login:pass\@server/backup/yourdomain.com.tgz\n";
 print " - An S3 bucket, like s3://accesskey:secretkey\@bucket\n";
+print " - A Rackspace container, like rs://user:apikey\@container\n";
 exit(1);
 }
 
