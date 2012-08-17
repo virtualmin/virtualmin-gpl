@@ -718,9 +718,13 @@ DOMAIN: foreach $d (@$doms) {
 			elsif ($mode == 6) {
 				# Via rackspace upload
 				&$first_print($text{'backup_upload6'});
+				local $dfpath = $path ? $path."/".$df : $df;
 				$err = &rs_upload_object($rsh,
-					$server, $df, "$dest/$df");
-				# XXX
+					$server, $dfpath, "$dest/$df");
+				$err = &rs_upload_object($rsh, $server,
+					$dfpath.".info", $infotemp) if (!$err);
+				$err = &rs_upload_object($rsh, $server,
+					$dfpath.".dom", $domtemp) if (!$err);
 				}
 			if ($err) {
 				&$second_print(&text('backup_uploadfailed',
@@ -1215,7 +1219,70 @@ foreach my $desturl (@$desturls) {
 		}
 	elsif ($ok && $mode == 6 && (@destfiles || !$dirfmt)) {
 		# Upload to Rackspace cloud files
-		# XXX
+		local $err;
+		&$first_print($text{'backup_upload6'});
+		local $infotemp = &transname();
+		local $domtemp = &transname();
+		if ($dirfmt) {
+			# Upload an entire directory of files
+			local $tstart = time();
+			foreach my $df (@destfiles) {
+				local $d = $destfiles_map{$df};
+				local $n = $d eq "virtualmin" ? "virtualmin"
+							      : $d->{'dom'};
+				local $binfo = { $n => $donefeatures{$n} };
+				local $bdom = { $n => $d };
+				&uncat_file($infotemp,
+					    &serialise_variable($binfo));
+				&uncat_file($domtemp,
+					    &serialise_variable($bdom));
+				local $dfpath = $path ? $path."/".$df : $df;
+				$err = &rs_upload_object($rsh, $server,
+					$dfpath, $dest."/".$df);
+				$err = &rs_upload_object($rsh, $server,
+					$dfpath.".info", $infotemp) if (!$err);
+				$err = &rs_upload_object($rsh, $server,
+					$dfpath.".dom", $domtemp) if (!$err);
+				}
+			if (!$err && $asd) {
+				# Log bandwidth used by domain
+				foreach my $df (@destfiles) {
+					local $d = $destfiles_map{$df};
+					if ($d) {
+						local @tst = stat("$dest/$df");
+						&record_backup_bandwidth(
+							$d, 0, $tst[7],
+							$tstart, time());
+						}
+					}
+				}
+			}
+		else {
+			# Upload one file to the container
+			local $tstart = time();
+			&uncat_file($infotemp,
+				    &serialise_variable(\%donefeatures));
+			&uncat_file($domtemp,
+				    &serialise_variable(\%donedoms));
+			$err = &rs_upload_object($rsh, $server, $path, $dest);
+			$err = &rs_upload_object($rsh, $server, $path.".info",
+					  $infotemp) if (!$err);
+			$err = &rs_upload_object($rsh, $server, $path.".dom",
+					  $domtemp) if (!$err);
+			if ($asd && !$err) {
+				# Log bandwidth used by whole transfer
+				local @tst = stat($dest);
+				&record_backup_bandwidth($asd, 0, $tst[7], 
+							 $tstart, time());
+				}
+			}
+		if ($err) {
+			&$second_print(&text('backup_uploadfailed', $err));
+			$ok = 0;
+			}
+		&unlink_file($infotemp);
+		&unlink_file($domtemp);
+		&$second_print($text{'setup_done'}) if ($ok);
 		}
 	elsif ($ok && $mode == 0 && (@destfiles || !$dirfmt) &&
 	       $path ne $path0) {
