@@ -3419,7 +3419,7 @@ resel_ebwunlimit=The virtual server $1 cannot be assigned to this reseller, as i
 licence_err=A problem was detected with your Virtualmin license :
 licence_soon=Notice - Your Virtualmin license will expire in $1 days.
 licence_soon2=Notice - Your Virtualmin license will expire in $1 hours.
-licence_renew=A renewal can be purchased at <a target=_new href='$1'>$1</a>
+licence_renew=A renewal can be purchased at <a target=_blank href='$1'>$1</a>
 licence_recheck=Re-check License Status
 licence_title=Re-Check License
 licence_doing=Now re-checking your Virtualmin license ..
@@ -3565,7 +3565,7 @@ scripts_epythonmod=.. automatic Python module installation is not supported on y
 scripts_epythoninst=.. automatic Python module installation failed
 scripts_installgem=Installing Ruby Gems package ..
 scripts_mmax=(At most $1)
-scripts_sitelink=More information on using this script can be found at <a href='$1' target=_new>$1</a>.
+scripts_sitelink=More information on using this script can be found at <a href='$1' target=_blank>$1</a>.
 scripts_userpass=The initial administration login is $1 with the password $2.
 scripts_useronly=The initial administration login is $1.
 scripts_passonly=The initial administration password is $1.
