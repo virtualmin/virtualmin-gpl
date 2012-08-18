@@ -65,5 +65,6 @@
 	- Documentation
 	- CHANGELOG
 	- Functional tests
-	- GPL version links
 	- Purging
+	- Combine S3 bucket and path into a single field
+	- Make sure backup to a sub-dir works

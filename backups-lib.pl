@@ -1452,6 +1452,7 @@ if ($mode > 0) {
 	# Need to download to temp file/directory first
 	&$first_print($mode == 1 ? $text{'restore_download'} :
 		      $mode == 3 ? $text{'restore_downloads3'} :
+		      $mode == 6 ? $text{'restore_downloadrs'} :
 				   $text{'restore_downloadssh'});
 	if ($mode == 3) {
 		local $cerr = &check_s3();
@@ -2646,6 +2647,82 @@ elsif ($mode == 3) {
 		return $err if ($err);
 		}
 	}
+elsif ($mode == 6) {
+	# Download from Rackspace cloud files
+	local $rsh = &rs_connect($config{'rs_endpoint'}, $user, $pass);
+	if (!ref($rsh)) {
+		return $rsh;
+		}
+	local $files = &rs_list_objects($rsh, $server);
+	return "Failed to list $server : $files" if (!ref($files));
+	local $pathslash = $path ? $path."/" : "";
+	if ($infoonly) {
+		# First try file with .info or .dom extension
+		$err = &rs_download_object($rsh, $server, $path.$sfx, $temp);
+		if ($err) {
+			# Doesn't exist .. but maybe path is a sub-directory
+			# full of .info and .dom files?
+			&make_dir($temp, 0700);
+			foreach my $f (@$files) {
+				if ($f =~ /\Q$sfx\E$/ &&
+				    $f =~ /^\Q$pathslash\E([^\/]*)$/) {
+					my $fname = $1;
+					&rs_download_object($rsh, $server, $f,
+						$temp."/".$fname);
+					}
+				}
+			}
+		}
+	else {
+		# If a list of domain names was given, first try to download
+		# only the files for those domains in the directory
+		local $gotfiles = 0;
+		if (@$domnames) {
+                        &unlink_file($temp);
+                        &make_dir($temp, 0711);
+			foreach my $f (@$files) {
+				my $want = 0;
+				my $fname;
+				if ($f =~ /^\Q$pathslash\E([^\/]*)$/) {
+					$fname = $1;
+					foreach my $d (@$domnames) {
+						$want++ if ($fname =~
+							    /^\Q$d\E\./);
+						}
+					}
+				if ($want) {
+					$err = &rs_download_object(
+						$rsh, $server, $f,
+						$temp."/".$fname);
+					$gotfiles++ if (!$err);
+					}
+				else {
+					$err = undef;
+					}
+				}
+			}
+		if (!$gotfiles && $path && &indexof($path, @$files) >= 0) {
+			# Download the file
+			&unlink_file($temp);
+			$err = &rs_download_object(
+				$rsh, $server, $path, $temp);
+			}
+		elsif (!$gotfiles) {
+			# Download the directory
+			&unlink_file($temp);
+                        &make_dir($temp, 0711);
+			foreach my $f (@$files) {
+				if ($f =~ /^\Q$pathslash\E([^\/]*)$/) {
+					my $fname = $1;
+					$err = &rs_download_object(
+						$rsh, $server, $f,
+						$temp."/".$fname);
+					}
+				}
+			}
+		return $err if ($err);
+		}
+	}
 $main::download_backup_cache{$url} = $temp if (!$infoonly);
 return undef;
 }
@@ -2860,6 +2937,27 @@ $st .= "<tr> <td></td> <td>".
        "</td> </tr>\n";
 $st .= "</table>\n";
 push(@opts, [ 3, $text{'backup_mode3'}, $st ]);
+
+# Rackspace backup fields (username, API key and bucket/file)
+local $rsuser = $mode == 6 ? $user : undef;
+local $rspass = $mode == 6 ? $pass : undef;
+if (&master_admin()) {
+	$rsuser ||= $config{'rs_user'};
+	$rspass ||= $config{'rs_key'};
+	}
+local $st = "<table>\n";
+$st .= "<tr> <td>$text{'backup_rsuser'}</td> <td>".
+       &ui_textbox($name."_rsuser", $rsuser, 40, 0, undef, $noac).
+       "</td> </tr>\n";
+$st .= "<tr> <td>$text{'backup_rskey'}</td> <td>".
+       &ui_password($name."_rskey", $rspass, 40, 0, undef, $noac).
+       "</td> </tr>\n";
+$st .= "<tr> <td>$text{'backup_rspath'}</td> <td>".
+       &ui_textbox($name."_rspath", $mode != 6 ? undef :
+				    $server.($path ? "/".$path : ""), 50).
+       "</td> </tr>\n";
+$st .= "</table>\n";
+push(@opts, [ 6, $text{'backup_mode6'}, $st ]);
 
 if (!$nodownload) {
 	# Show mode to download in browser
