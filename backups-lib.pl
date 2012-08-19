@@ -3074,6 +3074,16 @@ elsif ($mode == 5) {
 	$in{$name."_upload"} || &error($text{'backup_eupload'});
 	return "upload:";
 	}
+elsif ($mode == 6) {
+	# Rackspace cloud files
+	$in{$name.'_rsuser'} =~ /^\S+$/i || &error($text{'backup_ersuser'});
+	$in{$name.'_rskey'} =~ /^\S+$/i || &error($text{'backup_erskey'});
+	$in{$name.'_rspath'} =~ /^\S+$/i || &error($text{'backup_erspath'});
+	($in{$name.'_rspath'} =~ /^\// || $in{$name.'_rspath'} =~ /\/$/) &&
+		&error($text{'backup_erspath2'});
+	return "rs://".$in{$name.'_rsuser'}.":".$in{$name.'_rskey'}."\@".
+	       $in{$name.'_rspath'};
+	}
 else {
 	&error($text{'backup_emode'});
 	}
