@@ -3399,13 +3399,13 @@ elsif (($mode == 1 || $mode == 2) &&
 	$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($base, $date);
 	}
-elsif ($mode == 3 && $host =~ /%/) {
-	# S3 bucket which is date-based
+elsif (($mode == 3 || $mode == 6) && $host =~ /%/) {
+	# S3 / Rackspace bucket which is date-based
 	$host =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return (undef, $host);
 	}
-elsif ($mode == 3 && $path =~ /%/) {
-	# S3 filename which is date-based
+elsif (($mode == 3 || $mode == 6) && $path =~ /%/) {
+	# S3 / Rackspace filename which is date-based
 	$path =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($host, $path);
 	}
@@ -3607,6 +3607,45 @@ elsif ($mode == 3 && $path =~ /\%/) {
 			}
 		}
 	}
+
+elsif ($mode == 6 && $host =~ /\%/) {
+	# Search Rackspace for containers matching the regexp
+	local $rsh = &rs_connect($config{'rs_endpoint'}, $user, $pass);
+	if (!ref($rsh)) {
+		return &text('backup_purgeersh', $rsh);
+		}
+	local $containers = &rs_list_containers($rsh);
+	if (!ref($containers)) {
+		&$second_print(&text('backup_purgeecontainers', $containers));
+		return 0;
+		}
+	foreach my $c (@$containers) {
+		local $st = &rs_stat_container($rsh, $c);
+		next if (!ref($st));
+		local $ctime = int($st->{'X-Timestamp'});
+		if ($b->{'Name'} =~ /^$re$/ && $ctime && $ctime < $cutoff) {
+			# Found one to delete
+			local $old = int((time() - $ctime) / (24*60*60));
+			&$first_print(&text('backup_deletingcontainer',
+					    "<tt>$c</tt>", $old));
+
+			local $err = &rs_delete_container($rsh, $c, 1);
+			if ($err) {
+				&$second_print(
+					&text('backup_edelcontainer',$err));
+				$ok = 0;
+				}
+			else {
+				&$second_print(&text('backup_deleted',
+			          &nice_size($st->{'X-Container-Bytes-Used'})));
+				$pcount++;
+				}
+			}
+		}
+	}
+
+# XXX purge of files
+
 
 &$outdent_print();
 
