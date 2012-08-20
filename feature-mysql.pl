@@ -972,6 +972,15 @@ if (!$_[0]->{'parent'} && $info{'hosts'}) {
 	local @lhosts = &get_mysql_allowed_hosts($_[0]);
 	push(@lhosts, split(/\s+/, $info{'hosts'}));
 	@lhosts = &unique(@lhosts);
+	if (&indexof("%", @lhosts) >= 0 &&
+	    &indexof("localhost", @lhosts) < 0 &&
+	    &indexof("127.0.0.1", @lhosts) < 0) {
+		# If all hosts were allowed previously via % but localhost was
+		# not, add it now. This is needed because some MySQL versions
+		# (such as the one seen on Ubuntu 12.04) do not allow localhost
+		# connections even if % is granted
+		push(@lhosts, "localhost");
+		}
 	&save_mysql_allowed_hosts($_[0], \@lhosts);
 	&$second_print($text{'setup_done'});
 	}
