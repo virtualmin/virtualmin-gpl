@@ -1,0 +1,25 @@
+<header>Cloudmin Services Client</header>
+
+Met deze pagina kunt u Virtualmin configureren om te verbinden met een Cloudmin Services
+server, zodat MySQL databases, DNS zones en andere service belastingen worden uitgevoerd
+op remote systemen. In het meest ideale geval moet dit al gebruikt worden voordat er een
+virtuele server word aangemaakt omdat een mix van lokaal en remote databases en zones
+hosten zeer inefficient is. <p>
+
+De velden die compleet ingevuld moeten worden zijn :
+<dl>
+<dt><b>Cloudmin services master</b>
+<dd>Deze hostnaam van een Cloudmin machine met de Cloudmin Services plug-in geinstalleerd. Dit kan bij uzelf werken of bij een hosting bedrijf of een VPS provider.<p>
+
+<dt><b>Poort nummer</b>
+<dd>Dit moet bijna altijd worden ingesteld op 10000, wat de standaard Webmin / Cloudmin poort is.<p>
+
+<dt><b>Gebruikersnaam van de server</b>
+<dd>Dit veld moet de gebruikersnaam bevatten van een systeem eigenaar account op de Cloudmin Services master die permissie heeft om databases aan te maken, DNS zones of andere services.
+
+<dt><b>Functies naar de host</b>
+<dd>Deze sectie geeft u de mogelijkheid te kiezen welke Virtualmin functies moeten werken op het remote systeem. Alleen die functies waar uw account mee mag werken op het hoofd systeem kunnen worden geselecteerd.
+
+</dl>
+
+<footer>

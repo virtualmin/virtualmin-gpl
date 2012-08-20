@@ -1,0 +1,27 @@
+<header>Server Template</header>
+
+Een server template definieert de standaard instellingen voor nieuwe domeinen, 
+of voor functies die worden toegevoegd aan bestaande domeinen. Bijna alle tekst
+velden en boxen hieronder geven u de mogelijkheid om variabelen te gebruiken die
+worden toegevoegd gebaseerd op de virtuele server instellingen tijdens het
+gebruik van de template. 
+De meest bruikbare variabelen zijn :<p>
+<table>
+<tr> <td><tt><b>${DOM}</b></td>
+<td>De domein naam, zoals <tt>foo.com</tt></td> </tr>
+<tr> <td><tt><b>${PREFIX}</b></td>
+<td>Het eerste gedeelte van de domein naam, zoals <tt>foo</tt></td> </tr>
+<tr> <td><tt><b>${USER}</b></td>
+
+<td>De gebruiker waar het domein van is, zoals <tt>foo</tt></td> </tr>
+<tr> <td><tt><b>${IP}</b></td>
+<td>Het IP adres wat is toegekend aan de virtuele server, zoals <tt>192.168.1.1</tt></td> </tr>
+<tr> <td><tt><b>${HOME}</b></td>
+<td>De domein gebruikers home directory, zoals <tt>/home/foo</tt></td> </tr>
+<tr> <td><tt><b>${UID}</b></td>
+<td>Het systeem gebruiker ID van de domein eigenaar gebruiker, zoals <tt>502</tt>.</td></tr>
+
+</table>
+Als toevoeging extra blokken zoals <i>$IF-MAIL...$ENDIF-MAIL</i> en <i>$IF-WEB...$ELSE-WEB...{$ENDIF-WEB}</i> kunnen worden gebruikt.<p>
+
+<footer>

@@ -58,6 +58,13 @@
 
  - Rackspace cloud files backup destination
 	- http://www.virtualmin.com/node/11659
-
- - Deal with change of internal IP
-	- do on config check, if eth0 IP has changed
+	- http://docs.rackspace.com/files/api/v1/cf-devguide/content/index.html
+	- web UI for backup
+	- API for backup
+	- API for rs
+	- Documentation
+	- CHANGELOG
+	- Functional tests
+	- Purging
+	- Combine S3 bucket and path into a single field
+	- Make sure backup to a sub-dir works

@@ -1,0 +1,23 @@
+<header>Backup formaat</header>
+
+Deze optie bepaald het file formaat wat Virtualmin zal gebruiken voor deze backup.
+De beschikbare opties zijn :
+<dl>
+<dt>Enkele archief file
+<dd>Alle virtuele servers worden opgeslagen in een enkele file, op een gespecificeerde
+    locatie door de <b>Backup bestemming</b>.
+<dt>1 file per server
+<dd>Van iedere virtuele server word een aparte backup gemaakt met een eigen file, in de
+    directory die gespecificeerd is in de <b>Backup bestemming</b>.
+<dt>1 file per server, in een nieuw formaat
+<dd>Van iedere virtuele server word een aparte backup gemaakt met een eigen file, maar in
+    een ander formaat ten op zichten van de vorige optie. Dit nieuwe formaat is superieur omdat
+    het niet eerst grote file hoeft aan te maken in de <tt>/tmp</tt> directory
+    en daarom veel harddisk ruimte bespaard.
+</dl>
+
+De laatste optie word aanbevolen, omdat hiermee virtuele servers heel makkelijk individueel
+kunnen worden hersteld, en het bespaard veel tijdelijke harddisk ruimte.
+<p>
+
+<footer>

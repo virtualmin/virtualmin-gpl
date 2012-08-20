@@ -106,11 +106,22 @@ elsif ($in{'mode6'} == 1 && !$d->{'virt6'}) {
 		}
 	else {
 		# Validate manually entered IPv6 address
-		&check_ip6address($in{'ip6'}) ||
-			&error($text{'setup_eip6'});
-		$clash = &check_virt6_clash($in{'ip6'});
-		$clash && &error(&text('setup_evirt6clash'));
 		$ip6 = $in{'ip6'};
+		$virt6already = $in{'virt6already'};
+		&check_ip6address($ip6) ||
+			&error($text{'setup_eip6'});
+		$clash = &check_virt6_clash($ip6);
+		if (!$virt6already) {
+			# Make sure the IP isn't assigned yet
+			$clash && &error(&text('setup_evirt6clash'));
+			}
+		elsif ($virt6already) {
+			# Make sure the IP is assigned already, but
+			# not to any domain
+			$already = &get_domain_by("ip6", $ip6);
+			$already && &error(&text('setup_evirt6clash4',
+						 $already->{'dom'}));
+			}
 		}
 	$virt6 = 1;
 	}
@@ -173,12 +184,14 @@ elsif ($virt6 && !$d->{'virt6'}) {
 	$d->{'ip6'} = $ip6;
 	$d->{'netmask6'} = $netmask6;
 	$d->{'virt6'} = 1;
+	$d->{'virt6already'} = $virt6already;
 	}
 elsif (!$virt6 && $d->{'virt6'}) {
 	# Taking down IPv6 interface
 	$d->{'ip6'} = undef;
 	$d->{'netmask6'} = undef;
 	$d->{'virt6'} = 0;
+	$d->{'virt6already'} = 0;
 	}
 
 # Update for web ports
@@ -243,7 +256,7 @@ print $text{'setup_done'},"<p>\n";
 
 &$outdent_print();
 
-# Get and update alias domains
+# Get and update all alias domains
 @doms = &get_domain_by("alias", $d->{'id'});
 foreach $sd (@doms) {
 	&$first_print(&text('newip_dom2', $sd->{'dom'}));

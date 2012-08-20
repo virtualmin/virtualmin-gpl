@@ -24,7 +24,7 @@ return "WHMCS is an all-in-one client management, billing & support solution for
 # script_whmcs_versions()
 sub script_whmcs_versions
 {
-return ( "5.0.3" );
+return ( "5.1.2" );
 }
 
 sub script_whmcs_gpl
@@ -105,7 +105,9 @@ else {
 		return "Missing or invalid installation directory";
 	local $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
 	local ($newdb) = ($in->{'db'} =~ s/^\*//);
-	$in{'licensekey'} =~ /^\S+\-\S+$/ ||
+	$in{'licensekey'} =~ s/^\s*//;
+	$in{'licensekey'} =~ s/\s*$//;
+	$in{'licensekey'} =~ /^\S+$/ ||
 		return "Missing or invalid-looking licence key - should be ".
 		       "like Owned-a8f06f0510547d80704b";
 	return { 'db' => $in->{'db'},
@@ -473,8 +475,11 @@ return (1, "WHMCS directory and tables deleted.");
 
 sub script_whmcs_latest
 {
+local ($ver) = @_;
+local $sfx = $ver =~ /^(\d+)\.(\d+)\.(\d+)$/ ? ".$3" : "";
 return ( "http://www.whmcs.com/whats-new/#download",
-	 "WHMCS\\s+V(\\S+)\\s+Stable" );
+	 "WHMCS\\s+V(\\S+)\\s+Stable",
+	 undef, $sfx );
 }
 
 sub script_whmcs_site

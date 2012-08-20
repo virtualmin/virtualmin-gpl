@@ -1,0 +1,25 @@
+<header>Harddisk Gebruik</header>
+
+Deze pagina toont het harddisk gebruik van een virtuele server,
+verdeeld in vijf tabblad secties : <p>
+
+<dl>
+
+<dt><b>Overzicht</b>
+<dd>Deze sectie toont de harddisk quota die toegewezen is aan de virtuele server, de ruimte die op dit moment gebruikt word door de files op de server, en de grote van de databases.<p>
+
+<dt><b>Home directory</b>
+<dd>Dit toont de ruimte die gebruikt word door de top 10 directory's onder de server home directory. Voor ieder is de  <b>Quota Grote</b> de grote van de files die in bezit zijn van de server Unix groep, terwijl de <b>Grote</b> inclusief de files is die in bezit zijn van de andere gebruikers. De laatste kan veel grote zijn voor de directory's zoals <tt>log's</tt> wanneer er files staan die in bezit zijn van de <tt>root</tt>. De <tt>home's</tt> directory waarin email en FTP gebruikers zitten zit hier niet bij, omdat dit berekend word in de volgende sectie. <p>
+
+<dt><b>Door gebruiker</b>
+<dd>Deze sectie toont de harddisk ruimte die in gebruik is door de top 10 mailbox gebruikers in dit domein en alle sub-servers. Gebruik is gebaseerd op files die in bezit zijn door de Unix gebruiker van iedere mailbox.<p>
+
+<dt><b>Door sub-server</b>
+<dd>Dit toont de harddisk ruimte die in gebruik is door iedere sub-server, gebaseerd op de files in hun home directory's. De ruimte die gebruikt word door iedere mailbox gebruiker in deze servers word ook meegerekend.<p>
+
+<dt><b>Door database</b>
+<dd>Dit toont de harddisk ruimte die gebruikt word door iedere MySQL of PostgreSQL database in deze virtuele server of op iedere sub-server. Alleen de top 10 databases worden getoond.<p>
+
+</dl>
+
+<footer>

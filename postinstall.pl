@@ -110,6 +110,9 @@ if ($config{'virus'}) {
 	&fix_clam_wrapper();
 	}
 
+# Save the current default IP address if we don't currently know it
+$config{'old_defip'} ||= &get_default_ip();
+
 # Check if we have enough memory to preload
 local $lowmem;
 &foreign_require("proc", "proc-lib.pl");

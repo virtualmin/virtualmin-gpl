@@ -1,0 +1,18 @@
+<header>Standaard IP adres voor DNS record's</header>
+
+DNS record's worden automatisch gegenereerd voor nieuwe virtuele hosts en in normale
+omstandigheden wilt u dat deze overeenkomen met het virtuele server IP adres hierboven.
+Echter zit uw server achter een NAT router, een proxy server, een loadbalance server of
+een ander soort apparaat die naar uw server verwijst en werkt op een ander IP adres dan
+de wereld ziet wanneer met contact wil maken met uw domeinen, moet u hier de waarde wijzigen.
+Ook kan het zijn dat u dit wilt wijzigen omdat u de domeinen op een ontwikkel server wilt
+plaatsen die nu een andere adres heeft tot op het moment dat het in productie komt.
+U kunt hier het productie of publieke IP adres invullen in plaats van dat Virtualmin het
+locale IP adres gebruikt. <p>
+
+Indien de <b>Automatisch externe adres detecteren</b> optie is geselecteerd zal Virtualmin
+proberen uit te zoeken wat het IP adres was toen de virtuele server werd aangemaakt. Dit
+word gedaan door een HTTP aanvraag te maken naar <tt>www.virtualmin.com</tt> die vervolgens
+zal reageren met het adres waarvan de aanvraag komt. <p>
+
+<footer>

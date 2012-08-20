@@ -1,0 +1,19 @@
+<header>Virus Scanner Programma</header>
+
+De mogelijke opties voor dit veld zijn :
+
+<dl>
+<dt><b>Alleenstaande scanner (<tt>clamscan</tt>)</b>
+<dd>Dit is normaal gesproken de standaard, en zal aangeven bij Virtualmin om gebruik te maken van het ClamAV scan programma die al het werk zelfstandig doet. Dit werkt gegarandeerd goed maar kan langzamer zijn dan de volgende optie.
+
+<dt><b>Server scanner (<tt>clamdscan</tt>)</b>
+<dd>Deze optie kan worden geselecteerd als de <tt>clamd</tt> virus scanner server aan het werk is op uw systeem. Het is over het algemeen superieur, omdat de ClamAV virus database vrij groot is, en de server het maar eenmalig hoef te laden in het geheugen.
+
+<dt><b>Remote server scanner (<tt>clamd-stream-client</tt>)</b>
+<dd>Deze optie kan worden geselecteerd als de <tt>clamd</tt> virus scanner server werkt op een remote systeem, en is geconfigureerd om verbindingen te accepteren over het netwerk van andere hosts. Hiermee kunnen de taken van het systeem die de email ontvangt verlicht worden omdat het scannen op een ander systeem word gedaan.
+
+<dt><b>Ander programma</b>
+<dd>Deze optie geeft u de mogelijkheid om Virtualmin te laten weten dat u een totaal ander programma gebruikt, bijvoorbeeld uw eigen wrapper script voor ClamAV.
+</dl>
+
+<footer>

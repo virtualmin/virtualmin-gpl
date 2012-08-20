@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the SugarCRM script installer to version 6.5.2.
+html=Updated the SugarCRM script installer to version 6.5.2, WHCMS to 5.1.2, Django to 1.4.1, phpMyAdmin to 3.5.2.2, ZenPhoto to 1.4.3.1, PHPList to 2.10.19, Drupal to 7.15, RoundCube to 0.8.1, Typo3 to 4.6.12, dotProject to 2.1.6, Piwik to 1.8.3, Z-push to 2.0.2-1437, and CMS made simple to 1.11.1.
 master=1
 reseller=1
 domain=1

@@ -14,10 +14,16 @@ require './virtual-server-lib.pl';
 
 # Work out which domains to update
 if ($in{'servers_def'}) {
-	@doms = grep { !$_->{'virt'} && $_->{'ip'} eq $in{'old'} }
+	# Update all virtual servers on the old IP, including their aliases
+	# (even if the alias wasn't on the old IP)
+	@doms = grep { !$_->{'virt'} &&
+			($_->{'ip'} eq $in{'old'} ||
+			 $_->{'alias'} &&
+			 &get_domain($_->{'alias'})->{'ip'} eq $in{'old'}) }
 		     &list_domains();
 	}
 else {
+	# Update selected virtual servers, regardless of their IP
 	%servers = map { $_, 1 } split(/\0/, $in{'servers'});
 	@doms = grep { $servers{$_->{'id'}} } &list_domains();
 	}
@@ -66,6 +72,15 @@ foreach $d (@doms) {
 	&$outdent_print();
 	}
 &run_post_actions();
+
+# Update old default IP
+if ($in{'setold'}) {
+	$config{'old_defip'} = &get_default_ip();
+	&lock_file($module_config_file);
+	&save_module_config();
+	&unlock_file($module_config_file);
+	}
+
 &webmin_log("newips", "domains", scalar(@doms), { 'old' => $in{'old'},
 					          'new' => $in{'new'} });
 

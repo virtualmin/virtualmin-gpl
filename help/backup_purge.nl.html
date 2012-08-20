@@ -1,0 +1,21 @@
+<header>Verwijder oude backup's</header>
+
+Indien u de backup maakt naar een locale directory of een S3 bucket waarvan
+het pad is gebaseerd op de backup tijd, kan deze optie worden gebruikt om
+backup's te verwijderen die een aantal dagen oud zijn. Dit is erg handig om
+de hoeveelheid harddisk ruimte te besparen die nodig is voor oude data. <p>
+
+Echter dit kan alleen indien de backup bestemming directory een naam heeft
+zoals <tt>/backup/%d-%m-%Y</tt>, of wanneer de filenaam een naam heeft
+zoals <tt>/backup/virtualmin-%d-%m-%Y.tar.gz</tt>. dit is nodig voor
+Virtualmin om uit te zoeken welke files en directory's wanneer zijn aangemaakt
+tijdens een backup proces. <p>
+
+U moet ook een vinkje zetten bij <b>Strftime-style tijd substituties uitvoeren op 
+file of directory naam</b>, anders zullen de datum en de tijd in het backup pad niet
+worden geconverteerd wanneer de backup word uitgevoerd. <p>
+
+De maximum backup leeftijd word ingevuld in dagen, u kunt echter ook aangeven
+voor bepaalde uren zoals <i>0.25</i>. <p>
+
+<footer>

@@ -36,6 +36,10 @@ print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "current", 1);
 print &ui_tabs_start_tab("mode", "current");
 print "$text{'cert_desc2'}<p>\n";
 print &ui_table_start($text{'cert_header2'}, undef, 4);
+
+print &ui_table_row($text{'cert_incert'}, "<tt>$d->{'ssl_cert'}</tt>", 3);
+print &ui_table_row($text{'cert_inkey'}, "<tt>$d->{'ssl_key'}</tt>", 3);
+
 $info = &cert_info($d);
 foreach $i (@cert_attributes) {
 	$v = $info->{$i};
@@ -177,23 +181,29 @@ print &ui_table_start($text{'cert_header3'}, undef, 2);
 
 # Cert
 print &ui_table_row($text{'cert_cert'},
-		    &ui_textarea("cert", undef, 8, 70)."<br>\n".
-		    "<b>$text{'cert_upload'}</b>\n".
-		    &ui_upload("certupload"));
+	&ui_radio_table("cert_mode", 0,
+		[ [ 0, $text{'cert_cert0'},
+		    &ui_textarea("cert", undef, 8, 70) ],
+		  [ 1, $text{'cert_cert1'},
+		    &ui_upload("certupload") ],
+		  [ 2, $text{'cert_cert2'},
+		    &ui_textbox("certfile", undef, 70)." ".
+		    &file_chooser_button("certfile") ] ]));
 
 # Key
 if (-r $d->{'ssl_newkey'}) {
 	$newkey = &read_file_contents_as_domain_user($d, $d->{'ssl_newkey'});
 	}
 print &ui_table_row($text{'cert_newkey'},
-		    (-r $d->{'ssl_key'} ?
-			&ui_radio("newkey_def", 0,
-				  [ [ 1, $text{'cert_newkey1'} ],
-				    [ 0, $text{'cert_newkey0'} ] ])."<br>\n" :
-			"").
-		    &ui_textarea("newkey", $newkey, 8, 70)."<br>\n".
-		    "<b>$text{'cert_upload'}</b>\n".
-		    &ui_upload("newkeyupload"));
+	&ui_radio_table("newkey_mode", -r $d->{'ssl_key'} ? 3 : 0,
+		[ -r $d->{'ssl_key'} ? ( [ 3, $text{'cert_newkeykeep'} ] ) : ( ),
+		  [ 0, $text{'cert_cert0'},
+		    &ui_textarea("newkey", $newkey, 8, 70) ],
+		  [ 1, $text{'cert_cert1'},
+		    &ui_upload("newkeyupload") ],
+		  [ 2, $text{'cert_cert2'},
+		    &ui_textbox("newkeyfile", undef, 70)." ".
+		    &file_chooser_button("newkeyfile") ] ]));
 
 # Passphrase on key
 print &ui_table_row($text{'cert_pass'},

@@ -1,0 +1,15 @@
+<header>PHP script executie mode</header>
+
+Deze optie bepaald of PHP scripts worden uitgevoerd als de Apache web server
+gebruiker (typisch <tt>httpd</tt> of <tt>apache</tt>), of als de Unix gebruiker
+waar de virtuele server van is. De eerste optie is sneller omdat er geen extra
+processen hoeven worden opgestart om de PHP code uit te voeren, maar dit is
+minder veilig omdat scripts files lezen en schrijven als een gebruiker, anders
+dan een domein eigenaar. <p>
+
+Indien uw systeem het ondersteund is de <b>FCGId</b> optie het beste, omdat dit
+een PHP script snel uitvoert als een domein eigenaar. In alle andere gevallen
+als uw systeem zwaar belast word of veiligheid tussen gebruikers geen probleem is
+word de <b>CGI wrapper</b> optie aangeraden. <p>
+
+<footer>

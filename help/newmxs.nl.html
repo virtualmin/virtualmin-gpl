@@ -1,0 +1,26 @@
+<header>Secondaire Email Servers</header>
+
+Een secundaire email server is een server die ook email kan ontvangen voor
+1 van de virtuele servers die beheerd word door Virtualmin, maar alleen als
+een tijdelijk relais in plaats van de definitieve bestemming. Het is verstandig
+om een secundaire server op te zetten voor email domeinen die zwaar belast worden,
+om te gebruiken als een backup of bewaarplaats voor het geval dat de primaire
+email server uit gaat. <p>
+
+Op deze pagina kunt u andere servers selecteren waar Virtualmin geinstalleerd is
+om die te gebruiken als secundaire MX server voor nieuwe email domeinen die
+aangemaakt worden op dit systeem. Voordat er een server verschijnt moeten die
+eerst worden toegevoegd aan de Webmin Servers Index module, waarin u de root inlog
+en wachtwoord moet invullen van de remote server. <p>
+
+Voor iedere secundaire email server heeft u de optie om een andere hostnaam in te
+vullen om de DNS MX record te gebruiken, in plaats van de server hostnaam, zoals
+<i>secmx.yourdomain.com</i>. Wees er echter zeker van dat hetgeen u invult een
+geldige DNS naam is die opgehaald kan worden naar dezelfde server. <p>
+
+Als er op de <b>Opslaan en toevoegen</b> knop is geklikt zal iedere bestaande virtuele
+server waarvoor email is aangezet worden toegevoegd aan alle geselecteerde secundaire
+email servers. Bovendien zullen DNS MX records worden toegevoegd aan hun domeinen om
+te verwijzen naar de email servers. <p>
+
+<footer>

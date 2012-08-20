@@ -1,0 +1,20 @@
+<header>Toegestane login type</header>
+
+Deze instelling bepaald hoe de administrator voor dit domein moet inloggen
+door het veranderen van zijn Unix shell.
+De standaard beschikbare opties zijn :<p>
+<dl>
+<dt><b>Alleen email</b>
+<dd>Zowel FTP als SSH inloggen is geblokkeerd, maar POP3 en IMAP zal werken.
+<dt><b>Email en FTP</b>
+<dd>De gebruiker kan verbinden via FTP, maar niet via SSH of telnet.
+<dt><b>Email, FTP en SSH</b>
+<dd>Inloggen via FTP, SSH en telnet is toegestaan.
+</dl>
+Deze kunnen echter ook worden bewerkt bij de hoofd administrator op de
+<b>Eigen Shells</b> pagina. <p>
+
+Omdat deze functie werkt door het wijzigen van de virtuele server Unix gebruiker's
+shell, gaat het er vanuit dat uw FTP server de <tt>/etc/shells</tt> file gebruikt
+voor authenticatie. <p>
+<footer>

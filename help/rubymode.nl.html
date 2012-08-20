@@ -1,0 +1,17 @@
+<header>Ruby script uitvoer mode</header>
+
+Deze optie bepaald of de Ruby scripts worden uitgevoerd als de Apache web 
+server gebruiker (typisch <tt>httpd</tt> of <tt>apache</tt>), of de Unix
+gebruiker waar de virtuele server van is. De vorige optie is sneller omdat
+er geen extra processen hoeven worden opgestart om de Ruby code uit te voeren
+aar het is minder veilig omdat scripts files lezen en beschrijven als een
+gebruiker en niet als een domein eigenaar. <p>
+
+<!--
+Als uw systeem het ondersteunt, is de <b>FCGId</b> optie het beste, omdat het
+Ruby scripts snel uitvoert als de domein eigenaar. In alle andere gevallen als
+uw systeem zwaar belast word of veiligheid tussen gebruikers geen probleem is
+dan word de <b>CGI wrapper</b> optie aanbevolen.
+--> <p>
+
+<footer>

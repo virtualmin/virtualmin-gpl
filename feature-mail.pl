@@ -71,8 +71,22 @@ elsif ($config{'mail_system'} == 0) {
 		$sender_bcc_maps = &postfix::get_real_value("sender_bcc_maps");
 		@sender_bcc_map_files = &postfix::get_maps_files(
 						$sender_bcc_maps);
-		$supports_bcc = 1;
+		if (@sender_bcc_map_files) {
+			$supports_bcc = 1;
+			}
 		}
+
+	# Work out if per-domain outgoing IP support is available
+	if ($postfix::postfix_version >= 2.7) {
+		$dependent_maps = &postfix::get_real_value(
+			"sender_dependent_default_transport_maps");
+		@dependent_map_files = &postfix::get_maps_files(
+						$dependent_maps);
+		if (@dependent_map_files) {
+			$supports_dependent = 1;
+			}
+		}
+
 	$supports_aliascopy = 1;
 	}
 elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
@@ -509,6 +523,11 @@ if ($supports_bcc) {
 		}
 	}
 
+# Remove sender-dependent outgoing IP
+if ($supports_dependent) {
+	&save_domain_dependent($d, 0);
+	}
+
 # Remove any secondary MX servers
 &delete_on_secondaries($d);
 
@@ -934,6 +953,16 @@ if ($_[0]->{'dns'} && !$_[1]->{'dns'}) {
 	}
 elsif (!$_[0]->{'dns'} && $_[1]->{'dns'}) {
 	&update_dkim_domains($_[0], 'delete');
+	}
+
+# Update any outgoing IP mapping
+if (($_[0]->{'dom'} ne $_[1]->{'dom'} ||
+     $_[0]->{'ip'} ne $_[1]->{'ip'}) && $supports_dependent) {
+	local $old_dependent = &get_domain_dependent($_[1]);
+	if ($old_dependent) {
+		&save_domain_dependent($_[1], 0);
+		&save_domain_dependent($_[0], 1);
+		}
 	}
 
 # Unlock mail and unix DBs the same number of times we locked them
@@ -2295,13 +2324,15 @@ if (-d $user->{'home'} && $user->{'unix'}) {
 		}
 	}
 
-# Create spam, virus and trash Maildir sub-directories
+# Create spam, virus, drafts, sent and trash Maildir sub-directories
 if ($md && $md =~ /\/Maildir$/) {
 	local @folders;
-	local $tname = $config{'trash_folder'};
-	$tname ||= "trash";
-	if ($tname ne "*") {
-		push(@folders, "$md/.$tname");
+	foreach my $n ("trash", "drafts", "sent") {
+		local $tname = $config{$n.'_folder'};
+		$tname ||= $n;
+		if ($tname ne "*") {
+			push(@folders, "$md/.$tname");
+			}
 		}
 	if ($d->{'spam'}) {
 		local ($sdmode, $sdpath) = &get_domain_spam_delivery($d);
@@ -2510,7 +2541,8 @@ elsif ($config{'mail_system'} == 4) {
 	}
 elsif ($config{'mail_system'} == 5) {
 	# Mail dir is under VPOPMail home
-	@rv = ( "$_[0]->{'home'}/Maildir", 1 );
+	local $md = $config{'vpopmail_md'} || "Maildir";
+	@rv = ( "$_[0]->{'home'}/$md", 1 );
 	}
 elsif ($config{'mail_system'} == 6) { 
 	if (-d "$_[0]->{'home'}/Maildir") {
@@ -2926,6 +2958,14 @@ if ($supports_bcc) {
 	&close_tempfile(BCC);
 	}
 
+# Create sender dependent file
+if ($supports_dependent) {
+	local $dependent = &get_domain_dependent($_[0]);
+	&open_tempfile(DEPENDENT, ">$_[1]_dependent");
+	&print_tempfile(DEPENDENT, $dependent,"\n");
+	&close_tempfile(DEPENDENT);
+	}
+
 &$second_print($text{'setup_done'});
 
 if (!&mail_under_home()) {
@@ -3247,6 +3287,13 @@ if ($supports_bcc && -r "$_[1]_bcc") {
 	local $bcc = &read_file_contents("$_[1]_bcc");
 	chop($bcc);
 	&save_domain_sender_bcc($_[0], $bcc);
+	}
+
+# Restore sender-dependent IP
+if ($supports_dependent && -r "$_[1]_dependent") {
+	local $dependent = &read_file_contents("$_[1]_dependent");
+	chop($dependent);
+	&save_domain_dependent($_[0], $dependent ? 1 : 0);
 	}
 
 if (@errs) {
@@ -5143,6 +5190,99 @@ if ($config{'mail_server'} == 0) {
 else {
 	return $text{'bcc_emailserver'};
 	}
+}
+
+# get_domain_dependent(&domain)
+# If a sender-dependent outgoing IP is enabled for the given domain, returns it.
+# Otherwise returns undef.
+sub get_domain_dependent
+{
+local ($d) = @_;
+return undef if (!$supports_dependent);
+&require_mail();
+
+# Read the map file to find an entry for the domain
+local $map = &postfix::get_maps("sender_dependent_default_transport_maps");
+local ($rv) = grep { $_->{'name'} eq '@'.$d->{'dom'} } @$map;
+return undef if (!$rv);
+
+# Check for a Postfix service
+local $master = &postfix::get_master_config();
+foreach my $m (@$master) {
+	if ($m->{'name'} eq $rv->{'value'} && $m->{'enabled'}) {
+		# Found match on the name .. extract the IP
+		if ($m->{'command'} =~ /smtp_bind_address=([0-9\.]+)/) {
+			return $1;
+			}
+		}
+	}
+
+return undef;
+}
+
+# save_domain_dependent(&domain, enabled-flag)
+# Enables or disables sender-dependent outgoing IP for the domain
+sub save_domain_dependent
+{
+local ($d, $dependent) = @_;
+return undef if (!$supports_dependent);
+&require_mail();
+
+# Read the map file to find an entry for the domain
+local $map = &postfix::get_maps("sender_dependent_default_transport_maps");
+local ($rv) = grep { $_->{'name'} eq '@'.$d->{'dom'} } @$map;
+if ($rv && !$dependent) {
+	# Need to remove
+	&postfix::delete_mapping(
+		"sender_dependent_default_transport_maps", $rv);
+	&postfix::regenerate_any_table(
+		"sender_dependent_default_transport_maps");
+	}
+elsif (!$rv && $dependent) {
+	# Need to add
+	$rv = { 'name' => '@'.$d->{'dom'},
+		'value' => 'smtp-'.$d->{'id'} };
+	&postfix::create_mapping(
+		"sender_dependent_default_transport_maps", $rv);
+	&postfix::regenerate_any_table(
+		"sender_dependent_default_transport_maps");
+	}
+
+# Find the master file entry for smtp
+local $master = &postfix::get_master_config();
+local ($smtp) = grep { $_->{'name'} eq 'smtp' &&
+		       $_->{'type'} eq 'unix' &&
+		       $_->{'enabled'} } @$master;
+return "No master service named smtp found!" if (!$smtp);
+
+# Find the master file entry for this domain
+local ($m) = grep { $_->{'name'} eq 'smtp-'.$d->{'id'} && $_->{'enabled'} }
+		  @$master;
+if ($m && !$dependent) {
+	# Need to remove
+	&postfix::delete_master($m);
+	&postfix::reload_postfix();
+	}
+elsif (!$m && $dependent) {
+	# Need to add
+	$m = { %$smtp };
+	delete($m->{'line'});
+	delete($m->{'uline'});
+	$m->{'command'} .= " -o smtp_bind_address=$d->{'ip'}";
+	$m->{'name'} = "smtp-".$d->{'id'};
+	&postfix::create_master($m);
+	&postfix::reload_postfix();
+	}
+elsif ($m && $dependent) {
+	# Need to fix IP, maybe
+	if ($m->{'command'} =~ /smtp_bind_address=([0-9\.]+)/ &&
+	    $1 ne $d->{'ip'}) {
+		$m->{'command'} =~ s/smtp_bind_address=([0-9\.]+)/smtp_bind_address=$d->{'ip'}/;
+		&postfix::modify_master($m);
+		&postfix::reload_postfix();
+		}
+	}
+return undef;
 }
 
 # check_postfix_map(mapname)

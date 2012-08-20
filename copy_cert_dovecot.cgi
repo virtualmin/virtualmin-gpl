@@ -21,42 +21,67 @@ $cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
 	 &dovecot::find_value("ssl_cert", $conf);
 $kfile = &dovecot::find_value("ssl_key_file", $conf) ||
 	 &dovecot::find_value("ssl_key", $conf);
+$cafile = &dovecot::find_value("ssl_ca_file", $conf) ||
+	  &dovecot::find_value("ssl_ca", $conf);
 $cfile =~ s/^<//;
 $kfile =~ s/^<//;
+$cafile =~ s/^<//;
 if ($cfile =~ /snakeoil/) {
 	# Hack to not use shared cert file on Ubuntu / Debian
-	$cfile = $kfile = undef;
+	$cfile = $kfile = $cafile = undef;
 	}
 $cfile ||= "$dovedir/dovecot.cert.pem";
 $kfile ||= "$dovedir/dovecot.key.pem";
+$cafile ||= "$dovedir/dovecot.ca.pem";
 
 # Copy cert into those files
 &$first_print($text{'copycert_dsaving'});
 $cdata = &cert_pem_data($d);
 $kdata = &key_pem_data($d);
+$casrcfile = &get_website_ssl_file($d, "ca");
+$cadata = $casrcfile ? &read_file_contents($casrcfile) : undef;
 $cdata || &error($text{'copycert_ecert'});
 $kdata || &error($text{'copycert_ekey'});
 &open_lock_tempfile(CERT, ">$cfile");
 &print_tempfile(CERT, $cdata,"\n");
 &close_tempfile(CERT);
+&set_ownership_permissions(undef, undef, 0750, $cfile);
 &open_lock_tempfile(KEY, ">$kfile");
 &print_tempfile(KEY, $kdata,"\n");
 &close_tempfile(KEY);
-&set_ownership_permissions(undef, undef, 0750, $cfile);
 &set_ownership_permissions(undef, undef, 0750, $kfile);
+if ($cadata) {
+	&open_lock_tempfile(CA, ">$cafile");
+	&print_tempfile(CA, $cadata,"\n");
+	&close_tempfile(CA);
+	&set_ownership_permissions(undef, undef, 0750, $cafile);
+	}
 
 # Update config with correct files
 if (&dovecot::find_value("ssl_cert", $conf, 2)) {
 	# 2.0 and later format
 	&dovecot::save_directive($conf, "ssl_cert", "<".$cfile);
 	&dovecot::save_directive($conf, "ssl_key", "<".$kfile);
+	if ($cadata) {
+		&dovecot::save_directive($conf, "ssl_ca", "<".$cafile);
+		}
+	else {
+		&dovecot::save_directive($conf, "ssl_ca", undef);
+		}
 	}
 else {
 	# Pre-2.0 format
 	&dovecot::save_directive($conf, "ssl_cert_file", $cfile);
 	&dovecot::save_directive($conf, "ssl_key_file", $kfile);
+	if ($cadata) {
+		&dovecot::save_directive($conf, "ssl_ca_file", $cafile);
+		}
+	else {
+		&dovecot::save_directive($conf, "ssl_ca_file", undef);
+		}
 	}
-&$second_print(&text('copycert_dsaved', "<tt>$cfile</tt>", "<tt>$kfile</tt>"));
+&$second_print(&text($cadata ? 'copycert_dsaved2' : 'copycert_dsaved',
+		     "<tt>$cfile</tt>", "<tt>$kfile</tt>", "<tt>$cafile</tt>"));
 
 # Make sure SSL is enabled
 &$first_print($text{'copycert_denabling'});

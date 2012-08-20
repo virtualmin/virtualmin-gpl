@@ -1,0 +1,26 @@
+<header>Backup bestemming</header>
+
+Deze velden bepalen waar de Virtualmin backup naar toe word geschreven. U kunt
+kiezen uit drie bestemming modes :
+
+<dl>
+<dt><b>Locale file directory</b>
+<dd>In deze mode zal de backup is simpelweg opgeslagen worden naar een file op het systeem waar Virtualmin op werkt. Indien u het <b>Enkele archief file</b> backup formaat gebruikt, moet u hier een filenaam invullen, zoals <tt>/backup/domeinnaam.tgz</tt>. Indien u gebruik maakt van de <b>1 file per server</b> formaten, moet u een directory opgeven, zoals <tt>/backup</tt>.<br>
+<dt><b>FTP server</b>
+<dd>Deze mode kan worden gebruikt om een backup file of files te uploaden met gebruik van het FTP protocol naar een andere server. U moet de server naam opgeven, login, wachtwoord en bestemming file of directory.<br>
+<dt><b>SSH server</b>
+<dd>Dit is gelijk aan de FTP mode, echter gebruikt dan het SSH protocol.<br>
+</dl>
+
+Indien het backup formaat een enkele file is dan moet ook de bestemming die u hier specificeert een file zijn, die zal worden overschreven of worden aangemaakt. Indien u 1 file per domein wilt aanmaken moet de bestemming een directory zijn die al bestaat. <p>
+
+Indien u een backup wilt maken naar een SSH of FTP server op een niet standaard poort kunt
+u dit invullen in het server veld gescheiden van de hostnaam met een dubbele punt,
+bijvoorbeeld <tt>backupserver.uwdomein.com:2222</tt> . <p>
+
+Indien u een backup wilt maken naar een SSH server die alleen een
+certificaat-gebaseerde authenticatie ondersteund is het wachtwoord veld
+optioneel. Echter de <tt>root</tt> gebruiker op dat systeem moet een
+publieke SSH sleutel hebben in de gebruikers bestemming <tt>authorized_keys</tt> file. <p>
+
+<footer>

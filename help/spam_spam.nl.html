@@ -1,0 +1,21 @@
+<header>Bestemming voor spam e-mails</header>
+
+Dit veld bepaald wat er gebeurt met email berichten die zijn geindentificeerd
+door SpamAssassin als spam, gebaseerd op hun score en de ontvangers spam drempel.
+De beschikbare opties zijn :<p>
+<dl>
+<dt>Weggooien
+<dd>Ieder bericht wat word geclassificeerd als spam word onmiddellijk verwijdert.
+<dt>Normaal afleveren
+<dd>Spam word afgeleverd aan de ontvangers mailbox, echter met X-Spam headers die kunnen worden gebruikt voor filteren door de email client.
+<dt>Schrijf naar de standaard spam file ~/mail/spam
+<dd>Spam word weggeschreven naar de standaard folder voor handmatige analyse en verwijdering.
+<dt>Schrijf naar de email file onder de home directory
+<dd>Spam word opgeslagen naar de email file onder de gebruikers home directory die u invult. Om te schrijven naar een  Maildir formaat directory, moet u een / aan het einde van de filenaam plaatsen.
+<dt>Doorsturen naar email adres
+<dd>Ieder bericht wat geclassificeerd is als spam word doorgestuurd naar het ingevulde adres.
+<dt>Schrijf naar een andere file
+<dd>Spam word geschreven naar de opgegeven email file (of directory als het pad eindigt met /), wat overal op de server kan zijn.
+</dl>
+
+<footer>

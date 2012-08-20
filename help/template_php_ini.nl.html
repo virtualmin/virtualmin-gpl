@@ -1,0 +1,28 @@
+<header>Template PHP configuratie file</header>
+
+Standaard wanneer een virtuele server PHP scripts uitvoert als de server eigenaar,
+zal Virtualmin de systeem globale PHP configuratie file kopieren (normaal
+gesproken <tt>/etc/php.ini</tt>) naar de domein <tt>~/etc</tt> directory.
+Hierdoor heeft u de mogelijkheid om PHP opties in te stellen op een per-server
+basis. <p>
+
+Deze instelling kan worden gebruikt om een ander pad in te vullen om de basis
+PHP configuratie file te kopieren. Als toevoeging kunt u Virtualmin substituties
+in deze template file gebruiken zoals ${DOM}, die dan word vervangen zodra hij
+word gekopieerd.
+Andere bruikbare substituties die beschikbaar zijn :<p>
+
+<table>
+<tr> <td><tt><b>${DOM}</b></td>
+<td>De domein naam, zoals <tt>foo.com</tt></td> </tr>
+<tr> <td><tt><b>${USER}</b></td>
+<td>De server administratie login, zoals <tt>foo</tt></td> </tr>
+<tr> <td><tt><b>${HOME}</b></td>
+<td>De server home directory, zoals <tt>/home/foo</tt></td> </tr>
+<tr> <td><tt><b>${EMAILTO}</b></td>
+<td>De virtuele server contact email adres</td> </tr>
+</table>
+
+Als toevoeging kunnen ook blokken zoals <i>${IF-MAIL}...${ENDIF-MAIL}</i> and <i>${IF-WEB}...${ELSE-WEB}...{$ENDIF-WEB}</i> worden gebruikt.<p>
+
+<footer>

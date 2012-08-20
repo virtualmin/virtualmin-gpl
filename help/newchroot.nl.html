@@ -1,0 +1,36 @@
+<header>FTP Directory Beperkingen</header>
+
+Deze pagina geeft u de mogelijkheid om te bepalen welke directory's bekeken
+kunnen worden door server eigenaars en gebruikers die inloggen via FTP.
+Standaard heeft een FTP client toegang tot het gehele filesysteem, inclusief
+directory's zoals <tt>/etc</tt> en <tt>/home</tt>. Dit kan echter informatie
+geven die u liever verstopt houd voor gebruikers. <p>
+
+Iedere rij in de tabel op deze pagina definieert de virtuele server of servers
+die overeenkomen en de directory waartoe zij gelimiteerd worden. In de 
+<b>Toevoegen aan server en sub-servers</b> kolom kunt u alle virtuele servers
+kiezen, of een enkel domein (die automatisch al zijn sub-servers toevoegt).
+Indien de voorlaatste optie word gekozen en de <b>Alles behalve server</b> vak
+is aangevinkt zal de beperking effect hebben op de servers die niet zijn
+gekozen. <p>
+
+De <b>Beperk tot directory</b> kolom bepaald waartoe overeenkomende virtuele
+server worden beperkt, wanneer er word ingelogd via FTP. De meest gebruikte
+optie is <b>Gebruikers home directory's</b>, die een limiet legt op de domein
+eigenaar tot zijn virtuele server home, en iedere FTP gebruiker tot hun eigen
+sub-directory's die normaal gesproken onder de <tt>home</tt> zit. <p>
+
+<hr>
+
+In een standaard Virtualmin installatie heeft iedere domein home directory de
+<tt>750</tt> permissie, waarmee word voorkomen dat gebruikers van andere
+domeinen toegang hebben, ongeacht de FTP beperkingen. Dus het beperken van FTP
+gebruikers op deze pagina voegt niet veel meer toe aan de veiligheid van uw
+systeem. <p>
+
+Tot slot, de beperkingen op deze pagina worden niet toegevoegd aan PHP scripts,
+CGI programma's of virtuele server eigenaars die inloggen via SSH. Op dit 
+moment is er geen mogelijkheid om ze te beperken, hoewel de home directory
+permissies nog steeds van toepassing blijven. <p>
+
+<footer>

@@ -228,6 +228,7 @@ if ($key && $config{'compression'} == 3) {
 # See if we can actually connect to the remote server
 local $anyremote;
 local $anylocal;
+local $rsh;	# Rackspace cloud files handle
 foreach my $desturl (@$desturls) {
 	local ($mode, $user, $pass, $server, $path, $port) =
 		&parse_backup_url($desturl);
@@ -340,6 +341,24 @@ foreach my $desturl (@$desturls) {
 			&$first_print($err);
 			return (0, 0, $doms);
 			}
+		}
+	elsif ($mode == 6) {
+		# Connect to Rackspace cloud files and create container
+		if (!$path && !$dirfmt) {
+			&$first_print($text{'backup_ersnopath'});
+			return (0, 0, $doms);
+			}
+		$rsh = &rs_connect($config{'rs_endpoint'}, $user, $pass);
+		if (!ref($rsh)) {
+			&$first_print($rsh);
+			return (0, 0, $doms);
+			}
+		local $err = &rs_create_container($rsh, $server);
+		if ($err) {
+			&$first_print($err);
+			return (0, 0, $doms);
+			}
+
 		}
 	elsif ($mode == 0) {
 		# Make sure target is / is not a directory
@@ -695,6 +714,17 @@ DOMAIN: foreach $d (@$doms) {
 						  $path ? $path."/".$df : $df,
 						  $binfo, $bdom,
 						  $s3_upload_tries, $port);
+				}
+			elsif ($mode == 6) {
+				# Via rackspace upload
+				&$first_print($text{'backup_upload6'});
+				local $dfpath = $path ? $path."/".$df : $df;
+				$err = &rs_upload_object($rsh,
+					$server, $dfpath, "$dest/$df");
+				$err = &rs_upload_object($rsh, $server,
+					$dfpath.".info", $infotemp) if (!$err);
+				$err = &rs_upload_object($rsh, $server,
+					$dfpath.".dom", $domtemp) if (!$err);
 				}
 			if ($err) {
 				&$second_print(&text('backup_uploadfailed',
@@ -1187,6 +1217,73 @@ foreach my $desturl (@$desturls) {
 			}
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
+	elsif ($ok && $mode == 6 && (@destfiles || !$dirfmt)) {
+		# Upload to Rackspace cloud files
+		local $err;
+		&$first_print($text{'backup_upload6'});
+		local $infotemp = &transname();
+		local $domtemp = &transname();
+		if ($dirfmt) {
+			# Upload an entire directory of files
+			local $tstart = time();
+			foreach my $df (@destfiles) {
+				local $d = $destfiles_map{$df};
+				local $n = $d eq "virtualmin" ? "virtualmin"
+							      : $d->{'dom'};
+				local $binfo = { $n => $donefeatures{$n} };
+				local $bdom = { $n => $d };
+				&uncat_file($infotemp,
+					    &serialise_variable($binfo));
+				&uncat_file($domtemp,
+					    &serialise_variable($bdom));
+				local $dfpath = $path ? $path."/".$df : $df;
+				$err = &rs_upload_object($rsh, $server,
+					$dfpath, $dest."/".$df);
+				$err = &rs_upload_object($rsh, $server,
+					$dfpath.".info", $infotemp) if (!$err);
+				$err = &rs_upload_object($rsh, $server,
+					$dfpath.".dom", $domtemp) if (!$err);
+				}
+			if (!$err && $asd) {
+				# Log bandwidth used by domain
+				foreach my $df (@destfiles) {
+					local $d = $destfiles_map{$df};
+					if ($d) {
+						local @tst = stat("$dest/$df");
+						&record_backup_bandwidth(
+							$d, 0, $tst[7],
+							$tstart, time());
+						}
+					}
+				}
+			}
+		else {
+			# Upload one file to the container
+			local $tstart = time();
+			&uncat_file($infotemp,
+				    &serialise_variable(\%donefeatures));
+			&uncat_file($domtemp,
+				    &serialise_variable(\%donedoms));
+			$err = &rs_upload_object($rsh, $server, $path, $dest);
+			$err = &rs_upload_object($rsh, $server, $path.".info",
+					  $infotemp) if (!$err);
+			$err = &rs_upload_object($rsh, $server, $path.".dom",
+					  $domtemp) if (!$err);
+			if ($asd && !$err) {
+				# Log bandwidth used by whole transfer
+				local @tst = stat($dest);
+				&record_backup_bandwidth($asd, 0, $tst[7], 
+							 $tstart, time());
+				}
+			}
+		if ($err) {
+			&$second_print(&text('backup_uploadfailed', $err));
+			$ok = 0;
+			}
+		&unlink_file($infotemp);
+		&unlink_file($domtemp);
+		&$second_print($text{'setup_done'}) if ($ok);
+		}
 	elsif ($ok && $mode == 0 && (@destfiles || !$dirfmt) &&
 	       $path ne $path0) {
 		# Copy to another local directory
@@ -1355,6 +1452,7 @@ if ($mode > 0) {
 	# Need to download to temp file/directory first
 	&$first_print($mode == 1 ? $text{'restore_download'} :
 		      $mode == 3 ? $text{'restore_downloads3'} :
+		      $mode == 6 ? $text{'restore_downloadrs'} :
 				   $text{'restore_downloadssh'});
 	if ($mode == 3) {
 		local $cerr = &check_s3();
@@ -2549,6 +2647,82 @@ elsif ($mode == 3) {
 		return $err if ($err);
 		}
 	}
+elsif ($mode == 6) {
+	# Download from Rackspace cloud files
+	local $rsh = &rs_connect($config{'rs_endpoint'}, $user, $pass);
+	if (!ref($rsh)) {
+		return $rsh;
+		}
+	local $files = &rs_list_objects($rsh, $server);
+	return "Failed to list $server : $files" if (!ref($files));
+	local $pathslash = $path ? $path."/" : "";
+	if ($infoonly) {
+		# First try file with .info or .dom extension
+		$err = &rs_download_object($rsh, $server, $path.$sfx, $temp);
+		if ($err) {
+			# Doesn't exist .. but maybe path is a sub-directory
+			# full of .info and .dom files?
+			&make_dir($temp, 0700);
+			foreach my $f (@$files) {
+				if ($f =~ /\Q$sfx\E$/ &&
+				    $f =~ /^\Q$pathslash\E([^\/]*)$/) {
+					my $fname = $1;
+					&rs_download_object($rsh, $server, $f,
+						$temp."/".$fname);
+					}
+				}
+			}
+		}
+	else {
+		# If a list of domain names was given, first try to download
+		# only the files for those domains in the directory
+		local $gotfiles = 0;
+		if (@$domnames) {
+                        &unlink_file($temp);
+                        &make_dir($temp, 0711);
+			foreach my $f (@$files) {
+				my $want = 0;
+				my $fname;
+				if ($f =~ /^\Q$pathslash\E([^\/]*)$/) {
+					$fname = $1;
+					foreach my $d (@$domnames) {
+						$want++ if ($fname =~
+							    /^\Q$d\E\./);
+						}
+					}
+				if ($want) {
+					$err = &rs_download_object(
+						$rsh, $server, $f,
+						$temp."/".$fname);
+					$gotfiles++ if (!$err);
+					}
+				else {
+					$err = undef;
+					}
+				}
+			}
+		if (!$gotfiles && $path && &indexof($path, @$files) >= 0) {
+			# Download the file
+			&unlink_file($temp);
+			$err = &rs_download_object(
+				$rsh, $server, $path, $temp);
+			}
+		elsif (!$gotfiles) {
+			# Download the directory
+			&unlink_file($temp);
+                        &make_dir($temp, 0711);
+			foreach my $f (@$files) {
+				if ($f =~ /^\Q$pathslash\E([^\/]*)$/) {
+					my $fname = $1;
+					$err = &rs_download_object(
+						$rsh, $server, $f,
+						$temp."/".$fname);
+					}
+				}
+			}
+		return $err if ($err);
+		}
+	}
 $main::download_backup_cache{$url} = $temp if (!$infoonly);
 return undef;
 }
@@ -2577,8 +2751,8 @@ return $rv;
 
 # parse_backup_url(string)
 # Converts a URL like ftp:// or a filename into its components. These will be
-# protocol (1 for FTP, 2 for SSH, 0 for local, 3 for S3, 4 for download), login,
-# password, host, path and port
+# protocol (1 for FTP, 2 for SSH, 0 for local, 3 for S3, 4 for download,
+# 5 for upload, 6 for rackspace), login, password, host, path and port
 sub parse_backup_url
 {
 local @rv;
@@ -2603,6 +2777,10 @@ elsif ($_[0] =~ /^s3:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
 elsif ($_[0] =~ /^s3rrs:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
 	# S3 with less redundancy
 	@rv = (3, $1, $2, $3, $5, 1);
+	}
+elsif ($_[0] =~ /^rs:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
+	# Rackspace cloud files
+	@rv = (6, $1, $2, $3, $5, 0);
 	}
 elsif ($_[0] eq "download:") {
 	return (4, undef, undef, undef, undef, undef);
@@ -2650,6 +2828,11 @@ elsif ($proto == 4) {
 	}
 elsif ($proto == 5) {
 	$rv = $text{'backup_niceupload'};
+	}
+elsif ($proto == 6) {
+	$rv = $path ?
+		&text('backup_nicersp', "<tt>$host</tt>", "<tt>$path</tt>") :
+		&text('backup_nicers', "<tt>$host</tt>");
 	}
 else {
 	$rv = $url;
@@ -2728,34 +2911,53 @@ $st .= "<tr> <td>$text{'backup_pass'}</td> <td>".
 $st .= "</table>\n";
 push(@opts, [ 2, $text{'backup_mode2'}, $st ]);
 
-if (&can_use_s3()) {
-	# S3 backup fields (bucket, access key ID, secret key and file)
-	local $s3user = $mode == 3 ? $user : undef;
-	local $s3pass = $mode == 3 ? $pass : undef;
-	if (&master_admin()) {
-		$s3user ||= $config{'a3_akey'};
-		$s3pass ||= $config{'s3_akey'};
-		}
-	local $st = "<table>\n";
-	$st .= "<tr> <td>$text{'backup_bucket'}</td> <td>".
-	       &ui_textbox($name."_bucket", $mode == 3 ? $server : undef, 20).
-	       "</td> </tr>\n";
-	$st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
-	       &ui_textbox($name."_akey", $s3user, 40, 0, undef, $noac).
-	       "</td> </tr>\n";
-	$st .= "<tr> <td>$text{'backup_skey'}</td> <td>".
-	       &ui_password($name."_skey", $s3pass, 40, 0, undef, $noac).
-	       "</td> </tr>\n";
-	$st .= "<tr> <td>$text{'backup_s3path'}</td> <td>".
-	       &ui_opt_textbox($name."_s3file", $mode == 3 ? $path : undef,
-			       30, $text{'backup_nos3path'}).
-	       "</td> </tr>\n";
-	$st .= "<tr> <td></td> <td>".
-	       &ui_checkbox($name."_rrs", 1, $text{'backup_s3rrs'}, $port == 1).
-	       "</td> </tr>\n";
-	$st .= "</table>\n";
-	push(@opts, [ 3, $text{'backup_mode3'}, $st ]);
+# S3 backup fields (bucket, access key ID, secret key and file)
+local $s3user = $mode == 3 ? $user : undef;
+local $s3pass = $mode == 3 ? $pass : undef;
+if (&master_admin()) {
+	$s3user ||= $config{'a3_akey'};
+	$s3pass ||= $config{'s3_akey'};
 	}
+local $st = "<table>\n";
+$st .= "<tr> <td>$text{'backup_bucket'}</td> <td>".
+       &ui_textbox($name."_bucket", $mode == 3 ? $server : undef, 20).
+       "</td> </tr>\n";
+$st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
+       &ui_textbox($name."_akey", $s3user, 40, 0, undef, $noac).
+       "</td> </tr>\n";
+$st .= "<tr> <td>$text{'backup_skey'}</td> <td>".
+       &ui_password($name."_skey", $s3pass, 40, 0, undef, $noac).
+       "</td> </tr>\n";
+$st .= "<tr> <td>$text{'backup_s3path'}</td> <td>".
+       &ui_opt_textbox($name."_s3file", $mode == 3 ? $path : undef,
+		       30, $text{'backup_nos3path'}).
+       "</td> </tr>\n";
+$st .= "<tr> <td></td> <td>".
+       &ui_checkbox($name."_rrs", 1, $text{'backup_s3rrs'}, $port == 1).
+       "</td> </tr>\n";
+$st .= "</table>\n";
+push(@opts, [ 3, $text{'backup_mode3'}, $st ]);
+
+# Rackspace backup fields (username, API key and bucket/file)
+local $rsuser = $mode == 6 ? $user : undef;
+local $rspass = $mode == 6 ? $pass : undef;
+if (&master_admin()) {
+	$rsuser ||= $config{'rs_user'};
+	$rspass ||= $config{'rs_key'};
+	}
+local $st = "<table>\n";
+$st .= "<tr> <td>$text{'backup_rsuser'}</td> <td>".
+       &ui_textbox($name."_rsuser", $rsuser, 40, 0, undef, $noac).
+       "</td> </tr>\n";
+$st .= "<tr> <td>$text{'backup_rskey'}</td> <td>".
+       &ui_password($name."_rskey", $rspass, 40, 0, undef, $noac).
+       "</td> </tr>\n";
+$st .= "<tr> <td>$text{'backup_rspath'}</td> <td>".
+       &ui_textbox($name."_rspath", $mode != 6 ? undef :
+				    $server.($path ? "/".$path : ""), 50).
+       "</td> </tr>\n";
+$st .= "</table>\n";
+push(@opts, [ 6, $text{'backup_mode6'}, $st ]);
 
 if (!$nodownload) {
 	# Show mode to download in browser
@@ -2847,7 +3049,7 @@ elsif ($mode == 2) {
 	return "ssh://".$in{$name."_suser"}.":".$in{$name."_spass"}."\@".
 	       $in{$name."_sserver"}.":".$in{$name."_spath"};
 	}
-elsif ($mode == 3 && &can_use_s3()) {
+elsif ($mode == 3) {
 	# Amazon S3 service
 	local $cerr = &check_s3();
 	$cerr && &error($cerr);
@@ -2871,6 +3073,16 @@ elsif ($mode == 5) {
 	# Uploaded file
 	$in{$name."_upload"} || &error($text{'backup_eupload'});
 	return "upload:";
+	}
+elsif ($mode == 6) {
+	# Rackspace cloud files
+	$in{$name.'_rsuser'} =~ /^\S+$/i || &error($text{'backup_ersuser'});
+	$in{$name.'_rskey'} =~ /^\S+$/i || &error($text{'backup_erskey'});
+	$in{$name.'_rspath'} =~ /^\S+$/i || &error($text{'backup_erspath'});
+	($in{$name.'_rspath'} =~ /^\// || $in{$name.'_rspath'} =~ /\/$/) &&
+		&error($text{'backup_erspath2'});
+	return "rs://".$in{$name.'_rsuser'}.":".$in{$name.'_rskey'}."\@".
+	       $in{$name.'_rspath'};
 	}
 else {
 	&error($text{'backup_emode'});
@@ -3187,13 +3399,13 @@ elsif (($mode == 1 || $mode == 2) &&
 	$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($base, $date);
 	}
-elsif ($mode == 3 && $host =~ /%/) {
-	# S3 bucket which is date-based
+elsif (($mode == 3 || $mode == 6) && $host =~ /%/) {
+	# S3 / Rackspace bucket which is date-based
 	$host =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return (undef, $host);
 	}
-elsif ($mode == 3 && $path =~ /%/) {
-	# S3 filename which is date-based
+elsif (($mode == 3 || $mode == 6) && $path =~ /%/) {
+	# S3 / Rackspace filename which is date-based
 	$path =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($host, $path);
 	}
@@ -3396,17 +3608,50 @@ elsif ($mode == 3 && $path =~ /\%/) {
 		}
 	}
 
+elsif ($mode == 6 && $host =~ /\%/) {
+	# Search Rackspace for containers matching the regexp
+	local $rsh = &rs_connect($config{'rs_endpoint'}, $user, $pass);
+	if (!ref($rsh)) {
+		return &text('backup_purgeersh', $rsh);
+		}
+	local $containers = &rs_list_containers($rsh);
+	if (!ref($containers)) {
+		&$second_print(&text('backup_purgeecontainers', $containers));
+		return 0;
+		}
+	foreach my $c (@$containers) {
+		local $st = &rs_stat_container($rsh, $c);
+		next if (!ref($st));
+		local $ctime = int($st->{'X-Timestamp'});
+		if ($b->{'Name'} =~ /^$re$/ && $ctime && $ctime < $cutoff) {
+			# Found one to delete
+			local $old = int((time() - $ctime) / (24*60*60));
+			&$first_print(&text('backup_deletingcontainer',
+					    "<tt>$c</tt>", $old));
+
+			local $err = &rs_delete_container($rsh, $c, 1);
+			if ($err) {
+				&$second_print(
+					&text('backup_edelcontainer',$err));
+				$ok = 0;
+				}
+			else {
+				&$second_print(&text('backup_deleted',
+			          &nice_size($st->{'X-Container-Bytes-Used'})));
+				$pcount++;
+				}
+			}
+		}
+	}
+
+# XXX purge of files
+
+
 &$outdent_print();
 
 &$second_print($pcount ? &text('backup_purged', $pcount)
 		       : $text{'backup_purgednone'});
 return $ok;
-}
-
-# Returns 1 if the current user can backup to Amazon's S3 service
-sub can_use_s3
-{
-return 1;	# Now supported for GPL too
 }
 
 # write_backup_log(&domains, dest, incremental?, start, size, ok?,

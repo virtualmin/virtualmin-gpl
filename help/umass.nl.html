@@ -1,0 +1,32 @@
+<header>Batch gebruikers aanmaken</header>
+
+Deze pagina geeft u de mogelijkheid om meerdere email of FTP gebruikers
+in 1 keer aan te maken met een tekst file. Deze file moet een lijst
+bevatten die op iedere regel 1 gebruiker heeft staan, en iedere regel
+moet het volgende formaat hebben :<p>
+
+<tt><i>username</i>:<i>realname</i>:<i>password</i>:<i>ftp-flag</i>:<i>email-flag</i>:<i>quota</i>:[<i>extras</i>]:[<i>forwards</i>]:[<i>databases</i>]</tt><p>
+
+De betekenis van de velden zijn :<br>
+<dl>
+<dt>username <b>(gebruikersnaam)</b>
+<dd>De gebruikers korte login naam, zoals <i>joe</i>. Indien nodig zal het domein voorvoegsel worden toegevoegd om de echte login naam te maken.
+<dt>realname <b>(echte naam)</b>
+<dd>De gebruikers echte naam, zoals <i>Joe Smith</i>.
+<dt>password <b>(wachtwoord)</b>
+<dd>Het oorspronkelijke wachtwoord voor de gebruiker, in platte tekst.
+<dt>ftp-flag <b>(ftp-vlag)</b>
+<dd>Indien dit is ingesteld op 1, kan de gebruiker inloggen via FTP. Staat het op 0 of is het leeg gelaten zorgt ervoor dat er niet bij FTP ingelogd kan worden. U kunt ook het volledige pad gebruiken naar een geldige shell van een mailbox gebruiker, zoals <tt>/usr/bin/scponly</tt>.
+<dt>email-flag <b>(email-vlag)</b>
+<dd>Indien dit is ingesteld op 1, word de gebruikers primaire email adres aangezet.
+<dt>quota
+<dd>De gebruikers email en home directory quota, in 1 kB harddisk blokken.
+<dt>extra's
+<dd>Een komma-gescheiden lijst met extra email adressen voor deze gebruiker. Deze moeten zich bevinden in de Virtualmin domeinen die u beheerd.
+<dt>forwards <b>(doorsturingen)</b>
+<dd>Een komma-gescheiden lijst met email doorstuur bestemmingen voor deze gebruiker (normaal gesproken adressen zoals <i>joe@anderdomein.com</i>).
+<dt>databases
+<dd>Een komma-gescheiden lijst met databases om toegang te verlenen aan deze gebruiker. Iedere database moet van het type (<i>mysql</i> of <i>postgres</i>) zijn en met een database naam, gescheiden met een spatie.
+</dl><p>
+
+<footer>

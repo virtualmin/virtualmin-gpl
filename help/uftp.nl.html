@@ -1,0 +1,13 @@
+<header>FTP login aangezet?</header>
+
+Wanneer deze optie is ingesteld op <b>Ja</b> krijgt de gebruiker de
+<tt><exec %c = &foreign_config($module); $c{'ftp_shell'}></tt> shell,
+waarmee hij kan inloggen via FTP. Wanneer dit is ingesteld op <b>Nee</b>,
+word zijn shell ingesteld op <tt><exec %c = &foreign_config($module); $c{'shell'}></tt>
+en zullen FTP inlog pogingen worden geweigerd. <p>
+
+Hiermee word aangenomen dat de FTP shell zich bevind in de <tt>/etc/shells</tt>
+file, of op een andere wijze word toegestaan door de FTP server die aan het
+werk is op uw systeem. <p>
+
+<hr>

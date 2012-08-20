@@ -1,0 +1,6 @@
+desc=Outgoing SMTP IP Address
+html=The outgoing IP address for email sent from a domain can now be configured to match the domain's IP, when using Postfix 2.7 or above.
+master=1
+reseller=1
+owner=1
+link=edit_mail.cgi?dom=${ID}

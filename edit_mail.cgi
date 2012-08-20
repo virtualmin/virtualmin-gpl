@@ -30,6 +30,16 @@ if ($d->{'alias'} && $supports_aliascopy) {
 				[ 0, $text{'tmpl_aliascopy0'} ] ]));
 	}
 
+# Outgoing IP binding
+if ($supports_dependent) {
+	$dependent = &get_domain_dependent($d);
+	print &ui_table_row($text{'mail_dependent'},
+                    &ui_radio("dependent", $dependent ? 1 : 0,
+                              [ [ 0, $text{'mail_dependent0'} ],
+				[ 1, &text('mail_dependent1', $d->{'ip'}) ],
+			      ]));
+	}
+
 print &ui_table_end();
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 

@@ -93,6 +93,8 @@ other_doms=Notify other modules when updating mailbox Unix users?,1,1-Yes,0-No
 check_apache=Check Apache configuration before applying?,1,1-Yes,0-No
 nodeniedssh=Add users with no SSH access to <tt>deniedssh</tt> group?,1,0-Yes,1-No
 trash_folder=Trash folder name for new mailboxes,10,*-Don't create any,trash-trash,Trash-Trash,Other name
+drafts_folder=Drafts folder name for new mailboxes,10,*-Don't create any,drafts-drafts,Drafts-Drafts,Other name
+sent_folder=Sent mail folder name for new mailboxes,10,*-Don't create any,sent-sent,Sent-Sent,Other name
 
 line4.5=Qmail+LDAP options,11
 ldap_host=LDAP server,0
@@ -113,6 +115,7 @@ vpopmail_group=VPOPMail group,6
 vpopmail_auto=Path to autorespond program,3,Not installed
 vpopmail_owner=Create VPOPMail domains owned by administration user?,1,1-Yes,0-No
 vpopmail_maildir=VPOPMail domains directory resides in (path relative to home directory),3,VPOPMail's home directory
+vpopmail_md=VPOPMail sub-directory for email,3,Default (<tt>Maildir</tt>)
 
 line4.7=Spam filtering options,11
 spam_delivery=Default delivery for spam,10,-Deliver normally,/dev/null-Delete,$HOME/mail/spam-Spam mbox folder,$HOME/Maildir/.spam/-Spam Maildir folder,Other file or email address
@@ -155,8 +158,11 @@ tar_cmd=Full path to tar command,3,Detect automatically
 tar_args=Additonal parameters to tar command,0
 ssh_args=Additonal parameters to ssh and scp commands,0
 s3_endpoint=S3-compatible server hostname,3,Use Amazon S3
-s3_akey=Default S3 access key for backups and API,3,None
-s3_skey=Default S3 secret key for backups and API,3,None
+s3_akey=Default S3 access key for backups,3,None
+s3_skey=Default S3 secret key for backups,3,None
+rs_endpoint=Rackspace API URL,10,https://auth.api.rackspacecloud.com/v1.0-US default,https://lon.auth.api.rackspacecloud.com/v1.0-UK default,Other
+rs_user=Default Rackspace username for backups,3,None
+rs_key=Default Rackspace API key for backups,3,None
 
 line6=Advanced options,11
 iface_base=Base number for virtual interfaces,3,Automatic

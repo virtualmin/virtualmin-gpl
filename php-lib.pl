@@ -508,7 +508,7 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 			$common .= "export PHP_FCGI_MAX_REQUESTS\n";
 			}
 		elsif ($mode eq "cgi") {
-			$common .= "if [ \"\$REDIRECT_URL\" ne \"\" ]; then\n";
+			$common .= "if [ \"\$REDIRECT_URL\" != \"\" ]; then\n";
 			$common .= "  SCRIPT_NAME=\$REDIRECT_URL\n";
 			$common .= "  export SCRIPT_NAME\n";
 			$common .= "fi\n";

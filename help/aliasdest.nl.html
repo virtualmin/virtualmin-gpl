@@ -1,0 +1,40 @@
+<header>Alias bestemmingen</header>
+
+Deze tabel met velden bepaald wat er gebeurt met email die gestuurd word
+naar deze alias. Indien er meerdere bestemmingen worden ingevuld zal de
+email naar al deze bestemmingen verstuurd worden. Iedere bestemming heeft
+een type (gekozen van het menu), 
+Wat 1 van de volgende kan zijn :
+<ul>
+<li><b>Email adres</b><br>
+    Email word doorgestuurd naar het ingevulde adres in het aangrenzende veld.<p>
+<li><b>Adressen in file</b><br>
+    Email word doorgestuurd naar alle adressen in de lijst van de tekst file
+    waarvan het pad is ingevuld in het aangrenzende veld.<p>
+<li><b>Schrijf naar file</b><br>
+    Email naar de alias word toegevoegd aan de specifieke file. Alle headers en
+    de raw niet-gecodeerde body zal worden toegevoegd.<p>
+<li><b>Geven aan programma</b><br>
+    Het programma wat word ingevuld in het aangrenzende veld zal worden uitgevoerd
+    en de email naar de alias zal als input worden doorgegeven. <p>
+<li><b>Auto-antwoord van file</b><br>
+    Wanneer er email word ontvangen door deze alias, zal er een automatisch antwoord
+    worden teruggestuurd naar de afzender. De tekst van dit automatisch antwoord zal
+    zal uit de file gehaald worden die gemaakt is met de tekst die u in het 
+    aangrenzende tekstveld heeft ingevuld. <p>
+<li><b>Filter file toevoegen</b><br>
+    Email die verstuurd word naar de alias zal worden verwerkt volgende de regels in
+    de gespecificeerde filter file, wat kan leiden dat het word doorgestuurd naar
+    andere adressen of files afhankelijk van de inhoud van het bericht. <p>
+<li><b>Mailbox van gebruiker</b><br>
+    Email zal direct worden afgeleverd aan de mailbox van de gebruiker die ingevuld
+    word in het aangrenzende tekstveld. Dit zal ervoor zorgen dat de email word omgeleid
+    van alle adressen die deze gebruiker heeft ingesteld. Echter u moet de volledige
+    POP3 login gebruikersnaam invullen, zoals <i>joe.foo</i> inplaats van alleen <i>joe</i>.<p>
+</ul>
+Indien u kiest voor de <b>Adressen in file</b>, <b>Auto-antwoord van file</b> of de
+<b>Filter file toevoegen</b> soorten bestemmingen zal er bij opnieuw bewerken van de alias
+links een label <b>Bewerk..</b> veld staan naast deze bestemmingen voor het bewerken van de
+inhoud van de gespecificeerde file. <p>
+
+<hr>

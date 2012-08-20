@@ -1,0 +1,26 @@
+<header>Resource Limieten</header>
+
+Deze pagina geeft u de mogelijkheid om de limieten te definieren van de CPU
+en het geheugen gebruik wat word toegevoegd aan de virtuele server en alle
+sub-servers. Limieten worden ook toegevoegd aan PHP scripts en opdrachten
+die worden uitgevoerd via een SSH login. Dit kan worden gebruikt om te 
+voorkomen dat 1 domein eigenaar het hele systeem kan overbelasten met
+opdrachten of programma's die teveel RAM gebruiken. <p>
+
+De beschikbare limieten soorten zijn :<br>
+<dl>
+<dt><b>Maximum aantal processen</b>
+<dd>Meer processen opstarten dan als server Unix gebruiker limiet wat hier is
+    is ingesteld zal mislukken. Dit zal ook gelden voor samenwerkende PHP scripts.<p>
+
+<dt><b>Maximum grote per proces</b>
+<dd>Ieder enkel proces wat meer geheugen probeert te gebruiken dan dit limiet zal
+    worden uitgeschakeld. Echter de totale som van alle processen in bezit van de
+    server kan nog steeds over het limiet heen gaan.<p>
+
+<dt><b>Maximum CPU tijd per proces</b>
+<dd>Ieder proces die tijd gebruikt van de CPU (dus niet wacht op IO of slapen)
+    en over dit limiet gaat word gestopt.<p>
+</dl>
+
+<footer>

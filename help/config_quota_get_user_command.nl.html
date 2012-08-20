@@ -1,0 +1,18 @@
+<header>Opdracht om de gebruikers quota te verkrijgen</header>
+
+Wanneer externe quota opdrachten worden gebruikt kan het programma die in
+deze optie is ingesteld worden opgeroepen door Virtualmin, om de quota op
+te vragen voor een enkele gebruiker. Het word opgeroepen met een enkele
+parameter - de volledige Unix gebruiker naam, en moet als resultaat een enkele regel
+geven met de volgende spatie gescheiden velden :
+
+<ol>
+<li>Huidige gebruikte quota in 1 kB blokken.
+<li>De zachte quota in 1 kB blokken, of 0 voor ongelimiteerd.
+<li>De harde quota in 1 kB blokken, of 0 voor ongelimiteerd.
+</ol>
+
+Indien deze opdracht niet is ingesteld op de "Module Config" pagina zal
+Virtualmin de <b>Opdracht om groep quota lijst maken</b> gebruiken. <p>
+
+<footer>

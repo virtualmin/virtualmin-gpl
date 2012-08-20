@@ -254,6 +254,11 @@ if ($can_allowed_hosts) {
 
 print &ui_tabs_end(1) if (@tabs > 1);
 
+# Make sure the left menu is showing this domain
+if (defined(&theme_select_domain)) {
+	&theme_select_domain($d);
+	}
+
 &ui_print_footer(&domain_footer_link($d),
 		 "", $text{'index_return'});
 

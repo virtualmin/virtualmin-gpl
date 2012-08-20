@@ -57,6 +57,18 @@ if (defined($in{'aliascopy'}) && $d->{'mail'}) {
 	$d->{'aliascopy'} = $in{'aliascopy'};
 	}
 
+# Update outgoing IP mode
+if (defined($in{'dependent'}) && $supports_dependent) {
+	$old_dependent = &get_domain_dependent($d) ? 1 : 0;
+	if ($old_dependent != $in{'dependent'}) {
+		&$first_print($in{'dependent'} ?
+				&text('mail_dependenting1', $d->{'ip'}) :
+				&text('mail_dependenting0'));
+		&save_domain_dependent($d, $in{'dependent'});
+		&$second_print($text{'setup_done'});
+		}
+	}
+
 &save_domain($d);
 &run_post_actions();
 

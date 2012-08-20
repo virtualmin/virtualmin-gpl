@@ -87,7 +87,7 @@ local $chained = $_[0]->{'ssl_chain'};
 
 # Add NameVirtualHost if needed, and if there is more than one SSL site on
 # this IP address
-local $nvstar = &add_name_virtual($_[0], $conf, $web_sslport);
+local $nvstar = &add_name_virtual($_[0], $conf, $web_sslport, 1);
 
 # Add a Listen directive if needed
 &add_listen($_[0], $conf, $web_sslport);

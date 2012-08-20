@@ -1,0 +1,21 @@
+<header>Email alias mode voor alias domeinen</header>
+
+Deze instelling bepaald hoe Virtualmin email doorstuurt van een alias virtuele
+server naar een doel server. De standaard instelling is <b>Catchall doorsturen</b>,
+wat een enkele catchall alias gebruikt in het bron domein om alle berichten door
+te sturen naar het corresponderende doel adres. Het alternatief is <b>Kopieer
+aliassen van het doel</b>, wat Virtualmin opgeeft om alle email aliassen van het
+echte doel domein te dupliceren naar de alias. <p>
+
+Het voordeel van deze tweede mode is dat met de Postfix email server de email
+naar een adres in het alias domein word geweigerd op SMTP niveau. Wanneer de 
+catchall mode is geselecteerd zal de email naar een ongeldig adres worden door
+gestuurd naar het doel domein en dan worden afgeketst naar de afzender. Dit kan
+heel veel belasting veroorzaken op uw systeem en kan ervoor zorgen dat email
+word verstuurd naar een verkeerd adres als een spammer naar veel adressen email
+aan het versturen is binnen het alias domein. <p>
+
+Zoals met de meeste template instellingen worden deze alleen toegevoegd aan
+virtuele servers die aangemaakt zijn nadat de instelling is gewijzigd. <p>
+
+<footer>
