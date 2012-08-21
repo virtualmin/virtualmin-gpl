@@ -1,0 +1,6 @@
+desc=Rackspace Cloud Files backup
+html=Virtual servers can now be backed up to the <a href=http://www.rackspace.com/cloud/public/files/>Rackspace Cloud Files</a> service, in a similar way to Virtualmin's S3 backup support. You must first register for a Rackspace account and create an API key before this feature can be used.
+master=1
+reseller=1
+owner=1
+link=backup_form.cgi

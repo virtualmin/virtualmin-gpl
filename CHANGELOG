@@ -1359,3 +1359,4 @@ Alias virtual servers that have their own mailboxes and aliases can now be creat
 When installing Ruby scripts, dependencies like gcc and libfcgi-devel are now installed automatically if possible.
 The outgoing IP address for email sent from a domain can now be configured to match the domain's IP, when using Postfix 2.7 or above.
 If the system's primary IP address has changed, display a warning message and prompt to update all virtual servers on the old IP.
+Virtual servers can now be backed up to the Rackspace Cloud Files service, in a similar way to Virtualmin's S3 backup support.
