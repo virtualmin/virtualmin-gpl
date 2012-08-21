@@ -2392,6 +2392,111 @@ $s3backup_tests = [
 
 $enc_s3backup_tests = &convert_to_encrypted($s3backup_tests);
 
+$rs_backup_prefix = "rs://$config{'rs_user'}:$config{'rs_key'}\@virtualmin-test-backup-container";
+$rsbackup_tests = [
+	# Create target container
+	{ 'command' => 'create-rs-container.pl',
+	  'args' => [ [ 'container', 'virtualmin-test-backup-container' ] ],
+	},
+
+	# Create a simple domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
+		      [ 'logrotate' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a sub-server
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      [ 'logrotate' ],
+		      @create_args, ],
+	},
+
+	# Backup to Rackspace
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$rs_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$rs_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Restore from Rackspace
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', "$rs_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+
+	# Restore sub-domain from Rackspace
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', "$rs_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Backup to Rackspace in home format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $rs_backup_prefix ] ],
+	},
+
+	# Restore from Rackspace in home format
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', $rs_backup_prefix ] ],
+	},
+
+	# Backup from Rackspace one-by-one
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'onebyone' ],
+		      [ 'newformat' ],
+		      [ 'dest', $rs_backup_prefix ] ],
+	},
+
+	# Restore from Rackspace, all domains
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'all-domains' ],
+		      [ 'all-features' ],
+		      [ 'source', $rs_backup_prefix ] ],
+	},
+
+	# Cleanup the backup domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
+
+	# Delete the Rackspace container
+	{ 'command' => 'delete-rs-container.pl',
+	  'args' => [ [ 'container', 'virtualmin-test-backup-container' ],
+		      [ 'recursive' ] ],
+	  'cleanup' => 1,
+	},
+	];
+
+$enc_rsbackup_tests = &convert_to_encrypted($rsbackup_tests);
 
 $splitbackup_tests = [
 	# Create a domain for the backup target
@@ -6188,6 +6293,8 @@ $alltests = { '_config' => $_config_tests,
 	      'enc_remotebackup' => $enc_remotebackup_tests,
 	      's3backup' => $s3backup_tests,
 	      'enc_s3backup' => $enc_s3backup_tests,
+	      'rsbackup' => $rsbackup_tests,
+	      'enc_rsbackup' => $enc_rsbackup_tests,
 	      'configbackup' => $configbackup_tests,
 	      'enc_configbackup' => $enc_configbackup_tests,
 	      'ipbackup' => $ipbackup_tests,
