@@ -2919,9 +2919,6 @@ if (&master_admin()) {
 	$s3pass ||= $config{'s3_akey'};
 	}
 local $st = "<table>\n";
-$st .= "<tr> <td>$text{'backup_bucket'}</td> <td>".
-       &ui_textbox($name."_bucket", $mode == 3 ? $server : undef, 20).
-       "</td> </tr>\n";
 $st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
        &ui_textbox($name."_akey", $s3user, 40, 0, undef, $noac).
        "</td> </tr>\n";
@@ -2929,8 +2926,8 @@ $st .= "<tr> <td>$text{'backup_skey'}</td> <td>".
        &ui_password($name."_skey", $s3pass, 40, 0, undef, $noac).
        "</td> </tr>\n";
 $st .= "<tr> <td>$text{'backup_s3path'}</td> <td>".
-       &ui_opt_textbox($name."_s3file", $mode == 3 ? $path : undef,
-		       30, $text{'backup_nos3path'}).
+       &ui_textbox($name."_s3path", $mode != 3 ? "" :
+				    $server.($path ? "/".$path : ""), 50).
        "</td> </tr>\n";
 $st .= "<tr> <td></td> <td>".
        &ui_checkbox($name."_rrs", 1, $text{'backup_s3rrs'}, $port == 1).
@@ -3053,17 +3050,14 @@ elsif ($mode == 3) {
 	# Amazon S3 service
 	local $cerr = &check_s3();
 	$cerr && &error($cerr);
-	$in{$name.'_bucket'} =~ /^\S+$/ || &error($text{'backup_ebucket'});
-	$in{$name.'_bucket'} =~ /\// && &error($text{'backup_ebucket2'});
+	$in{$name.'_s3path'} =~ /^\S+$/ || &error($text{'backup_es3path'});
+	($in{$name.'_s3path'} =~ /^\// || $in{$name.'_s3path'} =~ /\/$/) &&
+		&error($text{'backup_es3path2'});
 	$in{$name.'_akey'} =~ /^\S+$/i || &error($text{'backup_eakey'});
 	$in{$name.'_skey'} =~ /^\S+$/i || &error($text{'backup_eskey'});
-	$in{$name."_s3file_def"} ||
-		$in{$name."_s3file"} =~ /^[a-z0-9\-\_\.\%]+$/i ||
-		&error($text{'backup_esfile'});
 	local $proto = $in{$name.'_rrs'} ? 's3rrs' : 's3';
 	return $proto."://".$in{$name.'_akey'}.":".$in{$name.'_skey'}."\@".
-	       $in{$name.'_bucket'}.
-	       ($in{$name."_s3file_def"} ? "" : "/".$in{$name."_s3file"});
+	       $in{$name.'_s3path'};
 	}
 elsif ($mode == 4) {
 	# Just download
@@ -3584,7 +3578,8 @@ elsif ($mode == 3 && $path =~ /\%/) {
 		}
 	foreach my $f (@$files) {
 		local $ctime = &s3_parse_date($f->{'LastModified'});
-		if ($f->{'Key'} =~ /^$re$/ && $ctime && $ctime < $cutoff) {
+		if ($f->{'Key'} =~ /^$re$/ && $ctime && $ctime < $cutoff &&
+		    $f->{'Key'} !~ /\.(dom|info)$/) {
 			# Found one to delete
 			local $old = int((time() - $ctime) / (24*60*60));
 			&$first_print(&text('backup_deletingfile',
@@ -3623,7 +3618,7 @@ elsif ($mode == 6 && $host =~ /\%/) {
 		local $st = &rs_stat_container($rsh, $c);
 		next if (!ref($st));
 		local $ctime = int($st->{'X-Timestamp'});
-		if ($b->{'Name'} =~ /^$re$/ && $ctime && $ctime < $cutoff) {
+		if ($c =~ /^$re$/ && $ctime && $ctime < $cutoff) {
 			# Found one to delete
 			local $old = int((time() - $ctime) / (24*60*60));
 			&$first_print(&text('backup_deletingcontainer',
@@ -3644,7 +3639,44 @@ elsif ($mode == 6 && $host =~ /\%/) {
 		}
 	}
 
-# XXX purge of files
+elsif ($mode == 6 && $path =~ /\%/) {
+	# Search for Rackspace files under the container
+	local $rsh = &rs_connect($config{'rs_endpoint'}, $user, $pass);
+	if (!ref($rsh)) {
+		return &text('backup_purgeersh', $rsh);
+		}
+	local $files = &rs_list_objects($rsh, $host);
+	if (!ref($files)) {
+		&$second_print(&text('backup_purgeefiles2', $files));
+		return 0;
+		}
+	foreach my $f (@$files) {
+		local $st = &rs_stat_object($rsh, $host, $f);
+		next if (!ref($st));
+		local $ctime = int($st->{'X-Timestamp'});
+		if ($f =~ /^$re($|\/)/ && $ctime && $ctime < $cutoff &&
+		    $f !~ /\.(dom|info)$/) {
+			# Found one to delete
+			local $old = int((time() - $ctime) / (24*60*60));
+			&$first_print(&text('backup_deletingfile',
+					    "<tt>$f</tt>", $old));
+			local $err = &rs_delete_object($rsh, $host, $f);
+			if ($err) {
+				&$second_print(&text('backup_edelbucket',$err));
+				$ok = 0;
+				}
+			else {
+				&rs_delete_object($rsh, $host, $f.".dom");
+				&rs_delete_object($rsh, $host, $f.".info");
+				&$second_print(&text('backup_deleted',
+				     &nice_size($st->{'Content-Length'})));
+				$pcount++;
+				}
+			}
+		}
+	}
+
+
 
 
 &$outdent_print();

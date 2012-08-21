@@ -62,8 +62,6 @@
 	- Documentation
 	- Functional tests
 	- Make sure purging worked
-	- Combine S3 bucket and path into a single field
-	- Make sure backup to a sub-dir works
 
  - RHEL 6 uses upstart
 	- sourceforge bug "Mgetty does not run"
