@@ -6240,10 +6240,21 @@ $s3_tests = [
 	  'args' => [ [ 'bucket', 'virtualmin-s3-test-bucket' ] ],
 	},
 
+	# List buckets
+	{ 'command' => 'list-s3-buckets.pl',
+	  'grep' => 'virtualmin-s3-test-bucket',
+	},
+
 	# Upload the file
 	{ 'command' => 'upload-s3-file.pl',
 	  'args' => [ [ 'bucket', 'virtualmin-s3-test-bucket' ],
 		      [ 'source', '/tmp/s3.dat' ] ],
+	},
+
+	# List files
+	{ 'command' => 'list-s3-files.pl',
+	  'args' => [ [ 'bucket', 'virtualmin-s3-test-bucket' ] ],
+	  'grep' => 's3.dat',
 	},
 
 	# Download the file
@@ -6260,6 +6271,12 @@ $s3_tests = [
 	{ 'command' => 'delete-s3-file.pl',
 	  'args' => [ [ 'bucket', 'virtualmin-s3-test-bucket' ],
 		      [ 'file', 's3.dat' ] ],
+	},
+
+	# List files, to make sure it is gone
+	{ 'command' => 'list-s3-files.pl',
+	  'args' => [ [ 'bucket', 'virtualmin-s3-test-bucket' ] ],
+	  'antigrep' => 's3.dat',
 	},
 
 	# Try a download, which should fail
@@ -6299,6 +6316,74 @@ if (!$config{'s3_akey'} || !$config{'s3_skey'}) {
 	}
 else {
 	$s3_eu_tests = &convert_to_location($s3_tests, "EU");
+	}
+
+$rs_tests = [
+	# Create a random file
+	{ 'command' => 'dd if=/dev/random of=/tmp/rs.dat count=10 bs=1024',
+	},
+
+	# Create a container
+	{ 'command' => 'create-rs-container.pl',
+	  'args' => [ [ 'container', 'virtualmin-rs-test-container' ] ],
+	},
+
+	# List containers
+	{ 'command' => 'list-rs-containers.pl',
+	  'grep' => 'virtualmin-rs-test-container',
+	},
+
+	# Upload the file
+	{ 'command' => 'upload-rs-file.pl',
+	  'args' => [ [ 'container', 'virtualmin-rs-test-container' ],
+		      [ 'source', '/tmp/rs.dat' ] ],
+	},
+
+	# List files
+	{ 'command' => 'list-rs-files.pl',
+	  'args' => [ [ 'container', 'virtualmin-rs-test-container' ] ],
+	  'grep' => 'rs.dat',
+	},
+
+	# Download the file
+	{ 'command' => 'download-rs-file.pl',
+	  'args' => [ [ 'container', 'virtualmin-rs-test-container' ],
+		      [ 'file', 'rs.dat' ],
+		      [ 'dest', '/tmp/rs.dat.2' ] ],
+	},
+
+	# Make sure they are the same
+	{ 'command' => 'diff /tmp/rs.dat /tmp/rs.dat.2 >/dev/null' },
+
+	# Delete the file on Rackspace
+	{ 'command' => 'delete-rs-file.pl',
+	  'args' => [ [ 'container', 'virtualmin-rs-test-container' ],
+		      [ 'file', 'rs.dat' ] ],
+	},
+
+	# List files to ensure it is gone
+	{ 'command' => 'list-rs-files.pl',
+	  'args' => [ [ 'container', 'virtualmin-rs-test-container' ] ],
+	  'antigrep' => 'rs.dat',
+	},
+
+	# Try a download, which should fail
+	{ 'command' => 'download-rs-file.pl',
+	  'args' => [ [ 'container', 'virtualmin-rs-test-container' ],
+		      [ 'file', 'rs.dat' ],
+		      [ 'dest', '/tmp/rs.dat.2' ] ],
+	  'fail' => 1,
+	},
+
+	# Delete the container
+	{ 'command' => 'delete-rs-container.pl',
+	  'args' => [ [ 'container', 'virtualmin-rs-test-container' ],
+		      [ 'recursive' ] ],
+	  'cleanup' => 1,
+	},
+	];
+if (!$config{'rs_user'} || !$config{'rs_key'}) {
+	$rs_tests = [ { 'command' => 'echo No default Rackspace access or secret key defined on this system' } ];
 	}
 
 $alltests = { '_config' => $_config_tests,
@@ -6358,6 +6443,7 @@ $alltests = { '_config' => $_config_tests,
 	      's3' => $s3_tests,
 	      's3_eu' => $s3_eu_tests,
 	      'exclude' => $exclude_tests,
+	      'rs' => $rs_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL

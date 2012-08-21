@@ -60,8 +60,6 @@
 	- http://www.virtualmin.com/node/11659
 	- http://docs.rackspace.com/files/api/v1/cf-devguide/content/index.html
 	- Documentation
-	- Functional tests
-	- Make sure purging worked
 
  - RHEL 6 uses upstart
 	- sourceforge bug "Mgetty does not run"
