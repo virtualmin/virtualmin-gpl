@@ -2376,6 +2376,23 @@ $s3backup_tests = [
 		      [ 'source', $s3_backup_prefix ] ],
 	},
 
+	# Backup to S3 subdirectory in home format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $s3_backup_prefix."/subdir" ] ],
+	},
+
+	# Restore from S3 subdirectory in home format
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', $s3_backup_prefix."/subdir" ] ],
+	},
+
 	# Cleanup the backup domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
@@ -2480,6 +2497,23 @@ $rsbackup_tests = [
 	  'args' => [ [ 'all-domains' ],
 		      [ 'all-features' ],
 		      [ 'source', $rs_backup_prefix ] ],
+	},
+
+	# Backup to Rackspace subdirectory in home format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $rs_backup_prefix."/subdir" ] ],
+	},
+
+	# Restore from Rackspace subdirectory in home format
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', $rs_backup_prefix."/subdir" ] ],
 	},
 
 	# Cleanup the backup domain
