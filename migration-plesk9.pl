@@ -509,6 +509,10 @@ foreach my $name (keys %$mailusers) {
 
 	# Copy mail into user's inbox
 	local $cids = [ $mailuser->{'preferences'}->{'mailbox'}->{'content'}->{'cid'} ];
+	if (ref($cids->[0]) eq 'ARRAY') {
+		# Sometimes there are multiple mailboxes .. just use the first
+		$cids = [ $cids->[0]->[0] ];
+		}
 	local $srcdir = &extract_plesk9_cid($root, $cids, "mailbox");
 	if ($srcdir) {
 		local $srcfolder = { 'file' => $srcdir, 'type' => 1 };
@@ -811,7 +815,7 @@ foreach my $sdom (keys %$subdoms) {
 		&$first_print(
 			"Copying web pages for sub-domain $subd{'dom'} ..");
 		&copy_source_dest($docroot_files, $hdir);
-		&set_home_ownership(\%dom);
+		&set_home_ownership(\%subd);
 		&$second_print(".. done");
 		}
 
@@ -822,7 +826,7 @@ foreach my $sdom (keys %$subdoms) {
 		&$first_print(
 			"Copying CGI scripts for sub-domain $subd{'dom'} ..");
 		&copy_source_dest($cgi_files, $cdir);
-		&set_home_ownership(\%dom);
+		&set_home_ownership(\%subd);
 		&$second_print(".. done");
 		}
 	if (defined(&set_php_wrappers_writable)) {
