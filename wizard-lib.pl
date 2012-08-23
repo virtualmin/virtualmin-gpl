@@ -481,7 +481,8 @@ $tmpl->{'hashpass'} = $in->{'hashpass'};
 
 # If not storing hashed passwords, need to have Usermin read mail files directly
 if ($in->{'hashpass'} && &foreign_check("usermin")) {
-	# Make sure read mail module is installed, and setup to use IMAP
+	# Make sure read mail module is installed, and setup to use local
+	# mail files
 	&foreign_require("usermin", "usermin-lib.pl");
 	return undef if (!&usermin::get_usermin_module_info("mailbox"));
 	my %mconfig;

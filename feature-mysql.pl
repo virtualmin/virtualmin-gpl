@@ -132,6 +132,12 @@ if ($d->{'provision_mysql'}) {
 else {
 	# Create the user
 	local @hosts = &get_mysql_hosts($d, 1);
+	if (&indexof("%", @hosts) >= 0 &&
+	    &indexof("localhost", @hosts) < 0 &&
+	    &indexof("127.0.0.1", @hosts) < 0) {
+		# Always add localhost if % was allowed
+		push(@hosts, "localhost");
+		}
 	local $wild = &substitute_domain_template($tmpl->{'mysql_wild'}, $d);
 	if (!$d->{'parent'}) {
 		&$first_print($text{'setup_mysqluser'});
@@ -971,7 +977,6 @@ if (!$_[0]->{'parent'} && $info{'hosts'}) {
 	&$first_print($text{'restore_mysqlgrant'});
 	local @lhosts = &get_mysql_allowed_hosts($_[0]);
 	push(@lhosts, split(/\s+/, $info{'hosts'}));
-	@lhosts = &unique(@lhosts);
 	if (&indexof("%", @lhosts) >= 0 &&
 	    &indexof("localhost", @lhosts) < 0 &&
 	    &indexof("127.0.0.1", @lhosts) < 0) {
@@ -981,6 +986,7 @@ if (!$_[0]->{'parent'} && $info{'hosts'}) {
 		# connections even if % is granted
 		push(@lhosts, "localhost");
 		}
+	@lhosts = &unique(@lhosts);
 	&save_mysql_allowed_hosts($_[0], \@lhosts);
 	&$second_print($text{'setup_done'});
 	}

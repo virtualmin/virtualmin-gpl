@@ -103,6 +103,10 @@ return [ split(/\r?\n/, $out) ];
 sub rs_upload_object
 {
 my ($h, $container, $file, $src) = @_;
+my @st = stat($src);
+if ($st[7] > 5*1024*1024*1024) {
+	return "Files larger than 5 GB cannot be uploaded to Rackspace";
+	}
 # XXX large files
 my ($ok, $out) = &rs_api_call($h, "/$container/$file", "PUT",
 			      undef, undef, $src);
