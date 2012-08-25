@@ -412,7 +412,7 @@ local $url = &script_path_url($d, $opts);
 local $adminurl = $url."admin/";
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
-return (1, "Initial Django installation complete. Go to <a target=_blank href='$adminurl'>$adminurl</a> to manage it. Django is a development environment, so it doesn't do anything by itself!", "Under $rp", $url, $domuser, $dompass);
+return (1, "Initial Django installation complete. Go to <a target=_blank href='$adminurl'>$adminurl</a> to manage it. Django is a development environment, so it doesn't do anything by itself!. Some applications may require you to set the PYTHONPATH environment variable to '$opts->{'dir'}/lib/python'.", "Under $rp", $url, $domuser, $dompass);
 }
 
 # script_django_uninstall(&domain, version, &opts)
