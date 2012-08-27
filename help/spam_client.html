@@ -5,10 +5,9 @@ This option determines if spam filtering is done using the standalone
 In the latter case, your system must be running the <tt>spamd</tt> server,
 or no spam classification will be done. <p>
 
-Using <tt>spamc</tt> is typically faster and consumes less memory and CPU.
-However, it will take away the ability to have a different SpamAssassin
-configuration for each virtual server, as the <tt>spamd</tt> server can only
-read a single set of configuration files. <p>
+Using <tt>spamc</tt> is typically faster consumes less CPU.  However, it will take away the ability to
+have a different SpamAssassin configuration for each virtual server, as the <tt>spamd</tt> server can
+only read a single set of configuration files. Using <tt>spamc/spamd</tt> also consumes more memory.<p>
 
 <footer>
 
