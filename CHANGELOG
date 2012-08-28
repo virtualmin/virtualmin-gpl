@@ -1361,4 +1361,4 @@ The outgoing IP address for email sent from a domain can now be configured to ma
 If the system's primary IP address has changed, display a warning message and prompt to update all virtual servers on the old IP.
 Virtual servers can now be backed up to the Rackspace Cloud Files service, in a similar way to Virtualmin's S3 backup support.
 ---- Changes since 3.94 ----
-Updated the osCommerce script installer to version 2.3.3, and TextPattern to 4.50.
+Updated the osCommerce script installer to version 2.3.3, phpBB to 3.0.11, and TextPattern to 4.50.
