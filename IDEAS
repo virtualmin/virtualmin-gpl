@@ -47,14 +47,15 @@
 	- CHANGELOG
 	- backup/restore
 
- - Plesk upper-case domain support
-	- Email from Regan Wallace
-	- /backup/plesk/backup_SyntaxNode.net_info_1108110206.xml.tgz
-
  - CSR script for eric holtzman
 	- SSL cert support
 	- Namecheap too
 	- Pro only
 
- - RHEL 6 uses upstart
-	- sourceforge bug "Mgetty does not run"
+ - Move all sites from srv2
+
+ - Better functional tests for web UI
+	- Alias list / creation
+	- DB list / creation
+	- Script list / install
+	- Check for errors

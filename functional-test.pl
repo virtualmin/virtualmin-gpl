@@ -3455,6 +3455,21 @@ $webmin_tests = [
 		      $virtualmin_pro ? ( 'Delete Selected' ) : ( ) ],
 	},
 
+	# Check left and right frames
+	{ 'command' => $webmin_wget_command.
+		       "${webmin_proto}://localhost:${webmin_port}/",
+	  'grep' => [ '<frameset', '</frameset>', 'left.cgi', 'right.cgi' ],
+	},
+	{ 'command' => $webmin_wget_command.
+		       "${webmin_proto}://localhost:${webmin_port}/left.cgi",
+	  'grep' => [ '<body', '</body>', 'Search:', '<select' ],
+	},
+	{ 'command' => $webmin_wget_command.
+		       "${webmin_proto}://localhost:${webmin_port}/right.cgi",
+	  'grep' => [ '<body', '</body>', 'System hostname',
+		      $virtualmin_pro ? ( 'Virtualmin Licenses' ) : ( ) ],
+	},
+
 	# Create a test domain
 	{ 'command' => $webmin_wget_command.
 		       "'${webmin_proto}://localhost:${webmin_port}/virtual-server/domain_setup.cgi?dom=$test_domain&vpass=smeg&template=0&plan=0&dns_ip_def=1&vuser_def=1&email_def=1&mgroup_def=1&group_def=1&prefix_def=1&db_def=1&quota=100&quota_units=1048576&uquota=120&uquota_units=1048576&bwlimit_def=0&bwlimit=100&bwlimit_units=MB&mailboxlimit_def=1&aliaslimit_def=0&aliaslimit=34&dbslimit_def=0&dbslimit=10&domslimit_def=0&domslimit=3&nodbname=0&field_purpose=&field_amicool=&unix=1&dir=1&logrotate=1&mail=1&dns=1&$web=1&webalizer=1&mysql=1&webmin=1&proxy_def=1&fwdto_def=1&virt=0&ip=&content_def=1'",
@@ -3467,6 +3482,11 @@ $webmin_tests = [
 	  'grep' => "^$test_domain",
 	},
 
+	# Get the domain ID
+	{ 'command' => 'list-domains.pl --id-only --domain '.$test_domain,
+	  'save' => 'DOMAIN_ID',
+	},
+
 	# Check Webmin login as domain owner
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
 		       ($webmin_proto eq "https" ? '--no-check-certificate '
@@ -3475,9 +3495,40 @@ $webmin_tests = [
 		       $webmin_port.'/',
 	},
 
+	# List users in the domain
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/list_users.cgi?dom=\$DOMAIN_ID",
+	  'grep' => [ '<body', '</body>', 'Mail and FTP Users',
+		      '<b>'.$test_domain_user.'</b>' ],
+	},
+
+	# Add a user to the domain
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_user.cgi?dom=\$DOMAIN_ID\\&new=1\\&mailuser=bob\\&real=Bob+Smeg\\&mailpass=smeg\\&quota_def=1\\&mquota_def=1\\&home_def=1\\&mailbox=1\\&tome=1\\&newmail_def=1\\&shell=/dev/null",
+	  'antigrep' => 'Error',
+	},
+
+	# Verify the new user exists
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ] ],
+	  'grep' => "bob",
+	},
+
+	# Open the page to edit the user
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/edit_user.cgi?dom=\$DOMAIN_ID\\&user=bob\\&unix=1",
+	  'grep' => [ '<body', '</body>', 'Edit User', 'Save', 'Delete' ],
+	},
+
+	# Delete the user
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_user.cgi?dom=\$DOMAIN_ID\\&old=bob\\&unix=1\\&delete=1\\&confirm=1",
+	  'antigrep' => 'Error',
+	},
+
 	# Delete the domain
 	{ 'command' => $webmin_wget_command.
-		       "${webmin_proto}://localhost:${webmin_port}/virtual-server/delete_domain.cgi\\?dom=`virtualmin list-domains.pl --domain $test_domain --id-only`\\&confirm=1",
+		       "${webmin_proto}://localhost:${webmin_port}/virtual-server/delete_domain.cgi\\?dom=\$DOMAIN_ID\\&confirm=1",
 	  'grep' => [ 'Deleting virtual website|Removing Nginx virtual host',
 		      'Deleting server details' ],
 	  'cleanup' => 1,
