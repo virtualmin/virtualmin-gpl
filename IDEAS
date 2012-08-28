@@ -55,7 +55,6 @@
  - Move all sites from srv2
 
  - Better functional tests for web UI
-	- Alias list / creation
 	- DB list / creation
 	- Script list / install
 	- Check for errors

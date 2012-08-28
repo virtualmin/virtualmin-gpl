@@ -11,6 +11,7 @@ $d = &get_domain($in{'dom'});
 @aliases = &list_domain_aliases($d);
 if (!$in{'new'}) {
 	($virt) = grep { $_->{'from'} eq $in{'old'} } @aliases;
+	$virt || &error($text{'alias_egone'});
 	%oldvirt = %$virt;
 	}
 &error_setup($text{'alias_err'});

@@ -22,7 +22,8 @@ if ($in{'new'}) {
 	}
 else {
 	@users = &list_domain_users($d);
-	($user) = grep { $_->{'user'} eq $in{'user'} &&
+	($user) = grep { ($_->{'user'} eq $in{'user'} ||
+			  &remove_userdom($_->{'user'}, $d) eq $in{'user'}) &&
 			 $_->{'unix'} == $in{'unix'} } @users;
 	$mailbox = $d && $d->{'user'} eq $user->{'user'} && $user->{'unix'};
 	$suffix = $user->{'webowner'} ? 'web' : '';

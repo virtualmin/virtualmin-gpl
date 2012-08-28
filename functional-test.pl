@@ -3520,10 +3520,99 @@ $webmin_tests = [
 	  'grep' => [ '<body', '</body>', 'Edit User', 'Save', 'Delete' ],
 	},
 
+	# XXX modify the user
+
 	# Delete the user
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_user.cgi?dom=\$DOMAIN_ID\\&old=bob\\&unix=1\\&delete=1\\&confirm=1",
 	  'antigrep' => 'Error',
+	},
+
+	# List mail aliases in the domain
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/list_aliases.cgi?dom=\$DOMAIN_ID",
+	  'grep' => [ '<body', '</body>', 'Mail Aliases',
+		      'Delete Selected Aliases' ],
+	},
+
+	# Create a new alias
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_alias.cgi?dom=\$DOMAIN_ID\\&new=1\\&simplename=sales\\&simplemode=simple\\&forward=1\\&forwardto=nobody\@virtualmin.com",
+	  'antigrep' => 'Error',
+	},
+
+	# Verify that the new alias exists
+	{ 'command' => 'list-aliases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^sales@'.$test_domain,
+		      'To: nobody@virtualmin.com' ],
+	},
+
+	# Open the page to edit the alias
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/edit_alias.cgi?dom=\$DOMAIN_ID\\&from=sales\@${test_domain}",
+	  'grep' => [ '<body', '</body>', 'Edit Mail Alias', 'Save', 'Delete' ],
+	},
+
+	# Re-save the alias
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_alias.cgi?dom=\$DOMAIN_ID\\&old=sales\@${test_domain}\\&simplename=sales\\&simplemode=simple\\&forward=1\\&forwardto=nobody\@webmin.com",
+	  'antigrep' => 'Error',
+	},
+
+	# Verify that the change happened
+	{ 'command' => 'list-aliases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^sales@'.$test_domain,
+		      'To: nobody@webmin.com' ],
+	},
+
+	# Delete the alias
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_alias.cgi?dom=\$DOMAIN_ID\\&old=sales\@${test_domain}\\&delete=1",
+	  'antigrep' => 'Error',
+	},
+
+	# List databases in the domain
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/list_databases.cgi?dom=\$DOMAIN_ID",
+	  'grep' => [ '<body', '</body>', 'Edit Databases',
+		      'Delete Selected' ],
+	},
+
+	# Create a new database
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_database.cgi?dom=\$DOMAIN_ID\\&new=1\\&name=${test_domain_db}_junk\\&type=mysql",
+	  'antigrep' => 'Error',
+	},
+
+	# Verify that it was created
+	{ 'command' => 'list-databases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => '^'.$test_domain_db.'_junk',
+	},
+
+	# Edit that same database
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/edit_database.cgi?dom=\$DOMAIN_ID\\&type=mysql\\&name=${test_domain_db}_junk",
+	  'grep' => [ '<body', '</body>', 'Delete This Database',
+		      'Manage Database' ],
+	},
+
+	# Delete the database
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_database.cgi?dom=\$DOMAIN_ID\\&delete=1\\&confirm=1\\&name=${test_domain_db}_junk\\&type=mysql",
+	  'antigrep' => 'Error',
+	},
+
+	# Verify that it is gone
+	{ 'command' => 'list-databases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => '^'.$test_domain_db.'_junk',
 	},
 
 	# Delete the domain

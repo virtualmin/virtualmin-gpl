@@ -21,7 +21,8 @@ if (!$in{'delete'} || $in{'confirm'}) {
 $tmpl = $d ? &get_template($d->{'template'}) : &get_template(0);
 if (!$in{'new'}) {
 	# Lookup user details
-	($user) = grep { $_->{'user'} eq $in{'old'} &&
+	($user) = grep { ($_->{'user'} eq $in{'old'} ||
+			  &remove_userdom($_->{'user'}, $d) eq $in{'old'}) &&
 			 $_->{'unix'} == $in{'unix'} } @users;
 	$user || &error("User does not exist!");
 	%old = %$user;

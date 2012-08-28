@@ -829,6 +829,7 @@ aliases_show=Show special aliases.
 
 alias_create=Create Mail Alias
 alias_edit=Edit Mail Alias
+alias_egone=Mail alias no longer exists
 alias_header=Mail forwarding alias details
 alias_name=Name
 alias_cmt=Description
