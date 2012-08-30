@@ -388,9 +388,10 @@ else {
 					&error($text{'user_eshell'});
 				$user->{'shell'} = $in{'shell'};
 				}
-			elsif ($in{'new'}) {
+			elsif ($in{'new'} && !$user->{'webowner'}) {
 				# If the shell cannot be edited, always use
-				# the default.
+				# the default. For website FTP users, the FTP
+				# shell is already set by create_initial_user
 				$user->{'shell'} =
 					&default_available_shell('mailbox');
 				}
