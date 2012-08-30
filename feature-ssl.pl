@@ -984,6 +984,8 @@ $lines[$#lines] =~ /^$end$/ || return "Data does not end with line ".
 				      "-----END $h-----";
 for(my $i=1; $i<$#lines; $i++) {
 	$lines[$i] =~ /^[A-Za-z0-9\+\/=]+$/ ||
+	    ($type eq 'ca' && ($lines[$i] =~ /^$begin$/ ||
+			       $lines[$i] =~ /^$end$/)) ||
 		return "Line ".($i+1)." does not look like PEM format";
 	}
 @lines > 4 || return "Data only has ".scalar(@lines)." lines";
