@@ -54,5 +54,9 @@
 
  - Move all sites from srv2
 
+ - Better functional tests for web UI
+	- Script list / install
+	- Check for errors
+
  - OpenCart installer
 	- https://www.virtualmin.com/node/23194
