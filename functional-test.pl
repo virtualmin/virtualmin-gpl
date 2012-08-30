@@ -892,7 +892,7 @@ $gplscript_tests = [
 	  'grep' => 'RoundCube',
 	},
 
-	# Install Wordpress
+	# Install Roundcube
 	{ 'command' => 'install-script.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'type', 'roundcube' ],
@@ -3595,6 +3595,10 @@ $webmin_tests = [
 	  'grep' => '^'.$test_domain_db.'_junk',
 	},
 
+	# Check MySQL login to the database
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.'_junk -e "select version()"',
+	},
+
 	# Edit that same database
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/edit_database.cgi?dom=\$DOMAIN_ID\\&type=mysql\\&name=${test_domain_db}_junk",
@@ -3614,6 +3618,40 @@ $webmin_tests = [
 		      [ 'multiline' ] ],
 	  'antigrep' => '^'.$test_domain_db.'_junk',
 	},
+
+	# Verify that list of scripts works
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/list_scripts.cgi?dom=\$DOMAIN_ID",
+	  'grep' => [ '<body', '</body>', 'Install Scripts',
+		      'phpMyAdmin', 'Installed Scripts', 'Available Scripts' ],
+	},
+
+	# Install a script via the web UI
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/script_install.cgi?dom=\$DOMAIN_ID\\&script=roundcube\\&version=0.8.1\\&dir_def=0\\&dir=roundcube\\&passmode=\\&db=mysql_${test_domain_db}",
+	  'grep' => [ '<body', '</body>', 'Install Script', 
+		      'Now installing RoundCube' ],
+	  'antigrep' => [ 'Error', 'failed' ],
+	},
+
+	# Make sure it worked
+	{ 'command' => 'list-scripts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Type: roundcube',
+		      'Database: '.$test_domain_db.' ',
+		      'URL: http://'.$test_domain.'/roundcube',
+		    ],
+	},
+
+	# Verify that list of scripts contains roundcube
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/list_scripts.cgi?dom=\$DOMAIN_ID",
+	  'grep' => [ '/roundcube' ],
+	},
+
+	# Un-install the script
+	# XXX
 
 	# Delete the domain
 	{ 'command' => $webmin_wget_command.
