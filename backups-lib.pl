@@ -2915,8 +2915,8 @@ push(@opts, [ 2, $text{'backup_mode2'}, $st ]);
 local $s3user = $mode == 3 ? $user : undef;
 local $s3pass = $mode == 3 ? $pass : undef;
 if (&master_admin()) {
-	$s3user ||= $config{'a3_akey'};
-	$s3pass ||= $config{'s3_akey'};
+	$s3user ||= $config{'s3_akey'};
+	$s3pass ||= $config{'s3_skey'};
 	}
 local $st = "<table>\n";
 $st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
