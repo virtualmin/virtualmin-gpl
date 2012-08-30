@@ -57,6 +57,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
 		}
+	elsif ($a eq "--id-only") {
+		$idonly = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -120,6 +123,12 @@ foreach my $d (@doms) {
 		# Just show script type codes
 		foreach $sinfo (@scripts) {
 			print $sinfo->{'name'},"\n";
+			}
+		}
+	elsif ($idonly) {
+		# Just show script install IDs
+		foreach $sinfo (@scripts) {
+			print $sinfo->{'id'},"\n";
 			}
 		}
 	else {
