@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the osCommerce script installer to version 2.3.3, phpBB to 3.0.11, and TextPattern to 4.50.
+html=Updated the osCommerce script installer to version 2.3.3, phpBB to 3.0.11, Dolibarr to 3.2.1, and TextPattern to 4.50.
 master=1
 reseller=1
 domain=1
