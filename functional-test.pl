@@ -3650,8 +3650,17 @@ $webmin_tests = [
 	  'grep' => [ '/roundcube' ],
 	},
 
+	# Get the script ID
+	{ 'command' => 'list-scripts.pl --id-only --domain '.$test_domain,
+	  'save' => 'SCRIPT_ID',
+	},
+
 	# Un-install the script
-	# XXX
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/unscript_install.cgi?dom=\$DOMAIN_ID\\&confirm=1\\&script=\$SCRIPT_ID",
+	  'grep' => [ '<body', '</body>', 'RoundCube directory deleted' ],
+	  'antigrep' => [ 'Error', 'failed' ],
+	},
 
 	# Delete the domain
 	{ 'command' => $webmin_wget_command.
