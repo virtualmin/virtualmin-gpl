@@ -749,6 +749,7 @@ user_remail1=Don't send
 user_nospam=Check email for spam and viruses?
 user_spamdis=No (disabled for virtual server)
 user_enewmail=Missing or invalid address for mailbox creation mail
+user_eremail=Missing or invalid address for mailbox update mail
 user_dbs=Allow access to databases
 user_dbsall=Databases in domain
 user_dbssel=Granted access to

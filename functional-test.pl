@@ -3520,7 +3520,19 @@ $webmin_tests = [
 	  'grep' => [ '<body', '</body>', 'Edit User', 'Save', 'Delete' ],
 	},
 
-	# XXX modify the user
+	# Modify the user to enable forwarding
+	{ 'command' => $webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_user.cgi?dom=\$DOMAIN_ID\\&old=bob\\&unix=1\\&mailuser=bob\\&oldpop3=bob\\&real=Bob+Smeg\\&mailpass_def=1\\&quota_def=1\\&mquota_def=1\\&home_def=1\\&mailbox=1\\&forward=1\\&forwardto=nobody\@virtualmin.com\\&shell=/dev/null\\&remail_def=1\\&simplemode=simple",
+	  'antigrep' => 'Error',
+	},
+
+	# Check that forwarding is set
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'multiline' ],
+		      [ 'simple-aliases' ] ],
+	  'grep' => 'Forward: nobody@virtualmin.com',
+	},
 
 	# Delete the user
 	{ 'command' => $webmin_wget_command.
