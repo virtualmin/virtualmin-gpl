@@ -3299,8 +3299,8 @@ foreach my $d (&sort_indent_domains($doms)) {
 			}
 		elsif ($c eq "uquota") {
 			# Quota used
-			if ($d->{'alias'}) {
-				# Alias domains have no usage
+			if ($d->{'alias'} || $d->{'parent'}) {
+				# Alias and sub-servers have no usage
 				push(@cols, undef);
 				}
 			else {
