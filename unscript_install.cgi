@@ -27,6 +27,7 @@ elsif ($in{'restart'}) {
 # Get the script being removed
 @got = &list_domain_scripts($d);
 ($sinfo) = grep { $_->{'id'} eq $in{'script'} } @got;
+$sinfo || &error($text{'scripts_egone'});
 $script = &get_script($sinfo->{'name'});
 
 if ($in{'confirm'}) {
