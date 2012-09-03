@@ -111,8 +111,8 @@ foreach $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 		}
 	}
 print &ui_tabs_start_tab("mode", "users");
-&usage_table(\@userusage, $text{'usage_user'}, 10, $text{'usage_userheader'},
-	     $text{'usage_dom'});
+&usage_table(\@userusage, $text{'usage_user'}, $in{'all'} ? 0 : 10,
+	     $text{'usage_userheader'}, $text{'usage_dom'});
 print &ui_tabs_end_tab();
 
 # Show usage by sub-servers
@@ -123,7 +123,8 @@ foreach $sd (@subs) {
 	push(@subusage, [ &show_domain_name($sd), $susage ]);
 	}
 print &ui_tabs_start_tab("mode", "subs");
-&usage_table(\@subusage, $text{'usage_sub'}, 10, $text{'usage_subheader'});
+&usage_table(\@subusage, $text{'usage_sub'}, $in{'all'} ? 0 : 10,
+	     $text{'usage_subheader'});
 print &ui_tabs_end_tab();
 
 # Show usage by databases
@@ -136,8 +137,8 @@ foreach $sd ($d, @subs) {
 		}
 	}
 print &ui_tabs_start_tab("mode", "dbs");
-&usage_table(\@dbusage, $text{'usage_db'}, 10, $text{'usage_dbheader'},
-	     $text{'usage_dom'});
+&usage_table(\@dbusage, $text{'usage_db'}, $in{'all'} ? 0 : 10,
+	     $text{'usage_dbheader'}, $text{'usage_dom'});
 print &ui_tabs_end_tab();
 
 print &ui_tabs_end(1);
@@ -178,7 +179,9 @@ print &ui_columns_table(
 	$text{'usage_none'},
 	);
 if ($max && @$list > $max) {
-	print "<i>",&text('usage_max', $max),"</i><br>\n";
+	print "<i>",&text('usage_max', $max)," ",
+	      "<a href='usage.cgi?dom=$in{'dom'}&all=1'>",
+	      $text{'usage_showall'},"</a></i><br>\n";
 	}
 }
 
