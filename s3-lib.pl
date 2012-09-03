@@ -356,6 +356,10 @@ foreach my $f (@{$response->entries}) {
 					};
 				}
 			}
+		else {
+			return &text('s3_einfo', $f->{'Key'},
+				     &extract_s3_message($response));
+			}
 		}
 	}
 return $rv;
