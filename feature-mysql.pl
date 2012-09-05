@@ -1828,7 +1828,7 @@ if (-d $mysql::config{'mysql_data'} &&
 				( [ "", $text{'default'} ] ) )]));
 	}
 
-if ($mysql::mysql_version >= 4.1) {
+if ($mysql::mysql_version >= 4.1 && $config{'mysql'}) {
 	# Default MySQL character set
 	print &ui_table_row(&hlink($text{'tmpl_mysql_charset'},
 				   "template_mysql_charset"),
@@ -1840,7 +1840,7 @@ if ($mysql::mysql_version >= 4.1) {
 		      &list_mysql_character_sets() ]));
 	}
 
-if ($mysql::mysql_version >= 5) {
+if ($mysql::mysql_version >= 5 && $config{'mysql'}) {
 	# Default MySQL collation order
 	print &ui_table_row(&hlink($text{'tmpl_mysql_collate'},
 				   "template_mysql_collate"),
@@ -1924,7 +1924,7 @@ if (-d $mysql::config{'mysql_data'} &&
     !$config{'provision_mysql'}) {
 	$tmpl->{'mysql_chgrp'} = $in{'mysql_chgrp'};
 	}
-if ($mysql::mysql_version >= 4.1) {
+if ($mysql::mysql_version >= 4.1 && $config{'mysql'}) {
 	$tmpl->{'mysql_charset'} = $in{'mysql_charset'};
 	$tmpl->{'mysql_collate'} = $in{'mysql_collate'};
 	}
