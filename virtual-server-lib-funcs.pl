@@ -7041,6 +7041,8 @@ if (!$dom->{'parent'}) {
 if ($aliasname && $aliasname ne $dom->{'dom'}) {
 	&$first_print(&text('setup_domalias', $aliasname));
 	&$indent_print();
+	local $parentdom = $dom->{'parent'} ?
+		&get_domain($dom->{'parent'}) : $dom;
 	local %alias = ( 'id', &domain_id(),
 			 'dom', $aliasname,
 			 'user', $dom->{'user'},
@@ -7060,7 +7062,7 @@ if ($aliasname && $aliasname ne $dom->{'dom'}) {
 			 'dns_ip', $dom->{'dns_ip'},
 			 'virt', 0,
 			 'source', $dom->{'source'},
-			 'parent', $dom->{'id'},
+			 'parent', $parentdom->{'id'},
 			 'template', $dom->{'template'},
 			 'plan', $dom->{'plan'},
 			 'reseller', $dom->{'reseller'},
@@ -7072,8 +7074,6 @@ if ($aliasname && $aliasname ne $dom->{'dom'}) {
 			 $tmpl->{'aliascopy'});
 		$alias{$f} = $dom->{$f};
 		}
-	local $parentdom = $dom->{'parent'} ?
-		&get_domain($dom->{'parent'}) : $dom;
 	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
 	&generate_domain_password_hashes(\%dom, 1);
 	&set_provision_features(\%alias);
