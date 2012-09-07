@@ -4553,6 +4553,7 @@ s3_ecreate=Failed to create S3 bucket : $1
 s3_einfo=Failed to upload information file : $1
 s3_edom=Failed to upload domain file : $1
 s3_elist2=Failed to list S3 bucket : $1
+s3_einfo=Failed to read $1 : $2
 
 tdelete_err=Failed to delete templates
 tdelete_enone=None selected
