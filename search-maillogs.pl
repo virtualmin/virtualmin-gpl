@@ -43,7 +43,6 @@ if (!$module_name) {
 	}
 
 use POSIX;
-require 'timelocal.pl';
 
 # Parse command-line args
 $owner = 1;

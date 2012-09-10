@@ -1,4 +1,6 @@
 
+use Time::Local;
+
 # Work out where our extra -lib.pl files are, and load them
 $virtual_server_root = $module_root_directory;
 if (!$virtual_server_root) {
@@ -9383,7 +9385,6 @@ return $rv || "localhost";
 # total bytes and time of last log entry.
 sub count_ftp_bandwidth
 {
-require 'timelocal.pl';
 local $max_ltime = $_[1];
 local $f;
 foreach $f ($_[5] ? &all_log_files($_[0], $max_ltime) : ( $_[0] )) {
@@ -9915,7 +9916,6 @@ local ($status, $expiry, $err, undef, undef, $autorenew) =
 local $expirytime;
 if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
 	# Make Unix time
-	require 'timelocal.pl';
 	$expirytime = timelocal(59, 59, 23, $3, $2-1, $1-1900);
 	}
 if ($status != 0) {

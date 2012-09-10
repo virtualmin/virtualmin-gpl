@@ -1606,7 +1606,6 @@ return $rv;
 # day counters in the given hash
 sub bandwidth_web
 {
-require 'timelocal.pl';
 local @logs = ( &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}),
 		&get_apache_log($_[0]->{'dom'}, $_[0]->{'web_sslport'}) );
 return if ($_[0]->{'alias'} || $_[0]->{'subdom'}); # never accounted separately

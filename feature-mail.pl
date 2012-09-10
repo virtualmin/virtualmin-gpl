@@ -3716,7 +3716,6 @@ local %max_updated;
 local $maillog = $config{'bw_maillog'};
 $maillog = &get_mail_log() if ($maillog eq "auto");
 return $starts if (!$maillog);
-require 'timelocal.pl';
 
 # Build a map from domain names to objects, and from Unix usernames to objects
 local (%maildoms, %mailusers);

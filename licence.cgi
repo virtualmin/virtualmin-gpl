@@ -2,7 +2,6 @@
 # Force a re-check of the licence
 
 require './virtual-server-lib.pl';
-require 'timelocal.pl';
 &can_recheck_licence() || &error($text{'licence_ecannot'});
 &ui_print_header(undef, $text{'licence_title'}, "");
 
