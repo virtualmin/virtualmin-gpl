@@ -357,7 +357,7 @@ foreach my $f (@{$response->entries}) {
 				}
 			}
 		else {
-			return &text('s3_einfo', $f->{'Key'},
+			return &text('s3_einfo2', $f->{'Key'},
 				     &extract_s3_message($response));
 			}
 		}
