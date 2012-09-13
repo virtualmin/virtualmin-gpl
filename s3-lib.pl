@@ -111,6 +111,7 @@ my $headers = { };
 if ($rrs) {
 	$headers->{'x-amz-storage-class'} = 'REDUCED_REDUNDANCY';
 	}
+my $rrsheaders = { %$headers };
 if ($st[7] >= 2**31) {
 	# 2GB or more forces multipart mode
 	$multipart = 1;
@@ -292,7 +293,8 @@ for(my $i=0; $i<$tries; $i++) {
 		# Write out the info file, if given
 		local $iconn = &make_s3_connection($akey, $skey);
 		local $response = $iconn->put($bucket, $destfile.".info",
-					     &serialise_variable($info));
+					     &serialise_variable($info),
+					     $rrsheaders);
 		if ($response->http_response->code != 200) {
 			$err = &text('s3_einfo',
                                      &extract_s3_message($response));
@@ -302,7 +304,8 @@ for(my $i=0; $i<$tries; $i++) {
 		# Write out the .dom file, if given
 		local $iconn = &make_s3_connection($akey, $skey);
 		local $response = $iconn->put($bucket, $destfile.".dom",
-		     &serialise_variable(&clean_domain_passwords($dom)));
+		     &serialise_variable(&clean_domain_passwords($dom)),
+		     $rrsheaders);
 		if ($response->http_response->code != 200) {
 			$err = &text('s3_edom',
                                      &extract_s3_message($response));
