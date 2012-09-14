@@ -1361,4 +1361,4 @@ The outgoing IP address for email sent from a domain can now be configured to ma
 If the system's primary IP address has changed, display a warning message and prompt to update all virtual servers on the old IP.
 Virtual servers can now be backed up to the Rackspace Cloud Files service, in a similar way to Virtualmin's S3 backup support.
 ---- Changes since 3.94 ----
-Updated the osCommerce script installer to version 2.3.3, phpBB to 3.0.11, Dolibarr to 3.2.2, SugarCRM to 6.5.4, Radiant to 1.1.0, ZenPhoto to 1.4.3.2, MediaWiki to 1.19.2, WordPress to 3.4.2, Moodle to 2.3.2, DokuWiki to 2012-09-10, OpenX to 2.8.10, and TextPattern to 4.5.1.
+Updated the osCommerce script installer to version 2.3.3, phpBB to 3.0.11, Dolibarr to 3.2.2, SugarCRM to 6.5.4, Radiant to 1.1.0, ZenPhoto to 1.4.3.2, MediaWiki to 1.19.2, WordPress to 3.4.2, Moodle to 2.3.2, DokuWiki to 2012-09-10, OpenX to 2.8.10, Joomla to 2.5.7, and TextPattern to 4.5.1.
