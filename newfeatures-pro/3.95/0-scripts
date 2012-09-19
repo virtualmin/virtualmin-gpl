@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the osCommerce script installer to version 2.3.3, phpBB to 3.0.11, Dolibarr to 3.2.2, SugarCRM to 6.5.4, Radiant to 1.1.0, ZenPhoto to 1.4.3.2, MediaWiki to 1.19.2, WordPress to 3.4.2, Moodle to 2.3.2, DokuWiki to 2012-09-10, OpenX to 2.8.10, Joomla to 2.5.7, Trac to 0.12.4 and 1.0, PiWik to 1.8.4, CMS Made Simple to 1.11.2, and TextPattern to 4.5.1. Disabled the Mambo installer, as it aoppears to be no longer supported or updated.
+html=Updated the osCommerce script installer to version 2.3.3, phpBB to 3.0.11, Dolibarr to 3.2.2, SugarCRM to 6.5.4, Radiant to 1.1.0, ZenPhoto to 1.4.3.2, MediaWiki to 1.19.2, WordPress to 3.4.2, Moodle to 2.3.2, DokuWiki to 2012-09-10, OpenX to 2.8.10, Joomla to 2.5.7, Trac to 0.12.4 and 1.0, PiWik to 1.8.4, CMS Made Simple to 1.11.2, Z-push to 2.0.3, and TextPattern to 4.5.1. Disabled the Mambo installer, as it aoppears to be no longer supported or updated.
 master=1
 reseller=1
 domain=1
