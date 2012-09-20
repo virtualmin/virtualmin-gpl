@@ -954,6 +954,17 @@ sub restore_mysql
 local %info;
 &read_file($_[1], \%info);
 
+# For DBs that exist already, save their user lists for later restore
+local (%userdbs, %userpasses);
+foreach my $db (&domain_databases($_[0], [ 'mysql' ])) {
+	foreach my $u (&list_mysql_database_users($_[0], $db->{'name'})) {
+		if ($u->[0] ne $_[0]->{'user'}) {
+			push(@{$userdbs{$u->[0]}}, $db->{'name'});
+			$userpasses{$u->[0]} = $u->[1];
+			}
+		}
+	}
+
 if (!$_[0]->{'wasmissing'}) {
 	# Only delete and re-create databases if this domain was not created
 	# as part of the restore process.
@@ -1006,6 +1017,7 @@ foreach $dbfile (glob("$_[1]_*")) {
 
 # Finally, import the data
 my $rv = 1;
+my %created;
 foreach my $db (@dbs) {
 	my $clash = &check_mysql_database_clash($_[0], $db->[0]);
 	if ($clash && $_[0]->{'wasmissing'}) {
@@ -1027,6 +1039,7 @@ foreach my $db (@dbs) {
 	&$indent_print();
 	if (!$clash) {
 		&create_mysql_database($_[0], $db->[0]);
+		$created{$db->[0]} = 1;
 		}
 	&$outdent_print();
 	if ($db->[1] =~ /\.gz$/) {
@@ -1059,6 +1072,16 @@ foreach my $db (@dbs) {
 		}
 	else {
 		&$second_print($text{'setup_done'});
+		}
+	}
+
+# Grant back permissions to any users who had access to the restored DBs
+# previously
+foreach my $uname (keys %userdbs) {
+	my @grant = grep { $created{$_} } @{$userdbs{$uname}};
+	if (@grant) {
+		&create_mysql_database_user($_[0], \@grant, $uname, undef,
+					    $userpasses{$uname});
 		}
 	}
 
