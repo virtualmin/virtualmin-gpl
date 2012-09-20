@@ -86,6 +86,10 @@ if ($multi) {
 			      $st->{'Content-Length'},"\n";
 			print "    Content type: ",
 			      $st->{'Content-Type'},"\n";
+			if ($st->{'X-Object-Manifest'}) {
+				print "    Multipart prefix: ",
+					$st->{'X-Object-Manifest'},"\n";
+				}
 			}
 		else {
 			print "    ERROR: $st\n";

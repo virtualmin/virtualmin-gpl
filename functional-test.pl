@@ -1803,6 +1803,17 @@ $dbbackup_tests = [
 		      [ 'dest', $test_backup_file ] ],
 	},
 
+	# Restore just MySQL from the temp file
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'feature', 'mysql' ],
+		      [ 'source', $test_backup_file ] ],
+	},
+
+	# Check that the user still has access
+	{ 'command' => 'mysql -u '.$test_full_user_mysql.' -psmeg '.$test_domain_db.' -e "select version()"',
+	},
+
 	# Disconnect the databases
 	{ 'command' => 'disconnect-database.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -1950,7 +1961,7 @@ $dbbackup_tests = [
 	  'cleanup' => 1,
 	  'ignorefail' => 1,
 	},
-	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' mysql -e "drop user if exists \''.$test_full_user_mysql.'\'@localhost;"',
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' mysql -e "drop user \''.$test_full_user_mysql.'\'@localhost;"',
 	  'cleanup' => 1,
 	  'ignorefail' => 1,
 	},
@@ -6519,7 +6530,7 @@ else {
 
 $rs_tests = [
 	# Create a random file
-	{ 'command' => 'dd if=/dev/random of=/tmp/rs.dat count=10 bs=1024',
+	{ 'command' => 'dd if=/dev/urandom of=/tmp/rs.dat count=2048 bs=1024',
 	},
 
 	# Create a container
@@ -6562,8 +6573,46 @@ $rs_tests = [
 
 	# List files to ensure it is gone
 	{ 'command' => 'list-rs-files.pl',
-	  'args' => [ [ 'container', 'virtualmin-rs-test-container' ] ],
+	  'args' => [ [ 'container', 'virtualmin-rs-test-container' ],
+		      [ 'name-only' ] ],
 	  'antigrep' => 'rs.dat',
+	},
+
+	# Upload the file in multipart mode
+	{ 'command' => 'upload-rs-file.pl',
+	  'args' => [ [ 'container', 'virtualmin-rs-test-container' ],
+		      [ 'source', '/tmp/rs.dat' ],
+		      [ 'multipart' ] ],
+	},
+
+	# List files to make sure the part exists
+	{ 'command' => 'list-rs-files.pl',
+	  'args' => [ [ 'container', 'virtualmin-rs-test-container' ],
+		      [ 'name-only' ] ],
+	  'grep' => [ 'rs.dat.0000', 'rs.dat$' ],
+	},
+
+	# Download the file again
+	{ 'command' => 'download-rs-file.pl',
+	  'args' => [ [ 'container', 'virtualmin-rs-test-container' ],
+		      [ 'file', 'rs.dat' ],
+		      [ 'dest', '/tmp/rs.dat.2' ] ],
+	},
+
+	# Make sure they are the same
+	{ 'command' => 'diff /tmp/rs.dat /tmp/rs.dat.2 >/dev/null' },
+
+	# Delete the file on Rackspace
+	{ 'command' => 'delete-rs-file.pl',
+	  'args' => [ [ 'container', 'virtualmin-rs-test-container' ],
+		      [ 'file', 'rs.dat' ] ],
+	},
+
+	# List files to ensure it is gone, and all parts
+	{ 'command' => 'list-rs-files.pl',
+	  'args' => [ [ 'container', 'virtualmin-rs-test-container' ],
+		      [ 'name-only' ] ],
+	  'antigrep' => [ 'rs.dat$', 'rs.dat.0000' ],
 	},
 
 	# Try a download, which should fail

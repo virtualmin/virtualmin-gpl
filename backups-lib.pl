@@ -3433,7 +3433,7 @@ if ($mode == 0) {
 		local $path = "$base/$f";
 		local @st = stat($path);
 		if ($f ne "." && $f ne ".." && $f =~ /^$re$/ &&
-		    $st[9] < $cutoff) {
+		    $st[9] < $cutoff && $f !~ /\.(dom|info)$/) {
 			# Found one to delete
 			local $old = int((time() - $st[9]) / (24*60*60));
 			&$first_print(&text(-d $path ? 'backup_deletingdir'
@@ -3465,7 +3465,8 @@ elsif ($mode == 1) {
 		return 0;
 		}
 	foreach my $f (@$dir) {
-		if ($f->[13] =~ /^$re$/ && $f->[9] && $f->[9] < $cutoff) {
+		if ($f->[13] =~ /^$re$/ && $f->[9] && $f->[9] < $cutoff &&
+		    $f->[13] !~ /\.(dom|info)$/) {
 			local $old = int((time() - $f->[9]) / (24*60*60));
 			&$first_print(&text('backup_deletingftp',
 					    "<tt>$base/$f->[13]</tt>", $old));
@@ -3507,7 +3508,8 @@ elsif ($mode == 2) {
 	foreach my $l (split(/\r?\n/, $lsout)) {
 		local @st = &parse_lsl_line($l);
 		next if (!scalar(@st));
-		if ($st[13] =~ /^$re$/ && $st[9] && $st[9] < $cutoff) {
+		if ($st[13] =~ /^$re$/ && $st[9] && $st[9] < $cutoff &&
+		    $st[13] !~ /\.(dom|info)$/) {
 			local $old = int((time() - $st[9]) / (24*60*60));
 			&$first_print(&text('backup_deletingssh',
 					    "<tt>$base/$st[13]</tt>", $old));

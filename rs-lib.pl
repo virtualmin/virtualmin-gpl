@@ -97,20 +97,53 @@ return $out if (!$ok);
 return [ split(/\r?\n/, $out) ];
 }
 
-# rs_upload_object(&handle, container, file, source-file)
+# rs_upload_object(&handle, container, file, source-file, [multipart])
 # Uploads the contents of some local file to rackspace. Returns undef on success
 # or an error message string if something goes wrong
 sub rs_upload_object
 {
-my ($h, $container, $file, $src) = @_;
+my ($h, $container, $file, $src, $multipart) = @_;
 my @st = stat($src);
-if ($st[7] > 5*1024*1024*1024) {
-	return "Files larger than 5 GB cannot be uploaded to Rackspace";
+if ($st[7] >= 2*1024*1024*1024 || $multipart) {
+	# Large files have to be uploaded in parts
+	my $pos = 0;
+	my $pinheaders = { 'X-Object-Meta-PIN' => int(rand()*10000) };
+	open(CHUNK, $src);
+	my $n = "00000000";
+	while($pos < $st[7]) {
+		# Read a 1MB chunk into memory
+		seek(CHUNK, $pos, 0);
+		my $buf;
+		my $got = read(CHUNK, $buf, 1024*1024);
+		if ($got <= 0) {
+			close(CHUNK);
+			return "Read failed at $pos : $!";
+			}
+		$pos += $got;
+
+		# Upload that chunk
+		my ($ok, $out) = &rs_api_call($h, "/$container/$file.$n", "PUT",
+					      $pinheaders, undef, $buf);
+		if (!$ok) {
+			close(CHUNK);
+			return "Upload failed at $pos : $out";
+			}
+		$n++;
+		}
+	close(CHUNK);
+
+	# Finally upload the manifest
+	$pinheaders->{'X-Object-Manifest'} = "$container/$file";
+	my ($ok, $out) = &rs_api_call($h, "/$container/$file", "PUT",
+                                      $pinheaders, undef, "");
+	return $ok ? undef : "Manifest upload filed : $out";
 	}
-# XXX large files
-my ($ok, $out) = &rs_api_call($h, "/$container/$file", "PUT",
-			      undef, undef, $src);
-return $ok ? undef : $out;
+else {
+	# Can upload in a single API call
+	my ($ok, $out) = &rs_api_call($h, "/$container/$file", "PUT",
+				      undef, undef, $src);
+	return $ok ? undef : $out;
+	}
 }
 
 # rs_download_object(&handle, container, file, dest-file)
@@ -146,11 +179,26 @@ return $headers;
 sub rs_delete_object
 {
 my ($h, $container, $file) = @_;
+my $st = &rs_stat_object($h, $container, $file);
+if (ref($st) && $st->{'X-Object-Manifest'}) {
+	# Looks multi-part .. delete the parts first
+	my ($mcontainer, $mprefix) = split(/\//, $st->{'X-Object-Manifest'});
+	my $files = &rs_list_objects($h, $mcontainer);
+	return "Failed to find parts : $files" if (!ref($files));
+	foreach my $f (@$files) {
+		if ($f =~ /^\Q$mprefix\E/ && $f ne $file) {
+			my ($ok, $out) = &rs_api_call($h, "/$mcontainer/$f",
+						      "DELETE");
+			return "Failed to delete part $f : $out" if (!$ok);
+			}
+		}
+	}
 my ($ok, $out) = &rs_api_call($h, "/$container/$file", "DELETE");
 return $ok ? undef : $out;
 }
 
-# rs_api_call(&handle, path, method, &headers, [save-to-file], [read-from-file])
+# rs_api_call(&handle, path, method, &headers, [save-to-file],
+# 	      [read-from-file|data])
 # Calls the rackspace API, and returns an OK flag, response body or error
 # message, and HTTP headers.
 sub rs_api_call
@@ -163,14 +211,15 @@ return &rs_http_call($h->{'storage-url'}.$path, $method, $sendheaders,
 		     $dstfile, $srcfile);
 }
 
-# rs_http_call(url, method, &headers, [save-to-file], [read-from-file])
+# rs_http_call(url, method, &headers, [save-to-file], [read-from-file|data])
 # Makes an HTTP call and returns an OK flag, response body or error
 # message, and HTTP headers.
 sub rs_http_call
 {
 my ($url, $method, $headers, $dstfile, $srcfile) = @_;
 my ($host, $port, $page, $ssl) = &parse_http_url($url);
-!$srcfile || -r $srcfile || return (0, "Source file $srcfile does not exist");
+$srcfile !~ /^\// || -r $srcfile ||
+	return (0, "Source file $srcfile does not exist");
 
 # Build headers
 my @headers;
@@ -180,9 +229,12 @@ push(@headers, [ "Accept-language", "en" ]);
 foreach my $hname (keys %$headers) {
 	push(@headers, [ $hname, $headers->{$hname} ]);
 	}
-if ($srcfile) {
+if ($srcfile =~ /^\//) {
 	my @st = stat($srcfile);
 	push(@headers, [ "Content-Length", $st[7] ]);
+	}
+elsif (defined($srcfile)) {
+	push(@headers, [ "Content-Length", length($srcfile) ]);
 	}
 
 # Make the HTTP connection
@@ -196,14 +248,18 @@ if (!ref($h)) {
 	return (0, $error);
 	}
 
-if ($srcfile) {
-	# Send body contents
+if ($srcfile =~ /^\//) {
+	# Send body contents from file
 	my $buf;
 	open(SRCFILE, $srcfile);
 	while(read(SRCFILE, $buf, 1024) > 0) {
 		&write_http_connection($h, $buf);
 		}
 	close(SRCFILE);
+	}
+elsif (defined($srcfile)) {
+	# Send body contents from string
+	&write_http_connection($h, $srcfile);
 	}
 
 my ($out, $error);

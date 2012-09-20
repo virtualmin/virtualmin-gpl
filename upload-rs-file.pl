@@ -13,6 +13,10 @@ The C<--container> flag must be given to specify the container to store the file
 in, the C<--source> flag to choose the file to upload, and the C<--file>
 flag to set the destination filename.
 
+The optional C<--multipart> flag can be used to force a multi-part upload.
+Otherwise only files above 2GB will be uploaded using Rackspace's multi-part
+upload protocol.
+
 =cut
 
 package virtual_server;
@@ -51,6 +55,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--key") {
 		$key = shift(@ARGV);
 		}
+	elsif ($a eq "--multipart") {
+		$multipart = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -74,7 +81,7 @@ if (!ref($h)) {
 	print "ERROR: $h\n";
 	exit(1);
 	}
-$err = &rs_upload_object($h, $container, $file, $source);
+$err = &rs_upload_object($h, $container, $file, $source, $multipart);
 if ($err) {
 	print "ERROR: $err\n";
 	exit(1);
@@ -94,5 +101,6 @@ print "                          [--key key]\n";
 print "                           --source local-file\n";
 print "                           --container name\n";
 print "                          [--file remote-file]\n";
+print "                          [--multipart]\n";
 exit(1);
 }
