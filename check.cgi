@@ -21,15 +21,7 @@ $cerr = &check_virtual_server_config(\%lastconfig);
 print "<b>$text{'check_done'}</b><p>\n";
 
 # See if any options effecting Webmin users have changed
-$webminchanged = 0;
-foreach $k (keys %config) {
-	if ($k eq 'leave_acl' || $k eq 'webmin_modules' ||
-	    &indexof($k, @features) >= 0) {
-		$webminchanged++ if ($config{$k} ne $lastconfig{$k});
-		}
-	}
-
-if ($webminchanged) {
+if (&need_update_webmin_users_post_config(\%lastconfig)) {
 	if ($config{'post_check'}) {
 		# Update all Webmin users
 		&modify_all_webmin();

@@ -13241,6 +13241,21 @@ $config{'disable'} =~ s/user/unix/g;	# changed since last release
 return undef;
 }
 
+# need_update_webmin_users_post_config(&oldconfig)
+# Check if we need to Webmin users following a config re-check
+sub need_update_webmin_users_post_config
+{
+local ($lastconfig) = @_;
+local $webminchanged = 0;
+foreach my $k (keys %config) {
+	if ($k eq 'leave_acl' || $k eq 'webmin_modules' ||
+	    &indexof($k, @features) >= 0) {
+		$webminchanged++ if ($config{$k} ne $lastconfig->{$k});
+		}
+	}
+return $webminchanged;
+}
+
 # get_beancounters()
 # Returns the contents of /proc/user_beancounters for this VM
 sub get_beancounters

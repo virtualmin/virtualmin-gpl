@@ -29,6 +29,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "check-scripts.pl must be run as root";
 	}
+@OLDARGV = @ARGV;
 
 while(@ARGV > 0) {
         local $a = shift(@ARGV);
@@ -45,12 +46,32 @@ while(@ARGV > 0) {
 $cerr = &html_tags_to_text(&check_virtual_server_config(\%lastconfig));
 if ($cerr) {
 	print "ERROR: $cerr\n";
-	exit(1);
 	}
 else {
+	# See if any options effecting Webmin users have changed
+	if (&need_update_webmin_users_post_config(\%lastconfig)) {
+		&modify_all_webmin();
+                if ($virtualmin_pro) {
+			&modify_all_resellers();
+			}
+		}
+
+	# Setup the licence cron job (if needed)
+	&setup_licence_cron();
+
+	# Apply the new config
+	&run_post_config_actions(\%lastconfig);
+
+	# Clear cache of links
+	&clear_links_cache();
+
+	&run_post_actions();
+
 	print "OK\n";
-	exit(0);
 	}
+
+&virtualmin_api_log(\@OLDARGV, $doms[0]);
+exit($cerr ? 1 : 0);
 
 sub usage
 {
