@@ -1176,6 +1176,10 @@ elsif ($info->{'cn'} =~ /^\*\.(\S+)$/ &&
 	# Matches wildcard
 	return 1;
 	}
+elsif ($info->{'cn'} eq '*') {
+	# Cert is for * , which matches everything
+	return 1;
+	}
 else {
 	# Check for subjectAltNames match (as seen in UCC certs)
 	foreach my $a (@{$info->{'alt'}}) {
