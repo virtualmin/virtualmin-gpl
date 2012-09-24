@@ -250,6 +250,18 @@ if (&has_incremental_tar() && &has_incremental_format()) {
 					[ 1, $text{'backup_increment1'} ] ]));
 	}
 
+# Before and after commands (fixed)
+if ($in{'oneoff'}) {
+	if ($sched->{'before'}){
+		print &ui_table_row($text{'backup_before'},
+		    "<tt>".&html_escape($sched->{'before'})."</tt>");
+		}
+	if ($sched->{'after'}){
+		print &ui_table_row($text{'backup_after'},
+		    "<tt>".&html_escape($sched->{'after'})."</tt>");
+		}
+	}
+
 print &ui_hidden_table_end("dest");
 
 if ($in{'sched'} || $in{'new'}) {
@@ -287,7 +299,6 @@ if ($in{'sched'} || $in{'new'}) {
 			&ui_opt_textbox("after", $sched->{'after'}, 40,
 					$text{'backup_none'}));
 		}
-
 	print &ui_hidden_table_end("sched");
 
 	# Save buttons

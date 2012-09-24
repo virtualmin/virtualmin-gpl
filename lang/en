@@ -2325,6 +2325,10 @@ backup_vmailserver_none=.. not installed
 backup_vmailserver_postgrey=Saving greylisting settings ..
 backup_vmailserver_doing=Saving mail server configuration ..
 backup_vmailserver_supp=.. server not supported
+backup_brun=Running pre-backup command ..
+backup_arun=Running post-backup command ..
+backup_brunfailed=.. failed. The backup will not proceed.
+backup_arunfailed=.. failed!
 
 restore_title=Restore Virtual Servers
 restore_header=Options for restoring backup
