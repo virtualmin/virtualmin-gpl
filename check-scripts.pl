@@ -154,12 +154,12 @@ foreach $s (@scripts) {
 				if (&compare_versions($lver, $v, $script) > 0) {
 					push(@errs, [ $script, $v, $url,
 						"Version $lver is available" ]);
-					print ".. Found newer version $lver\n";
+					print ".. found newer version $lver\n";
 					}
 				elsif (&compare_versions($lver, $v, $script) < 0) {
 					push(@errs, [ $script, $v, $url,
 						"Version $lver is older than $v" ]);
-					print ".. Found older version $lver\n";
+					print ".. found older version $lver\n";
 					}
 				else {
 					print ".. OK\n";
@@ -182,7 +182,7 @@ foreach $s (@scripts) {
 			if ($lver) {
 				push(@errs, [ $script, $v, $url,
 					"Latest version is $lver" ]);
-				print ".. Found never version : $lver\n";
+				print ".. found newer version : $lver\n";
 				}
 			else {
 				print ".. OK\n";
