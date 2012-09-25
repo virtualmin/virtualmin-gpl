@@ -34,6 +34,10 @@ if ($config{'backup_dest'}) {
 		push(@bf, $f) if ($config{'backup_feature_'.$f});
 		$backup{'opts_'.$f} = $config{'backup_opts_'.$f};
 		}
+	for(my $i=1; $config{'backup_dest'.$i}; $i++) {
+		$backup{'dest'.$i} = $config{'backup_dest'.$i};
+		$backup{'purge'.$i} = $config{'backup_purge'.$i};
+		}
 	$backup{'features'} = join(" ", @bf);
 	push(@rv, \%backup);
 	}
@@ -111,6 +115,15 @@ if ($backup->{'id'} == 1) {
 	foreach $f (&get_available_backup_features(), &list_backup_plugins()) {
 		$config{'backup_feature_'.$f} = &indexof($f, @bf) >= 0 ? 1 : 0;
 		$config{'backup_opts_'.$f} = $backup->{'opts_'.$f};
+		}
+	foreach my $k (keys %config) {
+		if ($k =~ /^backup_(dest|purge)\d+$/) {
+			delete($config{$k});
+			}
+		}
+	for(my $i=1; $backup->{'dest'.$i}; $i++) {
+		$config{'backup_dest'.$i} = $backup->{'dest'.$i};
+		$config{'backup_purge'.$i} = $backup->{'purge'.$i};
 		}
 	&lock_file($module_config_file);
 	&save_module_config();
