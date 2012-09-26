@@ -333,12 +333,14 @@ push(@stats, [ "load15", $info->{'load'}->[2] ]) if ($info->{'load'});
 push(@stats, [ "procs", $info->{'procs'} ]) if ($info->{'procs'});
 if ($info->{'mem'}) {
 	push(@stats, [ "memused",
-		       ($info->{'mem'}->[0]-$info->{'mem'}->[1])*1024,
+		       ($info->{'mem'}->[0]-$info->{'mem'}->[1])*1024 ]);
+	push(@stats, [ "memtotal",
 		       $info->{'mem'}->[0]*1024 ]);
 	if ($info->{'mem'}->[2]) {
 		push(@stats, [ "swapused",
-			      ($info->{'mem'}->[2]-$info->{'mem'}->[3])*1024,
-			      $info->{'mem'}->[2]*1024 ]);
+			      ($info->{'mem'}->[2]-$info->{'mem'}->[3])*1024 ]);
+		push(@stats, [ "swaptotal",
+			       $info->{'mem'}->[2]*1024 ]);
 		}
 	}
 if ($info->{'disk_total'}) {
