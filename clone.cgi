@@ -74,6 +74,9 @@ else {
 	&$second_print($text{'clone_failed'});
 	}
 
+# Refresh Webmin user
+&refresh_webmin_user($d, 1);
+
 &run_post_actions();
 &webmin_log("clone", "domain", $d->{'dom'}, $d);
 

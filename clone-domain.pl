@@ -124,6 +124,10 @@ else {
 	}
 $ok = &clone_virtual_server($d, $newdomain, $newuser, $newpass,
 			    $ip, $virtalready);
+
+# Refresh Webmin user to apply any new permisisons, such as DB ownership
+&refresh_webmin_user($d, 1);
+
 &run_post_actions_silently();
 if ($ok) {
 	&$second_print($text{'setup_done'});
