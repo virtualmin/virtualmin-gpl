@@ -3878,7 +3878,7 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 					}
 				}
 			}
-		elsif ($config{'bw_mail_all'} && /^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(\S+):\s+to=(\S+),(.+\s?=sent)?/) {
+		elsif ($config{'bw_mail_all'} && !/status=(deferred|bounced)/ && /^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(\S+):\s+to=(\S+),(.+\s?=sent)?/) {
 			# A To: line that has the off-site recipient
 			local $ltime = timelocal($5, $4, $3, $2,
 			    $apache_mmap{lc($1)}, $tm[5]);
@@ -3891,8 +3891,8 @@ foreach $f ($config{'bw_maillog_rotated'} ?
 			local $sz = $sizes{$8};
 			local $fd = $fromdoms{$8};
 			if ($fd && !$config{'bw_nomailout'} && $config{'bw_mail_all'}) {
-				# From a local domain, but to an off-site domain -
-				# add the size to the sender's usage
+				# From a local domain, but to an off-site
+				# domain - add the size to the sender's usage
 				if ($ltime > $max_ltime{$fd->{'id'}}) {
 					# Update most recent seen time for
 					# this domain.
