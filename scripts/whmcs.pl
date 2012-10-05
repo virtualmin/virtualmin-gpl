@@ -34,7 +34,7 @@ return 1;
 
 sub script_whmcs_release
 {
-return 2;
+return 3;
 }
 
 sub script_whmcs_category
@@ -209,6 +209,12 @@ if (&compare_versions($ver, "5.0.3") <= 0) {
 	push(@files, { 'name' => 'patch3',
 		       'file' => 'patch3.zip',
 		       'url' => 'http://www.whmcs.com/members/dl.php?type=d&id=126' });
+	}
+if (&compare_versions($ver, "5.1.2") <= 0) {
+	# Patch for Boleto module
+	push(@files, { 'name' => 'patch4',
+		       'file' => 'patch4.zip',
+		       'url' => 'http://www.whmcs.com/members/dl.php?type=d&id=138' });
 	}
 return @files;
 }
