@@ -634,10 +634,15 @@ foreach my $db (&domain_databases($oldd, [ 'mysql' ])) {
 	local $newname = $db->{'name'};
 	local $newprefix = &fix_database_name($d->{'prefix'}, 'mysql');
 	local $oldprefix = &fix_database_name($oldd->{'prefix'}, 'mysql');
-	if ($newname eq $oldd->{'db'}) {
+	if ($newname eq $oldd->{'db'} &&
+	    $oldd->{'db'} eq &database_name($oldd)) {
+		# If the DB name was the primary database for the old domain,
+		# set the new DB name to be the primary database for the new
+		# domain
 		$newname = $d->{'db'};
 		}
 	elsif ($newname !~ s/\Q$oldprefix\E/$newprefix/) {
+		# Otherwise, just replace the DB name prefix
 		&$second_print(&text('clone_mysqlprefix', $newname,
 				     $oldprefix, $newprefix));
 		next;
