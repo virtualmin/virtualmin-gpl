@@ -123,8 +123,10 @@ foreach $sname (&list_scripts()) {
 	if (!$want_download && $release{$sname} > $script->{'release'} &&
 	    !$any_local_newer) {
 		# New version of installer itself
-		print STDERR "$sname has new release $release{$sname} ",
-			     "compared to $script->{'release'}\n";
+		if ($debug) {
+			print STDERR "$sname has new release $release{$sname} ",
+				     "compared to $script->{'release'}\n";
+			}
 		$want_download++;
 		}
 	if ($want_download) {
