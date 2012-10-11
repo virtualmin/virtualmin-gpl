@@ -3064,6 +3064,7 @@ elsif ($mode == 3) {
 	local $cerr = &check_s3();
 	$cerr && &error($cerr);
 	$in{$name.'_s3path'} =~ /^\S+$/ || &error($text{'backup_es3path'});
+	$in{$name.'_s3path'} =~ /\\/ && &error($text{'backup_es3pathslash'});
 	($in{$name.'_s3path'} =~ /^\// || $in{$name.'_s3path'} =~ /\/$/) &&
 		&error($text{'backup_es3path2'});
 	$in{$name.'_akey'} =~ /^\S+$/i || &error($text{'backup_eakey'});
