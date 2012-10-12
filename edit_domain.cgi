@@ -146,6 +146,7 @@ foreach $plan (@plans) {
 	$js .= "if (num == $plan->{'id'}) {\n";
 	$js .= &quota_javascript("quota", $plan->{'quota'}, "home", 1);
 	$js .= &quota_javascript("uquota", $plan->{'uquota'}, "home", 1);
+	$js .= &quota_javascript("bw", $plan->{'bwlimit'}, "bw", 1);
 	$js .= "    }\n";
 	}
 $js .= "}\n";

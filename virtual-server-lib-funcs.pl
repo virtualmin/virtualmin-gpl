@@ -5167,7 +5167,7 @@ else {
 	}
 }
 
-# quota_javascript(name, value, filesystem|"none", unlimited-possible)
+# quota_javascript(name, value, filesystem|"bw"|"none", unlimited-possible)
 # Returns Javascript to set some quota field using Javascript
 sub quota_javascript
 {
