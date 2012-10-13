@@ -601,6 +601,14 @@ else {
 	&$second_print(".. done");
 	}
 
+# If php.ini is migrated wrong, fix it
+if ($dom{'web'}) {
+	local $mode = &get_domain_php_mode(\%dom);
+	if ($mode eq "cgi" || $mode eq "fcgid") {
+		&fix_php_extension_dir(\%dom);
+		}
+	}
+
 # Fix up home ownership and permissions
 &$first_print("Fixing home directory permissions ..");
 if (defined(&set_php_wrappers_writable)) {
