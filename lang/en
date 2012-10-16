@@ -2169,6 +2169,7 @@ backup_erskey=Missing or invalid-looking Rackspace API key
 backup_erspath=Missing or invalid Rackspace container and path
 backup_erspath2=Rackspace container and path cannot start or end with a slash
 backup_es3path=Missing or invalid S3 bucket and path
+backup_es3pathslash=The S3 bucket and path cannot contain a backslash
 backup_es3path2=S3 bucket and path cannot start or end with a slash
 backup_doing=Starting backup of $1 domains to $2 ..
 backup_emkdir=Failed to create directory $1 : $2
