@@ -54,3 +54,7 @@
 
  - OpenCart installer
 	- https://www.virtualmin.com/node/23194
+
+ - change-password.pl needs to work with hashed passwords
+
+ - API command to fix all domain user quotas
