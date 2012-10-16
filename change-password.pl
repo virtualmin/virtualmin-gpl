@@ -22,6 +22,7 @@ else {
 $0 = "$pwd/change-password.pl";
 require './virtual-server-lib.pl';
 $< == 0 || die "change-password.pl must be run as root";
+&require_useradmin();
 
 # Read inputs
 $| = 1;
@@ -55,7 +56,13 @@ $olduser = { %$user };
 if ($user->{'domainowner'}) {
 	# This is the domain owner, so changing his password means updating
 	# all features
-	$d->{'pass'} eq $oldpass || &error_exit("Wrong password");
+	if ($d->{'pass'}) {
+		$d->{'pass'} eq $oldpass || &error_exit("Wrong password");
+		}
+	else {
+		&useradmin::validate_password($oldpass, $user->{'pass'}) ||
+			&error_exit("Wrong password");
+		}
 	&set_all_null_print();
 	foreach my $d (&get_domain_by("user", $username)) {
 		$oldd = { %$d };
