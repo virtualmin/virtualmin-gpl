@@ -12778,6 +12778,7 @@ if ($config{'spam'}) {
 		&require_mail();
 		local $mbc = &postfix::get_real_value("mailbox_command");
 		local @mbc = &split_quoted_string($mbc);
+		$mbc[0] = &has_command($mbc[0]);
 		local @st = stat($mbc[0]);
 		if (!&has_command($mbc[0])) {
 			# Procmail does not exist
