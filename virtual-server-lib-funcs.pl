@@ -9925,7 +9925,7 @@ if ($status != 0) {
 	$rv .= $err."\n";
 	$rv .= &text('licence_renew', $virtualmin_renewal_url),"\n";
 	if (&can_recheck_licence()) {
-		$rv .= &ui_form_start("/$module_name/licence.cgi");
+		$rv .= &ui_form_start("$gconfig{'webprefix'}/$module_name/licence.cgi");
 		$rv .= &ui_submit($text{'licence_recheck'});
 		$rv .= &ui_form_end();
 		}
@@ -9944,7 +9944,7 @@ elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 		}
 	$rv .= &text('licence_renew', $virtualmin_renewal_url),"\n";
 	if (&can_recheck_licence()) {
-		$rv .= &ui_form_start("/$module_name/licence.cgi");
+		$rv .= &ui_form_start("$gconfig{'webprefix'}/$module_name/licence.cgi");
 		$rv .= &ui_submit($text{'licence_recheck'});
 		$rv .= &ui_form_end();
 		}
@@ -9958,7 +9958,7 @@ if ($config{'old_defip'} && $defip && $config{'old_defip'} ne $defip) {
 	$rv .= "<b>".&text('licence_ipchanged',
 			   "<tt>$config{'old_defip'}</tt>",
 			   "<tt>$defip</tt>")."</b><p>\n";
-	$rv .= &ui_form_start("/$module_name/edit_newips.cgi");
+	$rv .= &ui_form_start("$gconfig{'webprefix'}/$module_name/edit_newips.cgi");
 	$rv .= &ui_hidden("old", $config{'old_defip'});
 	$rv .= &ui_hidden("new", $defip);
 	$rv .= &ui_hidden("setold", 1);
@@ -11145,7 +11145,7 @@ return &can_config_domain($_[0]) ?
 # Calls redirect to edit_domain.cgi or view_domain.cgi
 sub domain_redirect
 {
-&redirect("/$module_name/postsave.cgi?dom=$_[0]->{'id'}");
+&redirect("$gconfig{'webprefix'}/$module_name/postsave.cgi?dom=$_[0]->{'id'}");
 #&redirect(&can_config_domain($_[0]) ? "edit_domain.cgi?dom=$_[0]->{'id'}"
 #				    : "view_domain.cgi?dom=$_[0]->{'id'}");
 }
