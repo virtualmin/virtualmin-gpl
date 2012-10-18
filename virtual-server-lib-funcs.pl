@@ -14333,13 +14333,15 @@ local @rv = grep { $_->{'user'} eq $user &&
 return wantarray ? @rv : $rv[0];
 }
 
-# list_available_shells([&domain])
+# list_available_shells([&domain], [mail])
 # Returns a list of shells assignable to domain owners and/or mailboxes.
 # Each is a hash ref with shell, desc, owner and mailbox keys.
 sub list_available_shells
 {
-local ($d) = @_;
-local $mail = !$d || $d->{'mail'};
+local ($d, $mail) = @_;
+if (!defined($mail)) {
+	$mail = !$d || $d->{'mail'};
+	}
 local @rv;
 if ($list_available_shells_cache{$mail}) {
 	return @{$list_available_shells_cache{$mail}};
@@ -14377,6 +14379,14 @@ if (!@rv) {
 			    'mailbox' => 1,
 			    'avail' => 1,
 			    'id' => 'ftp' });
+		}
+	if (&has_command("scponly")) {
+		push(@rv, { 'shell' => &has_command("scponly"),
+			    'desc' => $mail ? $text{'shells_mailboxscp'}
+					    : $text{'shells_mailboxscp2'},
+			    'mailbox' => 1,
+			    'avail' => 1,
+			    'id' => 'scp' });
 		}
 	local (%done, %classes, $defclass);
 	local $best_unix_shell;
@@ -14452,7 +14462,8 @@ else {
 sub available_shells_menu
 {
 local ($name, $value, $type, $showcmd, $mustftp) = @_;
-local @tshells = grep { $_->{$type} } &list_available_shells();
+local @tshells = grep { $_->{$type} } &list_available_shells(
+					undef, $mustftp ? 0 : undef);
 local @ashells = grep { $_->{'avail'} } @tshells;
 if ($mustftp) {
 	# Only show shells with FTP access or better

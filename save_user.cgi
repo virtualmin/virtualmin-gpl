@@ -381,17 +381,16 @@ else {
 		$clash && &error($text{'user_eclash2'});
 
 		if ($user->{'unix'}) {
-			if (&can_mailbox_ftp() && !$user->{'webowner'}) {
+			if (&can_mailbox_ftp()) {
 				# Shell can be set based on FTP flag
 				&check_available_shell($in{'shell'}, 'mailbox',
 						       undef) ||
 					&error($text{'user_eshell'});
 				$user->{'shell'} = $in{'shell'};
 				}
-			elsif ($in{'new'} && !$user->{'webowner'}) {
+			elsif ($in{'new'}) {
 				# If the shell cannot be edited, always use
-				# the default. For website FTP users, the FTP
-				# shell is already set by create_initial_user
+				# the default.
 				$user->{'shell'} =
 					&default_available_shell('mailbox');
 				}
