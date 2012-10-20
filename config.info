@@ -163,6 +163,7 @@ s3_skey=Default S3 secret key for backups,3,None
 rs_endpoint=Rackspace API URL,10,https://identity.api.rackspacecloud.com/v1.0-US default,https://lon.auth.api.rackspacecloud.com/v1.0-UK default,Other
 rs_user=Default Rackspace username for backups,3,None
 rs_key=Default Rackspace API key for backups,3,None
+rs_snet=Use internal Rackspace network servers?,1,1-Yes,0-No
 
 line6=Advanced options,11
 iface_base=Base number for virtual interfaces,3,Automatic

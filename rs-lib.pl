@@ -30,6 +30,10 @@ my $h = { 'url' => $url,
 	  'key' => $key,
 	  'api' => $apiver,
 	};
+if ($config{'rs_snet'}) {
+	# Storage URL needs to be customized for the internal network
+	$h->{'storage-url'} =~ s/^(http|https):\/\//$1:\/\/snet-/;
+	}
 return $h;
 }
 
