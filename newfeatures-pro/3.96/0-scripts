@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Typo3 script installer to version 4.6.13, CMS made simple to 1.11.2.1, and Django to 1.4.2.
+html=Updated the Typo3 script installer to version 4.6.13, CMS made simple to 1.11.2.1, Drupal to 7.16, and Django to 1.4.2.
 master=1
 reseller=1
 domain=1
