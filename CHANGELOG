@@ -1365,4 +1365,4 @@ Updated the osCommerce script installer to version 2.3.3, phpBB to 3.0.11, Dolib
 When running a scheduled backup from within the Virtualmin UI, pre and post backup commands are now run, and old backups purged if configured.
 Added the fix-domain-quota API command, to bring Unix quotas into sync with what Virtualmin expects.
 ---- Changes since 3.94 ----
-Updated the Typo3 script installer to version 4.6.13, and Django to 1.4.2.
+Updated the Typo3 script installer to version 4.6.13, CMS made simple to 1.11.2.1, and Django to 1.4.2.
