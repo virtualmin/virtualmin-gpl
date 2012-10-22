@@ -412,7 +412,10 @@ foreach my $desturl (@$desturls) {
 					}
 				}
 			}
-		$onebyone = 0;	# Local backups are always written directly
+		if (@$desturls == 1) {
+			$onebyone = 0;	# Local backups are always written
+					# to the destination directly
+			}
 		}
 	}
 
