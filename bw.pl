@@ -204,6 +204,7 @@ foreach $d (@doms) {
 				}
 			&run_post_actions();
 			}
+		&webmin_log("disable", "domain", $d->{'dom'}, $d);
 		}
 	elsif ($d->{'bw_limit'} && $config{'bw_warn'} &&
 	       $usage > $d->{'bw_limit'}*$config{'bw_warn'}/100) {
@@ -284,6 +285,7 @@ foreach $d (@doms) {
 			&reset_domain_envs($dd);
 			}
 		&run_post_actions();
+		&webmin_log("enable", "domain", $d->{'dom'}, $d);
 		}
 	&save_domain($d);
 	}
