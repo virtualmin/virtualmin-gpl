@@ -148,7 +148,7 @@ $current_id = undef;
 
 # If purging old backups, do that now
 @purges = &get_scheduled_backup_purges($sched);
-if ($ok) {
+if ($ok || $sched->{'errors'}) {
 	$i = 0;
 	foreach $dest (@dests) {
 		if ($purges[$i]) {

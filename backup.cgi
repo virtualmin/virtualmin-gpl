@@ -226,7 +226,7 @@ else {
 		}
 
 	# If purging old backups, do that now
-	if ($ok && $in{'oneoff'}) {
+	if (($ok || $in{'errors'}) && $in{'oneoff'}) {
 		@purges = &get_scheduled_backup_purges($sched);
 		$i = 0;
 		foreach $dest (@dests) {
