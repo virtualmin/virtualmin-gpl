@@ -106,6 +106,7 @@ local ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries,
 $tries ||= 1;
 &require_s3();
 local @st = stat($sourcefile);
+@st || return "File $sourcefile does not exist";
 my $can_use_write = &get_webmin_version() >= 1.451;
 my $headers = { };
 if ($rrs) {

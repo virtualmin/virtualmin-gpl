@@ -546,6 +546,10 @@ DOMAIN: foreach $d (@$doms) {
 		&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, undef,
 					   $d->{'home'});
 		}
+	elsif ($homefmt && !$d->{'dir'} && -d $d->{'home'}) {
+		# Home directory actually exists, so enable it on the domain
+		$d->{'dir'} = 1;
+		}
 
 	local $lockdir;
 	if ($homefmt) {

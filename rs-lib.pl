@@ -108,6 +108,7 @@ sub rs_upload_object
 {
 my ($h, $container, $file, $src, $multipart) = @_;
 my @st = stat($src);
+@st || return "File $src does not exist";
 if ($st[7] >= 2*1024*1024*1024 || $multipart) {
 	# Large files have to be uploaded in parts
 	my $pos = 0;
