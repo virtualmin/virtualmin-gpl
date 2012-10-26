@@ -1322,6 +1322,7 @@ if ($d->{'alias'} && $d->{'alias_mode'}) {
 		&print_tempfile(FILE, $a,"\n");
 		}
 	&close_tempfile(FILE);
+	&$second_print($text{'setup_done'});
 	return 1;
 	}
 &$first_print($text{'backup_apachecp'});
