@@ -55,7 +55,8 @@ if ($dbtype && $script->{'name'} !~ /^php(\S+)admin$/i) {
 		&text('scripts_idbname',
 		      "edit_database.cgi?dom=$in{'dom'}&type=$dbtype&".
 			"name=$dbname",
-		      $text{'databases_'.$dbtype}, "<tt>$dbname</tt>"));
+		      $text{'databases_'.$dbtype}, "<tt>$dbname</tt>").
+		($opts->{'newdb'} ? "<br>".$text{'scripts_inewdb'} : ""));
 	}
 
 # Show login, if we have it

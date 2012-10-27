@@ -109,6 +109,8 @@ foreach my $d (@doms) {
 			($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
 			if ($dbtype) {
 				print "    Database: $dbname ($dbtype)\n";
+				print "    Delete database on uninstall: ",
+				      ($opts->{'newdb'} ? "Yes" : "No"),"\n";
 				}
 			if ($sinfo->{'user'}) {
 				print "    Initial login: $sinfo->{'user'}\n";

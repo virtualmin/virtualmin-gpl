@@ -3520,6 +3520,7 @@ scripts_iurl=Installed URL
 scripts_itime=Installed on
 scripts_idir=Installation directory
 scripts_idb=Uses database
+scripts_inewdb=(Will be deleted when script is un-installed)
 scripts_idbname=<a href='$1'>$2 database $3</a>
 scripts_idbname2=<a href='$1'>$2 $3</a>
 scripts_iuser=Initial login
