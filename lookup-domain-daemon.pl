@@ -164,6 +164,7 @@ sub send_response
 local ($d, $user) = @_;
 local $now = localtime(time());
 if ($d && $user) {
+	# Get the user's quota
 	local $qmode = &mail_under_home() && &has_home_quotas() ? "home" :
 		       &has_mail_quotas() ? "mail" : undef;
 	local ($quota, $uquota);
@@ -173,16 +174,30 @@ if ($d && $user) {
 	elsif ($qmode eq "mail") {
 		($quota, $uquota) = ($user->{'mquota'}, $user->{'umquota'});
 		}
+	local $quotadiff = $quota ? ($quota - $uquota) : undef;
+
+	# Get the domain's quota, in case it is less
+	local $dquota = $d->{'quota'};
+	local $duquota;
+	if ($dquota && &has_group_quotas()) {
+		($duquota) = &get_domain_quota($d, 0);
+		local $dquotadiff = $dquota - $duquota;
+		if ($dquotadiff < $quotadiff) {
+			# Domain has less space free than user!
+			$quotadiff = $dquotadiff;
+			}
+		}
+
 	local $client = &get_domain_spam_client($d);
 	print join("\t", $d->{'id'},
 			 $d->{'dom'},
 			 $d->{'spam'} && !$user->{'nospam'},
 			 ($client eq "spamc" ? 1 : 0),
-			 ($quota ? ($quota - $uquota)*&quota_bsize($qmode)
-				 : "UNLIMITED"),
+			 (defined($quotadiff) ? $quotadiff*&quota_bsize($qmode)
+					      : "UNLIMITED"),
 		  ),"\n";
 	seek(STDERR, 0, 2);
-	print STDERR "[$now] user=$username dom=$d->{'dom'} spam=$d->{'spam'} client=$client quota=$quota uquota=$uquota\n";
+	print STDERR "[$now] user=$username dom=$d->{'dom'} spam=$d->{'spam'} client=$client quota=$quota uquota=$uquota dquota=$dquota duquota=$duquota\n";
 	}
 else {
 	print "\t\t\t\t\t\n";
