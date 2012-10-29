@@ -694,6 +694,7 @@ while(1) {
 	last if (!$want);
 	my $read = read(BACKUP, $buf, $want);
 	if ($read <= 0) {
+		close(BACKUP);
 		return (0, "Read failed for $want : $!");
 		}
 	$got += $read;
