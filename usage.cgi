@@ -180,7 +180,7 @@ print &ui_columns_table(
 	);
 if ($max && @$list > $max) {
 	print "<i>",&text('usage_max', $max)," ",
-	      "<a href='usage.cgi?dom=$in{'dom'}&all=1'>",
+	      "<a href='usage.cgi?dom=$in{'dom'}&all=1&mode=$in{'mode'}'>",
 	      $text{'usage_showall'},"</a></i><br>\n";
 	}
 }
