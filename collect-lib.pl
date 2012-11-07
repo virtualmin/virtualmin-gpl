@@ -682,6 +682,7 @@ sub setup_collectinfo_job
 # Work out correct steps
 local $step = $config{'collect_interval'};
 $step = 5 if (!$step || $step eq 'none');
+$step = 60 if ($step > 60);
 local $offset = int(rand()*$step);
 local @mins;
 for(my $i=$offset; $i<60; $i+= $step) {
