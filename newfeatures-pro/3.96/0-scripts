@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Typo3 script installer to version 4.6.13, CMS made simple to 1.11.2.1, Drupal to 7.16, SugarCRM to 6.5.6, PiWik to 1.9.1, FengOffice to 2.2.1, TikiWiki to 9.2, SugarCRM to 6.5.7, ZenPhoto to 1.4.3.4, Joomla to 3.0.1, phpMyFAQ to 2.7.9, Typo3 to 4.6.14, and Django to 1.4.2.
+html=Updated the Typo3 script installer to version 4.6.13, CMS made simple to 1.11.2.1, Drupal to 7.17, SugarCRM to 6.5.6, PiWik to 1.9.1, FengOffice to 2.2.1, TikiWiki to 9.2, SugarCRM to 6.5.7, ZenPhoto to 1.4.3.4, Joomla to 3.0.1, phpMyFAQ to 2.7.9, Typo3 to 4.6.14, and Django to 1.4.2.
 master=1
 reseller=1
 domain=1
