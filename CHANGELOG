@@ -1365,4 +1365,4 @@ Updated the osCommerce script installer to version 2.3.3, phpBB to 3.0.11, Dolib
 When running a scheduled backup from within the Virtualmin UI, pre and post backup commands are now run, and old backups purged if configured.
 Added the fix-domain-quota API command, to bring Unix quotas into sync with what Virtualmin expects.
 ---- Changes since 3.94 ----
-Updated the Typo3 script installer to version 4.6.13, CMS made simple to 1.11.2.1, Drupal to 7.17, SugarCRM to 6.5.6, PiWik to 1.9.2, FengOffice to 2.2.1, TikiWiki to 9.2, SugarCRM to 6.5.7, ZenPhoto to 1.4.3.4, Joomla to 3.0.1, phpMyFAQ to 2.7.9, Typo3 to 4.6.14, and Django to 1.4.2.
+Updated the Typo3 script installer to version 4.6.13, CMS made simple to 1.11.2.1, Drupal to 7.17, SugarCRM to 6.5.6, PiWik to 1.9.2, FengOffice to 2.2.1, TikiWiki to 9.2, SugarCRM to 6.5.7, ZenPhoto to 1.4.3.4, Joomla to 3.0.1, phpMyFAQ to 2.7.9, Typo3 to 4.6.14, RoundCube to 0.8.3, and Django to 1.4.2.
