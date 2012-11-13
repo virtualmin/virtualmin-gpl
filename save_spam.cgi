@@ -67,15 +67,24 @@ if ($d->{'spam'} && &get_domain_spam_client($d) ne "spamc") {
 	}
 
 # Save spam deletion field
-$auto = undef;
+$auto = { };
 if ($in{'clear'} == 1) {
 	$in{'days'} =~ /^\d+$/ && $in{'days'} > 0 ||
 		&error($text{'spam_edays'});
-	$auto = { 'days' => $in{'days'} };
+	$auto->{'days'} = $in{'days'};
 	}
 elsif ($in{'clear'} == 2) {
 	$in{'size'} =~ /^\d+$/ || &error($text{'spam_esize'});
-	$auto = { 'size' => $in{'size'}*$in{'size_units'} };
+	$auto->{'size'} = $in{'size'}*$in{'size_units'};
+	}
+if ($in{'trashclear'} == 1) {
+	$in{'trashdays'} =~ /^\d+$/ && $in{'trashdays'} > 0 ||
+		&error($text{'spam_etrashdays'});
+	$auto->{'trashdays'} = $in{'trashdays'};
+	}
+elsif ($in{'trashclear'} == 2) {
+	$in{'trashsize'} =~ /^\d+$/ || &error($text{'spam_etrashsize'});
+	$auto->{'trashsize'} = $in{'trashsize'}*$in{'trashsize_units'};
 	}
 &save_domain_spam_autoclear($d, $auto);
 

@@ -60,12 +60,24 @@ if ($d->{'spam'} && &get_domain_spam_client($d) ne "spamc") {
 # Show automatic spam clearing option
 $auto = &get_domain_spam_autoclear($d);
 print &ui_table_row(&hlink($text{'spam_clear'}, 'spam_clear'),
-	&ui_radio("clear", !$auto ? 0 : $auto->{'days'} ? 1 : 2,
+	&ui_radio("clear", $auto->{'days'} ne '' ? 1 :
+			   $auto->{'size'} ne '' ? 2 : 0,
 		[ [ 0, $text{'no'}."<br>" ],
 		  [ 1, &text('spam_cleardays',
-			     &ui_textbox("days", $auto->{'days'}, 5))."<br>" ],
+		    &ui_textbox("days", $auto->{'days'}, 5))."<br>" ],
 		  [ 2, &text('spam_clearsize',
-			     &ui_bytesbox("size", $auto->{'size'})) ],
+		    &ui_bytesbox("size", $auto->{'size'})) ],
+		]));
+
+# Show automatic trash clearing option
+print &ui_table_row(&hlink($text{'spam_trashclear'}, 'spam_trashclear'),
+	&ui_radio("trashclear", $auto->{'trashdays'} ne '' ? 1 :
+				$auto->{'trashsize'} ne '' ? 2 : 0,
+		[ [ 0, $text{'no'}."<br>" ],
+		  [ 1, &text('spam_cleardays',
+		    &ui_textbox("trashdays", $auto->{'trashdays'}, 5))."<br>" ],
+		  [ 2, &text('spam_clearsize',
+		    &ui_bytesbox("trashsize", $auto->{'trashsize'})) ],
 		]));
 
 # Show spamtrap option
