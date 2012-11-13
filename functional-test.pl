@@ -55,6 +55,7 @@ $migration_plesk_windows_domain = "sbcher.com";
 $migration_plesk_windows = "$migration_dir/$migration_plesk_windows_domain.plesk_windows.psa";
 $test_backup_file = "/tmp/$test_domain.tar.gz";
 $test_incremental_backup_file = "/tmp/$test_domain.incremental.tar.gz";
+$test_incremental_backup_file2 = "/tmp/$test_domain.incremental2.tar.gz";
 $test_backup_dir = "/tmp/functional-test-backups";
 $test_backup_dir2 = "/tmp/functional-test-backups2";
 $test_email_dir = "/usr/local/webadmin/virtualmin/testmail";
@@ -2795,6 +2796,28 @@ $incremental_tests = [
 		"full=`du -k $test_backup_file | cut -f 1` ; ".
 		"incr=`du -k $test_incremental_backup_file | cut -f 1` ; ".
 		"test \$incr -lt \$full"
+	},
+
+	# Create another incremental backup
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'incremental' ],
+		      [ 'dest', $test_incremental_backup_file2 ] ],
+	},
+
+	# Make sure the second incremental is smaller than the full
+	{ 'command' =>
+		"full=`du -k $test_backup_file | cut -f 1` ; ".
+		"incr=`du -k $test_incremental_backup_file2 | cut -f 1` ; ".
+		"test \$incr -lt \$full"
+	},
+
+	# Make sure the two incrementals are the same
+	{ 'command' =>
+		"incr=`du -k $test_incremental_backup_file | cut -f 1` ; ".
+		"incr2=`du -k $test_incremental_backup_file2 | cut -f 1` ; ".
+		"test \$incr -eq \$incr2"
 	},
 
 	# Delete the domain
