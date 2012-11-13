@@ -223,8 +223,6 @@ sub rs_http_call
 {
 my ($url, $method, $headers, $dstfile, $srcfile) = @_;
 my ($host, $port, $page, $ssl) = &parse_http_url($url);
-$srcfile !~ /^\// || -r $srcfile ||
-	return (0, "Source file $srcfile does not exist");
 
 # Build headers
 my @headers;
@@ -234,7 +232,7 @@ push(@headers, [ "Accept-language", "en" ]);
 foreach my $hname (keys %$headers) {
 	push(@headers, [ $hname, $headers->{$hname} ]);
 	}
-if ($srcfile =~ /^\//) {
+if ($srcfile =~ /^\// && -r $srcfile) {
 	my @st = stat($srcfile);
 	push(@headers, [ "Content-Length", $st[7] ]);
 	}
@@ -253,7 +251,7 @@ if (!ref($h)) {
 	return (0, $error);
 	}
 
-if ($srcfile =~ /^\//) {
+if ($srcfile =~ /^\// && -r $srcfile) {
 	# Send body contents from file
 	my $buf;
 	open(SRCFILE, $srcfile);
