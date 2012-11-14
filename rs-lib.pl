@@ -126,9 +126,13 @@ if ($st[7] >= 2*1024*1024*1024 || $multipart) {
 			}
 		$pos += $got;
 
-		# Upload that chunk
-		my ($ok, $out) = &rs_api_call($h, "/$container/$file.$n", "PUT",
-					      $pinheaders, undef, $buf);
+		# Upload that chunk (try 3 times)
+		my ($ok, $out);
+		for(my $try=0; $try<3; $try++) {
+			($ok, $out) = &rs_api_call($h, "/$container/$file.$n",
+					"PUT", $pinheaders, undef, $buf);
+			last if ($ok);
+			}
 		if (!$ok) {
 			close(CHUNK);
 			return "Upload failed at $pos : $out";
@@ -273,7 +277,8 @@ my $line;
 ($line = &read_http_connection($h)) =~ tr/\r\n//d;
 if ($line !~ /^HTTP\/1\..\s+(20[0-9])(\s+|$)/) {
 	alarm(0);
-	return (0, "Invalid HTTP response : $line");
+	return (0, $line ? "Invalid HTTP response : $line"
+			 : "Empty HTTP response");
 	}
 my $rcode = $1;
 my %header;
