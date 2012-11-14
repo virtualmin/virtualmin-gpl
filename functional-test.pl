@@ -4526,6 +4526,7 @@ $web_tests = [
 	# Test foo.domain wget
 	{ 'command' => $wget_command.'http://foo.'.$test_domain,
 	  'grep' => 'Test web page',
+	  'sleep' => 5,		# Wait for BIND update
 	},
 
 	# Disable matchall
@@ -4537,6 +4538,7 @@ $web_tests = [
 	# Test foo.domain wget, which should fail now
 	{ 'command' => $wget_command.'http://foo.'.$test_domain,
 	  'fail' => 1,
+	  'sleep' => 5,		# Wait for BIND update
 	},
 
 	# Disable web feature
