@@ -19,6 +19,7 @@ $now = time();
 &read_file($user_quota_warnings_file, \%userwarnings);
 foreach $d (&list_domains()) {
 	next if ($d->{'alias'});
+	next if ($d->{'disabled'});
 
 	if ($d->{'quota'} && !$d->{'parent'}) {
 		# Get usage for this server and all sub-servers
