@@ -11742,6 +11742,11 @@ if (!$oldd->{'parent'}) {
 	&rename_backup_owner($d, $oldd);
 	}
 
+# Clear email field, to force inheritance from new parent
+for(my $i=0; $i<@doms; $i++) {
+	delete($doms[$i]->{'email'});
+        }
+
 # Save the domain objects
 &$first_print($text{'save_domain'});
 for(my $i=0; $i<@doms; $i++) {
