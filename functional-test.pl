@@ -6607,7 +6607,8 @@ $rs_tests = [
 	{ 'command' => 'upload-rs-file.pl',
 	  'args' => [ [ 'container', 'virtualmin-rs-test-container' ],
 		      [ 'source', '/tmp/rs.dat' ],
-		      [ 'multipart' ] ],
+		      [ 'multipart' ],
+		      [ 'chunk-size', 1048576 ] ],
 	},
 
 	# List files to make sure the part exists

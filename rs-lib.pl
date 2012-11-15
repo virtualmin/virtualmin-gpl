@@ -1,5 +1,7 @@
 # Functions for accessing the Rackspace cloud files API
 
+our $rs_chunk_size = 200*1024*1024;	# 200 MB partial file chunk
+
 # rs_connect(url, user, key)
 # Connect to rackspace and get an authentication token. Returns a hash ref for
 # a connection handle on success, or an error message on failure.
@@ -101,42 +103,39 @@ return $out if (!$ok);
 return [ split(/\r?\n/, $out) ];
 }
 
-# rs_upload_object(&handle, container, file, source-file, [multipart])
+# rs_upload_object(&handle, container, file, source-file, [multipart],
+# 		   [force-chunk-size])
 # Uploads the contents of some local file to rackspace. Returns undef on success
 # or an error message string if something goes wrong
 sub rs_upload_object
 {
-my ($h, $container, $file, $src, $multipart) = @_;
+my ($h, $container, $file, $src, $multipart, $chunk) = @_;
+$chunk ||= $rs_chunk_size;
 my @st = stat($src);
 @st || return "File $src does not exist";
 if ($st[7] >= 2*1024*1024*1024 || $multipart) {
 	# Large files have to be uploaded in parts
 	my $pos = 0;
 	my $pinheaders = { 'X-Object-Meta-PIN' => int(rand()*10000) };
-	open(CHUNK, $src);
 	my $n = "00000000";
 	while($pos < $st[7]) {
-		# Read a 1MB chunk into memory
-		seek(CHUNK, $pos, 0);
-		my $buf;
-		my $got = read(CHUNK, $buf, 1024*1024);
-		if ($got <= 0) {
-			close(CHUNK);
-			return "Read failed at $pos : $!";
+		# Upload a chunk
+		my $want = $st[7] - $pos;
+		if ($want > $chunk) {
+			$want = $chunk;
 			}
-		$pos += $got;
-
-		# Upload that chunk (try 3 times)
 		my ($ok, $out);
 		for(my $try=0; $try<3; $try++) {
 			($ok, $out) = &rs_api_call($h, "/$container/$file.$n",
-					"PUT", $pinheaders, undef, $buf);
+					"PUT", $pinheaders, undef, $src,
+					$pos, $want);
 			last if ($ok);
 			}
 		if (!$ok) {
 			close(CHUNK);
 			return "Upload failed at $pos : $out";
 			}
+		$pos += $want;
 		$n++;
 		}
 	close(CHUNK);
@@ -207,25 +206,26 @@ return $ok ? undef : $out;
 }
 
 # rs_api_call(&handle, path, method, &headers, [save-to-file],
-# 	      [read-from-file|data])
+# 	      [read-from-file|data], [file-offset], [file-length])
 # Calls the rackspace API, and returns an OK flag, response body or error
 # message, and HTTP headers.
 sub rs_api_call
 {
-my ($h, $path, $method, $headers, $dstfile, $srcfile) = @_;
+my ($h, $path, $method, $headers, $dstfile, $srcfile, $offset, $length) = @_;
 my ($host, $port, $page, $ssl) = &parse_http_url($h->{'storage-url'});
 my $sendheaders = $headers ? { %$headers } : { };
 $sendheaders->{'X-Auth-Token'} = $h->{'token'};
 return &rs_http_call($h->{'storage-url'}.$path, $method, $sendheaders,
-		     $dstfile, $srcfile);
+		     $dstfile, $srcfile, $offset, $length);
 }
 
-# rs_http_call(url, method, &headers, [save-to-file], [read-from-file|data])
+# rs_http_call(url, method, &headers, [save-to-file], [read-from-file|data],
+# 	       [file-offset], [file-length])
 # Makes an HTTP call and returns an OK flag, response body or error
 # message, and HTTP headers.
 sub rs_http_call
 {
-my ($url, $method, $headers, $dstfile, $srcfile) = @_;
+my ($url, $method, $headers, $dstfile, $srcfile, $offset, $length) = @_;
 my ($host, $port, $page, $ssl) = &parse_http_url($url);
 
 # Build headers
@@ -237,8 +237,13 @@ foreach my $hname (keys %$headers) {
 	push(@headers, [ $hname, $headers->{$hname} ]);
 	}
 if ($srcfile =~ /^\// && -r $srcfile) {
-	my @st = stat($srcfile);
-	push(@headers, [ "Content-Length", $st[7] ]);
+	if ($length) {
+		push(@headers, [ "Content-Length", $length ]);
+		}
+	else {
+		my @st = stat($srcfile);
+		push(@headers, [ "Content-Length", $st[7] ]);
+		}
 	}
 elsif (defined($srcfile)) {
 	push(@headers, [ "Content-Length", length($srcfile) ]);
@@ -259,8 +264,28 @@ if ($srcfile =~ /^\// && -r $srcfile) {
 	# Send body contents from file
 	my $buf;
 	open(SRCFILE, $srcfile);
-	while(read(SRCFILE, $buf, 1024) > 0) {
-		&write_http_connection($h, $buf);
+	if ($offset) {
+		# Seek to some position
+		seek(SRCFILE, $offset, 0);
+		}
+	if ($length) {
+		# Only copy length bytes
+		my $want = $length;
+		while($want) {
+			my $readlen = $want;
+			if ($readlen > 1024*1024) {
+				$readlen = 1024*1024;
+				}
+			my $got = read(SRCFILE, $buf, $readlen);
+			&write_http_connection($h, $buf);
+			$want -= $got;
+			}
+		}
+	else {
+		# Copy till the end of the file
+		while(read(SRCFILE, $buf, 1024) > 0) {
+			&write_http_connection($h, $buf);
+			}
 		}
 	close(SRCFILE);
 	}
