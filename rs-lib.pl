@@ -1,6 +1,6 @@
 # Functions for accessing the Rackspace cloud files API
 
-our $rs_chunk_size = 200*1024*1024;	# 200 MB partial file chunk
+our $rs_chunk_size = $config{'rs_chunk'} || 200*1024*1024;	# 200 MB
 
 # rs_connect(url, user, key)
 # Connect to rackspace and get an authentication token. Returns a hash ref for

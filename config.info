@@ -164,6 +164,7 @@ rs_endpoint=Rackspace API URL,10,https://identity.api.rackspacecloud.com/v1.0-US
 rs_user=Default Rackspace username for backups,3,None
 rs_key=Default Rackspace API key for backups,3,None
 rs_snet=Use internal Rackspace network servers?,1,1-Yes,0-No
+rs_chunk=Rackspace multi-part upload chunk size,3,Default (200 MB)
 
 line6=Advanced options,11
 iface_base=Base number for virtual interfaces,3,Automatic
