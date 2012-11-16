@@ -26,6 +26,18 @@ while(@ARGV) {
 		}
 	}
 
+# Build list of local hostnames and IPs
+%local_src = ( 'localhost' => 1,
+	       'localhost.localdomain' => 1,
+	       '127.0.0.1' => 1,
+	       '::1' => 1,
+	       &get_system_hostname(0, 0) => 1,
+	       &get_system_hostname(1, 0) => 1,
+	       &get_system_hostname(0, 1) => 1,
+	       &get_system_hostname(1, 1) => 1,
+	     );
+%local_src = ( %local_src, &interface_ip_addresses() );
+
 # For each domain with spam enabled and with the aliases, process the files
 foreach $d (&list_domains()) {
 	# Skip if this domain wasn't on the list given
@@ -93,6 +105,35 @@ foreach $d (&list_domains()) {
 		print STDERR "$d->{'dom'}: user=",
 		    ($user ? $user->{'user'} : "")," what=$what\n" if ($debug);
 		next if (!$user);
+
+		# Check the received headers to see if it was sent locally
+		# or via SMTP auth. Walk the headers in order and fail if
+		# a non-local header is found. Or if an SMTP auth header is
+		# found, succeed.
+		my @rh = map { $_->[1] } grep { lc($_->[0]) eq 'received' }
+					      @{$m->{'headers'}};
+		my $invalid = 0;
+		foreach my $rh (@rh) {
+			print STDERR "rh=$rh\n";
+			my ($src, $uname) = &parse_received_header($rh);
+			if ($local_src{$src}) {
+				print STDERR "$d->{'dom'}: $user->{'user'}: ",
+					"Local received $rh\n" if ($debug);
+				next;
+				}
+			elsif ($uname) {
+				print STDERR "$d->{'dom'}: $user->{'user'}: ",
+					"Auth received $rh\n" if ($debug);
+				last;
+				}
+			else {
+				print STDERR "$d->{'dom'}: $user->{'user'}: ",
+					"Invalid received $rh\n" if ($debug);
+				$invalid = 1;
+				last;
+				}
+			}
+		next if ($invalid);
 
 		# For each message, find the attached mail if there is one and
 		# if this email was forwarded by a Virtualmin user.
@@ -195,3 +236,22 @@ foreach my $u (@$users) {
 return undef;
 }
 
+# parse_received_header(string)
+# Given a received header string, extract the sending system's IP and SMTP
+# authencation username.
+# XXX how to detect SMTP authentication?
+sub parse_received_header
+{
+my ($str) = @_;
+my $sender;
+my $uname;
+if ($str =~ /from\s+\S+\s+\((\S+)\s+\[(\S+)\]\)/) {
+	# from fudu.home (localhost.localdomain [127.0.0.1])
+	$sender = $2;
+	}
+elsif ($str =~ /from\s+\[(\S+)\]/) {
+	# from [98.138.90.52]
+	$sender = $1;
+	}
+return ($sender, $uname);
+}
