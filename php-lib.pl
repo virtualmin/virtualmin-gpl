@@ -309,6 +309,20 @@ foreach my $p (@ports) {
 		}
 	&apache::save_directive("RemoveHandler", \@remove, $vconf, $conf);
 
+	# For non-mod_php mode, use php_admin_value to turn off mod_php in
+	# case it gets enabled in a .htaccess file
+	if ($apache::httpd_modules{'mod_php4'} ||
+	    $apache::httpd_modules{'mod_php5'}) {
+		local @admin = &apache::find_directive("php_admin_value",
+						       $vconf);
+		@admin = grep { !/^engine\s+/ } @admin;
+		if ($mode ne "mod_php") {
+			push(@admin, "engine Off");
+			}
+		&apache::save_directive("php_admin_value", \@admin,
+					$vconf, $conf);
+		}
+
 	# For fcgid mode, set IPCCommTimeout to either the configured value
 	# or the PHP max execution time + 1, so that scripts run via fastCGI
 	# aren't disconnected
