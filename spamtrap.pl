@@ -114,7 +114,6 @@ foreach $d (&list_domains()) {
 					      @{$m->{'headers'}};
 		my $invalid = 0;
 		foreach my $rh (@rh) {
-			print STDERR "rh=$rh\n";
 			my ($src, $uname) = &parse_received_header($rh);
 			if ($local_src{$src}) {
 				print STDERR "$d->{'dom'}: $user->{'user'}: ",
@@ -239,19 +238,21 @@ return undef;
 # parse_received_header(string)
 # Given a received header string, extract the sending system's IP and SMTP
 # authencation username.
-# XXX how to detect SMTP authentication?
 sub parse_received_header
 {
 my ($str) = @_;
 my $sender;
 my $uname;
-if ($str =~ /from\s+\S+\s+\((\S+)\s+\[(\S+)\]\)/) {
+if ($str =~ /from\s+\S+\s+\((\S+)\s+\[(\S+)\]\)/i) {
 	# from fudu.home (localhost.localdomain [127.0.0.1])
 	$sender = $2;
 	}
-elsif ($str =~ /from\s+\[(\S+)\]/) {
+elsif ($str =~ /from\s+\[(\S+)\]/i) {
 	# from [98.138.90.52]
 	$sender = $1;
+	}
+if ($str =~ /Authenticated\s+sender:\s+(\S+)/i) {
+	$user = $1;
 	}
 return ($sender, $uname);
 }

@@ -54,7 +54,3 @@
 
  - Upgrade demo to pro
 	- Also upgrade all packages
-
- - spamtrap and hamtrap need to verify sender is SMTP authenticated or local
-	- postfix option smtpd_sasl_authenticated_header
-	- CHANGELOG

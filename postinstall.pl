@@ -384,6 +384,11 @@ if ($gconfig{'os_type'} eq 'debian-linux' && &foreign_check("bind8")) {
 		}
 	}
 
+# Configure mail server to log SMTP auth username
+if ($config{'spam'}) {
+	&setup_spamtrap_mailserver();
+	}
+
 # Record the install time for this version
 local %itimes;
 &read_file($install_times_file, \%itimes);

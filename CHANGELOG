@@ -1368,3 +1368,4 @@ Added the fix-domain-quota API command, to bring Unix quotas into sync with what
 Updated the Typo3 script installer to version 4.6.13, CMS made simple to 1.11.2.1, Drupal to 7.17, SugarCRM to 6.5.6, PiWik to 1.9.2, FengOffice to 2.2.1, TikiWiki to 9.2, SugarCRM to 6.5.7, ZenPhoto to 1.4.3.4, Joomla to 3.0.2 and 2.5.8, phpMyFAQ to 2.7.9, Typo3 to 4.6.14, RoundCube to 0.8.4, MediaWiki to 1.20.0, Z-push to 2.0.5, phpMyAdmin to 3.5.4, Mantis to 1.2.12, dotProject to 2.1.7, and Django to 1.4.2.
 Added an option to delete old mail in users' trash folder to the Spam and Virus Delivery page, similar to the existing option for deleting spam.
 Server templates can now be restricted to a subset of server owners, rather than being granted to all or nothing.
+The spamtrap and hamtrap email aliases now only accept mail from authenticated senders or the local system, to prevent poisoning of the spamassassin rules engine by attackers.
