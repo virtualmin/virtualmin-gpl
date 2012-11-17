@@ -3078,19 +3078,34 @@ return &master_admin() || $config{'edit_quota'};
 # Returns 1 if some template can be used by the current user, or his reseller
 sub can_use_template
 {
-if (&master_admin() || $_[0]->{'resellers'} eq '*' || !$virtualmin_pro) {
+local ($tmpl) = @_;
+if (&master_admin()) {
+	# Root can use all templates
 	return 1;
 	}
-local %resels = map { $_, 1 } split(/\s+/, $_[0]->{'resellers'});
-if (&reseller_admin()) {
-	# Is current user in the reseller list?
-	return $resels{$base_remote_user};
+if ($tmpl->{'resellers'} ne '*') {
+	# Template has a reseller restriction, check it
+	local %resels = map { $_, 1 } split(/\s+/, $tmpl->{'resellers'});
+	if (&reseller_admin()) {
+		# Is current user in the reseller list?
+		return 0 if (!$resels{$base_remote_user});
+		}
+	else {
+		# Is user's reseller in list?
+		local $dom = &get_domain_by("user", $base_remote_user,
+					    "parent", undef);
+		if (!($dom && $dom->{'reseller'} &&
+		      $resels{$dom->{'reseller'}})) {
+			return 0;
+			}
+		}
 	}
-else {
-	# Is user's reseller in list?
-	local $dom = &get_domain_by("user", $base_remote_user, "parent", undef);
-	return $dom && $dom->{'reseller'} && $resels{$dom->{'reseller'}};
+if ($tmpl->{'owners'} ne '*' && !&reseller_admin()) {
+	# Template has owner restrictions, check them
+	local %owners = map { $_, 1 } split(/\s+/, $tmpl->{'owners'});
+	return 0 if (!$owners{$base_remote_user});
 	}
+return 1;
 }
 
 # Returns 1 if the current user can execute remote commands
@@ -8003,6 +8018,8 @@ push(@rv, { 'id' => 0,
 	    'for_users' => !$config{'deftmpl_nousers'},
 	    'resellers' => !defined($config{'tmpl_resellers'}) ? "*" :
 				$config{'tmpl_resellers'},
+	    'owners' => !defined($config{'tmpl_owners'}) ? "*" :
+				$config{'tmpl_owners'},
 	  } );
 foreach my $w (@php_wrapper_templates) {
 	$rv[0]->{$w} = $config{$w} || 'none';
@@ -8043,6 +8060,7 @@ push(@rv, { 'id' => 1,
 	    'for_alias' => 0,
 	    'for_users' => !$config{'subtmpl_nousers'},
 	    'resellers' => '*',
+	    'owners' => '*',
 	  } );
 local $f;
 opendir(DIR, $templates_dir);
@@ -8053,6 +8071,7 @@ while(defined($f = readdir(DIR))) {
 		$tmpl{'file'} = "$templates_dir/$f";
 		$tmpl{'mail'} =~ s/\t/\n/g;
 		$tmpl{'resellers'} = '*' if (!defined($tmpl{'resellers'}));
+		$tmpl{'owners'} = '*' if (!defined($tmpl{'owners'}));
 		if ($tmpl{'id'} == 1 || $tmpl{'id'} == 0) {
 			foreach $k (keys %tmpl) {
 				$rv[$tmpl{'id'}]->{$k} = $tmpl{$k}
@@ -8112,6 +8131,12 @@ if ($tmpl->{'id'} == 0) {
 		}
 	else {
 		$config{'tmpl_resellers'} = $tmpl->{'resellers'};
+		}
+	if ($tmpl->{'owners'} eq '*') {
+		delete($config{'tmpl_owners'});
+		}
+	else {
+		$config{'tmpl_owners'} = $tmpl->{'owners'};
 		}
 	$config{'apache_config'} = $tmpl->{'web'};
 	$config{'suexec'} = $tmpl->{'web_suexec'};
@@ -13482,6 +13507,16 @@ if (@resels) {
 					" ($_->{'acl'}->{'desc'})" : "") ] }
 			       @resels ], 5, 1));
 	}
+
+# Which system owners can use this template
+local @owners = &unique(map { $_->{'user'} } &list_domains());
+print &ui_table_row(
+	&hlink($text{'tmpl_owners'}, "template_owners"),
+	&ui_radio("owners_def", $tmpl->{'owners'} eq "*" ? 1 : 0,
+		  [ [ 1, $text{'tmpl_owners_all'} ],
+		    [ 0, $text{'tmpl_owners_sel'} ] ])."<br>\n".
+		  &ui_select("owners", [ split(/\s+/, $tmpl->{'owners'}) ],
+			     \@owners, 5, 1));
 }
 
 # parse_template_basic(&tmpl)
@@ -13511,7 +13546,17 @@ if (@resels) {
 		}
 	else {
 		$tmpl->{'resellers'} = join(" ", split(/\0/, $in{'resellers'}));
+		$tmpl->{'resellers'} || &error($text{'tmpl_eresellers'});
 		}
+	}
+
+# Save system owners
+if ($in{'owners_def'}) {
+	$tmpl->{'owners'} = '*';
+	}
+else {
+	$tmpl->{'owners'} = join(" ", split(/\0/, $in{'owners'}));
+	$tmpl->{'owners'} || &error($text{'tmpl_eowners'});
 	}
 }
 
