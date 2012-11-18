@@ -252,7 +252,7 @@ elsif ($str =~ /from\s+\[(\S+)\]/i) {
 	$sender = $1;
 	}
 if ($str =~ /Authenticated\s+sender:\s+(\S+)/i) {
-	$user = $1;
+	$uname = $1;
 	}
 return ($sender, $uname);
 }
