@@ -6191,6 +6191,10 @@ return 1;
 sub scp_copy
 {
 local ($src, $dest, $pass, $err, $port) = @_;
+if ($src =~ /\s/) {
+	my ($host, $path) = split(/:/, $src, 2);
+	$src = $host.":".quotemeta($path);
+	}
 if ($dest =~ /\s/) {
 	my ($host, $path) = split(/:/, $dest, 2);
 	$dest = $host.":".quotemeta($path);
