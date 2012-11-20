@@ -455,6 +455,7 @@ setup_emaxnone=You are not allowed to create any virtual servers
 setup_eprefix=Missing or invalid mail username prefix
 setup_eprefix2=The specified username prefix is already in use
 setup_eprefix3=The username prefix $1 is already in use by $2
+setup_eprefix4=Username prefix cannot start or end with . or -
 setup_failure=.. $1 failed! : $2
 setup_aliasfailure=.. $1 alias setup failed : $2
 setup_edbname=Missing or invalid database name

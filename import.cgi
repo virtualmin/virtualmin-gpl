@@ -58,6 +58,8 @@ if (!$in{'home_def'}) {
 if (!$in{'prefix_def'}) {
 	$in{'prefix'} =~ /^[a-z0-9\.\-]+$/i ||
 		&error($text{'setup_eprefix'});
+	($in{'prefix'} =~ /^[\.\-]/ || $in{'prefix'} =~ /[\.\-]$/) &&
+		&error($text{'setup_eprefix4'});
 	$prefix = $in{'prefix'};
 	}
 else {
