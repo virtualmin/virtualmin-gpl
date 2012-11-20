@@ -86,9 +86,21 @@ foreach $f (&list_feature_plugins()) {
 print &ui_hidden_table_end("features");
 
 if (&can_edit_limits($doms[0])) {
-	# Mailbox/alias/doms limits
 	print &ui_hidden_table_start($text{'massdomains_headerl'}, "width=100%",
 				     2, "limits", 0);
+
+	# Account plan
+	@plans = sort { $a->{'name'} cmp $b->{'name'} } &list_available_plans();
+	if (@plans) {
+		print &ui_table_row($text{'massdomains_plan'},
+			&ui_select("plan", undef,
+			   [ [ undef, $text{'massdomains_leave'} ],
+			     map { [ $_->{'id'}, $_->{'name'} ] } @plans ])." ".
+			&ui_checkbox("applyplan", 1,
+				     $text{'edit_applyplan'}, 1));
+		}
+
+	# Mailbox/alias/doms limits
 	foreach $l (@limit_types) {
 		print &ui_table_row($text{'form_'.$l},
 			&ui_radio($l."_def", 2,

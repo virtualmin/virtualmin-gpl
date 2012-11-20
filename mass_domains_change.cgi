@@ -41,6 +41,10 @@ if (&can_edit_phpmode() && !$in{'phpchildren_def'}) {
 		&error(&text('phpmode_echildren',
 			     $max_php_fcgid_children));
 	}
+if ($in{'plan'}) {
+	$plan = &get_plan($in{'plan'});
+	&can_use_plan($plan) || &error($text{'setup_eplan'});
+	}
 
 # Apply the changes to the new domain objects, where possible
 local $changed_limits = 0;
@@ -291,6 +295,23 @@ foreach $d (@doms) {
 	if ($d->{'spam'} && defined($spamclear)) {
 		&$first_print($text{'massdomains_spamclearing'});
 		&save_domain_spam_autoclear($d, $spamclear);
+		&$second_print($text{'setup_done'});
+		}
+
+	# Update plan, and maybe apply it
+	if ($plan && !$d->{'parent'}) {
+		if ($in{'applyplan'}) {
+			&$first_print(&text('save_applyplan',
+				    &html_escape($plan->{'name'})));
+			&set_limits_from_plan($d, $plan);
+			&set_featurelimits_from_plan($d, $plan);
+			&set_capabilities_from_plan($d, $plan);
+			}
+		else {
+			&$first_print(&text('save_plan',
+                            &html_escape($plan->{'name'})));
+			}
+		$d->{'plan'} = $plan->{'id'};
 		&$second_print($text{'setup_done'});
 		}
 

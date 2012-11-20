@@ -3997,6 +3997,7 @@ massdomains_features2=Don't change
 massdomains_features1=Allow use of
 massdomains_features0=Disallow use of
 massdomains_shell=Allow login type
+massdomains_plan=Account plan
 massdomains_shelling=Updating allowed login type ..
 massdomains_spamclear=Automatically delete spam?
 massdomains_spamclearing=Updating automatic deletion of spam ..
