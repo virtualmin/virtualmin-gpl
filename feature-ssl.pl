@@ -170,7 +170,12 @@ if ($chained) {
 
 &release_lock_web($_[0]);
 &$second_print($text{'setup_done'});
-&register_post_action(\&restart_apache, $d->{'virt'} ? 1 : 0);
+if ($_[0]->{'virt'}) {
+	&register_post_action(\&restart_apache, 1);
+	}
+else {
+	&register_post_action(\&restart_apache);
+	}
 }
 
 # modify_ssl(&domain, &olddomain)
