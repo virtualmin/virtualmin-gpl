@@ -313,6 +313,10 @@ foreach $d (@doms) {
 			}
 		$d->{'plan'} = $plan->{'id'};
 		&$second_print($text{'setup_done'});
+		if ($d->{'unix'}) {
+			# To apply any quota change
+			&modify_unix($d, $oldd);
+			}
 		}
 
 	# Save new domain details
