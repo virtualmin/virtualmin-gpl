@@ -50,7 +50,7 @@ foreach $m ($module_name, @plugins) {
 		}
 	}
 $cmd || &api_error(&text('remote_eprogram2', $in{'program'}));
-if ($format) {
+if ($format && !defined($in{'simple-multiline'})) {
 	# Always force multiline format, as JSON output makes no sense
 	# without it
 	$in{'multiline'} = '';
