@@ -389,6 +389,14 @@ if ($config{'spam'}) {
 	&setup_spamtrap_mailserver();
 	}
 
+# Disable mod_php on domains that don't have it selected
+if ($config{'web'}) {
+	&fix_mod_php_security();
+	}
+
+# Run any needed actions, like server restarts
+&run_post_actions_silently();
+
 # Record the install time for this version
 local %itimes;
 &read_file($install_times_file, \%itimes);

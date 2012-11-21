@@ -1370,3 +1370,4 @@ Added an option to delete old mail in users' trash folder to the Spam and Virus 
 Server templates can now be restricted to a subset of server owners, rather than being granted to all or nothing.
 The spamtrap and hamtrap email aliases now only accept mail from authenticated senders or the local system, to prevent poisoning of the spamassassin rules engine by attackers.
 Account plans can now be changed for multiple virtual servers at once, on the Update Virtual Servers page.
+For virtual servers using CGI or fcgid mode for executing PHP, mod_php mode is now forcibly disabled to prevent potential security issues. This is also done for all domains at installation time.

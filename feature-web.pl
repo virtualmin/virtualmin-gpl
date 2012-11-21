@@ -3753,6 +3753,38 @@ if ($user && ($user->{'words'}->[0] eq $oldd->{'user'} ||
 	}
 }
 
+# fix_mod_php_security()
+# Goes through all virtual servers in non-mod_php mode, and adds the 
+# php_admin_value directive to forcibly disable mod_php if missing
+sub fix_mod_php_security
+{
+local @flush;
+foreach my $d (&list_domains()) {
+	next if (!$d->{'web'} || $d->{'alias'});
+	my $mode = &get_domain_php_mode($d);
+	if ($mode eq "cgi" || $mode eq "fcgid") {
+		local ($virt, $vconf, $conf) = &get_apache_virtual(
+			$d->{'dom'}, $d->{'web_port'});
+		local @admin = &apache::find_directive("php_admin_value",
+						       $vconf);
+		local ($engine) = grep { /engine\s+Off/i } @admin;
+		if (!$engine) {
+			push(@admin, "engine Off");
+			&apache::save_directive("php_admin_value", \@admin,
+						$vconf, $conf);
+			push(@flush, $virt->{'file'});
+			}
+		}
+	}
+@flush = &unique(@flush);
+foreach my $f (@flush) {
+	&flush_file_lines($f);
+	}
+if (@flush) {
+	&register_post_action(\&restart_apache);
+	}
+}
+
 $done_feature_script{'web'} = 1;
 
 1;
