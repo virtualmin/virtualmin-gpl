@@ -212,8 +212,16 @@ if (!$parentuser) {
 
 # Generate Javascript for template change
 @availtmpls = &list_available_templates($parentdom, $aliasdom);
-$deftmplid = &get_init_template($parentdom);
-($deftmpl) = grep { $_->{'id'} == $deftmplid } @availtmpls;
+if ($aliasdom || $parentdom) {
+	# Alias and sub-servers should inherit parent template, if possible
+	$deftmplid = $aliasdom ? $aliasdom->{'template'}
+			       : $parentdom->{'template'};
+	($deftmpl) = grep { $_->{'id'} == $deftmplid } @availtmpls;
+	}
+if (!$deftmpl) {
+	$deftmplid = &get_init_template($parentdom);
+	($deftmpl) = grep { $_->{'id'} == $deftmplid } @availtmpls;
+	}
 $deftmpl ||= $availtmpls[0];
 $js = "<script>\n";
 $js .= "function select_template(num)\n";
