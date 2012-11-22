@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Typo3 script installer to version 4.6.15, CMS made simple to 1.11.3, Drupal to 7.17, SugarCRM to 6.5.6, PiWik to 1.9.2, FengOffice to 2.2.1, TikiWiki to 9.2, SugarCRM to 6.5.7, ZenPhoto to 1.4.3.4, Joomla to 3.0.2 and 2.5.8, phpMyFAQ to 2.7.9, RoundCube to 0.8.4, MediaWiki to 1.20.0, Z-push to 2.0.5, phpMyAdmin to 3.5.4, Mantis to 1.2.12, dotProject to 2.1.7, Moodle to 2.3.3, and Django to 1.4.2.
+html=Updated the Typo3 script installer to version 4.6.15, CMS made simple to 1.11.3, Drupal to 7.17, PiWik to 1.9.2, FengOffice to 2.2.1, TikiWiki to 9.2, SugarCRM to 6.5.8, ZenPhoto to 1.4.3.4, Joomla to 3.0.2 and 2.5.8, phpMyFAQ to 2.7.9, RoundCube to 0.8.4, MediaWiki to 1.20.0, Z-push to 2.0.5, phpMyAdmin to 3.5.4, Mantis to 1.2.12, dotProject to 2.1.7, Moodle to 2.3.3, and Django to 1.4.2.
 master=1
 reseller=1
 domain=1
