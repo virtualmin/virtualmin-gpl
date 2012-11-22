@@ -1,0 +1,3 @@
+desc=PHP and symlink security fixes
+html=For virtual servers using CGI or fcgid mode for executing PHP, mod_php mode is now forcibly disabled to prevent potential security issues. This is also done for all domains at installation time.<br>Also, all existing virtual servers using the FollowSymLinks option will be converted to SymLinksifOwnerMatch, to protect against malicious links into other domain's directories.
+master=1

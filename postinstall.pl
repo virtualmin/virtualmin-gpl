@@ -394,6 +394,12 @@ if ($config{'web'}) {
 	&fix_mod_php_security();
 	}
 
+# Fix all use of FollowSymLinks, due to security issues
+if ($config{'web'}) {
+	&fix_symlink_security();
+	&fix_symlink_templates();
+	}
+
 # Run any needed actions, like server restarts
 &run_post_actions_silently();
 

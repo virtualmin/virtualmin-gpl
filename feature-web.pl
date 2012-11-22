@@ -3785,6 +3785,55 @@ if (@flush) {
 	}
 }
 
+# fix_symlink_security()
+# Goes through all virtual servers, and for any with Options FollowSymLinks 
+# set change them to SymLinksifOwnerMatch
+sub fix_symlink_security
+{
+local @flush;
+foreach my $d (&list_domains()) {
+        next if (!$d->{'web'} || $d->{'alias'});
+	local ($virt, $vconf, $conf) = &get_apache_virtual(
+		$d->{'dom'}, $d->{'web_port'});
+	local @dirs = &apache::find_directive_struct("Directory", $vconf);
+	foreach my $dir (@dirs) {
+		my @opts = &apache::find_directive("Options", $dir->{'members'});
+		foreach my $o (@opts) {
+			if ($o =~ /FollowSymLinks/) {
+				$o =~ s/FollowSymLinks/SymLinksifOwnerMatch/g;
+				$fixed++;
+				}
+			}
+		if ($fixed) {
+			&apache::save_directive("Options", \@opts,
+						$dir->{'members'}, $conf);
+			push(@flush, $dir->{'file'});
+			}
+		}
+	}
+@flush = &unique(@flush);
+foreach my $f (@flush) {
+	&flush_file_lines($f);
+	}
+if (@flush) {
+	&register_post_action(\&restart_apache);
+	}
+}
+
+# fix_symlink_templates()
+# Fix all templates that have Apache directives set to replace FollowSymLinks
+# with SymLinksifOwnerMatch
+sub fix_symlink_templates
+{
+foreach my $tmpl (&list_templates()) {
+	if ($tmpl->{'web'} && $tmpl->{'web'} ne 'none' &&
+	    $tmpl->{'web'} =~ /FollowSymLinks/) {
+		$tmpl->{'web'} =~ s/FollowSymLinks/SymLinksifOwnerMatch/g;
+		&save_template($tmpl);
+		}
+	}
+}
+
 $done_feature_script{'web'} = 1;
 
 1;

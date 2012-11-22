@@ -1371,3 +1371,4 @@ Server templates can now be restricted to a subset of server owners, rather than
 The spamtrap and hamtrap email aliases now only accept mail from authenticated senders or the local system, to prevent poisoning of the spamassassin rules engine by attackers.
 Account plans can now be changed for multiple virtual servers at once, on the Update Virtual Servers page.
 For virtual servers using CGI or fcgid mode for executing PHP, mod_php mode is now forcibly disabled to prevent potential security issues. This is also done for all domains at installation time.
+All existing virtual servers using the FollowSymLinks option will be converted to SymLinksifOwnerMatch, to protect against malicious links into other domain's directories.
