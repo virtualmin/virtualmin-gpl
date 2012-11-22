@@ -58,6 +58,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multipart") {
 		$multipart = 1;
 		}
+	elsif ($a eq "--chunk-size") {
+		$chunksize = shift(@ARGV);
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -81,7 +84,8 @@ if (!ref($h)) {
 	print "ERROR: $h\n";
 	exit(1);
 	}
-$err = &rs_upload_object($h, $container, $file, $source, $multipart);
+$err = &rs_upload_object($h, $container, $file, $source, $multipart,
+			 $chunksize);
 if ($err) {
 	print "ERROR: $err\n";
 	exit(1);
