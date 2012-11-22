@@ -3759,6 +3759,12 @@ if ($user && ($user->{'words'}->[0] eq $oldd->{'user'} ||
 sub fix_mod_php_security
 {
 local @flush;
+&require_apache();
+if (!$apache::httpd_modules{'mod_php4'} &&
+    !$apache::httpd_modules{'mod_php5'}) {
+	# mod_php not even enabled, so do nothing
+	return;
+	}
 foreach my $d (&list_domains()) {
 	next if (!$d->{'web'} || $d->{'alias'});
 	my $mode = &get_domain_php_mode($d);
@@ -3791,6 +3797,7 @@ if (@flush) {
 sub fix_symlink_security
 {
 local @flush;
+&require_apache();
 foreach my $d (&list_domains()) {
         next if (!$d->{'web'} || $d->{'alias'});
 	local ($virt, $vconf, $conf) = &get_apache_virtual(
