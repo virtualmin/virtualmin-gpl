@@ -348,9 +348,9 @@ if ($planfeatures) {
 	$d->{'parent'} && &usage("--plan-features can only be used with top ".
 				 "level virtual servers");
 	$plan ||= &get_plan($d->{'plan'});
-	$plan->{'featurelimits'} && $plan->{'featurelimits'} ne 'none' ||
-		&usage("--plan-features cannot be used unless the plan ".
-		       "has default features");
+	$plan->{'featurelimits'} eq 'none' &&
+		&usage("--plan-features cannot be used if the plan has ".
+		       "no features");
 	}
 
 # Find all other domains to be changed
@@ -534,7 +534,26 @@ elsif (!$dom->{'virt6'} && $old->{'virt6'}) {
 
 # If the plan is being applied, update features
 if ($planfeatures) {
-	%flimits = map { $_, 1 } split(/\s+/, $plan->{'featurelimits'});
+	if ($plan->{'featurelimits'}) {
+		# Use features from plan
+		%flimits = map { $_, 1 } split(/\s+/, $plan->{'featurelimits'});
+		}
+	else {
+		# Plan is using default features
+		%flimits = ( );
+		my $parent = $d->{'parent'} ? &get_domain($d->{'parent'})
+					   : undef;
+		my $alias = $d->{'alias'} ? &get_domain($d->{'alias'})
+					  : undef;
+		my $subdom = $d->{'subdom'} ? &get_domain($d->{'subdom'})
+					    : undef;
+		foreach my $f (&list_available_features($parent, $alias,
+							$subdom)) {
+			if ($f->{'default'} && $f->{'enabled'}) {
+				$flimits{$f->{'feature'}} = 1;
+				}
+			}
+		}
 	%newdom = %$dom;
 	$oldd = { %$dom };
 
