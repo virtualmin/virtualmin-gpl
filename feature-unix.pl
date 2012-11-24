@@ -630,7 +630,7 @@ return 1;
 }
 
 # restore_unix(&domain, file, &options)
-# Update's the domain's unix user's password, description, quotas and cron jobs.
+# Update's the domain's unix user's password, description, and cron jobs.
 # Note - quotas are not set here, as they get set in restore_domain
 sub restore_unix
 {
