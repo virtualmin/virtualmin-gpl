@@ -28,6 +28,7 @@
 	git add modules/branches/gpl-virtual-server/$ver
 	git add modules/branches/virtual-server/$prover
 	git commit -m "Virtualmin $ver branch" modules/branches/gpl-virtual-server/$ver modules/branches/virtual-server/$prover
+	git push
 
  x Create tar.gz file
 	cd /usr/local/webadmin && ./gpl-virtual-server/createvirtualminmodule.sh $ver /tmp/virtual-server-$ver.wbm.gz
@@ -52,12 +53,14 @@
  x Create signatures for all new packages
 	~/webmin.com/create-update-sigs.pl
 
- x Add to website
+ - Add to website
 	x Mention plugins too
 
  - Add to freshmeat.net
 
  - Announce on mailing list
+
+ - Facebook
 
  x Add to updates.txt
 

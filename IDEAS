@@ -55,4 +55,5 @@
  - Upgrade demo to pro
 	- Also upgrade all packages
 
- - fix alias follow mode on install
+ - Better detection of new key+cert vs existing key+re-signed cert
+	- separate form for re-signed cert
