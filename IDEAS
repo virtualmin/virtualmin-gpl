@@ -53,7 +53,7 @@
 	- Pro only
 
  - Upgrade demo to pro
-	- Also upgrade all packages
+	- need to upgrade Webmin to latest devel version
 
  - Better detection of new key+cert vs existing key+re-signed cert
 	- separate form for re-signed cert

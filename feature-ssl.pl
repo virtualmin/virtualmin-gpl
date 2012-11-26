@@ -790,7 +790,7 @@ local ($file, $d) = @_;
 local %rv;
 local $_;
 local $cmd = "openssl x509 -in ".quotemeta($file)." -issuer -subject -enddate -text";
-if (&is_under_directory($d->{'home'}, $file)) {
+if ($d && &is_under_directory($d->{'home'}, $file)) {
 	open(OUT, &command_as_user($d->{'user'}, 0, $cmd)." |");
 	}
 else {
@@ -853,6 +853,9 @@ while(<OUT>) {
 				push(@{$rv{'alt'}}, $1);
 				}
 			}
+		}
+	if (/RSA\s+Public\s+Key:\s+\((\d+)\s+bit/) {
+		$rv{'size'} = $1;
 		}
 	}
 close(OUT);

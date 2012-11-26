@@ -3459,6 +3459,10 @@ licence_maxdoms=Your system is licensed for only $1 servers, but you have $2.
 licence_maxservers=Your serial number is licensed for only $1 servers, but is being used on $2.
 licence_ipchanged=Your system's primary IP address appears to have changed from $1 to $2. Virtual servers using the old address may be unreachable or serve the wrong web content.
 licence_changeip=Update Incorrect IP Addresses
+licence_smallcert=Your system is using an SSL certificate that is only $1 bits long, which is smaller than the recommended size of 2048 bits. This certificate was issued by $4 to $3 for the domain $2.
+licence_smallself=Your system is using a self-signed SSL certificate that is only $1 bits long, which is smaller than the recommended size of 2048 bits. It should be immediately re-generated.
+licence_newcert=Generate New Certificate
+licence_newcsr=Request New Certificate
 
 config_deftheme=Global Webmin default
 config_oldtheme=Old Webmin theme

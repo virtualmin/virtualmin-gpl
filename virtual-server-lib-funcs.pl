@@ -10001,6 +10001,41 @@ if ($config{'old_defip'} && $defip && $config{'old_defip'} ne $defip) {
 	$rv .= "<p></td></tr></table>\n";
 	}
 
+# Check if in SSL mode, and SSL cert is < 2048 bits
+local $small;
+if ($ENV{'HTTPS'} eq 'ON') {
+	local %miniserv;
+	&get_miniserv_config(\%miniserv);
+	local $certfile = $miniserv{'certfile'} || $miniserv{'keyfile'};
+	if ($certfile) {
+		local $cert = &cert_file_info($certfile);
+		if ($cert->{'size'} && $cert->{'size'} < 2048) {
+			# Too small!
+			$small = $cert;
+			}
+		}
+	}
+if ($small) {
+	local $msg = $small->{'issuer_c'} eq $small->{'c'} &&
+		     $small->{'issuer_o'} eq $small->{'o'} ?
+			'licence_smallself' : 'licence_smallcert';
+	$rv .= "<table width=100%><tr bgcolor=#ffff88><td align=center><p>";
+	$rv .= "<b>".&text($msg,
+			   $small->{'size'},
+			   $small->{'cn'},
+			   $small->{'c'} || $small->{'o'},
+			   $small->{'issuer_c'} || $small->{'issuer_o'},
+			   )."</b><p>\n";
+	$rv .= &ui_form_start("$gconfig{'webprefix'}/webmin/edit_ssl.cgi");
+	$rv .= &ui_hidden("mode", $msg eq 'licence_smallself' ?
+					'create' : 'csr');
+	$rv .= &ui_submit($msg eq 'licence_smallself' ?
+				$text{'licence_newcert'} :
+				$text{'licence_newcsr'});
+	$rv .= &ui_form_end();
+	$rv .= "<p></td></tr></table>\n";
+	}
+
 return $rv;
 }
 

@@ -1372,3 +1372,5 @@ The spamtrap and hamtrap email aliases now only accept mail from authenticated s
 Account plans can now be changed for multiple virtual servers at once, on the Update Virtual Servers page.
 For virtual servers using CGI or fcgid mode for executing PHP, mod_php mode is now forcibly disabled to prevent potential security issues. This is also done for all domains at installation time.
 All existing virtual servers using the FollowSymLinks option will be converted to SymLinksifOwnerMatch, to protect against malicious links into other domain's directories.
+---- Changes since 3.96 ----
+If running Virtualmin in SSL mode with a certificate of less than 2048 bits, a warning is now displayed on the system information page prompting the admin to generate or request a new cert.
