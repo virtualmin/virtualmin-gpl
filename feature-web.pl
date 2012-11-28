@@ -3769,16 +3769,21 @@ foreach my $d (&list_domains()) {
 	next if (!$d->{'web'} || $d->{'alias'});
 	my $mode = &get_domain_php_mode($d);
 	if ($mode eq "cgi" || $mode eq "fcgid") {
-		local ($virt, $vconf, $conf) = &get_apache_virtual(
-			$d->{'dom'}, $d->{'web_port'});
-		local @admin = &apache::find_directive("php_admin_value",
-						       $vconf);
-		local ($engine) = grep { /engine\s+Off/i } @admin;
-		if (!$engine) {
-			push(@admin, "engine Off");
-			&apache::save_directive("php_admin_value", \@admin,
-						$vconf, $conf);
-			push(@flush, $virt->{'file'});
+		local @ports = ( $d->{'web_port'},
+				 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+		foreach my $p (@ports) {
+			local ($virt, $vconf, $conf) = &get_apache_virtual(
+				$d->{'dom'}, $p);
+			local @admin = &apache::find_directive(
+					"php_admin_value", $vconf);
+			local ($engine) = grep { /engine\s+Off/i } @admin;
+			if (!$engine) {
+				push(@admin, "engine Off");
+				&apache::save_directive(
+					"php_admin_value", \@admin,
+					$vconf, $conf);
+				push(@flush, $virt->{'file'});
+				}
 			}
 		}
 	}
@@ -3800,21 +3805,27 @@ local @flush;
 &require_apache();
 foreach my $d (&list_domains()) {
         next if (!$d->{'web'} || $d->{'alias'});
-	local ($virt, $vconf, $conf) = &get_apache_virtual(
-		$d->{'dom'}, $d->{'web_port'});
-	local @dirs = &apache::find_directive_struct("Directory", $vconf);
-	foreach my $dir (@dirs) {
-		my @opts = &apache::find_directive("Options", $dir->{'members'});
-		foreach my $o (@opts) {
-			if ($o =~ /FollowSymLinks/) {
-				$o =~ s/FollowSymLinks/SymLinksifOwnerMatch/g;
-				$fixed++;
+	local @ports = ( $d->{'web_port'},
+			 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+	foreach my $p (@ports) {
+		local ($virt, $vconf, $conf) = &get_apache_virtual(
+						$d->{'dom'}, $p);
+		local @dirs = &apache::find_directive_struct("Directory",
+							     $vconf);
+		foreach my $dir (@dirs) {
+			my @opts = &apache::find_directive("Options",
+							   $dir->{'members'});
+			foreach my $o (@opts) {
+				if ($o =~ /FollowSymLinks/) {
+					$o =~ s/FollowSymLinks/SymLinksifOwnerMatch/g;
+					$fixed++;
+					}
 				}
-			}
-		if ($fixed) {
-			&apache::save_directive("Options", \@opts,
+			if ($fixed) {
+				&apache::save_directive("Options", \@opts,
 						$dir->{'members'}, $conf);
-			push(@flush, $dir->{'file'});
+				push(@flush, $dir->{'file'});
+				}
 			}
 		}
 	}
