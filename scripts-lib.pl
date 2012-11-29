@@ -2143,6 +2143,9 @@ local $out = &run_as_domain_user($d, "(cd ".quotemeta($dir)." && ".$cmd.") 2>&1"
 return "Uncompression failed : <pre>".&html_escape($out)."</pre>"
 	if ($? && !$ignore);
 
+# Fix .htaccess files that use disallowed directives
+&fix_script_htaccess_files($d, $dir);
+
 # Make sure the target files are owner-writable, so we can copy over them
 if ($copydir && -e $copydir) {
 	&run_as_domain_user($d, "chmod -R u+w ".quotemeta($copydir));
@@ -2739,6 +2742,36 @@ if (defined($max)) {
 		}
 	}
 return 0;
+}
+
+# fix_script_htaccess_files(&domain, dir)
+# Find all .htaccess files under some dir to change FollowSymLinks to
+# SymLinksifOwnerMatch
+sub fix_script_htaccess_files
+{
+local ($d, $dir) = @_;
+local $out = &run_as_domain_user($d, "find ".quotemeta($dir).
+				     " -type f -name .htaccess");
+foreach my $file (split(/\r?\n/, $out)) {
+	next if (!-r $file);
+	eval {
+		local $main::error_must_die = 1;
+		local $lref = &read_file_lines_as_domain_user($d, $file);
+		local $fixed = 0;
+		foreach my $l (@$lref) {
+			if ($l =~ /^\s*Options.*FollowSymLinks/) {
+				$l =~ s/FollowSymLinks/SymLinksifOwnerMatch/g;
+				$fixed++;
+				}
+			}
+		if ($fixed) {
+			&flush_file_lines_as_domain_user($d, $file);
+			}
+		else {
+			&unflush_file_lines($file);
+			}
+		};
+	}
 }
 
 1;
