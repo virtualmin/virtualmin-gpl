@@ -911,11 +911,13 @@ foreach my $p (@ports) {
 				     ".php$v->[0]");
 				}
 			}
+		my $olist = $apache::httpd_modules{'core'} >= 2.2 ?
+				" ".&get_allowed_options_list() : "";
 		local @lines = (
 			"<Directory $dir>",
 			"Options Indexes IncludesNOEXEC SymLinksifOwnerMatch ExecCGI",
 			"allow from all",
-			"AllowOverride All",
+			"AllowOverride All".$olist,
 			@phplines,
 			"</Directory>"
 			);
