@@ -3835,8 +3835,7 @@ foreach my $d (@$doms) {
 
 			# For Apache 2.2 or later, disable other options
 			my $ofixed;
-			my $olist = "Options=ExecCGI,Includes,IncludesNOEXEC,".
-				    "Indexes,MultiViews,SymLinksIfOwnerMatch";
+			my $olist = &get_allowed_options_list();
 			if ($apache::httpd_modules{'core'} >= 2.2) {
 				my @allow = &apache::find_directive(
 					"AllowOverride", $dir->{'members'});
@@ -3872,13 +3871,27 @@ if (@flush) {
 # with SymLinksifOwnerMatch
 sub fix_symlink_templates
 {
+my $olist = &get_allowed_options_list();
+&require_apache();
 foreach my $tmpl (&list_templates()) {
 	if ($tmpl->{'web'} && $tmpl->{'web'} ne 'none' &&
 	    $tmpl->{'web'} =~ /FollowSymLinks/) {
 		$tmpl->{'web'} =~ s/FollowSymLinks/SymLinksifOwnerMatch/g;
 		&save_template($tmpl);
 		}
+	if ($apache::httpd_modules{'core'} >= 2.2 &&
+	    $tmpl->{'web'} && $tmpl->{'web'} ne 'none' &&
+	    $tmpl->{'web'} !~ /AllowOverride[^\t]*$olist/) {
+		$tmpl->{'web'} =~ s/AllowOverride\s+([^\t]*)/AllowOverride $1 $olist/g;
+		&save_template($tmpl);
+		}
 	}
+}
+
+sub get_allowed_options_list
+{
+return "Options=ExecCGI,Includes,IncludesNOEXEC,".
+       "Indexes,MultiViews,SymLinksIfOwnerMatch";
 }
 
 $done_feature_script{'web'} = 1;
