@@ -1,4 +1,4 @@
-<header>Suffix for alias domain</header>
+<header>Prefix for alias domain</header>
 
 When an automatic alias domain is created for a new virtual server, this option
 determines if the first part of the alias domain is the complete domain name
@@ -7,6 +7,10 @@ the domain to create under is <tt>isp.com</tt> and the new domain is
 <tt>foo.com</tt>, selecting <b>Entire domain name</b> would cause the alias
 to be <b>foo.com.isp.com</b>, while selecting <b>First part of domain</b> would
 cause it to be <b>foo.isp.com</b>. <p>
+
+Alternately, you can select <b>Virtualmin template</b> and enter an arbitrary
+expression that makes use of template variables like ${DOM}, ${USER} or
+${PREFIX}. <p>
 
 <footer>
 

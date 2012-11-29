@@ -3834,7 +3834,7 @@ for(my $i=1; $i<=10; $i++) {
 	do {
 		$r = int(rand()*(10**$i));
 		} while(length($r) != $i);
-	$hash{'RANDOM$i'} = $r;
+	$hash{"RANDOM$i"} = $r;
 	}
 
 # Add secondary mail servers
@@ -6978,8 +6978,14 @@ local $tmpl = &get_template($dom->{'template'});
 local $aliasname;
 if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$dom->{'alias'}) {
 	local $aliasprefix = $dom->{'dom'};
-	if ($tmpl->{'domalias_type'} == 1) {
+	if ($tmpl->{'domalias_type'} eq '1') {
+		# Shorten to first part of domain
 		$aliasprefix =~ s/\..*$//;
+		}
+	elsif ($tmpl->{'domalias_type'} ne '0') {
+		# Use template
+		$aliasprefix = &substitute_domain_template(
+				$tmpl->{'domalias_type'}, $dom);
 		}
 	my $count;
 	while(1) {
@@ -7071,47 +7077,53 @@ if (!$dom->{'parent'}) {
 # Create an automatic alias domain, if specified in template
 if ($aliasname && $aliasname ne $dom->{'dom'}) {
 	&$first_print(&text('setup_domalias', $aliasname));
-	&$indent_print();
-	local $parentdom = $dom->{'parent'} ?
-		&get_domain($dom->{'parent'}) : $dom;
-	local %alias = ( 'id', &domain_id(),
-			 'dom', $aliasname,
-			 'user', $dom->{'user'},
-			 'group', $dom->{'group'},
-			 'prefix', $dom->{'prefix'},
-			 'ugroup', $dom->{'ugroup'},
-			 'pass', $dom->{'pass'},
-			 'alias', $dom->{'id'},
-			 'uid', $dom->{'uid'},
-			 'gid', $dom->{'gid'},
-			 'ugid', $dom->{'ugid'},
-			 'owner', "Automatic alias of $dom->{'dom'}",
-			 'email', $dom->{'email'},
-			 'nocreationmail', 1,
-			 'name', 1,
-			 'ip', $dom->{'ip'},
-			 'dns_ip', $dom->{'dns_ip'},
-			 'virt', 0,
-			 'source', $dom->{'source'},
-			 'parent', $parentdom->{'id'},
-			 'template', $dom->{'template'},
-			 'plan', $dom->{'plan'},
-			 'reseller', $dom->{'reseller'},
-			);
-	# Alias gets all features of domain, except for directory if it isn't
-	# needed
-	foreach my $f (@alias_features) {
-		next if ($f eq 'dir' && $config{$f} == 3 &&
-			 $tmpl->{'aliascopy'});
-		$alias{$f} = $dom->{$f};
+	if ($aliasname !~ /^[a-z0-9\.\_\-]+$/i) {
+		&$second_print($text{'setup_domaliasbad'});
 		}
-	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
-	&generate_domain_password_hashes(\%dom, 1);
-	&set_provision_features(\%alias);
-	&complete_domain(\%alias);
-	&create_virtual_server(\%alias, $parentdom,$parentdom->{'user'});
-	&$outdent_print();
-	&$second_print($text{'setup_done'});
+	else {
+		&$indent_print();
+		local $parentdom = $dom->{'parent'} ?
+			&get_domain($dom->{'parent'}) : $dom;
+		local %alias = ( 'id', &domain_id(),
+				 'dom', $aliasname,
+				 'user', $dom->{'user'},
+				 'group', $dom->{'group'},
+				 'prefix', $dom->{'prefix'},
+				 'ugroup', $dom->{'ugroup'},
+				 'pass', $dom->{'pass'},
+				 'alias', $dom->{'id'},
+				 'uid', $dom->{'uid'},
+				 'gid', $dom->{'gid'},
+				 'ugid', $dom->{'ugid'},
+				 'owner', "Automatic alias of $dom->{'dom'}",
+				 'email', $dom->{'email'},
+				 'nocreationmail', 1,
+				 'name', 1,
+				 'ip', $dom->{'ip'},
+				 'dns_ip', $dom->{'dns_ip'},
+				 'virt', 0,
+				 'source', $dom->{'source'},
+				 'parent', $parentdom->{'id'},
+				 'template', $dom->{'template'},
+				 'plan', $dom->{'plan'},
+				 'reseller', $dom->{'reseller'},
+				);
+		# Alias gets all features of domain, except for directory
+		# if it isn't needed
+		foreach my $f (@alias_features) {
+			next if ($f eq 'dir' && $config{$f} == 3 &&
+				 $tmpl->{'aliascopy'});
+			$alias{$f} = $dom->{$f};
+			}
+		$alias{'home'} = &server_home_directory(\%alias, $parentdom);
+		&generate_domain_password_hashes(\%dom, 1);
+		&set_provision_features(\%alias);
+		&complete_domain(\%alias);
+		&create_virtual_server(\%alias, $parentdom,
+				       $parentdom->{'user'});
+		&$outdent_print();
+		&$second_print($text{'setup_done'});
+		}
 	}
 
 # Install any scripts specified in the template
@@ -13746,7 +13758,7 @@ sub show_template_virtualmin
 local ($tmpl) = @_;
 
 # Automatic alias domain
-local @afields = ( "domalias", "domalias_type" );
+local @afields = ( "domalias", "domalias_type", "domalias_tmpl" );
 print &ui_table_row(&hlink($text{'tmpl_domalias'}, "template_domalias"),
 	&none_def_input("domalias", $tmpl->{'domalias'},
 			$text{'tmpl_aliasset'},
@@ -13755,11 +13767,17 @@ print &ui_table_row(&hlink($text{'tmpl_domalias'}, "template_domalias"),
 				$tmpl->{'domalias'}, 30));
 
 # Suffix for alias domain
+my $mode = $tmpl->{'domalias_type'} eq '0' ? 0 :
+	   $tmpl->{'domalias_type'} eq '' ? 0 :
+	   $tmpl->{'domalias_type'} eq '1' ? 1 : 2;
 print &ui_table_row(&hlink($text{'tmpl_domalias_type'},
 			   "template_domalias_type"),
-	    &ui_radio("domalias_type", int($tmpl->{'domalias_type'}),
-		      [ [ 0, $text{'tmpl_domalias_type0'} ],
-			[ 1, $text{'tmpl_domalias_type1'} ] ]));
+	    &ui_radio("domalias_type", $mode,
+	      [ [ 0, $text{'tmpl_domalias_type0'} ],
+		[ 1, $text{'tmpl_domalias_type1'} ],
+		[ 2, $text{'tmpl_domalias_type2'}." ".
+		     &ui_textbox("domalias_tmpl",
+			$mode == 2 ? $tmpl->{'domalias_type'} : "", 20) ] ]));
 }
 
 # parse_template_virtualmin(&tmpl)
@@ -13773,7 +13791,14 @@ $tmpl->{'domalias'} = &parse_none_def("domalias");
 if ($in{'domalias_mode'} == 2) {
 	$in{'domalias'} =~ /^[a-z0-9\.\-\_]+$/i ||
 		&error($text{'tmpl_edomalias'});
-	$tmpl->{'domalias_type'} = $in{'domalias_type'};
+	if ($in{'domalias_type'} == 2) {
+		$in{'domalias_tmpl'} =~ /^\S+$/ ||
+			&error($text{'tmpl_edomaliastmpl'});
+		$tmpl->{'domalias_type'} = $in{'domalias_tmpl'};
+		}
+	else {
+		$tmpl->{'domalias_type'} = $in{'domalias_type'};
+		}
 	}
 }
 
