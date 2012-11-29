@@ -913,7 +913,7 @@ foreach my $p (@ports) {
 			}
 		local @lines = (
 			"<Directory $dir>",
-			"Options Indexes IncludesNOEXEC FollowSymLinks ExecCGI",
+			"Options Indexes IncludesNOEXEC SymLinksifOwnerMatch ExecCGI",
 			"allow from all",
 			"AllowOverride All",
 			@phplines,
