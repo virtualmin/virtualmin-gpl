@@ -3753,11 +3753,13 @@ if ($user && ($user->{'words'}->[0] eq $oldd->{'user'} ||
 	}
 }
 
-# fix_mod_php_security()
+# fix_mod_php_security([&domains])
 # Goes through all virtual servers in non-mod_php mode, and adds the 
 # php_admin_value directive to forcibly disable mod_php if missing
 sub fix_mod_php_security
 {
+local ($doms) = @_;
+$doms ||= [ &list_domains() ];
 local @flush;
 &require_apache();
 if (!$apache::httpd_modules{'mod_php4'} &&
@@ -3765,7 +3767,7 @@ if (!$apache::httpd_modules{'mod_php4'} &&
 	# mod_php not even enabled, so do nothing
 	return;
 	}
-foreach my $d (&list_domains()) {
+foreach my $d (@$doms) {
 	next if (!$d->{'web'} || $d->{'alias'});
 	my $mode = &get_domain_php_mode($d);
 	if ($mode eq "cgi" || $mode eq "fcgid") {
@@ -3796,14 +3798,16 @@ if (@flush) {
 	}
 }
 
-# fix_symlink_security()
+# fix_symlink_security([&domains])
 # Goes through all virtual servers, and for any with Options FollowSymLinks 
 # set change them to SymLinksifOwnerMatch
 sub fix_symlink_security
 {
+local ($doms) = @_;
+$doms ||= [ &list_domains() ];
 local @flush;
 &require_apache();
-foreach my $d (&list_domains()) {
+foreach my $d (@$doms) {
         next if (!$d->{'web'} || $d->{'alias'});
 	local @ports = ( $d->{'web_port'},
 			 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
@@ -3813,6 +3817,8 @@ foreach my $d (&list_domains()) {
 		local @dirs = &apache::find_directive_struct("Directory",
 							     $vconf);
 		foreach my $dir (@dirs) {
+			# Fix Options line
+			my $fixed;
 			my @opts = &apache::find_directive("Options",
 							   $dir->{'members'});
 			foreach my $o (@opts) {
@@ -3825,6 +3831,29 @@ foreach my $d (&list_domains()) {
 				&apache::save_directive("Options", \@opts,
 						$dir->{'members'}, $conf);
 				push(@flush, $dir->{'file'});
+				}
+
+			# For Apache 2.2 or later, disable other options
+			my $ofixed;
+			my $olist = "Options=ExecCGI,Includes,IncludesNOEXEC,".
+				    "Indexes,MultiViews,SymLinksIfOwnerMatch";
+			if ($apache::httpd_modules{'core'} >= 2.2) {
+				my @allow = &apache::find_directive(
+					"AllowOverride", $dir->{'members'});
+				if (!@allow) {
+					push(@allow, $olist);
+					$ofixed++;
+					}
+				elsif ($allow[0] !~ /$olist/) {
+					$allow[0] .= " ".$olist;
+					$ofixed++;
+					}
+				if ($ofixed) {
+					&apache::save_directive(
+						"AllowOverride", \@allow,
+						$dir->{'members'}, $conf);
+					push(@flush, $dir->{'file'});
+					}
 				}
 			}
 		}

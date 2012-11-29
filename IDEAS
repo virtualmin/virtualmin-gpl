@@ -52,8 +52,13 @@
 	- Namecheap too
 	- Pro only
 
- - Upgrade demo to pro
-	- need to upgrade Webmin to latest devel version
-
  - Better detection of new key+cert vs existing key+re-signed cert
 	- separate form for re-signed cert
+	- https://www.virtualmin.com/node/24272
+
+ - Thunderbird auto-config
+	- https://www.virtualmin.com/node/24238
+
+ - Option to disable clearing of incremental for a backup
+
+ - Make symlink and mod_php disable globally configurable
