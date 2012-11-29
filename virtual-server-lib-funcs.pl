@@ -6977,11 +6977,16 @@ if ($dom->{'ip'} eq &get_default_ip() &&
 local $tmpl = &get_template($dom->{'template'});
 local $aliasname;
 if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$dom->{'alias'}) {
-	$aliasname = $dom->{'dom'};
+	local $aliasprefix = $dom->{'dom'};
 	if ($tmpl->{'domalias_type'} == 1) {
-		$aliasname =~ s/\..*$//;
+		$aliasprefix =~ s/\..*$//;
 		}
-	$aliasname .= ".".$tmpl->{'domalias'};
+	my $count;
+	while(1) {
+		$aliasname = $aliasprefix.$count.".".$tmpl->{'domalias'};
+		last if (!&get_domain_by("dom", $aliasname));
+		$count++;
+		}
 	$dom->{'autoalias'} = $aliasname;
 	}
 
