@@ -177,10 +177,11 @@ if ($d && $user) {
 	local $quotadiff = $quota ? ($quota - $uquota) : undef;
 
 	# Get the domain's quota, in case it is less
-	local $dquota = $d->{'quota'};
+	local $qd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+	local $dquota = $qd->{'quota'};
 	local $duquota;
 	if ($dquota && &has_group_quotas()) {
-		($duquota) = &get_domain_quota($d, 0);
+		($duquota) = &get_domain_quota($qd, 0);
 		local $dquotadiff = $dquota - $duquota;
 		if ($dquotadiff < $quotadiff) {
 			# Domain has less space free than user!
