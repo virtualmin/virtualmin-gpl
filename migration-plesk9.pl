@@ -1,15 +1,15 @@
-# Functions for migrating a plesk 9 backup. These appear to be a tar.gz file,
+# Functions for migrating a Plesk 9-11 backup. These appear to be a tar.gz file,
 # containing XML and more tar.gz files
 
 # migration_plesk9_validate(file, domain, [user], [&parent], [prefix], [pass])
-# Make sure the given file is a Plesk 9 backup, and contains the domain
+# Make sure the given file is a Plesk 9-11 backup, and contains the domain
 sub migration_plesk9_validate
 {
 local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
 local ($ok, $root) = &extract_plesk9_dir($file, 8);
-$ok || return ("Not a Plesk 9 backup file : $root");
+$ok || return ("Not a Plesk 9, 10 or 11 backup file : $root");
 local ($xfile) = glob("$root/*.xml");
-$xfile && -r $xfile || return ("Not a complete Plesk 9 backup file - missing XML file");
+$xfile && -r $xfile || return ("Not a complete Plesk 9, 10 or 11 backup file - missing XML file");
 
 # Check if the domain is in there
 local $dump = &read_plesk_xml($xfile);
