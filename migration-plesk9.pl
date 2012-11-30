@@ -9,7 +9,7 @@ local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
 local ($ok, $root) = &extract_plesk9_dir($file, 8);
 $ok || return ("Not a Plesk 9 backup file : $root");
 local ($xfile) = glob("$root/*.xml");
-$xfile && -r $xfile || return ("Not a complete Plesk 8 backup file - missing XML file");
+$xfile && -r $xfile || return ("Not a complete Plesk 9 backup file - missing XML file");
 
 # Check if the domain is in there
 local $dump = &read_plesk_xml($xfile);
@@ -888,6 +888,11 @@ local $dir = &transname();
 local $err = &extract_compressed_file($file, $dir);
 if ($err) {
 	return (0, $err);
+	}
+local ($disc) = glob("$dir/*/.discovered");
+if ($disc =~ /\/([^\/]+)\/\.discovered$/) {
+	# Plesk 11 appears to use a sub-directory
+	$dir = "$dir/$1";
 	}
 $main::plesk9_dir_cache{$file} = $dir;
 return (1, $dir);
