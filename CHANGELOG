@@ -1375,3 +1375,4 @@ All existing virtual servers using the FollowSymLinks option will be converted t
 ---- Changes since 3.96 ----
 Updated the MediaWiki script installer to versions 1.20.1 and 1.19.3.
 If running Virtualmin in SSL mode with a certificate of less than 2048 bits, a warning is now displayed on the system information page prompting the admin to generate or request a new cert.
+Virtualmin will now prompt the root user after logging in if any virtual servers with unsafe symlink or mod_php settings are found. Previous versions applied fixes for these security issues automatically, which broke some domains.

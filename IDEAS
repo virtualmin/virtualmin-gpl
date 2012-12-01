@@ -60,11 +60,3 @@
 	- https://www.virtualmin.com/node/24238
 
  - Option to disable clearing of incremental for a backup
-
- - Make symlink and mod_php disable globally configurable
-	- Functional test should run post-install
-	- post-install warning
-		- should set flag to indicate yes or no
-		- only fix when restoring backups if yes?
-	- warning to fix php_admin_value setting
-	- Print warning to STDERR if allow_* isn't set

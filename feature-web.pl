@@ -3753,19 +3753,21 @@ if ($user && ($user->{'words'}->[0] eq $oldd->{'user'} ||
 	}
 }
 
-# fix_mod_php_security([&domains])
+# fix_mod_php_security([&domains], [find-only])
 # Goes through all virtual servers in non-mod_php mode, and adds the 
 # php_admin_value directive to forcibly disable mod_php if missing
 sub fix_mod_php_security
 {
-local ($doms) = @_;
+local ($doms, $findonly) = @_;
 $doms ||= [ &list_domains() ];
 local @flush;
 &require_apache();
+local @fixdoms;
+local @lockdoms;
 if (!$apache::httpd_modules{'mod_php4'} &&
     !$apache::httpd_modules{'mod_php5'}) {
 	# mod_php not even enabled, so do nothing
-	return;
+	return ( );
 	}
 foreach my $d (@$doms) {
 	next if (!$d->{'web'} || $d->{'alias'});
@@ -3773,6 +3775,12 @@ foreach my $d (@$doms) {
 	if ($mode eq "cgi" || $mode eq "fcgid") {
 		local @ports = ( $d->{'web_port'},
 				 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+		local $domfixed;
+		if (!$findonly) {
+			&obtain_lock_web($d);
+			&obtain_lock_ssl($d) if ($d->{'ssl'});
+			push(@lockdoms, $d);
+			}
 		foreach my $p (@ports) {
 			local ($virt, $vconf, $conf) = &get_apache_virtual(
 				$d->{'dom'}, $p);
@@ -3785,17 +3793,34 @@ foreach my $d (@$doms) {
 					"php_admin_value", \@admin,
 					$vconf, $conf);
 				push(@flush, $virt->{'file'});
+				$domfixed++;
 				}
 			}
+		push(@fixdoms, $d) if ($domfixed);
 		}
 	}
 @flush = &unique(@flush);
-foreach my $f (@flush) {
-	&flush_file_lines($f);
+if ($findonly) {
+	# Roll back all changes, since we are only testing for fixes
+        foreach my $f (@flush) {
+                &unflush_file_lines($f);
+                }
 	}
-if (@flush) {
-	&register_post_action(\&restart_apache);
+else {
+	# Actually save the files
+	foreach my $f (@flush) {
+		&flush_file_lines($f);
+		}
+	if (@flush) {
+		&register_post_action(\&restart_apache);
+		}
 	}
+# Unlock all locked domains
+foreach my $d (@lockdoms) {
+	&release_lock_ssl($d) if ($d->{'ssl'});
+	&release_lock_web($d);
+	}
+return @fixdoms;
 }
 
 # fix_symlink_security([&domains], [find-only])
@@ -3875,7 +3900,7 @@ if ($findonly) {
 		}
 	}
 else {
-	# Actually save the filed
+	# Actually save the files
 	foreach my $f (@flush) {
 		&flush_file_lines($f);
 		}

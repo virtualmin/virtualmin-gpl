@@ -9980,7 +9980,7 @@ if ($status != 0) {
 		$rv .= &ui_submit($text{'licence_recheck'});
 		$rv .= &ui_form_end();
 		}
-	$rv .= "<p></td></tr></table>\n";
+	$rv .= "<p></td></tr></table><p>\n";
 	}
 elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 	# One week to expiry .. tell the user
@@ -9999,7 +9999,7 @@ elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 		$rv .= &ui_submit($text{'licence_recheck'});
 		$rv .= &ui_form_end();
 		}
-	$rv .= "<p></td></tr></table>\n";
+	$rv .= "<p></td></tr></table><p>\n";
 	}
 
 # Check if default IP has changed
@@ -10015,7 +10015,7 @@ if ($config{'old_defip'} && $defip && $config{'old_defip'} ne $defip) {
 	$rv .= &ui_hidden("setold", 1);
 	$rv .= &ui_submit($text{'licence_changeip'});
 	$rv .= &ui_form_end();
-	$rv .= "<p></td></tr></table>\n";
+	$rv .= "<p></td></tr></table><p>\n";
 	}
 
 # Check if in SSL mode, and SSL cert is < 2048 bits
@@ -10050,7 +10050,7 @@ if ($small) {
 				$text{'licence_newcert'} :
 				$text{'licence_newcsr'});
 	$rv .= &ui_form_end();
-	$rv .= "<p></td></tr></table>\n";
+	$rv .= "<p></td></tr></table><p>\n";
 	}
 
 # Check if symlinks need to be fixed. Blank means not checked yet, 0 means
@@ -10059,18 +10059,43 @@ if ($config{'allow_symlinks'} eq '') {
 	# Do any domains have unsafe settings?
 	local @fixdoms = &fix_symlink_security(undef, 1);
 	if (@fixdoms) {
-		$rv .= "<table width=100%><tr bgcolor=#ffff88><td align=center><p>";
+		$rv .= "<table width=100%><tr bgcolor=#ffff88>".
+		       "<td align=center><p>";
 		$rv .= "<b>".&text('licence_fixlinks', scalar(@fixdoms))."<p>".
 		             $text{'licence_fixlinks2'}."</b><p>\n";
-		$rv .= &ui_form_start("$gconfig{'webprefix'}/$module_name/fix_symlinks.cgi");
+		$rv .= &ui_form_start(
+			"$gconfig{'webprefix'}/$module_name/fix_symlinks.cgi");
 		$rv .= &ui_submit($text{'licence_fixlinksok'}, undef);
 		$rv .= &ui_submit($text{'licence_fixlinksignore'}, 'ignore');
 		$rv .= &ui_form_end();
-		$rv .= "<p></td></tr></table>\n";
+		$rv .= "<p></td></tr></table><p>\n";
 		}
 	else {
 		# All OK already, don't check again
 		$config{'allow_symlinks'} = 0;
+		&save_module_config();
+		}
+	}
+
+# Check if mod_php needs to be disabled
+if ($config{'allow_modphp'} eq '') {
+	# Do any domains allow mod_php incorrectly?
+	local @fixdoms = &fix_mod_php_security(undef, 1);
+	if (@fixdoms) {
+		$rv .= "<table width=100%><tr bgcolor=#ffff88>".
+		       "<td align=center><p>";
+		$rv .= "<b>".&text('licence_fixphp', scalar(@fixdoms))."<p>".
+		             $text{'licence_fixphp2'}."</b><p>\n";
+		$rv .= &ui_form_start(
+			"$gconfig{'webprefix'}/$module_name/fix_modphp.cgi");
+		$rv .= &ui_submit($text{'licence_fixphpok'}, undef);
+		$rv .= &ui_submit($text{'licence_fixphpignore'}, 'ignore');
+		$rv .= &ui_form_end();
+		$rv .= "<p></td></tr></table><p>\n";
+		}
+	else {
+		# All OK already, don't check again
+		$config{'allow_modphp'} = 0;
 		&save_module_config();
 		}
 	}

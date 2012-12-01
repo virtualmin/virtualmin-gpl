@@ -389,9 +389,19 @@ if ($config{'spam'}) {
 	&setup_spamtrap_mailserver();
 	}
 
-# Disable mod_php on domains that don't have it selected
-if ($config{'web'}) {
-	&fix_mod_php_security();
+# Print warning if PHP or symlink settings have not been checked
+local $warn;
+if ($config{'allow_symlinks'} eq '') {
+	local @fixdoms = &fix_symlink_security(undef, 1);
+	$warn++ if (@fixdoms);
+	}
+if ($config{'allow_modphp'} eq '') {
+	local @fixdoms = &fix_mod_php_security(undef, 1);
+	$warn++ if (@fixdoms);
+	}
+if ($warn) {
+	print STDERR "WARNING: Potential security problems detected. Login to Virtualmin at\n";
+	print STDERR &get_virtualmin_url()," to fix them.\n";
 	}
 
 # Run any needed actions, like server restarts

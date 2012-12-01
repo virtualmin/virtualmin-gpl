@@ -3473,6 +3473,10 @@ licence_fixlinks=Virtualmin has detected that $1 domains on your system are conf
 licence_fixlinks2=WARNING : Fixing this setting will break all virtual servers that have content or applications under symbolic links to other directories.
 licence_fixlinksok=Fix Symbolic Link Permissions
 licence_fixlinksignore=Allow Unsafe Symbolic Links
+licence_fixphp=Virtualmin has detected that $1 domains on your system are configured to allow PHP scripts to be run using <tt>mod_php</tt>, even when this execution mode is disabled. This can be exploited by a domain owner to access configurations files and private data in other virtual servers, because all PHP scripts run as the Apache user which has access to all domains' files.
+licence_fixphp2=WARNING : Fixing this setting will break any virtual servers that use both PHP execution modes, such as via a shared install of a PHP application.
+licence_fixphpok=Fix PHP Permissions
+licence_fixphpignore=Allow Use Of Both PHP Execution Modes
 
 config_deftheme=Global Webmin default
 config_oldtheme=Old Webmin theme
@@ -6004,6 +6008,7 @@ hashtype_mysql=MySQL password hash
 hashtype_digest=Web digest authentication hash
 
 fixsymlinks_title=Fix Symbolic Link Permissions
+fixsymlinks_ecannot=You are not allowed to fix symbolic link permissions
 fixsymlinks_doing=Updating all virtual servers to prevent unsafe symbolic links ..
 fixsymlinks_done=.. fixed $1 domains
 fixsymlinks_finding=Searching for <tt>.htaccess</tt> files that use disallowed options ..
@@ -6014,5 +6019,10 @@ fixsymlinks_doms=Problematic <tt>.htaccess</tt> files were found in :
 fixsymlinks_ok=Fix Access Files
 fixsymlinks_htdoing=Fixing options in <tt>.htaccess</tt> files ..
 fixsymlinks_htdone=.. fixed $1 files in $2 domains
+
+fixmodphp_title=Fix PHP Permissions
+fixmodphp_ecannot=You are not allowed to fix PHP permissions
+fixmodphp_doing=Updating all virtual servers to prevent use of mod_php when disabled ..
+fixmodphp_done=.. fixed $1 domains
 
 __norefs=1
