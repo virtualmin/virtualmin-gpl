@@ -10053,6 +10053,28 @@ if ($small) {
 	$rv .= "<p></td></tr></table>\n";
 	}
 
+# Check if symlinks need to be fixed. Blank means not checked yet, 0 means
+# fixed, 1 means don't fix.
+if ($config{'allow_symlinks'} eq '') {
+	# Do any domains have unsafe settings?
+	local @fixdoms = &fix_symlink_security(undef, 1);
+	if (@fixdoms) {
+		$rv .= "<table width=100%><tr bgcolor=#ffff88><td align=center><p>";
+		$rv .= "<b>".&text('licence_fixlinks', scalar(@fixdoms))."<p>".
+		             $text{'licence_fixlinks2'}."</b><p>\n";
+		$rv .= &ui_form_start("$gconfig{'webprefix'}/$module_name/fix_symlinks.cgi");
+		$rv .= &ui_submit($text{'licence_fixlinksok'}, undef);
+		$rv .= &ui_submit($text{'licence_fixlinksignore'}, 'ignore');
+		$rv .= &ui_form_end();
+		$rv .= "<p></td></tr></table>\n";
+		}
+	else {
+		# All OK already, don't check again
+		$config{'allow_symlinks'} = 0;
+		&save_module_config();
+		}
+	}
+
 return $rv;
 }
 

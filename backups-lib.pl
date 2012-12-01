@@ -2205,9 +2205,7 @@ if (defined(&list_domain_scripts) && scalar(@wasmissing)) {
 	}
 
 # Apply symlink and security restrictions on restored domains
-if (!$config{'allow_modphp'}) {
-	&fix_mod_php_security($doms);
-	}
+&fix_mod_php_security($doms);
 if (!$config{'allow_symlinks'}) {
 	&fix_symlink_security($doms);
 	}

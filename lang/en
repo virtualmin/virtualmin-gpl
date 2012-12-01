@@ -2040,6 +2040,9 @@ log_create_bkey=Created backup encryption key $1
 log_modify_bkey=Updated backup encryption key $1
 log_delete_bkey=Deleted backup encryption key $1
 log_delete_bkeys=Deleted $1 backup encryption keys
+log_fixsymlinks=Fixed symbolic link permissions
+log_nofixsymlinks=Allowed unsafe symbolic link permissions
+log_fixhtaccess=Fixed symbolic link htaccess options
 
 backup_title=Backup Virtual Servers
 backup_title2=Edit Scheduled Backup
@@ -3466,6 +3469,10 @@ licence_smallcert=Your system is using an SSL certificate that is only $1 bits l
 licence_smallself=Your system is using a self-signed SSL certificate that is only $1 bits long, which is smaller than the recommended size of 2048 bits. It should be immediately re-generated.
 licence_newcert=Generate New Certificate
 licence_newcsr=Request New Certificate
+licence_fixlinks=Virtualmin has detected that $1 domains on your system are configured to allow symbolic links to other users' files. This can be exploited by a domain owner to access configurations files and private data in other virtual servers.
+licence_fixlinks2=WARNING : Fixing this setting will break all virtual servers that have content or applications under symbolic links to other directories.
+licence_fixlinksok=Fix Symbolic Link Permissions
+licence_fixlinksignore=Allow Unsafe Symbolic Links
 
 config_deftheme=Global Webmin default
 config_oldtheme=Old Webmin theme
@@ -5995,5 +6002,17 @@ hashtype_md5=MD5 hash
 hashtype_unix=System default hash type
 hashtype_mysql=MySQL password hash
 hashtype_digest=Web digest authentication hash
+
+fixsymlinks_title=Fix Symbolic Link Permissions
+fixsymlinks_doing=Updating all virtual servers to prevent unsafe symbolic links ..
+fixsymlinks_done=.. fixed $1 domains
+fixsymlinks_finding=Searching for <tt>.htaccess</tt> files that use disallowed options ..
+fixsymlinks_found=.. found $1 in $2 domains
+fixsymlinks_none=.. none found
+fixsymlinks_rusure=Virtualmin can fix these <tt>.htaccess</tt> files by changing the <tt>FollowSymLinks</tt> option to <tt>SymLinksifOwnerMatch</tt>. Unless this is done, accessing those directories via their websites will fail due to the use of the disallowed option.
+fixsymlinks_doms=Problematic <tt>.htaccess</tt> files were found in :
+fixsymlinks_ok=Fix Access Files
+fixsymlinks_htdoing=Fixing options in <tt>.htaccess</tt> files ..
+fixsymlinks_htdone=.. fixed $1 files in $2 domains
 
 __norefs=1

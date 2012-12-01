@@ -3798,19 +3798,27 @@ if (@flush) {
 	}
 }
 
-# fix_symlink_security([&domains])
+# fix_symlink_security([&domains], [find-only])
 # Goes through all virtual servers, and for any with Options FollowSymLinks 
 # set change them to SymLinksifOwnerMatch
 sub fix_symlink_security
 {
-local ($doms) = @_;
+local ($doms, $findonly) = @_;
 $doms ||= [ &list_domains() ];
 local @flush;
+local @fixdoms;
 &require_apache();
+local @lockdoms;
 foreach my $d (@$doms) {
         next if (!$d->{'web'} || $d->{'alias'});
 	local @ports = ( $d->{'web_port'},
 			 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+	local $domfixed = 0;
+	if (!$findonly) {
+		&obtain_lock_web($d);
+		&obtain_lock_ssl($d) if ($d->{'ssl'});
+		push(@lockdoms, $d);
+		}
 	foreach my $p (@ports) {
 		local ($virt, $vconf, $conf) = &get_apache_virtual(
 						$d->{'dom'}, $p);
@@ -3854,16 +3862,33 @@ foreach my $d (@$doms) {
 					push(@flush, $dir->{'file'});
 					}
 				}
+			$domfixed++ if ($fixed || $ofixed);
 			}
 		}
+	push(@fixdoms, $d) if ($domfixed);
 	}
 @flush = &unique(@flush);
-foreach my $f (@flush) {
-	&flush_file_lines($f);
+if ($findonly) {
+	# Roll back all changes, since we are only testing for fixes
+	foreach my $f (@flush) {
+		&unflush_file_lines($f);
+		}
 	}
-if (@flush) {
-	&register_post_action(\&restart_apache);
+else {
+	# Actually save the filed
+	foreach my $f (@flush) {
+		&flush_file_lines($f);
+		}
+	if (@flush) {
+		&register_post_action(\&restart_apache);
+		}
 	}
+# Unlock all locked domains
+foreach my $d (@lockdoms) {
+	&release_lock_ssl($d) if ($d->{'ssl'});
+	&release_lock_web($d);
+	}
+return @fixdoms;
 }
 
 # fix_symlink_templates()
@@ -3874,6 +3899,7 @@ sub fix_symlink_templates
 my $olist = &get_allowed_options_list();
 &require_apache();
 foreach my $tmpl (&list_templates()) {
+	&lock_file($tmpl->{'file'} || $module_config_file);
 	if ($tmpl->{'web'} && $tmpl->{'web'} ne 'none' &&
 	    $tmpl->{'web'} =~ /FollowSymLinks/) {
 		$tmpl->{'web'} =~ s/FollowSymLinks/SymLinksifOwnerMatch/g;
@@ -3885,6 +3911,7 @@ foreach my $tmpl (&list_templates()) {
 		$tmpl->{'web'} =~ s/AllowOverride\s+([^\t]*)/AllowOverride $1 $olist/g;
 		&save_template($tmpl);
 		}
+	&unlock_file($tmpl->{'file'} || $module_config_file);
 	}
 }
 

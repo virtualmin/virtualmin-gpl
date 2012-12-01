@@ -2144,7 +2144,9 @@ return "Uncompression failed : <pre>".&html_escape($out)."</pre>"
 	if ($? && !$ignore);
 
 # Fix .htaccess files that use disallowed directives
-&fix_script_htaccess_files($d, $dir);
+if (!$config{'allow_symlinks'}) {
+	&fix_script_htaccess_files($d, $dir);
+	}
 
 # Make sure the target files are owner-writable, so we can copy over them
 if ($copydir && -e $copydir) {
@@ -2744,18 +2746,20 @@ if (defined($max)) {
 return 0;
 }
 
-# fix_script_htaccess_files(&domain, dir)
+# fix_script_htaccess_files(&domain, dir, [find-only])
 # Find all .htaccess files under some dir to change FollowSymLinks to
 # SymLinksifOwnerMatch
 sub fix_script_htaccess_files
 {
-local ($d, $dir) = @_;
+local ($d, $dir, $findonly) = @_;
 local $out = &run_as_domain_user($d, "find ".quotemeta($dir).
 				     " -type f -name .htaccess");
+local @fixed;
 foreach my $file (split(/\r?\n/, $out)) {
 	next if (!-r $file);
 	eval {
 		local $main::error_must_die = 1;
+		&lock_file($file) if (!$findonly);
 		local $lref = &read_file_lines_as_domain_user($d, $file);
 		local $fixed = 0;
 		foreach my $l (@$lref) {
@@ -2765,13 +2769,18 @@ foreach my $file (split(/\r?\n/, $out)) {
 				}
 			}
 		if ($fixed) {
+			push(@fixed, $file);
+			}
+		if ($fixed && !$findonly) {
 			&flush_file_lines_as_domain_user($d, $file);
 			}
 		else {
 			&unflush_file_lines($file);
 			}
+		&unlock_file($file) if (!$findonly);
 		};
 	}
+return @fixed;
 }
 
 1;
