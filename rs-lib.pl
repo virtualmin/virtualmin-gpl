@@ -1,7 +1,5 @@
 # Functions for accessing the Rackspace cloud files API
 
-our $rs_chunk_size = $config{'rs_chunk'} || 200*1024*1024;	# 200 MB
-
 # rs_connect(url, user, key)
 # Connect to rackspace and get an authentication token. Returns a hash ref for
 # a connection handle on success, or an error message on failure.
@@ -110,7 +108,8 @@ return [ split(/\r?\n/, $out) ];
 sub rs_upload_object
 {
 my ($h, $container, $file, $src, $multipart, $chunk) = @_;
-$chunk ||= $rs_chunk_size;
+my $def_rs_chunk_size = $config{'rs_chunk'} || 200*1024*1024;	# 200 MB
+$chunk ||= $def_rs_chunk_size;
 my @st = stat($src);
 @st || return "File $src does not exist";
 if ($st[7] >= 2*1024*1024*1024 || $multipart) {
