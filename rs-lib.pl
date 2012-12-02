@@ -108,7 +108,7 @@ return [ split(/\r?\n/, $out) ];
 sub rs_upload_object
 {
 my ($h, $container, $file, $src, $multipart, $chunk) = @_;
-my $def_rs_chunk_size = $config{'rs_chunk'} || 200*1024*1024;	# 200 MB
+my $def_rs_chunk_size = $config{'rs_chunk'}*1024*10234 || 200*1024*1024;# 200 MB
 $chunk ||= $def_rs_chunk_size;
 my @st = stat($src);
 @st || return "File $src does not exist";
