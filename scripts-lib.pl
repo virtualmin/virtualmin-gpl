@@ -2760,7 +2760,9 @@ foreach my $file (split(/\r?\n/, $out)) {
 	eval {
 		local $main::error_must_die = 1;
 		&lock_file($file) if (!$findonly);
-		local $lref = &read_file_lines_as_domain_user($d, $file);
+		local $lref = $findonly ?
+			&read_file_lines($file) :
+			&read_file_lines_as_domain_user($d, $file);
 		local $fixed = 0;
 		foreach my $l (@$lref) {
 			if ($l =~ /^\s*Options.*FollowSymLinks/) {

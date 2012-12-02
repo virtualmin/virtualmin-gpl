@@ -3890,6 +3890,24 @@ foreach my $d (@$doms) {
 			$domfixed++ if ($fixed || $ofixed);
 			}
 		}
+
+	# Replace awstats symlinks with copies
+	local $htmldir = &public_html_dir($d);
+	local @dirs = ( "icon", "awstats-icon", "awstatsicons" );
+	if ($domfixed && !$findonly && $d->{'virtualmin-awstats'} &&
+	    -l "$htmldir/$dirs[0]") {
+		local $dest = readlink("$htmldir/$dirs[0]");
+		&unlink_logged_as_domain_user($d, "$htmldir/$dirs[0]");
+		&copy_source_dest($dest, "$htmldir/$dirs[0]");
+		&system_logged("chown -R $d->{'uid'}:$d->{'gid'} ".
+			       quotemeta("$htmldir/$dirs[0]"));
+		foreach my $dir (@dirs[1..$#dirs]) {
+			&unlink_file_as_domain_user($d, "$htmldir/$dir");
+			&virtual_server::symlink_logged_as_domain_user(
+				$d, $dirs[0], "$htmldir/$dir");
+			}
+		}
+
 	push(@fixdoms, $d) if ($domfixed);
 	}
 @flush = &unique(@flush);
