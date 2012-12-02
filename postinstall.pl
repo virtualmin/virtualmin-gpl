@@ -389,6 +389,11 @@ if ($config{'spam'}) {
 	&setup_spamtrap_mailserver();
 	}
 
+# If no domains yet, fix symlink perms in templates
+if (!@doms && $config{'allow_symlinks'} ne '1') {
+	&fix_symlink_templates();
+	}
+
 # Print warning if PHP or symlink settings have not been checked
 local $warn;
 if ($config{'allow_symlinks'} eq '') {
