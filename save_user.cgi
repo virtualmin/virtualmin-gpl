@@ -288,11 +288,13 @@ else {
 
 	# Get the email address to send new/updated mailbox, for the mailbox
 	# itself. Email may also be sent to the reseller and domain owner
-	if ($in{'new'} && &will_send_user_email($d) && !$in{'newmail_def'}) {
+	if ($in{'new'} && &will_send_user_email($d, 1) &&
+	    !$in{'newmail_def'}) {
 		$in{'newmail'} =~ /^\S+$/ || &error($text{'user_enewmail'});
 		$newmailto = $in{'newmail'};
 		}
-	elsif (!$in{'new'} && !$in{'remail_def'}) {
+	elsif (!$in{'new'} && &will_send_user_email($d, 0) &&
+	       !$in{'remail_def'}) {
 		$in{'remail'} =~ /^\S+$/ || &error($text{'user_eremail'});
 		$newmailto = $in{'remail'};
 		}

@@ -3855,13 +3855,14 @@ if ($config{'dns'}) {
 return %hash;
 }
 
-# will_send_user_email([&domain])
+# will_send_user_email([&domain], [new-flag])
 # Returns 1 if a new mailbox email would be sent to a user in this domain.
 # Will return 0 if no template is defined, or if sending mail to the mailbox
 # has been deactivated, or if the domain doesn't even have email
 sub will_send_user_email
 {
-local $tmode = $_[0] ? "user" : "local";
+local ($d, $isnew) = @_;
+local $tmode = !$d ? "local" : $isnew ? "user" : "update";
 if ($config{$tmode.'_template'} eq 'none' ||
     $tmode eq "user" && !$config{'new'.$tmode.'_to_mailbox'}) {
         return 0;

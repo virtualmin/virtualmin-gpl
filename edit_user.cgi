@@ -205,7 +205,7 @@ $hasprimary = $d && !$user->{'noprimary'} && $d->{'mail'};
 $hasmailfile = !$in{'new'} && ($user->{'email'} || @{$user->{'extraemail'}}) &&
 	       !$user->{'nomailfile'};
 $hasextra = !$user->{'noextra'};
-$hassend = $in{'new'} && &will_send_user_email($d) || !$in{'new'};
+$hassend = &will_send_user_email($d, $in{'new'});
 $hasspam = $config{'spam'} && $hasprimary;
 $hasemail = $hasprimary || $hasmailfile || $hasextra || $hassend || $hasspam;
 if ($hasemail) {
@@ -254,7 +254,7 @@ if ($hasextra) {
 			    2, \@tds);
 	}
 
-if ($in{'new'} && &will_send_user_email($d)) {
+if ($in{'new'} && &will_send_user_email($d, 1)) {
 	# Show address for confirmation email (for the mailbox itself)
 	print &ui_table_row(&hlink($text{'user_newmail'},"newmail"),
 		&ui_opt_textbox("newmail", undef, 40,
@@ -263,7 +263,7 @@ if ($in{'new'} && &will_send_user_email($d)) {
 				$text{'user_newmail0'}),
 		2, \@tds);
 	}
-elsif (!$in{'new'}) {
+elsif (!$in{'new'} && &will_send_user_email($d, 0)) {
 	# Show option to re-send info email
 	print &ui_table_row(&hlink($text{'user_remail'},"remail"),
 		    &ui_radio("remail_def", 1,
