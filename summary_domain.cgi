@@ -72,15 +72,42 @@ if (!$aliasdom) {
 			$reselip = $resel->{'acl'}->{'defip'};
 			}
 		}
+	$c = $d->{'virt6'} ? 1 : 3;
 	print &ui_table_row($text{'edit_ip'},
 		  "<tt>$d->{'ip'}</tt> ".
 		  ($d->{'virt'} ? $text{'edit_private'} :
 		   $d->{'ip'} eq $reselip ? &text('edit_rshared',
 						  "<tt>$resel->{'name'}</tt>") :
-					    $text{'edit_shared'}), 3, \@tds);
+					    $text{'edit_shared'}), $c, \@tds);
 	}
-if ($d->{'virt6'}) {
+if ($d->{'virt6'} && !$aliasdom) {
 	print &ui_table_row($text{'edit_ip6'}, "<tt>$d->{'ip6'}</tt>");
+	}
+
+# Plan, if any
+if ($d->{'plan'}) {
+	$plan = &get_plan($d->{'plan'});
+	print &ui_table_row($text{'edit_plan'}, $plan->{'name'}, undef, \@tds);
+	}
+
+if ($aliasdom) {
+	# Alias destination
+	print &ui_table_row($text{'edit_aliasto'},
+	   "<a href='view_domain.cgi?dom=$d->{'alias'}'>".
+	    &show_domain_name($aliasdom)."</a>",
+	   undef, \@tds);
+	}
+elsif (!$parentdom) {
+	# Contact email address
+	print &ui_table_row($text{'edit_email'},
+			    &html_escape($d->{'emailto'}), undef, \@tds);
+	}
+else {
+	# Show link to parent domain
+	print &ui_table_row($text{'edit_parent'},
+	    "<a href='view_domain.cgi?dom=$d->{'parent'}'>".
+	     &show_domain_name($parentdom)."</a>",
+	    undef, \@tds);
 	}
 
 # Home directory
@@ -91,27 +118,6 @@ if (!$aliasdom && $d->{'dir'}) {
 
 # Description
 print &ui_table_row($text{'edit_owner'}, $d->{'owner'}, 3, \@tds);
-
-if ($aliasdom) {
-	# Alias destination
-	print &ui_table_row($text{'edit_aliasto'},
-	   "<a href='view_domain.cgi?dom=$d->{'alias'}'>".
-	    &show_domain_name($aliasdom)."</a>",
-	   3, \@tds);
-	}
-elsif (!$parentdom) {
-	# Contact email address
-	print &ui_table_row($text{'edit_email'},
-			    &html_escape($d->{'emailto'}), 3, \@tds);
-	}
-else {
-	# Show link to parent domain
-	print &ui_table_row($text{'edit_parent'},
-	    "<a href='view_domain.cgi?dom=$d->{'parent'}'>".
-	     &show_domain_name($parentdom)."</a>",
-	    3, \@tds);
-	}
-
 
 print &ui_table_end();
 
