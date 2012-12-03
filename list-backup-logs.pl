@@ -129,7 +129,8 @@ if ($multi) {
 			}
 		print "    Destination: $l->{'dest'}\n";
 		print "    Incremental: ",
-		      ($l->{'increment'} ? "Yes" : "No"),"\n";
+		      ($l->{'increment'} == 1 ? "Yes" :
+		       $l->{'increment'} == 2 ? "Disabled" : "No"),"\n";
 		print "    Started: ",&make_date($l->{'start'}),"\n";
 		print "    Ended: ",&make_date($l->{'end'}),"\n";
 		if ($l->{'size'}) {

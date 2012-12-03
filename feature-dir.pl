@@ -384,7 +384,8 @@ sub backup_dir
 {
 local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
 &$first_print($homefmt && $config{'compression'} == 3 ? $text{'backup_dirzip'} :
-	      $increment ? $text{'backup_dirtarinc'} : $text{'backup_dirtar'});
+	      $increment == 1 ? $text{'backup_dirtarinc'}
+			      : $text{'backup_dirtar'});
 local $out;
 local $cmd;
 local $gzip = $homefmt && &has_command("gzip");
@@ -424,7 +425,7 @@ if ($gconfig{'os_type'} eq 'solaris') {
 
 # Work out incremental flags
 local ($iargs, $iflag, $ifile, $ifilecopy);
-if (&has_incremental_tar()) {
+if (&has_incremental_tar() && $increment != 2) {
 	if (!-d $incremental_backups_dir) {
 		&make_dir($incremental_backups_dir, 0700);
 		}

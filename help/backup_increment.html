@@ -16,5 +16,9 @@ and then the incremental to recover all files. Also, other data such as
 Apache configurations and databases is not incrementally backed up, and
 so will always be included regardless of this option. <p>
 
+The <b>Neither</b> option also performs a full backup, but does not change
+the incremental backup state. This can be useful when performing an ad-hoc
+backup of domains that also have full and incremental backups scheduled. <p>
+
 <footer>
 

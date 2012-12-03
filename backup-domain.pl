@@ -47,6 +47,11 @@ non-incremental backup will be included. This allows you to reduce the size of
 backups for large websites that rarely change, but means that when restoring
 both the full and incremental backups are needed.
 
+The alternative parameter C<--no-incremental> can be used by prevent Virtualmin
+from clearing the list of files that were included in the last full backup.
+This is used if you have a scheduled incremental backup setup, and don't want
+to change its behavior by doing an ad-hoc full backup.
+
 To exclude some files from each virtual server's home directory from the
 backup, use the C<--exclude> flag followed by a relative filename, like
 I<public_html/stats> or I<.bashrc>.
@@ -181,6 +186,9 @@ while(@ARGV > 0) {
 		&has_incremental_format() || &error("The configured backup format does not support incremental backups");
 		&has_incremental_tar() || &error("The tar command on this system does not support incremental backups");
 		$increment = 1;
+		}
+	elsif ($a eq "--no-incremental") {
+		$increment = 2;
 		}
 	elsif ($a eq "--purge") {
 		$purge = shift(@ARGV);
@@ -365,7 +373,7 @@ print "                         [--separate] | [--newformat]\n";
 print "                         [--onebyone]\n";
 print "                         [--strftime] [--purge days]\n";
 if (&has_incremental_tar()) {
-	print "                         [--incremental]\n";
+	print "                         [--incremental] | [--no-incremental]\n";
 	}
 print "                         [--all-virtualmin] | [--virtualmin config]\n";
 print "                         [--option \"feature name value\"]\n";
