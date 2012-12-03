@@ -206,6 +206,15 @@ if (keys %ipdom > 1) {
 	$info->{'ips'} = \@ips;
 	}
 
+# IPv6 addresses used
+local @ips6;
+foreach my $d (@doms) {
+	if ($d->{'virt6'}) {
+		push(@ips6, [ $d->{'ip6'}, 'virt', undef, 1, $d->{'dom'} ]);
+		}
+	}
+$info->{'ips6'} = \@ips6;
+
 # IP ranges available
 local $tmpl = &get_template(0);
 local @ranges = split(/\s+/, $tmpl->{'ranges'});
