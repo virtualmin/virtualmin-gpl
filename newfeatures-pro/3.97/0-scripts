@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the MediaWiki script installer to versions 1.20.1 and 1.19.3, bbPress to 1.2, and ZenPhoto to 1.4.3.5.
+html=Updated the MediaWiki script installer to versions 1.20.1 and 1.19.3, bbPress to 1.2, TextPattern to 4.5.3, and ZenPhoto to 1.4.3.5.
 master=1
 reseller=1
 domain=1
