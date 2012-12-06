@@ -3873,7 +3873,7 @@ foreach my $d (@$doms) {
 				my @allow = &apache::find_directive(
 					"AllowOverride", $dir->{'members'});
 				if (!@allow) {
-					push(@allow, $olist);
+					push(@allow, "All ".$olist);
 					$ofixed++;
 					}
 				elsif ($allow[0] !~ /$olist/) {
