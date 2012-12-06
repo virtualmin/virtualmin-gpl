@@ -3959,8 +3959,8 @@ foreach my $tmpl (&list_templates()) {
 		}
 	if ($apache::httpd_modules{'core'} >= 2.2 &&
 	    $tmpl->{'web'} && $tmpl->{'web'} ne 'none' &&
-	    $tmpl->{'web'} !~ /AllowOverride[^\t]*$olist/) {
-		$tmpl->{'web'} =~ s/AllowOverride\s+([^\t]*)/AllowOverride $1 $olist/g;
+	    $tmpl->{'web'} !~ /AllowOverride[^\t\r\n]*$olist/) {
+		$tmpl->{'web'} =~ s/AllowOverride\s+([^\t\r\n]*)/AllowOverride $1 $olist/g;
 		&save_template($tmpl);
 		}
 	&unlock_file($tmpl->{'file'} || $module_config_file);
