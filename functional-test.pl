@@ -4695,6 +4695,17 @@ $web_tests = [
 	{ 'command' => 'grep smeg /tmp/'.$test_domain.'_access_log' },
 	{ 'command' => 'grep smeg /tmp/'.$test_domain.'_error_log' },
 
+	# Create a test CGI script
+	{ 'command' => '(echo "#!/bin/sh" ; echo "echo Content-type: text/plain" ; echo echo ; echo uptime) >~'.$test_domain_user.'/cgi-bin/test.cgi',
+	},
+	{ 'command' => 'chown '.$test_domain_user.': ~'.$test_domain_user.'/cgi-bin/test.cgi',
+	},
+	{ 'command' => 'chmod 755 ~'.$test_domain_user.'/cgi-bin/test.cgi',
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain.'/cgi-bin/test.cgi',
+	  'grep' => 'load average',
+	},
+
 	# Get rid of the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
