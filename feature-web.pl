@@ -256,6 +256,15 @@ eval {
 			&save_domain_resource_limits($_[0], $rv, 1);
 			}
 		}
+
+	# Apply symlink and mod_php fixes, in case the template wasn't
+	# updated with them
+	if ($config{'allow_modphp'} ne '1' && !$_[0]->{'alias'}) {
+		&fix_mod_php_security([ $_[0] ]);
+		}
+	if ($config{'allow_symlinks'} ne '1' && !$_[0]->{'alias'}) {
+		&fix_symlink_security([ $_[0] ]);
+		}
 	};
 if ($@) {
 	&$second_print(&text('setup_ewebpost', "$@"));
