@@ -35,15 +35,17 @@ sub wizard_show_memory
 {
 print &ui_table_row(undef, $text{'wizard_memory'}, 2);
 
+local $mem = &get_uname_arch() =~ /64/ ? "40M" : "20M";
 print &ui_table_row($text{'wizard_memory_preload'},
 	&ui_radio("preload", $config{'preload_mode'} ? 1 : 0,
-		  [ [ 1, $text{'wizard_memory_preload1'}."<br>" ],
+		  [ [ 1, &text('wizard_memory_preload1', $mem)."<br>" ],
 		    [ 0, $text{'wizard_memory_preload0'} ] ]));
 
 if ($config{'spam'}) {
+	local $mem = &get_uname_arch() =~ /64/ ? "70M" : "35M";
 	print &ui_table_row($text{'wizard_memory_lookup'},
 		&ui_radio("lookup", &check_lookup_domain_daemon(),
-			  [ [ 1, $text{'wizard_memory_lookup1'}."<br>" ],
+			  [ [ 1, &text('wizard_memory_lookup1', $mem)."<br>" ],
 			    [ 0, $text{'wizard_memory_lookup0'} ] ]));
 	}
 }
@@ -521,6 +523,15 @@ return undef if (!&foreign_check("proc"));
 return undef if (!defined(&proc::get_memory_info));
 local ($real) = &proc::get_memory_info();
 return $real * 1024;
+}
+
+# get_uname_arch()
+# Returns the architecture, like x86_64 or i386
+sub get_uname_arch
+{
+local $out = &backquote_command("uname -m");
+$out =~ s/\s+//g;
+return $out;
 }
 
 1;
