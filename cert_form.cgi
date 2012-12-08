@@ -27,6 +27,9 @@ $prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 @tabs = ( [ "current", $text{'cert_tabcurrent'}, $prog."current" ],
 	  [ "csr", $text{'cert_tabcsr'}, $prog."csr" ],
 	  [ "self", $text{'cert_tabself'}, $prog."self" ],
+	  -r $d->{'ssl_newkey'} ?
+		( [ "savecsr", $text{'cert_tabsavecsr'}, $prog."savecsr" ] ) :
+		( ),
 	  [ "new", $text{'cert_tabnew'}, $prog."new" ],
 	  [ "chain", $text{'cert_tabchain'}, $prog."new" ],
 	);
@@ -129,6 +132,8 @@ if (&can_webmin_cert()) {
 
 print &ui_tabs_end_tab();
 
+##########################
+
 # CSR generation form
 print &ui_tabs_start_tab("mode", "csr");
 print "$text{'cert_desc1'}<br>\n";
@@ -149,6 +154,8 @@ print &ui_table_start($text{'cert_header1'}, undef, 2);
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'cert_csrok'} ] ]);
 print &ui_tabs_end_tab();
+
+##########################
 
 # Self-signed key generation form
 print &ui_tabs_start_tab("mode", "self");
@@ -171,7 +178,37 @@ print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'cert_self'} ] ]);
 print &ui_tabs_end_tab();
 
-# New key and cert form, for using existing key
+##########################
+
+# Apply signed cert form
+print &ui_tabs_start_tab("mode", "savecsr");
+print "$text{'cert_desc7'}<p>\n";
+
+print &ui_form_start("newkey.cgi", "form-data");
+print &ui_hidden("dom", $in{'dom'});
+print &ui_table_start($text{'cert_header7'}, undef, 2);
+
+# Cert
+print &ui_table_row($text{'cert_cert'},
+	&ui_radio_table("cert_mode", 0,
+		[ [ 0, $text{'cert_cert0'},
+		    &ui_textarea("cert", undef, 8, 70) ],
+		  [ 1, $text{'cert_cert1'},
+		    &ui_upload("certupload") ],
+		  [ 2, $text{'cert_cert2'},
+		    &ui_textbox("certfile", undef, 70)." ".
+		    &file_chooser_button("certfile") ] ]));
+
+# Use saved key from when CSR was generated
+print &ui_hidden("newkey_mode", 4);
+
+print &ui_table_end();
+print &ui_form_end([ [ "ok", $text{'cert_newok'} ] ]);
+print &ui_tabs_end_tab();
+
+##########################
+
+# New key and cert form
 print &ui_tabs_start_tab("mode", "new");
 print "$text{'cert_desc3'}<p>\n";
 
@@ -191,14 +228,11 @@ print &ui_table_row($text{'cert_cert'},
 		    &file_chooser_button("certfile") ] ]));
 
 # Key
-if (-r $d->{'ssl_newkey'}) {
-	$newkey = &read_file_contents_as_domain_user($d, $d->{'ssl_newkey'});
-	}
 print &ui_table_row($text{'cert_newkey'},
 	&ui_radio_table("newkey_mode", -r $d->{'ssl_key'} ? 3 : 0,
 		[ -r $d->{'ssl_key'} ? ( [ 3, $text{'cert_newkeykeep'} ] ) : ( ),
 		  [ 0, $text{'cert_cert0'},
-		    &ui_textarea("newkey", $newkey, 8, 70) ],
+		    &ui_textarea("newkey", undef, 8, 70) ],
 		  [ 1, $text{'cert_cert1'},
 		    &ui_upload("newkeyupload") ],
 		  [ 2, $text{'cert_cert2'},
@@ -212,6 +246,8 @@ print &ui_table_row($text{'cert_pass'},
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'cert_newok'} ] ]);
 print &ui_tabs_end_tab();
+
+##########################
 
 # CA certificate form
 $chain = &get_website_ssl_file($d, 'ca');

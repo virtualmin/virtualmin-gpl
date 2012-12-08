@@ -52,10 +52,6 @@
 	- Namecheap too
 	- Pro only
 
- - Better detection of new key+cert vs existing key+re-signed cert
-	- separate form for re-signed cert
-	- https://www.virtualmin.com/node/24272
-
  - Thunderbird auto-config
 	- https://www.virtualmin.com/node/24238
 

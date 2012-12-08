@@ -23,19 +23,30 @@ else {
 	$cert || &error(&text('newkey_ecertfile', $in{'certfile'}));
 	}
 if ($in{'newkey_mode'} == 0) {
+	# Pasted text
 	$newkey = $in{'newkey'};
 	}
 elsif ($in{'newkey_mode'} == 1) {
+	# Uploaded file
 	$newkey = $in{'newkeyupload'};
 	}
 elsif ($in{'newkey_mode'} == 2) {
+	# File on server
 	&is_under_directory($homed->{'home'}, $in{'newkeyfile'}) ||
 		&error(&text('newkey_enewkeyfilehome', $in{'newkeyfile'}));
+	$d->{'ssl_newkey'} && $in{'newkeyfile'} eq $d->{'ssl_newkey'} &&
+		&error($text{'newkey_ekeysame'});
 	$newkey = &read_file_contents_as_domain_user($d, $in{'newkeyfile'});
 	$newkey || &error(&text('newkey_enewkeyfile', $in{'newkeyfile'}));
 	}
-else {
+elsif ($in{'newkey_mode'} == 3) {
+	# Use existing key
 	$newkey = &read_file_contents($d->{'ssl_key'});
+	}
+elsif ($in{'newkey_mode'} == 4) {
+	# Use key from CSR
+	-r $d->{'ssl_newkey'} || &error($text{'newkey_enewkeycsr'});
+	$newkey =  &read_file_contents_as_domain_user($d, $d->{'ssl_newkey'});
 	}
 $cert =~ s/\r//g;
 $newkey =~ s/\r//g;
@@ -43,6 +54,8 @@ $err = &validate_cert_format($cert, "cert");
 $err && &error(&text('newkey_ecert2', $err));
 $err = &validate_cert_format($newkey, "key");
 $err && &error(&text('newkey_enewkey2', $err));
+
+#&error("key=<pre>".$newkey."</pre> cert=<pre>".$cert."</pre>");
 
 # Check if a passphrase is needed
 $passok = &check_passphrase($newkey, $in{'pass_def'} ? undef : $in{'pass'});
