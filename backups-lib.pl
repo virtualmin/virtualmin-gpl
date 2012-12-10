@@ -2980,6 +2980,7 @@ $st .= "<tr> <td>$text{'backup_rspath'}</td> <td>".
 				    $server.($path ? "/".$path : ""), 50).
        "</td> </tr>\n";
 $st .= "</table>\n";
+$st .= "<a href='http://affiliates.rackspacecloud.com/idevaffiliate.php?id=3533&url=105' target=_blank>$text{'backup_rssignup'}</a>\n";
 push(@opts, [ 6, $text{'backup_mode6'}, $st ]);
 
 if (!$nodownload) {
