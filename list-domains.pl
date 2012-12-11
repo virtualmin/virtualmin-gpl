@@ -399,9 +399,13 @@ if ($multi) {
 		if ($config{'spam'} && $d->{'spam'} && $multi == 1) {
 			$auto = &get_domain_spam_autoclear($d);
 			print "    Spam clearing policy: ",
-			      (!$auto ? "None" :
-			       $auto->{'days'} ? "$auto->{'days'} days" :
-						 "$auto->{'size'} bytes"),"\n";
+			  ($auto->{'days'} ? "$auto->{'days'} days" :
+			   $auto->{'size'} ? "$auto->{'size'} bytes" :
+					     "None"),"\n";
+			print "    Trash clearing policy: ",
+			  ($auto->{'trashdays'} ? "$auto->{'trashdays'} days" :
+			   $auto->{'trashsize'} ? "$auto->{'trashsize'} bytes" :
+						  "None"),"\n";
 			}
 
 		# Show PHP and suexec execution mode

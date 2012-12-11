@@ -28,6 +28,11 @@ enable this with the C<--spamclear-days> parameter followed by the maximum
 age in days, or C<--spamclear-size> followed by a size in bytes. Or to turn
 off spam deletion, use the C<--spamclear-none> parameter.
 
+Similarly you can enable automatic deletion from trash folders with the
+C<--trashclear-days> parameter followed by the maximum age in days, or
+C<--trashclear-size> followed by a size in bytes. Or to turn off trash
+deletion, use the C<--trashclear-none> parameter.
+
 SpamAssassin gives each message it scans a numeric score, and typically anything
 above 5 is considered spam and placed in a separate user folder. However, you
 can choose to simply delete all incoming spam with a score above some higher
@@ -63,6 +68,7 @@ $config{'spam'} || &usage("Spam filtering is not enabled for Virtualmin");
 
 # Parse command-line args
 $spamlevel = undef;
+$auto = { };
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -110,17 +116,34 @@ while(@ARGV > 0) {
 		$spam_client = $1;
 		}
 	elsif ($a eq "--spamclear-none") {
-		$auto = "";
+		$auto->{'days'} = $auto->{'size'} = undef;
 		}
 	elsif ($a eq "--spamclear-days") {
-		$auto = { 'days' => shift(@ARGV) };
+		$auto->{'days'} = shift(@ARGV);
 		$auto->{'days'} =~ /^\d+$/ ||
 		  &usage("The $a option must be followed by a number of days");
+		$auto->{'size'} = undef;
 		}
 	elsif ($a eq "--spamclear-size") {
-		$auto = { 'size' => shift(@ARGV) };
+		$auto->{'size'} = shift(@ARGV);
 		$auto->{'size'} =~ /^\d+$/ ||
 		  &usage("The $a option must be followed by a size in bytes");
+		$auto->{'days'} = undef;
+		}
+	elsif ($a eq "--trashclear-none") {
+		$auto->{'trashdays'} = $auto->{'trashsize'} = undef;
+		}
+	elsif ($a eq "--trashclear-days") {
+		$auto->{'trashdays'} = shift(@ARGV);
+		$auto->{'trashdays'} =~ /^\d+$/ ||
+		  &usage("The $a option must be followed by a number of days");
+		$auto->{'trashsize'} = undef;
+		}
+	elsif ($a eq "--trashclear-size") {
+		$auto->{'trashsize'} = shift(@ARGV);
+		$auto->{'trashsize'} =~ /^\d+$/ ||
+		  &usage("The $a option must be followed by a size in bytes");
+		$auto->{'trashdays'} = undef;
 		}
 	elsif ($a eq "--spam-delete-level") {
 		$spamlevel = shift(@ARGV);
@@ -195,8 +218,12 @@ foreach $d (@doms) {
 			&save_domain($d);
 			}
 		}
-	if (defined($auto)) {
-		&save_domain_spam_autoclear($d, $auto);
+	if (keys %$auto) {
+		my $oldauto = &get_domain_spam_autoclear($d);
+		foreach my $k (keys %$auto) {
+			$oldauto->{$k} = $auto->{$k};
+			}
+		&save_domain_spam_autoclear($d, $oldauto);
 		}
 	if (defined($virus_scanner)) {
 		&save_domain_virus_scanner($d, $virus_scanner);
@@ -248,6 +275,9 @@ print "                      [--use-spamassassin | --use-spamc]\n";
 print "                      [--spamclear-none |\n";
 print "                       --spamclear-days days\n";
 print "                       --spamclear-size bytes]\n";
+print "                      [--trashclear-none |\n";
+print "                       --trashclear-days days\n";
+print "                       --trashclear-size bytes]\n";
 print "                      [--use-clamscan | --use-clamdscan]\n";
 print "                      [--spamtrap | --no-spamtrap]\n";
 print "\n";
