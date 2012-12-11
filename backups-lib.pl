@@ -310,7 +310,7 @@ foreach my $desturl (@$desturls) {
 		local $sshcmd = "ssh".($port ? " -p $port" : "")." ".
 				$config{'ssh_args'}." ".
 				($user ? "$user\@" : "").$server;
-		local $rmcmd = $sshcmd." rm -f ".$testfile;
+		local $rmcmd = $sshcmd." rm -f ".quotemeta($testfile);
 		local $rmerr;
 		&run_ssh_command($rmcmd, $pass, \$rmerr);
 
