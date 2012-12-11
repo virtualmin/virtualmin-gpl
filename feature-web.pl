@@ -3864,7 +3864,7 @@ foreach my $d (@$doms) {
 			my @opts = &apache::find_directive("Options",
 							   $dir->{'members'});
 			foreach my $o (@opts) {
-				if ($o =~ /FollowSymLinks/) {
+				if ($o =~ /(\s|\+)FollowSymLinks/) {
 					$o =~ s/FollowSymLinks/SymLinksifOwnerMatch/g;
 					$fixed++;
 					}
@@ -3953,7 +3953,7 @@ my $olist = &get_allowed_options_list();
 foreach my $tmpl (&list_templates()) {
 	&lock_file($tmpl->{'file'} || $module_config_file);
 	if ($tmpl->{'web'} && $tmpl->{'web'} ne 'none' &&
-	    $tmpl->{'web'} =~ /FollowSymLinks/) {
+	    $tmpl->{'web'} =~ /(\s|\+)FollowSymLinks/) {
 		$tmpl->{'web'} =~ s/FollowSymLinks/SymLinksifOwnerMatch/g;
 		&save_template($tmpl);
 		}
