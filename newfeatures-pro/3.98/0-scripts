@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Z-push script installer to version 2.0.6, Dolibarr to 3.2.3, Django to 1.4.3, and Movable Type to 5.2.2. Added a script installer for FileCharger.
+html=Updated the Z-push script installer to version 2.0.6, Dolibarr to 3.2.3, Django to 1.4.3, WordPress to 3.5.0, and Movable Type to 5.2.2. Added a script installer for FileCharger.
 master=1
 reseller=1
 domain=1
