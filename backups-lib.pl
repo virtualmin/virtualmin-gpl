@@ -321,7 +321,8 @@ foreach my $desturl (@$desturls) {
 			local ($pathdir, $pathfile) = ($1, $2);
 
 			# ssh mkdir first
-			local $mkcmd = $sshcmd." mkdir -p ".quotemeta($path);
+			local $mkcmd = $sshcmd.
+				       " 'mkdir -p ".quotemeta($path)."'";
 			local $err;
 			local $lsout = &run_ssh_command($mkcmd, $pass, \$err);
 
