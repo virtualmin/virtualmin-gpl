@@ -46,9 +46,6 @@ else {
 		($sched) = grep { $_->{'id'} == $in{'oneoff'} } @scheds;
 		$sched || &error($text{'backup_egone'});
 		}
-	else {
-		$sched = $scheds[0];
-		}
 	$nodownload = 0;
 	$nopurge = 1;
 	}
@@ -245,10 +242,10 @@ if ($d) {
 if (&has_incremental_tar() && &has_incremental_format()) {
 	print &ui_table_row(
 		&hlink($text{'backup_increment'}, "backup_increment"),
-			    &ui_radio("increment", int($sched->{'increment'}),
-				      [ [ 0, $text{'backup_increment0'} ]."<br>",
-					[ 1, $text{'backup_increment1'} ]."<br>",
-					[ 2, $text{'backup_increment2'} ] ]));
+		&ui_radio("increment", int($sched->{'increment'}),
+			      [ [ 0, $text{'backup_increment0'}."<br>" ],
+				[ 1, $text{'backup_increment1'}."<br>" ],
+				[ 2, $text{'backup_increment2'} ] ]));
 	}
 
 # Before and after commands (fixed)
