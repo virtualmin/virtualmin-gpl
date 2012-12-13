@@ -2765,7 +2765,7 @@ foreach my $file (split(/\r?\n/, $out)) {
 			&read_file_lines_as_domain_user($d, $file);
 		local $fixed = 0;
 		foreach my $l (@$lref) {
-			if ($l =~ /^\s*Options.*FollowSymLinks/) {
+			if ($l =~ /^\s*Options.*(\s|\+)FollowSymLinks/) {
 				$l =~ s/FollowSymLinks/SymLinksifOwnerMatch/g;
 				$fixed++;
 				}
