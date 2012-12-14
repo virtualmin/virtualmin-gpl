@@ -2111,6 +2111,7 @@ backup_s3rrs=Use reduced redundancy storage?
 backup_rsuser=Rackspace username
 backup_rskey=Rackspace API key
 backup_rspath=Container and path
+backup_rssignup=Sign up for Rackspace Cloud Files..
 backup_ftpserver=FTP server
 backup_sshserver=SSH server
 backup_s3path=Bucket and path
