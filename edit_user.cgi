@@ -30,6 +30,15 @@ else {
 	&ui_print_header($din, $text{'user_edit'.$suffix}, "");
 	}
 
+# FTP user in a sub-server .. check if FTP restrictions are active
+if ($user->{'webowner'} && $d->{'parent'} && $config{'ftp'}) {
+	my @chroots = &list_ftp_chroots();
+	my ($home) = grep { $_->{'dir'} eq '~' } @chroots;
+	if (!$home) {
+		print "<b>$text{'user_chrootwarn'}</b><p>\n";
+		}
+	}
+
 @tds = ( "width=30%", "width=70%" );
 print &ui_form_start("save_user.cgi", "post");
 print &ui_hidden("new", $in{'new'});

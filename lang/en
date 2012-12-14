@@ -672,6 +672,7 @@ user_create=Create User
 user_createweb=Create FTP User
 user_edit=Edit User
 user_editweb=Edit FTP User
+user_chrootwarn=Warning : Because FTP directory restrictions are not enabled, this user will have access to the top-level server's web content as well.
 user_header=Virtual domain user mailbox details
 user_lheader=Local user mailbox details
 user_mheader=Virtual server administration user's mailbox details
