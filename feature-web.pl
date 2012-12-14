@@ -3793,6 +3793,7 @@ foreach my $d (@$doms) {
 		foreach my $p (@ports) {
 			local ($virt, $vconf, $conf) = &get_apache_virtual(
 				$d->{'dom'}, $p);
+			next if (!$virt);
 			local @admin = &apache::find_directive(
 					"php_admin_value", $vconf);
 			local ($engine) = grep { /engine\s+Off/i } @admin;
@@ -3856,6 +3857,7 @@ foreach my $d (@$doms) {
 	foreach my $p (@ports) {
 		local ($virt, $vconf, $conf) = &get_apache_virtual(
 						$d->{'dom'}, $p);
+		next if (!$virt);
 		local @dirs = &apache::find_directive_struct("Directory",
 							     $vconf);
 		foreach my $dir (@dirs) {
