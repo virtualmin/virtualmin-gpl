@@ -760,21 +760,14 @@ foreach my $d (@$doms) {
 	&obtain_lock_dns($d);
 	my $withdot = $d->{'dom'}.'.';
 	my $dkname = '_domainkey.'.$withdot;
-	my ($dkrec) = grep { $_->{'name'} eq $dkname &&
-			     $_->{'type'} eq 'TXT' } @$recs;
 	my $changed = 0;
-	if (!$dkrec) {
-		&bind8::create_record($file, $dkname, undef, 'IN', 'TXT',
-				      '"t=y; o=-;"');
-		$changed++;
-		}
 	my $selname = $dkim->{'selector'}.'.'.$dkname;
 	my ($selrec) = grep { $_->{'name'} eq $selname && 
 			      $_->{'type'} eq 'TXT' } @$recs;
 	if (!$selrec) {
 		# Add new record
 		&bind8::create_record($file, $selname, undef, 'IN', 'TXT',
-				      '"k=rsa; t=y; p='.$pubkey.'"');
+				      '"v=DKIM1; k=rsa; r=postmaster; t=s; p='.$pubkey.'"');
 		$changed++;
 		}
 	elsif ($selrec && $selrec->{'values'}->[0] !~ /p=\Q$pubkey\E/) {
