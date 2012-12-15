@@ -2764,9 +2764,16 @@ foreach my $file (split(/\r?\n/, $out)) {
 			&read_file_lines($file) :
 			&read_file_lines_as_domain_user($d, $file);
 		local $fixed = 0;
+		local $allowed = &get_allowed_options_list();
+		$allowed =~ s/^Options=//;
+		$allowed =~ s/,/ /g;
 		foreach my $l (@$lref) {
 			if ($l =~ /^\s*Options.*(\s|\+)FollowSymLinks/) {
 				$l =~ s/FollowSymLinks/SymLinksifOwnerMatch/g;
+				$fixed++;
+				}
+			elsif ($l =~ /^\s*Options.*(\s|\+)All(\s|$)/) {
+				$l =~ s/All/$allowed/g;
 				$fixed++;
 				}
 			}
