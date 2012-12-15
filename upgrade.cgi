@@ -101,6 +101,11 @@ if ($itype eq "rpm") {
 	# Update all Virtualmin-related packages
 	&foreign_require("software", "software-lib.pl");
 	foreach $p (&software::update_system_available()) {
+		if ($p->{'name'} eq 'wbm-virtualmin-multi-login' &&
+		    !&foreign_check('server-manager')) {
+			# Requires Cloudmin
+			next;
+			}
 		if ($p->{'name'} eq "webmin" || $p->{'name'} eq "usermin" ||
 		    $p->{'name'} =~ /^(wbm|wbt|usm|ust)-/) {
 			push(@packages, $p->{'name'});
@@ -142,6 +147,11 @@ elsif ($itype eq "deb") {
 	# Update all Virtualmin-related packages
 	&foreign_require("software", "software-lib.pl");
 	foreach $p (&software::update_system_available()) {
+		if ($p->{'name'} eq 'webmin-virtualmin-multi-login' &&
+		    !&foreign_check('server-manager')) {
+			# Requires Cloudmin
+			next;
+			}
 		if ($p->{'name'} eq "webmin" || $p->{'name'} eq "usermin" ||
 		    $p->{'name'} =~ /^(webmin|usermin)-(virtualmin|virtual-server|security-updates)/) {
 			if ($p->{'name'} eq 'webmin-virtual-server') {
