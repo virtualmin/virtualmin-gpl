@@ -13,10 +13,23 @@ $ubuntu_dkim_default = "/etc/default/opendkim";
 # Returns either 'ubuntu', 'debian', 'redhat' or undef
 sub get_dkim_type
 {
-return $gconfig{'os_type'} eq 'debian-linux' && $gconfig{'os_version'} >= 7 ?
-	 'ubuntu' :
-       $gconfig{'os_type'} eq 'debian-linux' ? 'debian' :
-       $gconfig{'os_type'} eq 'redhat-linux' ? 'redhat' : undef;
+if ($gconfig{'os_type'} eq 'debian-linux' && $gconfig{'os_version'} >= 7) {
+	# Debian 7+ uses OpenDKIM
+	return 'ubuntu';
+	}
+elsif ($gconfig{'os_type'} eq 'debian-linux' && $gconfig{'os_version'} >= 6 &&
+       !-x "/usr/sbin/dkim-filter") {
+	# Debian 6 can use OpenDKIM, unless it is already using dkim-filter
+	return 'ubuntu';
+	}
+elsif ($gconfig{'os_type'} eq 'debian-linux') {
+	# Older Debian versions only have dkim-filter
+	return 'debian';
+	}
+elsif ($gconfig{'os_type'} eq 'redhat-linux') {
+	return 'redhat';
+	}
+return undef;
 }
 
 # get_dkim_config_file()
