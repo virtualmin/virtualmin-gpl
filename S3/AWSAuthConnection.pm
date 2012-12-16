@@ -54,13 +54,36 @@ sub list_bucket {
     croak 'must specify bucket' unless $bucket;
     $options ||= {};
     $headers ||= {};
+    my @rv;
+    my $pos = undef;
 
-    my $path = $bucket;
-    if (%$options) {
-        $path .= "?" . join('&', map { "$_=" . urlencode($options->{$_}) } keys %$options)
-    }
+    my $response;
+    while(1) {
+	    my $path = $bucket;
+	    my %o = %$options;
+	    if ($pos) {
+		$o{'marker'} = $pos;
+	    }
+	    if (%o) {
+		$path .= "?".join('&', map { "$_=".urlencode($o{$_}) } keys %o)
+	    }
 
-    return S3::ListBucketResponse->new($self->_make_request('GET', $path, $headers));
+	    my $r = S3::ListBucketResponse->new(
+		$self->_make_request('GET', $path, $headers));
+	    if ($r->http_response->code != 200) {
+		return $r;
+	    }
+	    if ($response) {
+		# Add to existing response
+		push(@{$response->entries}, @{$r->entries});
+	    } else {
+		# This is the first response
+		$response = $r;
+	    }
+	    last if (!@{$r->entries});
+	    $pos = $r->entries->[@{$r->entries} - 1]->{'Key'};
+	}
+   return $response;
 }
 
 sub delete_bucket {
