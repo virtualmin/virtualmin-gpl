@@ -769,7 +769,9 @@ DOMAIN: foreach $d (@$doms) {
 
 		# Delete .backup directory
 		&execute_command("rm -rf ".quotemeta("$d->{'home'}/.backup"));
-		&execute_command("rm -rf ".quotemeta("$dest/$df"));
+		if (!$anylocal) {
+			&execute_command("rm -rf ".quotemeta("$dest/$df"));
+			}
 		}
 
 	&$outdent_print();
