@@ -14,37 +14,71 @@ $xfile && -r $xfile || return ("Not a complete Plesk 9, 10 or 11 backup file - m
 # Check if the domain is in there
 local $dump = &read_plesk_xml($xfile);
 ref($dump) || return ($dump);
-local $mig = $dump->{'Data'}->{'migration-dump'};
-$mig || return ("Missing migration-dump section in XML file");
-if (scalar(keys %{$mig->{'domain'}}) == 0 ||
-    $dom && !$mig->{'domain'}->{$dom} && $mig->{'domain'}->{'name'} ne $dom) {
-	# Inside client sub-section
-	$mig = $mig->{'client'}->{'domains'};
-	}
-if (!$dom) {
-	# Work out domain name
-	$dom = $mig->{'domain'}->{'name'};
-	$dom || return ("Could not work out domain name from backup");
-	}
-local $domain = $mig->{'domain'}->{$dom};
-if (!$domain && $mig->{'domain'}->{'name'} eq $dom) {
-	$domain = $mig->{'domain'};
-	}
-$domain || return ("Backup does not contain the domain $dom");
+use Data::Dumper;
+local $domain;
+if ($dump->{'admin'}->{'domains'}) {
+	# Plesk 11 format
+	if (!$dom) {
+		# Use first domain
+		foreach my $n (keys %{$dump->{'admin'}->{'domains'}->{'domain'}}) {
+			my $v = $dump->{'admin'}->{'domains'}->{'domain'}->{$n};
+			if ($v->{'phosting'}->{'preferences'}->{'sysuser'}->{'name'}) {
+				$dom = $n;
+				}
+			}
+		$dom || return ("Could not work out default domain");
+		}
+	$domain = $dump->{'admin'}->{'domains'}->{'domain'}->{$dom};
+	$domain || return ("Backup does not contain the domain $dom");
 
-if (!$parent && !$user) {
-	# Check if we can work out the user
-	$user = $domain->{'phosting'}->{'preferences'}->{'sysuser'}->{'name'};
-	$user ||
-	    return ("Could not work out original username from backup");
-	}
+	if (!$parent && !$user) {
+		# Check if we can work out the user
+		$user = $domain->{'phosting'}->{'preferences'}->{'sysuser'}->{'name'};
+		$user ||
+		  return ("Could not work out original username from backup");
+		}
 
-if (!$parent && !$pass) {
-	# Check if we can work out the password
-	$pass = $domain->{'phosting'}->{'preferences'}->{'sysuser'}->{'password'}->{'content'} ||
-		$domain->{'domainuser'}->{'password'}->{'content'};
-	$pass ||
-	    return ("Could not work out original password from backup");
+	if (!$parent && !$pass) {
+		$pass = $domain->{'phosting'}->{'preferences'}->{'sysuser'}->{'password'}->{'content'};
+		$pass ||
+		  return ("Could not work out original password from backup");
+		}
+	}
+else {
+	# Plesk 9 / 10 format, or Plesk 11 single-domain
+	local $mig = $dump->{'dump-format'} ? $dump :
+			$dump->{'Data'}->{'migration-dump'};
+	$mig || return ("Missing migration-dump section in XML file");
+	if (scalar(keys %{$mig->{'domain'}}) == 0 ||
+	    $dom && !$mig->{'domain'}->{$dom} && $mig->{'domain'}->{'name'} ne $dom) {
+		# Inside client sub-section
+		$mig = $mig->{'client'}->{'domains'};
+		}
+	if (!$dom) {
+		# Work out domain name
+		$dom = $mig->{'domain'}->{'name'};
+		$dom || return ("Could not work out domain name from backup");
+		}
+	$domain = $mig->{'domain'}->{$dom};
+	if (!$domain && $mig->{'domain'}->{'name'} eq $dom) {
+		$domain = $mig->{'domain'};
+		}
+	$domain || return ("Backup does not contain the domain $dom");
+
+	if (!$parent && !$user) {
+		# Check if we can work out the user
+		$user = $domain->{'phosting'}->{'preferences'}->{'sysuser'}->{'name'};
+		$user ||
+		    return ("Could not work out original username from backup");
+		}
+
+	if (!$parent && !$pass) {
+		# Check if we can work out the password
+		$pass = $domain->{'phosting'}->{'preferences'}->{'sysuser'}->{'password'}->{'content'} ||
+			$domain->{'domainuser'}->{'password'}->{'content'};
+		$pass ||
+		    return ("Could not work out original password from backup");
+		}
 	}
 
 return (undef, $dom, $user, $pass);
@@ -76,22 +110,36 @@ local ($ok, $root) = &extract_plesk9_dir($file);
 local ($xfile) = glob("$root/*.xml");
 local $dump = &read_plesk_xml($xfile);
 ref($dump) || &error($dump);
-local $mig = $dump->{'Data'}->{'migration-dump'};
-if (!$mig->{'domain'}->{$dom} &&
-    $mig->{'domain'}->{'name'} ne $dom) {
-	# Inside client sub-section
-	$mig = $mig->{'client'}->{'domains'};
-	}
+local $domain;
+if ($dump->{'admin'}->{'domains'}) {
+	# Plesk 11 format
 
-# Get the domain object from the XML
-local $domain = $mig->{'domain'}->{$dom};
-if (!$domain && $mig->{'domain'}->{'name'} eq $dom) {
-	$domain = $mig->{'domain'};
+	# Get the domain object and username if not specified
+	$domain = $dump->{'admin'}->{'domains'}->{'domain'}->{$dom};
+	if (!$user) {
+		$user = $domain->{'phosting'}->{'preferences'}->{'sysuser'}->{'name'};
+		}
 	}
+else {
+	# Plesk 9 / 10 format, or Plesk 11 single domain
+	local $mig = $dump->{'dump-format'} ? $dump :
+			$dump->{'Data'}->{'migration-dump'};
+	if (!$mig->{'domain'}->{$dom} &&
+	    $mig->{'domain'}->{'name'} ne $dom) {
+		# Inside client sub-section
+		$mig = $mig->{'client'}->{'domains'};
+		}
 
-# Work out user and group
-if (!$user) {
-	$user = $domain->{'phosting'}->{'preferences'}->{'sysuser'}->{'name'};
+	# Get the domain object from the XML
+	$domain = $mig->{'domain'}->{$dom};
+	if (!$domain && $mig->{'domain'}->{'name'} eq $dom) {
+		$domain = $mig->{'domain'};
+		}
+
+	# Work out user and group
+	if (!$user) {
+		$user = $domain->{'phosting'}->{'preferences'}->{'sysuser'}->{'name'};
+		}
 	}
 local $group = $user;
 local $ugroup = $group;
@@ -99,6 +147,8 @@ local $ugroup = $group;
 # Extract the tar.gz file containing additional content
 &$first_print("Finding contents files ..");
 local $cids = $domain->{'phosting'}->{'content'}->{'cid'};
+use Data::Dumper;
+print Dumper($cids);
 if (!$cids) {
 	&$second_print(".. no contents data found!");
 #	return ( \%dom );
@@ -566,7 +616,7 @@ if ($got{'mysql'}) {
 		local $cids = [ $database->{'content'}->{'cid'} ];
 		local $sqldir = &extract_plesk9_cid($root, $cids, "sqldump");
 		local ($sqlfile) = glob("$sqldir/*$name*");
-		if (!$sqlfile && !-f $sqlfile) {
+		if (!$sqlfile || !-f $sqlfile) {
 			($sqlfile) = glob("$sqldir/backup_*");
 			}
 		if (!$sqldir) {
@@ -907,6 +957,10 @@ local ($basedir, $cids, $type) = @_;
 local ($cid) = grep { $_->{'type'} eq $type } @$cids;
 return undef if (!$cid);
 local $file = $basedir."/".$cid->{'path'}."/".$cid->{'content-file'}->{'content'};
+if (!-r $file) {
+	# Try path as seen on Plesk 11
+	$file = $basedir."/".$cid->{'content-file'}->{'content'};
+	}
 -r $file || return undef;
 local $dir = $main::extract_plesk9_cid_cache{$file};
 if (!$dir) {
