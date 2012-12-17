@@ -4244,7 +4244,7 @@ if ($config{'mail_system'} == 1) {
 	local $cwfile;
 	local @dlist = &sendmail::get_file_or_config($conf, "R", undef,
 						     \$cwfile);
-	if (&indexof(lc($dom), (map { lc($_) } @dlist)) >= 0) {
+	if (&indexoflc($dom, @dlist) >= 0) {
 		return $text{'newmxs_already'};
 		}
 	&lock_file($cwfile) if ($cwfile);
