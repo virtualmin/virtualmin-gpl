@@ -361,18 +361,28 @@ if ($dkim_config) {
 	&save_debian_dkim_config($dkim_config,
                 "Syslog", "yes");
 
+	my $conf = &get_debian_dkim_config($dkim_config);
 	if (&get_dkim_type() eq 'ubuntu') {
-		# OpenDKIM version supplied with Ubuntu doesn't support the
-		# KeyList parameter
+		# OpenDKIM version supplied with Ubuntu and Debian 6 supports
+		# a domains file
+		my $domfile = $conf->{'Domain'};
+		if ($domfile !~ /^\//) {
+			$domfile = $dkim_config;
+			$domfile =~ s/\/[^\/]+$/\/dkim-domains.txt/;
+			}
+		&open_lock_tempfile(DOMAINS, ">$domfile");
+		foreach my $dom ((map { $_->{'dom'} } @doms),
+				 @{$dkim->{'extra'}}) {
+			&print_tempfile(DOMAINS, "$dom\n");
+			}
+		&close_tempfile(DOMAINS);
 		&save_debian_dkim_config($dkim_config,
-			"Domain", join(",", &unique((map { $_->{'dom'} } @doms),
-						    @{$dkim->{'extra'}})));
+					 "Domain", $domfile);
 		}
 	else {
 		# Work out mapping file
 		&save_debian_dkim_config($dkim_config, 
 			"Domain", undef);
-		my $conf = &get_debian_dkim_config($dkim_config);
 		my $keylist = $conf->{'KeyList'};
 		if (!$keylist) {
 			$keylist = $dkim_config;
@@ -729,10 +739,19 @@ if ($dkim_config) {
 		}
 	else {
 		# Just set list of domains
+		my $domfile = $conf->{'Domain'};
+		if ($domfile !~ /^\//) {
+			$domfile = $dkim_config;
+			$domfile =~ s/\/[^\/]+$/\/dkim-domains.txt/;
+			}
+		&open_lock_tempfile(DOMAINS, ">$domfile");
+		foreach my $dom ((map { $_->{'dom'} } @$doms),
+				 @{$dkim->{'extra'}}) {
+			&print_tempfile(DOMAINS, "$dom\n");
+			}
+		&close_tempfile(DOMAINS);
 		&save_debian_dkim_config($dkim_config,
-			"Domain",
-			join(",", &unique((map { $_->{'dom'} } @$doms),
-					  @{$dkim->{'extra'}})));
+					 "Domain", $domfile);
 		}
 
 	# Restart milter
