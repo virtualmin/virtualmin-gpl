@@ -467,7 +467,7 @@ else {
 	print &ui_form_end(
 	   [ [ "save", $text{'save'} ],
 	     $usermin ? ( [ "switch", $text{'user_switch'}, undef, undef,
-			    "onClick='form.target = \"_new\"'" ] ) : ( ),
+			    "onClick='form.target = \"_blank\"'" ] ) : ( ),
 	     &will_send_user_email($d) && $user->{'email'} ?
 	     	( [ "remailbut", $text{'user_remailbut'} ] ) : ( ),
 	     $mailbox ? ( ) : ( [ "delete", $text{'delete'} ] ) ]);
