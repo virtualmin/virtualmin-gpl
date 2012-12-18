@@ -2449,6 +2449,7 @@ if (&foreign_check("dovecot")) {
 }
 
 # rename_mail_file(&user, &olduser)
+# Rename a user's mail files, if they change due to a user rename
 sub rename_mail_file
 {
 return if (&mail_under_home());
@@ -2476,6 +2477,28 @@ elsif ($config{'mail_system'} == 4) {
 	# Rename from LDAP property
 	&rename_logged($_[1]->{'mailstore'}, $_[0]->{'mailstore'});
 	}
+
+# Rename Dovecot index files
+if (&foreign_check("dovecot")) {
+	&foreign_require("dovecot", "dovecot-lib.pl");
+	local $conf = &dovecot::get_config();
+	local $loc = &dovecot::find_value("mail_location", $conf);
+	$loc ||= &dovecot::find_value("default_mail_env", $conf);
+	local @doves;
+	if ($loc =~ /INDEX=([^:]+)\/%u/) {
+		push(@doves, $1);
+		}
+	if ($loc =~ /CONTROL=([^:]+)\/%u/) {
+		push(@doves, $1);
+		}
+	foreach my $dove (@doves) {
+		&rename_file($dove."/".$_[1]->{'user'},
+			     $dove."/".$_[0]->{'user'});
+		&rename_file($dove."/".&replace_atsign($_[1]->{'user'}),
+			     $dove."/".&replace_atsign($_[0]->{'user'}));
+		}
+	}
+
 }
 
 # mail_under_home()
