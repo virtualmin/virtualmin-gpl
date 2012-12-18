@@ -106,6 +106,10 @@ print &ui_table_row($text{'form_plan'},
 if ($config{'mysql'}) {
 	print &ui_table_row($text{'import_db_mysql'},
 			    &ui_textbox("db_mysql", undef, 40));
+
+	print &ui_table_row($text{'import_db_mysql_user'},
+			    &ui_opt_textbox("db_mysql_user", undef, 20,
+					    $text{'import_db_mysql_same'}));
 	}
 
 # PostgreSQL database names

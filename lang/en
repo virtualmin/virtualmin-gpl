@@ -1366,6 +1366,8 @@ import_gdf=Create automatically (same as username)
 import_gex=New or existing specified group
 import_webmin=Create Webmin login to manage server?
 import_db_mysql=MySQL database names
+import_db_mysql_user=MySQL username
+import_db_mysql_same=Same as administration user
 import_db_postgres=PostgreSQL database names
 import_ip=IP address used by Apache and DNS
 import_hasvirt=IP address is unique to domain?
@@ -1373,6 +1375,8 @@ import_show=Show What Will Be Imported ..
 import_regexp=Find mailbox users by
 import_regexpg=Primary group
 import_regexpr=Matching regexp
+import_emysql_user=Missing MySQL username
+import_emysql_user2=The specified MySQL user does not exist
 
 import_err=Import failed
 import_eexists=The specified domain is already managed by Virtualmin

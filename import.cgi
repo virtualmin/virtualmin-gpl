@@ -31,6 +31,16 @@ if (!$parent) {
 		&error(&text('setup_eroot2', join(" ", @banned_usernames)));
 	}
 
+# Validate MySQL username
+if (!$parent && $config{'mysql'} && !$in{'db_mysql_user_def'}) {
+	$in{'db_mysql_user'} =~ /^\S+$/ ||
+		&error($text{'import_emysql_user'});
+	my $faked = { 'dom' => $in{'dom'} };
+	&set_provision_features($faked);
+	&check_mysql_user_clash($faked, $in{'db_mysql_user'}) ||
+		&error($text{'import_emysql_user2'});
+	}
+
 # Make sure IP is valid
 if ($in{'virt'}) {
 	&foreign_require("net", "net-lib.pl");
@@ -151,6 +161,9 @@ if ($in{'confirm'}) {
 		 'plan', $plan->{'id'},
 		 'reseller', undef,
 		);
+	if (!$in{'db_mysql_user_def'} && $config{'mysql'}) {
+		$dom{'mysql_user'} = $in{'db_mysql_user'};
+		}
 	foreach $f (&list_feature_plugins()) {
 		$dom{$f} = int($found{$f});
 		}
