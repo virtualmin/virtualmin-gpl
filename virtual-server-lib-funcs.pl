@@ -7368,7 +7368,7 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 	# Run the before command
 	&set_domain_envs($dd, "DELETE_DOMAIN");
 	local $merr = &making_changes();
-	&reset_domain_envs($d);
+	&reset_domain_envs($dd);
 	return &text('delete_emaking', "<tt>$merr</tt>")
 		if (defined($merr));
 
@@ -7512,6 +7512,7 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 	# Call post script
 	&set_domain_envs($dd, "DELETE_DOMAIN");
 	local $merr = &made_changes();
+	&reset_domain_envs($dd);
 	&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
 		if (defined($merr));
 
