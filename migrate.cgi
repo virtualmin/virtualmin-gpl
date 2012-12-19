@@ -104,6 +104,12 @@ $mfunc = "migration_$in{'type'}_migrate";
 		$netmask);
 &run_post_actions();
 &$outdent_print();
+
+# Fix htaccess files
+foreach my $d (@doms) {
+	&fix_script_htaccess_files($d, &public_html_dir($d));
+	}
+
 if (@doms) {
 	$d = $doms[0];
 	&$second_print(&text('migrate_ok', "edit_domain.cgi?dom=$d->{'id'}", scalar(@doms)));

@@ -131,6 +131,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--test") {
+		$test_only = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -181,7 +184,13 @@ if ($err) {
 	&$second_print(".. validation failed : $err");
 	exit(3);
 	}
-&$second_print(".. done");
+if ($test_only) {
+	&$second_print(".. found domain $domain user $user password $pass");
+	exit(0);
+	}
+else {
+	&$second_print(".. done");
+	}
 
 # Delete any existing clashing domain
 if ($delete_existing && $domain) {
@@ -209,6 +218,11 @@ $mfunc = "migration_${type}_migrate";
 		$ip, $virt, $pass, $parent, $prefix, $virtalready, $email,
 		$netmask);
 &run_post_actions();
+
+# Fix htaccess files
+foreach my $d (@doms) {
+	&fix_script_htaccess_files($d, &public_html_dir($d));
+	}
 
 # Show the result
 if (@doms) {
@@ -239,6 +253,7 @@ print "                         [--ip-already]\n";
 print "                         [--parent domain]\n";
 print "                         [--prefix string]\n";
 print "                         [--delete-existing]\n";
+print "                         [--test]\n";
 print "\n";
 print "The source can be one of :\n";
 print " - A local file, like /backup/yourdomain.com.tgz\n";
