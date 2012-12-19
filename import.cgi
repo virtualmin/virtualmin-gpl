@@ -26,19 +26,21 @@ if (!$parent) {
 	$in{'group_def'} || $in{'group'} =~ /^[^\t :]+$/ ||
 		&error_exit($text{'import_egroup'});
 	$in{'user_def'} || &indexof($in{'user'}, @banned_usernames) < 0 ||
-		&error(&text('setup_eroot', join(" ", @banned_usernames)));
+		&error_exit(&text('setup_eroot', join(" ", @banned_usernames)));
 	$in{'group_def'} || &indexof($in{'group'}, @banned_usernames) < 0 ||
-		&error(&text('setup_eroot2', join(" ", @banned_usernames)));
+		&error_exit(&text('setup_eroot2', join(" ", @banned_usernames)));
 	}
 
 # Validate MySQL username
 if (!$parent && $config{'mysql'} && !$in{'db_mysql_user_def'}) {
 	$in{'db_mysql_user'} =~ /^\S+$/ ||
-		&error($text{'import_emysql_user'});
+		&error_exit($text{'import_emysql_user'});
 	my $faked = { 'dom' => $in{'dom'} };
 	&set_provision_features($faked);
 	&check_mysql_user_clash($faked, $in{'db_mysql_user'}) ||
-		&error($text{'import_emysql_user2'});
+		&error_exit($text{'import_emysql_user2'});
+	&indexof($in{'db_mysql_user'}, @banned_usernames) < 0 ||
+                &error_exit(&text('setup_eroot', join(" ", @banned_usernames)));
 	}
 
 # Make sure IP is valid
