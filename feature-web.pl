@@ -1159,6 +1159,10 @@ elsif ($log =~ /^\|/) {
 	# Via some program .. so we don't know where the real log is
 	$log = undef;
 	}
+if ($log && $log !~ /^\//) {
+	# Convert to absolute path
+	$log = &apache::server_root($log);
+	}
 return $log;
 }
 
