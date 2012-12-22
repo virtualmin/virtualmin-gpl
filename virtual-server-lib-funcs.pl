@@ -4329,7 +4329,7 @@ foreach my $v (&get_global_template_variables()) {
 sub reset_domain_envs
 {
 foreach my $e (keys %ENV) {
-	delete($ENV{$e}) if ($e =~ /^(VIRTUALSERVER_|RESELLER_|PARENT_VIRTUALSERVER_)/);
+	delete($ENV{$e}) if ($e =~ /^(VIRTUALSERVER_|RESELLER_|PARENT_VIRTUALSERVER_|GLOBAL_)/);
 	}
 }
 
