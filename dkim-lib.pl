@@ -310,7 +310,7 @@ else {
 
 # Generate private key
 if (!$dkim->{'keyfile'} || !-r $dkim->{'keyfile'} || $newkey) {
-	my $size = 1024;
+	my $size = 2048;
 	$dkim->{'keyfile'} ||= "/etc/dkim.key";
 	&$first_print(&text('dkim_newkey', "<tt>$dkim->{'keyfile'}</tt>"));
 	&lock_file($dkim->{'keyfile'});
