@@ -3337,12 +3337,14 @@ if (!$_[2]->{'mailuser'}) {
 	foreach $a (&list_domain_aliases($_[0], 1)) {
 		&delete_virtuser($a);
 		}
+	local %existing = map { $_->{'from'}, $_ } &list_virtusers();
 	local $_;
 	open(AFILE, "$_[1]_aliases");
 	while(<AFILE>) {
 		if (/^(\S+):\s*(.*)/) {
 			local $virt = { 'from' => $1,
 					'to' => [ split(/,/, $2) ] };
+			next if ($exists{$virt->{'from'}}++);
 			if ($virt->{'to'}->[0] =~ /^(\S+)\\@(\S+)$/ &&
 			    $config{'mail_system'} == 0) {
 				# Virtuser is to a local user with an @ in
@@ -3354,8 +3356,10 @@ if (!$_[2]->{'mailuser'}) {
 			eval {
 				# Alias creation can fail if a clash exists..
 				# but just skip it
-				local $main::error_must_die = 1;
-				&create_virtuser($virt);
+				eval {
+					local $main::error_must_die = 1;
+					&create_virtuser($virt);
+					};
 				};
 			}
 		}
