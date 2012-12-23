@@ -1378,4 +1378,4 @@ If running Virtualmin in SSL mode with a certificate of less than 2048 bits, a w
 Virtualmin will now prompt the root user after logging in if any virtual servers with unsafe symlink or mod_php settings are found. Previous versions applied fixes for these security issues automatically, which broke some domains.
 Backups can now be prevented from updating the incremental state, so that ad-hoc backups can be run without interfering with scheduled incremental backups.
 ---- Changes since 3.97 ----
-Updated the Z-push script installer to version 2.0.6, Dolibarr to 3.2.3, Django to 1.4.3, WordPress to 3.5.0, TWiki to 5.1.3, SMF to 2.0.3, CMS Made Simple to 1.11.4, Drupal to 7.18 and 6.27, phpMyAdmin to 3.5.5, eXtplorer to 2.1.2, and Movable Type to 5.2.2. Added a script installer for FileCharger.
+Updated the Z-push script installer to version 2.0.6, Dolibarr to 3.2.3, Django to 1.4.3, WordPress to 3.5.0, TWiki to 5.1.3, SMF to 2.0.3, CMS Made Simple to 1.11.4, Drupal to 7.18 and 6.27, phpMyAdmin to 3.5.5, eXtplorer to 2.1.2, and Movable Type to 5.2.2. Added script installers for FileCharger and AjaXplorer.
