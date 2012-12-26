@@ -1537,9 +1537,14 @@ else {
 sub osdn_package_versions
 {
 local ($project, @res) = @_;
+local $subdir;
+if ($project =~ /^([^\/]+)(\/\S+)$/) {
+	$project = $1;
+	$subdir = $2;
+	}
 local ($alldata, $err);
 &http_download($osdn_website_host, $osdn_website_port,
-	       "/projects/$project/files",
+	       "/projects/$project/files".$subdir,
 	       \$alldata, \$err, undef, 0, undef, undef, undef, 0, 1);
 return ( ) if ($err);
 
@@ -1547,7 +1552,7 @@ return ( ) if ($err);
 local @data = ( $alldata );
 local $data = $alldata;
 local %donepath;
-while($data =~ /href="(\/projects\/$project\/files\/[^: ]+)"(.*)/is) {
+while($data =~ /href="(\/projects\/$project\/files\Q$subdir\E\/[^: ]+)"(.*)/is) {
 	$data = $2;
 	local $spath = $1;
 	next if ($donepath{$spath}++ || $spath =~ /\/stats\/timeline/ ||
