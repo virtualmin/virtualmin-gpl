@@ -153,7 +153,6 @@ if ($in{'confirm'}) {
 		 'iface', $in{'virt'} ? $iface->{'fullname'} : "",
 		 'virt', $in{'virt'},
 		 'dns', int($found{'dns'}),
-		 'pass', $parent ? $parent->{'pass'} : $in{'pass'},
 		 'db', $dbs[0],
 		 'db_mysql', $in{'found_mysql'},
 		 'db_postgres', $in{'found_postgres'},
@@ -163,6 +162,20 @@ if ($in{'confirm'}) {
 		 'plan', $plan->{'id'},
 		 'reseller', undef,
 		);
+	if ($parent) {
+		# Password comes from parent
+		$dom{'pass'} = $parent->{'pass'};
+		}
+	elsif ($in{'pass_def'}) {
+		# Existing encrypted password
+		$uinfo || &error($text{'import_eencpass'});
+		$dom{'enc_pass'} = $uinfo{'pass'};
+		}
+	else {
+		# Entered plaintext password
+		$dom{'pass'} = $in{'pass'};
+		&generate_domain_password_hashes(\%dom, 1);
+		}
 	if (!$in{'db_mysql_user_def'} && $config{'mysql'}) {
 		$dom{'mysql_user'} = $in{'db_mysql_user'};
 		}
@@ -174,7 +187,6 @@ if ($in{'confirm'}) {
 		&set_capabilities_from_plan(\%dom, $plan);
 		&set_featurelimits_from_plan(\%dom, $plan);
 		}
-	&generate_domain_password_hashes(\%dom, 1);
 	$dom{'emailto'} = $dom{'email'} ||
 			  $dom{'user'}.'@'.&get_system_hostname();
 

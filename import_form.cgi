@@ -25,9 +25,14 @@ form.group.disabled = dis;
 form.group_def[0].disabled = dis;
 form.group_def[1].disabled = dis;
 form.pass.disabled = dis;
+form.pass_def[0].disabled = dis;
+form.pass_def[1].disabled = dis;
 form.webmin[0].disabled = dis;
 form.webmin[1].disabled = dis;
 form.plan.disabled = dis;
+form.db_mysql_user_def[0].disabled = dis;
+form.db_mysql_user_def[1].disabled = dis;
+form.db_mysql_user.disabled = dis;
 }
 </script>
 EOF
@@ -81,7 +86,7 @@ print &ui_table_row($text{'migrate_prefix'},
 
 # Password
 print &ui_table_row($text{'import_pass'},
-		    &ui_password("pass", undef, 20));
+	    &ui_opt_textbox("pass", undef, 20, $text{'import_encpass'}));
 
 # Create Webmin user
 print &ui_table_row($text{'import_webmin'},
