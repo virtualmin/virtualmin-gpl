@@ -3008,7 +3008,7 @@ if (!&mail_under_home()) {
 	else {
 		local $mfiles = join(" ", map { quotemeta($_) } @mfiles);
 		local $out;
-		&execute_command("cd '$mbase'; tar cf '$_[1]_files' $mfiles",
+		&execute_command("cd '$mbase' && tar cf '$_[1]_files' $mfiles",
 				 undef, \$out, \$out);
 		if ($?) {
 			&$second_print(&text('backup_mailfilesfailed',
@@ -3081,6 +3081,30 @@ if (&foreign_check("dovecot") && &foreign_installed("dovecot")) {
 			&$second_print($text{'backup_nomailcontrol'});
 			}
 		}
+	}
+
+# If any user's homes are outside the domain root, back them up separately
+local @homeless;
+foreach $u (&list_domain_users($_[0], 1)) {
+	if ($u->{'unix'} && -d $u->{'home'} &&
+	    !&is_under_directory($_[0]->{'home'}, $u->{'home'})) {
+		push(@homeless, $u);
+		}
+	}
+if (@homeless) {
+	&$first_print(&text('backup_mailhomeless', scalar(@homeless)));
+	foreach my $u (@homeless) {
+		local $file = $_[1]."_homes_".$u->{'user'};
+		local $out;
+		&execute_command("cd ".quotemeta($u->{'home'})." && ".
+				 "tar cf ".quotemeta($file)." .",
+				 undef, \$out, \$out);
+		if ($?) {
+			&$second_print(&text('backup_mailhomefailed',
+					     "<pre>$out</pre>"));
+			}
+		}
+	&$second_print($text{'setup_done'});
 	}
 
 return 1;
@@ -3244,6 +3268,21 @@ while(<UFILE>) {
 		# location has moved
 		if ($uinfo->{'email'} && !$uinfo->{'nomailfile'}) {
 			&create_mail_file($uinfo, $_[0]);
+			}
+
+		# If the user's home is outside the domain's home, re-extract
+		# it from the backup
+		if ($uinfo->{'unix'} &&
+		    !&is_under_directory($_[0]->{'home'}, $uinfo->{'home'})) {
+			local $file = $_[1]."_homes_".$uinfo->{'user'};
+			if (!-d $uinfo->{'home'}) {
+				&create_user_home($uinfo, $_[0]);
+				}
+			local $out;
+			&execute_command(
+				"cd ".quotemeta($uinfo->{'home'})." && ".
+				"tar xf ".quotemeta($file)." .",
+				undef, \$out, \$out);
 			}
 		}
 	}
