@@ -1771,6 +1771,13 @@ if ($config{'mail_system'} == 1) {
 			  "to" => $smto[0],
 			  "cmt" => $_[0]->{'cmt'} };
 		}
+	local @svirts = &sendmail::list_virtusers($sendmail_vfile);
+	local ($vclash) = grep { $_->{'from'} eq $virt->{'from'} } @svirts;
+	if ($vclash) {
+		# Replace clash
+		&sendmail::delete_virtuser($vclash, $sendmail_vfile,
+                                           $sendmail_vdbm, $sendmail_vdbmtype);
+		}
 	&sendmail::create_virtuser($virt, $sendmail_vfile,
 				   $sendmail_vdbm,
 				   $sendmail_vdbmtype);
