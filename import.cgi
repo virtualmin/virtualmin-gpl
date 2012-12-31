@@ -169,7 +169,7 @@ if ($in{'confirm'}) {
 	elsif ($in{'pass_def'}) {
 		# Existing encrypted password
 		$uinfo || &error($text{'import_eencpass'});
-		$dom{'enc_pass'} = $uinfo{'pass'};
+		$dom{'enc_pass'} = $uinfo->{'pass'};
 		}
 	else {
 		# Entered plaintext password
