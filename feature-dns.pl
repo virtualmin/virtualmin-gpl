@@ -1440,6 +1440,17 @@ if ($d->{'mail'} && $config{'mx_validate'}) {
 				$found = $ip;
 				last;
 				}
+			local ($arec) = grep { $_->{'name'} eq $mxh."." &&
+					       $_->{'type'} eq 'A' } @$recs;
+			if ($arec) {
+				$ip = $arec->{'values'}->[0];
+				if ($ip eq $d->{'ip'} ||
+				    $ip eq $d->{'dns_ip'} ||
+				    $ip eq $defip) {
+					$found = $ip;
+					last;
+					}
+				}
 			push(@mxips, $mxh);
 			}
 		if (!$found) {
