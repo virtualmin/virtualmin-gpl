@@ -13528,6 +13528,8 @@ local @mounts = &mount::list_mounts();
 local @mounted = &mount::list_mounted();
 # Exclude swap mounts
 local @realmounts = grep { $_->[0] ne 'none' &&
+			   $_->[0] ne 'proc' &&
+			   $_->[0] ne '/proc' &&
 			   $_->[0] !~ /^swap/ &&
 			   $_->[1] ne 'none' } @mounts;
 if (!@realmounts) {
