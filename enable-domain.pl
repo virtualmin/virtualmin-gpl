@@ -114,7 +114,7 @@ foreach $d (@doms) {
 	}
 
 &run_post_actions();
-&virtualmin_api_log(\@OLDARGV, $d);
+&virtualmin_api_log(\@OLDARGV, $doms[0]);
 print "All done!\n";
 
 sub usage

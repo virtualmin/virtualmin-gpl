@@ -1478,7 +1478,9 @@ disable_nothing=This domain does not have any features which are configured to b
 disable_status=Deactivating website status monitoring ..
 disable_statusssl=Deactivating SSL website status monitoring ..
 disable_users=Locking mail users' accounts ..
-disable_why=Reason for disabling:
+disable_why=Reason for disabling
+disable_subservers=Also disable sub-servers?
+disable_doing=Disabling virtual server $1 ..
 
 enable_title=Enable Server
 enable_rusure2=Are you sure you want to re-enable the virtual server $1? Its $2 will be restored to their original enabled states.
@@ -1500,6 +1502,8 @@ enable_emaking=Before enable command failed : $1
 enable_status=Re-activating website status monitoring ..
 enable_statusssl=Re-activating SSL website status monitoring ..
 enable_users=Un-locking mail users' accounts ..
+enable_subservers=Also enable sub-servers?
+enable_doing=Enabling virtual server $1 ..
 
 mail_usubject=Mailbox created
 mail_dsubject=Virtual server created
