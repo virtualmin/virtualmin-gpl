@@ -8,6 +8,9 @@ This program reverses the disable process done by C<disable-domain> , or in
 the Virtualmin web interface. It will restore the server to the state it was
 in before being disabled.
 
+To have all sub-servers owned by the same user as the specified server
+enabled as well, use the C<--subservers> flag.
+
 =cut
 
 package virtual_server;
@@ -39,6 +42,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--subservers") {
+		$subservers = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -49,53 +55,66 @@ $domain || usage("No domain specified");
 $d = &get_domain_by("dom", $domain);
 $d || &usage("Virtual server $domain does not exist");
 !$d->{'disabled'} && &usage("Virtual server $domain is not disabled");
+@doms = ( $d );
 
-# Work out what can be enabled
-@enable = &get_enable_features($d);
-
-# Go ahead and do it
-print "Enabling virtual server $domain ..\n\n";
-%enable = map { $_, 1 } @enable;
-delete($d->{'disabled_reason'});
-delete($d->{'disabled_why'});
-
-# Run the before command
-&set_domain_envs($d, "ENABLE_DOMAIN");
-$merr = &making_changes();
-&reset_domain_envs($d);
-&usage(&text('enable_emaking', "<tt>$merr</tt>")) if (defined($merr));
-
-# Enable all disabled features
-my $f;
-foreach $f (@features) {
-	if ($d->{$f} && $enable{$f}) {
-		local $efunc = "enable_$f";
-		&try_function($f, $efunc, $d);
-		}
-	}
-foreach $f (&list_feature_plugins()) {
-	if ($d->{$f} && $enable{$f}) {
-		&plugin_call($f, "feature_enable", $d);
+# If enabling sub-servers, find them too
+if ($subservers && !$d->{'parent'}) {
+	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
+		if ($sd->{'disabled'}) {
+			push(@doms, $sd);
+			}
 		}
 	}
 
-# Enable extra admins
-&update_extra_webmin($d, 0);
+foreach $d (@doms) {
+	# Work out what can be enabled
+	@enable = &get_enable_features($d);
 
-# Save new domain details
-&$first_print($text{'save_domain'});
-delete($d->{'disabled'});
-&save_domain($d);
-&$second_print($text{'setup_done'});
+	# Go ahead and do it
+	print "Enabling virtual server $d->{'dom'} ..\n\n";
+	%enable = map { $_, 1 } @enable;
+	delete($d->{'disabled_reason'});
+	delete($d->{'disabled_why'});
 
-# Run the after command
+	# Run the before command
+	&set_domain_envs($d, "ENABLE_DOMAIN");
+	$merr = &making_changes();
+	&reset_domain_envs($d);
+	&usage(&text('enable_emaking', "<tt>$merr</tt>")) if (defined($merr));
+
+	# Enable all disabled features
+	my $f;
+	foreach $f (@features) {
+		if ($d->{$f} && $enable{$f}) {
+			local $efunc = "enable_$f";
+			&try_function($f, $efunc, $d);
+			}
+		}
+	foreach $f (&list_feature_plugins()) {
+		if ($d->{$f} && $enable{$f}) {
+			&plugin_call($f, "feature_enable", $d);
+			}
+		}
+
+	# Enable extra admins
+	&update_extra_webmin($d, 0);
+
+	# Save new domain details
+	&$first_print($text{'save_domain'});
+	delete($d->{'disabled'});
+	&save_domain($d);
+	&$second_print($text{'setup_done'});
+
+	# Run the after command
+	&set_domain_envs($d, "ENABLE_DOMAIN");
+	local $merr = &made_changes();
+	&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
+		if (defined($merr));
+	&reset_domain_envs($d);
+	}
+
 &run_post_actions();
-&set_domain_envs($d, "ENABLE_DOMAIN");
-local $merr = &made_changes();
-&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
-&reset_domain_envs($d);
-
-&virtualmin_api_log(\@OLDARGV);
+&virtualmin_api_log(\@OLDARGV, $d);
 print "All done!\n";
 
 sub usage
@@ -104,6 +123,7 @@ print $_[0],"\n" if ($_[0]);
 print "Enables all disabled features in the specified virtual server.\n";
 print "\n";
 print "virtualmin enable-domain --domain domain.name\n";
+print "                        [--subservers]\n";
 exit(1);
 }
 

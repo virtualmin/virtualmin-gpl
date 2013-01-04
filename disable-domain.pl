@@ -13,6 +13,9 @@ The optional C<--why> parameter can be followed by a description explaining
 why the domain has been disabled, which will be shown when anyone tries to
 edit it in Virtualmin.
 
+To have all sub-servers owned by the same user as the specified server
+disabled as well, use the C<--subservers> flag.
+
 =cut
 
 package virtual_server;
@@ -47,6 +50,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--subservers") {
+		$subservers = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -57,54 +63,68 @@ $domain || usage("No domain specified");
 $d = &get_domain_by("dom", $domain);
 $d || &usage("Virtual server $domain does not exist");
 $d->{'disabled'} && &usage("Virtual server $domain is already disabled");
+@doms = ( $d );
 
-# Work out what can be disabled
-@disable = &get_disable_features($d);
-
-# Disable it
-print "Disabling virtual server $domain ..\n\n";
-%disable = map { $_, 1 } @disable;
-$d->{'disabled_reason'} = 'manual';
-$d->{'disabled_why'} = $why;
-
-# Run the before command
-&set_domain_envs($d, "DISABLE_DOMAIN");
-$merr = &making_changes();
-&reset_domain_envs($d);
-&usage(&text('disable_emaking', "<tt>$merr</tt>")) if (defined($merr));
-
-# Disable all configured features
-my $f;
-foreach $f (@features) {
-	if ($d->{$f} && $disable{$f}) {
-		local $dfunc = "disable_$f";
-		if (&try_function($f, $dfunc, $d)) {
-			push(@disabled, $f);
+# If disabling sub-servers, find them too
+if ($subservers && !$d->{'parent'}) {
+	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
+		if (!$sd->{'disabled'}) {
+			push(@doms, $sd);
 			}
 		}
 	}
-foreach $f (&list_feature_plugins()) {
-	if ($d->{$f} && $disable{$f}) {
-		&plugin_call($f, "feature_disable", $d);
-		push(@disabled, $f);
+
+foreach $d (@doms) {
+	# Work out what can be disabled
+	@disable = &get_disable_features($d);
+
+	# Disable it
+	print "Disabling virtual server $d->{'dom'} ..\n\n";
+	%disable = map { $_, 1 } @disable;
+	$d->{'disabled_reason'} = 'manual';
+	$d->{'disabled_why'} = $why;
+
+	# Run the before command
+	&set_domain_envs($d, "DISABLE_DOMAIN");
+	$merr = &making_changes();
+	&reset_domain_envs($d);
+	&usage(&text('disable_emaking', "<tt>$merr</tt>")) if (defined($merr));
+
+	# Disable all configured features
+	my $f;
+	foreach $f (@features) {
+		if ($d->{$f} && $disable{$f}) {
+			local $dfunc = "disable_$f";
+			if (&try_function($f, $dfunc, $d)) {
+				push(@disabled, $f);
+				}
+			}
 		}
+	foreach $f (&list_feature_plugins()) {
+		if ($d->{$f} && $disable{$f}) {
+			&plugin_call($f, "feature_disable", $d);
+			push(@disabled, $f);
+			}
+		}
+
+	# Disable extra admins
+	&update_extra_webmin($d, 1);
+
+	# Save new domain details
+	&$first_print($text{'save_domain'});
+	$d->{'disabled'} = join(",", @disabled);
+	&save_domain($d);
+	&$second_print($text{'setup_done'});
+
+	# Run the after command
+	&set_domain_envs($d, "DISABLE_DOMAIN");
+	local $merr = &made_changes();
+	&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
+		if (defined($merr));
+	&reset_domain_envs($d);
 	}
 
-# Disable extra admins
-&update_extra_webmin($d, 1);
-
-# Save new domain details
-&$first_print($text{'save_domain'});
-$d->{'disabled'} = join(",", @disabled);
-&save_domain($d);
-&$second_print($text{'setup_done'});
-
-# Run the after command
 &run_post_actions();
-&set_domain_envs($d, "DISABLE_DOMAIN");
-local $merr = &made_changes();
-&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
-&reset_domain_envs($d);
 &virtualmin_api_log(\@OLDARGV, $d);
 print "All done!\n";
 
@@ -115,6 +135,7 @@ print "Disables all features in the specified virtual server.\n";
 print "\n";
 print "virtualmin disable-domain --domain domain.name\n";
 print "                         [--why \"explanation for disable\"]\n";
+print "                         [--subservers]\n";
 exit(1);
 }
 
