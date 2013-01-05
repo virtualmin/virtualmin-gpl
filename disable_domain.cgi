@@ -44,9 +44,11 @@ elsif (!$in{'confirm'}) {
 	print "<center>\n";
 	print &ui_form_start("disable_domain.cgi");
 	@grid = ( "<b>$text{'disable_why'}</b>",
-		  &ui_textbox("why", undef, 50),
-		  "<b>$text{'disable_subservers'}</b>",
-		  &ui_yesno_radio("subservers", 0) );
+		  &ui_textbox("why", undef, 50) );
+	if (!$d->{'parent'}) {
+		push(@grid, "<b>$text{'disable_subservers'}</b>",
+			    &ui_yesno_radio("subservers", 0));
+		}
 	print &ui_grid_table(\@grid, 2, 50, [ "nowrap" ]);
 	print &ui_hidden("dom", $in{'dom'});
 	print &ui_form_end([ [ "confirm", $text{'disable_ok'} ] ]);
