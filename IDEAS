@@ -54,9 +54,3 @@
 
  - Thunderbird auto-config
 	- https://www.virtualmin.com/node/24238
-
- - When disabling a domain, also disable sub-servers (optionally)
-	- https://virtualmin.com/node/24740
-	- web UI
-	- enable too
-	- CHANGELOG
