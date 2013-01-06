@@ -5636,6 +5636,9 @@ foreach my $l (@$lref) {
 	elsif ($l =~ /^\$OWNER\s+=/) {
 		$l = "\$OWNER = '$d->{'owner'}';";
 		}
+	elsif ($l =~ /^\$USER\s+=/ && !$d->{'parent'}) {
+		$l = "\$USER = '$d->{'user'}';";
+		}
 	elsif ($l =~ /^\$SMTP_HOST\s+=/) {
 		$l = "\$SMTP_HOST = 'mail.$d->{'dom'}';";
 		}

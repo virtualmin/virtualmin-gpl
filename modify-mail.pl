@@ -33,6 +33,11 @@ domain use its own IP address for outgoing SMTP connections. This can be useful
 for separating virtual servers from each other from the point of view of 
 other mail servers. To disable this mode, use the C<--no-outgoing-ip> flag.
 
+To enable the Thunderbird auto-configuration URL for this domain, use the 
+C<--autoconfig> flag. This allows email clients to find the SMTP and IMAP
+username, hostname, port and protocol just based on an email address. To turn
+this feature off, use the C<--no-autoconfig> flag.
+
 =cut
 
 package virtual_server;

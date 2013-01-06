@@ -4,9 +4,10 @@
 
 # These variables get replaced when the script is copied
 $OWNER = '';		# Bob's website
-$STMP_HOST = '';	# mail.bob.com
-$STMP_PORT = '';	# 25
-$STMP_TYPE = '';	# plain or SSL
+$USER = '';		# bob
+$SMTP_HOST = '';	# mail.bob.com
+$SMTP_PORT = '';	# 25
+$SMTP_TYPE = '';	# plain or SSL
 $IMAP_HOST = '';	# mail.bob.com
 $IMAP_PORT = '';	# 143
 $IMAP_TYPE = '';	# plain or SSL
@@ -33,7 +34,11 @@ else {
 	}
 
 # Work out the full username
-if ($STYLE == 0) {
+if ($mailbox eq $USER) {
+	# Domain owner, so no need for prefix
+	$login = $USER;
+	}
+elsif ($STYLE == 0) {
 	$login = $mailbox.".".$PREFIX;
 	}
 elsif ($STYLE == 1) {
@@ -62,7 +67,7 @@ else {
 	}
 
 # Output the XML
-print "Content-type: text/plain\n\n";
+print "Content-type: text/xml\n\n";
 print <<EOF;
 <?xml version="1.0" encoding="UTF-8"?>
  
