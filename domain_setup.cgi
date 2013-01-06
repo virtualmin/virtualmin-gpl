@@ -75,7 +75,7 @@ if (!$parentuser) {
 	if (!$in{'email_def'}) {
 		$in{'email'} =~ /\S/ || &error($text{'setup_eemail'});
 		&extract_address_parts($in{'email'}) ||
-			&usage($text{'setup_eemail3'});
+			&error($text{'setup_eemail3'});
 		}
 	if (!$in{'unix'}) {
 		$tmpl->{'mail_on'} eq "none" || !$in{'email_def'} ||
