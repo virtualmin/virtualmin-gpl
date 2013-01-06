@@ -88,6 +88,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--alias-catchall") {
 		$aliascopy = 0;
 		}
+	elsif ($a eq "--autoconfig") {
+		$autoconfig = 1;
+		}
+	elsif ($a eq "--no-autoconfig") {
+		$autoconfig = 0;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -97,7 +103,7 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || @users || usage("No domains or users specified");
 defined($bcc) || defined($aliascopy) || defined($dependent) ||
-	&usage("Nothing to do");
+    defined($autoconfig) || &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -182,6 +188,22 @@ foreach $d (@doms) {
 			}
 		}
 
+	# Enable or disable autoconfig
+	if (defined($autoconfig)) {
+		if ($autoconfig) {
+			&$first_print("Enabling mail client ".
+				      "auto-configuration for $d->{'dom'} ..");
+			&enable_email_autoconfig($d);
+			&$second_print(".. done");
+			}
+		else {
+			&$first_print("Disabling mail client ".
+				      "auto-configuration for $d->{'dom'} ..");
+			&disable_email_autoconfig($d);
+			&$second_print(".. done");
+			}
+		}
+
 	&save_domain($d);
 
 	&$outdent_print();
@@ -200,6 +222,7 @@ print "virtualmin modify-mail --domain name | --user name | --all-domains\n";
 print "                      [--bcc user\@domain] | [--no-bcc]\n";
 print "                      [--alias-copy] | [--alias-catchall]\n";
 print "                      [--outgoing-ip | --no-outgoing-ip]\n";
+print "                      [--autoconfig | --no-autoconfig]\n";
 exit(1);
 }
 

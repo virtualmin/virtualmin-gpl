@@ -5614,6 +5614,208 @@ my ($d) = @_;
 &unlink_logged("$saved_aliases_dir/$d->{'id'}");
 }
 
+# enable_email_autoconfig(&domain)
+# Sets up an autoconfig.domain.com server alias and DNS entry, and configures
+# /mail/config-v1.1.xml?emailaddress=foo@domain.com to return XML for
+# automatic configuration for that domain
+sub enable_email_autoconfig
+{
+local ($d) = @_;
+local $autoconfig = "autoconfig.".$d->{'dom'};
+
+# Create CGI that outputs the correct XML for the domain
+local $autocgi = &cgi_bin_dir($d)."/autoconfig.cgi";
+&copy_source_dest_as_domain_user($d, "$module_root_directory/autoconfig.cgi",
+				 $autocgi);
+local $lref = &read_file_lines_as_domain_user($d, $autocgi);
+local $tmpl = &get_template($d->{'template'});
+foreach my $l (@$lref) {
+	if ($l =~ /^#!/) {
+		$l = "#!".&get_perl_path();
+		}
+	elsif ($l =~ /^\$OWNER\s+=/) {
+		$l = "\$OWNER = '$d->{'owner'}';";
+		}
+	elsif ($l =~ /^\$SMTP_HOST\s+=/) {
+		$l = "\$SMTP_HOST = 'mail.$d->{'dom'}';";
+		}
+	elsif ($l =~ /^\$SMTP_PORT\s+=/) {
+		$l = "\$SMTP_PORT = '25';";
+		}
+	elsif ($l =~ /^\$SMTP_TYPE\s+=/) {
+		$l = "\$SMTP_TYPE = 'plain';";
+		}
+	elsif ($l =~ /^\$IMAP_HOST\s+=/) {
+		$l = "\$IMAP_HOST = 'mail.$d->{'dom'}';";
+		}
+	elsif ($l =~ /^\$IMAP_PORT\s+=/) {
+		$l = "\$IMAP_PORT = '143';";
+		}
+	elsif ($l =~ /^\$IMAP_TYPE\s+=/) {
+		$l = "\$IMAP_TYPE = 'plain';";
+		}
+	elsif ($l =~ /^\$PREFIX\s+=/) {
+		$l = "\$PREFIX = '$d->{'prefix'}';";
+		}
+	elsif ($l =~ /^\$STYLE\s+=/) {
+		$l = "\$STYLE = '$tmpl->{'append_style'}';";
+		}
+	}
+&flush_file_lines_as_domain_user($d, $autocgi);
+&set_ownership_permissions(undef, undef, 0755, $autocgi);
+
+# Add ServerAlias and redirect if missing
+local $p = &domain_has_website($d);
+if ($p && $p ne "web") {
+	# Call plugin, like Nginx
+	&plugin_call($p, "feature_save_web_autoconfig", $d, 1);
+	}
+elsif ($p) {
+	# Add to Apache config
+	&require_apache();
+	local @ports = ( $d->{'web_port'},
+		      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+	local $any;
+	foreach my $p (@ports) {
+		local ($virt, $vconf, $conf) =
+			&get_apache_virtual($d->{'dom'}, $p);
+		next if (!$virt);
+
+		# Add ServerAlias
+		local @sa = &apache::find_directive("ServerAlias", $vconf);
+		local $found;
+		foreach my $sa (@sa) {
+			local @saw = split(/\s+/, $sa);
+			$found++ if (&indexoflc($autoconfig, @saw) >= 0);
+			}
+		if (!$found) {
+			push(@sa, $autoconfig);
+			&apache::save_directive("ServerAlias", \@sa,
+						$vconf, $conf);
+			&flush_file_lines($virt->{'file'});
+			$any++;
+			}
+
+		# Add redirect to CGI
+		local @rd = &apache::find_directive("Redirect", $vconf);
+		local $found;
+		foreach my $rd (@rd) {
+			if ($rd =~ /^\/mail\/config-v1.1.xml\s/) {
+				$found = 1;
+				}
+			}
+		if (!$found) {
+			push(@rd, "/mail/config-v1.1.xml ".
+				  "/cgi-bin/autoconfig.cgi");
+			&apache::save_directive("Redirect", \@rd,
+						$vconf, $conf);
+			&flush_file_lines($virt->{'file'});
+			$any++;
+			}
+		}
+	if ($any) {
+		&register_post_action(\&restart_apache);
+		}
+	}
+
+if ($d->{'dns'}) {
+	# Add DNS entry
+	local ($recs, $file) = &get_domain_dns_records_and_file($d);
+	$autoconfig .= ".";
+	if ($file) {
+		local ($r) = grep { $_->{'name'} eq $autoconfig } @$recs;
+		if (!$r) {
+			my $ip = $d->{'dns_ip'} || $d->{'ip'};
+			&bind8::create_record($file, $autoconfig, undef,
+					      "IN", "A", $ip);
+			my $err = &post_records_change($d, $recs, $file);
+			&register_post_action(\&restart_bind, $d);
+			}
+		}
+	}
+}
+
+# disable_email_autoconfig(&domain)
+# Delete the DNS entry, ServerAlias and Redirect for mail auto-config
+sub disable_email_autoconfig
+{
+local ($d) = @_;
+local $autoconfig = "autoconfig.".$d->{'dom'};
+
+# Remove ServerAlias and redirect if they exist
+local $p = &domain_has_website($d);
+if ($p && $p ne "web") {
+	# Call plugin, like Nginx
+	&plugin_call($p, "feature_save_web_autoconfig", $d, 0);
+	}
+elsif ($p) {
+	# Add to Apache config
+	&require_apache();
+	local @ports = ( $d->{'web_port'},
+		      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+	local $any;
+	foreach my $p (@ports) {
+		local ($virt, $vconf, $conf) =
+			&get_apache_virtual($d->{'dom'}, $p);
+		next if (!$virt);
+
+		# Remove ServerAlias
+		local @sa = &apache::find_directive("ServerAlias", $vconf);
+		local $found;
+		foreach my $sa (@sa) {
+			local @saw = split(/\s+/, $sa);
+			local $idx = &indexoflc($autoconfig, @saw);
+			if ($idx >= 0) {
+				splice(@saw, $idx, 1);
+				$sa = join(" ", @saw);
+				$found++;
+				}
+			}
+		if ($found) {
+			@sa = grep { $_ ne "" } @sa;
+			&apache::save_directive("ServerAlias", \@sa,
+						$vconf, $conf);
+			&flush_file_lines($virt->{'file'});
+			$any++;
+			}
+
+		# Remove redirect to CGI
+		local @rd = &apache::find_directive("Redirect", $vconf);
+		local $found;
+		foreach my $rd (@rd) {
+			if ($rd =~ /^\/mail\/config-v1.1.xml\s/) {
+				@rd = grep { $_ ne $rd } @rd;
+				$found = 1;
+				last;
+				}
+			}
+		if ($found) {
+			&apache::save_directive("Redirect", \@rd,
+						$vconf, $conf);
+			&flush_file_lines($virt->{'file'});
+			$any++;
+			}
+		}
+	if ($any) {
+		&register_post_action(\&restart_apache);
+		}
+	}
+
+if ($d->{'dns'}) {
+	# Remove DNS entry
+	local ($recs, $file) = &get_domain_dns_records_and_file($d);
+	$autoconfig .= ".";
+	if ($file) {
+		local ($r) = grep { $_->{'name'} eq $autoconfig } @$recs;
+		if ($r) {
+			&bind8::delete_record($file, $r);
+			my $err = &post_records_change($d, $recs, $file);
+			&register_post_action(\&restart_bind, $d);
+			}
+		}
+	}
+}
+
 $done_feature_script{'mail'} = 1;
 
 1;
