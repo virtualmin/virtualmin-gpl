@@ -8,9 +8,11 @@ $USER = '';		# bob
 $SMTP_HOST = '';	# mail.bob.com
 $SMTP_PORT = '';	# 25
 $SMTP_TYPE = '';	# plain or SSL
+$SMTP_ENC = '';		# password-cleartext
 $IMAP_HOST = '';	# mail.bob.com
 $IMAP_PORT = '';	# 143
 $IMAP_TYPE = '';	# plain or SSL
+$IMAP_ENC = '';		# password-cleartext or password-encrypted
 $PREFIX = '';		# bob
 $STYLE = '';		# 1
 
@@ -80,14 +82,14 @@ print <<EOF;
       <hostname>$IMAP_HOST</hostname>
       <port>$IMAP_PORT</port>
       <socketType>$IMAP_TYPE</socketType>
-      <authentication>password-cleartext</authentication>
+      <authentication>$IMAP_ENC</authentication>
       <username>$login</username>
     </incomingServer>
     <outgoingServer type="smtp">
       <hostname>$SMTP_HOST</hostname>
       <port>$SMTP_PORT</port>
       <socketType>$SMTP_TYPE</socketType>
-      <authentication>password-cleartext</authentication>
+      <authentication>$SMTP_ENC</authentication>
       <username>$login</username>
     </outgoingServer>
   </emailProvider>

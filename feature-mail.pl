@@ -5623,6 +5623,62 @@ sub enable_email_autoconfig
 local ($d) = @_;
 local $autoconfig = "autoconfig.".$d->{'dom'};
 
+# Work out IMAP server port and mode
+local $imap_host = "mail.$d->{'dom'}";
+local $imap_port = 143;
+local $imap_type = "plain";
+local $imap_enc = "password-cleartext";
+if (&foreign_installed("dovecot")) {
+	&foreign_require("dovecot");
+	local $conf = &dovecot::get_config();
+	local $sslopt = &dovecot::find("ssl_disable", $conf, 2) ?
+			"ssl_disable" : "ssl";
+	if ($sslopt eq "ssl" &&
+	    &dovecot::find_value($sslopt, $conf) ne "no") {
+		$imap_port = 993;
+		$imap_type = "SSL";
+		}
+	elsif ($sslopt eq "ssl_disable" &&
+	       &dovecot::find_value($sslopt, $conf) ne "yes") {
+		$imap_port = 993;
+		$imap_type = "SSL";
+		}
+	if ($imap_type ne "SSL" &&
+	    &dovecot::find_value("disable_plaintext_auth", $conf) ne "no") {
+		# Force use of hashed passwords
+		$imap_enc = "password-encrypted";
+		}
+	}
+
+# Work out SMTP server port and mode
+local $smtp_host = "mail.$d->{'dom'}";
+local $smtp_port = 25;
+local $smtp_type = "plain";
+local $smtp_enc = "password-cleartext";
+if ($config{'mail_system'} == 0) {
+	# Check for Postfix submission port
+	&foreign_require("postfix");
+	local $master = postfix::get_master_config();
+	local ($submission) = grep { $_->{'name'} eq 'submission' &&
+				     $_->{'enabled'} } @$master;
+	if ($submission) {
+		$smtp_port = 587;
+		if ($submission->{'command'} =~ /smtpd_tls_security_level=(encrypt|may)/) {
+			$smtp_type = "STARTTLS";
+			}
+		}
+	}
+elsif ($config{'mail_system'} == 1) {
+	# Check for Sendmail submission port
+	&foreign_require("sendmail");
+	local $conf = &sendmail::get_sendmailcf();
+	foreach my $dpo (&sendmail::find_options("DaemonPortOptions", $conf)) {
+		if ($dpo->[1] =~ /Port=(587|submission)/) {
+			$smtp_port = 587;
+			}
+		}
+	}
+
 # Create CGI that outputs the correct XML for the domain
 local $autocgi = &cgi_bin_dir($d)."/autoconfig.cgi";
 &copy_source_dest_as_domain_user($d, "$module_root_directory/autoconfig.cgi",
@@ -5640,22 +5696,28 @@ foreach my $l (@$lref) {
 		$l = "\$USER = '$d->{'user'}';";
 		}
 	elsif ($l =~ /^\$SMTP_HOST\s+=/) {
-		$l = "\$SMTP_HOST = 'mail.$d->{'dom'}';";
+		$l = "\$SMTP_HOST = '$smtp_host';";
 		}
 	elsif ($l =~ /^\$SMTP_PORT\s+=/) {
-		$l = "\$SMTP_PORT = '25';";
+		$l = "\$SMTP_PORT = '$smtp_port';";
 		}
 	elsif ($l =~ /^\$SMTP_TYPE\s+=/) {
-		$l = "\$SMTP_TYPE = 'plain';";
+		$l = "\$SMTP_TYPE = '$smtp_type';";
+		}
+	elsif ($l =~ /^\$SMTP_ENC\s+=/) {
+		$l = "\$SMTP_ENC = '$smtp_enc';";
 		}
 	elsif ($l =~ /^\$IMAP_HOST\s+=/) {
-		$l = "\$IMAP_HOST = 'mail.$d->{'dom'}';";
+		$l = "\$IMAP_HOST = '$imap_host';";
 		}
 	elsif ($l =~ /^\$IMAP_PORT\s+=/) {
-		$l = "\$IMAP_PORT = '143';";
+		$l = "\$IMAP_PORT = '$imap_port';";
 		}
 	elsif ($l =~ /^\$IMAP_TYPE\s+=/) {
-		$l = "\$IMAP_TYPE = 'plain';";
+		$l = "\$IMAP_TYPE = '$imap_type';";
+		}
+	elsif ($l =~ /^\$IMAP_ENC\s+=/) {
+		$l = "\$IMAP_ENC = '$imap_enc';";
 		}
 	elsif ($l =~ /^\$PREFIX\s+=/) {
 		$l = "\$PREFIX = '$d->{'prefix'}';";

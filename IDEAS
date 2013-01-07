@@ -55,6 +55,7 @@
  - Thunderbird auto-config
 	- https://www.virtualmin.com/node/24238
 	- CHANGELOG
-	- Get correct SMTP and IMAP host and port and SSL setting
+	- Test on lentor with Postfix submission
 	- Enable / disable for all domains in UI
+	- Don't do for alias domains
 	- Global backup and restore
