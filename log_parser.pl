@@ -172,6 +172,10 @@ elsif ($action eq "cmd" || $action eq "remote") {
 		     "<tt>$type</tt>",
 		     "<tt>".&un_urlize($p->{'argv'})."</tt>");
 	}
+elsif ($action eq "autoconfig") {
+	return $p->{'enabled'} ? $text{'log_autoconfigon'}
+			       : $text{'log_autoconfigoff'};
+	}
 else {
 	return $text{'log_'.$action};
 	}

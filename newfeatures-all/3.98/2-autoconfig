@@ -1,0 +1,4 @@
+desc=Mail client autoconfiguration
+html=Added the Mail Client Configuration page, for setting up a Thunderbird-style client autoconfiguration URL for all virtual servers.
+master=1
+link=edit_newautoconfig.cgi

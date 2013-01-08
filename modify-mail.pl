@@ -194,7 +194,7 @@ foreach $d (@doms) {
 		}
 
 	# Enable or disable autoconfig
-	if (defined($autoconfig)) {
+	if (!$d->{'alias'} && &domain_has_website($d) && defined($autoconfig)) {
 		if ($autoconfig) {
 			&$first_print("Enabling mail client ".
 				      "auto-configuration for $d->{'dom'} ..");

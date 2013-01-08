@@ -2054,6 +2054,8 @@ log_delete_bkeys=Deleted $1 backup encryption keys
 log_fixsymlinks=Fixed symbolic link permissions
 log_nofixsymlinks=Allowed unsafe symbolic link permissions
 log_fixhtaccess=Fixed symbolic link htaccess options
+log_autoconfigon=Enabled mail client auto-configuration
+log_autoconfigoff=Disabled mail client auto-configuration
 
 backup_title=Backup Virtual Servers
 backup_title2=Edit Scheduled Backup
@@ -5743,6 +5745,17 @@ dkim_undns=Removing DKIM records from DNS domain $1 ..
 dkim_dnsremoved=.. removed successfully
 dkim_dnsalreadygone=.. already gone
 dkim_records=DNS records for additional domains
+
+newautoconfig_title=Mail Client Configuration
+autoconfig_ecannot=You are not allowed to edit mail client configuration
+autoconfig_header=Client autoconfiguration options
+autoconfig_enable=Enable autoconfiguration URL?
+autoconfig_desc=This page allows you to enable the automatic configuration URL $1 for all Virtual servers, which is used by mail clients like Thunderbird. This lets users configure the IMAP and SMTP settings in their mail clients based on only an email address.
+autoconfig_enabled=Enable mail client autoconfiguration?
+autoconfig_err=Saved to save mail client configuration
+autoconfig_edoms=No virtual servers with email enabled exist!
+autoconfig_enable=Enabling mail client autoconfiguration for $1 virtual servers ..
+autoconfig_disable=Disabling mail client autoconfiguration for $1 virtual servers ..
 
 provision_title=Cloudmin Services Client
 provision_ecannot=You are not allowed to setup the Cloudmin services client

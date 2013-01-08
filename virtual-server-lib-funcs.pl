@@ -7267,6 +7267,13 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 	&save_domain($dom);
 	}
 
+# If mail client autoconfig is enabled globally, set it up for
+# this domain
+if ($config{'mail_autoconfig'} && $dom->{'mail'} &&
+    &domain_has_website($dom) && !$dom->{'alias'}) {
+	&enable_email_autoconfig($dom);
+	}
+
 # If this was an alias domain, notify all features in the original domain. This
 # is useful for things like awstats, which need to add the alias domain to those
 # supported for the main site.
@@ -11304,7 +11311,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    'validate', 'chroot', 'global', 'changelog',
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
    $config{'mail_system'} == 0 ? ( 'postgrey' ) : ( ),
-   'dkim', 'provision',
+   'dkim', 'provision', 'autoconfig',
    );
 local %tmplcat = (
 	'features' => 'setting',
@@ -11338,8 +11345,13 @@ local %tmplcat = (
 	'dkim' => 'email',
 	'changelog' => 'setting',
 	'provision' => 'setting',
+	'autoconfig' => 'email',
 	);
-local %nonew = ( 'history', 1, 'postgrey', 1, 'dkim', 1, 'provision', 1, );
+local %nonew = ( 'history', 1,
+		 'postgrey', 1,
+		 'dkim', 1,
+		 'provision', 1,
+	       );
 local @tlinks = map { $nonew{$_} ? "${_}.cgi"
 			         : "edit_new${_}.cgi" } @tmpls;
 local @ttitles = map { $nonew{$_} ? $text{"${_}_title"} 
@@ -13515,6 +13527,20 @@ if ($config{'validate_sched'}) {
 	&lock_file(&cron::cron_file($job));
 	&cron::create_cron_job($job);
 	&unlock_file(&cron::cron_file($job));
+	}
+
+# Enable or disable mail client auto-config
+if ($config{'mail_autoconfig'} ne '') {
+	my @doms = grep { $_->{'mail'} && &domain_has_website($_) &&
+			  !$_->{'alias'} } &list_domains();
+	foreach my $d (@doms) {
+		if ($config{'mail_autoconfig'} eq '1') {
+			&enable_email_autoconfig($d);
+			}
+		else {
+			&disable_email_autoconfig($d);
+			}
+		}
 	}
 }
 

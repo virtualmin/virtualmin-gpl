@@ -5681,6 +5681,7 @@ elsif ($config{'mail_system'} == 1) {
 
 # Create CGI that outputs the correct XML for the domain
 local $autocgi = &cgi_bin_dir($d)."/autoconfig.cgi";
+&lock_file($autocgi);
 &copy_source_dest_as_domain_user($d, "$module_root_directory/autoconfig.cgi",
 				 $autocgi);
 local $lref = &read_file_lines_as_domain_user($d, $autocgi);
@@ -5728,6 +5729,7 @@ foreach my $l (@$lref) {
 	}
 &flush_file_lines_as_domain_user($d, $autocgi);
 &set_ownership_permissions(undef, undef, 0755, $autocgi);
+&unlock_file($autocgi);
 
 # Add ServerAlias and redirect if missing
 local $p = &domain_has_website($d);
@@ -5737,6 +5739,7 @@ if ($p && $p ne "web") {
 	}
 elsif ($p) {
 	# Add to Apache config
+	&obtain_lock_web($d);
 	&require_apache();
 	local @ports = ( $d->{'web_port'},
 		      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
@@ -5781,10 +5784,12 @@ elsif ($p) {
 	if ($any) {
 		&register_post_action(\&restart_apache);
 		}
+	&release_lock_web($d);
 	}
 
 if ($d->{'dns'}) {
 	# Add DNS entry
+	&obtain_lock_dns($d);
 	local ($recs, $file) = &get_domain_dns_records_and_file($d);
 	$autoconfig .= ".";
 	if ($file) {
@@ -5797,6 +5802,7 @@ if ($d->{'dns'}) {
 			&register_post_action(\&restart_bind, $d);
 			}
 		}
+	&release_lock_dns($d);
 	}
 }
 
@@ -5816,6 +5822,7 @@ if ($p && $p ne "web") {
 elsif ($p) {
 	# Add to Apache config
 	&require_apache();
+	&obtain_lock_web($d);
 	local @ports = ( $d->{'web_port'},
 		      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 	local $any;
@@ -5861,6 +5868,7 @@ elsif ($p) {
 			$any++;
 			}
 		}
+	&release_lock_web($d);
 	if ($any) {
 		&register_post_action(\&restart_apache);
 		}
@@ -5868,6 +5876,7 @@ elsif ($p) {
 
 if ($d->{'dns'}) {
 	# Remove DNS entry
+	&obtain_lock_dns($d);
 	local ($recs, $file) = &get_domain_dns_records_and_file($d);
 	$autoconfig .= ".";
 	if ($file) {
@@ -5878,6 +5887,7 @@ if ($d->{'dns'}) {
 			&register_post_action(\&restart_bind, $d);
 			}
 		}
+	&release_lock_dns($d);
 	}
 }
 

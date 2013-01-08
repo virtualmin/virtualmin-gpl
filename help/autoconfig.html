@@ -1,0 +1,15 @@
+<header>Mail Client Configuration</header>
+
+This page can turn on or off the automatic mail client
+configuration URL for all virtual servers with email enabled.
+Clients like Thunderbird can use this URL to detect SMTP
+and IMAP settings based on only an email address, including
+the correct username, port number and encryption type. <p>
+
+When enabled, a sub-domain named <tt>autoconfig</tt> is created
+for each virtual server, and the URL path /mail/config-v1.1.xml 
+is mapped to a CGI that serves XML to supply the required 
+mail client parameters. These will be removed when the feature
+is disabled. <p>
+
+<footer>
