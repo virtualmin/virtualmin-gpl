@@ -30,6 +30,11 @@ return &compare_versions($ver, "3.1") > 0 ? "$ver (Latest)" :
 					     "$ver (Un-supported)";
 }
 
+sub script_phpmyadmin_release
+{
+return 2;		# To fix remote host issue
+}
+
 sub script_phpmyadmin_category
 {
 return "Database";
@@ -229,14 +234,14 @@ foreach $l (@$lref) {
 			$l = "\$cfg['Servers'][\$i]['password'] = '".
 			     &php_quotemeta($dbpass)."';";
 			}
-		if ($l =~ /^\$cfg\['Servers'\]\[\$i\]\['host'\]/) {
-			$l = "\$cfg['Servers'][\$i]['host'] = '$dbhost';";
-			}
 		}
 	else {
 		if ($l =~ /^\$cfg\['Servers'\]\[\$i\]\['auth_type'\]/) {
 			$l = "\$cfg['Servers'][\$i]['auth_type'] = 'cookie';";
 			}
+		}
+	if ($l =~ /^\$cfg\['Servers'\]\[\$i\]\['host'\]/) {
+		$l = "\$cfg['Servers'][\$i]['host'] = '$dbhost';";
 		}
 	if ($l =~ /^\$cfg\['Servers'\]\[\$i\]\['only_db'\]/) {
 		$l = "\$cfg['Servers'][\$i]['only_db'] = $dbsarray;";
