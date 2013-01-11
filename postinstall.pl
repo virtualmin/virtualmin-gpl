@@ -8,6 +8,18 @@ sub module_install
 &foreign_require("cron", "cron-lib.pl");
 local $need_restart;
 
+# If Webmin version has a copy of webmincron.pl that is too old, copy over
+# fixed version
+if (&get_webmin_version() < 1.615) {
+	local $src = "$module_root_directory/webmincron-fixed.pl";
+	local $dst = &module_root_directory("webmincron")."/webmincron.pl";
+	local @srcst = stat($src);
+	local @dstst = stat($dst);
+	if ($srcst[7] != $dstst[7]) {
+		&copy_source_dest($src, $dst);
+		}
+	}
+
 # Convert all templates to plans, if needed
 local @oldplans = &list_plans(1);
 if (!@oldplans) {
@@ -233,22 +245,16 @@ if (&foreign_installed("sshd") && !$config{'nodeniedssh'}) {
 &build_denied_ssh_group();
 
 # Create the cron job for sending in script ratings
-local $job = &find_virtualmin_cron_job($ratings_cron_cmd);
-&cron::create_wrapper($ratings_cron_cmd, $module_name,
-		      "sendratings.pl");
-if (!$job) {
-	# Create, and run for the first time
-	$job = { 'mins' => int(rand()*60),
-		 'hours' => int(rand()*24),
-		 'days' => '*',
-		 'months' => '*',
-		 'weekdays' => '*',
-		 'user' => 'root',
-		 'active' => 1,
-		 'command' => $ratings_cron_cmd };
-	&cron::create_cron_job($job);
-	&execute_command($ratings_cron_cmd);
-	}
+$job = { 'mins' => int(rand()*60),
+	 'hours' => int(rand()*24),
+	 'days' => '*',
+	 'months' => '*',
+	 'weekdays' => '*',
+	 'user' => 'root',
+	 'active' => 1,
+	 'command' => $ratings_cron_cmd };
+&setup_cron_script($job);
+&execute_command($ratings_cron_cmd);
 
 # Create the cron job for collecting system info
 &setup_collectinfo_job();

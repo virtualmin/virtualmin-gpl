@@ -15647,6 +15647,62 @@ return grep { /^[^@ ]+\@[^@ ]+$/ }
 	    map { $_->[0] } &mailboxes::split_addresses($str);
 }
 
+# run_cron_script(path)
+# Given a script like spamclear.pl that would normally be run by
+# cron via a wrapper, run it within the same process
+sub run_cron_script
+{
+local ($script) = @_;
+local $fh = "CRONOUT";
+local $temp = &transname();
+open($fh, ">$temp");
+my $pid = &execute_webmin_script("$module_root_directory/$script", $module_name,
+			         [ ], $fh);
+close($fh);
+waitpid($pid, 0);
+my $ex = $?;
+print &read_file_contents($temp);
+&unlink_file($temp);
+}
+
+# setup_cron_script(&cron-spec)
+# Creates a Webmin Cron entry for some cron job, converting any
+# existing matching regular Cron job if it exists. If the Webmin Cron
+# entry already exists for the command, do nothing
+sub setup_cron_script
+{
+local ($job) = @_;
+&foreign_require("cron");
+&foreign_require("webmincron");
+if ($job->{'command'} =~ /\Q$module_config_directory\E\/([^ \|\&><;]+)/) {
+	# Run from this module
+	local $script = $1;
+	&cron::create_wrapper($job->{'command'}, $module_name,
+			      $script);
+	local $cronjob = &find_virtualmin_cron_job($job->{'command'});
+	if ($cronjob) {
+		# Delete for conversion to Webmin Cron
+		&cron::delete_cron_job($cronjob);
+		$job = $cronjob;
+		}
+	local @wcrons = &webmincron::list_webmin_crons();
+	local ($wjob) = grep { $_->{'func'} eq "run_cron_script" &&
+			       $_->{'args'}->[0] eq $script } @wcrons;
+	if (!$wjob) {
+		# Need to create
+		$job->{'func'} = "run_cron_script";
+		$job->{'module'} = $module_name;
+		$job->{'args'} = [ $script ];
+		delete($job->{'command'});
+		&webmincron::save_webmin_cron($job);
+		}
+	}
+else {
+	# Some other random job .. just use normal cron
+	# XXX
+	}
+}
+
 # load_plugin_libraries([plugin, ...])
 # Call foreign_require on some or all plugins, just once
 sub load_plugin_libraries

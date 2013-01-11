@@ -200,7 +200,7 @@ return Dumper($data);
 
 # execute_webmin_script(command, module, &args, output-fh)
 # Run some Virtualmin or Cloudmin API command in a forked sub-process, but with
-# out executing a new perl instance. Returns the exit status.
+# out executing a new perl instance. Returns the PID.
 sub execute_webmin_script
 {
 my ($cmd, $mod, $args, $fh) = @_;
@@ -229,6 +229,9 @@ if (!$pid) {
 	$pkg =~ s/[^A-Za-z0-9]/_/g;
 	@ARGV = @$args;
 	$0 = $cmd;
+	my $dir = $cmd;
+	$dir =~ s/\/([^\/]+)$//;
+	chdir($dir);
 	eval "
 		\%pkg::ENV = \%ENV;
 		package $pkg;

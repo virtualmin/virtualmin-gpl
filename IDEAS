@@ -34,8 +34,6 @@
  - Allow admin to edit user's procmail rules
 	- http://www.virtualmin.com/node/12330 
 
- - Move cron jobs to webmincron
-
  - Per-directory SVN access control
 	- http://www.virtualmin.com/node/18073
 
@@ -51,3 +49,11 @@
 	- SSL cert support
 	- Namecheap too
 	- Pro only
+
+ - Move cron jobs to webmincron
+	- CHANGELOG (memory saving)
+	- Need generic cron setup function
+	- Convert all current crons
+
+ - PHP 5.3/5.4 support
+	- See Eric's email "PHP in Software Collections"
