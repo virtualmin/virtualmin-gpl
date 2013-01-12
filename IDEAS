@@ -54,6 +54,12 @@
 	- CHANGELOG (memory saving)
 	- Need generic cron setup function
 	- Convert all current crons
+		- on postinstall
+		- when creating, use new function
+		- what about backups that have parameters??
+	- need to pass parameters to backup.pl and others
 
  - PHP 5.3/5.4 support
 	- See Eric's email "PHP in Software Collections"
+
+ - Amazon payments

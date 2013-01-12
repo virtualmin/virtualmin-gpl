@@ -15647,17 +15647,18 @@ return grep { /^[^@ ]+\@[^@ ]+$/ }
 	    map { $_->[0] } &mailboxes::split_addresses($str);
 }
 
-# run_cron_script(path)
+# run_cron_script(path, [args])
 # Given a script like spamclear.pl that would normally be run by
 # cron via a wrapper, run it within the same process
 sub run_cron_script
 {
-local ($script) = @_;
+local ($script, $args) = @_;
+local @args = split(/\s+/, $args);
 local $fh = "CRONOUT";
 local $temp = &transname();
 open($fh, ">$temp");
 my $pid = &execute_webmin_script("$module_root_directory/$script", $module_name,
-			         [ ], $fh);
+			         \@args, $fh);
 close($fh);
 waitpid($pid, 0);
 my $ex = $?;
@@ -15694,6 +15695,7 @@ if ($job->{'command'} =~ /\Q$module_config_directory\E\/([^ \|\&><;]+)/) {
 		$job->{'module'} = $module_name;
 		$job->{'args'} = [ $script ];
 		delete($job->{'command'});
+		delete($job->{'file'});
 		&webmincron::save_webmin_cron($job);
 		}
 	}
@@ -15708,22 +15710,56 @@ else {
 sub delete_cron_script
 {
 local ($script) = @_;
+local $shortscript = $script;
+$shortscript =~ s/^.*\///;
 
 # Classic cron
 &foreign_require("cron");
 local @jobs = &cron::list_cron_jobs();
-local $job = &find_virtualmin_cron_job($script, \@jobs);
-if ($job) {
+foreach my $job (&find_virtualmin_cron_job($script, \@jobs)) {
 	&cron::delete_cron_job($job);
 	}
 
 # Webmin cron
 &foreign_require("webmincron");
 local @wcrons = &webmincron::list_webmin_crons();
-local ($wjob) = grep { $_->{'func'} eq "run_cron_script" &&
-		       $_->{'args'}->[0] eq $script } @wcrons;
-if ($wjob) {
+foreach my $wjob (grep { $_->{'func'} eq "run_cron_script" &&
+			 $_->{'args'}->[0] eq $shortscript } @wcrons) {
 	&webmincron::delete_webmin_cron($wjob);
+	}
+}
+
+# convert_cron_script(script)
+# If a classic cron job exists that runs some script, convert to webmin cron
+sub convert_cron_script
+{
+local ($script) = @_;
+local $shortscript = $script;
+$shortscript =~ s/^.*\///;
+
+&foreign_require("cron");
+&foreign_require("webmincron");
+local @jobs = &cron::list_cron_jobs();
+local @wcrons = &webmincron::list_webmin_crons();
+foreach my $job (&find_virtualmin_cron_job($script, \@jobs)) {
+	&cron::delete_cron_job($job);
+	my $args;
+	if ($job->{'command'} =~ /\Q$script\E\s+([^ \|\&><;]+)/) {
+		# Has command-line args 
+		$args = $1;
+		}
+	local ($wjob) = grep { $_->{'func'} eq "run_cron_script" &&
+			       $_->{'args'}->[0] eq $shortscript &&
+			       $_->{'args'}->[1] eq $args } @wcrons;
+	if (!$wjob) {
+		$job->{'func'} = "run_cron_script";
+		$job->{'module'} = $module_name;
+		$job->{'args'} = [ $shortscript ];
+		push(@{$job->{'args'}}, $args) if ($args);
+		delete($job->{'command'});
+		delete($job->{'file'});
+		&webmincron::save_webmin_cron($job);
+		}
 	}
 }
 

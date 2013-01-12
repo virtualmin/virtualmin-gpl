@@ -20,6 +20,12 @@ if (&get_webmin_version() < 1.615) {
 		}
 	}
 
+# Convert all existing cron jobs to WebminCron
+# XXX
+foreach my $script ($validate_cron_cmd) {
+	&convert_cron_script($script);
+	}
+
 # Convert all templates to plans, if needed
 local @oldplans = &list_plans(1);
 if (!@oldplans) {
