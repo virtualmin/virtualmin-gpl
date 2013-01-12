@@ -1,17 +1,13 @@
 # uninstall.pl
-# Called when this module is un-installed to delete the backup cron job
+# Called when this module is un-installed to delete all cron jobs, init
+# scripts and daemons
 
 require 'virtual-server-lib.pl';
 
 sub module_uninstall
 {
-&foreign_require("cron", "cron-lib.pl");
-local @jobs = &cron::list_cron_jobs();
 foreach my $cmd (@all_cron_commands) {
-	local $job = &find_virtualmin_cron_job($cmd, \@jobs);
-	if ($job) {
-		&cron::delete_cron_job($job);
-		}
+	&delete_cron_script($cmd);
 	}
 
 # Turn off lookup-domain action

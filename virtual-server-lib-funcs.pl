@@ -15703,6 +15703,30 @@ else {
 	}
 }
 
+# delete_cron_script(script)
+# Deletes the classic or WebminCron job that runs some script
+sub delete_cron_script
+{
+local ($script) = @_;
+
+# Classic cron
+&foreign_require("cron");
+local @jobs = &cron::list_cron_jobs();
+local $job = &find_virtualmin_cron_job($script, \@jobs);
+if ($job) {
+	&cron::delete_cron_job($job);
+	}
+
+# Webmin cron
+&foreign_require("webmincron");
+local @wcrons = &webmincron::list_webmin_crons();
+local ($wjob) = grep { $_->{'func'} eq "run_cron_script" &&
+		       $_->{'args'}->[0] eq $script } @wcrons;
+if ($wjob) {
+	&webmincron::delete_webmin_cron($wjob);
+	}
+}
+
 # load_plugin_libraries([plugin, ...])
 # Call foreign_require on some or all plugins, just once
 sub load_plugin_libraries
