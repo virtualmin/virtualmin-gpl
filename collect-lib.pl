@@ -697,7 +697,7 @@ local @mins;
 for(my $i=$offset; $i<60; $i+= $step) {
 	push(@mins, $i);
 	}
-local $job = &find_virtualmin_cron_job($collect_cron_cmd);
+local $job = &find_cron_script($collect_cron_cmd);
 if (!$job && $config{'collect_interval'} ne 'none') {
 	# Create, and run for the first time
 	$job = { 'mins' => join(',', @mins),
@@ -708,7 +708,7 @@ if (!$job && $config{'collect_interval'} ne 'none') {
 		 'user' => 'root',
 		 'active' => 1,
 		 'command' => $collect_cron_cmd };
-	&cron::create_cron_job($job);
+	&setup_cron_script($job);
 	}
 elsif ($job && $config{'collect_interval'} ne 'none') {
 	# Update existing job, if step has changed
@@ -718,14 +718,13 @@ elsif ($job && $config{'collect_interval'} ne 'none') {
 			 $oldmins[1]-$oldmins[0];
 	if ($step != $oldstep) {
 		$job->{'mins'} = join(',', @mins);
-		&cron::change_cron_job($job);
+		&setup_cron_script($job);
 		}
 	}
 elsif ($job && $config{'collect_interval'} eq 'none') {
 	# No longer wanted, so delete
-	&cron::delete_cron_job($job);
+	&delete_cron_script($job->{'command'});
 	}
-&cron::create_wrapper($collect_cron_cmd, $module_name, "collectinfo.pl");
 }
 
 # restart_collected_services(&info)

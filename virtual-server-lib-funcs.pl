@@ -15667,14 +15667,17 @@ if ($job->{'command'} =~ /\Q$module_config_directory\E\/([^ \|\&><;]+)/) {
 	local $script = $1;
 	&cron::create_wrapper($job->{'command'}, $module_name,
 			      $script);
+
+	# Find existing classic cron job, and remove it
 	local $cronjob = &find_virtualmin_cron_job($job->{'command'});
 	if ($cronjob) {
 		# Delete for conversion to Webmin Cron
 		&lock_file(&cron::cron_file($cronjob));
 		&cron::delete_cron_job($cronjob);
 		&unlock_file(&cron::cron_file($cronjob));
-		$job = $cronjob;
 		}
+
+	# Check if a WebminCron job exists already
 	my $args;
 	if ($job->{'command'} =~ /\Q$script\E\s+([^ \|\&><;]+)/) {
 		# Has command-line args 
@@ -15684,15 +15687,26 @@ if ($job->{'command'} =~ /\Q$module_config_directory\E\/([^ \|\&><;]+)/) {
 	local ($wjob) = grep { $_->{'func'} eq "run_cron_script" &&
 			       $_->{'args'}->[0] eq $script &&
 			       $_->{'args'}->[1] eq $args } @wcrons;
+
+	# Clear fields that are only used by classic cron
+	delete($job->{'command'});
+	delete($job->{'file'});
+
 	if (!$wjob) {
 		# Need to create
 		$job->{'func'} = "run_cron_script";
 		$job->{'module'} = $module_name;
 		$job->{'args'} = [ $script ];
 		push(@{$job->{'args'}}, $args) if ($args);
-		delete($job->{'command'});
-		delete($job->{'file'});
 		&webmincron::save_webmin_cron($job);
+		}
+	else {
+		# Bring times into sync
+		foreach my $f ("mins", "hours", "days", "months", "weekdays",
+			       "special", "interval") {
+			$wjob->{$f} = $job->{$f};
+			&webmincron::save_webmin_cron($job);
+			}
 		}
 	}
 else {
@@ -15701,11 +15715,14 @@ else {
 	}
 }
 
-# delete_cron_script(script)
+# delete_cron_script(script|&job)
 # Deletes the classic or WebminCron job that runs some script
 sub delete_cron_script
 {
 local ($script) = @_;
+if (ref($script)) {
+	$script = $script->{'command'};
+	}
 local $shortscript = $script;
 $shortscript =~ s/^.*\///;
 
