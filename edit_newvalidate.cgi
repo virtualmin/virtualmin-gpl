@@ -53,7 +53,7 @@ print &ui_form_start("save_validate.cgi", "post");
 print &ui_table_start($text{'newvalidate_header2'}, undef, 2);
 
 # When to validate
-$job = &find_validate_job();
+$job = &find_cron_script($validate_cron_cmd);
 print &ui_table_row($text{'newvalidate_sched'},
 	&virtualmin_ui_show_cron_time("sched", $job,
 				      $text{'newquotas_whenno'}));

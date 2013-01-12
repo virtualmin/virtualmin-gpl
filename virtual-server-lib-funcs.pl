@@ -10450,14 +10450,6 @@ local $job = &find_virtualmin_cron_job($quotas_cron_cmd);
 return $job;
 }
 
-# find_validate_job()
-# Returns the Cron job used for validating virtual servers
-sub find_validate_job
-{
-local $job = &find_virtualmin_cron_job($validate_cron_cmd);
-return $job;
-}
-
 # need_config_check()
 # Compares the current and previous configs, and returns 1 if a re-check is
 # needed due to any checked option changing.
@@ -13503,16 +13495,13 @@ if (defined(&setup_scriptlatest_job) && $config{'scriptlatest_enabled'}) {
 
 # Re-setup the validation cron job based on the saved config
 local ($oldjob, $job);
-$oldjob = $job = &find_validate_job();
+$oldjob = $job = &find_cron_script($validate_cron_cmd);
 $job ||= { 'user' => 'root',
 	   'active' => 1,
 	   'command' => $validate_cron_cmd };
 if ($oldjob) {
-	&lock_file(&cron::cron_file($oldjob));
-	&cron::delete_cron_job($oldjob);
-	&unlock_file(&cron::cron_file($oldjob));
+	&delete_cron_script($validate_cron_cmd);
 	}
-&cron::create_wrapper($validate_cron_cmd, $module_name, "validate.pl");
 if ($config{'validate_sched'}) {
 	# Re-create cron job
 	if ($config{'validate_sched'} =~ /^\@(\S+)/) {
@@ -13524,9 +13513,7 @@ if ($config{'validate_sched'}) {
 			split(/\s+/, $config{'validate_sched'});
 		delete($job->{'special'});
 		}
-	&lock_file(&cron::cron_file($job));
-	&cron::create_cron_job($job);
-	&unlock_file(&cron::cron_file($job));
+	&setup_cron_script($job);
 	}
 
 # Enable or disable mail client auto-config
@@ -15683,17 +15670,26 @@ if ($job->{'command'} =~ /\Q$module_config_directory\E\/([^ \|\&><;]+)/) {
 	local $cronjob = &find_virtualmin_cron_job($job->{'command'});
 	if ($cronjob) {
 		# Delete for conversion to Webmin Cron
+		&lock_file(&cron::cron_file($cronjob));
 		&cron::delete_cron_job($cronjob);
+		&unlock_file(&cron::cron_file($cronjob));
 		$job = $cronjob;
+		}
+	my $args;
+	if ($job->{'command'} =~ /\Q$script\E\s+([^ \|\&><;]+)/) {
+		# Has command-line args 
+		$args = $1;
 		}
 	local @wcrons = &webmincron::list_webmin_crons();
 	local ($wjob) = grep { $_->{'func'} eq "run_cron_script" &&
-			       $_->{'args'}->[0] eq $script } @wcrons;
+			       $_->{'args'}->[0] eq $script &&
+			       $_->{'args'}->[1] eq $args } @wcrons;
 	if (!$wjob) {
 		# Need to create
 		$job->{'func'} = "run_cron_script";
 		$job->{'module'} = $module_name;
 		$job->{'args'} = [ $script ];
+		push(@{$job->{'args'}}, $args) if ($args);
 		delete($job->{'command'});
 		delete($job->{'file'});
 		&webmincron::save_webmin_cron($job);
@@ -15717,7 +15713,9 @@ $shortscript =~ s/^.*\///;
 &foreign_require("cron");
 local @jobs = &cron::list_cron_jobs();
 foreach my $job (&find_virtualmin_cron_job($script, \@jobs)) {
+	&lock_file(&cron::cron_file($job));
 	&cron::delete_cron_job($job);
+	&unlock_file(&cron::cron_file($job));
 	}
 
 # Webmin cron
@@ -15742,7 +15740,10 @@ $shortscript =~ s/^.*\///;
 local @jobs = &cron::list_cron_jobs();
 local @wcrons = &webmincron::list_webmin_crons();
 foreach my $job (&find_virtualmin_cron_job($script, \@jobs)) {
+	&lock_file(&cron::cron_file($job));
 	&cron::delete_cron_job($job);
+	&unlock_file(&cron::cron_file($job));
+
 	my $args;
 	if ($job->{'command'} =~ /\Q$script\E\s+([^ \|\&><;]+)/) {
 		# Has command-line args 
@@ -15761,6 +15762,32 @@ foreach my $job (&find_virtualmin_cron_job($script, \@jobs)) {
 		&webmincron::save_webmin_cron($job);
 		}
 	}
+}
+
+# find_cron_script(script)
+# Finds the classic or Webmin cron job that runs some script
+sub find_cron_script
+{
+local ($script) = @_;
+local $shortscript = $script;
+$shortscript =~ s/^.*\///;
+
+local $job = &find_virtualmin_cron_job($script);
+return $job if ($job);
+
+&foreign_require("webmincron");
+local @wcrons = &webmincron::list_webmin_crons();
+local ($wjob) = grep { $_->{'func'} eq "run_cron_script" &&
+		       $_->{'args'}->[0] eq $shortscript }
+		     &webmincron::list_webmin_crons();
+if ($wjob) {
+	# Fake up command
+	$wjob->{'command'} = $script;
+	if ($wjob->{'args'}->[1]) {
+		$wjob->{'command'} .= " ".$wjob->{'args'}->[1];
+		}
+	}
+return $wjob;
 }
 
 # load_plugin_libraries([plugin, ...])
