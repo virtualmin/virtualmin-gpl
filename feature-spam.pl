@@ -1137,11 +1137,10 @@ else {
 &write_file($spamclear_file, \%spamclear);
 
 # Fix cron job
-&foreign_require("cron", "cron-lib.pl");
-local $job = &find_virtualmin_cron_job($spamclear_cmd);
+local $job = &find_cron_script($spamclear_cmd);
 if ($job && !%spamclear) {
 	# Disable job, as we don't need it
-	&cron::delete_cron_job($job);
+	&delete_cron_script($job);
 	}
 elsif (!$job && %spamclear) {
 	# Enable the job
@@ -1153,9 +1152,8 @@ elsif (!$job && %spamclear) {
 		 'days' => '*',
 		 'months' => '*',
 		 'weekdays' => '*' };
-	&cron::create_cron_job($job);
+	&setup_cron_script($job);
 	}
-&cron::create_wrapper($spamclear_cmd, $module_name, "spamclear.pl");
 }
 
 # create_spam_config_links(&domain)
