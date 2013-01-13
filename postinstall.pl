@@ -22,7 +22,7 @@ if (&get_webmin_version() < 1.615) {
 
 # Convert all existing cron jobs to WebminCron
 # XXX
-foreach my $script ($validate_cron_cmd, $collect_cron_cmd) {
+foreach my $script ($validate_cron_cmd, $collect_cron_cmd, $bw_cron_cmd) {
 	&convert_cron_script($script);
 	}
 

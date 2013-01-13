@@ -7622,7 +7622,7 @@ sub run_post_actions_silently
 # Returns the cron job used for bandwidth monitoring
 sub find_bandwidth_job
 {
-local $job = &find_virtualmin_cron_job($bw_cron_cmd);
+local $job = &find_cron_script($bw_cron_cmd);
 return $job;
 }
 
@@ -15042,13 +15042,17 @@ $step ||= 1;
 &foreign_require("cron", "cron-lib.pl");
 local $job = &find_bandwidth_job();
 if ($job) {
-	&lock_file(&cron::cron_file($job));
-	&cron::delete_cron_job($job);
+	&delete_cron_script($job);
 	}
 if ($active) {
 	my @hours;
-	for(my $h=0; $h<24; $h+=$step) {
-		push(@hours, $h);
+	if ($step == 1) {
+		@hours = ( "*" );
+		}
+	else {
+		for(my $h=0; $h<24; $h+=$step) {
+			push(@hours, $h);
+			}
 		}
 	$job = { 'user' => 'root',
 		 'command' => $bw_cron_cmd,
@@ -15058,10 +15062,7 @@ if ($active) {
 		 'days' => '*',
 		 'weekdays' => '*',
 		 'months' => '*' };
-	&lock_file(&cron::cron_file($job));
-	&cron::create_wrapper($bw_cron_cmd, $module_name, "bw.pl");
-	&cron::create_cron_job($job);
-	&unlock_file(&cron::cron_file($job));
+	&setup_cron_script($job);
 	}
 }
 
