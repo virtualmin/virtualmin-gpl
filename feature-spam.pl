@@ -1428,7 +1428,7 @@ foreach my $f ($spamfile, $hamfile) {
 sub setup_spamtrap_cron
 {
 &foreign_require("cron", "cron-lib.pl");
-local $job = &find_virtualmin_cron_job($spamtrap_cron_cmd);
+local $job = &find_cron_script($spamtrap_cron_cmd);
 if (!$job) {
 	$job = { 'user' => 'root',
 		 'command' => $spamtrap_cron_cmd,
@@ -1438,11 +1438,8 @@ if (!$job) {
                  'days' => '*',
                  'weekdays' => '*',
                  'months' => '*' };
-	&lock_file(&cron::cron_file($job));
-	&cron::create_cron_job($job);
-        &unlock_file(&cron::cron_file($job));
+	&setup_cron_script($job);
 	}
-&cron::create_wrapper($spamtrap_cron_cmd, $module_name, "spamtrap.pl");
 }
 
 # delete_spamtrap_aliases(&domain)
