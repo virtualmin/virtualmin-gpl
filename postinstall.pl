@@ -23,7 +23,7 @@ if (&get_webmin_version() < 1.615) {
 # Convert all existing cron jobs to WebminCron
 # XXX
 foreach my $script ($validate_cron_cmd, $collect_cron_cmd, $bw_cron_cmd,
-		    $spamconfig_cron_cmd) {
+		    $spamconfig_cron_cmd, $fcgiclear_cron_cmd) {
 	&convert_cron_script($script);
 	}
 
@@ -275,7 +275,7 @@ if ($config{'allow_subdoms'} eq '') {
 
 # Create the cron job for killing orphan php*-cgi processes
 if ($virtualmin_pro) {
-	local $job = &find_virtualmin_cron_job($fcgiclear_cron_cmd);
+	local $job = &find_cron_script($fcgiclear_cron_cmd);
 	if (!$job) {
 		# Create, and run for the first time
 		$job = { 'mins' => '0',
@@ -286,10 +286,8 @@ if ($virtualmin_pro) {
 			 'user' => 'root',
 			 'active' => 1,
 			 'command' => $fcgiclear_cron_cmd };
-		&cron::create_cron_job($job);
+		&setup_cron_script($job);
 		}
-	&cron::create_wrapper($fcgiclear_cron_cmd, $module_name,
-			      "fcgiclear.pl");
 	}
 
 # Add ftp user to the groups for all domains that have FTP enabled
