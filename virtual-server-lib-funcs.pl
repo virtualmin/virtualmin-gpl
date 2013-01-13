@@ -10435,14 +10435,6 @@ else {
 	}
 }
 
-# find_quotas_job()
-# Returns the Cron job used for regularly checking quotas
-sub find_quotas_job
-{
-local $job = &find_virtualmin_cron_job($quotas_cron_cmd);
-return $job;
-}
-
 # need_config_check()
 # Compares the current and previous configs, and returns 1 if a re-check is
 # needed due to any checked option changing.
@@ -15656,6 +15648,7 @@ sub setup_cron_script
 local ($job) = @_;
 &foreign_require("cron");
 &foreign_require("webmincron");
+local $cronjob = &find_virtualmin_cron_job($job->{'command'});
 if ($job->{'command'} =~ /\Q$module_config_directory\E\/([^ \|\&><;]+)/) {
 	# Run from this module
 	local $script = $1;
@@ -15663,7 +15656,6 @@ if ($job->{'command'} =~ /\Q$module_config_directory\E\/([^ \|\&><;]+)/) {
 			      $script);
 
 	# Find existing classic cron job, and remove it
-	local $cronjob = &find_virtualmin_cron_job($job->{'command'});
 	if ($cronjob) {
 		# Delete for conversion to Webmin Cron
 		&lock_file(&cron::cron_file($cronjob));
@@ -15705,7 +15697,16 @@ if ($job->{'command'} =~ /\Q$module_config_directory\E\/([^ \|\&><;]+)/) {
 	}
 else {
 	# Some other random job .. just use normal cron
-	# XXX
+	if (!$cronjob) {
+		if ($job->{'command'} =~
+		    /\Q$config_directory\E\/([^\/]+)\/([^ \|\&><;]+)/) {
+			local ($m, $s) = ($1, $2);
+			&cron::create_wrapper($job->{'command'}, $m, $s);
+			}
+		&lock_file(&cron::cron_file($job));
+		&cron::create_cron_job($job);
+		&unlock_file(&cron::cron_file($job));
+		}
 	}
 }
 

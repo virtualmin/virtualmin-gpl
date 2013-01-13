@@ -110,7 +110,7 @@ $spamtrap_cron_cmd = "$module_config_directory/spamtrap.pl";
 $validate_cron_cmd = "$module_config_directory/validate.pl";
 
 @all_cron_commands = ( $backup_cron_cmd, $bw_cron_cmd, $licence_cmd,
-		       $licence_status, $quotas_cron_cmd, $spamclear_cmd,
+		       $quotas_cron_cmd, $spamclear_cmd,
 		       $dynip_cron_cmd, $ratings_cron_cmd, $collect_cron_cmd,
 		       $fcgiclear_cron_cmd, $maillog_cron_cmd,
 		       $spamconfig_cron_cmd, $scriptwarn_cron_cmd,

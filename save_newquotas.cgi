@@ -7,7 +7,7 @@ require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newquotas_ecannot'});
 
 # Validate inputs
-$oldjob = $job = &find_quotas_job();
+$oldjob = $job = &find_cron_script($quotas_cron_cmd);
 $job ||= { 'user' => 'root',
 	   'active' => 1,
 	   'command' => $quotas_cron_cmd };
@@ -41,15 +41,10 @@ $in{'msg'} =~ /\S/ || &error($text{'newquotas_emsg'});
 
 # Setup the cron job
 if ($oldjob) {
-	&lock_file(&cron::cron_file($oldjob));
-	&cron::delete_cron_job($oldjob);
-	&unlock_file(&cron::cron_file($oldjob));
+	&delete_cron_script($oldjob);
 	}
-&cron::create_wrapper($quotas_cron_cmd, $module_name, "quotas.pl");
 if ($in{'sched'}) {
-	&lock_file(&cron::cron_file($job));
-	&cron::create_cron_job($job);
-	&unlock_file(&cron::cron_file($job));
+	&setup_cron_script($job);
 	}
 
 # Save configuration

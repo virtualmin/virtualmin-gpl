@@ -48,7 +48,7 @@ print &ui_table_row($text{'newquotas_interval'},
 		    $text{'newquotas_hours'});
 
 # Scheduled checking enabled?
-$job = &find_quotas_job();
+$job = &find_cron_script($quotas_cron_cmd);
 print &ui_table_row($text{'newquotas_when'},
 	&virtualmin_ui_show_cron_time("sched", $job,
 				      $text{'newquotas_whenno'}));
