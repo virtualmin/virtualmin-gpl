@@ -1,13 +1,5 @@
 # Functions for updating a dynamic IP address
 
-# get_dynip_cron_job()
-# Returns the cron job used for updating a dynamic IP
-sub get_dynip_cron_job
-{
-local $job = &find_virtualmin_cron_job($dynip_cron_cmd);
-return $job;
-}
-
 # list_dynip_services()
 # Returns a list of supported dynamic DNS services
 sub list_dynip_services

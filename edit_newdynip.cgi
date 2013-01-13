@@ -10,7 +10,7 @@ print &ui_form_start("save_newdynip.cgi", "post");
 print &ui_table_start($text{'newdynip_header'}, undef, 2);
 
 # Is regular update enabled?
-$job = &get_dynip_cron_job();
+$job = &find_cron_script($dynip_cron_cmd);
 print &ui_table_row($text{'newdynip_enabled'},
 	&ui_yesno_radio("enabled", $job ? 1 : 0));
 

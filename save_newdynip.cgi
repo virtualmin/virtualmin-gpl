@@ -23,7 +23,7 @@ $config{'dynip_pass'} = $in{'dpass'};
 $config{'dynip_email'} = $in{'email_def'} ? undef : $in{'email'};
 &save_module_config();
 &unlock_file($module_config_file);
-$job = &get_dynip_cron_job();
+$job = &find_cron_script($dynip_cron_cmd);
 if ($in{'enabled'} && !$job) {
 	# Need to create
 	$job = { 'command' => $dynip_cron_cmd,
@@ -34,18 +34,11 @@ if ($in{'enabled'} && !$job) {
 		 'months' => '*',
 		 'weekdays' => '*',
 		 'active' => 1 };
-	&lock_file(&cron::cron_file($job));
-	&cron::create_cron_job($job);
-	&unlock_file(&cron::cron_file($job));
-	&lock_file($dynip_cron_cmd);
-	&cron::create_wrapper($dynip_cron_cmd, $module_name, "dynip.pl");
-	&unlock_file($dynip_cron_cmd);
+	&setup_cron_script($job);
 	}
 elsif (!$in{'enabled'} && $job) {
 	# Need to delete
-	&lock_file(&cron::cron_file($job));
-	&cron::delete_cron_job($job);
-	&unlock_file(&cron::cron_file($job));
+	&delete_cron_script($job);
 	}
 &webmin_log("dynip");
 
