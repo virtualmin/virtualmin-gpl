@@ -1203,7 +1203,7 @@ if ($defdir) {
 # files in /tmp
 sub setup_spam_config_job
 {
-local $job = &find_virtualmin_cron_job($spamconfig_cron_cmd);
+local $job = &find_cron_script($spamconfig_cron_cmd);
 if (!$job) {
 	# Create, and run for the first time
 	$job = { 'mins' => int(rand()*60),
@@ -1214,10 +1214,8 @@ if (!$job) {
 		 'user' => 'root',
 		 'active' => 1,
 		 'command' => $spamconfig_cron_cmd };
-	&cron::create_cron_job($job);
+	&setup_cron_script($job);
 	}
-&cron::create_wrapper($spamconfig_cron_cmd, $module_name,
-		      "spamconfig.pl");
 
 # And run now, just in case spamassassin was upgraded recently
 foreach my $d (grep { $_->{'spam'} } &list_domains()) {

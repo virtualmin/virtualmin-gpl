@@ -15706,8 +15706,8 @@ if ($job->{'command'} =~ /\Q$module_config_directory\E\/([^ \|\&><;]+)/) {
 		foreach my $f ("mins", "hours", "days", "months", "weekdays",
 			       "special", "interval") {
 			$wjob->{$f} = $job->{$f};
-			&webmincron::save_webmin_cron($job);
 			}
+		&webmincron::save_webmin_cron($wjob);
 		}
 	}
 else {
