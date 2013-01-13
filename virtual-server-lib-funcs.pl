@@ -9805,10 +9805,7 @@ if (&require_licence()) {
 	return if (time() - $licence{'last'} < 24*60*60); # checked recently, so no worries
 
 	# Hasn't been checked from cron for 3 days .. do it now
-	&foreign_require("cron", "cron-lib.pl");
-	local ($job) = grep { $_->{'user'} eq 'root' &&
-			      $_->{'command'} eq $licence_cmd }
-			    &cron::list_cron_jobs();
+	local $job = &find_cron_script($licence_cmd);
 	if (!$job) {
 		# Create
 		$job = { 'mins' => int(rand()*60),
@@ -9819,7 +9816,6 @@ if (&require_licence()) {
 			 'user' => 'root',
 			 'active' => 1,
 			 'command' => $licence_cmd };
-		&cron::create_cron_job($job);
 		}
 	else {
 		# Enforce a proper schedule
@@ -9835,11 +9831,8 @@ if (&require_licence()) {
 		$job->{'active'} = 1;
 		$job->{'user'} = 'root';
 		$job->{'command'} = $licence_cmd;
-		&cron::change_cron_job($job);
 		}
-	if (!-x $licence_cmd) {
-		&cron::create_wrapper($licence_cmd, $module_name, "licence.pl");
-		}
+	&setup_cron_script($job);
 	}
 }
 

@@ -24,7 +24,7 @@ if (&get_webmin_version() < 1.615) {
 # XXX
 foreach my $script ($validate_cron_cmd, $collect_cron_cmd, $bw_cron_cmd,
 		    $spamconfig_cron_cmd, $fcgiclear_cron_cmd, $spamclear_cmd,
-		    $spamtrap_cron_cmd) {
+		    $spamtrap_cron_cmd, $licence_cmd) {
 	&convert_cron_script($script);
 	}
 
