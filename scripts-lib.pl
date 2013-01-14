@@ -2038,12 +2038,6 @@ return 0 if (!$job);
 return 1;
 }
 
-sub find_scriptlatest_job
-{
-local $job = &find_virtualmin_cron_job($scriptlatest_cron_cmd);
-return $job;
-}
-
 # list_script_upgrades(&domains)
 # Returns a list of script updates that can be done in the given domains
 sub list_script_upgrades
@@ -2539,12 +2533,10 @@ sub setup_scriptlatest_job
 {
 local ($enabled) = @_;
 &foreign_require("cron", "cron-lib.pl");
-local $job = &find_scriptlatest_job();
+local $job = &find_cron_script($scriptlatest_cron_cmd);
 if ($job && !$enabled) {
 	# Delete job
-	&lock_file(&cron::cron_file($job));
-	&cron::delete_cron_job($job);
-	&unlock_file(&cron::cron_file($job));
+	&delete_cron_script($job);
 	}
 elsif (!$job && $enabled) {
 	# Create daily job
@@ -2556,11 +2548,8 @@ elsif (!$job && $enabled) {
 		 'days' => '*',
 		 'months' => '*',
 		 'weekdays' => '*', };
-	&lock_file(&cron::cron_file($job));
-	&cron::create_cron_job($job);
-	&unlock_file(&cron::cron_file($job));
+	&setup_cron_script($job);
 	}
-&cron::create_wrapper($scriptlatest_cron_cmd, $module_name, "scriptlatest.pl");
 }
 
 # apply_cron_schedule(&job, 'daily'|'weekly'|'monthly')

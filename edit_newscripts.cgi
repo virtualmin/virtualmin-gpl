@@ -185,7 +185,7 @@ print &ui_form_start("save_scriptwarn.cgi", "post");
 print &ui_table_start($text{'newscripts_wheader'}, undef, 2);
 
 # Warning enabled and schedule
-$job = &find_scriptwarn_job();
+$job = &find_cron_script($scriptwarn_cron_cmd);
 print &ui_table_row($text{'newscripts_wenabled'},
 		    &ui_yesno_radio("enabled", $job ? 1 : 0));
 
@@ -251,7 +251,7 @@ print &ui_form_start("save_scriptlatest.cgi", "post");
 print &ui_table_start($text{'newscripts_lheader'}, undef, 2);
 
 # Automatically download latest scripts?
-$job = &find_scriptlatest_job();
+$job = &find_cron_script($scriptlatest_cron_cmd);
 print &ui_table_row($text{'newscripts_lenabled'},
 	&ui_yesno_radio("enabled", $job ? 1 : 0));
 
