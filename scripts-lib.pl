@@ -2038,12 +2038,6 @@ return 0 if (!$job);
 return 1;
 }
 
-sub find_scriptwarn_job
-{
-local $job = &find_virtualmin_cron_job($scriptwarn_cron_cmd);
-return $job;
-}
-
 sub find_scriptlatest_job
 {
 local $job = &find_virtualmin_cron_job($scriptlatest_cron_cmd);
@@ -2518,12 +2512,10 @@ sub setup_scriptwarn_job
 {
 local ($enabled, $when) = @_;
 &foreign_require("cron", "cron-lib.pl");
-local $job = &find_scriptwarn_job();
+local $job = &find_cron_script($scriptwarn_cron_cmd);
 if ($job && !$enabled) {
 	# Delete job
-	&lock_file(&cron::cron_file($job));
-	&cron::delete_cron_job($job);
-	&unlock_file(&cron::cron_file($job));
+	&delete_cron_script($job);
 	}
 elsif (!$job && $enabled) {
 	# Create daily job
@@ -2531,19 +2523,14 @@ elsif (!$job && $enabled) {
 		 'command' => $scriptwarn_cron_cmd,
 		 'active' => 1 };
 	&apply_cron_schedule($job, $when || 'daily');
-	&lock_file(&cron::cron_file($job));
-	&cron::create_cron_job($job);
-	&unlock_file(&cron::cron_file($job));
+	&setup_cron_script($job);
 	}
 elsif ($job && $enabled && $when &&
        $when ne &parse_cron_schedule($job)) {
 	# Update schedule if needed
 	&apply_cron_schedule($job, $when);
-	&lock_file(&cron::cron_file($job));
-	&cron::change_cron_job($job);
-	&unlock_file(&cron::cron_file($job));
+	&setup_cron_script($job);
 	}
-&cron::create_wrapper($scriptwarn_cron_cmd, $module_name, "scriptwarn.pl");
 }
 
 # setup_scriptlatest_job(enabled)

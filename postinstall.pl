@@ -25,7 +25,8 @@ if (&get_webmin_version() < 1.615) {
 foreach my $script ($validate_cron_cmd, $collect_cron_cmd, $bw_cron_cmd,
 		    $spamconfig_cron_cmd, $fcgiclear_cron_cmd, $spamclear_cmd,
 		    $spamtrap_cron_cmd, $licence_cmd, $quotas_cron_cmd,
-		    $dynip_cron_cmd) {
+		    $dynip_cron_cmd, $ratings_cron_cmd, $maillog_cron_cmd,
+		    $scriptwarn_cron_cmd) {
 	&convert_cron_script($script);
 	}
 
@@ -113,9 +114,7 @@ if ($config{'spam'}) {
 	#		 'user' => 'root',
 	#		 'active' => 1,
 	#		 'command' => $maillog_cron_cmd };
-	#	&cron::create_cron_job($job);
-	#	&cron::create_wrapper($maillog_cron_cmd, $module_name,
-	#			      "maillog.pl");
+	#	&setup_cron_script($job);
 	#	}
 	}
 
