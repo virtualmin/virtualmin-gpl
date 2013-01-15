@@ -50,17 +50,6 @@
 	- Namecheap too
 	- Pro only
 
- - Move cron jobs to webmincron
-	- CHANGELOG (memory saving)
-	- Need generic cron setup function
-	- Convert all current crons
-		- on postinstall
-		- when creating, use new function
-		- what about backups that have parameters??
-	- need to pass parameters to backup.pl and others
-	- fix up all functions that create cron jobs
-		- need functions to enable and disable?
-
  - PHP 5.3/5.4 support
 	- See Eric's email "PHP in Software Collections"
 

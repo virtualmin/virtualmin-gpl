@@ -1,0 +1,3 @@
+desc=Cron jobs moved to WebminCron
+html=Moved all background cron jobs (except existing backups) to Webmin's built-in scheduler, to save memory and reduce the CPU load from frequently launching new perl processes.
+master=1
