@@ -56,8 +56,8 @@ foreach my $b (readdir(BACKUPS)) {
 	}
 closedir(BACKUPS);
 
-# Merge in cron jobs to see which are enabled
-&foreign_require("cron", "cron-lib.pl");
+# Merge in classic cron jobs to see which are enabled
+&foreign_require("cron");
 local @jobs = &cron::list_cron_jobs();
 foreach my $j (@jobs) {
 	if ($j->{'user'} eq 'root' &&
@@ -71,6 +71,22 @@ foreach my $j (@jobs) {
 		}
 	}
 
+# Also merge in webmincron jobs
+&foreign_require("webmincron");
+local @jobs = &webmincron::list_webmin_crons();
+foreach my $j (@jobs) {
+	if ($j->{'module'} eq $module_name &&
+	    $j->{'func'} eq 'run_cron_script' &&
+	    $j->{'args'}->[0] eq 'backup.pl') {
+		local $id = $j->{'args'}->[1] =~ /--id\s+(\d+)/ ? $1 : 1;
+		local ($backup) = grep { $_->{'id'} eq $id } @rv;
+		if ($backup) {
+			$backup->{'enabled'} = 2;
+			&copy_cron_sched_keys($j, $backup);
+			}
+		}
+	}
+
 @rv = sort { $a->{'id'} <=> $b->{'id'} } @rv;
 return @rv;
 }
@@ -78,7 +94,8 @@ return @rv;
 sub copy_cron_sched_keys
 {
 local ($src, $dst) = @_;
-foreach my $k ('mins', 'hours', 'days', 'months', 'weekdays', 'special') {
+foreach my $k ('mins', 'hours', 'days', 'months', 'weekdays',
+	       'special', 'interval') {
 	$dst->{$k} = $src->{$k};
 	}
 }
@@ -145,7 +162,7 @@ local $cmd = $backup_cron_cmd;
 $cmd .= " --id $backup->{'id'}" if ($backup->{'id'} != 1);
 local $job;
 if (!$wasnew) {
-	local @jobs = &find_virtualmin_cron_job($cmd);
+	local @jobs = &find_cron_script($cmd);
 	if ($backup->{'id'} == 1) {
 		# The find_virtualmin_cron_job function will match
 		# backup.pl --id xxx when looking for backup.pl, so we have
@@ -157,19 +174,33 @@ if (!$wasnew) {
 if ($backup->{'enabled'} && $job) {
 	# Fix job schedule
 	&copy_cron_sched_keys($backup, $job);
-	&cron::change_cron_job($job);
+	if ($job->{'module'}) {
+		# Webmin cron
+		&setup_cron_script($job);
+		}
+	else {
+		# Classic cron
+		&cron::change_cron_job($job);
+		}
 	}
 elsif ($backup->{'enabled'} && !$job) {
-	# Create cron job
+	# Create webmincron job
 	$job = { 'user' => 'root',
 		 'active' => 1,
 		 'command' => $cmd };
 	&copy_cron_sched_keys($backup, $job);
-	&cron::create_cron_job($job);
+	&setup_cron_script($job);
 	}
 elsif (!$backup->{'enabled'} && $job) {
 	# Delete cron job
-	&cron::delete_cron_job($job);
+	if ($job->{'module'}) {
+		# Webmin cron
+		&delete_cron_script($job);
+		}
+	else {
+		# Classic cron
+		&cron::delete_cron_job($job);
+		}
 	}
 &cron::create_wrapper($backup_cron_cmd, $module_name, "backup.pl");
 }
@@ -183,14 +214,13 @@ $backup->{'id'} == 1 && &error("The default backup cannot be deleted!");
 &unlink_file($backup->{'file'});
 
 # Delete cron too
-&foreign_require("cron", "cron-lib.pl");
 local $cmd = $backup_cron_cmd." --id $backup->{'id'}";
-local @jobs = &find_virtualmin_cron_job($cmd);
+local @jobs = &find_cron_script($cmd);
 if ($backup->{'id'} == 1) {
 	@jobs = grep { $_->{'command'} !~ /\-\-id/ } @jobs;
 	}
 if (@jobs) {
-	&cron::delete_cron_job($jobs[0]);
+	&delete_cron_script($jobs[0]);
 	}
 }
 

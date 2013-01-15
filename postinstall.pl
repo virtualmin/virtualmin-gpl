@@ -20,14 +20,11 @@ if (&get_webmin_version() < 1.615) {
 		}
 	}
 
-# Convert all existing cron jobs to WebminCron
-# XXX
-foreach my $script ($validate_cron_cmd, $collect_cron_cmd, $bw_cron_cmd,
-		    $spamconfig_cron_cmd, $fcgiclear_cron_cmd, $spamclear_cmd,
-		    $spamtrap_cron_cmd, $licence_cmd, $quotas_cron_cmd,
-		    $dynip_cron_cmd, $ratings_cron_cmd, $maillog_cron_cmd,
-		    $scriptwarn_cron_cmd, $scriptlatest_cron_cmd) {
-	&convert_cron_script($script);
+# Convert all existing cron jobs to WebminCron, except existing backups
+foreach my $script (@all_cron_commands) {
+	if ($script ne $backup_cron_cmd) {
+		&convert_cron_script($script);
+		}
 	}
 
 # Convert all templates to plans, if needed
