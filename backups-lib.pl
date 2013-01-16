@@ -91,15 +91,6 @@ foreach my $j (@jobs) {
 return @rv;
 }
 
-sub copy_cron_sched_keys
-{
-local ($src, $dst) = @_;
-foreach my $k ('mins', 'hours', 'days', 'months', 'weekdays',
-	       'special', 'interval') {
-	$dst->{$k} = $src->{$k};
-	}
-}
-
 # save_scheduled_backup(&backup)
 # Create or update a scheduled backup. Also creates any needed cron job.
 sub save_scheduled_backup
