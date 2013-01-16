@@ -28,7 +28,7 @@ sub setup_cron_script
 local ($job) = @_;
 &foreign_require("cron");
 &foreign_require("webmincron");
-local $cronjob = &find_virtualmin_cron_job($job->{'command'});
+local $cronjob = &find_module_cron_job($job->{'command'});
 if ($job->{'command'} =~ /\Q$module_config_directory\E\/([^ \|\&><;]+)/) {
 	# Run from this module
 	local $script = $1;
@@ -115,7 +115,7 @@ else {
 	# Classic cron
 	&foreign_require("cron");
 	local @jobs = &cron::list_cron_jobs();
-	foreach my $job (&find_virtualmin_cron_job($script, \@jobs)) {
+	foreach my $job (&find_module_cron_job($script, \@jobs)) {
 		&lock_file(&cron::cron_file($job));
 		&cron::delete_cron_job($job);
 		&unlock_file(&cron::cron_file($job));
@@ -143,7 +143,7 @@ $shortscript =~ s/^.*\///;
 &foreign_require("webmincron");
 local @jobs = &cron::list_cron_jobs();
 local @wcrons = &webmincron::list_webmin_crons();
-foreach my $job (&find_virtualmin_cron_job($script, \@jobs)) {
+foreach my $job (&find_module_cron_job($script, \@jobs)) {
 	&lock_file(&cron::cron_file($job));
 	&cron::delete_cron_job($job);
 	&unlock_file(&cron::cron_file($job));
@@ -179,7 +179,7 @@ $shortscript =~ s/^.*\///;
 
 # Classic cron
 local @rv;
-push(@rv, &find_virtualmin_cron_job($fullscript));
+push(@rv, &find_module_cron_job($fullscript));
 
 # Webmin cron
 &foreign_require("webmincron");
@@ -213,6 +213,21 @@ foreach my $k ('mins', 'hours', 'days', 'months', 'weekdays',
 	       'special', 'interval') {
 	$dst->{$k} = $src->{$k};
 	}
+}
+
+# find_module_cron_job(command, [&jobs], [user])
+# Returns the cron job object that runs some command (perhaps with redirection)
+sub find_module_cron_job
+{
+local ($cmd, $jobs, $user) = @_;
+if (!$jobs) {
+	&foreign_require("cron", "cron-lib.pl");
+	$jobs = [ &cron::list_cron_jobs() ];
+	}
+$user ||= "root";
+local @rv = grep { $_->{'user'} eq $user &&
+	     $_->{'command'} =~ /(^|[ \|\&;\/])\Q$cmd\E($|[ \|\&><;])/ } @$jobs;
+return wantarray ? @rv : $rv[0];
 }
 
 1;

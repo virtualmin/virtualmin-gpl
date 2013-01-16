@@ -155,7 +155,7 @@ local $job;
 if (!$wasnew) {
 	local @jobs = &find_cron_script($cmd);
 	if ($backup->{'id'} == 1) {
-		# The find_virtualmin_cron_job function will match
+		# The find_module_cron_job function will match
 		# backup.pl --id xxx when looking for backup.pl, so we have
 		# to filter it out
 		@jobs = grep { $_->{'command'} !~ /\-\-id/ } @jobs;

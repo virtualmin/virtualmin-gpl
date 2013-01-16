@@ -100,7 +100,7 @@ if ($config{'spam'}) {
 
 	# And setup cron job to periodically process mail logs
 	# Disabled, as it is generating too much load on big sites
-	#local $job = &find_virtualmin_cron_job($maillog_cron_cmd);
+	#local $job = &find_module_cron_job($maillog_cron_cmd);
 	#if (!$job) {
 	#	# Create, and run for the first time
 	#	$job = { 'mins' => int(rand()*60),

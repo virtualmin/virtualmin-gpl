@@ -124,7 +124,7 @@ if ($p ne 'web') {
 	&webalizer::write_custom_logs(@custom);
 	}
 
-local $job = &find_virtualmin_cron_job("$webalizer::cron_cmd $alog");
+local $job = &find_module_cron_job("$webalizer::cron_cmd $alog");
 if (!$job) {
 	# Create a Cron job to process the log
 	&setup_webalizer_cron($lconf, $alog);
