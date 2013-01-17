@@ -23,13 +23,25 @@ $in{'body'} =~ /\S/ || &error($text{'newnotify_ebody'});
 # Construct and send the email
 @to = map { $_->{'emailto'} } @doms;
 if ($in{'admins'}) {
+	# Add extra admins
 	foreach my $d (@doms) {
 		push(@to, map { $_->{'email'} }
 			    grep { $_->{'email'} }
 			       &list_extra_admins($d));
 		}
 	}
+if ($in{'users'}) {
+	# Add domain mailboxes
+	foreach my $d (grep { $_->{'mail'} } @doms) {
+		foreach my $u (&list_domain_users($d, 1, 0, 1, 1)) {
+			if ($u->{'email'}) {
+				push(@to, $u->{'email'});
+				}
+			}
+		}
+	}
 @to = &unique(@to);
+&error(join(" ", @to));
 &send_notify_email($in{'from'}, \@doms, undef, $in{'subject'}, $in{'body'},
 		   $in{'attach'}, $in{"attach_filename"},
 		   $in{"attach_content_type"}, $in{'admins'},

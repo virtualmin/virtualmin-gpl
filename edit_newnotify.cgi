@@ -24,6 +24,8 @@ print &ui_table_row($text{'newnotify_servers'},
 		    "<br>".
 		    &ui_checkbox("admins", 1, $text{'newnotify_admins'}, 1).
 		    "<br>".
+		    &ui_checkbox("users", 1, $text{'newnotify_users'}, 0).
+		    "<br>".
 		    &ui_checkbox("nomany", 1, $text{'newnotify_nomany'}, 1));
 
 # Message subject
