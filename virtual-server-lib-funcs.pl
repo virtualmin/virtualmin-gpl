@@ -6873,7 +6873,8 @@ if ($left != -1 && $left-$newquota < 0) {
 
 # Check domains limit
 if (!$oldd) {
-	($left, $reason, $max) = &count_domains();
+	($left, $reason, $max) = &count_domains(
+				    $d->{'alias'} ? 'aliasdoms' : 'realdoms');
 	if ($left == 0) {
 		return &text('index_noadd'.$reason, $max);
 		}
@@ -14489,21 +14490,6 @@ if (@ttdoms > 10) {
 	@ttdoms = ( @ttdoms[0..9], &text('index_dmore', @ttdoms-10) );
 	}
 return join(" , ", @ttdoms);
-}
-
-# find_virtualmin_cron_job(command, [&jobs], [user])
-# Returns the cron job object that runs some command (perhaps with redirection)
-sub find_virtualmin_cron_job
-{
-local ($cmd, $jobs, $user) = @_;
-if (!$jobs) {
-	&foreign_require("cron", "cron-lib.pl");
-	$jobs = [ &cron::list_cron_jobs() ];
-	}
-$user ||= "root";
-local @rv = grep { $_->{'user'} eq $user &&
-	     $_->{'command'} =~ /(^|[ \|\&;\/])\Q$cmd\E($|[ \|\&><;])/ } @$jobs;
-return wantarray ? @rv : $rv[0];
 }
 
 # list_available_shells([&domain], [mail])
