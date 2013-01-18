@@ -64,6 +64,8 @@ if ($in{'confirm'}) {
 			print $text{'save_domain'},"<br>\n";
 			delete($d->{'disabled'});
 			delete($d->{'disabled_reason'});
+			delete($d->{'disabled_why'});
+			delete($d->{'disabled_time'});
 			&save_domain($d);
 			print $text{'setup_done'},"<p>\n";
 

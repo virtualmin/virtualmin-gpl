@@ -193,8 +193,10 @@ if ($d->{'disabled'}) {
 	      $text{'edit_disabled_'.$d->{'disabled_reason'}}." ".
 	      $text{'edit_disabled'}."\n".
 	      ($d->{'disabled_why'} ?
-	        "<br>".&text('edit_disabled_why', $d->{'disabled_why'}) :
-	       "").
+	        "<br>".&text('edit_disabled_why', $d->{'disabled_why'}) : "").
+	      ($d->{'disabled_time'} ?
+		&text('edit_disabled_time',
+		      &make_date($d->{'disabled_time'}))."<br>" : "").
 	      "</font>";
 	}
 else {

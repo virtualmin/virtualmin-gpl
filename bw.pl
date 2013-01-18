@@ -168,6 +168,7 @@ foreach $d (@doms) {
 				$dd->{'disabled_reason'} = 'bw';
 				$dd->{'disabled_why'} =
 					"Exceeded bandwidth limit";
+				$dd->{'disabled_time'} = time();
 
 				# Run the before command
 				&set_domain_envs($dd, "DISABLE_DOMAIN");
@@ -252,6 +253,7 @@ foreach $d (@doms) {
 			%enable = map { $_, 1 } @enable;
 			delete($dd->{'disabled_reason'});
 			delete($dd->{'disabled_why'});
+			delete($dd->{'disabled_time'});
 
 			# Run the before command
 			&set_domain_envs($dd, "ENABLE_DOMAIN");

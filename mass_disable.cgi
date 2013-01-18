@@ -68,6 +68,7 @@ if ($in{'confirm'}) {
 			$d->{'disabled'} = join(",", @disabled);
 			$d->{'disabled_reason'} = 'manual';
 			$d->{'disabled_why'} = $in{'why'};
+			$d->{'disabled_time'} = time();
 			&save_domain($d);
 			print $text{'setup_done'},"<p>\n";
 

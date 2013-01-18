@@ -83,6 +83,7 @@ foreach $d (@doms) {
 	%disable = map { $_, 1 } @disable;
 	$d->{'disabled_reason'} = 'manual';
 	$d->{'disabled_why'} = $why;
+	$d->{'disabled_time'} = time();
 
 	# Run the before command
 	&set_domain_envs($d, "DISABLE_DOMAIN");

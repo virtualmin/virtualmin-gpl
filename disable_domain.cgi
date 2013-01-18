@@ -85,6 +85,7 @@ else {
 		%disable = map { $_, 1 } @disable;
 		$d->{'disabled_reason'} = 'manual';
 		$d->{'disabled_why'} = $in{'why'};
+		$d->{'disabled_time'} = time();
 
 		# Disable all configured features
 		my $f;

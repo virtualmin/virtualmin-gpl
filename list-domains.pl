@@ -276,6 +276,10 @@ if ($multi) {
 				  "Manually ($d->{'disabled_why'})" :
 				  "Manually";
 			print "    Disabled: $dwhy\n";
+			if ($d->{'disabled_time'}) {
+				print "    Disabled at: ",
+				      &make_date($d->{'disabled_time'}),"\n";
+				}
 			}
 		if ($d->{'virt'}) {
 			if ($multi == 2) {
