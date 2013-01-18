@@ -50,7 +50,8 @@ if ($job->{'command'} =~ /\Q$module_config_directory\E\/([^ \|\&><;]+)/) {
 		$args = $1;
 		}
 	local @wcrons = &webmincron::list_webmin_crons();
-	local ($wjob) = grep { $_->{'func'} eq "run_cron_script" &&
+	local ($wjob) = grep { $_->{'module'} eq $module_name &&
+			       $_->{'func'} eq "run_cron_script" &&
 			       $_->{'args'}->[0] eq $script &&
 			       $_->{'args'}->[1] eq $args } @wcrons;
 
@@ -124,7 +125,8 @@ else {
 	# Webmin cron
 	&foreign_require("webmincron");
 	local @wcrons = &webmincron::list_webmin_crons();
-	foreach my $wjob (grep { $_->{'func'} eq "run_cron_script" &&
+	foreach my $wjob (grep { $_->{'module'} eq $module_name &&
+				 $_->{'func'} eq "run_cron_script" &&
 				 $_->{'args'}->[0] eq $shortscript } @wcrons) {
 		&webmincron::delete_webmin_cron($wjob);
 		}
@@ -153,7 +155,8 @@ foreach my $job (&find_module_cron_job($script, \@jobs)) {
 		# Has command-line args 
 		$args = $1;
 		}
-	local ($wjob) = grep { $_->{'func'} eq "run_cron_script" &&
+	local ($wjob) = grep { $_->{'module'} eq $module_name &&
+			       $_->{'func'} eq "run_cron_script" &&
 			       $_->{'args'}->[0] eq $shortscript &&
 			       $_->{'args'}->[1] eq $args } @wcrons;
 	if (!$wjob) {
@@ -183,7 +186,8 @@ push(@rv, &find_module_cron_job($fullscript));
 
 # Webmin cron
 &foreign_require("webmincron");
-foreach my $wjob (grep { $_->{'func'} eq "run_cron_script" &&
+foreach my $wjob (grep { $_->{'module'} eq $module_name &&
+			 $_->{'func'} eq "run_cron_script" &&
 		         $_->{'args'}->[0] eq $shortscript }
 		       &webmincron::list_webmin_crons()) {
 	# Check rest of the args
