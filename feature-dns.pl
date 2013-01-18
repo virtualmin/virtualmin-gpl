@@ -1382,6 +1382,13 @@ sub validate_dns
 {
 local ($d, $recs, $recsonly) = @_;
 local $file;
+if ($d->{'dns_submode'}) {
+	# For a sub-domain, don't complain if parent is disabled
+	my $parent = &get_domain($d->{'parent'});
+	if ($parent && $parent->{'disabled'}) {
+		return undef;
+		}
+	}
 if (!$recs) {
 	($recs, $file) = &get_domain_dns_records_and_file($d);
 	return &text('validate_edns', "<tt>$d->{'dom'}</tt>") if (!$file);
