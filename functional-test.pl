@@ -6561,7 +6561,7 @@ if (!$config{'s3_akey'} || !$config{'s3_skey'}) {
 	$s3_tests = [ { 'command' => 'echo No default S3 access or secret key defined on this system' } ];
 	}
 else {
-	$s3_eu_tests = &convert_to_location($s3_tests, "EU");
+	$s3_eu_tests = &convert_to_location($s3_tests, "eu-west-1");
 	}
 
 $rs_tests = [
