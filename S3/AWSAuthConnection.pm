@@ -80,7 +80,9 @@ sub list_bucket {
 		# This is the first response
 		$response = $r;
 	    }
-	    last if (!@{$r->entries});
+	    last if (!@{$r->entries});			# No more to get
+	    last if (!$pos && @{$r->entries} < 1000);	# Got less than 1000, so
+							# no need to go further
 	    $pos = $r->entries->[@{$r->entries} - 1]->{'Key'};
 	}
    return $response;
