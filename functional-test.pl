@@ -3119,6 +3119,37 @@ $mail_tests = [
 		},
 		) : ( ),
 
+        # Enable a website
+	{ 'command' => 'enable-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'web' ] ],
+	},
+
+	# Enable mail autoconfig URL
+	{ 'command' => 'modify-mail.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'autoconfig' ] ],
+	},
+
+	# Test the URL
+	{ 'command' => $wget_command.'http://autoconfig.'.$test_domain.
+		       '/mail/config-v1.1.xml?emailaddress=foo@'.$test_domain,
+	  'grep' => 'clientConfig',
+	},
+
+	# Disable mail autoconfig URL
+	{ 'command' => 'modify-mail.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'no-autoconfig' ] ],
+	},
+
+	# Test the URL is gone
+	{ 'command' => $wget_command.'http://autoconfig.'.$test_domain.
+		       '/mail/config-v1.1.xml?emailaddress=foo@'.$test_domain,
+	  'antigrep' => 'clientConfig',
+	  'fail' => 1,
+	},
+
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
