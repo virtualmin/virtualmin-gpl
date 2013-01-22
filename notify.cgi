@@ -41,7 +41,6 @@ if ($in{'users'}) {
 		}
 	}
 @to = &unique(@to);
-&error(join(" ", @to));
 &send_notify_email($in{'from'}, \@doms, undef, $in{'subject'}, $in{'body'},
 		   $in{'attach'}, $in{"attach_filename"},
 		   $in{"attach_content_type"}, $in{'admins'},
