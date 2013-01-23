@@ -1,9 +1,19 @@
-<header>Keep MySQL and administration passwords in sync?</header>
+<header>MySQL password for new domains</header>
 
-By default, Virtualmin will change the MySQL password for a domain when
-the administration password changes. Howver, this will cause problems for
-any installed applications that have already been configured with the old
-password. To avoid this, change this setting to <b>No</b>. <p>
+This option controls the initial MySQL password for new virtual servers. The
+options are :
+
+<dl>
+<dt><b>Sync with administration login</b>
+<dd>The password for MySQL is always kept the same as the virtual server's
+ administration login.<p>
+
+<dt><b>Same as initial administration login</b>
+<dd>The password is initially the same as the administration login, but is not modified if the administration password is changed.<p>
+
+<dt><b>Generate randomly</b>
+<dd>When the virtual server is created, a randomly generated MySQL password is chosen and not changed.<p>
+</dl>
 
 <footer>
 

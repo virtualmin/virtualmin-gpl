@@ -76,6 +76,12 @@ local $user = $d->{'mysql_user'};
 # Check if only hashed passwords are stored, and if so generate a random
 # MySQL password now
 if ($d->{'hashpass'} && !$d->{'parent'} && !$d->{'mysql_pass'}) {
+	# Hashed passwords in use
+	$d->{'mysql_pass'} = &random_password(16);
+	delete($d->{'mysql_enc_pass'});
+	}
+elsif ($tmpl->{'mysql_nopass'} == 2 && !$d->{'parent'} && !$d->{'mysql_pass'}) {
+	# Using random password by default
 	$d->{'mysql_pass'} = &random_password(16);
 	delete($d->{'mysql_enc_pass'});
 	}
@@ -1841,9 +1847,12 @@ print &ui_table_row(&hlink($text{'tmpl_mysql_nouser'}, "template_mysql_nouser"),
 		  ($tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ) )]));
 
 # Update MySQL password to match domain?
-print &ui_table_row(&hlink($text{'tmpl_mysql_nopass'}, "template_mysql_nopass"),
+print &ui_table_row(&hlink($text{'tmpl_mysql_nopass2'},
+			   "template_mysql_nopass"),
 	&ui_radio("mysql_nopass", $tmpl->{'mysql_nopass'},
-		[ [ 0, $text{'yes'} ], [ 1, $text{'no'} ],
+		[ [ 0, $text{'tmpl_mysql_nopass_sync'} ],
+		  [ 1, $text{'tmpl_mysql_nopass_same'} ],
+		  [ 2, $text{'tmpl_mysql_nopass_random'} ],
 		  ($tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ) )]));
 
 # Make MySQL DBs group-owned by domain, for quotas?
