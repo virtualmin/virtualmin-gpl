@@ -29,8 +29,6 @@
 	- Add to unit tests
 	- http://www.virtualmin.com/node/18938
 
- - Move scripts to new directory / DB login / URL
-
  - Allow admin to edit user's procmail rules
 	- http://www.virtualmin.com/node/12330 
 
@@ -45,12 +43,14 @@
 	- CHANGELOG
 	- backup/restore
 
- - CSR script for eric holtzman
-	- SSL cert support
-	- Namecheap too
-	- Pro only
-
  - PHP 5.3/5.4 support
 	- See Eric's email "PHP in Software Collections"
 
- - Amazon payments
+ - SSI enable / disable per domain
+	- https://virtualmin.com/node/24982
+	- web UI
+	- API
+	- CHANGELOG
+	- template
+
+ - AWstats to webmincron

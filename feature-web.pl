@@ -3979,6 +3979,157 @@ return "Options=ExecCGI,Includes,IncludesNOEXEC,".
        "Indexes,MultiViews,SymLinksIfOwnerMatch";
 }
 
+# get_domain_web_ssi(&domain)
+# Returns 1 and the file suffix if server-side includes are enabled for a
+# domain, or 0 and an optional error if not.
+sub get_domain_web_ssi
+{
+local ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	return &plugin_call($p, "feature_get_web_domain_ssi", $d);
+	}
+elsif (!$p) {
+	return (0, "Virtual server does not have a website");
+	}
+&require_apache();
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+return (0, "No Apache configuration found") if (!$virt);
+
+# Get options for public_html
+local @dirs = &apache::find_directive_struct("Directory", $vconf);
+local $phd = &public_html_dir($d);
+local ($dir) = grep { $_->{'words'}->[0] eq $phd } @dirs;
+return (0, "No directory block for $phd found") if (!$dir);
+local @opts = &apache::find_directive("Options", $dir->{'members'});
+local $foundincludes;
+foreach my $o (@opts) {
+	if ($o =~ /(^|\s|\+)Includes/) {
+		$foundincludes = 1;
+		}
+	}
+return (0) if (!$foundincludes);
+
+# Look for AddOutputFilter INCLUDES suffix
+local @filters = &apache::find_directive("AddOutputFilter", $dir->{'members'});
+local $foundfilter;
+foreach my $f (@filters) {
+	if ($f =~ /^INCLUDES\s+(\S+)/) {
+		$foundfilter = $1;
+		}
+	}
+return (0) if (!$foundfilter);
+
+return (1, $foundfilter);
+}
+
+# save_domain_web_ssi(&domain, suffix)
+# Enable or disable SSI for a domain, with files of some suffix. Returns undef
+# on success or an error message on failure.
+sub save_domain_web_ssi
+{
+local ($d, $suffix) = @_;
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	return &plugin_call($p, "feature_save_web_domain_ssi", $d, $suffix);
+	}
+elsif (!$p) {
+	return (0, "Virtual server does not have a website");
+	}
+&require_apache();
+
+&obtain_lock_web($d);
+local @ports = ( $d->{'web_port'} );
+push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+
+foreach my $p (@ports) {
+	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
+	next if (!$virt);
+
+	# Fix options for public_html
+	local @dirs = &apache::find_directive_struct("Directory", $vconf);
+	local $phd = &public_html_dir($d);
+	local ($dir) = grep { $_->{'words'}->[0] eq $phd } @dirs;
+	next if (!$dir);
+	local @opts = &apache::find_directive("Options", $dir->{'members'});
+	if ($suffix) {
+		# Adding to Options
+		local $foundincludes;
+		foreach my $o (@opts) {
+			if ($o =~ /(^|\s|\+)Includes/) {
+				$foundincludes = 1;
+				}
+			}
+		if (!$foundincludes) {
+			$opts[0] .= " Includes";
+			}
+		}
+	else {
+		# Removing from Options
+		foreach my $o (@opts) {
+			$o =~ s/(^|\s+)\+?Includes//g;
+			}
+		}
+	&apache::save_directive("Options", \@opts, $dir->{'members'}, $conf);
+
+	# Add AddOutputFilter directive for the suffix
+	local @filters = &apache::find_directive("AddOutputFilter",
+						 $dir->{'members'});
+	local $idx;
+	local $oldsuffix;
+	for(my $i=0; $i<@filters; $i++) {
+		if ($filters[$i] =~ /^INCLUDES\s+(\S+)/) {
+			$idx = $i;
+			$oldsuffix = $1;
+			}
+		}
+	if (defined($idx) && $suffix) {
+		# Fix existing line
+		$filters[$idx] = "INCLUDES $suffix";
+		}
+	elsif (defined($idx) && !$suffix) {
+		# Remove existing line
+		splice(@filters, $idx, 1);
+		}
+	elsif (!defined($idx) && $suffix) {
+		# Add new line
+		push(@filters, "INCLUDES $suffix");
+		}
+	&apache::save_directive("AddOutputFilter", \@filters,
+				$dir->{'members'}, $conf);
+
+	# Add AddType directive for the suffix, if not .html
+	local @types = &apache::find_directive("AddType", $dir->{'members'});
+	local $idx;
+	if ($oldsuffix) {
+		for(my $i=0; $i<@types; $i++) {
+			if ($types[$i] =~ /^(\S+)\s+\Q$oldsuffix\E/) {
+				$idx = $i;
+				}
+			}
+		}
+	if (defined($idx) && $suffix) {
+		# Fix existing line
+		$types[$idx] = "text/html $suffix";
+		}
+	elsif (defined($idx) && !$suffix) {
+		# Remove existing line
+		splice(@types, $idx, 1);
+		}
+	elsif (!defined($idx) && $suffix) {
+		# Add new line
+		push(@types, "text/html $suffix");
+		}
+	&apache::save_directive("AddTypes", \@types, $dir->{'members'}, $conf);
+
+	&flush_file_lines($virt->{'file'});
+	}
+
+&release_lock_web($d);
+&register_post_action(\&restart_apache);
+return undef;
+}
+
 $done_feature_script{'web'} = 1;
 
 1;
