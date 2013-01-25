@@ -44,6 +44,10 @@ To have Apache configured to accept requests for any sub-domain, use the
 C<--matchall> command-line flag. This will also add a C<*> DNS entry if needed.
 To turn this feature off, use the C<--no-matchall> flag.
 
+To enable server-side includes for this virtual server, use the C<--includes>
+flag followed by an extension like C<.html> or C<.shtml>. To disable includes,
+use the C<--no-includes> flag.
+
 To make a virtual server the default served by Apache for its IP address,
 use the C<--default-website> flag. This lets you control which domain's
 contents appear if someone accesses your system via a URL with only an IP
@@ -153,6 +157,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-matchall") {
 		$matchall = 0;
 		}
+	elsif ($a eq "--includes") {
+		$includes = shift(@ARGV);
+		}
+	elsif ($a eq "--no-includes") {
+		$includes = "";
+		}
 	elsif ($a eq "--default-website") {
 		$defwebsite = 1;
 		}
@@ -187,7 +197,7 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) ||
   defined($suexec) || $stylename || $content || defined($children) ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
-  &usage("Nothing to do");
+  defined($includes) || &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -294,6 +304,12 @@ foreach $d (@doms) {
 
 if ($defaultwebsite && @doms > 1) {
 	&usage("The --default-website flag can only be applied to a single virtual server");
+	}
+
+# Validate includes extension
+if ($includes ne "") {
+	$includes =~ /^\.([a-z0-9\.\_\-]+)$/i ||
+	    &usage("--includes must be followed by an extension like .html");
 	}
 
 # Lock them all
@@ -436,6 +452,21 @@ foreach $d (@doms) {
 			}
 		}
 
+	if (defined($includes) && &domain_has_website($d)) {
+		# Enable or disable server-side includes
+		local ($ok, $oldincludes) = &get_domain_web_ssi($d);
+		if ($includes && $includes ne $oldincludes) {
+			&$first_print("Enabling server-side includes ..");
+			$err = &save_domain_web_ssi($d, $includes);
+			&$second_print($err ? ".. failed : $err" : ".. done");
+			}
+		elsif (!$includes) {
+			&$first_print("Disabling server-side includes ..");
+			$err = &save_domain_web_ssi($d, undef);
+			&$second_print($err ? ".. failed : $err" : ".. done");
+			}
+		}
+
 	if ($defwebsite) {
 		# Make this site the default, by re-ordering the Apache config
 		&$first_print("Making website the default ..");
@@ -557,6 +588,7 @@ if (&has_webmail_rewrite($d)) {
 	print "                     [--webmail | --no-webmail]\n";
 	}
 print "                     [--matchall | --no-matchall]\n";
+print "                     [--includes extension | --no-includes]\n";
 print "                     [--default-website]\n";
 print "                     [--access-log log-path]\n";
 print "                     [--error-log log-path]\n";

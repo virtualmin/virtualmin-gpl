@@ -3981,7 +3981,8 @@ return "Options=ExecCGI,Includes,IncludesNOEXEC,".
 
 # get_domain_web_ssi(&domain)
 # Returns 1 and the file suffix if server-side includes are enabled for a
-# domain, or 0 and an optional error if not.
+# domain, 0 and an optional error if not, and 2 if the global settings are
+# in effect.
 sub get_domain_web_ssi
 {
 local ($d) = @_;
@@ -4004,7 +4005,7 @@ return (0, "No directory block for $phd found") if (!$dir);
 local @opts = &apache::find_directive("Options", $dir->{'members'});
 local $foundincludes;
 foreach my $o (@opts) {
-	if ($o =~ /(^|\s|\+)Includes/) {
+	if ($o =~ /(^|\s|\+)(Includes|IncludesNOEXEC)(\s|$)/) {
 		$foundincludes = 1;
 		}
 	}
@@ -4056,18 +4057,18 @@ foreach my $p (@ports) {
 		# Adding to Options
 		local $foundincludes;
 		foreach my $o (@opts) {
-			if ($o =~ /(^|\s|\+)Includes/) {
+			if ($o =~ /(^|\s|\+)(Includes|IncludesNOEXEC)(\s|$)/) {
 				$foundincludes = 1;
 				}
 			}
 		if (!$foundincludes) {
-			$opts[0] .= " Includes";
+			$opts[0] .= " IncludesNOEXEC";
 			}
 		}
 	else {
 		# Removing from Options
 		foreach my $o (@opts) {
-			$o =~ s/(^|\s+)\+?Includes//g;
+			$o =~ s/(^|\s+)\+?(Includes|IncludesNOEXEC)(\s|$)/$3/g;
 			}
 		}
 	&apache::save_directive("Options", \@opts, $dir->{'members'}, $conf);
@@ -4120,7 +4121,7 @@ foreach my $p (@ports) {
 		# Add new line
 		push(@types, "text/html $suffix");
 		}
-	&apache::save_directive("AddTypes", \@types, $dir->{'members'}, $conf);
+	&apache::save_directive("AddType", \@types, $dir->{'members'}, $conf);
 
 	&flush_file_lines($virt->{'file'});
 	}
