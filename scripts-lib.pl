@@ -183,6 +183,7 @@ local $rv = { 'name' => $name,
 	      'enabled' => !$disabled,
 	      'nocheck' => $disabled == 2,
 	      'minversion' => $unavail{$name."_minversion"},
+	      'abandoned_func' => "script_${name}_abandoned",
 	    };
 if (defined(&$vdfunc)) {
 	foreach my $ver (@{$rv->{'versions'}},

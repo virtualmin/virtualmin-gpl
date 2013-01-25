@@ -56,6 +56,18 @@ if (defined(&$phpvfunc)) {
 	}
 
 if ($ok) {
+	# Check if abandoned
+	$afunc = $script->{'abandoned_func'};
+	$abandoned = defined(&$afunc) && &$afunc($v);
+	if ($abandoned == 2) {
+		print "<font color=red><b>",
+			&text('scripts_abandoned2'),"</b></font><p>\n";
+		}
+	elsif ($abandoned == 1) {
+		print "<font color=red><b>",
+			&text('scripts_abandoned1', $v),"</b></font><p>\n";
+		}
+	
 	# Show install options form
 	print &ui_form_start("script_install.cgi", "post");
 	print &ui_hidden("dom", $in{'dom'}),"\n";
