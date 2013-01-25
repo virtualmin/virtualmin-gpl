@@ -2058,6 +2058,7 @@ log_nofixsymlinks=Allowed unsafe symbolic link permissions
 log_fixhtaccess=Fixed symbolic link htaccess options
 log_autoconfigon=Enabled mail client auto-configuration
 log_autoconfigoff=Disabled mail client auto-configuration
+log_postinstall=Ran post-install script
 
 backup_title=Backup Virtual Servers
 backup_title2=Edit Scheduled Backup
@@ -3680,6 +3681,8 @@ scripts_failedpackage=.. failed. Later steps in the installation of this script 
 scripts_gotpackage=.. already installed
 scripts_packagecount=.. installed $1 new packages
 scripts_packageall=.. all packages are already installed
+scripts_abandoned2=WARNING : This script is no longer supported by its original author.
+scripts_abandoned1=WARNING : Version $1 of this script is no longer supported by its original author.
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:
