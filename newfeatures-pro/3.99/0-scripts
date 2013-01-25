@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the OpenCart script installer to version 1.5.5.1, Squirrelmail to 1.4.22, and Radiant to 1.1.1.<br>Marked several scripts that no longer appear to be updated or available as unsupported.
+html=Updated the OpenCart script installer to version 1.5.5.1, Squirrelmail to 1.4.22, WordPress to 3.5.1, and Radiant to 1.1.1.<br>Marked several scripts that no longer appear to be updated or available as unsupported.
 master=1
 reseller=1
 domain=1
