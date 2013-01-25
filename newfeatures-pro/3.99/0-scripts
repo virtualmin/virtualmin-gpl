@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the OpenCart script installer to version 1.5.5.1, Squirrelmail to 1.4.22, WordPress to 3.5.1, Movable Type to 5.2.3, PHP-Calendar to 1.1, Gallery to 3.0.4, Advanced Poll to 2.0.9, PHP-Wiki to 1.4.0rc1, and Radiant to 1.1.1.<br>Marked several scripts that no longer appear to be updated or available as unsupported.
+html=Updated the OpenCart script installer to version 1.5.5.1, Squirrelmail to 1.4.22, WordPress to 3.5.1, Movable Type to 5.2.3, PHP-Calendar to 1.1, Gallery to 3.0.4, Advanced Poll to 2.0.9, PHP-Wiki to 1.4.0rc1, Simple Invoices to 2011.1, and Radiant to 1.1.1.<br>Marked several scripts that no longer appear to be updated or available as unsupported.
 master=1
 reseller=1
 domain=1
