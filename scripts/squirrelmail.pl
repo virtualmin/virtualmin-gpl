@@ -18,7 +18,7 @@ return "SquirrelMail is a standards-based webmail package written in PHP";
 # script_squirrelmail_versions()
 sub script_squirrelmail_versions
 {
-return ( "1.4.21" );
+return ( "1.4.22" );
 }
 
 sub script_squirrelmail_version_desc
@@ -124,7 +124,7 @@ sub script_squirrelmail_files
 local ($d, $ver, $opts, $upgrade) = @_;
 local @files = ( { 'name' => "source",
 	   'file' => "squirrelmail-$ver.tar.gz",
-	   'url' => "http://prdownloads.sourceforge.net/squirrelmail/squirrelmail-$ver.tar.gz" },
+	   'url' => "http://prdownloads.sourceforge.net/squirrelmail/squirrelmail-webmail-$ver.tar.gz" },
 	   { 'name' => 'set_user_data',
 	     'file' => 'set_user_data.tar.gz',
 	     'nofetch' => 1,
@@ -364,7 +364,7 @@ return (1, $dbname ? "SquirrelMail directory and tables deleted."
 sub script_squirrelmail_check_latest
 {
 local ($ver) = @_;
-local @vers = &osdn_package_versions("squirrelmail", "squirrelmail-([a-z0-9\\.]+)\\.tar\\.gz");
+local @vers = &osdn_package_versions("squirrelmail", "squirrelmail-webmail-([a-z0-9\\.]+)\\.tar\\.gz");
 @vers = grep { !/RC/ } @vers;
 if (&compare_versions($ver, 1.5) > 0) {
 	@vers = grep { &compare_versions($_, 1.5) > 0 } @vers;
