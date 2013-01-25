@@ -224,6 +224,7 @@ foreach my $k ('mins', 'hours', 'days', 'months', 'weekdays',
 sub find_module_cron_job
 {
 local ($cmd, $jobs, $user) = @_;
+return undef if (!$cmd);
 if (!$jobs) {
 	&foreign_require("cron", "cron-lib.pl");
 	$jobs = [ &cron::list_cron_jobs() ];
