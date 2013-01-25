@@ -163,7 +163,7 @@ if ($upgrade) {
 # Extract tar file to temp dir and copy to target
 local $temp = &transname();
 local $err = &extract_script_archive($files->{'source'}, $temp, $d,
-                                     $opts->{'dir'}, "squirrelmail-$ver");
+			     $opts->{'dir'}, "squirrelmail-webmail-$ver");
 $err && return (0, "Failed to extract source : $err");
 local $cprog = "$opts->{'dir'}/config/conf.pl";
 
