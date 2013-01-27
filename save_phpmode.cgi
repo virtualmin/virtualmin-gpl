@@ -55,6 +55,12 @@ if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./ &&
 		&error($text{'phpmode_ehtmldir4'});
 	}
 
+# Validate SSI suffix
+if ($in{'ssi'} == 1) {
+	$in{'suffix'} =~ /^\.([a-z0-9\.\_\-]+)$/i ||
+		&error($text{'phpmode_essisuffix'});
+	}
+
 # Start telling the user what is being done
 &ui_print_unbuffered_header(&domain_in($d), $text{'phpmode_title'}, "");
 &obtain_lock_web($d);
@@ -138,6 +144,27 @@ if (defined($in{'matchall'}) && $in{'matchall'} != $oldmatchall) {
 		&save_domain_matchall_record($d, $in{'matchall'});
 		}
 	&$second_print($text{'setup_done'});
+        $anything++;
+	}
+
+# Save SSI mode
+($oldssi, $oldsuffix) =  &get_domain_web_ssi($d);
+if (defined($in{'ssi'}) && ($in{'ssi'} != $oldssi ||
+			    $in{'ssi'} == 1 && $in{'suffix'} ne $oldsuffix)) {
+	if ($in{'ssi'}) {
+		&$first_print(&text('phpmode_ssion', $in{'suffix'}));
+		$err = &save_domain_web_ssi($d, $in{'suffix'});
+		}
+	else {
+		&$first_print(&text('phpmode_ssioff'));
+		$err = &save_domain_web_ssi($d, undef);
+		}
+	if ($err) {
+		&$second_print(&text('phpmode_ssierr', $err));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
         $anything++;
 	}
 

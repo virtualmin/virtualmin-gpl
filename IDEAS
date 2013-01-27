@@ -47,12 +47,7 @@
 	- See Eric's email "PHP in Software Collections"
 
  - SSI enable / disable per domain
-	- If disabled, need to add directives to disable SSI
-	- Status function needs to return indicator that it is neither enabled
-	  nor disabled
 	- https://virtualmin.com/node/24982
-	- web UI
-	- API
 	- CHANGELOG
 	- template
 

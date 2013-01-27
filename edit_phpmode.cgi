@@ -95,6 +95,19 @@ if ($p eq 'web' || &plugin_defined($p, "feature_get_web_domain_star")) {
 		    &ui_yesno_radio("matchall", &get_domain_web_star($d)));
 	}
 
+# Server-side includes
+if ($p eq 'web' || &plugin_defined($p, "feature_get_web_domain_ssi")) {
+	($ssi, $suffix) = &get_domain_web_ssi($d);
+	$suffix = ".shtml" if ($ssi != 1);
+	print &ui_table_row(&hlink($text{'phpmode_ssi'}, "phpmode_ssi"),
+	    &ui_radio("ssi", $ssi,
+		      [ [ 1, &text('phpmode_ssi1',
+				   &ui_textbox("suffix", $suffix, 6)) ],
+			[ 0, $text{'no'} ],
+			$ssi == 2 ? ( [ 2, $text{'phpmode_ssi2'} ] )
+				  : ( ) ]));
+	}
+
 # Default website for its IP
 if (!$d->{'alias'} || $d->{'alias_mode'} != 1 &&
     ($p eq 'web' || &plugin_defined($p, "feature_get_web_default_website"))) {

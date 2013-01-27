@@ -4019,7 +4019,7 @@ foreach my $f (@filters) {
 		$foundfilter = $1;
 		}
 	}
-return (0) if (!$foundfilter);
+return (2) if (!$foundfilter);
 
 return (1, $foundfilter);
 }
