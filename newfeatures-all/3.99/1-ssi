@@ -1,0 +1,6 @@
+desc=Server-side includes
+html=Added the ability to enable or disable server-side includes for a specific file extension for virtual servers with a website.
+master=1
+reseller=1
+owner=1
+link=edit_phpmode.cgi?dom=${ID}
