@@ -265,6 +265,14 @@ eval {
 	if ($config{'allow_symlinks'} ne '1' && !$_[0]->{'alias'}) {
 		&fix_symlink_security([ $_[0] ]);
 		}
+
+	# Apply template SSI setting
+	if ($tmpl->{'web_ssi'} == 1 && $tmpl->{'web_ssi_suffix'}) {
+		&save_domain_web_ssi($_[0], $tmpl->{'web_ssi_suffix'});
+		}
+	elsif ($tmpl->{'web_ssi'} == 0) {
+		&save_domain_web_ssi($_[0], undef);
+		}
 	};
 if ($@) {
 	&$second_print(&text('setup_ewebpost', "$@"));
@@ -2242,7 +2250,8 @@ local @webfields = ( "web", "suexec", "user_def",
 		     "html_dir", "html_dir_def", "html_perms", "stats_mode",
 		     "stats_dir", "stats_hdir", "statspass", "statsnoedit",
 		     "alias_mode", "web_port", "web_sslport",
-		     "web_webmin_ssl", "web_usermin_ssl" );
+		     "web_webmin_ssl", "web_usermin_ssl", "web_ssi",
+		     "web_ssi_suffix", );
 push(@webfields, "webmail", "webmaildom", "webmaildom_def",
 		 "admin", "admindom", "admindom_def");
 push(@webfields, "web_php_suexec", "web_phpver",
@@ -2326,6 +2335,16 @@ print &ui_table_row(&hlink($text{'tmpl_alias'}, "template_alias_mode"),
 		    [ 4, $text{'tmpl_alias4'}."<br>" ],
 		    [ 2, $text{'tmpl_alias2'}."<br>" ],
 		    [ 1, $text{'tmpl_alias1'} ] ]));
+
+# Default SSI setting
+print &ui_table_row(
+    &hlink($text{'tmpl_webssi'}, "template_webssi"),
+    &ui_radio("web_ssi", $tmpl->{'web_ssi'},
+	      [ [ 1, &text('phpmode_ssi1',
+		   &ui_textbox("web_ssi_suffix",
+			       $tmpl->{'web_ssi_suffix'}, 6)) ],
+		[ 0, $text{'no'} ],
+		[ 2, $text{'phpmode_ssi2'} ] ]));
 
 # Port for normal webserver
 print &ui_table_row(&hlink($text{'newweb_port'}, "template_web_port"),
@@ -2553,6 +2572,14 @@ if ($in{"web_mode"} == 2) {
 	$tmpl->{'web_sslport'} = $in{'web_sslport'};
 	$tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};
 	$tmpl->{'web_usermin_ssl'} = $in{'web_usermin_ssl'};
+
+	# Parse SSI setting
+	$tmpl->{'web_ssi'} = $in{'web_ssi'};
+	if ($in{'web_ssi'} == 1) {
+		$in{'web_ssi_suffix'} =~ /^\.([a-z0-9\.\_\-]+)$/i ||
+			&error($text{'phpmode_essisuffix'});
+		$tmpl->{'web_ssi_suffix'} = $in{'web_ssi_suffix'};
+		}
 
 	# Parse webmail redirect
 	foreach my $r ('webmail', 'admin') {

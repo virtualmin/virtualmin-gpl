@@ -49,7 +49,7 @@
  - SSI enable / disable per domain
 	- https://virtualmin.com/node/24982
 	- CHANGELOG
-	- template
+	- functional test
 
  - AWstats to webmincron
 

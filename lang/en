@@ -3070,6 +3070,7 @@ tmpl_phpchildrennone=None
 tmpl_php_iniv=Template PHP $1 configuration file
 tmpl_php_noedit=Allow editing of PHP configuration?
 tmpl_rubymode=Default Ruby execution mode
+tmpl_webssi=Allow server-side includes by default?
 tmpl_phpverdef=Lowest available
 tmpl_edisabled_url=Missing or invalid disabled website URL
 tmpl_php_vars=PHP configuration variables for scripts
