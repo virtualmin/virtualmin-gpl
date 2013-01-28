@@ -46,11 +46,6 @@
  - PHP 5.3/5.4 support
 	- See Eric's email "PHP in Software Collections"
 
- - SSI enable / disable per domain
-	- https://virtualmin.com/node/24982
-	- CHANGELOG
-	- functional test
-
  - AWstats to webmincron
 
  - Validate FreeBSD 9.x support
