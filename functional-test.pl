@@ -4596,6 +4596,30 @@ $web_tests = [
 	  'grep' => 'Test web page',
 	},
 
+	# Enable use of server-side includes
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'includes', '.shtml' ] ],
+	},
+
+	# Create a test file and get it
+	{ 'command' => 'echo "<!--#echo var="REQUEST_METHOD" -->" >~'.$test_domain_user.'/public_html/test.shtml',
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain.'/test.shtml',
+	  'grep' => 'GET',
+	},
+
+	# Disable use of server-side includes
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'no-includes' ] ],
+	},
+
+	# Get the file again, and make sure includes are disabled
+	{ 'command' => $wget_command.'http://'.$test_domain.'/test.shtml',
+	  'antigrep' => 'GET',
+	},
+
 	# Enable proxying
 	{ 'command' => 'modify-web.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
