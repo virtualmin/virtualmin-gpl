@@ -461,6 +461,15 @@ if ($multi) {
 			      ($star ? "Yes" : "No"),"\n";
 			}
 
+		# Shiw SSI setting
+		if (&domain_has_website($d) && !$d->{'alias'} && $multi == 1) {
+			($ssi, $suffix) = &get_domain_web_ssi($d);
+			print "    Server-side includes: ",
+			      ($ssi == 0 ? "Disabled" : 
+			       $ssi == 1 ? "Enabled for $suffix" :
+					   "Global default"),"\n";
+			}
+
 		# Show default website flag
 		if (&domain_has_website($d) && $multi == 1 &&
 		    (!$d->{'alias'} || $d->{'alias_mode'} != 1)) {
