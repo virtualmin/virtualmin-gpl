@@ -56,6 +56,7 @@ sub list_bucket {
     $headers ||= {};
     my @rv;
     my $pos = undef;
+    my $maxkeys = 1000;
 
     my $response;
     while(1) {
@@ -64,6 +65,7 @@ sub list_bucket {
 	    if ($pos) {
 		$o{'marker'} = $pos;
 	    }
+	    $o{'max-keys'} = $maxkeys;
 	    if (%o) {
 		$path .= "?".join('&', map { "$_=".urlencode($o{$_}) } keys %o)
 	    }
@@ -80,9 +82,9 @@ sub list_bucket {
 		# This is the first response
 		$response = $r;
 	    }
-	    last if (!@{$r->entries});			# No more to get
-	    last if (!$pos && @{$r->entries} < 1000);	# Got less than 1000, so
-							# no need to go further
+	    last if (!@{$r->entries});			  # No more to get
+	    last if (!$pos && @{$r->entries} < $maxkeys); # Got less than 1000,
+							  # no need to go on
 	    $pos = $r->entries->[@{$r->entries} - 1]->{'Key'};
 	}
    return $response;
@@ -273,14 +275,19 @@ sub _make_request {
 	$self->{SERVER_REDIRECTS}++;
 	my $newpath = $path;
 	if ($self->{'SERVER_REDIRECTS'} == 1) {
-		# Redirecting from default to new endpoint
-		$newpath =~ s/^([^\/]+)//;
+		# Redirecting from default to new endpoint. Remove the leading
+		# path element.
+		$newpath =~ s/^([^\/\?]+)//;
 		if ($newpath eq "") {
 		  # When requesting a bucket like /foo originally, we have to
 		  # request ? from foo.s3.amazonaws.com instead. HOWEVER, the
 		  # path to sign is still like /foo/
 		  $newpath = "?";
 		  $path .= "/";
+		} elsif ($newpath =~ /^\?/) {
+		  # When requesting a bucket like /foo?marker=smeg originally,
+		  # a / is needed at the end of the bucket
+		  $path =~ s/\?/\/\?/;
 		}
 		# If the new path ends up like /bar.com.tar.gz, it must be
 		# converted to bar.com.tar.gz for the HTTP request
