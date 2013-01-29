@@ -452,7 +452,8 @@ if (&can_switch_usermin($d, $user) &&
 	&foreign_require("usermin", "usermin-lib.pl");
 	local %uminiserv;
 	&usermin::get_usermin_miniserv_config(\%uminiserv);
-	if (defined(&usermin::switch_to_usermin_user) &&
+	if (&check_pid_file($uminiserv{'pidfile'}) &&
+	    defined(&usermin::switch_to_usermin_user) &&
 	    $uminiserv{'session'}) {
 		$usermin = 1;
 		}
