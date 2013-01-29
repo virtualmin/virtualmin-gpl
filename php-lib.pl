@@ -251,8 +251,9 @@ foreach my $p (@ports) {
 				     ($1 eq '' || $allvers{$1})) } @handlers;
 		local @wrappers = &apache::find_directive("FCGIWrapper",
 							  $phpconf);
-		@wrappers = grep { !(/^\Q$fdest\E\/php.\.fcgi\s+\.php(.*)$/ &&
-				     ($1 eq '' || $allvers{$1})) } @wrappers;
+		@wrappers = grep {
+			!(/^\Q$fdest\E\/php[0-9\.]+\.fcgi\s+\.php(.*)$/ &&
+		        ($1 eq '' || $allvers{$1})) } @wrappers;
 
 		# Add needed Apache directives. Don't add the AddHandler,
 		# Alias and Directory if already there.
@@ -720,6 +721,16 @@ foreach my $v (@all_possible_php_versions) {
 		$phpn = &has_command("/opt/csw/php$v/bin/php-cgi");
 		}
 	$phpn ||= &has_command("php$v-cgi") || &has_command("php$v");
+	local $nodotv = $v;
+	$nodotv =~ s/\.//;
+	if ($nodotv ne $v) {
+		# For a version like 5.4, check for binaries like php54 and
+		# /opt/rh/php54/bin/php
+		$phpn ||= &has_command("php$nodotv-cgi") ||
+			  &has_command("php$nodotv") ||
+			  &has_command("/opt/rh/php$nodotv/bin/php-cgi") ||
+			  &has_command("/opt/rh/php$nodotv/bin/php");
+		}
 	$vercmds{$v} = $phpn if ($phpn);
 	}
 local $php = &has_command("php-cgi") || &has_command("php");
@@ -801,8 +812,8 @@ foreach my $dir (@dirs) {
 		local $w = &apache::wsplit($v);
 		if (&indexof(".php", @$w) > 0) {
 			# This is for .php files .. look at the php version
-			if ($w->[0] =~ /php(\d+)\.(cgi|fcgi)/ ||
-			    $w->[0] =~ /x-httpd-php(\d+)/) {
+			if ($w->[0] =~ /php([0-9\.]+)\.(cgi|fcgi)/ ||
+			    $w->[0] =~ /x-httpd-php([0-9\.]+)/) {
 				# Add version and dir to list
 				push(@rv, { 'dir' => $dir->{'words'}->[0],
 					    'version' => $1,

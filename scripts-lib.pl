@@ -845,6 +845,13 @@ return $ver ? &indexof($ver, @avail) >= 0
 sub setup_php_version
 {
 local ($d, $vers, $path) = @_;
+if (&indexof(5, @$vers) >= 0) {
+	# If the script indicates that it supports PHP 5 but we have separate
+	# 5.3+ versions detected, allow them too
+	local @fiveplus = grep { $_ > 5 } map { $_->[0] }
+			       &list_available_php_versions($d);
+	push(@$vers, @fiveplus);
+	}
 
 # Find the best matching directory
 local $dirpath = &public_html_dir($d).$path;
@@ -859,7 +866,7 @@ foreach my $dir (sort { length($a->{'dir'}) cmp length($b->{'dir'}) } @dirs) {
 $bestdir || &error("Could not find PHP version for $dirpath");
 
 if (&indexof($bestdir->{'version'}, @$vers) >= 0) {
-	# The best match dir supports this PHP version .. so we are OK!
+	# The best match dir supports one of the PHP versions .. so we are OK!
 	return $bestdir->{'version'};
 	}
 
