@@ -786,19 +786,20 @@ foreach my $d (@$doms) {
 	if (!$selrec) {
 		# Add new record
 		&bind8::create_record($file, $selname, undef, 'IN', 'TXT',
-				      '"v=DKIM1; k=rsa; r=postmaster; t=s; p='.$pubkey.'"');
+		    &split_long_txt_record(
+			'"v=DKIM1; k=rsa; r=postmaster; t=s; p='.$pubkey.'"'));
 		$changed++;
 		}
-	elsif ($selrec && $selrec->{'values'}->[0] !~ /p=\Q$pubkey\E/) {
+	elsif ($selrec && join("", @{$selrec->{'values'}}) !~ /p=\Q$pubkey\E/) {
 		# Fix existing record
-		my $val = $selrec->{'values'}->[0];
+		my $val = join("", @{$selrec->{'values'}});
 		if ($val !~ s/p=([^;]+)/p=$pubkey/) {
 			$val = 'k=rsa; t=y; p='.$pubkey;
 			}
 		&bind8::modify_record($selrec->{'file'}, $selrec,
 				      $selrec->{'name'}, $selrec->{'ttl'},
 				      $selrec->{'class'}, $selrec->{'type'},
-				      '"'.$val.'"');
+				      &split_long_txt_record('"'.$val.'"'));
 		$changed++;
 		}
 	if ($changed) {
@@ -868,6 +869,22 @@ my $cmd = "cd $sendmail::config{'sendmail_features'}/m4 ; ".
 &system_logged("$cmd 2>/dev/null >$config{'sendmail_cf'} ".
 	       "</dev/null");
 &unlock_file($sendmail::config{'sendmail_cf'});
+}
+
+# split_long_txt_record(string)
+# Split a TXT record at 80 char boundaries
+sub split_long_txt_record
+{
+local ($str) = @_;
+$str =~ s/^"//;
+$str =~ s/"$//;
+local @rv;
+while($str) {
+	local $first = substr($str, 0, 80);
+	$str = substr($str, 80);
+	push(@rv, $first);
+	}
+return "( ".join("\n\t", map { '"'.$_.'"' } @rv)." )";
 }
 
 1;
