@@ -143,9 +143,7 @@ $shortscript =~ s/^.*\///;
 
 &foreign_require("cron");
 &foreign_require("webmincron");
-local @jobs = &cron::list_cron_jobs();
-local @wcrons = &webmincron::list_webmin_crons();
-foreach my $job (&find_module_cron_job($script, \@jobs)) {
+foreach my $job (&find_module_cron_job($script)) {
 	&lock_file(&cron::cron_file($job));
 	&cron::delete_cron_job($job);
 	&unlock_file(&cron::cron_file($job));
@@ -158,7 +156,8 @@ foreach my $job (&find_module_cron_job($script, \@jobs)) {
 	local ($wjob) = grep { $_->{'module'} eq $module_name &&
 			       $_->{'func'} eq "run_cron_script" &&
 			       $_->{'args'}->[0] eq $shortscript &&
-			       $_->{'args'}->[1] eq $args } @wcrons;
+			       $_->{'args'}->[1] eq $args }
+			     &webmincron::list_webmin_crons();
 	if (!$wjob) {
 		$job->{'func'} = "run_cron_script";
 		$job->{'module'} = $module_name;
