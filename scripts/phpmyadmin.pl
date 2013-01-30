@@ -59,7 +59,7 @@ return ("mcrypt");
 # Must have at least one existing DB, and PHP 5.2
 sub script_phpmyadmin_depends
 {
-local ($d, $ver) = @_;
+local ($d, $ver, $sinfo, $phpver) = @_;
 local @rv;
 
 &has_domain_databases($d, [ "mysql" ], 1) ||
@@ -67,7 +67,7 @@ local @rv;
 
 # Check for PHP 5.2+, if needed
 if (&compare_versions($ver, "3.1") > 0) {
-	local $phpv = &get_php_version(5, $d);
+	local $phpv = &get_php_version($phpver || 5, $d);
 	if (!$phpv) {
 		push(@rv, "Could not work out exact PHP version");
 		}

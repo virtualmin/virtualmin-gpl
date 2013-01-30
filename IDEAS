@@ -45,8 +45,16 @@
 
  - PHP 5.3/5.4 support
 	- See Eric's email "PHP in Software Collections"
-
- - AWstats to webmincron
+	- Template page for .ini files
+	- Use list_available_php_versions in all places all_possible_php_versions is
+	- Pear
+	- Scripts that ask for PHP 5 should allow 5.3 and 5.4
+		- Audit all scripts for code that gets PHP executable
+		- Make sure web UI script install works
+	- Where is php.ini ?
 
  - Validate FreeBSD 9.x support
 	- KVM instance?
+
+ - Email test button in Webmin
+	- https://www.virtualmin.com/node/25140

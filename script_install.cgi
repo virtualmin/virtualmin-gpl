@@ -89,10 +89,6 @@ if (!$fcount) {
 	&setup_script_packages($script, $d);
 	}
 
-# Check depends again
-$derr = &check_script_depends($script, $d, $ver, $sinfo);
-&error(&text('scripts_edep', $derr)) if ($derr);
-
 # Check for install into non-empty directory, unless upgrading
 if ($fcount > 0) {
 	# Has some files already .. ask the user if he is sure
@@ -127,6 +123,10 @@ if (defined(&$phpvfunc)) {
 		}
 	$opts->{'phpver'} = $phpver;
 	}
+
+# Check depends again
+$derr = &check_script_depends($script, $d, $ver, $sinfo, $phpver);
+&error(&text('scripts_edep', $derr)) if ($derr);
 
 # First fetch needed files
 $ferr = &fetch_script_files($d, $ver, $opts, $sinfo, \%gotfiles);

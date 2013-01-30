@@ -57,11 +57,11 @@ return ( [ 'suhosin.session.encrypt', 'Off' ] );
 # script_roundcube_depends(&domain, version)
 sub script_roundcube_depends
 {
-local ($d, $ver) = @_;
+local ($d, $ver, $sinfo, $phpver) = @_;
 local @rv;
 
 # Check for PHP 5.2+
-local $phpv = &get_php_version(5, $d);
+local $phpv = &get_php_version($phpver || 5, $d);
 if (!$phpv) {
 	push(@rv, "Could not work out exact PHP version");
 	}

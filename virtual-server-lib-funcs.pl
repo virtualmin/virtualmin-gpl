@@ -7167,13 +7167,6 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 		# Install needed packages
 		&setup_script_packages($script, $d);
 
-		# Check dependencies
-		local $derr = &check_script_depends($script, $dom, $ver,$sinfo);
-		if ($derr) {
-			&$second_print(&text('setup_scriptdeps', $derr));
-			next;
-			}
-
 		# Check PHP version
 		local $phpvfunc = $script->{'php_vers_func'};
 		local $phpver;
@@ -7187,6 +7180,14 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 				next;
 				}
 			$opts->{'phpver'} = $phpver;
+			}
+
+		# Check dependencies
+		local $derr = &check_script_depends($script, $dom, $ver,
+						    $sinfo, $phpver);
+		if ($derr) {
+			&$second_print(&text('setup_scriptdeps', $derr));
+			next;
 			}
 
 		# Install needed PHP modules

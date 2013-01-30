@@ -2434,17 +2434,17 @@ foreach my $p (@pkgs) {
 return 1;
 }
 
-# check_script_depends(&script, &domain, &ver, [&upgrade-info])
+# check_script_depends(&script, &domain, &ver, [&upgrade-info], [php-version])
 # Returns a list of dependency problems found for this script, including
 # missing commands.
 sub check_script_depends
 {
-local ($script, $d, $ver, $sinfo) = @_;
+local ($script, $d, $ver, $sinfo, $phpver) = @_;
 local @rv;
 
 # Call script's depends function
 if (defined(&{$script->{'depends_func'}})) {
-	push(@rv, grep { $_ } &{$script->{'depends_func'}}($d, $ver, $sinfo));
+	push(@rv, grep { $_ } &{$script->{'depends_func'}}($d, $ver, $sinfo, $phpver));
 	}
 
 # Check for DB type

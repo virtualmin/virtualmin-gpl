@@ -291,17 +291,6 @@ if (!$sinfo) {
 # Install needed packages
 &setup_script_packages($script, $d);
 
-# Check dependencies
-&$first_print("Checking dependencies ..");
-$derr = &check_script_depends($script, $d, $ver, $sinfo);
-if ($derr) {
-	&$second_print(".. failed : $derr");
-	exit(1);
-	}
-else {
-	&$second_print(".. done");
-	}
-
 # Get locks
 &obtain_lock_web($d);
 &obtain_lock_cron($d);
@@ -321,6 +310,17 @@ if (defined(&$phpvfunc)) {
 		&$second_print(".. done");
 		}
 	$opts->{'phpver'} = $phpver;
+	}
+
+# Check dependencies
+&$first_print("Checking dependencies ..");
+$derr = &check_script_depends($script, $d, $ver, $sinfo, $phpver);
+if ($derr) {
+	&$second_print(".. failed : $derr");
+	exit(1);
+	}
+else {
+	&$second_print(".. done");
 	}
 
 # First fetch needed files

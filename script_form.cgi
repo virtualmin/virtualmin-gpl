@@ -35,15 +35,8 @@ $ver =~ /^\S+$/ || &error($text{'scripts_eversion'});
 	&can_unsupported_scripts() ||
 		&error($text{'scripts_eversion2'});
 
-# Check dependencies
-$derr = &check_script_depends($script, $d, $ver, $sinfo);
-$ok = 1;
-if ($derr) {
-	print &text('scripts_edep', $derr),"<p>\n";
-	$ok = 0;
-	}
-
 # Check PHP version
+$ok = 1;
 $phpvfunc = $script->{'php_vers_func'};
 if (defined(&$phpvfunc)) {
 	@vers = &$phpvfunc($d, $ver);
@@ -53,6 +46,14 @@ if (defined(&$phpvfunc)) {
 		print &text('scripts_ephpvers', join(" or ", @vers)),"<p>\n";
 		$ok = 0;
 		}
+	}
+
+# Check dependencies
+# XXX wrong version?
+$derr = &check_script_depends($script, $d, $ver, $sinfo, $gotvers[0]);
+if ($derr) {
+	print &text('scripts_edep', $derr),"<p>\n";
+	$ok = 0;
 	}
 
 if ($ok) {

@@ -80,62 +80,62 @@ if ($in{'confirm'}) {
 		# Install needed packages
 		&setup_script_packages($script, $d);
 
-		if ($derr = &check_script_depends($script,
-						     $d, $ver, $sinfo)) {
+		# Get locks
+		&obtain_lock_web($d);
+		&obtain_lock_cron($d);
+
+		# Setup PHP version
+		$phpvfunc = $script->{'php_vers_func'};
+		local $phpver;
+		if (defined(&$phpvfunc)) {
+			@vers = &$phpvfunc($d, $ver);
+			$phpver = &setup_php_version($d, \@vers,
+						     $opts->{'path'});
+			if (!$phpver) {
+				&$second_print(&text('scripts_ephpvers',
+					     join(" ", @vers)));
+				next;
+				}
+			}
+
+		if ($derr = &check_script_depends($script, $d, $ver, $sinfo, $phpver)) {
 			# Failed depends
 			&$second_print(&text('massscript_edep', $derr));
+			next;
+			}
+
+		# Install needed PHP/perl/ruby modules
+		&setup_script_requirements($d, $script, $ver, $phpver,
+					   $opts) || next;
+
+		# Work out login and password
+		$domuser = $sinfo->{'user'} || $d->{'user'};
+		$dompass = $sinfo->{'pass'} || $d->{'pass'};
+
+		# Go ahead and do it
+		($ok, $msg, $desc, $url) = &{$script->{'install_func'}}(
+			$d, $ver, $sinfo->{'opts'}, \%gotfiles, $sinfo,
+			$domuser, $dompass);
+		print $msg,"<br>\n";
+		&$outdent_print();
+		&release_lock_web($d);
+		&release_lock_cron($d);
+		if ($ok) {
+			# Worked .. record it
+			&$second_print($text{'setup_done'});
+			&remove_domain_script($d, $sinfo);
+			&add_domain_script($d, $sname, $ver,
+				   $sinfo->{'opts'},
+				   $desc, $url,
+				   $sinfo->{'user'}, $sinfo->{'pass'});
 			}
 		else {
-			# Get locks
-			&obtain_lock_web($d);
-			&obtain_lock_cron($d);
-
-			# Setup PHP version
-			$phpvfunc = $script->{'php_vers_func'};
-			local $phpver;
-			if (defined(&$phpvfunc)) {
-				@vers = &$phpvfunc($d, $ver);
-				$phpver = &setup_php_version($d, \@vers,
-							     $opts->{'path'});
-				if (!$phpver) {
-					&error(&text('scripts_ephpvers',
-						     join(" ", @vers)));
-					}
-				}
-
-			# Install needed PHP/perl/ruby modules
-			&setup_script_requirements($d, $script, $ver, $phpver,
-						   $opts) || next;
-
-			# Work out login and password
-			$domuser = $sinfo->{'user'} || $d->{'user'};
-			$dompass = $sinfo->{'pass'} || $d->{'pass'};
-
-			# Go ahead and do it
-			($ok, $msg, $desc, $url) = &{$script->{'install_func'}}(
-				$d, $ver, $sinfo->{'opts'}, \%gotfiles, $sinfo,
-				$domuser, $dompass);
-			print $msg,"<br>\n";
-			&$outdent_print();
-			&release_lock_web($d);
-			&release_lock_cron($d);
-			if ($ok) {
-				# Worked .. record it
-				&$second_print($text{'setup_done'});
-				&remove_domain_script($d, $sinfo);
-				&add_domain_script($d, $sname, $ver,
-					   $sinfo->{'opts'},
-					   $desc, $url,
-					   $sinfo->{'user'}, $sinfo->{'pass'});
-				}
-			else {
-				&$second_print($text{'scripts_failed'});
-				last if ($in{'fail'});
-				}
-
-			# Clean up any temp files from this script
-			&cleanup_tempnames();
+			&$second_print($text{'scripts_failed'});
+			last if ($in{'fail'});
 			}
+
+		# Clean up any temp files from this script
+		&cleanup_tempnames();
 		}
 	&run_post_actions();
 	&webmin_log("upgrade", "scripts", scalar(@sinfos));
