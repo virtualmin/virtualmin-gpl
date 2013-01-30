@@ -210,6 +210,10 @@ my $remote_host = $ENV{'REMOTE_HOST'};
 my $miniserv_pid = $ENV{'MINISERV_PID'};
 my $miniserv_config = $ENV{'MINISERV_CONFIG'};
 if (!$pid) {
+	# Make this process have its own list of temp files to clean up
+	$main::initial_process_id = undef;
+	@main::temporary_files = undef;
+
 	untie(*STDOUT);
 	close(STDOUT);
 	open(STDOUT, ">&$fh");
