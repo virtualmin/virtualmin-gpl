@@ -50,12 +50,6 @@ if ($in{'confirm'}) {
 			next;
 			}
 
-		if ($derr = &check_script_depends($script, $d, $ver, $sinfo)) {
-			# Failed depends
-			&$second_print(&text('massscript_edep', $derr));
-			next;
-			}
-
 		# Setup PHP version
 		&$indent_print();
 		$phpvfunc = $script->{'php_vers_func'};
@@ -65,9 +59,16 @@ if ($in{'confirm'}) {
 			$phpver = &setup_php_version($d, \@vers,
 						     $opts->{'path'});
 			if (!$phpver) {
-				&error(&text('scripts_ephpvers',
+				&$second_print(&text('scripts_ephpvers',
 					     join(" ", @vers)));
+				next;
 				}
+			}
+
+		if ($derr = &check_script_depends($script, $d, $ver, $sinfo, $phpver)) {
+			# Failed depends
+			&$second_print(&text('massscript_edep', $derr));
+			next;
 			}
 
 		# Install needed PHP modules

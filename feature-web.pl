@@ -2007,7 +2007,7 @@ local @rv = ( [ $text{'sysinfo_apache'}, $ver ] );
 if (defined(&list_available_php_versions)) {
 	local @avail = &list_available_php_versions();
 	local @vers;
-	foreach my $a (@avail) {
+	foreach my $a (grep { $_->[1] } @avail) {
 		&clean_environment();
 		local $out = &backquote_command("$a->[1] -v 2>&1 </dev/null");
 		&reset_environment();
@@ -2243,6 +2243,7 @@ return $err;
 sub show_template_web
 {
 local ($tmpl) = @_;
+local @allvers = &list_available_php_versions();
 
 # Work out fields to disable
 local @webfields = ( "web", "suexec", "user_def",
@@ -2256,7 +2257,7 @@ push(@webfields, "webmail", "webmaildom", "webmaildom_def",
 		 "admin", "admindom", "admindom_def");
 push(@webfields, "web_php_suexec", "web_phpver",
 		 "web_phpchildren", "web_php_noedit");
-foreach my $phpver (@all_possible_php_versions) {
+foreach my $phpver (@allvers) {
 	push(@webfields, "web_php_ini_".$phpver,
 			 "web_php_ini_".$phpver."_def");
 	}
@@ -2406,7 +2407,7 @@ print &ui_table_row(
 	    5, $text{'tmpl_phpchildrennone'}));
 
 # Source php.ini files
-foreach my $phpver (@all_possible_php_versions) {
+foreach my $phpver (@allvers) {
 	print &ui_table_row(
 	    &hlink(&text('tmpl_php_iniv', $phpver), "template_php_ini"),
 	    &ui_opt_textbox("web_php_ini_$phpver",
@@ -2616,7 +2617,7 @@ if ($in{"web_mode"} == 2) {
 			}
 		$tmpl->{'web_phpchildren'} = $in{'web_phpchildren'};
 		}
-	foreach my $phpver (@all_possible_php_versions) {
+	foreach my $phpver (&list_available_php_versions()) {
 		$in{'web_php_ini_'.$phpver.'_def'} ||
 		  -r $in{'web_php_ini_'.$phpver} ||
 			&error($text{'tmpl_ephpini'});

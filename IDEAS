@@ -46,7 +46,6 @@
  - PHP 5.3/5.4 support
 	- See Eric's email "PHP in Software Collections"
 	- Template page for .ini files
-	- Use list_available_php_versions in all places all_possible_php_versions is
 	- Pear
 	- Allow PHP locations to be set on config page
 

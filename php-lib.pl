@@ -695,9 +695,9 @@ sub list_available_php_versions
 {
 local ($d, $mode) = @_;
 
-# If the domain is using mod_php, we can only use one version
 &require_apache();
 if ($d) {
+	# If the domain is using mod_php, we can only use one version
 	$mode ||= &get_domain_php_mode($d);
 	if ($mode eq "mod_php") {
 		if ($apache::httpd_modules{'mod_php4'}) {
@@ -709,6 +709,15 @@ if ($d) {
 		else {
 			return ( );
 			}
+		}
+	}
+else {
+	# If no domain is given, included mod_php versions if active
+	if ($apache::httpd_modules{'mod_php4'}) {
+		push(@rv, [ 4, undef ]);
+		}
+	elsif ($apache::httpd_modules{'mod_php5'}) {
+		push(@rv, [ 5, undef ]);
 		}
 	}
 

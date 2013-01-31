@@ -174,7 +174,7 @@ if (@avail > 1 && &can_edit_phpver()) {
 	print &ui_table_row($text{'massdomains_phpver'},
 		&ui_radio("phpver", undef,
 			  [ [ "", $text{'massdomains_leave'} ],
-			    map { [ $_->[0] ] } @avail ]), 1, \@tds);
+			    &unique(map { [ $_->[0] ] } @avail) ]), 1, \@tds);
 	}
 
 # PHP child processes
