@@ -839,19 +839,30 @@ return $ver ? &indexof($ver, @avail) >= 0
 	    : scalar(@avail);
 }
 
+# expand_php_versions(&domain, &versions)
+# Given a list of versions for a domain, expands it to include 5.x versions
+# if available
+sub expand_php_versions
+{
+local ($d, $vers) = @_;
+local @rv = @$vers;
+if (&indexof(5, @rv) >= 0) {
+	# If the script indicates that it supports PHP 5 but we have separate
+	# 5.3+ versions detected, allow them too
+	local @fiveplus = grep { $_ > 5 } map { $_->[0] }
+			       &list_available_php_versions($d);
+	push(@rv, @fiveplus);
+	}
+return sort { $b <=> $a } &unique(@rv);
+}
+
 # setup_php_version(&domain, &versions, path)
 # Checks if one of the given PHP versions is available for the domain.
 # If not, sets up a per-directory version if possible.
 sub setup_php_version
 {
 local ($d, $vers, $path) = @_;
-if (&indexof(5, @$vers) >= 0) {
-	# If the script indicates that it supports PHP 5 but we have separate
-	# 5.3+ versions detected, allow them too
-	local @fiveplus = grep { $_ > 5 } map { $_->[0] }
-			       &list_available_php_versions($d);
-	push(@$vers, @fiveplus);
-	}
+$vers = [ &expand_php_versions($d, $vers) ];
 
 # Find the best matching directory
 local $dirpath = &public_html_dir($d).$path;

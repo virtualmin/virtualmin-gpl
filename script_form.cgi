@@ -42,6 +42,7 @@ if (defined(&$phpvfunc)) {
 	@vers = &$phpvfunc($d, $ver);
 	@gotvers = grep { local $v = $_; local $_;
 			  &check_php_version($d, $v) } @vers;
+	@gotvers = &expand_php_versions($d, \@gotvers);
 	if (!@gotvers) {
 		print &text('scripts_ephpvers', join(" or ", @vers)),"<p>\n";
 		$ok = 0;
@@ -49,7 +50,6 @@ if (defined(&$phpvfunc)) {
 	}
 
 # Check dependencies
-# XXX wrong version?
 $derr = &check_script_depends($script, $d, $ver, $sinfo, $gotvers[0]);
 if ($derr) {
 	print &text('scripts_edep', $derr),"<p>\n";

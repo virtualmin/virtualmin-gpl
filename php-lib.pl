@@ -725,10 +725,12 @@ foreach my $v (@all_possible_php_versions) {
 	$nodotv =~ s/\.//;
 	if ($nodotv ne $v) {
 		# For a version like 5.4, check for binaries like php54 and
-		# /opt/rh/php54/bin/php
+		# /opt/rh/php54/root/usr/bin/php
 		$phpn ||= &has_command("php$nodotv-cgi") ||
-			  &has_command("php$nodotv") ||
+			  &has_command("/opt/rh/php$nodotv/root/usr/bin/php-cgi") ||
 			  &has_command("/opt/rh/php$nodotv/bin/php-cgi") ||
+			  &has_command("php$nodotv") ||
+			  &has_command("/opt/rh/php$nodotv/root/usr/bin/php");
 			  &has_command("/opt/rh/php$nodotv/bin/php");
 		}
 	$vercmds{$v} = $phpn if ($phpn);
@@ -1068,7 +1070,10 @@ else {
 sub get_global_php_ini
 {
 local ($ver, $mode) = @_;
-foreach my $i ("/etc/php.ini",
+local $nodotv = $ver;
+$nodotv =~ s/\.//g;
+foreach my $i ("/opt/rh/php$nodotv/root/etc/php.ini",
+	       "/etc/php.ini",
 	       $mode eq "mod_php" ? ("/etc/php$ver/apache/php.ini",
 				     "/etc/php$ver/apache2/php.ini")
 				  : ("/etc/php$ver/cgi/php.ini"),
