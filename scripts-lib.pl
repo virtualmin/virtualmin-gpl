@@ -2746,14 +2746,15 @@ if (defined($max)) {
 return 0;
 }
 
-# fix_script_htaccess_files(&domain, dir, [find-only])
+# fix_script_htaccess_files(&domain, dir, [find-only], [filename])
 # Find all .htaccess files under some dir to change FollowSymLinks to
 # SymLinksifOwnerMatch
 sub fix_script_htaccess_files
 {
-local ($d, $dir, $findonly) = @_;
+local ($d, $dir, $findonly, $filename) = @_;
+$filename ||= ".htaccess";
 local $out = &run_as_domain_user($d, "find ".quotemeta($dir).
-				     " -type f -name .htaccess");
+				     " -type f -name ".quotemeta($filename));
 local @fixed;
 foreach my $file (split(/\r?\n/, $out)) {
 	next if (!-r $file);
