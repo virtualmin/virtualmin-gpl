@@ -884,8 +884,9 @@ foreach my $d (&list_domains(), $newd) {
 	next if ($d->{'parent'} || !$d->{'unix'} || $d eq $deld);
 	local $user = &get_domain_owner($d, 1);
 	local ($sinfo) = grep { $_->{'shell'} eq $user->{'shell'} } @shells;
-	if ($sinfo && $sinfo->{'id'} ne 'ssh') {
-		# On the denied list..
+	if ($sinfo && $sinfo->{'id'} ne 'ssh' &&
+	    $user->{'shell'} !~ /\/(sh|bash|ksh|csh|tcsh|zsh|scponly)$/) {
+		# Has a non-SSH shell
 		push(@members, $user->{'user'});
 		}
 	}
