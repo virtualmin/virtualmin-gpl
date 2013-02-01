@@ -195,18 +195,18 @@ foreach $d (@doms) {
 
 	# Enable or disable autoconfig
 	if (!$d->{'alias'} && &domain_has_website($d) && defined($autoconfig)) {
+		local $err;
 		if ($autoconfig) {
 			&$first_print("Enabling mail client ".
 				      "auto-configuration for $d->{'dom'} ..");
-			&enable_email_autoconfig($d);
-			&$second_print(".. done");
+			$err = &enable_email_autoconfig($d);
 			}
 		else {
 			&$first_print("Disabling mail client ".
 				      "auto-configuration for $d->{'dom'} ..");
-			&disable_email_autoconfig($d);
-			&$second_print(".. done");
+			$err = &disable_email_autoconfig($d);
 			}
+		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
 
 	&save_domain($d);

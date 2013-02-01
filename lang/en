@@ -5774,6 +5774,7 @@ autoconfig_err=Saved to save mail client configuration
 autoconfig_edoms=No virtual servers with email enabled exist!
 autoconfig_enable=Enabling mail client autoconfiguration for $1 virtual servers ..
 autoconfig_disable=Disabling mail client autoconfiguration for $1 virtual servers ..
+autoconfig_failed=Failed for $1 : $2
 
 provision_title=Cloudmin Services Client
 provision_ecannot=You are not allowed to setup the Cloudmin services client

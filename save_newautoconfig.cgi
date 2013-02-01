@@ -15,11 +15,12 @@ require './virtual-server-lib.pl';
 				      : 'autoconfig_disable', scalar(@doms)));
 foreach $d (@doms) {
 	if ($in{'autoconfig'}) {
-		&enable_email_autoconfig($d);
+		$err = &enable_email_autoconfig($d);
 		}
 	else {
-		&disable_email_autoconfig($d);
+		$err = &disable_email_autoconfig($d);
 		}
+	&$second_print(&text('autoconfig_failed', &show_domain_name($d), $err));
 	}
 &$second_print($text{'setup_done'});
 

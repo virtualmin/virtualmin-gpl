@@ -5680,7 +5680,11 @@ elsif ($config{'mail_system'} == 1) {
 	}
 
 # Create CGI that outputs the correct XML for the domain
-local $autocgi = &cgi_bin_dir($d)."/autoconfig.cgi";
+local $cgidir = &cgi_bin_dir($d);
+local $autocgi = "$cgidir/autoconfig.cgi";
+if (!-d $cgidir) {
+	return "CGI directory $cgidir does not exist";
+	}
 &lock_file($autocgi);
 &copy_source_dest_as_domain_user($d, "$module_root_directory/autoconfig.cgi",
 				 $autocgi);
@@ -5735,7 +5739,8 @@ foreach my $l (@$lref) {
 local $p = &domain_has_website($d);
 if ($p && $p ne "web") {
 	# Call plugin, like Nginx
-	&plugin_call($p, "feature_save_web_autoconfig", $d, 1);
+	local $err = &plugin_call($p, "feature_save_web_autoconfig", $d, 1);
+	return $err if ($err);
 	}
 elsif ($p) {
 	# Add to Apache config
@@ -5744,10 +5749,12 @@ elsif ($p) {
 	local @ports = ( $d->{'web_port'},
 		      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 	local $any;
+	local $found;
 	foreach my $p (@ports) {
 		local ($virt, $vconf, $conf) =
 			&get_apache_virtual($d->{'dom'}, $p);
 		next if (!$virt);
+		$found++;
 
 		# Add ServerAlias
 		local @sa = &apache::find_directive("ServerAlias", $vconf);
@@ -5785,6 +5792,7 @@ elsif ($p) {
 		&register_post_action(\&restart_apache);
 		}
 	&release_lock_web($d);
+	$found || return "No Apache virtual hosts for $d->{'dom'} found";
 	}
 
 if ($d->{'dns'}) {
@@ -5803,7 +5811,9 @@ if ($d->{'dns'}) {
 			}
 		}
 	&release_lock_dns($d);
+	$file || return "No DNS zone for $d->{'dom'} found";
 	}
+return undef;
 }
 
 # disable_email_autoconfig(&domain)
@@ -5817,7 +5827,8 @@ local $autoconfig = "autoconfig.".$d->{'dom'};
 local $p = &domain_has_website($d);
 if ($p && $p ne "web") {
 	# Call plugin, like Nginx
-	&plugin_call($p, "feature_save_web_autoconfig", $d, 0);
+	local $err = &plugin_call($p, "feature_save_web_autoconfig", $d, 0);
+	return $err if ($err);
 	}
 elsif ($p) {
 	# Add to Apache config
@@ -5826,10 +5837,12 @@ elsif ($p) {
 	local @ports = ( $d->{'web_port'},
 		      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 	local $any;
+	local $found;
 	foreach my $p (@ports) {
 		local ($virt, $vconf, $conf) =
 			&get_apache_virtual($d->{'dom'}, $p);
 		next if (!$virt);
+		$found++;
 
 		# Remove ServerAlias
 		local @sa = &apache::find_directive("ServerAlias", $vconf);
@@ -5872,6 +5885,7 @@ elsif ($p) {
 	if ($any) {
 		&register_post_action(\&restart_apache);
 		}
+	$found || return "No Apache virtual hosts for $d->{'dom'} found";
 	}
 
 if ($d->{'dns'}) {
@@ -5888,7 +5902,9 @@ if ($d->{'dns'}) {
 			}
 		}
 	&release_lock_dns($d);
+	$file || return "No DNS zone for $d->{'dom'} found";
 	}
+return undef;
 }
 
 $done_feature_script{'mail'} = 1;
