@@ -1084,8 +1084,11 @@ $nodotv =~ s/\.//g;
 foreach my $i ("/opt/rh/php$nodotv/root/etc/php.ini",
 	       "/etc/php.ini",
 	       $mode eq "mod_php" ? ("/etc/php$ver/apache/php.ini",
-				     "/etc/php$ver/apache2/php.ini")
-				  : ("/etc/php$ver/cgi/php.ini"),
+				     "/etc/php$ver/apache2/php.ini",
+				     "/etc/php$nodotv/apache/php.ini",
+                                     "/etc/php$nodotv/apache2/php.ini")
+				  : ("/etc/php$ver/cgi/php.ini",
+				     "/etc/php$nodotv/cgi/php.ini"),
 	       "/opt/csw/php$ver/lib/php.ini",
 	       "/usr/local/lib/php.ini") {
 	return $i if (-r $i);

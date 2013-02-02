@@ -45,7 +45,6 @@
 
  - PHP 5.3/5.4 support
 	- See Eric's email "PHP in Software Collections"
-	- Template page for .ini files
 	- Allow PHP locations to be set on config page
 
  - Validate FreeBSD 9.x support

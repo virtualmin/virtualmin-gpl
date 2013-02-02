@@ -2243,7 +2243,7 @@ return $err;
 sub show_template_web
 {
 local ($tmpl) = @_;
-local @allvers = &list_available_php_versions();
+local @allvers = &unique(map { $_->[0] } &list_available_php_versions());
 
 # Work out fields to disable
 local @webfields = ( "web", "suexec", "user_def",
@@ -2617,7 +2617,8 @@ if ($in{"web_mode"} == 2) {
 			}
 		$tmpl->{'web_phpchildren'} = $in{'web_phpchildren'};
 		}
-	foreach my $phpver (&list_available_php_versions()) {
+	foreach my $phpver (&unique(map { $_->[0] }
+				    &list_available_php_versions())) {
 		$in{'web_php_ini_'.$phpver.'_def'} ||
 		  -r $in{'web_php_ini_'.$phpver} ||
 			&error($text{'tmpl_ephpini'});
