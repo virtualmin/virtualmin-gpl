@@ -1,0 +1,4 @@
+desc=PHP 5.3 and higher package support
+html=If PHP 5.3 or higher is installed via a separate package, Virtualmin will now detect it and allow it to be selected on a per-domain or per-directory basis. This is useful for systems whose default PHP package is version 5.2 or older.
+master=1
+link=edit_phpver.cgi?id=${ID}
