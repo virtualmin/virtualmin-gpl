@@ -81,10 +81,16 @@ foreach $f (@disable) {
 		&usage("$f is a vital feature which cannot be disabled");
 	}
 
+# Compute new list of plugins
+@neweverything = (@plugins, grep { $config{$_} } @features);
+push(@neweverything, @enable);
+@neweverything = grep { &indexof($_, @disable) < 0 } @neweverything;
+@neweverything = &unique(@neweverything);
+
 # Make sure new plugins can be used
 foreach $f (@enable) {
 	if (&indexof($f, @features) < 0) {
-		&foreign_require($f, "virtual_feature.pl");
+		&foreign_require($f, "virtual_feature.pl", \@neweverything);
 		$err = &plugin_call($f, "feature_check");
 		&usage("Plugin $f cannot be enabled : $err") if ($err);
 		}

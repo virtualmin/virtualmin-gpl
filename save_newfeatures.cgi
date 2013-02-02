@@ -7,11 +7,15 @@ require './virtual-server-lib.pl';
 &ReadParse();
 %lastconfig = %config;
 
-# Validate plugins
+# Work out which features and plugins are now active
 @newplugins = split(/\0/, $in{'mods'});
+@neweverything = ( @newplugins, @vital_features,
+		   split(/\0/, $in{'fmods'}) );
+
+# Validate plugins
 foreach $p (@newplugins) {
 	&foreign_require($p, "virtual_feature.pl");
-	$err = &plugin_call($p, "feature_check");
+	$err = &plugin_call($p, "feature_check", \@neweverything);
 	$name = &plugin_call($p, "feature_name");
 	if ($err) {
 		&error(&text('newplugin_emod', $name, $err));
