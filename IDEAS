@@ -45,6 +45,3 @@
 
  - Validate FreeBSD 9.x support
 	- KVM instance?
-
- - Email test button in Webmin
-	- https://www.virtualmin.com/node/25140
