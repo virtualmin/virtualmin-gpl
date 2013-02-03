@@ -12725,6 +12725,24 @@ if ($config{'web'}) {
 	else {
 		&$second_print($text{'check_webok'});
 		}
+
+	# Check PHP versions
+	local @msg;
+	foreach my $v (&list_available_php_versions()) {
+		if ($v->[1]) {
+			local $realv = &get_php_version($v->[0]);
+			push(@msg, ($realv || $v->[0])." (".$v->[1].")");
+			}
+		else {
+			push(@msg, $v->[0]." (mod_php)");
+			}
+		}
+	if (@msg) {
+		&$second_print(&text('check_webphpvers', join(", ", @msg)));
+		}
+	else {
+		&$second_print("<b>$text{'check_webphpnovers'}</b>");
+		}
 	}
 
 # Make sure SNI is supported by webserver, if enabled
