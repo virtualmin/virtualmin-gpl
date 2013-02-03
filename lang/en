@@ -5769,7 +5769,6 @@ dkim_records=DNS records for additional domains
 newautoconfig_title=Mail Client Configuration
 autoconfig_ecannot=You are not allowed to edit mail client configuration
 autoconfig_header=Client autoconfiguration options
-autoconfig_enable=Enable autoconfiguration URL?
 autoconfig_desc=This page allows you to enable the automatic configuration URL $1 for all Virtual servers, which is used by mail clients like Thunderbird. This lets users configure the IMAP and SMTP settings in their mail clients based on only an email address.
 autoconfig_enabled=Enable mail client autoconfiguration?
 autoconfig_err=Saved to save mail client configuration
