@@ -881,7 +881,9 @@ if (&indexof($bestdir->{'version'}, @$vers) >= 0) {
 	return $bestdir->{'version'};
 	}
 
-# Need to add a directory, or fix one
+# Need to add a directory, or fix one. Use the lowest PHP version that
+# is supported.
+$vers = [ sort { $a <=> $b } @$vers ];
 local $ok = &save_domain_php_directory($d, $dirpath, $vers->[0]);
 return $ok ? $vers->[0] : undef;
 }
