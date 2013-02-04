@@ -45,6 +45,3 @@
 
  - Validate FreeBSD 9.x support
 	- KVM instance?
-
- - Nginx SNI support
-	- https://www.virtualmin.com/node/25176
