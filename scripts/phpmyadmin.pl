@@ -246,6 +246,9 @@ foreach $l (@$lref) {
 	if ($l =~ /^\$cfg\['Servers'\]\[\$i\]\['only_db'\]/) {
 		$l = "\$cfg['Servers'][\$i]['only_db'] = $dbsarray;";
 		}
+	if ($l =~ /^\$cfg\['Servers'\]\[\$i\]\['hide_db'\]/) {
+		$l = "\$cfg['Servers'][\$i]['hide_db'] = 'information_schema';";
+		}
 
 	# These are for version 2.2.7
 	if ($opts->{'auto'}) {
