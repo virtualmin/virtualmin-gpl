@@ -59,7 +59,7 @@ elsif ($STYLE == 5) {
 	$login = $PREFIX."_".$name;
 	}
 elsif ($STYLE == 6) {
-	$login = $emailaddress;
+	$login = $email;
 	}
 elsif ($STYLE == 7) {
 	$login = $name."\%".$PREFIX;
