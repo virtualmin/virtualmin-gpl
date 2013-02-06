@@ -648,10 +648,12 @@ foreach my $db (&domain_databases($oldd, [ 'mysql' ])) {
 		$newname = $d->{'db'};
 		}
 	elsif ($newname !~ s/\Q$oldprefix\E/$newprefix/) {
-		# Otherwise, just replace the DB name prefix
+		# Otherwise, just replace the DB name prefix. If that isn't
+		# possible, prepend the new prefix as a last resort.
 		&$second_print(&text('clone_mysqlprefix', $newname,
 				     $oldprefix, $newprefix));
-		next;
+		$newname = $newprefix.$newname;
+		&$second_print(&text('clone_mysqlprefix2', $newname));
 		}
 	if (&check_mysql_database_clash($d, $newname)) {
 		&$second_print(&text('clone_mysqlclash', $newname));

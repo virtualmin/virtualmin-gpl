@@ -3156,6 +3156,7 @@ tmpl_availyes=Available?
 tmpl_deletewarn=Are you sure you want to delete this server template? Once removed it cannot be un-deleted.
 tmpl_deleteusers=The template is currently in use by $1 virtual servers.
 tmpl_deleteconfirm=Delete Template
+tmpl_autoconfig=Mail client auto-configuration XML
 
 newplugin_title=Plugin Modules
 newplugin_desc=Plugins are Webmin modules which provided additional server and mailbox features for Virtualmin. Unlike the core features, they can be installed separately and written by third-party developers.
@@ -5930,6 +5931,7 @@ clone_webold=.. source Apache configuration not found!
 clone_webnew=.. destination Apache configuration not found!
 clone_mysql=Re-creating MySQL databases ..
 clone_mysqlprefix=.. could not work out a new name for database $1, as it does not contain the prefix $2
+clone_mysqlprefix2=.. using the new database name $1 instead
 clone_mysqlcreate=.. creation of database $1 failed
 clone_mysqldone=.. created $1 databases
 clone_mysqlcopy=Copying contents of MySQL databases ..
