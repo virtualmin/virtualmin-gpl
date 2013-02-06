@@ -13,6 +13,13 @@ $virt || &error(&text('phpmode_evirt', $d->{'dom'}, $d->{'web_port'}));
 
 &ui_print_header(&domain_in($d), $text{'phpver_title'}, "", "phpver");
 
+$mode = &get_domain_php_mode($d);
+if ($mode eq "mod_php") {
+	print &text('phpver_emodphp'),"<p>\n";
+	&ui_print_footer(&domain_footer_link($d),
+			 "", $text{'index_return'});
+	return;
+	}
 @avail = &list_available_php_versions($d);
 if (@avail <= 1) {
 	print &text('phpver_eavail2', $avail[0]->[0]),"<p>\n";
