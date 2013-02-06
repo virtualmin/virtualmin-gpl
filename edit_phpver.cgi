@@ -30,6 +30,18 @@ if (@avail <= 1) {
 
 @hiddens = ( [ "dom", $in{'dom'} ] );
 
+# Build versions list
+@vlist = ( );
+foreach my $v (@avail) {
+	if ($v->[1]) {
+		my $fullver = &get_php_version($v->[1], $d);
+		push(@vlist, [ $v->[0], $fullver ]);
+		}
+	else {
+		push(@vlist, $v->[0]);
+		}
+	}
+
 # Build data for existing directories
 @dirs = &list_domain_php_directories($d);
 $pub = &public_html_dir($d);
@@ -38,8 +50,7 @@ $i = 0;
 $anydelete = 0;
 foreach $dir (@dirs) {
 	$ispub = $dir->{'dir'} eq $pub;
-	$sel = &ui_select("ver_$i", $dir->{'version'},
-			  [ map { [ $_->[0] ] } @avail ]);
+	$sel = &ui_select("ver_$i", $dir->{'version'}, \@vlist);
 	push(@hiddens, [ "dir_$i", $dir->{'dir'} ]);
 	if ($ispub) {
 		# Can only change version for public html
@@ -77,8 +88,7 @@ foreach $dir (@dirs) {
 push(@table, [ { 'type' => 'checkbox', 'name' => 'd',
 		 'value' => 1, 'disabled' => 1 },
 	       &ui_textbox("newdir", undef, 30),
-	       &ui_select("newver", $dir->{'version'},
-			  [ map { [ $_->[0] ] } @avail ]),
+	       &ui_select("newver", $dir->{'version'}, \@vlist),
 	     ]);
 
 # Generate the table
