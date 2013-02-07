@@ -995,20 +995,22 @@ foreach my $m (@mods) {
 	local $iok = 0;
 	local @poss;
 	local $fullphpver = &get_php_version($phpver, $d);
+	local $nodotphpver = $phpver;
+	$nodotphpver =~ s/\.//;
 	if ($software::update_system eq "csw") {
-		@poss = ( "php".$phpver."_".$m );
+		@poss = ( "php".$nodotphpver."_".$m );
 		}
 	else {
-		@poss = ( "php".$phpver."-".$m, "php-".$m );
+		@poss = ( "php".$nodotphpver."-".$m, "php-".$m );
 		if ($software::update_system eq "apt" &&
 		    $m eq "pdo_mysql") {
 			# On Debian, the pdo_mysql module is in the mysql module
-			push(@poss, "php".$phpver."-mysql", "php-mysql");
+			push(@poss, "php".$nodotphpver."-mysql", "php-mysql");
 			}
 		elsif ($software::update_system eq "yum" &&
 		       ($m eq "domxml" || $m eq "dom") && $phpver >= 5) {
 			# On Redhat, the domxml module is in php-domxml
-			push(@poss, "php".$phpver."-xml", "php-xml");
+			push(@poss, "php".$nodotphpver."-xml", "php-xml");
 			}
 		if ($software::update_system eq "yum" &&
 		    $fullphpver =~ /^5\.3/) {
