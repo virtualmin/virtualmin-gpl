@@ -8064,6 +8064,7 @@ push(@rv, { 'id' => 0,
 				$config{'tmpl_resellers'},
 	    'owners' => !defined($config{'tmpl_owners'}) ? "*" :
 				$config{'tmpl_owners'},
+	    'autoconfig' => $config{'tmpl_autoconfig'} || "none",
 	  } );
 foreach my $w (@php_wrapper_templates) {
 	$rv[0]->{$w} = $config{$w} || 'none';
@@ -8366,6 +8367,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'domalias'} = $tmpl->{'domalias'} eq 'none' ? undef :
 			      $tmpl->{'domalias'};
 	$config{'domalias_type'} = $tmpl->{'domalias_type'};
+	$config{'tmpl_autoconfig'} = $tmpl->{'autoconfig'};
 	foreach my $w (@php_wrapper_templates) {
 		$config{$w} = $tmpl->{$w};
 		}
@@ -8471,7 +8473,7 @@ if (!$tmpl->{'default'}) {
 		    @php_wrapper_templates,
 		    "capabilities",
 		    "featurelimits",
-		    "hashpass", "hashtypes",
+		    "hashpass", "hashtypes", "autoconfig",
 		    (map { $_."limit", $_."server", $_."master", $_."view",
 			   $_."passwd" } @plugins)) {
 		if ($tmpl->{$p} eq "") {
@@ -13877,6 +13879,39 @@ if ($in{'domalias_mode'} == 2) {
 	else {
 		$tmpl->{'domalias_type'} = $in{'domalias_type'};
 		}
+	}
+}
+
+# show_template_autoconfig(&tmpl)
+# Outputs HTML for mail client autoconfig XML
+sub show_template_autoconfig
+{
+local ($tmpl) = @_;
+local $xml;
+if ($tmpl->{'autoconfig'} eq "" || $tmpl->{'autoconfig'} eq "none") {
+	$xml = &get_autoconfig_xml();
+	}
+else {
+	$xml = join("\n", split(/\t/, $tmpl->{'autoconfig'}));
+	}
+print &ui_table_row(&hlink($text{'tmpl_autoconfig'}, "template_autoconfig"),
+	&none_def_input("autoconfig", $tmpl->{'autoconfig'},
+			$text{'tmpl_autoconfigset'}, 0, 0,
+			$text{'tmpl_autoconfignone'})."<br>\n".
+	&ui_textarea("autoconfig", $xml, 20, 80));
+}
+
+# parse_template_autoconfig(&tmpl)
+# Updates core mail client autoconfig template options from %in
+sub parse_template_autoconfig
+{
+local ($tmpl) = @_;
+
+# Parse automatic alias domain mode
+$tmpl->{'autoconfig'} = &parse_none_def("autoconfig");
+if ($in{'autoconfig_mode'} == 2) {
+	$in{'autoconfig'} =~ /<clientConfig.*>/i ||
+		&error($text{'tmpl_eautoconfig'});
 	}
 }
 

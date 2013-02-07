@@ -27,8 +27,8 @@ exit(0);
 if ($ENV{'QUERY_STRING'} =~ /emailaddress=([^&]+)/) {
 	$email = $1;
 	$email =~ s/%(..)/pack("c",hex($1))/ge;
-	($mailbox, $domain) = split(/\@/, $email);
-	$mailbox && $domain ||
+	($mailbox, $SMTP_DOMAIN) = split(/\@/, $email);
+	$mailbox && $SMTP_DOMAIN ||
 	    &error_exit("emailaddress parameter is not in user@domain format");
 	}
 else {
@@ -38,31 +38,31 @@ else {
 # Work out the full username
 if ($mailbox eq $USER) {
 	# Domain owner, so no need for prefix
-	$login = $USER;
+	$SMTP_LOGIN = $USER;
 	}
 elsif ($STYLE == 0) {
-	$login = $mailbox.".".$PREFIX;
+	$SMTP_LOGIN = $mailbox.".".$PREFIX;
 	}
 elsif ($STYLE == 1) {
-	$login = $mailbox."-".$PREFIX;
+	$SMTP_LOGIN = $mailbox."-".$PREFIX;
 	}
 elsif ($STYLE == 2) {
-	$login = $PREFIX.".".$mailbox;
+	$SMTP_LOGIN = $PREFIX.".".$mailbox;
 	}
 elsif ($STYLE == 3) {
-	$login = $PREFIX."-".$mailbox;
+	$SMTP_LOGIN = $PREFIX."-".$mailbox;
 	}
 elsif ($STYLE == 4) {
-	$login = $name."_".$PREFIX;
+	$SMTP_LOGIN = $name."_".$PREFIX;
 	}
 elsif ($STYLE == 5) {
-	$login = $PREFIX."_".$name;
+	$SMTP_LOGIN = $PREFIX."_".$name;
 	}
 elsif ($STYLE == 6) {
-	$login = $email;
+	$SMTP_LOGIN = $email;
 	}
 elsif ($STYLE == 7) {
-	$login = $name."\%".$PREFIX;
+	$SMTP_LOGIN = $name."\%".$PREFIX;
 	}
 else {
 	&error_exit("Unknown style $STYLE");
@@ -71,28 +71,5 @@ else {
 # Output the XML
 print "Content-type: text/xml\n\n";
 print <<EOF;
-<?xml version="1.0" encoding="UTF-8"?>
- 
-<clientConfig version="1.1">
-  <emailProvider id="$domain">
-    <domain>$domain</domain>
-    <displayName>$OWNER Email</displayName>
-    <displayShortName>$OWNER</displayShortName>
-    <incomingServer type="imap">
-      <hostname>$IMAP_HOST</hostname>
-      <port>$IMAP_PORT</port>
-      <socketType>$IMAP_TYPE</socketType>
-      <authentication>$IMAP_ENC</authentication>
-      <username>$login</username>
-    </incomingServer>
-    <outgoingServer type="smtp">
-      <hostname>$SMTP_HOST</hostname>
-      <port>$SMTP_PORT</port>
-      <socketType>$SMTP_TYPE</socketType>
-      <authentication>$SMTP_ENC</authentication>
-      <username>$login</username>
-    </outgoingServer>
-  </emailProvider>
-</clientConfig>
+_XML_GOES_HERE_
 EOF
-

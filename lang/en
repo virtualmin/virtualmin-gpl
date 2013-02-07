@@ -3102,6 +3102,7 @@ tmpl_nprev=Prev
 tmpl_editmode_basic=Basic settings and usage
 tmpl_editmode_virtualmin=Virtual server creation
 tmpl_editmode_plugins=Plugin options
+tmpl_editmode_autoconfig=Mail client auto-configuration
 tmpl_editmode_limits=Default domain owner limits
 tmpl_editmode_phpwrappers=PHP wrapper scripts
 tmpl_editmode_resources=CPU and memory resource limits
@@ -3157,6 +3158,9 @@ tmpl_deletewarn=Are you sure you want to delete this server template? Once remov
 tmpl_deleteusers=The template is currently in use by $1 virtual servers.
 tmpl_deleteconfirm=Delete Template
 tmpl_autoconfig=Mail client auto-configuration XML
+tmpl_autoconfigset=XML template below ..
+tmpl_autoconfignone=Automatically generated
+tmpl_eautoconfig=Mail client autoconfiguration XML is missing a &lt;clientConfig.&gt; tag.
 
 newplugin_title=Plugin Modules
 newplugin_desc=Plugins are Webmin modules which provided additional server and mailbox features for Virtualmin. Unlike the core features, they can be installed separately and written by third-party developers.

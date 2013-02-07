@@ -5731,6 +5731,19 @@ foreach my $l (@$lref) {
 		$l = "\$STYLE = '$tmpl->{'append_style'}';";
 		}
 	}
+local $xml;
+local $tmpl = &get_template($d->{'template'});
+if ($tmpl->{'autoconfig'} && $tmpl->{'autoconfig'} ne 'none') {
+	$xml = &substitute_domain_template($tmpl->{'autoconfig'}, $d);
+	$xml =~ s/\t/\n/g;
+	}
+else {
+	$xml = &get_autoconfig_xml();
+	}
+local $idx = &indexof("_XML_GOES_HERE_", @$lref);
+if ($idx >= 0) {
+	splice(@$lref, $idx, 1, split(/\n/, $xml));
+	}
 &flush_file_lines_as_domain_user($d, $autocgi);
 &set_ownership_permissions(undef, undef, 0755, $autocgi);
 &unlock_file($autocgi);
@@ -5905,6 +5918,37 @@ if ($d->{'dns'}) {
 	$file || return "No DNS zone for $d->{'dom'} found";
 	}
 return undef;
+}
+
+# get_autoconfig_xml()
+# Returns the XML template for the autoconfig response
+sub get_autoconfig_xml
+{
+return <<'EOF';
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<clientConfig version="1.1">
+  <emailProvider id="$SMTP_DOMAIN">
+    <domain>$SMTP_DOMAIN</domain>
+    <displayName>$OWNER Email</displayName>
+    <displayShortName>$OWNER</displayShortName>
+    <incomingServer type="imap">
+      <hostname>$IMAP_HOST</hostname>
+      <port>$IMAP_PORT</port>
+      <socketType>$IMAP_TYPE</socketType>
+      <authentication>$IMAP_ENC</authentication>
+      <username>$SMTP_LOGIN</username>
+    </incomingServer>
+    <outgoingServer type="smtp">
+      <hostname>$SMTP_HOST</hostname>
+      <port>$SMTP_PORT</port>
+      <socketType>$SMTP_TYPE</socketType>
+      <authentication>$SMTP_ENC</authentication>
+      <username>$SMTP_LOGIN</username>
+    </outgoingServer>
+  </emailProvider>
+</clientConfig>
+EOF
 }
 
 $done_feature_script{'mail'} = 1;
