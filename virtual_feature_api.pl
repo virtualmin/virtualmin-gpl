@@ -31,7 +31,7 @@ sub feature_hlink
 {
 }
 
-# feature_check()
+# feature_check([&new-plugins-list])
 # Returns undef if all the needed programs for this feature are installed,
 # or an error message if not
 sub feature_check
