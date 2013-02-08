@@ -9231,6 +9231,23 @@ if ($_[2] && $user->{'unix'}) {
 	delete($user->{'email'});
 	}
 
+# For a unix user, apply default password expiry restrictions
+if ($user->{'unix'} && $gconfig{'os_type'} =~ /-linux$/) {
+	&require_useradmin();
+	local %uconfig = &foreign_config("useradmin");
+	if ($usermodule eq "ldap-useradmin") {
+		local %lconfig = &foreign_config($usermodule);
+		foreach my $k (keys %lconfig) {
+			if ($lconfig{$k} ne "") {
+				$uconfig{$k} = $lconfig{$k};
+				}
+			}
+		}
+	$user->{'min'} = $uconfig{'default_min'};
+	$user->{'max'} = $uconfig{'default_max'};
+	$user->{'warn'} = $uconfig{'default_warn'};
+	}
+
 return $user;
 }
 
