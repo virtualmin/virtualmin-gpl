@@ -208,7 +208,7 @@ else {
 		push(@grid, $text{'feature_'.$f}) if ($d->{$f});
 		}
 	foreach $f (&list_feature_plugins()) {
-		push(@grid, &plugin_call($f, "feature_label", 1)) if ($d->{$f});
+		push(@grid, &plugin_call($f, "feature_label", 0)) if ($d->{$f});
 		}
 	$featmsg .= &ui_grid_table(\@grid, 2, 100,
 				   [ "width=30%", "width=70%" ]);
