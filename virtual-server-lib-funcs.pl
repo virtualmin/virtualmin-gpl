@@ -3857,6 +3857,11 @@ if ($config{'dns'}) {
 					    @servers);
 	}
 
+# If any website feature is enabled (like Nginx), set the web variable
+if (&domain_has_website($d)) {
+	$hash{'web'} = 1;
+	}
+
 return %hash;
 }
 
