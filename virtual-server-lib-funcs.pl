@@ -13488,6 +13488,12 @@ if ($config{'collect_interval'} ne $lastconfig{'collect_interval'}) {
 	&$second_print($text{'setup_done'});
 	}
 
+# Re-collect system info
+local $info = &collect_system_info();
+if ($info) {
+        &save_collected_info($info);
+        }
+
 # Update spamassassin lock files
 if ($config{'spam_lock'} != $lastconfig{'spam_lock'}) {
 	&$first_print($config{'spam_lock'} ? $text{'check_spamlockon'}
