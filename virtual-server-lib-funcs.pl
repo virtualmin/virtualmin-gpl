@@ -3194,7 +3194,7 @@ if (!defined(&list_resellers)) {
 	}
 push(@heads, map { $text{'index_'.$_} } @colnames);
 foreach my $f (&list_custom_fields()) {
-	if ($f->{'show'}) {
+	if ($f->{'show'} && ($f->{'visible'} < 2 || &master_admin())) {
 		push(@colnames, 'field_'.$f->{'name'});
 		push(@heads, $f->{'desc'});
 		}
