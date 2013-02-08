@@ -85,6 +85,11 @@ foreach my $group (&acl::list_groups()) {
 		}
 	}
 
+# Clear Webmin sessions
+local %miniserv;
+&get_miniserv_config(\%miniserv);
+&acl::delete_session_user(\%miniserv, $_[0]->{'user'});
+
 &release_lock_webmin($_[0]);
 &register_post_action(\&restart_webmin);
 &$second_print($text{'setup_done'});
