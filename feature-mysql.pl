@@ -1849,13 +1849,16 @@ print &ui_table_row(&hlink($text{'tmpl_mysql_nouser'}, "template_mysql_nouser"),
 		  ($tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ) )]));
 
 # Update MySQL password to match domain?
-print &ui_table_row(&hlink($text{'tmpl_mysql_nopass2'},
-			   "template_mysql_nopass"),
-	&ui_radio("mysql_nopass", $tmpl->{'mysql_nopass'},
-		[ [ 0, $text{'tmpl_mysql_nopass_sync'} ],
-		  [ 1, $text{'tmpl_mysql_nopass_same'} ],
-		  [ 2, $text{'tmpl_mysql_nopass_random'} ],
-		  ($tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ) )]));
+if (!$tmpl->{'hashpass'}) {
+	print &ui_table_row(&hlink($text{'tmpl_mysql_nopass2'},
+				   "template_mysql_nopass"),
+		&ui_radio("mysql_nopass", $tmpl->{'mysql_nopass'},
+			[ [ 0, $text{'tmpl_mysql_nopass_sync'} ],
+			  [ 1, $text{'tmpl_mysql_nopass_same'} ],
+			  [ 2, $text{'tmpl_mysql_nopass_random'} ],
+			  ($tmpl->{'default'} ? ( ) :
+			     ( [ "", $text{'default'} ] ) )]));
+	}
 
 # Make MySQL DBs group-owned by domain, for quotas?
 if (-d $mysql::config{'mysql_data'} &&
@@ -1959,7 +1962,9 @@ else {
 	$tmpl->{'mysql_suffix'} = $in{'mysql_suffix'};
 	}
 $tmpl->{'mysql_mkdb'} = $in{'mysql_mkdb'};
-$tmpl->{'mysql_nopass'} = $in{'mysql_nopass'};
+if (!$tmpl->{'hashpass'}) {
+	$tmpl->{'mysql_nopass'} = $in{'mysql_nopass'};
+	}
 $tmpl->{'mysql_nouser'} = $in{'mysql_nouser'};
 if (-d $mysql::config{'mysql_data'} &&
     !$config{'provision_mysql'}) {
