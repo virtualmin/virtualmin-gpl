@@ -794,7 +794,7 @@ foreach my $d (@$doms) {
 		# Fix existing record
 		my $val = join("", @{$selrec->{'values'}});
 		if ($val !~ s/p=([^;]+)/p=$pubkey/) {
-			$val = 'k=rsa; t=y; p='.$pubkey;
+			$val = 'k=rsa; t=s; p='.$pubkey;
 			}
 		&bind8::modify_record($selrec->{'file'}, $selrec,
 				      $selrec->{'name'}, $selrec->{'ttl'},
