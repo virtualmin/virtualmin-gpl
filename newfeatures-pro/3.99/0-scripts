@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the OpenCart script installer to version 1.5.5.1, Squirrelmail to 1.4.22, WordPress to 3.5.1, Movable Type to 5.2.3, PHP-Calendar to 1.1, Gallery to 3.0.4, Advanced Poll to 2.0.9, PHP-Wiki to 1.4.0rc1, Simple Invoices to 2011.1, phpScheduleIt to 2.3.6, Advanced Guestbook to 2.4.4, Zikula to 1.3.5, Roundcube to 0.8.5, phpMyAdmin to 3.5.6, Mantis to 1.12.14, SMF to 2.0.4, Trac to 1.0.1, SugarCRM to 6.5.10, Joomla to 3.0.3 and 2.5.9, ZenPhoto to 1.4.4.1b, Instiki to 0.19.6, and Radiant to 1.1.2.<br>Marked several scripts that no longer appear to be updated or available as unsupported.
+html=Updated the OpenCart script installer to version 1.5.5.1, Squirrelmail to 1.4.22, WordPress to 3.5.1, Movable Type to 5.2.3, PHP-Calendar to 1.1, Gallery to 3.0.4, Advanced Poll to 2.0.9, PHP-Wiki to 1.4.0rc1, Simple Invoices to 2011.1, phpScheduleIt to 2.3.6, Advanced Guestbook to 2.4.4, Zikula to 1.3.5, Roundcube to 0.8.5, phpMyAdmin to 3.5.6, Mantis to 1.12.14, SMF to 2.0.4, Trac to 1.0.1, SugarCRM to 6.5.10, Joomla to 3.0.3 and 2.5.9, ZenPhoto to 1.4.4.1b, TikiWiki to 10.1 and 6.10, Instiki to 0.19.6, and Radiant to 1.1.2.<br>Marked several scripts that no longer appear to be updated or available as unsupported.
 master=1
 reseller=1
 domain=1
