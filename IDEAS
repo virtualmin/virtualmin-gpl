@@ -46,13 +46,8 @@
  - Validate FreeBSD 9.x support
 	- KVM instance?
 
- - DKIM key not being added to sub-domains
-	- https://www.virtualmin.com/node/25323
-
  - Custom DNS records added to sub-domains includes SOA and $ttl
 	- https://www.virtualmin.com/node/25319
-
- - PHP.ini editing and PHP 5.3+
 
  - Control access to Nginx module by domain owners
 	- https://www.virtualmin.com/node/25293

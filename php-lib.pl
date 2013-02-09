@@ -1044,7 +1044,7 @@ sub find_domain_php_ini_files
 local ($d) = @_;
 local @inis;
 foreach my $f (glob("$d->{'home'}/etc/php*/php.ini")) {
-	if ($f =~ /php(\d+)\/php.ini$/) {
+	if ($f =~ /php([0-9\.]+)\/php.ini$/) {
 		push(@inis, [ $1, $f ]);
 		}
 	}
