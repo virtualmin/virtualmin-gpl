@@ -63,7 +63,7 @@ if ($dkim && $dkim->{'enabled'}) {
 	$records = "_domainkey IN TXT \"t=y; o=-;\"\n";
 	$pubkey = &get_dkim_pubkey($dkim);
 	$records .= $dkim->{'selector'}."._domainkey IN TXT ".
-		    "\"k=rsa; t=y; p=$pubkey\"";
+		    &split_long_txt_record("\"k=rsa; t=s; p=$pubkey\"");
 	print &ui_table_row($text{'dkim_records'},
 		&ui_textarea("records", $records, 4, 60, "off",
 			     undef, "readonly=true"));
