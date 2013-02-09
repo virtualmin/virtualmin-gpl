@@ -892,6 +892,19 @@ if ($pass) {
 return 0;
 }
 
+# get_key_size(file)
+# Given an SSL key file, returns the size in bits
+sub get_key_size
+{
+local ($file) = @_;
+local $out = &backquote_command(
+	"openssl rsa -in ".quotemeta($file)." -text 2>&1 </dev/null");
+if ($out =~ /Private-Key:\s+\((\d+)/i) {
+	return $1;
+	}
+return undef;
+}
+
 # save_domain_passphrase(&domain)
 # Configure Apache to use the right passphrase for a domain, if one is needed.
 # Otherwise, remove the passphrase config.
