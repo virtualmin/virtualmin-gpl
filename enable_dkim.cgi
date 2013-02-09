@@ -22,8 +22,10 @@ $dkim->{'extra'} = \@extra;
 
 if ($in{'enabled'}) {
 	# Turn on DKIM, or change settings
+	$in{'size'} =~ /^\d+$/ && $in{'size'} >= 512 ||
+		&error($text{'dkim_esize'});
 	&ui_print_unbuffered_header(undef, $text{'dkim_title1'}, "");
-	$ok = &enable_dkim($dkim, $in{'newkey'});
+	$ok = &enable_dkim($dkim, $in{'newkey'}, $in{'size'});
 	if (!$ok) {
 		print "<b>$text{'dkim_somefail'}</b><p>\n";
 		}

@@ -220,6 +220,11 @@ elsif ($config{'mail_system'} == 1) {
 # Add extra domains
 $rv{'extra'} = [ split(/\s+/, $config{'dkim_extra'}) ];
 
+# Work out key size
+if ($rv{'keyfile'} && -r $rv{'keyfile'}) {
+	$rv{'size'} = &get_key_size($rv{'keyfile'});
+	}
+
 return \%rv;
 }
 
@@ -284,11 +289,11 @@ else {
 &flush_file_lines($file);
 }
 
-# enable_dkim(&dkim, [force-new-key])
+# enable_dkim(&dkim, [force-new-key], [key-size])
 # Perform all the steps needed to enable DKIM
 sub enable_dkim
 {
-my ($dkim, $newkey) = @_;
+my ($dkim, $newkey, $size) = @_;
 &foreign_require("webmin");
 &foreign_require("init");
 
@@ -310,7 +315,7 @@ else {
 
 # Generate private key
 if (!$dkim->{'keyfile'} || !-r $dkim->{'keyfile'} || $newkey) {
-	my $size = 2048;
+	$size ||= 2048;
 	$dkim->{'keyfile'} ||= "/etc/dkim.key";
 	&$first_print(&text('dkim_newkey', "<tt>$dkim->{'keyfile'}</tt>"));
 	&lock_file($dkim->{'keyfile'});

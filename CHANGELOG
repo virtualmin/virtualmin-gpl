@@ -1387,3 +1387,4 @@ Updated the OpenCart script installer to version 1.5.5.1, Squirrelmail to 1.4.22
 Added the ability to enable or disable server-side includes for a specific file extension for virtual servers with a website.
 If PHP 5.3 or higher is installed via a separate package, Virtualmin will now detect it and allow it to be selected on a per-domain or per-directory basis. This is useful for systems whose default PHP package is version 5.2 or older.
 Added a template section to configure the mail client auto-configuration XML, for example if some domains use custom mail servers.
+The key size is now configurable when setting up DKIM or generating a new key.

@@ -44,6 +44,11 @@ if ($dkim && $dkim->{'keyfile'} && -r $dkim->{'keyfile'}) {
 		&ui_yesno_radio("newkey", 0));
 	}
 
+# New key size
+print &ui_table_row($text{'dkim_size'},
+	&ui_textbox("size", $dkim->{'size'} || 2048, 5).
+	" ".$text{'dkim_bits'});
+
 # Additional domains to sign for, defaulting to local hostname
 @extra = @{$dkim->{'extra'}};
 if (!@extra && (!$dkim || !$dkim->{'enabled'})) {

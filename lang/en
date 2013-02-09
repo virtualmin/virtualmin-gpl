@@ -5731,6 +5731,8 @@ dkim_header=DomainKeys identified mail options
 dkim_enabled=Signing of outgoing mail enabled?
 dkim_selector=Selector for DKIM record name
 dkim_verify=Verify DKIM signatures on incoming email?
+dkim_size=Size of new DKIM key
+dkim_bits=bits
 dkim_makenewkey=Force generation of new private key?
 dkim_emailsystem=DKIM is only supported with the Postfix and Sendmail mail servers
 dkim_esendmailmc=DKIM cannot be enabled for Sendmail unless an M4 configuration file is used
@@ -5771,6 +5773,7 @@ dkim_undns=Removing DKIM records from DNS domain $1 ..
 dkim_dnsremoved=.. removed successfully
 dkim_dnsalreadygone=.. already gone
 dkim_records=DNS records for additional domains
+dkim_esize=DKIM key size must be a number of at least 512 bits
 
 newautoconfig_title=Mail Client Configuration
 autoconfig_ecannot=You are not allowed to edit mail client configuration
