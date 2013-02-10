@@ -207,9 +207,11 @@ if ($sched->{'email'} && $has_mailboxes &&
 				&nice_hour_mins_secs($total_time))."\n";
 	$output_header .= "\n";
 
-	if (@$errdoms) {
+	# Add list of domains that failed
+	if (@$errdoms || !$ok) {
+		local $printdoms = @$errdoms ? $errdoms : \@doms;
 		$output_header .= $text{'backup_partial2'}."\n";
-		foreach $d (@$errdoms) {
+		foreach $d (@$printdoms) {
 			$output_header .= "    ".$d->{'dom'}."\n";
 			}
 		}
