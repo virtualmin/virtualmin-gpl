@@ -148,6 +148,19 @@ foreach my $ver (@vers) {
 			&phpini::save_directive($pconf,
 				"session.gc_divisor", 100) if (!$div);
 
+			# Set timezone to match system
+			local $tz;
+			if (&foreign_check("time")) {
+				&foreign_require("time");
+				if (&time::has_timezone()) {
+					$tz = &time::get_current_timezone();
+					}
+				}
+			if ($tz) {
+				&phpini::save_directive($pconf,
+					"date.timezone", $tz);
+				}
+
 			&flush_file_lines("$inidir/php.ini");
 			}
 		&set_ownership_permissions($uid, $gid, 0755, "$inidir/php.ini");
