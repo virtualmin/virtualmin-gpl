@@ -1012,8 +1012,13 @@ foreach my $m (@mods) {
 			# On Redhat, the domxml module is in php-domxml
 			push(@poss, "php".$nodotphpver."-xml", "php-xml");
 			}
-		if ($software::update_system eq "yum" &&
-		    $fullphpver =~ /^5\.3/) {
+		if ($phpver =~ /\./ && $software::update_system eq "yum") {
+			# PHP 5.3+ packages from software collections are
+			# named like php54-php-mysql
+			push(@poss, "php".$nodotphpver."-php-".$m);
+			}
+		elsif ($software::update_system eq "yum" &&
+		       $fullphpver =~ /^5\.3/) {
 			# If PHP 5.3 is being used, packages may start with
 			# php53-
 			my @vposs = grep { /^php5-/ } @poss;
