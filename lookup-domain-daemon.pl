@@ -189,6 +189,11 @@ if ($d && $user) {
 			}
 		}
 
+	# If using only soft quotas, disable all quota checking
+	if (!$config{'hard_quotas'}) {
+		$quotadiff = undef;
+		}
+
 	local $client = &get_domain_spam_client($d);
 	print join("\t", $d->{'id'},
 			 $d->{'dom'},
