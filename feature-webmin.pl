@@ -305,7 +305,7 @@ if ($onlydoms) {
 	}
 
 # Work out which extra (non feature-related) modules are available
-local %avail = map { split(/=/, $_) } split(/\s+/, $tmpl->{'avail'});
+local %avail = map { split(/=/, $_, 2) } split(/\s+/, $tmpl->{'avail'});
 local @extramods = grep { $avail{$_} } keys %avail;
 if ($noextras) {
 	@extramods = ( );
@@ -842,13 +842,16 @@ if (!$noextras) {
 	}
 
 if (!$nofeatures) {
-	# Add plugin-specified modules
+	# Add plugin-specified modules, except those that have been disabled
+	# for domain owners in the template
 	local $p;
 	foreach $p (@plugins) {
 		local @pmods = &plugin_call($p, "feature_webmin", $_[0],
 					    \@doms);
 		local $pm;
 		foreach $pm (@pmods) {
+			next if ($avail{$pm->[0]} ne '' &&
+				 !$avail{$pm->[0]});
 			push(@mods, $pm->[0]);
 			if ($pm->[1]) {
 				&save_module_acl_logged(

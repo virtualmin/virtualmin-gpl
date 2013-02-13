@@ -13765,7 +13765,7 @@ foreach my $f (@plugins) {
 # with module name, description and list of options (optional) entries.
 sub list_domain_owner_modules
 {
-return (
+local @rv = (
         [ 'dns', 'BIND DNS Server (for DNS domain)' ],
         [ 'mail', 'Virtual Email (for mailboxes and aliases)' ],
         [ 'web', 'Apache Webserver (for virtual host)' ],
@@ -13798,6 +13798,13 @@ return (
         [ 'syslog', 'System Logs (view Apache and FTP logs)' ],
         [ 'phpini', 'PHP Configuration (for domain\'s php.ini files)' ],
 	);
+&load_plugin_libraries();
+foreach my $p (@plugins) {
+	if (&plugin_defined($p, "feature_modules")) {
+		push(@rv, &plugin_call($p, "feature_modules"));
+		}
+	}
+return @rv;
 }
 
 # show_template_avail(&tmpl)
@@ -13825,7 +13832,13 @@ else {
 	my $deftmpl = &get_template(0);
 	$alist = $deftmpl->{'avail'};
 	}
-my %avail = map { split(/=/, $_) } split(/\s+/, $alist);
+my %avail = map { split(/=/, $_, 2) } split(/\s+/, $alist);
+# If not set yet, assumed enabled for plugins
+foreach my $p (@plugins) {
+	if ($avail{$p} eq '') {
+		$avail{$p} = 1;
+		}
+	}
 foreach my $m (&list_domain_owner_modules()) {
 	my $minp;
 	if ($m->[2]) {

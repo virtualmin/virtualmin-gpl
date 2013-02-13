@@ -159,6 +159,13 @@ sub feature_webmin
 {
 }
 
+# feature_modules()
+# Returns a list of the modules that domain owners with this feature may be
+# granted access to. Used in server templates.
+sub feature_modules
+{
+}
+
 # feature_import(domain-name, user-name, db-name)
 # Returns 1 if this feature is already enabled for some domain being imported,
 # or 0 if not
