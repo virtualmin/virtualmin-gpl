@@ -1015,7 +1015,7 @@ foreach my $m (@mods) {
 		if ($phpver =~ /\./ && $software::update_system eq "yum") {
 			# PHP 5.3+ packages from software collections are
 			# named like php54-php-mysql
-			push(@poss, "php".$nodotphpver."-php-".$m);
+			unshift(@poss, "php".$nodotphpver."-php-".$m);
 			}
 		elsif ($software::update_system eq "yum" &&
 		       $fullphpver =~ /^5\.3/) {
@@ -1052,8 +1052,8 @@ foreach my $m (@mods) {
 				# Real package name is different
 				$newpkg = "CSWphp".$phpver.$m;
 				}
-			@pinfo = &software::package_info($newpkg);
-			if (@pinfo && $pinfo[0] eq $newpkg) {
+			local @pinfo2 = &software::package_info($newpkg);
+			if (@pinfo2 && $pinfo2[0] eq $newpkg) {
 				# Yep, it worked
 				&$second_print($text{'setup_done'});
 				$iok = 1;
