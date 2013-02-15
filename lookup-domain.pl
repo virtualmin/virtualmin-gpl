@@ -38,6 +38,7 @@ if ($fromdaemon && !$connect_timed_out) {
 	    $quotaleft-$size-$quota_margin <= 0) {
 		# Quota has been reached, bounce mail
 		print STDERR "Disk quota for $ARGV[0] has been reached.\n";
+		print $did,"\n";
 		exit(73);
 		}
 	elsif (!$did || !$spam) {
@@ -165,6 +166,7 @@ $uquota *= $bsize;
 if ($quota && $uquota+$size+$quota_margin >= $quota) {
 	# Over quota - intentionally fail
 	print STDERR "Disk quota for $user->{'user'} of $quota blocks has been reached.\n";
+	print "$d->{'id'}\n";
 	exit(73);
 	}
 elsif ($user->{'nospam'}) {
