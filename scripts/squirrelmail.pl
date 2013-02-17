@@ -129,6 +129,9 @@ local @files = ( { 'name' => "source",
 	     'file' => 'set_user_data.tar.gz',
 	     'nofetch' => 1,
 	     'url' => 'http://scripts.virtualmin.com/set_user_data-1.0.tar.gz' },
+	   { 'name' => 'locales',
+	     'file' => 'locales.tar.gz',
+	     'url' => "http://sourceforge.net/projects/squirrelmail/files/locales/1.4.18-20090526/all_locales-1.4.18-20090526.tar.gz" },
 	    );
 return @files;
 }
@@ -166,6 +169,12 @@ local $err = &extract_script_archive($files->{'source'}, $temp, $d,
 			     $opts->{'dir'}, "squirrelmail-webmail-$ver");
 $err && return (0, "Failed to extract source : $err");
 local $cprog = "$opts->{'dir'}/config/conf.pl";
+
+# Extract locales
+local $temp2 = &transname();
+local $err2 = &extract_script_archive($files->{'locales'}, $temp2, $d,
+			     $opts->{'dir'}."/locale", "locale");
+$err2 && return (0, "Failed to extract locales : $err2");
 
 if (!$upgrade) {
 	# Run the config program
