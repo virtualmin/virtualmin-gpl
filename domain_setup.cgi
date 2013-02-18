@@ -72,11 +72,6 @@ else {
 	}
 if (!$parentuser) {
 	# Validate user and password-related inputs for top-level domain
-	if (!$in{'email_def'}) {
-		$in{'email'} =~ /\S/ || &error($text{'setup_eemail'});
-		&extract_address_parts($in{'email'}) ||
-			&error($text{'setup_eemail3'});
-		}
 	if (!$in{'unix'}) {
 		$tmpl->{'mail_on'} eq "none" || !$in{'email_def'} ||
 			&error($text{'setup_eemail2'});
@@ -100,6 +95,20 @@ if (!$parentuser) {
 		}
 	&indexof($user, @banned_usernames) < 0 ||
 		&error(&text('setup_eroot', join(" ", @banned_usernames)));
+
+	if (!$in{'email_def'}) {
+		$in{'email'} =~ /\S/ || &error($text{'setup_eemail'});
+		@parts = &extract_address_parts($in{'email'});
+		@parts || &error($text{'setup_eemail3'});
+		foreach my $p (@parts) {
+			if ($p =~ /^(\S+)\@(\S+)$/ && $2 eq $in{'dom'} &&
+			    $1 ne $user) {
+				# Don't allow contact address to be in the
+				# domain being created
+				&error($text{'setup_eemail4'});
+				}
+			}
+		}
 
 	# Parse mail group name
 	if ($in{'mgroup_def'}) {

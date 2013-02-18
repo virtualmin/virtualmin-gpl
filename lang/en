@@ -426,6 +426,7 @@ setup_edirectives=The Apache directives for new websites set on the Virtualmin C
 setup_eemail=Missing contact email address
 setup_eemail2=A contact email address must be entered for servers that have no administration user
 setup_eemail3=Contact email address is not valid - must contain a domain name
+setup_eemail4=The contact email address cannot be in the domain being created
 setup_emaking=Before creation command failed : $1
 setup_emade=Post-creation command failed : $1
 setup_emailbox=An email address for the unix user cannot be created unless email is enabled for the server
