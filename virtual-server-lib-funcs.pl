@@ -11323,7 +11323,8 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    'validate', 'chroot', 'global', 'changelog',
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
    $config{'mail_system'} == 0 ? ( 'postgrey' ) : ( ),
-   'dkim', 'provision', 'autoconfig',
+   'dkim', 'provision',
+   $config{'mail'} ? ( 'autoconfig' ) : ( ),
    );
 local %tmplcat = (
 	'features' => 'setting',
