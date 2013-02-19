@@ -401,8 +401,8 @@ foreach my $f (@features, &list_feature_plugins()) {
 	$dom{$f} = &can_use_feature($f) && int($in{$f});
 	}
 
-if ($in{'db_def'} || !&database_feature() || !&can_edit_databases() ||
-    $aliasdom || $subdom) {
+if ($in{'db_def'} || !defined($in{'db'}) || !&database_feature() ||
+    !&can_edit_databases() || $aliasdom || $subdom) {
 	# Database name is automatic (or not even used, in the case of alias
 	# and sub-domains)
 	$dom{'db'} = &database_name(\%dom);
