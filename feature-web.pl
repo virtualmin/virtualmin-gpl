@@ -374,9 +374,11 @@ else {
 		if ($alog && !&is_under_directory($_[0]->{'home'}, $alog) &&
 		    !$_[0]->{'subdom'}) {
 			&$first_print($text{'delete_apachelog'});
-			local @dlogs = ($alog, glob("$alog.*"));
+			local @dlogs = ($alog, glob("$alog.*"),
+					glob("$alog-*"));
 			if ($elog) {
-				push(@dlogs, $elog, glob("$elog.*"));
+				push(@dlogs, $elog, glob("$elog.*"),
+				     	     glob("$elog-*"));
 				}
 			&unlink_file(@dlogs);
 			&$second_print($text{'setup_done'});
