@@ -18,7 +18,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-return ( "1.4.3" );
+return ( "1.4.4" );
 }
 
 sub script_django_gpl
@@ -192,10 +192,16 @@ if (!-d $opts->{'dir'}) {
 $ENV{'PYTHONPATH'} = "$opts->{'dir'}/lib/python";
 &run_as_domain_user($d, "mkdir -p ".quotemeta($ENV{'PYTHONPATH'}));
 
-# Extract the source, then install to the target dir
+# Extract the source
 local $temp = &transname();
 local $err = &extract_script_archive($files->{'source'}, $temp, $d);
 $err && return (0, "Failed to extract Django source : $err");
+
+# Delete .pyc files from source that may be for an older python version
+&run_as_domain_user($d,
+	"find ".quotemeta($temp)." -name '*.pyc' | xargs rm -f");
+
+# Install to target dir
 local $icmd = "(cd ".quotemeta("$temp/Django-$ver")." && ".
       "python setup.py install --home ".quotemeta($opts->{'dir'}).") 2>&1";
 local $out = &run_as_domain_user($d, $icmd);

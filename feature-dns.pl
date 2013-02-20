@@ -2639,6 +2639,40 @@ if ($d->{'provision_dns'}) {
 		return "Error from provisioning server updating records : $msg";
 		}
 	}
+
+# If this domain has aliases, update their DNS records too
+if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
+	local @aliases = grep { $_->{'dns'} }
+			      &get_domain_by("alias", $d->{'id'});
+	foreach my $ad (@aliases) {
+		# XXX provision mode
+		&obtain_lock_dns($ad);
+		local $file;
+		local $recs;
+		if ($ad->{'provision_dns'}) {
+			# On provisioning server
+			$file = &transname();
+			local $bind8::config{'auto_chroot'} = undef;
+			local $bind8::config{'chroot'} = undef;
+			&create_alias_records($file, $ad,
+					      $ad->{'dns_ip'} || $ad->{'ip'});
+			$recs = [ &bind8::read_zone_file($temp, $ad->{'dom'}) ];
+			}
+		else {
+			# On local BIND
+			$file = &get_domain_dns_file($ad);
+			&open_tempfile(EMPTY, ">$file", 0, 1);
+			&close_tempfile(EMPTY);
+			&create_alias_records($file, $ad,
+					      $ad->{'dns_ip'} || $ad->{'ip'});
+			$recs = [ get_domain_dns_records($ad) ];
+			}
+		&post_records_change($ad, $recs, $file);
+		&reload_bind_records($ad);
+		&release_lock_dns($ad);
+		}
+	}
+
 return undef;
 }
 
