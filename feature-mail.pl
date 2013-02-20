@@ -965,6 +965,25 @@ if (($_[0]->{'dom'} ne $_[1]->{'dom'} ||
 		}
 	}
 
+# If contact email changed, update aliases to it
+if ($_[0]->{'emailto'} ne $_[1]->{'emailto'}) {
+	&$first_print($text{'save_mailto'});
+	local @tmplaliases = split(/\t+/, $tmpl->{'dom_aliases'});
+	local @aliases = &list_domain_aliases($_[0]);
+	foreach $a (@tmplaliases) {
+                local ($from, $to) = split(/=/, $a, 2);
+		local ($virt) = grep { $_->{'from'} eq
+				       $from."\@".$_[0]->{'dom'} } @aliases;
+		next if (!$virt);
+		next if ($virt->{'to'}->[0] ne $_[1]->{'emailto'});
+		local $oldvirt = { %$virt };
+		$virt->{'to'}->[0] = $_[0]->{'emailto'};
+		&modify_virtuser($oldvirt, $virt);
+		}
+	&sync_alias_virtuals($_[0]);
+	&$second_print($text{'setup_done'});
+	}
+
 # Unlock mail and unix DBs the same number of times we locked them
 while($our_mail_locks--) {
 	&release_lock_mail($_[0]);

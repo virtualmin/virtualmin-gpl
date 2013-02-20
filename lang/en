@@ -1295,6 +1295,7 @@ save_mailalias=Updating mail alias for domain ..
 save_mailrename=Updating mailbox users ..
 save_mailunalias1=Removing mail aliases copied from target domain ..
 save_mailunalias2=Removing catchall mail alias ..
+save_mailto=Updating aliases for contact address ..
 save_ssl=Changing IP address of SSL virtual website ..
 save_ssl2=Changing hostname of SSL virtual website ..
 save_ssl3=Changing home directory in SSL website configuration ..

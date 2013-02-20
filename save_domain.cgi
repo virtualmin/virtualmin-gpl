@@ -228,6 +228,7 @@ else {
 	}
 if (!$d->{'parent'}) {
 	$d->{'email'} = $in{'email_def'} ? undef : $in{'email'};
+	&compute_emailto($d);
 	}
 
 # Update quotas in domain object
@@ -240,6 +241,7 @@ if (&has_home_quotas() && !$d->{'parent'} && &can_edit_quotas($d)) {
 foreach $sd (&get_domain_by("parent", $d->{'id'})) {
 	$sd->{'pass'} = $d->{'pass'};
 	$sd->{'email'} = $d->{'email'};
+	$sd->{'emailto'} = $d->{'emailto'};
 	}
 
 # Update plan if changed
