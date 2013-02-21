@@ -387,6 +387,7 @@ if (defined($email)) {
 		&usage("Invalid email address $email");
 	foreach $d (@doms) {
 		$d->{'email'} = $email;
+		&compute_emailto($d);
 		}
 	}
 if (defined($quota)) {
