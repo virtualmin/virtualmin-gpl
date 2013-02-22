@@ -1391,3 +1391,4 @@ The key size is now configurable when setting up DKIM or generating a new key.
 Plugin modules available to domain owners can now be configured at the template level, in the Administrator's Webmin modules section.
 When the contact email address for a domain is changed, default mail aliases like postmaster will be updated to the new address.
 When DNS records are modified in a virtual server, all records are synchronized into any alias domains.
+Changed the default email folder names to Junk, Trash, Drafts, Sent and Virus.

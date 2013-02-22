@@ -31,12 +31,14 @@ if ($d->{'virus'}) {
 foreach $w (@what) {
 	# Show fields for dest
 	($pfx, $vmode, $vdest) = @$w;
+	$folder = $vmode == 4 || $vmode == 6 ? $vdest :
+		  $pfx eq "spam" ? "Junk" : "Virus";
 	print &ui_table_row(&hlink($text{'spam_'.$pfx}, 'spam_'.$pfx),
 	 &ui_radio($pfx."_mode", $vmode,
 	  [ [ 0, $text{'spam_'.$pfx.'0'}."<br>" ],
 	    $pfx eq 'spam' ? ( [ 5, $text{'spam_'.$pfx.'5'}."<br>" ] ) : ( ),
-	    [ 4, &text('spam_'.$pfx.'4', "<tt>~/mail/$pfx</tt>")."<br>" ],
-	    [ 6, &text('spam_'.$pfx.'6', "<tt>~/Maildir/.$pfx/</tt>")."<br>" ],
+	    [ 4, &text('spam_'.$pfx.'4', "<tt>~/mail/$folder</tt>")."<br>" ],
+	    [ 6, &text('spam_'.$pfx.'6', "<tt>~/Maildir/.$folder/</tt>")."<br>" ],
 	    [ 1, &text('spam_'.$pfx.'1',
 	       &ui_textbox($pfx."_file", $vmode == 1 ? $vdest : "", 30))."<br>" ],
 	    [ 2, &text('spam_'.$pfx.'2',

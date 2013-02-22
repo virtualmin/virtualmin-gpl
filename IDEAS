@@ -22,9 +22,6 @@
 	- Contao https://www.virtualmin.com/node/16164
 	- net2ftp https://www.virtualmin.com/node/19024
 
- - WebNIC registrar support
-	- See email from Winnie Lee
-
  - Command-line domain rename
 	- Add to unit tests
 	- http://www.virtualmin.com/node/18938
@@ -45,6 +42,14 @@
 
  - Validate FreeBSD 9.x support
 	- KVM instance?
+	- Validate all Webmin modules
+	- SMART module
+	- See email from Richard A Secor
+ 
+ - Option to exit with status 75 in lookup-domain
+	- https://www.virtualmin.com/node/25381
 
- - Multi-line directives in Nginx module
-	- https://www.virtualmin.com/node/25369
+ - Change folder names to Trash/Sent/Junk/Drafts
+	- https://www.virtualmin.com/node/25388
+	- Ensure that this does't break existing settings for spam / virus
+	- UI

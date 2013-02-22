@@ -2363,7 +2363,7 @@ if ($md && $md =~ /\/Maildir$/) {
 	if ($d->{'spam'}) {
 		local ($sdmode, $sdpath) = &get_domain_spam_delivery($d);
 		if ($sdmode == 6) {
-			push(@folders, "$md/.spam");
+			push(@folders, "$md/.".($sdpath || "Junk"));
 			}
 		elsif ($sdmode == 1 && $sdpath =~ /^Maildir\/(\S+)\/$/) {
 			push(@folders, "$md/$1");
@@ -2372,18 +2372,35 @@ if ($md && $md =~ /\/Maildir$/) {
 	if ($d->{'virus'}) {
 		local ($vdmode, $vdpath) = &get_domain_virus_delivery($d);
 		if ($vdmode == 6) {
-			push(@folders, "$md/.virus");
+			push(@folders, "$md/.".($vdpath || "Virus"));
 			}
 		elsif ($vdmode == 1 && $vdpath =~ /^Maildir\/(\S+)\/$/) {
 			push(@folders, "$md/$1");
 			}
 		}
+
+	# Actually create the folders
+	my @subs;
 	foreach my $f (@folders) {
+		if ($f =~ /\/Maildir\/\.(\S+)$/) {
+			push(@subs, $1);
+			}
 		next if (-d $f);
 		foreach $d ($f, "$f/cur", "$f/tmp", "$f/new") {
 			&make_dir($d, 0700, 1);
 			&set_ownership_permissions($uid, $gid, undef, $d);
 			}
+		}
+
+	# Create subscriptions file for Dovecot
+	if (@subs) {
+		&open_tempfile(SUBS, ">$md/subscriptions");
+		foreach my $s (@subs) {
+			&print_tempfile(SUBS, $s."\n");
+			}
+		&close_tempfile(SUBS);
+		&set_ownership_permissions($uid, $gid, undef,
+					   "$md/subscriptions");
 		}
 	}
 
