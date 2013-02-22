@@ -200,11 +200,11 @@ elsif (!$clamrec[1]) {
 elsif ($clamrec[1]->{'action'} eq '/dev/null') {
 	return (0);
 	}
-elsif ($clamrec[1]->{'action'} =~ /^\$HOME\/mail\/virus$/) {
-	return (4);
+elsif ($clamrec[1]->{'action'} =~ /^\$HOME\/mail\/(virus|Virus)$/) {
+	return (4, $1);
 	}
-elsif ($clamrec[1]->{'action'} =~ /^\$HOME\/Maildir\/.virus\/$/) {
-	return (6);
+elsif ($clamrec[1]->{'action'} =~ /^\$HOME\/Maildir\/.(virus|Virus)\/$/) {
+	return (6, $1);
 	}
 elsif ($clamrec[1]->{'action'} =~ /^\$HOME\/(.*)$/) {
 	return (1, $1);
@@ -228,9 +228,29 @@ local @recipes = &procmail::parse_procmail_file($spamrc);
 local @clamrec = &find_clam_recipe(\@recipes);
 return 0 if (!@clamrec);
 local $r = $clamrec[1];
+
+# Preserve existing settings if not set
+local ($oldmode, $olddest) = &get_domain_virus_delivery($d);
+if (!defined($mode)) {
+	($mode, $dest) = ($oldmode, $olddest);
+	}
+elsif (!defined($dest)) {
+	$dest = $olddest;
+	}
+
+# Work out folder name, defaulting to upper case
+local $folder;
+if ($mode == 4 || $mode == 6) {
+	if ($dest =~ /^[a-z0-9\.\_\-]+$/i) {
+		$folder = $dest;
+		}
+	else {
+		$folder = "Virus";
+		}
+	}
 $r->{'action'} = $mode == 0 ? "/dev/null" :
-		 $mode == 4 ? "\$HOME/mail/virus" :
-		 $mode == 6 ? "\$HOME/Maildir/.virus/" :
+		 $mode == 4 ? "\$HOME/mail/$folder" :
+		 $mode == 6 ? "\$HOME/Maildir/.$folder/" :
 		 $mode == 1 ? "\$HOME/$dest" :
 			      $dest;
 $r->{'type'} = $mode == 2 ? "!" : "";

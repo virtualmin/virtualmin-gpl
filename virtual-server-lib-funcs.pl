@@ -282,19 +282,7 @@ if (!defined($dom->{'db_postgres'}) && $dom->{'postgres'}) {
 $dom->{'db_postgres'} = join(" ", &unique(split(/\s+/, $dom->{'db_postgres'})));
 
 # Emailto is a computed field
-local $parent;
-if ($dom->{'email'}) {
-	$dom->{'emailto'} = $dom->{'email'};
-	}
-elsif ($dom->{'parent'} && ($parent = &get_domain($dom->{'parent'}))) {
-	$dom->{'emailto'} = $parent->{'emailto'};
-	}
-elsif ($dom->{'mail'}) {
-	$dom->{'emailto'} = $dom->{'user'}.'@'.$dom->{'dom'};
-	}
-else {
-	$dom->{'emailto'} = $dom->{'user'}.'@'.&get_system_hostname();
-	}
+&compute_emailto($dom);
 
 # Also compute first actual email address
 if (!$dom->{'emailto_addr'} ||
@@ -317,6 +305,26 @@ foreach my $ed (@edit_limits) {
 		}
 	}
 delete($dom->{'pass_set'});	# Only set by callers for modify_* functions
+}
+
+# compute_emailto(&domain)
+# Populate the emailto field based on the email field
+sub compute_emailto
+{
+local ($dom) = @_;
+local $parent;
+if ($dom->{'email'}) {
+	$dom->{'emailto'} = $dom->{'email'};
+	}
+elsif ($dom->{'parent'} && ($parent = &get_domain($dom->{'parent'}))) {
+	$dom->{'emailto'} = $parent->{'emailto'};
+	}
+elsif ($dom->{'mail'}) {
+	$dom->{'emailto'} = $dom->{'user'}.'@'.$dom->{'dom'};
+	}
+else {
+	$dom->{'emailto'} = $dom->{'user'}.'@'.&get_system_hostname();
+	}
 }
 
 # list_automatic_capabilities(can-create-domains)

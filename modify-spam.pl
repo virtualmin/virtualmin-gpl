@@ -84,10 +84,18 @@ while(@ARGV > 0) {
 		$mode{$1} = 5;
 		}
 	elsif ($a =~ /^--(spam|virus)-normal$/) {
-		$mode{$1} = 4;
+		$m = $1;
+		$mode{$m} = 4;
+		if (@ARGV && $ARGV[0] !~ /^-/) {
+			$dest{$m} = shift(@ARGV);
+			}
 		}
 	elsif ($a =~ /^--(spam|virus)-maildir$/) {
-		$mode{$1} = 6;
+		$m = $1;
+		$mode{$m} = 6;
+		if (@ARGV && $ARGV[0] !~ /^-/) {
+			$dest{$m} = shift(@ARGV);
+			}
 		}
 	elsif ($a =~ /^--(spam|virus)-file$/) {
 		$mode{$1} = 1;
@@ -262,14 +270,16 @@ print "Changes the spam and virus delivery modes for one or more domains.\n";
 print "\n";
 print "virtualmin modify-spam --domain name | --all-domains\n";
 print "                      [--spam-delete | --spam-deliver |\n";
-print "                       --spam-normal | --spam-file file-under-home |\n";
+print "                       --spam-normal [folder] |\n";
+print"                        --spam-file file-under-home |\n";
 print "                       --spam-email address | --spam-dest file |\n";
-print "                       --spam-maildir ]\n";
+print "                       --spam-maildir [folder] ]\n";
 print "                      [--spam-delete-level score | --spam-no-delete-level]\n";
 print "                      [--virus-delete |\n";
-print "                       --virus-normal | --virus-file file-under-home |\n";
+print "                       --virus-normal [folder] |\n";
+print "                       --virus-file file-under-home |\n";
 print "                       --virus-email address | --virus-dest file\n";
-print "                       --virus-maildir ]\n";
+print "                       --virus-maildir [folder] ]\n";
 print "                      [--spam-whitelist | --no-spam-whitelist]\n";
 print "                      [--use-spamassassin | --use-spamc]\n";
 print "                      [--spamclear-none |\n";

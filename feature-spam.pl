@@ -790,11 +790,11 @@ elsif (!$spamrec[3]) {
 elsif ($spamrec[3]->{'action'} eq '/dev/null') {
 	@rv = (0, undef);
 	}
-elsif ($spamrec[3]->{'action'} =~ /^\$HOME\/mail\/spam$/) {
-	@rv = (4, undef);
+elsif ($spamrec[3]->{'action'} =~ /^\$HOME\/mail\/(spam|Spam|junk|Junk)$/) {
+	@rv = (4, $1);
 	}
-elsif ($spamrec[3]->{'action'} =~ /^\$HOME\/Maildir\/\.spam\/$/) {
-	@rv = (6, undef);
+elsif ($spamrec[3]->{'action'} =~ /^\$HOME\/Maildir\/\.(spam|Spam|junk|Junk)\/$/) {
+	@rv = (6, $1);
 	}
 elsif ($spamrec[3]->{'action'} =~ /^\$HOME\/(.*)$/) {
 	@rv = (1, $1);
@@ -834,6 +834,9 @@ local ($oldmode, $olddest, $oldlevel, $oldddest) =
 if (!defined($mode)) {
 	($mode, $dest) = ($oldmode, $olddest);
 	}
+elsif (!defined($dest)) {
+	$dest = $olddest;
+	}
 if (!defined($level)) {
 	$level = $oldlevel;
 	}
@@ -863,9 +866,18 @@ if ($level) {
 	}
 if ($mode != 5) {
 	# Regular delivery
+	local $folder;
+	if ($mode == 4 || $mode == 6) {
+		if ($dest =~ /^[a-z0-9\.\_\-]+$/i) {
+			$folder = $dest;
+			}
+		else {
+			$folder = "Junk";
+			}
+		}
 	local $action = $mode == 0 ? "/dev/null" :
-			$mode == 4 ? "\$HOME/mail/spam" :
-			$mode == 6 ? "\$HOME/Maildir/.spam/" :
+			$mode == 4 ? "\$HOME/mail/$folder" :
+			$mode == 6 ? "\$HOME/Maildir/.$folder/" :
 			$mode == 1 ? "\$HOME/$dest" :
 				      $dest;
 	local $type = $mode == 2 ? "!" : "";

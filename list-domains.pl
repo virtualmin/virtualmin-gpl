@@ -381,9 +381,9 @@ if ($multi) {
 				       $mode == 1 ? "Mail file under home $dest" :
 				       $mode == 2 ? "Forward to $dest" :
 				       $mode == 3 ? "Mail file $dest" :
-				       $mode == 4 ? "Default mail file" :
+				       $mode == 4 ? "Default mail file $dest" :
 				       $mode == 5 ? "Deliver normally" :
-				       $mode == 6 ? "Default mail directory" :
+				       $mode == 6 ? "Default mail directory $dest" :
 						    "???";
 				print "    ".ucfirst($w)." delivery: $msg\n";
 				if ($w eq 'spam' && $slevel) {
