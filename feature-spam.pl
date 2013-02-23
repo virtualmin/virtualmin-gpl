@@ -1002,6 +1002,49 @@ foreach my $d (grep { $_->{'spam'} } &list_domains()) {
 	}
 }
 
+# get_global_quota_exitcode()
+# Returns the exit code from lookup-domain when a user is close to or over quota
+sub get_global_quota_exitcode
+{
+&require_spam();
+local @recipes = &procmail::get_procmailrc();
+foreach my $r (@recipes) {
+	if ($r->{'action'} =~ /\Q$domain_lookup_cmd\E\s+\-\-exitcode\s+(\d+)/) {
+		return $1;
+		}
+	}
+return 73;
+}
+
+# save_global_quota_exitcode(code)
+# Updates the exit code from lookup-domain when a user is close to or over quota
+sub save_global_quota_exitcode
+{
+local ($code) = @_;
+&require_spam();
+&lock_file($procmail::procmailrc);
+local @recipes = &procmail::get_procmailrc();
+local $changed = 0;
+foreach my $r (@recipes) {
+	if ($r->{'action'} =~ /\Q$domain_lookup_cmd\E\s+/) {
+		# Fix call to lookup-domain to return correct exit code
+		$r->{'action'} = "VIRTUALMIN=|$domain_lookup_cmd --exitcode $code \$LOGNAME";
+		&procmail::modify_recipe($r);
+		$changed++;
+		}
+	elsif ($r->{'conds'} && @{$r->{'conds'}} &&
+	       $r->{'conds'}->[0]->[1] =~ /EXITCODE/) {
+		# Fix rule that uses the exit code
+		$r->{'conds'}->[0]->[1] =~ s/'(\d+)'/'$code'/;
+		$r->{'conds'}->[0]->[1] =~ s/"(\d+)"/"$code"/;
+		&procmail::modify_recipe($r);
+		$changed++;
+		}
+	}
+&unlock_file($procmail::procmailrc);
+return $changed ? undef : "No receipes found";
+}
+
 # update_spam_whitelist(&domain)
 # Adds all mailboxes in this domain to the spamassassin whitelist in its
 # configuration, and removes any whitelists that don't correspond to users.

@@ -100,6 +100,11 @@ if ($config{'virus'} && !$config{'provision_virus_host'}) {
 				   $in{'vhost_def'} ? undef : $in{'vhost'});
 	}
 
+# Update bounce behavior
+if ($config{'spam'} && defined($in{'exitcode'})) {
+	&save_global_quota_exitcode($in{'exitcode'});
+	}
+
 &release_lock_spam_all();
 
 &set_all_null_print();

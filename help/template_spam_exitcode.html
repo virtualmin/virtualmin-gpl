@@ -1,0 +1,13 @@
+<header>When an over-quote user receives email</header>
+
+This option controls what happens when a mailbox that is close to or over its
+disk quota receives email that would put it over quota. By default Virtualmin
+will bounce the email back to the sender - but if you select the <b>Queue</b>
+option, email will be held in the local mail queue and re-tried at regular
+intervals. <p>
+
+If the user's disk usage eventually drops below quota, the message will be
+delivered. However, if usage never drops the message will be bounced back to
+the sender after a period configured by the mail server (typically 5 days). <p>
+
+<footer>

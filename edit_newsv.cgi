@@ -46,6 +46,16 @@ if ($config{'spam'}) {
 		&hlink($text{'spam_procmail'}, 'config_default_procmail'),
 		&ui_radio("default_procmail", $config{'default_procmail'},
 			  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
+
+	# Behavior when over quota?
+	$exitcode = &get_global_quota_exitcode();
+	if ($exitcode == 73 || $exitcode == 75) {
+		print &ui_table_row(
+		    &hlink($text{'spam_exitcode'}, 'template_spam_exitcode'),
+		    &ui_radio("exitcode", $exitcode,
+			      [ [ 73, $text{'spam_bounce'} ],
+			        [ 75, $text{'spam_queue'} ] ]));
+		}
 	}
 
 # Virus scanning program

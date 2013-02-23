@@ -95,6 +95,19 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--quota-behavior") {
+		$exitcode = shift(@ARGV);
+		if ($exitcode eq "bounce") {
+			$exitcode = 73;
+			}
+		elsif ($exitcode eq "queue") {
+			$exitcode = 75;
+			}
+		elsif ($exitcode !~ /^\d+$/) {
+			&usage("--quota-behavior must be followed by ".
+			       "bounce, queue or a number");
+			}
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -102,7 +115,7 @@ while(@ARGV > 0) {
 
 # Validate inputs
 $virus_scanner || $virus_host || $spam_client || $show || defined($clamd) ||
-  defined($spamd) || defined($spam_max) || &usage("Nothing to do");
+  defined($spamd) || defined($spam_max) || $exitcode || &usage("Nothing to do");
 if ($spam_client) {
 	&has_command($spam_client) ||
 	    &usage("SpamAssassin client program $spam_client does not exist");
@@ -203,6 +216,13 @@ if ($virus_scanner) {
 	print ".. done\n\n";
 	}
 
+# Change lookup-domain exit code
+if ($exitcode) {
+	print "Changing over-quota email behaviour ..\n";
+	&save_global_quota_exitcode($exitcode);
+	print ".. done\n\n";
+	}
+
 &release_lock_spam_all();
 
 &modify_all_webmin();	# Spam setting may have changed
@@ -225,6 +245,10 @@ if ($show) {
 		($scanner) = &get_global_virus_scanner();
 		print "Virus scanner: $scanner\n";
 		}
+	$exitcode = &get_global_quota_exitcode();
+	print "Over-quota behavior: ",
+	      ($exitcode == 73 ? "Bounce" :
+	       $exitcode == 75 ? "Queue" : $exitcode),"\n";
 	}
 
 sub usage
@@ -244,6 +268,7 @@ if (&check_clamd_status() >= 0) {
 if (&check_spamd_status() >= 0) {
 	print "                    [--enable-spamd | --disable-spamd]\n";
 	}
+print "                    [--quota-behavior \"queue\"|\"bounce\"]\n";
 print "                    [--show]\n";
 exit(1);
 }
