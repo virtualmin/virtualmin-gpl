@@ -3135,6 +3135,7 @@ $mail_tests = [
 	{ 'command' => $wget_command.'http://autoconfig.'.$test_domain.
 		       '/mail/config-v1.1.xml?emailaddress=foo@'.$test_domain,
 	  'grep' => 'clientConfig',
+	  'sleep' => 5,
 	},
 
 	# Disable mail autoconfig URL
