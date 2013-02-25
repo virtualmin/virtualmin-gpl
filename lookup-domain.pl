@@ -3,8 +3,23 @@
 # if the user is not approaching his quota
 
 $no_acl_check++;
-@ARGV == 1 || die "usage: lookup-domain.pl <username>";
 use Socket;
+
+# Parse command line args
+$exitcode = 73;
+while(@ARGV) {
+	my $a = shift(@ARGV);
+	if ($a eq "--exitcode") {
+		$exitcode = shift(@ARGV);
+		}
+	elsif ($a !~ /^-/) {
+		$username = $a;
+		}
+	else {
+		die "usage: lookup-domain.pl --exitcode number <username>";
+		}
+	}
+$username || die "Missing username parameter";
 
 # Get the message size
 while($got = read(STDIN, $buf, 1024)) {
@@ -22,7 +37,7 @@ alarm(30);
 $rv = connect(DAEMON, pack_sockaddr_in(11000, inet_aton("127.0.0.1")));
 if ($rv) {
 	select(DAEMON); $| = 1; select(STDOUT);
-	print DAEMON $ARGV[0],"\n";
+	print DAEMON $username,"\n";
 	$fromdaemon = <DAEMON>;
 	$fromdaemon =~ s/\r|\n//g;
 	close(DAEMON);
@@ -37,9 +52,9 @@ if ($fromdaemon && !$connect_timed_out) {
 	if ($did && $quotaleft ne "UNLIMITED" &&
 	    $quotaleft-$size-$quota_margin <= 0) {
 		# Quota has been reached, bounce mail
-		print STDERR "Disk quota for $ARGV[0] has been reached.\n";
+		print STDERR "Disk quota for $username has been reached.\n";
 		print $did,"\n";
-		exit(73);
+		exit($exitcode);
 		}
 	elsif (!$did || !$spam) {
 		# No such user, or user's domain doesn't have spam enabled -
@@ -74,9 +89,9 @@ if ($@) {
 
 # Check our cache first, in case we have just done this user
 $now = time();
-if (defined($usercache{$ARGV[0]})) {
+if (defined($usercache{$username})) {
 	($cachespam, $cachequota, $cacheuquota, $cachetime, $cacheclient) =
-		split(/ /, $usercache{$ARGV[0]});
+		split(/ /, $usercache{$username});
 	$cacheclient ||= "spamassassin";
 	if ($now - $cachetime < 60*60) {
 		if ($cachequota &&
@@ -117,7 +132,7 @@ if (defined($usercache{$ARGV[0]})) {
 
 # Lookup the user for real
 do './virtual-server-lib.pl';
-$d = &get_user_domain($ARGV[0]);
+$d = &get_user_domain($username);
 if (!$d || !$d->{'spam'}) {
 	$cachespam = $cachequota = $cacheuquota = 0;
 	$cachetime = $now;
@@ -143,8 +158,8 @@ $cacheclient = &get_domain_spam_client($d);
 
 # Check if the user is approaching his quota
 @users = &list_domain_users($d, 0, 1, 0, 1);
-($user) = grep { $_->{'user'} eq $ARGV[0] ||
-		 &replace_atsign($_->{'user'}) eq $ARGV[0] } @users;
+($user) = grep { $_->{'user'} eq $username ||
+		 &replace_atsign($_->{'user'}) eq $username } @users;
 if (!$user) {
 	# Couldn't find him?! So do the spam check
 	$cachespam = $d->{'id'};
@@ -167,7 +182,7 @@ if ($quota && $uquota+$size+$quota_margin >= $quota) {
 	# Over quota - intentionally fail
 	print STDERR "Disk quota for $user->{'user'} of $quota blocks has been reached.\n";
 	print "$d->{'id'}\n";
-	exit(73);
+	exit($exitcode);
 	}
 elsif ($user->{'nospam'}) {
 	# Spam filtering disabled for this user
@@ -194,7 +209,7 @@ exit(0);
 
 sub update_cache
 {
-$usercache{$ARGV[0]} = join(" ", $cachespam, $cachequota, $cacheuquota, $cachetime, $cacheclient);
+$usercache{$username} = join(" ", $cachespam, $cachequota, $cacheuquota, $cachetime, $cacheclient);
 dbmclose(%usercache);
 }
 
