@@ -2462,7 +2462,8 @@ if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 opendir(TEMP, "/tmp");
 foreach my $f (readdir(TEMP)) {
 	local $p = "/tmp/$f";
-	if ($f =~ /^clamav-([a-f0-9]+)$/ && -d $p) {
+	if ($f =~ /^clamav-([a-f0-9]+)$/ || $f =~ /^clamwrapper\.\d+$/ ||
+	    $f =~ /^\.spamassassin.*tmp$/) {
 		local @st = stat($p);
 		if ($st[4] == $_[0]->{'uid'} && $st[5] == $_[0]->{'gid'}) {
 			# Found one to remove
