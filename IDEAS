@@ -45,3 +45,6 @@
 	- Validate all Webmin modules
 	- SMART module
 	- See email from Richard A Secor
+
+ - Calls to complete_http_download should use a new function that knows about
+   domains and IPs for redirects
