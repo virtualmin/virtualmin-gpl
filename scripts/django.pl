@@ -18,7 +18,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-return ( "1.4.5" );
+return ( "1.5", "1.4.5" );
 }
 
 sub script_django_gpl
@@ -44,7 +44,20 @@ sub script_django_depends
 {
 local ($d, $ver) = @_;
 local @rv;
+
+# Check for python, and required version
 &has_command("python") || push(@rv, "The python command is not installed");
+local $out = &backquote_command("python --version 2>&1 </dev/null");
+if ($out =~ /Python\s+([0-9\.]+)/i) {
+	local $pyver = $1;
+	if ($ver >= 1.5 && &compare_versions($pyver, "2.6.5") < 0) {
+		push(@rv, "Django 1.5 requires Python 2.6.5 or later");
+		}
+	}
+else {
+	push(@rv, "Could not work out Python version : $out");
+	}
+
 &require_apache();
 local $conf = &apache::get_config();
 local $got_rewrite;
@@ -485,7 +498,8 @@ sub script_django_latest
 {
 local ($ver) = @_;
 return ( "http://www.djangoproject.com/download/",
-	 "Django-([0-9\\.]+)\\.tar\\.gz" );
+	 $ver >= 1.5 ? "Django-([0-9\\.]+)\\.tar\\.gz" 
+		     : "Django-(1\\.4\\.[0-9\\.]+)\\.tar\\.gz" );
 }
 
 sub script_django_site

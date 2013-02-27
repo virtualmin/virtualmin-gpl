@@ -1393,3 +1393,5 @@ When the contact email address for a domain is changed, default mail aliases lik
 When DNS records are modified in a virtual server, all records are synchronized into any alias domains.
 Changed the default email folder names to Junk, Trash, Drafts, Sent and Virus.
 Added an option to the Spam and Virus Scanning page to control what happens when email is sent to a mailbox that is over quota (bouncing or queueing for later).
+---- Changes since 3.99 ----
+Updated the Django script installer to version 1.5.
