@@ -759,13 +759,17 @@ ins\//);
 	# domain's home, or public_html (for web ftp users))
 	local $phd = &public_html_dir($d);
 	foreach my $u (@users) {
-		local $homebase = $u->{'webowner'} ? $phd : $d->{'home'};
-		if ($u->{'home'} &&
+		if (!$u->{'webowner'} && $u->{'home'} &&
 		    $u->{'home'} !~ /^$d->{'home'}\/$config{'homes_dir'}\// &&
-		    !&is_under_directory($homebase, $u->{'home'})) {
+		    !&is_under_directory($d->{'home'}, $u->{'home'})) {
 			# Home dir is outside domain's home base somehow
 			$u->{'brokenhome'} = 1;
 			}
+		elsif ($u->{'webowner'} && $u->{'home'} &&
+		       !&is_under_directory($phd, $u->{'home'})) {
+			# Website FTP user's home dir must be under public_html
+			$u->{'brokenhome'} = 1;
+                        }
 		elsif ($u->{'home'} eq $d->{'home'}) {
 			# Home dir is equal to domain's dir, which is invalid
 			$u->{'brokenhome'} = 1;
