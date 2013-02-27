@@ -593,8 +593,10 @@ foreach my $u (&list_domain_users($oldd, 1, 0, 0, 0)) {
 			$db->{'name'} = $d->{'db'};
 			}
 		elsif ($db->{'name'} !~ s/\Q$oldprefix\E/$newprefix/) {
-			# Cannot fix prefix, so skip
-			next;
+			# If cannot replace old prefix with new, prepend
+			# the new prefix to match what is done when the
+			# DB is cloned
+			$db->{'name'} = $newprefix.$db->{'name'};
 			}
 		push(@newdbs, $db);
 		}
