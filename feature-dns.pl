@@ -1098,6 +1098,10 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		local $str = &bind8::join_spf(&default_domain_spf($d));
 		&bind8::create_record($file, $withdot, undef,
 				      "IN", "TXT", "\"$str\"");
+		if ($bind8::config{'spf_record'}) {
+			&bind8::create_record($file, $withdot, undef,
+					      "IN", "SPF", "\"$str\"");
+			}
 		}
 	}
 
@@ -1856,9 +1860,12 @@ if ($file) {
 		}
 
 	# Make sure any SPF record contains this system's default IP
-	local ($r) = grep { $_->{'type'} eq 'SPF' &&
-			    $r->{'name'} eq $d->{'dom'}.'.' } @recs;
-	if ($r) {
+	local @types = $bind8::config{'spf_record'} ? ( "SPF", "TXT" )
+						    : ( "SPF" );
+	foreach my $t (@types) {
+		local ($r) = grep { $_->{'type'} eq $t &&
+				    $r->{'name'} eq $d->{'dom'}.'.' } @recs;
+		next if (!$r);
 		local $spf = &bind8::parse_spf(@{$r->{'values'}});
 		local $defip = &get_default_ip();
 		if (&indexof($defip, @{$spf->{'ip4'}}) < 0) {
@@ -1902,7 +1909,9 @@ foreach my $r (@$recs) {
 		$r->{'values'}->[0] = $newip;
 		$changed = 1;
 		}
-	elsif ($r->{'type'} eq "SPF" && $r->{'values'}->[0] =~ /$oldip/) {
+	elsif (($r->{'type'} eq "SPF" ||
+		$r->{'type'} eq "TXT" && $r->{'values'}->[0] =~ /^v=spf/) &&
+	       $r->{'values'}->[0] =~ /$oldip/) {
 		# SPF record - replace ocurrances of IP
 		$r->{'values'}->[0] =~ s/$oldip/$newip/g;
 		$changed = 1;
@@ -1939,7 +1948,8 @@ foreach my $r (@$recs) {
 	else {
 		$r->{'realname'} =~ s/\.$olddom\.$/\.$newdom\./;
 		}
-	if ($r->{'type'} eq 'SPF') {
+	if ($r->{'type'} eq 'SPF' ||
+	    $r->{'type'} eq 'TXT' && $r->{'values'}->[0] =~ /^v=spf/) {
 		# Fix SPF TXT record
 		$r->{'values'}->[0] =~ s/$olddom/$newdom/;
 		}
@@ -2375,28 +2385,31 @@ if (!$file) {
 	# Domain not found!
 	return;
 	}
-local ($r) = grep { $_->{'type'} eq 'SPF' &&
-		    $_->{'name'} eq $d->{'dom'}.'.' } @$recs;
-local $str = $spf ? &bind8::join_spf($spf) : undef;
-local $bump = 1;
-if ($r && $spf) {
-	# Update record
-	&bind8::modify_record($r->{'file'}, $r, $r->{'name'}, $r->{'ttl'},
-			      $r->{'class'}, $r->{'type'}, "\"$str\"",
-			      $r->{'comment'});
-	}
-elsif ($r && !$spf) {
-	# Remove record
-	&bind8::delete_record($r->{'file'}, $r);
-	}
-elsif (!$r && $spf) {
-	# Add record
-	&bind8::create_record($file, $d->{'dom'}.'.', undef,
-			      "IN", "TXT", "\"$str\"");
-	}
-else {
-	# Nothing to do
-	$bump = 0;
+local $bump = 0;
+foreach my $t ("SPF", "TXT") {
+	local ($r) = grep { $_->{'type'} eq $t &&
+			    $_->{'values'}->[0] =~ /^v=spf/ &&
+			    $_->{'name'} eq $d->{'dom'}.'.' } @$recs;
+	local $str = $spf ? &bind8::join_spf($spf) : undef;
+	if ($r && $spf) {
+		# Update record
+		&bind8::modify_record(
+			$r->{'file'}, $r, $r->{'name'}, $r->{'ttl'},
+			$r->{'class'}, $r->{'type'}, "\"$str\"",
+			$r->{'comment'});
+		$bump = 1;
+		}
+	elsif ($r && !$spf) {
+		# Remove record
+		&bind8::delete_record($r->{'file'}, $r);
+		$bump = 1;
+		}
+	elsif (!$r && $spf) {
+		# Add record
+		&bind8::create_record($file, $d->{'dom'}.'.', undef,
+				      "IN", $t, "\"$str\"");
+		$bump = 1;
+		}
 	}
 if ($bump) {
 	&post_records_change($d, $recs, $file);
@@ -2682,6 +2695,7 @@ sub records_to_text
 {
 local ($d, $recs) = @_;
 local @rv;
+&require_bind();
 foreach my $r (@$recs) {
 	next if ($r->{'type'} eq 'NS' &&	# Exclude NS for domain
 		 $r->{'name'} eq $d->{'dom'}.".");
@@ -2693,7 +2707,8 @@ foreach my $r (@$recs) {
 		}
 	elsif ($r->{'type'}) {
 		my $t = $r->{'type'};
-		$t = "TXT" if ($t eq "SPF");
+		$t = "TXT" if ($t eq "SPF" &&
+			       $bind8::config{'spf_record'} == 0);
 		push(@rv, join(" ", $r->{'name'}, $r->{'ttl'}, $r->{'class'},
 				    $t, &join_record_values($r, 1)));
 		}
@@ -2726,7 +2741,8 @@ if ($r->{'type'} eq 'NS' &&
 	# NS record for domain is automatically set in provisioning mode
 	return 0;
 	}
-elsif ($r->{'type'} eq 'SPF' &&
+elsif (($r->{'type'} eq 'SPF' ||
+	$r->{'type'} eq 'TXT' && $r->{'values'}->[0] =~ /^v=spf/) &&
        $r->{'name'} eq $d->{'dom'}.'.') {
 	# SPF is edited separately
 	return 0;
