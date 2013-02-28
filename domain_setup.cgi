@@ -397,7 +397,7 @@ $dom{'emailto'} = $parentdom ? $parentdom->{'emailto'} :
 # domain, don't set it
 foreach my $f (@features, &list_feature_plugins()) {
 	next if ($f eq 'dir' && $config{$f} == 3 && $aliasdom &&
-                 $tmpl->{'aliascopy'});
+                 $tmpl->{'aliascopy'} && !$dom{'aliasmail'});
 	$dom{$f} = &can_use_feature($f) && int($in{$f});
 	}
 
