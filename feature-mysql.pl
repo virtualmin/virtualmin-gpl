@@ -101,7 +101,8 @@ if ($d->{'provision_mysql'}) {
 		local @hosts = map { &to_ipaddress($_) }
 				   &get_mysql_hosts($d, 1);
 		$info->{'remote'} = \@hosts;
-		$info->{'conns'} = &get_mysql_user_connections($d, 0);
+		my $conns = &get_mysql_user_connections($d, 0);
+		$info->{'conns'} = $conns if ($conns);
 		my ($ok, $msg) = &provision_api_call(
 			"provision-mysql-login", $info, 0);
 		if (!$ok) {
@@ -381,7 +382,8 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 			}
 		local @hosts = map { &to_ipaddress($_) } @hosts;
 		$info->{'remote'} = \@hosts;
-		$info->{'conns'} = &get_mysql_user_connections($d, 0);
+		my $conns = &get_mysql_user_connections($d, 0);
+		$info->{'conns'} = $conns if ($conns);
 		my ($ok, $msg) = &provision_api_call(
 			"provision-mysql-login", $info, 0);
 		if (!$ok) {
@@ -1574,7 +1576,8 @@ if ($d->{'provision_mysql'}) {
 	local @hosts = map { &to_ipaddress($_) } &get_mysql_hosts($d, 1);
 	$info->{'remote'} = \@hosts;
 	$info->{'database'} = $dbs;
-	$info->{'conns'} = &get_mysql_user_connections($d, 1);
+	my $conns = &get_mysql_user_connections($d, 1);
+	$info->{'conns'} = $conns if ($conns);
 	my ($ok, $msg) = &provision_api_call(
 		"provision-mysql-login", $info, 0);
 	if (!$ok) {
