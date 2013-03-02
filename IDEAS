@@ -48,3 +48,4 @@
 
  - Calls to complete_http_download should use a new function that knows about
    domains and IPs for redirects
+	- test more scripts, such as sugarcrm

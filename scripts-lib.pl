@@ -1670,8 +1670,8 @@ if ($headers) {
 $post_http_headers = undef;
 $post_http_headers_array = undef;
 local $SIG{'ALRM'} = 'IGNORE';		# Let complete function run forever
-&complete_http_download($h, $out, $err, \&capture_http_headers, 0, $host,
-			$port, $headers);
+&complete_http_connection($d, $h, $out, $err, \&capture_http_headers, 0,
+			  $host, $port, $headers);
 if ($returnheaders && $post_http_headers) {
 	%$returnheaders = %$post_http_headers;
 	}
@@ -1726,8 +1726,127 @@ if (!ref($h)) {
 	if ($error) { $$error = $h; return; }
 	else { &error($h); }
 	}
-&complete_http_download($h, $dest, $error, $cbfunc, $osdn, $host, $port,
-			$headers);
+&complete_http_connection($d, $h, $dest, $error, $cbfunc, $osdn, $host, $port,
+			  $headers);
+}
+
+# complete_http_connection(&domain, &handle, dest, &error, &callback, osdn,
+# 			   [host], [port], &headers)
+# Once an HTTP connection is active, complete the download
+sub complete_http_connection
+{
+local ($d, $h, $dest, $error, $cbfunc, $osdn, $oldhost,
+       $oldport, $headers) = @_;
+
+# Kept local so that callback funcs can access them.
+local (%WebminCore::header, @WebminCore::headers);
+
+# read headers
+alarm(60);
+my $line;
+($line = &read_http_connection($h)) =~ tr/\r\n//d;
+if ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
+	alarm(0);
+	if ($error) { $$error = $line; return; }
+	else { &error("Download failed : $line"); }
+	}
+my $rcode = $1;
+&$cbfunc(1, $rcode >= 300 && $rcode < 400 ? 1 : 0)
+	if ($cbfunc);
+while(1) {
+	$line = &read_http_connection($h);
+	$line =~ tr/\r\n//d;
+	$line =~ /^(\S+):\s+(.*)$/ || last;
+	$WebminCore::header{lc($1)} = $2;
+	push(@WebminCore::headers, [ lc($1), $2 ]);
+	}
+alarm(0);
+if ($main::download_timed_out) {
+	if ($error) { $$error = $main::download_timed_out; return 0; }
+	else { &error($main::download_timed_out); }
+	}
+&$cbfunc(2, $WebminCore::header{'content-length'}) if ($cbfunc);
+if ($rcode >= 300 && $rcode < 400) {
+	# follow the redirect
+	&$cbfunc(5, $WebminCore::header{'location'}) if ($cbfunc);
+	my ($host, $port, $page, $ssl);
+	if ($WebminCore::header{'location'} =~ /^(http|https):\/\/([^:]+):(\d+)(\/.*)?$/) {
+		$ssl = $1 eq 'https' ? 1 : 0;
+		$host = $2;
+		$port = $3;
+		$page = $4 || "/";
+		}
+	elsif ($WebminCore::header{'location'} =~ /^(http|https):\/\/([^:\/]+)(\/.*)?$/) {
+		$ssl = $1 eq 'https' ? 1 : 0;
+		$host = $2;
+		$port = $ssl ? 443 : 80;
+		$page = $3 || "/";
+		}
+	elsif ($WebminCore::header{'location'} =~ /^\// && $oldhost) {
+		# Relative to same server
+		$host = $oldhost;
+		$port = $oldport;
+		$ssl = 0;
+		$page = $WebminCore::header{'location'};
+		}
+	elsif ($WebminCore::header{'location'}) {
+		# Assume relative to same dir .. not handled
+		if ($error) { $$error = "Invalid Location header $WebminCore::header{'location'}"; return; }
+		else { &error("Invalid Location header $WebminCore::header{'location'}"); }
+		}
+	else {
+		if ($error) { $$error = "Missing Location header"; return; }
+		else { &error("Missing Location header"); }
+		}
+	my $params;
+	($page, $params) = split(/\?/, $page);
+	$page =~ s/ /%20/g;
+	$page .= "?".$params if (defined($params));
+
+	# Download from the new URL
+	if ($host eq &get_domain_http_hostname($d) &&
+	    $port eq ($d->{'web_port'} || 80)) {
+		# Same domain, so use Virtualmin's function
+		&get_http_connection($d, $page, $dest, $error, $cbfunc);
+		}
+	else {
+		# Redirect elsewhere
+		&http_download($host, $port, $page, $dest, $error, $cbfunc,
+			       $ssl, undef, undef, undef, $osdn, 0, $headers);
+		}
+	}
+else {
+	# read data
+	if (ref($dest)) {
+		# Append to a variable
+		while(defined($buf = &read_http_connection($h, 1024))) {
+			$$dest .= $buf;
+			&$cbfunc(3, length($$dest)) if ($cbfunc);
+			}
+		}
+	else {
+		# Write to a file
+		my $got = 0;
+		if (!&open_tempfile(PFILE, ">$dest", 1)) {
+			if ($error) { $$error = "Failed to write to $dest : $!"; return; }
+			else { &error("Failed to write to $dest : $!"); }
+			}
+		binmode(PFILE);		# For windows
+		while(defined($buf = &read_http_connection($h, 1024))) {
+			&print_tempfile(PFILE, $buf);
+			$got += length($buf);
+			&$cbfunc(3, $got) if ($cbfunc);
+			}
+		&close_tempfile(PFILE);
+		if ($WebminCore::header{'content-length'} &&
+		    $got != $WebminCore::header{'content-length'}) {
+			if ($error) { $$error = "Download incomplete"; return; }
+			else { &error("Download incomplete"); }
+			}
+		}
+	&$cbfunc(4) if ($cbfunc);
+	}
+&close_http_connection($h);
 }
 
 # make_file_php_writable(&domain, file, [dir-only], [owner-too])
