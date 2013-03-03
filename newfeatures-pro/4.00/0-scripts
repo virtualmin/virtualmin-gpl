@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Django script installer to version 1.5, and ZenPhoto to version 1.4.4.2.
+html=Updated the Django script installer to version 1.5, SugarCRM to 6.5.11, and ZenPhoto to version 1.4.4.2.
 master=1
 reseller=1
 domain=1
