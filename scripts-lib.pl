@@ -1807,7 +1807,8 @@ if ($rcode >= 300 && $rcode < 400) {
 	if ($host eq &get_domain_http_hostname($d) &&
 	    $port eq ($d->{'web_port'} || 80)) {
 		# Same domain, so use Virtualmin's function
-		&get_http_connection($d, $page, $dest, $error, $cbfunc);
+		&get_http_connection($d, $page, $dest, $error, $cbfunc, $ssl,
+				     undef, undef, 0, $osdn, 0, $headers);
 		}
 	else {
 		# Redirect elsewhere
