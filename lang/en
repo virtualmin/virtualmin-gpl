@@ -5747,6 +5747,8 @@ dkim_eselector=Missing or invalid selector - must be a valid DNS record name
 dkim_eselfile=.. selector key file $1 already exists!
 dkim_extra=Additional domains to sign for
 dkim_eextra=Invalid additional domain $1
+dkim_eexclude=Invalid excluded domain $1
+dkim_exclude=Never sign for domains
 
 dkim_title4=Install DKIM
 dkim_installing=Installing the DKIM filter package ..
@@ -5759,6 +5761,7 @@ dkim_pubkey=Extracting public key from private key in $1 ..
 dkim_epubkey=.. public key failed!
 dkim_dns=Adding DKIM records to DNS domain $1 ..
 dkim_ednszone=.. domain not found!
+dkim_ednsexclude=.. domain has been excluded from DKIM
 dkim_dnsadded=.. added successfully
 dkim_dnsalready=.. records already exist
 dkim_config=Setting domain and selector in DKIM filter configuration ..

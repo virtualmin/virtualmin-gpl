@@ -120,6 +120,7 @@ return scalar(@inst) || !&check_dkim();
 # enabled - Set to 1 if postfix is setup to use DKIM
 # selector - Record within the domain for the key
 # extra - Additional domains to enable for
+# exclude - Domains for forcibly disable for
 # keyfile - Private key file
 sub get_dkim_config
 {
@@ -219,6 +220,7 @@ elsif ($config{'mail_system'} == 1) {
 
 # Add extra domains
 $rv{'extra'} = [ split(/\s+/, $config{'dkim_extra'}) ];
+$rv{'exclude'} = [ split(/\s+/, $config{'dkim_exclude'}) ];
 
 # Work out key size
 if ($rv{'keyfile'} && -r $rv{'keyfile'}) {
@@ -300,6 +302,7 @@ my ($dkim, $newkey, $size) = @_;
 # Find domains that we can enable DKIM for (those with mail and DNS)
 &$first_print($text{'dkim_domains'});
 my @doms = grep { $_->{'dns'} && $_->{'mail'} } &list_domains();
+@doms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) < 0 } @doms;
 if (@doms) {
 	&$second_print(&text('dkim_founddomains', scalar(@doms)));
 	}
@@ -415,6 +418,7 @@ if ($dkim_config) {
 
 	# Save list of extra domains
 	$config{'dkim_extra'} = join(" ", @{$dkim->{'extra'}});
+	$config{'dkim_exclude'} = join(" ", @{$dkim->{'exclude'}});
 	&save_module_config();
 	}
 
@@ -467,6 +471,13 @@ elsif (&get_dkim_type() eq 'redhat') {
 
 # Add public key to DNS domains
 &add_dkim_dns_records(\@doms, $dkim);
+
+# Remove from excluded domains
+my @exdoms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) >= 0 }
+		  grep { $_->{'dns'} } &list_domains();
+if (@exdoms) {
+	&remove_dkim_dns_records(\@exdoms, $dkim);
+	}
 
 # Enable filter at boot time
 &$first_print($text{'dkim_boot'});
@@ -683,6 +694,7 @@ elsif ($d && $action eq 'delete') {
 	}
 my %done;
 @doms = grep { !$done{$_->{'id'}}++ } @doms;
+@doms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) < 0 } @doms;
 &set_dkim_domains(\@doms, $dkim);
 
 # Add or remove DNS records
@@ -776,6 +788,10 @@ foreach my $d (@$doms) {
 	my ($recs, $file) = &get_domain_dns_records_and_file($d);
 	if (!$file) {
 		&$second_print($text{'dkim_ednszone'});
+		next;
+		}
+	if (&indexof($d->{'dom'}, @{$dkim->{'exclude'}}) >= 0) {
+		&$second_print($text{'dkim_ednsexclude'});
 		next;
 		}
 	&obtain_lock_dns($d);

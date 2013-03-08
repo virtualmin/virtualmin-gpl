@@ -58,6 +58,11 @@ if (!@extra && (!$dkim || !$dkim->{'enabled'})) {
 print &ui_table_row($text{'dkim_extra'},
 	&ui_textarea("extra", join("\n", @extra), 10, 60));
 
+# Domains to never sign for
+@exclude = @{$dkim->{'exclude'}};
+print &ui_table_row($text{'dkim_exclude'},
+	&ui_textarea("exclude", join("\n", @exclude), 5, 60));
+
 # Public key and DNS record, for offsite DNS domains
 if ($dkim && $dkim->{'enabled'}) {
 	$records = "_domainkey IN TXT \"t=y; o=-;\"\n";

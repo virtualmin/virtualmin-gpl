@@ -19,6 +19,11 @@ foreach $e (@extra) {
 	$e =~ /^[a-z0-9\-\_\.\*]+$/ || &error(&text('dkim_eextra', $e));
 	}
 $dkim->{'extra'} = \@extra;
+@exclude = split(/\s+/, $in{'exclude'});
+foreach $e (@exclude) {
+	$e =~ /^[a-z0-9\-\_\.\*]+$/ || &error(&text('dkim_eexclude', $e));
+	}
+$dkim->{'exclude'} = \@exclude;
 
 if ($in{'enabled'}) {
 	# Turn on DKIM, or change settings

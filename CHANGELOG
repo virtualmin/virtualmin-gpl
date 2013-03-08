@@ -1396,3 +1396,4 @@ Added an option to the Spam and Virus Scanning page to control what happens when
 ---- Changes since 3.99 ----
 Updated the Django script installer to version 1.5, SugarCRM to 6.5.11, Mediawiki to 1.20.3 and 1.19.4, PiWik to 1.11, Drupal to 7.21, and ZenPhoto to version 1.4.4.3.
 If Webmin's BIND module is configured to use the SPF type for Sender Permitted From records, Virtualmin will create both SPF and TXT records for domains.
+Added a field to the DKIM page for entering domains to exclude from signing and DNS record creation.
