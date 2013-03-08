@@ -1394,5 +1394,5 @@ When DNS records are modified in a virtual server, all records are synchronized 
 Changed the default email folder names to Junk, Trash, Drafts, Sent and Virus.
 Added an option to the Spam and Virus Scanning page to control what happens when email is sent to a mailbox that is over quota (bouncing or queueing for later).
 ---- Changes since 3.99 ----
-Updated the Django script installer to version 1.5, SugarCRM to 6.5.11, Mediawiki to 1.20.3 and 1.19.4, and ZenPhoto to version 1.4.4.3.
+Updated the Django script installer to version 1.5, SugarCRM to 6.5.11, Mediawiki to 1.20.3 and 1.19.4, PiWik to 1.11, and ZenPhoto to version 1.4.4.3.
 If Webmin's BIND module is configured to use the SPF type for Sender Permitted From records, Virtualmin will create both SPF and TXT records for domains.
