@@ -3266,10 +3266,11 @@ foreach my $d (&sort_indent_domains($doms)) {
 			if (&can_edit_admins($d)) {
 				@admins = map { "<a href='edit_admin.cgi?".
 						"dom=$d->{'id'}&name=".
-						&urlize($_)."'>$_</a>" }
+						&urlize($_)."'>".
+						&html_escape($_)."</a>" }
 					      @admins;
 				}
-			push(@cols, &html_escape(join(' ', @admins)));
+			push(@cols, join(' ', @admins));
 			}
 		elsif ($c eq "users") {
 			# User count
