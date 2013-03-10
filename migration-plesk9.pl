@@ -799,7 +799,13 @@ foreach my $adom (keys %$aliasdoms) {
 	}
 
 # Migrate sub-domains (as Virtualmin sub-servers)
-local $subdoms = $domain->{'phosting'}->{'subdomains'}->{'subdomain'};
+local $subdoms;
+if ($domain->{'phosting'}->{'sites'}) {
+	$subdoms = $domain->{'phosting'}->{'sites'}->{'site'};
+	}
+else {
+	$subdoms = $domain->{'phosting'}->{'subdomains'}->{'subdomain'};
+	}
 if (!$subdoms) {
 	$subdoms = { };
 	}
@@ -809,7 +815,10 @@ elsif ($subdoms->{'name'}) {
 	}
 foreach my $sdom (keys %$subdoms) {
 	local $subdom = $subdoms->{$sdom};
-	local $sname = $sdom.".".$dom{'dom'};
+	local $sname = $sdom;
+	if ($sname !~ /\.\Q$dom{'dom'}\E$/) {
+		$sname .= ".".$dom{'dom'};
+		}
 	&$first_print("Creating sub-domain $sname ..");
 	if (&domain_name_clash($sname)) {
 		&$second_print(".. the domain $sname already exists");
