@@ -147,8 +147,6 @@ local $ugroup = $group;
 # Extract the tar.gz file containing additional content
 &$first_print("Finding contents files ..");
 local $cids = $domain->{'phosting'}->{'content'}->{'cid'};
-use Data::Dumper;
-print Dumper($cids);
 if (!$cids) {
 	&$second_print(".. no contents data found!");
 #	return ( \%dom );
@@ -868,7 +866,8 @@ foreach my $sdom (keys %$subdoms) {
 		&set_php_wrappers_writable(\%subd, 1);
 		}
 	local $hdir = &public_html_dir(\%subd);
-	local $cids = $subdom->{'content'}->{'cid'};
+	local $cids = $subdom->{'phosting'}->{'content'}->{'cid'} ||
+		      $subdom->{'content'}->{'cid'};
 	local $docroot_files = &extract_plesk9_cid($root, $cids, "docroot");
 	if ($docroot_files) {
 		&$first_print(
