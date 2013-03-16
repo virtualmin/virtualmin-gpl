@@ -5396,6 +5396,8 @@ foreach my $t (@tmpls) {
 # Put back site-specific settings, as those in the backup are unlikely to
 # be correct.
 $config{'iface'} = $oldconfig{'iface'};
+$config{'defip'} = $oldconfig{'defip'};
+$config{'sharedips'} = $oldconfig{'sharedips'};
 $config{'home_quotas'} = $oldconfig{'home_quotas'};
 $config{'mail_quotas'} = $oldconfig{'mail_quotas'};
 $config{'group_quotas'} = $oldconfig{'group_quotas'};
