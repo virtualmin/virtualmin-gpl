@@ -13864,8 +13864,9 @@ foreach my $m (&list_domain_owner_modules()) {
 	else {
 		$minp = &ui_yesno_radio("avail_".$m->[0], int($avail{$m->[0]}));
 		}
-	$field .= &ui_columns_row([ &hlink($m->[1], "config_avail_".$m->[0]),
-				    $minp ]);
+	my @h = ( $m->[1], "config_avail_".$m->[0] );
+	$field .= &ui_columns_row([
+		-r &help_file($module_name, $h[1]) ? &hlink(@h) : $m->[1], $minp ]);
 	}
 $field .= &ui_columns_end();
 print &ui_table_row(undef, $field, 2);
