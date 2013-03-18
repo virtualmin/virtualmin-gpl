@@ -84,7 +84,9 @@ foreach $s (@scheds) {
 # Output the form and table
 print &ui_form_columns_table(
 	"delete_scheds.cgi",
-	[ [ undef, $text{'sched_delete'} ] ],
+	[ [ 'delete', $text{'sched_delete'} ],
+	  [ 'disable', $text{'sched_disable'} ],
+	  [ 'enable', $text{'sched_enable'} ] ],
 	1,
 	[ [ "backup_form.cgi?new=1", $text{'sched_add'} ] ],
 	undef,
