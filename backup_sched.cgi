@@ -19,6 +19,12 @@ else {
 	$sched = { };
 	}
 
+if ($in{'clone'}) {
+	# Redirect to backup form, cloning an existing backup
+	&redirect("backup_form.cgi?clone=$sched->{'id'}&new=1");
+	return;
+	}
+
 # Work out the current user's main domain, if needed
 if ($cbmode == 2) {
 	$d = &get_domain_by_user($base_remote_user);

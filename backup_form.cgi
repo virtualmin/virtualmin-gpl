@@ -36,6 +36,12 @@ elsif ($in{'new'}) {
 	print &ui_hidden("new", 1);
 	$nodownload = 1;
 	$nopurge = 0;
+	if ($in{'clone'}) {
+		($src) = grep { $_->{'id'} == $in{'clone'} } @scheds;
+		$src || &error($text{'backup_egone'});
+		$sched = { %$src };
+		delete($sched->{'id'});
+		}
 	}
 else {
 	# Doing a one-off backup
@@ -306,7 +312,9 @@ if ($in{'sched'} || $in{'new'}) {
 	else {
 		print &ui_form_end([ [ "save", $text{'backup_save'} ],
 			$in{'sched'} == 1 ? ( ) :
-				( [ "delete", $text{'backup_delete'} ] ) ]);
+				( [ "clone", $text{'backup_clone'} ],
+				  undef,
+				  [ "delete", $text{'backup_delete'} ] ) ]);
 		}
 	}
 else {
