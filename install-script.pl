@@ -338,7 +338,9 @@ else {
 &setup_script_requirements($d, $script, $ver, $phpver, $opts) || exit(1);
 
 # Disable PHP timeouts
-$t = &disable_script_php_timeout($d);
+if (&indexof("php", @{$script->{'uses'}}) >= 0) {
+	$t = &disable_script_php_timeout($d);
+	}
 
 # Apply Apache config if needed, for new PHP version or modules or settings
 &run_post_actions();
@@ -371,7 +373,9 @@ else {
 	}
 
 # Re-enable script PHP timeout
-&enable_script_php_timeout($d, $t);
+if (&indexof("php", @{$script->{'uses'}}) >= 0) {
+	&enable_script_php_timeout($d, $t);
+	}
 
 if ($ok) {
 	&$second_print($ok < 0 ? $text{'scripts_epartial'}

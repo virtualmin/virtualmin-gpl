@@ -141,7 +141,9 @@ if (!&setup_script_requirements($d, $script, $ver, $phpver, $opts)) {
 	}
 
 # Disable PHP timeouts
-$t = &disable_script_php_timeout($d);
+if (&indexof("php", @{$script->{'uses'}}) >= 0) {
+	$t = &disable_script_php_timeout($d);
+	}
 
 # Restart Apache now if needed
 &run_post_actions();
@@ -172,7 +174,9 @@ if ($ok > 0 && !$sinfo) {
 &$outdent_print();
 
 # Re-enable script PHP timeout
-&enable_script_php_timeout($d, $t);
+if (&indexof("php", @{$script->{'uses'}}) >= 0) {
+	&enable_script_php_timeout($d, $t);
+	}
 
 if ($ok) {
 	&$second_print($ok < 0 ? $text{'scripts_epartial'}
