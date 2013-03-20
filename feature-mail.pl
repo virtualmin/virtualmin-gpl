@@ -77,7 +77,7 @@ elsif ($config{'mail_system'} == 0) {
 		}
 
 	# Work out if per-domain outgoing IP support is available
-	if ($postfix::postfix_version >= 2.7) {
+	if (&compare_versions($postfix::postfix_version, 2.7) >= 0) {
 		$dependent_maps = &postfix::get_real_value(
 			"sender_dependent_default_transport_maps");
 		@dependent_map_files = &postfix::get_maps_files(

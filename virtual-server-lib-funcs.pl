@@ -12625,7 +12625,7 @@ if ($config{'mail'}) {
 		if ($supports_dependent) {
 			&$second_print($text{'check_dependentok'});
 			}
-		elsif ($postfix::postfix_version < 2.7) {
+		elsif (&compare_versions($postfix::postfix_version, 2.7) < 0) {
 			&$second_print($text{'check_dependentever'});
 			}
 		else {
