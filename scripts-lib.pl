@@ -1906,6 +1906,13 @@ foreach my $sinfo (@others) {
 		}
 	}
 
+# Add sub-dirs used by plugins
+if ($opts->{'dir'} eq &public_html_dir($d)) {
+	if ($d->{'virtualmin-git'}) {
+		$overlap{'git'} = 1;
+		}
+	}
+
 if (!scalar(keys %overlap)) {
 	# Delete all sub-directories
 	local $out = &backquote_logged(
