@@ -5774,7 +5774,8 @@ foreach my $l (@$lref) {
 local $xml;
 local $tmpl = &get_template($d->{'template'});
 if ($tmpl->{'autoconfig'} && $tmpl->{'autoconfig'} ne 'none') {
-	$xml = &substitute_domain_template($tmpl->{'autoconfig'}, $d);
+	$xml = &substitute_domain_template($tmpl->{'autoconfig'}, $d,
+					   undef, 1);
 	$xml =~ s/\t/\n/g;
 	}
 else {

@@ -13991,29 +13991,36 @@ if ($tmpl && $tmpl->{'id'} == 1) {
 return @rv;
 }
 
-# substitute_domain_template(string, &domain, [&extra-hash])
+# substitute_domain_template(string, &domain, [&extra-hash], [html-escape])
 # Does $VAR substitution in a string for a given domain, pulling in
 # PARENT_DOMAIN variables too
 sub substitute_domain_template
 {
-local ($str, $d, $extra) = @_;
+local ($str, $d, $extra, $escape) = @_;
 local %hash = &make_domain_substitions($d, 0);
 if ($extra) {
 	%hash = ( %hash, %$extra );
 	}
-return &substitute_virtualmin_template($str, \%hash);
+return &substitute_virtualmin_template($str, \%hash, $escape);
 }
 
-# substitute_virtualmin_template(string, &hash)
+# substitute_virtualmin_template(string, &hash, [html-escape])
 # Just calls the standard substitute_template function, but with global
 # variables added to the hash
 sub substitute_virtualmin_template
 {
-local ($str, $hash) = @_;
+local ($str, $hash, $escape) = @_;
 local %ghash = %$hash;
 foreach my $v (&get_global_template_variables()) {
 	if ($v->{'enabled'} && !defined($ghash{$v->{'name'}})) {
 		$ghash{$v->{'name'}} = $v->{'value'};
+		}
+	}
+if ($escape) {
+	# Escape XML / HTML special chars, for example when including in
+	# mail client autoconfig template
+	foreach my $v (keys %ghash) {
+		$ghash{$v} = &html_escape($ghash{$v});
 		}
 	}
 return &substitute_template($str, \%ghash);
