@@ -395,9 +395,13 @@ $xtemp = &transname();
 &open_tempfile(XTEMP, ">$xtemp");
 &print_tempfile(XTEMP, "domains\n");
 &print_tempfile(XTEMP, "./domains\n");
-if ($_[2]->{'dirnologs'}) {
+if ($opts->{'dirnologs'}) {
 	&print_tempfile(XTEMP, "logs\n");
 	&print_tempfile(XTEMP, "./logs\n");
+	}
+if ($opts->{'dirnohomes'}) {
+	&print_tempfile(XTEMP, "homes\n");
+	&print_tempfile(XTEMP, "./homes\n");
 	}
 &print_tempfile(XTEMP, "virtualmin-backup\n");
 &print_tempfile(XTEMP, "./virtualmin-backup\n");
@@ -517,9 +521,11 @@ else {
 # Returns HTML for the backup logs option
 sub show_backup_dir
 {
-return sprintf
-	"(<input type=checkbox name=dir_logs value=1 %s> %s)",
-	!$opts{'dirnologs'} ? "checked" : "", $text{'backup_dirlogs'};
+local ($opts) = @_;
+return &ui_checkbox("dir_logs", 1, $text{'backup_dirlogs'},
+		    !$opts->{'dirnologs'})." ".
+       &ui_checkbox("dir_homes", 1, $text{'backup_dirhomes'},
+		    !$opts->{'dirnohomes'});
 }
 
 # parse_backup_dir(&in)
@@ -527,7 +533,25 @@ return sprintf
 sub parse_backup_dir
 {
 local %in = %{$_[0]};
-return { 'dirnologs' => !$in{'dir_logs'} };
+return { 'dirnologs' => !$in{'dir_logs'},
+	 'dirnohomes' => !$in{'dir_homes'} };
+}
+
+# show_restore_dir(&options, &domain)
+# Returns HTML for mail restore option inputs
+sub show_restore_dir
+{
+local ($opts) = @_;
+return &ui_checkbox("dir_homes", 1, $text{'restore_dirhomes'},
+                    !$opts->{'dirnohomes'});
+}
+
+# parse_restore_dir(&in, &domain)
+# Parses the inputs for mail backup options
+sub parse_restore_dir
+{
+local %in = %{$_[0]};
+return { 'dirnohomes' => !$in{'dir_homes'} };
 }
 
 # restore_dir(&domain, file, &options, &all-options, homeformat?, &oldd,
@@ -559,6 +583,10 @@ local $xtemp = &transname();
 &print_tempfile(XTEMP, "./public_html/awstats-icon\n");
 &print_tempfile(XTEMP, ".backup\n");
 &print_tempfile(XTEMP, "./.backup\n");
+if ($opts->{'dirnohomes'}) {
+	&print_tempfile(XTEMP, "homes\n");
+	&print_tempfile(XTEMP, "./homes\n");
+	}
 &close_tempfile(XTEMP);
 
 # Check if Apache logs were links before the restore
@@ -638,7 +666,7 @@ else {
 		# in which case ~/homes is set too
 		&$first_print($text{'restore_dirchowning'});
 		&set_home_ownership($d);
-		if ($asd) {
+		if ($asd && !$opts->{'dirnohomes'}) {
 			&set_mailbox_homes_ownership($d);
 			}
 		&$second_print($text{'setup_done'});
