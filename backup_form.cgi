@@ -119,12 +119,19 @@ foreach $f (&get_available_backup_features()) {
 		$text{'backup_feature_'.$f} || $text{'feature_'.$f},
 		&indexof($f, @schedfeats) >= 0)."\n";
 	local $ofunc = "show_backup_$f";
-	if (defined(&$ofunc)) {
-		local %opts = map { split(/=/, $_) }
-				 split(/,/, $sched->{'backup_opts_'.$f});
-		$ftable .= &$ofunc(\%opts);
+	local %opts = map { split(/=/, $_) }
+			 split(/,/, $sched->{'backup_opts_'.$f});
+	local $ohtml;
+	if (defined(&$ofunc) && ($ohtml = &$ofunc(\%opts)) && $ohtml) {
+		$ftable .= "<table><tr><td>\n";
+		$ftable .= ("&nbsp;" x 5);
+		$ftable .= "</td> <td>\n";
+		$ftable .= $ohtml;
+		$ftable .= "</td></tr></table>\n";
 		}
-	$ftable .= "<br>\n";
+	else {
+		$ftable .= "<br>\n";
+		}
 	}
 foreach $f (&list_backup_plugins()) {
 	$ftable .= &ui_checkbox("feature", $f,
