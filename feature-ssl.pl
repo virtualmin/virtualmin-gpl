@@ -524,8 +524,7 @@ if ($key && !-r $key) {
 	}
 
 # Make sure this domain or www.domain matches cert
-if (!&check_domain_certificate($d->{'dom'}, $d) &&
-    !&check_domain_certificate("www.".$d->{'dom'}, $d)) {
+if (!&check_domain_certificate($d->{'dom'}, $d)) {
 	return &text('validate_essldom',
 		     "<tt>".$d->{'dom'}."</tt>",
 		     "<tt>"."www.".$d->{'dom'}."</tt>",
@@ -550,8 +549,7 @@ foreach my $v (&apache::find_directive_struct("VirtualHost",
 	}
 if ($firstcert && !$config{'sni_support'}) {
 	local $info = &cert_file_info($firstcert, $d);
-	if (!&check_domain_certificate($d->{'dom'}, $info) &&
-	    !&check_domain_certificate("www.".$d->{'dom'}, $info)) {
+	if (!&check_domain_certificate($d->{'dom'}, $info)) {
 		return &text('validate_esslfirst',
 			     "<tt>".$d->{'dom'}."</tt>",
 			     "<tt>"."www.".$d->{'dom'}."</tt>",
@@ -1188,30 +1186,32 @@ sub check_domain_certificate
 {
 local ($dname, $d_or_info) = @_;
 local $info = $d_or_info->{'dom'} ? &cert_info($d_or_info) : $d_or_info;
-if (lc($info->{'cn'}) eq lc($dname)) {
-	# Exact match
-	return 1;
-	}
-elsif ($info->{'cn'} =~ /^\*\.(\S+)$/ &&
-       (lc($dname) eq lc($1) || $dname =~ /\.\Q$1\E$/i)) {
-	# Matches wildcard
-	return 1;
-	}
-elsif ($info->{'cn'} eq '*') {
-	# Cert is for * , which matches everything
-	return 1;
-	}
-else {
-	# Check for subjectAltNames match (as seen in UCC certs)
-	foreach my $a (@{$info->{'alt'}}) {
-		if (lc($a) eq $dname ||
-		    $a =~ /^\*\.(\S+)$/ &&
-		    (lc($dname) eq lc($1) || $dname =~ /\.\Q$1\E$/i)) {
-			return 1;
+foreach my $check ($dname, "www.".$dname) {
+	if (lc($info->{'cn'}) eq lc($check)) {
+		# Exact match
+		return 1;
+		}
+	elsif ($info->{'cn'} =~ /^\*\.(\S+)$/ &&
+	       (lc($check) eq lc($1) || $check =~ /\.\Q$1\E$/i)) {
+		# Matches wildcard
+		return 1;
+		}
+	elsif ($info->{'cn'} eq '*') {
+		# Cert is for * , which matches everything
+		return 1;
+		}
+	else {
+		# Check for subjectAltNames match (as seen in UCC certs)
+		foreach my $a (@{$info->{'alt'}}) {
+			if (lc($a) eq $check ||
+			    $a =~ /^\*\.(\S+)$/ &&
+			    (lc($check) eq lc($1) || $check =~ /\.\Q$1\E$/i)) {
+				return 1;
+				}
 			}
 		}
-	return 0;
 	}
+return 0;
 }
 
 # list_domain_certificate(&domain|&cert-info)
