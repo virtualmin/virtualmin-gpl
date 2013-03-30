@@ -78,6 +78,7 @@ elsif ($dir !~ /^\//) {
 &obtain_lock_web($d);
 &set_all_null_print();
 &save_domain_php_directory($d, $dir, $version);
+&save_domain_php_mode($d, $mode);
 &release_lock_web($d);
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV, $d);

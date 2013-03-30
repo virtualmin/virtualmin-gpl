@@ -348,6 +348,10 @@ foreach $d (@doms) {
 	# Update PHP version
 	if ($version && !$d->{'alias'}) {
 		&save_domain_php_directory($d,  &public_html_dir($d), $version);
+		my $dommode = $mode || &get_domain_php_mode($d);
+		if ($dommode ne "mod_php") {
+			&save_domain_php_mode($d, $dommode);
+			}
 		}
 
 	# Update Ruby mode
