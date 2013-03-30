@@ -41,6 +41,10 @@ else {
 		}
 	}
 &release_lock_web($d);
+$mode = &get_domain_php_mode($d);
+if ($mode ne "mod_php") {
+	&save_domain_php_mode($d, $mode);
+	}
 &run_post_actions();
 &webmin_log("phpver", "domain", $d->{'dom'});
 &domain_redirect($d);
