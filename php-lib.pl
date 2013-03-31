@@ -1103,7 +1103,9 @@ foreach my $i ("/opt/rh/php$nodotv/root/etc/php.ini",
 				  : ("/etc/php$ver/cgi/php.ini",
 				     "/etc/php$nodotv/cgi/php.ini"),
 	       "/opt/csw/php$ver/lib/php.ini",
-	       "/usr/local/lib/php.ini") {
+	       "/usr/local/lib/php.ini",
+	       "/usr/local/etc/php.ini",
+	       "/usr/local/etc/php.ini-production") {
 	return $i if (-r $i);
 	}
 return undef;
