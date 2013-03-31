@@ -998,7 +998,12 @@ foreach my $m (@mods) {
 	local $nodotphpver = $phpver;
 	$nodotphpver =~ s/\.//;
 	if ($software::update_system eq "csw") {
+		# On Solaris, packages are named like php52_mysql
 		@poss = ( "php".$nodotphpver."_".$m );
+		}
+	elsif ($software::update_system eq "ports") {
+		# On FreeBSD, names are like php52-mysql
+		@poss = ( "php".$nodotphpver."-".$m );
 		}
 	else {
 		@poss = ( "php".$nodotphpver."-".$m, "php-".$m );
