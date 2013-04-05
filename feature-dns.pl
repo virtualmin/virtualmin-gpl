@@ -727,7 +727,8 @@ if ($_[0]->{'mail'} && !$_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 	if (!$mx) {
 		&$first_print($text{'save_dns4'});
 		local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
-		&create_mx_records($file, $_[0], $ip);
+		local $ip6 = $_[0]->{'ip6'};
+		&create_mx_records($file, $_[0], $ip, $ip6);
 		&$second_print($text{'setup_done'});
 		$rv++;
 		}
@@ -742,6 +743,7 @@ elsif (!$_[0]->{'mail'} && $_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 		return 0;
 		}
 	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
+	local $ip6 = $_[0]->{'ip6'};
 	local %ids = map { $_, 1 }
 		split(/\s+/, $_[0]->{'mx_servers'});
 	local @slaves = grep { $ids{$_->{'id'}} } &list_mx_servers();
@@ -752,6 +754,12 @@ elsif (!$_[0]->{'mail'} && $_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 		    $r->{'name'} eq "mail.".$_[0]->{'dom'}."." &&
 		    $r->{'values'}->[0] eq $ip) {
 			# mail.domain A record, pointing to our IP
+			push(@mx, $r);
+			}
+		elsif ($r->{'type'} eq 'AAAA' &&
+		       $r->{'name'} eq "mail.".$_[0]->{'dom'}."." &&
+		       $r->{'values'}->[0] eq $ip6) {
+			# mail.domain AAAA record, pointing to our IP
 			push(@mx, $r);
 			}
 		elsif ($r->{'type'} eq 'MX' &&
@@ -912,14 +920,18 @@ else {
 	}
 }
 
-# create_mx_records(file, &domain, ip)
+# create_mx_records(file, &domain, ip, ip6)
 # Adds MX records to a DNS domain
 sub create_mx_records
 {
-local ($file, $d, $ip) = @_;
+local ($file, $d, $ip, $ip6) = @_;
 local $withdot = $d->{'dom'}.".";
 &bind8::create_record($file, "mail.$withdot", undef,
 		      "IN", "A", $ip);
+if ($d->{'virt6'} && $ip6) {
+	&bind8::create_record($file, "mail.$withdot", undef,
+			      "IN", "AAAA", $ip6);
+	}
 &bind8::create_record($file, $withdot, undef,
 		      "IN", "MX", "5 mail.$withdot");
 
@@ -1087,9 +1099,10 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		&add_webmail_dns_records_to_file($d, $tmpl, $file, \%already);
 		}
 
-	# For mail domains, add MX to this server
+	# For mail domains, add MX to this server. Any IPv6 AAAA record is
+	# cloned later
 	if ($d->{'mail'}) {
-		&create_mx_records($file, $d, $ip);
+		&create_mx_records($file, $d, $ip, undef);
 		}
 
 	# Add SPF record for domain, if defined and if it's not a sub-domain
