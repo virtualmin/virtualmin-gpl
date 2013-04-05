@@ -1405,6 +1405,15 @@ if (!$d->{'provision_dns'} && $file) {
 	return &text('validate_ednsfile2', "<tt>$absfile</tt>")
 		if (!-r $absfile);
 	}
+if (!$d->{'provision_dns'}) {
+	# Make sure it is a master
+	local $zone = &get_bind_zone($d->{'dom'});
+	return &text('validate_edns', "<tt>$d->{'dom'}</tt>") if (!$zone);
+	local $type = &bind8::find_value("type", $zone->{'members'});
+	return &text('validate_ednsnotype', "<tt>$d->{'dom'}</tt>") if (!$type);
+	return &text('validate_ednstype', "<tt>$d->{'dom'}</tt>",
+	     "<tt>$type</tt>", "<tt>master</tt>") if ($type ne "master");
+	}
 
 # Check for critical records, and that www.$dom and $dom resolve to the
 # expected IP address (if we have a website)
