@@ -63,6 +63,11 @@ if ($_[0]->{'alias'} && $tmpl->{'web_alias'} == 1) {
 		&flush_file_lines($pvirt->{'file'});
 		}
 	$_[0]->{'alias_mode'} = 1;
+
+	# Redirect webmail and admin in the alias to Usermin and Webmin
+	if (&has_webmail_rewrite($_[0])) {
+		&add_webmail_redirect_directives($_[0], $tmpl);
+		}
 	}
 else {
 	# Add the actual <VirtualHost>
@@ -302,6 +307,7 @@ if ($_[0]->{'alias_mode'}) {
 	&$first_print($text{'delete_apachealias'});
 	local $alias = &get_domain($_[0]->{'alias'});
 	&obtain_lock_web($alias);
+	&remove_webmail_redirect_directives($_[0]);
 	local @ports = ( $alias->{'web_port'} );
 	push(@ports, $alias->{'web_sslport'}) if ($alias->{'ssl'});
 	foreach my $p (@ports) {
@@ -2966,8 +2972,15 @@ local @rrule = &apache::find_directive("RewriteRule", $vconf);
 local @sa = &apache::find_directive("ServerAlias", $vconf);
 
 # Filter out redirect rules
-@rcond = grep { !/^\%{HTTP_HOST}/ } @rcond;
-@rrule = grep { !/^\^\(\.\*\)\s+(http|https):/ } @rrule;
+for(my $i=0; $i<@rcond; $i++) {
+	if ($rcond[$i] =~ /^\%{HTTP_HOST}\s+=(webmail|admin)\.$d->{'dom'}/) {
+		splice(@rcond, $i, 1);
+		if ($rrule[$i] =~ /^\^\(\.\*\)\s+(http|https):/) {
+			splice(@rrule, $i, 1);
+			}
+		$i--;
+		}
+	}
 &apache::save_directive("RewriteCond", \@rcond, $vconf, $conf);
 &apache::save_directive("RewriteRule", \@rrule, $vconf, $conf);
 
