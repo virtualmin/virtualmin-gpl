@@ -59,26 +59,7 @@ if (@logs) {
 			 'name' => \@logs };
 	if ($tmpl->{'logrotate'} eq 'none') {
 		# Use automatic configurtation
-		local $p = &domain_has_website($_[0]);
-		local $script;
-		if ($p eq 'web') {
-			# Get restart command from Apache
-			local $apachectl = $apache::config{'apachectl_path'} ||
-					   &has_command("apachectl") ||
-					   &has_command("apache2ctl") ||
-					   "apachectl";
-			local $apply_cmd = $apache::config{'apply_cmd'};
-			$apply_cmd = undef if ($apply_cmd eq 'restart');
-			$script = $apache::config{'graceful_cmd'} ||
-				  $apply_cmd ||
-				  "$apachectl graceful";
-			$script .= " ; sleep 5";
-			}
-		else {
-			# Ask plugin
-			$script = &plugin_call($p,
-				"feature_restart_web_command", $_[0]);
-			}
+		local $script = &get_postrotate_script($_[0]);
 		$lconf->{'members'} = [
 				{ 'name' => 'rotate',
 				  'value' => $config{'logrotate_num'} || 5 },
@@ -343,13 +324,22 @@ if ($lconf) {
 	splice(@$dstlref, $lconf->{'line'}+1,
 	       $lconf->{'eline'}-$lconf->{'line'}-1,
 	       @$srclref[1 .. @$srclref-2]);
+	my @range = ($lconf->{'line'} .. $lconf->{'line'}+scalar(@$srclref)-1);
 	if ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
 		# Fix up any references to old home dir
-		local $i;
-		foreach $i ($lconf->{'line'} .. $lconf->{'line'}+scalar(@$srclref)-1) {
+		foreach my $i (@range) {
 			$dstlref->[$i] =~ s/(^|\s)$_[5]->{'home'}/$1$_[0]->{'home'}/g;
 			}
 		}
+
+	# Replace the old postrotate block with the config from this system
+	foreach my $i (@range) {
+		if ($dstlref->[$i] =~ /^\s*postrotate/) {
+			$dstlref->[$i+1] = "\t".&get_postrotate_script($_[0]);
+			last;
+			}
+		}
+
 	&flush_file_lines($lconf->{'file'});
 	undef($logrotate::get_config_parent_cache);
 	undef($logrotate::get_config_cache);
@@ -514,6 +504,33 @@ if ($main::got_lock_logrotate == 1) {
 	}
 $main::got_lock_logrotate-- if ($main::got_lock_logrotate);
 &release_lock_anything();
+}
+
+# get_postrotate_script(&domain)
+# Returns the script (as a string) for running after rotation
+sub get_postrotate_script
+{
+local ($d) = @_;
+local $p = &domain_has_website($d);
+local $script;
+if ($p eq 'web') {
+	# Get restart command from Apache
+	local $apachectl = $apache::config{'apachectl_path'} ||
+			   &has_command("apachectl") ||
+			   &has_command("apache2ctl") ||
+			   "apachectl";
+	local $apply_cmd = $apache::config{'apply_cmd'};
+	$apply_cmd = undef if ($apply_cmd eq 'restart');
+	$script = $apache::config{'graceful_cmd'} ||
+		  $apply_cmd ||
+		  "$apachectl graceful";
+	$script .= " ; sleep 5";
+	}
+else {
+	# Ask plugin
+	$script = &plugin_call($p, "feature_restart_web_command", $d);
+	}
+return $script;
 }
 
 $done_feature_script{'logrotate'} = 1;
