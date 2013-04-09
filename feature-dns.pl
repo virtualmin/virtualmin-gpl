@@ -1418,7 +1418,7 @@ if (!$d->{'provision_dns'} && $file) {
 	return &text('validate_ednsfile2', "<tt>$absfile</tt>")
 		if (!-r $absfile);
 	}
-if (!$d->{'provision_dns'}) {
+if (!$d->{'provision_dns'} && !$d->{'dns_submode'}) {
 	# Make sure it is a master
 	local $zone = &get_bind_zone($d->{'dom'});
 	return &text('validate_edns', "<tt>$d->{'dom'}</tt>") if (!$zone);
