@@ -303,6 +303,10 @@ foreach my $desturl (@$desturls) {
 			}
 		}
 	elsif ($mode == 2) {
+		# Extract destination directory and filename
+		$path =~ /^(.*)\/([^\/]+)\/?$/;
+		local ($pathdir, $pathfile) = ($1, $2);
+
 		# Try a dummy SCP
 		local $scperr;
 		local $qserver = &check_ip6address($server) ? "[$server]"
@@ -318,6 +322,18 @@ foreach my $desturl (@$desturls) {
 			# Copy to /tmp failed .. try current dir instead
 			$scperr = undef;
 			$testfile = "virtualmin-copy-test.$testuser";
+			$r = ($user ? "$user\@" : "").$qserver.":".$testfile;
+			&scp_copy($temp, $r, $pass, \$scperr, $port);
+			}
+		if ($scperr) {
+			# Copy to ~ failed .. try target dir instead
+			$scperr = undef;
+			if ($dirfmt) {
+				$testfile = "$path/virtualmin-copy-test.$testuser";
+				}
+			else {
+				$testfile = "$pathdir/virtualmin-copy-test.$testuser";
+				}
 			$r = ($user ? "$user\@" : "").$qserver.":".$testfile;
 			&scp_copy($temp, $r, $pass, \$scperr, $port);
 			}
@@ -338,8 +354,6 @@ foreach my $desturl (@$desturls) {
 		if ($dirfmt && $path ne "/") {
 			# Also create the destination directory now, by running
 			# mkdir via ssh or scping an empty dir
-			$path =~ /^(.*)\/([^\/]+)\/?$/;
-			local ($pathdir, $pathfile) = ($1, $2);
 
 			# ssh mkdir first
 			local $mkcmd = $sshcmd." 'mkdir -p $path'";
