@@ -49,6 +49,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--version") {
 		$ver = shift(@ARGV);
 		}
+	elsif ($a eq "--path") {
+		$path = shift(@ARGV);
+		}
 	elsif ($a eq "--id") {
 		$id = shift(@ARGV);
 		}
@@ -76,6 +79,9 @@ else {
 	@matches = grep { $_->{'name'} eq $sname } @scripts;
 	if ($ver) {
 		@matches = grep { $_->{'version'} eq $ver } @matches;
+		}
+	if ($path) {
+		@matches = grep { $_->{'opts'}->{'path'} eq $path } @matches;
 		}
 	@matches || &usage("No script install for $sname was found for this virtual server");
 	@matches == 1 || &usage("More than one script install for $sname was found for this virtual server. Use the --id option to specify the exact install, or --version to select a version");
