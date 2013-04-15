@@ -20,7 +20,10 @@ foreach $d (@doms) {
 	else {
 		$err = &disable_email_autoconfig($d);
 		}
-	&$second_print(&text('autoconfig_failed', &show_domain_name($d), $err));
+	if ($err) {
+		&$second_print(&text('autoconfig_failed',
+				     &show_domain_name($d), $err));
+		}
 	}
 &$second_print($text{'setup_done'});
 
