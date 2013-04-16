@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Django script installer to version 1.5.1, SugarCRM to 6.5.12, Mediawiki to 1.20.3 and 1.19.4, PiWik to 1.11.1, Drupal to 7.22, phpScheduleIt to 2.4.1, Moodle to 2.4.3, Typo3 to 4.6.18, phpScheduleIt to 2.4.1, FengOffice to 2.2.4.1, Dolibarr to 3.3.1, Gallery to 3.0.6, TikiWiki to 10.2, CMS Made Simple to 1.11.5, RoundCube to 0.8.6, Nucleus to 3.65, phpMyAdmin to 3.5.8, Mantis to 1.2.15, and ZenPhoto to version 1.4.4.4.
+html=Updated the Django script installer to version 1.5.1, SugarCRM to 6.5.12, Mediawiki to 1.20.4 and 1.19.5, PiWik to 1.11.1, Drupal to 7.22, phpScheduleIt to 2.4.1, Moodle to 2.4.3, Typo3 to 4.6.18, phpScheduleIt to 2.4.1, FengOffice to 2.2.4.1, Dolibarr to 3.3.1, Gallery to 3.0.6, TikiWiki to 10.2, CMS Made Simple to 1.11.5, RoundCube to 0.8.6, Nucleus to 3.65, phpMyAdmin to 3.5.8, Mantis to 1.2.15, and ZenPhoto to version 1.4.4.4.
 master=1
 reseller=1
 domain=1
