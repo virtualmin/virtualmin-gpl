@@ -41,7 +41,6 @@
 	- backup/restore
 
  - Validate FreeBSD 9.x support
-	- KVM instance?
-	- Validate all Webmin modules
-	- SMART module
 	- See email from Richard A Secor
+	- Verify PHP package installation in Virtualmin
+	- Check that DKIM works

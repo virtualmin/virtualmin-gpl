@@ -30,7 +30,7 @@ elsif ($name eq "tx" || $name eq "rx") {
 elsif ($name eq "aliases" || $name eq "doms" || $name eq "users") {
 	return { 'type' => 'virt' };
 	}
-elsif ($name =~ /^(mem|hostmem|swap)(used|free|total)$/) {
+elsif ($name =~ /^(mem|hostmem|swap)(used|free|total|cached)$/) {
 	return { 'type' => 'system', 'units' => 'MB',
 		 'scale' => 1024*1024 };
 	}
