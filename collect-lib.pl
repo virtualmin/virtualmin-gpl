@@ -351,6 +351,10 @@ if ($info->{'mem'}) {
 		push(@stats, [ "swaptotal",
 			       $info->{'mem'}->[2]*1024 ]);
 		}
+	if ($info->{'mem'}->[4] ne '') {
+		push(@stats, [ "memcached",
+			       $info->{'mem'}->[4]*1024 ]);
+		}
 	}
 if ($info->{'disk_total'}) {
 	push(@stats, [ "diskused",
