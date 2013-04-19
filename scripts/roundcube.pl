@@ -3,7 +3,7 @@
 		      'users', 'messages', 'contactgroupmembers',
 		      'contactgroups', 'contacts',
 		      'cache_index', 'cache_messages', 'cache_thread',
-		      'dictionary', 'searches', 'users' );
+		      'dictionary', 'searches', 'system', 'users' );
 
 # script_roundcube_desc()
 sub script_roundcube_desc
@@ -24,7 +24,7 @@ return "RoundCube Webmail is a browser-based multilingual IMAP client with an ap
 # script_roundcube_versions()
 sub script_roundcube_versions
 {
-return ( "0.8.6" );
+return ( "0.9.0", "0.8.6" );
 }
 
 sub script_roundcube_category
@@ -47,29 +47,26 @@ sub script_roundcube_php_vers
 return ( 5 );
 }
 
+sub script_roundcube_depends
+{
+local ($d, $ver, $sinfo, $phpver) = @_;
+local @rv;
+my $wantver = $ver >= 0.9 ? 5.3 : 5.2;
+local $phpv = &get_php_version($phpver || 5, $d);
+if (!$phpv) {
+	push(@rv, "Could not work out exact PHP version");
+	}
+elsif ($phpv < $wantver) {
+	push(@rv, "Roundcube $ver requires PHP version $wantver or later");
+	}
+return @rv;
+}
+
 # script_roundcube_php_vars(&domain)
 # Returns an array of extra PHP variables needed for this script
 sub script_roundcube_php_vars
 {
 return ( [ 'suhosin.session.encrypt', 'Off' ] );
-}
-
-# script_roundcube_depends(&domain, version)
-sub script_roundcube_depends
-{
-local ($d, $ver, $sinfo, $phpver) = @_;
-local @rv;
-
-# Check for PHP 5.2+
-local $phpv = &get_php_version($phpver || 5, $d);
-if (!$phpv) {
-	push(@rv, "Could not work out exact PHP version");
-	}
-elsif ($phpv < 5.2) {
-	push(@rv, "Roundcube requires PHP version 5.2 or later");
-	}
-
-return @rv;
 }
 
 # script_roundcube_params(&domain, version, &upgrade-info)
@@ -324,6 +321,7 @@ return (1, $dbname ? "RoundCube directory and tables deleted."
 sub script_roundcube_check_latest
 {
 local ($ver) = @_;
+return undef if ($ver < 0.9);
 local @vers = &osdn_package_versions("roundcubemail", "roundcubemail-([a-z0-9\\.\\-]+)\\.tar\\.gz");
 @vers = grep { !/beta/ && !/-dep$/ && !/alpha/ && !/-rc/ } @vers;
 return "Failed to find versions" if (!@vers);
