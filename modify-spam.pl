@@ -13,7 +13,7 @@ The following parameters control what happens to messages identified as spam :
 
 C<--spam-delete> Delete all spam mail.
 C<--spam-deliver> Deliver to user's mailbox normally.
-C<--spam-normal> Write to user's C<~/mail/spam> file in mbox format.
+C<--spam-mailfile> Write to user's C<~/mail/spam> file in mbox format.
 C<--spam-maildir> Write to user's C<~/Maildir/.spam> file in Maildir format.
 C<--spam-file> Write to the file following this parameter, which must be relative to the user's home directory.
 C<--spam-email> Forward to the email address following this parameter.
@@ -83,7 +83,7 @@ while(@ARGV > 0) {
 	elsif ($a =~ /^--(spam)-deliver$/) {
 		$mode{$1} = 5;
 		}
-	elsif ($a =~ /^--(spam|virus)-normal$/) {
+	elsif ($a =~ /^--(spam|virus)-(normal|mailfile)$/) {
 		$m = $1;
 		$mode{$m} = 4;
 		if (@ARGV && $ARGV[0] !~ /^-/) {
@@ -270,13 +270,13 @@ print "Changes the spam and virus delivery modes for one or more domains.\n";
 print "\n";
 print "virtualmin modify-spam --domain name | --all-domains\n";
 print "                      [--spam-delete | --spam-deliver |\n";
-print "                       --spam-normal [folder] |\n";
+print "                       --spam-mailfile [folder] |\n";
 print"                        --spam-file file-under-home |\n";
 print "                       --spam-email address | --spam-dest file |\n";
 print "                       --spam-maildir [folder] ]\n";
 print "                      [--spam-delete-level score | --spam-no-delete-level]\n";
 print "                      [--virus-delete |\n";
-print "                       --virus-normal [folder] |\n";
+print "                       --virus-mailfile [folder] |\n";
 print "                       --virus-file file-under-home |\n";
 print "                       --virus-email address | --virus-dest file\n";
 print "                       --virus-maildir [folder] ]\n";
