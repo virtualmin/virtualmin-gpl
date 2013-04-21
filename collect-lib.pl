@@ -68,9 +68,10 @@ if (&foreign_check("proc")) {
 					# to the zone source.
 					next;
 					}
-				if ($donedevice{$m->[0]}++) {
+				if ($donedevice{$m->[0]}++ ||
+				    $donedevice{$m->[1]}++) {
 					# Don't double-count mounts from
-					# the same device
+					# the same device, or of the same dir
 					next;
 					}
 				local ($t, $f) =
