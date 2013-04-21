@@ -55,7 +55,7 @@ if (@logs) {
 		}
 
 	# Add the new section
-	local $lconf = { 'file' => &logrotate::get_add_file(),
+	local $lconf = { 'file' => &logrotate::get_add_file($_[0]->{'dom'}),
 			 'name' => \@logs };
 	if ($tmpl->{'logrotate'} eq 'none') {
 		# Use automatic configurtation
