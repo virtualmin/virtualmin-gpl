@@ -1062,6 +1062,11 @@ foreach my $admin (&list_extra_admins($d)) {
 		}
 	}
 
+if (!@files) {
+	&$second_print($text{'backup_webminnofiles'});
+	return 1;
+	}
+
 # Tar them all up
 local $out = &backquote_command("cd $config_directory && tar cf ".quotemeta($file)." ".join(" ", @files)." 2>&1");
 if ($?) {
