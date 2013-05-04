@@ -19,14 +19,14 @@ return "A browser-based MySQL database management interface.";
 # script_phpmyadmin_versions()
 sub script_phpmyadmin_versions
 {
-return ( "3.5.8.1", "2.11.11.3" );
+return ( "4.0.0", "3.5.8.1", "2.11.11.3" );
 }
 
 sub script_phpmyadmin_version_desc
 {
 local ($ver) = @_;
-return &compare_versions($ver, "3.1") > 0 ? "$ver (Latest)" :
-       &compare_versions($ver, "2.11") > 0 ? "$ver (Old)" :
+return &compare_versions($ver, "4.0") > 0 ? "$ver (Latest)" :
+       &compare_versions($ver, "3.0") > 0 ? "$ver (Old)" :
 					     "$ver (Un-supported)";
 }
 
@@ -323,9 +323,13 @@ return (1, "phpMyAdmin directory deleted.");
 sub script_phpmyadmin_latest
 {
 local ($ver) = @_;
-if (&compare_versions($ver, "3.1") > 0) {
+if (&compare_versions($ver, "4.0") > 0) {
 	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
 		 "phpMyAdmin-([0-9\\.]+)-all-languages\\.zip" );
+	}
+elsif (&compare_versions($ver, "3.0") > 0) {
+	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
+		 "phpMyAdmin-(3\\.[0-9\\.]+)-all-languages\\.zip" );
 	}
 elsif (&compare_versions($ver, "2.11") > 0) {
 	return ( "https://sourceforge.net/projects/phpmyadmin/files/phpMyAdmin/",
