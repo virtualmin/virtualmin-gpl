@@ -805,7 +805,7 @@ foreach my $d (@$doms) {
 		# Add new record
 		&bind8::create_record($file, $selname, undef, 'IN', 'TXT',
 		    &split_long_txt_record(
-			'"v=DKIM1; k=rsa; r=postmaster; t=s; p='.$pubkey.'"'));
+			'"v=DKIM1; k=rsa; t=s; p='.$pubkey.'"'));
 		$changed++;
 		}
 	elsif ($selrec && join("", @{$selrec->{'values'}}) !~ /p=\Q$pubkey\E/) {
