@@ -1400,3 +1400,4 @@ Added a field to the DKIM page for entering domains to exclude from signing and 
 Added buttons to the Scheduled Backups page to enable or disable backups, and a button on the Edit Scheduled Backup page to clone a backup configuration.
 ---- Changes since 4.00 ----
 Updated the ZenPhoto script installer to version 1.4.4.5, Joomla to 3.1.1 and 2.5.11, MediaWiki to 1.20.5 and 1.19.6, phpMyAdmin to 4.0.0, and PHPList to 2.11.9.
+German translation updates, thanks to Raymond Vetter.
