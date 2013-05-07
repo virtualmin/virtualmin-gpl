@@ -348,7 +348,7 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'netmask6', $netmask6,
 	 'dns_ip', !$in{'dns_ip_def'} && &can_dnsip() ? $in{'dns_ip'} :
 		   $virt || $config{'all_namevirtual'} ? undef
-						       : &get_dns_ip(),
+						       : &get_dns_ip($resel),
 	 'virt', $virt,
 	 'virt6', $virt6,
 	 'virtalready', $virtalready,

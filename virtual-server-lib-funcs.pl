@@ -15117,10 +15117,18 @@ foreach my $ad (@aliases) {
 	}
 }
 
-# get_dns_ip()
+# get_dns_ip([reseller])
 # Returns the IP address for use in DNS records, or undef to use the domain's IP
 sub get_dns_ip
 {
+local ($reselname) = @_;
+if ($reselname && defined(&get_reseller)) {
+	# Check if the reseller has an external IP
+	local $resel = &get_reseller($reselname);
+	if ($resel && $resel->{'acl'}->{'defdnsip'}) {
+		return $resel->{'acl'}->{'defdnsip'};
+		}
+	}
 if ($config{'dns_ip'} eq '*') {
 	local $rv = &get_external_ip_address();
 	$rv || &error($text{'newdynip_eext'});

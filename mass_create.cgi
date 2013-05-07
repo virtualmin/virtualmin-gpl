@@ -282,8 +282,8 @@ foreach $line (@lines) {
 		 'name', !$virt,
 		 'ip', $ip,
 		 'netmask', $netmask,
-		 'dns_ip', $virt || $config{'all_namevirtual'} ? undef
-							       : &get_dns_ip(),
+		 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :
+			   &get_dns_ip($resel),
 		 'virt', $virt,
 		 'virtalready', $virtalready,
 		 'source', 'mass_create.cgi',

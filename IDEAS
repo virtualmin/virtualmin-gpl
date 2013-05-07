@@ -44,3 +44,6 @@
 	- See email from Richard A Secor
 	- Verify PHP package installation in Virtualmin
 	- Check that DKIM works
+
+ - Make script form use scriptdir config option
+	- http://virtualmin.com/node/26759

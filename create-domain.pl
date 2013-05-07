@@ -643,7 +643,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'netmask', $netmask,
 	 'dns_ip', defined($dns_ip) ? $dns_ip :
 		   $virt || $config{'all_namevirtual'} ? undef
-						       : &get_dns_ip(),
+						       : &get_dns_ip($resel),
          'virt', $virt,
          'virtalready', $virtalready,
 	 'ip6', $ip6,

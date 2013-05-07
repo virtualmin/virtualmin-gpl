@@ -1987,7 +1987,7 @@ if ($ok) {
 			# as the old setting is unlikely to be correct.
 			$d->{'old_dns_ip'} = $d->{'dns_ip'};
 			$d->{'dns_ip'} = $virt || $config{'all_namevirtual'} ?
-				undef : &get_dns_ip();
+				undef : &get_dns_ip($d->{'reseller'});
 
 			# Change provisioning settings to match this system
 			foreach my $f (&list_provision_features()) {

@@ -267,8 +267,8 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
          'name', !$virt,
          'ip', $ip,
          'netmask', $netmask,
-	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef
-						       : &get_dns_ip(),
+	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :
+		   &get_dns_ip($parent ? $parent->{'id'} : undef),
          'virt', $virt,
          'virtalready', $virtalready,
 	 $parent ? ( 'pass', $parent->{'pass'} )
