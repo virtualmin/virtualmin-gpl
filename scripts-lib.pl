@@ -1203,18 +1203,9 @@ foreach my $m (@mods) {
 		# Work out the package name
 		local $mp = $m;
 		if ($software::config{'package_system'} eq 'rpm') {
-			# Some RPM packages for Perl modules have odd names,
-			# but most are like perl-Foo-Bar
-			if ($mp eq "Template") {
-				$pkg = "perl-Template-Toolkit";
-				}
-			elsif ($mp eq "Date::Format") {
-				$pkg = "perl-TimeDate";
-				}
-			else {
-				$mp =~ s/::/\-/g;
-				$pkg = "perl-$mp";
-				}
+			# We can use RPM's tracking of perl dependencies
+			# to install the exact module
+			$pkg = "perl($mp)";
 			}
 		elsif ($software::config{'package_system'} eq 'debian') {
 			# Most Debian package perl modules are named
