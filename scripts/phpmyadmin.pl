@@ -112,8 +112,7 @@ else {
 				  $_->{'name'}." ($_->{'type'})" ] } @dbs ],
 			5, 1));
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
-			     &ui_opt_textbox("dir", "phpmyadmin", 30,
-					     "At top level"));
+			     &ui_opt_textbox("dir", &substitute_scriptname_template("phpmyadmin", $d), 30, "At top level"));
 	if ($ver >= 3) {
 		$rv .= &ui_table_row("Include all languages?",
 				     &ui_yesno_radio("all_langs", 0));

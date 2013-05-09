@@ -90,8 +90,7 @@ else {
 	$rv .= &ui_table_row("Database for RoundCube preferences",
 		     &ui_database_select("db", undef, \@dbs, $d, "roundcube"));
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
-			     &ui_opt_textbox("dir", "roundcube", 30,
-					     "At top level"));
+			     &ui_opt_textbox("dir", &substitute_scriptname_template("roundcube", $d), 30, "At top level"));
 	}
 return $rv;
 }

@@ -80,8 +80,7 @@ else {
 	$rv .= &ui_table_row("Database for WHMCS tables",
 		     &ui_database_select("db", undef, \@dbs, $d, "whmcs"));
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
-			     &ui_opt_textbox("dir", "whmcs", 30,
-					     "At top level"));
+			     &ui_opt_textbox("dir", &substitute_scriptname_template("whmcs", $d), 30, "At top level"));
 	$rv .= &ui_table_row("WHMCS license key",
 			     &ui_textbox("licensekey", undef, 30));
 	$rv .= &ui_table_row(" ",

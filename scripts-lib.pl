@@ -2775,12 +2775,20 @@ return $str;
 sub substitute_scriptname_template
 {
 local ($name, $d) = @_;
-if ($config{'scriptdir'}) {
+if ($config{'scriptdir'} eq '*') {
+	# Public HTML dir
+	return "";
+	}
+elsif ($config{'scriptdir'}) {
+	# Template for directory
 	local %hash = &make_domain_substitions($d, 0);
 	$hash{'SCRIPTNAME'} = $name;
 	return &substitute_virtualmin_template($config{'scriptdir'}, \%hash);
 	}
-return $name;
+else {
+	# Just the script name
+	return $name;
+	}
 }
 
 # describe_script_status(&sinfo, &script)

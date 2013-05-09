@@ -47,8 +47,7 @@ if ($upgrade) {
 else {
 	# Show editable install options
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
-			     &ui_opt_textbox("dir", "dokuwiki", 30,
-					     "At top level"));
+			     &ui_opt_textbox("dir", &substitute_scriptname_template("dokuwiki", $d), 30, "At top level"));
 	}
 return $rv;
 }

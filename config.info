@@ -182,4 +182,4 @@ api_helper=Path to create API helper command,3,Determine automatically
 fcgid_max=Maximum fcgid execution time,10,-From PHP configuration,*-Don't set,Time in seconds
 secmx_nodns=Add DNS MX records for secondary mail servers?,1,0-Yes,1-No
 mx_validate=Validate MX records for domains with email?,1,0-Yes,1-No
-scriptdir=Template for default script directory,3,Script code
+scriptdir=Template for default script directory,10,-Script default,*-Top level public_html directory,Directory template

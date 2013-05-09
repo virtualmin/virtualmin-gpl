@@ -73,8 +73,7 @@ else {
 		$rv .= &ui_hidden("db_def", 1)."\n";
 		}
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
-			     &ui_opt_textbox("dir", "squirrelmail", 30,
-					     "At top level"));
+			     &ui_opt_textbox("dir", &substitute_scriptname_template("squirrelmail", $d), 30, "At top level"));
 	}
 return $rv;
 }

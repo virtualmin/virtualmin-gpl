@@ -68,8 +68,7 @@ else {
 			[ [ "template1", "&lt;PostgreSQL default&gt;" ],
 			  map { [ $_->{'name'} ] } @dbs ]));
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
-			     &ui_opt_textbox("dir", "phppgadmin", 30,
-					     "At top level"));
+			     &ui_opt_textbox("dir", &substitute_scriptname_template("phppgadmin", $d), 30, "At top level"));
 	}
 return $rv;
 }
