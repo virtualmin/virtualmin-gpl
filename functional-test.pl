@@ -3148,7 +3148,8 @@ $mail_tests = [
 	{ 'command' => $wget_command.'http://autoconfig.'.$test_domain.
 		       '/mail/config-v1.1.xml?emailaddress=foo@'.$test_domain,
 	  'antigrep' => 'clientConfig',
-	  'fail' => 1,
+	  'ignorefail' => 1,
+	  'sleep' => 5,
 	},
 
 	# Cleanup the domain
