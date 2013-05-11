@@ -1574,7 +1574,7 @@ if ($virt) {
 		}
 
 	# Correct system-specific entries in PHP config files
-	if (!$_[0]->{'alias'}) {
+	if (!$_[0]->{'alias'} && $_[5]) {
 		local $sock = &get_php_mysql_socket($_[0]);
 		local @fixes = (
 		  [ "session.save_path", $_[5]->{'home'}, $_[0]->{'home'}, 1 ],
