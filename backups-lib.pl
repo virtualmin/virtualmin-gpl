@@ -2746,7 +2746,8 @@ elsif ($mode == 6) {
 			foreach my $f (@$files) {
 				my $want = 0;
 				my $fname;
-				if ($f =~ /^\Q$pathslash\E([^\/]*)$/) {
+				if ($f =~ /^\Q$pathslash\E([^\/]*)$/ &&
+				    $f !~ /\.\d+$/) {
 					$fname = $1;
 					foreach my $d (@$domnames) {
 						$want++ if ($fname =~
@@ -2775,7 +2776,8 @@ elsif ($mode == 6) {
 			&unlink_file($temp);
                         &make_dir($temp, 0711);
 			foreach my $f (@$files) {
-				if ($f =~ /^\Q$pathslash\E([^\/]*)$/) {
+				if ($f =~ /^\Q$pathslash\E([^\/]*)$/ &&
+				    $f !~ /\.\d+$/) {
 					my $fname = $1;
 					$err = &rs_download_object(
 						$rsh, $server, $f,
