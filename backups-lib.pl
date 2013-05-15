@@ -3724,7 +3724,7 @@ elsif ($mode == 6 && $path =~ /\%/) {
 		next if (!ref($st));
 		local $ctime = int($st->{'X-Timestamp'});
 		if ($f =~ /^$re($|\/)/ && $ctime && $ctime < $cutoff &&
-		    $f !~ /\.(dom|info)$/) {
+		    $f !~ /\.(dom|info)$/ && $f !~ /\.\d+$/) {
 			# Found one to delete
 			local $old = int((time() - $ctime) / (24*60*60));
 			&$first_print(&text('backup_deletingfile',
