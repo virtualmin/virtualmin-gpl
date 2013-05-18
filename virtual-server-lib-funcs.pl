@@ -10293,12 +10293,26 @@ else {
 	local @p = split(/\./, $name);
 	local $prefix;
 	if ($creating) {
+		# First try foo, then foo.com, then foo.com.au
 		for(my $i=0; $i<@p; $i++) {
 			local $testp = join("-", @p[0..$i]);
 			local $pclash = &get_domain_by("prefix", $testp);
 			if (!$pclash) {
 				$prefix = $testp;
 				last;
+				}
+			}
+		# If none of those worked, append a number
+		if (!$prefix) {
+			my $i = 1;
+			while(1) {
+				local $testp = $p[0].$i;
+				local $pclash = &get_domain_by("prefix",$testp);
+				if (!$pclash) {
+					$prefix = $testp;
+					last;
+					}
+				$i++;
 				}
 			}
 		}
