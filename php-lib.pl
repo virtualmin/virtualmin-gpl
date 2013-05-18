@@ -26,11 +26,11 @@ if ($virt) {
 	if ($dir) {
 		push(@actions, &apache::find_directive("Action",
 						       $dir->{'members'}));
-		}
-	foreach my $f (&apache::find_directive("FCGIWrapper",
-						$dir->{'members'})) {
-		if ($f =~ /^\Q$d->{'home'}\E\/fcgi-bin\/php.\.fcgi/) {
-			return 'fcgid';
+		foreach my $f (&apache::find_directive("FCGIWrapper",
+							$dir->{'members'})) {
+			if ($f =~ /^\Q$d->{'home'}\E\/fcgi-bin\/php.\.fcgi/) {
+				return 'fcgid';
+				}
 			}
 		}
 	foreach my $a (@actions) {
