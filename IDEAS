@@ -44,3 +44,11 @@
 	- See email from Richard A Secor
 	- Verify PHP package installation in Virtualmin
 	- Check that DKIM works
+
+ - Amazon glacier support
+	- option to move backups after some period?
+	- page listing buckets to move to glacier
+	- API
+		- include in list-s3-buckets
+		- command to change glacier rules for a bucket
+	- links from GPL version

@@ -224,6 +224,8 @@ index_backuplog=Backup Logs
 index_backuplogdesc=Show logs of all backups that you have permissions to create, made via the Virtualmin UI, command line or on schedule.
 index_bkeys=Backup Encryption Keys
 index_bkeysdesc=List GPG keys used for signing and encrypting Virtualmin backups.
+index_buckets=Amazon S3 Buckets
+index_bucketsdesc=Show S3 buckets used for backups, and allow migration to Glacier to be configured.
 index_dmore=$1 more ..
 index_virtualminconfig=Virtualmin Configuration
 
@@ -6107,5 +6109,16 @@ fixmodphp_title=Fix PHP Permissions
 fixmodphp_ecannot=You are not allowed to fix PHP permissions
 fixmodphp_doing=Updating all virtual servers to prevent use of mod_php when disabled ..
 fixmodphp_done=.. fixed $1 domains
+
+buckets_title=Amazon S3 Buckets
+buckets_ecannot=You are not allowed to manage S3 buckets
+buckets_eaccounts=No scheduled backups to S3 have been created yet, and no default S3 keys have been set.
+buckets_none=No S3 buckets associated with any of your S3 accounts were found.
+buckets_errs=One or more errors occurred listing your S3 buckets : $1
+buckets_name=Bucket name
+buckets_account=S3 account
+buckets_created=Created on
+buckets_location=Location
+buckets_add=Create a new S3 bucket.
 
 __norefs=1

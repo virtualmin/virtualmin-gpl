@@ -3192,6 +3192,12 @@ sub can_backup_commands
 return &master_admin();
 }
 
+# Returns 1 if the current user can configure Amazon S3 buckets
+sub can_backup_buckets
+{
+return &master_admin();
+}
+
 # Returns 1 if the configured backup format supports incremental backups
 sub has_incremental_format
 {
@@ -3320,6 +3326,13 @@ if (&can_backup_keys()) {
 	push(@titles, $text{'index_bkeys'});
 	push(@descs, $text{'index_bkeysdesc'});
 	push(@codes, 'bkeys');
+	}
+if (&can_backup_buckets()) {
+	# Show list of S3 buckets
+	push(@links, "list_buckets.cgi");
+	push(@titles, $text{'index_buckets'});
+	push(@descs, $text{'index_bucketsdesc'});
+	push(@codes, 'buckets');
 	}
 return (\@links, \@titles, \@descs, \@codes);
 }
@@ -3992,6 +4005,27 @@ if ($owner ne $oldowner) {
 			}
 		}
 	}
+}
+
+# list_all_s3_accounts()
+# Returns a list of S3 accounts from backups, as tuples
+sub list_all_s3_accounts
+{
+local @rv;
+if (&master_admin() && $config{'s3_akey'} && $config{'s3_skey'}) {
+	push(@rv, [ $config{'s3_akey'}, $config{'s3_skey'} ]);
+	}
+foreach my $sched (grep { &can_backup_sched($_) } &list_scheduled_backups()) {
+	local @dests = &get_scheduled_backup_dests($sched);
+	foreach my $dest (@dests) {
+		local ($mode, $user, $pass, $server, $path, $port) =
+			&parse_backup_url($dest);
+		if ($mode == 3) {
+			push(@rv, [ $user, $pass ]);
+			}
+		}
+	}
+return @rv;
 }
 
 1;
