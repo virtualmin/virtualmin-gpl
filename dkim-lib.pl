@@ -889,21 +889,5 @@ my $cmd = "cd $sendmail::config{'sendmail_features'}/m4 ; ".
 &unlock_file($sendmail::config{'sendmail_cf'});
 }
 
-# split_long_txt_record(string)
-# Split a TXT record at 80 char boundaries
-sub split_long_txt_record
-{
-local ($str) = @_;
-$str =~ s/^"//;
-$str =~ s/"$//;
-local @rv;
-while($str) {
-	local $first = substr($str, 0, 80);
-	$str = substr($str, 80);
-	push(@rv, $first);
-	}
-return "( ".join("\n\t", map { '"'.$_.'"' } @rv)." )";
-}
-
 1;
 

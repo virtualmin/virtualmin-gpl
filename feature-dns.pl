@@ -920,6 +920,22 @@ else {
 	}
 }
 
+# split_long_txt_record(string)
+# Split a TXT record at 80 char boundaries
+sub split_long_txt_record
+{
+local ($str) = @_;
+$str =~ s/^"//;
+$str =~ s/"$//;
+local @rv;
+while($str) {
+	local $first = substr($str, 0, 80);
+	$str = substr($str, 80);
+	push(@rv, $first);
+	}
+return "( ".join("\n\t", map { '"'.$_.'"' } @rv)." )";
+}
+
 # create_mx_records(file, &domain, ip, ip6)
 # Adds MX records to a DNS domain
 sub create_mx_records
@@ -1198,8 +1214,16 @@ RECORD: foreach my $r (@$recs) {
 			$v =~ s/\Q$oldip\E$/$ip/i;
 			}
 		}
+	my $str;
+	my $joined = join("", @{$r->{'values'}});
+	if ($r->{'type'} eq 'TXT' && length($joined) > 80) {
+		$str = &split_long_txt_record($joined);
+		}
+	else {
+		$str = &join_record_values($r);
+		}
 	&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
-			      'IN', $r->{'type'}, &join_record_values($r));
+			      'IN', $r->{'type'}, $str);
 	}
 }
 
