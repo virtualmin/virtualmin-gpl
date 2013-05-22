@@ -733,5 +733,14 @@ $rheader{'etag'} =~ s/^"(.*)"$/$1/;
 return (1, $rheader{'etag'});
 }
 
+# s3_list_locations(access-key, secret-key)
+# Returns a list of all possible S3 locations for buckets
+sub s3_list_locations
+{
+local ($akey, $skey) = @_;
+return ( "us-west-1", "us-west-2", "EU", "ap-southeast-1", "ap-southeast-2",
+	 "ap-northeast-1", "sa-east-1" );
+}
+
 1;
 

@@ -6120,5 +6120,23 @@ buckets_account=S3 account
 buckets_created=Created on
 buckets_location=Location
 buckets_add=Create a new S3 bucket.
+buckets_return=list of buckets
+
+bucket_title1=Create S3 Bucket
+bucket_title2=Edit S3 Bucket
+bucket_eagone=Account does not exist!
+bucket_elist=Failed to list buckets : $1
+bucket_egone=Bucket no longer exists!
+bucket_header=Amazon S3 bucket details
+bucket_account=S3 account key
+bucket_name=Bucket name
+bucket_owner=Owned by
+bucket_location=Storage location
+bucket_type=Grant type
+bucket_grantee=Grant to
+bucket_perm=Permission
+bucket_user=User
+bucket_group=Group
+bucket_grant=Granted permissions
 
 __norefs=1
