@@ -3278,6 +3278,7 @@ databases_tabimport=Import Database
 databases_desc1=This table lists any existing databases associated with this virtual server. Click on the Manage links to see their tables, or on a database name to see further information.
 databases_desc2=This form can be used to change the names of the database logins for this virtual server. By default they are kept the same as the server's administration login.
 databases_desc3=This form can be used to change the primary database passwords for this virtual server. By default they are kept the same as the server's administration password.
+databases_desc3h=This form can be used to change the primary database passwords for this virtual server.
 databases_desc4=This form allows you to bring existing manually created databases on the system under the ownership of this virtual server.
 databases_noimport=However, there are no un-owned databases on the system.
 databases_tabhosts=Remote hosts

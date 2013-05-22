@@ -152,7 +152,12 @@ if (!$d->{'parent'} && $virtualmin_pro) {
 # Show form to change database passwords
 if (!$d->{'parent'}) {
 	print &ui_tabs_start_tab("databasemode", "passwords") if (@tabs > 1);
-	print "$text{'databases_desc3'}<p>\n";
+	if ($d->{'hashpass'}) {
+		print "$text{'databases_desc3h'}<p>\n";
+		}
+	else {
+		print "$text{'databases_desc3'}<p>\n";
+		}
 	print &ui_form_start("save_dbpass.cgi");
 	print &ui_hidden("dom", $in{'dom'}),"\n";
 	print &ui_table_start($text{'databases_pheader'}, undef, 2);
