@@ -280,9 +280,15 @@ if ($user->{'unix'} && !$user->{'noquota'}) {
 	# Set quotas, if not using the defaults
 	if (defined($quota)) {
 		$user->{'quota'} = $quota;
+		!$quota || !$d->{'quota'} || $quota <= $d->{'quota'} ||
+			&usage("User's quota cannot be higher than domain's ".
+			       "quota of $d->{'quota'}");
 		}
 	if (defined($mquota)) {
 		$user->{'mquota'} = $mquota;
+		!$mquota || !$d->{'mquota'} || $mquota <= $d->{'mquota'} ||
+			&usage("User's mail quota cannot be higher than ".
+			       "domain's mail quota of $d->{'quota'}");
 		}
 	}
 $user->{'dbs'} = \@dbs if (@dbs);

@@ -208,6 +208,11 @@ else {
 				$in{'quota_def'} || $in{'quota'} =~ /^[0-9\.]+$/ ||
 					&error($text{'user_equota'});
 				$user->{'quota'} = $in{'quota_def'} ? 0 : &quota_parse("quota", "home");
+				!$user->{'quota'} || !$d->{'quota'} ||
+				  $user->{'quota'} <= $d->{'quota'} ||
+				  &error(&text('user_eoverquota',
+					&nice_size($d->{'quota'}*
+						   &quota_bsize("home"))));
 				}
 			elsif (&has_home_quotas() && $in{'new'}) {
 				# Use default
@@ -220,6 +225,11 @@ else {
 				$in{'mquota_def'} || $in{'mquota'} =~ /^[0-9\.]+$/ ||
 					&error($text{'user_equota'});
 				$user->{'mquota'} = $in{'mquota_def'} ? 0 : &quota_parse("mquota", "mail");
+				!$user->{'mquota'} || !$d->{'mquota'} ||
+				  $user->{'mquota'} <= $d->{'mquota'} ||
+				  &error(&text('user_eovermquota',
+					&nice_size($d->{'mquota'}*
+						   &quota_bsize("mail"))));
 				}
 			elsif (&has_mail_quotas() && $in{'new'}) {
 				# Use default

@@ -275,9 +275,15 @@ if (defined($real)) {
 	}
 if (defined($quota) && !$user->{'noquota'}) {
 	$user->{'quota'} = $quota eq "UNLIMITED" ? 0 : $quota;
+	$quota eq "UNLIMITED" || !$d->{'quota'} || $quota <= $d->{'quota'} ||
+		&usage("User's quota cannot be higher than domain's ".
+		       "quota of $d->{'quota'}");
 	}
 if (defined($mquota) && !$user->{'noquota'}) {
 	$user->{'mquota'} = $mquota eq "UNLIMITED" ? 0 : $mquota;
+	$mquota eq "UNLIMITED" || !$d->{'mquota'} || $mquota <= $d->{'mquota'}||
+		&usage("User's mail quota cannot be higher than domain's ".
+		       "mail quota of $d->{'quota'}");
 	}
 if (defined($qquota) && $user->{'mailquota'}) {
 	$user->{'qquota'} = $qquota eq "UNLIMITED" ? 0 : $qquota;
