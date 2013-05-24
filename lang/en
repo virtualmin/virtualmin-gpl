@@ -6148,5 +6148,9 @@ bucket_err=Failed to save bucket
 bucket_derr=Failed to delete bucket
 bucket_ename=Invalid bucket name
 bucket_eeclash=A bucket with the same name already exists
+bucket_title3=Delete S3 Bucket
+bucket_drusure=Are you sure you want to delete the S3 bucket $1? It contains $2 files totalling $3.
+bucket_drusure2=Are you sure you want to delete the S3 bucket $1? It does not contain any files.
+bucket_dok=Delete Now
 
 __norefs=1
