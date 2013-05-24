@@ -3,7 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
-can_backup_buckets() || &error($text{'buckets_ecannot'});
+&can_backup_buckets() || &error($text{'buckets_ecannot'});
 
 @accounts = &list_all_s3_accounts();
 if ($in{'new'}) {
@@ -59,6 +59,19 @@ else {
 
 	print &ui_table_row($text{'bucket_owner'},
 		"<tt>$info->{'acl'}->{'Owner'}->{'DisplayName'}</tt>");
+
+	# Show file count and size
+	$files = &s3_list_files(@$account, $in{'name'});
+	if (ref($files)) {
+		$size = 0;
+		foreach my $f (@$files) {
+			$size += $f->{'Size'};
+			}
+		print &ui_table_row($text{'bucket_size'},
+			@$files ? &text('bucket_sizestr', &nice_size($size),
+							  scalar(@$files))
+				: $text{'bucket_empty'});
+		}
 	}
 
 # Bucket permissions

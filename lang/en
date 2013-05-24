@@ -6141,5 +6141,12 @@ bucket_perm=Permission
 bucket_user=User
 bucket_group=Group
 bucket_grant=Granted permissions
+bucket_size=Bucket contents
+bucket_sizestr=$2 files totalling $1
+bucket_empty=Empty
+bucket_err=Failed to save bucket
+bucket_derr=Failed to delete bucket
+bucket_ename=Invalid bucket name
+bucket_eeclash=A bucket with the same name already exists
 
 __norefs=1
