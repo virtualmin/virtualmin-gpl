@@ -4650,6 +4650,8 @@ s3_einfo=Failed to upload information file : $1
 s3_edom=Failed to upload domain file : $1
 s3_elist2=Failed to list S3 bucket : $1
 s3_einfo2=Failed to read $1 : $2
+s3_eputacl=Failed to save bucket ACL : $1
+s3_eputlifecycle=Failed to save bucket lifecycle : $1
 
 tdelete_err=Failed to delete templates
 tdelete_enone=None selected
@@ -6152,5 +6154,17 @@ bucket_title3=Delete S3 Bucket
 bucket_drusure=Are you sure you want to delete the S3 bucket $1? It contains $2 files totalling $3.
 bucket_drusure2=Are you sure you want to delete the S3 bucket $1? It does not contain any files.
 bucket_dok=Delete Now
+bucket_enogrants=No granted permissions entered!
+bucket_egrantee=Missing or invalid-looking username in row $1
+bucket_lifecycle=Lifecycle rules
+bucket_lstatus=Enabled?
+bucket_lprefix=Apply to files
+bucket_lglacier=Move to Glacier
+bucket_ldelete=Delete files
+bucket_lall=All files in bucket
+bucket_lstart=Starting with
+bucket_lnever=Never
+bucket_ldays=After $1 days
+bucket_ldate=On date $1
 
 __norefs=1

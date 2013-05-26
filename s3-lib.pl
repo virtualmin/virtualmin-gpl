@@ -444,6 +444,10 @@ $response = $conn->get_bucket_acl($bucket);
 if ($response->http_response->code == 200) {
 	$rv{'acl'} = $response->{'AccessControlPolicy'};
 	}
+$response = $conn->get_bucket_lifecycle($bucket);
+if ($response->http_response->code == 200) {
+	$rv{'lifecycle'} = $response->{'LifecycleConfiguration'};
+	}
 return \%rv;
 }
 

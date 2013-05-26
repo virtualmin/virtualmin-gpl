@@ -33,7 +33,7 @@ else {
 	print &ui_hidden("name", $in{'name'});
 	}
 
-print &ui_table_start($text{'bucket_header'}, undef, 2);
+print &ui_table_start($text{'bucket_header'}, "width=100%", 2);
 if ($in{'new'}) {
 	# Can select account, enter a bucket name and choose a location
 	print &ui_table_row($text{'bucket_account'},
@@ -59,7 +59,7 @@ else {
 				    : $text{'default'});
 
 	print &ui_table_row($text{'bucket_owner'},
-		"<tt>$info->{'acl'}->{'Owner'}->[0]->{'DisplayName'}->[0]</tt>");
+	    "<tt>$info->{'acl'}->{'Owner'}->[0]->{'DisplayName'}->[0]</tt>");
 
 	# Show file count and size
 	$files = &s3_list_files(@$account, $in{'name'});
@@ -102,8 +102,27 @@ foreach my $g (@$grant, { }) {
 $ptable .= &ui_columns_end();
 print &ui_table_row($text{'bucket_grant'}, $ptable);
 
-# Expiry policy
-# XXX
+# Lifecycle policies
+$ltable = &ui_columns_start([ $text{'bucket_lstatus'},
+			      $text{'bucket_lprefix'},
+			      $text{'bucket_lglacier'},
+			      $text{'bucket_ldelete'} ]);
+$lifecycle = !$in{'new'} && $info->{'lifecycle'} ?
+		$info->{'lifecycle'}->{'Rule'} : [ ];
+$i = 0;
+foreach my $l (@$lifecycle, { }) {
+	$ltable .= &ui_columns_row([
+		&ui_checkbox("lstatus_$i", 1, "",
+			     $l->{'Status'}->[0] eq 'Enabled'),
+		&ui_opt_textbox("lprefix_$i", $l->{'Prefix'}->[0], 10,
+			$text{'bucket_lall'}."<br>", $text{'bucket_lstart'}),
+		&days_date_field("lglacier_$i", $l->{'Transition'}->[0]),
+		&days_date_field("ldelete_$i", $l->{'Expiration'}->[0]),
+		], [ "valign=top", "valign=top" ]);
+	$i++;
+	}
+$ltable .= &ui_columns_end();
+print &ui_table_row($text{'bucket_lifecycle'}, $ltable);
 
 print &ui_table_end();
 if ($in{'new'}) {
@@ -116,3 +135,19 @@ else {
 
 &ui_print_footer("list_buckets.cgi", $text{'buckets_return'});
 
+# days_date_field(name, object)
+# Returns HTML for selecting a day or date policy
+sub days_date_field
+{
+local ($name, $obj) = @_;
+local $mode = $obj->{'Days'} ? 1 : $obj->{'Date'} ? 2 : 0;
+local ($y, $m, $d) = $obj->{'Date'}->[0] =~ /^(\d+)\-(\d+)\-(\d+)/ ?
+			($1, $2, $3) : ( );
+return &ui_radio($name, $mode,
+	[ [ 0, $text{'bucket_lnever'}."<br>" ],
+	  [ 1, &text('bucket_ldays',
+	          &ui_textbox($name."_days", $obj->{'Days'}->[0], 5))."<br>" ],
+	  [ 2, &text('bucket_ldate',
+		  &ui_date_input($d, $m, $y, $name."_day", $name."_month",
+				 $name."_year")) ] ]);
+}
