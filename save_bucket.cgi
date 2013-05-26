@@ -16,7 +16,6 @@ ref($buckets) || &error(&text('bucket_elist', $buckets));
 if (!$in{'new'}) {
 	($bucket) = grep { $_->{'Name'} eq $in{'name'} } @$buckets;
 	$bucket || &error($text{'bucket_egone'});
-	$info = &s3_get_bucket(@$account, $in{'name'});
 	}
 
 if ($in{'delete'}) {
@@ -61,12 +60,15 @@ else {
 	&error_setup($text{'bucket_err'});
 
 	# Get current bucket ACL
-	$oldinfo = &s3_get_bucket(@$account, $in{'name'});
-	$oldacl = $info->{'acl'};
-	foreach my $g (@{$info->{'acl'}->{'AccessControlList'}->[0]->{'Grant'}}) {
-		if ($g->{'Grantee'}->[0]->{'xsi:type'} eq 'CanonicalUser') {
-			$useridmap{$g->{'Grantee'}->[0]->{'DisplayName'}->[0]} =
-				$g->{'Grantee'}->[0]->{'ID'}->[0];
+	if (!$in{'new'}) {
+		$oldinfo = &s3_get_bucket(@$account, $in{'name'});
+		$oldacl = $oldinfo->{'acl'};
+		foreach my $g (@{$info->{'acl'}->{'AccessControlList'}->[0]->{'Grant'}}) {
+			$grantee = $g->{'Grantee'}->[0];
+			if ($grantee->{'xsi:type'} eq 'CanonicalUser') {
+				$useridmap{$grantee->{'DisplayName'}->[0]} =
+					$grantee->{'ID'}->[0];
+				}
 			}
 		}
 
@@ -131,6 +133,11 @@ else {
 		}
 
 	# Apply permisisons
+	if ($in{'new'}) {
+		$oldinfo = &s3_get_bucket(@$account, $in{'name'});
+		$oldacl = $oldinfo->{'acl'};
+		$acl->{'Owner'} = $oldacl->{'Owner'};
+		}
 	$err = &s3_put_bucket_acl(@$account, $in{'name'}, $acl);
 	&error($err) if ($err);
 

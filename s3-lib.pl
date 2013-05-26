@@ -458,9 +458,6 @@ local $conn = &make_s3_connection($akey, $skey);
 local $xs = XML::Simple->new(KeepRoot => 1,
 		             RootName => "AccessControlPolicy");
 local $xml = $xs->XMLout($acl);
-print STDERR $xml;
-use Data::Dumper;
-print STDERR Dumper($acl);
 local $response = $conn->put_bucket_acl($bucket, $xml);
 return $response->http_response->code == 200 ? undef : 
 	&text('s3_eputacl', &extract_s3_message($response));
