@@ -58,9 +58,61 @@ if ($in{'delete'}) {
 		}
 	}
 else {
-	# Validate permissions
 	&error_setup($text{'bucket_err'});
-	# XXX
+
+	# Get current bucket ACL
+	$oldinfo = &s3_get_bucket(@$account, $in{'name'});
+	$oldacl = $info->{'acl'};
+	foreach my $g (@{$info->{'acl'}->{'AccessControlList'}->[0]->{'Grant'}}) {
+		if ($g->{'Grantee'}->[0]->{'xsi:type'} eq 'CanonicalUser') {
+			$useridmap{$g->{'Grantee'}->[0]->{'DisplayName'}->[0]} =
+				$g->{'Grantee'}->[0]->{'ID'}->[0];
+			}
+		}
+
+	# Validate and parse permissions
+	$acl = { 'Owner' => $oldacl->{'Owner'},
+		 'AccessControlList' => [ { 'Grant' => [ ] } ] };
+	for(my $i=0; defined($in{"type_$i"}); $i++) {
+		next if (!$in{"type_$i"});
+		$in{"grantee_$i"} =~ /^\S+$/ ||
+			&error(&text('bucket_egrantee', $i+1));
+		$obj = { 'Permission' => [ $in{"perm_$i"} ],
+			 'Grantee' => [ {
+				'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance', 
+				} ],
+		       };
+		if ($in{"type_$i"} eq "CanonicalUser") {
+			# Granting to a user
+			if ($useridmap{$in{"grantee_$i"}}) {
+				# We have the ID already
+				$obj->{'Grantee'}->[0]->{'xsi:type'} =
+					'CanonicalUser';
+				$obj->{'Grantee'}->[0]->{'ID'} = 
+					[ $useridmap{$in{"grantee_$i"}} ];
+				$obj->{'Grantee'}->[0]->{'DisplayName'} = 
+					[ $in{"grantee_$i"} ];
+				}
+			else {
+				# Grant by email
+				$obj->{'Grantee'}->[0]->{'xsi:type'} =
+					'AmazonCustomerByEmail';
+				$obj->{'Grantee'}->[0]->{'EmailAddress'} = 
+					[ $in{"grantee_$i"} ];
+				}
+			}
+		else {
+			# Granting to a group
+			$obj->{'Grantee'}->[0]->{'xsi:type'} = 'Group';
+			$uri = $in{"grantee_$i"};
+			if ($uri !~ /^(http|https):/) {
+				$uri = $s3_groups_uri.$uri;
+				}
+			$obj->{'Grantee'}->[0]->{'URI'} = [ $uri ];
+			}
+		push(@{$acl->{'AccessControlList'}->[0]->{'Grant'}}, $obj);
+		}
+	@{$acl->{'AccessControlList'}} || &error($text{'bucket_enogrants'});
 
 	# Validate expiry policy
 	# XXX
@@ -79,8 +131,11 @@ else {
 		}
 
 	# Apply permisisons
+	$err = &s3_put_bucket_acl(@$account, $in{'name'}, $acl);
+	&error($err) if ($err);
 
 	# Apply expiry policy
+	# XXX
 
 	&webmin_log($in{'new'} ? "create" : "modify", "bucket", $in{'name'});
 	&redirect("list_buckets.cgi");

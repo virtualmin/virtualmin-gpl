@@ -55,10 +55,11 @@ else {
 		"<tt>$in{'name'}</tt>");
 
 	print &ui_table_row($text{'bucket_location'},
-		"<tt>$info->{'location'}</tt>");
+		$info->{'location'} ? "<tt>$info->{'location'}</tt>"
+				    : $text{'default'});
 
 	print &ui_table_row($text{'bucket_owner'},
-		"<tt>$info->{'acl'}->{'Owner'}->{'DisplayName'}</tt>");
+		"<tt>$info->{'acl'}->{'Owner'}->[0]->{'DisplayName'}->[0]</tt>");
 
 	# Show file count and size
 	$files = &s3_list_files(@$account, $in{'name'});
@@ -78,17 +79,21 @@ else {
 $ptable = &ui_columns_start([ $text{'bucket_type'},
 			      $text{'bucket_grantee'},
 			      $text{'bucket_perm'} ]);
-$grant = $in{'new'} ? [ ] : $info->{'acl'}->{'AccessControlList'}->{'Grant'};
+$grant = $in{'new'} ? [ ] :
+	    $info->{'acl'}->{'AccessControlList'}->[0]->{'Grant'};
 $i = 0;
 foreach my $g (@$grant, { }) {
+	$grantee = $g->{'Grantee'}->[0]->{'DisplayName'}->[0] ||
+		   $g->{'Grantee'}->[0]->{'URI'}->[0];
+	$grantee =~ s/^\Q$s3_groups_uri\E//;
 	$ptable .= &ui_columns_row([
 		&ui_select("type_$i",
-			   $g->{'Grantee'}->{'xsi:type'},
+			   $g->{'Grantee'}->[0]->{'xsi:type'},
 			   [ [ "", "&nbsp;" ],
 			     [ "CanonicalUser", $text{'bucket_user'} ],
 			     [ "Group", $text{'bucket_group'} ] ]),
-		&ui_textbox("grantee_$i", $g->{'Grantee'}->{'DisplayName'}, 30),
-		&ui_select("perm_$i", $g->{'Permission'} || "READ",
+		&ui_textbox("grantee_$i", $grantee, 30),
+		&ui_select("perm_$i", $g->{'Permission'}->[0] || "READ",
 			   [ "FULL_CONTROL", "READ", "WRITE", "READ_ACP",
 			     "WRITE_ACP" ]),
 		]);

@@ -1,6 +1,7 @@
 # Functions for talking to Amazon's S3 service
 
 @s3_perl_modules = ( "S3::AWSAuthConnection", "S3::QueryStringAuthGenerator" );
+$s3_groups_uri = "http://acs.amazonaws.com/groups/global/";
 
 # check_s3()
 # Returns an error message if S3 cannot be used
@@ -444,6 +445,25 @@ if ($response->http_response->code == 200) {
 	$rv{'acl'} = $response->{'AccessControlPolicy'};
 	}
 return \%rv;
+}
+
+# s3_put_bucket_acl(access-key, secret-key, bucket, &acl)
+# Updates the ACL for a bucket, based on the structure in the format returned
+# by s3_get_bucket->{'acl'}
+sub s3_put_bucket_acl
+{
+&require_s3();
+local ($akey, $skey, $bucket, $acl) = @_;
+local $conn = &make_s3_connection($akey, $skey);
+local $xs = XML::Simple->new(KeepRoot => 1,
+		             RootName => "AccessControlPolicy");
+local $xml = $xs->XMLout($acl);
+print STDERR $xml;
+use Data::Dumper;
+print STDERR Dumper($acl);
+local $response = $conn->put_bucket_acl($bucket, $xml);
+return $response->http_response->code == 200 ? undef : 
+	&text('s3_eputacl', &extract_s3_message($response));
 }
 
 # s3_list_files(access-key, secret-key, bucket)
