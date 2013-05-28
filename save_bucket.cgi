@@ -182,6 +182,12 @@ if ($in{$name} == 1) {
 	}
 elsif ($in{$name} == 2) {
 	# Parse date field
-	# XXX
+	$in{$name."_year"} =~ /^[0-9]{4}$/ || &error(&text('bucket_elyear', $i+1));
+	$in{$name."_month"} =~ /^[0-9]{1,2}$/ || &error(&text('bucket_elmonth', $i+1));
+	$in{$name."_day"} =~ /^[0-9]{1,2}$/ || &error(&text('bucket_elday', $i+1));
+	$obj->{$section}->{'Date'} = [ sprintf("%4.4d-%2.2d-%2.2d",
+					       $in{$name."_year"},
+					       $in{$name."_month"},
+					       $in{$name."_day"}) ];
 	}
 }
