@@ -467,6 +467,22 @@ return $response->http_response->code == 200 ? undef :
 	&text('s3_eputacl', &extract_s3_message($response));
 }
 
+# s3_put_bucket_lifecycle(access-key, secret-key, bucket, &acl)
+# Updates the lifecycle for a bucket, based on the structure in the format
+# returned by s3_get_bucket->{'acl'}
+sub s3_put_bucket_lifecycle
+{
+&require_s3();
+local ($akey, $skey, $bucket, $acl) = @_;
+local $conn = &make_s3_connection($akey, $skey);
+local $xs = XML::Simple->new(KeepRoot => 1,
+		             RootName => "LifecycleConfiguration");
+local $xml = $xs->XMLout($acl);
+local $response = $conn->put_bucket_lifecycle($bucket, $xml);
+return $response->http_response->code == 200 ? undef : 
+	&text('s3_eputlifecycle', &extract_s3_message($response));
+}
+
 # s3_list_files(access-key, secret-key, bucket)
 # Returns a list of all files in an S3 bucket as an array ref, or an error
 # message string. Each is a hash ref with keys like 'Key', 'Size', 'Owner'

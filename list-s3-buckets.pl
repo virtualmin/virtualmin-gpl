@@ -81,14 +81,12 @@ if ($multi) {
 			}
 		if ($info && $info->{'acl'}) {
 			print "    Owner: ",
-			      $info->{'acl'}->{'Owner'}->{'DisplayName'},"\n";
-			$acl = $info->{'acl'}->{'AccessControlList'};
-			@grant = ref($acl->{'Grant'}) eq 'HASH' ?
-					( $acl->{'Grant'} ) :
-				 $acl->{'Grant'} ? @{$acl->{'Grant'}} : ( );
+			      $info->{'acl'}->{'Owner'}->[0]->{'DisplayName'}->[0],"\n";
+			$acl = $info->{'acl'}->{'AccessControlList'}->[0];
+			@grant = @{$acl->{'Grant'}};
 			foreach my $g (@grant) {
-				print "    Grant: $g->{'Permission'} to ",
-				      $g->{'Grantee'}->{'DisplayName'},"\n";
+				print "    Grant: $g->{'Permission'}->[0] to ",
+				      $g->{'Grantee'}->[0]->{'DisplayName'}->[0],"\n";
 				}
 			}
 		}

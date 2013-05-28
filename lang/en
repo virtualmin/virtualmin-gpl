@@ -6161,6 +6161,7 @@ bucket_lstatus=Enabled?
 bucket_lprefix=Apply to files
 bucket_lglacier=Move to Glacier
 bucket_ldelete=Delete files
+bucket_lnone=No files
 bucket_lall=All files in bucket
 bucket_lstart=Starting with
 bucket_lnever=Never

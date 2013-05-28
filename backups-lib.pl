@@ -4025,7 +4025,8 @@ foreach my $sched (grep { &can_backup_sched($_) } &list_scheduled_backups()) {
 			}
 		}
 	}
-return @rv;
+local %done;
+return grep { !$done{$_->[0]}++ } @rv;
 }
 
 1;

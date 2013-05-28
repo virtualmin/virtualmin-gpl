@@ -168,8 +168,21 @@ sub get_acl {
 
     my $rv = S3::GetResponse->new($self->_make_request('GET', "$bucket/$key?acl", $headers));
     if ($rv->http_response->code == 200) {
-      my $doc = XMLin($rv->{BODY});
+      my $doc = XMLin($rv->{BODY}, ForceArray => 1);
       $rv->{'AccessControlPolicy'} = $doc;
+    }
+    return $rv;
+}
+
+sub get_bucket_lifecycle {
+    my ($self, $bucket, $headers) = @_;
+    croak 'must specify bucket' unless $bucket;
+    $headers ||= {};
+
+    my $rv = S3::GetResponse->new($self->_make_request('GET', "$bucket?lifecycle", $headers));
+    if ($rv->http_response->code == 200) {
+      my $doc = XMLin($rv->{BODY}, ForceArray => 1);
+      $rv->{'LifecycleConfiguration'} = $doc;
     }
     return $rv;
 }
@@ -190,6 +203,18 @@ sub put_acl {
 
     return S3::Response->new(
         $self->_make_request('PUT', "$bucket/$key?acl", $headers, $acl_xml_doc));
+}
+
+sub put_bucket_lifecycle {
+    my ($self, $bucket, $lifecycle_xml_doc, $headers) = @_;
+    croak 'must specify lifecycle xml document' unless defined $lifecycle_xml_doc;
+    croak 'must specify bucket' unless $bucket;
+    $headers ||= {};
+    my $md5 = "XXX";
+    $headers->{'Content-MD5'} = &encode_base64($md5);
+
+    return S3::Response->new(
+        $self->_make_request('PUT', "$bucket/?lifecycle", $headers, $lifecycle_xml_doc));
 }
 
 sub abort_upload {

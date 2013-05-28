@@ -16,9 +16,7 @@ if (!@accounts) {
 # Find all buckets
 @buckets = ( );
 @errs = ( );
-%doneaccount = ( );
 foreach my $a (@accounts) {
-	next if ($doneaccount{$a->[0]}++);
 	my $buckets = &s3_list_buckets(@$a);
 	if (ref($buckets)) {
 		foreach my $b (@$buckets) {
@@ -41,6 +39,7 @@ if (@buckets) {
 	foreach my $b (sort { $a->{'Name'} cmp $b->{'Name'} } @buckets) {
 		print &ui_columns_row([
 			"<a href='edit_bucket.cgi?name=".&urlize($b->{'Name'}).
+			  "&account=".&urlize($b->{'s3_account'}->[0]).
 			  "'>".&html_escape($b->{'Name'})."</a>",
 			$b->{'s3_account'}->[0],
 			&make_date(&s3_parse_date($b->{'CreationDate'})),

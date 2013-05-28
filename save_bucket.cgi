@@ -63,7 +63,7 @@ else {
 	if (!$in{'new'}) {
 		$oldinfo = &s3_get_bucket(@$account, $in{'name'});
 		$oldacl = $oldinfo->{'acl'};
-		foreach my $g (@{$info->{'acl'}->{'AccessControlList'}->[0]->{'Grant'}}) {
+		foreach my $g (@{$oldacl->{'AccessControlList'}->[0]->{'Grant'}}) {
 			$grantee = $g->{'Grantee'}->[0];
 			if ($grantee->{'xsi:type'} eq 'CanonicalUser') {
 				$useridmap{$grantee->{'DisplayName'}->[0]} =
@@ -117,7 +117,30 @@ else {
 	@{$acl->{'AccessControlList'}} || &error($text{'bucket_enogrants'});
 
 	# Validate expiry policy
-	# XXX
+	$lifecycle = { 'Rule' => [ ] };
+	if (!$in{'new'}) {
+		@oldrules = @{$oldinfo->{'lifecycle'}->{'Rule'}};
+		}
+	for(my $i=0; defined($in{"lprefix_def_$i"}); $i++) {
+		next if ($in{"lprefix_def_$i"} == 2);
+		$obj = { };
+		if ($in{'new'} || $i >= @oldrules) {
+			# Generate a new ID
+			$obj->{'ID'} = [ &domain_id() ];
+			}
+		else {
+			# Use old ID for this row
+			$obj->{'ID'} = $oldrules[$i]->{'ID'};
+			}
+		if (!$in{"lprefix_${i}_def"}) {
+			$obj->{'Prefix'} = [ $in{"lprefix_$i"} ];
+			}
+		$obj->{'Status'} = [ $in{"lstatus_$i"} ? "Enabled"
+						       : "Disabled" ];
+		&days_date_parse("lglacier_$i", $obj, "Transition");
+		&days_date_parse("ldelete_$i", $obj, "Expiry");
+		push(@{$lifecycle->{'Rule'}}, $obj);
+		}
 
 	if ($in{'new'}) {
 		# Validate inputs
@@ -142,9 +165,23 @@ else {
 	&error($err) if ($err);
 
 	# Apply expiry policy
-	# XXX
+	$err = &s3_put_bucket_lifecycle(@$account, $in{'name'}, $lifecycle);
+	&error($err) if ($err);
 
 	&webmin_log($in{'new'} ? "create" : "modify", "bucket", $in{'name'});
 	&redirect("list_buckets.cgi");
 	}
 
+sub days_date_parse
+{
+local ($name, $obj, $section) = @_;
+if ($in{$name} == 1) {
+	# Parse days field
+	$in{$name."_days"} =~ /^\d+$/ || &error(&text('bucket_eldays', $i+1));
+	$obj->{$section}->{'Days'} = [ $in{$name."_days"} ];
+	}
+elsif ($in{$name} == 2) {
+	# Parse date field
+	# XXX
+	}
+}

@@ -103,22 +103,28 @@ $ptable .= &ui_columns_end();
 print &ui_table_row($text{'bucket_grant'}, $ptable);
 
 # Lifecycle policies
-$ltable = &ui_columns_start([ $text{'bucket_lstatus'},
-			      $text{'bucket_lprefix'},
+$ltable = &ui_columns_start([ $text{'bucket_lprefix'},
+			      $text{'bucket_lstatus'},
 			      $text{'bucket_lglacier'},
 			      $text{'bucket_ldelete'} ]);
 $lifecycle = !$in{'new'} && $info->{'lifecycle'} ?
 		$info->{'lifecycle'}->{'Rule'} : [ ];
 $i = 0;
 foreach my $l (@$lifecycle, { }) {
+	$mode = !keys %$l ? 2 :
+		$l->{'Prefix'}->[0] ? 0 : 1;
 	$ltable .= &ui_columns_row([
+		&ui_radio("lprefix_def_$i", $mode,
+			  [ [ 2, $text{'bucket_lnone'}."<br>" ],
+			    [ 1, $text{'bucket_lall'}."<br>" ],
+			    [ 0, $text{'bucket_lstart'}." ".
+				 &ui_textbox("lprefix_$i",
+					     $l->{'Prefix'}->[0], 10) ] ]),
 		&ui_checkbox("lstatus_$i", 1, "",
 			     $l->{'Status'}->[0] eq 'Enabled'),
-		&ui_opt_textbox("lprefix_$i", $l->{'Prefix'}->[0], 10,
-			$text{'bucket_lall'}."<br>", $text{'bucket_lstart'}),
 		&days_date_field("lglacier_$i", $l->{'Transition'}->[0]),
 		&days_date_field("ldelete_$i", $l->{'Expiration'}->[0]),
-		], [ "valign=top", "valign=top" ]);
+		]);
 	$i++;
 	}
 $ltable .= &ui_columns_end();
