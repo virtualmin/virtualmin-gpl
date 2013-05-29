@@ -138,7 +138,10 @@ else {
 		$obj->{'Status'} = [ $in{"lstatus_$i"} ? "Enabled"
 						       : "Disabled" ];
 		&days_date_parse("lglacier_$i", $obj, "Transition");
-		&days_date_parse("ldelete_$i", $obj, "Expiry");
+		&days_date_parse("ldelete_$i", $obj, "Expiration");
+		if ($obj->{'Transition'}) {
+			$obj->{'Transition'}->{'StorageClass'} = [ 'GLACIER' ];
+			}
 		push(@{$lifecycle->{'Rule'}}, $obj);
 		}
 
@@ -182,12 +185,16 @@ if ($in{$name} == 1) {
 	}
 elsif ($in{$name} == 2) {
 	# Parse date field
-	$in{$name."_year"} =~ /^[0-9]{4}$/ || &error(&text('bucket_elyear', $i+1));
-	$in{$name."_month"} =~ /^[0-9]{1,2}$/ || &error(&text('bucket_elmonth', $i+1));
-	$in{$name."_day"} =~ /^[0-9]{1,2}$/ || &error(&text('bucket_elday', $i+1));
-	$obj->{$section}->{'Date'} = [ sprintf("%4.4d-%2.2d-%2.2d",
-					       $in{$name."_year"},
-					       $in{$name."_month"},
-					       $in{$name."_day"}) ];
+	$in{$name."_year"} =~ /^[0-9]{4}$/ ||
+		&error(&text('bucket_elyear', $i+1));
+	$in{$name."_month"} =~ /^[0-9]{1,2}$/ ||
+		&error(&text('bucket_elmonth', $i+1));
+	$in{$name."_day"} =~ /^[0-9]{1,2}$/ ||
+		&error(&text('bucket_elday', $i+1));
+	$obj->{$section}->{'Date'} = [
+		sprintf("%4.4d-%2.2d-%2.2dT00:00:00.000Z",
+		       $in{$name."_year"},
+		       $in{$name."_month"},
+		       $in{$name."_day"}) ];
 	}
 }

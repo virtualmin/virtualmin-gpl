@@ -111,15 +111,15 @@ $lifecycle = !$in{'new'} && $info->{'lifecycle'} ?
 		$info->{'lifecycle'}->{'Rule'} : [ ];
 $i = 0;
 foreach my $l (@$lifecycle, { }) {
-	$mode = !keys %$l ? 2 :
-		$l->{'Prefix'}->[0] ? 0 : 1;
+	$prefix = $l->{'Prefix'} ? $l->{'Prefix'}->[0] : undef;
+	$prefix = undef if (ref($prefix));
+	$mode = !(keys %$l) ? 2 : $prefix ? 0 : 1;
 	$ltable .= &ui_columns_row([
 		&ui_radio("lprefix_def_$i", $mode,
 			  [ [ 2, $text{'bucket_lnone'}."<br>" ],
 			    [ 1, $text{'bucket_lall'}."<br>" ],
 			    [ 0, $text{'bucket_lstart'}." ".
-				 &ui_textbox("lprefix_$i",
-					     $l->{'Prefix'}->[0], 10) ] ]),
+				 &ui_textbox("lprefix_$i", $prefix, 10) ] ]),
 		&ui_checkbox("lstatus_$i", 1, "",
 			     $l->{'Status'}->[0] eq 'Enabled'),
 		&days_date_field("lglacier_$i", $l->{'Transition'}->[0]),

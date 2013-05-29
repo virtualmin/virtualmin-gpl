@@ -18,6 +18,7 @@ use HTTP::Date;
 use URI::Escape;
 use Carp;
 use XML::Simple;
+use Digest::MD5;
 
 use S3 qw($DEFAULT_HOST $PORTS_BY_SECURITY merge_meta urlencode);
 use S3::GetResponse;
@@ -210,9 +211,11 @@ sub put_bucket_lifecycle {
     croak 'must specify lifecycle xml document' unless defined $lifecycle_xml_doc;
     croak 'must specify bucket' unless $bucket;
     $headers ||= {};
-    my $md5 = "XXX";
-    $headers->{'Content-MD5'} = &encode_base64($md5);
-
+    my $digest = Digest::MD5::md5_base64($lifecycle_xml_doc);
+    while(length($digest) % 4) {
+	$digest .= "=";
+	}
+    $headers->{'Content-MD5'} = $digest;
     return S3::Response->new(
         $self->_make_request('PUT', "$bucket/?lifecycle", $headers, $lifecycle_xml_doc));
 }

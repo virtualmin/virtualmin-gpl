@@ -459,9 +459,8 @@ sub s3_put_bucket_acl
 &require_s3();
 local ($akey, $skey, $bucket, $acl) = @_;
 local $conn = &make_s3_connection($akey, $skey);
-local $xs = XML::Simple->new(KeepRoot => 1,
-		             RootName => "AccessControlPolicy");
-local $xml = $xs->XMLout($acl);
+local $xs = XML::Simple->new(KeepRoot => 1);
+local $xml = $xs->XMLout({ 'AccessControlPolicy' => [ $acl ] });
 local $response = $conn->put_bucket_acl($bucket, $xml);
 return $response->http_response->code == 200 ? undef : 
 	&text('s3_eputacl', &extract_s3_message($response));
@@ -473,11 +472,10 @@ return $response->http_response->code == 200 ? undef :
 sub s3_put_bucket_lifecycle
 {
 &require_s3();
-local ($akey, $skey, $bucket, $acl) = @_;
+local ($akey, $skey, $bucket, $lifecycle) = @_;
 local $conn = &make_s3_connection($akey, $skey);
-local $xs = XML::Simple->new(KeepRoot => 1,
-		             RootName => "LifecycleConfiguration");
-local $xml = $xs->XMLout($acl);
+local $xs = XML::Simple->new(KeepRoot => 1);
+local $xml = $xs->XMLout({ 'LifecycleConfiguration' => [ $lifecycle ] });
 local $response = $conn->put_bucket_lifecycle($bucket, $xml);
 return $response->http_response->code == 200 ? undef : 
 	&text('s3_eputlifecycle', &extract_s3_message($response));
