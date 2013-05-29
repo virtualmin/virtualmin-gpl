@@ -1,0 +1,4 @@
+desc=Amazon S3 bucket management
+html=Added the Amazon S3 Buckets page, for setting bucket ACLs, scheduled deletion and Glacier move rules.
+master=1
+link=list_buckets.cgi
