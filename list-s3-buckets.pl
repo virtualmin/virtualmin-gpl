@@ -89,6 +89,20 @@ if ($multi) {
 				      $g->{'Grantee'}->[0]->{'DisplayName'}->[0],"\n";
 				}
 			}
+		if ($info && $info->{'lifecycle'}) {
+			foreach my $r (@{$info->{'lifecycle'}->{'Rule'}}) {
+				print "    Lifecycle ID: ",
+				      $r->{'ID'}->[0],"\n";
+				print "    Lifecycle status: ",
+				      $r->{'Status'}->[0],"\n";
+				print "    Lifecycle prefix: ",
+				      $r->{'Prefix'}->[0],"\n";
+				&show_lifecycle_period($r, "Transition",
+					"move to glacier");
+				&show_lifecycle_period($r, "Expiration",
+					"delete");
+				}
+			}
 		}
 	}
 elsif ($nameonly) {
@@ -107,12 +121,27 @@ else {
 		}
 	}
 
+sub show_lifecycle_period
+{
+local ($r, $name, $txt) = @_;
+if ($r->{$name} && $r->{$name}->[0]) {
+	my $obj = $r->{$name}->[0];
+	if ($obj->{'Date'} && $obj->{'Date'}->[0]) {
+		print "    Lifecycle ${txt}: On date $obj->{'Date'}->[0]\n";
+		}
+	if ($obj->{'Days'} && $obj->{'Days'}->[0]) {
+		print "    Lifecycle ${txt}: After $obj->{'Days'}->[0] days\n";
+		}
+	}
+}
+
 sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
 print "Lists all buckets owned by an S3 account.\n";
 print "\n";
 print "virtualmin list-s3-buckets [--multiline | --name-only]\n";
+print "                           [--bucket name]\n";
 print "                           [--access-key key]\n";
 print "                           [--secret-key key]\n";
 exit(1);
