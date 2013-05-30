@@ -474,10 +474,20 @@ sub s3_put_bucket_lifecycle
 &require_s3();
 local ($akey, $skey, $bucket, $lifecycle) = @_;
 local $conn = &make_s3_connection($akey, $skey);
-local $xs = XML::Simple->new(KeepRoot => 1);
-local $xml = $xs->XMLout({ 'LifecycleConfiguration' => [ $lifecycle ] });
-local $response = $conn->put_bucket_lifecycle($bucket, $xml);
-return $response->http_response->code == 200 ? undef : 
+local $response;
+if (@{$lifecycle->{'Rule'}}) {
+	# Update lifecycle config
+	local $xs = XML::Simple->new(KeepRoot => 1);
+	local $xml = $xs->XMLout(
+		{ 'LifecycleConfiguration' => [ $lifecycle ] });
+	$response = $conn->put_bucket_lifecycle($bucket, $xml);
+	}
+else {
+	# Delete lifecycle config
+	$response = $conn->delete_bucket_lifecycle($bucket, $xml);
+	}
+return $response->http_response->code == 200 ||
+       $response->http_response->code == 204 ? undef : 
 	&text('s3_eputlifecycle', &extract_s3_message($response));
 }
 

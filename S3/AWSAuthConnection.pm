@@ -220,6 +220,14 @@ sub put_bucket_lifecycle {
         $self->_make_request('PUT', "$bucket/?lifecycle", $headers, $lifecycle_xml_doc));
 }
 
+sub delete_bucket_lifecycle {
+    my ($self, $bucket, $headers) = @_;
+    croak 'must specify bucket' unless $bucket;
+    $headers ||= {};
+
+    return S3::Response->new($self->_make_request('DELETE', "$bucket/?lifecycle", $headers));
+}
+
 sub abort_upload {
     my ($self, $bucket, $key, $uploadid, $headers) = @_;
     croak 'must specify bucket' unless $bucket;

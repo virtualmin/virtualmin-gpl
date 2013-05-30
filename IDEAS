@@ -45,11 +45,6 @@
 	- Verify PHP package installation in Virtualmin
 	- Check that DKIM works
 
- - Amazon glacier support
-	- how to clear all lifecycle rules
-	- Documentation
-	- https://www.virtualmin.com/node/27461
-
  - Use Envelope-from address in hamtrap checking
 	- https://www.virtualmin.com/node/27501
 	- don't set smtpd_sasl_authenticated_header

@@ -185,7 +185,8 @@ foreach $dest (@dests) {
 	# Add purging option
 	@grid = ( );
 	if (!$nopurge) {
-		push(@grid, &hlink($text{'backup_purge'}, "backup_purge"));
+		push(@grid, &hlink($text{'backup_purge'}, "backup_purge").
+			    "&nbsp;");
 		push(@grid, &ui_opt_textbox("purge".$i, $purges[$i], 5,
 			$text{'backup_purgeno'}, $text{'backup_purgeyes'})." ".
 			$text{'newbw_days'});

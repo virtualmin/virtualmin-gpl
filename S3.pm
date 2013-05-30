@@ -90,6 +90,8 @@ sub canonical_string {
         $buf .= '?location';
     } elsif ($path =~ /[&?]uploads($|=|&)/) {
         $buf .= '?uploads';
+    } elsif ($path =~ /[&?]lifecycle($|=|&)/) {
+        $buf .= '?lifecycle';
     } elsif ($path =~ /[&?]partNumber=([0-9]+)&uploadId=([^&]+)/) {
         $buf .= '?partNumber='.$1.'&uploadId='.$2;
     } elsif ($path =~ /[&?]uploadId=([^&]+)/) {
