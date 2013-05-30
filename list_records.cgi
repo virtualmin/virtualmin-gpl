@@ -93,8 +93,8 @@ RECORD: foreach $r (@$recs) {
 		      &urlize($r->{'id'})."'>$name</a>" :
 		    $name,
 		$tdesc,
-		$values,
-		$anycomment ? ( $r->{'comment'} ): ( ),
+		&html_escape($values),
+		$anycomment ? ( &html_escape($r->{'comment'}) ) : ( ),
 		], \@tds, "d", $r->{'id'}, 0, !&can_delete_record($r, $d));
 	}
 
