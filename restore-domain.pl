@@ -61,6 +61,11 @@ On a Virtualmin Pro system, you can use the C<--key> flag followed by
 a backup key ID or description to select the key to decrypt this backup with.
 This must be the same key that the backup was originally encrypted with.
 
+By default, if the domain already exists Virtualmin will just restore the
+backup over it. This means that any files in the domain's home directory that
+were not included in the backup will still exist after the restore. To force
+the domain to be deleted before restoring, use the C<--delete-existing> flag.
+
 =cut
 
 package virtual_server;
@@ -166,6 +171,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--only-existing") {
 		$onlyexisting = 1;
+		}
+	elsif ($a eq "--delete-existing") {
+		$delete_existing = 1;
 		}
 
 	# Alternate IP options
@@ -327,7 +335,8 @@ $opts{'reuid'} = $reuid;
 $opts{'fix'} = $fix;
 &$first_print("Starting restore..");
 $ok = &restore_domains($src, \@doms, \@rfeats, \%opts, \@vbs, $onlyfeats,
-		       $ipinfo, $asowner, $skipwarnings, $key, $continue);
+		       $ipinfo, $asowner, $skipwarnings, $key, $continue,
+		       $delete_existing);
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV, $doms[0]);
 if ($ok) {
@@ -359,6 +368,7 @@ print "                          --allocate-ip | --original-ip]\n";
 print "                         [--only-missing | --only-existing]\n";
 print "                         [--skip-warnings]\n";
 print "                         [--continue-on-error]\n";
+print "                         [--delete-existing]\n";
 if (defined(&list_backup_keys)) {
 	print "                         [--key id]\n";
 	}

@@ -286,7 +286,8 @@ else {
 		}
 	$ok = &restore_domains($src, \@doms, \@do_features, \%options, \@vbs,
 			       $in{'only'}, $ipinfo, !$safe_backup,
-			       $in{'skipwarnings'}, $key, $in{'continue'});
+			       $in{'skipwarnings'}, $key, $in{'continue'},
+			       $in{'delete_existing'});
 	&run_post_actions();
 	if ($ok) {
 		print &text('restore_done'),"<p>\n";

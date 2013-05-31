@@ -1403,3 +1403,4 @@ Updated the ZenPhoto script installer to version 1.4.4.5, Joomla to 3.1.1 and 2.
 German translation updates, thanks to Raymond Vetter.
 The default external IP address (for use in DNS records) can now be specified on a per-reseller basis.
 Added the Amazon S3 Buckets page, for setting bucket ACLs, scheduled deletion and Glacier move rules.
+Added an option when restoring virtual servers to have them deleted and re-created before restoring files.
