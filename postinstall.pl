@@ -393,11 +393,6 @@ if ($gconfig{'os_type'} eq 'debian-linux' && &foreign_check("bind8")) {
 		}
 	}
 
-# Configure mail server to log SMTP auth username
-if ($config{'spam'}) {
-	&setup_spamtrap_mailserver();
-	}
-
 # If no domains yet, fix symlink perms in templates
 if (!@doms && $config{'allow_symlinks'} ne '1') {
 	&fix_symlink_templates();

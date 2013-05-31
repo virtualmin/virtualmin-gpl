@@ -1430,33 +1430,9 @@ $hama = { 'from' => &ham_alias_name($d), 'to' => [ $hamfile ] };
 &create_virtuser($spama);
 &create_virtuser($hama);
 
-# Setup mail server
-&setup_spamtrap_mailserver();
-
 # Setup cron job
 &setup_spamtrap_cron();
 return undef;
-}
-
-# setup_spamtrap_mailserver()
-# Configure the mail server to support spam and ham traps
-sub setup_spamtrap_mailserver
-{
-# On postfix, set the smtpd_sasl_authenticated_header to yes to that we get
-# the SMTP username in the Received header
-if ($config{'mail_system'} == 0) {
-	&require_mail();
-	if ($postfix::postfix_version >= 2.3) {
-		local $h = &postfix::get_real_value(
-				"smtpd_sasl_authenticated_header");
-		if ($h !~ /yes|true/i) {
-			&lock_file($postfix::config{'postfix_config_file'});
-			&postfix::set_current_value(
-				"smtpd_sasl_authenticated_header", "yes");
-			&unlock_file($postfix::config{'postfix_config_file'});
-			}
-		}
-	}
 }
 
 # setup_spamtrap_directories(&domain)

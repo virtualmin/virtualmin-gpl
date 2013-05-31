@@ -106,6 +106,25 @@ foreach $d (&list_domains()) {
 		    ($user ? $user->{'user'} : "")," what=$what\n" if ($debug);
 		next if (!$user);
 
+		# Check the Return-Path: header to see if it was sent by
+		# a user in this domain. This is only set by Postfix on SMTP
+		# authenticated messages.
+		my @rp = map { $_->[1] } grep { lc($_->[0]) eq 'return-path' }
+					      @{$m->{'headers'}};
+		my $returnpath = 0;
+		foreach my $rp (@rp) {
+			if ($rp =~ /<\S+\@(\S+)>/ &&
+			    lc($1) eq lc($d->{'dom'})) {
+				print STDERR "$d->{'dom'}: $user->{'user'}: ",
+					"Good return path $rp\n" if ($debug);
+				$returnpath = 1;
+				}
+			else {
+				print STDERR "$d->{'dom'}: $user->{'user'}: ",
+					"Bad return path $rp\n" if ($debug);
+				}
+			}
+
 		# Check the received headers to see if it was sent locally
 		# or via SMTP auth. Walk the headers in order and fail if
 		# a non-local header is found. Or if an SMTP auth header is
@@ -132,7 +151,7 @@ foreach $d (&list_domains()) {
 				last;
 				}
 			}
-		next if ($invalid);
+		next if ($invalid && !$returnpath);
 
 		# For each message, find the attached mail if there is one and
 		# if this email was forwarded by a Virtualmin user.
