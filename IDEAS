@@ -44,3 +44,6 @@
 	- See email from Richard A Secor
 	- Verify PHP package installation in Virtualmin
 	- Check that DKIM works
+
+ - x2crm script installer
+	- http://wiki.x2engine.com/wiki/Installation#Using_The_Silent_Installer
