@@ -2136,7 +2136,7 @@ if (!$config{'provision_dns'}) {
 local $ndi = &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'}, 1,
      0, undef, [ "dns", "bind_replace", "dnsns", "dns_ttl_def", "dns_ttl",
 		 "dnsprins", "dns_records",
-		 @views ? ( "newdns_view" ) : ( ) ]);
+		 @views || $tmpl->{'dns_view'} ? ( "newdns_view" ) : ( ) ]);
 print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
 	$ndi."<br>\n".
 	&ui_textarea("dns", $tmpl->{'dns'} eq "none" ? "" :
@@ -2177,7 +2177,7 @@ print &ui_table_row(&hlink($text{'tmpl_dnsns'}, "template_dns_ns"),
 		     $tmpl->{'dns_prins'}));
 
 # Option for view to add to, for BIND 9
-if (@views) {
+if (@views || $tmpl->{'dns_view'}) {
 	print &ui_table_row($text{'newdns_view'},
 		&ui_select("view", $tmpl->{'dns_view'},
 			[ [ "", $text{'newdns_noview'} ],
