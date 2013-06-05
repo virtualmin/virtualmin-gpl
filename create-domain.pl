@@ -414,6 +414,11 @@ if ($parentdomain) {
 	$plan = &get_plan($parent->{'plan'});	# Parent overrides any selection
 	$alias = $parent if ($aliasdomain);
 	$subdom = $parent if ($subdomain);
+	if ($parent->{'parent'}) {
+		# Parent is not actually the top, such as when creating an alias
+		$parent = &get_domain($parent->{'parent'});
+		$parent || &usage("No top level parent domain found!");
+		}
 	if ($subdomain) {
 		$domain =~ /^(\S+)\.\Q$subdomain\E$/ ||
 			&usage("Sub-domain $domain must be under the parent domain $subdomain");
