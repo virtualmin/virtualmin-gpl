@@ -45,5 +45,5 @@
 	- Verify PHP package installation in Virtualmin
 	- Check that DKIM works
 
- - x2crm script installer
-	- http://wiki.x2engine.com/wiki/Installation#Using_The_Silent_Installer
+ - update DNS slave master IP on eth0 IP change
+	- http://virtualmin.com/node/27788
