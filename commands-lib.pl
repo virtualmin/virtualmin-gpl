@@ -198,7 +198,7 @@ unset SERVER_ROOT
 unset SCRIPT_FILENAME
 export WEBMIN_CONFIG WEBMIN_VAR PERLLIB SCRIPT_NAME FOREIGN_MODULE_NAME SERVER_ROOT SCRIPT_FILENAME
 cd $module_root_directory
-id -a | grep uid=0 >/dev/null
+id -a | grep -i uid=0 >/dev/null
 if [ "\$?" != 0 ]; then
 	echo "$api_helper_command must be run as root"
 	exit 2
