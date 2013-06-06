@@ -1113,6 +1113,8 @@ edit_spf=DNS Options
 edit_spfdesc=Configure DNS-related options for this virtual server, such as the (Sender Policy Framework) record.
 edit_records=DNS Records
 edit_recordsdesc=Create, edit and delete DNS records for this virtual server.
+edit_viewrecords=Suggested DNS Records
+edit_viewrecordsdesc=Show suggested DNS records for this virtual server.
 edit_backup=Backup Virtual Server
 edit_backupdesc=Backup just this virtual server to a local or remote file.
 edit_backupdesc2=Backup just this virtual server to a remote FTP or SSH server.
@@ -5915,6 +5917,7 @@ records_evalueptr=Value must be an DNS name and end with a dot
 records_comment=Comment
 records_manual=Manually Edit Records
 records_epost=Records were not fully deleted : $1
+records_viewdesc=This virtual server's DNS domain is not hosted by your Virtualmin system. If the domain is hosted elsewhere, the records below should be used to ensure that the website and email functions correctly.
 
 record_title1=Create DNS Record
 record_title2=Edit DNS Record

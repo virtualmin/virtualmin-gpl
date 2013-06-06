@@ -971,6 +971,7 @@ if (!$config{'secmx_nodns'}) {
 sub create_standard_records
 {
 local ($file, $d, $ip) = @_;
+&require_bind();
 local $rootfile = &bind8::make_chroot($file);
 local $tmpl = &get_template($d->{'template'});
 local $serial = $bconfig{'soa_style'} ?
