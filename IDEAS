@@ -47,3 +47,4 @@
 
  - update DNS slave master IP on eth0 IP change
 	- http://virtualmin.com/node/27788
+	- part of post-config check
