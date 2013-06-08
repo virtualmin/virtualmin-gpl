@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the ZenPhoto script installer to version 1.4.4.8, Joomla to 3.1.1 and 2.5.11, MediaWiki to 1.21.1 and 1.19.7, phpMyAdmin to 4.0.3, eGroupWare to 1.8.004, DokuWiki to 2013-05-10, Moodle to 2.4.4, SugarCRM to 6.5.13, Roundcube to 0.9.1, FengOffice to 2.3, Dolibarr to 3.3.2, Coppermine to 1.5.24, CMS Made Simple to 1.11.7, PiWik to 1.12, Movable Type to 5.2.6, phpMyFAQ to 2.8.0, AjaXplorer to 5.0.0, and PHPList to 2.11.10.<br>Added a script installer for X2CRM 3.0.2.
+html=Updated the ZenPhoto script installer to version 1.4.4.8, Joomla to 3.1.1 and 2.5.11, MediaWiki to 1.21.1 and 1.19.7, phpMyAdmin to 4.0.3, eGroupWare to 1.8.004, DokuWiki to 2013-05-10, Moodle to 2.4.4, SugarCRM to 6.5.13, Roundcube to 0.9.1, FengOffice to 2.3, Dolibarr to 3.3.2, Coppermine to 1.5.24, CMS Made Simple to 1.11.7, PiWik to 1.12, Movable Type to 5.2.6, phpMyFAQ to 2.8.0, AjaXplorer to 5.0.0, and PHPList to 2.11.10.<br>Added a script installers for ownCloud 5.0.7 and X2CRM 3.0.2.
 master=1
 reseller=1
 domain=1
