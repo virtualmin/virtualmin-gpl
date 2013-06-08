@@ -71,7 +71,6 @@ foreach $d (@doms) {
 
 	&$outdent_print();
 	}
-&run_post_actions();
 
 # Update old default IP
 if ($in{'setold'}) {
@@ -81,6 +80,30 @@ if ($in{'setold'}) {
 	&unlock_file($module_config_file);
 	}
 
+# Update master IP on slave zones
+if ($in{'masterip'}) {
+	&require_bind();
+	$oldmasterip = $bconfig{'this_ip'} ||
+		       &to_ipaddress(&get_system_hostname());
+	@bdoms = grep { $_->{'dns'} && $_->{'dns_slave'} ne '' } @doms;
+	if ($oldmasterip eq $in{'old'} && @bdoms) {
+		&$first_print(&text('newips_slaves', $in{'old'}, $in{'new'}));
+		if ($bconfig{'this_ip'} eq $in{'old'}) {
+			$bconfig{'this_ip'} = $in{'new'};
+			&save_module_config(\%bconfig, "bind8");
+			}
+		&$indent_print();
+		foreach $d (@bdoms) {
+			$oldslaves = $d->{'dns_slave'};
+			&delete_zone_on_slaves($d);
+			&create_zone_on_slaves($d, $oldslaves);
+			}
+		&$outdent_print();
+		&$second_print($text{'setup_done'});
+		}
+	}
+
+&run_post_actions();
 &webmin_log("newips", "domains", scalar(@doms), { 'old' => $in{'old'},
 					          'new' => $in{'new'} });
 

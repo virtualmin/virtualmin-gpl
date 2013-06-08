@@ -3362,6 +3362,9 @@ newips_dom=Changing IP address for $1 ..
 newips_servers=Servers to update
 newips_all=All servers
 newips_sel=Only selected ..
+newips_also=Global settings to update
+newips_masterip=Slave DNS zone master IP address
+newips_slaves=Re-creating slave DNS zones with to change master IP address from $1 to $2 ..
 
 newip_title=Change IP Address
 newip_header=New virtual IP address

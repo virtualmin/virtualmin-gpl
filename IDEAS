@@ -45,6 +45,8 @@
 	- Verify PHP package installation in Virtualmin
 	- Check that DKIM works
 
- - update DNS slave master IP on eth0 IP change
-	- http://virtualmin.com/node/27788
-	- part of post-config check
+ - Nginx backup should include whole file
+	- http://virtualmin.com/node/27900
+
+ - OwnCloud script installer
+	- http://virtualmin.com/node/27936
