@@ -49,7 +49,7 @@ if (!-d $spam_config_dir) {
 	}
 local $spamdir = "$spam_config_dir/$_[0]->{'id'}";
 &make_dir($spamdir, 0750);
-&set_ownership_permissions(undef, undef, 0750, $spamdir);
+&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'gid'}, 0750, $spamdir);
 
 &obtain_lock_spam($_[0]);
 &obtain_lock_cron($_[0]);
