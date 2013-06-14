@@ -2433,7 +2433,8 @@ if (!$file) {
 	return;
 	}
 local $bump = 0;
-foreach my $t ("SPF", "TXT") {
+local @types = $bind8::config{'spf_record'} ? ( "SPF", "TXT" ) : ( "SPF" );
+foreach my $t (@types) {
 	local ($r) = grep { $_->{'type'} eq $t &&
 			    $_->{'values'}->[0] =~ /^v=spf/ &&
 			    $_->{'name'} eq $d->{'dom'}.'.' } @$recs;
