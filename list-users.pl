@@ -95,14 +95,16 @@ else {
 
 foreach $d (@doms) {
 	@users = &list_domain_users($d, $owner, 0, 0, 0);
+	if (%usernames) {
+		@users = grep { $usernames{$_->{'user'}} ||
+				$usernames{&remove_userdom($_->{'user'}, $d)} }
+			      @users;
+		}
 	if ($multi) {
 		# Show attributes on separate lines
 		$home_bsize = &has_home_quotas() ? &quota_bsize("home") : 0;
 		$mail_bsize = &has_mail_quotas() ? &quota_bsize("mail") : 0;
 		foreach $u (@users) {
-			next if (%usernames && !$usernames{$u->{'user'}} &&
-				 !$usernames{&remove_userdom($u->{'user'}, $d)});
-				 
 			print &remove_userdom($u->{'user'}, $d),"\n";
 			print "    Domain: $d->{'dom'}\n";
 			print "    Unix username: ",$u->{'user'},"\n";
