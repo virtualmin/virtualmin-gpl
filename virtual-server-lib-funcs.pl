@@ -10066,6 +10066,7 @@ if ($config{'old_defip'} && $defip && $config{'old_defip'} ne $defip) {
 	$rv .= &ui_hidden("old", $config{'old_defip'});
 	$rv .= &ui_hidden("new", $defip);
 	$rv .= &ui_hidden("setold", 1);
+	$rv .= &ui_hidden("also", 1);
 	$rv .= &ui_submit($text{'licence_changeip'});
 	$rv .= &ui_form_end();
 	$rv .= "<p></td></tr></table><p>\n";
@@ -11107,13 +11108,23 @@ if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} &&
 		  });
 	}
 
-if ($d->{'dns'} && &can_edit_records($d)) {
-	# DNS records button
-	push(@rv, { 'page' => 'list_records.cgi',
-		    'title' => $text{'edit_records'},
-		    'desc' => $text{'edit_recordsdesc'},
-		    'cat' => 'server',
-		  });
+if (&can_edit_records($d)) {
+	if ($d->{'dns'}) {
+		# DNS edit records button
+		push(@rv, { 'page' => 'list_records.cgi',
+			    'title' => $text{'edit_records'},
+			    'desc' => $text{'edit_recordsdesc'},
+			    'cat' => 'server',
+			  });
+		}
+	elsif (!$d->{'subdom'}) {
+		# DNS suggested records button
+		push(@rv, { 'page' => 'view_records.cgi',
+			    'title' => $text{'edit_viewrecords'},
+			    'desc' => $text{'edit_viewrecordsdesc'},
+			    'cat' => 'server',
+			  });
+		}
 	}
 
 &require_mail();
