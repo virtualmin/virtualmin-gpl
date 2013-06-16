@@ -1486,12 +1486,12 @@ return $? ? $out : undef;
 
 # restore_domains(file, &domains, &features, &options, &vbs,
 #		  [only-backup-features], [&ip-address-info], [as-owner],
-#		  [skip-warnings], [&key], [continue-on-errors])
+#		  [skip-warnings], [&key], [continue-on-errors], [delete-first])
 # Restore multiple domains from the given file
 sub restore_domains
 {
 local ($file, $doms, $features, $opts, $vbs, $onlyfeats, $ipinfo, $asowner,
-       $skipwarnings, $key, $continue) = @_;
+       $skipwarnings, $key, $continue, $delete_existing) = @_;
 
 # Find owning domain
 local $asd;
@@ -1758,6 +1758,19 @@ if ($ok) {
 	local @bplugins = &list_backup_plugins();
 	DOMAIN: foreach $d (sort { $a->{'parent'} <=> $b->{'parent'} ||
 				   $a->{'alias'} <=> $b->{'alias'} } @$doms) {
+
+		if ($delete_existing && !$d->{'missing'}) {
+			# Delete the domain first
+			&$first_print(&text('restore_deletefirst',
+					    &show_domain_name($d)));
+			&$indent_print();
+			&delete_virtual_server($d);
+			&$outdent_print();
+			&$second_print($text{'setup_done'});
+
+			$d->{'missing'} = 1;
+			}
+
 		if ($d->{'missing'}) {
 			# This domain doesn't exist yet - need to re-create it
 			&$first_print(&text('restore_createdomain',
