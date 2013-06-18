@@ -18,7 +18,7 @@ return "DokuWiki is a standards compliant, simple to use Wiki, mainly aimed at c
 # script_dokuwiki_versions()
 sub script_dokuwiki_versions
 {
-return ( "2013-05-10" );
+return ( "2013-05-10a" );
 }
 
 sub script_dokuwiki_category
