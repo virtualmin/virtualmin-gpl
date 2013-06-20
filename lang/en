@@ -2256,6 +2256,7 @@ backup_mysqldump=Dumping MySQL database $1 ..
 backup_mysqldumpfailed=.. dump failed! $1
 backup_mysqlgzipfailed=.. gzip failed! $1
 backup_fordomain=Creating backup for virtual server $1 ..
+backup_emptydomain=.. some domain details missing!
 backup_donedomain=.. completed in $1
 backup_ebackupdir=.. failed to create temporary backup directory $1 : $2
 backup_final=Creating final backup archive ..

@@ -562,7 +562,14 @@ DOMAIN: foreach $d (@$doms) {
 
 	# Begin doing this domain
 	&$cbfunc($d, 0, $backupdir) if ($cbfunc);
-	&$first_print(&text('backup_fordomain', &show_domain_name($d)));
+	&$first_print(&text('backup_fordomain', &show_domain_name($d) ||
+						$d->{'id'}));
+	if (!$d->{'dom'} || !$d->{'home'}) {
+		# Has no domain name!
+		&$second_print($text{'backup_emptydomain'});
+		$dok = 0;
+		goto DOMAINFAILED;
+		}
 	local $f;
 	local $dok = 1;
 	local @donefeatures;
