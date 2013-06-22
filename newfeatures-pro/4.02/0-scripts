@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Roundcube script installer to version 0.9.2, DokuWiki to 2013-05-10a, X2CRM to 3.1, and phpMyAdmin to 4.0.4.
+html=Updated the Roundcube script installer to version 0.9.2, DokuWiki to 2013-05-10a, X2CRM to 3.1, WordPress to 3.5.2, and phpMyAdmin to 4.0.4.
 master=1
 reseller=1
 domain=1
