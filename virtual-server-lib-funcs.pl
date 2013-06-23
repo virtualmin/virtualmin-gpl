@@ -8027,7 +8027,7 @@ push(@rv, { 'id' => 0,
 	    'skel' => $config{'virtual_skel'} || "none",
 	    'skel_subs' => int($config{'virtual_skel_subs'}),
 	    'skel_nosubs' => $config{'virtual_skel_nosubs'},
-	    'frame' => &cat_file("framefwd-template"),
+	    'frame' => &cat_file("framefwd-template", 1),
 	    'gacl' => 1,
 	    'gacl_umode' => $config{'gacl_umode'},
 	    'gacl_uusers' => $config{'gacl_uusers'},
@@ -8371,7 +8371,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'defsafeunder'} = $tmpl->{'safeunder'};
 	$config{'defipfollow'} = $tmpl->{'ipfollow'};
 	$config{'defresources'} = $tmpl->{'resources'};
-	&uncat_file("framefwd-template", $tmpl->{'frame'});
+	&uncat_file("framefwd-template", $tmpl->{'frame'}, 1);
 	$config{'ip_ranges'} = $tmpl->{'ranges'} eq 'none' ? undef :
 			       $tmpl->{'ranges'};
 	$config{'ip_ranges6'} = $tmpl->{'ranges6'} eq 'none' ? undef :
@@ -8623,21 +8623,31 @@ else {
 	}
 }
 
-# cat_file(file)
+# cat_file(file, [newlines-to-tabs])
 # Returns the contents of some file
 sub cat_file
 {
-local $path = $_[0] =~ /^\// ? $_[0] : "$module_config_directory/$_[0]";
-return &read_file_contents($path);
+local ($file, $tabs) = @_;
+local $path = $file =~ /^\// ? $file : "$module_config_directory/$file";
+local $rv = &read_file_contents($path);
+if ($tabs) {
+	$rv =~ s/\r//g;
+	$rv =~ s/\n/\t/g;
+	}
+return $rv;
 }
 
-# uncat_file(file, data)
+# uncat_file(file, data, [tabs-to-newlines])
 # Writes to some file
 sub uncat_file
 {
-local $path = $_[0] =~ /^\// ? $_[0] : "$module_config_directory/$_[0]";
+local ($file, $data, $tabs) = @_;
+if ($tabs) {
+	$data =~ s/\t/\n/g;
+	}
+local $path = $file =~ /^\// ? $file : "$module_config_directory/$file";
 &open_lock_tempfile(FILE, ">$path");
-&print_tempfile(FILE, $_[1]);
+&print_tempfile(FILE, $data);
 &close_tempfile(FILE);
 }
 
