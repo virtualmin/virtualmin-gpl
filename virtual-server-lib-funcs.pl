@@ -5488,6 +5488,9 @@ foreach my $t (readdir(DIR)) {
 	next if ($t eq "." || $t eq "..");
 	if ($t =~ /^(\d+)_(\d+)$/) {
 		# A script file
+		if (!-d $template_scripts_dir) {
+			&make_dir($template_scripts_dir, 0755);
+			}
 		&copy_source_dest("$temp/$t", "$template_scripts_dir/$t");
 		}
 	else {
