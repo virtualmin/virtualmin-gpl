@@ -12,6 +12,8 @@ $d || &error($text{'edit_egone'});
 
 # Create standard set of records
 $temp = &transname();
+local $bind8::config{'auto_chroot'} = undef;
+local $bind8::config{'chroot'} = undef;
 &create_standard_records($temp, $d, $d->{'dns_ip'} || $d->{'ip'});
 $recs = &read_file_contents($temp);
 &unlink_file($temp);
