@@ -1408,4 +1408,4 @@ Added an option when restoring virtual servers to have them deleted and re-creat
 When changing the IP address of multiple domains, an option to update the master IP of slave DNS zones is now available.
 For domains whose DNS is not hosted by the Virtualmin system, a sensible default set of records is shown on the Suggested DNS Records page.
 ---- Changes since 4.01 ----
-Updated the Roundcube script installer to version 0.9.2, DokuWiki to 2013-05-10a, X2CRM to 3.1.1, WordPress to 3.5.2, and phpMyAdmin to 4.0.4.
+Updated the Roundcube script installer to version 0.9.2, DokuWiki to 2013-05-10a, X2CRM to 3.1.1, WordPress to 3.5.2, Movable Type to 5.2.7, and phpMyAdmin to 4.0.4.
