@@ -244,7 +244,6 @@ $d || &usage("Virtual server $domain does not exist");
 ($user) = grep { $_->{'user'} eq $username ||
 		 &remove_userdom($_->{'user'}, $d) eq $username } @users;
 $user || &usage("No user named $username was found in the server $domain");
-$user->{'domainowner'} && &usage("The user $username is the owner of server $domain, and so cannot be modified");
 $olduser = { %$user };
 $shortusername = &remove_userdom($user->{'user'}, $d);
 &build_taken(\%taken, \%utaken);
@@ -254,6 +253,23 @@ foreach $g (@addgroups) {
 		&usage("Group $g is not allowed for this virtual server");
 	}
 $disable && $enable && &usage("Only one of the --disable and --enable options can be used");
+
+# Limit what can be done to domain owners
+if ($user->{'domainowner'}) {
+	$real &&
+	  &usage("The --real flag cannot be used when editing a domain owner");
+	defined($pass) &&
+	  &usage("The --pass and --passfile flags cannot be used when ".
+		 "editing a domain owner");
+	($quota || $mquota || $qquota) &&
+	  &usage("Quotas cannot be changed when editing a domain owner");
+	(@adddbs || @deldbs) &&
+	  &usage("Databases cannot be changed when editing a domain owner");
+	$newusername &&
+	  &usage("The username cannot be changed when editing a domain owner");
+	$shell &&
+	  &usage("The shell cannot be changed when editing a domain owner");
+	}
 
 # Make the changes to the user object
 &require_useradmin();
