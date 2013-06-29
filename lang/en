@@ -5097,6 +5097,7 @@ history_stat_memtotal=Memory limit
 history_stat_swapused=Swap space used
 history_stat_swaptotal=Swap space limit
 history_stat_memcached=Buffer cache used
+history_stat_memburst=Burstable limit
 history_stat_diskused=Disk space used
 history_stat_quotalimit=Disk quota assigned
 history_stat_quotaused=Disk quota used
