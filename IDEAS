@@ -45,8 +45,11 @@
 	- Verify PHP package installation in Virtualmin
 	- Check that DKIM works
 
- - Nginx backup should include whole file
-	- http://virtualmin.com/node/27900
+ - Webmin cron type that fetches a URL
+	- http://virtualmin.com/node/28382
+	- use same format as Virtualmin
+	- CHANGELOG
 
- - OwnCloud script installer
-	- http://virtualmin.com/node/27936
+ - Usermin scheduled mail move
+ - Usermin apply filter to existing mail
+	- CHANGELOG
