@@ -2042,6 +2042,10 @@ sub add_name_virtual
 {
 local ($d, $conf, $web_port, $no_star_match) = @_;
 &require_apache();
+if ($apache::httpd_modules{'core'} >= 2.4) {
+	# Apache 2.4 doesn't need NameVirtualHost any more
+	return 1;
+	}
 local $nvstar;
 if ($d->{'name'}) {
 	local ($found, $found_no_port);
