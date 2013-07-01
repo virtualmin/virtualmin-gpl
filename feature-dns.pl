@@ -1986,14 +1986,20 @@ foreach my $r (@$recs) {
 	if ($r->{'name'} eq $olddom.".") {
 		$r->{'name'} = $newdom.".";
 		}
+	elsif ($r->{'name'} eq $olddom.".disabled.") {
+		$r->{'name'} = $newdom.".disabled.";
+		}
 	else {
-		$r->{'name'} =~ s/\.$olddom\.$/\.$newdom\./;
+		$r->{'name'} =~ s/\.$olddom(\.disabled)?\.$/\.$newdom$1\./;
 		}
 	if ($r->{'realname'} eq $olddom.".") {
 		$r->{'realname'} = $newdom.".";
 		}
+	elsif ($r->{'realname'} eq $olddom.".disabled.") {
+		$r->{'realname'} = $newdom.".";
+		}
 	else {
-		$r->{'realname'} =~ s/\.$olddom\.$/\.$newdom\./;
+		$r->{'realname'} =~ s/\.$olddom(\.disabled)?\.$/\.$newdom$1\./;
 		}
 	if ($r->{'type'} eq 'SPF' ||
 	    $r->{'type'} eq 'TXT' && $r->{'values'}->[0] =~ /^v=spf/) {
