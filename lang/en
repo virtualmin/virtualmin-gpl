@@ -6040,7 +6040,7 @@ mxv_eaccess=The spam control (access_db) feature is not enabled in the Sendmail 
 mxv_eaccessfile=The spam control (access_db) file $1 does not exist yet
 
 fixperms_err=Failed to fix permissions
-fixperms_edoms=No virutal servers selected
+fixperms_edoms=No virtual servers selected
 fixperms_title=Fixing Permissions
 fixperms_dom=Fixing file ownership and permissions for $1 ..
 
