@@ -399,8 +399,12 @@ bandwidth_web=Webseiten-Traffic
 bkey_create=Erstelle Verschl&#252;sselungsschl&#252;ssel
 bkey_data=ASCII-Format Schl&#252;ssel
 bkey_desc=Schl&#252;ssel-Beschreibung
+bkey_edata=Schl&#252;sseldaten scheint nicht im ASCII GPG privaten Schl&#252;ssel Format zu sein
 bkey_edesc=Fehlende Beschreibung
+bkey_edesc2=Beschreibung f&#252;r einen neuen Schl&#252;ssel muss mindestens 5 Zeichen lang sein
+bkey_edescclash=Ein GPG-Schl&#252;ssel mit der selben Beschreibung existiert bereits
 bkey_edit=Editiere Verschl&#252;sselungsschl&#252;ssel
+bkey_eemailclash=Ein GPG-Schl&#252;ssel mit der selben E-Mail-Adresse existiert bereits
 bkey_efile=Schl&#252;sseldatei exisitert nicht
 bkey_egenerate=Schl&#252;sselerzeugung fehlgeschlagen : $1
 bkey_egone=Verschl&#252;sselungsschl&#252;ssel existiert nicht l&#228;nger!
@@ -842,8 +846,11 @@ databases_tabusernames=Benutzernamen
 databases_title=Bearbeite Datenbanken
 databases_type=Datenbank-Art
 databases_uheader=&#196;ndere Datenbank Benutzernamen
+dbhosts_doing=Stellen erlaubte $1 Datenbank Hosts zu $2 ein ..
+dbhosts_done=.. setze f&#252;r $1 und andere Benutzer mit Datenbank-Zugriff.
 dbhosts_ehost='$1' ist kein g&#252;lstiger Hostname oder Ausdruck
 dbhosts_enone=Keine Hostnamen oder IP-Adressen eingeben
+dbhosts_err=Fehlgeschlagen entfernte Datenbank Hosts zu &#228;ndern
 dbhosts_failed=.. fehlgeschlagen : $1
 dbhosts_title=Update Datenbank Hosts
 dbname_eclash=Ein Datenbank Benutzer mit dem selben Namen existiert bereits
@@ -853,6 +860,7 @@ dbname_euser=Fehlender oder ung&#252;ltiger Benutzername
 dbpass_err=Fehlgeschlagen Datenbank Passw&#246;rter zu &#228;ndern
 ddatabases_dbs=Databanken die gel&#246;scht werden: $1
 ddatabases_edb=$1 Datenbank $2 existiert nicht l&#228;nger!
+ddatabases_edbdef=Sie sind nicht berechtigt die Standard $1 Datenbank $ 2 zu entfernen
 ddatabases_err=Fehler beim L&#246;schen der Datenbanke(n).
 ddatabases_ok=Jetzt l&#246;schen
 ddatabases_title=Datenbanken l&#246;schen
@@ -864,9 +872,12 @@ delete_aliasdoms=Die folgenden Alias-Server werden ebenfalls permanent gel&#246;
 delete_aliases=L&#246;sche Mail-Aliases ..
 delete_apache=L&#246;sche virtuelle Webseite ..
 delete_apachealias=Entferne virtuelle Webseite ..
+delete_apachelog=L&#246;sche Apache Log Dateien ..
 delete_bind=L&#246;sche DNS-Zone ..
 delete_bindeslave=.. einige Slave-Server konnten nicht gel&#246;scht werden :
 delete_bindslave=L&#246;sche Slave-DNS-Zone auf $1 ..
+delete_bindsub=L&#246;sche Eintr&#228;ge von DNS Zone $1 ..
+delete_dom=L&#246;sche Sub-Server $1 ..
 delete_domain=L&#246;sche Details des Servers $1 ..
 delete_doms=Entferne von der E-Mail-Domain-Liste ...
 delete_ebind_provision=.. L&#246;schen fehlgeschlagen : $1
@@ -904,6 +915,7 @@ delete_spam=Schalte Spamfilerung aus ..
 delete_ssl=L&#246;sche virtuelle SSL-Webseite ..
 delete_status=Entferne Statusmonitor f&#252;r die Webseite ..
 delete_statusssl=Entferne Statusmonitor f&#252;r die SSL-Webseite ..
+delete_stopscripts=Stoppe Skript Installer Server Prozesse ..
 delete_subs=Die folgenden Unterserver werden ebenfalls dauerhaft gel&#246;scht : $1
 delete_title=Server l&#246;schen
 delete_user=L&#246;sche Unix-Benutzer ..
@@ -919,6 +931,7 @@ delete_webmin=L&#246;sche Webmin-Benutzer ..
 disable_and=$1 und $2
 disable_apache=Ersetze Webseite mit Fehlerseite ...
 disable_bind=DNS-Zone umbenennen und deaktivieren ...
+disable_bindnosub=.. nicht m&#246;glich f&#252;r Sub-Server
 disable_doing=Deaktiviere Virtuellen Server $1
 disable_ealready=Dieser Virtuelle Server wurde bereits deaktiviert
 disable_ebind_provision=.. Umbenennung fehlgeschlagen : $1
@@ -941,6 +954,7 @@ disable_rusure2=Sind Sie sicher, da&#223; Sie den virtuellen Server $1 deaktivie
 disable_ssl=Tausche SSL-Webseite gegen eine Fehlerseite aus ..
 disable_status=Deaktiviere Statusmonitor f&#252;r die Webseite ..
 disable_statusssl=Deaktiviere Statusmonitor f&#252;r die SSL-Webseite ..
+disable_subservers=Auch Sub-Server deaktivieren?
 disable_title=Deaktiviere Virtuellen Server
 disable_undo=Alle obig aufgef&#252;hrten Aktionen sind ohne Datenverlust wiederherstellbar, wenn der Virtuelle Server reaktiviert wird.
 disable_unix=Sperre das Passwort des Unix-Benutzers ..
@@ -960,11 +974,16 @@ dkim_epubkey=.. &#246;ffentlicher Schl&#252;ssel fehlgeschlagen!
 dkim_err=Fehlgeschlagen DKIM Einstellungen zu speichern
 dkim_estart=.. starten fehlgeschlagen : $1
 dkim_exclude=Niemals signieren f&#252;r Domains
+dkim_extra=Zus&#228;tzliche Domains zu signieren f&#252;r
 dkim_founddomains=.. $1 Server gefunden
 dkim_install=Installiere jetzt
+dkim_installed=.. Installation erfolgreich abgeschlossen
 dkim_installfailed=.. Installation fehlgeschlagen!
+dkim_installing=Installiere das DKIM Filter Paket
+dkim_mailserver=Konfiguriere Mail Server um DKIM Filter zu nutzen ..
 dkim_makenewkey=Erzwinge Generation eines neuen privaten Schl&#252;ssels?
 dkim_newkey=Generiere privaten Schl&#252;ssel in Datei $1 ..
+dkim_return=DKIM Form
 dkim_size=Gr&#246;&#223;e eines neuen DKIM Schl&#252;ssel
 dkim_somefail=DKIM Einrichtung fehlgeschlagen!
 dkim_start=Starte DKIM Filter ..
@@ -978,6 +997,7 @@ edit_aliasdesc=F&#252;gen Sie einen virtuellen Server hinzu, der lediglich ein A
 edit_aliasdoms=Aliases f&#252;r diesen Server
 edit_aliases=E-Mail-Alias bearbeiten
 edit_aliasesdesc=Zeige alle E-Mail-Aliases f&#252;r die Domain des virtuellen Servers an, so da&#223; bestehende bearbeitet und neue angelegt werden k&#246;nnen.
+edit_aliasmail=Mit eigenen E-Mail
 edit_aliasto=Alias f&#252;r Server
 edit_alloc=Jetzt mit zugewiesener IP erzeugen
 edit_allquotah=Speicherplatz genutzt auf Disk (inklusive Sub-Server)
@@ -1084,6 +1104,7 @@ edit_proxy=Bearbeite Proxy-Webseite
 edit_proxy1=Proxy-Webseite nach
 edit_proxy2=Frame-forward-Webseite nach
 edit_proxydesc=Setzen oder &#228;ndern Sie die URL auf welche die Webseite f&#252;r diesen virtuellen Server weiterleten soll.
+edit_psearch=Liste an Sub-Server
 edit_qdbs=$1 in Datenbanken
 edit_qon=$1 auf $2
 edit_quota=Komplette Quota des Virtuellen Servers
@@ -1108,8 +1129,12 @@ edit_spam=Spamfilterung aktiv?
 edit_spf=DNS-Optionen
 edit_ssl=SSL-Webseite aktiviert?
 edit_status=Statusmonitor aktiv?
+edit_subdom=Erstelle Sub-Domain
+edit_subdoms=Sub-Server besitzt von diesem Server
 edit_sublist=(Liste ..)
 edit_subquota=Speicherplatz genutzt von Unterservern
+edit_subserv=Neuen Sub-Server
+edit_switch=Wechsele zu Server Admin
 edit_title=Server bearbeiten
 edit_tmpl=Erzeugt durch eine Vorlage
 edit_totalquota=Insgesamt verwendeter Speicherplatz
@@ -1139,6 +1164,7 @@ edit_webalizer=Webalizer-Statistiken verf&#252;gbar?
 edit_webmin=Webmin-Benutzer anlegen?
 edit_xndomain=Realer DNS Domain Name
 editgrey_cmts=Zus&#228;tzlicher Kommentar
+editgrey_valueclients=Mail Server IP-Adresse oder Hostname
 editgrey_valuerecipients=Ziel E-Mail-Adresse
 elink_cat=Men&#252;kategorie
 elink_desc=Link Titel
@@ -1256,10 +1282,14 @@ form_ftp=Richte einen virtuellen FTP-Server f&#252;r die Domain ein?
 form_fwdto=Standard E-Mail-Weiterleitungsadresse
 form_fwdto_none=Keine
 form_generic_master=Top-level Server
+form_generic_subdom=Sub-Domain von $1
+form_generic_subserver=Sub-Server
+form_genericmode=Neuer Virtueller Servertyp:
 form_group=Gruppe f&#252;r Unix-Benutzer
 form_header=Eigenschaften des neuen Virtuellen Servers
 form_iface=Netzwerkinterface
 form_iface6=IPv6-Netzwerk Interface
+form_inputssect=Zus&#228;tzliche Feature Optionen
 form_ip=IP-Adresse f&#252;r Webseite und Domaine
 form_ipsect=IP-Adresse und Interfaces
 form_k=kB
@@ -1269,6 +1299,7 @@ form_mail=E-Mail f&#252;r diese Domain akzeptieren?
 form_mailbox=Erzeuge eine E-Mail-Adresse f&#252;r den Unixbenutzer?
 form_mailboxlimit=Maximal erlaubte E-Mailboxen
 form_mgroup=Gruppe f&#252;r E-Mailbox-Benutzer
+form_mongrelslimit=Maximale Mongrel Server Prozesse f&#252;r Rails
 form_mysql=MySQL-Datenbank erzeugen?
 form_name=Details zum Webserver
 form_name0=IP basierend
@@ -1540,11 +1571,13 @@ index_elocal=Die lokale Benutzergruppe $1 existiert nicht, Vielleicht ist die <a
 index_elogrotate=Das Logrotate-Programm scheint auf Ihrem System nicht installiert zu sein oder es wurde in der <a href='$1'>Logrotation-Konfiguration</a> nicht richtig konfiguriert. Wenn Ihr System Logrotate nicht nutzt, dann &#228;ndern Sie dies bitte in der <a href='$2'>Modulkonfiguration</a>.
 index_elogrotatever=Das Logrotate-Programm scheint in Version $3 vorhanden zu sein. Virtualmin unterst&#252;tzt jedoch nur Version $4 oder h&#246;her, um multiple Logdateien in der gleichen Sektion zu handhaben.
 index_email=Keiner der unterst&#252;tzten Mail-Server (Sendmail und Postfix) wurde auf Ihrem System erkannt. Vielleicht sind sie nicht installiert oder die zugeh&#246;rigen Webmin-Module wurden nicht richtig eingerichtet.
+index_emailboxessystem=Die Read-Benutzer-Mail-Modul wird nicht eingerichtet, um die $3 Mail-Server zu verwenden. Entweder stellen Sie ihre <a href='$1'>Modul Konfiguration</a> ein, oder &#228;ndern Sie die <a href='$2'>Virtualmin Konfiguration</a>.
 index_emailmtab=Das Modul konnte keinen Mount-Point f&#252;r Ihre Mail-Verzeichnisse im Verzeichnis $1 finden. Das Editieren von Quota wird abgeschaltet.
 index_emailto=E-Mail-Adresse
 index_emodssl=Die Apache-Konfiguration scheint keine Einstellungen f&#252;r das Modul $1 zu beinhalten. Diese werden jedoch f&#252;r SSL-Webseiten ben&#246;tigt. Wenn Sie keine SSL-Webseiten bereitstellen m&#246;chten, so &#228;ndern Sie dies bitte in der <a href='$2'>Modulkonfiguration</a> page.
 index_emodssl2=Die Apache-Konfiguration scheint keine Einstellungen f&#252;r den Port $1 zu beinhalten. Diese werden jedoch f&#252;r SSL-Webseiten ben&#246;tigt. Wenn Sie keine SSL-Webseiten bereitstellen m&#246;chten, so &#228;ndern Sie dies bitte in der <a href='$2'>Modulkonfiguration</a> page.
 index_emysql=MySQL scheint nicht auf Ihrem System installiert zu sein oder er wurde in Webmin's <a href='$1'>MySQL Datenbank</a>-Modul nicht richtig eingerichtet. Wenn Ihr System MySQL nicht benutzt, so sollten Sie dies in Virtualmin's <a href='$2'>Modul-Konfiguration</a> deaktivieren.
+index_emysql2=MySQL-Client-Programme scheinen nicht installiert zu sein, oder ist noch nicht richtig in Webmins <a href='$1'>MySQL-Datenbank</a>-Modul eingestellt. Wenn Ihr System MySQL nicht verwendet, sollte es in der Virtualmin <a href='$2'>Modul Konfiguration</a> Seite deaktiviert werden.
 index_enable=Aktiviere ausgew&#228;hltes
 index_enet=Das Netzwerk-Konfigurationsmodul wird von Ihrem Betriebssystem nicht unterst&#252;tzt. Dies ist jedoch f&#252;r Virtualmin zwingend Vorraussetzung.
 index_eopenssl=Der Befehl $1 wurde auf Ihrem System nicht gefunden. Dieser wird jedoch f&#252;r die initiale Erzeugung und den Betrieb von SSL-Webseiten ben&#246;tigt. Wenn Sie nicht vorhaben SSL-Webseiten zu hosten, dann sollten Sie dieses Feature in der <a href='$2'>Modulkonfiguration</a> von Virtualmin deaktivieren.
@@ -1552,6 +1585,7 @@ index_epaliases=Es wurde keine Alias-Datei in Ihrer <a href='$1'>Postfix</a>-Kon
 index_epgens=Es wurde keine Canonical-Map-Datei f&#252;r abgehende Adressen in Ihrer <a href='$1'>Postfix</a>-Konfiguration gefunden. Sie sollten diese Map entweder der Konfiguration hinzuf&#252;gen oder dieses Feature in der <a href='$2'>Modulkonfiguration</a> von Virtualmin deaktivieren.
 index_epostfix=Der Postfix-Mail-Server scheint nicht auf Ihrem System installiert zu sein oder er wurde in Webmin's <a href='$1'>POstfix-Konfiguration</a>-Modul nicht richtig eingerichtet. Wenn Ihr System einen anderen Mail-Server benutzt, so sollten Sie dies in Virtualmin's <a href='$2'>Modul-Konfiguration</a> einrichten.
 index_epostgres=PostgreSQL scheint nicht auf Ihrem System installiert zu sein oder er wurde in Webmin's <a href='$1'>PostgreSQL-Datenbank</a>-Modul nicht richtig eingerichtet. Wenn Ihr System PostgreSQL nicht benutzt, so sollten Sie dies in Virtualmin's <a href='$2'>Modul-Konfiguration</a> deaktivieren.
+index_eprocmail=Das Programm Procmail, welches f&#252;r Spam-Filterung erforderlich ist, scheint nicht auf Ihrem System installiert zu sein, oder ist noch nicht richtig im Webmins <a href='$1'>Procmail Mail Filter</a>-Modul eingestellt. Wenn Ihr System Spam-Filterung nicht nutzt, sollte es in der Virtualmin <a href='$2'>Modul Konfiguration</a> Seite deaktiviert werden.
 index_eproftpd=Der ProFTPd-Server scheint auf Ihrem System nicht installiert zu sein oder er wurde nicht korrekt im <a href='$1'>ProFTPd-Server</a>-Modul konfiguriert. Wenn Ihr System den ProFTPd nicht benutzt, dann sollten Sie dies in der <a href='$2'>Modulkonfiguration</a> von Virtualmin deaktivieren.
 index_epvirts=Es wurde keine Virtuelle-Domain-Datei in Ihrer <a href='$1'>Postfix</a>-Konfiguration gefunden. Wahrscheinlich ist ind keine Domain-Map definiert.
 index_eqgens=Das Mapping von ausgehenden Adressen wird von QMail nicht unterst&#252;tzt. Sie sollten dies in der <a href='$1'>Modulkonfiguration</a> abschalten.
@@ -1567,6 +1601,7 @@ index_equota4=Quotas sind nicht f&#252;r das Dateisystem $1 aktiviert, welches d
 index_esaliases=Es wurden keine Aliase in Ihrer <a href='$1'>Sendmail-Konfiguration</a> gefunden. Entweder ist Sendmail nicht richtig installiert oder Sie nutzen einen anderen E-Mail-Server.
 index_esendmail=Der Sendmail-Mail-Server scheint nicht auf Ihrem System installiert zu sein oder er wurde in Webmin's <a href='$1'>Sendmail-Konfiguration</a>-Modul nicht richtig eingerichtet. Wenn Ihr System einen anderen Mail-Server benutzt, so sollten Sie dies in Virtualmin's <a href='$2'>Modul-Konfiguration</a> einrichten.
 index_esgens=Es wurde keine Datei f&#252;r ausgehende Adressen (genericstable) in Ihrer <a href='$1'>Sendmail-Konfiguration</a> gefunden. Sie m&#252;ssen wahrscheinlich dieses Feature Ihrer M$-Datei f&#252;r Sendmail hinzuf&#252;gen und die Konfiguration neu erstellen oder dieses Feature in der <a href='$2'>Modulkonfiguration</a> abstellen.
+index_espam=Das Programm SpamAssassin scheint nicht auf Ihrem System installiert zu sein, oder ist noch nicht richtig im Webmins <a href='$1'>SpamAssassin Mail Filter</a>-Modul eingestellt. Wenn Ihr System Spam-Filterung nicht nutzt, sollte es in der Virtualmin <a href='$2'>Modul Konfiguration</a> Seite deaktiviert werden.
 index_estatus=Das System und Server Status Modul scheint nicht auf Ihrem System installiert zu sein. Installieren Sie es oder deaktiveren Sie Staus Monitoring auf der <a href='$2'>Modulkonfiguration</a> Seite.
 index_esvirts=Es wurde keine Datei f&#252;r virtuelle Adressen (virtusertable) in Ihrer <a href='$1'>Sendmail-Konfiguration</a> gefunden. Sie m&#252;ssen wahrscheinlich dieses Feature Ihrer M$-Datei f&#252;r Sendmail hinzuf&#252;gen und die Konfiguration neu erstellen.
 index_evirus=Das Programm ClamAV $1 scheint nicht auf Ihrem System installiert zu sein. &#196;ndern Sie den Pfad auf der <a href='$2'>Modulkonfiguration</a> Seite oder deaktivieren Sie diese Funktion.
