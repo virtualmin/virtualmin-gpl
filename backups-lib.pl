@@ -3286,7 +3286,8 @@ return $cmd;
 # Returns the full path to the bzip2-compatible command
 sub get_bzip2_command
 {
-return &has_command($config{'pbzip2'} ? 'pbzip2' : 'bzip2');
+local $cmd = $config{'pbzip2'} ? 'pbzip2' : 'bzip2';
+return &has_command($cmd) || $cmd;
 }
 
 # get_bunzip2_command()
@@ -3294,14 +3295,14 @@ return &has_command($config{'pbzip2'} ? 'pbzip2' : 'bzip2');
 sub get_bunzip2_command
 {
 if (!$config{'pbzip2'}) {
-	return &has_command('bunzip2');
+	return &has_command('bunzip2') || 'bunzip2';
 	}
 elsif (&has_command('pbunzip2')) {
-	return &has_command('pbunzip2');
+	return &has_command('pbunzip2') || 'pbunzip2';
 	}
 else {
 	# Fall back to using -d option
-	return &has_command('pbzip2').' -d';
+	return (&has_command('pbzip2') || 'pbzip2').' -d';
 	}
 }
 
