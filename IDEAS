@@ -53,3 +53,5 @@
  - Usermin scheduled mail move
  - Usermin apply filter to existing mail
 	- CHANGELOG
+
+ - Allow move of domain to a new private IP
