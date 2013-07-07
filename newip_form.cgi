@@ -56,21 +56,19 @@ elsif (&can_use_feature("virt")) {
 		    &ui_select("ip", $d->{'ip'}, \@canips) ] );
 	%racl = $d->{'reseller'} ? &get_reseller_acl($d->{'reseller'}) : ();
 	if ($d->{'virt'}) {
-		# Already got a private IP
+		# Already got a private IP, show option to keep
 		push(@opts, [ 1, $text{'newip_virtaddr'} ] );
 		}
-	elsif ($tmpl->{'ranges'} ne "none" || $racl{'ranges'}) {
-		# IP can be alllocated
-		push(@opts, [ 1, $text{'newip_virtaddr2'} ]);
+	if ($tmpl->{'ranges'} ne "none" || $racl{'ranges'}) {
+		# IP can be alllocated, show option to generate a new one
+		push(@opts, [ 2, $text{'newip_virtaddr2'} ]);
 		}
-	else {
-		# User must enter IP, but has option to use one that is
-		# already active
-		push(@opts, [ 1, $text{'newip_virtaddr3'},
-			      &ui_textbox("virt", undef, 15)." ".
-			      &ui_checkbox("virtalready", 1,
-					   $text{'form_virtalready'}) ]);
-		}
+	# User can enter IP, but has option to use one that is
+	# already active
+	push(@opts, [ 3, $text{'newip_virtaddr3'},
+		      &ui_textbox("virt", undef, 15)." ".
+		      &ui_checkbox("virtalready", 1,
+				   $text{'form_virtalready'}) ]);
 
 	# Show new IP field
 	print &ui_table_row($text{'newips_new'},

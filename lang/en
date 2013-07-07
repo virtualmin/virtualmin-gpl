@@ -354,6 +354,7 @@ setup_eip6=Missing or invalid IPv6 address
 setup_evirtalloc=Could not allocate virtual IP address from range
 setup_evirt6alloc=Could not allocate IPv6 address from range
 setup_evirtalloc2=Could not allocate virtual IP address from reseller range
+setup_evirtalloc3=No IP allocation ranges defined!
 setup_evirttmpl=No IP allocation range is defined for the selected template
 setup_evirttmpl2=IP allocation must be used for the selected template
 setup_evirt6tmpl=No IPv6 allocation range is defined for the selected template
