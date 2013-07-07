@@ -38,6 +38,8 @@ if ($in{'convert'}) {
 
 # Validate inputs
 &error_setup($text{'newip_err'});
+%racl = $d->{'reseller'} ?
+	&get_reseller_acl($d->{'reseller'}) : ();
 if (!&can_use_feature("virt")) {
 	# Cannot change anything, so no validation needed
 	}
@@ -47,10 +49,14 @@ elsif ($in{'mode'} == 0 || $config{'all_namevirtual'}) {
 	&check_ipaddress($ip) || &error($text{'setup_eip'});
 	$virt = 0;
 	}
-elsif ($in{'mode'} == 1 && !$d->{'virt'}) {
-	# Switching to private IP
-	%racl = $d->{'reseller'} ?
-		&get_reseller_acl($d->{'reseller'}) : ();
+elsif ($in{'mode'} == 1) {
+	# Sticking with private IP
+	$ip = $d->{'ip'};
+	$virtalready = $d->{'virtalready'};
+	$virt = 1;
+	}
+elsif ($in{'mode'} == 2) {
+	# Allocate a new IP
 	if ($racl{'ranges'}) {
 		# Try allocating IP from reseller's range
 		($ip, $netmask) = &free_ip_address(\%racl);
@@ -62,33 +68,33 @@ elsif ($in{'mode'} == 1 && !$d->{'virt'}) {
 		$ip || &error(&text('setup_evirtalloc'));
 		}
 	else {
-		# Validate manually entered IP
-		$ip = $in{'virt'};
-		$virtalready = $in{'virtalready'};
-		&check_ipaddress($ip) ||
-			&error($text{'setup_eip'});
-		$clash = &check_virt_clash($ip);
-		if (!$virtalready) {
-			# Make sure the IP isn't assigned yet
-			$clash && &error(&text('setup_evirtclash'));
-			}
-		elsif ($virtalready) {
-			# Make sure the IP is assigned already, but
-			# not to any domain
-			$clash || &error(&text('setup_evirtclash2', $ip));
-			$already = &get_domain_by("ip", $ip);
-			$already && &error(&text('setup_evirtclash4',
-						 $already->{'dom'}));
-			}
+		&error(&text('setup_evirtalloc3'));
 		}
 	$virt = 1;
 	}
-elsif ($in{'mode'} == 1 && $d->{'virt'}) {
-	# Sticking with private IP
-	$ip = $d->{'ip'};
-	$virtalready = $d->{'virtalready'};
+elsif ($in{'mode'} == 3) {
+	# Validate manually entered IP
+	$ip = $in{'virt'};
+	$virtalready = $in{'virtalready'};
+	&check_ipaddress($ip) ||
+		&error($text{'setup_eip'});
+	$clash = &check_virt_clash($ip);
+	if (!$virtalready) {
+		# Make sure the IP isn't assigned yet
+		$clash && &error(&text('setup_evirtclash'));
+		}
+	elsif ($virtalready) {
+		# Make sure the IP is assigned already, but
+		# not to any domain
+		$clash || &error(&text('setup_evirtclash2', $ip));
+		$already = &get_domain_by("ip", $ip);
+		$already && &error(&text('setup_evirtclash4',
+					 $already->{'dom'}));
+		}
 	$virt = 1;
 	}
+
+&error("virt=$virt ip=$ip virtalready=$virtalready");
 
 if (!&supports_ip6() || !&can_use_feature("virt6")) {
 	# Cannot use or change IPv6, so no validation needed
