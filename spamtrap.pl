@@ -70,9 +70,9 @@ foreach $d (&list_domains()) {
 	print STDERR "$d->{'dom'}: processing spam file\n" if ($debug);
 	$spamf = { 'file' => &spam_alias_file($d),
 		   'type' => 0 };
-	&clear_index_file($spamf);
+	&clear_index_file($spamf->{'file'});
 	@spammails = &mailboxes::mailbox_list_mails(undef, undef, $spamf);
-	&clear_index_file($spamf);
+	&clear_index_file($spamf->{'file'});
 	print STDERR "$d->{'dom'}: ",scalar(@spammails)," messages in ",
 		     $spamf->{'file'},"\n" if ($debug);
 	foreach $m (@spammails) {
@@ -82,9 +82,9 @@ foreach $d (&list_domains()) {
 	print STDERR "$d->{'dom'}: processing ham file\n" if ($debug);
 	$hamf = { 'file' => &ham_alias_file($d),
 		  'type' => 0 };
-	&clear_index_file($hamf);
+	&clear_index_file($hamf->{'file'});
 	@hammails = &mailboxes::mailbox_list_mails(undef, undef, $hamf);
-	&clear_index_file($hamf);
+	&clear_index_file($hamf->{'file'});
 	print STDERR "$d->{'dom'}: ",scalar(@hammails)," messages in ",
 		     $hamf->{'file'},"\n" if ($debug);
 	push(@mails, @hammails);
