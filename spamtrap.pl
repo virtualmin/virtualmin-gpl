@@ -70,7 +70,9 @@ foreach $d (&list_domains()) {
 	print STDERR "$d->{'dom'}: processing spam file\n" if ($debug);
 	$spamf = { 'file' => &spam_alias_file($d),
 		   'type' => 0 };
+	&clear_index_file($spamf);
 	@spammails = &mailboxes::mailbox_list_mails(undef, undef, $spamf);
+	&clear_index_file($spamf);
 	print STDERR "$d->{'dom'}: ",scalar(@spammails)," messages in ",
 		     $spamf->{'file'},"\n" if ($debug);
 	foreach $m (@spammails) {
@@ -80,7 +82,9 @@ foreach $d (&list_domains()) {
 	print STDERR "$d->{'dom'}: processing ham file\n" if ($debug);
 	$hamf = { 'file' => &ham_alias_file($d),
 		  'type' => 0 };
+	&clear_index_file($hamf);
 	@hammails = &mailboxes::mailbox_list_mails(undef, undef, $hamf);
+	&clear_index_file($hamf);
 	print STDERR "$d->{'dom'}: ",scalar(@hammails)," messages in ",
 		     $hamf->{'file'},"\n" if ($debug);
 	push(@mails, @hammails);
@@ -274,4 +278,15 @@ if ($str =~ /Authenticated\s+sender:\s+(\S+)/i) {
 	$uname = $1;
 	}
 return ($sender, $uname);
+}
+
+# clear_index_file(mailfile)
+# Delete all indexes for a mail file
+sub clear_index_file
+{
+my ($mailfile) = @_;
+my $ifile = &mailboxes::user_index_file($mailfile);
+foreach my $ext (".dir", ".pag", ".db") {
+	&unlink_file($ifile.$ext);
+	}
 }
