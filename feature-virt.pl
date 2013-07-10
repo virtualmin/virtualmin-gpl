@@ -94,6 +94,7 @@ sub modify_virt
 {
 if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[0]->{'virt'} &&
     !$_[0]->{'virtalready'}) {
+	# Change IP on virtual interface
 	&$first_print($text{'save_virt'});
 	&obtain_lock_virt($_[0]);
 	&foreign_require("net", "net-lib.pl");

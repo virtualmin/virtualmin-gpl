@@ -71,6 +71,7 @@ elsif ($in{'mode'} == 2) {
 		&error(&text('setup_evirtalloc3'));
 		}
 	$virt = 1;
+	$virtalready = 0;
 	}
 elsif ($in{'mode'} == 3) {
 	# Validate manually entered IP
@@ -93,8 +94,6 @@ elsif ($in{'mode'} == 3) {
 		}
 	$virt = 1;
 	}
-
-&error("virt=$virt ip=$ip virtalready=$virtalready");
 
 if (!&supports_ip6() || !&can_use_feature("virt6")) {
 	# Cannot use or change IPv6, so no validation needed
@@ -177,8 +176,14 @@ elsif (!$virt && $d->{'virt'}) {
 	delete($d->{'dns_ip'});
 	}
 elsif (!$virt && !$d->{'virt'} && $d->{'ip'} ne $ip) {
-	# Changing IP
+	# Changing shared IP
 	$d->{'ip'} = $ip;
+	}
+elsif ($virt && $d->{'virt'} && $d->{'ip'} ne $ip) {
+	# Changing private IP
+	$d->{'ip'} = $ip;
+	$d->{'netmask'} = $netmask;
+	$d->{'virtalready'} = $virtalready;
 	}
 
 # Update for IPv6 change
