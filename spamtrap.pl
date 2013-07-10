@@ -72,7 +72,6 @@ foreach $d (&list_domains()) {
 		   'type' => 0 };
 	&clear_index_file($spamf->{'file'});
 	@spammails = &mailboxes::mailbox_list_mails(undef, undef, $spamf);
-	&clear_index_file($spamf->{'file'});
 	print STDERR "$d->{'dom'}: ",scalar(@spammails)," messages in ",
 		     $spamf->{'file'},"\n" if ($debug);
 	foreach $m (@spammails) {
@@ -84,7 +83,6 @@ foreach $d (&list_domains()) {
 		  'type' => 0 };
 	&clear_index_file($hamf->{'file'});
 	@hammails = &mailboxes::mailbox_list_mails(undef, undef, $hamf);
-	&clear_index_file($hamf->{'file'});
 	print STDERR "$d->{'dom'}: ",scalar(@hammails)," messages in ",
 		     $hamf->{'file'},"\n" if ($debug);
 	push(@mails, @hammails);
@@ -235,6 +233,8 @@ foreach $d (&list_domains()) {
 		&mailboxes::mailbox_empty_folder($spamf);
 		&mailboxes::mailbox_empty_folder($hamf);
 		}
+	&clear_index_file($spamf->{'file'});
+	&clear_index_file($hamf->{'file'});
 	}
 
 # find_user_by_email(email, &users, &aliases)
@@ -286,7 +286,7 @@ sub clear_index_file
 {
 my ($mailfile) = @_;
 my $ifile = &mailboxes::user_index_file($mailfile);
-foreach my $ext (".dir", ".pag", ".db") {
+foreach my $ext (".dir", ".pag", ".db", ".ids", "") {
 	&unlink_file($ifile.$ext);
 	}
 }
