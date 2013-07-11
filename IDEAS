@@ -54,5 +54,5 @@
  - Usermin apply filter to existing mail
 	- CHANGELOG
 
- - Allow move of domain to a new private IP
-	- verify that this works, back home!
+ - spamtrap.pl shouldn't read whole mail file into memory at once
+	- https://www.virtualmin.com/node/27219

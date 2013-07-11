@@ -218,7 +218,7 @@ $merr = &making_changes();
 &error(&text('save_emaking', "<tt>$merr</tt>")) if (defined($merr));
 
 # Update the primary domain
-&$first_print(&text('newip_dom', $d->{'dom'}));
+&$first_print(&text('newip_dom', $d->{'dom'}, $ip));
 &$indent_print();
 
 if ($d->{'virt'} && !$oldd->{'virt'}) {
@@ -270,7 +270,7 @@ print $text{'setup_done'},"<p>\n";
 # Get and update all alias domains
 @doms = &get_domain_by("alias", $d->{'id'});
 foreach $sd (@doms) {
-	&$first_print(&text('newip_dom2', $sd->{'dom'}));
+	&$first_print(&text('newip_dom2', $sd->{'dom'}, $d->{'ip'}));
 	&$indent_print();
 	$oldsd = { %$sd };
 
