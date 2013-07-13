@@ -1408,6 +1408,6 @@ Added an option when restoring virtual servers to have them deleted and re-creat
 When changing the IP address of multiple domains, an option to update the master IP of slave DNS zones is now available.
 For domains whose DNS is not hosted by the Virtualmin system, a sensible default set of records is shown on the Suggested DNS Records page.
 ---- Changes since 4.01 ----
-Updated the Roundcube script installer to version 0.9.2, DokuWiki to 2013-05-10a, X2CRM to 3.1.2, WordPress to 3.5.2, Movable Type to 5.2.7, TikiWiki to 10.3 and 6.11, AjaXplorer to 5.0.1, phpMyFAQ to 2.8.1, SugarCRM to 6.5.14, ZenPhoto to 1.4.5, Gallery to 3.0.9, Moodle to 2.5.1, ownCloud to 5.0.8, and phpMyAdmin to 4.0.4.1.
+Updated the Roundcube script installer to version 0.9.2, DokuWiki to 2013-05-10a, X2CRM to 3.2, WordPress to 3.5.2, Movable Type to 5.2.7, TikiWiki to 10.3 and 6.11, AjaXplorer to 5.0.1, phpMyFAQ to 2.8.1, SugarCRM to 6.5.14, ZenPhoto to 1.4.5, Gallery to 3.0.9, Moodle to 2.5.1, ownCloud to 5.0.8, and phpMyAdmin to 4.0.4.1.
 On Apache version 2.4 and above, Virtualmin no longer adds the NameVirtualHost directive as it is deprecated.
 The Change IP Address page can now be used to switch a domain with a private IP to another address.
