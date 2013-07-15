@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&error_setup($text{'databases_ierr'});
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_databases() && &can_import_servers() ||
 	&error($text{'edit_ecannot'});
