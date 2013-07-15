@@ -3294,6 +3294,9 @@ databases_desc5=This form lists remote hosts that are allowed to connect to data
 databases_ahosts=Allowed hosts for $1
 databases_hosts_mysql=You may enter hostnames, IP addresses, or network patterns like <tt>192.168.1.%</tt> .
 databases_hosts_fmt=Each hostname or IP must be entered on a separate line.
+databases_ierr=Failed to import databases
+databases_eimysql=Database $1 is internal to MySQL
+databases_eipostgres=Database $1 is a PostgreSQL template
 
 database_title1=Create Database
 database_title2=Edit Database

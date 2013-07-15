@@ -8,7 +8,20 @@ $d = &get_domain($in{'dom'});
 	&error($text{'edit_ecannot'});
 &set_all_null_print();
 
-foreach $tn (split(/\0/, $in{'import'})) {
+# Check databases to import for sanity
+@import = split(/\0/, $in{'import'});
+foreach $tn (@import) {
+	($type, $db) = split(/\s+/, $tn, 2);
+	if ($type eq "mysql" &&
+	    ($db eq "mysql" || $db eq "information_schema")) {
+		&error(&text('databases_eimysql', $db));
+		}
+	elsif ($type eq "postgres" && $db =~ /^template\d+$/) {
+		&error(&text('databases_eipostgres', $db));
+		}
+	}
+
+foreach $tn (@import) {
 	($type, $db) = split(/\s+/, $tn, 2);
 	@dbs = split(/\s+/, $d->{'db_'.$type});
 	push(@dbs, $db);
