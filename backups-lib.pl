@@ -3567,7 +3567,8 @@ elsif ($mode == 1) {
 		}
 	foreach my $f (@$dir) {
 		if ($f->[13] =~ /^$re$/ && $f->[9] && $f->[9] < $cutoff &&
-		    $f->[13] !~ /\.(dom|info)$/) {
+		    $f->[13] !~ /\.(dom|info)$/ &&
+		    $f->[13] ne "." && $f->[13] ne "..") {
 			local $old = int((time() - $f->[9]) / (24*60*60));
 			&$first_print(&text('backup_deletingftp',
 					    "<tt>$base/$f->[13]</tt>", $old));
@@ -3610,7 +3611,8 @@ elsif ($mode == 2) {
 		local @st = &parse_lsl_line($l);
 		next if (!scalar(@st));
 		if ($st[13] =~ /^$re$/ && $st[9] && $st[9] < $cutoff &&
-		    $st[13] !~ /\.(dom|info)$/) {
+		    $st[13] !~ /\.(dom|info)$/ &&
+		    $st[13] ne "." && $st[13] ne "..") {
 			local $old = int((time() - $st[9]) / (24*60*60));
 			&$first_print(&text('backup_deletingssh',
 					    "<tt>$base/$st[13]</tt>", $old));
