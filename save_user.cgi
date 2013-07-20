@@ -541,6 +541,8 @@ else {
 			if (-e $home &&
 			    &simplify_path($user->{'home'}) ne
 			     &simplify_path($home) &&
+			    &resolve_links($user->{'home'}) ne
+			     &resolve_links($home) &&
 			    $user->{'home'} ne $home &&
 			    !$user->{'nocreatehome'}) {
 				&error(&text('user_emkhome', $home));
