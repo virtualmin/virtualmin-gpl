@@ -3600,9 +3600,15 @@ elsif ($mode == 2) {
 	local $sshcmd = "ssh".($port ? " -p $port" : "")." ".
 			$config{'ssh_args'}." ".
 			$user."\@".$host;
-	local $lscmd = $sshcmd." ls -l ".quotemeta($base);
 	local $err;
+	local $lscmd = $sshcmd." LANG=C ls -l ".quotemeta($base);
 	local $lsout = &run_ssh_command($lscmd, $pass, \$err);
+	if ($err) {
+		# Try again without LANG=C , in case shell isn't bash/sh
+		$err = undef;
+		$lscmd = $sshcmd." ls -l ".quotemeta($base);
+		$lsout = &run_ssh_command($lscmd, $pass, \$err);
+		}
 	if ($err) {
 		&$second_print(&text('backup_purgeesshls', $err));
 		return 0;
