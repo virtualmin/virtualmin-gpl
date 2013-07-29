@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Roundcube script installer to version 0.9.2, DokuWiki to 2013-05-10a, X2CRM to 3.2, WordPress to 3.5.2, Movable Type to 5.2.7, TikiWiki to 11.0 and 6.12, AjaXplorer to 5.0.2, phpMyFAQ to 2.8.1, SugarCRM to 6.5.14, ZenPhoto to 1.4.5, Gallery to 3.0.9, Moodle to 2.5.1, ownCloud to 5.0.9, FengOffice to 2.3.1, and phpMyAdmin to 4.0.4.1.
+html=Updated the Roundcube script installer to version 0.9.2, DokuWiki to 2013-05-10a, X2CRM to 3.2, WordPress to 3.5.2, Movable Type to 5.2.7, TikiWiki to 11.0 and 6.12, AjaXplorer to 5.0.2, phpMyFAQ to 2.8.1, SugarCRM to 6.5.14, ZenPhoto to 1.4.5, Gallery to 3.0.9, Moodle to 2.5.1, ownCloud to 5.0.9, FengOffice to 2.3.1, dotProject to 2.1.8, and phpMyAdmin to 4.0.4.1.
 master=1
 reseller=1
 domain=1
