@@ -502,6 +502,42 @@ $disable_tests = [
 		      [ 'all-features' ] ],
 	},
 
+	# Add some DNS records
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-record', 'testing A 1.2.3.4' ] ],
+	},
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-record-with-ttl', 'ttltest A 3600 5.6.7.8' ] ],
+	},
+
+	# Verify that it worked
+	{ 'command' => 'host testing.'.$test_domain,
+	  'grep' => '1.2.3.4',
+	},
+	{ 'command' => 'host ttltest.'.$test_domain,
+	  'grep' => '5.6.7.8',
+	},
+
+	# Delete the records
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'delete-record', 'testing A' ] ],
+	},
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'delete-record', 'ttltest A 5.6.7.8' ] ],
+	},
+
+	# Make sure they are gone
+	{ 'command' => 'host testing.'.$test_domain,
+	  'fail' => 1,
+	},
+	{ 'command' => 'host ttltest.'.$test_domain,
+	  'fail' => 1,
+	},
+
 	# Cleanup the domains
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
