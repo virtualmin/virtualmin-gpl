@@ -5855,11 +5855,28 @@ if ($d->{'dns'}) {
 	local ($recs, $file) = &get_domain_dns_records_and_file($d);
 	$autoconfig .= ".";
 	if ($file) {
-		local ($r) = grep { $_->{'name'} eq $autoconfig } @$recs;
+		# Add A record for IPv4
+		local $changed = 0;
+		local ($r) = grep { $_->{'name'} eq $autoconfig &&
+				    $_->{'type'} eq 'A' } @$recs;
 		if (!$r) {
 			my $ip = $d->{'dns_ip'} || $d->{'ip'};
 			&bind8::create_record($file, $autoconfig, undef,
 					      "IN", "A", $ip);
+			$changed++;
+			}
+
+		# Add AAAA record for IPv6
+		local ($r) = grep { $_->{'name'} eq $autoconfig &&
+				    $_->{'type'} eq 'AAAA' } @$recs;
+		if (!$r && $d->{'virt6'}) {
+			my $ip = $d->{'ip6'};
+			&bind8::create_record($file, $autoconfig, undef,
+					      "IN", "AAAA", $ip);
+			$changed++;
+			}
+
+		if ($changed) {
 			my $err = &post_records_change($d, $recs, $file);
 			&register_post_action(\&restart_bind, $d);
 			}
@@ -5948,9 +5965,13 @@ if ($d->{'dns'}) {
 	local ($recs, $file) = &get_domain_dns_records_and_file($d);
 	$autoconfig .= ".";
 	if ($file) {
-		local ($r) = grep { $_->{'name'} eq $autoconfig } @$recs;
-		if ($r) {
+		local $changed = 0;
+		foreach my $r (reverse(grep { $_->{'name'} eq $autoconfig }
+					    @$recs)) {
 			&bind8::delete_record($file, $r);
+			$changed++;
+			}
+		if ($changed) {
 			my $err = &post_records_change($d, $recs, $file);
 			&register_post_action(\&restart_bind, $d);
 			}
