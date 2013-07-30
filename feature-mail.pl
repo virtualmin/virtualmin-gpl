@@ -957,6 +957,14 @@ elsif (!$_[0]->{'dns'} && $_[1]->{'dns'}) {
 	&update_dkim_domains($_[0], 'delete');
 	}
 
+# Add autoconfig DNS entry if re-enabling DNS
+if ($config{'mail_autoconfig'} &&
+    &domain_has_website($_[0]) && !$_[0]->{'alias'} &&
+    $_[0]->{'dns'} && !$_[1]->{'dns'}) {
+	local $autoconfig = &get_autoconfig_hostname($_[0]);
+	&enable_dns_autoconfig($_[0], $autoconfig);
+	}
+
 # Update any outgoing IP mapping
 if (($_[0]->{'dom'} ne $_[1]->{'dom'} ||
      $_[0]->{'ip'} ne $_[1]->{'ip'}) && $supports_dependent) {
@@ -5654,6 +5662,12 @@ my ($d) = @_;
 &unlink_logged("$saved_aliases_dir/$d->{'id'}");
 }
 
+sub get_autoconfig_hostname
+{
+local ($d) = @_;
+return "autoconfig.".$d->{'dom'};
+}
+
 # enable_email_autoconfig(&domain)
 # Sets up an autoconfig.domain.com server alias and DNS entry, and configures
 # /mail/config-v1.1.xml?emailaddress=foo@domain.com to return XML for
@@ -5661,7 +5675,7 @@ my ($d) = @_;
 sub enable_email_autoconfig
 {
 local ($d) = @_;
-local $autoconfig = "autoconfig.".$d->{'dom'};
+local $autoconfig = &get_autoconfig_hostname($d);
 
 # Work out IMAP server port and mode
 local $imap_host = "mail.$d->{'dom'}";
@@ -5851,39 +5865,50 @@ elsif ($p) {
 
 if ($d->{'dns'}) {
 	# Add DNS entry
-	&obtain_lock_dns($d);
-	local ($recs, $file) = &get_domain_dns_records_and_file($d);
-	$autoconfig .= ".";
-	if ($file) {
-		# Add A record for IPv4
-		local $changed = 0;
-		local ($r) = grep { $_->{'name'} eq $autoconfig &&
-				    $_->{'type'} eq 'A' } @$recs;
-		if (!$r) {
-			my $ip = $d->{'dns_ip'} || $d->{'ip'};
-			&bind8::create_record($file, $autoconfig, undef,
-					      "IN", "A", $ip);
-			$changed++;
-			}
-
-		# Add AAAA record for IPv6
-		local ($r) = grep { $_->{'name'} eq $autoconfig &&
-				    $_->{'type'} eq 'AAAA' } @$recs;
-		if (!$r && $d->{'virt6'}) {
-			my $ip = $d->{'ip6'};
-			&bind8::create_record($file, $autoconfig, undef,
-					      "IN", "AAAA", $ip);
-			$changed++;
-			}
-
-		if ($changed) {
-			my $err = &post_records_change($d, $recs, $file);
-			&register_post_action(\&restart_bind, $d);
-			}
-		}
-	&release_lock_dns($d);
-	$file || return "No DNS zone for $d->{'dom'} found";
+	my $err = &enable_dns_autoconfig($d, $autoconfig);
+	return $err if ($err);
 	}
+
+return undef;
+}
+
+# enable_dns_autoconfig(&domain, autoconfig-hostname)
+# Add the DNS records needed for email autoconfig
+sub enable_dns_autoconfig
+{
+local ($d, $autoconfig) = @_;
+&obtain_lock_dns($d);
+local ($recs, $file) = &get_domain_dns_records_and_file($d);
+$file || return "No DNS zone for $d->{'dom'} found";
+$autoconfig .= ".";
+
+# Add A record for IPv4
+local $changed = 0;
+local ($r) = grep { $_->{'name'} eq $autoconfig &&
+		    $_->{'type'} eq 'A' } @$recs;
+if (!$r) {
+	my $ip = $d->{'dns_ip'} || $d->{'ip'};
+	&bind8::create_record($file, $autoconfig, undef,
+			      "IN", "A", $ip);
+	$changed++;
+	}
+
+# Add AAAA record for IPv6
+local ($r) = grep { $_->{'name'} eq $autoconfig &&
+		    $_->{'type'} eq 'AAAA' } @$recs;
+if (!$r && $d->{'virt6'}) {
+	my $ip = $d->{'ip6'};
+	&bind8::create_record($file, $autoconfig, undef,
+			      "IN", "AAAA", $ip);
+	$changed++;
+	}
+
+if ($changed) {
+	my $err = &post_records_change($d, $recs, $file);
+	&register_post_action(\&restart_bind, $d);
+	}
+
+&release_lock_dns($d);
 return undef;
 }
 
@@ -5892,7 +5917,7 @@ return undef;
 sub disable_email_autoconfig
 {
 local ($d) = @_;
-local $autoconfig = "autoconfig.".$d->{'dom'};
+local $autoconfig = &get_autoconfig_hostname($d);
 
 # Remove ServerAlias and redirect if they exist
 local $p = &domain_has_website($d);

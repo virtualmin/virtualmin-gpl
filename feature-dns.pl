@@ -281,12 +281,7 @@ else {
 		$_[0]->{'dns_subalready'} = 1;
 		}
 	local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
-	if ($_[0]->{'alias'}) {
-		&create_standard_records($fn, $_[0], $ip);
-		}
-	else {
-		&create_standard_records($fn, $_[0], $ip);
-		}
+	&create_standard_records($fn, $_[0], $ip);
 	&post_records_change($parent, \@recs);
 
 	&release_lock_dns($parent);
