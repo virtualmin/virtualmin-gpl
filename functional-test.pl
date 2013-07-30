@@ -523,11 +523,11 @@ $disable_tests = [
 	# Delete the records
 	{ 'command' => 'modify-dns.pl',
 	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'delete-record', 'testing A' ] ],
+		      [ 'remove-record', 'testing A' ] ],
 	},
 	{ 'command' => 'modify-dns.pl',
 	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'delete-record', 'ttltest A 5.6.7.8' ] ],
+		      [ 'remove-record', 'ttltest A 5.6.7.8' ] ],
 	},
 
 	# Make sure they are gone
