@@ -18,7 +18,10 @@ To control how SPF treats senders not in the allowed hosts list, use one of the 
 This command can also be used to add and remove DNS records from all the
 selected domains. Adding is done with the C<--add-record> flag, which must
 be followed by a single parameter containing the record name, type and value.
-Similarly, deletion is done with the C<--delete-record> flag, followed by a 
+Alternately, you can use C<--add-record-with-ttl> followed by the name, type,
+TTL and value.
+
+Conversely, deletion is done with the C<--delete-record> flag, followed by a 
 single parameter containing the name and type of the record(s) to delete. Both
 of these can be given multiple times.
 
@@ -103,7 +106,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--add-record") {
 		my ($name, $type, @values) = split(/\s+/, shift(@ARGV));
 		$name && $type && @values || &usage("--add-record must be followed by the record name, type and values, all in one parameter");
-		push(@addrecs, [ $name, $type, \@values ]);
+		push(@addrecs, [ $name, $type, undef, \@values ]);
+		}
+	elsif ($a eq "--add-record-with-ttl") {
+		my ($name, $type, $ttl, @values) = split(/\s+/, shift(@ARGV));
+		$name && $type && $ttl && @values || &usage("--add-record-with-ttl must be followed by the record name, type, TTL and values, all in one parameter");
+		push(@addrecs, [ $name, $type, $ttl, \@values ]);
 		}
 	elsif ($a eq "--remove-record") {
 		my ($name, $type) = split(/\s+/, shift(@ARGV));
@@ -266,11 +274,11 @@ foreach $d (@doms) {
 	# Add records to the domain
 	if (@addrecs) {
 		foreach my $rn (@addrecs) {
-			my ($name, $type, $values) = @$rn;
+			my ($name, $type, $ttl, $values) = @$rn;
 			if ($name !~ /\.$/) {
 				$name .= ".".$d->{'dom'}.".";
 				}
-			&bind8::create_record($file, $name, undef, "IN",
+			&bind8::create_record($file, $name, $ttl, "IN",
 					      uc($type), join(" ", @$values));
 			$changed++;
 			}
@@ -332,6 +340,7 @@ print "                     [--spf-all-disallow | --spf-all-discourage |\n";
 print "                      --spf-all-neutral | --spf-all-allow |\n";
 print "                      --spf-all-default]\n";
 print "                     [--add-record \"name type value\"]\n";
+print "                     [--add-record-with-ttl \"name type TTL value\"]\n";
 print "                     [--remove-record \"name type\"]\n";
 print "                     [--ttl seconds]\n";
 print "                     [--add-slave hostname]* | [--add-all-slaves]\n";
