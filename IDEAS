@@ -58,3 +58,5 @@
  - When turning off DNS and then turning back on, autoconfig DNS entry is lost
 	- http://virtualmin.com/node/29052
 	- autoconfig functional test?
+
+ - Browse button when selecting backup source as domain owner

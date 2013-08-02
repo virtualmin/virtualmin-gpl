@@ -2945,10 +2945,12 @@ local $rv;
 local @opts;
 if ($d && $d->{'dir'}) {
 	# Limit local file to under virtualmin-backups
+	local $bdir = "$d->{'dir'}/virtualmin-backup";
 	push(@opts, [ 0, $text{'backup_mode0a'},
 	       &ui_textbox($name."_file",
 		  $mode == 0 && $path =~ /virtualmin-backup\/(.*)$/ ? $1 : "",
-		  50)."<br>\n" ]);
+		  50)." ".
+	       &file_chooser_button($name."_file", 0, 0, $bdir)."<br>\n" ]);
 	}
 elsif (!$nolocal) {
 	# Local file field (can be anywhere)
