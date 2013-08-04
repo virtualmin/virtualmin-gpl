@@ -51,10 +51,7 @@
 	- CHANGELOG
 
  - Usermin apply filter to existing mail
+	- button to copy/move all mail in shown folder
 	- CHANGELOG
 
  - php-fpm support for Joaquim
-
- - When turning off DNS and then turning back on, autoconfig DNS entry is lost
-	- http://virtualmin.com/node/29052
-	- autoconfig functional test?
