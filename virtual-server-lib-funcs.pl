@@ -14116,15 +14116,22 @@ foreach my $f (@features) {
 	}
 }
 
-# check_password_restrictions(&user, [webmin-too])
+# check_password_restrictions(&user, [webmin-too], [&domain])
 # Returns an error if some user's password (from plainpass) is not acceptable
 sub check_password_restrictions
 {
-local ($user, $webmin) = @_;
+local ($user, $webmin, $d) = @_;
 &require_useradmin();
 local $err = &useradmin::check_password_restrictions(
 	$user->{'plainpass'}, $user->{'user'}, $user);
 return $err if ($err);
+if ($d) {
+	# Check again with short username
+	$err = &useradmin::check_password_restrictions(
+		$user->{'plainpass'}, &remove_userdom($user->{'user'}, $d),
+		$user);
+	return $err if ($err);
+	}
 if ($webmin) {
 	# Check ACL module too
 	&foreign_require("acl", "acl-lib.pl");
