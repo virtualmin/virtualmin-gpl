@@ -50,8 +50,6 @@
 	- use same format as Virtualmin
 	- CHANGELOG
 
- - Usermin apply filter to existing mail
-	- button to copy/move all mail in shown folder
-	- CHANGELOG
-
  - php-fpm support for Joaquim
+
+ - Name-based hosting on IPv6 support
