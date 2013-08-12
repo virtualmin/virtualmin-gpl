@@ -143,11 +143,14 @@ if ($dests[0] eq "download:") {
 	# Special case .. we backup to a temp file and output in the browser
 	$temp = &transname().($config{'compression'} == 0 ? ".tar.gz" :
 			      $config{'compression'} == 1 ? ".tar.bz2" :".tar");
-	foreach $t ($temp, $temp.".info", $temp.".dom") {
-		&open_tempfile(TEMP, ">$t", 0, 1);
-		&close_tempfile(TEMP);
-		&set_ownership_permissions($doms[0]->{'uid'}, $doms[0]->{'gid'},
-					   0700, $t);
+	if (@doms) {
+		# Pre-create temp file with correct permissions
+		foreach $t ($temp, $temp.".info", $temp.".dom") {
+			&open_tempfile(TEMP, ">$t", 0, 1);
+			&close_tempfile(TEMP);
+			&set_ownership_permissions(
+				$doms[0]->{'uid'}, $doms[0]->{'gid'}, 0700, $t);
+			}
 		}
 	&set_all_null_print();
 	($ok, $size) = &backup_domains([ $temp ], \@doms, \@do_features,
