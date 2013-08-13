@@ -190,6 +190,10 @@ my $st = &rs_stat_object($h, $container, $file);
 if (ref($st) && $st->{'X-Object-Manifest'}) {
 	# Looks multi-part .. delete the parts first
 	my ($mcontainer, $mprefix) = split(/\//, $st->{'X-Object-Manifest'});
+	if ($mprefix !~ /\S/ || $mcontainer !~ /\S/) {
+		return "X-Object-Manifest header on file $file does not ".
+		       "contain a prefix : $st->{'X-Object-Manifest'}";
+		}
 	my $files = &rs_list_objects($h, $mcontainer);
 	return "Failed to find parts : $files" if (!ref($files));
 	foreach my $f (@$files) {
