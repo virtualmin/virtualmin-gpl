@@ -1412,4 +1412,4 @@ Updated the Roundcube script installer to version 0.9.2, DokuWiki to 2013-05-10a
 On Apache version 2.4 and above, Virtualmin no longer adds the NameVirtualHost directive as it is deprecated.
 The Change IP Address page can now be used to switch a domain with a private IP to another address.
 ---- Changes since 4.02 ----
-Updated the SMF script installer to version 2.0.5, X2CRM to 3.3.2, and ownCloud to 5.0.10.
+Updated the SMF script installer to version 2.0.5, X2CRM to 3.3.2, Django to 1.5.2 and 1.4.6, and ownCloud to 5.0.10.
