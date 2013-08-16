@@ -1057,7 +1057,7 @@ local @rm = &apache::find_directive("RedirectMatch", $vconf);
 @rm = grep { substr($_, 0, 5) ne "^/.*\$" } @rm;
 &apache::save_directive("RedirectMatch", \@rm, $vconf, $conf);
 
-&flush_file_lines($virt->{'file'});
+&flush_file_lines($virt->{'file'}, undef, 1);
 }
 
 # check_web_clash(&domain, [field])
