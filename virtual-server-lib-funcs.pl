@@ -3745,7 +3745,7 @@ delete($hash{''});
 $hash{'idndom'} = &show_domain_name($d->{'dom'});	# With unicode
 
 # Convert disabled_time to timestamp
-if ($d->{'disabled'} && $d->{'disabled_time'}) {
+if ($d->{'disabled_time'}) {
 	$hash{'disabled_time'} = &make_date($d->{'disabled_time'});
 	}
 
