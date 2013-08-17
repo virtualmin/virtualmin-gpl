@@ -45,11 +45,6 @@
 	- Verify PHP package installation in Virtualmin
 	- Check that DKIM works
 
- - Webmin cron type that fetches a URL
-	- http://virtualmin.com/node/28382
-	- use same format as Virtualmin
-	- CHANGELOG
-
  - php-fpm support for Joaquim
 
  - Name-based hosting on IPv6 support
