@@ -22,6 +22,18 @@ $tmpl = &get_template($d->{'template'});
 				 $subdom ?    $text{'edit_title4'} :
 				 $parentdom ? $text{'edit_title2'} :
 					      $text{'edit_title'}, "");
+# Disabled, so tell the user that features cannot be changed
+if ($d->{'disabled'}) {
+	print "<font color=#ff0000>".
+	      "<b>".$text{'edit_disabled_'.$d->{'disabled_reason'}}."\n".
+	      $text{'edit_disabled'}."<br>".
+	      ($d->{'disabled_why'} ?
+		&text('edit_disabled_why', $d->{'disabled_why'})."<br>" : "").
+	      ($d->{'disabled_time'} ?
+		&text('edit_disabled_time',
+		      &make_date($d->{'disabled_time'}))."<br>" : "").
+	      "</b></font><p>\n";
+	}
 
 @tds = ( "width=30%" );
 print &ui_form_start("save_domain.cgi", "post");
@@ -285,19 +297,7 @@ if ($fields) {
 	}
 
 # Show buttons for turning features on and off (if allowed)
-if ($d->{'disabled'}) {
-	# Disabled, so tell the user that features cannot be changed
-	print "<font color=#ff0000>".
-	      "<b>".$text{'edit_disabled_'.$d->{'disabled_reason'}}."\n".
-	      $text{'edit_disabled'}."<br>".
-	      ($d->{'disabled_why'} ?
-		&text('edit_disabled_why', $d->{'disabled_why'})."<br>" : "").
-	      ($d->{'disabled_time'} ?
-		&text('edit_disabled_time',
-		      &make_date($d->{'disabled_time'}))."<br>" : "").
-	      "</b></font>\n";
-	}
-else {
+if (!$d->{'disabled'}) {
 	# Show features for this domain
 	print &ui_hidden_table_start($text{'edit_featuresect'}, "width=100%", 2,
 				     "feature", 0);
