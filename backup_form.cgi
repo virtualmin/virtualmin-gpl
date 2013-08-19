@@ -175,8 +175,8 @@ print &ui_hidden_table_end("features");
 @dests = &get_scheduled_backup_dests($sched);
 push(@dests, undef) if ($in{'sched'});
 @purges = &get_scheduled_backup_purges($sched);
-@dfields = ( );
-$i = 0;
+my @dfields = ( );
+my $i = 0;
 foreach $dest (@dests) {
 	# Show destination fields
 	$dfield = &show_backup_destination("dest".$i, $dest, $cbmode == 3,
