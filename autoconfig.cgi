@@ -67,6 +67,7 @@ elsif ($STYLE == 7) {
 else {
 	&error_exit("Unknown style $STYLE");
 	}
+$MAILBOX = $mailbox;
 
 # Output the XML
 print "Content-type: text/xml\n\n";
