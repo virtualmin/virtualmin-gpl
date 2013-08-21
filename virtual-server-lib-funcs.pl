@@ -14012,6 +14012,20 @@ if ($in{'autoconfig_mode'} == 2) {
 	}
 }
 
+# postsave_template_autoconfig(&tmpl)
+# If mail autoconfig is active, update the template for all domains
+sub postsave_template_autoconfig
+{
+local ($tmpl) = @_;
+if ($config{'mail_autoconfig'}) {
+	local @doms = grep { $_->{'mail'} && &domain_has_website($_) &&
+			     !$_->{'alias'} } &list_domains();
+	foreach my $d (@doms) {
+		&enable_email_autoconfig($d);
+		}
+	}
+}
+
 # list_template_editmodes([&template])
 # Returns a list of available template sections for editing
 sub list_template_editmodes
