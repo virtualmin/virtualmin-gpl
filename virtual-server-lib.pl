@@ -195,6 +195,7 @@ $extra_admins_dir = "$module_config_directory/admins";
 @s3_perl_modules = ( "S3::AWSAuthConnection", "S3::QueryStringAuthGenerator" );
 $max_php_fcgid_children = 20;
 $s3_upload_tries = $config{'upload_tries'} || 3;
+$rs_upload_tries = $config{'upload_tries'} || 3;
 $ftp_upload_tries = $config{'upload_tries'} || 3;
 
 %get_domain_by_maps = ( 'user' => "$module_config_directory/map.user",

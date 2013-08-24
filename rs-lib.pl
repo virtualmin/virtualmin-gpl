@@ -223,10 +223,29 @@ return &rs_http_call($h->{'storage-url'}.$path, $method, $sendheaders,
 }
 
 # rs_http_call(url, method, &headers, [save-to-file], [read-from-file|data],
-# 	       [file-offset], [file-length])
+# 	       [file-offset], [file-length], [retry-attempts])
+# Makes an HTTP call and returns an OK flag, response body or error
+# message, and HTTP headers. Re-tries in the face of a transient failure.
+sub rs_http_call
+{
+my ($url, $method, $headers, $dstfile, $srcfile, $offset, $length, $tries) = @_;
+$tries ||= $rs_upload_tries;
+
+for(my $i=0; $i<$tries; $i++) {
+	@rv = &rs_http_single_call($url, $method, $headers, $dstfile, $srcfile,
+				   $offset, $length);
+	return @rv if ($rv[0]);		# Success
+	return @rv if ($rv[1] !~ /^(Invalid|Empty)\s+HTTP\s+response/i);
+	sleep(10);
+	}
+return @rv;	# Failure after reveral re-tries
+}
+
+# rs_http_single_call(url, method, &headers, [save-to-file], [read-from-file|data],
+# 	              [file-offset], [file-length])
 # Makes an HTTP call and returns an OK flag, response body or error
 # message, and HTTP headers.
-sub rs_http_call
+sub rs_http_single_call
 {
 my ($url, $method, $headers, $dstfile, $srcfile, $offset, $length) = @_;
 my ($host, $port, $page, $ssl) = &parse_http_url($url);
