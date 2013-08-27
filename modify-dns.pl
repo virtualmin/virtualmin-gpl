@@ -9,9 +9,12 @@ don't have their own private IP address with C<--all-nonvirt-domains>.
 
 To enable SPF for a domain, using C<--spf> option, and to turn it off use C<--no-spf>. By default, the SPF record will be created using the settings from the DNS section of the domain's server template.
 
-To add allowed hostname, MX domains or IP addresses, use the C<--spf-add-a>, C<--spf-add-mx> and C<--spf-add-ip4> options respectively. Each of which must be followed by a single host, domain or IP address.
+To add allowed hostname, MX domains or IP addresses, use the C<--spf-add-a>, C<--spf-add-mx>, C<--spf-add-ip4> and C<--spf-add-ip6> options respectively. Each of
+which must be followed by a single host, domain or IP address.
 
-Similarly, the C<--spf-remove-a>, C<--spf-remove-mx> and C<--spf-remove-ip4> options will remove the following host, domain or IP address from the allowed list for the specified domains.
+Similarly, the C<--spf-remove-a>, C<--spf-remove-mx>, C<--spf-remove-ip4> and
+C<--spf-remove-ip6> options will remove the following host, domain or IP address
+from the allowed list for the specified domains.
 
 To control how SPF treats senders not in the allowed hosts list, use one of the C<--spf-all-disallow>, C<--spf-all-discourage>, C<--spf-all-neutral>, C<--spf-all-allow> or C<--spf-all-default> parameters.
 
@@ -77,17 +80,17 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-spf") {
 		$spf = 0;
 		}
-	elsif ($a =~ /^--spf-add-(a|mx|ip4)$/) {
+	elsif ($a =~ /^--spf-add-(a|mx|ip4|ip6)$/) {
 		$add = shift(@ARGV);
 		$type = $1;
-		$add =~ /^[a-z0-9\.\-\_]+$/ ||
+		$add =~ /^[a-z0-9\.\-\_:]+$/ ||
 		    &usage("$a must be followed by a hostname or IP address");
 		push(@{$add{$type}}, $add);
 		}
-	elsif ($a =~ /^--spf-remove-(a|mx|ip4)$/) {
+	elsif ($a =~ /^--spf-remove-(a|mx|ip4|ip6)$/) {
 		$rem = shift(@ARGV);
 		$type = $1;
-		$rem =~ /^[a-z0-9\.\-\_]+$/ ||
+		$rem =~ /^[a-z0-9\.\-\_:]+$/ ||
 		    &usage("$a must be followed by a hostname or IP address");
 		push(@{$rem{$type}}, $rem);
 		}
@@ -213,7 +216,7 @@ foreach $d (@doms) {
 		}
 
 	if ((%add || %rem || defined($spfall)) && $currspf) {
-		# Update a, mx and ip4 in SPF record
+		# Update a, mx ip4 and ip6 in SPF record
 		&$first_print($text{'spf_change'});
 		foreach $t (keys %add) {
 			foreach $a (@{$add{$t}}) {
@@ -340,9 +343,11 @@ print "                     [--spf | --no-spf]\n";
 print "                     [--spf-add-a hostname]*\n";
 print "                     [--spf-add-mx domain]*\n";
 print "                     [--spf-add-ip4 address]*\n";
+print "                     [--spf-add-ip6 address]*\n";
 print "                     [--spf-remove-a hostname]*\n";
 print "                     [--spf-remove-mx domain]*\n";
 print "                     [--spf-remove-ip4 address]*\n";
+print "                     [--spf-remove-ip6 address]*\n";
 print "                     [--spf-all-disallow | --spf-all-discourage |\n";
 print "                      --spf-all-neutral | --spf-all-allow |\n";
 print "                      --spf-all-default]\n";

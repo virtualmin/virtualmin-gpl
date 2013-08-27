@@ -15,7 +15,7 @@ $spf = &get_domain_spf($d);
 if ($in{'enabled'}) {
 	$spf ||= &default_domain_spf($d);
 	$defspf = &default_domain_spf($d);
-	foreach $t ('a', 'mx', 'ip4', 'include') {
+	foreach $t ('a', 'mx', 'ip4', 'ip6', 'include') {
 		local @v = split(/\s+/, $in{'extra_'.$t});
 		foreach my $v (@v) {
 			if ($a eq 'a' || $t eq 'mx' || $t eq 'include') {
@@ -34,6 +34,15 @@ if ($in{'enabled'}) {
 				   &check_ipaddress("$2")) ||
 					&error(&text('spf_e'.$t, $v));
 				}
+			elsif ($a eq "ip6") {
+				# Must be a valid IPv6 or IPv6/cidr
+				&check_ip6address($v) ||
+				  ($v =~ /^([0-9\:]+)\/(\d+)$/ &&
+				   $2 > 0 && $2 <= 128 &&
+				   &check_ip6address("$1")) ||
+					&error(&text('spf_e'.$t, $v));
+				}
+			}
 			}
 		$spf->{$t.':'} = \@v;
 		}
