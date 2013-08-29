@@ -13986,7 +13986,7 @@ sub show_template_autoconfig
 local ($tmpl) = @_;
 local $xml;
 if ($tmpl->{'autoconfig'} eq "" || $tmpl->{'autoconfig'} eq "none") {
-	$xml = &get_autoconfig_xml();
+	$xml = &get_thunderbird_autoconfig_xml();
 	}
 else {
 	$xml = join("\n", split(/\t/, $tmpl->{'autoconfig'}));

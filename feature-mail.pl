@@ -5681,6 +5681,7 @@ local $autoconfig = &get_autoconfig_hostname($d);
 local $imap_host = "mail.$d->{'dom'}";
 local $imap_port = 143;
 local $imap_type = "plain";
+local $imap_ssl = "no";
 local $imap_enc = "password-cleartext";
 if (&foreign_installed("dovecot")) {
 	&foreign_require("dovecot");
@@ -5691,11 +5692,13 @@ if (&foreign_installed("dovecot")) {
 	    &dovecot::find_value($sslopt, $conf) ne "no") {
 		$imap_port = 993;
 		$imap_type = "SSL";
+		$imap_ssl = "yes";
 		}
 	elsif ($sslopt eq "ssl_disable" &&
 	       &dovecot::find_value($sslopt, $conf) ne "yes") {
 		$imap_port = 993;
 		$imap_type = "SSL";
+		$imap_ssl = "yes";
 		}
 	if ($imap_type ne "SSL" &&
 	    &dovecot::find_value("disable_plaintext_auth", $conf) ne "no") {
@@ -5708,6 +5711,7 @@ if (&foreign_installed("dovecot")) {
 local $smtp_host = "mail.$d->{'dom'}";
 local $smtp_port = 25;
 local $smtp_type = "plain";
+local $smtp_ssl = "no";
 local $smtp_enc = "password-cleartext";
 if ($config{'mail_system'} == 0) {
 	# Check for Postfix submission port
@@ -5719,6 +5723,7 @@ if ($config{'mail_system'} == 0) {
 		$smtp_port = 587;
 		if ($submission->{'command'} =~ /smtpd_tls_security_level=(encrypt|may)/) {
 			$smtp_type = "STARTTLS";
+			$smtp_ssl = "yes";
 			}
 		}
 	}
@@ -5766,6 +5771,9 @@ foreach my $l (@$lref) {
 	elsif ($l =~ /^\$SMTP_ENC\s+=/) {
 		$l = "\$SMTP_ENC = '$smtp_enc';";
 		}
+	elsif ($l =~ /^\$SMTP_SSL\s+=/) {
+		$l = "\$SMTP_SSL = '$smtp_ssl';";
+		}
 	elsif ($l =~ /^\$IMAP_HOST\s+=/) {
 		$l = "\$IMAP_HOST = '$imap_host';";
 		}
@@ -5777,6 +5785,9 @@ foreach my $l (@$lref) {
 		}
 	elsif ($l =~ /^\$IMAP_ENC\s+=/) {
 		$l = "\$IMAP_ENC = '$imap_enc';";
+		}
+	elsif ($l =~ /^\$IMAP_SSL\s+=/) {
+		$l = "\$IMAP_SSL = '$imap_ssl';";
 		}
 	elsif ($l =~ /^\$PREFIX\s+=/) {
 		$l = "\$PREFIX = '$d->{'prefix'}';";
@@ -5793,7 +5804,7 @@ if ($tmpl->{'autoconfig'} && $tmpl->{'autoconfig'} ne 'none') {
 	$xml =~ s/\t/\n/g;
 	}
 else {
-	$xml = &get_autoconfig_xml();
+	$xml = &get_thunderbird_autoconfig_xml();
 	}
 local $idx = &indexof("_XML_GOES_HERE_", @$lref);
 if ($idx >= 0) {
@@ -5839,17 +5850,26 @@ elsif ($p) {
 			$any++;
 			}
 
-		# Add redirect to CGI
+		# Add redirects to CGI
 		local @rd = &apache::find_directive("Redirect", $vconf);
-		local $found;
+		local ($found_thunderbird, $found_outlook);
 		foreach my $rd (@rd) {
 			if ($rd =~ /^\/mail\/config-v1.1.xml\s/) {
-				$found = 1;
+				$found_thunderbird = 1;
+				}
+			if ($rd =~ /^\/autodiscover\/autodiscover.xml\s/) {
+				$found_outlook = 1;
 				}
 			}
-		if (!$found) {
+		if (!$found_thunderbird) {
 			push(@rd, "/mail/config-v1.1.xml ".
 				  "/cgi-bin/autoconfig.cgi");
+			}
+		if (!$found_outlook) {
+			push(@rd, "/autodiscover/autodiscover.xml ".
+				  "/cgi-bin/autoconfig.cgi");
+			}
+		if (!$found_thunderbird || !$found_outlook) {
 			&apache::save_directive("Redirect", \@rd,
 						$vconf, $conf);
 			&flush_file_lines($virt->{'file'});
@@ -5960,13 +5980,20 @@ elsif ($p) {
 			$any++;
 			}
 
-		# Remove redirect to CGI
+		# Remove redirects to CGI
 		local @rd = &apache::find_directive("Redirect", $vconf);
 		local $found;
 		foreach my $rd (@rd) {
 			if ($rd =~ /^\/mail\/config-v1.1.xml\s/) {
 				@rd = grep { $_ ne $rd } @rd;
-				$found = 1;
+				$found++;
+				last;
+				}
+			}
+		foreach my $rd (@rd) {
+			if ($rd =~ /^\/autoconfig\/autoconfig.xml\s/) {
+				@rd = grep { $_ ne $rd } @rd;
+				$found++;
 				last;
 				}
 			}
@@ -6007,9 +6034,9 @@ if ($d->{'dns'}) {
 return undef;
 }
 
-# get_autoconfig_xml()
-# Returns the XML template for the autoconfig response
-sub get_autoconfig_xml
+# get_thunderbird_autoconfig_xml()
+# Returns the default XML template for the autoconfig response to Thunderbird
+sub get_thunderbird_autoconfig_xml
 {
 return <<'EOF';
 <?xml version="1.0" encoding="UTF-8"?>
@@ -6036,6 +6063,44 @@ return <<'EOF';
   </emailProvider>
 </clientConfig>
 EOF
+}
+
+# get_outlook_autoconfig_xml()
+# Returns the default XML template for the autoconfig response to Outlook
+sub get_outlook_autoconfig_xml
+{
+return <<'EOF';
+<?xml version="1.0" encoding="utf-8" ?>
+<Autodiscover xmlns="http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006">
+  <Response xmlns="http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a">
+    <Account>
+      <AccountType>email</AccountType>
+      <Action>settings</Action>
+      <Protocol>
+	<Type>IMAP</Type>
+        <TTL>24</TTL>
+	<Server>$IMAP_HOST</Server>
+        <Port>$IMAP_PORT</Port>
+	<LoginName>$SMTP_LOGIN</LoginName>
+        <DomainRequired>off</DomainRequired>
+        <SSL>$IMAP_SSL</SSL>
+	<AuthRequired>on</AuthRequired>
+      </Protocol>
+      <Protocol>
+	<Type>SMTP</Type>
+        <TTL>24</TTL>
+	<Server>$SMTP_HOST</Server>
+        <Port>$SMTP_PORT</Port>
+	<LoginName>$SMTP_LOGIN</LoginName>
+        <DomainRequired>off</DomainRequired>
+        <SSL>$SMTP_SSL</SSL>
+	<AuthRequired>on</AuthRequired>
+      </Protocol>
+    </Account>
+  </Response>
+</Autodiscover>
+EOF
+
 }
 
 $done_feature_script{'mail'} = 1;
