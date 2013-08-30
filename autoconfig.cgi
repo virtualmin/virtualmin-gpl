@@ -8,10 +8,12 @@ $USER = '';		# bob
 $SMTP_HOST = '';	# mail.bob.com
 $SMTP_PORT = '';	# 25
 $SMTP_TYPE = '';	# plain or SSL
+$SMTP_SSL = '';		# yes or no
 $SMTP_ENC = '';		# password-cleartext
 $IMAP_HOST = '';	# mail.bob.com
 $IMAP_PORT = '';	# 143
 $IMAP_TYPE = '';	# plain or SSL
+$IMAP_SSL = '';		# yes or no
 $IMAP_ENC = '';		# password-cleartext or password-encrypted
 $PREFIX = '';		# bob
 $STYLE = '';		# 1
@@ -25,11 +27,19 @@ exit(0);
 
 # Get email address parameter
 if ($ENV{'QUERY_STRING'} =~ /emailaddress=([^&]+)/) {
+	# Thunderbird style
 	$email = $1;
 	$email =~ s/%(..)/pack("c",hex($1))/ge;
 	($mailbox, $SMTP_DOMAIN) = split(/\@/, $email);
 	$mailbox && $SMTP_DOMAIN ||
 	    &error_exit("emailaddress parameter is not in user@domain format");
+	}
+elsif ($ENV{'REQUEST_METHOD'} eq 'POST') {
+	# Outlook style
+	read(STDIN, $buf, $ENV{'CONTENT_LENGTH'});
+	$buf =~ /<EMailAddress>([^@<>]+)@([^<>]+)<\/EMailAddress>/i ||
+		&error_exit("EMailAddress missing from input XML");
+	($mailbox, $SMTP_DOMAIN) = ($1, $2);
 	}
 else {
 	&error_exit("Missing emailaddress parameter");
@@ -71,6 +81,16 @@ $MAILBOX = $mailbox;
 
 # Output the XML
 print "Content-type: text/xml\n\n";
-print <<EOF;
-_XML_GOES_HERE_
+if ($ENV{'SCRIPT_NAME'} =~ /autodiscover.xml/) {
+	# Outlook
+	print <<EOF;
+_OUTLOOK_XML_GOES_HERE_
 EOF
+	}
+else {
+	# Thunderbird
+	print <<EOF;
+_THUNDERBIRD_XML_GOES_HERE_
+EOF
+	}
+

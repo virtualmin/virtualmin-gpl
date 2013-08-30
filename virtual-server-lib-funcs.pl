@@ -8089,6 +8089,7 @@ push(@rv, { 'id' => 0,
 	    'owners' => !defined($config{'tmpl_owners'}) ? "*" :
 				$config{'tmpl_owners'},
 	    'autoconfig' => $config{'tmpl_autoconfig'} || "none",
+	    'outlook_autoconfig' => $config{'tmpl_outlook_autoconfig'} || "none",
 	  } );
 foreach my $w (@php_wrapper_templates) {
 	$rv[0]->{$w} = $config{$w} || 'none';
@@ -8392,6 +8393,7 @@ if ($tmpl->{'id'} == 0) {
 			      $tmpl->{'domalias'};
 	$config{'domalias_type'} = $tmpl->{'domalias_type'};
 	$config{'tmpl_autoconfig'} = $tmpl->{'autoconfig'};
+	$config{'tmpl_outlook_autoconfig'} = $tmpl->{'outlook_autoconfig'};
 	foreach my $w (@php_wrapper_templates) {
 		$config{$w} = $tmpl->{$w};
 		}
@@ -8497,7 +8499,7 @@ if (!$tmpl->{'default'}) {
 		    @php_wrapper_templates,
 		    "capabilities",
 		    "featurelimits",
-		    "hashpass", "hashtypes", "autoconfig",
+		    "hashpass", "hashtypes", "autoconfig", "outlook_autoconfig",
 		    (map { $_."limit", $_."server", $_."master", $_."view",
 			   $_."passwd" } @plugins)) {
 		if ($tmpl->{$p} eq "") {
@@ -13984,6 +13986,8 @@ if ($in{'domalias_mode'} == 2) {
 sub show_template_autoconfig
 {
 local ($tmpl) = @_;
+
+# XML for Thunderbird
 local $xml;
 if ($tmpl->{'autoconfig'} eq "" || $tmpl->{'autoconfig'} eq "none") {
 	$xml = &get_thunderbird_autoconfig_xml();
@@ -13991,11 +13995,27 @@ if ($tmpl->{'autoconfig'} eq "" || $tmpl->{'autoconfig'} eq "none") {
 else {
 	$xml = join("\n", split(/\t/, $tmpl->{'autoconfig'}));
 	}
-print &ui_table_row(&hlink($text{'tmpl_autoconfig'}, "template_autoconfig"),
+print &ui_table_row(
+	&hlink($text{'tmpl_autoconfig'}, "template_autoconfig"),
 	&none_def_input("autoconfig", $tmpl->{'autoconfig'},
 			$text{'tmpl_autoconfigset'}, 0, 0,
 			$text{'tmpl_autoconfignone'})."<br>\n".
 	&ui_textarea("autoconfig", $xml, 20, 80));
+
+# XML for Outlook
+if ($tmpl->{'outlook_autoconfig'} eq "" ||
+    $tmpl->{'outlook_autoconfig'} eq "none") {
+	$xml = &get_outlook_autoconfig_xml();
+	}
+else {
+	$xml = join("\n", split(/\t/, $tmpl->{'outlook_autoconfig'}));
+	}
+print &ui_table_row(
+	&hlink($text{'tmpl_outlook_autoconfig'}, "template_outlook_autoconfig"),
+	&none_def_input("outlook_autoconfig", $tmpl->{'outlook_autoconfig'},
+			$text{'tmpl_autoconfigset'}, 0, 0,
+			$text{'tmpl_autoconfignone'})."<br>\n".
+	&ui_textarea("outlook_autoconfig", $xml, 20, 80));
 }
 
 # parse_template_autoconfig(&tmpl)
@@ -14004,11 +14024,18 @@ sub parse_template_autoconfig
 {
 local ($tmpl) = @_;
 
-# Parse automatic alias domain mode
+# Parse Thunderbird automatic alias domain mode
 $tmpl->{'autoconfig'} = &parse_none_def("autoconfig");
 if ($in{'autoconfig_mode'} == 2) {
 	$in{'autoconfig'} =~ /<clientConfig.*>/i ||
 		&error($text{'tmpl_eautoconfig'});
+	}
+
+# Parse Outlook automatic alias domain mode
+$tmpl->{'outlook_autoconfig'} = &parse_none_def("outlook_autoconfig");
+if ($in{'outlook_autoconfig_mode'} == 2) {
+	$in{'outlook_autoconfig'} =~ /<Autodiscover.*>/i ||
+		&error($text{'tmpl_outlook_eautoconfig'});
 	}
 }
 

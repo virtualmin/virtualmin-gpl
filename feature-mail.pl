@@ -3469,7 +3469,6 @@ if ($_[2]->{'mailuser'}) {
 	@users = grep { $_->{'user'} eq $foundmailuser } @users;
 	}
 
-
 if (-r "$_[1]_files" &&
     (!$_[2]->{'mailuser'} || $foundmailuser)) {
 	local $xtract;
@@ -5796,8 +5795,10 @@ foreach my $l (@$lref) {
 		$l = "\$STYLE = '$tmpl->{'append_style'}';";
 		}
 	}
-local $xml;
 local $tmpl = &get_template($d->{'template'});
+
+# Sub in XML for thunderbird
+local $xml;
 if ($tmpl->{'autoconfig'} && $tmpl->{'autoconfig'} ne 'none') {
 	$xml = &substitute_domain_template($tmpl->{'autoconfig'}, $d,
 					   undef, 1);
@@ -5806,10 +5807,25 @@ if ($tmpl->{'autoconfig'} && $tmpl->{'autoconfig'} ne 'none') {
 else {
 	$xml = &get_thunderbird_autoconfig_xml();
 	}
-local $idx = &indexof("_XML_GOES_HERE_", @$lref);
+local $idx = &indexof("_THUNDERBIRD_XML_GOES_HERE_", @$lref);
 if ($idx >= 0) {
 	splice(@$lref, $idx, 1, split(/\n/, $xml));
 	}
+
+# And for outlook
+if ($tmpl->{'outlook_autoconfig'} && $tmpl->{'outlook_autoconfig'} ne 'none') {
+	$xml = &substitute_domain_template($tmpl->{'outlook_autoconfig'}, $d,
+					   undef, 1);
+	$xml =~ s/\t/\n/g;
+	}
+else {
+	$xml = &get_outlook_autoconfig_xml();
+	}
+local $idx = &indexof("_OUTLOOK_XML_GOES_HERE_", @$lref);
+if ($idx >= 0) {
+	splice(@$lref, $idx, 1, split(/\n/, $xml));
+	}
+
 &flush_file_lines_as_domain_user($d, $autocgi);
 &set_ownership_permissions(undef, undef, 0755, $autocgi);
 &unlock_file($autocgi);
@@ -5850,28 +5866,37 @@ elsif ($p) {
 			$any++;
 			}
 
-		# Add redirects to CGI
+		# Add redirect to thunderbird CGI
 		local @rd = &apache::find_directive("Redirect", $vconf);
 		local ($found_thunderbird, $found_outlook);
 		foreach my $rd (@rd) {
 			if ($rd =~ /^\/mail\/config-v1.1.xml\s/) {
 				$found_thunderbird = 1;
 				}
-			if ($rd =~ /^\/autodiscover\/autodiscover.xml\s/) {
-				$found_outlook = 1;
-				}
 			}
 		if (!$found_thunderbird) {
 			push(@rd, "/mail/config-v1.1.xml ".
 				  "/cgi-bin/autoconfig.cgi");
-			}
-		if (!$found_outlook) {
-			push(@rd, "/autodiscover/autodiscover.xml ".
-				  "/cgi-bin/autoconfig.cgi");
-			}
-		if (!$found_thunderbird || !$found_outlook) {
 			&apache::save_directive("Redirect", \@rd,
 						$vconf, $conf);
+			}
+
+		# Add ScriptAlias to outlook CGI
+		local @sc = &apache::find_directive("ScriptAlias", $vconf);
+		foreach my $sc (@sc) {
+			if ($sc =~ /^\/autodiscover\/autodiscover.xml\s/) {
+				$found_outlook = 1;
+                                }
+			}
+		if (!$found_outlook) {
+			local $cgidir = &cgi_bin_dir($d);
+			push(@sc, "/autodiscover/autodiscover.xml ".
+				  "$cgidir/autoconfig.cgi");
+			&apache::save_directive("ScriptAlias", \@sc,
+						$vconf, $conf);
+			}
+
+		if (!$found_thunderbird || !$found_outlook) {
 			&flush_file_lines($virt->{'file'});
 			$any++;
 			}
@@ -5980,26 +6005,36 @@ elsif ($p) {
 			$any++;
 			}
 
-		# Remove redirects to CGI
+		# Remove redirect to CGI for Thunderbird
+		local ($found_thunderbird, $found_outlook);
 		local @rd = &apache::find_directive("Redirect", $vconf);
-		local $found;
 		foreach my $rd (@rd) {
 			if ($rd =~ /^\/mail\/config-v1.1.xml\s/) {
 				@rd = grep { $_ ne $rd } @rd;
-				$found++;
+				$found_thunderbird++;
 				last;
 				}
 			}
-		foreach my $rd (@rd) {
-			if ($rd =~ /^\/autoconfig\/autoconfig.xml\s/) {
-				@rd = grep { $_ ne $rd } @rd;
-				$found++;
-				last;
-				}
-			}
-		if ($found) {
+		if ($found_thunderbird) {
 			&apache::save_directive("Redirect", \@rd,
 						$vconf, $conf);
+			}
+
+		# Remove alias to CGI for Outlook
+		local @sc = &apache::find_directive("ScriptAlias", $vconf);
+		foreach my $sc (@sc) {
+			if ($sc =~ /^\/autodiscover\/autodiscover.xml\s/) {
+				@sc = grep { $_ ne $sc } @sc;
+				$found_outlook++;
+				last;
+				}
+			}
+		if ($found_outlook) {
+			&apache::save_directive("ScriptAlias", \@sc,
+						$vconf, $conf);
+			}
+
+		if ($found_thunderbird || $found_outlook) {
 			&flush_file_lines($virt->{'file'});
 			$any++;
 			}

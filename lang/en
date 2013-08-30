@@ -3173,10 +3173,12 @@ tmpl_availyes=Available?
 tmpl_deletewarn=Are you sure you want to delete this server template? Once removed it cannot be un-deleted.
 tmpl_deleteusers=The template is currently in use by $1 virtual servers.
 tmpl_deleteconfirm=Delete Template
-tmpl_autoconfig=Mail client auto-configuration XML
+tmpl_autoconfig=Thunderbird auto-configuration XML
 tmpl_autoconfigset=XML template below ..
 tmpl_autoconfignone=Automatically generated
-tmpl_eautoconfig=Mail client autoconfiguration XML is missing a &lt;clientConfig.&gt; tag.
+tmpl_eautoconfig=Thunderbird autoconfiguration XML is missing a &lt;clientConfig&gt; tag.
+tmpl_outlook_autoconfig=Outlook auto-configuration XML
+tmpl_outlook_eautoconfig=Outlook autoconfiguration XML is missing an &lt;Autodiscover&gt; tag.
 
 newplugin_title=Plugin Modules
 newplugin_desc=Plugins are Webmin modules which provided additional server and mailbox features for Virtualmin. Unlike the core features, they can be installed separately and written by third-party developers.

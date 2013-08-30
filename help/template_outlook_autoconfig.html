@@ -1,7 +1,7 @@
-<header>Thunderbird auto-configuration XML</header>
+<header>Outlook auto-configuration XML</header>
 
 This field allows you to customize the XML that is returned to mail clients
-that access the URL path <tt>/mail/config-v1.1.xml?emailaddress=user@example.com</tt> on a domain using this template. Clients like Thunderbird can use this
+that access the URL path <tt>/autodiscover/autodiscover.xml</tt> on a domain using this template. Clients like Outlook can use this
 XML to automatically configure the mail server hostname, login, port, protocol
 and username, based on the email address. <p>
 
@@ -18,11 +18,13 @@ Other variables that can be used in the XML are :
 <li><b>$IMAP_HOST</b> - Default IMAP server name, like mail.example.com
 <li><b>$IMAP_PORT</b> - Automatically determined IMAP server port (like 143) taken from the IMAP server configuration
 <li><b>$IMAP_TYPE</b> - Either <tt>SSL</tt> or <tt>plain</tt>, depending on your IMAP server configuration
+<li><b>$IMAP_SSL</b> - Either <tt>yes</tt> or <tt>no</tt>, depending on your IMAP server configuration
 <li><b>$IMAP_ENC</b> - Either <tt>password-cleartext</tt> or <tt>password-encrypted</tt>, depending on the IMAP server config.
 <li><b>$SMTP_LOGIN</b> - Full username to login to the IMAP and SMTP servers, like <tt>bob.example</tt>
 <li><b>$SMTP_HOST</b> - Default SMTP server name, like mail.example.com
 <li><b>$SMTP_PORT</b> - Automatically determined SMTP server port (like 587) taken from the mail server configuration
 <li><b>$SMTP_TYPE</b> - Either <tt>SSL</tt> or <tt>plain</tt>, depending on your mail server configuration
+<li><b>$SMTP_SSL</b> - Either <tt>yes</tt> or <tt>no</tt>, depending on your mail server configuration
 <li><b>$SMTP_ENC</b> - Either <tt>password-cleartext</tt> or <tt>STARTTLS</tt>, depending on the mail server config.
 </ul>
 
