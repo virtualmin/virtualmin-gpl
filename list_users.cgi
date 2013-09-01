@@ -9,8 +9,10 @@ $d = &get_domain($in{'dom'});
 $d || &error($text{'edit_egone'});
 &can_edit_domain($d) && &can_edit_users() || &error($text{'users_ecannot'});
 @users = &list_domain_users($d, 0, 0, 0, 0);
-&ui_print_header(&domain_in($d), $d->{'mail'} ? $text{'users_title'}
-					      : $text{'users_title2'}, "");
+$msg = &text('users_indom', scalar(@users),
+	     "<tt>".&show_domain_name($d)."</tt>");
+&ui_print_header($msg, $d->{'mail'} ? $text{'users_title'}
+				    : $text{'users_title2'}, "");
 $webinit = &create_initial_user($d, undef, 1);
 
 # Create select / add links

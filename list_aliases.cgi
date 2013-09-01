@@ -9,7 +9,9 @@ $d = &get_domain($in{'dom'});
 $d || &error($text{'edit_egone'});
 &can_edit_domain($d) && &can_edit_aliases() || &error($text{'aliases_ecannot'});
 @aliases = &list_domain_aliases($d, !$in{'show'});
-&ui_print_header(&domain_in($d), $text{'aliases_title'}, "");
+$msg = &text('aliases_indom', scalar(@aliases),
+	     "<tt>".&show_domain_name($d)."</tt>");
+&ui_print_header($msg, $text{'aliases_title'}, "");
 
 # Create add links
 ($mleft, $mreason, $mmax, $mhide) = &count_feature("aliases");

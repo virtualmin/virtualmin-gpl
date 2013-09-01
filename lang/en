@@ -621,6 +621,7 @@ equotacommand=Quota command $1 failed : $2
 users_ecannot=You are not allowed to edit users in this domain
 users_ecannot2=You are not allowed to edit local users
 users_emailbox=The domain owner's mailbox cannot be edited
+users_indom=$1 users in domain $2
 users_title=Mail and FTP Users
 users_title2=FTP Users
 users_name=Name
@@ -800,6 +801,7 @@ user_lastlogin_smtp=SMTP (sending email)
 user_lastlogin_never=No logins recorded yet
 
 aliases_ecannot=You are not allowed to edit aliases in this domain
+aliases_indom=$1 aliases in domain $2
 aliases_title=Mail Aliases
 aliases_name=Name
 aliases_domain=Domain
@@ -3253,6 +3255,7 @@ mail_system_4=Qmail+LDAP
 mail_system_5=Qmail+VPOPMail
 
 databases_title=Edit Databases
+databases_indom=$1 databases in domain $2
 databases_hosted=All databases on this system are hosted on the remote MySQL server $1.
 databases_none=This virtual server does not have any databases yet.
 databases_db=Database name

@@ -8,13 +8,16 @@ $d = &get_domain($in{'dom'});
 &can_edit_databases($d) || &error($text{'databases_ecannot'});
 $tmpl = &get_template($d->{'template'});
 
-&ui_print_header(&domain_in($d), $text{'databases_title'}, "", "databases");
-
 # Fix up manually deleted databases
 if (&can_import_servers()) {
 	@all = &all_databases($d);
 	&resync_all_databases($d, \@all);
 	}
+@dbs = &domain_databases($d);
+
+$msg = &text('databases_indom', scalar(@dbs),
+	     "<tt>".&show_domain_name($d)."</tt>");
+&ui_print_header($msg, $text{'databases_title'}, "", "databases");
 
 # Work out if allowed hosts can be edited
 $can_allowed_hosts = 0;
@@ -83,7 +86,6 @@ if ($dleft != 0) {
 # Build and show DB list
 print &ui_tabs_start_tab("databasemode", "list") if (@tabs > 1);
 print "$text{'databases_desc1'}<p>\n";
-@dbs = &domain_databases($d);
 foreach $db (sort { $a->{'name'} cmp $b->{'name'} } @dbs) {
 	local $action;
 	if ($db->{'link'}) {
