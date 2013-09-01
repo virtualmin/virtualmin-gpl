@@ -2453,10 +2453,11 @@ local $umf = &user_mail_file($_[0]);
 if ($umf) {
 	&system_logged("rm -rf ".quotemeta($umf));
 	}
+local $noat;
 if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 	# Remove real file as well as link, if any
 	local $fakeuser = { %{$_[0]} };
-	$fakeuser->{'user'} = &replace_atsign($_[0]->{'user'});
+	$fakeuser->{'user'} = $noat = &replace_atsign($_[0]->{'user'});
 	local ($realumf, $realtype) = &user_mail_file($fakeuser);
 	if ($realumf ne $umf && $realtype == 0) {
 		&system_logged("rm -f ".quotemeta($realumf));
@@ -2465,8 +2466,23 @@ if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 
 # Delete old-style mail file under /var/mail or /var/spool/mail , which
 # procmail sometimes creates
-&unlink_file("/var/mail/$_[0]->{'user'}",
-	     "/var/spool/mail/$_[0]->{'user'}");
+local @extras = ( "/var/mail/$_[0]->{'user'}",
+	          "/var/spool/mail/$_[0]->{'user'}" );
+if ($noat) {
+	# Also delete files under /var/mail for username without at sign
+	push(@extras, "/var/mail/$noat",
+		      "/var/spool/mail/$noat");
+	}
+&unlink_file(grep { -f $_ } @extras);
+
+# Delete BOGUS.username.xxx files
+foreach my $e (@extras) {
+	if ($e =~ /^(.*)\/([^\/]+)$/) {
+		local ($dir, $file) = ($1, $2);
+		local @bogus = grep { -f $_ } glob("$dir/BOGUS.$file.*");
+		&unlink_file(@bogus) if (@bogus);
+		}
+	}
 
 # Remove clamav temp files
 opendir(TEMP, "/tmp");
