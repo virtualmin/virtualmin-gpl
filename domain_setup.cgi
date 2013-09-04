@@ -52,13 +52,20 @@ if ($in{'subdom'}) {
 $dname = lc(&parse_domain_name($in{'dom'}));
 $err = &valid_domain_name($dname);
 &error($err) if ($err);
-&lock_domain_name($dname);
 if ($subdom) {
 	# Append super-domain
 	$dname =~ /^[A-Za-z0-9\-]+$/ || &error($text{'setup_esubdomain'});
 	$subprefix = $dname;
 	$dname .= ".$subdom->{'dom'}";
 	}
+else {
+	$force = $access{'forceunder'} && $parentdom ?
+			".$parentdom->{'dom'}" :
+		       $access{'subdom'} ? ".$access{'subdom'}" : undef;
+	!$force || $dname =~ /\Q$force\E$/ ||
+		&error(&text('setup_eforceunder', $force));
+	}
+&lock_domain_name($dname);
 $in{'owner'} =~ s/\r|\n//g;
 $in{'owner'} =~ /:/ && &error($text{'setup_eowner'});
 &domain_name_clash($dname) && &error($text{'setup_edomain4'});
