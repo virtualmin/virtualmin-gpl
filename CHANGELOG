@@ -1413,3 +1413,4 @@ On Apache version 2.4 and above, Virtualmin no longer adds the NameVirtualHost d
 The Change IP Address page can now be used to switch a domain with a private IP to another address.
 ---- Changes since 4.02 ----
 Updated the SMF script installer to version 2.0.5, X2CRM to 3.4.1, Django to 1.5.2 and 1.4.6, Roundcube to 0.9.3, osCommerce to 2.3.3.1, SugarCRM to 6.5.15, Z-push to 2.0.8, AjaXplorer to 5.0.3, and ownCloud to 5.0.10.
+Mail client auto-configuration now supports Outlook as well as Thunderbird.

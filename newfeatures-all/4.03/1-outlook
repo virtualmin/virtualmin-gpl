@@ -1,0 +1,4 @@
+desc=Outlook autoconfiguration
+html=Mail client auto-configuration now supports Outlook as well as Thunderbird. However, this requires that auto-configuration by disabled and then re-enabled to activate it for existing domains.
+master=1
+link=edit_newautoconfig.cgi
