@@ -35,6 +35,7 @@ docs_link=Link destination for additional documentation,3,None,50
 docs_text=Link title for additional documentation,3,None or default,50
 show_nf=Show new features to,2,master-Master administrator,reseller-Resellers,domain-Domain owners
 hide_alias=Include alias virtual servers in menu?,1,0-Yes,1-No
+force_email=Contact email address is mandatory?,1,1-Yes,0-No
 
 line1.5=Server administrator permissions,11
 edit_afiles=Can edit alias include and reply files?,1,1-Yes,0-No

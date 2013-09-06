@@ -208,3 +208,4 @@ lookup_domain_serial=0
 ipfollow=0
 rs_endpoint=https://identity.api.rackspacecloud.com/v1.0
 rs_snet=0
+force_email=0

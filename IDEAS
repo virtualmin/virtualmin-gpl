@@ -40,18 +40,11 @@
 	- CHANGELOG
 	- backup/restore
 
- - Validate FreeBSD 9.x support
-	- See email from Richard A Secor
-	- Verify PHP package installation in Virtualmin
-	- Check that DKIM works
-
  - php-fpm support for Joaquim
 
  - Name-based hosting on IPv6 support
 
  - Amazon tax docs
 
- - Outlook autoconfig support
-	- http://virtualmin.com/node/29670
-	- http://technet.microsoft.com/en-us/library/cc511507(v=office.14).aspx
-	- Test with actual outlook
+ - 2-factor authentication
+	- Authy?

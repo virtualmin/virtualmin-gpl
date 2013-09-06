@@ -355,6 +355,13 @@ if (!$parentuser) {
 		undef, \@tds);
 	}
 
+if (!$parentuser && $config{'force_email'}) {
+	# Contact email address (if manadatory)
+	print &ui_table_row(&hlink($text{'form_email'}, "ownersemail"),
+		&ui_textbox("email", undef, 40),
+		undef, \@tds);
+	}
+
 print &ui_hidden_table_end("basic");
 
 # Start of advanced section
@@ -366,12 +373,14 @@ if ($has_advanced) {
 
 # These settings are not needed for a sub-domain, as they come from the owner
 if (!$parentuser) {
-	# Contact email address
-	print &ui_table_row(&hlink($text{'form_email'}, "ownersemail"),
-		&ui_opt_textbox("email", undef, 30,
-				$text{'form_email_def'},
-				$text{'form_email_set'}),
-		undef, \@tds);
+	# Contact email address (if optional)
+	if (!$config{'force_email'}) {
+		print &ui_table_row(&hlink($text{'form_email'}, "ownersemail"),
+			&ui_opt_textbox("email", undef, 30,
+					$text{'form_email_def'},
+					$text{'form_email_set'}),
+			undef, \@tds);
+		}
 
 	# Mail group name
 	print &ui_table_row(&hlink($text{'form_mgroup'}, "mailgroupname"),
