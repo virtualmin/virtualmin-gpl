@@ -3522,6 +3522,39 @@ else {
 	}
 }
 
+# get_default_ip([reseller])
+# Returns this system's primary IPv6 address. If a reseller is given and he
+# has a custom IP, use that.
+sub get_default_ip6
+{
+local ($reselname) = @_;
+if ($reselname && defined(&get_reseller)) {
+	# Check if the reseller has an IP
+	local $resel = &get_reseller($reselname);
+	if ($resel && $resel->{'acl'}->{'defip6'}) {
+		return $resel->{'acl'}->{'defip6'};
+		}
+	}
+if ($config{'defip6'}) {
+	# Explicitly set on module config page
+	return $config{'defip6'};
+	}
+else {
+	# From interface detected at check time
+	&foreign_require("net", "net-lib.pl");
+	local $ifacename = $config{'iface'} || &first_ethernet_iface();
+	local ($iface) = grep { $_->{'fullname'} eq $ifacename }
+			      &net::active_interfaces();
+	if ($iface) {
+		return $iface->{'address6'} && @{$iface->{'address6'}} ?
+			$iface->{'address6'}->[0] : undef;
+		}
+	else {
+		return undef;
+		}
+	}
+}
+
 # first_ethernet_iface()
 # Returns the name of the first active ethernet interface
 sub first_ethernet_iface
@@ -5398,6 +5431,7 @@ foreach my $t (@tmpls) {
 $config{'iface'} = $oldconfig{'iface'};
 $config{'defip'} = $oldconfig{'defip'};
 $config{'sharedips'} = $oldconfig{'sharedips'};
+$config{'sharedip6s'} = $oldconfig{'sharedip6s'};
 $config{'home_quotas'} = $oldconfig{'home_quotas'};
 $config{'mail_quotas'} = $oldconfig{'mail_quotas'};
 $config{'group_quotas'} = $oldconfig{'group_quotas'};
@@ -14355,6 +14389,21 @@ return split(/\s+/, $config{'sharedips'});
 sub save_shared_ips
 {
 $config{'sharedips'} = join(" ", @_);
+&save_module_config();
+}
+
+# list_shared_ip6s()
+# Returns a list of extra IPv6 addresses that can be used by virtual servers
+sub list_shared_ip6s
+{
+return split(/\s+/, $config{'sharedip6s'});
+}
+
+# save_shared_ip6s(ip6, ...)
+# Updates the list of extra IPv6 addresses that can be used by virtual servers
+sub save_shared_ip6s
+{
+$config{'sharedip6s'} = join(" ", @_);
 &save_module_config();
 }
 
