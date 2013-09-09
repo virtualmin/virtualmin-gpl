@@ -27,6 +27,8 @@ if (!$d->{'parent'} && &can_rename_domains() == 2 &&
 		$in{'user'} || &error($text{'rename_euser'});
 		$user = $in{'user'};
 		&valid_mailbox_name($user) && &error($text{'setup_euser2'});
+		($clash) = grep { $_->{'user'} eq $user } &list_all_users();
+		$clash && &error($text{'rename_euserclash'});
 		}
 	}
 $parentdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;

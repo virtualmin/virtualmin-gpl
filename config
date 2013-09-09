@@ -209,3 +209,4 @@ ipfollow=0
 rs_endpoint=https://identity.api.rackspacecloud.com/v1.0
 rs_snet=0
 force_email=0
+ip6enabled=0

@@ -2615,6 +2615,7 @@ rename_prefix2=Change to
 rename_group=Change group name?
 rename_ok=Rename Now
 rename_err=Failed to change domain name
+rename_euserclash=A user with the same name already exists
 rename_emaking=Before rename command failed : $1
 rename_emade=Post-rename command failed : $1
 rename_enew=Missing or invalid new domain name
