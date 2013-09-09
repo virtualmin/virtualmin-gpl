@@ -603,21 +603,34 @@ else {
 # Show IPv6 address allocation section
 if (!$aliasdom && &can_use_feature("virt") && &supports_ip6()) {
 	local @ip6opts = ( [ 0, $text{'edit_virt6off'} ] );
+	local $defip6 = &get_default_ip6();
+	if ($defip6) {
+		# Default shared address
+		push(@ip6opts, [ 4, &text('form_shared', $defip6) ]);
+		}
+	local @shared = &list_shared_ip6s();
+	if (@shared) {
+		# Other shared address
+		push(@ip6opts, [ 3, $text{'form_shared2'},
+                                 &ui_select("sharedip6", undef,
+                                        [ map { [ $_ ] } @shared ]) ]);
+		}
 	local @alloctmpls = grep { $_->{'ranges6'} ne 'none' } @cantmpls;
 	if (@alloctmpls) {
-		# Can allocate
+		# Allocated address
 		push(@ip6opts, [ 2, $text{'edit_alloc'} ]);
 		}
 	local @noalloctmpls = grep { $_->{'ranges6'} eq 'none' } @cantmpls;
 	if (@noalloctmpls) {
-		# Can enter
+		# Manually entered address
 		push(@ip6opts, [ 1, $text{'edit_virt6on'},
 				 &ui_textbox("ip6", undef, 30)." ".
 				 &ui_checkbox("virt6already", 1,
                                       $text{'form_virtalready'}) ]);
 		}
 	print &ui_table_row(&hlink($text{'form_iface6'}, "iface6"),
-		&ui_radio_table("virt6", 0, \@ip6opts, 1));
+		&ui_radio_table("virt6", $config{'ip6enabled'} ? 4 : 0,
+				\@ip6opts, 1));
 	}
 
 # Show DNS IP address field

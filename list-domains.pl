@@ -295,6 +295,16 @@ if ($multi) {
 			print "    IP address: $d->{'ip'} (Shared)\n";
 			}
 		if ($d->{'virt6'}) {
+			if ($multi == 2) {
+				print "    IP address: $d->{'ip6'} (Private)\n";
+				}
+			else {
+				local $iface = &get_address_iface($d->{'ip6'});
+				print "    IP address: $d->{'ip6'} ",
+				      "(On $iface)\n";
+				}
+			}
+		elsif ($d->{'ip6'}) {
 			print "    IPv6 address: $d->{'ip6'}\n";
 			}
 		if ($d->{'dns_ip'}) {

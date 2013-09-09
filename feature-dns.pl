@@ -428,7 +428,7 @@ local $newip = $d->{'dns_ip'} || $d->{'ip'};
 if ($oldip ne $newip) {
 	&modify_records_ip_address($recs, $file, $oldip, $newip);
 	}
-if ($d->{'virt6'} && $d->{'ip6'} ne $oldd->{'ip6'}) {
+if ($d->{'ip6'} && $d->{'ip6'} ne $oldd->{'ip6'}) {
 	&modify_records_ip_address($recs, $file, $oldd->{'ip6'}, $d->{'ip6'});
 	}
 
@@ -838,7 +838,7 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'} && $_[0]->{'mail'} &&
 	$rv++;
 	}
 
-if ($_[0]->{'virt6'} && !$_[1]->{'virt6'}) {
+if ($_[0]->{'ip6'} && !$_[1]->{'ip6'}) {
 	# IPv6 enabled
 	&$first_print($text{'save_dnsip6on'});
 	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
@@ -851,7 +851,7 @@ if ($_[0]->{'virt6'} && !$_[1]->{'virt6'}) {
 	&$second_print($text{'setup_done'});
 	$rv++;
 	}
-elsif (!$_[0]->{'virt6'} && $_[1]->{'virt6'}) {
+elsif (!$_[0]->{'ip6'} && $_[1]->{'ip6'}) {
 	# IPv6 disabled
 	&$first_print($text{'save_dnsip6off'});
 	($recs, $file) = &get_domain_dns_records_and_file($_[0]) if (!$file);
@@ -864,7 +864,7 @@ elsif (!$_[0]->{'virt6'} && $_[1]->{'virt6'}) {
 	&$second_print($text{'setup_done'});
 	$rv++;
 	}
-elsif ($_[0]->{'virt6'} && $_[1]->{'virt6'} &&
+elsif ($_[0]->{'ip6'} && $_[1]->{'ip6'} &&
        $_[0]->{'ip6'} ne $_[1]->{'ip6'}) {
 	# IPv6 address changed
 	&$first_print($text{'save_dnsip6'});
@@ -939,7 +939,7 @@ local ($file, $d, $ip, $ip6) = @_;
 local $withdot = $d->{'dom'}.".";
 &bind8::create_record($file, "mail.$withdot", undef,
 		      "IN", "A", $ip);
-if ($d->{'virt6'} && $ip6) {
+if ($d->{'ip6'} && $ip6) {
 	&bind8::create_record($file, "mail.$withdot", undef,
 			      "IN", "AAAA", $ip6);
 	}
@@ -1145,7 +1145,7 @@ if ($tmpl->{'dns'} && (!$d->{'dns_submode'} || !$tmpl->{'dns_replace'})) {
 	&close_tempfile(RECS);
 	}
 
-if ($d->{'virt6'}) {
+if ($d->{'ip6'}) {
 	# Create IPv6 records for IPv4
 	&add_ip6_records($d, $file);
 	}

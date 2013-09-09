@@ -255,12 +255,33 @@ else {
 	}
 
 # Work out the IPv6 address
+$defip6 = &get_default_ip6($resel);
 if ($aliasdom) {
 	$ip6 = $aliasdom->{'ip6'};
 	$virt6 = 0;
 	}
+elsif (!&can_select_ip()) {
+	# Not allowed to select IPv6 address
+	if ($access{'ipfollow'} && $parentdom) {
+		# Inherit from parent
+		$ip6 = $parentdom->{'ip6'};
+		$virt6 = 0;
+		$name6 = 1;
+		}
+	else {
+		# Use global default
+		$ip6 = $defip6;
+		$virt6 = 0;
+		$name6 = 1;
+		}
+	}
 elsif (&can_use_feature("virt") && &supports_ip6()) {
-	if ($in{'virt6'} == 1) {
+	if ($in{'virt6'} == 0) {
+		# IPv6 specifically disabled
+		$virt6 = 0;
+		$name6 = 0;
+		}
+	elsif ($in{'virt6'} == 1) {
 		# Manually entered
 		$tmpl->{'ranges6'} eq 'none' ||
 			&error(&text('setup_evirt6tmpl2'));
@@ -280,6 +301,7 @@ elsif (&can_use_feature("virt") && &supports_ip6()) {
 		$virt6already = $in{'virt6already'};
 		$ip6 = $in{'ip6'};
 		$virt6 = 1;
+		$name6 = 0;
 		}
 	elsif ($in{'virt6'} == 2) {
 		# Allocated
@@ -288,6 +310,20 @@ elsif (&can_use_feature("virt") && &supports_ip6()) {
 		($ip6, $netmask6) = &free_ip6_address($tmpl);
 		$ip6 || &text('setup_evirt6alloc');
 		$virt6 = 1;
+		$name6 = 0;
+		}
+	elsif ($in{'virt6'} == 4) {
+		# System default IP
+		$ip6 = $defip6;
+		$ip6 || &error($text{'setup_evirt6def'});
+		$virt6 = 0;
+		$name6 = 1;
+		}
+	elsif ($in{'virt6'} == 3) {
+		# Other shared IP
+		$ip6 = $in{'sharedip6'};
+		$virt6 = 0;
+		$name6 = 1;
 		}
 	}
 
@@ -358,6 +394,7 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 						       : &get_dns_ip($resel),
 	 'virt', $virt,
 	 'virt6', $virt6,
+	 'name6', $name6,
 	 'virtalready', $virtalready,
 	 'virt6already', $virt6already,
 	 'source', 'domain_setup.cgi',

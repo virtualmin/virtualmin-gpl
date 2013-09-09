@@ -195,6 +195,7 @@ local $tmpl = &get_template($_[0]->{'template'});
 if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
     $_[0]->{'ip6'} ne $_[1]->{'ip6'} ||
     $_[0]->{'virt6'} != $_[1]->{'virt6'} ||
+    $_[0]->{'name6'} != $_[1]->{'name6'} ||
     $_[0]->{'web_sslport'} != $_[1]->{'web_sslport'}) {
 	# IP address or port has changed .. update VirtualHost
 	&$first_print($text{'save_ssl'});
@@ -502,7 +503,7 @@ if ($d->{'virt'}) {
 	&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
 		return &text('validate_ewebip', $ipp);
 	}
-if ($d->{'virt6'}) {
+if ($d->{'ip6'}) {
 	local $ipp = "[".$d->{'ip6'}."]:".$d->{'web_sslport'};
 	&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
 		return &text('validate_ewebip6', $ipp);

@@ -3587,11 +3587,14 @@ return undef;
 }
 
 # get_address_iface(address)
-# Given an IP address, returns the interface name
+# Given an IPv4 or v6 address, returns the interface name
 sub get_address_iface
 {
+local ($a) = @_;
 &foreign_require("net", "net-lib.pl");
-local ($iface) = grep { $_->{'address'} eq $_[0] } &net::active_interfaces();
+local ($iface) = grep { $_->{'address'} eq $a ||
+			&indexof($a, @{$_->{'address6'}}) >= 0 }
+		      &net::active_interfaces();
 return $iface ? $iface->{'fullname'} : undef;
 }
 

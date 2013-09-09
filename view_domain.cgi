@@ -82,6 +82,7 @@ if (!$aliasdom) {
 		$resel = &get_reseller($d->{'reseller'});
 		if ($resel) {
 			$reselip = $resel->{'acl'}->{'defip'};
+			$reselip6 = $resel->{'acl'}->{'defip6'};
 			}
 		}
 	print &ui_table_row($text{'edit_ip'},
@@ -91,8 +92,13 @@ if (!$aliasdom) {
 						  "<tt>$resel->{'name'}</tt>") :
 					    $text{'edit_shared'}), 3, \@tds);
 	}
-if ($d->{'virt6'}) {
-	print &ui_table_row($text{'edit_ip6'}, "<tt>$d->{'ip6'}</tt>");
+if ($d->{'ip6'}) {
+	print &ui_table_row($text{'edit_ip6'},
+		"<tt>$d->{'ip6'}</tt> ".
+		($d->{'virt6'} ? $text{'edit_private'} :
+		 $d->{'ip6'} eq $reselip6 ? &text('edit_rshared',
+						  "<tt>$resel->{'name'}</tt>") :
+					    $text{'edit_shared'}), 3, \@tds);
 	}
 
 # Home directory

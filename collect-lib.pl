@@ -175,10 +175,15 @@ foreach my $d (@doms) {
 	next if ($d->{'alias'});
 	$ipcount{$d->{'ip'}}++;
 	$ipdom{$d->{'ip'}} ||= $d;
+	if ($d->{'ip6'}) {
+		$ipcount{$d->{'ip6'}}++;
+		$ipdom{$d->{'ip6'}} ||= $d;
+		}
 	}
 local %doneip;
 if (keys %ipdom > 1) {
 	local $defip = &get_default_ip();
+	local $defip6 = &get_default_ip6();
 	if (defined(&list_resellers)) {
 		foreach my $r (&list_resellers()) {
 			if ($r->{'acl'}->{'defip'}) {
@@ -192,29 +197,27 @@ if (keys %ipdom > 1) {
 			$sharedip{$ip}++;
 			}
 		}
+	if (defined(&list_shared_ip6s)) {
+		foreach my $ip6 (&list_shared_ip6s()) {
+			$sharedip{$ip6}++;
+			}
+		}
 	local @ips;
 	foreach my $ip ($defip,
 		     (sort { $a cmp $b } keys %reselip),
 		     (sort { $a cmp $b } keys %ipcount)) {
 		next if ($doneip{$ip}++);
 		push(@ips, [ $ip, $ip eq $defip ? ('def', undef) :
+				  $ip eq $defip6 ? ('def', undef) :
 			          $reselip{$ip} ? ('reseller',
 						   $reselip{$ip}->{'name'}) :
 			          $sharedip{$ip} ? ('shared', undef) :
 						   ('virt', undef),
 			     $ipcount{$ip}, $ipdom{$ip}->{'dom'} ]);
 		}
-	$info->{'ips'} = \@ips;
+	$info->{'ips'} = [ grep { &check_ipaddress($_->[0]) } @ips ];
+	$info->{'ips6'} = [ grep { &check_ip6address($_->[0]) } @ips ];
 	}
-
-# IPv6 addresses used
-local @ips6;
-foreach my $d (@doms) {
-	if ($d->{'virt6'}) {
-		push(@ips6, [ $d->{'ip6'}, 'virt', undef, 1, $d->{'dom'} ]);
-		}
-	}
-$info->{'ips6'} = \@ips6;
 
 # IP ranges available
 local $tmpl = &get_template(0);

@@ -568,6 +568,7 @@ else {
 	    $_[0]->{'ip'} ne $_[1]->{'ip'} ||
 	    $_[0]->{'ip6'} ne $_[1]->{'ip6'} ||
 	    $_[0]->{'virt6'} != $_[1]->{'virt6'} ||
+	    $_[0]->{'name6'} != $_[1]->{'name6'} ||
 	    $_[0]->{'ssl'} != $_[1]->{'ssl'} ||
 	    $_[0]->{'web_port'} != $_[1]->{'web_port'}) {
 		# Name-based hosting mode or IP has changed .. update the
@@ -857,7 +858,7 @@ else {
 		&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
 			return &text('validate_ewebip', $ipp);
 		}
-	if ($d->{'virt6'}) {
+	if ($d->{'ip6'}) {
 		local $ipp = "[".$d->{'ip6'}."]:".$d->{'web_port'};
 		&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
 			return &text('validate_ewebip6', $ipp);
@@ -2085,7 +2086,7 @@ sub add_listen
 {
 local ($d, $conf, $web_port) = @_;
 &require_apache();
-foreach my $dip ($d->{'ip'}, $d->{'virt6'} ? ( $d->{'ip6'} ) : ( )) {
+foreach my $dip ($d->{'ip'}, $d->{'ip6'} ? ( $d->{'ip6'} ) : ( )) {
 	local $defport = &apache::find_directive("Port", $conf) || 80;
 	local @listen = &apache::find_directive("Listen", $conf);
 	local $lfound;
@@ -2124,7 +2125,7 @@ local ($d, $conf, $web_port) = @_;
 if ($d->{'virt'} && !$d->{'name'}) {
 	local @listen = &apache::find_directive("Listen", $conf);
 	local @newlisten = grep { $_ ne "$d->{'ip'}:$web_port" } @listen;
-	if ($d->{'virt6'}) {
+	if ($d->{'ip6'}) {
 		@newlisten = grep { $_ ne "[$d->{'ip6'}]:$web_port" } @listen;
 		}
 	if (scalar(@listen) != scalar(@newlisten)) {
@@ -3585,7 +3586,7 @@ local $vip = $d->{'name'} &&
 	     &is_shared_ip($d->{'ip'}) &&
 	     $nvstar ? "*" : $d->{'ip'};
 local @vips = ( "$vip:$port" );
-if ($d->{'virt6'}) {
+if ($d->{'ip6'}) {
 	push(@vips, "[$d->{'ip6'}]:$port");
 	}
 return join(" ", @vips);

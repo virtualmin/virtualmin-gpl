@@ -43,6 +43,15 @@
  - php-fpm support for Joaquim
 
  - Name-based hosting on IPv6 support
+	- Support multiple shared IPs
+	- Functional tests
+	- UI
+	- API
+	- Audit all code that uses ip6 and virt6
+	- Reseller IPv6 addresses
+	- config option to enable IPv6 address by default
+	- batch creation
+	- Nginx
 
  - Amazon tax docs
 
