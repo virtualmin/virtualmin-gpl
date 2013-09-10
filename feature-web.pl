@@ -3607,7 +3607,11 @@ if ($d->{'ip6'}) {
 	local $vip6 = $d->{'name'} &&
 		      &is_shared_ip($d->{'ip6'}) &&
 		      $nvstar6 ? "*" : $d->{'ip6'};
-	push(@vips, "[$vip6]:$port");
+	if ($vip6 ne "*") {
+		# If already matching *:port for the IPv4 part, no need to
+		# repeat it for IPv6
+		push(@vips, "[$vip6]:$port");
+		}
 	}
 return join(" ", @vips);
 }
