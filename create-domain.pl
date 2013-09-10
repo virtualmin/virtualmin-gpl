@@ -216,11 +216,11 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--shared-ip6") {
 		# IPv6 on shared address
-		$sharedip6 = shift(@ARGV);
+		$ip6 = shift(@ARGV);
 		$virt6 = 0;
 		$name6 = 1;
-		&indexof($sharedip6, &list_shared_ip6s()) >= 0 ||
-		    &usage("$sharedip6 is not in the shared IP addresses list");
+		&indexof($ip6, &list_shared_ip6s()) >= 0 ||
+		    &usage("$ip6 is not in the shared IP addresses list");
 		}
 	elsif ($a eq "--dns-ip") {
 		$dns_ip = shift(@ARGV);
@@ -686,7 +686,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 						       : &get_dns_ip($resel),
          'virt', $virt,
          'virtalready', $virtalready,
-	 'ip6', $ip6,
+	 'ip6', $parentip ? $parent->{'ip6'} : $ip6,
 	 'netmask6', $netmask6,
 	 'virt6', $virt6,
          'virt6already', $virt6already,

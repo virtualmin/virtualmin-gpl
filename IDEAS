@@ -47,13 +47,19 @@
 	- Functional tests
 	- UI
 	- API
+	- Make sure it works with NameVirtualHost *
 	- Audit all code that uses ip6 and virt6
 	- Reseller IPv6 addresses
-	- config option to enable IPv6 address by default
 	- batch creation
 	- Nginx
+	- change / add existing IPv6 address
+	- test with SSL on shared IP
 
  - Amazon tax docs
 
  - 2-factor authentication
 	- Authy?
+
+ - Adding DNS records to a disabled domain can make it invalid
+	- ie. DKIM
+	- add .disabled is post-change function

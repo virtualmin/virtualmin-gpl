@@ -14418,10 +14418,14 @@ sub is_shared_ip
 local ($ip) = @_;
 return 1 if ($ip eq &get_default_ip());
 return 1 if (&indexof($ip, &list_shared_ips()) >= 0);
+return 1 if ($ip eq &get_default_ip6());
+return 1 if (&indexof($ip, &list_shared_ip6s()) >= 0);
 if (defined(&list_resellers)) {
 	foreach my $r (&list_resellers()) {
 		return 1 if ($r->{'acl'}->{'defip'} &&
 			     $ip eq $r->{'acl'}->{'defip'});
+		return 1 if ($r->{'acl'}->{'defip6'} &&
+			     $ip eq $r->{'acl'}->{'defip6'});
 		}
 	}
 return 0;
