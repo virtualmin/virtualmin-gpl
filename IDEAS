@@ -46,10 +46,9 @@
 	- Support multiple shared IPs
 	- Functional tests
 	- UI
-	- API
-	- Make sure it works with NameVirtualHost *
 	- Audit all code that uses ip6 and virt6
 	- Reseller IPv6 addresses
+		- Use at creation from API and UI
 	- batch creation
 	- Nginx
 	- change / add existing IPv6 address
