@@ -193,7 +193,7 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--default-ip6" && &supports_ip6()) {
 		# IPv6 on default shared address
-		$ip6 = &get_default_ip6();
+		$ip6 = "default";
 		$ip6 || &usage("System does not have a default IPv6 address");
 		$virt6 = 0;
 		$name6 = 1;
@@ -366,6 +366,8 @@ if ($template eq "") {
 $tmpl = &get_template($template);
 $plan = $planid ne '' ? &get_plan($planid) : &get_default_plan();
 $plan || &usage("Plan does not exist");
+$defip = &get_default_ip($resel);
+$defip6 = &get_default_ip6($resel);
 
 if ($ip eq "allocate") {
 	# Allocate IP now
@@ -399,9 +401,16 @@ elsif ($virt6) {
 	# Make sure manual IP specification is allowed
 	$tmpl->{'ranges6'} eq "none" || &usage("The --ip6 option cannot be used when automatic IPv6 address allocation is enabled - use --allocate-ip6 instead");
 	}
+elsif ($ip6 eq "default") {
+	# Use default IP for reseller
+	$ip6 = $defip6;
+	$ip6 || &usage("No default IPv6 address found");
+	$virt6 = 0;
+	$name6 = 1;
+	}
 elsif (!defined($virt6) && $config{'ip6enabled'}) {
 	# No IPv6 selection made, use default
-	$ip6 = &get_default_ip6();
+	$ip6 = $defip6;
 	if ($ip6) {
 		$virt6 = 0;
                 $name6 = 1;
@@ -572,7 +581,6 @@ elsif ($parent) {
 	$resel = $parent->{'reseller'};
 	}
 
-$defip = &get_default_ip($resel);
 if (!$alias) {
 	if ($config{'all_namevirtual'}) {
 		# Make sure the IP *is* assigned

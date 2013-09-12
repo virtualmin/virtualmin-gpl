@@ -508,7 +508,7 @@ if ($d->{'virt'}) {
 	&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
 		return &text('validate_ewebip', $ipp);
 	}
-if ($d->{'ip6'}) {
+if ($d->{'virt6'}) {
 	local $ipp = "[".$d->{'ip6'}."]:".$d->{'web_sslport'};
 	&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
 		return &text('validate_ewebip6', $ipp);
