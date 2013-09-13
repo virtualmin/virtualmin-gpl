@@ -2894,7 +2894,8 @@ sub fix_script_htaccess_files
 local ($d, $dir, $findonly, $filename) = @_;
 $filename ||= ".htaccess";
 local $out = &run_as_domain_user($d, "find ".quotemeta($dir).
-				     " -type f -name ".quotemeta($filename));
+				     " -type f -name ".quotemeta($filename).
+				     " 2>/dev/null");
 local @fixed;
 foreach my $file (split(/\r?\n/, $out)) {
 	next if (!-r $file);
