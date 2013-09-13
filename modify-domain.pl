@@ -448,11 +448,14 @@ if ($ip6) {
 	$dom->{'ip6'} = $ip6;
 	$dom->{'netmask6'} = $netmask6;
 	$dom->{'virt6'} = 1;
+	$dom->{'name6'} = 0;
 	}
 elsif ($noip6) {
 	# Removing the IPv6 address
 	$dom->{'netmask6'} = undef;
 	$dom->{'virt6'} = 0;
+	$dom->{'name6'} = 0;
+	$dom->{'ip6'} = undef;
 	}
 if (defined($resel)) {
 	defined(&get_reseller) || &usage("Resellers are not supported");
