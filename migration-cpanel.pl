@@ -168,9 +168,11 @@ if (-d $daily) {
 			push(@got, "mail") if ($l eq $dom);
 			}
 		}
-	$userdir = &extract_cpanel_dir("$daily/$user.tar.gz")."/$user";
-	-d $userdir || return "No user directory found - ".
-			      "maybe username $user is incorrect";
+	($ok, $userdir) = &extract_cpanel_dir("$daily/$user.tar.gz");
+	$ok || return "Failed to extract user directory : $userdir";
+	$userdir .= "/".$user;
+	-d $userdir || return "No user directory found - maybe username ".
+			      "$user is incorrect";
 	$homesrc = "$userdir/homedir";
 	}
 elsif (-d $datastore) {
@@ -521,7 +523,8 @@ if ($got{'ssl'}) {
 if ($got{'dns'} && -d $daily) {
 	&$first_print("Copying and fixing DNS records ..");
 	&require_bind();
-	local $named = &extract_cpanel_dir("$daily/dirs/_var_named.tar.gz");
+	local ($ok, $named) = &extract_cpanel_dir(
+				"$daily/dirs/_var_named.tar.gz");
 	local $zsrcfile = &bind8::find_value("file", $zone->{'members'});
 	if (-r "$named/$zsrcfile") {
 		&execute_command("cp ".quotemeta("$named/$zsrcfile")." ".
@@ -1122,18 +1125,27 @@ return @rvdoms;
 sub extract_cpanel_dir
 {
 local ($file) = @_;
-return undef if (!-r $file);
+local $dir;
 if ($main::cpanel_dir_cache{$file} && -d $main::cpanel_dir_cache{$file}) {
 	# Use cached extract from this session
 	return (1, $main::cpanel_dir_cache{$file});
 	}
-local $temp = &transname();
-mkdir($temp, 0700);
-local $err = &extract_compressed_file($file, $temp);
-if ($err) {
-	return (0, $err);
+if (!-e $file) {
+	return (0, "File $file does not exist");
 	}
-$main::cpanel_dir_cache{$file} = $temp;
+elsif (-d $file) {
+	# Already extracted
+	$dir = $file;
+	}
+else {
+	$dir = &transname();
+	mkdir($dir, 0700);
+	local $err = &extract_compressed_file($file, $dir);
+	if ($err) {
+		return (0, $err);
+		}
+	}
+$main::cpanel_dir_cache{$file} = $dir;
 return (1, $temp);
 }
 

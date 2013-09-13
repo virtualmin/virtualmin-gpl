@@ -937,15 +937,23 @@ return (\%dom, @rvdoms);
 sub extract_plesk9_dir
 {
 local ($file, $version) = @_;
-if ($main::plesk9_dir_cache{$file} && -d $main::plesk9_dir_cache{$file}) {
-	# Use cached extract from this session
-	return (1, $main::plesk9_dir_cache{$file});
+local $dir;
+if (-d $file) {
+	# Already extracted, so just use the directory
+	$dir = $file;
 	}
-local $dir = &transname();
-&make_dir($dir, 0700);
-local $err = &extract_compressed_file($file, $dir);
-if ($err) {
-	return (0, $err);
+else {
+	if ($main::plesk9_dir_cache{$file} &&
+	    -d $main::plesk9_dir_cache{$file}) {
+		# Use cached extract from this session
+		return (1, $main::plesk9_dir_cache{$file});
+		}
+	$dir = &transname();
+	&make_dir($dir, 0700);
+	local $err = &extract_compressed_file($file, $dir);
+	if ($err) {
+		return (0, $err);
+		}
 	}
 local ($disc) = glob("$dir/*/.discovered");
 if ($disc =~ /\/([^\/]+)\/\.discovered$/) {
