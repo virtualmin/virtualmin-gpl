@@ -50,7 +50,6 @@
 	- change / add existing IPv6 address
 	- test with SSL on shared IP
 	- reseller access to shared IPs
-	- modify-domain and --default-ip6 and --shared-ip6
 
  - Amazon tax docs
 
