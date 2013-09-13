@@ -603,7 +603,7 @@ else {
 # Show IPv6 address allocation section
 if (!$aliasdom && &can_use_feature("virt") && &supports_ip6()) {
 	local @ip6opts = ( [ 0, $text{'edit_virt6off'} ] );
-	local $defip6 = &get_default_ip6();
+	local $defip6 = &get_default_ip6($resel);
 	if ($defip6) {
 		# Default shared address
 		push(@ip6opts, [ 4, &text('form_shared', $defip6) ]);

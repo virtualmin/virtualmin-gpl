@@ -3522,7 +3522,7 @@ else {
 	}
 }
 
-# get_default_ip([reseller])
+# get_default_ip([reseller-name])
 # Returns this system's primary IPv6 address. If a reseller is given and he
 # has a custom IP, use that.
 sub get_default_ip6
