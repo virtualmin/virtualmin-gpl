@@ -586,13 +586,14 @@ if ($can_feature{'mail'} && !$aliasdom && !$subdom && &can_edit_catchall()) {
 # Show IP address allocation section
 $resel = $parentdom ? $parentdom->{'reseller'} :
 	 &reseller_admin() ? $base_remote_user : undef;
+$defip = &get_default_ip($resel);
 if ($aliasdom) {
 	print &ui_table_row($text{'edit_ip'}, $aliasdom->{'ip'});
 	}
 elsif (!&can_select_ip()){
 	print &ui_table_row($text{'edit_ip'},
 		$access{'ipfollow'} && $parentdom ? $parentdom->{'ip'}
-						  : &get_default_ip());
+						  : $defip);
 	}
 else {
 	print &ui_table_row(&hlink($text{'form_iface'}, "iface"),
@@ -601,32 +602,51 @@ else {
 	}
 
 # Show IPv6 address allocation section
-if (!$aliasdom && &can_use_feature("virt") && &supports_ip6()) {
+$defip6 = &get_default_ip6($resel);
+if (!&supports_ip6()) {
+	# Not supported
+	print &ui_table_row($text{'edit_ip6'}, $text{'edit_noip6support'});
+	}
+elsif ($aliasdom) {
+	# From alias domain
+	print &ui_table_row($text{'edit_ip6'}, $aliasdom->{'ip6'} ||
+					       $text{'edit_virt6off'});
+	}
+elsif (!&can_select_ip6()) {
+	# User isn't allowed to select v6 address
+	print &ui_table_row($text{'edit_ip6'},
+		$access{'ipfollow'} && $parentdom ? $parentdom->{'ip6'} :
+		$config{'ip6enabled'} && $defip6 ? $defip6 :
+			$text{'edit_virt6off'});
+	}
+else {
+	# Can select addres or allocate one
 	local @ip6opts = ( [ 0, $text{'edit_virt6off'} ] );
-	local $defip6 = &get_default_ip6($resel);
 	if ($defip6) {
 		# Default shared address
 		push(@ip6opts, [ 4, &text('form_shared', $defip6) ]);
 		}
 	local @shared = &list_shared_ip6s();
-	if (@shared) {
+	if (@shared && &can_edit_sharedips()) {
 		# Other shared address
 		push(@ip6opts, [ 3, $text{'form_shared2'},
                                  &ui_select("sharedip6", undef,
                                         [ map { [ $_ ] } @shared ]) ]);
 		}
-	local @alloctmpls = grep { $_->{'ranges6'} ne 'none' } @cantmpls;
-	if (@alloctmpls) {
-		# Allocated address
-		push(@ip6opts, [ 2, $text{'edit_alloc'} ]);
-		}
-	local @noalloctmpls = grep { $_->{'ranges6'} eq 'none' } @cantmpls;
-	if (@noalloctmpls) {
-		# Manually entered address
-		push(@ip6opts, [ 1, $text{'edit_virt6on'},
-				 &ui_textbox("ip6", undef, 30)." ".
-				 &ui_checkbox("virt6already", 1,
-                                      $text{'form_virtalready'}) ]);
+	if (&can_use_feature("virt6")) {
+		local @alloctmpls = grep { $_->{'ranges6'} ne 'none' } @cantmpls;
+		if (@alloctmpls) {
+			# Allocated address
+			push(@ip6opts, [ 2, $text{'edit_alloc'} ]);
+			}
+		local @noalloctmpls = grep { $_->{'ranges6'} eq 'none' } @cantmpls;
+		if (@noalloctmpls) {
+			# Manually entered address
+			push(@ip6opts, [ 1, $text{'edit_virt6on'},
+					 &ui_textbox("ip6", undef, 30)." ".
+					 &ui_checkbox("virt6already", 1,
+					      $text{'form_virtalready'}) ]);
+			}
 		}
 	print &ui_table_row(&hlink($text{'form_iface6'}, "iface6"),
 		&ui_radio_table("virt6", $config{'ip6enabled'} ? 4 : 0,

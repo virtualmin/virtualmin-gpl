@@ -260,7 +260,7 @@ if ($aliasdom) {
 	$ip6 = $aliasdom->{'ip6'};
 	$virt6 = 0;
 	}
-elsif (!&can_select_ip()) {
+elsif (!&can_select_ip6()) {
 	# Not allowed to select IPv6 address
 	if ($access{'ipfollow'} && $parentdom) {
 		# Inherit from parent
@@ -268,20 +268,25 @@ elsif (!&can_select_ip()) {
 		$virt6 = 0;
 		$name6 = 1;
 		}
-	else {
+	elsif ($config{'ip6enabled'} && $defip6) {
 		# Use global default
 		$ip6 = $defip6;
 		$virt6 = 0;
 		$name6 = 1;
 		}
+	else {
+		# No v6 address
+		$virt6 = 0;
+		$name6 = 0;
+		}
 	}
-elsif (&can_use_feature("virt") && &supports_ip6()) {
+elsif (&supports_ip6()) {
 	if ($in{'virt6'} == 0) {
 		# IPv6 specifically disabled
 		$virt6 = 0;
 		$name6 = 0;
 		}
-	elsif ($in{'virt6'} == 1) {
+	elsif ($in{'virt6'} == 1 && &can_use_feature("virt6")) {
 		# Manually entered
 		$tmpl->{'ranges6'} eq 'none' ||
 			&error(&text('setup_evirt6tmpl2'));
@@ -303,7 +308,7 @@ elsif (&can_use_feature("virt") && &supports_ip6()) {
 		$virt6 = 1;
 		$name6 = 0;
 		}
-	elsif ($in{'virt6'} == 2) {
+	elsif ($in{'virt6'} == 2 && &can_use_feature("virt6")) {
 		# Allocated
 		$tmpl->{'ranges6'} ne "none" ||
 			&error(&text('setup_evirt6tmpl'));

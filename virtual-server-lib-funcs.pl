@@ -2860,6 +2860,15 @@ return $config{'all_namevirtual'} || &can_use_feature("virt") ||
        @shared && &can_edit_sharedips();
 }
 
+# Returns 1 if the current user is allowed to select a private or shared
+# IPv6 address for a virtual server
+sub can_select_ip6
+{
+local @shared = &list_shared_ip6s();
+return &can_use_feature("virt6") ||
+       @shared && &can_edit_sharedips();
+}
+
 # can_edit_limits(&domain)
 # Returns 1 if owner limits can be edited in some domain
 sub can_edit_limits
@@ -2956,7 +2965,9 @@ return &master_admin() || &reseller_admin() || $access{'edit_phpver'};
 
 sub can_edit_sharedips
 {
-return &master_admin() || &reseller_admin() || $access{'edit_sharedips'};
+return &master_admin() ||
+       &reseller_admin() && !$access{'nosharedips'} ||
+       $access{'edit_sharedips'};
 }
 
 sub can_edit_catchall
@@ -14579,7 +14590,7 @@ return @rv;
 # can be allowed access to
 sub list_allowable_features
 {
-return ( @opt_features, "virt", &list_feature_plugins() );
+return ( @opt_features, "virt", "virt6", &list_feature_plugins() );
 }
 
 # count_domain_users()
