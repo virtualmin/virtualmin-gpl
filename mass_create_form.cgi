@@ -85,7 +85,7 @@ foreach $f (@opt_features) {
 	local $txt = $text{'form_'.$f};
 	push(@grid, &ui_checkbox($f, 1, "", $config{$f} == 1, undef,
 			  !$config{$f} && defined($config{$f}))." ".
-		    &hlink($txt, $f));
+		    "<b>".&hlink($txt, $f)."</b>");
 	}
 
 # Show checkboxes for plugins
