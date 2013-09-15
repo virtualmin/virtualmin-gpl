@@ -154,11 +154,16 @@ if ($crmode == 1) {
 			    &ui_yesno_radio("delete_existing", 0));
 
 	# IP address for restored domains
+	@cantmpls = ( &get_template(0) );
 	if (&can_select_ip()) {
-		@cantmpls = ( &get_template(0) );
 		print &ui_table_row(&hlink($text{'restore_newip'},
 					   "restore_newip"),
 				&virtual_ip_input(\@cantmpls, undef, 1, 5));
+		}
+	if (&can_select_ip6() && &supports_ip6()) {
+		print &ui_table_row(&hlink($text{'restore_newip6'},
+					   "restore_newip6"),
+				&virtual_ip6_input(\@cantmpls, undef, 1, 5));
 		}
 
 	print &ui_hidden_table_end("opts");

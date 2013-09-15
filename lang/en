@@ -2396,7 +2396,8 @@ restore_only=Only create servers with selected features?
 restore_delete=Delete and re-create virtual servers?
 restore_virtualmin=Virtualmin settings to restore
 restore_dnswholefile=Restore everything in DNS zone file
-restore_newip=IP address for restored servers
+restore_newip=IPv4 address for restored servers
+restore_newip6=IPv6 address for restored servers
 
 restore_ecannot=You are not allowed to restore backups
 restore_esched=Selected backup schedule does not exist!

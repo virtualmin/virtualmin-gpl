@@ -60,8 +60,8 @@ if ($d->{'alias'} && $tmpl->{'web_alias'} == 1) {
 			return 0;
 			}
 		local @sa = &apache::find_directive("ServerAlias", $pconf);
-		foreach my $d (@dirs) {
-			if ($d =~ /^\s*Server(Name|Alias)\s+(.*)/) {
+		foreach my $dir (@dirs) {
+			if ($dir =~ /^\s*Server(Name|Alias)\s+(.*)/) {
 				push(@sa, $2);
 				}
 			}
@@ -118,24 +118,24 @@ else {
 				$subdom->{'dom'}, $subdom->{'web_port'}, 0);
 		local $elog = &get_apache_log(
 				$subdom->{'dom'}, $subdom->{'web_port'}, 1);
-		foreach my $d (@dirs) {
-			if ($d =~ /^\s*DocumentRoot/) {
-				$d = "DocumentRoot $subdir";
+		foreach my $dir (@dirs) {
+			if ($dir =~ /^\s*DocumentRoot/) {
+				$dir = "DocumentRoot $subdir";
 				}
-			if ($d =~ /^\s*ScriptAlias\s+\/cgi-bin\//) {
-				$d = "ScriptAlias /cgi-bin/ $subcgi/";
+			if ($dir =~ /^\s*ScriptAlias\s+\/cgi-bin\//) {
+				$dir = "ScriptAlias /cgi-bin/ $subcgi/";
 				}
-			elsif ($d =~ /^\s*<Directory\s+\Q$mydir\E>/) {
-				$d = "<Directory $subdir>";
+			elsif ($dir =~ /^\s*<Directory\s+\Q$mydir\E>/) {
+				$dir = "<Directory $subdir>";
 				}
-			elsif ($d =~ /^\s*<Directory\s+\Q$mycgi\E>/) {
-				$d = "<Directory $subcgi>";
+			elsif ($dir =~ /^\s*<Directory\s+\Q$mycgi\E>/) {
+				$dir = "<Directory $subcgi>";
 				}
-			elsif ($d =~ /^\s*ErrorLog/ && $elog) {
-				$d = "ErrorLog $elog";
+			elsif ($dir =~ /^\s*ErrorLog/ && $elog) {
+				$dir = "ErrorLog $elog";
 				}
-			elsif ($d =~ /^\s*CustomLog\s+(.*)\s+(\S+)$/ && $clog) {
-				$d = "CustomLog $clog $2";
+			elsif ($dir =~ /^\s*CustomLog\s+(.*)\s+(\S+)$/ && $clog) {
+				$dir = "CustomLog $clog $2";
 				}
 			}
 		$d->{'public_html_dir'} = $subdir;
@@ -149,14 +149,14 @@ else {
 	elsif ($d->{'public_html_path'}) {
 		# If a custom HTML directory was requested, set it up
 		local $mydir;
-		foreach my $d (@dirs) {
-			if ($d =~ /^\s*DocumentRoot\s+"([^"]+)"/ ||
-			    $d =~ /^\s*DocumentRoot\s+(\S+)/) {
+		foreach my $dir (@dirs) {
+			if ($dir =~ /^\s*DocumentRoot\s+"([^"]+)"/ ||
+			    $dir =~ /^\s*DocumentRoot\s+(\S+)/) {
 				$mydir = $1;
-				$d = "DocumentRoot $d->{'public_html_path'}";
+				$dir = "DocumentRoot $d->{'public_html_path'}";
 				}
-			elsif ($d =~ /^\s*<Directory\s+\Q$mydir\E>/ && $mydir) {
-				$d = "<Directory $d->{'public_html_path'}>";
+			elsif ($dir =~ /^\s*<Directory\s+\Q$mydir\E>/ && $mydir) {
+				$dir = "<Directory $d->{'public_html_path'}>";
 				}
 			}
 		}

@@ -1914,8 +1914,9 @@ if ($ok) {
 				$d->{'ssl_key'} =~ s/\Q$oldhome\E/$d->{'home'}/;
 				}
 
-			# Fix up the IP address if needed
+			# Fix up the IPv4 address if needed
 			$d->{'old_ip'} = $d->{'ip'};
+			local $defip = &get_default_ip($d->{'reseller'});
 			if ($d->{'alias'}) {
 				# Alias domains always have same IP as parent
 				local $alias = &get_domain($d->{'alias'});
@@ -1961,8 +1962,7 @@ if ($ok) {
 					}
 				else {
 					# Use shared IP
-					$d->{'ip'} = &get_default_ip(
-							$d->{'reseller'});
+					$d->{'ip'} = $defip;
 					if (!$d->{'ip'}) {
 						&$second_print(
 						    $text{'restore_edefip'});
@@ -1972,7 +1972,7 @@ if ($ok) {
 						}
 					}
 				}
-			elsif ($ipinfo) {
+			elsif ($ipinfo && $ipinfo->{'ip'}) {
 				# Use IP specified on backup form
 				$d->{'ip'} = $ipinfo->{'ip'};
 				$d->{'virt'} = $ipinfo->{'virt'};
@@ -1994,8 +1994,110 @@ if ($ok) {
 				}
 			elsif (!$d->{'virt'} && !$config{'all_namevirtual'}) {
 				# Use this system's default IP
-				$d->{'ip'} = &get_default_ip($d->{'reseller'});
+				$d->{'ip'} = $defip;
 				if (!$d->{'ip'}) {
+					&$second_print($text{'restore_edefip'});
+					$ok = 0;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
+					}
+				}
+
+			# Fix up the IPv6 address if needed
+			$d->{'old_ip6'} = $d->{'ip6'};
+			local $defip6 = &get_default_ip6($d->{'reseller'});
+			if ($d->{'alias'}) {
+				# Alias domains always have same IP as parent
+				local $alias = &get_domain($d->{'alias'});
+				$d->{'ip6'} = $alias->{'ip6'};
+				}
+			elsif ($ipinfo && $ipinfo->{'mode6'} == -2) {
+				# User requested no IPv6 address
+				$d->{'ip6'} = undef;
+				$d->{'virt6'} = 0;
+				}
+			elsif ($ipinfo && $ipinfo->{'mode6'} == 5) {
+				# Allocate IPv6 if the domain had one before,
+				# use shared IPv6 otherwise
+				if ($d->{'virt6'}) {
+					# Try to allocate, assuming template
+					# defines an IPv6 range
+					local %taken = &interface_ip_addresses();
+					if ($tmpl->{'ranges6'} eq "none") {
+						&$second_print(
+						    &text('setup_evirt6tmpl'));
+						$ok = 0;
+						if ($continue) { next DOMAIN; }
+						else { last DOMAIN; }
+						}
+					$d->{'virtalready6'} = 0;
+					if (&ip6_within_ranges(
+					      $d->{'ip6'}, $tmpl->{'ranges6'}) &&
+					    !$taken{$d->{'ip6'}} &&
+					    !&ping_ip_address($d->{'ip6'})) {
+						# Old IPv6 is within local range,
+						# so keep it
+						}
+					else {
+						# Actually allocate from range
+						($d->{'ip6'}, $d->{'netmask6'}) =
+							&free_ip6_address($tmpl);
+						if (!$d->{'ip6'}) {
+							&$second_print(&text('setup_evirtalloc'));
+							$ok = 0;
+							if ($continue) { next DOMAIN; }
+							else { last DOMAIN; }
+							}
+						}
+					}
+				elsif (&indexof($d->{'ip6'},
+						&list_shared_ip6s()) >= 0) {
+					# IP is on shared list, so keep it
+					}
+				elsif (!$config{'ip6enabled'}) {
+					# IPv6 for new domains is disabled
+					$d->{'ip6'} = undef;
+					}
+				else {
+					# Use default shared IP
+					$d->{'ip6'} = $defip6;
+					if (!$d->{'ip6'}) {
+						&$second_print(
+						    $text{'restore_edefip'});
+						$ok = 0;
+						if ($continue) { next DOMAIN; }
+						else { last DOMAIN; }
+						}
+					}
+				}
+			elsif ($ipinfo && $ipinfo->{'ip6'}) {
+				# Use IPv6 specified on backup form
+				$d->{'ip6'} = $ipinfo->{'ip6'};
+				$d->{'virt6'} = $ipinfo->{'virt6'};
+				$d->{'virtalready6'} = $ipinfo->{'virtalready6'};
+				$d->{'netmask6'} = $netmaskinfo->{'netmask6'};
+				if ($ipinfo->{'mode'} == 2) {
+					# Re-allocate an IP, as we might be
+					# doing several domains
+					($d->{'ip6'}, $d->{'netmask6'}) =
+						&free_ip6_address($tmpl);
+					}
+				if (!$d->{'ip6'}) {
+					&$second_print(
+						&text('setup_evirt6alloc'));
+					$ok = 0;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
+					}
+				}
+			elsif (!$d->{'virt6'} && !$config{'ip6enabled'}) {
+				# IPv6 for new domains is disabled
+				$d->{'ip6'} = undef;
+				}
+			elsif (!$d->{'virt6'}) {
+				# Use this system's default IPv6 address
+				$d->{'ip6'} = $defip6;
+				if (!$d->{'ip6'}) {
 					&$second_print($text{'restore_edefip'});
 					$ok = 0;
 					if ($continue) { next DOMAIN; }

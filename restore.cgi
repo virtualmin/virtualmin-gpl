@@ -108,17 +108,27 @@ if ($crmode == 1) {
 	$options{'fix'} = $in{'fix'};
 
 	# Parse IP inputs
-	if (!&can_select_ip() || $in{'virt'} == -1) {
-		# Just use original IP, or shared IP
-		$ipinfo = undef;
-		}
-	else {
-		$tmpl = &get_template(0);
+	$ipinfo = { };
+	$tmpl = &get_template(0);
+	if (&can_select_ip() && $in{'virt'} != -1) {
+		# Different IPv4 address selected
 		($ip, $virt, $virtalready, $netmask) =
 			&parse_virtual_ip($tmpl, undef);
-		$ipinfo = { 'ip' => $ip, 'virt' => $virt, 'mode' => $in{'virt'},
-			    'virtalready' => $virtalready,
-			    'netmask' => $netmask };
+		$ipinfo->{'ip'} = $ip;
+		$ipinfo->{'virt'} = $virt;
+		$ipinfo->{'mode'} = $in{'virt'};
+		$ipinfo->{'virtalready'} = $virtalready;
+		$ipinfo->{'netmask'} = $netmask;
+		}
+	if (&can_select_ip6() && &supports_ipv6() && $in{'virt6'} != -1) {
+		# Different IPv6 address selected
+		($ip6, $virt6, $virtalready6, $netmask6) =
+			&parse_virtual_ip6($tmpl, undef);
+		$ipinfo->{'ip6'} = $ip6;
+		$ipinfo->{'virt6'} = $virt6;
+		$ipinfo->{'mode6'} = $in{'virt6'};
+		$ipinfo->{'virtalready6'} = $virtalready6;
+		$ipinfo->{'netmask6'} = $netmask6;
 		}
 	}
 

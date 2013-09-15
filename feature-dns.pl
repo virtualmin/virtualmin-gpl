@@ -1884,6 +1884,17 @@ if ($file) {
 		&modify_records_ip_address(\@recs, $file, $baseip, $ip);
 		}
 
+	# Need to update IPv6 address
+	local ($baserec6) = grep { $_->{'type'} eq "AAAA" &&
+				   ($_->{'name'} eq $_[0]->{'dom'}."." ||
+				    $_->{'name'} eq '@') } @recs;
+	local $ip6 = $_[0]->{'ip6'};
+	local $baseip6 = $_[0]->{'old_ip6'} ? $_[0]->{'old_ip6'} :
+				$baserec6 ? $baserec6->{'values'}->[0] : undef;
+	if ($baseip6) {
+		&modify_records_ip_address(\@recs, $file, $baseip6, $ip6);
+		}
+
 	# Replace NS records with those from new system
 	if (!$_[2]->{'wholefile'}) {
 		local @thisns = grep { $_->{'type'} eq 'NS' } @thisrecs;
