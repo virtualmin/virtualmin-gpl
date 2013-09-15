@@ -92,7 +92,7 @@ print &ui_form_columns_table(
 
 # Show form to allow master admin
 print &ui_hr();
-print "<a name=allow>\n";
+print "<a name=allow></a>\n";
 ($allowmaster, $allowvers, $denydefault) = &get_script_master_permissions();
 print &ui_form_start("save_scriptallow.cgi");
 print &ui_table_start($text{'newscripts_allowheader'}, undef, 2);
