@@ -10027,7 +10027,7 @@ return defined(&running_in_zone) && &running_in_zone() ? 'zones' :
 sub warning_messages
 {
 return undef if (!&master_admin());
-local $rv;
+my $rv;
 
 # Get licence expiry date
 local ($status, $expiry, $err, undef, undef, $autorenew) =
@@ -10038,53 +10038,52 @@ if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
 	$expirytime = timelocal(59, 59, 23, $3, $2-1, $1-1900);
 	}
 if ($status != 0) {
+	my $alert_text;
 	# Not valid .. show message
-	$rv .= "<table width=100%><tr bgcolor=#ff8888><td align=center><p>";
-	$rv .= "<b>".$text{'licence_err'}."</b><br>\n";
-	$rv .= $err."\n";
-	$rv .= &text('licence_renew', $virtualmin_renewal_url),"\n";
+	$alert_text .= "<b>".$text{'licence_err'}."</b><br>\n";
+	$alert_text .= $err."\n";
+	$alert_text .= &text('licence_renew', $virtualmin_renewal_url),"\n";
 	if (&can_recheck_licence()) {
-		$rv .= &ui_form_start("$gconfig{'webprefix'}/$module_name/licence.cgi");
-		$rv .= &ui_submit($text{'licence_recheck'});
-		$rv .= &ui_form_end();
+		$alert_text .= &ui_form_start("$gconfig{'webprefix'}/$module_name/licence.cgi");
+		$alert_text .= &ui_submit($text{'licence_recheck'});
+		$alert_text .= &ui_form_end();
 		}
-	$rv .= "<p></td></tr></table><p>\n";
+	$rv .= &ui_alert_box($alert_text, "danger");
 	}
 elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 	# One week to expiry .. tell the user
 	local $days = int(($expirytime - time()) / (24*60*60));
 	local $hours = int(($expirytime - time()) / (60*60));
-	$rv .= "<table width=100%><tr bgcolor=#ffff88><td align=center><p>";
 	if ($days) {
-		$rv .= "<b>".&text('licence_soon', $days)."</b><br>\n";
+		$alert_text .= "<b>".&text('licence_soon', $days)."</b><br>\n";
 		}
 	else {
-		$rv .= "<b>".&text('licence_soon2', $hours)."</b><br>\n";
+		$alert_text .= "<b>".&text('licence_soon2', $hours)."</b><br>\n";
 		}
-	$rv .= &text('licence_renew', $virtualmin_renewal_url),"\n";
+	$alert_text .= &text('licence_renew', $virtualmin_renewal_url),"\n";
 	if (&can_recheck_licence()) {
-		$rv .= &ui_form_start("$gconfig{'webprefix'}/$module_name/licence.cgi");
-		$rv .= &ui_submit($text{'licence_recheck'});
-		$rv .= &ui_form_end();
+		$alert_text .= &ui_form_start("$gconfig{'webprefix'}/$module_name/licence.cgi");
+		$alert_text .= &ui_submit($text{'licence_recheck'});
+		$alert_text .= &ui_form_end();
 		}
-	$rv .= "<p></td></tr></table><p>\n";
+	$rv .= &ui_alert_box($alert_text, "warning");
 	}
 
 # Check if default IP has changed
 local $defip = &get_default_ip();
 if ($config{'old_defip'} && $defip && $config{'old_defip'} ne $defip) {
-	$rv .= "<table width=100%><tr bgcolor=#ffff88><td align=center><p>";
-	$rv .= "<b>".&text('licence_ipchanged',
+	my $alert_text;
+	$alert_text .= "<b>".&text('licence_ipchanged',
 			   "<tt>$config{'old_defip'}</tt>",
 			   "<tt>$defip</tt>")."</b><p>\n";
-	$rv .= &ui_form_start("$gconfig{'webprefix'}/$module_name/edit_newips.cgi");
-	$rv .= &ui_hidden("old", $config{'old_defip'});
-	$rv .= &ui_hidden("new", $defip);
-	$rv .= &ui_hidden("setold", 1);
-	$rv .= &ui_hidden("also", 1);
-	$rv .= &ui_submit($text{'licence_changeip'});
-	$rv .= &ui_form_end();
-	$rv .= "<p></td></tr></table><p>\n";
+	$alert_text .= &ui_form_start("$gconfig{'webprefix'}/$module_name/edit_newips.cgi");
+	$alert_text .= &ui_hidden("old", $config{'old_defip'});
+	$alert_text .= &ui_hidden("new", $defip);
+	$alert_text .= &ui_hidden("setold", 1);
+	$alert_text .= &ui_hidden("also", 1);
+	$alert_text .= &ui_submit($text{'licence_changeip'});
+	$alert_text .= &ui_form_end();
+	$rv .= &ui_alert_box($alert_text, "warning");
 	}
 
 # Check if in SSL mode, and SSL cert is < 2048 bits
@@ -10102,42 +10101,41 @@ if ($ENV{'HTTPS'} eq 'ON') {
 		}
 	}
 if ($small) {
+	my $alert_text;
 	local $msg = $small->{'issuer_c'} eq $small->{'c'} &&
 		     $small->{'issuer_o'} eq $small->{'o'} ?
 			'licence_smallself' : 'licence_smallcert';
-	$rv .= "<table width=100%><tr bgcolor=#ffff88><td align=center><p>";
-	$rv .= "<b>".&text($msg,
+	$alert_text .= "<b>".&text($msg,
 			   $small->{'size'},
 			   $small->{'cn'},
 			   $small->{'c'} || $small->{'o'},
 			   $small->{'issuer_c'} || $small->{'issuer_o'},
 			   )."</b><p>\n";
-	$rv .= &ui_form_start("$gconfig{'webprefix'}/webmin/edit_ssl.cgi");
-	$rv .= &ui_hidden("mode", $msg eq 'licence_smallself' ?
+	$alert_text .= &ui_form_start("$gconfig{'webprefix'}/webmin/edit_ssl.cgi");
+	$alert_text .= &ui_hidden("mode", $msg eq 'licence_smallself' ?
 					'create' : 'csr');
-	$rv .= &ui_submit($msg eq 'licence_smallself' ?
+	$alert_text .= &ui_submit($msg eq 'licence_smallself' ?
 				$text{'licence_newcert'} :
 				$text{'licence_newcsr'});
-	$rv .= &ui_form_end();
-	$rv .= "<p></td></tr></table><p>\n";
+	$alert_text .= &ui_form_end();
+	$rv .= &ui_alert_box($alert_text, "warning");
 	}
 
 # Check if symlinks need to be fixed. Blank means not checked yet, 0 means
 # fixed, 1 means don't fix.
 if ($config{'allow_symlinks'} eq '') {
+	my $alert_text;
 	# Do any domains have unsafe settings?
 	local @fixdoms = &fix_symlink_security(undef, 1);
 	if (@fixdoms) {
-		$rv .= "<table width=100%><tr bgcolor=#ffff88>".
-		       "<td align=center><p>";
-		$rv .= "<b>".&text('licence_fixlinks', scalar(@fixdoms))."<p>".
+		$alert_text .= "<b>".&text('licence_fixlinks', scalar(@fixdoms))."<p>".
 		             $text{'licence_fixlinks2'}."</b><p>\n";
-		$rv .= &ui_form_start(
+		$alert_text .= &ui_form_start(
 			"$gconfig{'webprefix'}/$module_name/fix_symlinks.cgi");
-		$rv .= &ui_submit($text{'licence_fixlinksok'}, undef);
-		$rv .= &ui_submit($text{'licence_fixlinksignore'}, 'ignore');
-		$rv .= &ui_form_end();
-		$rv .= "<p></td></tr></table><p>\n";
+		$alert_text .= &ui_submit($text{'licence_fixlinksok'}, undef);
+		$alert_text .= &ui_submit($text{'licence_fixlinksignore'}, 'ignore');
+		$alert_text .= &ui_form_end();
+		$rv .= &ui_alert_box($alert_text, "warning");
 		}
 	else {
 		# All OK already, don't check again
@@ -10148,19 +10146,18 @@ if ($config{'allow_symlinks'} eq '') {
 
 # Check if mod_php needs to be disabled
 if ($config{'allow_modphp'} eq '') {
+	my $alert_text;
 	# Do any domains allow mod_php incorrectly?
 	local @fixdoms = &fix_mod_php_security(undef, 1);
 	if (@fixdoms) {
-		$rv .= "<table width=100%><tr bgcolor=#ffff88>".
-		       "<td align=center><p>";
-		$rv .= "<b>".&text('licence_fixphp', scalar(@fixdoms))."<p>".
+		$alert_text .= "<b>".&text('licence_fixphp', scalar(@fixdoms))."<p>".
 		             $text{'licence_fixphp2'}."</b><p>\n";
-		$rv .= &ui_form_start(
+		$alert_text .= &ui_form_start(
 			"$gconfig{'webprefix'}/$module_name/fix_modphp.cgi");
-		$rv .= &ui_submit($text{'licence_fixphpok'}, undef);
-		$rv .= &ui_submit($text{'licence_fixphpignore'}, 'ignore');
-		$rv .= &ui_form_end();
-		$rv .= "<p></td></tr></table><p>\n";
+		$alert_text .= &ui_submit($text{'licence_fixphpok'}, undef);
+		$alert_text .= &ui_submit($text{'licence_fixphpignore'}, 'ignore');
+		$alert_text .= &ui_form_end();
+		$rv .= &ui_alert_box($alert_text, "warning"); 
 		}
 	else {
 		# All OK already, don't check again
