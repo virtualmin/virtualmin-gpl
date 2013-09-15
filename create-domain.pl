@@ -185,16 +185,42 @@ while(@ARGV > 0) {
 	elsif ($a eq "--parent-ip") {
 		$parentip = 1;
 		}
+	elsif ($a eq "--no-ip6") {
+		# IPv6 explicitly turned off
+		$ip6 = undef;
+		$virt6 = 0;
+		$name6 = 0;
+		}
+	elsif ($a eq "--default-ip6" && &supports_ip6()) {
+		# IPv6 on default shared address
+		$ip6 = "default";
+		$ip6 || &usage("System does not have a default IPv6 address");
+		$virt6 = 0;
+		$name6 = 1;
+		}
 	elsif ($a eq "--ip6" && &supports_ip6()) {
+		# IPv6 on specific address
 		$ip6 = shift(@ARGV);
 		$virt6 = 1;
+		$name6 = 0;
 		}
 	elsif ($a eq "--ip6-already" && &supports_ip6()) {
+		# Specific IPv6 address is already active
 		$virt6already = 1;
 		}
 	elsif ($a eq "--allocate-ip6" && &supports_ip6()) {
+		# IPv6 on allocated address
 		$ip6 = "allocate";
 		$virt6 = 1;
+		$name6 = 0;
+		}
+	elsif ($a eq "--shared-ip6") {
+		# IPv6 on shared address
+		$ip6 = shift(@ARGV);
+		$virt6 = 0;
+		$name6 = 1;
+		&indexof($ip6, &list_shared_ip6s()) >= 0 ||
+		    &usage("$ip6 is not in the shared IP addresses list");
 		}
 	elsif ($a eq "--dns-ip") {
 		$dns_ip = shift(@ARGV);
@@ -340,6 +366,8 @@ if ($template eq "") {
 $tmpl = &get_template($template);
 $plan = $planid ne '' ? &get_plan($planid) : &get_default_plan();
 $plan || &usage("Plan does not exist");
+$defip = &get_default_ip($resel);
+$defip6 = &get_default_ip6($resel);
 
 if ($ip eq "allocate") {
 	# Allocate IP now
@@ -372,6 +400,21 @@ if ($ip6 eq "allocate") {
 elsif ($virt6) {
 	# Make sure manual IP specification is allowed
 	$tmpl->{'ranges6'} eq "none" || &usage("The --ip6 option cannot be used when automatic IPv6 address allocation is enabled - use --allocate-ip6 instead");
+	}
+elsif ($ip6 eq "default") {
+	# Use default IP for reseller
+	$ip6 = $defip6;
+	$ip6 || &usage("No default IPv6 address found");
+	$virt6 = 0;
+	$name6 = 1;
+	}
+elsif (!defined($virt6) && $config{'ip6enabled'}) {
+	# No IPv6 selection made, use default
+	$ip6 = $defip6;
+	if ($ip6) {
+		$virt6 = 0;
+                $name6 = 1;
+		}
 	}
 
 # If no limit-related flags are given, assume from plan
@@ -538,7 +581,6 @@ elsif ($parent) {
 	$resel = $parent->{'reseller'};
 	}
 
-$defip = &get_default_ip($resel);
 if (!$alias) {
 	if ($config{'all_namevirtual'}) {
 		# Make sure the IP *is* assigned
@@ -640,6 +682,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
          'owner', $owner,
          'email', $parent ? $parent->{'email'} : $email,
          'name', $name,
+         'name6', $name6,
          'ip', $config{'all_namevirtual'} ? $ip :
 	       $virt ? $ip :
 	       $alias ? $ip :
@@ -651,7 +694,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 						       : &get_dns_ip($resel),
          'virt', $virt,
          'virtalready', $virtalready,
-	 'ip6', $ip6,
+	 'ip6', $parentip ? $parent->{'ip6'} : $ip6,
 	 'netmask6', $netmask6,
 	 'virt6', $virt6,
          'virt6already', $virt6already,
@@ -814,7 +857,9 @@ print "                        [--allocate-ip | --ip virtual.ip.address |\n";
 print "                         --shared-ip existing.ip.address]\n";
 print "                        [--ip-already]\n";
 if (&supports_ip6()) {
-	print "                        [--allocate-ip6 |\n";
+	print "                        [--default-ip6 |\n";
+	print "                         --shared-ip6 existing.ip.address |\n";
+	print "                         --allocate-ip6 |\n";
 	print "                         --ip6 virtual.ip.address]\n";
 	print "                        [--ip6-already]\n";
 	}

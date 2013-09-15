@@ -88,6 +88,11 @@ local $chained = $_[0]->{'ssl_chain'};
 # Add NameVirtualHost if needed, and if there is more than one SSL site on
 # this IP address
 local $nvstar = &add_name_virtual($_[0], $conf, $web_sslport, 1);
+local $nvstar6; 
+if ($d->{'ip6'}) {                                
+        $nvstar6 = &add_name_virtual($d, $conf, $web_sslport, 1,
+                                     "[".$d->{'ip6'}."]");
+        }       
 
 # Add a Listen directive if needed
 &add_listen($_[0], $conf, $web_sslport);
@@ -133,7 +138,7 @@ if ($err) {
 local $f = $virt->{'file'};
 local $lref = &read_file_lines($f);
 local @ssldirs = &apache_ssl_directives($_[0], $tmpl);
-push(@$lref, "<VirtualHost ".&get_apache_vhost_ips($_[0], 0, $web_sslport).">");
+push(@$lref, "<VirtualHost ".&get_apache_vhost_ips($_[0], 0, 0, $web_sslport).">");
 push(@$lref, @$srclref[$virt->{'line'}+1 .. $virt->{'eline'}-1]);
 push(@$lref, @ssldirs);
 push(@$lref, "</VirtualHost>");
@@ -195,6 +200,7 @@ local $tmpl = &get_template($_[0]->{'template'});
 if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
     $_[0]->{'ip6'} ne $_[1]->{'ip6'} ||
     $_[0]->{'virt6'} != $_[1]->{'virt6'} ||
+    $_[0]->{'name6'} != $_[1]->{'name6'} ||
     $_[0]->{'web_sslport'} != $_[1]->{'web_sslport'}) {
 	# IP address or port has changed .. update VirtualHost
 	&$first_print($text{'save_ssl'});
@@ -206,7 +212,7 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
 	local $lref = &read_file_lines($virt->{'file'});
 	$lref->[$virt->{'line'}] =
 		"<VirtualHost ".
-		&get_apache_vhost_ips($_[0], 0, $_[0]->{'web_sslport'}).">";
+		&get_apache_vhost_ips($_[0], 0, 0, $_[0]->{'web_sslport'}).">";
 	&flush_file_lines();
 	$rv++;
 	undef(@apache::get_config_cache);

@@ -117,9 +117,11 @@ foreach $line (@lines) {
 
 	# Validate IP address
 	local $defip = &get_default_ip($resel);
-	local ($virt, $virtalready);
+	local $defip6 = &get_default_ip6($resel);
+	local ($virt, $virtalready, $ip6, $virt6, $allocated);
 	if ($aliasdom) {
 		$ip = $aliasdom->{'ip'};
+		$ip6 = $aliasdom->{'ip6'};
 		}
 	elsif ($ip) {
 		if (!&check_ipaddress($ip) && $ip ne 'allocate') {
@@ -160,6 +162,7 @@ foreach $line (@lines) {
 				}
 			$virt = 1;
 			$virtalready = 0;
+			$allocated = 1;
 			}
 		else {
 			# IP specified manually
@@ -176,6 +179,44 @@ foreach $line (@lines) {
 		$virt = 0;
 		$virtalready = 1;
 		$ip = $defip;
+		}
+
+	# Pick an IPv6 address
+	if (&supports_ipv()) {
+		if ($allocated) {
+			# IPv4 allocation was requested, assume the same for V6
+			%racl = $resel ? &get_reseller_acl($resel) : ();
+			if ($racl{'ranges6'}) {
+				# Allocating from reseller's range
+				($ip6, $netmask6) = &free_ip6_address(\%racl);
+				if (!$ip6) {
+					&line_error($text{'cmass_eipresel'});
+					next;
+					}
+				}
+			else {
+				# Allocating from template
+				if ($tmpl->{'ranges6'} eq "none") {
+					&line_error($text{'cmass_eiptmpl'});
+					next;
+					}
+				($ip6, $netmask6) = &free_ip6_address($tmpl);
+				if (!$ip6) {
+					&line_error($text{'cmass_eipalloc'});
+					next;
+					}
+				}
+			$virt6 = 1;
+			$name6 = 0;
+			}
+		elsif ($config{'ip6enabled'}) {
+			# Use default shared IPv6
+			$ip6 = $defip6;
+			$virt6 = 0;
+			}
+		else {
+			# No IPv6 at all
+			}
 		}
 
 	# Work out username
@@ -280,11 +321,15 @@ foreach $line (@lines) {
 		 'owner', $owner,
 		 'email', $parentdom ? $parentdom->{'email'} : undef,
 		 'name', !$virt,
+		 'name6', !$virt6,
 		 'ip', $ip,
+		 'ip6', $ip6,
 		 'netmask', $netmask,
+		 'netmask6', $netmask6,
 		 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :
 			   &get_dns_ip($resel),
 		 'virt', $virt,
+		 'virt6', $virt6,
 		 'virtalready', $virtalready,
 		 'source', 'mass_create.cgi',
 		 'proxy_pass_mode', 0,

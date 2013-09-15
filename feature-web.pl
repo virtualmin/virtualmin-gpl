@@ -15,34 +15,40 @@ return if ($require_apache++);
 # Setup a virtual website for some domain
 sub setup_web
 {
-local $tmpl = &get_template($_[0]->{'template'});
-local $web_port = $_[0]->{'web_port'} || $tmpl->{'web_port'} || 80;
+local ($d) = @_;
+local $tmpl = &get_template($d->{'template'});
+local $web_port = $d->{'web_port'} || $tmpl->{'web_port'} || 80;
 local ($alias, $lockdom);
-if ($_[0]->{'alias'} && $tmpl->{'web_alias'} == 1) {
+if ($d->{'alias'} && $tmpl->{'web_alias'} == 1) {
 	&$first_print($text{'setup_webalias'});
-	$lockdom = $alias = &get_domain($_[0]->{'alias'});
+	$lockdom = $alias = &get_domain($d->{'alias'});
 	}
 else {
 	&$first_print($text{'setup_web'});
-	$lockdom = $_[0];
+	$lockdom = $d;
 	}
 &require_apache();
 &obtain_lock_web($lockdom);
 local $conf = &apache::get_config();
-local ($f, $newfile) = &get_website_file($_[0]);
+local ($f, $newfile) = &get_website_file($d);
 
 # Add NameVirtualHost if needed
-local $nvstar = &add_name_virtual($_[0], $conf, $web_port, 1);
+local $nvstar = &add_name_virtual($d, $conf, $web_port, 1, $d->{'ip'});
+local $nvstar6;
+if ($d->{'ip6'}) {
+	$nvstar6 = &add_name_virtual($d, $conf, $web_port, 1,
+				     "[".$d->{'ip6'}."]");
+	}
 
 # We use a * for the address for name-based servers under Apache 2,
 # if NameVirtualHost * exists.
-local $vips = &get_apache_vhost_ips($_[0], $nvstar, $web_port);
+local $vips = &get_apache_vhost_ips($d, $nvstar, $nvstar6, $web_port);
 
 # Add Listen if needed
-&add_listen($_[0], $conf, $web_port);
+&add_listen($d, $conf, $web_port);
 
-local @dirs = &apache_template($tmpl->{'web'}, $_[0], $tmpl->{'web_suexec'});
-if ($_[0]->{'alias'} && $tmpl->{'web_alias'} == 1) {
+local @dirs = &apache_template($tmpl->{'web'}, $d, $tmpl->{'web_suexec'});
+if ($d->{'alias'} && $tmpl->{'web_alias'} == 1) {
 	# Update the parent virtual host (and the SSL virtual host, if any)
 	local @ports = ( $alias->{'web_port'} );
 	push(@ports, $alias->{'web_sslport'}) if ($alias->{'ssl'});
@@ -62,11 +68,11 @@ if ($_[0]->{'alias'} && $tmpl->{'web_alias'} == 1) {
 		&apache::save_directive("ServerAlias", \@sa, $pconf, $conf);
 		&flush_file_lines($pvirt->{'file'});
 		}
-	$_[0]->{'alias_mode'} = 1;
+	$d->{'alias_mode'} = 1;
 
 	# Redirect webmail and admin in the alias to Usermin and Webmin
-	if (&has_webmail_rewrite($_[0])) {
-		&add_webmail_redirect_directives($_[0], $tmpl);
+	if (&has_webmail_rewrite($d)) {
+		&add_webmail_redirect_directives($d, $tmpl);
 		}
 	}
 else {
@@ -74,11 +80,11 @@ else {
 
 	# First build up the directives in the <VirtualHost>
 	local $proxying;
-	if ($_[0]->{'alias'}) {
+	if ($d->{'alias'}) {
 		# Because this is just an alias to an existing virtual server,
 		# create a ProxyPass or Redirect
 		@dirs = grep { /^\s*Server(Name|Alias)\s/i } @dirs;
-		local $aliasdom = &get_domain($_[0]->{'alias'});
+		local $aliasdom = &get_domain($d->{'alias'});
 		local $port = $aliasdom->{'web_port'} == 80 ? "" :
 				":$aliasdom->{'web_port'}";
 		local $urlhost = "www.".$aliasdom->{'dom'};
@@ -99,15 +105,15 @@ else {
 			push(@dirs, "RedirectPermanent / $url");
 			}
 		}
-	elsif ($_[0]->{'subdom'}) {
+	elsif ($d->{'subdom'}) {
 		# Because this is a sub-domain, force the document directory
 		# to be under the super-domain's public_html. Also, the logs
 		# must be the same as the parent domain's logs.
-		local $subdom = &get_domain($_[0]->{'subdom'});
-		local $subdir = &public_html_dir($_[0]);
-		local $mydir = &public_html_dir($_[0], 0, 1);
-		local $subcgi = &cgi_bin_dir($_[0]);
-		local $mycgi = &cgi_bin_dir($_[0], 0, 1);
+		local $subdom = &get_domain($d->{'subdom'});
+		local $subdir = &public_html_dir($d);
+		local $mydir = &public_html_dir($d, 0, 1);
+		local $subcgi = &cgi_bin_dir($d);
+		local $mycgi = &cgi_bin_dir($d, 0, 1);
 		local $clog = &get_apache_log(
 				$subdom->{'dom'}, $subdom->{'web_port'}, 0);
 		local $elog = &get_apache_log(
@@ -132,25 +138,25 @@ else {
 				$d = "CustomLog $clog $2";
 				}
 			}
-		$_[0]->{'public_html_dir'} = $subdir;
-		$_[0]->{'cgi_bin_dir'} = $subcgi;
+		$d->{'public_html_dir'} = $subdir;
+		$d->{'cgi_bin_dir'} = $subcgi;
 		foreach my $sd ($subdir, $subcgi) {
 			if (!-d $sd) {
-				&make_dir_as_domain_user($_[0], $sd, 0755);
+				&make_dir_as_domain_user($d, $sd, 0755);
 				}
 			}
 		}
-	elsif ($_[0]->{'public_html_path'}) {
+	elsif ($d->{'public_html_path'}) {
 		# If a custom HTML directory was requested, set it up
 		local $mydir;
 		foreach my $d (@dirs) {
 			if ($d =~ /^\s*DocumentRoot\s+"([^"]+)"/ ||
 			    $d =~ /^\s*DocumentRoot\s+(\S+)/) {
 				$mydir = $1;
-				$d = "DocumentRoot $_[0]->{'public_html_path'}";
+				$d = "DocumentRoot $d->{'public_html_path'}";
 				}
 			elsif ($d =~ /^\s*<Directory\s+\Q$mydir\E>/ && $mydir) {
-				$d = "<Directory $_[0]->{'public_html_path'}>";
+				$d = "<Directory $d->{'public_html_path'}>";
 				}
 			}
 		}
@@ -160,7 +166,7 @@ else {
 	# in the same file, we need to add before it.
 	local $lref = &read_file_lines($f);
 	local $pos = scalar(@$lref);
-	if ($_[0]->{'dom'} =~ /^([^\.]+)\.(\S+)$/) {
+	if ($d->{'dom'} =~ /^([^\.]+)\.(\S+)$/) {
 		local ($dsuffix, $dprefix) = ($1, $2);
 		local ($starvirt, undef) = &get_apache_virtual("*.$dprefix",
 							       $web_port);
@@ -175,7 +181,7 @@ else {
 				@dirs,
 				"</VirtualHost>");
 	&flush_file_lines($f);
-	$_[0]->{'web_port'} = $web_port;
+	$d->{'web_port'} = $web_port;
 
 	# Create a link from another Apache dir
 	if ($newfile) {
@@ -184,37 +190,37 @@ else {
 	undef(@apache::get_config_cache);
 
 	# Same the HTML and CGI dirs that we set
-	if (!$_[0]->{'alias'} && !$_[0]->{'subdom'}) {
-		&find_html_cgi_dirs($_[0]);
+	if (!$d->{'alias'} && !$d->{'subdom'}) {
+		&find_html_cgi_dirs($d);
 		}
 
 	# Add <Proxy *> section, to ensure that proxypass works
 	if ($proxying) {
-		&add_proxy_allow_directives($_[0]);
+		&add_proxy_allow_directives($d);
 		}
 
 	# Redirect webmail and admin to Usermin and Webmin
-	if (&has_webmail_rewrite($_[0])) {
-		&add_webmail_redirect_directives($_[0], $tmpl);
+	if (&has_webmail_rewrite($d)) {
+		&add_webmail_redirect_directives($d, $tmpl);
 		}
 
 	# Create empty access and error log files, owned by the domain's user.
 	# Apache opens them as root, so it will be able to write.
-	local $log = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}, 0);
-	local $elog = &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}, 1);
-	&setup_apache_logs($_[0], $log, $elog);
-	&link_apache_logs($_[0], $log, $elog);
-	$_[0]->{'alias_mode'} = 0;
+	local $log = &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0);
+	local $elog = &get_apache_log($d->{'dom'}, $d->{'web_port'}, 1);
+	&setup_apache_logs($d, $log, $elog);
+	&link_apache_logs($d, $log, $elog);
+	$d->{'alias_mode'} = 0;
 	}
-&create_framefwd_file($_[0]);
+&create_framefwd_file($d);
 &$second_print($text{'setup_done'});
 &register_post_action(\&restart_apache);
 
 # Add the Apache user to the group for this virtual server, if missing,
 # unless the template says not to.
-local $web_user = &get_apache_user($_[0]);
+local $web_user = &get_apache_user($d);
 if ($tmpl->{'web_user'} ne 'none' && $web_user) {
-	&add_user_to_domain_group($_[0], $web_user, 'setup_webuser');
+	&add_user_to_domain_group($d, $web_user, 'setup_webuser');
 	}
 
 &$first_print($text{'setup_webpost'});
@@ -223,22 +229,22 @@ eval {
 
 	# Make the web directory accessible under SElinux Apache
 	if (&has_command("chcon")) {
-		local $hdir = &public_html_dir($_[0]);
+		local $hdir = &public_html_dir($d);
 		&execute_command("chcon -R -t httpd_sys_content_t ".
 				 quotemeta($hdir));
-		local $cgidir = &cgi_bin_dir($_[0]);
+		local $cgidir = &cgi_bin_dir($d);
 		&execute_command("chcon -R -t httpd_sys_script_exec_t ".
 				 quotemeta($cgidir));
-		local $logdir = "$_[0]->{'home'}/logs";
+		local $logdir = "$d->{'home'}/logs";
 		&execute_command("chcon -R -t httpd_log_t ".
 				 quotemeta($logdir));
 		}
 
 	# Setup the writelogs wrapper
-	&setup_writelogs($_[0]);
+	&setup_writelogs($d);
 
 	# Create a root-owned file in ~/logs to prevent deletion of directory
-	local $logsdir = "$_[0]->{'home'}/logs";
+	local $logsdir = "$d->{'home'}/logs";
 	if (-d $logsdir && !-e "$logsdir/.nodelete") {
 		open(NODELETE, ">$logsdir/.nodelete");
 		close(NODELETE);
@@ -246,37 +252,37 @@ eval {
 		}
 
 	# Setup for script languages
-	if (!$_[0]->{'alias'} && $_[0]->{'dir'}) {
-		&add_script_language_directives($_[0], $tmpl,
-					        $_[0]->{'web_port'});
+	if (!$d->{'alias'} && $d->{'dir'}) {
+		&add_script_language_directives($d, $tmpl,
+					        $d->{'web_port'});
 		}
 
 	# Re-apply limits, so that Apache directives are updated
 	if (defined(&supports_resource_limits)) {
 		local ($ok) = &supports_resource_limits();
 		if ($ok) {
-			local $pd = $_[0]->{'parent'} ?
-				&get_domain($_[0]->{'parent'}) : $_[0];
+			local $pd = $d->{'parent'} ?
+				&get_domain($d->{'parent'}) : $d;
 			local $rv = &get_domain_resource_limits($pd);
-			&save_domain_resource_limits($_[0], $rv, 1);
+			&save_domain_resource_limits($d, $rv, 1);
 			}
 		}
 
 	# Apply symlink and mod_php fixes, in case the template wasn't
 	# updated with them
-	if ($config{'allow_modphp'} ne '1' && !$_[0]->{'alias'}) {
-		&fix_mod_php_security([ $_[0] ]);
+	if ($config{'allow_modphp'} ne '1' && !$d->{'alias'}) {
+		&fix_mod_php_security([ $d ]);
 		}
-	if ($config{'allow_symlinks'} ne '1' && !$_[0]->{'alias'}) {
-		&fix_symlink_security([ $_[0] ]);
+	if ($config{'allow_symlinks'} ne '1' && !$d->{'alias'}) {
+		&fix_symlink_security([ $d ]);
 		}
 
 	# Apply template SSI setting
 	if ($tmpl->{'web_ssi'} == 1 && $tmpl->{'web_ssi_suffix'}) {
-		&save_domain_web_ssi($_[0], $tmpl->{'web_ssi_suffix'});
+		&save_domain_web_ssi($d, $tmpl->{'web_ssi_suffix'});
 		}
 	elsif ($tmpl->{'web_ssi'} == 0) {
-		&save_domain_web_ssi($_[0], undef);
+		&save_domain_web_ssi($d, undef);
 		}
 	};
 if ($@) {
@@ -287,7 +293,7 @@ else {
 	}
 
 # If any alias domains with web already exist, re-set them up
-local @adoms = &get_domain_by("alias", $_[0]->{'id'},
+local @adoms = &get_domain_by("alias", $d->{'id'},
 			      "web", 1,
 			      "alias_mode", 1);
 foreach my $ad (@adoms) {
@@ -301,13 +307,14 @@ foreach my $ad (@adoms) {
 # Delete the virtual server from the Apache config
 sub delete_web
 {
+local ($d) = @_;
 &require_apache();
-if ($_[0]->{'alias_mode'}) {
+if ($d->{'alias_mode'}) {
 	# Just delete ServerAlias directives from parent
 	&$first_print($text{'delete_apachealias'});
-	local $alias = &get_domain($_[0]->{'alias'});
+	local $alias = &get_domain($d->{'alias'});
 	&obtain_lock_web($alias);
-	&remove_webmail_redirect_directives($_[0]);
+	&remove_webmail_redirect_directives($d);
 	local @ports = ( $alias->{'web_port'} );
 	push(@ports, $alias->{'web_sslport'}) if ($alias->{'ssl'});
 	foreach my $p (@ports) {
@@ -319,7 +326,7 @@ if ($_[0]->{'alias_mode'}) {
 			return 0;
 			}
 		local @sa = &apache::find_directive("ServerAlias", $pconf);
-		@sa = grep { !/\Q$_[0]->{'dom'}\E$/ } @sa;
+		@sa = grep { !/\Q$d->{'dom'}\E$/ } @sa;
 		&apache::save_directive("ServerAlias", \@sa, $pconf, $conf);
 		&flush_file_lines($pvirt->{'file'});
 		}
@@ -330,11 +337,11 @@ if ($_[0]->{'alias_mode'}) {
 elsif ($config{'delete_indom'}) {
 	# Delete all matching virtual servers
 	&$first_print($text{'delete_apache'});
-	&obtain_lock_web($_[0]);
+	&obtain_lock_web($d);
 	local $conf = &apache::get_config();
-	if (!$_[0]->{'alias_mode'}) {
+	if (!$d->{'alias_mode'}) {
 		# Remove the custom Listen directive added for the domain
-		&remove_listen($_[0], $conf, $_[0]->{'web_port'});
+		&remove_listen($d, $conf, $d->{'web_port'});
 		}
 	local @virt = reverse(&apache::find_directive_struct("VirtualHost",
 							     $conf));
@@ -343,42 +350,42 @@ elsif ($config{'delete_indom'}) {
 						    $v->{'members'});
 		local $vp = $v->{'words'}->[0] =~ /:(\d+)$/ ? $1 :
 				$default_web_port;
-		if ($sn =~ /\Q$_[0]->{'dom'}\E$/ &&
-		    $vp != $_[0]->{'web_sslport'}) {
+		if ($sn =~ /\Q$d->{'dom'}\E$/ &&
+		    $vp != $d->{'web_sslport'}) {
 			# Check if a real sub-domain corresponds to this
 			# virtualhost
 			local $real = &get_domain_by("dom", $sn);
-			if (!$real || $real->{'id'} == $_[0]->{'id'}) {
+			if (!$real || $real->{'id'} == $d->{'id'}) {
 				&delete_web_virtual_server($v);
 				}
 			}
 		}
-	&release_lock_web($_[0]);
+	&release_lock_web($d);
 	&register_post_action(\&restart_apache);
 	&$second_print($text{'setup_done'});
 	}
 else {
 	# Just delete one virtual server
 	&$first_print($text{'delete_apache'});
-	&obtain_lock_web($_[0]);
+	&obtain_lock_web($d);
 	local $conf = &apache::get_config();
-	if (!$_[0]->{'alias_mode'}) {
+	if (!$d->{'alias_mode'}) {
 		# Remove the custom Listen directive added for the domain
-		&remove_listen($_[0], $conf, $_[0]->{'web_port'});
+		&remove_listen($d, $conf, $d->{'web_port'});
 		}
-	local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
-						    $_[0]->{'web_port'});
+	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+						    $d->{'web_port'});
 	if ($virt) {
-		local $alog = &get_apache_log($_[0]->{'dom'},
-					      $_[0]->{'web_port'}, 0);
-		local $elog = &get_apache_log($_[0]->{'dom'},
-					      $_[0]->{'web_port'}, 1);
+		local $alog = &get_apache_log($d->{'dom'},
+					      $d->{'web_port'}, 0);
+		local $elog = &get_apache_log($d->{'dom'},
+					      $d->{'web_port'}, 1);
 		&delete_web_virtual_server($virt);
 		&$second_print($text{'setup_done'});
 
 		# Delete logs too, if outside home dir and if not a sub-domain
-		if ($alog && !&is_under_directory($_[0]->{'home'}, $alog) &&
-		    !$_[0]->{'subdom'}) {
+		if ($alog && !&is_under_directory($d->{'home'}, $alog) &&
+		    !$d->{'subdom'}) {
 			&$first_print($text{'delete_apachelog'});
 			local @dlogs = ($alog, glob("$alog.*"),
 					glob("$alog-*"));
@@ -394,7 +401,7 @@ else {
 	else {
 		&$second_print($text{'delete_noapache'});
 		}
-	&release_lock_web($_[0]);
+	&release_lock_web($d);
 	}
 undef(@apache::get_config_cache);
 }
@@ -568,6 +575,7 @@ else {
 	    $_[0]->{'ip'} ne $_[1]->{'ip'} ||
 	    $_[0]->{'ip6'} ne $_[1]->{'ip6'} ||
 	    $_[0]->{'virt6'} != $_[1]->{'virt6'} ||
+	    $_[0]->{'name6'} != $_[1]->{'name6'} ||
 	    $_[0]->{'ssl'} != $_[1]->{'ssl'} ||
 	    $_[0]->{'web_port'} != $_[1]->{'web_port'}) {
 		# Name-based hosting mode or IP has changed .. update the
@@ -578,13 +586,22 @@ else {
 			goto VIRTFAILED;
 			}
 		local $nvstar = &add_name_virtual($_[0], $conf,
-						  $_[0]->{'web_port'});
+						  $_[0]->{'web_port'}, 0,
+						  $_[0]->{'ip'});
+		local $nvstar6;
+		if ($_[0]->{'ip6'}) {
+			$nvstar6 = &add_name_virtual(
+				$_[0], $conf, $_[0]->{'web_port'}, 0,
+				"[".$_[0]->{'ip6'}."]");
+			}
 		&add_listen($_[0], $conf, $_[0]->{'web_port'});
 
 		# Change the virtualhost IPs
 		local $lref = &read_file_lines($virt->{'file'});
 		$lref->[$virt->{'line'}] =
-		    "<VirtualHost ".&get_apache_vhost_ips($_[0], $nvstar).">";
+			"<VirtualHost ".
+			&get_apache_vhost_ips($_[0], $nvstar, $nvstar6).
+			">";
 		&flush_file_lines($virt->{'file'});
 
 		undef(@apache::get_config_cache);
@@ -2033,14 +2050,14 @@ if (defined(&list_available_php_versions)) {
 return @rv;
 }
 
-# add_name_virtual(&domain, $conf, port, star-doesnt-match)
+# add_name_virtual(&domain, $conf, port, star-doesnt-match, ip-string)
 # Adds a NameVirtualHost entry for some domain, if needed. Returns 1 there is
 # an existing NameVirtualHost entry for * or *:80 .
 # For Apache 2.2 and above, NameVirtualHost * will no longer match
 # virtualhosts like *:80, so we need to add *:80 even if * is already there.
 sub add_name_virtual
 {
-local ($d, $conf, $web_port, $no_star_match) = @_;
+local ($d, $conf, $web_port, $no_star_match, $ip) = @_;
 &require_apache();
 if ($apache::httpd_modules{'core'} >= 2.4) {
 	# Apache 2.4 doesn't need NameVirtualHost any more
@@ -2055,23 +2072,23 @@ if ($d->{'name'}) {
 	local $canstar = $apache::httpd_modules{'core'} < 2.2;
 	foreach my $nv (@nv) {
 		$found++ if ($nv =~ /^(\S+):(\S+)/ &&   # Like x.x.x.x:80
-			      $1 eq $d->{'ip'} &&
+			      $1 eq $ip &&
 			      $2 == $web_port ||
 			     $nv eq '*' && $canstar &&	# Like *
 			      $defport == $web_port ||
 			     $nv =~ /^\*:(\d+)$/	# Like *:80
 			      && $1 == $web_port
 			      && !$no_star_match);
-		$found_no_port++ if ($nv eq $d->{'ip'});
+		$found_no_port++ if ($nv eq $ip);
 		$nvstar++ if ($nv eq '*' && $canstar && # Like *
 			       $defport == $web_port ||
 			      $nv =~ /^\*:(\d+)$/ &&    # Like *:80
 			       $1 == $web_port);
 		}
 	if (!$found) {
-		@nv = grep { $_ ne $d->{'ip'} } @nv if ($found_no_port);
+		@nv = grep { $_ ne $ip } @nv if ($found_no_port);
 		&apache::save_directive("NameVirtualHost",
-					[ @nv, "$d->{'ip'}:$web_port" ],
+					[ @nv, "$ip:$web_port" ],
 					$conf, $conf);
 		&flush_file_lines();
 		}
@@ -2085,7 +2102,7 @@ sub add_listen
 {
 local ($d, $conf, $web_port) = @_;
 &require_apache();
-foreach my $dip ($d->{'ip'}, $d->{'virt6'} ? ( $d->{'ip6'} ) : ( )) {
+foreach my $dip ($d->{'ip'}, $d->{'ip6'} ? ( $d->{'ip6'} ) : ( )) {
 	local $defport = &apache::find_directive("Port", $conf) || 80;
 	local @listen = &apache::find_directive("Listen", $conf);
 	local $lfound;
@@ -2124,7 +2141,7 @@ local ($d, $conf, $web_port) = @_;
 if ($d->{'virt'} && !$d->{'name'}) {
 	local @listen = &apache::find_directive("Listen", $conf);
 	local @newlisten = grep { $_ ne "$d->{'ip'}:$web_port" } @listen;
-	if ($d->{'virt6'}) {
+	if ($d->{'ip6'}) {
 		@newlisten = grep { $_ ne "[$d->{'ip6'}]:$web_port" } @listen;
 		}
 	if (scalar(@listen) != scalar(@newlisten)) {
@@ -3570,13 +3587,14 @@ else {
 	}
 }
 
-# get_apache_vhost_ips(&domain, star-namevirtualhost, [port])
+# get_apache_vhost_ips(&domain, star-namevirtualhost-ip4,
+# 		       star-namevirtualhost-ip6, [port])
 # Returns a string listing the IPs for a domain's <virtualhost> block.
 # A star is used for the IP if the virtual host is name based, and the IP
 # is shared with other domains.
 sub get_apache_vhost_ips
 {
-local ($d, $nvstar, $port) = @_;
+local ($d, $nvstar, $nvstar6, $port) = @_;
 local $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
 $port ||= $d->{'web_port'};
 &require_apache();
@@ -3585,8 +3603,15 @@ local $vip = $d->{'name'} &&
 	     &is_shared_ip($d->{'ip'}) &&
 	     $nvstar ? "*" : $d->{'ip'};
 local @vips = ( "$vip:$port" );
-if ($d->{'virt6'}) {
-	push(@vips, "[$d->{'ip6'}]:$port");
+if ($d->{'ip6'}) {
+	local $vip6 = $d->{'name'} &&
+		      &is_shared_ip($d->{'ip6'}) &&
+		      $nvstar6 ? "*" : $d->{'ip6'};
+	if ($vip6 ne "*") {
+		# If already matching *:port for the IPv4 part, no need to
+		# repeat it for IPv6
+		push(@vips, "[$vip6]:$port");
+		}
 	}
 return join(" ", @vips);
 }

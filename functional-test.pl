@@ -4886,6 +4886,34 @@ $ip6_tests = [
 	  'grep' => 'Test IPv6 home page',
 	},
 
+	# Create a sub-domain on the shared IP
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'desc', 'Test IPv6 sub-domain' ],
+		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'logrotate' ],
+		      [ 'default-ip6' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test IPv6 sub-domain home page' ],
+		      @create_args, ],
+	},
+
+	# Test DNS lookup for v6 entry
+	{ 'command' => 'host '.$test_subdomain,
+	  'grep' => [ 'IPv6 address', &get_default_ip6() ],
+	},
+
+	# Test HTTP get to v6 address
+	{ 'command' => $wget_command.' --inet6 http://'.$test_subdomain,
+	  'grep' => 'Test IPv6 sub-domain home page',
+	},
+
+	# Validate the domain
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_subdomain ],
+		      [ 'all-features' ] ],
+	},
+
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],

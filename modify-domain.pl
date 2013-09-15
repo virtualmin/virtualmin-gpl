@@ -166,6 +166,16 @@ while(@ARGV > 0) {
 		# Allocating an IPv6 address
 		$ip6 = "allocate";
 		}
+	elsif ($a eq "--default-ip6" && &supports_ip6()) {
+		# IPv6 on default shared address
+		$defaultip6 = 1;
+		}
+	elsif ($a eq "--shared-ip6") {
+		# Changing the shared IPv6 address
+		$sharedip6 = shift(@ARGV);
+		&check_ip6address($sharedip6) ||
+			&usage("Invalid shared IPv6 address");
+		}
 	elsif ($a eq "--reseller") {
 		# Changing the reseller
 		$resel = shift(@ARGV);
@@ -297,6 +307,12 @@ if (!$dom->{'virt'} && $defaultip) {
 if (($defaultip || $sharedip) && $ip) {
 	&usage("The --default-ip and --shared-ip flags cannot be combined with --ip or --allocate-ip");
 	}
+if ($dom->{'virt'} && defined($sharedip6)) {
+	&usage("The shared IPv6 address cannot be changed for a virtual server with a private IP");
+	}
+if (($defaultip6 || $sharedip6) && $ip6) {
+	&usage("The --default-ip6 and --shared-ip6 flags cannot be combined with --ip6 or --allocate-ip6");
+	}
 
 # Validate IPv6 changes
 if ($dom->{'virt6'} && $ip6 eq "allocate") {
@@ -418,6 +434,8 @@ if (defined($bw)) {
 if (defined($bw_no_disable)) {
 	$dom->{'bw_no_disable'} = $bw_no_disable;
 	}
+
+# Apply new IPv4 address
 if (defined($ip)) {
 	# Just change the IP
 	$dom->{'ip'} = $ip;
@@ -429,7 +447,7 @@ if (defined($ip)) {
 		$dom->{'virtalready'} = 0;
 		}
 	}
-if ($defaultip) {
+elsif ($defaultip) {
 	# Falling back to default IP
 	$dom->{'ip'} = &get_default_ip($dom->{'reseller'});
 	$dom->{'netmask'} = undef;
@@ -439,21 +457,40 @@ if ($defaultip) {
 	$dom->{'name'} = 1;
 	delete($dom->{'dns_ip'});
 	}
-if (defined($sharedip)) {
+elsif (defined($sharedip)) {
 	# Just change the shared IP address
 	$dom->{'ip'} = $sharedip;
 	}
+
+# Apply new IPv6 address
 if ($ip6) {
 	# Adding or changing an IPv6 address
 	$dom->{'ip6'} = $ip6;
 	$dom->{'netmask6'} = $netmask6;
 	$dom->{'virt6'} = 1;
+	$dom->{'name6'} = 0;
+	}
+elsif ($defaultip6) {
+	# Using the default IPv6 address
+	$dom->{'ip6'} = &get_default_ip6($dom->{'reseller'});
+	print STDERR "new ip6=$dom->{'ip6'}\n";
+	$dom->{'netmask6'} = undef;
+	$dom->{'virt6'} = 0;
+	$dom->{'name6'} = 1;
+	}
+elsif (defined($sharedip6)) {
+	# Just change the shared IP address
+	$dom->{'ip6'} = $sharedip6;
 	}
 elsif ($noip6) {
 	# Removing the IPv6 address
 	$dom->{'netmask6'} = undef;
 	$dom->{'virt6'} = 0;
+	$dom->{'name6'} = 0;
+	$dom->{'ip6'} = undef;
 	}
+
+# Apply reseller change
 if (defined($resel)) {
 	defined(&get_reseller) || &usage("Resellers are not supported");
 	if ($resel ne "NONE") {

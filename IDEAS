@@ -40,18 +40,23 @@
 	- CHANGELOG
 	- backup/restore
 
- - Validate FreeBSD 9.x support
-	- See email from Richard A Secor
-	- Verify PHP package installation in Virtualmin
-	- Check that DKIM works
-
  - php-fpm support for Joaquim
 
  - Name-based hosting on IPv6 support
+	- Audit all code that uses ip6 and virt6
+	- batch creation
+	- Nginx
+	- change / add existing IPv6 address
+	- test with SSL on shared IP
+	- reseller access to shared IPs
+		- option to limit if shared IPs can be selected
+	- virtual_ip_input function for ipv6
 
  - Amazon tax docs
 
- - Outlook autoconfig support
-	- http://virtualmin.com/node/29670
-	- http://technet.microsoft.com/en-us/library/cc511507(v=office.14).aspx
-	- Test with actual outlook
+ - 2-factor authentication
+	- Authy?
+
+ - Adding DNS records to a disabled domain can make it invalid
+	- ie. DKIM
+	- add .disabled is post-change function

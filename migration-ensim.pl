@@ -540,18 +540,32 @@ return (\%dom);
 # which it was extracted or an error message
 sub extract_ensim_dir
 {
-return (0, "File does not exist") if (!-r $_[0]);
-return (1, $done{$_[0]}) if ($done{$_[0]});	# Cache extracted dir
-local $temp = &transname();
-mkdir($temp, 0700);
-local $qf = quotemeta($_[0]);
-local $out = &backquote_command(
-	"cd $temp && ".&make_tar_command("xzf", $qf)." 2>&1");
-if ($? && $out !~ /decompression\s+OK/i) {
-	return (0, $out);
+local ($file) = @_;
+local $dir;
+if (!-e $file) {
+	return (0, "File does not exist");
 	}
-$done{$_[0]} = $temp;
-return (1, $temp);
+elsif (-d $file) {
+	# Extract extracted
+	$dir = $file;
+	}
+else {
+	if ($main::ensim_dir_cache{$file} &&
+	    -d $main::ensim_dir_cache{$file}) {
+		# Use cached extract from this session
+		return (1, $main::ensim_dir_cache{$file});
+		}
+	$dir = &transname();
+	mkdir($dir, 0700);
+	local $qf = quotemeta($file);
+	local $out = &backquote_command(
+		"cd $dir && ".&make_tar_command("xzf", $qf)." 2>&1");
+	if ($? && $out !~ /decompression\s+OK/i) {
+		return (0, $out);
+		}
+	$main::ensim_dir_cache{$file} = $dir;
+	}
+return (1, $dir);
 }
 
 # parse_enim_xml(dir)

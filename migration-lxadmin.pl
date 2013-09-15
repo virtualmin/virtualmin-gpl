@@ -236,9 +236,9 @@ if (!$homesfile) {
 	&$second_print(".. failed to find $realuser-client-* file!");
 	}
 else {
-	local $homes = &extract_lxadmin_dir($homesfile);
-	if (!$homes) {
-		&$second_print(".. failed to extract web directories file");
+	local ($ok, $homes) = &extract_lxadmin_dir($homesfile);
+	if (!$ok) {
+		&$second_print(".. failed to extract web directories file : $homes");
 		}
 	else {
 		# Find a sub-dir for this domain
@@ -278,9 +278,9 @@ if (!$mfile) {
 	&$second_print(".. no $dom-mmail-* file found");
 	}
 else {
-	$mdir = &extract_lxadmin_dir($mfile);
-	if (!$mdir) {
-		&$second_print(".. extraction failed");
+	($ok, $mdir) = &extract_lxadmin_dir($mfile);
+	if (!$ok) {
+		&$second_print(".. extraction failed : $mdir");
 		}
 	else {
 		&$second_print(".. done");
@@ -487,19 +487,29 @@ return @rv;
 sub extract_lxadmin_dir
 {
 local ($file) = @_;
-return undef if (!-r $file);
-if ($main::lxadmin_dir_cache{$file} && -d $main::lxadmin_dir_cache{$file}) {
-	# Use cached extract from this session
-	return (1, $main::lxadmin_dir_cache{$file});
+local $dir;
+if (!-e $file) {
+	return (0, "$file does not exist");
 	}
-local $temp = &transname();
-mkdir($temp, 0700);
-local $err = &extract_compressed_file($file, $temp);
-if ($err) {
-	return (0, $err);
+elsif (-d $file) {
+	# Just use directory
+	$dir = $file;
 	}
-$main::lxadmin_dir_cache{$file} = $temp;
-return (1, $temp);
+else {
+	if ($main::lxadmin_dir_cache{$file} &&
+	    -d $main::lxadmin_dir_cache{$file}) {
+		# Use cached extract from this session
+		return (1, $main::lxadmin_dir_cache{$file});
+		}
+	$dir = &transname();
+	mkdir($dir, 0700);
+	local $err = &extract_compressed_file($file, $dir);
+	if ($err) {
+		return (0, $err);
+		}
+	$main::lxadmin_dir_cache{$file} = $dir;
+	}
+return (1, $dir);
 }
 
 # extract_lxadmin_file(file)

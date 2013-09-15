@@ -5957,7 +5957,7 @@ if (!$r) {
 # Add AAAA record for IPv6
 local ($r) = grep { $_->{'name'} eq $autoconfig &&
 		    $_->{'type'} eq 'AAAA' } @$recs;
-if (!$r && $d->{'virt6'}) {
+if (!$r && $d->{'ip6'}) {
 	my $ip = $d->{'ip6'};
 	&bind8::create_record($file, $autoconfig, undef,
 			      "IN", "AAAA", $ip);

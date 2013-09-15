@@ -2860,6 +2860,15 @@ return $config{'all_namevirtual'} || &can_use_feature("virt") ||
        @shared && &can_edit_sharedips();
 }
 
+# Returns 1 if the current user is allowed to select a private or shared
+# IPv6 address for a virtual server
+sub can_select_ip6
+{
+local @shared = &list_shared_ip6s();
+return &can_use_feature("virt6") ||
+       @shared && &can_edit_sharedips();
+}
+
 # can_edit_limits(&domain)
 # Returns 1 if owner limits can be edited in some domain
 sub can_edit_limits
@@ -2956,7 +2965,9 @@ return &master_admin() || &reseller_admin() || $access{'edit_phpver'};
 
 sub can_edit_sharedips
 {
-return &master_admin() || &reseller_admin() || $access{'edit_sharedips'};
+return &master_admin() ||
+       &reseller_admin() && !$access{'nosharedips'} ||
+       $access{'edit_sharedips'};
 }
 
 sub can_edit_catchall
@@ -3522,6 +3533,39 @@ else {
 	}
 }
 
+# get_default_ip([reseller-name])
+# Returns this system's primary IPv6 address. If a reseller is given and he
+# has a custom IP, use that.
+sub get_default_ip6
+{
+local ($reselname) = @_;
+if ($reselname && defined(&get_reseller)) {
+	# Check if the reseller has an IP
+	local $resel = &get_reseller($reselname);
+	if ($resel && $resel->{'acl'}->{'defip6'}) {
+		return $resel->{'acl'}->{'defip6'};
+		}
+	}
+if ($config{'defip6'}) {
+	# Explicitly set on module config page
+	return $config{'defip6'};
+	}
+else {
+	# From interface detected at check time
+	&foreign_require("net", "net-lib.pl");
+	local $ifacename = $config{'iface'} || &first_ethernet_iface();
+	local ($iface) = grep { $_->{'fullname'} eq $ifacename }
+			      &net::active_interfaces();
+	if ($iface) {
+		return $iface->{'address6'} && @{$iface->{'address6'}} ?
+			$iface->{'address6'}->[0] : undef;
+		}
+	else {
+		return undef;
+		}
+	}
+}
+
 # first_ethernet_iface()
 # Returns the name of the first active ethernet interface
 sub first_ethernet_iface
@@ -3554,11 +3598,14 @@ return undef;
 }
 
 # get_address_iface(address)
-# Given an IP address, returns the interface name
+# Given an IPv4 or v6 address, returns the interface name
 sub get_address_iface
 {
+local ($a) = @_;
 &foreign_require("net", "net-lib.pl");
-local ($iface) = grep { $_->{'address'} eq $_[0] } &net::active_interfaces();
+local ($iface) = grep { $_->{'address'} eq $a ||
+			&indexof($a, @{$_->{'address6'}}) >= 0 }
+		      &net::active_interfaces();
 return $iface ? $iface->{'fullname'} : undef;
 }
 
@@ -5398,6 +5445,7 @@ foreach my $t (@tmpls) {
 $config{'iface'} = $oldconfig{'iface'};
 $config{'defip'} = $oldconfig{'defip'};
 $config{'sharedips'} = $oldconfig{'sharedips'};
+$config{'sharedip6s'} = $oldconfig{'sharedip6s'};
 $config{'home_quotas'} = $oldconfig{'home_quotas'};
 $config{'mail_quotas'} = $oldconfig{'mail_quotas'};
 $config{'group_quotas'} = $oldconfig{'group_quotas'};
@@ -14355,6 +14403,21 @@ $config{'sharedips'} = join(" ", @_);
 &save_module_config();
 }
 
+# list_shared_ip6s()
+# Returns a list of extra IPv6 addresses that can be used by virtual servers
+sub list_shared_ip6s
+{
+return split(/\s+/, $config{'sharedip6s'});
+}
+
+# save_shared_ip6s(ip6, ...)
+# Updates the list of extra IPv6 addresses that can be used by virtual servers
+sub save_shared_ip6s
+{
+$config{'sharedip6s'} = join(" ", @_);
+&save_module_config();
+}
+
 # is_shared_ip(ip)
 # Returns 1 if some IP address is shared among multiple domains (ie. default,
 # shared or reseller shared)
@@ -14363,10 +14426,14 @@ sub is_shared_ip
 local ($ip) = @_;
 return 1 if ($ip eq &get_default_ip());
 return 1 if (&indexof($ip, &list_shared_ips()) >= 0);
+return 1 if ($ip eq &get_default_ip6());
+return 1 if (&indexof($ip, &list_shared_ip6s()) >= 0);
 if (defined(&list_resellers)) {
 	foreach my $r (&list_resellers()) {
 		return 1 if ($r->{'acl'}->{'defip'} &&
 			     $ip eq $r->{'acl'}->{'defip'});
+		return 1 if ($r->{'acl'}->{'defip6'} &&
+			     $ip eq $r->{'acl'}->{'defip6'});
 		}
 	}
 return 0;
@@ -14520,7 +14587,7 @@ return @rv;
 # can be allowed access to
 sub list_allowable_features
 {
-return ( @opt_features, "virt", &list_feature_plugins() );
+return ( @opt_features, "virt", "virt6", &list_feature_plugins() );
 }
 
 # count_domain_users()
