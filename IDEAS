@@ -46,6 +46,9 @@
 	- Nginx
 	- change / add existing IPv6 address
 	- test with SSL on shared IP
+		- functional test
+	- CHANGELOG
+	- Documentation
 
  - Amazon tax docs
 

@@ -473,7 +473,6 @@ if ($ip6) {
 elsif ($defaultip6) {
 	# Using the default IPv6 address
 	$dom->{'ip6'} = &get_default_ip6($dom->{'reseller'});
-	print STDERR "new ip6=$dom->{'ip6'}\n";
 	$dom->{'netmask6'} = undef;
 	$dom->{'virt6'} = 0;
 	$dom->{'name6'} = 1;

@@ -19,11 +19,7 @@ local $port = $d->{'web_sslport'} || $defport;
 # Check if Apache supports SNI, which makes clashing certs not so bad
 local $sni = &has_sni_support($d);
 
-if ($d->{'virt'}) {
-	# Has a private IP
-	return undef;
-	}
-elsif ($port != $defport) {
+if ($port != $defport) {
 	# Has a private port
 	return undef;
 	}
@@ -34,11 +30,11 @@ elsif ($config{'sni_support'}) {
 	}
 else {
 	# Neither .. but we can still do SSL, if there are no other domains
-	# with SSL on the same IP
+	# with SSL on the same IPv4 address
 	local ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
 				   $_->{'ssl'} &&
 				   $_->{'id'} ne $d->{'id'}} &list_domains();
-	if ($sslclash && (!$oldd || !$oldd->{'ssl'})) {
+	if (!$d->{'virt'} && $sslclash && (!$oldd || !$oldd->{'ssl'})) {
 		# Clash .. but is the cert OK?
 		if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
 			local @certdoms = &list_domain_certificate($sslclash);
@@ -57,13 +53,51 @@ else {
 		local $conf = &apache::get_config();
 		foreach my $v (&apache::find_directive_struct("VirtualHost",
 							      $conf)) {
-			local ($vip, $vport) = split(/:/, $v->{'words'}->[0]);
-			if ($vip eq $d->{'ip'} && $vport == $port) {
-				return &text('setup_edepssl4',
-					     $d->{'ip'}, $port);
+			foreach my $w (@{$v->{'words'}}) {
+				local ($vip, $vport) = split(/:/, $w);
+				if ($vip eq $d->{'ip'} && $vport == $port) {
+					return &text('setup_edepssl4',
+						     $d->{'ip'}, $port);
+					}
 				}
 			}
 		}
+
+	# Perform the same check on IPv6
+	local ($sslclash6) = grep { $_->{'ip6'} &&
+				    $_->{'ip6'} eq $d->{'ip6'} &&
+				    $_->{'ssl'} &&
+				    $_->{'id'} ne $d->{'id'}} &list_domains();
+	if (!$d->{'virt6'} && $sslclash6 && (!$oldd || !$oldd->{'ssl'})) {
+		# Clash .. but is the cert OK?
+		if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
+			local @certdoms = &list_domain_certificate($sslclash);
+			return &text($sni ? 'setup_edepssl5sni'
+					  : 'setup_edepssl5', $d->{'ip6'},
+				join(", ", map { "<tt>$_</tt>" } @certdoms),
+				$sslclash->{'dom'});
+			}
+		else {
+			return undef;
+			}
+		}
+	# Check for <virtualhost> on the IPv6 address, if we are turning on SSL
+	if (!$oldd || !$oldd->{'ssl'}) {
+		&require_apache();
+		local $conf = &apache::get_config();
+		foreach my $v (&apache::find_directive_struct("VirtualHost",
+							      $conf)) {
+			foreach my $w (@{$v->{'words'}}) {
+				$w =~ /^\[([^\/]+)\]/ || next;
+				local $vip = $1;
+				if ($vip eq $d->{'ip6'} && $vport == $port) {
+					return &text('setup_edepssl4',
+						     $d->{'ip6'}, $port);
+					}
+				}
+			}
+		}
+
 	return undef;
 	}
 }
@@ -72,22 +106,23 @@ else {
 # Creates a website with SSL enabled, and a private key and cert it to use.
 sub setup_ssl
 {
-local $tmpl = &get_template($_[0]->{'template'});
-local $web_sslport = $_[0]->{'web_sslport'} || $tmpl->{'web_sslport'} || 443;
+local ($d) = @_;
+local $tmpl = &get_template($d->{'template'});
+local $web_sslport = $d->{'web_sslport'} || $tmpl->{'web_sslport'} || 443;
 &require_apache();
-&obtain_lock_web($_[0]);
+&obtain_lock_web($d);
 local $conf = &apache::get_config();
 
 # Find out if this domain will share a cert with another
-&find_matching_certificate($_[0]);
-local $chained = $_[0]->{'ssl_chain'};
+&find_matching_certificate($d);
+local $chained = $d->{'ssl_chain'};
 
 # Create a self-signed cert and key, if needed
-&generate_default_certificate($_[0]);
+&generate_default_certificate($d);
 
 # Add NameVirtualHost if needed, and if there is more than one SSL site on
 # this IP address
-local $nvstar = &add_name_virtual($_[0], $conf, $web_sslport, 1);
+local $nvstar = &add_name_virtual($d, $conf, $web_sslport, 1);
 local $nvstar6; 
 if ($d->{'ip6'}) {                                
         $nvstar6 = &add_name_virtual($d, $conf, $web_sslport, 1,
@@ -95,12 +130,12 @@ if ($d->{'ip6'}) {
         }       
 
 # Add a Listen directive if needed
-&add_listen($_[0], $conf, $web_sslport);
+&add_listen($d, $conf, $web_sslport);
 
 # Find directives in the non-SSL virtualhost, for copying
 &$first_print($text{'setup_ssl'});
-local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
-					    $_[0]->{'web_port'});
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+					    $d->{'web_port'});
 if (!$virt) {
 	&$second_print($text{'setup_esslcopy'});
 	return 0;
@@ -108,8 +143,8 @@ if (!$virt) {
 local $srclref = &read_file_lines($virt->{'file'});
 
 # Double-check cert and key
-local $certdata = &read_file_contents($_[0]->{'ssl_cert'});
-local $keydata = &read_file_contents($_[0]->{'ssl_key'});
+local $certdata = &read_file_contents($d->{'ssl_cert'});
+local $keydata = &read_file_contents($d->{'ssl_key'});
 local $err = &validate_cert_format($certdata, 'cert');
 if ($err) {
 	&$second_print(&text('setup_esslcert', $err));
@@ -120,8 +155,8 @@ if ($err) {
 	&$second_print(&text('setup_esslkey', $err));
 	return 0;
 	}
-if ($_[0]->{'ssl_ca'}) {
-	local $cadata = &read_file_contents($_[0]->{'ssl_ca'});
+if ($d->{'ssl_ca'}) {
+	local $cadata = &read_file_contents($d->{'ssl_ca'});
 	local $err = &validate_cert_format($cadata, 'ca');
 	if ($err) {
 		&$second_print(&text('setup_esslca', $err));
@@ -137,8 +172,8 @@ if ($err) {
 # Add the actual <VirtualHost>
 local $f = $virt->{'file'};
 local $lref = &read_file_lines($f);
-local @ssldirs = &apache_ssl_directives($_[0], $tmpl);
-push(@$lref, "<VirtualHost ".&get_apache_vhost_ips($_[0], 0, 0, $web_sslport).">");
+local @ssldirs = &apache_ssl_directives($d, $tmpl);
+push(@$lref, "<VirtualHost ".&get_apache_vhost_ips($d, 0, 0, $web_sslport).">");
 push(@$lref, @$srclref[$virt->{'line'}+1 .. $virt->{'eline'}-1]);
 push(@$lref, @ssldirs);
 push(@$lref, "</VirtualHost>");
@@ -147,35 +182,35 @@ push(@$lref, "</VirtualHost>");
 # Update the non-SSL virtualhost to include the port number, to fix old
 # hosts that were missing the :80
 local $lref = &read_file_lines($virt->{'file'});
-if (!$_[0]->{'name'} && $lref->[$virt->{'line'}] !~ /:\d+/) {
+if (!$d->{'name'} && $lref->[$virt->{'line'}] !~ /:\d+/) {
 	$lref->[$virt->{'line'}] =
-		"<VirtualHost $_[0]->{'ip'}:$_[0]->{'web_port'}>";
+		"<VirtualHost $d->{'ip'}:$d->{'web_port'}>";
 	&flush_file_lines($virt->{'file'});
 	}
 undef(@apache::get_config_cache);
 
 # Add this IP and cert to Webmin/Usermin's SSL keys list
 if ($tmpl->{'web_webmin_ssl'} && $d->{'virt'}) {
-	&setup_ipkeys($_[0], \&get_miniserv_config, \&put_miniserv_config,
+	&setup_ipkeys($d, \&get_miniserv_config, \&put_miniserv_config,
 		      \&restart_webmin);
 	}
 if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin") &&
     $d->{'virt'}) {
 	&foreign_require("usermin", "usermin-lib.pl");
-	&setup_ipkeys($_[0], \&usermin::get_usermin_miniserv_config,
+	&setup_ipkeys($d, \&usermin::get_usermin_miniserv_config,
 		      \&usermin::put_usermin_miniserv_config,
 		      \&restart_usermin);
 	}
 
 # Copy chained CA cert in from domain with same IP, if any
-$_[0]->{'web_sslport'} = $web_sslport;
+$d->{'web_sslport'} = $web_sslport;
 if ($chained) {
-	&save_website_ssl_file($_[0], 'ca', $chained);
+	&save_website_ssl_file($d, 'ca', $chained);
 	}
 
-&release_lock_web($_[0]);
+&release_lock_web($d);
 &$second_print($text{'setup_done'});
-if ($_[0]->{'virt'}) {
+if ($d->{'virt'}) {
 	&register_post_action(\&restart_apache, 1);
 	}
 else {
