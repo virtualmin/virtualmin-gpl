@@ -621,36 +621,9 @@ elsif (!&can_select_ip6()) {
 	}
 else {
 	# Can select addres or allocate one
-	local @ip6opts = ( [ 0, $text{'edit_virt6off'} ] );
-	if ($defip6) {
-		# Default shared address
-		push(@ip6opts, [ 4, &text('form_shared', $defip6) ]);
-		}
-	local @shared = &list_shared_ip6s();
-	if (@shared && &can_edit_sharedips()) {
-		# Other shared address
-		push(@ip6opts, [ 3, $text{'form_shared2'},
-                                 &ui_select("sharedip6", undef,
-                                        [ map { [ $_ ] } @shared ]) ]);
-		}
-	if (&can_use_feature("virt6")) {
-		local @alloctmpls = grep { $_->{'ranges6'} ne 'none' } @cantmpls;
-		if (@alloctmpls) {
-			# Allocated address
-			push(@ip6opts, [ 2, $text{'edit_alloc'} ]);
-			}
-		local @noalloctmpls = grep { $_->{'ranges6'} eq 'none' } @cantmpls;
-		if (@noalloctmpls) {
-			# Manually entered address
-			push(@ip6opts, [ 1, $text{'edit_virt6on'},
-					 &ui_textbox("ip6", undef, 30)." ".
-					 &ui_checkbox("virt6already", 1,
-					      $text{'form_virtalready'}) ]);
-			}
-		}
 	print &ui_table_row(&hlink($text{'form_iface6'}, "iface6"),
-		&ui_radio_table("virt6", $config{'ip6enabled'} ? 4 : 0,
-				\@ip6opts, 1));
+		&virtual_ip6_input(\@cantmpls, $resel),
+		undef, \@tds, undef, $config{'ip6enabled'} ? 0 : -2);
 	}
 
 # Show DNS IP address field

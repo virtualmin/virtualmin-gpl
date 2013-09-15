@@ -93,6 +93,14 @@ if (!$aliasdom && $d->{'dir'}) {
 			    "<tt>$d->{'home'}</tt>");
 	}
 
+# Show IP addresses
+@ips = ( $d->{'ip'} );
+if ($d->{'ip6'}) {
+	push(@ips, $d->{'ip6'});
+	}
+print &ui_table_row($text{'edit_ips'},
+	join(", ", @ips));
+
 if ($d->{'proxy_pass_mode'} && $d->{'proxy_pass'} && &domain_has_website($d)) {
 	# Show forwarding / proxy destination
 	print &ui_table_row($text{'edit_proxy'.$d->{'proxy_pass_mode'}},

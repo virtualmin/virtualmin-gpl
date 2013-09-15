@@ -1029,6 +1029,7 @@ edit_disabled_time=Disabled at : $1
 edit_disabled=Virtual server features such as the website and DNS domain cannot be added or removed while the server is disabled.
 edit_ip=IP address
 edit_ip6=IPv6 address
+edit_ips=IP addresses
 edit_noip6support=<i>Not supported on this system</i>
 edit_private=(Private to this server)
 edit_shared=(Shared by all servers)

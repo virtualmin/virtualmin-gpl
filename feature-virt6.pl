@@ -162,6 +162,154 @@ if (&has_command("ping6")) {
 return 0;
 }
 
+# virtual_ip6_input(&templates, [reseller], [show-original], [default-mode])
+# Returns HTML for selecting a virtual IPv6 mode for a new server, or not
+sub virtual_ip6_input
+{
+local ($tmpls, $resel, $orig, $mode) = @_;
+$mode ||= 0;
+local $defip = &get_default_ip6($resel);
+local ($t, $anyalloc, $anychoose, $anyzone);
+if (&running_in_zone() || &running_in_vserver()) {
+	# When running in a Solaris zone or VServer, you MUST select an
+	# existing active IP, as they are controlled from the host.
+	$anyzone = 1;
+	}
+elsif (&can_use_feature("virt6")) {
+	# Check if private IPs are allocated or manual, if we are
+	# allowed to choose them.
+	foreach $t (@$tmpls) {
+		local $tmpl = &get_template($t->{'id'});
+		if ($tmpl->{'ranges6'} ne "none") { $anyalloc++; }
+		else { $anychoose++; }
+		}
+	}
+local @opts;
+push(@opts, [ -2, $text{'edit_virt6off'} ]);
+if ($orig) {
+	# For restores - option to use original IP
+	push(@opts, [ -1, $text{'form_origip'} ]);
+	}
+push(@opts, [ 0, &text('form_shared', $defip6) ]);
+local @shared = &list_shared_ip6s();
+if (@shared && &can_edit_sharedips()) {
+	# Can select from extra shared list
+	push(@opts, [ 3, $text{'form_shared2'},
+			 &ui_select("sharedip6", undef,
+				[ map { [ $_ ] } @shared ]) ]);
+	}
+if ($anyalloc) {
+	# Can allocate
+	push(@opts, [ 2, &text('form_alloc') ]);
+	}
+if ($anychoose) {
+	# Can enter arbitrary IP
+	push(@opts, [ 1, $text{'form_vip'},
+		 &ui_textbox("ip6", undef, 20)." ".
+		 &ui_checkbox("virtalready6", 1,
+			      $text{'form_virtalready'}) ]);
+	}
+if ($anyzone) {
+	# Can select an existing active IP, for inside a Solaris zone
+	&foreign_require("net", "net-lib.pl");
+	local @act = grep { $_->{'virtual'} ne '' }
+			  &net::active_interfaces();
+	if (@act) {
+		push(@opts, [ 4, $text{'form_activeip'},
+			 &ui_select("zoneip6", undef,
+			  [ map { @{$_->{'address6'}} } @act ]) ]);
+		}
+	else {
+		push(@opts, [ 4, $text{'form_activeip'},
+				 &ui_textbox("zoneip6", undef, 20) ]);
+		}
+	}
+if ($mode == 5 && $anyalloc) {
+	# Use shared or allocated (for restores only)
+	push(@opts, [ 5, &text('form_allocmaybe') ]);
+	}
+if (&indexof($mode, map { $_->[0] } @opts) < 0) {
+	# Mode is not on the list .. use shared mode
+	$mode = 0;
+	}
+return &ui_radio_table("virt6", $mode, \@opts, 1);
+}
+
+# parse_virtual_ip6(&template, reseller)
+# Parses the virtual IPv6 input field, and returns the IP to use, virt flag,
+# already flag and netmask. May call &error if the input is invalid.
+sub parse_virtual_ip6
+{
+local ($tmpl, $resel) = @_;
+if ($in{'virt6'} == -2) {
+	# Completely disabled
+	return ( );
+	}
+elsif ($in{'virt6'} == 2) {
+	# Automatic IP allocation chosen .. select one from either the
+	# reseller's range, or the template
+	if ($resel) {
+		# Creating by or under a reseller .. use his range, if any
+		local %acl = &get_reseller_acl($resel);
+		if ($acl{'ranges6'}) {
+			local ($ip, $netmask) = &free_ip6_address(\%acl);
+			$ip || &error(&text('setup_evirtalloc'));
+			return ($ip, 1, 0, $netmask);
+			}
+		}
+	$tmpl->{'ranges6'} ne "none" || &error(&text('setup_evirttmpl'));
+	local ($ip, $netmask) = &free_ip6_address($tmpl);
+	$ip || &error(&text('setup_evirtalloc'));
+	return ($ip, 1, 0, $netmask);
+	}
+elsif ($in{'virt6'} == 1) {
+	# Manual IP allocation chosen
+	$tmpl->{'ranges6'} eq "none" || &error(&text('setup_evirttmpl2'));
+	&check_ip6address($in{'ip6'}) || &error($text{'setup_eip'});
+	local $clash = &check_virt6_clash($in{'ip6'});
+	if ($in{'virtalready6'}) {
+		# Fail if the IP isn't yet active, or if claimed by another
+		# virtual server
+		$clash || &error(&text('setup_evirtclash2', $in{'ip6'}));
+		local $already = &get_domain_by("ip6", $in{'ip6'});
+		$already && &error(&text('setup_evirtclash4',
+					 $already->{'dom'}));
+		}
+	else {
+		# Fail if the IP *is* already active
+		$clash && &error(&text('setup_evirtclash'));
+		}
+	return ($in{'ip6'}, 1, $in{'virtalready6'});
+	}
+elsif ($in{'virt6'} == 3 && &can_edit_sharedips()) {
+	# On a shared virtual IP
+	&indexof($in{'sharedip6'}, &list_shared_ip6s()) >= 0 ||
+		&error(&text('setup_evirtnoshared'));
+	return ($in{'sharedip6'}, 0, 0);
+	}
+elsif ($in{'virt6'} == 4 && (&running_in_zone() || &running_in_vserver())) {
+	# On an active IP on a virtual machine that cannot bring up its
+	# own IP.
+	&check_ip6address($in{'zoneip6'}) || &error($text{'setup_eip'});
+	local $clash = &check_virt6_clash($in{'zoneip6'});
+	$clash || &error(&text('setup_evirtclash2', $in{'zoneip6'}));
+	local $already = &get_domain_by("ip6", $in{'ip6'});
+	$already && &error(&text('setup_evirtclash4',
+				 $already->{'dom'}));
+	return ($in{'zoneip6'}, 1, 1);
+	}
+elsif ($in{'virt6'} == 5) {
+	# Allocate if needed, shared otherwise
+	local ($ip, $netmask) = &free_ip6_address($tmpl);
+	return ($ip, 1, 0, $netmask);
+	}
+else {
+	# Global shared IP
+	local $defip = &get_default_ip6($resel);
+	return ($defip, 0, 0);
+	}
+}
+
 # active_ip6_interfaces()
 # Returns a list of IPv6 addresses currently active
 sub active_ip6_interfaces

@@ -48,9 +48,6 @@
 	- Nginx
 	- change / add existing IPv6 address
 	- test with SSL on shared IP
-	- reseller access to shared IPs
-		- option to limit if shared IPs can be selected
-	- virtual_ip_input function for ipv6
 
  - Amazon tax docs
 
