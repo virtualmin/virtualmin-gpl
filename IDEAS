@@ -43,8 +43,6 @@
  - php-fpm support for Joaquim
 
  - Name-based hosting on IPv6 support
-	- Audit all code that uses ip6 and virt6
-	- batch creation
 	- Nginx
 	- change / add existing IPv6 address
 	- test with SSL on shared IP

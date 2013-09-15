@@ -182,7 +182,7 @@ foreach $line (@lines) {
 		}
 
 	# Pick an IPv6 address
-	if (&supports_ipv()) {
+	if (&supports_ipv6()) {
 		if ($allocated) {
 			# IPv4 allocation was requested, assume the same for V6
 			%racl = $resel ? &get_reseller_acl($resel) : ();
