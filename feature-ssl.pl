@@ -744,11 +744,6 @@ if ($virt) {
 	       $virt->{'eline'}-$virt->{'line'}-1,
 	       @$srclref[1 .. @$srclref-2]);
 
-	# Fix ip address in <Virtualhost> section (if needed)
-	if ($dstlref->[$virt->{'line'}] =~
-	    /^(.*<Virtualhost\s+)([0-9\.]+)(.*)$/i) {
-		$dstlref->[$virt->{'line'}] = $1.$_[0]->{'ip'}.$3;
-		}
 	if ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
 		# Fix up any DocumentRoot or other file-related directives
 		local $i;

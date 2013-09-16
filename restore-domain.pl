@@ -52,6 +52,10 @@ given the system's default shared IP. However, if you have defined additional
 shared addresses, a different one can be selected with the C<--shared-ip>
 flag followed by an address.
 
+Flags similar to all those above also exist for IPv6, if your system supports
+it. The equivalent flags are named C<--ip6>, C<--allocate-ip6>,
+C<--original-ip6> and C<--shared-ip6> respectively.
+
 By default, if any non-fatal warnings encountered during the restore process
 will cause the restore to fail. However, you can force it to continue with the
 C<--skip-warnings> flag. Similarly, the failure of any one domain will abort
@@ -93,6 +97,7 @@ $outdent_print = \&outdent_text_print;
 # Parse command-line args
 $asowner = 0;
 $reuid = 1;
+$ipinfo = { };
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--source") {
@@ -176,12 +181,13 @@ while(@ARGV > 0) {
 		$delete_existing = 1;
 		}
 
-	# Alternate IP options
+	# Alternate IPv4 options
 	elsif ($a eq "--shared-ip") {
 		$sharedip = shift(@ARGV);
 		&indexof($sharedip, &list_shared_ips()) >= 0 ||
 		    &usage("$sharedip is not in the shared IP addresses list");
-		$ipinfo = { 'virt' => 0, 'ip' => $sharedip,
+		$ipinfo = { %$ipinfo,
+			    'virt' => 0, 'ip' => $sharedip,
 			    'virtalready' => 0, 'mode' => 3 };
 		}
 	elsif ($a eq "--ip") {
@@ -189,23 +195,67 @@ while(@ARGV > 0) {
 		&check_ipaddress($ip) || &usage("Invalid IP address");
 		&check_virt_clash($ip) &&
 			&usage("IP address is already in use");
-		$ipinfo = { 'virt' => 1, 'ip' => $ip,
+		$ipinfo = { %$ipinfo,
+			    'virt' => 1, 'ip' => $ip,
 			    'virtalready' => 0, 'mode' => 1 };
 		}
 	elsif ($a eq "--allocate-ip") {
 		$tmpl = &get_template(0);
 		($ip, $netmask) = &free_ip_address($tmpl);
-		$ipinfo = { 'virt' => 1, 'ip' => $ip,
+		$ipinfo = { %$ipinfo,
+			    'virt' => 1, 'ip' => $ip,
 			    'virtalready' => 0, 'netmask' => $netmask,
 			    'mode' => 2 };
 		}
 	elsif ($a eq "--original-ip") {
 		$tmpl = &get_template(0);
 		($ip, $netmask) = &free_ip_address($tmpl);
-		$ipinfo = { 'virt' => 1, 'ip' => $ip,
+		$ipinfo = { %$ipinfo,
+			    'virt' => 1, 'ip' => $ip,
 			    'virtalready' => 0, 'netmask' => $netmask,
 			    'mode' => 5 };
 		}
+
+	# Alternate IPv6 options
+	elsif ($a eq "--default-ip6") {
+		$ipinfo = { %$ipinfo,
+			    'virt' => 0, 'ip6' => &get_default_ip6(),
+			    'virtalready' => 0, 'mode6' => 0 };
+		}
+	elsif ($a eq "--shared-ip6") {
+		$sharedip6 = shift(@ARGV);
+		&indexof($sharedip6, &list_shared_ip6s()) >= 0 ||
+		  &usage("$sharedip is not in the shared IPv6 addresses list");
+		$ipinfo = { %$ipinfo,
+			    'virt6' => 0, 'ip6' => $sharedip6,
+			    'virtalready6' => 0, 'mode6' => 3 };
+		}
+	elsif ($a eq "--ip6") {
+		$ip6 = shift(@ARGV);
+		&check_ip6address($ip6) || &usage("Invalid IPv6 address");
+		&check_virt6_clash($ip) &&
+			&usage("IPv6 address is already in use");
+		$ipinfo = { %$ipinfo,
+			    'virt6' => 1, 'ip6' => $ip6,
+			    'virtalready6' => 0, 'mode6' => 1 };
+		}
+	elsif ($a eq "--allocate-ip6") {
+		$tmpl = &get_template(0);
+		($ip6, $netmask6) = &free_ip6_address($tmpl);
+		$ipinfo = { %$ipinfo,
+			    'virt6' => 1, 'ip6' => $ip6,
+			    'virtalready6' => 0, 'netmask6' => $netmask6,
+			    'mode6' => 2 };
+		}
+	elsif ($a eq "--original-ip6") {
+		$tmpl = &get_template(0);
+		($ip6, $netmask6) = &free_ip6_address($tmpl);
+		$ipinfo = { %$ipinfo,
+			    'virt6' => 1, 'ip6' => $ip6,
+			    'virtalready6' => 0, 'netmask6' => $netmask6,
+			    'mode6' => 5 };
+		}
+
 	elsif ($a eq "--skip-warnings") {
 		$skipwarnings = 1;
 		}
@@ -365,6 +415,9 @@ print "                         [--all-virtualmin] | [--virtualmin config]\n";
 print "                         [--only-features]\n";
 print "                         [--shared-ip address | --ip address |\n";
 print "                          --allocate-ip | --original-ip]\n";
+print "                         [--default-ip6 |\n";
+print "                          --shared-ip6 address | --ip6 address |\n";
+print "                          --allocate-ip6 | --original-ip6]\n";
 print "                         [--only-missing | --only-existing]\n";
 print "                         [--skip-warnings]\n";
 print "                         [--continue-on-error]\n";

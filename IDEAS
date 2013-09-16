@@ -45,8 +45,6 @@
  - Name-based hosting on IPv6 support
 	- Nginx
 	- change / add existing IPv6 address
-	- restore form / API
-		- fix up IPs in VirtualHost line on restore (SSL and non-SSL)
 	- migration form / API
 	- CHANGELOG
 	- Documentation
