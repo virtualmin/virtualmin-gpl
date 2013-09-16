@@ -45,7 +45,7 @@
  - Name-based hosting on IPv6 support
 	- Nginx
 	- migration form / API
-	- CHANGELOG
+	- Switch private to shared address
 	- Documentation
 
  - Amazon tax docs

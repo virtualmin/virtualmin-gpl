@@ -1415,3 +1415,4 @@ The Change IP Address page can now be used to switch a domain with a private IP 
 Updated the SMF script installer to version 2.0.5, X2CRM to 3.5.1, Django to 1.5.4 and 1.4.8, Roundcube to 0.9.4, osCommerce to 2.3.3.2, SugarCRM to 6.5.15, Z-push to 2.0.8, AjaXplorer to 5.0.3, MediaWiki to 1.12.2 and 1.19.8, phpMyAdmin to 4.0.6, Moodle to 2.5.2, ZenPhoto to 1.4.5.2, CMS Made Simple to 1.11.8, Wordpress to 3.6.1, phpList to 3.0.2, and ownCloud to 5.0.11.
 Mail client auto-configuration now supports Outlook as well as Thunderbird.
 Backups from other control panels can now be migrated from their un-compressed or extract directories.
+Multiple virtual servers can now share a single IPv6 address, just as can be done for IPv4. Each domain can either not use IPv6 at all, use one of several shared addresses, or have its own private address.
