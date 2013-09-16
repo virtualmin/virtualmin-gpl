@@ -98,41 +98,60 @@ elsif ($in{'mode'} == 3) {
 if (!&supports_ip6() || !&can_use_feature("virt6")) {
 	# Cannot use or change IPv6, so no validation needed
 	}
-elsif ($in{'mode6'} == 0) {
+elsif ($in{'mode6'} == -2) {
 	# Turning off IPv6 address
 	$virt6 = 0;
+	$ip6 = undef;
 	}
-elsif ($in{'mode6'} == 1 && !$d->{'virt6'}) {
-	# Turning on IPv6 address
-	if ($tmpl->{'ranges6'} ne 'none') {
-		# Try allocating IPv6 from template range
+elsif ($in{'mode6'} == 0) {
+	# Switching to shared address
+	$ip6 = $in{'ip6'};
+	&check_ip6address($ip6) || &error($text{'setup_eip'});
+	$virt6 = 0;
+	}
+elsif ($in{'mode6'} == 1) {
+	# Sticking with private IP
+	$ip6 = $d->{'ip6'};
+	$virtalready6 = $d->{'virtalready6'};
+	$virt6 = 1;
+	}
+elsif ($in{'mode6'} == 2) {
+	# Allocate a new IP
+	if ($racl{'ranges6'}) {
+		# Try allocating IPv6 address from reseller's range
+		($ip6, $netmask6) = &free_ip6_address(\%racl);
+		$ip6 || &error(&text('setup_evirt6alloc2'));
+		}
+	elsif ($tmpl->{'ranges6'} ne "none") {
+		# Try allocating IP from template range
 		($ip6, $netmask6) = &free_ip6_address($tmpl);
 		$ip6 || &error(&text('setup_evirt6alloc'));
 		}
 	else {
-		# Validate manually entered IPv6 address
-		$ip6 = $in{'ip6'};
-		$virt6already = $in{'virt6already'};
-		&check_ip6address($ip6) ||
-			&error($text{'setup_eip6'});
-		$clash = &check_virt6_clash($ip6);
-		if (!$virt6already) {
-			# Make sure the IP isn't assigned yet
-			$clash && &error(&text('setup_evirt6clash'));
-			}
-		elsif ($virt6already) {
-			# Make sure the IP is assigned already, but
-			# not to any domain
-			$already = &get_domain_by("ip6", $ip6);
-			$already && &error(&text('setup_evirt6clash4',
-						 $already->{'dom'}));
-			}
+		&error(&text('setup_evirt6alloc3'));
 		}
 	$virt6 = 1;
+	$virtalready6 = 0;
 	}
-elsif ($in{'mode6'} == 1 && $d->{'virt6'}) {
-	# Sticking with IPv6 address
-	$ip6 = $d->{'ip6'};
+elsif ($in{'mode6'} == 3) {
+	# Validate manually entered IP
+	$ip6 = $in{'virt6'};
+	$virtalready6 = $in{'virtalready6'};
+	&check_ip6address($ip6) ||
+		&error($text{'setup_eip6'});
+	$clash = &check_virt6_clash($ip6);
+	if (!$virtalready6) {
+		# Make sure the IPv6 address isn't assigned yet
+		$clash && &error(&text('setup_evirt6clash'));
+		}
+	elsif ($virtalready6) {
+		# Make sure the IP is assigned already, but
+		# not to any domain
+		$clash || &error(&text('setup_evirt6clash2', $ip6));
+		$already = &get_domain_by("ip6", $ip6);
+		$already && &error(&text('setup_evirt6clash4',
+					 $already->{'dom'}));
+		}
 	$virt6 = 1;
 	}
 
@@ -195,14 +214,26 @@ elsif ($virt6 && !$d->{'virt6'}) {
 	$d->{'ip6'} = $ip6;
 	$d->{'netmask6'} = $netmask6;
 	$d->{'virt6'} = 1;
+	$d->{'name6'} = 0;
 	$d->{'virt6already'} = $virt6already;
 	}
 elsif (!$virt6 && $d->{'virt6'}) {
-	# Taking down IPv6 interface
-	$d->{'ip6'} = undef;
+	# Taking down IPv6 interface, revert to shared
+	$d->{'ip6'} = $ip6;
 	$d->{'netmask6'} = undef;
 	$d->{'virt6'} = 0;
+	$d->{'name6'} = 1;
 	$d->{'virt6already'} = 0;
+	}
+elsif (!$virt6 && !$d->{'virt6'} && $d->{'ip6'} ne $ip6) {
+	# Changing shared IPv6 address
+	$d->{'ip6'} = $ip6;
+	}
+elsif ($virt6 && $d->{'virt6'} && $d->{'ip6'} ne $ip6) {
+	# Changing private IPv6 address
+	$d->{'ip6'} = $ip6;
+	$d->{'netmask6'} = $netmask6;
+	$d->{'virtalready6'} = $virtalready6;
 	}
 
 # Update for web ports
@@ -218,7 +249,7 @@ $merr = &making_changes();
 &error(&text('save_emaking', "<tt>$merr</tt>")) if (defined($merr));
 
 # Update the primary domain
-&$first_print(&text('newip_dom', $d->{'dom'}, $ip));
+&$first_print(&text($ip6 ? 'newip_dom6' : 'newip_dom', $d->{'dom'}, $ip, $ip6));
 &$indent_print();
 
 if ($d->{'virt'} && !$oldd->{'virt'}) {

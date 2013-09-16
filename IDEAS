@@ -44,7 +44,6 @@
 
  - Name-based hosting on IPv6 support
 	- Nginx
-	- change / add existing IPv6 address
 	- migration form / API
 	- CHANGELOG
 	- Documentation

@@ -82,26 +82,46 @@ if (&supports_ip6() && $d->{'virt6'}) {
 	}
 
 if (&supports_ip6() && &can_use_feature("virt6")) {
-	# New IPv6 address
-	@ip6opts = ( [ 0, $text{'newip_virt6off'} ] );
+	# Build list of possible shared IPv6 addresses
+	@canips = ( );
+	push(@canips, [ &get_default_ip6(), $text{'newip_shared'} ]);
+	$rd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+	if ($rd->{'reseller'}) {
+		push(@canips, [ &get_default_ip6($rd->{'reseller'}),
+			&text('newip_resel', $rd->{'reseller'}) ]);
+		}
+	push(@canips, map { [ $_, $text{'newip_shared2'} ] }
+			  &list_shared_ip6s());
+	if (!$d->{'virt6'} && $d->{'ip6'}) {
+		push(@canips, [ $d->{'ip6'}, $text{'newip_current'} ]);
+		}
+	@canips = map { [ $_->[0], "$_->[0] ($_->[1])" ] }
+		      grep { !$done{$_->[0]}++ } @canips;
+
+	# Build options for new IPv6 field
+	@opts = ( [ -1, $text{'edit_virt6off'} ],
+		  [ 0, $text{'newip_sharedaddr'},
+		    &ui_select("ip6", $d->{'ip6'}, \@canips) ] );
+	%racl = $d->{'reseller'} ? &get_reseller_acl($d->{'reseller'}) : ();
 	if ($d->{'virt6'}) {
-		# Already active, so just show
-		push(@ip6opts, [ 1, $text{'newip_virt6addr'} ]);
+		# Already got a private IP, show option to keep
+		push(@opts, [ 1, $text{'newip_virtaddr'} ] );
 		}
-	elsif ($tmpl->{'ranges6'} ne 'none') {
-		# Can allocate
-		push(@ip6opts, [ 1, $text{'newip_virt6addr2'} ]);
+	if ($tmpl->{'ranges6'} ne "none" || $racl{'ranges6'}) {
+		# IP can be alllocated, show option to generate a new one
+		push(@opts, [ 2, $text{'newip_virtaddr2'} ]);
 		}
-	else {
-		# Manually enter, or already active
-		push(@ip6opts, [ 1, $text{'newip_virt6addr3'},
-				 &ui_textbox("ip6", $d->{'ip6'}, 30)." ".
-				 &ui_checkbox("virt6already", 1,
-                                           $text{'form_virtalready'}) ]);
-		}
-	print &ui_table_row($text{'newip_new6'},
-		&ui_radio_table("mode6", $d->{'virt6'} ? 1 : 0,
-				\@ip6opts, 1));
+	# User can enter IPv6, but has option to use one that is
+	# already active
+	push(@opts, [ 3, $text{'newip_virtaddr3'},
+		      &ui_textbox("virt6", undef, 40)." ".
+		      &ui_checkbox("virtalready6", 1,
+				   $text{'form_virtalready'}) ]);
+
+	# Show new IPv6 field
+	print &ui_table_row($text{'newips_new6'},
+		&ui_radio_table("mode6", $d->{'virt6'} ? 1 :
+					 $d->{'ip6'} ? 0 : -1, \@opts, 1));
 	}
 
 # HTTP and HTTPS ports
