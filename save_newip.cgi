@@ -9,12 +9,19 @@ $tmpl = &get_template($d->{'template'});
 
 if ($in{'convert'}) {
 	# Special mode - adding a new shared IP
-	$d->{'virt'} && &can_edit_templates() ||
+	$oldd = { %$d };
+	($d->{'virt'} || $d->{'virt6'}) && &can_edit_templates() ||
 		&error($text{'newip_ecannot'});
 
 	# Turn off virt mode for the domain
-	$d->{'virt'} = 0;
-	$d->{'name'} = 1;
+	if ($d->{'virt'}) {
+		$d->{'virt'} = 0;
+		$d->{'name'} = 1;
+		}
+	if ($d->{'virt6'}) {
+		$d->{'virt6'} = 0;
+		$d->{'name6'} = 1;
+		}
 	&set_domain_envs($d, "MODIFY_DOMAIN", $d);
 	$merr = &making_changes();
 	&error($merr) if ($merr);
@@ -25,10 +32,17 @@ if ($in{'convert'}) {
 	&reset_domain_envs($d);
 
 	# Add to shared IPs list
-	@ips = &list_shared_ips();
-	@ips = &unique(@ips, $d->{'ip'});
 	&lock_file($module_config_file);
-	&save_shared_ips(@ips);
+	if ($oldd->{'virt'}) {
+		@ips = &list_shared_ips();
+		@ips = &unique(@ips, $d->{'ip'});
+		&save_shared_ips(@ips);
+		}
+	if ($oldd->{'virt6'}) {
+		@ips = &list_shared_ip6s();
+		@ips = &unique(@ips, $d->{'ip6'});
+		&save_shared_ip6s(@ips);
+		}
 	&unlock_file($module_config_file);
 
 	&webmin_log("newipshared", "domain", $d->{'dom'}, $d);

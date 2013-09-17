@@ -143,7 +143,7 @@ if ($p) {
 
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'newips_ok'} ],
-		     $d->{'virt'} && &can_edit_templates() ?
+		     ($d->{'virt'} || $d->{'virt6'}) && &can_edit_templates() ?
 			( [ "convert", $text{'newip_convert'} ] ) : ( )
 		   ]);
 
