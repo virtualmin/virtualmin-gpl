@@ -35,7 +35,8 @@ index_return=virtual servers list
 index_return2=module index
 index_list=List..
 index_enet=The Network Configuration module is not supported on your operating system. Virtualmin needs this module to manage virtual network interfaces.
-index_edefip=Virtualmin could not work out the default IP address for virtual servers on your system. You will need to update either the <b>Network interface for virtual addresses</b> or <b>Default virtual server IP address</b> fields on the <a href='$1'>module configuration</a> page.
+index_edefip=Virtualmin could not work out the default IPv4 address for virtual servers on your system. You will need to update either the <b>Network interface for virtual addresses</b> or <b>Default virtual server IP address</b> fields on the <a href='$1'>module configuration</a> page.
+index_edefip6=Virtualmin could not work out the default IPv6 address for virtual servers on your system. You will need to update either the <b>Network interface for virtual addresses</b> or <b>Default virtual server IP address</b> fields on the <a href='$1'>module configuration</a> page.
 index_eapache=The Apache webserver does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>Apache Webserver</a> module. If your system does not use Apache, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page.
 index_eproftpd=The ProFTPd server does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>ProFTPd Server</a> module. If your system does not use ProFTPd, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page.
 index_ebind=The BIND DNS server version 8 or 9 does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>BIND DNS Server</a> module. If your system does not use BIND, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page.
@@ -1748,7 +1749,8 @@ check_lowmemory=Your system has only $1 of memory, which is below the Virtualmin
 check_lowgmemory=Your system is a VM with $1 of memory, but the guaranteed limit is only $2. This is below the Virtualmin recommended minimum of $3, and may cause intermittent memory allocation failures.
 check_okmemory=Your system has $1 of memory, which is at or above the Virtualmin recommended minimum of $2.
 check_okgmemory=Your system is a VM with at most $1 of memory, but a guaranteed limit of only $2. These are both at or above the Virtualmin recommended minimum of $3.
-check_defip=Default IP address for virtual servers is $1.
+check_defip=Default IPv4 address for virtual servers is $1.
+check_defip6=Default IPv6 address for virtual servers is $1.
 check_dnsip1=External IP address for DNS records is set to $1, which matches the detected external address.
 check_dnsip2=Default IP address is set to $1, which matches the detected external address.
 check_ednsip1=External IP address for DNS records is set to $1, but the detected external address is actually $2. This may cause DNS records for Virtualmin domains to point to the wrong system.
@@ -3367,8 +3369,9 @@ newips_title=Change IP Addresses
 newips_ecannot=You are not allowed to change IP addresses
 newips_desc=This page allows you to change the IP address of all non-private IP virtual servers that are using a specified address. This should be done if you have just updated the primary IP address on the system.
 newips_header=IP address change options
-newips_old=Address of servers to update
-newips_new=New IP address
+newips_old=IPv4 address of servers to update
+newips_new=New IPv4 address
+newips_old6=IPv6 address of servers to update
 newips_new6=New IPv6 address
 newips_ok=Change Now
 newips_err=Failed to change IP addresses

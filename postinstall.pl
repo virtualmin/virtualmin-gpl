@@ -129,6 +129,7 @@ if ($config{'virus'}) {
 
 # Save the current default IP address if we don't currently know it
 $config{'old_defip'} ||= &get_default_ip();
+$config{'old_defip6'} ||= &get_default_ip6();
 
 # Check if we have enough memory to preload
 local $lowmem;

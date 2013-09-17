@@ -11,13 +11,24 @@ print &ui_form_start("save_newips.cgi", "post");
 print &ui_hidden("setold", $in{'setold'});
 print &ui_table_start($text{'newips_header'}, undef, 2);
 
-# Old address
+# Old IPv4 address
 print &ui_table_row(&hlink($text{'newips_old'}, "newips_old"),
 		    &ui_textbox("old", $in{'old'} || &get_default_ip(), 20));
 
-# New address
+# New IPv4 address
 print &ui_table_row(&hlink($text{'newips_new'}, "newips_new"),
 		    &ui_textbox("new", $in{'new'}, 20));
+
+@v6doms = grep { $_->{'ip6'} } &list_domains();
+if (&supports_ip6() && @v6doms) {
+	# Old IPv6 address
+	print &ui_table_row(&hlink($text{'newips_old6'}, "newips_old6"),
+		    &ui_textbox("old6", $in{'old6'} || &get_default_ip6(), 40));
+
+	# New IPv6 address
+	print &ui_table_row(&hlink($text{'newips_new6'}, "newips_new6"),
+		    &ui_textbox("new6", $in{'new6'}, 40));
+	}
 
 # Virtual servers to update
 @doms = grep { !$_->{'virt'} && !$_->{'alias'} } &list_domains();

@@ -5450,6 +5450,7 @@ $config{'home_quotas'} = $oldconfig{'home_quotas'};
 $config{'mail_quotas'} = $oldconfig{'mail_quotas'};
 $config{'group_quotas'} = $oldconfig{'group_quotas'};
 $config{'old_defip'} = $oldconfig{'old_defip'};
+$config{'old_defip6'} = $oldconfig{'old_defip6'};
 $config{'last_check'} = $oldconfig{'last_check'};
 
 # Remove plugins that aren't on the new system
@@ -13187,6 +13188,7 @@ if (&supports_ip6()) {
 		"<tt>".($config{'iface6'} || $config{'iface'})."</tt>"));
 	}
 
+# Show the default IPv4 address
 local $defip = &get_default_ip();
 if (!$defip) {
 	return &text('index_edefip', "../config.cgi?$module_name");
@@ -13195,6 +13197,19 @@ else {
 	&$second_print(&text('check_defip', $defip));
 	}
 $config{'old_defip'} ||= $defip;
+
+# Show the default IPv6 address
+if (&supports_ip6()) {
+	local $defip6 = &get_default_ip6();
+	if (!$defip6) {
+		&$second_print("<b>".&text('index_edefip6',
+			"../config.cgi?$module_name")."</b>");
+		}
+	else {
+		&$second_print(&text('check_defip6', $defip6));
+		}
+	$config{'old_defip6'} ||= $defip6;
+	}
 
 # Make sure the external IP is set if needed
 if ($config{'dns_ip'} ne '*') {

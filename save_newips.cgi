@@ -9,21 +9,20 @@ require './virtual-server-lib.pl';
 &error_setup($text{'newips_err'});
 &check_ipaddress($in{'old'}) || &error($text{'newips_eold'});
 &check_ipaddress($in{'new'}) || &error($text{'newips_enew'});
+if (defined($in{'old6'})) {
+	&check_ip6address($in{'old6'}) || &error($text{'newips6_eold'});
+	&check_ip6address($in{'new6'}) || &error($text{'newips6_enew'});
+	}
 
 &ui_print_unbuffered_header(undef, $text{'newips_title'}, "");
 
 # Work out which domains to update
 if ($in{'servers_def'}) {
-	# Update all virtual servers on the old IP, including their aliases
-	# (even if the alias wasn't on the old IP)
-	@doms = grep { !$_->{'virt'} &&
-			($_->{'ip'} eq $in{'old'} ||
-			 $_->{'alias'} &&
-			 &get_domain($_->{'alias'})->{'ip'} eq $in{'old'}) }
-		     &list_domains();
+	# Update all virtual servers
+	@doms = &list_domains();
 	}
 else {
-	# Update selected virtual servers, regardless of their IP
+	# Update selected virtual servers
 	%servers = map { $_, 1 } split(/\0/, $in{'servers'});
 	@doms = grep { $servers{$_->{'id'}} } &list_domains();
 	}
@@ -33,11 +32,28 @@ if (!@doms) {
 
 # Do each domain, and all active features in it
 foreach $d (@doms) {
+	# Update IP addresses, if matching. Alias domains whose target points to
+	# the old IP are also updated
+	$oldd = { %$d };
+	$changed = 0;
+	if ($d->{'ip'} eq $in{'old'} ||
+	    $d->{'alias'} &&
+	    &get_domain($d->{'alias'})->{'ip'} eq $in{'old'}) {
+		$d->{'ip'} = $in{'new'};
+		$changed++;
+		}
+	if ($in{'old6'}) {
+		if ($d->{'ip6'} eq $in{'old6'} ||
+		    $d->{'alias'} &&
+		    &get_domain($d->{'alias'})->{'ip6'} eq $in{'old6'}) {
+			$d->{'ip6'} = $in{'new6'};
+			$changed++;
+			}
+		}
+	next if (!$changed);
+
 	&$first_print(&text('newips_dom', $d->{'dom'}));
 	&$indent_print();
-
-	$oldd = { %$d };
-	$d->{'ip'} = $in{'new'};
 
 	# Run the before command
 	&set_domain_envs(\%oldd, "MODIFY_DOMAIN", $d);
@@ -75,6 +91,7 @@ foreach $d (@doms) {
 # Update old default IP
 if ($in{'setold'}) {
 	$config{'old_defip'} = &get_default_ip();
+	$config{'old_defip6'} = &get_default_ip6();
 	&lock_file($module_config_file);
 	&save_module_config();
 	&unlock_file($module_config_file);
