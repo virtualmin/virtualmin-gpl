@@ -1452,6 +1452,14 @@ foreach my $lockfile (@lockfiles) {
 	&unlock_file($lockfile);
 	}
 
+# For any domains that failed and were full backups, clear the incremental
+# file so that future incremental backups aren't diffs against it
+if ($incremental == 0 && &has_incremental_tar()) {
+	foreach my $d (@errdoms) {
+		&unlink_file("$incremental_backups_dir/$d->{'id'}");
+		}
+	}
+
 return ($ok, $sz, \@errdoms);
 }
 
