@@ -2692,7 +2692,8 @@ if (!$fn) {
 
 # If the domain is disabled, make sure all records end with .disabled
 if ($d->{'disabled'} && &indexof("dns", split(/,/, $d->{'disabled'})) >= 0) {
-	foreach my $r (@$recs) {
+	local @disrecs = &bind8::read_zone_file($fn, $d->{'dom'});
+	foreach my $r (@disrecs) {
 		if ($r->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/ ||
 		    $r->{'name'} eq $d->{'dom'}.".") {
 			# Not disabled - make it so
