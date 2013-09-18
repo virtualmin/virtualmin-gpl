@@ -45,13 +45,8 @@
  - Name-based hosting on IPv6 support
 	- Nginx
 	- migration form / API
-	- Documentation
 
  - Amazon tax docs
 
  - 2-factor authentication
 	- Authy?
-
- - Adding DNS records to a disabled domain can make it invalid
-	- ie. DKIM
-	- add .disabled is post-change function

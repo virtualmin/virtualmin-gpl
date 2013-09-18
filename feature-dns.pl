@@ -2686,7 +2686,26 @@ if (!$fn) {
 	return "Failed to find records file for $d->{'dom'}" if (!$file);
 	$fn = $file->{'values'}->[0];
 	}
+
+# Increase the SOA
 &bind8::bump_soa_record($fn, $recs);
+
+# If the domain is disabled, make sure all records end with .disabled
+if ($d->{'disabled'} && &indexof("dns", split(/,/, $d->{'disabled'})) >= 0) {
+	foreach my $r (@$recs) {
+		if ($r->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/ ||
+		    $r->{'name'} eq $d->{'dom'}.".") {
+			# Not disabled - make it so
+			&bind8::modify_record($fn, $r,
+				      $r->{'name'}."disabled.",
+				      $r->{'ttl'}, $r->{'class'},
+				      $r->{'type'},
+				      &join_record_values($r),
+				      $r->{'comment'});
+			}
+		}
+	}
+
 if (defined(&bind8::supports_dnssec) &&
     &bind8::supports_dnssec() &&
     !$d->{'provision_dns'}) {
