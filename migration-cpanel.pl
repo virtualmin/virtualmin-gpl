@@ -104,14 +104,13 @@ return (undef, $dom, $user, $pass);
 }
 
 # migration_cpanel_migrate(file, domain, username, create-webmin, template-id,
-#			   ip-address, virtmode, pass, [&parent], [prefix],
-#			   virt-already, [email], [netmask])
+#			   &ipinfo, pass, [&parent], [prefix], [email])
 # Actually extract the given cPanel backup, and return the list of domains
 # created.
 sub migration_cpanel_migrate
 {
-local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
-       $prefix, $virtalready, $email, $netmask) = @_;
+local ($file, $dom, $user, $webmin, $template, $ipinfo, $pass, $parent,
+       $prefix, $email) = @_;
 local ($ok, $root) = &extract_cpanel_dir($file);
 $ok || &error("Failed to extract backup : $root");
 local $daily = glob("$root/backup*/cpbackup/daily");
@@ -254,12 +253,12 @@ if (-s "$userdir/mysql.sql" && !$waschild) {
 	closedir(MYDIR);
 	push(@got, "mysql") if ($mycount);
 	}
-if ($virt) {
+if ($ipinfo->{'virt'}) {
 	# Enable ProFTPd, if we have a private IP
 	push(@got, "ftp");
 	}
-if ($virt && -s "$userdir/sslcerts/www.$dom.crt" &&
-	     -s "$userdir/sslkeys/www.$dom.key") {
+if ($ipinfo->{'virt'} && -s "$userdir/sslcerts/www.$dom.crt" &&
+		         -s "$userdir/sslkeys/www.$dom.key") {
 	# Enable SSL, if we have a private IP and if the key was found
 	push(@got, "ssl");
 	}
@@ -332,13 +331,8 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
          'ugid', $ugid,
          'owner', "Migrated cPanel server $dom",
          'email', $email ? $email : $parent ? $parent->{'email'} : undef,
-         'name', !$virt,
-         'ip', $ip,
-         'netmask', $netmask,
-	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :
+	 'dns_ip', $ipinfo->{'virt'} || $config{'all_namevirtual'} ? undef :
 		   &get_dns_ip($parent ? $parent->{'id'} : undef),
-         'virt', $virt,
-         'virtalready', $virtalready,
 	 $parent ? ( 'pass', $parent->{'pass'} )
 		 : ( 'pass', $pass ),
 	 'source', 'migrate.cgi',
@@ -353,6 +347,7 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
 	 'nocopyskel', 1,
 	 'parent', $parent ? $parent->{'id'} : undef,
         );
+&merge_ipinfo_domain(\%dom, $ipinfo);
 if (!$parent) {
 	&set_limits_from_plan(\%dom, $plan);
 	$dom{'quota'} = $quota;
@@ -919,7 +914,8 @@ if ($got{'ftp'}) {
 	&$first_print("Modifying FTP server configuration ..");
 	&require_proftpd();
 	local $conf = &proftpd::get_config();
-	local ($fvirt, $fconf, $anon, $aconf) = &get_proftpd_virtual($ip);
+	local ($fvirt, $fconf, $anon, $aconf) =
+		&get_proftpd_virtual($ipinfo->{'ip'});
 	if ($anon) {
 		local $lref = &read_file_lines($anon->{'file'});
 		$lref->[$anon->{'line'}] = "<Anonymous $dom{'home'}/public_ftp>";

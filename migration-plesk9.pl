@@ -85,14 +85,13 @@ return (undef, $dom, $user, $pass);
 }
 
 # migration_plesk9_migrate(file, domain, username, create-webmin, template-id,
-#			   ip-address, virtmode, pass, [&parent], [prefix],
-#			   virt-already, [email], netmask)
+#			   &ipinfo, pass, [&parent], [prefix], [email])
 # Actually extract the given Plesk backup, and return the list of domains
 # created.
 sub migration_plesk9_migrate
 {
-local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
-       $prefix, $virtalready, $email, $netmask) = @_;
+local ($file, $dom, $user, $webmin, $template, $ipinfo, $pass, $parent,
+       $prefix, $email) = @_;
 
 # Check for prefix clash
 $prefix ||= &compute_prefix($dom, undef, $parent, 1);
@@ -181,7 +180,7 @@ local ($wwwcid) = grep { $_->{'type'} eq 'docroot' } @$cids;
 if ($domain->{'www'} eq 'true' || $wwwcid) {
 	push(@got, "web");
 	}
-if ($domain->{'properties'}->{'ip'}->{'ip-type'} eq 'exclusive' && $virt) {
+if ($domain->{'properties'}->{'ip'}->{'ip-type'} eq 'exclusive' && $ipinfo->{'virt'}) {
 	push(@got, "ssl");
 	}
 if (($domain->{'phosting'}->{'preferences'}->{'logrotation'}->{'enabled'} eq 'true' || $windows) && &indexof("web", @got) >= 0) {
@@ -280,13 +279,8 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
          'ugid', $ugid,
          'owner', "Migrated Plesk server $dom",
          'email', $email ? $email : $parent ? $parent->{'email'} : undef,
-         'name', !$virt,
-         'ip', $ip,
-         'netmask', $netmask,
-	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :
+	 'dns_ip', $ipinfo->{'virt'} || $config{'all_namevirtual'} ? undef :
 		   &get_dns_ip($parent ? $parent->{'id'} : undef),
-         'virt', $virt,
-         'virtalready', $virtalready,
 	 $parent ? ( 'pass', $parent->{'pass'} )
 		 : ( 'pass', $pass ),
 	 'source', 'migrate.cgi',
@@ -301,6 +295,7 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
 	 'nocopyskel', 1,
 	 'parent', $parent ? $parent->{'id'} : undef,
         );
+&merge_ipinfo_domain(\%dom, $ipinfo);
 if (!$parent) {
 	&set_limits_from_plan(\%dom, $plan);
 	$dom{'quota'} = $quota;
@@ -354,32 +349,45 @@ if (defined(&set_php_wrappers_writable)) {
 	}
 local $hdir = &public_html_dir(\%dom);
 if ($cids) {
-local $docroot_files = &extract_plesk9_cid($root, $cids, "docroot");
-if ($docroot_files) {
-	&copy_source_dest($docroot_files, $hdir);
-	&set_home_ownership(\%dom);
-	&$second_print(".. done");
-	}
-else {
-	&$second_print(".. no docroot data found");
-	}
+	local $docroot_files = &extract_plesk9_cid($root, $cids, "docroot");
+	local $user_data_files = &extract_plesk9_cid($root, $cids, "user-data");
+	local $httpdocs = $domain->{'phosting'}->{'www-root'} || "httpdocs";
+	local $cgidocs = "cgi-bin";
+	if ($docroot_files) {
+		&copy_source_dest($docroot_files, $hdir);
+		&set_home_ownership(\%dom);
+		&$second_print(".. done");
+		}
+	elsif ($user_data_files) {
+		&copy_source_dest($user_data_files."/".$httpdocs, $hdir);
+		&set_home_ownership(\%dom);
+		&$second_print(".. done");
+		}
+	else {
+		&$second_print(".. no docroot data found");
+		}
 
-# Copy CGI files
-&$first_print("Copying CGI scripts ..");
-local $cdir = &cgi_bin_dir(\%dom);
-local $cgi_files =  &extract_plesk9_cid($root, $cids, "cgi");
-if ($cgi_files) {
-	&copy_source_dest($cgi_files, $cdir);
-	&set_home_ownership(\%dom);
-	&$second_print(".. done");
+	# Copy CGI files
+	&$first_print("Copying CGI scripts ..");
+	local $cdir = &cgi_bin_dir(\%dom);
+	local $cgi_files =  &extract_plesk9_cid($root, $cids, "cgi");
+	if ($cgi_files) {
+		&copy_source_dest($cgi_files, $cdir);
+		&set_home_ownership(\%dom);
+		&$second_print(".. done");
+		}
+	elsif ($user_data_files) {
+                &copy_source_dest($user_data_files."/".$cgidocs, $cdir);
+                &set_home_ownership(\%dom);
+                &$second_print(".. done");
+                }
+	else {
+		&$second_print(".. no cgi data found");
+		}
+	if (defined(&set_php_wrappers_writable)) {
+		&set_php_wrappers_writable(\%dom, 0);
+		}
 	}
-else {
-	&$second_print(".. no cgi data found");
-	}
-if (defined(&set_php_wrappers_writable)) {
-	&set_php_wrappers_writable(\%dom, 0);
-	}
-}
 
 # Re-create DNS records
 local $oldip = $domain->{'properties'}->{'ip'}->{'ip-address'};
@@ -406,7 +414,7 @@ if ($got{'dns'}) {
 				local $rectype = $rec->{'type'};
 				if ($rectype eq "A" && $recvalue eq $oldip) {
 					# Use new IP address
-					$recvalue = $ip;
+					$recvalue = $ipinfo->{'ip'};
 					}
 				if ($rectype eq "MX") {
 					# Include priority in value

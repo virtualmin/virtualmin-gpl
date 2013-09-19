@@ -32,6 +32,15 @@ for features of the migrated server to not work properly (such as its SSL
 virtual website). If you want to use a virtual IP that is already active on
 the system, you must add the C<--ip-already> command-line option.
 
+When the migrated server was on a shared address, it will by default be
+given the system's default shared IP. However, if you have defined additional
+shared addresses, a different one can be selected with the C<--shared-ip>
+flag followed by an address.
+
+Flags similar to all those above also exist for IPv6, if your system supports
+it. The equivalent flags are named C<--ip6>, C<--allocate-ip6>,
+C<--original-ip6> and C<--shared-ip6> respectively.
+
 The C<--template> parameter can be used to specify a Virtualmin template by
 name to use when creating the migrated virtual server. If not given, the
 I<default settings> template will be used.
@@ -64,6 +73,7 @@ $outdent_print = \&outdent_text_print;
 
 # Parse command-line args
 $template = "";
+$ipinfo = { };
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--source") {
@@ -98,21 +108,6 @@ while(@ARGV > 0) {
 		$tmpl || &usage("Template $templatename does not exist");
 		$template = $tmpl->{'id'};
 		}
-	elsif ($a eq "--ip") {
-		$ip = shift(@ARGV);
-		&check_ipaddress($ip) || &usage("Invalid IP address");
-		if (!$config{'all_namevirtual'}) {
-			$virt = 1;
-			$virtalready = 1;
-			}
-		}
-	elsif ($a eq "--allocate-ip") {
-		$ip = "allocate";
-		$virt = 1;
-		}
-	elsif ($a eq "--ip-already") {
-		$virtalready = 1;
-		}
 	elsif ($a eq "--parent") {
 		$parentname = shift(@ARGV);
 		$parent = &get_domain_by("dom", $parentname);
@@ -134,6 +129,66 @@ while(@ARGV > 0) {
 	elsif ($a eq "--test") {
 		$test_only = 1;
 		}
+
+	# Alternate IPv4 options
+	elsif ($a eq "--shared-ip") {
+		$sharedip = shift(@ARGV);
+		&indexof($sharedip, &list_shared_ips()) >= 0 ||
+		    &usage("$sharedip is not in the shared IP addresses list");
+		$ipinfo = { %$ipinfo,
+			    'virt' => 0, 'ip' => $sharedip,
+			    'virtalready' => 0, 'mode' => 3 };
+		}
+	elsif ($a eq "--ip") {
+		$ip = shift(@ARGV);
+		&check_ipaddress($ip) || &usage("Invalid IP address");
+		&check_virt_clash($ip) &&
+			&usage("IP address is already in use");
+		$ipinfo = { %$ipinfo,
+			    'virt' => 1, 'ip' => $ip,
+			    'virtalready' => 0, 'mode' => 1 };
+		}
+	elsif ($a eq "--allocate-ip") {
+		$tmpl = &get_template(0);
+		($ip, $netmask) = &free_ip_address($tmpl);
+		$ipinfo = { %$ipinfo,
+			    'virt' => 1, 'ip' => $ip,
+			    'virtalready' => 0, 'netmask' => $netmask,
+			    'mode' => 2 };
+		}
+
+	# Alternate IPv6 options
+	elsif ($a eq "--default-ip6") {
+		$ipinfo = { %$ipinfo,
+			    'virt' => 0, 'ip6' => &get_default_ip6(),
+			    'virtalready' => 0, 'mode6' => 0 };
+		}
+	elsif ($a eq "--shared-ip6") {
+		$sharedip6 = shift(@ARGV);
+		&indexof($sharedip6, &list_shared_ip6s()) >= 0 ||
+		  &usage("$sharedip is not in the shared IPv6 addresses list");
+		$ipinfo = { %$ipinfo,
+			    'virt6' => 0, 'ip6' => $sharedip6,
+			    'virtalready6' => 0, 'mode6' => 3 };
+		}
+	elsif ($a eq "--ip6") {
+		$ip6 = shift(@ARGV);
+		&check_ip6address($ip6) || &usage("Invalid IPv6 address");
+		&check_virt6_clash($ip) &&
+			&usage("IPv6 address is already in use");
+		$ipinfo = { %$ipinfo,
+			    'virt6' => 1, 'ip6' => $ip6,
+			    'virtalready6' => 0, 'mode6' => 1 };
+		}
+	elsif ($a eq "--allocate-ip6") {
+		$tmpl = &get_template(0);
+		($ip6, $netmask6) = &free_ip6_address($tmpl);
+		$ipinfo = { %$ipinfo,
+			    'virt6' => 1, 'ip6' => $ip6,
+			    'virtalready6' => 0, 'netmask6' => $netmask6,
+			    'mode6' => 2 };
+		}
+
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -143,18 +198,10 @@ if ($template eq "") {
 	$template = &get_init_template($parentdomain);
 	}
 $tmpl = &get_template($template);
-
-# Work out the IP, if needed
-if ($ip eq "allocate") {
-	$tmpl->{'ranges'} ne "none" || &usage("The --allocate-ip option cannot be used unless automatic IP allocation is enabled - use --ip instead");
-	($ip, $netmask) = &free_ip_address($tmpl);
-	$ip || &usage("Failed to allocate IP address from ranges!");
-	}
-elsif ($ip) {
-	$tmpl->{'ranges'} eq "none" || $config{'all_namevirtual'} || &usage("The --ip option cannot be used when automatic IP allocation is enabled - use --allocate-ip instead");
-	}
-else {
-	$ip = &get_default_ip();
+if (!$ipinfo->{'ip'}) {
+	# Assume default IP
+	$ipinfo->{'ip'} = &get_default_ip();
+	$ipinfo->{'virt'} = 0;
 	}
 
 # Download the file, if needed
@@ -215,8 +262,7 @@ print "Starting migration of $domain from $nice ..\n\n";
 &lock_domain_name($domain);
 $mfunc = "migration_${type}_migrate";
 @doms = &$mfunc($src, $domain, $user, $webmin, $template,
-		$ip, $virt, $pass, $parent, $prefix, $virtalready, $email,
-		$netmask);
+		$ipinfo, $pass, $parent, $prefix, $email);
 &run_post_actions();
 
 # Fix htaccess files
@@ -248,11 +294,14 @@ print "                         [--user username]\n";
 print "                         [--pass password]\n";
 print "                         [--webmin]\n";
 print "                         [--template name]\n";
-print "                         [--ip address] [--allocate-ip]\n";
-print "                         [--ip-already]\n";
 print "                         [--parent domain]\n";
 print "                         [--prefix string]\n";
 print "                         [--delete-existing]\n";
+print "                         [--shared-ip address | --ip address |\n";
+print "                          --allocate-ip]\n";
+print "                         [--default-ip6 |\n";
+print "                          --shared-ip6 address | --ip6 address |\n";
+print "                          --allocate-ip6]\n";
 print "                         [--test]\n";
 print "\n";
 print "The source can be one of :\n";
