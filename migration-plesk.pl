@@ -76,14 +76,13 @@ return (undef, $dom, $user, $pass);
 }
 
 # migration_plesk_migrate(file, domain, username, create-webmin, template-id,
-#			   ip-address, virtmode, pass, [&parent], [prefix],
-#			   virt-already, [email], [netmask])
+#			  &ipinfo, pass, [&parent], [prefix], [email])
 # Actually extract the given Plesk backup, and return the list of domains
 # created.
 sub migration_plesk_migrate
 {
-local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
-       $prefix, $virtalready, $email, $netmask) = @_;
+local ($file, $dom, $user, $webmin, $template, $ipinfo, $pass, $parent,
+       $prefix, $email) = @_;
 
 # Check for prefix clash
 $prefix ||= &compute_prefix($dom, undef, $parent, 1);
@@ -264,13 +263,8 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
          'ugid', $ugid,
          'owner', "Migrated Plesk server $dom",
          'email', $email ? $email : $parent ? $parent->{'email'} : undef,
-         'name', !$virt,
-         'ip', $ip,
-         'netmask', $netmask,
-	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :
+	 'dns_ip', $ipinfo->{'virt'} || $config{'all_namevirtual'} ? undef :
 		   &get_dns_ip($parent ? $parent->{'id'} : undef),
-         'virt', $virt,
-         'virtalready', $virtalready,
 	 $parent ? ( 'pass', $parent->{'pass'} )
 		 : ( 'pass', $pass ),
 	 'source', 'migrate.cgi',
@@ -285,6 +279,7 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
 	 'nocopyskel', 1,
 	 'parent', $parent ? $parent->{'id'} : undef,
         );
+&merge_ipinfo_domain(\%dom, $ipinfo);
 if (!$parent) {
 	&set_limits_from_plan(\%dom, $plan);
 	$dom{'quota'} = $quota;

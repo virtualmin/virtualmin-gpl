@@ -40,14 +40,13 @@ return (undef, $dom, $user, $pass);
 }
 
 # migration_ensim_migrate(file, domain, username, create-webmin, template-id,
-#			  ip-address, virtmode, pass, [&parent], [prefix],
-#			  virt-already, netmask)
+#			  &ipinfo, pass, [&parent], [prefix], [email])
 # Actually extract the given ensim backup, and return the list of domains
 # created.
 sub migration_ensim_migrate
 {
-local ($file, $dom, $user, $webmin, $template, $ip, $virt, $pass, $parent,
-       $prefix, $virtalready, $defemail, $netmask) = @_;
+local ($file, $dom, $user, $webmin, $template, $ipinfo, $pass, $parent,
+       $prefix, $defemail) = @_;
 local ($ok, $root) = &extract_ensim_dir($file);
 
 # Check for prefix clash
@@ -182,13 +181,8 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
          'ugid', $ugid,
          'owner', "Migrated Ensim server $dom",
          'email', $defemail ? $defemail : $parent ? $parent->{'email'} : $email,
-         'name', !$virt,
-         'ip', $ip,
-         'netmask', $netmask,
-	 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :
+	 'dns_ip', $ipinfo->{'virt'} || $config{'all_namevirtual'} ? undef :
 		   &get_dns_ip($parent ? $parent->{'id'} : undef),
-         'virt', $virt,
-         'virtalready', $virtalready,
 	 $parent ? ( 'pass', $parent->{'pass'} )
 		 : ( 'pass', $pass,
 		     'enc_pass', $encpass,
@@ -205,6 +199,7 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
 	 'nocopyskel', 1,
 	 'parent', $parent ? $parent->{'id'} : undef,
         );
+&merge_ipinfo_domain(\%dom, $ipinfo);
 if (!$parent) {
 	&set_limits_from_plan(\%dom, $plan);
 	if (defined($quota)) {
@@ -274,7 +269,7 @@ if ($got{'dns'} && $si->{'config'}->{'zone'}) {
 	foreach my $rec (@srcrecs) {
 		if (!$got{$rec->{'owner'}}) {
 			if ($rec->{'address'} eq $oldip) {
-				$rec->{'address'} = $ip;
+				$rec->{'address'} = $ipinfo->{'ip'};
 				}
 			&bind8::create_record(
 				$file, $rec->{'owner'}, $rec->{'ttl'},
