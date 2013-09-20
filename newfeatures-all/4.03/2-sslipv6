@@ -1,4 +1,4 @@
 desc=Shared IPv6 addresses
-html=Multiple virtual servers can now share a single IPv6 address, just as can be done for IPv4. Each domain can either not use IPv6 at all, use one of several shared addresses, or have its own private address.
+html=Multiple virtual servers can now share a single IPv6 address, just as can be done for IPv4. Each domain can either not use IPv6 at all, use one of several shared addresses, or have its own private address.<br>Also, when migrating a virtual server from cPanel, Plesk or some other control panel, you can now select if it will be assigned an IPv6 address by Virtualmin.
 master=1
 link=newip_form.cgi?dom=${ID}

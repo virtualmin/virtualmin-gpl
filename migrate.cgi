@@ -42,9 +42,16 @@ if ($parent && !$tmpl->{'for_sub'}) {
 elsif (!$parent && !$tmpl->{'for_parent'}) {
 	&error($text{'migrate_etmplparent'});
 	}
-($ip, $virt, $virtalready, $netmask) = &parse_virtual_ip($tmpl,
-			$parent ? $parent->{'reseller'} :
-			&reseller_admin() ? $base_remote_user : undef);
+$ipinfo = { };
+($ipinfo->{'ip'}, $ipinfo->{'virt'}, $ipinfo->{'virtalready'}, $ipinfo->{'netmask'}) =
+	&parse_virtual_ip($tmpl, $parent ? $parent->{'reseller'} :
+				 &reseller_admin() ? $base_remote_user : undef);
+if (&supports_ip6()) {
+	($ipinfo->{'ip6'}, $ipinfo->{'virt6'}, $ipinfo->{'virtalready6'},
+	 $ipinfo->{'netmask6'}) =
+		&parse_virtual_ip6($tmpl, $parent ? $parent->{'reseller'} :
+					 &reseller_admin() ? $base_remote_user : undef);
+	}
 if (!$in{'prefix_def'}) {
 	$in{'prefix'} =~ /^[a-z0-9\.\-]+$/i ||
 		&error($text{'setup_eprefix'});
@@ -99,9 +106,8 @@ elsif (&domain_name_clash($domain)) {
 &$indent_print();
 $mfunc = "migration_$in{'type'}_migrate";
 @doms = &$mfunc($src, $domain, $user, $in{'webmin'}, $in{'template'},
-		$ip, $virt, $pass, $parent, $prefix,
-		$virtalready, $in{'email_def'} ? undef : $in{'email'},
-		$netmask);
+		$ipinfo, $pass, $parent, $prefix,
+		$in{'email_def'} ? undef : $in{'email'});
 &run_post_actions();
 &$outdent_print();
 

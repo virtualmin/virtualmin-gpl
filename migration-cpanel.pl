@@ -1142,7 +1142,7 @@ else {
 		}
 	}
 $main::cpanel_dir_cache{$file} = $dir;
-return (1, $temp);
+return (1, $dir);
 }
 
 # extract_cpanel_file(file)

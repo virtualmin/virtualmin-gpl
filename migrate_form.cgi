@@ -56,6 +56,12 @@ print &ui_table_row($text{'migrate_template'},
 # IP to assign
 print &ui_table_row($text{'migrate_ip'}, &virtual_ip_input(\@tmpls));
 
+# IPv6 address to assign
+if (&supports_ip6()) {
+	print &ui_table_row($text{'migrate_ip6'},
+		&virtual_ip6_input(\@tmpls, undef, 0, $config{'ip6enabled'} ? 0 : -2));
+	}
+
 # Parent user
 @doms = sort { $a->{'user'} cmp $b->{'user'} }
 	     grep { $_->{'unix'} } &list_domains();

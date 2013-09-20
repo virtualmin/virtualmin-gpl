@@ -44,10 +44,6 @@
 
  - Name-based hosting on IPv6 support
 	- Nginx
-	- migration form / API
-		- use ipinfo, bring into sync with restore
-		- UI
-		- CHANGELOG
 
  - Amazon tax docs
 
