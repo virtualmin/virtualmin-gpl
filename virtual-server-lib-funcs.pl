@@ -3555,7 +3555,15 @@ else {
 	&foreign_require("net", "net-lib.pl");
 	local $ifacename = $config{'iface'} || &first_ethernet_iface();
 	local ($iface) = grep { $_->{'fullname'} eq $ifacename }
-			      &net::active_interfaces();
+			      &net::boot_interfaces();
+	if ($iface && @{$iface->{'address6'}}) {
+		# Use address on the boot interface if possible, as active
+		# IPv6 addresses can get re-ordered
+		return $iface->{'address6'}->[0];
+		}
+	# Otherwise, fall back to first active address
+	($iface) = grep { $_->{'fullname'} eq $ifacename }
+			&net::active_interfaces();
 	if ($iface) {
 		return $iface->{'address6'} && @{$iface->{'address6'}} ?
 			$iface->{'address6'}->[0] : undef;
