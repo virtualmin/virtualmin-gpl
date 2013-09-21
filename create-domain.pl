@@ -393,9 +393,18 @@ elsif ($virt) {
 if ($ip6 eq "allocate") {
 	# Allocate an IPv6 address now
 	$virt6already && &usage("The --ip6-already and --allocate-ip6 options are incompatible");
-	$tmpl->{'ranges6'} ne "none" || &usage("The --allocate-ip6 option cannot be used unless automatic IPv6 allocation is enabled - use --ip6 instead");
-	($ip6, $netmask6) = &free_ip6_address($tmpl);
-	$ip6 || &usage("Failed to allocate IPv6 address from ranges!");
+	%racl = $resel ? &get_reseller_acl($resel) : ();
+	if ($racl{'ranges6'}) {
+		# Allocating from reseller's range
+		($ip6, $netmask6) = &free_ip6_address(\%racl);
+		$ip6 || &usage("Failed to allocate IPv6 address from reseller's ranges!");
+		}
+	else {
+		# Allocating from template
+		$tmpl->{'ranges6'} ne "none" || &usage("The --allocate-ip6 option cannot be used unless automatic IPv6 allocation is enabled - use --ip6 instead");
+		($ip6, $netmask6) = &free_ip6_address($tmpl);
+		$ip6 || &usage("Failed to allocate IPv6 address from ranges!");
+		}
 	}
 elsif ($virt6) {
 	# Make sure manual IP specification is allowed
