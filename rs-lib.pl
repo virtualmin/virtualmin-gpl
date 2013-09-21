@@ -6,6 +6,10 @@
 sub rs_connect
 {
 my ($url, $user, $key) = @_;
+if ($url =~ /^(.*);(\S+)$/) {
+	$url = $1;
+	$region = lc($2);
+	}
 my ($host, $port, $page, $ssl) = &parse_http_url($url);
 $host || return "Invalid URL : $url";
 my $apiver;
@@ -33,6 +37,10 @@ my $h = { 'url' => $url,
 if ($config{'rs_snet'}) {
 	# Storage URL needs to be customized for the internal network
 	$h->{'storage-url'} =~ s/^(http|https):\/\//$1:\/\/snet-/;
+	}
+if ($region) {
+	# Force to a specific region
+	$h->{'storage-url'} =~ s/\.([a-z]+)(\d+)\.clouddrive/\.$region$2.clouddrive/;
 	}
 return $h;
 }

@@ -1417,3 +1417,4 @@ Mail client auto-configuration now supports Outlook as well as Thunderbird.
 Backups from other control panels can now be migrated from their un-compressed or extract directories.
 Multiple virtual servers can now share a single IPv6 address, just as can be done for IPv4. Each domain can either not use IPv6 at all, use one of several shared addresses, or have its own private address.
 When migrating a virtual server from cPanel, Plesk or some other control panel, you can now select if it will be assigned an IPv6 address by Virtualmin.
+The Dallas or Chicago datacenters can now be explictly selected when using Rackspace cloud files.
