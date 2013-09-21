@@ -4167,5 +4167,24 @@ local %done;
 return grep { !$done{$_->[0]}++ } @rv;
 }
 
+# merge_ipinfo_domain(&domain, &ipinfo)
+# Update the IP in a domain based on an ipinfo hash
+sub merge_ipinfo_domain
+{
+local ($d, $ipinfo) = @_;
+$d->{'virt'} = $ipinfo->{'virt'};
+$d->{'ip'} = $ipinfo->{'ip'};
+$d->{'virtalready'} = $ipinfo->{'virtalready'};
+$d->{'netmask'} = $ipinfo->{'netmask'};
+$d->{'name'} = !$ipinfo->{'virt'};
+if ($ipinfo->{'ip6'}) {
+	$d->{'virt6'} = $ipinfo->{'virt6'};
+	$d->{'ip6'} = $ipinfo->{'ip6'};
+	$d->{'virtalready6'} = $ipinfo->{'virtalready6'};
+	$d->{'netmask6'} = $ipinfo->{'netmask6'};
+	$d->{'name6'} = !$ipinfo->{'virt6'};
+	}
+}
+
 1;
 
