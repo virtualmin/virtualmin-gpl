@@ -168,7 +168,7 @@ sub virtual_ip6_input
 {
 local ($tmpls, $resel, $orig, $mode) = @_;
 $mode ||= 0;
-local $defip = &get_default_ip6($resel);
+local $defip6 = &get_default_ip6($resel);
 local ($t, $anyalloc, $anychoose, $anyzone);
 if (&running_in_zone() || &running_in_vserver()) {
 	# When running in a Solaris zone or VServer, you MUST select an
