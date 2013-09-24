@@ -671,6 +671,44 @@ if ($got{'mysql'}) {
 		&$outdent_print();
 		$mcount++;
 		}
+
+	# Create DB users that are outside of databases
+	local $dbusers = $domain->{'databases'}->{'dbusers'}->{'dbuser'};
+	if (!$dbusers) {
+		$dbusers = { };
+		}
+	elsif ($dbusers->{'name'}) {
+		# Just one user
+		$dbusers = { $dbusers->{'name'} => $dbusers };
+		}
+	use Data::Dumper;
+	print STDERR Dumper($dbusers);
+	foreach my $mname (keys %$dbusers) {
+		my $dbuser = $dbusers->{$name};
+		next if ($mname eq $user);	# Domain owner
+		local $myuinfo = &create_initial_user(\%dom);
+		$myuinfo->{'user'} = $mname;
+		$myuinfo->{'plainpass'} =
+			$dbusers->{$mname}->{'password'}->{'content'};
+		$myuinfo->{'pass'} = &encrypt_user_password($myuinfo,
+					$myuinfo->{'plainpass'});
+		$myuinfo->{'uid'} = &allocate_uid(\%taken);
+		$myuinfo->{'gid'} = $dom{'gid'};
+		$myuinfo->{'real'} = "MySQL user";
+		$myuinfo->{'home'} =
+			"$dom{'home'}/$config{'homes_dir'}/$mname";
+		$myuinfo->{'shell'} = $nologin_shell->{'shell'};
+		delete($myuinfo->{'email'});
+		$myuinfo->{'dbs'} = [ map { { 'type' => 'mysql',
+					      'name' => $_ } }
+					  (keys %$databases) ];
+		&create_user_home($myuinfo, \%dom, 1);
+		&create_user($myuinfo, \%dom);
+		&create_mail_file($myuinfo, \%dom);
+		$taken{$myuinfo->{'uid'}}++;
+		$myucount++;
+		}
+
 	&enable_quotas(\%dom);
 	&$second_print(".. done (migrated $mcount databases, and created $myucount users)");
 	}
