@@ -699,12 +699,12 @@ if ($extramods{'htaccess-htpasswd'} && $_[0]->{'unix'}) {
         push(@mods, "htaccess-htpasswd");
         }
 
-if ($extramods{'mailboxes'} && $_[0]->{'mail'}) {
+local @maildoms = grep { $_->{'mail'} } @doms;
+if ($extramods{'mailboxes'} && @maildoms) {
 	# Can read mailboxes of users
 	local %acl = ( 'noconfig' => 1,
 		       'fmode' => 1,
-		       'from' => join(" ", map { $_->{'dom'} }
-					       grep { $_->{'mail'} } @doms),
+		       'from' => join(" ", map { $_->{'dom'} } @maildoms),
 		       'canattach' => 0,
 		       'candetach' => 0,
 		       'dir' => &mail_domain_base($_[0]) );
@@ -712,7 +712,7 @@ if ($extramods{'mailboxes'} && $_[0]->{'mail'}) {
 		# For vpopmail, mailboxes are identified by domain
 		$acl{'mmode'} = 6;
 		$acl{'musers'} = ".*\@(".
-				 join("|", map { $_->{'dom'} } @doms).")";
+				 join("|", map { $_->{'dom'} } @maildoms).")";
 		}
 	else {
 		# By server GID
