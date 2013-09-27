@@ -1479,6 +1479,7 @@ if ($d->{'mail'} && $config{'mx_validate'}) {
 	local @mxs = grep { $_->{'name'} eq $d->{'dom'}.'.' &&
 			    $_->{'type'} eq 'MX' } @$recs;
 	local $defip = &get_default_ip();
+	local %inuse = &interface_ip_addresses();
 	if (@mxs) {
 		local $found;
 		local @mxips;
@@ -1489,7 +1490,8 @@ if ($d->{'mail'} && $config{'mx_validate'}) {
 			local $ip = &to_ipaddress($mxh);
 			if ($ip eq $d->{'ip'} ||
 			    $ip eq $d->{'dns_ip'} ||
-			    $ip eq $defip) {
+			    $ip eq $defip ||
+			    $inuse{$ip}) {
 				$found = $ip;
 				last;
 				}
