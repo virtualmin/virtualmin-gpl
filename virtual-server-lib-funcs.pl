@@ -11862,17 +11862,19 @@ local (@doms, @olddoms);
 push(@doms, $d);
 push(@olddoms, $oldd);
 
-if (!$d->{'parent'}) {
+if (!$oldd->{'parent'}) {
 	# If this is a parent domain, all of it's children need to be
-	# re-parented too. This will also catch any aliases and sub-domains
+	# re-parented too. This will also catch any aliases and sub-domains.
+	# These have to be moved BEFORE their old parent, so that move of the
+	# parent doesn't cause the home directory to disappear.
 	local @subs = &get_domain_by("parent", $d->{'id'});
 	foreach my $sd (@subs) {
 		local $oldsd = { %$sd };
 		&set_parent_attributes($sd, $parent);
 		&change_home_directory($sd,
 				       &server_home_directory($sd, $parent));
-		push(@doms, $sd);
-		push(@olddoms, $oldsd);
+		unshift(@doms, $sd);
+		unshift(@olddoms, $oldsd);
 		}
 
 	# The template may no longer be valid if it was for a top-level server
