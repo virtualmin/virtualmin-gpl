@@ -1412,7 +1412,7 @@ Updated the Roundcube script installer to version 0.9.2, DokuWiki to 2013-05-10a
 On Apache version 2.4 and above, Virtualmin no longer adds the NameVirtualHost directive as it is deprecated.
 The Change IP Address page can now be used to switch a domain with a private IP to another address.
 ---- Changes since 4.02 ----
-Updated the SMF script installer to version 2.0.5, X2CRM to 3.5.2, Django to 1.5.4 and 1.4.8, Roundcube to 0.9.4, osCommerce to 2.3.3.4, SugarCRM to 6.5.15, Z-push to 2.1.0, AjaXplorer to 5.0.3, MediaWiki to 1.12.2 and 1.19.8, phpMyAdmin to 4.0.7, Moodle to 2.5.2, ZenPhoto to 1.4.5.2, CMS Made Simple to 1.11.8, Wordpress to 3.6.1, phpList to 3.0.4, FengOffice to 2.3.2, Radiant to 1.1.4, and ownCloud to 5.0.11.
+Updated the SMF script installer to version 2.0.5, X2CRM to 3.5.2, Django to 1.5.4 and 1.4.8, Roundcube to 0.9.4, osCommerce to 2.3.3.4, SugarCRM to 6.5.15, Z-push to 2.1.0, AjaXplorer to 5.0.3, MediaWiki to 1.12.2 and 1.19.8, phpMyAdmin to 4.0.7, Moodle to 2.5.2, ZenPhoto to 1.4.5.2, CMS Made Simple to 1.11.8, Wordpress to 3.6.1, phpList to 3.0.4, FengOffice to 2.3.2, Radiant to 1.1.4, phpBB to 3.0.12, and ownCloud to 5.0.11.
 Mail client auto-configuration now supports Outlook as well as Thunderbird.
 Backups from other control panels can now be migrated from their un-compressed or extract directories.
 Multiple virtual servers can now share a single IPv6 address, just as can be done for IPv4. Each domain can either not use IPv6 at all, use one of several shared addresses, or have its own private address.
