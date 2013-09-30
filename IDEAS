@@ -26,14 +26,8 @@
 	- Add to unit tests
 	- http://www.virtualmin.com/node/18938
 
- - Allow admin to edit user's procmail rules
-	- http://www.virtualmin.com/node/12330 
-
  - Per-directory SVN access control
 	- http://www.virtualmin.com/node/18073
-
- - Webmin code cleanup
-	- Can avoid need to use "our" for globals?
 
  - Move email messages into templates
 	- https://www.virtualmin.com/node/18405
@@ -45,4 +39,7 @@
  - Amazon tax docs
 
  - 2-factor authentication
-	- Authy?
+	- "acl" module ACL setting to control self-enroll
+
+ - Directadmin migration
+	- https://www.virtualmin.com/node/23126
