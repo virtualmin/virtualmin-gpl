@@ -38,8 +38,8 @@
 
  - Amazon tax docs
 
- - 2-factor authentication
-	- "acl" module ACL setting to control self-enroll
-
  - Directadmin migration
 	- https://www.virtualmin.com/node/23126
+
+ - Resellers should have access to plugins
+	- ie. protected directories
