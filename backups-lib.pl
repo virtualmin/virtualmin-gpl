@@ -1820,7 +1820,9 @@ if ($ok) {
 					# has changed.
 					$parentdom = &get_domain_by(
 					    "dom", $d->{'backup_parent_dom'});
-					$d->{'parent'} = $parentdom->{'id'};
+					if ($parentdom) {
+						$d->{'parent'} = $parentdom->{'id'};
+						}
 					}
 				if (!$parentdom) {
 					&$second_print(
