@@ -122,7 +122,7 @@ local $chained = $d->{'ssl_chain'};
 
 # Add NameVirtualHost if needed, and if there is more than one SSL site on
 # this IP address
-local $nvstar = &add_name_virtual($d, $conf, $web_sslport, 1);
+local $nvstar = &add_name_virtual($d, $conf, $web_sslport, 1, $d->{'ip'});
 local $nvstar6; 
 if ($d->{'ip6'}) {                                
         $nvstar6 = &add_name_virtual($d, $conf, $web_sslport, 1,
