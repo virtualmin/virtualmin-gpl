@@ -10122,7 +10122,7 @@ elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 		$alert_text .= &ui_submit($text{'licence_recheck'});
 		$alert_text .= &ui_form_end();
 		}
-	$rv .= &ui_alert_box($alert_text, "warning");
+	$rv .= &ui_alert_box($alert_text, "warn");
 	}
 
 # Check if default IP has changed
@@ -10139,7 +10139,7 @@ if ($config{'old_defip'} && $defip && $config{'old_defip'} ne $defip) {
 	$alert_text .= &ui_hidden("also", 1);
 	$alert_text .= &ui_submit($text{'licence_changeip'});
 	$alert_text .= &ui_form_end();
-	$rv .= &ui_alert_box($alert_text, "warning");
+	$rv .= &ui_alert_box($alert_text, "warn");
 	}
 
 # Check if in SSL mode, and SSL cert is < 2048 bits
@@ -10174,7 +10174,7 @@ if ($small) {
 				$text{'licence_newcert'} :
 				$text{'licence_newcsr'});
 	$alert_text .= &ui_form_end();
-	$rv .= &ui_alert_box($alert_text, "warning");
+	$rv .= &ui_alert_box($alert_text, "warn");
 	}
 
 # Check if symlinks need to be fixed. Blank means not checked yet, 0 means
@@ -10191,7 +10191,7 @@ if ($config{'allow_symlinks'} eq '') {
 		$alert_text .= &ui_submit($text{'licence_fixlinksok'}, undef);
 		$alert_text .= &ui_submit($text{'licence_fixlinksignore'}, 'ignore');
 		$alert_text .= &ui_form_end();
-		$rv .= &ui_alert_box($alert_text, "warning");
+		$rv .= &ui_alert_box($alert_text, "warn");
 		}
 	else {
 		# All OK already, don't check again
@@ -10213,7 +10213,7 @@ if ($config{'allow_modphp'} eq '') {
 		$alert_text .= &ui_submit($text{'licence_fixphpok'}, undef);
 		$alert_text .= &ui_submit($text{'licence_fixphpignore'}, 'ignore');
 		$alert_text .= &ui_form_end();
-		$rv .= &ui_alert_box($alert_text, "warning"); 
+		$rv .= &ui_alert_box($alert_text, "warn"); 
 		}
 	else {
 		# All OK already, don't check again
