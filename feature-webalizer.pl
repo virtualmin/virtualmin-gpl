@@ -241,8 +241,11 @@ if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 	&webalizer::save_log_config($alog, $lconf);
 
 	# Change password file path in stats/.htpassswd file
-	local $stats = &webalizer_stats_dir($_[0]);
-	local $htaccess_file = "$stats/.htaccess";
+	local $htaccess_file = &webalizer_stats_dir($_[0])."/.htaccess";
+	if (!-r $htaccess_file) {
+		# Try old location, as home may not have moved yet
+		$htaccess_file = &webalizer_stats_dir($_[1])."/.htaccess";
+		}
 	if (-r $htaccess_file) {
 		local $lref = &read_file_lines($htaccess_file);
 		foreach my $l (@$lref) {
