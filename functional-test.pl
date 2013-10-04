@@ -1294,6 +1294,18 @@ $move_tests = [
 		      @create_args, ],
         },
 
+	# Create a sub-server under the parent
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test sub-server home page' ],
+		      @create_args, ],
+	},
+
 	# Create a domain to be the target
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_target_domain ],
@@ -1314,6 +1326,15 @@ $move_tests = [
 		      [ 'mail-quota', 100*1024 ] ],
 	},
 
+	# Add an FTP user to the domain being moved
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', 'ftp_'.$test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test FTP user' ],
+		      [ 'web' ] ],
+	},
+
 	# Install a script into the domain being moved
 	{ 'command' => 'install-script.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -1329,6 +1350,20 @@ $move_tests = [
 		      [ 'parent', $test_target_domain ] ],
 	},
 
+	# Check parentage
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Parent domain: '.$test_target_domain,
+		      'Username: '.$test_target_domain_user ],
+	},
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Parent domain: '.$test_target_domain,
+		      'Username: '.$test_target_domain_user ],
+	},
+
 	# Make sure the old Unix user is gone
 	{ 'command' => 'grep ^'.$test_domain_user.': /etc/passwd',
 	  'fail' => 1,
@@ -1337,6 +1372,11 @@ $move_tests = [
 	# Make sure the website still works
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'Test home page',
+	},
+
+	# Make sure the sub-server website still works
+	{ 'command' => $wget_command.'http://'.$test_subdomain,
+	  'grep' => 'Test sub-server home page',
 	},
 
 	# Check MySQL login under new owner to the moved DB
@@ -1364,6 +1404,14 @@ $move_tests = [
 	{ 'command' => 'list-users.pl',
 	  'args' => [ [ 'domain' => $test_domain ] ],
 	  'grep' => "^$test_user",
+	},
+
+	# Make sure the FTP user still exists
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'user' => 'ftp_'.$test_user ],
+		      [ 'multiline' ] ],
+	  'grep' => [ "^ftp_".$test_user, "Website manager" ],
 	},
 
 	# Make sure the script install was updated
@@ -1408,6 +1456,20 @@ $move_tests = [
 		      [ 'domain', $test_domain ] ],
 	  'grep' => 'Username: '.$test_domain_user,
 	  'antigrep' => 'Parent domain:',
+	},
+
+	# Make sure the mailbox still exists
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ] ],
+	  'grep' => "^$test_user",
+	},
+
+	# Make sure the FTP user still exists
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'user' => 'ftp_'.$test_user ],
+		      [ 'multiline' ] ],
+	  'grep' => [ "^ftp_".$test_user, "Website manager" ],
 	},
 
 	# Cleanup the domain being moved

@@ -792,8 +792,9 @@ if (($_[0]->{'home'} ne $_[1]->{'home'} ||
 			}
 		if ($_[0]->{'uid'} != $_[1]->{'uid'} &&
  		    $u->{'uid'} == $_[1]->{'uid'}) {
-			# Website FTP access user's UID needs to change
+			# Website FTP access user's UID and GID needs to change
 			$u->{'uid'} = $_[0]->{'uid'};
+			$u->{'gid'} = $_[0]->{'gid'};
 			}
 
 		if ($_[0]->{'mail'}) {
