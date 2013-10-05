@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the SMF script installer to version 2.0.5, X2CRM to 3.5.2, Django to 1.5.4 and 1.4.8, Roundcube to 0.9.4, osCommerce to 2.3.3.4, SugarCRM to 6.5.15, Z-push to 2.1.0, AjaXplorer to 5.0.3, MediaWiki to 1.12.2 and 1.19.8, phpMyAdmin to 4.0.7, Moodle to 2.5.2, ZenPhoto to 1.4.5.4, CMS Made Simple to 1.11.9, Wordpress to 3.6.1, phpList to 3.0.4, FengOffice to 2.3.2.1, Radiant to 1.1.4, phpBB to 3.0.12, Magento to 1.8.0.0, eGroupware to 1.8.005, and ownCloud to 5.0.11.
+html=Updated the SMF script installer to version 2.0.5, X2CRM to 3.5.2, Django to 1.5.4 and 1.4.8, Roundcube to 0.9.4, osCommerce to 2.3.3.4, SugarCRM to 6.5.15, Z-push to 2.1.0, AjaXplorer to 5.0.3, MediaWiki to 1.12.2 and 1.19.8, phpMyAdmin to 4.0.7, Moodle to 2.5.2, ZenPhoto to 1.4.5.5, CMS Made Simple to 1.11.9, Wordpress to 3.6.1, phpList to 3.0.4, FengOffice to 2.3.2.1, Radiant to 1.1.4, phpBB to 3.0.12, Magento to 1.8.0.0, eGroupware to 1.8.005, and ownCloud to 5.0.11.
 master=1
 reseller=1
 domain=1
