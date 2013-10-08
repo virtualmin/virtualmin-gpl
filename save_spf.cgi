@@ -43,7 +43,6 @@ if ($in{'enabled'}) {
 					&error(&text('spf_e'.$t, $v));
 				}
 			}
-			}
 		$spf->{$t.':'} = \@v;
 		}
 	$spf->{'all'} = $in{'all'};
