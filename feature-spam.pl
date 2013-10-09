@@ -310,7 +310,8 @@ foreach my $r (@recipes) {
 # The DEFAULT destination needs to be set to match the mail server, as procmail
 # will deliver to /var/mail/USER by default
 local ($dir, $style, $mailbox, $maildir) = &get_mail_style();
-local $maildef = $dir ? "$dir/\$LOGNAME" :
+local $maildef = $dir && $dir =~ /^(.*)\/$/ ? "$1/\$LOGNAME/" :
+	         $dir ? "$dir/\$LOGNAME" :
 		 $maildir ? "\$HOME/$maildir/" :
 		 $mailbox ? "\$HOME/$mailbox" : undef;
 if ($gotdef) {
