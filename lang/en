@@ -6213,4 +6213,20 @@ bucket_elday=Missing or non-numeric day in lifecycle $1
 bucket_elmonth=Missing or non-numeric month in lifecycle $1
 bucket_elyear=Missing or non-numeric year in lifecycle $1
 
+ratelimit_title=Email Rate Limiting
+ratelimit_eos=Email rate limiting is not supported on this operating system
+ratelimit_econfig=The milter-greylist configuration file $1 does not exist
+ratelimit_einit=The milter-greylist boot script $1 does not exist
+ratelimit_emailsystem=Email rate limiting is only supported with the Postfix and Sendmail mail servers
+ratelimit_esendmailmc=Email rate limiting cannot be enabled for Sendmail unless an M4 configuration file is used
+ratelimit_failed=Email rate limiting is not available on this system : $1
+ratelimit_installdesc=However, Virtualmin can attempt to automatically install the required package for you.
+ratelimit_ecannot=You are not allowed to configure email rate limiting
+dkim_return=rate limiting form
+
+ratelimit_title4=Install Email Rate Limiting
+ratelimit_installing=Installing the email rate limiting package ..
+ratelimit_installfailed=.. installation failed!
+ratelimit_installed=.. installation completed successfully
+
 __norefs=1

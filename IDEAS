@@ -41,8 +41,11 @@
  - Directadmin migration
 	- https://www.virtualmin.com/node/23126
 
- - Per-user Postfix rate limit
-	- postfwd : http://postfwd.org/ratelimits.html
-	- mailfromd
+ - Per-user email rate limit
 	- milter-greylist
-	- own milter
+	- help page
+	- backup / restore
+	- command line API?
+	- web UI
+	- CHANGELOG
+	- Documentation
