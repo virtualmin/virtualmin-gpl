@@ -1,0 +1,6 @@
+desc=Updated script installers
+html=Updated the Ajaxplorer script installer to 5.0.4 (and renamed to Pydio).
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}
