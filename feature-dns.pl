@@ -114,9 +114,17 @@ elsif (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
 			 { 'name' => 'localnets' }, );
 	foreach my $s (@slaves) {
 		push(@trans, { 'name' => &to_ipaddress($s->{'host'}) });
+		my $s6 = &to_ip6address($s->{'host'});
+		if ($s6) {
+			push(@trans, { 'name' => $s6 });
+			}
 		}
 	foreach my $s (@extra_slaves) {
 		push(@trans, { 'name' => &to_ipaddress($s) });
+		my $s6 = &to_ip6address($s);
+		if ($s6) {
+			push(@trans, { 'name' => $s6 });
+			}
 		}
 	@trans = grep { $_->{'name'} } @trans;
 	local ($trans) = grep { $_->{'name'} eq 'allow-transfer' }
