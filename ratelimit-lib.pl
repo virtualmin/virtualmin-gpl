@@ -75,4 +75,97 @@ my @inst = &software::update_system_install($pkg);
 return scalar(@inst) || !&check_ratelimit();
 }
 
+# get_ratelimit_config()
+# Returns the current rate-limiting config, parsed into an array ref
+sub get_ratelimit_config
+{
+&require_apache();
+my $cfile = &get_ratelimit_config_file();
+my @rv;
+my $lref = &read_file_lines($cfile, 1);
+for(my $i=0; $i<@$lref; $i++) {
+	my $l = $lref->[$i];
+	$l =~ s/#.*$//;
+	next if (!/\S/);
+	my $lnum = $i;
+	while($l =~ s/\/\s*$//) {
+		# Ends with / .. continue on next line
+		$l .= $lref->[++$i];
+		}
+	# Split up line like foo bar { smeg spod }
+	my @toks = &apache::wsplit($l);
+	next if (!@toks);
+	my $dir = { 'line' => $lnum,
+		    'eline' => $i,
+		    'file' => $cfile,
+		    'name' => shift(@toks),
+		    'values' => [ ] };
+	while(@toks && $toks[0] ne "{") {
+		push(@{$dir->{'values'}}, shift(@toks));
+		}
+	$dir->{'value'} = $dir->{'values'}->[0];
+	if ($toks[0] eq "{") {
+		# Has sub-members
+		$dir->{'members'} = [ ];
+		shift(@toks);
+		while(@toks && $toks[0] ne "{") {
+			push(@{$dir->{'members'}}, shift(@toks));
+			}
+		}
+	push(@rv, $dir);
+	}
+return \@rv;
+}
+
+# save_ratelimit_directive(&config, &old, &new)
+# Create, update or delete a ratelimiting directive
+sub save_ratelimit_directive
+{
+my ($conf, $o, $n) = @_;
+my $file = $o ? $o->{'file'} : &get_ratelimit_config_file();
+my @lines = $n ? &make_ratelimit_lines($n) : ();
+my $idx = &indexof($o, @$conf);
+my ($roffset, $rlines);
+if ($o && $n) {
+	# Replace existing directive
+	# XXX
+	}
+elsif ($o && !$n) {
+	# Delete existing directive
+	$roffset = $o->{'line'};
+	$rlines = $o->{'eline'} - $o->{'line'} + 1;
+	splice(@$lref, $o->{'line'}, $rlines);
+	if ($idx >= 0) {
+		splice(@$conf, $idx, 1);
+		}
+	$rlines = -$rlines;
+	}
+elsif (!$o && $n) {
+	# Add new directive
+	push(@$conf, $n);
+	$n->{'line'} = scalar(@$lref);
+	$n->{'eline'} = $n->{'line'} + scalar(@lines) - 1;
+	push(@$lref, @lines);
+	}
+if ($rlines) {
+	foreach my $c (@$conf) {
+		$c->{'line'} += $rlines if ($c->{'line'} > $offset);
+		$c->{'eline'} += $rlines if ($c->{'eline'} > $offset);
+		}
+	}
+}
+
+# make_ratelimit_lines(&directive)
+# Returns an array of lines for some directive
+sub make_ratelimit_lines
+{
+my ($dir) = @_;
+&require_apache();
+my @w = ( $dir->{'name'}, @{$dir->{'values'}} );
+if ($dir->{'members'}) {
+	push(@w, "{", @{$dir->{'members'}}, "}");
+	}
+return &apache::wjoin(@w);
+}
+
 1;

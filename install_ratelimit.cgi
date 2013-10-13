@@ -6,11 +6,19 @@ require './virtual-server-lib.pl';
 
 &ui_print_header(undef, $text{'ratelimit_title4'}, "");
 
+$cfile = &get_ratelimit_config_file();
+$before = -e $cfile;
+
 print &text('ratelimit_installing'),"<br>\n";
 &$indent_print();
 $ok = &install_ratelimit_package();
 &$outdent_print();
 print $ok ? $text{'ratelimit_installed'}
 	  : $text{'ratelimit_installfailed'},"<p>\n";
+
+# If config didn't exist before, remove any list and racl lines
+# to disable default greylisting
+if (!$before) {
+	}
 
 &ui_print_footer("ratelimit.cgi", $text{'ratelimit_return'});
