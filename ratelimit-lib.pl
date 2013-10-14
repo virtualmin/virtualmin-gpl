@@ -69,7 +69,7 @@ return 0;
 # Attempt to install milter-greylist, outputting progress messages
 sub install_ratelimit_package
 {
-&foreign_require("software", "software-lib.pl");
+&foreign_require("software");
 my $pkg = 'milter-greylist';
 my @inst = &software::update_system_install($pkg);
 return scalar(@inst) || !&check_ratelimit();
@@ -128,7 +128,14 @@ my $idx = &indexof($o, @$conf);
 my ($roffset, $rlines);
 if ($o && $n) {
 	# Replace existing directive
-	# XXX
+	$roffset = $o->{'line'};
+	$rlines = scalar(@lines) - ($o->{'eline'} - $o->{'line'} + 1);
+	splice(@$lref, $o->{'line'}, $o->{'eline'} - $o->{'line'} + 1, @lines);
+	$n->{'line'} = $o->{'line'};
+	$n->{'eline'}= $n->{'line'} + scalar(@lines) - 1;
+	if ($idx >= 0) {
+		$conf->[$idx] = $n;
+		}
 	}
 elsif ($o && !$n) {
 	# Delete existing directive
@@ -166,6 +173,158 @@ if ($dir->{'members'}) {
 	push(@w, "{", @{$dir->{'members'}}, "}");
 	}
 return &apache::wjoin(@w);
+}
+
+# apply_ratelimit_config()
+# Restart the milter-greylist server
+sub apply_ratelimit_config
+{
+&foreign_require("init");
+my $init = &get_ratelimit_init_name();
+return &init::restart_action($init);
+}
+
+# is_ratelimit_enabled()
+# Returns 1 if the ratelimit server is running and the mail server is using it
+sub is_ratelimit_enabled
+{
+# Enabled at boot?
+&foreign_require("init");
+my $init = &get_ratelimit_init_name();
+return 0 if (&init::action_status($init) != 2);
+
+# Check mail server
+my $conf = &get_ratelimit_config();
+my ($socket) = grep { $_->{'name'} eq 'socket' } @$conf;
+return 0 if (!$socket);		# No socket in config?!
+my $wantmilter = "local:".$socket->{'value'};
+&require_mail();
+if ($config{'mail_system'} == 0) {
+	# Check Postfix config
+	my $milters = &postfix::get_real_value("smtpd_milters");
+	if ($milters !~ /\Q$wantmilter\E/) {
+		# Postfix not using the milter
+		return 0;
+		}
+	}
+elsif ($config{'mail_system'} == 1) {
+	# Check Sendmail config
+	my @feats = &sendmail::list_features();
+	my ($milter) = grep { $_->{'text'} =~ /INPUT_MAIL_FILTER/ &&
+			      $_->{'text'} =~ /\Q$wantmilter\E/ } @feats;
+	if (!$milter) {
+		# Sendmail not using the milter
+		return 0;
+		}
+	}
+else {
+	# Unsupported mail server
+	return 0;
+	}
+
+return 1;
+}
+
+# enable_ratelimit()
+# Turn on rate limiting, while printing progress
+sub enable_ratelimit
+{
+# Enable at boot
+&foreign_require("init");
+my $init = &get_ratelimit_init_name();
+&$first_print(&text('ratelimit_atboot', "<tt>$init</tt>"));
+&init::enable_at_boot($init);
+&$second_print($text{'setup_done'});
+
+# Start up now, if not running
+&$first_print($text{'ratelimit_start'});
+&init::stop_action($init);
+my $err = &init::start_action($init);
+if ($err) {
+	&$second_print(&text('ratelimit_estart', $err));
+	return 0;
+	}
+else {
+	&$second_print($text{'setup_done'});
+	}
+
+# Cconfigure mail server
+&$first_print($text{'ratelimit_mailserver'});
+my $conf = &get_ratelimit_config();
+my ($socket) = grep { $_->{'name'} eq 'socket' } @$conf;
+if (!$socket) {
+	&$second_print($text{'ratelimit_esocket'});
+	return 0;
+	}
+&require_mail();
+my $newmilter = "local:".$socket->{'value'};
+if ($config{'mail_system'} == 0) {
+	# Configure Postfix to use filter
+	&lock_file($postfix::config{'postfix_config_file'});
+	&postfix::set_current_value("milter_default_action", "accept");
+	&postfix::set_current_value("milter_protocol", 2);
+	my $milters = &postfix::get_current_value("smtpd_milters");
+	if ($milters !~ /\Q$newmilter\E/) {
+		$milters = $milters ? $milters.",".$newmilter : $newmilter;
+		&postfix::set_current_value("smtpd_milters", $milters);
+		&postfix::set_current_value("non_smtpd_milters", $milters);
+		}
+	&unlock_file($postfix::config{'postfix_config_file'});
+
+	# Apply Postfix config
+	&postfix::reload_postfix();
+	}
+elsif ($config{'mail_system'} == 1) {
+	# Configure Sendmail to use filter
+	&lock_file($sendmail::config{'sendmail_mc'});
+	my $changed = 0;
+	my @feats = &sendmail::list_features();
+
+	# Check for filter definition
+	my ($milter) = grep { $_->{'text'} =~ /INPUT_MAIL_FILTER/ &&
+			      $_->{'text'} =~ /\Q$newmilter\E/ } @feats;
+	if (!$milter) {
+		# Add to .mc file
+		&sendmail::create_feature({
+			'type' => 0,
+	    		'text' =>
+			  "INPUT_MAIL_FILTER(`ratelimit-filter', `S=$newmilter')" });
+		$changed++;
+		}
+
+	# Check for config for filters to call
+	my ($def) = grep { $_->{'type'} == 2 &&
+			   $_->{'name'} eq 'confINPUT_MAIL_FILTERS' } @feats;
+	if ($def) {
+		my @filters = split(/,/, $def->{'value'});
+		if (&indexof("ratelimit-filter", @filters) < 0) {
+			# Add to existing define
+			push(@filters, 'ratelimit-filter');
+			$def->{'value'} = join(',', @filters);
+			&sendmail::modify_feature($def);
+			$changed++;
+			}
+		}
+	else {
+		# Add the define
+		&sendmail::create_feature({
+			'type' => 2,
+			'name' => 'confINPUT_MAIL_FILTERS',
+			'value' => 'ratelimit-filter' });
+		$changed++;
+		}
+
+	if ($changed) {
+		&rebuild_sendmail_cf();
+		}
+	&unlock_file($sendmail::config{'sendmail_mc'});
+	if ($changed) {
+		&sendmail::restart_sendmail();
+		}
+	}
+&$second_print($text{'setup_done'});
+
+return 1;
 }
 
 1;

@@ -19,6 +19,22 @@ print $ok ? $text{'ratelimit_installed'}
 # If config didn't exist before, remove any list and racl lines
 # to disable default greylisting
 if (!$before) {
+	print &text('ratelimit_clearing'),"<br>\n";
+	$conf = &get_ratelimit_config();
+	foreach my $c (@$conf) {
+		if ($c->{'name'} eq 'list' || $c->{'name'} eq 'racl') {
+			&save_ratelimit_directive($conf, $c, undef);
+			}
+		}
+	($nospf) = grep { $_->{'name'} eq 'nospf' } @$conf;
+	if (!$nospf) {
+		&save_ratelimit_directive($conf, undef,
+			{ 'name' => 'nospf',
+			  'values' => [] });
+		}
+	&flush_file_lines();
+	&apply_ratelimit_config();
+	print $text{'setup_done'},"<p>\n";
 	}
 
 &ui_print_footer("ratelimit.cgi", $text{'ratelimit_return'});

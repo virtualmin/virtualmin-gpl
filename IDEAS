@@ -47,5 +47,8 @@
 	- backup / restore
 	- command line API?
 	- web UI
+	- delete most directives from config on new install
 	- CHANGELOG
 	- Documentation
+	- set "nospf" in config file
+	- See emails from Eric "Postfix user rate limiting"

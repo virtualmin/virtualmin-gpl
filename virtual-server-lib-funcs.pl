@@ -19,7 +19,8 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
 		 "balancer", "newfeatures", "resources", "backups",
 		 "domainname", "commands", "connectivity", "plans",
 		 "postgrey", "wizard", "security", "json", "redirects", "ftp",
-		 "dkim", "provision", "stats", "bkeys", "rs", "cron") {
+		 "dkim", "provision", "stats", "bkeys", "rs", "cron",
+		 "ratelimit") {
 	do "$virtual_server_root/$lib-lib.pl";
 	if ($@ && -r "$virtual_server_root/$lib-lib.pl") {
 		print STDERR "failed to load $lib-lib.pl : $@\n";
@@ -11432,7 +11433,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    'validate', 'chroot', 'global', 'changelog',
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
    $config{'mail_system'} == 0 ? ( 'postgrey' ) : ( ),
-   'dkim', 'provision',
+   'dkim', 'ratelimit', 'provision',
    $config{'mail'} ? ( 'autoconfig' ) : ( ),
    );
 local %tmplcat = (
@@ -11465,6 +11466,7 @@ local %tmplcat = (
 	'global' => 'custom',
 	'postgrey' => 'email',
 	'dkim' => 'email',
+	'ratelimit' => 'email',
 	'changelog' => 'setting',
 	'provision' => 'setting',
 	'autoconfig' => 'email',
@@ -11472,6 +11474,7 @@ local %tmplcat = (
 local %nonew = ( 'history', 1,
 		 'postgrey', 1,
 		 'dkim', 1,
+		 'ratelimit', 1,
 		 'provision', 1,
 	       );
 local @tlinks = map { $nonew{$_} ? "${_}.cgi"

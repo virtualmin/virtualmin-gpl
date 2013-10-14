@@ -6222,11 +6222,19 @@ ratelimit_esendmailmc=Email rate limiting cannot be enabled for Sendmail unless 
 ratelimit_failed=Email rate limiting is not available on this system : $1
 ratelimit_installdesc=However, Virtualmin can attempt to automatically install the required package for you.
 ratelimit_ecannot=You are not allowed to configure email rate limiting
-dkim_return=rate limiting form
+ratelimit_return=rate limiting form
+ratelimit_header=Rate limiting settings
+ratelimit_enabled=Rate limiting enabled?
 
 ratelimit_title4=Install Email Rate Limiting
 ratelimit_installing=Installing the email rate limiting package ..
 ratelimit_installfailed=.. installation failed!
 ratelimit_installed=.. installation completed successfully
+ratelimit_clearing=Removing un-necessary directives from configuration ..
+ratelimit_atboot=Enabling action $1 at boot time ..
+ratelimit_start=Starting milter-greylist server ..
+ratelimit_estart=.. startup failed : $1
+ratelimit_mailserver=Configuring mail server to use milter-greylist server ..
+ratelimit_esocket=.. no socket file found in config!
 
 __norefs=1

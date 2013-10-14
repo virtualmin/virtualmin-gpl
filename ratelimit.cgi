@@ -24,11 +24,11 @@ print &ui_form_start("enable_ratelimit.cgi");
 print &ui_table_start($text{'ratelimit_header'}, undef, 2);
 
 # Enabled?
-$ratelimit = &get_ratelimit_config();
 print &ui_table_row($text{'ratelimit_enabled'},
-	&ui_yesno_radio("enabled", $ratelimit && $ratelimit->{'enabled'}));
+	&ui_yesno_radio("enabled", &is_ratelimit_enabled()));
 
-# XXX rate limits
+# Max messages / hour for all domains
+# XXX
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
