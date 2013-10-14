@@ -884,7 +884,7 @@ my $cmd = "cd $sendmail::config{'sendmail_features'}/m4 ; ".
 	  "m4 $sendmail::config{'sendmail_features'}/m4/cf.m4 ".
 	  "$sendmail::config{'sendmail_mc'}";
 &lock_file($sendmail::config{'sendmail_cf'});
-&system_logged("$cmd 2>/dev/null >$config{'sendmail_cf'} ".
+&system_logged("$cmd 2>/dev/null >$sendmail::config{'sendmail_cf'} ".
 	       "</dev/null");
 &unlock_file($sendmail::config{'sendmail_cf'});
 }
