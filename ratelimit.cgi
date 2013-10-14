@@ -20,15 +20,17 @@ if ($err) {
 	}
 
 # Show form to enable
-print &ui_form_start("enable_ratelimit.cgi");
+print &ui_form_start("save_ratelimit.cgi");
 print &ui_table_start($text{'ratelimit_header'}, undef, 2);
 
 # Enabled?
 print &ui_table_row($text{'ratelimit_enabled'},
-	&ui_yesno_radio("enabled", &is_ratelimit_enabled()));
+	&ui_yesno_radio("enable", &is_ratelimit_enabled()));
 
 # Max messages / hour for all domains
-# XXX
+print &ui_table_row($text{'ratelimit_max'},
+	&ui_opt_textbox("max", $max, 6, $text{'form_unlimit'},
+			$text{'form_atmost'})." ".$text{'ratelimit_hour'});
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);

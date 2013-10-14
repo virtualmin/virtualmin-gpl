@@ -86,30 +86,32 @@ my $lref = &read_file_lines($cfile, 1);
 for(my $i=0; $i<@$lref; $i++) {
 	my $l = $lref->[$i];
 	$l =~ s/#.*$//;
-	next if (!/\S/);
+	next if ($l !~ /\S/);
 	my $lnum = $i;
-	while($l =~ s/\/\s*$//) {
+	while($l =~ s/\\\s*$//) {
 		# Ends with / .. continue on next line
-		$l .= $lref->[++$i];
+		$nl = $lref->[++$i];
+		$nl =~ s/#.*$//;
+		$l .= $nl;
 		}
 	# Split up line like foo bar { smeg spod }
-	my @toks = &apache::wsplit($l);
-	next if (!@toks);
+	my $toks = &apache::wsplit($l);
+	next if (!@$toks);
 	my $dir = { 'line' => $lnum,
 		    'eline' => $i,
 		    'file' => $cfile,
-		    'name' => shift(@toks),
+		    'name' => shift(@$toks),
 		    'values' => [ ] };
-	while(@toks && $toks[0] ne "{") {
-		push(@{$dir->{'values'}}, shift(@toks));
+	while(@$toks && $toks->[0] ne "{") {
+		push(@{$dir->{'values'}}, shift(@$toks));
 		}
 	$dir->{'value'} = $dir->{'values'}->[0];
-	if ($toks[0] eq "{") {
+	if ($toks->[0] eq "{") {
 		# Has sub-members
 		$dir->{'members'} = [ ];
-		shift(@toks);
-		while(@toks && $toks[0] ne "{") {
-			push(@{$dir->{'members'}}, shift(@toks));
+		shift(@$toks);
+		while(@$toks && $toks->[0] ne "{") {
+			push(@{$dir->{'members'}}, shift(@$toks));
 			}
 		}
 	push(@rv, $dir);
@@ -181,7 +183,8 @@ sub apply_ratelimit_config
 {
 &foreign_require("init");
 my $init = &get_ratelimit_init_name();
-return &init::restart_action($init);
+my ($ok, $err) = &init::restart_action($init);
+return $ok ? undef : $err;
 }
 
 # is_ratelimit_enabled()
@@ -239,8 +242,8 @@ my $init = &get_ratelimit_init_name();
 # Start up now, if not running
 &$first_print($text{'ratelimit_start'});
 &init::stop_action($init);
-my $err = &init::start_action($init);
-if ($err) {
+my ($ok, $err) = &init::start_action($init);
+if (!$ok) {
 	&$second_print(&text('ratelimit_estart', $err));
 	return 0;
 	}
@@ -322,6 +325,90 @@ elsif ($config{'mail_system'} == 1) {
 		&sendmail::restart_sendmail();
 		}
 	}
+&$second_print($text{'setup_done'});
+
+return 1;
+}
+
+# disable_ratelimit()
+# Shut down the greylist server and stop the mail sever from using it
+sub disable_ratelimit
+{
+&$first_print($text{'ratelimit_unmailserver'});
+my $conf = &get_ratelimit_config();
+my ($socket) = grep { $_->{'name'} eq 'socket' } @$conf;
+if (!$socket) {
+	&$second_print($text{'ratelimit_esocket'});
+	return 0;
+	}
+my $oldmilter = "local:".$socket->{'value'};
+&require_mail();
+if ($config{'mail_system'} == 0) {
+	# Configure Postfix to not use filter
+	&lock_file($postfix::config{'postfix_config_file'});
+	my $milters = &postfix::get_current_value("smtpd_milters");
+	if ($milters =~ /\Q$oldmilter\E/) {
+		$milters = join(",", grep { $_ ne $oldmilter }
+				split(/\s+,\s+/, $milters));
+		&postfix::set_current_value("smtpd_milters", $milters);
+		&postfix::set_current_value("non_smtpd_milters", $milters);
+		}
+	&unlock_file($postfix::config{'postfix_config_file'});
+
+	# Apply Postfix config
+	&postfix::reload_postfix();
+	}
+elsif ($config{'mail_system'} == 1) {
+	# Configure Sendmail to not use filter
+	&lock_file($sendmail::config{'sendmail_mc'});
+	my @feats = &sendmail::list_features();
+	my $changed = 0;
+
+	# Remove from list of milter to call
+	my ($def) = grep { $_->{'type'} == 2 &&
+			   $_->{'name'} eq 'confINPUT_MAIL_FILTERS' } @feats;
+	if ($def) {
+		my @filters = split(/,/, $def->{'value'});
+		@filters = grep { $_ ne 'ratelimit-filter' } @filters;
+		if (@filters) {
+			# Some still left, so update
+			$def->{'value'} = join(',', @filters);
+			&sendmail::modify_feature($def);
+			}
+		else {
+			# Delete completely
+			&sendmail::delete_feature($def);
+			}
+		$changed++;
+		}
+
+	# Remove milter definition
+	my ($milter) = grep { $_->{'text'} =~ /INPUT_MAIL_FILTER/ &&
+			      $_->{'text'} =~ /\Q$oldmilter\E/ } @feats;
+	if ($milter) {
+		&sendmail::delete_feature($milter);
+		$changed++;
+		}
+
+	if ($changed) {
+		&rebuild_sendmail_cf();
+		}
+	&unlock_file($sendmail::config{'sendmail_mc'});
+	if ($changed) {
+		&sendmail::restart_sendmail();
+		}
+	}
+&$second_print($text{'setup_done'});
+
+# Stop filter now
+&$first_print($text{'ratelimit_stop'});
+my $init = &get_ratelimit_init_name();
+&init::stop_action($init);
+&$second_print($text{'setup_done'});
+
+# Disable filter at boot time
+&$first_print($text{'ratelimit_unboot'});
+&init::disable_at_boot($init);
 &$second_print($text{'setup_done'});
 
 return 1;
