@@ -2,7 +2,12 @@
 
 sub get_ratelimit_type
 {
-if ($gconfig{'os_type'} eq 'debian-linux') {
+if (-r "/usr/local/etc/mail/greylist.conf" && 
+    -e "/usr/local/bin/milter-greylist") {
+	# Installed from source
+	return 'source';
+	}
+elsif ($gconfig{'os_type'} eq 'debian-linux') {
 	# Debian or Ubuntu packages
 	return 'debian';
 	}
@@ -15,9 +20,11 @@ return undef;	# Not supported
 
 sub get_ratelimit_config_file
 {
-return &get_ratelimit_type() eq 'redhat' ? '/etc/mail/greylist.conf' :
-       &get_ratelimit_type() eq 'debian' ? '/etc/milter-greylist/greylist.conf'
-					 : undef;
+my $type = &get_ratelimit_type();
+return $type eq 'redhat' ? '/etc/mail/greylist.conf' :
+       $type eq 'debian' ? '/etc/milter-greylist/greylist.conf' :
+       $type eq 'source' ? '/usr/local/etc/mail/greylist.conf' :
+			   undef;
 }
 
 sub get_ratelimit_init_name
@@ -37,9 +44,11 @@ if (!&get_ratelimit_type()) {
 my $config_file = &get_ratelimit_config_file();
 return &text('ratelimit_econfig', "<tt>$config_file</tt>")
 	if (!-r $config_file);
-my $init = &get_ratelimit_init_name();
-return &text('ratelimit_einit', "<tt>$init</tt>")
-	if (!&init::action_status($init));
+if (&get_ratelimit_type() ne 'source') {
+	my $init = &get_ratelimit_init_name();
+	return &text('ratelimit_einit', "<tt>$init</tt>")
+		if (!&init::action_status($init));
+	}
 
 # Check mail server
 &require_mail();
@@ -125,6 +134,7 @@ sub save_ratelimit_directive
 {
 my ($conf, $o, $n) = @_;
 my $file = $o ? $o->{'file'} : &get_ratelimit_config_file();
+my $lref = &read_file_lines($file);
 my @lines = $n ? &make_ratelimit_lines($n) : ();
 my $idx = &indexof($o, @$conf);
 my ($roffset, $rlines);
@@ -154,6 +164,7 @@ elsif (!$o && $n) {
 	push(@$conf, $n);
 	$n->{'line'} = scalar(@$lref);
 	$n->{'eline'} = $n->{'line'} + scalar(@lines) - 1;
+	$n->{'file'} = $file;
 	push(@$lref, @lines);
 	}
 if ($rlines) {
@@ -232,11 +243,27 @@ return 1;
 # Turn on rate limiting, while printing progress
 sub enable_ratelimit
 {
+# Build stop and start commands (needed when installed from source)
+my $conf = &get_ratelimit_config();
+my ($pidfile) = grep { $_->{'name'} eq 'pidfile' } @$conf;
+if (!$pidfile) {
+	$pidfile = { 'name' => 'pidfile',
+		     'values' => [ '/var/run/milter-greylist.pid' ] };
+	&save_ratelimit_directive($conf, undef, $pidfile);
+	&flush_file_lines($pidfile->{'file'});
+	}
+my $stopcmd = "kill `cat $pidfile->{'values'}->[0]` && sleep 5";
+my $startcmd = &has_command("milter-greylist").
+	       " -f ".&get_ratelimit_config_file();
+
 # Enable at boot
 &foreign_require("init");
 my $init = &get_ratelimit_init_name();
 &$first_print(&text('ratelimit_atboot', "<tt>$init</tt>"));
-&init::enable_at_boot($init);
+&init::enable_at_boot($init,
+	"Start milter-greylist",
+	$startcmd, $stopcmd, undef, 
+	{ 'fork' => 1 });
 &$second_print($text{'setup_done'});
 
 # Start up now, if not running
@@ -253,7 +280,6 @@ else {
 
 # Cconfigure mail server
 &$first_print($text{'ratelimit_mailserver'});
-my $conf = &get_ratelimit_config();
 my ($socket) = grep { $_->{'name'} eq 'socket' } @$conf;
 if (!$socket) {
 	&$second_print($text{'ratelimit_esocket'});

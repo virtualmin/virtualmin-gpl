@@ -45,7 +45,6 @@
 	- milter-greylist
 	- help page
 	- backup / restore
-	- command line API?
 	- web UI
 	- delete most directives from config on new install
 	- CHANGELOG
