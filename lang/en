@@ -6227,7 +6227,6 @@ ratelimit_header=Rate limiting settings
 ratelimit_enabled=Rate limiting enabled?
 ratelimit_err=Failed to save email rate limiting
 ratelimit_max=Global message limit
-ratelimit_hour=per hour
 
 ratelimit_title4=Install Email Rate Limiting
 ratelimit_installing=Installing the email rate limiting package ..
@@ -6242,5 +6241,12 @@ ratelimit_esocket=.. no socket file found in config!
 ratelimit_unmailserver=Configuring mail server to stop using milter-greylist server ..
 ratelimit_stop=Stopping milter-greylist server ..
 ratelimit_unboot=Disabling milter-greylist server at boot time ..
+ratelimit_per=At most $1 every $2 $3
+ratelimit_s=seconds
+ratelimit_m=minutes
+ratelimit_h=hours
+ratelimit_d=days
+ratelimit_w=weeks
+ratelimit_y=years
 
 __norefs=1

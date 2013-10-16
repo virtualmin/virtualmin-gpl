@@ -28,11 +28,43 @@ print &ui_table_row($text{'ratelimit_enabled'},
 	&ui_yesno_radio("enable", &is_ratelimit_enabled()));
 
 # Max messages / hour for all domains
+$conf = &get_ratelimit_config();
+($rl) = grep { $_->{'name'} eq 'ratelimit' &&
+	       $_->{'values'}->[0] eq 'virtualmin_limit' } @$conf;
 print &ui_table_row($text{'ratelimit_max'},
-	&ui_opt_textbox("max", $max, 6, $text{'form_unlimit'},
-			$text{'form_atmost'})." ".$text{'ratelimit_hour'});
+	&ui_radio("max_def", $rl ? 0 : 1,
+		  [ [ 1, $text{'form_unlimit'} ],
+		    [ 0, &ratelimit_field("max", $rl) ] ]));
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
 &ui_print_footer("", $text{'index_return'});
+
+# ratelimit_field(name, &ratelimit-object)
+# Return HTML for a field for selecting a rate and time
+sub ratelimit_field
+{
+my ($name, $rl) = @_;
+my ($num, $time, $units);
+if ($rl) {
+	$num = $rl->{'values'}->[2];
+	$time = $rl->{'values'}->[4];
+	if ($time =~ s/([smhdwy])$//) {
+		$units = $1;
+		}
+	else {
+		$units = "s";
+		}
+	}
+else {
+	$time = 1;
+	$units = "h";
+	}
+return &text('ratelimit_per',
+	     &ui_textbox($name."_num", $num, 5),
+	     &ui_textbox($name."_time", $time, 5),
+	     &ui_select($name."_units", $units,
+			[ map { [ $_, $text{'ratelimit_'.$_} ] }
+			      ('s', 'm', 'h', 'd', 'w', 'y') ]));
+}
