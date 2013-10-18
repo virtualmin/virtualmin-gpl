@@ -128,12 +128,13 @@ for(my $i=0; $i<@$lref; $i++) {
 return \@rv;
 }
 
-# save_ratelimit_directive(&config, &old, &new)
+# save_ratelimit_directive(&config, &old, &new, [&create-before])
 # Create, update or delete a ratelimiting directive
 sub save_ratelimit_directive
 {
-my ($conf, $o, $n) = @_;
-my $file = $o ? $o->{'file'} : &get_ratelimit_config_file();
+my ($conf, $o, $n, $b4) = @_;
+my $file = $o ? $o->{'file'} : $b4 ? $b4->{'file'} :
+	   &get_ratelimit_config_file();
 my $lref = &read_file_lines($file);
 my @lines = $n ? &make_ratelimit_lines($n) : ();
 my $idx = &indexof($o, @$conf);
@@ -161,11 +162,27 @@ elsif ($o && !$n) {
 	}
 elsif (!$o && $n) {
 	# Add new directive
-	push(@$conf, $n);
-	$n->{'line'} = scalar(@$lref);
-	$n->{'eline'} = $n->{'line'} + scalar(@lines) - 1;
-	$n->{'file'} = $file;
-	push(@$lref, @lines);
+	if ($b4) {
+		# Before some directive
+		$rlines = scalar(@lines);
+		$roffset = $b4->{'line'} - 1;
+		my $b4idx = &indexof($b4, @$conf);
+		$b4idx >= 0 || &error("Directive to add before was not found ".
+				      "in config!");
+		splice(@$conf, $b4idx, 0, $n);
+		splice(@$lref, $b4->{'line'}, 0, @lines);
+		$n->{'line'} = $b4->{'line'};
+		$n->{'eline'} = $n->{'line'} + scalar(@lines) - 1;
+		$n->{'file'} = $file;
+		}
+	else {
+		# At end of file
+		push(@$conf, $n);
+		$n->{'line'} = scalar(@$lref);
+		$n->{'eline'} = $n->{'line'} + scalar(@lines) - 1;
+		$n->{'file'} = $file;
+		push(@$lref, @lines);
+		}
 	}
 if ($rlines) {
 	foreach my $c (@$conf) {
