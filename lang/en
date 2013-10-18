@@ -6064,6 +6064,7 @@ mrecords_desc=This page allows you to manually modify all DNS records in the dom
 mrecords_err=Failed to save DNS records
 mrecords_enone=Nothing entered!
 mrecords_evalidate=Validation failed : $1
+mrecords_validate=Validate new records?
 
 mxv_unsupported=Only Sendmail and Postfix are supported for restricting relaying
 mxv_rrm=The $1 directive is not set in the Postfix configuration

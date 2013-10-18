@@ -25,6 +25,8 @@ print &ui_hidden("dom", $in{'dom'});
 print &ui_table_start(undef, "width=100%", 2);
 print &ui_table_row(undef, &ui_textarea("data", $data, 30, 80, "off",
 					0, "style='width:100%'"), 2);
+print &ui_table_row(undef,
+	&ui_checkbox("validate", 1, $text{'mrecords_validate'}, 1));
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 

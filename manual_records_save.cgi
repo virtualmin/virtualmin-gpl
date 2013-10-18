@@ -31,7 +31,7 @@ $temp = &transname();
 $recs = [ &bind8::read_zone_file($chroot_relative_file, $d->{'dom'}) ];
 &set_record_ids($recs);
 $err = &validate_dns($d, $recs);
-if ($err && !$olderr) {
+if ($in{'validate'} && $err && !$olderr) {
 	# Undo over-write
 	&copy_source_dest($temp, $file);
 	&error(&text('mrecords_evalidate', $err));
