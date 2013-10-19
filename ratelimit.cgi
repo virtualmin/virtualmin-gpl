@@ -19,6 +19,14 @@ if ($err) {
 	return;
 	}
 
+# If installed, check if version is usable
+$ver = &get_milter_greylist_version();
+if (&compare_versions($ver, "4.3.7") < 0) {
+	print &text('ratelimit_badversion', $ver, "4.3.7"),"<p>\n";
+	&ui_print_footer("", $text{'index_return'});
+	return;
+	}
+
 # Show form to enable
 print &ui_form_start("save_ratelimit.cgi");
 print &ui_table_start($text{'ratelimit_header'}, undef, 2);

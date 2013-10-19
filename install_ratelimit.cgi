@@ -18,13 +18,14 @@ print $ok ? $text{'ratelimit_installed'}
 
 # If config didn't exist before, remove any list and racl lines
 # to disable default greylisting
-if (!$before || 1) {
+if (!$before && $ok) {
 	print &text('ratelimit_clearing'),"<br>\n";
 	$conf = &get_ratelimit_config();
 	@copy = @$conf;		# Make a copy because deleting changes $conf
 	foreach my $c (@copy) {
 		if ($c->{'name'} eq 'list' ||
-		    $c->{'name'} eq 'racl' && $c->{'values'}->[1] ne 'default') {
+		    $c->{'name'} eq 'racl' && $c->{'values'}->[1] ne 'default'||
+		    $c->{'name'} eq 'acl' && $c->{'values'}->[1] ne 'default') {
 			&save_ratelimit_directive($conf, $c, undef);
 			}
 		}

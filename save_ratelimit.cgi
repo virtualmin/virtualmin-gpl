@@ -66,7 +66,7 @@ else {
 		    };
 	my $newracl = { 'name' => 'racl',
 			'values' => [
-			  'blacklist', 'from' '/.*/', 'ratelimit', $ratelimit,
+			  'blacklist', 'from', '/.*/', 'ratelimit', $ratelimit,
 			  'msg', 'Message quota exceeded' ],
 		      };
 	&save_ratelimit_directive($conf, $rl, $newrl);

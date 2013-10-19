@@ -49,6 +49,9 @@ if (&get_ratelimit_type() ne 'source') {
 	return &text('ratelimit_einit', "<tt>$init</tt>")
 		if (!&init::action_status($init));
 	}
+if (!&get_milter_greylist_path()) {
+	return &text('ratelimit_ecmd', "<tt>milter-greylist</tt>");
+	}
 
 # Check mail server
 &require_mail();
@@ -215,6 +218,23 @@ my ($ok, $err) = &init::restart_action($init);
 return $ok ? undef : $err;
 }
 
+# get_milter_greylist_path()
+# Returns the full path to milter-greylist, if installed
+sub get_milter_greylist_path
+{
+return &has_command("milter-greylist");
+}
+
+# get_milter_greylist_version()
+# Returns the installed version number, or undef
+sub get_milter_greylist_version
+{
+my $path = &get_milter_greylist_path();
+return undef if (!$path || !-x $path);
+my $out = &backquote_command("$path -r 2>&1 </dev/null");
+return $out =~ /milter-greylist-([0-9\.]+)/ ? $1 : undef;
+}
+
 # is_ratelimit_enabled()
 # Returns 1 if the ratelimit server is running and the mail server is using it
 sub is_ratelimit_enabled
@@ -281,6 +301,18 @@ my $init = &get_ratelimit_init_name();
 	"Start milter-greylist",
 	$startcmd, $stopcmd, undef, 
 	{ 'fork' => 1 });
+
+# On Debian, update the defaults file
+my $dfile = "/etc/default/milter-greylist";
+if (&get_ratelimit_type() eq 'debian' && -r $dfile) {
+	my $lref = &read_file_lines($dfile);
+	foreach my $l (@$lref) {
+		if ($l =~ /^\s*ENABLED=/) {
+			$l = "ENABLED=1";
+			}
+		}
+	&flush_file_lines($dfile);
+	}
 &$second_print($text{'setup_done'});
 
 # Start up now, if not running
