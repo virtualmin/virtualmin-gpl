@@ -5905,8 +5905,10 @@ elsif ($p) {
 				}
 			}
 		if (!$found_thunderbird) {
+			local $prot = $p == $d->{'web_sslport'} ?
+					"https" : "http";
 			push(@rd, "/mail/config-v1.1.xml ".
-				  "/cgi-bin/autoconfig.cgi");
+				  "$prot://$d->{'dom'}/cgi-bin/autoconfig.cgi");
 			&apache::save_directive("Redirect", \@rd,
 						$vconf, $conf);
 			}
