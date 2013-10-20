@@ -38,11 +38,34 @@ print &ui_table_row($text{'ratelimit_enabled'},
 # Max messages / hour for all domains
 $conf = &get_ratelimit_config();
 ($rl) = grep { $_->{'name'} eq 'ratelimit' &&
-	       $_->{'values'}->[0] eq 'virtualmin_limit' } @$conf;
+	       $_->{'values'}->[0] eq '"virtualmin_limit"' } @$conf;
 print &ui_table_row($text{'ratelimit_max'},
 	&ui_radio("max_def", $rl ? 0 : 1,
 		  [ [ 1, $text{'form_unlimit'} ],
 		    [ 0, &ratelimit_field("max", $rl) ] ]));
+
+# Max messages / hour by domain
+@rls = grep { $_->{'name'} eq 'ratelimit' &&
+              $_->{'values'}->[0] =~ /^"domain_(\d+)"/ } @$conf;
+$dtable = &ui_columns_start([ $text{'ratelimit_dom'},
+			      $text{'ratelimit_dmax'} ]);
+$i = 0;
+foreach $rl (@rls, {}, {}) {
+	my $did = $rl->{'values'}->[0] =~ /"domain_(\d+)"/ ? $1 : undef;
+	$dtable .= &ui_columns_row([
+		&ui_select("dom_$i", $did, 
+			[ [ "", "&nbsp;" ],
+			  map { [ $_->{'id'}, &show_domain_name($_) ] }
+			      grep { $_->{'mail'} }
+				   sort { $a->{'dom'} cmp $b->{'dom'} }
+					&list_domains() ]).
+		"&nbsp;",
+		&ratelimit_field("max_$i", $rl),
+		]);
+	$i++;
+	}
+$dtable .= &ui_columns_end();
+print &ui_table_row($text{'ratelimit_dtable'}, $dtable);
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);

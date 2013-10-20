@@ -91,7 +91,6 @@ return scalar(@inst) || !&check_ratelimit();
 # Returns the current rate-limiting config, parsed into an array ref
 sub get_ratelimit_config
 {
-&require_apache();
 my $cfile = &get_ratelimit_config_file();
 my @rv;
 my $lref = &read_file_lines($cfile, 1);
@@ -107,7 +106,7 @@ for(my $i=0; $i<@$lref; $i++) {
 		$l .= $nl;
 		}
 	# Split up line like foo bar { smeg spod }
-	my $toks = &apache::wsplit($l);
+	my $toks = &wsplit_with_quotes($l);
 	next if (!@$toks);
 	my $dir = { 'line' => $lnum,
 		    'eline' => $i,
@@ -118,6 +117,8 @@ for(my $i=0; $i<@$lref; $i++) {
 		push(@{$dir->{'values'}}, shift(@$toks));
 		}
 	$dir->{'value'} = $dir->{'values'}->[0];
+	$dir->{'value'} =~ s/^'(.*)'$/$1/;
+	$dir->{'value'} =~ s/^"(.*)"$/$1/;
 	if ($toks->[0] eq "{") {
 		# Has sub-members
 		$dir->{'members'} = [ ];
@@ -200,12 +201,11 @@ if ($rlines) {
 sub make_ratelimit_lines
 {
 my ($dir) = @_;
-&require_apache();
 my @w = ( $dir->{'name'}, @{$dir->{'values'}} );
 if ($dir->{'members'}) {
 	push(@w, "{", @{$dir->{'members'}}, "}");
 	}
-return &apache::wjoin(@w);
+return join(" ", @w);
 }
 
 # apply_ratelimit_config()
@@ -233,6 +233,10 @@ my $path = &get_milter_greylist_path();
 return undef if (!$path || !-x $path);
 my $out = &backquote_command("$path -r 2>&1 </dev/null");
 return $out =~ /milter-greylist-([0-9\.]+)/ ? $1 : undef;
+}
+
+sub get_mailserver_chroot
+{
 }
 
 # is_ratelimit_enabled()
@@ -392,6 +396,22 @@ elsif ($config{'mail_system'} == 1) {
 		$changed++;
 		}
 
+	# Add other defines to change milter behavior
+	foreach my $l ([ 'confMILTER_MACROS_CONNECT', 'j, {if_addr}' ],
+		       [ 'confMILTER_MACROS_HELO', '{verify}, {cert_subject}' ],
+		       [ 'confMILTER_MACROS_ENVFROM', 'i, {auth_authen}' ],
+		       [ 'confMILTER_MACROS_ENVRCPT', '{greylist}' ]) {
+		my ($def) = grep { $_->{'type'} == 2 &&
+				   $_->{'name'} eq $l->[0] } @$conf;
+		if (!$def) {
+			&sendmail::create_feature({
+				'type' => 2,
+				'name' => $l->[0],
+				'value' => $l->[1] });
+			$changed++;
+			}
+		}
+
 	if ($changed) {
 		&rebuild_sendmail_cf();
 		}
@@ -487,6 +507,23 @@ my $init = &get_ratelimit_init_name();
 &$second_print($text{'setup_done'});
 
 return 1;
+}
+
+# wsplit_with_quotes(string)
+# Splits a string like  foo "foo bar" bazzz  into an array of words, preserving
+# the quotes around them
+sub wsplit_with_quotes
+{
+my $s = $_[0];
+my @rv;
+$s =~ s/\\\"/\0/g;
+while($s =~ /^("[^"]*")\s*(.*)$/ || $s =~ /^(\S+)\s*(.*)$/) {
+	my $w = $1;
+	$s = $2;
+	$w =~ s/\0/"/g;
+	push(@rv, $w);
+	}
+return \@rv;
 }
 
 1;
