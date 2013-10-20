@@ -5405,15 +5405,28 @@ elsif (!$m && $dependent) {
 	delete($m->{'line'});
 	delete($m->{'uline'});
 	$m->{'command'} .= " -o smtp_bind_address=$d->{'ip'}";
+	if ($d->{'ip6'}) {
+		$m->{'command'} .= " -o smtp_bind_address6=$d->{'ip6'}";
+		}
 	$m->{'name'} = "smtp-".$d->{'id'};
 	&postfix::create_master($m);
 	&postfix::reload_postfix();
 	}
 elsif ($m && $dependent) {
 	# Need to fix IP, maybe
+	my $changed = 0;
 	if ($m->{'command'} =~ /smtp_bind_address=([0-9\.]+)/ &&
 	    $1 ne $d->{'ip'}) {
 		$m->{'command'} =~ s/smtp_bind_address=([0-9\.]+)/smtp_bind_address=$d->{'ip'}/;
+		$changed++;
+		}
+	if ($d->{'ip6'} &&
+	    $m->{'command'} =~ /smtp_bind_address6=([a-f0-9:]+)/ &&
+	    $1 ne $d->{'ip6'}) {
+		$m->{'command'} =~ s/smtp_bind_address6=([a-f0-9:]+)/smtp_bind_address6=$d->{'ip6'}/;
+		$changed++;
+		}
+	if ($changed) {
 		&postfix::modify_master($m);
 		&postfix::reload_postfix();
 		}
