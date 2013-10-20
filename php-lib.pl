@@ -707,6 +707,7 @@ return @rv;
 sub list_available_php_versions
 {
 local ($d, $mode) = @_;
+local @rv;
 
 &require_apache();
 if ($d) {

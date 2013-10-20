@@ -3927,7 +3927,7 @@ sysinfo_webalizer=Webalizer version
 sysinfo_os=Operating system
 sysinfo_perl=Perl version
 sysinfo_perlpath=Path to Perl
-sysinfo_php=PHP version
+sysinfo_php=PHP versions
 
 remote_ecannot=You are not allowed to run remote commands
 remote_eprogram=Invalid remote program name
