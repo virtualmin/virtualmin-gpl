@@ -70,7 +70,16 @@ foreach $i (keys %in) {
 		}
 	}
 
-print "Content-type: text/plain\n\n";
+# Print correct MIME type for output format
+if ($format eq "xml") {
+	print "Content-type: application/xml\n\n";
+	}
+elsif ($format eq "json") {
+	print "Content-type: application/json\n\n";
+	}
+else {
+	print "Content-type: text/plain\n\n";
+	}
 
 # Execute the command within the same perl interpreter
 socketpair(SUBr, SUBw, AF_UNIX, SOCK_STREAM, PF_UNSPEC);
