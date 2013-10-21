@@ -38,7 +38,7 @@ else {
 $conf = &get_ratelimit_config();
 
 # Save global max
-&parse_ratelimit_field("max", $conf, "virtualmin_limit");
+&parse_ratelimit_field("max", $conf, "virtualmin_limit", ".*");
 
 # Save per-domain maxes
 @rls = grep { $_->{'name'} eq 'ratelimit' &&
@@ -47,13 +47,23 @@ $conf = &get_ratelimit_config();
                 $_->{'values'}->[4] =~ /^"domain_(\d+)"/ } @$conf;
 for(my $i=0; defined($did = $in{"dom_$i"}); $i++) {
 	next if (!$did);
-	($oldrl) = grep { $_->{'values'}->[0] eq "\"domain_$did\"" } @rls;
-	($oldracl) = grep { $_->{'values'}->[4] eq "\"domain_$did\"" } @racls;
-	# XXX
+	$d = &get_domain($did);
+	&parse_ratelimit_field("max_$i", $conf, "domain_$did",
+			       ".*\@$d->{'dom'}");
+	$done{$did}++;
 	}
 
 # Remove per-domain maxes that are no longer used
-# XXX
+foreach my $rl (@rls) {
+	if ($rl->{'values'}->[0] =~ /^"domain_(\d+)"/ && !$done{$1}) {
+		&save_ratelimit_directive($conf, $rl, undef);
+		}
+	}
+foreach my $racl (@racls) {
+	if ($racl->{'values'}->[4] =~ /^"domain_(\d+)"/ && !$done{$1}) {
+		&save_ratelimit_directive($conf, $racl, undef);
+		}
+	}
 
 &flush_file_lines();
 &unlock_file(&get_ratelimit_config_file());
@@ -77,11 +87,11 @@ $in{$name."_num"} =~ /^\d+$/ || &error($msg." : ".$text{'ratelimit_enum'});
 $in{$name."_time"} =~ /^\d+$/ || &error($msg." : ".$text{'ratelimit_etime'});
 }
 
-# parse_ratelimit_field(name, &config, config-limit-name)
+# parse_ratelimit_field(name, &config, config-limit-name, regexp)
 # Update the ratelimit of some type
 sub parse_ratelimit_field
 {
-my ($name, $conf, $ratelimit) = @_;
+my ($name, $conf, $ratelimit, $regexp) = @_;
 
 # Get existing limit objects
 my ($rl) = grep { $_->{'name'} eq 'ratelimit' &&
@@ -104,7 +114,7 @@ else {
 		    };
 	my $newracl = { 'name' => 'racl',
 			'values' => [
-			  'blacklist', 'from', '/.*/', 'ratelimit',
+			  'blacklist', 'from', "/$regexp/", 'ratelimit',
 			  "\"$ratelimit\"",
 			  'msg', '"Message quota exceeded"' ],
 		      };

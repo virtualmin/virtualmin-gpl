@@ -32,6 +32,13 @@ sub get_ratelimit_init_name
 return 'milter-greylist';
 }
 
+sub get_ratelimit_user
+{
+my $type = &get_ratelimit_type();
+return $type eq 'redhat' ? 'greylist' :
+       $type eq 'debian' ? 'greylist' : undef;
+}
+
 # check_ratelimit()
 # Returns undef if all the commands needed for ratelimiting are installed
 sub check_ratelimit
@@ -235,8 +242,15 @@ my $out = &backquote_command("$path -r 2>&1 </dev/null");
 return $out =~ /milter-greylist-([0-9\.]+)/ ? $1 : undef;
 }
 
+# get_mailserver_chroot()
+# Returns the chroot directory that the mailserver runs under. The
+# milter-greylist socket file must be relative to this.
 sub get_mailserver_chroot
 {
+if ($config{'mail_system'} == 0) {
+	return "/var/spool/postfix";
+	}
+return "";
 }
 
 # is_ratelimit_enabled()
@@ -252,7 +266,12 @@ return 0 if (&init::action_status($init) != 2);
 my $conf = &get_ratelimit_config();
 my ($socket) = grep { $_->{'name'} eq 'socket' } @$conf;
 return 0 if (!$socket);		# No socket in config?!
-my $wantmilter = "local:".$socket->{'value'};
+my $socketfile = $socket->{'value'};
+my $chroot = &get_mailserver_chroot();
+if ($chroot) {
+	$socketfile =~ s/^\Q$chroot\E//;
+	}
+my $wantmilter = "local:".$socketfile;
 &require_mail();
 if ($config{'mail_system'} == 0) {
 	# Check Postfix config
@@ -319,6 +338,53 @@ if (&get_ratelimit_type() eq 'debian' && -r $dfile) {
 	}
 &$second_print($text{'setup_done'});
 
+# Pick a socket file under the mail server's chroot
+&$first_print($text{'ratelimit_socket'});
+my $chroot = &get_mailserver_chroot();
+my ($oldsocket) = grep { $_->{'name'} eq 'socket' } @$conf;
+if (!$oldsocket) {
+	&$second_print($text{'ratelimit_esocket'});
+	return 0;
+	}
+if ($chroot) {
+	# Adjust the socket to ensure it is under the chroot
+	my $socketfile = $oldsocket->{'value'};
+	if (!&is_under_directory($chroot, $socketfile)) {
+		my $newsocket = { 'name' => 'socket',
+				  'value' => "\"$chroot$socketfile\"" };
+		&save_ratelimit_directive($conf, $oldsocket, $newsocket);
+		$socketfile = "$chroot$socketfile";
+		&flush_file_lines($oldsocket->{'file'});
+		}
+
+	# Change path in init script and defaults file if needed
+	foreach my $ifile (&init::action_filename($init),
+			   "/etc/default/milter-greylist") {
+		if (-r $ifile) {
+			my $lref = &read_file_lines($ifile);
+			foreach my $l (@$lref) {
+				if ($l =~ /^SOCKET\s*=/) {
+					$l = "SOCKET=$chroot$socketfile";
+					}
+				}
+			&flush_file_lines($ifile);
+			}
+		}
+
+	# Make sure the socket file directory exists
+	my $socketdir = "$chroot$socketfile";
+	$socketdir =~ s/\/[^\/]+$//;
+	if (!-d $socketdir) {
+		&make_dir($socketdir, 0775, 1);
+		my $user = &get_ratelimit_user();
+		if ($user) {
+			&set_ownership_permissions($user, undef, undef,
+						   $socketdir);
+			}
+		}
+	}
+&$second_print($text{'setup_done'});
+
 # Start up now, if not running
 &$first_print($text{'ratelimit_start'});
 &init::stop_action($init);
@@ -331,13 +397,8 @@ else {
 	&$second_print($text{'setup_done'});
 	}
 
-# Cconfigure mail server
+# Configure mail server
 &$first_print($text{'ratelimit_mailserver'});
-my ($socket) = grep { $_->{'name'} eq 'socket' } @$conf;
-if (!$socket) {
-	&$second_print($text{'ratelimit_esocket'});
-	return 0;
-	}
 &require_mail();
 my $newmilter = "local:".$socket->{'value'};
 if ($config{'mail_system'} == 0) {

@@ -78,7 +78,7 @@ sub ratelimit_field
 {
 my ($name, $rl) = @_;
 my ($num, $time, $units);
-if ($rl) {
+if ($rl && $rl->{'values'}->[4]) {
 	$num = $rl->{'values'}->[2];
 	$time = $rl->{'values'}->[4];
 	if ($time =~ s/([smhdwy])$//) {
