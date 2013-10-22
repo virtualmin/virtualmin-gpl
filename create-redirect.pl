@@ -67,7 +67,9 @@ $domain || &usage("No domain specified");
 $path || &usage("No redirect path specified");
 if ($url) {
 	$url =~ /^*(http|https):\/\/\S+$/ ||
-		&usage("The --redirect flag must be followed by a URL");
+	    $url =~ /^\/\S+$/ ||
+		&usage("The --redirect flag must be followed by a URL or ".
+		       "a URL path");
 	}
 elsif ($dir) {
 	$dir =~ /^\/\S+$/ && -d $dir ||

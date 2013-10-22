@@ -39,6 +39,7 @@ else {
 	if ($in{'mode'} == 0) {
 		# Redirect to a URL
 		$in{'url'} =~ /^(http|https):\/\/\S+$/ ||
+		    $in{'url'} =~ /^\/\S+$/ ||
 			&error($text{'redirect_eurl'});
 		$r->{'dest'} = $in{'url'};
 		$r->{'alias'} = 0;
