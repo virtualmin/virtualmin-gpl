@@ -36,7 +36,6 @@ if (!$before && $ok) {
 			  'values' => [] });
 		}
 	&flush_file_lines();
-	&apply_ratelimit_config();
 	print $text{'setup_done'},"<p>\n";
 	}
 

@@ -215,16 +215,6 @@ if ($dir->{'members'}) {
 return join(" ", @w);
 }
 
-# apply_ratelimit_config()
-# Restart the milter-greylist server
-sub apply_ratelimit_config
-{
-&foreign_require("init");
-my $init = &get_ratelimit_init_name();
-my ($ok, $err) = &init::restart_action($init);
-return $ok ? undef : $err;
-}
-
 # get_milter_greylist_path()
 # Returns the full path to milter-greylist, if installed
 sub get_milter_greylist_path
@@ -346,15 +336,20 @@ if (!$oldsocket) {
 	&$second_print($text{'ratelimit_esocket'});
 	return 0;
 	}
+my $socketfile = $oldsocket->{'value'};		# Socket path used by postfix
 if ($chroot) {
 	# Adjust the socket to ensure it is under the chroot
-	my $socketfile = $oldsocket->{'value'};
-	if (!&is_under_directory($chroot, $socketfile)) {
+	if (!&is_under_directory($chroot, $socketfile) &&
+	    $socketfile !~ /^\Q$chroot\E/) {
+		# Not currently under the chroot .. make it so
 		my $newsocket = { 'name' => 'socket',
-				  'value' => "\"$chroot$socketfile\"" };
+				  'values' => [ "\"$chroot$socketfile\"" ] };
 		&save_ratelimit_directive($conf, $oldsocket, $newsocket);
-		$socketfile = "$chroot$socketfile";
 		&flush_file_lines($oldsocket->{'file'});
+		}
+	else {
+		# Already under the chroot, so remove the chroot prefix
+		$socketfile =~ s/^\Q$chroot\E//;
 		}
 
 	# Change path in init script and defaults file if needed
@@ -383,11 +378,21 @@ if ($chroot) {
 			}
 		}
 	}
+
+# Set socket to 666 permissions
+my ($socket) = grep { $_->{'name'} eq 'socket' } @$conf;
+if ($socket && $socket->{'values'}->[1] ne '666') {
+	$socket->{'values'}->[1] = '666';
+	&save_ratelimit_directive($conf, $socket, $socket);
+	&flush_file_lines($socket->{'file'});
+	}
+
 &$second_print($text{'setup_done'});
 
 # Start up now, if not running
 &$first_print($text{'ratelimit_start'});
 &init::stop_action($init);
+sleep(5);	# Seems to need time to stop
 my ($ok, $err) = &init::start_action($init);
 if (!$ok) {
 	&$second_print(&text('ratelimit_estart', $err));
@@ -400,7 +405,7 @@ else {
 # Configure mail server
 &$first_print($text{'ratelimit_mailserver'});
 &require_mail();
-my $newmilter = "local:".$socket->{'value'};
+my $newmilter = "local:".$socketfile;
 if ($config{'mail_system'} == 0) {
 	# Configure Postfix to use filter
 	&lock_file($postfix::config{'postfix_config_file'});
@@ -497,7 +502,13 @@ if (!$socket) {
 	&$second_print($text{'ratelimit_esocket'});
 	return 0;
 	}
-my $oldmilter = "local:".$socket->{'value'};
+my $socketfile = $socket->{'value'};
+my $chroot = &get_mailserver_chroot();
+if ($chroot) {
+	$socketfile =~ s/^\Q$chroot\E//;
+	}
+my $oldmilter = "local:".$socketfile;
+print "oldmilter=$oldmilter<br>\n";
 &require_mail();
 if ($config{'mail_system'} == 0) {
 	# Configure Postfix to not use filter
@@ -505,7 +516,7 @@ if ($config{'mail_system'} == 0) {
 	my $milters = &postfix::get_current_value("smtpd_milters");
 	if ($milters =~ /\Q$oldmilter\E/) {
 		$milters = join(",", grep { $_ ne $oldmilter }
-				split(/\s+,\s+/, $milters));
+				split(/\s*,\s*/, $milters));
 		&postfix::set_current_value("smtpd_milters", $milters);
 		&postfix::set_current_value("non_smtpd_milters", $milters);
 		}

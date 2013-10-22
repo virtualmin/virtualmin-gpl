@@ -67,14 +67,7 @@ foreach my $racl (@racls) {
 
 &flush_file_lines();
 &unlock_file(&get_ratelimit_config_file());
-$err = &apply_ratelimit_config();
-if ($err) {
-	&$second_print(&text('ratelimit_upfailed',
-			     "<tt>".&html_escape($err)."</tt>"));
-	}
-else {
-	&$second_print($text{'setup_done'});
-	}
+&$second_print($text{'setup_done'});
 
 &ui_print_footer("ratelimit.cgi", $text{'ratelimit_return'});
 
@@ -100,6 +93,9 @@ my ($racl) = grep { $_->{'name'} eq 'racl' &&
 		    $_->{'values'}->[0] eq 'blacklist' &&
 		    $_->{'values'}->[3] eq 'ratelimit' &&
 	            $_->{'values'}->[4] eq "\"$ratelimit\"" } @$conf;
+my ($defracl) = grep { $_->{'name'} eq 'racl' &&
+		       $_->{'values'}->[0] eq 'whitelist' &&
+		       $_->{'values'}->[1] eq 'default' } @$conf;
 if ($in{$name."_def"}) {
 	# Remove existing lines
 	&save_ratelimit_directive($conf, $rl, undef);
@@ -118,7 +114,7 @@ else {
 			  "\"$ratelimit\"",
 			  'msg', '"Message quota exceeded"' ],
 		      };
-	&save_ratelimit_directive($conf, $rl, $newrl);
-	&save_ratelimit_directive($conf, $racl, $newracl);
+	&save_ratelimit_directive($conf, $rl, $newrl, $defracl);
+	&save_ratelimit_directive($conf, $racl, $newracl, $defracl);
 	}
 }

@@ -44,10 +44,8 @@
  - Per-user email rate limit
 	- help page
 	- backup / restore
-	- add postfix to greylist group?
-	- chroot for postfix?
-	- need postfix restart on install?
 	- CHANGELOG
 	- Documentation
-	- See emails from Eric "Postfix user rate limiting"
 	- does ordering of ratelimit matter, and if so in what direction?
+		- all seem to match, lowest wins!
+	- CentOS

@@ -608,7 +608,7 @@ if ($config{'mail_system'} == 0) {
 	my $milters = &postfix::get_current_value("smtpd_milters");
 	if ($milters =~ /\Q$oldmilter\E/) {
 		$milters = join(",", grep { $_ ne $oldmilter }
-				split(/\s+,\s+/, $milters));
+				split(/\s*,\s*/, $milters));
 		&postfix::set_current_value("smtpd_milters", $milters);
 		&postfix::set_current_value("non_smtpd_milters", $milters);
 		}

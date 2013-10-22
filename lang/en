@@ -6232,7 +6232,7 @@ ratelimit_err=Failed to save email rate limiting
 ratelimit_max=Global message limit
 ratelimit_updating=Updating rate limiting settings ..
 ratelimit_upfailed=.. failed to apply configuration : $1
-ratelimit_dtable=Per-domain overrides
+ratelimit_dtable=Per sender domain overrides
 ratelimit_dom=Apply to domain
 ratelimit_dmax=Limit for domain
 ratelimit_edomid=Selected domain does not exist!
@@ -6240,6 +6240,7 @@ ratelimit_emaxdom=Invalid message limit for $1
 ratelimit_emax=Invalid global message limit
 ratelimit_enum=Message count must be a number
 ratelimit_etime=Time period must be a number
+ratelimit_socket=Adjusting socket file ..
 
 ratelimit_title4=Install Mail Rate Limiting
 ratelimit_installing=Installing the email rate limiting package ..
