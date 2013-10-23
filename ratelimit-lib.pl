@@ -508,7 +508,6 @@ if ($chroot) {
 	$socketfile =~ s/^\Q$chroot\E//;
 	}
 my $oldmilter = "local:".$socketfile;
-print "oldmilter=$oldmilter<br>\n";
 &require_mail();
 if ($config{'mail_system'} == 0) {
 	# Configure Postfix to not use filter

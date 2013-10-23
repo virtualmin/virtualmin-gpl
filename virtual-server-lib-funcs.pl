@@ -5976,6 +5976,23 @@ else {
 	}
 &write_file($file."_grey", \%grey);
 
+# Save rate limiting settings
+&$first_print($text{'backup_vmailserver_ratelimit'});
+local %ratelimit;
+if (!&check_ratelimit()) {
+	# Rate limiting can be used .. check if enabled, and save config
+	$ratelimit{'support'} = 1;
+	$ratelimit{'enabled'} = &is_ratelimit_enabled();
+	&copy_source_dest(&get_ratelimit_config_file(),
+			  $file."_ratelimitconfig");
+	&$second_print($text{'setup_done'});
+	}
+else {
+	$ratelimit{'support'} = 0;
+	&$second_print($text{'backup_vmailserver_none'});
+	}
+&write_file($file."_ratelimit", \%ratelimit);
+
 # Save mail server type
 &$first_print($text{'backup_vmailserver_doing'});
 &open_tempfile(MS, ">$file", 0, 1);
@@ -6124,6 +6141,54 @@ if (&check_postgrey() eq '') {
 else {
 	&$second_print($text{'backup_vmailserver_none'});
 	}
+
+# Restore rate limiting config
+&$first_print($text{'restore_vmailserver_ratelimit'});
+local %ratelimit;
+&read_file($file."_ratelimit", \%ratelimit);
+if (&check_ratelimit() ne '' && &can_install_ratelimit() &&
+    $ratelimit{'enabled'}) {
+	# Rate limiting is not installed on this system yet, but it was enabled
+	# on the old machine - try to install it now
+	&install_ratelimit_package();
+	}
+if (&check_ratelimit() eq '') {
+	if (!$ratelimit{'support'}) {
+		&$second_print($text{'restore_vmailserver_none'});
+		}
+	else {
+		local $enabled = &is_ratelimit_enabled();
+		# XXX put back socket
+		if ($ratelimit{'enabled'}) {
+			# Enable on this system, and copy config file
+			&$indent_print();
+			&enable_ratelimit();
+			my $conf = &get_ratelimit_config();
+			my ($oldsocket) = grep { $_->{'name'} eq 'socket' }
+					       @$conf;
+			&copy_source_dest($file."_ratelimitconfig",
+					  &get_ratelimit_config_file());
+			my $conf = &get_ratelimit_config();
+			my ($socket) = grep { $_->{'name'} eq 'socket' }
+					    @$conf;
+			&save_ratelimit_directive($conf, $socket, $oldsocket);
+			&$outdent_print();
+                        &$second_print($text{'setup_done'});
+			}
+		elsif ($enabled && !$ratelimit{'enabled'}) {
+			# Disable on this system
+			&$indent_print();
+			&disable_ratelimit();
+			&$outdent_print();
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			# Nothing to do
+			&$second_print($text{'restore_vmailserver_already'});
+			}
+		}
+	}
+
 &release_lock_mail();
 
 # Get mail server type from the backup
