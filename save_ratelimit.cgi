@@ -77,6 +77,7 @@ foreach my $rwhite (@rwhites) {
 
 &flush_file_lines();
 &unlock_file(&get_ratelimit_config_file());
+&webmin_log($action, "ratelimit");
 &$second_print($text{'setup_done'});
 
 &ui_print_footer("ratelimit.cgi", $text{'ratelimit_return'});

@@ -176,6 +176,9 @@ elsif ($action eq "autoconfig") {
 	return $p->{'enabled'} ? $text{'log_autoconfigon'}
 			       : $text{'log_autoconfigoff'};
 	}
+elsif ($type eq "ratelimit") {
+	return &text('log_'.$action.'_ratelimit');
+	}
 else {
 	return $text{'log_'.$action};
 	}

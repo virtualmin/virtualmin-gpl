@@ -2079,6 +2079,10 @@ log_fixhtaccess=Fixed symbolic link htaccess options
 log_autoconfigon=Enabled mail client auto-configuration
 log_autoconfigoff=Disabled mail client auto-configuration
 log_postinstall=Ran post-install script
+log_install_ratelimit=Installed rate limiting server
+log_enable_ratelimit=Enabled mail rate limiting
+log_disable_ratelimit=Disabled mail rate limiting
+log_modify_ratelimit=Updated mail rate limiting
 
 backup_title=Backup Virtual Servers
 backup_title2=Edit Scheduled Backup

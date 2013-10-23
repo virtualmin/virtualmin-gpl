@@ -20,6 +20,7 @@ print $ok ? $text{'ratelimit_installed'}
 # to disable default greylisting
 if (!$before && $ok) {
 	print &text('ratelimit_clearing'),"<br>\n";
+	&lock_file(&get_ratelimit_config_file());
 	$conf = &get_ratelimit_config();
 	@copy = @$conf;		# Make a copy because deleting changes $conf
 	foreach my $c (@copy) {
@@ -36,7 +37,9 @@ if (!$before && $ok) {
 			  'values' => [] });
 		}
 	&flush_file_lines();
+	&unlock_file(&get_ratelimit_config_file());
 	print $text{'setup_done'},"<p>\n";
 	}
 
+&webmin_log("install", "ratelimit");
 &ui_print_footer("ratelimit.cgi", $text{'ratelimit_return'});
