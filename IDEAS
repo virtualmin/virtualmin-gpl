@@ -46,6 +46,5 @@
 	- backup / restore
 	- CHANGELOG
 	- Documentation
-	- does ordering of ratelimit matter, and if so in what direction?
-		- all seem to match, lowest wins!
+	- logging
 	- CentOS

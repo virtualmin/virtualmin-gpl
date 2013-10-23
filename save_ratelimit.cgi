@@ -45,12 +45,17 @@ $conf = &get_ratelimit_config();
               $_->{'values'}->[0] =~ /^"domain_(\d+)"/ } @$conf;
 @racls = grep { $_->{'name'} eq 'racl' &&
                 $_->{'values'}->[4] =~ /^"domain_(\d+)"/ } @$conf;
+@rwhites = grep { $_->{'name'} eq 'racl' &&
+		  $_->{'values'}->[0] eq 'whitelist' &&
+		  $_->{'values'}->[1] eq 'from' &&
+		  $_->{'values'}->[2] =~ /^\/\.\*\@\S+\// } @$conf;
 for(my $i=0; defined($did = $in{"dom_$i"}); $i++) {
 	next if (!$did);
 	$d = &get_domain($did);
 	&parse_ratelimit_field("max_$i", $conf, "domain_$did",
 			       ".*\@$d->{'dom'}");
 	$done{$did}++;
+	$done{$d->{'dom'}}++;
 	}
 
 # Remove per-domain maxes that are no longer used
@@ -62,6 +67,11 @@ foreach my $rl (@rls) {
 foreach my $racl (@racls) {
 	if ($racl->{'values'}->[4] =~ /^"domain_(\d+)"/ && !$done{$1}) {
 		&save_ratelimit_directive($conf, $racl, undef);
+		}
+	}
+foreach my $rwhite (@rwhites) {
+	if ($rwhite->{'values'}->[2] =~ /\@(\S+)\/$/ && !$done{$1}) {
+		&save_ratelimit_directive($conf, $rwhite, undef);
 		}
 	}
 
@@ -93,6 +103,10 @@ my ($racl) = grep { $_->{'name'} eq 'racl' &&
 		    $_->{'values'}->[0] eq 'blacklist' &&
 		    $_->{'values'}->[3] eq 'ratelimit' &&
 	            $_->{'values'}->[4] eq "\"$ratelimit\"" } @$conf;
+my ($rwhite) = grep { $_->{'name'} eq 'racl' &&
+                      $_->{'values'}->[0] eq 'whitelist' &&
+                      $_->{'values'}->[1] eq 'from' &&
+                      $_->{'values'}->[2] eq "/$regexp/" } @$conf;
 my ($defracl) = grep { $_->{'name'} eq 'racl' &&
 		       $_->{'values'}->[0] eq 'whitelist' &&
 		       $_->{'values'}->[1] eq 'default' } @$conf;
@@ -100,6 +114,7 @@ if ($in{$name."_def"}) {
 	# Remove existing lines
 	&save_ratelimit_directive($conf, $rl, undef);
 	&save_ratelimit_directive($conf, $racl, undef);
+	&save_ratelimit_directive($conf, $rwhite, undef);
 	}
 else {
 	# Add or update
@@ -114,7 +129,14 @@ else {
 			  "\"$ratelimit\"",
 			  'msg', '"Message quota exceeded"' ],
 		      };
+	my $newrwhite = { 'name' => 'racl',
+                          'values' => [
+                            'whitelist', 'from', "/$regexp/" ],
+			};
 	&save_ratelimit_directive($conf, $rl, $newrl, $defracl);
 	&save_ratelimit_directive($conf, $racl, $newracl, $defracl);
+	if ($regexp ne ".*") {
+		&save_ratelimit_directive($conf, $rwhite, $newrwhite, $defracl);
+		}
 	}
 }
