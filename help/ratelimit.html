@@ -1,0 +1,13 @@
+<header>Mail Rate Limiting</header>
+
+This page allows you to control the rate at which your system's mail server
+will accept new messages. By default any script on the system or remote sender
+with an SMTP login can send email with no rate limits, which can be a problem
+if a login or script is hijacked by a spammer. This feature lets you set
+a reasonable limit, such as 1000 messages per hour across the whole system. <p>
+
+In addition to a global limit, you can also set per-sender domain rates.
+These will override any global limit, and can be used to grant a particular
+trusted domain a higher or lower limit than what applies to others. <p>
+
+<foooter>

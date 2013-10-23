@@ -42,8 +42,8 @@
 	- https://www.virtualmin.com/node/23126
 
  - Per-user email rate limit
-	- help page
 	- backup / restore
 	- CHANGELOG
 	- Documentation
+	- verify that ordering of global and domain-level limits works
 	- CentOS
