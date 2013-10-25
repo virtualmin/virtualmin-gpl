@@ -1,0 +1,4 @@
+desc=Mail Rate Limiting
+html=Added the Mail Rate Limiting page for restricting the rate at which messages will be accepted by the system, either for local delivery or relaying. This can be useful to prevent spammers from using a hijacked account or website to rapidly send large amounts of email.
+master=1
+link=ratelimit.cgi
