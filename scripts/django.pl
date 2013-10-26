@@ -18,7 +18,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-return ( "1.5.4", "1.4.8" );
+return ( "1.5.5", "1.4.9" );
 }
 
 sub script_django_gpl
@@ -52,6 +52,9 @@ if ($out =~ /Python\s+([0-9\.]+)/i) {
 	local $pyver = $1;
 	if ($ver >= 1.5 && &compare_versions($pyver, "2.6.5") < 0) {
 		push(@rv, "Django 1.5 requires Python 2.6.5 or later");
+		}
+	elsif (&compare_versions($pyver, "2.6") < 0) {
+		push(@rv, "Django 1.4 requires Python 2.6 or later");
 		}
 	}
 else {

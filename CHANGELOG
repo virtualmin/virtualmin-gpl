@@ -1420,5 +1420,5 @@ When migrating a virtual server from cPanel, Plesk or some other control panel, 
 The Dallas or Chicago datacenters can now be explictly selected when using Rackspace cloud files.
 ---- Changes since 4.03 ----
 Access to plugin modules is now granted to resellers.
-Updated the Ajaxplorer script installer to 5.0.4 (and renamed to Pydio), TWiki to 6.0.0, Roundcube to 0.9.5, SMF to 2.0.6, SugarCRM to 6.5.16, WordPress to 3.7, and Dolibarr to 3.4.1.
+Updated the Ajaxplorer script installer to 5.0.4 (and renamed to Pydio), TWiki to 6.0.0, Roundcube to 0.9.5, SMF to 2.0.6, SugarCRM to 6.5.16, WordPress to 3.7, Django to 1.4.9 and 1.5.5, and Dolibarr to 3.4.1.
 Added the Mail Rate Limiting page for restricting the rate at which messages will be accepted by the system, either for local delivery or relaying. This can be useful to prevent spammers from using a hijacked account or website to rapidly send large amounts of email.
