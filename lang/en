@@ -5323,18 +5323,23 @@ bcc_emailserver=Your mail server does not support BCCing
 mail_title=Email Settings
 mail_header=Virtual server email-related settings
 mail_bcc=BCC outgoing email to
+mail_rbcc=BCC incoming email to
 mail_bcc1=Nowhere - just deliver to recipients
 mail_bcc0=Additional email address $1
 mail_err=Failed to save email settings
 mail_ebcc=Missing or invalid BCC address
 mail_bccing=BCCing all sent email to $1 ..
 mail_nobcc=Disabling the BCC of sent email
+mail_rbccing=BCCing all incoming email to $1 ..
+mail_norbcc=Disabling the BCC of incoming email
 mail_bccoff=Leaving BCCing of sent email disabled.
+mail_rbccoff=Leaving BCCing of incoming email disabled.
 mail_dependent=Send outgoing email for domain from IP
 mail_dependent0=System's default address
 mail_dependent1=Virtual server's address $1
 mail_dependenting1=Configuring outgoing SMTP connections on IP address $1 ..
 mail_dependenting0=Reverting outgoing SMTP connections to system's default address ..
+mail_bccsupport=Not currently enabled in your <a href='$1'>Postfix configuration</a>
 
 nf_header=The following new features are available in $1 ..
 nf_desc=Feature

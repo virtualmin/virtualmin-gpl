@@ -36,6 +36,24 @@ if ($supports_bcc) {
 		&$second_print($text{'mail_bccoff'});
 		}
 	}
+if ($supports_bcc == 2) {
+	$rbcc = &get_domain_recipient_bcc($d);
+	if (!$in{'rbcc_def'}) {
+		# Update BCC setting
+		&$first_print(&text('mail_rbccing', $in{'rbcc'}));
+		&save_domain_recipient_bcc($d, $in{'rbcc'});
+		&$second_print($text{'setup_done'});
+		}
+	elsif ($rbcc && $in{'rbcc_def'}) {
+		# Turn off BCC
+		&$first_print($text{'mail_norbcc'});
+		&save_domain_recipient_bcc($d, undef);
+		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$second_print($text{'mail_rbccoff'});
+		}
+	}
 
 # Update alias mode
 if (defined($in{'aliascopy'}) && $d->{'mail'}) {

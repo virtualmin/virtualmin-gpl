@@ -15,11 +15,26 @@ print &ui_table_start($text{'mail_header'}, undef, 2);
 
 # BCC mode
 if ($supports_bcc) {
+	# Outgoing BCC
 	$bcc = &get_domain_sender_bcc($d);
 	print &ui_table_row($text{'mail_bcc'},
 		&ui_radio("bcc_def", $bcc ? 0 : 1,
 		  [ [ 1, $text{'mail_bcc1'}."<br>" ],
 		    [ 0, &text('mail_bcc0', &ui_textbox("bcc", $bcc, 50)) ] ]));
+	}
+if ($supports_bcc == 2) {
+	# Incoming BCC
+	$rbcc = &get_domain_recipient_bcc($d);
+	print &ui_table_row($text{'mail_rbcc'},
+		&ui_radio("rbcc_def", $rbcc ? 0 : 1,
+		  [ [ 1, $text{'mail_bcc1'}."<br>" ],
+		    [ 0, &text('mail_bcc0',
+			       &ui_textbox("rbcc", $rbcc, 50)) ] ]));
+	}
+elsif ($supports_bcc == 1 && &master_admin()) {
+	# Show message about incoming BCC not being enabled
+	print &ui_table_row($text{'mail_rbcc'},
+		&text('mail_bccsupport', '../postfix/bcc.cgi'));
 	}
 
 # Alias copy mode

@@ -1,0 +1,6 @@
+desc=Incoming email BCC
+html=All incoming email to a domain can now be silently BCCd to another address, similar to the existing option for BCCing outgoing messages.
+link=edit_mail.cgi?dom=${ID}
+master=1
+reseller=1
+owner=1

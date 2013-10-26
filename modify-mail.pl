@@ -12,9 +12,13 @@ administrator's username to get all his domains, or C<--all-domains> to modify
 all those on the system with mail enabled.
 
 If your mail server supports it, BCCing of relayed email by all users in
-the selected domains can  be enabled with the C<--bcc> flag, which must be
-followed by an email address. To turn this off again, use the C<--no-bcc>
-flag.
+the selected domains can  be enabled with the C<--sender-bcc> flag, which must
+be followed by an email address. To turn this off again, use the
+C<--no-sender-bcc> flag.
+
+Similarly, BCCing of incoming email to all users in the selected domains can
+be enabled with the C<--recipient-bcc> flag, which must be followed by an
+email address. To turn this off again, use the C<--no-recipient-bcc> flag.
 
 By default, Virtualmin implements mail alias domains with catchall aliases,
 which forward all email to addresses in the alias domain to the same address
@@ -70,11 +74,17 @@ while(@ARGV > 0) {
 	elsif ($a eq "--all-domains") {
 		$all_doms = 1;
 		}
-	elsif ($a eq "--bcc") {
+	elsif ($a eq "--bcc" || $a eq "--sender-bcc") {
 		$bcc = shift(@ARGV);
 		}
-	elsif ($a eq "--no-bcc") {
+	elsif ($a eq "--no-bcc" || $a eq "--no-sender-bcc") {
 		$bcc = "";
+		}
+	elsif ($a eq "--recipient-bcc") {
+		$rbcc = shift(@ARGV);
+		}
+	elsif ($a eq "--no-recipient-bcc") {
+		$rbcc = "";
 		}
 	elsif ($a eq "--outgoing-ip") {
 		$dependent = 1;
@@ -107,7 +117,7 @@ while(@ARGV > 0) {
 		}
 	}
 @dnames || $all_doms || @users || usage("No domains or users specified");
-defined($bcc) || defined($aliascopy) || defined($dependent) ||
+defined($bcc) || defined($rbcc) || defined($aliascopy) || defined($dependent) ||
     defined($autoconfig) || &usage("Nothing to do");
 
 # Get domains to update
@@ -123,7 +133,10 @@ else {
 
 # Check supported features
 if (defined($bcc) && !$supports_bcc) {
-	&usage("BCCing of email is not supported on this system");
+	&usage("Sender BCCing of email is not supported on this system");
+	}
+if (defined($rbcc) && $supports_bcc != 2) {
+	&usage("Recipient BCCing of email is not supported on this system");
 	}
 if (defined($dependent) && !$supports_dependent) {
 	&usage("Outgoing IP addresses are not supported on this system");
@@ -135,19 +148,36 @@ foreach $d (@doms) {
 	&$indent_print();
 	$oldd = { %$d };
 
-	# Turn BCCing on or off
+	# Turn sender BCCing on or off
 	$currbcc = &get_domain_sender_bcc($d);
 	if (defined($bcc)) {
 		if ($bcc) {
 			# Change or enable
-			&$first_print("BCCing all email to $bcc ..");
+			&$first_print("BCCing all outgoing email to $bcc ..");
 			&save_domain_sender_bcc($d, $bcc);
 			&$second_print(".. done");
 			}
 		elsif (!$bcc && $currbcc) {
 			# Turn off
-			&$first_print("Turning off BCCing ..");
+			&$first_print("Turning off outgoing BCCing ..");
 			&save_domain_sender_bcc($d, undef);
+			&$second_print(".. done");
+			}
+		}
+
+	# Turn recipient BCCing on or off
+	$currbcc = &get_domain_recipient_bcc($d);
+	if (defined($rbcc)) {
+		if ($rbcc) {
+			# Change or enable
+			&$first_print("BCCing all incoming email to $rbcc ..");
+			&save_domain_recipient_bcc($d, $rbcc);
+			&$second_print(".. done");
+			}
+		elsif (!$rbcc && $currbcc) {
+			# Turn off
+			&$first_print("Turning off incoming BCCing ..");
+			&save_domain_recipient_bcc($d, undef);
 			&$second_print(".. done");
 			}
 		}
@@ -224,7 +254,10 @@ print "$_[0]\n\n" if ($_[0]);
 print "Changes email-related settings for one or more domains.\n";
 print "\n";
 print "virtualmin modify-mail --domain name | --user name | --all-domains\n";
-print "                      [--bcc user\@domain] | [--no-bcc]\n";
+print "                      [--sender-bcc user\@domain] |\n";
+print "                      [--no-sender-bcc]\n";
+print "                      [--recipient-bcc user\@domain] |\n";
+print "                      [--no-recipient-bcc]\n";
 print "                      [--alias-copy] | [--alias-catchall]\n";
 print "                      [--outgoing-ip | --no-outgoing-ip]\n";
 print "                      [--autoconfig | --no-autoconfig]\n";

@@ -74,6 +74,13 @@ elsif ($config{'mail_system'} == 0) {
 		if (@sender_bcc_map_files) {
 			$supports_bcc = 1;
 			}
+		$recipient_bcc_maps = &postfix::get_real_value(
+					"recipient_bcc_maps");
+		@recipient_bcc_map_files = &postfix::get_maps_files(
+						$recipient_bcc_maps);
+		if ($supports_bcc && @recipient_bcc_map_files) {
+			$supports_bcc = 2;
+			}
 		}
 
 	# Work out if per-domain outgoing IP support is available
@@ -522,6 +529,12 @@ if ($supports_bcc) {
 		&save_domain_sender_bcc($d, undef);
 		}
 	}
+if ($supports_bcc == 2) {
+	local $bcc = &get_domain_recipient_bcc($d);
+	if ($bcc) {
+		&save_domain_recipient_bcc($d, undef);
+		}
+	}
 
 # Remove sender-dependent outgoing IP
 if ($supports_dependent) {
@@ -859,15 +872,22 @@ elsif ($isalias && $_[0]->{'dom'} ne $_[1]->{'dom'} &&
 if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 	# Delete the old mail domain and add the new
 	local $no_restart_mail = 1;
-	local $oldbcc;
+	local ($oldbcc, $oldrbcc);
 	if ($supports_bcc) {
 		$oldbcc = &get_domain_sender_bcc($_[1]);
+		}
+	if ($supports_bcc == 2) {
+		$oldrbcc = &get_domain_recipient_bcc($_[1]);
 		}
 	&delete_mail($_[1], 1);
 	&setup_mail($_[0], 1);
 	if ($supports_bcc) {
 		$oldbcc =~ s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g;
 		&save_domain_sender_bcc($_[0], $oldbcc);
+		}
+	if ($supports_bcc == 2) {
+		$oldrbcc =~ s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g;
+		&save_domain_recipient_bcc($_[0], $oldrbcc);
 		}
 	&require_mail();
 	if (&is_mail_running()) {
@@ -3045,11 +3065,17 @@ if (-r "$nospam_dir/$_[0]->{'id'}") {
 	&copy_source_dest("$nospam_dir/$_[0]->{'id'}", "$_[1]_nospam");
 	}
 
-# Create BCC file
+# Create BCC files
 if ($supports_bcc) {
 	local $bcc = &get_domain_sender_bcc($_[0]);
 	&open_tempfile(BCC, ">$_[1]_bcc");
 	&print_tempfile(BCC, $bcc,"\n");
+	&close_tempfile(BCC);
+	}
+if ($supports_bcc == 2) {
+	local $rbcc = &get_domain_recipient_bcc($_[0]);
+	&open_tempfile(BCC, ">$_[1]_rbcc");
+	&print_tempfile(BCC, $rbcc,"\n");
 	&close_tempfile(BCC);
 	}
 
@@ -3416,11 +3442,16 @@ if (-r "$_[1]_nospam") {
 		}
 	}
 
-# Restore BCC file
+# Restore BCC files
 if ($supports_bcc && -r "$_[1]_bcc") {
 	local $bcc = &read_file_contents("$_[1]_bcc");
 	chop($bcc);
 	&save_domain_sender_bcc($_[0], $bcc);
+	}
+if ($supports_bcc == 2 && -r "$_[1]_rbcc") {
+	local $rbcc = &read_file_contents("$_[1]_rbcc");
+	chop($rbcc);
+	&save_domain_recipient_bcc($_[0], $rbcc);
 	}
 
 # Restore sender-dependent IP
@@ -5328,6 +5359,55 @@ else {
 	}
 }
 
+# get_domain_recipient_bcc(&domain)
+# If a domain has automatic incoming BCCing enabled, return the address to
+# which mail is sent. Otherwise, return undef.
+sub get_domain_recipient_bcc
+{
+local ($d) = @_;
+&require_mail();
+if ($config{'mail_server'} == 0 && $recipient_bcc_maps) {
+	# Check Postfix config
+	local $map = &postfix::get_maps("recipient_bcc_maps");
+	local ($rv) = grep { $_->{'name'} eq '@'.$d->{'dom'} } @$map;
+	return $rv ? $rv->{'value'} : undef;
+	}
+return undef;
+}
+
+# save_domain_recipient_bcc(&domain, [email])
+# Turns on or off automatic incoming BCCing for some domain. May call &error.
+sub save_domain_recipient_bcc
+{
+local ($d, $email) = @_;
+&require_mail();
+if ($config{'mail_server'} == 0) {
+	$recipient_bcc_maps || &error($text{'bcc_epostfix'});
+	local $map = &postfix::get_maps("recipient_bcc_maps");
+        local ($rv) = grep { $_->{'name'} eq '@'.$d->{'dom'} } @$map;
+	if ($rv && $email) {
+		# Update existing
+		local $old = { %$rv };
+		$rv->{'value'} = $email;
+		&postfix::modify_mapping("recipient_bcc_maps", $old, $rv);
+		}
+	elsif ($rv && !$email) {
+		# Remove existing
+		&postfix::delete_mapping("recipient_bcc_maps", $rv);
+		}
+	elsif (!$rv && $email) {
+		# Add new mapping
+		&postfix::create_mapping("recipient_bcc_maps",
+					 { 'name' => '@'.$d->{'dom'},
+					   'value' => $email });
+		}
+	&postfix::regenerate_recipient_bcc_table();
+	}
+else {
+	return $text{'bcc_emailserver'};
+	}
+}
+
 # get_domain_dependent(&domain)
 # If a sender-dependent outgoing IP is enabled for the given domain, returns it.
 # Otherwise returns undef.
@@ -5482,6 +5562,7 @@ if ($main::got_lock_mail == 0) {
 		push(@main::got_lock_mail_files, @canonical_map_files);
 		push(@main::got_lock_mail_files, @$postfix_afiles);
 		push(@main::got_lock_mail_files, @sender_bcc_map_files);
+		push(@main::got_lock_mail_files, @recipient_bcc_map_files);
 		undef(%postfix::list_aliases_cache);
 		undef(%postfix::maps_cache);
 		}

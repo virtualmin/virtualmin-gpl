@@ -530,6 +530,10 @@ if ($multi) {
 			if ($bcc) {
 				print "    BCC email to: $bcc\n";
 				}
+			$rbcc = &get_domain_recipient_bcc($d);
+			if ($rbcc) {
+				print "    BCC incoming email to: $rbcc\n";
+				}
 			}
 
 		# Show owner limits
