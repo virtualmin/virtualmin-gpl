@@ -19,6 +19,7 @@ if (!$module_name) {
 	}
 $ENV{'PATH'} = "$module_root_directory:$ENV{'PATH'}";
 &require_mysql();
+&require_mail();
 $mysql::mysql_login ||= 'root';
 
 # Make sure wget doesn't use a cache
@@ -3249,6 +3250,67 @@ $mail_tests = [
 	  'ignorefail' => 1,
 	  'sleep' => 5,
 	},
+
+	# Test sender BCC feature
+	$supports_bcc ? (
+		# Enable outgoing BCC
+		{ 'command' => 'modify-mail.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'sender-bcc', 'bob@bob.com' ] ],
+		},
+
+		# Test if set in config
+		{ 'command' => 'list-domains.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+                              [ 'multiline' ] ],
+		  'grep' => 'BCC email to: bob@bob.com',
+		},
+
+		# Disable outgoing BCC
+		{ 'command' => 'modify-mail.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'no-sender-bcc' ] ],
+		},
+
+		# Test if set gone from config
+		{ 'command' => 'list-domains.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+                              [ 'multiline' ] ],
+		  'antigrep' => 'BCC email to:',
+		},
+
+		) : ( ),
+
+	# Test recipient feature
+	$supports_bcc ? (
+		# Enable incoming BCC
+		{ 'command' => 'modify-mail.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'recipient-bcc', 'bob@bob.com' ] ],
+		},
+
+		# Test if set in config
+		{ 'command' => 'list-domains.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+                              [ 'multiline' ] ],
+		  'grep' => 'BCC incoming email to: bob@bob.com',
+		  'antigrep' => 'BCC email to:',
+		},
+
+		# Disable incoming BCC
+		{ 'command' => 'modify-mail.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'no-recipient-bcc' ] ],
+		},
+
+		# Test if set gone from config
+		{ 'command' => 'list-domains.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+                              [ 'multiline' ] ],
+		  'antigrep' => 'BCC incoming email to:',
+		},
+
+		) : ( ),
 
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
