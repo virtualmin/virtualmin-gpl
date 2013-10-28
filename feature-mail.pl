@@ -6030,13 +6030,21 @@ if ($d->{'dns'}) {
 return undef;
 }
 
-# enable_dns_autoconfig(&domain, autoconfig-hostname)
+# enable_dns_autoconfig(&domain, autoconfig-hostname, [force-file])
 # Add the DNS records needed for email autoconfig
 sub enable_dns_autoconfig
 {
-local ($d, $autoconfig) = @_;
+local ($d, $autoconfig, $forcefile) = @_;
 &obtain_lock_dns($d);
-local ($recs, $file) = &get_domain_dns_records_and_file($d);
+local ($recs, $file);
+if ($forcefile) {
+	&require_bind();
+	$file = $forcefile;
+	$recs = [ &bind8::read_zone_file($file, $d->{'dom'}) ];
+	}
+else {
+	($recs, $file) = &get_domain_dns_records_and_file($d);
+	}
 $file || return "No DNS zone for $d->{'dom'} found";
 $autoconfig .= ".";
 

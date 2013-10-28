@@ -15,6 +15,9 @@ $temp = &transname();
 local $bind8::config{'auto_chroot'} = undef;
 local $bind8::config{'chroot'} = undef;
 &create_standard_records($temp, $d, $d->{'dns_ip'} || $d->{'ip'});
+if ($config{'mail_autoconfig'} && &domain_has_website($d)) {
+	&enable_dns_autoconfig($d, &get_autoconfig_hostname($d), $temp);
+	}
 $recs = &read_file_contents($temp);
 &unlink_file($temp);
 $recs =~ s/^\$ttl.*\n//;
