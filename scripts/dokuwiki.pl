@@ -91,7 +91,8 @@ sub script_dokuwiki_files
 local ($d, $ver, $opts, $upgrade) = @_;
 local @files = ( { 'name' => "source",
 	   'file' => "dokuwiki-$ver.tgz",
-	   'url' => "http://www.splitbrain.org/_media/projects/dokuwiki/dokuwiki-$ver.tgz" } );
+	   'nocache' => 1,
+	   'url' => "http://download.dokuwiki.org/src/dokuwiki/dokuwiki-stable.tgz" } );
 return @files;
 }
 
@@ -145,13 +146,13 @@ return (1, "DokuWiki directory deleted.");
 # Returns a URL and regular expression or callback func to get the version
 sub script_dokuwiki_latest
 {
-return ( "http://www.splitbrain.org/projects/dokuwiki",
-	 "dokuwiki-([0-9][a-z0-9\\-]+)\\.tgz" );
+return ( "http://download.dokuwiki.org/",
+	 "(2013-05-[0-9][a-z0-9\\-]+)" );
 }
 
 sub script_dokuwiki_site
 {
-return 'http://www.splitbrain.org/projects/dokuwiki';
+return 'https://www.dokuwiki.org/';
 }
 
 1;
