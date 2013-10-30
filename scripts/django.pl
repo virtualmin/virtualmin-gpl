@@ -21,6 +21,11 @@ sub script_django_versions
 return ( "1.5.5", "1.4.9" );
 }
 
+sub script_django_release
+{
+return 2;		# To fix install hang at email address
+}
+
 sub script_django_gpl
 {
 return 1;
@@ -338,7 +343,7 @@ if (!$upgrade) {
 	$domuser =~ s/[\.\@\-]/_/g;
 	foreach my $w ([ "yes.no", "yes" ],
 		       [ "Username", $domuser ],
-		       [ "E-mail address", $d->{'emailto_addr'} ],
+		       [ "E-?mail address", $d->{'emailto_addr'} ],
 		       [ "Password", $dompass ],
 		       [ "Password", $dompass ]) {
 		local $rv = &wait_for($fh, $w->[0]);
