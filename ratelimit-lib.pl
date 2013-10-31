@@ -146,6 +146,7 @@ sub save_ratelimit_directive
 my ($conf, $o, $n, $b4) = @_;
 my $file = $o ? $o->{'file'} : $b4 ? $b4->{'file'} :
 	   &get_ratelimit_config_file();
+$file || &error("No file to save config to!");
 my $lref = &read_file_lines($file);
 my @lines = $n ? &make_ratelimit_lines($n) : ();
 my $idx = &indexof($o, @$conf);
@@ -156,7 +157,8 @@ if ($o && $n) {
 	$rlines = scalar(@lines) - ($o->{'eline'} - $o->{'line'} + 1);
 	splice(@$lref, $o->{'line'}, $o->{'eline'} - $o->{'line'} + 1, @lines);
 	$n->{'line'} = $o->{'line'};
-	$n->{'eline'}= $n->{'line'} + scalar(@lines) - 1;
+	$n->{'eline'} = $n->{'line'} + scalar(@lines) - 1;
+	$n->{'file'} = $o->{'file'};
 	if ($idx >= 0) {
 		$conf->[$idx] = $n;
 		}

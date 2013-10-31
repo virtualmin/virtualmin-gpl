@@ -108,9 +108,22 @@ my ($rwhite) = grep { $_->{'name'} eq 'racl' &&
                       $_->{'values'}->[0] eq 'whitelist' &&
                       $_->{'values'}->[1] eq 'from' &&
                       $_->{'values'}->[2] eq "/$regexp/" } @$conf;
+
+# Find the directive to add before - either the final default whitelist, or
+# the matchall
 my ($defracl) = grep { $_->{'name'} eq 'racl' &&
 		       $_->{'values'}->[0] eq 'whitelist' &&
 		       $_->{'values'}->[1] eq 'default' } @$conf;
+my $rwhiteall;
+my $before = $defracl;
+if ($regexp ne ".*") {
+	($rlglobal) = grep { $_->{'name'} eq 'ratelimit' &&
+                  	$_->{'values'}->[0] eq "\"virtualmin_limit\"" } @$conf;
+	if ($rlglobal) {
+		$before = $rlglobal;
+		}
+	}
+
 if ($in{$name."_def"}) {
 	# Remove existing lines
 	&save_ratelimit_directive($conf, $rl, undef);
@@ -134,10 +147,10 @@ else {
                           'values' => [
                             'whitelist', 'from', "/$regexp/" ],
 			};
-	&save_ratelimit_directive($conf, $rl, $newrl, $defracl);
-	&save_ratelimit_directive($conf, $racl, $newracl, $defracl);
+	&save_ratelimit_directive($conf, $rl, $newrl, $before);
+	&save_ratelimit_directive($conf, $racl, $newracl, $before);
 	if ($regexp ne ".*") {
-		&save_ratelimit_directive($conf, $rwhite, $newrwhite, $defracl);
+		&save_ratelimit_directive($conf, $rwhite, $newrwhite, $before);
 		}
 	}
 }
