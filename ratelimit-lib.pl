@@ -237,7 +237,8 @@ return $out =~ /milter-greylist-([0-9\.]+)/ ? $1 : undef;
 # milter-greylist socket file must be relative to this.
 sub get_mailserver_chroot
 {
-if ($config{'mail_system'} == 0) {
+if ($config{'mail_system'} == 0 && &get_ratelimit_type() eq 'debian') {
+	# XXX actually check master.cf to see if chroot is enabled
 	return "/var/spool/postfix";
 	}
 return "";
@@ -298,11 +299,12 @@ my $conf = &get_ratelimit_config();
 my ($pidfile) = grep { $_->{'name'} eq 'pidfile' } @$conf;
 if (!$pidfile) {
 	$pidfile = { 'name' => 'pidfile',
-		     'values' => [ '/var/run/milter-greylist.pid' ] };
+		     'value' => '/var/run/milter-greylist.pid',
+		     'values' => [ '"/var/run/milter-greylist.pid"' ] };
 	&save_ratelimit_directive($conf, undef, $pidfile);
 	&flush_file_lines($pidfile->{'file'});
 	}
-my $stopcmd = "kill `cat $pidfile->{'values'}->[0]` && sleep 5";
+my $stopcmd = "kill `cat $pidfile->{'value'}` && sleep 5";
 my $startcmd = &has_command("milter-greylist").
 	       " -f ".&get_ratelimit_config_file();
 
@@ -355,7 +357,7 @@ if ($chroot) {
 	# Change path in init script and defaults file if needed
 	foreach my $ifile (&init::action_filename($init),
 			   "/etc/default/milter-greylist") {
-		if (-r $ifile) {
+		if ($ifile && -r $ifile) {
 			my $lref = &read_file_lines($ifile);
 			foreach my $l (@$lref) {
 				if ($l =~ /^SOCKET\s*=/) {
