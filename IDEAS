@@ -40,6 +40,3 @@
 
  - Directadmin migration
 	- https://www.virtualmin.com/node/23126
-
- - Per-user email rate limit
-	- deleting multiple entries causes leftovers
