@@ -199,8 +199,8 @@ elsif (!$o && $n) {
 	}
 if ($rlines) {
 	foreach my $c (@$conf) {
-		$c->{'line'} += $rlines if ($c->{'line'} > $offset);
-		$c->{'eline'} += $rlines if ($c->{'eline'} > $offset);
+		$c->{'line'} += $rlines if ($c->{'line'} > $roffset);
+		$c->{'eline'} += $rlines if ($c->{'eline'} > $roffset);
 		}
 	}
 }

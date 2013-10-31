@@ -14,6 +14,8 @@ for(my $i=0; defined($did = $in{"dom_$i"}); $i++) {
 	$d || &error($text{'ratelimit_edomid'});
 	&check_ratelimit_field("max_$i",
 		&text('ratelimit_emaxdom', &show_domain_name($d)));
+	$domdone{$did}++ && &error(&text('ratelimit_etwice',
+				         &show_domain_name($d)));
 	}
 
 &ui_print_unbuffered_header(undef, $text{'ratelimit_title'}, "");

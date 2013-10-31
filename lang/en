@@ -6252,6 +6252,7 @@ ratelimit_emax=Invalid global message limit
 ratelimit_enum=Message count must be a number
 ratelimit_etime=Time period must be a number
 ratelimit_socket=Adjusting socket file ..
+ratelimit_etwice=Domain $1 has been selected twice
 
 ratelimit_title4=Install Mail Rate Limiting
 ratelimit_installing=Installing the email rate limiting package ..
