@@ -63,9 +63,9 @@ else {
 	}
 
 # Limit to those on some plan, if given
-if ($in{'plan'} && &can_edit_plans()) {
+if ($in{'plan'} && !$in{'plan_def'} && &can_edit_plans()) {
 	%plandoms = map { $_->{'id'}, 1 }
-		        grep { $_->{'plan'} eq $in{'plan'} } @doms;
+	  grep { &indexof($_->{'plan'}, split(/\s+/, $in{'plan'}) >= 0 } @doms;
 	@doms = grep { $plandoms{$_->{'id'}} ||
 		       $plandoms{$_->{'parent'}} } @doms;
 	}

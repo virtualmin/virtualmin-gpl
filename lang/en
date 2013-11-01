@@ -2096,6 +2096,7 @@ backup_headersched=Schedule and reporting
 backup_doms=Servers to save
 backup_plan=Limit to servers on plan
 backup_anyplan=Any plan
+backup_selplan=Selected plans ..
 backup_parent=Include sub-servers of those selected?
 backup_parent2=Include sub-servers in backup?
 backup_features=Features to backup

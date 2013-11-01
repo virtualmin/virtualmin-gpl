@@ -97,9 +97,12 @@ print &ui_table_row(&hlink($text{'backup_doms'}, "backup_doms"),
 if (&can_edit_plans()) {
 	@plans = sort { lc($a->{'name'}) cmp lc($b->{'name'}) } &list_plans();
 	print &ui_table_row(&hlink($text{'backup_plan'}, "backup_plan"),
-		&ui_select("plan", $sched->{'plan'},
-			   [ [ '', "&lt;$text{'backup_anyplan'}&gt;" ],
-			     map { [ $_->{'id'}, $_->{'name'} ] } @plans ]));
+		&ui_radio("plan_def", $sched->{'plan'} ? 0 : 1,
+			  [ [ 1, $text{'backup_anyplan'} ],
+			    [ 0, $text{'backup_selplan'} ] ])."<br>\n".
+		&ui_select("plan", [ split(/\s+/, $sched->{'plan'}) ],
+			   [ map { [ $_->{'id'}, $_->{'name'} ] } @plans ],
+			   5, 1));
 	}
 
 print &ui_hidden_table_end("doms");
