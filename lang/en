@@ -5148,6 +5148,7 @@ history_stat_viruscount=Viruses per minute
 history_stat_recvcount=Received per minute
 history_stat_bouncecount=Bounced per minute
 history_stat_greycount=Email greylisted per minute
+history_stat_ratecount=Email rate limited per minute
 history_stat_rx=Network traffic received
 history_stat_tx=Network traffic sent
 history_stat_drivetemp=Drive temperature

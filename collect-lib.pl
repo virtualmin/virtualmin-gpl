@@ -452,7 +452,7 @@ if ($mail_log_file) {
 
 	# Read the log, finding number of messages recived, bounced and
 	# greylisted
-	local ($recvcount, $bouncecount, $greycount) = (0, 0, 0);
+	local ($recvcount, $bouncecount, $greycount, $ratecount) = (0, 0, 0);
 	open(MAILLOG, $mail_log_file);
 	if ($st[1] == $lastinode && $lastpos) {
 		seek(MAILLOG, $lastpos, 0);
@@ -480,6 +480,9 @@ if ($mail_log_file) {
 				$bouncecount++;
 				}
 			}
+		elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+).*ratelimit overflow for class/) {
+			$ratecount++;
+			}
 		}
 	$lastpos = tell(MAILLOG);
 	close(MAILLOG);
@@ -491,6 +494,9 @@ if ($mail_log_file) {
 	push(@stats, [ "bouncecount", $mins ? $bouncecount / $mins : 0 ]);
 	if ($greycount || !&check_postgrey()) {
 		push(@stats, [ "greycount", $mins ? $greycount / $mins : 0 ]);
+		}
+	if ($ratecount) {
+		push(@stats, [ "ratecount", $mins ? $ratecount / $mins : 0 ]);
 		}
 
 	# Save last seek
