@@ -14,6 +14,7 @@ $d || &error($text{'edit_egone'});
 $temp = &transname();
 local $bind8::config{'auto_chroot'} = undef;
 local $bind8::config{'chroot'} = undef;
+local $bind8::get_chroot_cache = "";
 &create_standard_records($temp, $d, $d->{'dns_ip'} || $d->{'ip'});
 if ($config{'mail_autoconfig'} && &domain_has_website($d)) {
 	&enable_dns_autoconfig($d, &get_autoconfig_hostname($d), $temp);
