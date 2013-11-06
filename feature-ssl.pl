@@ -891,6 +891,16 @@ while(<OUT>) {
 	if (/RSA\s+Public\s+Key:\s+\((\d+)\s+bit/) {
 		$rv{'size'} = $1;
 		}
+	if (/Modulus\s*\(.*\):/) {
+		$inmodulus = 1;
+		}
+	if (/^\s+([0-9a-f:]+)\s*$/ && $inmodulus) {
+		$rv{'modulus'} .= $1;
+		}
+	if (/Exponent:\s*(\d+)/) {
+		$rv{'exponent'} = $1;
+		$inmodulus = 0;
+		}
 	}
 close(OUT);
 foreach my $k (keys %rv) {
@@ -899,6 +909,16 @@ foreach my $k (keys %rv) {
 $rv{'type'} = $rv{'o'} eq $rv{'issuer_o'} ? $text{'cert_typeself'}
 					  : $text{'cert_typereal'};
 return \%rv;
+}
+
+# same_cert_file(file1, file2)
+# Checks if the certs in some files are the same
+sub same_cert_file
+{
+local ($file1, $file2) = @_;
+local $info1 = &cert_file_info($file1);
+local $info2 = &cert_file_info($file2);
+return $info1->{'modulus'} eq $info2->{'modulus'};
 }
 
 # check_passphrase(key-data, passphrase)

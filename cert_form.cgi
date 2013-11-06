@@ -45,6 +45,7 @@ print &ui_table_row($text{'cert_inkey'}, "<tt>$d->{'ssl_key'}</tt>", 3);
 
 $info = &cert_info($d);
 foreach $i (@cert_attributes) {
+	next if ($i eq 'modulus' || $i eq 'exponent');
 	$v = $info->{$i};
 	if (ref($v)) {
 		print &ui_table_row($text{'cert_'.$i},
@@ -85,20 +86,59 @@ print &ui_table_end();
 
 # Buttons to copy cert to Webmin
 if (&can_webmin_cert()) {
+	# Work out which other servers already have the cert
+	%cert_already = ( );
+	&get_miniserv_config(\%miniserv);
+	if ($miniserv{'ssl'} &&
+	    &same_cert_file($d->{'ssl_cert'}, $miniserv{'certfile'})) {
+		$cert_already{'webmin'} = 1;
+		}
+	if (&foreign_installed("usermin")) {
+		&foreign_require("usermin");
+		&usermin::get_usermin_miniserv_config(\%uminiserv);
+		if ($uminiserv{'ssl'} &&
+		    &same_cert_file($d->{'ssl_cert'}, $uminiserv{'certfile'})) {
+			$cert_already{'usermin'} = 1;
+			}
+		}
+	if (&foreign_installed("dovecot")) {
+		&foreign_require("dovecot");
+		$conf = &dovecot::get_config();
+		$cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
+			 &dovecot::find_value("ssl_cert", $conf);
+		if ($cfile && &same_cert_file($d->{'ssl_cert'}, $cfile)) {
+			$cert_already{'dovecot'} = 1;
+			}
+		}
+	if ($config{'mail_system'} == 0) {
+		&foreign_require("postfix");
+		$cfile = &postfix::get_real_value("smtpd_tls_cert_file");
+		if ($cfile && &same_cert_file($d->{'ssl_cert'}, $cfile)) {
+			$cert_already{'postfix'} = 1;
+			}
+		}
+
+	if (%cert_already) {
+		print "<p><b>".&text('cert_already',
+			join(", ", map { $text{'cert_already_'.$_} }
+				       (keys %cert_already))),"</b><p>\n";
+		}
 	print &ui_hr();
 	print &ui_buttons_start();
 
 	# Copy to Webmin button
 	&get_miniserv_config(\%miniserv);
-	print &ui_buttons_row(
-		"copy_cert.cgi",
-		$text{'cert_copy'},
-		&text('cert_copydesc', $miniserv{'port'}),
-		&ui_hidden("dom", $in{'dom'}).
-		&ui_hidden("webmin", 1));
+	if (!$cert_already{'webmin'}) {
+		print &ui_buttons_row(
+			"copy_cert.cgi",
+			$text{'cert_copy'},
+			&text('cert_copydesc', $miniserv{'port'}),
+			&ui_hidden("dom", $in{'dom'}).
+			&ui_hidden("webmin", 1));
+		}
 
 	# Copy to Usermin, if installed
-	if (&foreign_installed("usermin")) {
+	if (&foreign_installed("usermin") && !$cert_already{'usermin'}) {
 		&foreign_require("usermin");
 		&usermin::get_usermin_miniserv_config(\%uminiserv);
 		print &ui_buttons_row(
@@ -110,7 +150,7 @@ if (&can_webmin_cert()) {
 		}
 
 	# Copy to Dovecot, if installed
-	if (&foreign_installed("dovecot")) {
+	if (&foreign_installed("dovecot") && !$cert_already{'dovecot'}) {
 		print &ui_buttons_row(
 			"copy_cert_dovecot.cgi",
 			$text{'cert_dcopy'}, $text{'cert_dcopydesc'},
@@ -119,7 +159,7 @@ if (&can_webmin_cert()) {
 		}
 
 	# Copy to Postfix, if in use
-	if ($config{'mail_system'} == 0) {
+	if ($config{'mail_system'} == 0 && !$cert_already{'postfix'}) {
 		print &ui_buttons_row(
 			"copy_cert_postfix.cgi",
 			$text{'cert_pcopy'}, $text{'cert_pcopydesc'},
@@ -278,6 +318,7 @@ print &ui_table_row($text{'cert_chain'},
 if ($chain) {
 	$info = &cert_file_info($chain, $d);
 	foreach $i (@cert_attributes) {
+		next if ($i eq 'modulus' || $i eq 'exponent');
 		if ($info->{$i} && !ref($info->{$i})) {
 			print &ui_table_row($text{'cert_c'.$i} ||
 					    $text{'cert_'.$i}, $info->{$i});
@@ -335,6 +376,4 @@ print &ui_table_row($webmin::text{'ssl_size'},
 
 print &ui_table_row($webmin::text{'ssl_days'},
 		    &ui_textbox("days", 1825, 8));
-
-
 }
