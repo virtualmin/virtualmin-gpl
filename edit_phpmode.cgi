@@ -121,7 +121,9 @@ if (!$d->{'alias'} || $d->{'alias_mode'} != 1 &&
 		}
 	else {
 		print &ui_table_row(&hlink($text{'phpmode_defweb'}, "defweb"),
-			$defweb ? $text{'yes'} : $defno);
+			$defweb == 1 ? $text{'yes'} :
+			$defweb == 2 ? $text{'phpmode_defwebsort'} :
+				       $defno);
 		}
 	}
 

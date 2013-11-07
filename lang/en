@@ -4641,6 +4641,7 @@ phpmode_ssioff=Disabling server-side includes ..
 phpmode_ssierr=.. failed : $1
 phpmode_essisuffix=Invalid server-side includes suffix - should be like <tt>.shtml</tt>
 phpmode_defweb=Default website for IP address?
+phpmode_defwebsort=Yes (but only because it is alphabetically first)
 phpmode_defno=No, default is $1
 phpmode_defwebon=Making website the default ..
 phpmode_defweberr=.. failed : $1

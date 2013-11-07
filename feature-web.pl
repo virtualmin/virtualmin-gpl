@@ -3556,7 +3556,19 @@ if ($p ne 'web') {
 	}
 else {
 	local ($defvirt, $defd) = &get_default_apache_website($d);
-	return $defd && $defd->{'id'} eq $d->{'id'} ? 1 : 0;
+	if (!$defd || $defd->{'id'} ne $d->{'id'}) {
+		# No default found, or not the default
+		return 0;
+		}
+	elsif ($defvirt->{'file'} =~ /\/\Q$d->{'dom'}\E\.conf$/) {
+		# This domain is the default, but filename is based on
+		# domain name .. so it is only accidentally the default
+		return 2;
+		}
+	else {
+		# Definately the default
+		return 1;
+		}
 	}
 }
 
