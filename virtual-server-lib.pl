@@ -85,7 +85,8 @@ foreach my $fname (@features, "virt", "virt6") {
 	local $ifunc = "init_$fname";
 	&$ifunc() if (defined(&$ifunc));
 	}
-@migration_types = ( "cpanel", "ensim", "psa", "plesk", "plesk9", "lxadmin" );
+@migration_types = ( "cpanel", "ensim", "psa", "plesk", "plesk9", "lxadmin",
+		     "directadmin" );
 @startstop_features = ("web", "dns", "mail", "ftp", "unix", "virus", "spam",
 		       "mysql", "postgres");
 @bandwidth_features = ( @features, "backup", "restore" );
@@ -291,7 +292,7 @@ $everyone_alias_dir = "$module_config_directory/everyone";
 $ssl_passphrase_dir = "$module_config_directory/sslpass";
 
 @cert_attributes = ('cn', 'o', 'issuer_cn', 'issuer_o', 'notafter',
-		    'type', 'alt');
+		    'type', 'alt', 'modulus', 'exponent');
 
 $trap_base_dir = "/var/virtualmin-traps";
 $spam_alias_dir = "$trap_base_dir/spam";
