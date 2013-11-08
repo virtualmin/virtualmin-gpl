@@ -242,7 +242,30 @@ if (-d $statssrc) {
 		}
 	}
 
-# XXX public_ftp
+# Copy over public_ftp directory
+local $ftp = $dom{'home'}.'/'.($tmpl->{'ftp_dir'} || 'ftp');
+local $ftpsrc = "$domains/$dom/public_ftp";
+if (-d $ftpsrc) {
+	&$first_print("Copying public_ftp directory ..");
+	if (!-d $ftp) {
+		&make_dir($ftp, 0755);
+		&set_ownership_permissions($dom{'uid'}, $dom{'ugid'}, 0755, $ftp);
+		}
+	&execute_command("cd ".quotemeta($ftpsrc)." && ".
+			 &make_tar_command("cf", "-", ".")." | ".
+			 "(cd ".quotemeta($ftp)." && ".
+			   &make_tar_command("xf", "-").")",
+			 undef, \$out, \$out);
+	if ($?) {
+		&$second_print(".. copy failed : <tt>$out</tt>");
+		}
+	else {
+		&$second_print(".. done");
+		}
+	}
+
+# Fix home permissions
+&set_home_ownership(\%dom);
 
 if ($got{'web'}) {
 	# Just adjust cgi-bin directory to match DirectAdmin
@@ -293,12 +316,19 @@ if ($got{'dns'} && -r $dnsfile) {
 			$r->{'values'} = [ $master ];
 			$change++;
 			}
+		elsif ($r->{'name'} eq $dom."." &&
+		       ($r->{'type'} eq 'SPF' ||
+			$r->{'type'} eq 'TXT')) {
+			# Fix IP in SPF record
+			$r->{'values'}->[0] =~ s/ip4:([0-9\.]+)/ip4:$dom{'ip'}/;
+			$change++;
+			}
 		if ($change) {
 			&bind8::modify_record(
 				$zdstfile, $r, $r->{'name'},
 				$r->{'ttl'}, $r->{'class'},
 				$r->{'type'},
-				join(" ", @{$r->{'values'}}),
+				&join_record_values($r),
 				$r->{'comment'});
 			}
 		}
