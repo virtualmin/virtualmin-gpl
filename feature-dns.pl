@@ -1373,20 +1373,22 @@ foreach my $r (@recs) {
 return $count;
 }
 
-# remove_ip6_records(&domain, [file])
+# remove_ip6_records(&domain, [file], [&records])
 # Delete all AAAA records whose value is the domain's IP6 address
 sub remove_ip6_records
 {
-local ($d, $file) = @_;
+local ($d, $file, $recs) = @_;
 &require_bind();
 $file ||= &get_domain_dns_file($d);
 return 0 if (!$file);
-local @recs = &bind8::read_zone_file($file, $d->{'dom'});
+$recs ||= [ &bind8::read_zone_file($file, $d->{'dom'}) ];
 my $withdot = $d->{'dom'}.".";
-foreach my $r (reverse(@recs)) {
+for(my $i=@$recs-1; $i>=0; $i--) {
+	my $r = $recs->[$i];
 	if ($r->{'type'} eq 'AAAA' && $r->{'values'}->[0] eq $d->{'ip6'} &&
 	    ($r->{'name'} eq $withdot || $r->{'name'} =~ /\.\Q$withdot\E$/)) {
 		&bind8::delete_record($file, $r);
+		splice(@$recs, $i, 1);
 		}
 	}
 }
@@ -1902,7 +1904,12 @@ if ($file) {
 	local $baseip6 = $_[0]->{'old_ip6'} ? $_[0]->{'old_ip6'} :
 				$baserec6 ? $baserec6->{'values'}->[0] : undef;
 	if ($baseip6 && $ip6) {
+		# Update to new v6 address
 		&modify_records_ip_address(\@recs, $file, $baseip6, $ip6);
+		}
+	elsif ($baseip6 && !$ip6) {
+		# This domain doesn't have a v6 address now, so remove AAAAs
+		&remove_ip6_records($_[0], $file, \@recs);
 		}
 
 	# Replace NS records with those from new system
