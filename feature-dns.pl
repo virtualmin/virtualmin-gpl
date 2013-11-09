@@ -1901,7 +1901,7 @@ if ($file) {
 	local $ip6 = $_[0]->{'ip6'};
 	local $baseip6 = $_[0]->{'old_ip6'} ? $_[0]->{'old_ip6'} :
 				$baserec6 ? $baserec6->{'values'}->[0] : undef;
-	if ($baseip6) {
+	if ($baseip6 && $ip6) {
 		&modify_records_ip_address(\@recs, $file, $baseip6, $ip6);
 		}
 
