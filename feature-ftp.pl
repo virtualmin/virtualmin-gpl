@@ -35,9 +35,8 @@ push(@$lref, @lines);
 local ($fdir) = ($tmpl->{'ftp_dir'} || 'ftp');
 local $ftp = "$_[0]->{'home'}/$fdir";
 if (!-d $ftp) {
-	&system_logged("mkdir '$ftp' 2>/dev/null");
-	&system_logged("chmod 755 '$ftp'");
-	&system_logged("chown $_[0]->{'uid'}:$_[0]->{'ugid'} '$ftp'");
+	&make_dir($ftp, 0755);
+	&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'ugid'}, 0755, $ftp);
 	}
 
 &release_lock_ftp($_[0]);
