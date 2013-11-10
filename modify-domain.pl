@@ -737,7 +737,8 @@ print "                        [--ip address] | [--allocate-ip] |\n";
 print "                        [--default-ip | --shared-ip address]\n";
 if (&supports_ip6()) {
 	print "                        [--ip6 address | --allocate-ip6 |\n";
-	print "                         --no-ip6]\n";
+	print "                         --no-ip6 | --default-ip6 |\n";
+	print "                         --shared-ip6 address]\n";
 	}
 print "                        [--prefix name]\n";
 print "                        [--template name|id]\n";
