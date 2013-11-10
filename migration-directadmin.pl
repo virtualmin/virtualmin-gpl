@@ -95,6 +95,9 @@ if (-r $zonefile) {
 if (-r "$domains/$dom/stats/webalizer.current") {
 	push(@got, "webalizer");
 	}
+if (-r "$backup/$dom/email/aliases") {
+	push(@got, "mail");
+	}
 
 # Tell the user what we have got
 @got = &show_check_migration_features(@got);
@@ -119,9 +122,11 @@ else {
 
 # Work out quota
 local $quota;
-if ($dinfo{'quota'} && $dinfo{'quota'} ne 'unlimited') {
+local $bsize = &quota_bsize("home");
+$bsize ||= 1024;
+if ($uinfo{'quota'} && $uinfo{'quota'} ne 'unlimited') {
 	# Assume in MB
-	$quota = $dinfo{'quota'} * 1024;
+	$quota = $uinfo{'quota'} * 1024 * 1024 / $bsize;
 	}
 
 # Create the virtual server object
@@ -137,7 +142,9 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
          'gid', $gid,
          'ugid', $ugid,
          'owner', "Migrated DirectAdmin server $dom",
-         'email', $email ? $email : $parent ? $parent->{'email'} : undef,
+         'email', $email ? $email :
+		  $parent ? $parent->{'email'} :
+			    $uinfo{'email'},
 	 'dns_ip', $ipinfo->{'virt'} || $config{'all_namevirtual'} ? undef :
 		   &get_dns_ip($parent ? $parent->{'id'} : undef),
 	 $parent ? ( 'pass', $parent->{'pass'} )
@@ -160,6 +167,7 @@ if (!$parent) {
 	&set_limits_from_plan(\%dom, $plan);
 	$dom{'quota'} = $quota;
 	$dom{'uquota'} = $quota;
+	$dom{'bw_limit'} = $uinfo{'bandwidth'} * 1024 * 1024;
 	&set_capabilities_from_plan(\%dom, $plan);
 	}
 $dom{'db'} = &database_name(\%dom);
@@ -292,7 +300,6 @@ if ($got{'dns'} && -r $dnsfile) {
 	&copy_source_dest($dnsfile, &bind8::make_chroot($zonefile));
 	local ($recs, $zdstfile) =
 		&get_domain_dns_records_and_file(\%dom);
-	# XXX fix SPF record
 	foreach my $r (@$recs) {
 		my $change = 0;
 		if (($r->{'name'} eq $dom."." ||
@@ -318,7 +325,8 @@ if ($got{'dns'} && -r $dnsfile) {
 			}
 		elsif ($r->{'name'} eq $dom."." &&
 		       ($r->{'type'} eq 'SPF' ||
-			$r->{'type'} eq 'TXT')) {
+			$r->{'type'} eq 'TXT') &&
+		    $r->{'values'}->[0] =~ /ip4:/) {
 			# Fix IP in SPF record
 			$r->{'values'}->[0] =~ s/ip4:([0-9\.]+)/ip4:$dom{'ip'}/;
 			$change++;
@@ -347,17 +355,91 @@ local (%taken, %utaken);
 local %usermap;
 if ($got{'mail'}) {
 	# Migrate mail users
-	# XXX
+	local $mcount = 0;
+	&$first_print("Re-creating mail users ..");
+	&foreign_require("mailboxes");
+	my $lref = &read_file_lines("$backup/$dom/email/quota", 1);
+	foreach my $l (@$lref) {
+		my ($user, $quota) = split(/:/, $l);
+		if ($user && $quota =~ /^\d+$/) {
+			$quotamap{$user} = $quota * 1024 * 1024 / $bsize;
+			}
+		}
+	$lref = &read_file_lines("$backup/$dom/email/passwd");
+	foreach my $l (@$lref) {
+		my ($muser, $crypt) = split(/:/, $l);
+		next if (!$muser);
+		next if ($muser eq $user);	# Domain owner
+		local $uinfo = &create_initial_user($d);
+		$uinfo->{'user'} = &userdom_name(lc($muser), \%dom);
+		$uinfo->{'pass'} = $crypt;
+		$uinfo->{'uid'} = &allocate_uid(\%taken);
+		$uinfo->{'gid'} = $dom{'gid'};
+		$uinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/".
+				   lc($muser);
+		$uinfo->{'shell'} = $nologin_shell->{'shell'};
+		$uinfo->{'email'} = lc($muser)."\@$dom";
+		$uinfo->{'qquota'} = $quota{$muser};
+		$uinfo->{'quota'} = $quota{$muser};
+		$uinfo->{'mquota'} = $quota{$muser};
+		&create_user_home($uinfo, $d, 1);
+		&create_user($uinfo, $d);
+		$taken{$uinfo->{'uid'}}++;
+		local ($crfile, $crtype) = &create_mail_file($uinfo, $d);
+
+		# Move his Maildir directory
+		local $mailsrc = "$backup/$dom/email/data/imap/$muser/Maildir";
+		if (-d $mailsrc) {
+			local $srcfolder = { 'type' => 1,
+					     'file' => $mailsrc };
+			local $dstfolder = { 'file' => $crfile,
+					     'type' => $crtype };
+			&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
+			&set_mailfolder_owner($dstfolder, $uinfo);
+			}
+		$mcount++;
+		}
+	&$second_print(".. done (migrated $mcount users)");
 	}
 
-# XXX email aliases?
+if ($got{'mail'}) {
+	# Migration mail aliases
+	local $acount = 0;
+	&$first_print("Copying email aliases ..");
+	&set_alias_programs();
+	local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
+	my $lref = &read_file_lines("$backup/$dom/email/aliases", 1);
+	foreach my $l (@$lref) {
+		my ($name, $values) = split(/:/, $l, 2);
+		next if ($name eq $dom{'user'} && $values eq $dom{'user'});
+		my @values = split(/,/, $values);
+		foreach my $v (@values) {
+			if ($v eq ":fail:") {
+				$v = "BOUNCE";
+				}
+			}
+		local $virt = { 'from' => $name =~ /^\*/ ?
+				  "\@".$dom : $name,
+				'to' => \@values };
+		local $clash = $gotvirt{$virt->{'from'}};
+		&delete_virtuser($clash) if ($clash);
+		&create_virtuser($virt);
+		$acount++;
+		}
+	&$second_print(".. done (migrated $acount aliases)");
+	}
+
+# Migrate cron jobs
+# XXX
 
 &release_lock_mail(\%dom);
 &release_lock_unix(\%dom);
 
 if ($got{'mysql'}) {
 	# Re-create all MySQL databases
+	# XXX mysql users
 	local $mycount = 0;
+	local $myucount = 0;
 	&$first_print("Re-creating and loading MySQL databases ..");
 	&disable_quotas(\%dom);
 	foreach my $myf (glob("$backup/*.sql")) {
@@ -371,12 +453,39 @@ if ($got{'mysql'}) {
 				&$first_print("Error loading $db : $out");
 				}
 			&$outdent_print();
+
+			# Create extra DB users
+			local %dbusers;
+			&read_env_file("$backup/$db.conf", \%dbusers);
+			foreach my $myuser (keys %dbusers) {
+				next if ($myuser eq $user);
+				next if ($dbusers{$myuser} !~ /passwd=([^=]+)/);
+				my $mypass = $1;
+				local $myuinfo = &create_initial_user(\%dom);
+				$myuinfo->{'user'} = $myuser;
+				$myuinfo->{'pass'} = "x";	# not needed
+				$myuinfo->{'mysql_pass'} = $mypass;
+				$myuinfo->{'gid'} = $dom{'gid'};
+				$myuinfo->{'real'} = "MySQL user";
+				$myuinfo->{'home'} = "$dom{'home'}/$config{'homes_dir'}/$myuser";
+				$myuinfo->{'shell'} = $nologin_shell->{'shell'};
+				$myuinfo->{'dbs'} = [ { 'type' => 'mysql',
+							'name' => $db } ];
+				delete($myuinfo->{'email'});
+				# XXX what if already exists?
+				$myuinfo->{'uid'} = &allocate_uid(\%taken);
+				&create_user_home($myuinfo, \%dom, 1);
+				&create_user($myuinfo, \%dom);
+				&create_mail_file($myuinfo, \%dom);
+				$myucount++;
+				}
+
 			$mycount++;
 			}
 		}
 	closedir(MYDIR);
 	&enable_quotas(\%dom);
-	&$second_print(".. done (created $mycount databases)");
+	&$second_print(".. done (created $mycount databases and $myucount users)");
 	}
 
 if ($parent) {
