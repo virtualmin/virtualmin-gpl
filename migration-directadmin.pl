@@ -98,6 +98,9 @@ if (-r "$domains/$dom/stats/webalizer.current") {
 if (-r "$backup/$dom/email/aliases") {
 	push(@got, "mail");
 	}
+if (uc($dinfo{'ssl'}) eq 'ON') {
+	push(@got, "ssl");
+	}
 
 # Tell the user what we have got
 @got = &show_check_migration_features(@got);
@@ -370,7 +373,7 @@ if ($got{'mail'}) {
 		my ($muser, $crypt) = split(/:/, $l);
 		next if (!$muser);
 		next if ($muser eq $user);	# Domain owner
-		local $uinfo = &create_initial_user($d);
+		local $uinfo = &create_initial_user(\%dom);
 		$uinfo->{'user'} = &userdom_name(lc($muser), \%dom);
 		$uinfo->{'pass'} = $crypt;
 		$uinfo->{'uid'} = &allocate_uid(\%taken);
@@ -382,10 +385,10 @@ if ($got{'mail'}) {
 		$uinfo->{'qquota'} = $quota{$muser};
 		$uinfo->{'quota'} = $quota{$muser};
 		$uinfo->{'mquota'} = $quota{$muser};
-		&create_user_home($uinfo, $d, 1);
-		&create_user($uinfo, $d);
+		&create_user_home($uinfo, \%dom, 1);
+		&create_user($uinfo, \%dom);
 		$taken{$uinfo->{'uid'}}++;
-		local ($crfile, $crtype) = &create_mail_file($uinfo, $d);
+		local ($crfile, $crtype) = &create_mail_file($uinfo, \%dom);
 
 		# Move his Maildir directory
 		local $mailsrc = "$backup/$dom/email/data/imap/$muser/Maildir";
@@ -397,6 +400,7 @@ if ($got{'mail'}) {
 			&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
 			&set_mailfolder_owner($dstfolder, $uinfo);
 			}
+		$usermap{$uinfo->{'user'}} = $uinfo;
 		$mcount++;
 		}
 	&$second_print(".. done (migrated $mcount users)");
@@ -430,14 +434,13 @@ if ($got{'mail'}) {
 	}
 
 # Migrate cron jobs
-# XXX
+# XXX Format?
 
 &release_lock_mail(\%dom);
 &release_lock_unix(\%dom);
 
 if ($got{'mysql'}) {
 	# Re-create all MySQL databases
-	# XXX mysql users
 	local $mycount = 0;
 	local $myucount = 0;
 	&$first_print("Re-creating and loading MySQL databases ..");
@@ -472,11 +475,23 @@ if ($got{'mysql'}) {
 				$myuinfo->{'dbs'} = [ { 'type' => 'mysql',
 							'name' => $db } ];
 				delete($myuinfo->{'email'});
-				# XXX what if already exists?
-				$myuinfo->{'uid'} = &allocate_uid(\%taken);
-				&create_user_home($myuinfo, \%dom, 1);
-				&create_user($myuinfo, \%dom);
-				&create_mail_file($myuinfo, \%dom);
+				local $already = $usermap{$myuinfo->{'user'}};
+				if ($already) {
+					# User already exists, so just give him
+					# access to the dbs
+					my $olduinfo = { %$already };
+					push(@{$already->{'dbs'}},
+					     @{$myuinfo->{'dbs'}});
+					&modify_user($already, $old, \%dom);
+					}
+				else {
+					$myuinfo->{'uid'} =
+						&allocate_uid(\%taken);
+					&create_user_home($myuinfo, \%dom, 1);
+					&create_user($myuinfo, \%dom);
+					&create_mail_file($myuinfo, \%dom);
+					$usermap{$myuinfo->{'user'}} = $myuinfo;
+					}
 				$myucount++;
 				}
 

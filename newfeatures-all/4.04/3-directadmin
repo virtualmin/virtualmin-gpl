@@ -1,0 +1,6 @@
+desc=DirectAdmin migration
+html=Backups created by DirectAdmin can now be migrated as Virtualmin virtual servers.
+master=1
+reseller=1
+owner=1
+link=migrate_form.cgi
