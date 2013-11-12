@@ -99,12 +99,26 @@ else {
 		}
 	}
 
-# request the listing
-local $pasv = &ftp_command("PASV", 2, $_[2]);
-defined($pasv) || return 0;
-$pasv =~ /\(([0-9,]+)\)/;
-@n = split(/,/ , $1);
-&open_socket("$n[0].$n[1].$n[2].$n[3]", $n[4]*256 + $n[5], "CON", $_[2]) || return 0;
+# are we using IPv6?
+my $v6 = !&to_ipaddress($_[0]) &&
+	 &to_ip6address($_[0]);
+
+if ($v6) {
+	# request the listing over a EPSV port
+	my $epsv = &ftp_command("EPSV", 2, $_[3]);
+	defined($epsv) || return 0;
+	$epsv =~ /\|(\d+)\|/ || return 0;
+	my $epsvport = $1;
+	&open_socket($_[0], $epsvport, CON, $_[3]) || return 0;
+	}
+else {
+	# request the listing over a PASV connection
+	local $pasv = &ftp_command("PASV", 2, $_[2]);
+	defined($pasv) || return 0;
+	$pasv =~ /\(([0-9,]+)\)/ || return 0;
+	@n = split(/,/ , $1);
+	&open_socket("$n[0].$n[1].$n[2].$n[3]", $n[4]*256 + $n[5], "CON", $_[2]) || return 0;
+	}
 
 local @list;
 local $_;
