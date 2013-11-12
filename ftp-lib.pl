@@ -1,97 +1,16 @@
 # Functions for talking to an FTP server
 
-# ftp_upload(host, file, srcfile, [&error], [&callback], [user, pass], [port],
-# 	     [attempts])
+# ftp_tryload(host, file, srcfile, [&error], [&callback], [user, pass],
+# 	      [port], [attempts])
 # Download data from a local file to an FTP site
-sub ftp_upload
+sub ftp_tryload
 {
-local($buf, @n);
-local $cbfunc = $_[4];
 local $tries = $_[8] || 1;
-local $ok = 0;
-
 for(my $i=0; $i<$tries; $i++) {
-	$main::download_timed_out = undef;
-	local $SIG{ALRM} = \&download_timeout;
-	alarm(60);
-	if ($_[3]) { ${$_[3]} = undef; }
-	if ($i > 0) { sleep(10); }	# Delay before next try
-
-	# connect to host and login
-	&open_socket($_[0], $_[7] || 21, "SOCK", $_[3]) || next;
-	alarm(0);
-	if ($main::download_timed_out) {
-		if ($_[3]) { ${$_[3]} = $main::download_timed_out; next; }
-		else { &error($main::download_timed_out); }
-		}
-	&ftp_command("", 2, $_[3]) || return 0;
-	if ($_[5]) {
-		# Login as supplied user
-		local @urv = &ftp_command("USER $_[5]", [ 2, 3 ], $_[3]);
-		@urv || return 0;
-		if (int($urv[1]/100) == 3) {
-			&ftp_command("PASS $_[6]", 2, $_[3]) || next;
-			}
-		}
-	else {
-		# Login as anonymous
-		local @urv = &ftp_command("USER anonymous", [ 2, 3 ], $_[3]);
-		@urv || return 0;
-		if (int($urv[1]/100) == 3) {
-			&ftp_command("PASS root\@".&get_system_hostname(), 2,
-				     $_[3]) || next;
-			}
-		}
-	&$cbfunc(1, 0) if ($cbfunc);
-
-	# Switch to binary mode
-	&ftp_command("TYPE I", 2, $_[3]) || next;
-
-	# get the file size and tell the callback
-	local @st = stat($_[2]);
-	if ($cbfunc) {
-		&$cbfunc(2, $st[7]);
-		}
-
-	# send the file
-	local $pasv = &ftp_command("PASV", 2, $_[3]);
-	defined($pasv) || return 0;
-	$pasv =~ /\(([0-9,]+)\)/;
-	@n = split(/,/ , $1);
-	&open_socket("$n[0].$n[1].$n[2].$n[3]", $n[4]*256 + $n[5], "CON", $_[3]) || next;
-	&ftp_command("STOR $_[1]", 1, $_[3]) || next;
-
-	# transfer data
-	local $got;
-	open(PFILE, $_[2]);
-	while(read(PFILE, $buf, 1024) > 0) {
-		local $ok = print CON $buf;
-		if ($ok <= 0) {
-			# Write failed!
-			local $msg = "FTP write failed : $!";
-			if ($_[3]) { ${$_[3]} = $msg; next; }
-			else { &error($got); }
-			}
-		$got += length($buf);
-		&$cbfunc(3, $got) if ($cbfunc);
-		}
-	close(PFILE);
-	close(CON);
-	if ($got != $st[7]) {
-		local $msg = "Upload incomplete - file size is $st[7], but sent $got";
-		if ($_[3]) { ${$_[3]} = $msg; next; }
-		else { &error($msg); }
-		}
-	&$cbfunc(4) if ($cbfunc);
-
-	# finish off..
-	&ftp_command("", 2, $_[3]) || next;
-	&ftp_command("QUIT", 2, $_[3]) || next;
-	close(SOCK);
-	$ok = 1;
-	last;
+	&ftp_upload(@_);
+	return 1 if (!${$_[3]});
 	}
-return $ok;
+return 0;
 }
 
 # ftp_onecommand(host, command, [&error], [user, pass], [port])
