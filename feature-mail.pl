@@ -4588,7 +4588,7 @@ foreach my $s (@servers) {
 		}
 	}
 $d->{'mx_servers'} = join(" ", map { $_->{'id'} } @okservers);
-if ($d->{'dns'}) {
+if ($d->{'dns'} && !$config{'secmx_nodns'}) {
 	# Add DNS MX records. This is needed because sometimes the mail setup
 	# happens after DNS, and so mx_servers hasn't been populated.
 	my ($recs, $file) = &get_domain_dns_records_and_file($d);
