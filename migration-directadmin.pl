@@ -423,7 +423,8 @@ if ($got{'mail'}) {
 				}
 			}
 		local $virt = { 'from' => $name =~ /^\*/ ?
-				  "\@".$dom : $name,
+				  "\@".$dom :
+				  $name."\@".$dom,
 				'to' => \@values };
 		local $clash = $gotvirt{$virt->{'from'}};
 		&delete_virtuser($clash) if ($clash);
@@ -434,12 +435,11 @@ if ($got{'mail'}) {
 	}
 
 # Migrate FTP users
-# XXX test this
 local $fcount = 0;
 &$first_print("Copying FTP users ..");
 my $lref = &read_file_lines("$backup/$dom/ftp.passwd");
 foreach my $l (@$lref) {
-	$l =~ /^([^@]+)@[^=]+=passwd=([^=]+)&path=([^=]+)/ || next;
+	$l =~ /^([^@]+)@[^=]+=passwd=([^=]+)&path=([^=\&]+)/ || next;
 	my ($fuser, $crypt, $path) = ($1, $2, $3);
 	next if ($fuser eq $user);      # Domain owner
 	local $uinfo = &create_initial_user(\%dom, 0, 1);
@@ -449,24 +449,23 @@ foreach my $l (@$lref) {
 	$uinfo->{'gid'} = $dom{'gid'};
 	if ($path =~ /public_html\/?$/) {
 		# Same as web dir
-		$user->{'home'} = &public_html_dir(\%dom);
+		$uinfo->{'home'} = &public_html_dir(\%dom);
 		}
-	elsif ($path =~ /public_html\/(\S+)\/?$/) {
+	elsif ($path =~ /public_html\/([^\/]+)\/?$/) {
 		# Subdir of web dir
-		$user->{'home'} = &public_html_dir(\%dom)."/".$1;
+		$uinfo->{'home'} = &public_html_dir(\%dom)."/".$1;
 		}
 	else {
 		# Domain home
-		$user->{'home'} = $dom{'home'};
+		$uinfo->{'home'} = $dom{'home'};
 		}
 	$uinfo->{'shell'} = $ftp_shell->{'shell'};
-	&create_user_home($uinfo, \%dom, 1);
 	&create_user($uinfo, \%dom);
 	$taken{$uinfo->{'uid'}}++;
 	$usermap{$uinfo->{'user'}} = $uinfo;
 	$fcount++;
 	}
-&$second_print(".. done (migrated $mcount users)");
+&$second_print(".. done (migrated $fcount users)");
 
 # Migrate cron jobs
 # XXX Format?
