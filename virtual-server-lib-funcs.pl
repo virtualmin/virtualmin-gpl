@@ -3642,11 +3642,28 @@ $gotdoc || $gotproxy || return $text{'acheck_edoc'};
 return undef;
 }
 
+# Return optional javascript to force scroll to the botton
+sub bottom_scroll_js
+{
+if ($main::force_bottom_scroll) {
+	return "<script>".
+	       "window.scrollTo(0, document.body.scrollHeight)".
+	       "</script>\n";
+	}
+else {
+	return "";
+	}
+}
+
 # Print functions for HTML output
-sub first_html_print { print_and_capture(@_,"<br>\n"); }
-sub second_html_print { print_and_capture(@_,"<p>\n"); }
-sub indent_html_print { print_and_capture("<ul>\n"); }
-sub outdent_html_print { print_and_capture("</ul>\n"); }
+sub first_html_print { print_and_capture(@_,"<br>\n");
+		       print bottom_scroll_js(); }
+sub second_html_print { print_and_capture(@_,"<p>\n");
+		        print bottom_scroll_js(); }
+sub indent_html_print { print_and_capture("<ul>\n");
+		        print bottom_scroll_js(); }
+sub outdent_html_print { print_and_capture("</ul>\n");
+		         print bottom_scroll_js(); }
 
 # Print functions for text output
 sub first_text_print

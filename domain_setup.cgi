@@ -452,6 +452,7 @@ $lerr = &virtual_server_limits(\%dom);
 # Update custom fields
 &parse_custom_fields(\%dom, \%in);
 
+$main::force_bottom_scroll = 1;
 &ui_print_unbuffered_header(&domain_in(\%dom), $text{'setup_title'}, "");
 
 # Check for and show any warnings

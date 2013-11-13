@@ -13,6 +13,7 @@ $d->{'dom'} || &error("Domain $in{'dom'} is not valid!");
 &can_delete_domain($d) || &error($text{'delete_ecannot'});
 
 if ($in{'confirm'}) {
+	$main::force_bottom_scroll = 1;
 	&ui_print_unbuffered_header(&domain_in($d), $text{'delete_title'}, "");
 	}
 else {
