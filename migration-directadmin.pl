@@ -407,7 +407,7 @@ if ($got{'mail'}) {
 	}
 
 if ($got{'mail'}) {
-	# Migration mail aliases
+	# Migrate mail aliases
 	local $acount = 0;
 	&$first_print("Copying email aliases ..");
 	&set_alias_programs();
@@ -432,6 +432,41 @@ if ($got{'mail'}) {
 		}
 	&$second_print(".. done (migrated $acount aliases)");
 	}
+
+# Migrate FTP users
+# XXX test this
+local $fcount = 0;
+&$first_print("Copying FTP users ..");
+my $lref = &read_file_lines("$backup/$dom/ftp.passwd");
+foreach my $l (@$lref) {
+	$l =~ /^([^@]+)@[^=]+=passwd=([^=]+)&path=([^=]+)/ || next;
+	my ($fuser, $crypt, $path) = ($1, $2, $3);
+	next if ($fuser eq $user);      # Domain owner
+	local $uinfo = &create_initial_user(\%dom, 0, 1);
+	$uinfo->{'user'} = &userdom_name(lc($fuser), \%dom);
+	$uinfo->{'pass'} = $crypt;
+	$uinfo->{'uid'} = $dom{'uid'};
+	$uinfo->{'gid'} = $dom{'gid'};
+	if ($path =~ /public_html\/?$/) {
+		# Same as web dir
+		$user->{'home'} = &public_html_dir(\%dom);
+		}
+	elsif ($path =~ /public_html\/(\S+)\/?$/) {
+		# Subdir of web dir
+		$user->{'home'} = &public_html_dir(\%dom)."/".$1;
+		}
+	else {
+		# Domain home
+		$user->{'home'} = $dom{'home'};
+		}
+	$uinfo->{'shell'} = $ftp_shell->{'shell'};
+	&create_user_home($uinfo, \%dom, 1);
+	&create_user($uinfo, \%dom);
+	$taken{$uinfo->{'uid'}}++;
+	$usermap{$uinfo->{'user'}} = $uinfo;
+	$fcount++;
+	}
+&$second_print(".. done (migrated $mcount users)");
 
 # Migrate cron jobs
 # XXX Format?
