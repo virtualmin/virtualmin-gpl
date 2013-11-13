@@ -3931,6 +3931,12 @@ if (&domain_has_website($d)) {
 	$hash{'web'} = 1;
 	}
 
+# Add domain parts
+my @parts = split(/\./, $d->{'dom'});
+for(my $i=0; $i<@parts; $i++) {
+	$hash{'dompart'.$i} = $parts[$i];
+	}
+
 return %hash;
 }
 
