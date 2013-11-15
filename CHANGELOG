@@ -1420,7 +1420,7 @@ When migrating a virtual server from cPanel, Plesk or some other control panel, 
 The Dallas or Chicago datacenters can now be explictly selected when using Rackspace cloud files.
 ---- Changes since 4.03 ----
 Access to plugin modules is now granted to resellers.
-Updated the Ajaxplorer script installer to 5.0.4 (and renamed to Pydio), TWiki to 6.0.0, Roundcube to 0.9.5, SMF to 2.0.6, SugarCRM to 6.5.16, WordPress to 3.7.1, Django to 1.4.10 and 1.6, MoinMoin to 1.9.7, ZenPhoto to 1.4.5.7, TikiWiki to 11.1 and 6.13, phpMyAdmin to 4.0.9, OwnCloud to 5.0.13, Joomla to 3.2.0, Moodle to 2.5.3, Zikula to 1.3.6, and Dolibarr to 3.4.1.
+Updated the Ajaxplorer script installer to 5.0.4 (and renamed to Pydio), TWiki to 6.0.0, Roundcube to 0.9.5, SMF to 2.0.6, SugarCRM to 6.5.16, WordPress to 3.7.1, Django to 1.4.10 and 1.6, MoinMoin to 1.9.7, ZenPhoto to 1.4.5.7, TikiWiki to 11.1 and 6.13, phpMyAdmin to 4.0.9, OwnCloud to 5.0.13, Joomla to 3.2.0, Moodle to 2.5.3, Zikula to 1.3.6, MediaWiki to 1.19.9 and 1.21.3, and Dolibarr to 3.4.1.
 Added the Mail Rate Limiting page for restricting the rate at which messages will be accepted by the system, either for local delivery or relaying. This can be useful to prevent spammers from using a hijacked account or website to rapidly send large amounts of email.
 All incoming email to a domain can now be silently BCCd to another address, similar to the existing option for BCCing outgoing messages.
 Added support for migrating domains from DirectAdmin control panel backups.
