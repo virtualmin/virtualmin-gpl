@@ -3831,6 +3831,15 @@ if ($d->{'parent'}) {
 	delete($hash{'parent_domain_'});
 	}
 
+# Add alias target domain info
+if ($d->{'alias'}) {
+	local $alias = &get_domain($d->{'alias'});
+	foreach my $k (keys %$alias) {
+		$hash{'alias_domain_'.$k} = $alias->{$k};
+		}
+	delete($hash{'alias_domain_'});
+	}
+
 # Add reseller details
 if ($d->{'reseller'} && defined(&get_reseller)) {
 	local $resel = &get_reseller($d->{'reseller'});
