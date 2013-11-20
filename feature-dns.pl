@@ -2637,11 +2637,16 @@ sub default_domain_spf
 local ($d) = @_;
 local $tmpl = &get_template($d->{'template'});
 local $defip = &get_default_ip();
+local $defip6 = &get_default_ip6();
 local $spf = { 'a' => 1, 'mx' => 1,
 	       'a:' => [ $d->{'dom'} ],
-	       'ip4:' => [ ] };
+	       'ip4:' => [ ],
+	       'ip6:' => [ ] };
 if ($defip ne "127.0.0.1") {
 	push(@{$spf->{'ip4:'}}, $defip);
+	}
+if ($defip6) {
+	push(@{$spf->{'ip6:'}}, $defip6);
 	}
 local $hosts = &substitute_domain_template($tmpl->{'dns_spfhosts'}, $d);
 foreach my $h (split(/\s+/, $hosts)) {
@@ -2662,6 +2667,9 @@ if ($d->{'dns_ip'}) {
 	}
 if ($d->{'ip'} ne $defip) {
 	push(@{$spf->{'ip4:'}}, $d->{'ip'});
+	}
+if ($d->{'ip6'} && $d->{'ip6'} ne $defip) {
+	push(@{$spf->{'ip6:'}}, $d->{'ip6'});
 	}
 $spf->{'all'} = $tmpl->{'dns_spfall'} + 1;
 return $spf;
