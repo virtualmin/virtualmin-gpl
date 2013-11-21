@@ -100,6 +100,10 @@ if ($d->{'ip6'}) {
 						  "<tt>$resel->{'name'}</tt>") :
 					    $text{'edit_shared'}), 3, \@tds);
 	}
+if ($d->{'dns_ip'}) {
+	print &ui_table_row($text{'edit_dnsip'},
+		"<tt>$d->{'dns_ip'}</tt>");
+	}
 
 # Home directory
 if (!$aliasdom && $d->{'dir'}) {
