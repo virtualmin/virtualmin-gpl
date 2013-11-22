@@ -205,7 +205,7 @@ if ($anyalloc) {
 if ($anychoose) {
 	# Can enter arbitrary IP
 	push(@opts, [ 1, $text{'form_vip'},
-		 &ui_textbox("ip6", undef, 20)." ".
+		 &ui_textbox("ip6", undef, 40)." ".
 		 &ui_checkbox("virtalready6", 1,
 			      $text{'form_virtalready'}) ]);
 	}
@@ -221,7 +221,7 @@ if ($anyzone) {
 		}
 	else {
 		push(@opts, [ 4, $text{'form_activeip'},
-				 &ui_textbox("zoneip6", undef, 20) ]);
+				 &ui_textbox("zoneip6", undef, 40) ]);
 		}
 	}
 if ($mode == 5 && $anyalloc) {
