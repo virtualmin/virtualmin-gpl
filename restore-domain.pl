@@ -325,6 +325,7 @@ elsif ($onlyexisting) {
 &$first_print("Checking for missing features ..");
 @missing = &missing_restore_features($cont, $contdoms);
 @critical = grep { $_->{'critical'} } @missing;
+@errs = &check_restore_errors($cont, $contdoms);
 if (@critical) {
 	&$second_print(
 	  ".. WARNING - The following features were enabled for one or more\n".
