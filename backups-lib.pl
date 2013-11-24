@@ -552,7 +552,7 @@ DOMAIN: foreach $d (@$doms) {
         &resync_all_databases($d, \@alldbs);
 	my $dstart = time();
 
-	# If domain has a reseller set whole doesn't exist, clear it now
+	# If domain has a reseller set who doesn't exist, clear it now
 	# to prevent errors on restore
 	if ($d->{'reseller'} && defined(&get_reseller) &&
 	    !&get_reseller($d->{'reseller'})) {
@@ -2724,6 +2724,26 @@ if ($doms && !&supports_ip6()) {
 		}
 	}
 
+return @rv;
+}
+
+# check_restore_errors(&contents, [&domains])
+# Returns a list of errors that would prevent this backup from being restored
+sub check_restore_errors
+{
+my ($conts, $doms) = @_;
+my @rv;
+if ($doms) {
+	foreach my $d (@$doms) {
+		if ($d->{'reseller'} && defined(&get_reseller)) {
+			my $resel = &get_reseller($d->{'reseller'});
+			if (@$resel) {
+				push(@rv, "Reseller $d->{'reseller'} does ".
+					  "not exist for $d->{'dom'}");
+				}
+			}
+		}
+	}
 return @rv;
 }
 

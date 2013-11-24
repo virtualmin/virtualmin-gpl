@@ -325,7 +325,6 @@ elsif ($onlyexisting) {
 &$first_print("Checking for missing features ..");
 @missing = &missing_restore_features($cont, $contdoms);
 @critical = grep { $_->{'critical'} } @missing;
-@errs = &check_restore_errors($cont, $contdoms);
 if (@critical) {
 	&$second_print(
 	  ".. WARNING - The following features were enabled for one or more\n".
@@ -343,6 +342,22 @@ elsif (@missing) {
 	}
 else {
 	&$second_print(".. all features in backup are supported");
+	}
+
+# Make sure the backup is restorable
+&$first_print("Checking for errors in backup ..");
+@errs = &check_restore_errors($cont, $contdoms);
+if (@errs && $skipwarnings) {
+	&$second_print(".. some errors were found : ".
+		       join(", ", @errs));
+	}
+elsif (@errs) {
+	&$second_print(".. this backup cannot be restored : ".
+		       join(", ", @errs));
+	exit(2);
+	}
+else {
+	&$second_print(".. no errors found");
 	}
 
 if ($test) {
