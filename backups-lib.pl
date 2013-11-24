@@ -740,14 +740,14 @@ DOMAIN: foreach $d (@$doms) {
 				# Via FTP
 				&$first_print(&text('backup_upload',
 						    "<tt>$server</tt>"));
-				&ftp_upload($server, "$path/$df", "$dest/$df",
+				&ftp_tryload($server, "$path/$df", "$dest/$df",
 					    \$err, undef, $user, $pass, $port,
 					    $ftp_upload_tries);
-				&ftp_upload($server, "$path/$df.info",
+				&ftp_tryload($server, "$path/$df.info",
 					    $infotemp, \$err, undef, $user,
 					    $pass, $port, $ftp_upload_tries)
 						if (!$err);
-				&ftp_upload($server, "$path/$df.dom",
+				&ftp_tryload($server, "$path/$df.dom",
 					    $domtemp, \$err, undef, $user,
 					    $pass, $port, $ftp_upload_tries)
 						if (!$err);
@@ -1087,14 +1087,14 @@ foreach my $desturl (@$desturls) {
 					    &serialise_variable($binfo));
 				&uncat_file($domtemp,
 					    &serialise_variable($bdom));
-				&ftp_upload($server, "$path/$df", "$dest/$df",
+				&ftp_tryload($server, "$path/$df", "$dest/$df",
 					    \$err, undef, $user, $pass, $port,
 					    $ftp_upload_tries);
-				&ftp_upload($server, "$path/$df.info",
+				&ftp_tryload($server, "$path/$df.info",
 					    $infotemp, \$err,
 					    undef, $user, $pass, $port,
 					    $ftp_upload_tries) if (!$err);
-				&ftp_upload($server, "$path/$df.dom",
+				&ftp_tryload($server, "$path/$df.dom",
 					    $domtemp, \$err,
 					    undef, $user, $pass, $port,
 					    $ftp_upload_tries) if (!$err);
@@ -1120,12 +1120,12 @@ foreach my $desturl (@$desturls) {
 				    &serialise_variable(\%donefeatures));
 			&uncat_file($domtemp,
 				    &serialise_variable(\%donedoms));
-			&ftp_upload($server, $path, $dest, \$err, undef, $user,
+			&ftp_tryload($server, $path, $dest, \$err, undef, $user,
 				    $pass, $port, $ftp_upload_tries);
-			&ftp_upload($server, $path.".info", $infotemp, \$err,
+			&ftp_tryload($server, $path.".info", $infotemp, \$err,
 				    undef, $user, $pass, $port,
 				    $ftp_upload_tries) if (!$err);
-			&ftp_upload($server, $path.".dom", $domtemp, \$err,
+			&ftp_tryload($server, $path.".dom", $domtemp, \$err,
 				    undef, $user, $pass, $port,
 				    $ftp_upload_tries) if (!$err);
 			if ($err) {
