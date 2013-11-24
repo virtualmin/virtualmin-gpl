@@ -41,5 +41,5 @@
  - Sign file manager applet
 
  - Check for missing resellers before restoring
-	- Other errors too, unless skipwarnings is set
 	- Web UI too
+	- CHANGELOG

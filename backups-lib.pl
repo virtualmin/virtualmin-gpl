@@ -2737,7 +2737,7 @@ my @rv;
 if ($doms) {
 	foreach my $d (@$doms) {
 		# If domain has a reseller, make sure it exists now
-		if ($d->{'reseller'} && defined(&get_reseller)) {
+		if ($d->{'missing'} && $d->{'reseller'} && defined(&get_reseller)) {
 			my $resel = &get_reseller($d->{'reseller'});
 			if (@$resel) {
 				push(@rv, { 'critical' => 0,
@@ -2748,7 +2748,7 @@ if ($doms) {
 			}
 
 		# If some is a sub-server, make sure parent exists
-		if ($d->{'parent'}) {
+		if ($d->{'missing'} && $d->{'parent'}) {
 			my $parent = &get_domain($d->{'parent'}) ||
 			     &get_domain_by("dom", $d->{'backup_parent_dom'});
 			if (!$parent) {
