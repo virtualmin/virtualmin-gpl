@@ -2728,18 +2728,34 @@ return @rv;
 }
 
 # check_restore_errors(&contents, [&domains])
-# Returns a list of errors that would prevent this backup from being restored
+# Returns a list of errors that would prevent this backup from being restored.
+# Each if a hash ref with 'critical' and 'desc' fields.
 sub check_restore_errors
 {
 my ($conts, $doms) = @_;
 my @rv;
 if ($doms) {
 	foreach my $d (@$doms) {
+		# If domain has a reseller, make sure it exists now
 		if ($d->{'reseller'} && defined(&get_reseller)) {
 			my $resel = &get_reseller($d->{'reseller'});
 			if (@$resel) {
-				push(@rv, "Reseller $d->{'reseller'} does ".
-					  "not exist for $d->{'dom'}");
+				push(@rv, { 'critical' => 0,
+					    'desc' => &text('restore_ereseller',
+							    $d->{'reseller'}),
+					    'dom' => $d });
+				}
+			}
+
+		# If some is a sub-server, make sure parent exists
+		if ($d->{'parent'}) {
+			my $parent = &get_domain($d->{'parent'}) ||
+			     &get_domain_by("dom", $d->{'backup_parent_dom'});
+			if (!$parent) {
+				push(@rv, { 'critical' => 1,
+					    'desc' => &text('restore_eparent',
+						$d->{'parent_dom'}),
+					    'dom' => $d });
 				}
 			}
 		}
