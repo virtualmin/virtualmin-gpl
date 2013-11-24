@@ -347,14 +347,16 @@ else {
 # Make sure the backup is restorable
 &$first_print("Checking for errors in backup ..");
 @errs = &check_restore_errors($cont, $contdoms);
-if (@errs && $skipwarnings) {
-	&$second_print(".. some errors were found : ".
-		       join(", ", @errs));
+@criticalerrs = $skipwarnings ? (grep { !$_->{'critical'} } @errs)
+			      : @errs;
+if (@criticalerrs) {
+	&$second_print(".. this backup cannot be restored : ".
+	       join(", ", &unique(map { $_->{'desc'} } @criticalerrsa)));
+	exit(2);
 	}
 elsif (@errs) {
-	&$second_print(".. this backup cannot be restored : ".
-		       join(", ", @errs));
-	exit(2);
+	&$second_print(".. some errors were found : ".
+	       join(", ", &unique(map { $_->{'desc'} } @errs)));
 	}
 else {
 	&$second_print(".. no errors found");
