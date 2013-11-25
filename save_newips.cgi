@@ -27,7 +27,7 @@ else {
 	@doms = grep { $servers{$_->{'id'}} } &list_domains();
 	}
 if (!@doms) {
-	print "<b>",&text('newips_none', $in{'old'}),"</b><p>\n";
+	print "<b>$text{'newips_none2'}</b><p>\n";
 	}
 
 # Do each domain, and all active features in it
