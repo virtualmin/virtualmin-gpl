@@ -190,6 +190,27 @@ if (!$in{'confirm'}) {
 		print "<b>",$text{'restore_fmissing2'},"</b><p>\n";
 		}
 
+	# Check for backup problems
+	@errs = &check_restore_errors($cont, $contdoms);
+	@criticalerrs = $in{'skipwarnings'} ? (grep { !$_->{'critical'} } @errs)
+				      	    : @errs;
+	if (@criticalerrs) {
+		print "<b>",&text('restore_ferrors', 
+		    join(", ", &unique(map { $_->{'desc'} } @criticalerrs))),
+		    "</b><p>\n";
+		goto FAILED;
+		}
+	elsif (@errs) {
+		print "<b>",&text('restore_ferrors2', 
+		    join(", ", &unique(map { $_->{'desc'} } @criticalerrs))),
+		    "</b><p>\n";
+		}
+	else {
+		&$second_print(".. no errors found");
+		}
+
+
+
 	print &ui_form_start("restore.cgi", "form-data");
 	print &ui_hidden("origsrc", $origsrc);
 

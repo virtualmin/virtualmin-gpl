@@ -1425,3 +1425,4 @@ Renamed the OpenX script to Revive Adserver, to reflect its open-source fork, an
 Added the Mail Rate Limiting page for restricting the rate at which messages will be accepted by the system, either for local delivery or relaying. This can be useful to prevent spammers from using a hijacked account or website to rapidly send large amounts of email.
 All incoming email to a domain can now be silently BCCd to another address, similar to the existing option for BCCing outgoing messages.
 Added support for migrating domains from DirectAdmin control panel backups.
+Errors that would prevent a virtual server from being restored (such as a missing reseller or parent) are now detected before the long restore process starts.
