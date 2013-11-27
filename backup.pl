@@ -62,7 +62,7 @@ else {
 # Limit to those on some plan, if given
 if ($sched->{'plan'}) {
 	%plandoms = map { $_->{'id'}, 1 }
-	  grep { &indexof($_->{'plan'}, split(/\s+/, $sched->{'plan'}) >= 0 }
+	  grep { &indexof($_->{'plan'}, split(/\s+/, $sched->{'plan'})) >= 0 }
 	    @doms;
 	@doms = grep { $plandoms{$_->{'id'}} ||
 		       $plandoms{$_->{'parent'}} } @doms;
