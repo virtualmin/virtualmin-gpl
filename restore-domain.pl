@@ -347,7 +347,7 @@ else {
 # Make sure the backup is restorable
 &$first_print("Checking for errors in backup ..");
 @errs = &check_restore_errors($cont, $contdoms);
-@criticalerrs = $skipwarnings ? (grep { !$_->{'critical'} } @errs)
+@criticalerrs = $skipwarnings ? (grep { $_->{'critical'} } @errs)
 			      : @errs;
 if (@criticalerrs) {
 	&$second_print(".. this backup cannot be restored : ".

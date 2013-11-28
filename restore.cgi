@@ -192,7 +192,7 @@ if (!$in{'confirm'}) {
 
 	# Check for backup problems
 	@errs = &check_restore_errors($cont, $contdoms);
-	@criticalerrs = $in{'skipwarnings'} ? (grep { !$_->{'critical'} } @errs)
+	@criticalerrs = $in{'skipwarnings'} ? (grep { $_->{'critical'} } @errs)
 				      	    : @errs;
 	if (@criticalerrs) {
 		print "<b>",&text('restore_rerrors', 
