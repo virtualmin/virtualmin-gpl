@@ -7100,6 +7100,7 @@ else {
 		@match || die "No test named or matching $tests[$i]";
 		splice(@tests, $i, 1, @match);
 		}
+	@tests = sort { $a cmp $b } @tests;
 	}
 @tests = grep { &indexof($_, @skips) < 0 } @tests;
 
