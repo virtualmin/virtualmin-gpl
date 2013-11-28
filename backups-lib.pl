@@ -2513,7 +2513,18 @@ elsif (@dst && $dst[9] >= $fst[9]) {
 
 # If we got the .dom files, can return now
 if (%dom && %info && keys(%dom) >= keys(%info)) {
-	return $wantdoms ? (\%info, [ values %dom ]) : \%info;
+	if ($wantdoms) {
+		# Fill in missing field for domains that don't exist locally
+		foreach my $d (values %dom) {
+			if (!&get_domain_by("dom", $d->{'dom'})) {
+				$d->{'missing'} = 1;
+				}
+			}
+		return (\%info, [ values %dom ]);
+		}
+	else {
+		return \%info;
+		}
 	}
 
 if ($mode > 0) {
@@ -2527,10 +2538,10 @@ else {
 	$backup = $_[0];
 	}
 
+local %rv;
 if (-d $backup) {
 	# A directory of backup files, one per domain
 	opendir(DIR, $backup);
-	local %rv;
 	foreach my $f (readdir(DIR)) {
 		next if ($f eq "." || $f eq ".." || $f =~ /\.(info|dom)$/);
 		local ($cont, $fdoms);
@@ -2563,7 +2574,6 @@ if (-d $backup) {
 			}
 		}
 	closedir(DIR);
-	return $wantdoms ? (\%rv, $doms) : \%rv;
 	}
 else {
 	# A single file
@@ -2647,8 +2657,18 @@ else {
 				}
 			}
 		}
-
-	return $wantdoms ? (\%rv, $doms) : \%rv;
+	}
+if ($wantdoms) {
+	# Fill in missing field for domains from the backup that don't exist
+	foreach my $d (@$doms) {
+		if (!&get_domain_by("dom", $d->{'dom'})) {
+			$d->{'missing'} = 1;
+			}
+		}
+	return (\%rv, $doms);
+	}
+else {
+	return \%rv;
 	}
 }
 
@@ -2737,9 +2757,10 @@ my @rv;
 if ($doms) {
 	foreach my $d (@$doms) {
 		# If domain has a reseller, make sure it exists now
-		if ($d->{'missing'} && $d->{'reseller'} && defined(&get_reseller)) {
+		if ($d->{'missing'} && $d->{'reseller'} &&
+		    defined(&get_reseller)) {
 			my $resel = &get_reseller($d->{'reseller'});
-			if (@$resel) {
+			if (!$resel) {
 				push(@rv, { 'critical' => 0,
 					    'desc' => &text('restore_ereseller',
 							    $d->{'reseller'}),

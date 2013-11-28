@@ -195,21 +195,16 @@ if (!$in{'confirm'}) {
 	@criticalerrs = $in{'skipwarnings'} ? (grep { !$_->{'critical'} } @errs)
 				      	    : @errs;
 	if (@criticalerrs) {
-		print "<b>",&text('restore_ferrors', 
+		print "<b>",&text('restore_rerrors', 
 		    join(", ", &unique(map { $_->{'desc'} } @criticalerrs))),
 		    "</b><p>\n";
 		goto FAILED;
 		}
 	elsif (@errs) {
-		print "<b>",&text('restore_ferrors2', 
+		print "<b>",&text('restore_rerrors2', 
 		    join(", ", &unique(map { $_->{'desc'} } @criticalerrs))),
 		    "</b><p>\n";
 		}
-	else {
-		&$second_print(".. no errors found");
-		}
-
-
 
 	print &ui_form_start("restore.cgi", "form-data");
 	print &ui_hidden("origsrc", $origsrc);
