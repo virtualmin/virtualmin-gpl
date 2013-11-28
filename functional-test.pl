@@ -793,10 +793,108 @@ $reseller_tests = [
 		    ],
 	},
 
+	# Create a domain owned by the reseller
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ],
+		      [ 'reseller', $test_reseller ],
+		      @create_args, ],
+        },
+
+	# Make sure the domain is owned by the reseller
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Reseller: '.$test_reseller ],
+	},
+	{ 'command' => 'list-resellers.pl',
+	  'args' => [ [ 'name', $test_reseller ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Owned servers: '.$test_domain ],
+	},
+
+	# Change to no reseller
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'reseller', 'NONE' ] ],
+	},
+
+	# Verify that it worked
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => [ 'Reseller: '.$test_reseller ],
+	},
+	{ 'command' => 'list-resellers.pl',
+	  'args' => [ [ 'name', $test_reseller ],
+		      [ 'multiline' ] ],
+	  'antigrep' => [ 'Owned servers: '.$test_domain ],
+	},
+
+	# Switch to the reseller again
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'reseller', $test_reseller ] ],
+	},
+
+	# Verify ownership
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Reseller: '.$test_reseller ],
+	},
+	{ 'command' => 'list-resellers.pl',
+	  'args' => [ [ 'name', $test_reseller ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Owned servers: '.$test_domain ],
+	},
+
+	# Backup the domain
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_file ] ],
+	},
+
 	# Delete the reseller
 	{ 'command' => 'delete-reseller.pl',
 	  'args' => [ [ 'name', $test_reseller ] ],
-	  'cleanup' => 1 },
+	},
+
+	# Delete the domain in preparation for a restore
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Check that a restore fails
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ] ],
+	  'fail' => 1,
+	},
+
+	# Check that a restore with warnings skipped works
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'skip-warnings' ],
+		      [ 'source', $test_backup_file ] ],
+	},
+
+	# Delete the reseller and domain
+	{ 'command' => 'delete-reseller.pl',
+	  'args' => [ [ 'name', $test_reseller ] ],
+	  'cleanup' => 1,
+	  'ignorefail' => 1,
+	},
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	  'ignorefail' => 1,
+	},
 	];
 
 # Script tests
@@ -1842,6 +1940,14 @@ $backup_tests = [
 	# Delete the domain, in preparation for re-creation
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Try restoring only the sub-server, which will fail
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_dir ] ],
+	  'fail' => 1,
 	},
 
 	# Re-create from backup dir
@@ -4536,7 +4642,8 @@ $plans_tests = [
 	{ 'command' => 'list-domains.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
-	  'grep' => [ 'Server block quota: 7777',
+	  'grep' => [ 'Plan: '.$test_plan,
+		      'Server block quota: 7777',
 		      'User block quota: 8888',
 		      'Maximum sub-servers: 7',
 		      'Bandwidth limit: 74.17',
