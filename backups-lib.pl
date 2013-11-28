@@ -2607,7 +2607,7 @@ else {
 		}
 
 	# Look for a home-format backup first
-	local ($l, %rv, %done, $dotbackup, @virtfiles);
+	local ($l, %done, $dotbackup, @virtfiles);
 	foreach $l (split(/\n/, $out)) {
 		if ($l =~ /(^|\s)(.\/)?.backup\/([^_ ]+)_([a-z0-9\-]+)$/) {
 			# Found a .backup/domain_feature file
