@@ -2768,10 +2768,17 @@ if ($doms) {
 				}
 			}
 
-		# If some is a sub-server, make sure parent exists
+		# If some is a sub-server, make sure parent exists (or is in
+		# this backup)
 		if ($d->{'missing'} && $d->{'parent'}) {
 			my $parent = &get_domain($d->{'parent'}) ||
 			     &get_domain_by("dom", $d->{'backup_parent_dom'});
+			if (!$parent) {
+				($parent) = grep {
+				    $_->{'id'} eq $d->{'parent'} ||
+				    $_->{'dom'} eq $d->{'backup_parent_dom'}
+				    } @$doms;
+				}
 			if (!$parent) {
 				push(@rv, { 'critical' => 1,
 					    'desc' => &text('restore_eparent',
