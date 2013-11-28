@@ -351,7 +351,7 @@ else {
 			      : @errs;
 if (@criticalerrs) {
 	&$second_print(".. this backup cannot be restored : ".
-	       join(", ", &unique(map { $_->{'desc'} } @criticalerrsa)));
+	       join(", ", &unique(map { $_->{'desc'} } @criticalerrs)));
 	exit(2);
 	}
 elsif (@errs) {
