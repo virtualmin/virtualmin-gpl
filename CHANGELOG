@@ -1426,3 +1426,5 @@ Added the Mail Rate Limiting page for restricting the rate at which messages wil
 All incoming email to a domain can now be silently BCCd to another address, similar to the existing option for BCCing outgoing messages.
 Added support for migrating domains from DirectAdmin control panel backups.
 Errors that would prevent a virtual server from being restored (such as a missing reseller or parent) are now detected before the long restore process starts.
+---- Changes since 4.04 ----
+Added the fix-domain-permissions API command, for resetting home directory ownership.
