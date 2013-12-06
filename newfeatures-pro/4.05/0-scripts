@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Z-push script installer to version 2.1.1-1788, and TikiWiki to 12.0.
+html=Updated the Z-push script installer to version 2.1.1-1788, phpMyAdmin to 4.0.10, and TikiWiki to 12.0.
 master=1
 reseller=1
 domain=1
