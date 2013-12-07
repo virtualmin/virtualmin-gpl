@@ -36,6 +36,12 @@ if (!$before && $ok) {
 			{ 'name' => 'nospf',
 			  'values' => [] });
 		}
+	($noauth) = grep { $_->{'name'} eq 'noauth' } @$conf;
+	if (!$noauth) {
+		&save_ratelimit_directive($conf, undef,
+			{ 'name' => 'noauth',
+			  'values' => [] });
+		}
 	&flush_file_lines();
 	&unlock_file(&get_ratelimit_config_file());
 	print $text{'setup_done'},"<p>\n";
