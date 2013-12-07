@@ -23,7 +23,7 @@ return ( "1.6", "1.4.10" );
 
 sub script_django_release
 {
-return 2;		# To fix install hang at email address
+return 3;		# To fix DB login issue
 }
 
 sub script_django_gpl
@@ -264,6 +264,7 @@ if (!$upgrade) {
 	local $lref = &read_file_lines_as_domain_user($d, $sfile);
 	my $i = 0;
 	my $pdbtype = $dbtype eq "mysql" ? "mysql" : "postgresql";
+	my ($engine, $gotname, $gotuser, $gotpass, $gothost);
 	foreach my $l (@$lref) {
 		# Django 1.1 style variables
 		if ($l =~ /DATABASE_ENGINE\s*=/) {
@@ -290,20 +291,37 @@ if (!$upgrade) {
 		# Django 1.2 variables
 		if ($l =~ /'ENGINE':/) {
 			$l = "        'ENGINE': 'django.db.backends.$pdbtype',";
+			$engine = $i;
 			}
 		if ($l =~ /'NAME':/) {
 			$l = "        'NAME': '$dbname',";
+			$gotname++;
 			}
 		if ($l =~ /'USER':/) {
 			$l = "        'USER': '$dbuser',";
+			$gotuser++;
 			}
 		if ($l =~ /'PASSWORD':/) {
 			$l = "        'PASSWORD': '$dbpass',";
+			$gotpass++;
 			}
 		if ($l =~ /'HOST':/) {
 			$l = "        'HOST': '$dbhost',";
+			$gothost++;
 			}
 		$i++;
+		}
+	if (!$gotname) {
+		splice(@$lref, $engine, 0, "        'NAME': '$dbname',");
+		}
+	if (!$gotuser) {
+		splice(@$lref, $engine, 0, "        'USER': '$dbuser',");
+		}
+	if (!$gotpass) {
+		splice(@$lref, $engine, 0, "        'PASSWORD': '$dbpass',");
+		}
+	if (!$gothost) {
+		splice(@$lref, $engine, 0, "        'HOST': '$dbhost',");
 		}
 	&flush_file_lines_as_domain_user($d, $sfile);
 
