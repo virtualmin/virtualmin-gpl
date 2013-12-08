@@ -428,8 +428,10 @@ if (&get_dkim_type() eq 'debian' || &get_dkim_type() eq 'ubuntu') {
 	&lock_file($dkim_defaults);
 	my %def;
 	&read_env_file($dkim_defaults, \%def);
-	if (!$def{'SOCKET'}) {
-		# Set socket in defaults file if missing
+	if (!$def{'SOCKET'} ||
+	    $def{'SOCKET'} =~ /^local:/ && $config{'mail_system'} == 0) {
+		# Set socket in defaults file if missing, or if a local file
+		# and Postfix is in use
 		$def{'SOCKET'} = "inet:8891\@localhost";
 		$dkim->{'port'} = 8891;
 		}
