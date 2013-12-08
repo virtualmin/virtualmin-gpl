@@ -19,10 +19,10 @@ print "$text{'features_desc'}<p>\n";
 $n = 0;
 foreach $f (@features) {
 	local @acts;
-	push(@acts, "<a href='search.cgi?field=$f&what=1'>".
-		    "$text{'features_used'}</a>");
-	$vital = &indexof($f, @vital_features) >= 0;
-	$always = &indexof($f, @can_always_features) >= 0;
+	push(@acts, ui_link("search.cgi?field=$f&what=1",
+		                $text{'features_used'}));
+	my $vital = &indexof($f, @vital_features) >= 0;
+	my $always = &indexof($f, @can_always_features) >= 0;
 	if ($vital) {
 		# Some features are *never* disabled, but may be not checked
 		# by default
@@ -67,12 +67,12 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 		&foreign_require($m->{'dir'}, "virtual_feature.pl");
 		local @acts;
 		if (-r "$mdir/config.info") {
-			push(@acts, "<a href='edit_plugconfig.cgi?".
-				"mod=$m->{'dir'}'>$text{'newplugin_conf'}</a>");
+			push(@acts, ui_link("edit_plugconfig.cgi?mod=$m->{'dir'}",
+                                $text{'newplugin_conf'}));
 			}
 		if (!$m->{'hidden'}) {
-			push(@acts, "<a href='../$m->{'dir'}/'>".
-				    "$text{'newplugin_open'}</a>");
+			push(@acts, ui_link("../$m->{'dir'}/",
+                                $text{'newplugin_open'}));
 			}
 		if (!$donesep++) {
 			print &ui_columns_row([ "<hr>" ],
