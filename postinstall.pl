@@ -414,6 +414,18 @@ if ($warn) {
 	print STDERR &get_virtualmin_url()," to fix them.\n";
 	}
 
+# Fix rate limiting noauth setting
+if (!&check_ratelimit() && &is_ratelimit_enabled()) {
+	my $conf = &get_ratelimit_config();
+	($noauth) = grep { $_->{'name'} eq 'noauth' } @$conf;
+	if (!$noauth) {
+		&save_ratelimit_directive($conf, undef,
+			{ 'name' => 'noauth',
+			  'values' => [] });
+		&flush_file_lines(&get_ratelimit_config_file());
+		}
+	}
+
 # Run any needed actions, like server restarts
 &run_post_actions_silently();
 
