@@ -24,7 +24,7 @@ foreach $t (@tmpls) {
 			     $text{'default'};
 	if ($virtualmin_pro) {
 		push(@fcs, ui_link("edit_tmpl.cgi?id=$t->{'id'}&".
-			   "editmode=scripts", $smesg));
+			               "editmode=scripts", $smesg));
 		}
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
