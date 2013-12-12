@@ -683,6 +683,7 @@ sub update_dkim_domains
 {
 my ($d, $action) = @_;
 return if (&check_dkim());
+&lock_file(&get_dkim_config_file());
 my $dkim = &get_dkim_config();
 return if (!$dkim || !$dkim->{'enabled'});
 
@@ -698,6 +699,7 @@ my %done;
 @doms = grep { !$done{$_->{'id'}}++ } @doms;
 @doms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) < 0 } @doms;
 &set_dkim_domains(\@doms, $dkim);
+&unlock_file(&get_dkim_config_file());
 
 # Add or remove DNS records
 if ($d->{'dns'}) {
