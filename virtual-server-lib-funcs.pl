@@ -15662,6 +15662,8 @@ if (!$d->{'parent'}) {
 	delete($d->{'postgres_user'});
 	if ($newpass) {
 		$d->{'pass'} = $newpass;
+		delete($d->{'enc_pass'}); # Any stored encrypted
+					  # password is not valid
 		}
 
 	# Re-compute email address
