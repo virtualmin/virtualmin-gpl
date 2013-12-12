@@ -1428,4 +1428,4 @@ Added support for migrating domains from DirectAdmin control panel backups.
 Errors that would prevent a virtual server from being restored (such as a missing reseller or parent) are now detected before the long restore process starts.
 ---- Changes since 4.04 ----
 Added the fix-domain-permissions API command, for resetting home directory ownership.
-Updated the Z-push script installer to version 2.1.1-1788, phpMyAdmin to 4.0.10, MediaWiki to 1.22.0, LimeSurvey to 2.05, Magento to 1.8.1.0, and TikiWiki to 12.0.
+Updated the Z-push script installer to version 2.1.1-1788, phpMyAdmin to 4.1.0, MediaWiki to 1.22.0, LimeSurvey to 2.05, Magento to 1.8.1.0, and TikiWiki to 12.0.
