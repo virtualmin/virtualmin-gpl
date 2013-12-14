@@ -533,8 +533,8 @@ return &ui_checkbox("dir_logs", 1, $text{'backup_dirlogs'},
 sub parse_backup_dir
 {
 local %in = %{$_[0]};
-return { 'dirnologs' => !$in{'dir_logs'},
-	 'dirnohomes' => !$in{'dir_homes'} };
+return { 'dirnologs' => $in{'dir_logs'} ? 0 : 1,
+	 'dirnohomes' => $in{'dir_homes'} ? 0 : 1 };
 }
 
 # show_restore_dir(&options, &domain)
