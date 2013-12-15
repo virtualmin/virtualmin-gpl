@@ -823,8 +823,9 @@ return $@ ? 0 : 1;
 sub check_python_module
 {
 local ($mod, $d) = @_;
+my $python = &get_python_path();
 local $out = &backquote_command("echo import ".quotemeta($mod).
-				" | python 2>&1");
+				" | $python 2>&1");
 return $? ? 0 : 1;
 }
 
@@ -2932,6 +2933,12 @@ foreach my $file (split(/\r?\n/, $out)) {
 		};
 	}
 return @fixed;
+}
+
+sub get_python_path
+{
+return &has_command($config{'python_cmd'}) ||
+       &has_command("python") || "python";
 }
 
 1;
