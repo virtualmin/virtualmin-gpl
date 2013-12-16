@@ -12945,6 +12945,15 @@ if ($config{'web'}) {
 			     "<pre>".&html_escape($err)."</pre>");
 		}
 
+	# Check for sane Apache version
+	if (!$apache::httpd_modules{'core'}) {
+		return $text{'check_ewebapacheversion'};
+		}
+	elsif ($apache::httpd_modules{'core'} < 1.3) {
+		return &text('check_ewebapacheversion2',
+			     $apache::httpd_modules{'core'}, 1.3);
+		}
+
 	# Check for Ubuntu PHP setting that breaks fcgi
 	my $php5conf = "/etc/apache2/mods-enabled/php5.conf";
 	if (-r $php5conf) {
