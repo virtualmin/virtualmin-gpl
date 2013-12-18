@@ -918,7 +918,9 @@ sub same_cert_file
 local ($file1, $file2) = @_;
 local $info1 = &cert_file_info($file1);
 local $info2 = &cert_file_info($file2);
-return $info1->{'modulus'} eq $info2->{'modulus'};
+return &same_file($file1, $file2) ||
+       $info1->{'modulus'} && $info2->{'modulus'} &&
+       $info1->{'modulus'} eq $info2->{'modulus'};
 }
 
 # check_passphrase(key-data, passphrase)
