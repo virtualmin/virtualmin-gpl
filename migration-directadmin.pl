@@ -235,6 +235,24 @@ if (-d $phdsrc) {
 		}
 	}
 
+# Copy over public_html dir
+local $phd = "$dom{'home'}/private_html";
+local $phdsrc = "$domains/$dom/private_html";
+if (-d $phdsrc) {
+	&$first_print("Copying private_html directory ..");
+	&execute_command("cd ".quotemeta($phdsrc)." && ".
+			 &make_tar_command("cf", "-", ".")." | ".
+			 "(cd ".quotemeta($phd)." && ".
+			   &make_tar_command("xf", "-").")",
+			 undef, \$out, \$out);
+	if ($?) {
+		&$second_print(".. copy failed : <tt>$out</tt>");
+		}
+	else {
+		&$second_print(".. done");
+		}
+	}
+
 # Copy over stats directory
 local $stats = &webalizer_stats_dir(\%dom);
 local $statssrc = "$domains/$dom/stats";
