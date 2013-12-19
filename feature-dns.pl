@@ -2991,6 +2991,34 @@ return ( { 'type' => 'A',
 			 },
 		       ],
 	 },
+	 { 'type' => 'SRV',
+	   'desc' => $text{'records_typesrv'},
+	   'domain' => 1,
+	   'create' => 1,
+	   'values' => [ { 'desc' => $text{'records_valuesrv1'},
+                           'size' => 5,
+                           'func' => sub { $_[0] =~ /^\d+$/ ?
+					undef : $text{'records_evaluesrv1'} },
+                         },
+		         { 'desc' => $text{'records_valuesrv2'},
+                           'size' => 5,
+                           'func' => sub { $_[0] =~ /^\d+$/i ?
+                                        undef : $text{'records_evaluesrv2'} },
+                         },
+		         { 'desc' => $text{'records_valuesrv3'},
+                           'size' => 10,
+                           'func' => sub { $_[0] =~ /^\d+$/i ?
+                                        undef : $text{'records_evaluesrv3'} },
+                         },
+		         { 'desc' => $text{'records_valuesrv4'},
+                           'size' => 40,
+                           'func' => sub { $_[0] =~ /^[a-z0-9\.\_\-]+$/i ?
+                                        undef : $text{'records_evaluesrv4'} },
+			   'dot' => 1,
+                         },
+                       ],
+	 },
+
        );
 }
 
