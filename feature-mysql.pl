@@ -2389,7 +2389,7 @@ sub list_mysql_size_settings
 {
 local ($size) = @_;
 if ($size eq "small") {
-	return ([ "key_buffer", "16K" ],
+	return ([ "key_buffer_size", "16K" ],
 		[ "max_allowed_packet", "1M" ],
 		[ "table_cache", "4" ],
 		[ "sort_buffer_size", "64K" ],
@@ -2402,18 +2402,18 @@ if ($size eq "small") {
 		[ "query_cache_size", undef ],
 		[ "thread_concurrency", undef ],
 
-		[ "key_buffer", "8M", "isamchk" ],
+		[ "key_buffer_size", "8M", "isamchk" ],
 		[ "sort_buffer_size", "8M", "isamchk" ],
 		[ "read_buffer", undef, "isamchk" ],
 		[ "write_buffer", undef, "isamchk" ],
 
-		[ "key_buffer", "8M", "myisamchk" ],
+		[ "key_buffer_size", "8M", "myisamchk" ],
 		[ "sort_buffer_size", "8M", "myisamchk" ],
 		[ "read_buffer", undef, "myisamchk" ],
 		[ "write_buffer", undef, "myisamchk" ]);
 	}
 elsif ($size eq "medium") {
-	return ([ "key_buffer", "16M" ],
+	return ([ "key_buffer_size", "16M" ],
 		[ "max_allowed_packet", "1M" ],
 		[ "table_cache", "64" ],
 		[ "sort_buffer_size", "512K" ],
@@ -2426,18 +2426,18 @@ elsif ($size eq "medium") {
 		[ "query_cache_size", undef ],
 		[ "thread_concurrency", undef ],
 
-		[ "key_buffer", "20M", "isamchk" ],
+		[ "key_buffer_size", "20M", "isamchk" ],
 		[ "sort_buffer_size", "20M", "isamchk" ],
 		[ "read_buffer", "2M", "isamchk" ],
 		[ "write_buffer", "2M", "isamchk" ],
 
-		[ "key_buffer", "20M", "myisamchk" ],
+		[ "key_buffer_size", "20M", "myisamchk" ],
 		[ "sort_buffer_size", "20M", "myisamchk" ],
 		[ "read_buffer", "2M", "myisamchk" ],
 		[ "write_buffer", "2M", "myisamchk" ]);
 	}
 elsif ($size eq "large") {
-	return ([ "key_buffer", "256M" ],
+	return ([ "key_buffer_size", "256M" ],
 		[ "max_allowed_packet", "1M" ],
 		[ "table_cache", "256" ],
 		[ "sort_buffer_size", "1M" ],
@@ -2450,18 +2450,18 @@ elsif ($size eq "large") {
 		[ "query_cache_size", "16M" ],
 		[ "thread_concurrency", "8" ],
 
-		[ "key_buffer", "128M", "isamchk" ],
+		[ "key_buffer_size", "128M", "isamchk" ],
 		[ "sort_buffer_size", "128M", "isamchk" ],
 		[ "read_buffer", "2M", "isamchk" ],
 		[ "write_buffer", "2M", "isamchk" ],
 
-		[ "key_buffer", "128M", "myisamchk" ],
+		[ "key_buffer_size", "128M", "myisamchk" ],
 		[ "sort_buffer_size", "128M", "myisamchk" ],
 		[ "read_buffer", "2M", "myisamchk" ],
 		[ "write_buffer", "2M", "myisamchk" ]);
 	}
 elsif ($size eq "huge") {
-	return ([ "key_buffer", "384M" ],
+	return ([ "key_buffer_size", "384M" ],
 		[ "max_allowed_packet", "1M" ],
 		[ "table_cache", "512" ],
 		[ "sort_buffer_size", "2M" ],
@@ -2474,12 +2474,12 @@ elsif ($size eq "huge") {
 		[ "query_cache_size", "32M" ],
 		[ "thread_concurrency", "8" ],
 
-		[ "key_buffer", "256M", "isamchk" ],
+		[ "key_buffer_size", "256M", "isamchk" ],
 		[ "sort_buffer_size", "256M", "isamchk" ],
 		[ "read_buffer", "2M", "isamchk" ],
 		[ "write_buffer", "2M", "isamchk" ],
 
-		[ "key_buffer", "256M", "myisamchk" ],
+		[ "key_buffer_size", "256M", "myisamchk" ],
 		[ "sort_buffer_size", "256M", "myisamchk" ],
 		[ "read_buffer", "2M", "myisamchk" ],
 		[ "write_buffer", "2M", "myisamchk" ]);
