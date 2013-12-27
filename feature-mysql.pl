@@ -638,7 +638,8 @@ local ($d, $oldd) = @_;
 
 # Re-create each DB with a new name
 local %dbmap;
-foreach my $db (&domain_databases($oldd, [ 'mysql' ])) {
+my @dbs = &domain_databases($oldd, [ 'mysql' ]);
+foreach my $db (@dbs) {
 	local $newname = $db->{'name'};
 	local $newprefix = &fix_database_name($d->{'prefix'}, 'mysql');
 	local $oldprefix = &fix_database_name($oldd->{'prefix'}, 'mysql');
@@ -651,10 +652,19 @@ foreach my $db (&domain_databases($oldd, [ 'mysql' ])) {
 		}
 	elsif ($newname !~ s/\Q$oldprefix\E/$newprefix/) {
 		# Otherwise, just replace the DB name prefix. If that isn't
-		# possible, prepend the new prefix as a last resort.
+		# possible, prepend the new prefix as a last resort or just
+		# use the new prefix if this is the only database in the domain
 		&$second_print(&text('clone_mysqlprefix', $newname,
 				     $oldprefix, $newprefix));
-		$newname = $newprefix.$newname;
+		if (@dbs == 1 && !&check_mysql_database_clash($d, $newprefix)) {
+			# This domain has only one database, so we can just use
+			# the new prefix directly (as long as it doesn't clash)
+			$newname = $newprefix;
+			}
+		else {
+			# Prepend new prefix
+			$newname = $newprefix.$newname;
+			}
 		&$second_print(&text('clone_mysqlprefix2', $newname));
 		}
 	if (&check_mysql_database_clash($d, $newname)) {

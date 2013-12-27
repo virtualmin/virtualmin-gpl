@@ -40,6 +40,7 @@ if (&foreign_check("proc")) {
 		local %donezone;
 		local %donevzfs;
 		local %donedevice;
+		local %donedevno;
 		local @cfs = split(/\s+/, $config{'collect_fs'});
 		foreach my $m (@mounted) {
 			if (@cfs) {
@@ -72,6 +73,12 @@ if (&foreign_check("proc")) {
 				    $donedevice{$m->[1]}++) {
 					# Don't double-count mounts from
 					# the same device, or of the same dir
+					next;
+					}
+				my @st = stat($m->[1]);
+				if (@st && $donedevno{$st[0]}++) {
+					# Don't double-count same filesystem
+					# by device number
 					next;
 					}
 				local ($t, $f) =

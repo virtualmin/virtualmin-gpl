@@ -16,19 +16,26 @@ local $dump = &read_plesk_xml($xfile);
 ref($dump) || return ($dump);
 use Data::Dumper;
 local $domain;
-if ($dump->{'admin'}->{'domains'}) {
+local $domains = $dump->{'admin'} ? $dump->{'admin'}->{'domains'}
+				  : $dump->{'domains'};
+if ($domains) {
 	# Plesk 11 format
+	if ($domains->{'domain'}->{'name'}) {
+		# Just one domain
+		$domains->{'domain'} = { $domains->{'domain'}->{'name'} =>
+					 $domains->{'domain'} };
+		}
 	if (!$dom) {
 		# Use first domain
-		foreach my $n (keys %{$dump->{'admin'}->{'domains'}->{'domain'}}) {
-			my $v = $dump->{'admin'}->{'domains'}->{'domain'}->{$n};
+		foreach my $n (keys %{$domains->{'domain'}}) {
+			my $v = $domains->{'domain'}->{$n};
 			if ($v->{'phosting'}->{'preferences'}->{'sysuser'}->{'name'}) {
 				$dom = $n;
 				}
 			}
 		$dom || return ("Could not work out default domain");
 		}
-	$domain = $dump->{'admin'}->{'domains'}->{'domain'}->{$dom};
+	$domain = $domains->{'domain'}->{$dom};
 	$domain || return ("Backup does not contain the domain $dom");
 
 	if (!$parent && !$user) {
@@ -110,11 +117,18 @@ local ($xfile) = glob("$root/*.xml");
 local $dump = &read_plesk_xml($xfile);
 ref($dump) || &error($dump);
 local $domain;
-if ($dump->{'admin'}->{'domains'}) {
+local $domains = $dump->{'admin'} ? $dump->{'admin'}->{'domains'}
+				  : $dump->{'domains'};
+if ($domains) {
 	# Plesk 11 format
+	if ($domains->{'domain'}->{'name'}) {
+		# Just one domain
+		$domains->{'domain'} = { $domains->{'domain'}->{'name'} =>
+					 $domains->{'domain'} };
+		}
 
 	# Get the domain object and username if not specified
-	$domain = $dump->{'admin'}->{'domains'}->{'domain'}->{$dom};
+	$domain = $domains->{'domain'}->{$dom};
 	if (!$user) {
 		$user = $domain->{'phosting'}->{'preferences'}->{'sysuser'}->{'name'};
 		}
@@ -681,8 +695,6 @@ if ($got{'mysql'}) {
 		# Just one user
 		$dbusers = { $dbusers->{'name'} => $dbusers };
 		}
-	use Data::Dumper;
-	print STDERR Dumper($dbusers);
 	foreach my $mname (keys %$dbusers) {
 		my $dbuser = $dbusers->{$name};
 		next if ($mname eq $user);	# Domain owner

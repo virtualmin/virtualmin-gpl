@@ -428,8 +428,10 @@ if (&get_dkim_type() eq 'debian' || &get_dkim_type() eq 'ubuntu') {
 	&lock_file($dkim_defaults);
 	my %def;
 	&read_env_file($dkim_defaults, \%def);
-	if (!$def{'SOCKET'}) {
-		# Set socket in defaults file if missing
+	if (!$def{'SOCKET'} ||
+	    $def{'SOCKET'} =~ /^local:/ && $config{'mail_system'} == 0) {
+		# Set socket in defaults file if missing, or if a local file
+		# and Postfix is in use
 		$def{'SOCKET'} = "inet:8891\@localhost";
 		$dkim->{'port'} = 8891;
 		}
@@ -681,6 +683,7 @@ sub update_dkim_domains
 {
 my ($d, $action) = @_;
 return if (&check_dkim());
+&lock_file(&get_dkim_config_file());
 my $dkim = &get_dkim_config();
 return if (!$dkim || !$dkim->{'enabled'});
 
@@ -696,6 +699,7 @@ my %done;
 @doms = grep { !$done{$_->{'id'}}++ } @doms;
 @doms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) < 0 } @doms;
 &set_dkim_domains(\@doms, $dkim);
+&unlock_file(&get_dkim_config_file());
 
 # Add or remove DNS records
 if ($d->{'dns'}) {

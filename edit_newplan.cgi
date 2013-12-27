@@ -14,8 +14,8 @@ foreach $plan (@plans) {
 	local @cols;
 	push(@cols, { 'type' => 'checkbox', 'name' => 'd',
 		      'value' => $plan->{'id'} });
-	push(@cols, "<a href='edit_plan.cgi?id=$plan->{'id'}'>".
-		    &html_escape($plan->{'name'})."</a>");
+	push(@cols, ui_link("edit_plan.cgi?id=$plan->{'id'}'",
+		    &html_escape($plan->{'name'})));
 	if ($canplans == 2) {
 		push(@cols, $plan->{'owner'} ||
 			    "<i>$text{'plans_noresel'}</i>");

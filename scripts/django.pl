@@ -18,7 +18,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-return ( "1.6", "1.4.10" );
+return ( "1.6.1", "1.4.10" );
 }
 
 sub script_django_release
@@ -51,8 +51,9 @@ local ($d, $ver) = @_;
 local @rv;
 
 # Check for python, and required version
-&has_command("python") || push(@rv, "The python command is not installed");
-local $out = &backquote_command("python --version 2>&1 </dev/null");
+my $python = &has_command($config{'python_cmd'} || "python");
+$python || push(@rv, "The python command is not installed");
+local $out = &backquote_command("$python --version 2>&1 </dev/null");
 if ($out =~ /Python\s+([0-9\.]+)/i) {
 	local $pyver = $1;
 	if ($ver >= 1.5 && &compare_versions($pyver, "2.6.5") < 0) {
@@ -174,7 +175,7 @@ return @files;
 sub script_django_commands
 {
 local ($d, $ver, $opts) = @_;
-return ("python");
+return ($config{'python_cmd'} || "python");
 }
 
 # script_django_install(&domain, version, &opts, &files, &upgrade-info)
@@ -200,7 +201,7 @@ if ($dbtype) {
 						   $dbuser, $dbpass);
 	return (0, "Database connection failed : $dberr") if ($dberr);
 	}
-local $python = &has_command("python");
+my $python = &has_command($config{'python_cmd'} || "python");
 
 # Create target dir
 if (!-d $opts->{'dir'}) {
@@ -224,7 +225,7 @@ $err && return (0, "Failed to extract Django source : $err");
 
 # Install to target dir
 local $icmd = "(cd ".quotemeta("$temp/Django-$ver")." && ".
-      "python setup.py install --home ".quotemeta($opts->{'dir'}).") 2>&1";
+      "$python setup.py install --home ".quotemeta($opts->{'dir'}).") 2>&1";
 local $out = &run_as_domain_user($d, $icmd);
 if ($?) {
 	return (0, "Django source install failed : ".

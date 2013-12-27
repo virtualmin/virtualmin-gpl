@@ -4401,6 +4401,7 @@ if ($oldd) {
 		&show_domain_name($oldd->{'dom'});
 	}
 local $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
+local $alias = $d->{'alias'} ? &get_domain($d->{'alias'}) : undef;
 if (defined(&get_reseller)) {
 	# Set reseller details, if we have one
 	local $resel = $d->{'reseller'} ? &get_reseller($d->{'reseller'}) :
@@ -4427,6 +4428,16 @@ if ($parent) {
 		}
 	$ENV{'PARENT_VIRTUALSERVER_IDNDOM'} =
 		&show_domain_name($parent->{'dom'});
+	}
+if ($alias) {
+	# Set alias domain variables
+	foreach my $e (keys %$alias) {
+		local $env = uc($e);
+		$env =~ s/\-/_/g;
+		$ENV{'ALIAS_VIRTUALSERVER_'.$env} = $alias->{$e};
+		}
+	$ENV{'ALIAS_VIRTUALSERVER_IDNDOM'} =
+		&show_domain_name($alias->{'dom'});
 	}
 foreach my $v (&get_global_template_variables()) {
 	if ($v->{'enabled'}) {
@@ -12934,6 +12945,15 @@ if ($config{'web'}) {
 			     "<pre>".&html_escape($err)."</pre>");
 		}
 
+	# Check for sane Apache version
+	if (!$apache::httpd_modules{'core'}) {
+		return $text{'check_ewebapacheversion'};
+		}
+	elsif ($apache::httpd_modules{'core'} < 1.3) {
+		return &text('check_ewebapacheversion2',
+			     $apache::httpd_modules{'core'}, 1.3);
+		}
+
 	# Check for Ubuntu PHP setting that breaks fcgi
 	my $php5conf = "/etc/apache2/mods-enabled/php5.conf";
 	if (-r $php5conf) {
@@ -15662,6 +15682,8 @@ if (!$d->{'parent'}) {
 	delete($d->{'postgres_user'});
 	if ($newpass) {
 		$d->{'pass'} = $newpass;
+		delete($d->{'enc_pass'}); # Any stored encrypted
+					  # password is not valid
 		}
 
 	# Re-compute email address
