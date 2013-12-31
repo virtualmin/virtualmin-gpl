@@ -204,8 +204,11 @@ for(my $i=0; $i<$tries; $i++) {
 		}
 	&close_http_connection($out);
 
-	if ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
-		$err = "Upload failed : $line";
+	if ($line =~ /\S/) {
+		$err = "Empty response to HTTP request";
+		}
+	elsif ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
+		$err = "Invalid HTTP response : $line";
 		}
 	elsif ($1 >= 300 && $1 < 400) {
 		# Follow the SOAP redirect
