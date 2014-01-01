@@ -891,7 +891,7 @@ while(<OUT>) {
 	if (/RSA\s+Public\s+Key:\s+\((\d+)\s+bit/) {
 		$rv{'size'} = $1;
 		}
-	if (/Modulus\s*\(.*\):/) {
+	if (/Modulus\s*\(.*\):/ || /Modulus:/) {
 		$inmodulus = 1;
 		}
 	if (/^\s+([0-9a-f:]+)\s*$/ && $inmodulus) {
