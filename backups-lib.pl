@@ -791,6 +791,7 @@ DOMAIN: foreach $d (@$doms) {
 			if ($err) {
 				&$second_print(&text('backup_uploadfailed',
 						     $err));
+				push(@errdoms, $d);
 				$ok = 0;
 				}
 			else {
@@ -1434,6 +1435,10 @@ if (!$anylocal) {
 	# Always delete the temporary destination
 	&execute_command("rm -rf ".quotemeta($dest));
 	}
+
+# Each domain can only fail once
+my %doneerrdom;
+@errdoms = grep { !$doneerrdom{$_->{'id'}}++ } @errdoms;
 
 # Show some status
 if ($ok) {
