@@ -209,10 +209,9 @@ if ($sched->{'email'} && $has_mailboxes &&
 	$output_header .= "\n";
 
 	# Add list of domains that failed
-	if (@$errdoms || !$ok) {
-		local $printdoms = @$errdoms ? $errdoms : \@doms;
+	if (@$errdoms) {
 		$output_header .= $text{'backup_partial2'}."\n";
-		foreach $d (@$printdoms) {
+		foreach $d (@$errdoms) {
 			$output_header .= "    ".$d->{'dom'}."\n";
 			}
 		}
