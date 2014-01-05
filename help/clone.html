@@ -12,5 +12,10 @@ When duplicating a top-level virtual server you must also enter a new username
 and password to own the new domain. If the server has a private IP address,
 a new IP will be automatically allocated for the clone. <p>
 
+The cloning process will copy any databases associated with the original
+domain under new names, and duplicate their contents. However, it will NOT
+update any scripts installed into the original domain that are configured to
+use the original databases - this must be done manually. <p>
+
 <footer>
 

@@ -20,6 +20,11 @@ a new IP for the clone from the configured IP allocation range. If no ranges
 are defined or you want to use a specific address, the C<--ip> flag can
 be given instead, followed by the address for the new domain to use.
 
+The cloning process will copy any databases associated with the original
+domain under new names, and duplicate their contents. However, it will NOT
+update any scripts installed into the original domain that are configured to
+use the original databases - this must be done manually.
+
 =cut
 
 package virtual_server;
