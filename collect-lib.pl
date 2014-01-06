@@ -390,7 +390,8 @@ push(@stats, [ "quotaused", $qused ]);
 
 # Get messages processed by procmail since the last collection time
 local $now = time();
-if (-r $procmail_log_file) {
+my $hasprocmail = &mail_system_has_procmail();
+if (-r $procmail_log_file && $hasprocmail) {
 	# Get last seek position
 	local $lastinfo = &read_file_contents("$historic_info_dir/procmailpos");
 	local @st = stat($procmail_log_file);
@@ -444,6 +445,7 @@ local $mail_log_file = $config{'bw_maillog'};
 $mail_log_file = &get_mail_log() if ($mail_log_file eq "auto");
 if ($mail_log_file) {
 	# Get last seek position
+	local ($spamcount, $mailcount) = (0, 0);
 	local $lastinfo = &read_file_contents("$historic_info_dir/maillogpos");
 	local @st = stat($mail_log_file);
 	local ($lastpos, $lastinode, $lasttime);
@@ -488,7 +490,17 @@ if ($mail_log_file) {
 				}
 			}
 		elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+).*ratelimit overflow for class/) {
+			# Rate limiting message
 			$ratecount++;
+			}
+		elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+).*spam:\s*identified\s+spam/ && !$hasprocmail) {
+			# Classified as spam when procmail delivery isn't used
+			$spamcount++;
+			$mailcount++;
+			}
+		elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+).*spam:\s*clean\s+message/ && !$hasprocmail) {
+			# Deliverted normally when procmail delivery isn't used
+			$mailcount++;
 			}
 		}
 	$lastpos = tell(MAILLOG);
@@ -504,6 +516,12 @@ if ($mail_log_file) {
 		}
 	if ($ratecount) {
 		push(@stats, [ "ratecount", $mins ? $ratecount / $mins : 0 ]);
+		}
+	if ($spamcount) {
+		push(@stats, [ "spamcount", $mins ? $spamcount / $mins : 0 ]);
+		}
+	if ($mailcount) {
+		push(@stats, [ "mailcount", $mins ? $mailcount / $mins : 0 ]);
 		}
 
 	# Save last seek
