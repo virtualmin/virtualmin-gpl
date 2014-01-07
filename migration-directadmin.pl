@@ -235,7 +235,7 @@ if (-d $phdsrc) {
 		}
 	}
 
-# Copy over public_html dir
+# Copy over private_html dir
 local $phd = "$dom{'home'}/private_html";
 local $phdsrc = "$domains/$dom/private_html";
 if (-d $phdsrc) {
@@ -256,7 +256,7 @@ if (-d $phdsrc) {
 # Copy over stats directory
 local $stats = &webalizer_stats_dir(\%dom);
 local $statssrc = "$domains/$dom/stats";
-if (-d $statssrc) {
+if (-d $statssrc && $dom{'webalizer'}) {
 	&$first_print("Copying stats directory ..");
 	&execute_command("cd ".quotemeta($statssrc)." && ".
 			 &make_tar_command("cf", "-", ".")." | ".
@@ -553,6 +553,56 @@ if ($got{'mysql'}) {
 	closedir(MYDIR);
 	&enable_quotas(\%dom);
 	&$second_print(".. done (created $mycount databases and $myucount users)");
+	}
+
+# Migrate any alias domains
+my %aliaslist;
+&read_env_file("$backup/$dom/domain.pointers", \%aliaslist);
+foreach my $adom (keys %aliaslist) {
+	next if ($aliaslist{$adom} ne 'alias');
+	&$first_print("Creating alias domain $adom ..");
+	if (&domain_name_clash($adom)) {
+		&$second_print(".. the domain $adom already exists");
+		next;
+		}
+	&$indent_print();
+	local %alias = ( 'id', &domain_id(),
+			 'dom', $adom,
+			 'user', $dom{'user'},
+			 'group', $dom{'group'},
+			 'prefix', $dom{'prefix'},
+			 'ugroup', $dom{'ugroup'},
+			 'pass', $dom{'pass'},
+			 'alias', $dom{'id'},
+			 'aliasmail', 1,
+			 'uid', $dom{'uid'},
+			 'gid', $dom{'gid'},
+			 'ugid', $dom{'ugid'},
+			 'owner', "Migrated DirectAdmin alias for $dom{'dom'}",
+			 'email', $dom{'email'},
+			 'name', 1,
+			 'ip', $dom{'ip'},
+			 'virt', 0,
+			 'source', $dom{'source'},
+			 'parent', $dom{'id'},
+			 'template', $dom{'template'},
+			 'reseller', $dom{'reseller'},
+			 'nocreationmail', 1,
+			 'nocopyskel', 1,
+			);
+	foreach my $f (@alias_features) {
+		$alias{$f} = $dom{$f};
+		}
+	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+					  : \%dom;
+	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
+	&generate_domain_password_hashes(\%alias, 1);
+	&complete_domain(\%alias);
+	&create_virtual_server(\%alias, $parentdom,
+			       $parentdom->{'user'});
+	&$outdent_print();
+	&$second_print($text{'setup_done'});
+	push(@rvdoms, \%alias);
 	}
 
 if ($parent) {
