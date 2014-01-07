@@ -6023,6 +6023,7 @@ clone_clashfound=.. clash found : $1
 clone_dependfound=.. clash found : $1
 clone_create=Creating new virtual server ..
 clone_createfailed=.. creation failed : $1
+clone_scripts=Copying installed script logs ..
 clone_prefixclash=.. prefix $1 is already in use by virtual server $2
 clone_doing=Cloning virtual server $1 to $2 ..
 clone_doing2=Cloning virtual server $1 to $2 with username $3 ..

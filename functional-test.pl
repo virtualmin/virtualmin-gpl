@@ -6143,6 +6143,14 @@ $clone_tests = [
 		},
 		) : ( ),
 
+	# Install phpMyAdmin
+	{ 'command' => 'install-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'phpmyadmin' ],
+		      [ 'path', '/phpmyadmin' ],
+		      [ 'version', '2.11.11.3' ] ],
+	},
+
 	# Clone it
 	{ 'command' => 'clone-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -6200,6 +6208,17 @@ $clone_tests = [
 		      'Forward: jill@'.$test_clone_domain,
 		      'Autoreply message: User autoreply',
 	            ],
+	},
+
+	# Check script list
+	{ 'command' => 'list-scripts.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Type: phpmyadmin',
+		      'Directory: /home/'.$test_clone_domain_user.
+			'/public_html/phpmyadmin',
+		      'URL: http://'.$test_clone_domain.'/phpmyadmin',
+		    ],
 	},
 
 	# Test DNS lookup

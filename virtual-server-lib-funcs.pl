@@ -15817,6 +15817,25 @@ foreach my $f (@plugins) {
 	}
 &save_domain($d);
 
+# Copy across script logs, and then fix paths
+# Fix script installer paths in all domains
+local $scriptsrc = "$script_log_directory/$oldd->{'id'}";
+local $scriptdest = "$script_log_directory/$d->{'id'}";
+if (defined(&list_domain_scripts) && -d $scriptsrc) {
+	&$first_print($text{'clone_scripts'});
+	&copy_source_dest($scriptsrc, $scriptdest);
+	local ($olddir, $newdir) = ($oldd->{'home'}, $d->{'home'});
+	foreach $sinfo (&list_domain_scripts($d)) {
+		my $changed = 0;
+		$changed++ if ($sinfo->{'opts'}->{'dir'} =~
+		       		s/^\Q$olddir\E\//$newdir\//);
+		$changed++ if ($sinfo->{'url'} =~
+				s/\/$oldd->{'dom'}/\/$d->{'dom'}/);
+		&save_domain_script($d, $sinfo) if ($changed);
+		}
+	&$second_print($text{'setup_done'});
+	}
+
 &run_post_actions();
 return 1;
 }
