@@ -11677,6 +11677,14 @@ if (&can_edit_templates()) {
 		    'icon' => 'recheck' });
 	}
 
+# Add wizard page
+if ($config{'wizard_run'}) {
+	push(@rv, { 'url' => "$vm/wizard.cgi",
+		    'title' => $text{'index_rewizard'},
+		    'cat' => 'setting',
+		    'icon' => 'wizard' });
+	}
+
 # Add creation-related links
 my ($dleft, $dreason, $dmax, $dhide) = &count_domains("realdoms");
 my ($aleft, $areason, $amax, $ahide) = &count_domains("aliasdoms");
