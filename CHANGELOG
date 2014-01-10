@@ -1428,5 +1428,5 @@ Added support for migrating domains from DirectAdmin control panel backups.
 Errors that would prevent a virtual server from being restored (such as a missing reseller or parent) are now detected before the long restore process starts.
 ---- Changes since 4.04 ----
 Added the fix-domain-permissions API command, for resetting home directory ownership.
-Updated the Z-push script installer to version 2.1.1-1788, phpMyAdmin to 4.1.4, MediaWiki to 1.22.0, LimeSurvey to 2.05, Magento to 1.8.1.0, WordPress to 3.8, FengOffice to 2.4.0.6, Revive Adserver to 3.0.2, Django to 1.6.1, Joomla to 3.2.1 and 2.5.17, PiWik to 2.0.2, ZenPhoto to 1.4.5.8, phpMyFAQ to 2.8.5, eXtplorer to 2.1.5, Drupal to 7.25, ownCloud to 6.0.0a, Dolibarr to 3.4.2, WHMCS to 5.2.15, and TikiWiki to 12.0.
+Updated the Z-push script installer to version 2.1.1-1788, phpMyAdmin to 4.1.4, MediaWiki to 1.22.0, LimeSurvey to 2.05, Magento to 1.8.1.0, WordPress to 3.8, FengOffice to 2.4.0.6, Revive Adserver to 3.0.2, Django to 1.6.1, Joomla to 3.2.1 and 2.5.17, PiWik to 2.0.2, ZenPhoto to 1.4.5.8, phpMyFAQ to 2.8.5, eXtplorer to 2.1.5, Drupal to 7.25, ownCloud to 6.0.0a, Dolibarr to 3.4.2, WHMCS to 5.2.15, Coppermine to 1.5.26, and TikiWiki to 12.0.
 Added SRV record support to the DNS Records page.
