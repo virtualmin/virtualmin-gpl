@@ -130,22 +130,30 @@ if ($sched->{'before'}) {
 @strfdests = $sched->{'strftime'} ? map { &backup_strftime($_) } @dests
 				  : @dests;
 $current_id = undef;
-($ok, $size, $errdoms) = &backup_domains(
-				\@strfdests,
-				\@doms,
-				\@do_features,
-			        $sched->{'fmt'},
-			        $sched->{'errors'},
-			        \%options,
-			        $sched->{'fmt'} == 2,
-			        \@vbs,
-			        $sched->{'mkdir'},
-			        $sched->{'onebyone'},
-			        $cbmode == 2,
-			        \&backup_cbfunc,
-			        $sched->{'increment'},
-			        1,
-				$key);
+eval {
+	local $main::error_must_die = 1;
+	($ok, $size, $errdoms) = &backup_domains(
+					\@strfdests,
+					\@doms,
+					\@do_features,
+					$sched->{'fmt'},
+					$sched->{'errors'},
+					\%options,
+					$sched->{'fmt'} == 2,
+					\@vbs,
+					$sched->{'mkdir'},
+					$sched->{'onebyone'},
+					$cbmode == 2,
+					\&backup_cbfunc,
+					$sched->{'increment'},
+					1,
+					$key);
+	};
+if ($@) {
+	# Perl error during backup!
+	$ok = 0;
+	$output .= $@;
+	}
 
 # If purging old backups, do that now
 @purges = &get_scheduled_backup_purges($sched);
