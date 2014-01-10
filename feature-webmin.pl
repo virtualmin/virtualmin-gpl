@@ -70,10 +70,6 @@ sub delete_webmin
 
 # Delete the user
 &acl::delete_user($_[0]->{'user'});
-local $m;
-foreach $m (&get_all_module_infos()) {
-	&unlink_logged("$config_directory/$m->{'dir'}/$_[0]->{'user'}.acl");
-	}
 &update_extra_webmin($_[0]);
 
 # Delete from any groups
@@ -946,9 +942,10 @@ if ($wd->{'reseller'} && $virtualmin_pro) {
 # Save an ACL file, with locking and tight permissions
 sub save_module_acl_logged
 {
-local $afile = "$config_directory/$_[2]/$_[1].acl";
+my ($acl, $user, $mod) = @_;
+my $afile = "$config_directory/$mod/$user.acl";
 &lock_file($afile);
-&save_module_acl(@_);
+&save_module_acl($acl, $user, $mod);
 &unlock_file($afile);
 &set_ownership_permissions(undef, undef, 0600, $afile);
 }
@@ -1200,15 +1197,11 @@ $tmpl->{'webmin_group'} = $in{'webmin_group'};
 }
 
 # get_reseller_acl(username)
-# Returns just the ACL for some reseller
+# Returns just the ACL for some Webmin user, in this module
 sub get_reseller_acl
 {
-local %acl;
-&read_file_cached("$module_config_directory/$_[0].acl", \%acl);
-if (defined(&theme_get_module_acl)) {
-	%acl = &theme_get_module_acl($_[0], $module_name, \%acl);
-	}
-return %acl;
+my ($name) = @_;
+return &get_module_acl($name);
 }
 
 # obtain_lock_webmin()
