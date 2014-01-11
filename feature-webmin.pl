@@ -1032,10 +1032,26 @@ sub backup_webmin
 local ($d, $file, $opts) = @_;
 &$first_print($text{'backup_webmin'});
 &require_acl();
-local ($wuser) = grep { $_->{'name'} eq $d->{'user'} } &acl::list_users();
-if ($wuser->{'proto'}) {
-	&$second_print($text{'backup_webminproto'});
-	return 1;
+
+# Write out .acl files for domain owner and extra admins, if they are in 
+# MySQL or LDAP
+my ($wuser) = &acl::get_user($d->{'user'});
+my @nonlocal;
+push(@nonlocal, $wuser) if ($wuser && $wuser->{'proto'});
+foreach my $admin (&list_extra_admins($d)) {
+	my ($auser) = &acl::get_user($admin->{'name'});
+	push(@nonlocal, $auser) if ($auser && $auser->{'proto'});
+	}
+my @acltemp;
+foreach my $u (@nonlocal) {
+	foreach my $m ("", @{$u->{'modules'}}) {
+		my %acl = &get_module_acl($u->{'name'}, $m, 0, 1);
+		if (%acl) {
+			my $acltemp = "$config_directory/$m/$u->{'name'}.acl";
+			&write_file($acltemp, \%acl);
+			push(@acltemp, $acltemp);
+			}
+		}
 	}
 
 # Add .acl files for domain owner
@@ -1065,8 +1081,12 @@ if (!@files) {
 	}
 
 # Tar them all up
-local $out = &backquote_command("cd $config_directory && tar cf ".quotemeta($file)." ".join(" ", @files)." 2>&1");
-if ($?) {
+local $out = &backquote_command(
+	"cd $config_directory && ".
+	"tar cf ".quotemeta($file)." ".join(" ", @files)." 2>&1");
+my $ex = $?;
+&unlink_file(@acltemp) if (@acltemp);
+if ($ex) {
 	&$second_print(&text('backup_webminfailed', "<pre>$out</pre>"));
 	return 0;
 	}
@@ -1083,11 +1103,6 @@ sub restore_webmin
 local ($d, $file, $opts) = @_;
 &$first_print($text{'restore_webmin'});
 &require_acl();
-local ($wuser) = grep { $_->{'name'} eq $d->{'user'} } &acl::list_users();
-if ($wuser->{'proto'}) {
-	&$second_print($text{'backup_webminproto'});
-	return 1;
-	}
 
 &obtain_lock_webmin($_[0]);
 local $out = &backquote_logged(
@@ -1100,7 +1115,27 @@ if ($?) {
 else {
 	&$second_print($text{'setup_done'});
 	$rv = 1;
+
+	# Re-load .acl files for domain owner and extra admins, if they are in
+	# MySQL or LDAP
+	my ($wuser) = &acl::get_user($d->{'user'});
+	my @nonlocal;
+	push(@nonlocal, $wuser) if ($wuser && $wuser->{'proto'});
+	foreach my $admin (&list_extra_admins($d)) {
+		my ($auser) = &acl::get_user($admin->{'name'});
+		push(@nonlocal, $auser) if ($auser && $auser->{'proto'});
+		}
+	foreach my $u (@nonlocal) {
+		foreach my $m ("", @{$u->{'modules'}}) {
+			my %acl;
+			my $acltemp = "$config_directory/$m/$u->{'name'}.acl";
+			&read_file($acltemp, \%acl) || next;
+			&unlink_file($acltemp);
+			&save_module_acl(\%acl, $u->{'name'}, $m);
+			}
+		}
 	}
+
 &release_lock_webmin($_[0]);
 return $rv;
 }
