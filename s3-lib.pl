@@ -204,7 +204,7 @@ for(my $i=0; $i<$tries; $i++) {
 		}
 	&close_http_connection($out);
 
-	if ($line =~ /\S/) {
+	if ($line !~ /\S/) {
 		$err = "Empty response to HTTP request";
 		}
 	elsif ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
