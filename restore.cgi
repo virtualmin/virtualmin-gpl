@@ -288,10 +288,8 @@ if (!$in{'confirm'}) {
 				}
 			}
 		print "<center>",&ui_submit($text{'restore_now2'}, "confirm"),
-		      ($anymissing ? 
-			      "<br>".&ui_checkbox("skipwarnings", 1,
-						  $text{'restore_wskip'}, 0) :
-			      ""),
+		      "<br>",&ui_checkbox("skipwarnings", 1,
+					  $text{'restore_wskip'}, 0),
 		      (keys %$cont > 1 ?
 			      "<br>".&ui_checkbox("continue", 1,
 					  $text{'restore_wcontinue'}, 0) : ""),
