@@ -192,6 +192,7 @@ index_squotas5=Active for users only on home directories and email filesystem $1
 index_squotas5g=Active for users and groups on home directories and email filesystem $1.
 index_srefresh=Re-check and refresh configuration
 index_srefresh2=Re-Check Configuration
+index_rewizard=Re-Run Install Wizard
 index_featuresb=Manage Enabled Features and Plugins
 index_tmpls=Edit Server Templates
 index_smail=Mail server
