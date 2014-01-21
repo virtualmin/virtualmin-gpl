@@ -16066,6 +16066,156 @@ return grep { /^[^@ ]+\@[^@ ]+$/ }
 	    map { $_->[0] } &mailboxes::split_addresses($str);
 }
 
+# execute_command_via_ssh(host:port, pass, command)
+# Run some command on a remote system, and return either 1 and the output, or
+# 0 and an error message
+sub execute_command_via_ssh
+{
+my ($host, $pass, $cmd) = @_;
+my $port;
+if ($host =~ s/:(\d+)$//) {
+	$port = $1;
+	}
+my $sshcmd = "ssh".($port ? " -p $port" : "")." ".
+	     $config{'ssh_args'}." ".
+	     "root\@".$server." ".
+	     $cmd;
+my $err;
+my $out = &run_ssh_command($sshcmd, $pass, \$err);
+if ($err) {
+	return (0, $err);
+	}
+else {
+	return (1, $out);
+	}
+}
+
+# execute_virtualmin_api_command(host, pass, command)
+# Runs a Virtualmin API command on some system via SSH. Returns
+# 0 and the output structure on success, 1 and an error message
+# on remote API failure, or 2 and an error message on SSH failure.
+sub execute_virtualmin_api_command
+{
+my ($host, $pass, $cmd) = @_;
+my ($sshok, $out) = &execute_command_via_ssh($host, $pass,
+						"virtualmin ".$cmd);
+if (!$sshok) {
+	return (2, $out);
+	}
+my $args = { };
+if ($cmd =~ /--(multiline|name-only|id-only)/) {
+	$args->{$1} = '';
+	}
+my $data = &convert_remote_format($out, 0, $args, undef);
+if ($data->{'error'}) {
+	return (1, $data->{'error'});
+	}
+else {
+	return (0, $data->{'data'});
+	}
+}
+
+# validate_transfer_host(&domain, desthost, destpass)
+# Checks if a transfer to a remote Virtualmin system is possible
+sub validate_transfer_host
+{
+my ($d, $desthost, $destpass) = @_;
+my ($status, $out) = &execute_virtualmin_api_command($desthost, $destpass,
+					     "list-domains --name-only");
+if ($status) {
+	# Couldn't connect or run the command
+	return $out;
+	}
+# Check for domains clash
+my @poss = ( $d );
+push(@poss, &get_domain_by("parent", $d->{'id'}));
+push(@poss, &get_domain_by("alias", $d->{'id'}));
+foreach my $p (@poss) {
+	if (&indexoflc($p->{'dom'}, @$out) >= 0) {
+		return "Virtual server $p->{'dom'} is already hosted on the ".
+		       "destination system";
+		}
+	}
+return undef;
+}
+
+# transfer_virtual_server(&domain, desthost, destpass, delete-mode)
+# Transfers a domain (and sub-servers) to a destination system, possibly while
+# deleting it from the source. Will print stuff while transferring, and returns
+# an OK flag.
+sub transfer_virtual_server
+{
+my ($d, $desthost, $destpass, $deletemode) = @_;
+
+# Get all domains to include
+my @doms = ( $d );
+push(@doms, &get_domain_by("parent", $d->{'id'}));
+push(@doms, &get_domain_by("alias", $d->{'id'}));
+
+# Get all feature names
+my @feats = grep { $config{$_} || $_ eq 'virtualmin' }
+	          @backup_features;
+push(@feats, &list_backup_plugins());
+
+# Backup all the domains to a temp dir on the remote system
+my $remotetemp = "/tmp/virtualmin-transfer-$$";
+local $config{'compression'} = 0;
+local $config{'zip_args'} = undef;
+my ($ok, $errdoms) = &backup_domains(
+	"ssh://root:$destpass\@$desthost:$remotetemp",
+	\@doms,
+	\@feats,
+	1,
+	0,
+	[ ],
+	1,
+	[ ],
+	1,
+	1,
+	0);
+if (!$ok) {
+	return "Backup to remote system failed";
+	}
+
+# Verify that the destination directory was actually created and contains
+# all the expected files
+my ($lsok, $lsout) = &execute_command_via_ssh($desthost, $destpass,
+					      "ls ".$remotetemp);
+if (!$lsok) {
+	return "Expected destination directory $remotetemp was not found on ".
+	       $desthost;
+	}
+my @lsfiles = split(/\r?\n/, $lsout);
+my @missing;
+foreach my $lsd (@doms) {
+	if (&indexof($lsd->{'dom'}.".tar.gz", \@lsfiles) < 0) {
+		push(@missing, $lsd);
+		}
+	}
+if (@missing) {
+	&execute_command_via_ssh($desthost, $destpass,
+				 "rm -rf ".$remotetemp);
+	if (@missing == @doms) {
+		return "Destination directory $remotetemp does not contain ".
+		       "any backups";
+		}
+	else {
+		return "Destination directory $remotetemp is missing backups ".
+		       "for : ".join(" ", map { $_->{'dom'} } @missing);
+		}
+	}
+
+# Delete or disable locally, if requested
+# XXX
+
+# Restore via an API call to the remote system
+# XXX
+
+# Remove temp file from remote system
+
+return undef;
+}
+
 # load_plugin_libraries([plugin, ...])
 # Call foreign_require on some or all plugins, just once
 sub load_plugin_libraries
