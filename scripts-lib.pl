@@ -2768,7 +2768,7 @@ local ($str) = @_;
 $str =~ s/\\/\\\\/g;
 $str =~ s/'/\\'/g;
 $str =~ s/"/\\"/g;
-$str =~ s/\$/\\$/g;
+$str =~ s/\$/\\\$/g;
 return $str;
 }
 
