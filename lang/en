@@ -6301,4 +6301,19 @@ ratelimit_d=days
 ratelimit_w=weeks
 ratelimit_y=years
 
+transfer_doing=Transferring $1 to $2 ..
+transfer_doing2=Transferring $1 and $3 sub-servers to $2 ..
+transfer_already=Virtual server $1 is already hosted on the destination system
+transfer_econnect=Failed to contact Virtualmin on destination system : $1
+transfer_ebackup=Backup to remote system failed
+transfer_eremotetemp=.. expected destination directory $1 was not found on $2
+transfer_empty=.. destination directory $1 does not contain any backups
+transfer_missing=.. destination directory $1 is missing backups for : $2
+transfer_restoring=Restoring backup on destination system ..
+transfer_backing=Backing up to destination system ..
+transfer_backingdone=.. backup done
+transfer_restoringdone=.. restore complete
+transfer_validating=Validating backup ..
+transfer_validated=.. all domains transferred successfully
+
 __norefs=1

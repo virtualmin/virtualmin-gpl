@@ -16078,7 +16078,7 @@ if ($host =~ s/:(\d+)$//) {
 	}
 my $sshcmd = "ssh".($port ? " -p $port" : "")." ".
 	     $config{'ssh_args'}." ".
-	     "root\@".$server." ".
+	     "root\@".$host." ".
 	     $cmd;
 my $err;
 my $out = &run_ssh_command($sshcmd, $pass, \$err);
@@ -16098,7 +16098,7 @@ sub execute_virtualmin_api_command
 {
 my ($host, $pass, $cmd) = @_;
 my ($sshok, $out) = &execute_command_via_ssh($host, $pass,
-						"virtualmin ".$cmd);
+					     "virtualmin ".$cmd);
 if (!$sshok) {
 	return (2, $out);
 	}
@@ -16124,7 +16124,7 @@ my ($status, $out) = &execute_virtualmin_api_command($desthost, $destpass,
 					     "list-domains --name-only");
 if ($status) {
 	# Couldn't connect or run the command
-	return $out;
+	return &text('transfer_econnect', $out);
 	}
 # Check for domains clash
 my @poss = ( $d );
@@ -16132,8 +16132,7 @@ push(@poss, &get_domain_by("parent", $d->{'id'}));
 push(@poss, &get_domain_by("alias", $d->{'id'}));
 foreach my $p (@poss) {
 	if (&indexoflc($p->{'dom'}, @$out) >= 0) {
-		return "Virtual server $p->{'dom'} is already hosted on the ".
-		       "destination system";
+		return &text('transfer_already', $p->{'dom'});
 		}
 	}
 return undef;
@@ -16161,29 +16160,33 @@ push(@feats, &list_backup_plugins());
 my $remotetemp = "/tmp/virtualmin-transfer-$$";
 local $config{'compression'} = 0;
 local $config{'zip_args'} = undef;
+&$first_print($text{'transfer_backing'});
 my ($ok, $errdoms) = &backup_domains(
 	"ssh://root:$destpass\@$desthost:$remotetemp",
 	\@doms,
 	\@feats,
 	1,
 	0,
-	[ ],
+	{ },
 	1,
 	[ ],
 	1,
 	1,
 	0);
 if (!$ok) {
-	return "Backup to remote system failed";
+	&$second_print($text{'transfer_ebackup'});
+	return 0;
 	}
+&$second_print($text{'transfer_backingdone'});
 
 # Verify that the destination directory was actually created and contains
 # all the expected files
+&$first_print($text{'transfer_validating'});
 my ($lsok, $lsout) = &execute_command_via_ssh($desthost, $destpass,
 					      "ls ".$remotetemp);
 if (!$lsok) {
-	return "Expected destination directory $remotetemp was not found on ".
-	       $desthost;
+	&$second_print(&text('transfer_eremotetemp', $remotetemp, $desthost));
+	return 0;
 	}
 my @lsfiles = split(/\r?\n/, $lsout);
 my @missing;
@@ -16196,24 +16199,34 @@ if (@missing) {
 	&execute_command_via_ssh($desthost, $destpass,
 				 "rm -rf ".$remotetemp);
 	if (@missing == @doms) {
-		return "Destination directory $remotetemp does not contain ".
-		       "any backups";
+		&$second_print(&text('transfer_empty', $remotetemp));
 		}
 	else {
-		return "Destination directory $remotetemp is missing backups ".
-		       "for : ".join(" ", map { $_->{'dom'} } @missing);
+		&$second_print(&text('transfer_missing', $remotetemp,
+			     join(" ", map { $_->{'dom'} } @missing)));
 		}
+	return 0;
 	}
+&$second_print($text{'transfer_validated'});
 
 # Delete or disable locally, if requested
 # XXX
 
 # Restore via an API call to the remote system
-# XXX
+&$first_print($text{'transfer_restoring'});
+my ($rok, $rout) = &execute_virtualmin_api_command($desthost, $destpass,
+	"restore-domain --source $remotetemp --all-domains --all-features");
+if ($rok != 0) {
+	&$second_print(&text('transfer_erestoring', $rout));
+	return 0;
+	}
+&$second_print($text{'transfer_restoringdone'});
 
 # Remove temp file from remote system
+&execute_command_via_ssh($desthost, $destpass,
+			 "rm -rf ".$remotetemp);
 
-return undef;
+return 1;
 }
 
 # load_plugin_libraries([plugin, ...])

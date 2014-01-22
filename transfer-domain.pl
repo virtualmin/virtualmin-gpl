@@ -66,7 +66,10 @@ $err = &validate_transfer_host($d, $desthost, $destpass);
 &usage($err) if ($err);
 
 # Call the transfer function
-&$first_print(&text('transfer_doing', $d->{'dom'}, $desthost));
+my @subs = ( &get_domain_by("parent", $d->{'id'}),
+	     &get_domain_by("alias", $d->{'id'}) );
+&$first_print(&text(@subs ? 'transfer_doing2' : 'transfer_doing',
+		    $d->{'dom'}, $desthost, scalar(@subs)));
 &$indent_print();
 $ok = &transfer_virtual_server($d, $desthost, $destpass,
 			       $delete ? 2 : $disable ? 1 : 0);
@@ -86,8 +89,8 @@ print $_[0],"\n\n" if ($_[0]);
 print "Move a virtual server to another system.\n";
 print "\n";
 print "virtualmin transfer-domain --domain domain.name\n";
-print "                           --desthost hostname\n";
-print "                          [--destpass password]\n";
+print "                           --host hostname\n";
+print "                          [--pass password]\n";
 print "                          [--disable | --delete]\n";
 exit(1);
 }
