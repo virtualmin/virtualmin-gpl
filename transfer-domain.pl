@@ -4,7 +4,20 @@
 
 Move a virtual server to another system.
 
-XXX
+This command copies or moves a virtual server to another system, which
+must also run Virtualmin. The server to move is specified with the C<--domain>
+flag, and if a top-level server is given all sub-servers will be moved along
+with it.
+
+The target system is set with the C<--host> flag follow by the hostname or
+IP of a system that is reachable via SSH. If the C<root> user requires a
+password to login, the C<--pass> flag must also be given.
+
+By default the domain is simply copied to the target system using Virtualmin's
+backup and restore functions. However, if the C<--delete> flag is given it
+will be remove from this system after being copied. Alternately, the 
+C<--disable> flag can be used to disable the domain on the source system without
+completely removing it.
 
 =cut
 
