@@ -16127,6 +16127,7 @@ if ($status) {
 	return &text('transfer_econnect', $out);
 	}
 # Check for domains clash
+# XXX doesn't work
 my @poss = ( $d );
 push(@poss, &get_domain_by("parent", $d->{'id'}));
 push(@poss, &get_domain_by("alias", $d->{'id'}));
@@ -16191,7 +16192,7 @@ if (!$lsok) {
 my @lsfiles = split(/\r?\n/, $lsout);
 my @missing;
 foreach my $lsd (@doms) {
-	if (&indexof($lsd->{'dom'}.".tar.gz", \@lsfiles) < 0) {
+	if (&indexof($lsd->{'dom'}.".tar.gz", @lsfiles) < 0) {
 		push(@missing, $lsd);
 		}
 	}
