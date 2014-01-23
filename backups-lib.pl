@@ -2787,7 +2787,7 @@ if ($doms) {
 			if (!$parent) {
 				push(@rv, { 'critical' => 1,
 					    'desc' => &text('restore_eparent',
-						$d->{'parent_dom'}),
+						$d->{'backup_parent_dom'}),
 					    'dom' => $d });
 				}
 			}
