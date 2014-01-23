@@ -16086,6 +16086,7 @@ if ($err) {
 	return (0, $err);
 	}
 else {
+	$out =~ s/^\S+\s+password:.*\n//;	# Strip password prompt
 	return (1, $out);
 	}
 }
@@ -16106,7 +16107,7 @@ my $args = { };
 if ($cmd =~ /--(multiline|name-only|id-only)/) {
 	$args->{$1} = '';
 	}
-my $data = &convert_remote_format($out, 0, $args, undef);
+my $data = &convert_remote_format($out, 0, $cmd, $args, undef);
 if ($data->{'error'}) {
 	return (1, $data->{'error'});
 	}
@@ -16115,27 +16116,44 @@ else {
 	}
 }
 
-# validate_transfer_host(&domain, desthost, destpass)
+# validate_transfer_host(&domain, desthost, destpass, ignore-clash)
 # Checks if a transfer to a remote Virtualmin system is possible
 sub validate_transfer_host
 {
-my ($d, $desthost, $destpass) = @_;
+my ($d, $desthost, $destpass, $overwrite) = @_;
 my ($status, $out) = &execute_virtualmin_api_command($desthost, $destpass,
 					     "list-domains --name-only");
 if ($status) {
 	# Couldn't connect or run the command
 	return &text('transfer_econnect', $out);
 	}
+
 # Check for domains clash
-# XXX doesn't work
-my @poss = ( $d );
-push(@poss, &get_domain_by("parent", $d->{'id'}));
-push(@poss, &get_domain_by("alias", $d->{'id'}));
-foreach my $p (@poss) {
-	if (&indexoflc($p->{'dom'}, @$out) >= 0) {
-		return &text('transfer_already', $p->{'dom'});
+if (!$overwrite) {
+	my @poss = ( $d );
+	push(@poss, &get_domain_by("parent", $d->{'id'}));
+	push(@poss, &get_domain_by("alias", $d->{'id'}));
+	foreach my $p (@poss) {
+		if (&indexoflc($p->{'dom'}, @$out) >= 0) {
+			return &text('transfer_already', $p->{'dom'});
+			}
 		}
 	}
+
+# Make sure parent and alias target exists on target
+if ($d->{'parent'}) {
+	my $parent = &get_domain($d->{'parent'});
+	if (&indexoflc($parent->{'dom'}, @$out) < 0) {
+		return &text('transfer_noparent', $parent->{'dom'});
+		}
+	}
+if ($d->{'alias'}) {
+	my $alias = &get_domain($d->{'alias'});
+	if (&indexoflc($alias->{'dom'}, @$out) < 0) {
+		return &text('transfer_noalias', $alias->{'dom'});
+		}
+	}
+
 return undef;
 }
 
@@ -16216,7 +16234,8 @@ if (@missing) {
 # Restore via an API call to the remote system
 &$first_print($text{'transfer_restoring'});
 my ($rok, $rout) = &execute_virtualmin_api_command($desthost, $destpass,
-	"restore-domain --source $remotetemp --all-domains --all-features");
+	"restore-domain --source $remotetemp --all-domains --all-features ".
+	"--skip-warnings --continue-on-error");
 if ($rok != 0) {
 	&$second_print(&text('transfer_erestoring', $rout));
 	return 0;

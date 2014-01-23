@@ -49,6 +49,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--overwrite") {
+		$overwrite = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -62,7 +65,7 @@ $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist.");
 
 # Validate transfer target
-$err = &validate_transfer_host($d, $desthost, $destpass);
+$err = &validate_transfer_host($d, $desthost, $destpass, $overwrite);
 &usage($err) if ($err);
 
 # Call the transfer function
@@ -92,6 +95,7 @@ print "virtualmin transfer-domain --domain domain.name\n";
 print "                           --host hostname\n";
 print "                          [--pass password]\n";
 print "                          [--disable | --delete]\n";
+print "                          [--overwrite]\n";
 exit(1);
 }
 
