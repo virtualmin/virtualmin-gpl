@@ -2717,6 +2717,11 @@ return &can_edit_domain($d) &&
        (&master_admin() || &reseller_admin());
 }
 
+sub can_transfer_domain
+{
+return &master_admin();
+}
+
 # Returns 1 if the current user is the master Virtualmin admin
 sub master_admin
 {
@@ -11084,6 +11089,16 @@ if (&can_move_domain($d) && !$d->{'alias'} && !$d->{'subdom'}) {
 		    'title' => $text{'edit_move'},
 		    'desc' => $d->{'parent'} ? $text{'edit_movedesc2'}
 					     : $text{'edit_movedesc'},
+		    'cat' => 'server',
+		    'icon' => 'arrow_right',
+		  });
+	}
+
+if (&can_transfer_domain($d)) {
+	# Send server to another system
+	push(@rv, { 'page' => 'transfer_form.cgi',
+		    'title' => $text{'edit_transfer'},
+		    'desc' => $text{'edit_transferdesc'},
 		    'cat' => 'server',
 		    'icon' => 'arrow_right',
 		  });
