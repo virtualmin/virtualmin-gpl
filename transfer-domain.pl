@@ -96,7 +96,7 @@ if ($ok) {
 	&virtualmin_api_log(\@OLDARGV, $d);
 	}
 else {
-	&$second_print($text{'move_failed'});
+	&$second_print($text{'transfer_failed'});
 	}
 
 sub usage

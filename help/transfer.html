@@ -1,0 +1,18 @@
+<header>Transfer Virtual Server</header>
+
+This page can be used to send a virtual server (and any sub-servers or aliases)
+to another system running Virtualmin. The transfer process using Virtualmin's
+backup and restore functionality, and will include all home directory content,
+databases, DNS records and other configurations. <p>
+
+The hostname or IP address of the target system must be entered in the
+<b>Hostname of destination system</b> field, and the <b>Root password for destination system</b> field should be filled in unless you have password-less
+SSH authentication setup. <p>
+
+By default the domain will be simply copied to the new system. However, the
+<b>Action after transfer</b> field can be used to have it moved instead, by
+deleting the server from the source system. This is necessary if both the 
+source and destination share a clustered DNS server, or are secondary name
+servers for each other. <p>
+
+<footer>

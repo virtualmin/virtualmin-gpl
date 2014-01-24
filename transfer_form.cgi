@@ -7,27 +7,24 @@ $d = &get_domain($in{'dom'});
 &can_transfer_domain($d) || &error($text{'transfer_ecannot'});
 &ui_print_header(&domain_in($d), $text{'transfer_title'}, "", "transfer");
 
-if (!$d->{'parent'}) {
-	print "$text{'transfer_desc'}<p>\n";
-	}
-else {
-	print "$text{'transfer_desc2'}<p>\n";
-	}
 print &ui_form_start("transfer.cgi");
 print &ui_hidden("dom", $d->{'id'}),"\n";
 print &ui_table_start($text{'transfer_header'}, undef, 2);
 
 # Domain being transferred
+my @subs = ( &get_domain_by("parent", $d->{'id'}),
+	     &get_domain_by("alias", $d->{'id'}) );
 print &ui_table_row($text{'transfer_dom'},
-	"<tt>".&show_domain_name($d)."</tt>");
+	"<tt>".&show_domain_name($d)."</tt>".
+	(@subs ? " ($text{'transfer_subs'})" : ""));
 
 # Destination system
 print &ui_table_row($text{'transfer_host'},
-	&ui_textbox("desthost", undef, 40));
+	&ui_textbox("host", undef, 40));
 
 # Root password
 print &ui_table_row($text{'transfer_pass'},
-	&ui_password("destpass", undef, 40)." ".
+	&ui_password("pass", undef, 20)." ".
 	$text{'transfer_passdef'});
 
 # Delete from source

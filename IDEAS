@@ -34,8 +34,23 @@
 	- CHANGELOG
 	- backup/restore
 
- - php-fpm support for Joaquim
-
- - Amazon tax docs
-
  - Sign file manager applet
+	- http://codesigning.ksoftware.net/
+	- http://virtualmin.com/node/32082
+	- https://sourceforge.net/p/webadmin/bugs/4350/
+
+ - Ghost installer (plus node.js)
+
+ - Domain(s) move from within Virtualmin
+	- DNS record TTL update in advance?
+	- UI
+	- API
+	- http://virtualmin.com/node/31970
+	- rsync first?
+	- CHANGELOG
+	- symlink from GPL version
+	- offer to save dest system details
+
+ - Allow restore with different webserver type
+	- convert web redirects
+	- http://virtualmin.com/node/17606
