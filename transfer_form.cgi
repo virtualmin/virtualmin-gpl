@@ -28,7 +28,13 @@ print &ui_table_row($text{'transfer_host'},
 # Root password
 print &ui_table_row($text{'transfer_pass'},
 	&ui_password("destpass", undef, 40)." ".
-	$text{'transfer_passdef'}));
+	$text{'transfer_passdef'});
+
+# Delete from source
+print &ui_table_row($text{'transfer_delete'},
+	&ui_radio("delete", 0, [ [ 2, $text{'transfer_delete2'} ],
+				 [ 1, $text{'transfer_delete1'} ],
+				 [ 0, $text{'transfer_delete0'} ] ]));
 
 # Over-write when restoring?
 print &ui_table_row($text{'transfer_overwrite'},
