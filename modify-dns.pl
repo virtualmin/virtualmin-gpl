@@ -32,7 +32,8 @@ deletion flags can be given multiple times.
 
 Similarly, the default TTL for records can be set with the C<--ttl> flag
 followed by a number in seconds. Suffixes like h, m and d are also allowed
-to specific a TTL in hours, minutes or days.
+to specific a TTL in hours, minutes or days. Alternately, the C<--all-ttl>
+flag can be used to set the TTL for all records in the domain.
 
 You can also add or remove slave DNS servers for this domain, assuming that
 they have already been setup in Webmin's BIND DNS Server module. To add a
@@ -126,6 +127,11 @@ while(@ARGV > 0) {
 	elsif ($a eq "--ttl") {
 		$ttl = shift(@ARGV);
 		$ttl =~ /^\d+(s|m|h|d)?$/ || &usage("--ttl must be followed by a number with a valid suffix");
+		}
+	elsif ($a eq "--all-ttl") {
+		$allttl = shift(@ARGV);
+		$allttl =~ /^\d+(s|m|h|d)?$/ || &usage("--all-ttl must be followed by a number with a valid suffix");
+		$ttl = $allttl;
 		}
 	elsif ($a eq "--increment-soa") {
 		$bumpsoa = 1;
@@ -311,6 +317,19 @@ foreach $d (@doms) {
 		$changed++;
 		}
 
+	# Change the TTL on any records that have one
+	if ($allttl) {
+		foreach my $r (@$recs) {
+			if ($r->{'ttl'}) {
+				$r->{'ttl'} = $ttl;
+				&bind8::modify_record($file, $r, $r->{'name'},
+				    $r->{'ttl'}, $r->{'class'}, $r->{'type'},
+				    &join_record_values($r), $r->{'comment'});
+				$changed++;
+				}
+			}
+		}
+
 	if ($changed || $bumpsoa) {
 		&post_records_change($d, $recs, $file);
 		&reload_bind_records($d);
@@ -354,7 +373,7 @@ print "                      --spf-all-default]\n";
 print "                     [--add-record \"name type value\"]\n";
 print "                     [--add-record-with-ttl \"name type TTL value\"]\n";
 print "                     [--remove-record \"name type [value]\"]\n";
-print "                     [--ttl seconds]\n";
+print "                     [--ttl seconds | --all-ttl seconds]\n";
 print "                     [--add-slave hostname]* | [--add-all-slaves]\n";
 print "                     [--remove-slave hostname]*\n";
 exit(1);
