@@ -46,10 +46,8 @@
 	- UI
 	- API
 	- http://virtualmin.com/node/31970
-	- rsync first?
 	- CHANGELOG
 	- symlink from GPL version
-	- offer to save dest system details
 
  - Allow restore with different webserver type
 	- convert web redirects

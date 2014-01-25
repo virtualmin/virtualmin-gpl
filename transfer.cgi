@@ -8,12 +8,33 @@ $d = &get_domain($in{'dom'});
 &can_move_domain($d) || &error($text{'transfer_ecannot'});
 
 # Validate inputs
-$in{'host'} =~ /^\S+$/ || &error($text{'transfer_ehost'});
-&to_ipaddress($in{'host'}) || &to_ip6address($in{'host'}) ||
-	&error($text{'transfer_ehost2'});
-my $err = &validate_transfer_host($d, $in{'host'}, $in{'pass'},
-				  $in{'overwrite'});
+my @hosts = &get_transfer_hosts();
+if ($in{'host_mode'}) {
+	my ($h) = grep { $_->[0] eq $in{'oldhost'} } @hosts;
+	$host = $h->[0];
+	$pass = $h->[1];
+	}
+else {
+	$in{'host'} =~ /^\S+$/ || &error($text{'transfer_ehost'});
+	&to_ipaddress($in{'host'}) || &to_ip6address($in{'host'}) ||
+		&error($text{'transfer_ehost2'});
+	$host = $in{'host'};
+	$pass = $in{'hostpass'};
+	if ($in{'savehost'}) {
+		my ($h) = grep { $_->[0] eq $in{'host'} } @hosts;
+		if ($h) {
+			$h->[1] = $pass;
+			}
+		else {
+			push(@hosts, [ $host, $pass ]);
+			}
+		&save_transfer_hosts(@hosts);
+		}
+	}
+my $err = &validate_transfer_host($d, $host, $pass, $in{'overwrite'});
 &error($err) if ($err);
+
+# Save the host, if requested
 
 &ui_print_unbuffered_header(&domain_in($d), $text{'transfer_title'}, "");
 
@@ -21,9 +42,9 @@ my $err = &validate_transfer_host($d, $in{'host'}, $in{'pass'},
 my @subs = ( &get_domain_by("parent", $d->{'id'}),
 	     &get_domain_by("alias", $d->{'id'}) );
 &$first_print(&text(@subs ? 'transfer_doing2' : 'transfer_doing',
-		    $d->{'dom'}, $in{'host'}, scalar(@subs)));
+		    $d->{'dom'}, $host, scalar(@subs)));
 &$indent_print();
-$ok = &transfer_virtual_server($d, $in{'host'}, $in{'pass'},
+$ok = &transfer_virtual_server($d, $host, $pass,
 			       $delete ? 2 : $disable ? 1 : 0);
 &$outdent_print();
 if ($ok) {

@@ -19,12 +19,26 @@ print &ui_table_row($text{'transfer_dom'},
 	(@subs ? " ($text{'transfer_subs'})" : ""));
 
 # Destination system
-print &ui_table_row($text{'transfer_host'},
-	&ui_textbox("host", undef, 40));
+my @hosts = &get_transfer_hosts();
+my $hfield = &ui_textbox("host", undef, 40, 0, undef, "autocomplete=off")." ".
+	     &ui_checkbox("savehost", 1, $text{'transfer_savehost'}, 0);
+if (@hosts) {
+	print &ui_table_row($text{'transfer_host'},
+		&ui_radio_table("host_mode", 1,
+		    [ [ 1, $text{'transfer_host1'},
+			&ui_select("oldhost", $hosts[0]->[0],
+				   [ (map { $_->[0] } @hosts) ]) ],
+		      [ 0, $text{'transfer_host0'},
+			$hfield ] ]));
+	}
+else {
+	# No saved hosts yet
+	print &ui_table_row($text{'transfer_host'}, $hfield);
+	}
 
 # Root password
 print &ui_table_row($text{'transfer_pass'},
-	&ui_password("pass", undef, 20)." ".
+	&ui_password("hostpass", undef, 20)." ".
 	$text{'transfer_passdef'});
 
 # Delete from source
