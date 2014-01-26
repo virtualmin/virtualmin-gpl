@@ -320,7 +320,7 @@ foreach $d (@doms) {
 	# Change the TTL on any records that have one
 	if ($allttl) {
 		foreach my $r (@$recs) {
-			if ($r->{'ttl'}) {
+			if ($r->{'ttl'} && $r->{'type'} ne 'SOA') {
 				$r->{'ttl'} = $ttl;
 				&bind8::modify_record($file, $r, $r->{'name'},
 				    $r->{'ttl'}, $r->{'class'}, $r->{'type'},

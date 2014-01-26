@@ -12,7 +12,7 @@ $d || &error($text{'edit_egone'});
 if ($d->{'dns'}) {
 	my ($recs, $file) = &get_domain_dns_records_and_file($d);
 	my ($oldttl) = grep { $_->{'defttl'} } @$recs;
-	my $maxttl = $oldttl ? $oldttl->{'value'} : 0;
+	my $maxttl = $oldttl ? $oldttl->{'defttl'} : 0;
 	foreach my $r (@$recs) {
 		if ($r->{'type'} eq 'SOA' && !$maxttl) {
 			# Default comes from SOA record
