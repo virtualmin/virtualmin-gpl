@@ -23,7 +23,7 @@ else {
 return undef;
 }
 
-# convert_remote_format(&output, exit-status, command, format)
+# convert_remote_format(&output, exit-status, command, &in, [format])
 # Converts output from some API command to JSON or XML format
 sub convert_remote_format
 {
@@ -40,7 +40,7 @@ if ($ex) {
 	$data->{'error'} = $err;
 	$data->{'full_error'} = $out;
 	}
-elsif ($cmd =~ /^(list\-|get-dns)/ && defined($in{'multiline'}) ||
+elsif ($cmd =~ /^(list\-|get-dns)/ && defined($in->{'multiline'}) ||
        $cmd =~ /^(list\-php\-ini|get\-command)/) {
 	# Parse multiline output into data structure
 	my @lines = split(/\r?\n/, $out);
@@ -70,7 +70,7 @@ elsif ($cmd =~ /^(list\-|get-dns)/ && defined($in{'multiline'}) ||
 	$data->{'data'} = \@data;
 	}
 elsif ($cmd =~ /^list\-/ &&
-       (defined($in{'name-only'}) || defined($in{'id-only'}))) {
+       (defined($in->{'name-only'}) || defined($in->{'id-only'}))) {
 	# Parse list of names into values
 	my @lines = split(/\r?\n/, $out);
 	$data->{'data'} = \@lines;
@@ -165,9 +165,15 @@ else {
 	$data->{'output'} = $out;
 	}
 
-# Call formatting function
-my $ffunc = "create_".$format."_format";
-return &$ffunc($data);
+if ($format) {
+	# Call formatting function
+	my $ffunc = "create_".$format."_format";
+	return &$ffunc($data);
+	}
+else {
+	# Just return perl hash (for internal use)
+	return $data;
+	}
 }
 
 # create_xml_format(&hash)
