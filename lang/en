@@ -6347,5 +6347,7 @@ transfer_fixttl=Lower TTL To:
 transfer_secs=seconds
 transfer_err2=Failed to change TTL
 transfer_enewttl=New TTL must be a number of seconds
+transfer_deleting=Deleting $1 from this system ..
+transfer_edelete=.. deletion failed : $1
 
 __norefs=1

@@ -16159,13 +16159,13 @@ if (!$overwrite) {
 if ($d->{'parent'}) {
 	my $parent = &get_domain($d->{'parent'});
 	if (&indexoflc($parent->{'dom'}, @$out) < 0) {
-		return &text('transfer_noparent', $parent->{'dom'});
+		return &text('transfer_noparent', &show_domain_name($parent));
 		}
 	}
 if ($d->{'alias'}) {
 	my $alias = &get_domain($d->{'alias'});
 	if (&indexoflc($alias->{'dom'}, @$out) < 0) {
-		return &text('transfer_noalias', $alias->{'dom'});
+		return &text('transfer_noalias', &show_domain_name($alias));
 		}
 	}
 
@@ -16237,14 +16237,31 @@ if (@missing) {
 		}
 	else {
 		&$second_print(&text('transfer_missing', $remotetemp,
-			     join(" ", map { $_->{'dom'} } @missing)));
+			     join(" ", map { &show_domain_name($_) } @missing)));
 		}
 	return 0;
 	}
 &$second_print($text{'transfer_validated'});
 
 # Delete or disable locally, if requested
-# XXX
+if ($in{'delete'} == 2) {
+	# Delete from this system
+	&$first_print(&text('transfer_deleting', &show_domain_name($d)));
+	&push_all_print();
+	&set_all_null_print();
+	my $err = &delete_virtual_server($d);
+	&pop_all_print();
+	if ($err) {
+		&$second_print(&text('transfer_edelete', $err));
+		return 0;
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	}
+elsif ($in{'delete'} == 1) {
+	# Disable on this system
+	}
 
 # Restore via an API call to the remote system
 &$first_print($text{'transfer_restoring'});
