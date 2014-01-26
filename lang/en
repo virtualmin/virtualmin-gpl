@@ -1028,6 +1028,7 @@ edit_enabledesc=Re-activate all features of this virtual server that have been d
 edit_desc=Changing the web or DNS server options to No will delete their entries from the Apache or BIND configuration files. Similarly, changing the MySQL or PostgreSQL options to No will delete the contents of those databases.
 edit_disabled_bw=This server has been disabled for exceeding its bandwidth limit.
 edit_disabled_manual=This server has been manually disabled.
+edit_disabled_transfer=This server was disabled after transfer to another system.
 edit_disabled_why=Reason for disabling : $1
 edit_disabled_time=Disabled at : $1
 edit_disabled=Virtual server features such as the website and DNS domain cannot be added or removed while the server is disabled.
@@ -6351,5 +6352,6 @@ transfer_err2=Failed to change TTL
 transfer_enewttl=New TTL must be a number of seconds
 transfer_deleting=Deleting $1 from this system ..
 transfer_edelete=.. deletion failed : $1
+transfer_disabling=Disabling $1 on this system ..
 
 __norefs=1
