@@ -3022,6 +3022,18 @@ return ( { 'type' => 'A',
        );
 }
 
+# ttl_to_seconds(string)
+# Converts a TTL string like 1h to a number of seconds, like 3600
+sub ttl_to_seconds
+{
+my ($str) = @_;
+return $str =~ /^(\d+)s$/i ? $1 :
+       $str =~ /^(\d+)m$/i ? $1*60 :
+       $str =~ /^(\d+)h$/i ? $1*3600 :
+       $str =~ /^(\d+)d$/i ? $1*86400 :
+       $str =~ /^(\d+)w$/i ? $1*7*86400 : $str;
+}
+
 # obtain_lock_dns(&domain, [named-conf-too])
 # Lock a domain's zone file and named.conf file
 sub obtain_lock_dns

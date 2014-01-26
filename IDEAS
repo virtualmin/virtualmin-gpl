@@ -43,8 +43,7 @@
 
  - Domain(s) move from within Virtualmin
 	- DNS record TTL update in advance?
-	- UI
-	- API
+	- delete code
 	- http://virtualmin.com/node/31970
 	- CHANGELOG
 	- symlink from GPL version

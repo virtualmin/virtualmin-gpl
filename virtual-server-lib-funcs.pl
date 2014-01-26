@@ -16252,6 +16252,7 @@ my ($rok, $rout) = &execute_virtualmin_api_command($desthost, $destpass,
 	"restore-domain --source $remotetemp --all-domains --all-features ".
 	"--skip-warnings --continue-on-error");
 if ($rok != 0) {
+	# XXX show useful message if deleted on source already
 	&$second_print(&text('transfer_erestoring', $rout));
 	return 0;
 	}
@@ -16262,6 +16263,26 @@ if ($rok != 0) {
 			 "rm -rf ".$remotetemp);
 
 return 1;
+}
+
+# get_transfer_hosts()
+# Returns previous hosts that transfers have been made to. Each is a tuple
+# of hostname and password
+sub get_transfer_hosts
+{
+my $hfile = "$module_config_directory/transfer-hosts";
+my %hosts;
+&read_file($hfile, \%hosts);
+return map { [ $_, $hosts{$_} ] } keys %hosts;
+}
+
+# save_transfer_hosts(&host, ...)
+# Writes out tuples in the same format as returned by get_transfer_hosts
+sub save_transfer_hosts
+{
+my $hfile = "$module_config_directory/transfer-hosts";
+my %hosts = map { $_->[0], $_->[1] } @_;
+&write_file($hfile, \%hosts);
 }
 
 # load_plugin_libraries([plugin, ...])

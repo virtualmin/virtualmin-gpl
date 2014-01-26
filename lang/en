@@ -6339,5 +6339,11 @@ transfer_backingdone=.. backup done
 transfer_restoringdone=.. restore complete
 transfer_validating=Validating backup ..
 transfer_validated=.. all domains transferred successfully
+transfer_ttlerror=WARNING : The DNS TTL for this virtual server is set to $1, which means that the IP address change needed for the transfer will not be visible to clients for at least that long. The TTL should be lowered by clicking the button below before performing the transfer.
+transfer_recent=WARNING : The DNS TTL for this virtual server was changed from $1 only $2 ago, which is not long enough for the change to be visible to all clients.
+transfer_fixttl=Lower TTL To:
+transfer_secs=seconds
+transfer_err2=Failed to change TTL
+transfer_enewttl=New TTL must be a number of seconds
 
 __norefs=1
