@@ -65,66 +65,21 @@ else {
 			}
 		}
 
-	foreach $d (@doms) {
+	foreach $dd (@doms) {
 		if (@doms > 1) {
 			&$first_print(&text('disable_doing',
-					    &show_domain_name($d)));
+					    &show_domain_name($dd)));
 			&$indent_print();
 			}
 
-		# Work out what can be disabled
-		@disable = &get_disable_features($d);
-
-		# Run the before command
-		&set_domain_envs($d, "DISABLE_DOMAIN");
-		$merr = &making_changes();
-		&reset_domain_envs($d);
-		&error(&text('disable_emaking', "<tt>$merr</tt>"))
-			if (defined($merr));
-
-		%disable = map { $_, 1 } @disable;
-		$d->{'disabled_reason'} = 'manual';
-		$d->{'disabled_why'} = $in{'why'};
-		$d->{'disabled_time'} = time();
-
-		# Disable all configured features
-		my $f;
-		foreach $f (@features) {
-			if ($d->{$f} && $disable{$f}) {
-				local $dfunc = "disable_$f";
-				if (&try_function($f, $dfunc, $d)) {
-					push(@disabled, $f);
-					}
-				}
-			}
-		foreach $f (&list_feature_plugins()) {
-			if ($d->{$f} && $disable{$f}) {
-				&plugin_call($f, "feature_disable", $d);
-				push(@disabled, $f);
-				}
-			}
-
-		# Disable extra admins
-		&update_extra_webmin($d, 1);
-
-		# Save new domain details
-		print $text{'save_domain'},"<br>\n";
-		$d->{'disabled'} = join(",", @disabled);
-		&save_domain($d);
-		print $text{'setup_done'},"<p>\n";
-
-		# Run the after command
-		&set_domain_envs($d, "DISABLE_DOMAIN");
-		local $merr = &made_changes();
-		&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
-			if (defined($merr));
-		&reset_domain_envs($d);
+		$err = &disable_virtual_server($dd, 'manual', $in{'why'});
+		&error(&text('disable_emaking', "<tt>$err</tt>"))
+			if (defined($err));
 
 		if (@doms > 1) {
 			&$outdent_print();
 			}
 		}
-	$d = $doms[0];
 
 	&run_post_actions();
 	&webmin_log("disable", "domain", $d->{'dom'}, $d);

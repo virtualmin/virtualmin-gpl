@@ -43,7 +43,8 @@
 
  - Domain(s) move from within Virtualmin
 	- disable code
-	- make restore message shorter
+		- re-factor disable function
+		- and enable
 	- http://virtualmin.com/node/31970
 	- CHANGELOG
 

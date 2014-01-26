@@ -7765,6 +7765,65 @@ else {
 	}
 }
 
+# disable_virtual_server(&domain, [reason-code], [reason-why])
+# Disables all features of one virtual server. Returns undef on success, or
+# an error message on failure.
+sub disable_virtual_server
+{
+my ($d, $reason, $why) = @_;
+
+# Work out what can be disabled
+my @disable = &get_disable_features($d);
+
+# Disable it
+my %disable = map { $_, 1 } @disable;
+$d->{'disabled_reason'} = $reason;
+$d->{'disabled_why'} = $why;
+$d->{'disabled_time'} = time();
+
+# Run the before command
+&set_domain_envs($d, "DISABLE_DOMAIN");
+my $merr = &making_changes();
+&reset_domain_envs($d);
+return &text('disable_emaking', "<tt>".&html_escape($merr)."</tt>")
+	if (defined($merr));
+
+# Disable all configured features
+my @disabled;
+foreach my $f (@features) {
+	if ($d->{$f} && $disable{$f}) {
+		my $dfunc = "disable_$f";
+		if (&try_function($f, $dfunc, $d)) {
+			push(@disabled, $f);
+			}
+		}
+	}
+foreach my $f (&list_feature_plugins()) {
+	if ($d->{$f} && $disable{$f}) {
+		&plugin_call($f, "feature_disable", $d);
+		push(@disabled, $f);
+		}
+	}
+
+# Disable extra admins
+&update_extra_webmin($d, 1);
+
+# Save new domain details
+&$first_print($text{'save_domain'});
+$d->{'disabled'} = join(",", @disabled);
+&save_domain($d);
+&$second_print($text{'setup_done'});
+
+# Run the after command
+&set_domain_envs($d, "DISABLE_DOMAIN");
+my $merr = &made_changes();
+&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
+	if (defined($merr));
+&reset_domain_envs($d);
+
+return undef;
+}
+
 # register_post_action(&function, args)
 sub register_post_action
 {
@@ -16195,6 +16254,8 @@ my $remotetemp = "/tmp/virtualmin-transfer-$$";
 local $config{'compression'} = 0;
 local $config{'zip_args'} = undef;
 &$first_print($text{'transfer_backing'});
+&push_all_print();
+&set_all_null_print();
 my ($ok, $errdoms) = &backup_domains(
 	"ssh://root:$destpass\@$desthost:$remotetemp",
 	\@doms,
@@ -16207,6 +16268,7 @@ my ($ok, $errdoms) = &backup_domains(
 	1,
 	1,
 	0);
+&pop_all_print();
 if (!$ok) {
 	&$second_print($text{'transfer_ebackup'});
 	return 0;
