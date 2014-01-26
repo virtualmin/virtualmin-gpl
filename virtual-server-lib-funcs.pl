@@ -16244,7 +16244,7 @@ if (@missing) {
 &$second_print($text{'transfer_validated'});
 
 # Delete or disable locally, if requested
-if ($in{'delete'} == 2) {
+if ($deletemode == 2) {
 	# Delete from this system
 	&$first_print(&text('transfer_deleting', &show_domain_name($d)));
 	&push_all_print();
@@ -16259,7 +16259,7 @@ if ($in{'delete'} == 2) {
 		&$second_print($text{'setup_done'});
 		}
 	}
-elsif ($in{'delete'} == 1) {
+elsif ($deletemode == 1) {
 	# Disable on this system
 	}
 
@@ -16269,8 +16269,20 @@ my ($rok, $rout) = &execute_virtualmin_api_command($desthost, $destpass,
 	"restore-domain --source $remotetemp --all-domains --all-features ".
 	"--skip-warnings --continue-on-error");
 if ($rok != 0) {
-	# XXX show useful message if deleted on source already
-	&$second_print(&text('transfer_erestoring', $rout));
+	if ($deletemode == 2) {
+		&$second_print(&text('transfer_erestoring2', $rout,
+				     $remotetemp, $desthost));
+		}
+	elsif ($deletemode == 1) {
+		&$second_print(&text('transfer_erestoring1', $rout));
+		}
+	else {
+		&$second_print(&text('transfer_erestoring', $rout));
+		}
+	if ($deletemode != 2) {
+		&execute_command_via_ssh($desthost, $destpass,
+					 "rm -rf ".$remotetemp);
+		}
 	return 0;
 	}
 &$second_print($text{'transfer_restoringdone'});

@@ -42,11 +42,10 @@
  - Ghost installer (plus node.js)
 
  - Domain(s) move from within Virtualmin
-	- DNS record TTL update in advance?
-	- delete code
+	- disable code
+	- make restore message shorter
 	- http://virtualmin.com/node/31970
 	- CHANGELOG
-	- symlink from GPL version
 
  - Allow restore with different webserver type
 	- convert web redirects
