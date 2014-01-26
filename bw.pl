@@ -162,46 +162,8 @@ foreach $d (@doms) {
 			&set_all_null_print();
 
 			foreach my $dd (@alld) {
-				@disable = &get_disable_features($dd);
-				%disable = map { $_, 1 } @disable;
-				@disabled = ( );
-				$dd->{'disabled_reason'} = 'bw';
-				$dd->{'disabled_why'} =
-					"Exceeded bandwidth limit";
-				$dd->{'disabled_time'} = time();
-
-				# Run the before command
-				&set_domain_envs($dd, "DISABLE_DOMAIN");
-				$merr = &making_changes();
-				&reset_domain_envs($dd);
-				next if ($merr);
-
-				# Disable all configured features
-				foreach my $f (@features) {
-					if ($dd->{$f} && $disable{$f}) {
-						local $dfunc = "disable_$f";
-						&$dfunc($dd);
-						push(@disabled, $f);
-						}
-					}
-				foreach my $f (&list_feature_plugins()) {
-					if ($dd->{$f} && $disable{$f}) {
-						&plugin_call($f, "feature_disable", $dd);
-						push(@disabled, $f);
-						}
-					}
-
-				# Disable extra admins
-				&update_extra_webmin($dd, 1);
-
-				# Save new domain details
-				$dd->{'disabled'} = join(",", @disabled);
-				&save_domain($dd);
-
-				# Run the after command
-				&set_domain_envs($dd, "DISABLE_DOMAIN");
-				&made_changes();
-				&reset_domain_envs($dd);
+				&disable_virtual_server($dd, 'bw',
+					'Exceeded bandwidth limit');
 				}
 			&run_post_actions();
 			}
