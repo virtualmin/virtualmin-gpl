@@ -194,11 +194,17 @@ $_config_tests = [
 	# Bandwidth monitoring enabled?
 	{ 'command' => 'grep bw_active=1 '.$module_config_directory.'/config' },
 
+	# Has some backup keys
 	defined(&list_backup_keys) ?
 		( { 'command' => 'list-backup-keys.pl',
 		    'args' => [ [ 'multiline' ] ],
 		    'grep' => 'Description' } ) :
 		( ),
+
+	# Is Webmin running?
+	{ 'command' => $admin_webmin_wget_command.
+		       "${webmin_proto}://localhost:${webmin_port}/",
+	},
 	];
 
 $domains_tests = [
