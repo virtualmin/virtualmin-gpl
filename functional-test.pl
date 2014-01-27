@@ -136,6 +136,8 @@ if ($webmin_proto eq "https") {
 	$webmin_wget_command .= "--no-check-certificate ";
 	$admin_webmin_wget_command .= "--no-check-certificate ";
 	}
+$normal_agent_wget_command = $webmin_wget_command;
+$normal_agent_wget_command =~ s/--user-agent=\S+//;
 
 ($test_domain_user) = &unixuser_name($test_domain);
 ($test_rename_domain_user) = &unixuser_name($test_rename_domain);
@@ -202,7 +204,7 @@ $_config_tests = [
 		( ),
 
 	# Is Webmin running?
-	{ 'command' => $admin_webmin_wget_command.
+	{ 'command' => $normal_agent_wget_command.
 		       "${webmin_proto}://localhost:${webmin_port}/",
 	},
 	];
