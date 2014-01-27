@@ -34,48 +34,8 @@ if ($in{'confirm'}) {
 		else {
 			# Do the enable
 			&$indent_print();
-			%enable = map { $_, 1 } @enable;
-
-			# Run the before command
-			&set_domain_envs($d, "ENABLE_DOMAIN");
-			$merr = &making_changes();
-			&reset_domain_envs($d);
-			&error(&text('enable_emaking', "<tt>$merr</tt>"))
-				if (defined($merr));
-
-			# Enable all disabled features
-			my $f;
-			foreach $f (@features) {
-				if ($d->{$f} && $enable{$f}) {
-					local $efunc = "enable_$f";
-					&try_function($f, $efunc, $d);
-					}
-				}
-			foreach $f (&list_feature_plugins()) {
-				if ($d->{$f} && $enable{$f}) {
-					&plugin_call($f, "feature_enable", $d);
-					}
-				}
-
-			# Enable extra admins
-			&update_extra_webmin($dd, 0);
-
-			# Save new domain details
-			print $text{'save_domain'},"<br>\n";
-			delete($d->{'disabled'});
-			delete($d->{'disabled_reason'});
-			delete($d->{'disabled_why'});
-			delete($d->{'disabled_time'});
-			&save_domain($d);
-			print $text{'setup_done'},"<p>\n";
-
-			# Run the after command
-			&set_domain_envs($d, "ENABLE_DOMAIN");
-			local $merr = &made_changes();
-			&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
-				if (defined($merr));
-			&reset_domain_envs($d);
-
+			$err = &enable_virtual_server($d);
+			&error($err) if ($err);
 			&$outdent_print();
 			&$second_print($text{'setup_done'});
 			}
