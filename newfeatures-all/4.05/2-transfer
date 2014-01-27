@@ -1,0 +1,4 @@
+desc=Transfer virtual servers
+html=Added the Transfer Virtual Server page and transfer-domain API command for copying or moving a domain to another system running Virtualmin.
+link=transfer_form.cgi?dom=${ID}
+master=1

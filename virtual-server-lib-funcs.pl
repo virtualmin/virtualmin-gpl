@@ -16324,10 +16324,13 @@ if ($deletemode == 2) {
 elsif ($deletemode == 1) {
 	# Disable on this system
 	&$first_print(&text('transfer_disabling', &show_domain_name($d)));
+	&push_all_print();
+	&set_all_null_print();
 	foreach my $dd (@doms) {
 		&disable_virtual_server($dd, 'transfer',
 				'Transferred to '.$desthost);
 		}
+	&pop_all_print();
 	&$second_print($text{'setup_done'});
 	}
 
