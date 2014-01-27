@@ -7824,6 +7824,59 @@ my $merr = &made_changes();
 return undef;
 }
 
+# enable_virtual_server(&domain)
+# Enables all disabled features of one virtual server. Returns undef on
+# success, or an error message on failure.
+sub enable_virtual_server
+{
+my ($d) = @_;
+
+# Work out what can be enabled
+my @enable = &get_enable_features($d);
+
+# Go ahead and do it
+my %enable = map { $_, 1 } @enable;
+delete($d->{'disabled_reason'});
+delete($d->{'disabled_why'});
+
+# Run the before command
+&set_domain_envs($d, "ENABLE_DOMAIN");
+my $merr = &making_changes();
+&reset_domain_envs($d);
+return &text('enable_emaking', "<tt>$merr</tt>") if (defined($merr));
+
+# Enable all disabled features
+foreach my $f (@features) {
+	if ($d->{$f} && $enable{$f}) {
+		my $efunc = "enable_$f";
+		&try_function($f, $efunc, $d);
+		}
+	}
+foreach my $f (&list_feature_plugins()) {
+	if ($d->{$f} && $enable{$f}) {
+		&plugin_call($f, "feature_enable", $d);
+		}
+	}
+
+# Enable extra admins
+&update_extra_webmin($d, 0);
+
+# Save new domain details
+&$first_print($text{'save_domain'});
+delete($d->{'disabled'});
+&save_domain($d);
+&$second_print($text{'setup_done'});
+
+# Run the after command
+&set_domain_envs($d, "ENABLE_DOMAIN");
+my $merr = &made_changes();
+&$second_print(&text('setup_emade', "<tt>".&html_escape($merr)."</tt>"))
+	if (defined($merr));
+&reset_domain_envs($d);
+
+return undef;
+}
+
 # register_post_action(&function, args)
 sub register_post_action
 {

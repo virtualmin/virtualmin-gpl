@@ -42,7 +42,6 @@
  - Ghost installer (plus node.js)
 
  - Domain(s) move from within Virtualmin
-	- re-factor enable
 	- http://virtualmin.com/node/31970
 
  - Allow restore with different webserver type

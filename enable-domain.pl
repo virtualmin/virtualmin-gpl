@@ -67,50 +67,9 @@ if ($subservers && !$d->{'parent'}) {
 	}
 
 foreach $d (@doms) {
-	# Work out what can be enabled
-	@enable = &get_enable_features($d);
-
-	# Go ahead and do it
 	print "Enabling virtual server $d->{'dom'} ..\n\n";
-	%enable = map { $_, 1 } @enable;
-	delete($d->{'disabled_reason'});
-	delete($d->{'disabled_why'});
-
-	# Run the before command
-	&set_domain_envs($d, "ENABLE_DOMAIN");
-	$merr = &making_changes();
-	&reset_domain_envs($d);
-	&usage(&text('enable_emaking', "<tt>$merr</tt>")) if (defined($merr));
-
-	# Enable all disabled features
-	my $f;
-	foreach $f (@features) {
-		if ($d->{$f} && $enable{$f}) {
-			local $efunc = "enable_$f";
-			&try_function($f, $efunc, $d);
-			}
-		}
-	foreach $f (&list_feature_plugins()) {
-		if ($d->{$f} && $enable{$f}) {
-			&plugin_call($f, "feature_enable", $d);
-			}
-		}
-
-	# Enable extra admins
-	&update_extra_webmin($d, 0);
-
-	# Save new domain details
-	&$first_print($text{'save_domain'});
-	delete($d->{'disabled'});
-	&save_domain($d);
-	&$second_print($text{'setup_done'});
-
-	# Run the after command
-	&set_domain_envs($d, "ENABLE_DOMAIN");
-	local $merr = &made_changes();
-	&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
-		if (defined($merr));
-	&reset_domain_envs($d);
+	$err = &enable_virtual_server($d);
+	&usage($err) if ($err);
 	}
 
 &run_post_actions();
