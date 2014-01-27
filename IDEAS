@@ -41,9 +41,6 @@
 
  - Ghost installer (plus node.js)
 
- - Domain(s) move from within Virtualmin
-	- http://virtualmin.com/node/31970
-
  - Allow restore with different webserver type
 	- convert web redirects
 	- http://virtualmin.com/node/17606

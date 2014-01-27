@@ -20,11 +20,15 @@ if ($oldttl) {
 	}
 else {
 	&bind8::create_defttl($file, $in{'newttl'});
+	foreach my $e (@$recs) {
+		$e->{'line'}++;
+		$e->{'eline'}++ if (defined($e->{'eline'}));
+		}
 	}
 
 # Update records
 foreach my $r (@$recs) {
-	if ($r->{'ttl'}) {
+	if ($r->{'ttl'} && $r->{'type'} ne 'SOA') {
 		$r->{'ttl'} = $in{'newttl'};
 		&bind8::modify_record($file, $r, $r->{'name'},
 		    $r->{'ttl'}, $r->{'class'}, $r->{'type'},
