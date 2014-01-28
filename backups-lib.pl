@@ -1816,6 +1816,21 @@ if ($ok) {
 					}
 				}
 
+			# If the domain originally had a different webserver
+			# enabled, use the one from this system instead
+			local $oldweb = $d->{'backup_web_type'};
+			if (!$oldweb && $d->{'web'}) {
+				$oldweb = 'web';
+				}
+			elsif (!$oldweb && $d->{'virtualmin-nginx'}) {
+				$oldweb = 'virtualmin-nginx';
+				}
+			if (&indexof($oldweb, @features, @plugins) < 0) {
+				$d->{'oldweb'} = 0;
+				my $newweb = &domain_has_website();
+				$d->{$newweb} = 1 if ($newweb);
+				}
+
 			local ($parentdom, $parentuser);
 			if ($d->{'parent'}) {
 				# Does the parent exist?

@@ -41,6 +41,4 @@
 
  - Ghost installer (plus node.js)
 
- - Allow restore with different webserver type
-	- convert web redirects
-	- http://virtualmin.com/node/17606
+ - Replace cron::show_times_input with function that returns HTML
