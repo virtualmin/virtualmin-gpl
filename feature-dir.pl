@@ -708,8 +708,10 @@ local ($d) = @_;
 local $hd = $config{'homes_dir'};
 $hd =~ s/^\.\///;
 local $gid = $d->{'gid'} || $d->{'ugid'};
-if (defined(&set_php_wrappers_writable)) {
-	&set_php_wrappers_writable($d, 1);
+foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
+	if (defined(&set_php_wrappers_writable)) {
+		&set_php_wrappers_writable($sd, 1);
+		}
 	}
 my @subhomes;
 if (!$d->{'parent'}) {
@@ -724,8 +726,10 @@ if (!$d->{'parent'}) {
 	       " | xargs chown $d->{'uid'}:$gid");
 &system_logged("chown $d->{'uid'}:$gid ".
 	       quotemeta($d->{'home'})."/".$config{'homes_dir'});
-if (defined(&set_php_wrappers_writable)) {
-	&set_php_wrappers_writable($d, 0);
+foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
+	if (defined(&set_php_wrappers_writable)) {
+		&set_php_wrappers_writable($sd, 0);
+		}
 	}
 return undef;
 }
