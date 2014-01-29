@@ -5403,12 +5403,15 @@ if ($_[0]->{'unix'} && !$_[0]->{'parent'} && !$_[0]->{'disabled'}) {
 	}
 
 # Record if default for the IP
-if ($_[0]->{'web'}) {
+if (&domain_has_website($_[0])) {
 	$_[0]->{'backup_web_default'} = &is_default_website($_[0]);
 	}
 else {
 	delete($_[0]->{'backup_web_default'});
 	}
+
+# Record webserver type
+$_[0]->{'backup_web_type'} = &domain_has_website($_[0]);
 
 &save_domain($_[0]);
 
