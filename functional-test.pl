@@ -7135,7 +7135,7 @@ else {
 $total_failed = 0;
 @failed_tests = ( );
 foreach $tt (@tests) {
-	next if ($done_test{%tt}++);
+	next if ($done_test{$tt}++);
 
 	# Cleanup backups first
 	&unlink_file($test_backup_file);
