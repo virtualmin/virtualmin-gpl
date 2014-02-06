@@ -1432,5 +1432,5 @@ Updated the Z-push script installer to version 2.1.1-1788, phpMyAdmin to 4.1.6, 
 Added SRV record support to the DNS Records page.
 Added the Transfer Virtual Server page and transfer-domain API command for copying or moving a domain to another system running Virtualmin.
 ---- Changes since 4.05 ----
-Updated the CMS Made Simple script installer to version 1.11.10, and Dolibarr to 3.5.0.
+Updated the CMS Made Simple script installer to version 1.11.10, phpMyFAQ to 2.8.7, and Dolibarr to 3.5.0.
 Added a script installer for Node.js version 0.10.25.
