@@ -12620,6 +12620,9 @@ delete($d->{'cgi_bin_path'});
 $d->{'cgi_bin_dir'} = &cgi_bin_dir($d, 1);
 $d->{'cgi_bin_path'} = &cgi_bin_dir($d, 0);
 
+# Create domains dir if missing
+&setup_for_subdomain($parent, $parent->{'user'}, $d);
+
 # Create the directory, if missing
 if (!$d->{'dir'}) {
 	$d->{'dir'} = 1;
