@@ -2544,30 +2544,32 @@ if (&foreign_check("dovecot")) {
 # Rename a user's mail files, if they change due to a user rename
 sub rename_mail_file
 {
-return if (&mail_under_home());
 &require_mail();
-if ($config{'mail_system'} == 1) {
-	# Just rename the Sendmail mail file (if necessary)
-	local $of = &sendmail::user_mail_file($_[1]->{'user'});
-	local $nf = &sendmail::user_mail_file($_[0]->{'user'});
-	&rename_logged($of, $nf);
-	}
-elsif ($config{'mail_system'} == 0) {
-	# Find out from Postfix which file to rename (if necessary)
-	local $newumf = &postfix::postfix_mail_file($_[0]->{'user'});
-	local $oldumf = &postfix::postfix_mail_file($_[1]->{'user'});
-	&rename_logged($oldumf, $newumf);
-	}
-elsif ($config{'mail_system'} == 2 ||
-       $config{'mail_system'} == 4 && !$_[0]->{'qmail'}) {
-	# Just rename the Qmail mail file (if necessary)
-	local $of = &qmailadmin::user_mail_file($_[1]->{'user'});
-	local $nf = &qmailadmin::user_mail_file($_[0]->{'user'});
-	&rename_logged($of, $nf);
-	}
-elsif ($config{'mail_system'} == 4) {
-	# Rename from LDAP property
-	&rename_logged($_[1]->{'mailstore'}, $_[0]->{'mailstore'});
+if (!&mail_under_home()) {
+	if ($config{'mail_system'} == 1) {
+		# Just rename the Sendmail mail file (if necessary)
+		local $of = &sendmail::user_mail_file($_[1]->{'user'});
+		local $nf = &sendmail::user_mail_file($_[0]->{'user'});
+		&rename_logged($of, $nf) if ($of ne $nf);
+		}
+	elsif ($config{'mail_system'} == 0) {
+		# Find out from Postfix which file to rename (if necessary)
+		local $nf = &postfix::postfix_mail_file($_[0]->{'user'});
+		local $of = &postfix::postfix_mail_file($_[1]->{'user'});
+		&rename_logged($of, $nf) if ($of ne $nf);
+		}
+	elsif ($config{'mail_system'} == 2 ||
+	       $config{'mail_system'} == 4 && !$_[0]->{'qmail'}) {
+		# Just rename the Qmail mail file (if necessary)
+		local $of = &qmailadmin::user_mail_file($_[1]->{'user'});
+		local $nf = &qmailadmin::user_mail_file($_[0]->{'user'});
+		&rename_logged($of, $nf) if ($of ne $nf);
+		}
+	elsif ($config{'mail_system'} == 4) {
+		# Rename from LDAP property
+		&rename_logged($_[1]->{'mailstore'}, $_[0]->{'mailstore'})
+			if ($_[1]->{'mailstore'} ne $_[0]->{'mailstore'});
+		}
 	}
 
 # Rename Dovecot index files
@@ -2590,7 +2592,6 @@ if (&foreign_check("dovecot")) {
 			     $dove."/".&replace_atsign($_[0]->{'user'}));
 		}
 	}
-
 }
 
 # mail_under_home()
