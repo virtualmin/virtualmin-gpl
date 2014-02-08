@@ -543,7 +543,9 @@ sub show_restore_dir
 {
 local ($opts) = @_;
 return &ui_checkbox("dir_homes", 1, $text{'restore_dirhomes'},
-                    !$opts->{'dirnohomes'});
+                    !$opts->{'dirnohomes'})."<br>\n".
+       &ui_checkbox("dir_delete", 1, $text{'restore_dirdelete'},
+		    $opts->{'delete'});
 }
 
 # parse_restore_dir(&in, &domain)
@@ -551,7 +553,8 @@ return &ui_checkbox("dir_homes", 1, $text{'restore_dirhomes'},
 sub parse_restore_dir
 {
 local %in = %{$_[0]};
-return { 'dirnohomes' => !$in{'dir_homes'} };
+return { 'dirnohomes' => !$in{'dir_homes'},
+	 'delete' => $in{'dir_delete'} };
 }
 
 # restore_dir(&domain, file, &options, &all-options, homeformat?, &oldd,
@@ -571,21 +574,18 @@ if (defined(&set_php_wrappers_writable)) {
 # Create exclude file, to skip local system-specific files
 local $xtemp = &transname();
 &open_tempfile(XTEMP, ">$xtemp");
-&print_tempfile(XTEMP, "cgi-bin/lang\n");	# Used by AWstats, and created
-&print_tempfile(XTEMP, "./cgi-bin/lang\n");	# locally .. so no need to
-&print_tempfile(XTEMP, "cgi-bin/lib\n");	# include in restore.
-&print_tempfile(XTEMP, "./cgi-bin/lib\n");
-&print_tempfile(XTEMP, "cgi-bin/plugins\n");
-&print_tempfile(XTEMP, "./cgi-bin/plugins\n");
-&print_tempfile(XTEMP, "public_html/icon\n");
-&print_tempfile(XTEMP, "./public_html/icon\n");
-&print_tempfile(XTEMP, "public_html/awstats-icon\n");
-&print_tempfile(XTEMP, "./public_html/awstats-icon\n");
-&print_tempfile(XTEMP, ".backup\n");
-&print_tempfile(XTEMP, "./.backup\n");
+my @exc = ( "cgi-bin/lang",	# Used by AWstats, and created locally .. so
+	    "cgi-bin/lib",	# no need to include in restore.
+	    "cgi-bin/plugins",
+	    "public_html/icon",
+	    "public_html/awstats-icon",
+	    ".backup");
 if ($opts->{'dirnohomes'}) {
-	&print_tempfile(XTEMP, "homes\n");
-	&print_tempfile(XTEMP, "./homes\n");
+	push(@exc, "homes");
+	}
+foreach my $e (@exc) {
+	&print_tempfile(XTEMP, $e,"\n");
+	&print_tempfile(XTEMP, "./",$e,"\n");
 	}
 &close_tempfile(XTEMP);
 
@@ -611,7 +611,7 @@ if (!-e $d->{'home'}) {
 # Turn off quotas for the domain, to prevent the import failing
 &disable_quotas($d);
 
-local $out;
+local ($out, $err);
 local $cf = &compression_format($file, $key);
 local $q = quotemeta($file);
 local $qh = quotemeta($d->{'home'});
@@ -631,27 +631,29 @@ else {
 	local $comp = $cf == 1 ? "gunzip -c" :
 		      $cf == 2 ? "uncompress -c" :
 		      $cf == 3 ? &get_bunzip2_command()." -c" : "cat";
-	local $tarcmd = &make_tar_command("xfX", "-", $xtemp);
+	local $tarcmd = &make_tar_command("xvfX", "-", $xtemp);
 	local $reader = $catter." | ".$comp;
 	#if ($asd) {
 	#	# Run as domain owner - disabled, as this prevents some files
 	#	# from being written to by tar
 	#	$tarcmd = &command_as_user($d->{'user'}, 0, $tarcmd);
 	#	}
-	&execute_command("cd $qh && $reader | $tarcmd", undef, \$out, \$out);
+	&execute_command("cd $qh && $reader | $tarcmd", undef, \$out, \$err);
 	}
 local $ex = $?;
 &enable_quotas($d);
 if ($ex) {
 	# Errors about utime in the tar extract are ignored when running
 	# as the domain owner
-	&$second_print(&text('backup_dirtarfailed', "<pre>$out</pre>"));
+	&$second_print(&text('backup_dirtarfailed',
+			     "<pre>".&html_escape($err)."</pre>"));
 	return 0;
 	}
 else {
-	# Check for incremental restore of new-created domain, which indicates
+	# Check for incremental restore of newly-created domain, which indicates
 	# that is is not complete
-	if ($d->{'wasmissing'} && -r $iflag) {
+	my $wasincr = -r $iflag;
+	if ($d->{'wasmissing'} && $wasincr) {
 		&$second_print($text{'restore_wasmissing'});
 		}
 	else {
@@ -692,6 +694,59 @@ else {
 		if ($eloglink && !$new_eloglink) {
 			&system_logged("mv ".quotemeta($elog)." ".
 					     quotemeta($new_elog));
+			}
+		}
+
+	# For a non-incremental restore, delete files that weren't in the backup
+	# XXX make optional
+	if (!$wasincr && $cf != 4 && $opts->{'delete'}) {
+		# Parse tar output to find files that were restored
+		my %restored;
+		foreach my $l (split(/\r?\n/, $out)) {
+			$l =~ s/^\.\///;
+			$l =~ s/\/$//;
+			$restored{$l} = 1;
+			}
+
+		# Find files that exist now
+		my @existing;
+		&open_execute_command(FIND,
+			"cd ".quotemeta($d->{'home'})." && ".
+			"find . -print", 1, 1);
+		while(my $l = <FIND>) {
+			$l =~ s/\r|\n//g;
+			$l =~ s/^\.\///;
+			push(@existing, $l);
+			}
+
+		# Add standard dirs to exclude list
+		foreach my $dir (&virtual_server_directories($d)) {
+			push(@exc, $dir->[0]);
+			}
+		push(@exc, ".backup.lock");
+		push(@exc, "virtualmin-backup");
+		push(@exc, "logs");	# Some backups don't include logs
+		push(@exc, "homes");	# or homes dirs
+		push(@exc, &get_backup_excludes($d));
+
+		# Delete those that weren't in tar, except for excluded dirs
+		foreach my $f (@existing) {
+			next if ($restored{$f});
+			next if ($f eq "." || $f eq ".." ||
+				 $f =~ /\/\.$/ || $f =~ /\/\.\.$/);
+			next if ($f =~ /\/\.zfs$/ || $f eq ".zfs");
+
+			# Check if on exclude list
+			my $skip = 0;
+			foreach my $e (@exc) {
+				if ($f eq $e || $f =~ /^\Q$e\E\//) {
+					$skip = 1;
+					}
+				}
+			next if ($skip);
+
+			# Can delete the file
+			&unlink_logged("$d->{'home'}/$f");
 			}
 		}
 
