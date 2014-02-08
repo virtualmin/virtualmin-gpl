@@ -16254,6 +16254,12 @@ else {
 sub validate_transfer_host
 {
 my ($d, $desthost, $destpass, $overwrite) = @_;
+
+# Cannot transfer a disabled domain
+if ($d->{'disabled'}) {
+	return $text{'transfer_edisabled'};
+	}
+
 my ($status, $out) = &execute_virtualmin_api_command($desthost, $destpass,
 					     "list-domains --name-only");
 if ($status) {

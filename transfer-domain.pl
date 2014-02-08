@@ -118,7 +118,7 @@ print "                           --host hostname\n";
 print "                          [--pass password]\n";
 print "                          [--disable | --delete]\n";
 print "                          [--overwrite]\n";
-print "				 [--delete-missing-files]\n";
+print "                          [--delete-missing-files]\n";
 exit(1);
 }
 
