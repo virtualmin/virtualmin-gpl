@@ -19,6 +19,11 @@ will be remove from this system after being copied. Alternately, the
 C<--disable> flag can be used to disable the domain on the source system without
 completely removing it.
 
+If the C<--overwrite> flag is not given, this command will fail if the domain
+already exists on the destination system. If you do expect it to exist, the
+C<--delete-missing-files> flag will cause the restore to remove from the
+destination domain any files that are not included in the backup.
+
 =cut
 
 package virtual_server;
@@ -65,6 +70,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--overwrite") {
 		$overwrite = 1;
 		}
+	elsif ($a eq "--delete-missing-files") {
+		$deletemissing = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -88,7 +96,8 @@ my @subs = ( &get_domain_by("parent", $d->{'id'}),
 		    $d->{'dom'}, $desthost, scalar(@subs)));
 &$indent_print();
 $ok = &transfer_virtual_server($d, $desthost, $destpass,
-			       $delete ? 2 : $disable ? 1 : 0);
+			       $delete ? 2 : $disable ? 1 : 0,
+			       $deletemissing);
 &$outdent_print();
 if ($ok) {
 	&$second_print($text{'setup_done'});
@@ -109,6 +118,7 @@ print "                           --host hostname\n";
 print "                          [--pass password]\n";
 print "                          [--disable | --delete]\n";
 print "                          [--overwrite]\n";
+print "				 [--delete-missing-files]\n";
 exit(1);
 }
 

@@ -16290,7 +16290,8 @@ if ($d->{'alias'}) {
 return undef;
 }
 
-# transfer_virtual_server(&domain, desthost, destpass, delete-mode)
+# transfer_virtual_server(&domain, desthost, destpass, delete-mode,
+# 			  delete-missing-files)
 # Transfers a domain (and sub-servers) to a destination system, possibly while
 # deleting it from the source. Will print stuff while transferring, and returns
 # an OK flag.
@@ -16397,7 +16398,8 @@ elsif ($deletemode == 1) {
 &$first_print($text{'transfer_restoring'});
 my ($rok, $rout) = &execute_virtualmin_api_command($desthost, $destpass,
 	"restore-domain --source $remotetemp --all-domains --all-features ".
-	"--skip-warnings --continue-on-error");
+	"--skip-warnings --continue-on-error ".
+	($deletemissing ? "--option dir delete 1" : ""));
 if ($rok != 0) {
 	if ($deletemode == 2) {
 		&$second_print(&text('transfer_erestoring2', $rout,
