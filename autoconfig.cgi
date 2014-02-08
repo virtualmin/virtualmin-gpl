@@ -63,16 +63,16 @@ elsif ($STYLE == 3) {
 	$SMTP_LOGIN = $PREFIX."-".$mailbox;
 	}
 elsif ($STYLE == 4) {
-	$SMTP_LOGIN = $name."_".$PREFIX;
+	$SMTP_LOGIN = $mailbox."_".$PREFIX;
 	}
 elsif ($STYLE == 5) {
-	$SMTP_LOGIN = $PREFIX."_".$name;
+	$SMTP_LOGIN = $PREFIX."_".$mailbox;
 	}
 elsif ($STYLE == 6) {
 	$SMTP_LOGIN = $email;
 	}
 elsif ($STYLE == 7) {
-	$SMTP_LOGIN = $name."\%".$PREFIX;
+	$SMTP_LOGIN = $mailbox."\%".$PREFIX;
 	}
 else {
 	&error_exit("Unknown style $STYLE");
