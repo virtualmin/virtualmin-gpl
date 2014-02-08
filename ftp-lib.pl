@@ -246,5 +246,44 @@ else {
 return $sz;
 }
 
+# ftp_encrypted_download(..)
+# Takes the same parameters as ftp_download, but uses an encrypted control 
+# connection
+sub ftp_encrypted_download
+{
+my ($host, $file, $dest, $error, $cbfunc, $user, $pass, $port, $nocache) = @_;
+if (!&has_command("curl")) {
+	my $msg = "The curl command is needed for encrypted FTP downloads";
+	if ($error) { $$error = $msg; return }
+	else { &error($error); }
+	}
+my $cmd = "curl --ftp-ssl-control -k";
+if ($user) {
+	$cmd .= " -u ".quotemeta($user).":".quotemeta($pass);
+	}
+if (!ref($dest)) {
+	$cmd = " -O ".quotemeta($dest);
+	}
+$cmd .= " ftp://".$host.($port ? ":".$port : "").$file;
+my $errtemp = &transname();
+if (ref($dest)) {
+	# Save to scalar reference
+	$$dest = &backquote_command("$cmd 2>$errtemp </dev/null");
+	}
+else {
+	# Save to a file
+	&system_logged("$cmd >".quotemeta($dest)." 2>$errtemp </dev/null");
+	}
+# Handle any error
+if ($?) {
+	my $errmsg = &read_file_contents($errtemp);
+	&unlink_file($errtemp);
+	if ($error) { $$error = $errmsg; return 0; }
+	else { &error($errmsg); }
+	}
+&unlink_file($errtemp);
+return 1;
+}
+
 1;
 
