@@ -40,5 +40,5 @@
 	- https://sourceforge.net/p/webadmin/bugs/4350/
 
  - Ghost installer (plus node.js)
-
- - Replace cron::show_times_input with function that returns HTML
+	- http://docs.ghost.org/installation/
+	- node.js only script
