@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the CMS Made Simple script installer to version 1.11.10, phpMyFAQ to 2.8.7, Pydio to 5.2.1, Joomla to 3.2.2 and 2.5.18, and Dolibarr to 3.5.0.<br>Added a script installer for Node.js version 0.10.25.
+html=Updated the CMS Made Simple script installer to version 1.11.10, phpMyFAQ to 2.8.7, Pydio to 5.2.1, Joomla to 3.2.2 and 2.5.18, phpMyAdmin to 4.1.7, and Dolibarr to 3.5.0.<br>Added a script installer for Node.js version 0.10.25.
 master=1
 reseller=1
 domain=1
