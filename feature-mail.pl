@@ -5998,13 +5998,13 @@ elsif ($p) {
 		# Add ScriptAlias to outlook CGI
 		local @sc = &apache::find_directive("ScriptAlias", $vconf);
 		foreach my $sc (@sc) {
-			if ($sc =~ /^\/autodiscover\/autodiscover.xml\s/) {
+			if ($sc =~ /^\/AutoDiscover\/AutoDiscover.xml\s/i) {
 				$found_outlook = 1;
                                 }
 			}
 		if (!$found_outlook) {
 			local $cgidir = &cgi_bin_dir($d);
-			push(@sc, "/autodiscover/autodiscover.xml ".
+			push(@sc, "/AutoDiscover/AutoDiscover.xml ".
 				  "$cgidir/autoconfig.cgi");
 			&apache::save_directive("ScriptAlias", \@sc,
 						$vconf, $conf);
@@ -6145,7 +6145,7 @@ elsif ($p) {
 		# Remove alias to CGI for Outlook
 		local @sc = &apache::find_directive("ScriptAlias", $vconf);
 		foreach my $sc (@sc) {
-			if ($sc =~ /^\/autodiscover\/autodiscover.xml\s/) {
+			if ($sc =~ /^\/AutoDiscover\/AutoDiscover.xml\s/i) {
 				@sc = grep { $_ ne $sc } @sc;
 				$found_outlook++;
 				last;
