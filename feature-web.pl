@@ -2871,6 +2871,8 @@ return $added;
 sub add_webmail_redirect_directives
 {
 local ($d, $tmpl) = @_;
+return 1 if ($d->{'alias'});	# Don't bother for alias domains, due to
+				# Apache config clashes
 $tmpl ||= &get_template($d->{'template'});
 local $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
