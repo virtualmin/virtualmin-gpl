@@ -139,6 +139,14 @@ if ($p) {
 
 	print &ui_table_row($text{'newip_sslport'},
 			    &ui_textbox("sslport", $d->{'web_sslport'}, 5));
+
+	print &ui_table_row($text{'newip_urlport'},
+		    &ui_opt_textbox("urlport", $d->{'web_urlport'}, 5,
+				$text{'newip_sameport'}));
+
+	print &ui_table_row($text{'newip_urlsslport'},
+		    &ui_opt_textbox("urlsslport", $d->{'web_urlsslport'}, 5,
+				$text{'newip_sameport'}));
 	}
 
 print &ui_table_end();

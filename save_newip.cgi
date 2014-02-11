@@ -174,6 +174,8 @@ if (&domain_has_website($d)) {
 	foreach $p ("port", "sslport") {
 		$in{$p} =~ /^\d+$/ && $in{$p} > 0 && $in{$p} < 65536 ||
 			&error($text{'newip_e'.$p});
+		$in{"url".$p."_def"} || $in{"url".$p} =~ /^\d+$/ ||
+			&error($text{'newip_e'.$p});
 		}
 	}
 
@@ -254,6 +256,10 @@ elsif ($virt6 && $d->{'virt6'} && $d->{'ip6'} ne $ip6) {
 if (&domain_has_website($d)) {
 	$d->{'web_port'} = $in{'port'};
 	$d->{'web_sslport'} = $in{'sslport'};
+	$d->{'web_urlport'} =
+		$in{'urlport_def'} ? undef : $in{'urlport'};
+	$d->{'web_urlsslport'} =
+		$in{'urlsslport_def'} ? undef : $in{'urlsslport'};
 	}
 
 # Run the before command

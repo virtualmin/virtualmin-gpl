@@ -2378,6 +2378,18 @@ print &ui_table_row(&hlink($text{'newweb_port'}, "template_web_port"),
 print &ui_table_row(&hlink($text{'newweb_sslport'}, "template_web_sslport"),
 	&ui_textbox("web_sslport", $tmpl->{'web_sslport'}, 6));
 
+# URL port for normal webserver
+print &ui_table_row(
+	&hlink($text{'newweb_urlport'}, "template_web_urlport"),
+	&ui_opt_textbox("web_urlport", $tmpl->{'web_urlport'}, 6,
+			$text{'newweb_sameport'}));
+
+# URL port for SSL webserver
+print &ui_table_row(
+	&hlink($text{'newweb_urlsslport'}, "template_web_urlsslport"),
+	&ui_opt_textbox("web_urlsslport", $tmpl->{'web_urlsslport'}, 6,
+			$text{'newweb_sameport'}));
+
 # Setup matching Webmin/Usermin SSL cert
 print &ui_table_row(&hlink($text{'newweb_webmin'},
 			   "template_web_webmin_ssl"),
@@ -2585,6 +2597,7 @@ if ($in{"web_mode"} == 2) {
 		$tmpl->{'web_user'} = $in{'user'};
 		}
 	$tmpl->{'web_alias'} = $in{'alias_mode'};
+
 	$in{'web_port'} =~ /^\d+$/ && $in{'web_port'} > 0 &&
 		$in{'web_port'} < 65536 || &error($text{'newweb_eport'});
 	$tmpl->{'web_port'} = $in{'web_port'};
@@ -2594,6 +2607,16 @@ if ($in{"web_mode"} == 2) {
 	$in{'web_port'} != $in{'web_sslport'} ||
 			&error($text{'newweb_esslport2'});
 	$tmpl->{'web_sslport'} = $in{'web_sslport'};
+
+	$in{'web_urlport_def'} || $in{'web_urlport'} =~ /^\d+$/ ||
+		&error($text{'newweb_eport'});
+	$tmpl->{'web_urlport'} = $in{'web_urlport_def'} ?
+					undef : $in{'web_urlport'};
+	$in{'web_urlsslport_def'} || $in{'web_urlsslport'} =~ /^\d+$/ ||
+		&error($text{'newweb_esslport'});
+	$tmpl->{'web_urlsslport'} = $in{'web_urlsslport_def'} ?
+					undef : $in{'web_urlsslport'};
+
 	$tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};
 	$tmpl->{'web_usermin_ssl'} = $in{'web_usermin_ssl'};
 
