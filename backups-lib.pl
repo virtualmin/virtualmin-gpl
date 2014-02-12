@@ -3645,8 +3645,9 @@ sub can_backup_keys
 {
 return 0 if (!$virtualmin_pro);		# Pro only feature
 return 0 if ($access{'admin'});		# Not for extra admins
+return 0 if (!&can_backup_domain());	# Can't do backups, so can't manage keys
 return 1 if (&master_admin());		# Master admin can access all keys
-return 2;			# Domain owner / reseller can access his own
+return 2;				# Domain owner / reseller can access own
 }
 
 # backup_log_own_domains(&log, [error-domains-only])

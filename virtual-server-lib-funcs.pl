@@ -11808,7 +11808,7 @@ if (&can_edit_templates()) {
 	}
 
 # Add wizard page
-if ($config{'wizard_run'}) {
+if ($config{'wizard_run'} && &can_edit_templates()) {
 	push(@rv, { 'url' => "$vm/wizard.cgi",
 		    'title' => $text{'index_rewizard'},
 		    'cat' => 'setting',
@@ -15632,6 +15632,16 @@ else {
 	$rv = $proto."://$d->{'dom'}:$port";
 	}
 return $rv;
+}
+
+# get_domain_url(&domain)
+# Returns the URL for a domain (with no trailing /)
+sub get_domain_url
+{
+my ($d) = @_;
+my $ptn = $d->{'web_urlport'} || $d->{'web_port'};
+my $pt = $ptn == 80 || !$ptn ?  "" : ":".$ptn;
+return "http://".$d->{'dom'}.$pt;
 }
 
 # get_quotas_message()
