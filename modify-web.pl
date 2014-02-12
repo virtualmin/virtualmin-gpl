@@ -57,6 +57,11 @@ To change the HTTP port the selected virtual servers listen on, use the
 C<--port> flag followed by a port number. For SSL websites, you can also use
 the C<--ssl-port> flag.
 
+Alternately, you can change the HTTP port that Virtualmin uses in URLs
+referencing this domain with the C<--url-port> flag. For SSL websites, you can
+also use the C<--ssl-url-port> flag.
+
+
 =cut
 
 package virtual_server;
@@ -185,6 +190,16 @@ while(@ARGV > 0) {
 		$sslport =~ /^\d+$/ && $sslport > 0 && $sslport < 65536 ||
 			&usage("--ssl-port must be followed by a number");
 		}
+	elsif ($a eq "--url-port") {
+		$urlport = shift(@ARGV);
+		$urlport =~ /^\d+$/ && $urlport > 0 && $urlport < 65536 ||
+			&usage("--url-port must be followed by a number");
+		}
+	elsif ($a eq "--ssl-url-port") {
+		$sslurlport = shift(@ARGV);
+		$sslurlport =~ /^\d+$/ && $sslport > 0 && $sslport < 65536 ||
+			&usage("--ssl-url-port must be followed by a number");
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -197,7 +212,7 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) ||
   defined($suexec) || $stylename || $content || defined($children) ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
-  defined($includes) || &usage("Nothing to do");
+  $urlport || $sslurlport || defined($includes) || &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -526,6 +541,12 @@ foreach $d (@doms) {
 	if ($sslport) {
 		$d->{'web_sslport'} = $sslport;
 		}
+	if ($urlport) {
+		$d->{'web_urlport'} = $urlport;
+		}
+	if ($urlsslport) {
+		$d->{'web_urlsslport'} = $urlsslport;
+		}
 
 	if (defined($proxy) || defined($framefwd) || $port || $sslport) {
 		# Update website feature
@@ -544,7 +565,7 @@ foreach $d (@doms) {
 		}
 
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
-	    $port || $sslport) {
+	    $port || $sslport || $urlport || $sslurlport) {
 		# Save the domain
 		&$first_print($text{'save_domain'});
 		&save_domain($d);
@@ -598,6 +619,7 @@ print "                     [--access-log log-path]\n";
 print "                     [--error-log log-path]\n";
 print "                     [--document-dir subdirectory]\n";
 print "                     [--port number] [--ssl-port number]\n";
+print "                     [--url-port number] [--ssl-url-port number]\n";
 exit(1);
 }
 

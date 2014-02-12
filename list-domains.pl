@@ -214,6 +214,9 @@ if ($multi) {
 		if ($dname ne $d->{'dom'}) {
 			print "    International domain name: $dname\n";
 			}
+		if (&domain_has_website($d)) {
+			print "    URL: ",&get_domain_url($d),"/\n";
+			}
 		if ($d->{'alias'}) {
 			$aliasdom = &get_domain_by("id", $d->{'alias'});
 			print "    Real domain: $aliasdom->{'dom'}\n";

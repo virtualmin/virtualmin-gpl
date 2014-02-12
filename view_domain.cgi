@@ -28,9 +28,10 @@ print &ui_hidden_table_start($text{'edit_header'}, "width=100%", 4,
 			     "basic", 1);
 
 # Domain name (with link), user and group
-if ($d->{'web'}) {
+if (&domain_has_website($d)) {
+	$url = &get_domain_url($d)."/";
 	print &ui_table_row($text{'edit_domain'},
-			"<tt><a href=http://$d->{'dom'}/>$d->{'dom'}</a></tt>",
+			"<tt><a href=$url>$d->{'dom'}</a></tt>",
 			undef, \@tds);
 	}
 else {

@@ -41,9 +41,12 @@
 
  - Externally visible port, for use in URLs when behind proxy
 	- http://virtualmin.com/node/32366
-	- template
+	- template inheritance
 	- template help pages
-	- API
-	- UI
 	- common function for URLs
 	- CHANGELOG
+
+ - Convert mail list subjects to unicode
+	- Unicode::MapUTF8
+	- Only when UTF-8 is enabled
+	- Default lang should be en-UTF8?
