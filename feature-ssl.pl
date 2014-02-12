@@ -207,6 +207,7 @@ $d->{'web_sslport'} = $web_sslport;
 if ($chained) {
 	&save_website_ssl_file($d, 'ca', $chained);
 	}
+$d->{'web_urlsslport'} = $tmpl->{'web_urlsslport'};
 
 &release_lock_web($d);
 &$second_print($text{'setup_done'});

@@ -182,6 +182,7 @@ else {
 				"</VirtualHost>");
 	&flush_file_lines($f);
 	$d->{'web_port'} = $web_port;
+	$d->{'web_urlport'} = $tmpl->{'web_urlport'};
 
 	# Create a link from another Apache dir
 	if ($newfile) {
