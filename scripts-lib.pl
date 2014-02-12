@@ -1423,13 +1423,11 @@ return undef;
 sub script_path_url
 {
 local ($d, $opts) = @_;
-local $pt = $d->{'web_port'} == 80 || !$d->{'web_port'} ?
-		"" : ":$d->{'web_port'}";
 local $pp = $opts->{'path'} eq '/' ? '' : $opts->{'path'};
 if ($pp !~ /\.(cgi|pl|php)$/i) {
 	$pp .= "/";
 	}
-return "http://$d->{'dom'}$pt$pp";
+return &get_domain_url($d).$pp;
 }
 
 # show_template_scripts(&tmpl)
