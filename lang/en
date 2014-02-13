@@ -5653,6 +5653,7 @@ copycert_psaving=Copying certificate and key to Postfix files ..
 copycert_penabling=Enabling SSL in Postfix configuration ..
 
 wizard_title=Post-Installation Wizard
+wizard_ecannot=You are not allowed to run the post-installation wizard
 wizard_next=Next
 wizard_prev=Prev
 wizard_cancel=Cancel
