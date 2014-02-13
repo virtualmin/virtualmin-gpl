@@ -74,9 +74,9 @@ $forms++;
 print "</table>\n";
 
 # Tell the user if something was saved
-$port = $d->{'web_port'} == 80 ? "" : ":".$d->{'web_port'};
+$url = &get_domain_url($d);
 if ($in{'saved'}) {
-	print "<p><b>",&text('html_saved', "<a href='http://$d->{'dom'}$port/$in{'edit'}' target=_blank><tt>$in{'edit'}</tt></a>"),"</b><p>\n";
+	print "<p><b>",&text('html_saved', "<a href='$url/$in{'edit'}' target=_blank><tt>$in{'edit'}</tt></a>"),"</b><p>\n";
 	}
 
 if ($editing) {
@@ -99,7 +99,7 @@ if ($editing) {
 	print &ui_hr();
 	print "<b>";
 	if ($editing == 1) {
-		print &text('html_editing', "<a href='http://$d->{'dom'}$port/$in{'edit'}' target=_blank><tt>$in{'edit'}</tt></a>");
+		print &text('html_editing', "<a href='$url/$in{'edit'}' target=_blank><tt>$in{'edit'}</tt></a>");
 		}
 	else {
 		print &text('html_creating', "<tt>$in{'create'}</tt>");
@@ -117,7 +117,7 @@ if ($editing) {
 		}
 	else {
 		print &virtualmin_ui_show_html_editor("body", $data,
-						      "http://$d->{'dom'}/");
+						      $url."/");
 		}
 
 	if ($in{'editok'} || $in{'textok'}) {
