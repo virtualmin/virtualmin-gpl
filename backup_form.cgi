@@ -120,7 +120,8 @@ $ftable .= &ui_links_row(\@links);
 foreach $f (&get_available_backup_features()) {
 	$ftable .= &ui_checkbox("feature", $f,
 		$text{'backup_feature_'.$f} || $text{'feature_'.$f},
-		&indexof($f, @schedfeats) >= 0)."\n";
+		&indexof($f, @schedfeats) >= 0,
+		"onClick='form.feature_all[1].checked = true'")."\n";
 	local $ofunc = "show_backup_$f";
 	local %opts = map { split(/=/, $_) }
 			 split(/,/, $sched->{'backup_opts_'.$f});
@@ -140,7 +141,8 @@ foreach $f (&list_backup_plugins()) {
 	$ftable .= &ui_checkbox("feature", $f,
 		&plugin_call($f, "feature_backup_name") ||
 		    &plugin_call($f, "feature_name"),
-		&indexof($f, @schedfeats) >= 0)."\n";
+		&indexof($f, @schedfeats) >= 0,
+		"onClick='form.feature_all[1].checked = true'")."\n";
 	if (&plugin_defined($f, "feature_backup_opts")) {
 		local %opts = map { split(/=/, $_) }
 				 split(/,/, $sched->{'backup_opts_'.$f});
