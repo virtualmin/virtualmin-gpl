@@ -3142,6 +3142,7 @@ local @opts;
 if ($d && $d->{'dir'}) {
 	# Limit local file to under virtualmin-backups
 	local $bdir = "$d->{'home'}/virtualmin-backup";
+	$bdir =~ s/\.\///g;	# Fix /./ in directory path
 	push(@opts, [ 0, $text{'backup_mode0a'},
 	       &ui_textbox($name."_file",
 		  $mode == 0 && $path =~ /virtualmin-backup\/(.*)$/ ? $1 : "",
