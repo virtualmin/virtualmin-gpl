@@ -95,8 +95,7 @@ foreach $f (&get_available_backup_features(!$safe_backup)) {
 	local %opts = map { split(/=/, $_) }
 			split(/,/, $sched->{'opts_'.$f});
 	local $ohtml;
-	if (defined(&$ofunc) && ($ohtml = &$ofunc(\%opts)) &&
-	    $ohtml =~ /type=(text|radio|check)/i) {
+	if (defined(&$ofunc) && ($ohtml = &$ofunc(\%opts)) && $ohtml) {
 		$ftable .= "<table><tr><td>\n";
 		$ftable .= ("&nbsp;" x 5);
 		$ftable .= "</td> <td>\n";
