@@ -12499,7 +12499,14 @@ for(my $i=0; $i<@doms; $i++) {
 &$second_print($text{'setup_done'});
 
 # Update old Webmin user
-&modify_webmin($oldparent, $oldparent);
+if ($oldparent->{'webmin'}) {
+	&modify_webmin($oldparent, $oldparent);
+	}
+
+# Re-save the new Webmin user to grant access to all aliases
+if ($d->{'webmin'}) {
+	&modify_webmin($d, $d);
+	}
 
 # Re-apply resource limits, to update Apache and PHP configs
 if (defined(&supports_resource_limits) && &supports_resource_limits()) {
