@@ -12376,7 +12376,7 @@ $d->{'plan'} = $oldparent->{'plan'};
 # Find any alias domains that also need to be re-parented. Also find
 # any sub-domains
 local @aliases = &get_domain_by("alias", $d->{'id'});
-local @subdoms = &get_domain_by("subdoms", $d->{'id'});
+local @subdoms = &get_domain_by("subdom", $d->{'id'});
 foreach my $ad (@aliases, @subdoms) {
 	local $oldad = { %$ad };
 	&set_parent_attributes($ad, $d);
