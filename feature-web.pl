@@ -4062,6 +4062,7 @@ sub fix_symlink_templates
 my $olist = &get_allowed_options_list();
 &require_apache();
 foreach my $tmpl (&list_templates()) {
+	next if ($tmpl->{'id'} == 1);	# Skip sub-server settings
 	&lock_file($tmpl->{'file'} || $module_config_file);
 	if ($tmpl->{'web'} && $tmpl->{'web'} ne 'none' &&
 	    $tmpl->{'web'} =~ /(\s|\+)FollowSymLinks/) {
