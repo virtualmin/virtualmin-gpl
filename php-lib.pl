@@ -28,13 +28,13 @@ if ($virt) {
 						       $dir->{'members'}));
 		foreach my $f (&apache::find_directive("FCGIWrapper",
 							$dir->{'members'})) {
-			if ($f =~ /^\Q$d->{'home'}\E\/fcgi-bin\/php.\.fcgi/) {
+			if ($f =~ /^\Q$d->{'home'}\E\/fcgi-bin\/php\S+\.fcgi/) {
 				return 'fcgid';
 				}
 			}
 		}
 	foreach my $a (@actions) {
-		if ($a =~ /^application\/x-httpd-php.\s+\/cgi-bin\/php.\.cgi/) {
+		if ($a =~ /^application\/x-httpd-php.\s+\/cgi-bin\/php\S+\.cgi/) {
 			return 'cgi';
 			}
 		}
