@@ -2,6 +2,7 @@
 # Show the multi-step post-install wizard
 
 require './virtual-server-lib.pl';
+&can_edit_templates() || &error($text{'wizard_ecannot'});
 &ReadParse();
 
 if ($in{'cancel'}) {
