@@ -1432,7 +1432,7 @@ Updated the Z-push script installer to version 2.1.1-1788, phpMyAdmin to 4.1.6, 
 Added SRV record support to the DNS Records page.
 Added the Transfer Virtual Server page and transfer-domain API command for copying or moving a domain to another system running Virtualmin.
 ---- Changes since 4.05 ----
-Updated the CMS Made Simple script installer to version 1.11.10, phpMyFAQ to 2.8.7, Pydio to 5.2.1, Joomla to 3.2.2 and 2.5.18, phpMyAdmin to 4.1.7, Mantis to 1.2.16, Django to 1.6.2, and Dolibarr to 3.5.0.
+Updated the CMS Made Simple script installer to version 1.11.10, phpMyFAQ to 2.8.7, Pydio to 5.2.1, Joomla to 3.2.2 and 2.5.18, phpMyAdmin to 4.1.8, Mantis to 1.2.16, Django to 1.6.2, and Dolibarr to 3.5.0.
 Added a script installer for Node.js version 0.10.25, and Ghost version 0.4.1.
 Added an option to the restore process to delete files in an existing destination domain that were not included in the backup.
 The port used in URLs can now be set independently of the actual port, so that URLs are correct when a reverse proxy is in use.
