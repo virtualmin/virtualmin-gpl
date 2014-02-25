@@ -262,7 +262,7 @@ if ($user) {
 	$cmd .= " -u ".quotemeta($user).":".quotemeta($pass);
 	}
 if (!ref($dest)) {
-	$cmd = " -O ".quotemeta($dest);
+	$cmd .= " -O ".quotemeta($dest);
 	}
 $cmd .= " ftp://".$host.($port ? ":".$port : "").$file;
 my $errtemp = &transname();
@@ -275,8 +275,9 @@ else {
 	&system_logged("$cmd >".quotemeta($dest)." 2>$errtemp </dev/null");
 	}
 # Handle any error
-if ($?) {
-	my $errmsg = &read_file_contents($errtemp);
+if ($? || (!ref($dest) && !-s $dest)) {
+	my $errmsg = &html_escape(&read_file_contents($errtemp)) ||
+		     "Unknown curl error with $cmd";
 	&unlink_file($errtemp);
 	if ($error) { $$error = $errmsg; return 0; }
 	else { &error($errmsg); }
