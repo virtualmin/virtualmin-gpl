@@ -1438,3 +1438,4 @@ Added an option to the restore process to delete files in an existing destinatio
 The port used in URLs can now be set independently of the actual port, so that URLs are correct when a reverse proxy is in use.
 ---- Changes since 4.06 ----
 Updated the Node.js script installer to version 0.10.26, Pydio to 5.2.2, and phpMyAdmin to 4.1.8.
+Added Norwegian translation updates, thanks to Stein-Aksel Basma.
