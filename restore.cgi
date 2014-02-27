@@ -47,6 +47,7 @@ if ($src eq "upload:") {
 		&print_tempfile(TEMP, $in{'src_upload'});
 		&close_tempfile(TEMP);
 		}
+	&set_ownership_permissions(undef, undef, 0700, $temp);
 	$src = $temp;
 	}
 ($mode) = &parse_backup_url($src);
