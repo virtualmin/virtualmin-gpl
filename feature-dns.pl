@@ -2853,7 +2853,7 @@ elsif (($r->{'type'} eq 'SPF' ||
 	return 0;
 	}
 elsif ($r->{'type'} eq 'TXT' &&
-       $r->{'values'}->[0] =~ /^(t=|k=)/) {
+       $r->{'values'}->[0] =~ /^(t=|k=|v=)/) {
 	# DKIM, managed by Virtualmin
 	return 0;
 	}
