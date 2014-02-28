@@ -40,6 +40,10 @@
 	- https://sourceforge.net/p/webadmin/bugs/4350/
 
  - Convert mail list subjects to unicode
-	- Unicode::MapUTF8
+	- Dont' set charset in index.cgi
+	- Need can_convert function
+	- Convert when replying to email
 	- Only when UTF-8 is enabled
 	- Default lang should be en-UTF8?
+	- For printing too
+
