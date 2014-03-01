@@ -262,7 +262,7 @@ if ($user) {
 	$cmd .= " -u ".quotemeta($user).":".quotemeta($pass);
 	}
 if (!ref($dest)) {
-	$cmd .= " -O ".quotemeta($dest);
+	$cmd .= " -o ".quotemeta($dest);
 	}
 $cmd .= " ftp://".$host.($port ? ":".$port : "").$file;
 my $errtemp = &transname();
