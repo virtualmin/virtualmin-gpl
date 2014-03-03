@@ -906,7 +906,7 @@ foreach my $p (@ports) {
 			local @wrappers = &apache::find_directive(
 				"FCGIWrapper", $dirstr->{'members'});
 			@wrappers = grep {
-				!(/^\Q$dest\E\/php.\.fcgi\s+\.php(.*)$/ &&
+				!(/^\Q$dest\E\/php\S+\.fcgi\s+\.php(\S*)$/ &&
 				 ($1 eq '' || $allvers{$1})) } @wrappers;
 			foreach my $v (&list_available_php_versions($d)) {
 				push(@wrappers,
