@@ -34,66 +34,8 @@ if (&foreign_check("proc")) {
 	if (&foreign_check("mount")) {
 		&require_useradmin();
 		&foreign_require("mount", "mount-lib.pl");
-		local @mounted = &mount::list_mounted();
-		local $total = 0;
-		local $free = 0;
-		local %donezone;
-		local %donevzfs;
-		local %donedevice;
-		local %donedevno;
 		local @cfs = split(/\s+/, $config{'collect_fs'});
-		foreach my $m (@mounted) {
-			if (@cfs) {
-				# If a list of filesystesm to monitor is given,
-				# only include those
-				if (&indexof($m->[0], @cfs) >= 0) {
-					local ($t, $f) =
-					  &mount::disk_space($m->[2], $m->[0]);
-					$total += $t*1024;
-					$free += $f*1024;
-					}
-				}
-			elsif ($m->[2] =~ /^ext/ ||
-			       $m->[2] eq "reiserfs" || $m->[2] eq "ufs" ||
-			       $m->[2] eq "zfs" || $m->[2] eq "simfs" ||
-			       $m->[2] eq "xfs" || $m->[2] eq "jfs" ||
-			       $m->[1] =~ /^\/dev\// ||
-			       ($m->[1] eq $home_base &&
-				$m->[0] ne $home_base)) {
-				if ($m->[1] =~ /^(zones|zonas)\/([^\/]+)/ &&
-				    $m->[2] eq "zfs" &&
-				    $donezone{$2}++) {
-					# Only count each zone once, as there
-					# may be mounts from zones/foo/bar
-					# and zones/foo/smeg that really refer
-					# to the zone source.
-					next;
-					}
-				if ($donedevice{$m->[0]}++ ||
-				    $donedevice{$m->[1]}++) {
-					# Don't double-count mounts from
-					# the same device, or of the same dir
-					next;
-					}
-				my @st = stat($m->[0]);
-				if (@st && $donedevno{$st[0]}++) {
-					# Don't double-count same filesystem
-					# by device number
-					next;
-					}
-				local ($t, $f) =
-					&mount::disk_space($m->[2], $m->[0]);
-				if (($m->[2] eq "simfs" || $m->[2] eq "vzfs" ||
-				     $m->[0] eq "/dev/vzfs" ||
-				     $m->[0] eq "/dev/simfs") &&
-				    $donevzfs{$t,$f}++) {
-					# Don't double-count VPS filesystems
-					next;
-					}
-				$total += $t*1024;
-				$free += $f*1024;
-				}
-			}
+	        local ($total, $free) = &mount::local_disk_space(\@cfs);
 		$info->{'disk_total'} = $total;
 		$info->{'disk_free'} = $free;
 		}
