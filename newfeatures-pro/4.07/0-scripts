@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Node.js script installer to version 0.10.26, Pydio to 5.2.2, Zikula to 1.3.7, MediaWiki to 1.22.3, Feng Office to 2.5.1.1, and phpMyAdmin to 4.1.8.
+html=Updated the Node.js script installer to version 0.10.26, Pydio to 5.2.2, Zikula to 1.3.7, MediaWiki to 1.22.3, Feng Office to 2.5.1.1, Mantis to 1.2.17, and phpMyAdmin to 4.1.8.
 master=1
 reseller=1
 domain=1

@@ -1437,5 +1437,5 @@ Added a script installer for Node.js version 0.10.25, and Ghost version 0.4.1.
 Added an option to the restore process to delete files in an existing destination domain that were not included in the backup.
 The port used in URLs can now be set independently of the actual port, so that URLs are correct when a reverse proxy is in use.
 ---- Changes since 4.06 ----
-Updated the Node.js script installer to version 0.10.26, Pydio to 5.2.2, Zikula to 1.3.7, MediaWiki to 1.22.3, Feng Office to 2.5.1.1, and phpMyAdmin to 4.1.8.
+Updated the Node.js script installer to version 0.10.26, Pydio to 5.2.2, Zikula to 1.3.7, MediaWiki to 1.22.3, Feng Office to 2.5.1.1, Mantis to 1.2.17, and phpMyAdmin to 4.1.8.
 Added Norwegian translation updates, thanks to Stein-Aksel Basma.
