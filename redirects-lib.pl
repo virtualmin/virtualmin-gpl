@@ -19,6 +19,8 @@ return &plugin_defined($p, "feature_supports_web_redirects") &&
 #   dest - Either a URL or a directory
 #   alias - Set to 1 for an alias, 0 for a redirect
 #   regexp - If set to 1, any sub-path is redirected to the same destination
+#   http - Set in the non-SSL virtual host
+#   https - Set in the SSL virtual host
 sub list_redirects
 {
 my ($d) = @_;
@@ -27,35 +29,46 @@ if ($p && $p ne 'web') {
         return &plugin_call($p, "feature_list_web_redirects", $d);
         }
 &require_apache();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-return ( ) if (!$virt);
+my @ports = ( $d->{'web_port'},
+	      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 my @rv;
-foreach my $al (&apache::find_directive_struct("Alias", $vconf),
-		&apache::find_directive_struct("AliasMatch", $vconf),
-		&apache::find_directive_struct("Redirect", $vconf),
-                &apache::find_directive_struct("RedirectMatch", $vconf),
-	       ) {
-	my $rd = { 'alias' => $al->{'name'} =~ /^Alias/i ? 1 : 0,
-		   'dir' => $al };
-	if ($al->{'words'}->[2]) {
-		# Has a code too
-		$rd->{'code'} = $al->{'words'}->[1];
-		$rd->{'dest'} = $al->{'words'}->[2];
-		}
-	else {
-		$rd->{'dest'} = $al->{'words'}->[1];
-		}
-	if ($al->{'name'} eq 'Alias' || $al->{'name'} eq 'Redirect') {
-		$rd->{'path'} = $al->{'words'}->[0];
-		push(@rv, $rd);
-		}
-	elsif (($al->{'name'} eq 'AliasMatch' ||
-		$al->{'name'} eq 'RedirectMatch') &&
-	       ($al->{'words'}->[0] =~ /^(.*)\.\*\$$/ ||
-		$al->{'words'}->[0] =~ /^(.*)\(\.\*\)\$$/)) {
-		$rd->{'path'} = $1;
-		$rd->{'regexp'} = 1;
-		push(@rv, $rd);
+foreach my $p (@ports) {
+	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
+	next if (!$virt);
+	foreach my $al (&apache::find_directive_struct("Alias", $vconf),
+			&apache::find_directive_struct("AliasMatch", $vconf),
+			&apache::find_directive_struct("Redirect", $vconf),
+			&apache::find_directive_struct("RedirectMatch", $vconf),
+		       ) {
+		my $proto = $p == $d->{'web_port'} ? 'http' : 'https';
+		my $rd = { 'alias' => $al->{'name'} =~ /^Alias/i ? 1 : 0,
+			   'dir' => $al,
+			   $proto => 1 };
+		if ($al->{'words'}->[2]) {
+			# Has a code too
+			$rd->{'code'} = $al->{'words'}->[1];
+			$rd->{'dest'} = $al->{'words'}->[2];
+			}
+		else {
+			$rd->{'dest'} = $al->{'words'}->[1];
+			}
+		my ($already) = grep { $_->{'dest'} eq $rd->{'dest'} } @rv;
+		if ($already) {
+			$already->{$proto} = 1;
+			next;
+			}
+		if ($al->{'name'} eq 'Alias' || $al->{'name'} eq 'Redirect') {
+			$rd->{'path'} = $al->{'words'}->[0];
+			push(@rv, $rd);
+			}
+		elsif (($al->{'name'} eq 'AliasMatch' ||
+			$al->{'name'} eq 'RedirectMatch') &&
+		       ($al->{'words'}->[0] =~ /^(.*)\.\*\$$/ ||
+			$al->{'words'}->[0] =~ /^(.*)\(\.\*\)\$$/)) {
+			$rd->{'path'} = $1;
+			$rd->{'regexp'} = 1;
+			push(@rv, $rd);
+			}
 		}
 	}
 return @rv;
@@ -74,8 +87,10 @@ if ($p && $p ne 'web') {
 my @ports = ( $d->{'web_port'},
 	      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 my $count = 0;
-foreach my $port (@ports) {
-	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
+foreach my $p (@ports) {
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
+	my $proto = $p == $d->{'web_port'} ? 'http' : 'https';
+	next if (!$redirect->{$proto});
 	next if (!$virt);
 	my $dir = $redirect->{'alias'} ? "Alias" : "Redirect";
 	$dir .= "Match" if ($redirect->{'regexp'});

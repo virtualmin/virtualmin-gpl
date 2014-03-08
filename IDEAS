@@ -34,7 +34,6 @@
 	- CHANGELOG
 	- backup/restore
 
- - Sign file manager applet
-	- http://codesigning.ksoftware.net/
-	- http://virtualmin.com/node/32082
-	- https://sourceforge.net/p/webadmin/bugs/4350/
+ - SSL and non-SSL vhost redirects
+	- http://virtualmin.com/node/32641
+	- CHANGELOG

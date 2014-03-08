@@ -18,6 +18,10 @@ complete URL starting with http or https. To map the path to a directory,
 use the C<--alias> flag followed by a full directory path, ideally under the
 domain's C<public_html> directory.
 
+For domains with both non-SSL and SSL websites, you can use the C<--http> and
+C<--https> flags to limit the alias or redirect to one website type or the
+other.
+
 =cut
 
 package virtual_server;
@@ -59,6 +63,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--http") {
+		$http = 1;
+		}
+	elsif ($a eq "--https") {
+		$https = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -78,6 +88,10 @@ elsif ($dir) {
 else {
 	&usage("One of --redirect or --alias must be given");
 	}
+if (!$http && !$https) {
+	# If no protocol was given, assume both for backwards compatability
+	$http = $https = 1;
+	}
 
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
@@ -94,7 +108,10 @@ $clash && &usage("A redirect for the path $path already exists");
 $r = { 'path' => $path,
        'dest' => $url || $dir,
        'alias' => $dir ? 1 : 0,
-       'regexp' => $regexp };
+       'regexp' => $regexp,
+       'http' => $http,
+       'https' => $https,
+     };
 $err = &create_redirect($d, $r);
 &release_lock_web($d);
 if ($err) {
@@ -117,6 +134,7 @@ print "virtualmin create-redirect --domain domain.name\n";
 print "                           --path url-path\n";
 print "                           --alias directory | --redirect url\n";
 print "                          [--regexp]\n";
+print "                          [--http | --https]\n";
 exit(1);
 }
 
