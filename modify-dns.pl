@@ -4,19 +4,25 @@
 
 Change DNS settings for virtual servers
 
-This program updates DNS-related options for one or more servers, selected using the C<--domain> or C<--all-domains> flags. Or you can select all domains that
-don't have their own private IP address with C<--all-nonvirt-domains>.
+This program updates DNS-related options for one or more servers, selected
+using the C<--domain> or C<--all-domains> flags. Or you can select all domains
+that don't have their own private IP address with C<--all-nonvirt-domains>.
 
-To enable SPF for a domain, using C<--spf> option, and to turn it off use C<--no-spf>. By default, the SPF record will be created using the settings from the DNS section of the domain's server template.
+To enable SPF for a domain, using C<--spf> option, and to turn it off use
+C<--no-spf>. By default, the SPF record will be created using the settings
+from the DNS section of the domain's server template.
 
-To add allowed hostname, MX domains or IP addresses, use the C<--spf-add-a>, C<--spf-add-mx>, C<--spf-add-ip4> and C<--spf-add-ip6> options respectively. Each of
-which must be followed by a single host, domain or IP address.
+To add allowed hostname, MX domains or IP addresses, use the C<--spf-add-a>,
+C<--spf-add-mx>, C<--spf-add-ip4> and C<--spf-add-ip6> options respectively.
+Each of which must be followed by a single host, domain or IP address.
 
 Similarly, the C<--spf-remove-a>, C<--spf-remove-mx>, C<--spf-remove-ip4> and
 C<--spf-remove-ip6> options will remove the following host, domain or IP address
 from the allowed list for the specified domains.
 
-To control how SPF treats senders not in the allowed hosts list, use one of the C<--spf-all-disallow>, C<--spf-all-discourage>, C<--spf-all-neutral>, C<--spf-all-allow> or C<--spf-all-default> parameters.
+To control how SPF treats senders not in the allowed hosts list, use one of
+the C<--spf-all-disallow>, C<--spf-all-discourage>, C<--spf-all-neutral>,
+C<--spf-all-allow> or C<--spf-all-default> parameters.
 
 This command can also be used to add and remove DNS records from all the
 selected domains. Adding is done with the C<--add-record> flag, which must
@@ -40,6 +46,13 @@ they have already been setup in Webmin's BIND DNS Server module. To add a
 specific slave host, use the C<--add-slave> flag followed by a hostname. Or to
 add them all, use the C<--add-all-slaves> flag. To remove a single slave host,
 use the C<--remove-slave> command followed by a hostname.
+
+If your system is on an internal network and made available to the Internet
+via a router doing NAT, the IP address of a domain in DNS may be different
+from it's IP on the actual system. To set this, the C<--dns-ip> flag can
+be given, followed by the external IP address to use. To revert to using the
+real IP in DNS, use C<--no-dns-ip> instead. In both cases, the actual
+DNS records managed by Virtualmin will be updated.
 
 =cut
 
@@ -376,6 +389,7 @@ print "                     [--remove-record \"name type [value]\"]\n";
 print "                     [--ttl seconds | --all-ttl seconds]\n";
 print "                     [--add-slave hostname]* | [--add-all-slaves]\n";
 print "                     [--remove-slave hostname]*\n";
+print "                     [--dns-ip address | --no-dns-ip]\n";
 exit(1);
 }
 
