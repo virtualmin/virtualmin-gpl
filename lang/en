@@ -3413,6 +3413,7 @@ newips_sel=Only selected ..
 newips_also=Global settings to update
 newips_masterip=Slave DNS zone master IP address
 newips_slaves=Re-creating slave DNS zones with to change master IP address from $1 to $2 ..
+newips_blank=(Leave empty to not change IP)
 
 newip_title=Change IP Address
 newip_header=New virtual IP address
@@ -5808,6 +5809,9 @@ redirect_dest=Destination
 redirect_url=URL at other website
 redirect_dir=Directory on this system
 redirect_regexp=Include sub-paths in redirect?
+redirect_proto=Enable redirect for
+redirect_http=Non-SSL website
+redirect_https=SSL website
 redirect_err=Failed to save redirect
 redirect_epath=Missing or invalid source URL path
 redirect_epath2=Domain in source URL is not $1

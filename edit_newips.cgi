@@ -17,7 +17,8 @@ print &ui_table_row(&hlink($text{'newips_old'}, "newips_old"),
 
 # New IPv4 address
 print &ui_table_row(&hlink($text{'newips_new'}, "newips_new"),
-		    &ui_textbox("new", $in{'new'}, 20));
+		    &ui_textbox("new", $in{'new'}, 20)." ".
+		    $text{'newips_blank'});
 
 @v6doms = grep { $_->{'ip6'} } &list_domains();
 if (&supports_ip6() && @v6doms) {
@@ -27,7 +28,8 @@ if (&supports_ip6() && @v6doms) {
 
 	# New IPv6 address
 	print &ui_table_row(&hlink($text{'newips_new6'}, "newips_new6"),
-		    &ui_textbox("new6", $in{'new6'}, 40));
+		    &ui_textbox("new6", $in{'new6'}, 40)." ".
+		    $text{'newips_blank'});
 	}
 
 # Virtual servers to update
