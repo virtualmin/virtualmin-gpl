@@ -26,7 +26,14 @@ sub list_redirects
 my ($d) = @_;
 local $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
-        return &plugin_call($p, "feature_list_web_redirects", $d);
+        my @rv = &plugin_call($p, "feature_list_web_redirects", $d);
+	foreach my $r (@rv) {
+		if (!$r->{'http'} && !$r->{'https'}) {
+			# Deal with plugin that doesn't support protocols
+			$r->{'http'} = $r->{'https'} = 1;
+			}
+		}
+	return @rv;
         }
 &require_apache();
 my @ports = ( $d->{'web_port'},
