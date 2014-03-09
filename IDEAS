@@ -34,6 +34,5 @@
 	- CHANGELOG
 	- backup/restore
 
- - SSL and non-SSL vhost redirects
-	- http://virtualmin.com/node/32641
-	- CHANGELOG
+ - Mass change DNS IP
+	- http://virtualmin.com/node/32652

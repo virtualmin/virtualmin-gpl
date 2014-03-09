@@ -64,6 +64,8 @@ else {
 		$r->{'alias'} = 1;
 		}
 	$r->{'regexp'} = $in{'regexp'};
+	$r->{'http'} = $in{'http'};
+	$r->{'https'} = $in{'https'};
 
 	# Create or update
 	if ($in{'new'}) {

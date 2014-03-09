@@ -11,6 +11,9 @@ if (!$in{'new'}) {
 	($r) = grep { $_->{'path'} eq $in{'path'} } &list_redirects($d);
 	$r || &error($text{'redirect_egone'});
 	}
+else {
+	$r = { 'http' => 1, 'https' => 1 };
+	}
 
 &ui_print_header(&domain_in($d), $in{'new'} ? $text{'redirect_create'}
 					    : $text{'redirect_edit'}, "");
@@ -37,6 +40,18 @@ print &ui_table_row(&hlink($text{'redirect_dest'}, 'redirect_dest'),
 # Include sub-paths
 print &ui_table_row(&hlink($text{'redirect_regexp'}, 'redirect_regexp'),
 	&ui_yesno_radio("regexp", $r->{'regexp'}));
+
+# Protocols to include
+if ($d->{'ssl'}) {
+	print &ui_table_row(&hlink($text{'redirect_proto'}, 'redirect_proto'),
+		&ui_checkbox("http", 1, $text{'redirect_http'}, $r->{'http'}).
+		" ".
+		&ui_checkbox("https", 1, $text{'redirect_https'}, $r->{'https'})
+		);
+	}
+else {
+	print &ui_hidden("http", 1);
+	}
 
 print &ui_table_end();
 print &ui_form_end(
