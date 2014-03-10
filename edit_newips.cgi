@@ -6,6 +6,9 @@ require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newips_ecannot'});
 &ui_print_header(undef, $text{'newips_title'}, "", "newips");
 
+@v6doms = grep { $_->{'ip6'} } &list_domains();
+$anyv6 = &supports_ip6() && @v6doms;
+
 print "$text{'newips_desc'}<p>\n";
 print &ui_form_start("save_newips.cgi", "post");
 print &ui_hidden("setold", $in{'setold'});
@@ -17,19 +20,19 @@ print &ui_table_row(&hlink($text{'newips_old'}, "newips_old"),
 
 # New IPv4 address
 print &ui_table_row(&hlink($text{'newips_new'}, "newips_new"),
-		    &ui_textbox("new", $in{'new'}, 20)." ".
-		    $text{'newips_blank'});
+		    $anyv6 ? &ui_opt_textbox("new", $in{'new'}, 20,
+				   	     $text{'newips_leave'})
+			   : &ui_textbox("new", $in{'new'}, 20));
 
-@v6doms = grep { $_->{'ip6'} } &list_domains();
-if (&supports_ip6() && @v6doms) {
+if ($anyv6) {
 	# Old IPv6 address
 	print &ui_table_row(&hlink($text{'newips_old6'}, "newips_old6"),
 		    &ui_textbox("old6", $in{'old6'} || &get_default_ip6(), 40));
 
 	# New IPv6 address
 	print &ui_table_row(&hlink($text{'newips_new6'}, "newips_new6"),
-		    &ui_textbox("new6", $in{'new6'}, 40)." ".
-		    $text{'newips_blank'});
+		    &ui_opt_textbox("new6", $in{'new6'}, 40,
+				    $text{'newips_leave'}));
 	}
 
 # Virtual servers to update

@@ -3413,7 +3413,8 @@ newips_sel=Only selected ..
 newips_also=Global settings to update
 newips_masterip=Slave DNS zone master IP address
 newips_slaves=Re-creating slave DNS zones with to change master IP address from $1 to $2 ..
-newips_blank=(Leave empty to not change IP)
+newips_leave=Don't change
+newips_enothing=Neither the IPv4 or v6 addresses are being changed
 
 newip_title=Change IP Address
 newip_header=New virtual IP address

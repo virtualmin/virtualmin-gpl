@@ -8,10 +8,14 @@ require './virtual-server-lib.pl';
 # Validate inputs
 &error_setup($text{'newips_err'});
 &check_ipaddress($in{'old'}) || &error($text{'newips_eold'});
-&check_ipaddress($in{'new'}) || &error($text{'newips_enew'});
+$in{'new_def'} || &check_ipaddress($in{'new'}) || &error($text{'newips_enew'});
 if (defined($in{'old6'})) {
 	&check_ip6address($in{'old6'}) || &error($text{'newips6_eold'});
-	&check_ip6address($in{'new6'}) || &error($text{'newips6_enew'});
+	$in{'new6_def'} || &check_ip6address($in{'new6'}) ||
+		&error($text{'newips6_enew'});
+	}
+if ($in{'new_def'} && (!defined($in{'old6'}) || $in{'new6_def'})) {
+	&error($text{'newips_enothing'});
 	}
 
 &ui_print_unbuffered_header(undef, $text{'newips_title'}, "");
@@ -36,16 +40,18 @@ foreach $d (@doms) {
 	# the old IP are also updated
 	$oldd = { %$d };
 	$changed = 0;
-	if ($d->{'ip'} eq $in{'old'} ||
-	    $d->{'alias'} &&
-	    &get_domain($d->{'alias'})->{'ip'} eq $in{'old'}) {
+	if (!$in{'new_def'} &&
+	    ($d->{'ip'} eq $in{'old'} ||
+	     $d->{'alias'} &&
+	     &get_domain($d->{'alias'})->{'ip'} eq $in{'old'})) {
 		$d->{'ip'} = $in{'new'};
 		$changed++;
 		}
 	if ($in{'old6'}) {
-		if ($d->{'ip6'} eq $in{'old6'} ||
-		    $d->{'alias'} &&
-		    &get_domain($d->{'alias'})->{'ip6'} eq $in{'old6'}) {
+		if (!$in{'new6_def'} &&
+		    ($d->{'ip6'} eq $in{'old6'} ||
+		     $d->{'alias'} &&
+		     &get_domain($d->{'alias'})->{'ip6'} eq $in{'old6'})) {
 			$d->{'ip6'} = $in{'new6'};
 			$changed++;
 			}
@@ -103,7 +109,7 @@ if ($in{'masterip'}) {
 	$oldmasterip = $bconfig{'this_ip'} ||
 		       &to_ipaddress(&get_system_hostname());
 	@bdoms = grep { $_->{'dns'} && $_->{'dns_slave'} ne '' } @doms;
-	if ($oldmasterip eq $in{'old'} && @bdoms) {
+	if ($oldmasterip eq $in{'old'} && @bdoms && !$in{'new_def'}) {
 		&$first_print(&text('newips_slaves', $in{'old'}, $in{'new'}));
 		if ($bconfig{'this_ip'} eq $in{'old'}) {
 			$bconfig{'this_ip'} = $in{'new'};
@@ -121,7 +127,10 @@ if ($in{'masterip'}) {
 	}
 
 &run_post_actions();
-&webmin_log("newips", "domains", scalar(@doms), { 'old' => $in{'old'},
-					          'new' => $in{'new'} });
+&webmin_log("newips", "domains", scalar(@doms),
+	    { 'old' => $in{'old'},
+	      'new' => $in{'new_def'} ? "" : $in{'new'},
+	      'old6' => $in{'old6'},
+	      'new6' => $in{'new6_def'} ? "" : $in{'new6'} });
 
 &ui_print_footer("", $text{'index_return'});
