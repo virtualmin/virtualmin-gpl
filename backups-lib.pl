@@ -364,7 +364,7 @@ foreach my $desturl (@$desturls) {
 				# Try scping an empty dir
 				local $empty = &transname($pathfile);
 				local $mkdirerr;
-				&make_dir($empty, 0755);
+				&make_dir($empty, 0700);
 				local $r = ($user ? "$user\@" : "").
 					   "$server:$pathdir";
 				&scp_copy($empty, $r, $pass, \$mkdirerr, $port);
@@ -414,7 +414,7 @@ foreach my $desturl (@$desturls) {
 			# Looking for a directory
 			if ($mkdir) {
 				local $derr = &make_backup_dir(
-						$desturl, 0755, 1, $asd)
+						$desturl, 0700, 1, $asd)
 					if (!-d $desturl);
 				if ($derr) {
 					&$first_print(&text('backup_emkdir',
@@ -439,7 +439,7 @@ foreach my $desturl (@$desturls) {
 			$dirdest =~ s/\/[^\/]+$//;
 			if ($dirdest && !-d $dirdest) {
 				local $derr = &make_backup_dir(
-						$dirdest, 0755, 0, $asd);
+						$dirdest, 0700, 0, $asd);
 				if ($derr) {
 					&$first_print(&text('backup_emkdir',
 						   "<tt>$dirdest</tt>", $derr));
