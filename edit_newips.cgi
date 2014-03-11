@@ -14,6 +14,11 @@ print &ui_form_start("save_newips.cgi", "post");
 print &ui_hidden("setold", $in{'setold'});
 print &ui_table_start($text{'newips_header'}, undef, 2);
 
+# Changing real or external IP?
+print &ui_table_row(&hlink($text{'newips_mode'}, "newips_mode"),
+		    &ui_radio("mode", 0, [ [ 0, $text{'newips_mode0'} ],
+					   [ 1, $text{'newips_mode1'} ] ]));
+
 # Old IPv4 address
 print &ui_table_row(&hlink($text{'newips_old'}, "newips_old"),
 		    &ui_textbox("old", $in{'old'} || &get_default_ip(), 20));

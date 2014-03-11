@@ -3415,6 +3415,9 @@ newips_masterip=Slave DNS zone master IP address
 newips_slaves=Re-creating slave DNS zones with to change master IP address from $1 to $2 ..
 newips_leave=Don't change
 newips_enothing=Neither the IPv4 or v6 addresses are being changed
+newips_mode=Address type to change
+newips_mode0=Real address
+newips_mode1=External address used in DNS records
 
 newip_title=Change IP Address
 newip_header=New virtual IP address
