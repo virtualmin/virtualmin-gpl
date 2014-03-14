@@ -7332,7 +7332,8 @@ if ($aliasname && $aliasname ne $dom->{'dom'}) {
 # Install any scripts specified in the template
 local @scripts = &get_template_scripts($tmpl);
 if (@scripts && !$dom->{'alias'} && !$noscripts &&
-    $dom->{'web'} && $dom->{'dir'} && !$dom->{'nocreationscripts'}) {
+    &domain_has_website($dom) && $dom->{'dir'} &&
+    !$dom->{'nocreationscripts'}) {
 	&$first_print($text{'setup_scripts'});
 	&$indent_print();
 	foreach my $sinfo (@scripts) {
