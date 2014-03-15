@@ -12110,12 +12110,20 @@ if ($d->{'parent'}) {
 	}
 
 # Update the domain object with new home directory and parent details
-local (@doms, @olddoms);
+local (@doms, @olddoms, @remove_feats);
 &set_parent_attributes($d, $parent);
 &change_home_directory($d, &server_home_directory($d, $parent));
 if ($d->{'alias'}) {
 	# Set new alias target to new parent
 	$d->{'alias'} = $parent->{'id'};
+
+	# Clear any alias features that the new domain doesn't have
+	foreach my $f (@alias_features) {
+		if ($d->{$f} && !$parent->{$f}) {
+			$d->{$f} = 0;
+			push(@remove_feats, $f);
+			}
+		}
 	}
 push(@doms, $d);
 push(@olddoms, $oldd);
@@ -12163,6 +12171,20 @@ local $merr = &making_changes();
 &error(&text('rename_emaking', "<tt>$merr</tt>")) if (defined($merr));
 &setup_for_subdomain($parent);
 
+# If this is an alias domain, first delete features that don't exist in
+# the target
+foreach my $f (@remove_feats) {
+	my $dfunc = "delete_".$f;
+	local $main::error_must_die = 1;
+	eval {
+		&$dfunc($oldd);
+		};
+	if ($@) {
+		&$second_print(&text('setup_failure',
+			$text{'feature_'.$f}, "$@"));
+		}
+	}
+
 # Setup print function to include domain name
 sub first_html_withdom_move
 {
@@ -12176,12 +12198,11 @@ if (@doms > 1) {
 	}
 
 # Update all features in all domains
-my $f;
 local %vital = map { $_, 1 } @vital_features;
-foreach $f (@features) {
+foreach my $f (@features) {
 	local $mfunc = "modify_$f";
 	for(my $i=0; $i<@doms; $i++) {
-		if (($doms[$i]->{$f} || $f eq 'mail') &&
+		if (($doms[$i]->{$f} || ($f eq 'mail' && !$d->{'alias'})) &&
 		    ($config{$f} || $f eq "unix" || $f eq "mail")) {
 			$doing_dom = $doms[$i];
 			local $main::error_must_die = 1;
@@ -12228,7 +12249,7 @@ foreach $f (@features) {
 	}
 
 # Do move for plugins, with error handling
-foreach $f (&list_feature_plugins()) {
+foreach my $f (&list_feature_plugins()) {
 	for(my $i=0; $i<@doms; $i++) {
 		if ($doms[$i]->{$f}) {
 			$doing_dom = $doms[$i];
