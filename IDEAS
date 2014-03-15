@@ -34,5 +34,9 @@
 	- CHANGELOG
 	- backup/restore
 
- - Mass change DNS IP
-	- http://virtualmin.com/node/32652
+ - Move alias to another target domain
+	- http://virtualmin.com/node/32673
+	- CHANGELOG
+	- test?
+
+ - Update screenshot on webmin.com

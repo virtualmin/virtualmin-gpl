@@ -753,6 +753,14 @@ if ($wasalias && !$isalias) {
 	return 1;
 	}
 
+# Second special case - changing of alias target
+if ($_[0]->{'alias'} && $_[1]->{'alias'} &&
+    $_[0]->{'alias'} != $_[1]->{'alias'}) {
+	&delete_mail($_[1]);
+	&setup_mail($_[0]);
+	return 1;
+	}
+
 # Need to update the home directory of all mail users .. but only
 # in the Unix object, as their files will have already been moved
 # as part of the domain's directory.

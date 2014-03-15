@@ -572,6 +572,13 @@ if (!$_[0]->{'subdom'} && $_[1]->{'subdom'} && $_[0]->{'dns_submode'} ||
 	&setup_dns($_[0]);
 	return 1;
 	}
+if ($_[0]->{'alias'} && $_[1]->{'alias'} &&
+    $_[0]->{'alias'} != $_[1]->{'alias'}) {
+	# Alias target changed
+	&delete_dns($_[1]);
+	&setup_dns($_[0]);
+	return 1;
+	}
 
 &require_bind();
 local $tmpl = &get_template($_[0]->{'template'});

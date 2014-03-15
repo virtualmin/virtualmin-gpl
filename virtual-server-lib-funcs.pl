@@ -12113,6 +12113,10 @@ if ($d->{'parent'}) {
 local (@doms, @olddoms);
 &set_parent_attributes($d, $parent);
 &change_home_directory($d, &server_home_directory($d, $parent));
+if ($d->{'alias'}) {
+	# Set new alias target to new parent
+	$d->{'alias'} = $parent->{'id'};
+	}
 push(@doms, $d);
 push(@olddoms, $oldd);
 
@@ -12289,6 +12293,11 @@ if ($oldparent) {
 if (defined(&supports_resource_limits) && &supports_resource_limits()) {
 	local $rv = &get_domain_resource_limits($parent);
 	&save_domain_resource_limits($parent, $rv);
+	}
+
+# If the domain was an alias, re-copy any mail aliases
+if ($d->{'alias'} && $d->{'mail'} && $parent->{'mail'}) {
+	&sync_alias_virtuals($parent);
 	}
 
 &run_post_actions();
