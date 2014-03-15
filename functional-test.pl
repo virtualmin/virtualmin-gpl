@@ -1590,6 +1590,68 @@ $move_tests = [
 	  'cleanup' => 1 },
 	];
 
+# Move alias domain tests
+$movealias_tests = [
+	# Create a parent domain
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
+		      [ 'mysql' ], [ 'logrotate' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test old home page' ],
+		      @create_args, ],
+        },
+
+	# Create an alias of it
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'alias', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test alias-domain' ],
+		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      @create_args, ],
+	},
+
+	# Create a domain to be the target
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'desc', 'Test target domain' ],
+		      [ 'pass', 'spod' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test new home page' ],
+		      @create_args, ],
+        },
+
+	# Test HTTP get to the alias
+	{ 'command' => $wget_command.'http://'.$test_subdomain,
+	  'grep' => 'Test old home page',
+	},
+
+	# Move to the new target
+	{ 'command' => 'move-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_target_domain ] ],
+	},
+
+	# Test HTTP get to the alias again
+	{ 'command' => $wget_command.'http://'.$test_subdomain,
+	  'grep' => 'Test new home page',
+	},
+
+	# Cleanup the original parent domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+
+	# Cleanup the new target domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 # Alias domain tests
 $aliasdom_tests = [
 	# Create a domain to be the alias target
@@ -7065,6 +7127,7 @@ $alltests = { '_config' => $_config_tests,
 	      'proxy' => $proxy_tests,
 	      'migrate' => $migrate_tests,
 	      'move' => $move_tests,
+	      'movealias' => $movealias_tests,
 	      'backup' => $backup_tests,
 	      'dbbackup' => $dbbackup_tests,
 	      'enc_backup' => $enc_backup_tests,
