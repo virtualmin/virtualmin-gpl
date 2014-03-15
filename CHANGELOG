@@ -1441,3 +1441,4 @@ Updated the Node.js script installer to version 0.10.26, Pydio to 5.2.2, Zikula 
 Added Norwegian translation updates, thanks to Stein-Aksel Basma.
 Aliases and redirects can now be separately enabled for the SSL and non-SSL websites of a virtual server.
 The Change IP Addresses	page can now be used to update the external DNS address of multiple virtual servers, as well as the actual address.
+Alias servers can now be re-pointed to a different target, using the Move Virtual Server page or the move-domain API command.

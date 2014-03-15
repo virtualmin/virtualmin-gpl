@@ -35,9 +35,6 @@
 	- backup/restore
 
  - Move alias to another target domain
-	- http://virtualmin.com/node/32673
-	- CHANGELOG
 	- test?
-	- allow move under same top-level doamin in UI
 
  - Update screenshot on webmin.com

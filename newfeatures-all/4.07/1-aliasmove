@@ -1,0 +1,6 @@
+desc=Move alias servers
+html=Alias servers can now be re-pointed to a different target, using the Move Virtual Server page or the move-domain API command.
+link=move_form.cgi?dom=${ID}
+master=1
+reseller=1
+owner=1

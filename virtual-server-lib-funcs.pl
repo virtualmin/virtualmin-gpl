@@ -11203,7 +11203,7 @@ if (&can_rename_domains()) {
 		  });
 	}
 
-if (&can_move_domain($d) && !$d->{'alias'} && !$d->{'subdom'}) {
+if (&can_move_domain($d) && !$d->{'subdom'}) {
 	# Move sub-server to different owner, or turn parent into sub
 	push(@rv, { 'page' => 'move_form.cgi',
 		    'title' => $text{'edit_move'},
@@ -12268,7 +12268,7 @@ foreach my $f (&list_feature_plugins()) {
 $first_print = $old_first_print if ($old_first_print);
 
 # Fix script installer paths in all domains
-if (defined(&list_domain_scripts)) {
+if (defined(&list_domain_scripts) && !$d->{'alias'}) {
 	&$first_print($text{'rename_scripts'});
 	for(my $i=0; $i<@doms; $i++) {
 		local ($olddir, $newdir) =
