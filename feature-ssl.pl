@@ -244,11 +244,21 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
 		&$second_print($text{'delete_noapache'});
 		goto VIRTFAILED;
 		}
+	local $nvstar = &add_name_virtual($_[0], $conf,
+					  $_[0]->{'web_sslport'}, 0,
+					  $_[0]->{'ip'});
+	local $nvstar6;
+	if ($_[0]->{'ip6'}) {
+		$nvstar6 = &add_name_virtual(
+			$_[0], $conf, $_[0]->{'web_sslport'}, 0,
+			"[".$_[0]->{'ip6'}."]");
+		}
 	&add_listen($_[0], $conf, $_[0]->{'web_sslport'});
 	local $lref = &read_file_lines($virt->{'file'});
 	$lref->[$virt->{'line'}] =
 		"<VirtualHost ".
-		&get_apache_vhost_ips($_[0], 0, 0, $_[0]->{'web_sslport'}).">";
+		&get_apache_vhost_ips($_[0], $nvstar, $nvstar6,
+				      $_[0]->{'web_sslport'}).">";
 	&flush_file_lines();
 	$rv++;
 	undef(@apache::get_config_cache);
