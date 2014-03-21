@@ -52,7 +52,7 @@ if (&mail_system_needs_group() || $_[0]->{'gid'} == $_[0]->{'ugid'}) {
 		&foreign_call($usermodule, "made_changes");
 		};
 	my $err = $@;
-	if ($err || !defined(getgrnam($_[0]->{'group'}))) {
+	if ($err || !&wait_for_group_to_exist($_[0]->{'group'})) {
 		&delete_partial_group(\%ginfo);
 		&$second_print($err ? &text('setup_ecrgroup2', $err)
 				    : $text{'setup_ecrgroup'});
@@ -106,7 +106,7 @@ eval {
 		}
 	};
 my $err = $@;
-if ($err || !defined(getpwnam($_[0]->{'user'}))) {
+if ($err || !&wait_for_user_to_exist($_[0]->{'user'})) {
 	&delete_partial_group(\%ginfo) if (%ginfo);
 	&delete_partial_user(\%uinfo);
 	&$second_print($err ? &text('setup_ecruser2', $err)
@@ -1037,6 +1037,30 @@ eval {
 		&foreign_call($uinfo->{'module'}, "made_changes");
 		}
 	};
+}
+
+# wait_for_group_to_exist(group)
+# Wait 10 seconds for a new group to become visible
+sub wait_for_group_to_exist
+{
+my ($g) = @_;
+for(my $i=0; $i<10; $i++) {
+	return 1 if (defined(getgrnam($g)));
+	sleep(1);
+	}
+return 0;
+}
+
+# wait_for_user_to_exist(user)
+# Wait 10 seconds for a new user to become visible
+sub wait_for_user_to_exist
+{
+my ($u) = @_;
+for(my $i=0; $i<10; $i++) {
+	return 1 if (defined(getpwnam($u)));
+	sleep(1);
+	}
+return 0;
 }
 
 # Lock all Unix password files
