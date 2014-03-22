@@ -66,9 +66,9 @@ if (&has_home_quotas() && !$parentdom) {
 
 # IP-related options
 if (!$aliasdom) {
-	if ($d->{'reseller'}) {
-		$resel = &get_reseller($d->{'reseller'});
-		if ($resel) {
+	foreach $r (split(/\s+/, $d->{'reseller'})) {
+		$resel = &get_reseller($r);
+		if ($resel && $resel->{'acl'}->{'defip'}) {
 			$reselip = $resel->{'acl'}->{'defip'};
 			$reselip6 = $resel->{'acl'}->{'defip6'};
 			}

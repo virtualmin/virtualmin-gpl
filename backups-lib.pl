@@ -3383,7 +3383,7 @@ elsif (&reseller_admin()) {
 	if ($sched) {
 		return 0 if (!$sched->{'owner'});       # Master admin's backup
 		return 1 if ($sched->{'owner'} eq $base_remote_user);
-		foreach my $d (&get_domain_by("reseller", $base_remote_user)) {
+		foreach my $d (&get_reseller_domains($base_remote_user)) {
 			return 1 if ($d->{'id'} eq $sched->{'owner'});
 			}
 		return 0;

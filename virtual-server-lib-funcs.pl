@@ -3500,7 +3500,7 @@ sub max_username_length
 return $uconfig{'max_length'};
 }
 
-# get_default_ip([reseller])
+# get_default_ip([reseller-list])
 # Returns this system's primary IP address. If a reseller is given and he
 # has a custom IP, use that.
 sub get_default_ip
@@ -3508,9 +3508,11 @@ sub get_default_ip
 local ($reselname) = @_;
 if ($reselname && defined(&get_reseller)) {
 	# Check if the reseller has an IP
-	local $resel = &get_reseller($reselname);
-	if ($resel && $resel->{'acl'}->{'defip'}) {
-		return $resel->{'acl'}->{'defip'};
+	foreach my $r (split(/\s+/, $reselname)) {
+		local $resel = &get_reseller($r);
+		if ($resel && $resel->{'acl'}->{'defip'}) {
+			return $resel->{'acl'}->{'defip'};
+			}
 		}
 	}
 if ($config{'defip'}) {
@@ -3846,9 +3848,10 @@ if ($d->{'alias'}) {
 	delete($hash{'alias_domain_'});
 	}
 
-# Add reseller details
+# Add (first) reseller details
 if ($d->{'reseller'} && defined(&get_reseller)) {
-	local $resel = &get_reseller($d->{'reseller'});
+	my @r = split(/\s+/, $d->{'reseller'});
+	local $resel = &get_reseller($r[0]);
 	local $acl = $resel->{'acl'};
 	$hash{'reseller_name'} = $resel->{'name'};
 	$hash{'reseller_theme'} = $resel->{'theme'};
@@ -4005,9 +4008,11 @@ push(@ccs, $config{'new'.$tmode.'_cc'}) if ($config{'new'.$tmode.'_cc'});
 push(@ccs, $d->{'emailto'}) if ($config{'new'.$tmode.'_to_owner'});
 if ($config{'new'.$tmode.'_to_reseller'} && $d->{'reseller'} &&
     defined(&get_reseller)) {
-	local $resel = &get_reseller($d->{'reseller'});
-	if ($resel && $resel->{'acl'}->{'email'}) {
-		push(@ccs, $resel->{'acl'}->{'email'});
+	foreach my $r (split(/\s+/, $d->{'reseller'})) {
+		local $resel = &get_reseller($r);
+		if ($resel && $resel->{'acl'}->{'email'}) {
+			push(@ccs, $resel->{'acl'}->{'email'});
+			}
 		}
 	}
 local $cc = join(",", @ccs);
@@ -4253,7 +4258,9 @@ local ($d) = @_;
 &foreign_require("mailboxes", "mailboxes-lib.pl");
 local $rv = $config{'from_addr'} || &mailboxes::get_from_address();
 if ($d && $d->{'reseller'} && defined(&get_reseller)) {
-	local $resel = &get_reseller($d->{'reseller'});
+	# From first reseller
+	my @r = split(/\s+/, $d->{'reseller'});
+	local $resel = &get_reseller($r[0]);
 	if ($resel && $resel->{'acl'}->{'email'}) {
 		$rv = $resel->{'acl'}->{'email'};
 		}
@@ -4409,10 +4416,11 @@ if ($oldd) {
 local $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
 local $alias = $d->{'alias'} ? &get_domain($d->{'alias'}) : undef;
 if (defined(&get_reseller)) {
-	# Set reseller details, if we have one
-	local $resel = $d->{'reseller'} ? &get_reseller($d->{'reseller'}) :
-		       $parent && $parent->{'reseller'} ?
-			   &get_reseller($parent->{'reseller'}) : undef;
+	# Set (first) reseller details, if we have one
+	local $rd = $d->{'reseller'} ? $d :
+		    $parent && $parent->{'reseller'} ? $parent : undef;
+	local ($r) = $rd ? split(/\s+/, $rd->{'reseller'}) : undef;
+	local $resel = $r ? &get_reseller($r) : undef;
 	if ($resel) {
 		local $acl = $resel->{'acl'};
 		$ENV{'RESELLER_NAME'} = $resel->{'name'};
@@ -6736,7 +6744,7 @@ if (!$access{'reseller'}) {
 			$usermax = $parent->{'domslimit'};
 			}
 		}
-	$reseller = $parent->{'reseller'};
+	($reseller) = split(/\s+/, $parent->{'reseller'});
 	}
 else {
 	$reseller = $user;
@@ -6744,7 +6752,7 @@ else {
 
 if ($reseller) {
 	# Either this user is owned by a reseller, or he is a reseller.
-	local @rdoms = &get_domain_by("reseller", $reseller);
+	local @rdoms = &get_reseller_domains($reseller);
 	local %racl = &get_reseller_acl($reseller);
 	local $reason = $access{'reseller'} ? 2 : 1;
 	local $hide = $base_remote_user ne $reseller && $racl{'hide'};
@@ -15058,10 +15066,13 @@ if (!$d) {
 	}
 if ($d && $d->{'reseller'} && defined(&get_reseller)) {
 	# Domain has a reseller .. check for his logo
-	local $resel = &get_reseller($d->{'reseller'});
-	if ($resel->{'acl'}->{'logo'}) {
-		$logo = $resel->{'acl'}->{'logo'};
-		$link = $resel->{'acl'}->{'link'};
+	foreach my $r (split(/\s+/, $d->{'reseller'})) {
+		local $resel = &get_reseller($r);
+		if ($resel->{'acl'}->{'logo'}) {
+			$logo = $resel->{'acl'}->{'logo'};
+			$link = $resel->{'acl'}->{'link'};
+			last;
+			}
 		}
 	}
 if (!$d && &reseller_admin()) {

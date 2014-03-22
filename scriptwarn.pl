@@ -93,13 +93,18 @@ if (@updates) {
 			# Mail it off
 			@emailto = ( );
 			if ($email{'owner'}) {
+				# Add owner email
 				push(@emailto, $d->{'emailto'});
 				}
 			if ($email{'reseller'} && $d->{'reseller'}) {
-				$resel = &get_reseller($d->{'reseller'});
-				if ($resel && $resel->{'acl'}->{'email'}) {
-					push(@emailto,
-					     $resel->{'acl'}->{'email'});
+				# Add emails from all resellers
+				foreach my $r (split(/\s+/, $d->{'reseller'})) {
+					$resel = &get_reseller($r);
+					if ($resel &&
+					    $resel->{'acl'}->{'email'}) {
+						push(@emailto,
+						   $resel->{'acl'}->{'email'});
+						}
 					}
 				}
 			if ($other) {
