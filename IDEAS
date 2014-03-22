@@ -33,3 +33,12 @@
 	- https://www.virtualmin.com/node/18405
 	- CHANGELOG
 	- backup/restore
+
+ - Multiple resellers own a domain
+	- UI
+	- API
+	- CHANGELOG
+	- All references to reseller field
+	- reseller rename
+	- resellers get Unix logins, who are members of all domain groups
+	- http://virtualmin.com/node/32667

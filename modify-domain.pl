@@ -180,6 +180,14 @@ while(@ARGV > 0) {
 		# Changing the reseller
 		$resel = shift(@ARGV);
 		}
+	elsif ($a eq "--add-reseller") {
+		# Adding a reseller
+		push(@add_resel, shift(@ARGV));
+		}
+	elsif ($a eq "--delete-reseller") {
+		# Removing a reseller
+		push(@del_resel, shift(@ARGV));
+		}
 	elsif ($a eq "--prefix") {
 		# Changing the prefix
 		$prefix = shift(@ARGV);
@@ -255,24 +263,27 @@ if ($dom->{'parent'}) {
 	(defined($quota) || defined($uquota)) && &usage("Quotas cannot be changed for a sub-domain");
 	}
 
-# Check for unlimited quota clash with reseller
+# Check for unlimited quota clash with reseller, if quota was changed
 if ($dom->{'reseller'} && defined(&get_reseller)) {
-	$r = &get_reseller($dom->{'reseller'});
-	if (!$dom->{'parent'} &&
-	    defined($quota) && $quota eq "0" &&
-	    $r && $r->{'acl'}->{'max_quota'}) {
-		&usage("The disk quota for this domain cannot be set to ".
-		       "unlimited, as it is owned by reseller ".
-		       "$dom->{'reseller'} who has a quota limit");
-		       
-		}
-	if (!$dom->{'parent'} &&
-	    $bw eq "NONE" &&
-	    $r && $r->{'acl'}->{'max_bw'}) {
-		&usage("The bandwidth for this domain cannot be set to ".
-		       "unlimited, as it is owned by reseller ".
-		       "$dom->{'reseller'} who has a bandwidth limit");
-		       
+	foreach $r (split(/\s+/, $dom->{'reseller'})) {
+		$rinfo = &get_reseller($r);
+		next if (!$rinfo);
+		if (!$dom->{'parent'} &&
+		    defined($quota) && $quota eq "0" &&
+		    $rinfo->{'acl'}->{'max_quota'}) {
+			&usage("The disk quota for this domain cannot be set ".
+			       "to unlimited, as it is owned by reseller ".
+			       "$r who has a quota limit");
+			       
+			}
+		if (!$dom->{'parent'} &&
+		    $bw eq "NONE" &&
+		    $rinfo->{'acl'}->{'max_bw'}) {
+			&usage("The bandwidth for this domain cannot be set ".
+			       "to unlimited, as it is owned by reseller ".
+			       "$r who has a bandwidth limit");
+			       
+			}
 		}
 	}
 
@@ -324,11 +335,12 @@ elsif (!$dom->{'virt6'} && $ip6 eq "allocate") {
 	$ip6 || &usage("Failed to allocate IPv6 address from ranges!");
 	}
 
-if (defined($resel)) {
+if (defined($resel) || @add_resel || @del_resel) {
 	$dom->{'parent'} && &usage("Reseller cannot be set for a sub-server");
-	@resels = &list_resellers();
-	($rinfo) = grep { $_->{'name'} eq $resel } @resels;
-	$resel eq "NONE" || $rinfo || &usage("Reseller $resel not found");
+	foreach $r ($resel ? ($resel) : (), @add_resel, @del_resel) {
+		$rinfo = &get_reseller($r);
+		$r eq "NONE" || $rinfo || &usage("Reseller $r not found");
+		}
 	}
 if (defined($prefix)) {
 	$dom->{'alias'} && &usage("Prefix cannot be changed for alias domains");
@@ -490,26 +502,40 @@ elsif ($noip6) {
 	}
 
 # Apply reseller change
-if (defined($resel)) {
+if ($resel eq "NONE") {
+	# Just clear reseller
+	$dom->{'reseller'} = undef;
+	}
+elsif (defined($resel) || @add_resel || @del_resel) {
 	defined(&get_reseller) || &usage("Resellers are not supported");
-	if ($resel ne "NONE") {
-		$r = &get_reseller($resel);
-		$r || &usage("Reseller $resel does not exist");
+
+	# Make sure resellers are compatible with quota
+	foreach $r ($resel ? ($resel) : (), @add_resel) {
+		$rinfo = &get_reseller($r);
 		if (($dom->{'quota'} eq '' || $dom->{'quota'} eq '0') &&
-		    $r->{'acl'}->{'max_quota'}) {
+		    $rinfo->{'acl'}->{'max_quota'}) {
 			&usage("This domain has unlimited disk quota, and so ".
-			       "cannot be assigned to reseller $resel who has ".
+			       "cannot be assigned to reseller $r who has ".
 			       "a quota limit");
 			}
 		if (($dom->{'bw_limit'} eq '' || $dom->{'bw_limit'} eq '0') &&
-		    $r->{'acl'}->{'max_bw'}) {
+		    $rinfo->{'acl'}->{'max_bw'}) {
 			&usage("This domain has unlimited bandwidth, and so ".
-			       "cannot be assigned to reseller $resel who has ".
+			       "cannot be assigned to reseller $r who has ".
 			       "a bandwidth limit");
 			}
 		}
-	$dom->{'reseller'} = $resel eq "NONE" ? undef : $resel;
+
+	# Apply changes
+	my @r = split(/\s+/, $dom->{'reseller'});
+	if ($resel) {
+		@r = ( $resel );
+		}
+	push(@r, @add_resel);
+	@r = grep { &indexof($_, @del_resel) < 0 } @r;
+	$dom->{'reseller'} = join(" ", &unique(@r));
 	}
+
 if (defined($dns_ip)) {
 	if ($dns_ip) {
 		# Changing IP address for DNS
@@ -732,7 +758,9 @@ print "                        [--bw bytes|NONE]\n";
 if ($config{'bw_disable'}) {
 	print "                        [--bw-disable|--bw-no-disable]\n";
 	}
-print "                        [--resel reseller|NONE]\n";
+print "                        [--reseller reseller|NONE]\n";
+print "                        [--add-reseller reseller]*\n";
+print "                        [--delele-reseller reseller]*\n";
 print "                        [--ip address] | [--allocate-ip] |\n";
 print "                        [--default-ip | --shared-ip address]\n";
 if (&supports_ip6()) {

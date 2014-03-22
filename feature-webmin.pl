@@ -930,10 +930,11 @@ if ($wd->{'webmin'}) {
 	&modify_webmin($wd, $wd);
 	}
 if ($wd->{'reseller'} && $virtualmin_pro) {
-	local @resels = &list_resellers();
-	local ($r) = grep { $_->{'name'} eq $d->{'reseller'} } @resels;
-	if ($r) {
-		&modify_reseller($r, $r);
+	foreach my $r (split(/\s+/, $wd->{'reseller'})) {
+		my $rinfo = &get_reseller($r);
+		if ($rinfo) {
+			&modify_reseller($rinfo, $rinfo);
+			}
 		}
 	}
 }

@@ -2687,7 +2687,8 @@ if ($access{'reseller'}) {
 		return &can_edit_domain(&get_domain($_[0]->{'parent'}));
 		}
 	else {
-		return $_[0]->{'reseller'} eq $base_remote_user;
+		return &indexof($base_remote_user, 
+				split(/\s+/, $_[0]->{'reseller'})) >= 0;
 		}
 	}
 else {
