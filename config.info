@@ -81,6 +81,7 @@ sni_support=Allow multiple SSL websites on the same IP?,1,1-Yes,0-No
 line6.5=Reseller settings,11
 reseller_theme=Theme for new resellers,15,theme,reseller_theme
 reseller_modules=Additional modules for resellers,15,modules,reseller_modules
+reseller_unix=Create Unix user for new resellers?,1,1-Yes,0-No
 
 line4=Actions upon server and user creation,11
 from_addr=From: address for email sent by Virtualmin,3,Webmin default

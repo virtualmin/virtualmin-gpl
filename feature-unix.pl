@@ -79,8 +79,7 @@ if ($shell eq 'none' || !$shell) {
 	   'uid', $_[0]->{'uid'},
 	   'gid', $_[0]->{'ugid'},
 	   'pass', $_[0]->{'enc_pass'} ||
-		   &foreign_call($usermodule, "encrypt_password",
-				 $_[0]->{'pass'}),
+		   &useradmin::encrypt_password($_[0]->{'pass'}),
 	   'real', $_[0]->{'owner'},
 	   'home', $_[0]->{'home'},
 	   'shell', $shell,

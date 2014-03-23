@@ -91,7 +91,7 @@ foreach my $fname (@features, "virt", "virt6") {
 		       "mysql", "postgres");
 @bandwidth_features = ( @features, "backup", "restore" );
 @config_features = grep { $config{$_} } @features;
-@banned_usernames = ( 'root' );
+@banned_usernames = ( 'root', 'resellers' );
 
 $backup_cron_cmd = "$module_config_directory/backup.pl";
 $bw_cron_cmd = "$module_config_directory/bw.pl";
@@ -141,6 +141,8 @@ $styles_unavail_file = "$module_config_directory/stylesunavail";
 @plan_restrictions = ('nodbname', 'norename', 'forceunder', 'safeunder');
 
 @reseller_modules = ("webminlog", "mailboxes", "bind8", "syslog");
+
+$reseller_group_name = "resellers";
 
 @all_template_files = ( "domain-template", "subdomain-template",
 			"user-template", "local-template", "bw-template",
