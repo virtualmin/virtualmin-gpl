@@ -1026,10 +1026,13 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		# Get nameservers from reseller, if any
 		my @reselns;
 		if ($d->{'reseller'} && defined(&get_reseller)) {
-			my $resel = &get_reseller($d->{'reseller'});
-			if ($resel->{'acl'}->{'defns'}) {
-				@reselns = split(/\s+/,
-					$resel->{'acl'}->{'defns'});
+			foreach my $r (split(/\s+/, $d->{'reseller'})) {
+				my $resel = &get_reseller($r);
+				if ($resel->{'acl'}->{'defns'}) {
+					@reselns = split(/\s+/,
+						$resel->{'acl'}->{'defns'});
+					last;
+					}
 				}
 			}
 

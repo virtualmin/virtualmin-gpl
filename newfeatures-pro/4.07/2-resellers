@@ -1,0 +1,4 @@
+desc=Multiple resellers per domain
+html=A single virtual server can now be owned by multiple resellers, each of whom has permissions to manage it. This can be useful if reseller accounts are used as an additional layer of administrative control in Virtualmin.
+link=list_resellers.cgi
+master=1

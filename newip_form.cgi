@@ -29,6 +29,10 @@ if ($d->{'virt'}) {
 			    "<tt>$d->{'iface'}</tt>");
 	}
 
+# Get reseller IP ranges
+@r = split(/\s+/, $d->{'reseller'});
+%racl = @r ? &get_reseller_acl($r[0]) : ();
+
 if ($config{'all_namevirtual'} && &can_use_feature("virt")) {
 	# Always name-based, but IP can be changed
 	print &ui_table_row($text{'newips_new'},
@@ -54,7 +58,6 @@ elsif (&can_use_feature("virt")) {
 	# Build options for new IP field
 	@opts = ( [ 0, $text{'newip_sharedaddr'},
 		    &ui_select("ip", $d->{'ip'}, \@canips) ] );
-	%racl = $d->{'reseller'} ? &get_reseller_acl($d->{'reseller'}) : ();
 	if ($d->{'virt'}) {
 		# Already got a private IP, show option to keep
 		push(@opts, [ 1, $text{'newip_virtaddr'} ] );
@@ -102,7 +105,6 @@ if (&supports_ip6() && &can_use_feature("virt6")) {
 	@opts = ( [ -1, $text{'edit_virt6off'} ],
 		  [ 0, $text{'newip_sharedaddr'},
 		    &ui_select("ip6", $d->{'ip6'}, \@canips) ] );
-	%racl = $d->{'reseller'} ? &get_reseller_acl($d->{'reseller'}) : ();
 	if ($d->{'virt6'}) {
 		# Already got a private IP, show option to keep
 		push(@opts, [ 1, $text{'newip_virtaddr'} ] );

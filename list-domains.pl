@@ -180,7 +180,8 @@ if ($must_tmpl) {
 
 # Limit by reseller
 if ($resel) {
-	@doms = grep { $_->{'reseller'} eq $resel } @doms;
+	@doms = grep { &indexof($resel, split(/\s+/, $_->{'reseller'})) >= 0 }
+		     @doms;
 	}
 elsif ($no_resel) {
 	@doms = grep { !$_->{'reseller'} } @doms;

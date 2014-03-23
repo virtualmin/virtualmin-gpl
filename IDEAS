@@ -36,7 +36,5 @@
 
  - Multiple resellers own a domain
 	- CHANGELOG
-	- All references to 'reseller' and "reseller" fields
-	- reseller rename
 	- resellers get Unix logins, who are members of all domain groups
 	- http://virtualmin.com/node/32667

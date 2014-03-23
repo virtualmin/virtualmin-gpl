@@ -167,7 +167,8 @@ return 1 if (!$timed_out && !$?);
 return 0;
 }
 
-# virtual_ip_input(&templates, [reseller], [show-original], [default-mode])
+# virtual_ip_input(&templates, [reseller-name-list], [show-original],
+# 		   [default-mode])
 # Returns HTML for selecting a virtual IP mode for a new server, or not
 sub virtual_ip_input
 {
@@ -265,11 +266,13 @@ elsif ($in{'virt'} == 2) {
 	# reseller's range, or the template
 	if ($resel) {
 		# Creating by or under a reseller .. use his range, if any
-		local %acl = &get_reseller_acl($resel);
-		if ($acl{'ranges'}) {
-			local ($ip, $netmask) = &free_ip_address(\%acl);
-			$ip || &error(&text('setup_evirtalloc'));
-			return ($ip, 1, 0, $netmask);
+		foreach my $r (split(/\s+/, $resel)) {
+			local %acl = &get_reseller_acl($r);
+			if ($acl{'ranges'}) {
+				local ($ip, $netmask) = &free_ip_address(\%acl);
+				$ip || &error(&text('setup_evirtalloc'));
+				return ($ip, 1, 0, $netmask);
+				}
 			}
 		}
 	$tmpl->{'ranges'} ne "none" || &error(&text('setup_evirttmpl'));

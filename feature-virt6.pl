@@ -162,7 +162,8 @@ if (&has_command("ping6")) {
 return 0;
 }
 
-# virtual_ip6_input(&templates, [reseller], [show-original], [default-mode])
+# virtual_ip6_input(&templates, [reseller-name-list],
+# 		    [show-original], [default-mode])
 # Returns HTML for selecting a virtual IPv6 mode for a new server, or not
 sub virtual_ip6_input
 {
@@ -235,7 +236,7 @@ if (&indexof($mode, map { $_->[0] } @opts) < 0) {
 return &ui_radio_table("virt6", $mode, \@opts, 1);
 }
 
-# parse_virtual_ip6(&template, reseller)
+# parse_virtual_ip6(&template, reseller-name-list)
 # Parses the virtual IPv6 input field, and returns the IP to use, virt flag,
 # already flag and netmask. May call &error if the input is invalid.
 sub parse_virtual_ip6
@@ -250,11 +251,13 @@ elsif ($in{'virt6'} == 2) {
 	# reseller's range, or the template
 	if ($resel) {
 		# Creating by or under a reseller .. use his range, if any
-		local %acl = &get_reseller_acl($resel);
-		if ($acl{'ranges6'}) {
-			local ($ip, $netmask) = &free_ip6_address(\%acl);
-			$ip || &error(&text('setup_evirtalloc'));
-			return ($ip, 1, 0, $netmask);
+		foreach my $r (split(/\s+/, $resel)) {
+			local %acl = &get_reseller_acl($r);
+			if ($acl{'ranges6'}) {
+				local ($ip,$netmask) = &free_ip6_address(\%acl);
+				$ip || &error(&text('setup_evirtalloc'));
+				return ($ip, 1, 0, $netmask);
+				}
 			}
 		}
 	$tmpl->{'ranges6'} ne "none" || &error(&text('setup_evirttmpl'));

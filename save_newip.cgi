@@ -52,8 +52,8 @@ if ($in{'convert'}) {
 
 # Validate inputs
 &error_setup($text{'newip_err'});
-%racl = $d->{'reseller'} ?
-	&get_reseller_acl($d->{'reseller'}) : ();
+@r = split(/\s+/, $d->{'reseller'});
+%racl = @r ? &get_reseller_acl($r[0]) : ();
 if (!&can_use_feature("virt")) {
 	# Cannot change anything, so no validation needed
 	}
