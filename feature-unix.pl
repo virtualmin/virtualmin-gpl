@@ -1045,6 +1045,8 @@ sub wait_for_group_to_exist
 my ($g) = @_;
 for(my $i=0; $i<10; $i++) {
 	return 1 if (defined(getgrnam($g)));
+	return 1 if (system("getent group ".
+			    quotemeta($g)." >/dev/null 2>&1") == 0);
 	sleep(1);
 	}
 return 0;
@@ -1057,6 +1059,8 @@ sub wait_for_user_to_exist
 my ($u) = @_;
 for(my $i=0; $i<10; $i++) {
 	return 1 if (defined(getpwnam($u)));
+	return 1 if (system("getent passwd ".
+			    quotemeta($u)." >/dev/null 2>&1") == 0);
 	sleep(1);
 	}
 return 0;
