@@ -918,19 +918,32 @@ local ($tid) = @_;
 &register_post_action(\&restart_webmin);
 }
 
-# refresh_webmin_user(&domain, [quiet])
+# refresh_webmin_user(&domain, [&old-domain])
 # Calls modify_webmin for a domain or the appropriate parent. This will
 # update the ACL for the domain's Webmin login, create and update extra
 # admins, and possibly update the reseller too.
 sub refresh_webmin_user
 {
-local ($d, $quiet) = @_;
+local ($d, $oldd) = @_;
+my $has_oldd = $oldd ? 1 : 0;
+$oldd ||= $d;
 local $wd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+local $oldwd = $oldd->{'parent'} ? &get_domain($oldd->{'parent'}) : $oldd;
 if ($wd->{'webmin'}) {
-	&modify_webmin($wd, $wd);
+	&modify_webmin($wd, $oldwd);
 	}
 if ($wd->{'reseller'} && $virtualmin_pro) {
+	# Update all resellers on the domain
 	foreach my $r (split(/\s+/, $wd->{'reseller'})) {
+		my $rinfo = &get_reseller($r);
+		if ($rinfo) {
+			&modify_reseller($rinfo, $rinfo);
+			}
+		}
+	}
+if ($oldwd->{'reseller'} && $virtualmin_pro && $has_oldd) {
+	# Update resellers who were previously owners of the domain
+	foreach my $r (split(/\s+/, $oldwd->{'reseller'})) {
 		my $rinfo = &get_reseller($r);
 		if ($rinfo) {
 			&modify_reseller($rinfo, $rinfo);

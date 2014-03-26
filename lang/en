@@ -3525,6 +3525,7 @@ resel_emax_bw=Missing or invalid maximum bandwidth limit
 resel_egone=Reseller no longer exists!
 resel_doms=Servers owned by reseller
 resel_eclash=A reseller or Webmin user with the same name already exists
+resel_eclash2=A unix user with the same name already exists
 resel_leave=Leave unchanged
 resel_count=(Currently $1)
 resel_backups=Can backup virtual servers?

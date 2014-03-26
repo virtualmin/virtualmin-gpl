@@ -75,7 +75,7 @@ else {
 	}
 
 # Refresh Webmin user
-&refresh_webmin_user($d, 1);
+&refresh_webmin_user($d);
 
 &run_post_actions();
 &webmin_log("clone", "domain", $d->{'dom'}, $d);

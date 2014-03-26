@@ -718,13 +718,8 @@ if (@add_excludes || @remove_excludes) {
 	&$second_print($text{'setup_done'});
 	}
 
-# Update the parent user
-if ($dom->{'parent'}) {
-	&refresh_webmin_user(&get_domain($dom->{'parent'}));
-	}
-else {
-	&refresh_webmin_user($dom);
-	}
+# Update the Webmin user for this domain, or the parent
+&refresh_webmin_user($dom, $old);
 
 # If the template has changed, update secondary groups
 if ($dom->{'template'} ne $old->{'template'}) {

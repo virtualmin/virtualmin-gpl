@@ -7512,6 +7512,14 @@ if ($dom->{'alias'}) {
 		}
 	}
 
+# Refresh Unix group membership for reseller
+if ($dom->{'reseller'} && defined(&update_reseller_unix_groups)) {
+	local $rinfo = &get_reseller($dom->{'reseller'});
+	if ($rinfo) {
+		&update_reseller_unix_groups($rinfo, 1);
+		}
+	}
+
 # Run the after creation command
 if (!$nopost) {
 	&run_post_actions();
