@@ -13326,9 +13326,10 @@ if ($config{'logrotate'}) {
 				   $clink, $ver, 3.6);
 
 	# Make sure the current config is OK
-	local $out = &backquote_command(
+	local $out = &backquote_with_timeout(
 		"$logrotate::config{'logrotate'} -d -f ".
-		&quote_path($logrotate::config{'logrotate_conf'})." 2>&1");
+		&quote_path($logrotate::config{'logrotate_conf'})." 2>&1",
+		60, 1, 1000);
 	if ($? && $out =~ /(.*stat\s+of\s+.*\s+failed:.*)/) {
 		return &text('check_elogrotateconf',
 			     "<pre>".&html_escape("$1")."</pre>");
