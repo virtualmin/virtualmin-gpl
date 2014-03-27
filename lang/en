@@ -3495,6 +3495,7 @@ resel_header5=Logo and other settings
 resel_name=Reseller username
 resel_pass=Password for username
 resel_lock=Account is temporarily locked?
+resel_unix=Create FTP/SSH account for reseller?
 resel_desc=Real name or description
 resel_email=Contact email address
 resel_subdom=Force virtual servers to be under domain?

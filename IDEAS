@@ -36,5 +36,9 @@
 
  - Multiple resellers own a domain
 	- CHANGELOG
-	- resellers get Unix logins, who are members of all domain groups
+	- API
+	- UI
+	- functional test
+	- enabling Unix login for reseller post-creation?
+		-what about password?
 	- http://virtualmin.com/node/32667
