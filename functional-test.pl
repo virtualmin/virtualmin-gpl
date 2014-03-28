@@ -758,7 +758,8 @@ $reseller_tests = [
 	  'args' => [ [ 'name', $test_reseller ],
 		      [ 'pass', 'smeg' ],
 		      [ 'desc', 'Test reseller' ],
-		      [ 'email', $test_reseller.'@'.$test_domain ] ],
+		      [ 'email', $test_reseller.'@'.$test_domain ],
+		      [ 'unix' ] ],
 	},
 
 	# Verify that he exists
@@ -778,6 +779,12 @@ $reseller_tests = [
 		       ':smeg@localhost:'.$webmin_port.'/',
 	},
 
+	# Check FTP login
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_reseller.':smeg@localhost/',
+	  'antigrep' => 'Login incorrect',
+	},
+
 	# Make changes
 	{ 'command' => 'modify-reseller.pl',
 	  'args' => [ [ 'name', $test_reseller ],
@@ -785,6 +792,7 @@ $reseller_tests = [
 		      [ 'email', 'newmail@'.$test_domain ],
 		      [ 'max-doms', 66 ],
 		      [ 'allow', $web ],
+		      [ 'pass', 'smeg2' ],
 		      [ 'logo', 'http://'.$test_domain.'/logo.gif' ],
 		      [ 'link', 'http://'.$test_domain ] ],
 	},
@@ -799,6 +807,45 @@ $reseller_tests = [
 		      'Logo URL: http://'.$test_domain.'/logo.gif',
 		      'Logo link: http://'.$test_domain,
 		    ],
+	},
+
+	# Check Webmin login again
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
+		       $webmin_proto.'://'.$test_reseller.
+		       ':smeg2@localhost:'.$webmin_port.'/',
+	},
+
+	# Check FTP login again
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_reseller.':smeg2@localhost/',
+	  'antigrep' => 'Login incorrect',
+	},
+
+	# Turn off Unix login
+	{ 'command' => 'modify-reseller.pl',
+	  'args' => [ [ 'name', $test_reseller ],
+		      [ 'no-unix' ] ],
+	},
+
+	# Check FTP login again, which should now fail
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_reseller.':smeg2@localhost/',
+	  'grep' => 'Login incorrect',
+	  'ignorefail' => 1,
+	},
+
+	# Turn on Unix login
+	{ 'command' => 'modify-reseller.pl',
+	  'args' => [ [ 'name', $test_reseller ],
+		      [ 'unix' ] ],
+	},
+
+	# Check FTP login again, which should now work
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_reseller.':smeg2@localhost/',
+	  'antigrep' => 'Login incorrect',
 	},
 
 	# Create a domain owned by the reseller
