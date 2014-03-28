@@ -1437,9 +1437,10 @@ Added a script installer for Node.js version 0.10.25, and Ghost version 0.4.1.
 Added an option to the restore process to delete files in an existing destination domain that were not included in the backup.
 The port used in URLs can now be set independently of the actual port, so that URLs are correct when a reverse proxy is in use.
 ---- Changes since 4.06 ----
-Updated the Node.js script installer to version 0.10.26, Pydio to 5.2.3, Zikula to 1.3.7, MediaWiki to 1.22.4 and 1.19.13, Feng Office to 2.5.1.2, Mantis to 1.2.17, PiWik to 2.1.0, ownCloud to 6.0.2, Dolibarr to 3.5.1, Joomla to 3.2.3 and 2.5.19, Moodle to 2.6.2, Revive AdServer to 3.0.3, eGroupWare to 1.8.006, phpMyFAQ to 2.8.8, and phpMyAdmin to 4.1.11.
+Updated the Node.js script installer to version 0.10.26, Pydio to 5.2.3, Zikula to 1.3.7, MediaWiki to 1.22.4 and 1.19.13, Feng Office to 2.5.1.2, Mantis to 1.2.17, PiWik to 2.1.0, ownCloud to 6.0.2, Dolibarr to 3.5.1, Joomla to 3.2.3 and 2.5.19, Moodle to 2.6.2, Revive AdServer to 3.0.3, eGroupWare to 1.8.006, phpMyFAQ to 2.8.8, and phpMyAdmin to 4.1.12.
 Added Norwegian translation updates, thanks to Stein-Aksel Basma.
 Aliases and redirects can now be separately enabled for the SSL and non-SSL websites of a virtual server.
 The Change IP Addresses	page can now be used to update the external DNS address of multiple virtual servers, as well as the actual address.
 Alias servers can now be re-pointed to a different target, using the Move Virtual Server page or the move-domain API command.
 A single virtual server can now be owned by multiple resellers, each of whom has permissions to manage it. This can be useful if reseller accounts are used as an additional layer of administrative control in Virtualmin.
+Reseller accounts can now have an associated Unix account for FTP/SSH access, which has permissions to access all managed domains' files.
