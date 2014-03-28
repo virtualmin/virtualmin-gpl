@@ -1,0 +1,4 @@
+desc=Reseller Unix accounts
+html=Reseller accounts can now have an associated Unix account for FTP/SSH access, which has permissions to access all managed domains' files.
+master=1
+link=edit_newresels.cgi

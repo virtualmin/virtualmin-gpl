@@ -35,10 +35,6 @@
 	- backup/restore
 
  - Multiple resellers own a domain
-	- CHANGELOG
-	- API
-	- UI
+	- backup/restore
 	- functional test
-	- enabling Unix login for reseller post-creation?
-		-what about password?
 	- http://virtualmin.com/node/32667
