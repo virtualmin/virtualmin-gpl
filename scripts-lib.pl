@@ -1345,6 +1345,10 @@ foreach my $m (@mods) {
 		elsif ($m eq "setuptools") {
 			push(@pkgs, "setuptools", "python-setuptools");
 			}
+		elsif ($mp eq "psycopg") {
+			# Try to install old and new versions
+			push(@pkgs, "python-psycopg", "python-psycopg2");
+			}
 		else {
 			$mp = lc($mp);
 			push(@pkgs, "python-".$mp);
