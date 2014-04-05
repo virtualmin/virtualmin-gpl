@@ -39,6 +39,7 @@ $test_user = "testy";
 $test_alias = "testing";
 $test_alias_two = "yetanothertesting";
 $test_reseller = "testsel";
+$test_reseller_two = "anothersel";
 $test_plan = "Test plan";
 $test_admin = "testadmin";
 $timeout = 120;			# Longest time a test should take
@@ -906,6 +907,46 @@ $reseller_tests = [
 	  'grep' => [ 'Owned servers: '.$test_domain ],
 	},
 
+	# Create a second reseller
+	{ 'command' => 'create-reseller.pl',
+	  'args' => [ [ 'name', $test_reseller_two ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test reseller two' ],
+		      [ 'email', $test_reseller_two.'@'.$test_domain ],
+		      [ 'unix' ] ],
+	},
+
+	# Add him to the domain
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-reseller', $test_reseller_two ] ],
+	},
+
+	# Verify ownership by both
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Reseller: '.$test_reseller.' '.$test_reseller_two ],
+	},
+	{ 'command' => 'list-resellers.pl',
+	  'args' => [ [ 'name', $test_reseller_two ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Owned servers: '.$test_domain ],
+	},
+
+	# Take away ownership
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'delete-reseller', $test_reseller_two ] ],
+	},
+
+	# Verify ownership again
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => [ 'Reseller:.*'.$test_reseller_two ],
+	},
+
 	# Backup the domain
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -942,6 +983,11 @@ $reseller_tests = [
 	# Delete the reseller and domain
 	{ 'command' => 'delete-reseller.pl',
 	  'args' => [ [ 'name', $test_reseller ] ],
+	  'cleanup' => 1,
+	  'ignorefail' => 1,
+	},
+	{ 'command' => 'delete-reseller.pl',
+	  'args' => [ [ 'name', $test_reseller_two ] ],
 	  'cleanup' => 1,
 	  'ignorefail' => 1,
 	},
