@@ -40,7 +40,8 @@ sub script_django_python_modules
 {
 local ($d, $ver, $opts) = @_;
 local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-return ( "setuptools", $dbtype eq "mysql" ? "MySQLdb" : "psycopg" );
+return ( "setuptools", $dbtype eq "mysql" ? "MySQLdb" :
+		       $ver >= 1.6 ? "psycopg2" : "psycopg" );
 }
 
 # script_django_depends(&domain, version)
