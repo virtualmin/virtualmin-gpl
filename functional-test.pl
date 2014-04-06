@@ -1094,6 +1094,7 @@ $script_tests = [
 		      [ 'db', 'mysql '.$test_domain_db ],
 		      [ 'opt', 'demo 1' ],
 		      [ 'version', 'latest' ] ],
+	  'timeout' => 300,
 	},
 
 	# Check that it works
