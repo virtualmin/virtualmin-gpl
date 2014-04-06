@@ -265,7 +265,8 @@ if (!$upgrade) {
 	-r $sfile || return (-1, "Project settings file $sfile was not found");
 	local $lref = &read_file_lines_as_domain_user($d, $sfile);
 	my $i = 0;
-	my $pdbtype = $dbtype eq "mysql" ? "mysql" : "postgresql";
+	my $pdbtype = $dbtype eq "mysql" ? "mysql" :
+		      $ver >= 1.6 ? "postgresql_psycopg2" : "postgresql";
 	my ($engine, $gotname, $gotuser, $gotpass, $gothost);
 	foreach my $l (@$lref) {
 		# Django 1.1 style variables
