@@ -1444,3 +1444,5 @@ The Change IP Addresses	page can now be used to update the external DNS address 
 Alias servers can now be re-pointed to a different target, using the Move Virtual Server page or the move-domain API command.
 A single virtual server can now be owned by multiple resellers, each of whom has permissions to manage it. This can be useful if reseller accounts are used as an additional layer of administrative control in Virtualmin.
 Reseller accounts can now have an associated Unix account for FTP/SSH access, which has permissions to access all managed domains' files.
+---- Changes since 4.07 ----
+Updated the Roundcube script installer to version 1.0.0.

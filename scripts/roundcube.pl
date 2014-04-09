@@ -3,7 +3,8 @@
 		      'users', 'messages', 'contactgroupmembers',
 		      'contactgroups', 'contacts',
 		      'cache_index', 'cache_messages', 'cache_thread',
-		      'dictionary', 'searches', 'system', 'users' );
+		      'cache_shared', 'dictionary', 'searches', 'system',
+		      'users' );
 
 # script_roundcube_desc()
 sub script_roundcube_desc
@@ -24,7 +25,7 @@ return "RoundCube Webmail is a browser-based multilingual IMAP client with an ap
 # script_roundcube_versions()
 sub script_roundcube_versions
 {
-return ( "0.9.5", "0.8.6" );
+return ( "1.0.0", "0.8.6" );
 }
 
 sub script_roundcube_category
@@ -183,62 +184,76 @@ if (!$upgrade) {
 	# Fix up the DB config file
 	local $dbcfileorig = "$opts->{'dir'}/config/db.inc.php.dist";
 	local $dbcfile = "$opts->{'dir'}/config/db.inc.php";
-	&copy_source_dest_as_domain_user($d, $dbcfileorig, $dbcfile);
-	local $lref = &read_file_lines_as_domain_user($d, $dbcfile);
-	foreach my $l (@$lref) {
-		if ($l =~ /^\$rcmail_config\['db_dsnw'\]\s+=/) {
-			$l = "\$rcmail_config['db_dsnw'] = 'mysql://$dbuser:".
-			     &php_quotemeta($dbpass)."\@$dbhost/$dbname';";
+	if (-r $dbcfileorig) {
+		&copy_source_dest_as_domain_user($d, $dbcfileorig, $dbcfile);
+		local $lref = &read_file_lines_as_domain_user($d, $dbcfile);
+		foreach my $l (@$lref) {
+			if ($l =~ /^\$rcmail_config\['db_dsnw'\]\s+=/) {
+				$l = "\$rcmail_config['db_dsnw'] = 'mysql://$dbuser:".
+				     &php_quotemeta($dbpass)."\@$dbhost/$dbname';";
+				}
+			elsif ($l =~ /^\$rcmail_config\['db_backend'\]\s+=/) {
+				$l = "\$rcmail_config['db_backend'] = 'db';";
+				}
 			}
-		elsif ($l =~ /^\$rcmail_config\['db_backend'\]\s+=/) {
-			$l = "\$rcmail_config['db_backend'] = 'db';";
-			}
+		&flush_file_lines_as_domain_user($d, $dbcfile);
 		}
-	&flush_file_lines_as_domain_user($d, $dbcfile);
 
 	# Fix up the main config file
 	local $mcfileorig = "$opts->{'dir'}/config/main.inc.php.dist";
 	local $mcfile = "$opts->{'dir'}/config/main.inc.php";
+	if (!-r $mcfileorig) {
+		$mcfileorig = "$opts->{'dir'}/config/config.inc.php.sample";
+		$mcfile = "$opts->{'dir'}/config/config.inc.php";
+		}
 	&copy_source_dest_as_domain_user($d, $mcfileorig, $mcfile);
 	local $lref = &read_file_lines_as_domain_user($d, $mcfile);
 	local $vuf = &get_mail_virtusertable();
 	local $added_vuf = 0;
 	foreach my $l (@$lref) {
-		if ($l =~ /^\$rcmail_config\['enable_caching'\]\s+=/) {
-			$l = "\$rcmail_config['enable_caching'] = FALSE;";
+		if ($l =~ /^\$(rcmail_config|config)\['enable_caching'\]\s+=/) {
+			$l = "\$${1}['enable_caching'] = FALSE;";
 			}
-		if ($l =~ /^\$rcmail_config\['default_host'\]\s+=/) {
-			$l = "\$rcmail_config['default_host'] = 'localhost';";
+		if ($l =~ /^\$(rcmail_config|config)\['default_host'\]\s+=/) {
+			$l = "\$${1}['default_host'] = 'localhost';";
 			}
-		if ($l =~ /^\$rcmail_config\['default_port'\]\s+=/) {
-			$l = "\$rcmail_config['default_port'] = 143;";
+		if ($l =~ /^\$(rcmail_config|config)\['default_port'\]\s+=/) {
+			$l = "\$${1}['default_port'] = 143;";
 			}
-		if ($l =~ /^\$rcmail_config\['smtp_server'\]\s+=/) {
-			$l = "\$rcmail_config['smtp_server'] = 'localhost';";
+		if ($l =~ /^\$(rcmail_config|config)\['smtp_server'\]\s+=/) {
+			$l = "\$${1}['smtp_server'] = 'localhost';";
 			}
-		if ($l =~ /^\$rcmail_config\['smtp_port'\]\s+=/) {
-			$l = "\$rcmail_config['smtp_port'] = 25;";
+		if ($l =~ /^\$(rcmail_config|config)\['smtp_port'\]\s+=/) {
+			$l = "\$${1}['smtp_port'] = 25;";
 			}
-		if ($l =~ /^\$rcmail_config\['smtp_user'\]\s+=/) {
-			$l = "\$rcmail_config['smtp_user'] = '%u';";
+		if ($l =~ /^\$(rcmail_config|config)\['smtp_user'\]\s+=/) {
+			$l = "\$${1}['smtp_user'] = '%u';";
 			}
-		if ($l =~ /^\$rcmail_config\['smtp_pass'\]\s+=/) {
-			$l = "\$rcmail_config['smtp_pass'] = '%p';";
+		if ($l =~ /^\$(rcmail_config|config)\['smtp_pass'\]\s+=/) {
+			$l = "\$${1}['smtp_pass'] = '%p';";
 			}
-		if ($l =~ /^\$rcmail_config\['mail_domain'\]\s+=/) {
-			$l = "\$rcmail_config['mail_domain'] = '$d->{'dom'}';";
+		if ($l =~ /^\$(rcmail_config|config)\['mail_domain'\]\s+=/) {
+			$l = "\$${1}['mail_domain'] = '$d->{'dom'}';";
 			}
-		if ($l =~ /^\$rcmail_config\['virtuser_file'\]\s+=/ && $vuf) {
+		if ($l =~ /^\$(rcmail_config|config)\['virtuser_file'\]\s+=/ && $vuf) {
 			$added_vuf = 1;
-			$l = "\$rcmail_config['virtuser_file'] = '$vuf';";
+			$l = "\$${1}['virtuser_file'] = '$vuf';";
 			}
-		if ($l =~ /^\$rcmail_config\['plugins'\]\s+=/) {
-			$l = "\$rcmail_config['plugins'] = array('virtuser_file');";
+		if ($l =~ /^\$(rcmail_config|config)\['plugins'\]\s+=\s+array\(\s*$/) {
+			$l = "\$${1}['plugins'] = array('virtuser_file',";
+			}
+		elsif ($l =~ /^\$(rcmail_config|config)\['plugins'\]\s+=/) {
+			$l = "\$${1}['plugins'] = array('virtuser_file');";
+			}
+		if ($l =~ /^\$(rcmail_config|config)\['db_dsnw'\]\s+=/) {
+			$l = "\$${1}['db_dsnw'] = 'mysql://$dbuser:".
+			     &php_quotemeta($dbpass)."\@$dbhost/$dbname';";
 			}
 		}
 	if (!$added_vuf && $vuf) {
 		# Need to add virtuser_file directive, as no default exists
 		push(@$lref, "\$rcmail_config['virtuser_file'] = '$vuf';");
+		push(@$lref, "\$config['virtuser_file'] = '$vuf';");
 		}
 	&flush_file_lines_as_domain_user($d, $mcfile);
 
