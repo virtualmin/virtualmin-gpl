@@ -1097,6 +1097,7 @@ local ($ver, $mode) = @_;
 local $nodotv = $ver;
 $nodotv =~ s/\.//g;
 foreach my $i ("/opt/rh/php$nodotv/root/etc/php.ini",
+	       "/opt/rh/php$nodotv/lib/php.ini",
 	       "/etc/php.ini",
 	       $mode eq "mod_php" ? ("/etc/php$ver/apache/php.ini",
 				     "/etc/php$ver/apache2/php.ini",
