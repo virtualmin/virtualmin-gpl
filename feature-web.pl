@@ -205,6 +205,27 @@ else {
 		&add_webmail_redirect_directives($d, $tmpl);
 		}
 
+	# For Apache 2.4+, add a "Require all granted" directive
+	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+						    $d->{'web_port'});
+	if ($virt && $apache::httpd_modules{'core'} >= 2.4) {
+		local $pdir = &public_html_dir($d);
+		local ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
+				      $_->{'words'}->[0] eq $pdir."/" }
+			    &apache::find_directive_struct("Directory", $vconf);
+		if ($dir) {
+			local @req = &apache::find_directive("Require",
+						$dir->{'members'});
+			local ($g) = grep { /all\s+granted/i } @req;
+			if (!$g) {
+				push(@req, "all granted");
+				&apache::save_directive("Require", \@req,
+					$dir->{'members'}, $conf);
+				&flush_file_lines($dir->{'file'});
+				}
+			}
+		}
+
 	# Create empty access and error log files, owned by the domain's user.
 	# Apache opens them as root, so it will be able to write.
 	local $log = &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0);
