@@ -318,7 +318,7 @@ if (!$dom->{'virt'} && $defaultip) {
 if (($defaultip || $sharedip) && $ip) {
 	&usage("The --default-ip and --shared-ip flags cannot be combined with --ip or --allocate-ip");
 	}
-if ($dom->{'virt'} && defined($sharedip6)) {
+if ($dom->{'virt6'} && defined($sharedip6)) {
 	&usage("The shared IPv6 address cannot be changed for a virtual server with a private IP");
 	}
 if (($defaultip6 || $sharedip6) && $ip6) {
