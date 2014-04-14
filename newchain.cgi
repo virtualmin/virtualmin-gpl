@@ -68,6 +68,7 @@ $d->{'ssl_chain'} = $chain;
 &release_lock_ssl($d);
 &save_domain($d);
 foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
+	next if (!&domain_has_ssl($od));
 	$od->{'ssl_chain'} = $chain;
 	&save_website_ssl_file($od, 'ca', $chain);
 	&save_domain($od);
