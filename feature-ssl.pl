@@ -984,6 +984,9 @@ if ($p ne "web") {
 	}
 local $pass_script = "$ssl_passphrase_dir/$d->{'id'}";
 &lock_file($pass_script);
+local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+                                                   $d->{'web_sslport'});
+return "SSL virtual host not found" if (!$vconf);
 local @pps = &apache::find_directive("SSLPassPhraseDialog", $conf);
 local @pps_str = &apache::find_directive_struct("SSLPassPhraseDialog", $conf);
 &lock_file(@pps_str ? $pps_str[0]->{'file'} : $conf->[0]->{'file'});
