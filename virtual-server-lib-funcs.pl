@@ -16191,6 +16191,10 @@ if ($p ne "web") {
 &obtain_lock_ssl($d);
 local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
 						   $d->{'web_sslport'});
+if (!$virt) {
+	&release_lock_ssl($d);
+	return "No virtual host found for $d->{'dom'}:$d->{'web_sslport'}";
+	}
 local $dir = $type eq 'cert' ? "SSLCertificateFile" :
 	     $type eq 'key' ? "SSLCertificateKeyFile" :
 	     $type eq 'ca' ? "SSLCACertificateFile" : undef;
