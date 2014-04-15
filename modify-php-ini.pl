@@ -117,7 +117,7 @@ foreach my $d (@doms) {
 				&phpini::save_directive($conf, $ini_names[$i],
 							       $ini_values[$i]);
 				}
-			&flush_file_lines($ini->[1]);
+			&flush_file_lines($ini->[1], undef, 1);
 			&unlock_file($ini->[1]);
 			}
 		}
