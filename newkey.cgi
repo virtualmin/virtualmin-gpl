@@ -145,6 +145,7 @@ if ($d->{'ssl_newkey'}) {
 
 # Copy SSL directives to domains using same cert
 foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
+	next if (!&domain_has_ssl($od));
 	$od->{'ssl_cert'} = $d->{'ssl_cert'};
 	$od->{'ssl_key'} = $d->{'ssl_key'};
 	$od->{'ssl_newkey'} = $d->{'ssl_newkey'};

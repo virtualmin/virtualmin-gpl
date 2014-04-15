@@ -115,6 +115,7 @@ else {
 	# Copy to other domains using same cert. Only the password needs to be
 	# copied though, as the cert file isn't changing
 	foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
+		next if (!&domain_has_ssl($od));
 		&obtain_lock_ssl($od);
 		$od->{'ssl_pass'} = undef;
 		&save_domain_passphrase($od);
