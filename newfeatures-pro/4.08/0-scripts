@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Roundcube script installer to version 1.0.0, Revive AdServer to 3.0.4, phpMyAdmin to 4.1.13, and WordPress to 3.8.3.
+html=Updated the Roundcube script installer to version 1.0.0, Revive AdServer to 3.0.4, phpMyAdmin to 4.1.13, and WordPress to 3.9.
 master=1
 reseller=1
 domain=1
