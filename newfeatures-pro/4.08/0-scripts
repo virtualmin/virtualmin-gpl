@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Roundcube script installer to version 1.0.0, Revive AdServer to 3.0.4, phpMyAdmin to 4.1.13, Piwik to 2.2.0, OpenGoo to 2.5.1.4, and WordPress to 3.9.
+html=Updated the Roundcube script installer to version 1.0.0, Revive AdServer to 3.0.4, phpMyAdmin to 4.1.13, Piwik to 2.2.0, OpenGoo to 2.5.1.4, Dolibarr to 3.5.2, and WordPress to 3.9.
 master=1
 reseller=1
 domain=1
