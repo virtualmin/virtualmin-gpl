@@ -155,8 +155,7 @@ else {
 				    "delete from user where host = '$h' ".
 				    "and user = '$user'");
 				&mysql::execute_sql_logged($mysql::master_db,
-				    "insert into user (host, user, password) ".
-				    "values ('$h', '$user', $encpass)");
+				    &get_user_creation_sql($h, $user,$encpass));
 				if ($wild && $wild ne $d->{'db'}) {
 					&add_db_table($h, $wild, $user);
 					}
@@ -431,8 +430,7 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 			local $h;
 			foreach $h (@hosts) {
 				&mysql::execute_sql_logged($mysql::master_db,
-				  "insert into user (host, user, password) ".
-				  "values (?, ?, $encpass)", $h, $user);
+				  &get_user_creation_sql($h, $user, $encpass));
 				if ($wild && $wild ne $d->{'db'}) {
 					&add_db_table($h, $wild, $user);
 					}
@@ -1606,10 +1604,9 @@ else {
 			    "delete from user where host = '$h' ".
 			    "and user = '$user'");
 			&mysql::execute_sql_logged($mysql::master_db,
-			    "insert into user (host, user, password) ".
-			    "values ('$h', '$myuser', ".
-			    ($encpass ? "'$encpass'"
-				      : "$password_func('$qpass')").")");
+			    &get_user_creation_sql($h, $myuser, 
+			      $encpass ? "'$encpass'"
+				        : "$password_func('$qpass')"));
 			local $db;
 			foreach $db (@$dbs) {
 				&add_db_table($h, $db, $myuser);
@@ -2100,8 +2097,7 @@ else {
 			"delete from db where user = '$user'");
 		foreach my $h (@$hosts) {
 			&mysql::execute_sql_logged($mysql::master_db,
-				"insert into user (host, user, password) ".
-				"values ('$h', '$user', $encpass)");
+				&get_user_creation_sql($h, $user, $encpass));
 			foreach my $db (@dbs) {
 				&add_db_table($h, $db->{'name'}, $user);
 				}
@@ -2137,8 +2133,8 @@ else {
 				"delete from user where user = ?", $u->[0]);
 			foreach my $h (@$hosts) {
 				&mysql::execute_sql_logged($mysql::master_db,
-				    "insert into user (host, user, password) ".
-				    "values (?, ?, ?)", $h, $u->[0], $u->[1]);
+				    &get_user_creation_sql($h, $u->[0],
+							   "'$u->[1]'"));
 				&set_mysql_user_connections($d, $h, $u->[0], 1);
 				}
 			}
@@ -2485,6 +2481,21 @@ elsif ($size eq "huge") {
 		[ "write_buffer", "2M", "myisamchk" ]);
 	}
 return ( );
+}
+
+# get_user_creation_sql(host, user, password-sql)
+# Returns SQL to add a user, with SSL fields if needed
+sub get_user_creation_sql
+{
+my ($host, $user, $encpass) = @_;
+if ($mysql::mysql_version >= 5) {
+	return "insert into user (host, user, password, ssl_type, ssl_cipher) ".
+	       "values ('$host', '$user', $encpass, '', '')";
+	}
+else {
+	return "insert into user (host, user, password) ".
+	       "values ('$host', '$user', $encpass)";
+	}
 }
 
 $done_feature_script{'mysql'} = 1;
