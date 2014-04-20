@@ -10063,6 +10063,11 @@ sub can_manual_dns
 return &master_admin();
 }
 
+sub can_edit_resellers
+{
+return &can_edit_templates();
+}
+
 # has_proxy_balancer(&domain)
 # Returns 2 if some domain supports proxy balancing to multiple URLs, 1 for
 # proxying to a single URL, 0 if neither.
