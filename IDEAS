@@ -34,6 +34,8 @@
 	- CHANGELOG
 	- backup/restore
 
- - Multiple resellers own a domain
-	- backup/restore
-	- http://virtualmin.com/node/32667
+ - Per-domain DKIM keys
+
+ - Resellers who can create other resellers
+	- help page
+	- API
