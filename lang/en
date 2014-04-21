@@ -3534,6 +3534,7 @@ resel_backups2=Schedule and make backups
 resel_backups1=Make backups only
 resel_backups0=Neither
 resel_plans=Can create and edit plans?
+resel_create=Can create and edit resellers?
 resel_demo=Limit to read-only demo mode?
 resel_hide=Hide limits from server owners?
 resel_ranges=IPv4 allocation ranges

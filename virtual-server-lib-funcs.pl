@@ -10065,7 +10065,7 @@ return &master_admin();
 
 sub can_edit_resellers
 {
-return &can_edit_templates();
+return &can_edit_templates() || $access{'createresellers'};
 }
 
 # has_proxy_balancer(&domain)
@@ -11905,6 +11905,12 @@ if (&reseller_admin() && &can_edit_plans()) {
 	push(@rv, { 'url' => $vm."/edit_newplan.cgi",
 		    'title' => $text{'plans_title'},
 		    'icon' => 'newplan' });
+	}
+if (&reseller_admin() && &can_edit_resellers()) {
+	# Reseller who can edit other resellers
+	push(@rv, { 'url' => $vm."/edit_newresels.cgi",
+		    'title' => $text{'newresellers_title'},
+		    'icon' => 'newresels' });
 	}
 if (&can_show_history()) {
 	# History graphs
