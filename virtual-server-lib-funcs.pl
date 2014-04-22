@@ -11909,8 +11909,8 @@ if (&reseller_admin() && &can_edit_plans()) {
 if (&reseller_admin() && &can_edit_resellers()) {
 	# Reseller who can edit other resellers
 	push(@rv, { 'url' => $vm."/edit_newresels.cgi",
-		    'title' => $text{'newresellers_title'},
-		    'icon' => 'newresels' });
+		    'title' => $text{'newresels_title'},
+		    'icon' => 'webmin-small' });
 	}
 if (&can_show_history()) {
 	# History graphs
