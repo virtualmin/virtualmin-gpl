@@ -1,0 +1,8 @@
+<header>S3 upload chunk size</header>
+
+S3 backups larger than 2GB in size are uploaded by Virtualmin in file chunks
+whose size is specified by this option. Because there is a limit of 10000 chunks
+per file, the default size of 5MB will not be big enough for backups of larger
+than approximately 48GB. <p>
+
+<footer>
