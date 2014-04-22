@@ -244,9 +244,10 @@ for(my $i=0; $i<$tries; $i++) {
 			my $part = 1;
 			my $j = 0;
 			my @tags;
+			my $chunksize = ($config{'s3_chunk'} || 5) * 1024*1024;
 			while($sent < $st[7]) {
 				my $chunk = $st[7] - $sent;
-				$chunk = 5*1024*1024 if ($chunk > 5*1024*1024);
+				$chunk = $chunksize if ($chunk > $chunksize);
 				my ($pok, $ptag) = &s3_part_upload(
 				    $conn, $bucket, $endpoint, $sourcefile,
 				    $destfile, $part, $sent, $chunk, $uploadid);
