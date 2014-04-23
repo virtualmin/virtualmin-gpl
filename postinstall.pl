@@ -426,6 +426,12 @@ if (!&check_ratelimit() && &is_ratelimit_enabled()) {
 		}
 	}
 
+# Cache the DKIM status
+if (!&check_dkim()) {
+	my $dkim = &get_dkim_config();
+	$config{'dkim_enabled'} = $dkim && $dkim->{'enabled'} ? 1 : 0;
+	}
+
 # Run any needed actions, like server restarts
 &run_post_actions_silently();
 

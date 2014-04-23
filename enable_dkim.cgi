@@ -34,12 +34,19 @@ if ($in{'enabled'}) {
 	if (!$ok) {
 		print "<b>$text{'dkim_somefail'}</b><p>\n";
 		}
+	else {
+		$config{'dkim_enabled'} = 1;
+		}
 	}
 else {
 	# Turn off DKIM
 	&ui_print_unbuffered_header(undef, $text{'dkim_title2'}, "");
 	$ok = &disable_dkim($dkim);
+	$config{'dkim_enabled'} = 0;
 	}
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
 &run_post_actions();
 &webmin_log($in{'enabled'} ? "enable" : "disable", "dkim");
 
