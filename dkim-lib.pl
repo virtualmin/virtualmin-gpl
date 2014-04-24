@@ -893,5 +893,32 @@ my $cmd = "cd $sendmail::config{'sendmail_features'}/m4 ; ".
 &unlock_file($sendmail::config{'sendmail_cf'});
 }
 
+# get_domain_dkim_key(&domain)
+# Returns the DKIM private key for a domain
+sub get_domain_dkim_key
+{
+my ($d) = @_;
+my $dkim_config = &get_dkim_config_file();
+return undef if (!-r $dkim_config);
+my $conf = &get_debian_dkim_config($dkim_config);
+return undef if (!$conf->{'KeyList'});
+my $keyfile = $conf->{'KeyFile'};
+my $lref = &read_file_lines($conf->{'KeyList'}, 1);
+foreach my $l (@$lref) {
+	my ($pat, $dom, $file) = split(/:/, $l);
+	if ($dom eq $d->{'dom'} && !&same_file($file, $keyfile)) {
+		# Has it's own key
+		return &read_file_contents($file);
+		}
+	}
+return undef;
+}
+
+# save_domain_dkim_key(&domain, key)
+# Updates the private key for a domain (also in DNS)
+sub save_domain_dkim_key
+{
+}
+
 1;
 

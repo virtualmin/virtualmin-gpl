@@ -11472,6 +11472,15 @@ if ($d->{'mail'} && $config{'mail'} && &can_edit_mail() &&
 		  });
 	}
 
+if ($d->{'mail'} && $config{'dkim_enabled'}) {
+	# Per-domain DKIM page
+	push(@rv, { 'page' => 'edit_domdkim.cgi',
+		    'title' => $text{'edit_domdkim'},
+		    'desc' => $text{'edit_domdkimdesc'},
+		    'cat' => 'server',
+		  });
+	}
+
 # Button to show bandwidth graph
 if ($config{'bw_active'} && &can_monitor_bandwidth($d)) {
 	push(@rv, { 'page' => 'bwgraph.cgi',
