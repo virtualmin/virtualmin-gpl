@@ -573,13 +573,15 @@ elsif ($config{'mail_system'} == 1) {
 return 1;
 }
 
-# get_dkim_pubkey(&dkim)
+# get_dkim_pubkey(&dkim, &domain)
 # Returns the public key in a format suitable for inclusion in a DNS record
 sub get_dkim_pubkey
 {
-my ($dkim) = @_;
+my ($dkim, $d) = @_;
+my $keyfile = &get_domain_dkim_key($d) ||
+	      $dkim->{'keyfile'};
 my $pubkey = &backquote_command(
-        "openssl rsa -in ".quotemeta($dkim->{'keyfile'}).
+        "openssl rsa -in ".quotemeta($keyfile).
         " -pubout -outform PEM 2>/dev/null");
 if ($? || $pubkey !~ /BEGIN\s+PUBLIC\s+KEY/) {
 	return undef;
@@ -785,9 +787,9 @@ if ($dkim_config) {
 sub add_dkim_dns_records
 {
 my ($doms, $dkim) = @_;
-my $pubkey = &get_dkim_pubkey($dkim);
 my $anychanged = 0;
 foreach my $d (@$doms) {
+	my $pubkey = &get_dkim_pubkey($dkim, $d);
 	&$first_print(&text('dkim_dns', "<tt>$d->{'dom'}</tt>"));
 	my ($recs, $file) = &get_domain_dns_records_and_file($d);
 	if (!$file) {
@@ -894,7 +896,7 @@ my $cmd = "cd $sendmail::config{'sendmail_features'}/m4 ; ".
 }
 
 # get_domain_dkim_key(&domain)
-# Returns the DKIM private key for a domain
+# Returns the DKIM private key file for a domain
 sub get_domain_dkim_key
 {
 my ($d) = @_;
@@ -908,16 +910,61 @@ foreach my $l (@$lref) {
 	my ($pat, $dom, $file) = split(/:/, $l);
 	if ($dom eq $d->{'dom'} && !&same_file($file, $keyfile)) {
 		# Has it's own key
-		return &read_file_contents($file);
+		return $file;
 		}
 	}
 return undef;
 }
 
-# save_domain_dkim_key(&domain, key)
+# save_domain_dkim_key(&domain, [key-text])
 # Updates the private key for a domain (also in DNS)
 sub save_domain_dkim_key
 {
+my ($d, $key) = @_;
+&$first_print($key ? $text{'domdkim_setkey'} : $text{'domdkim_clearkey'});
+my $dkim = &get_dkim_config();
+my $dkim_config = &get_dkim_config_file();
+if (!-r $dkim_config) {
+	&$second_print($text{'domdkim_econfig'});
+	return 0;
+	}
+my $conf = &get_debian_dkim_config($dkim_config);
+if (!$conf->{'KeyList'}) {
+	&$second_print($text{'domdkim_ekeylist'});
+	return 0;
+	}
+my $keyfile = $conf->{'KeyFile'};
+&lock_file($conf->{'KeyList'});
+my $lref = &read_file_lines($conf->{'KeyList'});
+my $selkeyfile = $conf->{'KeyList'};
+$selkeyfile =~ s/\/([^\/]+)$/\/$dkim->{'selector'}/;
+foreach my $l (@$lref) {
+	my ($pat, $dom, $file) = split(/:/, $l);
+	if ($dom eq $d->{'dom'}) {
+		# Found the domain's line
+		if ($key) {
+			# Use a custom key file
+			# XXX why does it have to be named after the selector?
+			$file = $conf->{'KeyList'};
+			$file =~ s/\/([^\/]+)$/\/$d->{'id'}/;
+			&unlink_logged($file);	# Replace link
+			&open_tempfile(PRIVKEY, ">$file");
+			&print_tempfile(PRIVKEY, $key);
+			&close_tempfile(PRIVKEY);
+			}
+		else {
+			# Revert to default (which is a link to the actual key)
+			$file = $selkeyfile;
+			}
+		$l = join(":", $pat, $dom, $file);
+		}
+	}
+&flush_file_lines($conf->{'KeyList'});
+&unlock_file($conf->{'KeyList'});
+if ($d->{'dns'}) {
+	&add_dkim_dns_records([ $d ], $dkim);
+	}
+return 1;
 }
 
 1;

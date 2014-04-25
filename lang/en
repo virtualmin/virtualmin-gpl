@@ -1168,6 +1168,8 @@ edit_maillog=Search Mail Logs
 edit_maillogdesc=Search the email log for this virtual server
 edit_mailopts=Email Settings
 edit_mailoptsdesc=Configure settings related to email for this virtual server.
+edit_domdkim=DKIM Options
+edit_domdkimdesc=Configured DKIM settings for just this virtual server.
 edit_connect=Check Connectivity
 edit_connectdesc=Validate that this virtual server's website, DNS domain and mail server can be accessed from the rest of the Internet.
 edit_psearch=List Sub-Servers
@@ -6375,5 +6377,16 @@ transfer_enewttl=New TTL must be a number of seconds
 transfer_deleting=Deleting $1 from this system ..
 transfer_edelete=.. deletion failed : $1
 transfer_disabling=Disabling $1 on this system ..
+
+domdkim_title=DKIM Options
+domdkim_header=DKIM options for this domain
+domdkim_key=DKIM key for this domain
+domdkim_key1=Use global default key
+domdkim_key0=Use key below
+domdkim_err=Failed to save DKIM options
+domdkim_setkey=Using custom DKIM key ..
+domdkim_clearkey=Using default DKIM key ..
+domdkim_econfig=.. DKIM configuration file was not found!
+domdkim_ekeylist=.. no key list is set in the DKIM configuration file
 
 __norefs=1
