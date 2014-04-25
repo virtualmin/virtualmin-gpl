@@ -947,8 +947,7 @@ foreach my $l (@$lref) {
 			# XXX why does it have to be named after the selector?
 			$file = $conf->{'KeyList'};
 			$file =~ s/\/([^\/]+)$/\/$d->{'id'}/;
-			&unlink_logged($file);	# Replace link
-			&open_tempfile(PRIVKEY, ">$file");
+			&open_lock_tempfile(PRIVKEY, ">$file");
 			&print_tempfile(PRIVKEY, $key);
 			&close_tempfile(PRIVKEY);
 			}
@@ -961,6 +960,8 @@ foreach my $l (@$lref) {
 	}
 &flush_file_lines($conf->{'KeyList'});
 &unlock_file($conf->{'KeyList'});
+&$second_print($text{'setup_done'});
+
 if ($d->{'dns'}) {
 	&add_dkim_dns_records([ $d ], $dkim);
 	}

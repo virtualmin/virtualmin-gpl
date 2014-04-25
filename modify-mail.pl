@@ -42,6 +42,11 @@ C<--autoconfig> flag. This allows email clients to find the SMTP and IMAP
 username, hostname, port and protocol just based on an email address. To turn
 this feature off, use the C<--no-autoconfig> flag.
 
+If DKIM is enabled on the system, by default all virtual servers share the same
+key for signing outgoing email. However, the C<--dkim-key> flag followed by a path
+contained a PEM-format key can be used to select an alternate custom key for this
+domain. Or you can revert to the default key with the C<--default-dkim-key> flag.
+
 =cut
 
 package virtual_server;
@@ -109,6 +114,16 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-autoconfig") {
 		$autoconfig = 0;
 		}
+	elsif ($a eq "--dkim-key") {
+		$keyfile = shift(@ARGV);
+		$key = &read_file_contents($keyfile);
+		$key || &usage("DKIM key file $keyfile does not exist");
+		$err = &validate_cert_format($key, 'key');
+		$err && &usage("DKIM key format is invalid : $err");
+		}
+	elsif ($a eq "--default-dkim-key") {
+		$key = "";
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -118,7 +133,7 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || @users || usage("No domains or users specified");
 defined($bcc) || defined($rbcc) || defined($aliascopy) || defined($dependent) ||
-    defined($autoconfig) || &usage("Nothing to do");
+    defined($autoconfig) || defined($key) || &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -239,6 +254,11 @@ foreach $d (@doms) {
 		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
 
+	# Change DKIM key
+	if ($d->{'mail'} && $config{'dkim_enabled'} && defined($key)) {
+		&save_domain_dkim_key($d, $key);
+		}
+
 	&save_domain($d);
 
 	&$outdent_print();
@@ -261,6 +281,7 @@ print "                      [--no-recipient-bcc]\n";
 print "                      [--alias-copy] | [--alias-catchall]\n";
 print "                      [--outgoing-ip | --no-outgoing-ip]\n";
 print "                      [--autoconfig | --no-autoconfig]\n";
+print "                      [--dkim-key file | --default-dkim-key]\n";
 exit(1);
 }
 
