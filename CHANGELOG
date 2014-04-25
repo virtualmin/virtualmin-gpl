@@ -1445,5 +1445,5 @@ Alias servers can now be re-pointed to a different target, using the Move Virtua
 A single virtual server can now be owned by multiple resellers, each of whom has permissions to manage it. This can be useful if reseller accounts are used as an additional layer of administrative control in Virtualmin.
 Reseller accounts can now have an associated Unix account for FTP/SSH access, which has permissions to access all managed domains' files.
 ---- Changes since 4.07 ----
-Updated the Roundcube script installer to version 1.0.0, Revive AdServer to 3.0.4, phpMyAdmin to 4.1.13, Piwik to 2.2.0, OpenGoo to 2.5.1.4, Dolibarr to 3.5.2, phpList to 3.0.6, Drupal to 6.31 and 7.27, MediaWiki to 1.22.6, and WordPress to 3.9.
+Updated the Roundcube script installer to version 1.0.0, Revive AdServer to 3.0.4, phpMyAdmin to 4.1.13, Piwik to 2.2.0, OpenGoo to 2.5.1.4, Dolibarr to 3.5.2, phpList to 3.0.6, Drupal to 6.31 and 7.27, MediaWiki to 1.22.6, Django to 1.4.11 and 1.6.3, and WordPress to 3.9.
 Reseller accounts can now be granted the ability to edit and create other resellers.
