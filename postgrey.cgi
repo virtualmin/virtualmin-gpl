@@ -37,6 +37,7 @@ print &ui_buttons_end();
 
 if ($ok) {
 	# Show whitelists of emails and clients
+	$formno = 1;
 	print &ui_hr();
 	@tabs = map { [ $_, $text{'postgrey_tab'.$_},
 			'postgrey.cgi?type='.&urlize($_) ] }
@@ -76,6 +77,7 @@ if ($ok) {
 				0,
 				undef,
 				$text{'postgrey_none'.$t},
+				$formno++,
 				);
 			}
 		else {
