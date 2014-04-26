@@ -8,17 +8,26 @@ $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_mail() || &error($text{'edit_ecannot'});
 
 # Validate inputs
-if (!$in{'key_def'}) {
+if ($in{'key_def'} == 0) {
+	# Manual key
 	$in{'key'} =~ s/\r//g;
 	$err = &validate_cert_format($in{'key'}, 'key');
 	&error($err) if ($err);
+	$key = $in{'key'};
+	}
+elsif ($in{'key_def'} == 2) {
+	# Generate key
+	($ok, $key) = &generate_dkim_key();
+	$ok || &error($key);
+	}
+else {
+	$key = undef;
 	}
 
 &ui_print_unbuffered_header(&domain_in($d), $text{'mail_title'}, "");
 
 # Update the key
-# XXX print stuff
-$err = &save_domain_dkim_key($d, $in{'key_def'} ? undef : $in{'key'});
+$err = &save_domain_dkim_key($d, $key);
 &save_domain($d);
 &run_post_actions();
 

@@ -18,6 +18,7 @@ $key = $keyfile ? &read_file_contents($keyfile) : undef;
 print &ui_table_row($text{'domdkim_key'},
 	&ui_radio("key_def", $key ? 0 : 1,
 		  [ [ 1, $text{'domdkim_key1'} ],
+		    [ 2, $text{'domdkim_key2'} ],
 		    [ 0, $text{'domdkim_key0'} ] ])."<br>\n".
 	&ui_textarea("key", $key, 10, 80));
 
