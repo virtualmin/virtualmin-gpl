@@ -320,15 +320,15 @@ if (!$dkim->{'keyfile'} || !-r $dkim->{'keyfile'} || $newkey) {
 	$size ||= 2048;
 	$dkim->{'keyfile'} ||= "/etc/dkim.key";
 	&$first_print(&text('dkim_newkey', "<tt>$dkim->{'keyfile'}</tt>"));
-	&lock_file($dkim->{'keyfile'});
-	my $out = &backquote_logged("openssl genrsa -out ".
-		quotemeta($dkim->{'keyfile'})." $size 2>&1 </dev/null");
-	if ($?) {
+	my ($ok, $out) = &generate_dkim_key($size);
+	if (!$ok) {
 		&$second_print(&text('dkim_enewkey',
 				"<tt>".&html_escape($out)."</tt>"));
 		return 0;
 		}
-	&unlock_file($dkim->{'keyfile'});
+	&open_lock_tempfile(KEY, ">$dkim->{'keyfile'}");
+	&print_tempfile(KEY, $out);
+	&close_tempfile(KEY);
 	&$second_print($text{'setup_done'});
 	}
 
@@ -722,14 +722,27 @@ if ($d->{'dns'}) {
 sub create_key_mapping_file
 {
 my ($doms, $keylist, $keyfile, $extra) = @_;
+
+# Build a list of existing domains with their own keys
+my $lref = &read_file_lines($keylist, 1);
+my %keymap;
+foreach my $l (@$lref) {
+	my ($pat, $dom, $file) = split(/:/, $l);
+	if (!&same_file($file, $keyfile)) {
+		$keymap{$dom} = $file;
+		}
+	}
+
+# Re-write the whole mapping file
 &open_lock_tempfile(KEYLIST, ">$keylist");
 foreach my $d (@$doms) {
 	&print_tempfile(KEYLIST,
-		"*\@".$d->{'dom'}.":".$d->{'dom'}.":".$keyfile."\n");
+		"*\@".$d->{'dom'}.":".$d->{'dom'}.":".
+		($keymap{$d->{'dom'}} || $keyfile)."\n");
 	}
 foreach my $dname (@$extra) {
 	&print_tempfile(KEYLIST,
-		"*\@".$dname.":".$dname.":".$keyfile."\n");
+		"*\@".$dname.":".$dname.":".($keymap{$dname} || $keyfile)."\n");
 	}
 &close_tempfile(KEYLIST);
 &set_ownership_permissions(undef, undef, 0755, $keylist);
@@ -943,10 +956,15 @@ foreach my $l (@$lref) {
 	if ($dom eq $d->{'dom'}) {
 		# Found the domain's line
 		if ($key) {
-			# Use a custom key file
-			# XXX why does it have to be named after the selector?
-			$file = $conf->{'KeyList'};
-			$file =~ s/\/([^\/]+)$/\/$d->{'id'}/;
+			# Use a custom key file. The suffix is used as the
+			# selector name by dkim-milter
+			my $dir = $conf->{'KeyList'};
+			$dir =~ s/\/([^\/]+)$/\/$d->{'id'}/;
+			if (-f $dir) {
+				&unlink_file($dir);
+				}
+			&make_dir($dir, 0755);
+			$file = "$dir/$dkim->{'selector'}";
 			&open_lock_tempfile(PRIVKEY, ">$file");
 			&print_tempfile(PRIVKEY, $key);
 			&close_tempfile(PRIVKEY);
@@ -965,7 +983,36 @@ foreach my $l (@$lref) {
 if ($d->{'dns'}) {
 	&add_dkim_dns_records([ $d ], $dkim);
 	}
+
+# Restart milter
+my $init = &get_dkim_init_name();
+&foreign_require("init");
+if (&init::action_status($init)) {
+	&init::restart_action($init);
+	}
+
 return 1;
+}
+
+# generate_dkim_key([size])
+# Generate a new DKIM PEM format key of the given size. Returns either 0 and
+# an error message, or 1 and the key text
+sub generate_dkim_key
+{
+my ($size) = @_;
+$size ||= 2048;
+my $temp = &transname();
+my $out = &backquote_logged("openssl genrsa -out ".
+	quotemeta($temp)." $size 2>&1 </dev/null");
+my $ex = $?;
+my $key = &read_file_contents($temp);
+&unlink_file($temp);
+if ($ex) {
+	return (0, $out);
+	}
+else {
+	return (1, $key);
+	}
 }
 
 1;

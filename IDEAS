@@ -37,8 +37,6 @@
  - Per-domain DKIM keys
 	- CHANGELOG
 	- what if no KeyList
-	- verify that it actually works
-	- clearing of key list when re-generating
 
  - fail2ban module
 	- http://virtualmin.com/node/33008
