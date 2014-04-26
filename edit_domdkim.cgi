@@ -5,6 +5,8 @@ require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_mail() || &error($text{'edit_ecannot'});
+$dkim = &get_dkim_config();
+$dkim && $dkim->{'enabled'} ||  &error($text{'domdkim_enabled'});
 &require_mail();
 
 &ui_print_header(&domain_in($d), $text{'domdkim_title'}, "", "domdkim");
@@ -20,7 +22,16 @@ print &ui_table_row($text{'domdkim_key'},
 		  [ [ 1, $text{'domdkim_key1'} ],
 		    [ 2, $text{'domdkim_key2'} ],
 		    [ 0, $text{'domdkim_key0'} ] ])."<br>\n".
-	&ui_textarea("key", $key, 10, 80));
+	&ui_textarea("key", $key, 20, 80));
+
+if ($keyfile) {
+	$pubkey = &get_dkim_pubkey($dkim, $d);
+	$records = $dkim->{'selector'}."._domainkey IN TXT ".
+		   &split_long_txt_record("\"v=DKIM1; k=rsa; t=s; p=$pubkey\"");
+	print &ui_table_row($text{'dkim_records'},
+		&ui_textarea("records", $records, 4, 80, "off",
+			     undef, "readonly=true"));
+	}
 
 print &ui_table_end();
 print &ui_form_end([ [ "save", $text{'save'} ] ]);

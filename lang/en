@@ -6392,5 +6392,6 @@ domdkim_econfig=.. DKIM configuration file was not found!
 domdkim_ekeylist=.. no key list is set in the DKIM configuration file
 domdkim_ekey=Invalid key format : $1
 domdkim_egen=Failed to generate new key : $1
+domdkim_enabled=DKIM is not current enabled
 
 __norefs=1
