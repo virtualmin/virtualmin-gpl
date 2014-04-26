@@ -35,7 +35,6 @@
 	- backup/restore
 
  - Per-domain DKIM keys
-	- CHANGELOG
 	- what if no KeyList
 
  - fail2ban module

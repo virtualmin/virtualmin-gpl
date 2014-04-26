@@ -1,0 +1,6 @@
+desc=Per-domain DKIM key
+html=DKIM keys can now be set on a domain by domain basis, rather than all virtual servers using the same key. This can be useful when a domain already has a key, or is using an off-site DNS server.
+master=1
+reseller=1
+owner=1
+link=edit_domdkim.cgi?dom=${ID}
