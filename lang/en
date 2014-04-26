@@ -1946,6 +1946,7 @@ log_newip_domain=Changed IP address for server $1
 log_newipshared_domain=Converted IP address for server $1 to shared
 log_style_domain=Applied new website content style to server $1
 log_exclude_domain=Updated excluded backup directories for server $1
+log_domdkim_domain=Changed DKIM key for server $1
 log_check=Re-checked configuration
 log_newweb=Updated new website template
 log_newuser=Updated new mailbox email template

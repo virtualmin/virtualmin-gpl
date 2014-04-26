@@ -39,7 +39,6 @@
 	- help page
 	- backup and restore
 	- what if no KeyList
-	- logging
 
  - fail2ban module
 	- http://virtualmin.com/node/33008
