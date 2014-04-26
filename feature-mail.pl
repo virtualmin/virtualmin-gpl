@@ -3096,6 +3096,21 @@ if ($supports_dependent) {
 	&close_tempfile(DEPENDENT);
 	}
 
+# Create custom DKIM key file
+if ($_[0]->{'mail'} && !$_[0]->{'alias'} && $config{'dkim_enabled'}) {
+	local $keyfile = &get_domain_dkim_key($_[0]);
+	local $keyback = $_[1]."_domdkim";
+	if ($keyfile) {
+		# Save the key
+		&copy_source_dest($keyfile, $keyback);
+		}
+	else {
+		# Record that there is no custom key
+		&open_tempfile(KEYFILE, ">$keyback");
+		&close_tempfile(KEYFILE);
+		}
+	}
+
 &$second_print($text{'setup_done'});
 
 if (!&mail_under_home()) {
@@ -3468,6 +3483,16 @@ if ($supports_dependent && -r "$_[1]_dependent") {
 	local $dependent = &read_file_contents("$_[1]_dependent");
 	chop($dependent);
 	&save_domain_dependent($_[0], $dependent ? 1 : 0);
+	}
+
+# Restore custom DKIM key
+if ($_[0]->{'mail'} && !$_[0]->{'alias'} && $config{'dkim_enabled'} &&
+    -r $_[1]."_domdkim") {
+	local $key = &read_file_contents($_[1]."_domdkim");
+	&push_all_print();
+	&set_all_null_print();
+	&save_domain_dkim_key($_[0], $key);
+	&pop_all_print();
 	}
 
 if (@errs) {

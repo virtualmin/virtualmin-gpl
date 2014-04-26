@@ -6390,5 +6390,7 @@ domdkim_setkey=Using custom DKIM key ..
 domdkim_clearkey=Using default DKIM key ..
 domdkim_econfig=.. DKIM configuration file was not found!
 domdkim_ekeylist=.. no key list is set in the DKIM configuration file
+domdkim_ekey=Invalid key format : $1
+domdkim_egen=Failed to generate new key : $1
 
 __norefs=1

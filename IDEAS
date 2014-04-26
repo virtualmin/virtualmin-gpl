@@ -36,10 +36,9 @@
 
  - Per-domain DKIM keys
 	- CHANGELOG
-	- help page
-	- backup and restore
 	- what if no KeyList
-	- key generation (test it!)
+	- verify that it actually works
+	- clearing of key list when re-generating
 
  - fail2ban module
 	- http://virtualmin.com/node/33008
