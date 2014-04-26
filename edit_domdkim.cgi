@@ -24,11 +24,11 @@ print &ui_table_row($text{'domdkim_key'},
 		    [ 0, $text{'domdkim_key0'} ] ])."<br>\n".
 	&ui_textarea("key", $key, 20, 80));
 
-if ($keyfile) {
+if ($keyfile && !$d->{'dns'}) {
 	$pubkey = &get_dkim_pubkey($dkim, $d);
 	$records = $dkim->{'selector'}."._domainkey IN TXT ".
 		   &split_long_txt_record("\"v=DKIM1; k=rsa; t=s; p=$pubkey\"");
-	print &ui_table_row($text{'dkim_records'},
+	print &ui_table_row($text{'domdkim_records'},
 		&ui_textarea("records", $records, 4, 80, "off",
 			     undef, "readonly=true"));
 	}
