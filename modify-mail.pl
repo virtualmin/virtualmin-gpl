@@ -43,9 +43,11 @@ username, hostname, port and protocol just based on an email address. To turn
 this feature off, use the C<--no-autoconfig> flag.
 
 If DKIM is enabled on the system, by default all virtual servers share the same
-key for signing outgoing email. However, the C<--dkim-key> flag followed by a path
-contained a PEM-format key can be used to select an alternate custom key for this
-domain. Or you can revert to the default key with the C<--default-dkim-key> flag.
+key for signing outgoing email. However, the C<--dkim-key> flag followed by a
+path contained a PEM-format key can be used to select an alternate custom key
+for this domain. Alternately you can revert to the default key with the
+C<--default-dkim-key> flag, or generate a new random key with the
+C<--generate-dkim-key> flag.
 
 =cut
 
@@ -123,6 +125,10 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--default-dkim-key") {
 		$key = "";
+		}
+	elsif ($a eq "--generate-dkim-key") {
+		($ok, $key) = &generate_dkim_key();
+		$ok || &usage("Failed to generate key : $key");
 		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
@@ -255,7 +261,8 @@ foreach $d (@doms) {
 		}
 
 	# Change DKIM key
-	if ($d->{'mail'} && $config{'dkim_enabled'} && defined($key)) {
+	if ($d->{'mail'} && !$d->{'alias'} && $config{'dkim_enabled'} &&
+	    defined($key)) {
 		&save_domain_dkim_key($d, $key);
 		}
 
@@ -281,7 +288,8 @@ print "                      [--no-recipient-bcc]\n";
 print "                      [--alias-copy] | [--alias-catchall]\n";
 print "                      [--outgoing-ip | --no-outgoing-ip]\n";
 print "                      [--autoconfig | --no-autoconfig]\n";
-print "                      [--dkim-key file | --default-dkim-key]\n";
+print "                      [--dkim-key file | --default-dkim-key |\n";
+print "                       --generate-dkim-key]\n";
 exit(1);
 }
 

@@ -11472,7 +11472,7 @@ if ($d->{'mail'} && $config{'mail'} && &can_edit_mail() &&
 		  });
 	}
 
-if ($d->{'mail'} && $config{'dkim_enabled'}) {
+if ($d->{'mail'} && !$d->{'alias'} && $config{'dkim_enabled'}) {
 	# Per-domain DKIM page
 	push(@rv, { 'page' => 'edit_domdkim.cgi',
 		    'title' => $text{'edit_domdkim'},
