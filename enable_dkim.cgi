@@ -47,6 +47,7 @@ else {
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
+&clear_links_cache();
 &run_post_actions();
 &webmin_log($in{'enabled'} ? "enable" : "disable", "dkim");
 
