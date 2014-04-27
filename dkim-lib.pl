@@ -333,18 +333,7 @@ if (!$dkim->{'keyfile'} || !-r $dkim->{'keyfile'} || $newkey) {
 	}
 
 # Make sure key has the right permissions
-if (&get_dkim_type() eq 'ubuntu') {
-	&set_ownership_permissions("opendkim", undef, 0700,
-				   $dkim->{'keyfile'});
-	}
-elsif (&get_dkim_type() eq 'debian') {
-	&set_ownership_permissions("dkim-filter", undef, 0700,
-				   $dkim->{'keyfile'});
-	}
-elsif (&get_dkim_type() eq 'redhat') {
-	&set_ownership_permissions("dkim-milter", undef, 0700,
-				   $dkim->{'keyfile'});
-	}
+&set_dkim_keyfile_permissions($dkim->{'keyfile'});
 
 # Get the public key
 &$first_print(&text('dkim_pubkey', "<tt>$dkim->{'keyfile'}</tt>"));
@@ -916,14 +905,38 @@ my ($d) = @_;
 my $dkim_config = &get_dkim_config_file();
 return undef if (!-r $dkim_config);
 my $conf = &get_debian_dkim_config($dkim_config);
-return undef if (!$conf->{'KeyList'});
-my $keyfile = $conf->{'KeyFile'};
-my $lref = &read_file_lines($conf->{'KeyList'}, 1);
-foreach my $l (@$lref) {
-	my ($pat, $dom, $file) = split(/:/, $l);
-	if ($dom eq $d->{'dom'} && !&same_file($file, $keyfile)) {
-		# Has it's own key
-		return $file;
+if ($conf->{'KeyList'}) {
+	# Old-style file mapping domains to key files
+	my $keyfile = $conf->{'KeyFile'};
+	my $lref = &read_file_lines($conf->{'KeyList'}, 1);
+	foreach my $l (@$lref) {
+		my ($pat, $dom, $file) = split(/:/, $l);
+		if ($dom eq $d->{'dom'} && !&same_file($file, $keyfile)) {
+			# Has it's own key
+			return $file;
+			}
+		}
+	}
+elsif ($conf->{'SigningTable'} && $conf->{'KeyTable'}) {
+	# New style mapping domains to key names, and key names to files
+	my $signingfile = $conf->{'SigningTable'};
+	$signingfile =~ s/^[a-z]+://;
+	my $slref = &read_file_lines($signingfile, 1);
+	my $keyname;
+	foreach my $l (@$slref) {
+		my ($re, $name) = split(/\s+/, $l);
+		if ($re eq "*\@$d->{'dom'}") {
+			$keyname = $name;
+			last;
+			}
+		}
+	return undef if (!$keyname);
+	my $klref = &read_file_lines($conf->{'KeyTable'}, 1);
+	foreach my $l (@$klref) {
+		my ($name, $kdom, $ksel, $kfile) = split(/\s+|:/, $l);
+		if ($name eq $keyname) {
+			return $kfile;
+			}
 		}
 	}
 return undef;
@@ -942,42 +955,130 @@ if (!-r $dkim_config) {
 	return 0;
 	}
 my $conf = &get_debian_dkim_config($dkim_config);
-if (!$conf->{'KeyList'}) {
-	&$second_print($text{'domdkim_ekeylist'});
-	return 0;
-	}
-my $keyfile = $conf->{'KeyFile'};
-&lock_file($conf->{'KeyList'});
-my $lref = &read_file_lines($conf->{'KeyList'});
-my $selkeyfile = $conf->{'KeyList'};
-$selkeyfile =~ s/\/([^\/]+)$/\/$dkim->{'selector'}/;
-foreach my $l (@$lref) {
-	my ($pat, $dom, $file) = split(/:/, $l);
-	if ($dom eq $d->{'dom'}) {
-		# Found the domain's line
-		if ($key) {
-			# Use a custom key file. The suffix is used as the
-			# selector name by dkim-milter
-			my $dir = $conf->{'KeyList'};
-			$dir =~ s/\/([^\/]+)$/\/$d->{'id'}/;
-			if (-f $dir) {
-				&unlink_file($dir);
-				}
-			&make_dir($dir, 0755);
-			$file = "$dir/$dkim->{'selector'}";
-			&open_lock_tempfile(PRIVKEY, ">$file");
-			&print_tempfile(PRIVKEY, $key);
-			&close_tempfile(PRIVKEY);
-			}
-		else {
-			# Revert to default (which is a link to the actual key)
-			$file = $selkeyfile;
-			}
-		$l = join(":", $pat, $dom, $file);
+if (&get_dkim_type() ne 'ubuntu') {
+	# Old style which supports a single key list file
+	if (!$conf->{'KeyList'}) {
+		&$second_print($text{'domdkim_ekeylist'});
+		return 0;
 		}
+	my $keyfile = $conf->{'KeyFile'};
+	&lock_file($conf->{'KeyList'});
+	my $lref = &read_file_lines($conf->{'KeyList'});
+	my $selkeyfile = $conf->{'KeyList'};
+	$selkeyfile =~ s/\/([^\/]+)$/\/$dkim->{'selector'}/;
+	foreach my $l (@$lref) {
+		my ($pat, $dom, $file) = split(/:/, $l);
+		if ($dom eq $d->{'dom'}) {
+			# Found the domain's line
+			if ($key) {
+				# Use a custom key file. The suffix is used as
+				# the selector name by dkim-milter
+				my $dir = $conf->{'KeyList'};
+				$dir =~ s/\/([^\/]+)$/\/$d->{'id'}/;
+				if (-f $dir) {
+					&unlink_file($dir);
+					}
+				&make_dir($dir, 0755);
+				$file = "$dir/$dkim->{'selector'}";
+				&open_lock_tempfile(PRIVKEY, ">$file");
+				&print_tempfile(PRIVKEY, $key);
+				&close_tempfile(PRIVKEY);
+				&set_dkim_keyfile_permissions($file);
+				}
+			else {
+				# Revert to default (which is a link to the
+				# actual key)
+				$file = $selkeyfile;
+				}
+			$l = join(":", $pat, $dom, $file);
+			}
+		}
+	&flush_file_lines($conf->{'KeyList'});
+	&unlock_file($conf->{'KeyList'});
 	}
-&flush_file_lines($conf->{'KeyList'});
-&unlock_file($conf->{'KeyList'});
+elsif (&get_dkim_type() eq 'ubuntu') {
+	# New style with SigningTable and KeyTable options
+
+	# Add missing directives if needed
+	if (!$conf->{'SigningTable'}) {
+		$conf->{'SigningTable'} = "refile:".$dkim_config;
+		$conf->{'SigningTable'} =~ s/\/([^\/]+)$/\/dkim-signingtable/;
+		&save_debian_dkim_config($dkim_config,
+			"SigningTable", $conf->{'SigningTable'});
+		}
+	if (!$conf->{'KeyTable'}) {
+		$conf->{'KeyTable'} = $dkim_config;
+		$conf->{'KeyTable'} =~ s/\/([^\/]+)$/\/dkim-keytable/;
+		&save_debian_dkim_config($dkim_config,
+			"KeyTable", $conf->{'KeyTable'});
+		}
+
+	# Find domain's entry in signing table
+	my $signingfile = $conf->{'SigningTable'};
+	$signingfile =~ s/^[a-z]+://;
+	&lock_file($signingfile);
+	my $slref = &read_file_lines($signingfile);
+	if (!@$slref) {
+		# Add entry for the default key
+		push(@$slref, "*\tdefault");
+		}
+	my $i = 0;
+	my $sidx = -1;
+	foreach my $l (@$slref) {
+		my ($re, $name) = split(/\s+/, $l);
+		if ($re eq "*\@$d->{'dom'}") {
+			$sidx = $i;
+			last;
+			}
+		$i++;
+		}
+	if ($sidx < 0 && $key) {
+		# Need to add (at the start, so it matches first)
+		splice(@$slref, 0, 0, "*\@$d->{'dom'}\t$d->{'id'}");
+		}
+	elsif ($sidx >= 0 && !$key) {
+		# Need to remove
+		splice(@$slref, $sidx, 1);
+		}
+	&flush_file_lines($signingfile);
+	&unlock_file($signingfile);
+
+	# Find domain's entry in key table
+	&lock_file($conf->{'KeyTable'});
+	my $klref = &read_file_lines($conf->{'KeyTable'});
+	if (!@$klref) {
+		# Add entry for the default key
+		push(@$klref, "default\t*:$dkim->{'selector'}:".
+			      $dkim->{'keyfile'});
+		}
+	$i = 0;
+	my $kidx = -1;
+	foreach my $l (@$klref) {
+		my ($name, $kdom, $ksel, $kfile) = split(/\s+|:/, $l);
+		if ($name eq $d->{'id'}) {
+			$kidx = $i;
+			last;
+			}
+		$i++;
+		}
+	if ($kidx < 0 && $key) {
+		# Need to add
+		my $keyfile = $dkim_config;
+		$keyfile =~ s/\/([^\/]+)$/\/$d->{'id'}.dkim-key/;
+		&open_lock_tempfile(PRIVKEY, ">$keyfile");
+		&print_tempfile(PRIVKEY, $key);
+		&close_tempfile(PRIVKEY);
+		&set_dkim_keyfile_permissions($keyfile);
+		push(@$klref, "$d->{'id'}\t$d->{'dom'}:".
+			      "$dkim->{'selector'}:$keyfile");
+		}
+	elsif ($kidx >= 0 && !$key) {
+		# Need to remove
+		splice(@$klref, $kidx, 1);
+		}
+	&flush_file_lines($conf->{'KeyTable'});
+	&unlock_file($conf->{'KeyTable'});
+	}
 &$second_print($text{'setup_done'});
 
 if ($d->{'dns'}) {
@@ -1012,6 +1113,22 @@ if ($ex) {
 	}
 else {
 	return (1, $key);
+	}
+}
+
+# set_dkim_keyfile_permissions(keyfile)
+# Set the ownership and perms on a key file
+sub set_dkim_keyfile_permissions
+{
+my ($keyfile) = @_;
+if (&get_dkim_type() eq 'ubuntu') {
+	&set_ownership_permissions("opendkim", undef, 0700, $keyfile);
+	}
+elsif (&get_dkim_type() eq 'debian') {
+	&set_ownership_permissions("dkim-filter", undef, 0700, $keyfile);
+	}
+elsif (&get_dkim_type() eq 'redhat') {
+	&set_ownership_permissions("dkim-milter", undef, 0700, $keyfile);
 	}
 }
 

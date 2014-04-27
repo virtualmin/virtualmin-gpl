@@ -12,13 +12,13 @@ if ($in{'key_def'} == 0) {
 	# Manual key
 	$in{'key'} =~ s/\r//g;
 	$err = &validate_cert_format($in{'key'}, 'key');
-	&error($err) if ($err);
+	&error(&text('domdkim_ekey', $err)) if ($err);
 	$key = $in{'key'};
 	}
 elsif ($in{'key_def'} == 2) {
 	# Generate key
 	($ok, $key) = &generate_dkim_key();
-	$ok || &error($key);
+	$ok || &error(&text('domdkim_egen', $key));
 	}
 else {
 	$key = undef;

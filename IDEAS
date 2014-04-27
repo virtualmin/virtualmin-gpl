@@ -35,7 +35,7 @@
 	- backup/restore
 
  - Per-domain DKIM keys
-	- what if no KeyList
+	- domain rename
 
  - fail2ban module
 	- http://virtualmin.com/node/33008
