@@ -2773,7 +2773,6 @@ if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
 	local @aliases = grep { $_->{'dns'} }
 			      &get_domain_by("alias", $d->{'id'});
 	foreach my $ad (@aliases) {
-		# XXX provision mode
 		&obtain_lock_dns($ad);
 		local $file;
 		local $recs;
