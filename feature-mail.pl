@@ -978,6 +978,17 @@ if (!$isalias) {
 	&create_everyone_file($_[0]);
 	}
 
+# If domain was re-named and had a private DKIM key, update it
+if (!$_[0]->{'alias'} && $config{'dkim_enabled'}) {
+	my $keyfile = &get_domain_dkim_key($_[1]);
+	if ($keyfile) {
+		my $key = &read_file_contents($keyfile);
+		if ($key) {
+			&save_domain_dkim_key($_[0], $key);
+			}
+		}
+	}
+
 # Update domain in DKIM list, if DNS was enabled or disabled
 if ($_[0]->{'dns'} && !$_[1]->{'dns'}) {
 	&update_dkim_domains($_[0], 'setup');

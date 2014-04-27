@@ -34,8 +34,5 @@
 	- CHANGELOG
 	- backup/restore
 
- - Per-domain DKIM keys
-	- domain rename
-
  - fail2ban module
 	- http://virtualmin.com/node/33008
