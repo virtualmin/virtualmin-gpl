@@ -65,7 +65,8 @@ RECORD: foreach $r (@$recs) {
 		# Regular DNS record
 		next if ($r->{'type'} eq 'DNSKEY' ||	# auto-generated DNSSEC
 			 $r->{'type'} eq 'NSEC' ||
-			 $r->{'type'} eq 'NSEC3');
+			 $r->{'type'} eq 'NSEC3' ||
+			 $r->{'type'} eq 'RRSIG');
 		# Skip sub-domain records
 		foreach $sname (@subdoms) {
 			next RECORD if ($r->{'name'} eq $sname."." ||
