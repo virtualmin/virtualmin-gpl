@@ -6008,6 +6008,7 @@ records_valuesrv4=Target hostname
 records_evaluesrv4=Invalid DNS name for target hostname
 records_typetxt=Text
 records_valuetxt=Text record
+records_valuespf=Sender permitted from specification
 records_typesoa=Start Of Domain
 records_typespf=Sender Permitted From
 records_typedefttl=Default Cache Time
