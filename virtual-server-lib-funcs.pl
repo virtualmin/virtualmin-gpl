@@ -11564,7 +11564,7 @@ if (&can_delete_domain($d)) {
 		  });
 	}
 
-if (!&master_admin() && &can_passwd()) {
+if (&can_passwd()) {
 	# Change password button
 	push(@rv, { 'page' => 'edit_pass.cgi',
 		    'title' => $text{'edit_changepass'},
