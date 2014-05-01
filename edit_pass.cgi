@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-# Show a form for changing a reseller password
+# Show a form for changing a domain's password
 
 require './virtual-server-lib.pl';
 &ReadParse();
