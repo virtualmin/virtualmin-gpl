@@ -304,7 +304,7 @@ foreach $d (@doms) {
 	if (@addrecs) {
 		foreach my $rn (@addrecs) {
 			my ($name, $type, $ttl, $values) = @$rn;
-			if ($name !~ /\.$/) {
+			if ($name !~ /\.$/ && $name ne "\@") {
 				$name .= ".".$d->{'dom'}.".";
 				}
 			&bind8::create_record($file, $name, $ttl, "IN",
