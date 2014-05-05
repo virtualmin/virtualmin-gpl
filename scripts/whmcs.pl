@@ -49,7 +49,7 @@ return ( 5 );
 
 sub script_whmcs_php_modules
 {
-return ("mysql", "curl");
+return ("mysql", "curl", "gd");
 }
 
 sub script_whmcs_dbs
