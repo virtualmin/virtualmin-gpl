@@ -1066,6 +1066,25 @@ for(my $i=0; $i<10; $i++) {
 return 0;
 }
 
+# is_hashed_password(string)
+# Returns non-null if some string looks like a hashed password
+sub is_hashed_password
+{
+my ($pass) = @_;
+if ($pass =~ /^\{[a-zA-Z0-9]+\}\S+$/) {
+	return "ldap";
+	}
+elsif ($pass =~ /^\$1\$[a-z0-9\.\/\$]+$/) {
+	return "md5";
+	}
+elsif ($pass =~ /^\$2a\$/) {
+	return "blowfish";
+	}
+else {
+	return undef;
+	}
+}
+
 # Lock all Unix password files
 sub obtain_lock_unix
 {
