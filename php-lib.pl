@@ -750,6 +750,7 @@ foreach my $v (@all_possible_php_versions) {
 		# For a version like 5.4, check for binaries like php54 and
 		# /opt/rh/php54/root/usr/bin/php
 		$phpn ||= &has_command("php$nodotv-cgi") ||
+			  &has_command("php-cgi$nodotv") ||
 			  &has_command("/opt/rh/php$nodotv/root/usr/bin/php-cgi") ||
 			  &has_command("/opt/rh/php$nodotv/bin/php-cgi") ||
 			  &has_command("php$nodotv") ||
