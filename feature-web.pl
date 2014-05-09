@@ -1649,6 +1649,13 @@ if ($virt) {
 	# Re-link Apache logs if needed
 	&link_apache_logs($_[0]);
 
+	# Fix Options lines
+	my ($virt, $vconf, $conf) = &get_apache_virtual($_[0]->{'dom'},
+							$_[0]->{'web_port'});
+	if ($virt) {
+		&fix_options_directives($vconf, $conf);
+		}
+
 	&register_post_action(\&restart_apache);
 	$rv = 1;
 	}
@@ -4256,6 +4263,42 @@ foreach my $p (@ports) {
 &release_lock_web($d);
 &register_post_action(\&restart_apache);
 return undef;
+}
+
+# fix_options_directives(&vconf, &config)
+# If running Apache 2.4+, Options lines with a mix of + and non+ are not
+# allowed, so fix them up.
+sub fix_options_directives
+{
+my ($vconf, $conf) = @_;
+my @o = &apache::find_directive("Options", $vconf);
+my $changed = 0;
+foreach my $o (@o) {
+	my @w = split(/\s+/, $o);
+	my $plus_minus = 0;
+	my $other = 0;
+	foreach my $w (@w) {
+		$plus_minus++ if ($w =~ /^[\-\+]/);
+		$other++ if ($w !~ /^[\-\+]/);
+		}
+	if ($plus_minus && $other) {
+		# Upgrade all non-decorated to +
+		foreach my $w (@w) {
+			if ($w !~ /^[\-\+]/) {
+				$w = "+".$w;
+				}
+			}
+		$o = join(" ", @w);
+		$changed++;
+		}
+	}
+if ($changed) {
+	&apache::save_directive("Options", \@o, $vconf, $conf);
+	}
+foreach my $dir (&apache::find_directive_struct("Directory", $pconf)) {
+	$changed += &fix_options_directives($dir->{'members'}, $conf);
+	}
+return $changed;
 }
 
 $done_feature_script{'web'} = 1;
