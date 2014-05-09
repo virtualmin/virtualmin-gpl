@@ -4296,9 +4296,10 @@ foreach my $o (@o) {
 	}
 if ($changed) {
 	&apache::save_directive("Options", \@o, $vconf, $conf);
+	&flush_file_lines($vconf->[0]->{'file'});
 	}
-foreach my $dir (&apache::find_directive_struct("Directory", $pconf)) {
-	$changed += &fix_options_directives($dir->{'members'}, $conf);
+foreach my $dir (&apache::find_directive_struct("Directory", $vconf)) {
+	$changed += &fix_options_directives($dir->{'members'}, $conf, $ignore);
 	}
 return $changed;
 }

@@ -576,10 +576,22 @@ foreach $d (@doms) {
 
 	if ($fixoptions) {
 		# Fix Options to support Apache 2.4
-		my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
-								$d->{'web_port'});
-		if ($virt) {
-			&fix_options_directives($vconf, $conf, 1);
+		foreach my $p ($d->{'web_port'},
+			       $d->{'ssl'} ? ($d->{'web_sslport'}) : ()) {
+			&$first_print("Fixing Options directives for port $p ..");
+			my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
+			if ($virt) {
+				my $c = &fix_options_directives($vconf, $conf, 1);
+				if ($c) {
+					&$second_print(".. fixed $c directives");
+					}
+				else {
+					&$second_print(".. no fixes needed");
+					}
+				}
+			else {
+				&$second_print(".. no Virtualhost found!");
+				}
 			}
 		}
 
@@ -639,6 +651,7 @@ print "                     [--error-log log-path]\n";
 print "                     [--document-dir subdirectory]\n";
 print "                     [--port number] [--ssl-port number]\n";
 print "                     [--url-port number] [--ssl-url-port number]\n";
+print "                     [--fix-options]\n";
 exit(1);
 }
 
