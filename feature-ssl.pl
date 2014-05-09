@@ -808,6 +808,13 @@ if ($virt) {
 	# Re-save PHP mode, in case it changed
 	&save_domain_php_mode($_[0], &get_domain_php_mode($_[0]));
 
+	# Fix Options lines
+	my ($virt, $vconf, $conf) = &get_apache_virtual($_[0]->{'dom'},
+							$_[0]->{'web_sslport'});
+	if ($virt) {
+		&fix_options_directives($vconf, $conf, 0);
+		}
+
 	&$second_print($text{'setup_done'});
 	}
 else {

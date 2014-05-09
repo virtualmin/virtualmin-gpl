@@ -4,16 +4,23 @@
 
 Change a virtual server's web configuration
 
-This script can update the PHP and web forwarding settings for one or more virtual servers. Like other scripts, the servers to change are selecting using the C<--domain> or C<--all-domains> parameters.
+This script can update the PHP and web forwarding settings for one or more
+virtual servers. Like other scripts, the servers to change are selecting
+using the C<--domain> or C<--all-domains> parameters.
 
 To change the method Virtualmin uses to run CGI scripts, use the C<--mode>
 parameter followed by one of C<mod_php>, C<cgi> or C<fcgid>. To enable
 or disable the use of Suexec for running CGI scripts, give either the
 C<--suexec> or C<--no-suexec> parameter.
 
-The C<--proxy> parameter can be used to have the website proxy all requests to another URL, which must follow C<--proxy>. To disable this, the C<--no-proxy> parameter must be given.
+The C<--proxy> parameter can be used to have the website proxy all requests
+to another URL, which must follow C<--proxy>. To disable this, the
+C<--no-proxy> parameter must be given.
 
-The C<--framefwd> parameter similarly can be used to forward requests to the virtual server to another URL, using a hidden frame rather than proxying. To turn it off, using the C<--no-framefwd> option. To specify a title for the forwarding frame page, use C<--frametitle>.
+The C<--framefwd> parameter similarly can be used to forward requests to the
+virtual server to another URL, using a hidden frame rather than proxying. To
+turn it off, using the C<--no-framefwd> option. To specify a title for the
+forwarding frame page, use C<--frametitle>.
 
 If your system has more than one version of PHP installed, the version to use
 for a domain can be set with the C<--php-version> parameter, followed by a
@@ -60,7 +67,6 @@ the C<--ssl-port> flag.
 Alternately, you can change the HTTP port that Virtualmin uses in URLs
 referencing this domain with the C<--url-port> flag. For SSL websites, you can
 also use the C<--ssl-url-port> flag.
-
 
 =cut
 
@@ -200,6 +206,9 @@ while(@ARGV > 0) {
 		$sslurlport =~ /^\d+$/ && $sslport > 0 && $sslport < 65536 ||
 			&usage("--ssl-url-port must be followed by a number");
 		}
+	elsif ($a eq "--fix-options") {
+		$fixoptions = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -212,7 +221,8 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) ||
   defined($suexec) || $stylename || $content || defined($children) ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
-  $urlport || $sslurlport || defined($includes) || &usage("Nothing to do");
+  $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
+  &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -561,6 +571,15 @@ foreach $d (@doms) {
 		else {
 			# Via plugin call
 			&plugin_call($p, "feature_modify", $d, $oldd);
+			}
+		}
+
+	if ($fixoptions) {
+		# Fix Options to support Apache 2.4
+		my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+								$d->{'web_port'});
+		if ($virt) {
+			&fix_options_directives($vconf, $conf, 1);
 			}
 		}
 

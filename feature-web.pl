@@ -1653,7 +1653,7 @@ if ($virt) {
 	my ($virt, $vconf, $conf) = &get_apache_virtual($_[0]->{'dom'},
 							$_[0]->{'web_port'});
 	if ($virt) {
-		&fix_options_directives($vconf, $conf);
+		&fix_options_directives($vconf, $conf, 0);
 		}
 
 	&register_post_action(\&restart_apache);
@@ -4265,12 +4265,14 @@ foreach my $p (@ports) {
 return undef;
 }
 
-# fix_options_directives(&vconf, &config)
+# fix_options_directives(&vconf, &config, [ignore-version])
 # If running Apache 2.4+, Options lines with a mix of + and non+ are not
 # allowed, so fix them up.
 sub fix_options_directives
 {
-my ($vconf, $conf) = @_;
+my ($vconf, $conf, $ignore) = @_;
+&require_apache();
+return 0 if ($apache::httpd_modules{'core'} < 2.4 && !$ignore);
 my @o = &apache::find_directive("Options", $vconf);
 my $changed = 0;
 foreach my $o (@o) {
