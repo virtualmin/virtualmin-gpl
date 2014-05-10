@@ -4304,6 +4304,44 @@ foreach my $dir (&apache::find_directive_struct("Directory", $vconf)) {
 return $changed;
 }
 
+# fix_options_template(&tmpl, [ignore-version]))
+# If some template has Options lines for the web setting that are a mix of + and non+,
+# fix them up
+sub fix_options_template
+{
+my ($tmpl, $ignore) = @_;
+&require_apache();
+return 0 if ($apache::httpd_modules{'core'} < 2.4 && !$ignore);
+return 0 if (!$tmpl->{'web'} || $tmpl->{'web'} eq 'none');
+my @lines = split(/\t/, $tmpl->{'web'});
+my $changed = 0;
+foreach my $l (@lines) {
+	if ($l =~ /^\s*Options\s*(.*)/) {
+		my @w = split(/\s+/, $1);
+		my $plus_minus = 0;
+		my $other = 0;
+		foreach my $w (@w) {
+			$plus_minus++ if ($w =~ /^[\-\+]/);
+			$other++ if ($w !~ /^[\-\+]/);
+			}
+		if ($plus_minus && $other) {
+			# Upgrade all non-decorated to +
+			foreach my $w (@w) {
+				if ($w !~ /^[\-\+]/) {
+					$w = "+".$w;
+					}
+				}
+			$l = "Options ".join(" ", @w);
+			$changed++;
+			}
+		}
+	}
+if ($changed) {
+	$tmpl->{'web'} = join("\t", @lines);
+	&save_template($tmpl);
+	}
+}
+
 $done_feature_script{'web'} = 1;
 
 1;

@@ -5623,6 +5623,11 @@ foreach my $t (readdir(DIR)) {
 closedir(DIR);
 &execute_command("rm -rf ".quotemeta($temp));
 
+# Fix up bad Apache directives in templates
+foreach my $tmpl (&list_templates()) {
+	&fix_options_template($tmpl);
+	}
+
 # Restore global variables
 if (-r $file."_global") {
 	&copy_source_dest($file."_global", $global_template_variables_file);
