@@ -57,6 +57,9 @@ while(@ARGV > 0) {
 		defined($v) || &usage("Failed to read file $f : $!");
 		push(@values, $v);
 		}
+	elsif ($a eq "--fix-options") {
+		$fixoptions = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -66,7 +69,7 @@ while(@ARGV > 0) {
 	}
 
 # Validate args, get the template
-scalar(@names) && scalar(@values) ||
+scalar(@names) && scalar(@values) || $fixoptions ||
 	&usage("At least one --name and --value parameter must be given");
 scalar(@names) == scalar(@values) ||
 	&usage("The number of --name and --value parameters must be the same");
@@ -82,12 +85,20 @@ elsif (defined($tmplid)) {
 else {
 	&usage("Missing --name or --id parameter");
 	}
+my $file = $tmpl->{'file'} || $module_config_file;
+&lock_file($file);
 
 # Update the template
 for($i=0; $i<scalar(@names); $i++) {
 	$tmpl->{$names[$i]} = $values[$i];
 	}
 &save_template($tmpl);
+
+# Apply Apache Options line fix
+if ($fixoptions) {
+	&fix_options_template($tmpl, 1);
+	}
+&unlock_file($file);
 
 # Run all post-save functions
 foreach my $f (@features) {
@@ -112,6 +123,7 @@ print "Changes one or more settings in a virtual server template\n";
 print "\n";
 print "virtualmin modify-template --name template-name | --id template-id\n";
 print "                          [--setting name --value newvalue]+\n";
+print "                          [--fix-options]\n";
 exit(1);
 }
 
