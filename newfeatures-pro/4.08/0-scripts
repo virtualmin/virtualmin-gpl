@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Roundcube script installer to version 1.0.0 and 0.8.7, Revive AdServer to 3.0.4, phpMyAdmin to 4.1.14, Piwik to 2.2.2, OpenGoo to 2.5.1.4, Dolibarr to 3.5.2, phpList to 3.0.6, Drupal to 6.31 and 7.27, MediaWiki to 1.22.6, Django to 1.4.12 and 1.6.4, ownCloud to 6.0.3, phpMyFAQ to 2.8.9, Joomla to 3.3.0 and 2.5.20, TikiWiki to 12.1 and 6.14, Node.JS to 0.10.28, and WordPress to 3.9.1.
+html=Updated the Roundcube script installer to version 1.0.0 and 0.8.7, Revive AdServer to 3.0.4, phpMyAdmin to 4.2.0, Piwik to 2.2.2, OpenGoo to 2.5.1.4, Dolibarr to 3.5.2, phpList to 3.0.6, Drupal to 6.31 and 7.27, MediaWiki to 1.22.6, Django to 1.4.12 and 1.6.4, ownCloud to 6.0.3, phpMyFAQ to 2.8.9, Joomla to 3.3.0 and 2.5.20, TikiWiki to 12.1 and 6.14, Node.JS to 0.10.28, and WordPress to 3.9.1.
 master=1
 reseller=1
 domain=1
