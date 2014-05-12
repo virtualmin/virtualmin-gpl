@@ -3522,7 +3522,7 @@ $mail_tests = [
 	},
 
 	# Test sender BCC feature
-	$supports_bcc ? (
+	$supports_bcc >= 1 ? (
 		# Enable outgoing BCC
 		{ 'command' => 'modify-mail.pl',
 		  'args' => [ [ 'domain', $test_domain ],
@@ -3552,7 +3552,7 @@ $mail_tests = [
 		) : ( ),
 
 	# Test recipient feature
-	$supports_bcc ? (
+	$supports_bcc >= 2 ? (
 		# Enable incoming BCC
 		{ 'command' => 'modify-mail.pl',
 		  'args' => [ [ 'domain', $test_domain ],
