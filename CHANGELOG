@@ -1449,3 +1449,5 @@ Updated the Roundcube script installer to version 1.0.1 and 0.8.7, Revive AdServ
 Reseller accounts can now be granted the ability to edit and create other resellers.
 DKIM keys can now be set on a domain by domain basis, rather than all virtual servers using the same key.
 Fixed support for the Options directive in Apache 2.4.
+---- Changes since 4.08 ----
+Updated the phpMyAdmin script installer to version 4.2.1.
