@@ -16,17 +16,18 @@ $msg = &text('aliases_indom', scalar(@aliases),
 # Create add links
 ($mleft, $mreason, $mmax, $mhide) = &count_feature("aliases");
 if ($mleft != 0) {
-	push(@links, [ "edit_alias.cgi?new=1&dom=$in{'dom'}&show=$in{'show'}",
+	push(@links, [ "edit_alias.cgi?new=1&dom=".&urlize($in{'dom'}).
+			"&show=".&urlize($in{'show'}),
 		       $text{'aliases_add'} ]);
 	}
-push(@links, [ "mass_aedit_form.cgi?dom=$in{'dom'}",
+push(@links, [ "mass_aedit_form.cgi?dom=".&urlize($in{'dom'}),
 	       $text{'aliases_emass'}, 'right' ]);
 if ($in{'show'}) {
-	push(@links, [ "list_aliases.cgi?dom=$in{'dom'}&show=0",
+	push(@links, [ "list_aliases.cgi?dom=".&urlize($in{'dom'})."&show=0",
 		       $text{'aliases_hide'}, 'right' ]);
 	}
 else {
-	push(@links, [ "list_aliases.cgi?dom=$in{'dom'}&show=1",
+	push(@links, [ "list_aliases.cgi?dom=".&urlize($in{'dom'})."&show=1",
 		       $text{'aliases_show'}, 'right' ]);
 	}
 
@@ -76,8 +77,8 @@ foreach $a (sort { $a->{'from'} cmp $b->{'from'} } @aliases) {
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $a->{'from'} },
-		"<a href='edit_alias.cgi?dom=$in{'dom'}&".
-		"alias=".&urlize($a->{'from'})."&show=$in{'show'}'>$name</a>",
+		"<a href='edit_alias.cgi?dom=".&urlize($in{'dom'})."&".
+		"alias=".&urlize($a->{'from'})."&show=".&urlize($in{'show'})."'>$name</a>",
 		$alines,
 		$anycmt ? ( $a->{'cmt'} ) : ( ),
 		]);
