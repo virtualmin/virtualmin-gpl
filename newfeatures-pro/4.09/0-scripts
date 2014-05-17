@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to version 4.2.1, Revive Adserver to 3.0.5, and Django to 1.6.5 and 1.4.13.
+html=Updated the phpMyAdmin script installer to version 4.2.1, Revive Adserver to 3.0.5, Magento to 1.9.0.1, and Django to 1.6.5 and 1.4.13.
 master=1
 reseller=1
 domain=1
