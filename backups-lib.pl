@@ -3722,6 +3722,7 @@ if (!$base && !$re) {
 $start ||= time();
 local $cutoff = $start - $days*24*60*60;
 local $pcount = 0;
+local $mcount = 0;
 local $ok = 1;
 
 if ($mode == 0) {
@@ -3731,8 +3732,10 @@ if ($mode == 0) {
 		local $path = "$base/$f";
 		local @st = stat($path);
 		if ($f ne "." && $f ne ".." && $f =~ /^$re$/ &&
-		    $st[9] < $cutoff && $f !~ /\.(dom|info)$/) {
+		    $f !~ /\.(dom|info)$/) {
 			# Found one to delete
+			$mcount++;
+			next if ($st[9] >= $cutoff);
 			local $old = int((time() - $st[9]) / (24*60*60));
 			&$first_print(&text(-d $path ? 'backup_deletingdir'
 					             : 'backup_deletingfile',
@@ -3763,9 +3766,11 @@ elsif ($mode == 1) {
 		return 0;
 		}
 	foreach my $f (@$dir) {
-		if ($f->[13] =~ /^$re$/ && $f->[9] && $f->[9] < $cutoff &&
+		if ($f->[13] =~ /^$re$/ &&
 		    $f->[13] !~ /\.(dom|info)$/ &&
 		    $f->[13] ne "." && $f->[13] ne "..") {
+			$mcount++;
+			next if (!$f->[9] || $f->[9] >= $cutoff);
 			local $old = int((time() - $f->[9]) / (24*60*60));
 			&$first_print(&text('backup_deletingftp',
 					    "<tt>$base/$f->[13]</tt>", $old));
@@ -3813,9 +3818,11 @@ elsif ($mode == 2) {
 	foreach my $l (split(/\r?\n/, $lsout)) {
 		local @st = &parse_lsl_line($l);
 		next if (!scalar(@st));
-		if ($st[13] =~ /^$re$/ && $st[9] && $st[9] < $cutoff &&
+		if ($st[13] =~ /^$re$/ &&
 		    $st[13] !~ /\.(dom|info)$/ &&
 		    $st[13] ne "." && $st[13] ne "..") {
+			$mcount++;
+			next if (!$st[9] || $st[9] >= $cutoff);
 			local $old = int((time() - $st[9]) / (24*60*60));
 			&$first_print(&text('backup_deletingssh',
 					    "<tt>$base/$st[13]</tt>", $old));
@@ -3847,8 +3854,10 @@ elsif ($mode == 3 && $host =~ /\%/) {
 		}
 	foreach my $b (@$buckets) {
 		local $ctime = &s3_parse_date($b->{'CreationDate'});
-		if ($b->{'Name'} =~ /^$re$/ && $ctime && $ctime < $cutoff) {
+		if ($b->{'Name'} =~ /^$re$/) {
 			# Found one to delete
+			$mcount++;
+			next if (!$ctime || $ctime >= $cutoff);
 			local $old = int((time() - $ctime) / (24*60*60));
 			&$first_print(&text('backup_deletingbucket',
 					    "<tt>$b->{'Name'}</tt>", $old));
@@ -3886,9 +3895,10 @@ elsif ($mode == 3 && $path =~ /\%/) {
 		}
 	foreach my $f (@$files) {
 		local $ctime = &s3_parse_date($f->{'LastModified'});
-		if ($f->{'Key'} =~ /^$re$/ && $ctime && $ctime < $cutoff &&
-		    $f->{'Key'} !~ /\.(dom|info)$/) {
+		if ($f->{'Key'} =~ /^$re$/ && $f->{'Key'} !~ /\.(dom|info)$/) {
 			# Found one to delete
+			$mcount++;
+			next if (!$ctime || $ctime >= $cutoff);
 			local $old = int((time() - $ctime) / (24*60*60));
 			&$first_print(&text('backup_deletingfile',
 					    "<tt>$f->{'Key'}</tt>", $old));
@@ -3926,8 +3936,10 @@ elsif ($mode == 6 && $host =~ /\%/) {
 		local $st = &rs_stat_container($rsh, $c);
 		next if (!ref($st));
 		local $ctime = int($st->{'X-Timestamp'});
-		if ($c =~ /^$re$/ && $ctime && $ctime < $cutoff) {
+		if ($c =~ /^$re$/) {
 			# Found one to delete
+			$mcount++;
+			next if (!$ctime || $ctime >= $cutoff);
 			local $old = int((time() - $ctime) / (24*60*60));
 			&$first_print(&text('backup_deletingcontainer',
 					    "<tt>$c</tt>", $old));
@@ -3962,9 +3974,11 @@ elsif ($mode == 6 && $path =~ /\%/) {
 		local $st = &rs_stat_object($rsh, $host, $f);
 		next if (!ref($st));
 		local $ctime = int($st->{'X-Timestamp'});
-		if ($f =~ /^$re($|\/)/ && $ctime && $ctime < $cutoff &&
-		    $f !~ /\.(dom|info)$/ && $f !~ /\.\d+$/) {
+		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/ &&
+		    $f !~ /\.\d+$/) {
 			# Found one to delete
+			$mcount++;
+			next if (!$ctime || $ctime >= $cutoff);
 			local $old = int((time() - $ctime) / (24*60*60));
 			&$first_print(&text('backup_deletingfile',
 					    "<tt>$f</tt>", $old));
@@ -3989,8 +4003,9 @@ elsif ($mode == 6 && $path =~ /\%/) {
 
 &$outdent_print();
 
-&$second_print($pcount ? &text('backup_purged', $pcount)
-		       : $text{'backup_purgednone'});
+&$second_print($pcount ? &text('backup_purged', $pcount, $mcount) :
+	       $mcount ? &text('backup_purgedtime', $mcount) :
+		         $text{'backup_purgednone'});
 return $ok;
 }
 
