@@ -1,7 +1,6 @@
 #!/usr/local/bin/perl
 # Show a domain's or user's password
 
-$trust_unknown_referers = 1;
 require './virtual-server-lib.pl';
 use POSIX;
 &ReadParse();

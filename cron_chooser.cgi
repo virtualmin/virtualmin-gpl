@@ -1,7 +1,6 @@
 #!/usr/local/bin/perl
 # Show the Cron scheduler in a popup window
 
-$trust_unknown_referers = 1;
 require './virtual-server-lib.pl';
 &ReadParse();
 &foreign_require("cron", "cron-lib.pl");
