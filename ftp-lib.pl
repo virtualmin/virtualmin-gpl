@@ -55,7 +55,7 @@ local @rv = &ftp_command($_[1], 2, $_[2]);
 @rv || return 0;
 
 # finish off..
-&ftp_command("QUIT", 2, $_[3]) || return 0;
+&ftp_command("QUIT", 2, $_[2]) || return 0;
 close(SOCK);
 
 return $rv[1];
