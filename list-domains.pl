@@ -451,6 +451,16 @@ if ($multi) {
 				$childs < 0 ? "Not set" :
 				$childs == 0 ? "None" : $childs,"\n";
 			}
+		$p = &domain_has_website($d);
+		if (!$d->{'alias'} &&
+		    ($p eq 'web' ||
+		     &plugin_defined($p, "feature_get_fcgid_max_execution_time"))) {
+			$max = $mode eq "fcgid" ?
+				&get_fcgid_max_execution_time($d) :
+				&get_php_max_execution_time($d);
+			print "    PHP max execution time: ",
+			      ($max || "Unlimited"),"\n";
+			}
 		if (!$d->{'alias'} &&
 		    &domain_has_website($d) &&
 		    defined(&list_domain_php_directories) && $multi == 1) {
