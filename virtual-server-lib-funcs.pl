@@ -7332,6 +7332,11 @@ if ($aliasname && $aliasname ne $dom->{'dom'}) {
 				 $tmpl->{'aliascopy'});
 			$alias{$f} = $dom->{$f};
 			}
+		my $web = &domain_has_website($dom);
+		if ($web) {
+			# Website may use Nginx
+			$alias{$web} = 1;
+			}
 		$alias{'home'} = &server_home_directory(\%alias, $parentdom);
 		&generate_domain_password_hashes(\%dom, 1);
 		&set_provision_features(\%alias);
